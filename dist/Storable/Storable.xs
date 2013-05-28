@@ -2886,90 +2886,58 @@ static int store(pTHX_ store_cxt_t *store_cxt, SV *sv)
 	 *		-- RAM, 14/09/1999
 	 */
 
-	svh = (SV **)ptr_table_fetch(pseen, sv);
-	if (svh) {
-		I32 tagval;
+	tag1 = ptr_table_fetch(pseen, sv);
+	if (tag1) {
+		if (sv != &PL_sv_undef) {
+                        I32 tag = LOW_32BITS(((char *)tag1)-1);
 
-		if (sv == &PL_sv_undef) {
-			/* We have seen PL_sv_undef before, but fake it as
-			   if we have not.
+                        TRACEME(("object 0x%"UVxf" seen as #%d", PTR2UV(sv), tag));
 
-			   Not the simplest solution to making restricted
-			   hashes work on 5.8.0, but it does mean that
-			   repeated references to the one true undef will
-			   take up less space in the output file.
-			*/
-			/* Need to jump past the next hv_store, because on the
-			   second store of undef the old hash value will be
-			   SvREFCNT_dec()ed, and as Storable cheats horribly
-			   by storing non-SVs in the hash a SEGV will ensure.
-			   Need to increase the tag number so that the
-			   receiver has no idea what games we're up to.  This
-			   special casing doesn't affect hooks that store
-			   undef, as the hook routine does its own lookup into
-			   hseen.  Also this means that any references back
-			   to PL_sv_undef (from the pathological case of hooks
-			   storing references to it) will find the seen hash
-			   entry for the first time, as if we didn't have this
-			   hackery here. (That hseen lookup works even on 5.8.0
-			   because it's a key of &PL_sv_undef and a value
-			   which is a tag number, not a value which is
-			   PL_sv_undef.)  */
-			store_cxt->tagnum++;
-			type = svis_SCALAR;
-			goto undef_special_case;
-		}
-		
-		tagval = LOW_32BITS(((char *)svh)-1);
+                        WRITE_MARK(SX_OBJECT);
+                        WRITE_I32N(tag);
+                        return 0;
+                }
 
-		TRACEME(("object 0x%"UVxf" seen as #%d", PTR2UV(sv), tagval));
+                /* We have seen PL_sv_undef before, but fake it as if
+                   we have not.
 
-		WRITE_MARK(SX_OBJECT);
-		WRITE_I32N(tagval);
-		return 0;
-	}
+                   Not the simplest solution to making restricted
+                   hashes work on 5.8.0, but it does mean that
+                   repeated references to the one true undef will
+                   take up less space in the output file.
 
-	/*
-	 * Allocate a new tag and associate it with the address of the sv being
-	 * stored, before recursing...
-	 *
-	 * In order to avoid creating new SvIVs to hold the tagnum we just
-	 * cast the tagnum to an SV pointer and store that in the hash.  This
-	 * means that we must clean up the hash manually afterwards, but gives
-	 * us a 15% throughput increase.
-	 *
-	 */
+                   Don't bother decrementing PL_sv_undef ref count as
+                   it is an immortal.
+                */
+        }
 
-	store_cxt->tagnum++;
-	ptr_table_store(pseen, sv, INT2PTR(SV*, 1 + store_cxt->tagnum));
+        /*
+         * Allocate a new tag and associate it with the address of the sv being
+         * stored, before recursing...
+         */
+        store_cxt->tagnum++;
+        ptr_table_store(pseen, sv, INT2PTR(SV*, 1 + store_cxt->tagnum));
 
-	/*
-	 * Store 'sv' and everything beneath it, using appropriate routine.
-	 * Abort immediately if we get a non-zero status back.
-	 */
+        /*
+         * Store 'sv' and everything beneath it, using appropriate routine.
+         * Abort immediately if we get a non-zero status back.
+         */
 
-	type = sv_type(aTHX_ sv);
+        type = sv_type(aTHX_ sv);
 
-undef_special_case:
 	TRACEME(("storing 0x%"UVxf" tag #%d, type %d...",
 		 PTR2UV(sv), store_cxt->tagnum, type));
 
-	if (SvOBJECT(sv)) {
-		HV *pkg = SvSTASH(sv);
-		ret = store_blessed(aTHX_ store_cxt, sv, type, pkg);
-	} else
-		ret = SV_STORE(type)(aTHX_ store_cxt, sv);
+        ret = ( SvOBJECT(sv) 
+                ? store_blessed(aTHX_ store_cxt, sv, type, SvSTASH(sv))
+                : SV_STORE(type)(aTHX_ store_cxt, sv) );
         
-        if (ret) {
-                TRACEME(("%s (stored 0x%"UVxf", refcnt=%d, %s)",
-                         "FAILED", PTR2UV(sv),
-                         SvREFCNT(sv), sv_reftype(sv, FALSE)));
-        }
-        else {
-                TRACEME(("%s (stored 0x%"UVxf", refcnt=%d, %s)",
-                         "ok", PTR2UV(sv),
-                         SvREFCNT(sv), sv_reftype(sv, FALSE)));
-        }
+        ASSERT(ret, ("store_blessed or SV_STORE returned non NULL"));
+
+        TRACEME(("%s (stored 0x%"UVxf", refcnt=%d, %s)",
+                 "FAILED", PTR2UV(sv),
+                 SvREFCNT(sv), sv_reftype(sv, FALSE)));
+
 	return ret;
 }
 
