@@ -335,11 +335,55 @@ typedef struct stcxt {
 	int in_retrieve_overloaded; /* performance hack for retrieving overloaded objects */
 } stcxt_t;
 
+static int storable_free(pTHX_ SV *sv, MAGIC* mg);
+
+static MGVTBL vtbl_storable = {
+    NULL, /* get */
+    NULL, /* set */
+    NULL, /* len */
+    NULL, /* clear */
+    storable_free,
+#ifdef MGf_COPY
+    NULL, /* copy */
+#endif
+#ifdef MGf_DUP
+    NULL, /* dup */
+#endif
+#ifdef MGf_LOCAL
+    NULL /* local */
+#endif
+};
+
+/* From Digest::MD5.  */
+#ifndef sv_magicext
+# define sv_magicext(sv, obj, type, vtbl, name, namlen) \
+    THX_sv_magicext(aTHX_ sv, obj, type, vtbl, name, namlen)
+static MAGIC *THX_sv_magicext(pTHX_ SV *sv, SV *obj, int type,
+    MGVTBL const *vtbl, char const *name, I32 namlen)
+{
+    MAGIC *mg;
+    if (obj || namlen)
+	/* exceeded intended usage of this reserve implementation */
+	return NULL;
+    Newxz(mg, 1, MAGIC);
+    mg->mg_virtual = (MGVTBL*)vtbl;
+    mg->mg_type = type;
+    mg->mg_ptr = (char *)name;
+    mg->mg_len = -1;
+    (void) SvUPGRADE(sv, SVt_PVMG);
+    mg->mg_moremagic = SvMAGIC(sv);
+    SvMAGIC_set(sv, mg);
+    SvMAGICAL_off(sv);
+    mg_magical(sv);
+    return mg;
+}
+#endif
+
 #define NEW_STORABLE_CXT_OBJ(cxt)					\
   STMT_START {										\
 	SV *self = newSV(sizeof(stcxt_t) - 1);			\
 	SV *my_sv = newRV_noinc(self);					\
-	sv_bless(my_sv, gv_stashpv("Storable::Cxt", GV_ADD));	\
+	sv_magicext(self, NULL, PERL_MAGIC_ext, &vtbl_storable, NULL, 0); \
 	cxt = (stcxt_t *)SvPVX(self);					\
 	Zero(cxt, 1, stcxt_t);							\
 	cxt->my_sv = my_sv;								\
@@ -6388,21 +6432,17 @@ static SV *dclone(pTHX_ SV *sv)
 #define InputStream		PerlIO *
 #endif	/* !OutputStream */
 
-MODULE = Storable	PACKAGE = Storable::Cxt
-
-void
-DESTROY(self)
-    SV *self
-PREINIT:
-	stcxt_t *cxt = (stcxt_t *)SvPVX(SvRV(self));
-PPCODE:
+static int
+storable_free(pTHX_ SV *sv, MAGIC* mg) {
+	stcxt_t *cxt = (stcxt_t *)SvPVX(sv);
 	if (kbuf)
 		Safefree(kbuf);
 	if (!cxt->membuf_ro && mbase)
 		Safefree(mbase);
 	if (cxt->membuf_ro && (cxt->msaved).arena)
 		Safefree((cxt->msaved).arena);
-
+	return 0;
+}
 
 MODULE = Storable	PACKAGE = Storable
 
