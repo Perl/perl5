@@ -1,16 +1,15 @@
-# [perl #118139] crash in global destruction when accessing an
-# already freed PL_modglobal or accessing the freed cxt.
-use Test;
+# [perl #118139] crash in global destruction when accessing the freed cxt.
+use Test::More tests => 1;
 use Storable;
 BEGIN {
-  plan tests => 1;
   store {}, "foo";
 }
 package foo;
 sub new { return bless {} }
 DESTROY {
-  open $fh, "<", "foo";
-  eval { Storable::pretrieve($fh); };
+  open FH, "<foo" or die $!;
+  eval { Storable::pretrieve(*FH); };
+  close FH or die $!;
   unlink "foo";
 }
 

@@ -2,7 +2,6 @@ Thu May 23 09:59:33 CDT 2013    Reini Urban <rurban@cpanel.net>
 
         Protect against SEGV during global destruction when used
         in DESTROY blocks [perl #118139].
-        Compatibility fixes back to 5.6.
 
 Wed May 8 18:27:42 2013 -0600 Karl Williamson <public@khwilliamson.com>
     Version 2.42
