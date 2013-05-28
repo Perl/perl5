@@ -192,7 +192,6 @@ pod/perlmacosx.pod	Verbatim line length including indents exceeds 100 by	3
 pod/perlos2.pod	Verbatim line length including indents exceeds 100 by	4
 pod/perlperf.pod	Verbatim line length including indents exceeds 100 by	32
 pod/perlrun.pod	Verbatim line length including indents exceeds 100 by	1
-pod/perlthrtut.pod	Verbatim line length including indents exceeds 100 by	1
 pod/perltru64.pod	Verbatim line length including indents exceeds 100 by	1
 pod/perlwin32.pod	Verbatim line length including indents exceeds 100 by	6
 porting/release_managers_guide.pod	Verbatim line length including indents exceeds 100 by	1
