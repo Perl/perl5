@@ -1414,7 +1414,7 @@ ithread_kill(...)
         /* Set the signal for the thread */
         thread = S_SV_to_ithread(aTHX_ ST(0));
         MUTEX_LOCK(&thread->mutex);
-        if (thread->interp) {
+        if (thread->interp && ! (thread->state & PERL_ITHR_FINISHED)) {
             dTHXa(thread->interp);
             if (PL_psig_pend && PL_psig_ptr[signal]) {
                 PL_psig_pend[signal]++;
@@ -1422,7 +1422,7 @@ ithread_kill(...)
                 no_handler = 0;
             }
         } else {
-            /* Ignore signal to terminated thread */
+            /* Ignore signal to terminated/finished thread */
             no_handler = 0;
         }
         MUTEX_UNLOCK(&thread->mutex);

@@ -5,7 +5,7 @@ use 5.008;
 use strict;
 use warnings;
 
-our $VERSION = '1.86';
+our $VERSION = '1.87';
 my $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -134,7 +134,7 @@ threads - Perl interpreter-based threads
 
 =head1 VERSION
 
-This document describes threads version 1.86
+This document describes threads version 1.87
 
 =head1 SYNOPSIS
 
@@ -785,7 +785,7 @@ current operation has completed.  For instance, if the thread is I<stuck> on
 an I/O call, sending it a signal will not cause the I/O call to be interrupted
 such that the signal is acted up immediately.
 
-Sending a signal to a terminated thread is ignored.
+Sending a signal to a terminated/finished thread is ignored.
 
 =head1 WARNINGS
 
@@ -841,7 +841,7 @@ C<useithreads> configuration option.
 Having threads support requires all of Perl and all of the XS modules in the
 Perl installation to be rebuilt; it is not just a question of adding the
 L<threads> module (i.e., threaded and non-threaded Perls are binary
-incompatible.)
+incompatible).
 
 =item Cannot change stack size of an existing thread
 
@@ -1006,7 +1006,7 @@ the C<-E<gt>kill()> signalling method cannot be used.
 
 =item Returning closures from threads
 
-Returning closures from threads should not be relied upon.  Depending of the
+Returning closures from threads should not be relied upon.  Depending on the
 Perl version and the application code, results may range from success, to
 (apparently harmless) warnings of leaked scalar, or all the way up to crashing
 of the Perl interpreter.
