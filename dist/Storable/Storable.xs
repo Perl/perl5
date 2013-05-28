@@ -401,12 +401,10 @@ write_bytes(pTHX_ store_cxt_t *store_cxt, const char *str, STRLEN len) {
 
 static void
 write_i32n(pTHX_ store_cxt_t *store_cxt, I32 i32) {
-        char b[4];
-        b[0] = (i32 >> 24) & 255;
-        b[1] = (i32 >> 16) & 255;
-        b[2] = (i32 >>  8) & 255;
-        b[3] =  i32        & 255;
-        write_bytes(aTHX_ store_cxt, b, 4);
+#ifdef HAS_HTONL
+        i32 = htonl(i32);
+#endif
+        write_bytes(aTHX_ store_cxt, oI(&i32), 4);
 }
 
 #define WRITE_I32N(x)                           \
@@ -414,8 +412,11 @@ write_i32n(pTHX_ store_cxt_t *store_cxt, I32 i32) {
 
 static void
 write_i32(pTHX_ store_cxt_t *store_cxt, I32 i32) {
-        if (store_cxt->netorder) write_i32n (aTHX_ store_cxt, i32);
-        else                     write_bytes(aTHX_ store_cxt, oI(&i32), 4);
+#ifdef HAS_HTONL
+        if (store_cxt->netorder)
+                i32 = htonl(i32);
+#endif
+        write_bytes(aTHX_ store_cxt, oI(&i32), 4);
 }
 
 #define WRITE_I32(x)                                                    \
@@ -689,21 +690,25 @@ read_uchar(pTHX_ retrieve_cxt_t *retrieve_cxt) {
 
 static I32
 read_i32n(pTHX_ retrieve_cxt_t *retrieve_cxt) {
-        unsigned char b[5];
-        READ_BYTES(b, 4);
-        return (I32)(U32)((b[0] << 24) | (b[1] << 16) | (b[2] <<  8) | b[3] );
+        I32 x;
+        oC(x);
+        READ_BYTES(oI(&x), 4);
+#ifdef HAS_NTOHL
+        x = ntohl(x);
+#endif
+        return x;
 }
 
 static I32
 read_i32(pTHX_ retrieve_cxt_t *retrieve_cxt) {
+        I32 x;
+        oC(x);
+        READ_BYTES(oI(&x), 4);
+#ifdef HAS_NTOHL
         if (retrieve_cxt->netorder)
-                return read_i32n(aTHX_ retrieve_cxt);
-        else {
-                I32 x;
-                oC(x);
-                READ_BYTES(oI(&x), 4);
-                return x;
-        }
+                x = ntohl(x);
+#endif
+        return x;
 }
 
 #define READ_I32(x)                                                     \
@@ -1031,7 +1036,6 @@ static void init_store_cxt(
 
         Zero(store_cxt, 1, store_cxt_t);
 
-        /* FIXME: make everything here a mortal so it gets released when done or croaked */
 	store_cxt->netorder = network_order;
 	store_cxt->deparse = -1;				/* Idem */
 	store_cxt->canonical = -1;			/* Idem */
@@ -2863,7 +2867,7 @@ static int sv_type(pTHX_ SV *sv)
  */
 static int store(pTHX_ store_cxt_t *store_cxt, SV *sv)
 {
-	SV **svh;
+	void *tag1;
 	int ret;
 	int type;
 	PTR_TBL_t *pseen = store_cxt->pseen;
