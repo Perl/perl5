@@ -31,13 +31,13 @@ BEGIN {
     # Use of Log::Agent is optional. If it hasn't imported these subs then
     # provide a fallback implementation.
     #
-    if (!exists &logcroak) {
+    unless ($Storable::{logcroak} && *{$Storable::{logcroak}}{CODE}) {
         require Carp;
         *logcroak = sub {
             Carp::croak(@_);
         };
     }
-    if (!exists &logcarp) {
+    unless ($Storable::{logcarp} && *{$Storable::{logcarp}}{CODE}) {
 	require Carp;
         *logcarp = sub {
           Carp::carp(@_);
