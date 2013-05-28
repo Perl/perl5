@@ -2500,7 +2500,7 @@ my %cmd_lookup =
         { t => 's', v => \&_DB__handle_restart_and_rerun_commands, },
         } qw(R rerun)),
     (map { $_ => {t => 'm', v => '_handle_cmd_wrapper_commands' }, }
-    qw(a A b B e E h i l L M o O P v w W)),
+        qw(a A b B e E h i l L M o O v w W)),
 );
 
 sub DB {
