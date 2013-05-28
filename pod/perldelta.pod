@@ -243,15 +243,42 @@ Most of these are built within the directories F<utils> and F<x2p>.
 entries for each change
 Use L<XXX> with program names to get proper documentation linking. ]
 
-=head3 L<XXX>
+=head3 F<bisect.pl> enhancements
+
+The git bisection tool F<Porting/bisect.pl> has had many enhancements.
 
 =over 4
 
 =item *
 
-XXX
+Can optionally run the test case with a timeout.
+
+=item *
+
+Can now run in-place in a clean git checkout.
+
+=item *
+
+Can run the test case under C<valgrind>.
+
+=item *
+
+Can apply user supplied patches and fixes to the source checkout before
+building.
+
+=item *
+
+Now has fixups to enable building several more historical ranges of bleadperl,
+which can be useful for pinpointing the origins of bugs or behaviour changes.
 
 =back
+
+It is provided as part of the source distribution but not installed because
+it is not self-contained as it relies on being run from within a git
+checkout. Note also that it makes no attempt to fix tests, correct runtime
+bugs or make something useful to install - its purpose is to make minimal
+changes to get any historical revision of interest to build and run as close
+as possible to "as-was", and thereby make C<git bisect> easy to use.
 
 =head1 Configuration and Compilation
 
