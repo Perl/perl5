@@ -32,21 +32,6 @@
 #endif
 
 /*
- * Pre PerlIO time when none of USE_PERLIO and PERLIO_IS_STDIO is defined
- * Provide them with the necessary defines so they can build with pre-5.004.
- */
-#ifndef USE_PERLIO
-#ifndef PERLIO_IS_STDIO
-#define PerlIO FILE
-#define PerlIO_getc(x) getc(x)
-#define PerlIO_putc(f,x) putc(x,f)
-#define PerlIO_read(x,y,z) fread(y,1,z,x)
-#define PerlIO_write(x,y,z) fwrite(y,1,z,x)
-#define PerlIO_stdoutf printf
-#endif	/* PERLIO_IS_STDIO */
-#endif	/* USE_PERLIO */
-
-/*
  * Earlier versions of perl might be used, we can't assume they have the latest!
  */
 
