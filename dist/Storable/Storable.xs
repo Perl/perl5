@@ -2217,14 +2217,12 @@ static void store_tied_item(pTHX_ store_cxt_t *store_cxt, SV *sv)
  * real object type is held in the <extra> flag.  At the very end of the
  * serialization stream, the underlying magic object is serialized, just like
  * any other tied variable.
+ *
+ * A true return value indicates that the hook succeeded and the
+ * object has been already saved. False indicates that the default
+ * serialization of the blessed object must continue
  */
-static void store_hook(
-        pTHX_
-	store_cxt_t *store_cxt,
-	SV *sv,
-	int type,
-	HV *pkg,
-	SV *hook)
+static int store_hook(pTHX_ store_cxt_t *store_cxt, SV *sv, int type, HV *pkg, SV *hook, int repeating)
 {
         dSP;
 	I32 classlen;
@@ -2336,20 +2334,16 @@ static void store_hook(
                 FREETMPS;
                 LEAVE;
 		
-		if (hv_fetch(store_cxt->hclass, classname, classlen, FALSE))
+		if (repeating)
                         /* They must not change their mind in the middle of a serialization. */
 			CROAK(("Too late to ignore hooks for %s class \"%s\"",
                                (store_cxt->cloning ? "cloning" : "storing"), classname));
-	
-		pkg_hide(aTHX_ store_cxt->hook, pkg, "STORABLE_freeze");
 
-		ASSERT(!pkg_can(aTHX_ store_cxt->hook, pkg, "STORABLE_freeze"), ("hook invisible"));
+                hv_store(aTHX_ store_cxt->hook, classname, classlen, newSV(0), 0);
+
 		TRACEME(("ignoring STORABLE_freeze in class \"%s\"", classname));
 
-
-
-                store_blessed(aTHX_ store_cxt, sv, type, pkg);
-                return;
+                return 0;
 	}
 
         SPAGAIN; /* this trick documented in perlcall */
@@ -2360,24 +2354,26 @@ static void store_hook(
         WRITE_MARK(SX_HOOK);
 
         if (count > 1) {
-                /* FIXME: We can't use pkg_can here because it only caches one method per
-                 * package */
+                /* STORABLE_attach does not support the extra
+                 * references. We use magic as a marker on the hook SV
+                 * that the class does not use STORABLE_attach */
 
-                GV* gv = gv_fetchmethod_autoload(pkg, "STORABLE_attach", FALSE);
-                if (gv && isGV(gv))
-                        CROAK(("Freeze cannot return references if %s class is using STORABLE_attach", classname));
+                if (!SvMAGICAL(sv) || !mg_find(hook, PERL_MAGIC_ext)) {
+                        GV* gv = gv_fetchmethod_autoload(pkg, "STORABLE_attach", FALSE);
+                        if (gv && isGV(gv))
+                                CROAK(("Freeze cannot return references if %s class is using STORABLE_attach", classname));
+                        else
+                                sv_magic(hook, NULL, PERL_MAGIC_ext, "no STORABLE_attach", 0);
+                }
                 
                 /*
-                 * If they returned more than one item, we need to serialize some
-                 * extra references if not already done.
+                 * If they returned more than one item, we need to
+                 * serialize some extra references if not already
+                 * done.
                  *
-                 * Loop over the array, starting at position #1, and for each item,
-                 * ensure it is a reference, serialize it if not already done, and
-                 * replace the entry with the tag ID of the corresponding serialized
-                 * object.
-                 *
-                 * We CHEAT by not calling av_fetch() and read directly within the
-                 * array, for speed.
+                 * Loop over the result values and, for each item,
+                 * ensure it is a reference, serialize it if not
+                 * already done.
                  */
 
                 for (i = 1; i < count; i++) {
@@ -2555,6 +2551,8 @@ static void store_hook(
 
 		store(aTHX_ store_cxt, mg->mg_obj);
 	}
+
+        return 1;
 }
 
 /*
@@ -2588,29 +2586,38 @@ static void store_blessed(
 	int type,
 	HV *pkg)
 {
-	SV *hook;
-	I32 len;
+	SV *hook, **hookp;
+	I32 classlen;
 	char *classname;
 	I32 classnum;
 
 	TRACEME(("store_blessed, type %d, class \"%s\"", type, HvNAME_get(pkg)));
+
+	classname = HvNAME_get(pkg);
+	classlen = strlen(classname);
 
 	/*
 	 * Look for a hook for this blessed SV and redirect to store_hook()
 	 * if needed.
 	 */
 
-	hook = pkg_can(aTHX_ store_cxt->hook, pkg, "STORABLE_freeze");
-	if (hook)
-		return store_hook(aTHX_ store_cxt, sv, type, pkg, hook);
+        hookp = hv_fetch(store_cxt->hook, classname, classlen, FALSE);
+        if (hookp)
+                hook = *hookp;
+        else {
+                GV *gv = gv_fetchmethod_autoload(pkg, "STORABLE_freeze", FALSE);
+                hook = (gv && isGV(gv) ? newRV((SV*) GvCV(gv)) : newSV(0));
+                hv_store(store_cxt->hook, classname, classlen, hook, 0);
+        }
+
+        if (SvOK(hook)) {
+                if (store_hook(aTHX_ store_cxt, sv, type, pkg, hook, (hookp ? 1 : 0)))
+                        return;
+        }
 
 	/*
 	 * This is a blessed SV without any serialization hook.
 	 */
-
-	classname = HvNAME_get(pkg);
-	len = strlen(classname);
-
 	TRACEME(("blessed 0x%"UVxf" in %s, no hook: tagged #%d",
 		 PTR2UV(sv), classname, store_cxt->tagnum));
 
@@ -2621,7 +2628,7 @@ static void store_blessed(
 	 * used).
 	 */
 
-	if (known_class(aTHX_ store_cxt, classname, len, &classnum)) {
+	if (known_class(aTHX_ store_cxt, classname, classlen, &classnum)) {
 		TRACEME(("already seen class %s, ID = %d", classname, classnum));
 		WRITE_MARK(SX_IX_BLESS);
 		if (classnum <= LG_BLESS) {
@@ -2633,13 +2640,13 @@ static void store_blessed(
 	} else {
 		TRACEME(("first time we see class %s, ID = %d", classname, classnum));
 		WRITE_MARK(SX_BLESS);
-		if (len <= LG_BLESS) {
-			WRITE_MARK(len);
+		if (classlen <= LG_BLESS) {
+			WRITE_MARK(classlen);
 		} else {
 			WRITE_MARK(0x80);
-			WRITE_LEN(len);					/* Don't BER-encode, this should be rare */
+			WRITE_LEN(classlen);					/* Don't BER-encode, this should be rare */
 		}
-		WRITE_BYTES(classname, len);				/* Final \0 is omitted */
+		WRITE_BYTES(classname, classlen);				/* Final \0 is omitted */
 	}
 
 	/*
