@@ -2232,8 +2232,6 @@ static void store_hook(
 	char *classname;
 	STRLEN frozenlen;
 	SV *ref;
-	AV *av;
-	SV **ary;
 	int count, i;
 	unsigned char flags;
 	char *frozenpv;
@@ -2312,8 +2310,6 @@ static void store_hook(
 
 	TRACEME(("about to call STORABLE_freeze on class %s", classname));
 
-        av = (AV*)sv_2mortal((SV*)newAV());
-
         ENTER;
         SAVETMPS;
 
@@ -2328,13 +2324,6 @@ static void store_hook(
 
         SP -= count; /* this trick documented in perlcall */
         ax = (SP - PL_stack_base) + 1;
-
-        for (i = 0; i < count; i++)
-		av_store(av, i, SvREFCNT_inc_NN(ST(i)));
-        
-        PUTBACK;
-        FREETMPS;
-	LEAVE;
 
 	TRACEME(("store_hook, array holds %d items", count));
 
@@ -2367,8 +2356,6 @@ static void store_hook(
         /* Write header */
         WRITE_MARK(SX_HOOK);
 
-	ary = AvARRAY(av);
-
         if (count > 1) {
                 /* FIXME: We can't use pkg_can here because it only caches one method per
                  * package */
@@ -2391,15 +2378,13 @@ static void store_hook(
                  */
 
                 for (i = 1; i < count; i++) {
-                        char *tag1;
-                        SV *rsv = ary[i];
                         SV *xsv;
                         AV *av_hook = store_cxt->hook_seen;
                         
-                        if (!SvROK(rsv))
+                        if (!SvROK(ST(i)))
                                 CROAK(("Item #%d returned by STORABLE_freeze "
                                        "for %s is not a reference", i, classname));
-                        xsv = SvRV(rsv);		/* Follow ref to know what to look for */
+                        xsv = SvRV(ST(i));		/* Follow ref to know what to look for */
                         
                         /*
                          * Look in pseen and see if we have a tag already.
@@ -2427,24 +2412,26 @@ static void store_hook(
                                         eflags = '\0'; /* write eflags just once */
                                 }
 
-                                store(aTHX_ store_cxt, xsv);
+                                store(aTHX_ store_cxt, xsv); /* that may invalidate SP */
                         
                                 /*
                                  * It was the first time we serialized 'xsv'.
                                  *
-                                 * Keep this SV alive until the end of the serialization: if we
-                                 * disposed of it right now by decrementing its refcount, and it was
-                                 * a temporary value, some next temporary value allocated during
-                                 * another STORABLE_freeze might take its place, and we'd wrongly
-                                 * assume that new SV was already serialized, based on its presence
-                                 * in retrieve_cxt->hseen.
+                                 * Keep this SV alive until the end of the serialization: if it gets
+                                 * disposed on the FREETMPS, some next temporary value allocated during
+                                 * another STORABLE_freeze might take its place, and we'd wrongly assume
+                                 * that new SV was already serialized, based on its presence in
+                                 * retrieve_cxt->hseen.
                                  *
                                  * Therefore, push it away in retrieve_cxt->hook_seen.
-                                 */
-                        
+                                 */                        
                                 av_store(av_hook, AvFILLp(av_hook) + 1, SvREFCNT_inc_NN(xsv));
                         }                       
                 }
+
+                /* SP may have been invalidated by a stack change when recursing */
+                SPAGAIN;
+                SP -= count;
 
 		flags |= SHF_HAS_LIST;
                 if (count - 1 > LG_SCALAR)
@@ -2454,7 +2441,7 @@ static void store_hook(
 	/*
 	 * Get frozen string.
 	 */
-	frozenpv = SvPV(ary[0], frozenlen);
+	frozenpv = SvPV(ST(0), frozenlen);
 	if (frozenlen > LG_SCALAR)
 		flags |= SHF_LARGE_STRLEN;
 
@@ -2526,13 +2513,8 @@ static void store_hook(
 		else
 			WRITE_MARK(count - 1);
 
-		/*
-		 * NOTA BENE, for 64-bit machines: the ary[i] below does not yield a
-		 * real pointer, rather a tag number, well under the 32-bit limit.
-		 */
-
 		for (i = 1; i < count; i++) {
-                        void *tag1 = ptr_table_fetch(store_cxt->pseen, SvRV(ary[i]));
+                        void *tag1 = ptr_table_fetch(store_cxt->pseen, SvRV(ST(i)));
                         if (tag1) {
                                 I32 tag = LOW_32BITS(((char *)tag1) - 1);
                                 WRITE_I32N(tag);
@@ -2542,6 +2524,10 @@ static void store_hook(
                                 CROAK(("Could not serialize item #%d from hook in %s", i, classname));
 		}
 	}
+
+        PUTBACK;
+        FREETMPS;
+	LEAVE;
 
 	/*
 	 * If object was tied, need to insert serialization of the magic object.
