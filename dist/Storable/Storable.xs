@@ -792,8 +792,6 @@ hv_store_safe(pTHX_ HV *hv, const char *key, I32 klen, SV *val) {
  * To achieve that, the class name of the last retrieved object is passed down
  * recursively, and the first SEEN() call for which the class name is not NULL
  * will bless the object.
- *
- * i should be true iff sv is immortal (ie PL_sv_yes, PL_sv_no or PL_sv_undef)
  */
 #define SEEN_no_inc(y, c)                                               \
     STMT_START {                                                        \
@@ -2212,7 +2210,7 @@ static int store_hook(pTHX_ store_cxt_t *store_cxt, SV *sv, int type, HV *pkg, S
         if (count > 1) {
                 /* STORABLE_attach does not support the extra
                  * references. We use magic as a marker on the hook SV
-                 * that the class does not use STORABLE_attach */
+                 * that the class does not use STORABLE_attach at all */
 
                 if (!SvMAGICAL(sv) || !mg_find(hook, PERL_MAGIC_ext)) {
                         GV* gv = gv_fetchmethod_autoload(pkg, "STORABLE_attach", FALSE);
@@ -2276,7 +2274,7 @@ static int store_hook(pTHX_ store_cxt_t *store_cxt, SV *sv, int type, HV *pkg, S
                                  * disposed on the FREETMPS, some next temporary value allocated during
                                  * another STORABLE_freeze might take its place, and we'd wrongly assume
                                  * that new SV was already serialized, based on its presence in
-                                 * retrieve_cxt->hseen.
+                                 * retrieve_cxt->pseen.
                                  *
                                  * Therefore, push it away in retrieve_cxt->hook_seen.
                                  */                        
