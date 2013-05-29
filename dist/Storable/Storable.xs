@@ -1624,49 +1624,6 @@ static void free_context(pTHX_ stcxt_t *cxt)
 }
 
 /***
- *** Predicates.
- ***/
-
-/*
- * is_storing
- *
- * Tells whether we're in the middle of a store operation.
- */
-static int is_storing(pTHX)
-{
-	dSTCXT;
-
-	return cxt->entry && (cxt->optype & ST_STORE);
-}
-
-/*
- * is_retrieving
- *
- * Tells whether we're in the middle of a retrieve operation.
- */
-static int is_retrieving(pTHX)
-{
-	dSTCXT;
-
-	return cxt->entry && (cxt->optype & ST_RETRIEVE);
-}
-
-/*
- * last_op_in_netorder
- *
- * Returns whether last operation was made using network order.
- *
- * This is typically out-of-band information that might prove useful
- * to people wishing to convert native to network order data when used.
- */
-static int last_op_in_netorder(pTHX)
-{
-	dSTCXT;
-
-	return cxt->netorder;
-}
-
-/***
  *** Hook lookup and calling routines.
  ***/
 
@@ -3814,7 +3771,7 @@ static int do_store(
 	 * Recursively store object...
 	 */
 
-	ASSERT(is_storing(aTHX), ("within store operation"));
+	ASSERT(cxt->entry && (cxt->optype & ST_STORE), ("within store operation"));
 
 	status = store(aTHX_ cxt, sv);		/* Just do it! */
 
@@ -6192,7 +6149,7 @@ static SV *do_retrieve(
 	TRACEME(("input source is %s", is_tainted ? "tainted" : "trusted"));
 	init_retrieve_context(aTHX_ cxt, optype, is_tainted);
 
-	ASSERT(is_retrieving(aTHX), ("within retrieve operation"));
+	ASSERT(cxt->entry && (cxt->optype & ST_RETRIEVE), ("within retrieve operation"));
 
 	sv = retrieve(aTHX_ cxt, 0);		/* Recursively retrieve object, get root SV */
 
@@ -6531,13 +6488,12 @@ last_op_in_netorder()
  is_retrieving = ST_RETRIEVE
  PREINIT:
   bool result;
+  dSTCXT;
  PPCODE:
   if (ix) {
-   dSTCXT;
-
    result = cxt->entry && (cxt->optype & ix) ? TRUE : FALSE;
   } else {
-   result = !!last_op_in_netorder(aTHX);
+   result = !!cxt->netorder;
   }
   ST(0) = boolSV(result);
   XSRETURN(1);
