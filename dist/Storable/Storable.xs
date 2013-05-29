@@ -2228,6 +2228,7 @@ static void store_hook(
 {
         dSP;
 	I32 classlen;
+        I32 ax;
 	char *classname;
 	STRLEN frozenlen;
 	SV *ref;
@@ -2325,10 +2326,11 @@ static void store_hook(
         count = perl_call_sv(hook, G_ARRAY);
         SPAGAIN;
 
-        for (i = count; i--; ) {
-		SV *sv = POPs;
-		av_store(av, i, SvREFCNT_inc_NN(sv));
-	}
+        SP -= count; /* this trick documented in perlcall */
+        ax = (SP - PL_stack_base) + 1;
+
+        for (i = 0; i < count; i++)
+		av_store(av, i, SvREFCNT_inc_NN(ST(i)));
         
         PUTBACK;
         FREETMPS;
