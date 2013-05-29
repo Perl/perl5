@@ -1285,50 +1285,6 @@ static SV *pkg_can(
 }
 
 /*
- * array_call
- *
- * Call routine obj->hook(cloning) in list context.
- * Returns the list of returned values in an array.
- */
-static AV *array_call(
-        pTHX_
-	SV *obj,
-	SV *hook,
-	int cloning)
-{
-	dSP;
-	int count;
-	AV *av;
-	int i;
-
-	TRACEME(("array_call (cloning=%d)", cloning));
-
-	ENTER;
-	SAVETMPS;
-
-	PUSHMARK(sp);
-	XPUSHs(obj);								/* Target object */
-	XPUSHs(sv_2mortal(newSViv(cloning)));		/* Cloning flag */
-	PUTBACK;
-
-	count = perl_call_sv(hook, G_ARRAY);		/* Go back to Perl code */
-
-	SPAGAIN;
-
-	av = newAV();
-	for (i = count - 1; i >= 0; i--) {
-		SV *sv = POPs;
-		av_store(av, i, SvREFCNT_inc_NN(sv));
-	}
-
-	PUTBACK;
-	FREETMPS;
-	LEAVE;
-
-	return av;
-}
-
-/*
  * known_class
  *
  * Lookup the class name in the 'hclass' table and either assign it a new ID
