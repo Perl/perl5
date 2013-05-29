@@ -277,7 +277,7 @@ struct st_store_cxt {
 	HV *hseen;		/* Still need hseen for the 0.6 file format code. */
 	AV *hook_seen;		/* which SVs were returned by STORABLE_freeze() */
 	IV where_is_undef;	/* index in aseen of PL_sv_undef */
-	HV *hclass;		/* which classnames have been seen, store time */
+	PTR_TBL_t *pclass;	/* which classnames have been seen, store time */
 	HV *hook;		/* cache for hook methods per class name */
 	IV tagnum;		/* incremented at store time for each seen object */
 	IV classnum;		/* incremented at store time for each seen classname */
@@ -1036,7 +1036,6 @@ static void init_store_cxt(
 	store_cxt->deparse = -1;				/* Idem */
 	store_cxt->canonical = -1;			/* Idem */
 	store_cxt->tagnum = -1;				/* Reset tag numbers */
-	store_cxt->classnum = -1;				/* Reset class numbers */
 	store_cxt->output_fh = f;					/* Where I/O are performed */
 
 	if (!f) {
@@ -1075,12 +1074,8 @@ static void init_store_cxt(
 	 * We turn the shared key optimization on.
 	 */
 
-        store_cxt->hclass = (HV*)sv_2mortal((SV*)newHV()); /* Where seen classnames are stored */
-
-#if PERL_VERSION >= 5
-#define HBUCKETS	4096
-	HvMAX(store_cxt->hclass) = HBUCKETS - 1;	/* keys %hclass = $HBUCKETS; */
-#endif
+        store_cxt->pclass = ptr_table_new();
+        SAVEDESTRUCTOR_X(PTR_TABLE_DESTRUCTOR, store_cxt->pclass);
 
 	/*
 	 * The 'hook' hash table is used to keep track of the references on
@@ -1134,8 +1129,6 @@ static void init_retrieve_cxt(pTHX_ retrieve_cxt_t *retrieve_cxt)
 	retrieve_cxt->aseen = (AV*)sv_2mortal((SV*)newAV()); /* Where retrieved objects are kept */
 	retrieve_cxt->where_is_undef = -1;		/* Special case for PL_sv_undef */
 	retrieve_cxt->aclass = (AV*)sv_2mortal((SV*)newAV()); /* Where seen classnames are kept */
-	retrieve_cxt->tagnum = 0;				/* Have to count objects... */
-	retrieve_cxt->classnum = 0;				/* ...and class names as well */
 
 #ifndef HAS_UTF8_ALL
         retrieve_cxt->use_bytes = -1;		/* Fetched from perl if needed */
@@ -1172,37 +1165,28 @@ downgrade_restricted(pTHX) {
  *
  * Return true if the class was known, false if the ID was just generated.
  */
-static int known_class(
-        pTHX_
-	store_cxt_t *store_cxt,
-	char *name,		/* Class name */
-	int len,		/* Name length */
-	I32 *classnum)
-{
-	SV **svh;
-	HV *hclass = store_cxt->hclass;
+static int known_class(pTHX_ store_cxt_t *store_cxt, HV *pkg, I32 *classnum) {
 
-	TRACEME(("known_class (%s)", name));
+        char *tag1;
 
-	/*
-	 * Recall that we don't store pointers in this hash table, but tags.
-	 * Therefore, we need LOW_32BITS() to extract the relevant parts.
-	 */
+	TRACEME(("known_class (%s)", HvNAME_get(pkg)));
 
-	svh = hv_fetch(hclass, name, len, FALSE);
-	if (svh) {
-		*classnum = SvIV(*svh);
-		return TRUE;
-	}
-        else {
+        tag1 = ptr_table_fetch(store_cxt->pclass, pkg);
+        if (tag1) {
                 /*
-                 * Unknown classname, we need to record it.
+                 * Recall that we don't store pointers in this table, but
+                 * tags.  Therefore, we need LOW_32BITS() to extract the
+                 * relevant parts.
                  */
+                *classnum = LOW_32BITS(((char *)tag1) - 1);
+                return TRUE;
+        }
+        else {
+                /* Unknown classname, we need to record it. */
+                *classnum = store_cxt->classnum++;
 
-                SV *sv = newSViv(++(store_cxt->classnum));
-                hv_store_safe(aTHX_ hclass, name, len, sv);
-
-                *classnum = store_cxt->classnum;
+                /* We store classnum + 1 because 0 is not a valid value */
+                ptr_table_store(store_cxt->pclass, pkg, INT2PTR(SV*, store_cxt->classnum));
                 return FALSE;
         }
 }
@@ -2332,7 +2316,7 @@ static int store_hook(pTHX_ store_cxt_t *store_cxt, SV *sv, int type, HV *pkg, S
 	 * Salvador Ortiz Garcia <sog@msg.com.mx> who spot that bug and
 	 * proposed the right fix.  -- RAM, 15/09/2000
 	 */
-	if (known_class(aTHX_ store_cxt, classname, classlen, &classnum)) {
+	if (known_class(aTHX_ store_cxt, pkg, &classnum)) {
 		TRACEME(("already seen class %s, ID = %d", classname, classnum));
                 flags |= SHF_IDX_CLASSNAME;
                 if (classnum > LG_SCALAR)
@@ -2340,7 +2324,6 @@ static int store_hook(pTHX_ store_cxt_t *store_cxt, SV *sv, int type, HV *pkg, S
         }
         else {
 		TRACEME(("first time we see class %s, ID = %d", classname, classnum));
-		classnum = -1;				/* Mark: we must store classname */
                 if (classlen > LG_SCALAR)
                         flags |= SHF_LARGE_CLASSLEN;
 	}
@@ -2508,7 +2491,7 @@ static void store_blessed(
 	 * used).
 	 */
 
-	if (known_class(aTHX_ store_cxt, classname, classlen, &classnum)) {
+	if (known_class(aTHX_ store_cxt, pkg, &classnum)) {
 		TRACEME(("already seen class %s, ID = %d", classname, classnum));
 		WRITE_MARK(SX_IX_BLESS);
 		if (classnum <= LG_BLESS) {
