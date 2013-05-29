@@ -2437,62 +2437,44 @@ static void store_hook(
                          * Serialize entry if not done already, and get its tag.
                          */
                         
-                        if ((tag1 = (char *)ptr_table_fetch(store_cxt->pseen, xsv)))
-                                goto sv_seen;		/* Avoid moving code too far to the right */
-                        
-                        TRACEME(("listed object %d at 0x%"UVxf" is unknown", i-1, PTR2UV(xsv)));
+                        if (!ptr_table_fetch(store_cxt->pseen, xsv)) {
+                                TRACEME(("listed object %d at 0x%"UVxf" is unknown", i-1, PTR2UV(xsv)));
 
-                        /*
-                         * We need to recurse to store that object and get it to be known
-                         * so that we can resolve the list of object-IDs at retrieve time.
-                         *
-                         * The first time we do this, we need to emit the proper header
-                         * indicating that we recursed, and what the type of object is (the
-                         * object we're storing via a user-hook).  Indeed, during retrieval,
-                         * we'll have to create the object before recursing to retrieve the
-                         * others, in case those would point back at that object.
-                         */
+                                /*
+                                 * We need to recurse to store that object and get it to be known
+                                 * so that we can resolve the list of object-IDs at retrieve time.
+                                 *
+                                 * The first time we do this, we need to emit the proper header
+                                 * indicating that we recursed, and what the type of object is (the
+                                 * object we're storing via a user-hook).  Indeed, during retrieval,
+                                 * we'll have to create the object before recursing to retrieve the
+                                 * others, in case those would point back at that object.
+                                 */
 
-                        /* [SX_HOOK] <flags> [<extra>] <object>*/
-                        WRITE_MARK(flags);
-                        if (eflags) {
-                                WRITE_MARK(eflags);
-                                eflags = '\0'; /* write eflags just once */
-                        }
+                                /* [SX_HOOK] <flags> [<extra>] <object>*/
+                                WRITE_MARK(flags);
+                                if (eflags) {
+                                        WRITE_MARK(eflags);
+                                        eflags = '\0'; /* write eflags just once */
+                                }
 
-                        store(aTHX_ store_cxt, xsv);
+                                store(aTHX_ store_cxt, xsv);
                         
-                        tag1 = (char *)ptr_table_fetch(store_cxt->pseen, xsv);
-                        if (!tag1)
-                                CROAK(("Could not serialize item #%d from hook in %s", i, classname));
-                        /*
-                         * It was the first time we serialized 'xsv'.
-                         *
-                         * Keep this SV alive until the end of the serialization: if we
-                         * disposed of it right now by decrementing its refcount, and it was
-                         * a temporary value, some next temporary value allocated during
-                         * another STORABLE_freeze might take its place, and we'd wrongly
-                         * assume that new SV was already serialized, based on its presence
-                         * in retrieve_cxt->hseen.
-                         *
-                         * Therefore, push it away in retrieve_cxt->hook_seen.
-                         */
+                                /*
+                                 * It was the first time we serialized 'xsv'.
+                                 *
+                                 * Keep this SV alive until the end of the serialization: if we
+                                 * disposed of it right now by decrementing its refcount, and it was
+                                 * a temporary value, some next temporary value allocated during
+                                 * another STORABLE_freeze might take its place, and we'd wrongly
+                                 * assume that new SV was already serialized, based on its presence
+                                 * in retrieve_cxt->hseen.
+                                 *
+                                 * Therefore, push it away in retrieve_cxt->hook_seen.
+                                 */
                         
-                        av_store(av_hook, AvFILLp(av_hook)+1, SvREFCNT_inc_NN(xsv));
-                        
-                sv_seen:
-                        /*
-                         * Dispose of the REF they returned.  If we saved the 'xsv' away
-                         * in the array of returned SVs, that will not cause the underlying
-                         * referenced SV to be reclaimed.
-                         */
-                        
-                        ASSERT(SvREFCNT(xsv) > 1, ("SV will survive disposal of its REF"));
-                        SvREFCNT_dec(rsv);			/* Dispose of reference */
-                        
-                        ary[i] = newSViv(PTR2UV(tag1) - 1);
-                        TRACEME(("listed object %d at 0x%"UVxf" is tag #%"UVuf,
-                                 i-1, PTR2UV(xsv), PTR2UV(tag1) - 1));
+                                av_store(av_hook, AvFILLp(av_hook) + 1, SvREFCNT_inc_NN(xsv));
+                        }                       
                 }
         }
 
@@ -2587,9 +2569,14 @@ static void store_hook(
 		 */
 
 		for (i = 1; i < count; i++) {
-			I32 tagval = SvIV(ary[i]);
-			WRITE_I32N(tagval);
-			TRACEME(("object %d, tag #%d", i-1, tagval));
+                        void *tag1 = ptr_table_fetch(store_cxt->pseen, SvRV(ary[i]));
+                        if (tag1) {
+                                I32 tag = LOW_32BITS(((char *)tag1) - 1);
+                                WRITE_I32N(tag);
+                                TRACEME(("object %d, tag #%d", i-1, tag));
+                        }
+                        else
+                                CROAK(("Could not serialize item #%d from hook in %s", i, classname));
 		}
 	}
 
