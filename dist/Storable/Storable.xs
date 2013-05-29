@@ -1043,27 +1043,12 @@ static void init_store_cxt(
 	 * The following does not work well with perl5.004_04, and causes
 	 * a core dump later on, in a completely unrelated spot, which
 	 * makes me think there is a memory corruption going on.
-	 *
-	 * Calling hv_ksplit(hseen, HBUCKETS) instead of manually hacking
-	 * it below does not make any difference. It seems to work fine
-	 * with perl5.004_68 but given the probable nature of the bug,
-	 * that does not prove anything.
-	 *
-	 * It's a shame because increasing the amount of buckets raises
-	 * store() throughput by 5%, but until I figure this out, I can't
-	 * allow for this to go into production.
-	 *
-	 * It is reported fixed in 5.005, hence the #if.
-	 */
+         */
 
 	/*
-	 * The 'hclass' hash uses the same settings as 'hseen' above, but it is
-	 * used to assign sequential tags (numbers) to class names for blessed
-	 * objects.
-	 *
-	 * We turn the shared key optimization on.
+	 * The 'pclass' table uses the same settings as 'pseen' above, but it is
+	 * used to assign sequential tags (numbers) to class stashes.
 	 */
-
         store_cxt->pclass = ptr_table_new();
         SAVEDESTRUCTOR_X(PTR_TABLE_DESTRUCTOR, store_cxt->pclass);
 
@@ -1075,7 +1060,6 @@ static void init_store_cxt(
 	 * storing, and that no new method will be dynamically created by the
 	 * hooks.
 	 */
-
 	store_cxt->hook = (HV*)sv_2mortal((SV*)newHV()); /* Table where hooks are cached */
 
 	/*
@@ -1084,8 +1068,7 @@ static void init_store_cxt(
 	 * reclaimed until the end of the serialization process.  Each SV is
 	 * only stored once, the first time it is seen.
 	 */
-
-	store_cxt->hook_seen = (AV*)sv_2mortal((SV*)newAV());		/* Lists SVs returned by STORABLE_freeze */
+	store_cxt->hook_seen = (AV*)sv_2mortal((SV*)newAV()); /* Lists SVs returned by STORABLE_freeze */
 }
 
 /*
