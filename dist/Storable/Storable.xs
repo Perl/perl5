@@ -2270,15 +2270,15 @@ static void store_hook(
 	HV *pkg,
 	SV *hook)
 {
-	I32 len;
+	I32 classlen;
 	char *classname;
-	STRLEN len2;
+	STRLEN frozenlen;
 	SV *ref;
 	AV *av;
 	SV **ary;
-	int count;				/* really len3 + 1 */
+	int count;
 	unsigned char flags;
-	char *pv;
+	char *frozenpv;
 	int i;
 	int obj_type;			/* object type, on 2 bits */
 	I32 classnum;
@@ -2335,10 +2335,10 @@ static void store_hook(
 	default:
 		CROAK(("Unexpected object type (%d) in store_hook()", type));
 	}
-	flags = SHF_NEED_RECURSE | obj_type;
+	flags = obj_type;
 
 	classname = HvNAME_get(pkg);
-	len = strlen(classname);
+	classlen = strlen(classname);
 
 	/*
 	 * To call the hook, we need to fake a call like:
@@ -2376,7 +2376,7 @@ static void store_hook(
 		 * They must not change their mind in the middle of a serialization.
 		 */
 
-		if (hv_fetch(store_cxt->hclass, classname, len, FALSE))
+		if (hv_fetch(store_cxt->hclass, classname, classlen, FALSE))
 			CROAK(("Too late to ignore hooks for %s class \"%s\"",
                                (store_cxt->cloning ? "cloning" : "storing"), classname));
 	
@@ -2396,9 +2396,6 @@ static void store_hook(
 	 */
 
 	ary = AvARRAY(av);
-	pv = SvPV(ary[0], len2);
-
-
 
         if (count > 1) {
                 /* FIXME: We can't use pkg_can here because it only caches one method per
@@ -2452,7 +2449,7 @@ static void store_hook(
                                  */
 
                                 /* [SX_HOOK] <flags> [<extra>] <object>*/
-                                WRITE_MARK(flags);
+                                WRITE_MARK(flags | SHF_NEED_RECURSE);
                                 if (eflags) {
                                         WRITE_MARK(eflags);
                                         eflags = '\0'; /* write eflags just once */
@@ -2476,6 +2473,10 @@ static void store_hook(
                                 av_store(av_hook, AvFILLp(av_hook) + 1, SvREFCNT_inc_NN(xsv));
                         }                       
                 }
+
+		flags |= SHF_HAS_LIST;
+                if (count - 1 > LG_SCALAR)
+                        flags |= SHF_LARGE_LISTLEN;
         }
 
         /*
@@ -2487,81 +2488,69 @@ static void store_hook(
 	 * proposed the right fix.  -- RAM, 15/09/2000
 	 */
 
-	if (!known_class(aTHX_ store_cxt, classname, len, &classnum)) {
+	frozenpv = SvPV(ary[0], frozenlen);
+	if (frozenlen > LG_SCALAR)
+		flags |= SHF_LARGE_STRLEN;
+
+	if (known_class(aTHX_ store_cxt, classname, classlen, &classnum)) {
+		TRACEME(("already seen class %s, ID = %d", classname, classnum));
+                flags |= SHF_IDX_CLASSNAME;
+                if (classnum > LG_SCALAR)
+                        flags |= SHF_LARGE_CLASSLEN;
+        }
+        else {
 		TRACEME(("first time we see class %s, ID = %d", classname, classnum));
 		classnum = -1;				/* Mark: we must store classname */
-	} else {
-		TRACEME(("already seen class %s, ID = %d", classname, classnum));
+                if (classlen > LG_SCALAR)
+                        flags |= SHF_LARGE_CLASSLEN;
 	}
-
-	/*
-	 * Compute leading flags.
-	 */
-
-	flags = obj_type;
-	if (((classnum == -1) ? len : classnum) > LG_SCALAR)
-		flags |= SHF_LARGE_CLASSLEN;
-	if (classnum != -1)
-		flags |= SHF_IDX_CLASSNAME;
-	if (len2 > LG_SCALAR)
-		flags |= SHF_LARGE_STRLEN;
-	if (count > 1)
-		flags |= SHF_HAS_LIST;
-	if (count > (LG_SCALAR + 1))
-		flags |= SHF_LARGE_LISTLEN;
 
 	/* 
 	 * We're ready to emit either serialized form:
 	 *
-	 *   SX_HOOK <flags> [<eflags>] <len> <classname> <len2> <str> [<len3> <object-IDs>]
-	 *   SX_HOOK <flags> [<eflags>] <index>           <len2> <str> [<len3> <object-IDs>]
+	 *   SX_HOOK <flags> [<eflags>] <classlen> <classname> <frozenlen> <str> [<#objects> <object-IDs>]
+	 *   SX_HOOK <flags> [<eflags>] <index>           <frozenlen> <str> [<#objects> <object-IDs>]
 	 *
 	 * If we recursed, the SX_HOOK has already been emitted.
 	 */
 
 	TRACEME(("SX_HOOK (recursed=%d) flags=0x%x "
-			"class=%"IVdf" len=%"IVdf" len2=%"IVdf" len3=%d",
-		 recursed, flags, (IV)classnum, (IV)len, (IV)len2, count-1));
+			"class=%"IVdf" classlen=%"IVdf" frozenlen=%"IVdf" #objects=%d",
+		 recursed, flags, (IV)classnum, (IV)classlen, (IV)frozenlen, count-1));
 
 	/* SX_HOOK <flags> [<extra>] */
         WRITE_MARK(flags);
         if (eflags)
                 WRITE_MARK(eflags);
 
-	/* <len> <classname> or <index> */
+	/* <classlen> <classname> or <index> */
 	if (flags & SHF_IDX_CLASSNAME) {
 		if (flags & SHF_LARGE_CLASSLEN)
 			WRITE_LEN(classnum);
-		else {
-			unsigned char cnum = (unsigned char) classnum;
-			WRITE_MARK(cnum);
-		}
-	} else {
+		else
+			WRITE_MARK(classnum);
+	}
+        else {
 		if (flags & SHF_LARGE_CLASSLEN)
-			WRITE_LEN(len);
-		else {
-			unsigned char clen = (unsigned char) len;
-			WRITE_MARK(clen);
-		}
-		WRITE_BYTES(classname, len);		/* Final \0 is omitted */
+			WRITE_LEN(classlen);
+		else
+			WRITE_MARK(classlen);
+		WRITE_BYTES(classname, classlen);		/* Final \0 is omitted */
 	}
 
-	/* <len2> <frozen-str> */
-	if (flags & SHF_LARGE_STRLEN) {
-                WRITE_LEN(len2);
-	} else {
-		WRITE_MARK(len2);
-	}
-        WRITE_BYTES(pv, len2);	/* Final \0 is omitted */
+	/* <frozenlen> <frozen-str> */
+	if (flags & SHF_LARGE_STRLEN)
+                WRITE_LEN(frozenlen);
+	else
+		WRITE_MARK(frozenlen);
+        WRITE_BYTES(frozenpv, frozenlen);	/* Final \0 is omitted */
 
-	/* [<len3> <object-IDs>] */
+	/* [<#objects> <object-IDs>] */
 	if (flags & SHF_HAS_LIST) {
-		int len3 = count - 1;
 		if (flags & SHF_LARGE_LISTLEN)
-			WRITE_LEN(len3);
-		else {
-			WRITE_MARK(len3);
-		}
+			WRITE_LEN(count - 1);
+		else
+			WRITE_MARK(count - 1);
 
 		/*
 		 * NOTA BENE, for 64-bit machines: the ary[i] below does not yield a
