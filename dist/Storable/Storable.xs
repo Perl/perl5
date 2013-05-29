@@ -2053,9 +2053,10 @@ static void store_code(pTHX_ store_cxt_t *store_cxt, CV *cv)
 	 * call the coderef2text method
 	 */
 
-	PUSHMARK(sp);
-	XPUSHs(bdeparse); /* XXX is this already mortal? */
-	XPUSHs(sv_2mortal(newRV_inc((SV*)cv)));
+	PUSHMARK(SP);
+        EXTEND(SP, 2);
+	PUSHs(bdeparse); /* XXX is this already mortal? */
+	PUSHs(sv_2mortal(newRV_inc((SV*)cv)));
 	PUTBACK;
 	count = call_method("coderef2text", G_SCALAR);
 	SPAGAIN;
@@ -2063,6 +2064,7 @@ static void store_code(pTHX_ store_cxt_t *store_cxt, CV *cv)
 		CROAK(("Unexpected return value from B::Deparse::coderef2text\n"));
 
 	text = POPs;
+        PUTBACK;
 	len = SvCUR(text);
 	reallen = strlen(SvPV_nolen(text));
 
