@@ -17,64 +17,64 @@ Sat Apr 13 17:45:10 2013 +0100 James E Keenan <jkeenan@cpan.org>
 Fri Nov 30 23:03:09 2012 -0500 Steffen Mueller <smueller@cpan.org>
     Version 2.40
 
-	Security warnings section added
+        Security warnings section added
 
 Tue 11 Sep 06:51:11 IST 2012   Abhijit Menon-Sen <ams@toroid.org>
     Version 2.39
 
-	Various bugfixes, including compatibility fixes for older
-	versions of Perl and vstring handling.
+        Various bugfixes, including compatibility fixes for older
+        versions of Perl and vstring handling.
 
 Sun  3 Jul 09:10:11 IST 2011   Abhijit Menon-Sen <ams@toroid.org>
     Version 2.29
 
-	Various bugfixes, notably including preventing nfreeze from
-	incorrectly stringifying integers.
+        Various bugfixes, notably including preventing nfreeze from
+        incorrectly stringifying integers.
 
 Fri  3 Dec 14:12:32 GMT 2010   David Leadbeater <dgl@dgl.cx>
     Version 2.25
 
-	Support for serializing coderefs containing UTF-8.
+        Support for serializing coderefs containing UTF-8.
 
 Fri Nov 12 10:52:19 IST 2010   Abhijit Menon-Sen <ams@toroid.org>
 
     Version 2.24
 
-	Performance improvement for overloaded classes from Benjamin
-	Holzman.
+        Performance improvement for overloaded classes from Benjamin
+        Holzman.
 
 Fri Nov 12 10:36:22 IST 2010   Abhijit Menon-Sen <ams@toroid.org>
 
     Version 2.23
 
-	Release the latest version from the Perl repository.
+        Release the latest version from the Perl repository.
 
 Thu Aug  6 10:55:50 IST 2009   Abhijit Menon-Sen <ams@toroid.org>
 
     Version 2.21
 
-	Includes hints/hpux.pl that was inadvertently left out of 2.20.
+        Includes hints/hpux.pl that was inadvertently left out of 2.20.
 
 Mon May 18 09:38:20 IST 2009   Abhijit Menon-Sen <ams@toroid.org>
 
     Version 2.20
 
-	Fix bug handling blessed references to overloaded objects, plus
-	other miscellaneous fixes.
+        Fix bug handling blessed references to overloaded objects, plus
+        other miscellaneous fixes.
 
-	(Version 2.19 was released with 5.8.9.)
+        (Version 2.19 was released with 5.8.9.)
 
 Thu Nov 22 13:24:18 IST 2007   Abhijit Menon-Sen <ams@toroid.org>
 
     Version 2.18
 
-	Compile fixes for older Perls. (No functional changes.)
+        Compile fixes for older Perls. (No functional changes.)
 
 Sat Nov 17 02:12:12 IST 2007   Abhijit Menon-Sen <ams@toroid.org>
 
     Version 2.17
 
-	Various broken tests fixed. (No functional changes.)
+        Various broken tests fixed. (No functional changes.)
 
 Sat Mar 31 06:11:06 IST 2007   Abhijit Menon-Sen <ams@toroid.org>
 
@@ -94,17 +94,17 @@ Mon Apr 25 07:29:14 IST 2005   Abhijit Menon-Sen <ams@wiw.org>
 
     Version 2.14
 
-	1. Store weak references
-	2. Add STORABLE_attach hook.
+        1. Store weak references
+        2. Add STORABLE_attach hook.
 
 Thu Jun 17 12:26:43 BST 2004   Nicholas Clark <nick@ccl4.org>
 
     Version 2.13
 
         1. Don't change the type of top level overloaded references to RV -
-	   they are perfectly correct as PVMG
-	2. Storable needs to cope with incoming frozen data that happens to be
-	   utf8 encoded.
+           they are perfectly correct as PVMG
+        2. Storable needs to cope with incoming frozen data that happens to be
+           utf8 encoded.
 
 Wed Mar 17 15:40:29 GMT 2004   Nicholas Clark <nick@ccl4.org>
 
@@ -115,7 +115,7 @@ Wed Mar 17 15:40:29 GMT 2004   Nicholas Clark <nick@ccl4.org>
         3. Change to no context (should give speedup with ithreads)
 
 Sat Mar 13 20:11:03 GMT 2004   Nicholas Clark <nick@ccl4.org>
-	
+
     Version 2.11
 
         1. Storing restricted hashes in canonical order would SEGV. Fixed.
@@ -143,11 +143,11 @@ Sat Jan  3 18:49:18 GMT 2004   Nicholas Clark <nick@ccl4.org>
 
     Version 2.09
 
-	Fix minor problems with the CPAN release
-	1: Make Storable.xs work on 5.8.2 and later (already in the core)
-	2: Ship the linux hints file
-	3: Ship Test::More for the benefit of Perls pre 5.6.2
-	4: Correct Makefile.PL to only install in core for 5.8.0 and later
+        Fix minor problems with the CPAN release
+        1: Make Storable.xs work on 5.8.2 and later (already in the core)
+        2: Ship the linux hints file
+        3: Ship Test::More for the benefit of Perls pre 5.6.2
+        4: Correct Makefile.PL to only install in core for 5.8.0 and later
 
 Sat Sep  6 01:08:20 IST 2003   Abhijit Menon-Sen <ams@wiw.org>
 
@@ -172,21 +172,21 @@ Mon Oct  7 21:56:38 BST 2002   Nicholas Clark  <nick@ccl4.org>
 
     Version 2.06
 
-	Remove qr// from t/downgrade.t so that it will run on 5.004
-	Mention $File::Spec::VERSION a second time in t/forgive.t so that it
-	runs without warnings in 5.004 (this may be a 5.00405 bug I'm working
-	round)
-	Fix t/integer.t initialisation to actually generate 64 bits of 9c
-	Fix comparison tests to use eval to get around 64 bit IV conversion
-	issues on 5.6.x, following my t/integer.t ^ precedence bug found by
-	Rafael Garcia-Suarez
-	Alter t/malice.t to work with Test/More.pm in t/, and skip individual
-	subtests that use $Config{ptrsize}, so that the rest of the test can
-	now be run with 5.004
-	Change t/malice.t and the error message in check_magic in Storable.xs
-	from "Pointer integer size" to "Pointer size"
-	Remove prerequisite of Test::More from Makefile.PL
-	Ship Test::Builder, Test::Simple and Test::More in t
+        Remove qr// from t/downgrade.t so that it will run on 5.004
+        Mention $File::Spec::VERSION a second time in t/forgive.t so that it
+        runs without warnings in 5.004 (this may be a 5.00405 bug I'm working
+        round)
+        Fix t/integer.t initialisation to actually generate 64 bits of 9c
+        Fix comparison tests to use eval to get around 64 bit IV conversion
+        issues on 5.6.x, following my t/integer.t ^ precedence bug found by
+        Rafael Garcia-Suarez
+        Alter t/malice.t to work with Test/More.pm in t/, and skip individual
+        subtests that use $Config{ptrsize}, so that the rest of the test can
+        now be run with 5.004
+        Change t/malice.t and the error message in check_magic in Storable.xs
+        from "Pointer integer size" to "Pointer size"
+        Remove prerequisite of Test::More from Makefile.PL
+        Ship Test::Builder, Test::Simple and Test::More in t
 
 Thu Oct  3 08:57:22 IST 2002   Abhijit Menon-Sen <ams@wiw.org>
 
@@ -199,19 +199,19 @@ Fri Jun  7 23:55:41 BST 2002   Nicholas Clark
 
     Version 2.04
 
-	Bug fix from Radu Greab <radu@netsoft.ro> (plus regression test)
-	to fix a recently introduced bug detected by Dave Rolsky.
-	Bug was that for a non threaded build, the class information was
-	being lost at freeze time on the first object with a STORABLE_freeze
-	hook. Consequentially the object was not blessed at all when thawed.
-	(The presence (or lack) of STORABLE_thaw was irrelevant; this was
-	a store-time data lost bug, caused by failure to initialize internal
-	context)
-	The bug was introduced as development perl change 16442 (on
-	2002/05/07), so has been present since 2.00.
-	Patches to introduce more regression tests to reduce the chance of
-	a reoccurence of this sort of goof are always welcome.
-	
+        Bug fix from Radu Greab <radu@netsoft.ro> (plus regression test)
+        to fix a recently introduced bug detected by Dave Rolsky.
+        Bug was that for a non threaded build, the class information was
+        being lost at freeze time on the first object with a STORABLE_freeze
+        hook. Consequentially the object was not blessed at all when thawed.
+        (The presence (or lack) of STORABLE_thaw was irrelevant; this was
+        a store-time data lost bug, caused by failure to initialize internal
+        context)
+        The bug was introduced as development perl change 16442 (on
+        2002/05/07), so has been present since 2.00.
+        Patches to introduce more regression tests to reduce the chance of
+        a reoccurence of this sort of goof are always welcome.
+
 Thu May 30 20:31:08 BST 2002   Nicholas Clark <nick@ccl4.org>
 
     Version 2.03        Header changes on 5.6.x on Unix where IV is long long
@@ -249,7 +249,7 @@ Thu May 30 20:31:08 BST 2002   Nicholas Clark <nick@ccl4.org>
 Sat May 25 22:38:39 BST 2002   Nicholas Clark <nick@ccl4.org>
 
     Version 2.02
-                
+
         Rewrite Storable.xs so that the file header structure for write_magic
         is built at compile time, and check_magic attempts to the header in
         blocks rather than byte per byte. These changes make the compiled
@@ -264,13 +264,13 @@ Thu May 23 22:50:41 BST 2002   Nicholas Clark <nick@ccl4.org>
         - Add code to safely store large unsigned integers.
         - Change code not to attempt to store large integers (ie > 32 bits)
           in network order as 32 bits.
-        
+
         *Never* underestimate the value of a pathological test suite carefully
         crafted with maximum malice before writing a line of real code. It
         prevents crafty bugs from stowing away in your released code.
         It's much less embarrassing to find them before you ship.
         (Well, never underestimate it if you ever want to work for me)
-        
+
 Fri May 17 22:48:59 BST 2002   Nicholas Clark <nick@ccl4.org>
 
     Version 2.0, binary format 2.5 (but writes format 2.4 on pre 5.7.3)
@@ -315,7 +315,7 @@ Fri May 17 22:48:59 BST 2002   Nicholas Clark <nick@ccl4.org>
         if you encounter bugs or other problems building or using Storable,
         please let us know at perl5-porters@perl.org
         Patches welcome!
-        
+
 Sat Dec  1 14:37:54 MET 2001   Raphael Manfredi <Raphael_Manfredi@pobox.com>
 
         This is the LAST maintenance release of the Storable module.
@@ -764,7 +764,7 @@ Fri May 16 10:45:47 METDST 1997   Raphael Manfredi <Raphael_Manfredi@grenoble.hp
         I could use
 
                 use AutoLoader 'AUTOLOAD';
-        
+
         but that would not be backward compatible. So the export is
         done by hand...
 
