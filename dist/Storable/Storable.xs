@@ -2280,7 +2280,6 @@ static void store_hook(
 	unsigned char flags;
 	char *pv;
 	int i;
-	int recursed = 0;		/* counts recursion */
 	int obj_type;			/* object type, on 2 bits */
 	I32 classnum;
 	char mtype = '\0';				/* for blessed ref to tied structures */
@@ -2389,12 +2388,17 @@ static void store_hook(
 		return store_blessed(aTHX_ store_cxt, sv, type, pkg);
 	}
 
+        /* Write header */
+        WRITE_MARK(SX_HOOK);
+
 	/*
 	 * Get frozen string.
 	 */
 
 	ary = AvARRAY(av);
 	pv = SvPV(ary[0], len2);
+
+
 
         if (count > 1) {
                 /* FIXME: We can't use pkg_can here because it only caches one method per
@@ -2450,13 +2454,11 @@ static void store_hook(
                          */
 
                         /* [SX_HOOK] <flags> [<extra>] <object>*/
-                        if (!recursed++) {
-                                WRITE_MARK(SX_HOOK);
-                                WRITE_MARK(flags);
-                                if (obj_type == SHT_EXTRA)
-                                        WRITE_MARK(eflags);
-                        } else
-                                WRITE_MARK(flags);
+                        WRITE_MARK(flags);
+                        if (eflags) {
+                                WRITE_MARK(eflags);
+                                eflags = '\0'; /* write eflags just once */
+                        }
 
                         store(aTHX_ store_cxt, xsv);
                         
@@ -2529,8 +2531,8 @@ static void store_hook(
 	/* 
 	 * We're ready to emit either serialized form:
 	 *
-	 *   SX_HOOK <flags> <len> <classname> <len2> <str> [<len3> <object-IDs>]
-	 *   SX_HOOK <flags> <index>           <len2> <str> [<len3> <object-IDs>]
+	 *   SX_HOOK <flags> [<eflags>] <len> <classname> <len2> <str> [<len3> <object-IDs>]
+	 *   SX_HOOK <flags> [<eflags>] <index>           <len2> <str> [<len3> <object-IDs>]
 	 *
 	 * If we recursed, the SX_HOOK has already been emitted.
 	 */
@@ -2540,13 +2542,9 @@ static void store_hook(
 		 recursed, flags, (IV)classnum, (IV)len, (IV)len2, count-1));
 
 	/* SX_HOOK <flags> [<extra>] */
-	if (!recursed) {
-		WRITE_MARK(SX_HOOK);
-		WRITE_MARK(flags);
-		if (obj_type == SHT_EXTRA)
-			WRITE_MARK(eflags);
-	} else
-		WRITE_MARK(flags);
+        WRITE_MARK(flags);
+        if (eflags)
+                WRITE_MARK(eflags);
 
 	/* <len> <classname> or <index> */
 	if (flags & SHF_IDX_CLASSNAME) {
