@@ -396,14 +396,12 @@ static MAGIC *THX_sv_magicext(pTHX_ SV *sv, SV *obj, int type,
 	sv_setiv(perinterp_sv, PTR2IV(cxt->my_sv))
 
 #define SET_STCXT(x)								\
-  STMT_START {										\
-	dSTCXT_SV;										\
-	sv_setiv(perinterp_sv, PTR2IV(x->my_sv));		\
-  } STMT_END
+	sv_setiv(perinterp_sv, PTR2IV(x->my_sv));
 
 #else /* !MULTIPLICITY && !PERL_OBJECT && !PERL_CAPI */
 
 static stcxt_t *Context_ptr = NULL;
+#define dSTCXT_SV 		dNOOP
 #define dSTCXT			stcxt_t *cxt = Context_ptr
 #define SET_STCXT(x)		Context_ptr = x
 #define INIT_STCXT						\
@@ -1584,6 +1582,7 @@ static void clean_context(pTHX_ stcxt_t *cxt)
 static stcxt_t *allocate_context(pTHX_ stcxt_t *parent_cxt)
 {
 	stcxt_t *cxt;
+	dSTCXT_SV;
 
 	TRACEME(("allocate_context"));
 
@@ -1607,6 +1606,7 @@ static stcxt_t *allocate_context(pTHX_ stcxt_t *parent_cxt)
 static void free_context(pTHX_ stcxt_t *cxt)
 {
 	stcxt_t *prev = (stcxt_t *)(cxt->prev ? SvPVX(SvRV(cxt->prev)) : 0);
+	dSTCXT_SV;
 
 	TRACEME(("free_context"));
 
