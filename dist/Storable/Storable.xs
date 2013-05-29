@@ -385,12 +385,10 @@ static MAGIC *THX_sv_magicext(pTHX_ SV *sv, SV *obj, int type,
 		MY_VERSION, sizeof(MY_VERSION)-1, TRUE)
 #endif	/* < perl5.004_68 */
 
-#define dSTCXT_PTR(T,name)							\
-	T name = ((perinterp_sv && SvIOK(perinterp_sv) && SvIVX(perinterp_sv)	\
-				? (T)SvPVX(SvRV(INT2PTR(SV*,SvIVX(perinterp_sv)))) : (T) 0))
 #define dSTCXT										\
 	dSTCXT_SV;										\
-	dSTCXT_PTR(stcxt_t *, cxt)
+	stcxt_t *cxt = (perinterp_sv && SvIOK(perinterp_sv) && SvIVX(perinterp_sv)	\
+			? (stcxt_t *)SvPVX(SvRV(INT2PTR(SV*,SvIVX(perinterp_sv)))) : NULL)
 
 #define INIT_STCXT							\
 	dSTCXT;									\
