@@ -2270,16 +2270,16 @@ static void store_hook(
 	HV *pkg,
 	SV *hook)
 {
+        dSP;
 	I32 classlen;
 	char *classname;
 	STRLEN frozenlen;
 	SV *ref;
 	AV *av;
 	SV **ary;
-	int count;
+	int count, i;
 	unsigned char flags;
 	char *frozenpv;
-	int i;
 	int obj_type;			/* object type, on 2 bits */
 	I32 classnum;
 	char mtype = '\0';				/* for blessed ref to tied structures */
@@ -2355,11 +2355,29 @@ static void store_hook(
 
 	TRACEME(("about to call STORABLE_freeze on class %s", classname));
 
-        /* FIXME: this can leak too many mortals: */
-	ref = sv_2mortal(newRV_inc(sv));				/* Temporary reference */
-	av = (AV*)sv_2mortal((SV*)array_call(aTHX_ ref, hook, store_cxt->cloning));	/* @a = $object->STORABLE_freeze($c) */
+        av = (AV*)sv_2mortal((SV*)newAV());
 
-	count = AvFILLp(av) + 1;
+        ENTER;
+        SAVETMPS;
+
+        PUSHMARK(SP);
+        EXTEND(SP, 2);
+        PUSHs(sv_2mortal(newRV_inc(sv)));
+        PUSHs(sv_2mortal(newSViv(store_cxt->cloning)));
+        PUTBACK;
+
+        count = perl_call_sv(hook, G_ARRAY);
+        SPAGAIN;
+
+        for (i = count; i--; ) {
+		SV *sv = POPs;
+		av_store(av, i, SvREFCNT_inc_NN(sv));
+	}
+        
+        PUTBACK;
+        FREETMPS;
+	LEAVE;
+
 	TRACEME(("store_hook, array holds %d items", count));
 
 	/*
