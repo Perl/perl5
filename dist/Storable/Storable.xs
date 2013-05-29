@@ -2479,6 +2479,10 @@ static void store_hook(
                         flags |= SHF_LARGE_LISTLEN;
         }
 
+	frozenpv = SvPV(ary[0], frozenlen);
+	if (frozenlen > LG_SCALAR)
+		flags |= SHF_LARGE_STRLEN;
+
         /*
          * Allocate a class ID if not already done.
          *
@@ -2487,10 +2491,6 @@ static void store_hook(
 	 * Salvador Ortiz Garcia <sog@msg.com.mx> who spot that bug and
 	 * proposed the right fix.  -- RAM, 15/09/2000
 	 */
-
-	frozenpv = SvPV(ary[0], frozenlen);
-	if (frozenlen > LG_SCALAR)
-		flags |= SHF_LARGE_STRLEN;
 
 	if (known_class(aTHX_ store_cxt, classname, classlen, &classnum)) {
 		TRACEME(("already seen class %s, ID = %d", classname, classnum));
