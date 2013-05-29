@@ -2320,28 +2320,24 @@ static void store_hook(
         PUTBACK;
 
         count = perl_call_sv(hook, G_ARRAY);
-        SPAGAIN;
-
-        SP -= count; /* this trick documented in perlcall */
-        ax = (SP - PL_stack_base) + 1;
 
 	TRACEME(("store_hook, array holds %d items", count));
 
-	/*
-	 * If they return an empty list, it means they wish to ignore the
-	 * hook for this class (and not just this instance -- that's for them
-	 * to handle if they so wish).
-	 *
-	 * Simply disable the cached entry for the hook (it won't be recomputed
-	 * since it's present in the cache) and recurse to store_blessed().
-	 */
-
 	if (!count) {
-		/*
-		 * They must not change their mind in the middle of a serialization.
-		 */
+                /*
+                 * If they return an empty list, it means they wish to ignore the
+                 * hook for this class (and not just this instance -- that's for them
+                 * to handle if they so wish).
+                 *
+                 * Simply disable the cached entry for the hook (it won't be recomputed
+                 * since it's present in the cache) and recurse to store_blessed().
+                 */
 
+                FREETMPS;
+                LEAVE;
+		
 		if (hv_fetch(store_cxt->hclass, classname, classlen, FALSE))
+                        /* They must not change their mind in the middle of a serialization. */
 			CROAK(("Too late to ignore hooks for %s class \"%s\"",
                                (store_cxt->cloning ? "cloning" : "storing"), classname));
 	
@@ -2350,8 +2346,15 @@ static void store_hook(
 		ASSERT(!pkg_can(aTHX_ store_cxt->hook, pkg, "STORABLE_freeze"), ("hook invisible"));
 		TRACEME(("ignoring STORABLE_freeze in class \"%s\"", classname));
 
-		return store_blessed(aTHX_ store_cxt, sv, type, pkg);
+
+
+                store_blessed(aTHX_ store_cxt, sv, type, pkg);
+                return;
 	}
+
+        SPAGAIN; /* this trick documented in perlcall */
+        SP -= count;
+        ax = (SP - PL_stack_base) + 1;
 
         /* Write header */
         WRITE_MARK(SX_HOOK);
