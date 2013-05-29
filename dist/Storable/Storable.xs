@@ -1165,49 +1165,6 @@ downgrade_restricted(pTHX) {
  ***/
 
 /*
- * pkg_fetchmeth
- *
- * A wrapper on gv_fetchmethod_autoload() which caches results.
- *
- * Returns the routine reference as an SV*, or null if neither the package
- * nor its ancestors know about the method.
- */
-static SV *pkg_fetchmeth(
-        pTHX_
-	HV *cache,
-	HV *pkg,
-	const char *method)
-{
-	GV *gv;
-	SV *sv;
-	const char *hvname = HvNAME_get(pkg);
-
-
-	/*
-	 * The following code is the same as the one performed by UNIVERSAL::can
-	 * in the Perl core.
-	 */
-
-	gv = gv_fetchmethod_autoload(pkg, method, FALSE);
-	if (gv && isGV(gv)) {
-		sv = newRV((SV*) GvCV(gv));
-		TRACEME(("%s->%s: 0x%"UVxf, hvname, method, PTR2UV(sv)));
-	} else {
-		sv = newSVsv(&PL_sv_undef);
-		TRACEME(("%s->%s: not found", hvname, method));
-	}
-
-	/*
-	 * Cache the result, ignoring failure: if we can't store the value,
-	 * it just won't be cached.
-	 */
-
-	(void) hv_store(cache, hvname, strlen(hvname), sv, 0);
-
-	return SvOK(sv) ? sv : (SV *) 0;
-}
-
-/*
  * known_class
  *
  * Lookup the class name in the 'hclass' table and either assign it a new ID
