@@ -1224,8 +1224,6 @@ static const sv_retrieve_t sv_retrieve[] = {
 
 #define RETRIEVE(c,x) (*(c)->retrieve_vtbl[(x) >= SX_ERROR ? SX_ERROR : (x)])
 
-static SV *mbuf2sv(pTHX);
-
 /***
  *** Context management.
  ***/
@@ -3785,7 +3783,7 @@ static int do_store(
 	 */
 
 	if (!cxt->fio && res)
-		*res = mbuf2sv(aTHX);
+		*res = newSVpv(mbase, MBUF_SIZE());
 
 	/*
 	 * Final cleanup.
@@ -3810,22 +3808,6 @@ static int do_store(
 	TRACEME(("do_store returns %d", status));
 
 	return status == 0;
-}
-
-/***
- *** Memory stores.
- ***/
-
-/*
- * mbuf2sv
- *
- * Build a new SV out of the content of the internal memory buffer.
- */
-static SV *mbuf2sv(pTHX)
-{
-	dSTCXT;
-
-	return newSVpv(mbase, MBUF_SIZE());
 }
 
 /***
