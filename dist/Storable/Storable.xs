@@ -2391,10 +2391,6 @@ static void store_hook(
         /* Write header */
         WRITE_MARK(SX_HOOK);
 
-	/*
-	 * Get frozen string.
-	 */
-
 	ary = AvARRAY(av);
 
         if (count > 1) {
@@ -2479,6 +2475,9 @@ static void store_hook(
                         flags |= SHF_LARGE_LISTLEN;
         }
 
+	/*
+	 * Get frozen string.
+	 */
 	frozenpv = SvPV(ary[0], frozenlen);
 	if (frozenlen > LG_SCALAR)
 		flags |= SHF_LARGE_STRLEN;
@@ -2491,7 +2490,6 @@ static void store_hook(
 	 * Salvador Ortiz Garcia <sog@msg.com.mx> who spot that bug and
 	 * proposed the right fix.  -- RAM, 15/09/2000
 	 */
-
 	if (known_class(aTHX_ store_cxt, classname, classlen, &classnum)) {
 		TRACEME(("already seen class %s, ID = %d", classname, classnum));
                 flags |= SHF_IDX_CLASSNAME;
