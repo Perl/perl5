@@ -1027,36 +1027,6 @@ static const char byteorderstr_56[] = {BYTEORDER_BYTES_56, 0};
 	SvRV_set(ref, NULL);						\
 	SvREFCNT_dec(ref);						\
   } STMT_END
-/*
- * sort (used in store_hash) - conditionally use qsort when
- * sortsv is not available ( <= 5.6.1 ).
- */
-
-#if (PATCHLEVEL <= 6)
-
-#if defined(USE_ITHREADS)
-
-#define STORE_HASH_SORT \
-        ENTER; { \
-        PerlInterpreter *orig_perl = PERL_GET_CONTEXT; \
-        SAVESPTR(orig_perl); \
-        PERL_SET_CONTEXT(aTHX); \
-        qsort((char *) AvARRAY(av), len, sizeof(SV *), sortcmp); \
-        } LEAVE;
-
-#else /* ! USE_ITHREADS */
-
-#define STORE_HASH_SORT \
-        qsort((char *) AvARRAY(av), len, sizeof(SV *), sortcmp);
-
-#endif  /* USE_ITHREADS */
-
-#else /* PATCHLEVEL > 6 */
-
-#define STORE_HASH_SORT \
-        sortsv(AvARRAY(av), len, Perl_sv_cmp);  
-
-#endif /* PATCHLEVEL <= 6 */
 
 static int store(pTHX_ stcxt_t *cxt, SV *sv);
 static SV *retrieve(pTHX_ stcxt_t *cxt, const char *cname);
@@ -2316,7 +2286,11 @@ static int store_hash(pTHX_ stcxt_t *cxt, HV *hv)
 			av_store(av, AvFILLp(av)+1, key);	/* av_push(), really */
 		}
 			
-		STORE_HASH_SORT;
+#if (PATCHLEVEL <= 6)
+		qsort((char *) AvARRAY(av), len, sizeof(SV *), sortcmp);
+#else
+		sortsv(AvARRAY(av), len, Perl_sv_cmp);  
+#endif
 
 		for (i = 0; i < len; i++) {
 #ifdef HAS_RESTRICTED_HASHES
