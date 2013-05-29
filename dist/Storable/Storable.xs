@@ -629,14 +629,6 @@ static const char byteorderstr_56[] = {BYTEORDER_BYTES_56, 0};
  * Useful store shortcuts...
  */
 
-/*
- * Note that if you put more than one mark for storing a particular
- * type of thing, *and* in the retrieve_foo() function you mark both
- * the thingy's you get off with SEEN(), you *must* increase the
- * tagnum with retrieve_cxt->tagnum++ along with this macro!
- *     - samv 20Jan04
- */
-
 #define WRITE_SCALAR(pv, len)	WRITE_PV_WITH_LEN_AND_TYPE(pv, len, SX_SCALAR)
 
 /*
