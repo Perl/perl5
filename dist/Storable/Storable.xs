@@ -390,13 +390,7 @@ static MAGIC *THX_sv_magicext(pTHX_ SV *sv, SV *obj, int type,
 	stcxt_t *cxt = (perinterp_sv && SvIOK(perinterp_sv) && SvIVX(perinterp_sv)	\
 			? (stcxt_t *)SvPVX(SvRV(INT2PTR(SV*,SvIVX(perinterp_sv)))) : NULL)
 
-#define INIT_STCXT							\
-	dSTCXT;									\
-	NEW_STORABLE_CXT_OBJ(cxt);				\
-	sv_setiv(perinterp_sv, PTR2IV(cxt->my_sv))
-
-#define SET_STCXT(x)								\
-	sv_setiv(perinterp_sv, PTR2IV(x->my_sv));
+#define SET_STCXT(x)		sv_setiv(perinterp_sv, PTR2IV(x->my_sv));
 
 #else /* !MULTIPLICITY && !PERL_OBJECT && !PERL_CAPI */
 
@@ -404,11 +398,6 @@ static stcxt_t *Context_ptr = NULL;
 #define dSTCXT_SV 		dNOOP
 #define dSTCXT			stcxt_t *cxt = Context_ptr
 #define SET_STCXT(x)		Context_ptr = x
-#define INIT_STCXT						\
-	dSTCXT;								\
-	NEW_STORABLE_CXT_OBJ(cxt);			\
-	SET_STCXT(cxt)
-
 
 #endif /* MULTIPLICITY || PERL_OBJECT || PERL_CAPI */
 
@@ -1231,7 +1220,9 @@ static const sv_retrieve_t sv_retrieve[] = {
  */
 static void init_perinterp(pTHX)
 {
-    INIT_STCXT;
+    dSTCXT;
+    NEW_STORABLE_CXT_OBJ(cxt);
+    SET_STCXT(cxt);
 
     cxt->netorder = 0;		/* true if network order used */
     cxt->forgive_me = -1;	/* whether to be forgiving... */
