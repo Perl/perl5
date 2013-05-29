@@ -3783,7 +3783,7 @@ static int do_store(
 	 */
 
 	if (!cxt->fio && res)
-		*res = newSVpv(mbase, MBUF_SIZE());
+		*res = newSVpvn(mbase, MBUF_SIZE());
 
 	/*
 	 * Final cleanup.
