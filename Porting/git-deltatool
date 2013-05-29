@@ -228,8 +228,7 @@ sub edit_text {
   else {
     warn("No VISUAL or EDITOR defined");
   }
-  $tempfh->seek(0,0);
-  return do { local $/; <$tempfh> };
+  return do { local (@ARGV,$/) = "$tempfh"; <> };
 }
 
 sub find_commits {
