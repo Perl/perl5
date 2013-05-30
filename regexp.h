@@ -577,11 +577,9 @@ get_regex_charset_name(const U32 flags, STRLEN* const lenp)
 #define FBMrf_MULTILINE	1
 
 
-/* saved state when executing a regex that contains code blocks.
- * These need restoring at the end of the match, or on croak().
- * These fields can't be stored in regmatch_info since the latter is
- * allocated directly on the stack in regexec_flags(), and they need to
- * exist during a croak() after the stack has been unwound */
+/* like regmatch_info_aux, but contains extra fields only needed if the
+ * pattern contains (?{}). If used, is snuck into the second slot in the
+ * regmatch_state stack at the start of execution */
 
 typedef struct {
     regexp *rex;
@@ -595,12 +593,24 @@ typedef struct {
     STRLEN  subcoffset; /* saved subcoffset field from rex */
     MAGIC   *pos_magic; /* pos() magic attached to $_ */
     I32     pos;        /* the original value of pos() in pos_magic */
-    bool    restored;   /* we have already undone the save */
-    bool    direct;     /* we are calling the destructor directly */
-} regmatch_eval_state;
+} regmatch_info_aux_eval;
+
+
+/* fields that logically  live in regmatch_info, but which need cleaning
+ * up on croak(), and so are instead are snuck into the first slot in
+ * the regmatch_state stack at the start of execution */
+
+typedef struct {
+    regmatch_info_aux_eval *info_aux_eval;
+} regmatch_info_aux;
+
 
 /* some basic information about the current match that is created by
- * Perl_regexec_flags and then passed to regtry(), regmatch() etc */
+ * Perl_regexec_flags and then passed to regtry(), regmatch() etc.
+ * It is allocated as a local var on the stack, so nothing should be
+ * stored in it that needs preserving or clearing up on croak().
+ * For that, see the aux_info and aux_info_eval members of the
+ * regmatch_state union. */
 
 typedef struct {
     REGEXP *prog;
@@ -610,7 +620,8 @@ typedef struct {
     SV *sv;
     char *ganch;
     char *cutpoint;
-    regmatch_eval_state *eval_state; /* extra saved state for (?{}) */
+    regmatch_info_aux      *info_aux; /* extra fields that need cleanup */
+    regmatch_info_aux_eval *info_aux_eval; /* extra saved state for (?{}) */
     I32  poscache_maxiter; /* how many whilems todo before S-L cache kicks in */
     I32  poscache_iter;    /* current countdown from _maxiter to zero */
     bool intuit;    /* re_intuit_start() is the top-level caller */
@@ -633,6 +644,29 @@ typedef struct regmatch_state {
     char *locinput;		/* where to backtrack in string on failure */
 
     union {
+
+        /* the 'info_aux' and 'info_aux_eval' union members are cuckoos in
+         * the nest. They aren't saved backtrack state; rather they
+         * represent one or two extra chunks of data that need allocating
+         * at the start of a match. These fields would logically live in
+         * the regmatch_info struct, except that is allocated on the
+         * C stack, and these fields are all things that require cleanup
+         * after a croak(), when the stack is lost.
+         * As a convenience, we just use the first 1 or 2 regmatch_state
+         * slots to store this info, as we will be allocating a slab of
+         * these anyway. Otherwise we'd have to malloc and then free them,
+         * or allocate them on the save stack (where they will get
+         * realloced if the save stack grows).
+         * info_aux contains the extra fields that are always needed;
+         * info_aux_eval contains extra fields that only needed if
+         * the pattern contains code blocks
+         * We split them into two separate structs to avoid increasing
+         * the size of the union.
+         */
+
+        regmatch_info_aux info_aux;
+
+        regmatch_info_aux_eval info_aux_eval;
 
 	/* this is a fake union member that matches the first element
 	 * of each member that needs to store positive backtrack
