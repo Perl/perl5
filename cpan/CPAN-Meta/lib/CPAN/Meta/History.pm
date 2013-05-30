@@ -3,7 +3,7 @@ use 5.006;
 use strict;
 use warnings;
 package CPAN::Meta::History;
-our $VERSION = '2.130880'; # VERSION
+our $VERSION = '2.131490'; # VERSION
 
 1;
 
@@ -21,7 +21,7 @@ CPAN::Meta::History - history of CPAN Meta Spec changes
 
 =head1 VERSION
 
-version 2.130880
+version 2.131490
 
 =head1 DESCRIPTION
 
@@ -315,15 +315,7 @@ Ansgar Burchardt <ansgar@cpan.org>
 
 =item *
 
-Michael G. Schwern <mschwern@cpan.org>
-
-=item *
-
-Randy Sims <randys@thepierianspring.org>
-
-=item *
-
-Ævar Arnfjörð Bjarmason <avar@cpan.org>
+Avar Arnfjord Bjarmason <avar@cpan.org>
 
 =item *
 
@@ -351,7 +343,11 @@ Ken Williams <kwilliams@cpan.org>
 
 =item *
 
-Lars Dɪᴇᴄᴋᴏᴡ 迪拉斯 <daxim@cpan.org>
+Kenichi Ishigaki <ishigaki@cpan.org>
+
+=item *
+
+Lars Dieckow <daxim@cpan.org>
 
 =item *
 
@@ -360,6 +356,14 @@ Leon Timmermans <leont@cpan.org>
 =item *
 
 Mark Fowler <markf@cpan.org>
+
+=item *
+
+Michael G. Schwern <mschwern@cpan.org>
+
+=item *
+
+Randy Sims <randys@thepierianspring.org>
 
 =back
 

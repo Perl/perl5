@@ -3,7 +3,7 @@ use 5.006;
 use strict;
 use warnings;
 package CPAN::Meta::Spec;
-our $VERSION = '2.130880'; # VERSION
+our $VERSION = '2.131490'; # VERSION
 
 1;
 
@@ -21,7 +21,7 @@ CPAN::Meta::Spec - specification for CPAN distribution metadata
 
 =head1 VERSION
 
-version 2.130880
+version 2.131490
 
 =head1 SYNOPSIS
 
@@ -659,19 +659,22 @@ PAUSE, CPAN, and search.cpan.org to build indexes saying in which
 distribution various packages can be found.
 
 The keys of C<provides> are package names that can be found within
-the distribution.  The values are Maps with the following valid subkeys:
+the distribution.  If a package name key is provided, it must
+have a Map with the following valid subkeys:
 
 =over
 
 =item file
 
-This field is required.  The value must contain a Unix-style relative
-file path from the root of the distribution to the module containing the
-package.
+This field is required.  It must contain a Unix-style relative file path
+from the root of the distribution directory to a file that contains or
+generates the package.
 
 =item version
 
-This field contains a I<Version> String for the package, if one exists.
+If it exists, this field must contains a I<Version> String for the
+package.  If the package does not have a C<$VERSION>, this field must
+be omitted.
 
 =back
 
@@ -1147,15 +1150,7 @@ Ansgar Burchardt <ansgar@cpan.org>
 
 =item *
 
-Michael G. Schwern <mschwern@cpan.org>
-
-=item *
-
-Randy Sims <randys@thepierianspring.org>
-
-=item *
-
-Ævar Arnfjörð Bjarmason <avar@cpan.org>
+Avar Arnfjord Bjarmason <avar@cpan.org>
 
 =item *
 
@@ -1183,7 +1178,11 @@ Ken Williams <kwilliams@cpan.org>
 
 =item *
 
-Lars Dɪᴇᴄᴋᴏᴡ 迪拉斯 <daxim@cpan.org>
+Kenichi Ishigaki <ishigaki@cpan.org>
+
+=item *
+
+Lars Dieckow <daxim@cpan.org>
 
 =item *
 
@@ -1192,6 +1191,14 @@ Leon Timmermans <leont@cpan.org>
 =item *
 
 Mark Fowler <markf@cpan.org>
+
+=item *
+
+Michael G. Schwern <mschwern@cpan.org>
+
+=item *
+
+Randy Sims <randys@thepierianspring.org>
 
 =back
 

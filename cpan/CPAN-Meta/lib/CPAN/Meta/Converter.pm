@@ -2,7 +2,7 @@ use 5.006;
 use strict;
 use warnings;
 package CPAN::Meta::Converter;
-our $VERSION = '2.130880'; # VERSION
+our $VERSION = '2.131490'; # VERSION
 
 
 use CPAN::Meta::Validator;
@@ -78,6 +78,12 @@ sub _ucfirst_custom {
   my $key = shift;
   $key = ucfirst $key unless $key =~ /[A-Z]/;
   return $key;
+}
+
+sub _no_prefix_ucfirst_custom {
+  my $key = shift;
+  $key =~ s/^x_//;
+  return _ucfirst_custom($key);
 }
 
 sub _change_meta_spec {
@@ -653,7 +659,7 @@ my $resource_downgrade_spec = {
   homepage   => \&_url_or_drop,
   bugtracker => sub { return $_[0]->{web} },
   repository => sub { return $_[0]->{url} || $_[0]->{web} },
-  ':custom'  => \&_ucfirst_custom,
+  ':custom'  => \&_no_prefix_ucfirst_custom,
 };
 
 sub _downgrade_resources {
@@ -1274,7 +1280,7 @@ CPAN::Meta::Converter - Convert CPAN distribution metadata structures
 
 =head1 VERSION
 
-version 2.130880
+version 2.131490
 
 =head1 SYNOPSIS
 
@@ -1392,15 +1398,7 @@ Ansgar Burchardt <ansgar@cpan.org>
 
 =item *
 
-Michael G. Schwern <mschwern@cpan.org>
-
-=item *
-
-Randy Sims <randys@thepierianspring.org>
-
-=item *
-
-Ævar Arnfjörð Bjarmason <avar@cpan.org>
+Avar Arnfjord Bjarmason <avar@cpan.org>
 
 =item *
 
@@ -1428,7 +1426,11 @@ Ken Williams <kwilliams@cpan.org>
 
 =item *
 
-Lars Dɪᴇᴄᴋᴏᴡ 迪拉斯 <daxim@cpan.org>
+Kenichi Ishigaki <ishigaki@cpan.org>
+
+=item *
+
+Lars Dieckow <daxim@cpan.org>
 
 =item *
 
@@ -1437,6 +1439,14 @@ Leon Timmermans <leont@cpan.org>
 =item *
 
 Mark Fowler <markf@cpan.org>
+
+=item *
+
+Michael G. Schwern <mschwern@cpan.org>
+
+=item *
+
+Randy Sims <randys@thepierianspring.org>
 
 =back
 

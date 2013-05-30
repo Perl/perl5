@@ -166,6 +166,22 @@ for my $f ( reverse sort @files ) {
   );
 }
 
+# specific test for round-tripping resources
+{
+  my $path = File::Spec->catfile('t','data','resources.yml');
+  my $original = Parse::CPAN::Meta->load_file( $path  );
+  ok( $original, "loaded resources.yml" );
+  my $cmc1 = CPAN::Meta::Converter->new( $original );
+  my $converted = $cmc1->convert( version => 2 );
+  my $cmc2 = CPAN::Meta::Converter->new( $converted );
+  my $roundtrip = $cmc2->convert( version => 1.4 );
+  is_deeply(
+    $roundtrip->{resources},
+    $original->{resources},
+    "round-trip of resources (1.4->2->1.4)"
+  );
+}
+
 # specific test for object conversion
 {
   my $path = File::Spec->catfile('t','data','resources.yml');
