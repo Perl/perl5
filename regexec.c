@@ -251,7 +251,6 @@ static const char* const non_utf8_target_but_utf8_required
 
 static void S_setup_eval_state(pTHX_ regmatch_info *const reginfo);
 static void S_cleanup_regmatch_info_aux(pTHX_ void *arg);
-static void S_clear_backtrack_stack(pTHX_ void *p);
 static regmatch_state * S_push_slab(pTHX);
 
 #define REGCP_PAREN_ELEMS 3
@@ -2102,16 +2101,11 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
     reginfo->intuit = 0;
     reginfo->is_utf8_target = cBOOL(utf8_target);
 
-    /* on first ever match, allocate first slab */
-    if (!PL_regmatch_slab) {
-	Newx(PL_regmatch_slab, 1, regmatch_slab);
-	PL_regmatch_slab->prev = NULL;
-	PL_regmatch_slab->next = NULL;
-	PL_regmatch_state = SLAB_FIRST(PL_regmatch_slab);
-    }
+    /* at the end of this function, we'll do a LEAVE_SCOPE(oldsave),
+     * which will call destuctors to reset PL_regmatch_state, free higher
+     * PL_regmatch_slabs, and clean up regmatch_info_aux and
+     * regmatch_info_aux_eval */
 
-    /* note current PL_regmatch_state position; at end of match we'll
-     * pop back to there and free any higher slabs */
     oldsave = PL_savestack_ix;
 
     DEBUG_EXECUTE_r( 
@@ -2147,36 +2141,54 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
     /* see how far we have to get to not match where we matched before */
     reginfo->till = startpos+minend;
 
-    SAVEDESTRUCTOR_X(S_clear_backtrack_stack, NULL);
-    SAVEVPTR(PL_regmatch_slab);
-    SAVEVPTR(PL_regmatch_state);
+    /* reserve next 2 or 3 slots in PL_regmatch_state:
+     * slot N+0: may currently be in use: skip it
+     * slot N+1: use for regmatch_info_aux struct
+     * slot N+2: use for regmatch_info_aux_eval struct if we have (?{})'s
+     * slot N+3: ready for use by regmatch()
+     */
 
-    /* grab next slot in regmatch_state stack to store regmatch_info_aux
-     * struct */
+    {
+        regmatch_state *old_regmatch_state;
+        regmatch_slab  *old_regmatch_slab;
+        int i, max = (prog->extflags & RXf_EVAL_SEEN) ? 2 : 1;
 
-    reginfo->info_aux = &(PL_regmatch_state->u.info_aux);
-    if (++PL_regmatch_state >  SLAB_LAST(PL_regmatch_slab))
-	PL_regmatch_state = S_push_slab(aTHX);
+        /* on first ever match, allocate first slab */
+        if (!PL_regmatch_slab) {
+            Newx(PL_regmatch_slab, 1, regmatch_slab);
+            PL_regmatch_slab->prev = NULL;
+            PL_regmatch_slab->next = NULL;
+            PL_regmatch_state = SLAB_FIRST(PL_regmatch_slab);
+        }
 
-    SAVEDESTRUCTOR_X(S_cleanup_regmatch_info_aux, reginfo->info_aux);
+        old_regmatch_state = PL_regmatch_state;
+        old_regmatch_slab  = PL_regmatch_slab;
 
-
-    if ((prog->extflags & RXf_EVAL_SEEN)) {
-        /* grab next slot in regmatch_state stack to store
-         * regmatch_info_aux_eval struct */
-
-        reginfo->info_aux_eval =
-        reginfo->info_aux->info_aux_eval =
+        for (i=0; i <= max; i++) {
+            if (i == 1)
+                reginfo->info_aux = &(PL_regmatch_state->u.info_aux);
+            else if (i ==2)
+                reginfo->info_aux_eval =
+                reginfo->info_aux->info_aux_eval =
                             &(PL_regmatch_state->u.info_aux_eval);
 
-        if (++PL_regmatch_state >  SLAB_LAST(PL_regmatch_slab))
-            PL_regmatch_state = S_push_slab(aTHX);
+            if (++PL_regmatch_state >  SLAB_LAST(PL_regmatch_slab))
+                PL_regmatch_state = S_push_slab(aTHX);
+        }
 
-        S_setup_eval_state(aTHX_ reginfo);
+        /* note initial PL_regmatch_state position; at end of match we'll
+         * pop back to there and free any higher slabs */
+
+        reginfo->info_aux->old_regmatch_state = old_regmatch_state;
+        reginfo->info_aux->old_regmatch_slab  = old_regmatch_slab;
+
+        SAVEDESTRUCTOR_X(S_cleanup_regmatch_info_aux, reginfo->info_aux);
+
+        if ((prog->extflags & RXf_EVAL_SEEN))
+            S_setup_eval_state(aTHX_ reginfo);
+        else
+            reginfo->info_aux_eval = reginfo->info_aux->info_aux_eval = NULL;
     }
-    else
-        reginfo->info_aux_eval = reginfo->info_aux->info_aux_eval = NULL;
-
 
     /* If there is a "must appear" string, look for it. */
     s = startpos;
@@ -3218,25 +3230,6 @@ S_reg_check_named_buff_matched(pTHX_ const regexp *rex, const regnode *scan)
 }
 
 
-/* free all slabs above current one  - called during LEAVE_SCOPE */
-
-STATIC void
-S_clear_backtrack_stack(pTHX_ void *p)
-{
-    regmatch_slab *s = PL_regmatch_slab->next;
-    PERL_UNUSED_ARG(p);
-
-    if (!s)
-	return;
-    PL_regmatch_slab->next = NULL;
-    while (s) {
-	regmatch_slab * const osl = s;
-	s = s->next;
-	Safefree(osl);
-    }
-}
-
-
 static bool
 S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
         U8* c1_utf8, int *c2p, U8* c2_utf8, regmatch_info *reginfo)
@@ -3585,10 +3578,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    PerlIO_printf(Perl_debug_log,"regmatch start\n");
     }));
 
-    /* grab next free state slot */
-    st = ++PL_regmatch_state;
-    if (st >  SLAB_LAST(PL_regmatch_slab))
-	st = PL_regmatch_state = S_push_slab(aTHX);
+    st = PL_regmatch_state;
 
     /* Note that nextchr is a byte even in UTF */
     SET_nextchr;
@@ -7592,27 +7582,45 @@ S_cleanup_regmatch_info_aux(pTHX_ void *arg)
     dVAR;
     regmatch_info_aux *aux = (regmatch_info_aux *) arg;
     regmatch_info_aux_eval *eval_state =  aux->info_aux_eval;
+    regmatch_slab *s;
 
-    if (!eval_state)
-        return;
+    if (eval_state) {
 
-    /* undo the effects of S_setup_eval_state() */
+        /* undo the effects of S_setup_eval_state() */
 
-    if (eval_state->subbeg) {
-        regexp * const rex = eval_state->rex;
-        rex->subbeg     = eval_state->subbeg;
-        rex->sublen     = eval_state->sublen;
-        rex->suboffset  = eval_state->suboffset;
-        rex->subcoffset = eval_state->subcoffset;
+        if (eval_state->subbeg) {
+            regexp * const rex = eval_state->rex;
+            rex->subbeg     = eval_state->subbeg;
+            rex->sublen     = eval_state->sublen;
+            rex->suboffset  = eval_state->suboffset;
+            rex->subcoffset = eval_state->subcoffset;
 #ifdef PERL_ANY_COW
-        rex->saved_copy = eval_state->saved_copy;
+            rex->saved_copy = eval_state->saved_copy;
 #endif
-        RXp_MATCH_COPIED_on(rex);
-    }
-    if (eval_state->pos_magic)
-        eval_state->pos_magic->mg_len = eval_state->pos;
+            RXp_MATCH_COPIED_on(rex);
+        }
+        if (eval_state->pos_magic)
+            eval_state->pos_magic->mg_len = eval_state->pos;
 
-    PL_curpm = eval_state->curpm;
+        PL_curpm = eval_state->curpm;
+    }
+
+    PL_regmatch_state = aux->old_regmatch_state;
+    PL_regmatch_slab  = aux->old_regmatch_slab;
+
+    /* free all slabs above current one - this must be the last action
+     * of this function, as aux and eval_state are allocated within
+     * slabs and may be freed here */
+
+    s = PL_regmatch_slab->next;
+    if (s) {
+        PL_regmatch_slab->next = NULL;
+        while (s) {
+            regmatch_slab * const osl = s;
+            s = s->next;
+            Safefree(osl);
+        }
+    }
 }
 
 

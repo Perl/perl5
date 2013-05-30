@@ -576,6 +576,8 @@ get_regex_charset_name(const U32 flags, STRLEN* const lenp)
 
 #define FBMrf_MULTILINE	1
 
+struct regmatch_state;
+struct regmatch_slab;
 
 /* like regmatch_info_aux, but contains extra fields only needed if the
  * pattern contains (?{}). If used, is snuck into the second slot in the
@@ -602,6 +604,8 @@ typedef struct {
 
 typedef struct {
     regmatch_info_aux_eval *info_aux_eval;
+    struct regmatch_state *old_regmatch_state; /* saved PL_regmatch_state */
+    struct regmatch_slab  *old_regmatch_slab;  /* saved PL_regmatch_slab */
 } regmatch_info_aux;
 
 
