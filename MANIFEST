@@ -2458,6 +2458,7 @@ cpan/Text-Tabs/lib/Text/Tabs.pm		Do expand and unexpand
 cpan/Text-Tabs/lib/Text/Wrap.pm		Paragraph formatter
 cpan/Text-Tabs/t/37000.t		See if Text::Tabs is working
 cpan/Text-Tabs/t/39548.t		See if Text::Tabs is working
+cpan/Text-Tabs/t/79766.t		See if Text::Tabs is working
 cpan/Text-Tabs/t/belg4mit.t		See if Text::Tabs is working
 cpan/Text-Tabs/t/dandv.t		See if Text::Tabs is working
 cpan/Text-Tabs/t/fill.t			See if Text::Wrap::fill works

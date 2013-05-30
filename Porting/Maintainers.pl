@@ -1750,7 +1750,7 @@ use File::Glob qw(:case);
 
     'Text-Tabs+Wrap' => {
         'MAINTAINER'   => 'muir',
-        'DISTRIBUTION' => 'MUIR/modules/Text-Tabs+Wrap-2012.0818.tar.gz',
+        'DISTRIBUTION' => 'MUIR/modules/Text-Tabs+Wrap-2013.0523.tar.gz',
         'FILES'        => q[cpan/Text-Tabs],
         'EXCLUDED'   => [
             qr/^lib\.old/,
