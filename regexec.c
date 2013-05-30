@@ -2151,6 +2151,10 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
     /* see how far we have to get to not match where we matched before */
     reginfo->till = startpos+minend;
 
+    if ((prog->extflags & RXf_EVAL_SEEN))
+        S_setup_eval_state(aTHX_ reginfo);
+
+
     /* If there is a "must appear" string, look for it. */
     s = startpos;
 
@@ -2812,9 +2816,6 @@ S_regtry(pTHX_ regmatch_info *reginfo, char **startposp)
     PERL_ARGS_ASSERT_REGTRY;
 
     reginfo->cutpoint=NULL;
-
-    if ((prog->extflags & RXf_EVAL_SEEN) && !reginfo->eval_state)
-        S_setup_eval_state(aTHX_ reginfo);
 
 #ifdef DEBUGGING
     PL_reg_starttry = *startposp;
