@@ -246,8 +246,12 @@ static const char* const non_utf8_target_but_utf8_required
 #define SCount 11172    /* Length of block */
 #define TCount 28
 
+#define SLAB_FIRST(s) (&(s)->states[0])
+#define SLAB_LAST(s)  (&(s)->states[PERL_REGMATCH_SLAB_SLOTS-1])
+
 static void S_setup_eval_state(pTHX_ regmatch_info *const reginfo);
 static void S_restore_eval_state(pTHX_ void *arg);
+static void S_clear_backtrack_stack(pTHX_ void *p);
 
 #define REGCP_PAREN_ELEMS 3
 #define REGCP_OTHER_ELEMS 3
@@ -2079,6 +2083,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
     regmatch_info reginfo_buf;  /* create some info to pass to regtry etc */
     regmatch_info *const reginfo = &reginfo_buf;
     regexp_paren_pair *swap = NULL;
+    I32 oldsave;
     GET_RE_DEBUG_FLAGS_DECL;
 
     PERL_ARGS_ASSERT_REGEXEC_FLAGS;
@@ -2096,6 +2101,22 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
     reginfo->prog = rx;	 /* Yes, sorry that this is confusing.  */
     reginfo->intuit = 0;
     reginfo->is_utf8_target = cBOOL(utf8_target);
+
+    /* on first ever match, allocate first slab */
+    if (!PL_regmatch_slab) {
+	Newx(PL_regmatch_slab, 1, regmatch_slab);
+	PL_regmatch_slab->prev = NULL;
+	PL_regmatch_slab->next = NULL;
+	PL_regmatch_state = SLAB_FIRST(PL_regmatch_slab);
+    }
+
+    /* note current PL_regmatch_state position; at end of match we'll
+     * pop back to there and free any higher slabs */
+    oldsave = PL_savestack_ix;
+    SAVEDESTRUCTOR_X(S_clear_backtrack_stack, NULL);
+    SAVEVPTR(PL_regmatch_slab);
+    SAVEVPTR(PL_regmatch_state);
+
 
     DEBUG_EXECUTE_r( 
         debug_start_match(rx, utf8_target, startpos, strend,
@@ -2608,6 +2629,9 @@ got_it:
 	S_restore_eval_state(aTHX_ reginfo->eval_state);
     }
 
+    /* clean up; in particular, free all slabs above current one */
+    LEAVE_SCOPE(oldsave);
+
     if (RXp_PAREN_NAMES(prog)) 
         (void)hv_iterinit(RXp_PAREN_NAMES(prog));
 
@@ -2743,6 +2767,9 @@ phooey:
 	S_restore_eval_state(aTHX_ reginfo->eval_state);
     }
 
+    /* clean up; in particular, free all slabs above current one */
+    LEAVE_SCOPE(oldsave);
+
     if (swap) {
         /* we failed :-( roll it back */
 	DEBUG_BUFFERS_r(PerlIO_printf(Perl_debug_log,
@@ -2855,9 +2882,6 @@ S_regtry(pTHX_ regmatch_info *reginfo, char **startposp)
 #define CHRTEST_VOID   -1000 /* the c1/c2 "next char" test should be skipped */
 #define CHRTEST_NOT_A_CP_1 -999
 #define CHRTEST_NOT_A_CP_2 -998
-
-#define SLAB_FIRST(s) (&(s)->states[0])
-#define SLAB_LAST(s)  (&(s)->states[PERL_REGMATCH_SLAB_SLOTS-1])
 
 /* grab a new slab and return the first slot in it */
 
@@ -3191,6 +3215,8 @@ S_clear_backtrack_stack(pTHX_ void *p)
 	Safefree(osl);
     }
 }
+
+
 static bool
 S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
         U8* c1_utf8, int *c2p, U8* c2_utf8, regmatch_info *reginfo)
@@ -3461,7 +3487,6 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
     REGEXP *rex_sv = reginfo->prog;
     regexp *rex = ReANY(rex_sv);
     RXi_GET_DECL(rex,rexi);
-    I32	oldsave;
     /* the current state. This is a cached copy of PL_regmatch_state */
     regmatch_state *st;
     /* cache heavy used fields of st in registers */
@@ -3539,18 +3564,6 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
     DEBUG_OPTIMISE_r( DEBUG_EXECUTE_r({
 	    PerlIO_printf(Perl_debug_log,"regmatch start\n");
     }));
-    /* on first ever call to regmatch, allocate first slab */
-    if (!PL_regmatch_slab) {
-	Newx(PL_regmatch_slab, 1, regmatch_slab);
-	PL_regmatch_slab->prev = NULL;
-	PL_regmatch_slab->next = NULL;
-	PL_regmatch_state = SLAB_FIRST(PL_regmatch_slab);
-    }
-
-    oldsave = PL_savestack_ix;
-    SAVEDESTRUCTOR_X(S_clear_backtrack_stack, NULL);
-    SAVEVPTR(PL_regmatch_slab);
-    SAVEVPTR(PL_regmatch_state);
 
     /* grab next free state slot */
     st = ++PL_regmatch_state;
@@ -6581,9 +6594,6 @@ no_silent:
 	POP_MULTICALL;
         PERL_UNUSED_VAR(SP);
     }
-
-    /* clean up; in particular, free all slabs above current one */
-    LEAVE_SCOPE(oldsave);
 
     assert(!result ||  locinput - reginfo->strbeg >= 0);
     return result ?  locinput - reginfo->strbeg : -1;
