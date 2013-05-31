@@ -2821,7 +2821,7 @@ phooey:
 }
 
 
-/* Set which rex is pointed to by PL_reg_state, handling ref counting.
+/* Set which rex is pointed to by PL_reg_curpm, handling ref counting.
  * Do inc before dec, in case old and new rex are the same */
 #define SET_reg_curpm(Re2) \
     if (reginfo->info_aux_eval) {                   \
@@ -4836,28 +4836,11 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		OP * const oop = PL_op;
 		COP * const ocurcop = PL_curcop;
 		OP *nop;
-		struct re_save_state saved_state;
 		CV *newcv;
 
 		/* save *all* paren positions */
 		regcppush(rex, 0, maxopenparen);
 		REGCP_SET(runops_cp);
-
-		/* To not corrupt the existing regex state while executing the
-		 * eval we would normally put it on the save stack, like with
-		 * save_re_context. However, re-evals have a weird scoping so we
-		 * can't just add ENTER/LEAVE here. With that, things like
-		 *
-		 *    (?{$a=2})(a(?{local$a=$a+1}))*aak*c(?{$b=$a})
-		 *
-		 * would break, as they expect the localisation to be unwound
-		 * only when the re-engine backtracks through the bit that
-		 * localised it.
-		 *
-		 * What we do instead is just saving the state in a local c
-		 * variable.
-		 */
-		Copy(&PL_reg_state, &saved_state, 1, struct re_save_state);
 
 		if (!caller_cv)
 		    caller_cv = find_runcv(NULL);
@@ -5006,8 +4989,6 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		    }
 
 		}
-
-		Copy(&saved_state, &PL_reg_state, 1, struct re_save_state);
 
 		/* *** Note that at this point we don't restore
 		 * PL_comppad, (or pop the CxSUB) on the assumption it may

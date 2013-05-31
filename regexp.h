@@ -829,13 +829,6 @@ typedef struct regmatch_slab {
 } regmatch_slab;
 
 
-struct re_save_state {
-    /* temporarily give the struct a member till we delete the whole thing */
-    int dummy;
-};
-
-#define SAVESTACK_ALLOC_FOR_RE_SAVE_STATE \
-	(1 + ((sizeof(struct re_save_state) - 1) / sizeof(*PL_savestack)))
 
 /*
  * Local variables:

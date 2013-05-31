@@ -16,7 +16,7 @@
 #define SAVEt_CLEARPADRANGE	1
 #define SAVEt_CLEARSV		2
 #define SAVEt_REGCONTEXT	3
-#define SAVEt_RE_STATE		4
+/*** SPARE      	        4 ***/
 
 #define SAVEt_ARG0_MAX		4
 

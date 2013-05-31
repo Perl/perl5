@@ -119,8 +119,6 @@ PERLVAR(I, sv_objcount,	IV)		/* DEPRECATED AND UNMAINTAINED.
 PERLVAR(I, sv_root,	SV *)		/* storage for SVs belonging to interp */
 PERLVAR(I, sv_arenaroot, SV *)		/* list of areas for garbage collection */
 
-PERLVAR(I, reg_state,	struct re_save_state)
-
 /* fake PMOP that PL_curpm points to while in (?{}) so $1 et al are visible */
 PERLVARI(I, reg_curpm, PMOP*, NULL)
 

@@ -246,7 +246,6 @@
 #define PL_reentrant_buffer	(vTHX->Ireentrant_buffer)
 #define PL_reentrant_retint	(vTHX->Ireentrant_retint)
 #define PL_reg_curpm		(vTHX->Ireg_curpm)
-#define PL_reg_state		(vTHX->Ireg_state)
 #define PL_regdummy		(vTHX->Iregdummy)
 #define PL_regex_pad		(vTHX->Iregex_pad)
 #define PL_regex_padav		(vTHX->Iregex_padav)

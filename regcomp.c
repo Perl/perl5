@@ -15458,17 +15458,6 @@ Perl_save_re_context(pTHX)
 {
     dVAR;
 
-    struct re_save_state *state;
-
-    SAVEVPTR(PL_curcop);
-    SSGROW(SAVESTACK_ALLOC_FOR_RE_SAVE_STATE + 1);
-
-    state = (struct re_save_state *)(PL_savestack + PL_savestack_ix);
-    PL_savestack_ix += SAVESTACK_ALLOC_FOR_RE_SAVE_STATE;
-    SSPUSHUV(SAVEt_RE_STATE);
-
-    Copy(&PL_reg_state, state, 1, struct re_save_state);
-
     /* Save $1..$n (#18107: UTF-8 s/(\w+)/uc($1)/e); AMS 20021106. */
     if (PL_curpm) {
 	const REGEXP * const rx = PM_GETRE(PL_curpm);
