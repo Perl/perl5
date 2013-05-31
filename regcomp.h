@@ -288,7 +288,7 @@ struct regnode_charclass_class {
 
 #define REG_MAGIC 0234
 
-#define SIZE_ONLY (RExC_emit == &PL_regdummy)
+#define SIZE_ONLY (RExC_emit == &RExC_emit_dummy)
 
 /* If the bitmap doesn't fully represent what this ANYOF node can match, the
  * ARG is set to this special value (since 0, 1, ... are legal, but will never

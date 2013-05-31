@@ -126,7 +126,9 @@ typedef struct RExC_state_t {
     I32		whilem_seen;		/* number of WHILEM in this expr */
     regnode	*emit_start;		/* Start of emitted-code area */
     regnode	*emit_bound;		/* First regnode outside of the allocated space */
-    regnode	*emit;			/* Code-emit pointer; &regdummy = don't = compiling */
+    regnode	*emit;			/* Code-emit pointer; if = &emit_dummy,
+                                           implies compiling, so don't emit */
+    regnode	emit_dummy;		/* placeholder for emit to point to */
     I32		naughty;		/* How bad is this pattern? */
     I32		sawback;		/* Did we see \1, ...? */
     U32		seen;
@@ -187,6 +189,7 @@ typedef struct RExC_state_t {
 #define RExC_offsets	(pRExC_state->rxi->u.offsets) /* I am not like the others */
 #endif
 #define RExC_emit	(pRExC_state->emit)
+#define RExC_emit_dummy	(pRExC_state->emit_dummy)
 #define RExC_emit_start	(pRExC_state->emit_start)
 #define RExC_emit_bound	(pRExC_state->emit_bound)
 #define RExC_naughty	(pRExC_state->naughty)
@@ -5796,7 +5799,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     RExC_npar = 1;
     RExC_nestroot = 0;
     RExC_size = 0L;
-    RExC_emit = &PL_regdummy;
+    RExC_emit = &RExC_emit_dummy;
     RExC_whilem_seen = 0;
     RExC_open_parens = NULL;
     RExC_close_parens = NULL;

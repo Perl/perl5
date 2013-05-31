@@ -13312,7 +13312,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
     /* regex stuff */
 
-    PL_regdummy		= proto_perl->Iregdummy;
     PL_colorset		= 0;		/* reinits PL_colors[] */
     /*PL_colors[6]	= {0,0,0,0,0,0};*/
 

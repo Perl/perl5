@@ -227,8 +227,6 @@ PERLVAR(I, secondgv,	GV *)		/* $b */
 PERLVAR(I, efloatbuf,	char *)
 PERLVAR(I, efloatsize,	STRLEN)
 
-PERLVAR(I, regdummy,	regnode)	/* from regcomp.c */
-
 PERLVARI(I, dumpindent,	U16,	4)	/* number of blanks per dump
 					   indentation level */
 
