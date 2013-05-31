@@ -41,7 +41,7 @@ Since some features (like C<~~> or C<my $_>) now emit experimental warnings,
 and you may want to disable them in code that is also run on perls that do not
 recognize these warning categories, consider using the C<if> pragma like this:
 
-    no if $] >= 5.018, 'warnings', "experimental::feature_name";
+    no if $] >= 5.018, warnings => "experimental::feature_name";
 
 Existing experimental features may begin emitting these warnings, too.  Please
 consult L<perlexperiment> for information on which features are considered
@@ -405,7 +405,7 @@ is not recommended.
 Warnings will now be issued when the parser sees C<~~>, C<given>, or C<when>.
 To disable these warnings, you can add this line to the appropriate scope:
 
-  no if $] >= 5.018, "experimental::smartmatch";
+  no if $] >= 5.018, warnings => "experimental::smartmatch";
 
 Consider, though, replacing the use of these features, as they may change
 behavior again before becoming stable.
