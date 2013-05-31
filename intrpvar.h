@@ -123,7 +123,8 @@ PERLVAR(I, sv_arenaroot, SV *)		/* list of areas for garbage collection */
 PERLVARI(I, reg_curpm, PMOP*, NULL)
 
 /* the currently active slab in a chain of slabs of regmatch states,
- * and the currently active state within that slab */
+ * and the currently active state within that slab. This stack of states
+ * is shared amongst re-entrant calls to the regex engine */
 
 PERLVARI(I, regmatch_slab, regmatch_slab *,	NULL)
 PERLVAR(I, regmatch_state, regmatch_state *)
@@ -234,7 +235,7 @@ PERLVAR(I, exit_flags,	U8)		/* was exit() unexpected, etc. */
 
 PERLVAR(I, utf8locale,	bool)		/* utf8 locale detected */
 
-PERLVARA(I, colors,6,	char *)		/* from regcomp.c */
+PERLVARA(I, colors,6,	char *)		/* values from PERL_RE_COLORS env var */
 
 /*
 =for apidoc Amn|peep_t|PL_peepp
@@ -555,7 +556,7 @@ PERLVAR(I, sawampersand, U8)		/* must save all match strings */
 #endif
 
 PERLVAR(I, unsafe,	bool)
-PERLVAR(I, colorset,	bool)		/* from regcomp.c */
+PERLVAR(I, colorset,	bool)		/* PERL_RE_COLORS env var is in use */
 
 /* current phase the interpreter is in
    for ordering this structure to remove holes, we're assuming that this is 4
