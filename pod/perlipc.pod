@@ -992,7 +992,7 @@ or firewall machine), fill this in with your real address instead.
                         scalar localtime(), $EOL;
     }
 
-And here's a multithreaded version.  It's multithreaded in that
+And here's a multitasking version.  It's multitasked in that
 like most typical servers, it spawns (fork()s) a slave server to
 handle the client request so that the master server can quickly
 go back to service a new client.
@@ -1548,7 +1548,7 @@ you'll have to use the C<sysread> variant of the interactive client above.
 
 This server accepts one of five different commands, sending output back to
 the client.  Unlike most network servers, this one handles only one
-incoming client at a time.  Multithreaded servers are covered in 
+incoming client at a time.  Multitasking servers are covered in
 Chapter 16 of the Camel.
 
 Here's the code.  We'll
