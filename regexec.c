@@ -7576,6 +7576,10 @@ S_setup_eval_state(pTHX_ regmatch_info *const reginfo)
         eval_state->pos_magic = NULL;
 
     if (!PL_reg_curpm) {
+        /* PL_reg_curpm is a fake PMOP that we can attach the current
+         * regex to and point PL_curpm at, so that $1 et al are visible
+         * within a /(?{})/. It's just allocated once per interpreter the
+         * first time its needed */
         Newxz(PL_reg_curpm, 1, PMOP);
 #ifdef USE_ITHREADS
         {

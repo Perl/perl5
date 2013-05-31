@@ -12900,10 +12900,6 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 
 		Copy(old_state, new_state, 1, struct re_save_state);
 		ix -= SAVESTACK_ALLOC_FOR_RE_SAVE_STATE;
-
-		new_state->re_state_reg_curpm
-		    = (PMOP*)  any_dup(old_state->re_state_reg_curpm, 
-			       proto_perl);
 		break;
 	    }
 	case SAVEt_COMPILE_WARNINGS:
@@ -13165,6 +13161,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     /* RE engine related */
     Zero(&PL_reg_state, 1, struct re_save_state);
     PL_regmatch_slab	= NULL;
+    PL_reg_curpm	= NULL;
 
     PL_sub_generation	= proto_perl->Isub_generation;
 

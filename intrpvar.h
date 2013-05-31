@@ -121,6 +121,9 @@ PERLVAR(I, sv_arenaroot, SV *)		/* list of areas for garbage collection */
 
 PERLVAR(I, reg_state,	struct re_save_state)
 
+/* fake PMOP that PL_curpm points to while in (?{}) so $1 et al are visible */
+PERLVARI(I, reg_curpm, PMOP*, NULL)
+
 /* the currently active slab in a chain of slabs of regmatch states,
  * and the currently active state within that slab */
 

@@ -828,11 +828,9 @@ typedef struct regmatch_slab {
     struct regmatch_slab *prev, *next;
 } regmatch_slab;
 
-#define PL_reg_curpm		PL_reg_state.re_state_reg_curpm
 #define PL_reg_starttry		PL_reg_state.re_state_reg_starttry
 
 struct re_save_state {
-    PMOP *re_state_reg_curpm;		/* from regexec.c */
     char *re_state_reg_starttry;	/* from regexec.c */
 };
 
