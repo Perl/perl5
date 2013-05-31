@@ -606,6 +606,7 @@ typedef struct {
     regmatch_info_aux_eval *info_aux_eval;
     struct regmatch_state *old_regmatch_state; /* saved PL_regmatch_state */
     struct regmatch_slab  *old_regmatch_slab;  /* saved PL_regmatch_slab */
+    char *poscache;	/* S-L cache of fail positions of WHILEMs */
 } regmatch_info_aux;
 
 
@@ -628,6 +629,7 @@ typedef struct {
     regmatch_info_aux_eval *info_aux_eval; /* extra saved state for (?{}) */
     I32  poscache_maxiter; /* how many whilems todo before S-L cache kicks in */
     I32  poscache_iter;    /* current countdown from _maxiter to zero */
+    STRLEN poscache_size;  /* size of regmatch_info_aux.poscache */
     bool intuit;    /* re_intuit_start() is the top-level caller */
     bool is_utf8_pat;    /* regex is utf8 */
     bool is_utf8_target; /* string being matched is utf8 */
@@ -827,14 +829,10 @@ typedef struct regmatch_slab {
 } regmatch_slab;
 
 #define PL_reg_curpm		PL_reg_state.re_state_reg_curpm
-#define PL_reg_poscache		PL_reg_state.re_state_reg_poscache
-#define PL_reg_poscache_size	PL_reg_state.re_state_reg_poscache_size
 #define PL_reg_starttry		PL_reg_state.re_state_reg_starttry
 
 struct re_save_state {
     PMOP *re_state_reg_curpm;		/* from regexec.c */
-    STRLEN re_state_reg_poscache_size;	/* size of pos cache of WHILEM */
-    char *re_state_reg_poscache;	/* cache of pos of WHILEM */
     char *re_state_reg_starttry;	/* from regexec.c */
 };
 

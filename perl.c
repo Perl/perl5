@@ -1219,7 +1219,6 @@ perl_destruct(pTHXx)
     Safefree(PL_origfilename);
     PL_origfilename = NULL;
     Safefree(PL_reg_curpm);
-    Safefree(PL_reg_poscache);
     free_tied_hv_pool();
     Safefree(PL_op_mask);
     Safefree(PL_psig_name);
@@ -3626,7 +3625,6 @@ S_init_interp(pTHX)
     /* As these are inside a structure, PERLVARI isn't capable of initialising
        them  */
     PL_reg_curpm = NULL;
-    PL_reg_poscache = PL_reg_starttry = NULL;
 }
 
 STATIC void

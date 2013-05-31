@@ -1233,9 +1233,6 @@ Perl_leave_scope(pTHX_ I32 base)
 		     - SAVESTACK_ALLOC_FOR_RE_SAVE_STATE);
 		PL_savestack_ix -= SAVESTACK_ALLOC_FOR_RE_SAVE_STATE;
 
-		if (PL_reg_poscache != state->re_state_reg_poscache) {
-		    Safefree(PL_reg_poscache);
-		}
 		Copy(state, &PL_reg_state, 1, struct re_save_state);
 	    }
 	    break;

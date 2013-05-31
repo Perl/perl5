@@ -15469,9 +15469,6 @@ Perl_save_re_context(pTHX)
 
     Copy(&PL_reg_state, state, 1, struct re_save_state);
 
-    PL_reg_poscache = NULL;
-    PL_reg_poscache_size = 0;
-
     /* Save $1..$n (#18107: UTF-8 s/(\w+)/uc($1)/e); AMS 20021106. */
     if (PL_curpm) {
 	const REGEXP * const rx = PM_GETRE(PL_curpm);

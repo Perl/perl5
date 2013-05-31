@@ -2181,6 +2181,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
 
         reginfo->info_aux->old_regmatch_state = old_regmatch_state;
         reginfo->info_aux->old_regmatch_slab  = old_regmatch_slab;
+        reginfo->info_aux->poscache = NULL;
 
         SAVEDESTRUCTOR_X(S_cleanup_regmatch_info_aux, reginfo->info_aux);
 
@@ -2900,7 +2901,7 @@ S_regtry(pTHX_ regmatch_info *reginfo, char **startposp)
    "unreachable code" warnings, which are bogus, but distracting. */
 #define CACHEsayNO \
     if (ST.cache_mask) \
-       PL_reg_poscache[ST.cache_offset] |= ST.cache_mask; \
+       reginfo->info_aux->poscache[ST.cache_offset] |= ST.cache_mask; \
     sayNO
 
 /* this is used to determine how far from the left messages like
@@ -5444,16 +5445,17 @@ NULL
 		if (reginfo->poscache_iter-- == 0) {
 		    /* initialise cache */
 		    const I32 size = (reginfo->poscache_maxiter + 7)/8;
-		    if (PL_reg_poscache) {
-			if ((I32)PL_reg_poscache_size < size) {
-			    Renew(PL_reg_poscache, size, char);
-			    PL_reg_poscache_size = size;
+                    regmatch_info_aux *const aux = reginfo->info_aux;
+		    if (aux->poscache) {
+			if ((I32)reginfo->poscache_size < size) {
+			    Renew(aux->poscache, size, char);
+			    reginfo->poscache_size = size;
 			}
-			Zero(PL_reg_poscache, size, char);
+			Zero(aux->poscache, size, char);
 		    }
 		    else {
-			PL_reg_poscache_size = size;
-			Newxz(PL_reg_poscache, size, char);
+			reginfo->poscache_size = size;
+			Newxz(aux->poscache, size, char);
 		    }
 		    DEBUG_EXECUTE_r( PerlIO_printf(Perl_debug_log,
       "%swhilem: Detected a super-linear match, switching on caching%s...\n",
@@ -5469,7 +5471,7 @@ NULL
                                   * (scan->flags>>4);
 		    mask    = 1 << (offset % 8);
 		    offset /= 8;
-		    if (PL_reg_poscache[offset] & mask) {
+		    if (reginfo->info_aux->poscache[offset] & mask) {
 			DEBUG_EXECUTE_r( PerlIO_printf(Perl_debug_log,
 			    "%*s  whilem: (cache) already tried at this position...\n",
 			    REPORT_CODE_OFF+depth*2, "")
@@ -7583,6 +7585,8 @@ S_cleanup_regmatch_info_aux(pTHX_ void *arg)
     regmatch_info_aux *aux = (regmatch_info_aux *) arg;
     regmatch_info_aux_eval *eval_state =  aux->info_aux_eval;
     regmatch_slab *s;
+
+    Safefree(aux->poscache);
 
     if (eval_state) {
 

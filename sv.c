@@ -12904,10 +12904,6 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 		new_state->re_state_reg_curpm
 		    = (PMOP*)  any_dup(old_state->re_state_reg_curpm, 
 			       proto_perl);
-		new_state->re_state_reg_poscache
-		    = pv_dup(old_state->re_state_reg_poscache);
-		new_state->re_state_reg_starttry
-		    = pv_dup(old_state->re_state_reg_starttry);
 		break;
 	    }
 	case SAVEt_COMPILE_WARNINGS:
