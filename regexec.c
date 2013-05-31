@@ -643,8 +643,6 @@ Perl_re_intuit_start(pTHX_
     PERL_UNUSED_ARG(flags);
     PERL_UNUSED_ARG(data);
 
-    reginfo->is_utf8_target = cBOOL(utf8_target);
-
     /* CHR_DIST() would be more correct here but it makes things slow. */
     if (prog->minlen > strend - strpos) {
 	DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
@@ -652,6 +650,7 @@ Perl_re_intuit_start(pTHX_
 	goto fail;
     }
 
+    reginfo->is_utf8_target = cBOOL(utf8_target);
     reginfo->info_aux = NULL;
     reginfo->strbeg = strbeg;
     reginfo->strend = strend;
@@ -2095,11 +2094,11 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
 	return 0;
     }
 
-    multiline = prog->extflags & RXf_PMf_MULTILINE;
+    DEBUG_EXECUTE_r(
+        debug_start_match(rx, utf8_target, startpos, strend,
+        "Matching");
+    );
 
-    reginfo->prog = rx;	 /* Yes, sorry that this is confusing.  */
-    reginfo->intuit = 0;
-    reginfo->is_utf8_target = cBOOL(utf8_target);
 
     /* at the end of this function, we'll do a LEAVE_SCOPE(oldsave),
      * which will call destuctors to reset PL_regmatch_state, free higher
@@ -2108,11 +2107,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
 
     oldsave = PL_savestack_ix;
 
-    DEBUG_EXECUTE_r( 
-        debug_start_match(rx, utf8_target, startpos, strend,
-        "Matching");
-    );
-
+    multiline = prog->extflags & RXf_PMf_MULTILINE;
     minlen = prog->minlen;
     
     if (strend - startpos < (minlen+(prog->check_offset_min<0?prog->check_offset_min:0))) {
@@ -2120,7 +2115,6 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
 			      "String too short [regexec_flags]...\n"));
 	goto phooey;
     }
-
     
     /* Check validity of program. */
     if (UCHARAT(progi->program) != REG_MAGIC) {
@@ -2129,15 +2123,15 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
 
     RX_MATCH_TAINTED_off(rx);
 
+    reginfo->prog = rx;	 /* Yes, sorry that this is confusing.  */
+    reginfo->intuit = 0;
+    reginfo->is_utf8_target = cBOOL(utf8_target);
     reginfo->is_utf8_pat = cBOOL(RX_UTF8(rx));
     reginfo->warned = FALSE;
     reginfo->strbeg  = strbeg;
     reginfo->sv = sv;
     reginfo->poscache_maxiter = 0; /* not yet started a countdown */
-
-    /* Mark end of string for $ (and such) */
     reginfo->strend = strend;
-
     /* see how far we have to get to not match where we matched before */
     reginfo->till = startpos+minend;
 
