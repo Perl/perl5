@@ -618,13 +618,13 @@ typedef struct {
  * regmatch_state union. */
 
 typedef struct {
-    REGEXP *prog;
+    REGEXP *prog;        /* the regex being executed */
     const char * strbeg; /* real start of string */
-    char *strend;   /* one byte beyond last char of match string */
-    char *till;
-    SV *sv;
-    char *ganch;
-    char *cutpoint;
+    char *strend;        /* one byte beyond last char of match string */
+    char *till;          /* matches shorter than this fail (see minlen arg) */
+    SV *sv;              /* the SV string currently being matched */
+    char *ganch;         /* position of \G anchor */
+    char *cutpoint;      /* (*COMMIT) position (if any) */
     regmatch_info_aux      *info_aux; /* extra fields that need cleanup */
     regmatch_info_aux_eval *info_aux_eval; /* extra saved state for (?{}) */
     I32  poscache_maxiter; /* how many whilems todo before S-L cache kicks in */
