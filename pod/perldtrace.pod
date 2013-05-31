@@ -208,9 +208,9 @@ C<Module::Name>-style names.
 
 =over 4
 
-=item DTrace User Guide
+=item DTrace Dynamic Tracing Guide
 
-L<http://download.oracle.com/docs/cd/E19082-01/819-3620/index.html>
+L<http://dtrace.org/guide/preface.html>
 
 =item DTrace: Dynamic Tracing in Oracle Solaris, Mac OS X and FreeBSD
 
@@ -224,7 +224,8 @@ L<http://www.amazon.com/DTrace-Dynamic-Tracing-Solaris-FreeBSD/dp/0132091518/>
 
 =item L<Devel::DTrace::Provider>
 
-This CPAN module lets you create application-level DTrace probes written in Perl.
+This CPAN module lets you create application-level DTrace probes written in
+Perl.
 
 =back
 
