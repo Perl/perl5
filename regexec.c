@@ -5097,7 +5097,14 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
 		maxopenparen = 0;
 
-		/* XXXX This is too dramatic a measure... */
+                /* invalidate the S-L poscache. We're now executing a
+                 * different set of WHILEM ops (and their associated
+                 * indexes) against the same string, so the bits in the
+                 * cache are meaningless. Setting maxiter to zero forces
+                 * the cache to be invalidated and zeroed before reuse.
+		 * XXX This is too dramatic a measure. Ideally we should
+                 * save the old cache and restore when running the outer
+                 * pattern again */
 		reginfo->poscache_maxiter = 0;
 
                 is_utf8_pat = reginfo->is_utf8_pat = cBOOL(RX_UTF8(re_sv));
@@ -5128,7 +5135,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    cur_eval = ST.prev_eval;
 	    cur_curlyx = ST.prev_curlyx;
 
-	    /* XXXX This is too dramatic a measure... */
+	    /* Invalidate cache. See "invalidate" comment above. */
 	    reginfo->poscache_maxiter = 0;
             if ( nochange_depth )
 	        nochange_depth--;
@@ -5147,7 +5154,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    regcppop(rex, &maxopenparen);
 	    cur_eval = ST.prev_eval;
 	    cur_curlyx = ST.prev_curlyx;
-	    /* XXXX This is too dramatic a measure... */
+	    /* Invalidate cache. See "invalidate" comment above. */
 	    reginfo->poscache_maxiter = 0;
 	    if ( nochange_depth )
 	        nochange_depth--;
@@ -5426,7 +5433,37 @@ NULL
 		goto do_whilem_B_max;
 	    }
 
-	    /* super-linear cache processing */
+	    /* super-linear cache processing.
+             *
+             * The idea here is that for certain types of CURLYX/WHILEM -
+             * principally those whose upper bound is infinity (and
+             * excluding regexes that have things like \1 and other very
+             * non-regular expresssiony things), then if a pattern like
+             * /....A*.../ fails and we backtrack to the WHILEM, then we
+             * make a note that this particular WHILEM op was at string
+             * position 47 (say) when the rest of pattern failed. Then, if
+             * we ever find ourselves back at that WHILEM, and at string
+             * position 47 again, we can just fail immediately rather than
+             * running the rest of the pattern again.
+             *
+             * This is very handy when patterns start to go
+             * 'super-linear', like in (a+)*(a+)*(a+)*, where you end up
+             * with a combinatorial explosion of backtracking.
+             *
+             * The cache is implemented as a bit array, with one bit per
+             * string byte position per WHILEM op (up to 16) - so its
+             * between 0.25 and 2x the string size.
+             *
+             * To avoid allocating a poscache buffer every time, we do an
+             * initially countdown; only after we have  executed a WHILEM
+             * op (string-length x #WHILEMs) times do we allocate the
+             * cache.
+             *
+             * The top 4 bits of scan->flags byte say how many different
+             * relevant CURLLYX/WHILEM op pairs there are, while the
+             * bottom 4-bits is the identifying index number of this
+             * WHILEM.
+             */
 
 	    if (scan->flags) {
 
