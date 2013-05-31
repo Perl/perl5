@@ -256,19 +256,19 @@ if ($isvax) {
 # given version of Perl.
 if ($ENV{PERLSHR_USE_GSMATCH}) {
   if ($ENV{PERLSHR_USE_GSMATCH} eq 'INCLUDE_COMPILE_OPTIONS') {
-    # Build up a major ID. Since it can only be 8 bits, we encode the version
-    # number in the top four bits and use the bottom four for build options
-    # that'll cause incompatibilities
-    my ($ver, $sub) = $] =~ /\.(\d\d\d)(\d\d)/;
+    # Build up a major ID. Since on Alpha it can only be 8 bits, we encode
+    # the version number in the top 5 bits and use the bottom 3 for build
+    # options most likely to cause incompatibilities.  Breaks at Perl 5.32.
+    my ($ver, $sub) = $] =~ /\.(\d\d\d)(\d\d\d)/;
     $ver += 0; $sub += 0;
-    my $gsmatch = ($sub >= 50) ? "equal" : "lequal"; # Force an equal match for
+    my $gsmatch = ($ver % 2 == 1) ? "EQUAL" : "LEQUAL"; # Force an equal match for
 						  # dev, but be more forgiving
 						  # for releases
 
-    $ver *=16;
-    $ver += 8 if $debugging_enabled;	# If DEBUGGING is set
-    $ver += 4 if $use_threads;		# if we're threaded
-    $ver += 2 if $use_mymalloc;		# if we're using perl's malloc
+    $ver <<= 3;
+    $ver += 1 if $debugging_enabled;	# If DEBUGGING is set
+    $ver += 2 if $use_threads;		# if we're threaded
+    $ver += 4 if $use_mymalloc;		# if we're using perl's malloc
     print OPTBLD "GSMATCH=$gsmatch,$ver,$sub\n";
   }
   else {
@@ -277,7 +277,7 @@ if ($ENV{PERLSHR_USE_GSMATCH}) {
     print OPTBLD "GSMATCH=LEQUAL,$major,$minor\n";
   }
   print OPTBLD 'CLUSTER=$$TRANSFER_VECTOR,,',
-               map(",$_$objsuffix",@symfiles), "\n";
+               map(",$_$objsuffix",@symfiles), "\n" if $isvax;
 }
 elsif (@symfiles) { $incstr .= ',' . join(',',@symfiles); }
 # Include object modules and RTLs in options file
