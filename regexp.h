@@ -828,10 +828,10 @@ typedef struct regmatch_slab {
     struct regmatch_slab *prev, *next;
 } regmatch_slab;
 
-#define PL_reg_starttry		PL_reg_state.re_state_reg_starttry
 
 struct re_save_state {
-    char *re_state_reg_starttry;	/* from regexec.c */
+    /* temporarily give the struct a member till we delete the whole thing */
+    int dummy;
 };
 
 #define SAVESTACK_ALLOC_FOR_RE_SAVE_STATE \

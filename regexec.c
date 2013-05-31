@@ -1351,7 +1351,7 @@ if ((reginfo->intuit || regtry(reginfo, &s))) \
     
 #define DUMP_EXEC_POS(li,s,doutf8) \
     dump_exec_pos(li,s,(reginfo->strend),(reginfo->strbeg), \
-                (PL_reg_starttry),doutf8)
+                startpos, doutf8)
 
 
 #define UTF8_NOLOAD(TEST_NON_UTF8, IF_SUCCESS, IF_FAIL) \
@@ -2849,9 +2849,6 @@ S_regtry(pTHX_ regmatch_info *reginfo, char **startposp)
 
     reginfo->cutpoint=NULL;
 
-#ifdef DEBUGGING
-    PL_reg_starttry = *startposp;
-#endif
     prog->offs[0].start = *startposp - reginfo->strbeg;
     prog->lastparen = 0;
     prog->lastcloseparen = 0;
@@ -6249,8 +6246,8 @@ NULL
 		DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
 				      "%sMatch possible, but length=%ld is smaller than requested=%ld, failing!%s\n",
 				      PL_colors[4],
-				      (long)(locinput - PL_reg_starttry),
-				      (long)(reginfo->till - PL_reg_starttry),
+				      (long)(locinput - startpos),
+				      (long)(reginfo->till - startpos),
 				      PL_colors[5]));
                				      
 		sayNO_SILENT;		/* Cannot match: too short. */
