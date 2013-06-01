@@ -11,7 +11,7 @@ package Pod::Select;
 use strict;
 
 use vars qw($VERSION @ISA @EXPORT $MAX_HEADING_LEVEL %myData @section_headings @selected_sections);
-$VERSION = '1.60'; ## Current version of this package
+$VERSION = '1.61'; ## Current version of this package
 require  5.005;    ## requires this Perl version or later
 
 #############################################################################
@@ -669,7 +669,7 @@ sub _compile_section_spec {
     ## Parse the regexs for the heading titles
     @regexs = split(/\//, $_, $MAX_HEADING_LEVEL);
 
-    ## Set default regex for ommitted levels
+    ## Set default regex for omitted levels
     for (my $i = 0; $i < $MAX_HEADING_LEVEL; ++$i) {
         $regexs[$i]  = '.*'  unless ((defined $regexs[$i])
                                      && (length $regexs[$i]));

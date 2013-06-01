@@ -12,7 +12,7 @@ package Pod::InputObjects;
 use strict;
 
 use vars qw($VERSION);
-$VERSION = '1.60';  ## Current version of this package
+$VERSION = '1.61';  ## Current version of this package
 require  5.005;    ## requires this Perl version or later
 
 #############################################################################
@@ -480,7 +480,7 @@ sub new {
           @_
     };
 
-    ## Initialize contents if they havent been already
+    ## Initialize contents if they haven't been already
     my $ptree = $self->{'-ptree'} || new Pod::ParseTree();
     if ( ref $ptree =~ /^(ARRAY)?$/ ) {
         ## We have an array-ref, or a normal scalar. Pass it as an

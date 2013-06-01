@@ -11,7 +11,7 @@ package Pod::ParseUtils;
 use strict;
 
 use vars qw($VERSION);
-$VERSION = '1.60'; ## Current version of this package
+$VERSION = '1.61'; ## Current version of this package
 require  5.005;    ## requires this Perl version or later
 
 =head1 NAME
@@ -311,7 +311,7 @@ sub parse {
     # only page
     # problem: a lot of people use (), or (1) or the like to indicate
     # man page sections. But this collides with L<func()> that is supposed
-    # to point to an internal funtion...
+    # to point to an internal function...
     my $page_rx = '[\w.-]+(?:::[\w.-]+)*(?:[(](?:\d\w*|)[)]|)';
     # page name only
     if(/^($page_rx)$/o) {
