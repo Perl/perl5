@@ -723,9 +723,7 @@ Here the multi-argument form of pipe open() is preferred because the
 pattern and indeed even the filenames themselves might hold metacharacters.
 
 Be aware that these operations are full Unix forks, which means they may
-not be correctly implemented on all alien systems.  Additionally, these are
-not true multithreading.  To learn more about threading, see the F<modules>
-file mentioned below in the SEE ALSO section.
+not be correctly implemented on all alien systems.
 
 =head2 Avoiding Pipe Deadlocks
 
