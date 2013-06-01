@@ -22,7 +22,7 @@ BEGIN {
 }
 
 
-plan tests => 2531;  # Update this when adding/deleting tests.
+plan tests => 2532;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1167,6 +1167,10 @@ EOP
 	# in the report above that only happened in a thread.
 	my $s = "\x{1ff}" . "f" x 32;
 	ok($s =~ /\x{1ff}[[:alpha:]]+/gca, "POSIXA pointer wrap");
+
+	# this one segfaulted under the conditions above
+	# of course, CANY is evil, maybe it should crash
+	ok($s =~ /.\C+/, "CANY pointer wrap");
     }
 } # End of sub run_tests
 
