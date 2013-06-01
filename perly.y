@@ -1219,12 +1219,12 @@ term	:	termbinop
 			{ $$ = $1; }
 	|	amper                                /* &foo; */
 			{ $$ = newUNOP(OP_ENTERSUB, 0, scalar($1)); }
-	|	amper '(' ')'                 /* &foo() */
+	|	amper '(' ')'                 /* &foo() or foo() */
 			{ $$ = newUNOP(OP_ENTERSUB, OPf_STACKED, scalar($1));
 			  TOKEN_GETMAD($2,$$,'(');
 			  TOKEN_GETMAD($3,$$,')');
 			}
-	|	amper '(' expr ')'            /* &foo(@args) */
+	|	amper '(' expr ')'          /* &foo(@args) or foo(@args) */
 			{
 			  $$ = newUNOP(OP_ENTERSUB, OPf_STACKED,
 				op_append_elem(OP_LIST, $3, scalar($1)));
@@ -1237,7 +1237,7 @@ term	:	termbinop
 			      token_getmad($4,op,')');
 			  });
 			}
-	|	NOAMP subname optlistexpr               /* foo(@args) */
+	|	NOAMP subname optlistexpr       /* foo @args (no parens) */
 			{ $$ = newUNOP(OP_ENTERSUB, OPf_STACKED,
 			    op_append_elem(OP_LIST, $3, scalar($2)));
 			  TOKEN_GETMAD($1,$$,'o');
