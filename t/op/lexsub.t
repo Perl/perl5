@@ -8,7 +8,7 @@ BEGIN {
     *bar::like = *like;
 }
 no warnings 'deprecated';
-plan 128;
+plan 130;
 
 # -------------------- Errors with feature disabled -------------------- #
 
@@ -318,6 +318,15 @@ sub make_anon_with_state_sub{
   }
   r(1);
 }
+$::TODO = ' ';
+like runperl(
+      switches => [ '-Mfeature=:all' ],
+      prog     => 'state sub a { foo ref } a()',
+      stderr   => 1
+     ),
+     qr/syntax error/,
+    'referencing a state sub after a syntax error does not crash';
+undef $::TODO;
 
 # -------------------- my -------------------- #
 
@@ -607,6 +616,15 @@ not_lexical11();
   eval q{ my sub george () { 2 } };
   is $w, undef, 'no double free from constant my subs';
 }
+$::TODO = ' ';
+like runperl(
+      switches => [ '-Mfeature=:all' ],
+      prog     => 'my sub a { foo ref } a()',
+      stderr   => 1
+     ),
+     qr/syntax error/,
+    'referencing a my sub after a syntax error does not crash';
+undef $::TODO;
 
 # -------------------- Interactions (and misc tests) -------------------- #
 
