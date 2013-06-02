@@ -204,7 +204,7 @@ Deprecated.  Use C<GIMME_V> instead.
 #define OPpENTERSUB_HASTARG	4	/* Called from OP tree. */
 #define OPpENTERSUB_INARGS	1	/* Lval used as arg to a sub. */
 /* used by OPpDEREF             (32|64) */
-/* used by HINT_STRICT_SUBS     2          */
+/* used by HINT_STRICT_REFS     2          */
   /* Mask for OP_ENTERSUB flags, the absence of which must be propagated
      in dynamic context */
 #define OPpENTERSUB_LVAL_MASK (OPpLVAL_INTRO|OPpENTERSUB_INARGS)
