@@ -8,7 +8,7 @@ BEGIN {
     *bar::like = *like;
 }
 no warnings 'deprecated';
-plan 130;
+plan 132;
 
 # -------------------- Errors with feature disabled -------------------- #
 
@@ -299,6 +299,8 @@ sub make_anon_with_state_sub{
     is ref $_[0], 'ARRAY', 'state sub with proto';
   }
   p(my @a);
+  state sub q () { 45 }
+  is q(), 45, 'state constant called with parens';
 }
 {
   state sub x;
@@ -596,6 +598,8 @@ not_lexical11();
     is ref $_[0], 'ARRAY', 'my sub with proto';
   }
   p(my @a);
+  my sub q () { 46 }
+  is q(), 46, 'my constant called with parens';
 }
 {
   my sub x;
