@@ -7151,7 +7151,7 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	op_free(block);
 	SvREFCNT_dec(compcv);
 	PL_compcv = NULL;
-	goto clone;
+	goto setname;
     }
     /* Checking whether outcv is CvOUTSIDE(compcv) is not sufficient to
        determine whether this sub definition is in the same scope as its
@@ -7214,6 +7214,7 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	cv = compcv;
 	*spot = cv;
     }
+   setname:
     if (!CvNAME_HEK(cv)) {
 	CvNAME_HEK_set(cv,
 	 hek
@@ -7223,6 +7224,8 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 		      0)
 	);
     }
+    if (const_sv) goto clone;
+
     CvFILE_set_from_cop(cv, PL_curcop);
     CvSTASH_set(cv, PL_curstash);
 
