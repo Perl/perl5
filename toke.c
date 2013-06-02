@@ -6936,8 +6936,7 @@ Perl_yylex(pTHX)
 		else {
 		    rv2cv_op = newOP(OP_PADANY, 0);
 		    rv2cv_op->op_targ = off;
-		    rv2cv_op = (OP*)newCVREF(0, rv2cv_op);
-		    cv = (CV *)PAD_SV(off);
+		    cv = find_lexical_cv(off);
 		}
 		lex = TRUE;
 		goto just_a_word;
@@ -7266,7 +7265,8 @@ Perl_yylex(pTHX)
 		    }
 
 		    op_free(pl_yylval.opval);
-		    pl_yylval.opval = rv2cv_op;
+		    pl_yylval.opval =
+			off ? (OP *)newCVREF(0, rv2cv_op) : rv2cv_op;
 		    pl_yylval.opval->op_private |= OPpENTERSUB_NOPAREN;
 		    PL_last_lop = PL_oldbufptr;
 		    PL_last_lop_op = OP_ENTERSUB;
@@ -7362,7 +7362,8 @@ Perl_yylex(pTHX)
 			gv = gv_fetchpv(PL_tokenbuf, GV_ADD | ( UTF ? SVf_UTF8 : 0 ),
                                         SVt_PVCV);
 			op_free(pl_yylval.opval);
-			pl_yylval.opval = rv2cv_op;
+			pl_yylval.opval =
+			    off ? (OP *)newCVREF(0, rv2cv_op) : rv2cv_op;
 			pl_yylval.opval->op_private |= OPpENTERSUB_NOPAREN;
 			PL_last_lop = PL_oldbufptr;
 			PL_last_lop_op = OP_ENTERSUB;

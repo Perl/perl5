@@ -8189,7 +8189,6 @@ Perl_newCVREF(pTHX_ I32 flags, OP *o)
 	dVAR;
 	o->op_type = OP_PADCV;
 	o->op_ppaddr = PL_ppaddr[OP_PADCV];
-	return o;
     }
     return newUNOP(OP_RV2CV, flags, scalar(o));
 }
@@ -9910,6 +9909,28 @@ subroutine.
 =cut
 */
 
+/* shared by toke.c:yylex */
+CV *
+Perl_find_lexical_cv(pTHX_ PADOFFSET off)
+{
+    PADNAME *name = PAD_COMPNAME(off);
+    CV *compcv = PL_compcv;
+    while (PadnameOUTER(name)) {
+	assert(PARENT_PAD_INDEX(name));
+	compcv = CvOUTSIDE(PL_compcv);
+	name = PadlistNAMESARRAY(CvPADLIST(compcv))
+		[off = PARENT_PAD_INDEX(name)];
+    }
+    assert(!PadnameIsOUR(name));
+    if (!PadnameIsSTATE(name)) {
+	MAGIC * mg = mg_find(name, PERL_MAGIC_proto);
+	assert(mg);
+	assert(mg->mg_obj);
+	return (CV *)mg->mg_obj;
+    }
+    return (CV *)AvARRAY(PadlistARRAY(CvPADLIST(compcv))[1])[off];
+}
+
 CV *
 Perl_rv2cv_op_cv(pTHX_ OP *cvop, U32 flags)
 {
@@ -9944,24 +9965,7 @@ Perl_rv2cv_op_cv(pTHX_ OP *cvop, U32 flags)
 	    gv = NULL;
 	} break;
 	case OP_PADCV: {
-	    PADNAME *name = PAD_COMPNAME(rvop->op_targ);
-	    CV *compcv = PL_compcv;
-	    PADOFFSET off = rvop->op_targ;
-	    while (PadnameOUTER(name)) {
-		assert(PARENT_PAD_INDEX(name));
-		compcv = CvOUTSIDE(PL_compcv);
-		name = PadlistNAMESARRAY(CvPADLIST(compcv))
-			[off = PARENT_PAD_INDEX(name)];
-	    }
-	    assert(!PadnameIsOUR(name));
-	    if (!PadnameIsSTATE(name)) {
-		MAGIC * mg = mg_find(name, PERL_MAGIC_proto);
-		assert(mg);
-		assert(mg->mg_obj);
-		cv = (CV *)mg->mg_obj;
-	    }
-	    else cv =
-		    (CV *)AvARRAY(PadlistARRAY(CvPADLIST(compcv))[1])[off];
+	    cv = find_lexical_cv(rvop->op_targ);
 	    gv = NULL;
 	} break;
 	default: {
