@@ -9906,7 +9906,7 @@ Perl_find_lexical_cv(pTHX_ PADOFFSET off)
 		[off = PARENT_PAD_INDEX(name)];
     }
     assert(!PadnameIsOUR(name));
-    if (!PadnameIsSTATE(name)) {
+    if (!PadnameIsSTATE(name) && SvMAGICAL(name)) {
 	MAGIC * mg = mg_find(name, PERL_MAGIC_proto);
 	assert(mg);
 	assert(mg->mg_obj);
@@ -10546,7 +10546,9 @@ Perl_ck_subr(pTHX_ OP *o)
 		   really need is a new call checker API that accepts a
 		   GV or string (or GV or CV). */
 	    HEK * const hek = CvNAME_HEK(cv);
-	    assert(hek);
+	    /* After a syntax error in a lexical sub, the cv that
+	       rv2cv_op_cv returns may be a nameless stub. */
+	    if (!hek) return ck_entersub_args_list(o);;
 	    namegv = (GV *)sv_newmortal();
 	    gv_init_pvn(namegv, PL_curstash, HEK_KEY(hek), HEK_LEN(hek),
 			SVf_UTF8 * !!HEK_UTF8(hek));
