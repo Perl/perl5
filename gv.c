@@ -3174,10 +3174,11 @@ Perl_gv_try_downgrade(pTHX_ GV *gv)
 			HEK_LEN(namehek)*(HEK_UTF8(namehek) ? -1 : 1), 0)) &&
 	    *gvp == (SV*)gv) {
 	SV *value = SvREFCNT_inc(CvXSUBANY(cv).any_ptr);
+	const bool imported = !!GvIMPORTED_CV(gv);
 	SvREFCNT(gv) = 0;
 	sv_clear((SV*)gv);
 	SvREFCNT(gv) = 1;
-	SvFLAGS(gv) = SVt_IV|SVf_ROK;
+	SvFLAGS(gv) = SVt_IV|SVf_ROK|SVprv_PCS_IMPORTED * imported;
 	SvANY(gv) = (XPVGV*)((char*)&(gv->sv_u.svu_iv) -
 				STRUCT_OFFSET(XPVIV, xiv_iv));
 	SvRV_set(gv, value);

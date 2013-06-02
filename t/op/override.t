@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 28;
+plan tests => 29;
 
 #
 # This file tries to test builtin override using CORE::GLOBAL
@@ -144,3 +144,9 @@ BEGIN { *OverridenPop::pop = sub { ::is( $_[0][0], "ok" ) }; }
     };
     is $@, '';
 }
+
+# Constant inlining should not countermand "use subs" overrides
+BEGIN { package other; *::caller = \&::caller }
+sub caller() { 42 }
+caller; # inline the constant
+is caller, 42, 'constant inlining does not undo "use subs" on keywords';
