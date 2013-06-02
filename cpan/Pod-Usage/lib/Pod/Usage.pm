@@ -11,7 +11,7 @@ package Pod::Usage;
 use strict;
 
 use vars qw($VERSION @ISA @EXPORT);
-$VERSION = '1.61';  ## Current version of this package
+$VERSION = '1.63';  ## Current version of this package
 require  5.006;    ## requires this Perl version or later
 
 #use diagnostics;
@@ -93,7 +93,7 @@ sub pod2usage {
     ## Default the input file
     $opts{'-input'} = $0  unless (defined $opts{'-input'});
 
-    ## Look up input file in path if it doesnt exist.
+    ## Look up input file in path if it doesn't exist.
     unless ((ref $opts{'-input'}) || (-e $opts{'-input'})) {
         my $basename = $opts{'-input'};
         my $pathsep = ($^O =~ /^(?:dos|os2|MSWin32)$/i) ? ';'
@@ -341,7 +341,7 @@ sub preprocess_paragraph {
     my $self = shift;
     local $_ = shift;
     my $line = shift;
-    ## See if this is a heading and we arent printing the entire manpage.
+    ## See if this is a heading and we aren't printing the entire manpage.
     if (($self->{USAGE_OPTIONS}->{-verbose} < 2) && /^=head/) {
         ## Change the title of the SYNOPSIS section to USAGE
         s/^=head1\s+SYNOPSIS\s*$/=head1 USAGE/;
