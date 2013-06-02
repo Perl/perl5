@@ -1107,8 +1107,12 @@ p	|REGEXP*|re_op_compile	|NULLOK SV ** const patternp \
 				|NULLOK bool *is_bare_re \
 				|U32 rx_flags|U32 pm_flags
 Ap	|REGEXP*|re_compile	|NN SV * const pattern|U32 orig_rx_flags
-Ap	|char*	|re_intuit_start|NN REGEXP * const rx|NULLOK SV* sv|NN char* strpos \
-				|NN char* strend|const U32 flags \
+Ap	|char*	|re_intuit_start|NN REGEXP * const rx \
+				|NULLOK SV* sv \
+				|NN const char* const strbeg \
+				|NN char* strpos \
+				|NN char* strend \
+				|const U32 flags \
 				|NULLOK re_scream_pos_data *data
 Ap	|SV*	|re_intuit_string|NN REGEXP  *const r
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_TOKE_C)
@@ -2069,8 +2073,10 @@ ERs	|bool	|isFOO_lc	|const U8 classnum|const U8 character
 ERs	|bool	|isFOO_utf8_lc	|const U8 classnum|NN const U8* character
 ERs	|I32	|regmatch	|NN regmatch_info *reginfo|NN char *startpos|NN regnode *prog
 ERs	|I32	|regrepeat	|NN regexp *prog|NN char **startposp \
-				|NN const regnode *p|I32 max|int depth \
-				|bool is_utf8_pat
+				|NN const regnode *p \
+				|NN regmatch_info *const reginfo \
+				|I32 max \
+				|int depth
 ERs	|I32	|regtry		|NN regmatch_info *reginfo|NN char **startposp
 ERs	|bool	|reginclass	|NULLOK regexp * const prog|NN const regnode * const n|NN const U8 * const p\
 				|bool const utf8_target
@@ -2089,8 +2095,7 @@ ERsn	|U8*	|reghop4	|NN U8 *s|I32 off|NN const U8 *llim \
 ERsn	|U8*	|reghopmaybe3	|NN U8 *s|I32 off|NN const U8 *lim
 ERs	|char*	|find_byclass	|NN regexp * prog|NN const regnode *c \
 				|NN char *s|NN const char *strend \
-				|NULLOK regmatch_info *reginfo \
-				|bool is_utf_pat
+				|NULLOK regmatch_info *reginfo
 Es	|void	|to_utf8_substr	|NN regexp * prog
 Es	|bool	|to_byte_substr	|NN regexp * prog
 ERs	|I32	|reg_check_named_buff_matched	|NN const regexp *rex \

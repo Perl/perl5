@@ -21,6 +21,7 @@ following format:
                          void* data, U32 flags);
         char*   (*intuit) (pTHX_
                            REGEXP * const rx, SV *sv,
+			   const char * const strbeg,
                            char *strpos, char *strend, U32 flags,
                            struct re_scream_pos_data_s *data);
         SV*     (*checkstr) (pTHX_ REGEXP * const rx);
@@ -286,15 +287,35 @@ Optimisation flags; subject to change.
 
 =head2 intuit
 
-    char* intuit(pTHX_ REGEXP * const rx,
-                  SV *sv, char *strpos, char *strend,
-                  const U32 flags, struct re_scream_pos_data_s *data);
+    char* intuit(pTHX_
+		REGEXP * const rx,
+		SV *sv,
+		const char * const strbeg,
+		char *strpos,
+		char *strend,
+		const U32 flags,
+		struct re_scream_pos_data_s *data);
 
 Find the start position where a regex match should be attempted,
 or possibly if the regex engine should not be run because the
 pattern can't match.  This is called, as appropriate, by the core,
 depending on the values of the C<extflags> member of the C<regexp>
 structure.
+
+Arguments:
+
+    rx:     the regex to match against
+    sv:     the SV being matched: only used for utf8 flag; the string
+	    itself is accessed via the pointers below. Note that on
+	    something like an overloaded SV, SvPOK(sv) may be false
+	    and the string pointers may point to something unrelated to
+	    the SV itself.
+    strbeg: real beginning of string
+    strpos: the point in the string at which to begin matching
+    strend: pointer to the byte following the last char of the string
+    flags   currently unused; set to 0
+    data:   currently unused; set to NULL
+
 
 =head2 checkstr
 

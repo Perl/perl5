@@ -451,7 +451,7 @@
 #define pv_pretty(a,b,c,d,e,f,g)	Perl_pv_pretty(aTHX_ a,b,c,d,e,f,g)
 #define pv_uni_display(a,b,c,d,e)	Perl_pv_uni_display(aTHX_ a,b,c,d,e)
 #define re_compile(a,b)		Perl_re_compile(aTHX_ a,b)
-#define re_intuit_start(a,b,c,d,e,f)	Perl_re_intuit_start(aTHX_ a,b,c,d,e,f)
+#define re_intuit_start(a,b,c,d,e,f,g)	Perl_re_intuit_start(aTHX_ a,b,c,d,e,f,g)
 #define re_intuit_string(a)	Perl_re_intuit_string(aTHX_ a)
 #define reentrant_free()	Perl_reentrant_free(aTHX)
 #define reentrant_init()	Perl_reentrant_init(aTHX)
@@ -976,7 +976,7 @@
 #  endif
 #  if defined(PERL_IN_REGEXEC_C)
 #define core_regclass_swash(a,b,c,d)	S_core_regclass_swash(aTHX_ a,b,c,d)
-#define find_byclass(a,b,c,d,e,f)	S_find_byclass(aTHX_ a,b,c,d,e,f)
+#define find_byclass(a,b,c,d,e)	S_find_byclass(aTHX_ a,b,c,d,e)
 #define isFOO_lc(a,b)		S_isFOO_lc(aTHX_ a,b)
 #define isFOO_utf8_lc(a,b)	S_isFOO_utf8_lc(aTHX_ a,b)
 #define reg_check_named_buff_matched(a,b)	S_reg_check_named_buff_matched(aTHX_ a,b)

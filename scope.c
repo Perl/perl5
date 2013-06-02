@@ -1225,20 +1225,6 @@ Perl_leave_scope(pTHX_ I32 base)
 
 	    PL_compiling.cop_warnings = (STRLEN*)ARG0_PTR;
 	    break;
-	case SAVEt_RE_STATE:
-	    {
-		const struct re_save_state *const state
-		    = (struct re_save_state *)
-		    (PL_savestack + PL_savestack_ix
-		     - SAVESTACK_ALLOC_FOR_RE_SAVE_STATE);
-		PL_savestack_ix -= SAVESTACK_ALLOC_FOR_RE_SAVE_STATE;
-
-		if (PL_reg_poscache != state->re_state_reg_poscache) {
-		    Safefree(PL_reg_poscache);
-		}
-		Copy(state, &PL_reg_state, 1, struct re_save_state);
-	    }
-	    break;
 	case SAVEt_PARSER:
 	    parser_free((yy_parser *) ARG0_PTR);
 	    break;

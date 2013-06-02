@@ -12889,43 +12889,6 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 	    sv = (const SV *)POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = sv_dup(sv, param);
 	    break;
-	case SAVEt_RE_STATE:
-	    {
-		const struct re_save_state *const old_state
-		    = (struct re_save_state *)
-		    (ss + ix - SAVESTACK_ALLOC_FOR_RE_SAVE_STATE);
-		struct re_save_state *const new_state
-		    = (struct re_save_state *)
-		    (nss + ix - SAVESTACK_ALLOC_FOR_RE_SAVE_STATE);
-
-		Copy(old_state, new_state, 1, struct re_save_state);
-		ix -= SAVESTACK_ALLOC_FOR_RE_SAVE_STATE;
-
-		new_state->re_state_bostr
-		    = pv_dup(old_state->re_state_bostr);
-		new_state->re_state_regeol
-		    = pv_dup(old_state->re_state_regeol);
-#ifdef PERL_ANY_COW
-		new_state->re_state_nrs
-		    = sv_dup(old_state->re_state_nrs, param);
-#endif
-		new_state->re_state_reg_magic
-		    = (MAGIC*) any_dup(old_state->re_state_reg_magic, 
-			       proto_perl);
-		new_state->re_state_reg_oldcurpm
-		    = (PMOP*) any_dup(old_state->re_state_reg_oldcurpm, 
-			      proto_perl);
-		new_state->re_state_reg_curpm
-		    = (PMOP*)  any_dup(old_state->re_state_reg_curpm, 
-			       proto_perl);
-		new_state->re_state_reg_oldsaved
-		    = pv_dup(old_state->re_state_reg_oldsaved);
-		new_state->re_state_reg_poscache
-		    = pv_dup(old_state->re_state_reg_poscache);
-		new_state->re_state_reg_starttry
-		    = pv_dup(old_state->re_state_reg_starttry);
-		break;
-	    }
 	case SAVEt_COMPILE_WARNINGS:
 	    ptr = POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = DUP_WARNINGS((STRLEN*)ptr);
@@ -13183,8 +13146,8 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 #endif
 
     /* RE engine related */
-    Zero(&PL_reg_state, 1, struct re_save_state);
     PL_regmatch_slab	= NULL;
+    PL_reg_curpm	= NULL;
 
     PL_sub_generation	= proto_perl->Isub_generation;
 
@@ -13349,7 +13312,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
     /* regex stuff */
 
-    PL_regdummy		= proto_perl->Iregdummy;
     PL_colorset		= 0;		/* reinits PL_colors[] */
     /*PL_colors[6]	= {0,0,0,0,0,0};*/
 

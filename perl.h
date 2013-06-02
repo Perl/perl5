@@ -224,8 +224,8 @@
 #define CALLREGEXEC(prog,stringarg,strend,strbeg,minend,screamer,data,flags) \
     RX_ENGINE(prog)->exec(aTHX_ (prog),(stringarg),(strend), \
         (strbeg),(minend),(screamer),(data),(flags))
-#define CALLREG_INTUIT_START(prog,sv,strpos,strend,flags,data) \
-    RX_ENGINE(prog)->intuit(aTHX_ (prog), (sv), (strpos), \
+#define CALLREG_INTUIT_START(prog,sv,strbeg,strpos,strend,flags,data) \
+    RX_ENGINE(prog)->intuit(aTHX_ (prog), (sv), (strbeg), (strpos), \
         (strend),(flags),(data))
 #define CALLREG_INTUIT_STRING(prog) \
     RX_ENGINE(prog)->checkstr(aTHX_ (prog))

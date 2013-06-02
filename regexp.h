@@ -157,8 +157,13 @@ typedef struct regexp_engine {
     I32     (*exec) (pTHX_ REGEXP * const rx, char* stringarg, char* strend,
                      char* strbeg, I32 minend, SV* screamer,
                      void* data, U32 flags);
-    char*   (*intuit) (pTHX_ REGEXP * const rx, SV *sv, char *strpos,
-                       char *strend, const U32 flags,
+    char*   (*intuit) (pTHX_
+                        REGEXP * const rx,
+                        SV *sv,
+                        const char * const strbeg,
+                        char *strpos,
+                        char *strend,
+                        const U32 flags,
                        re_scream_pos_data *data);
     SV*     (*checkstr) (pTHX_ REGEXP * const rx);
     void    (*free) (pTHX_ REGEXP * const rx);
@@ -401,7 +406,7 @@ get_regex_charset_name(const U32 flags, STRLEN* const lenp)
 #define RXf_CHECK_ALL   	(1<<(RXf_BASE_SHIFT+10))
 
 /* UTF8 related */
-#define RXf_MATCH_UTF8  	(1<<(RXf_BASE_SHIFT+11))
+#define RXf_MATCH_UTF8  	(1<<(RXf_BASE_SHIFT+11)) /* $1 etc are utf8 */
 
 /* Intuit related */
 #define RXf_USE_INTUIT_NOML	(1<<(RXf_BASE_SHIFT+12))
@@ -523,8 +528,8 @@ get_regex_charset_name(const U32 flags, STRLEN* const lenp)
 #define RX_MATCH_UTF8_on(prog)		(RX_EXTFLAGS(prog) |= RXf_MATCH_UTF8)
 #define RX_MATCH_UTF8_off(prog)		(RX_EXTFLAGS(prog) &= ~RXf_MATCH_UTF8)
 #define RX_MATCH_UTF8_set(prog, t)	((t) \
-			? (RX_MATCH_UTF8_on(prog), (PL_reg_match_utf8 = 1)) \
-			: (RX_MATCH_UTF8_off(prog), (PL_reg_match_utf8 = 0)))
+			? RX_MATCH_UTF8_on(prog) \
+			: RX_MATCH_UTF8_off(prog))
 
 /* Whether the pattern stored at RX_WRAPPED is in UTF-8  */
 #define RX_UTF8(prog)			SvUTF8(prog)
@@ -571,17 +576,63 @@ get_regex_charset_name(const U32 flags, STRLEN* const lenp)
 
 #define FBMrf_MULTILINE	1
 
-/* some basic information about the current match that is created by
- * Perl_regexec_flags and then passed to regtry(), regmatch() etc */
+struct regmatch_state;
+struct regmatch_slab;
+
+/* like regmatch_info_aux, but contains extra fields only needed if the
+ * pattern contains (?{}). If used, is snuck into the second slot in the
+ * regmatch_state stack at the start of execution */
 
 typedef struct {
-    REGEXP *prog;
-    char *bol;
-    char *till;
-    SV *sv;
-    char *ganch;
-    char *cutpoint;
-    bool is_utf8_pat;
+    regexp *rex;
+    PMOP    *curpm;     /* saved PL_curpm */
+#ifdef PERL_ANY_COW
+    SV      *saved_copy; /* saved saved_copy field from rex */
+#endif
+    char    *subbeg;    /* saved subbeg     field from rex */
+    STRLEN  sublen;     /* saved sublen     field from rex */
+    STRLEN  suboffset;  /* saved suboffset  field from rex */
+    STRLEN  subcoffset; /* saved subcoffset field from rex */
+    MAGIC   *pos_magic; /* pos() magic attached to $_ */
+    I32     pos;        /* the original value of pos() in pos_magic */
+} regmatch_info_aux_eval;
+
+
+/* fields that logically  live in regmatch_info, but which need cleaning
+ * up on croak(), and so are instead are snuck into the first slot in
+ * the regmatch_state stack at the start of execution */
+
+typedef struct {
+    regmatch_info_aux_eval *info_aux_eval;
+    struct regmatch_state *old_regmatch_state; /* saved PL_regmatch_state */
+    struct regmatch_slab  *old_regmatch_slab;  /* saved PL_regmatch_slab */
+    char *poscache;	/* S-L cache of fail positions of WHILEMs */
+} regmatch_info_aux;
+
+
+/* some basic information about the current match that is created by
+ * Perl_regexec_flags and then passed to regtry(), regmatch() etc.
+ * It is allocated as a local var on the stack, so nothing should be
+ * stored in it that needs preserving or clearing up on croak().
+ * For that, see the aux_info and aux_info_eval members of the
+ * regmatch_state union. */
+
+typedef struct {
+    REGEXP *prog;        /* the regex being executed */
+    const char * strbeg; /* real start of string */
+    char *strend;        /* one byte beyond last char of match string */
+    char *till;          /* matches shorter than this fail (see minlen arg) */
+    SV *sv;              /* the SV string currently being matched */
+    char *ganch;         /* position of \G anchor */
+    char *cutpoint;      /* (*COMMIT) position (if any) */
+    regmatch_info_aux      *info_aux; /* extra fields that need cleanup */
+    regmatch_info_aux_eval *info_aux_eval; /* extra saved state for (?{}) */
+    I32  poscache_maxiter; /* how many whilems todo before S-L cache kicks in */
+    I32  poscache_iter;    /* current countdown from _maxiter to zero */
+    STRLEN poscache_size;  /* size of regmatch_info_aux.poscache */
+    bool intuit;    /* re_intuit_start() is the top-level caller */
+    bool is_utf8_pat;    /* regex is utf8 */
+    bool is_utf8_target; /* string being matched is utf8 */
     bool warned; /* we have issued a recursion warning; no need for more */
 } regmatch_info;
  
@@ -599,6 +650,29 @@ typedef struct regmatch_state {
     char *locinput;		/* where to backtrack in string on failure */
 
     union {
+
+        /* the 'info_aux' and 'info_aux_eval' union members are cuckoos in
+         * the nest. They aren't saved backtrack state; rather they
+         * represent one or two extra chunks of data that need allocating
+         * at the start of a match. These fields would logically live in
+         * the regmatch_info struct, except that is allocated on the
+         * C stack, and these fields are all things that require cleanup
+         * after a croak(), when the stack is lost.
+         * As a convenience, we just use the first 1 or 2 regmatch_state
+         * slots to store this info, as we will be allocating a slab of
+         * these anyway. Otherwise we'd have to malloc and then free them,
+         * or allocate them on the save stack (where they will get
+         * realloced if the save stack grows).
+         * info_aux contains the extra fields that are always needed;
+         * info_aux_eval contains extra fields that only needed if
+         * the pattern contains code blocks
+         * We split them into two separate structs to avoid increasing
+         * the size of the union.
+         */
+
+        regmatch_info_aux info_aux;
+
+        regmatch_info_aux_eval info_aux_eval;
 
 	/* this is a fake union member that matches the first element
 	 * of each member that needs to store positive backtrack
@@ -654,7 +728,6 @@ typedef struct regmatch_state {
 	    struct regmatch_state *prev_eval;
 	    struct regmatch_state *prev_curlyx;
 	    REGEXP	*prev_rex;
-	    bool	saved_utf8_pat; /* saved copy of is_utf8_pat */
 	    CHECKPOINT	cp;	/* remember current savestack indexes */
 	    CHECKPOINT	lastcp;
 	    U32        close_paren; /* which close bracket is our end */
@@ -755,50 +828,7 @@ typedef struct regmatch_slab {
     struct regmatch_slab *prev, *next;
 } regmatch_slab;
 
-#define PL_bostr		PL_reg_state.re_state_bostr
-#define PL_regeol		PL_reg_state.re_state_regeol
-#define PL_reg_match_utf8	PL_reg_state.re_state_reg_match_utf8
-#define PL_reg_magic		PL_reg_state.re_state_reg_magic
-#define PL_reg_oldpos		PL_reg_state.re_state_reg_oldpos
-#define PL_reg_oldcurpm		PL_reg_state.re_state_reg_oldcurpm
-#define PL_reg_curpm		PL_reg_state.re_state_reg_curpm
-#define PL_reg_oldsaved		PL_reg_state.re_state_reg_oldsaved
-#define PL_reg_oldsavedlen	PL_reg_state.re_state_reg_oldsavedlen
-#define PL_reg_oldsavedoffset	PL_reg_state.re_state_reg_oldsavedoffset
-#define PL_reg_oldsavedcoffset	PL_reg_state.re_state_reg_oldsavedcoffset
-#define PL_reg_maxiter		PL_reg_state.re_state_reg_maxiter
-#define PL_reg_leftiter		PL_reg_state.re_state_reg_leftiter
-#define PL_reg_poscache		PL_reg_state.re_state_reg_poscache
-#define PL_reg_poscache_size	PL_reg_state.re_state_reg_poscache_size
-#define PL_reg_starttry		PL_reg_state.re_state_reg_starttry
-#define PL_nrs			PL_reg_state.re_state_nrs
 
-struct re_save_state {
-    bool re_state_eval_setup_done;	/* from regexec.c */
-    bool re_state_reg_match_utf8;	/* from regexec.c */
-    /* Space for U8 */
-    I32 re_state_reg_oldpos;		/* from regexec.c */
-    I32 re_state_reg_maxiter;		/* max wait until caching pos */
-    I32 re_state_reg_leftiter;		/* wait until caching pos */
-    char *re_state_bostr;
-    char *re_state_regeol;		/* End of input, for $ check. */
-    MAGIC *re_state_reg_magic;		/* from regexec.c */
-    PMOP *re_state_reg_oldcurpm;	/* from regexec.c */
-    PMOP *re_state_reg_curpm;		/* from regexec.c */
-    char *re_state_reg_oldsaved;	/* old saved substr during match */
-    STRLEN re_state_reg_oldsavedlen;	/* old length of saved substr during match */
-    STRLEN re_state_reg_oldsavedoffset;	/* old offset of saved substr during match */
-    STRLEN re_state_reg_oldsavedcoffset;/* old coffset of saved substr during match */
-    STRLEN re_state_reg_poscache_size;	/* size of pos cache of WHILEM */
-    char *re_state_reg_poscache;	/* cache of pos of WHILEM */
-    char *re_state_reg_starttry;	/* from regexec.c */
-#ifdef PERL_ANY_COW
-    SV *re_state_nrs;			/* was placeholder: unused since 5.8.0 (5.7.2 patch #12027 for bug ID 20010815.012). Used to save rx->saved_copy */
-#endif
-};
-
-#define SAVESTACK_ALLOC_FOR_RE_SAVE_STATE \
-	(1 + ((sizeof(struct re_save_state) - 1) / sizeof(*PL_savestack)))
 
 /*
  * Local variables:

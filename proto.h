@@ -3252,12 +3252,13 @@ PERL_CALLCONV REGEXP*	Perl_re_compile(pTHX_ SV * const pattern, U32 orig_rx_flag
 #define PERL_ARGS_ASSERT_RE_COMPILE	\
 	assert(pattern)
 
-PERL_CALLCONV char*	Perl_re_intuit_start(pTHX_ REGEXP * const rx, SV* sv, char* strpos, char* strend, const U32 flags, re_scream_pos_data *data)
+PERL_CALLCONV char*	Perl_re_intuit_start(pTHX_ REGEXP * const rx, SV* sv, const char* const strbeg, char* strpos, char* strend, const U32 flags, re_scream_pos_data *data)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_3)
-			__attribute__nonnull__(pTHX_4);
+			__attribute__nonnull__(pTHX_4)
+			__attribute__nonnull__(pTHX_5);
 #define PERL_ARGS_ASSERT_RE_INTUIT_START	\
-	assert(rx); assert(strpos); assert(strend)
+	assert(rx); assert(strbeg); assert(strpos); assert(strend)
 
 PERL_CALLCONV SV*	Perl_re_intuit_string(pTHX_ REGEXP  *const r)
 			__attribute__nonnull__(pTHX_1);
@@ -6891,7 +6892,7 @@ STATIC SV*	S_core_regclass_swash(pTHX_ const regexp *prog, const struct regnode 
 #define PERL_ARGS_ASSERT_CORE_REGCLASS_SWASH	\
 	assert(node)
 
-STATIC char*	S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s, const char *strend, regmatch_info *reginfo, bool is_utf_pat)
+STATIC char*	S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s, const char *strend, regmatch_info *reginfo)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
@@ -6956,13 +6957,14 @@ STATIC I32	S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *pro
 #define PERL_ARGS_ASSERT_REGMATCH	\
 	assert(reginfo); assert(startpos); assert(prog)
 
-STATIC I32	S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p, I32 max, int depth, bool is_utf8_pat)
+STATIC I32	S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p, regmatch_info *const reginfo, I32 max, int depth)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
-			__attribute__nonnull__(pTHX_3);
+			__attribute__nonnull__(pTHX_3)
+			__attribute__nonnull__(pTHX_4);
 #define PERL_ARGS_ASSERT_REGREPEAT	\
-	assert(prog); assert(startposp); assert(p)
+	assert(prog); assert(startposp); assert(p); assert(reginfo)
 
 STATIC I32	S_regtry(pTHX_ regmatch_info *reginfo, char **startposp)
 			__attribute__warn_unused_result__
