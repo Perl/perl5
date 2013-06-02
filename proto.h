@@ -1087,6 +1087,7 @@ PERL_CALLCONV void	Perl_finalize_optree(pTHX_ OP* o)
 #define PERL_ARGS_ASSERT_FINALIZE_OPTREE	\
 	assert(o)
 
+PERL_CALLCONV CV *	Perl_find_lexical_cv(pTHX_ PADOFFSET off);
 PERL_CALLCONV CV*	Perl_find_runcv(pTHX_ U32 *db_seqp)
 			__attribute__warn_unused_result__;
 

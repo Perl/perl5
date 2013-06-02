@@ -427,6 +427,7 @@ p	|void	|dump_sub_perl	|NN const GV* gv|bool justperl
 Apd	|void	|fbm_compile	|NN SV* sv|U32 flags
 ApdR	|char*	|fbm_instr	|NN unsigned char* big|NN unsigned char* bigend \
 				|NN SV* littlestr|U32 flags
+p	|CV *	|find_lexical_cv|PADOFFSET off
 : Defined in util.c, used only in perl.c
 p	|char*	|find_script	|NN const char *scriptname|bool dosearch \
 				|NULLOK const char *const *const search_ext|I32 flags
