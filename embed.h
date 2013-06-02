@@ -1502,7 +1502,7 @@
 #define make_matcher(a)		S_make_matcher(aTHX_ a)
 #define matcher_matches_sv(a,b)	S_matcher_matches_sv(aTHX_ a,b)
 #define num_overflow		S_num_overflow
-#define path_is_absolute	S_path_is_absolute
+#define path_is_searchable	S_path_is_searchable
 #define run_user_filter(a,b,c)	S_run_user_filter(aTHX_ a,b,c)
 #define rxres_free(a)		S_rxres_free(aTHX_ a)
 #define rxres_restore(a,b)	S_rxres_restore(aTHX_ a,b)

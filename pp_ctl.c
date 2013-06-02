@@ -3624,6 +3624,32 @@ S_doopen_pm(pTHX_ SV *name)
 #  define doopen_pm(name) check_type_and_open(name)
 #endif /* !PERL_DISABLE_PMC */
 
+/* require doesn't search for absolute names, or when the name is
+   explicity relative the current directory */
+PERL_STATIC_INLINE bool
+S_path_is_searchable(const char *name)
+{
+    PERL_ARGS_ASSERT_PATH_IS_SEARCHABLE;
+
+    if (PERL_FILE_IS_ABSOLUTE(name)
+#ifdef WIN32
+	|| (*name == '.' && ((name[1] == '/' ||
+			     (name[1] == '.' && name[2] == '/'))
+			 || (name[1] == '\\' ||
+			     ( name[1] == '.' && name[2] == '\\')))
+	    )
+#else
+	|| (*name == '.' && (name[1] == '/' ||
+			     (name[1] == '.' && name[2] == '/')))
+#endif
+	 )
+    {
+	return FALSE;
+    }
+    else
+	return TRUE;
+}
+
 PP(pp_require)
 {
     dVAR; dSP;
@@ -3651,6 +3677,7 @@ PP(pp_require)
     SV *encoding;
     OP *op;
     int saved_errno;
+    bool path_searchable;
 
     sv = POPs;
     if ( (SvNIOKp(sv) || SvVOK(sv)) && PL_op->op_type != OP_DOFILE) {
@@ -3715,6 +3742,7 @@ PP(pp_require)
 	DIE(aTHX_ "Null filename used");
     TAINT_PROPER("require");
 
+    path_searchable = path_is_searchable(name);
 
 #ifdef VMS
     /* The key in the %ENV hash is in the syntax of file passed as the argument
@@ -3754,12 +3782,12 @@ PP(pp_require)
 
     /* prepare to compile file */
 
-    if (path_is_absolute(name)) {
+    if (!path_searchable) {
 	/* At this point, name is SvPVX(sv)  */
 	tryname = name;
 	tryrsfp = doopen_pm(sv);
     }
-    if (!tryrsfp && !(errno == EACCES && path_is_absolute(name))) {
+    if (!tryrsfp && !(errno == EACCES && !path_searchable)) {
 	AV * const ar = GvAVn(PL_incgv);
 	I32 i;
 #ifdef VMS
@@ -3889,8 +3917,7 @@ PP(pp_require)
 		    }
 		}
 		else {
-		  if (!path_is_absolute(name)
-		  ) {
+		  if (path_searchable) {
 		    const char *dir;
 		    STRLEN dirlen;
 
@@ -5507,32 +5534,6 @@ S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
 	return 1;
     }
     return status;
-}
-
-/* perhaps someone can come up with a better name for
-   this?  it is not really "absolute", per se ... */
-static bool
-S_path_is_absolute(const char *name)
-{
-    PERL_ARGS_ASSERT_PATH_IS_ABSOLUTE;
-
-    if (PERL_FILE_IS_ABSOLUTE(name)
-#ifdef WIN32
-	|| (*name == '.' && ((name[1] == '/' ||
-			     (name[1] == '.' && name[2] == '/'))
-			 || (name[1] == '\\' ||
-			     ( name[1] == '.' && name[2] == '\\')))
-	    )
-#else
-	|| (*name == '.' && (name[1] == '/' ||
-			     (name[1] == '.' && name[2] == '/')))
-#endif
-	 )
-    {
-	return TRUE;
-    }
-    else
-    	return FALSE;
 }
 
 /*
