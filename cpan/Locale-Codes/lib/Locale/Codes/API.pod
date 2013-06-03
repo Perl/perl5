@@ -113,7 +113,7 @@ names will be examined.
 
 =item B<XXX_code2code ( CODE ,CODESET ,CODESET2 )>
 
-These functions takes a a code from one code set, and returns the
+These functions takes a code from one code set, and returns the
 corresponding code from another code set. CODE must exists in the code
 set specified by CODESET and must have a corresponding code in the
 code set specified by CODESET2 or C<undef> will be returned.

@@ -26,7 +26,17 @@ codes, I will add them to the module and release a new version.
 
 =head1 VERSION 3.27  (planned 2013-09-01; sbeck)
 
-=head1 VERSION 3.26  (planned 2013-06-01; sbeck)
+=head1 VERSION 3.26  (2013-06-03; sbeck)
+
+=over 4
+
+=item B<Documentation fixes>
+
+Some of the examples were not correct.  RT 84589
+
+Some typos corrected.  RT 85692
+
+=back
 
 =head1 VERSION 3.25  (2013-03-01; sbeck)
 

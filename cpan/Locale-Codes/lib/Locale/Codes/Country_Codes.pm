@@ -2,7 +2,7 @@ package Locale::Codes::Country_Codes;
 
 # This file was automatically generated.  Any changes to this file will
 # be lost the next time 'get_codes' is run.
-#    Generated on: Wed Feb 27 10:04:03 EST 2013
+#    Generated on: Mon Jun  3 09:46:20 EDT 2013
 
 =pod
 
@@ -13,7 +13,7 @@ Locale::Codes::Country_Codes - country codes for the Locale::Codes::Country modu
 =head1 SYNOPSIS
 
 This module contains data used by the Locale::Codes::Country module. It is
-not intended to be used directly, and contains no calleable routines.
+not intended to be used directly, and contains no callable routines.
 
 =head1 AUTHOR
 
@@ -38,7 +38,7 @@ use warnings;
 use utf8;
 
 our($VERSION);
-$VERSION='3.25';
+$VERSION='3.26';
 
 $Locale::Codes::Data{'country'}{'id'} = '0294';
 

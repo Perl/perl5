@@ -32,7 +32,7 @@ constant that is automatically exported by this module.
 For example, the two are equivalent:
 
    $lang = code2language('en','alpha-2');
-   $lang = code2language('en',LOCALE_CODE_ALPHA_2);
+   $lang = code2language('en',LOCALE_LANG_ALPHA_2);
 
 The codesets currently supported are:
 

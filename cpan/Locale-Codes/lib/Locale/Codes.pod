@@ -63,7 +63,7 @@ in ISO 639-5) to specify families of languages.
 
 =back
 
-Each module can support an arbitrary number of code sets, and it it
+Each module can support an arbitrary number of code sets, and it is
 not required that the relationship between these code sets be
 one-to-one.  For example, the Locale::Codes::Country module supports
 code sets from ISO-3166 and the FIPS 10 standard, and they do not

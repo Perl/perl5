@@ -70,6 +70,18 @@ a 0.
 The FIPS 10 data are two-letter (uppercase) codes assigned by the
 National Geospatial-Intelligence Agency.
 
+NOTE: The FIPS-10 document is being withdrawn.  It was deprecated in
+2008, and is being updated now only until all the agencies that use it
+have switched to something else.
+
+I will continue to support the FIPS-10 codeset as long as it is
+available, but at the point it is no longer available, support will be
+withdrawn immediately.  If an official end-of-life date is announced,
+I will include a notice here.  Otherwise, support for the codeset will
+be discontinued when the document is withdrawn.
+
+You are encouraged to no longer use the FIPS-10 codeset.
+
 =item B<dom, LOCALE_CODE_DOM>
 
 The IANA is responsible for delegating management of the top level country
@@ -177,7 +189,7 @@ For some reason, this table is incomplete! Several countries are
 missing from it, and I cannot find them anywhere on the UN site.  I
 get as much of the data from here as I can.
 
-=item B<http://earth-info.nga.mil/gns/html/digraphs.htm>
+=item B<http://earth-info.nga.mil/gns/html/gazetteers2.html>
 
 The official list of the FIPS 10 codes.
 

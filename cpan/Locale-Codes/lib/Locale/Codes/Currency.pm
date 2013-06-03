@@ -22,7 +22,7 @@ use Locale::Codes::Currency_Retired;
 
 our($VERSION,@ISA,@EXPORT,@EXPORT_OK);
 
-$VERSION='3.25';
+$VERSION='3.26';
 @ISA       = qw(Exporter);
 @EXPORT    = qw(code2currency
                 currency2code

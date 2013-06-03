@@ -2,7 +2,7 @@ package Locale::Codes::LangVar_Retired;
 
 # This file was automatically generated.  Any changes to this file will
 # be lost the next time 'deprecate_codes' is run.
-#    Generated on: Wed Feb 27 10:06:46 EST 2013
+#    Generated on: Mon Jun  3 10:51:27 EDT 2013
 
 =pod
 
@@ -13,7 +13,7 @@ Locale::Codes::LangVar_Retired - retired langvar codes for the Locale::Codes::La
 =head1 SYNOPSIS
 
 This module contains data used by the Locale::Codes::LangVar module. It is
-not intended to be used directly, and contains no calleable routines.
+not intended to be used directly, and contains no callable routines.
 
 =head1 AUTHOR
 
@@ -38,7 +38,7 @@ use warnings;
 use utf8;
 
 our($VERSION);
-$VERSION='3.25';
+$VERSION='3.26';
 
 $Locale::Codes::Retired{'langvar'}{'alpha'}{'code'} = {
 };
