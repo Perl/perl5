@@ -5475,6 +5475,8 @@ NULL
 		if (reginfo->poscache_iter < 0) {
 		    /* have we already failed at this position? */
 		    I32 offset, mask;
+
+                    reginfo->poscache_iter = -1; /* stop eventual underflow */
 		    offset  = (scan->flags & 0xf) - 1
                                 +   (locinput - reginfo->strbeg)
                                   * (scan->flags>>4);
