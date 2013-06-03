@@ -42,8 +42,8 @@ utf8 - Perl pragma to enable/disable UTF-8 (or UTF-EBCDIC) in source code
  utf8::encode($string);  # "\x{100}"  becomes "\xc4\x80"
  utf8::decode($string);  # "\xc4\x80" becomes "\x{100}"
 
- $flag = utf8::is_utf8(STRING); # since Perl 5.8.1
- $flag = utf8::valid(STRING);
+ $flag = utf8::is_utf8($string); # since Perl 5.8.1
+ $flag = utf8::valid($string);
 
 =head1 DESCRIPTION
 
@@ -126,7 +126,7 @@ that the substr() or length() function works with the usually faster
 byte algorithm.
 
 Fails if the original I<UTF-X> sequence cannot be represented in the
-native 8 bit encoding. On failure dies or, if the value of C<$fail_ok> is
+native 8 bit encoding. On failure dies or, if the value of I<$fail_ok> is
 true, returns false. 
 
 Returns true on success.
@@ -169,16 +169,16 @@ B<Note that this function does not handle arbitrary encodings.>
 Therefore Encode is recommended for the general purposes; see also
 L<Encode>.
 
-=item * $flag = utf8::is_utf8(STRING)
+=item * $flag = utf8::is_utf8($string)
 
-(Since Perl 5.8.1)  Test whether STRING is marked internally as encoded in
+(Since Perl 5.8.1)  Test whether I<$string> is marked internally as encoded in
 UTF-8.  Functionally the same as Encode::is_utf8().
 
-=item * $flag = utf8::valid(STRING)
+=item * $flag = utf8::valid($string)
 
-[INTERNAL] Test whether STRING is in a consistent state regarding
+[INTERNAL] Test whether I<$string> is in a consistent state regarding
 UTF-8.  Will return true if it is well-formed UTF-8 and has the UTF-8 flag
-on B<or> if STRING is held as bytes (both these states are 'consistent').
+on B<or> if I<$string> is held as bytes (both these states are 'consistent').
 Main reason for this routine is to allow Perl's test suite to check
 that operations have left strings in a consistent state.  You most
 probably want to use utf8::is_utf8() instead.
