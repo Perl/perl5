@@ -704,7 +704,6 @@ static XSPROTO(is_common); /* prototype to pass -Wmissing-prototypes */
 static XSPROTO(is_common)
 {
     dXSARGS;
-    SV *charstring;
     if (items != 1)
        croak_xs_usage(cv,  "charstring");
 
