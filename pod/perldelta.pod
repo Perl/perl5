@@ -373,8 +373,6 @@ XXX Changes which affect the interface available to C<XS> code go here.  Other
 significant internal changes for future core maintainers should be noted as
 well.
 
-[ List each change as a =item entry ]
-
 =over 4
 
 =item *
@@ -434,6 +432,16 @@ The functions C<my_swap>, C<my_htonl> and C<my_ntohl> have been removed.
 It is unclear why these functions were ever marked as I<A>, part of the
 API. XS code can't call them directly, as it can't rely on them being
 compiled. Unsurprisingly, no code on CPAN references them.
+
+=item *
+
+The signature of the C<Perl_re_intuit_start()> regex function has changed;
+the function pointer C<intuit> in the regex engine plugin structure
+has also changed accordingly. A new parameter, C<strbeg> has been added;
+this has the same meaning as the same-named parameter in
+C<Perl_regexec_flags>. Previously intuit would try to guess the start of
+the string from the passed SV (if any), and would sometimes get it wrong
+(e.g. with an overloaded SV).
 
 =back
 
