@@ -6766,8 +6766,8 @@ If LENGTH is omitted, removes everything from OFFSET onward.
 If LENGTH is negative, removes the elements from OFFSET onward
 except for -LENGTH elements at the end of the array.
 If both OFFSET and LENGTH are omitted, removes everything.  If OFFSET is
-past the end of the array, Perl issues a warning, and splices at the
-end of the array.
+past the end of the array and a LENGTH was provided, Perl issues a warning,
+and splices at the end of the array.
 
 The following equivalences hold (assuming C<< $#a >= $i >> )
 
