@@ -34,7 +34,7 @@ utf8 - Perl pragma to enable/disable UTF-8 (or UTF-EBCDIC) in source code
  # Convert the internal representation of a Perl scalar to/from UTF-8.
 
  $num_octets = utf8::upgrade($string);
- $success    = utf8::downgrade($string[, FAIL_OK]);
+ $success    = utf8::downgrade($string[, $fail_ok]);
 
  # Change each character of a Perl scalar to/from a series of
  # characters that represent the UTF-8 bytes of each original character.
@@ -114,7 +114,7 @@ B<Note that this function does not handle arbitrary encodings.>
 Therefore Encode is recommended for the general purposes; see also
 L<Encode>.
 
-=item * $success = utf8::downgrade($string[, FAIL_OK])
+=item * $success = utf8::downgrade($string[, $fail_ok])
 
 Converts in-place the internal representation of the string from
 I<UTF-X> to the equivalent octet sequence in the native encoding (Latin-1
@@ -126,7 +126,7 @@ that the substr() or length() function works with the usually faster
 byte algorithm.
 
 Fails if the original I<UTF-X> sequence cannot be represented in the
-native 8 bit encoding. On failure dies or, if the value of C<FAIL_OK> is
+native 8 bit encoding. On failure dies or, if the value of C<$fail_ok> is
 true, returns false. 
 
 Returns true on success.
