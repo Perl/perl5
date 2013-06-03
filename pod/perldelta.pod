@@ -475,6 +475,12 @@ of used chains in the hash is now cached for larger hashes. Smaller hashes
 continue not to store it and calculate it when needed, as this saves one IV.
 That would be 1 IV overhead for every object built from a hash. [RT #114576]
 
+=item *
+
+Fixed a small number of regexp constructions could either fail to
+match or crash perl when the string being matched against was
+allocated above the 2GB line on 32-bit systems. [RT #118175]
+
 =back
 
 =head1 Known Problems
