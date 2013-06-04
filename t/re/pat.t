@@ -20,7 +20,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 467;  # Update this when adding/deleting tests.
+plan tests => 470;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1349,6 +1349,19 @@ EOP
         like("ab", qr/a( ?#foo)b/x);
     }
 
+    { # 118297: Mixing up- and down-graded strings in regex
+        utf8::upgrade(my $u = "\x{e5}");
+        utf8::downgrade(my $d = "\x{e5}");
+        my $warned;
+        local $SIG{__WARN__} = sub { $warned++ if $_[0] =~ /\AMalformed UTF-8/ };
+        my $re = qr/$u$d/;
+        ok(!$warned, "no warnings when interpolating mixed up-/downgraded strings in pattern");
+        my $c = "\x{e5}\x{e5}";
+        utf8::downgrade($c);
+        like($c, $re, "mixed up-/downgraded pattern matches downgraded string");
+        utf8::upgrade($c);
+        like($c, $re, "mixed up-/downgraded pattern matches upgraded string");
+    }
 
 } # End of sub run_tests
 
