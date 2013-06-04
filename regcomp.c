@@ -5117,16 +5117,15 @@ S_concat_pat(pTHX_ RExC_state_t * const pRExC_state,
                  *     sv_catsv_nomg(pat, msv);
                  * that allows us to adjust code block indices if
                  * needed */
-                STRLEN slen, dlen;
+                STRLEN dlen;
                 char *dst = SvPV_force_nomg(pat, dlen);
-                const char *src = SvPV_flags_const(msv, slen, 0);
                 orig_patlen = dlen;
                 if (SvUTF8(msv) && !SvUTF8(pat)) {
                     S_pat_upgrade_to_utf8(aTHX_ pRExC_state, &dst, &dlen, n);
                     sv_setpvn(pat, dst, dlen);
                     SvUTF8_on(pat);
                 }
-                sv_catpvn_nomg(pat, src, slen);
+                sv_catsv_nomg(pat, msv);
                 rx = msv;
             }
             else
