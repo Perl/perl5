@@ -972,6 +972,9 @@ sub indent {
 	    }
 	    $line = substr($line, 1);
 	}
+	if (index($line, "\f") > 0) {
+		$line =~ s/\f/\n/;
+	}
 	if (substr($line, 0, 1) eq "\f") {
 	    $line = substr($line, 1); # no indent
 	} else {

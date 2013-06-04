@@ -185,6 +185,16 @@ sub :::::: {
 }
 EOCODG
 
+# [perl #117311]
+$a = `$^X $path "-MO=Deparse,-l" -e "map{ eval(0) }()" 2>&1`;
+$a =~ s/-e syntax OK\n//g;
+is($a, <<'EOCODH', "[perl #117311] [PATCH] -l option ('#line ...') does not emit ^Ls in the output");
+#line 1 "-e"
+map {
+#line 1 "-e"
+eval 0;} ();
+EOCODH
+
 # [perl #33752]
 {
   my $code = <<"EOCODE";
