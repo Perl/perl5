@@ -1410,3 +1410,6 @@ use feature 'state', 'lexical_subs';
 no warnings 'experimental::lexical_subs';
 state sub f {}
 print f();
+####
+# Elements of %# should not be confused with $#{ array }
+() = ${#}{'foo'};

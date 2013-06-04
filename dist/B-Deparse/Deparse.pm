@@ -3515,7 +3515,9 @@ sub elem {
     }
     if (my $array_name=$self->elem_or_slice_array_name
 	    ($array, $left, $padname, 1)) {
-	return ($array_name =~ /->\z/ ? $array_name : "\$" . $array_name)
+	return ($array_name =~ /->\z/
+		    ? $array_name
+		    : $array_name eq '#' ? '${#}' : "\$" . $array_name)
 	      . $left . $idx . $right;
     } else {
 	# $x[20][3]{hi} or expr->[20]
