@@ -10694,7 +10694,9 @@ tryagain:
                     /* Probably a character specified in octal, e.g. \35 */
 		    goto defchar;
 		else {
+#ifdef RE_TRACK_PATTERN_OFFSETS
 		    char * const parse_start = RExC_parse - 1; /* MJD */
+#endif
 		    while (isDIGIT(*RExC_parse))
 			RExC_parse++;
                     if (hasbrace) {
