@@ -18,7 +18,7 @@ sub apply_config {
     # duplicates logic from Configure (mostly)
     push @no, "DB_File" unless $config->{i_db};
     push @no, "GDBM_File" unless $config->{i_gdbm};
-    push @no, "I18N-Langinfo" unless $config->{i_langinfo} && $config->{i_nl_langinfo};
+    push @no, "I18N-Langinfo" unless $config->{i_langinfo} && $config->{d_nl_langinfo};
     push @no, "IPC-SysV" unless $config->{d_msg} || $config->{d_sem} || $config->{d_shm};
     push @no, "NDBM_File" unless $config->{d_ndbm};
     push @no, "ODBM_File"
