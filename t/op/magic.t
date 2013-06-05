@@ -56,11 +56,11 @@ $Is_Dos      = $^O eq 'dos';
 $Is_os2      = $^O eq 'os2';
 $Is_Cygwin   = $^O eq 'cygwin';
 
-$PERL = $ENV{PERL}
-    || ($Is_NetWare           ? 'perl'   :
-       $Is_VMS                ? $^X      :
-       $Is_MSWin32            ? '.\perl' :
-       './perl');
+$PERL = $ENV{PERL} ||
+   ($Is_NetWare ? 'perl'   :
+    $Is_VMS     ? $^X      :
+    $Is_MSWin32 ? '.\perl' :
+                  './perl');
 
 sub env_is {
     my ($key, $val, $desc) = @_;
@@ -82,7 +82,8 @@ sub env_is {
         $eqv = "\n" if length($eqv) == 2 and $eqv eq "\000\n";
         is $eqv, "$val\n", $desc;
     } else {
-        is `echo \$\Q$key\E`, "$val\n", $desc;
+        chomp (my @env = grep { s/^$key=// } `env`);
+        is "@env", $val, $desc;
     }
 }
 
@@ -625,10 +626,10 @@ is ${^LAST_FH}, undef, '${^LAST_FH} is undef when PL_last_in_gv is NULL';
 
 
 # $|
-fresh_perl_is 'print $| = ~$|', "1\n", {switches => ['-l']}, 
+fresh_perl_is 'print $| = ~$|', "1\n", {switches => ['-l']},
  '[perl #4760] print $| = ~$|';
 fresh_perl_is
- 'select f; undef *f; ${q/|/}; print STDOUT qq|ok\n|', "ok\n", {}, 
+ 'select f; undef *f; ${q/|/}; print STDOUT qq|ok\n|', "ok\n", {},
  '[perl #115206] no crash when vivifying $| while *{+select}{IO} is undef';
 
 
