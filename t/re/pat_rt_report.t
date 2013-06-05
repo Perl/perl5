@@ -1147,6 +1147,8 @@ EOP
 
     {
         # [perl #4289] First mention $& after a match
+	local $::TODO = "these tests fail without Copy-on-Write enabled"
+	    if $Config{ccflags} =~ /PERL_NO_COW/;
         fresh_perl_is(
             '$_ = "abc"; /b/g; $_ = "hello"; print eval q|$&|, "\n"',
             "b\n", {}, '$& first mentioned after match');
