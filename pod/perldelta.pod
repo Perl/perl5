@@ -24,6 +24,23 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 C<use dots>
+
+The new C<use dots> pragma replaces the '->' operator with the shorter,
+easier-to-read, and industry standard '.' operator within a lexical scope.
+
+Under C<use dots>:
+
+=over 4
+
+=item '.' follows references and invokes methods
+
+=item '~' concatenates strings (same as Perl 6)
+
+=item '->' is disallowed, unless requested by writing C<use dots 'mixed'>
+
+=back
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security

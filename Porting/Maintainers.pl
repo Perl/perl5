@@ -2068,6 +2068,7 @@ use File::Glob qw(:case);
                 lib/charnames.{pm,t}
                 lib/dbm_filter_util.pl
                 lib/deprecate.pm
+                lib/dots.{pm,t}
                 lib/dumpvar.{pl,t}
                 lib/feature.{pm,t}
                 lib/feature/

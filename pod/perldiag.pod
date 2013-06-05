@@ -6318,6 +6318,18 @@ what you want, put an & in front.)
 not get any randomness out of your system.  This usually indicates
 Something Very Wrong.
 
+=item use dots in effect; replace '->' with '.'
+
+(F) You should replace all instances of '->' with '.' under C<use dots>.
+
+The C<use dots> pragma makes code easier to write and read by using '.'
+intead of '->' for all purposes, and using the infix '~' operator for string
+concatenation.  When C<use dots> is in effect, '->' is forbidden, so readers
+know that if they see '->' then '.' means concatenation.
+
+If you know what you're doing, you can request mixing of '->' and '.' by
+writing C<use dots 'mixed'>.
+
 =back
 
 =head1 SEE ALSO
