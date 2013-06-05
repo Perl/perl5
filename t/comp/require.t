@@ -16,8 +16,20 @@ sub do_require {
 # don't make this lexical
 $i = 1;
 
-my @fjles_to_delete = qw (bleah.pm bleah.do bleah.flg urkkk.pm urkkk.pmc
+my @files_to_delete = qw (bleah.pm bleah.do bleah.flg urkkk.pm urkkk.pmc
 krunch.pm krunch.pmc whap.pm whap.pmc);
+
+# there may be another copy of this test script running, or the files may
+# just not have been deleted at the end of the last run; if the former, we
+# wait a while so that creating and unlinking these files won't interfere
+# with the other process; if the latter, then the delay is harmless.  As
+# to why there might be multiple execution of this test file, I don't
+# know; but this is an experiment to see if random smoke failures go away.
+
+if (grep -e, @files_to_delete) {
+    print "# Sleeping for 20 secs waiting for other process to finish\n";
+    sleep 20;
+}
 
 
 my $Is_EBCDIC = (ord('A') == 193) ? 1 : 0;
@@ -330,7 +342,7 @@ foreach (sort keys %templates) {
 }
 
 END {
-    foreach my $file (@fjles_to_delete) {
+    foreach my $file (@files_to_delete) {
 	1 while unlink $file;
     }
 }
