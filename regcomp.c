@@ -634,7 +634,7 @@ static const scan_data_t zero_scan_data =
 #define Set_Cur_Node_Offset
 #define Set_Node_Length_To_R(node,len)
 #define Set_Node_Length(node,len)
-#define Set_Node_Cur_Length(node)
+#define Set_Node_Cur_Length(node,start)
 #define Node_Offset(n) 
 #define Node_Length(n) 
 #define Set_Node_Offset_Length(node,offset,len)
@@ -673,9 +673,8 @@ static const scan_data_t zero_scan_data =
 
 #define Set_Node_Length(node,len) \
     Set_Node_Length_To_R((node)-RExC_emit_start, len)
-#define Set_Cur_Node_Length(len) Set_Node_Length(RExC_emit, len)
-#define Set_Node_Cur_Length(node) \
-    Set_Node_Length(node, RExC_parse - parse_start)
+#define Set_Node_Cur_Length(node, start)                \
+    Set_Node_Length(node, RExC_parse - start)
 
 /* Get offsets and lengths */
 #define Node_Offset(n) (RExC_offsets[2*((n)-RExC_emit_start)-1])
@@ -8827,7 +8826,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                     *flagp |= HASWIDTH;
 
                     Set_Node_Offset(ret, parse_start+1);
-                    Set_Node_Cur_Length(ret); /* MJD */
+                    Set_Node_Cur_Length(ret, parse_start);
 
                     nextchar(pRExC_state);
                     return ret;
@@ -9477,7 +9476,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 	    if (paren == '>')
 		node = SUSPEND, flag = 0;
 	    reginsert(pRExC_state, node,ret, depth+1);
-	    Set_Node_Cur_Length(ret);
+            Set_Node_Cur_Length(ret, parse_start);
 	    Set_Node_Offset(ret, parse_start + 1);
 	    ret->flags = flag;
             REGTAIL_STUDY(pRExC_state, ret, reg_node(pRExC_state, TAIL));
@@ -9701,7 +9700,7 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 		RExC_naughty += 2 + RExC_naughty / 2;
 		reginsert(pRExC_state, CURLY, ret, depth+1);
                 Set_Node_Offset(ret, parse_start+1); /* MJD */
-                Set_Node_Cur_Length(ret);
+                Set_Node_Cur_Length(ret, parse_start);
 	    }
 	    else {
 		regnode * const w = reg_node(pRExC_state, WHILEM);
@@ -10583,7 +10582,7 @@ tryagain:
 		RExC_parse--;
 
 		Set_Node_Offset(ret, parse_start + 2);
-		Set_Node_Cur_Length(ret);
+                Set_Node_Cur_Length(ret, parse_start);
 		nextchar(pRExC_state);
 	    }
 	    break;
@@ -10647,7 +10646,7 @@ tryagain:
 
                 /* override incorrect value set in reganode MJD */
                 Set_Node_Offset(ret, parse_start+1);
-                Set_Node_Cur_Length(ret); /* MJD */
+                Set_Node_Cur_Length(ret, parse_start);
                 nextchar(pRExC_state);
 
             }
@@ -10724,7 +10723,7 @@ tryagain:
 
                     /* override incorrect value set in reganode MJD */
                     Set_Node_Offset(ret, parse_start+1);
-                    Set_Node_Cur_Length(ret); /* MJD */
+                    Set_Node_Cur_Length(ret, parse_start);
 		    RExC_parse--;
 		    nextchar(pRExC_state);
 		}
@@ -11349,7 +11348,7 @@ tryagain:
             }
 
 	    RExC_parse = p - 1;
-            Set_Node_Cur_Length(ret); /* MJD */
+            Set_Node_Cur_Length(ret, parse_start);
 	    nextchar(pRExC_state);
 	    {
 		/* len is STRLEN which is unsigned, need to copy to signed */
