@@ -1,5 +1,11 @@
 Revision history for CPAN-Meta
 
+2.131560  2013-06-05 15:26:36 America/New_York
+
+  [DOCUMENTATION]
+
+  - Replaced CPAN::Meta SYNOPSIS with code that actually works
+
 2.131490  2013-05-29 14:15:16 America/New_York
 
   [BUGFIX]
