@@ -1337,6 +1337,7 @@ Perl_my_lstat_flags(pTHX_ const U32 flags)
     dSP;
     const char *file;
     SV* const sv = TOPs;
+    bool isio = FALSE;
     if (PL_op->op_flags & OPf_REF) {
 	if (cGVOP_gv == PL_defgv) {
 	    if (PL_laststype != OP_LSTAT)
@@ -1345,6 +1346,7 @@ Perl_my_lstat_flags(pTHX_ const U32 flags)
 	}
 	PL_laststatval = -1;
 	if (ckWARN(WARN_IO)) {
+	    /* diag_listed_as: Use of -l on filehandle%s */
 	    Perl_warner(aTHX_ packWARN(WARN_IO),
 		 	     "Use of -l on filehandle %"HEKf,
 			      HEKfARG(GvENAME_HEK(cGVOP_gv)));
@@ -1360,9 +1362,22 @@ Perl_my_lstat_flags(pTHX_ const U32 flags)
 
     PL_laststype = OP_LSTAT;
     PL_statgv = NULL;
-    if (SvROK(sv) && isGV_with_GP(SvRV(sv)) && ckWARN(WARN_IO)) {
-        Perl_warner(aTHX_ packWARN(WARN_IO), "Use of -l on filehandle %s",
-           GvENAME((const GV *)SvRV(sv)));
+    if ( (  (SvROK(sv) && (  isGV_with_GP(SvRV(sv))
+                          || (isio = SvTYPE(SvRV(sv)) == SVt_PVIO)  )
+            )
+         || isGV_with_GP(sv)
+         )
+      && ckWARN(WARN_IO)) {
+        if (isio)
+	    /* diag_listed_as: Use of -l on filehandle%s */
+            Perl_warner(aTHX_ packWARN(WARN_IO),
+                             "Use of -l on filehandle");
+        else
+	    /* diag_listed_as: Use of -l on filehandle%s */
+            Perl_warner(aTHX_ packWARN(WARN_IO),
+                             "Use of -l on filehandle %"HEKf,
+                              GvENAME_HEK((const GV *)
+                                          (SvROK(sv) ? SvRV(sv) : sv)));
     }
     file = SvPV_flags_const_nolen(sv, flags);
     sv_setpv(PL_statname,file);

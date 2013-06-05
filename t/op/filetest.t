@@ -9,7 +9,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan(tests => 50 + 27*14);
+plan(tests => 53 + 27*14);
 
 # Tests presume we are in t/op directory and that file 'TEST' is found
 # therein.
@@ -117,6 +117,23 @@ SKIP: {
  ok($warnings[0] =~ /-l on filehandle foo/, 'warning for -l $handle');
  unlink \*foo;
 }
+# More -l $handle warning tests
+{
+ local $^W = 1;
+ my @warnings;
+ local $SIG{__WARN__} = sub { push @warnings, @_ };
+ () = -l \*{"\x{3c6}oo"};
+ like($warnings[0], qr/-l on filehandle \x{3c6}oo/,
+  '-l $handle warning is utf8-clean');
+ () = -l *foo;
+ like($warnings[1], qr/-l on filehandle foo/,
+  '-l $handle warning occurs for globs, not just globrefs');
+ tell foo; # vivify the IO slot
+ () = -l *foo{IO};
+    # (element [3] because tell also warns)
+ like($warnings[3], qr/-l on filehandle at/,
+  '-l $handle warning occurs for iorefs as well');
+} 
 
 # test that _ is a bareword after filetest operators
 
