@@ -477,7 +477,7 @@ That would be 1 IV overhead for every object built from a hash. [RT #114576]
 
 =item *
 
-Fixed a small number of regexp constructions could either fail to
+Fixed a small number of regexp constructions that could either fail to
 match or crash perl when the string being matched against was
 allocated above the 2GB line on 32-bit systems. [RT #118175]
 
