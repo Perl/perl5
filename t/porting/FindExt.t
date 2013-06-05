@@ -11,9 +11,6 @@ use Config;
 
 # Test that Win32/FindExt.pm is consistent with Configure in determining the
 # types of extensions.
-# It's not possible to check the list of built dynamic extensions, as that
-# varies based on which headers are present, and which options ./Configure was
-# invoked with.
 
 if ($^O eq "MSWin32" && !defined $ENV{PERL_STATIC_EXT}) {
     skip_all "PERL_STATIC_EXT must be set to the list of static extensions";
@@ -23,7 +20,7 @@ unless (defined $Config{usedl}) {
     skip_all "FindExt just plain broken for static perl.";
 }
 
-plan tests => 10;
+plan tests => 12;
 use FindExt;
 
 FindExt::apply_config(\%Config);
@@ -45,7 +42,9 @@ my @found_built;
 @config_built = sort @config_built;
 @found_built = sort @found_built;
 
-foreach (['static_ext',
+foreach (['dynamic_ext',
+          [FindExt::dynamic_ext()], $Config{dynamic_ext}],
+         ['static_ext',
 	  [FindExt::static_ext()], $Config{static_ext}],
 	 ['nonxs_ext',
 	  [FindExt::nonxs_ext()], $Config{nonxs_ext}],
@@ -62,3 +61,10 @@ foreach (['static_ext',
 	"We find the same number of $type");
     is ("@$found", "@config", "We find the same list of $type");
 }
+
+# Local variables:
+# cperl-indent-level: 4
+# indent-tabs-mode: nil
+# End:
+#
+# ex: set ts=8 sts=4 sw=4 et:
