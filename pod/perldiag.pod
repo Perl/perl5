@@ -1945,9 +1945,10 @@ queue of such routines has been prematurely ended.
 
 (W regexp)(F) A character class range must start and end at a literal
 character, not another character class like C<\d> or C<[:alpha:]>.  The "-"
-in your false range is interpreted as a literal "-".  Consider quoting the
-"-", "\-".  The <-- HERE shows whereabouts in the regular expression the
-problem was discovered.  See L<perlre>.
+in your false range is interpreted as a literal "-".  In a C<(?[...])>
+construct, this is an error, rather than a warning.  Consider quoting
+the "-", "\-".  The <-- HERE shows whereabouts in the regular expression
+the problem was discovered.  See L<perlre>.
 
 =item Fatal VMS error (status=%d) at %s, line %d
 
