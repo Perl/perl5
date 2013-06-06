@@ -641,6 +641,7 @@ MINIDIR		= .\mini
 PERLEXE		= ..\perl.exe
 WPERLEXE	= ..\wperl.exe
 PERLEXESTATIC	= ..\perl-static.exe
+STATICDIR	= .\static.tmp
 GLOBEXE		= ..\perlglob.exe
 CONFIGPM	= ..\lib\Config.pm ..\lib\Config_heavy.pl
 MINIMOD		= ..\lib\ExtUtils\Miniperl.pm
@@ -1154,16 +1155,13 @@ $(PERLDLL): perldll.def $(PERLDLL_OBJ) $(PERLDLL_RES) Extensions_static
 .ENDIF
 	$(XCOPY) $(PERLIMPLIB) $(COREDIR)
 
-$(PERLSTATICLIB): Extensions_static
+$(PERLSTATICLIB): $(PERLDLL_OBJ) Extensions_static
 .IF "$(CCTYPE)" == "GCC"
-# XXX: It would be nice if MinGW's ar accepted a temporary file, but this
-# doesn't seem to work:
-#	$(LIB32) $(LIB_FLAGS) $@ \
-#	    $(mktmp $(LKPRE) $(shell @type Extensions_static) \
-#		$(PERLDLL_OBJ) $(LKPOST))
-	$(LIB32) $(LIB_FLAGS) $@ \
-	    $(shell @type Extensions_static) \
-	    $(PERLDLL_OBJ)
+	if exist $(STATICDIR) rmdir /s /q $(STATICDIR)
+	mkdir $(STATICDIR)
+	cd $(STATICDIR) && for %i in ($(shell @type Extensions_static)) do $(ARCHPREFIX)ar x ..\%i
+	$(LIB32) $(LIB_FLAGS) $@ $(STATICDIR)\*$(o) $(PERLDLL_OBJ)
+	rmdir /s /q $(STATICDIR)
 .ELSE
 	$(LIB32) $(LIB_FLAGS) -out:$@ @Extensions_static \
 	    @$(mktmp $(PERLDLL_OBJ))
