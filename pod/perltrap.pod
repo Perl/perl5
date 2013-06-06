@@ -205,77 +205,6 @@ to find their names on your system.
 
 =back
 
-=head2 Sed Traps
-
-Seasoned B<sed> programmers should take note of the following:
-
-=over 4
-
-=item *
-
-A Perl program executes only once, not once for each input line.  You can
-do an implicit loop with C<-n> or C<-p>.
-
-=item *
-
-Backreferences in substitutions use "$" rather than "\".
-
-=item *
-
-The pattern matching metacharacters "(", ")", and "|" do not have backslashes
-in front.
-
-=item *
-
-The range operator is C<...>, rather than comma.
-
-=back
-
-=head2 Shell Traps
-
-Sharp shell programmers should take note of the following:
-
-=over 4
-
-=item *
-
-The backtick operator does variable interpolation without regard to
-the presence of single quotes in the command.
-
-=item *
-
-The backtick operator does no translation of the return value, unlike B<csh>.
-
-=item *
-
-Shells (especially B<csh>) do several levels of substitution on each
-command line.  Perl does substitution in only certain constructs
-such as double quotes, backticks, angle brackets, and search patterns.
-
-=item *
-
-Shells interpret scripts a little bit at a time.  Perl compiles the
-entire program before executing it (except for C<BEGIN> blocks, which
-execute at compile time).
-
-=item *
-
-The arguments are available via @ARGV, not $1, $2, etc.
-
-=item *
-
-The environment is not automatically made available as separate scalar
-variables.
-
-=item *
-
-The shell's C<test> uses "=", "!=", "<" etc for string comparisons and "-eq",
-"-ne", "-lt" etc for numeric comparisons. This is the reverse of Perl, which
-uses C<eq>, C<ne>, C<lt> for string comparisons, and C<==>, C<!=> C<< < >> etc
-for numeric comparisons.
-
-=back
-
 =head2 JavaScript Traps
 
 Judicious JavaScript programmers should take note of the following:
@@ -368,6 +297,77 @@ C<$_> to the object:
 
 The object or class on which a method is called is passed as one of the
 method's arguments, not as a separate C<this> value.
+
+=back
+
+=head2 Sed Traps
+
+Seasoned B<sed> programmers should take note of the following:
+
+=over 4
+
+=item *
+
+A Perl program executes only once, not once for each input line.  You can
+do an implicit loop with C<-n> or C<-p>.
+
+=item *
+
+Backreferences in substitutions use "$" rather than "\".
+
+=item *
+
+The pattern matching metacharacters "(", ")", and "|" do not have backslashes
+in front.
+
+=item *
+
+The range operator is C<...>, rather than comma.
+
+=back
+
+=head2 Shell Traps
+
+Sharp shell programmers should take note of the following:
+
+=over 4
+
+=item *
+
+The backtick operator does variable interpolation without regard to
+the presence of single quotes in the command.
+
+=item *
+
+The backtick operator does no translation of the return value, unlike B<csh>.
+
+=item *
+
+Shells (especially B<csh>) do several levels of substitution on each
+command line.  Perl does substitution in only certain constructs
+such as double quotes, backticks, angle brackets, and search patterns.
+
+=item *
+
+Shells interpret scripts a little bit at a time.  Perl compiles the
+entire program before executing it (except for C<BEGIN> blocks, which
+execute at compile time).
+
+=item *
+
+The arguments are available via @ARGV, not $1, $2, etc.
+
+=item *
+
+The environment is not automatically made available as separate scalar
+variables.
+
+=item *
+
+The shell's C<test> uses "=", "!=", "<" etc for string comparisons and "-eq",
+"-ne", "-lt" etc for numeric comparisons. This is the reverse of Perl, which
+uses C<eq>, C<ne>, C<lt> for string comparisons, and C<==>, C<!=> C<< < >> etc
+for numeric comparisons.
 
 =back
 
