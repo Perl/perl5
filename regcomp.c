@@ -11967,6 +11967,7 @@ S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV** return_invlist, I32 *f
                 }
                 else {
                     SV* top = av_pop(stack);
+                    SV *prev = NULL;
                     char current_operator;
 
                     if (IS_OPERAND(top)) {
@@ -11996,7 +11997,8 @@ S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV** return_invlist, I32 *f
                             goto handle_operand;
 
                         case '&':
-                            _invlist_intersection(av_pop(stack),
+                            prev = av_pop(stack);
+                            _invlist_intersection(prev,
                                                    current,
                                                    &current);
                             av_push(stack, current);
@@ -12004,12 +12006,14 @@ S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV** return_invlist, I32 *f
 
                         case '|':
                         case '+':
-                            _invlist_union(av_pop(stack), current, &current);
+                            prev = av_pop(stack);
+                            _invlist_union(prev, current, &current);
                             av_push(stack, current);
                             break;
 
                         case '-':
-                            _invlist_subtract(av_pop(stack), current, &current);
+                            prev = av_pop(stack);;
+                            _invlist_subtract(prev, current, &current);
                             av_push(stack, current);
                             break;
 
@@ -12019,9 +12023,12 @@ S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV** return_invlist, I32 *f
                             SV* u = NULL;
                             SV* element;
 
-                            element = av_pop(stack);
-                            _invlist_union(element, current, &u);
-                            _invlist_intersection(element, current, &i);
+                            prev = av_pop(stack);
+                            _invlist_union(prev, current, &u);
+                            _invlist_intersection(prev, current, &i);
+                            /* _invlist_subtract will overwrite current
+                                without freeing what it already contains */
+                            element = current;
                             _invlist_subtract(u, i, &current);
                             av_push(stack, current);
                             SvREFCNT_dec_NN(i);
@@ -12034,6 +12041,7 @@ S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV** return_invlist, I32 *f
                             Perl_croak(aTHX_ "panic: Unexpected item on '(?[ ])' stack");
                 }
                 SvREFCNT_dec_NN(top);
+                SvREFCNT_dec(prev);
             }
         }
 

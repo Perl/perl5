@@ -15,7 +15,7 @@ BEGIN {
 
 use Config;
 
-plan tests => 115;
+plan tests => 121;
 
 # run some code N times. If the number of SVs at the end of loop N is
 # greater than (N-1)*delta at the end of loop 1, we've got a leak
@@ -241,6 +241,12 @@ eleak(2,0,'/[[:ascii:]]/');
 eleak(2,0,'/[[.zog.]]/');
 eleak(2,0,'/[.zog.]/');
 eleak(2,0,'no warnings; /(?[])/');
+eleak(2,0,'no warnings; /(?[[a]+[b]])/');
+eleak(2,0,'no warnings; /(?[[a]-[b]])/');
+eleak(2,0,'no warnings; /(?[[a]&[b]])/');
+eleak(2,0,'no warnings; /(?[[a]|[b]])/');
+eleak(2,0,'no warnings; /(?[[a]^[b]])/');
+eleak(2,0,'no warnings; /(?[![a]])/');
 
 # These can generate one ref count, but just  once.
 eleak(4,1,'chr(0x100) =~ /[[:punct:]]/');
