@@ -13724,6 +13724,7 @@ parseit:
 
     if (ret_invlist) {
         *ret_invlist = cp_list;
+        SvREFCNT_dec(swash);
 
         /* Discard the generated node */
         if (SIZE_ONLY) {
