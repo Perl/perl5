@@ -324,7 +324,10 @@ L</Modules and Pragmata>.
 
 =item *
 
-XXX
+Perl v5.16 inadvertently introduced a bug whereby calls to XSUBs that were
+not visible at compile time were treated as lvalues and could be assigned
+to, even when the subroutine was not an lvalue sub.  This has been fixed.
+[perl #117947]
 
 =back
 
