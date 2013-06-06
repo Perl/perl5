@@ -11729,7 +11729,7 @@ S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV** return_invlist, I32 *f
      * been parsed and evaluated to a single operand (or else is a syntax
      * error), and is handled as a regular operand */
 
-    stack = newAV();
+    sv_2mortal((SV *)(stack = newAV()));
 
     while (RExC_parse < RExC_end) {
         I32 top_index = av_tindex(stack);
@@ -12049,7 +12049,6 @@ S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV** return_invlist, I32 *f
     RExC_end = save_end;
     SvREFCNT_dec_NN(final);
     SvREFCNT_dec_NN(result_string);
-    SvREFCNT_dec_NN(stack);
 
     nextchar(pRExC_state);
     Set_Node_Length(node, RExC_parse - oregcomp_parse + 1); /* MJD */
