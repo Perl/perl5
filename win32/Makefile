@@ -777,7 +777,8 @@ SETARGV_OBJ	= setargv$(o)
 STATIC_EXT	= * !Win32 !SDBM_File !Encode
 !ELSE
 # specify static extensions here, for example:
-#STATIC_EXT	= Cwd Compress/Raw/Zlib
+# (be sure to include Win32CORE to load Win32 on demand)
+#STATIC_EXT	= Win32CORE Cwd Compress/Raw/Zlib
 STATIC_EXT	= Win32CORE
 !ENDIF
 

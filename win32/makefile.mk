@@ -884,7 +884,8 @@ STATIC_EXT	+= !Compress/Raw/Bzip2
 .ENDIF
 .ELSE
 # specify static extensions here, for example:
-#STATIC_EXT	= Cwd Compress/Raw/Zlib
+# (be sure to include Win32CORE to load Win32 on demand)
+#STATIC_EXT	= Win32CORE Cwd Compress/Raw/Zlib
 STATIC_EXT	= Win32CORE
 .ENDIF
 
