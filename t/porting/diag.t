@@ -403,7 +403,6 @@ sub check_message {
            ($categories ? "categories are [$categories]" : "no category")
              . " for $key");
       }
-      # Later, should start checking that the severity is correct, too.
     } elsif ($partial) {
       # noop
     } else {
