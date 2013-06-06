@@ -1943,7 +1943,7 @@ queue of such routines has been prematurely ended.
 
 =item False [] range "%s" in regex; marked by <-- HERE in m/%s/
 
-(W regexp) A character class range must start and end at a literal
+(W regexp)(F) A character class range must start and end at a literal
 character, not another character class like C<\d> or C<[:alpha:]>.  The "-"
 in your false range is interpreted as a literal "-".  Consider quoting the
 "-", "\-".  The <-- HERE shows whereabouts in the regular expression the
