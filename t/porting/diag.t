@@ -490,7 +490,6 @@ Don't know how to handle magic of type \%o
 -Dp not implemented on this platform
 Error reading "%s": %s
 execl not implemented!
-Expecting '(?flags:(?[...' in regex; marked by <-- HERE in m/%s/
 EVAL without pos change exceeded limit in regex
 Filehandle opened only for %sput
 Filehandle %s opened only for %sput
