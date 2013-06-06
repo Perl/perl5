@@ -53,7 +53,8 @@ my %entries;
 my $reading_categorical_exceptions;
 while (<DATA>) {
   chomp;
-  $entries{$_}{$reading_categorical_exceptions ? 'cattodo' : 'todo'}=1;
+  $entries{$_}{todo} = 1;
+  $reading_categorical_exceptions and $entries{$_}{cattodo}=1;
   /__CATEGORIES__/ and ++$reading_categorical_exceptions;
 }
 
@@ -82,7 +83,8 @@ while (<$diagfh>) {
     $cur_entry =~ s/\n/ /gs; # Fix multi-line headers if they have \n's
     $cur_entry =~ s/\s+\z//;
 
-    if (exists $entries{$cur_entry} && $entries{$cur_entry}{todo}) {
+    if (exists $entries{$cur_entry} &&  $entries{$cur_entry}{todo}
+                                    && !$entries{$cur_entry}{cattodo}) {
         TODO: {
             local $::TODO = "Remove the TODO entry \"$cur_entry\" from DATA as it is already in $pod near line $.";
             ok($cur_entry);
@@ -365,7 +367,10 @@ sub check_message {
     # Kill precision
     $key =~ s/\%\.(\d+|\*)/%/g;
 
-    if (exists $entries{$key}) {
+    if (exists $entries{$key} and
+          # todo + cattodo means it is not found and it is not in the
+          # regular todo list, either
+          !$entries{$key}{todo} || !$entries{$key}{cattodo}) {
       $ret = 1;
       if ( $entries{$key}{seen}++ ) {
         # no need to repeat entries we've tested
@@ -485,6 +490,7 @@ Don't know how to handle magic of type \%o
 -Dp not implemented on this platform
 Error reading "%s": %s
 execl not implemented!
+Expecting '(?flags:(?[...' in regex; marked by <-- HERE in m/%s/
 EVAL without pos change exceeded limit in regex
 Filehandle opened only for %sput
 Filehandle %s opened only for %sput
@@ -530,6 +536,7 @@ More than one argument to open
 More than one argument to open(,':%s')
 mprotect for %p %u failed with %d
 mprotect RW for %p %u failed with %d
+\N{} in character class restricted to one character in regex; marked by <-- HERE in m/%s/
 No %s allowed while running setgid
 No %s allowed with (suid) fdscript
 No such class field "%s"
@@ -613,6 +620,7 @@ Within []-length '%c' not allowed in %s
 Wrong syntax (suid) fd script name "%s"
 'X' outside of string in %s
 'X' outside of string in unpack
+Zero length \N{} in regex; marked by <-- HERE in m/%s/
 
 __CATEGORIES__
 Code point 0x%X is not Unicode, all \p{} matches fail; all \P{} matches succeed
@@ -625,6 +633,3 @@ Operation "%s" returns its argument for UTF-16 surrogate U+%X
 Unicode surrogate U+%X is illegal in UTF-8
 UTF-16 surrogate U+%X
 False [] range "%s" in regex; marked by <-- HERE in m/%s/
-\N{} in character class restricted to one character in regex; marked by <-- HERE in m/%s/
-Zero length \N{} in regex; marked by <-- HERE in m/%s/
-Expecting '(?flags:(?[...' in regex; marked by <-- HERE in m/%s/
