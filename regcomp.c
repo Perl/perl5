@@ -11901,6 +11901,7 @@ S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV** return_invlist, I32 *f
                     || IS_OPERAND(lparen)
                     || SvUV(lparen) != '(')
                 {
+                    SvREFCNT_dec(current);
                     RExC_parse++;
                     vFAIL("Unexpected ')'");
                 }
