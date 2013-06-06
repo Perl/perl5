@@ -11972,6 +11972,8 @@ S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV** return_invlist, I32 *f
                     char current_operator;
 
                     if (IS_OPERAND(top)) {
+                        SvREFCNT_dec_NN(top);
+                        SvREFCNT_dec_NN(current);
                         vFAIL("Operand with no preceding operator");
                     }
                     current_operator = (char) SvUV(top);
