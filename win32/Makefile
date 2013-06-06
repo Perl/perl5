@@ -553,7 +553,7 @@ CONFIGPM	= ..\lib\Config.pm ..\lib\Config_heavy.pl
 MINIMOD		= ..\lib\ExtUtils\Miniperl.pm
 X2P		= ..\x2p\a2p.exe
 GENUUDMAP	= ..\generate_uudmap.exe
-!IF "$(BUILD_STATIC)" == "define"
+!IF "$(BUILD_STATIC)" == "define" || "$(ALL_STATIC)" == "define"
 PERLSTATIC	= static
 !ELSE
 PERLSTATIC	= 
