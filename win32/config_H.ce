@@ -651,7 +651,7 @@
  *	should be included.
  */
 /*#define I_DBM	/**/
-#define I_RPCSVC_DBM	/**/
+/*#define I_RPCSVC_DBM	/ **/
 
 /* I_DIRENT:
  *	This symbol, if defined, indicates to the C program that it should

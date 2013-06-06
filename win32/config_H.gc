@@ -646,7 +646,7 @@
  *	should be included.
  */
 /*#define I_DBM	/ **/
-#define I_RPCSVC_DBM	/**/
+/*#define I_RPCSVC_DBM	/ **/
 
 /* I_DLFCN:
  *	This symbol, if defined, indicates that <dlfcn.h> exists and should
