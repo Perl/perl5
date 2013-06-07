@@ -48,7 +48,7 @@ BEGIN {
   $running = 1;         # are we running, or are we stopped?
   @stack = (0);
   @clients = ();
-  $deep = 100;
+  $deep = 1000;
   $ready = 0;
   @saved = ();
   @skippkg = ();

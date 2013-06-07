@@ -9030,7 +9030,7 @@ BEGIN {    # This does not compile, alas. (XXX eh?)
 
     # This defines the point at which you get the 'deep recursion'
     # warning. It MUST be defined or the debugger will not load.
-    $deep = 100;
+    $deep = 1000;
 
     # Number of lines around the current one that are shown in the
     # 'w' command.
