@@ -4152,7 +4152,10 @@ Perl_init_os_extras(void)
     /* Initialize Win32CORE if it has been statically linked. */
 #ifndef PERL_IS_MINIPERL
     void (*pfn_init)(pTHX);
-    pfn_init = (void (*)(pTHX))GetProcAddress((HMODULE)w32_perldll_handle, "init_Win32CORE");
+    HMODULE module = (HMODULE)((w32_perldll_handle == INVALID_HANDLE_VALUE)
+                               ? GetModuleHandle(NULL)
+                               : w32_perldll_handle);
+    pfn_init = (void (*)(pTHX))GetProcAddress(module, "init_Win32CORE");
     aTHXa(PERL_GET_THX);
     if (pfn_init)
         pfn_init(aTHX);

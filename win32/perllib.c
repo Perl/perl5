@@ -311,14 +311,6 @@ DllMain(HANDLE hModule,		/* DLL module handle */
 	 * initialization or a call to LoadLibrary.
 	 */
     case DLL_PROCESS_ATTACH:
-/* #define DEFAULT_BINMODE */
-#ifdef DEFAULT_BINMODE
-	setmode( fileno( stdin  ), O_BINARY );
-	setmode( fileno( stdout ), O_BINARY );
-	setmode( fileno( stderr ), O_BINARY );
-	_fmode = O_BINARY;
-#endif
-
 #ifndef UNDER_CE
 	DisableThreadLibraryCalls((HMODULE)hModule);
 #endif
