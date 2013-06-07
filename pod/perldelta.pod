@@ -70,7 +70,9 @@ as an updated module in the L</Modules and Pragmata> section.
 
 =item *
 
-...
+L<DB> has been updated from 1.05 to 1.06 and L<perl5db.pl> from 1.39_10
+to 1.40.  The call depth allowed by default in the debugger is now 1000
+rather than 100.
 
 =back
 
