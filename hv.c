@@ -750,7 +750,8 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	       recursive call would call the key conversion routine again.
 	       However, as we replace the original key with the converted
 	       key, this would result in a double conversion, which would show
-	       up as a bug if the conversion routine is not idempotent.  */
+	       up as a bug if the conversion routine is not idempotent.
+	       Hence the use of HV_DISABLE_UVAR_XKEY.  */
 	    return hv_common(hv, keysv, key, klen, flags,
 			     HV_FETCH_ISSTORE|HV_DISABLE_UVAR_XKEY|return_svp,
 			     val, hash);
