@@ -4511,7 +4511,8 @@ S_do_delete_local(pTHX)
 		}
 		else {
 		    sv = hv_delete_ent(hv, keysv, 0, 0);
-		    SvREFCNT_inc_simple_void(sv); /* De-mortalize */
+		    if (preeminent)
+			SvREFCNT_inc_simple_void(sv); /* De-mortalize */
 		}
 		if (preeminent) {
 		    if (!sv) DIE(aTHX_ PL_no_helem_sv, SVfARG(keysv));
@@ -4546,7 +4547,8 @@ S_do_delete_local(pTHX)
 		    }
 		    else {
 			sv = av_delete(av, idx, 0);
-		        SvREFCNT_inc_simple_void(sv); /* De-mortalize */
+			if (preeminent)
+			   SvREFCNT_inc_simple_void(sv); /* De-mortalize */
 		    }
 		    if (preeminent) {
 		        save_aelem_flags(av, idx, &sv, SAVEf_KEEPOLDELEM);
