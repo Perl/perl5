@@ -237,8 +237,10 @@ S_rv2gv(pTHX_ SV *sv, const bool vivify_sv, const bool strict,
 			Perl_croak_no_modify();
 		    if (cUNOP->op_targ) {
 			SV * const namesv = PAD_SV(cUNOP->op_targ);
+			HV *stash = CopSTASH(PL_curcop);
+			if (SvTYPE(stash) != SVt_PVHV) stash = NULL;
 			gv = MUTABLE_GV(newSV(0));
-			gv_init_sv(gv, CopSTASH(PL_curcop), namesv, 0);
+			gv_init_sv(gv, stash, namesv, 0);
 		    }
 		    else {
 			const char * const name = CopSTASHPV(PL_curcop);

@@ -10,7 +10,7 @@ $|  = 1;
 use warnings;
 use Config;
 
-plan tests => 121;
+plan tests => 122;
 
 my $Perl = which_perl();
 
@@ -386,3 +386,8 @@ SKIP: {
     ok( eval { $fh->autoflush(1); 1 }, '$fh->autoflush(1) lives' );
     ok( $INC{'IO/File.pm'}, "IO::File now loaded" );
 }
+
+sub _117941 { package _117941; open my $a, "TEST" }
+delete $::{"_117941::"};
+_117941();
+pass("no crash when open autovivifies glob in freed package");
