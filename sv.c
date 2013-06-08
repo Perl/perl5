@@ -1507,6 +1507,18 @@ Perl_sv_grow(pTHX_ SV *const sv, STRLEN newlen)
 	s = SvPVX_mutable(sv);
     }
 
+#ifdef PERL_NEW_COPY_ON_WRITE
+    /* the new COW scheme uses SvPVX(sv)[SvLEN(sv)-1] (if spare)
+     * to store the COW count. So in general, allocate one more byte than
+     * asked for, to make it likely this byte is always spare: and thus
+     * make more strings COW-able.
+     * If the new size is a big power of two, don't bother: we assume the
+     * caller wanted a nice 2^N sized block and will be annoyed at getting
+     * 2^N+1 */
+    if (newlen & 0xff)
+        newlen++;
+#endif
+
     if (newlen > SvLEN(sv)) {		/* need more room? */
 	STRLEN minlen = SvCUR(sv);
 	minlen += (minlen >> PERL_STRLEN_EXPAND_SHIFT) + 10;
