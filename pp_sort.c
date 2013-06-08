@@ -1648,10 +1648,8 @@ PP(pp_sort)
 	    if (!hasargs && !is_xsub) {
 		SAVESPTR(PL_firstgv);
 		SAVESPTR(PL_secondgv);
-		SAVESPTR(PL_sortstash);
 		PL_firstgv = gv_fetchpvs("a", GV_ADD|GV_NOTQUAL, SVt_PV);
 		PL_secondgv = gv_fetchpvs("b", GV_ADD|GV_NOTQUAL, SVt_PV);
-		PL_sortstash = stash;
 		SAVESPTR(GvSV(PL_firstgv));
 		SAVESPTR(GvSV(PL_secondgv));
 	    }
