@@ -3116,7 +3116,7 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
 	*(PL_stack_base + TOPMARK + 1) = sv_2mortal(newRV(MUTABLE_SV(iogv)));
     }
 
-    /* if we got here, ob should be a reference or a glob */
+    /* if we got here, ob should be an object or a glob */
     if (!ob || !(SvOBJECT(ob)
 		 || (SvTYPE(ob) == SVt_PVGV 
 		     && isGV_with_GP(ob)
