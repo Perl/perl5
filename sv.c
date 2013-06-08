@@ -8982,7 +8982,7 @@ Perl_sv_resetpvn(pTHX_ const char *s, STRLEN len, HV * const stash)
     char todo[PERL_UCHAR_MAX+1];
     const char *send;
 
-    if (!stash)
+    if (!stash || SvTYPE(stash) != SVt_PVHV)
 	return;
 
     if (!s) {		/* reset ?? searches */

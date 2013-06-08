@@ -7,7 +7,7 @@ BEGIN {
 }
 use strict;
 
-plan tests => 30;
+plan tests => 31;
 
 package aiieee;
 
@@ -120,6 +120,10 @@ fresh_perl_is( # it crashes more reliably with a smaller script
   "ok\n", {},
   "no crash if package is effectively renamed before op is freed");
 
+sub _117941 { package _117941; reset }
+delete $::{"_117941::"};
+_117941();
+pass("no crash when current package is freed");
 
 undef $/;
 my $prog = <DATA>;
