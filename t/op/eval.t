@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan(tests => 128);
+plan(tests => 129);
 
 eval 'pass();';
 
@@ -618,3 +618,8 @@ syntax error at (eval 1) line 1, at EOF
 EOE
 	qq'Right line number for eval "$_"';
 }
+
+sub _117941 { package _117941; eval '$a' }
+delete $::{"_117941::"};
+_117941();
+pass("eval in freed package does not crash");
