@@ -772,8 +772,7 @@ SETARGV_OBJ	= setargv$(o)
 !IF "$(ALL_STATIC)" == "define"
 # some exclusions, unfortunately, until fixed:
 #  - MakeMaker isn't capable enough for SDBM_File (small bug)
-#  - Encode (encoding search algorithm relies on shared library?)
-STATIC_EXT	= * !SDBM_File !Encode
+STATIC_EXT	= * !SDBM_File
 !ELSE
 # specify static extensions here, for example:
 # (be sure to include Win32CORE to load Win32 on demand)

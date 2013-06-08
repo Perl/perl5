@@ -56,6 +56,19 @@ $opt{dynamic_ext}      = join(' ',FindExt::dynamic_ext()) || ' ';
 $opt{extensions}       = join(' ',FindExt::extensions()) || ' ';
 $opt{known_extensions} = join(' ',FindExt::known_extensions()) || ' ';
 
+# Encode is a special case.  If we are building Encode as a static
+# extension, we need to explicitly list its subextensions as well.
+# For other nested extensions, this is handled automatically by
+# the appropriate Makefile.PL.
+if ($opt{static_ext} =~ /\bEncode\b/) {
+    foreach my $file (`dir /s /b ..\\cpan\\Encode\\Makefile.PL`) {
+	if ($file =~ /\b(Encode\\.+)\\Makefile\.PL/) {
+	    (my $xxx = $1) =~ s|\\|/|g;
+	    $opt{static_ext} .= " $xxx";
+	}
+    }
+}
+
 my $pl_h = '../patchlevel.h';
 
 if (-e $pl_h) {
