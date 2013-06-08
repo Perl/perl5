@@ -259,6 +259,12 @@ thread.  See L<threads>.
 (F) The failing code has attempted to get or set a key which is not in
 the current set of allowed keys of a restricted hash.
 
+=item Attempt to bless into a freed package
+
+(F) You wrote C<bless $foo> with one argument after somehow causing
+the current package to be freed.  Perl cannot figure out what to
+do, so it throws up in hands in despair.
+
 =item Attempt to bless into a reference
 
 (F) The CLASSNAME argument to the bless() operator is expected to be

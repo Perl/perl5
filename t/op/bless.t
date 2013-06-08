@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan (109);
+plan (110);
 
 sub expected {
     my($object, $package, $type) = @_;
@@ -142,3 +142,9 @@ expected($c4, 'C4', "SCALAR");
 
 bless [], "main::";
 ok(1, 'blessing into main:: does not crash'); # [perl #87388]
+
+sub _117941 { package _117941; bless [] }
+delete $::{"_117941::"};
+eval { _117941() };
+like $@, qr/^Attempt to bless into a freed package at /,
+        'bless with one arg when current stash is freed';

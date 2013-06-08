@@ -607,8 +607,12 @@ PP(pp_bless)
     HV *stash;
 
     if (MAXARG == 1)
+    {
       curstash:
 	stash = CopSTASH(PL_curcop);
+	if (SvTYPE(stash) != SVt_PVHV)
+	    Perl_croak(aTHX_ "Attempt to bless into a freed package");
+    }
     else {
 	SV * const ssv = POPs;
 	STRLEN len;
