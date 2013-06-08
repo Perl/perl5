@@ -11664,6 +11664,7 @@ S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV** return_invlist, I32 *f
      * these things, we need to realize that something preceded by a backslash
      * is escaped, so we have to keep track of backslashes */
     if (SIZE_ONLY) {
+        UV depth = 0; /* how many nested (?[...]) constructs */
 
         Perl_ck_warner_d(aTHX_
             packWARN(WARN_EXPERIMENTAL__REGEX_SETS),
@@ -11675,6 +11676,9 @@ S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV** return_invlist, I32 *f
             RExC_parse = regpatws(pRExC_state, RExC_parse,
                                 TRUE); /* means recognize comments */
             switch (*RExC_parse) {
+                case '?':
+                    if (RExC_parse[1] == '[') depth++, RExC_parse++;
+                    /* FALL THROUGH */
                 default:
                     break;
                 case '\\':
@@ -11722,6 +11726,7 @@ S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV** return_invlist, I32 *f
                 }
 
                 case ']':
+                    if (depth--) break;
                     RExC_parse++;
                     if (RExC_parse < RExC_end
                         && *RExC_parse == ')')
