@@ -6,7 +6,7 @@ BEGIN {
     require 'test.pl';
 }
 use warnings;
-plan( tests => 176 );
+plan( tests => 177 );
 
 # these shouldn't hang
 {
@@ -117,6 +117,10 @@ cmp_ok("@b",'eq','1 2 3 4','map then sort');
 
 @b = sort reverse (4,1,3,2);
 cmp_ok("@b",'eq','1 2 3 4','reverse then sort');
+
+
+@b = sort CORE::reverse (4,1,3,2);
+cmp_ok("@b",'eq','1 2 3 4','CORE::reverse then sort');
 
 
 

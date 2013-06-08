@@ -2129,8 +2129,13 @@ S_force_word(pTHX_ char *start, int token, int check_keyword, int allow_pack, in
 	(allow_initial_tick && *s == '\'') )
     {
 	s = scan_word(s, PL_tokenbuf, sizeof PL_tokenbuf, allow_pack, &len);
-	if (check_keyword && keyword(PL_tokenbuf, len, 0))
+	if (check_keyword) {
+	  char *s2 = PL_tokenbuf;
+	  if (allow_pack && len > 6 && strnEQ(s2, "CORE::", 6))
+	    s2 += 6, len -= 6;
+	  if (keyword(s2, len, 0))
 	    return start;
+	}
 	start_force(PL_curforce);
 	if (PL_madskills)
 	    curmad('X', newSVpvn(start,s-start));

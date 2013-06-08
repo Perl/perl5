@@ -34,7 +34,7 @@ if (grep -e, @files_to_delete) {
 
 my $Is_EBCDIC = (ord('A') == 193) ? 1 : 0;
 my $Is_UTF8   = (${^OPEN} || "") =~ /:utf8/;
-my $total_tests = 54;
+my $total_tests = 55;
 if ($Is_EBCDIC || $Is_UTF8) { $total_tests -= 3; }
 print "1..$total_tests\n";
 
@@ -209,6 +209,15 @@ if($@ =~ /Can't locate threads in \@INC/) {
     print "ok $i - RT #24404\n";
 } else {
     print "not ok - RT #24404$i\n";
+}
+
+# require CORE::foo
+eval ' require CORE::lc "THREADS" ';
+$i++;
+if($@ =~ /Can't locate threads in \@INC/) {
+    print "ok $i - [perl #24482] require CORE::foo\n";
+} else {
+    print "not ok - [perl #24482] require CORE::foo\n";
 }
 
 
