@@ -563,7 +563,7 @@ copiable.
 
 =item Bizarre SvTYPE [%d]
 
-(P) When starting a new thread or return values from a thread, Perl
+(P) When starting a new thread or returning values from a thread, Perl
 encountered an invalid data type.
 
 =item Buffer overflow in prime_env_iter: %s
