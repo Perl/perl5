@@ -13,7 +13,7 @@ BEGIN {
 use strict;
 no warnings 'once';
 
-plan(tests => 141);
+plan(tests => 142);
 
 @A::ISA = 'B';
 @B::ISA = 'C';
@@ -582,7 +582,7 @@ SKIP: {
 
     is(Colour::H1->getline(), <DATA>, 'read from a file');
     is(Color::H1->getline(), <DATA>,
-       'file handles take priority after typeglob assignment');
+       'file handles take priority after io-to-typeglob assignment');
 
     *Color::H1 = *CLOSED{IO};
     {
@@ -594,6 +594,11 @@ SKIP: {
     undef *Color::H1;
     is(Color::H1->getline(), 'method in Color::H1',
        'undefining the typeglob does change object resolution');
+
+    *Color::H1 = *Colour::H1;
+
+    is(Color::H1->getline(), <DATA>,
+       'file handles take priority after typeglob-to-typeglob assignment');
 
     seek Colour::H1, $fh_start, Fcntl::SEEK_SET() or die $!;
     seek DATA, $data_start, Fcntl::SEEK_SET() or die $!;

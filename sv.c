@@ -3746,6 +3746,15 @@ S_glob_assign_glob(pTHX_ SV *const dstr, SV *const sstr, const int dtype)
 	    );
     }
     else if(mro_changes) mro_method_changed_in(GvSTASH(dstr));
+    if (GvIO(dstr) && dtype == SVt_PVGV) {
+	DEBUG_o(Perl_deb(aTHX_
+			"glob_assign_glob clearing PL_stashcache\n"));
+	/* It's a cache. It will rebuild itself quite happily.
+	   It's a lot of effort to work out exactly which key (or keys)
+	   might be invalidated by the creation of the this file handle.
+	 */
+	hv_clear(PL_stashcache);
+    }
     return;
 }
 
