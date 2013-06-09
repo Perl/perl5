@@ -866,7 +866,8 @@ h2ph - convert .h C header files to .ph Perl header files
 
 =head1 SYNOPSIS
 
-B<h2ph [-d destination directory] [-r | -a] [-l] [headerfiles]>
+B<h2ph [-d destination directory] [-r | -a] [-l] [-h] [-e] [-D] [-Q]
+[headerfiles]>
 
 =head1 DESCRIPTION
 
@@ -931,6 +932,11 @@ you will see the slightly more helpful
 	[ some error condition ] at filename.ph line nnn
 
 However, the B<.ph> files almost double in size when built using B<-h>.
+
+=item -e
+
+If an error is encountered during conversion, output file will be removed and
+a warning emitted instead of terminating the conversion immediately.
 
 =item -D
 
