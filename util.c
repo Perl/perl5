@@ -2766,19 +2766,9 @@ Perl_my_pclose(pTHX_ PerlIO *ptr)
 #endif
     close_failed = (PerlIO_close(ptr) == EOF);
     SAVE_ERRNO;
-#ifndef PERL_MICRO
-    rsignal_save(SIGHUP,  (Sighandler_t) SIG_IGN, &hstat);
-    rsignal_save(SIGINT,  (Sighandler_t) SIG_IGN, &istat);
-    rsignal_save(SIGQUIT, (Sighandler_t) SIG_IGN, &qstat);
-#endif
     if (should_wait) do {
 	pid2 = wait4pid(pid, &status, 0);
     } while (pid2 == -1 && errno == EINTR);
-#ifndef PERL_MICRO
-    rsignal_restore(SIGHUP, &hstat);
-    rsignal_restore(SIGINT, &istat);
-    rsignal_restore(SIGQUIT, &qstat);
-#endif
     if (close_failed) {
 	RESTORE_ERRNO;
 	return -1;
