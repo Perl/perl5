@@ -1331,6 +1331,9 @@ if (not defined &get_fork_TTY)       # only if no routine exists
     {
         *get_fork_TTY = \&xterm_get_fork_TTY;    # use the xterm version
     }
+    elsif ( $ENV{TMUX} ) {
+        *get_fork_TTY = \&tmux_get_fork_TTY;
+    }
     elsif ( $^O eq 'os2' ) {                     # If this is OS/2,
         *get_fork_TTY = \&os2_get_fork_TTY;      # use the OS/2 version
     }
@@ -7074,6 +7077,45 @@ sub macosx_get_fork_TTY
     close($pipe);
     return unless defined($tty) && $tty =~ m(^/dev/);
     chomp $tty;
+    return $tty;
+}
+
+=head3 C<tmux_get_fork_TTY>
+
+Creates a split window for subprocesses when a process running under the
+perl debugger in Tmux forks.
+
+=cut
+
+sub tmux_get_fork_TTY {
+    return unless $ENV{TMUX};
+
+    my $pipe;
+
+    my $status = open $pipe, '-|', 'tmux', 'split-window',
+        '-P', '-F', '#{pane_tty}', 'sleep 100000';
+
+    if ( !$status ) {
+        return;
+    }
+
+    my $tty = <$pipe>;
+    close $pipe;
+
+    if ( $tty ) {
+        chomp $tty;
+
+        if ( !defined $term ) {
+            require Term::ReadLine;
+            if ( !$rl ) {
+                $term = Term::ReadLine::Stub->new( 'perldb', $IN, $OUT );
+            }
+            else {
+                $term = Term::ReadLine->new( 'perldb', $IN, $OUT );
+            }
+        }
+    }
+
     return $tty;
 }
 
