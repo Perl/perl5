@@ -54,7 +54,7 @@ L<perlfunc/accept>.
 
 (X) You can't allocate more than 64K on an MS-DOS machine.
 
-=item '%c' allowed only after types %s
+=item '%c' allowed only after types %s in %s
 
 (F) The modifiers '!', '<' and '>' are allowed in pack() or unpack() only
 after certain types.  See L<perlfunc/pack>.
