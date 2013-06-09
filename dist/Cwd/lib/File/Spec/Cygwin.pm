@@ -92,7 +92,7 @@ from the following list:
     $ENV{'TEMP'}
     C:/temp
 
-Since Perl 5.8.0, if running under taint mode, and if the environment
+If running under taint mode, and if the environment
 variables are tainted, they are not used.
 
 =cut

@@ -271,7 +271,7 @@ from the following list or '' if none are writable:
     sys$scratch:
     $ENV{TMPDIR}
 
-Since perl 5.8.0, if running under taint mode, and if $ENV{TMPDIR}
+If running under taint mode, and if $ENV{TMPDIR}
 is tainted, it is not used.
 
 =cut

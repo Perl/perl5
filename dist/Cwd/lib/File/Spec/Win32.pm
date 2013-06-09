@@ -62,7 +62,7 @@ from the following list:
 The SYS:/temp is preferred in Novell NetWare and the C:\system\temp
 for Symbian (the File::Spec::Win32 is used also for those platforms).
 
-Since Perl 5.8.0, if running under taint mode, and if the environment
+If running under taint mode, and if the environment
 variables are tainted, they are not used.
 
 =cut
