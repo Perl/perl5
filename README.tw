@@ -31,7 +31,8 @@ Encode 延伸模組支援下列正體中文的編碼方式 ('big5' 表示 'big5-
 
 舉例來說, 將 Big5 編碼的檔案轉成 Unicode, 祗需鍵入下列指令:
 
-    perl -MEncode=decode,encode -pe '$_= encode( utf8 => decode( big5 => $_ ) )' < file.big5 > file.utf8
+    perl -MEncode -pe '$_= encode( utf8 => decode( big5 => $_ ) )' \
+      < file.big5 > file.utf8
 
 Perl 也內附了 "piconv", 一支完全以 Perl 寫成的字符轉換工具程式, 用法如下:
 
