@@ -2260,8 +2260,12 @@ filehandle, generally its name.
 You can use this to find out whether two handles refer to the
 same underlying descriptor:
 
-    if (fileno(THIS) == fileno(THAT)) {
+    if (fileno(THIS) != -1 && fileno(THIS) == fileno(THAT)) {
         print "THIS and THAT are dups\n";
+    } elsif (fileno(THIS) != -1 && fileno(THAT) != -1) {
+        print "THIS and THAT have different underlying file descriptors\n";
+    } else {
+        print "At least one of THIS and THAT does not have a real file descriptor\n";
     }
 
 =item flock FILEHANDLE,OPERATION
