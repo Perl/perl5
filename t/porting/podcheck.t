@@ -1704,7 +1704,7 @@ foreach my $filename (@files) {
 
         skip($skip, 1) if $skip;
         my @diagnostics;
-        my @thankful_diagnostics;
+        my $thankful_diagnostics = 0;
         my $indent = '  ';
 
         my $total_known = 0;
@@ -1737,7 +1737,7 @@ foreach my $filename (@files) {
                 $files_with_unknown_issues{$filename} = 1;
             } elsif ($problem_count < $known_problems{$canonical}{$message}) {
                $diagnostic = output_thanks($filename, $known_problems{$canonical}{$message}, $problem_count, $message);
-               push @thankful_diagnostics, $diagnostic;
+               $thankful_diagnostics++;
             }
             push @diagnostics, $diagnostic if $diagnostic;
         }
@@ -1751,18 +1751,18 @@ foreach my $filename (@files) {
             next if $known_problems{$canonical}{$message} < 0; # Preserve negs
             my $diagnostic = output_thanks($filename, $known_problems{$canonical}{$message}, 0, $message);
             push @diagnostics, $diagnostic if $diagnostic;
-            push @thankful_diagnostics, $diagnostic if $diagnostic;
+            $thankful_diagnostics++ if $diagnostic;
         }
 
         my $output = "POD of $filename";
         $output .= ", excluding $total_known not shown known potential problems"
                                                                 if $total_known;
-        if (@diagnostics && @diagnostics == @thankful_diagnostics) {
+        if (@diagnostics && @diagnostics == $thankful_diagnostics) {
             # Output fixed issues as passing to-do tests, so they do not
             # cause failures, but t/harness still flags them.
             $output .= " # TODO"
         }
-        ok(@diagnostics == @thankful_diagnostics, $output);
+        ok(@diagnostics == $thankful_diagnostics, $output);
         if (@diagnostics) {
             note(join "", @diagnostics,
             "See end of this test output for your options on silencing this");
