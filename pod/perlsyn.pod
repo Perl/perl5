@@ -533,6 +533,12 @@ rather than merely terminating the inner one.  And it's faster because
 Perl executes a C<foreach> statement more rapidly than it would the
 equivalent C<for> loop.
 
+Perceptive Perl hackers may have noticed that a C<for> loop has a return
+value, and that this value can be captured by wrapping the loop in a C<do>
+block.  The reward for this discovery is this cautionary advice:  The
+return value of a C<for> loop is unspecified and may change without notice.
+Do not rely on it.
+
 =head2 Basic BLOCKs
 X<block>
 
