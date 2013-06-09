@@ -3,7 +3,7 @@ package File::Spec::Unix;
 use strict;
 use vars qw($VERSION);
 
-$VERSION = '3.40';
+$VERSION = '3.41';
 $VERSION =~ tr/_//;
 
 =head1 NAME
