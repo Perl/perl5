@@ -140,9 +140,22 @@ is tainted, it is not used.
 
 =cut
 
-my $tmpdir;
+my ($tmpdir, %tmpenv);
+# Cache and return the calculated tmpdir, recording which env vars
+# determined it.
+sub _cache_tmpdir {
+    @tmpenv{@_[2..$#_]} = @ENV{@_[2..$#_]};
+    return $tmpdir = $_[1];
+}
+# Retrieve the cached tmpdir, checking first whether relevant env vars have
+# changed and invalidated the cache.
+sub _cached_tmpdir {
+    shift;
+    local $^W;
+    return if grep $ENV{$_} ne $tmpenv{$_}, @_;
+    return $tmpdir;
+}
 sub _tmpdir {
-    return $tmpdir if defined $tmpdir;
     my $self = shift;
     my @dirlist = @_;
     {
@@ -166,8 +179,9 @@ sub _tmpdir {
 }
 
 sub tmpdir {
-    return $tmpdir if defined $tmpdir;
-    $tmpdir = $_[0]->_tmpdir( $ENV{TMPDIR}, "/tmp" );
+    my $cached = $_[0]->_cached_tmpdir('TMPDIR');
+    return $cached if defined $cached;
+    $_[0]->_cache_tmpdir($_[0]->_tmpdir( $ENV{TMPDIR}, "/tmp" ), 'TMPDIR');
 }
 
 =item updir

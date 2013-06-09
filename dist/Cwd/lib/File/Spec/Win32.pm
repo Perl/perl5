@@ -67,8 +67,8 @@ variables are tainted, they are not used.
 
 =cut
 
-my $tmpdir;
 sub tmpdir {
+    my $tmpdir = $_[0]->_cached_tmpdir(qw(TMPDIR TEMP TMP));
     return $tmpdir if defined $tmpdir;
     $tmpdir = $_[0]->_tmpdir( map( $ENV{$_}, qw(TMPDIR TEMP TMP) ),
 			      'SYS:/temp',
@@ -76,6 +76,7 @@ sub tmpdir {
 			      'C:/temp',
 			      '/tmp',
 			      '/'  );
+    $_[0]->_cache_tmpdir($tmpdir, qw(TMPDIR TEMP TMP));
 }
 
 =item case_tolerant

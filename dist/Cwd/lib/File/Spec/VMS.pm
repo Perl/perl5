@@ -276,16 +276,17 @@ is tainted, it is not used.
 
 =cut
 
-my $tmpdir;
 sub tmpdir {
     my $self = shift @_;
+    my $tmpdir = $self->_cached_tmpdir('TMPDIR');
     return $tmpdir if defined $tmpdir;
     if ($self->_unix_rpt) {
         $tmpdir = $self->_tmpdir('/tmp', '/sys$scratch', $ENV{TMPDIR});
-        return $tmpdir;
     }
-
-    $tmpdir = $self->_tmpdir( 'sys$scratch:', $ENV{TMPDIR} );
+    else {
+        $tmpdir = $self->_tmpdir( 'sys$scratch:', $ENV{TMPDIR} );
+    }
+    $self->_cache_tmpdir($tmpdir, 'TMPDIR');
 }
 
 =item updir (override)

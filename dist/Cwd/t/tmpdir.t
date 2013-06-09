@@ -1,5 +1,5 @@
 use strict;
-use Test::More tests => 5;
+use Test::More tests => 7;
 
 # Grab all of the plain routines from File::Spec
 use File::Spec;
@@ -29,3 +29,20 @@ SKIP: {
 
 File::Spec::Win32->tmpdir;
 is(scalar keys %ENV, $num_keys, "Win32->tmpdir() shouldn't change the contents of %ENV");
+
+# Changing tmpdir dynamically
+for ('File::Spec', "File::Spec::Win32") {
+  SKIP: {
+    skip('sys$scratch: takes precedence over env on vms', 1)
+	if $^O eq 'VMS';
+    local $ENV{TMPDIR} = $_->catfile($_->curdir, 'lib');
+    -d $ENV{TMPDIR} && -w _
+       or skip "Can't create usable TMPDIR env var", 1;
+    my $tmpdir1 = $_->tmpdir;
+    $ENV{TMPDIR} = $_->catfile($_->curdir, 't');
+    -d $ENV{TMPDIR} && -w _
+       or skip "Can't create usable TMPDIR env var", 1;
+    my $tmpdir2 = $_->tmpdir;
+    isn't $tmpdir2, $tmpdir1, "$_->tmpdir works with changing env";
+  }
+}

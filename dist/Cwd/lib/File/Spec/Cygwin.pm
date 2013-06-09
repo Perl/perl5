@@ -97,10 +97,15 @@ variables are tainted, they are not used.
 
 =cut
 
-my $tmpdir;
 sub tmpdir {
-    return $tmpdir if defined $tmpdir;
-    $tmpdir = $_[0]->_tmpdir( $ENV{TMPDIR}, "/tmp", $ENV{'TMP'}, $ENV{'TEMP'}, 'C:/temp' );
+    my $cached = $_[0]->_cached_tmpdir(qw 'TMPDIR TMP TEMP');
+    return $cached if defined $cached;
+    $_[0]->_cache_tmpdir(
+        $_[0]->_tmpdir(
+            $ENV{TMPDIR}, "/tmp", $ENV{'TMP'}, $ENV{'TEMP'}, 'C:/temp'
+        ),
+        qw 'TMPDIR TMP TEMP'
+    );
 }
 
 =item case_tolerant
