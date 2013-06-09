@@ -3,7 +3,7 @@ use strict;
 require Exporter;
 
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK);
-$VERSION = 1.18;
+$VERSION = 1.19;
 @ISA = qw(Exporter);
 @EXPORT = qw(pod2html htmlify);
 @EXPORT_OK = qw(anchorify);
@@ -447,9 +447,14 @@ sub usage {
     my $podfile = shift;
     warn "$0: $podfile: @_\n" if @_;
     die <<END_OF_USAGE;
-Usage:  $0 --help --htmlroot=<name> --infile=<name> --outfile=<name>
-           --podpath=<name>:...:<name> --podroot=<name> --cachedir=<name>
-           --recurse --verbose --index --norecurse --noindex
+Usage:  $0 --help --htmldir=<name> --htmlroot=<URL>
+           --infile=<name> --outfile=<name>
+           --podpath=<name>:...:<name> --podroot=<name>
+           --cachedir=<name> --flush --recurse --norecurse
+           --quiet --noquiet --verbose --noverbose
+           --index --noindex --backlink --nobacklink
+           --header --noheader --poderrors --nopoderrors
+           --css=<URL> --title=<name>
 
   --[no]backlink  - turn =head1 directives into links pointing to the top of
                       the page (off by default).
