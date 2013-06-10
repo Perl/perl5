@@ -482,7 +482,6 @@ Code missing after '/' in unpack
 '%c' outside of string in pack
 Debug leaking scalars child failed%s with errno %d: %s
 '/' does not take a repeat count in %s
-Don't know how to get file name
 Don't know how to handle magic of type \%o
 -Dp not implemented on this platform
 Error reading "%s": %s
@@ -493,11 +492,8 @@ Filehandle %s opened only for %sput
 Filehandle STD%s reopened as %s only for input
 filter_del can only delete in reverse order (currently)
 YOU HAVEN'T DISABLED SET-ID SCRIPTS IN THE KERNEL YET! FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!
-fork() not implemented!
 free %s
-Free to wrong pool %p not %p
 get %s %p %p %p
-gethostent not implemented!
 getpwnam returned invalid UIC %o for user "%s"
 glob failed (can't start child: %s)
 glob failed (child exited with status %d%s)
@@ -591,8 +587,6 @@ Unknown Unicode option value %d
 Unrecognized character %s; marked by <-- HERE after %s<-- HERE near column %d
 Unstable directory path, current directory changed unexpectedly
 Unterminated compressed integer in unpack
-Usage: CODE(0x%x)(%s)
-Usage: %s(%s)
 Usage: %s::%s(%s)
 Usage: File::Copy::rmscopy(from,to[,date_flag])
 Usage: VMS::Filespec::candelete(spec)
