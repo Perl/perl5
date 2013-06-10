@@ -677,6 +677,11 @@ Something like this will reproduce the error:
     process $BADREF 1,2,3;
     $BADREF->process(1,2,3);
 
+=item Can't call mro_isa_changed_in() on anonymous symbol table
+
+(P) Perl got confused as to whether a hash was a plain hash or a
+symbol table hash when trying to update @ISA caches.
+
 =item Can't chdir to %s
 
 (F) You called C<perl -x/foo/bar>, but F</foo/bar> is not a directory
