@@ -47,9 +47,65 @@ timeit( 1, sub { $foo = @_ });
 is ($foo, 0, "benchmarked code called without arguments");
 
 
-print "# Burning CPU to benchmark things will take time...\n";
+print "# Burning CPU to see if clock is consistent...\n";
+
+# Run some code for approx 3 secs, then for 1 sec. If the first doesn't
+# take appoex 3 times longer than the second, then skip any tests which
+# require a consistent clock
+
+my $INCONSISTENT_CLOCK = 0;
+
+{
+    my ($t0, $t1, $tdelta);
+
+    $t0 = times; 1 while times == $t0; # wait for OS clock to tick
+
+    # guess approx n for code to run for 1 sec
+    my $n = 1;
+    while ($n < 1_000_000_000) { # eventually stop in worst case
+	$t0 = times;
+	fib($ballast) for 1..$n;
+	$t1 = times;
+	$tdelta = ($t1 - $t0);
+	last if ($tdelta) >= 1.0;
+	$n *= 2;
+    }
+    print "# did $n iterations in $tdelta sec\n";
+
+    # adjust n for exactly one second
+    $n /= $tdelta;
+
+    # now run enough loops for approx 3 secs
+
+    $t0 = times; 1 while times == $t0; # wait for OS clock to tick
+    $t0 = times;
+    fib($ballast) for 1..($n*3);
+    $t1 = times;
+    my $td3 = ($t1 - $t0);
+    print "# approx 3 sec delta is $td3 secs\n";
+
+    # now run enough loops for approx 1 sec
+
+    $t0 = times; 1 while times == $t0; # wait for OS clock to tick
+    $t0 = times;
+    fib($ballast) for 1..$n;
+    $t1 = times;
+    my $td1 = ($t1 - $t0);
+    print "# approx 1 sec delta is $td1 secs\n";
+
+    # we use 0.7 of $delta so that we err on the side of assuming
+    # a bad clock and skip tests; otherwise we might be just within the
+    # delta here, and just outside the delta on tests, and so get random
+    # failures
+    if ( abs(($td3 - 3*$td1) / $td3) > 0.7*$delta) {
+	print "# INCONSISTENT CLOCK! - will skip timing-related tests\n";
+	$INCONSISTENT_CLOCK = 1;
+    }
+
+}
 
 
+print "# Burning CPU to benchmark things; will take time...\n";
 
 # We need to do something fairly slow in the coderef.
 # Same coderef. Same place in memory.
@@ -89,7 +145,11 @@ print "# in_onesec_adj=$in_onesec_adj adjusted iterations\n";
 {
   my $difference = $in_onesec_adj - $estimate;
   my $actual = abs ($difference / $in_onesec_adj);
-  cmp_ok($actual, '<=', $delta, "is $in_onesec_adj within $delta of estimate ($estimate)")
+  SKIP: {
+    skip("INCONSISTENT CLOCK") if $INCONSISTENT_CLOCK;
+
+    cmp_ok($actual, '<=', $delta,
+		"is $in_onesec_adj within $delta of estimate ($estimate)")
     or do {
 	diag("  in_threesecs     = $in_threesecs");
 	diag("  in_threesecs_adj = $in_threesecs_adj");
@@ -101,6 +161,7 @@ print "# in_onesec_adj=$in_onesec_adj adjusted iterations\n";
 	diag("  cpu1             = $cpu1");
 	diag("  sys1             = $sys1");
     };
+  }
 }
 
 # I found that the eval'ed version was 3 times faster than the coderef.
