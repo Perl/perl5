@@ -2176,7 +2176,7 @@ static int store_hook(pTHX_ store_cxt_t *store_cxt, SV *sv, int type, HV *pkg, S
 			CROAK(("Too late to ignore hooks for %s class \"%s\"",
                                (store_cxt->cloning ? "cloning" : "storing"), classname));
 
-                hv_store(aTHX_ store_cxt->hook, classname, classlen, newSV(0), 0);
+                hv_store(store_cxt->hook, classname, classlen, newSV(0), 0);
 
 		TRACEME(("ignoring STORABLE_freeze in class \"%s\"", classname));
 
