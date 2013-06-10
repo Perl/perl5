@@ -9056,9 +9056,11 @@ explicitly by assigning the name of the format to the C<$~> variable.
 
 Top of form processing is handled automatically:  if there is insufficient
 room on the current page for the formatted record, the page is advanced by
-writing a form feed, a special top-of-page format is used to format the new
+writing a form feed and a special top-of-page
+format is used to format the new
 page header before the record is written.  By default, the top-of-page
-format is the name of the filehandle with "_TOP" appended.  This would be a
+format is the name of the filehandle with "_TOP" appended, or "top"
+in the current package if the former does not exist.  This would be a
 problem with autovivified filehandles, but it may be dynamically set to the
 format of your choice by assigning the name to the C<$^> variable while
 that filehandle is selected.  The number of lines remaining on the current
