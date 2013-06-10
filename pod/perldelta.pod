@@ -563,6 +563,12 @@ C<delete local $ENV{nonexistent_env_var}> no longer leaks memory.
 C<sort> and C<require> followed by a keyword prefixed with C<CORE::> now
 treat it as a keyword, and not as a subroutine or module name. [RT #24482]
 
+=item *
+
+Through certain conundrums, it is possible to cause the current package to
+be freed.  Certain operators (C<bless>, C<reset>, C<open>, C<eval>) could
+not cope and would crash.  They have been made more resilient. [RT #117941]
+
 =back
 
 =head1 Known Problems
