@@ -140,6 +140,9 @@ B::Deparse has been upgraded from version 1.20 to 1.21.
 C<foreach my $lexical> is now deparsed correctly with the B<-p> option.
 [RT #117081]
 
+The B<-l> option no longer puts form feeds in the middle of a line when
+outputting C<map> and C<grep> blocks. [RT #117311]
+
 =item *
 
 Test::Harness has been upgraded from version 3.26 to 3.28
