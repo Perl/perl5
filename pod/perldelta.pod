@@ -569,6 +569,13 @@ Through certain conundrums, it is possible to cause the current package to
 be freed.  Certain operators (C<bless>, C<reset>, C<open>, C<eval>) could
 not cope and would crash.  They have been made more resilient. [RT #117941]
 
+=item *
+
+Aliasing filehandles through glob-to-glob assignment would not update
+internal method caches properly if a package of the same name as the
+filehandle existed, resulting in filehandle method calls going to the
+package instead.  This has been fixed.
+
 =back
 
 =head1 Known Problems
