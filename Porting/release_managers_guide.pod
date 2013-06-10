@@ -1271,6 +1271,16 @@ Thanks for releasing perl!
 Add, to your quote to F<Porting/epigraphs.pod>, a link to the release
 announcement in the web-visible mailing list archive.  Commit it.
 
+=head3 Update Module::CoreList
+
+XXX -- experimental in response to [perl #118195]
+
+I<After a BLEAD-POINT release only>
+
+After Module::CoreList has shipped to CPAN by the maintainer, update
+Module::CoreList in the source so that it reflects the new blead
+version number.
+
 =head3 check tarball availability
 
 Check various website entries to make sure the that tarball has appeared
