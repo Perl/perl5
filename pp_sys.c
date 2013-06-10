@@ -1470,8 +1470,7 @@ PP(pp_leavewrite)
 	PL_formtarget = PL_toptarget;
 	IoFLAGS(io) |= IOf_DIDTOP;
 	fgv = IoTOP_GV(io);
-	if (!fgv)
-	    DIE(aTHX_ "bad top format reference");
+	assert(fgv); /* IoTOP_GV(io) should have been set above */
 	cv = GvFORM(fgv);
 	if (!cv) {
 	    SV * const sv = sv_newmortal();
