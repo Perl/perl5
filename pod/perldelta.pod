@@ -510,6 +510,12 @@ non-zero number for the number part starting being treated as true.  In
 previous versions they were treated as false, the string representation
 taking precedeence.  The old behaviour has been restored. [RT #118159]
 
+=item *
+
+Since Perl v5.12, inlining of constants that override built-in keywords of
+the same name had countermanded C<use subs>, causing subsequent mentions of
+the constant to use the built-in keyword instead.  This has been fixed.
+
 =back
 
 =head1 Known Problems
