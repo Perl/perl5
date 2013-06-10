@@ -554,6 +554,10 @@ C<(?[...])> now allows interpolation of precompiled patterns consisting of
 S<qr/(?[ [a] ])/;> S</(?[ $pat ])/>>).  Formerly, the brackets would
 confuse the regular expression parser.
 
+=item *
+
+C<delete local $ENV{nonexistent_env_var}> no longer leaks memory.
+
 =back
 
 =head1 Known Problems
