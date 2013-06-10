@@ -558,6 +558,11 @@ confuse the regular expression parser.
 
 C<delete local $ENV{nonexistent_env_var}> no longer leaks memory.
 
+=item *
+
+C<sort> and C<require> followed by a keyword prefixed with C<CORE::> now
+treat it as a keyword, and not as a subroutine or module name. [RT #24482]
+
 =back
 
 =head1 Known Problems
