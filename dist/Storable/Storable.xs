@@ -2807,6 +2807,14 @@ static void do_store(pTHX_ PerlIO *f, SV *sv, int network_order, SV **res)
 	 *       pstore(aTHX_ FILE, \@array);
 	 * so we must get the scalar value behind that reference.
 	 */
+
+	if ((SvTYPE(sv) == SVt_PVLV
+#if ((PERL_VERSION < 8) || ((PERL_VERSION == 8) && (PERL_SUBVERSION < 1)))
+	     || SvTYPE(sv) == SVt_PVMG
+#endif
+	     ) && SvRMAGICAL(sv) && mg_find(sv, 'p')) {
+		mg_get(sv);
+	}
 	if (!SvROK(sv))
 		CROAK(("Not a reference"));
 	sv = SvRV(sv);			/* So follow it to know what to store */
@@ -4865,7 +4873,7 @@ static SV *dclone(pTHX_ SV *in)
 	 */
 
 	if ((SvTYPE(in) == SVt_PVLV
-#if PERL_VERSION < 8
+#if ((PERL_VERSION < 8) || ((PERL_VERSION == 8) && (PERL_SUBVERSION < 1)))
 	     || SvTYPE(in) == SVt_PVMG
 #endif
 	     ) && SvRMAGICAL(in) && mg_find(in, 'p')) {
