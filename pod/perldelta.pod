@@ -516,6 +516,16 @@ Since Perl v5.12, inlining of constants that override built-in keywords of
 the same name had countermanded C<use subs>, causing subsequent mentions of
 the constant to use the built-in keyword instead.  This has been fixed.
 
+=item *
+
+Lexical constants (C<my sub a() { 42 }>) no longer crash when inlined.
+
+=item *
+
+Parameter prototypes attached to lexical subroutines are now respected when
+compiling sub calls without parentheses.  Previously, the prototypes were
+honoured only for calls I<with> parentheses. [RT #116735]
+
 =back
 
 =head1 Known Problems
