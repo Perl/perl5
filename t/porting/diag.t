@@ -458,7 +458,6 @@ __DATA__
 Malformed UTF-8 character (unexpected non-continuation byte 0x%x, immediately after start byte 0x%x)
 
 Cannot apply "%s" in non-PerlIO perl
-Can't %s big-endian %ss on this
 Can't call mro_isa_changed_in() on anonymous symbol table
 Can't call mro_method_changed_in() on anonymous symbol table
 Can't coerce readonly %s to string
