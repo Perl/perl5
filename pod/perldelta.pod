@@ -542,6 +542,18 @@ subroutines no longer cause crashes at compile time.
 The warning produced by C<-l $handle> now applies to IO refs and globs, not
 just to glob refs.  That warning is also now UTF8-clean. [RT #117595]
 
+=item *
+
+Various memory leaks involving the parsing of the C<(?[...])> regular
+expression construct have been fixed.
+
+=item *
+
+C<(?[...])> now allows interpolation of precompiled patterns consisting of
+(?[...])> with bracket character classes inside (C<$pat =
+S<qr/(?[ [a] ])/;> S</(?[ $pat ])/>>).  Formerly, the brackets would
+confuse the regular expression parser.
+
 =back
 
 =head1 Known Problems
