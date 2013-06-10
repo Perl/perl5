@@ -490,6 +490,13 @@ not visible at compile time were treated as lvalues and could be assigned
 to, even when the subroutine was not an lvalue sub.  This has been fixed.
 [RT #117947]
 
+=item *
+
+In Perl v5.18.0 dualvars that had an empty string for the string part but a
+non-zero number for the number part starting being treated as true.  In
+previous versions they were treated as false, the string representation
+taking precedeence.  The old behaviour has been restored. [RT #118159]
+
 =back
 
 =head1 Known Problems
