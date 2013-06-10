@@ -351,6 +351,11 @@ all now work again.
 
 =item *
 
+C<@_> is now correctly visible in the debugger, fixing a regression
+introduced in v5.18.0's debugger. [RT #118169]
+
+=item *
+
 Perl v5.16 inadvertently introduced a bug whereby calls to XSUBs that were
 not visible at compile time were treated as lvalues and could be assigned
 to, even when the subroutine was not an lvalue sub.  This has been fixed.
