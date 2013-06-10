@@ -401,6 +401,11 @@ Parameter prototypes attached to lexical subroutines are now respected when
 compiling sub calls without parentheses.  Previously, the prototypes were
 honoured only for calls I<with> parentheses. [RT #116735]
 
+=item *
+
+Syntax errors in lexical subroutines in combination with calls to the same
+subroutines no longer cause crashes at compile time.
+
 =back
 
 =head1 Known Problems
