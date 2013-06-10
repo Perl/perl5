@@ -135,6 +135,13 @@ XXX
 
 =item *
 
+B::Deparse has been upgraded from version 1.20 to 1.21.
+
+C<foreach my $lexical> is now deparse correctly with the B<-p> option.
+[RT #117081]
+
+=item *
+
 Test::Harness has been upgraded from version 3.26 to 3.28
 
 Memory usage is dramatically reduced. t/harness now uses about 10% of the
