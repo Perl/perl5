@@ -137,7 +137,7 @@ XXX
 
 B::Deparse has been upgraded from version 1.20 to 1.21.
 
-C<foreach my $lexical> is now deparse correctly with the B<-p> option.
+C<foreach my $lexical> is now deparsed correctly with the B<-p> option.
 [RT #117081]
 
 =item *
