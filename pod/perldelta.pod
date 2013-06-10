@@ -563,6 +563,12 @@ confuse the regular expression parser.
 
 =item *
 
+The "Quantifier unexpected on zero-length expression" warning message could
+appear twice starting in Perl v5.10 for a regular expression also
+containing alternations (e.g., "a|b") triggering the trie optimisation.
+
+=item *
+
 C<delete local $ENV{nonexistent_env_var}> no longer leaks memory.
 
 =item *
