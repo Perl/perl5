@@ -397,6 +397,17 @@ platforms has been removed. We believe that Perl has long been unable to
 build on mixed endian architectures (such as PDP-11s), so we don't think
 that this change will affect any platforms which are able to build v5.18.0.
 
+=item Windows
+
+The BUILD_STATIC and ALL_STATIC makefile options for linking some or (nearly)
+all extensions statically (into perl519.dll, and into a separate
+perl-static.exe too) were broken for MinGW builds. This has now been fixed.
+
+The ALL_STATIC option has also been improved to include the Win32 extension,
+and also the Encode extension for VC++ builds. (However, Encode and
+Compress/Raw/Bzip2 are currently still excluded from MinGW builds. This will
+hopefully be rectified soon.)
+
 =back
 
 =head1 Internal Changes
