@@ -391,6 +391,16 @@ C<\x80..\xff> followed a UTF-8 string, e.g.
 
 [perl #118297].
 
+=item *
+
+Lexical constants (C<my sub a() { 42 }>) no longer crash when inlined.
+
+=item *
+
+Parameter prototypes attached to lexical subroutines are now respected when
+compiling sub calls without parentheses.  Previously, the prototypes were
+honoured only for calls I<with> parentheses. [RT #116735]
+
 =back
 
 =head1 Known Problems
