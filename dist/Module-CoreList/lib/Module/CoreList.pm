@@ -3,7 +3,7 @@ use strict;
 use vars qw/$VERSION %released %version %families %upstream
 	    %bug_tracker %deprecated/;
 use Module::CoreList::TieHashDelta;
-$VERSION = '2.91';
+$VERSION = '2.92';
 
 my $dumpinc = 0;
 sub import {
@@ -8317,6 +8317,7 @@ for my $version (sort { $a <=> $b } keys %delta) {
         'CPANPLUS::Shell::Default::Plugins::Remote'=> '1',
         'CPANPLUS::Shell::Default::Plugins::Source'=> '1',
         'Devel::InnerPackage'   => '1',
+        'File::CheckTree'       => '1',
         'Log::Message'          => '1',
         'Log::Message::Config'  => '1',
         'Log::Message::Handlers'=> '1',
@@ -8328,6 +8329,7 @@ for my $version (sort { $a <=> $b } keys %delta) {
         'Pod::LaTeX'            => '1',
         'Term::UI'              => '1',
         'Term::UI::History'     => '1',
+        'Text::Soundex'         => '1',
     },
     5.014004 => {
 	'Shell'                 => '1',
@@ -8380,6 +8382,7 @@ for my $version (sort { $a <=> $b } keys %delta) {
         'CPANPLUS::Shell::Default::Plugins::Remote'=> '1',
         'CPANPLUS::Shell::Default::Plugins::Source'=> '1',
         'Devel::InnerPackage'   => '1',
+        'File::CheckTree'       => '1',
         'Log::Message'          => '1',
         'Log::Message::Config'  => '1',
         'Log::Message::Handlers'=> '1',
@@ -8391,6 +8394,7 @@ for my $version (sort { $a <=> $b } keys %delta) {
         'Pod::LaTeX'            => '1',
         'Term::UI'              => '1',
         'Term::UI::History'     => '1',
+        'Text::Soundex'         => '1',
     },
     5.017011 => {
         'Archive::Extract'      => '1',
@@ -8438,6 +8442,7 @@ for my $version (sort { $a <=> $b } keys %delta) {
         'CPANPLUS::Shell::Default::Plugins::Remote'=> '1',
         'CPANPLUS::Shell::Default::Plugins::Source'=> '1',
         'Devel::InnerPackage'   => '1',
+        'File::CheckTree'       => '1',
         'Log::Message'          => '1',
         'Log::Message::Config'  => '1',
         'Log::Message::Handlers'=> '1',
@@ -8449,6 +8454,7 @@ for my $version (sort { $a <=> $b } keys %delta) {
         'Pod::LaTeX'            => '1',
         'Term::UI'              => '1',
         'Term::UI::History'     => '1',
+        'Text::Soundex'         => '1',
     },
     5.017012 => {
         'Archive::Extract'      => '1',
@@ -8496,6 +8502,7 @@ for my $version (sort { $a <=> $b } keys %delta) {
         'CPANPLUS::Shell::Default::Plugins::Remote'=> '1',
         'CPANPLUS::Shell::Default::Plugins::Source'=> '1',
         'Devel::InnerPackage'   => '1',
+        'File::CheckTree'       => '1',
         'Log::Message'          => '1',
         'Log::Message::Config'  => '1',
         'Log::Message::Handlers'=> '1',
@@ -8507,6 +8514,7 @@ for my $version (sort { $a <=> $b } keys %delta) {
         'Pod::LaTeX'            => '1',
         'Term::UI'              => '1',
         'Term::UI::History'     => '1',
+        'Text::Soundex'         => '1',
     },
     5.018000 => {
 	'Archive::Extract'      => '1',
@@ -8554,6 +8562,7 @@ for my $version (sort { $a <=> $b } keys %delta) {
 	'CPANPLUS::Shell::Default::Plugins::Remote'=> '1',
 	'CPANPLUS::Shell::Default::Plugins::Source'=> '1',
 	'Devel::InnerPackage'   => '1',
+	'File::CheckTree'       => '1',
 	'Log::Message'          => '1',
 	'Log::Message::Config'  => '1',
 	'Log::Message::Handlers'=> '1',
@@ -8565,6 +8574,7 @@ for my $version (sort { $a <=> $b } keys %delta) {
 	'Pod::LaTeX'            => '1',
 	'Term::UI'              => '1',
 	'Term::UI::History'     => '1',
+	'Text::Soundex'         => '1',
     },
     5.019000 => {
     },
