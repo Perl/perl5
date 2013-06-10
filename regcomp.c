@@ -405,6 +405,7 @@ static const scan_data_t zero_scan_data =
 
 #define SCF_TRIE_RESTUDY        0x4000 /* Do restudy? */
 #define SCF_SEEN_ACCEPT         0x8000 
+#define SCF_TRIE_DOING_RESTUDY 0x10000
 
 #define UTF cBOOL(RExC_utf8)
 
@@ -3909,8 +3910,9 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		}
 		if (!scan) 		/* It was not CURLYX, but CURLY. */
 		    scan = next;
-		if ( /* ? quantifier ok, except for (?{ ... }) */
-		    (next_is_eval || !(mincount == 0 && maxcount == 1))
+		if (!(flags & SCF_TRIE_DOING_RESTUDY)
+		    /* ? quantifier ok, except for (?{ ... }) */
+		    && (next_is_eval || !(mincount == 0 && maxcount == 1))
 		    && (minnext == 0) && (deltanext == 0)
 		    && data && !(data->flags & (SF_HAS_PAR|SF_IN_PAR))
 		    && maxcount <= REG_INFTY/3) /* Complement check for big count */
@@ -6223,7 +6225,9 @@ reStudy:
         
 	minlen = study_chunk(pRExC_state, &first, &minlen, &fake, scan + RExC_size, /* Up to end */
             &data, -1, NULL, NULL,
-            SCF_DO_SUBSTR | SCF_WHILEM_VISITED_POS | stclass_flag,0);
+            SCF_DO_SUBSTR | SCF_WHILEM_VISITED_POS | stclass_flag
+                          | (restudied ? SCF_TRIE_DOING_RESTUDY : 0),
+            0);
 
 
         CHECK_RESTUDY_GOTO_butfirst(LEAVE_with_name("study_chunk"));
@@ -6359,7 +6363,10 @@ reStudy:
 
         
 	minlen = study_chunk(pRExC_state, &scan, &minlen, &fake, scan + RExC_size,
-	    &data, -1, NULL, NULL, SCF_DO_STCLASS_AND|SCF_WHILEM_VISITED_POS,0);
+	    &data, -1, NULL, NULL,
+            SCF_DO_STCLASS_AND|SCF_WHILEM_VISITED_POS
+                              |(restudied ? SCF_TRIE_DOING_RESTUDY : 0),
+            0);
         
         CHECK_RESTUDY_GOTO_butfirst(NOOP);
 

@@ -211,6 +211,7 @@ my @warning = (
     '/\q/' => 'Unrecognized escape \q passed through {#} m/\q{#}/',
     '/\q{/' => 'Unrecognized escape \q{ passed through {#} m/\q{{#}/',
     '/(?=a){1,3}/' => 'Quantifier unexpected on zero-length expression {#} m/(?=a){1,3}{#}/',
+    '/(a|b)(?=a){3}/' => 'Quantifier unexpected on zero-length expression {#} m/(a|b)(?=a){3}{#}/',
     '/\_/' => "",
     '/[\_\0]/' => "",
     '/[\07]/' => "",
