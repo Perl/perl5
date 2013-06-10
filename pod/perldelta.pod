@@ -513,6 +513,11 @@ all now work again.
 
 =item *
 
+C<@_> is now correctly visible in the debugger, fixing a regression
+introduced in v5.18.0's debugger. [RT #118169]
+
+=item *
+
 Evaluating large hashes in scalar context is now much faster, as the number
 of used chains in the hash is now cached for larger hashes. Smaller hashes
 continue not to store it and calculate it when needed, as this saves one IV.
