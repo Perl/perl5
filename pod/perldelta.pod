@@ -148,6 +148,13 @@ correctly. [RT #117531]
 
 =item *
 
+File::Spec has been upgraded from version 3.40 to 3.41.
+
+C<tmpdir> now respects changes to environment variables from which the
+temporary directory is derived. [RT #88940]
+
+=item *
+
 Test::Harness has been upgraded from version 3.26 to 3.28
 
 Memory usage is dramatically reduced. t/harness now uses about 10% of the
