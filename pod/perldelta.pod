@@ -486,6 +486,13 @@ C<Perl_regexec_flags>. Previously intuit would try to guess the start of
 the string from the passed SV (if any), and would sometimes get it wrong
 (e.g. with an overloaded SV).
 
+=item *
+
+XS code may use various macros to change the case of a character or code
+point (for example C<toLOWER()>).  These weren't documented until now;
+and now they should be used in preference to calling the underlying
+functions.  See L<perlapi/Character case changing>.
+
 =back
 
 =head1 Selected Bug Fixes
