@@ -8226,6 +8226,7 @@ for my $version (sort { $a <=> $b } keys %delta) {
             CPANPLUS::Shell::Default::Plugins::Remote
             CPANPLUS::Shell::Default::Plugins::Source
             Devel::InnerPackage
+            File::CheckTree
             Log::Message
             Log::Message::Config
             Log::Message::Handlers
@@ -8236,6 +8237,7 @@ for my $version (sort { $a <=> $b } keys %delta) {
             Object::Accessor
             Term::UI
             Term::UI::History
+            Text::Soundex
         /},
     },
     5.01701  => { delta_from => 5.017009 },
@@ -8292,6 +8294,7 @@ for my $version (sort { $a <=> $b } keys %delta) {
             CPANPLUS::Shell::Default::Plugins::Remote
             CPANPLUS::Shell::Default::Plugins::Source
             Devel::InnerPackage
+            File::CheckTree
             Log::Message
             Log::Message::Config
             Log::Message::Handlers
@@ -8303,6 +8306,7 @@ for my $version (sort { $a <=> $b } keys %delta) {
             Pod::LaTeX
             Term::UI
             Term::UI::History
+            Text::Soundex
         /}
     },
 );
