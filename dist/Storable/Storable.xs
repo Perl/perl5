@@ -829,37 +829,6 @@ static void bless_retrieved(pTHX_ retrieve_cxt_t *retrieve_cxt, SV *sv, const ch
 #define BLESS(s,p)                                      \
         (bless_retrieved(aTHX_ retrieve_cxt, s, p))
 
-/*
- * sort (used in store_hash) - conditionally use qsort when
- * sortsv is not available ( <= 5.6.1 ).
- */
-
-#if (PATCHLEVEL <= 6)
-
-#if defined(USE_ITHREADS)
-
-#define STORE_HASH_SORT                                                 \
-        ENTER; {                                                        \
-                PerlInterpreter *orig_perl = PERL_GET_CONTEXT;          \
-                SAVESPTR(orig_perl);                                    \
-                PERL_SET_CONTEXT(aTHX);                                 \
-                qsort((char *)AvARRAY(av), len, sizeof(SV *), sortcmp); \
-        } LEAVE;
-
-#else /* ! USE_ITHREADS */
-
-#define STORE_HASH_SORT                                                 \
-        qsort((char *) AvARRAY(av), len, sizeof(SV *), sortcmp);
-
-#endif  /* USE_ITHREADS */
-
-#else /* PATCHLEVEL > 6 */
-
-#define STORE_HASH_SORT                         \
-        sortsv(AvARRAY(av), len, Perl_sv_cmp);  
-
-#endif /* PATCHLEVEL <= 6 */
-
 static void store(pTHX_ store_cxt_t *store_cxt, SV *sv);
 static SV *retrieve(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname);
 
@@ -1469,9 +1438,7 @@ static void store_array(pTHX_ store_cxt_t *store_cxt, AV *av)
 static int
 sortcmp(const void *a, const void *b)
 {
-#if defined(USE_ITHREADS)
         dTHX;
-#endif /* USE_ITHREADS */
         return sv_cmp(*(SV * const *) a, *(SV * const *) b);
 }
 
@@ -1596,7 +1563,11 @@ static void store_hash(pTHX_ store_cxt_t *store_cxt, HV *hv)
 			av_store(av, AvFILLp(av)+1, key);	/* av_push(), really */
 		}
 			
-		STORE_HASH_SORT;
+#if (PATCHLEVEL <= 6)
+		qsort((char *) AvARRAY(av), len, sizeof(SV *), sortcmp);
+#else
+		sortsv(AvARRAY(av), len, Perl_sv_cmp);  
+#endif
 
 		for (i = 0; i < len; i++) {
                         unsigned char flags = 0;
