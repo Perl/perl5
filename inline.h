@@ -67,7 +67,7 @@ S_SvREFCNT_dec(pTHX_ SV *sv)
 {
     if (LIKELY(sv != NULL)) {
 	U32 rc = SvREFCNT(sv);
-	if (rc > 1)
+	if (LIKELY(rc > 1))
 	    SvREFCNT(sv) = rc - 1;
 	else
 	    Perl_sv_free2(aTHX_ sv, rc);
@@ -78,7 +78,7 @@ PERL_STATIC_INLINE void
 S_SvREFCNT_dec_NN(pTHX_ SV *sv)
 {
     U32 rc = SvREFCNT(sv);
-    if (rc > 1)
+    if (LIKELY(rc > 1))
 	SvREFCNT(sv) = rc - 1;
     else
 	Perl_sv_free2(aTHX_ sv, rc);
