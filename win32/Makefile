@@ -952,14 +952,15 @@ $(CONFIGPM) : $(MINIPERL) ..\config.sh config_h.PL ..\minimod.pl
 	-$(MINIPERL) -I..\lib $(ICWD) config_h.PL
 	if errorlevel 1 $(MAKE) /$(MAKEFLAGS) $(CONFIGPM)
 
-..\lib\buildcustomize.pl: $(MINIPERL) ..\write_buildcustomize.pl
-	$(MINIPERL) -I..\lib ..\write_buildcustomize.pl .. >..\lib\buildcustomize.pl
+# See the comment in Makefile.SH explaining this seemingly cranky ordering
+$(MINIPERL) : ..\lib\buildcustomize.pl 
 
-$(MINIPERL) : $(MINIDIR) $(MINI_OBJ)
-	$(LINK32) -subsystem:console -out:$@ @<<
+..\lib\buildcustomize.pl : $(MINIDIR) $(MINI_OBJ) ..\write_buildcustomize.pl
+	$(LINK32) -subsystem:console -out:$(MINIPERL) @<<
 	$(LINK_FLAGS) $(DELAYLOAD) $(LIBFILES) $(MINI_OBJ)
 <<
 	$(EMBED_EXE_MANI)
+	$(MINIPERL) -I..\lib ..\write_buildcustomize.pl .. >..\lib\buildcustomize.pl
 
 $(MINIDIR) :
 	if not exist "$(MINIDIR)" mkdir "$(MINIDIR)"

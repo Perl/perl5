@@ -1082,19 +1082,19 @@ $(CONFIGPM) : $(MINIPERL) ..\config.sh config_h.PL ..\minimod.pl
 	$(MINIPERL) -I..\lib $(ICWD) config_h.PL "ARCHPREFIX=$(ARCHPREFIX)" \
 	    || $(MAKE) $(MAKEMACROS) $(CONFIGPM) $(MAKEFILE)
 
-..\lib\buildcustomize.pl: $(MINIPERL) ..\write_buildcustomize.pl
-	$(MINIPERL) -I..\lib ..\write_buildcustomize.pl .. >..\lib\buildcustomize.pl
+# See the comment in Makefile.SH explaining this seemingly cranky ordering
+$(MINIPERL) : ..\lib\buildcustomize.pl
 
-
-$(MINIPERL) : $(MINIDIR) $(MINI_OBJ) $(CRTIPMLIBS)
+..\lib\buildcustomize.pl : $(MINIDIR) $(MINI_OBJ) $(CRTIPMLIBS) ..\write_buildcustomize.pl
 .IF "$(CCTYPE)" == "GCC"
-	$(LINK32) -v -mconsole -o $@ $(BLINK_FLAGS) \
+	$(LINK32) -v -mconsole -o $(MINIPERL) $(BLINK_FLAGS) \
 	    $(mktmp $(LKPRE) $(MINI_OBJ) $(LIBFILES) $(LKPOST))
 .ELSE
-	$(LINK32) -subsystem:console -out:$@ $(BLINK_FLAGS) \
+	$(LINK32) -subsystem:console -out:$(MINIPERL) $(BLINK_FLAGS) \
 	    @$(mktmp $(DELAYLOAD) $(LIBFILES) $(MINI_OBJ))
 	$(EMBED_EXE_MANI)
 .ENDIF
+	$(MINIPERL) -I..\lib ..\write_buildcustomize.pl .. >..\lib\buildcustomize.pl
 
 $(MINIDIR) :
 	if not exist "$(MINIDIR)" mkdir "$(MINIDIR)"

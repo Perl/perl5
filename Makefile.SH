@@ -851,21 +851,32 @@ $(LIBPERL): $& $(obj) $(DYNALOADER) $(LIBPERLEXPORT)
 # build problems but that's not obvious to the novice.
 # The Module used here must not depend on Config or any extensions.
 
+# The seemingly cranky ordering of having $(MINIPERL_EXE) depend on
+# lib/buildcustomize.pl despite the reality that lib/buildcustomize.pl needs
+# miniperl to exist first permits us to
+# a) have one rule generate both miniperl and lib/buildcustomize.pl
+#    (so that lib/buildcustomise.pl is always available. This simplifies things)
+# b) have the rest of the Makefile depend on the more obvious $(MINIPERL_EXE)
+
+$(MINIPERL_EXE): lib/buildcustomize.pl
+
 !NO!SUBS!
 
 	case "${osname}${osvers}" in
 	aix*)
 		$spitshell >>$Makefile <<'!NO!SUBS!'
-$(MINIPERL_EXE): $& $(mini_obj)
+lib/buildcustomize.pl: $& $(mini_obj)
 	$(CC) -o $(MINIPERL_EXE) $(CLDFLAGS) $(mini_obj) $(libs)
 	$(LDLIBPTH) $(RUN) ./miniperl$(HOST_EXE_EXT) -w -Ilib -MExporter -e '<?>' || $(MAKE) minitest
+	$(MINIPERL) write_buildcustomize.pl >lib/buildcustomize.pl
 !NO!SUBS!
 		;;
 	next4*)
 		$spitshell >>$Makefile <<'!NO!SUBS!'
-$(MINIPERL_EXE): $& $(mini_obj)
+lib/buildcustomize.pl: $& $(mini_obj) write_buildcustomize.pl
 	$(CC) -o $(MINIPERL_EXE) $(mini_obj) $(libs)
 	$(LDLIBPTH) $(RUN) ./miniperl$(HOST_EXE_EXT) -w -Ilib -MExporter -e '<?>' || $(MAKE) minitest
+	$(MINIPERL) write_buildcustomize.pl >lib/buildcustomize.pl
 !NO!SUBS!
 		;;
 	darwin*)
@@ -882,27 +893,29 @@ NAMESPACEFLAGS = -force_flat_namespace
 		    ;;
 		esac
 		$spitshell >>$Makefile <<'!NO!SUBS!'
-$(MINIPERL_EXE): $& $(mini_obj)
+lib/buildcustomize.pl: $& $(mini_obj) write_buildcustomize.pl
 	-@rm -f miniperl.xok
 	$(CC) $(CLDFLAGS) $(NAMESPACEFLAGS) -o $(MINIPERL_EXE) \
 	    $(mini_obj) $(libs)
 	$(LDLIBPTH) $(RUN) ./miniperl$(HOST_EXE_EXT) -w -Ilib -MExporter -e '<?>' || $(MAKE) minitest
+	$(MINIPERL) write_buildcustomize.pl >lib/buildcustomize.pl
 !NO!SUBS!
 		;;
 	*)
 		$spitshell >>$Makefile <<'!NO!SUBS!'
-$(MINIPERL_EXE): $& $(mini_obj)
+lib/buildcustomize.pl: $& $(mini_obj) write_buildcustomize.pl
 	-@rm -f miniperl.xok
 	$(LDLIBPTH) $(CC) $(CLDFLAGS) -o $(MINIPERL_EXE) \
 	    $(mini_obj) $(libs)
 	$(LDLIBPTH) $(RUN) ./miniperl$(HOST_EXE_EXT) -w -Ilib -MExporter -e '<?>' || $(MAKE) minitest
+	$(MINIPERL) write_buildcustomize.pl >lib/buildcustomize.pl
 !NO!SUBS!
 		;;
 	esac
 
 	$spitshell >>$Makefile <<'!NO!SUBS!'
 
-$(PERL_EXE): $& perlmain$(OBJ_EXT) $(LIBPERL) $(static_ext) ext.libs $(PERLEXPORT)
+$(PERL_EXE): $& perlmain$(OBJ_EXT) $(LIBPERL) $(static_ext) ext.libs $(PERLEXPORT) write_buildcustomize.pl
 	-@rm -f miniperl.xok
 	$(SHRPENV) $(LDLIBPTH) $(CC) -o perl$(PERL_SUFFIX) $(PERL_PROFILE_LDFLAGS) $(CLDFLAGS) $(CCDLFLAGS) perlmain$(OBJ_EXT) $(static_ext) $(LLIBPERL) `cat ext.libs` $(libs)
 
@@ -1056,9 +1069,6 @@ $(CONFIGPOD): config.sh $(MINIPERL_EXE) configpm Porting/Glossary lib/Config_git
 
 lib/ExtUtils/Miniperl.pm: miniperlmain.c $(MINIPERL_EXE) minimod.pl $(CONFIGPM)
 	$(MINIPERL) minimod.pl > lib/ExtUtils/Miniperl.pm
-
-lib/buildcustomize.pl: $(MINIPERL_EXE) write_buildcustomize.pl
-	$(MINIPERL) write_buildcustomize.pl >lib/buildcustomize.pl
 
 unidatafiles $(unidatafiles) pod/perluniprops.pod: uni.data
 
