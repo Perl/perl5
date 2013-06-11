@@ -29,6 +29,7 @@ The types are:
     SVt_PVIV
     SVt_PVNV
     SVt_PVMG
+    SVt_INVLIST
     SVt_REGEXP
     SVt_PVGV
     SVt_PVLV
@@ -56,7 +57,8 @@ typeglob has been assigned.  Assigning to it again will stop it from being
 a typeglob.  SVt_PVLV represents a scalar that delegates to another scalar
 behind the scenes.  It is used, e.g., for the return value of C<substr> and
 for tied hash and array elements.  It can hold any scalar value, including
-a typeglob. SVt_REGEXP is for regular expressions.
+a typeglob. SVt_REGEXP is for regular expressions.  SVt_INVLIST is for Perl
+core internal use only.
 
 SVt_PVMG represents a "normal" scalar (not a typeglob, regular expression,
 or delegate).  Since most scalars do not need all the internal fields of a
@@ -90,6 +92,9 @@ Type flag for scalars.  See L</svtype>.
 =for apidoc AmU||SVt_PVMG
 Type flag for scalars.  See L</svtype>.
 
+=for apidoc AmU||SVt_INVLIST
+Type flag for scalars.  See L</svtype>.
+
 =for apidoc AmU||SVt_REGEXP
 Type flag for regular expressions.  See L</svtype>.
 
@@ -119,11 +124,12 @@ Type flag for I/O objects.  See L</svtype>.
 
 typedef enum {
 	SVt_NULL,	/* 0 */
-	SVt_DUMMY,	/* 1 */
-	SVt_IV,		/* 2 */
-	SVt_NV,		/* 3 */
+	/* BIND was here, before INVLIST replaced it.  */
+	SVt_IV,		/* 1 */
+	SVt_NV,		/* 2 */
 	/* RV was here, before it was merged with IV.  */
-	SVt_PV,		/* 4 */
+	SVt_PV,		/* 3 */
+	SVt_INVLIST,	/* 4, implemented as a PV */
 	SVt_PVIV,	/* 5 */
 	SVt_PVNV,	/* 6 */
 	SVt_PVMG,	/* 7 */
@@ -140,7 +146,9 @@ typedef enum {
 } svtype;
 
 /* *** any alterations to the SV types above need to be reflected in
- * SVt_MASK and the various PL_valid_types_* tables */
+ * SVt_MASK and the various PL_valid_types_* tables.  As of this writing those
+ * tables are in perl.h.  There are also two affected names tables in dump.c,
+ * one in B.xs, and 'bodies_by_type[]' in sv.c */
 
 #define SVt_MASK 0xf	/* smallest bitmask that covers all types */
 
