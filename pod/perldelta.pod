@@ -489,7 +489,8 @@ the string from the passed SV (if any), and would sometimes get it wrong
 =item *
 
 XS code may use various macros to change the case of a character or code
-point (for example C<toLOWER()>).  These weren't documented until now;
+point (for example C<toLOWER_utf8()>).  Only a couple of these were
+documented until now;
 and now they should be used in preference to calling the underlying
 functions.  See L<perlapi/Character case changing>.
 
