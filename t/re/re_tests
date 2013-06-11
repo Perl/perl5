@@ -1740,4 +1740,8 @@ m?^xy\?$?	xy?	y	$&	xy?
 # patterns
 ^(\x{100}|a)(??{ qr/.?\xF7/d})	a_\xF7	y	-	-
 
+# [perl #118375]
+/(a|(bc)){0,0}?xyz/	xyz	y	$&	xyz
+/( a | ( bc ) ) {0,0} ? xyz/x	xyz	y	$&	xyz
+
 # vim: softtabstop=0 noexpandtab
