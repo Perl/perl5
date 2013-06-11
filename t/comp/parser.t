@@ -3,7 +3,7 @@
 # Checks if the parser behaves correctly in edge cases
 # (including weird syntax errors)
 
-print "1..154\n";
+print "1..156\n";
 
 sub failed {
     my ($got, $expected, $name) = @_;
@@ -449,6 +449,28 @@ is 1,1, ' no crash for "no ... syntax error"';
 for my $pkg(()){}
 $pkg = 3;
 is $pkg, 3, '[perl #114942] for my $foo()){} $foo';
+
+# Check that format 'Foo still works after removing the hack from
+# force_word
+$test++;
+format 'one =
+ok @<< - format 'foo still works
+$test
+.
+{
+    local $~ = "one";
+    write();
+}
+
+$test++;
+format ::two =
+ok @<< - format ::foo still works
+$test
+.
+{
+    local $~ = "two";
+    write();
+}
 
 # Add new tests HERE (above this line)
 
