@@ -584,7 +584,7 @@ expression construct have been fixed.
 =item *
 
 C<(?[...])> now allows interpolation of precompiled patterns consisting of
-C<(?[...])> with bracket character classes inside (C<$pat =
+C<(?[...])> with bracketed character classes inside (C<$pat =
 S<qr/(?[ [a] ])/;> S</(?[ $pat ])/>>).  Formerly, the brackets would
 confuse the regular expression parser.
 
