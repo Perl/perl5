@@ -8100,485 +8100,220 @@ for my $version (sort { $a <=> $b } keys %delta) {
 }
 
 %deprecated = (
-    5.011 => {
-	'Class::ISA'            => '1',
-	'Pod::Plainer'          => '1',
-	'Shell'                 => '1',
-	'Switch'                => '1',
+    5.011    => {
+        changed => { map { $_ => 1 } qw/
+            Class::ISA
+            Pod::Plainer
+            Shell
+            Switch
+        /},
     },
-    5.011001 => {
-	'Class::ISA'            => '1',
-	'Pod::Plainer'          => '1',
-	'Shell'                 => '1',
-	'Switch'                => '1',
-    },
-    5.011002 => {
-	'Class::ISA'            => '1',
-	'Pod::Plainer'          => '1',
-	'Shell'                 => '1',
-	'Switch'                => '1',
-    },
-    5.011003 => {
-	'Class::ISA'            => '1',
-	'Pod::Plainer'          => '1',
-	'Shell'                 => '1',
-	'Switch'                => '1',
-    },
-    5.011004 => {
-	'Class::ISA'            => '1',
-	'Pod::Plainer'          => '1',
-	'Shell'                 => '1',
-	'Switch'                => '1',
-    },
-    5.011005 => {
-	'Class::ISA'            => '1',
-	'Pod::Plainer'          => '1',
-	'Shell'                 => '1',
-	'Switch'                => '1',
-    },
-    5.012000 => {
-	'Class::ISA'            => '1',
-	'Pod::Plainer'          => '1',
-	'Shell'                 => '1',
-	'Switch'                => '1',
-    },
-    5.013000 => {
-	'Class::ISA'            => '1',
-	'Pod::Plainer'          => '1',
-	'Shell'                 => '1',
-	'Switch'                => '1',
-    },
-    5.012001 => {
-	'Class::ISA'            => '1',
-	'Pod::Plainer'          => '1',
-	'Shell'                 => '1',
-	'Switch'                => '1',
-    },
+    5.011001 => { delta_from => 5.011 },
+    5.011002 => { delta_from => 5.011001 },
+    5.011003 => { delta_from => 5.011002 },
+    5.011004 => { delta_from => 5.011003 },
+    5.011005 => { delta_from => 5.011004 },
+
+    5.012    => { delta_from => 5.011005 },
+    5.012001 => { delta_from => 5.012 },
+    5.012002 => { delta_from => 5.012001 },
+    5.012003 => { delta_from => 5.012002 },
+    5.012004 => { delta_from => 5.012003 },
+    5.012005 => { delta_from => 5.012004 },
+
+    5.013    => { delta_from => 5.012005 },
     5.013001 => {
-	'Shell'                 => '1',
+        delta_from => 5.013,
+        removed => { map { $_ => 1 } qw/
+            Class::ISA
+            Pod::Plainer
+            Switch
+        /},
     },
-    5.013002 => {
-	'Shell'                 => '1',
+    5.013002 => { delta_from => 5.013001 },
+    5.013003 => { delta_from => 5.013002 },
+    5.013004 => { delta_from => 5.013003 },
+    5.013005 => { delta_from => 5.013004 },
+    5.013006 => { delta_from => 5.013005 },
+    5.013007 => { delta_from => 5.013006 },
+    5.013008 => { delta_from => 5.013007 },
+    5.013009 => { delta_from => 5.013008 },
+    5.01301  => { delta_from => 5.013009 },
+    5.013011 => { delta_from => 5.01301  },
+
+    5.014    => { delta_from => 5.013011 },
+    5.014001 => { delta_from => 5.014    },
+    5.014002 => { delta_from => 5.014001 },
+    5.014003 => { delta_from => 5.014002 },
+    5.014004 => { delta_from => 5.014003 },
+
+    5.015    => {
+        delta_from => 5.014004,
+        removed => { Shell => 1 },
     },
-    5.013003 => {
-	'Shell'                 => '1',
-    },
-    5.013004 => {
-	'Shell'                 => '1',
-    },
-    5.012002 => {
-	'Class::ISA'            => '1',
-	'Pod::Plainer'          => '1',
-	'Shell'                 => '1',
-	'Switch'                => '1',
-    },
-    5.013005 => {
-	'Shell'                 => '1',
-    },
-    5.013006 => {
-	'Shell'                 => '1',
-    },
-    5.013007 => {
-	'Shell'                 => '1',
-    },
-    5.013008 => {
-	'Shell'                 => '1',
-    },
-    5.012003 => {
-	'Class::ISA'            => '1',
-	'Pod::Plainer'          => '1',
-	'Shell'                 => '1',
-	'Switch'                => '1',
-    },
-    5.013009 => {
-	'Shell'                 => '1',
-    },
-    5.013010 => {
-	'Shell'                 => '1',
-    },
-    5.013011 => {
-	'Shell'                 => '1',
-    },
-    5.014000 => {
-	'Shell'                 => '1',
-    },
-    5.012004 => {
-	'Class::ISA'            => '1',
-	'Pod::Plainer'          => '1',
-	'Shell'                 => '1',
-	'Switch'                => '1',
-    },
-    5.012005 => {
-	'Class::ISA'            => '1',
-	'Pod::Plainer'          => '1',
-	'Shell'                 => '1',
-	'Switch'                => '1',
-    },
-    5.014001 => {
-        'Shell'                 => '1',
-    },
-    5.015000 => {
-	'Devel::DProf'          => '1',
-    },
-    5.015000 => {
-    },
-    5.015001 => {
-    },
-    5.015002 => {
-    },
-    5.014002 => {
-	'Shell'                 => '1',
-    },
-    5.015003 => {
-    },
-    5.015004 => {
-    },
-    5.015005 => {
-    },
-    5.015006 => {
-    },
-    5.015007 => {
-    },
-    5.015008 => {
-    },
-    5.015009 => {
-    },
-    5.016000 => {
-    },
-    5.016001 => {
-    },
-    5.016002 => {
-    },
-    5.017000 => {
-    },
-    5.017001 => {
-    },
-    5.017002 => {
-    },
-    5.017003 => {
-    },
-    5.017004 => {
-    },
-    5.014003 => {
-	'Shell'                 => '1',
-    },
-    5.017005 => {
-    },
-    5.017006 => {
-    },
-    5.017007 => {
-    },
+    5.015001 => { delta_from => 5.015    },
+    5.015002 => { delta_from => 5.015001 },
+    5.015003 => { delta_from => 5.015002 },
+    5.015004 => { delta_from => 5.015003 },
+    5.015005 => { delta_from => 5.015004 },
+    5.015006 => { delta_from => 5.015005 },
+    5.015007 => { delta_from => 5.015006 },
+    5.015008 => { delta_from => 5.015007 },
+    5.015009 => { delta_from => 5.015008 },
+
+    5.016    => { delta_from => 5.015009 },
+    5.016001 => { delta_from => 5.016    },
+    5.016002 => { delta_from => 5.016001 },
+    5.016003 => { delta_from => 5.016002 },
+
+    5.017    => { delta_from => 5.016003 },
+    5.017001 => { delta_from => 5.017    },
+    5.017002 => { delta_from => 5.017001 },
+    5.017003 => { delta_from => 5.017002 },
+    5.017004 => { delta_from => 5.017003 },
+    5.017005 => { delta_from => 5.017004 },
+    5.017006 => { delta_from => 5.017005 },
+    5.017007 => { delta_from => 5.017006 },
     5.017008 => {
-        'Pod::LaTeX'            => '1',
+        delta_from => 5.017007,
+        changed => { 'Pod::LaTeX' => 1 },
     },
     5.017009 => {
-        'Archive::Extract'      => '1',
-        'B::Lint'               => '1',
-        'B::Lint::Debug'        => '1',
-        'CPANPLUS'              => '1',
-        'CPANPLUS::Backend'     => '1',
-        'CPANPLUS::Backend::RV' => '1',
-        'CPANPLUS::Config'      => '1',
-        'CPANPLUS::Config::HomeEnv'=> '1',
-        'CPANPLUS::Configure'   => '1',
-        'CPANPLUS::Configure::Setup'=> '1',
-        'CPANPLUS::Dist'        => '1',
-        'CPANPLUS::Dist::Autobundle'=> '1',
-        'CPANPLUS::Dist::Base'  => '1',
-        'CPANPLUS::Dist::Build' => '1',
-        'CPANPLUS::Dist::Build::Constants'=> '1',
-        'CPANPLUS::Dist::MM'    => '1',
-        'CPANPLUS::Dist::Sample'=> '1',
-        'CPANPLUS::Error'       => '1',
-        'CPANPLUS::Internals'   => '1',
-        'CPANPLUS::Internals::Constants'=> '1',
-        'CPANPLUS::Internals::Constants::Report'=> '1',
-        'CPANPLUS::Internals::Extract'=> '1',
-        'CPANPLUS::Internals::Fetch'=> '1',
-        'CPANPLUS::Internals::Report'=> '1',
-        'CPANPLUS::Internals::Search'=> '1',
-        'CPANPLUS::Internals::Source'=> '1',
-        'CPANPLUS::Internals::Source::Memory'=> '1',
-        'CPANPLUS::Internals::Source::SQLite'=> '1',
-        'CPANPLUS::Internals::Source::SQLite::Tie'=> '1',
-        'CPANPLUS::Internals::Utils'=> '1',
-        'CPANPLUS::Internals::Utils::Autoflush'=> '1',
-        'CPANPLUS::Module'      => '1',
-        'CPANPLUS::Module::Author'=> '1',
-        'CPANPLUS::Module::Author::Fake'=> '1',
-        'CPANPLUS::Module::Checksums'=> '1',
-        'CPANPLUS::Module::Fake'=> '1',
-        'CPANPLUS::Module::Signature'=> '1',
-        'CPANPLUS::Selfupdate'  => '1',
-        'CPANPLUS::Shell'       => '1',
-        'CPANPLUS::Shell::Classic'=> '1',
-        'CPANPLUS::Shell::Default'=> '1',
-        'CPANPLUS::Shell::Default::Plugins::CustomSource'=> '1',
-        'CPANPLUS::Shell::Default::Plugins::Remote'=> '1',
-        'CPANPLUS::Shell::Default::Plugins::Source'=> '1',
-        'Devel::InnerPackage'   => '1',
-        'File::CheckTree'       => '1',
-        'Log::Message'          => '1',
-        'Log::Message::Config'  => '1',
-        'Log::Message::Handlers'=> '1',
-        'Log::Message::Item'    => '1',
-        'Log::Message::Simple'  => '1',
-        'Module::Pluggable'     => '1',
-        'Module::Pluggable::Object'=> '1',
-        'Object::Accessor'      => '1',
-        'Pod::LaTeX'            => '1',
-        'Term::UI'              => '1',
-        'Term::UI::History'     => '1',
-        'Text::Soundex'         => '1',
+        delta_from => 5.017008,
+        changed => { map { $_ => 1 } qw/
+            Archive::Extract
+            B::Lint
+            B::Lint::Debug
+            CPANPLUS
+            CPANPLUS::Backend
+            CPANPLUS::Backend::RV
+            CPANPLUS::Config
+            CPANPLUS::Config::HomeEnv
+            CPANPLUS::Configure
+            CPANPLUS::Configure::Setup
+            CPANPLUS::Dist
+            CPANPLUS::Dist::Autobundle
+            CPANPLUS::Dist::Base
+            CPANPLUS::Dist::Build
+            CPANPLUS::Dist::Build::Constants
+            CPANPLUS::Dist::MM
+            CPANPLUS::Dist::Sample
+            CPANPLUS::Error
+            CPANPLUS::Internals
+            CPANPLUS::Internals::Constants
+            CPANPLUS::Internals::Constants::Report
+            CPANPLUS::Internals::Extract
+            CPANPLUS::Internals::Fetch
+            CPANPLUS::Internals::Report
+            CPANPLUS::Internals::Search
+            CPANPLUS::Internals::Source
+            CPANPLUS::Internals::Source::Memory
+            CPANPLUS::Internals::Source::SQLite
+            CPANPLUS::Internals::Source::SQLite::Tie
+            CPANPLUS::Internals::Utils
+            CPANPLUS::Internals::Utils::Autoflush
+            CPANPLUS::Module
+            CPANPLUS::Module::Author
+            CPANPLUS::Module::Author::Fake
+            CPANPLUS::Module::Checksums
+            CPANPLUS::Module::Fake
+            CPANPLUS::Module::Signature
+            CPANPLUS::Selfupdate
+            CPANPLUS::Shell
+            CPANPLUS::Shell::Classic
+            CPANPLUS::Shell::Default
+            CPANPLUS::Shell::Default::Plugins::CustomSource
+            CPANPLUS::Shell::Default::Plugins::Remote
+            CPANPLUS::Shell::Default::Plugins::Source
+            Devel::InnerPackage
+            Log::Message
+            Log::Message::Config
+            Log::Message::Handlers
+            Log::Message::Item
+            Log::Message::Simple
+            Module::Pluggable
+            Module::Pluggable::Object
+            Object::Accessor
+            Term::UI
+            Term::UI::History
+        /},
     },
-    5.014004 => {
-	'Shell'                 => '1',
-    },
-    5.016003 => {
-    },
-    5.017010 => {
-        'Archive::Extract'      => '1',
-        'B::Lint'               => '1',
-        'B::Lint::Debug'        => '1',
-        'CPANPLUS'              => '1',
-        'CPANPLUS::Backend'     => '1',
-        'CPANPLUS::Backend::RV' => '1',
-        'CPANPLUS::Config'      => '1',
-        'CPANPLUS::Config::HomeEnv'=> '1',
-        'CPANPLUS::Configure'   => '1',
-        'CPANPLUS::Configure::Setup'=> '1',
-        'CPANPLUS::Dist'        => '1',
-        'CPANPLUS::Dist::Autobundle'=> '1',
-        'CPANPLUS::Dist::Base'  => '1',
-        'CPANPLUS::Dist::Build' => '1',
-        'CPANPLUS::Dist::Build::Constants'=> '1',
-        'CPANPLUS::Dist::MM'    => '1',
-        'CPANPLUS::Dist::Sample'=> '1',
-        'CPANPLUS::Error'       => '1',
-        'CPANPLUS::Internals'   => '1',
-        'CPANPLUS::Internals::Constants'=> '1',
-        'CPANPLUS::Internals::Constants::Report'=> '1',
-        'CPANPLUS::Internals::Extract'=> '1',
-        'CPANPLUS::Internals::Fetch'=> '1',
-        'CPANPLUS::Internals::Report'=> '1',
-        'CPANPLUS::Internals::Search'=> '1',
-        'CPANPLUS::Internals::Source'=> '1',
-        'CPANPLUS::Internals::Source::Memory'=> '1',
-        'CPANPLUS::Internals::Source::SQLite'=> '1',
-        'CPANPLUS::Internals::Source::SQLite::Tie'=> '1',
-        'CPANPLUS::Internals::Utils'=> '1',
-        'CPANPLUS::Internals::Utils::Autoflush'=> '1',
-        'CPANPLUS::Module'      => '1',
-        'CPANPLUS::Module::Author'=> '1',
-        'CPANPLUS::Module::Author::Fake'=> '1',
-        'CPANPLUS::Module::Checksums'=> '1',
-        'CPANPLUS::Module::Fake'=> '1',
-        'CPANPLUS::Module::Signature'=> '1',
-        'CPANPLUS::Selfupdate'  => '1',
-        'CPANPLUS::Shell'       => '1',
-        'CPANPLUS::Shell::Classic'=> '1',
-        'CPANPLUS::Shell::Default'=> '1',
-        'CPANPLUS::Shell::Default::Plugins::CustomSource'=> '1',
-        'CPANPLUS::Shell::Default::Plugins::Remote'=> '1',
-        'CPANPLUS::Shell::Default::Plugins::Source'=> '1',
-        'Devel::InnerPackage'   => '1',
-        'File::CheckTree'       => '1',
-        'Log::Message'          => '1',
-        'Log::Message::Config'  => '1',
-        'Log::Message::Handlers'=> '1',
-        'Log::Message::Item'    => '1',
-        'Log::Message::Simple'  => '1',
-        'Module::Pluggable'     => '1',
-        'Module::Pluggable::Object'=> '1',
-        'Object::Accessor'      => '1',
-        'Pod::LaTeX'            => '1',
-        'Term::UI'              => '1',
-        'Term::UI::History'     => '1',
-        'Text::Soundex'         => '1',
-    },
-    5.017011 => {
-        'Archive::Extract'      => '1',
-        'B::Lint'               => '1',
-        'B::Lint::Debug'        => '1',
-        'CPANPLUS'              => '1',
-        'CPANPLUS::Backend'     => '1',
-        'CPANPLUS::Backend::RV' => '1',
-        'CPANPLUS::Config'      => '1',
-        'CPANPLUS::Config::HomeEnv'=> '1',
-        'CPANPLUS::Configure'   => '1',
-        'CPANPLUS::Configure::Setup'=> '1',
-        'CPANPLUS::Dist'        => '1',
-        'CPANPLUS::Dist::Autobundle'=> '1',
-        'CPANPLUS::Dist::Base'  => '1',
-        'CPANPLUS::Dist::Build' => '1',
-        'CPANPLUS::Dist::Build::Constants'=> '1',
-        'CPANPLUS::Dist::MM'    => '1',
-        'CPANPLUS::Dist::Sample'=> '1',
-        'CPANPLUS::Error'       => '1',
-        'CPANPLUS::Internals'   => '1',
-        'CPANPLUS::Internals::Constants'=> '1',
-        'CPANPLUS::Internals::Constants::Report'=> '1',
-        'CPANPLUS::Internals::Extract'=> '1',
-        'CPANPLUS::Internals::Fetch'=> '1',
-        'CPANPLUS::Internals::Report'=> '1',
-        'CPANPLUS::Internals::Search'=> '1',
-        'CPANPLUS::Internals::Source'=> '1',
-        'CPANPLUS::Internals::Source::Memory'=> '1',
-        'CPANPLUS::Internals::Source::SQLite'=> '1',
-        'CPANPLUS::Internals::Source::SQLite::Tie'=> '1',
-        'CPANPLUS::Internals::Utils'=> '1',
-        'CPANPLUS::Internals::Utils::Autoflush'=> '1',
-        'CPANPLUS::Module'      => '1',
-        'CPANPLUS::Module::Author'=> '1',
-        'CPANPLUS::Module::Author::Fake'=> '1',
-        'CPANPLUS::Module::Checksums'=> '1',
-        'CPANPLUS::Module::Fake'=> '1',
-        'CPANPLUS::Module::Signature'=> '1',
-        'CPANPLUS::Selfupdate'  => '1',
-        'CPANPLUS::Shell'       => '1',
-        'CPANPLUS::Shell::Classic'=> '1',
-        'CPANPLUS::Shell::Default'=> '1',
-        'CPANPLUS::Shell::Default::Plugins::CustomSource'=> '1',
-        'CPANPLUS::Shell::Default::Plugins::Remote'=> '1',
-        'CPANPLUS::Shell::Default::Plugins::Source'=> '1',
-        'Devel::InnerPackage'   => '1',
-        'File::CheckTree'       => '1',
-        'Log::Message'          => '1',
-        'Log::Message::Config'  => '1',
-        'Log::Message::Handlers'=> '1',
-        'Log::Message::Item'    => '1',
-        'Log::Message::Simple'  => '1',
-        'Module::Pluggable'     => '1',
-        'Module::Pluggable::Object'=> '1',
-        'Object::Accessor'      => '1',
-        'Pod::LaTeX'            => '1',
-        'Term::UI'              => '1',
-        'Term::UI::History'     => '1',
-        'Text::Soundex'         => '1',
-    },
-    5.017012 => {
-        'Archive::Extract'      => '1',
-        'B::Lint'               => '1',
-        'B::Lint::Debug'        => '1',
-        'CPANPLUS'              => '1',
-        'CPANPLUS::Backend'     => '1',
-        'CPANPLUS::Backend::RV' => '1',
-        'CPANPLUS::Config'      => '1',
-        'CPANPLUS::Config::HomeEnv'=> '1',
-        'CPANPLUS::Configure'   => '1',
-        'CPANPLUS::Configure::Setup'=> '1',
-        'CPANPLUS::Dist'        => '1',
-        'CPANPLUS::Dist::Autobundle'=> '1',
-        'CPANPLUS::Dist::Base'  => '1',
-        'CPANPLUS::Dist::Build' => '1',
-        'CPANPLUS::Dist::Build::Constants'=> '1',
-        'CPANPLUS::Dist::MM'    => '1',
-        'CPANPLUS::Dist::Sample'=> '1',
-        'CPANPLUS::Error'       => '1',
-        'CPANPLUS::Internals'   => '1',
-        'CPANPLUS::Internals::Constants'=> '1',
-        'CPANPLUS::Internals::Constants::Report'=> '1',
-        'CPANPLUS::Internals::Extract'=> '1',
-        'CPANPLUS::Internals::Fetch'=> '1',
-        'CPANPLUS::Internals::Report'=> '1',
-        'CPANPLUS::Internals::Search'=> '1',
-        'CPANPLUS::Internals::Source'=> '1',
-        'CPANPLUS::Internals::Source::Memory'=> '1',
-        'CPANPLUS::Internals::Source::SQLite'=> '1',
-        'CPANPLUS::Internals::Source::SQLite::Tie'=> '1',
-        'CPANPLUS::Internals::Utils'=> '1',
-        'CPANPLUS::Internals::Utils::Autoflush'=> '1',
-        'CPANPLUS::Module'      => '1',
-        'CPANPLUS::Module::Author'=> '1',
-        'CPANPLUS::Module::Author::Fake'=> '1',
-        'CPANPLUS::Module::Checksums'=> '1',
-        'CPANPLUS::Module::Fake'=> '1',
-        'CPANPLUS::Module::Signature'=> '1',
-        'CPANPLUS::Selfupdate'  => '1',
-        'CPANPLUS::Shell'       => '1',
-        'CPANPLUS::Shell::Classic'=> '1',
-        'CPANPLUS::Shell::Default'=> '1',
-        'CPANPLUS::Shell::Default::Plugins::CustomSource'=> '1',
-        'CPANPLUS::Shell::Default::Plugins::Remote'=> '1',
-        'CPANPLUS::Shell::Default::Plugins::Source'=> '1',
-        'Devel::InnerPackage'   => '1',
-        'File::CheckTree'       => '1',
-        'Log::Message'          => '1',
-        'Log::Message::Config'  => '1',
-        'Log::Message::Handlers'=> '1',
-        'Log::Message::Item'    => '1',
-        'Log::Message::Simple'  => '1',
-        'Module::Pluggable'     => '1',
-        'Module::Pluggable::Object'=> '1',
-        'Object::Accessor'      => '1',
-        'Pod::LaTeX'            => '1',
-        'Term::UI'              => '1',
-        'Term::UI::History'     => '1',
-        'Text::Soundex'         => '1',
-    },
-    5.018000 => {
-	'Archive::Extract'      => '1',
-	'B::Lint'               => '1',
-	'B::Lint::Debug'        => '1',
-	'CPANPLUS'              => '1',
-	'CPANPLUS::Backend'     => '1',
-	'CPANPLUS::Backend::RV' => '1',
-	'CPANPLUS::Config'      => '1',
-	'CPANPLUS::Config::HomeEnv'=> '1',
-	'CPANPLUS::Configure'   => '1',
-	'CPANPLUS::Configure::Setup'=> '1',
-	'CPANPLUS::Dist'        => '1',
-	'CPANPLUS::Dist::Autobundle'=> '1',
-	'CPANPLUS::Dist::Base'  => '1',
-	'CPANPLUS::Dist::Build' => '1',
-	'CPANPLUS::Dist::Build::Constants'=> '1',
-	'CPANPLUS::Dist::MM'    => '1',
-	'CPANPLUS::Dist::Sample'=> '1',
-	'CPANPLUS::Error'       => '1',
-	'CPANPLUS::Internals'   => '1',
-	'CPANPLUS::Internals::Constants'=> '1',
-	'CPANPLUS::Internals::Constants::Report'=> '1',
-	'CPANPLUS::Internals::Extract'=> '1',
-	'CPANPLUS::Internals::Fetch'=> '1',
-	'CPANPLUS::Internals::Report'=> '1',
-	'CPANPLUS::Internals::Search'=> '1',
-	'CPANPLUS::Internals::Source'=> '1',
-	'CPANPLUS::Internals::Source::Memory'=> '1',
-	'CPANPLUS::Internals::Source::SQLite'=> '1',
-	'CPANPLUS::Internals::Source::SQLite::Tie'=> '1',
-	'CPANPLUS::Internals::Utils'=> '1',
-	'CPANPLUS::Internals::Utils::Autoflush'=> '1',
-	'CPANPLUS::Module'      => '1',
-	'CPANPLUS::Module::Author'=> '1',
-	'CPANPLUS::Module::Author::Fake'=> '1',
-	'CPANPLUS::Module::Checksums'=> '1',
-	'CPANPLUS::Module::Fake'=> '1',
-	'CPANPLUS::Module::Signature'=> '1',
-	'CPANPLUS::Selfupdate'  => '1',
-	'CPANPLUS::Shell'       => '1',
-	'CPANPLUS::Shell::Classic'=> '1',
-	'CPANPLUS::Shell::Default'=> '1',
-	'CPANPLUS::Shell::Default::Plugins::CustomSource'=> '1',
-	'CPANPLUS::Shell::Default::Plugins::Remote'=> '1',
-	'CPANPLUS::Shell::Default::Plugins::Source'=> '1',
-	'Devel::InnerPackage'   => '1',
-	'File::CheckTree'       => '1',
-	'Log::Message'          => '1',
-	'Log::Message::Config'  => '1',
-	'Log::Message::Handlers'=> '1',
-	'Log::Message::Item'    => '1',
-	'Log::Message::Simple'  => '1',
-	'Module::Pluggable'     => '1',
-	'Module::Pluggable::Object'=> '1',
-	'Object::Accessor'      => '1',
-	'Pod::LaTeX'            => '1',
-	'Term::UI'              => '1',
-	'Term::UI::History'     => '1',
-	'Text::Soundex'         => '1',
-    },
-    5.019000 => {
+    5.01701  => { delta_from => 5.017009 },
+    5.017011 => { delta_from => 5.01701  },
+    5.017012 => { delta_from => 5.017011 },
+
+    5.018    => { delta_from => 5.017012 },
+
+    5.019    => {
+        delta_from => 5.018,
+        removed => { map { $_ => 1 } qw/
+            Archive::Extract
+            B::Lint
+            B::Lint::Debug
+            CPANPLUS
+            CPANPLUS::Backend
+            CPANPLUS::Backend::RV
+            CPANPLUS::Config
+            CPANPLUS::Config::HomeEnv
+            CPANPLUS::Configure
+            CPANPLUS::Configure::Setup
+            CPANPLUS::Dist
+            CPANPLUS::Dist::Autobundle
+            CPANPLUS::Dist::Base
+            CPANPLUS::Dist::Build
+            CPANPLUS::Dist::Build::Constants
+            CPANPLUS::Dist::MM
+            CPANPLUS::Dist::Sample
+            CPANPLUS::Error
+            CPANPLUS::Internals
+            CPANPLUS::Internals::Constants
+            CPANPLUS::Internals::Constants::Report
+            CPANPLUS::Internals::Extract
+            CPANPLUS::Internals::Fetch
+            CPANPLUS::Internals::Report
+            CPANPLUS::Internals::Search
+            CPANPLUS::Internals::Source
+            CPANPLUS::Internals::Source::Memory
+            CPANPLUS::Internals::Source::SQLite
+            CPANPLUS::Internals::Source::SQLite::Tie
+            CPANPLUS::Internals::Utils
+            CPANPLUS::Internals::Utils::Autoflush
+            CPANPLUS::Module
+            CPANPLUS::Module::Author
+            CPANPLUS::Module::Author::Fake
+            CPANPLUS::Module::Checksums
+            CPANPLUS::Module::Fake
+            CPANPLUS::Module::Signature
+            CPANPLUS::Selfupdate
+            CPANPLUS::Shell
+            CPANPLUS::Shell::Classic
+            CPANPLUS::Shell::Default
+            CPANPLUS::Shell::Default::Plugins::CustomSource
+            CPANPLUS::Shell::Default::Plugins::Remote
+            CPANPLUS::Shell::Default::Plugins::Source
+            Devel::InnerPackage
+            Log::Message
+            Log::Message::Config
+            Log::Message::Handlers
+            Log::Message::Item
+            Log::Message::Simple
+            Module::Pluggable
+            Module::Pluggable::Object
+            Object::Accessor
+            Pod::LaTeX
+            Term::UI
+            Term::UI::History
+        /}
     },
 );
+
+for my $version (sort { $a <=> $b } keys %deprecated) {
+    my $data = $deprecated{$version};
+
+    tie %{ $deprecated{$version} }, 'Module::CoreList::TieHashDelta',
+        $data->{changed}, $data->{removed},
+        $data->{delta_from} ? $deprecated{ $data->{delta_from} } : undef;
+}
 
 %upstream = (
     'App::Cpan'             => 'cpan',
