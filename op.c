@@ -8625,6 +8625,7 @@ Perl_ck_rvconst(pTHX_ OP *o)
 	    SvREFCNT_dec(kid->op_sv);
 #ifdef USE_ITHREADS
 	    /* XXX hack: dependence on sizeof(PADOP) <= sizeof(SVOP) */
+	    assert (sizeof(PADOP) <= sizeof(SVOP));
 	    kPADOP->op_padix = pad_alloc(OP_GV, SVs_PADTMP);
 	    SvREFCNT_dec(PAD_SVl(kPADOP->op_padix));
 	    GvIN_PAD_on(gv);
