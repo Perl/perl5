@@ -1308,7 +1308,8 @@ Perl_sv_upgrade(pTHX_ SV *const sv, svtype new_type)
 #ifndef NODEFAULT_SHAREKEYS
 	    HvSHAREKEYS_on(sv);         /* key-sharing on by default */
 #endif
-	    HvMAX(sv) = 7; /* (start with 8 buckets) */
+            /* start with PERL_HASH_DEFAULT_HvMAX+1 buckets: */
+	    HvMAX(sv) = PERL_HASH_DEFAULT_HvMAX;
 	}
 
 	/* SVt_NULL isn't the only thing upgraded to AV or HV.
