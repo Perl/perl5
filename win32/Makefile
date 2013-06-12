@@ -940,7 +940,7 @@ regen_config_h:
 	$(MINIPERL) -I..\lib config_sh.PL $(CFG_VARS) $(CFGSH_TMPL) > ..\config.sh
 	$(MINIPERL) -I..\lib ..\configpm --chdir=..
 	-del /f $(CFGH_TMPL)
-	-$(MINIPERL) -I..\lib $(ICWD) config_h.PL
+	-$(MINIPERL) -I..\lib config_h.PL
 	rename config.h $(CFGH_TMPL)
 
 $(CONFIGPM) : $(MINIPERL) ..\config.sh config_h.PL ..\minimod.pl
@@ -949,7 +949,7 @@ $(CONFIGPM) : $(MINIPERL) ..\config.sh config_h.PL ..\minimod.pl
 	$(XCOPY) ..\*.h $(COREDIR)\*.*
 	$(XCOPY) *.h $(COREDIR)\*.*
 	$(RCOPY) include $(COREDIR)\*.*
-	-$(MINIPERL) -I..\lib $(ICWD) config_h.PL
+	-$(MINIPERL) -I..\lib config_h.PL
 	if errorlevel 1 $(MAKE) /$(MAKEFLAGS) $(CONFIGPM)
 
 # See the comment in Makefile.SH explaining this seemingly cranky ordering
@@ -1076,7 +1076,7 @@ $(PERLEXESTATIC): $(PERLSTATICLIB) $(CONFIGPM) $(PERLEXEST_OBJ) $(PERLEXE_RES)
 	$(EMBED_EXE_MANI)
 
 MakePPPort: $(MINIPERL) $(CONFIGPM) Extensions_nonxs
-	$(MINIPERL) -I..\lib $(ICWD) ..\mkppport
+	$(MINIPERL) -I..\lib ..\mkppport
 
 #-------------------------------------------------------------------------------
 # There's no direct way to mark a dependency on
