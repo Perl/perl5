@@ -350,7 +350,7 @@ miniperl : $(DBG)miniperl$(E)  vmspipe.com
 
 [.lib]buildcustomize.pl :  miniperlmain$(O), $(DBG)libperlmini$(OLB) $(CRTL) write_buildcustomize.pl [.lib.VMS]Filespec.pm
 	Link $(LINKFLAGS)/NoDebug/Trace/NoMap/NoFull/NoCross/Exe=$(MINIPERL_EXE) miniperlmain$(O), $(DBG)libperlmini$(OLB)/Library/Include=globals $(CRTLOPTS)
-       $(MINIPERL) write_buildcustomize.pl > [.lib]buildcustomize.pl
+       $(MINIPERL) "-f" write_buildcustomize.pl
 
 $(DBG)miniperl$(E) :  miniperlmain$(O), $(DBG)libperlmini$(OLB) $(CRTL)
 	Link $(LINKFLAGS)/Trace/Exe=$(MMS$TARGET) miniperlmain$(O), $(DBG)libperlmini$(OLB)/Library/Include=globals  $(CRTLOPTS)

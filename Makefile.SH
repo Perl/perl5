@@ -866,15 +866,15 @@ $(MINIPERL_EXE): lib/buildcustomize.pl
 lib/buildcustomize.pl: $& $(mini_obj)
 	$(CC) -o $(MINIPERL_EXE) $(CLDFLAGS) $(mini_obj) $(libs)
 	$(LDLIBPTH) $(RUN) ./miniperl$(HOST_EXE_EXT) -w -Ilib -MExporter -e '<?>' || $(MAKE) minitest
-	$(MINIPERL) write_buildcustomize.pl >lib/buildcustomize.pl
+	$(MINIPERL) -f write_buildcustomize.pl
 !NO!SUBS!
 		;;
 	next4*)
 		$spitshell >>$Makefile <<'!NO!SUBS!'
-lib/buildcustomize.pl: $& $(mini_obj) write_buildcustomize.pl
-	$(CC) -o $(MINIPERL_EXE) $(mini_obj) $(libs)
-	$(LDLIBPTH) $(RUN) ./miniperl$(HOST_EXE_EXT) -w -Ilib -MExporter -e '<?>' || $(MAKE) minitest
-	$(MINIPERL) write_buildcustomize.pl >lib/buildcustomize.pl
+lib/buildcustomize.pl: $& $(mini_obj) write    ldcustomize.pl
+	$(CC) -o $(MINIPERL_EXE) $(mini_obj    libs)
+	$(LDLIBPTH) $(RUN) ./miniperl$(HOST    _EXT) -w -Ilib -MExporter -e '<?>' || $(MAKE) minitest
+	$(MINIPERL) -f write_buildcustomize.pl    
 !NO!SUBS!
 		;;
 	darwin*)
@@ -896,7 +896,7 @@ lib/buildcustomize.pl: $& $(mini_obj) write_buildcustomize.pl
 	$(CC) $(CLDFLAGS) $(NAMESPACEFLAGS) -o $(MINIPERL_EXE) \
 	    $(mini_obj) $(libs)
 	$(LDLIBPTH) $(RUN) ./miniperl$(HOST_EXE_EXT) -w -Ilib -MExporter -e '<?>' || $(MAKE) minitest
-	$(MINIPERL) write_buildcustomize.pl >lib/buildcustomize.pl
+	$(MINIPERL) -f write_buildcustomize.pl
 !NO!SUBS!
 		;;
 	*)
@@ -906,7 +906,7 @@ lib/buildcustomize.pl: $& $(mini_obj) write_buildcustomize.pl
 	$(LDLIBPTH) $(CC) $(CLDFLAGS) -o $(MINIPERL_EXE) \
 	    $(mini_obj) $(libs)
 	$(LDLIBPTH) $(RUN) ./miniperl$(HOST_EXE_EXT) -w -Ilib -MExporter -e '<?>' || $(MAKE) minitest
-	$(MINIPERL) write_buildcustomize.pl >lib/buildcustomize.pl
+	$(MINIPERL) -f write_buildcustomize.pl
 !NO!SUBS!
 		;;
 	esac

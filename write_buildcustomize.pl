@@ -10,6 +10,8 @@ if (@ARGV) {
 unshift @INC, ('dist/Cwd', 'dist/Cwd/lib');
 require File::Spec::Functions;
 
+my $file = 'lib/buildcustomize.pl';
+
 # To clarify, this isn't the entire suite of modules considered "toolchain"
 # It's not even all modules needed to build ext/
 # It's just the source paths of the (minimum complete set of) modules in ext/
@@ -42,10 +44,15 @@ my $inc = join ",\n        ",
     map { "q\0$_\0" }
     (map {File::Spec::Functions::rel2abs($_)} @toolchain, 'lib'), '.';
 
+open my $fh, '>', $file
+    or die "Can't open $file: $!";
+
+my $error;
+
 # If any of the system's build tools are written in Perl, then this module
 # may well be loaded by a much older version than we are building. So keep it
 # as backwards compatible as is easy.
-print <<"EOT";
+print $fh <<"EOT" or $error = "Can't print to $file: $!";
 #!perl
 
 # We are miniperl, building extensions
@@ -53,3 +60,24 @@ print <<"EOT";
 # installed directories (which we don't need to read, and may confuse us)
 \@INC = ($inc);
 EOT
+
+if ($error) {
+    close $fh
+        or warn "Can't unlink $file after error: $!";
+} else {
+    close $fh and exit;
+    $error = "Can't close $file: $!";
+}
+
+# It's going very wrong, so try to remove the botched file.
+
+unlink $file
+    or warn "Can't unlink $file after error: $!";
+die $error;
+
+# Local variables:
+# cperl-indent-level: 4
+# indent-tabs-mode: nil
+# End:
+#
+# ex: set ts=8 sts=4 sw=4 et:
