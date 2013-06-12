@@ -457,7 +457,7 @@ THX_unix_canonpath(pTHX_ SV *path)
 #endif
     o = SvPVX(retval);
     if(DOUBLE_SLASHES_SPECIAL && p[0] == '/' && p[1] == '/' && p[2] != '/') {
-	q = memchr(p+2, '/', pe-(p+2));
+	q = (const char *) memchr(p+2, '/', pe-(p+2));
 	if(!q) q = pe;
 	l = q - p;
 	memcpy(o, p, l);
@@ -493,7 +493,7 @@ THX_unix_canonpath(pTHX_ SV *path)
     }
     if(p == pe) goto end;
     while(1) {
-	q = memchr(p, '/', pe-p);
+	q = (const char *) memchr(p, '/', pe-p);
 	if(!q) q = pe;
 	l = q - p;
 	memcpy(o, p, l);
