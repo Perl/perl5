@@ -15,10 +15,10 @@ deemed necessary by the Pumpking.
 
 Code freezes (which happen in the 5.19.X series)
 
-  2013-01-20  5.19.8          Contentious changes freeze
-  2013-02-20  5.19.9          User-visible changes freeze
-  2013-03-20  5.19.10         Full code freeze
-  2013-05-20  5.20.0          Stable release!
+  2014-01-20  5.19.8          Contentious changes freeze
+  2014-02-20  5.19.9          User-visible changes freeze
+  2014-03-20  5.19.10         Full code freeze
+  2014-05-20  5.20.0          Stable release!
 
 =head2 Perl 5.18
 
