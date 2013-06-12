@@ -2739,7 +2739,7 @@ static void magic_write(pTHX_ store_cxt_t *store_cxt)
         length -= sizeof (magicstr) - 1;
     }        
 
-    WRITE_BYTES((unsigned char*) header, length);
+    WRITE_BYTES((const char*) header, length);
 
     if (!store_cxt->netorder) {
 	TRACEME(("ok (magic_write byteorder = 0x%lx [%d], I%d L%d P%d D%d)",
@@ -3659,7 +3659,7 @@ static SV *retrieve_vstring_any(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *
  * SX_VSTRING <length> <data> with SX_VSTRING already read.
  */
 static SV *retrieve_vstring(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname) {
-        retrieve_vstring_any(aTHX_ retrieve_cxt, cname, 0);
+        return retrieve_vstring_any(aTHX_ retrieve_cxt, cname, 0);
 }
 
 /*
@@ -3668,7 +3668,7 @@ static SV *retrieve_vstring(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cnam
  * Like retrieve_vstring, but for longer vstrings.
  */
 static SV *retrieve_lvstring(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname) {
-        retrieve_vstring_any(aTHX_ retrieve_cxt, cname, 1);
+        return retrieve_vstring_any(aTHX_ retrieve_cxt, cname, 1);
 }
 
 /*
@@ -4739,7 +4739,7 @@ static SV *do_retrieve(pTHX_ PerlIO *f, SV *in) {
 				CROAK(("Frozen string corrupt - contains characters outside 0-255"));
 #endif
 		}
-		retrieve_cxt.input = SvPV(in, size);
+		retrieve_cxt.input = (const unsigned char *)SvPV(in, size);
                 retrieve_cxt.input_end = retrieve_cxt.input + size;
 	}
 
@@ -4870,7 +4870,7 @@ static SV *dclone(pTHX_ SV *in)
        	retrieve_cxt.is_tainted = SvTAINTED(in);
 	retrieve_cxt.retrieve_vtbl = sv_retrieve;
 	retrieve_cxt.netorder = 0;
-        retrieve_cxt.input = SvPV(store_cxt.output_sv, size);
+        retrieve_cxt.input = (const unsigned char *)SvPV(store_cxt.output_sv, size);
         retrieve_cxt.input_end = retrieve_cxt.input + size;
 
         sv_setpvs(state, "retrieving");
