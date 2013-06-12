@@ -12,7 +12,7 @@ use Test::More tests => 196;
 
 use Benchmark qw(:all);
 
-my $delta = 0.4;
+my $DELTA = 0.4;
 
 # Some timing ballast
 sub fib {
@@ -30,6 +30,15 @@ my $Nop_Pattern =
     qr/(\d+) +wallclock secs? +\( *(-?\d+\.\d\d) +cusr +\+ +(-?\d+\.\d\d) +csys += +\d+\.\d\d +CPU\)/;
 # Please don't trust the matching parentheses to be useful in this :-)
 my $Default_Pattern = qr/$All_Pattern|$Noc_Pattern/;
+
+# see if the ratio of two integer values is within (1+$delta)
+
+sub cmp_delta {
+    my ($min, $max, $delta) = @_;
+    ($min, $max) = ($max, $min) if $max < $min;
+    return 0 if $min < 1; # avoid / 0
+    return $max/$min <= (1+$delta);
+}
 
 my $t0 = new Benchmark;
 isa_ok ($t0, 'Benchmark', "Ensure we can create a benchmark object");
@@ -94,11 +103,11 @@ my $calibration;
     my $td1 = ($t1 - $t0);
     print "# approx 1 sec delta is $td1 secs\n";
 
-    # we use 0.7 of $delta so that we err on the side of assuming
+    # we use 0.7 of $DELTA so that we err on the side of assuming
     # a bad clock and skip tests; otherwise we might be just within the
     # delta here, and just outside the delta on tests, and so get random
     # failures
-    if ( abs(($td3 - 3*$td1) / $td3) > 0.7*$delta) {
+    unless (cmp_delta(3*$td1, $td3, 0.7*$DELTA)) {
 	print "# INCONSISTENT CLOCK! - will skip timing-related tests\n";
 	$INCONSISTENT_CLOCK = 1;
     }
@@ -144,14 +153,11 @@ my $in_onesec_adj = $in_onesec;
 $in_onesec_adj *= (1/$cpu1); # adjust because may not have run for exactly 1s
 print "# in_onesec_adj=$in_onesec_adj adjusted iterations\n";
 
-{
-  my $difference = $in_onesec_adj - $estimate;
-  my $actual = abs ($difference / $in_onesec_adj);
-  SKIP: {
+SKIP: {
     skip("INCONSISTENT CLOCK") if $INCONSISTENT_CLOCK;
 
-    cmp_ok($actual, '<=', $delta,
-		"is $in_onesec_adj within $delta of estimate ($estimate)")
+    ok(cmp_delta($in_onesec_adj, $estimate, $DELTA),
+		"is $in_onesec_adj within $DELTA of estimate ($estimate)?")
     or do {
 	diag("  in_threesecs     = $in_threesecs");
 	diag("  in_threesecs_adj = $in_threesecs_adj");
@@ -164,7 +170,6 @@ print "# in_onesec_adj=$in_onesec_adj adjusted iterations\n";
 	diag("  sys1             = $sys1");
 	diag("  calibration      = $calibration");
     };
-  }
 }
 
 # I found that the eval'ed version was 3 times faster than the coderef.
