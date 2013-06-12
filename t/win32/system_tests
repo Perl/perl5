@@ -3,7 +3,9 @@
 use Config;
 use Cwd;
 use strict;
-use './test.pl';
+BEGIN {
+    require './test.pl';
+}
 
 $| = 1;
 
@@ -85,7 +87,7 @@ my @av = (
   ['" "', 'a" "b" "c', "abc"],
 );
 
-plan @commands * @av * 2;
+print "1.." . (@commands * @av * 2) . "\n";
 for my $cmds (@commands) {
     for my $args (@av) {
 	my @all_args;

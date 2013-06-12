@@ -134,8 +134,8 @@ my $expect;
 my $comment = "";
 while (<$T>) {
     chomp;
-    if (/^1\.\./) {
-	print "$_\n";
+    if (s/^1\.\.//) {
+	plan $_;
     }
     elsif (/^#+\s(.*)$/) {
 	$comment = $1;
@@ -150,8 +150,8 @@ while (<$T>) {
 	    note $comment if $comment;
 	    note "want: $expect";
 	    note "got : $_";
-    }
-    ok($expect eq $_);
+	}
+	ok($expect eq $_);
     }
 }
 close $T;
