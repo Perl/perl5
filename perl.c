@@ -2090,9 +2090,11 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 	SV **const inc0 = inc ? av_fetch(inc, 0, FALSE) : NULL;
 
 	if (inc0) {
+            /* if lib/buildcustomize.pl exists, it should not fail. If it does,
+               it should be reported immediately as a build failure.  */
 	    (void)Perl_av_create_and_unshift_one(aTHX_ &PL_preambleav,
 						 Perl_newSVpvf(aTHX_
-							       "BEGIN { do {local $!; -f q%c%"SVf"/buildcustomize.pl%c} && do q%c%"SVf"/buildcustomize.pl%c }",
+        "BEGIN { do {local $!; -f q%c%"SVf"/buildcustomize.pl%c} and do q%c%"SVf"/buildcustomize.pl%c || die $@ }",
 							       0, *inc0, 0,
 							       0, *inc0, 0));
 	}
