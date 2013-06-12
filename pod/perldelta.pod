@@ -42,6 +42,11 @@ XXX For a release on a stable branch, this section aspires to be:
 
 [ List each incompatible change as a =head2 entry ]
 
+=head2 Most regex engine global state eliminated
+
+As part of this series of fixes it was necessary to change the API of
+Perl_re_intuit_start().  See L</Internal Changes> for more.
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.
@@ -203,6 +208,16 @@ XXX Description of the purpose of the new file here
 XXX Changes which significantly change existing files in F<pod/> go here.
 However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
 section.
+
+=head3 L<perllocale>
+
+=over
+
+=item *
+
+Update to mention fc(), \F
+
+=back
 
 =head3 L<perltrap>
 
@@ -375,6 +390,11 @@ XXX List any platforms that this version of perl no longer compiles on.
 
 =over 4
 
+=item DG/UX
+
+DG/UX was a Unix sold by Data General. The last release was in April 2001.
+It only runs on Data General's own hardware.
+
 =item XXX-some-platform
 
 XXX
@@ -493,6 +513,13 @@ point (for example C<toLOWER_utf8()>).  Only a couple of these were
 documented until now;
 and now they should be used in preference to calling the underlying
 functions.  See L<perlapi/Character case changing>.
+
+=item *
+
+The code dealt rather inconsistently with uids and gids. Some
+places assumed that they could be safely stored in UVs, others
+in IVs, others in ints. Four new macros are introduced:
+SvUID(), sv_setuid(), SvGID(), and sv_setgid()
 
 =back
 
@@ -616,6 +643,10 @@ Aliasing filehandles through glob-to-glob assignment would not update
 internal method caches properly if a package of the same name as the
 filehandle existed, resulting in filehandle method calls going to the
 package instead.  This has been fixed.
+
+=item *
+
+C<./Configure -de -Dusevendorprefix> didn't default [RT #64126]
 
 =back
 
