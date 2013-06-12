@@ -1,6 +1,7 @@
-...
+2.92
   - Make switches case-sensitive (keep -d and -D distinct)
   - correct omission of Text::Soundex and File::CheckTree from deprecations
+  - switch %deprecated to a delta hash
 
 2.91 Mon May 20 2013
   - Updated for v5.19.0
