@@ -131,7 +131,12 @@ if ( open my $ucdv, "<", "lib/unicore/version" ) {
     close $ucdv;
 }
 
-my $delta_data = make_corelist_delta($perl_vnum, \%lines);
+my $delta_data = make_corelist_delta(
+  $perl_vnum,
+  \%lines,
+  \%Module::CoreList::version
+);
+
 my $versions_in_release = "    " . $perl_vnum . " => {\n";
 $versions_in_release .= "        delta_from => $delta_data->{delta_from},\n";
 $versions_in_release .= "        changed => {\n";
@@ -230,13 +235,31 @@ $upstream_stanza .= ");";
 $corelist =~ s/^%upstream .*? ;$/$upstream_stanza/ismx;
 
 # Deprecation generation
-my $deprecated_stanza = "    " . $perl_vnum . " => {\n";
-foreach my $module ( sort keys %module_to_deprecated ) {
-    my $deprecated = defined $module_to_deprecated{$module} ? "'$module_to_deprecated{$module}'" : 'undef';
-    $deprecated_stanza .= sprintf "\t%-24s=> %s,\n", "'$module'", $deprecated;
+{
+  my $delta_data = make_corelist_delta(
+    $perl_vnum,
+    \%module_to_deprecated,
+    do { no warnings 'once'; \%Module::CoreList::deprecated },
+  );
+
+  my $deprecated_stanza = "    " . $perl_vnum . " => {\n";
+  $deprecated_stanza .= "        delta_from => $delta_data->{delta_from},\n";
+  $deprecated_stanza .= "        changed => {\n";
+  foreach my $key (sort keys $delta_data->{changed}) {
+    $deprecated_stanza .= sprintf "            %-24s=> %s,\n", "'$key'",
+        defined $delta_data->{changed}{$key} ? "'"
+          . $delta_data->{changed}{$key} . "'" : "undef";
+  }
+  $deprecated_stanza .= "        },\n";
+  $deprecated_stanza .= "        removed => {\n";
+  for my $key (sort keys($delta_data->{removed} || {})) {
+    $deprecated_stanza .= sprintf "           %-24s=> %s,\n", "'$key'", 1;
+  }
+  $deprecated_stanza .= "        }\n";
+  $deprecated_stanza .= "    },\n";
+
+  $corelist =~ s/^(%deprecated\s*=\s*.*?)(^\);)$/$1$deprecated_stanza$2/xism;
 }
-$deprecated_stanza .= "    },\n";
-$corelist =~ s/^(%deprecated\s*=\s*.*?)(^\);)$/$1$deprecated_stanza$2/xism;
 
 my $tracker = "%bug_tracker = (\n";
 foreach my $module ( sort keys %module_to_upstream ) {
@@ -309,7 +332,7 @@ sub fetch_url {
 }
 
 sub make_corelist_delta {
-  my($version, $lines) = @_;
+  my($version, $lines, $existing) = @_;
   # Trust core perl, if someone does use a weird version number the worst that
   # can happen is an extra delta entry for a module.
   my %versions = map { $_ => eval $lines->{$_} } keys %$lines;
@@ -320,13 +343,13 @@ sub make_corelist_delta {
   my %deltas;
   # Search for the release with the least amount of changes (this avoids having
   # to ask for where this perl was branched from).
-  for my $previous(reverse sort keys %Module::CoreList::version) {
+  for my $previous(reverse sort keys %$existing) {
     # Shouldn't happen, but ensure we don't load weird data...
     next if $previous > $version || $previous == $version && $previous eq $version;
 
     my $delta = $deltas{$previous} = {};
     ($delta->{changed}, $delta->{removed}) = calculate_delta(
-      $Module::CoreList::version{$previous}, \%versions);
+      $existing->{$previous}, \%versions);
   }
 
   my $smallest = (sort {
