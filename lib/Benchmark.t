@@ -54,6 +54,7 @@ print "# Burning CPU to see if clock is consistent...\n";
 # require a consistent clock
 
 my $INCONSISTENT_CLOCK = 0;
+my $calibration;
 
 {
     my ($t0, $t1, $tdelta);
@@ -101,6 +102,7 @@ my $INCONSISTENT_CLOCK = 0;
 	print "# INCONSISTENT CLOCK! - will skip timing-related tests\n";
 	$INCONSISTENT_CLOCK = 1;
     }
+    $calibration = $td3/(3*$td1); # for diag output
 
 }
 
@@ -160,6 +162,7 @@ print "# in_onesec_adj=$in_onesec_adj adjusted iterations\n";
 	diag("  in_onesec_adj    = $in_onesec_adj");
 	diag("  cpu1             = $cpu1");
 	diag("  sys1             = $sys1");
+	diag("  calibration      = $calibration");
     };
   }
 }
