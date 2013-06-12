@@ -9700,9 +9700,16 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                 }
                 ret = reg_node(pRExC_state, NOTHING);
 
-                /* But the quantifier includes any '?' (the non-greedy
-                 * modifier) after the {}, [perl #118375] */
-                if (RExC_parse < RExC_end && *RExC_parse == '?') {
+                /* But the quantifier includes any '?', the non-greedy
+                 * modifier, after the {}, [perl #118375]
+                 * Likewise the '+', the possessive modifier, and
+                 * they can be combined too, '?+' is the possessive
+                 * non-greedy modifier.
+                 */
+                if (RExC_parse < RExC_end && *RExC_parse == '?' ) {
+                    nextchar(pRExC_state);
+                }
+                if (RExC_parse < RExC_end && *RExC_parse == '+' ) {
                     nextchar(pRExC_state);
                 }
                 return ret;
