@@ -65,8 +65,12 @@ if ($error) {
     close $fh
         or warn "Can't unlink $file after error: $!";
 } else {
-    close $fh and exit;
-    $error = "Can't close $file: $!";
+    if (close $fh) {
+        do $file and exit;
+        $error = "Can't load generated $file: $@";
+    } else {
+        $error = "Can't close $file: $!";
+    }
 }
 
 # It's going very wrong, so try to remove the botched file.
