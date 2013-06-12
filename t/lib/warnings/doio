@@ -187,6 +187,8 @@ no warnings 'io' ;
 exec "lskdjfalksdjfdjfkls","" ;
 EXPECT
 OPTION regex
+Statement unlikely to be reached at - line .+
+	\(Maybe you meant system\(\) when you said exec\(\)\?\)
 Can't exec "lskdjfalksdjfdjfkls": .+
 ########
 # doio.c [Perl_do_exec3]
@@ -196,6 +198,8 @@ no warnings 'io' ;
 exec "lskdjfalksdjfdjfkls", "abc" ;
 EXPECT
 OPTION regex
+Statement unlikely to be reached at - line .+
+	\(Maybe you meant system\(\) when you said exec\(\)\?\)
 Can't exec "lskdjfalksdjfdjfkls(:? abc)?": .+
 ########
 # doio.c [win32_execvp]

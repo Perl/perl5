@@ -1735,7 +1735,7 @@ S_finalize_op(pTHX_ OP* o)
     case OP_EXEC:
 	if ( o->op_sibling
 	    && (o->op_sibling->op_type == OP_NEXTSTATE || o->op_sibling->op_type == OP_DBSTATE)
-	    && ckWARN(WARN_SYNTAX))
+	    && ckWARN(WARN_EXEC))
 	    {
 		if (o->op_sibling->op_sibling) {
 		    const OPCODE type = o->op_sibling->op_sibling->op_type;
