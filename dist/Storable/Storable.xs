@@ -2167,7 +2167,7 @@ static int store_hook(pTHX_ store_cxt_t *store_cxt, SV *sv, int type, HV *pkg, S
                  * references. We use magic as a marker on the hook SV
                  * that the class does not use STORABLE_attach at all */
 
-                if (!SvMAGICAL(sv) || !mg_find(hook, PERL_MAGIC_ext)) {
+                if (!SvMAGICAL(hook) || !mg_find(hook, PERL_MAGIC_ext)) {
                         GV* gv = gv_fetchmethod_autoload(pkg, "STORABLE_attach", FALSE);
                         if (gv && isGV(gv))
                                 CROAK(("Freeze cannot return references if %s class is using STORABLE_attach", classname));
