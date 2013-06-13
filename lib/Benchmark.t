@@ -8,7 +8,7 @@ BEGIN {
 use warnings;
 use strict;
 use vars qw($foo $bar $baz $ballast);
-use Test::More tests => 196;
+use Test::More tests => 197;
 
 use Benchmark qw(:all);
 
@@ -114,6 +114,7 @@ my $calibration;
     $calibration = $td3/(3*$td1); # for diag output
 
 }
+ok(!$INCONSISTENT_CLOCK, "temporary calibration test");
 
 
 print "# Burning CPU to benchmark things; will take time...\n";
