@@ -2037,7 +2037,6 @@ static int store_hook(pTHX_ store_cxt_t *store_cxt, SV *sv, int type, HV *pkg, S
         I32 ax;
 	char *classname;
 	STRLEN frozenlen;
-	SV *ref;
 	int count, i;
 	unsigned char flags;
 	char *frozenpv;
