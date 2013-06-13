@@ -155,7 +155,7 @@ $in_onesec_adj *= (1/$cpu1); # adjust because may not have run for exactly 1s
 print "# in_onesec_adj=$in_onesec_adj adjusted iterations\n";
 
 SKIP: {
-    skip("INCONSISTENT CLOCK") if $INCONSISTENT_CLOCK;
+    skip(1, "INCONSISTENT CLOCK") if $INCONSISTENT_CLOCK;
 
     ok(cmp_delta($in_onesec_adj, $estimate, $DELTA),
 		"is $in_onesec_adj within $DELTA of estimate ($estimate)?")
