@@ -539,7 +539,7 @@ X<?> X<*?> X<+?> X<??> X<{n}?> X<{n,}?> X<{n,m}?>
     {n,}?     Match at least n times, not greedily
     {n,m}?    Match at least n but not more than m times, not greedily
 
-By default, when a quantified subpattern does not allow the rest of the
+Normally when a quantified subpattern does not allow the rest of the
 overall pattern to match, Perl will backtrack. However, this behaviour is
 sometimes undesirable. Thus Perl provides the "possessive" quantifier form
 as well.
@@ -570,6 +570,16 @@ possessive quantifiers are just syntactic sugar for that construct. For
 instance the above example could also be written as follows:
 
    /"(?>(?:(?>[^"\\]+)|\\.)*)"/
+
+Note that the possessive quantifier modifier can not be be combined
+with the non-greedy modifier. This is because it would make no sense.
+Consider the follow equivalency table:
+
+    Illegal         Legal
+    ------------    ------
+    X??+            X{0}
+    X+?+            X{1}
+    X{min,max}?+    X{min}
 
 =head3 Escape sequences
 

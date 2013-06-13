@@ -9702,14 +9702,9 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 
                 /* But the quantifier includes any '?', the non-greedy
                  * modifier, after the {}, [perl #118375]
-                 * Likewise the '+', the possessive modifier, and
-                 * they can be combined too, '?+' is the possessive
-                 * non-greedy modifier.
+                 * Likewise the '+', the possessive modifier. They are mutually exclusive.
                  */
-                if (RExC_parse < RExC_end && *RExC_parse == '?' ) {
-                    nextchar(pRExC_state);
-                }
-                if (RExC_parse < RExC_end && *RExC_parse == '+' ) {
+                if (RExC_parse < RExC_end && (*RExC_parse == '?' || *RExC_parse == '+') ) {
                     nextchar(pRExC_state);
                 }
                 return ret;
@@ -9825,9 +9820,7 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 	reginsert(pRExC_state, MINMOD, ret, depth+1);
         REGTAIL(pRExC_state, ret, ret + NODE_STEP_REGNODE);
     }
-#ifndef REG_ALLOW_MINMOD_SUSPEND
     else
-#endif
     if (RExC_parse < RExC_end && *RExC_parse == '+') {
         regnode *ender;
         nextchar(pRExC_state);
@@ -9837,7 +9830,6 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
         ret->flags = 0;
         ender = reg_node(pRExC_state, TAIL);
         REGTAIL(pRExC_state, ret, ender);
-        /*ret= ender;*/
     }
 
     if (RExC_parse < RExC_end && ISMULT2(RExC_parse)) {
