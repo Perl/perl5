@@ -352,8 +352,8 @@ struct st_retrieve_cxt {
 #endif
 
 static void
-croak_io_error(pTHX_ SSize_t rc, retrieve_cxt_t *retrieve_cxt, char *str) {
-        char *error;
+croak_io_error(pTHX_ SSize_t rc, retrieve_cxt_t *retrieve_cxt, const char *str) {
+        const char *error;
         if (rc < 0) {
                 SV *ioe = GvSV(gv_fetchpvs("!", GV_ADDMULTI, SVt_PV));
                 error = SvPV_nolen(ioe);
@@ -367,7 +367,7 @@ croak_io_error(pTHX_ SSize_t rc, retrieve_cxt_t *retrieve_cxt, char *str) {
                            (retrieve_cxt->input_fh ? "file" : "string"),
                            error);
         else
-                Perl_croak(aTHX_ "%s: %s", str, error);
+                Perl_croak(aTHX_ "%s: %s", (char *)str, (char*)error);
 }
 
 #define READ_ERROR(bytes)                                          \
@@ -3098,7 +3098,7 @@ static SV *retrieve_hook(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname)
                                 load_module(PERL_LOADMOD_NOIMPORT, newSVsv(class_sv), Nullsv);
                         }
                         for (is_thaw = 0; is_thaw < 2; is_thaw++) {
-                                char *method = (is_thaw ? "STORABLE_thaw" : "STORABLE_attach");
+                                const char *method = (is_thaw ? "STORABLE_thaw" : "STORABLE_attach");
                                 GV *gv = gv_fetchmethod_autoload(gv_stashsv(class_sv, GV_ADD),
                                                                  method, FALSE);
                                 if (gv && isGV(gv)) {
