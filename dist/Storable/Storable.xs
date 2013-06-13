@@ -1169,7 +1169,7 @@ static void store_ref(pTHX_ store_cxt_t *store_cxt, SV *sv)
 	} else
 		WRITE_MARK(is_weak ? SX_WEAKREF : SX_REF);
 
-	return store(aTHX_ store_cxt, sv);
+	store(aTHX_ store_cxt, sv);
 }
 
 /*
@@ -1772,7 +1772,7 @@ static void store_code(pTHX_ store_cxt_t *store_cxt, CV *cv)
     /*
 	 * retrieve_code does not work with perl 5.005 or less
 	 */
-	return store_other(aTHX_ retrieve_cxt, (SV*)cv);
+	store_other(aTHX_ retrieve_cxt, (SV*)cv);
 #else
 	dSP;
 	I32 len;
@@ -1786,7 +1786,8 @@ static void store_code(pTHX_ store_cxt_t *store_cxt, CV *cv)
 		(store_cxt->deparse < 0 && !(store_cxt->deparse =
 			SvTRUE(perl_get_sv("Storable::Deparse", GV_ADD)) ? 1 : 0))
 	) {
-		return store_other(aTHX_ store_cxt, (SV*)cv);
+		store_other(aTHX_ store_cxt, (SV*)cv);
+		return;
 	}
 
 	/*
@@ -2460,7 +2461,7 @@ static void store_blessed(
 	 * Now emit the <object> part.
 	 */
 
-	return SV_STORE(type)(aTHX_ store_cxt, sv);
+	SV_STORE(type)(aTHX_ store_cxt, sv);
 }
 
 /*
