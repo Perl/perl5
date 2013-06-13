@@ -2587,7 +2587,6 @@ static int sv_type(pTHX_ SV *sv)
 static void store(pTHX_ store_cxt_t *store_cxt, SV *sv)
 {
 	void *tag1;
-	int ret;
 	int type;
 	PTR_TBL_t *pseen = store_cxt->pseen;
 
@@ -2861,7 +2860,6 @@ static SV *retrieve_idx_blessed(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *
 	I32 idx;
 	const char *classname;
 	SV **sva;
-	SV *sv;
 
 	PERL_UNUSED_ARG(cname);
 	TRACEME(("retrieve_idx_blessed (#%d)", retrieve_cxt->tagnum));
@@ -3624,7 +3622,6 @@ static SV *retrieve_lutf8str(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cna
 static SV *retrieve_vstring_any(pTHX_ retrieve_cxt_t *retrieve_cxt, const char *cname, int l) {
 #ifdef SvVOK
 	SV *sv, *s;
-        MAGIC *mg;
         I32 len;
         READ_VARINT(l, len);
         READ_SVPV(s, len);
