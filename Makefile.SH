@@ -507,8 +507,6 @@ perltoc_pod_prereqs = extra.pods pod/perl5191delta.pod pod/perlapi.pod pod/perli
 generated_pods = pod/perltoc.pod $(perltoc_pod_prereqs)
 generated_headers = uudmap.h bitcount.h mg_data.h
 
-Icwd = -Idist/Cwd -Idist/Cwd/lib -Idist/Carp/lib
-
 lintflags = \
     -b \
     -n \
@@ -851,21 +849,32 @@ $(LIBPERL): $& $(obj) $(DYNALOADER) $(LIBPERLEXPORT)
 # build problems but that's not obvious to the novice.
 # The Module used here must not depend on Config or any extensions.
 
+# The seemingly cranky ordering of having $(MINIPERL_EXE) depend on
+# lib/buildcustomize.pl despite the reality that lib/buildcustomize.pl needs
+# miniperl to exist first permits us to
+# a) have one rule generate both miniperl and lib/buildcustomize.pl
+#    (so that lib/buildcustomise.pl is always available. This simplifies things)
+# b) have the rest of the Makefile depend on the more obvious $(MINIPERL_EXE)
+
+$(MINIPERL_EXE): lib/buildcustomize.pl
+
 !NO!SUBS!
 
 	case "${osname}${osvers}" in
 	aix*)
 		$spitshell >>$Makefile <<'!NO!SUBS!'
-$(MINIPERL_EXE): $& $(mini_obj)
+lib/buildcustomize.pl: $& $(mini_obj)
 	$(CC) -o $(MINIPERL_EXE) $(CLDFLAGS) $(mini_obj) $(libs)
 	$(LDLIBPTH) $(RUN) ./miniperl$(HOST_EXE_EXT) -w -Ilib -MExporter -e '<?>' || $(MAKE) minitest
+	$(MINIPERL) -f write_buildcustomize.pl
 !NO!SUBS!
 		;;
 	next4*)
 		$spitshell >>$Makefile <<'!NO!SUBS!'
-$(MINIPERL_EXE): $& $(mini_obj)
-	$(CC) -o $(MINIPERL_EXE) $(mini_obj) $(libs)
-	$(LDLIBPTH) $(RUN) ./miniperl$(HOST_EXE_EXT) -w -Ilib -MExporter -e '<?>' || $(MAKE) minitest
+lib/buildcustomize.pl: $& $(mini_obj) write    ldcustomize.pl
+	$(CC) -o $(MINIPERL_EXE) $(mini_obj    libs)
+	$(LDLIBPTH) $(RUN) ./miniperl$(HOST    _EXT) -w -Ilib -MExporter -e '<?>' || $(MAKE) minitest
+	$(MINIPERL) -f write_buildcustomize.pl    
 !NO!SUBS!
 		;;
 	darwin*)
@@ -882,27 +891,29 @@ NAMESPACEFLAGS = -force_flat_namespace
 		    ;;
 		esac
 		$spitshell >>$Makefile <<'!NO!SUBS!'
-$(MINIPERL_EXE): $& $(mini_obj)
+lib/buildcustomize.pl: $& $(mini_obj) write_buildcustomize.pl
 	-@rm -f miniperl.xok
 	$(CC) $(CLDFLAGS) $(NAMESPACEFLAGS) -o $(MINIPERL_EXE) \
 	    $(mini_obj) $(libs)
 	$(LDLIBPTH) $(RUN) ./miniperl$(HOST_EXE_EXT) -w -Ilib -MExporter -e '<?>' || $(MAKE) minitest
+	$(MINIPERL) -f write_buildcustomize.pl
 !NO!SUBS!
 		;;
 	*)
 		$spitshell >>$Makefile <<'!NO!SUBS!'
-$(MINIPERL_EXE): $& $(mini_obj)
+lib/buildcustomize.pl: $& $(mini_obj) write_buildcustomize.pl
 	-@rm -f miniperl.xok
 	$(LDLIBPTH) $(CC) $(CLDFLAGS) -o $(MINIPERL_EXE) \
 	    $(mini_obj) $(libs)
 	$(LDLIBPTH) $(RUN) ./miniperl$(HOST_EXE_EXT) -w -Ilib -MExporter -e '<?>' || $(MAKE) minitest
+	$(MINIPERL) -f write_buildcustomize.pl
 !NO!SUBS!
 		;;
 	esac
 
 	$spitshell >>$Makefile <<'!NO!SUBS!'
 
-$(PERL_EXE): $& perlmain$(OBJ_EXT) $(LIBPERL) $(static_ext) ext.libs $(PERLEXPORT)
+$(PERL_EXE): $& perlmain$(OBJ_EXT) $(LIBPERL) $(static_ext) ext.libs $(PERLEXPORT) write_buildcustomize.pl
 	-@rm -f miniperl.xok
 	$(SHRPENV) $(LDLIBPTH) $(CC) -o perl$(PERL_SUFFIX) $(PERL_PROFILE_LDFLAGS) $(CLDFLAGS) $(CCDLFLAGS) perlmain$(OBJ_EXT) $(static_ext) $(LLIBPERL) `cat ext.libs` $(libs)
 
@@ -1038,7 +1049,7 @@ makeppport: \$(MINIPERL_EXE) \$(CONFIGPM)
 $spitshell >>$Makefile <<'!NO!SUBS!'
 .PHONY: makeppport
 makeppport: $(MINIPERL_EXE) $(CONFIGPM) $(nonxs_ext)
-	$(MINIPERL) $(Icwd) mkppport
+	$(MINIPERL) mkppport
 
 !NO!SUBS!
 ;;
@@ -1057,13 +1068,10 @@ $(CONFIGPOD): config.sh $(MINIPERL_EXE) configpm Porting/Glossary lib/Config_git
 lib/ExtUtils/Miniperl.pm: miniperlmain.c $(MINIPERL_EXE) minimod.pl $(CONFIGPM)
 	$(MINIPERL) minimod.pl > lib/ExtUtils/Miniperl.pm
 
-lib/buildcustomize.pl: $(MINIPERL_EXE) write_buildcustomize.pl
-	$(MINIPERL) write_buildcustomize.pl >lib/buildcustomize.pl
-
 unidatafiles $(unidatafiles) pod/perluniprops.pod: uni.data
 
 uni.data: $(MINIPERL_EXE) $(CONFIGPM) lib/unicore/mktables $(nonxs_ext)
-	$(MINIPERL) $(Icwd) lib/unicore/mktables -C lib/unicore -P pod -maketest -makelist -p
+	$(MINIPERL) lib/unicore/mktables -C lib/unicore -P pod -maketest -makelist -p
 #	Commented out so always runs, mktables looks at far more files than we
 #	can in this makefile to decide if needs to run or not
 #	touch uni.data
@@ -1081,7 +1089,7 @@ pod/perlintern.pod: $(MINIPERL_EXE) autodoc.pl embed.fnc $(nonxs_ext)
 	$(MINIPERL) autodoc.pl
 
 pod/perlmodlib.pod: $(MINIPERL_EXE) pod/perlmodlib.PL MANIFEST
-	$(MINIPERL) $(Icwd) pod/perlmodlib.PL -q
+	$(MINIPERL) pod/perlmodlib.PL -q
 
 pod/perl5191delta.pod: pod/perldelta.pod
 	$(RMS) pod/perl5191delta.pod

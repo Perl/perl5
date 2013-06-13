@@ -940,7 +940,7 @@ regen_config_h:
 	$(MINIPERL) -I..\lib config_sh.PL $(CFG_VARS) $(CFGSH_TMPL) > ..\config.sh
 	$(MINIPERL) -I..\lib ..\configpm --chdir=..
 	-del /f $(CFGH_TMPL)
-	-$(MINIPERL) -I..\lib $(ICWD) config_h.PL
+	-$(MINIPERL) -I..\lib config_h.PL
 	rename config.h $(CFGH_TMPL)
 
 $(CONFIGPM) : $(MINIPERL) ..\config.sh config_h.PL ..\minimod.pl
@@ -949,17 +949,18 @@ $(CONFIGPM) : $(MINIPERL) ..\config.sh config_h.PL ..\minimod.pl
 	$(XCOPY) ..\*.h $(COREDIR)\*.*
 	$(XCOPY) *.h $(COREDIR)\*.*
 	$(RCOPY) include $(COREDIR)\*.*
-	-$(MINIPERL) -I..\lib $(ICWD) config_h.PL
+	-$(MINIPERL) -I..\lib config_h.PL
 	if errorlevel 1 $(MAKE) /$(MAKEFLAGS) $(CONFIGPM)
 
-..\lib\buildcustomize.pl: $(MINIPERL) ..\write_buildcustomize.pl
-	$(MINIPERL) -I..\lib ..\write_buildcustomize.pl .. >..\lib\buildcustomize.pl
+# See the comment in Makefile.SH explaining this seemingly cranky ordering
+$(MINIPERL) : ..\lib\buildcustomize.pl 
 
-$(MINIPERL) : $(MINIDIR) $(MINI_OBJ)
-	$(LINK32) -subsystem:console -out:$@ @<<
+..\lib\buildcustomize.pl : $(MINIDIR) $(MINI_OBJ) ..\write_buildcustomize.pl
+	$(LINK32) -subsystem:console -out:$(MINIPERL) @<<
 	$(LINK_FLAGS) $(DELAYLOAD) $(LIBFILES) $(MINI_OBJ)
 <<
 	$(EMBED_EXE_MANI)
+	$(MINIPERL) -I..\lib -f ..\write_buildcustomize.pl ..
 
 $(MINIDIR) :
 	if not exist "$(MINIDIR)" mkdir "$(MINIDIR)"
@@ -1075,7 +1076,7 @@ $(PERLEXESTATIC): $(PERLSTATICLIB) $(CONFIGPM) $(PERLEXEST_OBJ) $(PERLEXE_RES)
 	$(EMBED_EXE_MANI)
 
 MakePPPort: $(MINIPERL) $(CONFIGPM) Extensions_nonxs
-	$(MINIPERL) -I..\lib $(ICWD) ..\mkppport
+	$(MINIPERL) -I..\lib ..\mkppport
 
 #-------------------------------------------------------------------------------
 # There's no direct way to mark a dependency on

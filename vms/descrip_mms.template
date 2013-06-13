@@ -181,7 +181,7 @@ NOOP = continue
 # Macros to invoke a copy of miniperl during the build.  Targets which
 # are built using these macros should depend on $(MINIPERL_EXE)
 MINIPERL_EXE = Sys$Disk:[]miniperl$(E)
-MINIPERL = MCR $(MINIPERL_EXE) "-I[.lib]" "-I[.dist.Cwd]" "-I[.dist.Cwd.lib]"
+MINIPERL = MCR $(MINIPERL_EXE) "-I[.lib]"
 MINIPERLQ = MCR $(MINIPERL_EXE) ""-I[.lib]""
 XSUBPP = $(MINIPERL) "-I[.ext.re]" [.lib.extutils]xsubpp -noprototypes
 # Macro to invoke a preexisting copy of Perl.  This is used to regenerate
@@ -338,16 +338,20 @@ $(PERLDELTA_CURRENT) : [.pod]perldelta.pod
 archcorefiles : $(ac) $(ARCHAUTO)time.stamp
 	@ $(NOOP)
 
-[.lib]buildcustomize.pl : write_buildcustomize.pl $(MINIPERL_EXE)
-       $(MINIPERL) write_buildcustomize.pl > [.lib]buildcustomize.pl
+# See the comment in Makefile.SH explaining this seemingly cranky ordering
+$(MINIPERL_EXE) : [.lib]buildcustomize.pl
+	@ $(NOOP)
 
 vmspipe.com : [.vms]vmspipe.com
 	Copy/NoConfirm/Log $(MMS$SOURCE) []
 
 miniperl : $(DBG)miniperl$(E)  vmspipe.com
 	@ Continue
-$(MINIPERL_EXE) :  miniperlmain$(O), $(DBG)libperlmini$(OLB) $(CRTL)
-	Link $(LINKFLAGS)/NoDebug/Trace/NoMap/NoFull/NoCross/Exe=$(MMS$TARGET) miniperlmain$(O), $(DBG)libperlmini$(OLB)/Library/Include=globals $(CRTLOPTS)
+
+[.lib]buildcustomize.pl :  miniperlmain$(O), $(DBG)libperlmini$(OLB) $(CRTL) write_buildcustomize.pl [.lib.VMS]Filespec.pm
+	Link $(LINKFLAGS)/NoDebug/Trace/NoMap/NoFull/NoCross/Exe=$(MINIPERL_EXE) miniperlmain$(O), $(DBG)libperlmini$(OLB)/Library/Include=globals $(CRTLOPTS)
+       $(MINIPERL) "-f" write_buildcustomize.pl
+
 $(DBG)miniperl$(E) :  miniperlmain$(O), $(DBG)libperlmini$(OLB) $(CRTL)
 	Link $(LINKFLAGS)/Trace/Exe=$(MMS$TARGET) miniperlmain$(O), $(DBG)libperlmini$(OLB)/Library/Include=globals  $(CRTLOPTS)
 
