@@ -1109,7 +1109,7 @@ downgrade_restricted(pTHX) {
  */
 static int known_class(pTHX_ store_cxt_t *store_cxt, HV *pkg, I32 *classnum) {
 
-        char *tag1;
+        void *tag1;
 
 	TRACEME(("known_class (%s)", HvNAME_get(pkg)));
 
