@@ -1395,7 +1395,6 @@ static void store_array(pTHX_ store_cxt_t *store_cxt, AV *av)
 	SV **sav;
 	I32 len = av_len(av) + 1;
 	I32 i;
-	int ret;
 
 	TRACEME(("store_array (0x%"UVxf")", PTR2UV(av)));
 
