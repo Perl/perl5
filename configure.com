@@ -1980,7 +1980,6 @@ $ use_vmsdebug_perl = ans
 $ IF use_vmsdebug_perl
 $ THEN
 $   usevmsdebug = "define"
-$   macros = macros + """__DEBUG__=1"","
 $ ELSE
 $   usevmsdebug = "undef"
 $ ENDIF
@@ -7029,6 +7028,12 @@ $   ENDIF
 $ ELSE
 $   LARGEFILE_REPLACE = "LARGEFILE="
 $ ENDIF
+$ IF use_vmsdebug_perl
+$ THEN
+$   DEBUG_REPLACE = "USEVMSDEBUG=__DEBUG__=1"
+$ ELSE
+$   DEBUG_REPLACE = "USEVMSDEBUG="
+$ ENDIF
 $!
 $! In order not to stress the tiny command buffer on pre-7.3-2 systems,
 $! we put the following substitutions in a file and pass the file to
@@ -7050,6 +7055,7 @@ $ WC "PV=''version'"
 $ WC "FLAGS=FLAGS=''extra_flags'"
 $ WC "''LARGEFILE_REPLACE'"
 $ WC "ARCHNAME=ARCHNAME=''archname'"
+$ WC "''DEBUG_REPLACE'"
 $ close CONFIG
 $!
 $ echo4 "Extracting ''defmakefile' (with variable substitutions)"
