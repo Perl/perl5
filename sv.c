@@ -5075,8 +5075,14 @@ Perl_sv_chop(pTHX_ SV *const sv, const char *const ptr)
     evacp = p - evacn;
 #endif
 
+    /* This sets 'delta' to the accumulated value of all deltas so far */
     delta += old_delta;
     assert(delta);
+
+    /* If 'delta' fits in a byte, store it just prior to the new beginning of
+     * the string; otherwise store a 0 byte there and store 'delta' just prior
+     * to that, using as many bytes as a STRLEN occupies.  Thus it overwrites a
+     * portion of the chopped part of the string */
     if (delta < 0x100) {
 	*--p = (U8) delta;
     } else {

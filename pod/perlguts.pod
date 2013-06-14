@@ -261,9 +261,10 @@ somewhere inside the PV, and it discards everything before the
 pointer. The efficiency comes by means of a little hack: instead of
 actually removing the characters, C<sv_chop> sets the flag C<OOK>
 (offset OK) to signal to other functions that the offset hack is in
-effect, and it puts the number of bytes chopped off into the IV field
-of the SV. It then moves the PV pointer (called C<SvPVX>) forward that
-many bytes, and adjusts C<SvCUR> and C<SvLEN>.
+effect, and it moves the PV pointer (called C<SvPVX>) forward
+by the number of bytes chopped off, and adjusts C<SvCUR> and C<SvLEN>
+accordingly.  (A portion of the space between the old and new PV
+pointers is used to store the count of chopped bytes.)
 
 Hence, at this point, the start of the buffer that we allocated lives
 at C<SvPVX(sv) - SvIV(sv)> in memory and the PV pointer is pointing
