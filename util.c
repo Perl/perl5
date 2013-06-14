@@ -2738,7 +2738,6 @@ I32
 Perl_my_pclose(pTHX_ PerlIO *ptr)
 {
     dVAR;
-    Sigsave_t hstat, istat, qstat;
     int status;
     SV **svp;
     Pid_t pid;
