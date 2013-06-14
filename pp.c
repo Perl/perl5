@@ -590,10 +590,8 @@ PP(pp_ref)
     dVAR; dSP; dTARGET;
     SV * const sv = POPs;
 
-    if (sv)
-	SvGETMAGIC(sv);
-
-    if (!sv || !SvROK(sv))
+    SvGETMAGIC(sv);
+    if (!SvROK(sv))
 	RETPUSHNO;
 
     (void)sv_ref(TARG,SvRV(sv),TRUE);
