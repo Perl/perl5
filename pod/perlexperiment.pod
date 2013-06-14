@@ -16,10 +16,6 @@ their inception, versions, etc. There's a lot of speculation here.
 
 =over 8
 
-=item -Dusemultiplicity -Duseithreads
-
-Introduced in Perl 5.6.0
-
 =item C<(?{code})> and C<(??{ code })>
 
 Introduced in Perl 5.6.0
@@ -253,6 +249,12 @@ Introduced in Perl 5.6.0
 Introduced in Perl 5.6.1
 
 See also L<perlfork>
+
+=item -Dusemultiplicity -Duseithreads
+
+Introduced in Perl 5.6.0
+
+Accepted in Perl 5.8.0
 
 =item Support for long doubles
 
