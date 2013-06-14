@@ -90,6 +90,9 @@ See also: L<perlrecharclass/Extended Bracketed Character Classes>
 Using this feature triggers warnings in the category
 C<experimental::regex_sets>.
 
+=item C<\s> in regexp matches vertical tab
+
+Introduced in Perl 5.18
 
 =item The <:pop> IO pseudolayer
 
