@@ -192,6 +192,8 @@ foreach my $pm_file (sort keys %module_diffs) {
 sub get_file_from_git {
     my ($file, $tag) = @_;
     local $/;
+
+    use open IN => ':raw';
     return scalar `git --no-pager show $tag:$file 2>$null`;
 }
 

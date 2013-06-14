@@ -30,6 +30,8 @@ while (my $file = <$fh>) {
 
     local $/;
     open my $t, '<', $file or die "Can't open $file: $!";
+    # avoid PERL_UNICODE causing us to read non-UTF-8 files as UTF-8
+    binmode $t;
     my $contents = <$t>;
     # Make sure that we don't match ourselves
     unlike($contents, qr/use\s+Test::More/, "$file doesn't use Test::\QMore");
