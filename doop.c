@@ -15,8 +15,8 @@
  */
 
 /* This file contains some common functions needed to carry out certain
- * ops. For example both pp_schomp() and pp_chomp() - scalar and array
- * chomp operations - call the function do_chomp() found in this file.
+ * ops. For example, both pp_sprintf() and pp_prtf() call the function
+ * do_printf() found in this file.
  */
 
 #include "EXTERN.h"
