@@ -8500,7 +8500,6 @@ Perl_yylex(pTHX)
 	  really_sub:
 	    {
 		char * const tmpbuf = PL_tokenbuf + 1;
-		SSize_t tboffset = 0;
 		expectation attrful;
 		bool have_name, have_proto;
 		const int key = tmp;
@@ -8531,8 +8530,6 @@ Perl_yylex(pTHX)
 
 		    PL_expect = XBLOCK;
 		    attrful = XATTRBLOCK;
-		    /* remember buffer pos'n for later force_word */
-		    tboffset = s - PL_oldbufptr;
 		    d = scan_word(s, tmpbuf, sizeof PL_tokenbuf - 1, TRUE,
 				  &len);
 #ifdef PERL_MAD
@@ -8586,7 +8583,6 @@ Perl_yylex(pTHX)
 #ifdef PERL_MAD
 		    PL_thistoken = subtoken;
 		    s = d;
-                    PERL_UNUSED_VAR(tboffset);
 #else
 		    if (format_name) {
                         start_force(PL_curforce);
