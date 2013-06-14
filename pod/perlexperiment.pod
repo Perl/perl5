@@ -168,9 +168,15 @@ Introduced in Perl 5.10.0
 
 Modified in Perl 5.10.1, 5.12.0
 
+Using this feature triggers warnings in the category
+C<experimental::smartmatch>.
+
 =item Lexical C<$_>
 
 Introduced in Perl 5.10.0
+
+Using this feature triggers warnings in the category
+C<experimental::lexical_topic>.
 
 =item Backtracking control verbs
 
@@ -207,11 +213,17 @@ Introduced in: Perl 5.18
 
 See also: L<perlsub/Lexical Subroutines>
 
+Using this feature triggers warnings in the category
+C<experimental::lexical_subs>.
+
 =item Regular Expression Set Operations
 
 Introduced in: Perl 5.18
 
 See also: L<perlrecharclass/Extended Bracketed Character Classes>
+
+Using this feature triggers warnings in the category
+C<experimental::regex_sets>.
 
 =back
 
