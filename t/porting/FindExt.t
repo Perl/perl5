@@ -21,14 +21,13 @@ unless (defined $Config{usedl}) {
 }
 
 plan tests => 12;
-use FindExt;
+require FindExt;
 
 FindExt::apply_config(\%Config);
-FindExt::scan_ext('../cpan');
-FindExt::scan_ext('../dist');
-FindExt::scan_ext('../ext');
-FindExt::set_static_extensions(split ' ', $ENV{PERL_STATIC_EXT}) if $^O eq "MSWin32";
-FindExt::set_static_extensions(split ' ', $Config{static_ext}) unless $^O eq "MSWin32";
+FindExt::scan_ext("../$_")
+    foreach qw(cpan dist ext);
+FindExt::set_static_extensions(split ' ', $^O eq 'MSWin32'
+                               ? $ENV{PERL_STATIC_EXT} : $Config{static_ext});
 
 # Config.pm and FindExt.pm make different choices about what should be built
 my @config_built;
