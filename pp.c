@@ -4817,10 +4817,10 @@ PP(pp_lslice)
 
 PP(pp_anonlist)
 {
-    dVAR; dSP; dMARK; dORIGMARK;
+    dVAR; dSP; dMARK;
     const I32 items = SP - MARK;
     SV * const av = MUTABLE_SV(av_make(items, MARK+1));
-    SP = ORIGMARK;		/* av_make() might realloc stack_sp */
+    SP = MARK;
     mXPUSHs((PL_op->op_flags & OPf_SPECIAL)
 	    ? newRV_noinc(av) : av);
     RETURN;
