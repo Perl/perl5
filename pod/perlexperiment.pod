@@ -20,6 +20,18 @@ their inception, versions, etc. There's a lot of speculation here.
 
 Introduced in Perl 5.6.0
 
+=item C<(?{code})> and C<(??{ code })>
+
+Introduced in Perl 5.6.0
+
+See also L<perlre>
+
+=item Lvalue subroutines
+
+Introduced in Perl 5.6.0
+
+See also L<perlsub>
+
 =item Long Doubles Still Don't Work In Solaris
 
 Introduced in Perl 5.7.0
@@ -35,6 +47,57 @@ Deprecated in Perl 5.10.0
 Introduced in Perl 5.9.2
 
 See also L<Socket>
+
+=item Smart match (C<~~>)
+
+Introduced in Perl 5.10.0
+
+Modified in Perl 5.10.1, 5.12.0
+
+Using this feature triggers warnings in the category
+C<experimental::smartmatch>.
+
+=item Lexical C<$_>
+
+Introduced in Perl 5.10.0
+
+Using this feature triggers warnings in the category
+C<experimental::lexical_topic>.
+
+=item Backtracking control verbs
+
+C<(*ACCEPT)>
+
+Introduced in: Perl 5.10
+
+=item Pluggable keywords
+
+See L<perlapi/PL_keyword_plugin> for the mechanism.
+
+Introduced in: Perl 5.11.2
+
+=item Array and hash container functions accept references
+
+Introduced in Perl 5.14.0
+
+=item Lexical subroutines
+
+Introduced in: Perl 5.18
+
+See also: L<perlsub/Lexical Subroutines>
+
+Using this feature triggers warnings in the category
+C<experimental::lexical_subs>.
+
+=item Regular Expression Set Operations
+
+Introduced in: Perl 5.18
+
+See also: L<perlrecharclass/Extended Bracketed Character Classes>
+
+Using this feature triggers warnings in the category
+C<experimental::regex_sets>.
+
 
 =item The <:pop> IO pseudolayer
 
@@ -140,50 +203,13 @@ Introduced in Perl 5.16.0
 
 =item utf8_to_bytes
 
-=item Lvalue subroutines
-
-Introduced in Perl 5.6.0
-
-See also L<perlsub>
-
 =item There is an C<installhtml> target in the Makefile.
 
 =item Unicode in Perl on EBCDIC
 
-=item C<(?{code})>
-
-See also L<perlre>
-
-=item C<(??{ code })>
-
-See also L<perlre>
-
-=item Smart match (C<~~>)
-
-Introduced in Perl 5.10.0
-
-Modified in Perl 5.10.1, 5.12.0
-
-Using this feature triggers warnings in the category
-C<experimental::smartmatch>.
-
-=item Lexical C<$_>
-
-Introduced in Perl 5.10.0
-
-Using this feature triggers warnings in the category
-C<experimental::lexical_topic>.
-
-=item Backtracking control verbs
-
-C<(*ACCEPT)>
-
-Introduced in: Perl 5.10
-
 See also: L<perlre/"Special Backtracking Control Verbs">
 
 =item Code expressions, conditional expressions, and independent expressions in regexes
-
 
 =item gv_try_downgrade
 
@@ -193,58 +219,24 @@ See also L<perlintern>
 
 See also L<perllinux>
 
-=item Pluggable keywords
-
-See L<perlapi/PL_keyword_plugin> for the mechanism.
-
-Introduced in: Perl 5.11.2
-
-=item Array and hash container functions accept references
-
-Introduced in Perl 5.14.0
-
-=item Lexical subroutines
-
-Introduced in: Perl 5.18
-
-See also: L<perlsub/Lexical Subroutines>
-
-Using this feature triggers warnings in the category
-C<experimental::lexical_subs>.
-
-=item Regular Expression Set Operations
-
-Introduced in: Perl 5.18
-
-See also: L<perlrecharclass/Extended Bracketed Character Classes>
-
-Using this feature triggers warnings in the category
-C<experimental::regex_sets>.
-
 =back
 
 =head2 Accepted features
 
 These features were so wildly successful and played so well with others that
 we decided to remove their experimental status and admit them as full, stable
-features in the world of Perl, lavishing all the benefits and luxuries thereof. 
+features in the world of Perl, lavishing all the benefits and luxuries thereof.
 They are also awarded +5 Stability and +3 Charisma.
 
 =over 8
 
-=item The C<\N> regex character class
+=item 64-bit support
 
-The C<\N> character class, not to be confused with the named character
-sequence C<\N{NAME}>, denotes any non-newline character in a regular
-expression.
+Introduced in Perl 5.005
 
-Introduced in: Perl 5.12
+=item die accepts a reference
 
-=item fork() emulation
-
-Introduced in Perl 5.6.1
-
-See also L<perlfork>
+Introduced in Perl 5.005
 
 =item DB module
 
@@ -260,13 +252,19 @@ Introduced in Perl 5.6.0
 
 Introduced in Perl 5.6.0
 
-=item die accepts a reference
+=item fork() emulation
 
-Introduced in Perl 5.005
+Introduced in Perl 5.6.1
 
-=item 64-bit support
+See also L<perlfork>
 
-Introduced in Perl 5.005
+=item The C<\N> regex character class
+
+The C<\N> character class, not to be confused with the named character
+sequence C<\N{NAME}>, denotes any non-newline character in a regular
+expression.
+
+Introduced in: Perl 5.12
 
 =back
 
@@ -278,13 +276,29 @@ these features after we explicitly told you not to (see L<perlpolicy>).
 
 =over 8
 
-=item C<legacy>
+=item 5.005-style threading
 
-The experimental C<legacy> pragma was swallowed by the C<feature> pragma.
+Introduced in Perl 5.005
 
-Introduced in: 5.11.2
+Removed in Perl 5.10
 
-Removed in: 5.11.3
+=item perlcc
+
+Introduced in Perl 5.005
+
+Moved from Perl 5.9.0 to CPAN
+
+=item The pseudo-hash data type
+
+Introduced in Perl 5.6.0
+
+Removed in Perl 5.9.0
+
+=item GetOpt::Long Options can now take multiple values at once (experimental)
+
+C<Getopt::Long> upgraded to version 2.35
+
+Removed in Perl 5.8.8
 
 =item Assertions
 
@@ -298,29 +312,13 @@ Removed in Perl 5.9.5
 
 Moved from Perl 5.10.1 to CPAN
 
-=item GetOpt::Long Options can now take multiple values at once (experimental)
+=item C<legacy>
 
-C<Getopt::Long> upgraded to version 2.35
+The experimental C<legacy> pragma was swallowed by the C<feature> pragma.
 
-Removed in Perl 5.8.8
+Introduced in: 5.11.2
 
-=item The pseudo-hash data type
-
-Introduced in Perl 5.6.0
-
-Removed in Perl 5.9.0
-
-=item 5.005-style threading
-
-Introduced in Perl 5.005
-
-Removed in Perl 5.10
-
-=item perlcc
-
-Introduced in Perl 5.005
-
-Moved from Perl 5.9.0 to CPAN
+Removed in: 5.11.3
 
 =back
 
