@@ -1745,7 +1745,7 @@ Perl_pad_tidy(pTHX_ padtidy_type type)
 	}
     }
 
-    /* extend curpad to match namepad */
+    /* extend namepad to match curpad */
     if (AvFILLp(PL_comppad_name) < AvFILLp(PL_comppad))
 	av_store(PL_comppad_name, AvFILLp(PL_comppad), NULL);
 
