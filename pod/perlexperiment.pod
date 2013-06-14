@@ -268,7 +268,9 @@ The C<\N> character class, not to be confused with the named character
 sequence C<\N{NAME}>, denotes any non-newline character in a regular
 expression.
 
-Introduced in: Perl 5.12
+Introduced in Perl 5.12
+
+Exact version of acceptance unclear, but no later than Perl 5.18.
 
 =back
 
