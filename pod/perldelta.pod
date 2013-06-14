@@ -648,6 +648,14 @@ package instead.  This has been fixed.
 
 C<./Configure -de -Dusevendorprefix> didn't default [RT #64126]
 
+=item *
+
+The C<Statement unlikely to be reached> warning was listed in
+L<perldiag> as an C<exec>-category warning, but was enabled and disabled
+by the C<syntax> category.  On the other hand, the C<exec> category
+controlled its fatal-ness.  It is now entirely handled by the C<exec>
+category.
+
 =back
 
 =head1 Known Problems
