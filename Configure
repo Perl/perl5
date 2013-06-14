@@ -22353,10 +22353,10 @@ esac
 : Check extensions
 echo " "
 echo "Looking for extensions..." >&4
-: If we are using the old config.sh, known_extensions may contain
-: old or inaccurate or duplicate values.
-known_extensions=''
+: If we are using the old config.sh, nonxs_extensions and xs_extensions may
+: contain old or inaccurate or duplicate values.
 nonxs_extensions=''
+xs_extensions=''
 : We do not use find because it might not be available.
 : We do not just use MANIFEST because the user may have dropped
 : some additional extensions into the source tree and expect them
@@ -22372,7 +22372,7 @@ find_extensions='
 	    DynaLoader|dynaload) ;;
 	    *)
 	    this_ext=`echo $xxx | $sed -e s/-/\\\//g`;
-	    echo " $known_extensions $nonxs_extensions" > $$.tmp;
+	    echo " $xs_extensions $nonxs_extensions" > $$.tmp;
 	    if $contains " $this_ext " $$.tmp; then
 		echo >&4;
 		echo "Duplicate directories detected for extension $xxx" >&4;
@@ -22393,9 +22393,9 @@ find_extensions='
 	    fi;
 	    $ls -1 $xxx > $$.tmp;
 	    if   $contains "\.xs$" $$.tmp > /dev/null 2>&1; then
-		known_extensions="$known_extensions $this_ext";
+		xs_extensions="$xs_extensions $this_ext";
 	    elif $contains "\.c$"  $$.tmp > /dev/null 2>&1; then
-		known_extensions="$known_extensions $this_ext";
+		xs_extensions="$xs_extensions $this_ext";
 	    elif $test -d $xxx; then
 		nonxs_extensions="$nonxs_extensions $this_ext";
 	    fi;
@@ -22416,17 +22416,18 @@ cd "$rsrc/ext"
 set X
 shift
 eval $find_extensions
-set X $known_extensions
+set X $xs_extensions
 shift
-known_extensions=`echo "$*" | tr ' ' $trnl | $sort | tr $trnl ' '`
+xs_extensions=`echo "$*" | tr ' ' $trnl | $sort | tr $trnl ' '`
 set X $nonxs_extensions
 shift
 nonxs_extensions=`echo "$*" | tr ' ' $trnl | $sort | tr $trnl ' '`
 cd "$tdir"
+known_extensions=`echo $nonxs_extensions $xs_extensions  | tr ' ' $trnl | $sort | tr $trnl ' '`
 
 : Now see which are supported on this system.
 avail_ext=''
-for xxx in $known_extensions ; do
+for xxx in $xs_extensions ; do
 	case "$xxx" in
 	DB_File|db_file)
 		case "$i_db" in

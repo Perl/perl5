@@ -92,8 +92,10 @@ sub _ext_ne {
 }
 
 *extensions = _ext_ne('known');
-# faithfully copy Configure in not including nonxs extensions for the nonce
-*known_extensions = _ext_ne('nonxs');
+
+sub known_extensions {
+    sort keys %ext;
+}
 
 sub is_static
 {

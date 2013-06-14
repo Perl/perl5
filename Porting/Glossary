@@ -2666,7 +2666,7 @@ expr (Loc.U):
 
 extensions (Extensions.U):
 	This variable holds a list of all extension files (both XS and
-	non-xs linked into the package.  It is propagated to Config.pm
+	non-xs) installed with the package.  It is propagated to Config.pm
 	and is typically used to test whether a particular extension
 	is available.
 
@@ -3620,8 +3620,12 @@ ivtype (perlxv.U):
 	This variable contains the C type used for Perl's IV.
 
 known_extensions (Extensions.U):
-	This variable holds a list of all XS extensions included in
-	the package.
+	This variable holds a list of all extensions (both XS and non-xs)
+	included in the package source distribution.  This information is
+	only really of use during the Perl build, as the list makes no
+	distinction between extensions which were build and installed, and
+	those which where not.  See "extensions" for the list of extensions
+	actually built and available.
 
 ksh (Loc.U):
 	This variable is defined but not used by Configure.
@@ -3990,8 +3994,10 @@ nm_so_opt (usenm.U):
 	Maybe Linux should just always set usenm=false.
 
 nonxs_ext (Extensions.U):
-	This variable holds a list of all non-xs extensions included
-	in the package.  All of them will be built.
+	This variable holds a list of all non-xs extensions built and
+	installed by the package.  By default, all non-xs extensions
+	distributed will be built, with the exception of platform-specific
+	extensions (currently only one VMS specific extension).
 
 nroff (Loc.U):
 	This variable is used internally by Configure to determine the
