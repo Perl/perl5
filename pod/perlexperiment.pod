@@ -32,10 +32,6 @@ Introduced in Perl 5.6.0
 
 See also L<perlsub>
 
-=item Long Doubles Still Don't Work In Solaris
-
-Introduced in Perl 5.7.0
-
 =item C<our> can now have an experimental optional attribute C<unique>
 
 Introduced in Perl 5.8.0
@@ -257,6 +253,12 @@ Introduced in Perl 5.6.0
 Introduced in Perl 5.6.1
 
 See also L<perlfork>
+
+=item Support for long doubles
+
+Introduced in Perl 5.6.0
+
+Accepted in Perl 5.8.1
 
 =item The C<\N> regex character class
 
