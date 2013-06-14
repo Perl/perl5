@@ -875,12 +875,7 @@ SETARGV_OBJ	= setargv$(o)
 .IF "$(ALL_STATIC)" == "define"
 # some exclusions, unfortunately, until fixed:
 #  - MakeMaker isn't capable enough for SDBM_File (small bug)
-#  - GCC's linker gets undefined references to _BZ2_compressBlock and
-#    _cp936_encoding, _cp932_encoding and others in Encode/CN.o and Encode/JP.o
 STATIC_EXT	= * !SDBM_File
-.IF "$(CCTYPE)" == "GCC"
-STATIC_EXT	+= !Compress/Raw/Bzip2 !Encode
-.ENDIF
 .ELSE
 # specify static extensions here, for example:
 # (be sure to include Win32CORE to load Win32 on demand)
@@ -1161,11 +1156,13 @@ $(PERLDLL): perldll.def $(PERLDLL_OBJ) $(PERLDLL_RES) Extensions_static
 
 $(PERLSTATICLIB): $(PERLDLL_OBJ) Extensions_static
 .IF "$(CCTYPE)" == "GCC"
+	$(LIB32) $(LIB_FLAGS) $@ $(PERLDLL_OBJ)
 	if exist $(STATICDIR) rmdir /s /q $(STATICDIR)
-	mkdir $(STATICDIR)
-	cd $(STATICDIR) && for %i in ($(shell @type Extensions_static)) do $(ARCHPREFIX)ar x ..\%i
-	$(LIB32) $(LIB_FLAGS) $@ $(STATICDIR)\*$(o) $(PERLDLL_OBJ)
-	rmdir /s /q $(STATICDIR)
+	for %i in ($(shell @type Extensions_static)) do \
+		@mkdir $(STATICDIR) && cd $(STATICDIR) && \
+		$(ARCHPREFIX)ar x ..\%i && \
+		$(ARCHPREFIX)ar q ..\$@ *$(o) && \
+		cd .. && rmdir /s /q $(STATICDIR)
 .ELSE
 	$(LIB32) $(LIB_FLAGS) -out:$@ @Extensions_static \
 	    @$(mktmp $(PERLDLL_OBJ))
