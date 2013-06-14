@@ -84,14 +84,9 @@ sub _ext_eq {
 *static_ext = _ext_eq('static');
 *nonxs_ext = _ext_eq('nonxs');
 
-sub _ext_ne {
-    my $key = shift;
-    sub {
-        sort grep $ext{$_} ne $key, keys %ext;
-    }
+sub extensions {
+    sort grep $ext{$_} ne 'known', keys %ext;
 }
-
-*extensions = _ext_ne('known');
 
 sub known_extensions {
     sort keys %ext;
