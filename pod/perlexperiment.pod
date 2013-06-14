@@ -36,10 +36,6 @@ Introduced in Perl 5.9.2
 
 See also L<Socket>
 
-=item L<Pod::HTML2Pod|Pod::HTML2Pod>
-
-=item L<Pod::PXML|Pod::PXML>
-
 =item The <:pop> IO pseudolayer
 
 See also L<perlrun>
