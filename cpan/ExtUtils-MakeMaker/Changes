@@ -1,3 +1,41 @@
+6.68 Fri Jun 14 23:26:11 BST 2013
+    No changes from 6.67_05
+
+6.67_05 Thu Jun 13 21:52:46 BST 2013
+    Doc fixes:
+    * RT#86007 - Restore meaning for divorced sentence
+
+6.67_04 Mon Jun 10 20:18:25 BST 2013
+    Bug fixes
+    * Address RT#85406, where specifying 'meta-spec' in
+      META_[ADD|MERGE] would remove all prereqs (bingos)
+
+6.67_03 Wed Jun  5 22:03:28 BST 2013
+    Doc Fixes
+    * Document how to specify meta-spec in META_MERGE (bingos)
+
+6.67_02 Sun Jun  2 18:27:45 BST 2013
+    Bug Fixes
+    * Allow v-prefixed version strings once more (bingos)
+    * Typos fixed (David Steinbrunner)
+    * Resolve test failure with latest CPAN::Meta
+
+6.67_01 Thu Apr 25 21:03:58 BST 2013
+    Doc Fixes
+    * Change references to makemaker.org in the docs
+      (Reported as RT#83246 by dolmen)
+
+    VOS Fixes
+    * 'core' files are keep files (*.kp) on vos, adjust the
+      'clean' target to account for this (Paul Green)
+
+    Win32 Fixes
+    * Increase dmake MAXLINELENGTH to 800000 (RT#77215) as
+      per kmx's recommendations (kmx)
+
+    Cygwin Fixes
+    * Allow linking of Cygwin libraries (Reini Urban)
+
 6.66 Fri Apr 19 17:53:13 BST 2013
     No changes from 6.65_03
 

@@ -15,7 +15,7 @@ use ExtUtils::MakeMaker qw($Verbose neatvalue);
 
 # If we make $VERSION an our variable parse_version() breaks
 use vars qw($VERSION);
-$VERSION = '6.66';
+$VERSION = '6.68';
 $VERSION = eval $VERSION;  ## no critic [BuiltinFunctions::ProhibitStringyEval]
 
 require ExtUtils::MM_Any;
@@ -1087,7 +1087,7 @@ sub fixin {    # stolen from the pink Camel book, more or less
         open( my $fixin, '<', $file ) or croak "Can't process '$file': $!";
         local $/ = "\n";
         chomp( my $line = <$fixin> );
-        next unless $line =~ s/^\s*\#!\s*//;    # Not a shbang file.
+        next unless $line =~ s/^\s*\#!\s*//;    # Not a shebang file.
 
         my $shb = $self->_fixin_replace_shebang( $file, $line );
         next unless defined $shb;
@@ -1874,7 +1874,7 @@ sub init_PERL {
     push @perls, map { "$_$Config{exe_ext}" }
                      ('perl', 'perl5', "perl$Config{version}");
 
-    # miniperl has priority over all but the cannonical perl when in the
+    # miniperl has priority over all but the canonical perl when in the
     # core.  Otherwise its a last resort.
     my $miniperl = "miniperl$Config{exe_ext}";
     if( $self->{PERL_CORE} ) {
@@ -2367,7 +2367,7 @@ $(MAKE_APERL_FILE) : $(FIRST_MAKEFILE) pm_to_blib
 	# don't include the installed version of this extension. I
 	# leave this line here, although it is not necessary anymore:
 	# I patched minimod.PL instead, so that Miniperl.pm won't
-	# enclude duplicates
+	# include duplicates
 
 	# Once the patch to minimod.PL is in the distribution, I can
 	# drop it

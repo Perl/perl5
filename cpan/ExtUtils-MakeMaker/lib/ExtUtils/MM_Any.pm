@@ -1,7 +1,7 @@
 package ExtUtils::MM_Any;
 
 use strict;
-our $VERSION = '6.66';
+our $VERSION = '6.68';
 
 use Carp;
 use File::Spec;
@@ -531,10 +531,10 @@ clean :: clean_subdirs
 #     push @dirs, qw($(INST_ARCHLIB) $(INST_LIB)
 #                    $(INST_BIN) $(INST_SCRIPT)
 #                    $(INST_MAN1DIR) $(INST_MAN3DIR)
-#                    $(INST_LIBDIR) $(INST_ARCHLIBDIR) $(INST_AUTODIR) 
+#                    $(INST_LIBDIR) $(INST_ARCHLIBDIR) $(INST_AUTODIR)
 #                    $(INST_STATIC) $(INST_DYNAMIC) $(INST_BOOT)
 #                 );
-                  
+
 
     if( $attribs{FILES} ) {
         # Use @dirs because we don't know what's in here.
@@ -543,7 +543,7 @@ clean :: clean_subdirs
                         split /\s+/, $attribs{FILES}   ;
     }
 
-    push(@files, qw[$(MAKE_APERL_FILE) 
+    push(@files, qw[$(MAKE_APERL_FILE)
                     MYMETA.json MYMETA.yml perlmain.c tmon.out mon.out so_locations
                     blibdirs.ts pm_to_blib pm_to_blib.ts
                     *$(OBJ_EXT) *$(LIB_EXT) perl.exe perl perl$(EXE_EXT)
@@ -556,7 +556,13 @@ clean :: clean_subdirs
     push(@files, $self->catfile('$(INST_ARCHAUTODIR)','extralibs.ld'));
 
     # core files
-    push(@files, qw[core core.*perl.*.? *perl.core]);
+    if ($^O eq 'vos') {
+        push(@files, qw[perl*.kp]);
+    }
+    else {
+        push(@files, qw[core core.*perl.*.? *perl.core]);
+    }
+
     push(@files, map { "core." . "[0-9]"x$_ } (1..5));
 
     # OS specific things to clean up.  Use @dirs since we don't know
@@ -625,7 +631,7 @@ Because depending on a directory to just ensure it exists doesn't work
 too well (the modified time changes too often) dir_target() creates a
 .exists file in the created directory.  It is this you should depend on.
 For portability purposes you should use the $(DIRFILESEP) macro rather
-than a '/' to seperate the directory from the file.
+than a '/' to separate the directory from the file.
 
     yourdirectory$(DIRFILESEP).exists
 
@@ -683,7 +689,7 @@ MAKE_FRAG
 =head3 dist_test
 
 Defines a target that produces the distribution in the
-scratchdirectory, and runs 'perl Makefile.PL; make ;make test' in that
+scratch directory, and runs 'perl Makefile.PL; make ;make test' in that
 subdirectory.
 
 =cut
@@ -999,7 +1005,13 @@ sub metafile_data {
         };
     }
 
-    %meta = $self->_add_requirements_to_meta_v1_4( %meta );
+    {
+      my $vers = _metaspec_version( $meta_add, $meta_merge );
+      my $method = $vers =~ m!^2!
+               ? '_add_requirements_to_meta_v2'
+               : '_add_requirements_to_meta_v1_4';
+      %meta = $self->$method( %meta );
+    }
 
     while( my($key, $val) = each %$meta_add ) {
         $meta{$key} = $val;
@@ -1016,6 +1028,17 @@ sub metafile_data {
 =begin private
 
 =cut
+
+sub _metaspec_version {
+  my ( $meta_add, $meta_merge ) = @_;
+  return $meta_add->{'meta-spec'}->{version}
+    if defined $meta_add->{'meta-spec'}
+       and defined $meta_add->{'meta-spec'}->{version};
+  return $meta_merge->{'meta-spec'}->{version}
+    if defined $meta_merge->{'meta-spec'}
+       and  defined $meta_merge->{'meta-spec'}->{version};
+  return '1.4';
+}
 
 sub _add_requirements_to_meta_v1_4 {
     my ( $self, %meta ) = @_;
@@ -1977,7 +2000,7 @@ sub init_VERSION {
 
     # Graham Barr and Paul Marquess had some ideas how to ensure
     # version compatibility between the *.pm file and the
-    # corresponding *.xs file. The bottomline was, that we need an
+    # corresponding *.xs file. The bottom line was, that we need an
     # XS_VERSION macro that defaults to VERSION:
     $self->{XS_VERSION} ||= $self->{VERSION};
 
@@ -2194,7 +2217,7 @@ sub tools_other {
   $MM->init_DIRFILESEP;
   my $dirfilesep = $MM->{DIRFILESEP};
 
-Initializes the DIRFILESEP macro which is the seperator between the
+Initializes the DIRFILESEP macro which is the separator between the
 directory and filename in a filepath.  ie. / on Unix, \ on Win32 and
 nothing on VMS.
 
@@ -2206,8 +2229,8 @@ For example:
 Something of a hack but it prevents a lot of code duplication between
 MM_* variants.
 
-Do not use this as a seperator between directories.  Some operating
-systems use different seperators between subdirectories as between
+Do not use this as a separator between directories.  Some operating
+systems use different separators between subdirectories as between
 directories and filenames (for example:  VOLUME:[dir1.dir2]file on VMS).
 
 =head3 init_linker  I<Abstract>
@@ -2236,7 +2259,7 @@ Some OSes do not need these in which case leave it blank.
 
 Initialize any macros which are for platform specific use only.
 
-A typical one is the version number of your OS specific mocule.
+A typical one is the version number of your OS specific module.
 (ie. MM_Unix_VERSION or MM_VMS_VERSION).
 
 =cut
@@ -2309,7 +2332,7 @@ sub POD2MAN_macro {
     my $self = shift;
 
 # Need the trailing '--' so perl stops gobbling arguments and - happens
-# to be an alternative end of line seperator on VMS so we quote it
+# to be an alternative end of line separator on VMS so we quote it
     return <<'END_OF_DEF';
 POD2MAN_EXE = $(PERLRUN) "-MExtUtils::Command::MM" -e pod2man "--"
 POD2MAN = $(POD2MAN_EXE)

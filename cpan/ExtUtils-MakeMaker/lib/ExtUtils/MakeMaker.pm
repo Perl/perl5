@@ -18,7 +18,7 @@ our @Overridable;
 my @Prepend_parent;
 my %Recognized_Att_Keys;
 
-our $VERSION = '6.66';
+our $VERSION = '6.68';
 $VERSION = eval $VERSION;  ## no critic [BuiltinFunctions::ProhibitStringyEval]
 
 # Emulate something resembling CVS $Revision$
@@ -978,7 +978,7 @@ sub mv_all_methods {
 
     # We have to clean out %INC also, because the current directory is
     # changed frequently and Graham Barr prefers to get his version
-    # out of a History.pl file which is "required" so woudn't get
+    # out of a History.pl file which is "required" so wouldn't get
     # loaded again in another extension requiring a History.pl
 
     # With perl5.002_01 the deletion of entries in %INC caused Tk-b11
@@ -1127,7 +1127,7 @@ sub clean_versions {
     for my $module (keys %$reqs) {
         my $version = $reqs->{$module};
 
-        if( !defined $version or $version !~ /^[\d_\.]+$/ ) {
+        if( !defined $version or $version !~ /^v?[\d_\.]+$/ ) {
             carp "Unparsable version '$version' for prerequisite $module";
             $reqs->{$module} = 0;
         }
@@ -2029,6 +2029,22 @@ own.  META_MERGE will merge its value with the default.
 Unless you want to override the defaults, prefer META_MERGE so as to
 get the advantage of any future defaults.
 
+By default CPAN Meta specification C<1.4> is used. In order to use
+CPAN Meta specification C<2.0>, indicate with C<meta-spec> the version
+you want to use.
+
+  META_MERGE        => {
+
+    "meta-spec" => { version => 2 },
+
+    repository => {
+      type => 'git',
+      url => 'git://github.com/Perl-Toolchain-Gang/ExtUtils-MakeMaker.git',
+      web => 'https://github.com/Perl-Toolchain-Gang/ExtUtils-MakeMaker',
+    },
+
+  },
+
 =item MIN_PERL_VERSION
 
 The minimum required version of Perl for this distribution.
@@ -2470,6 +2486,8 @@ but these will fail:
     local $VERSION      = '1.02';
     local $FOO::VERSION = '1.30';
 
+(Putting C<my> or C<local> on the preceding line will work o.k.)
+
 "Version strings" are incompatible and should not be used.
 
     # Bad
@@ -2483,8 +2501,6 @@ as $VERSION is declared.
 
     # All on one line
     use version; our $VERSION = qv(1.2.3);
-
-(Putting C<my> or C<local> on the preceding line will work o.k.)
 
 The file named in VERSION_FROM is not added as a dependency to
 Makefile. This is not really correct, but it would be a major pain
@@ -2916,13 +2932,13 @@ Send patches and ideas to C<makemaker@perl.org>.
 Send bug reports via http://rt.cpan.org/.  Please send your
 generated Makefile along with your report.
 
-For more up-to-date information, see L<http://www.makemaker.org>.
+For more up-to-date information, see L<https://metacpan.org/release/ExtUtils-MakeMaker>.
 
 Repository available at L<https://github.com/Perl-Toolchain-Gang/ExtUtils-MakeMaker>.
 
 =head1 LICENSE
 
-This program is free software; you can redistribute it and/or 
+This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
 
 See L<http://www.perl.com/perl/misc/Artistic.html>

@@ -15,7 +15,7 @@ BEGIN {
 
 use File::Basename;
 
-our $VERSION = '6.66';
+our $VERSION = '6.68';
 
 require ExtUtils::MM_Any;
 require ExtUtils::MM_Unix;
@@ -251,7 +251,7 @@ sub find_perl {
 =item _fixin_replace_shebang (override)
 
 Helper routine for MM->fixin(), overridden because there's no such thing as an
-actual shebang line that will be intepreted by the shell, so we just prepend
+actual shebang line that will be interpreted by the shell, so we just prepend
 $Config{startperl} and preserve the shebang line argument for any switches it
 may contain.
 
@@ -396,7 +396,7 @@ sub init_DEST {
 
 =item init_DIRFILESEP
 
-No seperator between a directory path and a filename on VMS.
+No separator between a directory path and a filename on VMS.
 
 =cut
 

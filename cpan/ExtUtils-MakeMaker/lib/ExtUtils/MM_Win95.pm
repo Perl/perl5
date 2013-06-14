@@ -2,7 +2,7 @@ package ExtUtils::MM_Win95;
 
 use strict;
 
-our $VERSION = '6.66';
+our $VERSION = '6.68';
 
 require ExtUtils::MM_Win32;
 our @ISA = qw(ExtUtils::MM_Win32);
@@ -116,7 +116,7 @@ Currently maintained by Michael G Schwern C<schwern@pobox.com>.
 
 Send patches and ideas to C<makemaker@perl.org>.
 
-See http://www.makemaker.org.
+See https://metacpan.org/release/ExtUtils-MakeMaker.
 
 =cut
 
