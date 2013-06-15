@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan( tests => 16 );
+plan( tests => 17 );
 
 sub empty_sub {}
 
@@ -85,3 +85,26 @@ undef *foo;
 undef *bar;
 print "ok\n";
 end
+
+# The outer call sets the scalar returned by ${\""}.${\""} to the current
+# package name.
+# The inner call sets it to "road".
+# Each call records the value twice, the outer call surrounding the inner
+# call.  In 5.10-5.18 under ithreads, what gets pushed is
+# qw(main road road road) because the inner call is clobbering the same
+# scalar.  If __PACKAGE__ is changed to "main", it works, the last element
+# becoming "main".
+my @scratch;
+sub a {
+  for (${\""}.${\""}) {
+    $_ = $_[0];
+    push @scratch, $_;
+    a("road",1) unless $_[1];
+    push @scratch, $_;
+  }
+}
+a(__PACKAGE__);
+require Config;
+$::TODO = "not fixed yet" if $Config::Config{useithreads};
+is "@scratch", "main road road main",
+   'recursive calls do not share shared-hash-key TARGs';
