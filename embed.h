@@ -868,6 +868,7 @@
 #define reg_numbered_buff_length(a,b,c)	Perl_reg_numbered_buff_length(aTHX_ a,b,c)
 #define reg_numbered_buff_store(a,b,c)	Perl_reg_numbered_buff_store(aTHX_ a,b,c)
 #define reg_qr_package(a)	Perl_reg_qr_package(aTHX_ a)
+#define reg_set_capture_string(a,b,c,d,e,f)	Perl_reg_set_capture_string(aTHX_ a,b,c,d,e,f)
 #define reg_temp_copy(a,b)	Perl_reg_temp_copy(aTHX_ a,b)
 #define regprop(a,b,c)		Perl_regprop(aTHX_ a,b,c)
 #define report_uninit(a)	Perl_report_uninit(aTHX_ a)
