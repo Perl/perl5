@@ -14,7 +14,7 @@ use File::Spec;
 
 no warnings 'utf8';
 
-our $VERSION = '0.97';
+our $VERSION = '0.98';
 our $PACKAGE = __PACKAGE__;
 
 ### begin XS only ###
@@ -118,11 +118,11 @@ our @ChangeNG = qw/
     derivCode normCode rearrangeHash backwardsFlag
     suppress suppressHash
     __useXS /; ### XS only
-# The hash key 'ignored' is deleted at v 0.21.
-# The hash key 'isShift' is deleted at v 0.23.
-# The hash key 'combining' is deleted at v 0.24.
-# The hash key 'entries' is deleted at v 0.30.
-# The hash key 'L3_ignorable' is deleted at v 0.40.
+# The hash key 'ignored' was deleted at v 0.21.
+# The hash key 'isShift' was deleted at v 0.23.
+# The hash key 'combining' was deleted at v 0.24.
+# The hash key 'entries' was deleted at v 0.30.
+# The hash key 'L3_ignorable' was deleted at v 0.40.
 
 sub version {
     my $self = shift;
@@ -311,7 +311,7 @@ sub parseAtmark {
     elsif ($line =~ /^backwards\s+(\S*)/) {
 	push @{ $self->{backwardsTable} }, $1;
     }
-    elsif ($line =~ /^forwards\s+(\S*)/) { # parhaps no use
+    elsif ($line =~ /^forwards\s+(\S*)/) { # perhaps no use
 	push @{ $self->{forwardsTable} }, $1;
     }
     elsif ($line =~ /^rearrange\s+(.*)/) { # (\S*) is NG
@@ -397,7 +397,7 @@ sub parseEntry
     if (defined $self->{undefChar} || defined $self->{ignoreChar}) {
 	my $ele = pack_U(@uv);
 
-	# regarded as if it were not entried in the table
+	# regarded as if it were not stored in the table
 	return
 	    if defined $self->{undefChar} && $ele =~ /$self->{undefChar}/;
 
@@ -1212,9 +1212,9 @@ C<$str> may be C<"abcd">, C<"abc012">, but should not include C<U+FFFF>
 such as C<"abc\x{FFFF}xyz">.
 
 C<$coll-E<gt>le($str, "abc\x{FFFF}")> works like C<$coll-E<gt>lt($str, "abd")>
-almostly, but the latter has a problem that you should know which letter is
+almost, but the latter has a problem that you should know which letter is
 next to C<c>. For a certain language where C<ch> as the next letter,
-C<"abch"> is greater than C<"abc\x{FFFF}">, but lesser than C<"abd">.
+C<"abch"> is greater than C<"abc\x{FFFF}">, but less than C<"abd">.
 
 Note: This is equivalent to C<entry =E<gt> 'FFFF ; [.FFFE.0020.0005.FFFF]'>.
 Any other character than C<U+FFFF> can be tailored by C<entry>.
@@ -1231,7 +1231,7 @@ If the parameter is made true, a final, tie-breaking level is used.
 If no difference of weights is found after the comparison through
 all the level specified by C<level>, the comparison with code points
 will be performed.
-For the tie-breaking comparision, the sort key has code points
+For the tie-breaking comparison, the sort key has code points
 of the original string appended.
 Completely ignorable characters are not ignored.
 
@@ -1374,7 +1374,7 @@ B<Unicode::Normalize> is required (see also B<CAVEAT>).
 -- see 7.1 Derived Collation Elements, UTS #10.
 
 By default, CJK unified ideographs are ordered in Unicode codepoint
-order, but those in the CJK Unified Ideographs block are lesser than
+order, but those in the CJK Unified Ideographs block are less than
 those in the CJK Unified Ideographs Extension A etc.
 
     In the CJK Unified Ideographs block:
@@ -1492,7 +1492,7 @@ L<perluniintro>, L<perlunitut>, L<perlunifaq>, L<utf8>.
 -- see 3.5 Rearrangement, UTS #10.
 
 Characters that are not coded in logical order and to be rearranged.
-If C<UCA_Version> is equal to or lesser than 11, default is:
+If C<UCA_Version> is equal to or less than 11, default is:
 
     rearrange => [ 0x0E40..0x0E44, 0x0EC0..0x0EC4 ],
 
@@ -1661,7 +1661,7 @@ Sorts a list of strings.
 
 Returns 1 (when C<$a> is greater than C<$b>)
 or 0 (when C<$a> is equal to C<$b>)
-or -1 (when C<$a> is lesser than C<$b>).
+or -1 (when C<$a> is less than C<$b>).
 
 =item C<$result = $Collator-E<gt>eq($a, $b)>
 
@@ -1679,8 +1679,8 @@ They works like the same name operators as theirs.
 
    eq : whether $a is equal to $b.
    ne : whether $a is not equal to $b.
-   lt : whether $a is lesser than $b.
-   le : whether $a is lesser than $b or equal to $b.
+   lt : whether $a is less than $b.
+   le : whether $a is less than $b or equal to $b.
    gt : whether $a is greater than $b.
    ge : whether $a is greater than $b or equal to $b.
 
@@ -1727,7 +1727,7 @@ differ from those on the specified string.
 
 C<rearrange> and C<hangul_terminator> parameters are neglected.
 C<katakana_before_hiragana> and C<upper_before_lower> don't affect
-matching and searching, as it doesn't matter whether greater or lesser.
+matching and searching, as it doesn't matter whether greater or less.
 
 =over 4
 
@@ -1960,7 +1960,7 @@ B<Unicode::Normalize is required to try The Conformance Test.>
 =head1 AUTHOR, COPYRIGHT AND LICENSE
 
 The Unicode::Collate module for perl was written by SADAHIRO Tomoyuki,
-<SADAHIRO@cpan.org>. This module is Copyright(C) 2001-2012,
+<SADAHIRO@cpan.org>. This module is Copyright(C) 2001-2013,
 SADAHIRO Tomoyuki. Japan. All rights reserved.
 
 This module is free software; you can redistribute it and/or

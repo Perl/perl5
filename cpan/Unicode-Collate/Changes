@@ -1,9 +1,12 @@
 Revision history for Perl module Unicode::Collate.
 
+0.98  Sat Jun 15 19:44:06 2013
+    - typo (see [rt.cpan.org #85655] typo fixes)
+
 0.97  Sat Dec 22 14:25:50 2012
     - bug fix: XS of 0.96 (if UCA_Version is 9 to 11) wrongly referred to
       DUCET for completely ignorable characters, even though the collator
-      don't use DUCET.
+      doesn't use DUCET.
     - separated t/notable.t from t/test.t.
 
 0.96  Sat Dec 15 19:43:10 2012
