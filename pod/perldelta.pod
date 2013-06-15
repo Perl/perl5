@@ -360,10 +360,36 @@ introduced in v5.18.0's debugger. [RT #118169]
 
 =item *
 
+Fixed a small number of regexp constructions that could either fail to
+match or crash perl when the string being matched against was
+allocated above the 2GB line on 32-bit systems. [RT #118175]
+
+=item *
+
 Perl v5.16 inadvertently introduced a bug whereby calls to XSUBs that were
 not visible at compile time were treated as lvalues and could be assigned
 to, even when the subroutine was not an lvalue sub.  This has been fixed.
 [perl #117947]
+
+=item *
+
+Perl v5.18 inadvertently introduced a bug whereby dual-vars (i.e.
+variables with both string and numeric values, such as C<$!> ) where the
+truthness of the variable was determined by the numeric value rather than
+the string value. [RT #118159]
+
+=item *
+
+Perl v5.18 inadvertently introduced a bug whereby interpolating mixed up-
+and down-graded UTF-8 strings in a regex could result in malformed UTF-8
+in the pattern: specifically if a downgraded character in the range
+C<\x80..\xff> followed a UTF-8 string, e.g.
+
+    utf8::upgrade(  my $u = "\x{e5}");
+    utf8::downgrade(my $d = "\x{e5}");
+    /$u$d/
+
+[perl #118297].
 
 =back
 
