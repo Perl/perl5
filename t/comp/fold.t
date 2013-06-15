@@ -4,7 +4,7 @@
 # we've not yet verified that use works.
 # use strict;
 
-print "1..26\n";
+print "1..27\n";
 my $test = 0;
 
 # Historically constant folding was performed by evaluating the ops, and if
@@ -149,3 +149,12 @@ eval "truncate 1 ? $n : 0, 0;";
 print "not " unless -z $n;
 print "ok ", ++$test, " - truncate(const ? word : ...)\n";
 unlink $n;
+
+# Constant folding should not change the mutability of returned values.
+for(1+2) {
+    eval { $_++ };
+    print "not " unless $_ eq 4;
+    print "ok ", ++$test,
+          " - 1+2 returns mutable value, just like \$a+\$b",
+          " # TODO\n";
+}
