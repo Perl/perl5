@@ -3,7 +3,7 @@ package HTTP::Tiny;
 use strict;
 use warnings;
 # ABSTRACT: A small, simple, correct HTTP/1.1 client
-our $VERSION = '0.029'; # VERSION
+our $VERSION = '0.030'; # VERSION
 
 use Carp ();
 
@@ -259,20 +259,21 @@ sub _prepare_headers_and_cb {
     $request->{headers}{'connection'}   = "close";
     $request->{headers}{'user-agent'} ||= $self->{agent};
 
-    if (defined $args->{content}) {
-        $request->{headers}{'content-type'} ||= "application/octet-stream";
+    if ( defined $args->{content} ) {
         if (ref $args->{content} eq 'CODE') {
+            $request->{headers}{'content-type'} ||= "application/octet-stream";
             $request->{headers}{'transfer-encoding'} = 'chunked'
               unless $request->{headers}{'content-length'}
                   || $request->{headers}{'transfer-encoding'};
             $request->{cb} = $args->{content};
         }
-        else {
+        elsif ( length $args->{content} ) {
             my $content = $args->{content};
             if ( $] ge '5.008' ) {
                 utf8::downgrade($content, 1)
                     or die(qq/Wide character in request message body\n/);
             }
+            $request->{headers}{'content-type'} ||= "application/octet-stream";
             $request->{headers}{'content-length'} = length $content
               unless $request->{headers}{'content-length'}
                   || $request->{headers}{'transfer-encoding'};
@@ -973,7 +974,7 @@ HTTP::Tiny - A small, simple, correct HTTP/1.1 client
 
 =head1 VERSION
 
-version 0.029
+version 0.030
 
 =head1 SYNOPSIS
 
@@ -1119,7 +1120,7 @@ The C<success> field of the response will be true if the status code is 2XX.
 
 Executes a C<GET> request for the URL and saves the response body to the file
 name provided.  The URL must have unsafe characters escaped and international
-domain names encoded.  If the file already exists, the request will includes an
+domain names encoded.  If the file already exists, the request will include an
 C<If-Modified-Since> header with the modification timestamp of the file.  You
 may specify a different C<If-Modified-Since> header yourself in the C<<
 $options->{headers} >> hash.
@@ -1179,6 +1180,9 @@ body received.
 If the C<content> option is a code reference, it will be called iteratively
 to provide the content body of the request.  It should return the empty
 string or undef when the iterator is exhausted.
+
+If the C<content> option is the empty string, no C<content-type> or
+C<content-length> headers will be generated.
 
 If the C<data_callback> option is provided, it will be called iteratively until
 the entire response body is received.  The first argument will be a string
@@ -1508,6 +1512,10 @@ Jess Robinson <castaway@desert-island.me.uk>
 =item *
 
 Lukas Eklund <leklund@gmail.com>
+
+=item *
+
+Martin-Louis Bright <mlbright@gmail.com>
 
 =item *
 
