@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan( tests => 18 );
+plan( tests => 20 );
 
 sub empty_sub {}
 
@@ -114,3 +114,12 @@ $::TODO = "not fixed yet";
 sub { is \$_[0], \$_[0],
         '[perl #78194] \$_[0] == \$_[0] when @_ aliases "$x"' }
  ->("${\''}");
+
+# The return statement should make no difference in this case:
+sub not_constant () {        42 }
+sub not_constantr() { return 42 }
+eval { ${\not_constant}++ };
+is $@, "", 'sub (){42} returns a mutable value';
+undef $::TODO;
+eval { ${\not_constantr}++ };
+is $@, "", 'sub (){ return 42 } returns a mutable value';
