@@ -1751,7 +1751,7 @@ S_finalize_op(pTHX_ OP* o)
 	 * Despite being a "constant", the SV is written to,
 	 * for reference counts, sv_upgrade() etc. */
 	if (cSVOPo->op_sv) {
-	    const PADOFFSET ix = pad_alloc(OP_CONST, SVs_PADTMP);
+	    const PADOFFSET ix = pad_alloc(OP_CONST, SVf_READONLY);
 	    if (o->op_type != OP_METHOD_NAMED &&
 		(SvPADTMP(cSVOPo->op_sv) || SvPADMY(cSVOPo->op_sv)))
 	    {

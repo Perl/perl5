@@ -758,6 +758,7 @@ perl_destruct(pTHXx)
 	/* ensure comppad/curpad to refer to main's pad */
 	if (CvPADLIST(PL_main_cv)) {
 	    PAD_SET_CUR_NOSAVE(CvPADLIST(PL_main_cv), 1);
+	    PL_comppad_name = PadlistNAMES(CvPADLIST(PL_main_cv));
 	}
 	op_free(PL_main_root);
 	PL_main_root = NULL;

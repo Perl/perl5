@@ -56,8 +56,9 @@ at that depth of recursion into the CV.  The 0th slot of a frame AV is an
 AV which is @_.  Other entries are storage for variables and op targets.
 
 Iterating over the PADNAMELIST iterates over all possible pad
-items.  Pad slots that are SVs_PADTMP (targets/GVs/constants) end up having
-&PL_sv_undef "names" (see pad_alloc()).
+items.  Pad slots for targets (SVs_PADTMP) and GVs end up having &PL_sv_no
+"names", while slots for constants have &PL_sv_no "names" (see
+pad_alloc()).
 
 Only my/our variable (SvPADMY/PADNAME_isOUR) slots get valid names.
 The rest are op targets/GVs/constants which are statically allocated
@@ -711,6 +712,10 @@ which will be set in the value SV for the allocated pad entry:
 
     SVs_PADMY    named lexical variable ("my", "our", "state")
     SVs_PADTMP   unnamed temporary store
+    SVf_READONLY constant shared between recursion levels
+
+C<SVf_READONLY> has been supported here only since perl 5.20.  To work with
+earlier versions as well, use C<SVf_READONLY|SVs_PADTMP>.
 
 I<optype> should be an opcode indicating the type of operation that the
 pad entry is to support.  This doesn't affect operational semantics,
@@ -762,6 +767,11 @@ Perl_pad_alloc(pTHX_ I32 optype, U32 tmptype)
 	    if (!(SvFLAGS(sv) & (SVs_PADTMP | SVs_PADMY)) &&
 		!IS_PADGV(sv) && !IS_PADCONST(sv))
 		break;
+	}
+	if (tmptype & SVf_READONLY) {
+	    av_store(PL_comppad_name, PL_padix, &PL_sv_no);
+	    tmptype &= ~SVf_READONLY;
+	    tmptype |= SVs_PADTMP;
 	}
 	retval = PL_padix;
     }
@@ -874,7 +884,7 @@ S_pad_check_dup(pTHX_ SV *name, U32 flags, const HV *ourstash)
     for (off = top; (I32)off > PL_comppad_name_floor; off--) {
 	SV * const sv = svp[off];
 	if (sv
-	    && sv != &PL_sv_undef
+	    && PadnameLEN(sv)
 	    && !SvFAKE(sv)
 	    && (   COP_SEQ_RANGE_LOW(sv)  == PERL_PADSEQ_INTRO
 		|| COP_SEQ_RANGE_HIGH(sv) == PERL_PADSEQ_INTRO)
@@ -899,7 +909,7 @@ S_pad_check_dup(pTHX_ SV *name, U32 flags, const HV *ourstash)
 	while (off > 0) {
 	    SV * const sv = svp[off];
 	    if (sv
-		&& sv != &PL_sv_undef
+		&& PadnameLEN(sv)
 		&& !SvFAKE(sv)
 		&& (   COP_SEQ_RANGE_LOW(sv)  == PERL_PADSEQ_INTRO
 		    || COP_SEQ_RANGE_HIGH(sv) == PERL_PADSEQ_INTRO)
@@ -975,10 +985,9 @@ Perl_pad_findmy_pvn(pTHX_ const char *namepv, STRLEN namelen, U32 flags)
     name_svp = AvARRAY(nameav);
     for (offset = AvFILLp(nameav); offset > 0; offset--) {
         const SV * const namesv = name_svp[offset];
-	if (namesv && namesv != &PL_sv_undef
+	if (namesv && PadnameLEN(namesv) == namelen
 	    && !SvFAKE(namesv)
 	    && (SvPAD_OUR(namesv))
-	    && SvCUR(namesv) == namelen
             && sv_eq_pvn_flags(aTHX_ namesv, namepv, namelen,
                                 flags & padadd_UTF8_NAME ? SVf_UTF8 : 0 )
 	    && COP_SEQ_RANGE_LOW(namesv) == PERL_PADSEQ_INTRO
@@ -1167,8 +1176,7 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv,
 
 	for (offset = AvFILLp(nameav); offset > 0; offset--) {
             const SV * const namesv = name_svp[offset];
-	    if (namesv && namesv != &PL_sv_undef
-		    && SvCUR(namesv) == namelen
+	    if (namesv && PadnameLEN(namesv) == namelen
                     && sv_eq_pvn_flags(aTHX_ namesv, namepv, namelen,
                                     flags & padadd_UTF8_NAME ? SVf_UTF8 : 0))
 	    {
@@ -1517,7 +1525,7 @@ Perl_intro_my(pTHX)
     for (i = PL_min_intro_pending; i <= PL_max_intro_pending; i++) {
 	SV * const sv = svp[i];
 
-	if (sv && sv != &PL_sv_undef && !SvFAKE(sv)
+	if (sv && PadnameLEN(sv) && !SvFAKE(sv)
 	    && COP_SEQ_RANGE_LOW(sv) == PERL_PADSEQ_INTRO)
 	{
 	    COP_SEQ_RANGE_HIGH_set(sv, PERL_PADSEQ_INTRO); /* Don't know scope end yet. */
@@ -1565,7 +1573,7 @@ Perl_pad_leavemy(pTHX)
     if (PL_min_intro_pending && PL_comppad_name_fill < PL_min_intro_pending) {
 	for (off = PL_max_intro_pending; off >= PL_min_intro_pending; off--) {
 	    const SV * const sv = svp[off];
-	    if (sv && sv != &PL_sv_undef && !SvFAKE(sv))
+	    if (sv && PadnameLEN(sv) && !SvFAKE(sv))
 		Perl_ck_warner_d(aTHX_ packWARN(WARN_INTERNAL),
 				 "%"SVf" never introduced",
 				 SVfARG(sv));
@@ -1574,7 +1582,7 @@ Perl_pad_leavemy(pTHX)
     /* "Deintroduce" my variables that are leaving with this scope. */
     for (off = AvFILLp(PL_comppad_name); off > PL_comppad_name_fill; off--) {
 	SV * const sv = svp[off];
-	if (sv && sv != &PL_sv_undef && !SvFAKE(sv)
+	if (sv && PadnameLEN(sv) && !SvFAKE(sv)
 	    && COP_SEQ_RANGE_HIGH(sv) == PERL_PADSEQ_INTRO)
 	{
 	    COP_SEQ_RANGE_HIGH_set(sv, PL_cop_seqmax);
@@ -1641,6 +1649,11 @@ Perl_pad_swipe(pTHX_ PADOFFSET po, bool refadjust)
 #else
     PL_curpad[po] = &PL_sv_undef;
 #endif
+    if (PadnamelistMAX(PL_comppad_name) != -1
+     && PadnamelistMAX(PL_comppad_name) >= po) {
+	assert(!PadnameLEN(PadnamelistARRAY(PL_comppad_name)[po]));
+	PadnamelistARRAY(PL_comppad_name)[po] = &PL_sv_undef;
+    }
     if ((I32)po < PL_padix)
 	PL_padix = po - 1;
 }
@@ -1882,7 +1895,7 @@ Perl_do_dump_pad(pTHX_ I32 level, PerlIO *file, PADLIST *padlist, int full)
 
     for (ix = 1; ix <= AvFILLp(pad_name); ix++) {
         const SV *namesv = pname[ix];
-	if (namesv && namesv == &PL_sv_undef) {
+	if (namesv && !PadnameLEN(namesv)) {
 	    namesv = NULL;
 	}
 	if (namesv) {
@@ -2048,7 +2061,7 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside, bool newcv)
     for (ix = fpad; ix > 0; ix--) {
 	SV* const namesv = (ix <= fname) ? pname[ix] : NULL;
 	SV *sv = NULL;
-	if (namesv && namesv != &PL_sv_undef) { /* lexical */
+	if (namesv && PadnameLEN(namesv)) { /* lexical */
 	    if (SvFAKE(namesv)) {   /* lexical from outside? */
 		/* formats may have an inactive, or even undefined, parent;
 		   but state vars are always available. */
@@ -2291,7 +2304,7 @@ Perl_pad_push(pTHX_ PADLIST *padlist, int depth)
 	AV *av;
 
 	for ( ;ix > 0; ix--) {
-	    if (names_fill >= ix && names[ix] != &PL_sv_undef) {
+	    if (names_fill >= ix && PadnameLEN(names[ix])) {
 		const char sigil = SvPVX_const(names[ix])[0];
 		if ((SvFLAGS(names[ix]) & SVf_FAKE)
 			|| (SvFLAGS(names[ix]) & SVpad_STATE)
@@ -2419,7 +2432,7 @@ Perl_padlist_dup(pTHX_ PADLIST *srcpad, CLONE_PARAMS *param)
 	    for ( ;ix > 0; ix--) {
 		if (!oldpad[ix]) {
 		    pad1a[ix] = NULL;
-		} else if (names_fill >= ix && names[ix] != &PL_sv_undef) {
+		} else if (names_fill >= ix && PadnameLEN(names[ix])) {
 		    const char sigil = SvPVX_const(names[ix])[0];
 		    if ((SvFLAGS(names[ix]) & SVf_FAKE)
 			|| (SvFLAGS(names[ix]) & SVpad_STATE)

@@ -3295,7 +3295,7 @@ CV* cv
   for ( i = PadnamelistMAX(pad_namelist); i >= 0; i-- ) {
     PADNAME* name = PadnamelistARRAY(pad_namelist)[i];
 
-    if (SvPOKp(name)) {
+    if (PadnameLEN(name)) {
         av_push(retav, newSVpadname(name));
     }
   }
