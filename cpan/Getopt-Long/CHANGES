@@ -1,3 +1,10 @@
+Changes in version 2.40
+-----------------------
+
+* Fix bug #86095 Possible problem with aliases
+
+* Fix bug #85362 typo fix
+
 Changes in version 2.39
 -----------------------
 
