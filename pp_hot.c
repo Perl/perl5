@@ -1441,7 +1441,25 @@ PP(pp_match)
 	    goto nope;
 	if ( (RX_EXTFLAGS(rx) & RXf_CHECK_ALL)
 	     && !SvROK(TARG))	/* Cannot trust since INTUIT cannot guess ^ */
+        {
+            assert(!RX_NPARENS(rx));
+            /* match via INTUIT shouldn't have any captures.
+             * Let @-, @+, $^N know */
+            RX_LASTPAREN(rx) = RX_LASTCLOSEPAREN(rx) = 0;
+            RX_MATCH_UTF8_set(rx, cBOOL(DO_UTF8(rx)));
+            if ( !(r_flags & REXEC_NOT_FIRST) )
+                Perl_reg_set_capture_string(aTHX_ rx,
+                                        (char*)truebase, (char *)strend,
+                                        TARG, r_flags, cBOOL(DO_UTF8(TARG)));
+
+            /* skipping regexec means that indices for $&, $-[0] etc not set */
+            RX_OFFS(rx)[0].start = s - truebase;
+            RX_OFFS(rx)[0].end =
+                RX_MATCH_UTF8(rx)
+                    ? (char*)utf8_hop((U8*)s, RX_MINLENRET(rx)) - truebase
+                    : s - truebase + RX_MINLENRET(rx);
 	    goto yup;
+        }
     }
     if (!CALLREGEXEC(rx, (char*)s, (char *)strend, (char*)truebase,
 		     minmatch, TARG, NUM2PTR(void*, gpos), r_flags))
@@ -1518,7 +1536,6 @@ PP(pp_match)
     }
 
 yup:					/* Confirmed by INTUIT */
-    assert(!RX_NPARENS(rx));
     if (rxtainted)
 	RX_MATCH_TAINTED_on(rx);
     TAINT_IF(RX_MATCH_TAINTED(rx));
@@ -1531,25 +1548,11 @@ yup:					/* Confirmed by INTUIT */
 #endif
     }
 
-    RX_MATCH_UTF8_set(rx, cBOOL(DO_UTF8(rx)));
-    if ( !(r_flags & REXEC_NOT_FIRST) )
-        Perl_reg_set_capture_string(aTHX_ rx,
-                                    (char*)truebase, (char *)strend,
-                                    TARG, r_flags, cBOOL(DO_UTF8(TARG)));
-
-    /* skipping regexec means that indices for $&, $-[0] etc weren't set */
-    RX_OFFS(rx)[0].start = s - truebase;
-    RX_OFFS(rx)[0].end =
-        RX_MATCH_UTF8(rx)
-            ? (char*)utf8_hop((U8*)s, RX_MINLENRET(rx)) - truebase
-            : s - truebase + RX_MINLENRET(rx);
 
     if (global) {
 	goto gotcha;
     }
 
-    /* match via INTUIT shouldn't have any captures. Let @-, @+, $^N know */
-    RX_LASTPAREN(rx) = RX_LASTCLOSEPAREN(rx) = 0;
     LEAVE_SCOPE(oldsave);
     RETPUSHYES;
 
