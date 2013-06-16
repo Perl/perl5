@@ -22,7 +22,8 @@ Tie::Scalar, Tie::StdScalar - base class definitions for tied scalars
 
     @ISA = qw(Tie::StdScalar);
 
-    # All methods provided by default, so define only what needs be overridden
+    # All methods provided by default, so define
+    # only what needs be overridden
     sub FETCH { ... }
 
 

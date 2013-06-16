@@ -528,7 +528,7 @@ outside the compartment) placed into the compartment. For example,
 
     $cpt = new Safe;
     sub wrapper {
-        # vet arguments and perform potentially unsafe operations
+      # vet arguments and perform potentially unsafe operations
     }
     $cpt->share('&wrapper');
 

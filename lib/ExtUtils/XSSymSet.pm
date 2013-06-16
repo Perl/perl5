@@ -143,7 +143,8 @@ ExtUtils::XSSymSet - keep sets of symbol names palatable to the VMS linker
   $set = new ExtUtils::XSSymSet;
   while ($sym = make_symbol()) { $set->addsym($sym); }
   foreach $safesym ($set->all_trimmed) {
-    print "Processing $safesym (derived from ",$self->get_orig($safesym),")\n";
+    print "Processing $safesym (derived from ",
+        $self->get_orig($safesym), ")\n";
     do_stuff($safesym);
   }
 

@@ -86,13 +86,13 @@ Follows this formula:
 
 For a release on a stable branch, follows this formula:
 
-    This document describes differences between the 5.10.3 release and
-    the 5.10.4 release.
+    This document describes differences between the 5.10.3 release
+    and the 5.10.4 release.
 
 For the start of a new stable branch, follows this formula:
 
-    This document describes differences between the 5.12.0 release and
-    the 5.10.0 release.
+    This document describes differences between the 5.12.0 release
+    and the 5.10.0 release.
 
 Clearly this sets the scope of which changes are to be summarised in the rest
 of the document.
@@ -106,8 +106,8 @@ notice.
 
 For a release on a stable branch, this section aspires to be
 
-    There are no changes intentionally incompatible with 5.10.3. If any exist,
-    they are bugs and reports are welcome.
+    There are no changes intentionally incompatible with 5.10.3.
+    If any exist, they are bugs and reports are welcome.
 
 =item Core Enhancements
 

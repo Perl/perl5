@@ -548,7 +548,8 @@ a normalized or reduced form (no extraneous zeros), and with a leading 'v':
   print $ver->stringify;      # ditto
   print $ver;                 # ditto
   print $nver->normal;        # prints as v1.2.0
-  print $nver->stringify;     # prints as 1.002, see "Stringification"
+  print $nver->stringify;     # prints as 1.002,
+                              # see "Stringification"
 
 In order to preserve the meaning of the processed version, the
 normalized representation will always contain at least three sub terms.

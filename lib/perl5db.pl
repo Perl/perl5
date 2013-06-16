@@ -1362,7 +1362,8 @@ the R command stuffed into the environment variables.
   PERLDB_RESTART   - flag only, contains no restart data itself.
   PERLDB_HIST      - command history, if it's available
   PERLDB_ON_LOAD   - breakpoints set by the rc file
-  PERLDB_POSTPONE  - subs that have been loaded/not executed, and have actions
+  PERLDB_POSTPONE  - subs that have been loaded/not executed,
+                     and have actions
   PERLDB_VISITED   - files that had breakpoints
   PERLDB_FILE_...  - breakpoints for a file
   PERLDB_OPT       - active options

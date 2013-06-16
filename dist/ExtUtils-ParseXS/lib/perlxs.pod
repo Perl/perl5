@@ -1691,7 +1691,7 @@ called and C<THIS> will be given as its parameter.  The generated C++ code for
 
 will look like this:
 
-     color *THIS = ...;	// Initialized as in typemap
+     color *THIS = ...;  // Initialized as in typemap
 
      delete THIS;
 
@@ -1711,22 +1711,23 @@ The following is an example of a typemap that could be used for this C++
 example.
 
     TYPEMAP
-    color *		O_OBJECT
+    color *  O_OBJECT
 
     OUTPUT
     # The Perl object is blessed into 'CLASS', which should be a
     # char* having the name of the package for the blessing.
     O_OBJECT
-	sv_setref_pv( $arg, CLASS, (void*)$var );
+        sv_setref_pv( $arg, CLASS, (void*)$var );
 
     INPUT
     O_OBJECT
-	if( sv_isobject($arg) && (SvTYPE(SvRV($arg)) == SVt_PVMG) )
-		$var = ($type)SvIV((SV*)SvRV( $arg ));
-	else{
-		warn( \"${Package}::$func_name() -- $var is not a blessed SV reference\" );
-		XSRETURN_UNDEF;
-	}
+        if( sv_isobject($arg) && (SvTYPE(SvRV($arg)) == SVt_PVMG) )
+            $var = ($type)SvIV((SV*)SvRV( $arg ));
+        else{
+            warn("${Package}::$func_name() -- " .
+                "$var is not a blessed SV reference");
+            XSRETURN_UNDEF;
+        }
 
 =head2 Interface Strategy
 

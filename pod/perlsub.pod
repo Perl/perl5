@@ -561,23 +561,23 @@ Synopsis:
 
     # localization of values
 
-    local $foo;			# make $foo dynamically local
-    local (@wid, %get);		# make list of variables local
-    local $foo = "flurp";	# make $foo dynamic, and init it
-    local @oof = @bar;		# make @oof dynamic, and init it
+    local $foo;		       # make $foo dynamically local
+    local (@wid, %get);	       # make list of variables local
+    local $foo = "flurp";      # make $foo dynamic, and init it
+    local @oof = @bar;	       # make @oof dynamic, and init it
 
-    local $hash{key} = "val";	# sets a local value for this hash entry
-    delete local $hash{key};    # delete this entry for the current block
-    local ($cond ? $v1 : $v2);	# several types of lvalues support
-				# localization
+    local $hash{key} = "val";  # sets a local value for this hash entry
+    delete local $hash{key};   # delete this entry for the current block
+    local ($cond ? $v1 : $v2); # several types of lvalues support
+			       # localization
 
     # localization of symbols
 
-    local *FH;			# localize $FH, @FH, %FH, &FH  ...
-    local *merlyn = *randal;	# now $merlyn is really $randal, plus
-                                #     @merlyn is really @randal, etc
-    local *merlyn = 'randal';	# SAME THING: promote 'randal' to *randal
-    local *merlyn = \$randal;   # just alias $merlyn, not @merlyn etc
+    local *FH;		       # localize $FH, @FH, %FH, &FH  ...
+    local *merlyn = *randal;   # now $merlyn is really $randal, plus
+                               #     @merlyn is really @randal, etc
+    local *merlyn = 'randal';  # SAME THING: promote 'randal' to *randal
+    local *merlyn = \$randal;  # just alias $merlyn, not @merlyn etc
 
 A C<local> modifies its listed variables to be "local" to the
 enclosing block, C<eval>, or C<do FILE>--and to I<any subroutine
@@ -997,10 +997,10 @@ a local alias.
 
     {
         local *grow = \&shrink; # only until this block exits
-        grow();                 # really calls shrink()
-	move();			# if move() grow()s, it shrink()s too
+        grow();                # really calls shrink()
+	move();		       # if move() grow()s, it shrink()s too
     }
-    grow();			# get the real grow() again
+    grow();		       # get the real grow() again
 
 See L<perlref/"Function Templates"> for more about manipulating
 functions by name in this way.
@@ -1164,22 +1164,22 @@ subroutines that work like built-in functions, here are prototypes
 for some other functions that parse almost exactly like the
 corresponding built-in.
 
-    Declared as			Called as
+   Declared as		   Called as
 
-    sub mylink ($$)	     mylink $old, $new
-    sub myvec ($$$)	     myvec $var, $offset, 1
-    sub myindex ($$;$)	     myindex &getstring, "substr"
-    sub mysyswrite ($$$;$)   mysyswrite $buf, 0, length($buf) - $off, $off
-    sub myreverse (@)	     myreverse $a, $b, $c
-    sub myjoin ($@)	     myjoin ":", $a, $b, $c
-    sub mypop (+)	     mypop @array
-    sub mysplice (+$$@)	     mysplice @array, 0, 2, @pushme
-    sub mykeys (+)	     mykeys %{$hashref}
-    sub myopen (*;$)	     myopen HANDLE, $name
-    sub mypipe (**)	     mypipe READHANDLE, WRITEHANDLE
-    sub mygrep (&@)	     mygrep { /foo/ } $a, $b, $c
-    sub myrand (;$)	     myrand 42
-    sub mytime ()	     mytime
+   sub mylink ($$)	   mylink $old, $new
+   sub myvec ($$$)	   myvec $var, $offset, 1
+   sub myindex ($$;$)	   myindex &getstring, "substr"
+   sub mysyswrite ($$$;$)  mysyswrite $buf, 0, length($buf) - $off, $off
+   sub myreverse (@)	   myreverse $a, $b, $c
+   sub myjoin ($@)	   myjoin ":", $a, $b, $c
+   sub mypop (+)	   mypop @array
+   sub mysplice (+$$@)	   mysplice @array, 0, 2, @pushme
+   sub mykeys (+)	   mykeys %{$hashref}
+   sub myopen (*;$)	   myopen HANDLE, $name
+   sub mypipe (**)	   mypipe READHANDLE, WRITEHANDLE
+   sub mygrep (&@)	   mygrep { /foo/ } $a, $b, $c
+   sub myrand (;$)	   myrand 42
+   sub mytime ()	   mytime
 
 Any backslashed prototype character represents an actual argument
 that must start with that character (optionally preceded by C<my>,

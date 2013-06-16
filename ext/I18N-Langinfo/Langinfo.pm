@@ -103,7 +103,8 @@ answers for a yes/no question in the current locale.
 
     use I18N::Langinfo qw(langinfo ABDAY_1 YESSTR NOSTR);
 
-    my ($abday_1, $yesstr, $nostr) = map { langinfo($_) } (ABDAY_1, YESSTR, NOSTR);
+    my ($abday_1, $yesstr, $nostr) =
+        map { langinfo($_) } (ABDAY_1, YESSTR, NOSTR);
 
     print "$abday_1? [$yesstr/$nostr] ";
 

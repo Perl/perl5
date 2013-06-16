@@ -173,7 +173,8 @@ enabled. If your program can't run without them, you can say something
 like:
 
     use Config;
-    $Config{useithreads} or die('Recompile Perl with threads to run this program.');
+    $Config{useithreads} or
+        die('Recompile Perl with threads to run this program.');
 
 A possibly-threaded program using a possibly-threaded module might
 have code like this:

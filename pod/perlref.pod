@@ -149,7 +149,8 @@ reference to it, you have these options:
 
 On the other hand, if you want the other meaning, you can do this:
 
-    sub showem {        { @_ } }   # ambiguous (currently ok, but may change)
+    sub showem {        { @_ } }   # ambiguous (currently ok,
+                                   # but may change)
     sub showem {       {; @_ } }   # ok
     sub showem { { return @_ } }   # ok
 

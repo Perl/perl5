@@ -4087,7 +4087,8 @@ are as follows.
   --------+---------------+-----------------------------------------
   0       | NO            | Disables key traversal randomization
   1       | RANDOM        | Enables full key traversal randomization
-  2       | DETERMINISTIC | Enables repeatable key traversal randomization
+  2       | DETERMINISTIC | Enables repeatable key traversal
+          |               | randomization
 
 Both numeric and string values are accepted, but note that string values are
 case sensitive.  The default for this setting is "RANDOM" or 1.

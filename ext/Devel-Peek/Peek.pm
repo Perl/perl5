@@ -145,8 +145,9 @@ Three additional functions allow access to this statistic from Perl.
 First, use C<mstats_fillhash(%hash)> to get the information contained
 in the output of mstat() into %hash. The field of this hash are
 
-  minbucket nbuckets sbrk_good sbrk_slack sbrked_remains sbrks start_slack
-  topbucket topbucket_ev topbucket_odd total total_chain total_sbrk totfree
+  minbucket nbuckets sbrk_good sbrk_slack sbrked_remains sbrks
+  start_slack topbucket topbucket_ev topbucket_odd total total_chain
+  total_sbrk totfree
 
 Two additional fields C<free>, C<used> contain array references which
 provide per-bucket count of free and used chunks.  Two other fields

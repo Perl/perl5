@@ -390,7 +390,7 @@ backward compatibility, and this will probably make your list order
 unintuitive.  Also, if many elements may be undefined you may see the
 following unattractive method calls:
 
-    $obj->do_something(undef, undef, undef, undef, undef, undef, 1024);
+    $obj->do_something(undef, undef, undef, undef, undef, 1024);
 
 Provide sensible defaults for parameters which have them.  Don't make
 your users specify parameters which will almost always be the same.

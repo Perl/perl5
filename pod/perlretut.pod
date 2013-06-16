@@ -859,9 +859,9 @@ well, and this is exactly what the parenthesized construct C<(?|...)>,
 set around an alternative achieves. Here is an extended version of the
 previous pattern:
 
-    if ( $time =~ /(?|(\d\d|\d):(\d\d)|(\d\d)(\d\d))\s+([A-Z][A-Z][A-Z])/ ){
-	print "hour=$1 minute=$2 zone=$3\n";
-    }
+  if($time =~ /(?|(\d\d|\d):(\d\d)|(\d\d)(\d\d))\s+([A-Z][A-Z][A-Z])/){
+      print "hour=$1 minute=$2 zone=$3\n";
+  }
 
 Within the alternative numbering group, group numbers start at the same
 position for each alternative. After the group, numbering continues
@@ -879,8 +879,8 @@ this code
 
     $x = "Mmm...donut, thought Homer";
     $x =~ /^(Mmm|Yech)\.\.\.(donut|peas)/; # matches
-    foreach $expr (1..$#-) {
-        print "Match $expr: '${$expr}' at position ($-[$expr],$+[$expr])\n";
+    foreach $exp (1..$#-) {
+        print "Match $exp: '${$exp}' at position ($-[$exp],$+[$exp])\n";
     }
 
 prints
@@ -1005,10 +1005,10 @@ Here are some examples:
     /y(es)?/i;       # matches 'y', 'Y', or a case-insensitive 'yes'
     $year =~ /^\d{2,4}$/;  # make sure year is at least 2 but not more
                            # than 4 digits
-    $year =~ /^\d{4}$|^\d{2}$/;    # better match; throw out 3-digit dates
-    $year =~ /^\d{2}(\d{2})?$/;  # same thing written differently. However,
-                                 # this captures the last two digits in $1
-                                 # and the other does not.
+    $year =~ /^\d{4}$|^\d{2}$/; # better match; throw out 3-digit dates
+    $year =~ /^\d{2}(\d{2})?$/; # same thing written differently.
+                                # However, this captures the last two
+                                # digits in $1 and the other does not.
 
     % simple_grep '^(\w+)\g1$' /usr/dict/words   # isn't this easier?
     beriberi
@@ -1744,7 +1744,8 @@ One other interesting thing that the C<s///r> flag allows is chaining
 substitutions:
 
     $x = "Cats are great.";
-    print $x =~ s/Cats/Dogs/r =~ s/Dogs/Frogs/r =~ s/Frogs/Hedgehogs/r, "\n";
+    print $x =~ s/Cats/Dogs/r =~ s/Dogs/Frogs/r =~
+        s/Frogs/Hedgehogs/r, "\n";
     # prints "Hedgehogs are great."
 
 A modifier available specifically to search and replace is the
@@ -1756,7 +1757,7 @@ computation in the process of replacing text.  This example counts
 character frequencies in a line:
 
     $x = "Bill the cat";
-    $x =~ s/(.)/$chars{$1}++;$1/eg;  # final $1 replaces char with itself
+    $x =~ s/(.)/$chars{$1}++;$1/eg; # final $1 replaces char with itself
     print "frequency of '$_' is $chars{$_}\n"
         foreach (sort {$chars{$b} <=> $chars{$a}} keys %chars);
 
@@ -1961,23 +1962,24 @@ example, to match lower and uppercase characters,
 Here is the association between some Perl named classes and the
 traditional Unicode classes:
 
-    Perl class name  Unicode class name or regular expression
+  Perl class  Unicode class name or regular expression
+  name  
 
-    IsAlpha          /^[LM]/
-    IsAlnum          /^[LMN]/
-    IsASCII          $code <= 127
-    IsCntrl          /^C/
-    IsBlank          $code =~ /^(0020|0009)$/ || /^Z[^lp]/
-    IsDigit          Nd
-    IsGraph          /^([LMNPS]|Co)/
-    IsLower          Ll
-    IsPrint          /^([LMNPS]|Co|Zs)/
-    IsPunct          /^P/
-    IsSpace          /^Z/ || ($code =~ /^(0009|000A|000B|000C|000D)$/
-    IsSpacePerl      /^Z/ || ($code =~ /^(0009|000A|000C|000D|0085|2028|2029)$/
-    IsUpper          /^L[ut]/
-    IsWord           /^[LMN]/ || $code eq "005F"
-    IsXDigit         $code =~ /^00(3[0-9]|[46][1-6])$/
+  IsAlpha     /^[LM]/
+  IsAlnum     /^[LMN]/
+  IsASCII     $code <= 127
+  IsCntrl     /^C/
+  IsBlank     $code =~ /^(0020|0009)$/ || /^Z[^lp]/
+  IsDigit     Nd
+  IsGraph     /^([LMNPS]|Co)/
+  IsLower     Ll
+  IsPrint     /^([LMNPS]|Co|Zs)/
+  IsPunct     /^P/
+  IsSpace     /^Z/ || ($code =~ /^(0009|000A|000B|000C|000D)$/
+  IsSpacePerl /^Z/ || ($code =~ /^(0009|000A|000C|000D|0085|2028|2029)$/
+  IsUpper     /^L[ut]/
+  IsWord      /^[LMN]/ || $code eq "005F"
+  IsXDigit    $code =~ /^00(3[0-9]|[46][1-6])$/
 
 You can also use the official Unicode class names with C<\p> and
 C<\P>, like C<\p{L}> for Unicode 'letters', C<\p{Lu}> for uppercase
@@ -2139,14 +2141,14 @@ algorithm.
     % cat > keymatch
     #!/usr/bin/perl
     $kwds = 'copy compare list print';
-    while( $command = <> ){
-        $command =~ s/^\s+|\s+$//g;  # trim leading and trailing spaces
-        if( ( @matches = $kwds =~ /\b$command\w*/g ) == 1 ){
+    while( $cmd = <> ){
+        $cmd =~ s/^\s+|\s+$//g;  # trim leading and trailing spaces
+        if( ( @matches = $kwds =~ /\b$cmd\w*/g ) == 1 ){
             print "command: '@matches'\n";
         } elsif( @matches == 0 ){
-            print "no such command: '$command'\n";
+            print "no such command: '$cmd'\n";
         } else {
-            print "not unique: '$command' (could be one of: @matches)\n";
+            print "not unique: '$cmd' (could be one of: @matches)\n";
         }
     }
     ^D
@@ -2161,7 +2163,7 @@ algorithm.
 
 Rather than trying to match the input against the keywords, we match the
 combined set of keywords against the input.  The pattern matching
-operation S<C<$kwds =~ /\b($command\w*)/g>> does several things at the
+operation S<C<$kwds =~ /\b($cmd\w*)/g>> does several things at the
 same time. It makes sure that the given command begins where a keyword
 begins (C<\b>). It tolerates abbreviations due to the added C<\w*>. It
 tells us the number of matches (C<scalar @matches>) and all the keywords
@@ -2812,14 +2814,14 @@ termcap color sequences.  Here is example output:
     Guessed: match at offset 0
     Matching REx 'a*b+c' against 'abc'
       Setting an EVAL scope, savestack=3
-       0 <> <abc>             |  1:  STAR
-                               EXACT <a> can match 1 times out of 32767...
+       0 <> <abc>           |  1:  STAR
+                             EXACT <a> can match 1 times out of 32767...
       Setting an EVAL scope, savestack=3
-       1 <a> <bc>             |  4:    PLUS
-                               EXACT <b> can match 1 times out of 32767...
+       1 <a> <bc>           |  4:    PLUS
+                             EXACT <b> can match 1 times out of 32767...
       Setting an EVAL scope, savestack=3
-       2 <ab> <c>             |  7:      EXACT <c>
-       3 <abc> <>             |  9:      END
+       2 <ab> <c>           |  7:      EXACT <c>
+       3 <abc> <>           |  9:      END
     Match successful!
     Freeing REx: 'a*b+c'
 
@@ -2851,14 +2853,14 @@ process:
 
     Matching REx 'a*b+c' against 'abc'
       Setting an EVAL scope, savestack=3
-       0 <> <abc>             |  1:  STAR
-                               EXACT <a> can match 1 times out of 32767...
+       0 <> <abc>           |  1:  STAR
+                             EXACT <a> can match 1 times out of 32767...
       Setting an EVAL scope, savestack=3
-       1 <a> <bc>             |  4:    PLUS
-                               EXACT <b> can match 1 times out of 32767...
+       1 <a> <bc>           |  4:    PLUS
+                             EXACT <b> can match 1 times out of 32767...
       Setting an EVAL scope, savestack=3
-       2 <ab> <c>             |  7:      EXACT <c>
-       3 <abc> <>             |  9:      END
+       2 <ab> <c>           |  7:      EXACT <c>
+       3 <abc> <>           |  9:      END
     Match successful!
     Freeing REx: 'a*b+c'
 

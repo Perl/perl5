@@ -341,9 +341,9 @@ sub file_name_is_absolute {
 
 =item splitpath (override)
 
-    ($volume,$directories,$file) = File::Spec->splitpath( $path );
-    ($volume,$directories,$file) = File::Spec->splitpath( $path,
-                                                          $no_file );
+   ($volume,$directories,$file) = File::Spec->splitpath( $path );
+   ($volume,$directories,$file) = File::Spec->splitpath( $path,
+                                                         $no_file );
 
 Passing a true value for C<$no_file> indicates that the path being
 split only contains directory components, even on systems where you

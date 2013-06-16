@@ -1803,13 +1803,13 @@ B<walk_output> lets you change the print destination from STDOUT to
 another open filehandle, or into a string passed as a ref (unless
 you've built perl with -Uuseperlio).
 
-    my $walker = B::Concise::compile('-terse','aFuncName', \&aSubRef);  # 1
-    walk_output(\my $buf);
-    $walker->();			# 1 renders -terse
-    set_style_standard('concise');	# 2
-    $walker->();			# 2 renders -concise
-    $walker->(@new);			# 3 renders whatever
-    print "3 different renderings: terse, concise, and @new: $buf\n";
+  my $walker = B::Concise::compile('-terse','aFuncName', \&aSubRef); # 1
+  walk_output(\my $buf);
+  $walker->();			        # 1 renders -terse
+  set_style_standard('concise');	# 2
+  $walker->();  		        # 2 renders -concise
+  $walker->(@new);			# 3 renders whatever
+  print "3 different renderings: terse, concise, and @new: $buf\n";
 
 When $walker is called, it traverses the subroutines supplied when it
 was created, and renders them using the current style.  You can change

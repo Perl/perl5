@@ -17,7 +17,7 @@ version - Perl extension for Version Objects
 
   # Declaring an old-style decimal $VERSION (use quotes!)
 
-  our $VERSION = "1.0203";                                     # recommended
+  our $VERSION = "1.0203";                                # recommended
   use version; our $VERSION = version->parse("1.0203");   # formal
   use version; our $VERSION = version->parse("1.02_03");  # alpha
 
@@ -251,7 +251,7 @@ True if and only if the version object was created with a underscore, e.g.
 
 True only if the version object is a dotted-decimal version, e.g.
 
-  version->parse('v1.2.0')->is_qv;        # TRUE
+  version->parse('v1.2.0')->is_qv;       # TRUE
   version->declare('v1.2')->is_qv;       # TRUE
   qv('1.2')->is_qv;                      # TRUE
   version->parse('1.2')->is_qv;          # FALSE

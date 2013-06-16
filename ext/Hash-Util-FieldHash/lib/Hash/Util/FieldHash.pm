@@ -522,8 +522,8 @@ to a file F<Example.pm>.
     use strict; use warnings;
 
     {
-        package Name_hash; # standard implementation: the object is a hash
-
+        package Name_hash;  # standard implementation: the
+                            # object is a hash
         sub init {
             my $obj = shift;
             my ($first, $last) = @_;
@@ -714,7 +714,7 @@ incompatibility of object bodies.
 
     {
         package Name;
-        use base 'Name_id';      # define here which implementation to run
+        use base 'Name_id';  # define here which implementation to run
     }
 
 

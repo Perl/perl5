@@ -221,7 +221,8 @@ difference between each pair of tests.
 
 C<cmpthese> can also be passed the data structure that timethese() returns:
 
-    $results = timethese( -1, { a => "++\$i", b => "\$i *= 2" } ) ;
+    $results = timethese( -1,
+        { a => "++\$i", b => "\$i *= 2" } ) ;
     cmpthese( $results );
 
 in case you want to see both sets of results.
@@ -231,7 +232,8 @@ that is RESULTSHASHREF; otherwise that is COUNT.
 Returns a reference to an ARRAY of rows, each row is an ARRAY of cells from the
 above chart, including labels. This:
 
-    my $rows = cmpthese( -1, { a => '++$i', b => '$i *= 2' }, "none" );
+    my $rows = cmpthese( -1,
+        { a => '++$i', b => '$i *= 2' }, "none" );
 
 returns a data structure like:
 

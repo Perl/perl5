@@ -12,15 +12,15 @@ This document aims to record the Perl source code releases.
 
 Perl history in brief, by Larry Wall:
 
-    Perl 0 introduced Perl to my officemates.
-    Perl 1 introduced Perl to the world, and changed /\(...\|...\)/ to
-        /(...|...)/.  \(Dan Faigin still hasn't forgiven me. :-\)
-    Perl 2 introduced Henry Spencer's regular expression package.
-    Perl 3 introduced the ability to handle binary data (embedded nulls).
-    Perl 4 introduced the first Camel book.  Really.  We mostly just
-        switched version numbers so the book could refer to 4.000.
-    Perl 5 introduced everything else, including the ability to
-        introduce everything else.
+   Perl 0 introduced Perl to my officemates.
+   Perl 1 introduced Perl to the world, and changed /\(...\|...\)/ to
+       /(...|...)/.  \(Dan Faigin still hasn't forgiven me. :-\)
+   Perl 2 introduced Henry Spencer's regular expression package.
+   Perl 3 introduced the ability to handle binary data (embedded nulls).
+   Perl 4 introduced the first Camel book.  Really.  We mostly just
+       switched version numbers so the book could refer to 4.000.
+   Perl 5 introduced everything else, including the ability to
+       introduce everything else.
 
 =head1 THE KEEPERS OF THE PUMPKIN
 

@@ -226,8 +226,10 @@ arg is passed as the args to the called function. They return whatever
 the C function itself pushed onto the stack, plus the return value from
 the function; for example
 
-    call_sv( sub { @_, 'c' }, G_ARRAY,  'a', 'b'); # returns 'a', 'b', 'c', 3
-    call_sv( sub { @_ },      G_SCALAR, 'a', 'b'); # returns 'b', 1
+    call_sv( sub { @_, 'c' }, G_ARRAY,  'a', 'b');
+    # returns 'a', 'b', 'c', 3
+    call_sv( sub { @_ },      G_SCALAR, 'a', 'b');
+    # returns 'b', 1
 
 =item B<eval_sv>
 
