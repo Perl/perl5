@@ -1439,13 +1439,9 @@ PP(pp_match)
 
 	if (!s)
 	    goto nope;
-#ifdef PERL_SAWAMPERSAND
 	if ( (RX_EXTFLAGS(rx) & RXf_CHECK_ALL)
-	     && !PL_sawampersand
-	     && !(RX_EXTFLAGS(rx) & RXf_PMf_KEEPCOPY)
 	     && !SvROK(TARG))	/* Cannot trust since INTUIT cannot guess ^ */
 	    goto yup;
-#endif
     }
     if (!CALLREGEXEC(rx, (char*)s, (char *)strend, (char*)truebase,
 		     minmatch, TARG, NUM2PTR(void*, gpos), r_flags))
@@ -1531,9 +1527,8 @@ PP(pp_match)
 	RETPUSHYES;
     }
 
-#ifdef PERL_SAWAMPERSAND
 yup:					/* Confirmed by INTUIT */
-#endif
+    assert(!RX_NPARENS(rx));
     if (rxtainted)
 	RX_MATCH_TAINTED_on(rx);
     TAINT_IF(RX_MATCH_TAINTED(rx));
@@ -1545,67 +1540,25 @@ yup:					/* Confirmed by INTUIT */
         dynpm->op_pmflags |= PMf_USED;
 #endif
     }
-    if (RX_MATCH_COPIED(rx))
-	Safefree(RX_SUBBEG(rx));
-    RX_MATCH_COPIED_off(rx);
-    RX_SUBBEG(rx) = NULL;
+
+    RX_MATCH_UTF8_set(rx, cBOOL(DO_UTF8(rx)));
+    if ( !(r_flags & REXEC_NOT_FIRST) )
+        Perl_reg_set_capture_string(aTHX_ rx,
+                                    (char*)truebase, (char *)strend,
+                                    TARG, r_flags, cBOOL(DO_UTF8(TARG)));
+
+    /* skipping regexec means that indices for $&, $-[0] etc weren't set */
+    RX_OFFS(rx)[0].start = s - truebase;
+    RX_OFFS(rx)[0].end =
+        RX_MATCH_UTF8(rx)
+            ? (char*)utf8_hop((U8*)s, RX_MINLENRET(rx)) - truebase
+            : s - truebase + RX_MINLENRET(rx);
+
     if (global) {
-	/* FIXME - should rx->subbeg be const char *?  */
-	RX_SUBBEG(rx) = (char *) truebase;
-	RX_SUBOFFSET(rx) = 0;
-	RX_SUBCOFFSET(rx) = 0;
-	RX_OFFS(rx)[0].start = s - truebase;
-	if (RX_MATCH_UTF8(rx)) {
-	    char * const t = (char*)utf8_hop((U8*)s, RX_MINLENRET(rx));
-	    RX_OFFS(rx)[0].end = t - truebase;
-	}
-	else {
-	    RX_OFFS(rx)[0].end = s - truebase + RX_MINLENRET(rx);
-	}
-	RX_SUBLEN(rx) = strend - truebase;
 	goto gotcha;
     }
-#ifdef PERL_SAWAMPERSAND
-    if (PL_sawampersand || RX_EXTFLAGS(rx) & RXf_PMf_KEEPCOPY)
-#endif
-    {
-	I32 off;
-#ifdef PERL_ANY_COW
-	if (SvCANCOW(TARG)) {
-	    if (DEBUG_C_TEST) {
-		PerlIO_printf(Perl_debug_log,
-			      "Copy on write: pp_match $& capture, type %d, truebase=%p, t=%p, difference %d\n",
-			      (int) SvTYPE(TARG), (void*)truebase, (void*)t,
-			      (int)(t-truebase));
-	    }
-	    RX_SAVED_COPY(rx) = sv_setsv_cow(RX_SAVED_COPY(rx), TARG);
-	    RX_SUBBEG(rx)
-		= (char *) SvPVX_const(RX_SAVED_COPY(rx)) + (t - truebase);
-	    assert (SvPOKp(RX_SAVED_COPY(rx)));
-	} else
-#endif
-	{
 
-	    RX_SUBBEG(rx) = savepvn(t, strend - t);
-#ifdef PERL_ANY_COW
-	    RX_SAVED_COPY(rx) = NULL;
-#endif
-	}
-	RX_SUBLEN(rx) = strend - t;
-	RX_SUBOFFSET(rx) = 0;
-	RX_SUBCOFFSET(rx) = 0;
-	RX_MATCH_COPIED_on(rx);
-	off = RX_OFFS(rx)[0].start = s - t;
-	RX_OFFS(rx)[0].end = off + RX_MINLENRET(rx);
-    }
-#ifdef PERL_SAWAMPERSAND
-    else {			/* startp/endp are used by @- @+. */
-	RX_OFFS(rx)[0].start = s - truebase;
-	RX_OFFS(rx)[0].end = s - truebase + RX_MINLENRET(rx);
-    }
-#endif
     /* match via INTUIT shouldn't have any captures. Let @-, @+, $^N know */
-    assert(!RX_NPARENS(rx));
     RX_LASTPAREN(rx) = RX_LASTCLOSEPAREN(rx) = 0;
     LEAVE_SCOPE(oldsave);
     RETPUSHYES;
