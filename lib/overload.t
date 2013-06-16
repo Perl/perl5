@@ -48,7 +48,7 @@ package main;
 
 $| = 1;
 BEGIN { require './test.pl' }
-plan tests => 5191;
+plan tests => 5193;
 
 use Scalar::Util qw(tainted);
 
@@ -1290,6 +1290,20 @@ foreach my $op (qw(<=> == != < <= > >=)) {
     # Check that constant overloading propagates into evals
     BEGIN { overload::constant integer => sub { 23 } }
     is(eval "17", $twenty_three);
+}
+
+{
+    # Check readonliness of constants, whether shared hash key
+    # scalars or no (brought up in bug #109744)
+    BEGIN { overload::constant integer => sub { "main" }; }
+    eval { ${\5} = 'whatever' };
+    like $@, qr/^Modification of a read-only value attempted at /,
+	'constant overloading makes read-only constants';
+    BEGIN { overload::constant integer => sub { __PACKAGE__ }; }
+    eval { ${\5} = 'whatever' };
+    local $::TODO = ' ';
+    like $@, qr/^Modification of a read-only value attempted at /,
+	'... even with shared hash key scalars';
 }
 
 {
