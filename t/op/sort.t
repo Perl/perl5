@@ -6,7 +6,7 @@ BEGIN {
     require 'test.pl';
 }
 use warnings;
-plan( tests => 180 );
+plan( tests => 181 );
 
 # these shouldn't hang
 {
@@ -1007,3 +1007,8 @@ is $@, "",
 $#a = -1;
 () = [sort { $a = 10; $b = 10; 0 } $#a, $#a];
 is $#a, 10, 'sort block modifying $a and $b';
+
+$::TODO = ' ';
+() = sort {
+    is \$a, \$a, '[perl #78194] op return values passed to sort'; 0
+} "${\''}", "${\''}";

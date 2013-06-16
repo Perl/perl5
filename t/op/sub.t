@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan( tests => 17 );
+plan( tests => 18 );
 
 sub empty_sub {}
 
@@ -108,3 +108,9 @@ require Config;
 $::TODO = "not fixed yet" if $Config::Config{useithreads};
 is "@scratch", "main road road main",
    'recursive calls do not share shared-hash-key TARGs';
+
+$::TODO = "not fixed yet";
+# [perl #78194] @_ aliasing op return values
+sub { is \$_[0], \$_[0],
+        '[perl #78194] \$_[0] == \$_[0] when @_ aliases "$x"' }
+ ->("${\''}");

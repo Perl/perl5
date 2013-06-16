@@ -3,7 +3,7 @@ BEGIN {
     @INC = '../lib';
     require './test.pl';
 }
-plan tests=>192;
+plan tests=>193;
 
 sub a : lvalue { my $a = 34; ${\(bless \$a)} }  # Return a temporary
 sub b : lvalue { ${\shift} }
@@ -962,6 +962,11 @@ sub ucfr : lvalue {
     }
 }
 ucfr();
+
+# Test TARG with potential lvalue context, too
+for (sub : lvalue { "$x" }->()) {
+    is \$_, \$_, '\$_ == \$_ in for(sub :lvalue{"$x"}->()){...}'
+}
 
 # [perl #117947] XSUBs should not be treated as lvalues at run time
 eval { &{\&utf8::is_utf8}("") = 3 };
