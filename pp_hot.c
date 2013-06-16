@@ -1477,7 +1477,12 @@ PP(pp_match)
         }
     }
 
-    if (gimme == G_ARRAY) {
+    if ((!RX_NPARENS(rx) && !global) || gimme != G_ARRAY) {
+	LEAVE_SCOPE(oldsave);
+	RETPUSHYES;
+    }
+
+    {
 	const I32 nparens = RX_NPARENS(rx);
 	I32 i = (global && !nparens) ? 1 : 0;
 
@@ -1508,14 +1513,8 @@ PP(pp_match)
 	    r_flags |= REXEC_IGNOREPOS | REXEC_NOT_FIRST;
 	    goto play_it_again;
 	}
-	else if (!nparens)
-	    XPUSHs(&PL_sv_yes);
 	LEAVE_SCOPE(oldsave);
 	RETURN;
-    }
-    else {
-	LEAVE_SCOPE(oldsave);
-	RETPUSHYES;
     }
 
 yup:					/* Confirmed by INTUIT */
