@@ -84,7 +84,7 @@ operator:
 
 That now parses as you'd expect, but you still ought to get in the habit of
 using parentheses in that situation.  For more on prototypes, see
-L<perlsub>
+L<perlsub>.
 
 Subroutines declarations can also be loaded up with the C<require> statement
 or both loaded and imported into your namespace with a C<use> statement.
@@ -1199,7 +1199,7 @@ this works in Perl 5:
     say "that's all, folks!";
 
 But it doesn't work at all in Perl 6.  Instead, you should
-use the (parallelizable) C<any> operator instead:
+use the (parallelizable) C<any> operator:
 
    if any(@primary) eq "red" {
        say "primary smartmatches red";
