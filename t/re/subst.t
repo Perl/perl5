@@ -863,7 +863,7 @@ $_ = "hello";
     local *a = *1;
     s/e(.)\1/a$a/g;
 }
-is $_, 'halo', 's/pat/$alias_to_match_var/';
+is $_, 'halo', 's/pat/foo$alias_to_match_var/';
 # Last-used pattern containing re-evals that modify "constant" rhs
 {
     local *a;
