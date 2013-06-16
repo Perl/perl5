@@ -8,7 +8,7 @@ BEGIN {
 
 use strict qw(refs subs);
 
-plan(234);
+plan(235);
 
 # Test glob operations.
 
@@ -807,6 +807,13 @@ for ("4eounthouonth") {
     eval { ${\$_} = 4 };
     like $@, qr/^Modification of a read-only/,
        'refgen does not allow assignment to value aliased to literal string';
+}
+{
+    local $::TODO = ' '
+	if $Config::Config{useithreads} && $Config::Config{mad};
+    my $aref = \123;
+    is \$$aref, $aref,
+	'[perl #109746] referential identity of \literal under threads+mad'
 }
 
 # Bit of a hack to make test.pl happy. There are 3 more tests after it leaves.
