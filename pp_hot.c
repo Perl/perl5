@@ -1460,6 +1460,23 @@ PP(pp_match)
     if (rxtainted)
 	RX_MATCH_TAINTED_on(rx);
     TAINT_IF(RX_MATCH_TAINTED(rx));
+
+    /* update pos */
+
+    if (global && (gimme != G_ARRAY || (dynpm->op_pmflags & PMf_CONTINUE))) {
+        MAGIC *mg = mg_find_mglob(TARG);
+        if (!mg) {
+            mg = sv_magicext_mglob(TARG);
+        }
+        if (RX_OFFS(rx)[0].start != -1) {
+            mg->mg_len = RX_OFFS(rx)[0].end;
+            if (RX_OFFS(rx)[0].start + RX_GOFS(rx) == (UV)RX_OFFS(rx)[0].end)
+                mg->mg_flags |= MGf_MINMATCH;
+            else
+                mg->mg_flags &= ~MGf_MINMATCH;
+        }
+    }
+
     if (gimme == G_ARRAY) {
 	const I32 nparens = RX_NPARENS(rx);
 	I32 i = (global && !nparens) ? 1 : 0;
@@ -1484,19 +1501,6 @@ PP(pp_match)
 	    }
 	}
 	if (global) {
-	    if (dynpm->op_pmflags & PMf_CONTINUE) {
-		MAGIC *mg = mg_find_mglob(TARG);
-		if (!mg) {
-		    mg = sv_magicext_mglob(TARG);
-		}
-		if (RX_OFFS(rx)[0].start != -1) {
-		    mg->mg_len = RX_OFFS(rx)[0].end;
-		    if (RX_OFFS(rx)[0].start + RX_GOFS(rx) == (UV)RX_OFFS(rx)[0].end)
-			mg->mg_flags |= MGf_MINMATCH;
-		    else
-			mg->mg_flags &= ~MGf_MINMATCH;
-		}
-	    }
 	    had_zerolen = (RX_OFFS(rx)[0].start != -1
 			   && (RX_OFFS(rx)[0].start + RX_GOFS(rx)
 			       == (UV)RX_OFFS(rx)[0].end));
@@ -1510,19 +1514,6 @@ PP(pp_match)
 	RETURN;
     }
     else {
-	if (global) {
-	    MAGIC *mg = mg_find_mglob(TARG);
-	    if (!mg) {
-		mg = sv_magicext_mglob(TARG);
-	    }
-	    if (RX_OFFS(rx)[0].start != -1) {
-		mg->mg_len = RX_OFFS(rx)[0].end;
-		if (RX_OFFS(rx)[0].start + RX_GOFS(rx) == (UV)RX_OFFS(rx)[0].end)
-		    mg->mg_flags |= MGf_MINMATCH;
-		else
-		    mg->mg_flags &= ~MGf_MINMATCH;
-	    }
-	}
 	LEAVE_SCOPE(oldsave);
 	RETPUSHYES;
     }
