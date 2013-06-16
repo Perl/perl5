@@ -8,7 +8,7 @@ BEGIN {
 
 use strict qw(refs subs);
 
-plan(230);
+plan(234);
 
 # Test glob operations.
 
@@ -786,6 +786,28 @@ SKIP:{
 
 
 is ref( bless {}, "nul\0clean" ), "nul\0clean", "ref() is nul-clean";
+
+# Test constants and references thereto.
+for (3) {
+    eval { $_ = 4 };
+    like $@, qr/^Modification of a read-only/,
+       'assignment to value aliased to literal number';
+    require Config;
+    local $::TODO = " " if $Config::Config{useithreads};
+    eval { ${\$_} = 4 };
+    like $@, qr/^Modification of a read-only/,
+       'refgen does not allow assignment to value aliased to literal number';
+}
+for ("4eounthouonth") {
+    eval { $_ = 4 };
+    like $@, qr/^Modification of a read-only/,
+       'assignment to value aliased to literal string';
+    require Config;
+    local $::TODO = " " if $Config::Config{useithreads};
+    eval { ${\$_} = 4 };
+    like $@, qr/^Modification of a read-only/,
+       'refgen does not allow assignment to value aliased to literal string';
+}
 
 # Bit of a hack to make test.pl happy. There are 3 more tests after it leaves.
 $test = curr_test();
