@@ -750,11 +750,11 @@ Perl_pad_alloc(pTHX_ I32 optype, U32 tmptype)
         const SSize_t names_fill = AvFILLp(PL_comppad_name);
 	for (;;) {
 	    /*
-	     * "foreach" index vars temporarily become aliases to non-"my"
-	     * values.  Thus we must skip, not just pad values that are
+	     * Entries that close over unavailable variables
+	     * in outer subs contain values not marked PADMY.
+	     * Thus we must skip, not just pad values that are
 	     * marked as current pad values, but also those with names.
 	     */
-	    /* HVDS why copy to sv here? we don't seem to use it */
 	    if (++PL_padix <= names_fill &&
 		   (sv = names[PL_padix]) && sv != &PL_sv_undef)
 		continue;
