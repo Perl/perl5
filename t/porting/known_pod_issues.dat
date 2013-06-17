@@ -145,6 +145,7 @@ Scalar::Readonly
 Semi::Semicolons
 sendmail(1)
 sendmsg(3)
+setlocale(3)
 sha1sum(1)
 Shell
 Shell::Command

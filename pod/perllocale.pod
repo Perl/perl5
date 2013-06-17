@@ -22,7 +22,7 @@ these kinds of matters is called B<internationalization> (often
 abbreviated as B<i18n>); telling such an application about a particular
 set of preferences is known as B<localization> (B<l10n>).
 
-Perl was extended to support the locale system.  This
+Perl has been extended to support the locale system.  This
 is controlled per application by using one pragma, one function call,
 and several environment variables.
 
@@ -102,7 +102,7 @@ request, B<all> of the following must be true for it to work properly:
 =item *
 
 B<Your operating system must support the locale system>.  If it does,
-you should find that the setlocale() function is a documented part of
+you should find that the C<setlocale()> function is a documented part of
 its C library.
 
 =item *
@@ -186,11 +186,11 @@ The operations that are affected by locale are:
 
 =item *
 
-B<Format declarations> (format()) use C<LC_NUMERIC>
+B<Format declarations> (C<format()>) use C<LC_NUMERIC>
 
 =item *
 
-B<The POSIX date formatting function> (strftime()) uses C<LC_TIME>.
+B<The POSIX date formatting function> (C<strftime()>) uses C<LC_TIME>.
 
 =back
 
@@ -208,8 +208,8 @@ The above operations are affected, as well as the following:
 =item *
 
 B<The comparison operators> (C<lt>, C<le>, C<cmp>, C<ge>, and C<gt>) and
-the POSIX string collation functions strcoll() and strxfrm() use
-C<LC_COLLATE>.  sort() is also affected if used without an
+the POSIX string collation functions C<strcoll()> and C<strxfrm()> use
+C<LC_COLLATE>.  C<sort()> is also affected if used without an
 explicit comparison function, because it uses C<cmp> by default.
 
 B<Note:> C<eq> and C<ne> are unaffected by locale: they always
@@ -224,8 +224,8 @@ L<Category LC_COLLATE: Collation>.
 
 =item *
 
-B<Regular expressions and case-modification functions> (uc(), lc(),
-ucfirst(), and lcfirst()) use C<LC_CTYPE>
+B<Regular expressions and case-modification functions> (C<uc()>, C<lc()>,
+C<ucfirst()>, and C<lcfirst()>) use C<LC_CTYPE>
 
 =back
 
@@ -244,7 +244,7 @@ untrustworthy.  See L<"SECURITY">.
 =head2 The setlocale function
 
 You can switch locales as often as you wish at run time with the
-POSIX::setlocale() function:
+C<POSIX::setlocale()> function:
 
         # Import locale-handling tool set from POSIX module.
         # This example uses: setlocale -- the function call
@@ -264,7 +264,7 @@ POSIX::setlocale() function:
         # restore the old locale
         setlocale(LC_CTYPE, $old_locale);
 
-The first argument of setlocale() gives the B<category>, the second the
+The first argument of C<setlocale()> gives the B<category>, the second the
 B<locale>.  The category tells in what aspect of data processing you
 want to apply locale-specific rules.  Category names are discussed in
 L</LOCALE CATEGORIES> and L</"ENVIRONMENT">.  The locale is the name of a
@@ -273,21 +273,21 @@ combination of language, country or territory, and codeset.  Read on for
 hints on the naming of locales: not all systems name locales as in the
 example.
 
-If no second argument is provided and the category is something else
+If no second argument is provided and the category is something other
 than LC_ALL, the function returns a string naming the current locale
 for the category.  You can use this value as the second argument in a
-subsequent call to setlocale().
+subsequent call to C<setlocale()>.
 
 If no second argument is provided and the category is LC_ALL, the
 result is implementation-dependent.  It may be a string of
 concatenated locale names (separator also implementation-dependent)
-or a single locale name.  Please consult your setlocale(3) man page for
+or a single locale name.  Please consult your L<setlocale(3)> man page for
 details.
 
 If a second argument is given and it corresponds to a valid locale,
 the locale for the category is set to that value, and the function
 returns the now-current locale value.  You can then use this in yet
-another call to setlocale().  (In some implementations, the return
+another call to C<setlocale()>.  (In some implementations, the return
 value may sometimes differ from the value you gave as the second
 argument--think of it as an alias for the value you gave.)
 
@@ -299,16 +299,16 @@ to the environment made by the application after startup may or may not
 be noticed, depending on your system's C library.
 
 If the second argument does not correspond to a valid locale, the locale
-for the category is not changed, and the function returns I<undef>.
+for the category is not changed, and the function returns C<undef>.
 
 Note that Perl ignores the current C<LC_CTYPE> and C<LC_COLLATE> locales
 within the scope of a C<use locale ':not_characters'>.
 
-For further information about the categories, consult setlocale(3).
+For further information about the categories, consult L<setlocale(3)>.
 
 =head2 Finding locales
 
-For locales available in your system, consult also setlocale(3) to
+For locales available in your system, consult also L<setlocale(3)> to
 see whether it leads to the list of available locales (search for the
 I<SEE ALSO> section).  If that fails, try the following command lines:
 
@@ -334,7 +334,7 @@ and see whether they list something resembling these
         english.iso88591    german.iso88591     russian.iso88595
         english.roman8                          russian.koi8r
 
-Sadly, even though the calling interface for setlocale() has been
+Sadly, even though the calling interface for C<setlocale()> has been
 standardized, names of locales and the directories where the
 configuration resides have not been.  The basic form of the name is
 I<language_territory>B<.>I<codeset>, but the latter parts after
@@ -353,9 +353,11 @@ mainly that the first one is defined by the C standard, the second by
 the POSIX standard.  They define the B<default locale> in which
 every program starts in the absence of locale information in its
 environment.  (The I<default> default locale, if you will.)  Its language
-is (American) English and its character codeset ASCII.
-B<Warning>. The C locale delivered by some vendors may not
-actually exactly match what the C standard calls for.  So beware.
+is (American) English and its character codeset ASCII or, rarely, a
+superset thereof (such as the "DEC Multinational Character Set
+(DEC-MCS)").  B<Warning>. The C locale delivered by some vendors
+may not actually exactly match what the C standard calls for.  So
+beware.
 
 B<NOTE>: Not all systems have the "POSIX" locale (not all systems are
 POSIX-conformant), so use "C" when you need explicitly to specify this
@@ -475,10 +477,10 @@ because these things are not that standardized.
 
 =head2 The localeconv function
 
-The POSIX::localeconv() function allows you to get particulars of the
+The C<POSIX::localeconv()> function allows you to get particulars of the
 locale-dependent numeric formatting information specified by the current
 C<LC_NUMERIC> and C<LC_MONETARY> locales.  (If you just want the name of
-the current locale for a particular category, use POSIX::setlocale()
+the current locale for a particular category, use C<POSIX::setlocale()>
 with a single parameter--see L<The setlocale function>.)
 
         use POSIX qw(locale_h);
@@ -491,13 +493,13 @@ with a single parameter--see L<The setlocale function>.)
             printf "%-20s = %s\n", $_, $locale_values->{$_}
         }
 
-localeconv() takes no arguments, and returns B<a reference to> a hash.
+C<localeconv()> takes no arguments, and returns B<a reference to> a hash.
 The keys of this hash are variable names for formatting, such as
 C<decimal_point> and C<thousands_sep>.  The values are the
 corresponding, er, values.  See L<POSIX/localeconv> for a longer
 example listing the categories an implementation might be expected to
 provide; some provide more and others fewer.  You don't need an
-explicit C<use locale>, because localeconv() always observes the
+explicit C<use locale>, because C<localeconv()> always observes the
 current locale.
 
 Here's a simple-minded example program that rewrites its command-line
@@ -541,11 +543,11 @@ parameters as integers correctly formatted in the current locale:
 =head2 I18N::Langinfo
 
 Another interface for querying locale-dependent information is the
-I18N::Langinfo::langinfo() function, available at least in Unix-like
+C<I18N::Langinfo::langinfo()> function, available at least in Unix-like
 systems and VMS.
 
-The following example will import the langinfo() function itself and
-three constants to be used as arguments to langinfo(): a constant for
+The following example will import the C<langinfo()> function itself and
+three constants to be used as arguments to C<langinfo()>: a constant for
 the abbreviated first day of the week (the numbering starts from
 Sunday = 1) and two more constants for the affirmative and negative
 answers for a yes/no question in the current locale.
@@ -607,19 +609,19 @@ first example is useful for natural text.
 As noted in L<USING LOCALES>, C<cmp> compares according to the current
 collation locale when C<use locale> is in effect, but falls back to a
 char-by-char comparison for strings that the locale says are equal. You
-can use POSIX::strcoll() if you don't want this fall-back:
+can use C<POSIX::strcoll()> if you don't want this fall-back:
 
         use POSIX qw(strcoll);
         $equal_in_locale =
             !strcoll("space and case ignored", "SpaceAndCaseIgnored");
 
-$equal_in_locale will be true if the collation locale specifies a
+C<$equal_in_locale> will be true if the collation locale specifies a
 dictionary-like ordering that ignores space characters completely and
 which folds case.
 
 If you have a single string that you want to check for "equality in
 locale" against several others, you might think you could gain a little
-efficiency by using POSIX::strxfrm() in conjunction with C<eq>:
+efficiency by using C<POSIX::strxfrm()> in conjunction with C<eq>:
 
         use POSIX qw(strxfrm);
         $xfrm_string = strxfrm("Mixed-case string");
@@ -630,25 +632,25 @@ efficiency by using POSIX::strxfrm() in conjunction with C<eq>:
         print "locale collation ignores case\n"
             if $xfrm_string eq strxfrm("mixed-case string");
 
-strxfrm() takes a string and maps it into a transformed string for use
+C<strxfrm()> takes a string and maps it into a transformed string for use
 in char-by-char comparisons against other transformed strings during
 collation.  "Under the hood", locale-affected Perl comparison operators
-call strxfrm() for both operands, then do a char-by-char
-comparison of the transformed strings.  By calling strxfrm() explicitly
+call C<strxfrm()> for both operands, then do a char-by-char
+comparison of the transformed strings.  By calling C<strxfrm()> explicitly
 and using a non locale-affected comparison, the example attempts to save
 a couple of transformations.  But in fact, it doesn't save anything: Perl
 magic (see L<perlguts/Magic Variables>) creates the transformed version of a
 string the first time it's needed in a comparison, then keeps this version around
 in case it's needed again.  An example rewritten the easy way with
 C<cmp> runs just about as fast.  It also copes with null characters
-embedded in strings; if you call strxfrm() directly, it treats the first
+embedded in strings; if you call C<strxfrm()> directly, it treats the first
 null it finds as a terminator.  don't expect the transformed strings
 it produces to be portable across systems--or even from one revision
-of your operating system to the next.  In short, don't call strxfrm()
+of your operating system to the next.  In short, don't call C<strxfrm()>
 directly: let Perl do it for you.
 
 Note: C<use locale> isn't shown in some of these examples because it isn't
-needed: strcoll() and strxfrm() exist only to generate locale-dependent
+needed: C<strcoll()> and C<strxfrm()> exist only to generate locale-dependent
 results, and so always obey the current C<LC_COLLATE> locale.
 
 =head2 Category LC_CTYPE: Character Types
@@ -666,15 +668,15 @@ setting, characters like "E<aelig>", "E<eth>", "E<szlig>", and
 
 The C<LC_CTYPE> locale also provides the map used in transliterating
 characters between lower and uppercase.  This affects the case-mapping
-functions--fc(), lc(), lcfirst(), uc(), and ucfirst(); case-mapping
+functions--C<fc()>, C<lc()>, C<lcfirst()>, C<uc()>, and C<ucfirst()>; case-mapping
 interpolation with C<\F>, C<\l>, C<\L>, C<\u>, or C<\U> in double-quoted
 strings and C<s///> substitutions; and case-independent regular expression
 pattern matching using the C<i> modifier.
 
 Finally, C<LC_CTYPE> affects the POSIX character-class test
-functions--isalpha(), islower(), and so on.  For example, if you move
+functions--C<isalpha()>, C<islower()>, and so on.  For example, if you move
 from the "C" locale to a 7-bit Scandinavian one, you may find--possibly
-to your surprise--that "|" moves from the ispunct() class to isalpha().
+to your surprise--that "|" moves from the C<ispunct()> class to C<isalpha()>.
 Unfortunately, this creates big problems for regular expressions. "|" still
 means alternation even though it matches C<\w>.
 
@@ -692,10 +694,10 @@ should use C<\w> with the C</a> regular expression modifier.  See L<"SECURITY">.
 
 =head2 Category LC_NUMERIC: Numeric Formatting
 
-After a proper POSIX::setlocale() call, Perl obeys the C<LC_NUMERIC>
+After a proper C<POSIX::setlocale()> call, Perl obeys the C<LC_NUMERIC>
 locale information, which controls an application's idea of how numbers
-should be formatted for human readability by the printf(), sprintf(), and
-write() functions. String-to-numeric conversion by the POSIX::strtod()
+should be formatted for human readability by the C<printf()>, C<sprintf()>, and
+C<write()> functions. String-to-numeric conversion by the C<POSIX::strtod()>
 function is also affected.  In most implementations the only effect is to
 change the character used for the decimal point--perhaps from "."  to ",".
 These functions aren't aware of such niceties as thousands separation and
@@ -740,7 +742,7 @@ See also L<I18N::Langinfo> and C<CRNCYSTR>.
 
 =head2 LC_TIME
 
-Output produced by POSIX::strftime(), which builds a formatted
+Output produced by C<POSIX::strftime()>, which builds a formatted
 human-readable date/time string, is affected by the current C<LC_TIME>
 locale.  Thus, in a French locale, the output produced by the C<%B>
 format element (full month name) for the first month of the year would
@@ -754,7 +756,7 @@ current locale:
         }
 
 Note: C<use locale> isn't needed in this example: as a function that
-exists only to generate locale-dependent results, strftime() always
+exists only to generate locale-dependent results, C<strftime()> always
 obeys the current C<LC_TIME> locale.
 
 See also L<I18N::Langinfo> and C<ABDAY_1>..C<ABDAY_7>, C<DAY_1>..C<DAY_7>,
@@ -809,7 +811,7 @@ dollars instead of Hong Kong dollars.
 
 =item *
 
-The date and day names in dates formatted by strftime() could be
+The date and day names in dates formatted by C<strftime()> could be
 manipulated to advantage by a malicious user able to subvert the
 C<LC_DATE> locale.  ("Look--it says I wasn't in the building on
 Sunday.")
@@ -874,7 +876,7 @@ case-mapping with C<\l>, C<\L>,C<\u> or C<\U>.
 
 =item *
 
-B<Output formatting functions> (printf() and write()):
+B<Output formatting functions> (C<printf()> and C<write()>):
 
 Results are never tainted because otherwise even output from print,
 for example C<print(1/7)>, should be tainted if C<use locale> is in
@@ -882,23 +884,23 @@ effect.
 
 =item *
 
-B<Case-mapping functions> (lc(), lcfirst(), uc(), ucfirst()):
+B<Case-mapping functions> (C<lc()>, C<lcfirst()>, C<uc()>, C<ucfirst()>):
 
 Results are tainted if C<use locale> (but not
 S<C<use locale ':not_characters'>>) is in effect.
 
 =item *
 
-B<POSIX locale-dependent functions> (localeconv(), strcoll(),
-strftime(), strxfrm()):
+B<POSIX locale-dependent functions> (C<localeconv()>, C<strcoll()>,
+C<strftime()>, C<strxfrm()>):
 
 Results are never tainted.
 
 =item *
 
-B<POSIX character class tests> (isalnum(), isalpha(), isdigit(),
-isgraph(), islower(), isprint(), ispunct(), isspace(), isupper(),
-isxdigit()):
+B<POSIX character class tests> (C<isalnum()>, C<isalpha()>, C<isdigit()>,
+C<isgraph()>, C<islower()>, C<isprint()>, C<ispunct()>, C<isspace()>, C<isupper()>,
+C<isxdigit()>):
 
 True/false results are never tainted.
 
@@ -968,7 +970,7 @@ and you should investigate what the problem is.
 =back
 
 The following environment variables are not specific to Perl: They are
-part of the standardized (ISO C, XPG4, POSIX 1.c) setlocale() method
+part of the standardized (ISO C, XPG4, POSIX 1.c) C<setlocale()> method
 for controlling an application's opinion on data.
 
 =over 12
@@ -1039,7 +1041,7 @@ The LC_NUMERIC controls the numeric output:
    setlocale(LC_NUMERIC, "fr_FR") or die "Pardon";
    printf "%g\n", 1.23; # If the "fr_FR" succeeded, probably shows 1,23.
 
-and also how strings are parsed by POSIX::strtod() as numbers:
+and also how strings are parsed by C<POSIX::strtod()> as numbers:
 
    use locale;
    use POSIX qw(locale_h strtod);
@@ -1089,12 +1091,12 @@ exact multiplier depends on the string's contents, the operating system
 and the locale.) These downsides are dictated more by the operating
 system's implementation of the locale system than by Perl.
 
-=head2 write() and LC_NUMERIC
+=head2 C<write()> and C<LC_NUMERIC>
 
 If a program's environment specifies an LC_NUMERIC locale and C<use
 locale> is in effect when the format is declared, the locale is used
 to specify the decimal point character in formatted output.  Formatted
-output cannot be controlled by C<use locale> at the time when write()
+output cannot be controlled by C<use locale> at the time when C<write()>
 is called.
 
 =head2 Freely available locale definitions
