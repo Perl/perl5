@@ -2924,8 +2924,8 @@ this replaces most structured uses of C<goto> in other languages.)
 
 The C<goto-EXPR> form expects to evaluate C<EXPR> to a code reference or
 a label name.  If it evaluates to a code reference, it will be handled
-like C<goto-&NAME>, below.  This is especially useful to implement tail
-recursion via C<goto __SUB__>.
+like C<goto-&NAME>, below.  This is especially useful for implementing
+tail recursion via C<goto __SUB__>.
 
 If the expression evaluates to a label name, its scope will be resolved
 dynamically.  This allows for computed C<goto>s per FORTRAN, but isn't
