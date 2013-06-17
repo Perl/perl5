@@ -16,11 +16,6 @@ if ($^O eq "MSWin32" && !defined $ENV{PERL_STATIC_EXT}) {
     skip_all "PERL_STATIC_EXT must be set to the list of static extensions";
 }
 
-unless (defined $Config{usedl}) {
-    skip_all "FindExt just plain broken for static perl.";
-}
-
-plan tests => 12;
 require FindExt;
 
 FindExt::apply_config(\%Config);
@@ -38,33 +33,42 @@ sub compare {
     is("@have", "@$want", "We find the same list of $desc");
 }
 
-# Config.pm and FindExt.pm make different choices about what should be built
-my @config_built;
-my @found_built;
-{
-    foreach my $type (qw(static dynamic nonxs)) {
-	push @found_built, eval "FindExt::${type}_ext()";
-	push @config_built, split ' ', $Config{"${type}_ext"};
-    }
-}
-@config_built = sort @config_built;
-@found_built = sort @found_built;
+unless (join (' ', sort split ' ', $Config{extensions})
+        eq join(' ', FindExt::extensions())) {
+    # There are various things that break our assumptions.
+    # If Encode is a static extension, then Configure has special case logic
+    # to add Encode/* as static extensions
+    # -Uusedl causes Encode to be a static extension, and drops building
+    # XS::APItest and XS::Typemap
+    # Any use of -Dnoextensions to choose not to build a extension
 
-foreach (['dynamic_ext',
-          [FindExt::dynamic_ext()], $Config{dynamic_ext}],
-         ['static_ext',
-	  [FindExt::static_ext()], $Config{static_ext}],
-	 ['nonxs_ext',
-	  [FindExt::nonxs_ext()], $Config{nonxs_ext}],
-	 ['known_extensions',
-	  [FindExt::known_extensions()], $Config{known_extensions}],
-	 ['"config" dynamic + static + nonxs',
-	  \@config_built, $Config{extensions}],
-	 ['"found" dynamic + static + nonxs', 
-	  \@found_built, [FindExt::extensions()]],
-	) {
-    my ($type, $found, $config) = @$_;
-    compare($type, $config, @$found);
+    plan(tests => 2);
+    note("configured extension list doesn't match, so only minimal testing is possible");
+    compare('known_extensions', $Config{known_extensions},
+            FindExt::known_extensions());
+} else {
+    # dynamic linking, and all possible extensions for this system were built,
+    # so can test everything.
+    plan(tests => 12);
+
+    compare('known_extensions', $Config{known_extensions},
+            FindExt::known_extensions());
+
+    # Config.pm and FindExt.pm make different choices about what should be built
+    my @config_built;
+    my @found_built;
+
+    foreach my $type (qw(static dynamic nonxs)) {
+        my @this_found = eval "FindExt::${type}_ext()";
+        push @found_built, @this_found;
+	push @config_built, split ' ', $Config{"${type}_ext"};
+        compare("${type}_ext", $Config{"${type}_ext"}, @this_found);
+    }
+
+    compare('"config" dynamic + static + nonxs', $Config{extensions},
+            sort @config_built);
+    compare('"found" dynamic + static + nonxs', [FindExt::extensions()],
+            sort @found_built);
 }
 
 # Local variables:
