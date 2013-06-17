@@ -280,7 +280,7 @@ CRTLOPTS =,$(CRTL)/Options
 unidatadirs = lib/unicore/To lib/unicore/lib
 
 # Modules which must be installed before we can build extensions
-LIBPREREQ = $(ARCHDIR)Config.pm $(ARCHDIR)Config_heavy.pl [.lib.VMS]Filespec.pm $(ARCHDIR)vmspipe.com [.lib]buildcustomize.pl
+LIBPREREQ = $(ARCHDIR)Config.pm $(ARCHDIR)Config_heavy.pl
 
 utils1 = [.utils]perldoc.com [.lib.ExtUtils]Miniperl.pm [.utils]c2ph.com [.utils]h2ph.com 
 utils2 = [.utils]h2xs.com [.utils]libnetcfg.com [.lib]perlbug.com [.utils]json_pp.com
@@ -349,7 +349,7 @@ vmspipe.com : [.vms]vmspipe.com
 miniperl : $(DBG)miniperl$(E)  vmspipe.com
 	@ Continue
 
-[.lib]buildcustomize.pl :  miniperlmain$(O), $(DBG)libperlmini$(OLB) $(CRTL) write_buildcustomize.pl [.lib.VMS]Filespec.pm
+[.lib]buildcustomize.pl :  miniperlmain$(O), $(DBG)libperlmini$(OLB) $(CRTL) write_buildcustomize.pl
 	Link $(LINKFLAGS)/NoDebug/Trace/NoMap/NoFull/NoCross/Exe=$(MINIPERL_EXE) miniperlmain$(O), $(DBG)libperlmini$(OLB)/Library/Include=globals $(CRTLOPTS)
        $(MINIPERL) "-f" write_buildcustomize.pl
 
@@ -439,7 +439,7 @@ unidatafiles.ts : $(MINIPERL_EXE) [.lib]Config.pm [.lib.unicore]mktables nonxsex
 	@ If F$Search("$(MMS$TARGET)").nes."" Then Delete/NoLog/NoConfirm $(MMS$TARGET);*
 	@ Copy/NoConfirm _NLA0: $(MMS$TARGET)
  
-DynaLoader$(O) : [.lib]buildcustomize.pl $(ARCHDIR)Config.pm $(MINIPERL_EXE) [.lib.VMS]Filespec.pm 
+DynaLoader$(O) : [.lib]buildcustomize.pl $(ARCHDIR)Config.pm $(MINIPERL_EXE)
 	$(MINIPERL) make_ext.pl "MAKE=$(MMS)" "DynaLoader"
 
 dynext : $(LIBPREREQ) $(DBG)perlshr$(E) unidatafiles.ts DynaLoader$(O) preplibrary makeppport $(MINIPERL_EXE)
@@ -447,10 +447,6 @@ dynext : $(LIBPREREQ) $(DBG)perlshr$(E) unidatafiles.ts DynaLoader$(O) preplibra
 
 nonxsext : $(LIBPREREQ) preplibrary $(MINIPERL_EXE) [.pod]perlfunc.pod
        $(MINIPERL) make_ext.pl "MAKE=$(MMS)" "--nonxs"
-
-[.lib.VMS]Filespec.pm : [.vms.ext]Filespec.pm
-	@ If F$Search("[.lib]VMS.Dir").eqs."" Then Create/Directory [.lib.VMS]
-	Copy/NoConfirm/Log $(MMS$SOURCE) [.lib.VMS]
 
 [.utils]perldoc.com : [.utils]perldoc.PL $(ARCHDIR)Config.pm
 	$(MINIPERL) -"I[-.lib]" $(MMS$SOURCE)
@@ -602,25 +598,20 @@ regen_headers :
 perly$(O) : perly.c, perly.h, $(h)
 .endif
 
-VMSFSPEC_T = [.t.lib]vmsfspec.t
-
-$(VMSFSPEC_T) : [.vms.ext]filespec.t
-	Copy/NoConfirm/Log $(MMS$SOURCE) $(VMSFSPEC_T)
-
 check : test
 	@ Continue
 
-test : all [.t.lib]vmsfspec.t
+test : all
 	@ PERL_TEST_DRIVER == "TEST."
 	- @[.vms]test.com "$(E)" "$(__DEBUG__)"
 	@ $(MINIPERL) -e "print ""Ran tests"";" > [.t]rantests.
 
-test_harness : all [.t.lib]vmsfspec.t
+test_harness : all
 	@ PERL_TEST_DRIVER == "harness."
 	- @[.vms]test.com "$(E)" "$(__DEBUG__)"
 	@ $(MINIPERL) -e "print ""Ran tests"";" > [.t]rantests.
 
-minitest : $(MINITEST_EXE) [.lib.VMS]Filespec.pm unidatafiles.ts
+minitest : $(MINITEST_EXE) unidatafiles.ts
 	@ PERL_TEST_DRIVER == "minitest"
 	- @[.vms]test.com "$(E)" "$(__DEBUG__)"
 
@@ -899,7 +890,6 @@ realclean : clean
 	- If F$Search("Perl_Setup.Com").nes."" Then Delete/NoConfirm/Log Perl_Setup.Com;*
 	- If F$Search("[.t]rantests.").nes."" Then Delete/NoConfirm/Log [.t]rantests.;*
 	- If F$Search("[.t]test_state.").nes."" Then Delete/NoConfirm/Log [.t]test_state.;*
-	- If F$Search("[.t.lib]vmsfspec.t").nes."" Then Delete/NoConfirm/Log [.t.lib]vmsfspec.t;*
 	- If F$Search("[.t.lib]vmsish.t").nes."" Then Delete/NoConfirm/Log [.t.lib]vmsish.t;*
 	- If F$Search("vmspipe.com").nes."" Then Delete/NoConfirm/Log vmspipe.com;*
 	- If F$Search("[.lib]buildcustomize.pl").nes."" Then Delete/NoConfirm/Log [.lib]buildcustomize.pl;*

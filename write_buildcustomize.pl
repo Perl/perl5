@@ -7,9 +7,6 @@ if (@ARGV) {
     unshift @INC, 'lib';
 }
 
-unshift @INC, ('dist/Cwd', 'dist/Cwd/lib');
-require File::Spec::Functions;
-
 my $file = 'lib/buildcustomize.pl';
 
 # To clarify, this isn't the entire suite of modules considered "toolchain"
@@ -35,6 +32,10 @@ my @toolchain = qw(cpan/AutoLoader/lib
 
 # Used only in ExtUtils::Liblist::Kid::_win32_ext()
 push @toolchain, 'cpan/Text-ParseWords/lib' if $^O eq 'MSWin32';
+push @toolchain, 'ext/VMS-Filespec/lib' if $^O eq 'VMS';
+
+unshift @INC, @toolchain;
+require File::Spec::Functions;
 
 # lib must be last, as the toolchain modules write themselves into it
 # as they build, and it's important that @INC order ensures that the partially

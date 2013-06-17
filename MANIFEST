@@ -3808,6 +3808,8 @@ ext/VMS-DCLsym/DCLsym.pm	Perl access to CLI symbols
 ext/VMS-DCLsym/DCLsym.xs	Perl access to CLI symbols
 ext/VMS-DCLsym/Makefile.PL	MakeMaker driver for VMS::DCLsym
 ext/VMS-DCLsym/t/vms_dclsym.t	regression tests for VMS::DCLsym
+ext/VMS-Filespec/lib/VMS/Filespec.pm	VMS-Unix file syntax interconversion
+ext/VMS-Filespec/t/filespec.t		See if VMS::Filespec functions work
 ext/VMS-Stdio/0README.txt	ReadMe file for VMS::Stdio
 ext/VMS-Stdio/Makefile.PL	MakeMaker driver for VMS::Stdio
 ext/VMS-Stdio/Stdio.pm		VMS options to stdio routines
@@ -5453,8 +5455,6 @@ utils/splain.PL			Stand-alone version of diagnostics.pm
 utils/xsubpp.PL			External subroutine preprocessor
 utils/zipdetails.PL			display the internal structure of zip files
 vms/descrip_mms.template	Template MM[SK] description file for build
-vms/ext/Filespec.pm		VMS-Unix file syntax interconversion
-vms/ext/filespec.t		See if VMS::Filespec functions work
 vms/genopt.com			hack to write options files in case of broken makes
 vms/gen_shrfls.pl		generate options files and glue for shareable image
 vms/make_command.com		record MM[SK] command used to build Perl

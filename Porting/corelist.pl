@@ -106,7 +106,6 @@ find(
             $module =~ s{^Sys-Syslog/win32}{Sys-Syslog},
             $module =~ s{^Time-Piece/Seconds}{Time/Seconds},
             );
-        $module =~ s{^vms/ext}{VMS};
 		$module =~ s{^lib/}{}g;
         $module =~ s{/}{::}g;
         $module =~ s{-}{::}g;
@@ -115,7 +114,6 @@ find(
         $lines{$module}          = $version;
         $module_to_file{$module} = $File::Find::name;
     },
-    'vms/ext',
     'symbian/ext',
     'lib',
     'ext',

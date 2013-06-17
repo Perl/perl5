@@ -207,6 +207,7 @@ ext/pod-html/testdir/perlpodspec-copy.pod	Verbatim line length including indents
 ext/pod-html/testdir/perlvar-copy.pod	? Should you be using L<...> instead of	3
 ext/pod-html/testdir/perlvar-copy.pod	Verbatim line length including indents exceeds 79 by	6
 ext/vms-dclsym/dclsym.pm	? Should you be using L<...> instead of	1
+ext/vms-filespec/lib/vms/filespec.pm	Verbatim line length including indents exceeds 79 by	1
 install	? Should you be using F<...> or maybe L<...> instead of	1
 os2/os2/os2-extattr/extattr.pm	? Should you be using F<...> or maybe L<...> instead of	1
 os2/os2/os2-process/process.pm	Verbatim line length including indents exceeds 79 by	27
@@ -268,7 +269,6 @@ porting/expand-macro.pl	Verbatim line length including indents exceeds 79 by	2
 porting/release_managers_guide.pod	Verbatim line length including indents exceeds 79 by	7
 porting/todo.pod	Verbatim line length including indents exceeds 79 by	7
 utils/c2ph	Verbatim line length including indents exceeds 79 by	44
-vms/ext/filespec.pm	Verbatim line length including indents exceeds 79 by	1
 lib/benchmark.pm	Verbatim line length including indents exceeds 79 by	2
 lib/config.pod	? Should you be using L<...> instead of	-1
 lib/extutils/embed.pm	Verbatim line length including indents exceeds 79 by	2

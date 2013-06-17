@@ -1951,6 +1951,12 @@ use File::Glob qw(:case);
         'UPSTREAM'   => undef,
     },
 
+    'VMS::Filespec' => {
+        'MAINTAINER' => 'p5p',
+        'FILES'      => q[ext/VMS-Filespec],
+        'UPSTREAM'   => undef,
+    },
+
     'VMS::Stdio' => {
         'MAINTAINER' => 'craig',
         'FILES'      => q[ext/VMS-Stdio],
