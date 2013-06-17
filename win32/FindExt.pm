@@ -66,13 +66,6 @@ sub set_static_extensions {
     }
 }
 
-sub scan_ext
-{
-    my $dir  = shift;
-    find_ext("$dir/");
-    extensions();
-}
-
 sub _ext_eq {
     my $key = shift;
     sub {
@@ -108,14 +101,14 @@ sub has_xs_or_c {
 }
 
 # Function to find available extensions, ignoring DynaLoader
-sub find_ext
+sub scan_ext
 {
     my $ext_dir = shift;
     opendir my $dh, "$ext_dir";
     while (defined (my $item = readdir $dh)) {
         next if $item =~ /^\.\.?$/;
         next if $item eq "DynaLoader";
-        next unless -d "$ext_dir$item";
+        next unless -d "$ext_dir/$item";
         my $this_ext = $item;
         my $leaf = $item;
 
@@ -125,12 +118,12 @@ sub find_ext
 	# Temporary hack to cope with smokers that are not clearing directories:
         next if $ext{$this_ext};
 
-        if (has_xs_or_c("$ext_dir$item")) {
+        if (has_xs_or_c("$ext_dir/$item")) {
             $ext{$this_ext} = $static{$this_ext} ? 'static' : 'dynamic';
         } else {
             $ext{$this_ext} = 'nonxs';
         }
-        $ext{$this_ext} = 'known' if $ext{$this_ext} && $item =~ $no;
+        $ext{$this_ext} = 'known' if $item =~ $no;
     }
 }
 
