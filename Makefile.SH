@@ -1324,7 +1324,7 @@ _cleaner1:
 	sh $(CLEAN).sh ; \
 	fi
 	rm -f realclean.sh veryclean.sh
-	-for file in `find cpan dist ext -name ppport.h` ; do rm -f $$file; done
+	-rm -f `grep -v ^# mkppport.lst | grep . | sed -e 's/$$/\/ppport.h/'`
 
 # Dear POSIX, thanks for making the default to xargs to be
 # run once if nothhing is passed in. It is such a great help.
