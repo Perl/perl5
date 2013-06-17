@@ -29,6 +29,15 @@ FindExt::scan_ext("../$_")
 FindExt::set_static_extensions(split ' ', $^O eq 'MSWin32'
                                ? $ENV{PERL_STATIC_EXT} : $Config{static_ext});
 
+sub compare {
+    my ($desc, $want, @have) = @_;
+    $want = [sort split ' ', $want]
+        unless ref $want eq 'ARRAY';
+    local $::Level = $::Level + 1;
+    is(scalar @have, scalar @$want, "We find the same number of $desc");
+    is("@have", "@$want", "We find the same list of $desc");
+}
+
 # Config.pm and FindExt.pm make different choices about what should be built
 my @config_built;
 my @found_built;
@@ -52,13 +61,10 @@ foreach (['dynamic_ext',
 	 ['"config" dynamic + static + nonxs',
 	  \@config_built, $Config{extensions}],
 	 ['"found" dynamic + static + nonxs', 
-	  \@found_built, join " ", FindExt::extensions()],
+	  \@found_built, [FindExt::extensions()]],
 	) {
     my ($type, $found, $config) = @$_;
-    my @config = sort split ' ', $config;
-    is (scalar @$found, scalar @config,
-	"We find the same number of $type");
-    is ("@$found", "@config", "We find the same list of $type");
+    compare($type, $config, @$found);
 }
 
 # Local variables:
