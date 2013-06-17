@@ -1447,7 +1447,7 @@ PP(pp_match)
             /* match via INTUIT shouldn't have any captures.
              * Let @-, @+, $^N know */
             RX_LASTPAREN(rx) = RX_LASTCLOSEPAREN(rx) = 0;
-            RX_MATCH_UTF8_set(rx, cBOOL(DO_UTF8(rx)));
+            RX_MATCH_UTF8_set(rx, cBOOL(DO_UTF8(TARG)));
             if ( !(r_flags & REXEC_NOT_FIRST) )
                 Perl_reg_set_capture_string(aTHX_ rx,
                                         (char*)truebase, (char *)strend,
