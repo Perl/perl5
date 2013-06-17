@@ -3,7 +3,7 @@ package HTTP::Tiny;
 use strict;
 use warnings;
 # ABSTRACT: A small, simple, correct HTTP/1.1 client
-our $VERSION = '0.030'; # VERSION
+our $VERSION = '0.031'; # VERSION
 
 use Carp ();
 
@@ -739,7 +739,7 @@ sub read_content_body {
     my ($self, $cb, $response, $content_length) = @_;
     $content_length ||= $response->{headers}{'content-length'};
 
-    if ( $content_length ) {
+    if ( defined $content_length ) {
         my $len = $content_length;
         while ($len > 0) {
             my $read = ($len > BUFSIZE) ? BUFSIZE : $len;
@@ -974,7 +974,7 @@ HTTP::Tiny - A small, simple, correct HTTP/1.1 client
 
 =head1 VERSION
 
-version 0.030
+version 0.031
 
 =head1 SYNOPSIS
 
