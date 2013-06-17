@@ -26,7 +26,6 @@ regen/regcharclass.pl
 regen/uconfig_h.pl
 runtests.SH
 t/TEST
-vms/ext/filespec.t
 x2p/Makefile.SH
 Porting/Maintainers.pl
 Porting/add-package.pl
