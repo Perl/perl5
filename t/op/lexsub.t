@@ -8,7 +8,7 @@ BEGIN {
     *bar::like = *like;
 }
 no warnings 'deprecated';
-plan 134;
+plan 135;
 
 # -------------------- Errors with feature disabled -------------------- #
 
@@ -695,3 +695,11 @@ eval 'sub not_lexical7 { my @x }';
     }
   }
 }
+
+like runperl(
+      switches => [ '-Mfeature=:all', '-Mwarnings=FATAL,all', '-M-warnings=experimental::lexical_subs' ],
+      prog     => 'my sub foo; sub foo { foo } foo',
+      stderr   => 1
+     ),
+     qr/Deep recursion on subroutine "foo"/,
+    'deep recursion warnings for lexical subs do not crash';
