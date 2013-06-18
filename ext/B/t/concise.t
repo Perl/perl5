@@ -413,8 +413,12 @@ like($out, qr/FUNC: \*ExtUtils::Mksymlists::_write_vms/,
 $out = runperl ( switches => ["-MO=Concise,-stash=Data::Dumper,-src,-exec"],
 		 prog => '-e 1', stderr => 1 );
 
-like($out, qr/FUNC: \*Data::Dumper::format_refaddr/,
-     "stash rendering loads package as needed");
+SKIP: {
+    skip "Data::Dumper is statically linked", 1
+	if $Config{static_ext} =~ m|\bData/Dumper\b|;
+    like($out, qr/FUNC: \*Data::Dumper::format_refaddr/,
+	"stash rendering loads package as needed");
+}
 
 my $prog = q{package FOO; sub bar { print q{bar} } package main; FOO::bar(); };
 
