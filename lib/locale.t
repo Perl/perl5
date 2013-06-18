@@ -1054,17 +1054,7 @@ foreach $Locale (@Locale) {
             {
                 no locale;
 
-                # The earlier test was $e = "$x".  But this fails [perl
-                # #108378], and the "no locale" was commented out.  But doing
-                # that made all the tests in the block after this one
-                # meaningless, as originally it was testing the nesting of a
-                # "no locale" scope, and how it recovers after that scope is
-                # done.  So I (khw) filed a bug report and changed this so it
-                # wouldn't fail.  It seemed too much work to add TODOs
-                # instead.  Should this be fixed, the following test names
-                # would need to be revised; they mostly don't really test
-                # anything currently.
-                $e = $x;
+                $e = "$x";
 
                 $ok6 = $e == 1.23;
                 $ok7 = $e == $x;
@@ -1107,7 +1097,7 @@ foreach $Locale (@Locale) {
             $ok5 = $c == $d;
             {
                 no locale;
-                $e = $x;
+                $e = "$x";
 
                 $ok6 = $e == 1.23;
                 $ok7 = $e == $x;
@@ -1148,7 +1138,7 @@ foreach $Locale (@Locale) {
     debug "# $first_c_test..$locales_test_number: \$c = $c, \$d = $d, Locale = $Locale\n";
 
     tryneoalpha($Locale, ++$locales_test_number, $ok6);
-    $test_names{$locales_test_number} = 'Verify that can assign numerically under inner no-locale block';
+    $test_names{$locales_test_number} = 'Verify that can assign stringified under inner no-locale block';
     my $first_e_test = $locales_test_number;
 
     tryneoalpha($Locale, ++$locales_test_number, $ok7);
