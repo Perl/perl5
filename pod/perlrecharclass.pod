@@ -944,8 +944,8 @@ equivalent:
 
  /(?[[ a b ]])/
 
-(You can, of course, specify single characters by using, C<\x{ }>,
-C<\N{ }>, etc.)
+(You can, of course, specify single characters by using, C<\x{...}>,
+C<\N{...}>, etc.)
 
 This last example shows the use of this construct to specify an ordinary
 bracketed character class without additional set operations.  Note the
