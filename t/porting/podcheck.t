@@ -784,14 +784,17 @@ package My::Pod::Checker {      # Extend Pod::Checker
             }
             $lines[$i] =~ s/\s+$//;
             my $indent = $self->get_current_indent;
-            my $exceeds = length(Text::Tabs::expand($lines[$i]))
-                          + $indent - $MAX_LINE_LENGTH;
-            next unless $exceeds > 0;
-            my ($file, $line) = $pod_para->file_line;
-            $self->poderror({ -line => $line + $i, -file => $file,
-                -msg => $line_length,
-                parameter => "+$exceeds (including " . ($indent - $INDENT) . " from =over's)",
-            });
+
+            if ($ENV{PERL_POD_PEDANTIC}) {
+              my $exceeds = length(Text::Tabs::expand($lines[$i]))
+                            + $indent - $MAX_LINE_LENGTH;
+              next unless $exceeds > 0;
+              my ($file, $line) = $pod_para->file_line;
+              $self->poderror({ -line => $line + $i, -file => $file,
+                  -msg => $line_length,
+                  parameter => "+$exceeds (including " . ($indent - $INDENT) . " from =over's)",
+              });
+            }
         }
     }
 
@@ -1841,6 +1844,10 @@ foreach my $filename (@files) {
             next if $problems{$filename}{$message};
             next if ! $known_problems{$canonical}{$message};
             next if $known_problems{$canonical}{$message} < 0; # Preserve negs
+
+            next if index($message, $line_length) == 0
+                  and ! $ENV{PERL_POD_PENDANTIC};
+
             my $diagnostic = output_thanks($filename, $known_problems{$canonical}{$message}, 0, $message);
             push @diagnostics, $diagnostic if $diagnostic;
             $thankful_diagnostics++ if $diagnostic;
