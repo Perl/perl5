@@ -1777,7 +1777,8 @@ X<error, handling> X<exception, handling>
 
 =for Pod::Functions catch exceptions or compile and run code
 
-In the first form, the return value of EXPR is parsed and executed as if it
+In the first form, often referred to as a "string eval", the return
+value of EXPR is parsed and executed as if it
 were a little Perl program.  The value of the expression (which is itself
 determined within scalar context) is first parsed, and if there were no
 errors, executed as a block within the lexical context of the current Perl
@@ -1799,6 +1800,12 @@ exhibit the erratic, but historical, behaviour of affecting some outer file
 scope that is still compiling.  See also the L</evalbytes> keyword, which
 always treats its input as a byte stream and works properly with source
 filters, and the L<feature> pragma.
+
+Problems can arise if the string expands a scalar containing a floating
+point number.  That scalar can expand to letters, such as C<"NaN"> or
+C<"Infinity">; or, within the scope of a C<use locale>, the decimal
+point character may be something other than a dot (such as a comma).
+None of these are likely to parse as you are likely expecting.
 
 In the second form, the code within the BLOCK is parsed only once--at the
 same time the code surrounding the C<eval> itself was parsed--and executed
