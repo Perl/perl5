@@ -654,6 +654,19 @@ by the C<syntax> category.  On the other hand, the C<exec> category
 controlled its fatal-ness.  It is now entirely handled by the C<exec>
 category.
 
+=item *
+
+Perl v5.18 inadvertently introduced a bug whereby interpolating mixed up-
+and down-graded UTF-8 strings in a regex could result in malformed UTF-8
+in the pattern: specifically if a downgraded character in the range
+C<\x80..\xff> followed a UTF-8 string, e.g.
+
+    utf8::upgrade(  my $u = "\x{e5}");
+    utf8::downgrade(my $d = "\x{e5}");
+    /$u$d/
+
+[RT #118297]
+
 =back
 
 =head1 Known Problems
