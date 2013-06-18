@@ -47,6 +47,16 @@ XXX For a release on a stable branch, this section aspires to be:
 As part of this series of fixes it was necessary to change the API of
 Perl_re_intuit_start().  See L</Internal Changes> for more.
 
+=head2 Locale decimal point character no longer leaks outside of S<C<use locale>> scope
+
+This is actually a bug fix, but some code has come to rely on the bug
+being present, so this change is listed here.  The current locale that
+the program is running under is not supposed to be visible to Perl code
+except within the scope of a S<C<use locale>>.  However, until now under
+certain circumstances, the character used for a decimal point (often a
+comma) leaked outside the scope.  If your code is affected by this
+change, simply add a S<C<use locale>>.
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.
