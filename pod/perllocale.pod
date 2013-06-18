@@ -93,9 +93,9 @@ deficiencies, so keep reading.
 
 =head1 PREPARING TO USE LOCALES
 
-Perl will not use locales unless specifically requested to (see L</NOTES> below
-for the partial exception of C<write()>).  But even if there is such a
-request, B<all> of the following must be true for it to work properly:
+Perl itself will not use locales unless specifically requested to.  But
+even if there is such a request, B<all> of the following must be true
+for it to work properly:
 
 =over 4
 
@@ -180,17 +180,66 @@ The operations that are affected by locale are:
 
 =over 4
 
+=item B<Not within the scope of any C<use locale> variant>
+
+Only non-Perl operations should be affected.  These include going
+outside of Perl via constructs like L<system()|perlfunc/system LIST> or
+L<qxE<sol>E<sol>|perlop/qxE<sol>STRINGE<sol>>.  Perl also gives access
+to various C library functions through the L<POSIX> module.  Some of
+those functions are always affected by the current locale.  For example,
+C<POSIX::strftime()> uses C<LC_TIME>; C<POSIX::strtod()> uses
+C<LC_NUMERIC>; C<POSIX::strcoll()> and C<POSIX::strxfrm()> use
+C<LC_COLLATE>; and character classification functions like
+C<POSIX::isalnum()> use C<LC_CTYPE>.  All such functions will behave
+according to the current underlying locale, even if that isn't exposed
+to Perl operations.
+
+Also, certain Perl operations that are set-up within the scope of a
+C<use locale> variant retain that effect even outside the scope.
+These include:
+
+=over 4
+
+=item *
+
+The output format of a L<write()|perlfunc/write> is determined by an
+earlier format declaration (L<perlfunc/format>), so whether or not the
+output is affected by locale is determined by if the C<format()> is
+within the scope of a C<use locale> variant, not whether the C<write()>
+is.
+
+=item *
+
+Regular expression patterns can be compiled using
+L<qrE<sol>E<sol>|perlop/qrE<sol>STRINGE<sol>msixpodual> with actual
+matching deferred to later.  Again, it is whether or not the compilation
+was done within the scope of C<use locale> that determines the match
+behavior, not if the matches are done within such a scope or not.
+
+=back
+
 =item B<Under C<use locale ':not_characters';>>
 
 =over 4
 
 =item *
 
-B<Format declarations> (C<format()>) use C<LC_NUMERIC>
+All the non-Perl operations.
 
 =item *
 
-B<The POSIX date formatting function> (C<strftime()>) uses C<LC_TIME>.
+B<Format declarations> (L<perlfunc/format>) and hence any subsequent
+C<write()>s use C<LC_NUMERIC>.
+
+=item *
+
+B<stringification and output> use C<LC_NUMERIC>.
+These include the results of
+C<print()>,
+C<printf()>,
+C<say()>,
+and
+C<sprintf()>.
 
 =back
 
@@ -201,14 +250,15 @@ E<160>
 
 =item B<Under just plain C<use locale;>>
 
-The above operations are affected, as well as the following:
-
 =over 4
 
 =item *
 
-B<The comparison operators> (C<lt>, C<le>, C<cmp>, C<ge>, and C<gt>) and
-the POSIX string collation functions C<strcoll()> and C<strxfrm()> use
+All the above operations
+
+=item *
+
+B<The comparison operators> (C<lt>, C<le>, C<cmp>, C<ge>, and C<gt>) use
 C<LC_COLLATE>.  C<sort()> is also affected if used without an
 explicit comparison function, because it uses C<cmp> by default.
 
@@ -694,35 +744,30 @@ should use C<\w> with the C</a> regular expression modifier.  See L<"SECURITY">.
 
 =head2 Category LC_NUMERIC: Numeric Formatting
 
-After a proper C<POSIX::setlocale()> call, Perl obeys the C<LC_NUMERIC>
+After a proper C<POSIX::setlocale()> call, and within the scope of one
+of the C<use locale> variants, Perl obeys the C<LC_NUMERIC>
 locale information, which controls an application's idea of how numbers
-should be formatted for human readability by the C<printf()>, C<sprintf()>, and
-C<write()> functions. String-to-numeric conversion by the C<POSIX::strtod()>
-function is also affected.  In most implementations the only effect is to
+should be formatted for human readability.
+In most implementations the only effect is to
 change the character used for the decimal point--perhaps from "."  to ",".
-These functions aren't aware of such niceties as thousands separation and
+The functions aren't aware of such niceties as thousands separation and
 so on. (See L<The localeconv function> if you care about these things.)
 
-Output produced by print() is also affected by the current locale: it
-corresponds to what you'd get from printf() in the "C" locale.  The
-same is true for Perl's internal conversions between numeric and
-string formats:
+ use POSIX qw(strtod setlocale LC_NUMERIC);
+ use locale;
 
-        use POSIX qw(strtod setlocale LC_NUMERIC);
-        use locale;
+ setlocale LC_NUMERIC, "";
 
-	setlocale LC_NUMERIC, "";
+ $n = 5/2;   # Assign numeric 2.5 to $n
 
-        $n = 5/2;   # Assign numeric 2.5 to $n
+ $a = " $n"; # Locale-dependent conversion to string
 
-        $a = " $n"; # Locale-dependent conversion to string
+ print "half five is $n\n";       # Locale-dependent output
 
-        print "half five is $n\n";       # Locale-dependent output
+ printf "half five is %g\n", $n;  # Locale-dependent output
 
-        printf "half five is %g\n", $n;  # Locale-dependent output
-
-        print "DECIMAL POINT IS COMMA\n"
-            if $n == (strtod("2,5"))[0]; # Locale-dependent conversion
+ print "DECIMAL POINT IS COMMA\n"
+          if $n == (strtod("2,5"))[0]; # Locale-dependent conversion
 
 See also L<I18N::Langinfo> and C<RADIXCHAR>.
 
@@ -1052,6 +1097,34 @@ and also how strings are parsed by C<POSIX::strtod()> as numbers:
 
 =head1 NOTES
 
+=head2 String C<eval> and C<LC_NUMERIC>
+
+A string L<eval|perlfunc/eval EXPR> parses its expression as standard
+Perl.  It is therefore expecting the decimal point to be a dot.  If
+C<LC_NUMERIC> is set to have this be a comma instead, the parsing will
+be confused, perhaps silently.
+
+ use locale;
+ use POSIX qw(locale_h);
+ setlocale(LC_NUMERIC, "fr_FR") or die "Pardon";
+ my $a = 1.2;
+ print eval "$a + 1.5";
+ print "\n";
+
+prints C<13,5>.  This is because in that locale, the comma is the
+decimal point character.  The C<eval> thus expands to:
+
+ eval "1,2 + 1.5"
+
+and the result is not what you likely expected.  No warnings are
+generated.  If you do string C<eval>'s within the scope of
+S<C<use locale>>, you should instead change the C<eval> line to do
+something like:
+
+ print eval "no locale; $a + 1.5";
+
+This prints C<2.7>.
+
 =head2 Backward compatibility
 
 Versions of Perl prior to 5.004 B<mostly> ignored locale information,
@@ -1091,14 +1164,6 @@ collation rules, it will take 3-15 times more memory than before.  (The
 exact multiplier depends on the string's contents, the operating system
 and the locale.) These downsides are dictated more by the operating
 system's implementation of the locale system than by Perl.
-
-=head2 C<write()> and C<LC_NUMERIC>
-
-If a program's environment specifies an LC_NUMERIC locale and C<use
-locale> is in effect when the format is declared, the locale is used
-to specify the decimal point character in formatted output.  Formatted
-output cannot be controlled by C<use locale> at the time when C<write()>
-is called.
 
 =head2 Freely available locale definitions
 
