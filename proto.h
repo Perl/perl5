@@ -3394,14 +3394,6 @@ PERL_CALLCONV SV*	Perl_reg_qr_package(pTHX_ REGEXP * const rx)
 #define PERL_ARGS_ASSERT_REG_QR_PACKAGE	\
 	assert(rx)
 
-PERL_CALLCONV void	Perl_reg_set_capture_string(pTHX_ REGEXP * const rx, char *strbeg, char *strend, SV *sv, U32 flags, bool utf8_target)
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2)
-			__attribute__nonnull__(pTHX_3)
-			__attribute__nonnull__(pTHX_4);
-#define PERL_ARGS_ASSERT_REG_SET_CAPTURE_STRING	\
-	assert(rx); assert(strbeg); assert(strend); assert(sv)
-
 PERL_CALLCONV REGEXP*	Perl_reg_temp_copy(pTHX_ REGEXP* ret_x, REGEXP* rx)
 			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_REG_TEMP_COPY	\

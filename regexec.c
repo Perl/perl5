@@ -2053,8 +2053,8 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 /* set RX_SAVED_COPY, RX_SUBBEG etc.
  * flags have same meanings as with regexec_flags() */
 
-void
-Perl_reg_set_capture_string(pTHX_ REGEXP * const rx,
+static void
+S_reg_set_capture_string(pTHX_ REGEXP * const rx,
                             char *strbeg,
                             char *strend,
                             SV *sv,
@@ -2062,8 +2062,6 @@ Perl_reg_set_capture_string(pTHX_ REGEXP * const rx,
                             bool utf8_target)
 {
     struct regexp *const prog = ReANY(rx);
-
-    PERL_ARGS_ASSERT_REG_SET_CAPTURE_STRING;
 
     if (flags & REXEC_COPY_STR) {
 #ifdef PERL_ANY_COW
@@ -2252,7 +2250,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
             prog->lastparen = prog->lastcloseparen = 0;
             RX_MATCH_UTF8_set(rx, utf8_target);
             if ( !(flags & REXEC_NOT_FIRST) )
-                Perl_reg_set_capture_string(aTHX_ rx,
+                S_reg_set_capture_string(aTHX_ rx,
                                         strbeg, strend,
                                         sv, flags, utf8_target);
 
@@ -2846,7 +2844,7 @@ got_it:
 
     /* make sure $`, $&, $', and $digit will work later */
     if ( !(flags & REXEC_NOT_FIRST) )
-        Perl_reg_set_capture_string(aTHX_ rx,
+        S_reg_set_capture_string(aTHX_ rx,
                                     strbeg, reginfo->strend,
                                     sv, flags, utf8_target);
 
