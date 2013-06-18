@@ -128,7 +128,8 @@ cribbed.
 
 =item *
 
-XXX
+L<Module::CoreList::Utils> which provides information on which core and
+dual-life utilities shipped with each version of L<perl>.
 
 =back
 
