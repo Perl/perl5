@@ -1432,8 +1432,7 @@ PP(pp_match)
 	if (update_minmatch++)
 	    minmatch = had_zerolen;
     }
-    if (RX_EXTFLAGS(rx) & RXf_USE_INTUIT &&
-	DO_UTF8(TARG) == (RX_UTF8(rx) != 0)) {
+    if (RX_EXTFLAGS(rx) & RXf_USE_INTUIT) {
 	s = CALLREG_INTUIT_START(rx, TARG, truebase,
                         (char *)s, (char *)strend, r_flags, NULL);
 

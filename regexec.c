@@ -1112,8 +1112,11 @@ Perl_re_intuit_start(pTHX_
 	/* If regstclass takes bytelength more than 1: If charlength==1, OK.
 	   This leaves EXACTF-ish only, which are dealt with in find_byclass().  */
         const U8* const str = (U8*)STRING(progi->regstclass);
+        /* XXX this value could be pre-computed */
         const int cl_l = (PL_regkind[OP(progi->regstclass)] == EXACT
-		    ? CHR_DIST(str+STR_LEN(progi->regstclass), str)
+		    ?  (reginfo->is_utf8_pat
+                        ? utf8_distance(str + STR_LEN(progi->regstclass), str)
+                        : STR_LEN(progi->regstclass))
 		    : 1);
 	char * endpos;
 	if (prog->anchored_substr || prog->anchored_utf8 || ml_anch)
