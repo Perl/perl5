@@ -22730,6 +22730,7 @@ case " $static_ext " in
 	cd "$rsrc/cpan"
 	for xxx in `ls Encode/*/Makefile.PL|awk -F/ '{print $2}'`; do
 		static_ext="$static_ext Encode/$xxx"
+		known_extensions="$known_extensions Encode/$xxx"
 	done
 	cd "$tdir"
 	;;
