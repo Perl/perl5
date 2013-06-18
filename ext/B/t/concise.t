@@ -399,7 +399,7 @@ $out = runperl ( switches => ["-MStorable", "-MO=Concise,-stash=Storable,-src"],
 		 prog => '-e 1', stderr => 1 );
 
 like($out, qr/FUNC: \*Storable::BIN_MAJOR/,
-     "stash rendering includes constant sub: PAD_FAKELEX_MULTI");
+     "stash rendering has constant sub: Storable::BIN_MAJOR");
 
 like($out, qr/BIN_MAJOR is a constant sub, optimized to a IV/,
      "stash rendering identifies it as constant");
