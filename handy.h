@@ -551,6 +551,12 @@ C<isASCII_LC_utf8>.  Note, however, that some platforms do not have the C
 library routine C<isascii()>.  In these cases, the variants whose names contain
 C<LC> are the same as the corresponding ones without.
 
+Also note, that because all ASCII characters are UTF-8 invariant (meaning they
+have the exact same representation (always a single byte) whether encoded in
+UTF-8 or not), C<isASCII> will give the correct results when called with any
+byte in any string encoded or not in UTF-8.  And similarly C<isASCII_utf8> will
+work properly on any string encoded or not in UTF-8.
+
 =for apidoc Am|bool|isBLANK|char ch
 Returns a boolean indicating whether the specified character is a
 character considered to be a blank, analogous to C<m/[[:blank:]]/>.
