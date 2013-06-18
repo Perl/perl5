@@ -859,3 +859,107 @@ sub _create_aliases {
 }
 
 'foo';
+
+=pod
+
+=head1 NAME
+
+Module::CoreList::Utils - what utilities shipped with versions of perl
+
+=head1 SYNOPSIS
+
+ use Module::CoreList::Utils;
+
+ print $Module::CoreList::Utils::utilities{5.009003}{ptar}; # prints 1
+
+ print Module::CoreList::Utils->first_release('corelist');    # prints 5.008009
+ print Module::CoreList->first_release_by_date('corelist');   # prints 5.009002
+
+=head1 DESCRIPTION
+
+Module::CoreList::Utils provides information on which core and dual-life utilities shipped
+with each version of L<perl>.
+
+It provides a number of mechanisms for querying this information.
+
+There is a functional programming API available for programmers to query
+information.
+
+Programmers may also query the contained hash structure to find relevant
+information.
+
+=head1 FUNCTIONS API
+
+These are the functions that are available, they may either be called as functions or class methods:
+
+  Module::CoreList::Utils::first_release('corelist'); # as a function
+
+  Module::CoreList::Utils->first_release('corelist'); # class method
+
+=over
+
+=item C<utilities>
+
+Requires a perl version as an argument, returns a list of utilities that shipped with
+that version of perl, or undef/empty list if that perl doesn't exist.
+
+=item C<first_release( UTILITY )>
+
+Requires a UTILITY name as an argument, returns the perl version when that utility first
+appeared in core as ordered by perl version number or undef ( in scalar context )
+or an empty list ( in list context ) if that utility is not in core.
+
+=item C<first_release_by_date( UTILITY )>
+
+Requires a UTILITY name as an argument, returns the perl version when that utility first
+appeared in core as ordered by release date or undef ( in scalar context )
+or an empty list ( in list context ) if that utility is not in core.
+
+=item C<removed_from( UTILITY )>
+
+Takes a UTILITY name as an argument, returns the first perl version where that utility
+was removed from core. Returns undef if the given utility was never in core or remains
+in core.
+
+=item C<removed_from_by_date( UTILITY )>
+
+Takes a UTILITY name as an argument, returns the first perl version by release date where that
+utility was removed from core. Returns undef if the given utility was never in core or remains
+in core.
+
+=back
+
+=head1 DATA STRUCTURES
+
+These are the hash data structures that are available:
+
+=over
+
+=item C<%Module::CoreList::Utils::utilities>
+
+A hash of hashes that is keyed on perl version as indicated
+in $].  The second level hash is utility / defined pairs.
+
+=back
+
+=head1 AUTHOR
+
+Chris C<BinGOs> Williams <chris@bingosnet.co.uk>
+
+Currently maintained by the perl 5 porters E<lt>perl5-porters@perl.orgE<gt>.
+
+This module is the result of archaeology undertaken during QA Hackathon
+in Lancaster, April 2013.
+
+=head1 LICENSE
+
+Copyright (C) 2013 Chris Williams.  All Rights Reserved.
+
+This module is free software; you can redistribute it and/or modify it
+under the same terms as Perl itself.
+
+=head1 SEE ALSO
+
+L<corelist>, L<Module::CoreList>, L<perl>, L<http://perlpunks.de/corelist>
+
+=cut
