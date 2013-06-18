@@ -54,13 +54,15 @@ sub set_static_extensions {
     # For other nested extensions, this is handled automatically by
     # the appropriate Makefile.PL.
     if ($ext{Encode} && $ext{Encode} eq 'static') {
-	foreach my $file (`dir /s /b ..\\cpan\\Encode\\Makefile.PL`) {
-	    if ($file =~ /\b(Encode\\.+)\\Makefile\.PL/) {
-		(my $xxx = $1) =~ s|\\|/|g;
-		$static{$xxx} = 1;
-		$ext{$xxx} = 'static';
-	    }
-	}
+        require File::Find;
+        File::Find::find({
+                          no_chdir => 1,
+                          wanted => sub {
+                              return unless m!\b(Encode/.+)/Makefile\.PL!;
+                              $static{$1} = 1;
+                              $ext{$1} = 'static';
+                          },
+                         }, "../cpan/Encode");
     }
 }
 
