@@ -2919,7 +2919,7 @@ X<goto> X<jump> X<jmp>
 
 =for Pod::Functions create spaghetti code
 
-The C<goto-LABEL> form finds the statement labeled with LABEL and
+The C<goto LABEL> form finds the statement labeled with LABEL and
 resumes execution there.  It can't be used to get out of a block or
 subroutine given to C<sort>.  It can be used to go almost anywhere
 else within the dynamic scope, including out of subroutines, but it's
@@ -2929,9 +2929,9 @@ The author of Perl has never felt the need to use this form of C<goto>
 does not offer named loops combined with loop control.  Perl does, and
 this replaces most structured uses of C<goto> in other languages.)
 
-The C<goto-EXPR> form expects to evaluate C<EXPR> to a code reference or
+The C<goto EXPR> form expects to evaluate C<EXPR> to a code reference or
 a label name.  If it evaluates to a code reference, it will be handled
-like C<goto-&NAME>, below.  This is especially useful for implementing
+like C<goto &NAME>, below.  This is especially useful for implementing
 tail recursion via C<goto __SUB__>.
 
 If the expression evaluates to a label name, its scope will be resolved
@@ -2940,19 +2940,19 @@ necessarily recommended if you're optimizing for maintainability:
 
     goto ("FOO", "BAR", "GLARCH")[$i];
 
-As shown in this example, C<goto-EXPR> is exempt from the "looks like a
+As shown in this example, C<goto EXPR> is exempt from the "looks like a
 function" rule.  A pair of parentheses following it does not (necessarily)
 delimit its argument.  C<goto("NE")."XT"> is equivalent to C<goto NEXT>.
 Also, unlike most named operators, this has the same precedence as
 assignment.
 
-Use of C<goto-LABEL> or C<goto-EXPR> to jump into a construct is
+Use of C<goto LABEL> or C<goto EXPR> to jump into a construct is
 deprecated and will issue a warning.  Even then, it may not be used to
 go into any construct that requires initialization, such as a
 subroutine or a C<foreach> loop.  It also can't be used to go into a
 construct that is optimized away.
 
-The C<goto-&NAME> form is quite different from the other forms of
+The C<goto &NAME> form is quite different from the other forms of
 C<goto>.  In fact, it isn't a goto in the normal sense at all, and
 doesn't have the stigma associated with other gotos.  Instead, it
 exits the current subroutine (losing any changes set by local()) and
