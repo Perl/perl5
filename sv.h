@@ -531,7 +531,7 @@ struct xpvgv {
     union _xnvu xnv_u;
 };
 
-typedef U16 cv_flags_t;
+typedef U32 cv_flags_t;
 
 #define _XPVCV_COMMON								\
     HV *	xcv_stash;							\
