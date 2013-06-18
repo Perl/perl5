@@ -715,7 +715,10 @@ which will be set in the value SV for the allocated pad entry:
     SVf_READONLY constant shared between recursion levels
 
 C<SVf_READONLY> has been supported here only since perl 5.20.  To work with
-earlier versions as well, use C<SVf_READONLY|SVs_PADTMP>.
+earlier versions as well, use C<SVf_READONLY|SVs_PADTMP>.  C<SVf_READONLY>
+does not cause the SV in the pad slot to be marked read-only, but simply
+tells C<pad_alloc> that it I<will> be made read-only (by the caller), or at
+least should be treated as such.
 
 I<optype> should be an opcode indicating the type of operation that the
 pad entry is to support.  This doesn't affect operational semantics,
