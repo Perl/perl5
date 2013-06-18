@@ -6607,7 +6607,7 @@ Perl_sv_free2(pTHX_ SV *const sv, const U32 rc)
 
     PERL_ARGS_ASSERT_SV_FREE2;
 
-    if (rc == 1) {
+    if (LIKELY( rc == 1 )) {
         /* normal case */
         SvREFCNT(sv) = 0;
 
