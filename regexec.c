@@ -2234,6 +2234,36 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
         "Matching");
     );
 
+    if ((RX_EXTFLAGS(rx) & RXf_USE_INTUIT)
+        && !(flags & REXEC_CHECKED))
+    {
+	stringarg = re_intuit_start(rx, sv, strbeg, stringarg, strend,
+                                    flags, NULL);
+	if (!stringarg)
+	    return 0;
+
+	if (RX_EXTFLAGS(rx) & RXf_CHECK_ALL) {
+            /* we can match based purely on the result of INTUIT.
+             * Set up captures etc just for $& and $-[0]
+             * (an intuit-only match wont have $1,$2,..) */
+            assert(!prog->nparens);
+            /* match via INTUIT shouldn't have any captures.
+             * Let @-, @+, $^N know */
+            prog->lastparen = prog->lastcloseparen = 0;
+            RX_MATCH_UTF8_set(rx, utf8_target);
+            if ( !(flags & REXEC_NOT_FIRST) )
+                Perl_reg_set_capture_string(aTHX_ rx,
+                                        strbeg, strend,
+                                        sv, flags, utf8_target);
+
+            prog->offs[0].start = stringarg - strbeg;
+            prog->offs[0].end = utf8_target
+                ? (char*)utf8_hop((U8*)stringarg, prog->minlenret) - strbeg
+                : stringarg - strbeg + prog->minlenret;
+	    return 1;
+        }
+    }
+
 
     /* at the end of this function, we'll do a LEAVE_SCOPE(oldsave),
      * which will call destuctors to reset PL_regmatch_state, free higher

@@ -1324,7 +1324,7 @@ PP(pp_match)
     const char *s;
     const char *strend;
     I32 global;
-    U8 r_flags = REXEC_CHECKED;
+    U8 r_flags = 0;
     const char *truebase;			/* Start of string  */
     REGEXP *rx = PM_GETRE(pm);
     bool rxtainted;
@@ -1432,40 +1432,11 @@ PP(pp_match)
 	if (update_minmatch++)
 	    minmatch = had_zerolen;
     }
-    if (RX_EXTFLAGS(rx) & RXf_USE_INTUIT) {
-	s = CALLREG_INTUIT_START(rx, TARG, truebase,
-                        (char *)s, (char *)strend, r_flags, NULL);
 
-	if (!s)
-	    goto nope;
-	if (RX_EXTFLAGS(rx) & RXf_CHECK_ALL) {
-            /* we can match based purely on the result of INTUIT.
-             * Fix up all the things that won't get set because we skip
-             * calling regexec() */
-            assert(!RX_NPARENS(rx));
-            /* match via INTUIT shouldn't have any captures.
-             * Let @-, @+, $^N know */
-            RX_LASTPAREN(rx) = RX_LASTCLOSEPAREN(rx) = 0;
-            RX_MATCH_UTF8_set(rx, cBOOL(DO_UTF8(TARG)));
-            if ( !(r_flags & REXEC_NOT_FIRST) )
-                Perl_reg_set_capture_string(aTHX_ rx,
-                                        (char*)truebase, (char *)strend,
-                                        TARG, r_flags, cBOOL(DO_UTF8(TARG)));
-
-            /* skipping regexec means that indices for $&, $-[0] etc not set */
-            RX_OFFS(rx)[0].start = s - truebase;
-            RX_OFFS(rx)[0].end =
-                RX_MATCH_UTF8(rx)
-                    ? (char*)utf8_hop((U8*)s, RX_MINLENRET(rx)) - truebase
-                    : s - truebase + RX_MINLENRET(rx);
-	    goto gotcha;
-        }
-    }
     if (!CALLREGEXEC(rx, (char*)s, (char *)strend, (char*)truebase,
 		     minmatch, TARG, NUM2PTR(void*, gpos), r_flags))
 	goto nope;
 
-  gotcha:
     PL_curpm = pm;
     if (dynpm->op_pmflags & PMf_ONCE) {
 #ifdef USE_ITHREADS
