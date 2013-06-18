@@ -819,6 +819,13 @@ my %delta = (
             'pod2latex'             => '1',
         }
     },
+    5.019001 => {
+        delta_from => 5.019000,
+        changed => {
+        },
+        removed => {
+        }
+    },
 );
 
 for my $version (sort { $a <=> $b } keys %delta) {
