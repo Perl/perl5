@@ -709,6 +709,7 @@ same is true for Perl's internal conversions between numeric and
 string formats:
 
         use POSIX qw(strtod setlocale LC_NUMERIC);
+        use locale;
 
 	setlocale LC_NUMERIC, "";
 

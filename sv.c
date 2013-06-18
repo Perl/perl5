@@ -2918,13 +2918,31 @@ Perl_sv_2pv_flags(pTHX_ SV *const sv, STRLEN *const lp, const I32 flags)
 	    s = SvGROW_mutable(sv, NV_DIG + 20);
 	    /* some Xenix systems wipe out errno here */
 
-            Gconvert(SvNVX(sv), NV_DIG, 0, s);
 #ifndef USE_LOCALE_NUMERIC
-            /* We don't call SvPOK_on() if there are locales, because it may
-             * come to pass that the locale changes so that the stringification
-             * we just did is no longer correct.  We will have to re-stringify
-             * every time it is needed */
+            Gconvert(SvNVX(sv), NV_DIG, 0, s);
             SvPOK_on(sv);
+#else
+            /* Gconvert always uses the current locale.  That's the right thing
+             * to do if we're supposed to be using locales.  But otherwise, we
+             * want the result to be based on the C locale, so we need to
+             * change to the C locale during the Gconvert and then change back.
+             * But if we're already in the C locale (PL_numeric_standard is
+             * TRUE in that case), no need to do any changing */
+            if (PL_numeric_standard || IN_LOCALE_RUNTIME) {
+                Gconvert(SvNVX(sv), NV_DIG, 0, s);
+            }
+            else {
+                char *loc = savepv(setlocale(LC_NUMERIC, NULL));
+                setlocale(LC_NUMERIC, "C");
+                Gconvert(SvNVX(sv), NV_DIG, 0, s);
+                setlocale(LC_NUMERIC, loc);
+                Safefree(loc);
+            }
+
+            /* We don't call SvPOK_on(), because it may come to pass that the
+             * locale changes so that the stringification we just did is no
+             * longer correct.  We will have to re-stringify every time it is
+             * needed */
 #endif
 	    RESTORE_ERRNO;
 	    while (*s) s++;

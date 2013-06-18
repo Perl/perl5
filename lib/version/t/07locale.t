@@ -20,6 +20,8 @@ SKIP: {
 	# test locale handling
 	my $warning;
 
+        use locale;
+
 	local $SIG{__WARN__} = sub { $warning = $_[0] };
 
 	my $ver = 1.23;  # has to be floating point number
@@ -61,6 +63,7 @@ SKIP: {
 	(my $package = basename($filename)) =~ s/\.pm$//;
 	print $fh <<"EOF";
 package $package;
+use locale;
 use POSIX qw(locale_h);
 \$^W = 1;
 use version;
