@@ -2132,28 +2132,15 @@ PP(pp_subst)
 #endif
 
     orig = m = s;
-    if (RX_EXTFLAGS(rx) & RXf_USE_INTUIT) {
-	s = CALLREG_INTUIT_START(rx, TARG, orig, s, strend, r_flags, NULL);
 
-	if (!s)
-	    goto ret_no;
-	/* How to do it in subst? */
-/*	if ( (RX_EXTFLAGS(rx) & RXf_CHECK_ALL)
-	     && !PL_sawampersand
-	     && !(RX_EXTFLAGS(rx) & RXf_KEEPCOPY))
-	    goto yup;
-*/
-    }
-
-    if (!CALLREGEXEC(rx, s, strend, orig, 0, TARG, NULL,
-			 r_flags | REXEC_CHECKED))
+    if (!CALLREGEXEC(rx, s, strend, orig, 0, TARG, NULL, r_flags))
     {
-      ret_no:
 	SPAGAIN;
 	PUSHs(rpm->op_pmflags & PMf_NONDESTRUCT ? TARG : &PL_sv_no);
 	LEAVE_SCOPE(oldsave);
 	RETURN;
     }
+    s = RX_OFFS(rx)[0].start + orig;
 
     PL_curpm = pm;
 
