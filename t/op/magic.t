@@ -466,11 +466,13 @@ SKIP:  {
 }
 
 # Check that we don't auto-load packages
-SKIP: {
-    skip "staticly linked; may be preloaded", 4 unless $Config{usedl};
-    foreach (['powie::!', 'Errno'],
-	     ['powie::+', 'Tie::Hash::NamedCapture']) {
-	my ($symbol, $package) = @$_;
+foreach (['powie::!', 'Errno'],
+	 ['powie::+', 'Tie::Hash::NamedCapture']) {
+    my ($symbol, $package) = @$_;
+    SKIP: {
+	(my $extension = $package) =~ s|::|/|g;
+	skip "$package is statically linked", 2
+	    if $Config{static_ext} =~ m|\b\Q$extension\E\b|;
 	foreach my $scalar_first ('', '$$symbol;') {
 	    my $desc = qq{Referencing %{"$symbol"}};
 	    $desc .= qq{ after mentioning \${"$symbol"}} if $scalar_first;
