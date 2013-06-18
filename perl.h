@@ -3038,6 +3038,11 @@ typedef pthread_key_t	perl_key;
 
 #define HEKfARG(p) ((void*)(p))
 
+/* Takes three arguments: is_utf8, length, str */
+#ifndef UTF8f
+#  define UTF8f "u%"UVuf"%4p"
+#endif
+
 #ifdef PERL_CORE
 /* not used; but needed for backward compatibility with XS code? - RMB */
 #  undef VDf
