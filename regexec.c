@@ -2071,10 +2071,19 @@ S_reg_set_capture_string(pTHX_ REGEXP * const rx,
                               "Copy on write: regexp capture, type %d\n",
                               (int) SvTYPE(sv));
             }
-            RX_MATCH_COPY_FREE(rx);
-            prog->saved_copy = sv_setsv_cow(prog->saved_copy, sv);
-            prog->subbeg = (char *)SvPVX_const(prog->saved_copy);
-            assert (SvPOKp(prog->saved_copy));
+            /* skip creating new COW SV if a valid one already exists */
+            if (! (    prog->saved_copy
+                    && SvIsCOW(sv)
+                    && SvPOKp(sv)
+                    && SvIsCOW(prog->saved_copy)
+                    && SvPOKp(prog->saved_copy)
+                    && SvPVX(sv) == SvPVX(prog->saved_copy)))
+            {
+                RX_MATCH_COPY_FREE(rx);
+                prog->saved_copy = sv_setsv_cow(prog->saved_copy, sv);
+                prog->subbeg = (char *)SvPVX_const(prog->saved_copy);
+                assert (SvPOKp(prog->saved_copy));
+            }
             prog->sublen  = strend - strbeg;
             prog->suboffset = 0;
             prog->subcoffset = 0;
