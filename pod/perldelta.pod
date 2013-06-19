@@ -679,6 +679,11 @@ category.
 
 =item *
 
+The "Replacement list is longer that search list" warning for C<tr///> and
+C<y///> no longer occurs in the presence of the C</c> flag. [RT #118047]
+
+=item *
+
 Perl v5.18 inadvertently introduced a bug whereby interpolating mixed up-
 and down-graded UTF-8 strings in a regex could result in malformed UTF-8
 in the pattern: specifically if a downgraded character in the range
