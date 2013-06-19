@@ -1339,7 +1339,7 @@ quick hint:
 =head2 PERL_DESTRUCT_LEVEL
 
 If you want to run any of the tests yourself manually using e.g.
-valgrind, or the pureperl or perl.third executables, please note that
+valgrind, or the pureperl executable, please note that
 by default perl B<does not> explicitly cleanup all the memory it has
 allocated (such as global memory arenas) but instead lets the exit() of
 the whole program "take care" of such allocations, also known as
@@ -1348,9 +1348,9 @@ the whole program "take care" of such allocations, also known as
 There is a way to tell perl to do complete cleanup: set the environment
 variable PERL_DESTRUCT_LEVEL to a non-zero value. The t/TEST wrapper
 does set this to 2, and this is what you need to do too, if you don't
-want to see the "global leaks": For example, for "third-degreed" Perl:
+want to see the "global leaks": For example, for running under valgrind
 
-	env PERL_DESTRUCT_LEVEL=2 ./perl.third -Ilib t/foo/bar.t
+	env PERL_DESTRUCT_LEVEL=2 valgrind ./perl -Ilib t/foo/bar.t
 
 (Note: the mod_perl apache module uses also this environment variable
 for its own purposes and extended its semantics. Refer to the mod_perl

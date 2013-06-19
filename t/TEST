@@ -139,21 +139,6 @@ if (-f 'TEST' && -f 'harness' && -d '../lib') {
 die "You need to run \"make test\" first to set things up.\n"
   unless -e 'perl' or -e 'perl.exe' or -e 'perl.pm';
 
-if ($ENV{PERL_3LOG}) { # Tru64 third(1) tool, see perlhack
-    unless (-x 'perl.third') {
-	unless (-x '../perl.third') {
-	    die "You need to run \"make perl.third first.\n";
-	}
-	else {
-	    print "Symlinking ../perl.third as perl.third...\n";
-	    die "Failed to symlink: $!\n"
-		unless symlink("../perl.third", "perl.third");
-	    die "Symlinked but no executable perl.third: $!\n"
-		unless -x 'perl.third';
-	}
-    }
-}
-
 # check leakage for embedders
 $ENV{PERL_DESTRUCT_LEVEL} = 2 unless exists $ENV{PERL_DESTRUCT_LEVEL};
 # check existence of all symbols
@@ -726,14 +711,6 @@ EOT
 	}
 	if ($type eq 'deparse') {
 	    unlink "./$test.dp";
-	}
-	if ($ENV{PERL_3LOG}) {
-	    my $tpp = $test;
-	    $tpp =~ s:^\.\./::;
-	    $tpp =~ s:/:_:g;
-	    $tpp =~ s:\.t$:.3log:;
-	    rename("perl.3log", $tpp) ||
-		die "rename: perl3.log to $tpp: $!\n";
 	}
 	if (not defined $failure and $next != $max) {
 	    $failure="FAILED--expected $max tests, saw $next";

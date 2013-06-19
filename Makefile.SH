@@ -949,43 +949,10 @@ esac
 
 $spitshell >>$Makefile <<'!NO!SUBS!'
 
-# Third Degree Perl (Tru64 only)
-
 perl.config.dashg:
 	@echo "Checking optimize='-g' in config.sh..."
 	@grep "^optimize=" config.sh
 	@egrep "^optimize='(.*-g.*)'" config.sh >/dev/null || exit 1
-
-perl.third.config: config.sh
-	@echo "To build perl.third you must Configure -Doptimize=-g -Uusemymalloc, checking..."
-	@$(MAKE) perl.config.dashg
-	@echo "Checking usemymalloc='n' in config.sh..."
-	@grep "^usemymalloc="    config.sh
-	@grep "^usemymalloc='n'" config.sh >/dev/null || exit 1
-
-perl.third: /usr/bin/atom perl.third.config perl
-	atom -tool third -L. -all -gp -toolargs="-invalid -uninit heap+stack+copy -min 0" perl
-	@echo "Now you may run perl.third and then study perl.3log."
-
-# Pixie Perls (Tru64 and IRIX only)
-
-perl.pixie.config: config.sh
-	@echo "To build perl.pixie you must Configure -Doptimize=-g, checking..."
-	@$(MAKE) perl.config.dashg
-
-perl.pixie.atom: /usr/bin/atom perl
-	atom -tool pixie -L. -all -toolargs="-quiet" perl
-
-perl.pixie.irix: perl
-	pixie perl
-
-perl.pixie: /usr/bin/pixie perl.pixie.config perl
-	if test -x /usr/bin/atom; then \
-	  $(MAKE) perl.pixie.atom; \
-	else \
-	  $(MAKE) perl.pixie.irix; \
-	fi
-	@echo "Now you may run perl.pixie and then run pixie."
 
 # Gprof Perl
 
@@ -1294,9 +1261,7 @@ _mopup:
 	-@test -f vms/README_vms.pod && rm -f vms/README_vms.pod
 	-rm -f perl.exp ext.libs $(generated_pods) uni.data opmini.o perlmini.o pod/roffitall
 	-rm -f perl.export perl.dll perl.libexp perl.map perl.def
-	-rm -f perl.third lib*.so.perl.third perl.3log t/perl.third t/perl.3log
-	-rm -f perl.pixie lib*.so.perl.pixie lib*.so.Addrs
-	-rm -f perl.Addrs perl.Counts t/perl.Addrs t/perl.Counts *perl.xok
+	-rm -f *perl.xok
 	-rm -f cygwin.c libperl*.def libperl*.dll cygperl*.dll *.exe.stackdump
 	-rm -f $(PERL_EXE) $(MINIPERL_EXE) $(LIBPERL) libperl.* microperl
 	-rm -f config.arch config.over $(DTRACE_H)
