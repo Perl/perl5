@@ -765,59 +765,16 @@ systems.
 This runs some basic sanity tests on the source tree and helps catch
 basic errors before you submit a patch.
 
-=item * coretest
-
-Run F<perl> on all core tests (F<t/*> and F<lib/[a-z]*> pragma tests).
-
-(Not available on Win32)
-
-=item * test.deparse
-
-Run all the tests through L<B::Deparse>. Not all tests will succeed.
-
-(Not available on Win32)
-
-=item * test.taintwarn
-
-Run all tests with the B<-t> command-line switch. Not all tests are
-expected to succeed (until they're specifically fixed, of course).
-
-(Not available on Win32)
-
 =item * minitest
 
 Run F<miniperl> on F<t/base>, F<t/comp>, F<t/cmd>, F<t/run>, F<t/io>,
 F<t/op>, F<t/uni> and F<t/mro> tests.
 
-=item * test.valgrind check.valgrind utest.valgrind ucheck.valgrind
+=item * test.valgrind check.valgrind
 
 (Only in Linux) Run all the tests using the memory leak + naughty
 memory access tool "valgrind". The log files will be named
 F<testname.valgrind>.
-
-=item * test.torture torturetest
-
-Run all the usual tests and some extra tests. As of Perl 5.8.0, the
-only extra tests are Abigail's JAPHs, F<t/japh/abigail.t>.
-
-You can also run the torture test with F<t/harness> by giving
-C<-torture> argument to F<t/harness>.
-
-=item * utest ucheck test.utf8 check.utf8
-
-Run all the tests with -Mutf8. Not all tests will succeed.
-
-(Not available on Win32)
-
-=item * minitest.utf16 test.utf16
-
-Runs the tests with UTF-16 encoded scripts, encoded with different
-versions of this encoding.
-
-C<make utest.utf16> runs the test suite with a combination of C<-utf8>
-and C<-utf16> arguments to F<t/TEST>.
-
-(Not available on Win32)
 
 =item * test_harness
 

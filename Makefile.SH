@@ -1430,11 +1430,7 @@ depend: makedepend
 
 .PHONY: test check test_prep test_prep_nodll test_prep_pre \
 	test_prep_reonly test_tty test-tty test_notty test-notty \
-	utest ucheck test.utf8 check.utf8 test.torture torturetest \
-	test.utf16 check.utf16 utest.utf16 ucheck.utf16 \
-	test.third check.third utest.third ucheck.third test_notty.third \
-	test.deparse test_notty.deparse test_harness test_harness_notty \
-	minitest coretest test.taintwarn test-reonly _test
+	test_harness test_harness_notty minitest test-reonly _test
 
 _test:
 	echo >&2 The _test target is deprecated. Please upgrade your smoker
@@ -1465,29 +1461,6 @@ test_tty test-tty: test_prep
 test_notty test-notty: test_prep
 	$(RUN_TESTS) no-tty
 
-utest ucheck test.utf8 check.utf8: test_prep
-	TEST_ARGS=-utf8 $(RUN_TESTS) choose
-
-coretest: test_prep
-	TEST_ARGS=-core $(RUN_TESTS) choose
-
-# Torture testing
-
-test.torture torturetest:	test_prep
-	TEST_ARGS=-torture $(RUN_TESTS) choose
-
-# Targets for UTF16 testing:
-
-minitest.utf16: minitest.prep
-	- cd t && (rm -f $(PERL_EXE); $(LNS) ../$(MINIPERL_EXE) $(PERL_EXE)) \
-		&& $(RUN_PERL) TEST -utf16 base/*.t comp/*.t cmd/*.t run/*.t io/*.t opbasic/*.t op/*.t uni/*.t </dev/tty
-
-test.utf16 check.utf16: test_prep
-	TEST_ARGS=-utf16 $(RUN_TESTS) choose
-
-utest.utf16 ucheck.utf16: test_prep
-	TEST_ARGS="-utf8 -utf16" $(RUN_TESTS) choose
-
 !NO!SUBS!
 
 case "${osname}${osvers}" in
@@ -1500,9 +1473,6 @@ test_prep.valgrind: test_prep perl.valgrind
 test.valgrind check.valgrind:	test_prep perl.valgrind.config
 	PERL_VALGRIND=1 VALGRIND='$(VALGRIND)' $(RUN_TESTS) choose
 
-utest.valgrind ucheck.valgrind: test_prep.valgrind perl.valgrind.config
-	PERL_VALGRIND=1 TEST_ARGS=-utf8 $(RUN_TESTS) choose
-
 test_notty.valgrind: test_prep.valgrind perl.valgrind.config
 	PERL_VALGRIND=1 $(RUN_TESTS) no-tty
 !NO!SUBS!
@@ -1510,33 +1480,6 @@ test_notty.valgrind: test_prep.valgrind perl.valgrind.config
 esac
 
 $spitshell >>$Makefile <<'!NO!SUBS!'
-
-# Targets for Third Degree testing.
-
-test_prep.third: test_prep perl.third
-	cd t && (rm -f ./perl.third$(EXE_EXT); $(LNS) ../perl.third$(EXE_EXT) perl.third(EXE_EXT))
-
-test.third check.third:	test_prep.third perl.third
-	PERL=./perl.third PERL_3LOG=1 $(RUN_TESTS) choose
-
-utest.third ucheck.third: test_prep.third perl.third
-	PERL=./perl.third PERL_3LOG=1 TEST_ARGS=-utf8 $(RUN_TESTS) choose
-
-test_notty.third: test_prep.third perl.third
-	PERL=./perl.third PERL_3LOG=1 $(RUN_TESTS) choose
-
-# Targets for Deparse testing.
-
-test.deparse:	test_prep
-	TEST_ARGS=-deparse $(RUN_TESTS) choose
-
-test_notty.deparse:	test_prep
-	TEST_ARGS=-deparse $(RUN_TESTS) no-tty
-
-# Targets to run the test suite with -t
-
-test.taintwarn:	test_prep
-	TEST_ARGS=-taintwarn $(RUN_TESTS) choose
 
 minitest.prep:
 	-@test -f lib/Config.pm || $(MAKE) lib/Config.pm $(unidatafiles)
