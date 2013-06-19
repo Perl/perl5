@@ -116,8 +116,6 @@ sub run {
         'x|crosscheck'  => \$do_crosscheck,
     ) or usage;
 
-    @wanted_upstreams = map { $_ eq 'undef' ? undef : $_ } @wanted_upstreams;
-
     my @modules;
 
     usage("Cannot mix -a with module list") if $scan_all && @ARGV;
@@ -241,7 +239,7 @@ sub do_compare {
             warn "WARNING: duplicate entry for $dist in $module\n";
         }
 
-        my $upstream = $m->{UPSTREAM};
+        my $upstream = $m->{UPSTREAM} // 'undef';
         next if @$wanted_upstreams and !$wanted_upstream{$upstream};
 
         print $outfh "\n$module - "
@@ -490,7 +488,7 @@ sub do_crosscheck {
         my $pdist = $m->{DISTRIBUTION};
         die "ERROR: $module has no DISTRIBUTION entry\n" unless defined $pdist;
 
-        my $upstream = $m->{UPSTREAM};
+        my $upstream = $m->{UPSTREAM} // 'undef';
         next if @$wanted_upstreams and !$wanted_upstream{$upstream};
 
         my $cdist = $modules{$module};
