@@ -936,8 +936,6 @@ linux*|darwin*)
 # Valgrind perl (currently Linux, Darwin only)
 
 perl.valgrind.config: config.sh
-	@echo "To build perl.valgrind you must Configure -Doptimize=-g -Uusemymalloc, checking..."
-	@$(MAKE) perl.config.dashg
 	@echo "Checking usemymalloc='n' in config.sh..."
 	@grep "^usemymalloc="    config.sh
 	@grep "^usemymalloc='n'" config.sh >/dev/null || exit 1
@@ -948,11 +946,6 @@ perl.valgrind.config: config.sh
 esac	
 
 $spitshell >>$Makefile <<'!NO!SUBS!'
-
-perl.config.dashg:
-	@echo "Checking optimize='-g' in config.sh..."
-	@grep "^optimize=" config.sh
-	@egrep "^optimize='(.*-g.*)'" config.sh >/dev/null || exit 1
 
 # Gprof Perl
 
