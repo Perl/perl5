@@ -348,7 +348,8 @@ checkOptree ( name	=> 'lc*,uc*,gt,lt,ge,le,cmp',
 # n           <$> const[PV "b-cmp-a"] s ->o
 # p        <;> nextstate(main 916 optree_constants.t:313) v:>,<,%,{ ->q
 # q        <$> const[PVNV 0] s/SHORT ->r      < 5.017002
-# q        <$> const[PVNV 0] s/FOLD,SHORT ->r >=5.017002
+# q        <$> const[PVNV 0] s/FOLD,SHORT ->r >=5.017002 < 5.019001
+# q        <$> const[SPECIAL sv_no] s/FOLD,SHORT ->r >=5.019001
 EOT_EOT
 # r  <1> leavesub[1 ref] K/REFC,1 ->(end)
 # -     <@> lineseq KP ->r

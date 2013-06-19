@@ -1638,7 +1638,7 @@ Perl_pad_swipe(pTHX_ PADOFFSET po, bool refadjust)
 		"Pad 0x%"UVxf"[0x%"UVxf"] swipe:   %ld\n",
 		PTR2UV(PL_comppad), PTR2UV(PL_curpad), (long)po));
 
-    if (PL_curpad[po])
+    if (PL_curpad[po] && !SvPADMY(PL_curpad[po]))
 	SvPADTMP_off(PL_curpad[po]);
     if (refadjust)
 	SvREFCNT_dec(PL_curpad[po]);

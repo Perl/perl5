@@ -793,7 +793,6 @@ for (3) {
     like $@, qr/^Modification of a read-only/,
        'assignment to value aliased to literal number';
     require Config;
-    local $::TODO = " " if $Config::Config{useithreads};
     eval { ${\$_} = 4 };
     like $@, qr/^Modification of a read-only/,
        'refgen does not allow assignment to value aliased to literal number';
@@ -803,14 +802,11 @@ for ("4eounthouonth") {
     like $@, qr/^Modification of a read-only/,
        'assignment to value aliased to literal string';
     require Config;
-    local $::TODO = " " if $Config::Config{useithreads};
     eval { ${\$_} = 4 };
     like $@, qr/^Modification of a read-only/,
        'refgen does not allow assignment to value aliased to literal string';
 }
 {
-    local $::TODO = ' '
-	if $Config::Config{useithreads} && $Config::Config{mad};
     my $aref = \123;
     is \$$aref, $aref,
 	'[perl #109746] referential identity of \literal under threads+mad'

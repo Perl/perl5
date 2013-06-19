@@ -88,6 +88,5 @@ for (!1) { eval { $_ = 43 } }
 like $@, qr/^Modification of a read-only value attempted at /,
    'not 1 is read-only';
 require Config;
-$::TODO = 'not fixed yet' if $Config::Config{useithreads};;
 is \!0, \$yes, '!0 returns the same value each time [perl #114838]';
 is \!1, \$no,  '!1 returns the same value each time [perl #114838]';

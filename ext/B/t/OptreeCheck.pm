@@ -213,7 +213,8 @@ They're both required, and the correct one is selected for the platform
 being tested, and saved into the synthesized property B<wanted>.
 
 Individual sample lines may be suffixed with whitespace followed
-by (<|<=|==|>=|>)5.nnnn to select that line only for the listed perl
+by (<|<=|==|>=|>)5.nnnn (up to two times) to
+select that line only for the listed perl
 version; the whitespace and conditional are stripped.
 
 =head2 bcopts => $bcopts || [ @bcopts ]
@@ -641,9 +642,10 @@ sub mkCheckRex {
 
     # strip out conditional lines
 
-    $str =~ s{^(.*?)\s+(<|<=|==|>=|>)\s*(5\.\d+)\ *\n}
+    $str =~ s{^(.*?)   \s+(<|<=|==|>=|>)\s*(5\.\d+)
+		    (?:\s+(<|<=|==|>=|>)\s*(5\.\d+))? \ *\n}
      {
-	my ($line, $cmp, $version) = ($1,$2,$3);
+	my ($line, $cmp, $version, $cmp2, $v2) = ($1,$2,$3,$4,$5,$6);
 	my $repl = "";
 	if (  $cmp eq '<'  ? $] <  $version
 	    : $cmp eq '<=' ? $] <= $version
@@ -651,11 +653,19 @@ sub mkCheckRex {
 	    : $cmp eq '>=' ? $] >= $version
 	    : $cmp eq '>'  ? $] >  $version
 	    : die("bad comparision '$cmp' in string [$str]\n")
+	 and !$cmp2 || (
+	      $cmp2 eq '<'  ? $] <  $v2
+	    : $cmp2 eq '<=' ? $] <= $v2
+	    : $cmp2 eq '==' ? $] == $v2
+	    : $cmp2 eq '>=' ? $] >= $v2
+	    : $cmp2 eq '>'  ? $] >  $v2
+	    : die("bad comparision '$cmp2' in string [$str]\n")
+	  )
 	) {
 	    $repl = "$line\n";
 	}
 	$repl;
-     }gem;
+     }gemx;
 
     $tc->{wantstr} = $str;
 

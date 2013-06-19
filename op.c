@@ -1752,16 +1752,7 @@ S_finalize_op(pTHX_ OP* o)
 	 * for reference counts, sv_upgrade() etc. */
 	if (cSVOPo->op_sv) {
 	    const PADOFFSET ix = pad_alloc(OP_CONST, SVf_READONLY);
-	    if (o->op_type != OP_METHOD_NAMED &&
-		(SvPADTMP(cSVOPo->op_sv) || SvPADMY(cSVOPo->op_sv)))
-	    {
-		/* If op_sv is already a PADTMP/MY then it is being used by
-		 * some pad, so make a copy. */
-		sv_setsv(PAD_SVl(ix),cSVOPo->op_sv);
-		if (!SvIsCOW(PAD_SVl(ix))) SvREADONLY_on(PAD_SVl(ix));
-		SvREFCNT_dec(cSVOPo->op_sv);
-	    }
-	    else if (o->op_type != OP_METHOD_NAMED
+	    if (o->op_type != OP_METHOD_NAMED
 		&& cSVOPo->op_sv == &PL_sv_undef) {
 		/* PL_sv_undef is hack - it's unsafe to store it in the
 		   AV that is the pad, because av_fetch treats values of
@@ -1775,7 +1766,6 @@ S_finalize_op(pTHX_ OP* o)
 	    }
 	    else {
 		SvREFCNT_dec(PAD_SVl(ix));
-		SvPADTMP_on(cSVOPo->op_sv);
 		PAD_SETSV(ix, cSVOPo->op_sv);
 		/* XXX I don't know how this isn't readonly already. */
 		if (!SvIsCOW(PAD_SVl(ix))) SvREADONLY_on(PAD_SVl(ix));

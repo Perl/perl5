@@ -363,7 +363,6 @@ eval q{
 	local $TODO;
 	if ($Config::Config{useithreads}) {
 	    skip "fails under threads", 1 if $] < 5.019001;
-	    $TODO = ' ';
 	}
 	like $@, qr/^Modification of a read-only value attempted at /,
 	    '... and immutable through refgen, too';
@@ -387,7 +386,6 @@ SKIP: {
     local $TODO;
     if ($Config::Config{useithreads}) {
 	skip "fails under threads", 1 if $] < 5.019001;
-	$TODO = ' ';
     }
     like $@, qr/^Modification of a read-only value attempted at /,
 	'... and immutable through refgen, too';
