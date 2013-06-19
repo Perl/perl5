@@ -603,6 +603,7 @@ my $a ; my @a = () ; my %a = () ; my $b = \@a ; my $c = \%a ;my $d = 'test';
 %$c =~ tr/a/b/ ;
 $d =~ tr/a/b/d ;
 $d2 =~ tr/a/bc/;
+$d3 =~ tr//b/c;
 {
 no warnings 'misc' ;
 my $a ; my @a = () ; my %a = () ; my $b = \@a ; my $c = \%a ; my $d = 'test';
@@ -620,6 +621,7 @@ my $a ; my @a = () ; my %a = () ; my $b = \@a ; my $c = \%a ; my $d = 'test';
 %$c =~ tr/a/b/ ;
 $d =~ tr/a/b/d ;
 $d =~ tr/a/bc/ ;
+$d =~ tr//b/c;
 }
 EXPECT
 Applying pattern match (m//) to @a will act on scalar(@a) at - line 5.
@@ -637,7 +639,7 @@ Applying transliteration (tr///) to %hash will act on scalar(%hash) at - line 16
 Useless use of /d modifier in transliteration operator at - line 17.
 Replacement list is longer than search list at - line 18.
 Can't modify array dereference in substitution (s///) at - line 6, near "s/a/b/ ;"
-BEGIN not safe after errors--compilation aborted at - line 20.
+BEGIN not safe after errors--compilation aborted at - line 21.
 ########
 # op.c
 use warnings 'parenthesis' ;

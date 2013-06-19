@@ -4397,7 +4397,7 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 
     if(del && rlen == tlen) {
 	Perl_ck_warner(aTHX_ packWARN(WARN_MISC), "Useless use of /d modifier in transliteration operator"); 
-    } else if(rlen > tlen) {
+    } else if(rlen > tlen && !complement) {
 	Perl_ck_warner(aTHX_ packWARN(WARN_MISC), "Replacement list is longer than search list");
     }
 
