@@ -1392,7 +1392,7 @@ depend: makedepend
 
 _test:
 	echo >&2 The _test target is deprecated. Please upgrade your smoker
-	PERL=./perl $(RUN_TESTS) choose
+	$(RUN_TESTS) choose
 
 # Cannot delegate rebuilding of t/perl to make
 # to allow interlaced test and minitest
