@@ -31,7 +31,7 @@ use vars qw[$DEBUG $error $VERSION $WARN $FOLLOW_SYMLINK $CHOWN $CHMOD
 $DEBUG                  = 0;
 $WARN                   = 1;
 $FOLLOW_SYMLINK         = 0;
-$VERSION                = "1.90";
+$VERSION                = "1.92";
 $CHOWN                  = 1;
 $CHMOD                  = 1;
 $SAME_PERMISSIONS       = $> == 0 ? 1 : 0;
@@ -485,7 +485,7 @@ sub _read_tar {
                 ### but that doesn't *always* happen.. so check if the last
                 ### character is a control character, and if so remove it
                 ### at any rate, we better remove that character here, or tests
-                ### like 'eq' and hashlook ups based on names will SO not work
+                ### like 'eq' and hash lookups based on names will SO not work
                 ### remove it by calculating the proper size, and then
                 ### tossing out everything that's longer than that size.
 
@@ -1553,7 +1553,7 @@ sub add_data {
 
 =head2 $tar->error( [$BOOL] )
 
-Returns the current errorstring (usually, the last error reported).
+Returns the current error string (usually, the last error reported).
 If a true value was specified, it will give the C<Carp::longmess>
 equivalent of the error, in effect giving you a stacktrace.
 
