@@ -1,4 +1,4 @@
-2.92
+2.92 Thu Jun 21 2013
   - Make switches case-sensitive (keep -d and -D distinct)
   - correct omission of Text::Soundex and File::CheckTree from deprecations
   - switch %deprecated to a delta hash
