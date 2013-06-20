@@ -2203,8 +2203,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
 /* sv:        SV being matched: only used for utf8 flag, pos() etc; string
  *            itself is accessed via the pointers above */
 /* data:      May be used for some additional optimizations.
-              Currently its only used, with a U32 cast, for transmitting
-              the ganch offset when doing a /g match. This will change */
+              Currently unused. */
 /* nosave:    For optimizations. */
 
 {
@@ -2394,12 +2393,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
 		    goto phooey;
 	    }
 	}
-	else if (data) {
-	    reginfo->ganch = strbeg + PTR2UV(data);
-            DEBUG_GPOS_r(PerlIO_printf(Perl_debug_log,
-		 "GPOS DATA: reginfo->ganch= strbeg + %"UVxf"\n",PTR2UV(data)));
-
-	} else {				/* pos() not defined */
+	else {				/* pos() not defined */
 	    reginfo->ganch = strbeg;
             DEBUG_GPOS_r(PerlIO_printf(Perl_debug_log,
 		 "GPOS: reginfo->ganch = strbeg\n"));

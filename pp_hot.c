@@ -1334,7 +1334,6 @@ PP(pp_match)
     const I32 oldsave = PL_savestack_ix;
     I32 update_minmatch = 1;
     I32 had_zerolen = 0;
-    U32 gpos = 0;
 
     if (PL_op->op_flags & OPf_STACKED)
 	TARG = POPs;
@@ -1398,9 +1397,8 @@ PP(pp_match)
 		else if (RX_EXTFLAGS(rx) & RXf_ANCH_GPOS) {
 		    r_flags |= REXEC_IGNOREPOS;
 		    RX_OFFS(rx)[0].end = RX_OFFS(rx)[0].start = mg->mg_len;
-		} else if (RX_EXTFLAGS(rx) & RXf_GPOS_FLOAT) 
-		    gpos = mg->mg_len;
-		else 
+		}
+		else if (!(RX_EXTFLAGS(rx) & RXf_GPOS_FLOAT))
 		    RX_OFFS(rx)[0].end = RX_OFFS(rx)[0].start = mg->mg_len;
 		minmatch = (mg->mg_flags & MGf_MINMATCH) ? RX_GOFS(rx) + 1 : 0;
 		update_minmatch = 0;
@@ -1434,7 +1432,7 @@ PP(pp_match)
     }
 
     if (!CALLREGEXEC(rx, (char*)s, (char *)strend, (char*)truebase,
-		     minmatch, TARG, NUM2PTR(void*, gpos), r_flags))
+		     minmatch, TARG, NULL, r_flags))
 	goto nope;
 
     PL_curpm = pm;
