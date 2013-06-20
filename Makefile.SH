@@ -915,7 +915,7 @@ lib/buildcustomize.pl: $& $(mini_obj) write_buildcustomize.pl
 
 $(PERL_EXE): $& perlmain$(OBJ_EXT) $(LIBPERL) $(static_ext) ext.libs $(PERLEXPORT) write_buildcustomize.pl
 	-@rm -f miniperl.xok
-	$(SHRPENV) $(LDLIBPTH) $(CC) -o perl$(PERL_SUFFIX) $(PERL_PROFILE_LDFLAGS) $(CLDFLAGS) $(CCDLFLAGS) perlmain$(OBJ_EXT) $(static_ext) $(LLIBPERL) `cat ext.libs` $(libs)
+	$(SHRPENV) $(LDLIBPTH) $(CC) -o perl $(CLDFLAGS) $(CCDLFLAGS) perlmain$(OBJ_EXT) $(static_ext) $(LLIBPERL) `cat ext.libs` $(libs)
 
 !NO!SUBS!
 
@@ -935,39 +935,6 @@ perl.valgrind.config: config.sh
 esac	
 
 $spitshell >>$Makefile <<'!NO!SUBS!'
-
-# Gprof Perl
-
-perl.config.dashpg:
-	@echo "Checking optimize='-pg' in config.sh..."
-	@grep "^optimize="      config.sh
-	@grep "^optimize='.*-pg.*'" config.sh >/dev/null || exit 1
-
-perl.gprof.config: config.sh
-	@echo "To build perl.gprof you must Configure -Doptimize=-pg, checking..."
-	@$(MAKE) perl.config.dashpg
-
-perl.gprof: /usr/bin/gprof perl.gprof.config
-	@-rm -f perl
-	$(MAKE) PERL_SUFFIX=.gprof PERL_PROFILE_LDFLAGS=-pg perl
-	@echo "Now you may run perl.gprof and then run gprof perl.gprof."
-
-# Gcov Perl
-
-perl.config.gcov:
-	@echo "To build perl.gcov you must use gcc 3.0 or newer, checking..."
-	@echo "Checking gccversion in config.sh..."
-	@grep "^gccversion="      config.sh
-	@grep "^gccversion='[3-9]\." config.sh >/dev/null || exit 1
-	@echo "To build perl.gcov you must Configure -Dccflags=-fprofile-arcs -ftest-coverage, checking..."
-	@echo "Checking ccflags='-fprofile-arcs -ftest-coverage' in config.sh..."
-	@grep "^ccflags="      config.sh
-	@grep "^ccflags='.*-fprofile-arcs -ftest-coverage.*'" config.sh >/dev/null || exit 1
-
-perl.gcov: perl.config.gcov
-	@-rm -f perl
-	$(MAKE) PERL_SUFFIX=.gcov PERL_PROFILE_LDFLAGS='' perl
-	@echo "Now you may run perl.gcov and then run gcov some.c."
 
 # Microperl.  This is just a convenience thing if one happens to
 # build also the full Perl and therefore the real big Makefile:

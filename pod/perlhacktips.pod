@@ -1092,18 +1092,27 @@ results.
 
 =head2 Gprof Profiling
 
-gprof is a profiling tool available in many Unix platforms, it uses
-F<statistical time-sampling>.
+I<gprof> is a profiling tool available in many Unix platforms which
+uses I<statistical time-sampling>. You can build a profiled version of
+F<perl> by compiling using gcc with the flag C<-pg>. Either edit
+F<config.sh> or re-run F<Configure>. Running the profiled version of
+Perl will create an output file called F<gmon.out> which contains the
+profiling data collected during the execution.
 
-You can build a profiled version of perl called "perl.gprof" by
-invoking the make target "perl.gprof"  (What is required is that Perl
-must be compiled using the C<-pg> flag, you may need to re-Configure).
-Running the profiled version of Perl will create an output file called
-F<gmon.out> is created which contains the profiling data collected
-during the execution.
+quick hint:
 
-The gprof tool can then display the collected data in various ways.
-Usually gprof understands the following options:
+    $ sh Configure -des -Dusedevel -Accflags='-pg' \
+        -Aldflags='-pg' -Alddlflags='-pg -shared' \
+        && make perl
+    $ ./perl ... # creates gmon.out in current directory
+    $ gprof ./perl > out
+    $ less out
+
+(you probably need to add C<-shared> to the <-Alddlflags> line until RT
+#118199 is resolved)
+
+The F<gprof> tool can then display the collected data in various ways.
+Usually F<gprof> understands the following options:
 
 =over 4
 
@@ -1135,30 +1144,35 @@ Display routines that have zero usage.
 =back
 
 For more detailed explanation of the available commands and output
-formats, see your own local documentation of gprof.
-
-quick hint:
-
-    $ sh Configure -des -Dusedevel -Doptimize='-pg' && make perl.gprof
-    $ ./perl.gprof someprog # creates gmon.out in current directory
-    $ gprof ./perl.gprof > out
-    $ view out
+formats, see your own local documentation of F<gprof>.
 
 =head2 GCC gcov Profiling
 
-Starting from GCC 3.0 I<basic block profiling> is officially available
-for the GNU CC.
+I<basic block profiling> is officially available in gcc 3.0 and later.
+You can build a profiled version of F<perl> by compiling using gcc with
+the flags C<-fprofile-arcs -ftest-coverage>. Either edit F<config.sh>
+or re-run F<Configure>.
 
-You can build a profiled version of perl called F<perl.gcov> by
-invoking the make target "perl.gcov" (what is required that Perl must
-be compiled using gcc with the flags C<-fprofile-arcs -ftest-coverage>,
-you may need to re-Configure).
+quick hint:
+
+    $ sh Configure -des -Dusedevel -Doptimize='-g' \
+        -Accflags='-fprofile-arcs -ftest-coverage' \
+        -Aldflags='-fprofile-arcs -ftest-coverage' \
+        -Alddlflags='-fprofile-arcs -ftest-coverage -shared' \
+        && make perl
+    $ rm -f regexec.c.gcov regexec.gcda
+    $ ./perl ...
+    $ gcov regexec.c
+    $ less regexec.c.gcov
+
+(you probably need to add C<-shared> to the <-Alddlflags> line until RT
+#118199 is resolved)
 
 Running the profiled version of Perl will cause profile output to be
-generated. For each source file an accompanying ".da" file will be
+generated. For each source file an accompanying F<.gcda> file will be
 created.
 
-To display the results you use the "gcov" utility (which should be
+To display the results you use the I<gcov> utility (which should be
 installed if you have gcc 3.0 or newer installed). F<gcov> is run on
 source code files, like this
 
@@ -1172,23 +1186,8 @@ Useful options of F<gcov> include C<-b> which will summarise the basic
 block, branch, and function call coverage, and C<-c> which instead of
 relative frequencies will use the actual counts. For more information
 on the use of F<gcov> and basic block profiling with gcc, see the
-latest GNU CC manual, as of GCC 3.0 see
-
-    http://gcc.gnu.org/onlinedocs/gcc-3.0/gcc.html
-
-and its section titled "8. gcov: a Test Coverage Program"
-
-    http://gcc.gnu.org/onlinedocs/gcc-3.0/gcc_8.html#SEC132
-
-quick hint:
-
-    $ sh Configure -des -Dusedevel -Doptimize='-g' \
-        -Accflags='-fprofile-arcs -ftest-coverage' \
-        -Aldflags='-fprofile-arcs -ftest-coverage' && make perl.gcov
-    $ rm -f regexec.c.gcov regexec.gcda
-    $ ./perl.gcov
-    $ gcov regexec.c
-    $ view regexec.c.gcov
+latest GNU CC manual. As of gcc 4.8, this is at
+L<http://gcc.gnu.org/onlinedocs/gcc/Gcov-Intro.html#Gcov-Intro>
 
 =head1 MISCELLANEOUS TRICKS
 
