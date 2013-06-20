@@ -1180,7 +1180,12 @@ source code files, like this
 
 which will cause F<sv.c.gcov> to be created. The F<.gcov> files contain
 the source code annotated with relative frequencies of execution
-indicated by "#" markers.
+indicated by "#" markers. If you want to generate F<.gcov> files for
+all profiled object files, you can run something like this:
+
+    for file in `find . -name \*.gcno`
+    do sh -c "cd `dirname $file` && gcov `basename $file .gcno`"
+    done
 
 Useful options of F<gcov> include C<-b> which will summarise the basic
 block, branch, and function call coverage, and C<-c> which instead of
