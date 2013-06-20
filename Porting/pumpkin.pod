@@ -651,42 +651,6 @@ things.
 
 =back
 
-=head1 Running Purify
-
-Purify is a commercial tool that is helpful in identifying memory
-overruns, wild pointers, memory leaks and other such badness.  Perl
-must be compiled in a specific way for optimal testing with Purify.
-
-Use the following commands to test perl with Purify:
-
-	sh Configure -des -Doptimize=-g -Uusemymalloc \
-            -Dusemultiplicity -Accflags=-DPURIFY
-	setenv PURIFYOPTIONS "-chain-length=25"
-	make all pureperl
-	cd t
-	ln -s ../pureperl perl
-	setenv PERL_DESTRUCT_LEVEL 2
-	./perl TEST
-
-Disabling Perl's malloc allows Purify to monitor allocations and leaks
-more closely; using Perl's malloc will make Purify report most leaks
-in the "potential" leaks category.  Enabling the multiplicity option
-allows perl to clean up thoroughly when the interpreter shuts down, which
-reduces the number of bogus leak reports from Purify.  The -DPURIFY
-enables any Purify-specific debugging code in the sources.
-
-Purify outputs messages in "Viewer" windows by default.  If you don't have
-a windowing environment or if you simply want the Purify output to
-unobtrusively go to a log file instead of to the interactive window,
-use the following options instead:
-
-	setenv PURIFYOPTIONS "-chain-length=25 -windows=no \
-            -log-file=perl.log -append-logfile=yes"
-
-The only currently known leaks happen when there are compile-time errors
-within eval or require.  (Fixing these is non-trivial, unfortunately, but
-they must be fixed eventually.)
-
 =head1 Common Gotchas
 
 =over 4
