@@ -979,18 +979,7 @@ factor 2.
 
 B<NOTE 2>: To minimize the number of memory leak false alarms (see
 L</PERL_DESTRUCT_LEVEL> for more information), you have to set the
-environment variable PERL_DESTRUCT_LEVEL to 2.
-
-For csh-like shells:
-
-    setenv PERL_DESTRUCT_LEVEL 2
-
-For Bourne-type shells:
-
-    PERL_DESTRUCT_LEVEL=2
-    export PERL_DESTRUCT_LEVEL
-
-In Unixy environments you can also use the C<env> command:
+environment variable PERL_DESTRUCT_LEVEL to 2. For example, like this:
 
     env PERL_DESTRUCT_LEVEL=2 valgrind ./perl -Ilib ...
 
