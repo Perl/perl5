@@ -3667,13 +3667,7 @@ S_dooneliner(pTHX_ const char *cmd, const char *filename)
 		 ; e++)
 	    {
 		/* you don't see this */
-		const char * const errmsg =
-#ifdef HAS_SYS_ERRLIST
-		    sys_errlist[e]
-#else
-		    strerror(e)
-#endif
-		    ;
+		const char * const errmsg = Strerror(e) ;
 		if (!errmsg)
 		    break;
 		if (instr(s, errmsg)) {
