@@ -147,6 +147,7 @@ my @writables = qw(
     perlapi.c
     cpan/Devel-PPPort/module2.c
     cpan/Devel-PPPort/module3.c
+    cpan/autodie/t/truncate_me
     reentr.c
     reentr.h
     regcharclass.h
