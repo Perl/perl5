@@ -20,7 +20,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 670;  # Update this when adding/deleting tests.
+plan tests => 681;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -821,6 +821,36 @@ sub run_tests {
         pos ($foo) = 5;
         ok($foo =~ /\G(..)/g, $message);
         is($1, 'cd', $message);
+    }
+
+    {
+        my $message = 'basic \G floating checks';
+        my $foo = 'aabbccddeeffgg';
+        pos ($foo) = 1;
+
+	ok($foo =~ /a+\G(..)/g, "$message: a+\\G");
+	is($1, 'ab', "$message: ab");
+
+	pos ($foo) += 1;
+	ok($foo =~ /b+\G(..)/g, "$message: b+\\G");
+	is($1, 'cc', "$message: cc");
+
+	pos ($foo) += 1;
+	ok($foo =~ /d+\G(..)/g, "$message: d+\\G");
+	is($1, 'de', "$message: de");
+
+	ok($foo =~ /\Gef/g, "$message: \\Gef");
+
+        pos ($foo) = 1;
+
+	ok($foo =~ /(?=a+\G)(..)/g, "$message: (?a+\\G)");
+	is($1, 'aa', "$message: aa");
+
+        pos ($foo) = 2;
+
+	ok($foo =~ /a(?=a+\G)(..)/g, "$message: a(?=a+\\G)");
+	is($1, 'ab', "$message: ab");
+
     }
 
     {
