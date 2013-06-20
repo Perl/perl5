@@ -15281,7 +15281,6 @@ Perl_re_dup_guts(pTHX_ const REGEXP *sstr, REGEXP *dstr, CLONE_PARAMS *param)
 	       so we need to copy it locally.  */
     RX_WRAPPED(dstr) = SAVEPVN(RX_WRAPPED(sstr), SvCUR(sstr)+1);
     ret->mother_re   = NULL;
-    ret->gofs = 0;
 }
 #endif /* PERL_IN_XSUB_RE */
 

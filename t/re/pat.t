@@ -726,8 +726,6 @@ sub run_tests {
         like($str, qr/^..\G/, $message);
         unlike($str, qr/^...\G/, $message);
         ok($str =~ /\G../ && $& eq 'cd', $message);
-
-        local $::TODO = $::running_as_thread;
         ok($str =~ /.\G./ && $& eq 'bc', $message);
     }
 
@@ -799,22 +797,19 @@ sub run_tests {
         my $message = '\G anchor checks';
         my $foo = 'aabbccddeeffgg';
         pos ($foo) = 1;
-        {
-            local $::TODO = $::running_as_thread;
-            no warnings 'uninitialized';
-            ok($foo =~ /.\G(..)/g, $message);
-            is($1, 'ab', $message);
 
-            pos ($foo) += 1;
-            ok($foo =~ /.\G(..)/g, $message);
-            is($1, 'cc', $message);
+	ok($foo =~ /.\G(..)/g, $message);
+	is($1, 'ab', $message);
 
-            pos ($foo) += 1;
-            ok($foo =~ /.\G(..)/g, $message);
-            is($1, 'de', $message);
+	pos ($foo) += 1;
+	ok($foo =~ /.\G(..)/g, $message);
+	is($1, 'cc', $message);
 
-            ok($foo =~ /\Gef/g, $message);
-        }
+	pos ($foo) += 1;
+	ok($foo =~ /.\G(..)/g, $message);
+	is($1, 'de', $message);
+
+	ok($foo =~ /\Gef/g, $message);
 
         undef pos $foo;
         ok($foo =~ /\G(..)/g, $message);
