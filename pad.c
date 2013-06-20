@@ -1653,7 +1653,7 @@ Perl_pad_swipe(pTHX_ PADOFFSET po, bool refadjust)
     PL_curpad[po] = &PL_sv_undef;
 #endif
     if (PadnamelistMAX(PL_comppad_name) != -1
-     && PadnamelistMAX(PL_comppad_name) >= po) {
+     && (PADOFFSET)PadnamelistMAX(PL_comppad_name) >= po) {
 	assert(!PadnameLEN(PadnamelistARRAY(PL_comppad_name)[po]));
 	PadnamelistARRAY(PL_comppad_name)[po] = &PL_sv_undef;
     }
