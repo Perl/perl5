@@ -1157,6 +1157,8 @@ in the remaining files and test and commit.
 If this was a BLEAD-POINT release, then just follow the section
 L<"Bump the version number">.
 
+After bumping the version, follow the section L<"update INSTALL"> to
+ensure all version number references are correct.
 
 =head3 clean build and test
 
