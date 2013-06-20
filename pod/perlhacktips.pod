@@ -1016,13 +1016,12 @@ To get valgrind and for more information see
 
 =head2 AddressSanitizer
 
-AddressSanitizer is a clang and gcc extension, included in clang since v3.1
-and gcc since v4.8. It
-checks illegal heap pointers, global pointers, stack pointers and use
-after free errors, and is fast enough that you can easily compile your
-debugging or optimized perl with it. It does not check memory leaks
-though. AddressSanitizer is available for Linux, Mac OS X and soon on
-Windows.
+AddressSanitizer is a clang and gcc extension, included in clang since
+v3.1 and gcc since v4.8. It checks illegal heap pointers, global
+pointers, stack pointers and use after free errors, and is fast enough
+that you can easily compile your debugging or optimized perl with it.
+It does not check memory leaks though. AddressSanitizer is available
+for Linux, Mac OS X and soon on Windows.
 
 To build perl with AddressSanitizer, your Configure invocation should
 look like:
@@ -1196,11 +1195,10 @@ quick hint:
 =head2 PERL_DESTRUCT_LEVEL
 
 If you want to run any of the tests yourself manually using e.g.
-valgrind, please note that
-by default perl B<does not> explicitly cleanup all the memory it has
-allocated (such as global memory arenas) but instead lets the exit() of
-the whole program "take care" of such allocations, also known as
-"global destruction of objects".
+valgrind, please note that by default perl B<does not> explicitly
+cleanup all the memory it has allocated (such as global memory arenas)
+but instead lets the exit() of the whole program "take care" of such
+allocations, also known as "global destruction of objects".
 
 There is a way to tell perl to do complete cleanup: set the environment
 variable PERL_DESTRUCT_LEVEL to a non-zero value. The t/TEST wrapper
@@ -1316,16 +1314,16 @@ L<perlclib>.
 Under ithreads the optree is read only. If you want to enforce this, to
 check for write accesses from buggy code, compile with
 C<-DPERL_DEBUG_READONLY_OPS> to enable code that allocates op memory
-via C<mmap>, and sets it read-only when it is attached to a subroutine. Any
-write access to an op results in a C<SIGBUS> and abort.
+via C<mmap>, and sets it read-only when it is attached to a subroutine.
+Any write access to an op results in a C<SIGBUS> and abort.
 
 This code is intended for development only, and may not be portable
 even to all Unix variants. Also, it is an 80% solution, in that it
-isn't able to make all ops read only. Specifically it does not apply to op
-slabs belonging to C<BEGIN> blocks.
+isn't able to make all ops read only. Specifically it does not apply to
+op slabs belonging to C<BEGIN> blocks.
 
-However, as an 80% solution it is still effective, as it has caught bugs in
-the past.
+However, as an 80% solution it is still effective, as it has caught
+bugs in the past.
 
 =head2 The .i Targets
 
