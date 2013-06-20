@@ -60,30 +60,29 @@ It can be disabled (for now) in a perl build with:
 
 =head1 Modules and Pragmata
 
-XXX All changes to installed files in F<cpan/>, F<dist/>, F<ext/> and F<lib/>
-go here.  If Module::CoreList is updated, generate an initial draft of the
-following sections using F<Porting/corelist-perldelta.pl>, which prints stub
-entries to STDOUT.  Results can be pasted in place of the '=head2' entries
-below.  A paragraph summary for important changes should then be added by hand.
-In an ideal world, dual-life modules would have a F<Changes> file that could be
-cribbed.
-
-[ Within each section, list entries as a =item entry ]
-
-=head2 New Modules and Pragmata
+=head2 Updated Modules and Pragmata
 
 =over 4
 
 =item *
 
-L<Module::CoreList::Utils> which provides information on which core and
-dual-life utilities shipped with each version of L<perl>.
+L<Archive::Tar> has been upgraded from version 1.90 to 1.92.
 
-=back
+=item *
 
-=head2 Updated Modules and Pragmata
+L<Attribute::Handlers> has been upgraded from version 0.94 to 0.95.
 
-=over 4
+=item *
+
+L<autodie> has been upgraded from version 2.13 to 2.19.
+
+=item *
+
+L<B> has been upgraded from version 1.42 to 1.43.
+
+=item *
+
+L<B::Concise> has been upgraded from version 0.95 to 0.96.
 
 =item *
 
@@ -100,9 +99,75 @@ correctly. [RT #117531]
 
 =item *
 
+L<Benchmark> has been upgraded from version 1.15 to 1.16.
+
+=item *
+
+L<Carp> has been upgraded from version 1.29 to 1.30.
+
+=item *
+
+L<Compress::Raw::Bzip2> has been upgraded from version 2.060 to 2.061.
+
+=item *
+
+L<Compress::Raw::Zlib> has been upgraded from version 2.060 to 2.061.
+
+=item *
+
+L<Config::Perl::V> has been upgraded from version 0.17 to 0.18.
+
+=item *
+
+L<CPAN::Meta> has been upgraded from version 2.120921 to 2.131560.
+
+=item *
+
+L<Data::Dumper> has been upgraded from version 2.145 to 2.146.
+
+=item *
+
 L<DB> has been updated from 1.05 to 1.06 and L<perl5db.pl> from 1.39_10
-to 1.40.  The call depth allowed by default in the debugger is now 1000
+to 1.40.
+
+The call depth allowed by default in the debugger is now 1000
 rather than 100.
+
+=item *
+
+L<DB_File> has been upgraded from version 1.827 to 1.828.
+
+=item *
+
+L<Encode> has been upgraded from version 2.49 to 2.51.
+
+=item *
+
+L<ExtUtils::Install> has been upgraded from version 1.59 to 1.60.
+
+=item *
+
+L<ExtUtils::MakeMaker> has been upgraded from version 6.66 to 6.68.
+
+=item *
+
+L<ExtUtils::ParseXS> has been upgraded from version 3.18 to 3.19.
+
+=item *
+
+L<File::Copy> has been upgraded from version 2.26 to 2.27.
+
+=item *
+
+L<File::DosGlob> has been upgraded from version 1.10 to 1.11.
+
+=item *
+
+L<File::Fetch> has been upgraded from version 0.38 to 0.42.
+
+=item *
+
+L<File::Find> has been upgraded from version 1.23 to 1.24.
 
 =item *
 
@@ -113,12 +178,143 @@ temporary directory is derived. [RT #88940]
 
 =item *
 
+L<File::Temp> has been upgraded from version 0.23 to 0.2301.
+
+=item *
+
+L<Filter::Simple> has been upgraded from version 0.89 to 0.90.
+
+=item *
+
+L<Filter::Util::Call> has been upgraded from version 1.45 to 1.49.
+
+=item *
+
+L<Getopt::Long> has been upgraded from version 2.39 to 2.4.
+
+=item *
+
+L<Hash::Util::FieldHash> has been upgraded from version 1.10 to 1.11.
+
+=item *
+
+L<HTTP::Tiny> has been upgraded from version 0.025 to 0.031.
+
+=item *
+
+L<IPC::Open3> has been upgraded from version 1.13 to 1.14.
+
+=item *
+
+L<Locale::Maketext> has been upgraded from version 1.23 to 1.24.
+
+=item *
+
+L<Math::BigInt> has been upgraded from version 1.9991 to 1.9992.
+
+=item *
+
+L<Math::BigRat> has been upgraded from version 0.2604 to 0.2606.
+
+=item *
+
+L<Module::Build> has been upgraded from version 0.4003 to 0.4005.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 2.91 to 2.92.
+
+Adds L<Module::CoreList::Utils> which provides information on which core and
+dual-life utilities shipped with each version of L<perl>.
+
+=item *
+
+L<Module::Metadata> has been upgraded from version 1.000011 to 1.000014.
+
+=item *
+
+L<mro> has been upgraded from version 1.11 to 1.12.
+
+=item *
+
+L<Net::Ping> has been upgraded from version 2.41 to 2.42.
+
+=item *
+
+L<perlfaq> has been upgraded from version 5.0150042 to 5.0150043.
+
+=item *
+
+L<Pod::Html> has been upgraded from version 1.18 to 1.19.
+
+=item *
+
+L<Pod::Parser> has been upgraded from version 1.60 to 1.61.
+
+=item *
+
+L<Pod::Perldoc> has been upgraded from version 3.19 to 3.20.
+
+=item *
+
+L<Pod::Usage> has been upgraded from version 1.61 to 1.63.
+
+=item *
+
+L<POSIX> has been upgraded from version 1.32 to 1.33.
+
+=item *
+
+L<re> has been upgraded from version 0.23 to 0.25.
+
+=item *
+
+L<Safe> has been upgraded from version 2.35 to 2.36.
+
+=item *
+
+L<Storable> has been upgraded from version 2.42 to 2.43.
+
+=item *
+
+L<Sys::Hostname> has been upgraded from version 1.17 to 1.18.
+
+=item *
+
+L<Sys::Syslog> has been upgraded from version 0.32 to 0.33.
+
+=item *
+
+L<Term::ReadLine> has been upgraded from version 1.12 to 1.13.
+
+=item *
+
 L<Test::Harness> has been upgraded from version 3.26 to 3.28
 
 Memory usage is dramatically reduced. t/harness now uses about 10% of the
 memory used by 3.26 and earlier.
 
 C<PERL5LIB> is always propagated to a test's C<@INC>, even under C<-T>.
+
+=item *
+
+L<threads> has been upgraded from version 1.86 to 1.87.
+
+=item *
+
+L<threads::shared> has been upgraded from version 1.43 to 1.44.
+
+=item *
+
+L<Tie::File> has been upgraded from version 0.99 to 1.00.
+
+=item *
+
+L<Time::Piece> has been upgraded from version 1.20_01 to 1.2002.
+
+=item *
+
+L<Unicode::Collate> has been upgraded from version 0.97 to 0.98.
 
 =item *
 
@@ -154,7 +350,7 @@ Noted that C<chop> and C<chomp> can reset the hash iterator
 
 =item *
 
-Improved fileno example
+Improved C<fileno> example
 
 =back
 
@@ -202,16 +398,6 @@ The following additions or changes have been made to diagnostic output,
 including warnings and fatal error messages.  For the complete list of
 diagnostic messages, see L<perldiag>.
 
-=head3 New Errors
-
-=over 4
-
-=item *
-
-XXX L<message|perldiag/"message">
-
-=back
-
 =head3 New Warnings
 
 =over 4
@@ -224,7 +410,7 @@ L<Trailing white-space in a charnames alias definition is deprecated|perldiag/"T
 
 These two deprecation warnings involving C<\N{...}> were incorrectly
 implemented.  They did not warn by default (now they do) and could not be
-made fatal via C<use warnings FATAL => 'deprecated'> (now they can).
+made fatal via C<< use warnings FATAL => 'deprecated' >> (now they can).
 
 =back
 
@@ -546,9 +732,34 @@ stringification of the decimal point [perl #108378] [perl #115800]
 
 =head1 Acknowledgements
 
-XXX Generate this with:
+Perl 5.19.1 represents approximately 4 weeks of development since Perl 5.19.0
+and contains approximately 26,000 lines of changes across 680 files from 37
+authors.
 
-  perl Porting/acknowledgements.pl v5.19.1..HEAD
+Perl continues to flourish into its third decade thanks to a vibrant community
+of users and developers. The following people are known to have contributed the
+improvements that became Perl 5.19.1:
+
+Alexandr Ciornii, Brian Fraser, Chris 'BinGOs' Williams, Craig A. Berry,
+Dagfinn Ilmari Mannsåker, Daniel Dragan, David Golden, David Mitchell, David
+Steinbrunner, Dominic Hargreaves, Eric Brine, Father Chrysostomos, H.Merijn
+Brand, Heiko Eissfeldt, James E Keenan, Jerry D. Hedden, Kang-min Liu, Karl
+Williamson, Leon Timmermans, Lukas Mai, Marcel Grünauer, Mark Jason Dominus,
+Max Maischein, Mike Doherty, Nicholas Clark, Paul Green, Peter Martini, Petr
+Písař, Ricardo Signes, Shirakata Kentaro, Shlomi Fish, Steffen Müller, Steve
+Hay, Sullivan Beck, Tony Cook, Yves Orton, Zsbán Ambrus.
+
+The list above is almost certainly incomplete as it is automatically generated
+from version control history. In particular, it does not include the names of
+the (very much appreciated) contributors who reported issues to the Perl bug
+tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please see
+the F<AUTHORS> file in the Perl source distribution.
 
 =head1 Reporting Bugs
 
