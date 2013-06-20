@@ -510,6 +510,7 @@ the strings?).
  Ricardo  5.18.0        2013-May-18
 
  Ricardo  5.19.0        2013-May-20
+ David G  5.19.1        2013-Jun-21
 
 =head2 SELECTED RELEASE SIZES
 
