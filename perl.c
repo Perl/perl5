@@ -502,7 +502,7 @@ Perl_dump_sv_child(pTHX_ SV *sv)
     if (returned_errno || *buffer) {
 	Perl_warn(aTHX_ "Debug leaking scalars child failed%s%.*s with errno"
 		  " %d: %s", (*buffer ? " at " : ""), (int) *buffer, buffer + 1,
-		  returned_errno, strerror(returned_errno));
+		  returned_errno, Strerror(returned_errno));
     }
 }
 #endif
@@ -3834,7 +3834,7 @@ S_open_script(pTHX_ const char *scriptname, bool dosearch, bool *suidscript)
         && S_ISDIR(tmpstatbuf.st_mode))
         Perl_croak(aTHX_ "Can't open perl script \"%s\": %s\n",
             CopFILE(PL_curcop),
-            strerror(EISDIR));
+            Strerror(EISDIR));
 
     return rsfp;
 }
