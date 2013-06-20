@@ -1014,6 +1014,7 @@ foreach $Locale (@Locale) {
     my $ok11;
     my $ok12;
     my $ok13;
+    my $ok14;
 
     my $c;
     my $d;
@@ -1069,6 +1070,7 @@ foreach $Locale (@Locale) {
             $ok11 = $f == $c;
             $ok12 = abs(($f + $g) - 3.57) < 0.01;
             $ok13 = $w == 0;
+            $ok14 = 1;  # Skip for non-utf8 locales
         }
     }
     else {
@@ -1112,6 +1114,26 @@ foreach $Locale (@Locale) {
             $ok11 = $f == $c;
             $ok12 = abs(($f + $g) - 3.57) < 0.01;
             $ok13 = $w == 0;
+
+            # Look for non-ASCII error messages, and verify that the first
+            # such is in UTF-8 (the others almost certainly will be like the
+            # first).
+            $ok14 = 1;
+            foreach my $err (keys %!) {
+                use Errno;
+                $! = eval "&Errno::$err";   # Convert to strerror() output
+                my $strerror = "$!";
+                if ("$strerror" =~ /\P{ASCII}/) {
+                    my $utf8_strerror = $strerror;
+                    utf8::upgrade($utf8_strerror);
+
+                    # If $! was already in UTF-8, the upgrade was a no-op;
+                    # otherwise they will be different byte strings.
+                    use bytes;
+                    $ok14 = $utf8_strerror eq $strerror;
+                    last;
+                }
+            }
         }
     }
 
@@ -1164,6 +1186,9 @@ foreach $Locale (@Locale) {
 
     tryneoalpha($Locale, ++$locales_test_number, $ok13);
     $test_names{$locales_test_number} = 'Verify that don\'t get warning under "==" even if radix is not a dot';
+
+    tryneoalpha($Locale, ++$locales_test_number, $ok14);
+    $test_names{$locales_test_number} = 'Verify that non-ASCII UTF-8 error messages are in UTF-8';
 
     debug "# $first_f_test..$locales_test_number: \$f = $f, \$g = $g, back to locale = $Locale\n";
 

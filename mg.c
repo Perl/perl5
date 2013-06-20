@@ -1043,7 +1043,35 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	    sv_setpv(sv, os2error(Perl_rc));
 	else
 #endif
-	sv_setpv(sv, errno ? Strerror(errno) : "");
+	if (! errno) {
+            sv_setpvs(sv, "");
+        }
+        else {
+
+            /* Strerror can return NULL on some platforms, which will result in
+             * 'sv' not being considered SvOK.  The SvNOK_on() below will cause
+             * just the number part to be valid */
+            sv_setpv(sv, Strerror(errno));
+
+            /* In some locales the error string may come back as UTF-8, in
+             * which case we should turn on that flag.  This didn't use to
+             * happen, and to avoid any possible backward compatibility issues,
+             * we don't turn on the flag unless we have to.  So the flag stays
+             * off for an entirely ASCII string.  We assume that if the string
+             * looks like UTF-8, it really is UTF-8:  "text in any other
+             * encoding that uses bytes with the high bit set is extremely
+             * unlikely to pass a UTF-8 validity test"
+             * (http://en.wikipedia.org/wiki/Charset_detection).  There is a
+             * potential that we will get it wrong however, especially on short
+             * error message text.  (If it turns out to be necessary, we could
+             * also keep track if the current LC_MESSAGES locale is UTF-8) */
+            if (SvOK(sv)    /* It could be that Strerror returned invalid */
+                && ! is_ascii_string((U8*) SvPVX_const(sv), SvCUR(sv))
+                && is_utf8_string((U8*) SvPVX_const(sv), SvCUR(sv)))
+            {
+                SvUTF8_on(sv);
+            }
+        }
 	RESTORE_ERRNO;
 	}
 
