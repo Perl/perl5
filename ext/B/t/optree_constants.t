@@ -20,7 +20,7 @@ plan tests => 67;
 
 #################################
 
-use constant {		# see also t/op/gv.t line 282
+use constant {		# see also t/op/gv.t line 358
     myaref	=> [ 1,2,3 ],
     myfl	=> 1.414213,
     myglob	=> \*STDIN,
