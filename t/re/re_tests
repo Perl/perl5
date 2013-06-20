@@ -1747,4 +1747,11 @@ m?^xy\?$?	xy?	y	$&	xy?
 /(a|(bc)){0,0}+xyz/	xyz	y	$&	xyz
 /( a | ( bc ) ) {0,0} + xyz/x	xyz	y	$&	xyz
 
+(A(*PRUNE)B|A(*PRUNE)C)	AC	n	-	-
+(A(*PRUNE)B|A(*PRUNE)D|A(*PRUNE)C)	AC	n	-	-
+(A(*PRUNE)B|A(*PRUNE)C|A(*PRUNE)D)	AC	n	-	-
+((A(*PRUNE)B|A(*PRUNE)C))	AC	n	-	-
+((A(*PRUNE)B|A(*PRUNE)D|A(*PRUNE)C))	AC	n	-	-
+((A(*PRUNE)B|A(*PRUNE)C|A(*PRUNE)D))	AC	n	-	-
+
 # vim: softtabstop=0 noexpandtab
