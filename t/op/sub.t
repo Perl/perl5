@@ -108,8 +108,8 @@ require Config;
 $::TODO = "not fixed yet" if $Config::Config{useithreads};
 is "@scratch", "main road road main",
    'recursive calls do not share shared-hash-key TARGs';
+undef $::TODO;
 
-$::TODO = "not fixed yet";
 # [perl #78194] @_ aliasing op return values
 sub { is \$_[0], \$_[0],
         '[perl #78194] \$_[0] == \$_[0] when @_ aliases "$x"' }
@@ -119,6 +119,7 @@ sub { is \$_[0], \$_[0],
 sub not_constant () {        42 }
 sub not_constantr() { return 42 }
 eval { ${\not_constant}++ };
+$::TODO = "not fixed yet";
 is $@, "", 'sub (){42} returns a mutable value';
 undef $::TODO;
 eval { ${\not_constantr}++ };

@@ -2702,7 +2702,6 @@ PP(pp_entersub)
     }
 
     ENTER;
-    SAVETMPS;
 
   retry:
     if (CvCLONE(cv) && ! CvCLONED(cv))
@@ -2802,12 +2801,18 @@ try_autoload:
 	    Copy(MARK,AvARRAY(av),items,SV*);
 	    AvFILLp(av) = items - 1;
 	
+	    MARK = AvARRAY(av);
 	    while (items--) {
 		if (*MARK)
+		{
+		    if (SvPADTMP(*MARK) && !IS_PADGV(*MARK))
+			*MARK = sv_mortalcopy(*MARK);
 		    SvTEMP_off(*MARK);
+		}
 		MARK++;
 	    }
 	}
+	SAVETMPS;
 	if ((cx->blk_u16 & OPpENTERSUB_LVAL_MASK) == OPpLVAL_INTRO &&
 	    !CvLVALUE(cv))
 	    DIE(aTHX_ "Can't modify non-lvalue subroutine call");
@@ -2823,6 +2828,7 @@ try_autoload:
     else {
 	I32 markix = TOPMARK;
 
+	SAVETMPS;
 	PUTBACK;
 
 	if (((PL_op->op_private

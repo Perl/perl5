@@ -153,7 +153,8 @@ my $type = do_test('result of addition',
         $c + $d,
 'SV = ([NI])V\\($ADDR\\) at $ADDR
   REFCNT = 1
-  FLAGS = \\(PADTMP,\1OK,p\1OK\\)
+  FLAGS = \\(PADTMP,\1OK,p\1OK\\)		# $] < 5.019002
+  FLAGS = \\(\1OK,p\1OK\\)			# $] >=5.019002
   \1V = 456');
 
 ($d = "789") += 0.1;
