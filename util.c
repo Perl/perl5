@@ -4469,8 +4469,11 @@ Perl_upg_version(pTHX_ SV *ver, bool qv)
 	SV *sv = SvNVX(ver) > 10e50 ? newSV(64) : 0;
 	char *buf;
 #ifdef USE_LOCALE_NUMERIC
-	char *loc = savepv(setlocale(LC_NUMERIC, NULL));
-	setlocale(LC_NUMERIC, "C");
+	char *loc = NULL;
+        if (! PL_numeric_standard) {
+            loc = savepv(setlocale(LC_NUMERIC, NULL));
+            setlocale(LC_NUMERIC, "C");
+        }
 #endif
 	if (sv) {
 	    Perl_sv_setpvf(aTHX_ sv, "%.9"NVff, SvNVX(ver));
@@ -4481,8 +4484,10 @@ Perl_upg_version(pTHX_ SV *ver, bool qv)
 	    buf = tbuf;
 	}
 #ifdef USE_LOCALE_NUMERIC
-	setlocale(LC_NUMERIC, loc);
-	Safefree(loc);
+        if (loc) {
+            setlocale(LC_NUMERIC, loc);
+            Safefree(loc);
+        }
 #endif
 	while (buf[len-1] == '0' && len > 0) len--;
 	if ( buf[len-1] == '.' ) len--; /* eat the trailing decimal */
