@@ -682,6 +682,11 @@ Something like this will reproduce the error:
 (P) Perl got confused as to whether a hash was a plain hash or a
 symbol table hash when trying to update @ISA caches.
 
+=item Can't call mro_method_changed_in() on anonymous symbol table
+
+(F) An XS module tried to call C<mro_method_changed_in> on a hash that was
+not attached to the symbol table.
+
 =item Can't chdir to %s
 
 (F) You called C<perl -x/foo/bar>, but F</foo/bar> is not a directory
