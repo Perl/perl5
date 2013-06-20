@@ -10,7 +10,7 @@ BEGIN {
     require "test.pl";
 }
 
-plan( tests => 64 );
+plan( tests => 66 );
 
 {
     my @lol = ([qw(a b c)], [], [qw(1 2 3)]);
@@ -216,12 +216,10 @@ plan( tests => 64 );
 }
 
 # [perl #78194] grep/map aliasing op return values
-{ local $::TODO = ' ';
 grep is(\$_, \$_, '[perl #78194] \$_ == \$_ inside grep ..., "$x"'),
-     "${\''}";
+     "${\''}", "${\''}";
 map is(\$_, \$_, '[perl #78194] \$_ == \$_ inside map ..., "$x"'),
-     "${\''}";
-}
+     "${\''}", "${\''}";
 
 # [perl #92254] freeing $_ in gremap block
 {
