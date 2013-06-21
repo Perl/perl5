@@ -1388,16 +1388,15 @@ PP(pp_match)
     /* XXXX What part of this is needed with true \G-support? */
     if (global) {
 	MAGIC * const mg = mg_find_mglob(TARG);
-	RX_OFFS(rx)[0].start = -1;
 	if (mg && mg->mg_len >= 0) {
 		if (!(RX_EXTFLAGS(rx) & RXf_GPOS_SEEN))
-		    curpos = RX_OFFS(rx)[0].start = mg->mg_len;
+		    curpos = mg->mg_len;
 		else if (RX_EXTFLAGS(rx) & RXf_ANCH_GPOS) {
 		    r_flags |= REXEC_IGNOREPOS;
-		    curpos = RX_OFFS(rx)[0].start = mg->mg_len;
+		    curpos = mg->mg_len;
 		}
 		else if (!(RX_EXTFLAGS(rx) & RXf_GPOS_FLOAT))
-		    curpos = RX_OFFS(rx)[0].start = mg->mg_len;
+		    curpos = mg->mg_len;
 		minmatch = (mg->mg_flags & MGf_MINMATCH) ? RX_GOFS(rx) + 1 : 0;
 		update_minmatch = 0;
 	}
@@ -1421,7 +1420,7 @@ PP(pp_match)
     s = truebase;
 
   play_it_again:
-    if (global && RX_OFFS(rx)[0].start != -1) {
+    if (global) {
 	s = truebase + curpos - RX_GOFS(rx);
 	if ((s + RX_MINLEN(rx)) > strend || s < truebase) {
 	    DEBUG_r(PerlIO_printf(Perl_debug_log, "Regex match can't succeed, so not even tried\n"));
@@ -1495,6 +1494,7 @@ PP(pp_match)
 	    }
 	}
 	if (global) {
+            assert(RX_OFFS(rx)[0].start != -1);
             curpos = (UV)RX_OFFS(rx)[0].end;
 	    had_zerolen = (RX_OFFS(rx)[0].start != -1
 			   && (RX_OFFS(rx)[0].start + RX_GOFS(rx)
