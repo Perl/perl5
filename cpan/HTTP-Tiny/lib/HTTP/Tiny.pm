@@ -3,14 +3,14 @@ package HTTP::Tiny;
 use strict;
 use warnings;
 # ABSTRACT: A small, simple, correct HTTP/1.1 client
-our $VERSION = '0.031'; # VERSION
+our $VERSION = '0.033'; # VERSION
 
 use Carp ();
 
 
 my @attributes;
 BEGIN {
-    @attributes = qw(agent cookie_jar default_headers local_address max_redirect max_size proxy timeout SSL_options verify_SSL);
+    @attributes = qw(cookie_jar default_headers local_address max_redirect max_size proxy no_proxy timeout SSL_options verify_SSL);
     no strict 'refs';
     for my $accessor ( @attributes ) {
         *{$accessor} = sub {
@@ -19,27 +19,34 @@ BEGIN {
     }
 }
 
+sub agent {
+    my($self, $agent) = @_;
+    if( @_ > 1 ){
+        $self->{agent} =
+            (defined $agent && $agent =~ / $/) ? $agent . $self->_agent : $agent;
+    }
+    return $self->{agent};
+}
+
 sub new {
     my($class, %args) = @_;
 
-    (my $default_agent = $class) =~ s{::}{-}g;
-    $default_agent .= "/" . ($class->VERSION || 0);
-
     my $self = {
-        agent        => $default_agent,
         max_redirect => 5,
         timeout      => 60,
         verify_SSL   => $args{verify_SSL} || $args{verify_ssl} || 0, # no verification by default
+        no_proxy     => $ENV{no_proxy},
     };
 
-    $args{agent} .= $default_agent
-        if defined $args{agent} && $args{agent} =~ / $/;
+    bless $self, $class;
 
     $class->_validate_cookie_jar( $args{cookie_jar} ) if $args{cookie_jar};
 
     for my $key ( @attributes ) {
         $self->{$key} = $args{$key} if exists $args{$key}
     }
+
+    $self->agent( exists $args{agent} ? $args{agent} : $class->_agent );
 
     # Never override proxy argument as this breaks backwards compat.
     if (!exists $self->{proxy} && (my $http_proxy = $ENV{http_proxy})) {
@@ -51,7 +58,13 @@ sub new {
         }
     }
 
-    return bless $self, $class;
+    # Split no_proxy to array reference if not provided as such
+    unless ( ref $self->{no_proxy} eq 'ARRAY' ) {
+        $self->{no_proxy} =
+            (defined $self->{no_proxy}) ? [ split /\s*,\s*/, $self->{no_proxy} ] : [];
+    }
+
+    return $self;
 }
 
 
@@ -188,6 +201,12 @@ my %DefaultPort = (
     https => 443,
 );
 
+sub _agent {
+    my $class = ref($_[0]) || $_[0];
+    (my $default_agent = $class) =~ s{::}{-}g;
+    return $default_agent . "/" . ($class->VERSION || 0);
+}
+
 sub _request {
     my ($self, $method, $url, $args) = @_;
 
@@ -208,7 +227,7 @@ sub _request {
         local_address   => $self->{local_address},
     );
 
-    if ($self->{proxy}) {
+    if ($self->{proxy} && ! grep { $host =~ /\Q$_\E$/ } @{$self->{no_proxy}}) {
         $request->{uri} = "$scheme://$request->{host_port}$path_query";
         die(qq/HTTPS via proxy is not supported\n/)
             if $request->{scheme} eq 'https';
@@ -974,7 +993,7 @@ HTTP::Tiny - A small, simple, correct HTTP/1.1 client
 
 =head1 VERSION
 
-version 0.031
+version 0.033
 
 =head1 SYNOPSIS
 
@@ -1055,6 +1074,12 @@ responses larger than this will return an exception.
 C<proxy>
 
 URL of a proxy server to use (default is C<$ENV{http_proxy}> if set)
+
+=item *
+
+C<no_proxy>
+
+List of domain suffixes that should not be proxied.  Must be a comma-separated string or an array reference. (default is C<$ENV{no_proxy}>)
 
 =item *
 
@@ -1262,6 +1287,7 @@ local_address
 max_redirect
 max_size
 proxy
+no_proxy
 timeout
 verify_SSL
 SSL_options
@@ -1397,6 +1423,13 @@ undef), then the C<http_proxy> environment variable is ignored.
 
 =item *
 
+C<no_proxy> environment variable is supported in the format comma-separated
+list of domain extensions proxy should not be used for.  If a C<no_proxy>
+argument is passed to C<new>, then the C<no_proxy> environment variable is
+ignored.
+
+=item *
+
 There is no provision for delaying a request body using an C<Expect> header.
 Unexpected C<1XX> responses are silently ignored as per the specification.
 
@@ -1420,19 +1453,27 @@ There is no support for IPv6 of any kind.
 
 =item *
 
-L<LWP::UserAgent>
+L<HTTP::Thin> - HTTP::Tiny wrapper with L<HTTP::Request>/L<HTTP::Response> compatibility
 
 =item *
 
-L<IO::Socket::SSL>
+L<HTTP::Tiny::Mech> - Wrap L<WWW::Mechanize> instance in HTTP::Tiny compatible interface
 
 =item *
 
-L<Mozilla::CA>
+L<IO::Socket::SSL> - Required for SSL support
 
 =item *
 
-L<Net::SSLeay>
+L<LWP::UserAgent> - If HTTP::Tiny isn't enough for you, this is the "standard" way to do things
+
+=item *
+
+L<Mozilla::CA> - Required if you want to validate SSL certificates
+
+=item *
+
+L<Net::SSLeay> - Required for SSL support
 
 =back
 
@@ -1483,6 +1524,10 @@ Alessandro Ghedini <al3xbio@gmail.com>
 
 =item *
 
+Brad Gilbert <bgills@cpan.org>
+
+=item *
+
 Chris Nehren <apeiron@cpan.org>
 
 =item *
@@ -1524,6 +1569,10 @@ Mike Doherty <doherty@cpan.org>
 =item *
 
 Serguei Trouchelle <stro@cpan.org>
+
+=item *
+
+Syohei YOSHIDA <syohex@gmail.com>
 
 =item *
 
