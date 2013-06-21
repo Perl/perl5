@@ -764,9 +764,6 @@ also accepted.
 =head2 Lvalue subroutines
 X<lvalue> X<subroutine, lvalue>
 
-B<WARNING>: Lvalue subroutines are still experimental and the
-implementation may change in future versions of Perl.
-
 It is possible to return a modifiable value from a subroutine.
 To do this, you have to declare the subroutine to return an lvalue.
 
@@ -797,33 +794,12 @@ and in:
 
 all the subroutines are called in a list context.
 
-=over 4
-
-=item Lvalue subroutines are EXPERIMENTAL
-
-They appear to be convenient, but there is at least one reason to be
-circumspect.
-
-They violate encapsulation.  A normal mutator can check the supplied
-argument before setting the attribute it is protecting, an lvalue
-subroutine never gets that chance.  Consider;
-
-    my $some_array_ref = [];	# protected by mutators ??
-
-    sub set_arr { 		# normal mutator
-	my $val = shift;
-	die("expected array, you supplied ", ref $val)
-	   unless ref $val eq 'ARRAY';
-	$some_array_ref = $val;
-    }
-    sub set_arr_lv : lvalue {	# lvalue mutator
-	$some_array_ref;
-    }
-
-    # set_arr_lv cannot stop this !
-    set_arr_lv() = { a => 1 };
-
-=back
+Lvalue subroutines are convenient, but you have to keep in mind that,
+when used with objects, they may violate encapsulation. A normal
+mutator can check the supplied argument before setting the attribute
+it is protecting, an lvalue subroutine cannot. If you require any
+special processing when storing and retrieving the values, consider
+using the CPAN module Sentinel or something similar.
 
 =head2 Lexical Subroutines
 X<my sub> X<state sub> X<our sub> X<subroutine, lexical>
