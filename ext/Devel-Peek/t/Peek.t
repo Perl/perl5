@@ -955,8 +955,8 @@ unless ($Config{useithreads}) {
     MG_TYPE = PERL_MAGIC_bm\\(B\\)
     MG_LEN = 256
     MG_PTR = $ADDR "(?:\\\\\d){256}"
-  RARE = \d+
-  PREVIOUS = 1
+  RARE = \d+					# $] < 5.019002
+  PREVIOUS = 1					# $] < 5.019002
   USEFUL = 100
 ');
 
@@ -974,8 +974,8 @@ unless ($Config{useithreads}) {
     MG_TYPE = PERL_MAGIC_bm\\(B\\)
     MG_LEN = 256
     MG_PTR = $ADDR "(?:\\\\\d){256}"
-  RARE = \d+
-  PREVIOUS = 1
+  RARE = \d+					# $] < 5.019002
+  PREVIOUS = 1					# $] < 5.019002
   USEFUL = 100
 ');
 
@@ -1009,8 +1009,8 @@ unless ($Config{useithreads}) {
     MG_TYPE = PERL_MAGIC_bm\\(B\\)
     MG_LEN = 256
     MG_PTR = $ADDR "(?:\\\\\d){256}"
-  RARE = \d+
-  PREVIOUS = \d+
+  RARE = \d+					# $] < 5.019002
+  PREVIOUS = \d+				# $] < 5.019002
   USEFUL = 100
 ';
 

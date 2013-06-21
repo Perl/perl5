@@ -1288,15 +1288,13 @@ MODULE = B	PACKAGE = B::IV
 
 #define PVMG_stash_ix	sv_SVp | offsetof(struct xpvmg, xmg_stash)
 
-#if PERL_VERSION > 14
+#if PERL_VERSION > 18
+#    define PVBM_useful_ix	sv_I32p | offsetof(struct xpvgv, xnv_u.xbm_useful)
+#elif PERL_VERSION > 14
 #    define PVBM_useful_ix	sv_I32p | offsetof(struct xpvgv, xnv_u.xbm_s.xbm_useful)
-#    define PVBM_previous_ix	sv_UVp | offsetof(struct xpvuv, xuv_uv)
 #else
 #define PVBM_useful_ix	sv_I32p | offsetof(struct xpvgv, xiv_u.xivu_i32)
-#define PVBM_previous_ix    sv_U32p | offsetof(struct xpvgv, xnv_u.xbm_s.xbm_previous)
 #endif
-
-#define PVBM_rare_ix	sv_U8p | offsetof(struct xpvgv, xnv_u.xbm_s.xbm_rare)
 
 #define PVLV_targoff_ix	sv_U32p | offsetof(struct xpvlv, xlv_targoff)
 #define PVLV_targlen_ix	sv_U32p | offsetof(struct xpvlv, xlv_targlen)
@@ -1364,8 +1362,6 @@ IVX(sv)
 	B::GV::STASH = PVGV_stash_ix
 	B::GV::GvFLAGS = PVGV_flags_ix
 	B::BM::USEFUL = PVBM_useful_ix
-	B::BM::PREVIOUS = PVBM_previous_ix
-	B::BM::RARE = PVBM_rare_ix
 	B::IO::LINES =  PVIO_lines_ix
 	B::IO::PAGE = PVIO_page_ix
 	B::IO::PAGE_LEN = PVIO_page_len_ix
@@ -1665,6 +1661,16 @@ MOREMAGIC(mg)
 	    }
 	    break;
 	}
+
+MODULE = B	PACKAGE = B::BM		PREFIX = Bm
+
+U32
+BmPREVIOUS(sv)
+	B::BM	sv
+
+U8
+BmRARE(sv)
+	B::BM	sv
 
 MODULE = B	PACKAGE = B::GV		PREFIX = Gv
 

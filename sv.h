@@ -462,10 +462,7 @@ union _xnvu {
 	U32 xlow;
 	U32 xhigh;
     }	    xpad_cop_seq;	/* used by pad.c for cop_sequence */
-    struct {
-	I32 xbm_useful;
-	U8  xbm_rare;		/* rarest character in string */
-    }	    xbm_s;		/* fields from PVBM */
+    I32	    xbm_useful;
 };
 
 union _xivu {
@@ -1360,30 +1357,21 @@ sv_force_normal does nothing.
 #endif
 
 #if defined (DEBUGGING) && defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
-#  define BmRARE(sv)							\
-	(*({ SV *const _bmrare = MUTABLE_SV(sv);			\
-		assert(SvTYPE(_bmrare) == SVt_PVMG);			\
-		assert(SvVALID(_bmrare));				\
-	    &(((XPVMG*) SvANY(_bmrare))->xnv_u.xbm_s.xbm_rare);		\
-	 }))
 #  define BmUSEFUL(sv)							\
 	(*({ SV *const _bmuseful = MUTABLE_SV(sv);			\
 	    assert(SvTYPE(_bmuseful) == SVt_PVMG);			\
 	    assert(SvVALID(_bmuseful));					\
 	    assert(!SvIOK(_bmuseful));					\
-	    &(((XPVMG*) SvANY(_bmuseful))->xnv_u.xbm_s.xbm_useful);	\
-	 }))
-#  define BmPREVIOUS(sv)						\
-    (*({ SV *const _bmprevious = MUTABLE_SV(sv);			\
-		assert(SvTYPE(_bmprevious) == SVt_PVMG);		\
-		assert(SvVALID(_bmprevious));				\
-	    &(((XPVMG*) SvANY(_bmprevious))->xiv_u.xivu_uv);		\
+	    &(((XPVMG*) SvANY(_bmuseful))->xnv_u.xbm_useful);		\
 	 }))
 #else
-#  define BmRARE(sv)		((XPVMG*) SvANY(sv))->xnv_u.xbm_s.xbm_rare
-#  define BmUSEFUL(sv)		((XPVMG*) SvANY(sv))->xnv_u.xbm_s.xbm_useful
-#  define BmPREVIOUS(sv)	((XPVMG*) SvANY(sv))->xiv_u.xivu_uv
+#  define BmUSEFUL(sv)		((XPVMG*) SvANY(sv))->xnv_u.xbm_useful
 
+#endif
+
+#ifndef PERL_CORE
+# define BmRARE(sv)	0
+# define BmPREVIOUS(sv)	0
 #endif
 
 #define FmLINES(sv)	((XPVIV*)  SvANY(sv))->xiv_iv

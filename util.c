@@ -593,13 +593,11 @@ Perl_fbm_compile(pTHX_ SV *sv, U32 flags)
 	    frequency = PL_freq[s[i]];
 	}
     }
-    BmRARE(sv) = s[rarest];
-    BmPREVIOUS(sv) = rarest;
     BmUSEFUL(sv) = 100;			/* Initial value */
     if (flags & FBMcf_TAIL)
 	SvTAIL_on(sv);
     DEBUG_r(PerlIO_printf(Perl_debug_log, "rarest char %c at %"UVuf"\n",
-			  BmRARE(sv), BmPREVIOUS(sv)));
+			  s[rarest], rarest));
 }
 
 /* If SvTAIL(littlestr), it has a fake '\n' at end. */
