@@ -7,7 +7,7 @@ BEGIN {
 }
 
 use strict;
-plan( tests => 114 );
+plan( tests => 116 );
 
 run_tests() unless caller;
 
@@ -216,5 +216,15 @@ is(index('bang', PVBM2), 0, "index isn't confused by format compilation");
     is(index("perl rules", perl), 5, 'first index of a constant works');
     is(index("rules 1 & 2", perl), 0, 'second index of the same constant works');
 }
+
+# PVBM compilation should not flatten ref constants
+use constant riffraff => \our $referent;
+index "foo", riffraff;
+is ref riffraff, 'SCALAR', 'index does not flatten ref constants';
+
+package o { use overload '""' => sub { "foo" } }
+bless \our $referent, o::;
+is index("foo", riffraff), 0,
+    'index respects changes in ref stringification';
 
 } # end of sub run_tests

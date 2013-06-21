@@ -527,7 +527,7 @@ Perl_fbm_compile(pTHX_ SV *sv, U32 flags)
 
     PERL_ARGS_ASSERT_FBM_COMPILE;
 
-    if (isGV_with_GP(sv))
+    if (isGV_with_GP(sv) || SvROK(sv))
 	return;
 
     if (SvVALID(sv))
