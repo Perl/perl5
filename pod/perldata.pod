@@ -176,12 +176,13 @@ Put together, a grammar to match a basic identifier becomes
       (?<basic_identifier>
         # is use utf8 on?
           (?(?{ (caller(0))[8] & $utf8::hint_bits })
-              (?&Perl_XIDS) \p{XID_Continue}*
+              (?&Perl_XIDS) (?&Perl_XIDC)*
             | (?aa) (?!\d) \w+
           )
       )
       (?<sigil> [&*\$\@\%])
       (?<Perl_XIDS> (?[ ( \p{Word} & \p{XID_Start} ) + [_] ]) )
+      (?<Perl_XIDC> (?[ \p{Word} & \p{XID_Continue} ]) )
   )
  /x
 
