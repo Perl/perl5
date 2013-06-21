@@ -1739,7 +1739,7 @@ use File::Glob qw(:case);
 
     'Text::ParseWords' => {
         'MAINTAINER'   => 'chorny',
-        'DISTRIBUTION' => 'CHORNY/Text-ParseWords-3.28.tar.gz',
+        'DISTRIBUTION' => 'CHORNY/Text-ParseWords-3.29.tar.gz',
         'FILES'        => q[cpan/Text-ParseWords],
         'EXCLUDED'     => ['t/pod.t'],
 
