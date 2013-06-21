@@ -217,4 +217,4 @@ is(index('bang', PVBM2), 0, "index isn't confused by format compilation");
     is(index("rules 1 & 2", perl), 0, 'second index of the same constant works');
 }
 
-}
+} # end of sub run_tests
