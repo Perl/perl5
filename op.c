@@ -9146,7 +9146,14 @@ Perl_ck_index(pTHX_ OP *o)
 	    kid = kid->op_sibling;			/* get past "big" */
 	if (kid && kid->op_type == OP_CONST) {
 	    const bool save_taint = TAINT_get;
-	    fbm_compile(((SVOP*)kid)->op_sv, 0);
+	    SV *sv = kSVOP->op_sv;
+	    if ((!SvPOK(sv) || SvNIOKp(sv)) && SvOK(sv) && !SvROK(sv)) {
+		sv = newSV(0);
+		sv_copypv(sv, kSVOP->op_sv);
+		SvREFCNT_dec_NN(kSVOP->op_sv);
+		kSVOP->op_sv = sv;
+	    }
+	    if (SvOK(sv)) fbm_compile(sv, 0);
 	    TAINT_set(save_taint);
 #ifdef NO_TAINT_SUPPORT
             PERL_UNUSED_VAR(save_taint);

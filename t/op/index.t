@@ -7,7 +7,7 @@ BEGIN {
 }
 
 use strict;
-plan( tests => 116 );
+plan( tests => 120 );
 
 run_tests() unless caller;
 
@@ -226,5 +226,26 @@ package o { use overload '""' => sub { "foo" } }
 bless \our $referent, o::;
 is index("foo", riffraff), 0,
     'index respects changes in ref stringification';
+
+use constant quire => ${qr/(?{})/}; # A REGEXP, not a reference to one
+index "foo", quire;
+eval ' "" =~ quire ';
+is $@, "", 'regexp constants containing code blocks are not flattened';
+
+use constant bang => $! = 8;
+index "foo", bang;
+cmp_ok bang, '==', 8, 'dualvar constants are not flattened';
+
+use constant u => undef;
+{
+    my $w;
+    local $SIG{__WARN__} = sub { $w .= shift };
+    eval '
+        use warnings;
+        sub { () = index "foo", u; }
+    ';
+    is $w, undef, 'no warnings from compiling index($foo, undef_constant)';
+}
+is u, undef, 'undef constant is still undef';
 
 } # end of sub run_tests
