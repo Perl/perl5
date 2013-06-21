@@ -1322,6 +1322,7 @@ PP(pp_match)
     PMOP *dynpm = pm;
     const char *s;
     const char *strend;
+    I32 curpos = 0; /* initial pos() or current $+[0] */
     I32 global;
     U8 r_flags = 0;
     const char *truebase;			/* Start of string  */
@@ -1390,13 +1391,13 @@ PP(pp_match)
 	RX_OFFS(rx)[0].start = -1;
 	if (mg && mg->mg_len >= 0) {
 		if (!(RX_EXTFLAGS(rx) & RXf_GPOS_SEEN))
-		    RX_OFFS(rx)[0].end = RX_OFFS(rx)[0].start = mg->mg_len;
+		    curpos = RX_OFFS(rx)[0].start = mg->mg_len;
 		else if (RX_EXTFLAGS(rx) & RXf_ANCH_GPOS) {
 		    r_flags |= REXEC_IGNOREPOS;
-		    RX_OFFS(rx)[0].end = RX_OFFS(rx)[0].start = mg->mg_len;
+		    curpos = RX_OFFS(rx)[0].start = mg->mg_len;
 		}
 		else if (!(RX_EXTFLAGS(rx) & RXf_GPOS_FLOAT))
-		    RX_OFFS(rx)[0].end = RX_OFFS(rx)[0].start = mg->mg_len;
+		    curpos = RX_OFFS(rx)[0].start = mg->mg_len;
 		minmatch = (mg->mg_flags & MGf_MINMATCH) ? RX_GOFS(rx) + 1 : 0;
 		update_minmatch = 0;
 	}
@@ -1421,7 +1422,7 @@ PP(pp_match)
 
   play_it_again:
     if (global && RX_OFFS(rx)[0].start != -1) {
-	s = RX_OFFS(rx)[0].end + truebase - RX_GOFS(rx);
+	s = truebase + curpos - RX_GOFS(rx);
 	if ((s + RX_MINLEN(rx)) > strend || s < truebase) {
 	    DEBUG_r(PerlIO_printf(Perl_debug_log, "Regex match can't succeed, so not even tried\n"));
 	    goto nope;
@@ -1494,9 +1495,10 @@ PP(pp_match)
 	    }
 	}
 	if (global) {
+            curpos = (UV)RX_OFFS(rx)[0].end;
 	    had_zerolen = (RX_OFFS(rx)[0].start != -1
 			   && (RX_OFFS(rx)[0].start + RX_GOFS(rx)
-			       == (UV)RX_OFFS(rx)[0].end));
+			       == (UV)curpos));
 	    PUTBACK;			/* EVAL blocks may use stack */
 	    r_flags |= REXEC_IGNOREPOS | REXEC_NOT_FIRST;
 	    goto play_it_again;
