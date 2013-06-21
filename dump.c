@@ -791,6 +791,7 @@ OP_PRIVATE_ONCE(op_list, OPpLIST_GUESSED, ",GUESSED");
 OP_PRIVATE_ONCE(op_delete, OPpSLICE, ",SLICE");
 OP_PRIVATE_ONCE(op_exists, OPpEXISTS_SUB, ",EXISTS_SUB");
 OP_PRIVATE_ONCE(op_die, OPpHUSH_VMSISH, ",HUSH_VMSISH");
+OP_PRIVATE_ONCE(op_split, OPpSPLIT_IMPLIM, ",IMPLIM");
 
 struct op_private_by_op {
     U16 op_type;
@@ -818,6 +819,7 @@ const struct op_private_by_op op_private_names[] = {
     {OP_CONST, C_ARRAY_LENGTH(op_const_names), op_const_names },
     {OP_SORT, C_ARRAY_LENGTH(op_sort_names), op_sort_names },
     {OP_OPEN, C_ARRAY_LENGTH(op_open_names), op_open_names },
+    {OP_SPLIT, C_ARRAY_LENGTH(op_split_names), op_split_names },
     {OP_BACKTICK, C_ARRAY_LENGTH(op_open_names), op_open_names }
 };
 
