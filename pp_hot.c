@@ -1320,7 +1320,6 @@ PP(pp_match)
     dVAR; dSP; dTARG;
     PMOP *pm = cPMOP;
     PMOP *dynpm = pm;
-    const char *t;
     const char *s;
     const char *strend;
     I32 global;
@@ -1347,12 +1346,12 @@ PP(pp_match)
     PUTBACK;				/* EVAL blocks need stack_sp. */
     /* Skip get-magic if this is a qr// clone, because regcomp has
        already done it. */
-    s = ReANY(rx)->mother_re
+    truebase = ReANY(rx)->mother_re
 	 ? SvPV_nomg_const(TARG, len)
 	 : SvPV_const(TARG, len);
-    if (!s)
+    if (!truebase)
 	DIE(aTHX_ "panic: pp_match");
-    strend = s + len;
+    strend = truebase + len;
     rxtainted = (RX_ISTAINTED(rx) ||
 		 (TAINT_get && (pm->op_pmflags & PMf_RETAINT)));
     TAINT_NOT;
@@ -1384,8 +1383,6 @@ PP(pp_match)
         DEBUG_r(PerlIO_printf(Perl_debug_log, "String shorter than min possible regex match\n"));
 	goto nope;
     }
-
-    truebase = t = s;
 
     /* XXXX What part of this is needed with true \G-support? */
     if (global) {
@@ -1420,9 +1417,11 @@ PP(pp_match)
             r_flags |= REXEC_COPY_SKIP_POST;
     };
 
+    s = truebase;
+
   play_it_again:
     if (global && RX_OFFS(rx)[0].start != -1) {
-	t = s = RX_OFFS(rx)[0].end + truebase - RX_GOFS(rx);
+	s = RX_OFFS(rx)[0].end + truebase - RX_GOFS(rx);
 	if ((s + RX_MINLEN(rx)) > strend || s < truebase) {
 	    DEBUG_r(PerlIO_printf(Perl_debug_log, "Regex match can't succeed, so not even tried\n"));
 	    goto nope;
@@ -1482,7 +1481,7 @@ PP(pp_match)
 	    PUSHs(sv_newmortal());
 	    if ((RX_OFFS(rx)[i].start != -1) && RX_OFFS(rx)[i].end != -1 ) {
 		const I32 len = RX_OFFS(rx)[i].end - RX_OFFS(rx)[i].start;
-		s = RX_OFFS(rx)[i].start + truebase;
+		const char * const s = RX_OFFS(rx)[i].start + truebase;
 	        if (RX_OFFS(rx)[i].end < 0 || RX_OFFS(rx)[i].start < 0 ||
 		    len < 0 || len > strend - s)
 		    DIE(aTHX_ "panic: pp_match start/end pointers, i=%ld, "
