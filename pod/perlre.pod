@@ -1256,14 +1256,11 @@ may be used instead of C<< \k<NAME> >>.
 =item C<(?{ code })>
 X<(?{})> X<regex, code in> X<regexp, code in> X<regular expression, code in>
 
-B<WARNING>: This extended regular expression feature is considered
-experimental, and may be changed without notice. Code executed that
-has side effects may not perform identically from version to version
-due to the effect of future optimisations in the regex engine. The
-implementation of this feature was radically overhauled for the 5.18.0
-release, and its behaviour in earlier versions of perl was much buggier,
-especially in relation to parsing, lexical vars, scoping, recursion and
-reentrancy.
+B<WARNING>: Using this feature safely requires that you understand its
+limitations.  Code executed that has side effects may not perform identically
+from version to version due to the effect of future optimisations in the regex
+engine.  For more information on this, see L</Embedded Code Execution
+Frequency>.
 
 This zero-width assertion executes any embedded Perl code.  It always
 succeeds, and its return value is set as C<$^R>.
@@ -1382,10 +1379,11 @@ keep track of the number of nested parentheses. For example:
 X<(??{})>
 X<regex, postponed> X<regexp, postponed> X<regular expression, postponed>
 
-B<WARNING>: This extended regular expression feature is considered
-experimental, and may be changed without notice. Code executed that
-has side effects may not perform identically from version to version
-due to the effect of future optimisations in the regex engine.
+B<WARNING>: Using this feature safely requires that you understand its
+limitations.  Code executed that has side effects may not perform
+identically from version to version due to the effect of future
+optimisations in the regex engine.  For more information on this, see
+L</Embedded Code Execution Frequency>.
 
 This is a "postponed" regular subexpression.  It behaves in I<exactly> the
 same way as a C<(?{ code })> code block as described above, except that
@@ -2567,6 +2565,41 @@ part of this regular expression needs to be converted explicitly
     chomp $re;
     $re = customre::convert $re;
     /\Y|$re\Y|/;
+
+=head2 Embedded Code Execution Frequency
+
+The exact rules for how often (??{}) and (?{}) are executed in a pattern
+are unspecified.  In the case of a successful match you can assume that
+they DWIM and will be executed in left to right order the appropriate
+number of times in the accepting path of the pattern as would any other
+meta-pattern.  How non-accepting pathways and match failures affect the
+number of times a pattern is executed is specifically unspecified and
+may vary depending on what optimizations can be applied to the pattern
+and is likely to change from version to version.
+
+For instance in
+
+  "aaabcdeeeee"=~/a(?{print "a"})b(?{print "b"})cde/;
+
+the exact number of times "a" or "b" are printed out is unspecified for
+failure, but you may assume they will be printed at least once during
+a successful match, additionally you may assume that if "b" is printed,
+it will be preceded by at least one "a".
+
+In the case of branching constructs like the following:
+
+  /a(b|(?{ print "a" }))c(?{ print "c" })/;
+
+you can assume that the input "ac" will output "ac", and that "abc"
+will output only "c".
+
+When embedded code is quantified, successful matches will call the
+code once for each matched iteration of the quantifier.  For
+example:
+
+  "good" =~ /g(?:o(?{print "o"}))*d/;
+
+will output "o" twice.
 
 =head2 PCRE/Python Support
 

@@ -16,12 +16,6 @@ their inception, versions, etc. There's a lot of speculation here.
 
 =over 8
 
-=item C<(?{code})> and C<(??{ code })>
-
-Introduced in Perl 5.6.0
-
-See also L<perlre>
-
 =item Lvalue subroutines
 
 Introduced in Perl 5.6.0
@@ -268,6 +262,14 @@ expression.
 Introduced in Perl 5.12
 
 Exact version of acceptance unclear, but no later than Perl 5.18.
+
+=item C<(?{code})> and C<(??{ code })>
+
+Introduced in Perl 5.6.0
+
+Accepted in Perl 5.20.0
+
+See also L<perlre>
 
 =item Backtracking control verbs
 
