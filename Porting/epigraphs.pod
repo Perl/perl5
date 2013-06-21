@@ -17,6 +17,36 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.19.1 - William Shakespeare, "A Midsummer Night's Dream"
+
+Announced on 2013-06-21 by David Golden
+
+  Over hill, over dale,
+  Thorough bush, thorough briar,
+  Over park, over pale,
+  Thorough flood, thorough fire,
+  I do wander everywhere,
+  Swifter than the moon's sphere;
+  And I serve the fairy queen,
+  To dew her orbs upon the green.
+  The cowslips tall her pensioners be;
+  In their gold coats, spots you see;
+  Those be rubies, fairy favours,
+  In their freckles live our savours.
+  I must go seek some dew-drops here,
+  And hang a perl in every cowslip's ear.
+  Farewell, thou lob of spirits, I'll be gone;
+  My queen and all her elves come here anon!
+
+=head2 v5.19.0 -- Batman, of the Joker, in "The Dark Knight Returns"
+
+L<Announced on 2013-05-20 by Ricardo Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2013/05/msg201980.html>
+
+   From the beginning, I knew…
+  …that there was nothing wrong with you…
+  …that I can't fix…
+  …with my hands…
+
 =head2 v5.18.0 - Yevgeny Zamyatin
 
 L<Announced on 2013-05-18 by Ricardo Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2013/05/msg201940.html>
