@@ -2185,6 +2185,7 @@ available at L<http://www.cpan.org/src/>
         BeOS
         BSD/OS          (BSDi)
         Cygwin
+        DG/UX
         DOS DJGPP       1)
         DYNIX/ptx
         EPOC R5
