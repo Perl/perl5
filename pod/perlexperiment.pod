@@ -56,12 +56,6 @@ Introduced in Perl 5.10.0
 Using this feature triggers warnings in the category
 C<experimental::lexical_topic>.
 
-=item Backtracking control verbs
-
-C<(*ACCEPT)>
-
-Introduced in: Perl 5.10
-
 =item Pluggable keywords
 
 See L<perlapi/PL_keyword_plugin> for the mechanism.
@@ -274,6 +268,14 @@ expression.
 Introduced in Perl 5.12
 
 Exact version of acceptance unclear, but no later than Perl 5.18.
+
+=item Backtracking control verbs
+
+C<(*ACCEPT)>
+
+Introduced in: Perl 5.10
+
+Accepted in Perl 5.20.0
 
 =back
 

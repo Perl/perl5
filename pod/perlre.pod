@@ -1756,10 +1756,6 @@ See L<perlrecharclass/Extended Bracketed Character Classes>.
 
 =head2 Special Backtracking Control Verbs
 
-B<WARNING:> These patterns are experimental and subject to change or
-removal in a future version of Perl. Their usage in production code should
-be noted to avoid problems during upgrades.
-
 These special patterns are generally of the form C<(*VERB:ARG)>. Unless
 otherwise stated the ARG argument is optional; in some cases, it is
 forbidden.
@@ -1984,9 +1980,6 @@ It is probably useful only when combined with C<(?{})> or C<(??{})>.
 
 =item C<(*ACCEPT)>
 X<(*ACCEPT)>
-
-B<WARNING:> This feature is highly experimental. It is not recommended
-for production code.
 
 This pattern matches nothing and causes the end of successful matching at
 the point at which the C<(*ACCEPT)> pattern was encountered, regardless of
