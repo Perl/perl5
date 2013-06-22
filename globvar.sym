@@ -42,6 +42,7 @@ opargs
 phase_names
 ppaddr
 reg_extflags_name
+reg_intflags_name
 reg_name
 regkind
 revision
