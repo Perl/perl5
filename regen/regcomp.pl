@@ -245,6 +245,10 @@ print $out <<EOP;
 };
 #endif /* DOINIT */
 
+EOP
+
+{
+print $out <<EOP;
 /* PL_reg_extflags_name[] - Opcode/state names in string form, for debugging */
 
 #ifndef DOINIT
@@ -263,7 +267,7 @@ foreach my $file ("op_reg_common.h", "regexp.h") {
 
         # optional leading '_'.  Return symbol in $1, and strip it from
         # rest of line
-        if (s/ \# \s* define \s+ ( _? RXf_ \w+ ) \s+ //xi) {
+        if (s/^ \# \s* define \s+ ( _? RXf_ \w+ ) \s+ //xi) {
             chomp;
             my $define = $1;
             my $orig= $_;
@@ -335,6 +339,47 @@ print $out <<EOP;
 #endif /* DOINIT */
 
 EOP
+}
+{
+print $out <<EOP;
+/* PL_reg_intflags_name[] - Opcode/state names in string form, for debugging */
+
+#ifndef DOINIT
+EXTCONST char * PL_reg_intflags_name[];
+#else
+EXTCONST char * const PL_reg_intflags_name[] = {
+EOP
+
+my %rxfv;
+my %definitions;    # Remember what the symbol definitions are
+my $val = 0;
+my %reverse;
+foreach my $file ("regcomp.h") {
+    open my $fh, "<", $file or die "Can't read $file: $!";
+    while (<$fh>) {
+        # optional leading '_'.  Return symbol in $1, and strip it from
+        # rest of line
+        if (m/^ \# \s* define \s+ ( PREGf_ ( \w+ ) ) \s+ 0x([0-9a-f]+)(?:\s*\/\*(.*)\*\/)?/xi) {
+            chomp;
+            my $define = $1;
+            my $abbr= $2;
+            my $hex= $3;
+            my $comment= $4;
+            my $val= hex($hex);
+            $comment= $comment ? " - $comment" : "";
+
+            printf $out qq(\t%-30s/* 0x%08x - %s%s */\n), qq("$abbr",), $val, $define, $comment;
+        }
+    }
+}
+
+print $out <<EOP;
+};
+#endif /* DOINIT */
+
+EOP
+}
+
 
 print $out process_flags('V', 'varies', <<'EOC');
 /* The following have no fixed length. U8 so we can do strchr() on it. */

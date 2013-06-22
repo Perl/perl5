@@ -686,6 +686,21 @@ EXTCONST char * const PL_reg_extflags_name[] = {
 };
 #endif /* DOINIT */
 
+/* PL_reg_intflags_name[] - Opcode/state names in string form, for debugging */
+
+#ifndef DOINIT
+EXTCONST char * PL_reg_intflags_name[];
+#else
+EXTCONST char * const PL_reg_intflags_name[] = {
+        "SKIP",                       /* 0x00000001 - PREGf_SKIP */
+        "IMPLICIT",                   /* 0x00000002 - PREGf_IMPLICIT -  Converted .* to ^.*  */
+        "NAUGHTY",                    /* 0x00000004 - PREGf_NAUGHTY -  how exponential is this pattern?  */
+        "VERBARG_SEEN",               /* 0x00000008 - PREGf_VERBARG_SEEN */
+        "CUTGROUP_SEEN",              /* 0x00000010 - PREGf_CUTGROUP_SEEN */
+        "USE_RE_EVAL",                /* 0x00000020 - PREGf_USE_RE_EVAL -  compiled with "use re 'eval'"  */
+};
+#endif /* DOINIT */
+
 /* The following have no fixed length. U8 so we can do strchr() on it. */
 #define REGNODE_VARIES(node) (PL_varies_bitmask[(node) >> 3] & (1 << ((node) & 7)))
 

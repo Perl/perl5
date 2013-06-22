@@ -5188,6 +5188,7 @@ STATIC void	S_put_byte(pTHX_ SV* sv, int c)
 	assert(sv)
 
 STATIC void	S_regdump_extflags(pTHX_ const char *lead, const U32 flags);
+STATIC void        S_regdump_intflags(pTHX_ const char *lead, const U32 flags);
 STATIC U8	S_regtail_study(pTHX_ struct RExC_state_t *pRExC_state, regnode *p, const regnode *val, U32 depth)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)

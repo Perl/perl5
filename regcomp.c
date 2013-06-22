@@ -14446,6 +14446,29 @@ S_regtail_study(pTHX_ RExC_state_t *pRExC_state, regnode *p, const regnode *val,
  - regdump - dump a regexp onto Perl_debug_log in vaguely comprehensible form
  */
 #ifdef DEBUGGING
+
+static void
+S_regdump_intflags(pTHX_ const char *lead, const U32 flags)
+{
+    int bit;
+    int set=0;
+    regex_charset cs;
+
+    for (bit=0; bit<32; bit++) {
+        if (flags & (1<<bit)) {
+            if (!set++ && lead)
+                PerlIO_printf(Perl_debug_log, "%s",lead);
+            PerlIO_printf(Perl_debug_log, "%s ",PL_reg_intflags_name[bit]);
+        }
+    }
+    if (lead)  {
+        if (set)
+            PerlIO_printf(Perl_debug_log, "\n");
+        else
+            PerlIO_printf(Perl_debug_log, "%s[none-set]\n",lead);
+    }
+}
+
 static void 
 S_regdump_extflags(pTHX_ const char *lead, const U32 flags)
 {
@@ -14578,7 +14601,10 @@ Perl_regdump(pTHX_ const regexp *r)
     if (r->extflags & RXf_EVAL_SEEN)
 	PerlIO_printf(Perl_debug_log, "with eval ");
     PerlIO_printf(Perl_debug_log, "\n");
-    DEBUG_FLAGS_r(regdump_extflags("r->extflags: ",r->extflags));            
+    DEBUG_FLAGS_r({
+        regdump_extflags("r->extflags: ",r->extflags);
+        regdump_intflags("r->intflags: ",r->intflags);
+    });
 #else
     PERL_ARGS_ASSERT_REGDUMP;
     PERL_UNUSED_CONTEXT;

@@ -2047,6 +2047,7 @@ Es	|void	|make_trie_failtable	|NN struct RExC_state_t *pRExC_state \
                                 |NN regnode *source|NN regnode *stclass \
 				|U32 depth
 #  ifdef DEBUGGING
+Es        |void        |regdump_intflags|NULLOK const char *lead| const U32 flags
 Es	|void	|regdump_extflags|NULLOK const char *lead| const U32 flags
 Es	|const regnode*|dumpuntil|NN const regexp *r|NN const regnode *start \
 				|NN const regnode *node \
