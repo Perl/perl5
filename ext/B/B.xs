@@ -1328,7 +1328,7 @@ MODULE = B	PACKAGE = B::IV
 #define PVCV_file_ix	sv_char_pp | offsetof(struct xpvcv, xcv_file)
 #define PVCV_outside_ix	sv_SVp | offsetof(struct xpvcv, xcv_outside)
 #define PVCV_outside_seq_ix sv_U32p | offsetof(struct xpvcv, xcv_outside_seq)
-#define PVCV_flags_ix	sv_U16p | offsetof(struct xpvcv, xcv_flags)
+#define PVCV_flags_ix	sv_U32p | offsetof(struct xpvcv, xcv_flags)
 
 #define PVHV_max_ix	sv_STRLENp | offsetof(struct xpvhv, xhv_max)
 
