@@ -5521,6 +5521,8 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     I32 sawlookahead = 0;
     I32 sawplus = 0;
     I32 sawopen = 0;
+    I32 sawminmod = 0;
+
     regex_charset initial_charset = get_regex_charset(orig_rx_flags);
     bool recompile = 0;
     bool runtime_code = 0;
@@ -6029,7 +6031,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     }
 
 reStudy:
-    r->minlen = minlen = sawlookahead = sawplus = sawopen = 0;
+    r->minlen = minlen = sawlookahead = sawplus = sawopen = sawminmod = 0;
     Zero(r->substrs, 1, struct reg_substr_data);
 
 #ifdef TRIE_STUDY_OPT
@@ -6098,12 +6100,15 @@ reStudy:
 		 * the only op that could be a regnode is PLUS, all the rest
 		 * will be regnode_1 or regnode_2.
 		 *
+                 * (yves doesn't think this is true)
 		 */
 		if (OP(first) == PLUS)
 		    sawplus = 1;
-		else
+                else {
+                    if (OP(first) == MINMOD)
+                        sawminmod = 1;
 		    first += regarglen[OP(first)];
-
+                }
 		first = NEXTOPER(first);
 		first_next= regnext(first);
 	}
@@ -6174,7 +6179,7 @@ reStudy:
 	    first = NEXTOPER(first);
 	    goto again;
 	}
-	if (sawplus && !sawlookahead && (!sawopen || !RExC_sawback)
+        if (sawplus && !sawminmod && !sawlookahead && (!sawopen || !RExC_sawback)
 	    && !pRExC_state->num_code_blocks) /* May examine pos and $& */
 	    /* x+ must match at the 1st pos of run of x's */
 	    r->intflags |= PREGf_SKIP;

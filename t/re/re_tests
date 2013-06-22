@@ -1754,4 +1754,12 @@ m?^xy\?$?	xy?	y	$&	xy?
 ((A(*PRUNE)B|A(*PRUNE)D|A(*PRUNE)C))	AC	n	-	-
 ((A(*PRUNE)B|A(*PRUNE)C|A(*PRUNE)D))	AC	n	-	-
 
+A+?(*THEN)BC	AAABC	y	$&	ABC
+A+?(*PRUNE)BC	AAABC	y	$&	ABC
+A+(*THEN)BC	AAABC	y	$&	AAABC
+A+(*PRUNE)BC	AAABC	y	$&	AAABC
+A+?(*THEN)BC(?{})	AAABC	y	$&	ABC
+A+?(*PRUNE)BC(?{})	AAABC	y	$&	ABC
+A+(*THEN)BC(?{})	AAABC	y	$&	AAABC
+A+(*PRUNE)BC(?{})	AAABC	y	$&	AAABC
 # vim: softtabstop=0 noexpandtab

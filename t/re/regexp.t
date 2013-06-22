@@ -101,6 +101,9 @@ foreach (@tests) {
     chomp;
     s/\\n/\n/g unless $regex_sets;
     my ($pat, $subject, $result, $repl, $expect, $reason) = split(/\t/,$_,6);
+    if (!defined $subject) {
+        die "Bad test definition on line $test: $_\n";
+    }
     $reason = '' unless defined $reason;
     my $input = join(':',$pat,$subject,$result,$repl,$expect);
     # the double '' below keeps simple syntax highlighters from going crazy
