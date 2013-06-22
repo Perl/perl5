@@ -4861,7 +4861,6 @@ Perl_sv_force_normal_flags(pTHX_ SV *const sv, const U32 flags)
 
 #ifdef PERL_ANY_COW
     if (SvREADONLY(sv)) {
-	if (IN_PERL_RUNTIME)
 	    Perl_croak_no_modify();
     }
     else if (SvIsCOW(sv)) {
@@ -4920,7 +4919,6 @@ Perl_sv_force_normal_flags(pTHX_ SV *const sv, const U32 flags)
     }
 #else
     if (SvREADONLY(sv)) {
-	if (IN_PERL_RUNTIME)
 	    Perl_croak_no_modify();
     }
     else
