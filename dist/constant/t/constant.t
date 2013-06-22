@@ -392,10 +392,10 @@ SKIP: {
 }
 
 # Test that list constants are also immutable.  This only works under
-# 5.19.1 and later (er, except it doesn’t work under that version yet,
+# 5.19.2 and later (er, except it doesn’t work under that version yet,
 # either, hence the to-do status).
 SKIP: {
-    skip "fails under 5.19.0 and earlier", 2 if $] < 5.019001;
+    skip "fails under 5.19.1 and earlier", 2 if $] < 5.019002;
     local $TODO = " ";
     use constant constant_list => 1..2;
     for (constant_list) {
