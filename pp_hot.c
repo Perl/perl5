@@ -1392,7 +1392,6 @@ PP(pp_match)
 		if (!(RX_EXTFLAGS(rx) & RXf_GPOS_SEEN))
 		    curpos = mg->mg_len;
 		else if (RX_EXTFLAGS(rx) & RXf_ANCH_GPOS) {
-		    r_flags |= REXEC_IGNOREPOS;
 		    curpos = mg->mg_len;
 		}
 		else if (!(RX_EXTFLAGS(rx) & RXf_GPOS_FLOAT))
