@@ -1660,7 +1660,8 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	return;
     }
 
-    if (type <= SVt_PVLV && !isGV_with_GP(sv)) {
+    if ((type <= SVt_PVLV && !isGV_with_GP(sv))
+     || (type == SVt_PVIO && IoFLAGS(sv) & IOf_FAKE_DIRP)) {
 	const bool re = isREGEXP(sv);
 	const char * const ptr =
 	    re ? RX_WRAPPED((REGEXP*)sv) : SvPVX_const(sv);
