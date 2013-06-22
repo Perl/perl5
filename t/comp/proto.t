@@ -18,7 +18,7 @@ BEGIN {
 # strict
 use strict;
 
-print "1..180\n";
+print "1..186\n";
 
 my $i = 1;
 
@@ -550,6 +550,15 @@ star2(\*FOO, \*BAR, sub {
 	print "ok $i - star2(\*FOO, \*BAR)\n";
     }); $i++;
 
+# [perl #118585]
+# Test that multiple semicolons are treated as one with *
+sub star3(;;;*){}
+sub star4( ; ; ; ; *){}
+print "not " unless eval 'star3 STDERR; 1';
+print "ok ", $i++, " star3 STDERR\n";
+print "not " unless eval 'star4 STDERR; 1';
+print "ok ", $i++, " star4 STDERR\n";
+
 # test scalarref prototype
 sub sreftest (\$$) {
     print "not " unless ref $_[0];
@@ -688,6 +697,8 @@ print "ok ", $i++, "\n";
 # [perl #75904]
 # Test that the following prototypes make subs parse as unary functions:
 #  * \sigil \[...] ;$ ;* ;\sigil ;\[...]
+# [perl #118585]
+# As a special case, make sure that ;;* is treated the same as ;*
 print "not "
  unless eval 'sub uniproto1 (*) {} uniproto1 $_, 1' or warn $@;
 print "ok ", $i++, "\n";
@@ -715,6 +726,18 @@ print "ok ", $i++, "\n";
 print "not "
  unless eval 'sub uniproto9 (;+) {} uniproto9 $_, 1' or warn $@;
 print "ok ", $i++, "\n";
+print "not "
+ unless eval 'sub uniproto10 (;;;*) {} uniproto10 $_, 1' or warn $@;
+print "ok ", $i++, " - uniproto10 (;;;*)\n";
+print "not "
+ unless eval 'sub uniproto11 ( ; ; ; * ) {} uniproto10 $_, 1' or warn $@;
+print "ok ", $i++, " - uniproto11 ( ; ; ;  *)\n";
+print "not "
+ unless eval 'sub uniproto12 (;;;+) {} uniproto12 $_, 1' or warn $@;
+print "ok ", $i++, " - uniproto12 (;;;*)\n";
+print "not "
+ unless eval 'sub uniproto12 ( ; ; ; + ) {} uniproto12 $_, 1' or warn $@;
+print "ok ", $i++, " - uniproto12 ( ; ; ; * )\n";
 
 # Test that a trailing semicolon makes a sub have listop precedence
 sub unilist ($;)  { $_[0]+1 }

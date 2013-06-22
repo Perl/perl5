@@ -3995,13 +3995,13 @@ S_intuit_method(pTHX_ char *start, GV *gv, CV *cv)
     if (gv && SvTYPE(gv) == SVt_PVGV && GvIO(gv))
 	    return 0;
     if (cv && SvPOK(cv)) {
-		const char *proto = CvPROTO(cv);
-		if (proto) {
-		    if (*proto == ';')
-			proto++;
-		    if (*proto == '*')
-			return 0;
-		}
+	const char *proto = CvPROTO(cv);
+	if (proto) {
+	    while (*proto && (isSPACE(*proto) || *proto == ';'))
+		proto++;
+	    if (*proto == '*')
+		return 0;
+	}
     }
 
     if (*start == '$') {
