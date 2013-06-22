@@ -1015,6 +1015,8 @@ foreach $Locale (@Locale) {
     my $ok12;
     my $ok13;
     my $ok14;
+    my $ok15;
+    my $ok16;
 
     my $c;
     my $d;
@@ -1070,7 +1072,7 @@ foreach $Locale (@Locale) {
             $ok11 = $f == $c;
             $ok12 = abs(($f + $g) - 3.57) < 0.01;
             $ok13 = $w == 0;
-            $ok14 = 1;  # Skip for non-utf8 locales
+            $ok14 = $ok15 = $ok16 = 1;  # Skip for non-utf8 locales
         }
     }
     else {
@@ -1134,6 +1136,21 @@ foreach $Locale (@Locale) {
                     last;
                 }
             }
+
+            # Similarly, we verify that a non-ASCII radix is in UTF-8.  This
+            # also catches if there is a disparity between sprintf and
+            # stringification.
+
+            my $string_g = "$g";
+
+            my $utf8_string_g = "$g";
+            utf8::upgrade($utf8_string_g);
+
+            my $utf8_sprintf_g = sprintf("%g", $g);
+            utf8::upgrade($utf8_sprintf_g);
+            use bytes;
+            $ok15 = $utf8_string_g eq $string_g;
+            $ok16 = $utf8_sprintf_g eq $string_g;
         }
     }
 
@@ -1189,6 +1206,12 @@ foreach $Locale (@Locale) {
 
     tryneoalpha($Locale, ++$locales_test_number, $ok14);
     $test_names{$locales_test_number} = 'Verify that non-ASCII UTF-8 error messages are in UTF-8';
+
+    tryneoalpha($Locale, ++$locales_test_number, $ok15);
+    $test_names{$locales_test_number} = 'Verify that a number with a UTF-8 radix has a UTF-8 stringification';
+
+    tryneoalpha($Locale, ++$locales_test_number, $ok16);
+    $test_names{$locales_test_number} = 'Verify that a sprintf of a number with a UTF-8 radix yields UTF-8';
 
     debug "# $first_f_test..$locales_test_number: \$f = $f, \$g = $g, back to locale = $Locale\n";
 

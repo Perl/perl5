@@ -2930,6 +2930,15 @@ Perl_sv_2pv_flags(pTHX_ SV *const sv, STRLEN *const lp, const I32 flags)
              * TRUE in that case), no need to do any changing */
             if (PL_numeric_standard || IN_SOME_LOCALE_FORM_RUNTIME) {
                 Gconvert(SvNVX(sv), NV_DIG, 0, s);
+
+                /* If the radix character is UTF-8, and actually is in the
+                 * output, turn on the UTF-8 flag for the scalar */
+                if (! PL_numeric_standard
+                    && PL_numeric_radix_sv && SvUTF8(PL_numeric_radix_sv)
+                    && instr(s, SvPVX_const(PL_numeric_radix_sv)))
+                {
+                    SvUTF8_on(sv);
+                }
             }
             else {
                 char *loc = savepv(setlocale(LC_NUMERIC, NULL));
@@ -2937,6 +2946,7 @@ Perl_sv_2pv_flags(pTHX_ SV *const sv, STRLEN *const lp, const I32 flags)
                 Gconvert(SvNVX(sv), NV_DIG, 0, s);
                 setlocale(LC_NUMERIC, loc);
                 Safefree(loc);
+
             }
 
             /* We don't call SvPOK_on(), because it may come to pass that the
@@ -11275,6 +11285,12 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	    }
 	float_converted:
 	    eptr = PL_efloatbuf;
+            if (PL_numeric_radix_sv && SvUTF8(PL_numeric_radix_sv)
+                && instr(eptr, SvPVX_const(PL_numeric_radix_sv)))
+            {
+                is_utf8 = TRUE;
+            }
+
 	    break;
 
 	    /* SPECIAL */
