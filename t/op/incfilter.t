@@ -13,7 +13,7 @@ use strict;
 use Config;
 use Filter::Util::Call;
 
-plan(tests => 145);
+plan(tests => 148);
 
 unshift @INC, sub {
     no warnings 'uninitialized';
@@ -194,6 +194,22 @@ do [$fh, sub {$_ .= $_ . $_; return;}] or die;
 
 do \"pass\n(\n'Scalar references are treated as initial file contents'\n)\n"
 or die;
+
+use constant scalarreffee =>
+  "pass\n(\n'Scalar references are treated as initial file contents'\n)\n";
+do \scalarreffee or die;
+is scalarreffee,
+  "pass\n(\n'Scalar references are treated as initial file contents'\n)\n",
+  'and are not gobbled up when read-only';
+
+{
+    local $SIG{__WARN__} = sub {}; # ignore deprecation warning from ?...?
+    do qr/a?, 1/;
+    pass "No crash (perhaps) when regexp ref is returned from inc filter";
+    # Even if that outputs "ok", it may not have passed, as the crash
+    # occurs during globular destruction.  But the crash will result in
+    # this script failing.
+}
 
 open $fh, "<", \"ss('The file is concatenated');";
 
