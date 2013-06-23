@@ -1038,7 +1038,7 @@ Perl_gv_fetchmethod_pvn_flags(pTHX_ HV *stash, const char *name, const STRLEN le
 		    packnamesv = newSVpvn_flags(origname, nsplit - origname,
                                                     SVs_TEMP | is_utf8);
 		} else {
-		    packnamesv = sv_2mortal(newSVsv(error_report));
+		    packnamesv = error_report;
 		}
 
 		Perl_croak(aTHX_
