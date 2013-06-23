@@ -156,5 +156,5 @@ for(1+2) {
     print "not " unless $_ eq 4;
     print "ok ", ++$test,
           " - 1+2 returns mutable value, just like \$a+\$b",
-          " # TODO\n";
+          "\n";
 }

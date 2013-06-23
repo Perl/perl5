@@ -443,7 +443,8 @@ do_test('string with Unicode',
 	chr(256).chr(0).chr(512),
 'SV = PV\\($ADDR\\) at $ADDR
   REFCNT = 1
-  FLAGS = \\((?:$PADTMP,)?POK,READONLY,pPOK,UTF8\\)
+  FLAGS = \\((?:$PADTMP,)?POK,READONLY,pPOK,UTF8\\)	# $] < 5.019002
+  FLAGS = \\((?:$PADTMP,)?POK,pPOK,UTF8\\)		# $] >=5.019002
   PV = $ADDR "\\\214\\\101\\\0\\\235\\\101"\\\0 \[UTF8 "\\\x\{100\}\\\x\{0\}\\\x\{200\}"\]
   CUR = 5
   LEN = \\d+');
@@ -452,7 +453,8 @@ do_test('string with Unicode',
 	chr(256).chr(0).chr(512),
 'SV = PV\\($ADDR\\) at $ADDR
   REFCNT = 1
-  FLAGS = \\((?:$PADTMP,)?POK,READONLY,pPOK,UTF8\\)
+  FLAGS = \\((?:$PADTMP,)?POK,READONLY,pPOK,UTF8\\)	# $] < 5.019002
+  FLAGS = \\((?:$PADTMP,)?POK,pPOK,UTF8\\)		# $] >=5.019002
   PV = $ADDR "\\\304\\\200\\\0\\\310\\\200"\\\0 \[UTF8 "\\\x\{100\}\\\x\{0\}\\\x\{200\}"\]
   CUR = 5
   LEN = \\d+');

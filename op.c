@@ -3333,6 +3333,7 @@ S_fold_constants(pTHX_ OP *o)
     op_free(o);
 #endif
     assert(sv);
+    if (!SvIMMORTAL(sv)) SvPADTMP_on(sv);
     if (type == OP_RV2GV)
 	newop = newGVOP(OP_GV, 0, MUTABLE_GV(sv));
     else
