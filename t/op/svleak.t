@@ -159,36 +159,43 @@ leak_expr(5, 0, q{"YYYYYa" =~ /.+?(a(.+?)|b)/ }, "trie leak");
     my $s;
     my @a;
     my @count = (0) x 4; # pre-allocate
+    # Using 0..3 with constant endpoints will cause an erroneous test fail-
+    # ure, as the SV in the op tree needs to be copied (to protect it),
+    # but copying happens *during iteration*, causing the number of SVs to
+    # go up.  Using a variable (0..$_3) will cause evaluation of the range
+    # operator at run time, not compile time, so the values will already be
+    # on the stack before grep starts.
+    my $_3 = 3;
 
-    grep qr/1/ && ($count[$_] = sv_count()) && 99,  0..3;
+    grep qr/1/ && ($count[$_] = sv_count()) && 99,  0..$_3;
     is(@count[3] - @count[0], 0, "void   grep expr:  no new tmps per iter");
-    grep { qr/1/ && ($count[$_] = sv_count()) && 99 }  0..3;
+    grep { qr/1/ && ($count[$_] = sv_count()) && 99 }  0..$_3;
     is(@count[3] - @count[0], 0, "void   grep block: no new tmps per iter");
 
-    $s = grep qr/1/ && ($count[$_] = sv_count()) && 99,  0..3;
+    $s = grep qr/1/ && ($count[$_] = sv_count()) && 99,  0..$_3;
     is(@count[3] - @count[0], 0, "scalar grep expr:  no new tmps per iter");
-    $s = grep { qr/1/ && ($count[$_] = sv_count()) && 99 }  0..3;
+    $s = grep { qr/1/ && ($count[$_] = sv_count()) && 99 }  0..$_3;
     is(@count[3] - @count[0], 0, "scalar grep block: no new tmps per iter");
 
-    @a = grep qr/1/ && ($count[$_] = sv_count()) && 99,  0..3;
+    @a = grep qr/1/ && ($count[$_] = sv_count()) && 99,  0..$_3;
     is(@count[3] - @count[0], 0, "list   grep expr:  no new tmps per iter");
-    @a = grep { qr/1/ && ($count[$_] = sv_count()) && 99 }  0..3;
+    @a = grep { qr/1/ && ($count[$_] = sv_count()) && 99 }  0..$_3;
     is(@count[3] - @count[0], 0, "list   grep block: no new tmps per iter");
 
 
-    map qr/1/ && ($count[$_] = sv_count()) && 99,  0..3;
+    map qr/1/ && ($count[$_] = sv_count()) && 99,  0..$_3;
     is(@count[3] - @count[0], 0, "void   map expr:  no new tmps per iter");
-    map { qr/1/ && ($count[$_] = sv_count()) && 99 }  0..3;
+    map { qr/1/ && ($count[$_] = sv_count()) && 99 }  0..$_3;
     is(@count[3] - @count[0], 0, "void   map block: no new tmps per iter");
 
-    $s = map qr/1/ && ($count[$_] = sv_count()) && 99,  0..3;
+    $s = map qr/1/ && ($count[$_] = sv_count()) && 99,  0..$_3;
     is(@count[3] - @count[0], 0, "scalar map expr:  no new tmps per iter");
-    $s = map { qr/1/ && ($count[$_] = sv_count()) && 99 }  0..3;
+    $s = map { qr/1/ && ($count[$_] = sv_count()) && 99 }  0..$_3;
     is(@count[3] - @count[0], 0, "scalar map block: no new tmps per iter");
 
-    @a = map qr/1/ && ($count[$_] = sv_count()) && 99,  0..3;
+    @a = map qr/1/ && ($count[$_] = sv_count()) && 99,  0..$_3;
     is(@count[3] - @count[0], 3, "list   map expr:  one new tmp per iter");
-    @a = map { qr/1/ && ($count[$_] = sv_count()) && 99 }  0..3;
+    @a = map { qr/1/ && ($count[$_] = sv_count()) && 99 }  0..$_3;
     is(@count[3] - @count[0], 3, "list   map block: one new tmp per iter");
 
 }

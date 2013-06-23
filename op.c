@@ -3353,6 +3353,8 @@ S_gen_constant_list(pTHX_ OP *o)
     dVAR;
     OP *curop;
     const I32 oldtmps_floor = PL_tmps_floor;
+    SV **svp;
+    AV *av;
 
     list(o);
     if (PL_parser && PL_parser->error_count)
@@ -3375,7 +3377,11 @@ S_gen_constant_list(pTHX_ OP *o)
     o->op_flags |= OPf_PARENS;	/* and flatten \(1..2,3) */
     o->op_opt = 0;		/* needs to be revisited in rpeep() */
     curop = ((UNOP*)o)->op_first;
-    ((UNOP*)o)->op_first = newSVOP(OP_CONST, 0, SvREFCNT_inc_NN(*PL_stack_sp--));
+    av = (AV *)SvREFCNT_inc_NN(*PL_stack_sp--);
+    ((UNOP*)o)->op_first = newSVOP(OP_CONST, 0, (SV *)av);
+    if (AvFILLp(av) != -1)
+	for (svp = AvARRAY(av) + AvFILLp(av); svp >= AvARRAY(av); --svp)
+	    SvPADTMP_on(*svp);
 #ifdef PERL_MAD
     op_getmad(curop,o,'O');
 #else
