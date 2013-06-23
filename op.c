@@ -548,9 +548,10 @@ S_bad_type_pv(pTHX_ I32 n, const char *t, const char *name, U32 flags, const OP 
 }
 
 STATIC void
-S_bad_type_sv(pTHX_ I32 n, const char *t, SV *namesv, U32 flags, const OP *kid)
+S_bad_type_gv(pTHX_ I32 n, const char *t, GV *gv, U32 flags, const OP *kid)
 {
-    PERL_ARGS_ASSERT_BAD_TYPE_SV;
+    SV * const namesv = gv_ename(gv);
+    PERL_ARGS_ASSERT_BAD_TYPE_GV;
  
     yyerror_pv(Perl_form(aTHX_ "Type of arg %d to %"SVf" must be %s (not %s)",
 		 (int)n, SVfARG(namesv), t, OP_DESC(kid)), SvUTF8(namesv) | flags);
@@ -10121,9 +10122,9 @@ Perl_ck_entersub_args_proto(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 		proto++;
 		arg++;
 		if (o3->op_type != OP_REFGEN && o3->op_type != OP_UNDEF)
-		    bad_type_sv(arg,
+		    bad_type_gv(arg,
 			    arg == 1 ? "block or sub {}" : "sub {}",
-			    gv_ename(namegv), 0, o3);
+			    namegv, 0, o3);
 		break;
 	    case '*':
 		/* '*' allows any scalar type, including bareword */
@@ -10208,9 +10209,9 @@ Perl_ck_entersub_args_proto(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 				     OP_READ, /* not entersub */
 				     OP_LVALUE_NO_CROAK
 				    )) goto wrapref;
-			    bad_type_sv(arg, Perl_form(aTHX_ "one of %.*s",
+			    bad_type_gv(arg, Perl_form(aTHX_ "one of %.*s",
 					(int)(end - p), p),
-				    gv_ename(namegv), 0, o3);
+				    namegv, 0, o3);
 			} else
 			    goto oops;
 			break;
@@ -10218,13 +10219,13 @@ Perl_ck_entersub_args_proto(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 			if (o3->op_type == OP_RV2GV)
 			    goto wrapref;
 			if (!contextclass)
-			    bad_type_sv(arg, "symbol", gv_ename(namegv), 0, o3);
+			    bad_type_gv(arg, "symbol", namegv, 0, o3);
 			break;
 		    case '&':
 			if (o3->op_type == OP_ENTERSUB)
 			    goto wrapref;
 			if (!contextclass)
-			    bad_type_sv(arg, "subroutine entry", gv_ename(namegv), 0,
+			    bad_type_gv(arg, "subroutine entry", namegv, 0,
 				    o3);
 			break;
 		    case '$':
@@ -10240,7 +10241,7 @@ Perl_ck_entersub_args_proto(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 				    OP_READ,  /* not entersub */
 				    OP_LVALUE_NO_CROAK
 			       )) goto wrapref;
-			    bad_type_sv(arg, "scalar", gv_ename(namegv), 0, o3);
+			    bad_type_gv(arg, "scalar", namegv, 0, o3);
 			}
 			break;
 		    case '@':
@@ -10248,14 +10249,14 @@ Perl_ck_entersub_args_proto(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 				o3->op_type == OP_PADAV)
 			    goto wrapref;
 			if (!contextclass)
-			    bad_type_sv(arg, "array", gv_ename(namegv), 0, o3);
+			    bad_type_gv(arg, "array", namegv, 0, o3);
 			break;
 		    case '%':
 			if (o3->op_type == OP_RV2HV ||
 				o3->op_type == OP_PADHV)
 			    goto wrapref;
 			if (!contextclass)
-			    bad_type_sv(arg, "hash", gv_ename(namegv), 0, o3);
+			    bad_type_gv(arg, "hash", namegv, 0, o3);
 			break;
 		    wrapref:
 			{
