@@ -2022,8 +2022,12 @@ PP(pp_iter)
                 *itersvp = NULL;
                 Perl_croak(aTHX_ "Use of freed value in iteration");
             }
-            SvTEMP_off(sv);
-            SvREFCNT_inc_simple_void_NN(sv);
+            if (SvPADTMP(sv) && !IS_PADGV(sv))
+                sv = newSVsv(sv);
+            else {
+                SvTEMP_off(sv);
+                SvREFCNT_inc_simple_void_NN(sv);
+            }
         }
         else
             sv = &PL_sv_undef;

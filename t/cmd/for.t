@@ -99,5 +99,5 @@ print $@ =~ /Use of freed value in iteration/ ? "ok" : "not ok", " 13\n";
 for ("${\''}") {
     print "not " unless \$_ == \$_;
     print 'ok 15 - [perl \#78194] \$_ == \$_ inside for("$x"){...}',
-          " # TODO \n";
+          "\n";
 }

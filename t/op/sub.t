@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan( tests => 20 );
+plan( tests => 21 );
 
 sub empty_sub {}
 
@@ -105,9 +105,22 @@ sub a {
 }
 a(__PACKAGE__);
 require Config;
-$::TODO = "not fixed yet" if $Config::Config{useithreads};
 is "@scratch", "main road road main",
    'recursive calls do not share shared-hash-key TARGs';
+
+# Another test for the same bug, that does not rely on foreach.  It depends
+# on ref returning a shared hash key TARG.
+undef @scratch;
+sub b {
+    my ($pack, $depth) = @_;
+    my $o = bless[], $pack;
+    $pack++;
+    push @scratch, (ref $o, $depth||b($pack,$depth+1))[0];
+}
+b('n',0);
+$::TODO = "not fixed yet" if $Config::Config{useithreads};
+is "@scratch", "o n", 
+   'recursive calls do not share shared-hash-key TARGs (2)';
 undef $::TODO;
 
 # [perl #78194] @_ aliasing op return values
