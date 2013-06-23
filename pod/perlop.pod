@@ -1705,8 +1705,8 @@ you can use any pair of non-whitespace (ASCII) characters
 as delimiters.  This is particularly useful for matching path names
 that contain "/", to avoid LTS (leaning toothpick syndrome).  If "?" is
 the delimiter, then a match-only-once rule applies,
-described in C<m?PATTERN?> below.
-If "'" is the delimiter, no interpolation is performed on the PATTERN.
+described in C<m?PATTERN?> below. If "'" (single quote) is the delimiter,
+no interpolation is performed on the PATTERN.
 When using a character valid in an identifier, whitespace is required
 after the C<m>.
 

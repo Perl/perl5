@@ -61,11 +61,7 @@ Nevertheless, if you wish to use long variable names, you need only say:
 
 at the top of your program.  This aliases all the short names to the long
 names in the current package.  Some even have medium names, generally
-borrowed from B<awk>.  To avoid a performance hit, if you don't need the
-C<$PREMATCH>, C<$MATCH>, or C<$POSTMATCH> it's best to use the C<English>
-module without them:
-
-    use English '-no_match_vars';
+borrowed from B<awk>. For more info, please see L<English>.
 
 Before you continue, note the sort order for variables.  In general, we
 first list the variables in case-insensitive, almost-lexigraphical
@@ -782,15 +778,6 @@ we have not made another match:
     $1 is Wallace; $2 is Grommit
     $1 is Mutt; $2 is Jeff
     $1 is Wallace; $2 is Grommit
-
-If you are using Perl v5.18 or earlier, note that C<use
-English> imposes a considerable performance penalty on all regular
-expression matches in a program because it uses the C<$`>, C<$&>, and
-C<$'>, regardless of whether they occur in the scope of C<use
-English>.  For that reason, saying C<use English> in libraries is
-strongly discouraged unless you import it without the match variables:
-
-    use English '-no_match_vars'
 
 The C<Devel::NYTProf> and C<Devel::FindAmpersand>
 modules can help you find uses of these

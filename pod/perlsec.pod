@@ -307,7 +307,7 @@ not called with a string that the shell could expand.  This is by far the
 best way to call something that might be subjected to shell escapes: just
 never call the shell at all.  
 
-        use English '-no_match_vars';
+        use English;
         die "Can't fork: $!" unless defined($pid = open(KID, "-|"));
         if ($pid) {           # parent
             while (<KID>) {

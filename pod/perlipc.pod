@@ -546,7 +546,7 @@ write to the filehandle you opened and your kid will find it in I<his>
 STDIN.  If you open a pipe I<from> minus, you can read from the filehandle
 you opened whatever your kid writes to I<his> STDOUT.
 
-    use English qw[ -no_match_vars ];
+    use English;
     my $PRECIOUS = "/path/to/some/safe/file";
     my $sleep_count;
     my $pid;
