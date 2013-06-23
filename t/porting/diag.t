@@ -517,8 +517,6 @@ Malformed UTF-8 character (fatal)
 Missing (suid) fd script name
 More than one argument to open
 More than one argument to open(,':%s')
-mprotect for %p %u failed with %d
-mprotect RW for %p %u failed with %d
 \N{} in character class restricted to one character in regex; marked by <-- HERE in m/%s/
 No %s allowed while running setgid
 No %s allowed with (suid) fdscript
