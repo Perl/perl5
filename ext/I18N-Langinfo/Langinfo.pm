@@ -72,7 +72,7 @@ our @EXPORT_OK = qw(
 	YESSTR
 );
 
-our $VERSION = '0.10';
+our $VERSION = '0.11';
 
 XSLoader::load();
 
