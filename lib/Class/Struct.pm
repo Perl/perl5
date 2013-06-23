@@ -14,7 +14,7 @@ require Exporter;
 @ISA = qw(Exporter);
 @EXPORT = qw(struct);
 
-$VERSION = '0.64';
+$VERSION = '0.65';
 
 my $print = 0;
 sub printem {
