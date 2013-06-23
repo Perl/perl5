@@ -2345,14 +2345,11 @@ documentation in L<mro> for more information.
 Unicode code points, and encoded in EBCDIC as UTF-EBCDIC.  The UTF-EBCDIC
 encoding is limited to code points no larger than 2147483647 (0x7FFFFFFF).
 
-=item Infinite recursion in regex; marked by <-- HERE in m/%s/
+=item Infinite recursion in regex
 
 (F) You used a pattern that references itself without consuming any input
 text.  You should check the pattern to ensure that recursive patterns
 either consume text or fail.
-
-The <-- HERE shows whereabouts in the regular expression the problem was
-discovered.
 
 =item Initialization of state variables in list context currently forbidden
 
