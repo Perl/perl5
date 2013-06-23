@@ -501,6 +501,9 @@ get_regex_charset_name(const U32 flags, STRLEN* const lenp)
 #define RX_LASTPAREN(prog)	(ReANY(prog)->lastparen)
 #define RX_LASTCLOSEPAREN(prog)	(ReANY(prog)->lastcloseparen)
 #define RX_SAVED_COPY(prog)	(ReANY(prog)->saved_copy)
+/* last match was zero-length */
+#define RX_ZERO_LEN(prog) \
+        (RX_OFFS(prog)[0].start + RX_GOFS(prog) == (UV)RX_OFFS(prog)[0].end)
 
 #endif /* PLUGGABLE_RE_EXTENSION */
 

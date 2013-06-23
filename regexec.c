@@ -2211,7 +2211,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
     struct regexp *const prog = ReANY(rx);
     char *s;
     regnode *c;
-    char *startpos = stringarg;
+    char *startpos;
     I32 minlen;		/* must match at least this many chars */
     I32 dontbother = 0;	/* how many characters not to try at end */
     I32 end_shift = 0;			/* Same for the end. */		/* CC */
@@ -2230,15 +2230,50 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
     PERL_UNUSED_ARG(data);
 
     /* Be paranoid... */
-    if (prog == NULL || startpos == NULL) {
+    if (prog == NULL || stringarg == NULL) {
 	Perl_croak(aTHX_ "NULL regexp parameter");
 	return 0;
     }
 
     DEBUG_EXECUTE_r(
-        debug_start_match(rx, utf8_target, startpos, strend,
+        debug_start_match(rx, utf8_target, stringarg, strend,
         "Matching");
     );
+
+    if (prog->extflags & RXf_GPOS_SEEN) {
+        /* in the presence of \G, we may need to start looking earlier in
+         * the string than the suggested start point of stringarg:
+         * if gofs->prog is set, then that's a known, fixed minimum
+         * offset, such as
+         * /..\G/:   gofs = 2
+         * /ab|c\G/: gofs = 1
+         * or if the minimum offset isn't known, then we have to go back
+         * to the start of the string, e.g. /w+\G/
+         */
+        if (prog->gofs) {
+            if (stringarg - prog->gofs < strbeg) {
+                minend += (stringarg - strbeg);
+                stringarg = strbeg;
+            }
+            else {
+                stringarg -= prog->gofs;
+                minend    += prog->gofs;
+            }
+        }
+        else if (prog->extflags & RXf_GPOS_FLOAT) {
+            minend += (stringarg - strbeg);
+            stringarg = strbeg;
+        }
+    }
+
+    minlen = prog->minlen;
+    if ((stringarg + minlen) > strend || stringarg < strbeg) {
+        DEBUG_r(PerlIO_printf(Perl_debug_log,
+                    "Regex match can't succeed, so not even tried\n"));
+        return 0;
+    }
+
+    startpos = stringarg;
 
     if ((RX_EXTFLAGS(rx) & RXf_USE_INTUIT)
         && !(flags & REXEC_CHECKED))
@@ -2279,7 +2314,6 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
     oldsave = PL_savestack_ix;
 
     multiline = prog->extflags & RXf_PMf_MULTILINE;
-    minlen = prog->minlen;
     
     if (strend - startpos < (minlen+(prog->check_offset_min<0?prog->check_offset_min:0))) {
         DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
