@@ -8,7 +8,7 @@ BEGIN {
     *bar::like = *like;
 }
 no warnings 'deprecated';
-plan 135;
+plan 136;
 
 # -------------------- Errors with feature disabled -------------------- #
 
@@ -703,3 +703,11 @@ like runperl(
      ),
      qr/Deep recursion on subroutine "foo"/,
     'deep recursion warnings for lexical subs do not crash';
+
+like runperl(
+      switches => [ '-Mfeature=:all', '-Mwarnings=FATAL,all', '-M-warnings=experimental::lexical_subs' ],
+      prog     => 'my sub foo() { 42 } undef &foo',
+      stderr   => 1
+     ),
+     qr/Constant subroutine foo undefined at /,
+    'constant undefinition warnings for lexical subs do not crash';
