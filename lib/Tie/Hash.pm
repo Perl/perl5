@@ -1,6 +1,6 @@
 package Tie::Hash;
 
-our $VERSION = '1.04';
+our $VERSION = '1.05';
 
 =head1 NAME
 
