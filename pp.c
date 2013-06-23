@@ -969,7 +969,12 @@ PP(pp_undef)
                           "Constant subroutine %"SVf" undefined",
 			   SVfARG(CvANON((const CV *)sv)
                              ? newSVpvs_flags("(anonymous)", SVs_TEMP)
-                             : sv_2mortal(newSVhek(GvENAME_HEK(CvGV((const CV *)sv))))));
+                             : sv_2mortal(newSVhek(
+                                CvNAMED(sv)
+                                 ? CvNAME_HEK((CV *)sv)
+                                 : GvENAME_HEK(CvGV((const CV *)sv))
+                               ))
+                           ));
 	/* FALLTHROUGH */
     case SVt_PVFM:
 	{
