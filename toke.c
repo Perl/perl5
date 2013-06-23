@@ -7182,9 +7182,13 @@ Perl_yylex(pTHX)
 		if (*s == '=' && s[1] == '>' && !pkgname) {
 		    op_free(rv2cv_op);
 		    CLINE;
+		    /* This is our own scalar, created a few lines above,
+		       so this is safe. */
+		    SvREADONLY_off(cSVOPx(pl_yylval.opval)->op_sv);
 		    sv_setpv(((SVOP*)pl_yylval.opval)->op_sv, PL_tokenbuf);
 		    if (UTF && !IN_BYTES && is_utf8_string((U8*)PL_tokenbuf, len))
 		      SvUTF8_on(((SVOP*)pl_yylval.opval)->op_sv);
+		    SvREADONLY_on(cSVOPx(pl_yylval.opval)->op_sv);
 		    TERM(WORD);
 		}
 

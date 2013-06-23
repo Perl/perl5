@@ -663,6 +663,7 @@ for ("mapwhile", "mapstart", "grepwhile", "grepstart");
 $priv{$_}{128} = '+1' for qw "caller wantarray runcv";
 @{$priv{coreargs}}{1,2,64,128} = ('DREF1','DREF2','$MOD','MARK');
 $priv{$_}{128} = 'UTF' for qw "last redo next goto dump";
+$priv{split}{128} = 'IMPLIM';
 
 our %hints; # used to display each COP's op_hints values
 

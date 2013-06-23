@@ -6,7 +6,7 @@ BEGIN {
 }
 
 require "test.pl";
-plan( tests => 32 );
+plan( tests => 33 );
 
 my $Is_EBCDIC = (ord('A') == 193) ? 1 : 0;
 
@@ -107,3 +107,7 @@ $destroyed = 0;
     $x = bless({}, 'Class');
 }
 is($destroyed, 1, 'Timely scalar destruction with lvalue vec');
+
+eval { for (\1) { vec($_,0,1) = 1 } };
+like($@, qr/^Modification of a read-only value attempted at /,
+        'err msg when modifying read-only refs');

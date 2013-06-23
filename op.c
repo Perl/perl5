@@ -5646,9 +5646,22 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
                    if (PL_modcount < RETURN_UNLIMITED_NUMBER &&
 		      ((LISTOP*)right)->op_last->op_type == OP_CONST)
 		    {
-			SV *sv = ((SVOP*)((LISTOP*)right)->op_last)->op_sv;
+			SV ** const svp =
+			    &((SVOP*)((LISTOP*)right)->op_last)->op_sv;
+			SV * const sv = *svp;
 			if (SvIOK(sv) && SvIVX(sv) == 0)
+			{
+			  if (right->op_private & OPpSPLIT_IMPLIM) {
+			    /* our own SV, created in ck_split */
+			    SvREADONLY_off(sv);
 			    sv_setiv(sv, PL_modcount+1);
+			  }
+			  else {
+			    /* SV may belong to someone else */
+			    SvREFCNT_dec(sv);
+			    *svp = newSViv(PL_modcount+1);
+			  }
+			}
 		    }
 		}
 	    }
@@ -9133,7 +9146,14 @@ Perl_ck_index(pTHX_ OP *o)
 	    kid = kid->op_sibling;			/* get past "big" */
 	if (kid && kid->op_type == OP_CONST) {
 	    const bool save_taint = TAINT_get;
-	    fbm_compile(((SVOP*)kid)->op_sv, 0);
+	    SV *sv = kSVOP->op_sv;
+	    if ((!SvPOK(sv) || SvNIOKp(sv)) && SvOK(sv) && !SvROK(sv)) {
+		sv = newSV(0);
+		sv_copypv(sv, kSVOP->op_sv);
+		SvREFCNT_dec_NN(kSVOP->op_sv);
+		kSVOP->op_sv = sv;
+	    }
+	    if (SvOK(sv)) fbm_compile(sv, 0);
 	    TAINT_set(save_taint);
 #ifdef NO_TAINT_SUPPORT
             PERL_UNUSED_VAR(save_taint);
@@ -9834,7 +9854,10 @@ Perl_ck_split(pTHX_ OP *o)
     scalar(kid);
 
     if (!kid->op_sibling)
+    {
 	op_append_elem(OP_SPLIT, o, newSVOP(OP_CONST, 0, newSViv(0)));
+	o->op_private |= OPpSPLIT_IMPLIM;
+    }
     assert(kid->op_sibling);
 
     kid = kid->op_sibling;

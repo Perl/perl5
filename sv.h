@@ -1361,7 +1361,7 @@ sv_force_normal does nothing.
 	(*({ SV *const _bmuseful = MUTABLE_SV(sv);			\
 	    assert(SvTYPE(_bmuseful) == SVt_PVMG);			\
 	    assert(SvVALID(_bmuseful));					\
-	    assert(!SvIOK(_bmuseful));					\
+	    assert(!SvNOK(_bmuseful));					\
 	    &(((XPVMG*) SvANY(_bmuseful))->xnv_u.xbm_useful);		\
 	 }))
 #else

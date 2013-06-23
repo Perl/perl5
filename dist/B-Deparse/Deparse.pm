@@ -20,7 +20,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
          CVf_METHOD CVf_LVALUE
 	 PMf_KEEP PMf_GLOBAL PMf_CONTINUE PMf_EVAL PMf_ONCE
 	 PMf_MULTILINE PMf_SINGLELINE PMf_FOLD PMf_EXTENDED);
-$VERSION = '1.21';
+$VERSION = '1.22';
 use strict;
 use vars qw/$AUTOLOAD/;
 use warnings ();
@@ -2957,14 +2957,14 @@ sub pp_list {
 	# OPs that store things other than flags in their op_private,
 	# like OP_AELEMFAST, won't be immediate children of a list.
 	#
-	# OP_ENTERSUB can break this logic, so check for it.
+	# OP_ENTERSUB and OP_SPLIT can break this logic, so check for them.
 	# I suspect that open and exit can too.
+	# XXX This really needs to be rewritten to accept only those ops
+	#     known to take the OPpLVAL_INTRO flag.
 
 	if (!($lop->private & (OPpLVAL_INTRO|OPpOUR_INTRO)
 		or $lop->name eq "undef")
-	    or $lop->name eq "entersub"
-	    or $lop->name eq "exit"
-	    or $lop->name eq "open")
+	    or $lop->name =~ /^(?:entersub|exit|open|split)\z/)
 	{
 	    $local = ""; # or not
 	    last;

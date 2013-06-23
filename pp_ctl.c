@@ -3842,7 +3842,6 @@ PP(pp_require)
 			if (SvROK(arg) && (SvTYPE(SvRV(arg)) <= SVt_PVLV)
 			    && !isGV_with_GP(SvRV(arg))) {
 			    filter_cache = SvRV(arg);
-			    SvREFCNT_inc_simple_void_NN(filter_cache);
 
 			    if (i < count) {
 				arg = SP[i++];
@@ -3905,10 +3904,7 @@ PP(pp_require)
 		    }
 
 		    filter_has_file = 0;
-		    if (filter_cache) {
-			SvREFCNT_dec(filter_cache);
-			filter_cache = NULL;
-		    }
+		    filter_cache = NULL;
 		    if (filter_state) {
 			SvREFCNT_dec(filter_state);
 			filter_state = NULL;
@@ -4074,7 +4070,10 @@ PP(pp_require)
 	   than hanging another SV from it. In turn, filter_add() optionally
 	   takes the SV to use as the filter (or creates a new SV if passed
 	   NULL), so simply pass in whatever value filter_cache has.  */
-	SV * const datasv = filter_add(S_run_user_filter, filter_cache);
+	SV * const fc = filter_cache ? newSV(0) : NULL;
+	SV *datasv;
+	if (fc) sv_copypv(fc, filter_cache);
+	datasv = filter_add(S_run_user_filter, fc);
 	IoLINES(datasv) = filter_has_file;
 	IoTOP_GV(datasv) = MUTABLE_GV(filter_state);
 	IoBOTTOM_GV(datasv) = MUTABLE_GV(filter_sub);
