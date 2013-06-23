@@ -5173,7 +5173,7 @@ t/op/lex_assign.t		See if ops involving lexicals or pad temps work
 t/op/lexsub.t			See if lexical subroutines work
 t/op/lex.t			Tests too complex for t/base/lex.t
 t/op/lfs.t			See if large files work for perlio
-t/op/list.t			See if array lists work
+t/op/list.t			See if lists and list slices work
 t/op/localref.t			See if local ${deref} works
 t/op/local.t			See if local works
 t/op/lock.t			Tests for lock args & retval (no threads)
