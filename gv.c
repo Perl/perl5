@@ -1026,10 +1026,9 @@ Perl_gv_fetchmethod_pvn_flags(pTHX_ HV *stash, const char *name, const STRLEN le
 			return gv;
 		}
 		Perl_croak(aTHX_
-			   "Can't locate object method \"%"SVf
+			   "Can't locate object method \"%"UTF8f
 			   "\" via package \"%"HEKf"\"",
-			            SVfARG(newSVpvn_flags(name, nend - name,
-                                           SVs_TEMP | is_utf8)),
+			            is_utf8, nend - name, name,
                                     HEKfARG(HvNAME_HEK(stash)));
 	    }
 	    else {
@@ -1138,9 +1137,10 @@ Perl_gv_autoload_pvn(pTHX_ HV *stash, const char *name, STRLEN len, U32 flags)
      && (GvCVGEN(gv) || GvSTASH(gv) != stash)
     )
 	Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED),
-			 "Use of inherited AUTOLOAD for non-method %"SVf"::%"SVf"() is deprecated",
+			 "Use of inherited AUTOLOAD for non-method %"SVf
+			 "::%"UTF8f"() is deprecated",
 			 SVfARG(packname),
-                         SVfARG(newSVpvn_flags(name, len, SVs_TEMP | is_utf8)));
+                         is_utf8, len, name);
 
     if (CvISXSUB(cv)) {
         /* Instead of forcing the XSUB do another lookup for $AUTOLOAD
@@ -1410,7 +1410,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
     const char *name = nambeg;
     GV *gv = NULL;
     GV**gvp;
-    I32 len;
+    STRLEN len;
     const char *name_cursor;
     HV *stash = NULL;
     const I32 no_init = flags & (GV_NOADD_NOINIT | GV_NOINIT);
@@ -1569,18 +1569,18 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 			     (sv_type == SVt_PVAV && !GvIMPORTED_AV(*gvp)) ||
 			     (sv_type == SVt_PVHV && !GvIMPORTED_HV(*gvp)) )
 		    {
-                        SV* namesv = newSVpvn_flags(name, len, SVs_TEMP | is_utf8);
 			/* diag_listed_as: Variable "%s" is not imported%s */
 			Perl_ck_warner_d(
 			    aTHX_ packWARN(WARN_MISC),
-			    "Variable \"%c%"SVf"\" is not imported",
+			    "Variable \"%c%"UTF8f"\" is not imported",
 			    sv_type == SVt_PVAV ? '@' :
 			    sv_type == SVt_PVHV ? '%' : '$',
-			    SVfARG(namesv));
+			    is_utf8, len, name);
 			if (GvCVu(*gvp))
 			    Perl_ck_warner_d(
 				aTHX_ packWARN(WARN_MISC),
-				"\t(Did you mean &%"SVf" instead?)\n", SVfARG(namesv)
+				"\t(Did you mean &%"UTF8f" instead?)\n",
+				is_utf8, len, name
 			    );
 			stash = NULL;
 		    }
@@ -1597,15 +1597,14 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 
     if (!stash) {
 	if (add && !PL_in_clean_all) {
-	    SV * const namesv = newSVpvn_flags(name, len, is_utf8);
 	    SV * const err = Perl_mess(aTHX_
-		 "Global symbol \"%s%"SVf"\" requires explicit package name",
+		 "Global symbol \"%s%"UTF8f
+		 "\" requires explicit package name",
 		 (sv_type == SVt_PV ? "$"
 		  : sv_type == SVt_PVAV ? "@"
 		  : sv_type == SVt_PVHV ? "%"
-		  : ""), SVfARG(namesv));
+		  : ""), is_utf8, len, name);
 	    GV *gv;
-	    SvREFCNT_dec_NN(namesv);
 	    if (is_utf8)
 		SvUTF8_on(err);
 	    qerror(err);
@@ -1700,8 +1699,9 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
     faking_it = SvOK(gv);
 
     if (add & GV_ADDWARN)
-	Perl_ck_warner_d(aTHX_ packWARN(WARN_INTERNAL), "Had to create %"SVf" unexpectedly",
-                SVfARG(newSVpvn_flags(nambeg, name_end-nambeg, SVs_TEMP | is_utf8 )));
+	Perl_ck_warner_d(aTHX_ packWARN(WARN_INTERNAL),
+		"Had to create %"UTF8f" unexpectedly",
+                is_utf8, name_end-nambeg, nambeg);
     gv_init_pvn(gv, stash, name, len, (add & GV_ADDMULTI)|is_utf8);
 
     if ( isIDFIRST_lazy_if(name, is_utf8)
@@ -2124,10 +2124,10 @@ Perl_newGVgen_flags(pTHX_ const char *pack, U32 flags)
 {
     dVAR;
     PERL_ARGS_ASSERT_NEWGVGEN_FLAGS;
+    assert(!(flags & ~SVf_UTF8));
 
-    return gv_fetchpv(Perl_form(aTHX_ "%"SVf"::_GEN_%ld",
-                                    SVfARG(newSVpvn_flags(pack, strlen(pack),
-                                            SVs_TEMP | flags)),
+    return gv_fetchpv(Perl_form(aTHX_ "%"UTF8f"::_GEN_%ld",
+                                    flags, strlen(pack), pack,
                                 (long)PL_gensym++),
                       GV_ADD, SVt_PVGV);
 }

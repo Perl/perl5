@@ -3070,9 +3070,8 @@ PP(pp_goto)
 	    PL_lastgotoprobe = gotoprobe;
 	}
 	if (!retop)
-	    DIE(aTHX_ "Can't find label %"SVf,
-                            SVfARG(newSVpvn_flags(label, label_len,
-                                        SVs_TEMP | label_flags)));
+	    DIE(aTHX_ "Can't find label %"UTF8f, 
+                            label_flags, label_len, label);
 
 	/* if we're leaving an eval, check before we pop any frames
            that we're not going to punt, otherwise the error
