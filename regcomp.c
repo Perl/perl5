@@ -14457,7 +14457,6 @@ S_regdump_intflags(pTHX_ const char *lead, const U32 flags)
 {
     int bit;
     int set=0;
-    regex_charset cs;
 
     for (bit=0; bit<32; bit++) {
         if (flags & (1<<bit)) {
