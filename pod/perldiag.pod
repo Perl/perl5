@@ -2453,6 +2453,15 @@ L<perlvms/"exec LIST">).  Somehow, this count has become scrambled, so
 Perl is making a guess and treating this C<exec> as a request to
 terminate the Perl script and execute the specified command.
 
+=item internal %<num>p might conflict with future printf extensions
+
+(S internal) Perl's internal routine that handles C<printf> and C<sprintf>
+formatting follows a slightly different set of rules when called from
+C or XS code.  Specifically, formats consisting of digits followed
+by "p" (e.g., "%7p") are reserved for future use.  If you see this
+message, then an XS module tried to call that routine with one such
+reserved format.
+
 =item Internal urp in regex; marked by <-- HERE in m/%s/
 
 (P) Something went badly awry in the regular expression parser.  The

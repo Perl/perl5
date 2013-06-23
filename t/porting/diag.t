@@ -501,7 +501,6 @@ Illegal binary digit '%c' ignored
 Illegal character %sin prototype for %s : %s
 Illegal hexadecimal digit '%c' ignored
 Illegal octal digit '%c' ignored
-internal %<num>p might conflict with future printf extensions
 Invalid argument to sv_cat_decode
 Invalid range "%c-%c" in transliteration operator
 Invalid separator character %c%c%c in PerlIO layer specification %s
