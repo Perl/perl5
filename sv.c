@@ -9314,7 +9314,7 @@ Perl_sv_pvn_force_flags(pTHX_ SV *const sv, STRLEN *const lp, const I32 flags)
     PERL_ARGS_ASSERT_SV_PVN_FORCE_FLAGS;
 
     if (flags & SV_GMAGIC) SvGETMAGIC(sv);
-    if (SvTHINKFIRST(sv) && !SvROK(sv))
+    if (SvTHINKFIRST(sv) && (!SvROK(sv) || SvREADONLY(sv)))
         sv_force_normal_flags(sv, 0);
 
     if (SvPOK(sv)) {
@@ -9325,14 +9325,6 @@ Perl_sv_pvn_force_flags(pTHX_ SV *const sv, STRLEN *const lp, const I32 flags)
 	char *s;
 	STRLEN len;
  
-	if (SvREADONLY(sv) && !(flags & SV_MUTABLE_RETURN)) {
-	    const char * const ref = sv_reftype(sv,0);
-	    if (PL_op)
-		Perl_croak(aTHX_ "Can't coerce readonly %s to string in %s",
-			   ref, OP_DESC(PL_op));
-	    else
-		Perl_croak(aTHX_ "Can't coerce readonly %s to string", ref);
-	}
 	if (SvTYPE(sv) > SVt_PVLV
 	    || isGV_with_GP(sv))
 	    /* diag_listed_as: Can't coerce %s to %s in %s */

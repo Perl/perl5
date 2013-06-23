@@ -459,8 +459,6 @@ __DATA__
 Malformed UTF-8 character (unexpected non-continuation byte 0x%x, immediately after start byte 0x%x)
 
 Cannot apply "%s" in non-PerlIO perl
-Can't coerce readonly %s to string
-Can't coerce readonly %s to string in %s
 Can't find string terminator %c%s%c anywhere before EOF
 Can't fix broken locale name "%s"
 Can't get short module name from a handle
