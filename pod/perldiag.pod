@@ -3995,15 +3995,11 @@ knowledgeable people to determine what the type being checked against
 was.  If C<utf8> warnings are enabled, a further message is raised,
 giving details of the malformation.
 
-=item Pattern subroutine nesting without pos change exceeded limit in regex; 
-marked by <-- HERE in m/%s/
+=item Pattern subroutine nesting without pos change exceeded limit in regex
 
 (F) You used a pattern that uses too many nested subpattern calls without
 consuming any text.  Restructure the pattern so text is consumed before
 the nesting limit is exceeded.
-
-The <-- HERE shows whereabouts in the regular expression the problem was
-discovered.
 
 =item C<-p> destination: %s
 
