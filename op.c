@@ -10734,9 +10734,11 @@ Perl_ck_length(pTHX_ OP *o)
                     name, hash ? "keys " : "", name
                 );
             else if (hash)
+     /* diag_listed_as: length() used on %s (did you mean "scalar(%s)"?) */
                 Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
                     "length() used on %%hash (did you mean \"scalar(keys %%hash)\"?)");
             else
+     /* diag_listed_as: length() used on %s (did you mean "scalar(%s)"?) */
                 Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
                     "length() used on @array (did you mean \"scalar(@array)\"?)");
         }

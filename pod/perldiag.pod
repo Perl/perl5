@@ -2712,7 +2712,7 @@ effective uids or gids failed.
 length/code combination tried to obtain more data.  This results in
 an undefined value for the length.  See L<perlfunc/pack>.
 
-=item length() used on %s
+=item length() used on %s (did you mean "scalar(%s)"?)
 
 (W syntax) You used length() on either an array or a hash when you
 probably wanted a count of the items.

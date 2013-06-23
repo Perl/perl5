@@ -511,9 +511,6 @@ Invalid type '%c' in unpack
 Invalid type ',' in %s
 ioctlsocket not implemented!
 killpg not implemented!
-length() used on %s (did you mean "scalar(%s)"?)
-length() used on %hash (did you mean "scalar(keys %hash)"?)
-length() used on @array (did you mean "scalar(@array)"?)
 List form of pipe open not implemented
 Malformed integer in [] in %s
 Malformed UTF-8 character (fatal)
