@@ -5436,7 +5436,7 @@ Perl_sv_magic(pTHX_ SV *const sv, SV *const obj, const int how,
     vtable = (vtable_index == magic_vtable_max)
 	? NULL : PL_magic_vtables + vtable_index;
 
-#ifdef PERL_ANY_COW
+#ifdef PERL_OLD_COPY_ON_WRITE
     if (SvIsCOW(sv))
         sv_force_normal_flags(sv, 0);
 #endif
