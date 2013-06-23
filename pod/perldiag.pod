@@ -5502,7 +5502,7 @@ discovered.  See L<perlre>.
 (F) You specified an unknown Unicode option.  See L<perlrun> documentation
 of the C<-C> switch for the list of known options.
 
-=item Unknown Unicode option value %x
+=item Unknown Unicode option value %d
 
 (F) You specified an unknown Unicode option.  See L<perlrun> documentation
 of the C<-C> switch for the list of known options.
