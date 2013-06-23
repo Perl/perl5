@@ -246,8 +246,8 @@ sub check_file {
         $nextline =~ s/^\s+//;
         $_ =~ s/\\$//;
         # Note that we only want to do this where *both* are true.
-        if ($_ =~ m/"$/ and $nextline =~ m/^"/) {
-          $_ =~ s/"$//;
+        if ($_ =~ m/"\s*$/ and $nextline =~ m/^"/) {
+          $_ =~ s/"\s*$//;
           $nextline =~ s/^"//;
         }
         $_ .= $nextline;
@@ -520,7 +520,6 @@ More than one argument to open(,':%s')
 \N{} in character class restricted to one character in regex; marked by <-- HERE in m/%s/
 No %s allowed while running setgid
 No %s allowed with (suid) fdscript
-No such class field "%s"
 Not an XSUB reference
 Operator or semicolon missing before %c%s
 Pattern subroutine nesting without pos change exceeded limit in regex
