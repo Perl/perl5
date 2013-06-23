@@ -1,6 +1,6 @@
 package English;
 
-our $VERSION = '1.06';
+our $VERSION = '1.07';
 
 require Exporter;
 @ISA = qw(Exporter);
