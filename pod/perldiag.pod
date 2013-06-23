@@ -1763,7 +1763,7 @@ define a C<$VERSION>.
 (F) You cannot put a repeat count of any kind right after the '/' code.
 See L<perlfunc/pack>.
 
-=item Don't know how to handle magic of type '%s'
+=item Don't know how to handle magic of type \%o
 
 (P) The internal handling of magical variables has been cursed.
 

@@ -479,7 +479,6 @@ Code missing after '/' in unpack
 '%c' outside of string in pack
 Debug leaking scalars child failed%s with errno %d: %s
 '/' does not take a repeat count in %s
-Don't know how to handle magic of type \%o
 -Dp not implemented on this platform
 Error reading "%s": %s
 execl not implemented!
