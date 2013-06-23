@@ -4039,7 +4039,7 @@ interpreted as a decimal, with every three digits after the
 decimal point representing a part of the version number.  So 5.10
 is equivalent to v5.100.
 
-=item Perl %s required--this is only version %s, stopped
+=item Perl %s required--this is only %s, stopped
 
 (F) The module in question uses features of a version of Perl more
 recent than the currently running version.  How long has it been since

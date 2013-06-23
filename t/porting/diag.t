@@ -522,7 +522,6 @@ No %s allowed while running setgid
 No %s allowed with (suid) fdscript
 Not an XSUB reference
 Operator or semicolon missing before %c%s
-Perl %s required--this is only %s, stopped
 PerlApp::TextQuery: no arguments, please
 POSIX syntax [%c %c] is reserved for future extensions in regex; marked by <-- HERE in m/%s/
 ptr wrong %p != %p fl=%x nl=%p e=%p for %d
