@@ -530,7 +530,6 @@ Regexp modifier "%c" may appear a maximum of twice in regex; marked by <-- HERE 
 Regexp modifier "%c" may not appear twice in regex; marked by <-- HERE in m/%s/
 Regexp modifiers "%c" and "%c" are mutually exclusive in regex; marked by <-- HERE in m/%s/
 Regexp *+ operand could be empty in regex; marked by <-- HERE in m/%s/
-Repeated format line will never terminate (~~ and @#)
 Reversed %c= operator
 %s(%f) failed
 %sCompilation failed in require
