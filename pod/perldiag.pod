@@ -1283,6 +1283,8 @@ test the type of the reference, if need be.
 
 =item Can't use string ("%s") as %s ref while "strict refs" in use
 
+=item Can't use string ("%s"...) as %s ref while "strict refs" in use
+
 (F) You've told Perl to dereference a string, something which
 C<use strict> blocks to prevent it happening accidentally.  See
 L<perlref/"Symbolic references">.  This can be triggered by an C<@> or C<$>
