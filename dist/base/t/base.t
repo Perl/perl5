@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 
 use strict;
-use Test::More tests => 11;
+use Test::More tests => 12;
 
 use_ok('base');
 
@@ -55,6 +55,11 @@ like( $@, qr/^Base class package "reallyReAlLyNotexists" is empty\./,
 eval q{use base 'reallyReAlLyNotexists'};
 like( $@, qr/^Base class package "reallyReAlLyNotexists" is empty\./,
                                           '  still empty on 2nd load');
+eval 'sub reallyReAlLyNotexists::Sub::welp { }';
+eval q{use base 'reallyReAlLyNotexists'};
+like( $@, qr/^Base class package "reallyReAlLyNotexists" is empty\./,
+    '  empty even with sub-package existing');
+
 {
     my $warning;
     local $SIG{__WARN__} = sub { $warning = shift };

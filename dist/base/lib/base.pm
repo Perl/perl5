@@ -2,7 +2,7 @@ package base;
 
 use strict 'vars';
 use vars qw($VERSION);
-$VERSION = '2.18';
+$VERSION = '2.19';
 $VERSION = eval $VERSION;
 
 # constant.pm is slow
@@ -82,7 +82,7 @@ sub import {
                 # Only ignore "Can't locate" errors from our eval require.
                 # Other fatal errors (syntax etc) must be reported.
                 die if $@ && $@ !~ /^Can't locate .*? at \(eval /;
-                unless (%{"$base\::"}) {
+                unless (grep { !/::$/ } keys %{"$base\::"}) {
                     require Carp;
                     local $" = " ";
                     Carp::croak(<<ERROR);
