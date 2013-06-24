@@ -3758,19 +3758,19 @@ and C<IPC::SysV::Msg> documentation.
 
 Portability issues: L<perlport/msgsnd>.
 
-=item my EXPR
+=item my VARLIST
 X<my>
 
-=item my TYPE EXPR
+=item my TYPE VARLIST
 
-=item my EXPR : ATTRS
+=item my VARLIST : ATTRS
 
-=item my TYPE EXPR : ATTRS
+=item my TYPE VARLIST : ATTRS
 
 =for Pod::Functions declare and assign a local variable (lexical scoping)
 
 A C<my> declares the listed variables to be local (lexically) to the
-enclosing block, file, or C<eval>.  If more than one value is listed,
+enclosing block, file, or C<eval>.  If more than one variable is listed,
 the list must be placed in parentheses.
 
 The exact semantics and interface of TYPE and ATTRS are still
@@ -3779,6 +3779,11 @@ and attributes are handled using the C<attributes> pragma, or starting
 from Perl 5.8.0 also via the C<Attribute::Handlers> module.  See
 L<perlsub/"Private Variables via my()"> for details, and L<fields>,
 L<attributes>, and L<Attribute::Handlers>.
+
+Note that with a parenthesised list, C<undef> can be used as a dummy
+placeholder, for example to skip assignment of initial values:
+
+    my ( undef, $min, $hour ) = localtime;
 
 =item next LABEL
 X<next> X<continue>
@@ -4322,14 +4327,14 @@ If EXPR is an empty string, returns 0.  If EXPR is omitted, uses C<$_>.
 For the reverse, see L</chr>.
 See L<perlunicode> for more about Unicode.
 
-=item our EXPR
+=item our VARLIST
 X<our> X<global>
 
-=item our TYPE EXPR
+=item our TYPE VARLIST
 
-=item our EXPR : ATTRS
+=item our VARLIST : ATTRS
 
-=item our TYPE EXPR : ATTRS
+=item our TYPE VARLIST : ATTRS
 
 =for Pod::Functions +5.6.0 declare and assign a package variable (lexical scoping)
 
@@ -4346,7 +4351,7 @@ the lexical scope of the C<our> declaration.  In this way, C<our> differs from
 C<use vars>, which allows use of an unqualified name I<only> within the
 affected package, but across scopes.
 
-If more than one value is listed, the list must be placed
+If more than one variable is listed, the list must be placed
 in parentheses.
 
     our $foo;
@@ -4394,6 +4399,11 @@ and attributes are handled using the C<attributes> pragma, or, starting
 from Perl 5.8.0, also via the C<Attribute::Handlers> module.  See
 L<perlsub/"Private Variables via my()"> for details, and L<fields>,
 L<attributes>, and L<Attribute::Handlers>.
+
+Note that with a parenthesised list, C<undef> can be used as a dummy
+placeholder, for example to skip assignment of initial values:
+
+    our ( undef, $min, $hour ) = localtime;
 
 =item pack TEMPLATE,LIST
 X<pack>
@@ -7543,14 +7553,14 @@ instead of the target file behind the link, use the C<lstat> function.
 
 Portability issues: L<perlport/stat>.
 
-=item state EXPR
+=item state VARLIST
 X<state>
 
-=item state TYPE EXPR
+=item state TYPE VARLIST
 
-=item state EXPR : ATTRS
+=item state VARLIST : ATTRS
 
-=item state TYPE EXPR : ATTRS
+=item state TYPE VARLIST : ATTRS
 
 =for Pod::Functions +state declare and assign a persistent lexical variable
 
@@ -7559,6 +7569,11 @@ However, those variables will never be reinitialized, contrary to
 lexical variables that are reinitialized each time their enclosing block
 is entered.
 See L<perlsub/"Persistent Private Variables"> for details.
+
+If more than one variable is listed, the list must be placed in
+parentheses. With a parenthesised list, C<undef> can be used as a
+dummy placeholder. However, since initialization of state variables in
+list context is currently not possible this would serve no purpose.
 
 C<state> variables are enabled only when the C<use feature "state"> pragma 
 is in effect, unless the keyword is written as C<CORE::state>.
