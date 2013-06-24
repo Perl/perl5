@@ -179,18 +179,11 @@ sub process_file {
 
   $self->{typemap} = process_typemaps( $args{typemap}, $pwd );
 
-  # Since at this point we're ready to begin printing to the output file and
-  # reading from the input file, I want to get as much data as possible into
-  # the proto-object $self.  That means assigning to $self and elements of
-  # %args referenced below this point.
-  # HOWEVER:  This resulted in an error when I tried:
-  #   $args{'s'} ---> $self->{s}.
-  # Use of uninitialized value in quotemeta at
-  #   .../blib/lib/ExtUtils/ParseXS.pm line 733
-
+  # Move more settings from parameters to object
   foreach my $datum ( qw| argtypes except inout optimize | ) {
     $self->{$datum} = $args{$datum};
   }
+  $self->{strip_c_func_prefix} = $args{s};
 
   # Identify the version of xsubpp used
   print <<EOM;
@@ -670,8 +663,9 @@ EOF
               print "THIS->";
             }
           }
-          $self->{func_name} =~ s/^\Q$args{'s'}//
-            if exists $args{'s'};
+          my $strip = $self->{strip_c_func_prefix};
+          $self->{func_name} =~ s/^\Q$strip//
+            if defined $strip;
           $self->{func_name} = 'XSFUNCTION' if $self->{interface};
           print "$self->{func_name}($self->{func_args});\n";
         }
