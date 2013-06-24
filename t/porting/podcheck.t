@@ -566,17 +566,19 @@ if (($regen + $show_all + $show_counts + $add_link + $cpan_or_deltas ) > 1) {
 
 my $has_input_files = @files;
 
-if ($has_input_files) {
+
+if ($add_link) {
+    if (! $has_input_files) {
+        croak "--add_link requires at least one module or man page reference";
+    }
+}
+elsif ($has_input_files) {
     if ($regen || $show_counts || $do_upstream_cpan || $do_deltas) {
         croak "--regen, --counts, --deltas, and --cpan can't be used since using specific files";
     }
     foreach my $file (@files) {
         croak "Can't read file '$file'" if ! -r $file;
     }
-}
-
-if ($add_link && ! $has_input_files) {
-    croak "--add_link requires at least one module or man page reference";
 }
 
 our %problems;  # potential problems found in this run
