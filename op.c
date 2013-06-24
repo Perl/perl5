@@ -10078,6 +10078,7 @@ Perl_ck_entersub_args_proto(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
     if (SvTYPE(protosv) == SVt_PVCV)
 	 proto = CvPROTO(protosv), proto_len = CvPROTOLEN(protosv);
     else proto = SvPV(protosv, proto_len);
+    proto = S_strip_spaces(aTHX_ proto, &proto_len);
     proto_end = proto + proto_len;
     aop = cUNOPx(entersubop)->op_first;
     if (!aop->op_sibling)

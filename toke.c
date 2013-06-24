@@ -7281,6 +7281,7 @@ Perl_yylex(pTHX)
 			STRLEN protolen = CvPROTOLEN(cv);
 			const char *proto = CvPROTO(cv);
 			bool optional;
+			proto = S_strip_spaces(aTHX_ proto, &protolen);
 			if (!protolen)
 			    TERM(FUNC0SUB);
 			if ((optional = *proto == ';'))
