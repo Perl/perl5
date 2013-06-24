@@ -1387,6 +1387,7 @@
 #  endif
 #  if defined(PERL_IN_LOCALE_C)
 #    if defined(USE_LOCALE_NUMERIC) || defined(USE_LOCALE_COLLATE)
+#define is_cur_LC_category_utf8(a)	S_is_cur_LC_category_utf8(aTHX_ a)
 #define stdize_locale(a)	S_stdize_locale(aTHX_ a)
 #    endif
 #  endif

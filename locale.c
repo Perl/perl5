@@ -34,7 +34,6 @@
 
 #include "reentr.h"
 
-#if defined(USE_LOCALE_NUMERIC) || defined(USE_LOCALE_COLLATE)
 /*
  * Standardize the locale name from a string returned by 'setlocale'.
  *
@@ -76,7 +75,6 @@ S_stdize_locale(pTHX_ char *locs)
 
     return locs;
 }
-#endif
 
 void
 Perl_set_numeric_radix(pTHX)
@@ -504,48 +502,12 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 #ifdef USE_PERLIO
     {
       /* Set PL_utf8locale to TRUE if using PerlIO _and_
-	 any of the following are true:
-	 - nl_langinfo(CODESET) contains /^utf-?8/i
-	 - $ENV{LC_ALL}   contains /^utf-?8/i
-	 - $ENV{LC_CTYPE} contains /^utf-?8/i
-	 - $ENV{LANG}     contains /^utf-?8/i
-	 The LC_ALL, LC_CTYPE, LANG obey the usual override
-	 hierarchy of locale environment variables.  (LANGUAGE
-	 affects only LC_MESSAGES only under glibc.) (If present,
-	 it overrides LC_MESSAGES for GNU gettext, and it also
-	 can have more than one locale, separated by spaces,
-	 in case you need to know.)
+         the current LC_CTYPE locale is UTF-8.
 	 If PL_utf8locale and PL_unicode (set by -C or by $ENV{PERL_UNICODE})
          are true, perl.c:S_parse_body() will turn on the PerlIO :utf8 layer
 	 on STDIN, STDOUT, STDERR, _and_ the default open discipline.
       */
-	 bool utf8locale = FALSE;
-	 char *codeset = NULL;
-#if defined(HAS_NL_LANGINFO) && defined(CODESET)
-	 codeset = nl_langinfo(CODESET);
-#endif
-	 if (codeset)
-	      utf8locale = (foldEQ(codeset, STR_WITH_LEN("UTF-8"))
-			    || foldEQ(codeset, STR_WITH_LEN("UTF8") ));
-#if defined(USE_LOCALE)
-	 else { /* nl_langinfo(CODESET) is supposed to correctly
-		 * interpret the locale environment variables,
-		 * but just in case it fails, let's do this manually. */ 
-	      if (lang)
-		   utf8locale = (foldEQ(lang, STR_WITH_LEN("UTF-8"))
-				 || foldEQ(lang, STR_WITH_LEN("UTF8") ));
-#ifdef USE_LOCALE_CTYPE
-	      if (curctype)
-		   utf8locale = (foldEQ(curctype, STR_WITH_LEN("UTF-8"))
-				 || foldEQ(curctype, STR_WITH_LEN("UTF8") ));
-#endif
-	      if (lc_all)
-		   utf8locale = (foldEQ(lc_all, STR_WITH_LEN("UTF-8"))
-				 || foldEQ(lc_all, STR_WITH_LEN("UTF8") ));
-	 }
-#endif /* USE_LOCALE */
-	 if (utf8locale)
-	      PL_utf8locale = TRUE;
+        PL_utf8locale = is_cur_LC_category_utf8(LC_CTYPE);
     }
     /* Set PL_unicode to $ENV{PERL_UNICODE} if using PerlIO.
        This is an alternative to using the -C command line switch
@@ -632,6 +594,125 @@ Perl_mem_collxfrm(pTHX_ const char *s, STRLEN len, STRLEN *xlen)
 }
 
 #endif /* USE_LOCALE_COLLATE */
+
+bool
+S_is_cur_LC_category_utf8(pTHX_ int category)
+{
+    /* Returns TRUE if the current locale for 'category' is UTF-8; FALSE
+     * otherwise. 'category' may not be LC_ALL.  If the platform doesn't have
+     * nl_langinfo(), this employs a heuristic, which hence could give the
+     * wrong result.  It errs on the side of not being a UTF-8 locale. */
+
+    char *save_input_locale = NULL;
+    int has_hyphen;
+    STRLEN final_pos;
+
+    assert(category != LC_ALL);
+
+    /* First dispose of the trivial cases */
+    save_input_locale = stdize_locale(setlocale(category, NULL));
+    if (! save_input_locale) {
+        return FALSE;   /* XXX maybe should croak */
+    }
+    if ((*save_input_locale == 'C' && save_input_locale[1] == '\0')
+        || strEQ(save_input_locale, "POSIX"))
+    {
+        return FALSE;
+    }
+
+    save_input_locale = savepv(save_input_locale);
+
+#if defined(HAS_NL_LANGINFO) && defined(CODESET) && defined(USE_LOCALE_CTYPE)
+
+    { /* Next try nl_langinfo if available */
+
+        char *save_ctype_locale = NULL;
+        char *codeset = NULL;
+
+        if (category != LC_CTYPE) { /* nl_langinfo works only on LC_CTYPE */
+
+            /* Get the current LC_CTYPE locale */
+            save_ctype_locale = stdize_locale(savepv(setlocale(LC_CTYPE, NULL)));
+            if (! save_ctype_locale) {
+                goto cant_use_nllanginfo;
+            }
+
+            /* If LC_CTYPE and the desired category use the same locale, this
+             * means that finding the value for LC_CTYPE is the same as finding
+             * the value for the desired category.  Otherwise, switch LC_CTYPE
+             * to the desired category's locale */
+            if (strEQ(save_ctype_locale, save_input_locale)) {
+                Safefree(save_ctype_locale);
+                save_ctype_locale = NULL;
+            }
+            else if (! setlocale(LC_CTYPE, save_input_locale)) {
+                Safefree(save_ctype_locale);
+                goto cant_use_nllanginfo;
+            }
+        }
+
+        /* Here the current LC_CTYPE is set to the locale of the category whose
+         * information is desired.  This means that nl_langinfo() should give
+         * the correct results */
+        codeset = savepv(nl_langinfo(CODESET));
+        if (codeset) {
+            bool is_utf8;
+
+            /* If we switched LC_CTYPE, switch back */
+            if (save_ctype_locale) {
+                setlocale(LC_CTYPE, save_ctype_locale);
+                Safefree(save_ctype_locale);
+            }
+
+            is_utf8 = foldEQ(codeset, STR_WITH_LEN("UTF-8"))
+                      || foldEQ(codeset, STR_WITH_LEN("UTF8"));
+
+            Safefree(codeset);
+            Safefree(save_input_locale);
+            return is_utf8;
+        }
+
+    }
+  cant_use_nllanginfo:
+
+#endif /* HAS_NL_LANGINFO etc */
+
+    /* nl_langinfo not available or failed somehow.  Look at the locale name to
+     * see if it matches qr/UTF -? 8 $ /ix  */
+
+    final_pos = strlen(save_input_locale) - 1;
+    if (final_pos >= 3
+        && *(save_input_locale + final_pos) == '8')
+    {
+        has_hyphen = *(save_input_locale + final_pos - 1 ) == '-';
+        if ((! has_hyphen || final_pos >= 4)
+            && toFOLD(*(save_input_locale + final_pos - has_hyphen - 1)) == 'f'
+            && toFOLD(*(save_input_locale + final_pos - has_hyphen - 2)) == 't'
+            && toFOLD(*(save_input_locale + final_pos - has_hyphen - 3)) == 'u')
+        {
+            Safefree(save_input_locale);
+            return TRUE;
+        }
+    }
+
+#ifdef WIN32
+    /* http://msdn.microsoft.com/en-us/library/windows/desktop/dd317756.aspx */
+    if (final_pos >= 4
+        && *(save_input_locale + final_pos - 0) == '1'
+        && *(save_input_locale + final_pos - 1) == '0'
+        && *(save_input_locale + final_pos - 2) == '0'
+        && *(save_input_locale + final_pos - 3) == '5'
+        && *(save_input_locale + final_pos - 4) == '6')
+    {
+        Safefree(save_input_locale);
+        return TRUE;
+    }
+#endif
+
+    return FALSE;
+}
+
+
 
 /*
  * Local variables:

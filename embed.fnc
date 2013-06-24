@@ -2263,6 +2263,7 @@ s	|bool|isa_lookup	|NN HV *stash|NN const char * const name \
 #if defined(PERL_IN_LOCALE_C)
 #if defined(USE_LOCALE_NUMERIC) || defined(USE_LOCALE_COLLATE)
 s	|char*	|stdize_locale	|NN char* locs
+s	|bool	|is_cur_LC_category_utf8|int category
 #endif
 #endif
 
