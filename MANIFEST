@@ -3679,6 +3679,7 @@ ext/Pod-Functions/Makefile.PL		Makefile writer
 ext/Pod-Functions/t/Functions.t		See if Pod::Functions works
 ext/Pod-Html/bin/pod2html	Translator to turn pod into HTML
 ext/Pod-Html/lib/Pod/Html.pm	Convert POD data to HTML
+ext/Pod-Html/t/anchorify.t
 ext/Pod-Html/t/cache.pod
 ext/Pod-Html/t/cache.t
 ext/Pod-Html/t/crossref2.t
