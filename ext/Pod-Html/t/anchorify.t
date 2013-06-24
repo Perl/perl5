@@ -37,8 +37,8 @@ my %expected = map { $_ => 1 } qw(
     has_hyphen_and_space
 );
 is_deeply(
-    [ keys %heads ],
-    [ keys %expected ],
+    \%heads,
+    \%expected,
     "Got expected POD heads"
 );
 
