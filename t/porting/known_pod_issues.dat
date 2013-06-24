@@ -62,6 +62,7 @@ File::chdir
 File::Copy::Recursive
 File::Findgrep
 File::MMagic
+File::Map
 File::ShareDir
 flock(3)
 fsync(3c)
@@ -97,6 +98,7 @@ Module::Find
 Module::Info
 Module::Pluggable
 Module::Pluggable::Object
+Module::Requires
 Module::Starter
 Moo
 Moose
@@ -133,6 +135,7 @@ Pod::PXML
 poll(2)
 prctl(2)
 printf(3)
+provide
 pstruct
 ptar(1)
 ptargrep(1)
@@ -166,6 +169,7 @@ Test::Harness::TAP
 Test::Inline
 Test::MockObject
 Text::Autoformat
+Text::Soundex
 Text::Template
 Text::Unidecode
 Time::Object
