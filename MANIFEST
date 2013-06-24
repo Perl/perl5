@@ -3635,6 +3635,7 @@ ext/NDBM_File/hints/gnukfreebsd.pl	Hint for NDBM_File for named architecture
 ext/NDBM_File/hints/gnuknetbsd.pl	Hint for NDBM_File for named architecture
 ext/NDBM_File/hints/gnu.pl	Hint for NDBM_File for named architecture
 ext/NDBM_File/hints/linux.pl	Hint for NDBM_File for named architecture
+ext/NDBM_File/hints/MSWin32.pl	Hint for NDBM_File for named architecture
 ext/NDBM_File/hints/sco.pl	Hint for NDBM_File for named architecture
 ext/NDBM_File/hints/solaris.pl	Hint for NDBM_File for named architecture
 ext/NDBM_File/hints/svr4.pl	Hint for NDBM_File for named architecture
@@ -3649,7 +3650,8 @@ ext/ODBM_File/hints/gnukfreebsd.pl	Hint for NDBM_File for named architecture
 ext/ODBM_File/hints/gnuknetbsd.pl	Hint for NDBM_File for named architecture
 ext/ODBM_File/hints/gnu.pl	Hint for ODBM_File for named architecture
 ext/ODBM_File/hints/hpux.pl	Hint for ODBM_File for named architecture
-ext/ODBM_File/hints/linux.pl	Hint for NDBM_File for named architecture
+ext/ODBM_File/hints/linux.pl	Hint for ODBM_File for named architecture
+ext/ODBM_File/hints/MSWin32.pl	Hint for ODBM_File for named architecture
 ext/ODBM_File/hints/sco.pl	Hint for ODBM_File for named architecture
 ext/ODBM_File/hints/solaris.pl	Hint for ODBM_File for named architecture
 ext/ODBM_File/hints/svr4.pl	Hint for ODBM_File for named architecture
