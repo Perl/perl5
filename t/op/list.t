@@ -184,7 +184,6 @@ cmp_ok(join('',(1,2),3,(4,5)),'eq','12345','list (..).(..)');
 }
 
 # [perl #78194] list slice aliasing op return values
-$::TODO = 'not fixed yet';
 sub {
  is(\$_[0], \$_[1],
   '[perl #78194] \$_[0] == \$_[1] when @_ aliases elems repeated by lslice'
