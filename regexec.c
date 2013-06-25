@@ -1916,9 +1916,8 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
     case NPOSIXA:
         if (utf8_target) {
             /* The complement of something that matches only ASCII matches all
-             * UTF-8 variant code points, plus everything in ASCII that isn't
-             * in the class */
-            REXEC_FBC_UTF8_CLASS_SCAN(! UTF8_IS_INVARIANT(*s)
+             * non-ASCII, plus everything in ASCII that isn't in the class. */
+            REXEC_FBC_UTF8_CLASS_SCAN(! isASCII_utf8(s)
                                       || ! _generic_isCC_A(*s, FLAGS(c)));
             break;
         }
@@ -7339,10 +7338,9 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
         else {
 
             /* The complement of something that matches only ASCII matches all
-             * UTF-8 variant code points, plus everything in ASCII that isn't
-             * in the class. */
+             * non-ASCII, plus everything in ASCII that isn't in the class. */
 	    while (hardcount < max && scan < loceol
-                   && (! UTF8_IS_INVARIANT(*scan)
+                   && (! isASCII_utf8(scan)
                        || ! _generic_isCC_A((U8) *scan, FLAGS(p))))
             {
                 scan += UTF8SKIP(scan);
