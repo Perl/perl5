@@ -1657,6 +1657,7 @@ PP(pp_repeat)
 	static const char* const oom_list_extend = "Out of memory during list extend";
 	const I32 items = SP - MARK;
 	const I32 max = items * count;
+	const U8 mod = PL_op->op_flags & OPf_MOD;
 
 	MEM_WRAP_CHECK_1(max, SV*, oom_list_extend);
 	/* Did the max computation overflow? */
@@ -1690,7 +1691,11 @@ PP(pp_repeat)
 		}
 #else
                if (*SP)
+                {
+                   if (mod && SvPADTMP(*SP) && !IS_PADGV(*SP))
+                       *SP = sv_mortalcopy(*SP);
 		   SvTEMP_off((*SP));
+		}
 #endif
 		SP--;
 	    }

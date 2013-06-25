@@ -156,7 +156,6 @@ is(77, scalar ((1,7)x2),    'stack truncation');
 is( (join ',', (qw(a b c) x 3)), 'a,b,c,a,b,c,a,b,c', 'x on qw produces list' );
 
 # [perl #78194] x aliasing op return values
-$::TODO = 'not fixed yet';
 sub {
     is(\$_[0], \$_[1],
       '[perl #78194] \$_[0] == \$_[1] when @_ aliases elems repeated by x')
