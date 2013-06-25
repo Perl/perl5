@@ -18,7 +18,7 @@ BEGIN {
 # strict
 use strict;
 
-print "1..187\n";
+print "1..196\n";
 
 my $i = 1;
 
@@ -669,19 +669,43 @@ for my $p ( "", qw{ () ($) ($@) ($%) ($;$) (&) (&\@) (&@) (%) (\%) (\@) } ) {
   
   eval 'sub badproto (@bar) { 1; }';
   print "not " unless $warn =~ /Illegal character in prototype for main::badproto : \@bar/;
-  print "ok ", $i++, "\n";
+  print "ok ", $i++, " checking badproto - (\@bar)\n";
 
   eval 'sub badproto2 (bar) { 1; }';
   print "not " unless $warn =~ /Illegal character in prototype for main::badproto2 : bar/;
-  print "ok ", $i++, "\n";
+  print "ok ", $i++, " checking badproto2 - (bar)\n";
   
   eval 'sub badproto3 (&$bar$@) { 1; }';
   print "not " unless $warn =~ /Illegal character in prototype for main::badproto3 : &\$bar\$\@/;
-  print "ok ", $i++, "\n";
+  print "ok ", $i++, " checking badproto3 - (&\$bar\$\@)\n";
   
   eval 'sub badproto4 (@ $b ar) { 1; }';
+  # This one emits two warnings
   print "not " unless $warn =~ /Illegal character in prototype for main::badproto4 : \@ \$b ar/;
-  print "ok ", $i++, "\n";
+  print "ok ", $i++, " checking badproto4 - (\@ \$b ar) - illegal character\n";
+  print "not " unless $warn =~ /Prototype after '\@' for main::badproto4 : \@ \$b ar/;
+  print "ok ", $i++, " checking badproto4 - (\@ \$b ar) - prototype after '\@'\n";
+
+  eval 'sub badproto5 ($_$) { 1; }';
+  print "not " unless $warn =~ /Illegal character after '_' in prototype for main::badproto5 : \$_\$/;
+  print "ok ", $i++, " checking badproto5 - (\$_\$) - illegal character after '_'\n";
+  print "not " if $warn =~ /Illegal character in prototype for main::badproto5 : \$_\$/;
+  print "ok ", $i++, " checking badproto5 - (\$_\$) - but not just illegal character\n";
+  eval 'sub badproto6 (bar_) { 1; }';
+  print "not " unless $warn =~ /Illegal character in prototype for main::badproto6 : bar_/;
+  print "ok ", $i++, " checking badproto6 - (bar_) - illegal character\n";
+  print "not " if $warn =~ /Illegal character after '_' in prototype for main::badproto6 : bar_/;
+  print "ok ", $i++, " checking badproto6 - (bar_) - shouldn't add \"after '_'\"\n";
+  eval 'sub badproto7 (_;bar) { 1; }';
+  print "not " unless $warn =~ /Illegal character in prototype for main::badproto7 : _;bar/;
+  print "ok ", $i++, " checking badproto7 - (_;bar) - illegal character\n";
+  print "not " if $warn =~ /Illegal character after '_' in prototype for main::badproto7 : _;bar/;
+  print "ok ", $i++, " checking badproto7 - (_;bar) - shouldn't add \"after '_'\"\n";
+  eval 'sub badproto8 (_b) { 1; }';
+  print "not " unless $warn =~ /Illegal character after '_' in prototype for main::badproto8 : _b/;
+  print "ok ", $i++, " checking badproto8 - (_b) - illegal character after '_'\n";
+  print "not " unless $warn =~ /Illegal character in prototype for main::badproto8 : _b/;
+  print "ok ", $i++, " checking badproto8 - (_b) - just illegal character\n";
 }
 
 # make sure whitespace in prototypes works
@@ -745,8 +769,9 @@ print "not "
  unless eval 'sub uniproto12 (;;;+) {} uniproto12 $_, 1' or warn $@;
 print "ok ", $i++, " - uniproto12 (;;;*)\n";
 print "not "
- unless eval 'sub uniproto12 ( ; ; ; + ) {} uniproto12 $_, 1' or warn $@;
-print "ok ", $i++, " - uniproto12 ( ; ; ; * )\n";
+ unless eval 'sub uniproto13 ( ; ; ; + ) {} uniproto13 $_, 1' or warn $@;
+print "ok ", $i++, " - uniproto13 ( ; ; ; * )\n";
+
 
 # Test that a trailing semicolon makes a sub have listop precedence
 sub unilist ($;)  { $_[0]+1 }

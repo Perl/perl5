@@ -1608,7 +1608,7 @@ Perl_validate_proto(pTHX_ SV *name, SV *proto, bool warn)
     bool proto_after_greedy_proto = FALSE;
     bool must_be_last = FALSE;
     bool underscore = FALSE;
-    bool seen_underscore = FALSE;
+    bool bad_proto_after_underscore = FALSE;
 
     PERL_ARGS_ASSERT_VALIDATE_PROTO;
 
@@ -1620,16 +1620,15 @@ Perl_validate_proto(pTHX_ SV *name, SV *proto, bool warn)
 	if (!isSPACE(*p)) {
 	    if (must_be_last)
 		proto_after_greedy_proto = TRUE;
+	    if (underscore) {
+		if (!strchr(";@%", *p))
+		    bad_proto_after_underscore = TRUE;
+		underscore = FALSE;
+	    }
 	    if (!strchr("$@%*;[]&\\_+", *p) || *p == '\0') {
 		bad_proto = TRUE;
 	    }
 	    else {
-		if (underscore) {
-		    if(!strchr(";@%", *p))
-			bad_proto = TRUE;
-		    underscore = FALSE;
-		}
-
 		if (*p == '[')
 		    in_brackets = TRUE;
 		else if (*p == ']')
@@ -1641,7 +1640,7 @@ Perl_validate_proto(pTHX_ SV *name, SV *proto, bool warn)
 		    greedy_proto = *p;
 		}
 		else if (*p == '_')
-		    underscore = seen_underscore = TRUE;
+		    underscore = TRUE;
 	    }
 	    if (*p == '\\')
 		after_slash = TRUE;
@@ -1664,8 +1663,12 @@ Perl_validate_proto(pTHX_ SV *name, SV *proto, bool warn)
 			greedy_proto, SVfARG(name), p);
 	if (bad_proto)
 	    Perl_warner(aTHX_ packWARN(WARN_ILLEGALPROTO),
-			"Illegal character %sin prototype for %"SVf" : %s",
-			seen_underscore ? "after '_' " : "", SVfARG(name), p);
+			"Illegal character in prototype for %"SVf" : %s",
+			SVfARG(name), p);
+	if (bad_proto_after_underscore)
+	    Perl_warner(aTHX_ packWARN(WARN_ILLEGALPROTO),
+			"Illegal character after '_' in prototype for %"SVf" : %s",
+			SVfARG(name), p);
     }
 
     return (! (proto_after_greedy_proto || bad_proto) );
