@@ -20,7 +20,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 570;  # Update this when adding/deleting tests.
+plan tests => 670;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1366,17 +1366,19 @@ EOP
     {
         # if we have 87 capture buffers defined then \87 should refer to the 87th.
         # test that this is true for 1..100
-        my $str= "aa";
         for my $i (1..100) {
-            my $pat= "a";
-            $pat= "($pat)" for 1 .. $i;
-            $pat.="\\$i";
-            eval {
-                ok($str=~/$pat/,"\\$i works with $i buffers");
-                1;
-            } or do {
-                ok(0,"\\$i works with $i buffers");
-            };
+            my $capture= "a";
+            $capture= "($capture)" for 1 .. $i;
+            for my $mid ("","b") {
+                my $str= "a${mid}a";
+                my $backref= "\\$i";
+                eval {
+                    ok($str=~/$capture$mid$backref/,"\\$i works with $i buffers '$str'=~/...$mid$backref/");
+                    1;
+                } or do {
+                    is("$@","","\\$i works with $i buffers works with $i buffers '$str'=~/...$mid$backref/");
+                };
+            }
         }
     }
 
