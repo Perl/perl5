@@ -1487,10 +1487,9 @@ abc\N{def	-	c	-	\\N{NAME} must be resolved by the lexer
 [a\o{1000}]	\x{200}	y	$&	\x{200}
 
 # The below were inserting a NULL
-\87	87	y	$&	87
-a\87	a87	y	$&	a87
-a\97	a97	y	$&	a97
-
+\87	87	c	-	Reference to nonexistent group in regex
+a\87	a87	c	-	Reference to nonexistent group in regex
+a\97	a97	c	-	Reference to nonexistent group in regex
 
 # The below was inserting a NULL into the character class.
 [\8\9]	\000	Sn	-	-

@@ -10706,7 +10706,7 @@ tryagain:
                     if (num < 1)
                         vFAIL("Reference to nonexistent or unclosed group");
                 }
-		if (!isg && num > 9 && num >= RExC_npar)
+                if (!isg && num > 9 && num >= RExC_npar && *RExC_parse != '8' && *RExC_parse != '9')
                     /* Probably a character specified in octal, e.g. \35 */
 		    goto defchar;
 		else {
@@ -10983,10 +10983,28 @@ tryagain:
 			p++;
 			ender = grok_bslash_c(*p++, UTF, SIZE_ONLY);
 			break;
-		    case '0': case '1': case '2': case '3':case '4':
+                    case '8': case '9': /* must be a backreference */
+                        --p;
+                        goto loopdone;
+                    case '1': case '2': case '3':case '4':
 		    case '5': case '6': case '7':
-			if (*p == '0' ||
-			    (isDIGIT(p[1]) && atoi(p) >= RExC_npar))
+                        /* When we parse backslash escapes there is ambiguity between
+                         * backreferences and octal escapes. Any escape from \1 - \9 is
+                         * a backreference, any multi-digit escape which does not start with
+                         * 0 and which when evaluated as decimal could refer to an already
+                         * parsed capture buffer is a backslash. Anything else is octal.
+                         *
+                         * Note this implies that \118 could be interpreted as 118 OR as
+                         * "\11" . "8" depending on whether there were 118 capture buffers
+                         * defined already in the pattern.
+                         */
+                        if ( !isDIGIT(p[1]) || atoi(p) <= RExC_npar )
+                        {  /* Not to be treated as an octal constant, go
+                                   find backref */
+                            --p;
+                            goto loopdone;
+                        }
+                    case '0':
 			{
 			    I32 flags = PERL_SCAN_SILENT_ILLDIGIT;
 			    STRLEN numlen = 3;
@@ -11004,11 +11022,6 @@ tryagain:
                                          p + 1,
                                          form_short_octal_warning(p, numlen));
                             }
-			}
-                        else {  /* Not to be treated as an octal constant, go
-                                   find backref */
-			    --p;
-			    goto loopdone;
 			}
 			if (PL_encoding && ender < 0x100)
 			    goto recode_encoding;

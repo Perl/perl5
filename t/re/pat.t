@@ -20,7 +20,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 470;  # Update this when adding/deleting tests.
+plan tests => 570;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1361,6 +1361,23 @@ EOP
         like($c, $re, "mixed up-/downgraded pattern matches downgraded string");
         utf8::upgrade($c);
         like($c, $re, "mixed up-/downgraded pattern matches upgraded string");
+    }
+
+    {
+        # if we have 87 capture buffers defined then \87 should refer to the 87th.
+        # test that this is true for 1..100
+        my $str= "aa";
+        for my $i (1..100) {
+            my $pat= "a";
+            $pat= "($pat)" for 1 .. $i;
+            $pat.="\\$i";
+            eval {
+                ok($str=~/$pat/,"\\$i works with $i buffers");
+                1;
+            } or do {
+                ok(0,"\\$i works with $i buffers");
+            };
+        }
     }
 
 } # End of sub run_tests

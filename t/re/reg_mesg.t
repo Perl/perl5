@@ -177,6 +177,9 @@ my @death =
  'm/[\o]/' => 'Missing braces on \o{} {#} m/[\o{#}]/',
  'm/[\o{}]/' => 'Number with no digits {#} m/[\o{}{#}]/',
  'm/(?^-i:foo)/' => 'Sequence (?^-...) not recognized {#} m/(?^-{#}i:foo)/',
+ 'm/\87/' => 'Reference to nonexistent group {#} m/\87{#}/',
+ 'm/a\87/' => 'Reference to nonexistent group {#} m/a\87{#}/',
+ 'm/a\97/' => 'Reference to nonexistent group {#} m/a\97{#}/',
 );
 # Tests involving a user-defined charnames translator are in pat_advanced.t
 
@@ -203,9 +206,6 @@ my @warning = (
     '/\018/' => '\'\018\' resolved to \'\o{1}8\' {#} m/\018{#}/',
     '/[\08]/' => '\'\08\' resolved to \'\o{0}8\' {#} m/[\08{#}]/',
     '/[\018]/' => '\'\018\' resolved to \'\o{1}8\' {#} m/[\018{#}]/',
-    '/\87/' => 'Unrecognized escape \8 passed through {#} m/\8{#}7/',
-    '/a\87/' => 'Unrecognized escape \8 passed through {#} m/a\8{#}7/',
-    '/a\97/' => 'Unrecognized escape \9 passed through {#} m/a\9{#}7/',
     '/(?=a)*/' => '(?=a)* matches null string many times {#} m/(?=a)*{#}/',
     'my $x = \'\m\'; qr/a$x/' => 'Unrecognized escape \m passed through {#} m/a\m{#}/',
     '/\q/' => 'Unrecognized escape \q passed through {#} m/\q{#}/',
