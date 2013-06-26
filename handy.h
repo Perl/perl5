@@ -1550,7 +1550,15 @@ EXTCONST U32 PL_charclass[];
                                                utf8, the non-utf8 macro works
                                              */
 #define isBLANK_utf8(p)         _generic_func_utf8(_CC_BLANK, is_HORIZWS_high, p)
-#define isCNTRL_utf8(p)         _generic_utf8(_CC_CNTRL, p, 0)
+
+#ifdef EBCDIC
+    /* Because all controls are UTF-8 invariants in EBCDIC, we can use this
+     * more efficient macro instead of the more general one */
+#   define isCNTRL_utf8(p)      isCNTRL_L1(p)
+#else
+#   define isCNTRL_utf8(p)      _generic_utf8(_CC_CNTRL, p, 0)
+#endif
+
 #define isDIGIT_utf8(p)         _generic_utf8_no_upper_latin1(_CC_DIGIT, p,   \
                                                   _is_utf8_FOO(_CC_DIGIT, p))
 #define isGRAPH_utf8(p)         _generic_swash_utf8(_CC_GRAPH, p)
