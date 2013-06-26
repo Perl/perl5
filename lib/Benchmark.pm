@@ -292,6 +292,46 @@ wallclock time to be measured in microseconds, instead of integer
 seconds.  Note though that the speed computations are still conducted
 in CPU time, not wallclock time.
 
+=head1 Benchmark Object
+
+Many of the functions in this module return a Benchmark object,
+or in the case of C<timethese()>, a reference to a hash, the values of
+which are Benchmark objects.  This is useful if you want to store or
+further process results from Benchmark functions.
+
+Internally the Benchmark object holds timing values,
+described in L</"NOTES"> below.
+The following methods can be used to access them:
+
+=over 4
+
+=item cpu_p
+
+Total CPU (User + System) of the main (parent) process.
+
+=item cpu_c
+
+Total CPU (User + System) of any children processes.
+
+=item cpu_a
+
+Total CPU of parent and any children processes.
+
+=item real
+
+Real elapsed time "wallclock seconds".
+
+=item iters
+
+Number of iterations run.
+
+=back
+
+The following illustrates use of the Benchmark object:
+
+    $result = timethis(100000, sub { ... });
+    print "total CPU = ", $result->cpu_a, "\n";
+
 =head1 NOTES
 
 The data is stored as a list of values from the time and times
