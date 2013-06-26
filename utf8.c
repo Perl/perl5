@@ -107,6 +107,11 @@ Perl_uvoffuni_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
 	return d;
     }
 
+#ifdef EBCDIC
+    /* Not representable in UTF-EBCDIC */
+    flags |= UNICODE_DISALLOW_FE_FF;
+#endif
+
     /* The first problematic code point is the first surrogate */
     if (uv >= UNICODE_SURROGATE_FIRST
         && ckWARN3_d(WARN_SURROGATE, WARN_NON_UNICODE, WARN_NONCHAR))
@@ -130,6 +135,10 @@ Perl_uvoffuni_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
 	    if (flags & UNICODE_DISALLOW_SUPER
 		|| (UNICODE_IS_FE_FF(uv) && (flags & UNICODE_DISALLOW_FE_FF)))
 	    {
+#ifdef EBCDIC
+                Perl_die(aTHX_ "Can't represent character for Ox%"UVXf" on this platform", uv);
+                assert(0);
+#endif
 		return NULL;
 	    }
 	}

@@ -1181,6 +1181,13 @@ probably because you don't have write permission to the directory.
 (P) An error peculiar to VMS.  Perl thought stdin was a pipe, and tried
 to reopen it to accept binary data.  Alas, it failed.
 
+=item Can't represent character for Ox%X on this platform
+
+(F) There is a hard limit to how big a character code point can be due
+to the fundamental properties of UTF-8, especially on EBCDIC
+platforms.  The given code point exceeds that.  The only work-around is
+to not use such a large code point.
+
 =item Can't reset %ENV on this system
 
 (F) You called C<reset('E')> or similar, which tried to reset
