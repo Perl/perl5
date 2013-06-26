@@ -32,7 +32,7 @@ all interpreters and all threads in a process.
 #if defined(USE_ITHREADS)
 PERLVAR(G, op_mutex,	perl_mutex)	/* Mutex for op refcounting */
 #endif
-PERLVAR(G, curinterp,	PerlInterpreter *)
+PERLVARI(G, curinterp,	PerlInterpreter *, NULL)
 					/* currently running interpreter
 					 * (initial parent interpreter under
 					 * useithreads) */
@@ -217,7 +217,7 @@ the Perl core) will normally return C<KEYWORD_PLUGIN_DECLINE>.
 
 PERLVARI(G, keyword_plugin, Perl_keyword_plugin_t, Perl_keyword_plugin_standard)
 
-PERLVAR(G, op_sequence, HV *)		/* dump.c */
+PERLVARI(G, op_sequence, HV *, NULL)	/* dump.c */
 PERLVARI(G, op_seq,	UV,	0)	/* dump.c */
 
 #ifdef USE_ITHREADS
@@ -225,7 +225,10 @@ PERLVAR(G, dollarzero_mutex, perl_mutex) /* Modifying $0 */
 #endif
 
 /* Restricted hashes placeholder value.
- * The contents are never used, only the address. */
+   In theory, the contents are never used, only the address.
+   In practice, &PL_sv_placeholder is returned by some APIs, and the calling
+   code is checking SvOK().  */
+
 PERLVAR(G, sv_placeholder, SV)
 
 #if defined(MYMALLOC) && defined(USE_ITHREADS)

@@ -5456,6 +5456,10 @@ Perl_init_global_struct(pTHX)
 #  ifdef PERL_SET_VARS
     PERL_SET_VARS(plvarsp);
 #  endif
+#  ifdef PERL_GLOBAL_STRUCT_PRIVATE
+    plvarsp->Gsv_placeholder.sv_flags = 0;
+    memset(plvarsp->Ghash_seed, 0, sizeof(plvarsp->Ghash_seed));
+#  endif
 # undef PERL_GLOBAL_STRUCT_INIT
 # endif
     return plvarsp;

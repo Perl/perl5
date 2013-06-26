@@ -177,6 +177,12 @@ main(int argc, char **argv, char **env)
 
 #ifdef PERL_GLOBAL_STRUCT
     free_global_struct(plvarsp);
+#  ifdef PERL_GLOBAL_STRUCT_PRIVATE
+    my_plvarsp = NULL;
+    /* Remember, functions registered with atexit() can run after this point,
+       and may access "global" variables, and hence end up calling
+       Perl_GetVarsPrivate()  */
+#endif
 #endif /* PERL_GLOBAL_STRUCT */
 
     exit(exitstatus);
