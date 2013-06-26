@@ -542,8 +542,6 @@ for my $strict ("", "use re 'strict';") {
         my $expect = fixup_expect($death[$i+1]);
         no warnings 'experimental::regex_sets';
         no warnings 'experimental::re_strict';
-        # skip the utf8 test on EBCDIC since they do not die
-        #next if $::IS_EBCDIC && $regex =~ /utf8/;
 
         warning_is(sub {
                     my $eval_string = "$strict $regex";
