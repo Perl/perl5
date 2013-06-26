@@ -9714,8 +9714,6 @@ S_simplify_sort(pTHX_ OP *o)
 
     PERL_ARGS_ASSERT_SIMPLIFY_SORT;
 
-    if (!(o->op_flags & OPf_STACKED))
-	return;
     GvMULTI_on(gv_fetchpvs("a", GV_ADD|GV_NOTQUAL, SVt_PV));
     GvMULTI_on(gv_fetchpvs("b", GV_ADD|GV_NOTQUAL, SVt_PV));
     kid = kUNOP->op_first;				/* get past null */
