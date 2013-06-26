@@ -169,10 +169,9 @@ int main(int argc, char **argv, char **env) {
 #endif
     PerlInterpreter *my_perl;
 #ifdef PERL_GLOBAL_STRUCT
-    dVAR;
-    struct perl_vars *plvarsp = init_global_struct();
+    struct perl_vars *my_vars = init_global_struct();
 #  ifdef PERL_GLOBAL_STRUCT_PRIVATE
-    my_vars = my_plvarsp = plvarsp;
+    my_plvarsp = my_vars;
 #  endif
 #endif /* PERL_GLOBAL_STRUCT */
 
@@ -209,11 +208,13 @@ int main(int argc, char **argv, char **env) {
     PERL_SYS_TERM();
 
 #ifdef PERL_GLOBAL_STRUCT
-    free_global_struct(plvarsp);
+    free_global_struct(my_vars);
+#  ifdef PERL_GLOBAL_STRUCT_PRIVATE
     my_plvarsp = NULL;
     /* Remember, functions registered with atexit() can run after this point,
        and may access "global" variables, and hence end up calling
        Perl_GetVarsPrivate()  */
+#endif
 #endif /* PERL_GLOBAL_STRUCT */
 
     return 0;

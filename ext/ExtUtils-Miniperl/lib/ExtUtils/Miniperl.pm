@@ -95,12 +95,11 @@ int
 main(int argc, char **argv, char **env)
 #endif
 {
-    dVAR;
     int exitstatus, i;
 #ifdef PERL_GLOBAL_STRUCT
-    struct perl_vars *plvarsp = init_global_struct();
+    struct perl_vars *my_vars = init_global_struct();
 #  ifdef PERL_GLOBAL_STRUCT_PRIVATE
-    my_vars = my_plvarsp = plvarsp;
+    my_plvarsp = my_vars;
 #  endif
 #endif /* PERL_GLOBAL_STRUCT */
 #ifndef NO_ENV_ARRAY_IN_MAIN
@@ -176,7 +175,7 @@ main(int argc, char **argv, char **env)
     PERL_SYS_TERM();
 
 #ifdef PERL_GLOBAL_STRUCT
-    free_global_struct(plvarsp);
+    free_global_struct(my_vars);
 #  ifdef PERL_GLOBAL_STRUCT_PRIVATE
     my_plvarsp = NULL;
     /* Remember, functions registered with atexit() can run after this point,
