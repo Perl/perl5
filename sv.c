@@ -10467,7 +10467,8 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 		%-<num>p	include an SV with precision <num>	
 		%2p		include a HEK
 		%3p		include a HEK with precision of 256
-		%<num>p		(where num != 2 or 3) reserved for future
+		%4p		char* preceded by utf8 flag and length
+		%<num>p		(where num is 1 or > 4) reserved for future
 				extensions
 
 	Robin Barker 2005-07-14 (but modified since)
@@ -10479,6 +10480,15 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	    STRLEN n = 0;
 	    if (*q == '-')
 		sv = *q++;
+	    else if (strnEQ(q, UTF8f, sizeof(UTF8f)-1)) { /* UTF8f */
+		/* The argument has already gone through cBOOL, so the cast
+		   is safe. */
+		is_utf8 = (bool)va_arg(*args, int);
+		elen = va_arg(*args, UV);
+		eptr = va_arg(*args, char *);
+		q += sizeof(UTF8f)-1;
+		goto string;
+	    }
 	    n = expect_number(&q);
 	    if (*q++ == 'p') {
 		if (sv) {			/* SVf */
