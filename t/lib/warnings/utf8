@@ -17,7 +17,7 @@ __END__
 # utf8.c [utf8_to_uvchr_buf] -W
 BEGIN {
     if (ord('A') == 193) {
-        print "SKIPPED\n# ebcdic platforms do not generate Malformed UTF-8 warnings.";
+        print "SKIPPED\n# ebcdic platforms generates different Malformed UTF-8 warnings.";
         exit 0;
     }
 }
