@@ -9697,9 +9697,9 @@ Perl_ck_sort(pTHX_ OP *o)
 	firstkid = firstkid->op_sibling;
     }
 
-    /* provide list context for arguments */
-    list(firstkid);
     for (kid = firstkid; kid; kid = kid->op_sibling) {
+	/* provide list context for arguments */
+	list(kid);
 	if (stacked)
 	    op_lvalue(kid, OP_GREPSTART);
     }

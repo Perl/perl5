@@ -6,7 +6,7 @@ BEGIN {
     require 'test.pl';
 }
 use warnings;
-plan( tests => 179 );
+plan( tests => 180 );
 
 # these shouldn't hang
 {
@@ -287,6 +287,8 @@ cmp_ok($x,'eq','123',q(optimized-away comparison block doesn't take any other ar
     cxt_two();
     sub cxt_three { sort &test_if_list() }
     cxt_three();
+    sub cxt_three_anna_half { sort 0, test_if_list() }
+    cxt_three_anna_half();
 
     sub test_if_scalar {
         my $gimme = wantarray;
