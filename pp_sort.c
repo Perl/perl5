@@ -1588,7 +1588,10 @@ PP(pp_sort)
 	    if (SvREADONLY(av))
 		Perl_croak_no_modify();
 	    else
+	    {
 		SvREADONLY_on(av);
+		save_pushptr((void *)av, SAVEt_READONLY_OFF);
+	    }
 	    p1 = p2 = AvARRAY(av);
 	    sorting_av = 1;
 	}

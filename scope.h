@@ -38,12 +38,12 @@
 #define SAVEt_OP		18
 #define SAVEt_PARSER		19
 #define SAVEt_STACK_POS		20
+#define SAVEt_READONLY_OFF	21
 
-#define SAVEt_ARG1_MAX		20
+#define SAVEt_ARG1_MAX		21
 
 /* two args */
 
-#define SAVEt_ADELETE		21
 #define SAVEt_APTR		22
 #define SAVEt_AV		23
 #define SAVEt_DESTRUCTOR	24
@@ -68,17 +68,18 @@
 #define SAVEt_SV		43
 #define SAVEt_SVREF		44
 #define SAVEt_VPTR		45
+#define SAVEt_ADELETE		46
 
-#define SAVEt_ARG2_MAX		45
+#define SAVEt_ARG2_MAX		46
 
 /* three args */
 
-#define SAVEt_AELEM		46
 #define SAVEt_DELETE		47
 #define SAVEt_HELEM		48
 #define SAVEt_PADSV_AND_MORTALIZE 49
 #define SAVEt_SET_SVFLAGS	50
 #define SAVEt_GVSLOT		51
+#define SAVEt_AELEM		52
 
 #define SAVEf_SETMAGIC		1
 #define SAVEf_KEEPOLDELEM	2

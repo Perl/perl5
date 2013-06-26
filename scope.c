@@ -1228,6 +1228,9 @@ Perl_leave_scope(pTHX_ I32 base)
 	case SAVEt_PARSER:
 	    parser_free((yy_parser *) ARG0_PTR);
 	    break;
+	case SAVEt_READONLY_OFF:
+	    SvREADONLY_off(ARG0_SV);
+	    break;
 	default:
 	    Perl_croak(aTHX_ "panic: leave_scope inconsistency %u", type);
 	}

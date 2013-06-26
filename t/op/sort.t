@@ -6,7 +6,7 @@ BEGIN {
     require 'test.pl';
 }
 use warnings;
-plan( tests => 177 );
+plan( tests => 178 );
 
 # these shouldn't hang
 {
@@ -770,6 +770,8 @@ cmp_ok($answer,'eq','good','sort subr called from other package');
 
     $fail_msg = q(Modification of a read-only value attempted);
     cmp_ok(substr($@,0,length($fail_msg)),'eq',$fail_msg,'bug 7567');
+    eval { @a=1..3 };
+    is $@, "", 'abrupt scope exit turns off readonliness';
 }
 
 {
