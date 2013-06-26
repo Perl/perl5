@@ -1167,33 +1167,33 @@ my $prop;
 my ($invlist_ref, $invmap_ref, $format, $missing);
 if ($::IS_ASCII) { # On EBCDIC, other things will come first, and can vary
                 # according to code page
-$prop = "uc";
-($invlist_ref, $invmap_ref, $format, $missing) = prop_invmap($prop);
-is($format, 'al', "prop_invmap() format of '$prop' is 'al'");
-is($missing, '0', "prop_invmap() missing of '$prop' is '0'");
-is($invlist_ref->[1], 0x61, "prop_invmap('$prop') list[1] is 0x61");
-is($invmap_ref->[1], 0x41, "prop_invmap('$prop') map[1] is 0x41");
+    $prop = "uc";
+    ($invlist_ref, $invmap_ref, $format, $missing) = prop_invmap($prop);
+    is($format, 'al', "prop_invmap() format of '$prop' is 'al'");
+    is($missing, '0', "prop_invmap() missing of '$prop' is '0'");
+    is($invlist_ref->[1], 0x61, "prop_invmap('$prop') list[1] is 0x61");
+    is($invmap_ref->[1], 0x41, "prop_invmap('$prop') map[1] is 0x41");
 
-$prop = "upper";
-($invlist_ref, $invmap_ref, $format, $missing) = prop_invmap($prop);
-is($format, 's', "prop_invmap() format of '$prop' is 's");
-is($missing, 'N', "prop_invmap() missing of '$prop' is 'N'");
-is($invlist_ref->[1], 0x41, "prop_invmap('$prop') list[1] is 0x41");
-is($invmap_ref->[1], 'Y', "prop_invmap('$prop') map[1] is 'Y'");
+    $prop = "upper";
+    ($invlist_ref, $invmap_ref, $format, $missing) = prop_invmap($prop);
+    is($format, 's', "prop_invmap() format of '$prop' is 's");
+    is($missing, 'N', "prop_invmap() missing of '$prop' is 'N'");
+    is($invlist_ref->[1], 0x41, "prop_invmap('$prop') list[1] is 0x41");
+    is($invmap_ref->[1], 'Y', "prop_invmap('$prop') map[1] is 'Y'");
 
-$prop = "lower";
-($invlist_ref, $invmap_ref, $format, $missing) = prop_invmap($prop);
-is($format, 's', "prop_invmap() format of '$prop' is 's'");
-is($missing, 'N', "prop_invmap() missing of '$prop' is 'N'");
-is($invlist_ref->[1], 0x61, "prop_invmap('$prop') list[1] is 0x61");
-is($invmap_ref->[1], 'Y', "prop_invmap('$prop') map[1] is 'Y'");
+    $prop = "lower";
+    ($invlist_ref, $invmap_ref, $format, $missing) = prop_invmap($prop);
+    is($format, 's', "prop_invmap() format of '$prop' is 's'");
+    is($missing, 'N', "prop_invmap() missing of '$prop' is 'N'");
+    is($invlist_ref->[1], 0x61, "prop_invmap('$prop') list[1] is 0x61");
+    is($invmap_ref->[1], 'Y', "prop_invmap('$prop') map[1] is 'Y'");
 
-$prop = "lc";
-($invlist_ref, $invmap_ref, $format, $missing) = prop_invmap($prop);
-is($format, 'al', "prop_invmap() format of '$prop' is 'al'");
-is($missing, '0', "prop_invmap() missing of '$prop' is '0'");
-is($invlist_ref->[1], 0x41, "prop_invmap('$prop') list[1] is 0x41");
-is($invmap_ref->[1], 0x61, "prop_invmap('$prop') map[1] is 0x61");
+    $prop = "lc";
+    ($invlist_ref, $invmap_ref, $format, $missing) = prop_invmap($prop);
+    is($format, 'al', "prop_invmap() format of '$prop' is 'al'");
+    is($missing, '0', "prop_invmap() missing of '$prop' is '0'");
+    is($invlist_ref->[1], 0x41, "prop_invmap('$prop') list[1] is 0x41");
+    is($invmap_ref->[1], 0x61, "prop_invmap('$prop') map[1] is 0x61");
 }
 
 # This property is stable and small, so can test all of it
