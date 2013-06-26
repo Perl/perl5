@@ -308,7 +308,12 @@ foreach my $ref (\@warning, \@experimental_regex_sets, \@deprecated) {
                 }
             }
             foreach my $i (0 .. $count - 1) {
-                if (like($got[$i], qr/\Q$expect[$i]/, "... and gave expected warning[$i]")) {
+                if (! like($got[$i], qr/\Q$expect[$i]/, "... and gave expected warning")) {
+                    chomp($got[$i]);
+                    chomp($expect[$i]);
+                    diag("GOT\n'$got[$i]'\nEXPECT\n'$expect[$i]'");
+                }
+                else {
                     ok (0 == capture_warnings(sub {
                                     $_ = "x";
                                     eval "no warnings '$warning_type'; $regex;" }
