@@ -117,9 +117,11 @@ nok
 ########
 # Implicit unicode_eval feature
 use v5.15;
-print eval "use utf8; q|\xc5\xbf|" eq "\xc5\xbf" ? "ok\n" : "nok\n";
+require '../../t/charset_tools.pl';
+my $long_s = byte_utf8a_to_utf8n("\xc5\xbf");
+print eval "use utf8; q|$long_s|" eq $long_s ? "ok\n" : "nok\n";
 use v5.8.8;
-print eval "use utf8; q|\xc5\xbf|" eq "\x{17f}" ? "ok\n" : "nok\n";
+print eval "use utf8; q|$long_s|" eq "\x{17f}" ? "ok\n" : "nok\n";
 EXPECT
 ok
 ok
