@@ -162,7 +162,6 @@ my %specialformats = (IVdf => 'd',
 		      NVgf => 'f',
 		      HEKf256=>'s',
 		      HEKf => 's',
-		      UTF8f=> 's',
 		      SVf256=>'s',
 		      SVf32=> 's',
 		      SVf  => 's');

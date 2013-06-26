@@ -1042,10 +1042,10 @@ Perl_gv_fetchmethod_pvn_flags(pTHX_ HV *stash, const char *name, const STRLEN le
 		}
 
 		Perl_croak(aTHX_
-			   "Can't locate object method \"%"UTF8f
-			   "\" via package \"%"SVf"\""
+			   "Can't locate object method \"%"SVf"\" via package \"%"SVf"\""
 			   " (perhaps you forgot to load \"%"SVf"\"?)",
-			   is_utf8, nend - name, name,
+			   SVfARG(newSVpvn_flags(name, nend - name,
+                                SVs_TEMP | is_utf8)),
                            SVfARG(packnamesv), SVfARG(packnamesv));
 	    }
 	}
