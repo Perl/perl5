@@ -4,8 +4,8 @@
 	##
 	## Copyright (C) 2003-2013 Mark Shelor, All Rights Reserved
 	##
-	## Version: 5.84
-	## Sat Mar  9 17:36:08 MST 2013
+	## Version: 5.85
+	## Wed Jun 26 04:05:26 MST 2013
 
 	## shasum SYNOPSIS adapted from GNU Coreutils sha1sum.
 	## Add an "-a" option for algorithm selection, a "-p"
@@ -97,7 +97,7 @@ use strict;
 use Fcntl;
 use Getopt::Long;
 
-my $VERSION = "5.84";
+my $VERSION = "5.85";
 
 
 	## Try to use Digest::SHA.  If not installed, use the slower
@@ -164,7 +164,7 @@ usage(1, "shasum: --status option used only when verifying checksums\n")
 	if $status && !$check;
 
 
-	## Default to SHA-1 unless overriden by command line option
+	## Default to SHA-1 unless overridden by command line option
 
 $alg = 1 unless defined $alg;
 grep { $_ == $alg } (1, 224, 256, 384, 512, 512224, 512256)
@@ -181,7 +181,7 @@ if ($version) {
 
 	## Try to figure out if the OS is DOS-like.  If it is,
 	## default to binary mode when reading files, unless
-	## explicitly overriden by command line "--text" or
+	## explicitly overridden by command line "--text" or
 	## "--portable" options.
 
 my $isDOSish = ($^O =~ /^(MSWin\d\d|os2|dos|mint|cygwin)$/);

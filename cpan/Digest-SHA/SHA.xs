@@ -31,6 +31,9 @@ PROTOTYPES: ENABLE
 int
 shaclose(s)
 	SHA *	s
+CODE:
+	RETVAL = shaclose(s);
+	sv_setiv(SvRV(ST(0)), 0);
 
 int
 shadump(file, s)

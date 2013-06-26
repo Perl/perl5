@@ -1,5 +1,12 @@
 Revision history for Perl extension Digest::SHA.
 
+5.85  Wed Jun 26 04:05:26 MST 2013
+	- workaround for repeated calls to shaclose (ref. Bug #86295)
+		-- need to explicitly reset internal pointer to NULL
+			ref. shaclose() in SHA.xs
+	- corrected typos in shasum script
+		-- ref. Bug #85430
+
 5.84  Sat Mar  9 17:36:08 MST 2013
 	- untweaked Makefile.PL to remove dependencies of SHA.c
 		-- dependencies were breaking builds on VMS
