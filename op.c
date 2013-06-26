@@ -9657,7 +9657,8 @@ Perl_ck_sort(pTHX_ OP *o)
 {
     dVAR;
     OP *firstkid;
-    HV * const hinthv = GvHV(PL_hintgv);
+    HV * const hinthv =
+	PL_hints & HINT_LOCALIZE_HH ? GvHV(PL_hintgv) : NULL;
 
     PERL_ARGS_ASSERT_CK_SORT;
 
