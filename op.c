@@ -6844,12 +6844,14 @@ Perl_cv_ckproto_len_flags(pTHX_ const CV *cv, const GV *gv, const char *p,
 	if (name)
 	    Perl_sv_catpvf(aTHX_ msg, " sub %"SVf, SVfARG(name));
 	if (cvp)
-	    Perl_sv_catpvf(aTHX_ msg, " (%"UTF8f")", SvUTF8(cv),clen,cvp);
+	    Perl_sv_catpvf(aTHX_ msg, " (%"SVf")",
+		SVfARG(newSVpvn_flags(cvp,clen, SvUTF8(cv)|SVs_TEMP))
+	    );
 	else
 	    sv_catpvs(msg, ": none");
 	sv_catpvs(msg, " vs ");
 	if (p)
-	    Perl_sv_catpvf(aTHX_ msg, "(%"UTF8f")", flags&SVf_UTF8,len,p);
+	    Perl_sv_catpvf(aTHX_ msg, "(%"SVf")", SVfARG(newSVpvn_flags(p, len, flags | SVs_TEMP)));
 	else
 	    sv_catpvs(msg, "none");
 	Perl_warner(aTHX_ packWARN(WARN_PROTOTYPE), "%"SVf, SVfARG(msg));
