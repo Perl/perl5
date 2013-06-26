@@ -6,7 +6,7 @@ BEGIN {
     require 'test.pl';
 }
 use warnings;
-plan( tests => 178 );
+plan( tests => 179 );
 
 # these shouldn't hang
 {
@@ -1001,3 +1001,7 @@ sub yarn($$) { "no thinking aloud" }
 eval { eval { use warnings FATAL => 'all'; () = sort yarn 1,2 } };
 is $@, "",
   'no panic/crash with fatal warnings when sort sub($$) returns string';
+
+$#a = -1;
+() = [sort { $a = 10; $b = 10; 0 } $#a, $#a];
+is $#a, 10, 'sort block modifying $a and $b';

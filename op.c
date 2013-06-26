@@ -9657,8 +9657,10 @@ Perl_ck_sort(pTHX_ OP *o)
 {
     dVAR;
     OP *firstkid;
+    OP *kid;
     HV * const hinthv =
 	PL_hints & HINT_LOCALIZE_HH ? GvHV(PL_hintgv) : NULL;
+    U8 stacked;
 
     PERL_ARGS_ASSERT_CK_SORT;
 
@@ -9676,7 +9678,7 @@ Perl_ck_sort(pTHX_ OP *o)
     if (o->op_flags & OPf_STACKED)
 	simplify_sort(o);
     firstkid = cLISTOPo->op_first->op_sibling;		/* get past pushmark */
-    if (o->op_flags & OPf_STACKED) {			/* may have been cleared */
+    if ((stacked = o->op_flags & OPf_STACKED)) {	/* may have been cleared */
 	OP *kid = cUNOPx(firstkid)->op_first;		/* get past null */
 
 	if (kid->op_type == OP_SCOPE || kid->op_type == OP_LEAVE) {
@@ -9697,6 +9699,10 @@ Perl_ck_sort(pTHX_ OP *o)
 
     /* provide list context for arguments */
     list(firstkid);
+    for (kid = firstkid; kid; kid = kid->op_sibling) {
+	if (stacked)
+	    op_lvalue(kid, OP_GREPSTART);
+    }
 
     return o;
 }
