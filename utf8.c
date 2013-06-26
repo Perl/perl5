@@ -100,6 +100,11 @@ Perl_uvoffuni_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
 {
     PERL_ARGS_ASSERT_UVOFFUNI_TO_UTF8_FLAGS;
 
+    if (UNI_IS_INVARIANT(uv)) {
+	*d++ = (U8) LATIN1_TO_NATIVE(uv);
+	return d;
+    }
+
     /* The first problematic code point is the first surrogate */
     if (uv >= UNICODE_SURROGATE_FIRST
         && ckWARN4_d(WARN_UTF8, WARN_SURROGATE, WARN_NON_UNICODE, WARN_NONCHAR))
@@ -137,12 +142,9 @@ Perl_uvoffuni_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
 	    }
 	}
     }
-    if (UNI_IS_INVARIANT(uv)) {
-	*d++ = (U8) LATIN1_TO_NATIVE(uv);
-	return d;
-    }
+
 #if defined(EBCDIC)
-    else {
+    {
 	STRLEN len  = OFFUNISKIP(uv);
 	U8 *p = d+len-1;
 	while (p > d) {
