@@ -2668,7 +2668,7 @@ lightly.
 All bytes in a multi-byte UTF-8 character will have the high bit set,
 so you can test if you need to do something special with this
 character like this (the UTF8_IS_INVARIANT() is a macro that tests
-whether the byte can be encoded as a single byte even in UTF-8):
+whether the byte is encoded as a single byte even in UTF-8):
 
     U8 *utf;
     U8 *utf_end; /* 1 beyond buffer pointed to by utf */
