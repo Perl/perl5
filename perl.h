@@ -1227,16 +1227,16 @@ EXTERN_C char *crypt(const char *, const char *);
 #endif
 
 #ifdef HAS_STRERROR
-#ifndef DONT_DECLARE_STD
+#   ifndef DONT_DECLARE_STD
 #       ifdef VMS
 	char *strerror (int,...);
 #       else
 	char *strerror (int);
 #       endif
-#endif
-#       ifndef Strerror
-#           define Strerror strerror
-#       endif
+#    endif
+#    ifndef Strerror
+#       define Strerror strerror
+#    endif
 #else
 #    ifdef HAS_SYS_ERRLIST
 	extern int sys_nerr;
