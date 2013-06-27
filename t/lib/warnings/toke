@@ -890,6 +890,11 @@ $^W = 0 ;
     *foo *foo ;
 }
 *foo *foo ;
+# These should not warn [perl #117535]:
+foo**foo ;
+no warnings 'deprecated';
+sort $*foo ;
+sort $ *foo ;
 EXPECT
 Operator or semicolon missing before *foo at - line 3.
 Ambiguous use of * resolved as operator * at - line 3.
@@ -897,6 +902,59 @@ Operator or semicolon missing before *foo at - line 8.
 Ambiguous use of * resolved as operator * at - line 8.
 Operator or semicolon missing before *foo at - line 10.
 Ambiguous use of * resolved as operator * at - line 10.
+########
+# toke.c
+$^W = 0 ;
+%foo %foo ;
+{
+    no warnings 'ambiguous' ;
+    %foo %foo ;
+    use warnings 'ambiguous' ;
+    %foo %foo ;
+}
+%foo %foo ;
+# This should not produce ambiguity warnings [perl #117535]:
+sort $%foo ;
+sort $ %foo ;
+EXPECT
+Operator or semicolon missing before %foo at - line 3.
+Ambiguous use of % resolved as operator % at - line 3.
+Operator or semicolon missing before %foo at - line 8.
+Ambiguous use of % resolved as operator % at - line 8.
+Operator or semicolon missing before %foo at - line 10.
+Ambiguous use of % resolved as operator % at - line 10.
+Bareword found where operator expected at - line 12, near "$%foo"
+	(Missing operator before foo?)
+Bareword found where operator expected at - line 13, near "$ %foo"
+	(Missing operator before foo?)
+Illegal modulus zero at - line 3.
+########
+# toke.c
+$^W = 0 ;
+&foo &foo ;
+{
+    no warnings 'ambiguous' ;
+    &foo &foo ;
+    use warnings 'ambiguous' ;
+    &foo &foo ;
+}
+&foo &foo ;
+# These should not warn produce ambiguity warnings [perl #76910]:
+foo&&foo ;
+sort $&foo ;
+sort $ &foo ;
+EXPECT
+Operator or semicolon missing before &foo at - line 3.
+Ambiguous use of & resolved as operator & at - line 3.
+Operator or semicolon missing before &foo at - line 8.
+Ambiguous use of & resolved as operator & at - line 8.
+Operator or semicolon missing before &foo at - line 10.
+Ambiguous use of & resolved as operator & at - line 10.
+Bareword found where operator expected at - line 13, near "$&foo"
+	(Missing operator before foo?)
+Bareword found where operator expected at - line 14, near "$ &foo"
+	(Missing operator before foo?)
+Undefined subroutine &main::foo called at - line 3.
 ########
 # toke.c
 use utf8;

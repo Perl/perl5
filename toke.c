@@ -4640,6 +4640,7 @@ Perl_yylex(pTHX)
     char *d;
     STRLEN len;
     bool bof = FALSE;
+    const bool saw_infix_sigil = PL_parser->saw_infix_sigil;
     U8 formbrack = 0;
     U32 fake_eof = 0;
 
@@ -5042,6 +5043,7 @@ Perl_yylex(pTHX)
     s = PL_bufptr;
     PL_oldoldbufptr = PL_oldbufptr;
     PL_oldbufptr = s;
+    PL_parser->saw_infix_sigil = 0;
 
   retry:
 #ifdef PERL_MAD
@@ -5697,6 +5699,7 @@ Perl_yylex(pTHX)
 	    s--;
 	    TOKEN(0);
 	}
+	PL_parser->saw_infix_sigil = 1;
 	Mop(OP_MULTIPLY);
 
     case '%':
@@ -5705,6 +5708,7 @@ Perl_yylex(pTHX)
 		    PL_lex_fakeeof >= LEX_FAKEEOF_ASSIGN)
 		TOKEN(0);
 	    ++s;
+	    PL_parser->saw_infix_sigil = 1;
 	    Mop(OP_MODULO);
 	}
 	PL_tokenbuf[0] = '%';
@@ -6198,6 +6202,7 @@ Perl_yylex(pTHX)
 		s--;
 		TOKEN(0);
 	    }
+	    PL_parser->saw_infix_sigil = 1;
 	    BAop(OP_BIT_AND);
 	}
 
@@ -7433,7 +7438,8 @@ Perl_yylex(pTHX)
 		op_free(rv2cv_op);
 
 	    safe_bareword:
-		if ((lastchar == '*' || lastchar == '%' || lastchar == '&')) {
+		if ((lastchar == '*' || lastchar == '%' || lastchar == '&')
+		 && saw_infix_sigil) {
 		    Perl_ck_warner_d(aTHX_ packWARN(WARN_AMBIGUOUS),
 				     "Operator or semicolon missing before %c%"SVf,
 				     lastchar, SVfARG(newSVpvn_flags(PL_tokenbuf,
