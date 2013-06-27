@@ -3,7 +3,7 @@ package HTTP::Tiny;
 use strict;
 use warnings;
 # ABSTRACT: A small, simple, correct HTTP/1.1 client
-our $VERSION = '0.033'; # VERSION
+our $VERSION = '0.034'; # VERSION
 
 use Carp ();
 
@@ -210,7 +210,7 @@ sub _agent {
 sub _request {
     my ($self, $method, $url, $args) = @_;
 
-    my ($scheme, $host, $port, $path_query) = $self->_split_url($url);
+    my ($scheme, $host, $port, $path_query, $auth) = $self->_split_url($url);
 
     my $request = {
         method    => $method,
@@ -237,7 +237,7 @@ sub _request {
         $handle->connect($scheme, $host, $port);
     }
 
-    $self->_prepare_headers_and_cb($request, $args, $url);
+    $self->_prepare_headers_and_cb($request, $args, $url, $auth);
     $handle->write_request($request);
 
     my $response;
@@ -266,7 +266,7 @@ sub _request {
 }
 
 sub _prepare_headers_and_cb {
-    my ($self, $request, $args, $url) = @_;
+    my ($self, $request, $args, $url, $auth) = @_;
 
     for ($self->{default_headers}, $args->{headers}) {
         next unless defined;
@@ -306,6 +306,13 @@ sub _prepare_headers_and_cb {
     if ( $self->{cookie_jar} ) {
         my $cookies = $self->cookie_jar->cookie_header( $url );
         $request->{headers}{cookie} = $cookies if length $cookies;
+    }
+
+    # if we have Basic auth parameters, add them
+    if ( length $auth && ! defined $request->{headers}{authentication} ) {
+        require MIME::Base64;
+        $request->{headers}{authorization} =
+            "Basic " . MIME::Base64::encode_base64($auth, "");
     }
 
     return;
@@ -382,15 +389,23 @@ sub _split_url {
     $scheme     = lc $scheme;
     $path_query = "/$path_query" unless $path_query =~ m<\A/>;
 
-    my $host = (length($authority)) ? lc $authority : 'localhost';
-       $host =~ s/\A[^@]*@//;   # userinfo
+    my ($auth,$host);
+    $authority = (length($authority)) ? $authority : 'localhost';
+    if ( $authority =~ /@/ ) {
+        ($auth,$host) = $authority =~ m/\A([^@]*)@(.*)\z/;   # user:pass@host
+    }
+    else {
+        $host = $authority;
+        $auth = '';
+    }
+    $host = lc $host;
     my $port = do {
        $host =~ s/:([0-9]*)\z// && length $1
          ? $1
          : ($scheme eq 'http' ? 80 : $scheme eq 'https' ? 443 : undef);
     };
 
-    return ($scheme, $host, $port, $path_query);
+    return ($scheme, $host, $port, $path_query, $auth);
 }
 
 # Date conversions adapted from HTTP::Date
@@ -993,7 +1008,7 @@ HTTP::Tiny - A small, simple, correct HTTP/1.1 client
 
 =head1 VERSION
 
-version 0.033
+version 0.034
 
 =head1 SYNOPSIS
 
@@ -1164,8 +1179,15 @@ be updated accordingly.
 
 Executes an HTTP request of the given method type ('GET', 'HEAD', 'POST',
 'PUT', etc.) on the given URL.  The URL must have unsafe characters escaped and
-international domain names encoded.  A hashref of options may be appended to
-modify the request.
+international domain names encoded.
+
+If the URL includes a "user:password" stanza, they will be used for Basic-style
+authorization headers.  (Authorization headers will not be included in a
+redirected request.) For example:
+
+    $http->request('GET', 'http://Aladdin:open sesame@example.com/');
+
+A hashref of options may be appended to modify the request.
 
 Valid options are:
 

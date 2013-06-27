@@ -1082,7 +1082,11 @@ cpan/HTTP-Tiny/t/140_proxy.t
 cpan/HTTP-Tiny/t/141_no_proxy.t
 cpan/HTTP-Tiny/t/150_post_form.t
 cpan/HTTP-Tiny/t/160_cookies.t
+cpan/HTTP-Tiny/t/161_basic_auth.t
 cpan/HTTP-Tiny/t/BrokenCookieJar.pm
+cpan/HTTP-Tiny/t/cases/auth-01.txt
+cpan/HTTP-Tiny/t/cases/auth-02.txt
+cpan/HTTP-Tiny/t/cases/auth-03.txt
 cpan/HTTP-Tiny/t/cases/cookies-01.txt
 cpan/HTTP-Tiny/t/cases/cookies-02.txt
 cpan/HTTP-Tiny/t/cases/cookies-03.txt
