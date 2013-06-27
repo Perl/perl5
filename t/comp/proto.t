@@ -18,7 +18,7 @@ BEGIN {
 # strict
 use strict;
 
-print "1..186\n";
+print "1..187\n";
 
 my $i = 1;
 
@@ -688,6 +688,15 @@ for my $p ( "", qw{ () ($) ($@) ($%) ($;$) (&) (&\@) (&@) (%) (\%) (\@) } ) {
 eval "sub good (\$\t\$\n\$) { 1; }";
 print "not " if $@;
 print "ok ", $i++, "\n";
+# [perl #118629]
+{
+  my $warnings = 0;
+  local $SIG{__WARN__} = sub { $warnings++;};
+  $::{ckproto_test} = ' $ $ ';
+	eval 'sub ckproto_test($$){1;}';
+  print "not " if $warnings;
+  print "ok ", $i++, " Check that ckproto ignores spaces in comparisons\n";
+}
 
 # Ought to fail, doesn't in 5.8.1.
 eval 'sub bug (\[%@]) {  } my $array = [0 .. 1]; bug %$array;';
