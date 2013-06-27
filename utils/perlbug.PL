@@ -22,37 +22,12 @@ $file .= '.com' if $^O eq 'VMS';
 
 open OUT, ">$file" or die "Can't create $file: $!";
 
-# extract patchlevel.h information
+# get patchlevel.h timestamp
 
-open PATCH_LEVEL, "<" . catfile(updir, "patchlevel.h")
-    or die "Can't open patchlevel.h: $!";
+-e catfile(updir, "patchlevel.h")
+    or die "Can't find patchlevel.h: $!";
 
-my $patchlevel_date = (stat PATCH_LEVEL)[9];
-
-while (<PATCH_LEVEL>) {
-    last if $_ =~ /^\s*static\s+(?:const\s+)?char.*?local_patches\[\]\s*=\s*{\s*$/;
-}
-
-if (! defined($_)) {
-    warn "Warning: local_patches section not found in patchlevel.h\n";
-}
-
-my @patches;
-while (<PATCH_LEVEL>) {
-    last if /^\s*}/;
-    next if /^\s*#/;  # preprocessor stuff
-    next if /PERL_GIT_UNPUSHED_COMMITS/;    # XXX expand instead
-    next if /"uncommitted-changes"/;        # XXX determine if active instead
-    chomp;
-    s/^\s+,?\s*"?//;
-    s/"?\s*,?$//;
-    s/(['\\])/\\$1/g;
-    push @patches, $_ unless $_ eq 'NULL';
-}
-my $patch_desc = "'" . join("',\n    '", @patches) . "'";
-my $patch_tags = join "", map /(\S+)/ ? "+$1 " : (), @patches;
-
-close(PATCH_LEVEL) or die "Error closing patchlevel.h: $!";
+my $patchlevel_date = (stat _)[9];
 
 # TO DO (perhaps): store/embed $Config::config_sh into perlbug. When perlbug is
 # used, compare $Config::config_sh with the stored version. If they differ then
@@ -74,15 +49,13 @@ $Config{startperl}
 my \$config_tag1 = '$extract_version - $Config{cf_time}';
 
 my \$patchlevel_date = $patchlevel_date;
-my \$patch_tags = '$patch_tags';
-my \@patches = (
-    $patch_desc
-);
 !GROK!THIS!
 
 # In the following, perl variables are not expanded during extraction.
 
 print OUT <<'!NO!SUBS!';
+my @patches = Config::local_patches();
+my $patch_tags = join "", map /(\S+)/ ? "+$1 " : (), @patches;
 
 use warnings;
 use strict;
