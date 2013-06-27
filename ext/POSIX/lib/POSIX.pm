@@ -4,7 +4,7 @@ use warnings;
 
 our ($AUTOLOAD, %SIGRT);
 
-our $VERSION = '1.33';
+our $VERSION = '1.34';
 
 require XSLoader;
 
@@ -187,6 +187,8 @@ eval join ';', map "sub $_", keys %replacement, keys %reimpl;
 
 sub AUTOLOAD {
     my ($func) = ($AUTOLOAD =~ /.*::(.*)/);
+
+    die "POSIX.xs has failed to load\n" if $func eq 'constant';
 
     if (my $code = $reimpl{$func}) {
 	my ($num, $arg) = (0, '');
