@@ -10172,8 +10172,11 @@ S_scan_heredoc(pTHX_ char *s)
 	}
 	CopLINE_set(PL_curcop, (line_t)PL_multi_start - 1);
 	if (!SvCUR(PL_linestr) || PL_bufend[-1] != '\n') {
-	    lex_grow_linestr(SvCUR(PL_linestr) + 2);
+            s = lex_grow_linestr(SvLEN(PL_linestr) + 3);
+            /* ^That should be enough to avoid this needing to grow:  */
 	    sv_catpvs(PL_linestr, "\n\0");
+            assert(s == SvPVX(PL_linestr));
+            PL_bufend = SvEND(PL_linestr);
 	}
 	s = PL_bufptr;
 #ifdef PERL_MAD
