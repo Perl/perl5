@@ -4976,7 +4976,6 @@ t/lib/warnings/op		Tests for op.c for warnings.t
 t/lib/warnings/pad		Tests for pad.c for warnings.t
 t/lib/warnings/perl		Tests for perl.c for warnings.t
 t/lib/warnings/perlio		Tests for perlio.c for warnings.t
-t/lib/warnings/perly		Tests for perly.y for warnings.t
 t/lib/warnings/pp		Tests for pp.c for warnings.t
 t/lib/warnings/pp_ctl		Tests for pp_ctl.c for warnings.t
 t/lib/warnings/pp_hot		Tests for pp_hot.c for warnings.t

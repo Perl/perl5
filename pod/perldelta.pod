@@ -45,6 +45,11 @@ XXX For a release on a stable branch, this section aspires to be:
 
 [ List each incompatible change as a =head2 entry ]
 
+=head2 C<do> can no longer be used to call subroutines
+
+The C<do SUBROUTINE(LIST)> form has resulted in a deprecation warning
+since Perl v5.0.0, and is now a syntax error.
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.

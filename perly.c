@@ -433,9 +433,6 @@ Perl_yyparse (pTHX_ int gramtype)
 
     switch (yyn) {
 
-
-#define dep() deprecate("\"do\" to call subroutines")
-
 #ifdef PERL_IN_MADLY_C
 #  define IVAL(i) (i)->tk_lval.ival
 #  define PVAL(p) (p)->tk_lval.pval

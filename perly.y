@@ -1120,49 +1120,6 @@ termdo	:       DO term	%prec UNIOP                     /* do $filename */
 			{ $$ = newUNOP(OP_NULL, OPf_SPECIAL, op_scope($2));
 			  TOKEN_GETMAD($1,$$,'D');
 			}
-	|	DO subname '(' ')'                  /* do somesub() */
-			{ $$ = newUNOP(OP_ENTERSUB,
-			    OPf_SPECIAL|OPf_STACKED,
-			    op_prepend_elem(OP_LIST,
-				scalar(newCVREF(
-				    (OPpENTERSUB_AMPER<<8),
-				    scalar($2)
-				)),(OP*)NULL)); dep();
-			  TOKEN_GETMAD($1,$$,'o');
-			  TOKEN_GETMAD($3,$$,'(');
-			  TOKEN_GETMAD($4,$$,')');
-			}
-	|	DO subname '(' expr ')'             /* do somesub(@args) */
-			{ $$ = newUNOP(OP_ENTERSUB,
-			    OPf_SPECIAL|OPf_STACKED,
-			    op_append_elem(OP_LIST,
-				$4,
-				scalar(newCVREF(
-				    (OPpENTERSUB_AMPER<<8),
-				    scalar($2)
-				)))); dep();
-			  TOKEN_GETMAD($1,$$,'o');
-			  TOKEN_GETMAD($3,$$,'(');
-			  TOKEN_GETMAD($5,$$,')');
-			}
-	|	DO scalar '(' ')'                /* do $subref () */
-			{ $$ = newUNOP(OP_ENTERSUB, OPf_SPECIAL|OPf_STACKED,
-			    op_prepend_elem(OP_LIST,
-				scalar(newCVREF(0,scalar($2))), (OP*)NULL)); dep();
-			  TOKEN_GETMAD($1,$$,'o');
-			  TOKEN_GETMAD($3,$$,'(');
-			  TOKEN_GETMAD($4,$$,')');
-			}
-	|	DO scalar '(' expr ')'           /* do $subref (@args) */
-			{ $$ = newUNOP(OP_ENTERSUB, OPf_SPECIAL|OPf_STACKED,
-			    op_prepend_elem(OP_LIST,
-				$4,
-				scalar(newCVREF(0,scalar($2))))); dep();
-			  TOKEN_GETMAD($1,$$,'o');
-			  TOKEN_GETMAD($3,$$,'(');
-			  TOKEN_GETMAD($5,$$,')');
-			}
-
         ;
 
 term	:	termbinop
