@@ -76,10 +76,6 @@ C<experimental::regex_sets>.
 
 Introduced in Perl 5.18
 
-=item The <:pop> IO pseudolayer
-
-See also L<perlrun>
-
 =item The <:win32> IO pseudolayer
 
 See also L<perlrun>
@@ -278,6 +274,12 @@ See also L<perlsub>
 C<(*ACCEPT)>
 
 Introduced in: Perl 5.10
+
+Accepted in Perl 5.20.0
+
+=item The <:pop> IO pseudolayer
+
+See also L<perlrun>
 
 Accepted in Perl 5.20.0
 
