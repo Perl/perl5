@@ -1008,7 +1008,6 @@ $#a = -1;
 () = [sort { $a = 10; $b = 10; 0 } $#a, $#a];
 is $#a, 10, 'sort block modifying $a and $b';
 
-$::TODO = ' ';
 () = sort {
     is \$a, \$a, '[perl #78194] op return values passed to sort'; 0
 } "${\''}", "${\''}";
