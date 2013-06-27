@@ -38,14 +38,15 @@
 /*
  * Standardize the locale name from a string returned by 'setlocale'.
  *
- * The standard return value of setlocale() is either
+ * The typical return value of setlocale() is either
  * (1) "xx_YY" if the first argument of setlocale() is not LC_ALL
  * (2) "xa_YY xb_YY ..." if the first argument of setlocale() is LC_ALL
  *     (the space-separated values represent the various sublocales,
- *      in some unspecified order)
+ *      in some unspecified order).  This is not handled by this function.
  *
  * In some platforms it has a form like "LC_SOMETHING=Lang_Country.866\n",
- * which is harmful for further use of the string in setlocale().
+ * which is harmful for further use of the string in setlocale().  This
+ * function removes the trailing new line and everything up through the '='
  *
  */
 STATIC char *
