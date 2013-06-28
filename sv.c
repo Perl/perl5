@@ -2928,7 +2928,7 @@ Perl_sv_2pv_flags(pTHX_ SV *const sv, STRLEN *const lp, const I32 flags)
              * change to the C locale during the Gconvert and then change back.
              * But if we're already in the C locale (PL_numeric_standard is
              * TRUE in that case), no need to do any changing */
-            if (PL_numeric_standard || IN_LOCALE_RUNTIME) {
+            if (PL_numeric_standard || IN_SOME_LOCALE_FORM_RUNTIME) {
                 Gconvert(SvNVX(sv), NV_DIG, 0, s);
             }
             else {
