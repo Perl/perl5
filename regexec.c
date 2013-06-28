@@ -2135,6 +2135,18 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
     /* see how far we have to get to not match where we matched before */
     reginfo->till = startpos+minend;
 
+    if (prog->extflags & RXf_EVAL_SEEN && SvPADTMP(sv) && !IS_PADGV(sv)) {
+        /* SAVEFREESV, not sv_mortalcopy, as this SV must last until after
+           S_cleanup_regmatch_info_aux has executed (registered by
+           SAVEDESTRUCTOR_X below).  S_cleanup_regmatch_info_aux modifies
+           magic belonging to this SV.
+           Not newSVsv, either, as it does not COW.
+        */
+        reginfo->sv = newSV(0);
+        sv_setsv(reginfo->sv, sv);
+        SAVEFREESV(reginfo->sv);
+    }
+
     /* reserve next 2 or 3 slots in PL_regmatch_state:
      * slot N+0: may currently be in use: skip it
      * slot N+1: use for regmatch_info_aux struct

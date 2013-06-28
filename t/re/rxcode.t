@@ -92,7 +92,6 @@ cmp_ok( scalar(@var), '==', 0, '..still nothing pushed (package)' );
     is eval { "a" =~ /a++(?{})+$x/x } || $@, '1', '/a++(?{})+$code_block/'
 }
 
-$::TODO = "not fixed yet";
 # [perl #78194] $_ in code block aliasing op return values
 "$_" =~ /(?{ is \$_, \$_,
                '[perl #78194] \$_ == \$_ when $_ aliases "$x"' })/;
