@@ -6816,10 +6816,10 @@ Perl_cv_ckproto_len_flags(pTHX_ const CV *cv, const GV *gv, const char *p,
 
     PERL_ARGS_ASSERT_CV_CKPROTO_LEN_FLAGS;
 
-    if (!ckWARN_d(WARN_PROTOTYPE))
+    if (p == NULL && cvp == NULL)
 	return;
 
-    if (p == NULL && cvp == NULL)
+    if (!ckWARN_d(WARN_PROTOTYPE))
 	return;
 
     if (p && cvp) {
