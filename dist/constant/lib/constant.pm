@@ -25,12 +25,19 @@ BEGIN {
     # We'd like to do use constant _CAN_PCS => $] > 5.009002
     # but that's a bit tricky before we load the constant module :-)
     # By doing this, we save 1 run time check for *every* call to import.
-    no strict 'refs';
     my $const = $] > 5.009002;
-    *_CAN_PCS = sub () {$const};
-
     my $downgrade = $] < 5.015004; # && $] >= 5.008
-    *_DOWNGRADE = sub () { $downgrade };
+    if ($const) {
+	Internals::SvREADONLY($const, 1);
+	Internals::SvREADONLY($downgrade, 1);
+	$constant::{_CAN_PCS}   = \$const;
+	$constant::{_DOWNGRADE} = \$downgrade;
+    }
+    else {
+	no strict 'refs';
+	*{"_CAN_PCS"}   = sub () {$const};
+	*{"_DOWNGRADE"} = sub () { $downgrade };
+    }
 }
 
 #=======================================================================
@@ -128,14 +135,23 @@ sub import {
 
 		# The constant serves to optimise this entire block out on
 		# 5.8 and earlier.
-		if (_CAN_PCS && $symtab && !exists $symtab->{$name}) {
-		    # No typeglob yet, so we can use a reference as space-
-		    # efficient proxy for a constant subroutine
+		if (_CAN_PCS) {
+		    # Use a reference as a proxy for a constant subroutine.
+		    # If this is not a glob yet, it saves space.  If it is
+		    # a glob, we must still create it this way to get the
+		    # right internal flags set, as constants are distinct
+		    # from subroutines created with sub(){...}.
 		    # The check in Perl_ck_rvconst knows that inlinable
 		    # constants from cv_const_sv are read only. So we have to:
 		    Internals::SvREADONLY($scalar, 1);
-		    $symtab->{$name} = \$scalar;
-		    ++$flush_mro;
+		    if ($symtab && !exists $symtab->{$name}) {
+			$symtab->{$name} = \$scalar;
+			++$flush_mro;
+		    }
+		    else {
+			local $constant::{_dummy} = \$scalar;
+			*$full_name = \&{"_dummy"};
+		    }
 		} else {
 		    *$full_name = sub () { $scalar };
 		}
