@@ -197,16 +197,16 @@ C<__FILE__>, C<goto>, C<last>, C<__LINE__>, C<next>, C<__PACKAGE__>,
 C<redo>, C<return>, C<sub>, C<__SUB__>, C<wantarray>
 
 C<break> is available only if you enable the experimental C<"switch">
-feature or use the C<CORE::> prefix. The C<"switch"> feature also enables
+feature or use the C<CORE::> prefix.  The C<"switch"> feature also enables
 the C<default>, C<given> and C<when> statements, which are documented in
-L<perlsyn/"Switch Statements">. The C<"switch"> feature is enabled
+L<perlsyn/"Switch Statements">.  The C<"switch"> feature is enabled
 automatically with a C<use v5.10> (or higher) declaration in the current
-scope. In Perl v5.14 and earlier, C<continue> required the C<"switch">
+scope.  In Perl v5.14 and earlier, C<continue> required the C<"switch">
 feature, like the other keywords.
 
 C<evalbytes> is only available with the C<"evalbytes"> feature (see
 L<feature>) or if prefixed with C<CORE::>.  C<__SUB__> is only available
-with the C<"current_sub"> feature or if prefixed with C<CORE::>. Both
+with the C<"current_sub"> feature or if prefixed with C<CORE::>.  Both
 the C<"evalbytes"> and C<"current_sub"> features are enabled automatically
 with a C<use v5.16> (or higher) declaration in the current scope.
 
@@ -1653,13 +1653,13 @@ this a syntax error.  When called in scalar context, returns only the key
 
 Hash entries are returned in an apparently random order.  The actual random
 order is specific to a given hash; the exact same series of operations
-on two hashes may result in a different order for each hash. Any insertion
+on two hashes may result in a different order for each hash.  Any insertion
 into the hash may change the order, as will any deletion, with the exception
 that the most recent key returned by C<each> or C<keys> may be deleted
-without changing the order. So long as a given hash is unmodified you may
+without changing the order.  So long as a given hash is unmodified you may
 rely on C<keys>, C<values> and C<each> to repeatedly return the same order
-as each other. See L<perlsec/"Algorithmic Complexity Attacks"> for
-details on why hash order is randomized. Aside from the guarantees
+as each other.  See L<perlsec/"Algorithmic Complexity Attacks"> for
+details on why hash order is randomized.  Aside from the guarantees
 provided here the exact details of Perl's hash algorithm and the hash
 traversal order are subject to change in any release of Perl.
 
@@ -2200,7 +2200,7 @@ characters, these are not provided by the Perl core; However, the CPAN module
 C<Unicode::Casing> may be used to provide an implementation.
 
 This keyword is available only when the C<"fc"> feature is enabled,
-or when prefixed with C<CORE::>; See L<feature>. Alternately,
+or when prefixed with C<CORE::>; See L<feature>.  Alternately,
 include a C<use v5.16> or later to the current scope.
 
 =item fcntl FILEHANDLE,FUNCTION,SCALAR
@@ -2542,7 +2542,7 @@ Returns the process id of the parent process.
 Note for Linux users: Between v5.8.1 and v5.16.0 Perl would work
 around non-POSIX thread semantics the minority of Linux systems (and
 Debian GNU/kFreeBSD systems) that used LinuxThreads, this emulation
-has since been removed. See the documentation for L<$$|perlvar/$$> for
+has since been removed.  See the documentation for L<$$|perlvar/$$> for
 details.
 
 Portability issues: L<perlport/getppid>.
@@ -3140,13 +3140,13 @@ array argument.  In scalar context, returns the number of keys or indices.
 
 Hash entries are returned in an apparently random order.  The actual random
 order is specific to a given hash; the exact same series of operations
-on two hashes may result in a different order for each hash. Any insertion
+on two hashes may result in a different order for each hash.  Any insertion
 into the hash may change the order, as will any deletion, with the exception
 that the most recent key returned by C<each> or C<keys> may be deleted
-without changing the order. So long as a given hash is unmodified you may
+without changing the order.  So long as a given hash is unmodified you may
 rely on C<keys>, C<values> and C<each> to repeatedly return the same order
-as each other. See L<perlsec/"Algorithmic Complexity Attacks"> for
-details on why hash order is randomized. Aside from the guarantees
+as each other.  See L<perlsec/"Algorithmic Complexity Attacks"> for
+details on why hash order is randomized.  Aside from the guarantees
 provided here the exact details of Perl's hash algorithm and the hash
 traversal order are subject to change in any release of Perl.
 
@@ -3232,12 +3232,13 @@ same signal.  The string form of SIGNAL is recommended for portability because
 the same signal may have different numbers in different operating systems.
 
 A list of signal names supported by the current platform can be found in
-C<$Config{sig_name}>, which is provided by the C<Config> module. See L<Config>
+C<$Config{sig_name}>, which is provided by the C<Config> module.  See L<Config>
 for more details.
 
 A negative signal name is the same as a negative signal number, killing process
 groups instead of processes.  For example, C<kill '-KILL', $pgrp> and
-C<kill -9, $pgrp> will send C<SIGKILL> to the entire process group specified. That
+C<kill -9, $pgrp> will send C<SIGKILL> to
+the entire process group specified.  That
 means you usually want to use positive not negative signals.
 
 If SIGNAL is either the number 0 or the string C<ZERO> (or C<SIGZZERO>),
@@ -4519,7 +4520,7 @@ including all its subgroups.
 =begin comment
 
 Larry recalls that the hex and bit string formats (H, h, B, b) were added to
-pack for processing data from NASA's Magellan probe. Magellan was in an
+pack for processing data from NASA's Magellan probe.  Magellan was in an
 elliptical orbit, using the antenna for the radar mapping when close to
 Venus and for communicating data back to Earth for the rest of the orbit.
 There were two transmission units, but one of these failed, and then the
@@ -6893,7 +6894,7 @@ instead treated as if it were C</\s+/>; in particular, this means that
 I<any> contiguous whitespace (not just a single space character) is used as
 a separator.  However, this special treatment can be avoided by specifying
 the pattern S<C</ />> instead of the string S<C<" ">>, thereby allowing
-only a single space character to be a separator. In earlier Perl's this
+only a single space character to be a separator.  In earlier Perls this
 special case was restricted to the use of a plain S<C<" ">> as the
 pattern argument to split, in Perl 5.18.0 and later this special case is
 triggered by any expression which evaluates as the simple string S<C<" ">>.
@@ -7571,8 +7572,8 @@ is entered.
 See L<perlsub/"Persistent Private Variables"> for details.
 
 If more than one variable is listed, the list must be placed in
-parentheses. With a parenthesised list, C<undef> can be used as a
-dummy placeholder. However, since initialization of state variables in
+parentheses.  With a parenthesised list, C<undef> can be used as a
+dummy placeholder.  However, since initialization of state variables in
 list context is currently not possible this would serve no purpose.
 
 C<state> variables are enabled only when the C<use feature "state"> pragma 
@@ -8680,13 +8681,13 @@ produce a syntax error.  In scalar context, returns the number of values.
 
 Hash entries are returned in an apparently random order.  The actual random
 order is specific to a given hash; the exact same series of operations
-on two hashes may result in a different order for each hash. Any insertion
+on two hashes may result in a different order for each hash.  Any insertion
 into the hash may change the order, as will any deletion, with the exception
 that the most recent key returned by C<each> or C<keys> may be deleted
-without changing the order. So long as a given hash is unmodified you may
+without changing the order.  So long as a given hash is unmodified you may
 rely on C<keys>, C<values> and C<each> to repeatedly return the same order
-as each other. See L<perlsec/"Algorithmic Complexity Attacks"> for
-details on why hash order is randomized. Aside from the guarantees
+as each other.  See L<perlsec/"Algorithmic Complexity Attacks"> for
+details on why hash order is randomized.  Aside from the guarantees
 provided here the exact details of Perl's hash algorithm and the hash
 traversal order are subject to change in any release of Perl.
 
