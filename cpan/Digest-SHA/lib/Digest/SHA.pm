@@ -62,7 +62,7 @@ sub new {
 
 sub DESTROY {
 	my $self = shift;
-	shaclose($$self) if $$self;
+	if ($$self) { shaclose($$self); $$self = undef }
 }
 
 sub clone {
