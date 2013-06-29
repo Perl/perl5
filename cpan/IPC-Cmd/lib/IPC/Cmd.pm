@@ -17,7 +17,7 @@ BEGIN {
                         $INSTANCES $ALLOW_NULL_ARGS
                     ];
 
-    $VERSION        = '0.80';
+    $VERSION        = '0.82';
     $VERBOSE        = 0;
     $DEBUG          = 0;
     $WARN           = 1;
@@ -124,7 +124,7 @@ sub can_use_ipc_run     {
     ### IPC::Run doesn't run on win98
     return if IS_WIN98;
 
-    ### if we dont have ipc::run, we obviously can't use it.
+    ### if we don't have ipc::run, we obviously can't use it.
     return unless can_load(
                         modules => { 'IPC::Run' => '0.55' },
                         verbose => ($WARN && $verbose),
@@ -150,7 +150,7 @@ sub can_use_ipc_open3   {
     ### IPC::Open3 is not working on VMS because of a lack of fork.
     return if IS_VMS;
 
-    ### IPC::Open3 works on every non-VMS platform platform, but it can't
+    ### IPC::Open3 works on every non-VMS platform, but it can't
     ### capture buffers on win32 :(
     return unless can_load(
         modules => { map {$_ => '0.0'} qw|IPC::Open3 IO::Select Symbol| },
@@ -638,7 +638,7 @@ Invocation requires the command to be executed or a coderef and optionally a has
 
 =item C<timeout>
 
-Specify in seconds how long to run the command before it is killed with with SIG_KILL (9),
+Specify in seconds how long to run the command before it is killed with SIG_KILL (9),
 which effectively terminates it and all of its children (direct or indirect).
 
 =item C<child_stdin>
@@ -1123,7 +1123,7 @@ sub run {
     ### flag indicating if the subcall went ok
     my $ok;
 
-    ### dont look at previous errors:
+    ### don't look at previous errors:
     local $?;
     local $@;
     local $!;
@@ -1313,7 +1313,7 @@ sub _open3_run {
     ### whitespace. This sub fixes up such commands so they run properly
     $cmd = $self->__fix_cmd_whitespace_and_special_chars( $cmd );
 
-    ### dont stringify @$cmd, so spaces in filenames/paths are
+    ### don't stringify @$cmd, so spaces in filenames/paths are
     ### treated properly
     my $pid = eval {
         IPC::Open3::open3(
@@ -1459,7 +1459,7 @@ sub _open3_run {
         ### if there's no pipe in the command, append STDIN to the back
         ### of the command instead.
         ### XXX seems IPC::Run works it out for itself if you just
-        ### dont pass STDIN at all.
+        ### don't pass STDIN at all.
         #     if( $special_chars and $special_chars =~ /\|/ ) {
         #         ### only add STDIN the first time..
         #         my $i;
