@@ -11980,6 +11980,7 @@ const_sv_xsub(pTHX_ CV* cv)
     dVAR;
     dXSARGS;
     SV *const sv = MUTABLE_SV(XSANY.any_ptr);
+    PERL_UNUSED_ARG(items);
     if (!sv) {
 	XSRETURN(0);
     }
