@@ -746,6 +746,9 @@ PERL_CALLCONV CV*	Perl_cv_clone_into(pTHX_ CV* proto, CV *target)
 PERL_CALLCONV SV*	Perl_cv_const_sv(pTHX_ const CV *const cv)
 			__attribute__warn_unused_result__;
 
+PERL_CALLCONV SV*	Perl_cv_const_sv_or_av(pTHX_ const CV *const cv)
+			__attribute__warn_unused_result__;
+
 PERL_CALLCONV void	Perl_cv_forget_slab(pTHX_ CV *cv)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_CV_FORGET_SLAB	\

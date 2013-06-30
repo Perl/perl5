@@ -7323,7 +7323,7 @@ Perl_yylex(pTHX)
 			d = s + 1;
 			while (SPACE_OR_TAB(*d))
 			    d++;
-			if (*d == ')' && (sv = cv_const_sv(cv))) {
+			if (*d == ')' && (sv = cv_const_sv_or_av(cv))) {
 			    s = d + 1;
 			    goto its_constant;
 			}
@@ -7387,14 +7387,19 @@ Perl_yylex(pTHX)
 			     UTF8fARG(UTF, l, PL_tokenbuf));
                     }
 		    /* Check for a constant sub */
-		    if ((sv = cv_const_sv(cv))) {
+		    if ((sv = cv_const_sv_or_av(cv))) {
 		  its_constant:
 			op_free(rv2cv_op);
 			SvREFCNT_dec(((SVOP*)pl_yylval.opval)->op_sv);
 			((SVOP*)pl_yylval.opval)->op_sv = SvREFCNT_inc_simple(sv);
-			pl_yylval.opval->op_private = OPpCONST_FOLDED;
-			pl_yylval.opval->op_folded = 1;
-			pl_yylval.opval->op_flags |= OPf_SPECIAL;
+			if (SvTYPE(sv) == SVt_PVAV)
+			    pl_yylval.opval = newUNOP(OP_RV2AV, OPf_PARENS,
+						      pl_yylval.opval);
+			else {
+			    pl_yylval.opval->op_private = OPpCONST_FOLDED;
+			    pl_yylval.opval->op_folded = 1;
+			    pl_yylval.opval->op_flags |= OPf_SPECIAL;
+			}
 			TOKEN(WORD);
 		    }
 

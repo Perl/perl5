@@ -6875,6 +6875,16 @@ Perl_cv_const_sv(pTHX_ const CV *const cv)
     return sv;
 }
 
+SV *
+Perl_cv_const_sv_or_av(pTHX_ const CV * const cv)
+{
+    PERL_UNUSED_CONTEXT;
+    if (!cv)
+	return NULL;
+    assert (SvTYPE(cv) == SVt_PVCV || SvTYPE(cv) == SVt_PVFM);
+    return CvCONST(cv) ? MUTABLE_SV(CvXSUBANY(cv).any_ptr) : NULL;
+}
+
 /* op_const_sv:  examine an optree to determine whether it's in-lineable.
  * Can be called in 3 ways:
  *
@@ -8582,6 +8592,7 @@ Perl_ck_rvconst(pTHX_ OP *o)
 		Perl_croak(aTHX_ "Constant is not %s reference", badtype);
 	    return o;
 	}
+	if (SvTYPE(kidsv) == SVt_PVAV) return o;
 	if ((o->op_private & HINT_STRICT_REFS) && (kid->op_private & OPpCONST_BARE)) {
 	    const char *badthing;
 	    switch (o->op_type) {
