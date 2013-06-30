@@ -366,8 +366,7 @@ used.
 
 =head1 CAVEATS
 
-In the current version of Perl, list constants are not inlined
-and some symbols may be redefined without generating a warning.
+List constants were not inlined unless you are using Perl v5.20 or higher.
 
 It is not possible to have a subroutine or a keyword with the same
 name as a constant in the same package. This is probably a Good Thing.
