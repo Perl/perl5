@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan( tests => 21 );
+plan( tests => 23 );
 
 sub empty_sub {}
 
@@ -131,9 +131,14 @@ sub { is \$_[0], \$_[0],
 # The return statement should make no difference in this case:
 sub not_constant () {        42 }
 sub not_constantr() { return 42 }
+use feature 'lexical_subs'; no warnings 'experimental::lexical_subs';
+my sub not_constantm () {        42 }
+my sub not_constantmr() { return 42 }
 eval { ${\not_constant}++ };
-$::TODO = "not fixed yet";
 is $@, "", 'sub (){42} returns a mutable value';
-undef $::TODO;
 eval { ${\not_constantr}++ };
 is $@, "", 'sub (){ return 42 } returns a mutable value';
+eval { ${\not_constantm}++ };
+is $@, "", 'my sub (){42} returns a mutable value';
+eval { ${\not_constantmr}++ };
+is $@, "", 'my sub (){ return 42 } returns a mutable value';
