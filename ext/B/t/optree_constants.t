@@ -176,7 +176,10 @@ EOT_EOT
 EONT_EONT
 
 
-my ($expect, $expect_nt) = (<<'EOT_EOT', <<'EONT_EONT');
+my ($expect, $expect_nt) =
+    $] >= 5.019002
+	? (" is a constant sub, optimized to a AV\n") x 2
+	: (<<'EOT_EOT', <<'EONT_EONT');
 # 3  <1> leavesub[2 refs] K/REFC,1 ->(end)
 # -     <@> lineseq K ->3
 # 1        <;> nextstate(constant 61 constant.pm:118) v:*,&,x*,x&,x$ ->2
