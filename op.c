@@ -6845,6 +6845,7 @@ Perl_cv_ckproto_len_flags(pTHX_ const CV *cv, const GV *gv, const char *p,
 }
 
 static void const_sv_xsub(pTHX_ CV* cv);
+static void const_av_xsub(pTHX_ CV* cv);
 
 /*
 
@@ -6863,12 +6864,15 @@ L<perlsub/"Constant Functions">.
 SV *
 Perl_cv_const_sv(pTHX_ const CV *const cv)
 {
+    SV *sv;
     PERL_UNUSED_CONTEXT;
     if (!cv)
 	return NULL;
     if (!(SvTYPE(cv) == SVt_PVCV || SvTYPE(cv) == SVt_PVFM))
 	return NULL;
-    return CvCONST(cv) ? MUTABLE_SV(CvXSUBANY(cv).any_ptr) : NULL;
+    sv = CvCONST(cv) ? MUTABLE_SV(CvXSUBANY(cv).any_ptr) : NULL;
+    if (sv && SvTYPE(sv) == SVt_PVAV) return NULL;
+    return sv;
 }
 
 /* op_const_sv:  examine an optree to determine whether it's in-lineable.
@@ -7850,7 +7854,11 @@ Perl_newCONSTSUB_flags(pTHX_ HV *stash, const char *name, STRLEN len,
        and so doesn't get free()d.  (It's expected to be from the C pre-
        processor __FILE__ directive). But we need a dynamically allocated one,
        and we need it to get freed.  */
-    cv = newXS_len_flags(name, len, const_sv_xsub, file ? file : "", "",
+    cv = newXS_len_flags(name, len,
+			 sv && SvTYPE(sv) == SVt_PVAV
+			     ? const_av_xsub
+			     : const_sv_xsub,
+			 file ? file : "", "",
 			 &sv, XS_DYNAMIC_FILENAME | flags);
     CvXSUBANY(cv).any_ptr = SvREFCNT_inc_simple(sv);
     CvCONST_on(cv);
@@ -11964,6 +11972,31 @@ const_sv_xsub(pTHX_ CV* cv)
     EXTEND(sp, 1);
     ST(0) = sv;
     XSRETURN(1);
+}
+
+static void
+const_av_xsub(pTHX_ CV* cv)
+{
+    dVAR;
+    dXSARGS;
+    AV * const av = MUTABLE_AV(XSANY.any_ptr);
+    SP -= items;
+    assert(av);
+#ifndef DEBUGGING
+    if (!av) {
+	XSRETURN(0);
+    }
+#endif
+    if (SvRMAGICAL(av))
+	Perl_croak(aTHX_ "Magical list constants are not supported");
+    if (GIMME_V != G_ARRAY) {
+	EXTEND(SP, 1);
+	ST(0) = newSViv((IV)AvFILLp(av)+1);
+	XSRETURN(1);
+    }
+    EXTEND(SP, AvFILLp(av)+1);
+    Copy(AvARRAY(av), &ST(0), AvFILLp(av)+1, SV *);
+    XSRETURN(AvFILLp(av)+1);
 }
 
 /*

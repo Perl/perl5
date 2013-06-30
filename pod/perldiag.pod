@@ -2804,6 +2804,12 @@ foo :lvalue;> declaration before the definition.
 
 See also L<attributes.pm|attributes>.
 
+=item Magical list constants are not supported
+
+(F) You assigned a magical array to a stash element, and then tried
+to use the subroutine from the same slot.  You are asking Perl to do
+something it cannot do, details subject to change between Perl versions.
+
 =item Malformed integer in [] in pack
 
 (F) Between the brackets enclosing a numeric repeat count only digits

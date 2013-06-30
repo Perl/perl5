@@ -12,7 +12,7 @@ BEGIN {
 
 use warnings;
 
-plan( tests => 245 );
+plan( tests => 250 );
 
 # type coercion on assignment
 $foo = 'foo';
@@ -494,6 +494,14 @@ is (ref \$::{oonk}, 'GLOB', "This export does affect original");
 is (eval 'biff', "Value", "Constant has correct value");
 is (ref \$::{biff}, 'GLOB', "Symbol table has full typeglob");
 
+$::{yarrow} = [4,5,6];
+is join("-", eval "yarrow()"), '4-5-6', 'array ref as stash elem';
+is ref $::{yarrow}, "ARRAY", 'stash elem is still array ref after use';
+is join("-", eval "&yarrow"), '4-5-6', 'calling const list with &';
+is join("-", eval "&yarrow(1..10)"), '4-5-6', 'const list ignores & args';
+is prototype "yarrow", "", 'const list has "" prototype';
+is eval "yarrow", 3, 'const list in scalar cx returns length';
+
 {
     use vars qw($glook $smek $foof);
     # Check reference assignment isn't affected by the SV type (bug #38439)
@@ -516,7 +524,7 @@ is (ref \$::{biff}, 'GLOB', "Symbol table has full typeglob");
 format =
 .
 
-foreach my $value ([1,2,3], {1=>2}, *STDOUT{IO}, \&ok, *STDOUT{FORMAT}) {
+foreach my $value ({1=>2}, *STDOUT{IO}, \&ok, *STDOUT{FORMAT}) {
     # *STDOUT{IO} returns a reference to a PVIO. As it's blessed, ref returns
     # IO::Handle, which isn't what we want.
     my $type = $value;
