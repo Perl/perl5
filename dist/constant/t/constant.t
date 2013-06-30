@@ -396,7 +396,6 @@ SKIP: {
 # either, hence the to-do status).
 SKIP: {
     skip "fails under 5.19.1 and earlier", 2 if $] < 5.019002;
-    local $TODO = " ";
     use constant constant_list => 1..2;
     for (constant_list) {
 	my $num = $_;

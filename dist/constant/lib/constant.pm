@@ -27,16 +27,19 @@ BEGIN {
     # By doing this, we save 1 run time check for *every* call to import.
     my $const = $] > 5.009002;
     my $downgrade = $] < 5.015004; # && $] >= 5.008
+    my $constarray = $] > 5.019001;
     if ($const) {
 	Internals::SvREADONLY($const, 1);
 	Internals::SvREADONLY($downgrade, 1);
 	$constant::{_CAN_PCS}   = \$const;
 	$constant::{_DOWNGRADE} = \$downgrade;
+	$constant::{_CAN_PCS_FOR_ARRAY} = \$constarray;
     }
     else {
 	no strict 'refs';
 	*{"_CAN_PCS"}   = sub () {$const};
 	*{"_DOWNGRADE"} = sub () { $downgrade };
+	*{"_CAN_PCS_FOR_ARRAY"} = sub () { $constarray };
     }
 }
 
@@ -157,7 +160,19 @@ sub import {
 		}
 	    } elsif (@_) {
 		my @list = @_;
-		*$full_name = sub () { @list };
+		if (_CAN_PCS_FOR_ARRAY) {
+		    Internals::SvREADONLY(@list, 1);
+		    Internals::SvREADONLY($list[$_], 1) for 0..$#list;
+		    if ($symtab && !exists $symtab->{$name}) {
+			$symtab->{$name} = \@list;
+			$flush_mro++;
+		    }
+		    else {
+			local $constant::{_dummy} = \@list;
+			*$full_name = \&{"_dummy"};
+		    }
+		}
+		else { *$full_name = sub () { @list }; }
 	    } else {
 		*$full_name = sub () { };
 	    }
