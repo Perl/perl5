@@ -4830,6 +4830,9 @@ PP(pp_anonhash)
 {
     dVAR; dSP; dMARK; dORIGMARK;
     HV* const hv = (HV *)sv_2mortal((SV *)newHV());
+    SV* const retval = sv_2mortal( PL_op->op_flags & OPf_SPECIAL
+                                    ? newRV_inc(MUTABLE_SV(hv))
+                                    : MUTABLE_SV(hv) );
 
     while (MARK < SP) {
 	SV * const key =
@@ -4850,9 +4853,7 @@ PP(pp_anonhash)
 	(void)hv_store_ent(hv,key,val,0);
     }
     SP = ORIGMARK;
-    if (PL_op->op_flags & OPf_SPECIAL)
-	mXPUSHs(newRV_inc(MUTABLE_SV(hv)));
-    else XPUSHs(MUTABLE_SV(hv));
+    XPUSHs(retval);
     RETURN;
 }
 
