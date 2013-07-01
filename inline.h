@@ -43,6 +43,7 @@ S_CvDEPTHp(const CV * const sv)
  prototype and will be updated when this returns.
  */
 
+#ifdef PERL_CORE
 PERL_STATIC_INLINE char *
 S_strip_spaces(pTHX_ const char * orig, STRLEN * const len)
 {
@@ -59,6 +60,7 @@ S_strip_spaces(pTHX_ const char * orig, STRLEN * const len)
     *len = tmps - SvPVX(tmpsv);
 		return SvPVX(tmpsv);
 }
+#endif
 
 /* ----------------------------- regexp.h ----------------------------- */
 
