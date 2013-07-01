@@ -2317,6 +2317,14 @@ EOP
                             "Overlapping ranges in user-defined properties");
     }
 
+    { # Regexp:Grammars was broken:
+  # http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2013-06/msg01290.html
+        fresh_perl_like('use warnings; "abc" =~ qr{(?&foo){0}abc(?<foo>)}',
+                        'Quantifier unexpected on zero-length expression',
+                        "",
+                        'No segfault on qr{(?&foo){0}abc(?<foo>)}');
+    }
+
     # !!! NOTE that tests that aren't at all likely to crash perl should go
     # a ways above, above these last ones.
 

@@ -9696,24 +9696,6 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                 ret = reg_node(pRExC_state, OPFAIL);
                 return ret;
             }
-            else if (max == 0) {    /* replace {0} with a nothing node */
-                if (SIZE_ONLY) {
-                    RExC_size = PREVOPER(RExC_size) - regarglen[(U8)NOTHING];
-                }
-                else {
-                    RExC_emit = orig_emit;
-                }
-                ret = reg_node(pRExC_state, NOTHING);
-
-                /* But the quantifier includes any '?', the non-greedy
-                 * modifier, after the {}, [perl #118375]
-                 * Likewise the '+', the possessive modifier. They are mutually exclusive.
-                 */
-                if (RExC_parse < RExC_end && (*RExC_parse == '?' || *RExC_parse == '+') ) {
-                    nextchar(pRExC_state);
-                }
-                return ret;
-            }
 
 	do_curly:
 	    if ((flags&SIMPLE)) {
