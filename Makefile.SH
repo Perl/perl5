@@ -915,18 +915,7 @@ lib/buildcustomize.pl: $& $(mini_obj) write_buildcustomize.pl
 
 $(PERL_EXE): $& perlmain$(OBJ_EXT) $(LIBPERL) $(static_ext) ext.libs $(PERLEXPORT) write_buildcustomize.pl
 	-@rm -f miniperl.xok
-	$(SHRPENV) $(LDLIBPTH) $(CC) -o perl$(PERL_SUFFIX) $(PERL_PROFILE_LDFLAGS) $(CLDFLAGS) $(CCDLFLAGS) perlmain$(OBJ_EXT) $(static_ext) $(LLIBPERL) `cat ext.libs` $(libs)
-
-# Purify/Quantify Perls.
-
-pure$(PERL_EXE): $& perlmain$(OBJ_EXT) $(LIBPERL) $(static_ext) ext.libs $(PERLEXPORT)
-	$(SHRPENV) $(LDLIBPTH) purify $(CC) -o pureperl $(CLDFLAGS) $(CCDLFLAGS) perlmain$(OBJ_EXT) $(static_ext) $(LLIBPERL) `cat ext.libs` $(libs)
-
-purecov$(PERL_EXE): $& perlmain$(OBJ_EXT) $(LIBPERL) $(static_ext) ext.libs $(PERLEXPORT)
-	$(SHRPENV) $(LDLIBPTH) purecov $(CC) -o purecovperl $(CLDFLAGS) $(CCDLFLAGS) perlmain$(OBJ_EXT) $(static_ext) $(LLIBPERL) `cat ext.libs` $(libs)
-
-quant$(PERL_EXE): $& perlmain$(OBJ_EXT) $(LIBPERL) $(static_ext) ext.libs $(PERLEXPORT)
-	$(SHRPENV) $(LDLIBPTH) quantify $(CC) -o quantperl $(CLDFLAGS) $(CCDLFLAGS) perlmain$(OBJ_EXT) $(static_ext) $(LLIBPERL) `cat ext.libs` $(libs)
+	$(SHRPENV) $(LDLIBPTH) $(CC) -o perl $(CLDFLAGS) $(CCDLFLAGS) perlmain$(OBJ_EXT) $(static_ext) $(LLIBPERL) `cat ext.libs` $(libs)
 
 !NO!SUBS!
 
@@ -936,8 +925,6 @@ linux*|darwin*)
 # Valgrind perl (currently Linux, Darwin only)
 
 perl.valgrind.config: config.sh
-	@echo "To build perl.valgrind you must Configure -Doptimize=-g -Uusemymalloc, checking..."
-	@$(MAKE) perl.config.dashg
 	@echo "Checking usemymalloc='n' in config.sh..."
 	@grep "^usemymalloc="    config.sh
 	@grep "^usemymalloc='n'" config.sh >/dev/null || exit 1
@@ -948,77 +935,6 @@ perl.valgrind.config: config.sh
 esac	
 
 $spitshell >>$Makefile <<'!NO!SUBS!'
-
-# Third Degree Perl (Tru64 only)
-
-perl.config.dashg:
-	@echo "Checking optimize='-g' in config.sh..."
-	@grep "^optimize=" config.sh
-	@egrep "^optimize='(.*-g.*)'" config.sh >/dev/null || exit 1
-
-perl.third.config: config.sh
-	@echo "To build perl.third you must Configure -Doptimize=-g -Uusemymalloc, checking..."
-	@$(MAKE) perl.config.dashg
-	@echo "Checking usemymalloc='n' in config.sh..."
-	@grep "^usemymalloc="    config.sh
-	@grep "^usemymalloc='n'" config.sh >/dev/null || exit 1
-
-perl.third: /usr/bin/atom perl.third.config perl
-	atom -tool third -L. -all -gp -toolargs="-invalid -uninit heap+stack+copy -min 0" perl
-	@echo "Now you may run perl.third and then study perl.3log."
-
-# Pixie Perls (Tru64 and IRIX only)
-
-perl.pixie.config: config.sh
-	@echo "To build perl.pixie you must Configure -Doptimize=-g, checking..."
-	@$(MAKE) perl.config.dashg
-
-perl.pixie.atom: /usr/bin/atom perl
-	atom -tool pixie -L. -all -toolargs="-quiet" perl
-
-perl.pixie.irix: perl
-	pixie perl
-
-perl.pixie: /usr/bin/pixie perl.pixie.config perl
-	if test -x /usr/bin/atom; then \
-	  $(MAKE) perl.pixie.atom; \
-	else \
-	  $(MAKE) perl.pixie.irix; \
-	fi
-	@echo "Now you may run perl.pixie and then run pixie."
-
-# Gprof Perl
-
-perl.config.dashpg:
-	@echo "Checking optimize='-pg' in config.sh..."
-	@grep "^optimize="      config.sh
-	@grep "^optimize='.*-pg.*'" config.sh >/dev/null || exit 1
-
-perl.gprof.config: config.sh
-	@echo "To build perl.gprof you must Configure -Doptimize=-pg, checking..."
-	@$(MAKE) perl.config.dashpg
-
-perl.gprof: /usr/bin/gprof perl.gprof.config
-	@-rm -f perl
-	$(MAKE) PERL_SUFFIX=.gprof PERL_PROFILE_LDFLAGS=-pg perl
-	@echo "Now you may run perl.gprof and then run gprof perl.gprof."
-
-# Gcov Perl
-
-perl.config.gcov:
-	@echo "To build perl.gcov you must use gcc 3.0 or newer, checking..."
-	@echo "Checking gccversion in config.sh..."
-	@grep "^gccversion="      config.sh
-	@grep "^gccversion='[3-9]\." config.sh >/dev/null || exit 1
-	@echo "To build perl.gcov you must Configure -Dccflags=-fprofile-arcs -ftest-coverage, checking..."
-	@echo "Checking ccflags='-fprofile-arcs -ftest-coverage' in config.sh..."
-	@grep "^ccflags="      config.sh
-	@grep "^ccflags='.*-fprofile-arcs -ftest-coverage.*'" config.sh >/dev/null || exit 1
-
-perl.gcov: perl.config.gcov
-	@-rm -f perl
-	$(MAKE) PERL_SUFFIX=.gcov PERL_PROFILE_LDFLAGS='' perl
-	@echo "Now you may run perl.gcov and then run gcov some.c."
 
 # Microperl.  This is just a convenience thing if one happens to
 # build also the full Perl and therefore the real big Makefile:
@@ -1294,9 +1210,7 @@ _mopup:
 	-@test -f vms/README_vms.pod && rm -f vms/README_vms.pod
 	-rm -f perl.exp ext.libs $(generated_pods) uni.data opmini.o perlmini.o pod/roffitall
 	-rm -f perl.export perl.dll perl.libexp perl.map perl.def
-	-rm -f perl.third lib*.so.perl.third perl.3log t/perl.third t/perl.3log
-	-rm -f perl.pixie lib*.so.perl.pixie lib*.so.Addrs
-	-rm -f perl.Addrs perl.Counts t/perl.Addrs t/perl.Counts *perl.xok
+	-rm -f *perl.xok
 	-rm -f cygwin.c libperl*.def libperl*.dll cygperl*.dll *.exe.stackdump
 	-rm -f $(PERL_EXE) $(MINIPERL_EXE) $(LIBPERL) libperl.* microperl
 	-rm -f config.arch config.over $(DTRACE_H)
@@ -1430,15 +1344,11 @@ depend: makedepend
 
 .PHONY: test check test_prep test_prep_nodll test_prep_pre \
 	test_prep_reonly test_tty test-tty test_notty test-notty \
-	utest ucheck test.utf8 check.utf8 test.torture torturetest \
-	test.utf16 check.utf16 utest.utf16 ucheck.utf16 \
-	test.third check.third utest.third ucheck.third test_notty.third \
-	test.deparse test_notty.deparse test_harness test_harness_notty \
-	minitest coretest test.taintwarn test-reonly _test
+	test_harness test_harness_notty minitest test-reonly _test
 
 _test:
 	echo >&2 The _test target is deprecated. Please upgrade your smoker
-	PERL=./perl $(RUN_TESTS) choose
+	$(RUN_TESTS) choose
 
 # Cannot delegate rebuilding of t/perl to make
 # to allow interlaced test and minitest
@@ -1465,29 +1375,6 @@ test_tty test-tty: test_prep
 test_notty test-notty: test_prep
 	$(RUN_TESTS) no-tty
 
-utest ucheck test.utf8 check.utf8: test_prep
-	TEST_ARGS=-utf8 $(RUN_TESTS) choose
-
-coretest: test_prep
-	TEST_ARGS=-core $(RUN_TESTS) choose
-
-# Torture testing
-
-test.torture torturetest:	test_prep
-	TEST_ARGS=-torture $(RUN_TESTS) choose
-
-# Targets for UTF16 testing:
-
-minitest.utf16: minitest.prep
-	- cd t && (rm -f $(PERL_EXE); $(LNS) ../$(MINIPERL_EXE) $(PERL_EXE)) \
-		&& $(RUN_PERL) TEST -utf16 base/*.t comp/*.t cmd/*.t run/*.t io/*.t opbasic/*.t op/*.t uni/*.t </dev/tty
-
-test.utf16 check.utf16: test_prep
-	TEST_ARGS=-utf16 $(RUN_TESTS) choose
-
-utest.utf16 ucheck.utf16: test_prep
-	TEST_ARGS="-utf8 -utf16" $(RUN_TESTS) choose
-
 !NO!SUBS!
 
 case "${osname}${osvers}" in
@@ -1500,9 +1387,6 @@ test_prep.valgrind: test_prep perl.valgrind
 test.valgrind check.valgrind:	test_prep perl.valgrind.config
 	PERL_VALGRIND=1 VALGRIND='$(VALGRIND)' $(RUN_TESTS) choose
 
-utest.valgrind ucheck.valgrind: test_prep.valgrind perl.valgrind.config
-	PERL_VALGRIND=1 TEST_ARGS=-utf8 $(RUN_TESTS) choose
-
 test_notty.valgrind: test_prep.valgrind perl.valgrind.config
 	PERL_VALGRIND=1 $(RUN_TESTS) no-tty
 !NO!SUBS!
@@ -1511,43 +1395,14 @@ esac
 
 $spitshell >>$Makefile <<'!NO!SUBS!'
 
-# Targets for Third Degree testing.
-
-test_prep.third: test_prep perl.third
-	cd t && (rm -f ./perl.third$(EXE_EXT); $(LNS) ../perl.third$(EXE_EXT) perl.third(EXE_EXT))
-
-test.third check.third:	test_prep.third perl.third
-	PERL=./perl.third PERL_3LOG=1 $(RUN_TESTS) choose
-
-utest.third ucheck.third: test_prep.third perl.third
-	PERL=./perl.third PERL_3LOG=1 TEST_ARGS=-utf8 $(RUN_TESTS) choose
-
-test_notty.third: test_prep.third perl.third
-	PERL=./perl.third PERL_3LOG=1 $(RUN_TESTS) choose
-
-# Targets for Deparse testing.
-
-test.deparse:	test_prep
-	TEST_ARGS=-deparse $(RUN_TESTS) choose
-
-test_notty.deparse:	test_prep
-	TEST_ARGS=-deparse $(RUN_TESTS) no-tty
-
-# Targets to run the test suite with -t
-
-test.taintwarn:	test_prep
-	TEST_ARGS=-taintwarn $(RUN_TESTS) choose
-
-minitest.prep:
+# Can't depend on lib/Config.pm because that might be where miniperl
+# is crashing.
+minitest: $(MINIPERL_EXE)
 	-@test -f lib/Config.pm || $(MAKE) lib/Config.pm $(unidatafiles)
 	@echo " "
 	@echo "You may see some irrelevant test failures if you have been unable"
 	@echo "to build lib/Config.pm, or the Unicode data files."
 	@echo " "
-
-# Can't depend on lib/Config.pm because that might be where miniperl
-# is crashing.
-minitest: $(MINIPERL_EXE) minitest.prep
 	- cd t && (rm -f $(PERL_EXE); $(LNS) ../$(MINIPERL_EXE) $(PERL_EXE)) \
 		&& $(RUN_PERL) TEST base/*.t comp/*.t cmd/*.t run/*.t io/*.t re/*.t opbasic/*.t op/*.t uni/*.t </dev/tty
 

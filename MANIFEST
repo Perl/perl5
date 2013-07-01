@@ -4692,8 +4692,6 @@ Porting/release_schedule.pod	Schedule for future releases
 Porting/rt_list_patches		A tool to help you apply patches from RT
 Porting/sort_perldiag.pl	Keep our diagnostics orderly
 Porting/sync-with-cpan		Sync with CPAN
-Porting/testall.atom		Cumulative profile with Third Degree
-Porting/thirdclean		Cleanup Third Degree reports
 Porting/timecheck2.c		Test program for the 2038 fix
 Porting/timecheck.c		Test program for the 2038 fix
 Porting/todo.pod		Perl things to do

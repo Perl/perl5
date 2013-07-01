@@ -979,18 +979,7 @@ factor 2.
 
 B<NOTE 2>: To minimize the number of memory leak false alarms (see
 L</PERL_DESTRUCT_LEVEL> for more information), you have to set the
-environment variable PERL_DESTRUCT_LEVEL to 2.
-
-For csh-like shells:
-
-    setenv PERL_DESTRUCT_LEVEL 2
-
-For Bourne-type shells:
-
-    PERL_DESTRUCT_LEVEL=2
-    export PERL_DESTRUCT_LEVEL
-
-In Unixy environments you can also use the C<env> command:
+environment variable PERL_DESTRUCT_LEVEL to 2. For example, like this:
 
     env PERL_DESTRUCT_LEVEL=2 valgrind ./perl -Ilib ...
 
@@ -1002,139 +991,6 @@ but they must be fixed eventually.
 B<NOTE 4>: L<DynaLoader> will not clean up after itself completely
 unless Perl is built with the Configure option
 C<-Accflags=-DDL_UNLOAD_ALL_AT_EXIT>.
-
-=head2 Rational Software's Purify
-
-Purify is a commercial tool that is helpful in identifying memory
-overruns, wild pointers, memory leaks and other such badness. Perl must
-be compiled in a specific way for optimal testing with Purify.  Purify
-is available under Windows NT, Solaris, HP-UX, SGI, and Siemens Unix.
-
-=head3 Purify on Unix
-
-On Unix, Purify creates a new Perl binary. To get the most benefit out
-of Purify, you should create the perl to Purify using:
-
-    sh Configure -Accflags=-DPURIFY -Doptimize='-g' \
-     -Uusemymalloc -Dusemultiplicity
-
-where these arguments mean:
-
-=over 4
-
-=item * -Accflags=-DPURIFY
-
-Disables Perl's arena memory allocation functions, as well as forcing
-use of memory allocation functions derived from the system malloc.
-
-=item * -Doptimize='-g'
-
-Adds debugging information so that you see the exact source statements
-where the problem occurs. Without this flag, all you will see is the
-source filename of where the error occurred.
-
-=item * -Uusemymalloc
-
-Disable Perl's malloc so that Purify can more closely monitor
-allocations and leaks. Using Perl's malloc will make Purify report most
-leaks in the "potential" leaks category.
-
-=item * -Dusemultiplicity
-
-Enabling the multiplicity option allows perl to clean up thoroughly
-when the interpreter shuts down, which reduces the number of bogus leak
-reports from Purify.
-
-=back
-
-Once you've compiled a perl suitable for Purify'ing, then you can just:
-
-    make pureperl
-
-which creates a binary named 'pureperl' that has been Purify'ed. This
-binary is used in place of the standard 'perl' binary when you want to
-debug Perl memory problems.
-
-As an example, to show any memory leaks produced during the standard
-Perl testset you would create and run the Purify'ed perl as:
-
-    make pureperl
-    cd t
-    ../pureperl -I../lib harness
-
-which would run Perl on test.pl and report any memory problems.
-
-Purify outputs messages in "Viewer" windows by default. If you don't
-have a windowing environment or if you simply want the Purify output to
-unobtrusively go to a log file instead of to the interactive window,
-use these following options to output to the log file "perl.log":
-
-    setenv PURIFYOPTIONS "-chain-length=25 -windows=no \
-     -log-file=perl.log -append-logfile=yes"
-
-If you plan to use the "Viewer" windows, then you only need this
-option:
-
-    setenv PURIFYOPTIONS "-chain-length=25"
-
-In Bourne-type shells:
-
-    PURIFYOPTIONS="..."
-    export PURIFYOPTIONS
-
-or if you have the "env" utility:
-
-    env PURIFYOPTIONS="..." ../pureperl ...
-
-=head3 Purify on NT
-
-Purify on Windows NT instruments the Perl binary 'perl.exe' on the fly.
- There are several options in the makefile you should change to get the
-most use out of Purify:
-
-=over 4
-
-=item * DEFINES
-
-You should add -DPURIFY to the DEFINES line so the DEFINES line looks
-something like:
-
-   DEFINES = -DWIN32 -D_CONSOLE -DNO_STRICT $(CRYPT_FLAG) -DPURIFY=1
-
-to disable Perl's arena memory allocation functions, as well as to
-force use of memory allocation functions derived from the system
-malloc.
-
-=item * USE_MULTI = define
-
-Enabling the multiplicity option allows perl to clean up thoroughly
-when the interpreter shuts down, which reduces the number of bogus leak
-reports from Purify.
-
-=item * #PERL_MALLOC = define
-
-Disable Perl's malloc so that Purify can more closely monitor
-allocations and leaks. Using Perl's malloc will make Purify report most
-leaks in the "potential" leaks category.
-
-=item * CFG = Debug
-
-Adds debugging information so that you see the exact source statements
-where the problem occurs. Without this flag, all you will see is the
-source filename of where the error occurred.
-
-=back
-
-As an example, to show any memory leaks produced during the standard
-Perl testset you would create and run Purify as:
-
-    cd win32
-    make
-    cd ../t
-    purify ../perl -I../lib harness
-
-which would instrument Perl in memory, run Perl on test.pl, then
-finally report any memory problems.
 
 =head2 valgrind
 
@@ -1160,12 +1016,12 @@ To get valgrind and for more information see
 
 =head2 AddressSanitizer
 
-AddressSanitizer is a clang extension, included in clang since v3.1. It
-checks illegal heap pointers, global pointers, stack pointers and use
-after free errors, and is fast enough that you can easily compile your
-debugging or optimized perl with it. It does not check memory leaks
-though. AddressSanitizer is available for linux, Mac OS X and soon on
-Windows.
+AddressSanitizer is a clang and gcc extension, included in clang since
+v3.1 and gcc since v4.8. It checks illegal heap pointers, global
+pointers, stack pointers and use after free errors, and is fast enough
+that you can easily compile your debugging or optimized perl with it.
+It does not check memory leaks though. AddressSanitizer is available
+for Linux, Mac OS X and soon on Windows.
 
 To build perl with AddressSanitizer, your Configure invocation should
 look like:
@@ -1196,7 +1052,7 @@ Link the perl executable with AddressSanitizer.
 Link dynamic extensions with AddressSanitizer. You must manually
 specify C<-shared> because using C<-Alddlflags=-shared> will prevent
 Configure from setting a default value for C<lddlflags>, which usually
-contains C<-shared> (at least on linux).
+contains C<-shared> (at least on Linux).
 
 =back
 
@@ -1236,18 +1092,27 @@ results.
 
 =head2 Gprof Profiling
 
-gprof is a profiling tool available in many Unix platforms, it uses
-F<statistical time-sampling>.
+I<gprof> is a profiling tool available in many Unix platforms which
+uses I<statistical time-sampling>. You can build a profiled version of
+F<perl> by compiling using gcc with the flag C<-pg>. Either edit
+F<config.sh> or re-run F<Configure>. Running the profiled version of
+Perl will create an output file called F<gmon.out> which contains the
+profiling data collected during the execution.
 
-You can build a profiled version of perl called "perl.gprof" by
-invoking the make target "perl.gprof"  (What is required is that Perl
-must be compiled using the C<-pg> flag, you may need to re-Configure).
-Running the profiled version of Perl will create an output file called
-F<gmon.out> is created which contains the profiling data collected
-during the execution.
+quick hint:
 
-The gprof tool can then display the collected data in various ways.
-Usually gprof understands the following options:
+    $ sh Configure -des -Dusedevel -Accflags='-pg' \
+        -Aldflags='-pg' -Alddlflags='-pg -shared' \
+        && make perl
+    $ ./perl ... # creates gmon.out in current directory
+    $ gprof ./perl > out
+    $ less out
+
+(you probably need to add C<-shared> to the <-Alddlflags> line until RT
+#118199 is resolved)
+
+The F<gprof> tool can then display the collected data in various ways.
+Usually F<gprof> understands the following options:
 
 =over 4
 
@@ -1279,30 +1144,35 @@ Display routines that have zero usage.
 =back
 
 For more detailed explanation of the available commands and output
-formats, see your own local documentation of gprof.
-
-quick hint:
-
-    $ sh Configure -des -Dusedevel -Doptimize='-pg' && make perl.gprof
-    $ ./perl.gprof someprog # creates gmon.out in current directory
-    $ gprof ./perl.gprof > out
-    $ view out
+formats, see your own local documentation of F<gprof>.
 
 =head2 GCC gcov Profiling
 
-Starting from GCC 3.0 I<basic block profiling> is officially available
-for the GNU CC.
+I<basic block profiling> is officially available in gcc 3.0 and later.
+You can build a profiled version of F<perl> by compiling using gcc with
+the flags C<-fprofile-arcs -ftest-coverage>. Either edit F<config.sh>
+or re-run F<Configure>.
 
-You can build a profiled version of perl called F<perl.gcov> by
-invoking the make target "perl.gcov" (what is required that Perl must
-be compiled using gcc with the flags C<-fprofile-arcs -ftest-coverage>,
-you may need to re-Configure).
+quick hint:
+
+    $ sh Configure -des -Dusedevel -Doptimize='-g' \
+        -Accflags='-fprofile-arcs -ftest-coverage' \
+        -Aldflags='-fprofile-arcs -ftest-coverage' \
+        -Alddlflags='-fprofile-arcs -ftest-coverage -shared' \
+        && make perl
+    $ rm -f regexec.c.gcov regexec.gcda
+    $ ./perl ...
+    $ gcov regexec.c
+    $ less regexec.c.gcov
+
+(you probably need to add C<-shared> to the <-Alddlflags> line until RT
+#118199 is resolved)
 
 Running the profiled version of Perl will cause profile output to be
-generated. For each source file an accompanying ".da" file will be
+generated. For each source file an accompanying F<.gcda> file will be
 created.
 
-To display the results you use the "gcov" utility (which should be
+To display the results you use the I<gcov> utility (which should be
 installed if you have gcc 3.0 or newer installed). F<gcov> is run on
 source code files, like this
 
@@ -1310,47 +1180,36 @@ source code files, like this
 
 which will cause F<sv.c.gcov> to be created. The F<.gcov> files contain
 the source code annotated with relative frequencies of execution
-indicated by "#" markers.
+indicated by "#" markers. If you want to generate F<.gcov> files for
+all profiled object files, you can run something like this:
+
+    for file in `find . -name \*.gcno`
+    do sh -c "cd `dirname $file` && gcov `basename $file .gcno`"
+    done
 
 Useful options of F<gcov> include C<-b> which will summarise the basic
 block, branch, and function call coverage, and C<-c> which instead of
 relative frequencies will use the actual counts. For more information
 on the use of F<gcov> and basic block profiling with gcc, see the
-latest GNU CC manual, as of GCC 3.0 see
-
-    http://gcc.gnu.org/onlinedocs/gcc-3.0/gcc.html
-
-and its section titled "8. gcov: a Test Coverage Program"
-
-    http://gcc.gnu.org/onlinedocs/gcc-3.0/gcc_8.html#SEC132
-
-quick hint:
-
-    $ sh Configure -des -Dusedevel -Doptimize='-g' \
-        -Accflags='-fprofile-arcs -ftest-coverage' \
-        -Aldflags='-fprofile-arcs -ftest-coverage' && make perl.gcov
-    $ rm -f regexec.c.gcov regexec.gcda
-    $ ./perl.gcov
-    $ gcov regexec.c
-    $ view regexec.c.gcov
+latest GNU CC manual. As of gcc 4.8, this is at
+L<http://gcc.gnu.org/onlinedocs/gcc/Gcov-Intro.html#Gcov-Intro>
 
 =head1 MISCELLANEOUS TRICKS
 
 =head2 PERL_DESTRUCT_LEVEL
 
 If you want to run any of the tests yourself manually using e.g.
-valgrind, or the pureperl or perl.third executables, please note that
-by default perl B<does not> explicitly cleanup all the memory it has
-allocated (such as global memory arenas) but instead lets the exit() of
-the whole program "take care" of such allocations, also known as
-"global destruction of objects".
+valgrind, please note that by default perl B<does not> explicitly
+cleanup all the memory it has allocated (such as global memory arenas)
+but instead lets the exit() of the whole program "take care" of such
+allocations, also known as "global destruction of objects".
 
 There is a way to tell perl to do complete cleanup: set the environment
 variable PERL_DESTRUCT_LEVEL to a non-zero value. The t/TEST wrapper
 does set this to 2, and this is what you need to do too, if you don't
-want to see the "global leaks": For example, for "third-degreed" Perl:
+want to see the "global leaks": For example, for running under valgrind
 
-	env PERL_DESTRUCT_LEVEL=2 ./perl.third -Ilib t/foo/bar.t
+	env PERL_DESTRUCT_LEVEL=2 valgrind ./perl -Ilib t/foo/bar.t
 
 (Note: the mod_perl apache module uses also this environment variable
 for its own purposes and extended its semantics. Refer to the mod_perl
@@ -1459,16 +1318,16 @@ L<perlclib>.
 Under ithreads the optree is read only. If you want to enforce this, to
 check for write accesses from buggy code, compile with
 C<-DPERL_DEBUG_READONLY_OPS> to enable code that allocates op memory
-via C<mmap>, and sets it read-only when it is attached to a subroutine. Any
-write access to an op results in a C<SIGBUS> and abort.
+via C<mmap>, and sets it read-only when it is attached to a subroutine.
+Any write access to an op results in a C<SIGBUS> and abort.
 
 This code is intended for development only, and may not be portable
 even to all Unix variants. Also, it is an 80% solution, in that it
-isn't able to make all ops read only. Specifically it does not apply to op
-slabs belonging to C<BEGIN> blocks.
+isn't able to make all ops read only. Specifically it does not apply to
+op slabs belonging to C<BEGIN> blocks.
 
-However, as an 80% solution it is still effective, as it has caught bugs in
-the past.
+However, as an 80% solution it is still effective, as it has caught
+bugs in the past.
 
 =head2 The .i Targets
 

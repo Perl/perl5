@@ -54,19 +54,14 @@ if test X"\$TESTFILE" = X; then
     TESTFILE=TEST
 fi
 
-if test X"\$PERL" = X; then
-    PERL=./perl$_exe
-    export PERL
-fi
-
 cd t
 
 # The second branch is for testing without a tty or controlling terminal,
 # see t/op/stat.t
 if test \$tty = Y; then
-    \$PERL \$TESTFILE \$TEST_ARGS \$TEST_FILES </dev/tty
+    ./perl$_exe \$TESTFILE \$TEST_ARGS \$TEST_FILES </dev/tty
 else
-    PERL_SKIP_TTY_TEST=1 \$PERL \$TESTFILE \$TEST_ARGS \$TEST_FILES
+    PERL_SKIP_TTY_TEST=1 ./perl$_exe \$TESTFILE \$TEST_ARGS \$TEST_FILES
 fi
 
 echo "Ran tests" > rantests
