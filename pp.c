@@ -4829,9 +4829,9 @@ PP(pp_anonlist)
 PP(pp_anonhash)
 {
     dVAR; dSP; dMARK; dORIGMARK;
-    HV* const hv = (HV *)sv_2mortal((SV *)newHV());
+    HV* const hv = newHV();
     SV* const retval = sv_2mortal( PL_op->op_flags & OPf_SPECIAL
-                                    ? newRV_inc(MUTABLE_SV(hv))
+                                    ? newRV_noinc(MUTABLE_SV(hv))
                                     : MUTABLE_SV(hv) );
 
     while (MARK < SP) {
