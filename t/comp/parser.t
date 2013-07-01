@@ -3,6 +3,11 @@
 # Checks if the parser behaves correctly in edge cases
 # (including weird syntax errors)
 
+BEGIN {
+    @INC = qw(. ../lib);
+    chdir 't';
+}
+
 print "1..156\n";
 
 sub failed {
@@ -476,7 +481,7 @@ $test
 
 # bug #74022: Loop on characters in \p{OtherIDContinue}
 # This test hangs if it fails.
-eval chr 0x387;
+eval chr 0x387;   # forces loading of utf8.pm
 is(1,1, '[perl #74022] Parser looping on OtherIDContinue chars');
 
 # More awkward tests for #line. Keep these at the end, as they will screw
