@@ -302,7 +302,7 @@ ApdR	|SV*	|gv_const_sv	|NN GV* gv
 ApdR	|SV*	|cv_const_sv	|NULLOK const CV *const cv
 pR	|SV*	|cv_const_sv_or_av|NULLOK const CV *const cv
 : Used in pad.c
-pR	|SV*	|op_const_sv	|NULLOK const OP* o|NULLOK CV* cv
+pR	|SV*	|op_const_sv	|NULLOK const OP* o
 Apd	|void	|cv_undef	|NN CV* cv
 p	|void	|cv_forget_slab	|NN CV *cv
 Ap	|void	|cx_dump	|NN PERL_CONTEXT* cx

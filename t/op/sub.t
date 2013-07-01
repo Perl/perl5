@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan( tests => 23 );
+plan( tests => 26 );
 
 sub empty_sub {}
 
@@ -142,3 +142,22 @@ eval { ${\not_constantm}++ };
 is $@, "", 'my sub (){42} returns a mutable value';
 eval { ${\not_constantmr}++ };
 is $@, "", 'my sub (){ return 42 } returns a mutable value';
+
+# [perl #79908]
+{
+    my $x = 5;
+    *_79908 = sub (){$x};
+    $x = 7;
+    is eval "_79908", 7, 'sub(){$x} does not break closures';
+    isnt eval '\_79908', \$x, 'sub(){$x} returns a copy';
+
+    # Test another thing that was broken by $x inlinement
+    my $y;
+    no warnings 'once';
+    local *time = sub():method{$y};
+    my $w;
+    local $SIG{__WARN__} = sub { $w .= shift };
+    eval "()=time";
+    is $w, undef,
+      '*keyword = sub():method{$y} does not cause ambiguity warnings';
+}
