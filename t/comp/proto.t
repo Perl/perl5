@@ -680,7 +680,7 @@ for my $p ( "", qw{ () ($) ($@) ($%) ($;$) (&) (&\@) (&@) (%) (\%) (\@) } ) {
   print "ok ", $i++, "\n";
   
   eval 'sub badproto4 (@ $b ar) { 1; }';
-  print "not " unless $warn =~ /Illegal character in prototype for main::badproto4 : \@\$bar/;
+  print "not " unless $warn =~ /Illegal character in prototype for main::badproto4 : \@ \$b ar/;
   print "ok ", $i++, "\n";
 }
 

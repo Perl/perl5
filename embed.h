@@ -868,6 +868,7 @@
 #define reg_temp_copy(a,b)	Perl_reg_temp_copy(aTHX_ a,b)
 #define regprop(a,b,c)		Perl_regprop(aTHX_ a,b,c)
 #define report_uninit(a)	Perl_report_uninit(aTHX_ a)
+#define validate_proto(a,b,c)	Perl_validate_proto(aTHX_ a,b,c)
 #define vivify_defelem(a)	Perl_vivify_defelem(aTHX_ a)
 #define yylex()			Perl_yylex(aTHX)
 #  if defined(DEBUGGING)

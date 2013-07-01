@@ -1578,6 +1578,104 @@ Perl_lex_read_space(pTHX_ U32 flags)
 }
 
 /*
+
+=for apidoc EXMp|bool|validate_proto|SV *name|SV *proto|bool warn
+
+This function performs syntax checking on a prototype, C<proto>.
+If C<warn> is true, any illegal characters or mismatched brackets
+will trigger illegalproto warnings, declaring that they were
+detected in the prototype for C<name>.
+
+The return value is C<true> if this is a valid prototype, and
+C<false> if it is not, regardless of whether C<warn> was C<true> or
+C<false>.
+
+Note that C<NULL> is a valid C<proto> and will always return C<true>.
+
+=cut
+
+ */
+
+bool
+Perl_validate_proto(pTHX_ SV *name, SV *proto, bool warn)
+{
+    STRLEN len, origlen;
+    char *p = proto ? SvPV(proto, len) : NULL;
+    bool bad_proto = FALSE;
+    bool in_brackets = FALSE;
+    bool after_slash = FALSE;
+    char greedy_proto = ' ';
+    bool proto_after_greedy_proto = FALSE;
+    bool must_be_last = FALSE;
+    bool underscore = FALSE;
+    bool seen_underscore = FALSE;
+
+    PERL_ARGS_ASSERT_VALIDATE_PROTO;
+
+    if (!proto)
+	return TRUE;
+
+    origlen = len;
+    for (; len--; p++) {
+	if (!isSPACE(*p)) {
+	    if (must_be_last)
+		proto_after_greedy_proto = TRUE;
+	    if (!strchr("$@%*;[]&\\_+", *p) || *p == '\0') {
+		bad_proto = TRUE;
+	    }
+	    else {
+		if (underscore) {
+		    if(!strchr(";@%", *p))
+			bad_proto = TRUE;
+		    underscore = FALSE;
+		}
+
+		if (*p == '[')
+		    in_brackets = TRUE;
+		else if (*p == ']')
+		    in_brackets = FALSE;
+		else if ((*p == '@' || *p == '%') &&
+		    !after_slash &&
+		    !in_brackets ) {
+		    must_be_last = TRUE;
+		    greedy_proto = *p;
+		}
+		else if (*p == '_')
+		    underscore = seen_underscore = TRUE;
+	    }
+	    if (*p == '\\')
+		after_slash = TRUE;
+	    else
+		after_slash = FALSE;
+	}
+    }
+
+    if (warn) {
+	p -= origlen;
+	if (proto_after_greedy_proto)
+	    Perl_warner(aTHX_ packWARN(WARN_ILLEGALPROTO),
+			"Prototype after '%c' for %"SVf" : %s",
+			greedy_proto, SVfARG(name), p);
+	if (bad_proto) {
+	    SV *dsv = newSVpvs_flags("", SVs_TEMP);
+	    Perl_warner(aTHX_ packWARN(WARN_ILLEGALPROTO),
+			"Illegal character %sin prototype for %"SVf" : %s",
+			seen_underscore ? "after '_' " : "",
+			SVfARG(PL_subname),
+			SvUTF8(PL_lex_stuff)
+			    ? sv_uni_display(dsv,
+				newSVpvn_flags(p, origlen, SVs_TEMP | SVf_UTF8),
+				origlen,
+				UNI_DISPLAY_ISPRINT)
+			    : pv_pretty(dsv, p, origlen, 60, NULL, NULL,
+				PERL_PV_ESCAPE_NONASCII));
+	}
+    }
+
+    return (! (proto_after_greedy_proto || bad_proto) );
+}
+
+/*
  * S_incline
  * This subroutine has nothing to do with tilting, whether at windmills
  * or pinball tables.  Its name is short for "increment line".  It
@@ -8602,78 +8700,10 @@ Perl_yylex(pTHX)
 
 		/* Look for a prototype */
 		if (*s == '(') {
-		    char *p;
-		    bool bad_proto = FALSE;
-		    bool in_brackets = FALSE;
-		    char greedy_proto = ' ';
-		    bool proto_after_greedy_proto = FALSE;
-		    bool must_be_last = FALSE;
-		    bool underscore = FALSE;
-		    bool seen_underscore = FALSE;
-		    const bool warnillegalproto = ckWARN(WARN_ILLEGALPROTO);
-                    STRLEN tmplen;
-
 		    s = scan_str(s,!!PL_madskills,FALSE,FALSE, FALSE);
 		    if (!s)
 			Perl_croak(aTHX_ "Prototype not terminated");
-		    /* strip spaces and check for bad characters */
-		    d = SvPV(PL_lex_stuff, tmplen);
-		    tmp = 0;
-		    for (p = d; tmplen; tmplen--, ++p) {
-			if (!isSPACE(*p)) {
-                            d[tmp++] = *p;
-
-			    if (warnillegalproto) {
-				if (must_be_last)
-				    proto_after_greedy_proto = TRUE;
-				if (!strchr("$@%*;[]&\\_+", *p) || *p == '\0') {
-				    bad_proto = TRUE;
-				}
-				else {
-				    if ( underscore ) {
-					if ( !strchr(";@%", *p) )
-					    bad_proto = TRUE;
-					underscore = FALSE;
-				    }
-				    if ( *p == '[' ) {
-					in_brackets = TRUE;
-				    }
-				    else if ( *p == ']' ) {
-					in_brackets = FALSE;
-				    }
-				    else if ( (*p == '@' || *p == '%') &&
-					 ( tmp < 2 || d[tmp-2] != '\\' ) &&
-					 !in_brackets ) {
-					must_be_last = TRUE;
-					greedy_proto = *p;
-				    }
-				    else if ( *p == '_' ) {
-					underscore = seen_underscore = TRUE;
-				    }
-				}
-			    }
-			}
-		    }
-                    d[tmp] = '\0';
-		    if (proto_after_greedy_proto)
-			Perl_warner(aTHX_ packWARN(WARN_ILLEGALPROTO),
-				    "Prototype after '%c' for %"SVf" : %s",
-				    greedy_proto, SVfARG(PL_subname), d);
-		    if (bad_proto) {
-                        SV *dsv = newSVpvs_flags("", SVs_TEMP);
-			Perl_warner(aTHX_ packWARN(WARN_ILLEGALPROTO),
-				    "Illegal character %sin prototype for %"SVf" : %s",
-				    seen_underscore ? "after '_' " : "",
-				    SVfARG(PL_subname),
-                                    SvUTF8(PL_lex_stuff)
-                                        ? sv_uni_display(dsv,
-                                            newSVpvn_flags(d, tmp, SVs_TEMP | SVf_UTF8),
-                                            tmp,
-                                            UNI_DISPLAY_ISPRINT)
-                                        : pv_pretty(dsv, d, tmp, 60, NULL, NULL,
-                                            PERL_PV_ESCAPE_NONASCII));
-                    }
-                    SvCUR_set(PL_lex_stuff, tmp);
+		    (void)validate_proto(PL_subname, PL_lex_stuff, ckWARN(WARN_ILLEGALPROTO));
 		    have_proto = TRUE;
 
 #ifdef PERL_MAD

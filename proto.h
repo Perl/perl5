@@ -4738,6 +4738,11 @@ PERL_CALLCONV UV	Perl_valid_utf8_to_uvuni(pTHX_ const U8 *s, STRLEN *retlen)
 #define PERL_ARGS_ASSERT_VALID_UTF8_TO_UVUNI	\
 	assert(s)
 
+PERL_CALLCONV bool	Perl_validate_proto(pTHX_ SV *name, SV *proto, bool warn)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_VALIDATE_PROTO	\
+	assert(name)
+
 PERL_CALLCONV int	Perl_vcmp(pTHX_ SV *lhv, SV *rhv)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);

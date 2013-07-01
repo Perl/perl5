@@ -2253,6 +2253,7 @@ s	|int	|tokereport	|I32 rv|NN const YYSTYPE* lvalp
 s	|void	|printbuf	|NN const char *const fmt|NN const char *const s
 #  endif
 #endif
+EXMp	|bool	|validate_proto	|NN SV *name|NULLOK SV *proto|bool warn
 
 #if defined(PERL_IN_UNIVERSAL_C)
 s	|bool|isa_lookup	|NN HV *stash|NN const char * const name \
