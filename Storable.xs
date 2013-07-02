@@ -156,7 +156,8 @@
 #define SX_WEAKOVERLOAD	C(28)	/* Overloaded weak reference */
 #define SX_VSTRING	C(29)	/* vstring forthcoming (small) */
 #define SX_LVSTRING	C(30)	/* vstring forthcoming (large) */
-#define SX_ERROR	C(31)	/* Error */
+#define SX_SVUNDEF_ELEM	C(31)	/* array element set to &PL_sv_undef */
+#define SX_ERROR	C(32)	/* Error */
 
 /*
  * Those are only used to retrieve "old" pre-0.6 binary images.
@@ -843,7 +844,7 @@ static const char byteorderstr_56[] = {BYTEORDER_BYTES_56, 0};
 #endif
 
 #define STORABLE_BIN_MAJOR	2		/* Binary major "version" */
-#define STORABLE_BIN_MINOR	9		/* Binary minor "version" */
+#define STORABLE_BIN_MINOR	10		/* Binary minor "version" */
 
 #if (PATCHLEVEL <= 5)
 #define STORABLE_BIN_WRITE_MINOR	4
@@ -852,6 +853,9 @@ static const char byteorderstr_56[] = {BYTEORDER_BYTES_56, 0};
  * Perl 5.6.0-5.8.0 can do weak references, but not vstring magic.
 */
 #define STORABLE_BIN_WRITE_MINOR	8
+#elif PATCHLEVEL >= 19
+/* Perl 5.19 takes away the special meaning of PL_sv_undef in arrays. */
+#define STORABLE_BIN_WRITE_MINOR	10
 #else
 #define STORABLE_BIN_WRITE_MINOR	9
 #endif /* (PATCHLEVEL <= 5) */
@@ -935,7 +939,9 @@ static const char byteorderstr_56[] = {BYTEORDER_BYTES_56, 0};
 #define STORE_SCALAR(pv, len)	STORE_PV_LEN(pv, len, SX_SCALAR, SX_LSCALAR)
 
 /*
- * Store &PL_sv_undef in arrays without recursing through store().
+ * Store &PL_sv_undef in arrays without recursing through store().  We
+ * actually use this to represent nonexistent elements, for historical
+ * reasons.
  */
 #define STORE_SV_UNDEF() 					\
   STMT_START {							\
@@ -1186,6 +1192,7 @@ static const sv_retrieve_t sv_old_retrieve[] = {
 	(sv_retrieve_t)retrieve_other,	/* SX_WEAKOVERLOAD not supported */
 	(sv_retrieve_t)retrieve_other,	/* SX_VSTRING not supported */
 	(sv_retrieve_t)retrieve_other,	/* SX_LVSTRING not supported */
+	(sv_retrieve_t)retrieve_other,	/* SX_SVUNDEF_ELEM not supported */
 	(sv_retrieve_t)retrieve_other,	/* SX_ERROR */
 };
 
@@ -1206,6 +1213,7 @@ static SV *retrieve_weakref(pTHX_ stcxt_t *cxt, const char *cname);
 static SV *retrieve_weakoverloaded(pTHX_ stcxt_t *cxt, const char *cname);
 static SV *retrieve_vstring(pTHX_ stcxt_t *cxt, const char *cname);
 static SV *retrieve_lvstring(pTHX_ stcxt_t *cxt, const char *cname);
+static SV *retrieve_svundef_elem(pTHX_ stcxt_t *cxt, const char *cname);
 
 static const sv_retrieve_t sv_retrieve[] = {
 	0,			/* SX_OBJECT -- entry unused dynamically */
@@ -1239,6 +1247,7 @@ static const sv_retrieve_t sv_retrieve[] = {
 	(sv_retrieve_t)retrieve_weakoverloaded,	/* SX_WEAKOVERLOAD */
 	(sv_retrieve_t)retrieve_vstring,	/* SX_VSTRING */
 	(sv_retrieve_t)retrieve_lvstring,	/* SX_LVSTRING */
+	(sv_retrieve_t)retrieve_svundef_elem,	/* SX_SVUNDEF_ELEM */
 	(sv_retrieve_t)retrieve_other,		/* SX_ERROR */
 };
 
@@ -2253,10 +2262,23 @@ static int store_array(pTHX_ stcxt_t *cxt, AV *av)
 	for (i = 0; i < len; i++) {
 		sav = av_fetch(av, i, 0);
 		if (!sav) {
-			TRACEME(("(#%d) undef item", i));
+			TRACEME(("(#%d) nonexistent item", i));
 			STORE_SV_UNDEF();
 			continue;
 		}
+#if PATCHLEVEL >= 19
+		/* In 5.19.3 and up, &PL_sv_undef can actually be stored in
+		 * an array; it no longer represents nonexistent elements.
+		 * Historically, we have used SX_SV_UNDEF in arrays for
+		 * nonexistent elements, so we use SX_SVUNDEF_ELEM for
+		 * &PL_sv_undef itself. */
+		if (*sav == &PL_sv_undef) {
+			TRACEME(("(#%d) undef item", i));
+			cxt->tagnum++;
+			PUTMARK(SX_SVUNDEF_ELEM);
+			continue;
+		}
+#endif			
 		TRACEME(("(#%d) item", i));
 		if ((ret = store(aTHX_ cxt, *sav)))	/* Extra () for -Wall, grr... */
 			return ret;
@@ -5238,6 +5260,24 @@ static SV *retrieve_sv_no(pTHX_ stcxt_t *cxt, const char *cname)
 }
 
 /*
+ * retrieve_svundef_elem
+ *
+ * Return &PL_sv_placeholder, representing &PL_sv_undef in an array.  This
+ * is a bit of a hack, but we already use SX_SV_UNDEF to mean a nonexistent
+ * element, for historical reasons.
+ */
+static SV *retrieve_svundef_elem(pTHX_ stcxt_t *cxt, const char *cname)
+{
+	TRACEME(("retrieve_svundef_elem"));
+
+	/* SEEN reads the contents of its SV argument, which we are not
+	   supposed to do with &PL_sv_placeholder. */
+	SEEN(&PL_sv_undef, cname, 1);
+
+	return &PL_sv_placeholder;
+}
+
+/*
  * retrieve_array
  *
  * Retrieve a whole array.
@@ -5253,6 +5293,7 @@ static SV *retrieve_array(pTHX_ stcxt_t *cxt, const char *cname)
 	AV *av;
 	SV *sv;
 	HV *stash;
+	bool seen_null = FALSE;
 
 	TRACEME(("retrieve_array (#%d)", cxt->tagnum));
 
@@ -5279,9 +5320,16 @@ static SV *retrieve_array(pTHX_ stcxt_t *cxt, const char *cname)
 		sv = retrieve(aTHX_ cxt, 0);			/* Retrieve item */
 		if (!sv)
 			return (SV *) 0;
+		if (sv == &PL_sv_undef) {
+			seen_null = TRUE;
+			continue;
+		}
+		if (sv == &PL_sv_placeholder)
+			sv = &PL_sv_undef;
 		if (av_store(av, i, sv) == 0)
 			return (SV *) 0;
 	}
+	if (seen_null) av_fill(av, len-1);
 
 	TRACEME(("ok (retrieve_array at 0x%"UVxf")", PTR2UV(av)));
 
