@@ -4666,7 +4666,7 @@ PP(pp_exists)
     SV *tmpsv;
     HV *hv;
 
-    if (PL_op->op_private & OPpEXISTS_SUB) {
+    if (UNLIKELY( PL_op->op_private & OPpEXISTS_SUB )) {
 	GV *gv;
 	SV * const sv = POPs;
 	CV * const cv = sv_2cv(sv, &hv, &gv, 0);
@@ -4678,7 +4678,7 @@ PP(pp_exists)
     }
     tmpsv = POPs;
     hv = MUTABLE_HV(POPs);
-    if (SvTYPE(hv) == SVt_PVHV) {
+    if (LIKELY( SvTYPE(hv) == SVt_PVHV )) {
 	if (hv_exists_ent(hv, tmpsv, 0))
 	    RETPUSHYES;
     }
