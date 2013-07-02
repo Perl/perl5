@@ -292,8 +292,9 @@ class> of them.
 
 One such concept is that of a I<character class>.  A character class
 allows a set of possible characters, rather than just a single
-character, to match at a particular point in a regexp.  Character
-classes are denoted by brackets C<[...]>, with the set of characters
+character, to match at a particular point in a regexp.  You can define
+your own custom character classes.  These
+are denoted by brackets C<[...]>, with the set of characters
 to be possibly matched inside.  Here are some examples:
 
     /cat/;       # matches 'cat'
@@ -420,7 +421,7 @@ ASCII with non-ASCII characters; otherwise a Unicode "Kelvin Sign"
 would caselessly match a "k" or "K".)
 
 The C<\d\s\w\D\S\W> abbreviations can be used both inside and outside
-of character classes.  Here are some in use:
+of bracketed character classes.  Here are some in use:
 
     /\d\d:\d\d:\d\d/; # matches a hh:mm:ss time format
     /[\d\s]/;         # matches any digit or whitespace character
@@ -435,6 +436,11 @@ as an ordinary period. Because, for example, C<\d> and C<\w> are sets
 of characters, it is incorrect to think of C<[^\d\w]> as C<[\D\W]>; in
 fact C<[^\d\w]> is the same as C<[^\w]>, which is the same as
 C<[\W]>. Think DeMorgan's laws.
+
+In actuality, the period and C<\d\s\w\D\S\W> abbreviations are
+themselves types of character classes, so the ones surrounded by
+brackets are just one type of character class.  When we need to make a
+distinction, we refer to them as "bracketed character classes."
 
 An anchor useful in basic regexps is the I<word anchor>
 C<\b>.  This matches a boundary between a word character and a non-word
