@@ -216,6 +216,7 @@
 #define PL_ofsgv		(vTHX->Iofsgv)
 #define PL_oldname		(vTHX->Ioldname)
 #define PL_op			(vTHX->Iop)
+#define PL_op_exec_cnt		(vTHX->Iop_exec_cnt)
 #define PL_op_mask		(vTHX->Iop_mask)
 #define PL_opfreehook		(vTHX->Iopfreehook)
 #define PL_opsave		(vTHX->Iopsave)

@@ -238,6 +238,10 @@ perl_construct(pTHXx)
 #endif
     PL_curcop = &PL_compiling;	/* needed by ckWARN, right away */
 
+#ifdef PERL_TRACE_OPS
+    Zero(PL_op_exec_cnt, OP_max+2, UV);
+#endif
+
     init_constants();
 
     SvREADONLY_on(&PL_sv_placeholder);
@@ -567,6 +571,20 @@ perl_destruct(pTHXx)
 
     /* Need to flush since END blocks can produce output */
     my_fflush_all();
+
+#ifdef PERL_TRACE_OPS
+    /* If we traced all Perl OP usage, report and clean up */
+    PerlIO_printf(Perl_debug_log, "Trace of all OPs executed:\n");
+    for (i = 0; i <= OP_max; ++i) {
+        PerlIO_printf(Perl_debug_log, "  %s: %"UVuf"\n", PL_op_name[i], PL_op_exec_cnt[i]);
+        PL_op_exec_cnt[i] = 0;
+    }
+    /* Utility slot for easily doing little tracing experiments in the runloop: */
+    if (PL_op_exec_cnt[OP_max+1] != 0)
+        PerlIO_printf(Perl_debug_log, "  SPECIAL: %"UVuf"\n", PL_op_exec_cnt[OP_max+1]);
+    PerlIO_printf(Perl_debug_log, "\n");
+#endif
+
 
     if (PL_threadhook(aTHX)) {
         /* Threads hook has vetoed further cleanup */

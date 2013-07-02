@@ -777,6 +777,15 @@ PERLVARI(I, sv_serial,	U32,	0)	/* SV serial number, used in sv.c */
 
 PERLVARA(I, sv_consts, SV_CONSTS_COUNT, SV*)	/* constant SVs with precomputed hash value */
 
+#ifdef PERL_TRACE_OPS
+PERLVARA(I, op_exec_cnt, OP_max+2, UV)	/* Counts of executed OPs of the given type.
+                                           If PERL_TRACE_OPS is enabled, we'll dump
+                                           a summary count of all ops executed in the
+                                           program at perl_destruct time. For
+                                           profiling/debugging only. Works only if
+                                           DEBUGGING is enabled, too. */
+#endif
+
 /* If you are adding a U8 or U16, check to see if there are 'Space' comments
  * above on where there are gaps which currently will be structure padding.  */
 

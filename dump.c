@@ -2213,6 +2213,9 @@ Perl_runops_debug(pTHX)
 
     DEBUG_l(Perl_deb(aTHX_ "Entering new RUNOPS level\n"));
     do {
+#ifdef PERL_TRACE_OPS
+        ++PL_op_exec_cnt[PL_op->op_type];
+#endif
 	if (PL_debug) {
 	    if (PL_watchaddr && (*PL_watchaddr != PL_watchok))
 		PerlIO_printf(Perl_debug_log,
