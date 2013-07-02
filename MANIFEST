@@ -2958,6 +2958,9 @@ dist/Dumpvalue/t/Dumpvalue.t	See if Dumpvalue works
 dist/Env/lib/Env.pm		Map environment into ordinary variables
 dist/Env/t/array.t		See if Env works for arrays
 dist/Env/t/env.t		See if Env works
+dist/Exporter/lib/Exporter/Heavy.pm	Complicated routines for Exporter
+dist/Exporter/lib/Exporter.pm		Exporter base class
+dist/Exporter/t/Exporter.t		See if Exporter works
 dist/ExtUtils-CBuilder/Changes		EU-CB change log
 dist/ExtUtils-CBuilder/lib/ExtUtils/CBuilder/Base.pm		Base class for ExtUtils::CBuilder methods
 dist/ExtUtils-CBuilder/lib/ExtUtils/CBuilder/Platform/aix.pm	CBuilder methods for AIX
@@ -4099,9 +4102,6 @@ lib/dumpvar.pl			A variable dumper
 lib/dumpvar.t			A variable dumper tester
 lib/English.pm			Readable aliases for short variables
 lib/English.t			See if English works
-lib/Exporter/Heavy.pm		Complicated routines for Exporter
-lib/Exporter.pm			Exporter base class
-lib/Exporter.t			See if Exporter works
 lib/ExtUtils/Embed.pm		Utilities for embedding Perl in C programs
 lib/ExtUtils/t/Embed.t		See if ExtUtils::Embed and embedding works
 lib/ExtUtils/typemap		Extension interface types

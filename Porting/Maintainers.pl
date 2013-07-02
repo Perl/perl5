@@ -634,19 +634,12 @@ use File::Glob qw(:case);
     'Exporter' => {
         'MAINTAINER'   => 'ferreira',
         'DISTRIBUTION' => 'TODDR/Exporter-5.68.tar.gz',
-        'FILES'        => q[lib/Exporter.pm
-                            lib/Exporter.t
-                            lib/Exporter/Heavy.pm
-                           ],
+        'FILES'        => q[dist/Exporter],
         'EXCLUDED' => [
             qw( t/pod.t
                 t/use.t
                 ),
         ],
-        'MAP' => {
-            't/'   => 'lib/',
-            'lib/' => 'lib/',
-        },
         'UPSTREAM' => 'blead',
     },
 

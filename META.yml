@@ -24,6 +24,7 @@ no_index:
     - dist/Devel-SelfStubber
     - dist/Dumpvalue
     - dist/Env
+    - dist/Exporter
     - dist/ExtUtils-CBuilder
     - dist/ExtUtils-Command
     - dist/ExtUtils-Install
@@ -102,9 +103,6 @@ no_index:
     - dist/lib/lib_pm.PL
     - dist/lib/Makefile.PL
     - dist/lib/t/01lib.t
-    - lib/Exporter.pm
-    - lib/Exporter.t
-    - lib/Exporter/Heavy.pm
     - lib/unicore/mktables
     - lib/version.pm
     - lib/version.pod
