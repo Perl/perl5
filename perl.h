@@ -701,6 +701,12 @@ struct op *Perl_op asm(stringify(OP_IN_REGISTER));
 #   if !defined(NO_LOCALE_NUMERIC) && defined(LC_NUMERIC)
 #	define USE_LOCALE_NUMERIC
 #   endif
+#   if !defined(NO_LOCALE_MESSAGES) && defined(LC_MESSAGES)
+#	define USE_LOCALE_MESSAGES
+#   endif
+#   if !defined(NO_LOCALE_MONETARY) && defined(LC_MONETARY)
+#	define USE_LOCALE_MONETARY
+#   endif
 #endif /* !NO_LOCALE && HAS_SETLOCALE */
 
 #include <setjmp.h>

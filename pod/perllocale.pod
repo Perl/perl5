@@ -776,8 +776,8 @@ See also L<I18N::Langinfo> and C<RADIXCHAR>.
 The C standard defines the C<LC_MONETARY> category, but not a function
 that is affected by its contents.  (Those with experience of standards
 committees will recognize that the working group decided to punt on the
-issue.)  Consequently, Perl takes no notice of it.  If you really want
-to use C<LC_MONETARY>, you can query its contents--see
+issue.)  Consequently, Perl essentially takes no notice of it.  If you
+really want to use C<LC_MONETARY>, you can query its contents--see
 L<The localeconv function>--and use the information that it returns in your
 application's own formatting of currency amounts.  However, you may well
 find that the information, voluminous and complex though it may be, still

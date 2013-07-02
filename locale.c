@@ -709,6 +709,160 @@ S_is_cur_LC_category_utf8(pTHX_ int category)
     }
 #endif
 
+    /* Other common encodings are the ISO 8859 series, which aren't UTF-8 */
+    if (instr(save_input_locale, "8859")) {
+        Safefree(save_input_locale);
+        return FALSE;
+    }
+
+#ifdef HAS_LOCALECONV
+
+#   ifdef USE_LOCALE_MONETARY
+
+    /* Here, there is nothing in the locale name to indicate whether the locale
+     * is UTF-8 or not.  This "name", the return of setlocale(), is actually
+     * defined to be opaque, so we can't really rely on the absence of various
+     * substrings in the name to indicate its UTF-8ness.  Look at the locale's
+     * currency symbol.  Often that will be in the native script, and if the
+     * symbol isn't in UTF-8, we know that the locale isn't.  If it is
+     * non-ASCII UTF-8, we infer that the locale is too.
+     * To do this, like above for LC_CTYPE, we first set LC_MONETARY to the
+     * locale of the desired category, if it isn't that locale already */
+
+    {
+        char *save_monetary_locale = NULL;
+        bool illegal_utf8 = FALSE;
+        bool only_ascii = FALSE;
+        const struct lconv* const lc = localeconv();
+
+        if (category != LC_MONETARY) {
+
+            save_monetary_locale = stdize_locale(savepv(setlocale(LC_MONETARY,
+                                                                  NULL)));
+            if (! save_monetary_locale) {
+                goto cant_use_monetary;
+            }
+
+            if (strNE(save_monetary_locale, save_input_locale)) {
+                if (! setlocale(LC_MONETARY, save_input_locale)) {
+                    Safefree(save_monetary_locale);
+                    goto cant_use_monetary;
+                }
+            }
+        }
+
+        /* Here the current LC_MONETARY is set to the locale of the category
+         * whose information is desired. */
+
+        if (lc && lc->currency_symbol) {
+            if (! is_utf8_string((U8 *) lc->currency_symbol, 0)) {
+                illegal_utf8 = TRUE;
+            }
+            else if (is_ascii_string((U8 *) lc->currency_symbol, 0)) {
+                only_ascii = TRUE;
+            }
+        }
+
+        /* If we changed it, restore LC_MONETARY to its original locale */
+        if (save_monetary_locale) {
+            setlocale(LC_MONETARY, save_monetary_locale);
+            Safefree(save_monetary_locale);
+        }
+
+        Safefree(save_input_locale);
+
+        /* It isn't a UTF-8 locale if the symbol is not legal UTF-8; otherwise
+         * assume the locale is UTF-8 if and only if the symbol is non-ascii
+         * UTF-8.  (We can't really tell if the locale is UTF-8 or not if the
+         * symbol is just a '$', so we err on the side of it not being UTF-8)
+         * */
+        return (illegal_utf8)
+                ? FALSE
+                : ! only_ascii;
+
+    }
+  cant_use_monetary:
+
+#   endif /* USE_LOCALE_MONETARY */
+#endif /* HAS_LOCALECONV */
+
+#if 0 && defined(HAS_STRERROR) && defined(USE_LOCALE_MESSAGES)
+
+/* This code is ifdefd out because it was found to not be necessary in testing
+ * on our dromedary test machine, which has over 700 locales.  There, looking
+ * at just the currency symbol gave essentially the same results as doing this
+ * extra work.  Executing this also caused segfaults in miniperl.  I left it in
+ * so as to avoid rewriting it if real-world experience indicates that
+ * dromedary is an outlier.  Essentially, instead of returning abpve if we
+ * haven't found illegal utf8, we continue on and examine all the strerror()
+ * messages on the platform for utf8ness.  If all are ASCII, we still don't
+ * know the answer; but otherwise we have a pretty good indication of the
+ * utf8ness.  The reason this doesn't necessarily help much is that the
+ * messages may not have been translated into the locale.  The currency symbol
+ * is much more likely to have been translated.  The code below would need to
+ * be altered somewhat to just be a continuation of testing the currency
+ * symbol. */
+        int e;
+        unsigned int failures = 0, non_ascii = 0;
+        char *save_messages_locale = NULL;
+
+        /* Like above for LC_CTYPE, we set LC_MESSAGES to the locale of the
+         * desired category, if it isn't that locale already */
+
+        if (category != LC_MESSAGES) {
+
+            save_messages_locale = stdize_locale(savepv(setlocale(LC_MESSAGES,
+                                                                  NULL)));
+            if (! save_messages_locale) {
+                goto cant_use_messages;
+            }
+
+            if (strEQ(save_messages_locale, save_input_locale)) {
+                Safefree(save_input_locale);
+            }
+            else if (! setlocale(LC_MESSAGES, save_input_locale)) {
+                Safefree(save_messages_locale);
+                goto cant_use_messages;
+            }
+        }
+
+        /* Here the current LC_MESSAGES is set to the locale of the category
+         * whose information is desired.  Look through all the messages */
+
+        for (e = 0;
+#ifdef HAS_SYS_ERRLIST
+             e <= sys_nerr
+#endif
+             ; e++)
+        {
+            const U8* const errmsg = (U8 *) Strerror(e) ;
+            if (!errmsg)
+                break;
+            if (! is_utf8_string(errmsg, 0)) {
+                failures++;
+                break;
+            }
+            else if (! is_ascii_string(errmsg, 0)) {
+                non_ascii++;
+            }
+        }
+
+        /* And, if we changed it, restore LC_MESSAGES to its original locale */
+        if (save_messages_locale) {
+            setlocale(LC_MESSAGES, save_messages_locale);
+            Safefree(save_messages_locale);
+        }
+
+        /* Any non-UTF-8 message means not a UTF-8 locale; if all are valid,
+         * any non-ascii means it is one; otherwise we assume it isn't */
+        return (failures) ? FALSE : non_ascii;
+
+    }
+  cant_use_messages:
+
+#endif
+
+    Safefree(save_input_locale);
     return FALSE;
 }
 
