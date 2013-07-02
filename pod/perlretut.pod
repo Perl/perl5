@@ -1951,10 +1951,10 @@ bit encoding, depending on the history of the string, but conceptually
 it is a sequence of characters, not bytes. See L<perlunitut> for a
 tutorial about that.
 
-Let us now discuss Unicode character classes.  Just as with Unicode
-characters, there are named Unicode character classes represented by the
+Let us now discuss Unicode character classes, most usually called
+"character properties".  These are represented by the
 C<\p{name}> escape sequence.  Closely associated is the C<\P{name}>
-character class, which is the negation of the C<\p{name}> class.  For
+property, which is the negation of the C<\p{name}> one.  For
 example, to match lower and uppercase characters,
 
     $x = "BOB";
@@ -1965,40 +1965,20 @@ example, to match lower and uppercase characters,
 
 (The "Is" is optional.)
 
-Here is the association between some Perl named classes and the
-traditional Unicode classes:
+There are many, many Unicode character properties.  For the full list
+see L<perluniprops>.  Most of them have synonyms with shorter names,
+also listed there.  Some synonyms are a single character.  For these,
+you can drop the braces.  For instance, C<\pM> is the same thing as
+C<\p{Mark}>, meaning things like accent marks.
 
-  Perl class  Unicode class name or regular expression
-  name  
-
-  IsAlpha     /^[LM]/
-  IsAlnum     /^[LMN]/
-  IsASCII     $code <= 127
-  IsCntrl     /^C/
-  IsBlank     $code =~ /^(0020|0009)$/ || /^Z[^lp]/
-  IsDigit     Nd
-  IsGraph     /^([LMNPS]|Co)/
-  IsLower     Ll
-  IsPrint     /^([LMNPS]|Co|Zs)/
-  IsPunct     /^P/
-  IsSpace     /^Z/ || ($code =~ /^(0009|000A|000B|000C|000D)$/
-  IsSpacePerl /^Z/ || ($code =~ /^(0009|000A|000C|000D|0085|2028|2029)$/
-  IsUpper     /^L[ut]/
-  IsWord      /^[LMN]/ || $code eq "005F"
-  IsXDigit    $code =~ /^00(3[0-9]|[46][1-6])$/
-
-You can also use the official Unicode class names with C<\p> and
-C<\P>, like C<\p{L}> for Unicode 'letters', C<\p{Lu}> for uppercase
-letters, or C<\P{Nd}> for non-digits.  If a C<name> is just one
-letter, the braces can be dropped.  For instance, C<\pM> is the
-character class of Unicode 'marks', for example accent marks.
-For the full list see L<perlunicode>.
-
-Unicode has also been separated into various sets of characters
-which you can test with C<\p{...}> (in) and C<\P{...}> (not in).
-To test whether a character is (or is not) an element of a script
-you would use the script name, for example C<\p{Latin}>, C<\p{Greek}>,
-or C<\P{Katakana}>.
+The Unicode C<\p{Script}> property is used to categorize every Unicode
+character into the language script it is written in.  For example,
+English, French, and a bunch of other European languages are written in
+the Latin script.  But there is also the Greek script, the Thai script,
+the Katakana script, etc.  You can test whether a character is in a
+particular script with, for example C<\p{Latin}>, C<\p{Greek}>,
+or C<\p{Katakana}>.  To test if it isn't in the Balinese script, you
+would use C<\P{Balinese}>.
 
 What we have described so far is the single form of the C<\p{...}> character
 classes.  There is also a compound form which you may run into.  These
@@ -2006,8 +1986,9 @@ look like C<\p{name=value}> or C<\p{name:value}> (the equals sign and colon
 can be used interchangeably).  These are more general than the single form,
 and in fact most of the single forms are just Perl-defined shortcuts for common
 compound forms.  For example, the script examples in the previous paragraph
-could be written equivalently as C<\p{Script=Latin}>, C<\p{Script:Greek}>, and
-C<\P{script=katakana}> (case is irrelevant between the C<{}> braces).  You may
+could be written equivalently as C<\p{Script=Latin}>, C<\p{Script:Greek}>,
+C<\p{script=katakana}>, and C<\P{script=balinese}> (case is irrelevant
+between the C<{}> braces).  You may
 never have to use the compound forms, but sometimes it is necessary, and their
 use can make your code easier to understand.
 
