@@ -540,6 +540,9 @@ if ($define{'PERL_GLOBAL_STRUCT'}) {
     ++$skip{$_} foreach qw(Perl_init_global_struct Perl_free_global_struct);
 }
 
+++$skip{PL_op_exec_cnt}
+    unless $define{PERL_TRACE_OPS};
+
 # functions from *.sym files
 
 my @syms = qw(globvar.sym);
