@@ -7025,9 +7025,8 @@ S_reg_scan_name(pTHX_ RExC_state_t *pRExC_state, U32 flags)
 
 /* This section of code defines the inversion list object and its methods.  The
  * interfaces are highly subject to change, so as much as possible is static to
- * this file.  An inversion list is here implemented as a malloc'd C UV array.
- * Currently it is a SVt_PVLV, with some of the header fields from that
- * repurposed for uses here.
+ * this file.  An inversion list is here implemented as a malloc'd C UV array
+ * as an SVt_INVLIST scalar.
  *
  * An inversion list for Unicode is an array of code points, sorted by ordinal
  * number.  The zeroth element is the first code point in the list.  The 1th
@@ -7087,7 +7086,7 @@ S__invlist_array_init(pTHX_ SV* const invlist, const bool will_have_0)
      * element is either the element reserved for 0, if TRUE, or the element
      * after it, if FALSE */
 
-    U8* offset = get_invlist_offset_addr(invlist);
+    bool* offset = get_invlist_offset_addr(invlist);
     UV* zero_addr = (UV *) SvPVX(invlist);
 
     PERL_ARGS_ASSERT__INVLIST_ARRAY_INIT;
@@ -7143,12 +7142,12 @@ S_invlist_set_len(pTHX_ SV* const invlist, const UV len)
 PERL_STATIC_INLINE IV*
 S_get_invlist_previous_index_addr(pTHX_ SV* invlist)
 {
-    /* Return the address of the UV that is reserved to hold the cached index
+    /* Return the address of the IV that is reserved to hold the cached index
      * */
 
     PERL_ARGS_ASSERT_GET_INVLIST_PREVIOUS_INDEX_ADDR;
 
-    return &(((XPVLV*) SvANY(invlist))->xiv_u.xivu_iv);
+    return &(((XINVLIST*) SvANY(invlist))->prev_index);
 }
 
 PERL_STATIC_INLINE IV
@@ -7186,7 +7185,7 @@ S_invlist_max(pTHX_ SV* const invlist)
            : FROM_INTERNAL_SIZE(SvLEN(invlist));
 }
 
-PERL_STATIC_INLINE U8*
+PERL_STATIC_INLINE bool*
 S_get_invlist_offset_addr(pTHX_ SV* invlist)
 {
     /* Return the address of the field that says whether the inversion list is
@@ -7194,7 +7193,7 @@ S_get_invlist_offset_addr(pTHX_ SV* invlist)
 
     PERL_ARGS_ASSERT_GET_INVLIST_OFFSET_ADDR;
 
-    return (U8*) &(LvFLAGS(invlist));
+    return &(((XINVLIST*) SvANY(invlist))->is_offset);
 }
 
 #ifndef PERL_IN_XSUB_RE
@@ -7207,14 +7206,14 @@ Perl__new_invlist(pTHX_ IV initial_size)
      * system default is used instead */
 
     SV* new_list;
-    U8* offset_addr;
+    bool* offset_addr;
 
     if (initial_size < 0) {
 	initial_size = 10;
     }
 
     /* Allocate the initial space */
-    new_list = newSV_type(SVt_PVLV);
+    new_list = newSV_type(SVt_INVLIST);
     SvGROW(new_list, TO_INTERNAL_SIZE(initial_size) + 1); /* 1 is for trailing
                                                              NUL */
     invlist_set_len(new_list, 0);
@@ -7258,7 +7257,7 @@ S__new_invlist_C_array(pTHX_ const UV* const list)
                                         inversion list of the correct vintage.
                                        */
 
-    SV* invlist = newSV_type(SVt_PVLV);
+    SV* invlist = newSV_type(SVt_INVLIST);
 
     PERL_ARGS_ASSERT__NEW_INVLIST_C_ARRAY;
 
@@ -8167,7 +8166,7 @@ S_get_invlist_iter_addr(pTHX_ SV* invlist)
 
     PERL_ARGS_ASSERT_GET_INVLIST_ITER_ADDR;
 
-    return &(LvTARGOFF(invlist));
+    return &(((XINVLIST*) SvANY(invlist))->iterator);
 }
 
 PERL_STATIC_INLINE void
