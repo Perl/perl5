@@ -7318,7 +7318,7 @@ S_core_regclass_swash(pTHX_ const regexp *prog, const regnode* node, bool doinit
 
 	    /* Element [1] is reserved for the set-up swash.  If already there,
 	     * return it; if not, create it and store it there */
-	    if (SvROK(ary[1])) {
+	    if (ary[1] && SvROK(ary[1])) {
 		sw = ary[1];
 	    }
 	    else if (si && doinit) {

@@ -4330,7 +4330,7 @@ PP(pp_aslice)
 
 	    svp = av_fetch(av, elem, lval);
 	    if (lval) {
-		if (!svp || *svp == &PL_sv_undef)
+		if (!svp || !*svp)
 		    DIE(aTHX_ PL_no_aelem, elem);
 		if (localizing) {
 		    if (preeminent)
@@ -5016,7 +5016,7 @@ PP(pp_splice)
 	}
 	i = -diff;
 	while (i)
-	    dst[--i] = &PL_sv_undef;
+	    dst[--i] = NULL;
 	
 	if (newlen) {
  	    Copy( tmparyval, AvARRAY(ary) + offset, newlen, SV* );
