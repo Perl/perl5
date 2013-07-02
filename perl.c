@@ -2709,7 +2709,6 @@ Perl_call_sv(pTHX_ SV *sv, VOL I32 flags)
 {
     dVAR; dSP;
     LOGOP myop;		/* fake syntax tree node */
-    OP* method;
     UNOP method_unop;
     SVOP method_svop;
     I32 oldmark;
