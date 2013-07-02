@@ -141,14 +141,9 @@ quote (C<'>).  Normal identifiers can start or end with a double colon, and
 can contain several parts delimited by double colons.
 Single quotes have similar rules, but with the exception that they are not
 legal at the end of an identifier: That is, C<$'foo> and C<$foo'bar> are
-legal, but C<$foo'bar'> are not.
+legal, but C<$foo'bar'> is not.
 
-
-Finally, if the identifier is preceded by a sigil --
-More so, normal identifiers can start or end with any number
-of double colons (::), and can contain several parts delimited
-by double colons.
-And additionally, if the identifier is preceded by a sigil --
+Additionally, if the identifier is preceded by a sigil --
 that is, if the identifier is part of a variable name -- it
 may optionally be enclosed in braces.
 
