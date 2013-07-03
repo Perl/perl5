@@ -57,22 +57,22 @@ my $orig_dir = cwd();
 
 cleanup();
 
-$::count_commonsense = 0;
-find({wanted => sub { ++$::count_commonsense if $_ eq 'commonsense.t'; } },
+$::count_taint = 0;
+find({wanted => sub { ++$::count_taint if $_ eq 'taint.t'; } },
    File::Spec->curdir);
-if ($::count_commonsense == 1) {
+if ($::count_taint == 1) {
   print "ok 1\n";
 } else {
-  print "not ok 1 # found $::count_commonsense files named 'commonsense.t'\n";
+  print "not ok 1 # found $::count_taint files named 'taint.t'\n";
 }
 
-$::count_commonsense = 0;
-finddepth({wanted => sub { ++$::count_commonsense if $_ eq 'commonsense.t'; } },
+$::count_taint = 0;
+finddepth({wanted => sub { ++$::count_taint if $_ eq 'taint.t'; } },
 	File::Spec->curdir);
-if ($::count_commonsense == 1) {
+if ($::count_taint == 1) {
   print "ok 2\n";
 } else {
-  print "not ok 2 # found $::count_commonsense files named 'commonsense.t'\n";
+  print "not ok 2 # found $::count_taint files named 'taint.t'\n";
 }
 
 my $case = 2;

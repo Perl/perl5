@@ -60,16 +60,16 @@ my $orig_dir = cwd();
 cleanup();
 
 my $found;
-find({wanted => sub { $found = 1 if ($_ eq 'commonsense.t') },
+find({wanted => sub { ++$found if $_ eq 'taint.t' },
 		untaint => 1, untaint_pattern => qr|^(.+)$|}, File::Spec->curdir);
 
-ok($found, 'commonsense.t found');
+is($found, 1, 'taint.t found once');
 $found = 0;
 
-finddepth({wanted => sub { $found = 1 if $_ eq 'commonsense.t'; },
+finddepth({wanted => sub { ++$found if $_ eq 'taint.t'; },
            untaint => 1, untaint_pattern => qr|^(.+)$|}, File::Spec->curdir);
 
-ok($found, 'commonsense.t found again');
+is($found, 1, 'taint.t found once again');
 
 my $case = 2;
 my $FastFileTests_OK = 0;
