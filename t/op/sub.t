@@ -118,10 +118,8 @@ sub b {
     push @scratch, (ref $o, $depth||b($pack,$depth+1))[0];
 }
 b('n',0);
-$::TODO = "not fixed yet" if $Config::Config{useithreads};
 is "@scratch", "o n", 
    'recursive calls do not share shared-hash-key TARGs (2)';
-undef $::TODO;
 
 # [perl #78194] @_ aliasing op return values
 sub { is \$_[0], \$_[0],
