@@ -622,7 +622,10 @@ x2p/s2p: $x2p_deps
 x2p/find2perl: $x2p_deps
 	cd x2p; \$(LDLIBPTH) \$(MAKE) find2perl
 
-utilities:	$util_deps
+utils/Makefile: \$(MINIPERL_EXE) \$(CONFIGPM) utils/Makefile.PL
+	\$(MINIPERL) -Ilib utils/Makefile.PL
+
+utilities:	utils/Makefile $util_deps
 	@echo " "; echo "	Making utilities"; cd utils; \$(LDLIBPTH) \$(MAKE) all
 
 !GROK!THIS!
