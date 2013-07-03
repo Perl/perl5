@@ -16,11 +16,10 @@ my ($cwd, $cwd_untainted);
 
 BEGIN {
     require File::Spec;
-    chdir 't' if -d 't';
-    # May be doing dynamic loading while @INC is all relative
-    my $lib = File::Spec->rel2abs('../lib');
-    $lib = $1 if $lib =~ m/(.*)/;
-    unshift @INC => $lib;
+    if ($ENV{PERL_CORE}) {
+        # May be doing dynamic loading while @INC is all relative
+        @INC = map { $_ = File::Spec->rel2abs($_); /(.*)/; $1 } @INC;
+    }
 }
 
 use Config;

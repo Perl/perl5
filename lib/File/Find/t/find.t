@@ -11,11 +11,21 @@ my ($warn_msg, @files, $file);
 
 BEGIN {
     require File::Spec;
-    chdir 't' if -d 't';
-    # May be doing dynamic loading while @INC is all relative
-    unshift @INC => File::Spec->rel2abs('../lib');
+    if ($ENV{PERL_CORE}) {
+        # May be doing dynamic loading while @INC is all relative
+        @INC = map { $_ = File::Spec->rel2abs($_); /(.*)/; $1 } @INC;
+    }
+    $SIG{'__WARN__'} = sub { $warn_msg = $_[0]; warn "# $_[0]"; };
 
-    $SIG{'__WARN__'} = sub { $warn_msg = $_[0]; warn "# $_[0]"; }
+    if ($^O eq 'MSWin32' || $^O eq 'cygwin' || $^O eq 'VMS') {
+        # This is a hack - at present File::Find does not produce native names
+        # on Win32 or VMS, so force File::Spec to use Unix names.
+        # must be set *before* importing File::Find
+        require File::Spec::Unix;
+        @File::Spec::ISA = 'File::Spec::Unix';
+    }
+    require File::Find;
+    import File::Find;
 }
 
 my $test_count = 98;
@@ -44,21 +54,6 @@ my $orig_dir = cwd();
 #         return $return;
 #     };
 # }
-
-
-BEGIN {
-    use File::Spec;
-    if ($^O eq 'MSWin32' || $^O eq 'cygwin' || $^O eq 'VMS')
-     {
-      # This is a hack - at present File::Find does not produce native names on 
-      # Win32 or VMS, so force File::Spec to use Unix names.
-      # must be set *before* importing File::Find
-      require File::Spec::Unix;
-      @File::Spec::ISA = 'File::Spec::Unix';
-     }
-     require File::Find;
-     import File::Find;
-}
 
 cleanup();
 
