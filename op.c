@@ -10562,7 +10562,7 @@ Perl_ck_svconst(pTHX_ OP *o)
 {
     PERL_ARGS_ASSERT_CK_SVCONST;
     PERL_UNUSED_CONTEXT;
-    if (!SvIsCOW(cSVOPo->op_sv)) SvREADONLY_on(cSVOPo->op_sv);
+    SvREADONLY_on(cSVOPo->op_sv);
     return o;
 }
 

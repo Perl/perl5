@@ -1301,7 +1301,6 @@ foreach my $op (qw(<=> == != < <= > >=)) {
 	'constant overloading makes read-only constants';
     BEGIN { overload::constant integer => sub { __PACKAGE__ }; }
     eval { ${\5} = 'whatever' };
-    local $::TODO = ' ';
     like $@, qr/^Modification of a read-only value attempted at /,
 	'... even with shared hash key scalars';
 }
