@@ -652,9 +652,9 @@ Code point 0x110000 is not Unicode, all \p{} matches fail; all \P{} matches succ
 ########
 # TODO optimized regnode should still give warnings
 use warnings 'utf8';
-chr(0x110000) =~ /lb=cr/;
+chr(0x110000) =~ /\p{lb=cr}/;
 no warnings 'non_unicode';
-chr(0x110000) =~ /lb=cr/;
+chr(0x110000) =~ /\p{lb=cr}/;
 EXPECT
 Code point 0x110000 is not Unicode, all \p{} matches fail; all \P{} matches succeed at - line 2.
 ########
