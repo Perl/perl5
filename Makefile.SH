@@ -986,7 +986,7 @@ uni.data: $(MINIPERL_EXE) $(CONFIGPM) lib/unicore/mktables $(nonxs_ext)
 #	can in this makefile to decide if needs to run or not
 #	touch uni.data
 
-# $(PERL_EXE) and ext because buildtoc uses Text::Wrap uses re
+# $(PERL_EXE) and ext because pod_lib.pl needs Digest::MD5
 # But also this ensures that all extensions are built before we try to scan
 # them, which picks up Devel::PPPort's documentation.
 pod/perltoc.pod: $(perltoc_pod_prereqs)  $(PERL_EXE) $(ext) pod/buildtoc
@@ -994,8 +994,7 @@ pod/perltoc.pod: $(perltoc_pod_prereqs)  $(PERL_EXE) $(ext) pod/buildtoc
 
 pod/perlapi.pod: pod/perlintern.pod
 
-# Depending on $(nonxs_ext) gets us Text::Wrap built
-pod/perlintern.pod: $(MINIPERL_EXE) autodoc.pl embed.fnc $(nonxs_ext)
+pod/perlintern.pod: $(MINIPERL_EXE) autodoc.pl embed.fnc
 	$(MINIPERL) autodoc.pl
 
 pod/perlmodlib.pod: $(MINIPERL_EXE) pod/perlmodlib.PL MANIFEST
