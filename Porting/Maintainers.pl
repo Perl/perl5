@@ -766,7 +766,7 @@ use File::Glob qw(:case);
 
     'File::Find' => {
         'MAINTAINER' => 'p5p',
-        'FILES'      => q[lib/File/Find.pm lib/File/Find],
+        'FILES'      => q[ext/File-Find],
         'UPSTREAM'   => 'blead',
     },
 

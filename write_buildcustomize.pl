@@ -29,6 +29,7 @@ my @toolchain = qw(cpan/AutoLoader/lib
 		   ext/re
 		   dist/Term-ReadLine/lib
                    dist/Exporter/lib
+                   ext/File-Find/lib
 		   );
 
 # Used only in ExtUtils::Liblist::Kid::_win32_ext()

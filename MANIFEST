@@ -3585,6 +3585,9 @@ ext/FileCache/t/07noimport.t	See if FileCache works without importing
 ext/File-DosGlob/DosGlob.xs		Win32 DOS-globbing module
 ext/File-DosGlob/lib/File/DosGlob.pm	Win32 DOS-globbing module
 ext/File-DosGlob/t/DosGlob.t		See if File::DosGlob works
+ext/File-Find/lib/File/Find.pm	Routines to do a find
+ext/File-Find/t/find.t		See if File::Find works
+ext/File-Find/t/taint.t		See if File::Find works with taint
 ext/File-Glob/bsd_glob.c	File::Glob extension run time code
 ext/File-Glob/bsd_glob.h	File::Glob extension header file
 ext/File-Glob/Changes		File::Glob extension changelog
@@ -4115,9 +4118,6 @@ lib/File/Compare.pm		Emulation of cmp command
 lib/File/Compare.t		See if File::Compare works
 lib/File/Copy.pm		Emulation of cp command
 lib/File/Copy.t			See if File::Copy works
-lib/File/Find.pm		Routines to do a find
-lib/File/Find/t/find.t		See if File::Find works
-lib/File/Find/t/taint.t		See if File::Find works with taint
 lib/FileHandle.pm		Backward-compatible front end to IO extension
 lib/FileHandle.t		See if FileHandle works
 lib/File/stat-7896.t		A test for ID 20011110.104

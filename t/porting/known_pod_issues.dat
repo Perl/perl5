@@ -202,6 +202,7 @@ dist/threads/lib/threads.pm	Verbatim line length including indents exceeds 79 by
 dist/tie-file/lib/tie/file.pm	Verbatim line length including indents exceeds 79 by	3
 ext/devel-peek/peek.pm	? Should you be using L<...> instead of	2
 ext/dynaloader/dynaloader.pm	Verbatim line length including indents exceeds 79 by	1
+ext/file-find/lib/file/find.pm	Verbatim line length including indents exceeds 79 by	1
 ext/file-glob/glob.pm	Verbatim line length including indents exceeds 79 by	15
 ext/pod-html/testdir/perlpodspec-copy.pod	Verbatim line length including indents exceeds 79 by	8
 ext/pod-html/testdir/perlvar-copy.pod	? Should you be using L<...> instead of	3
@@ -272,7 +273,6 @@ utils/c2ph	Verbatim line length including indents exceeds 79 by	44
 lib/benchmark.pm	Verbatim line length including indents exceeds 79 by	2
 lib/config.pod	? Should you be using L<...> instead of	-1
 lib/extutils/embed.pm	Verbatim line length including indents exceeds 79 by	2
-lib/file/find.pm	Verbatim line length including indents exceeds 79 by	1
 lib/perl5db.pl	? Should you be using L<...> instead of	1
 lib/pod/text/overstrike.pm	Verbatim line length including indents exceeds 79 by	1
 lib/version/internals.pod	Verbatim line length including indents exceeds 79 by	1
