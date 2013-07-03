@@ -3,7 +3,7 @@ use strict;
 use vars qw($Needs_Write $Verbose @Changed $TAP);
 use File::Compare;
 use Symbol;
-use Text::Wrap;
+use Text::Wrap();
 
 # Common functions needed by the regen scripts
 
@@ -98,8 +98,7 @@ sub read_only_top {
     }
     if ($args{copyright}) {
 	local $" = ', ';
-	local $Text::Wrap::columns = 75;
-	$raw .= wrap('   ', '   ', <<"EOM") . "\n";
+         $raw .= wrap(75, '   ', '   ', <<"EOM") . "\n";
 
 Copyright (C) @{$args{copyright}} by\0Larry\0Wall\0and\0others
 
@@ -126,10 +125,9 @@ EOM
     $raw .= "Any changes made here will be lost!\n";
     $raw .= $args{final} if $args{final};
 
-    local $Text::Wrap::columns = 78;
     my $cooked = $lang eq 'C'
-        ? wrap('/* ', $style, $raw) . " */\n\n"
-        : wrap($lang_opener{$lang}, $lang_opener{$lang}, $raw) . "\n";
+        ? wrap(78, '/* ', $style, $raw) . " */\n\n"
+        : wrap(78, $lang_opener{$lang}, $lang_opener{$lang}, $raw) . "\n";
     $cooked =~ tr/\0/ /; # Don't break Larry's name etc
     $cooked =~ s/ +$//mg; # Remove all trailing spaces
     $cooked =~ s! \*/\n!$args{quote}!s if $args{quote};
@@ -182,5 +180,10 @@ sub digest {
     close FH or die "Can't close $file: $!";
     return Digest::SHA::sha256_hex($raw);
 };
+
+sub wrap {
+    local $Text::Wrap::columns = shift;
+    Text::Wrap::wrap(@_);
+}
 
 1;
