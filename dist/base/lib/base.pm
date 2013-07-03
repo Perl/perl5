@@ -82,7 +82,7 @@ sub import {
                 # Only ignore "Can't locate" errors from our eval require.
                 # Other fatal errors (syntax etc) must be reported.
                 die if $@ && $@ !~ /^Can't locate .*? at \(eval /;
-                unless (grep { !/::$/ } keys %{"$base\::"}) {
+                unless (%{"$base\::"}) {
                     require Carp;
                     local $" = " ";
                     Carp::croak(<<ERROR);
