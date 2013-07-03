@@ -768,7 +768,7 @@ Perl_pad_alloc(pTHX_ I32 optype, U32 tmptype)
 		continue;
 	    sv = *av_fetch(PL_comppad, PL_padix, TRUE);
 	    if (!(SvFLAGS(sv) & (SVs_PADTMP | SVs_PADMY)) &&
-		!IS_PADGV(sv) && !IS_PADCONST(sv))
+		!IS_PADGV(sv))
 		break;
 	}
 	if (tmptype & SVf_READONLY) {
