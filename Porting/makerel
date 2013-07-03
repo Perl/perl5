@@ -160,7 +160,6 @@ my @writables = qw(
     win32/config_H.ce
     win32/config_H.gc
     win32/config_H.vc
-    utils/Makefile
     uconfig.h
 );
 system("chmod u+w @writables") == 0

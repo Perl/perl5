@@ -5438,7 +5438,6 @@ utils/instmodsh.PL		Give information about installed extensions
 utils/json_pp.PL		JSON::PP command line utility
 utils/libnetcfg.PL		libnet
 utils.lst			Lists utilities bundled with Perl
-utils/Makefile			Pregenerated from utils/Makefile.SH
 utils/Makefile.PL		Extract the utility scripts
 utils/perlbug.PL		A simple tool to submit a bug report
 utils/perldoc.PL		A simple tool to find & display perl's documentation

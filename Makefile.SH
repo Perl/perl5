@@ -1247,7 +1247,7 @@ _cleaner2:
 	rm -rf t/tmp*
 	rm -f so_locations $(LIBPERL_NONSHR) $(MINIPERL_NONSHR)
 	rm -rf $(addedbyconf)
-	rm -f $(FIRSTMAKEFILE) $(FIRSTMAKEFILE).old makefile.old
+	rm -f $(FIRSTMAKEFILE) $(FIRSTMAKEFILE).old makefile.old utils/Makefile
 	rm -f $(private)
 	rm -rf $(unidatafiles) $(unidatadirs)
 	rm -rf lib/auto

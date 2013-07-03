@@ -7,21 +7,23 @@ if (@ARGV) {
     chdir $dir or die "Can't chdir '$dir': $!";
 }
 
+# Note, the generated utils/Makefile isn't used by VMS yet.
+# The next step on cleaning this is up is probably to work to reduce the size
+# of the "problem" in both this file and vms/descrip_mms.template by
+# attempting to move the work from them to the extension directories and
+# ExtUtils::MakeMaker.
+
 require 'regen/regen_lib.pl';
 
 my $target = 'utils/Makefile';
 print "Extracting $target (with variable substitutions)\n";
-my $fh = open_new($target, undef, undef, 1);
+my $fh = open_new($target, undef, {by => $0}, 1);
 
 # These use the Cwd extension.  For statically-built perls, we
 # need perl, not just miniperl.
 my $perl = defined $Config{usedl} ? '../miniperl' : '../perl';
 
 print $fh <<"EOT";
-# Generated from utils/Makefile.SH.  The generated file is
-# shipped with the source kit for systems such as win32
-# which don't do .SH extraction.
-
 PERL = $perl
 REALPERL = ../perl
 RUN = $Config{run}  # Used mainly cross-compilation setups.
@@ -104,4 +106,4 @@ veryclean:	distclean
 	-rm -f *~ *.org
 EOT
 
-close_and_rename($fh);
+read_only_bottom_close_and_rename($fh);
