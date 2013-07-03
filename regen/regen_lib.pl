@@ -49,9 +49,8 @@ sub open_new {
     } else {
 	die "Unhandled open mode '$mode#";
     }
-    *{$fh}->{name} = $name;
-    *{$fh}->{final_name} = $final_name;
-    *{$fh}->{lang} = $lang;
+    @{*$fh}{qw(name final_name lang)}
+        = ($name, $final_name, $lang);
     binmode $fh;
     print {$fh} read_only_top(lang => $lang, %$header) if $header;
     $fh;
@@ -59,9 +58,8 @@ sub open_new {
 
 sub close_and_rename {
     my $fh = shift;
-    my $name = *{$fh}->{name};
+    my ($name, $final_name) = @{*{$fh}}{qw(name final_name)};
     close $fh or die "Error closing $name: $!";
-    my $final_name = *{$fh}->{final_name};
 
     if ($TAP) {
 	my $not = compare($name, $final_name) ? 'not ' : '';
@@ -87,9 +85,10 @@ my %lang_opener = (Perl => '# ', Pod => '', C => '/* ');
 
 sub read_only_top {
     my %args = @_;
-    die "Missing language argument" unless defined $args{lang};
-    die "Unknown language argument '$args{lang}'"
-	unless exists $lang_opener{$args{lang}};
+    my $lang = $args{lang};
+    die "Missing language argument" unless defined $lang;
+    die "Unknown language argument '$lang'"
+        unless exists $lang_opener{$lang};
     my $style = $args{style} ? " $args{style} " : '   ';
 
     my $raw = "-*- buffer-read-only: t -*-\n";
@@ -128,9 +127,9 @@ EOM
     $raw .= $args{final} if $args{final};
 
     local $Text::Wrap::columns = 78;
-    my $cooked = $args{lang} eq 'C'
-	? wrap('/* ', $style, $raw) . " */\n\n"
-	: wrap($lang_opener{$args{lang}}, $lang_opener{$args{lang}}, $raw) . "\n";
+    my $cooked = $lang eq 'C'
+        ? wrap('/* ', $style, $raw) . " */\n\n"
+        : wrap($lang_opener{$lang}, $lang_opener{$lang}, $raw) . "\n";
     $cooked =~ tr/\0/ /; # Don't break Larry's name etc
     $cooked =~ s/ +$//mg; # Remove all trailing spaces
     $cooked =~ s! \*/\n!$args{quote}!s if $args{quote};
@@ -139,10 +138,9 @@ EOM
 
 sub read_only_bottom_close_and_rename {
     my ($fh, $sources) = @_;
-    my $name = *{$fh}->{name};
-    my $lang = *{$fh}->{lang};
+    my ($name, $lang, $final_name) = @{*{$fh}}{qw(name lang final_name)};
     die "No final name specified at open time for $name"
-	unless *{$fh}->{final_name};
+        unless $final_name;
 
     my $comment;
     if ($sources) {
