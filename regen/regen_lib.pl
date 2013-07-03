@@ -34,10 +34,15 @@ sub safer_unlink {
 
 # Open a new file.
 sub open_new {
-    my ($final_name, $mode, $header) = @_;
+    my ($final_name, $mode, $header, $force) = @_;
     my $name = $final_name . '-new';
     my $lang = $final_name =~ /\.pod$/ ? 'Pod' :
 	$final_name =~ /\.(?:c|h|tab|act)$/ ? 'C' : 'Perl';
+    if ($force && -e $final_name) {
+        chmod 0777, $name if $Needs_Write;
+        CORE::unlink $final_name
+                or die "Couldn't unlink $final_name: $!\n";
+    }
     my $fh = gensym;
     if (!defined $mode or $mode eq '>') {
 	if (-f $name) {
@@ -47,10 +52,10 @@ sub open_new {
     } elsif ($mode eq '>>') {
 	open $fh, ">>$name" or die "Can't append to $name: $!";
     } else {
-	die "Unhandled open mode '$mode#";
+        die "Unhandled open mode '$mode'";
     }
-    @{*$fh}{qw(name final_name lang)}
-        = ($name, $final_name, $lang);
+    @{*$fh}{qw(name final_name lang force)}
+        = ($name, $final_name, $lang, $force);
     binmode $fh;
     print {$fh} read_only_top(lang => $lang, %$header) if $header;
     $fh;
@@ -58,7 +63,7 @@ sub open_new {
 
 sub close_and_rename {
     my $fh = shift;
-    my ($name, $final_name) = @{*{$fh}}{qw(name final_name)};
+    my ($name, $final_name, $force) = @{*{$fh}}{qw(name final_name force)};
     close $fh or die "Error closing $name: $!";
 
     if ($TAP) {
@@ -67,13 +72,15 @@ sub close_and_rename {
 	safer_unlink($name);
 	return;
     }
-    if (compare($name, $final_name) == 0) {
-	warn "no changes between '$name' & '$final_name'\n" if $Verbose > 0;
-	safer_unlink($name);
-	return;
+    unless ($force) {
+        if (compare($name, $final_name) == 0) {
+            warn "no changes between '$name' & '$final_name'\n" if $Verbose > 0;
+            safer_unlink($name);
+            return;
+        }
+        warn "changed '$name' to '$final_name'\n" if $Verbose > 0;
+        push @Changed, $final_name unless $Verbose < 0;
     }
-    warn "changed '$name' to '$final_name'\n" if $Verbose > 0;
-    push @Changed, $final_name unless $Verbose < 0;
 
     # Some DOSish systems can't rename over an existing file:
     safer_unlink $final_name;

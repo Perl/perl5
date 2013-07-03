@@ -254,7 +254,7 @@ sub output {
     my ($podname, $header, $dochash, $missing, $footer) = @_;
     my $fh = open_new("pod/$podname.pod", undef,
 		      {by => "$0 extracting documentation",
-		       from => 'the C source files'});
+                       from => 'the C source files'}, 1);
 
     print $fh $header;
 
