@@ -81,6 +81,12 @@ sub import {
                 eval "require $base";
                 # Only ignore "Can't locate" errors from our eval require.
                 # Other fatal errors (syntax etc) must be reported.
+                #
+                # changing the check here is fragile - if the check
+                # here isn't catching every error you want, you should
+                # probably be using parent.pm, which doesn't try to
+                # guess whether require is needed or failed,
+                # see [perl #118561]
                 die if $@ && $@ !~ /^Can't locate .*? at \(eval /;
                 unless (%{"$base\::"}) {
                     require Carp;
