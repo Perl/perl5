@@ -1,7 +1,5 @@
 #!./perl
 
-BEGIN { unshift(@INC,'../lib') if -d '../lib'; }
-
 use VMS::Filespec;
 use File::Spec;
 
@@ -12,7 +10,7 @@ foreach (<DATA>) {
   push(@tests,$_);
 }
 
-require './test.pl';
+require 'test.pl';
 plan(tests => scalar(2*@tests)+6);
 
 my $vms_unix_rpt;
