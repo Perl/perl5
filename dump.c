@@ -27,13 +27,12 @@
 #include "perl.h"
 #include "regcomp.h"
 
-
 static const char* const svtypenames[SVt_LAST] = {
     "NULL",
-    "DUMMY",
     "IV",
     "NV",
     "PV",
+    "INVLIST",
     "PVIV",
     "PVNV",
     "PVMG",
@@ -50,10 +49,10 @@ static const char* const svtypenames[SVt_LAST] = {
 
 static const char* const svshorttypenames[SVt_LAST] = {
     "UNDEF",
-    "DUMMY",
     "IV",
     "NV",
     "PV",
+    "INVLST",
     "PVIV",
     "PVNV",
     "PVMG",
@@ -2798,7 +2797,7 @@ Perl_sv_xmlpeek(pTHX_ SV *sv)
     case SVt_PVGV:
 	sv_catpv(t, " GV=\"");
 	break;
-    case SVt_DUMMY:
+    case SVt_INVLIST:
 	sv_catpv(t, " DUMMY=\"");
 	break;
     case SVt_REGEXP:

@@ -881,11 +881,6 @@ static const struct body_details bodies_by_type[] = {
     /* HEs use this offset for their arena.  */
     { 0, 0, 0, SVt_NULL, FALSE, NONV, NOARENA, 0 },
 
-    /* The bind placeholder pretends to be an RV for now.
-       Also it's marked as "can't upgrade" to stop anyone using it before it's
-       implemented.  */
-    { 0, 0, 0, SVt_DUMMY, TRUE, NONV, NOARENA, 0 },
-
     /* IVs are in the head, so the allocation size is 0.  */
     { 0,
       sizeof(IV), /* This is used to copy out the IV body.  */
@@ -902,6 +897,12 @@ static const struct body_details bodies_by_type[] = {
       + STRUCT_OFFSET(XPV, xpv_cur),
       SVt_PV, FALSE, NONV, HASARENA,
       FIT_ARENA(0, sizeof(XPV) - STRUCT_OFFSET(XPV, xpv_cur)) },
+
+    { sizeof(XINVLIST) - STRUCT_OFFSET(XPV, xpv_cur),
+      copy_length(XINVLIST, is_offset) - STRUCT_OFFSET(XPV, xpv_cur),
+      + STRUCT_OFFSET(XPV, xpv_cur),
+      SVt_INVLIST, TRUE, NONV, HASARENA,
+      FIT_ARENA(0, sizeof(XINVLIST) - STRUCT_OFFSET(XPV, xpv_cur)) },
 
     { sizeof(XPVIV) - STRUCT_OFFSET(XPV, xpv_cur),
       copy_length(XPVIV, xiv_u) - STRUCT_OFFSET(XPV, xpv_cur),
@@ -1340,6 +1341,7 @@ Perl_sv_upgrade(pTHX_ SV *const sv, svtype new_type)
     case SVt_PVGV:
     case SVt_PVCV:
     case SVt_PVLV:
+    case SVt_INVLIST:
     case SVt_REGEXP:
     case SVt_PVMG:
     case SVt_PVNV:
@@ -4117,7 +4119,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, SV* sstr, const I32 flags)
 	}
 	break;
 
-	/* case SVt_DUMMY: */
+	case SVt_INVLIST:
     case SVt_PVLV:
     case SVt_PVGV:
     case SVt_PVMG:
@@ -6178,7 +6180,7 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
 		SvREFCNT_dec(SvSTASH(sv));
 	}
 	switch (type) {
-	    /* case SVt_DUMMY: */
+	    /* case SVt_INVLIST: */
 	case SVt_PVIO:
 	    if (IoIFP(sv) &&
 		IoIFP(sv) != PerlIO_stdin() &&
@@ -6304,6 +6306,7 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
 	case SVt_PVMG:
 	case SVt_PVNV:
 	case SVt_PVIV:
+	case SVt_INVLIST:
 	case SVt_PV:
 	  freescalar:
 	    /* Don't bother with SvOOK_off(sv); as we're only going to
@@ -9440,7 +9443,7 @@ Perl_sv_reftype(pTHX_ const SV *const sv, const int ob)
 				    ? "GLOB" : "SCALAR");
 	case SVt_PVFM:		return "FORMAT";
 	case SVt_PVIO:		return "IO";
-	case SVt_DUMMY:		return "DUMMY";
+	case SVt_INVLIST:	return "INVLIST";
 	case SVt_REGEXP:	return "REGEXP";
 	default:		return "UNKNOWN";
 	}
@@ -12177,7 +12180,6 @@ S_sv_dup_common(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
 	SvANY(dstr)	= new_XNV();
 	SvNV_set(dstr, SvNVX(sstr));
 	break;
-	/* case SVt_DUMMY: */
     default:
 	{
 	    /* These are all the types that need complex bodies allocating.  */
@@ -12202,6 +12204,7 @@ S_sv_dup_common(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
 	    case SVt_PVMG:
 	    case SVt_PVNV:
 	    case SVt_PVIV:
+            case SVt_INVLIST:
 	    case SVt_PV:
 		assert(sv_type_details->body_size);
 		if (sv_type_details->arena) {
