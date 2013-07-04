@@ -521,9 +521,9 @@ Perl_fbm_compile(pTHX_ SV *sv, U32 flags)
     const U8 *s;
     STRLEN i;
     STRLEN len;
-    STRLEN rarest = 0;
     U32 frequency = 256;
     MAGIC *mg;
+    PERL_DEB( STRLEN rarest = 0 );
 
     PERL_ARGS_ASSERT_FBM_COMPILE;
 
@@ -591,7 +591,7 @@ Perl_fbm_compile(pTHX_ SV *sv, U32 flags)
     s = (const unsigned char*)(SvPVX_const(sv));	/* deeper magic */
     for (i = 0; i < len; i++) {
 	if (PL_freq[s[i]] < frequency) {
-	    rarest = i;
+	    PERL_DEB( rarest = i );
 	    frequency = PL_freq[s[i]];
 	}
     }
