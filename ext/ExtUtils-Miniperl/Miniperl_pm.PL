@@ -11,9 +11,10 @@
 #
 # Version 1.0, Feb 2nd 1995 by Andreas Koenig
 
-BEGIN { unshift @INC, "lib" }
-
 use strict;
+
+open STDOUT, '>Miniperl.pm'
+    or die "Can't open Miniperl.pm: $!";
 
 print <<'END';
 # This File keeps the contents of miniperlmain.c.
@@ -33,7 +34,7 @@ require Exporter;
 $head= <<'EOF!HEAD';
 END
 
-open MINI, "miniperlmain.c";
+open MINI, shift;
 while (<MINI>) {
     last if /Do not delete this line--writemain depends on it/;
     print;

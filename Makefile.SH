@@ -453,7 +453,7 @@ shextract=`SH_to_target $SH`
 ## In the following dollars and backticks do not need the extra backslash.
 $spitshell >>$Makefile <<!GROK!THIS!
 
-private = preplibrary \$(CONFIGPM) \$(CONFIGPOD) lib/ExtUtils/Miniperl.pm git_version.h lib/buildcustomize.pl
+private = preplibrary \$(CONFIGPM) \$(CONFIGPOD) git_version.h lib/buildcustomize.pl
 
 # Files to be built with variable substitution before miniperl
 # is available.
@@ -684,7 +684,7 @@ generate_uudmap$(OBJ_EXT): mg_raw.h
 generate_uudmap$(HOST_EXE_EXT): generate_uudmap$(OBJ_EXT)
 	$(CC) -o generate_uudmap$(EXE_EXT) $(LDFLAGS) generate_uudmap$(OBJ_EXT) $(libs)
 
-perlmain.c: $(MINIPERL_EXE) lib/ExtUtils/Miniperl.pm
+perlmain.c: $(MINIPERL_EXE) ext/ExtUtils-Miniperl/pm_to_blib
 	$(MINIPERL) -Ilib -MExtUtils::Miniperl -e 'writemain(@ARGV)' DynaLoader $(static_ext) > perlmain.c
 
 # The file ext.libs is a list of libraries that must be linked in
@@ -977,9 +977,6 @@ $(CONFIGPM_FROM_CONFIG_SH): $(CONFIGPOD)
 
 $(CONFIGPOD): config.sh $(MINIPERL_EXE) configpm Porting/Glossary lib/Config_git.pl
 	$(MINIPERL) configpm
-
-lib/ExtUtils/Miniperl.pm: miniperlmain.c $(MINIPERL_EXE) minimod.pl $(CONFIGPM)
-	$(MINIPERL) minimod.pl > lib/ExtUtils/Miniperl.pm
 
 unidatafiles $(unidatafiles) pod/perluniprops.pod: uni.data
 

@@ -2030,6 +2030,7 @@ use File::Glob qw(:case);
         'MAINTAINER' => 'p5p',
         'FILES'      => q[
                 ext/arybase/
+                ext/ExtUtils-Miniperl/
                 ext/XS-APItest/
                 lib/CORE.pod
                 lib/Config.t

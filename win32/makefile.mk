@@ -644,7 +644,6 @@ PERLEXESTATIC	= ..\perl-static.exe
 STATICDIR	= .\static.tmp
 GLOBEXE		= ..\perlglob.exe
 CONFIGPM	= ..\lib\Config.pm ..\lib\Config_heavy.pl
-MINIMOD		= ..\lib\ExtUtils\Miniperl.pm
 X2P		= ..\x2p\a2p.exe
 GENUUDMAP	= ..\generate_uudmap.exe
 .IF "$(BUILD_STATIC)" == "define" || "$(ALL_STATIC)" == "define"
@@ -929,7 +928,7 @@ ICWD = -I..\dist\Cwd -I..\dist\Cwd\lib
 #
 
 all : CHECKDMAKE .\config.h ..\git_version.h $(GLOBEXE) $(MINIPERL)	\
-	$(MINIMOD) $(CONFIGPM) $(UNIDATAFILES) MakePPPort		\
+	$(CONFIGPM) $(UNIDATAFILES) MakePPPort				\
 	$(PERLEXE) $(X2P) Extensions Extensions_nonxs $(PERLSTATIC)
 
 regnodes : ..\regnodes.h
@@ -939,7 +938,7 @@ regnodes : ..\regnodes.h
 ..\regexec$(o) : ..\regnodes.h ..\regcharclass.h
 
 reonly : regnodes .\config.h ..\git_version.h $(GLOBEXE) $(MINIPERL)	\
-	$(MINIMOD) $(CONFIGPM) $(UNIDATAFILES) $(PERLEXE)		\
+	$(CONFIGPM) $(UNIDATAFILES) $(PERLEXE)				\
 	$(X2P) Extensions_reonly
 
 static: $(PERLEXESTATIC)
@@ -1068,7 +1067,7 @@ regen_config_h:
 	-$(MINIPERL) -I..\lib config_h.PL "ARCHPREFIX=$(ARCHPREFIX)"
 	rename config.h $(CFGH_TMPL)
 
-$(CONFIGPM) : $(MINIPERL) ..\config.sh config_h.PL ..\minimod.pl
+$(CONFIGPM) : $(MINIPERL) ..\config.sh config_h.PL
 	$(MINIPERL) -I..\lib ..\configpm --chdir=..
 	if exist lib\* $(RCOPY) lib\*.* ..\lib\$(NULL)
 	$(XCOPY) ..\*.h $(COREDIR)\*.*
@@ -1170,9 +1169,6 @@ $(PERLSTATICLIB): $(PERLDLL_OBJ) Extensions_static
 	$(XCOPY) $(PERLSTATICLIB) $(COREDIR)
 
 $(PERLEXE_RES): perlexe.rc $(PERLEXE_MANIFEST) $(PERLEXE_ICO)
-
-$(MINIMOD) : $(MINIPERL) ..\minimod.pl
-	cd .. && miniperl minimod.pl > lib\ExtUtils\Miniperl.pm
 
 ..\x2p\a2p$(o) : ..\x2p\a2p.c
 	$(CC) -I..\x2p $(CFLAGS) $(OBJOUT_FLAG)$@ -c ..\x2p\a2p.c
@@ -1346,8 +1342,7 @@ utils: $(PERLEXE) $(X2P) ..\utils\Makefile
 
 distclean: realclean
 	-del /f $(MINIPERL) $(PERLEXE) $(PERLDLL) $(GLOBEXE) \
-		$(PERLIMPLIB) ..\miniperl$(a) $(MINIMOD) \
-		$(PERLEXESTATIC) $(PERLSTATICLIB)
+		$(PERLIMPLIB) ..\miniperl$(a) $(PERLEXESTATIC) $(PERLSTATICLIB)
 	-del /f *.def *.map
 	-del /f $(LIBDIR)\Encode.pm $(LIBDIR)\encoding.pm $(LIBDIR)\Errno.pm
 	-del /f $(LIBDIR)\Config.pod $(LIBDIR)\POSIX.pod $(LIBDIR)\threads.pm
