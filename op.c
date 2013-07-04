@@ -1394,16 +1394,16 @@ Perl_scalarvoid(pTHX_ OP *o)
 		else if (SvNIOK(sv) && (SvNV(sv) == 0.0 || SvNV(sv) == 1.0))
 		    useless = NULL;
 		else if (SvPOK(sv)) {
-			SV * const dsv = newSVpvs("");
-			useless_sv
-                            = Perl_newSVpvf(aTHX_
-                                            "a constant (%s)",
-                                            pv_pretty(dsv, SvPVX_const(sv),
-                                                      SvCUR(sv), 32, NULL, NULL,
-                                                      PERL_PV_PRETTY_DUMP
-                                                      | PERL_PV_ESCAPE_NOCLEAR
-                                                      | PERL_PV_ESCAPE_UNI_DETECT));
-			SvREFCNT_dec_NN(dsv);
+                    SV * const dsv = newSVpvs("");
+                    useless_sv
+                        = Perl_newSVpvf(aTHX_
+                                        "a constant (%s)",
+                                        pv_pretty(dsv, SvPVX_const(sv),
+                                                  SvCUR(sv), 32, NULL, NULL,
+                                                  PERL_PV_PRETTY_DUMP
+                                                  | PERL_PV_ESCAPE_NOCLEAR
+                                                  | PERL_PV_ESCAPE_UNI_DETECT));
+                    SvREFCNT_dec_NN(dsv);
 		}
 		else if (SvOK(sv)) {
 		    useless_sv = Perl_newSVpvf(aTHX_ "a constant (%"SVf")", sv);
