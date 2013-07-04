@@ -2800,7 +2800,7 @@ $   if ans.eqs."TWO_POT" then use_two_pot_malloc = "Y"
 $   if ans.eqs."PACK_MALLOC" then use_pack_malloc = "Y"
 $ ENDIF
 $!
-$ known_extensions = ""
+$ xs_extensions = ""
 $ xxx = ""
 $ OPEN/READ CONFIG 'manifestfound'
 $ext_loop:
@@ -2844,7 +2844,7 @@ $   goto replace_dash_with_slash
 $
 $ end_replace_dash_with_slash:
 $   
-$ xxx = known_extensions
+$ xxx = xs_extensions
 $ gosub may_already_have_extension
 $ IF $STATUS .EQ. 1
 $ THEN
@@ -2882,7 +2882,10 @@ $	xxx = F$EXTRACT(F$LENGTH(extspec) + 1, extlen, xxx)
 $   ENDIF
 $!
 $ found_new_extension:
-$   IF F$SEARCH("[-.ext.''extension_dir_name']*.xs") .EQS. "" .AND. F$SEARCH("[-.dist.''extension_dir_name']*.xs") .EQS. "" .AND. F$SEARCH("[-.cpan.''extension_dir_name']*.xs") .EQS. ""
+$   IF F$SEARCH("[-.ext.''extension_dir_name']*.xs") .EQS. "" -
+        .AND. F$SEARCH("[-.dist.''extension_dir_name']*.xs") .EQS. "" -
+        .AND. F$SEARCH("[-.cpan.''extension_dir_name']*.xs") .EQS. "" -
+        .AND. extension_dir_name .NES. "VMS-Filespec"
 $   THEN
 $!  Bit if a hack to get around the 1K buffer on older systems.
 $       IF F$LENGTH(nonxs_ext) .GT. 950
@@ -2892,7 +2895,7 @@ $       ELSE
 $           nonxs_ext = nonxs_ext + " ''extspec'"
 $       ENDIF
 $   ELSE
-$       known_extensions = known_extensions + " ''extspec'"
+$       xs_extensions = xs_extensions + " ''extspec'"
 $   ENDIF
 $   goto ext_loop
 $end_ext:
@@ -2902,8 +2905,8 @@ $ DELETE/SYMBOL idx
 $ DELETE/SYMBOL extspec
 $ DELETE/SYMBOL extlen
 $ DELETE/SYMBOL extension_dir_name
-$ known_extensions = F$EDIT(known_extensions,"TRIM,COMPRESS")
-$ dflt = known_extensions
+$ xs_extensions = F$EDIT(xs_extensions,"TRIM,COMPRESS")
+$ dflt = xs_extensions
 $ IF ccname .NES. "DEC" .AND. ccname .NES. "CXX"
 $ THEN
 $   dflt = dflt - "POSIX"             ! not with VAX C or GCC
@@ -6511,11 +6514,9 @@ $ WC "ivdformat='" + ivdformat + "'"
 $ WC "ivsize='" + ivsize + "'"
 $ WC "ivtype='" + ivtype + "'"
 $!
-$! The known_extensions symbol may be quite long
+$! The xs_extensions symbol may be quite long
 $!
-$ tmp = "known_extensions='" + known_extensions + "'"
-$ WC/symbol tmp
-$ DELETE/SYMBOL tmp
+$ WC/symbol "known_extensions='", xs_extensions, " ", nonxs_ext, " ", nonxs_ext2, "'"
 $ WC "ld='" + ld + "'"
 $ WC "lddlflags='/Share'"
 $ WC "ldflags='" + ldflags + "'"
