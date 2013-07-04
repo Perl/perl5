@@ -21,7 +21,7 @@ S__get_invlist_len_addr(pTHX_ SV* invlist)
 
     PERL_ARGS_ASSERT__GET_INVLIST_LEN_ADDR;
 
-    return &(((XINVLIST*) SvANY(invlist))->count);
+    return &(LvTARGLEN(invlist));
 }
 
 PERL_STATIC_INLINE UV
