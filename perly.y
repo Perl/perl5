@@ -94,6 +94,7 @@
 
 %type <opval> stmtseq fullstmt labfullstmt barestmt block mblock else
 %type <opval> expr term subscripted scalar ary hsh arylen star amper sideff
+%type <opval> sliceme gelem
 %type <opval> listexpr nexpr texpr iexpr mexpr mnexpr miexpr
 %type <opval> optlistexpr optexpr indirob listop method
 %type <opval> formname subname proto subbody cont my_scalar formblock
@@ -845,7 +846,7 @@ method	:	METHOD
 	;
 
 /* Some kind of subscripted expression */
-subscripted:    star '{' expr ';' '}'        /* *main::{something} */
+subscripted:    gelem '{' expr ';' '}'        /* *main::{something} */
                         /* In this and all the hash accessors, ';' is
                          * provided by the tokeniser */
 			{ $$ = newBINOP(OP_GELEM, 0, $1, scalar($3));
@@ -1195,7 +1196,7 @@ term	:	termbinop
 			{ $$ = newUNOP(OP_AV2ARYLEN, 0, ref($1, OP_AV2ARYLEN));}
 	|       subscripted
 			{ $$ = $1; }
-	|	ary '[' expr ']'                     /* array slice */
+	|	sliceme '[' expr ']'                     /* array slice */
 			{ $$ = op_prepend_elem(OP_ASLICE,
 				newOP(OP_PUSHMARK, 0),
 				    newLISTOP(OP_ASLICE, 0,
@@ -1219,7 +1220,7 @@ term	:	termbinop
 			  TOKEN_GETMAD($2,$$,'[');
 			  TOKEN_GETMAD($4,$$,']');
 			}
-	|	ary '{' expr ';' '}'                 /* @hash{@keys} */
+	|	sliceme '{' expr ';' '}'                 /* @hash{@keys} */
 			{ $$ = op_prepend_elem(OP_HSLICE,
 				newOP(OP_PUSHMARK, 0),
 				    newLISTOP(OP_HSLICE, 0,
@@ -1273,6 +1274,27 @@ term	:	termbinop
 			{ $$ = newUNOP(OP_ENTERSUB, OPf_STACKED,
 			    op_append_elem(OP_LIST, $3, scalar($2)));
 			  TOKEN_GETMAD($1,$$,'o');
+			}
+	|	term ARROW '$' '*'
+			{ $$ = newSVREF($1);
+			  TOKEN_GETMAD($3,$$,'$');
+			}
+	|	term ARROW '@' '*'
+			{ $$ = newAVREF($1);
+			  TOKEN_GETMAD($3,$$,'@');
+			}
+	|	term ARROW '%' '*'
+			{ $$ = newHVREF($1);
+			  TOKEN_GETMAD($3,$$,'%');
+			}
+	|	term ARROW '&' '*'
+			{ $$ = newUNOP(OP_ENTERSUB, 0,
+				       scalar(newCVREF(IVAL($3),$1)));
+			  TOKEN_GETMAD($3,$$,'&');
+			}
+	|	term ARROW '*' '*'	%prec '('
+			{ $$ = newGVREF(0,$1);
+			  TOKEN_GETMAD($3,$$,'*');
 			}
 	|	LOOPEX  /* loop exiting command (goto, last, dump, etc) */
 			{ $$ = newOP(IVAL($1), OPf_SPECIAL);
@@ -1462,6 +1484,20 @@ arylen	:	DOLSHARP indirob
 star	:	'*' indirob
 			{ $$ = newGVREF(0,$2);
 			  TOKEN_GETMAD($1,$$,'*');
+			}
+	;
+
+sliceme	:	ary
+	|	term ARROW '@'
+			{ $$ = newAVREF($1);
+			  TOKEN_GETMAD($3,$$,'@');
+			}
+	;
+
+gelem	:	star
+	|	term ARROW '*'
+			{ $$ = newGVREF(0,$1);
+			  TOKEN_GETMAD($3,$$,'*');
 			}
 	;
 

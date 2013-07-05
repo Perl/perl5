@@ -211,6 +211,7 @@ static const char* const lex_state_names[] = {
  * PRETERMBLOCK : beginning a non-code-defining {} block (eg, hash ref)
  * PREREF       : *EXPR where EXPR is not a simple identifier
  * TERM         : expression term
+ * POSTDEREF    : postfix dereference (->$* ->@[...] etc.)
  * LOOPX        : loop exiting command (goto, last, dump, etc)
  * FTST         : file test operator
  * FUN0         : zero-argument function
@@ -242,6 +243,7 @@ static const char* const lex_state_names[] = {
 #define PRETERMBLOCK(retval) return (PL_expect = XTERMBLOCK,PL_bufptr = s, REPORT(retval))
 #define PREREF(retval) return (PL_expect = XREF,PL_bufptr = s, REPORT(retval))
 #define TERM(retval) return (CLINE, PL_expect = XOPERATOR, PL_bufptr = s, REPORT(retval))
+#define POSTDEREF(f) return (PL_bufptr = s, S_postderef(aTHX_ REPORT(f),s[1]))
 #define LOOPX(f) return (pl_yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, REPORT((int)LOOPEX))
 #define FTST(f)  return (pl_yylval.ival=f, PL_expect=XTERMORDORDOR, PL_bufptr=s, REPORT((int)UNIOP))
 #define FUN0(f)  return (pl_yylval.ival=f, PL_expect=XOPERATOR, PL_bufptr=s, REPORT((int)FUNC0))
@@ -2153,6 +2155,37 @@ S_force_next(pTHX_ I32 type)
 	PL_lex_state = LEX_KNOWNEXT;
     }
 #endif
+}
+
+/*
+ * S_postderef
+ *
+ * This subroutine handles postfix deref syntax after the arrow has already
+ * been emitted.  @* $* etc. are emitted as two separate token right here.
+ * @[ @{ %[ %{ *{ are emitted also as two tokens, but this function emits
+ * only the first, leaving yylex to find the next.
+ * %[ and %{ are currently unrecognized by the parser, causing syntax
+ * errors.  If/when they are added to the parser, no change will be neces-
+ * sary here.
+ */
+
+static int
+S_postderef(pTHX_ char const funny, char const next)
+{
+    dVAR;
+    assert(strchr("$@%&*", funny));
+    assert(strchr("*[{", next));
+    if (next == '*') {
+	PL_expect = XOPERATOR;
+	start_force(PL_curforce);
+	force_next(next);
+	PL_bufptr+=2;
+    }
+    else {
+	PL_expect = XOPERATOR;
+	PL_bufptr++;
+    }
+    return funny;
 }
 
 void
@@ -4664,7 +4697,7 @@ S_tokenize_use(pTHX_ int is_use, char *s) {
 #ifdef DEBUGGING
     static const char* const exp_name[] =
 	{ "OPERATOR", "TERM", "REF", "STATE", "BLOCK", "ATTRBLOCK",
-	  "ATTRTERM", "TERMBLOCK", "TERMORDORDOR"
+	  "ATTRTERM", "TERMBLOCK", "POSTDEREF", "TERMORDORDOR"
 	};
 #endif
 
@@ -5728,6 +5761,13 @@ Perl_yylex(pTHX)
 	    else if (*s == '>') {
 		s++;
 		s = SKIPSPACE1(s);
+		if (((*s == '$' || *s == '&') && s[1] == '*')
+		  ||((*s == '@' || *s == '%') && strchr("*[{", s[1]))
+		  ||(*s == '*' && (s[1] == '*' || s[1] == '{')))
+		{
+		    PL_expect = XPOSTDEREF;
+		    TOKEN(ARROW);
+		}
 		if (isIDFIRST_lazy_if(s,UTF)) {
 		    s = force_word(s,METHOD,FALSE,TRUE);
 		    TOKEN(ARROW);
@@ -5778,6 +5818,7 @@ Perl_yylex(pTHX)
 	}
 
     case '*':
+	if (PL_expect == XPOSTDEREF) POSTDEREF('*');
 	if (PL_expect != XOPERATOR) {
 	    s = scan_ident(s, PL_tokenbuf, sizeof PL_tokenbuf, TRUE);
 	    PL_expect = XOPERATOR;
@@ -5814,6 +5855,7 @@ Perl_yylex(pTHX)
 	    PL_parser->saw_infix_sigil = 1;
 	    Mop(OP_MODULO);
 	}
+	else if (PL_expect == XPOSTDEREF) POSTDEREF('%');
 	PL_tokenbuf[0] = '%';
 	s = scan_ident(s, PL_tokenbuf + 1,
 		sizeof PL_tokenbuf - 1, FALSE);
@@ -6295,6 +6337,7 @@ Perl_yylex(pTHX)
 	}
 	TOKEN(';');
     case '&':
+	if (PL_expect == XPOSTDEREF) POSTDEREF('&');
 	s++;
 	if (*s++ == '&') {
 	    if (!PL_lex_allbrackets && PL_lex_fakeeof >=
@@ -6553,6 +6596,7 @@ Perl_yylex(pTHX)
 		return deprecate_commaless_var_list();
 	    }
 	}
+	else if (PL_expect == XPOSTDEREF) POSTDEREF('$');
 
 	if (s[1] == '#' && (isIDFIRST_lazy_if(s+2,UTF) || strchr("{$:+-@", s[2]))) {
 	    PL_tokenbuf[0] = '@';
@@ -6686,6 +6730,7 @@ Perl_yylex(pTHX)
     case '@':
 	if (PL_expect == XOPERATOR)
 	    no_op("Array", s);
+	else if (PL_expect == XPOSTDEREF) POSTDEREF('@');
 	PL_tokenbuf[0] = '@';
 	s = scan_ident(s, PL_tokenbuf + 1, sizeof PL_tokenbuf - 1, FALSE);
 	pl_yylval.ival = 0;
