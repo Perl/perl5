@@ -8505,7 +8505,9 @@ Perl_yylex(pTHX)
 		expectation attrful;
 		bool have_name, have_proto;
 		const int key = tmp;
+#ifndef PERL_MAD
                 SV *format_name = NULL;
+#endif
 
 #ifdef PERL_MAD
 		SV *tmpwhite = 0;
@@ -8537,9 +8539,10 @@ Perl_yylex(pTHX)
 #ifdef PERL_MAD
 		    if (PL_madskills)
 			nametoke = newSVpvn_flags(s, d - s, SvUTF8(PL_linestr));
-#endif
+#else
                     if (key == KEY_format)
 			format_name = S_newSV_maybe_utf8(aTHX_ s, d - s);
+#endif
 		    *PL_tokenbuf = '&';
 		    if (memchr(tmpbuf, ':', len) || key != KEY_sub
 		     || pad_findmy_pvn(
@@ -8588,8 +8591,6 @@ Perl_yylex(pTHX)
 #else
 		    if (format_name) {
                         start_force(PL_curforce);
-                        if (PL_madskills)
-                            curmad('X', newSVpvn(start,s-start));
                         NEXTVAL_NEXTTOKE.opval
                             = (OP*)newSVOP(OP_CONST,0, format_name);
                         NEXTVAL_NEXTTOKE.opval->op_private |= OPpCONST_BARE;
