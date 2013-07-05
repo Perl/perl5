@@ -1,4 +1,17 @@
+2013-07-02   Gisle Aas <gisle@ActiveState.com>
+
+   Release 2.53
+
+   Drop File::Spec dependency and don't override installation location
+   for perl-5.12++
+
+   Documentation tweaks.
+
+
+
 2012-06-08   Gisle Aas <gisle@ActiveState.com>
+
+   Release 2.52
 
    Gisle Aas (3):
       Wrong version number in the changelog
