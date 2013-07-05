@@ -1171,7 +1171,7 @@ use File::Glob qw(:case);
 
     'MIME::Base64' => {
         'MAINTAINER'   => 'gaas',
-        'DISTRIBUTION' => 'GAAS/MIME-Base64-3.13.tar.gz',
+        'DISTRIBUTION' => 'GAAS/MIME-Base64-3.14.tar.gz',
         'FILES'        => q[cpan/MIME-Base64],
         'EXCLUDED'     => ['t/bad-sv.t'],
         'UPSTREAM'     => 'cpan',

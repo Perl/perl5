@@ -2,7 +2,7 @@ require 5.006;
 use ExtUtils::MakeMaker;
 
 my @makefileopts;
-if ($] >= 5.008) {
+if ($] >= 5.008 && $] < 5.012) {
     push @makefileopts, INSTALLDIRS => 'perl';
 }
 
