@@ -155,7 +155,7 @@ main(int argc, char **argv, char **env)
 static void
 xs_init(pTHX)
 {
-	dXSUB_SYS;
+    dXSUB_SYS;
     PERL_UNUSED_CONTEXT;
 }
 
