@@ -428,7 +428,9 @@ Returns the AV object (i.e. in class B::AV) representing END blocks.
 
 =item comppadlist
 
-Returns the AV object (i.e. in class B::AV) of the global comppadlist.
+Returns the PADLIST object (i.e. in class B::PADLIST) of the global
+comppadlist.  In Perl 5.16 and earlier it returns an AV object (class
+B::AV).
 
 =item regex_padav
 
@@ -1000,6 +1002,9 @@ in with the main SV flags, so this method is no longer present.
 
 =item PADLIST
 
+Returns a B::PADLIST object under Perl 5.18 or higher, or a B::AV in
+earlier versions.
+
 =item OUTSIDE
 
 =item OUTSIDE_SEQ
@@ -1235,6 +1240,30 @@ Since perl 5.17.1
 
 =back
 
+=head2 OTHER CLASSES
+
+Perl 5.18 introduces a new class, B::PADLIST, returned by B::CV's
+C<PADLIST> method.
+
+=head2 B::PADLIST Methods
+
+=over 4
+
+=item MAX
+
+=item ARRAY
+
+A list of pads.  The first one contains the names.  These are currently
+B::AV objects, but that is likely to change in future versions.
+
+=item ARRAYelt
+
+Like C<ARRAY>, but takes an index as an argument to get only one element,
+rather than a list of all of them.
+
+=item REFCNT
+
+=back
 
 =head2 $B::overlay
 
