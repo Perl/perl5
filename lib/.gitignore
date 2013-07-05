@@ -84,6 +84,8 @@
 /Encode.pm
 /Env.pm
 /Errno.pm
+/Exporter.pm
+/Exporter/Heavy.pm
 /ExtUtils/CBuilder.pm
 /ExtUtils/CBuilder/
 /ExtUtils/Command.pm
