@@ -7047,10 +7047,10 @@ S_reg_scan_name(pTHX_ RExC_state_t *pRExC_state, U32 flags)
  * list.)
  * Taking the complement (inverting) an inversion list is quite simple, if the
  * first element is 0, remove it; otherwise add a 0 element at the beginning.
- * This implementation reserves an element at the beginning of each inversion
- * list to contain 0 when the list contains 0, and contains 1 otherwise.  The
- * actual beginning of the list is either that element if 0, or the next one if
- * 1.
+ * This implementation reserves an element (considered to be the final element
+ * of the header) at the beginning of each inversion list to always contain 0;
+ * there is an additional flag in the header which indicates if the list begins
+ * at the 0, or is offset to begin at the next element.
  *
  * More about inversion lists can be found in "Unicode Demystified"
  * Chapter 13 by Richard Gillam, published by Addison-Wesley.
@@ -7075,11 +7075,11 @@ S__invlist_array_init(pTHX_ SV* const invlist, const bool will_have_0)
 {
     /* Returns a pointer to the first element in the inversion list's array.
      * This is called upon initialization of an inversion list.  Where the
-     * array begins depends on whether the list has the code point U+0000
-     * in it or not.  The other parameter tells it whether the code that
-     * follows this call is about to put a 0 in the inversion list or not.
-     * The first element is either the element with 0, if 0, or the next one,
-     * if 1 */
+     * array begins depends on whether the list has the code point U+0000 in it
+     * or not.  The other parameter tells it whether the code that follows this
+     * call is about to put a 0 in the inversion list or not.  The first
+     * element is either the final part of the header reserved for 0, if TRUE,
+     * or the first element of the non-heading part, if FALSE */
 
     UV* zero = get_invlist_zero_addr(invlist);
 
@@ -7090,7 +7090,8 @@ S__invlist_array_init(pTHX_ SV* const invlist, const bool will_have_0)
 
     /* 1^1 = 0; 1^0 = 1 */
     *zero = 1 ^ will_have_0;
-    return zero + *zero;
+    *(zero + 1) = 0;
+    return 1 + zero + *zero;
 }
 
 PERL_STATIC_INLINE UV*
@@ -7108,10 +7109,12 @@ S_invlist_array(pTHX_ SV* const invlist)
     assert(*get_invlist_zero_addr(invlist) == 0
 	   || *get_invlist_zero_addr(invlist) == 1);
 
-    /* The array begins either at the element reserved for zero if the
-     * list contains 0 (that element will be set to 0), or otherwise the next
-     * element (in which case the reserved element will be set to 1). */
-    return (UV *) (get_invlist_zero_addr(invlist)
+    /* The array begins either at the header element reserved for zero or the
+     * element after that.  The reserved element is 1 past the zero_addr
+     * element; the latter contains 0 or 1 to indicate how much additionally to
+     * add */
+    assert(0 == *(1 + get_invlist_zero_addr(invlist)));
+    return (UV *) (1 + get_invlist_zero_addr(invlist)
 		   + *get_invlist_zero_addr(invlist));
 }
 
@@ -7127,19 +7130,7 @@ S_invlist_set_len(pTHX_ SV* const invlist, const UV len)
     assert(len <= SvLEN(invlist));
 
     SvCUR_set(invlist, TO_INTERNAL_SIZE(len));
-    /* If the list contains U+0000, that element is part of the header,
-     * and should not be counted as part of the array.  It will contain
-     * 0 in that case, and 1 otherwise.  So we could flop 0=>1, 1=>0 and
-     * subtract:
-     *	SvCUR_set(invlist,
-     *		  TO_INTERNAL_SIZE(len
-     *				   - (*get_invlist_zero_addr(inv_list) ^ 1)));
-     * But, this is only valid if len is not 0.  The consequences of not doing
-     * this is that the memory allocation code may think that 1 more UV is
-     * being used than actually is, and so might do an unnecessary grow.  That
-     * seems worth not bothering to make this the precise amount.
-     *
-     * Note that when inverting, SvCUR shouldn't change */
+    /* Note that when inverting, SvCUR shouldn't change */
 }
 
 PERL_STATIC_INLINE IV*
@@ -7191,10 +7182,8 @@ S_invlist_max(pTHX_ SV* const invlist)
 PERL_STATIC_INLINE UV*
 S_get_invlist_zero_addr(pTHX_ SV* invlist)
 {
-    /* Return the address of the UV that is reserved to hold 0 if the inversion
-     * list contains 0.  This has to be the last element of the heading, as the
-     * list proper starts with either it if 0, or the next element if not.
-     * (But we force it to contain either 0 or 1) */
+    /* Return the address of the UV that says whether the inversion list is
+     * offset (it contains 1) or not (contains 0) */
 
     PERL_ARGS_ASSERT_GET_INVLIST_ZERO_ADDR;
 
@@ -7211,6 +7200,7 @@ Perl__new_invlist(pTHX_ IV initial_size)
      * system default is used instead */
 
     SV* new_list;
+    UV* zero_addr;
 
     if (initial_size < 0) {
 	initial_size = INVLIST_INITIAL_LEN;
@@ -7225,11 +7215,13 @@ Perl__new_invlist(pTHX_ IV initial_size)
 
     /* This should force a segfault if a method doesn't initialize this
      * properly */
-    *get_invlist_zero_addr(new_list) = UV_MAX;
+    zero_addr = get_invlist_zero_addr(new_list);
+    *zero_addr = UV_MAX;
+    *(zero_addr + 1) = 0;
 
     *get_invlist_previous_index_addr(new_list) = 0;
     *get_invlist_version_id_addr(new_list) = INVLIST_VERSION_ID;
-#if HEADER_LENGTH != 5
+#if HEADER_LENGTH != 6
 #   error Need to regenerate INVLIST_VERSION_ID by running perl -E 'say int(rand 2**31-1)', and then changing the #if to the new length
 #endif
 
@@ -7554,7 +7546,7 @@ Perl__invlist_populate_swatch(pTHX_ SV* const invlist, const UV start, const UV 
 }
 
 void
-Perl__invlist_union_maybe_complement_2nd(pTHX_ SV* const a, SV* const b, bool complement_b, SV** output)
+Perl__invlist_union_maybe_complement_2nd(pTHX_ SV* const a, SV* const b, const bool complement_b, SV** output)
 {
     /* Take the union of two inversion lists and point <output> to it.  *output
      * SHOULD BE DEFINED upon input, and if it points to one of the two lists,
@@ -7576,8 +7568,8 @@ Perl__invlist_union_maybe_complement_2nd(pTHX_ SV* const a, SV* const b, bool co
      * return the larger of the input lists, but then outside code might need
      * to keep track of whether to free the input list or not */
 
-    UV* array_a;    /* a's array */
-    UV* array_b;
+    const UV* array_a;    /* a's array */
+    const UV* array_b;
     UV len_a;	    /* length of a's array */
     UV len_b;
 
@@ -7645,23 +7637,17 @@ Perl__invlist_union_maybe_complement_2nd(pTHX_ SV* const a, SV* const b, bool co
     if (complement_b) {
 
 	/* To complement, we invert: if the first element is 0, remove it.  To
-	 * do this, we just pretend the array starts one later, and clear the
-	 * flag as we don't have to do anything else later */
+	 * do this, we just pretend the array starts one later */
         if (array_b[0] == 0) {
             array_b++;
             len_b--;
-            complement_b = FALSE;
         }
         else {
 
-            /* But if the first element is not zero, we unshift a 0 before the
-             * array.  The data structure reserves a space for that 0 (which
-             * should be a '1' right now), so physical shifting is unneeded,
-             * but temporarily change that element to 0.  Before exiting the
-             * routine, we must restore the element to '1' */
+            /* But if the first element is not zero, we pretend the list starts
+             * at the 0 that is always stored immediately before the array. */
             array_b--;
             len_b++;
-            array_b[0] = 0;
         }
     }
 
@@ -7778,11 +7764,6 @@ Perl__invlist_union_maybe_complement_2nd(pTHX_ SV* const a, SV* const b, bool co
 	}
     }
 
-    /* If we've changed b, restore it */
-    if (complement_b) {
-        array_b[0] = 1;
-    }
-
     /*  We may be removing a reference to one of the inputs */
     if (a == *output || b == *output) {
         assert(! invlist_is_iterating(*output));
@@ -7794,7 +7775,7 @@ Perl__invlist_union_maybe_complement_2nd(pTHX_ SV* const a, SV* const b, bool co
 }
 
 void
-Perl__invlist_intersection_maybe_complement_2nd(pTHX_ SV* const a, SV* const b, bool complement_b, SV** i)
+Perl__invlist_intersection_maybe_complement_2nd(pTHX_ SV* const a, SV* const b, const bool complement_b, SV** i)
 {
     /* Take the intersection of two inversion lists and point <i> to it.  *i
      * SHOULD BE DEFINED upon input, and if it points to one of the two lists,
@@ -7811,8 +7792,8 @@ Perl__invlist_intersection_maybe_complement_2nd(pTHX_ SV* const a, SV* const b, 
      * union above
      */
 
-    UV* array_a;		/* a's array */
-    UV* array_b;
+    const UV* array_a;		/* a's array */
+    const UV* array_b;
     UV len_a;	/* length of a's array */
     UV len_b;
 
@@ -7877,23 +7858,17 @@ Perl__invlist_intersection_maybe_complement_2nd(pTHX_ SV* const a, SV* const b, 
     if (complement_b) {
 
 	/* To complement, we invert: if the first element is 0, remove it.  To
-	 * do this, we just pretend the array starts one later, and clear the
-	 * flag as we don't have to do anything else later */
+	 * do this, we just pretend the array starts one later */
         if (array_b[0] == 0) {
             array_b++;
             len_b--;
-            complement_b = FALSE;
         }
         else {
 
-            /* But if the first element is not zero, we unshift a 0 before the
-             * array.  The data structure reserves a space for that 0 (which
-             * should be a '1' right now), so physical shifting is unneeded,
-             * but temporarily change that element to 0.  Before exiting the
-             * routine, we must restore the element to '1' */
+            /* But if the first element is not zero, we pretend the list starts
+             * at the 0 that is always stored immediately before the array. */
             array_b--;
             len_b++;
-            array_b[0] = 0;
         }
     }
 
@@ -7998,11 +7973,6 @@ Perl__invlist_intersection_maybe_complement_2nd(pTHX_ SV* const a, SV* const b, 
 	else if ((copy_count = len_b - i_b) > 0) {
 	    Copy(array_b + i_b, array_r + i_r, copy_count, UV);
 	}
-    }
-
-    /* If we've changed b, restore it */
-    if (complement_b) {
-        array_b[0] = 1;
     }
 
     /*  We may be removing a reference to one of the inputs */
@@ -8343,14 +8313,14 @@ Perl__invlist_dump(pTHX_ SV* const invlist, const char * const header)
 
 #if 0
 bool
-S__invlistEQ(pTHX_ SV* const a, SV* const b, bool complement_b)
+S__invlistEQ(pTHX_ SV* const a, SV* const b, const bool complement_b)
 {
     /* Return a boolean as to if the two passed in inversion lists are
      * identical.  The final argument, if TRUE, says to take the complement of
      * the second inversion list before doing the comparison */
 
-    UV* array_a = invlist_array(a);
-    UV* array_b = invlist_array(b);
+    const UV* array_a = invlist_array(a);
+    const UV* array_b = invlist_array(b);
     UV len_a = _invlist_len(a);
     UV len_b = _invlist_len(b);
 
@@ -8372,20 +8342,15 @@ S__invlistEQ(pTHX_ SV* const a, SV* const b, bool complement_b)
 
             /* Otherwise, to complement, we invert.  Here, the first element is
              * 0, just remove it.  To do this, we just pretend the array starts
-             * one later, and clear the flag as we don't have to do anything
-             * else later */
+             * one later */
 
             array_b++;
             len_b--;
-            complement_b = FALSE;
         }
         else {
 
-            /* But if the first element is not zero, we unshift a 0 before the
-             * array.  The data structure reserves a space for that 0 (which
-             * should be a '1' right now), so physical shifting is unneeded,
-             * but temporarily change that element to 0.  Before exiting the
-             * routine, we must restore the element to '1' */
+            /* But if the first element is not zero, we pretend the list starts
+             * at the 0 that is always stored immediately before the array. */
             array_b--;
             len_b++;
             array_b[0] = 0;
@@ -8405,9 +8370,6 @@ S__invlistEQ(pTHX_ SV* const a, SV* const b, bool complement_b)
         }
     }
 
-    if (complement_b) {
-        array_b[0] = 1;
-    }
     return retval;
 }
 #endif
