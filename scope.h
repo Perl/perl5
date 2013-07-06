@@ -39,12 +39,14 @@
 #define SAVEt_PARSER		19
 #define SAVEt_STACK_POS		20
 #define SAVEt_READONLY_OFF	21
+#ifdef USE_ITHREADS
+# define SAVEt_COPFILEFREE	22
+#endif
 
-#define SAVEt_ARG1_MAX		21
+#define SAVEt_ARG1_MAX		22
 
 /* two args */
 
-#define SAVEt_APTR		22
 #define SAVEt_AV		23
 #define SAVEt_DESTRUCTOR	24
 #define SAVEt_DESTRUCTOR_X	25
@@ -69,17 +71,18 @@
 #define SAVEt_SVREF		44
 #define SAVEt_VPTR		45
 #define SAVEt_ADELETE		46
+#define SAVEt_APTR		47
 
-#define SAVEt_ARG2_MAX		46
+#define SAVEt_ARG2_MAX		47
 
 /* three args */
 
-#define SAVEt_DELETE		47
 #define SAVEt_HELEM		48
 #define SAVEt_PADSV_AND_MORTALIZE 49
 #define SAVEt_SET_SVFLAGS	50
 #define SAVEt_GVSLOT		51
 #define SAVEt_AELEM		52
+#define SAVEt_DELETE		53
 
 #define SAVEf_SETMAGIC		1
 #define SAVEf_KEEPOLDELEM	2
@@ -301,8 +304,11 @@ scope has the given name. Name must be a literal string.
 
 #ifdef USE_ITHREADS
 #  define SAVECOPSTASH_FREE(c)	SAVEIV((c)->cop_stashoff)
-#  define SAVECOPFILE(c)	SAVEPPTR(CopFILE(c))
-#  define SAVECOPFILE_FREE(c)	SAVESHAREDPV(CopFILE(c))
+#  define SAVECOPFILE(c)	SAVEIV((c)->cop_filegvoff)
+#  define SAVECOPFILE_FREE(c) ( \
+	SAVEIV((c)->cop_filegvoff),			\
+	save_pushptr((void *)(c), SAVEt_COPFILEFREE)	\
+    )
 #else
 #  /* XXX not refcounted */
 #  define SAVECOPSTASH_FREE(c)	SAVESPTR(CopSTASH(c))

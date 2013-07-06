@@ -389,7 +389,8 @@ struct cop {
 #ifdef USE_ITHREADS
     PADOFFSET	cop_stashoff;	/* offset into PL_stashpad, for the
 				   package the line was compiled in */
-    char *	cop_file;	/* file name the following line # is from */
+    PADOFFSET	cop_filegvoff;	/* PL_filegv offset, for the file name the
+				   following line # is from */
 #else
     HV *	cop_stash;	/* package line was compiled in */
     GV *	cop_filegv;	/* file the following line # is from */
@@ -404,54 +405,32 @@ struct cop {
 };
 
 #ifdef USE_ITHREADS
-#  define CopFILE(c)		((c)->cop_file)
-#  define CopFILEGV(c)		(CopFILE(c) \
-				 ? gv_fetchfile(CopFILE(c)) : NULL)
-				 
-#  ifdef NETWARE
-#    define CopFILE_set(c,pv)	((c)->cop_file = savepv(pv))
-#    define CopFILE_setn(c,pv,l)  ((c)->cop_file = savepv((pv),(l)))
-#  else
-#    define CopFILE_set(c,pv)	((c)->cop_file = savesharedpv(pv))
-#    define CopFILE_setn(c,pv,l)  ((c)->cop_file = savesharedpvn((pv),(l)))
-#  endif
-
-#  define CopFILESV(c)		(CopFILE(c) \
-				 ? GvSV(gv_fetchfile(CopFILE(c))) : NULL)
-#  define CopFILEAV(c)		(CopFILE(c) \
-				 ? GvAV(gv_fetchfile(CopFILE(c))) : NULL)
-#  define CopFILEAVx(c)		(assert_(CopFILE(c)) \
-				   GvAV(gv_fetchfile(CopFILE(c))))
+#  define CopFILEGV(c)		PL_filegvpad[(c)->cop_filegvoff]
+#  define CopFILEGV_set(c,gv)	((c)->cop_filegvoff = (gv) \
+				 ? allocfilegv((GV *)SvREFCNT_inc_NN(gv)) \
+				 : 0)
 
 #  define CopSTASH(c)           PL_stashpad[(c)->cop_stashoff]
 #  define CopSTASH_set(c,hv)	((c)->cop_stashoff = (hv)		\
 				    ? alloccopstash(hv)			\
 				    : 0)
-#  ifdef NETWARE
-#    define CopFILE_free(c) SAVECOPFILE_FREE(c)
-#  else
-#    define CopFILE_free(c)	(PerlMemShared_free(CopFILE(c)),(CopFILE(c) = NULL))
-#  endif
+#  define CopFILE_free(c)	S_CopFILE_free(aTHX_ c)
 #else
 #  define CopFILEGV(c)		((c)->cop_filegv)
 #  define CopFILEGV_set(c,gv)	((c)->cop_filegv = (GV*)SvREFCNT_inc(gv))
-#  define CopFILE_set(c,pv)	CopFILEGV_set((c), gv_fetchfile(pv))
-#  define CopFILE_setn(c,pv,l)	CopFILEGV_set((c), gv_fetchfile_flags((pv),(l),0))
-#  define CopFILESV(c)		(CopFILEGV(c) ? GvSV(CopFILEGV(c)) : NULL)
-#  define CopFILEAV(c)		(CopFILEGV(c) ? GvAV(CopFILEGV(c)) : NULL)
-#  ifdef DEBUGGING
-#    define CopFILEAVx(c)	(assert(CopFILEGV(c)), GvAV(CopFILEGV(c)))
-#  else
-#    define CopFILEAVx(c)	(GvAV(CopFILEGV(c)))
-# endif
-#  define CopFILE(c)		(CopFILEGV(c) && GvSV(CopFILEGV(c)) \
-				    ? SvPVX(GvSV(CopFILEGV(c))) : NULL)
 #  define CopSTASH(c)		((c)->cop_stash)
 #  define CopSTASH_set(c,hv)	((c)->cop_stash = (hv))
 #  define CopFILE_free(c)	(SvREFCNT_dec(CopFILEGV(c)),(CopFILEGV(c) = NULL))
 
 #endif /* USE_ITHREADS */
 
+#define CopFILE_set(c,pv)	CopFILEGV_set((c), gv_fetchfile(pv))
+#define CopFILE_setn(c,pv,l)	CopFILEGV_set((c), gv_fetchfile_flags((pv),(l),0))
+#define CopFILESV(c)		(CopFILEGV(c) ? GvSV(CopFILEGV(c)) : NULL)
+#define CopFILEAV(c)		(CopFILEGV(c) ? GvAV(CopFILEGV(c)) : NULL)
+#define CopFILEAVx(c)		(assert_(CopFILEGV(c)) GvAV(CopFILEGV(c)))
+#define CopFILE(c)		(CopFILEGV(c) && GvSV(CopFILEGV(c)) \
+				    ? SvPVX(GvSV(CopFILEGV(c))) : NULL)
 #define CopSTASHPV(c)		(CopSTASH(c) ? HvNAME_get(CopSTASH(c)) : NULL)
    /* cop_stash is not refcounted */
 #define CopSTASHPV_set(c,pv)	CopSTASH_set((c), gv_stashpv(pv,GV_ADD))

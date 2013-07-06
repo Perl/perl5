@@ -23,6 +23,20 @@ S_av_top_index(pTHX_ AV *av)
     return AvFILL(av);
 }
 
+/* ------------------------------- cop.h ------------------------------ */
+
+#ifdef USE_ITHREADS
+PERL_STATIC_INLINE void
+S_CopFILE_free(pTHX_ COP * const c)
+{
+    GV * const gv = CopFILEGV(c);
+    if (!gv) return;
+    if (SvREFCNT(gv) == 1) PL_filegvpad[c->cop_filegvoff] = NULL;
+    SvREFCNT_dec_NN(gv);
+    c->cop_filegvoff = 0;
+}
+#endif
+
 /* ------------------------------- cv.h ------------------------------- */
 
 PERL_STATIC_INLINE I32 *
@@ -108,6 +122,7 @@ PERL_STATIC_INLINE void
 S_SvREFCNT_dec_NN(pTHX_ SV *sv)
 {
     U32 rc = SvREFCNT(sv);
+    PERL_ARGS_ASSERT_SVREFCNT_DEC_NN;
     if (LIKELY(rc > 1))
 	SvREFCNT(sv) = rc - 1;
     else

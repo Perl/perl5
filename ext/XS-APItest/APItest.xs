@@ -3387,6 +3387,13 @@ CODE:
 OUTPUT:
     RETVAL
 
+bool
+test_allocfilegv()
+CODE:
+    RETVAL = PL_filegvpad[allocfilegv(PL_defgv)] == PL_defgv;
+OUTPUT:
+    RETVAL
+
 #endif
 
 bool

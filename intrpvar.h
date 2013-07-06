@@ -657,6 +657,9 @@ PERLVAR(I, regex_padav,   AV *)		/* All regex objects, indexed via the
 PERLVAR(I, stashpad,    HV **)		/* for CopSTASH */
 PERLVARI(I, stashpadmax, PADOFFSET, 64)
 PERLVARI(I, stashpadix, PADOFFSET, 0)
+PERLVAR(I, filegvpad,    GV **)		/* for CopFILEGV */
+PERLVARI(I, filegvpadmax, PADOFFSET, 64)
+PERLVARI(I, filegvpadix, PADOFFSET, 0)
 #endif
 
 #ifdef USE_REENTRANT_API

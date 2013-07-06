@@ -806,6 +806,7 @@
 #endif
 #if defined(USE_ITHREADS)
 #define alloccopstash(a)	Perl_alloccopstash(aTHX_ a)
+#define allocfilegv(a)		Perl_allocfilegv(aTHX_ a)
 #define any_dup(a,b)		Perl_any_dup(aTHX_ a,b)
 #define cx_dup(a,b,c,d)		Perl_cx_dup(aTHX_ a,b,c,d)
 #define dirp_dup(a,b)		Perl_dirp_dup(aTHX_ a,b)

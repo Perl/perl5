@@ -363,6 +363,9 @@ unless ($define{'USE_ITHREADS'}) {
 		    PL_stashpad
 		    PL_stashpadix
 		    PL_stashpadmax
+		    PL_filegvpad
+		    PL_filegvpadix
+		    PL_filegvpadmax
 		    Perl_alloccopstash
 		    Perl_clone_params_del
 		    Perl_clone_params_new

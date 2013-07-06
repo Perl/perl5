@@ -2102,12 +2102,9 @@ Perl_gv_check(pTHX_ const HV *stash)
 		    continue;
 		file = GvFILE(gv);
 		CopLINE_set(PL_curcop, GvLINE(gv));
-#ifdef USE_ITHREADS
-		CopFILE(PL_curcop) = (char *)file;	/* set for warning */
-#else
-		CopFILEGV(PL_curcop)
-		    = gv_fetchfile_flags(file, HEK_LEN(GvFILE_HEK(gv)), 0);
-#endif
+		/* set file name for warning */
+		CopFILE_setn(PL_curcop, file, HEK_LEN(GvFILE_HEK(gv)));
+		SvREFCNT_dec(CopFILEGV(PL_curcop));
 		Perl_warner(aTHX_ packWARN(WARN_ONCE),
 			"Name \"%"HEKf"::%"HEKf
 			"\" used only once: possible typo",

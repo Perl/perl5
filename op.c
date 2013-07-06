@@ -634,30 +634,63 @@ C<PL_stashpad> for the stash passed to it.
 */
 
 #ifdef USE_ITHREADS
+
 PADOFFSET
-Perl_alloccopstash(pTHX_ HV *hv)
+S_alloc_global_pad_slot(pTHX_ SV *sv, svtype type, SV ***padp,
+			      PADOFFSET *ixp, PADOFFSET *maxp)
 {
     PADOFFSET off = 0, o = 1;
     bool found_slot = FALSE;
+    SV **pad = *padp;
 
-    PERL_ARGS_ASSERT_ALLOCCOPSTASH;
+    if (pad[*ixp] == sv) return *ixp;
 
-    if (PL_stashpad[PL_stashpadix] == hv) return PL_stashpadix;
-
-    for (; o < PL_stashpadmax; ++o) {
-	if (PL_stashpad[o] == hv) return PL_stashpadix = o;
-	if (!PL_stashpad[o] || SvTYPE(PL_stashpad[o]) != SVt_PVHV)
+    for (; o < *maxp; ++o) {
+	if (pad[o] == sv) return *ixp = o;
+	if (!pad[o] || SvTYPE(pad[o]) != type)
 	    found_slot = TRUE, off = o;
     }
     if (!found_slot) {
-	Renew(PL_stashpad, PL_stashpadmax + 10, HV *);
-	Zero(PL_stashpad + PL_stashpadmax, 10, HV *);
-	off = PL_stashpadmax;
-	PL_stashpadmax += 10;
+	Renew(*padp, *maxp + 10, SV *);
+	pad = *padp;
+	Zero(pad + *maxp, 10, SV *);
+	off = *maxp;
+	*maxp += 10;
     }
 
-    PL_stashpad[PL_stashpadix = off] = hv;
+    pad[*ixp = off] = sv;
     return off;
+}
+
+PADOFFSET
+Perl_alloccopstash(pTHX_ HV *hv)
+{
+    PERL_ARGS_ASSERT_ALLOCCOPSTASH;
+    return S_alloc_global_pad_slot(aTHX_
+		(SV *)hv, SVt_PVHV, (SV ***)&PL_stashpad, &PL_stashpadix,
+		&PL_stashpadmax
+	   );
+}
+#endif
+
+/*
+=for apidoc allocfilegv
+
+Available only under threaded builds, this function allocates an entry in
+C<PL_filegvpad> for the GV passed to it.
+
+=cut
+*/
+
+#ifdef USE_ITHREADS
+PADOFFSET
+Perl_allocfilegv(pTHX_ GV *gv)
+{
+    PERL_ARGS_ASSERT_ALLOCFILEGV;
+    return S_alloc_global_pad_slot(aTHX_
+		(SV *)gv, SVt_PVGV, (SV ***)&PL_filegvpad, &PL_filegvpadix,
+		&PL_filegvpadmax
+	   );
 }
 #endif
 
@@ -5723,7 +5756,10 @@ Perl_newSTATEOP(pTHX_ I32 flags, char *label, OP *o)
 	PL_parser->copline = NOLINE;
     }
 #ifdef USE_ITHREADS
-    CopFILE_set(cop, CopFILE(PL_curcop));	/* XXX share in a pvtable? */
+    /* While CopFILEGV_set does work under ithreads, this is faster, as it
+       avoids a linear scan of the filegv pad: */
+    if((cop->cop_filegvoff = PL_curcop->cop_filegvoff))
+	SvREFCNT_inc_void_NN(PL_filegvpad[cop->cop_filegvoff]);
 #else
     CopFILEGV_set(cop, CopFILEGV(PL_curcop));
 #endif
@@ -10874,7 +10910,7 @@ Perl_rpeep(pTHX_ OP *o)
 		    firstcop->cop_line = secondcop->cop_line;
 #ifdef USE_ITHREADS
 		    firstcop->cop_stashoff = secondcop->cop_stashoff;
-		    firstcop->cop_file = secondcop->cop_file;
+		    firstcop->cop_filegvoff = secondcop->cop_filegvoff;
 #else
 		    firstcop->cop_stash = secondcop->cop_stash;
 		    firstcop->cop_filegv = secondcop->cop_filegv;
@@ -10886,7 +10922,7 @@ Perl_rpeep(pTHX_ OP *o)
 
 #ifdef USE_ITHREADS
 		    secondcop->cop_stashoff = 0;
-		    secondcop->cop_file = NULL;
+		    secondcop->cop_filegvoff = 0;
 #else
 		    secondcop->cop_stash = NULL;
 		    secondcop->cop_filegv = NULL;

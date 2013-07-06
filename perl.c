@@ -286,6 +286,7 @@ perl_construct(pTHXx)
     Perl_av_create_and_push(aTHX_ &PL_regex_padav, newSVpvs(""));
     PL_regex_pad = AvARRAY(PL_regex_padav);
     Newxz(PL_stashpad, PL_stashpadmax, HV *);
+    Newxz(PL_filegvpad, PL_filegvpadmax, GV *);
 #endif
 #ifdef USE_REENTRANT_API
     Perl_reentrant_init(aTHX);
@@ -1092,6 +1093,7 @@ perl_destruct(pTHXx)
 
 #ifdef USE_ITHREADS
     Safefree(PL_stashpad); /* must come after sv_clean_all */
+    Safefree(PL_filegvpad);
 #endif
 
     AvREAL_off(PL_fdpid);		/* no surviving entries */

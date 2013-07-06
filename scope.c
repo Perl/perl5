@@ -1231,6 +1231,11 @@ Perl_leave_scope(pTHX_ I32 base)
 	case SAVEt_READONLY_OFF:
 	    SvREADONLY_off(ARG0_SV);
 	    break;
+#ifdef USE_ITHREADS
+	case SAVEt_COPFILEFREE:
+	    CopFILE_free((COP *)ARG0_PTR);
+	    break;
+#endif
 	default:
 	    Perl_croak(aTHX_ "panic: leave_scope inconsistency %u", type);
 	}
