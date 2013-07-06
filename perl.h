@@ -2286,6 +2286,7 @@ typedef struct xpvuv XPVUV;
 typedef struct xpvnv XPVNV;
 typedef struct xpvmg XPVMG;
 typedef struct xpvlv XPVLV;
+typedef struct xpvinvlist XINVLIST;
 typedef struct xpvav XPVAV;
 typedef struct xpvhv XPVHV;
 typedef struct xpvgv XPVGV;
@@ -5057,7 +5058,7 @@ PL_valid_types_IVX[]    = { 0, 1, 0, 0, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0 };
 EXTCONST bool
 PL_valid_types_NVX[]    = { 0, 0, 1, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0 };
 EXTCONST bool
-PL_valid_types_PVX[]    = { 0, 0, 0, 1, 0, 1, 1, 1, 0, 1, 1, 0, 0, 1, 1, 1 };
+PL_valid_types_PVX[]    = { 0, 0, 0, 1, 1, 1, 1, 1, 0, 1, 1, 0, 0, 1, 1, 1 };
 EXTCONST bool
 PL_valid_types_RV[]     = { 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1 };
 EXTCONST bool

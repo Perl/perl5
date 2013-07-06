@@ -898,10 +898,11 @@ static const struct body_details bodies_by_type[] = {
       SVt_PV, FALSE, NONV, HASARENA,
       FIT_ARENA(0, sizeof(XPV) - STRUCT_OFFSET(XPV, xpv_cur)) },
 
-    /* The invlist placeholder pretends to be an RV for now.
-       Also it's marked as "can't upgrade" to stop anyone using it before it's
-       implemented.  */
-    { 0, 0, 0, SVt_INVLIST, TRUE, NONV, NOARENA, 0 },
+    { sizeof(XINVLIST) - STRUCT_OFFSET(XPV, xpv_cur),
+      copy_length(XINVLIST, is_offset) - STRUCT_OFFSET(XPV, xpv_cur),
+      + STRUCT_OFFSET(XPV, xpv_cur),
+      SVt_INVLIST, TRUE, NONV, HASARENA,
+      FIT_ARENA(0, sizeof(XINVLIST) - STRUCT_OFFSET(XPV, xpv_cur)) },
 
     { sizeof(XPVIV) - STRUCT_OFFSET(XPV, xpv_cur),
       copy_length(XPVIV, xiv_u) - STRUCT_OFFSET(XPV, xpv_cur),
@@ -1340,6 +1341,7 @@ Perl_sv_upgrade(pTHX_ SV *const sv, svtype new_type)
     case SVt_PVGV:
     case SVt_PVCV:
     case SVt_PVLV:
+    case SVt_INVLIST:
     case SVt_REGEXP:
     case SVt_PVMG:
     case SVt_PVNV:
@@ -4127,7 +4129,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, SV* sstr, const I32 flags)
 	}
 	break;
 
-	/* case SVt_INVLIST: */
+	case SVt_INVLIST:
     case SVt_PVLV:
     case SVt_PVGV:
     case SVt_PVMG:
@@ -6338,6 +6340,7 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
 	case SVt_PVMG:
 	case SVt_PVNV:
 	case SVt_PVIV:
+	case SVt_INVLIST:
 	case SVt_PV:
 	  freescalar:
 	    /* Don't bother with SvOOK_off(sv); as we're only going to
@@ -12217,7 +12220,6 @@ S_sv_dup_common(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
 	SvANY(dstr)	= new_XNV();
 	SvNV_set(dstr, SvNVX(sstr));
 	break;
-	/* case SVt_INVLIST: */
     default:
 	{
 	    /* These are all the types that need complex bodies allocating.  */
@@ -12242,6 +12244,7 @@ S_sv_dup_common(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
 	    case SVt_PVMG:
 	    case SVt_PVNV:
 	    case SVt_PVIV:
+            case SVt_INVLIST:
 	    case SVt_PV:
 		assert(sv_type_details->body_size);
 		if (sv_type_details->arena) {
