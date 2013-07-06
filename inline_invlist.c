@@ -18,8 +18,8 @@
 #define INVLIST_VERSION_ID_OFFSET 1
 #define INVLIST_VERSION_ID 1511554547
 
-#define INVLIST_ZERO_OFFSET 2	/* 0 or 1 */
-/* The UV at position ZERO contains either 0 or 1.  If 0, the inversion list
+#define INVLIST_OFFSET_OFFSET 2	/* 0 or 1 */
+/* The UV at this position contains either 0 or 1.  If 0, the inversion list
  * contains the code point U+00000, and begins at element [0] in the array,
  * which always contains 0.  If 1, the inversion list doesn't contain U+0000,
  * and it begins at element [1].  Inverting an inversion list consists of
@@ -29,7 +29,7 @@
 /* For safety, when adding new elements, remember to #undef them at the end of
  * the inversion list code section */
 
-#define HEADER_LENGTH (INVLIST_ZERO_OFFSET + 2) /* includes 1 for the constant
+#define HEADER_LENGTH (INVLIST_OFFSET_OFFSET + 2) /* includes 1 for the constant
                                                    0 element */
 
 /* An element is in an inversion list iff its index is even numbered: 0, 2, 4,

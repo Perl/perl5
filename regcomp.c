@@ -7084,7 +7084,7 @@ S__invlist_array_init(pTHX_ SV* const invlist, const bool will_have_0)
      * element is either the final part of the header reserved for 0, if TRUE,
      * or the first element of the non-heading part, if FALSE */
 
-    UV* zero = get_invlist_zero_addr(invlist);
+    UV* offset = get_invlist_offset_addr(invlist);
 
     PERL_ARGS_ASSERT__INVLIST_ARRAY_INIT;
 
@@ -7092,9 +7092,9 @@ S__invlist_array_init(pTHX_ SV* const invlist, const bool will_have_0)
     assert(! *_get_invlist_len_addr(invlist));
 
     /* 1^1 = 0; 1^0 = 1 */
-    *zero = 1 ^ will_have_0;
-    *(zero + 1) = 0;
-    return 1 + zero + *zero;
+    *offset = 1 ^ will_have_0;
+    *(offset + 1) = 0;
+    return (UV *) (1 + offset + *offset);
 }
 
 PERL_STATIC_INLINE UV*
@@ -7109,16 +7109,16 @@ S_invlist_array(pTHX_ SV* const invlist)
     /* Must not be empty.  If these fail, you probably didn't check for <len>
      * being non-zero before trying to get the array */
     assert(*_get_invlist_len_addr(invlist));
-    assert(*get_invlist_zero_addr(invlist) == 0
-	   || *get_invlist_zero_addr(invlist) == 1);
+    assert(*get_invlist_offset_addr(invlist) == 0
+	   || *get_invlist_offset_addr(invlist) == 1);
 
     /* The array begins either at the header element reserved for zero or the
-     * element after that.  The reserved element is 1 past the zero_addr
+     * element after that.  The reserved element is 1 past the offset_addr
      * element; the latter contains 0 or 1 to indicate how much additionally to
      * add */
-    assert(0 == *(1 + get_invlist_zero_addr(invlist)));
-    return (UV *) (1 + get_invlist_zero_addr(invlist)
-		   + *get_invlist_zero_addr(invlist));
+    assert(0 == *(1 + get_invlist_offset_addr(invlist)));
+    return (UV *) (1 + get_invlist_offset_addr(invlist)
+		   + *get_invlist_offset_addr(invlist));
 }
 
 PERL_STATIC_INLINE void
@@ -7183,14 +7183,14 @@ S_invlist_max(pTHX_ SV* const invlist)
 }
 
 PERL_STATIC_INLINE UV*
-S_get_invlist_zero_addr(pTHX_ SV* invlist)
+S_get_invlist_offset_addr(pTHX_ SV* invlist)
 {
     /* Return the address of the UV that says whether the inversion list is
      * offset (it contains 1) or not (contains 0) */
 
-    PERL_ARGS_ASSERT_GET_INVLIST_ZERO_ADDR;
+    PERL_ARGS_ASSERT_GET_INVLIST_OFFSET_ADDR;
 
-    return (UV *) (SvPVX(invlist) + (INVLIST_ZERO_OFFSET * sizeof (UV)));
+    return (UV *) (SvPVX(invlist) + (INVLIST_OFFSET_OFFSET * sizeof (UV)));
 }
 
 #ifndef PERL_IN_XSUB_RE
@@ -7203,7 +7203,7 @@ Perl__new_invlist(pTHX_ IV initial_size)
      * system default is used instead */
 
     SV* new_list;
-    UV* zero_addr;
+    UV* offset_addr;
 
     if (initial_size < 0) {
 	initial_size = INVLIST_INITIAL_LEN;
@@ -7220,9 +7220,9 @@ Perl__new_invlist(pTHX_ IV initial_size)
 
     /* This should force a segfault if a method doesn't initialize this
      * properly */
-    zero_addr = get_invlist_zero_addr(new_list);
-    *zero_addr = UV_MAX;
-    *(zero_addr + 1) = 0;
+    offset_addr = get_invlist_offset_addr(new_list);
+    *offset_addr = (unsigned) UV_MAX;
+    *(offset_addr + 1) = 0;
 
     *get_invlist_previous_index_addr(new_list) = 0;
 #if HEADER_LENGTH != 4
@@ -8060,7 +8060,7 @@ Perl__invlist_invert(pTHX_ SV* const invlist)
     /* The exclusive or complents 0 to 1; and 1 to 0.  If the result is 1, the
      * zero element was a 0, so it is being removed, so the length decrements
      * by 1; and vice-versa.  SvCUR is unaffected */
-    if (*get_invlist_zero_addr(invlist) ^= 1) {
+    if (*get_invlist_offset_addr(invlist) ^= 1) {
 	(*len_pos)--;
     }
     else {
@@ -8372,7 +8372,7 @@ S__invlistEQ(pTHX_ SV* const a, SV* const b, const bool complement_b)
 #undef TO_INTERNAL_SIZE
 #undef FROM_INTERNAL_SIZE
 #undef INVLIST_LEN_OFFSET
-#undef INVLIST_ZERO_OFFSET
+#undef INVLIST_OFFSET_OFFSET
 #undef INVLIST_VERSION_ID
 
 /* End of inversion list object */
