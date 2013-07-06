@@ -222,16 +222,6 @@ EOT
 
     print $fh <<'EOT';
 }
-
-/*
- * Local variables:
- * c-indentation-style: bsd
- * c-basic-offset: 4
- * indent-tabs-mode: nil
- * End:
- *
- * ex: set ts=8 sts=4 sw=4 et:
- */
 EOT
 }
 
@@ -280,3 +270,11 @@ deal with this module directly.
 L<ExtUtils::MakeMaker>
 
 =cut
+
+# Local variables:
+# c-indentation-style: bsd
+# c-basic-offset: 4
+# indent-tabs-mode: nil
+# End:
+#
+# ex: set ts=8 sts=4 sw=4 et:

@@ -10,6 +10,6 @@ BEGIN {
 
 use ExtUtils::Miniperl;
 
-my $fh = open_new('miniperlmain.c');
+my $fh = open_new('miniperlmain.c', undef, {by => "$0 and ExtUtils::Miniperl"});
 writemain($fh);
-close_and_rename($fh);
+read_only_bottom_close_and_rename($fh);
