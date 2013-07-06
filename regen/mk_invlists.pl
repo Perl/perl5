@@ -15,7 +15,7 @@ require 'regen/regen_lib.pl';
 # in the headers is used to minimize the possibility of things getting
 # out-of-sync, or the wrong data structure being passed.  Currently that
 # random number is:
-my $VERSION_DATA_STRUCTURE_TYPE = 1039476070;
+my $VERSION_DATA_STRUCTURE_TYPE = 1511554547;
 
 my $out_fh = open_new('charclass_invlists.h', '>',
 		      {style => '*', by => $0,
@@ -53,12 +53,6 @@ sub output_invlist ($$) {
     print $out_fh "\nstatic UV ${name}_invlist[] = {\n";
 
     print $out_fh "\t$count,\t/* Number of elements */\n";
-
-    # This should be UV_MAX, but I (khw) am not confident that the suffixes
-    # for specifying the constant are portable, e.g.  'ull' on a 32 bit
-    # machine that is configured to use 64 bits; might need a Configure probe
-    print $out_fh "\t0,\t/* Current iteration position */\n";
-    print $out_fh "\t0,\t/* Cache of previous search index result */\n";
     print $out_fh "\t$VERSION_DATA_STRUCTURE_TYPE, /* Version and data structure type */\n";
     print $out_fh "\t", $zero_or_one,
                   ",\t/* 0 if the list starts at 0;",
