@@ -19,7 +19,7 @@ our %EXPORT_TAGS = (
     ':override' => 'internal',
     );
 
-our $VERSION = '1.2002';
+our $VERSION = '1.21';
 
 bootstrap Time::Piece $VERSION;
 
@@ -415,7 +415,7 @@ sub week {
 
     # Now that we have the Julian day including fractions
     # convert it to an integer Julian Day Number using nearest
-    # int (since the day changes at midday we oconvert all Julian
+    # int (since the day changes at midday we convert all Julian
     # dates to following midnight).
     $J = int($J+0.5);
 
@@ -728,7 +728,7 @@ using locales.
 
   my $french_day = localtime->day(@days);
 
-These settings can be overriden globally too:
+These settings can be overridden globally too:
 
   Time::Piece::day_list(@days);
 
