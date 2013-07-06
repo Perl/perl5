@@ -7027,10 +7027,13 @@ S_reg_scan_name(pTHX_ RExC_state_t *pRExC_state, U32 flags)
  * interfaces are highly subject to change, so as much as possible is static to
  * this file.  An inversion list is here implemented as a malloc'd C UV array
  * with some added info that is placed as UVs at the beginning in a header
- * portion.  An inversion list for Unicode is an array of code points, sorted
- * by ordinal number.  The zeroth element is the first code point in the list.
- * The 1th element is the first element beyond that not in the list.  In other
- * words, the first range is
+ * portion.  Currently it is a SVt_PVLV, with some of the header fields from
+ * that repurposed for uses here.
+ *
+ * An inversion list for Unicode is an array of code points, sorted by ordinal
+ * number.  The zeroth element is the first code point in the list.  The 1th
+ * element is the first element beyond that not in the list.  In other words,
+ * the first range is
  *  invlist[0]..(invlist[1]-1)
  * The other ranges follow.  Thus every element whose index is divisible by two
  * marks the beginning of a range that is in the list, and every element not
@@ -7127,7 +7130,7 @@ S_invlist_set_len(pTHX_ SV* const invlist, const UV len)
 
     *_get_invlist_len_addr(invlist) = len;
 
-    assert(len <= SvLEN(invlist));
+    assert(SvLEN(invlist) == 0 || len <= SvLEN(invlist));
 
     SvCUR_set(invlist, TO_INTERNAL_SIZE(len));
     /* Note that when inverting, SvCUR shouldn't change */
@@ -7207,7 +7210,9 @@ Perl__new_invlist(pTHX_ IV initial_size)
     }
 
     /* Allocate the initial space */
-    new_list = newSV(TO_INTERNAL_SIZE(initial_size));
+    new_list = newSV_type(SVt_PVLV);
+    SvGROW(new_list, TO_INTERNAL_SIZE(initial_size) + 1); /* 1 is for trailing
+                                                             NUL */
     invlist_set_len(new_list, 0);
 
     /* Force iterinit() to be used to get iteration to work */
@@ -7237,7 +7242,7 @@ S__new_invlist_C_array(pTHX_ UV* list)
      * form, including internal fields.  Thus this is a dangerous routine that
      * should not be used in the wrong hands */
 
-    SV* invlist = newSV_type(SVt_PV);
+    SV* invlist = newSV_type(SVt_PVLV);
 
     PERL_ARGS_ASSERT__NEW_INVLIST_C_ARRAY;
 
@@ -7249,6 +7254,7 @@ S__new_invlist_C_array(pTHX_ UV* list)
     if (*get_invlist_version_id_addr(invlist) != INVLIST_VERSION_ID) {
         Perl_croak(aTHX_ "panic: Incorrect version for previously generated inversion list");
     }
+    invlist_set_len(invlist, list[INVLIST_LEN_OFFSET]);
 
     /* Initialize the iteration pointer.
      * XXX This could be done at compile time in charclass_invlists.h, but I
@@ -8043,7 +8049,7 @@ Perl__invlist_invert(pTHX_ SV* const invlist)
      * have a zero; removes it otherwise.  As described above, the data
      * structure is set up so that this is very efficient */
 
-    UV* len_pos = _get_invlist_len_addr(invlist);
+    STRLEN* len_pos = _get_invlist_len_addr(invlist);
 
     PERL_ARGS_ASSERT__INVLIST_INVERT;
 
@@ -8120,6 +8126,7 @@ S_invlist_clone(pTHX_ SV* const invlist)
     PERL_ARGS_ASSERT_INVLIST_CLONE;
 
     SvCUR_set(new_invlist, length); /* This isn't done automatically */
+    invlist_set_len(new_invlist, _invlist_len(invlist));
     Copy(SvPVX(invlist), SvPVX(new_invlist), length, char);
 
     return new_invlist;

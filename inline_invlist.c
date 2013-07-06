@@ -41,7 +41,7 @@
 #define ELEMENT_RANGE_MATCHES_INVLIST(i) (! ((i) & 1))
 #define PREV_RANGE_MATCHES_INVLIST(i) (! ELEMENT_RANGE_MATCHES_INVLIST(i))
 
-PERL_STATIC_INLINE UV*
+PERL_STATIC_INLINE STRLEN*
 S__get_invlist_len_addr(pTHX_ SV* invlist)
 {
     /* Return the address of the UV that contains the current number
@@ -49,7 +49,7 @@ S__get_invlist_len_addr(pTHX_ SV* invlist)
 
     PERL_ARGS_ASSERT__GET_INVLIST_LEN_ADDR;
 
-    return (UV *) (SvPVX(invlist) + (INVLIST_LEN_OFFSET * sizeof (UV)));
+    return &(LvTARGLEN(invlist));
 }
 
 PERL_STATIC_INLINE UV
