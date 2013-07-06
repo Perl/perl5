@@ -16,7 +16,7 @@
  * in the range 2**31-1 should be generated.  Then, if an auxiliary program
  * doesn't change correspondingly, it will be discovered immediately */
 #define INVLIST_VERSION_ID_OFFSET 1
-#define INVLIST_VERSION_ID 1511554547
+#define INVLIST_VERSION_ID 1826693541
 
 #define INVLIST_OFFSET_OFFSET 2	/* 0 or 1 */
 /* The UV at this position contains either 0 or 1.  If 0, the inversion list

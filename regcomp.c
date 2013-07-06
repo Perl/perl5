@@ -7239,7 +7239,7 @@ Perl__new_invlist(pTHX_ IV initial_size)
 #endif
 
 STATIC SV*
-S__new_invlist_C_array(pTHX_ UV* list)
+S__new_invlist_C_array(pTHX_ const UV* const list)
 {
     /* Return a pointer to a newly constructed inversion list, initialized to
      * point to <list>, which has to be in the exact correct inversion list
