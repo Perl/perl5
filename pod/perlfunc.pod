@@ -3241,7 +3241,7 @@ C<kill -9, $pgrp> will send C<SIGKILL> to
 the entire process group specified.  That
 means you usually want to use positive not negative signals.
 
-If SIGNAL is either the number 0 or the string C<ZERO> (or C<SIGZZERO>),
+If SIGNAL is either the number 0 or the string C<ZERO> (or C<SIGZERO>),
 no signal is sent to
 the process, but C<kill> checks whether it's I<possible> to send a signal to it
 (that means, to be brief, that the process is owned by the same user, or we are
