@@ -29,7 +29,7 @@
 /* For safety, when adding new elements, remember to #undef them at the end of
  * the inversion list code section */
 
-#define HEADER_LENGTH (INVLIST_OFFSET_OFFSET + 2) /* includes 1 for the constant
+#define HEADER_LENGTH (INVLIST_OFFSET_OFFSET + 1) /* includes 1 for the constant
                                                    0 element */
 
 /* An element is in an inversion list iff its index is even numbered: 0, 2, 4,
