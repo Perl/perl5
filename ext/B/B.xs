@@ -682,11 +682,7 @@ struct OP_methods {
 #ifdef USE_ITHREADS
     STR_WITH_LEN("pmoffset"),IVp,     offsetof(struct pmop, op_pmoffset),/*20*/
     STR_WITH_LEN("filegv"),  op_offset_special, 0,                       /*21*/
-#  if PERL_VERSION < 19
     STR_WITH_LEN("file"),    char_pp, offsetof(struct cop, cop_file),    /*22*/
-#  else
-    STR_WITH_LEN("file"),    op_offset_special, 0,                       /*22*/
-#  endif
     STR_WITH_LEN("stash"),   op_offset_special, 0,                       /*23*/
 #  if PERL_VERSION < 17
     STR_WITH_LEN("stashpv"), char_pp, offsetof(struct cop, cop_stashpv), /*24*/
@@ -731,11 +727,6 @@ struct OP_methods {
 #if PERL_VERSION >= 19
     STR_WITH_LEN("folded"),  op_offset_special, 0,                       /*50*/
 #endif
-#endif
-#if PERL_VERSION < 19 || !defined(USE_ITHREADS)
-    STR_WITH_LEN("filegvoff"),op_offset_special, 0,                      /*51*/
-#else
-    STR_WITH_LEN("filegvoff"),PADOFFSETp,offsetof(struct cop, cop_filegvoff),/*51*/
 #endif
 };
 
@@ -1040,7 +1031,7 @@ next(o)
 		ret = make_sv_object(aTHX_ (SV *)CopFILEGV((COP*)o));
 		break;
 #endif
-#if !defined(USE_ITHREADS) || PERL_VERSION >= 19
+#ifndef USE_ITHREADS
 	    case 22: /* file */
 		ret = sv_2mortal(newSVpv(CopFILE((COP*)o), 0));
 		break;

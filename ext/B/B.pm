@@ -1228,8 +1228,6 @@ Since perl 5.17.1
 
 =item file
 
-=item filegvoff (threaded only)
-
 =item cop_seq
 
 =item arybase

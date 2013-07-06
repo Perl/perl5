@@ -32,11 +32,6 @@ PERL_CALLCONV void	Perl_Slab_Free(pTHX_ void *op)
 #define PERL_ARGS_ASSERT_SLAB_FREE	\
 	assert(op)
 
-PERL_STATIC_INLINE void	S_SvREFCNT_dec_NN(pTHX_ SV *sv)
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_SVREFCNT_DEC_NN	\
-	assert(sv)
-
 PERL_CALLCONV bool	Perl__is_uni_FOO(pTHX_ const U8 classnum, const UV c)
 			__attribute__warn_unused_result__;
 
@@ -7650,11 +7645,6 @@ PERL_CALLCONV PADOFFSET	Perl_alloccopstash(pTHX_ HV *hv)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_ALLOCCOPSTASH	\
 	assert(hv)
-
-PERL_CALLCONV PADOFFSET	Perl_allocfilegv(pTHX_ GV *gv)
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_ALLOCFILEGV	\
-	assert(gv)
 
 PERL_CALLCONV void*	Perl_any_dup(pTHX_ void* v, const PerlInterpreter* proto_perl)
 			__attribute__warn_unused_result__

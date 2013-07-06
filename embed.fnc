@@ -1024,7 +1024,6 @@ p	|PADOFFSET|allocmy	|NN const char *const name|const STRLEN len\
 				|const U32 flags
 #ifdef USE_ITHREADS
 AMp	|PADOFFSET|alloccopstash|NN HV *hv
-AMp	|PADOFFSET|allocfilegv	|NN GV *gv
 #endif
 : Used in perly.y
 pR	|OP*	|oopsAV		|NN OP* o
@@ -2659,9 +2658,5 @@ op	|void	|populate_isa	|NN const char *name|STRLEN len|...
 : Used in keywords.c and toke.c
 Xop	|bool	|feature_is_enabled|NN const char *const name \
 		|STRLEN namelen
-
-: Some static inline functions that implement macros need predeclaration
-: because they are used inside other static inline functions.
-Aoi	|void	|SvREFCNT_dec_NN|NN SV *sv
 
 : ex: set ts=8 sts=4 sw=4 noet:
