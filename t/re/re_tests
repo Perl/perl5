@@ -613,6 +613,8 @@ $(?<=^(a))	a	y	$1	a
 ^[^bcd]*(c+)	aexycd	y	$1	c
 (?{$a=2})a*aa(?{local$a=$a+1})k*c(?{$b=$a})	yaaxxaaaacd	y	$b	3
 (?{$a=2})(a(?{local$a=$a+1}))*aak*c(?{$b=$a})	yaaxxaaaacd	y	$b	4
+# [perl #117917]
+^(a(?{ "x" =~ m{x}})b)(??{ $1 })	abab	y	$&	abab
 (>a+)ab	aaab	n	-	-
 (?>a+)b	aaab	y	-	-
 ([[:]+)	a:[b]:	y	$1	:[

@@ -4991,6 +4991,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		PL_op = oop;
 		PL_curcop = ocurcop;
 		S_regcp_restore(aTHX_ rex, runops_cp, &maxopenparen);
+		PL_curpm = PL_reg_curpm;
 
 		if (logical != 2)
 		    break;
