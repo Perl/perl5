@@ -136,6 +136,7 @@
 /Fcntl.pm
 /File/CheckTree.pm
 /File/Fetch.pm
+/File/Find.pm
 /File/Glob.pm
 /File/GlobMapper.pm
 /File/Path.pm
