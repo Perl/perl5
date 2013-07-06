@@ -12,7 +12,7 @@ use IO::Socket;
 use Carp;
 
 @ISA = qw(IO::Socket);
-$VERSION = "1.24";
+$VERSION = "1.25";
 $VERSION = eval $VERSION;
 
 IO::Socket::UNIX->register_domain( AF_UNIX );
@@ -96,11 +96,12 @@ C<IO::Socket::UNIX> provides.
     Type    	Type of socket (eg SOCK_STREAM or SOCK_DGRAM)
     Local   	Path to local fifo
     Peer    	Path to peer fifo
-    Listen  	Create a listen socket
+    Listen  	Queue size for listen
 
 If the constructor is only passed a single argument, it is assumed to
 be a C<Peer> specification.
 
+If the C<Listen> argument is given, but false, the queue size will be set to 5.
 
  NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE NOTE
 
