@@ -3,6 +3,7 @@
 /config.w32
 /perl.base
 bin/*.bat
+html/
 Extensions_static
 dlutils.c
 perllibst.h
