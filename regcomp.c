@@ -7075,7 +7075,6 @@ S_reg_scan_name(pTHX_ RExC_state_t *pRExC_state, U32 flags)
 #define TO_INTERNAL_SIZE(x) (((x) + 1) * sizeof(UV))
 #define FROM_INTERNAL_SIZE(x) (((x)/ sizeof(UV)) - 1)
 
-#define INVLIST_INITIAL_LEN 10
 
 PERL_STATIC_INLINE UV*
 S__invlist_array_init(pTHX_ SV* const invlist, const bool will_have_0)
@@ -7211,7 +7210,7 @@ Perl__new_invlist(pTHX_ IV initial_size)
     U8* offset_addr;
 
     if (initial_size < 0) {
-	initial_size = INVLIST_INITIAL_LEN;
+	initial_size = 10;
     }
 
     /* Allocate the initial space */
@@ -7230,9 +7229,6 @@ Perl__new_invlist(pTHX_ IV initial_size)
     *offset_addr = (U8) UV_MAX;
 
     *get_invlist_previous_index_addr(new_list) = 0;
-#if HEADER_LENGTH != 3
-#   error Need to regenerate INVLIST_VERSION_ID by running perl -E 'say int(rand 2**31-1)', and then changing the #if to the new length
-#endif
 
     return new_list;
 }
@@ -7244,15 +7240,29 @@ S__new_invlist_C_array(pTHX_ const UV* const list)
     /* Return a pointer to a newly constructed inversion list, initialized to
      * point to <list>, which has to be in the exact correct inversion list
      * form, including internal fields.  Thus this is a dangerous routine that
-     * should not be used in the wrong hands */
+     * should not be used in the wrong hands.  The passed in 'list' contains
+     * several header fields at the beginning that are not part of the
+     * inversion list body proper */
+
+    const STRLEN length = (STRLEN) list[0];
+    const UV version_id =          list[1];
+    const U8 offset = (U8)         list[2];
+#define HEADER_LENGTH 3
+    /* If any of the above changes in any way, you must change HEADER_LENGTH
+     * (if appropriate) and regenerate INVLIST_VERSION_ID by running
+     *      perl -E 'say int(rand 2**31-1)'
+     */
+#define INVLIST_VERSION_ID 1826693541/* This is a combination of a version and
+                                        data structure type, so that one being
+                                        passed in can be validated to be an
+                                        inversion list of the correct vintage.
+                                       */
 
     SV* invlist = newSV_type(SVt_PVLV);
-    STRLEN length = (STRLEN) list[INVLIST_LEN_OFFSET];
-    U8 offset = (U8) list[INVLIST_OFFSET_OFFSET];
 
     PERL_ARGS_ASSERT__NEW_INVLIST_C_ARRAY;
 
-    if (list[INVLIST_VERSION_ID_OFFSET] != INVLIST_VERSION_ID) {
+    if (version_id != INVLIST_VERSION_ID) {
         Perl_croak(aTHX_ "panic: Incorrect version for previously generated inversion list");
     }
 
@@ -8389,11 +8399,8 @@ S__invlistEQ(pTHX_ SV* const a, SV* const b, const bool complement_b)
 #endif
 
 #undef HEADER_LENGTH
-#undef INVLIST_INITIAL_LENGTH
 #undef TO_INTERNAL_SIZE
 #undef FROM_INTERNAL_SIZE
-#undef INVLIST_LEN_OFFSET
-#undef INVLIST_OFFSET_OFFSET
 #undef INVLIST_VERSION_ID
 
 /* End of inversion list object */
