@@ -3567,6 +3567,7 @@ ext/Errno/ChangeLog	Errno changes
 ext/Errno/Errno_pm.PL	Errno perl module create script
 ext/Errno/Makefile.PL	Errno extension makefile writer
 ext/Errno/t/Errno.t	See if Errno works
+ext/ExtUtils-Miniperl/lib/ExtUtils/Miniperl.pm	Writes {mini,}perlmain.c
 ext/Fcntl/Fcntl.pm	Fcntl extension Perl module
 ext/Fcntl/Fcntl.xs	Fcntl extension external subroutines
 ext/Fcntl/Makefile.PL	Fcntl extension makefile writer
@@ -4336,7 +4337,6 @@ mg.h				Magic header
 mg_names.c			Generated magic names used by dump.c
 mg_raw.h			Generated magic data used by generate_uudmap.c
 mg_vtable.h			Generated magic vtable data
-minimod.pl			Writes lib/ExtUtils/Miniperl.pm
 miniperlmain.c			Basic perl w/o dynamic loading or extensions
 mkppport			A script that distributes ppport.h
 mkppport.lst			List of extensions that need a ppport.h
@@ -4756,6 +4756,7 @@ regen/feature.pl		Generates feature.pm
 regen/genpacksizetables.pl	Generate the size tables for pack/unpack
 regen/keywords.pl		Program to write keywords.h
 regen/mg_vtable.pl		generate mg_vtable.h
+regen/miniperlmain.pl		generate miniperlmain.c
 regen/mk_invlists.pl		Generates charclass_invlists.h
 regen/mk_PL_charclass.pl	Populate the PL_charclass table
 regen/opcode.pl			Opcode header generator

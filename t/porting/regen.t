@@ -19,7 +19,8 @@ if ( $^O eq "VMS" ) {
 my $in_regen_pl = 24; # I can't see a clean way to calculate this automatically.
 my @files = qw(perly.act perly.h perly.tab keywords.c keywords.h uconfig.h);
 my @progs = qw(regen/regcharclass.pl regen/mk_PL_charclass.pl
-               regen/unicode_constants.pl regen/genpacksizetables.pl);
+               regen/unicode_constants.pl regen/genpacksizetables.pl
+               regen/miniperlmain.pl);
 
 plan (tests => $in_regen_pl + @files + @progs + 2);
 
