@@ -31,6 +31,7 @@ while(<$fh>) {
 
 for my $file (@porting_files) {
     $file =~ s!^Porting/!!;
+    $file =~ s/\.\z// if $^O eq 'VMS';
     next if $file =~ /^perl[0-9]+delta\.pod$/;
     ok(exists($files_in_pod{$file}), "$file is mentioned in Porting/README.pod");
     delete $files_in_pod{$file};
