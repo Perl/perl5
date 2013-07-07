@@ -111,11 +111,11 @@ ok UNIVERSAL::can(23, "can");
 ++${"23::foo"};
 ok UNIVERSAL::can("23", "can"), '"23" can can when the pack exists';
 ok UNIVERSAL::can(23, "can"), '23 can can when the pack exists';
+sub IO::Handle::turn {}
+ok UNIVERSAL::can(*STDOUT, 'turn'), 'globs with IOs can';
+ok UNIVERSAL::can(\*STDOUT, 'turn'), 'globrefs with IOs can';
 {
     local $::TODO = '[perl #113932]';
-    ok UNIVERSAL::can(*STDOUT, 'print'), 'globs with IOs can can';
-    ok UNIVERSAL::can(\*STDOUT, 'print'), 'globrefs with IOs can can';
-    sub IO::Handle::turn {}
     # Should this pass?  Or is the existing behaviour correct?
     ok UNIVERSAL::can("STDOUT", 'turn'), 'IO barewords can';
 }
