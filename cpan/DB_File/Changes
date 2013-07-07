@@ -1,3 +1,20 @@
+1.829 7 July 2013
+
+   * make realclean: removing all files
+     RT #68214
+
+   * Documented the issue where the error below 
+
+        BDB0588 At least one secondary cursor must be specified to DB->join
+
+   * DB_File installs to wrong place for CPAN version
+     RT #70420
+     Makefile.PL prevents INSTALLDIRS on command line.
+     RT #68287: Makefile.PL prevents INSTALLDIRS on command line.
+
+   * typo fix
+     RT #85335
+
 1.828 7 May 2013
 
    * Minor change to build with Berkeley DB 6.x
@@ -5,17 +22,17 @@
 1.827 25 Jan 2012
 
    * DB_File.pm - Don't use "@_" construct
-     [RT ##79287]
+     [RT #79287]
 
 1.826 25 Jan 2012
 
    * t/db-btree.t - fix use of "length @array"
-     [RT ##74336]
+     [RT #74336]
 
 1.825 24 Jan 2012
 
    * t/db-btree.t - fix use of "length @array"
-     [RT ##74336]
+     [RT #74336]
 
 1.824 6 Aug 2011
 
@@ -30,7 +47,7 @@
 1.822 12 March 2011
 
    * Link rot
-     [rt.cpan.org #69739] 
+     [rt.cpan.org #68739] 
 
 1.822 12 March 2011
 

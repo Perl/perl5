@@ -140,6 +140,16 @@
 #ifdef COMPAT185
 #    include <db_185.h>
 #else
+
+/* Uncomment one of the lines below */
+/* See the section "At least one secondary cursor must be specified to DB->join"
+   in the README file for the circumstances where you need to uncomment one
+   of the two lines below.
+*/
+
+/* #define time_t __time64_t */
+/* #define time_t __time32_t */
+
 #    include <db.h>
 #endif
 
@@ -1541,6 +1551,7 @@ db_DoTie_(isHASH, dbtype, name=undef, flags=O_CREAT|O_RDWR, mode=0666, type=DB_H
 	        sv = ST(5) ;
 
 	    RETVAL = ParseOpenInfo(aTHX_ isHASH, name, flags, mode, sv) ;
+	    Trace(("db_DoTie_ %p\n", RETVAL));
 	    if (RETVAL->dbp == NULL) {
 	        Safefree(RETVAL);
 	        RETVAL = NULL ;

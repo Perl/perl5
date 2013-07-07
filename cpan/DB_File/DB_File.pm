@@ -163,7 +163,7 @@ our ($db_version, $use_XSLoader, $splice_end_array_no_length, $splice_end_array,
 use Carp;
 
 
-$VERSION = "1.828" ;
+$VERSION = "1.829" ;
 $VERSION = eval $VERSION; # needed for dev releases
 
 {
@@ -2285,7 +2285,7 @@ Although B<DB_File> is covered by the Perl license, the library it
 makes use of, namely Berkeley DB, is not. Berkeley DB has its own
 copyright and its own license. Please take the time to read it.
 
-Here are are few words taken from the Berkeley DB FAQ (at
+Here are a few words taken from the Berkeley DB FAQ (at
 F<http://www.oracle.com/technology/products/berkeley-db/db/index.html>) regarding the license:
 
     Do I have to license DB to use it in Perl scripts? 

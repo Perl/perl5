@@ -61,12 +61,15 @@ WriteMakefile(
         : ()
     ),
     
+    ($] < 5.008 || $] > 5.011) 
+        ? (INSTALLDIRS => 'site') 
+        : (INSTALLDIRS => 'perl'),
 
 	#OPTIMIZE	=> '-g',
 	'depend'	=> { 'Makefile'          => 'config.in',
                              'version$(OBJ_EXT)' => 'version.c'},
-	'clean'		=> { FILES => 'constants.h constants.xs' },
-	'macro'		=> { INSTALLDIRS => 'perl', my_files => "@files" },
+	'clean'		=> { FILES => 'constants.h constants.xs DB_File.pm.bak t/db-btree.t.bak t/db-hash.t.bak t/db-recno.t.bak t/pod.t.bak' },
+	'macro'		=> { my_files => "@files" },
         'dist'          => { COMPRESS => 'gzip', SUFFIX => 'gz',
 			     DIST_DEFAULT => 'MyDoubleCheck tardist'},    
 	);
