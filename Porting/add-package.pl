@@ -283,8 +283,8 @@ my @ChangedFiles;
             push @NewFiles, $file;
         }
 
-        ### add an entry to utils/Makefile.SH for $bin
-        {   my $file = "utils/Makefile.SH";
+        ### add an entry to utils/Makefile.PL for $bin
+        {   my $file = "utils/Makefile.PL";
 
             ### not there already?
             unless( `grep $bin $Repo/$file` ) {

@@ -1,49 +1,36 @@
-case $PERL_CONFIG_SH in
-'')
-	if test -f config.sh; then TOP=.;
-	elif test -f ../config.sh; then TOP=..;
-	elif test -f ../../config.sh; then TOP=../..;
-	elif test -f ../../../config.sh; then TOP=../../..;
-	elif test -f ../../../../config.sh; then TOP=../../../..;
-	else
-		echo "Can't find config.sh."; exit 1
-	fi
-	. $TOP/config.sh
-	;;
-esac
-: This forces SH files to create target in same directory as SH file.
-: This is so that make depend always knows where to find SH derivatives.
-case "$0" in
-*/Makefile.SH) cd `expr X$0 : 'X\(.*\)/'` ;;
-Makefile.SH) ;;
-*) case `pwd` in
-   */utils) ;;
-   *) if test -d utils; then cd utils
-      else echo "Can't figure out where to write output."; exit 1
-	  fi;;
-   esac;;
-esac
+#!./miniperl -w
+use strict;
+use Config;
 
-echo "Extracting utils/Makefile (with variable substitutions)"
-rm -f Makefile
+if (@ARGV) {
+    my $dir = shift;
+    chdir $dir or die "Can't chdir '$dir': $!";
+}
+
+# Note, the generated utils/Makefile isn't used by VMS yet.
+# The next step on cleaning this is up is probably to work to reduce the size
+# of the "problem" in both this file and vms/descrip_mms.template by
+# attempting to move the work from them to the extension directories and
+# ExtUtils::MakeMaker.
+
+require 'regen/regen_lib.pl';
+
+my $target = 'utils/Makefile';
+print "Extracting $target (with variable substitutions)\n";
+my $fh = open_new($target, undef, {by => $0}, 1);
+
 # These use the Cwd extension.  For statically-built perls, we
 # need perl, not just miniperl.
-case "$usedl" in
-    define) perl="../miniperl" ;;
-    *)      perl="../perl" ;;
-esac
-cat >Makefile <<!GROK!THIS!
-# Generated from utils/Makefile.SH.  The generated file is
-# shipped with the source kit for systems such as win32
-# which don't do .SH extraction.
+my $perl = defined $Config{usedl} ? '../miniperl' : '../perl';
 
+print $fh <<"EOT";
 PERL = $perl
 REALPERL = ../perl
-RUN = $run  # Used mainly cross-compilation setups.
+RUN = $Config{run}  # Used mainly cross-compilation setups.
 
-!GROK!THIS!
+EOT
 
-cat >>Makefile <<'!NO!SUBS!'
+print $fh <<'EOT';
 
 # Files to be built with variable substitution after miniperl is
 # available.  Dependencies handled manually below (for now).
@@ -117,12 +104,6 @@ distclean:	clobber
 
 veryclean:	distclean
 	-rm -f *~ *.org
-!NO!SUBS!
-$eunicefix Makefile
-case `pwd` in
-*SH)
-    $rm -f ../Makefile
-    $ln Makefile ../Makefile
-    ;;
-esac
-rm -f $firstmakefile
+EOT
+
+read_only_bottom_close_and_rename($fh);

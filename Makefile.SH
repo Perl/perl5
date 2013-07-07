@@ -622,7 +622,10 @@ x2p/s2p: $x2p_deps
 x2p/find2perl: $x2p_deps
 	cd x2p; \$(LDLIBPTH) \$(MAKE) find2perl
 
-utilities:	$util_deps
+utils/Makefile: \$(MINIPERL_EXE) \$(CONFIGPM) utils/Makefile.PL
+	\$(MINIPERL) -Ilib utils/Makefile.PL
+
+utilities:	utils/Makefile $util_deps
 	@echo " "; echo "	Making utilities"; cd utils; \$(LDLIBPTH) \$(MAKE) all
 
 !GROK!THIS!
@@ -986,7 +989,7 @@ uni.data: $(MINIPERL_EXE) $(CONFIGPM) lib/unicore/mktables $(nonxs_ext)
 #	can in this makefile to decide if needs to run or not
 #	touch uni.data
 
-# $(PERL_EXE) and ext because buildtoc uses Text::Wrap uses re
+# $(PERL_EXE) and ext because pod_lib.pl needs Digest::MD5
 # But also this ensures that all extensions are built before we try to scan
 # them, which picks up Devel::PPPort's documentation.
 pod/perltoc.pod: $(perltoc_pod_prereqs)  $(PERL_EXE) $(ext) pod/buildtoc
@@ -994,8 +997,7 @@ pod/perltoc.pod: $(perltoc_pod_prereqs)  $(PERL_EXE) $(ext) pod/buildtoc
 
 pod/perlapi.pod: pod/perlintern.pod
 
-# Depending on $(nonxs_ext) gets us Text::Wrap built
-pod/perlintern.pod: $(MINIPERL_EXE) autodoc.pl embed.fnc $(nonxs_ext)
+pod/perlintern.pod: $(MINIPERL_EXE) autodoc.pl embed.fnc
 	$(MINIPERL) autodoc.pl
 
 pod/perlmodlib.pod: $(MINIPERL_EXE) pod/perlmodlib.PL MANIFEST
@@ -1245,7 +1247,7 @@ _cleaner2:
 	rm -rf t/tmp*
 	rm -f so_locations $(LIBPERL_NONSHR) $(MINIPERL_NONSHR)
 	rm -rf $(addedbyconf)
-	rm -f $(FIRSTMAKEFILE) $(FIRSTMAKEFILE).old makefile.old
+	rm -f $(FIRSTMAKEFILE) $(FIRSTMAKEFILE).old makefile.old utils/Makefile
 	rm -f $(private)
 	rm -rf $(unidatafiles) $(unidatadirs)
 	rm -rf lib/auto
