@@ -2,10 +2,8 @@ require 5.002;
 
 package ExtUtils::Embed;
 require Exporter;
-require FileHandle;
 use Config;
-use Getopt::Std;
-use File::Spec;
+require File::Spec;
 
 #Only when we need them
 #require ExtUtils::MakeMaker;
@@ -18,7 +16,7 @@ use vars qw(@ISA @EXPORT $VERSION
 use strict;
 
 # This is not a dual-life module, so no need for development version numbers
-$VERSION = '1.30';
+$VERSION = '1.31';
 
 @ISA = qw(Exporter);
 @EXPORT = qw(&xsinit &ldopts 
@@ -54,7 +52,8 @@ sub xsinit {
        @mods = @$mods if $mods;
     }
     else {
-       getopts('o:s:');
+       require Getopt::Std;
+       Getopt::Std::getopts('o:s:');
        $file = $opt_o if defined $opt_o;
        $std  = $opt_s  if defined $opt_s;
        @mods = @ARGV;
@@ -65,7 +64,8 @@ sub xsinit {
 	$fh = \*STDOUT;
     }
     else {
-	$fh = new FileHandle "> $file";
+        open $fh, '>', $file
+            or die "Can't open '$file': $!";
     }
 
     push(@mods, static_ext()) if defined $std;
