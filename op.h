@@ -359,7 +359,7 @@ struct pmop {
     OP *	op_first;
     OP *	op_last;
 #ifdef USE_ITHREADS
-    IV          op_pmoffset;
+    PADOFFSET   op_pmoffset;
 #else
     REGEXP *    op_pmregexp;            /* compiled expression */
 #endif
