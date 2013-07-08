@@ -72,7 +72,8 @@ E<160>
 
 =item Category LC_MESSAGES: Error and other messages
 
-This for the most part is beyond the scope of Perl
+This is used by Perl itself only for accessing operating system error
+messages via L<$!|perlvar/$ERRNO>.
 
 =item Category LC_COLLATE: Collation
 
@@ -83,9 +84,17 @@ In Latin alphabets, for example, "b", generally follows "a".
 
 This indicates, for example if a character is an uppercase letter.
 
+=item Other categories
+
+Some platforms have other categories, dealing with such things as
+measurement units and paper sizes.  None of these are used directly by
+Perl, but outside operations that Perl interacts with may use
+these.  See L</Not within the scope of any use locale variant> below.
+
 =back
 
-More details on the categories are given below in L</LOCALE CATEGORIES>.
+More details on the categories used by Perl are given below in L</LOCALE
+CATEGORIES>.
 
 Together, these categories go a long way towards being able to customize
 a single program to run in many different locations.  But there are
@@ -93,8 +102,9 @@ deficiencies, so keep reading.
 
 =head1 PREPARING TO USE LOCALES
 
-Perl itself will not use locales unless specifically requested to.  But
-even if there is such a request, B<all> of the following must be true
+Perl itself will not use locales unless specifically requested to (but
+again note that Perl may interact with code that does use them).  Even
+if there is such a request, B<all> of the following must be true
 for it to work properly:
 
 =over 4
@@ -150,7 +160,7 @@ L<The setlocale function>.
 
 =head2 The use locale pragma
 
-By default, Perl ignores the current locale.  The S<C<use locale>>
+By default, Perl itself ignores the current locale.  The S<C<use locale>>
 pragma tells Perl to use the current locale for some operations.
 Starting in v5.16, there is an optional parameter to this pragma:
 
@@ -160,7 +170,7 @@ This parameter allows better mixing of locales and Unicode, and is
 described fully in L</Unicode and UTF-8>, but briefly, it tells Perl to
 not use the character portions of the locale definition, that is
 the C<LC_CTYPE> and C<LC_COLLATE> categories.  Instead it will use the
-native (extended by Unicode) character set.  When using this parameter,
+native character set (extended by Unicode).  When using this parameter,
 you are responsible for getting the external character set translated
 into the native/Unicode one (which it already will be if it is one of
 the increasingly popular UTF-8 locales).  There are convenient ways of
@@ -182,19 +192,27 @@ The operations that are affected by locale are:
 
 =item B<Not within the scope of any C<use locale> variant>
 
-Only non-Perl operations should be affected.  These include going
-outside of Perl via constructs like L<system()|perlfunc/system LIST> or
-L<qxE<sol>E<sol>|perlop/qxE<sol>STRINGE<sol>>.  Perl also gives access
-to various C library functions through the L<POSIX> module.  Some of
-those functions are always affected by the current locale.  For example,
-C<POSIX::strftime()> uses C<LC_TIME>; C<POSIX::strtod()> uses
-C<LC_NUMERIC>; C<POSIX::strcoll()> and C<POSIX::strxfrm()> use
-C<LC_COLLATE>; and character classification functions like
-C<POSIX::isalnum()> use C<LC_CTYPE>.  All such functions will behave
-according to the current underlying locale, even if that isn't exposed
-to Perl operations.
+Only operations originating outside Perl should be affected.
 
-Also, certain Perl operations that are set-up within the scope of a
+The variable L<$!|perlvar/$ERRNO> (and its synonyms C<$ERRNO> and
+C<$OS_ERROR>) when used as strings always are in terms of the current
+locale.
+
+The current locale is also used when going outside of Perl with
+operations like L<system()|perlfunc/system LIST> or
+L<qxE<sol>E<sol>|perlop/qxE<sol>STRINGE<sol>>, if those operations are
+locale-sensitive.
+
+Also Perl gives access to various C library functions through the
+L<POSIX> module.  Some of those functions are always affected by the
+current locale.  For example, C<POSIX::strftime()> uses C<LC_TIME>;
+C<POSIX::strtod()> uses C<LC_NUMERIC>; C<POSIX::strcoll()> and
+C<POSIX::strxfrm()> use C<LC_COLLATE>; and character classification
+functions like C<POSIX::isalnum()> use C<LC_CTYPE>.  All such functions
+will behave according to the current underlying locale, even if that
+isn't exposed to Perl space.
+
+And, certain Perl operations that are set-up within the scope of a
 C<use locale> variant retain that effect even outside the scope.
 These include:
 
@@ -299,6 +317,9 @@ C<POSIX::setlocale()> function:
         # Import locale-handling tool set from POSIX module.
         # This example uses: setlocale -- the function call
         #                    LC_CTYPE -- explained below
+        # (Showing the testing for success/failure of operations is
+        # omitted in these examples to avoid distracting from the main
+        # point)
         use POSIX qw(locale_h);
 
         # query and save the old locale
@@ -353,6 +374,9 @@ for the category is not changed, and the function returns C<undef>.
 
 Note that Perl ignores the current C<LC_CTYPE> and C<LC_COLLATE> locales
 within the scope of a C<use locale ':not_characters'>.
+
+If C<set_locale()> fails for some reason (for example an attempt to set
+to a locale unknown to the system), C<undef> is returned.
 
 For further information about the categories, consult L<setlocale(3)>.
 
@@ -801,19 +825,18 @@ current locale:
                 strftime("%B", 0, 0, 0, 1, $_, 96);
         }
 
-Note: C<use locale> isn't needed in this example: as a function that
-exists only to generate locale-dependent results, C<strftime()> always
-obeys the current C<LC_TIME> locale.
+Note: C<use locale> isn't needed in this example: C<strftime()> is a POSIX
+function which uses the standard system-supplied C<libc> function that
+always obeys the current C<LC_TIME> locale.
 
 See also L<I18N::Langinfo> and C<ABDAY_1>..C<ABDAY_7>, C<DAY_1>..C<DAY_7>,
 C<ABMON_1>..C<ABMON_12>, and C<ABMON_1>..C<ABMON_12>.
 
 =head2 Other categories
 
-The remaining locale category, C<LC_MESSAGES> (possibly supplemented
-by others in particular implementations) is not currently used by
-Perl--except possibly to affect the behavior of library functions
-called by extensions outside the standard Perl distribution and by the
+The remaining locale categories are not currently used by Perl itself.
+But again note that things Perl interacts with may use these, including
+extensions outside the standard Perl distribution, and by the
 operating system and its utilities.  Note especially that the string
 value of C<$!> and the error messages given by external utilities may
 be changed by C<LC_MESSAGES>.  If you want to have portable error
