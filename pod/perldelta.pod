@@ -309,9 +309,12 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
+=item MidnightBSD
 
-XXX
+C<objformat> was removed from version 0.4-RELEASE of MidnightBSD and had been
+deprecated on earlier versions. This caused the build environment to be
+erroneously configured for C<a.out> rather than C<elf>. This has been now
+been corrected.
 
 =back
 
