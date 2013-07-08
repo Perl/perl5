@@ -26,6 +26,7 @@ BEGIN {
         print "1..0 # Skip: \$ENV{PERL5DB} is already set to '$ENV{PERL5DB}'\n";
         exit 0;
     }
+    $ENV{PERL_RL} = 'Perl'; # Suppress system Term::ReadLine::Gnu
 }
 
 plan(116);
