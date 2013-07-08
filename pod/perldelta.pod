@@ -53,16 +53,17 @@ XXX Any deprecated features, syntax, modules etc. should be listed here.
 
 XXX Remove this section if inapplicable.
 
-The following modules will be removed from the core distribution in a future
-release, and will at that time need to be installed from CPAN. Distributions
-on CPAN which require these modules will need to list them as prerequisites.
+The following modules will be removed from the core distribution in a
+future release, and will at that time need to be installed from CPAN.
+Distributions on CPAN which require these modules will need to list them as
+prerequisites.
 
 The core versions of these modules will now issue C<"deprecated">-category
-warnings to alert you to this fact. To silence these deprecation warnings,
+warnings to alert you to this fact.  To silence these deprecation warnings,
 install the modules in question from CPAN.
 
 Note that these are (with rare exceptions) fine modules that you are encouraged
-to continue to use. Their disinclusion from core primarily hinges on their
+to continue to use.  Their disinclusion from core primarily hinges on their
 necessity to bootstrapping a fully functional, CPAN-capable Perl installation,
 not usually on concerns over their design.
 
@@ -312,8 +313,8 @@ L</Modules and Pragmata> section.
 =item MidnightBSD
 
 C<objformat> was removed from version 0.4-RELEASE of MidnightBSD and had been
-deprecated on earlier versions. This caused the build environment to be
-erroneously configured for C<a.out> rather than C<elf>. This has been now
+deprecated on earlier versions.  This caused the build environment to be
+erroneously configured for C<a.out> rather than C<elf>.  This has been now
 been corrected.
 
 =back
@@ -332,7 +333,7 @@ well.
 
 The Makefile shortcut targets for many rarely (or never) used testing and
 profiling targets have been removed, or merged into the only other Makefile
-target that uses them. Specifically, these targets are gone, along with
+target that uses them.  Specifically, these targets are gone, along with
 documentation that referenced them or explained how to use them:
 
  check.third check.utf16 check.utf8 coretest minitest.prep
