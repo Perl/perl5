@@ -80,10 +80,6 @@ Introduced in Perl 5.18
 
 See also L<perlrun>
 
-=item MLDBM
-
-See also L<perldsc>
-
 =item internal functions with M flag
 
 See also L<perlguts>
