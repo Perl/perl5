@@ -22,12 +22,6 @@ Introduced in Perl 5.8.0
 
 Deprecated in Perl 5.10.0
 
-=item Linux abstract Unix domain sockets
-
-Introduced in Perl 5.9.2
-
-See also L<Socket>
-
 =item Smart match (C<~~>)
 
 Introduced in Perl 5.10.0
@@ -256,6 +250,15 @@ Introduced in Perl 5.6.0
 Accepted in Perl 5.20.0
 
 See also L<perlre>
+
+=item Linux abstract Unix domain sockets
+
+Introduced in Perl 5.9.2
+
+Accepted before Perl 5.20.0.  The Socket library is now primarily maintained
+on CPAN, rather than in the perl core.
+
+See also L<Socket>
 
 =item Lvalue subroutines
 
