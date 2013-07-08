@@ -80,41 +80,47 @@ EOF
 }    
 
 sub xsi_protos {
-    my(@exts) = @_;
-    my(@retval,%seen);
+    my @exts = @_;
+    my %seen;
+    my $retval = '';
     foreach my $cname (canon('__', @exts)) {
-        my($ccode) = "EXTERN_C void boot_${cname} (pTHX_ CV* cv);\n";
-	next if $seen{$ccode}++;
-        push(@retval, $ccode);
+        my $ccode = "EXTERN_C void boot_${cname} (pTHX_ CV* cv);\n";
+        $retval .= $ccode
+            unless $seen{$ccode}++;
     }
-    return join '', @retval;
+    return $retval;
 }
 
 sub xsi_body {
-    my(@exts) = @_;
-    my(@retval,%seen);
-    push(@retval, "    static const char file[] = __FILE__;\n")
+    my @exts = @_;
+    my %seen;
+    my $retval;
+    $retval .= "    static const char file[] = __FILE__;\n"
         if @exts;
-    push(@retval, "    dXSUB_SYS;\n");
-    push(@retval, "    PERL_UNUSED_CONTEXT;\n");
-    push(@retval, "\n")
+    $retval .= <<'EOT';
+    dXSUB_SYS;
+    PERL_UNUSED_CONTEXT;
+EOT
+    $retval .= "\n"
         if @exts;
 
     foreach my $pname (canon('/', @exts)) {
-        my($cname, $mname, $ccode);
-        ($mname = $pname) =~ s!/!::!g;
-        ($cname = $pname) =~ s!/!__!g;
+        next
+            if $seen{$pname}++;
+        (my $mname = $pname) =~ s!/!::!g;
+        (my $cname = $pname) =~ s!/!__!g;
+        my $fname;
         if ($pname eq 'DynaLoader'){
             # Must NOT install 'DynaLoader::boot_DynaLoader' as 'bootstrap'!
             # boot_DynaLoader is called directly in DynaLoader.pm
-            $ccode = "    /* DynaLoader is a special case */\n    newXS(\"${mname}::boot_${cname}\", boot_${cname}, file);\n";
-            push(@retval, $ccode) unless $seen{$ccode}++;
+            $retval .= "    /* DynaLoader is a special case */\n";
+            $fname = "${mname}::boot_DynaLoader";
         } else {
-            $ccode = "    newXS(\"${mname}::bootstrap\", boot_${cname}, file);\n";
-            push(@retval, $ccode) unless $seen{$ccode}++;
+            $fname = "${mname}::bootstrap";
         }
+        $retval .= "    newXS(\"$fname\", boot_${cname}, file);\n"
     }
-    return join '', @retval;
+    return $retval;
 }
 
 sub static_ext {
