@@ -1097,7 +1097,10 @@ setlocale(category, locale = 0)
 	char *		retval;
     CODE:
 	retval = setlocale(category, locale);
-	if (retval) {
+	if (! retval) {
+            XSRETURN_UNDEF;
+        }
+        else {
 	    /* Save retval since subsequent setlocale() calls
 	     * may overwrite it. */
 	    RETVAL = savepv(retval);
@@ -1153,13 +1156,10 @@ setlocale(category, locale = 0)
 	    }
 #endif /* USE_LOCALE_NUMERIC */
 	}
-	else
-	    RETVAL = NULL;
     OUTPUT:
 	RETVAL
     CLEANUP:
-        if (RETVAL)
-	    Safefree(RETVAL);
+        Safefree(RETVAL);
 
 NV
 acos(x)

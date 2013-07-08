@@ -1519,6 +1519,16 @@ if ($didwarn) {
 
 $test_num = $final_locales_test_number;
 
+{   # perl #115808
+    use warnings;
+    my $warned = 0;
+    local $SIG{__WARN__} = sub {
+        $warned = $_[0] =~ /uninitialized/;
+    };
+    my $z = "y" . setlocale(&POSIX::LC_ALL, "xyzzy");
+    ok($warned, "variable set to setlocale(BAD LOCALE) is considered uninitialized");
+}
+
 # Test that tainting and case changing works on utf8 strings.  These tests are
 # placed last to avoid disturbing the hard-coded test numbers that existed at
 # the time these were added above this in this file.
