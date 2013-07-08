@@ -1368,6 +1368,9 @@ L<POSIX/isupper>, L<POSIX/isxdigit>, L<POSIX/localeconv>,
 L<POSIX/setlocale>, L<POSIX/strcoll>, L<POSIX/strftime>,
 L<POSIX/strtod>, L<POSIX/strxfrm>.
 
+For special considerations when Perl is embedded in a C program,
+see L<perlembed/Using embedded Perl with POSIX locales>.
+
 =head1 HISTORY
 
 Jarkko Hietaniemi's original F<perli18n.pod> heavily hacked by Dominic

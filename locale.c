@@ -276,6 +276,10 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 #ifdef __GLIBC__
     char * const language   = PerlEnv_getenv("LANGUAGE");
 #endif
+    /* NULL uses the existing already set up locale */
+    const char * const setlocale_init = (PerlEnv_getenv("PERL_SKIP_LOCALE_INIT"))
+                                        ? NULL
+                                        : "";
     char * const lc_all     = PerlEnv_getenv("LC_ALL");
     char * const lang       = PerlEnv_getenv("LANG");
     bool setlocale_failure = FALSE;
@@ -291,7 +295,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 
 #   ifdef LC_ALL
     if (lang) {
-	if (setlocale(LC_ALL, ""))
+	if (setlocale(LC_ALL, setlocale_init))
 	    done = TRUE;
 	else
 	    setlocale_failure = TRUE;
@@ -302,7 +306,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 	if (! (curctype =
 	       setlocale(LC_CTYPE,
 			 (!done && (lang || PerlEnv_getenv("LC_CTYPE")))
-				    ? "" : NULL)))
+				    ? setlocale_init : NULL)))
 	    setlocale_failure = TRUE;
 	else
 	    curctype = savepv(curctype);
@@ -312,7 +316,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 	if (! (curcoll =
 	       setlocale(LC_COLLATE,
 			 (!done && (lang || PerlEnv_getenv("LC_COLLATE")))
-				   ? "" : NULL)))
+				   ? setlocale_init : NULL)))
 	    setlocale_failure = TRUE;
 	else
 	    curcoll = savepv(curcoll);
@@ -322,7 +326,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 	if (! (curnum =
 	       setlocale(LC_NUMERIC,
 			 (!done && (lang || PerlEnv_getenv("LC_NUMERIC")))
-				  ? "" : NULL)))
+				  ? setlocale_init : NULL)))
 	    setlocale_failure = TRUE;
 	else
 	    curnum = savepv(curnum);
@@ -334,28 +338,28 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 #endif /* !LOCALE_ENVIRON_REQUIRED */
 
 #ifdef LC_ALL
-    if (! setlocale(LC_ALL, ""))
+    if (! setlocale(LC_ALL, setlocale_init))
 	setlocale_failure = TRUE;
 #endif /* LC_ALL */
 
     if (!setlocale_failure) {
 #ifdef USE_LOCALE_CTYPE
 	Safefree(curctype);
-	if (! (curctype = setlocale(LC_CTYPE, "")))
+	if (! (curctype = setlocale(LC_CTYPE, setlocale_init)))
 	    setlocale_failure = TRUE;
 	else
 	    curctype = savepv(curctype);
 #endif /* USE_LOCALE_CTYPE */
 #ifdef USE_LOCALE_COLLATE
 	Safefree(curcoll);
-	if (! (curcoll = setlocale(LC_COLLATE, "")))
+	if (! (curcoll = setlocale(LC_COLLATE, setlocale_init)))
 	    setlocale_failure = TRUE;
 	else
 	    curcoll = savepv(curcoll);
 #endif /* USE_LOCALE_COLLATE */
 #ifdef USE_LOCALE_NUMERIC
 	Safefree(curnum);
-	if (! (curnum = setlocale(LC_NUMERIC, "")))
+	if (! (curnum = setlocale(LC_NUMERIC, setlocale_init)))
 	    setlocale_failure = TRUE;
 	else
 	    curnum = savepv(curnum);
