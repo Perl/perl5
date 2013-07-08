@@ -23,10 +23,6 @@ $VERSION = '1.31';
 	     &ccopts &ccflags &ccdlflags &perl_inc
 	     &xsi_header &xsi_protos &xsi_body);
 
-#let's have Miniperl borrow from us instead
-#require ExtUtils::Miniperl;
-#*canon = \&ExtUtils::Miniperl::canon;
-
 $Verbose = 0;
 $lib_ext = $Config{lib_ext} || '.a';
 

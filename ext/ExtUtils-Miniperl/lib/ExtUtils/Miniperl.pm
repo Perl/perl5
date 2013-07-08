@@ -2,6 +2,7 @@
 package ExtUtils::Miniperl;
 use strict;
 require Exporter;
+use ExtUtils::Embed qw(xsi_header xsi_protos xsi_body);
 
 use vars qw($VERSION @ISA @EXPORT);
 
@@ -19,8 +20,7 @@ sub writemain{
 
     my(@exts) = @_;
 
-    my($dl) = canon('/','DynaLoader');
-    print $fh <<'EOF!HEAD';
+    printf $fh <<'EOF!HEAD', xsi_header();
 /*    miniperlmain.c
  *
  *    Copyright (C) 1994, 1995, 1996, 1997, 1999, 2000, 2001, 2002, 2003,
@@ -57,12 +57,8 @@ sub writemain{
 #endif
 #endif
 
-
-#include "EXTERN.h"
 #define PERL_IN_MINIPERLMAIN_C
-#include "perl.h"
-#include "XSUB.h"
-
+%s
 static void xs_init (pTHX);
 static PerlInterpreter *my_perl;
 
@@ -176,65 +172,12 @@ main(int argc, char **argv, char **env)
 
 EOF!HEAD
 
-    foreach $_ (@exts){
-	my($pname) = canon('/', $_);
-	my($mname, $cname);
-	($mname = $pname) =~ s!/!::!g;
-	($cname = $pname) =~ s!/!__!g;
-        print "EXTERN_C void boot_${cname} (pTHX_ CV* cv);\n";
-    }
-
-    print $fh <<'EOT';
+    print $fh xsi_protos(@exts), <<'EOT', xsi_body(@exts), "}\n";
 
 static void
 xs_init(pTHX)
 {
 EOT
-
-    print $fh "    static const char file[] = __FILE__;\n"
-        if @exts;
-    print $fh <<'EOT';
-    dXSUB_SYS;
-    PERL_UNUSED_CONTEXT;
-EOT
-
-    my %seen;
-    foreach $_ (@exts){
-	my($pname) = canon('/', $_);
-	my($mname, $cname, $ccode);
-	($mname = $pname) =~ s!/!::!g;
-	($cname = $pname) =~ s!/!__!g;
-	if ($pname eq $dl){
-	    # Must NOT install 'DynaLoader::boot_DynaLoader' as 'bootstrap'!
-	    # boot_DynaLoader is called directly in DynaLoader.pm
-            $ccode = <<"EOT";
-        /* DynaLoader is a special case */
-        newXS(\"${mname}::boot_${cname}\", boot_${cname}, file);
-EOT
-	} else {
-            $ccode = <<"EOT";
-        newXS(\"${mname}::bootstrap\", boot_${cname}, file);
-EOT
-	}
-        print $fh "    {\n" . $ccode . "    }\n"
-            unless $seen{$ccode}++;
-    }
-
-    print $fh <<'EOT';
-}
-EOT
-}
-
-sub canon{
-    my($as, @ext) = @_;
-	foreach(@ext){
-	    # might be X::Y or lib/auto/X/Y/Y.a
-		next if s!::!/!g;
-	    s:^(lib|ext)/(auto/)?::;
-	    s:/\w+\.\w+$::;
-	}
-	grep(s:/:$as:, @ext) if ($as ne '/');
-	@ext;
 }
 
 1;
