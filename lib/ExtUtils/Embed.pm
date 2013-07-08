@@ -1,13 +1,7 @@
-require 5.002;
-
 package ExtUtils::Embed;
 require Exporter;
 use Config;
 require File::Spec;
-
-#Only when we need them
-#require ExtUtils::MakeMaker;
-#require ExtUtils::Liblist;
 
 use vars qw(@ISA @EXPORT $VERSION
 	    @Extensions $Verbose $lib_ext
@@ -88,13 +82,8 @@ EOF
 sub xsi_protos {
     my(@exts) = @_;
     my(@retval,%seen);
-    my $boot_proto = "pTHX_ CV* cv";
-    foreach $_ (@exts){
-        my($pname) = canon('/', $_);
-        my($mname, $cname);
-        ($mname = $pname) =~ s!/!::!g;
-        ($cname = $pname) =~ s!/!__!g;
-	my($ccode) = "EXTERN_C void boot_${cname} ($boot_proto);\n";
+    foreach my $cname (canon('__', @exts)) {
+        my($ccode) = "EXTERN_C void boot_${cname} (pTHX_ CV* cv);\n";
 	next if $seen{$ccode}++;
         push(@retval, $ccode);
     }
@@ -103,8 +92,7 @@ sub xsi_protos {
 
 sub xsi_body {
     my(@exts) = @_;
-    my($pname,@retval,%seen);
-    my($dl) = canon('/','DynaLoader');
+    my(@retval,%seen);
     push(@retval, "    static const char file[] = __FILE__;\n")
         if @exts;
     push(@retval, "    dXSUB_SYS;\n");
@@ -112,12 +100,11 @@ sub xsi_body {
     push(@retval, "\n")
         if @exts;
 
-    foreach $_ (@exts){
-        my($pname) = canon('/', $_);
-        my($mname, $cname, $ccode);
+    foreach my $pname (canon('/', @exts)) {
+        my($cname, $mname, $ccode);
         ($mname = $pname) =~ s!/!::!g;
         ($cname = $pname) =~ s!/!__!g;
-        if ($pname eq $dl){
+        if ($pname eq 'DynaLoader'){
             # Must NOT install 'DynaLoader::boot_DynaLoader' as 'bootstrap'!
             # boot_DynaLoader is called directly in DynaLoader.pm
             $ccode = "    /* DynaLoader is a special case */\n    newXS(\"${mname}::boot_${cname}\", boot_${cname}, file);\n";
@@ -131,12 +118,8 @@ sub xsi_body {
 }
 
 sub static_ext {
-    unless (scalar @Extensions) {
-      my $static_ext = $Config{static_ext};
-      $static_ext =~ s/^\s+//;
-      @Extensions = sort split /\s+/, $static_ext;
-	unshift @Extensions, qw(DynaLoader);
-    }
+    @Extensions = ('DynaLoader', sort $Config{static_ext} =~ /(\S+)/g)
+        unless @Extensions;
     @Extensions;
 }
 
@@ -275,12 +258,16 @@ sub ccopts {
 sub canon {
     my($as, @ext) = @_;
     foreach(@ext) {
-       # might be X::Y or lib/auto/X/Y/Y.a
-       next if s!::!/!g;
-       s:^(lib|ext)/(auto/)?::;
-       s:/\w+\.\w+$::;
+        # might be X::Y or lib/auto/X/Y/Y.a
+        next
+            if s!::!/!g;
+        s!^(?:lib|ext|dist|cpan)/(?:auto/)?!!;
+        s!/\w+\.\w+$!!;
     }
-    map(s:/:$as:, @ext) if ($as ne '/');
+    if ($as ne '/') {
+        s!/!$as!
+            foreach @ext;
+    }
     @ext;
 }
 
