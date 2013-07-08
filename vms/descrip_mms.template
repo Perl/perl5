@@ -365,7 +365,7 @@ $(DBG)libperlmini$(OLB) : $(mini_obj)
 	Library/Object/Replace $(MMS$TARGET) $(MMS$SOURCE_LIST)
 
 perlmain.c : miniperlmain.c $(MINIPERL_EXE) nonxsext
-	$(MINIPERL) -"MExtUtils::Miniperl" -e "writemain(@ARGV)" "$(EXT)" > perlmain.c
+	$(MINIPERL) -"MExtUtils::Miniperl" -e "writemain(\'perlmain.c', @ARGV)" "$(EXT)"
 
 .ifdef __DEBUG__
 # Link an extra perl that doesn't invoke the debugger
