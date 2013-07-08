@@ -85,6 +85,7 @@ sub xsi_header {
     return <<EOF;
 #include <EXTERN.h>
 #include <perl.h>
+#include <XSUB.h>
 
 EOF
 }    
@@ -109,8 +110,9 @@ sub xsi_body {
     my(@exts) = @_;
     my($pname,@retval,%seen);
     my($dl) = canon('/','DynaLoader');
-    push(@retval, "\tchar *file = __FILE__;\n");
-    push(@retval, "\tdXSUB_SYS;\n") if $] > 5.002;
+    push(@retval, "\tstatic const char file[] = __FILE__;\n");
+    push(@retval, "\tdXSUB_SYS;\n");
+    push(@retval, "\tPERL_UNUSED_CONTEXT;\n");
     push(@retval, "\n");
 
     foreach $_ (@exts){
