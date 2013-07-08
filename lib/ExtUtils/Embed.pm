@@ -72,7 +72,7 @@ sub xsinit {
     @mods = grep(!$seen{$_}++, @mods);
 
     print $fh &xsi_header();
-    print $fh "EXTERN_C void xs_init ($xsinit_proto);\n\n";     
+    print $fh "\nEXTERN_C void xs_init ($xsinit_proto);\n\n";
     print $fh &xsi_protos(@mods);
 
     print $fh "\nEXTERN_C void\nxs_init($xsinit_proto)\n{\n";
@@ -83,10 +83,9 @@ sub xsinit {
 
 sub xsi_header {
     return <<EOF;
-#include <EXTERN.h>
-#include <perl.h>
-#include <XSUB.h>
-
+#include "EXTERN.h"
+#include "perl.h"
+#include "XSUB.h"
 EOF
 }    
 
@@ -110,10 +109,12 @@ sub xsi_body {
     my(@exts) = @_;
     my($pname,@retval,%seen);
     my($dl) = canon('/','DynaLoader');
-    push(@retval, "\tstatic const char file[] = __FILE__;\n");
-    push(@retval, "\tdXSUB_SYS;\n");
-    push(@retval, "\tPERL_UNUSED_CONTEXT;\n");
-    push(@retval, "\n");
+    push(@retval, "    static const char file[] = __FILE__;\n")
+        if @exts;
+    push(@retval, "    dXSUB_SYS;\n");
+    push(@retval, "    PERL_UNUSED_CONTEXT;\n");
+    push(@retval, "\n")
+        if @exts;
 
     foreach $_ (@exts){
         my($pname) = canon('/', $_);
@@ -123,10 +124,10 @@ sub xsi_body {
         if ($pname eq $dl){
             # Must NOT install 'DynaLoader::boot_DynaLoader' as 'bootstrap'!
             # boot_DynaLoader is called directly in DynaLoader.pm
-            $ccode = "\t/* DynaLoader is a special case */\n\tnewXS(\"${mname}::boot_${cname}\", boot_${cname}, file);\n";
+            $ccode = "    /* DynaLoader is a special case */\n    newXS(\"${mname}::boot_${cname}\", boot_${cname}, file);\n";
             push(@retval, $ccode) unless $seen{$ccode}++;
         } else {
-            $ccode = "\tnewXS(\"${mname}::bootstrap\", boot_${cname}, file);\n";
+            $ccode = "    newXS(\"${mname}::bootstrap\", boot_${cname}, file);\n";
             push(@retval, $ccode) unless $seen{$ccode}++;
         }
     }
