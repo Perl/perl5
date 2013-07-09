@@ -493,7 +493,7 @@ is "3foo"->uc, '3FOO', '"3foo"->uc (autobox style!)';
 # Test that PL_stashcache doesn't change the resolution behaviour for file
 # handles and package names.
 SKIP: {
-    skip_if_miniperl('file handles as methods requires loading IO::File', 25);
+    skip_if_miniperl('file handles as methods requires loading IO::File', 26);
     require Fcntl;
 
     foreach (qw (Count::DATA Count Colour::H1 Color::H1 C3::H1)) {
