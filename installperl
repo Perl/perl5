@@ -275,7 +275,7 @@ if (($Is_W32 and ! $Is_NetWare) or $Is_Cygwin) {
     safe_unlink("$installbin/$perldll");
     copy("$perldll", "$installbin/$perldll");
     chmod(0755, "$installbin/$perldll");
-    $packlist->{"$installbin/$perldll"} = { type => 'file' };
+    $packlist->{"$Config{installbin}/$perldll"} = { type => 'file' };
 } # if (($Is_W32 and ! $Is_NetWare) or $Is_Cygwin)
 
 # First we install the version-numbered executables.
@@ -357,21 +357,22 @@ if ($Is_VMS) {  # We did core file selection during build
 elsif ($Is_Cygwin) { # On Cygwin symlink it to CORE to make Makefile happy
     @corefiles = <*.h libperl*.* perl*$Config{lib_ext}>;
     my $coredll = "$installarchlib/CORE/$libperl";
+    my $instcoredll = "$Config{installarchlib}/CORE/$libperl";
     safe_unlink($coredll);
     ( $Config{'d_link'} eq 'define' &&
       eval {
           CORE::link("$installbin/$libperl", $coredll);
-          $packlist->{$coredll} = { from => "$installbin/$libperl",
+          $packlist->{$instcoredll} = { from => "$Config{installbin}/$libperl",
                                     type => 'link' };
       }
     ) ||
     eval {
         symlink("$installbin/$libperl", $coredll);
-        $packlist->{$coredll} = { from => "$installbin/$libperl",
+        $packlist->{$instcoredll} = { from => "$Config{installbin}/$libperl",
                                   type => 'link' };
     } ||
     ( copy("$installbin/$libperl", $coredll) &&
-      push(@corefiles, $coredll)
+      push(@corefiles, $instcoredll)
     )
 } else {
     # [als] hard-coded 'libperl' name... not good!
