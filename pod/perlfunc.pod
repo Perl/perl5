@@ -5778,13 +5778,24 @@ Otherwise, C<require> demands that a library file be included if it
 hasn't already been included.  The file is included via the do-FILE
 mechanism, which is essentially just a variety of C<eval> with the
 caveat that lexical variables in the invoking script will be invisible
-to the included code.  Has semantics similar to the following subroutine:
+to the included code.  If it were implemented in pure Perl, it
+would have semantics similar to the following:
+
+    use Carp 'croak';
+    use version;
 
     sub require {
        my ($filename) = @_;
+       if ( my $version = eval { version->parse($filename) } ) {
+           if ( $version > $^V ) {
+               my $vn = $version->normal;
+               croak "Perl $vn required--this is only $^V, stopped";
+           }
+           return 1;
+       }
        if (exists $INC{$filename}) {
            return 1 if $INC{$filename};
-           die "Compilation failed in require";
+           croak "Compilation failed in require";
        }
        my ($realfilename,$result);
        ITER: {
@@ -5792,19 +5803,25 @@ to the included code.  Has semantics similar to the following subroutine:
                $realfilename = "$prefix/$filename";
                if (-f $realfilename) {
                    $INC{$filename} = $realfilename;
-                   $result = do $realfilename;
+                   my $caller = caller;
+                   my $do_as_caller = eval qq{
+                       package $caller;
+                       sub { do \$_[0] }
+                   };
+                   $result = $do_as_caller->($realfilename);
                    last ITER;
                }
            }
-           die "Can't find $filename in \@INC";
+           croak "Can't locate $filename in \@INC";
        }
        if ($@) {
            $INC{$filename} = undef;
-           die $@;
+           croak $@;
        } elsif (!$result) {
            delete $INC{$filename};
-           die "$filename did not return true value";
+           croak "$filename did not return true value";
        } else {
+           $! = 0;
            return $result;
        }
     }
