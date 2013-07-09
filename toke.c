@@ -1651,25 +1651,21 @@ Perl_validate_proto(pTHX_ SV *name, SV *proto, bool warn)
     }
 
     if (warn) {
+	SV *tmpsv = newSVpvs_flags("", SVs_TEMP);
 	p -= origlen;
+	p = SvUTF8(proto)
+	    ? sv_uni_display(tmpsv, newSVpvn_flags(p, origlen, SVs_TEMP | SVf_UTF8),
+	                     origlen, UNI_DISPLAY_ISPRINT)
+	    : pv_pretty(tmpsv, p, origlen, 60, NULL, NULL, PERL_PV_ESCAPE_NONASCII);
+
 	if (proto_after_greedy_proto)
 	    Perl_warner(aTHX_ packWARN(WARN_ILLEGALPROTO),
 			"Prototype after '%c' for %"SVf" : %s",
 			greedy_proto, SVfARG(name), p);
-	if (bad_proto) {
-	    SV *dsv = newSVpvs_flags("", SVs_TEMP);
+	if (bad_proto)
 	    Perl_warner(aTHX_ packWARN(WARN_ILLEGALPROTO),
 			"Illegal character %sin prototype for %"SVf" : %s",
-			seen_underscore ? "after '_' " : "",
-			SVfARG(PL_subname),
-			SvUTF8(PL_lex_stuff)
-			    ? sv_uni_display(dsv,
-				newSVpvn_flags(p, origlen, SVs_TEMP | SVf_UTF8),
-				origlen,
-				UNI_DISPLAY_ISPRINT)
-			    : pv_pretty(dsv, p, origlen, 60, NULL, NULL,
-				PERL_PV_ESCAPE_NONASCII));
-	}
+			seen_underscore ? "after '_' " : "", SVfARG(name), p);
     }
 
     return (! (proto_after_greedy_proto || bad_proto) );
