@@ -40,9 +40,8 @@
 #endif
 #endif
 
-
-#include "EXTERN.h"
 #define PERL_IN_MINIPERLMAIN_C
+#include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
 

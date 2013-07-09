@@ -119,6 +119,32 @@ XXX
 
 =item *
 
+L<ExtUtils::Embed> has been upgraded from version 1.30 to 1.31
+
+The generated C<C> code now incorporates bug fixes present in
+F<miniperlmain.c>, and has whitespace changes. It now uses
+C<#include "..."> for header files instead of C<< #include <...> >>.
+This should not make any difference, unless programs embedding C<libperl>
+happen to have local and incompatible files named F<EXTERN.h>, F<XSUB.h> or
+F<perl.h>, as these will now be picked up instead of the installed Perl
+headers.
+
+=item *
+
+L<ExtUtils::Miniperl> has been upgraded and given a version of 1.
+Previously it did not have a version number.
+
+C<writemain()> now takes an optional first argument. A reference to a scalar
+is treated as a filename to be opened and written to. Any other reference is
+used as the filehandle to write to. Otherwise the existing default remains,
+to write to C<STDOUT>.
+
+C<writemain()> has been refactored to use functions from L<ExtUtils::Embed>,
+reducing code size and duplication. The internal function C<canon()> has been
+deleted.
+
+=item *
+
 L<POSIX> has been upgraded from version 1.33 to 1.34.
 
 C<POSIX::AUTOLOAD> will no longer infinitely recurse if the shared
