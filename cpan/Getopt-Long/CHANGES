@@ -1,3 +1,11 @@
+Changes in version 2.41
+-----------------------
+
+* Change INSTALLDIRS to site for perl >= 5.011.
+
+  See https://rt.perl.org/rt3//Ticket/Display.html?id=116479
+  for details.
+
 Changes in version 2.40
 -----------------------
 
