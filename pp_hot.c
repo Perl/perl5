@@ -3075,6 +3075,19 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
     if (SvROK(sv))
 	ob = MUTABLE_SV(SvRV(sv));
     else if (!SvOK(sv)) goto undefined;
+    else if (isGV_with_GP(sv)) {
+	if (!GvIO(sv))
+	    Perl_croak(aTHX_ "Can't call method \"%"SVf"\" "
+			     "without a package or object reference",
+			      SVfARG(meth));
+	ob = sv;
+	if (SvTYPE(ob) == SVt_PVLV && LvTYPE(ob) == 'y') {
+	    assert(!LvTARGLEN(ob));
+	    ob = LvTARG(ob);
+	    assert(ob);
+	}
+	*(PL_stack_base + TOPMARK + 1) = sv_2mortal(newRV(ob));
+    }
     else {
 	/* this isn't a reference */
 	GV* iogv;
@@ -3125,8 +3138,7 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
 
     /* if we got here, ob should be an object or a glob */
     if (!ob || !(SvOBJECT(ob)
-		 || (SvTYPE(ob) == SVt_PVGV 
-		     && isGV_with_GP(ob)
+		 || (isGV_with_GP(ob)
 		     && (ob = MUTABLE_SV(GvIO((const GV *)ob)))
 		     && SvOBJECT(ob))))
     {

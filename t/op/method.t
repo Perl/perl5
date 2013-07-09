@@ -13,7 +13,7 @@ BEGIN {
 use strict;
 no warnings 'once';
 
-plan(tests => 142);
+plan(tests => 146);
 
 @A::ISA = 'B';
 @B::ISA = 'C';
@@ -489,6 +489,24 @@ like $@,
 is "3foo"->CORE::uc, '3FOO', '"3foo"->CORE::uc';
 { no strict; @{"3foo::ISA"} = "CORE"; }
 is "3foo"->uc, '3FOO', '"3foo"->uc (autobox style!)';
+
+# *foo vs (\*foo)
+sub myclass::squeak { 'eek' }
+eval { *myclass->squeak };
+like $@,
+     qr/^Can't call method "squeak" without a package or object reference/,
+    'method call on typeglob ignores package';
+eval { (\*myclass)->squeak };
+like $@,
+     qr/^Can't call method "squeak" on unblessed reference/,
+    'method call on \*typeglob';
+*stdout2 = *STDOUT;  # stdout2 now stringifies as *main::STDOUT
+sub IO::Handle::self { $_[0] }
+# This used to stringify the glob:
+is *stdout2->self, (\*stdout2)->self,
+  '*glob->method is equiv to (\*glob)->method';
+sub { $_[0] = *STDOUT; is $_[0]->self, \$::h{k}, '$pvlv_glob->method' }
+ ->($::h{k});
 
 # Test that PL_stashcache doesn't change the resolution behaviour for file
 # handles and package names.
