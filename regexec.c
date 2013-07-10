@@ -2215,8 +2215,6 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
     I32 minlen;		/* must match at least this many chars */
     I32 dontbother = 0;	/* how many characters not to try at end */
     I32 end_shift = 0;			/* Same for the end. */		/* CC */
-    I32 scream_pos = -1;		/* Internal iterator of scream. */
-    char *scream_olds = NULL;
     const bool utf8_target = cBOOL(DO_UTF8(sv));
     I32 multiline;
     RXi_GET_DECL(prog,progi);
@@ -2446,11 +2444,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
 	));
     }
     if (!(flags & REXEC_CHECKED) && (prog->check_substr != NULL || prog->check_utf8 != NULL)) {
-	re_scream_pos_data d;
-
-	d.scream_olds = &scream_olds;
-	d.scream_pos = &scream_pos;
-	s = re_intuit_start(rx, sv, strbeg, s, strend, flags, &d);
+	s = re_intuit_start(rx, sv, strbeg, s, strend, flags, NULL);
 	if (!s) {
 	    DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "Not present...\n"));
 	    goto phooey;	/* not present */
@@ -2658,7 +2652,6 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
 
 	/* XXXX check_substr already used to find "s", can optimize if
 	   check_substr==must. */
-	scream_pos = -1;
 	dontbother = end_shift;
 	strend = HOPc(strend, -dontbother);
 	while ( (s <= last) &&
