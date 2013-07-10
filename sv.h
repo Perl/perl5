@@ -1478,7 +1478,7 @@ C<SvPVx> for a version which guarantees to evaluate sv only once.
 
 Note that there is no guarantee that the return value of C<SvPV()> is
 equal to C<SvPVX(sv)>, or that C<SvPVX(sv)> contains valid data, or that
-successive calls to C<SvPV(sv)) will return the same pointer value each
+successive calls to C<SvPV(sv)> will return the same pointer value each
 time. This is due to the way that things like overloading and
 Copy-On-Write are handled.  In these cases, the return value may point to
 a temporary buffer or similar.  If you absolutely need the SvPVX field to
