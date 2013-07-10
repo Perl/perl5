@@ -727,6 +727,9 @@ for creating hard links into files, see L<perlfunc/link>.
 
 Get numeric formatting information.  Returns a reference to a hash
 containing the current locale formatting values.
+Users of this function should also read L<perllocale>, where there is a
+discussion devoted to this function
+(L<perllocale/The localeconv function>).
 
 Here is how to query the database for the B<de> (Deutsch or German) locale.
 
@@ -1082,7 +1085,14 @@ see L<perlfunc/eval>.
 
 =item setlocale
 
-Modifies and queries program's locale.  The following examples assume
+Modifies and queries the program's underlying locale.  Users of this
+function should also read L<perllocale>, where there is a discussion
+devoted to this function (L<perllocale/The setlocale function>).
+Note that Perl itself is almost entirely unaffected by the locale
+except within the scope of S<C<"use locale">>.  (Exceptions are listed
+in L<perllocale/Not within the scope of any use locale variant>.)
+
+The following examples assume
 
 	use POSIX qw(setlocale LC_ALL LC_CTYPE);
 

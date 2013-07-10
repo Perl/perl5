@@ -319,7 +319,9 @@ C<POSIX::setlocale()> function:
         #                    LC_CTYPE -- explained below
         # (Showing the testing for success/failure of operations is
         # omitted in these examples to avoid distracting from the main
-        # point)
+        # point; also, any real work would almost certainly have to be
+        # done within the scope of "use locale".)
+
         use POSIX qw(locale_h);
 
         # query and save the old locale
