@@ -1383,24 +1383,17 @@ PP(pp_match)
 	goto nope;
     }
 
-    /* XXXX What part of this is needed with true \G-support? */
+    /* get pos() if //g */
     if (global) {
-	MAGIC * const mg = mg_find_mglob(TARG);
-	if (mg && mg->mg_len >= 0) {
-		if (!(RX_EXTFLAGS(rx) & RXf_GPOS_SEEN))
-		    curpos = mg->mg_len;
-		else if (RX_EXTFLAGS(rx) & RXf_ANCH_GPOS) {
-		    curpos = mg->mg_len;
-		}
-		else if (!(RX_EXTFLAGS(rx) & RXf_GPOS_FLOAT))
-		    curpos = mg->mg_len;
-                else
-                    curpos = mg->mg_len;
-                /* last time pos() was set, it was zero-length match */
-		if (mg->mg_flags & MGf_MINMATCH)
-                    had_zerolen = 1;
-	}
+        MAGIC * const mg = mg_find_mglob(TARG);
+        if (mg && mg->mg_len >= 0) {
+            curpos = mg->mg_len;
+            /* last time pos() was set, it was zero-length match */
+            if (mg->mg_flags & MGf_MINMATCH)
+                had_zerolen = 1;
+        }
     }
+
 #ifdef PERL_SAWAMPERSAND
     if (       RX_NPARENS(rx)
             || PL_sawampersand
