@@ -2240,6 +2240,8 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
         "Matching");
     );
 
+    startpos = stringarg;
+
     if (prog->extflags & RXf_GPOS_SEEN) {
         /* in the presence of \G, we may need to start looking earlier in
          * the string than the suggested start point of stringarg:
@@ -2251,34 +2253,26 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
          * to the start of the string, e.g. /w+\G/
          */
         if (prog->gofs) {
-            if (stringarg - prog->gofs < strbeg) {
-                minend += (stringarg - strbeg);
-                stringarg = strbeg;
-            }
-            else {
-                stringarg -= prog->gofs;
-                minend    += prog->gofs;
-            }
+            if (startpos - prog->gofs < strbeg)
+                startpos = strbeg;
+            else
+                startpos -= prog->gofs;
         }
-        else if (prog->extflags & RXf_GPOS_FLOAT) {
-            minend += (stringarg - strbeg);
-            stringarg = strbeg;
-        }
+        else if (prog->extflags & RXf_GPOS_FLOAT)
+            startpos = strbeg;
     }
 
     minlen = prog->minlen;
-    if ((stringarg + minlen) > strend || stringarg < strbeg) {
+    if ((startpos + minlen) > strend || startpos < strbeg) {
         DEBUG_r(PerlIO_printf(Perl_debug_log,
                     "Regex match can't succeed, so not even tried\n"));
         return 0;
     }
 
-    startpos = stringarg;
-
     if ((RX_EXTFLAGS(rx) & RXf_USE_INTUIT)
         && !(flags & REXEC_CHECKED))
     {
-	startpos = re_intuit_start(rx, sv, strbeg, stringarg, strend,
+	startpos = re_intuit_start(rx, sv, strbeg, startpos, strend,
                                     flags, NULL);
 	if (!startpos)
 	    return 0;
@@ -2338,7 +2332,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
     reginfo->poscache_maxiter = 0; /* not yet started a countdown */
     reginfo->strend = strend;
     /* see how far we have to get to not match where we matched before */
-    reginfo->till = stringarg + minend;
+    reginfo->till = startpos + minend;
 
     if (prog->extflags & RXf_EVAL_SEEN && SvPADTMP(sv) && !IS_PADGV(sv)) {
         /* SAVEFREESV, not sv_mortalcopy, as this SV must last until after
