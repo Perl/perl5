@@ -237,31 +237,30 @@ esc_q_utf8(pTHX_ SV* sv, const char *src, STRLEN slen, I32 do_utf8, I32 useqq)
 	      if (useqq && (k <= 31 || k == 127 || (!do_utf8 && k > 127))) {
 		*r++ = '\\';
 		switch (k) {
-		    case 7:  *r++ = 'a'; break;
-		    case 8:  *r++ = 'b'; break;
-		    case 9:  *r++ = 't'; break;
-		    case 10: *r++ = 'n'; break;
-		    case 12: *r++ = 'f'; break;
-		    case 13: *r++ = 'r'; break;
-		    case 27: *r++ = 'e'; break;
-                    default:
-                      /* faster than
-                       * r = r + my_sprintf(r, "%o", k);
-                       */
-                      if (k <= 7) {
-                        *r++ = (char)k + '0';
-                      } else if (k <= 63) {
-                        *r++ = (char)(k>>3) + '0';
-                        *r++ = (char)(k&7) + '0';
-                      } else {
-                        *r++ = (char)(k>>6) + '0';
-                        *r++ = (char)((k&63)>>3) + '0';
-                        *r++ = (char)(k&7) + '0';
-		      }
+		case 7:  *r++ = 'a'; break;
+		case 8:  *r++ = 'b'; break;
+		case 9:  *r++ = 't'; break;
+		case 10: *r++ = 'n'; break;
+		case 12: *r++ = 'f'; break;
+		case 13: *r++ = 'r'; break;
+		case 27: *r++ = 'e'; break;
+		default:
+		    /* faster than
+		     * r = r + my_sprintf(r, "%o", k);
+		     */
+		    if (k <= 7) {
+			*r++ = (char)k + '0';
+		    } else if (k <= 63) {
+			*r++ = (char)(k>>3) + '0';
+			*r++ = (char)(k&7) + '0';
+		    } else {
+			*r++ = (char)(k>>6) + '0';
+			*r++ = (char)((k&63)>>3) + '0';
+			*r++ = (char)(k&7) + '0';
+		    }
 		}
-	      }
-	      else
-	      if (k < 0x80)
+	    }
+	    else if (k < 0x80)
 #endif
                 *r++ = (char)k;
             else {
