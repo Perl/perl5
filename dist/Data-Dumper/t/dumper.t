@@ -83,11 +83,11 @@ sub SKIP_TEST {
 $Data::Dumper::Useperl = 1;
 if (defined &Data::Dumper::Dumpxs) {
   print "### XS extension loaded, will run XS tests\n";
-  $TMAX = 402; $XS = 1;
+  $TMAX = 420; $XS = 1;
 }
 else {
   print "### XS extensions not loaded, will NOT run XS tests\n";
-  $TMAX = 201; $XS = 0;
+  $TMAX = 210; $XS = 0;
 }
 
 print "1..$TMAX\n";
@@ -1524,5 +1524,35 @@ EOW
   TEST q(Data::Dumper->Dump([bless \*finkle, "overtest"])),
     'blessed overloaded globs';
   TEST q(Data::Dumper->Dumpxs([\*finkle])), 'blessed overloaded globs (xs)'
+    if $XS;
+}
+############# 390
+{
+  # [perl #74798] uncovered behaviour
+  $WANT = <<'EOW';
+#$VAR1 = "\0000";
+EOW
+  local $Data::Dumper::Useqq = 1;
+  TEST q(Data::Dumper->Dump(["\x000"])),
+    "\\ octal followed by digit";
+  TEST q(Data::Dumper->Dumpxs(["\x000"])), '\\ octal followed by digit (xs)'
+    if $XS;
+
+  $WANT = <<'EOW';
+#$VAR1 = "\x{100}\0000";
+EOW
+  local $Data::Dumper::Useqq = 1;
+  TEST q(Data::Dumper->Dump(["\x{100}\x000"])),
+    "\\ octal followed by digit unicode";
+  TEST q(Data::Dumper->Dumpxs(["\x{100}\x000"])), '\\ octal followed by digit unicode (xs)'
+    if $XS;
+
+
+  $WANT = <<'EOW';
+#$VAR1 = "\0\x{660}";
+EOW
+  TEST q(Data::Dumper->Dump(["\\x00\\x{0660}"])),
+    "\\ octal followed by unicode digit";
+  TEST q(Data::Dumper->Dumpxs(["\\x00\\x{0660}"])), '\\ octal followed by unicode digit (xs)'
     if $XS;
 }

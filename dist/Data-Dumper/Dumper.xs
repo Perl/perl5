@@ -175,6 +175,7 @@ esc_q_utf8(pTHX_ SV* sv, const char *src, STRLEN slen, I32 do_utf8, I32 useqq)
     STRLEN qq_escapables = 0;	/* " $ @ will need a \ in "" strings.  */
     STRLEN normal = 0;
     int increment;
+    UV next;
 
     /* this will need EBCDICification */
     for (s = src; s < send; do_utf8 ? s += increment : s++) {
@@ -182,6 +183,12 @@ esc_q_utf8(pTHX_ SV* sv, const char *src, STRLEN slen, I32 do_utf8, I32 useqq)
 
         /* check for invalid utf8 */
         increment = (k == 0 && *s != '\0') ? 1 : UTF8SKIP(s);
+
+	/* this is only used to check if the next character is an
+	 * ASCII digit, which are invariant, so if the following collects
+	 * a UTF-8 start byte it does no harm
+	 */
+	next = (s + increment >= send ) ? 0 : *(U8*)(s+increment);
 
 #ifdef EBCDIC
 	if (!isprint(k) || k > 256) {
@@ -197,11 +204,14 @@ esc_q_utf8(pTHX_ SV* sv, const char *src, STRLEN slen, I32 do_utf8, I32 useqq)
 #endif
                 );
 #ifndef EBCDIC
-	} else if (useqq && (k <= 10 || k == 12 || k == 13 || k == 27)) {
+	} else if (useqq &&
+	    /* we can't use the short form like '\0' if followed by a digit */
+                   ((k >= 7 && k <= 10 || k == 12 || k == 13 || k == 27)
+                 || (k < 8 && (next < '0' || next > '9')))) {
 	    grow += 2;
-	} else if (useqq && k <= 31) {
+	} else if (useqq && k <= 31 && (next < '0' || next > '9')) {
 	    grow += 3;
-	} else if (useqq && k >= 127) {
+	} else if (useqq && (k <= 31 || k >= 127)) {
 	    grow += 4;
 #endif
         } else if (k == '\\') {
@@ -225,7 +235,6 @@ esc_q_utf8(pTHX_ SV* sv, const char *src, STRLEN slen, I32 do_utf8, I32 useqq)
         for (s = src; s < send; do_utf8 ? s += UTF8SKIP(s) : s++) {
             const UV k = do_utf8 ? utf8_to_uvchr_buf((U8*)s, (U8*) send, NULL) : *(U8*)s;
 
-
             if (k == '"' || k == '\\' || k == '$' || k == '@') {
                 *r++ = '\\';
                 *r++ = (char)k;
@@ -235,6 +244,8 @@ esc_q_utf8(pTHX_ SV* sv, const char *src, STRLEN slen, I32 do_utf8, I32 useqq)
 	      if (isprint(k) && k < 256)
 #else
 	      if (useqq && (k <= 31 || k == 127 || (!do_utf8 && k > 127))) {
+	        bool next_is_digit;
+
 		*r++ = '\\';
 		switch (k) {
 		case 7:  *r++ = 'a'; break;
@@ -245,12 +256,21 @@ esc_q_utf8(pTHX_ SV* sv, const char *src, STRLEN slen, I32 do_utf8, I32 useqq)
 		case 13: *r++ = 'r'; break;
 		case 27: *r++ = 'e'; break;
 		default:
+		    increment = (k == 0 && *s != '\0') ? 1 : UTF8SKIP(s);
+
+		    /* only ASCII digits matter here, which are invariant,
+		     * since we only encode characters \377 and under, or
+		     * \x177 and under for a unicode string
+		     */
+		    next = (s+increment < send) ? *(U8*)(s+increment) : 0;
+		    next_is_digit = next >= '0' && next <= '9';
+
 		    /* faster than
 		     * r = r + my_sprintf(r, "%o", k);
 		     */
-		    if (k <= 7) {
+		    if (k <= 7 && !next_is_digit) {
 			*r++ = (char)k + '0';
-		    } else if (k <= 63) {
+		    } else if (k <= 63 && !next_is_digit) {
 			*r++ = (char)(k>>3) + '0';
 			*r++ = (char)(k&7) + '0';
 		    } else {
