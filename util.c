@@ -599,7 +599,7 @@ Perl_fbm_compile(pTHX_ SV *sv, U32 flags)
     if (flags & FBMcf_TAIL)
 	SvTAIL_on(sv);
     DEBUG_r(PerlIO_printf(Perl_debug_log, "rarest char %c at %"UVuf"\n",
-			  s[rarest], rarest));
+			  s[rarest], (UV)rarest));
 }
 
 /* If SvTAIL(littlestr), it has a fake '\n' at end. */
