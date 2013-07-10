@@ -221,7 +221,6 @@ sub DESTROY {}
 sub Dump {
     return &Dumpxs
     unless $Data::Dumper::Useperl || (ref($_[0]) && $_[0]->{useperl}) ||
-           $Data::Dumper::Useqq   || (ref($_[0]) && $_[0]->{useqq}) ||
            $Data::Dumper::Deparse || (ref($_[0]) && $_[0]->{deparse});
     return &Dumpperl;
 }

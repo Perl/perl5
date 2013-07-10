@@ -307,19 +307,8 @@ $foo = { "abc\000\'\efg" => "mno\000",
 {
   local $Data::Dumper::Useqq = 1;
   TEST q(Dumper($foo));
+  TEST q(Data::Dumper::DumperX($foo)) if $XS;
 }
-
-  $WANT = <<"EOT";
-#\$VAR1 = {
-#  'abc\0\\'\efg' => 'mno\0',
-#  'reftest' => \\\\1
-#};
-EOT
-
-  {
-    local $Data::Dumper::Useqq = 1;
-    TEST q(Data::Dumper::DumperX($foo)) if $XS;   # cheat
-  }
 
 
 
@@ -1461,7 +1450,7 @@ EOT
   $foo = [ join "", map chr, 0..255 ];
   local $Data::Dumper::Useqq = 1;
   TEST q(Dumper($foo)), 'All latin1 characters';
-  for (1..3) { print "not ok " . (++$TNUM) . " # TODO NYI\n" if $XS } # TEST q(Data::Dumper::DumperX($foo)) if $XS;
+  TEST q(Data::Dumper::DumperX($foo)) if $XS;
 }
 
 ############# 372
@@ -1481,7 +1470,7 @@ EOT
     TEST q(Dumper($foo)),
 	 'All latin1 characters with utf8 flag including a wide character';
   }
-  for (1..3) { print "not ok " . (++$TNUM) . " # TODO NYI\n" if $XS } # TEST q(Data::Dumper::DumperX($foo)) if $XS;
+  TEST q(Data::Dumper::DumperX($foo)) if $XS;
 }
 
 ############# 378
