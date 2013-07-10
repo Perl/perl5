@@ -2278,9 +2278,9 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
     if ((RX_EXTFLAGS(rx) & RXf_USE_INTUIT)
         && !(flags & REXEC_CHECKED))
     {
-	stringarg = re_intuit_start(rx, sv, strbeg, stringarg, strend,
+	startpos = re_intuit_start(rx, sv, strbeg, stringarg, strend,
                                     flags, NULL);
-	if (!stringarg)
+	if (!startpos)
 	    return 0;
 
 	if (RX_EXTFLAGS(rx) & RXf_CHECK_ALL) {
@@ -2297,10 +2297,10 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
                                         strbeg, strend,
                                         sv, flags, utf8_target);
 
-            prog->offs[0].start = stringarg - strbeg;
+            prog->offs[0].start = startpos - strbeg;
             prog->offs[0].end = utf8_target
-                ? (char*)utf8_hop((U8*)stringarg, prog->minlenret) - strbeg
-                : stringarg - strbeg + prog->minlenret;
+                ? (char*)utf8_hop((U8*)startpos, prog->minlenret) - strbeg
+                : startpos - strbeg + prog->minlenret;
 	    return 1;
         }
     }
@@ -2338,7 +2338,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
     reginfo->poscache_maxiter = 0; /* not yet started a countdown */
     reginfo->strend = strend;
     /* see how far we have to get to not match where we matched before */
-    reginfo->till = startpos+minend;
+    reginfo->till = stringarg + minend;
 
     if (prog->extflags & RXf_EVAL_SEEN && SvPADTMP(sv) && !IS_PADGV(sv)) {
         /* SAVEFREESV, not sv_mortalcopy, as this SV must last until after
