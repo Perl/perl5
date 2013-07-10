@@ -89,7 +89,7 @@ This indicates, for example if a character is an uppercase letter.
 Some platforms have other categories, dealing with such things as
 measurement units and paper sizes.  None of these are used directly by
 Perl, but outside operations that Perl interacts with may use
-these.  See L</Not within the scope of any use locale variant> below.
+these.  See L</Not within the scope of any "use locale" variant> below.
 
 =back
 
@@ -190,7 +190,7 @@ The operations that are affected by locale are:
 
 =over 4
 
-=item B<Not within the scope of any C<use locale> variant>
+=item B<Not within the scope of any C<"use locale"> variant>
 
 Only operations originating outside Perl should be affected.
 
@@ -236,7 +236,7 @@ behavior, not if the matches are done within such a scope or not.
 
 =back
 
-=item B<Under C<use locale ':not_characters';>>
+=item B<Under C<"use locale ':not_characters';">>
 
 =over 4
 
@@ -266,7 +266,7 @@ The nbsp below makes this look better
 
 E<160>
 
-=item B<Under just plain C<use locale;>>
+=item B<Under just plain C<"use locale";>>
 
 =over 4
 
