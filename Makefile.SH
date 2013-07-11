@@ -1375,13 +1375,8 @@ linux*|darwin*)
 	$spitshell >>$Makefile <<'!NO!SUBS!'
 # Targets for valgrind testing:
 
-test_prep.valgrind: test_prep perl.valgrind
-
 test.valgrind check.valgrind:	test_prep perl.valgrind.config
 	PERL_VALGRIND=1 VALGRIND='$(VALGRIND)' $(RUN_TESTS) choose
-
-test_notty.valgrind: test_prep.valgrind perl.valgrind.config
-	PERL_VALGRIND=1 $(RUN_TESTS) no-tty
 !NO!SUBS!
 	;;
 esac
