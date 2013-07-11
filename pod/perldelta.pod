@@ -368,15 +368,16 @@ profiling targets have been removed, or merged into the only other Makefile
 target that uses them.  Specifically, these targets are gone, along with
 documentation that referenced them or explained how to use them:
 
- check.third check.utf16 check.utf8 coretest minitest.prep
- minitest.utf16 perl.config.dashg perl.config.dashpg
- perl.config.gcov perl.gcov perl.gprof perl.gprof.config perl.pixie
- perl.pixie.atom perl.pixie.config perl.pixie.irix perl.third
- perl.third.config pureperl purecovperl quantperl test.deparse
- test.taintwarn test.third test.torture test.utf16 test.utf8
- test_notty.deparse test_notty.third test_prep.third torturetest
- ucheck ucheck.third ucheck.utf16 ucheck.valgrind utest utest.third
- utest.utf16 utest.valgrind
+    check.third check.utf16 check.utf8 coretest minitest.prep
+    minitest.utf16 perl.config.dashg perl.config.dashpg
+    perl.config.gcov perl.gcov perl.gprof perl.gprof.config
+    perl.pixie perl.pixie.atom perl.pixie.config perl.pixie.irix
+    perl.third perl.third.config perl.valgrind.config purecovperl
+    pureperl quantperl test.deparse test.taintwarn test.third
+    test.torture test.utf16 test.utf8 test_notty.deparse
+    test_notty.third test_notty.valgrind test_prep.third
+    test_prep.valgrind torturetest ucheck ucheck.third ucheck.utf16
+    ucheck.valgrind utest utest.third utest.utf16 utest.valgrind
 
 It's still possible to run the relevant commands by "hand" - no underlying
 functionality has been removed.

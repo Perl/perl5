@@ -914,25 +914,6 @@ $(PERL_EXE): $& perlmain$(OBJ_EXT) $(LIBPERL) $(static_ext) ext.libs $(PERLEXPOR
 	-@rm -f miniperl.xok
 	$(SHRPENV) $(LDLIBPTH) $(CC) -o perl $(CLDFLAGS) $(CCDLFLAGS) perlmain$(OBJ_EXT) $(static_ext) $(LLIBPERL) `cat ext.libs` $(libs)
 
-!NO!SUBS!
-
-case "${osname}${osvers}" in
-linux*|darwin*)
-	$spitshell >>$Makefile <<'!NO!SUBS!'
-# Valgrind perl (currently Linux, Darwin only)
-
-perl.valgrind.config: config.sh
-	@echo "Checking usemymalloc='n' in config.sh..."
-	@grep "^usemymalloc="    config.sh
-	@grep "^usemymalloc='n'" config.sh >/dev/null || exit 1
-	@echo "And of course you have to have valgrind..."
-	$(VALGRIND) $(VG_TEST) || exit 1
-!NO!SUBS!
-	;;
-esac	
-
-$spitshell >>$Makefile <<'!NO!SUBS!'
-
 # Microperl.  This is just a convenience thing if one happens to
 # build also the full Perl and therefore the real big Makefile:
 # usually one should manually explicitly issue the below command.
@@ -1375,7 +1356,12 @@ linux*|darwin*)
 	$spitshell >>$Makefile <<'!NO!SUBS!'
 # Targets for valgrind testing:
 
-test.valgrind check.valgrind:	test_prep perl.valgrind.config
+test.valgrind check.valgrind:	test_prep
+	@echo "Checking usemymalloc='n' in config.sh..."
+	@grep "^usemymalloc="    config.sh
+	@grep "^usemymalloc='n'" config.sh >/dev/null || exit 1
+	@echo "And of course you have to have valgrind..."
+	$(VALGRIND) $(VG_TEST) || exit 1
 	PERL_VALGRIND=1 VALGRIND='$(VALGRIND)' $(RUN_TESTS) choose
 !NO!SUBS!
 	;;
