@@ -4247,14 +4247,29 @@ static SV *retrieve_hook(pTHX_ stcxt_t *cxt, const char *cname)
 	    AvARRAY(av)[0] = SvREFCNT_inc(frozen);
 	    rv = newSVpv(classname, 0);
 	    attached = scalar_call(aTHX_ rv, attach_hook, clone, av, G_SCALAR);
+	    /* Free memory after a call */
+	    SvREFCNT_dec(rv);
+	    SvREFCNT_dec(frozen);
+	    av_undef(av);
+	    sv_free((SV *) av);
+	    SvREFCNT_dec(attach_hook);
 	    if (attached &&
 	        SvROK(attached) && 
 	        sv_derived_from(attached, classname)
         ) {
 	        UNSEE();
-	        SEEN(SvRV(attached), 0, 0);
-	        return SvRV(attached);
-        }
+		/* refcnt of unneeded sv is 2 at this point (one from newHV, second from SEEN call) */
+		SvREFCNT_dec(sv);
+		SvREFCNT_dec(sv);
+		/* we need to free RV but preserve value that RV point to */
+		sv = SvRV(attached);
+		SEEN(sv, 0, 0);
+		SvRV_set(attached, NULL);
+		SvREFCNT_dec(attached);
+		if (!(flags & SHF_IDX_CLASSNAME) && classname != buf)
+		    Safefree(classname);
+		return sv;
+	    }
 	    CROAK(("STORABLE_attach did not return a %s object", classname));
 	}
 
