@@ -1919,7 +1919,7 @@ S_update_debugger_info(pTHX_ SV *orig_sv, const char *const buf, STRLEN len)
     if (av) {
 	SV * const sv = newSV_type(SVt_PVMG);
 	if (orig_sv)
-	    sv_setsv(sv, orig_sv);
+	    sv_setsv_flags(sv, orig_sv, 0); /* no cow */
 	else
 	    sv_setpvn(sv, buf, len);
 	(void)SvIOK_on(sv);

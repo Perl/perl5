@@ -9,7 +9,7 @@ BEGIN { require "./test.pl"; }
 
 # This test depends on t/lib/Devel/switchd*.pm.
 
-plan(tests => 10);
+plan(tests => 11);
 
 my $r;
 
@@ -162,4 +162,15 @@ like(
   ),
   qr/42/,
   "Recursive DB::DB does not clobber its own pad",
+);
+
+# [perl #118627]
+like(
+  runperl(
+   switches => [ '-Ilib', '-d:switchd_empty' ],
+   prog     => 'print @{q|_<-e|}',
+  ),
+  qr "use Devel::switchd_empty;(?:BEGIN|\r?\nprint)",
+                         # miniperl tacks a BEGIN block on to the same line
+ 'Copy on write does not mangle ${"_<-e"}[0] [perl #48332]',
 );
