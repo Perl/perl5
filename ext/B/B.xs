@@ -296,6 +296,17 @@ make_sv_object(pTHX_ SV *sv)
 }
 
 static SV *
+make_hek_object(pTHX_ HEK *hek)
+{
+  SV *ret = sv_setref_pvn(sv_newmortal(), "B::HEK", HEK_KEY(hek), HEK_LEN(hek));
+  SV *rv = SvRV(ret);
+  SvIOKp_on(rv);
+  SvIV_set(rv, PTR2IV(hek));
+  SvREADONLY_on(rv);
+  return ret;
+}
+
+static SV *
 make_temp_object(pTHX_ SV *temp)
 {
     SV *target;
@@ -602,6 +613,7 @@ typedef IO	*B__IO;
 
 typedef MAGIC	*B__MAGIC;
 typedef HE      *B__HE;
+typedef HEK     *B__HEK;
 typedef struct refcounted_he	*B__RHE;
 #ifdef PadlistARRAY
 typedef PADLIST	*B__PADLIST;
@@ -1390,7 +1402,10 @@ IVX(sv)
 	ptr = (ix & 0xFFFF) + (char *)SvANY(sv);
 	switch ((U8)(ix >> 16)) {
 	case (U8)(sv_SVp >> 16):
-	    ret = make_sv_object(aTHX_ *((SV **)ptr));
+            if ((ix == (PVCV_gv_ix)) && CvNAMED(sv))
+                ret = make_hek_object(aTHX_ CvNAME_HEK((CV*)sv));
+            else
+	        ret = make_sv_object(aTHX_ *((SV **)ptr));
 	    break;
 	case (U8)(sv_IVp >> 16):
 	    ret = sv_2mortal(newSViv(*((IV *)ptr)));
@@ -1587,6 +1602,31 @@ PV(sv)
 	    p = NULL;
         }
 	ST(0) = newSVpvn_flags(p, len, SVs_TEMP | utf8);
+
+MODULE = B	PACKAGE = B::HEK
+
+void
+KEY(hek)
+        B::HEK   hek
+    ALIAS:
+	LEN = 1
+	FLAGS = 2
+    PPCODE:
+        SV *pv;
+	switch (ix) {
+	case 0:
+            pv = newSVpvn(HEK_KEY(hek), HEK_LEN(hek));
+            if (HEK_UTF8(hek)) SvUTF8_on(pv);
+            SvREADONLY_on(pv);
+            PUSHs(pv);
+            break;
+        case 1:
+            mPUSHu(HEK_LEN(hek));
+            break;
+        case 2:
+            mPUSHu(HEK_FLAGS(hek));
+            break;
+        }
 
 MODULE = B	PACKAGE = B::PVMG
 
