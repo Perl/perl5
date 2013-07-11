@@ -4296,6 +4296,7 @@ PP(pp_aslice)
     if (SvTYPE(av) == SVt_PVAV) {
 	const bool localizing = PL_op->op_private & OPpLVAL_INTRO;
 	bool can_preserve = FALSE;
+	SV **dst = MARK;
 
 	if (localizing) {
 	    MAGIC *mg;
@@ -4317,8 +4318,26 @@ PP(pp_aslice)
 	}
 
 	while (++MARK <= SP) {
+	  I32 elem = SvIV(*MARK);
+	  I32 count;
+	  if (MARK < SP && MARK[1] == &PL_sv_placeholder) {
+	    count = AvFILL(av) - elem + 1;
+	    if (count < 0) count = 0;
+	    else if (count > 1) {
+		I32  off = MARK - PL_stack_base;
+		I32 doff = dst  - PL_stack_base;
+		EXTEND(SP, count-1);
+		MARK = PL_stack_base +  off;
+		dst  = PL_stack_base + doff;
+		Move(MARK, MARK+count-1, SP-MARK+1, SV *);
+		SP   += count-1;
+		MARK += count-1;		
+	    }
+	    MARK++; /* skip placeholder */
+	  }
+	  else count = 1;
+	  while (count) {
 	    SV **svp;
-	    I32 elem = SvIV(*MARK);
 	    bool preeminent = TRUE;
 
 	    if (localizing && can_preserve) {
@@ -4340,8 +4359,12 @@ PP(pp_aslice)
 			SAVEADELETE(av, elem);
 		}
 	    }
-	    *MARK = svp ? *svp : &PL_sv_undef;
+	    *++dst = svp ? *svp : &PL_sv_undef;
+
+	    count--, elem++;
+	  }
 	}
+	SP = dst;
     }
     if (GIMME != G_ARRAY) {
 	MARK = ORIGMARK;

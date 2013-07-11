@@ -142,6 +142,7 @@
 #define Perl_pp_custom Perl_unimplemented_op
 #define Perl_pp_reach Perl_pp_rkeys
 #define Perl_pp_rvalues Perl_pp_rkeys
+#define Perl_pp_postdotdot Perl_unimplemented_op
 START_EXTERN_C
 
 #ifndef DOINIT
@@ -525,6 +526,7 @@ EXTCONST char* const PL_op_name[] = {
 	"introcv",
 	"clonecv",
 	"padrange",
+	"postdotdot",
 	"freed",
 };
 #endif
@@ -910,6 +912,7 @@ EXTCONST char* const PL_op_desc[] = {
 	"private subroutine",
 	"private subroutine",
 	"list of private variables",
+	"postfix .. in slice",
 	"freed op",
 };
 #endif
@@ -1309,6 +1312,7 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	Perl_pp_introcv,
 	Perl_pp_clonecv,
 	Perl_pp_padrange,
+	Perl_pp_postdotdot,	/* implemented by Perl_unimplemented_op */
 }
 #endif
 #ifdef PERL_PPADDR_INITED
@@ -1458,7 +1462,7 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	Perl_ck_null,		/* aelemfast */
 	Perl_ck_null,		/* aelemfast_lex */
 	Perl_ck_null,		/* aelem */
-	Perl_ck_null,		/* aslice */
+	Perl_ck_slice,		/* aslice */
 	Perl_ck_each,		/* aeach */
 	Perl_ck_each,		/* akeys */
 	Perl_ck_each,		/* avalues */
@@ -1475,7 +1479,7 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	Perl_ck_split,		/* split */
 	Perl_ck_join,		/* join */
 	Perl_ck_null,		/* list */
-	Perl_ck_null,		/* lslice */
+	Perl_ck_slice,		/* lslice */
 	Perl_ck_fun,		/* anonlist */
 	Perl_ck_fun,		/* anonhash */
 	Perl_ck_fun,		/* splice */
@@ -1704,6 +1708,7 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	Perl_ck_null,		/* introcv */
 	Perl_ck_null,		/* clonecv */
 	Perl_ck_null,		/* padrange */
+	Perl_ck_null,		/* postdotdot */
 }
 #endif
 #ifdef PERL_CHECK_INITED
@@ -2093,6 +2098,7 @@ EXTCONST U32 PL_opargs[] = {
 	0x00000040,	/* introcv */
 	0x00000040,	/* clonecv */
 	0x00000040,	/* padrange */
+	0x00000600,	/* postdotdot */
 };
 #endif
 

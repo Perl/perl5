@@ -377,6 +377,7 @@ static struct debug_tokens {
     { PLUGSTMT,		TOKENTYPE_OPVAL,	"PLUGSTMT" },
     { PMFUNC,		TOKENTYPE_OPVAL,	"PMFUNC" },
     { POSTDEC,		TOKENTYPE_NONE,		"POSTDEC" },
+    { POSTDOTDOT,	TOKENTYPE_NONE,		"POSTDOTDOT" },
     { POSTINC,		TOKENTYPE_NONE,		"POSTINC" },
     { POWOP,		TOKENTYPE_OPNUM,	"POWOP" },
     { PREDEC,		TOKENTYPE_NONE,		"PREDEC" },
@@ -6776,7 +6777,13 @@ Perl_yylex(pTHX)
 		    pl_yylval.ival = OPf_SPECIAL;
 		}
 		else
+		{
+		    char * const s2 = skipspace(s);
+		    if (*s2 == ',' || *s2 == ']'
+		     || (*s2 == '=' && s2[1] == '>'))
+			OPERATOR(POSTDOTDOT);
 		    pl_yylval.ival = 0;
+		}
 		OPERATOR(DOTDOT);
 	    }
 	    if (*s == '=' && !PL_lex_allbrackets &&

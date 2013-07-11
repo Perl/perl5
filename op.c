@@ -1752,7 +1752,7 @@ S_finalize_op(pTHX_ OP* o)
 	/* Relocate sv to the pad for thread safety.
 	 * Despite being a "constant", the SV is written to,
 	 * for reference counts, sv_upgrade() etc. */
-	if (cSVOPo->op_sv) {
+	if (cSVOPo->op_sv && cSVOPo->op_sv != &PL_sv_placeholder) {
 	    const PADOFFSET ix = pad_alloc(OP_CONST, SVf_READONLY);
 	    if (o->op_type != OP_METHOD_NAMED
 		&& cSVOPo->op_sv == &PL_sv_undef) {
@@ -1880,6 +1880,8 @@ S_finalize_op(pTHX_ OP* o)
 	}
 	break;
     }
+
+    case OP_POSTDOTDOT: Perl_croak(aTHX_ "Postfix .. outside of slice");
 
     case OP_SUBST: {
 	if (cPMOPo->op_pmreplrootu.op_pmreplroot)
@@ -9600,6 +9602,28 @@ Perl_ck_shift(pTHX_ OP *o)
 #endif
     }
     return scalar(ck_fun(o));
+}
+
+OP *
+Perl_ck_slice(pTHX_ OP *o)
+{
+    dVAR;
+    OP *kid;
+
+    PERL_ARGS_ASSERT_CK_SLICE;
+
+    kid = cBINOPo->op_first;
+    if (kid->op_type != OP_PUSHMARK && kid->op_flags & OPf_KIDS)
+	kid = kUNOP->op_first;
+
+    for (kid = kid->op_sibling; kid; kid = kid->op_sibling) {
+	if (kid->op_type == OP_POSTDOTDOT) {
+	    kid->op_type = OP_CONST;
+	    kid->op_ppaddr = PL_ppaddr[OP_CONST];
+	}
+    }
+
+    return o;
 }
 
 OP *

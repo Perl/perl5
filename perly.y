@@ -80,7 +80,7 @@
 %token <i_tkval> FORMAT SUB ANONSUB PACKAGE USE
 %token <i_tkval> WHILE UNTIL IF UNLESS ELSE ELSIF CONTINUE FOR
 %token <i_tkval> GIVEN WHEN DEFAULT
-%token <i_tkval> LOOPEX DOTDOT YADAYADA
+%token <i_tkval> LOOPEX DOTDOT YADAYADA POSTDOTDOT
 %token <i_tkval> FUNC0 FUNC1 FUNC UNIOP LSTOP
 %token <i_tkval> RELOP EQOP MULOP ADDOP
 %token <i_tkval> DOLSHARP DO HASHBRACK NOAMP
@@ -111,7 +111,7 @@
 %left <i_tkval> ','
 %right <i_tkval> ASSIGNOP
 %right <i_tkval> '?' ':'
-%nonassoc DOTDOT YADAYADA
+%nonassoc DOTDOT YADAYADA POSTDOTDOT
 %left <i_tkval> OROR DORDOR
 %left <i_tkval> ANDAND
 %left <i_tkval> BITOROP
@@ -1000,6 +1000,13 @@ termbinop:	term ASSIGNOP term                     /* $x = $y */
 			      op = (UNOP*)op->op_first;	/* get to range */
 			      token_getmad($2,(OP*)op,'o');
 			    });
+			}
+	|	term POSTDOTDOT                        /* $x.. in slice */
+			{
+			  $$ = op_append_elem(OP_LIST,scalar($1),
+					      newSVOP(OP_POSTDOTDOT, 0,
+						      &PL_sv_placeholder));
+			  TOKEN_GETMAD($2,$$,'o');
 			}
 	|	term ANDAND term                       /* $x && $y */
 			{ $$ = newLOGOP(OP_AND, 0, $1, $3);

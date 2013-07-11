@@ -85,47 +85,48 @@
      LOOPEX = 294,
      DOTDOT = 295,
      YADAYADA = 296,
-     FUNC0 = 297,
-     FUNC1 = 298,
-     FUNC = 299,
-     UNIOP = 300,
-     LSTOP = 301,
-     RELOP = 302,
-     EQOP = 303,
-     MULOP = 304,
-     ADDOP = 305,
-     DOLSHARP = 306,
-     DO = 307,
-     HASHBRACK = 308,
-     NOAMP = 309,
-     LOCAL = 310,
-     MY = 311,
-     REQUIRE = 312,
-     COLONATTR = 313,
-     FORMLBRACK = 314,
-     FORMRBRACK = 315,
-     PREC_LOW = 316,
-     DOROP = 317,
-     OROP = 318,
-     ANDOP = 319,
-     NOTOP = 320,
-     ASSIGNOP = 321,
-     DORDOR = 322,
-     OROR = 323,
-     ANDAND = 324,
-     BITOROP = 325,
-     BITANDOP = 326,
-     SHIFTOP = 327,
-     MATCHOP = 328,
-     REFGEN = 329,
-     UMINUS = 330,
-     POWOP = 331,
-     POSTDEC = 332,
-     POSTINC = 333,
-     PREDEC = 334,
-     PREINC = 335,
-     ARROW = 336,
-     PEG = 337
+     POSTDOTDOT = 297,
+     FUNC0 = 298,
+     FUNC1 = 299,
+     FUNC = 300,
+     UNIOP = 301,
+     LSTOP = 302,
+     RELOP = 303,
+     EQOP = 304,
+     MULOP = 305,
+     ADDOP = 306,
+     DOLSHARP = 307,
+     DO = 308,
+     HASHBRACK = 309,
+     NOAMP = 310,
+     LOCAL = 311,
+     MY = 312,
+     REQUIRE = 313,
+     COLONATTR = 314,
+     FORMLBRACK = 315,
+     FORMRBRACK = 316,
+     PREC_LOW = 317,
+     DOROP = 318,
+     OROP = 319,
+     ANDOP = 320,
+     NOTOP = 321,
+     ASSIGNOP = 322,
+     DORDOR = 323,
+     OROR = 324,
+     ANDAND = 325,
+     BITOROP = 326,
+     BITANDOP = 327,
+     SHIFTOP = 328,
+     MATCHOP = 329,
+     REFGEN = 330,
+     UMINUS = 331,
+     POWOP = 332,
+     POSTDEC = 333,
+     POSTINC = 334,
+     PREDEC = 335,
+     PREINC = 336,
+     ARROW = 337,
+     PEG = 338
    };
 #endif
 /* Tokens.  */
@@ -168,47 +169,48 @@
 #define LOOPEX 294
 #define DOTDOT 295
 #define YADAYADA 296
-#define FUNC0 297
-#define FUNC1 298
-#define FUNC 299
-#define UNIOP 300
-#define LSTOP 301
-#define RELOP 302
-#define EQOP 303
-#define MULOP 304
-#define ADDOP 305
-#define DOLSHARP 306
-#define DO 307
-#define HASHBRACK 308
-#define NOAMP 309
-#define LOCAL 310
-#define MY 311
-#define REQUIRE 312
-#define COLONATTR 313
-#define FORMLBRACK 314
-#define FORMRBRACK 315
-#define PREC_LOW 316
-#define DOROP 317
-#define OROP 318
-#define ANDOP 319
-#define NOTOP 320
-#define ASSIGNOP 321
-#define DORDOR 322
-#define OROR 323
-#define ANDAND 324
-#define BITOROP 325
-#define BITANDOP 326
-#define SHIFTOP 327
-#define MATCHOP 328
-#define REFGEN 329
-#define UMINUS 330
-#define POWOP 331
-#define POSTDEC 332
-#define POSTINC 333
-#define PREDEC 334
-#define PREINC 335
-#define ARROW 336
-#define PEG 337
+#define POSTDOTDOT 297
+#define FUNC0 298
+#define FUNC1 299
+#define FUNC 300
+#define UNIOP 301
+#define LSTOP 302
+#define RELOP 303
+#define EQOP 304
+#define MULOP 305
+#define ADDOP 306
+#define DOLSHARP 307
+#define DO 308
+#define HASHBRACK 309
+#define NOAMP 310
+#define LOCAL 311
+#define MY 312
+#define REQUIRE 313
+#define COLONATTR 314
+#define FORMLBRACK 315
+#define FORMRBRACK 316
+#define PREC_LOW 317
+#define DOROP 318
+#define OROP 319
+#define ANDOP 320
+#define NOTOP 321
+#define ASSIGNOP 322
+#define DORDOR 323
+#define OROR 324
+#define ANDAND 325
+#define BITOROP 326
+#define BITANDOP 327
+#define SHIFTOP 328
+#define MATCHOP 329
+#define REFGEN 330
+#define UMINUS 331
+#define POWOP 332
+#define POSTDEC 333
+#define POSTINC 334
+#define PREDEC 335
+#define PREINC 336
+#define ARROW 337
+#define PEG 338
 
 
 
@@ -266,6 +268,6 @@ typedef union YYSTYPE
 
 
 /* Generated from:
- * 9e20ffc538d3ca3c4dbd4bd0d0c82f329cb509a0e5b976490f105c62fcddec27 perly.y
+ * c8857eb383fcef33f1db8781717665ee60fbef5253bd0824c7bb9c8def8593da perly.y
  * 5c9d2a0262457fe9b70073fc8ad6c188f812f38ad57712b7e2f53daa01b297cc regen_perly.pl
  * ex: set ro: */

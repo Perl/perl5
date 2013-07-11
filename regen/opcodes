@@ -216,7 +216,7 @@ rv2av		array dereference	ck_rvconst	dt1
 aelemfast	constant array element	ck_null		s$	A S
 aelemfast_lex	constant lexical array element	ck_null		d0	A S
 aelem		array element		ck_null		s2	A S
-aslice		array slice		ck_null		m@	A L
+aslice		array slice		ck_slice	m@	A L
 
 aeach		each on array		ck_each		%	A
 akeys		keys on array		ck_each		t%	A
@@ -243,7 +243,7 @@ join		join or string		ck_join		mst@	S L
 # List operators.
 
 list		list			ck_null		m@	L
-lslice		list slice		ck_null		2	H L L
+lslice		list slice		ck_slice	2	H L L
 anonlist	anonymous list ([])	ck_fun		ms@	L
 anonhash	anonymous hash ({})	ck_fun		ms@	L
 
@@ -551,3 +551,4 @@ padcv		private subroutine	ck_null		d0
 introcv		private subroutine	ck_null		d0
 clonecv		private subroutine	ck_null		d0
 padrange	list of private variables	ck_null		d0
+postdotdot	postfix .. in slice	ck_null		$
