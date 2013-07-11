@@ -4049,6 +4049,7 @@ static SV *retrieve_hook(pTHX_ stcxt_t *cxt, const char *cname)
 	SV *sv;
 	SV *rv;
 	GV *attach;
+	HV *stash;
 	int obj_type;
 	int clone = cxt->optype & ST_CLONE;
 	char mtype = '\0';
@@ -4271,14 +4272,16 @@ static SV *retrieve_hook(pTHX_ stcxt_t *cxt, const char *cname)
 	}
 
 	/*
-	 * Bless the object and look up the STORABLE_thaw hook.
+	 * Look up the STORABLE_attach hook
 	 */
-
-	BLESS(sv, classname);
+	stash = gv_stashpv(classname, 0);
+	if (!stash) {
+		CROAK(("Can't find stash for class '%s'", classname));
+	}
 
 	/* Handle attach case; again can't use pkg_can because it only
 	 * caches one method */
-	attach = gv_fetchmethod_autoload(SvSTASH(sv), "STORABLE_attach", FALSE);
+	attach = gv_fetchmethod_autoload(stash, "STORABLE_attach", FALSE);
 	if (attach && isGV(attach)) {
 	    SV* attached;
 	    SV* attach_hook = newRV((SV*) GvCV(attach));
@@ -4316,6 +4319,12 @@ static SV *retrieve_hook(pTHX_ stcxt_t *cxt, const char *cname)
 	    }
 	    CROAK(("STORABLE_attach did not return a %s object", classname));
 	}
+
+	/*
+	 * Bless the object and look up the STORABLE_thaw hook.
+	 */
+
+	BLESS(sv, classname);
 
 	hook = pkg_can(aTHX_ cxt->hook, SvSTASH(sv), "STORABLE_thaw");
 	if (!hook) {
