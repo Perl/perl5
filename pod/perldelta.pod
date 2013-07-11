@@ -381,6 +381,25 @@ documentation that referenced them or explained how to use them:
 It's still possible to run the relevant commands by "hand" - no underlying
 functionality has been removed.
 
+=item *
+
+It is now possible to keep Perl from initializing locale handling.
+For the most part, Perl doesn't pay attention to locale.  (See
+L<perllocale>.)  Nonetheless, until now, on startup, it has always
+initialized locale handling to the system default, just in case the
+program being executed ends up using locales.  (This is one of the first
+things a locale-aware program should do, long before Perl knows if it
+will actually be needed or not.)  This works well except when Perl is
+embedded in another application which wants a locale that isn't the
+system default.  Now, if the environment variable
+C<PERL_SKIP_LOCALE_INIT> is set at the time Perl is started, this
+initialization step is skipped.  Prior to this, on Windows platforms,
+the only workaround for this deficiency was to use a hacked-up copy of
+internal Perl code.  Applications that need to use older Perls can
+discover if the embedded Perl they are using needs the workaround by
+testing that the C preprocessor symbol C<HAS_SKIP_LOCALE_INIT> is not
+defined.  (RT #38193)
+
 =back
 
 =head1 Selected Bug Fixes
@@ -394,7 +413,15 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+There have been several fixes related to Perl's handling of locales.  RT
+#38193 was described above in L</Internal Changes>.
+Also fixed is #112208 in which the error string in C<$!> displayed as
+garbage in many UTF-8 locales;
+#118197, where the radix (decimal point) character had to be an ASCII
+character (which doesn't work for some non-Western languages);
+and #115808] in which C<POSIX::setlocale()> on failure returned an
+C<undef> which didn't warn about not being defined even if those
+warnings were enabled.
 
 =back
 
