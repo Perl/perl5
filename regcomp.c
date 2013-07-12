@@ -7048,10 +7048,10 @@ S_reg_scan_name(pTHX_ RExC_state_t *pRExC_state, U32 flags)
  * list.)
  * Taking the complement (inverting) an inversion list is quite simple, if the
  * first element is 0, remove it; otherwise add a 0 element at the beginning.
- * This implementation reserves an element (considered to be the final element
- * of the header) at the beginning of each inversion list to always contain 0;
- * there is an additional flag in the header which indicates if the list begins
- * at the 0, or is offset to begin at the next element.
+ * This implementation reserves an element at the beginning of each inversion
+ * list to always contain 0; there is an additional flag in the header which
+ * indicates if the list begins at the 0, or is offset to begin at the next
+ * element.
  *
  * More about inversion lists can be found in "Unicode Demystified"
  * Chapter 13 by Richard Gillam, published by Addison-Wesley.
@@ -7067,12 +7067,9 @@ S_reg_scan_name(pTHX_ RExC_state_t *pRExC_state, U32 flags)
 
 /* The header definitions are in F<inline_invlist.c> */
 
-/* This converts to/from our UVs to what the SV code is expecting: bytes.  The
- * first element is always a 0, which may or may not currently be in the list.
- * Just assume the worst case, that it isn't, and so the length of the list
- * passed in has to add 1 to account for it */
-#define TO_INTERNAL_SIZE(x) (((x) + 1) * sizeof(UV))
-#define FROM_INTERNAL_SIZE(x) (((x)/ sizeof(UV)) - 1)
+/* This converts to/from our UVs to what the SV code is expecting: bytes. */
+#define TO_INTERNAL_SIZE(x) ((x) * sizeof(UV))
+#define FROM_INTERNAL_SIZE(x) ((x)/ sizeof(UV))
 
 
 PERL_STATIC_INLINE UV*
@@ -7125,16 +7122,18 @@ S_invlist_array(pTHX_ SV* const invlist)
 PERL_STATIC_INLINE void
 S_invlist_set_len(pTHX_ SV* const invlist, const UV len)
 {
-    /* Sets the current number of elements stored in the inversion list */
+    /* Sets the current number of elements stored in the inversion list.
+     * Updates SvCUR correspondingly */
 
     PERL_ARGS_ASSERT_INVLIST_SET_LEN;
 
     *_get_invlist_len_addr(invlist) = len;
 
-    assert(SvLEN(invlist) == 0 || len <= SvLEN(invlist));
-
-    SvCUR_set(invlist, TO_INTERNAL_SIZE(len));
-    /* Note that when inverting, SvCUR shouldn't change */
+    SvCUR_set(invlist,
+              (len == 0)
+               ? 0
+               : TO_INTERNAL_SIZE(len + *get_invlist_offset_addr(invlist)));
+    assert(SvLEN(invlist) == 0 || SvCUR(invlist) <= SvLEN(invlist));
 }
 
 PERL_STATIC_INLINE IV*
@@ -7178,9 +7177,11 @@ S_invlist_max(pTHX_ SV* const invlist)
 
     PERL_ARGS_ASSERT_INVLIST_MAX;
 
+    /* Assumes worst case, in which the 0 element is not counted in the
+     * inversion list, so subtracts 1 for that */
     return SvLEN(invlist) == 0  /* This happens under _new_invlist_C_array */
-           ? _invlist_len(invlist)
-           : FROM_INTERNAL_SIZE(SvLEN(invlist));
+           ? FROM_INTERNAL_SIZE(SvCUR(invlist)) - 1
+           : FROM_INTERNAL_SIZE(SvLEN(invlist)) - 1;
 }
 
 PERL_STATIC_INLINE bool*
@@ -7211,8 +7212,10 @@ Perl__new_invlist(pTHX_ IV initial_size)
 
     /* Allocate the initial space */
     new_list = newSV_type(SVt_INVLIST);
-    SvGROW(new_list, TO_INTERNAL_SIZE(initial_size) + 1); /* 1 is for trailing
-                                                             NUL */
+
+    /* First 1 is in case the zero element isn't in the list; second 1 is for
+     * trailing NUL */
+    SvGROW(new_list, TO_INTERNAL_SIZE(initial_size + 1) + 1);
     invlist_set_len(new_list, 0);
 
     /* Force iterinit() to be used to get iteration to work */
@@ -7242,7 +7245,7 @@ S__new_invlist_C_array(pTHX_ const UV* const list)
      * (if appropriate) and regenerate INVLIST_VERSION_ID by running
      *      perl -E 'say int(rand 2**31-1)'
      */
-#define INVLIST_VERSION_ID 1826693541/* This is a combination of a version and
+#define INVLIST_VERSION_ID 148565664 /* This is a combination of a version and
                                         data structure type, so that one being
                                         passed in can be validated to be an
                                         inversion list of the correct vintage.
@@ -7262,17 +7265,14 @@ S__new_invlist_C_array(pTHX_ const UV* const list)
 
     SvLEN_set(invlist, 0);  /* Means we own the contents, and the system
 			       shouldn't touch it */
-    /* The 'length' passed to us is the number of elements in the inversion
-     * list.  If the list doesn't include the always present 0 element, the
-     * length should be adjusted upwards to include it.  The TO_INTERNAL_SIZE
-     * macro returns a worst case scenario, always making that adjustment, even
-     * if not needed.  To get the precise size, then, we have to subtract 1
-     * when that adjustment wasn't needed.  That happens when the offset was 0;
-     * the exclusive-or flips the 0 to 1, and vice versa */
-    SvCUR_set(invlist, TO_INTERNAL_SIZE(length - (offset ^ 1)));
+    /* The 'length' passed to us is the physical number of elements in the
+     * inversion list. */
+    SvCUR_set(invlist, TO_INTERNAL_SIZE(length));
+
     *(get_invlist_offset_addr(invlist)) = offset;
 
-    invlist_set_len(invlist, length);
+    /* But if there is an offset the logical number is one less than that */
+    invlist_set_len(invlist, length  - offset);
 
     invlist_set_previous_index(invlist, 0);
 
@@ -7289,7 +7289,9 @@ S_invlist_extend(pTHX_ SV* const invlist, const UV new_max)
 
     PERL_ARGS_ASSERT_INVLIST_EXTEND;
 
-    SvGROW((SV *)invlist, TO_INTERNAL_SIZE(new_max));
+    /* Add one to account for the zero element at the beginning which may not
+     * be counted by the calling parameters */
+    SvGROW((SV *)invlist, TO_INTERNAL_SIZE(new_max + 1));
 }
 
 PERL_STATIC_INLINE void
@@ -8140,7 +8142,6 @@ S_invlist_clone(pTHX_ SV* const invlist)
 
     PERL_ARGS_ASSERT_INVLIST_CLONE;
 
-    SvCUR_set(new_invlist, physical_length); /* This isn't done automatically */
     *(get_invlist_offset_addr(new_invlist))
                                 = *(get_invlist_offset_addr(invlist));
     invlist_set_len(new_invlist, _invlist_len(invlist));
