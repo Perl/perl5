@@ -198,7 +198,7 @@ L<perlfunc/"Perl Functions by Category"> section.
 
 =cut
 
-our $VERSION = '1.06';
+our $VERSION = '1.07';
 
 require Exporter;
 
@@ -265,7 +265,7 @@ foreach my $func (sort_funcs(keys %Flavor)) {
     my $desc = $Flavor{$func};
     die "No types listed for $func" unless $Type{$func};
     next if $Omit{$func};
-    print $fh join("\t", $func, @{$Type{$func}}, $desc), "\n";
+    print $fh join("\t", $func, (sort @{$Type{$func}}), $desc), "\n";
 }
 
 close $fh or die "Can't close '$temp': $!";
