@@ -172,5 +172,5 @@ like(
   ),
   qr "use Devel::switchd_empty;(?:BEGIN|\r?\nprint)",
                          # miniperl tacks a BEGIN block on to the same line
- 'Copy on write does not mangle ${"_<-e"}[0] [perl #48332]',
+ 'Copy on write does not mangle ${"_<-e"}[0] [perl #118627]',
 );
