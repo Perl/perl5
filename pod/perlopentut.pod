@@ -270,10 +270,8 @@ To be announced.
 
 =head1 AUTHOR and COPYRIGHT
 
-To be announced.
+Copyright 2013 Tom Christiansen.
 
-=head1 HISTORY
-
-To be announced.
-
+This documentation is free; you can redistribute it and/or modify it under
+the same terms as Perl itself.
 
