@@ -7270,9 +7270,10 @@ S__new_invlist_C_array(pTHX_ const UV* const list)
      * when that adjustment wasn't needed.  That happens when the offset was 0;
      * the exclusive-or flips the 0 to 1, and vice versa */
     SvCUR_set(invlist, TO_INTERNAL_SIZE(length - (offset ^ 1)));
+    *(get_invlist_offset_addr(invlist)) = offset;
 
     invlist_set_len(invlist, length);
-    *(get_invlist_offset_addr(invlist)) = offset;
+
     invlist_set_previous_index(invlist, 0);
 
     /* Initialize the iteration pointer. */
@@ -8140,9 +8141,9 @@ S_invlist_clone(pTHX_ SV* const invlist)
     PERL_ARGS_ASSERT_INVLIST_CLONE;
 
     SvCUR_set(new_invlist, physical_length); /* This isn't done automatically */
-    invlist_set_len(new_invlist, _invlist_len(invlist));
     *(get_invlist_offset_addr(new_invlist))
                                 = *(get_invlist_offset_addr(invlist));
+    invlist_set_len(new_invlist, _invlist_len(invlist));
     Copy(SvPVX(invlist), SvPVX(new_invlist), physical_length, char);
 
     return new_invlist;
