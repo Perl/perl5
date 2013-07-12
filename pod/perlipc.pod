@@ -124,11 +124,10 @@ example:
     $SIG{CHLD} = sub {
         # don't change $! and $? outside handler
         local ($!, $?);
-        my $pid = waitpid(-1, WNOHANG);
-        return if $pid == -1;
-        return unless defined $children{$pid};
-        delete $children{$pid};
-        cleanup_child($pid, $?);
+        while ( (my $pid = waitpid(-1, WNOHANG)) > 0 ) {
+            delete $children{$pid};
+            cleanup_child($pid, $?);
+        }
     };
 
     while (1) {
