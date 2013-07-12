@@ -1434,7 +1434,6 @@ EsM	|void	|_append_range_to_invlist   |NN SV* const invlist|const UV start|const
 EiMR	|UV*	|_invlist_array_init	|NN SV* const invlist|const bool will_have_0
 EiMR	|UV*	|invlist_array	|NN SV* const invlist
 EsM	|void	|invlist_extend    |NN SV* const invlist|const UV len
-EiMR	|bool*	|get_invlist_offset_addr|NN SV* invlist
 EiMR	|UV	|invlist_max	|NN SV* const invlist
 EiM	|void	|invlist_set_len|NN SV* const invlist|const UV len|const bool offset
 EiMR	|IV*	|get_invlist_previous_index_addr|NN SV* invlist
@@ -1473,7 +1472,7 @@ EXp	|SV*	|_core_swash_init|NN const char* pkg|NN const char* name \
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_UTF8_C)
 EXMpR	|SV*	|_invlist_contents|NN SV* const invlist
-EiMR	|STRLEN*|_get_invlist_len_addr	|NN SV* invlist
+EiMR	|bool*	|get_invlist_offset_addr|NN SV* invlist
 EiMR	|UV	|_invlist_len	|NN SV* const invlist
 EMiR	|bool	|_invlist_contains_cp|NN SV* const invlist|const UV cp
 EXpMR	|IV	|_invlist_search	|NN SV* const invlist|const UV cp

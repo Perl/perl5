@@ -532,7 +532,6 @@ struct xpvinvlist {
     _XPV_HEAD;
     IV          prev_index;
     STRLEN	iterator;
-    STRLEN	count;
     bool	is_offset;	/* */
 };
 

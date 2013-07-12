@@ -7067,11 +7067,6 @@ S_reg_scan_name(pTHX_ RExC_state_t *pRExC_state, U32 flags)
 
 /* The header definitions are in F<inline_invlist.c> */
 
-/* This converts to/from our UVs to what the SV code is expecting: bytes. */
-#define TO_INTERNAL_SIZE(x) ((x) * sizeof(UV))
-#define FROM_INTERNAL_SIZE(x) ((x)/ sizeof(UV))
-
-
 PERL_STATIC_INLINE UV*
 S__invlist_array_init(pTHX_ SV* const invlist, const bool will_have_0)
 {
@@ -7089,7 +7084,7 @@ S__invlist_array_init(pTHX_ SV* const invlist, const bool will_have_0)
     PERL_ARGS_ASSERT__INVLIST_ARRAY_INIT;
 
     /* Must be empty */
-    assert(! *_get_invlist_len_addr(invlist));
+    assert(! _invlist_len(invlist));
 
     *zero_addr = 0;
 
@@ -7109,7 +7104,7 @@ S_invlist_array(pTHX_ SV* const invlist)
 
     /* Must not be empty.  If these fail, you probably didn't check for <len>
      * being non-zero before trying to get the array */
-    assert(*_get_invlist_len_addr(invlist));
+    assert(_invlist_len(invlist));
 
     /* The very first element always contains zero, The array begins either
      * there, or if the inversion list is offset, at the element after it.
@@ -7126,8 +7121,6 @@ S_invlist_set_len(pTHX_ SV* const invlist, const UV len, const bool offset)
      * Updates SvCUR correspondingly */
 
     PERL_ARGS_ASSERT_INVLIST_SET_LEN;
-
-    *_get_invlist_len_addr(invlist) = len;
 
     SvCUR_set(invlist,
               (len == 0)
@@ -7182,17 +7175,6 @@ S_invlist_max(pTHX_ SV* const invlist)
     return SvLEN(invlist) == 0  /* This happens under _new_invlist_C_array */
            ? FROM_INTERNAL_SIZE(SvCUR(invlist)) - 1
            : FROM_INTERNAL_SIZE(SvLEN(invlist)) - 1;
-}
-
-PERL_STATIC_INLINE bool*
-S_get_invlist_offset_addr(pTHX_ SV* invlist)
-{
-    /* Return the address of the field that says whether the inversion list is
-     * offset (it contains 1) or not (contains 0) */
-
-    PERL_ARGS_ASSERT_GET_INVLIST_OFFSET_ADDR;
-
-    return &(((XINVLIST*) SvANY(invlist))->is_offset);
 }
 
 #ifndef PERL_IN_XSUB_RE
@@ -8070,27 +8052,17 @@ Perl__invlist_invert(pTHX_ SV* const invlist)
      * have a zero; removes it otherwise.  As described above, the data
      * structure is set up so that this is very efficient */
 
-    STRLEN* len_pos = _get_invlist_len_addr(invlist);
-
     PERL_ARGS_ASSERT__INVLIST_INVERT;
 
     assert(! invlist_is_iterating(invlist));
 
     /* The inverse of matching nothing is matching everything */
-    if (*len_pos == 0) {
+    if (_invlist_len(invlist) == 0) {
 	_append_range_to_invlist(invlist, 0, UV_MAX);
 	return;
     }
 
-    /* The exclusive or complents 0 to 1; and 1 to 0.  If the result is 1, the
-     * zero element was a 0, so it is being removed, so the length decrements
-     * by 1; and vice-versa.  SvCUR is unaffected */
-    if (*get_invlist_offset_addr(invlist) ^= 1) {
-	(*len_pos)--;
-    }
-    else {
-	(*len_pos)++;
-    }
+    *get_invlist_offset_addr(invlist) = ! *get_invlist_offset_addr(invlist);
 }
 
 void
