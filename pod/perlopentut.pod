@@ -66,7 +66,7 @@ possible values that the I<MODE> parameter can take on.
 
 One last thing before we show you how to open files: opening
 files does not (usually) automatically lock them in Perl.  See
-L<perlfaq4> for how to lock.
+L<perlfaq5> for how to lock.
 
 =head1 Opening Text Files
 
@@ -188,7 +188,7 @@ C<say>, C<write>, or C<syswrite>.
 
 What about read-write mode?  You should probably pretend it doesn't exist,
 because opening text files in read-write mode is unlikely to do what you
-would like.  See L<perlfaq4> for details.
+would like.  See L<perlfaq5> for details.
 
 =head1 Opening Binary Files
 
