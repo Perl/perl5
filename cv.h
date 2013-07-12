@@ -49,7 +49,7 @@ See L<perlguts/Autoloading with XSUBs>.
 #define CvROOT(sv)	((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_root_u.xcv_root
 #define CvXSUB(sv)	((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_root_u.xcv_xsub
 #define CvXSUBANY(sv)	((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_start_u.xcv_xsubany
-#define CvGV(sv)	S_CvGV((CV *)(sv))
+#define CvGV(sv)	S_CvGV((const CV *)(sv))
 #define CvGV_set(cv,gv)	Perl_cvgv_set(aTHX_ cv, gv)
 #define CvFILE(sv)	((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_file
 #ifdef USE_ITHREADS
@@ -189,7 +189,7 @@ See L<perlguts/Autoloading with XSUBs>.
 #define XS_DYNAMIC_FILENAME	0x01	/* The filename isn't static  */
 
 PERL_STATIC_INLINE GV *
-S_CvGV(CV *sv)
+S_CvGV(const CV *sv)
 {
     return CvNAMED(sv)
 	? 0
