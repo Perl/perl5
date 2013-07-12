@@ -7113,8 +7113,6 @@ S_invlist_array(pTHX_ SV* const invlist)
     /* Must not be empty.  If these fail, you probably didn't check for <len>
      * being non-zero before trying to get the array */
     assert(*_get_invlist_len_addr(invlist));
-    assert(*get_invlist_offset_addr(invlist) == 0
-	   || *get_invlist_offset_addr(invlist) == 1);
 
     /* The very first element always contains zero, The array begins either
      * there, or if the inversion list is offset, at the element after it.
@@ -7206,7 +7204,6 @@ Perl__new_invlist(pTHX_ IV initial_size)
      * system default is used instead */
 
     SV* new_list;
-    bool* offset_addr;
 
     if (initial_size < 0) {
 	initial_size = 10;
@@ -7220,12 +7217,6 @@ Perl__new_invlist(pTHX_ IV initial_size)
 
     /* Force iterinit() to be used to get iteration to work */
     *get_invlist_iter_addr(new_list) = (STRLEN) UV_MAX;
-
-    /* This should force a segfault if a method doesn't initialize this
-     * properly.  XXX Although now that the max is currently just 255, it might
-     * not segfault. */
-    offset_addr = get_invlist_offset_addr(new_list);
-    *offset_addr = (U8) UV_MAX;
 
     *get_invlist_previous_index_addr(new_list) = 0;
 
@@ -7245,7 +7236,7 @@ S__new_invlist_C_array(pTHX_ const UV* const list)
 
     const STRLEN length = (STRLEN) list[0];
     const UV version_id =          list[1];
-    const U8 offset = (U8)         list[2];
+    const bool offset   =    cBOOL(list[2]);
 #define HEADER_LENGTH 3
     /* If any of the above changes in any way, you must change HEADER_LENGTH
      * (if appropriate) and regenerate INVLIST_VERSION_ID by running
