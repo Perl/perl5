@@ -7307,7 +7307,6 @@ S_invlist_trim(pTHX_ SV* const invlist)
 
     /* Change the length of the inversion list to how many entries it currently
      * has */
-
     SvPV_shrink_to_cur((SV *) invlist);
 }
 
@@ -7367,8 +7366,8 @@ S__append_range_to_invlist(pTHX_ SV* const invlist, const UV start, const UV end
 
     len += 2;	/* Includes an element each for the start and end of range */
 
-    /* If overflows the existing space, extend, which may cause the array to be
-     * moved */
+    /* If wll overflow the existing space, extend, which may cause the array to
+     * be moved */
     if (max < len) {
 	invlist_extend(invlist, len);
 	invlist_set_len(invlist, len);	/* Have to set len here to avoid assert
@@ -8145,15 +8144,15 @@ S_invlist_clone(pTHX_ SV* const invlist)
     /* Need to allocate extra space to accommodate Perl's addition of a
      * trailing NUL to SvPV's, since it thinks they are always strings */
     SV* new_invlist = _new_invlist(_invlist_len(invlist) + 1);
-    STRLEN length = SvCUR(invlist);
+    STRLEN physical_length = SvCUR(invlist);
 
     PERL_ARGS_ASSERT_INVLIST_CLONE;
 
-    SvCUR_set(new_invlist, length); /* This isn't done automatically */
+    SvCUR_set(new_invlist, physical_length); /* This isn't done automatically */
     invlist_set_len(new_invlist, _invlist_len(invlist));
     *(get_invlist_offset_addr(new_invlist))
                                 = *(get_invlist_offset_addr(invlist));
-    Copy(SvPVX(invlist), SvPVX(new_invlist), length, char);
+    Copy(SvPVX(invlist), SvPVX(new_invlist), physical_length, char);
 
     return new_invlist;
 }
