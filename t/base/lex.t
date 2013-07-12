@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..85\n";
+print "1..93\n";
 
 $x = 'x';
 
@@ -400,3 +400,46 @@ print "ok 84 - call a function in package v10::foo\n";
 
 print "not " unless (1?v65:"bar") eq 'A';
 print "ok 85 - colon detection after vstring does not break ? vstring :\n";
+
+# Test pyoq ops with comments before the first delim
+q # comment
+ "b"#
+  eq 'b' or print "not ";
+print "ok 86 - q <comment> <newline> ...\n";
+qq # comment
+ "b"#
+  eq 'b' or print "not ";
+print "ok 87 - qq <comment> <newline> ...\n";
+qw # comment
+ "b"#
+  [0] eq 'b' or print "not ";
+print "ok 88 - qw <comment> <newline> ...\n";
+"b" =~ m # comment
+ "b"#
+   or print "not ";
+print "ok 89 - m <comment> <newline> ...\n";
+qr # comment
+ "b"#
+   eq qr/b/ or print "not ";
+print "ok 90 - qr <comment> <newline> ...\n";
+$_ = "a";
+s # comment
+ [a] #
+ [b] #
+ ;
+print "not " unless $_ eq 'b';
+print "ok 91 - s <comment> <newline> ...\n";
+$_ = "a";
+tr # comment
+ [a] #
+ [b] #
+ ;
+print "not " unless $_ eq 'b';
+print "ok 92 - tr <comment> <newline> ...\n";
+$_ = "a";
+y # comment
+ [a] #
+ [b] #
+ ;
+print "not " unless $_ eq 'b';
+print "ok 93 - y <comment> <newline> ...\n";
