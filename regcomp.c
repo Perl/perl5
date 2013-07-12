@@ -7265,13 +7265,12 @@ S__new_invlist_C_array(pTHX_ const UV* const list)
 
     SvLEN_set(invlist, 0);  /* Means we own the contents, and the system
 			       shouldn't touch it */
-    /* The 'length' passed to us is the physical number of elements in the
-     * inversion list. */
-    SvCUR_set(invlist, TO_INTERNAL_SIZE(length));
 
     *(get_invlist_offset_addr(invlist)) = offset;
 
-    /* But if there is an offset the logical number is one less than that */
+    /* The 'length' passed to us is the physical number of elements in the
+     * inversion list.  But if there is an offset the logical number is one
+     * less than that */
     invlist_set_len(invlist, length  - offset);
 
     invlist_set_previous_index(invlist, 0);
