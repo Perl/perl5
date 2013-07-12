@@ -10,7 +10,7 @@ Whenever you do I/O on a file in Perl, you do so through what in Perl is
 called a B<filehandle>.  A filehandle is an internal name for an external
 file.  It is the job of the C<open> function to make the association
 between the internal name and the external name, and it is the job
-of the C<close> function to break that associations.
+of the C<close> function to break that association.
 
 For your convenience, Perl sets up a few special filehandles that are
 already open when you run.  These include C<STDIN>, C<STDOUT>, C<STDERR>,
@@ -26,13 +26,13 @@ without having to go to the trouble of opening them yourself:
     while (<ARGV>) { ... }
 
 As you see from those examples, C<STDOUT> and C<STDERR> are output
-handles, and C<STDIN> and C<ARGV> are input handles.  Those are
+handles, and C<STDIN> and C<ARGV> are input handles.  They are
 in all capital letters because they are reserved to Perl, much
 like the C<@ARGV> array and the C<%ENV> hash are.  Their external
 associations were set up by your shell.
 
-For eveyrthing else, you will need to open it on your own. Although there
-are many other variants, the most common way to call Perl's open() function
+You will need to open every other filehandle on your own. Although there
+are many variants, the most common way to call Perl's open() function
 is with three arguments and one return value:
 
 C<    I<OK> = open(I<HANDLE>, I<MODE>, I<PATHNAME>)>
@@ -109,11 +109,10 @@ You can also just quickly C<die> on an undefined value this way:
 
     $line = <$handle> // die "no input found";
 
-However, if hitting EOF is an expected and normal event, you
-would not to exit just because you ran out of input.  Instead,
-you probably just want to exit an input loop.  Immediately
-afterwards you can then test to see if there was an actual
-error that caused the loop to terminate, and act accordingly:
+However, if hitting EOF is an expected and normal event, you do not want to
+exit simply because you have run out of input.  Instead, you probably just want
+to exit an input loop.  You can then test to see if an actual error has caused
+the loop to terminate, and act accordingly:
 
     while (<$handle>) {
         # do something with data in $_
@@ -144,13 +143,13 @@ See L<perlunitut> for more about encodings.
 
 =head2 Opening Text Files for Writing
 
-On the other hand, you want to write to a file, you first have to decide
-what to do about any existing contents.  You have two basic choices here:
-to preserve or to clobber.
+When you want to write to a file, you first have to decide what to do about
+any existing contents of that file.  You have two basic choices here: to
+preserve or to clobber.
 
-If you want to preserve any existing contents, then you want to open the
-file in append mode.  As in the shell, in Perl you use C<<< ">>" >>> to
-open an existing file in append mode, and creates the file if it does not
+If you want to preserve any existing contents, then you want to open the file
+in append mode.  As in the shell, in Perl you use C<<< ">>" >>> to open an
+existing file in append mode.  C<<< ">>" >>> creates the file if it does not
 already exist.
 
     my $handle   = undef;
@@ -163,10 +162,10 @@ already exist.
 Now you can write to that filehandle using any of C<print>, C<printf>,
 C<say>, C<write>, or C<syswrite>.
 
-The file does not have to exist just to open it in append mode.  If the
-file did not previously exist, then the append-mode open creates it for
-you.  But if the file does previously exist, its contents are safe from
-harm because you will be adding your new text past the end of the old text.
+As noted above, if the file does not already exist, then the append-mode open
+will create it for you.  But if the file does already exist, its contents are
+safe from harm because you will be adding your new text past the end of the
+old text.
 
 On the other hand, sometimes you want to clobber whatever might already be
 there.  To empty out a file before you start writing to it, you can open it
