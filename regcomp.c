@@ -7120,7 +7120,7 @@ S_invlist_array(pTHX_ SV* const invlist)
 }
 
 PERL_STATIC_INLINE void
-S_invlist_set_len(pTHX_ SV* const invlist, const UV len)
+S_invlist_set_len(pTHX_ SV* const invlist, const UV len, const bool offset)
 {
     /* Sets the current number of elements stored in the inversion list.
      * Updates SvCUR correspondingly */
@@ -7132,7 +7132,7 @@ S_invlist_set_len(pTHX_ SV* const invlist, const UV len)
     SvCUR_set(invlist,
               (len == 0)
                ? 0
-               : TO_INTERNAL_SIZE(len + *get_invlist_offset_addr(invlist)));
+               : TO_INTERNAL_SIZE(len + offset));
     assert(SvLEN(invlist) == 0 || SvCUR(invlist) <= SvLEN(invlist));
 }
 
@@ -7216,7 +7216,7 @@ Perl__new_invlist(pTHX_ IV initial_size)
     /* First 1 is in case the zero element isn't in the list; second 1 is for
      * trailing NUL */
     SvGROW(new_list, TO_INTERNAL_SIZE(initial_size + 1) + 1);
-    invlist_set_len(new_list, 0);
+    invlist_set_len(new_list, 0, 0);
 
     /* Force iterinit() to be used to get iteration to work */
     *get_invlist_iter_addr(new_list) = (STRLEN) UV_MAX;
@@ -7271,7 +7271,7 @@ S__new_invlist_C_array(pTHX_ const UV* const list)
     /* The 'length' passed to us is the physical number of elements in the
      * inversion list.  But if there is an offset the logical number is one
      * less than that */
-    invlist_set_len(invlist, length  - offset);
+    invlist_set_len(invlist, length  - offset, offset);
 
     invlist_set_previous_index(invlist, 0);
 
@@ -7315,11 +7315,13 @@ S__append_range_to_invlist(pTHX_ SV* const invlist, const UV start, const UV end
     UV* array;
     UV max = invlist_max(invlist);
     UV len = _invlist_len(invlist);
+    bool offset;
 
     PERL_ARGS_ASSERT__APPEND_RANGE_TO_INVLIST;
 
     if (len == 0) { /* Empty lists must be initialized */
-        array = _invlist_array_init(invlist, start == 0);
+        offset = start != 0;
+        array = _invlist_array_init(invlist, ! offset);
     }
     else {
 	/* Here, the existing list is non-empty. The current max entry in the
@@ -7342,6 +7344,7 @@ S__append_range_to_invlist(pTHX_ SV* const invlist, const UV start, const UV end
 	 * value not in the set, it is extending the set, so the new first
 	 * value not in the set is one greater than the newly extended range.
 	 * */
+        offset = *get_invlist_offset_addr(invlist);
 	if (array[final_element] == start) {
 	    if (end != UV_MAX) {
 		array[final_element] = end + 1;
@@ -7349,7 +7352,7 @@ S__append_range_to_invlist(pTHX_ SV* const invlist, const UV start, const UV end
 	    else {
 		/* But if the end is the maximum representable on the machine,
 		 * just let the range that this would extend to have no end */
-		invlist_set_len(invlist, len - 1);
+		invlist_set_len(invlist, len - 1, offset);
 	    }
 	    return;
 	}
@@ -7363,12 +7366,14 @@ S__append_range_to_invlist(pTHX_ SV* const invlist, const UV start, const UV end
      * be moved */
     if (max < len) {
 	invlist_extend(invlist, len);
-	invlist_set_len(invlist, len);	/* Have to set len here to avoid assert
-					   failure in invlist_array() */
+
+        /* Have to set len here to avoid assert failure in invlist_array() */
+        invlist_set_len(invlist, len, offset);
+
 	array = invlist_array(invlist);
     }
     else {
-	invlist_set_len(invlist, len);
+	invlist_set_len(invlist, len, offset);
     }
 
     /* The next item on the list starts the range, the one after that is
@@ -7380,7 +7385,7 @@ S__append_range_to_invlist(pTHX_ SV* const invlist, const UV start, const UV end
     else {
 	/* But if the end is the maximum representable on the machine, just let
 	 * the range have no end */
-	invlist_set_len(invlist, len - 1);
+	invlist_set_len(invlist, len - 1, offset);
     }
 }
 
@@ -7765,7 +7770,7 @@ Perl__invlist_union_maybe_complement_2nd(pTHX_ SV* const a, SV* const b, const b
     /* Set result to final length, which can change the pointer to array_u, so
      * re-find it */
     if (len_u != _invlist_len(u)) {
-	invlist_set_len(u, len_u);
+	invlist_set_len(u, len_u, *get_invlist_offset_addr(u));
 	invlist_trim(u);
 	array_u = invlist_array(u);
     }
@@ -7981,7 +7986,7 @@ Perl__invlist_intersection_maybe_complement_2nd(pTHX_ SV* const a, SV* const b, 
     /* Set result to final length, which can change the pointer to array_r, so
      * re-find it */
     if (len_r != _invlist_len(r)) {
-	invlist_set_len(r, len_r);
+	invlist_set_len(r, len_r, *get_invlist_offset_addr(r));
 	invlist_trim(r);
 	array_r = invlist_array(r);
     }
@@ -8115,11 +8120,11 @@ Perl__invlist_invert_prop(pTHX_ SV* const invlist)
 		invlist_extend(invlist, len);
 		array = invlist_array(invlist);
 	    }
-	    invlist_set_len(invlist, len);
+	    invlist_set_len(invlist, len, *get_invlist_offset_addr(invlist));
 	    array[len - 1] = PERL_UNICODE_MAX + 1;
 	}
 	else {  /* Remove the 0x110000 */
-	    invlist_set_len(invlist, len - 1);
+	    invlist_set_len(invlist, len - 1, *get_invlist_offset_addr(invlist));
 	}
     }
 
@@ -8138,12 +8143,12 @@ S_invlist_clone(pTHX_ SV* const invlist)
      * trailing NUL to SvPV's, since it thinks they are always strings */
     SV* new_invlist = _new_invlist(_invlist_len(invlist) + 1);
     STRLEN physical_length = SvCUR(invlist);
+    bool offset = *(get_invlist_offset_addr(invlist));
 
     PERL_ARGS_ASSERT_INVLIST_CLONE;
 
-    *(get_invlist_offset_addr(new_invlist))
-                                = *(get_invlist_offset_addr(invlist));
-    invlist_set_len(new_invlist, _invlist_len(invlist));
+    *(get_invlist_offset_addr(new_invlist)) = offset;
+    invlist_set_len(new_invlist, _invlist_len(invlist), offset);
     Copy(SvPVX(invlist), SvPVX(new_invlist), physical_length, char);
 
     return new_invlist;

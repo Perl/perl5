@@ -1436,7 +1436,7 @@ EiMR	|UV*	|invlist_array	|NN SV* const invlist
 EsM	|void	|invlist_extend    |NN SV* const invlist|const UV len
 EiMR	|bool*	|get_invlist_offset_addr|NN SV* invlist
 EiMR	|UV	|invlist_max	|NN SV* const invlist
-EiM	|void	|invlist_set_len|NN SV* const invlist|const UV len
+EiM	|void	|invlist_set_len|NN SV* const invlist|const UV len|const bool offset
 EiMR	|IV*	|get_invlist_previous_index_addr|NN SV* invlist
 EiMR	|IV	|invlist_previous_index|NN SV* const invlist
 EiM	|void	|invlist_set_previous_index|NN SV* const invlist|const IV index
