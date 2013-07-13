@@ -212,6 +212,18 @@ also affects L<perlre> and L<perlsub>.)
 
 =back
 
+=head3 L<perlfunc>
+
+=over 4
+
+=item *
+
+Since Perl v5.10, it has been possible for subroutines in @INC to return
+a reference to a scalar holding initial source code to prepend to the file.
+This is now documented.
+
+=back
+
 =head1 Diagnostics
 
 The following additions or changes have been made to diagnostic output,
