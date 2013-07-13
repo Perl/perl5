@@ -477,6 +477,11 @@ crashing [perl #118305].
 Compiling a C<split> operator whose third argument is a named constant
 evaulating to 0 no longer causes the constant's value to change.
 
+=item *
+
+A named constant used as the second argument to C<index> no longer gets
+flattened to a string if it is a reference.
+
 =back
 
 =head1 Known Problems
