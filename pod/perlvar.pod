@@ -426,7 +426,8 @@ Previously, only child processes received stringified values:
     $ENV{'bar'} = \$foo;
 
     # Always printed 'non ref'
-    system($^X,'-e',q/print ( ref $ENV{'bar'}  ? 'ref' : 'non ref' ) /);
+    system($^X, '-e',
+           q/print ( ref $ENV{'bar'}  ? 'ref' : 'non ref' ) /);
 
 This happens because you can't really share arbitrary data structures with
 foreign processes.
