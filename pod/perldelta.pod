@@ -254,7 +254,11 @@ XXX L<message|perldiag/"message">
 
 =item *
 
-XXX L<message|perldiag/"message">
+L<Missing ']' in prototype for %s : %s|perldiag/"Missing ']' in prototype
+for %s : %s">
+
+(W illegalproto) A grouping was started with C<[> but never closed with
+C<]>.
 
 =back
 
