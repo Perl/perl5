@@ -444,6 +444,13 @@ defined.  (RT #38193)
 C<BmRARE> and C<BmPREVIOUS> have been removed.  They were not used anywhere
 and are not part of the API.  For XS modules, they are now #defined as 0.
 
+=item *
+
+C<sv_force_normal>, which usually croaks on read-only values, used to allow
+read-only values to be modified at compile time.  This has been changed to
+croak on read-only values regardless.  This change uncovered several core
+bugs.
+
 =back
 
 =head1 Selected Bug Fixes
