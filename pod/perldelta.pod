@@ -521,6 +521,13 @@ an internal copy of the scalar instead.
 Undefining an inlinable lexical subroutine (C<my sub foo() { 42 } undef
 &foo>) would result in a crash if warnings were turned on.
 
+=item *
+
+Certain uses of the C<sort> operator are optimised to modify an array in
+place, such as C<@a = sort @a>.  During the sorting, the array is made
+read-only.  If a sort block should happen to die, then the array remained
+read-only even outside the C<sort>.  This has been fixed.
+
 =back
 
 =head1 Known Problems
