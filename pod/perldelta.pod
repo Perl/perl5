@@ -457,13 +457,13 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-There have been several fixes related to Perl's handling of locales.  RT
+There have been several fixes related to Perl's handling of locales.  perl
 #38193 was described above in L</Internal Changes>.
 Also fixed is #112208 in which the error string in C<$!> displayed as
 garbage in many UTF-8 locales;
 #118197, where the radix (decimal point) character had to be an ASCII
 character (which doesn't work for some non-Western languages);
-and #115808] in which C<POSIX::setlocale()> on failure returned an
+and #115808, in which C<POSIX::setlocale()> on failure returned an
 C<undef> which didn't warn about not being defined even if those
 warnings were enabled.
 
