@@ -282,7 +282,8 @@ been fixed [perl #117535, #76910].
 Warnings about malformed subroutine prototypes are now more consistent in
 how the prototypes are rendered.  Some of these warnings would truncate
 prototypes containing nulls.  In other cases one warning would suppress
-another.
+another.  The warning about illegal characters in prototypes no longer says
+"after '_'" if the bad character came before the underscore.
 
 =back
 
