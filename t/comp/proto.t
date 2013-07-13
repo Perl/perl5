@@ -18,7 +18,7 @@ BEGIN {
 # strict
 use strict;
 
-print "1..196\n";
+print "1..199\n";
 
 my $i = 1;
 
@@ -691,21 +691,34 @@ for my $p ( "", qw{ () ($) ($@) ($%) ($;$) (&) (&\@) (&@) (%) (\%) (\@) } ) {
   print "ok ", $i++, " checking badproto5 - (\$_\$) - illegal character after '_'\n";
   print "not " if $warn =~ /Illegal character in prototype for main::badproto5 : \$_\$/;
   print "ok ", $i++, " checking badproto5 - (\$_\$) - but not just illegal character\n";
+
   eval 'sub badproto6 (bar_) { 1; }';
   print "not " unless $warn =~ /Illegal character in prototype for main::badproto6 : bar_/;
   print "ok ", $i++, " checking badproto6 - (bar_) - illegal character\n";
   print "not " if $warn =~ /Illegal character after '_' in prototype for main::badproto6 : bar_/;
   print "ok ", $i++, " checking badproto6 - (bar_) - shouldn't add \"after '_'\"\n";
+
   eval 'sub badproto7 (_;bar) { 1; }';
   print "not " unless $warn =~ /Illegal character in prototype for main::badproto7 : _;bar/;
   print "ok ", $i++, " checking badproto7 - (_;bar) - illegal character\n";
   print "not " if $warn =~ /Illegal character after '_' in prototype for main::badproto7 : _;bar/;
   print "ok ", $i++, " checking badproto7 - (_;bar) - shouldn't add \"after '_'\"\n";
+
   eval 'sub badproto8 (_b) { 1; }';
   print "not " unless $warn =~ /Illegal character after '_' in prototype for main::badproto8 : _b/;
   print "ok ", $i++, " checking badproto8 - (_b) - illegal character after '_'\n";
   print "not " unless $warn =~ /Illegal character in prototype for main::badproto8 : _b/;
   print "ok ", $i++, " checking badproto8 - (_b) - just illegal character\n";
+
+  eval 'sub badproto9 ([) { 1; }';
+  print "not " unless $warn =~ /Missing '\]' in prototype for main::badproto9 : \[/;
+  print "ok ", $i++, " checking for matching bracket\n";
+
+  eval 'sub badproto10 ([_]) { 1; }';
+  print "not " if $warn =~ /Missing '\]' in prototype for main::badproto10 : \[/;
+  print "ok ", $i++, " checking badproto10 - ([_]) - shouldn't trigger matching bracket\n";
+  print "not " unless $warn =~ /Illegal character after '_' in prototype for main::badproto10 : \[_\]/;
+  print "ok ", $i++, " checking badproto10 - ([_]) - should trigger after '_' warnings\n";
 }
 
 # make sure whitespace in prototypes works

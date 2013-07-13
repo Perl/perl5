@@ -2981,6 +2981,11 @@ they have a name with which they can be found.
 are always mentioned with the $ in Perl, unlike in the shells, where it
 can vary from one line to the next.
 
+=item Missing ']' in prototype for %s : %s
+
+(W illegalproto) A grouping was started with C<[> but never closed with
+C<]>.
+
 =item (Missing operator before %s?)
 
 (S syntax) This is an educated guess made in conjunction with the message

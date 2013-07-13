@@ -1661,6 +1661,10 @@ Perl_validate_proto(pTHX_ SV *name, SV *proto, bool warn)
 	    Perl_warner(aTHX_ packWARN(WARN_ILLEGALPROTO),
 			"Prototype after '%c' for %"SVf" : %s",
 			greedy_proto, SVfARG(name), p);
+	if (in_brackets)
+	    Perl_warner(aTHX_ packWARN(WARN_ILLEGALPROTO),
+			"Missing ']' in prototype for %"SVf" : %s",
+			SVfARG(name), p);
 	if (bad_proto)
 	    Perl_warner(aTHX_ packWARN(WARN_ILLEGALPROTO),
 			"Illegal character in prototype for %"SVf" : %s",
