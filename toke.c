@@ -1512,14 +1512,16 @@ chunk will not be discarded.
 =cut
 */
 
+#define LEX_NO_INCLINE    0x40000000
 #define LEX_NO_NEXT_CHUNK 0x80000000
 
 void
 Perl_lex_read_space(pTHX_ U32 flags)
 {
     char *s, *bufend;
+    const bool can_incline = !(flags & LEX_NO_INCLINE);
     bool need_incline = 0;
-    if (flags & ~(LEX_KEEP_PREVIOUS|LEX_NO_NEXT_CHUNK))
+    if (flags & ~(LEX_KEEP_PREVIOUS|LEX_NO_NEXT_CHUNK|LEX_NO_INCLINE))
 	Perl_croak(aTHX_ "Lexing code internal error (%s)", "lex_read_space");
 #ifdef PERL_MAD
     if (PL_skipwhite) {
@@ -1539,11 +1541,13 @@ Perl_lex_read_space(pTHX_ U32 flags)
 	    } while (!(c == '\n' || (c == 0 && s == bufend)));
 	} else if (c == '\n') {
 	    s++;
-	    PL_parser->linestart = s;
-	    if (s == bufend)
-		need_incline = 1;
-	    else
-		incline(s);
+	    if (can_incline) {
+		PL_parser->linestart = s;
+		if (s == bufend)
+		    need_incline = 1;
+		else
+		    incline(s);
+	    }
 	} else if (isSPACE(c)) {
 	    s++;
 	} else if (c == 0 && s == bufend) {
@@ -1555,14 +1559,14 @@ Perl_lex_read_space(pTHX_ U32 flags)
 	    if (flags & LEX_NO_NEXT_CHUNK)
 		break;
 	    PL_parser->bufptr = s;
-	    COPLINE_INC_WITH_HERELINES;
+	    if (can_incline) COPLINE_INC_WITH_HERELINES;
 	    got_more = lex_next_chunk(flags);
-	    CopLINE_dec(PL_curcop);
+	    if (can_incline) CopLINE_dec(PL_curcop);
 	    s = PL_parser->bufptr;
 	    bufend = PL_parser->bufend;
 	    if (!got_more)
 		break;
-	    if (need_incline && PL_parser->rsfp) {
+	    if (can_incline && need_incline && PL_parser->rsfp) {
 		incline(s);
 		need_incline = 0;
 	    }
@@ -1834,6 +1838,8 @@ S_incline(pTHX_ const char *s)
     CopLINE_set(PL_curcop, line_num);
 }
 
+#define skipspace(s) skipspace_flags(s, 0)
+
 #ifdef PERL_MAD
 /* skip space before PL_thistoken */
 
@@ -1939,12 +1945,12 @@ S_update_debugger_info(pTHX_ SV *orig_sv, const char *const buf, STRLEN len)
  */
 
 STATIC char *
-S_skipspace(pTHX_ char *s)
+S_skipspace_flags(pTHX_ char *s, U32 flags)
 {
 #ifdef PERL_MAD
     char *start = s;
 #endif /* PERL_MAD */
-    PERL_ARGS_ASSERT_SKIPSPACE;
+    PERL_ARGS_ASSERT_SKIPSPACE_FLAGS;
 #ifdef PERL_MAD
     if (PL_skipwhite) {
 	sv_free(PL_skipwhite);
@@ -1957,7 +1963,7 @@ S_skipspace(pTHX_ char *s)
     } else {
 	STRLEN bufptr_pos = PL_bufptr - SvPVX(PL_linestr);
 	PL_bufptr = s;
-	lex_read_space(LEX_KEEP_PREVIOUS |
+	lex_read_space(flags | LEX_KEEP_PREVIOUS |
 		(PL_sublex_info.sub_inwhat || PL_lex_state == LEX_FORMLINE ?
 		    LEX_NO_NEXT_CHUNK : 0));
 	s = PL_bufptr;
@@ -5636,8 +5642,12 @@ Perl_yylex(pTHX)
 		PL_bufend = s; */
 	    }
 #else
-	    *s = '\0';
-	    PL_bufend = s;
+	    while (s < PL_bufend && *s != '\n')
+		s++;
+	    if (s < PL_bufend)
+		s++;
+	    else if (s > PL_bufend) /* Found by Ilya: feed random input to Perl. */
+	      Perl_croak(aTHX_ "panic: input overflow");
 #endif
 	}
 	goto retry;
@@ -6965,6 +6975,7 @@ Perl_yylex(pTHX)
 
 	/* Is this a word before a => operator? */
 	if (*d == '=' && d[1] == '>') {
+	  fat_arrow:
 	    CLINE;
 	    pl_yylval.opval
 		= (OP*)newSVOP(OP_CONST, 0,
@@ -7096,6 +7107,18 @@ Perl_yylex(pTHX)
 				   "qualify as such or use &",
 				   GvENAME(hgv));
 	    }
+	}
+
+	if (tmp && tmp != KEY___DATA__ && tmp != KEY___END__
+	 && (!anydelim || *s != '#')) {
+	    /* no override, and not s### either; skipspace is safe here
+	     * check for => on following line */
+	    STRLEN bufoff = PL_bufptr - SvPVX(PL_linestr);
+	    STRLEN   soff = s         - SvPVX(PL_linestr);
+	    s = skipspace_flags(s, LEX_NO_INCLINE);
+	    if (*s == '=' && s[1] == '>') goto fat_arrow;
+	    PL_bufptr = SvPVX(PL_linestr) + bufoff;
+	    s         = SvPVX(PL_linestr) +   soff;
 	}
 
       reserved_word:
