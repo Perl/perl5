@@ -24,7 +24,6 @@ my $scr_ext = ($Is_VMS ? '.Com' : $Is_W32 ? '.bat' : '');
 use File::Find;
 use File::Compare;
 use File::Copy ();
-use File::Path ();
 use ExtUtils::Packlist;
 use Cwd;
 # nogetopt_compat to disable treating +v as meaning -v
@@ -35,11 +34,6 @@ require './Porting/pod_lib.pl';
 if ($Is_NetWare) {
     $Is_W32 = 0;
     $scr_ext = '.pl';
-}
-
-# override the ones in the rest of the script
-sub mkpath {
-    File::Path::mkpath(@_) unless $opts{notify};
 }
 
 my $mainperldir = "/usr/bin";
@@ -237,7 +231,7 @@ if ($Is_VMS) {  # Hang in there until File::Spec hits the big time
 # Do some quick sanity checks.
 
    $installbin		|| die "No installbin directory in config.sh\n";
--d $installbin		|| mkpath($installbin, $opts{verbose}, 0777);
+-d $installbin	        || mkpath($installbin);
 -d $installbin		|| $opts{notify} || die "$installbin is not a directory\n";
 -w $installbin		|| $opts{notify} || die "$installbin is not writable by you\n"
 	unless $installbin =~ m#^/afs/# || $opts{notify};
@@ -313,13 +307,13 @@ elsif ($^O ne 'dos') {
 	# If installing onto a NetWare server
         if ($opts{netware}) {
 	    # Copy perl.nlm, echo.nlm, type.nlm, a2p.nlm & cgi2perl.nlm
-            mkpath($Config{installnwsystem}, $opts{verbose}, 0777);
+            mkpath($Config{installnwsystem});
 	    copy("netware\\".$ENV{'MAKE_TYPE'}."\\perl.nlm", $Config{installnwsystem});
 	    copy("netware\\testnlm\\echo\\echo.nlm", $Config{installnwsystem});
 	    copy("netware\\testnlm\\type\\type.nlm", $Config{installnwsystem});
 	    copy("x2p\\a2p.nlm", $Config{installnwsystem});
 	    chmod(0755, "$Config{installnwsystem}\\perl.nlm");
-            mkpath($Config{installnwlcgi}, $opts{verbose}, 0777);
+            mkpath($Config{installnwlcgi});
 	    copy("lib\\auto\\cgi2perl\\cgi2perl.nlm", $Config{installnwlcgi});
 	}
     } #if (!$Is_NetWare)
@@ -336,8 +330,8 @@ my $do_installprivlib = !samepath($installprivlib, 'lib');
 my $vershort = ($Is_Cygwin and !$Config{usedevel}) ? substr($ver,0,-2) : $ver;
 $do_installprivlib = 0 if $versiononly && !($installprivlib =~ m/\Q$vershort/);
 
-mkpath($installprivlib, $opts{verbose}, 0777);
-mkpath($installarchlib, $opts{verbose}, 0777);
+mkpath($installprivlib);
+mkpath($installarchlib);
 mkpath($installsitelib, $opts{verbose}, 0777) if ($installsitelib);
 mkpath($installsitearch, $opts{verbose}, 0777) if ($installsitearch);
 
@@ -350,7 +344,7 @@ else {
 }
 
 # Install header files and libraries.
-mkpath("$installarchlib/CORE", $opts{verbose}, 0777);
+mkpath("$installarchlib/CORE");
 my @corefiles;
 if ($Is_VMS) {  # We did core file selection during build
     my $coredir = "lib/$Config{archname}/$ver/CORE";
@@ -499,7 +493,7 @@ sub script_alias {
 }
 
 # Install scripts.
-mkpath($installscript, $opts{verbose}, 0777);
+mkpath($installscript);
 if ($versiononly) {
     for (@scripts) {
 	(my $base = $_) =~ s#.*/##;
@@ -533,7 +527,7 @@ if ($versiononly) {
 # ($installprivlib/pods for cygwin).
 if (!$opts{nopods} && (!$versiononly || ($installprivlib =~ m/\Q$vershort/))) {
     my $pod = ($Is_Cygwin || $Is_Darwin || $Is_VMS || $Is_W32) ? 'pods' : 'pod';
-    mkpath("${installprivlib}/$pod", $opts{verbose}, 0777);
+    mkpath("${installprivlib}/$pod");
 
     for (map {$_->[1]} @{get_pod_metadata()->{master}}) {
 	# $_ is a name like  pod/perl.pod
@@ -754,7 +748,7 @@ sub installlib {
 	$packlist->{$xname} = { type => 'file' };
         if ($opts{force} || compare($_, "$installlib/$name") || $opts{notify}) {
 	    unlink("$installlib/$name");
-	    mkpath("$installlib/$dir", $opts{verbose}, 0777);
+	    mkpath("$installlib/$dir");
 	    # HP-UX (at least) needs to maintain execute permissions
 	    # on dynamically-loaded libraries.
             if (copy_if_diff($_, "$installlib/$name")) {

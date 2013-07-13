@@ -7,6 +7,7 @@ use strict;
 use vars qw($Is_VMS $Is_W32 $Is_OS2 $Is_Cygwin $Is_Darwin $Is_NetWare
 	    %opts $packlist);
 use subs qw(unlink link chmod);
+require File::Path;
 
 use Config;
 BEGIN {
@@ -139,6 +140,10 @@ sub safe_rename {
     }
     link($from,$to) || return 0;
     unlink($from);
+}
+
+sub mkpath {
+    File::Path::mkpath(shift , $opts{verbose}, 0777) unless $opts{notify};
 }
 
 1;

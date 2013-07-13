@@ -8,7 +8,6 @@ BEGIN {
 use strict;
 
 use Getopt::Long;
-require File::Path;
 use ExtUtils::Packlist;
 use Pod::Man;
 use vars qw(%opts $packlist);
@@ -119,7 +118,7 @@ sub pod2man {
         }
     }
 
-    File::Path::mkpath($mandir, $opts{verbose}, 0777) unless $opts{notify};
+    mkpath($mandir);
 
     foreach my $manpage (sort keys %$modpods) {
         my $mod = $modpods->{$manpage};
