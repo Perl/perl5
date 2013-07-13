@@ -516,6 +516,11 @@ was magically converted into an IO thingy, possibly resulting in "Bizarre
 copy" errors if that scalar continued to be used elsewhere.  Now Perl uses
 an internal copy of the scalar instead.
 
+=item *
+
+Undefining an inlinable lexical subroutine (C<my sub foo() { 42 } undef
+&foo>) would result in a crash if warnings were turned on.
+
 =back
 
 =head1 Known Problems
