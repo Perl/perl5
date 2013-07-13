@@ -628,13 +628,17 @@ B<pod2fm>.  Various others are available in CPAN.
 =head2 Embedding Pods in Perl Modules
 X<POD, embedding>
 
-You can embed Pod documentation in your Perl modules and scripts.
-Start your documentation with an empty line, a "=head1" command at the
-beginning, and end it with a "=cut" command and an empty line.  Perl
-will ignore the Pod text.  See any of the supplied library modules for
-examples.  If you're going to put your Pod at the end of the file, and
-you're using an __END__ or __DATA__ cut mark, make sure to put an
-empty line there before the first Pod command.
+You can embed Pod documentation in your Perl modules and scripts.  Start
+your documentation with an empty line, a "=head1" command at the
+beginning, and end it with a "=cut" command and an empty line.  The
+B<perl> executable will ignore the Pod text.  You can place a Pod
+statement where B<perl> expects the beginning of a new statement, but
+not within a statement, as that would result in an error.  See any of
+the supplied library modules for examples.
+
+If you're going to put your Pod at the end of the file, and you're using
+an C<__END__> or C<__DATA__> cut mark, make sure to put an empty line there
+before the first Pod command.
 
   __END__
 
