@@ -254,7 +254,9 @@ XXX Changes (i.e. rewording) of diagnostic messages go here
 
 =item *
 
-XXX Describe change here
+Under rare circumstances, one could get a "Can't coerce readonly REF to
+string" instead of the customary "Modification of a read-only value".  This
+alternate error message has been removed.
 
 =back
 
