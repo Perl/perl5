@@ -733,10 +733,12 @@ X<caller> X<call stack> X<stack> X<stack trace>
 
 =for Pod::Functions get context of the current subroutine call
 
-Returns the context of the current subroutine call.  In scalar context,
-returns the caller's package name if there I<is> a caller (that is, if
+Returns the context of the current pure perl subroutine call.  In scalar
+context, returns the caller's package name if there I<is> a caller (that is, if
 we're in a subroutine or C<eval> or C<require>) and the undefined value
-otherwise.  In list context, returns
+otherwise.  caller never returns XS subs and they are skipped.  The next pure
+perl sub will appear instead of the XS sub in caller's return values. In list
+context, caller returns
 
     # 0         1          2
     ($package, $filename, $line) = caller;
