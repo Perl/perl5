@@ -3121,8 +3121,8 @@ local() if you want to localize a package variable.
 
 (W once) Typographical errors often show up as unique variable names.
 If you had a good reason for having a unique name, then just mention it
-again somehow to suppress the message.  The C<our> declaration is
-provided for this purpose.
+again somehow to suppress the message.  The C<our> declaration is provided
+for this purpose.
 
 NOTE: This warning detects symbols that have been used only once so $c, @c,
 %c, *c, &c, sub c{}, c(), and c (the filehandle or format) are considered
