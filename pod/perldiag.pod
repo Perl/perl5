@@ -2230,10 +2230,10 @@ offending digit.
 
 =item Illegal character after '_' in prototype for %s : %s
 
-(W illegalproto) An illegal character was found in a prototype declaration.
-The '_' in a prototype must be followed by a ';', indicating the rest of
-the parameters are optional, or one of '@' or '%', since those two will
-accept 0 or more final parameters.
+(W illegalproto) An illegal character was found in a prototype
+declaration.  The '_' in a prototype must be followed by a ';',
+indicating the rest of the parameters are optional, or one of '@'
+or '%', since those two will accept 0 or more final parameters.
 
 =item Illegal character \%o (carriage return)
 
