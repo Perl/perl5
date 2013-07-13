@@ -2264,12 +2264,14 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
         return 0;
     }
 
+    s = startpos;
+
     if ((RX_EXTFLAGS(rx) & RXf_USE_INTUIT)
         && !(flags & REXEC_CHECKED))
     {
-	startpos = re_intuit_start(rx, sv, strbeg, startpos, strend,
+	s = re_intuit_start(rx, sv, strbeg, startpos, strend,
                                     flags, NULL);
-	if (!startpos)
+	if (!s)
 	    return 0;
 
 	if (RX_EXTFLAGS(rx) & RXf_CHECK_ALL) {
@@ -2286,10 +2288,10 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
                                         strbeg, strend,
                                         sv, flags, utf8_target);
 
-            prog->offs[0].start = startpos - strbeg;
+            prog->offs[0].start = s - strbeg;
             prog->offs[0].end = utf8_target
-                ? (char*)utf8_hop((U8*)startpos, prog->minlenret) - strbeg
-                : startpos - strbeg + prog->minlenret;
+                ? (char*)utf8_hop((U8*)s, prog->minlenret) - strbeg
+                : s - strbeg + prog->minlenret;
 	    return 1;
         }
     }
@@ -2304,7 +2306,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
 
     multiline = prog->extflags & RXf_PMf_MULTILINE;
     
-    if (strend - startpos < (minlen+(prog->check_offset_min<0?prog->check_offset_min:0))) {
+    if (strend - s < (minlen+(prog->check_offset_min<0?prog->check_offset_min:0))) {
         DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
 			      "String too short [regexec_flags]...\n"));
 	goto phooey;
@@ -2392,7 +2394,6 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
     }
 
     /* If there is a "must appear" string, look for it. */
-    s = startpos;
 
     if (prog->extflags & RXf_GPOS_SEEN) { /* Need to set reginfo->ganch */
 	MAGIC *mg;
@@ -2440,15 +2441,6 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
 	    PTR2UV(prog->offs)
 	));
     }
-    if (!(flags & REXEC_CHECKED) && (prog->check_substr != NULL || prog->check_utf8 != NULL)) {
-	s = re_intuit_start(rx, sv, strbeg, s, strend, flags, NULL);
-	if (!s) {
-	    DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "Not present...\n"));
-	    goto phooey;	/* not present */
-	}
-    }
-
-
 
     /* Simplest case:  anchored match need be tried only once. */
     /*  [unless only anchor is BOL and multiline is set] */
