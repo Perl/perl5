@@ -528,6 +528,13 @@ place, such as C<@a = sort @a>.  During the sorting, the array is made
 read-only.  If a sort block should happen to die, then the array remained
 read-only even outside the C<sort>.  This has been fixed.
 
+=item *
+
+C<$a> and C<$b> inside a sort block are aliased to the actual arguments to
+C<sort>, so they can be modified through those two variables.  This did not
+always work, e.g., for lvalue subs and C<$#ary>, and probably many other
+operators.  It works now.
+
 =back
 
 =head1 Known Problems
