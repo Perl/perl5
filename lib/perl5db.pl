@@ -4094,9 +4094,6 @@ sub _print_frame_message {
 }
 
 sub DB::sub {
-    # Do not use a regex in this subroutine -> results in corrupted memory
-    # See: [perl #66110]
-
     # lock ourselves under threads
     lock($DBGR);
 
