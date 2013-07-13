@@ -574,9 +574,9 @@ static const scan_data_t zero_scan_data =
 	    (int)offset, RExC_precomp, RExC_precomp + offset);		\
 } STMT_END
 
-#define	ckWARN2regdep(loc,m, a1) STMT_START {				\
+#define	ckWARN2reg_d(loc,m, a1) STMT_START {				\
     const IV offset = loc - RExC_precomp;				\
-    Perl_ck_warner_d(aTHX_ packWARN2(WARN_DEPRECATED, WARN_REGEXP),	\
+    Perl_ck_warner_d(aTHX_ packWARN(WARN_REGEXP),			\
 	    m REPORT_LOCATION,						\
 	    a1, (int)offset, RExC_precomp, RExC_precomp + offset);	\
 } STMT_END
@@ -13562,7 +13562,7 @@ parseit:
                             default:
                                 /* Use deprecated warning to increase the
                                  * chances of this being output */
-                                ckWARN2regdep(RExC_parse, "Perl folding rules are not up-to-date for 0x%"UVXf"; please use the perlbug utility to report;", j);
+                                ckWARN2reg_d(RExC_parse, "Perl folding rules are not up-to-date for 0x%"UVXf"; please use the perlbug utility to report;", j);
                                 break;
                         }
                     }
