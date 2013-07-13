@@ -306,6 +306,7 @@ sub check_file {
                  :  $routine =~ /warner/       ? '[WDS]'
                  :  $routine =~ /warn/         ?  'S'
                  :  $routine =~ /ckWARN.*dep/  ?  'D'
+                 :  $routine =~ /ckWARN\d*reg_d/? 'S'
                  :  $routine =~ /ckWARN\d*reg/ ?  'W'
                  :  $routine =~ /vWARN\d/      ? '[WDS]'
                  :                             '[PFX]';
