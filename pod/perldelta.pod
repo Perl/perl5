@@ -411,6 +411,11 @@ subroutines no longer cause crashes at compile time.
 The dtrace sub-entry probe now works with lexical subs, instead of
 crashing [perl #118305].
 
+=item *
+
+Undefining an inlinable lexical subroutine (C<my sub foo() { 42 } undef
+&foo>) would result in a crash if warnings were turned on.
+
 =back
 
 =head1 Known Problems
