@@ -285,6 +285,16 @@ prototypes containing nulls.  In other cases one warning would suppress
 another.  The warning about illegal characters in prototypes no longer says
 "after '_'" if the bad character came before the underscore.
 
+=item *
+
+L<"Perl folding rules are not up-to-date for 0x%X; please use the perlbug
+utility to report; in regex; marked by <-- HERE in m/%s/"|perldiag/"Perl
+folding rules are not up-to-date for 0x%X; please use the perlbug utility
+to report; in regex; marked by <-- HERE in m/%s/">:
+
+This message is now only in the regexp category, and not in the deprecated
+category.  It is still a default (i.e., severe) warning [perl #89648].
+
 =back
 
 =head1 Utility Changes
