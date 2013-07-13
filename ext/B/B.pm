@@ -1244,8 +1244,6 @@ Since perl 5.17.1
 
 Perl 5.18 introduces a new class, B::PADLIST, returned by B::CV's
 C<PADLIST> method.
-Perl 5.18.1 and 5.19 introduce a new class, B::HEK, returned by B::CV's
-C<GV> method for lexical subs.
 
 =head2 B::PADLIST Methods
 
@@ -1264,29 +1262,6 @@ Like C<ARRAY>, but takes an index as an argument to get only one element,
 rather than a list of all of them.
 
 =item REFCNT
-
-=back
-
-=head2 B::HEK Methods
-
-A B::HEK is returned by B::CV->GV for a lexical sub, defining its name.
-Using the dereferenced scalar value of the object returns the string value,
-which is usually enough; the other methods are rarely needed.
-
-    use B;
-    use feature 'lexical_subs';
-    my sub p {1};
-    $cv = B::svref_2object(\&p);
-    $hek = $cv->GV;
-    print $$hek, "==", $hek->KEY;
-
-=over 4
-
-=item KEY
-
-=item LEN
-
-=item FLAGS
 
 =back
 
