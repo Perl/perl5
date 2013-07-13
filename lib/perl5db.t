@@ -29,7 +29,7 @@ BEGIN {
     $ENV{PERL_RL} = 'Perl'; # Suppress system Term::ReadLine::Gnu
 }
 
-plan(116);
+plan(117);
 
 my $rc_filename = '.perldb';
 
@@ -1043,6 +1043,20 @@ sub _calc_trace_wrapper
         'b subroutine works fine',
     );
 }
+
+# Test for n with lvalue subs
+DebugWrap->new({
+    cmds =>
+    [
+        'n', 'print "<$x>"',
+        'n', 'print "<$x>"',
+        'q',
+    ],
+    prog => '../lib/perl5db/t/lsub-n',
+})->output_like(
+    qr/<1><11>/,
+    'n steps over lvalue subs',
+);
 
 # Test for 'M' (module list).
 {

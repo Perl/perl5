@@ -4266,7 +4266,9 @@ sub lsub : lvalue {
     $stack[-1] = $single;
 
     # Turn off all flags except single-stepping.
-    $single &= 1;
+    # Use local so the single-step value is popped back off the
+    # stack for us.
+    local $single = $single & 1;
 
     # If we've gotten really deeply recursed, turn on the flag that will
     # make us stop with the 'deep recursion' message.
@@ -4274,9 +4276,6 @@ sub lsub : lvalue {
 
     # If frame messages are on ...
     _print_frame_message($al);
-
-    # Pop the single-step value back off the stack.
-    $single |= $stack[ $stack_depth-- ];
 
     # call the original lvalue sub.
     &$sub;
