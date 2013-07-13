@@ -548,6 +548,12 @@ The arguments to C<sort> are now all in list context.  If the C<sort>
 itself were called in void or scalar context, then I<some>, but not all, of
 the arguments used to be in void or scalar context.
 
+=item *
+
+Subroutine prototypes with Unicode characters above U+00FF were getting
+mangled during closure cloning.  This would happen with subroutines closing
+over lexical variables declared outside, and with lexical subs.
+
 =back
 
 =head1 Known Problems
