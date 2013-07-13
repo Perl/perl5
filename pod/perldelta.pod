@@ -554,6 +554,13 @@ Subroutine prototypes with Unicode characters above U+00FF were getting
 mangled during closure cloning.  This would happen with subroutines closing
 over lexical variables declared outside, and with lexical subs.
 
+=item *
+
+In regular expressions containing multiple code blocks, the values of
+C<$1>, C<$2>, etc., set by nested regular expression calls would leak from
+one block to the next.  Now these variables always refer to the outer
+regular expression at the start of an embedded block [perl #117917].
+
 =back
 
 =head1 Known Problems
