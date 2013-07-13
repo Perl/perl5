@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..94\n";
+print "1..93\n";
 
 $x = 'x';
 
@@ -443,7 +443,3 @@ y # comment
  ;
 print "not " unless $_ eq 'b';
 print "ok 93 - y <comment> <newline> ...\n";
-
-print "not " unless (time
-                     =>) eq time=>;
-print "ok 94 - => quotes keywords across lines\n";
