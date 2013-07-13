@@ -488,6 +488,13 @@ A named constant evaluating to the undefined value used as the second
 argument to C<index> no longer produces "uninitialized" warnings at compile
 time.  It will still produce them at run time.
 
+=item *
+
+When a scalar was returned from a subroutine in @INC, the referenced scalar
+was magically converted into an IO thingy, possibly resulting in "Bizarre
+copy" errors if that scalar continued to be used elsewhere.  Now Perl uses
+an internal copy of the scalar instead.
+
 =back
 
 =head1 Known Problems
