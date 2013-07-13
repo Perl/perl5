@@ -36,9 +36,12 @@ my $usage =
         --verbose (or -V) report all progress.
         --silent  (or -S) be silent. Only report errors.\n";
 
+# --strip intentionally does nothing. By permitting installman to accept it
+# without error, the Makefile can pass the same options to installperl and
+# installman, which permits more simplification there than this comment costs.
 GetOptions( \%opts,
             qw( man1dir=s man1ext=s man3dir=s man3ext=s
-                destdir:s notify n help silent S verbose V))
+                destdir:s notify|n help|h|? silent|S verbose|V strip))
 	|| die $usage;
 die $usage if $opts{help};
 $opts{destdir} //= '';
@@ -47,9 +50,7 @@ foreach my $pre (qw(man1 man3)) {
     $opts{"${pre}dir"} //= $opts{destdir} . $Config{"install${pre}dir"};
     $opts{"${pre}ext"} //= $Config{"${pre}ext"};
 }
-$opts{silent} ||= $opts{S};
-$opts{notify} ||= $opts{n};
-$opts{verbose} ||= $opts{V} || $opts{notify};
+$opts{verbose} ||= $opts{notify};
 
 #Sanity checks
 
