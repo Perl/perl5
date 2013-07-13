@@ -6242,7 +6242,7 @@ reStudy:
 	     && data.last_start_min == 0 && data.last_end > 0
 	     && !RExC_seen_zerolen
 	     && !(RExC_seen & REG_SEEN_VERBARG)
-	     && (!(RExC_seen & REG_SEEN_GPOS) || (r->extflags & RXf_ANCH_GPOS)))
+	     && !((RExC_seen & REG_SEEN_GPOS) || (r->extflags & RXf_ANCH_GPOS)))
 	    r->extflags |= RXf_CHECK_ALL;
 	scan_commit(pRExC_state, &data,&minlen,0);
 
@@ -6339,9 +6339,7 @@ reStudy:
 	    r->check_offset_min = r->float_min_offset;
 	    r->check_offset_max = r->float_max_offset;
 	}
-	/* XXXX Currently intuiting is not compatible with ANCH_GPOS.
-	   This should be changed ASAP!  */
-	if ((r->check_substr || r->check_utf8) && !(r->extflags & RXf_ANCH_GPOS)) {
+	if ((r->check_substr || r->check_utf8) ) {
 	    r->extflags |= RXf_USE_INTUIT;
 	    if (SvTAIL(r->check_substr ? r->check_substr : r->check_utf8))
 		r->extflags |= RXf_INTUIT_TAIL;
