@@ -277,7 +277,32 @@ L</Platform Support> section, instead.
 
 =item *
 
-XXX
+F<installperl> and F<installman>'s option handling has been refactored to use
+L<Getopt::Long>. Both are used by the F<Makefile> C<install> targets, and
+are not installed, so these changes are only likely to affect custom
+installation scripts.
+
+=over 4
+
+=item *
+
+single letter options now also have long names
+
+=item *
+
+invalid options are now rejected
+
+=item *
+
+command line arguments that are not options are now rejected
+
+=item *
+
+Each now has a C<--help> option to display the usage message.
+
+=back
+
+The behaviour for all valid documented invocations is unchanged.
 
 =back
 
