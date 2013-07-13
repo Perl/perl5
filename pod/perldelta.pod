@@ -277,6 +277,13 @@ about "%" and "&" used to occur in some circumstances where there was no
 operator of the type cited, so the warning was completely wrong.  This has
 been fixed [perl #117535, #76910].
 
+=item *
+
+Warnings about malformed subroutine prototypes are now more consistent in
+how the prototypes are rendered.  Some of these warnings would truncate
+prototypes containing nulls.  In other cases one warning would suppress
+another.
+
 =back
 
 =head1 Utility Changes
