@@ -299,6 +299,11 @@ to report; in regex; marked by <-- HERE in m/%s/">:
 This message is now only in the regexp category, and not in the deprecated
 category.  It is still a default (i.e., severe) warning [perl #89648].
 
+=item *
+
+The debugger's "n" command now respects lvalue subroutines and steps over
+them [perl #118839].
+
 =back
 
 =head1 Utility Changes
