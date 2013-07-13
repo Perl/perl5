@@ -127,4 +127,18 @@ sub samepath {
     }
 }
 
+sub safe_rename {
+    my($from,$to) = @_;
+    if (-f $to and not unlink($to)) {
+        my($i);
+        for ($i = 1; $i < 50; $i++) {
+            last if rename($to, "$to.$i");
+        }
+        warn("Cannot rename to '$to.$i': $!"), return 0
+           if $i >= 50; # Give up!
+    }
+    link($from,$to) || return 0;
+    unlink($from);
+}
+
 1;
