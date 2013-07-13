@@ -1189,13 +1189,6 @@ without a C<fchdir> function (in sv.c:Perl_dirp_dup).
 
 Fix Perl_sv_dup, et al so that threads can return objects.
 
-=head2 Add class set operations to regexp engine
-
-Apparently these are quite useful. Anyway, Jeffery Friedl wants them.
-
-demerphq has this on his todo list, but right at the bottom.  
-
-
 =head1 Tasks for microperl
 
 
