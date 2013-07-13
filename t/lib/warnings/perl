@@ -39,6 +39,16 @@ $z = 3
 EXPECT
 Name "main::x" used only once: possible typo at - line 3.
 ########
+# perl.c
+use warnings 'once';
+$\; # test a few
+$:; # punct vars
+$0; # and
+$123; # numbers
+$_;    # and
+$_foo;  # underscores (none of which should warn)
+EXPECT
+########
 -W
 # perl.c
 no warnings 'once' ;
