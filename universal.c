@@ -348,6 +348,7 @@ XS(XS_UNIVERSAL_can)
     SV   *sv;
     SV   *rv;
     HV   *pkg = NULL;
+    GV   *iogv;
 
     if (items != 2)
 	croak_xs_usage(cv, "object-ref, method");
@@ -373,6 +374,8 @@ XS(XS_UNIVERSAL_can)
     }
     else if (isGV_with_GP(sv) && GvIO(sv))
         pkg = SvSTASH(GvIO(sv));
+    else if ((iogv = gv_fetchsv_nomg(sv, 0, SVt_PVIO)) && GvIO(iogv))
+        pkg = SvSTASH(GvIO(iogv));
     else {
         pkg = gv_stashsv(sv, 0);
         if (!pkg)
