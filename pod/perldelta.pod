@@ -449,6 +449,11 @@ and #115808] in which C<POSIX::setlocale()> on failure returned an
 C<undef> which didn't warn about not being defined even if those
 warnings were enabled.
 
+=item *
+
+The dtrace sub-entry probe now works with lexical subs, instead of
+crashing [perl #118305].
+
 =back
 
 =head1 Known Problems
