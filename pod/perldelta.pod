@@ -480,7 +480,13 @@ evaulating to 0 no longer causes the constant's value to change.
 =item *
 
 A named constant used as the second argument to C<index> no longer gets
-flattened to a string if it is a reference.
+coerced to a string if it is a reference, regular expression, dualvar, etc.
+
+=item *
+
+A named constant evaluating to the undefined value used as the second
+argument to C<index> no longer produces "uninitialized" warnings at compile
+time.  It will still produce them at run time.
 
 =back
 
