@@ -20,7 +20,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 688;  # Update this when adding/deleting tests.
+plan tests => 689;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -748,6 +748,14 @@ sub run_tests {
 	pos = 3;
 	ok($_ =~ /c\Gd/, $message);
     }
+
+    {
+        my $s = '123';
+        pos($s) = 1;
+        my @a = $s =~ /(\d)\G/g; # this infinitely looped up till 5.19.1
+        is("@a", "1", '\G looping');
+    }
+
 
     {
         my $message = 'pos inside (?{ })';

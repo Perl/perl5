@@ -2329,7 +2329,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
     reginfo->poscache_maxiter = 0; /* not yet started a countdown */
     reginfo->strend = strend;
     /* see how far we have to get to not match where we matched before */
-    reginfo->till = startpos + minend;
+    reginfo->till = stringarg + minend;
 
     if (prog->extflags & RXf_EVAL_SEEN && SvPADTMP(sv) && !IS_PADGV(sv)) {
         /* SAVEFREESV, not sv_mortalcopy, as this SV must last until after
@@ -2398,9 +2398,9 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
     if (prog->extflags & RXf_GPOS_SEEN) { /* Need to set reginfo->ganch */
 	MAGIC *mg;
 	if (flags & REXEC_IGNOREPOS){	/* Means: check only at start */
-	    reginfo->ganch = startpos + prog->gofs;
+	    reginfo->ganch = stringarg;
 	    DEBUG_GPOS_r(PerlIO_printf(Perl_debug_log,
-	      "GPOS IGNOREPOS: reginfo->ganch = startpos + %"UVxf"\n",(UV)prog->gofs));
+	      "GPOS IGNOREPOS: reginfo->ganch = stringarg\n"));
 	} else if (sv && (mg = mg_find_mglob(sv))
 		  && mg->mg_len >= 0) {
 	    reginfo->ganch = strbeg + mg->mg_len;	/* Defined pos() */
