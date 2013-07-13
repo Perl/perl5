@@ -1006,27 +1006,31 @@ extras.install: $(PERL_EXE)
 .PHONY: install install-strip install-all install-verbose install-silent \
 	no-install install.perl install.man install.html
 
-install_strip install-strip:
-	$(MAKE) STRIPFLAGS=-s install DESTDIR="$(DESTDIR)"
-
-install install_all install-all:
-	$(MAKE) install.perl install.man STRIPFLAGS=$(STRIPFLAGS) DESTDIR="$(DESTDIR)"
-
-install_verbose install-verbose:
-	$(MAKE) install.perl install.man STRIPFLAGS=$(STRIPFLAGS) INSTALLFLAGS=-V DESTDIR="$(DESTDIR)"
-
-install_silent install-silent:
-	$(MAKE) install.perl install.man STRIPFLAGS=$(STRIPFLAGS) INSTALLFLAGS=-S DESTDIR="$(DESTDIR)"
-
-no_install no-install:
-	$(MAKE) install.perl install.man STRIPFLAGS=$(STRIPFLAGS) INSTALLFLAGS=-n DESTDIR="$(DESTDIR)"
-
 # Set this to an empty string to avoid an attempt of rebuild before install
 INSTALL_DEPENDENCE = all
 
+no_install no-install: install-notify
+
+install: install-all
+!NO!SUBS!
+
+for name in all notify silent strip verbose; do
+    flags="--$name";
+    $spitshell >>$Makefile <<EOT
+
+install_$name install-$name: \$(INSTALL_DEPENDENCE) installperl all installman
+	\$(RUN_PERL) installperl --destdir=\$(DESTDIR) ${flags%--all} \$(INSTALLFLAGS) \$(STRIPFLAGS)
+	\$(RUN_PERL) installman --destdir=\$(DESTDIR) ${flags%--all}
+EOT
+
+    test $name = notify || echo '	-@test ! -s extras.lst || PATH="`pwd`:${PATH}" PERL5LIB="`pwd`/lib" $(RUN_PERL) -Ilib -MCPAN -e '\''@ARGV&&install(@ARGV)'\'' `cat extras.lst`' >>$Makefile
+done
+
+$spitshell >>$Makefile <<'!NO!SUBS!'
+
 install.perl:	$(INSTALL_DEPENDENCE) installperl
 	$(RUN_PERL) installperl --destdir=$(DESTDIR) $(INSTALLFLAGS) $(STRIPFLAGS)
-	-@test ! -s extras.lst || $(MAKE) extras.install
+	-@test ! -s extras.lst || PATH="`pwd`:\${PATH}" PERL5LIB="`pwd`/lib" \$(RUN_PERL) -Ilib -MCPAN -e '@ARGV&&install(@ARGV)' `cat extras.lst`
 
 install.man:	all installman
 	$(RUN_PERL) installman --destdir=$(DESTDIR) $(INSTALLFLAGS)
