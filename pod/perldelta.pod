@@ -561,6 +561,13 @@ C<$1>, C<$2>, etc., set by nested regular expression calls would leak from
 one block to the next.  Now these variables always refer to the outer
 regular expression at the start of an embedded block [perl #117917].
 
+=item *
+
+C<UNIVERSAL::can> now treats its first argument the same way that method
+calls do: Typeglobs and glob references with non-empty IO slots are treated
+as handles, and strings are treated as filehandles, rather than packages,
+if a handle with that name exists [perl #113932].
+
 =back
 
 =head1 Known Problems
