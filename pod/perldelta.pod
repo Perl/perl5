@@ -270,6 +270,13 @@ Under rare circumstances, one could get a "Can't coerce readonly REF to
 string" instead of the customary "Modification of a read-only value".  This
 alternate error message has been removed.
 
+=item *
+
+"Ambiguous use of * resolved as operator *": This and similar warnings
+about "%" and "&" used to occur in some circumstances where there was no
+operator of the type cited, so the warning was completely wrong.  This has
+been fixed [perl #117535, #76910].
+
 =back
 
 =head1 Utility Changes
