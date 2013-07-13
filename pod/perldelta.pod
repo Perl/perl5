@@ -568,6 +568,16 @@ calls do: Typeglobs and glob references with non-empty IO slots are treated
 as handles, and strings are treated as filehandles, rather than packages,
 if a handle with that name exists [perl #113932].
 
+=item *
+
+Method calls on typeglobs (e.g., C<< *ARGV->getline >>) used to stringify
+the typeglob and then look it up again.  Combined with changes in Perl
+5.18.0, this allowed C<< *foo->bar >> to call methods on the "foo" package
+(like C<< foo->bar >>).  In some cases it could cause the method to be
+called on the wrong handle.  Now a typeglob argument is treated as a
+handle (just like C<< (\*foo)->bar >>), or, if its IO slot is empty, an
+error is raised.
+
 =back
 
 =head1 Known Problems
