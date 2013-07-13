@@ -586,6 +586,12 @@ called on the wrong handle.  Now a typeglob argument is treated as a
 handle (just like C<< (\*foo)->bar >>), or, if its IO slot is empty, an
 error is raised.
 
+=item *
+
+Under copy-on-write builds (the default as of 5.19.1) C<${'_<-e'}[0]> no
+longer gets mangled.  This is the first line of input saved for the
+debugger's use for one-liners [perl #118627].
+
 =back
 
 =head1 Known Problems
