@@ -7340,10 +7340,10 @@ STATIC char*	S_scan_word(pTHX_ char *s, char *dest, STRLEN destlen, int allow_pa
 #define PERL_ARGS_ASSERT_SCAN_WORD	\
 	assert(s); assert(dest); assert(slp)
 
-STATIC char*	S_skipspace(pTHX_ char *s)
+STATIC char*	S_skipspace_flags(pTHX_ char *s, U32 flags)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_SKIPSPACE	\
+#define PERL_ARGS_ASSERT_SKIPSPACE_FLAGS	\
 	assert(s)
 
 STATIC I32	S_sublex_done(pTHX)
