@@ -472,6 +472,11 @@ warnings were enabled.
 The dtrace sub-entry probe now works with lexical subs, instead of
 crashing [perl #118305].
 
+=item *
+
+Compiling a C<split> operator whose third argument is a named constant
+evaulating to 0 no longer causes the constant's value to change.
+
 =back
 
 =head1 Known Problems
