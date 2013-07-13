@@ -25,7 +25,20 @@ XXX New core language features go here.  Summarize user-visible core language
 enhancements.  Particularly prominent performance optimisations could go
 here, but most should go in the L</Performance Enhancements> section.
 
-[ List each enhancement as a =head2 entry ]
+=head2 More consistent prototype parsing
+
+Multiple semicolons in subroutine prototypes have long been tolerated and
+treated as a single semicolon.  There was one case where this did not
+happen.  A subroutine whose prototype begins with "*" or ";*" can affect
+whether a bareword is considered a method name or sub call.  This now
+applies also to ";;;*".
+
+Whitespace has long been allowed inside subroutine prototypes, so
+C<sub( $ $ )> is equivalent to C<sub($$)>.  But it was stripped when the
+subroutine was parse.  Hence, whitespace was I<not> allowed in prototypes
+set by C<Scalar::Util::set_prototype>.  Now it is permitted, and the parser
+no longer strips whitespace.  This means C<prototype &mysub> returns the
+original prototype, whitespace and all.
 
 =head1 Security
 
