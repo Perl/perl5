@@ -426,6 +426,11 @@ discover if the embedded Perl they are using needs the workaround by
 testing that the C preprocessor symbol C<HAS_SKIP_LOCALE_INIT> is not
 defined.  (RT #38193)
 
+=item *
+
+C<BmRARE> and C<BmPREVIOUS> have been removed.  They were not used anywhere
+and are not part of the API.  For XS modules, they are now #defined as 0.
+
 =back
 
 =head1 Selected Bug Fixes
