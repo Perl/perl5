@@ -128,8 +128,9 @@ L<Benchmark::Perl::Formance>
 
 =head2 fix tainting bugs
 
-Fix the bugs revealed by running the test suite with the C<-t> switch (via
-C<make test.taintwarn>).
+Fix the bugs revealed by running the test suite with the C<-t> switch.
+Setting the TEST_ARGS environment variable to C<-taintwarn> will accomplish
+this.
 
 =head2 Dual life everything
 
