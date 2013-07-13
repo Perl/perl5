@@ -406,6 +406,11 @@ honoured only for calls I<with> parentheses. [RT #116735]
 Syntax errors in lexical subroutines in combination with calls to the same
 subroutines no longer cause crashes at compile time.
 
+=item *
+
+The dtrace sub-entry probe now works with lexical subs, instead of
+crashing [perl #118305].
+
 =back
 
 =head1 Known Problems
