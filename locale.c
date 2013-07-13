@@ -688,20 +688,32 @@ S_is_cur_LC_category_utf8(pTHX_ int category)
 #endif /* HAS_NL_LANGINFO etc */
 
     /* nl_langinfo not available or failed somehow.  Look at the locale name to
-     * see if it matches qr/UTF -? 8 $ /ix  */
+     * see if it matches qr/UTF -? 8 /ix  */
 
     final_pos = strlen(save_input_locale) - 1;
-    if (final_pos >= 3
-        && *(save_input_locale + final_pos) == '8')
-    {
-        has_hyphen = *(save_input_locale + final_pos - 1 ) == '-';
-        if ((! has_hyphen || final_pos >= 4)
-            && toFOLD(*(save_input_locale + final_pos - has_hyphen - 1)) == 'f'
-            && toFOLD(*(save_input_locale + final_pos - has_hyphen - 2)) == 't'
-            && toFOLD(*(save_input_locale + final_pos - has_hyphen - 3)) == 'u')
+    if (final_pos >= 3) {
+        char *name = save_input_locale;
+
+        /* Find next 'U' or 'u' and look from there */
+        while ((name += strcspn(name, "Uu") + 1)
+                                            <= save_input_locale + final_pos - 2)
         {
-            Safefree(save_input_locale);
-            return TRUE;
+            if (toFOLD(*(name)) != 't'
+                || toFOLD(*(name + 1)) != 'f')
+            {
+                continue;
+            }
+            name += 2;
+            if (*(name) == '-') {
+                if ((name > save_input_locale + final_pos - 1)) {
+                    break;
+                }
+                name++;
+            }
+            if (*(name) == '8') {
+                Safefree(save_input_locale);
+                return TRUE;
+            }
         }
     }
 
