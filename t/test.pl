@@ -969,6 +969,13 @@ sub fresh_perl_like {
 # If the global variable $FATAL is true then OPTION fatal is the
 # default.
 
+sub _setup_one_file {
+    my $fh = shift;
+    local $/;
+    my @these = split "\n########\n", <$fh>;
+    ((scalar @these), @these);
+}
+
 sub setup_multiple_progs {
     my ($tests, @prgs);
     foreach my $file (@_) {
@@ -996,12 +1003,9 @@ sub setup_multiple_progs {
         die "Could not find '__END__' in $file"
             unless $found;
 
-        {
-            local $/ = undef;
-            my @these = split "\n########\n", <$fh>;
-            $tests += @these;
-            push @prgs, $file, @these;
-        }
+        my ($t, @p) = _setup_one_file($fh);
+        $tests += $t;
+        push @prgs, $file, @p;
 
         close $fh
             or die "Cannot close $file: $!\n";
@@ -1018,9 +1022,9 @@ sub run_multiple_progs {
 	@prgs = @_;
     } else {
 	# The tests below t run in t and pass in a file handle.
-	my $fh = shift;
-	local $/;
-	@prgs = split "\n########\n", <$fh>;
+        # Not going to rely on undef in list assignment.
+        my $dummy;
+        ($dummy, @prgs) = _setup_one_file(shift);
     }
 
     my $tmpfile = tempfile();
