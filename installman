@@ -1,10 +1,13 @@
 #!./perl -w
+
 BEGIN {
     @INC = qw(lib);
 
     # This needs to be at BEGIN time, before any use of Config
+    # install_lib itself loads and imports Config into main::
     require './install_lib.pl';
 }
+
 use strict;
 
 use Getopt::Long;

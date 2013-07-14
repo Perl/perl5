@@ -1,12 +1,12 @@
 #!./perl -w
 
 BEGIN {
-    require 5.004;
     chdir '..' if !-d 'lib' and -d '../lib';
     @INC = 'lib';
     $ENV{PERL5LIB} = 'lib';
 
     # This needs to be at BEGIN time, before any use of Config
+    # install_lib itself loads and imports Config into main::
     require './install_lib.pl';
 }
 

@@ -9,9 +9,9 @@ use vars qw($Is_VMS $Is_W32 $Is_OS2 $Is_Cygwin $Is_Darwin $Is_NetWare
 use subs qw(unlink link chmod);
 require File::Path;
 
-use Config;
 BEGIN {
-    if ($Config{userelocatableinc}) {
+    require Config;
+    if ($Config::Config{userelocatableinc}) {
 	# This might be a considered a hack. Need to get information about the
 	# configuration from Config.pm *before* Config.pm expands any .../
 	# prefixes.
@@ -19,7 +19,7 @@ BEGIN {
 	# So we set $^X to pretend that we're the already installed perl, so
 	# Config.pm does its ... expansion off that location.
 
-	my $location = $Config{initialinstalllocation};
+        my $location = $Config::Config{initialinstalllocation};
 	die <<'OS' unless defined $location;
 $Config{initialinstalllocation} is not defined - can't install a relocatable
 perl without this.
@@ -34,8 +34,8 @@ OS
 	# You never saw us. We weren't here.
 
 	require Config;
-	Config->import;
     }
+    Config->import;
 }
 
 if ($Config{d_umask}) {
