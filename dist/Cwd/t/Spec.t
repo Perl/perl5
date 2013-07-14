@@ -468,6 +468,10 @@ my @tests = (
 [ "VMS->rel2abs('[-.t4]','[t1.t2.t3]')",         $vms_unix_rpt ? '/sys$disk/t1/t2/t4/'       : '[t1.t2.t4]'       ],
 [ "VMS->rel2abs('[t1]','[t1.t2.t3]')",           $vms_unix_rpt ? '/sys$disk/t1/'             : '[t1]'             ],
 
+[ "VMS->file_name_is_absolute('foo:')",                '1'  ],
+[ "VMS->file_name_is_absolute('foo:bar.dat')",         '1'  ],
+[ "VMS->file_name_is_absolute('foo:[000000]bar.dat')", '1'  ],
+
 [ "OS2->case_tolerant()",         '1'  ],
 
 [ "OS2->catdir('A:/d1','B:/d2','d3','')", 'A:/d1/B:/d2/d3' ],
