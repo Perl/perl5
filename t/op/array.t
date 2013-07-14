@@ -20,9 +20,6 @@ is($tmp, 5);
 is($#ary, 3);
 is(join('',@ary), '1234');
 
-{
-    no warnings 'deprecated';
-
 @foo = ();
 $r = join(',', $#foo, @foo);
 is($r, "-1");
@@ -54,8 +51,6 @@ is($r, "0,0");
 $bar[2] = '2';
 $r = join(',', $#bar, @bar);
 is($r, "2,0,,2");
-
-}
 
 $foo = 'now is the time';
 ok(scalar (($F1,$F2,$Etc) = ($foo =~ /^(\S+)\s+(\S+)\s*(.*)/)));
