@@ -969,6 +969,46 @@ sub fresh_perl_like {
 # If the global variable $FATAL is true then OPTION fatal is the
 # default.
 
+sub setup_multiple_progs {
+    my ($tests, @prgs);
+    foreach my $file (@_) {
+        next if $file =~ /(?:~|\.orig|,v)$/;
+        next if $file =~ /perlio$/ && !PerlIO::Layer->find('perlio');
+        next if -d $file;
+
+        open my $fh, '<', $file or die "Cannot open $file: $!\n" ;
+        my $found;
+        while (<$fh>) {
+            if (/^__END__/) {
+                ++$found;
+                last;
+            }
+        }
+        # This is an internal error, and should never happen. All bar one of
+        # the files had an __END__ marker to signal the end of their preamble,
+        # although for some it wasn't technically necessary as they have no
+        # tests. It might be possible to process files without an __END__ by
+        # seeking back to the start and treating the whole file as tests, but
+        # it's simpler and more reliable just to make the rule that all files
+        # must have __END__ in. This should never fail - a file without an
+        # __END__ should not have been checked in, because the regression tests
+        # would not have passed.
+        die "Could not find '__END__' in $file"
+            unless $found;
+
+        {
+            local $/ = undef;
+            my @these = split "\n########\n", <$fh>;
+            $tests += @these;
+            push @prgs, $file, @these;
+        }
+
+        close $fh
+            or die "Cannot close $file: $!\n";
+    }
+    return ($tests, @prgs);
+}
+
 sub run_multiple_progs {
     my $up = shift;
     my @prgs;
