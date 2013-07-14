@@ -111,21 +111,20 @@ sub chmod {
       unless $opts{notify};
 }
 
-
 sub samepath {
     my($p1, $p2) = @_;
 
     return (lc($p1) eq lc($p2)) if ($Is_W32 || $Is_NetWare);
 
-    if ($p1 ne $p2) {
-	my($dev1, $ino1, $dev2, $ino2);
-	($dev1, $ino1) = stat($p1);
-	($dev2, $ino2) = stat($p2);
-	($dev1 == $dev2 && $ino1 == $ino2);
-    }
-    else {
-	1;
-    }
+    return 1
+        if $p1 eq $p2;
+
+    my ($dev1, $ino1) = stat $p1;
+    return 0
+        unless defined $dev1;
+    my ($dev2, $ino2) = stat $p2;
+
+    return $dev1 == $dev2 && $ino1 == $ino2;
 }
 
 sub safe_rename {
