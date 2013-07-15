@@ -2179,13 +2179,13 @@ PP(pp_subst)
 
 	if (once) {
             char *d, *m;
-            I32 i;
 	    if (RX_MATCH_TAINTED(rx)) /* run time pattern taint, eg locale */
 		rxtainted |= SUBST_TAINT_PAT;
 	    m = orig + RX_OFFS(rx)[0].start;
 	    d = orig + RX_OFFS(rx)[0].end;
 	    s = orig;
 	    if (m - s > strend - d) {  /* faster to shorten from end */
+                I32 i;
 		if (clen) {
 		    Copy(c, m, clen, char);
 		    m += clen;
@@ -2198,20 +2198,14 @@ PP(pp_subst)
 		*m = '\0';
 		SvCUR_set(TARG, m - s);
 	    }
-	    else if ((i = m - s)) {	/* faster from front */
+	    else {	/* faster from front */
+                I32 i = m - s;
 		d -= clen;
-		Move(s, d - i, i, char);
+                if (i > 0)
+                    Move(s, d - i, i, char);
 		sv_chop(TARG, d-i);
 		if (clen)
 		    Copy(c, d, clen, char);
-	    }
-	    else if (clen) {
-		d -= clen;
-		sv_chop(TARG, d);
-		Copy(c, d, clen, char);
-	    }
-	    else {
-		sv_chop(TARG, d);
 	    }
 	    SPAGAIN;
 	    PUSHs(&PL_sv_yes);
