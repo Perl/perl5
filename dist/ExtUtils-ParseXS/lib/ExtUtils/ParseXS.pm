@@ -833,7 +833,8 @@ EOF
     if (%{ $self->{XsubAliases} }) {
       $self->{XsubAliases}->{ $self->{pname} } = 0
         unless defined $self->{XsubAliases}->{ $self->{pname} };
-      while ( my ($xname, $value) = each %{ $self->{XsubAliases} }) {
+      foreach my $xname (sort keys %{ $self->{XsubAliases} }) {
+        my $value = $self->{XsubAliases}{$xname};
         push(@{ $self->{InitFileCode} }, Q(<<"EOF"));
 #        cv = $self->{newXS}(\"$xname\", XS_$self->{Full_func_name}, file$self->{proto});
 #        XSANY.any_i32 = $value;
@@ -847,7 +848,8 @@ EOF
 EOF
     }
     elsif ($self->{interface}) {
-      while ( my ($yname, $value) = each %{ $self->{Interfaces} }) {
+      foreach my $yname (sort keys %{ $self->{Interfaces} }) {
+        my $value = $self->{Interfaces}{$yname};
         $yname = "$self->{Package}\::$yname" unless $yname =~ /::/;
         push(@{ $self->{InitFileCode} }, Q(<<"EOF"));
 #        cv = $self->{newXS}(\"$yname\", XS_$self->{Full_func_name}, file$self->{proto});
