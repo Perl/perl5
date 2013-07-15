@@ -1033,7 +1033,7 @@ static const char byteorderstr_56[] = {BYTEORDER_BYTES_56, 0};
 	TRACEME(("aseen(#%d) = 0x%"UVxf" (refcnt=%d)", cxt->tagnum-1, \
 		 PTR2UV(y), SvREFCNT(y)-1));		\
 	if (stash)								\
-		BLESS((SV *) (y), stash);			\
+		BLESS((SV *) (y), (HV *)(stash));			\
   } STMT_END
 
 /*
@@ -4773,7 +4773,7 @@ static SV *retrieve_tied_idx(pTHX_ stcxt_t *cxt, const char *cname)
 {
 	SV *tv;
 	SV *sv;
-	SV *stash;
+	HV *stash;
 	I32 idx;
 
 	TRACEME(("retrieve_tied_idx (#%d)", cxt->tagnum));
