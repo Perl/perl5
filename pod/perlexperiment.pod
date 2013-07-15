@@ -174,10 +174,6 @@ See also: L<perlre/"Special Backtracking Control Verbs">
 
 See also L<perlintern>
 
-=item Experimental Support for Sun Studio Compilers for Linux OS
-
-See also L<perllinux>
-
 =back
 
 =head2 Accepted features
