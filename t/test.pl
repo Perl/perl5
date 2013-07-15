@@ -971,9 +971,27 @@ sub fresh_perl_like {
 
 sub _setup_one_file {
     my $fh = shift;
-    local $/;
-    my @these = split "\n########\n", <$fh>;
-    ((scalar @these), @these);
+    # Store the filename as a program that started at line 0.
+    # Real files count lines starting at line 1.
+    my @these = (0, shift);
+    my ($lineno, $current);
+    while (<$fh>) {
+        if ($_ eq "########\n") {
+            if (defined $current) {
+                push @these, $lineno, $current;
+            }
+            undef $current;
+        } else {
+            if (!defined $current) {
+                $lineno = $.;
+            }
+            $current .= $_;
+        }
+    }
+    if (defined $current) {
+        push @these, $lineno, $current;
+    }
+    ((scalar @these) / 2 - 1, @these);
 }
 
 sub setup_multiple_progs {
@@ -1003,9 +1021,9 @@ sub setup_multiple_progs {
         die "Could not find '__END__' in $file"
             unless $found;
 
-        my ($t, @p) = _setup_one_file($fh);
+        my ($t, @p) = _setup_one_file($fh, $file);
         $tests += $t;
-        push @prgs, $file, @p;
+        push @prgs, @p;
 
         close $fh
             or die "Cannot close $file: $!\n";
@@ -1021,7 +1039,15 @@ sub run_multiple_progs {
 	# pass in a list of "programs" to run
 	@prgs = @_;
     } else {
-	# The tests below t run in t and pass in a file handle.
+        # The tests below t run in t and pass in a file handle. In theory we
+        # can pass (caller)[1] as the second argument to report errors with
+        # the filename of our caller, as the handle is always DATA. However,
+        # line numbers in DATA count from the __END__ token, so will be wrong.
+        # Which is more confusing than not providing line numbers. So, for now,
+        # don't provide line numbers. No obvious clean solution - one hack
+        # would be to seek DATA back to the start and read to the __END__ token,
+        # but that feels almost like we should just open $0 instead.
+
         # Not going to rely on undef in list assignment.
         my $dummy;
         ($dummy, @prgs) = _setup_one_file(shift);
@@ -1029,10 +1055,15 @@ sub run_multiple_progs {
 
     my $tmpfile = tempfile();
 
+    my ($file, $line);
   PROGRAM:
-    for (@prgs){
-	unless (/\n/) {
-	    print "# From $_\n";
+    while (defined ($line = shift @prgs)) {
+        $_ = shift @prgs;
+        unless ($line) {
+            $file = $_;
+            if (defined $file) {
+                print "# From $file\n";
+            }
 	    next;
 	}
 	my $switch = "";
@@ -1192,7 +1223,14 @@ sub run_multiple_progs {
 	    }
 	}
 
-	ok($ok, $name);
+        if (defined $file) {
+            _ok($ok, "at $file line $line", $name);
+        } else {
+            # We don't have file and line number data for the test, so report
+            # errors as coming from our caller.
+            local $Level = $Level + 1;
+            ok($ok, $name);
+        }
 
 	foreach (@temps) {
 	    unlink $_ if $_;
