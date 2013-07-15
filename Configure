@@ -28,7 +28,7 @@
 # See Porting/pumpkin.pod for more information on metaconfig.
 #
 
-# Generated on Mon May 27 09:27:16 CEST 2013 [metaconfig 3.5 PL0]
+# Generated on Mon Jul 15 15:52:13 CEST 2013 [metaconfig 3.5 PL0]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -4155,13 +4155,11 @@ $define|true|[yY]*)     dflt='y';;
 esac
 cat <<EOM
 
-Perl can be built to take advantage of threads on some systems.
+Perl can be built to offer a form of threading support on some systems
 To do so, Configure can be run with -Dusethreads.
 
 Note that Perl built with threading support runs slightly slower
-and uses more memory than plain Perl. The current implementation
-is believed to be stable, but it is fairly new, and so should be
-treated with caution.
+and uses slightly more memory than plain Perl.
 
 If this doesn't make any sense to you, just accept the default '$dflt'.
 EOM
@@ -4177,22 +4175,14 @@ eval $setvar
 if $test $patchlevel -lt 9; then
     case "$usethreads" in
     $define)
-	$cat <<EOM
-
-Since release 5.6, Perl has had two different threading implementations,
-the newer interpreter-based version (ithreads) with one interpreter per
-thread, and the older 5.005 version (5005threads).
-The 5005threads version is effectively unmaintained and will probably be
-removed in Perl 5.10, so there should be no need to build a Perl using it
-unless needed for backwards compatibility with some existing 5.005threads
-code.
-
-EOM
 	: Default to ithreads unless overridden on command line or with
 	: old config.sh
 	dflt='y'
 	case "$use5005threads" in
-		$define|true|[yY]*) dflt='n';;
+		$define|true|[yY]*)
+			echo "5.005 threads are no longer supported"
+			exit 1
+		;;
 	esac
 	case "$useithreads" in
 		$undef|false|[nN]*) dflt='n';;
