@@ -726,9 +726,10 @@ for creating hard links into files, see L<perlfunc/link>.
 =item localeconv
 
 Get numeric formatting information.  Returns a reference to a hash
-containing the current locale formatting values.
-Users of this function should also read L<perllocale>, where there is a
-L<discussion devoted to this function|perllocale/The localeconv function>.
+containing the current locale formatting values.  Users of this function
+should also read L<perllocale>, which provides a comprehensive
+discussion of Perl locale handling, including
+L<a section devoted to this function|perllocale/The localeconv function>.
 
 Here is how to query the database for the B<de> (Deutsch or German) locale.
 
@@ -1085,8 +1086,11 @@ see L<perlfunc/eval>.
 =item setlocale
 
 Modifies and queries the program's underlying locale.  Users of this
-function should also read L<perllocale>, where there is a
-L<discussion devoted to this function|perllocale/The setlocale function>.
+function should read L<perllocale>, whch provides a comprehensive
+discussion of Perl locale handling, knowledge of which is necessary to
+properly use this function.  It contains
+L<a section devoted to this function|perllocale/The setlocale function>.
+The discussion here is merely a summary reference for C<setlocale()>.
 Note that Perl itself is almost entirely unaffected by the locale
 except within the scope of S<C<"use locale">>.  (Exceptions are listed
 in L<perllocale/Not within the scope of any "use locale" variant>.)

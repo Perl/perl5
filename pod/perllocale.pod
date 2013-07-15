@@ -183,8 +183,9 @@ current locale is that which was determined by the L</"ENVIRONMENT"> in
 effect at the start of the program, except that
 C<L<LC_NUMERIC|/Category LC_NUMERIC: Numeric Formatting>> is always
 initialized to the C locale (mentioned under L<Finding locales>).
-If there is no valid environment, the current locale is undefined.  It
-is likely, but not necessarily, the "C" locale.
+If there is no valid environment, the current locale is whatever the
+system default has been set to.  It is likely, but not necessarily, the
+"C" locale.
 
 The operations that are affected by locale are:
 
@@ -319,10 +320,11 @@ C<POSIX::setlocale()> function:
         #                    LC_CTYPE -- explained below
         # (Showing the testing for success/failure of operations is
         # omitted in these examples to avoid distracting from the main
-        # point; also, any real work would almost certainly have to be
-        # done within the scope of "use locale".)
+        # point
 
         use POSIX qw(locale_h);
+        use locale;
+        my $old_locale;
 
         # query and save the old locale
         $old_locale = setlocale(LC_CTYPE);
@@ -371,14 +373,13 @@ return to the default that was in force when Perl started up: changes
 to the environment made by the application after startup may or may not
 be noticed, depending on your system's C library.
 
-If the second argument does not correspond to a valid locale, the locale
-for the category is not changed, and the function returns C<undef>.
-
 Note that Perl ignores the current C<LC_CTYPE> and C<LC_COLLATE> locales
 within the scope of a C<use locale ':not_characters'>.
 
 If C<set_locale()> fails for some reason (for example an attempt to set
-to a locale unknown to the system), C<undef> is returned.
+to a locale unknown to the system), the locale for the category is not
+changed, and the function returns C<undef>.
+
 
 For further information about the categories, consult L<setlocale(3)>.
 
@@ -726,8 +727,9 @@ of your operating system to the next.  In short, don't call C<strxfrm()>
 directly: let Perl do it for you.
 
 Note: C<use locale> isn't shown in some of these examples because it isn't
-needed: C<strcoll()> and C<strxfrm()> exist only to generate locale-dependent
-results, and so always obey the current C<LC_COLLATE> locale.
+needed: C<strcoll()> and C<strxfrm()> are POSIX functions
+which use the standard system-supplied C<libc> functions that
+always obey the current C<LC_COLLATE> locale.
 
 =head2 Category LC_CTYPE: Character Types
 
