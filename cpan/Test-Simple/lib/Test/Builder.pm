@@ -915,7 +915,7 @@ sub _is_dualvar {
 
     no warnings 'numeric';
     my $numval = $val + 0;
-    return $numval != 0 and $numval ne $val ? 1 : 0;
+    return ($numval != 0 and $numval ne $val ? 1 : 0);
 }
 
 =item B<is_eq>
