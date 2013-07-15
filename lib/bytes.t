@@ -62,7 +62,6 @@ utf8::encode(my $c2_utf8 = $c2);
     # and if there's other tests for lc/uc under bytes I didn't find them
     is(lc($c2), $c2_utf8, "lc under use bytes returns bytes");
     is(uc($c2), $c2_utf8, "uc under use bytes returns bytes");
-    local $TODO = "[perl #117355] [lu]cfirst don't respect 'use bytes'";
     is(lcfirst($c2), $c2_utf8, "lcfirst under use bytes returns bytes");
     is(ucfirst($c2), $c2_utf8, "unfirst under use bytes returns bytes");
 }
