@@ -2018,7 +2018,6 @@ PP(pp_subst)
     STRLEN clen;
     I32 iters = 0;
     I32 maxiters;
-    I32 i;
     bool once;
     U8 rxtainted = 0; /* holds various SUBST_TAINT_* flag bits.
 			See "how taint works" above */
@@ -2180,6 +2179,7 @@ PP(pp_subst)
 
 	if (once) {
             char *d, *m;
+            I32 i;
 	    if (RX_MATCH_TAINTED(rx)) /* run time pattern taint, eg locale */
 		rxtainted |= SUBST_TAINT_PAT;
 	    m = orig + RX_OFFS(rx)[0].start;
@@ -2221,6 +2221,7 @@ PP(pp_subst)
             char *d, *m;
             d = s = RX_OFFS(rx)[0].start + orig;
 	    do {
+                I32 i;
 		if (iters++ > maxiters)
 		    DIE(aTHX_ "Substitution loop");
 		if (RX_MATCH_TAINTED(rx)) /* run time pattern taint, eg locale */
@@ -2241,7 +2242,7 @@ PP(pp_subst)
 				 /* don't match same null twice */
 				 REXEC_NOT_FIRST|REXEC_IGNOREPOS));
 	    if (s != d) {
-		i = strend - s;
+                I32 i = strend - s;
 		SvCUR_set(TARG, d - SvPVX_const(TARG) + i);
 		Move(s, d, i+1, char);		/* include the NUL */
 	    }
