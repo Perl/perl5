@@ -2014,7 +2014,6 @@ PP(pp_subst)
     PMOP *rpm = pm;
     char *s;
     char *strend;
-    char *m;
     const char *c;
     STRLEN clen;
     I32 iters = 0;
@@ -2180,7 +2179,7 @@ PP(pp_subst)
 	}
 
 	if (once) {
-            char *d;
+            char *d, *m;
 	    if (RX_MATCH_TAINTED(rx)) /* run time pattern taint, eg locale */
 		rxtainted |= SUBST_TAINT_PAT;
 	    m = orig + RX_OFFS(rx)[0].start;
@@ -2219,7 +2218,7 @@ PP(pp_subst)
 	    PUSHs(&PL_sv_yes);
 	}
 	else {
-            char *d;
+            char *d, *m;
             d = s = RX_OFFS(rx)[0].start + orig;
 	    do {
 		if (iters++ > maxiters)
@@ -2252,6 +2251,7 @@ PP(pp_subst)
     }
     else {
 	bool first;
+        char *m;
 	SV *repl;
 	if (force_on_match) {
             /* redo the first match, this time with the orig var
@@ -2297,12 +2297,13 @@ PP(pp_subst)
 	    if (RX_MATCH_TAINTED(rx))
 		rxtainted |= SUBST_TAINT_PAT;
 	    if (RX_MATCH_COPIED(rx) && RX_SUBBEG(rx) != orig) {
-		m = s;
-		s = orig;
+		char *old_s    = s;
+		char *old_orig = orig;
                 assert(RX_SUBOFFSET(rx) == 0);
+
 		orig = RX_SUBBEG(rx);
-		s = orig + (m - s);
-		strend = s + (strend - m);
+		s = orig + (old_s - old_orig);
+		strend = s + (strend - old_s);
 	    }
 	    m = RX_OFFS(rx)[0].start + orig;
 	    sv_catpvn_nomg_maybeutf8(dstr, s, m - s, DO_UTF8(TARG));
