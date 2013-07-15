@@ -2117,17 +2117,13 @@ PP(pp_subst)
     r_flags = REXEC_COPY_STR;
 #endif
 
-    m = s = orig;
-
-    if (!CALLREGEXEC(rx, s, strend, orig, 0, TARG, NULL, r_flags))
+    if (!CALLREGEXEC(rx, orig, strend, orig, 0, TARG, NULL, r_flags))
     {
 	SPAGAIN;
 	PUSHs(rpm->op_pmflags & PMf_NONDESTRUCT ? TARG : &PL_sv_no);
 	LEAVE_SCOPE(oldsave);
 	RETURN;
     }
-    s = RX_OFFS(rx)[0].start + orig;
-
     PL_curpm = pm;
 
     /* known replacement string? */
@@ -2223,7 +2219,8 @@ PP(pp_subst)
 	    PUSHs(&PL_sv_yes);
 	}
 	else {
-            char *d = s;
+            char *d;
+            d = s = RX_OFFS(rx)[0].start + orig;
 	    do {
 		if (iters++ > maxiters)
 		    DIE(aTHX_ "Substitution loop");
@@ -2277,10 +2274,13 @@ PP(pp_subst)
 	if (RX_MATCH_TAINTED(rx)) /* run time pattern taint, eg locale */
 	    rxtainted |= SUBST_TAINT_PAT;
 	repl = dstr;
-	dstr = newSVpvn_flags(m, s-m, SVs_TEMP | (DO_UTF8(TARG) ? SVf_UTF8 : 0));
+        s = RX_OFFS(rx)[0].start + orig;
+	dstr = newSVpvn_flags(orig, s-orig,
+                    SVs_TEMP | (DO_UTF8(TARG) ? SVf_UTF8 : 0));
 	if (!c) {
 	    PERL_CONTEXT *cx;
 	    SPAGAIN;
+            m = orig;
 	    /* note that a whole bunch of local vars are saved here for
 	     * use by pp_substcont: here's a list of them in case you're
 	     * searching for places in this sub that uses a particular var:
