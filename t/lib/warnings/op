@@ -1739,3 +1739,118 @@ OPTION regex
 ?(?s).*
 Subroutine DynaLoader::dl_error redefined at \(eval 2\) line 2\.
 ########
+# op.c
+use warnings;
+sub do_warn_1  { return $a or $b; }
+sub do_warn_2  { return $a and $b; }
+sub do_warn_3  { return $a xor $b; }
+sub do_warn_4  { die $a or $b; }
+sub do_warn_5  { die $a and $b; }
+sub do_warn_6  { die $a xor $b; }
+sub do_warn_7  { exit $a or $b; }
+sub do_warn_8  { exit $a and $b; }
+sub do_warn_9  { exit $a xor $b; }
+
+# Since exit is an unary operator, it is even stronger than
+# || and &&.
+sub do_warn_10 { exit $a || $b; }
+sub do_warn_11 { exit $a && $b; }
+
+sub do_warn_12 { goto $a or $b; }
+sub do_warn_13 { goto $a and $b; }
+sub do_warn_14 { goto $a xor $b; }
+sub do_warn_15 { next $a or $b while(1);  }
+sub do_warn_16 { next $a and $b while(1); }
+sub do_warn_17 { next $a xor $b while(1); }
+sub do_warn_18 { last $a or $b while(1);  }
+sub do_warn_19 { last $a and $b while(1); }
+sub do_warn_20 { last $a xor $b while(1); }
+sub do_warn_21 { redo $a or $b while(1); }
+sub do_warn_22 { redo $a and $b while(1); }
+sub do_warn_23 { redo $a xor $b while(1); }
+# These get re-written to "(return/die $a) and $b"
+sub do_warn_24 { $b if return $a; }
+sub do_warn_25 { $b if die $a; }
+EXPECT
+Possible precedence issue with control flow operator at - line 3.
+Possible precedence issue with control flow operator at - line 4.
+Possible precedence issue with control flow operator at - line 5.
+Possible precedence issue with control flow operator at - line 6.
+Possible precedence issue with control flow operator at - line 7.
+Possible precedence issue with control flow operator at - line 8.
+Possible precedence issue with control flow operator at - line 9.
+Possible precedence issue with control flow operator at - line 10.
+Possible precedence issue with control flow operator at - line 11.
+Possible precedence issue with control flow operator at - line 15.
+Possible precedence issue with control flow operator at - line 16.
+Possible precedence issue with control flow operator at - line 18.
+Possible precedence issue with control flow operator at - line 19.
+Possible precedence issue with control flow operator at - line 20.
+Possible precedence issue with control flow operator at - line 21.
+Possible precedence issue with control flow operator at - line 22.
+Possible precedence issue with control flow operator at - line 23.
+Possible precedence issue with control flow operator at - line 24.
+Possible precedence issue with control flow operator at - line 25.
+Possible precedence issue with control flow operator at - line 26.
+Possible precedence issue with control flow operator at - line 27.
+Possible precedence issue with control flow operator at - line 28.
+Possible precedence issue with control flow operator at - line 29.
+Possible precedence issue with control flow operator at - line 31.
+Possible precedence issue with control flow operator at - line 32.
+########
+# op.c
+#  (same as above, except these should not warn)
+use constant FEATURE => 1;
+use constant MISSING_FEATURE => 0;
+
+sub dont_warn_1  { MISSING_FEATURE and return or dont_warn_3(); }
+sub dont_warn_2  { FEATURE || return and dont_warn_3(); }
+sub dont_warn_3  { not FEATURE and return or dont_warn_3(); }
+sub dont_warn_4  { !MISSING_FEATURE || return and dont_warn_3(); }
+sub dont_warn_5  { MISSING_FEATURE and die or dont_warn_3(); }
+sub dont_warn_6  { FEATURE || die and dont_warn_3(); }
+sub dont_warn_7  { not FEATURE and die or dont_warn_3(); }
+sub dont_warn_8  { !MISSING_FEATURE || die and dont_warn_3(); }
+sub dont_warn_9  { MISSING_FEATURE and goto $a or dont_warn_3(); }
+sub dont_warn_10 { FEATURE || goto $a and dont_warn_3(); }
+sub dont_warn_11 { not FEATURE and goto $a or dont_warn_3(); }
+sub dont_warn_12 { !MISSING_FEATURE || goto $a and dont_warn_3(); }
+
+sub dont_warn_13 { MISSING_FEATURE and exit $a or dont_warn_3(); }
+sub dont_warn_14 { FEATURE || exit $a and dont_warn_3(); }
+sub dont_warn_15 { not FEATURE and exit $a or dont_warn_3(); }
+sub dont_warn_16 { !MISSING_FEATURE || exit $a and dont_warn_3(); }
+
+sub dont_warn_17 { MISSING_FEATURE and next or dont_warn_3() while(1); }
+sub dont_warn_18 { FEATURE || next and dont_warn_3() while(1); }
+sub dont_warn_19 { not FEATURE and next or dont_warn_3() while(1); }
+sub dont_warn_20 { !MISSING_FEATURE || next and dont_warn_3() while(1); }
+sub dont_warn_21 { MISSING_FEATURE and redo or dont_warn_3() while(1); }
+sub dont_warn_22 { FEATURE || redo and dont_warn_3() while(1); }
+sub dont_warn_23 { not FEATURE and redo or dont_warn_3() while(1); }
+sub dont_warn_24 { !MISSING_FEATURE || redo and dont_warn_3() while(1); }
+sub dont_warn_25 { MISSING_FEATURE and last or dont_warn_3() while(1); }
+sub dont_warn_26 { FEATURE || last and dont_warn_3() while(1); }
+sub dont_warn_27 { not FEATURE and last or dont_warn_3() while(1); }
+sub dont_warn_28 { !MISSING_FEATURE || last and dont_warn_3() while(1); }
+
+# These are weird, but at least not ambiguous.
+sub dont_warn_29 { return ($a or $b); }
+sub dont_warn_30 { return ($a and $b); }
+sub dont_warn_31 { return ($a xor $b); }
+sub dont_warn_32 { die ($a or $b); }
+sub dont_warn_33 { die ($a and $b); }
+sub dont_warn_34 { die ($a xor $b); }
+sub dont_warn_35 { goto ($a or $b); }
+sub dont_warn_36 { goto ($a and $b); }
+sub dont_warn_37 { goto ($a xor $b); }
+sub dont_warn_38 { next ($a or $b) while(1);  }
+sub dont_warn_39 { next ($a and $b) while(1); }
+sub dont_warn_40 { next ($a xor $b) while(1); }
+sub dont_warn_41 { last ($a or $b) while(1);  }
+sub dont_warn_42 { last ($a and $b) while(1); }
+sub dont_warn_43 { last ($a xor $b) while(1); }
+sub dont_warn_44 { redo ($a or $b) while(1);  }
+sub dont_warn_45 { redo ($a and $b) while(1); }
+sub dont_warn_46 { redo ($a xor $b) while(1); }
+EXPECT
