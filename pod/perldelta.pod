@@ -142,6 +142,12 @@ happen to have local and incompatible files named F<EXTERN.h>, F<XSUB.h> or
 F<perl.h>, as these will now be picked up instead of the installed Perl
 headers.
 
+The C<canon()> function now correctly handles packages with multiple C<::>
+separators when the I<$as> parameter is not I</>. Given that it used to
+generate strings which would likely be syntax errors or pathnames instead of
+filenames, we infer that from the complete lack of bug reports no-one was
+using this functionality. (C<ExtUtils::Miniperl> is now using it.)
+
 =item *
 
 L<ExtUtils::Miniperl> has been upgraded and given a version of 1.

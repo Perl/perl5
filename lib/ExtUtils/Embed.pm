@@ -271,7 +271,7 @@ sub canon {
         s!/\w+\.\w+$!!;
     }
     if ($as ne '/') {
-        s!/!$as!
+        s!/!$as!g
             foreach @ext;
     }
     @ext;
