@@ -74,10 +74,6 @@ Introduced in Perl 5.18
 
 See also L<perlrun>
 
-=item internal functions with M flag
-
-See also L<perlguts>
-
 =item lex_start API
 
 Introduced in Perl 5.13.7
