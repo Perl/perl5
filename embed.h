@@ -1395,7 +1395,7 @@
 #define magic_methcall1(a,b,c,d,e,f)	S_magic_methcall1(aTHX_ a,b,c,d,e,f)
 #define magic_methpack(a,b,c)	S_magic_methpack(aTHX_ a,b,c)
 #define restore_magic(a)	S_restore_magic(aTHX_ a)
-#define save_magic(a,b)		S_save_magic(aTHX_ a,b)
+#define save_magic_flags(a,b,c)	S_save_magic_flags(aTHX_ a,b,c)
 #define unwind_handler_stack(a)	S_unwind_handler_stack(aTHX_ a)
 #  endif
 #  if defined(PERL_IN_MG_C) || defined(PERL_IN_PP_C)

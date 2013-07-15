@@ -90,13 +90,13 @@ struct magic_state {
 /* MGS is typedef'ed to struct magic_state in perl.h */
 
 STATIC void
-S_save_magic(pTHX_ I32 mgs_ix, SV *sv)
+S_save_magic_flags(pTHX_ I32 mgs_ix, SV *sv, U32 flags)
 {
     dVAR;
     MGS* mgs;
     bool bumped = FALSE;
 
-    PERL_ARGS_ASSERT_SAVE_MAGIC;
+    PERL_ARGS_ASSERT_SAVE_MAGIC_FLAGS;
 
     assert(SvMAGICAL(sv));
 
@@ -120,11 +120,13 @@ S_save_magic(pTHX_ I32 mgs_ix, SV *sv)
     mgs->mgs_ss_ix = PL_savestack_ix;   /* points after the saved destructor */
     mgs->mgs_bumped = bumped;
 
-    SvMAGICAL_off(sv);
+    SvFLAGS(sv) &= ~flags;
     /* Turning READONLY off for a copy-on-write scalar (including shared
        hash keys) is a bad idea.  */
     if (!SvIsCOW(sv)) SvREADONLY_off(sv);
 }
+
+#define save_magic(a,b) save_magic_flags(a,b,SVs_GMG|SVs_SMG|SVs_RMG)
 
 /*
 =for apidoc mg_magical
@@ -263,7 +265,7 @@ Perl_mg_set(pTHX_ SV *sv)
 
     if (PL_localizing == 2 && sv == DEFSV) return 0;
 
-    save_magic(mgs_ix, sv);
+    save_magic_flags(mgs_ix, sv, SVs_GMG|SVs_SMG); /* leave SVs_RMG on */
 
     for (mg = SvMAGIC(sv); mg; mg = nextmg) {
         const MGVTBL* vtbl = mg->mg_virtual;

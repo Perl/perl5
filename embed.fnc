@@ -1785,7 +1785,7 @@ sM	|void	|clear_placeholders	|NN HV *hv|U32 items
 #endif
 
 #if defined(PERL_IN_MG_C)
-s	|void	|save_magic	|I32 mgs_ix|NN SV *sv
+s	|void	|save_magic_flags|I32 mgs_ix|NN SV *sv|U32 flags
 -s	|int	|magic_methpack	|NN SV *sv|NN const MAGIC *mg|NN SV *meth
 s	|SV*	|magic_methcall1|NN SV *sv|NN const MAGIC *mg \
 				|NN SV *meth|U32 flags \

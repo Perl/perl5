@@ -1332,3 +1332,11 @@ Can't call method "FETCHSIZE" on an undefined value at - line 5.
 Can't call method "FETCHSIZE" on an undefined value at - line 6.
 Can't call method "FETCHSIZE" on an undefined value at - line 7.
 Can't call method "FETCHSIZE" on an undefined value at - line 8.
+########
+
+# Assigning vstrings to tied scalars
+sub TIESCALAR{bless[]};
+sub STORE { print ref \$_[1], "\n" }
+tie $x, ""; $x = v3;
+EXPECT
+VSTRING
