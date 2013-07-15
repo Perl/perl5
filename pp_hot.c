@@ -2070,7 +2070,10 @@ PP(pp_subst)
 	Perl_croak_no_modify();
     PUTBACK;
 
-    s = SvPV_nomg(TARG, len);
+    orig = SvPV_nomg(TARG, len);
+    /* note we don't (yet) force the var into being a string; if we fail
+     * to match, we leave as-is; on successful match howeverm, we *will*
+     * coerce into a string, then repeat the match */
     if (!SvPOKp(TARG) || SvTYPE(TARG) == SVt_PVGV || SvVOK(TARG))
 	force_on_match = 1;
 
@@ -2089,11 +2092,11 @@ PP(pp_subst)
     }
 
   force_it:
-    if (!pm || !s)
-	DIE(aTHX_ "panic: pp_subst, pm=%p, s=%p", pm, s);
+    if (!pm || !orig)
+	DIE(aTHX_ "panic: pp_subst, pm=%p, orig=%p", pm, orig);
 
-    strend = s + len;
-    slen = DO_UTF8(TARG) ? utf8_length((U8*)s, (U8*)strend) : len;
+    strend = orig + len;
+    slen = DO_UTF8(TARG) ? utf8_length((U8*)orig, (U8*)strend) : len;
     maxiters = 2 * slen + 10;	/* We can match twice at each
 				   position, once with zero-length,
 				   second time with non-zero. */
@@ -2115,7 +2118,7 @@ PP(pp_subst)
     r_flags = REXEC_COPY_STR;
 #endif
 
-    orig = m = s;
+    m = s = orig;
 
     if (!CALLREGEXEC(rx, s, strend, orig, 0, TARG, NULL, r_flags))
     {
@@ -2174,8 +2177,10 @@ PP(pp_subst)
 	}
 #endif
 	if (force_on_match) {
+            /* redo the first match, this time with the orig var
+             * forced into being a string */
 	    force_on_match = 0;
-	    s = SvPV_force_nomg(TARG, len);
+	    orig = SvPV_force_nomg(TARG, len);
 	    goto force_it;
 	}
 	d = s;
@@ -2251,6 +2256,8 @@ PP(pp_subst)
 	bool first;
 	SV *repl;
 	if (force_on_match) {
+            /* redo the first match, this time with the orig var
+             * forced into being a string */
 	    force_on_match = 0;
 	    if (rpm->op_pmflags & PMf_NONDESTRUCT) {
 		/* I feel that it should be possible to avoid this mortal copy
@@ -2260,7 +2267,7 @@ PP(pp_subst)
 		   cases where it would be viable to drop into the copy code. */
 		TARG = sv_2mortal(newSVsv(TARG));
 	    }
-	    s = SvPV_force_nomg(TARG, len);
+	    orig = SvPV_force_nomg(TARG, len);
 	    goto force_it;
 	}
 #ifdef PERL_ANY_COW
