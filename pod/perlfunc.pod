@@ -3909,12 +3909,6 @@ FILEHANDLE is an expression, its value is the real filehandle.  (This is
 considered a symbolic reference, so C<use strict "refs"> should I<not> be
 in effect.)
 
-If EXPR is omitted, the global (package) scalar variable of the same
-name as the FILEHANDLE contains the filename.  (Note that lexical 
-variables--those declared with C<my> or C<state>--will not work for this
-purpose; so if you're using C<my> or C<state>, specify EXPR in your
-call to open.)
-
 If three (or more) arguments are specified, the open mode (including
 optional encoding) in the second argument are distinct from the filename in
 the third.  If MODE is C<< < >> or nothing, the file is opened for input.
@@ -3997,6 +3991,33 @@ where you want to format a suitable error message (but there are
 modules that can help with that problem)) always check
 the return value from opening a file.  
 
+The filehandle will be closed when its reference count reaches zero.
+If it is a lexically scoped variable declared with C<my>, that usually
+means the end of the enclosing scope.  However, this automatic close
+does not check for errors, so it is better to explicitly close
+filehandles, especially those used for writing:
+
+    close($handle)
+       || warn "close failed: $!";
+
+An older style is to use a bareword as the filehandle, as
+
+    open(FH, "<", "input.txt")
+       or die "cannot open < input.txt: $!";
+
+Then you can use C<FH> as the filehandle, in C<< close FH >> and C<<
+<FH> >> and so on.  Note that it's a global variable, so this form is
+not recommended in new code.
+
+As a shortcut a one-argument call takes the filename from the global
+scalar variable of the same name as the filehandle:
+
+    $ARTICLE = 100;
+    open(ARTICLE) or die "Can't find article $ARTICLE: $!\n";
+
+Here C<$ARTICLE> must be a global (package) scalar variable - not one
+declared with C<my> or C<state>.
+
 As a special case the three-argument form with a read/write mode and the third
 argument being C<undef>:
 
@@ -4020,10 +4041,6 @@ To (re)open C<STDOUT> or C<STDERR> as an in-memory file, close it first:
 	or die "Can't open STDOUT: $!";
 
 General examples:
-
-    $ARTICLE = 100;
-    open(ARTICLE) or die "Can't find article $ARTICLE: $!\n";
-    while (<ARTICLE>) {...
 
     open(LOG, ">>/usr/spool/news/twitlog");  # (log is reserved)
     # if the open fails, output is discarded
@@ -4268,34 +4285,6 @@ interpretation.  For example:
     print HANDLE "stuff $$\n";
     seek(HANDLE, 0, 0);
     print "File contains: ", <HANDLE>;
-
-Using the constructor from the C<IO::Handle> package (or one of its
-subclasses, such as C<IO::File> or C<IO::Socket>), you can generate anonymous
-filehandles that have the scope of the variables used to hold them, then
-automatically (but silently) close once their reference counts become
-zero, typically at scope exit:
-
-    use IO::File;
-    #...
-    sub read_myfile_munged {
-        my $ALL = shift;
-	# or just leave it undef to autoviv
-        my $handle = IO::File->new;
-        open($handle, "<", "myfile") or die "myfile: $!";
-        $first = <$handle>
-            or return ();     # Automatically closed here.
-        mung($first) or die "mung failed";  # Or here.
-        return (first, <$handle>) if $ALL;  # Or here.
-        return $first;                      # Or here.
-    }
-
-B<WARNING:> The previous example has a bug because the automatic
-close that happens when the refcount on C<handle> reaches zero does not
-properly detect and report failures.  I<Always> close the handle
-yourself and inspect the return value.
-
-    close($handle) 
-	|| warn "close failed: $!";
 
 See L</seek> for some details about mixing reading and writing.
 
