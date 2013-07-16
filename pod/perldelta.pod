@@ -626,8 +626,9 @@ vstring into a regular string.
 
 =item *
 
-C<pos> did not work properly on subroutine arguments aliased to nonexistent
-hash and array elements [perl #77814].
+C<pos>, C<tie>, C<tied> and C<untie> did not work
+properly on subroutine arguments aliased to nonexistent
+hash and array elements [perl #77814, #27010].
 
 =back
 
