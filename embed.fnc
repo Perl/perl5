@@ -16,7 +16,7 @@
 :         any doc entry goes in perlapi.pod rather than perlintern.pod.  If no
 :	     documentation is furnished for this function, and M is also
 :	     specified, the function is not listed as part of the public API.
-:	     If M isn't specified and no documentation is furnished, the
+:	     If M isn't specified, and no documentation is furnished, the
 :	     function is listed in perlapi as existing and being undocumented
 :         makes '#define foo Perl_foo' scope not just for PERL_CORE/PERL_EXT
 :
@@ -48,8 +48,9 @@
 :         in embed.h, change "#ifdef PERL_CORE"
 :         into               "#if defined(PERL_CORE) || defined(PERL_EXT)"
 :
-:      Should always be combined with "X" to be usable from dynamically
-:      loaded extensions.
+:      To be usable from dynamically loaded extensions, either:
+:	  1) must be static to its containing file ("i" or "s" flag); or
+:         2) be combined with the "X" flag.
 :
 :   f  Function takes printf style format string, varargs (hence any entry that
 :      would otherwise go in embed.h is suppressed):
