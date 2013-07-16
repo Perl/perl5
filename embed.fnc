@@ -843,7 +843,7 @@ pd	|void	|mg_localize	|NN SV* sv|NN SV* nsv|bool setmagic
 ApdR	|MAGIC*	|mg_find	|NULLOK const SV* sv|int type
 ApdR	|MAGIC*	|mg_findext	|NULLOK const SV* sv|int type|NULLOK const MGVTBL *vtbl
 : exported for re.pm
-EpR	|MAGIC*	|mg_find_mglob	|NN SV* sv
+EXpR	|MAGIC*	|mg_find_mglob	|NN SV* sv
 Apd	|int	|mg_free	|NN SV* sv
 Apd	|void	|mg_free_type	|NN SV* sv|int how
 Apd	|int	|mg_get		|NN SV* sv
@@ -1363,7 +1363,7 @@ Apd	|MAGIC *|sv_magicext	|NN SV *const sv|NULLOK SV *const obj|const int how \
 				|NULLOK const MGVTBL *const vtbl|NULLOK const char *const name \
 				|const I32 namlen
 : exported for re.pm
-Ep	|MAGIC *|sv_magicext_mglob|NN SV *sv
+EXp	|MAGIC *|sv_magicext_mglob|NN SV *sv
 ApdbamR	|SV*	|sv_mortalcopy	|NULLOK SV *const oldsv
 XpaR	|SV*	|sv_mortalcopy_flags|NULLOK SV *const oldsv|U32 flags
 ApdR	|SV*	|sv_newmortal
