@@ -5410,6 +5410,24 @@ Perl_sv_magicext(pTHX_ SV *const sv, SV *const obj, const int how,
     return mg;
 }
 
+MAGIC *
+Perl_sv_magicext_mglob(pTHX_ SV *sv)
+{
+    PERL_ARGS_ASSERT_SV_MAGICEXT_MGLOB;
+    if (SvTYPE(sv) == SVt_PVLV && LvTYPE(sv) == 'y') {
+	/* This sv is only a delegate.  //g magic must be attached to
+	   its target. */
+	vivify_defelem(sv);
+	sv = LvTARG(sv);
+    }
+#ifdef PERL_OLD_COPY_ON_WRITE
+    if (SvIsCOW(sv))
+	sv_force_normal_flags(sv, 0);
+#endif
+    return sv_magicext(sv, NULL, PERL_MAGIC_regex_global,
+		       &PL_vtbl_mglob, 0, 0);
+}
+
 /*
 =for apidoc sv_magic
 

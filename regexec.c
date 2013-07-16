@@ -2194,9 +2194,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
 	    reginfo->ganch = startpos + prog->gofs;
 	    DEBUG_GPOS_r(PerlIO_printf(Perl_debug_log,
 	      "GPOS IGNOREPOS: reginfo->ganch = startpos + %"UVxf"\n",(UV)prog->gofs));
-	} else if (sv && SvTYPE(sv) >= SVt_PVMG
-		  && SvMAGIC(sv)
-		  && (mg = mg_find(sv, PERL_MAGIC_regex_global))
+	} else if (sv && (mg = mg_find_mglob(sv))
 		  && mg->mg_len >= 0) {
 	    reginfo->ganch = strbeg + mg->mg_len;	/* Defined pos() */
 	    DEBUG_GPOS_r(PerlIO_printf(Perl_debug_log,
@@ -7533,15 +7531,9 @@ S_setup_eval_state(pTHX_ regmatch_info *const reginfo)
             DEFSV_set(reginfo->sv);
         }
 
-        if (!(SvTYPE(reginfo->sv) >= SVt_PVMG && SvMAGIC(reginfo->sv)
-              && (mg = mg_find(reginfo->sv, PERL_MAGIC_regex_global)))) {
+        if (!(mg = mg_find_mglob(reginfo->sv))) {
             /* prepare for quick setting of pos */
-#ifdef PERL_OLD_COPY_ON_WRITE
-            if (SvIsCOW(reginfo->sv))
-                sv_force_normal_flags(reginfo->sv, 0);
-#endif
-            mg = sv_magicext(reginfo->sv, NULL, PERL_MAGIC_regex_global,
-                             &PL_vtbl_mglob, NULL, 0);
+            mg = sv_magicext_mglob(reginfo->sv);
             mg->mg_len = -1;
         }
         eval_state->pos_magic = mg;

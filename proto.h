@@ -2468,6 +2468,12 @@ PERL_CALLCONV int	Perl_mg_copy(pTHX_ SV *sv, SV *nsv, const char *key, I32 klen)
 PERL_CALLCONV MAGIC*	Perl_mg_find(pTHX_ const SV* sv, int type)
 			__attribute__warn_unused_result__;
 
+PERL_CALLCONV MAGIC*	Perl_mg_find_mglob(pTHX_ SV* sv)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_MG_FIND_MGLOB	\
+	assert(sv)
+
 PERL_CALLCONV MAGIC*	Perl_mg_findext(pTHX_ const SV* sv, int type, const MGVTBL *vtbl)
 			__attribute__warn_unused_result__;
 
@@ -4113,6 +4119,11 @@ PERL_CALLCONV void	Perl_sv_magic(pTHX_ SV *const sv, SV *const obj, const int ho
 PERL_CALLCONV MAGIC *	Perl_sv_magicext(pTHX_ SV *const sv, SV *const obj, const int how, const MGVTBL *const vtbl, const char *const name, const I32 namlen)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_SV_MAGICEXT	\
+	assert(sv)
+
+PERL_CALLCONV MAGIC *	Perl_sv_magicext_mglob(pTHX_ SV *sv)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_SV_MAGICEXT_MGLOB	\
 	assert(sv)
 
 /* PERL_CALLCONV SV*	Perl_sv_mortalcopy(pTHX_ SV *const oldsv)

@@ -1390,10 +1390,9 @@ PP(pp_match)
 
     /* XXXX What part of this is needed with true \G-support? */
     if (global) {
+	MAGIC * const mg = mg_find_mglob(TARG);
 	RX_OFFS(rx)[0].start = -1;
-	if (SvTYPE(TARG) >= SVt_PVMG && SvMAGIC(TARG)) {
-	    MAGIC* const mg = mg_find(TARG, PERL_MAGIC_regex_global);
-	    if (mg && mg->mg_len >= 0) {
+	if (mg && mg->mg_len >= 0) {
 		if (!(RX_EXTFLAGS(rx) & RXf_GPOS_SEEN))
 		    RX_OFFS(rx)[0].end = RX_OFFS(rx)[0].start = mg->mg_len;
 		else if (RX_EXTFLAGS(rx) & RXf_ANCH_GPOS) {
@@ -1405,7 +1404,6 @@ PP(pp_match)
 		    RX_OFFS(rx)[0].end = RX_OFFS(rx)[0].start = mg->mg_len;
 		minmatch = (mg->mg_flags & MGf_MINMATCH) ? RX_GOFS(rx) + 1 : 0;
 		update_minmatch = 0;
-	    }
 	}
     }
 #ifdef PERL_SAWAMPERSAND
@@ -1491,16 +1489,9 @@ PP(pp_match)
 	}
 	if (global) {
 	    if (dynpm->op_pmflags & PMf_CONTINUE) {
-		MAGIC* mg = NULL;
-		if (SvTYPE(TARG) >= SVt_PVMG && SvMAGIC(TARG))
-		    mg = mg_find(TARG, PERL_MAGIC_regex_global);
+		MAGIC *mg = mg_find_mglob(TARG);
 		if (!mg) {
-#ifdef PERL_OLD_COPY_ON_WRITE
-		    if (SvIsCOW(TARG))
-			sv_force_normal_flags(TARG, 0);
-#endif
-		    mg = sv_magicext(TARG, NULL, PERL_MAGIC_regex_global,
-				     &PL_vtbl_mglob, NULL, 0);
+		    mg = sv_magicext_mglob(TARG);
 		}
 		if (RX_OFFS(rx)[0].start != -1) {
 		    mg->mg_len = RX_OFFS(rx)[0].end;
@@ -1524,18 +1515,9 @@ PP(pp_match)
     }
     else {
 	if (global) {
-	    MAGIC* mg;
-	    if (SvTYPE(TARG) >= SVt_PVMG && SvMAGIC(TARG))
-		mg = mg_find(TARG, PERL_MAGIC_regex_global);
-	    else
-		mg = NULL;
+	    MAGIC *mg = mg_find_mglob(TARG);
 	    if (!mg) {
-#ifdef PERL_OLD_COPY_ON_WRITE
-		if (SvIsCOW(TARG))
-		    sv_force_normal_flags(TARG, 0);
-#endif
-		mg = sv_magicext(TARG, NULL, PERL_MAGIC_regex_global,
-				 &PL_vtbl_mglob, NULL, 0);
+		mg = sv_magicext_mglob(TARG);
 	    }
 	    if (RX_OFFS(rx)[0].start != -1) {
 		mg->mg_len = RX_OFFS(rx)[0].end;
@@ -1631,11 +1613,9 @@ yup:					/* Confirmed by INTUIT */
 nope:
 ret_no:
     if (global && !(dynpm->op_pmflags & PMf_CONTINUE)) {
-	if (SvTYPE(TARG) >= SVt_PVMG && SvMAGIC(TARG)) {
-	    MAGIC* const mg = mg_find(TARG, PERL_MAGIC_regex_global);
+	    MAGIC* const mg = mg_find_mglob(TARG);
 	    if (mg)
 		mg->mg_len = -1;
-	}
     }
     LEAVE_SCOPE(oldsave);
     if (gimme == G_ARRAY)

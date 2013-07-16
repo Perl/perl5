@@ -436,6 +436,21 @@ Perl_mg_findext(pTHX_ const SV *sv, int type, const MGVTBL *vtbl)
     return S_mg_findext_flags(aTHX_ sv, type, vtbl, 1);
 }
 
+MAGIC *
+Perl_mg_find_mglob(pTHX_ SV *sv)
+{
+    PERL_ARGS_ASSERT_MG_FIND_MGLOB;
+    if (SvTYPE(sv) == SVt_PVLV && LvTYPE(sv) == 'y') {
+        /* This sv is only a delegate.  //g magic must be attached to
+           its target. */
+        vivify_defelem(sv);
+        sv = LvTARG(sv);
+    }
+    if (SvTYPE(sv) >= SVt_PVMG && SvMAGIC(sv))
+        return S_mg_findext_flags(aTHX_ sv, PERL_MAGIC_regex_global, 0, 0);
+    return NULL;
+}
+
 /*
 =for apidoc mg_copy
 
@@ -2076,19 +2091,17 @@ Perl_magic_getpos(pTHX_ SV *sv, MAGIC *mg)
 {
     dVAR;
     SV* const lsv = LvTARG(sv);
+    MAGIC * const found = mg_find_mglob(lsv);
 
     PERL_ARGS_ASSERT_MAGIC_GETPOS;
     PERL_UNUSED_ARG(mg);
 
-    if (SvTYPE(lsv) >= SVt_PVMG && SvMAGIC(lsv)) {
-	MAGIC * const found = mg_find(lsv, PERL_MAGIC_regex_global);
-	if (found && found->mg_len >= 0) {
+    if (found && found->mg_len >= 0) {
 	    I32 i = found->mg_len;
 	    if (DO_UTF8(lsv))
 		sv_pos_b2u(lsv, &i);
 	    sv_setiv(sv, i);
 	    return 0;
-	}
     }
     SvOK_off(sv);
     return 0;
@@ -2108,19 +2121,11 @@ Perl_magic_setpos(pTHX_ SV *sv, MAGIC *mg)
     PERL_ARGS_ASSERT_MAGIC_SETPOS;
     PERL_UNUSED_ARG(mg);
 
-    if (SvTYPE(lsv) >= SVt_PVMG && SvMAGIC(lsv))
-	found = mg_find(lsv, PERL_MAGIC_regex_global);
-    else
-	found = NULL;
+    found = mg_find_mglob(lsv);
     if (!found) {
 	if (!SvOK(sv))
 	    return 0;
-#ifdef PERL_OLD_COPY_ON_WRITE
-    if (SvIsCOW(lsv))
-        sv_force_normal_flags(lsv, 0);
-#endif
-	found = sv_magicext(lsv, NULL, PERL_MAGIC_regex_global, &PL_vtbl_mglob,
-			    NULL, 0);
+	found = sv_magicext_mglob(lsv);
     }
     else if (!SvOK(sv)) {
 	found->mg_len = -1;
