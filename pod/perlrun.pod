@@ -265,6 +265,8 @@ is equivalent to
 
 An alternate delimiter may be specified using B<-F>.
 
+B<-a> implicitly sets B<-n>.
+
 =item B<-C [I<number/list>]>
 X<-C>
 
@@ -487,9 +489,11 @@ perl, you can check the value of C<$Config{usesitecustomize}>.
 =item B<-F>I<pattern>
 X<-F>
 
-specifies the pattern to split on if B<-a> is also in effect.  The
-pattern may be surrounded by C<//>, C<"">, or C<''>, otherwise it will be
-put in single quotes. You can't use literal whitespace in the pattern.
+specifies the pattern to split on for B<-a>. The pattern may be
+surrounded by C<//>, C<"">, or C<''>, otherwise it will be put in single
+quotes. You can't use literal whitespace in the pattern.
+
+B<-F> implicitly sets both B<-a> and B<-n>.
 
 =item B<-h>
 X<-h>
