@@ -547,6 +547,9 @@ get_regex_charset_name(const U32 flags, STRLEN* const lenp)
                                      * to skip copying ... */
 #define REXEC_COPY_SKIP_PRE  0x20   /* ...the $` part of the string, or */
 #define REXEC_COPY_SKIP_POST 0x40   /* ...the $' part of the string */
+#define REXEC_FAIL_ON_UNDERFLOW 0x80 /* fail the match if $& would start before
+                                        the start pos (so s/.\G// would fail
+                                        on second iteration */
 
 #if defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
 #  define ReREFCNT_inc(re)						\

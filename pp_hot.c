@@ -2233,7 +2233,7 @@ PP(pp_subst)
 	    } while (CALLREGEXEC(rx, s, strend, orig, s == m,
 				 TARG, NULL,
 				 /* don't match same null twice */
-				 REXEC_NOT_FIRST|REXEC_IGNOREPOS));
+                     REXEC_NOT_FIRST|REXEC_IGNOREPOS|REXEC_FAIL_ON_UNDERFLOW));
 	    if (s != d) {
                 I32 i = strend - s;
 		SvCUR_set(TARG, d - SvPVX_const(TARG) + i);
@@ -2321,7 +2321,8 @@ PP(pp_subst)
 	    if (once)
 		break;
 	} while (CALLREGEXEC(rx, s, strend, orig, s == m,
-			     TARG, NULL, REXEC_NOT_FIRST|REXEC_IGNOREPOS));
+			     TARG, NULL,
+                    REXEC_NOT_FIRST|REXEC_IGNOREPOS|REXEC_FAIL_ON_UNDERFLOW));
 	sv_catpvn_nomg_maybeutf8(dstr, s, strend - s, DO_UTF8(TARG));
 
 	if (rpm->op_pmflags & PMf_NONDESTRUCT) {

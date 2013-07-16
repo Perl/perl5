@@ -229,7 +229,7 @@ PP(pp_substcont)
 	if (CxONCE(cx) || s < orig ||
                 !CALLREGEXEC(rx, s, cx->sb_strend, orig,
 			     (s == m), cx->sb_targ, NULL,
-                                (REXEC_IGNOREPOS|REXEC_NOT_FIRST)))
+                    (REXEC_IGNOREPOS|REXEC_NOT_FIRST|REXEC_FAIL_ON_UNDERFLOW)))
 	{
 	    SV *targ = cx->sb_targ;
 

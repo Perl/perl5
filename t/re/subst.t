@@ -7,7 +7,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan( tests => 207 );
+plan( tests => 231 );
 
 $_ = 'david';
 $a = s/david/rules/r;
@@ -670,10 +670,94 @@ is($name, "cis", q[#22351 bug with 'e' substitution modifier]);
 
 fresh_perl_is( '$_=q(foo);s/(.)\G//g;print' => 'foo',
                 '[perl #69056] positive GPOS regex segfault' );
-fresh_perl_is( '$_="abcdef"; s/bc|(.)\G(.)/$1 ? "[$1-$2]" : "XX"/ge; print' => 'aXX[c-d][d-e][e-f]',
+fresh_perl_is( '$_="abcdef"; s/bc|(.)\G(.)/$1 ? "[$1-$2]" : "XX"/ge; print' => 'aXXdef',
                 'positive GPOS regex substitution failure (#69056, #114884)' );
 fresh_perl_is( '$_="abcdefg123456"; s/(?<=...\G)?(\d)/($1)/; print' => 'abcdefg(1)23456',
                 'positive GPOS lookbehind regex substitution failure #114884' );
+
+# s/..\G//g should stop after the first iteration, rather than working its
+# way backwards, or looping infinitely, or SEGVing (for example)
+{
+    my ($s, $count);
+
+    # use a function to disable constant folding
+    my $f = sub { substr("789", 0, $_[0]) };
+
+    $s = '123456';
+    pos($s) = 4;
+    $count = $s =~ s/\d\d\G/7/g;
+    is($count, 1, "..\\G count (short)");
+    is($s, "12756", "..\\G s (short)");
+
+    $s = '123456';
+    pos($s) = 4;
+    $count = $s =~ s/\d\d\G/78/g;
+    is($count, 1, "..\\G count (equal)");
+    is($s, "127856", "..\\G s (equal)");
+
+    $s = '123456';
+    pos($s) = 4;
+    $count = $s =~ s/\d\d\G/789/g;
+    is($count, 1, "..\\G count (long)");
+    is($s, "1278956", "..\\G s (long)");
+
+
+    $s = '123456';
+    pos($s) = 4;
+    $count = $s =~ s/\d\d\G/$f->(1)/eg;
+    is($count, 1, "..\\G count (short code)");
+    is($s, "12756", "..\\G s (short code)");
+
+    $s = '123456';
+    pos($s) = 4;
+    $count = $s =~ s/\d\d\G/$f->(2)/eg;
+    is($count, 1, "..\\G count (equal code)");
+    is($s, "127856", "..\\G s (equal code)");
+
+    $s = '123456';
+    pos($s) = 4;
+    $count = $s =~ s/\d\d\G/$f->(3)/eg;
+    is($count, 1, "..\\G count (long code)");
+    is($s, "1278956", "..\\G s (long code)");
+
+    $s = '123456';
+    pos($s) = 4;
+    $count = $s =~ s/\d\d(?=\d\G)/7/g;
+    is($count, 1, "..\\G count (lookahead short)");
+    is($s, "17456", "..\\G s (lookahead short)");
+
+    $s = '123456';
+    pos($s) = 4;
+    $count = $s =~ s/\d\d(?=\d\G)/78/g;
+    is($count, 1, "..\\G count (lookahead equal)");
+    is($s, "178456", "..\\G s (lookahead equal)");
+
+    $s = '123456';
+    pos($s) = 4;
+    $count = $s =~ s/\d\d(?=\d\G)/789/g;
+    is($count, 1, "..\\G count (lookahead long)");
+    is($s, "1789456", "..\\G s (lookahead long)");
+
+
+    $s = '123456';
+    pos($s) = 4;
+    $count = $s =~ s/\d\d(?=\d\G)/$f->(1)/eg;
+    is($count, 1, "..\\G count (lookahead short code)");
+    is($s, "17456", "..\\G s (lookahead short code)");
+
+    $s = '123456';
+    pos($s) = 4;
+    $count = $s =~ s/\d\d(?=\d\G)/$f->(2)/eg;
+    is($count, 1, "..\\G count (lookahead equal code)");
+    is($s, "178456", "..\\G s (lookahead equal code)");
+
+    $s = '123456';
+    pos($s) = 4;
+    $count = $s =~ s/\d\d(?=\d\G)/$f->(3)/eg;
+    is($count, 1, "..\\G count (lookahead long code)");
+    is($s, "1789456", "..\\G s (lookahead long code)");
+}
+
 
 # [perl #71470] $var =~ s/$qr//e calling get-magic on $_ as well as $var
 {

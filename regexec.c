@@ -2279,6 +2279,19 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
              * Set up captures etc just for $& and $-[0]
              * (an intuit-only match wont have $1,$2,..) */
             assert(!prog->nparens);
+
+            /* s/// doesn't like it if $& is earlier than where we asked it to
+             * start searching (which can happen on something like /.\G/) */
+            if (       (flags & REXEC_FAIL_ON_UNDERFLOW)
+                    && (s < stringarg))
+            {
+                /* this should only be possible under \G */
+                assert(prog->extflags & RXf_GPOS_SEEN);
+                DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
+                    "matched, but failing for REXEC_FAIL_ON_UNDERFLOW\n"));
+                goto phooey;
+            }
+
             /* match via INTUIT shouldn't have any captures.
              * Let @-, @+, $^N know */
             prog->lastparen = prog->lastcloseparen = 0;
@@ -2834,6 +2847,18 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
     goto phooey;
 
 got_it:
+    /* s/// doesn't like it if $& is earlier than where we asked it to
+     * start searching (which can happen on something like /.\G/) */
+    if (       (flags & REXEC_FAIL_ON_UNDERFLOW)
+            && (prog->offs[0].start < stringarg - strbeg))
+    {
+        /* this should only be possible under \G */
+        assert(prog->extflags & RXf_GPOS_SEEN);
+        DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
+            "matched, but failing for REXEC_FAIL_ON_UNDERFLOW\n"));
+        goto phooey;
+    }
+
     DEBUG_BUFFERS_r(
 	if (swap)
 	    PerlIO_printf(Perl_debug_log,

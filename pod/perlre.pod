@@ -746,6 +746,17 @@ row.
 It is worth noting that C<\G> improperly used can result in an infinite
 loop. Take care when using patterns that include C<\G> in an alternation.
 
+Note also that C<s///> will refuse to overwrite part of a substitution
+that has already been replaced; so for example this will stop after the
+first iteration, rather than iterating its way backwards through the
+string:
+
+    $_ = "123456789";
+    pos = 6;
+    s/.(?=.\G)/X/g;
+    print; 	# prints 1234X6789, not XXXXX6789
+
+
 =head3 Capture groups
 
 The bracketing construct C<( ... )> creates capture groups (also referred to as
