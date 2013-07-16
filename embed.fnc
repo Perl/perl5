@@ -1088,8 +1088,8 @@ Ap	|SV*	|regclass_swash	|NULLOK const regexp *prog \
 				|NN const struct regnode *node|bool doinit \
 				|NULLOK SV **listsvp|NULLOK SV **altsvp
 #ifdef PERL_IN_REGCOMP_C
-EMsR	|SV*	|_new_invlist_C_array|NN UV* list
-: Not used currently: EXMs	|bool	|_invlistEQ	|NN SV* const a|NN SV* const b|bool complement_b
+EMsR	|SV*	|_new_invlist_C_array|NN const UV* const list
+: Not used currently: EXMs	|bool	|_invlistEQ	|NN SV* const a|NN SV* const b|const bool complement_b
 #endif
 Ap	|I32	|pregexec	|NN REGEXP * const prog|NN char* stringarg \
 				|NN char* strend|NN char* strbeg|I32 minend \
@@ -1434,17 +1434,15 @@ EsM	|void	|_append_range_to_invlist   |NN SV* const invlist|const UV start|const
 EiMR	|UV*	|_invlist_array_init	|NN SV* const invlist|const bool will_have_0
 EiMR	|UV*	|invlist_array	|NN SV* const invlist
 EsM	|void	|invlist_extend    |NN SV* const invlist|const UV len
-EiMR	|UV*	|get_invlist_zero_addr	|NN SV* invlist
 EiMR	|UV	|invlist_max	|NN SV* const invlist
-EiM	|void	|invlist_set_len|NN SV* const invlist|const UV len
+EiM	|void	|invlist_set_len|NN SV* const invlist|const UV len|const bool offset
 EiMR	|IV*	|get_invlist_previous_index_addr|NN SV* invlist
 EiMR	|IV	|invlist_previous_index|NN SV* const invlist
 EiM	|void	|invlist_set_previous_index|NN SV* const invlist|const IV index
 EiM	|void	|invlist_trim	|NN SV* const invlist
 EiMR	|SV*	|invlist_clone	|NN SV* const invlist
 EiMR	|bool	|invlist_is_iterating|NN SV* const invlist
-EiMR	|UV*	|get_invlist_iter_addr	|NN SV* invlist
-EiMR	|UV*	|get_invlist_version_id_addr	|NN SV* invlist
+EiMR	|STRLEN*|get_invlist_iter_addr	|NN SV* invlist
 EiM	|void	|invlist_iterinit|NN SV* invlist
 EsMR	|bool	|invlist_iternext|NN SV* invlist|NN UV* start|NN UV* end
 EiM	|void	|invlist_iterfinish|NN SV* invlist
@@ -1452,9 +1450,13 @@ EiMR	|UV	|invlist_highest|NN SV* const invlist
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_UTF8_C)
 EXmM	|void	|_invlist_intersection	|NN SV* const a|NN SV* const b|NN SV** i
-EXpM	|void	|_invlist_intersection_maybe_complement_2nd|NULLOK SV* const a|NN SV* const b|bool complement_b|NN SV** i
+EXpM	|void	|_invlist_intersection_maybe_complement_2nd \
+		|NULLOK SV* const a|NN SV* const b          \
+		|const bool complement_b|NN SV** i
 EXmM	|void	|_invlist_union	|NULLOK SV* const a|NN SV* const b|NN SV** output
-EXpM	|void	|_invlist_union_maybe_complement_2nd|NULLOK SV* const a|NN SV* const b|bool complement_b|NN SV** output
+EXpM	|void	|_invlist_union_maybe_complement_2nd        \
+		|NULLOK SV* const a|NN SV* const b          \
+		|const bool complement_b|NN SV** output
 EXmM	|void	|_invlist_subtract|NN SV* const a|NN SV* const b|NN SV** result
 EXpM	|void	|_invlist_invert|NN SV* const invlist
 EXpM	|void	|_invlist_invert_prop|NN SV* const invlist
@@ -1470,7 +1472,7 @@ EXp	|SV*	|_core_swash_init|NN const char* pkg|NN const char* name \
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_UTF8_C)
 EXMpR	|SV*	|_invlist_contents|NN SV* const invlist
-EiMR	|UV*	|_get_invlist_len_addr	|NN SV* invlist
+EiMR	|bool*	|get_invlist_offset_addr|NN SV* invlist
 EiMR	|UV	|_invlist_len	|NN SV* const invlist
 EMiR	|bool	|_invlist_contains_cp|NN SV* const invlist|const UV cp
 EXpMR	|IV	|_invlist_search	|NN SV* const invlist|const UV cp

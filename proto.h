@@ -6439,7 +6439,7 @@ PERL_STATIC_INLINE UV*	S__invlist_array_init(pTHX_ SV* const invlist, const bool
 #define PERL_ARGS_ASSERT__INVLIST_ARRAY_INIT	\
 	assert(invlist)
 
-STATIC SV*	S__new_invlist_C_array(pTHX_ UV* list)
+STATIC SV*	S__new_invlist_C_array(pTHX_ const UV* const list)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT__NEW_INVLIST_C_ARRAY	\
@@ -6503,7 +6503,7 @@ STATIC bool	S_could_it_be_a_POSIX_class(pTHX_ struct RExC_state_t *pRExC_state)
 #define PERL_ARGS_ASSERT_COULD_IT_BE_A_POSIX_CLASS	\
 	assert(pRExC_state)
 
-PERL_STATIC_INLINE UV*	S_get_invlist_iter_addr(pTHX_ SV* invlist)
+PERL_STATIC_INLINE STRLEN*	S_get_invlist_iter_addr(pTHX_ SV* invlist)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_GET_INVLIST_ITER_ADDR	\
@@ -6513,18 +6513,6 @@ PERL_STATIC_INLINE IV*	S_get_invlist_previous_index_addr(pTHX_ SV* invlist)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_GET_INVLIST_PREVIOUS_INDEX_ADDR	\
-	assert(invlist)
-
-PERL_STATIC_INLINE UV*	S_get_invlist_version_id_addr(pTHX_ SV* invlist)
-			__attribute__warn_unused_result__
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_GET_INVLIST_VERSION_ID_ADDR	\
-	assert(invlist)
-
-PERL_STATIC_INLINE UV*	S_get_invlist_zero_addr(pTHX_ SV* invlist)
-			__attribute__warn_unused_result__
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_GET_INVLIST_ZERO_ADDR	\
 	assert(invlist)
 
 STATIC bool	S_grok_bslash_N(pTHX_ struct RExC_state_t *pRExC_state, regnode** nodep, UV *valuep, I32 *flagp, U32 depth, bool in_char_class, const bool strict)
@@ -6599,7 +6587,7 @@ PERL_STATIC_INLINE IV	S_invlist_previous_index(pTHX_ SV* const invlist)
 #define PERL_ARGS_ASSERT_INVLIST_PREVIOUS_INDEX	\
 	assert(invlist)
 
-PERL_STATIC_INLINE void	S_invlist_set_len(pTHX_ SV* const invlist, const UV len)
+PERL_STATIC_INLINE void	S_invlist_set_len(pTHX_ SV* const invlist, const UV len, const bool offset)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_INVLIST_SET_LEN	\
 	assert(invlist)
@@ -6766,12 +6754,6 @@ STATIC I32	S_study_chunk(pTHX_ struct RExC_state_t *pRExC_state, regnode **scanp
 
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_UTF8_C)
-PERL_STATIC_INLINE UV*	S__get_invlist_len_addr(pTHX_ SV* invlist)
-			__attribute__warn_unused_result__
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT__GET_INVLIST_LEN_ADDR	\
-	assert(invlist)
-
 PERL_CALLCONV SV*	Perl__get_swash_invlist(pTHX_ SV* const swash)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
@@ -6807,6 +6789,12 @@ PERL_CALLCONV HV*	Perl__swash_inversion_hash(pTHX_ SV* const swash)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT__SWASH_INVERSION_HASH	\
 	assert(swash)
+
+PERL_STATIC_INLINE bool*	S_get_invlist_offset_addr(pTHX_ SV* invlist)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_GET_INVLIST_OFFSET_ADDR	\
+	assert(invlist)
 
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_UTF8_C) || defined(PERL_IN_TOKE_C)
@@ -6862,7 +6850,7 @@ PERL_CALLCONV SV*	Perl__add_range_to_invlist(pTHX_ SV* invlist, const UV start, 
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3); */
 
-PERL_CALLCONV void	Perl__invlist_intersection_maybe_complement_2nd(pTHX_ SV* const a, SV* const b, bool complement_b, SV** i)
+PERL_CALLCONV void	Perl__invlist_intersection_maybe_complement_2nd(pTHX_ SV* const a, SV* const b, const bool complement_b, SV** i)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_4);
 #define PERL_ARGS_ASSERT__INVLIST_INTERSECTION_MAYBE_COMPLEMENT_2ND	\
@@ -6893,7 +6881,7 @@ PERL_CALLCONV void	Perl__invlist_populate_swatch(pTHX_ SV* const invlist, const 
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3); */
 
-PERL_CALLCONV void	Perl__invlist_union_maybe_complement_2nd(pTHX_ SV* const a, SV* const b, bool complement_b, SV** output)
+PERL_CALLCONV void	Perl__invlist_union_maybe_complement_2nd(pTHX_ SV* const a, SV* const b, const bool complement_b, SV** output)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_4);
 #define PERL_ARGS_ASSERT__INVLIST_UNION_MAYBE_COMPLEMENT_2ND	\

@@ -7026,11 +7026,12 @@ S_reg_scan_name(pTHX_ RExC_state_t *pRExC_state, U32 flags)
 /* This section of code defines the inversion list object and its methods.  The
  * interfaces are highly subject to change, so as much as possible is static to
  * this file.  An inversion list is here implemented as a malloc'd C UV array
- * with some added info that is placed as UVs at the beginning in a header
- * portion.  An inversion list for Unicode is an array of code points, sorted
- * by ordinal number.  The zeroth element is the first code point in the list.
- * The 1th element is the first element beyond that not in the list.  In other
- * words, the first range is
+ * as an SVt_INVLIST scalar.
+ *
+ * An inversion list for Unicode is an array of code points, sorted by ordinal
+ * number.  The zeroth element is the first code point in the list.  The 1th
+ * element is the first element beyond that not in the list.  In other words,
+ * the first range is
  *  invlist[0]..(invlist[1]-1)
  * The other ranges follow.  Thus every element whose index is divisible by two
  * marks the beginning of a range that is in the list, and every element not
@@ -7048,9 +7049,9 @@ S_reg_scan_name(pTHX_ RExC_state_t *pRExC_state, U32 flags)
  * Taking the complement (inverting) an inversion list is quite simple, if the
  * first element is 0, remove it; otherwise add a 0 element at the beginning.
  * This implementation reserves an element at the beginning of each inversion
- * list to contain 0 when the list contains 0, and contains 1 otherwise.  The
- * actual beginning of the list is either that element if 0, or the next one if
- * 1.
+ * list to always contain 0; there is an additional flag in the header which
+ * indicates if the list begins at the 0, or is offset to begin at the next
+ * element.
  *
  * More about inversion lists can be found in "Unicode Demystified"
  * Chapter 13 by Richard Gillam, published by Addison-Wesley.
@@ -7065,32 +7066,31 @@ S_reg_scan_name(pTHX_ RExC_state_t *pRExC_state, U32 flags)
  * should eventually be made public */
 
 /* The header definitions are in F<inline_invlist.c> */
-#define TO_INTERNAL_SIZE(x) (((x) + HEADER_LENGTH) * sizeof(UV))
-#define FROM_INTERNAL_SIZE(x) (((x)/ sizeof(UV)) - HEADER_LENGTH)
-
-#define INVLIST_INITIAL_LEN 10
 
 PERL_STATIC_INLINE UV*
 S__invlist_array_init(pTHX_ SV* const invlist, const bool will_have_0)
 {
     /* Returns a pointer to the first element in the inversion list's array.
      * This is called upon initialization of an inversion list.  Where the
-     * array begins depends on whether the list has the code point U+0000
-     * in it or not.  The other parameter tells it whether the code that
-     * follows this call is about to put a 0 in the inversion list or not.
-     * The first element is either the element with 0, if 0, or the next one,
-     * if 1 */
+     * array begins depends on whether the list has the code point U+0000 in it
+     * or not.  The other parameter tells it whether the code that follows this
+     * call is about to put a 0 in the inversion list or not.  The first
+     * element is either the element reserved for 0, if TRUE, or the element
+     * after it, if FALSE */
 
-    UV* zero = get_invlist_zero_addr(invlist);
+    bool* offset = get_invlist_offset_addr(invlist);
+    UV* zero_addr = (UV *) SvPVX(invlist);
 
     PERL_ARGS_ASSERT__INVLIST_ARRAY_INIT;
 
     /* Must be empty */
-    assert(! *_get_invlist_len_addr(invlist));
+    assert(! _invlist_len(invlist));
+
+    *zero_addr = 0;
 
     /* 1^1 = 0; 1^0 = 1 */
-    *zero = 1 ^ will_have_0;
-    return zero + *zero;
+    *offset = 1 ^ will_have_0;
+    return zero_addr + *offset;
 }
 
 PERL_STATIC_INLINE UV*
@@ -7104,53 +7104,40 @@ S_invlist_array(pTHX_ SV* const invlist)
 
     /* Must not be empty.  If these fail, you probably didn't check for <len>
      * being non-zero before trying to get the array */
-    assert(*_get_invlist_len_addr(invlist));
-    assert(*get_invlist_zero_addr(invlist) == 0
-	   || *get_invlist_zero_addr(invlist) == 1);
+    assert(_invlist_len(invlist));
 
-    /* The array begins either at the element reserved for zero if the
-     * list contains 0 (that element will be set to 0), or otherwise the next
-     * element (in which case the reserved element will be set to 1). */
-    return (UV *) (get_invlist_zero_addr(invlist)
-		   + *get_invlist_zero_addr(invlist));
+    /* The very first element always contains zero, The array begins either
+     * there, or if the inversion list is offset, at the element after it.
+     * The offset header field determines which; it contains 0 or 1 to indicate
+     * how much additionally to add */
+    assert(0 == *(SvPVX(invlist)));
+    return ((UV *) SvPVX(invlist) + *get_invlist_offset_addr(invlist));
 }
 
 PERL_STATIC_INLINE void
-S_invlist_set_len(pTHX_ SV* const invlist, const UV len)
+S_invlist_set_len(pTHX_ SV* const invlist, const UV len, const bool offset)
 {
-    /* Sets the current number of elements stored in the inversion list */
+    /* Sets the current number of elements stored in the inversion list.
+     * Updates SvCUR correspondingly */
 
     PERL_ARGS_ASSERT_INVLIST_SET_LEN;
 
-    *_get_invlist_len_addr(invlist) = len;
-
-    assert(len <= SvLEN(invlist));
-
-    SvCUR_set(invlist, TO_INTERNAL_SIZE(len));
-    /* If the list contains U+0000, that element is part of the header,
-     * and should not be counted as part of the array.  It will contain
-     * 0 in that case, and 1 otherwise.  So we could flop 0=>1, 1=>0 and
-     * subtract:
-     *	SvCUR_set(invlist,
-     *		  TO_INTERNAL_SIZE(len
-     *				   - (*get_invlist_zero_addr(inv_list) ^ 1)));
-     * But, this is only valid if len is not 0.  The consequences of not doing
-     * this is that the memory allocation code may think that 1 more UV is
-     * being used than actually is, and so might do an unnecessary grow.  That
-     * seems worth not bothering to make this the precise amount.
-     *
-     * Note that when inverting, SvCUR shouldn't change */
+    SvCUR_set(invlist,
+              (len == 0)
+               ? 0
+               : TO_INTERNAL_SIZE(len + offset));
+    assert(SvLEN(invlist) == 0 || SvCUR(invlist) <= SvLEN(invlist));
 }
 
 PERL_STATIC_INLINE IV*
 S_get_invlist_previous_index_addr(pTHX_ SV* invlist)
 {
-    /* Return the address of the UV that is reserved to hold the cached index
+    /* Return the address of the IV that is reserved to hold the cached index
      * */
 
     PERL_ARGS_ASSERT_GET_INVLIST_PREVIOUS_INDEX_ADDR;
 
-    return (IV *) (SvPVX(invlist) + (INVLIST_PREVIOUS_INDEX_OFFSET * sizeof (UV)));
+    return &(((XINVLIST*) SvANY(invlist))->prev_index);
 }
 
 PERL_STATIC_INLINE IV
@@ -7183,22 +7170,11 @@ S_invlist_max(pTHX_ SV* const invlist)
 
     PERL_ARGS_ASSERT_INVLIST_MAX;
 
+    /* Assumes worst case, in which the 0 element is not counted in the
+     * inversion list, so subtracts 1 for that */
     return SvLEN(invlist) == 0  /* This happens under _new_invlist_C_array */
-           ? _invlist_len(invlist)
-           : FROM_INTERNAL_SIZE(SvLEN(invlist));
-}
-
-PERL_STATIC_INLINE UV*
-S_get_invlist_zero_addr(pTHX_ SV* invlist)
-{
-    /* Return the address of the UV that is reserved to hold 0 if the inversion
-     * list contains 0.  This has to be the last element of the heading, as the
-     * list proper starts with either it if 0, or the next element if not.
-     * (But we force it to contain either 0 or 1) */
-
-    PERL_ARGS_ASSERT_GET_INVLIST_ZERO_ADDR;
-
-    return (UV *) (SvPVX(invlist) + (INVLIST_ZERO_OFFSET * sizeof (UV)));
+           ? FROM_INTERNAL_SIZE(SvCUR(invlist)) - 1
+           : FROM_INTERNAL_SIZE(SvLEN(invlist)) - 1;
 }
 
 #ifndef PERL_IN_XSUB_RE
@@ -7213,56 +7189,75 @@ Perl__new_invlist(pTHX_ IV initial_size)
     SV* new_list;
 
     if (initial_size < 0) {
-	initial_size = INVLIST_INITIAL_LEN;
+	initial_size = 10;
     }
 
     /* Allocate the initial space */
-    new_list = newSV(TO_INTERNAL_SIZE(initial_size));
-    invlist_set_len(new_list, 0);
+    new_list = newSV_type(SVt_INVLIST);
+
+    /* First 1 is in case the zero element isn't in the list; second 1 is for
+     * trailing NUL */
+    SvGROW(new_list, TO_INTERNAL_SIZE(initial_size + 1) + 1);
+    invlist_set_len(new_list, 0, 0);
 
     /* Force iterinit() to be used to get iteration to work */
-    *get_invlist_iter_addr(new_list) = UV_MAX;
-
-    /* This should force a segfault if a method doesn't initialize this
-     * properly */
-    *get_invlist_zero_addr(new_list) = UV_MAX;
+    *get_invlist_iter_addr(new_list) = (STRLEN) UV_MAX;
 
     *get_invlist_previous_index_addr(new_list) = 0;
-    *get_invlist_version_id_addr(new_list) = INVLIST_VERSION_ID;
-#if HEADER_LENGTH != 5
-#   error Need to regenerate INVLIST_VERSION_ID by running perl -E 'say int(rand 2**31-1)', and then changing the #if to the new length
-#endif
 
     return new_list;
 }
 #endif
 
 STATIC SV*
-S__new_invlist_C_array(pTHX_ UV* list)
+S__new_invlist_C_array(pTHX_ const UV* const list)
 {
     /* Return a pointer to a newly constructed inversion list, initialized to
      * point to <list>, which has to be in the exact correct inversion list
      * form, including internal fields.  Thus this is a dangerous routine that
-     * should not be used in the wrong hands */
+     * should not be used in the wrong hands.  The passed in 'list' contains
+     * several header fields at the beginning that are not part of the
+     * inversion list body proper */
 
-    SV* invlist = newSV_type(SVt_PV);
+    const STRLEN length = (STRLEN) list[0];
+    const UV version_id =          list[1];
+    const bool offset   =    cBOOL(list[2]);
+#define HEADER_LENGTH 3
+    /* If any of the above changes in any way, you must change HEADER_LENGTH
+     * (if appropriate) and regenerate INVLIST_VERSION_ID by running
+     *      perl -E 'say int(rand 2**31-1)'
+     */
+#define INVLIST_VERSION_ID 148565664 /* This is a combination of a version and
+                                        data structure type, so that one being
+                                        passed in can be validated to be an
+                                        inversion list of the correct vintage.
+                                       */
+
+    SV* invlist = newSV_type(SVt_INVLIST);
 
     PERL_ARGS_ASSERT__NEW_INVLIST_C_ARRAY;
 
-    SvPV_set(invlist, (char *) list);
-    SvLEN_set(invlist, 0);  /* Means we own the contents, and the system
-			       shouldn't touch it */
-    SvCUR_set(invlist, TO_INTERNAL_SIZE(_invlist_len(invlist)));
-
-    if (*get_invlist_version_id_addr(invlist) != INVLIST_VERSION_ID) {
+    if (version_id != INVLIST_VERSION_ID) {
         Perl_croak(aTHX_ "panic: Incorrect version for previously generated inversion list");
     }
 
-    /* Initialize the iteration pointer.
-     * XXX This could be done at compile time in charclass_invlists.h, but I
-     * (khw) am not confident that the suffixes for specifying the C constant
-     * UV_MAX are portable, e.g.  'ull' on a 32 bit machine that is configured
-     * to use 64 bits; might need a Configure probe */
+    /* The generated array passed in includes header elements that aren't part
+     * of the list proper, so start it just after them */
+    SvPV_set(invlist, (char *) (list + HEADER_LENGTH));
+
+    SvLEN_set(invlist, 0);  /* Means we own the contents, and the system
+			       shouldn't touch it */
+
+    *(get_invlist_offset_addr(invlist)) = offset;
+
+    /* The 'length' passed to us is the physical number of elements in the
+     * inversion list.  But if there is an offset the logical number is one
+     * less than that */
+    invlist_set_len(invlist, length  - offset, offset);
+
+    invlist_set_previous_index(invlist, 0);
+
+    /* Initialize the iteration pointer. */
     invlist_iterfinish(invlist);
 
     return invlist;
@@ -7275,7 +7270,9 @@ S_invlist_extend(pTHX_ SV* const invlist, const UV new_max)
 
     PERL_ARGS_ASSERT_INVLIST_EXTEND;
 
-    SvGROW((SV *)invlist, TO_INTERNAL_SIZE(new_max));
+    /* Add one to account for the zero element at the beginning which may not
+     * be counted by the calling parameters */
+    SvGROW((SV *)invlist, TO_INTERNAL_SIZE(new_max + 1));
 }
 
 PERL_STATIC_INLINE void
@@ -7285,7 +7282,6 @@ S_invlist_trim(pTHX_ SV* const invlist)
 
     /* Change the length of the inversion list to how many entries it currently
      * has */
-
     SvPV_shrink_to_cur((SV *) invlist);
 }
 
@@ -7301,11 +7297,13 @@ S__append_range_to_invlist(pTHX_ SV* const invlist, const UV start, const UV end
     UV* array;
     UV max = invlist_max(invlist);
     UV len = _invlist_len(invlist);
+    bool offset;
 
     PERL_ARGS_ASSERT__APPEND_RANGE_TO_INVLIST;
 
     if (len == 0) { /* Empty lists must be initialized */
-        array = _invlist_array_init(invlist, start == 0);
+        offset = start != 0;
+        array = _invlist_array_init(invlist, ! offset);
     }
     else {
 	/* Here, the existing list is non-empty. The current max entry in the
@@ -7328,6 +7326,7 @@ S__append_range_to_invlist(pTHX_ SV* const invlist, const UV start, const UV end
 	 * value not in the set, it is extending the set, so the new first
 	 * value not in the set is one greater than the newly extended range.
 	 * */
+        offset = *get_invlist_offset_addr(invlist);
 	if (array[final_element] == start) {
 	    if (end != UV_MAX) {
 		array[final_element] = end + 1;
@@ -7335,7 +7334,7 @@ S__append_range_to_invlist(pTHX_ SV* const invlist, const UV start, const UV end
 	    else {
 		/* But if the end is the maximum representable on the machine,
 		 * just let the range that this would extend to have no end */
-		invlist_set_len(invlist, len - 1);
+		invlist_set_len(invlist, len - 1, offset);
 	    }
 	    return;
 	}
@@ -7345,16 +7344,18 @@ S__append_range_to_invlist(pTHX_ SV* const invlist, const UV start, const UV end
 
     len += 2;	/* Includes an element each for the start and end of range */
 
-    /* If overflows the existing space, extend, which may cause the array to be
-     * moved */
+    /* If wll overflow the existing space, extend, which may cause the array to
+     * be moved */
     if (max < len) {
 	invlist_extend(invlist, len);
-	invlist_set_len(invlist, len);	/* Have to set len here to avoid assert
-					   failure in invlist_array() */
+
+        /* Have to set len here to avoid assert failure in invlist_array() */
+        invlist_set_len(invlist, len, offset);
+
 	array = invlist_array(invlist);
     }
     else {
-	invlist_set_len(invlist, len);
+	invlist_set_len(invlist, len, offset);
     }
 
     /* The next item on the list starts the range, the one after that is
@@ -7366,7 +7367,7 @@ S__append_range_to_invlist(pTHX_ SV* const invlist, const UV start, const UV end
     else {
 	/* But if the end is the maximum representable on the machine, just let
 	 * the range have no end */
-	invlist_set_len(invlist, len - 1);
+	invlist_set_len(invlist, len - 1, offset);
     }
 }
 
@@ -7554,7 +7555,7 @@ Perl__invlist_populate_swatch(pTHX_ SV* const invlist, const UV start, const UV 
 }
 
 void
-Perl__invlist_union_maybe_complement_2nd(pTHX_ SV* const a, SV* const b, bool complement_b, SV** output)
+Perl__invlist_union_maybe_complement_2nd(pTHX_ SV* const a, SV* const b, const bool complement_b, SV** output)
 {
     /* Take the union of two inversion lists and point <output> to it.  *output
      * SHOULD BE DEFINED upon input, and if it points to one of the two lists,
@@ -7576,8 +7577,8 @@ Perl__invlist_union_maybe_complement_2nd(pTHX_ SV* const a, SV* const b, bool co
      * return the larger of the input lists, but then outside code might need
      * to keep track of whether to free the input list or not */
 
-    UV* array_a;    /* a's array */
-    UV* array_b;
+    const UV* array_a;    /* a's array */
+    const UV* array_b;
     UV len_a;	    /* length of a's array */
     UV len_b;
 
@@ -7645,23 +7646,17 @@ Perl__invlist_union_maybe_complement_2nd(pTHX_ SV* const a, SV* const b, bool co
     if (complement_b) {
 
 	/* To complement, we invert: if the first element is 0, remove it.  To
-	 * do this, we just pretend the array starts one later, and clear the
-	 * flag as we don't have to do anything else later */
+	 * do this, we just pretend the array starts one later */
         if (array_b[0] == 0) {
             array_b++;
             len_b--;
-            complement_b = FALSE;
         }
         else {
 
-            /* But if the first element is not zero, we unshift a 0 before the
-             * array.  The data structure reserves a space for that 0 (which
-             * should be a '1' right now), so physical shifting is unneeded,
-             * but temporarily change that element to 0.  Before exiting the
-             * routine, we must restore the element to '1' */
+            /* But if the first element is not zero, we pretend the list starts
+             * at the 0 that is always stored immediately before the array. */
             array_b--;
             len_b++;
-            array_b[0] = 0;
         }
     }
 
@@ -7757,7 +7752,7 @@ Perl__invlist_union_maybe_complement_2nd(pTHX_ SV* const a, SV* const b, bool co
     /* Set result to final length, which can change the pointer to array_u, so
      * re-find it */
     if (len_u != _invlist_len(u)) {
-	invlist_set_len(u, len_u);
+	invlist_set_len(u, len_u, *get_invlist_offset_addr(u));
 	invlist_trim(u);
 	array_u = invlist_array(u);
     }
@@ -7778,11 +7773,6 @@ Perl__invlist_union_maybe_complement_2nd(pTHX_ SV* const a, SV* const b, bool co
 	}
     }
 
-    /* If we've changed b, restore it */
-    if (complement_b) {
-        array_b[0] = 1;
-    }
-
     /*  We may be removing a reference to one of the inputs */
     if (a == *output || b == *output) {
         assert(! invlist_is_iterating(*output));
@@ -7794,7 +7784,7 @@ Perl__invlist_union_maybe_complement_2nd(pTHX_ SV* const a, SV* const b, bool co
 }
 
 void
-Perl__invlist_intersection_maybe_complement_2nd(pTHX_ SV* const a, SV* const b, bool complement_b, SV** i)
+Perl__invlist_intersection_maybe_complement_2nd(pTHX_ SV* const a, SV* const b, const bool complement_b, SV** i)
 {
     /* Take the intersection of two inversion lists and point <i> to it.  *i
      * SHOULD BE DEFINED upon input, and if it points to one of the two lists,
@@ -7811,8 +7801,8 @@ Perl__invlist_intersection_maybe_complement_2nd(pTHX_ SV* const a, SV* const b, 
      * union above
      */
 
-    UV* array_a;		/* a's array */
-    UV* array_b;
+    const UV* array_a;		/* a's array */
+    const UV* array_b;
     UV len_a;	/* length of a's array */
     UV len_b;
 
@@ -7877,23 +7867,17 @@ Perl__invlist_intersection_maybe_complement_2nd(pTHX_ SV* const a, SV* const b, 
     if (complement_b) {
 
 	/* To complement, we invert: if the first element is 0, remove it.  To
-	 * do this, we just pretend the array starts one later, and clear the
-	 * flag as we don't have to do anything else later */
+	 * do this, we just pretend the array starts one later */
         if (array_b[0] == 0) {
             array_b++;
             len_b--;
-            complement_b = FALSE;
         }
         else {
 
-            /* But if the first element is not zero, we unshift a 0 before the
-             * array.  The data structure reserves a space for that 0 (which
-             * should be a '1' right now), so physical shifting is unneeded,
-             * but temporarily change that element to 0.  Before exiting the
-             * routine, we must restore the element to '1' */
+            /* But if the first element is not zero, we pretend the list starts
+             * at the 0 that is always stored immediately before the array. */
             array_b--;
             len_b++;
-            array_b[0] = 0;
         }
     }
 
@@ -7984,7 +7968,7 @@ Perl__invlist_intersection_maybe_complement_2nd(pTHX_ SV* const a, SV* const b, 
     /* Set result to final length, which can change the pointer to array_r, so
      * re-find it */
     if (len_r != _invlist_len(r)) {
-	invlist_set_len(r, len_r);
+	invlist_set_len(r, len_r, *get_invlist_offset_addr(r));
 	invlist_trim(r);
 	array_r = invlist_array(r);
     }
@@ -7998,11 +7982,6 @@ Perl__invlist_intersection_maybe_complement_2nd(pTHX_ SV* const a, SV* const b, 
 	else if ((copy_count = len_b - i_b) > 0) {
 	    Copy(array_b + i_b, array_r + i_r, copy_count, UV);
 	}
-    }
-
-    /* If we've changed b, restore it */
-    if (complement_b) {
-        array_b[0] = 1;
     }
 
     /*  We may be removing a reference to one of the inputs */
@@ -8073,27 +8052,17 @@ Perl__invlist_invert(pTHX_ SV* const invlist)
      * have a zero; removes it otherwise.  As described above, the data
      * structure is set up so that this is very efficient */
 
-    UV* len_pos = _get_invlist_len_addr(invlist);
-
     PERL_ARGS_ASSERT__INVLIST_INVERT;
 
     assert(! invlist_is_iterating(invlist));
 
     /* The inverse of matching nothing is matching everything */
-    if (*len_pos == 0) {
+    if (_invlist_len(invlist) == 0) {
 	_append_range_to_invlist(invlist, 0, UV_MAX);
 	return;
     }
 
-    /* The exclusive or complents 0 to 1; and 1 to 0.  If the result is 1, the
-     * zero element was a 0, so it is being removed, so the length decrements
-     * by 1; and vice-versa.  SvCUR is unaffected */
-    if (*get_invlist_zero_addr(invlist) ^= 1) {
-	(*len_pos)--;
-    }
-    else {
-	(*len_pos)++;
-    }
+    *get_invlist_offset_addr(invlist) = ! *get_invlist_offset_addr(invlist);
 }
 
 void
@@ -8123,11 +8092,11 @@ Perl__invlist_invert_prop(pTHX_ SV* const invlist)
 		invlist_extend(invlist, len);
 		array = invlist_array(invlist);
 	    }
-	    invlist_set_len(invlist, len);
+	    invlist_set_len(invlist, len, *get_invlist_offset_addr(invlist));
 	    array[len - 1] = PERL_UNICODE_MAX + 1;
 	}
 	else {  /* Remove the 0x110000 */
-	    invlist_set_len(invlist, len - 1);
+	    invlist_set_len(invlist, len - 1, *get_invlist_offset_addr(invlist));
 	}
     }
 
@@ -8145,17 +8114,19 @@ S_invlist_clone(pTHX_ SV* const invlist)
     /* Need to allocate extra space to accommodate Perl's addition of a
      * trailing NUL to SvPV's, since it thinks they are always strings */
     SV* new_invlist = _new_invlist(_invlist_len(invlist) + 1);
-    STRLEN length = SvCUR(invlist);
+    STRLEN physical_length = SvCUR(invlist);
+    bool offset = *(get_invlist_offset_addr(invlist));
 
     PERL_ARGS_ASSERT_INVLIST_CLONE;
 
-    SvCUR_set(new_invlist, length); /* This isn't done automatically */
-    Copy(SvPVX(invlist), SvPVX(new_invlist), length, char);
+    *(get_invlist_offset_addr(new_invlist)) = offset;
+    invlist_set_len(new_invlist, _invlist_len(invlist), offset);
+    Copy(SvPVX(invlist), SvPVX(new_invlist), physical_length, char);
 
     return new_invlist;
 }
 
-PERL_STATIC_INLINE UV*
+PERL_STATIC_INLINE STRLEN*
 S_get_invlist_iter_addr(pTHX_ SV* invlist)
 {
     /* Return the address of the UV that contains the current iteration
@@ -8163,17 +8134,7 @@ S_get_invlist_iter_addr(pTHX_ SV* invlist)
 
     PERL_ARGS_ASSERT_GET_INVLIST_ITER_ADDR;
 
-    return (UV *) (SvPVX(invlist) + (INVLIST_ITER_OFFSET * sizeof (UV)));
-}
-
-PERL_STATIC_INLINE UV*
-S_get_invlist_version_id_addr(pTHX_ SV* invlist)
-{
-    /* Return the address of the UV that contains the version id. */
-
-    PERL_ARGS_ASSERT_GET_INVLIST_VERSION_ID_ADDR;
-
-    return (UV *) (SvPVX(invlist) + (INVLIST_VERSION_ID_OFFSET * sizeof (UV)));
+    return &(((XINVLIST*) SvANY(invlist))->iterator);
 }
 
 PERL_STATIC_INLINE void
@@ -8197,7 +8158,7 @@ S_invlist_iterfinish(pTHX_ SV* invlist)
 
     PERL_ARGS_ASSERT_INVLIST_ITERFINISH;
 
-    *get_invlist_iter_addr(invlist) = UV_MAX;
+    *get_invlist_iter_addr(invlist) = (STRLEN) UV_MAX;
 }
 
 STATIC bool
@@ -8210,14 +8171,14 @@ S_invlist_iternext(pTHX_ SV* invlist, UV* start, UV* end)
      * <*start> and <*end> are unchanged, and the next call to this function
      * will start over at the beginning of the list */
 
-    UV* pos = get_invlist_iter_addr(invlist);
+    STRLEN* pos = get_invlist_iter_addr(invlist);
     UV len = _invlist_len(invlist);
     UV *array;
 
     PERL_ARGS_ASSERT_INVLIST_ITERNEXT;
 
     if (*pos >= len) {
-	*pos = UV_MAX;	/* Force iterinit() to be required next time */
+	*pos = (STRLEN) UV_MAX;	/* Force iterinit() to be required next time */
 	return FALSE;
     }
 
@@ -8240,7 +8201,7 @@ S_invlist_is_iterating(pTHX_ SV* const invlist)
 {
     PERL_ARGS_ASSERT_INVLIST_IS_ITERATING;
 
-    return *(get_invlist_iter_addr(invlist)) < UV_MAX;
+    return *(get_invlist_iter_addr(invlist)) < (STRLEN) UV_MAX;
 }
 
 PERL_STATIC_INLINE UV
@@ -8343,14 +8304,14 @@ Perl__invlist_dump(pTHX_ SV* const invlist, const char * const header)
 
 #if 0
 bool
-S__invlistEQ(pTHX_ SV* const a, SV* const b, bool complement_b)
+S__invlistEQ(pTHX_ SV* const a, SV* const b, const bool complement_b)
 {
     /* Return a boolean as to if the two passed in inversion lists are
      * identical.  The final argument, if TRUE, says to take the complement of
      * the second inversion list before doing the comparison */
 
-    UV* array_a = invlist_array(a);
-    UV* array_b = invlist_array(b);
+    const UV* array_a = invlist_array(a);
+    const UV* array_b = invlist_array(b);
     UV len_a = _invlist_len(a);
     UV len_b = _invlist_len(b);
 
@@ -8372,20 +8333,15 @@ S__invlistEQ(pTHX_ SV* const a, SV* const b, bool complement_b)
 
             /* Otherwise, to complement, we invert.  Here, the first element is
              * 0, just remove it.  To do this, we just pretend the array starts
-             * one later, and clear the flag as we don't have to do anything
-             * else later */
+             * one later */
 
             array_b++;
             len_b--;
-            complement_b = FALSE;
         }
         else {
 
-            /* But if the first element is not zero, we unshift a 0 before the
-             * array.  The data structure reserves a space for that 0 (which
-             * should be a '1' right now), so physical shifting is unneeded,
-             * but temporarily change that element to 0.  Before exiting the
-             * routine, we must restore the element to '1' */
+            /* But if the first element is not zero, we pretend the list starts
+             * at the 0 that is always stored immediately before the array. */
             array_b--;
             len_b++;
             array_b[0] = 0;
@@ -8405,22 +8361,14 @@ S__invlistEQ(pTHX_ SV* const a, SV* const b, bool complement_b)
         }
     }
 
-    if (complement_b) {
-        array_b[0] = 1;
-    }
     return retval;
 }
 #endif
 
 #undef HEADER_LENGTH
-#undef INVLIST_INITIAL_LENGTH
 #undef TO_INTERNAL_SIZE
 #undef FROM_INTERNAL_SIZE
-#undef INVLIST_LEN_OFFSET
-#undef INVLIST_ZERO_OFFSET
-#undef INVLIST_ITER_OFFSET
 #undef INVLIST_VERSION_ID
-#undef INVLIST_PREVIOUS_INDEX_OFFSET
 
 /* End of inversion list object */
 
