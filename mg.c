@@ -2301,14 +2301,14 @@ Perl_magic_setvec(pTHX_ SV *sv, MAGIC *mg)
     return 0;
 }
 
-int
-Perl_magic_getdefelem(pTHX_ SV *sv, MAGIC *mg)
+SV *
+Perl_defelem_target(pTHX_ SV *sv, MAGIC *mg)
 {
     dVAR;
     SV *targ = NULL;
-
-    PERL_ARGS_ASSERT_MAGIC_GETDEFELEM;
-
+    PERL_ARGS_ASSERT_DEFELEM_TARGET;
+    if (!mg) mg = mg_find(sv, PERL_MAGIC_defelem);
+    assert(mg);
     if (LvTARGLEN(sv)) {
 	if (mg->mg_obj) {
 	    SV * const ahv = LvTARG(sv);
@@ -2330,10 +2330,18 @@ Perl_magic_getdefelem(pTHX_ SV *sv, MAGIC *mg)
 	    mg->mg_obj = NULL;
 	    mg->mg_flags &= ~MGf_REFCOUNTED;
 	}
+	return targ;
     }
     else
-	targ = LvTARG(sv);
-    sv_setsv(sv, targ ? targ : &PL_sv_undef);
+	return LvTARG(sv);
+}
+
+int
+Perl_magic_getdefelem(pTHX_ SV *sv, MAGIC *mg)
+{
+    PERL_ARGS_ASSERT_MAGIC_GETDEFELEM;
+
+    sv_setsv(sv, defelem_target(sv, mg));
     return 0;
 }
 

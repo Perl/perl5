@@ -899,6 +899,10 @@ PP(pp_tie)
 		varsv = MUTABLE_SV(GvIOp(varsv));
 		break;
 	    }
+	    if (SvTYPE(varsv) == SVt_PVLV && LvTYPE(varsv) == 'y') {
+		vivify_defelem(varsv);
+		varsv = LvTARG(varsv);
+	    }
 	    /* FALL THROUGH */
 	default:
 	    methname = "TIESCALAR";
@@ -967,6 +971,9 @@ PP(pp_untie)
     if (isGV_with_GP(sv) && !SvFAKE(sv) && !(sv = MUTABLE_SV(GvIOp(sv))))
 	RETPUSHYES;
 
+    if (SvTYPE(sv) == SVt_PVLV && LvTYPE(sv) == 'y' &&
+	!(sv = defelem_target(sv, NULL))) RETPUSHUNDEF;
+
     if ((mg = SvTIED_mg(sv, how))) {
 	SV * const obj = SvRV(SvTIED_obj(sv, mg));
         if (obj) {
@@ -1004,6 +1011,9 @@ PP(pp_tied)
 
     if (isGV_with_GP(sv) && !SvFAKE(sv) && !(sv = MUTABLE_SV(GvIOp(sv))))
 	RETPUSHUNDEF;
+
+    if (SvTYPE(sv) == SVt_PVLV && LvTYPE(sv) == 'y' &&
+	!(sv = defelem_target(sv, NULL))) RETPUSHUNDEF;
 
     if ((mg = SvTIED_mg(sv, how))) {
 	PUSHs(SvTIED_obj(sv, mg));
