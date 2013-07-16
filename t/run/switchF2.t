@@ -7,9 +7,10 @@ BEGIN {
 }
 plan(tests => 1);
 
-my $cmd = "echo 1 | ./perl -n -F: -e print+\\\@F";
-my $got = `$cmd` || '';
-my $ok = 0 == $?;
-chomp $got;
-ok( ($ok and $got eq 1),
-  "passing -F implies -a" );
+{ # perl #116190
+  fresh_perl_is('print qq!@F!', '1 2',
+		{
+		 stdin => "1:2",
+		 switches => [ '-n', '-F:' ],
+		}, "passing -F implies -a");
+}
