@@ -2770,6 +2770,17 @@ cpan/Unicode-Normalize/t/proto.t	Unicode::Normalize
 cpan/Unicode-Normalize/t/split.t	Unicode::Normalize
 cpan/Unicode-Normalize/t/test.t		Unicode::Normalize
 cpan/Unicode-Normalize/t/tie.t		Unicode::Normalize
+cpan/version/lib/version/Internals.pod	Description of the internals of version objects
+cpan/version/lib/version.pm		Support for version objects
+cpan/version/lib/version.pod		Documentation of the version module
+cpan/version/t/01base.t			Tests for version objects`
+cpan/version/t/02derived.t		Tests for version objects
+cpan/version/t/03require.t		Tests for version objects
+cpan/version/t/04strict_lax.t		Tests for version objects
+cpan/version/t/05sigdie.t		Tests for version objects
+cpan/version/t/06noop.t			Tests for version objects
+cpan/version/t/07locale.t		Tests for version objects
+cpan/version/t/coretests.pm		Tests for version objects
 cpan/Win32API-File/buffers.h	Win32API::File extension
 cpan/Win32API-File/cFile.h	Win32API::File extension
 cpan/Win32API-File/cFile.pc	Win32API::File extension
@@ -4297,17 +4308,6 @@ lib/utf8.t			See if utf8 operations work
 lib/vars_carp.t			See if "use vars" doesn't load Carp.pm per default
 lib/vars.pm			Declare pseudo-imported global variables
 lib/vars.t			See if "use vars" works
-lib/version/Internals.pod	Description of the internals of version objects
-lib/version.pm			Support for version objects
-lib/version.pod			Documentation of the version module
-lib/version/t/01base.t		Tests for version objects`
-lib/version/t/02derived.t	Tests for version objects
-lib/version/t/03require.t	Tests for version objects
-lib/version/t/04strict_lax.t	Tests for version objects
-lib/version/t/05sigdie.t	Tests for version objects
-lib/version/t/06noop.t		Tests for version objects
-lib/version/t/07locale.t	Tests for version objects
-lib/version/t/coretests.pm	Tests for version objects
 lib/vmsish.pm			Control VMS-specific behavior of Perl core
 lib/vmsish.t			Tests for vmsish.pm
 lib/warnings.pm			For "use warnings"

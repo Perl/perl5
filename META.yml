@@ -55,7 +55,6 @@ no_index:
     - dist/threads-shared
     - dist/Tie-File
     - dist/XSLoader
-    - lib/version
     - mad
     - win32
   file:
@@ -104,8 +103,6 @@ no_index:
     - dist/lib/Makefile.PL
     - dist/lib/t/01lib.t
     - lib/unicore/mktables
-    - lib/version.pm
-    - lib/version.pod
     - pod/perlfilter.pod
     - pod/perlpodstyle.pod
     - Porting/Maintainers.pm

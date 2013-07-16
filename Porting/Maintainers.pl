@@ -1917,7 +1917,7 @@ use File::Glob qw(:case);
     'version' => {
         'MAINTAINER'   => 'jpeacock',
         'DISTRIBUTION' => 'JPEACOCK/version-0.9902.tar.gz',
-        'FILES'        => q[lib/version.pm lib/version.pod lib/version],
+        'FILES'        => q[cpan/version],
         'EXCLUDED' => [
             qr{^t/.*\.t$},
             qr{^vutil/},
@@ -1925,10 +1925,6 @@ use File::Glob qw(:case);
             't/survey_locales',
             'vperl/vpp.pm',
         ],
-        'MAP' => {
-            'lib/'           => 'lib/',
-            't/'             => 'lib/version/t/'
-        },
         'UPSTREAM' => undef,
     },
 

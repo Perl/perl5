@@ -363,3 +363,5 @@ unicore/TestProp.pl
 /unicore/To
 /unicore/UCD.pl
 /unicore/lib
+/version.pm
+/version/

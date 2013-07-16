@@ -1270,7 +1270,7 @@ _cleaner2:
 	-rmdir lib/Sys lib/Scalar/Util lib/Scalar
 	-rmdir lib/Term/UI lib/Thread lib/Tie/Hash
 	-rmdir lib/Test/Builder/Tester lib/Test/Builder lib/Test
-	-rmdir lib/Unicode/Collate
+	-rmdir lib/Unicode/Collate lib/version
 	-rmdir lib/XS/APItest lib/XS
 	-rmdir lib/inc/latest lib/inc
 	-rmdir lib/autodie/exception lib/autodie lib/encoding lib/threads
