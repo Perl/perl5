@@ -18,7 +18,7 @@
 
 static I32 num_q (const char *s, STRLEN slen);
 static I32 esc_q (char *dest, const char *src, STRLEN slen);
-static I32 esc_q_utf8 (pTHX_ SV *sv, const char *src, STRLEN slen);
+static I32 esc_q_utf8 (pTHX_ SV *sv, const char *src, STRLEN slen, I32 do_utf8, I32 useqq);
 static I32 needs_quote(const char *s, STRLEN len);
 static SV *sv_x (pTHX_ SV *sv, const char *str, STRLEN len, I32 n);
 static I32 DD_dump (pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval,
@@ -26,7 +26,7 @@ static I32 DD_dump (pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval,
 		    SV *pad, SV *xpad, SV *apad, SV *sep, SV *pair,
 		    SV *freezer, SV *toaster,
 		    I32 purity, I32 deepcopy, I32 quotekeys, SV *bless,
-		    I32 maxdepth, SV *sortkeys, int use_sparse_seen_hash);
+		    I32 maxdepth, SV *sortkeys, int use_sparse_seen_hash, I32 useqq);
 
 #ifndef HvNAME_get
 #define HvNAME_get HvNAME
@@ -158,8 +158,9 @@ esc_q(char *d, const char *s, STRLEN slen)
     return ret;
 }
 
+/* this function is also misused for implementing $Useqq */
 static I32
-esc_q_utf8(pTHX_ SV* sv, const char *src, STRLEN slen)
+esc_q_utf8(pTHX_ SV* sv, const char *src, STRLEN slen, I32 do_utf8, I32 useqq)
 {
     char *r, *rstart;
     const char *s = src;
@@ -174,13 +175,20 @@ esc_q_utf8(pTHX_ SV* sv, const char *src, STRLEN slen)
     STRLEN qq_escapables = 0;	/* " $ @ will need a \ in "" strings.  */
     STRLEN normal = 0;
     int increment;
+    UV next;
 
     /* this will need EBCDICification */
-    for (s = src; s < send; s += increment) {
-        const UV k = utf8_to_uvchr_buf((U8*)s, (U8*) send, NULL);
+    for (s = src; s < send; do_utf8 ? s += increment : s++) {
+        const UV k = do_utf8 ? utf8_to_uvchr_buf((U8*)s, (U8*) send, NULL) : *(U8*)s;
 
         /* check for invalid utf8 */
         increment = (k == 0 && *s != '\0') ? 1 : UTF8SKIP(s);
+
+	/* this is only used to check if the next character is an
+	 * ASCII digit, which are invariant, so if the following collects
+	 * a UTF-8 start byte it does no harm
+	 */
+	next = (s + increment >= send ) ? 0 : *(U8*)(s+increment);
 
 #ifdef EBCDIC
 	if (!isprint(k) || k > 256) {
@@ -195,6 +203,17 @@ esc_q_utf8(pTHX_ SV* sv, const char *src, STRLEN slen)
                 k <= 0xFFFFFFFF ? 8 : UVSIZE * 4
 #endif
                 );
+#ifndef EBCDIC
+	} else if (useqq &&
+	    /* we can't use the short form like '\0' if followed by a digit */
+                   ((k >= 7 && k <= 10 || k == 12 || k == 13 || k == 27)
+                 || (k < 8 && (next < '0' || next > '9')))) {
+	    grow += 2;
+	} else if (useqq && k <= 31 && (next < '0' || next > '9')) {
+	    grow += 3;
+	} else if (useqq && (k <= 31 || k >= 127)) {
+	    grow += 4;
+#endif
         } else if (k == '\\') {
             backslashes++;
         } else if (k == '\'') {
@@ -205,7 +224,7 @@ esc_q_utf8(pTHX_ SV* sv, const char *src, STRLEN slen)
             normal++;
         }
     }
-    if (grow) {
+    if (grow || useqq) {
         /* We have something needing hex. 3 is ""\0 */
         sv_grow(sv, cur + 3 + grow + 2*backslashes + single_quotes
 		+ 2*qq_escapables + normal);
@@ -213,8 +232,8 @@ esc_q_utf8(pTHX_ SV* sv, const char *src, STRLEN slen)
 
         *r++ = '"';
 
-        for (s = src; s < send; s += UTF8SKIP(s)) {
-            const UV k = utf8_to_uvchr_buf((U8*)s, (U8*) send, NULL);
+        for (s = src; s < send; do_utf8 ? s += UTF8SKIP(s) : s++) {
+            const UV k = do_utf8 ? utf8_to_uvchr_buf((U8*)s, (U8*) send, NULL) : *(U8*)s;
 
             if (k == '"' || k == '\\' || k == '$' || k == '@') {
                 *r++ = '\\';
@@ -224,7 +243,44 @@ esc_q_utf8(pTHX_ SV* sv, const char *src, STRLEN slen)
 #ifdef EBCDIC
 	      if (isprint(k) && k < 256)
 #else
-	      if (k < 0x80)
+	      if (useqq && (k <= 31 || k == 127 || (!do_utf8 && k > 127))) {
+	        bool next_is_digit;
+
+		*r++ = '\\';
+		switch (k) {
+		case 7:  *r++ = 'a'; break;
+		case 8:  *r++ = 'b'; break;
+		case 9:  *r++ = 't'; break;
+		case 10: *r++ = 'n'; break;
+		case 12: *r++ = 'f'; break;
+		case 13: *r++ = 'r'; break;
+		case 27: *r++ = 'e'; break;
+		default:
+		    increment = (k == 0 && *s != '\0') ? 1 : UTF8SKIP(s);
+
+		    /* only ASCII digits matter here, which are invariant,
+		     * since we only encode characters \377 and under, or
+		     * \x177 and under for a unicode string
+		     */
+		    next = (s+increment < send) ? *(U8*)(s+increment) : 0;
+		    next_is_digit = next >= '0' && next <= '9';
+
+		    /* faster than
+		     * r = r + my_sprintf(r, "%o", k);
+		     */
+		    if (k <= 7 && !next_is_digit) {
+			*r++ = (char)k + '0';
+		    } else if (k <= 63 && !next_is_digit) {
+			*r++ = (char)(k>>3) + '0';
+			*r++ = (char)(k&7) + '0';
+		    } else {
+			*r++ = (char)(k>>6) + '0';
+			*r++ = (char)((k&63)>>3) + '0';
+			*r++ = (char)(k&7) + '0';
+		    }
+		}
+	    }
+	    else if (k < 0x80)
 #endif
                 *r++ = (char)k;
             else {
@@ -298,7 +354,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	AV *postav, I32 *levelp, I32 indent, SV *pad, SV *xpad,
 	SV *apad, SV *sep, SV *pair, SV *freezer, SV *toaster, I32 purity,
 	I32 deepcopy, I32 quotekeys, SV *bless, I32 maxdepth, SV *sortkeys,
-        int use_sparse_seen_hash)
+        int use_sparse_seen_hash, I32 useqq)
 {
     char tmpbuf[128];
     U32 i;
@@ -524,7 +580,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		DD_dump(aTHX_ ival, SvPVX_const(namesv), SvCUR(namesv), retval, seenhv,
 			postav, levelp,	indent, pad, xpad, apad, sep, pair,
 			freezer, toaster, purity, deepcopy, quotekeys, bless,
-			maxdepth, sortkeys, use_sparse_seen_hash);
+			maxdepth, sortkeys, use_sparse_seen_hash, useqq);
 		sv_catpvn(retval, ")}", 2);
 	    }						     /* plain */
 	    else {
@@ -532,7 +588,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		DD_dump(aTHX_ ival, SvPVX_const(namesv), SvCUR(namesv), retval, seenhv,
 			postav, levelp,	indent, pad, xpad, apad, sep, pair,
 			freezer, toaster, purity, deepcopy, quotekeys, bless,
-			maxdepth, sortkeys, use_sparse_seen_hash);
+			maxdepth, sortkeys, use_sparse_seen_hash, useqq);
 	    }
 	    SvREFCNT_dec(namesv);
 	}
@@ -544,7 +600,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	    DD_dump(aTHX_ ival, SvPVX_const(namesv), SvCUR(namesv), retval, seenhv,
 		    postav, levelp,	indent, pad, xpad, apad, sep, pair,
 		    freezer, toaster, purity, deepcopy, quotekeys, bless,
-		    maxdepth, sortkeys, use_sparse_seen_hash);
+		    maxdepth, sortkeys, use_sparse_seen_hash, useqq);
 	    SvREFCNT_dec(namesv);
 	}
 	else if (realtype == SVt_PVAV) {
@@ -617,7 +673,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		DD_dump(aTHX_ elem, iname, ilen, retval, seenhv, postav,
 			levelp,	indent, pad, xpad, apad, sep, pair,
 			freezer, toaster, purity, deepcopy, quotekeys, bless,
-			maxdepth, sortkeys, use_sparse_seen_hash);
+			maxdepth, sortkeys, use_sparse_seen_hash, useqq);
 		if (ix < ixmax)
 		    sv_catpvn(retval, ",", 1);
 	    }
@@ -777,9 +833,9 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
                    The code is also smaller (22044 vs 22260) because I've been
                    able to pull the common logic out to both sides.  */
                 if (quotekeys || needs_quote(key,keylen)) {
-                    if (do_utf8) {
+                    if (do_utf8 || useqq) {
                         STRLEN ocur = SvCUR(retval);
-                        nlen = esc_q_utf8(aTHX_ retval, key, klen);
+                        nlen = esc_q_utf8(aTHX_ retval, key, klen, do_utf8, useqq);
                         nkey = SvPVX(retval) + ocur;
                     }
                     else {
@@ -824,7 +880,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		DD_dump(aTHX_ hval, SvPVX_const(sname), SvCUR(sname), retval, seenhv,
 			postav, levelp,	indent, pad, xpad, newapad, sep, pair,
 			freezer, toaster, purity, deepcopy, quotekeys, bless,
-			maxdepth, sortkeys, use_sparse_seen_hash);
+			maxdepth, sortkeys, use_sparse_seen_hash, useqq);
 		SvREFCNT_dec(sname);
 		Safefree(nkey_buffer);
 		if (indent >= 2)
@@ -973,7 +1029,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		r = SvPVX(retval)+SvCUR(retval);
 		r[0] = '*'; r[1] = '{';
 		SvCUR_set(retval, SvCUR(retval)+2);
-		esc_q_utf8(aTHX_ retval, c, i);
+		esc_q_utf8(aTHX_ retval, c, i, 1, useqq);
 		sv_grow(retval, SvCUR(retval)+2);
 		r = SvPVX(retval)+SvCUR(retval);
 		r[0] = '}'; r[1] = '\0';
@@ -1033,7 +1089,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 				seenhv, postav, &nlevel, indent, pad, xpad,
 				newapad, sep, pair, freezer, toaster, purity,
 				deepcopy, quotekeys, bless, maxdepth, 
-				sortkeys, use_sparse_seen_hash);
+				sortkeys, use_sparse_seen_hash, useqq);
 			SvREFCNT_dec(e);
 		    }
 		}
@@ -1062,8 +1118,8 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	else {
         integer_came_from_string:
 	    c = SvPV(val, i);
-	    if (DO_UTF8(val))
-	        i += esc_q_utf8(aTHX_ retval, c, i);
+	    if (DO_UTF8(val) || useqq)
+	        i += esc_q_utf8(aTHX_ retval, c, i, DO_UTF8(val), useqq);
 	    else {
 		sv_grow(retval, SvCUR(retval)+3+2*i); /* 3: ""\0 */
 		r = SvPVX(retval) + SvCUR(retval);
@@ -1108,7 +1164,7 @@ Data_Dumper_Dumpxs(href, ...)
 	    HV *seenhv = NULL;
 	    AV *postav, *todumpav, *namesav;
 	    I32 level = 0;
-	    I32 indent, terse, i, imax, postlen;
+	    I32 indent, terse, useqq, i, imax, postlen;
 	    SV **svp;
 	    SV *val, *name, *pad, *xpad, *apad, *sep, *pair, *varname;
 	    SV *freezer, *toaster, *bless, *sortkeys;
@@ -1149,7 +1205,7 @@ Data_Dumper_Dumpxs(href, ...)
 		= freezer = toaster = bless = sortkeys = &PL_sv_undef;
 	    name = sv_newmortal();
 	    indent = 2;
-	    terse = purity = deepcopy = 0;
+	    terse = purity = deepcopy = useqq = 0;
 	    quotekeys = 1;
 	
 	    retval = newSVpvn("", 0);
@@ -1173,10 +1229,8 @@ Data_Dumper_Dumpxs(href, ...)
 		    purity = SvIV(*svp);
 		if ((svp = hv_fetch(hv, "terse", 5, FALSE)))
 		    terse = SvTRUE(*svp);
-#if 0 /* useqq currently unused */
 		if ((svp = hv_fetch(hv, "useqq", 5, FALSE)))
 		    useqq = SvTRUE(*svp);
-#endif
 		if ((svp = hv_fetch(hv, "pad", 3, FALSE)))
 		    pad = *svp;
 		if ((svp = hv_fetch(hv, "xpad", 4, FALSE)))
@@ -1280,7 +1334,7 @@ Data_Dumper_Dumpxs(href, ...)
 		    DD_dump(aTHX_ val, SvPVX_const(name), SvCUR(name), valstr, seenhv,
 			    postav, &level, indent, pad, xpad, newapad, sep, pair,
 			    freezer, toaster, purity, deepcopy, quotekeys,
-			    bless, maxdepth, sortkeys, use_sparse_seen_hash);
+			    bless, maxdepth, sortkeys, use_sparse_seen_hash, useqq);
 		    SPAGAIN;
 		
 		    if (indent >= 2 && !terse)
