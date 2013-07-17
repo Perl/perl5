@@ -55,7 +55,7 @@ push @paths, qw(/usr/local/lib /lib /usr/lib)
 unless(GetOptions(\%options,
                   'target=s', 'make=s', 'jobs|j=i', 'expect-pass=i',
                   'expect-fail' => sub { $options{'expect-pass'} = 0; },
-                  'clean!', 'one-liner|e=s', 'c', 'l', 'w', 'match=s',
+                  'clean!', 'one-liner|e=s@', 'c', 'l', 'w', 'match=s',
                   'no-match=s' => sub {
                       $options{match} = $_[1];
                       $options{'expect-pass'} = 0;
@@ -294,7 +294,8 @@ This prepends C<./perl -Ilib -e 'code to run'> to the test case given,
 or F<./miniperl> if I<target> is C<miniperl>.
 
 (Usually you'll use C<-e> instead of providing a test case in the
-non-option arguments to F<bisect.pl>)
+non-option arguments to F<bisect.pl>. You can repeat C<-e> on the command
+line, just like you can with C<perl>)
 
 C<-E> intentionally isn't supported, as it's an error in 5.8.0 and earlier,
 which interferes with detecting errors in the example code itself.
@@ -1339,7 +1340,7 @@ match_and_exit($real_target, @ARGV) if $match;
 
 if (defined $options{'one-liner'}) {
     my $exe = $target =~ /^(?:perl$|test)/ ? 'perl' : 'miniperl';
-    unshift @ARGV, '-e', $options{'one-liner'};
+    unshift @ARGV, map {('-e', $_)} @{$options{'one-liner'}};
     foreach (qw(c l w)) {
         unshift @ARGV, "-$_" if $options{$_};
     }
