@@ -2316,10 +2316,10 @@ Perl_defelem_target(pTHX_ SV *sv, MAGIC *mg)
             if (he)
                 targ = HeVAL(he);
 	}
-	else {
+	else if (LvSTARGOFF(sv) >= 0) {
 	    AV *const av = MUTABLE_AV(LvTARG(sv));
-	    if ((I32)LvTARGOFF(sv) <= AvFILL(av))
-		targ = AvARRAY(av)[LvTARGOFF(sv)];
+	    if (LvSTARGOFF(sv) <= AvFILL(av))
+		targ = AvARRAY(av)[LvSTARGOFF(sv)];
 	}
 	if (targ && (targ != &PL_sv_undef)) {
 	    /* somebody else defined it for us */
@@ -2378,14 +2378,16 @@ Perl_vivify_defelem(pTHX_ SV *sv)
 	if (!value || value == &PL_sv_undef)
 	    Perl_croak(aTHX_ PL_no_helem_sv, SVfARG(mg->mg_obj));
     }
+    else if (LvSTARGOFF(sv) < 0)
+	Perl_croak(aTHX_ PL_no_aelem, LvSTARGOFF(sv));
     else {
 	AV *const av = MUTABLE_AV(LvTARG(sv));
-	if ((I32)LvTARGLEN(sv) < 0 && (I32)LvTARGOFF(sv) > AvFILL(av))
+	if ((I32)LvTARGLEN(sv) < 0 && LvSTARGOFF(sv) > AvFILL(av))
 	    LvTARG(sv) = NULL;	/* array can't be extended */
 	else {
-	    SV* const * const svp = av_fetch(av, LvTARGOFF(sv), TRUE);
+	    SV* const * const svp = av_fetch(av, LvSTARGOFF(sv), TRUE);
 	    if (!svp || (value = *svp) == &PL_sv_undef)
-		Perl_croak(aTHX_ PL_no_aelem, (I32)LvTARGOFF(sv));
+		Perl_croak(aTHX_ PL_no_aelem, LvSTARGOFF(sv));
 	}
     }
     SvREFCNT_inc_simple_void(value);

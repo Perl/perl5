@@ -528,13 +528,18 @@ struct xpvlv {
     _XPV_HEAD;
     union _xivu xiv_u;
     union _xnvu xnv_u;
-    STRLEN	xlv_targoff;
+    union {
+	STRLEN	xlvu_targoff;
+	SSize_t xlvu_stargoff;
+    } xlv_targoff_u;
     STRLEN	xlv_targlen;
     SV*		xlv_targ;
     char	xlv_type;	/* k=keys .=pos x=substr v=vec /=join/re
 				 * y=alem/helem/iter t=tie T=tied HE */
     char	xlv_flags;	/* 1 = negative offset  2 = negative len */
 };
+
+#define xlv_targoff xlv_targoff_u.xlvu_targoff
 
 struct xpvinvlist {
     _XPV_HEAD;
@@ -1403,6 +1408,7 @@ sv_force_normal does nothing.
 #define LvTYPE(sv)	((XPVLV*)  SvANY(sv))->xlv_type
 #define LvTARG(sv)	((XPVLV*)  SvANY(sv))->xlv_targ
 #define LvTARGOFF(sv)	((XPVLV*)  SvANY(sv))->xlv_targoff
+#define LvSTARGOFF(sv)	((XPVLV*)  SvANY(sv))->xlv_targoff_u.xlvu_stargoff
 #define LvTARGLEN(sv)	((XPVLV*)  SvANY(sv))->xlv_targlen
 #define LvFLAGS(sv)	((XPVLV*)  SvANY(sv))->xlv_flags
 
