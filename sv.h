@@ -120,7 +120,13 @@ Type flag for formats.  See L</svtype>.
 Type flag for I/O objects.  See L</svtype>.
 
 =cut
+
+  These are ordered so that the simpler types have a lower value; SvUPGRADE
+  doesn't allow you to upgrade from a higher numbered type to a lower numbered
+  one; also there is code that assumes that anything that has as a PV component
+  has a type numbered >= SVt_PV.
 */
+
 
 typedef enum {
 	SVt_NULL,	/* 0 */
@@ -154,7 +160,7 @@ typedef enum {
 
 #ifndef PERL_CORE
 /* Although Fast Boyer Moore tables are now being stored in PVGVs, for most
-   purposes eternal code wanting to consider PVBM probably needs to think of
+   purposes external code wanting to consider PVBM probably needs to think of
    PVMG instead.  */
 #  define SVt_PVBM	SVt_PVMG
 /* Anything wanting to create a reference from clean should ensure that it has
@@ -943,6 +949,7 @@ in gv.h: */
 #define HvAMAGIC_off(hv)	(SvFLAGS(hv) &=~ SVf_AMAGIC)
 
 
+/* "nog" means "doesn't have get magic" */
 #define SvPOK_nog(sv)		((SvFLAGS(sv) & (SVf_POK|SVs_GMG)) == SVf_POK)
 #define SvIOK_nog(sv)		((SvFLAGS(sv) & (SVf_IOK|SVs_GMG)) == SVf_IOK)
 #define SvUOK_nog(sv)		((SvFLAGS(sv) & (SVf_IOK|SVf_IVisUV|SVs_GMG)) == (SVf_IOK|SVf_IVisUV))
