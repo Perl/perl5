@@ -23,7 +23,8 @@
  *	op_static	tell op_free() to skip PerlMemShared_free(), when
  *                      !op_slabbed.
  *	op_savefree	on savestack via SAVEFREEOP
- *	op_spare	Three spare bits
+ *	op_folded	Result/remainder of a constant fold operation.
+ *	op_spare	Two spare bits
  *	op_flags	Flags common to all operations.  See OPf_* below.
  *	op_private	Flags peculiar to a particular operation (BUT,
  *			by default, set to the number of children until
@@ -56,7 +57,8 @@ typedef PERL_BITFIELD16 Optype;
     PERL_BITFIELD16 op_slabbed:1;	\
     PERL_BITFIELD16 op_savefree:1;	\
     PERL_BITFIELD16 op_static:1;	\
-    PERL_BITFIELD16 op_spare:3;		\
+    PERL_BITFIELD16 op_folded:1;	\
+    PERL_BITFIELD16 op_spare:2;		\
     U8		op_flags;		\
     U8		op_private;
 #endif
@@ -257,6 +259,7 @@ Deprecated.  Use C<GIMME_V> instead.
 #define	OPpCONST_STRICT		8	/* bareword subject to strict 'subs' */
 #define OPpCONST_ENTERED	16	/* Has been entered as symbol. */
 #define OPpCONST_BARE		64	/* Was a bare word (filehandle?). */
+/* Replaced by op_folded in perl itself, still used by B/B::Concise etc. */
 #define OPpCONST_FOLDED		128	/* Result of constant folding */
 
 /* Private for OP_FLIP/FLOP */

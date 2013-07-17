@@ -7393,6 +7393,7 @@ Perl_yylex(pTHX)
 			SvREFCNT_dec(((SVOP*)pl_yylval.opval)->op_sv);
 			((SVOP*)pl_yylval.opval)->op_sv = SvREFCNT_inc_simple(sv);
 			pl_yylval.opval->op_private = OPpCONST_FOLDED;
+			pl_yylval.opval->op_folded = 1;
 			pl_yylval.opval->op_flags |= OPf_SPECIAL;
 			TOKEN(WORD);
 		    }

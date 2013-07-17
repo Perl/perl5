@@ -3345,7 +3345,10 @@ S_fold_constants(pTHX_ OP *o)
     if (type == OP_RV2GV)
 	newop = newGVOP(OP_GV, 0, MUTABLE_GV(sv));
     else
+    {
 	newop = newSVOP(OP_CONST, OPpCONST_FOLDED<<8, MUTABLE_SV(sv));
+	newop->op_folded = 1;
+    }
     op_getmad(o,newop,'f');
     return newop;
 
@@ -5880,6 +5883,8 @@ S_new_logop(pTHX_ I32 type, I32 flags, OP** firstp, OP** otherp)
 		other->op_flags |= OPf_SPECIAL;
 	    else if (other->op_type == OP_CONST)
 		other->op_private |= OPpCONST_FOLDED;
+
+	    other->op_folded = 1;
 	    return other;
 	}
 	else {
@@ -6041,6 +6046,7 @@ Perl_newCONDOP(pTHX_ I32 flags, OP *first, OP *trueop, OP *falseop)
 	    live->op_flags |= OPf_SPECIAL;
 	else if (live->op_type == OP_CONST)
 	    live->op_private |= OPpCONST_FOLDED;
+	live->op_folded = 1;
 	return live;
     }
     NewOp(1101, logop, 1, LOGOP);
@@ -8651,7 +8657,7 @@ Perl_ck_ftst(pTHX_ OP *o)
 	const OPCODE kidtype = kid->op_type;
 
 	if (kidtype == OP_CONST && (kid->op_private & OPpCONST_BARE)
-	 && !(kid->op_private & OPpCONST_FOLDED)) {
+	 && !kid->op_folded) {
 	    OP * const newop = newGVOP(type, OPf_REF,
 		gv_fetchsv(kid->op_sv, GV_ADD, SVt_PVIO));
 #ifdef PERL_MAD
@@ -9236,7 +9242,7 @@ Perl_ck_listiob(pTHX_ OP *o)
 	kid = kid->op_sibling;
     else if (kid && !kid->op_sibling) {		/* print HANDLE; */
 	if (kid->op_type == OP_CONST && kid->op_private & OPpCONST_BARE
-	 && !(kid->op_private & OPpCONST_FOLDED)) {
+	 && !kid->op_folded) {
 	    o->op_flags |= OPf_STACKED;	/* make it a filehandle */
 	    kid = newUNOP(OP_RV2GV, OPf_REF, scalar(kid));
 	    cLISTOPo->op_first->op_sibling = kid;
@@ -10603,8 +10609,8 @@ Perl_ck_trunc(pTHX_ OP *o)
 	if (kid->op_type == OP_NULL)
 	    kid = (SVOP*)kid->op_sibling;
 	if (kid && kid->op_type == OP_CONST &&
-	    (kid->op_private & (OPpCONST_BARE|OPpCONST_FOLDED))
-			     == OPpCONST_BARE)
+	    (kid->op_private & OPpCONST_BARE) &&
+	    !kid->op_folded)
 	{
 	    o->op_flags |= OPf_SPECIAL;
 	    kid->op_private &= ~OPpCONST_STRICT;
