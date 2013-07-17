@@ -5145,6 +5145,8 @@ Perl_yylex(pTHX)
 	return yylex();
     }
 
+    /* We really do *not* want PL_linestr ever becoming a COW. */
+    assert (!SvIsCOW(PL_linestr));
     s = PL_bufptr;
     PL_oldoldbufptr = PL_oldbufptr;
     PL_oldbufptr = s;
@@ -10536,8 +10538,49 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims, int re_reparse,
 		int offset = s - SvPVX_const(PL_linestr);
 		const bool found = sv_cat_decode(sv, PL_encoding, PL_linestr,
 					   &offset, (char*)termstr, termlen);
-		const char * const ns = SvPVX_const(PL_linestr) + offset;
-		char * const svlast = SvEND(sv) - 1;
+		const char *ns;
+		char *svlast;
+
+		if (SvIsCOW(PL_linestr)) {
+		    STRLEN bufend_pos, bufptr_pos, oldbufptr_pos;
+		    STRLEN oldoldbufptr_pos, linestart_pos, last_uni_pos;
+		    STRLEN last_lop_pos, re_eval_start_pos, s_pos;
+		    char *buf = SvPVX(PL_linestr);
+		    bufend_pos = PL_parser->bufend - buf;
+		    bufptr_pos = PL_parser->bufptr - buf;
+		    oldbufptr_pos = PL_parser->oldbufptr - buf;
+		    oldoldbufptr_pos = PL_parser->oldoldbufptr - buf;
+		    linestart_pos = PL_parser->linestart - buf;
+		    last_uni_pos = PL_parser->last_uni
+			? PL_parser->last_uni - buf
+			: 0;
+		    last_lop_pos = PL_parser->last_lop
+			? PL_parser->last_lop - buf
+			: 0;
+		    re_eval_start_pos =
+			PL_parser->lex_shared->re_eval_start ?
+                            PL_parser->lex_shared->re_eval_start - buf : 0;
+		    s_pos = s - buf;
+
+		    sv_force_normal(PL_linestr);
+
+		    buf = SvPVX(PL_linestr);
+		    PL_parser->bufend = buf + bufend_pos;
+		    PL_parser->bufptr = buf + bufptr_pos;
+		    PL_parser->oldbufptr = buf + oldbufptr_pos;
+		    PL_parser->oldoldbufptr = buf + oldoldbufptr_pos;
+		    PL_parser->linestart = buf + linestart_pos;
+		    if (PL_parser->last_uni)
+			PL_parser->last_uni = buf + last_uni_pos;
+		    if (PL_parser->last_lop)
+			PL_parser->last_lop = buf + last_lop_pos;
+		    if (PL_parser->lex_shared->re_eval_start)
+		        PL_parser->lex_shared->re_eval_start  =
+			    buf + re_eval_start_pos;
+		    s = buf + s_pos;
+		}
+		ns = SvPVX_const(PL_linestr) + offset;
+		svlast = SvEND(sv) - 1;
 
 		for (; s < ns; s++) {
 		    if (*s == '\n' && !PL_rsfp && !PL_parser->filtered)
