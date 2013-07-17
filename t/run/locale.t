@@ -62,7 +62,7 @@ EOF
 # try to find out a locale where LC_NUMERIC makes a difference
 my $original_locale = setlocale(LC_NUMERIC);
 
-my ($base, $different, $difference);
+my ($base, $different, $comma, $difference);
 for ("C", @locales) { # prefer C for the base if available
     BEGIN {
         if($Config{d_setlocale}) {
@@ -76,9 +76,10 @@ for ("C", @locales) { # prefer C for the base if available
     } else {
 	$different ||= $_;
 	$difference ||= $s;
+        $comma ||= $_ if localeconv()->{decimal_point} eq ',';
     }
 
-    last if $base && $different;
+    last if $base && $different && $comma;
 }
 setlocale(LC_NUMERIC, $original_locale);
 
@@ -167,7 +168,6 @@ EOF
             "", {}, "version does not clobber version (via eval)");
     }
 
-
     for ($different) {
 	local $ENV{LC_NUMERIC} = $_;
 	local $ENV{LC_ALL}; # so it never overrides LC_NUMERIC
@@ -180,6 +180,37 @@ EOF
 EOF
 	"sprintf() and printf() look at LC_NUMERIC regardless of constant folding");
     }
+
+    unless ($comma) {
+        skip("no locale available where LC_NUMERIC is a comma", 2);
+    }
+    else {
+
+        fresh_perl_is(<<"EOF",
+            my \$i = 1.5;
+            {
+                use locale;
+                use POSIX;
+                POSIX::setlocale(POSIX::LC_NUMERIC(),"$comma");
+                print \$i, "\n";
+            }
+            print \$i, "\n";
+EOF
+            "1,5\n1.5", {}, "Radix print properly in locale scope, and without");
+
+        fresh_perl_is(<<"EOF",
+            my \$i = 1.5;   # Should be exactly representable as a base 2
+                            # fraction, so can use 'eq' below
+            use locale;
+            use POSIX;
+            POSIX::setlocale(POSIX::LC_NUMERIC(),"$comma");
+            print \$i, "\n";
+            \$i += 1;
+            print \$i, "\n";
+EOF
+            "1,5\n2,5", {}, "Can do math when radix is a comma"); # [perl 115800]
+    }
+
 } # SKIP
 
-sub last { 9 }
+sub last { 11 }
