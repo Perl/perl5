@@ -27,7 +27,10 @@ SKIP: {
 	my $ver = 1.23;  # has to be floating point number
 	my $loc;
 	my $orig_loc = setlocale(LC_NUMERIC);
-	is ($ver, '1.23', 'Not using locale yet');
+	ok ($ver eq "1.23", 'Not using locale yet');  # Don't use is(),
+                                                      # because have to
+                                                      # evaluate in current
+                                                      # scope
 	while (<DATA>) {
 	    chomp;
 	    $loc = setlocale( LC_ALL, $_);
@@ -39,11 +42,11 @@ SKIP: {
 	diag ("Testing locale handling with $loc") unless $ENV{PERL_CORE};
 
         setlocale(LC_NUMERIC, $loc);
-	ok ("$ver eq '1,23'", "Using locale: $loc");
+	ok ($ver eq "1,23", "Using locale: $loc");
 	$v = version->new($ver);
 	unlike($warning, qr/Version string '1,23' contains invalid data/,
 	    "Process locale-dependent floating point");
-	ok ($v == "1.23", "Locale doesn't apply to version objects");
+	ok ($v eq "1.23", "Locale doesn't apply to version objects");
 	ok ($v == $ver, "Comparison to locale floating point");
 
         {
