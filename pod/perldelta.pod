@@ -630,6 +630,12 @@ C<pos>, C<tie>, C<tied> and C<untie> did not work
 properly on subroutine arguments aliased to nonexistent
 hash and array elements [perl #77814, #27010].
 
+=item *
+
+The C<< => >> fat arrow operator can now quote built-in keywords even if it
+occurs on the next line, making it consistent with how it treats other
+barewords.
+
 =back
 
 =head1 Known Problems
