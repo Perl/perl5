@@ -718,6 +718,14 @@ struct OP_methods {
     STR_WITH_LEN("warnings"),0,       -1,                                /*44*/
     STR_WITH_LEN("io"),      0,       -1,                                /*45*/
     STR_WITH_LEN("hints_hash"),0,     -1,                                /*46*/
+#if PERL_VERSION >= 17
+    STR_WITH_LEN("slabbed"), 0,       -1,                                /*47*/
+    STR_WITH_LEN("savefree"),0,       -1,                                /*48*/
+    STR_WITH_LEN("static"),  0,       -1,                                /*49*/
+#if PERL_VERSION >= 19
+    STR_WITH_LEN("folded"),  0,       -1,                                /*50*/
+#endif
+#endif
 };
 
 #include "const-c.inc"
@@ -989,6 +997,10 @@ next(o)
 	B::COP::warnings     = 44
 	B::COP::io           = 45
 	B::COP::hints_hash   = 46
+	B::OP::slabbed       = 47
+	B::OP::savefree      = 48
+	B::OP::static        = 49
+	B::OP::folded        = 50
     PREINIT:
 	char *ptr;
 	SV *ret;
@@ -1064,10 +1076,22 @@ next(o)
 	    case 30: /* type  */
 	    case 31: /* opt   */
 	    case 32: /* spare */
-	    /* These 3 are all bitfields, so we can't take their addresses */
+#if PERL_VERSION >= 17
+	    case 47: /* slabbed  */
+	    case 48: /* savefree */
+	    case 49: /* static   */
+#if PERL_VERSION >= 19
+	    case 50: /* folded   */
+#endif
+#endif
+	    /* These are all bitfields, so we can't take their addresses */
 		ret = sv_2mortal(newSVuv((UV)(
 				      ix == 30 ? o->op_type
 		                    : ix == 31 ? o->op_opt
+		                    : ix == 47 ? o->op_slabbed
+		                    : ix == 48 ? o->op_savefree
+		                    : ix == 49 ? o->op_static
+		                    : ix == 50 ? o->op_folded
 		                    :            o->op_spare)));
 		break;
 	    case 33: /* children */
