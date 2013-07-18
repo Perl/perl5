@@ -2975,6 +2975,7 @@ dist/Env/t/env.t		See if Env works
 dist/Exporter/lib/Exporter/Heavy.pm	Complicated routines for Exporter
 dist/Exporter/lib/Exporter.pm		Exporter base class
 dist/Exporter/t/Exporter.t		See if Exporter works
+dist/Exporter/t/warn.t			See if Exporter respects warning handlers
 dist/ExtUtils-CBuilder/Changes		EU-CB change log
 dist/ExtUtils-CBuilder/lib/ExtUtils/CBuilder/Base.pm		Base class for ExtUtils::CBuilder methods
 dist/ExtUtils-CBuilder/lib/ExtUtils/CBuilder/Platform/aix.pm	CBuilder methods for AIX
