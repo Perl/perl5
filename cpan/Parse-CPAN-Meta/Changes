@@ -1,5 +1,11 @@
 Changes for Perl programming language extension Parse-CPAN-Meta
 
+1.4405    2013-07-17 21:43:34 America/New_York
+      - Fixed incorrect "return ... or die ..." constructs
+      - Converted distribution to Dist::Zilla management
+      - Noted new repository location in the Github Perl-Toolchain-Gang
+        organization
+
 1.4404 Sun Apr 05 2012
       - Protected tests from user PERL_YAML/JSON_BACKEND
 

@@ -58,8 +58,8 @@ my $want = {
   "version" => "0.101010",
 };
 
-my $meta_json = catfile( test_data_directory(), 'VR-META.json' );
-my $meta_yaml = catfile( test_data_directory(), 'VR-META.yml' );
+my $meta_json = catfile( test_data_directory(), 'META-VR.json' );
+my $meta_yaml = catfile( test_data_directory(), 'META-VR.yml' );
 
 ### YAML tests
 {
@@ -73,7 +73,7 @@ my $meta_yaml = catfile( test_data_directory(), 'VR-META.yml' );
 {
   local $ENV{PERL_YAML_BACKEND}; # ensure we get CPAN::META::YAML
 
-  my $yaml   = load_ok( 'VR-META.yml', $meta_yaml, 100);
+  my $yaml   = load_ok( 'META-VR.yml', $meta_yaml, 100);
   my $from_yaml = Parse::CPAN::Meta->load_yaml_string( $yaml );
   is_deeply($from_yaml, $want, "load from YAML str results in expected data");
 }
@@ -84,7 +84,7 @@ SKIP: {
   local $ENV{PERL_YAML_BACKEND} = 'YAML';
 
   is(Parse::CPAN::Meta->yaml_backend(), 'YAML', 'yaml_backend()');
-  my $yaml   = load_ok( 'VR-META.yml', $meta_yaml, 100);
+  my $yaml   = load_ok( 'META-VR.yml', $meta_yaml, 100);
   my $from_yaml = Parse::CPAN::Meta->load_yaml_string( $yaml );
   is_deeply($from_yaml, $want, "load_yaml_string using PERL_YAML_BACKEND");
 }
@@ -103,7 +103,7 @@ SKIP: {
   # JSON tests with JSON::PP
   local $ENV{PERL_JSON_BACKEND}; # ensure we get JSON::PP
 
-  my $json   = load_ok( 'VR-META.json', $meta_json, 100);
+  my $json   = load_ok( 'META-VR.json', $meta_json, 100);
   my $from_json = Parse::CPAN::Meta->load_json_string( $json );
   is_deeply($from_json, $want, "load from JSON str results in expected data");
 }
@@ -112,7 +112,7 @@ SKIP: {
   # JSON tests with JSON::PP, take 2
   local $ENV{PERL_JSON_BACKEND} = 0; # request JSON::PP
 
-  my $json   = load_ok( 'VR-META.json', $meta_json, 100);
+  my $json   = load_ok( 'META-VR.json', $meta_json, 100);
   my $from_json = Parse::CPAN::Meta->load_json_string( $json );
   is_deeply($from_json, $want, "load_json_string with PERL_JSON_BACKEND = 0");
 }
@@ -121,7 +121,7 @@ SKIP: {
   # JSON tests with JSON::PP, take 3
   local $ENV{PERL_JSON_BACKEND} = 'JSON::PP'; # request JSON::PP
 
-  my $json   = load_ok( 'VR-META.json', $meta_json, 100);
+  my $json   = load_ok( 'META-VR.json', $meta_json, 100);
   my $from_json = Parse::CPAN::Meta->load_json_string( $json );
   is_deeply($from_json, $want, "load_json_string with PERL_JSON_BACKEND = 'JSON::PP'");
 }
@@ -132,7 +132,7 @@ SKIP: {
   local $ENV{PERL_JSON_BACKEND} = 1;
 
   is(Parse::CPAN::Meta->json_backend(), 'JSON', 'json_backend()');
-  my $json   = load_ok( 'VR-META.json', $meta_json, 100);
+  my $json   = load_ok( 'META-VR.json', $meta_json, 100);
   my $from_json = Parse::CPAN::Meta->load_json_string( $json );
   is_deeply($from_json, $want, "load_json_string with PERL_JSON_BACKEND = 1");
 }

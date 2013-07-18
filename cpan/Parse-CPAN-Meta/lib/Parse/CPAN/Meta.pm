@@ -1,6 +1,8 @@
-package Parse::CPAN::Meta;
-
 use strict;
+package Parse::CPAN::Meta;
+# ABSTRACT: Parse META.yml and META.json CPAN metadata files
+our $VERSION = '1.4405'; # VERSION
+
 use Carp 'croak';
 
 # UTF Support?
@@ -17,7 +19,6 @@ BEGIN {
 	# Class structure
 	require 5.004;
 	require Exporter;
-	$Parse::CPAN::Meta::VERSION   = '1.4404';
 	@Parse::CPAN::Meta::ISA       = qw{ Exporter      };
 	@Parse::CPAN::Meta::EXPORT_OK = qw{ Load LoadFile };
 }
@@ -108,15 +109,17 @@ sub _can_load {
 # Create an object from a file
 sub LoadFile ($) {
   require CPAN::Meta::YAML;
-  return CPAN::Meta::YAML::LoadFile(shift)
+  my $object = CPAN::Meta::YAML::LoadFile(shift)
     or die CPAN::Meta::YAML->errstr;
+  return $object;
 }
 
 # Parse a document from a string.
 sub Load ($) {
   require CPAN::Meta::YAML;
-  return CPAN::Meta::YAML::Load(shift)
+  my $object = CPAN::Meta::YAML::Load(shift)
     or die CPAN::Meta::YAML->errstr;
+  return $object;
 }
 
 1;
@@ -125,9 +128,15 @@ __END__
 
 =pod
 
+=encoding utf-8
+
 =head1 NAME
 
 Parse::CPAN::Meta - Parse META.yml and META.json CPAN metadata files
+
+=head1 VERSION
+
+version 1.4405
 
 =head1 SYNOPSIS
 
@@ -170,6 +179,8 @@ All error reporting is done with exceptions (die'ing).
 
 Note that META files are expected to be in UTF-8 encoding, only.  When
 converted string data, it must first be decoded from UTF-8.
+
+=for Pod::Coverage HAVE_UTF8 IO_LAYER
 
 =head1 METHODS
 
@@ -248,29 +259,61 @@ old, an exception will be thrown.
 =head2 PERL_YAML_BACKEND
 
 By default, L<CPAN::Meta::YAML> will be used for deserializing YAML data. If
-the C<PERL_YAML_BACKEND> environment variable is defined, then it is intepreted
+the C<PERL_YAML_BACKEND> environment variable is defined, then it is interpreted
 as a module to use for deserialization.  The given module must be installed,
 must load correctly and must implement the C<Load()> function or an exception
 will be thrown.
 
+=for :stopwords cpan testmatrix url annocpan anno bugtracker rt cpants kwalitee diff irc mailto metadata placeholders metacpan
+
 =head1 SUPPORT
 
-Bugs should be reported via the CPAN bug tracker at
+=head2 Bugs / Feature Requests
 
-L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Parse-CPAN-Meta>
+Please report any bugs or feature requests through the issue tracker
+at L<https://rt.cpan.org/Public/Dist/Display.html?Name=Parse-CPAN-Meta>.
+You will be notified automatically of any progress on your issue.
+
+=head2 Source Code
+
+This is open source software.  The code repository is available for
+public review and contribution under the terms of the license.
+
+L<http://github.com/Perl-Toolchain-Gang/Parse-CPAN-Meta>
+
+  git clone git://github.com/Perl-Toolchain-Gang/Parse-CPAN-Meta.git
 
 =head1 AUTHOR
 
-Adam Kennedy E<lt>adamk@cpan.orgE<gt>
+Adam Kennedy <adamk@cpan.org>
 
-=head1 COPYRIGHT
+=head1 CONTRIBUTORS
 
-Copyright 2006 - 2010 Adam Kennedy.
+=over 4
 
-This program is free software; you can redistribute
-it and/or modify it under the same terms as Perl itself.
+=item *
 
-The full text of the license can be found in the
-LICENSE file included with this module.
+David Golden <dagolden@cpan.org>
+
+=item *
+
+Joshua ben Jore <jjore@cpan.org>
+
+=item *
+
+Ricardo SIGNES <rjbs@cpan.org>
+
+=item *
+
+Steffen Müller <smueller@cpan.org>
+
+=back
+
+=head1 COPYRIGHT AND LICENSE
+
+This software is copyright (c) 2013 by Adam Kennedy and Contributors.
+
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
 
 =cut

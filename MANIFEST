@@ -1710,13 +1710,12 @@ cpan/parent/t/parent-returns-false.t		tests for parent.pm
 cpan/parent/t/parent.t				tests for parent.pm
 cpan/Parse-CPAN-Meta/Changes
 cpan/Parse-CPAN-Meta/lib/Parse/CPAN/Meta.pm
-cpan/Parse-CPAN-Meta/t/01_compile.t
 cpan/Parse-CPAN-Meta/t/02_api.t
 cpan/Parse-CPAN-Meta/t/03_functions.t
 cpan/Parse-CPAN-Meta/t/04_export.t
 cpan/Parse-CPAN-Meta/t/05_errors.t
-cpan/Parse-CPAN-Meta/t/data/VR-META.json
-cpan/Parse-CPAN-Meta/t/data/VR-META.yml
+cpan/Parse-CPAN-Meta/t/data/META-VR.json
+cpan/Parse-CPAN-Meta/t/data/META-VR.yml
 cpan/Parse-CPAN-Meta/t/lib/Parse/CPAN/Meta/Test.pm
 cpan/perlfaq/lib/perlfaq1.pod		General Questions About Perl
 cpan/perlfaq/lib/perlfaq2.pod	Obtaining and Learning about Perl
