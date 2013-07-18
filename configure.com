@@ -2005,28 +2005,22 @@ $! Ask about threads, if appropriate
 $ IF ccname .EQS. "DEC" .OR. ccname .EQS. "CXX"
 $ THEN
 $   echo ""
-$   echo "Perl can be built to take advantage of threads on some systems."
+$   echo "Perl can be built to offer a form of threading support on some systems."
 $   echo "To do so, configure.com can be run with -""Dusethreads""."
 $   echo ""
 $   echo "Note that Perl built with threading support runs slightly slower"
-$   echo "and uses more memory than plain Perl. The current implementation"
-$   echo "is believed to be stable, but it is fairly new, and so should be"
-$   echo "treated with caution."
+$   echo "and uses slightly more memory than plain Perl."
 $   echo ""
 $   bool_dflt = "n"
 $   if f$type(usethreads) .nes. "" 
 $   then 
 $       if usethreads .or. usethreads .eqs. "define" then bool_dflt="y"
 $   endif
-$!  Catch cases where user specified ithreads or 5005threads but
+$!  Catch cases where user specified ithreads but
 $!  forgot -Dusethreads 
 $   if f$type(useithreads) .nes. ""
 $   then
 $         if useithreads .or. useithreads .eqs. "define" then bool_dflt="y"
-$   endif
-$   if f$type(use5005threads) .nes. ""
-$   then
-$         if use5005threads .or. use5005threads .eqs. "define" then bool_dflt="y"
 $   endif
 $   echo "If this doesn't make any sense to you, just accept the default '" + bool_dflt + "'."
 $   rp = "Build a threading Perl? [''bool_dflt'] "
@@ -2035,15 +2029,6 @@ $   if ans
 $   THEN
 $     usethreads = "define"
 $     use_threads="T"
-$     ! Shall we do the 5.005-type threads, or IThreads?
-$     echo "Since release 5.6, Perl has had two different threading implementations,"
-$     echo "the newer interpreter-based version (ithreads) with one interpreter per"
-$     echo "thread, and the older 5.005 version (5005threads)."
-$     echo "The 5005threads version is effectively unmaintained and will probably be"
-$     echo "removed in Perl 5.10, so there should be no need to build a Perl using it"
-$     echo "unless needed for backwards compatibility with some existing 5.005threads"
-$     echo "code."
-$     echo ""
 $     bool_dflt = "y"
 $     if f$type(useithreads) .nes. ""
 $     then
@@ -2051,17 +2036,16 @@ $         if useithreads .eqs. "undef" then bool_dflt="n"
 $     endif
 $     if f$type(use5005threads) .nes. ""
 $     then
-$         if use5005threads .or. use5005threads .eqs. "define" then bool_dflt="n"
+$         if use5005threads .or. use5005threads .eqs. "define"
+$         then
+$             echo "5.005 threads are no longer supported"
+$             exit 44
+$         endif
 $     endif
 $     rp = "Use the newer interpreter-based ithreads? [''bool_dflt'] "
 $     GOSUB myread
 $     use_ithreads=ans
-$     if use_ithreads 
-$     THEN
-$       use_5005_threads="N"
-$     ELSE
-$       use_5005_threads="Y"
-$     ENDIF
+$     use_5005_threads="N"
 $     ! Are they on VMS 7.1 or greater?
 $     IF "''f$extract(1,3, f$getsyi(""version""))'" .GES. "7.1"
 $     THEN
@@ -3406,24 +3390,13 @@ $ ENDIF
 $!
 $! Now some that we build up
 $!
+$ use5005threads = "undef"
+$ d_old_pthread_create_joinable = "undef"
+$ old_pthread_create_joinable = " "
 $ IF use_threads
 $ THEN
-$   IF use_5005_threads
-$   THEN
-$     d_old_pthread_create_joinable = "undef"
-$     old_pthread_create_joinable = " "
-$     use5005threads = "define"
-$     useithreads = "undef"
-$   ELSE
-$     d_old_pthread_create_joinable = "undef"
-$     old_pthread_create_joinable = " "
-$     use5005threads = "undef"
-$     useithreads = "define"
-$   ENDIF
+$    useithreads = "define"
 $ ELSE
-$   d_old_pthread_create_joinable = "undef"
-$   old_pthread_create_joinable = " "
-$   use5005threads = "undef"
 $   useithreads = "undef"
 $ ENDIF
 $!
