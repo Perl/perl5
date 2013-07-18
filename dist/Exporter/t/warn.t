@@ -34,6 +34,6 @@ package main;
 
     local $SIG{__WARN__} = sub { push @warn, join "", @_ };
     eval { Foo->import(":quux") };
-    ok(grep(/"quux" is not defined/, @warn), "# TODO warnings captured");
+    ok(grep(/"quux" is not defined/, @warn), "warnings captured");
 }
 
