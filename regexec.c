@@ -2278,6 +2278,13 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
         return 0;
     }
 
+    /* at the end of this function, we'll do a LEAVE_SCOPE(oldsave),
+     * which will call destuctors to reset PL_regmatch_state, free higher
+     * PL_regmatch_slabs, and clean up regmatch_info_aux and
+     * regmatch_info_aux_eval */
+
+    oldsave = PL_savestack_ix;
+
     s = startpos;
 
     if ((prog->extflags & RXf_USE_INTUIT)
@@ -2322,14 +2329,6 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
 	    return 1;
         }
     }
-
-
-    /* at the end of this function, we'll do a LEAVE_SCOPE(oldsave),
-     * which will call destuctors to reset PL_regmatch_state, free higher
-     * PL_regmatch_slabs, and clean up regmatch_info_aux and
-     * regmatch_info_aux_eval */
-
-    oldsave = PL_savestack_ix;
 
     multiline = prog->extflags & RXf_PMf_MULTILINE;
     
