@@ -557,12 +557,8 @@ Perl_pregexec(pTHX_ REGEXP * const prog, char* stringarg, char *strend,
  * with giant delta may be not rechecked).
  */
 
-/* Assumptions: if ANCH_GPOS, then strpos is anchored. XXXX Check GPOS logic */
-
 /* If SCREAM, then SvPVX_const(sv) should be compatible with strpos and strend.
    Otherwise, only SvCUR(sv) is used to get strbeg. */
-
-/* XXXX We assume that strpos is strbeg unless sv. */
 
 /* XXXX Some places assume that there is a fixed substring.
 	An update may be needed if optimizer marks as "INTUITable"
@@ -671,14 +667,15 @@ Perl_re_intuit_start(pTHX_
         }
 	check = prog->check_substr;
     }
-    if (prog->extflags & RXf_ANCH) {	/* Match at beg-of-str or after \n */
-	ml_anch = !( (prog->extflags & RXf_ANCH_SINGLE)
+    if ((prog->extflags & RXf_ANCH)	/* Match at beg-of-str or after \n */
+	 && !(prog->extflags & RXf_ANCH_GPOS)) /* \G isn't a BOS or \n */
+    {
+        ml_anch = !( (prog->extflags & RXf_ANCH_SINGLE)
 		     || ( (prog->extflags & RXf_ANCH_BOL)
 			  && !multiline ) );	/* Check after \n? */
 
 	if (!ml_anch) {
-	  if ( !(prog->extflags & RXf_ANCH_GPOS) /* Checked by the caller */
-		&& !(prog->intflags & PREGf_IMPLICIT) /* not a real BOL */
+	  if (    !(prog->intflags & PREGf_IMPLICIT) /* not a real BOL */
 	       && (strpos != strbeg)) {
 	      DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "Not at start...\n"));
 	      goto fail;

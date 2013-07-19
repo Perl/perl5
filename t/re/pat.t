@@ -20,7 +20,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 681;  # Update this when adding/deleting tests.
+plan tests => 688;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -727,6 +727,26 @@ sub run_tests {
         unlike($str, qr/^...\G/, $message);
         ok($str =~ /\G../ && $& eq 'cd', $message);
         ok($str =~ /.\G./ && $& eq 'bc', $message);
+
+    }
+
+    {
+        my $message = '\G and intuit and anchoring';
+	$_ = "abcdef";
+	pos = 0;
+	ok($_ =~ /\Gabc/, $message);
+	ok($_ =~ /^\Gabc/, $message);
+
+	pos = 3;
+	ok($_ =~ /\Gdef/, $message);
+	pos = 3;
+	ok($_ =~ /\Gdef$/, $message);
+	pos = 3;
+	ok($_ =~ /abc\Gdef$/, $message);
+	pos = 3;
+	ok($_ =~ /^abc\Gdef$/, $message);
+	pos = 3;
+	ok($_ =~ /c\Gd/, $message);
     }
 
     {
