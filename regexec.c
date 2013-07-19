@@ -2419,16 +2419,6 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
 	    reginfo->ganch = strbeg + mg->mg_len;	/* Defined pos() */
 	    DEBUG_GPOS_r(PerlIO_printf(Perl_debug_log,
 		"GPOS MAGIC: reginfo->ganch = strbeg + %"IVdf"\n",(IV)mg->mg_len));
-
-	    if (prog->extflags & RXf_ANCH_GPOS) {
-	        if (s > reginfo->ganch)
-		    goto phooey;
-		s = reginfo->ganch - prog->gofs;
-	        DEBUG_GPOS_r(PerlIO_printf(Perl_debug_log,
-		     "GPOS ANCH_GPOS: s = ganch - %"UVxf"\n",(UV)prog->gofs));
-		if (s < strbeg)
-		    goto phooey;
-	    }
 	}
 	else {				/* pos() not defined */
 	    reginfo->ganch = strbeg;
@@ -2542,7 +2532,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
            and we only enter this block when the same bit is set. */
         char *tmp_s = reginfo->ganch - prog->gofs;
 
-	if (tmp_s >= strbeg && regtry(reginfo, &tmp_s))
+	if (s <= tmp_s && regtry(reginfo, &tmp_s))
 	    goto got_it;
 	goto phooey;
     }
