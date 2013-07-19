@@ -2238,6 +2238,8 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
     startpos = stringarg;
 
     if (prog->extflags & RXf_GPOS_SEEN) {
+        MAGIC *mg;
+
         /* in the presence of \G, we may need to start looking earlier in
          * the string than the suggested start point of stringarg:
          * if gofs->prog is set, then that's a known, fixed minimum
@@ -2255,6 +2257,24 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
         }
         else if (prog->extflags & RXf_GPOS_FLOAT)
             startpos = strbeg;
+
+        /* set reginfo->ganch, the position where \G can match */
+
+        if (flags & REXEC_IGNOREPOS){	/* Means: check only at start */
+            reginfo->ganch = stringarg;
+            DEBUG_GPOS_r(PerlIO_printf(Perl_debug_log,
+              "GPOS IGNOREPOS: reginfo->ganch = stringarg\n"));
+        } else if (sv && (mg = mg_find_mglob(sv))
+                  && mg->mg_len >= 0) {
+            reginfo->ganch = strbeg + mg->mg_len;	/* Defined pos() */
+            DEBUG_GPOS_r(PerlIO_printf(Perl_debug_log,
+                "GPOS MAGIC: reginfo->ganch = strbeg + %"IVdf"\n",(IV)mg->mg_len));
+        }
+        else {				/* pos() not defined */
+            reginfo->ganch = strbeg;
+            DEBUG_GPOS_r(PerlIO_printf(Perl_debug_log,
+                 "GPOS: reginfo->ganch = strbeg\n"));
+        }
     }
 
     minlen = prog->minlen;
@@ -2408,24 +2428,6 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
 
     /* If there is a "must appear" string, look for it. */
 
-    if (prog->extflags & RXf_GPOS_SEEN) { /* Need to set reginfo->ganch */
-	MAGIC *mg;
-	if (flags & REXEC_IGNOREPOS){	/* Means: check only at start */
-	    reginfo->ganch = stringarg;
-	    DEBUG_GPOS_r(PerlIO_printf(Perl_debug_log,
-	      "GPOS IGNOREPOS: reginfo->ganch = stringarg\n"));
-	} else if (sv && (mg = mg_find_mglob(sv))
-		  && mg->mg_len >= 0) {
-	    reginfo->ganch = strbeg + mg->mg_len;	/* Defined pos() */
-	    DEBUG_GPOS_r(PerlIO_printf(Perl_debug_log,
-		"GPOS MAGIC: reginfo->ganch = strbeg + %"IVdf"\n",(IV)mg->mg_len));
-	}
-	else {				/* pos() not defined */
-	    reginfo->ganch = strbeg;
-            DEBUG_GPOS_r(PerlIO_printf(Perl_debug_log,
-		 "GPOS: reginfo->ganch = strbeg\n"));
-	}
-    }
     if (PL_curpm && (PM_GETRE(PL_curpm) == rx)) {
         /* We have to be careful. If the previous successful match
            was from this regex we don't want a subsequent partially
