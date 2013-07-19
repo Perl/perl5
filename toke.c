@@ -940,40 +940,65 @@ into the buffer.
 =cut
 */
 
+#define dSAVEBUFPOINTERS \
+    STRLEN bufend_pos, bufptr_pos, oldbufptr_pos;		\
+    STRLEN oldoldbufptr_pos, linestart_pos, last_uni_pos;	\
+    STRLEN last_lop_pos, re_eval_start_pos;			\
+    char *_bufstart
+
+#define SAVEBUFPOINTERS STMT_START { \
+	_bufstart = SvPVX(PL_parser->linestr);				\
+	bufend_pos = PL_parser->bufend - _bufstart;			\
+	bufptr_pos = PL_parser->bufptr  - _bufstart;			\
+	oldbufptr_pos = PL_parser->oldbufptr - _bufstart;		\
+	oldoldbufptr_pos = PL_parser->oldoldbufptr - _bufstart;		\
+	linestart_pos = PL_parser->linestart - _bufstart;		\
+	last_uni_pos = PL_parser->last_uni				\
+			    ? PL_parser->last_uni - _bufstart		\
+			    : 0;					\
+	last_lop_pos = PL_parser->last_lop				\
+			    ? PL_parser->last_lop - _bufstart		\
+			    : 0;					\
+	re_eval_start_pos = PL_parser->lex_shared->re_eval_start	\
+		? PL_parser->lex_shared->re_eval_start - _bufstart	\
+		: 0;							\
+    } STMT_END
+
+#define ZEROBUFPOINTERS \
+    bufend_pos = bufptr_pos = oldbufptr_pos = oldoldbufptr_pos =	\
+    linestart_pos = last_uni_pos = last_lop_pos = re_eval_start_pos = 0
+
+#define RESTOREBUFPOINTERS STMT_START { \
+	_bufstart = SvPVX(PL_parser->linestr);			\
+	PL_parser->bufend = _bufstart + bufend_pos;		\
+	PL_parser->bufptr = _bufstart + bufptr_pos;		\
+	PL_parser->oldbufptr = _bufstart + oldbufptr_pos;	\
+	PL_parser->oldoldbufptr = _bufstart + oldoldbufptr_pos;	\
+	PL_parser->linestart = _bufstart + linestart_pos;	\
+	if (PL_parser->last_uni)				\
+	    PL_parser->last_uni = _bufstart + last_uni_pos;	\
+	if (PL_parser->last_lop)				\
+	    PL_parser->last_lop = _bufstart + last_lop_pos;	\
+	if (PL_parser->lex_shared->re_eval_start)		\
+	    PL_parser->lex_shared->re_eval_start  =		\
+		_bufstart + re_eval_start_pos;			\
+    } STMT_END
+
 char *
 Perl_lex_grow_linestr(pTHX_ STRLEN len)
 {
     SV *linestr;
     char *buf;
-    STRLEN bufend_pos, bufptr_pos, oldbufptr_pos, oldoldbufptr_pos;
-    STRLEN linestart_pos, last_uni_pos, last_lop_pos, re_eval_start_pos;
+    dSAVEBUFPOINTERS;
     linestr = PL_parser->linestr;
     buf = SvPVX(linestr);
     if (len <= SvLEN(linestr))
 	return buf;
-    bufend_pos = PL_parser->bufend - buf;
-    bufptr_pos = PL_parser->bufptr - buf;
-    oldbufptr_pos = PL_parser->oldbufptr - buf;
-    oldoldbufptr_pos = PL_parser->oldoldbufptr - buf;
-    linestart_pos = PL_parser->linestart - buf;
-    last_uni_pos = PL_parser->last_uni ? PL_parser->last_uni - buf : 0;
-    last_lop_pos = PL_parser->last_lop ? PL_parser->last_lop - buf : 0;
-    re_eval_start_pos = PL_parser->lex_shared->re_eval_start ?
-                            PL_parser->lex_shared->re_eval_start - buf : 0;
+    SAVEBUFPOINTERS;
 
     buf = sv_grow(linestr, len);
 
-    PL_parser->bufend = buf + bufend_pos;
-    PL_parser->bufptr = buf + bufptr_pos;
-    PL_parser->oldbufptr = buf + oldbufptr_pos;
-    PL_parser->oldoldbufptr = buf + oldoldbufptr_pos;
-    PL_parser->linestart = buf + linestart_pos;
-    if (PL_parser->last_uni)
-	PL_parser->last_uni = buf + last_uni_pos;
-    if (PL_parser->last_lop)
-	PL_parser->last_lop = buf + last_lop_pos;
-    if (PL_parser->lex_shared->re_eval_start)
-        PL_parser->lex_shared->re_eval_start  = buf + re_eval_start_pos;
+    RESTOREBUFPOINTERS;
     return buf;
 }
 
@@ -1299,40 +1324,30 @@ Perl_lex_next_chunk(pTHX_ U32 flags)
 {
     SV *linestr;
     char *buf;
-    STRLEN old_bufend_pos, new_bufend_pos;
-    STRLEN bufptr_pos, oldbufptr_pos, oldoldbufptr_pos;
-    STRLEN linestart_pos, last_uni_pos, last_lop_pos;
+    STRLEN new_bufend_pos;
+    dSAVEBUFPOINTERS; /* provides bufend_pos */
     bool got_some_for_debugger = 0;
     bool got_some;
     if (flags & ~(LEX_KEEP_PREVIOUS|LEX_FAKE_EOF|LEX_NO_TERM))
 	Perl_croak(aTHX_ "Lexing code internal error (%s)", "lex_next_chunk");
     linestr = PL_parser->linestr;
-    buf = SvPVX(linestr);
     if (!(flags & LEX_KEEP_PREVIOUS) &&
 	    PL_parser->bufptr == PL_parser->bufend) {
-	old_bufend_pos = bufptr_pos = oldbufptr_pos = oldoldbufptr_pos = 0;
-	linestart_pos = 0;
+	ZEROBUFPOINTERS;
 	if (PL_parser->last_uni != PL_parser->bufend)
 	    PL_parser->last_uni = NULL;
 	if (PL_parser->last_lop != PL_parser->bufend)
 	    PL_parser->last_lop = NULL;
-	last_uni_pos = last_lop_pos = 0;
-	*buf = 0;
+	*SvPVX(linestr) = 0;
 	SvCUR(linestr) = 0;
     } else {
-	old_bufend_pos = PL_parser->bufend - buf;
-	bufptr_pos = PL_parser->bufptr - buf;
-	oldbufptr_pos = PL_parser->oldbufptr - buf;
-	oldoldbufptr_pos = PL_parser->oldoldbufptr - buf;
-	linestart_pos = PL_parser->linestart - buf;
-	last_uni_pos = PL_parser->last_uni ? PL_parser->last_uni - buf : 0;
-	last_lop_pos = PL_parser->last_lop ? PL_parser->last_lop - buf : 0;
+	SAVEBUFPOINTERS;
     }
     if (flags & LEX_FAKE_EOF) {
 	goto eof;
     } else if (!PL_parser->rsfp && !PL_parser->filtered) {
 	got_some = 0;
-    } else if (filter_gets(linestr, old_bufend_pos)) {
+    } else if (filter_gets(linestr, bufend_pos)) {
 	got_some = 1;
 	got_some_for_debugger = 1;
     } else if (flags & LEX_NO_TERM) {
@@ -1365,24 +1380,17 @@ Perl_lex_next_chunk(pTHX_ U32 flags)
 	    sv_catpvs(linestr, ";");
 	got_some = 1;
     }
+    RESTOREBUFPOINTERS;
     buf = SvPVX(linestr);
     new_bufend_pos = SvCUR(linestr);
     PL_parser->bufend = buf + new_bufend_pos;
-    PL_parser->bufptr = buf + bufptr_pos;
-    PL_parser->oldbufptr = buf + oldbufptr_pos;
-    PL_parser->oldoldbufptr = buf + oldoldbufptr_pos;
-    PL_parser->linestart = buf + linestart_pos;
-    if (PL_parser->last_uni)
-	PL_parser->last_uni = buf + last_uni_pos;
-    if (PL_parser->last_lop)
-	PL_parser->last_lop = buf + last_lop_pos;
     if (got_some_for_debugger && (PERLDB_LINE || PERLDB_SAVESRC) &&
 	    PL_curstash != PL_debstash) {
 	/* debugger active and we're not compiling the debugger code,
 	 * so store the line into the debugger's array of lines
 	 */
-	update_debugger_info(NULL, buf+old_bufend_pos,
-	    new_bufend_pos-old_bufend_pos);
+	update_debugger_info(NULL, buf+bufend_pos,
+	    new_bufend_pos-bufend_pos);
     }
     return got_some;
 }
@@ -4222,28 +4230,14 @@ Perl_filter_add(pTHX_ filter_t funcp, SV *datasv)
 	while (s < PL_bufend) {
 	    if (*s == '\n') {
 		SV *linestr = PL_parser->linestr;
-		char *buf = SvPVX(linestr);
-		STRLEN const bufptr_pos = PL_parser->bufptr - buf;
-		STRLEN const oldbufptr_pos = PL_parser->oldbufptr - buf;
-		STRLEN const oldoldbufptr_pos=PL_parser->oldoldbufptr-buf;
-		STRLEN const linestart_pos = PL_parser->linestart - buf;
-		STRLEN const last_uni_pos =
-		    PL_parser->last_uni ? PL_parser->last_uni - buf : 0;
-		STRLEN const last_lop_pos =
-		    PL_parser->last_lop ? PL_parser->last_lop - buf : 0;
+		dSAVEBUFPOINTERS;
+		SAVEBUFPOINTERS;
 		av_push(PL_rsfp_filters, linestr);
 		PL_parser->linestr = 
 		    newSVpvn(SvPVX(linestr), ++s-SvPVX(linestr));
-		buf = SvPVX(PL_parser->linestr);
-		PL_parser->bufend = buf + SvCUR(PL_parser->linestr);
-		PL_parser->bufptr = buf + bufptr_pos;
-		PL_parser->oldbufptr = buf + oldbufptr_pos;
-		PL_parser->oldoldbufptr = buf + oldoldbufptr_pos;
-		PL_parser->linestart = buf + linestart_pos;
-		if (PL_parser->last_uni)
-		    PL_parser->last_uni = buf + last_uni_pos;
-		if (PL_parser->last_lop)
-		    PL_parser->last_lop = buf + last_lop_pos;
+		RESTOREBUFPOINTERS;
+		PL_parser->bufend =
+		    SvPVX(PL_parser->linestr) + SvCUR(PL_parser->linestr);
 		SvLEN(linestr) = SvCUR(linestr);
 		SvCUR(linestr) = s-SvPVX(linestr);
 		PL_parser->filtered = 1;
@@ -10543,42 +10537,12 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims, int re_reparse,
 		char *svlast;
 
 		if (SvIsCOW(PL_linestr)) {
-		    STRLEN bufend_pos, bufptr_pos, oldbufptr_pos;
-		    STRLEN oldoldbufptr_pos, linestart_pos, last_uni_pos;
-		    STRLEN last_lop_pos, re_eval_start_pos, s_pos;
-		    char *buf = SvPVX(PL_linestr);
-		    bufend_pos = PL_parser->bufend - buf;
-		    bufptr_pos = PL_parser->bufptr - buf;
-		    oldbufptr_pos = PL_parser->oldbufptr - buf;
-		    oldoldbufptr_pos = PL_parser->oldoldbufptr - buf;
-		    linestart_pos = PL_parser->linestart - buf;
-		    last_uni_pos = PL_parser->last_uni
-			? PL_parser->last_uni - buf
-			: 0;
-		    last_lop_pos = PL_parser->last_lop
-			? PL_parser->last_lop - buf
-			: 0;
-		    re_eval_start_pos =
-			PL_parser->lex_shared->re_eval_start ?
-                            PL_parser->lex_shared->re_eval_start - buf : 0;
-		    s_pos = s - buf;
-
+		    STRLEN const s_pos = s - SvPVX(PL_linestr);
+		    dSAVEBUFPOINTERS;
+		    SAVEBUFPOINTERS;
 		    sv_force_normal(PL_linestr);
-
-		    buf = SvPVX(PL_linestr);
-		    PL_parser->bufend = buf + bufend_pos;
-		    PL_parser->bufptr = buf + bufptr_pos;
-		    PL_parser->oldbufptr = buf + oldbufptr_pos;
-		    PL_parser->oldoldbufptr = buf + oldoldbufptr_pos;
-		    PL_parser->linestart = buf + linestart_pos;
-		    if (PL_parser->last_uni)
-			PL_parser->last_uni = buf + last_uni_pos;
-		    if (PL_parser->last_lop)
-			PL_parser->last_lop = buf + last_lop_pos;
-		    if (PL_parser->lex_shared->re_eval_start)
-		        PL_parser->lex_shared->re_eval_start  =
-			    buf + re_eval_start_pos;
-		    s = buf + s_pos;
+		    RESTOREBUFPOINTERS;
+		    s = SvPVX(PL_linestr) + s_pos;
 		}
 		ns = SvPVX_const(PL_linestr) + offset;
 		svlast = SvEND(sv) - 1;
