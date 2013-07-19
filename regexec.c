@@ -2092,7 +2092,7 @@ S_reg_set_capture_string(pTHX_ REGEXP * const rx,
             I32 sublen;
 
             if (    (flags & REXEC_COPY_SKIP_POST)
-                && !(RX_EXTFLAGS(rx) & RXf_PMf_KEEPCOPY) /* //p */
+                && !(prog->extflags & RXf_PMf_KEEPCOPY) /* //p */
                 && !(PL_sawampersand & SAWAMPERSAND_RIGHT)
             ) { /* don't copy $' part of string */
                 U32 n = 0;
@@ -2113,7 +2113,7 @@ S_reg_set_capture_string(pTHX_ REGEXP * const rx,
             }
 
             if (    (flags & REXEC_COPY_SKIP_PRE)
-                && !(RX_EXTFLAGS(rx) & RXf_PMf_KEEPCOPY) /* //p */
+                && !(prog->extflags & RXf_PMf_KEEPCOPY) /* //p */
                 && !(PL_sawampersand & SAWAMPERSAND_LEFT)
             ) { /* don't copy $` part of string */
                 U32 n = 0;
@@ -2280,7 +2280,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
 
     s = startpos;
 
-    if ((RX_EXTFLAGS(rx) & RXf_USE_INTUIT)
+    if ((prog->extflags & RXf_USE_INTUIT)
         && !(flags & REXEC_CHECKED))
     {
 	s = re_intuit_start(rx, sv, strbeg, startpos, strend,
@@ -2288,7 +2288,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
 	if (!s)
 	    return 0;
 
-	if (RX_EXTFLAGS(rx) & RXf_CHECK_ALL) {
+	if (prog->extflags & RXf_CHECK_ALL) {
             /* we can match based purely on the result of INTUIT.
              * Set up captures etc just for $& and $-[0]
              * (an intuit-only match wont have $1,$2,..) */
