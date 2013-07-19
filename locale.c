@@ -605,7 +605,7 @@ Perl_mem_collxfrm(pTHX_ const char *s, STRLEN len, STRLEN *xlen)
 
 #endif /* USE_LOCALE_COLLATE */
 
-bool
+STATIC bool
 S_is_cur_LC_category_utf8(pTHX_ int category)
 {
     /* Returns TRUE if the current locale for 'category' is UTF-8; FALSE
