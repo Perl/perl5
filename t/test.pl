@@ -827,7 +827,7 @@ sub tempfile {
 	    return $try;
 	}
     }
-    die "Can't find temporary file name starting 'tmp$$'";
+    die "Can't find temporary file name starting \"tmp$$\"";
 }
 
 # This is the temporary file for _fresh_perl
