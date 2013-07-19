@@ -2458,7 +2458,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
     /* Simplest case:  anchored match need be tried only once. */
     /*  [unless only anchor is BOL and multiline is set] */
     if (prog->extflags & (RXf_ANCH & ~RXf_ANCH_GPOS)) {
-	if (s == startpos && regtry(reginfo, &startpos))
+	if (s == startpos && regtry(reginfo, &s))
 	    goto got_it;
 	else if (multiline || (prog->intflags & PREGf_IMPLICIT)
 		 || (prog->extflags & RXf_ANCH_MBOL)) /* XXXX SBOL? */
