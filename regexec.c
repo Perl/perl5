@@ -2310,15 +2310,15 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
              * Let @-, @+, $^N know */
             prog->lastparen = prog->lastcloseparen = 0;
             RX_MATCH_UTF8_set(rx, utf8_target);
+            prog->offs[0].start = s - strbeg;
+            prog->offs[0].end = utf8_target
+                ? (char*)utf8_hop((U8*)s, prog->minlenret) - strbeg
+                : s - strbeg + prog->minlenret;
             if ( !(flags & REXEC_NOT_FIRST) )
                 S_reg_set_capture_string(aTHX_ rx,
                                         strbeg, strend,
                                         sv, flags, utf8_target);
 
-            prog->offs[0].start = s - strbeg;
-            prog->offs[0].end = utf8_target
-                ? (char*)utf8_hop((U8*)s, prog->minlenret) - strbeg
-                : s - strbeg + prog->minlenret;
 	    return 1;
         }
     }
