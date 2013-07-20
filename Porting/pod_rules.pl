@@ -216,27 +216,23 @@ pod/$_: pod/$state->{copies}{$_}
     $makefile_SH;
 }
 
-# Do stuff
-while (my ($target, $name) = each %Build) {
-    print "Now processing $name\n" if $Verbose;
+sub process {
+    my ($target, $name, $callback, $test, $verbose) = @_;
 
+    print "Now processing $name\n" if $verbose;
     my $orig = slurp_or_die($name);
     my_die "$name contains NUL bytes" if $orig =~ /\0/;
 
-    my $new = do {
-        no strict 'refs';
-        &{"do_$target"}($target, $orig);
-    };
+    my $new = $callback->($target, $orig);
 
-    if ($Test) {
-        printf "%s %d # $name is up to date\n",
-            $new eq $orig ? 'ok' : 'not ok',
-                ++$test;
-        next;
+    if (defined $test) {
+        printf "%s%s # $name is up to date\n",
+            ($new eq $orig ? 'ok' : 'not ok'), ($test ? " $test" : '');
+        return;
     } elsif ($new eq $orig) {
         print "Was not modified\n"
-            if $Verbose;
-        next;
+            if $verbose;
+        return;
     }
 
     my $mode = (stat $name)[2] // my_die "Can't stat $name: $!";
@@ -244,6 +240,12 @@ while (my ($target, $name) = each %Build) {
 
     write_or_die($name, $new);
     chmod $mode & 0777, $name or my_die "can't chmod $mode $name: $!";
+}
+
+# Do stuff
+while (my ($target, $name) = each %Build) {
+    process($target, $name, main->can("do_$target"), $Test && ++$test,
+            $Verbose);
 }
 
 # Local variables:
