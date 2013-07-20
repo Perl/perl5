@@ -57,13 +57,8 @@
 /Carp.pm
 /Carp/Heavy.pm
 /Compress/
-/Config.pm
-/Config.pod
 /Config/Perl/
 /Config/Perl/V.pm
-/Config_git.pl
-/Config_heavy.pl
-/Cross.pm
 /Cwd.pm
 /DB_File.pm
 /Data/
@@ -96,7 +91,6 @@
 /ExtUtils/Installed.pm
 /ExtUtils/Liblist.pm
 /ExtUtils/Liblist/Kid.pm
-/ExtUtils/MANIFEST.SKIP
 /ExtUtils/MM.pm
 /ExtUtils/MM_AIX.pm
 /ExtUtils/MM_Any.pm
@@ -330,7 +324,6 @@
 /XSLoader.pm
 /arybase.pm
 /attributes.pm
-/auto/
 /autodie.pm
 /autodie/
 /autouse.pm
@@ -338,7 +331,6 @@
 /bigint.pm
 /bignum.pm
 /bigrat.pm
-/buildcustomize.pl
 /constant.pm
 /encoding.pm
 /encoding/
@@ -357,16 +349,6 @@
 /re.pm
 /threads.pm
 /threads/
-/unicore/CombiningClass.pl
-/unicore/Decomposition.pl
-/unicore/Heavy.pl
-/unicore/Name.pl
-/unicore/Name.pm
-/unicore/TestProp.pl
-/unicore/To/
-/unicore/UCD.pl
-/unicore/lib/
-/unicore/mktables.lst
 /version.pm
 /version.pod
 /version/
