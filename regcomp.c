@@ -8356,7 +8356,6 @@ S__invlistEQ(pTHX_ SV* const a, SV* const b, const bool complement_b)
              * at the 0 that is always stored immediately before the array. */
             array_b--;
             len_b++;
-            array_b[0] = 0;
         }
     }
 
