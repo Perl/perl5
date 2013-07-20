@@ -25,7 +25,7 @@ BEGIN {
 use strict;
 use feature 'fc';
 
-my $debug = 0;
+my $debug = $ENV{PERL_DEBUG_FULL_TEST} // 0;
 
 # Certain tests have been shown to be problematical for a few locales.  Don't
 # fail them unless at least this percentage of the tested locales fail.
@@ -1429,6 +1429,9 @@ foreach ($first_locales_test_number..$final_locales_test_number) {
                 print "# are errors in the locale definitions.  The test is marked TODO, as the\n";
                 print "# problem is not likely to be Perl's\n";
             }
+        }
+        unless ($debug) {
+            print "#\nFor more details, rerun, with environment variable PERL_DEBUG_FULL_TEST=1\n";
         }
 	print "not ";
     }
