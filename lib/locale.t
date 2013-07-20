@@ -715,9 +715,9 @@ foreach $Locale (@Locale) {
     # to Unicode.
     my $is_utf8_locale = $Locale =~ /UTF-?8/i;
 
-    my %UPPER = ();
-    my %lower = ();
-    my %BoThCaSe = ();
+    my %UPPER = ();     # All alpha X for which uc(X) == X and lc(X) != X
+    my %lower = ();     # All alpha X for which lc(X) == X and uc(X) != X
+    my %BoThCaSe = ();  # All alpha X for which uc(X) == lc(X) == X
 
     if (! $is_utf8_locale) {
         use locale;
@@ -789,14 +789,14 @@ foreach $Locale (@Locale) {
     my $message = "";
     $locales_test_number++;
     $first_casing_test_number = $locales_test_number;
-    $test_names{$locales_test_number} = 'Verify that /[[:upper:]]/ matches sieved uppercase characters.';
+    $test_names{$locales_test_number} = 'Verify that /[[:upper:]]/ matches all alpha X for which uc(X) == X and lc(X) != X';
     $message = 'Failed for ' . join ", ", @failures if @failures;
     tryneoalpha($Locale, $locales_test_number, scalar @failures == 0, $message);
 
     $message = "";
     $locales_test_number++;
 
-    $test_names{$locales_test_number} = 'Verify that /[[:lower:]]/i matches sieved uppercase characters.';
+    $test_names{$locales_test_number} = 'Verify that /[[:lower:]]/i matches all alpha X for which uc(X) == X and lc(X) != X';
     $message = 'Failed for ' . join ", ", @fold_failures if @fold_failures;
     tryneoalpha($Locale, $locales_test_number, scalar @fold_failures == 0, $message);
 
@@ -822,13 +822,13 @@ foreach $Locale (@Locale) {
     }
 
     $locales_test_number++;
-    $test_names{$locales_test_number} = 'Verify that /[[:lower:]]/ matches sieved lowercase characters.';
+    $test_names{$locales_test_number} = 'Verify that /[[:lower:]]/ matches all alpha X for which lc(X) == X and uc(X) != X';
     $message = 'Failed for ' . join ", ", @failures if @failures;
     tryneoalpha($Locale, $locales_test_number, scalar @failures == 0, $message);
     $message = "";
     $locales_test_number++;
     $final_casing_test_number = $locales_test_number;
-    $test_names{$locales_test_number} = 'Verify that /[[:upper:]]/i matches sieved lowercase characters.';
+    $test_names{$locales_test_number} = 'Verify that /[[:upper:]]/i matches all alpha X for which lc(X) == X and uc(X) != X';
     $message = 'Failed for ' . join ", ", @fold_failures if @fold_failures;
     tryneoalpha($Locale, $locales_test_number, scalar @fold_failures == 0, $message);
 
@@ -862,8 +862,10 @@ foreach $Locale (@Locale) {
 
 	my $word = join('', @Neoalpha);
 
+        # This test is likely pointless, as everything
+        # matched \w in the first place.
         ++$locales_test_number;
-        $test_names{$locales_test_number} = 'Verify that alnums outside the C locale match \w';
+        $test_names{$locales_test_number} = 'Verify that alphas outside the C locale match \w';
         my $ok;
         if ($is_utf8_locale) {
             use locale ':not_characters';
