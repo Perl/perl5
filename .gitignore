@@ -119,9 +119,6 @@ lib/unicore/mktables.lst
 
 # test byproducts
 ext/Test-Harness/t/ext/
-lib/Archive/Tar/t/src/long/foo.tbz
-lib/Archive/Tar/t/src/short/foo.tbz
-lib/IPC/Cmd/t/src/x.tgz
 t/rantests
 t/tmp*
 t/perl
