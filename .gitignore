@@ -93,22 +93,13 @@ MYMETA.*
 /bitcount.h
 /mg_data.h
 
-lib/inc/
-lib/Win32.pm
-lib/Win32API/
-lib/Win32CORE.pm
 lib/CORE/
 
 # test byproducts
 ext/Test-Harness/t/ext/
-lib/App/
 lib/Archive/Tar/t/src/long/foo.tbz
 lib/Archive/Tar/t/src/short/foo.tbz
 lib/IPC/Cmd/t/src/x.tgz
-lib/mro.pm
-lib/TAP/
-lib/Test/Harness.pm
-lib/File/DosGlob.pm
 t/rantests
 t/tmp*
 t/perl
