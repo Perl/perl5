@@ -372,7 +372,6 @@ EXTDIR		= ..\ext
 DISTDIR		= ..\dist
 CPANDIR		= ..\cpan
 PODDIR		= ..\pod
-EXTUTILSDIR	= $(LIBDIR)\ExtUtils
 HTMLDIR		= .\html
 
 #
