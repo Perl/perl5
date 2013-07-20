@@ -697,9 +697,9 @@ Perl_av_unshift(pTHX_ AV *av, I32 num)
 /*
 =for apidoc av_shift
 
-Shifts an SV off the beginning of the
-array.  Returns C<&PL_sv_undef> if the 
-array is empty.
+Removes one SV from the start of the array, reducing its size by one and
+returning the SV (transferring control of one reference count) to the
+caller.  Returns C<&PL_sv_undef> if the array is empty.
 
 Perl equivalent: C<shift(@myarray);>
 
