@@ -160,6 +160,48 @@ sub write_or_die {
     close $fh or die "Can't close $filename: $!";
 }
 
+=head2 C<verify_contiguous()>
+
+=over 4
+
+=item * Purpose
+
+Verify that a file contains exactly one contiguous run of lines which matches
+the passed in pattern. C<croak()>s if the pattern is not found, or found in
+more than one place.
+
+=item * Arguments
+
+=over 4
+
+=item * Name of file
+
+=item * Contents of file
+
+=item * Pattern of interest
+
+=item * Name to report on error
+
+=back
+
+=item * Return Value
+
+The contents of the file, with C<qr/\0+/> substituted for the pattern.
+
+=back
+
+=cut
+
+sub verify_contiguous {
+    my ($name, $content, $re, $what) = @_;
+    require Carp;
+    $content =~ s/$re/\0/g;
+    my $sections = () = $content =~ m/\0+/g;
+    Carp::croak("$0: $name contains no $what") if $sections < 1;
+    Carp::croak("$0: $name contains discontiguous $what") if $sections > 1;
+    return $content;
+}
+
 =head2 C<pods_to_install()>
 
 =over 4

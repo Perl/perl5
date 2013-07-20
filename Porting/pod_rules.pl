@@ -129,16 +129,6 @@ sub generate_pod_mak {
     $line;
 }
 
-sub verify_contiguous {
-    my ($name, $content, $re, $what) = @_;
-    require Carp;
-    $content =~ s/$re/\0/g;
-    my $sections = () = $content =~ m/\0+/g;
-    Carp::croak("$0: $name contains no $what") if $sections < 1;
-    Carp::croak("$0: $name contains discontiguous $what") if $sections > 1;
-    return $content;
-}
-
 sub do_manifest {
     my ($name, $prev) = @_;
     my @manifest =
