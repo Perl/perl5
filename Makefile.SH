@@ -1241,9 +1241,6 @@ _cleaner2:
 	rm -rf lib/TAP lib/Module/Pluggable lib/App
 	rm -rf lib/mro
 	rm -rf lib/IO/Compress lib/IO/Uncompress
-	rm -f lib/ExtUtils/ParseXS/t/XSTest.c
-	rm -f lib/ExtUtils/ParseXS/t/XSTest$(OBJ_EXT)
-	rm -f lib/ExtUtils/ParseXS/t/XSTest$(DLSUFFIX)
 	rm -fr lib/B
 	rm -fr lib/CPAN
 	rm -fr lib/ExtUtils/CBuilder
@@ -1274,8 +1271,6 @@ _cleaner2:
 	-rmdir lib/XS/APItest lib/XS
 	-rmdir lib/inc/latest lib/inc
 	-rmdir lib/autodie/exception lib/autodie lib/encoding lib/threads
-	-rm -f lib/ExtUtils/CBuilder/t/libcompilet.dll.a
-	-rm -f lib/ExtUtils/ParseXS/t/libXSTest.dll.a
 
 _realcleaner:
 	@$(LDLIBPTH) $(MAKE) _cleaner1 CLEAN=distclean
