@@ -838,7 +838,7 @@ foreach $Locale (@Locale) {
 	no locale;
 
 	@Added_alpha = ();
-	for (keys %UPPER, keys %lower) {
+	for (keys %UPPER, keys %lower, keys %BoThCaSe) {
 	    push(@Added_alpha, $_) if (/\W/);
 	}
     }
