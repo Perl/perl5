@@ -1227,7 +1227,6 @@ _cleaner2:
 	rm -f core *perl.core t/core t/*perl.core core.* t/core.*
 	rm -f t/$(PERL_EXE) t/rantests
 	rm -rf t/tmp*
-	rm -f so_locations $(LIBPERL_NONSHR) $(MINIPERL_NONSHR)
 	rm -rf $(addedbyconf)
 	rm -f $(FIRSTMAKEFILE) $(FIRSTMAKEFILE).old makefile.old utils/Makefile
 	rm -f $(private)
@@ -1237,6 +1236,10 @@ _cleaner2:
 	rm -f h2ph.man pstruct
 	rm -rf .config
 	rm -f preload
+	rm -f pod2htmd.tmp
+	rm -rf pod/perlfunc pod/perlipc
+	-rmdir ext/B/lib
+	rm -f so_locations $(LIBPERL_NONSHR) $(MINIPERL_NONSHR)
 	rm -rf lib/Encode lib/Compress lib/Hash lib/re
 	rm -rf lib/TAP lib/Module/Pluggable lib/App
 	rm -rf lib/mro
@@ -1244,9 +1247,6 @@ _cleaner2:
 	rm -fr lib/B
 	rm -fr lib/CPAN
 	rm -fr lib/ExtUtils/CBuilder
-	rm -f pod2htmd.tmp
-	rm -rf pod/perlfunc pod/perlipc
-	-rmdir ext/B/lib
 	-rmdir lib/Archive/Tar lib/Archive lib/Attribute
 	-rmdir lib/CGI lib/Carp
 	-rmdir lib/Data lib/Devel lib/Digest
