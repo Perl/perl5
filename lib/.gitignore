@@ -55,7 +55,6 @@
 /CPAN/Version.pm
 /Carp.pm
 /Carp/Heavy.pm
-/Class/ISA.pm
 /Compress
 /Config.pm
 /Config.pod
@@ -220,7 +219,6 @@
 /Memoize/Storable.pm
 /Module/Build
 /Module/Build.pm
-!/Module/Build/ConfigData.pm
 /Module/CoreList
 /Module/CoreList.pm
 /Module/CoreList.pod
@@ -275,7 +273,6 @@
 /Pod/Perldoc
 /Pod/Perldoc.pm
 /Pod/PlainText.pm
-/Pod/Plainer.pm
 /Pod/Select.pm
 /Pod/Simple
 /Pod/Simple.pm
@@ -294,10 +291,8 @@
 /Scalar
 /Search/
 /SelfLoader.pm
-/Shell.pm
 /Socket.pm
 /Storable.pm
-/Switch.pm
 /Sys
 /Term
 /Test.pm
