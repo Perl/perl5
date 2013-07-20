@@ -650,7 +650,9 @@ platform specific bugs also go here.
 
 =item *
 
-XXX
+One of the bug fixes has accidentally thrown line numbers off in rare
+cases, causing test failures for some CPAN modules.  This will hopefully be
+fixed soon [perl #118931].
 
 =back
 
