@@ -678,14 +678,14 @@ for ( @Locale ) {
 my %Problem;
 my %Okay;
 my %Testing;
-my @Neoalpha;   # Alnums that aren't in the C locale.
+my @Added_alpha;   # Alphas that aren't in the C locale.
 my %test_names;
 
-sub tryneoalpha {
-    my ($Locale, $i, $test, $message) = @_;
+sub report_result {
+    my ($Locale, $i, $pass_fail, $message) = @_;
     $message //= "";
     $message = "  ($message)" if $message;
-    unless ($test) {
+    unless ($pass_fail) {
 	$Problem{$i}{$Locale} = 1;
 	debug "# failed $i with locale '$Locale'$message\n";
     } else {
@@ -791,14 +791,14 @@ foreach $Locale (@Locale) {
     $first_casing_test_number = $locales_test_number;
     $test_names{$locales_test_number} = 'Verify that /[[:upper:]]/ matches all alpha X for which uc(X) == X and lc(X) != X';
     $message = 'Failed for ' . join ", ", @failures if @failures;
-    tryneoalpha($Locale, $locales_test_number, scalar @failures == 0, $message);
+    report_result($Locale, $locales_test_number, scalar @failures == 0, $message);
 
     $message = "";
     $locales_test_number++;
 
     $test_names{$locales_test_number} = 'Verify that /[[:lower:]]/i matches all alpha X for which uc(X) == X and lc(X) != X';
     $message = 'Failed for ' . join ", ", @fold_failures if @fold_failures;
-    tryneoalpha($Locale, $locales_test_number, scalar @fold_failures == 0, $message);
+    report_result($Locale, $locales_test_number, scalar @fold_failures == 0, $message);
 
     $message = "";
     undef @failures;
@@ -824,35 +824,35 @@ foreach $Locale (@Locale) {
     $locales_test_number++;
     $test_names{$locales_test_number} = 'Verify that /[[:lower:]]/ matches all alpha X for which lc(X) == X and uc(X) != X';
     $message = 'Failed for ' . join ", ", @failures if @failures;
-    tryneoalpha($Locale, $locales_test_number, scalar @failures == 0, $message);
+    report_result($Locale, $locales_test_number, scalar @failures == 0, $message);
     $message = "";
     $locales_test_number++;
     $final_casing_test_number = $locales_test_number;
     $test_names{$locales_test_number} = 'Verify that /[[:upper:]]/i matches all alpha X for which lc(X) == X and uc(X) != X';
     $message = 'Failed for ' . join ", ", @fold_failures if @fold_failures;
-    tryneoalpha($Locale, $locales_test_number, scalar @fold_failures == 0, $message);
+    report_result($Locale, $locales_test_number, scalar @fold_failures == 0, $message);
 
     {   # Find the alphabetic characters that are not considered alphabetics
         # in the default (C) locale.
 
 	no locale;
 
-	@Neoalpha = ();
+	@Added_alpha = ();
 	for (keys %UPPER, keys %lower) {
-	    push(@Neoalpha, $_) if (/\W/);
+	    push(@Added_alpha, $_) if (/\W/);
 	}
     }
 
-    @Neoalpha = sort @Neoalpha;
+    @Added_alpha = sort @Added_alpha;
 
-    debug "# Neoalpha = ", join("",@Neoalpha), "\n";
+    debug "# Added_alpha = ", join("",@Added_alpha), "\n";
 
-    my $first_Neoalpha_test_number =  $locales_test_number + 1;
-    my $final_Neoalpha_test_number =  $first_Neoalpha_test_number + 3;
-    if (@Neoalpha == 0) {
-	# If we have no Neoalphas the remaining tests are no-ops.
-	debug "# no Neoalpha, skipping tests $first_Neoalpha_test_number..$final_Neoalpha_test_number for locale '$Locale'\n";
-	foreach ($locales_test_number+1..$final_Neoalpha_test_number) {
+    my $first_Added_alpha_test_number =  $locales_test_number + 1;
+    my $final_Added_alpha_test_number =  $first_Added_alpha_test_number + 3;
+    if (@Added_alpha == 0) {
+	# If we have no Added_alpha the remaining tests are no-ops.
+	debug "# no Added_alpha, skipping tests $first_Added_alpha_test_number..$final_Added_alpha_test_number for locale '$Locale'\n";
+	foreach ($locales_test_number+1..$final_Added_alpha_test_number) {
 	    push @{$Okay{$_}}, $Locale;
             $locales_test_number++;
 	}
@@ -860,9 +860,9 @@ foreach $Locale (@Locale) {
 
 	# Test \w.
 
-	my $word = join('', @Neoalpha);
+	my $word = join('', @Added_alpha);
 
-        # This test is likely pointless, as everything
+        # This test is likely pointless, as everything in @Added_alpha
         # matched \w in the first place.
         ++$locales_test_number;
         $test_names{$locales_test_number} = 'Verify that alphas outside the C locale match \w';
@@ -875,7 +875,7 @@ foreach $Locale (@Locale) {
             # Already in 'use locale'; this tests that exiting scopes works
 	    $ok = $word =~ /^(\w+)$/;
         }
-        tryneoalpha($Locale, $locales_test_number, $ok);
+        report_result($Locale, $locales_test_number, $ok);
 
 	# Cross-check the whole 8-bit character set.
 
@@ -893,7 +893,7 @@ foreach $Locale (@Locale) {
 			(/\d/ xor /\D/) ||
 			(/\s/ xor /\S/);
             }
-	    tryneoalpha($Locale, $locales_test_number, $ok);
+	    report_result($Locale, $locales_test_number, $ok);
 	}
 
 	# Test for read-only scalars' locale vs non-locale comparisons.
@@ -909,7 +909,7 @@ foreach $Locale (@Locale) {
                 use locale;
                 $ok = ($a cmp "qwerty") == 0;
             }
-            tryneoalpha($Locale, ++$locales_test_number, $ok);
+            report_result($Locale, ++$locales_test_number, $ok);
             $test_names{$locales_test_number} = 'Verify that cmp works with a read-only scalar; no- vs locale';
 	}
 
@@ -971,7 +971,7 @@ foreach $Locale (@Locale) {
                     }
 		    $test ||= $test{$ti}
 		}
-                tryneoalpha($Locale, $locales_test_number, $test == 0);
+                report_result($Locale, $locales_test_number, $test == 0);
 		if ($test) {
 		    debug "# lesser  = '$lesser'\n";
 		    debug "# greater = '$greater'\n";
@@ -995,11 +995,11 @@ foreach $Locale (@Locale) {
 	}
     }
 
-    if ($locales_test_number != $final_Neoalpha_test_number) {
-        die("The delta for \$final_Neoalpha needs to be updated from "
-            . ($final_Neoalpha_test_number - $first_Neoalpha_test_number)
+    if ($locales_test_number != $final_Added_alpha_test_number) {
+        die("The delta for \$final_Added_alpha needs to be updated from "
+            . ($final_Added_alpha_test_number - $first_Added_alpha_test_number)
             . " to "
-            . ($locales_test_number - $first_Neoalpha_test_number)
+            . ($locales_test_number - $first_Added_alpha_test_number)
             );
     }
 
@@ -1156,63 +1156,63 @@ foreach $Locale (@Locale) {
         }
     }
 
-    tryneoalpha($Locale, ++$locales_test_number, $ok1);
+    report_result($Locale, ++$locales_test_number, $ok1);
     $test_names{$locales_test_number} = 'Verify that an intervening printf doesn\'t change assignment results';
     my $first_a_test = $locales_test_number;
 
     debug "# $first_a_test..$locales_test_number: \$a = $a, \$b = $b, Locale = $Locale\n";
 
-    tryneoalpha($Locale, ++$locales_test_number, $ok2);
+    report_result($Locale, ++$locales_test_number, $ok2);
     $test_names{$locales_test_number} = 'Verify that an intervening sprintf doesn\'t change assignment results';
 
     my $first_c_test = $locales_test_number;
 
-    tryneoalpha($Locale, ++$locales_test_number, $ok3);
+    report_result($Locale, ++$locales_test_number, $ok3);
     $test_names{$locales_test_number} = 'Verify that a different locale radix works when doing "==" with a constant';
 
-    tryneoalpha($Locale, ++$locales_test_number, $ok4);
+    report_result($Locale, ++$locales_test_number, $ok4);
     $test_names{$locales_test_number} = 'Verify that a different locale radix works when doing "==" with a scalar';
 
-    tryneoalpha($Locale, ++$locales_test_number, $ok5);
+    report_result($Locale, ++$locales_test_number, $ok5);
     $test_names{$locales_test_number} = 'Verify that a different locale radix works when doing "==" with a scalar and an intervening sprintf';
 
     debug "# $first_c_test..$locales_test_number: \$c = $c, \$d = $d, Locale = $Locale\n";
 
-    tryneoalpha($Locale, ++$locales_test_number, $ok6);
+    report_result($Locale, ++$locales_test_number, $ok6);
     $test_names{$locales_test_number} = 'Verify that can assign stringified under inner no-locale block';
     my $first_e_test = $locales_test_number;
 
-    tryneoalpha($Locale, ++$locales_test_number, $ok7);
+    report_result($Locale, ++$locales_test_number, $ok7);
     $test_names{$locales_test_number} = 'Verify that "==" with a scalar still works in inner no locale';
 
-    tryneoalpha($Locale, ++$locales_test_number, $ok8);
+    report_result($Locale, ++$locales_test_number, $ok8);
     $test_names{$locales_test_number} = 'Verify that "==" with a scalar and an intervening sprintf still works in inner no locale';
 
     debug "# $first_e_test..$locales_test_number: \$e = $e, no locale\n";
 
-    tryneoalpha($Locale, ++$locales_test_number, $ok9);
+    report_result($Locale, ++$locales_test_number, $ok9);
     $test_names{$locales_test_number} = 'Verify that after a no-locale block, a different locale radix still works when doing "==" with a constant';
     my $first_f_test = $locales_test_number;
 
-    tryneoalpha($Locale, ++$locales_test_number, $ok10);
+    report_result($Locale, ++$locales_test_number, $ok10);
     $test_names{$locales_test_number} = 'Verify that after a no-locale block, a different locale radix still works when doing "==" with a scalar';
 
-    tryneoalpha($Locale, ++$locales_test_number, $ok11);
+    report_result($Locale, ++$locales_test_number, $ok11);
     $test_names{$locales_test_number} = 'Verify that after a no-locale block, a different locale radix still works when doing "==" with a scalar and an intervening sprintf';
 
-    tryneoalpha($Locale, ++$locales_test_number, $ok12);
+    report_result($Locale, ++$locales_test_number, $ok12);
     $test_names{$locales_test_number} = 'Verify that after a no-locale block, a different locale radix can participate in an addition and function call as numeric';
 
-    tryneoalpha($Locale, ++$locales_test_number, $ok13);
+    report_result($Locale, ++$locales_test_number, $ok13);
     $test_names{$locales_test_number} = 'Verify that don\'t get warning under "==" even if radix is not a dot';
 
-    tryneoalpha($Locale, ++$locales_test_number, $ok14);
+    report_result($Locale, ++$locales_test_number, $ok14);
     $test_names{$locales_test_number} = 'Verify that non-ASCII UTF-8 error messages are in UTF-8';
 
-    tryneoalpha($Locale, ++$locales_test_number, $ok15);
+    report_result($Locale, ++$locales_test_number, $ok15);
     $test_names{$locales_test_number} = 'Verify that a number with a UTF-8 radix has a UTF-8 stringification';
 
-    tryneoalpha($Locale, ++$locales_test_number, $ok16);
+    report_result($Locale, ++$locales_test_number, $ok16);
     $test_names{$locales_test_number} = 'Verify that a sprintf of a number with a UTF-8 radix yields UTF-8';
 
     debug "# $first_f_test..$locales_test_number: \$f = $f, \$g = $g, back to locale = $Locale\n";
@@ -1237,7 +1237,7 @@ foreach $Locale (@Locale) {
         my $y = "aa";
         my $z = "AB";
 
-        tryneoalpha($Locale, ++$locales_test_number,
+        report_result($Locale, ++$locales_test_number,
 		    lcA($x, $y) == 1 && lcB($x, $y) == 1 ||
 		    lcA($x, $z) == 0 && lcB($x, $z) == 0);
     }
@@ -1258,7 +1258,7 @@ foreach $Locale (@Locale) {
         my $y = "aa";
         my $z = "AB";
 
-        tryneoalpha($Locale, ++$locales_test_number,
+        report_result($Locale, ++$locales_test_number,
 		    lcC($x, $y) == 1 && lcD($x, $y) == 1 ||
 		    lcC($x, $z) == 0 && lcD($x, $z) == 0);
     }
@@ -1364,7 +1364,7 @@ foreach $Locale (@Locale) {
                 push @f, $x unless lc $x eq fc $x;
             }
 	}
-	tryneoalpha($Locale, $locales_test_number, @f == 0);
+	report_result($Locale, $locales_test_number, @f == 0);
 	if (@f) {
 	    print "# failed $locales_test_number locale '$Locale' characters @f\n"
 	}
@@ -1397,7 +1397,7 @@ foreach $Locale (@Locale) {
             }
         }
 
-	tryneoalpha($Locale, $locales_test_number, @f == 0);
+	report_result($Locale, $locales_test_number, @f == 0);
 	if (@f) {
 	    print "# failed $locales_test_number locale '$Locale' numbers @f\n"
 	}
