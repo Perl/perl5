@@ -848,7 +848,7 @@ S_cl_init(const RExC_state_t *pRExC_state, struct regnode_charclass_class *cl)
 }
 
 /* These two functions currently do the exact same thing */
-#define cl_init_zero		S_cl_init
+#define cl_init_zero		cl_init
 
 /* 'AND' a given class with another one.  Can create false positives.  'cl'
  * should not be inverted.  'and_with->flags & ANYOF_CLASS' should be 0 if
