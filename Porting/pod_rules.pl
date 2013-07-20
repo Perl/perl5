@@ -57,7 +57,7 @@ sub my_die;
 }
 
 if ($Verbose) {
-    print "I will be building $_\n" foreach keys %Build;
+    print "I will be building $_\n" foreach sort keys %Build;
 }
 
 my $test = 1;
@@ -68,10 +68,10 @@ my $state = $Test
     ? get_pod_metadata(0, sub {
                            printf "1..%d\n", 1 + scalar keys %Build;
                            if (@_) {
-                               print "not ok $test\n";
+                               print "not ok $test # got Pod metadata\n";
                                die @_;
                            }
-                           print "ok $test\n";
+                           print "ok $test # got Pod metadata\n";
                        })
     : get_pod_metadata(1, sub { warn @_ if @_ }, values %Build);
 
@@ -217,16 +217,16 @@ pod/$_: pod/$state->{copies}{$_}
 }
 
 sub process {
-    my ($target, $name, $callback, $test, $verbose) = @_;
+    my ($desc, $filename, $callback, $test, $verbose) = @_;
 
-    print "Now processing $name\n" if $verbose;
-    my $orig = slurp_or_die($name);
-    my_die "$name contains NUL bytes" if $orig =~ /\0/;
+    print "Now processing $filename\n" if $verbose;
+    my $orig = slurp_or_die($filename);
+    my_die "$filename contains NUL bytes" if $orig =~ /\0/;
 
-    my $new = $callback->($target, $orig);
+    my $new = $callback->($desc, $orig);
 
     if (defined $test) {
-        printf "%s%s # $name is up to date\n",
+        printf "%s%s # $filename is up to date\n",
             ($new eq $orig ? 'ok' : 'not ok'), ($test ? " $test" : '');
         return;
     } elsif ($new eq $orig) {
@@ -235,18 +235,19 @@ sub process {
         return;
     }
 
-    my $mode = (stat $name)[2] // my_die "Can't stat $name: $!";
-    rename $name, "$name.old" or my_die "Can't rename $name to $name.old: $!";
+    my $mode = (stat $filename)[2];
+    my_die "Can't stat $filename: $!"
+        unless defined $mode;
+    rename $filename, "$filename.old"
+        or my_die "Can't rename $filename to $filename.old: $!";
 
-    write_or_die($name, $new);
-    chmod $mode & 0777, $name or my_die "can't chmod $mode $name: $!";
+    write_or_die($filename, $new);
+    chmod $mode & 0777, $filename or my_die "can't chmod $mode $filename: $!";
 }
 
 # Do stuff
-while (my ($target, $name) = each %Build) {
-    process($target, $name, main->can("do_$target"), $Test && ++$test,
-            $Verbose);
-}
+process($_, $Build{$_}, main->can("do_$_"), $Test && ++$test, $Verbose)
+    foreach sort keys %Build;
 
 # Local variables:
 # cperl-indent-level: 4
