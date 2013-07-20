@@ -5,7 +5,6 @@ use vars qw(%Build %Targets $Verbose $Test);
 use Text::Tabs;
 use Text::Wrap;
 use Getopt::Long;
-use Carp;
 
 # Generate the sections of files listed in %Targets from pod/perl.pod
 # Mostly these are rules in Makefiles
@@ -131,10 +130,13 @@ sub generate_pod_mak {
 }
 
 sub verify_contiguous {
-    my ($name, $content, $what) = @_;
+    my ($name, $content, $re, $what) = @_;
+    require Carp;
+    $content =~ s/$re/\0/g;
     my $sections = () = $content =~ m/\0+/g;
-    croak("$0: $name contains no $what") if $sections < 1;
-    croak("$0: $name contains discontiguous $what") if $sections > 1;
+    Carp::croak("$0: $name contains no $what") if $sections < 1;
+    Carp::croak("$0: $name contains discontiguous $what") if $sections > 1;
+    return $content;
 }
 
 sub do_manifest {
@@ -154,8 +156,8 @@ sub do_manifest {
 
 sub do_nmake {
     my ($name, $makefile) = @_;
-    $makefile =~ s/^\tcopy \.\.\\README.*\n/\0/gm;
-    verify_contiguous($name, $makefile, 'README copies');
+    my $re = qr/^\tcopy \.\.\\README[^\n]*\n/sm;
+    $makefile = verify_contiguous($name, $makefile, $re, 'README copies');
     # Now remove the other copies that follow
     1 while $makefile =~ s/\0\tcopy .*\n/\0/gm;
     $makefile =~ s/\0+/join ("", &generate_nmake_1)/se;
@@ -184,9 +186,9 @@ sub do_vms {
     # Looking for the macro defining the current perldelta:
     #PERLDELTA_CURRENT = [.pod]perl5139delta.pod
 
-    $makefile =~ s{\nPERLDELTA_CURRENT\s+=\s+\Q[.pod]perl\E\d+delta\.pod\n}
-                  {\0}sx;
-    verify_contiguous($name, $makefile, 'current perldelta macro');
+    my $re = qr{\nPERLDELTA_CURRENT\s+=\s+\Q[.pod]perl\E\d+delta\.pod\n}smx;
+    $makefile
+        = verify_contiguous($name, $makefile, $re, 'current perldelta macro');
     $makefile =~ s/\0+/join "\n", '', "PERLDELTA_CURRENT = [.pod]$state->{delta_target}", ''/se;
 
     $makefile;
@@ -207,13 +209,12 @@ sub do_unix {
     # although it seems that HP-UX make gets confused, always tried to
     # regenerate the symlink, and then the ln -s fails, as the target exists.
 
-    $makefile_SH =~ s!(
+    my $re = qr{(
 pod/perl[a-z0-9_]+\.pod: pod/perl[a-z0-9_]+\.pod
 	\$\(RMS\) pod/perl[a-z0-9_]+\.pod
 	\$\(LNS\) perl[a-z0-9_]+\.pod pod/perl[a-z0-9_]+\.pod
-)+!\0!gm;
-
-    verify_contiguous($name, $makefile_SH, 'copy rules');
+)+}sm;
+    $makefile_SH = verify_contiguous($name, $makefile_SH, $re, 'copy rules');
 
     my @copy_rules = map "
 pod/$_: pod/$state->{copies}{$_}
