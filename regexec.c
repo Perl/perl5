@@ -2068,19 +2068,29 @@ S_reg_set_capture_string(pTHX_ REGEXP * const rx,
                               "Copy on write: regexp capture, type %d\n",
                               (int) SvTYPE(sv));
             }
-            /* skip creating new COW SV if a valid one already exists */
-            if (! (    prog->saved_copy
-                    && SvIsCOW(sv)
-                    && SvPOKp(sv)
-                    && SvIsCOW(prog->saved_copy)
-                    && SvPOKp(prog->saved_copy)
-                    && SvPVX(sv) == SvPVX(prog->saved_copy)))
+            /* Create a new COW SV to share the match string and store
+             * in saved_copy, unless the current COW SV in saved_copy
+             * is valid and suitable for our purpose */
+            if ((   prog->saved_copy
+                 && SvIsCOW(prog->saved_copy)
+                 && SvPOKp(prog->saved_copy)
+                 && SvIsCOW(sv)
+                 && SvPOKp(sv)
+                 && SvPVX(sv) == SvPVX(prog->saved_copy)))
             {
+                /* just reuse saved_copy SV */
+                if (RXp_MATCH_COPIED(prog)) {
+                    Safefree(prog->subbeg);
+                    RXp_MATCH_COPIED_off(prog);
+                }
+            }
+            else {
+                /* create new COW SV to share string */
                 RX_MATCH_COPY_FREE(rx);
                 prog->saved_copy = sv_setsv_cow(prog->saved_copy, sv);
-                prog->subbeg = (char *)SvPVX_const(prog->saved_copy);
-                assert (SvPOKp(prog->saved_copy));
             }
+            prog->subbeg = (char *)SvPVX_const(prog->saved_copy);
+            assert (SvPOKp(prog->saved_copy));
             prog->sublen  = strend - strbeg;
             prog->suboffset = 0;
             prog->subcoffset = 0;

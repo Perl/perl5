@@ -20,7 +20,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 689;  # Update this when adding/deleting tests.
+plan tests => 694;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1434,6 +1434,20 @@ EOP
             }
         }
     }
+
+    # this mixture of readonly (not COWable) and COWable strings
+    # messed up the capture buffers under COW. The actual test results
+    # are incidental; the issue is was an AddressSanitizer failure
+    {
+	my $c ='AB';
+	my $res = '';
+	for ($c, 'C', $c, 'DE') {
+	    ok(/(.)/, "COWable match");
+	    $res .= $1;
+	}
+	is($res, "ACAD");
+    }
+
 
 } # End of sub run_tests
 
