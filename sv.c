@@ -7093,9 +7093,6 @@ S_utf8_mg_len_cache_update(pTHX_ SV *const sv, MAGIC **const mgp,
     assert(*mgp);
 
     (*mgp)->mg_len = ulen;
-    /* For now, treat "overflowed" as "still unknown". See RT #72924.  */
-    if (ulen != (STRLEN) (*mgp)->mg_len)
-	(*mgp)->mg_len = -1;
 }
 
 /* Create and update the UTF8 magic offset cache, with the proffered utf8/
