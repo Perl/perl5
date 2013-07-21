@@ -13885,8 +13885,6 @@ parseit:
 	    for (i = start; i <= (int) high; i++) {
 		if (! ANYOF_BITMAP_TEST(ret, i)) {
 		    ANYOF_BITMAP_SET(ret, i);
-		    prevvalue = value;
-		    value = i;
 		}
 	    }
 	}
