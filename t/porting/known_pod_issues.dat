@@ -36,6 +36,7 @@ Classic::Perl
 Clone
 cpan2dist(1)
 cpanp(1)
+CPAN::Changes::Spec
 CPANPLUS
 Crypt::Random
 curl(1)
