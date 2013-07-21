@@ -13982,9 +13982,13 @@ parseit:
 	invlist_iterfinish(cp_list);
 
         /* Done with loop; remove any code points that are in the bitmap from
-         * <cp_list> */
+         * <cp_list>; similarly for code points above latin1 if we have a flag
+         * to match all of them anyways */
 	if (change_invlist) {
 	    _invlist_subtract(cp_list, PL_Latin1, &cp_list);
+	}
+        if (ANYOF_FLAGS(ret) & ANYOF_UNICODE_ALL) {
+	    _invlist_intersection(cp_list, PL_Latin1, &cp_list);
 	}
 
 	/* If have completely emptied it, remove it completely */
