@@ -439,12 +439,12 @@ PP(pp_pos)
     }
     else {
 	    const MAGIC * const mg = mg_find_mglob(sv);
-	    if (mg && mg->mg_len >= 0) {
+	    if (mg && mg->mg_len != -1) {
 		dTARGET;
-		I32 i = mg->mg_len;
+		STRLEN i = mg->mg_len;
 		if (DO_UTF8(sv))
-		    sv_pos_b2u(sv, &i);
-		PUSHi(i);
+		    i = sv_pos_b2u_flags(sv, i, SV_GMAGIC|SV_CONST_RETURN);
+		PUSHu(i);
 		RETURN;
 	    }
 	    RETPUSHUNDEF;

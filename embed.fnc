@@ -2460,7 +2460,7 @@ poM	|AV**	|hv_backreferences_p	|NN HV *hv
 poM	|void	|hv_kill_backrefs	|NN HV *hv
 #endif
 Apd	|void	|hv_clear_placeholders	|NN HV *hv
-ApoR	|I32*	|hv_placeholders_p	|NN HV *hv
+XpoR	|SSize_t*|hv_placeholders_p	|NN HV *hv
 ApoR	|I32	|hv_placeholders_get	|NN const HV *hv
 Apo	|void	|hv_placeholders_set	|NN HV *hv|I32 ph
 

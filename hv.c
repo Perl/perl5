@@ -2895,7 +2895,7 @@ S_share_hek_flags(pTHX_ const char *str, I32 len, U32 hash, int flags)
     return HeKEY_hek(entry);
 }
 
-I32 *
+SSize_t *
 Perl_hv_placeholders_p(pTHX_ HV *hv)
 {
     dVAR;

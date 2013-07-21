@@ -4848,6 +4848,7 @@ t/base/rs.t			See if record-read works
 t/base/term.t			See if various terms work
 t/base/while.t			See if while work
 t/benchmark/rt26188-speed-up-keys-on-empty-hash.t	Benchmark if keys on empty hashes is fast enough
+t/bigmem/pos.t			Check that pos() handles large offsets
 t/bigmem/read.t			Check read() handles large offsets
 t/bigmem/vec.t			Check vec() handles large offsets
 t/cmd/elsif.t			See if else-if works
