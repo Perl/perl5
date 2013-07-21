@@ -2250,6 +2250,18 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
     if (prog->extflags & RXf_GPOS_SEEN) {
         MAGIC *mg;
 
+        /* set reginfo->ganch, the position where \G can match */
+
+        reginfo->ganch =
+            (flags & REXEC_IGNOREPOS)
+            ? stringarg /* use start pos rather than pos() */
+            : (sv && (mg = mg_find_mglob(sv)) && mg->mg_len >= 0)
+            ? strbeg + mg->mg_len /* Defined pos() */
+            : strbeg; /* pos() not defined; use start of string */
+
+        DEBUG_GPOS_r(PerlIO_printf(Perl_debug_log,
+            "GPOS ganch set to strbeg[%"IVdf"]\n", reginfo->ganch - strbeg));
+
         /* in the presence of \G, we may need to start looking earlier in
          * the string than the suggested start point of stringarg:
          * if gofs->prog is set, then that's a known, fixed minimum
@@ -2267,18 +2279,6 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
         }
         else if (prog->extflags & RXf_GPOS_FLOAT)
             startpos = strbeg;
-
-        /* set reginfo->ganch, the position where \G can match */
-
-        reginfo->ganch =
-            (flags & REXEC_IGNOREPOS)
-            ? stringarg /* use start pos rather than pos() */
-            : (sv && (mg = mg_find_mglob(sv)) && mg->mg_len >= 0)
-            ? strbeg + mg->mg_len /* Defined pos() */
-            : strbeg; /* pos() not defined; use start of string */
-
-        DEBUG_GPOS_r(PerlIO_printf(Perl_debug_log,
-            "GPOS ganch set to strbeg[%"IVdf"]\n", reginfo->ganch - strbeg));
     }
 
     minlen = prog->minlen;
