@@ -2271,7 +2271,18 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
          * or if the minimum offset isn't known, then we have to go back
          * to the start of the string, e.g. /w+\G/
          */
-        if (prog->gofs) {
+
+        if (prog->extflags & RXf_ANCH_GPOS) {
+            startpos  = reginfo->ganch - prog->gofs;
+            if (startpos <
+                ((flags & REXEC_FAIL_ON_UNDERFLOW) ? stringarg : strbeg))
+            {
+                DEBUG_r(PerlIO_printf(Perl_debug_log,
+                        "fail: ganch-gofs before earliest possible start\n"));
+                return 0;
+            }
+        }
+        else if (prog->gofs) {
             if (startpos - prog->gofs < strbeg)
                 startpos = strbeg;
             else
@@ -2532,12 +2543,11 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
 	goto phooey;
     } else if (RXf_GPOS_CHECK == (prog->extflags & RXf_GPOS_CHECK)) 
     {
-        /* the warning about reginfo->ganch being used without initialization
-           is bogus -- we set it above, when prog->extflags & RXf_GPOS_SEEN 
-           and we only enter this block when the same bit is set. */
-        char *tmp_s = reginfo->ganch - prog->gofs;
-
-	if (s <= tmp_s && regtry(reginfo, &tmp_s))
+        /* For anchored \G, the only position it can match from is
+         * (ganch-gofs); we already set startpos to this above; if intuit
+         * moved us on from there, we can't possibly succeed */
+        assert(startpos == reginfo->ganch - prog->gofs);
+	if (s == startpos && regtry(reginfo, &s))
 	    goto got_it;
 	goto phooey;
     }
