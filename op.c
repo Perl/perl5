@@ -3302,7 +3302,13 @@ S_fold_constants(pTHX_ OP *o)
 	    /* Can't simply swipe the SV from the pad, because that relies on
 	       the op being freed "real soon now". Under MAD, this doesn't
 	       happen (see the #ifdef below).  */
-	    sv = newSVsv(sv);
+	    /* We use multiple statements, because newSVsv does not allow a
+	       COW copy, unlike sv_setsv. */
+	    {
+		SV *sv2 = newSV(0);
+		sv_setsv(sv2,sv);
+		sv = sv2;
+	    }
 #else
 	    pad_swipe(o->op_targ,  FALSE);
 #endif
