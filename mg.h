@@ -26,7 +26,7 @@ struct magic {
     U16		mg_private;
     char	mg_type;
     U8		mg_flags;
-    I32		mg_len;
+    SSize_t	mg_len;
     SV*		mg_obj;
     char*	mg_ptr;
 };

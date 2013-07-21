@@ -2097,9 +2097,10 @@ Perl_magic_getpos(pTHX_ SV *sv, MAGIC *mg)
     PERL_UNUSED_ARG(mg);
 
     if (found && found->mg_len >= 0) {
-	    I32 i = found->mg_len;
+	    SSize_t i = found->mg_len;
 	    if (DO_UTF8(lsv))
-		sv_pos_b2u(lsv, &i);
+		i = sv_pos_b2u_flags(lsv, (STRLEN)i,
+				     SV_GMAGIC|SV_CONST_RETURN);
 	    sv_setiv(sv, i);
 	    return 0;
     }
