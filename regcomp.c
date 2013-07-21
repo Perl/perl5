@@ -860,6 +860,7 @@ S_cl_init(const RExC_state_t *pRExC_state, struct regnode_charclass_class *cl)
     cl->type = ANYOF;
     cl_anything(pRExC_state, cl);
     ARG_SET(cl, ANYOF_NONBITMAP_EMPTY);
+    OP(cl) = ANYOF_SYNTHETIC;
 }
 
 /* These two functions currently do the exact same thing */
@@ -6307,7 +6308,6 @@ reStudy:
 	    && !cl_is_anything(data.start_class))
 	{
 	    const U32 n = add_data(pRExC_state, 1, "f");
-	    OP(data.start_class) = ANYOF_SYNTHETIC;
 
 	    Newx(RExC_rxi->data->data[n], 1,
 		struct regnode_charclass_class);
@@ -6380,7 +6380,6 @@ reStudy:
 	    && !cl_is_anything(data.start_class))
 	{
 	    const U32 n = add_data(pRExC_state, 1, "f");
-	    OP(data.start_class) = ANYOF_SYNTHETIC;
 
 	    Newx(RExC_rxi->data->data[n], 1,
 		struct regnode_charclass_class);
