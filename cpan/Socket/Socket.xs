@@ -32,6 +32,9 @@
 #if defined(I_NETINET_IN) || defined(__ultrix__)
 #  include <netinet/in.h>
 #endif
+#if defined(I_NETINET_IP)
+#  include <netinet/ip.h>
+#endif
 #ifdef I_NETDB
 #  if !defined(ultrix)	/* Avoid double definition. */
 #   include <netdb.h>
