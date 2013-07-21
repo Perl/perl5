@@ -7273,11 +7273,12 @@ S_sv_pos_b2u_midway(pTHX_ const U8 *const s, const U8 *const target,
 }
 
 /*
-=for apidoc sv_pos_b2u
+=for apidoc sv_pos_b2u_flags
 
 Converts the value pointed to by offsetp from a count of bytes from the
 start of the string, to a count of the equivalent number of UTF-8 chars.
-Handles magic and type coercion.
+Handles type coercion.  I<flags> is passed to C<SvPV_flags>, and usually
+should be C<SV_GMAGIC|SV_CONST_RETURN> to handle magic.
 
 =cut
 */
@@ -7288,29 +7289,25 @@ Handles magic and type coercion.
  * byte offsets.
  *
  */
-void
-Perl_sv_pos_b2u(pTHX_ SV *const sv, I32 *const offsetp)
+STRLEN
+Perl_sv_pos_b2u_flags(pTHX_ SV *const sv, STRLEN const offset, U32 flags)
 {
     const U8* s;
-    const STRLEN byte = *offsetp;
     STRLEN len = 0; /* Actually always set, but let's keep gcc happy.  */
     STRLEN blen;
     MAGIC* mg = NULL;
     const U8* send;
     bool found = FALSE;
 
-    PERL_ARGS_ASSERT_SV_POS_B2U;
+    PERL_ARGS_ASSERT_SV_POS_B2U_FLAGS;
 
-    if (!sv)
-	return;
+    s = (const U8*)SvPV_flags(sv, blen, flags);
 
-    s = (const U8*)SvPV_const(sv, blen);
-
-    if (blen < byte)
+    if (blen < offset)
 	Perl_croak(aTHX_ "panic: sv_pos_b2u: bad byte offset, blen=%"UVuf
-		   ", byte=%"UVuf, (UV)blen, (UV)byte);
+		   ", byte=%"UVuf, (UV)blen, (UV)offset);
 
-    send = s + byte;
+    send = s + offset;
 
     if (!SvREADONLY(sv)
 	&& PL_utf8cache
@@ -7319,18 +7316,16 @@ Perl_sv_pos_b2u(pTHX_ SV *const sv, I32 *const offsetp)
     {
 	if (mg->mg_ptr) {
 	    STRLEN * const cache = (STRLEN *) mg->mg_ptr;
-	    if (cache[1] == byte) {
+	    if (cache[1] == offset) {
 		/* An exact match. */
-		*offsetp = cache[0];
-		return;
+		return cache[0];
 	    }
-	    if (cache[3] == byte) {
+	    if (cache[3] == offset) {
 		/* An exact match. */
-		*offsetp = cache[2];
-		return;
+		return cache[2];
 	    }
 
-	    if (cache[1] < byte) {
+	    if (cache[1] < offset) {
 		/* We already know part of the way. */
 		if (mg->mg_len != -1) {
 		    /* Actually, we know the end too.  */
@@ -7341,7 +7336,7 @@ Perl_sv_pos_b2u(pTHX_ SV *const sv, I32 *const offsetp)
 		    len = cache[0] + utf8_length(s + cache[1], send);
 		}
 	    }
-	    else if (cache[3] < byte) {
+	    else if (cache[3] < offset) {
 		/* We're between the two cached pairs, so we do the calculation
 		   offset by the byte/utf-8 positions for the earlier pair,
 		   then add the utf-8 characters from the string start to
@@ -7351,7 +7346,7 @@ Perl_sv_pos_b2u(pTHX_ SV *const sv, I32 *const offsetp)
 		    + cache[2];
 
 	    }
-	    else { /* cache[3] > byte */
+	    else { /* cache[3] > offset */
 		len = S_sv_pos_b2u_midway(aTHX_ s, send, s + cache[3],
 					  cache[2]);
 
@@ -7370,14 +7365,46 @@ Perl_sv_pos_b2u(pTHX_ SV *const sv, I32 *const offsetp)
 	    assert_uft8_cache_coherent("sv_pos_b2u", len, real_len, sv);
 	len = real_len;
     }
-    *offsetp = len;
 
     if (PL_utf8cache) {
-	if (blen == byte)
+	if (blen == offset)
 	    utf8_mg_len_cache_update(sv, &mg, len);
 	else
-	    utf8_mg_pos_cache_update(sv, &mg, byte, len, blen);
+	    utf8_mg_pos_cache_update(sv, &mg, offset, len, blen);
     }
+
+    return len;
+}
+
+/*
+=for apidoc sv_pos_b2u
+
+Converts the value pointed to by offsetp from a count of bytes from the
+start of the string, to a count of the equivalent number of UTF-8 chars.
+Handles magic and type coercion.
+
+Use C<sv_pos_b2u_flags> in preference, which correctly handles strings
+longer than 2Gb.
+
+=cut
+*/
+
+/*
+ * sv_pos_b2u() uses, like sv_pos_u2b(), the mg_ptr of the potential
+ * PERL_MAGIC_utf8 of the sv to store the mapping between UTF-8 and
+ * byte offsets.
+ *
+ */
+void
+Perl_sv_pos_b2u(pTHX_ SV *const sv, I32 *const offsetp)
+{
+    PERL_ARGS_ASSERT_SV_POS_B2U;
+
+    if (!sv)
+	return;
+
+    *offsetp = (I32)sv_pos_b2u_flags(sv, (STRLEN)*offsetp,
+				     SV_GMAGIC|SV_CONST_RETURN);
 }
 
 static void
