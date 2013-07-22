@@ -17,6 +17,17 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.19.2 - Fred Brooks, "The Mythical Man-Month"
+
+L<Announced on 2013-07-22 by Aristotle Pagaltzis|http://www.nntp.perl.org/group/perl.perl5.porters/2013/07/msg204905.html>
+
+  The magic of myth and legend has come true in our time. One types the correct
+  incantation on a keyboard, and a display screen comes to life, showing things
+  that never were nor could be. [...] Not all is delight, however [...] One must
+  perform perfectly. The computer resembles the magic of legend in this respect,
+  too. If one character, one pause, of the incantation is not strictly in proper
+  form, the magic doesn't work.
+
 =head2 v5.19.1 - William Shakespeare, "A Midsummer Night's Dream"
 
 L<Announced on 2013-06-21 by David Golden|http://www.nntp.perl.org/group/perl.perl5.porters/2013/06/msg203449.html>
