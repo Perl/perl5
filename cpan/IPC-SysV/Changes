@@ -1,3 +1,13 @@
+2.04 - 2013-07-20
+
+    * CPAN #72458: Add 'all' export
+      (thanks to Milan Kocian for providing a patch)
+    * CPAN #79821: Install to 'site' for perl 5.11+
+      (thanks to Robert Sedlacek for providing a patch)
+    * CPAN #86736: Fix spelling of IPC_CREAT
+    * CPAN #78882: Document SIZE parameter of IPC::SharedMem->new()
+    * CPAN #78927: Fix spelling of 'nattch'
+
 2.03 - 2010-05-23
 
     * fix CPAN #57530: IPC::Msg Documentation Bug
