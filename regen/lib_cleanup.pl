@@ -1,7 +1,8 @@
 #!perl -w
 use strict;
 require 'regen/regen_lib.pl';
-use vars '$TAP';
+require 'Porting/pod_lib.pl';
+use vars qw($TAP $Verbose);
 
 # For processing later
 my @ext;
@@ -15,7 +16,7 @@ while (<$fh>) {
     if (m<^((?:cpan|dist|ext)/[^/]+/              # In an extension directory
            (?!t/|private/|corpus/|demo/|testdir/) # but not a test or similar
            \S+                                    # filename characters
-           (?:\.pm|\.pod|_pm\.PL|_pod\.PL))       # useful ending
+           (?:\.pm|\.pod|_pm\.PL|_pod\.PL|\.yml)) # useful ending
            (?:\s|$)                               # whitespace or end of line
           >x) {
         push @ext, $1;
@@ -37,13 +38,18 @@ close $fh
 
 # Lines we need in lib/.gitignore
 my %ignore;
+# Directories that the Makfiles should remove
+# With a special case already :-(
+my %rmdir = ('lib/Unicode/Collate/Locale' => 1);
 
 FILE:
 foreach my $file (@ext) {
     my ($extname, $path) = $file =~ m!^(?:cpan|dist|ext)/([^/]+)/(.*)!
         or die "Can't parse '$file'";
 
-    if ($path =~ /\.pod$/) {
+    if ($path =~ /\.yml$/) {
+	next unless $path =~ s!^lib/!!;
+    } elsif ($path =~ /\.pod$/) {
         unless ($path =~ s!^lib/!!) {
             # ExtUtils::MakeMaker will install it to a path based on the
             # extension name:
@@ -90,6 +96,12 @@ foreach my $file (@ext) {
         if (!$libdirs{$prefix}) {
             # It is a directory that we will create. Ignore everything in it:
             ++$ignore{"/$prefix/"};
+            ++$rmdir{"lib/$prefix"};
+            pop @parts;
+            while (@parts) {
+                $prefix .= '/' . shift @parts;
+                ++$rmdir{"lib/$prefix"};
+            }
             next FILE;
         }
         $prefix .= '/' . shift @parts;
@@ -101,6 +113,24 @@ foreach my $file (@ext) {
     ++$ignore{"/$path"};
 }
 
+sub edit_makefile_SH {
+    my ($desc, $contents) = @_;
+    my $start_re = qr/(\trm -f so_locations[^\n]+)/;
+    my ($start) = $contents =~ $start_re;
+    $contents = verify_contiguous($desc, $contents,
+                                  qr/$start_re\n(?:\t-rmdir [^\n]+\n)+/sm,
+                                  'lib directory rmdir rules');
+    # Reverse sort ensures that any subdirectories are deleted first.
+    $contents =~ s{\0}
+                  {"$start\n"
+                   . wrap(79, "\t-rmdir ", "\t-rmdir ", reverse sort keys %rmdir)
+                   . "\n"}e;
+    $contents;
+}
+
+process('Makefile.SH', 'Makefile.SH', \&edit_makefile_SH, $TAP && '', $Verbose);
+
+# This must come last as it can exit early:
 if ($TAP && !-d '.git' && !-f 'lib/.gitignore') {
     print "ok # skip not being run from a git checkout, hence no lib/.gitignore\n";
     exit 0;

@@ -1240,37 +1240,42 @@ _cleaner2:
 	rm -rf pod/perlfunc pod/perlipc
 	-rmdir ext/B/lib
 	rm -f so_locations $(LIBPERL_NONSHR) $(MINIPERL_NONSHR)
-	rm -rf lib/Encode lib/Compress lib/Hash lib/re
-	rm -rf lib/TAP lib/Module/Pluggable lib/App
-	rm -rf lib/mro
-	rm -rf lib/IO/Compress lib/IO/Uncompress
-	rm -fr lib/B
-	rm -fr lib/CPAN
-	rm -fr lib/ExtUtils/CBuilder
-	-rmdir lib/Archive/Tar lib/Archive lib/Attribute
-	-rmdir lib/CGI lib/Carp
-	-rmdir lib/Data lib/Devel lib/Digest
-	-rmdir lib/ExtUtils/Command lib/ExtUtils/Constant lib/ExtUtils/Liblist lib/ExtUtils/MakeMaker
-	-rmdir lib/File/Spec lib/Filter/Util lib/Filter
-	-rmdir lib/I18N/LangTags lib/IO/Socket lib/IO lib/IPC
-	-rmdir lib/List/Util lib/List
-	-rmdir lib/Locale/Maketext lib/Locale
-	-rmdir lib/Log/Message lib/Log
-	-rmdir lib/Math/Big* lib/Math
-	-rmdir lib/Memoize lib/MIME
-	-rmdir lib/Module/Build/Platform lib/Module/Build lib/Module/Load lib/Module
-	-rmdir lib/Net/FTP lib/Object
-	-rmdir lib/Parse/CPAN lib/Parse
-	-rmdir lib/PerlIO/via lib/PerlIO
-	-rmdir lib/Package lib/Params
-	-rmdir lib/Pod/Perldoc lib/Pod/Simple lib/Pod/Text
-	-rmdir lib/Sys lib/Scalar/Util lib/Scalar
-	-rmdir lib/Term/UI lib/Thread lib/Tie/Hash
-	-rmdir lib/Test/Builder/Tester lib/Test/Builder lib/Test
-	-rmdir lib/Unicode/Collate lib/version
-	-rmdir lib/XS/APItest lib/XS
-	-rmdir lib/inc/latest lib/inc
-	-rmdir lib/autodie/exception lib/autodie lib/encoding lib/threads
+	-rmdir lib/version lib/threads lib/inc/latest lib/inc lib/encoding
+	-rmdir lib/autodie/exception lib/autodie lib/XS lib/Win32API lib/VMS
+	-rmdir lib/Unicode/Collate/Locale lib/Unicode/Collate/CJK
+	-rmdir lib/Unicode/Collate lib/Tie/Hash lib/Thread lib/Text
+	-rmdir lib/Test/Builder/Tester lib/Test/Builder lib/Test lib/Term
+	-rmdir lib/TAP/Parser/YAMLish lib/TAP/Parser/SourceHandler
+	-rmdir lib/TAP/Parser/Scheduler lib/TAP/Parser/Result
+	-rmdir lib/TAP/Parser/Iterator lib/TAP/Parser lib/TAP/Harness
+	-rmdir lib/TAP/Formatter/File lib/TAP/Formatter/Console
+	-rmdir lib/TAP/Formatter lib/TAP lib/Sys/Syslog lib/Sys lib/Search
+	-rmdir lib/Scalar lib/Pod/Text lib/Pod/Simple lib/Pod/Perldoc
+	-rmdir lib/PerlIO/via lib/PerlIO lib/Perl lib/Parse/CPAN lib/Parse
+	-rmdir lib/Params lib/Package lib/Net/FTP lib/Module/Load
+	-rmdir lib/Module/CoreList lib/Module/Build/Platform lib/Module/Build
+	-rmdir lib/Module lib/Memoize lib/Math/BigInt lib/Math/BigFloat
+	-rmdir lib/Math lib/MIME lib/Locale/Maketext lib/Locale/Codes
+	-rmdir lib/Locale lib/List/Util lib/List lib/JSON/PP lib/JSON lib/IPC
+	-rmdir lib/IO/Uncompress/Adapter lib/IO/Uncompress lib/IO/Socket
+	-rmdir lib/IO/Compress/Zlib lib/IO/Compress/Zip lib/IO/Compress/Gzip
+	-rmdir lib/IO/Compress/Base lib/IO/Compress/Adapter lib/IO/Compress
+	-rmdir lib/IO lib/I18N/LangTags lib/I18N lib/Hash/Util lib/Hash
+	-rmdir lib/HTTP lib/Filter/Util lib/Filter lib/File/Spec
+	-rmdir lib/ExtUtils/Typemaps lib/ExtUtils/ParseXS
+	-rmdir lib/ExtUtils/MakeMaker lib/ExtUtils/Liblist
+	-rmdir lib/ExtUtils/Constant lib/ExtUtils/Command
+	-rmdir lib/ExtUtils/CBuilder/Platform/Windows
+	-rmdir lib/ExtUtils/CBuilder/Platform lib/ExtUtils/CBuilder
+	-rmdir lib/Exporter lib/Encode/Unicode lib/Encode/MIME/Header
+	-rmdir lib/Encode/MIME lib/Encode/KR lib/Encode/JP lib/Encode/CN
+	-rmdir lib/Encode lib/Digest lib/Devel lib/Data lib/Config/Perl
+	-rmdir lib/Compress/Raw lib/Compress lib/Carp lib/CPAN/Meta
+	-rmdir lib/CPAN/LWP lib/CPAN/Kwalify lib/CPAN/HTTP lib/CPAN/FTP
+	-rmdir lib/CPAN/Exception lib/CPAN/API lib/CPAN lib/CGI lib/B
+	-rmdir lib/Attribute lib/Archive/Tar lib/Archive
+	-rmdir lib/App/Prove/State/Result lib/App/Prove/State lib/App/Prove
+	-rmdir lib/App
 
 _realcleaner:
 	@$(LDLIBPTH) $(MAKE) _cleaner1 CLEAN=distclean
