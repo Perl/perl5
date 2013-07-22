@@ -202,6 +202,78 @@ sub verify_contiguous {
     return $content;
 }
 
+=head2 C<process()>
+
+=over 4
+
+=item * Purpose
+
+Read a file from disk, pass the contents to the callback, and either update
+the file on disk (if changed) or generate TAP output to confirm that the
+version on disk is up to date. C<die>s if the file contains any C<NUL> bytes.
+This permits the callback routine to use C<NUL> bytes as placeholders while
+manipulating the file's contents.
+
+=item * Arguments
+
+=over 4
+
+=item * Description for use in error messages
+
+=item * Name of file
+
+=item * Callback
+
+Passed description and file contents, should return updated file contents.
+
+=item * Test number
+
+If defined, generate TAP output to C<STDOUT>. If defined and false, generate
+an unnumbered test. Otherwise this is the test number in the I<ok> line.
+
+=item * Verbose flag
+
+If true, generate verbose output.
+
+=back
+
+=item * Return Value
+
+Does not return anything.
+
+=back
+
+=cut
+
+sub process {
+    my ($desc, $filename, $callback, $test, $verbose) = @_;
+
+    print "Now processing $filename\n" if $verbose;
+    my $orig = slurp_or_die($filename);
+    my_die "$filename contains NUL bytes" if $orig =~ /\0/;
+
+    my $new = $callback->($desc, $orig);
+
+    if (defined $test) {
+        printf "%s%s # $filename is up to date\n",
+            ($new eq $orig ? 'ok' : 'not ok'), ($test ? " $test" : '');
+        return;
+    } elsif ($new eq $orig) {
+        print "Was not modified\n"
+            if $verbose;
+        return;
+    }
+
+    my $mode = (stat $filename)[2];
+    my_die "Can't stat $filename: $!"
+        unless defined $mode;
+    rename $filename, "$filename.old"
+        or my_die "Can't rename $filename to $filename.old: $!";
+
+    write_or_die($filename, $new);
+    chmod $mode & 0777, $filename or my_die "can't chmod $mode $filename: $!";
+}
+
 =head2 C<pods_to_install()>
 
 =over 4

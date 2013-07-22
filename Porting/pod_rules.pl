@@ -216,35 +216,6 @@ pod/$_: pod/$state->{copies}{$_}
     $makefile_SH;
 }
 
-sub process {
-    my ($desc, $filename, $callback, $test, $verbose) = @_;
-
-    print "Now processing $filename\n" if $verbose;
-    my $orig = slurp_or_die($filename);
-    my_die "$filename contains NUL bytes" if $orig =~ /\0/;
-
-    my $new = $callback->($desc, $orig);
-
-    if (defined $test) {
-        printf "%s%s # $filename is up to date\n",
-            ($new eq $orig ? 'ok' : 'not ok'), ($test ? " $test" : '');
-        return;
-    } elsif ($new eq $orig) {
-        print "Was not modified\n"
-            if $verbose;
-        return;
-    }
-
-    my $mode = (stat $filename)[2];
-    my_die "Can't stat $filename: $!"
-        unless defined $mode;
-    rename $filename, "$filename.old"
-        or my_die "Can't rename $filename to $filename.old: $!";
-
-    write_or_die($filename, $new);
-    chmod $mode & 0777, $filename or my_die "can't chmod $mode $filename: $!";
-}
-
 # Do stuff
 process($_, $Build{$_}, main->can("do_$_"), $Test && ++$test, $Verbose)
     foreach sort keys %Build;
