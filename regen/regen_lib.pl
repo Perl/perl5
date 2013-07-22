@@ -67,8 +67,39 @@ sub close_and_rename {
     close $fh or die "Error closing $name: $!";
 
     if ($TAP) {
-	my $not = compare($name, $final_name) ? 'not ' : '';
-	print STDOUT $not . "ok - $0 $final_name\n";
+        # Don't use compare beacuse if there are errors it doesn't give any
+        # way to generate diagnostics about what went wrong.
+        # These files are small enough to read into memory.
+        local $/;
+        # This is the file we just closed, so it should open cleanly:
+        open $fh, '<', $name
+            or die "Can't open '$name': $!";
+        my $want = <$fh>;
+        die "Can't read '$name': $!"
+            unless defined $want;
+        close $fh
+            or die "Can't close '$name': $!";
+
+        my $fail;
+        if (!open $fh, '<', $final_name) {
+            $fail = "Can't open '$final_name': $!";
+        } else {
+            my $have = <$fh>;
+            if (!defined $have) {
+                $fail = "Can't read '$final_name': $!";
+                close $fh;
+            } elsif (!close $fh) {
+                $fail = "Can't close '$final_name': $!";
+            } elsif ($want ne $have) {
+                $fail = "'$name' and '$final_name' differ";
+            }
+        }
+        if ($fail) {
+            print STDOUT "not ok - $0 $final_name\n";
+            print STDERR "$fail\n";
+        } else {
+            print STDOUT "ok - $0 $final_name\n";
+        }
 	safer_unlink($name);
 	return;
     }
