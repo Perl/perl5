@@ -10,7 +10,7 @@ perlmacosx - Perl under Mac OS X
 
 This document briefly describes Perl under Mac OS X.
 
-  curl http://www.cpan.org/src/perl-5.19.3.tar.gz > perl-5.19.2.tar.gz
+  curl -O http://www.cpan.org/src/perl-5.19.3.tar.gz
   tar -xzf perl-5.19.3.tar.gz
   cd perl-5.19.3
   ./Configure -des -Dprefix=/usr/local/
