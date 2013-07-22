@@ -11476,6 +11476,69 @@ S_regpatws( RExC_state_t *pRExC_state, char *p , const bool recognize_comment )
     return p;
 }
 
+STATIC void
+S_populate_ANYOF_from_invlist(pTHX_ regnode *node, SV** invlist_ptr)
+{
+    /* Uses the inversion list '*invlist_ptr' to populate the ANYOF 'node'.  It
+     * sets up the bitmap and any flags, removing those code points from the
+     * inversion list, setting it to NULL should it become completely empty */
+
+    PERL_ARGS_ASSERT_POPULATE_ANYOF_FROM_INVLIST;
+    assert(PL_regkind[OP(node)] == ANYOF);
+
+    ANYOF_BITMAP_ZERO(node);
+    if (*invlist_ptr) {
+
+	/* This gets set if we actually need to modify things */
+	bool change_invlist = FALSE;
+
+	UV start, end;
+
+	/* Start looking through *invlist_ptr */
+	invlist_iterinit(*invlist_ptr);
+	while (invlist_iternext(*invlist_ptr, &start, &end)) {
+	    UV high;
+	    int i;
+
+            if (end == UV_MAX && start <= 256) {
+                ANYOF_FLAGS(node) |= ANYOF_UNICODE_ALL;
+            }
+
+	    /* Quit if are above what we should change */
+	    if (start > 255) {
+		break;
+	    }
+
+	    change_invlist = TRUE;
+
+	    /* Set all the bits in the range, up to the max that we are doing */
+	    high = (end < 255) ? end : 255;
+	    for (i = start; i <= (int) high; i++) {
+		if (! ANYOF_BITMAP_TEST(node, i)) {
+		    ANYOF_BITMAP_SET(node, i);
+		}
+	    }
+	}
+	invlist_iterfinish(*invlist_ptr);
+
+        /* Done with loop; remove any code points that are in the bitmap from
+         * *invlist_ptr; similarly for code points above latin1 if we have a flag
+         * to match all of them anyways */
+	if (change_invlist) {
+	    _invlist_subtract(*invlist_ptr, PL_Latin1, invlist_ptr);
+	}
+        if (ANYOF_FLAGS(node) & ANYOF_UNICODE_ALL) {
+	    _invlist_intersection(*invlist_ptr, PL_Latin1, invlist_ptr);
+	}
+
+	/* If have completely emptied it, remove it completely */
+	if (_invlist_len(*invlist_ptr) == 0) {
+	    SvREFCNT_dec_NN(*invlist_ptr);
+	    *invlist_ptr = NULL;
+	}
+    }
+}
+
 /* Parse POSIX character classes: [[:foo:]], [[=foo=]], [[.foo.]].
    Character classes ([:foo:]) can also be negated ([:^foo:]).
    Returns a named class id (ANYOF_XXX) if successful, -1 otherwise.
@@ -13946,57 +14009,8 @@ parseit:
      * for things that belong in the bitmap, put them there, and delete from
      * <cp_list>.  While we are at it, see if everything above 255 is in the
      * list, and if so, set a flag to speed up execution */
-    ANYOF_BITMAP_ZERO(ret);
-    if (cp_list) {
 
-	/* This gets set if we actually need to modify things */
-	bool change_invlist = FALSE;
-
-	UV start, end;
-
-	/* Start looking through <cp_list> */
-	invlist_iterinit(cp_list);
-	while (invlist_iternext(cp_list, &start, &end)) {
-	    UV high;
-	    int i;
-
-            if (end == UV_MAX && start <= 256) {
-                ANYOF_FLAGS(ret) |= ANYOF_UNICODE_ALL;
-            }
-
-	    /* Quit if are above what we should change */
-	    if (start > 255) {
-		break;
-	    }
-
-	    change_invlist = TRUE;
-
-	    /* Set all the bits in the range, up to the max that we are doing */
-	    high = (end < 255) ? end : 255;
-	    for (i = start; i <= (int) high; i++) {
-		if (! ANYOF_BITMAP_TEST(ret, i)) {
-		    ANYOF_BITMAP_SET(ret, i);
-		}
-	    }
-	}
-	invlist_iterfinish(cp_list);
-
-        /* Done with loop; remove any code points that are in the bitmap from
-         * <cp_list>; similarly for code points above latin1 if we have a flag
-         * to match all of them anyways */
-	if (change_invlist) {
-	    _invlist_subtract(cp_list, PL_Latin1, &cp_list);
-	}
-        if (ANYOF_FLAGS(ret) & ANYOF_UNICODE_ALL) {
-	    _invlist_intersection(cp_list, PL_Latin1, &cp_list);
-	}
-
-	/* If have completely emptied it, remove it completely */
-	if (_invlist_len(cp_list) == 0) {
-	    SvREFCNT_dec_NN(cp_list);
-	    cp_list = NULL;
-	}
-    }
+    populate_ANYOF_from_invlist(ret, &cp_list);
 
     if (invert) {
         ANYOF_FLAGS(ret) |= ANYOF_INVERT;

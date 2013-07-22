@@ -2046,6 +2046,7 @@ Es	|bool	|reg_skipcomment|NN struct RExC_state_t *pRExC_state
 Es	|void	|scan_commit	|NN const struct RExC_state_t *pRExC_state \
 				|NN struct scan_data_t *data \
 				|NN SSize_t *minlenp|int is_inf
+Es	|void	|populate_ANYOF_from_invlist|NN regnode *node|NN SV** invlist_ptr
 Esn	|void	|cl_anything	|NN const struct RExC_state_t *pRExC_state \
 				|NN struct regnode_charclass_class *cl
 EsRn	|int	|cl_is_anything	|NN const struct regnode_charclass_class *cl
