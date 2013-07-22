@@ -83,11 +83,11 @@ sub SKIP_TEST {
 $Data::Dumper::Useperl = 1;
 if (defined &Data::Dumper::Dumpxs) {
   print "### XS extension loaded, will run XS tests\n";
-  $TMAX = 420; $XS = 1;
+  $TMAX = 426; $XS = 1;
 }
 else {
   print "### XS extensions not loaded, will NOT run XS tests\n";
-  $TMAX = 210; $XS = 0;
+  $TMAX = 213; $XS = 0;
 }
 
 print "1..$TMAX\n";
@@ -1554,5 +1554,22 @@ EOW
   TEST q(Data::Dumper->Dump(["\\x00\\x{0660}"])),
     "\\ octal followed by unicode digit";
   TEST q(Data::Dumper->Dumpxs(["\\x00\\x{0660}"])), '\\ octal followed by unicode digit (xs)'
+    if $XS;
+
+  # [perl #118933 - handling of digits
+$WANT = <<'EOW';
+#$VAR1 = 0;
+#$VAR2 = 1;
+#$VAR3 = 90;
+#$VAR4 = -10;
+#$VAR5 = "010";
+#$VAR6 = 112345678;
+#$VAR7 = "1234567890";
+EOW
+  TEST q(Data::Dumper->Dump([0, 1, 90, -10, "010", "112345678", "1234567890" ])),
+    "numbers and number-like scalars";
+
+  TEST q(Data::Dumper->Dumpxs([0, 1, 90, -10, "010", "112345678", "1234567890" ])),
+    "numbers and number-like scalars"
     if $XS;
 }
