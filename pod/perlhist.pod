@@ -503,14 +503,15 @@ the strings?).
  BinGOs   5.17.9        2013-Feb-20
  Max M    5.17.10       2013-Mar-21
 
- Ricardo  5.18.0-RC1    2013-May-11
+ Ricardo  5.18.0-RC1    2013-May-11     The 5.18 maintenance track
  Ricardo  5.18.0-RC2    2013-May-12
  Ricardo  5.18.0-RC3    2013-May-13
  Ricardo  5.18.0-RC4    2013-May-15
  Ricardo  5.18.0        2013-May-18
 
- Ricardo  5.19.0        2013-May-20
- David G  5.19.1        2013-Jun-21
+ Ricardo   5.19.0       2013-May-20     The 5.19 development track
+ David G   5.19.1       2013-Jun-21
+ Aristotle 5.19.1       2013-Jul-22
 
 =head2 SELECTED RELEASE SIZES
 
