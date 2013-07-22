@@ -969,6 +969,68 @@ sub fresh_perl_like {
 # If the global variable $FATAL is true then OPTION fatal is the
 # default.
 
+sub _setup_one_file {
+    my $fh = shift;
+    # Store the filename as a program that started at line 0.
+    # Real files count lines starting at line 1.
+    my @these = (0, shift);
+    my ($lineno, $current);
+    while (<$fh>) {
+        if ($_ eq "########\n") {
+            if (defined $current) {
+                push @these, $lineno, $current;
+            }
+            undef $current;
+        } else {
+            if (!defined $current) {
+                $lineno = $.;
+            }
+            $current .= $_;
+        }
+    }
+    if (defined $current) {
+        push @these, $lineno, $current;
+    }
+    ((scalar @these) / 2 - 1, @these);
+}
+
+sub setup_multiple_progs {
+    my ($tests, @prgs);
+    foreach my $file (@_) {
+        next if $file =~ /(?:~|\.orig|,v)$/;
+        next if $file =~ /perlio$/ && !PerlIO::Layer->find('perlio');
+        next if -d $file;
+
+        open my $fh, '<', $file or die "Cannot open $file: $!\n" ;
+        my $found;
+        while (<$fh>) {
+            if (/^__END__/) {
+                ++$found;
+                last;
+            }
+        }
+        # This is an internal error, and should never happen. All bar one of
+        # the files had an __END__ marker to signal the end of their preamble,
+        # although for some it wasn't technically necessary as they have no
+        # tests. It might be possible to process files without an __END__ by
+        # seeking back to the start and treating the whole file as tests, but
+        # it's simpler and more reliable just to make the rule that all files
+        # must have __END__ in. This should never fail - a file without an
+        # __END__ should not have been checked in, because the regression tests
+        # would not have passed.
+        die "Could not find '__END__' in $file"
+            unless $found;
+
+        my ($t, @p) = _setup_one_file($fh, $file);
+        $tests += $t;
+        push @prgs, @p;
+
+        close $fh
+            or die "Cannot close $file: $!\n";
+    }
+    return ($tests, @prgs);
+}
+
 sub run_multiple_progs {
     my $up = shift;
     my @prgs;
@@ -977,18 +1039,31 @@ sub run_multiple_progs {
 	# pass in a list of "programs" to run
 	@prgs = @_;
     } else {
-	# The tests below t run in t and pass in a file handle.
-	my $fh = shift;
-	local $/;
-	@prgs = split "\n########\n", <$fh>;
+        # The tests below t run in t and pass in a file handle. In theory we
+        # can pass (caller)[1] as the second argument to report errors with
+        # the filename of our caller, as the handle is always DATA. However,
+        # line numbers in DATA count from the __END__ token, so will be wrong.
+        # Which is more confusing than not providing line numbers. So, for now,
+        # don't provide line numbers. No obvious clean solution - one hack
+        # would be to seek DATA back to the start and read to the __END__ token,
+        # but that feels almost like we should just open $0 instead.
+
+        # Not going to rely on undef in list assignment.
+        my $dummy;
+        ($dummy, @prgs) = _setup_one_file(shift);
     }
 
     my $tmpfile = tempfile();
 
+    my ($file, $line);
   PROGRAM:
-    for (@prgs){
-	unless (/\n/) {
-	    print "# From $_\n";
+    while (defined ($line = shift @prgs)) {
+        $_ = shift @prgs;
+        unless ($line) {
+            $file = $_;
+            if (defined $file) {
+                print "# From $file\n";
+            }
 	    next;
 	}
 	my $switch = "";
@@ -1148,7 +1223,14 @@ sub run_multiple_progs {
 	    }
 	}
 
-	ok($ok, $name);
+        if (defined $file) {
+            _ok($ok, "at $file line $line", $name);
+        } else {
+            # We don't have file and line number data for the test, so report
+            # errors as coming from our caller.
+            local $Level = $Level + 1;
+            ok($ok, $name);
+        }
 
 	foreach (@temps) {
 	    unlink $_ if $_;
