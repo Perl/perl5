@@ -2,7 +2,7 @@ package Module::Build::Platform::VMS;
 
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.4005';
+$VERSION = '0.4007';
 $VERSION = eval $VERSION;
 use Module::Build::Base;
 use Config;
@@ -427,26 +427,15 @@ sub _detildefy {
         my @hdirs = File::Spec::Unix->splitdir($hdir);
         my @dirs = File::Spec::Unix->splitdir($dir);
 
-        my $newdirs;
+        unless ($arg =~ m#^~/#) {
+            # There is a home directory after the tilde, but it will already
+            # be present in in @hdirs so we need to remove it by from @dirs.
 
-        # Two cases of tilde handling
-        if ($arg =~ m#^~/#) {
-
-            # Simple case, just merge together
-            $newdirs = File::Spec::Unix->catdir(@hdirs, @dirs);
-
-        } else {
-
-            # Complex case, need to add an updir - No delimiters
-            my @backup = File::Spec::Unix->splitdir(File::Spec::Unix->updir);
-
-            $newdirs = File::Spec::Unix->catdir(@hdirs, @backup, @dirs);
-
+            shift @dirs;
         }
+        my $newdirs = File::Spec::Unix->catdir(@hdirs, @dirs);
 
-        # Now put the two cases back together
         $arg = File::Spec::Unix->catpath($hvol, $newdirs, $file);
-
     }
     return $arg;
 

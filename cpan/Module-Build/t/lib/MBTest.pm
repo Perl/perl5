@@ -2,7 +2,6 @@ package MBTest;
 
 use strict;
 
-use IO::File ();
 use File::Spec;
 use File::Temp ();
 use File::Path ();
@@ -159,7 +158,7 @@ sub stdout_stderr_of {
 }
 
 sub slurp {
-  my $fh = IO::File->new($_[0]) or die "Can't open $_[0]: $!";
+  open(my $fh, '<', $_[0]) or die "Can't open $_[0]: $!";
   local $/;
   return scalar <$fh>;
 }

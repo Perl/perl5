@@ -1597,6 +1597,8 @@ cpan/Module-Build/lib/Module/Build/YAML.pm
 cpan/Module-Build/t/00-compile.t
 cpan/Module-Build/t/actions/installdeps.t
 cpan/Module-Build/t/actions/manifest_skip.t
+cpan/Module-Build/t/add_property_array.t
+cpan/Module-Build/t/add_property_hash.t
 cpan/Module-Build/t/add_property.t
 cpan/Module-Build/t/basic.t
 cpan/Module-Build/t/bundled/Software/License.pm
@@ -1617,6 +1619,7 @@ cpan/Module-Build/t/lib/MBTest.pm
 cpan/Module-Build/t/lib/Module/Signature.pm
 cpan/Module-Build/t/lib/Software/License/VaporWare.pm
 cpan/Module-Build/t/manifypods.t
+cpan/Module-Build/t/manifypods_with_utf8.t
 cpan/Module-Build/t/metadata2.t
 cpan/Module-Build/t/metadata.t
 cpan/Module-Build/t/mymeta.t
@@ -1643,6 +1646,7 @@ cpan/Module-Build/t/test_file_exts.t
 cpan/Module-Build/t/test_types.t
 cpan/Module-Build/t/test_type.t
 cpan/Module-Build/t/tilde.t
+cpan/Module-Build/t/unit_run_test_harness.t
 cpan/Module-Build/t/use_tap_harness.t
 cpan/Module-Build/t/versions.t
 cpan/Module-Build/t/write_default_maniskip.t

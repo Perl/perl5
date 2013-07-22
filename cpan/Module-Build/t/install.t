@@ -2,7 +2,7 @@
 
 use strict;
 use lib 't/lib';
-use MBTest tests => 35;
+use MBTest tests => 34;
 
 blib_load('Module::Build');
 
@@ -36,18 +36,15 @@ $dist->regen;
 use File::Spec::Functions qw( catdir );
 
 my $mb = Module::Build->new_from_context(
-  # need default install paths to ensure manpages & HTML get generated
+  # Need default install paths to ensure manpages get generated.
   installdirs => 'site',
   config => {
     installman1dir  => catdir($tmp, 'man', 'man1'),
     installman3dir  => catdir($tmp, 'man', 'man3'),
-    installhtml1dir => catdir($tmp, 'html'),
-    installhtml3dir => catdir($tmp, 'html'),
-
     installsiteman1dir  => catdir($tmp, 'site', 'man', 'man1'),
     installsiteman3dir  => catdir($tmp, 'site', 'man', 'man3'),
-    installsitehtml1dir => catdir($tmp, 'site', 'html'),
-    installsitehtml3dir => catdir($tmp, 'site', 'html'),
+    ## We also used to have HTML paths here, but building HTML docs
+    ## can be super slow, and we never checked the result anyway.
   }
 
 );
@@ -164,10 +161,6 @@ is $@, '';
   my $basedir = File::Spec->catdir('', 'bar');
   eval {$mb->run_perl_script($cmd, [], ['install', '--destdir', $destdir,
 					      '--install_base', $basedir])};
-  is $@, '';
-
-  eval {$mb->run_perl_script($cmd, [], ['install', '--destdir', $destdir,
-					      '--install_base', $basedir, '--install_base', $basedir])};
   is $@, '';
 
   $install_to = File::Spec->catfile($destdir, $libdir, $dist->name ) . '.pm';

@@ -395,6 +395,14 @@ To link your XS code against glib you might write something like:
      extra_linker_flags   => scalar `glib-config --libs`,
     );
 
+=item extra_manify_args
+
+[version 0.4006]
+
+Any extra arguments to pass to C<< Pod::Man->new() >> when building
+man pages.  One common choice might be C<< utf8 => 1 >> to get Unicode
+support.
+
 =item get_options
 
 [version 0.26]
@@ -1082,7 +1090,7 @@ This method is the preferred interface for retrieving the arguments passed via
 command line options to F<Build.PL> or F<Build>, minus the Module-Build
 specific options.
 
-When called in in a scalar context with no arguments, this method returns a
+When called in a scalar context with no arguments, this method returns a
 reference to the hash storing all of the arguments; in an array context, it
 returns the hash itself.  When passed a single argument, it returns the value
 stored in the args hash for that option key.  When called with two arguments,
@@ -1984,6 +1992,8 @@ accessor methods for the following properties:
 
 =item dynamic_config()
 
+=item extra_manify_args()
+
 =item get_options()
 
 =item html_css()
@@ -2071,7 +2081,7 @@ accessor methods for the following properties:
 If you would like to add other useful metadata, C<Module::Build>
 supports this with the C<meta_add> and C<meta_merge> arguments to
 L</new()>. The authoritative list of supported metadata can be found at
-L<CPAN::META::Spec> but for convenience - here are a few of the more useful ones:
+L<CPAN::Meta::Spec> but for convenience - here are a few of the more useful ones:
 
 =over 4
 

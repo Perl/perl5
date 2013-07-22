@@ -1,5 +1,45 @@
 Revision history for Perl extension Module::Build.
 
+0.4007 - Fri Jul 19 13:44:39 CEST 2013
+
+  [BUG FIXES]
+
+  - Removed undeclared test dependency on parent.pm [Leon Timmermans]
+
+  - Declared dependency on Pod::Man 2.17 for utf8 support [Leon Timmermans]
+
+  - Force generation of man pages in manify_with_utf8.t [Leon Timmermans]
+
+0.4006 - Thu Jul 18 14:19:49 CEST 2013
+
+  [ENHANCEMENTS]
+
+  - Significantly sped up some tests by not forcing HTML docs to be
+    built when the user's config doesn't ask for them anyway.
+    [Ken Williams]
+
+  - The Module::Metadata package was split out from this distro back
+    in 2010.  Removed its regression tests. [Ken Williams]
+
+  - Removed dependence on IO::File, replacing it with safe invocations
+    of open(). [Sven Dowideit]
+
+  - Added an 'extra_manify_args' parameter to facilitate man pages
+    containing Unicode. [Joenio Costa]
+
+  - Added an '--html_links 0' argument for the 'html' action, which
+    can hugely speed things up.  The main effect is speeding up the
+    M::B tests themselves. [Ken Williams]
+
+  [BUG FIXES]
+
+  - Fix hash argument parsing in subclasses [Graham Ollis]
+
+  - Revised detildification on VMS [Craig Berry]
+
+  - Fix run_test_harness for case when $Switches is an empty string
+    [Victor Efimov, Ken Williams]
+
 0.4005 - Thu Apr 25 15:10:14 CEST 2013
 
   [ENHANCEMENTS]

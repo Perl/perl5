@@ -6,7 +6,7 @@ use strict;
 use vars qw($VERSION);
 use warnings;
 
-$VERSION = '0.4005';
+$VERSION = '0.4007';
 $VERSION = eval $VERSION;
 BEGIN { require 5.006001 }
 
@@ -19,7 +19,6 @@ use File::Basename ();
 use File::Spec 0.82 ();
 use File::Compare ();
 use Module::Build::Dumper ();
-use IO::File ();
 use Text::ParseWords ();
 
 use Module::Build::ModuleInfo;
@@ -757,17 +756,11 @@ sub ACTION_config_data {
   }
 
   sub array_properties {
-    for (shift->_mb_classes) {
-      return @{$additive_properties{$_}->{ARRAY}}
-        if exists $additive_properties{$_}->{ARRAY};
-    }
+    map { exists $additive_properties{$_}->{ARRAY} ? @{$additive_properties{$_}->{ARRAY}} : () } shift->_mb_classes;
   }
 
   sub hash_properties {
-    for (shift->_mb_classes) {
-      return @{$additive_properties{$_}->{'HASH'}}
-        if exists $additive_properties{$_}->{'HASH'};
-    }
+    map { exists $additive_properties{$_}->{HASH} ? @{$additive_properties{$_}->{HASH}} : () } shift->_mb_classes;
   }
 
   sub add_property {
@@ -798,10 +791,10 @@ sub ACTION_config_data {
     return $class;
   }
 
-    sub property_error {
-      my $self = shift;
-      die 'ERROR: ', @_;
-    }
+  sub property_error {
+    my $self = shift;
+    die 'ERROR: ', @_;
+  }
 
   sub _set_defaults {
     my $self = shift;
@@ -831,7 +824,7 @@ sub ACTION_config_data {
     }
   }
 
-} # end closure
+} # end enclosure
 ########################################################################
 sub _make_hash_accessor {
   my ($property, $p) = @_;
@@ -1007,6 +1000,7 @@ __PACKAGE__->add_property($_) for qw(
   verbose
   debug
   xs_files
+  extra_manify_args
 );
 
 sub config {
@@ -1082,7 +1076,7 @@ sub subclass {
   File::Path::mkpath($filedir);
   die "Can't create directory $filedir: $!" unless -d $filedir;
 
-  my $fh = IO::File->new("> $filename") or die "Can't create $filename: $!";
+  open(my $fh, '>', $filename) or die "Can't create $filename: $!";
   print $fh <<EOF;
 package $opts{class};
 use $pack;
@@ -1129,83 +1123,90 @@ END_WARN
 sub dist_name {
   my $self = shift;
   my $p = $self->{properties};
-  return $p->{dist_name} if defined $p->{dist_name};
+  my $me = 'dist_name';
+  return $p->{$me} if defined $p->{$me};
 
   die "Can't determine distribution name, must supply either 'dist_name' or 'module_name' parameter"
     unless $self->module_name;
 
-  ($p->{dist_name} = $self->module_name) =~ s/::/-/g;
+  ($p->{$me} = $self->module_name) =~ s/::/-/g;
 
-  return $p->{dist_name};
+  return $p->{$me};
 }
 
 sub release_status {
   my ($self) = @_;
+  my $me = 'release_status';
   my $p = $self->{properties};
 
-  if ( ! defined $p->{release_status} ) {
-    $p->{release_status} = $self->_is_dev_version ? 'testing' : 'stable';
+  if ( ! defined $p->{$me} ) {
+    $p->{$me} = $self->_is_dev_version ? 'testing' : 'stable';
   }
 
-  unless ( $p->{release_status} =~ qr/\A(?:stable|testing|unstable)\z/ ) {
-    die "Illegal value '$p->{release_status}' for release_status\n";
+  unless ( $p->{$me} =~ qr/\A(?:stable|testing|unstable)\z/ ) {
+    die "Illegal value '$p->{$me}' for $me\n";
   }
 
-  if ( $p->{release_status} eq 'stable' && $self->_is_dev_version ) {
+  if ( $p->{$me} eq 'stable' && $self->_is_dev_version ) {
     my $version = $self->dist_version;
-    die "Illegal value '$p->{release_status}' with version '$version'\n";
+    die "Illegal value '$p->{$me}' with version '$version'\n";
   }
-  return $p->{release_status};
+  return $p->{$me};
 }
 
 sub dist_suffix {
   my ($self) = @_;
   my $p = $self->{properties};
-  return $p->{dist_suffix} if defined $p->{dist_suffix};
+  my $me = 'dist_suffix';
+
+  return $p->{$me} if defined $p->{$me};
 
   if ( $self->release_status eq 'stable' ) {
-    $p->{dist_suffix} = "";
+    $p->{$me} = "";
   }
   else {
     # non-stable release but non-dev version number needs '-TRIAL' appended
-    $p->{dist_suffix} = $self->_is_dev_version ? "" : "TRIAL" ;
+    $p->{$me} = $self->_is_dev_version ? "" : "TRIAL" ;
   }
 
-  return $p->{dist_suffix};
+  return $p->{$me};
 }
 
 sub dist_version_from {
   my ($self) = @_;
   my $p = $self->{properties};
+  my $me = 'dist_version_from';
+
   if ($self->module_name) {
-    $p->{dist_version_from} ||=
+    $p->{$me} ||=
       join( '/', 'lib', split(/::/, $self->module_name) ) . '.pm';
   }
-  return $p->{dist_version_from} || undef;
+  return $p->{$me} || undef;
 }
 
 sub dist_version {
   my ($self) = @_;
   my $p = $self->{properties};
+  my $me = 'dist_version';
 
-  return $p->{dist_version} if defined $p->{dist_version};
+  return $p->{$me} if defined $p->{$me};
 
   if ( my $dist_version_from = $self->dist_version_from ) {
     my $version_from = File::Spec->catfile( split( qr{/}, $dist_version_from ) );
     my $pm_info = Module::Build::ModuleInfo->new_from_file( $version_from )
       or die "Can't find file $version_from to determine version";
-    #$p->{dist_version} is undef here
-    $p->{dist_version} = $self->normalize_version( $pm_info->version() );
-    unless (defined $p->{dist_version}) {
+    #$p->{$me} is undef here
+    $p->{$me} = $self->normalize_version( $pm_info->version() );
+    unless (defined $p->{$me}) {
       die "Can't determine distribution version from $version_from";
     }
   }
 
   die ("Can't determine distribution version, must supply either 'dist_version',\n".
        "'dist_version_from', or 'module_name' parameter")
-    unless defined $p->{dist_version};
+    unless defined $p->{$me};
 
-  return $p->{dist_version};
+  return $p->{$me};
 }
 
 sub _is_dev_version {
@@ -1229,7 +1230,7 @@ sub _pod_parse {
 
   my $docfile = $self->_main_docfile
     or return;
-  my $fh = IO::File->new($docfile)
+  open(my $fh, '<', $docfile)
     or return;
 
   require Module::Build::PodParser;
@@ -1289,13 +1290,13 @@ sub read_config {
 
   my $file = $self->config_file('build_params')
     or die "Can't find 'build_params' in " . $self->config_dir;
-  my $fh = IO::File->new($file) or die "Can't read '$file': $!";
+  open(my $fh, '<', $file) or die "Can't read '$file': $!";
   my $ref = eval do {local $/; <$fh>};
   die if $@;
+  close $fh;
   my $c;
   ($self->{args}, $c, $self->{properties}) = @$ref;
   $self->{config} = Module::Build::Config->new(values => $c);
-  close $fh;
 }
 
 sub has_config_data {
@@ -1307,13 +1308,14 @@ sub _write_data {
   my ($self, $filename, $data) = @_;
 
   my $file = $self->config_file($filename);
-  my $fh = IO::File->new("> $file") or die "Can't create '$file': $!";
+  open(my $fh, '>', $file) or die "Can't create '$file': $!";
   unless (ref($data)) {  # e.g. magicnum
     print $fh $data;
     return;
   }
 
   print {$fh} Module::Build::Dumper->_data_dump($data);
+  close $fh;
 }
 
 sub write_config {
@@ -1511,7 +1513,7 @@ sub auto_require {
   my ($self) = @_;
   my $p = $self->{properties};
 
-  # If needs_compiler is not explictly set, automatically set it
+  # If needs_compiler is not explicitly set, automatically set it
   # If set, we need ExtUtils::CBuilder (and a compiler)
   my $xs_files = $self->find_xs_files;
   if ( ! defined $p->{needs_compiler} ) {
@@ -1832,10 +1834,10 @@ use File::Spec;
 
 sub magic_number_matches {
   return 0 unless -e '$q{magic_numfile}';
-  local *FH;
-  open FH, '$q{magic_numfile}' or return 0;
-  my \$filenum = <FH>;
-  close FH;
+  my \$FH;
+  open \$FH, '<','$q{magic_numfile}' or return 0;
+  my \$filenum = <\$FH>;
+  close \$FH;
   return \$filenum == $magic_number;
 }
 
@@ -1972,7 +1974,7 @@ sub create_build_script {
 
   $self->log_info("Creating new '$build_script' script for ",
                   "'$dist_name' version '$dist_version'\n");
-  my $fh = IO::File->new(">$build_script") or die "Can't create '$build_script': $!";
+  open(my $fh, '>', $build_script) or die "Can't create '$build_script': $!";
   $self->print_build_script($fh);
   close $fh;
 
@@ -2340,7 +2342,7 @@ sub read_modulebuildrc {
     return () unless $modulebuildrc;
   }
 
-  my $fh = IO::File->new( $modulebuildrc )
+  open(my $fh, '<', $modulebuildrc )
       or die "Can't open $modulebuildrc: $!";
 
   my %options; my $buffer = '';
@@ -2461,7 +2463,7 @@ sub get_action_docs {
     (my $file = $class) =~ s{::}{/}g;
     # NOTE: silently skipping relative paths if any chdir() happened
     $file = $INC{$file . '.pm'} or next;
-    my $fh = IO::File->new("< $file") or next;
+    open(my $fh, '<', $file) or next;
     $files_found++;
 
     # Code below modified from /usr/bin/perldoc
@@ -2759,25 +2761,27 @@ sub run_test_harness {
     my ($self, $tests) = @_;
     require Test::Harness;
     my $p = $self->{properties};
-    my @harness_switches = $self->harness_switches;
 
     # Work around a Test::Harness bug that loses the particular perl
     # we're running under.  $self->perl is trustworthy, but $^X isn't.
     local $^X = $self->perl;
 
     # Do everything in our power to work with all versions of Test::Harness
+    local ($Test::Harness::verbose,
+           $Test::Harness::Verbose,
+           $ENV{TEST_VERBOSE},
+           $ENV{HARNESS_VERBOSE}) = ($p->{verbose} || 0) x 4;
+
+    my @harness_switches = $self->harness_switches;
+    return Test::Harness::runtests(@$tests) unless @harness_switches;  # Nothing to modify
+
     local $Test::Harness::switches    = join ' ', grep defined, $Test::Harness::switches, @harness_switches;
     local $Test::Harness::Switches    = join ' ', grep defined, $Test::Harness::Switches, @harness_switches;
     local $ENV{HARNESS_PERL_SWITCHES} = join ' ', grep defined, $ENV{HARNESS_PERL_SWITCHES}, @harness_switches;
 
     $Test::Harness::switches = undef   unless length $Test::Harness::switches;
-    $Test::Harness::Switches = undef   unless length $Test::Harness::Switches;
+    $Test::Harness::Switches = undef   unless defined $Test::Harness::Switches and length $Test::Harness::Switches;
     delete $ENV{HARNESS_PERL_SWITCHES} unless length $ENV{HARNESS_PERL_SWITCHES};
-
-    local ($Test::Harness::verbose,
-           $Test::Harness::Verbose,
-           $ENV{TEST_VERBOSE},
-           $ENV{HARNESS_VERBOSE}) = ($p->{verbose} || 0) x 4;
 
     Test::Harness::runtests(@$tests);
 }
@@ -3104,10 +3108,10 @@ sub fix_shebang_line { # Adapted from fixin() in ExtUtils::MM_Unix 1.35
 
   my ($does_shbang) = $c->get('sharpbang') =~ /^\s*\#\!/;
   for my $file (@files) {
-    my $FIXIN = IO::File->new($file) or die "Can't process '$file': $!";
+    open(my $FIXIN, '<', $file) or die "Can't process '$file': $!";
     local $/ = "\n";
     chomp(my $line = <$FIXIN>);
-    next unless $line =~ s/^\s*\#!\s*//;     # Not a shbang file.
+    next unless $line =~ s/^\s*\#!\s*//;     # Not a shebang file.
 
     my ($cmd, $arg) = (split(' ', $line, 2), '');
     next unless $cmd =~ /perl/i;
@@ -3124,7 +3128,7 @@ eval 'exec $interpreter $arg -S \$0 \${1+"\$\@"}'
     if 0; # not running under some shell
 } unless $self->is_windowsish; # this won't work on win32, so don't
 
-    my $FIXOUT = IO::File->new(">$file.new")
+    open(my $FIXOUT, '>', "$file.new")
       or die "Can't create new $file: $!\n";
 
     # Print out the new #! line (or equivalent).
@@ -3237,6 +3241,8 @@ sub ACTION_manpages {
 
   $self->depends_on('code');
 
+  my %extra_manify_args = $self->{properties}{'extra_manify_args'} ? %{ $self->{properties}{'extra_manify_args'} } : ();
+
   foreach my $type ( qw(bin lib) ) {
     next unless ( $self->invoked_action eq 'manpages' || $self->_is_default_installable("${type}doc"));
     my $files = $self->_find_pods( $self->{properties}{"${type}doc_dirs"},
@@ -3244,12 +3250,13 @@ sub ACTION_manpages {
     next unless %$files;
 
     my $sub = $self->can("manify_${type}_pods");
-    $self->$sub() if defined( $sub );
+    $self->$sub( %extra_manify_args ) if defined( $sub );
   }
 }
 
 sub manify_bin_pods {
   my $self    = shift;
+  my %podman_args = (section =>  1, @_); # binaries go in section 1
 
   my $files   = $self->_find_pods( $self->{properties}{bindoc_dirs},
                                    exclude => [ $self->file_qr('\.bat$') ] );
@@ -3262,7 +3269,7 @@ sub manify_bin_pods {
   foreach my $file (keys %$files) {
     # Pod::Simple based parsers only support one document per instance.
     # This is expected to change in a future version (Pod::Simple > 3.03).
-    my $parser  = Pod::Man->new( section => 1 ); # binaries go in section 1
+    my $parser  = Pod::Man->new( %podman_args );
     my $manpage = $self->man1page_name( $file ) . '.' .
                   $self->config( 'man1ext' );
     my $outfile = File::Spec->catfile($mandir, $manpage);
@@ -3276,6 +3283,7 @@ sub manify_bin_pods {
 
 sub manify_lib_pods {
   my $self    = shift;
+  my %podman_args = (section => 3, @_); # libraries go in section 3
 
   my $files   = $self->_find_pods($self->{properties}{libdoc_dirs});
   return unless keys %$files;
@@ -3287,7 +3295,7 @@ sub manify_lib_pods {
   while (my ($file, $relfile) = each %$files) {
     # Pod::Simple based parsers only support one document per instance.
     # This is expected to change in a future version (Pod::Simple > 3.03).
-    my $parser  = Pod::Man->new( section => 3 ); # libraries go in section 3
+    my $parser  = Pod::Man->new( %podman_args );
     my $manpage = $self->man3page_name( $relfile ) . '.' .
                   $self->config( 'man3ext' );
     my $outfile = File::Spec->catfile( $mandir, $manpage);
@@ -3321,7 +3329,7 @@ sub contains_pod {
   my ($self, $file) = @_;
   return '' unless -T $file;  # Only look at text files
 
-  my $fh = IO::File->new( $file ) or die "Can't open $file: $!";
+  open(my $fh, '<', $file ) or die "Can't open $file: $!";
   while (my $line = <$fh>) {
     return 1 if $line =~ /^\=(?:head|pod|item)/;
   }
@@ -3368,15 +3376,18 @@ sub htmlify_pods {
               : $self->original_prefix('core');
 
   my $htmlroot = $self->install_sets('core')->{libhtml};
-  my @podpath = ( (map { File::Spec->abs2rel($_ ,$podroot) } grep { -d  }
-    ( $self->install_sets('core', 'lib'), # lib
-      $self->install_sets('core', 'bin'), # bin
-      $self->install_sets('site', 'lib'), # site/lib
-    ) ), File::Spec->rel2abs($self->blib) );
+  my $podpath;
+  unless (defined $self->args('html_links') and !$self->args('html_links')) {
+    my @podpath = ( (map { File::Spec->abs2rel($_ ,$podroot) } grep { -d  }
+                     ( $self->install_sets('core', 'lib'), # lib
+                       $self->install_sets('core', 'bin'), # bin
+                       $self->install_sets('site', 'lib'), # site/lib
+                     ) ), File::Spec->rel2abs($self->blib) );
 
-  my $podpath = $ENV{PERL_CORE}
-              ? File::Spec->catdir($podroot, 'lib')
-              : join(":", map { tr,:\\,|/,; $_ } @podpath);
+    $podpath = $ENV{PERL_CORE}
+      ? File::Spec->catdir($podroot, 'lib')
+        : join(":", map { tr,:\\,|/,; $_ } @podpath);
+  }
 
   my $blibdir = join('/', File::Spec->splitdir(
     (File::Spec->splitpath(File::Spec->rel2abs($htmldir),1))[1]),''
@@ -3426,7 +3437,7 @@ sub htmlify_pods {
       my $depth = @rootdirs + @dirs;
       my %opts = ( infile => $infile,
         outfile => $tmpfile,
-        podpath => $podpath,
+        ( defined($podpath) ? (podpath => $podpath) : ()),
         podroot => $podroot,
         index => 1,
         depth => $depth,
@@ -3437,8 +3448,8 @@ sub htmlify_pods {
       } or $self->log_warn("[$htmltool] pod2html (" .
         join(", ", map { "q{$_} => q{$opts{$_}}" } (keys %opts)) . ") failed: $@");
     } else {
-      my $path2root = File::Spec->catdir(File::Spec->updir x @dirs);
-      my $fh = IO::File->new($infile) or die "Can't read $infile: $!";
+      my $path2root = File::Spec->catdir((File::Spec->updir) x @dirs);
+      open(my $fh, '<', $infile) or die "Can't read $infile: $!";
       my $abstract = Module::Build::PodParser->new(fh => $fh)->get_abstract();
 
       my $title = join( '::', (@dirs, $name) );
@@ -3446,11 +3457,11 @@ sub htmlify_pods {
 
       my @opts = (
         "--title=$title",
-        "--podpath=$podpath",
+        ( defined($podpath) ? "--podpath=$podpath" : ()),
         "--infile=$infile",
         "--outfile=$tmpfile",
         "--podroot=$podroot",
-        "--htmlroot=$path2root",
+        ($path2root ? "--htmlroot=$path2root" : ()),
       );
 
       unless ( eval{Pod::Html->VERSION(1.12)} ) {
@@ -3477,9 +3488,9 @@ sub htmlify_pods {
       $errors++;
       next POD;
     }
-    my $fh = IO::File->new($tmpfile) or die "Can't read $tmpfile: $!";
+    open(my $fh, '<', $tmpfile) or die "Can't read $tmpfile: $!";
     my $html = join('',<$fh>);
-    $fh->close;
+    close $fh;
     if (!$self->_is_ActivePerl) {
       # These fixups are already done by AP::DT:P:pod2html
       # The output from pod2html is NOT XHTML!
@@ -3494,9 +3505,9 @@ sub htmlify_pods {
     # Fixup links that point to our temp blib
     $html =~ s/\Q$blibdir\E//g;
 
-    $fh = IO::File->new(">$outfile") or die "Can't write $outfile: $!";
+    open($fh, '>', $outfile) or die "Can't write $outfile: $!";
     print $fh $html;
-    $fh->close;
+    close $fh;
     unlink($tmpfile);
   }
 
@@ -3584,7 +3595,7 @@ sub ACTION_install {
   my ($self) = @_;
   require ExtUtils::Install;
   $self->depends_on('build');
-  # RT#63003 suggest that odd cirmstances that we might wind up
+  # RT#63003 suggest that odd circumstances that we might wind up
   # in a different directory than we started, so wrap with _do_in_dir to
   # ensure we get back to where we started; hope this fixes it!
   $self->_do_in_dir( ".", sub {
@@ -3693,10 +3704,6 @@ sub ACTION_installdeps {
         last;
       }
     }
-  }
-
-  if ( ! -x $command ) {
-    die "cpan_client '$command' is not executable\n";
   }
 
   $self->do_system($command, @opts, @install);
@@ -3869,12 +3876,12 @@ sub _add_to_manifest {
   my $mode = (stat $manifest)[2];
   chmod($mode | oct(222), $manifest) or die "Can't make $manifest writable: $!";
 
-  my $fh = IO::File->new("< $manifest") or die "Can't read $manifest: $!";
+  open(my $fh, '<', $manifest) or die "Can't read $manifest: $!";
   my $last_line = (<$fh>)[-1] || "\n";
   my $has_newline = $last_line =~ /\n$/;
-  $fh->close;
+  close $fh;
 
-  $fh = IO::File->new(">> $manifest") or die "Can't write to $manifest: $!";
+  open($fh, '>>', $manifest) or die "Can't write to $manifest: $!";
   print $fh "\n" unless $has_newline;
   print $fh map "$_\n", @$lines;
   close $fh;
@@ -3970,7 +3977,7 @@ HERE
 
   $self->delete_filetree('LICENSE');
 
-  my $fh = IO::File->new('> LICENSE')
+  open(my $fh, '>', 'LICENSE')
     or die "Can't write LICENSE file: $!";
   print $fh $license->fulltext;
   close $fh;
@@ -4002,8 +4009,7 @@ EOF
   } elsif ( eval {require Pod::Text; 1} ) {
     $self->log_info("Creating README using Pod::Text\n");
 
-    my $fh = IO::File->new('> README');
-    if ( defined($fh) ) {
+    if ( open(my $fh, '>', 'README') ) {
       local $^W = 0;
       no strict "refs";
 
@@ -4024,7 +4030,7 @@ EOF
 
       Pod::Text::pod2text( $docfile, $fh );
 
-      $fh->close;
+      close $fh;
     } else {
       $self->log_warn(
         "Cannot create 'README' file: Can't open file for writing\n" );
@@ -4218,17 +4224,17 @@ sub _append_maniskip {
   my $skip = shift;
   my $file = shift || 'MANIFEST.SKIP';
   return unless defined $skip && length $skip;
-  my $fh = IO::File->new(">> $file")
+  open(my $fh, '>>', $file)
     or die "Can't open $file: $!";
 
   print $fh "$skip\n";
-  $fh->close();
+  close $fh;
 }
 
 sub _write_default_maniskip {
   my $self = shift;
   my $file = shift || 'MANIFEST.SKIP';
-  my $fh = IO::File->new("> $file")
+  open(my $fh, '>', $file)
     or die "Can't open $file: $!";
 
   my $content = $self->_eumanifest_has_include ? "#!include_default\n"
@@ -4254,6 +4260,8 @@ EOF
   $content .= '\b'.$self->dist_name.'-[\d\.\_]+'."\n";
 
   print $fh $content;
+  
+  close $fh;
 
   return;
 }
@@ -5417,7 +5425,7 @@ sub compile_xs {
                    @typemaps, $file);
 
     $self->log_info("@command\n");
-    my $fh = IO::File->new("> $args{outfile}") or die "Couldn't write $args{outfile}: $!";
+    open(my $fh, '>', $args{outfile}) or die "Couldn't write $args{outfile}: $!";
     print {$fh} $self->_backticks(@command);
     close $fh;
   }
@@ -5546,7 +5554,7 @@ sub process_xs {
     require ExtUtils::Mkbootstrap;
     $self->log_info("ExtUtils::Mkbootstrap::Mkbootstrap('$spec->{bs_file}')\n");
     ExtUtils::Mkbootstrap::Mkbootstrap($spec->{bs_file});  # Original had $BSLOADLIBS - what's that?
-    {my $fh = IO::File->new(">> $spec->{bs_file}")}  # create
+    open(my $fh, '>>', $spec->{bs_file});  # create
     utime((time)x2, $spec->{bs_file});  # touch
   }
 

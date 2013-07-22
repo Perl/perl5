@@ -1,4 +1,4 @@
-Module::Build cpan/Module-Build/lib/Module/Build/ConfigData.pm 2f3f07fd889077ebd51791ad6e195d9164b4baf3
+Module::Build cpan/Module-Build/lib/Module/Build/ConfigData.pm 409075121c3a50488052df00e5cdeeeb5594409a
 Test::Harness cpan/Test-Harness/t/source.t 884890970fb850874213159df263ba483bac62e9
 Test::Simple cpan/Test-Simple/t/fail-more.t 851583390f26786131535e2837dae1113d72c41a
 Text::Balanced cpan/Text-Balanced/t/01_compile.t 1598cf491a48fa546260a2ec41142abe84da533d
