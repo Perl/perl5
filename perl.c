@@ -3213,13 +3213,16 @@ Perl_moreswitches(pTHX_ const char *s)
 	    PL_utf8cache = -1;
 	return s;
     case 'F':
+	PL_minus_a = TRUE;
 	PL_minus_F = TRUE;
+        PL_minus_n = TRUE;
 	PL_splitstr = ++s;
 	while (*s && !isSPACE(*s)) ++s;
 	PL_splitstr = savepvn(PL_splitstr, s - PL_splitstr);
 	return s;
     case 'a':
 	PL_minus_a = TRUE;
+        PL_minus_n = TRUE;
 	s++;
 	return s;
     case 'c':
