@@ -16,7 +16,7 @@ if ( $^O eq "VMS" ) {
   skip_all( "- regen.pl needs porting." );
 }
 
-my $tests = 24; # I can't see a clean way to calculate this automatically.
+my $tests = 26; # I can't see a clean way to calculate this automatically.
 
 my %skip = ("regen_perly.pl"    => [qw(perly.act perly.h perly.tab)],
             "regen/keywords.pl" => [qw(keywords.c keywords.h)],

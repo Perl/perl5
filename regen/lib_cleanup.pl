@@ -40,7 +40,7 @@ close $fh
 my %ignore;
 # Directories that the Makfiles should remove
 # With a special case already :-(
-my %rmdir = ('lib/Unicode/Collate/Locale' => 1);
+my %rmdir_s = my %rmdir = ('Unicode/Collate/Locale' => 1);
 
 FILE:
 foreach my $file (@ext) {
@@ -96,11 +96,12 @@ foreach my $file (@ext) {
         if (!$libdirs{$prefix}) {
             # It is a directory that we will create. Ignore everything in it:
             ++$ignore{"/$prefix/"};
-            ++$rmdir{"lib/$prefix"};
+            ++$rmdir{$prefix};
+            ++$rmdir_s{$prefix};
             pop @parts;
             while (@parts) {
                 $prefix .= '/' . shift @parts;
-                ++$rmdir{"lib/$prefix"};
+                ++$rmdir{$prefix};
             }
             next FILE;
         }
@@ -121,14 +122,41 @@ sub edit_makefile_SH {
                                   qr/$start_re\n(?:\t-rmdir [^\n]+\n)+/sm,
                                   'lib directory rmdir rules');
     # Reverse sort ensures that any subdirectories are deleted first.
+    # The extensions themselves delete files with the MakeMaker generated clean
+    # targets.
     $contents =~ s{\0}
                   {"$start\n"
-                   . wrap(79, "\t-rmdir ", "\t-rmdir ", reverse sort keys %rmdir)
+                   . wrap(79, "\t-rmdir ", "\t-rmdir ",
+                          map {"lib/$_"} reverse sort keys %rmdir)
                    . "\n"}e;
     $contents;
 }
 
+sub edit_win32_makefile {
+    my ($desc, $contents) = @_;
+    my $start = "\t-del /f *.def *.map";
+    my $start_re = quotemeta($start);
+    $contents = verify_contiguous($desc, $contents,
+                                  qr!$start_re\n(?:\t-if exist (\$\(LIBDIR\)\\\S+) rmdir /s /q \1\n)+!sm,
+                                  'Win32 lib directory rmdir rules');
+    # Win32 is (currently) using rmdir /s /q which deletes recursively
+    # (seems to be analogous to rm -r) so we don't explicitly list
+    # subdirectories to delete, and don't need to ensure that subdirectories are
+    # deleted before their parents.
+    # Might be able to rely on MakeMaker generated clean targets to clean
+    # everything, but not in a position to test this.
+    my $lines = join '', map {
+        tr!/!\\!;
+        "\t-if exist \$(LIBDIR)\\$_ rmdir /s /q \$(LIBDIR)\\$_\n"
+    } sort {lc $a cmp lc $b} keys %rmdir_s;
+    $contents =~ s/\0/$start\n$lines/;
+    $contents;
+}
+
 process('Makefile.SH', 'Makefile.SH', \&edit_makefile_SH, $TAP && '', $Verbose);
+foreach ('win32/Makefile', 'win32/makefile.mk') {
+    process($_, $_, \&edit_win32_makefile, $TAP && '', $Verbose);
+}
 
 # This must come last as it can exit early:
 if ($TAP && !-d '.git' && !-f 'lib/.gitignore') {
