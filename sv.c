@@ -13635,6 +13635,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     /* Unicode inversion lists */
     PL_ASCII		= sv_dup_inc(proto_perl->IASCII, param);
     PL_Latin1		= sv_dup_inc(proto_perl->ILatin1, param);
+    PL_AboveLatin1	= sv_dup_inc(proto_perl->IAboveLatin1, param);
 
     PL_NonL1NonFinalFold = sv_dup_inc(proto_perl->INonL1NonFinalFold, param);
     PL_HasMultiCharFold= sv_dup_inc(proto_perl->IHasMultiCharFold, param);
@@ -13664,9 +13665,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_utf8_foldable	= sv_dup_inc(proto_perl->Iutf8_foldable, param);
     PL_utf8_charname_begin = sv_dup_inc(proto_perl->Iutf8_charname_begin, param);
     PL_utf8_charname_continue = sv_dup_inc(proto_perl->Iutf8_charname_continue, param);
-    PL_ASCII		= sv_dup_inc(proto_perl->IASCII, param);
-    PL_AboveLatin1	= sv_dup_inc(proto_perl->IAboveLatin1, param);
-    PL_Latin1		= sv_dup_inc(proto_perl->ILatin1, param);
 
     if (proto_perl->Ipsig_pend) {
 	Newxz(PL_psig_pend, SIG_SIZE, int);
