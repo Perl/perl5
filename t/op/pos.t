@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 22;
+plan tests => 28;
 
 $x='banana';
 $x=~/.a/g;
@@ -91,3 +91,34 @@ sub {
     pos $h{n} = 1;
     ok $_[3] =~ /\Ge/, '\G works with defelem scalars';
 }->($h{k}, $h{l}, $h{m}, $h{n});
+
+$x = bless [], chr 256;
+pos $x=1;
+bless $x, a;
+is pos($x), 1, 'pos is not affected by reference stringification changing';
+{
+    my $w;
+    local $SIG{__WARN__} = sub { $w .= shift };
+    $x = bless [], chr 256;
+    pos $x=1;
+    bless $x, "\x{1000}";
+    is pos $x, 1,
+       'pos unchanged after increasing size of chars in stringification';
+    is $w, undef, 'and no malformed utf8 warning';
+}
+$x = bless [], chr 256;
+$x =~ /.(?{
+     bless $x, a;
+     is pos($x), 1, 'pos unaffected by ref str changing (in re-eval)';
+})/;
+{
+    my $w;
+    local $SIG{__WARN__} = sub { $w .= shift };
+    $x = bless [], chr(256);
+    $x =~ /.(?{
+        bless $x, "\x{1000}";
+        is pos $x, 1,
+         'pos unchanged in re-eval after increasing size of chars in str';
+    })/;
+    is $w, undef, 'and no malformed utf8 warning';
+}

@@ -38,6 +38,7 @@ struct magic {
 #define MGf_COPY       8	/* has an svt_copy  MGVTBL entry */
 #define MGf_DUP     0x10 	/* has an svt_dup   MGVTBL entry */
 #define MGf_LOCAL   0x20	/* has an svt_local MGVTBL entry */
+#define MGf_BYTES   0x40        /* PERL_MAGIC_regex_global only */
 
 #define MgTAINTEDDIR(mg)	(mg->mg_flags & MGf_TAINTEDDIR)
 #define MgTAINTEDDIR_on(mg)	(mg->mg_flags |= MGf_TAINTEDDIR)
@@ -56,6 +57,19 @@ struct magic {
 #define SvTIED_mg(sv,how) (SvRMAGICAL(sv) ? mg_find((sv),(how)) : NULL)
 #define SvTIED_obj(sv,mg) \
     ((mg)->mg_obj ? (mg)->mg_obj : sv_2mortal(newRV(sv)))
+
+#if defined(PERL_CORE) || defined(PERL_EXT)
+# define MgBYTEPOS(mg,sv,pv,len) S_MgBYTEPOS(aTHX_ mg,sv,pv,len)
+/* assumes get-magic and stringification have already occurred */
+# define MgBYTEPOS_set(mg,sv,pv,off) (			 \
+    assert_((mg)->mg_type == PERL_MAGIC_regex_global)	  \
+    SvPOK(sv) && !SvGMAGICAL(sv)			   \
+	? (mg)->mg_len = (off), (mg)->mg_flags |= MGf_BYTES \
+	: ((mg)->mg_len = DO_UTF8(sv)			     \
+	    ? utf8_length((U8 *)(pv), (U8 *)(pv)+(off))	      \
+	    : (off),					       \
+	   (mg)->mg_flags &= ~MGf_BYTES))
+#endif
 
 #define whichsig(pv) whichsig_pv(pv)
 

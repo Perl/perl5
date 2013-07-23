@@ -2098,7 +2098,7 @@ Perl_magic_getpos(pTHX_ SV *sv, MAGIC *mg)
 
     if (found && found->mg_len != -1) {
 	    STRLEN i = found->mg_len;
-	    if (DO_UTF8(lsv))
+	    if (found->mg_flags & MGf_BYTES && DO_UTF8(lsv))
 		i = sv_pos_b2u_flags(lsv, i, SV_GMAGIC|SV_CONST_RETURN);
 	    sv_setuv(sv, i);
 	    return 0;
@@ -2149,12 +2149,8 @@ Perl_magic_setpos(pTHX_ SV *sv, MAGIC *mg)
     else if (pos > (SSize_t)len)
 	pos = len;
 
-    if (ulen) {
-	pos = sv_or_pv_pos_u2b(lsv, s, pos, 0);
-    }
-
     found->mg_len = pos;
-    found->mg_flags &= ~MGf_MINMATCH;
+    found->mg_flags &= ~(MGf_MINMATCH|MGf_BYTES);
 
     return 0;
 }

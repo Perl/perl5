@@ -605,8 +605,11 @@ do_test('scalar with pos magic',
   MAGIC = $ADDR
     MG_VIRTUAL = &PL_vtbl_mglob
     MG_TYPE = PERL_MAGIC_regex_global\\(g\\)
-    MG_FLAGS = 0x01
-      MINMATCH');
+    MG_FLAGS = 0x01					# $] < 5.019003
+    MG_FLAGS = 0x41					# $] >=5.019003
+      MINMATCH
+      BYTES						# $] >=5.019003
+');
 
 #
 # TAINTEDDIR is not set on: OS2, AMIGAOS, WIN32, MSDOS

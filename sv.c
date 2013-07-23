@@ -3487,21 +3487,13 @@ must_be_utf8:
 	    if (SvTYPE(sv) >= SVt_PVMG && SvMAGIC(sv)) {
 		/* Update pos. We do it at the end rather than during
 		 * the upgrade, to avoid slowing down the common case
-		 * (upgrade without pos) */
+		 * (upgrade without pos).
+		 * pos can be stored as either bytes or characters.  Since
+		 * this was previously a byte string we can just turn off
+		 * the bytes flag. */
 		MAGIC * mg = mg_find(sv, PERL_MAGIC_regex_global);
 		if (mg) {
-		    I32 pos = mg->mg_len;
-		    if (pos > 0 && (U32)pos > invariant_head) {
-			U8 *d = (U8*) SvPVX(sv) + invariant_head;
-			STRLEN n = (U32)pos - invariant_head;
-			while (n > 0) {
-			    if (UTF8_IS_START(*d))
-				d++;
-			    d++;
-			    n--;
-			}
-			mg->mg_len  = d - (U8*)SvPVX(sv);
-		    }
+		    mg->mg_flags &= ~MGf_BYTES;
 		}
 		if ((mg = mg_find(sv, PERL_MAGIC_utf8)))
 		    magic_setutf8(sv,mg); /* clear UTF8 cache */
@@ -3548,13 +3540,10 @@ Perl_sv_utf8_downgrade(pTHX_ SV *const sv, const bool fail_ok)
 	    if (SvTYPE(sv) >= SVt_PVMG && SvMAGIC(sv)) {
 		/* update pos */
 		MAGIC * mg = mg_find(sv, PERL_MAGIC_regex_global);
-		if (mg) {
-		    I32 pos = mg->mg_len;
-		    if (pos > 0) {
-			sv_pos_b2u(sv, &pos);
+		if (mg && mg->mg_len > 0 && mg->mg_flags & MGf_BYTES) {
+			mg->mg_len = sv_pos_b2u_flags(sv, mg->mg_len,
+						SV_GMAGIC|SV_CONST_RETURN);
 			mg_flags = 0; /* sv_pos_b2u does get magic */
-			mg->mg_len  = pos;
-		    }
 		}
 		if ((mg = mg_find(sv, PERL_MAGIC_utf8)))
 		    magic_setutf8(sv,mg); /* clear UTF8 cache */
@@ -3643,6 +3632,9 @@ Perl_sv_utf8_decode(pTHX_ SV *const sv)
 	    }
         }
 	if (SvTYPE(sv) >= SVt_PVMG && SvMAGIC(sv)) {
+	    /* XXX Is this dead code?  XS_utf8_decode calls SvSETMAGIC
+		   after this, clearing pos.  Does anything on CPAN
+		   need this? */
 	    /* adjust pos to the start of a UTF8 char sequence */
 	    MAGIC * mg = mg_find(sv, PERL_MAGIC_regex_global);
 	    if (mg) {
@@ -5536,6 +5528,16 @@ Perl_sv_magic(pTHX_ SV *const sv, SV *const obj, const int how,
 		mg->mg_len |= 1;
 	    return;
 	}
+    }
+
+    /* Force pos to be stored as characters, not bytes. */
+    if (SvMAGICAL(sv) && DO_UTF8(sv)
+      && (mg = mg_find(sv, PERL_MAGIC_regex_global))
+      && mg->mg_len != -1
+      && mg->mg_flags & MGf_BYTES) {
+	mg->mg_len = (SSize_t)sv_pos_b2u_flags(sv, (STRLEN)mg->mg_len,
+					       SV_CONST_RETURN);
+	mg->mg_flags &= ~MGf_BYTES;
     }
 
     /* Rest of work is done else where */

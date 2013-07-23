@@ -1262,6 +1262,9 @@ Perl_do_magic_dump(pTHX_ I32 level, PerlIO *file, const MAGIC *mg, I32 nest, I32
 	        Perl_dump_indent(aTHX_ level, file, "      DUP\n");
 	    if (mg->mg_flags & MGf_LOCAL)
 	        Perl_dump_indent(aTHX_ level, file, "      LOCAL\n");
+	    if (mg->mg_type == PERL_MAGIC_regex_global &&
+		mg->mg_flags & MGf_BYTES)
+	        Perl_dump_indent(aTHX_ level, file, "      BYTES\n");
         }
 	if (mg->mg_obj) {
 	    Perl_dump_indent(aTHX_ level, file, "    MG_OBJ = 0x%"UVxf"\n",

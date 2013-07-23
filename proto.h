@@ -4159,6 +4159,12 @@ PERL_CALLCONV NV	Perl_sv_nv(pTHX_ SV* sv)
 #define PERL_ARGS_ASSERT_SV_NV	\
 	assert(sv)
 
+PERL_STATIC_INLINE STRLEN	S_sv_or_pv_pos_u2b(pTHX_ SV *sv, const char *pv, STRLEN pos, STRLEN *lenp)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_SV_OR_PV_POS_U2B	\
+	assert(sv); assert(pv)
+
 PERL_CALLCONV char*	Perl_sv_peek(pTHX_ SV* sv);
 PERL_CALLCONV void	Perl_sv_pos_b2u(pTHX_ SV *const sv, I32 *const offsetp)
 			__attribute__nonnull__(pTHX_2);

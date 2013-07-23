@@ -62,6 +62,26 @@ S_strip_spaces(pTHX_ const char * orig, STRLEN * const len)
 }
 #endif
 
+/* ------------------------------- mg.h ------------------------------- */
+
+#if defined(PERL_CORE) || defined(PERL_EXT)
+/* assumes get-magic and stringification have already occurred */
+PERL_STATIC_INLINE STRLEN
+S_MgBYTEPOS(pTHX_ MAGIC *mg, SV *sv, const char *s, STRLEN len)
+{
+    assert(mg->mg_type == PERL_MAGIC_regex_global);
+    assert(mg->mg_len != -1);
+    if (mg->mg_flags & MGf_BYTES || !DO_UTF8(sv))
+	return (STRLEN)mg->mg_len;
+    else {
+	const STRLEN pos = (STRLEN)mg->mg_len;
+	/* Without this check, we may read past the end of the buffer: */
+	if (pos > sv_or_pv_len_utf8(sv, s, len)) return len+1;
+	return sv_or_pv_pos_u2b(sv, s, pos, NULL);
+    }
+}
+#endif
+
 /* ----------------------------- regexp.h ----------------------------- */
 
 PERL_STATIC_INLINE struct regexp *
@@ -151,10 +171,11 @@ S_SvPADSTALE_off(SV *sv)
     assert(SvFLAGS(sv) & SVs_PADMY);
     return SvFLAGS(sv) &= ~SVs_PADSTALE;
 }
-#ifdef PERL_CORE
+#if defined(PERL_CORE) || defined (PERL_EXT)
 PERL_STATIC_INLINE STRLEN
 S_sv_or_pv_pos_u2b(pTHX_ SV *sv, const char *pv, STRLEN pos, STRLEN *lenp)
 {
+    PERL_ARGS_ASSERT_SV_OR_PV_POS_U2B;
     if (SvGAMAGIC(sv)) {
 	U8 *hopped = utf8_hop((U8 *)pv, pos);
 	if (lenp) *lenp = (STRLEN)(utf8_hop(hopped, *lenp) - hopped);

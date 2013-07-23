@@ -446,7 +446,7 @@ PP(pp_pos)
 	    if (mg && mg->mg_len != -1) {
 		dTARGET;
 		STRLEN i = mg->mg_len;
-		if (DO_UTF8(sv))
+		if (mg->mg_flags & MGf_BYTES && DO_UTF8(sv))
 		    i = sv_pos_b2u_flags(sv, i, SV_GMAGIC|SV_CONST_RETURN);
 		PUSHu(i);
 		RETURN;

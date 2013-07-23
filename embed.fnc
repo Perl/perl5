@@ -2665,4 +2665,9 @@ op	|void	|populate_isa	|NN const char *name|STRLEN len|...
 Xop	|bool	|feature_is_enabled|NN const char *const name \
 		|STRLEN namelen
 
+: Some static inline functions need predeclaration because they are used
+: inside other static inline functions.
+Ei	|STRLEN	|sv_or_pv_pos_u2b|NN SV *sv|NN const char *pv|STRLEN pos \
+				 |NULLOK STRLEN *lenp
+
 : ex: set ts=8 sts=4 sw=4 noet:

@@ -606,6 +606,7 @@ typedef struct {
     STRLEN  subcoffset; /* saved subcoffset field from rex */
     MAGIC   *pos_magic; /* pos() magic attached to $_ */
     I32     pos;        /* the original value of pos() in pos_magic */
+    U8      pos_flags;  /* flags to be restored; currently only MGf_BYTES*/
 } regmatch_info_aux_eval;
 
 
