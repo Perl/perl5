@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 21;
+plan tests => 22;
 
 $x='banana';
 $x=~/.a/g;
@@ -35,6 +35,8 @@ is(pos($x), 4, "value of pos() unaffected by intermediate localization");
 $x = "\x{100}BC";
 $x =~ m/.*/g;
 is(pos $x, 3, "utf8_mg_len_cache_update() test");
+
+is(scalar pos $x, 3, "rvalue pos() utf8 test");
 
 
 my $destroyed;
