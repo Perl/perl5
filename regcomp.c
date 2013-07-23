@@ -7122,6 +7122,8 @@ S_invlist_set_len(pTHX_ SV* const invlist, const UV len, const bool offset)
 
     PERL_ARGS_ASSERT_INVLIST_SET_LEN;
 
+    assert(SvTYPE(invlist) == SVt_INVLIST);
+
     SvCUR_set(invlist,
               (len == 0)
                ? 0
@@ -7136,6 +7138,8 @@ S_get_invlist_previous_index_addr(pTHX_ SV* invlist)
      * */
 
     PERL_ARGS_ASSERT_GET_INVLIST_PREVIOUS_INDEX_ADDR;
+
+    assert(SvTYPE(invlist) == SVt_INVLIST);
 
     return &(((XINVLIST*) SvANY(invlist))->prev_index);
 }
@@ -7169,6 +7173,8 @@ S_invlist_max(pTHX_ SV* const invlist)
      * array, without having to realloc() */
 
     PERL_ARGS_ASSERT_INVLIST_MAX;
+
+    assert(SvTYPE(invlist) == SVt_INVLIST);
 
     /* Assumes worst case, in which the 0 element is not counted in the
      * inversion list, so subtracts 1 for that */
@@ -7270,6 +7276,8 @@ S_invlist_extend(pTHX_ SV* const invlist, const UV new_max)
 
     PERL_ARGS_ASSERT_INVLIST_EXTEND;
 
+    assert(SvTYPE(invlist) == SVt_INVLIST);
+
     /* Add one to account for the zero element at the beginning which may not
      * be counted by the calling parameters */
     SvGROW((SV *)invlist, TO_INTERNAL_SIZE(new_max + 1));
@@ -7279,6 +7287,8 @@ PERL_STATIC_INLINE void
 S_invlist_trim(pTHX_ SV* const invlist)
 {
     PERL_ARGS_ASSERT_INVLIST_TRIM;
+
+    assert(SvTYPE(invlist) == SVt_INVLIST);
 
     /* Change the length of the inversion list to how many entries it currently
      * has */
@@ -8133,6 +8143,8 @@ S_get_invlist_iter_addr(pTHX_ SV* invlist)
      * position */
 
     PERL_ARGS_ASSERT_GET_INVLIST_ITER_ADDR;
+
+    assert(SvTYPE(invlist) == SVt_INVLIST);
 
     return &(((XINVLIST*) SvANY(invlist))->iterator);
 }

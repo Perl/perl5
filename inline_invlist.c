@@ -25,6 +25,8 @@ S_get_invlist_offset_addr(pTHX_ SV* invlist)
 
     PERL_ARGS_ASSERT_GET_INVLIST_OFFSET_ADDR;
 
+    assert(SvTYPE(invlist) == SVt_INVLIST);
+
     return &(((XINVLIST*) SvANY(invlist))->is_offset);
 }
 
@@ -35,6 +37,8 @@ S__invlist_len(pTHX_ SV* const invlist)
      * array */
 
     PERL_ARGS_ASSERT__INVLIST_LEN;
+
+    assert(SvTYPE(invlist) == SVt_INVLIST);
 
     return (SvCUR(invlist) == 0)
            ? 0
