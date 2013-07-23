@@ -329,6 +329,13 @@ not visible at compile time were treated as lvalues and could be assigned
 to, even when the subroutine was not an lvalue sub.  This has been fixed.
 [perl #117947]
 
+=item *
+
+Avoid calling signal handlers from some places within the regex
+engine, as parts of the regex engine stores some state in
+per-interpreter variables, and code called within signal handlers can
+change these values. [perl #114972]
+
 =back
 
 =head1 Known Problems
