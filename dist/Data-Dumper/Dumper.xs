@@ -124,7 +124,7 @@ TOP:
  * The perl code does this by matching against /^(?:0|-?[1-9]\d{0,8})\z/
 */
 static bool
-safe_decimal_number(SV *val) {
+safe_decimal_number(pTHX_ SV *val) {
     STRLEN len;
     const char *p = SvPV(val, len);
 
@@ -1157,7 +1157,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	 * the pure perl code.
 	 * see [perl #74798]
 	 */
-	else if (useqq && safe_decimal_number(val)) {
+	else if (useqq && safe_decimal_number(aTHX_ val)) {
 	    sv_catsv(retval, val);
 	}
 	else {
