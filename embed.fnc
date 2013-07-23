@@ -1479,7 +1479,11 @@ EMiR	|bool	|_invlist_contains_cp|NN SV* const invlist|const UV cp
 EXpMR	|IV	|_invlist_search	|NN SV* const invlist|const UV cp
 EXMpR	|SV*	|_get_swash_invlist|NN SV* const swash
 EXMpR	|HV*	|_swash_inversion_hash	|NN SV* const swash
-: Not used currently: EXMp	|void	|_invlist_dump	|NN SV* const invlist|NN const char * const header
+#endif
+#if defined(PERL_IN_REGCOMP_C) || defined (PERL_IN_DUMP_C)
+EXMp	|void	|_invlist_dump	|NN PerlIO *file|I32 level   \
+				|NN const char* const indent \
+				|NN SV* const invlist
 #endif
 Ap	|void	|taint_env
 Ap	|void	|taint_proper	|NULLOK const char* f|NN const char *const s

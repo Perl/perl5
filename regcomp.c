@@ -8293,40 +8293,54 @@ Perl__invlist_contents(pTHX_ SV* const invlist)
 }
 #endif
 
-#ifdef PERL_ARGS_ASSERT__INVLIST_DUMP
 void
-Perl__invlist_dump(pTHX_ SV* const invlist, const char * const header)
+Perl__invlist_dump(pTHX_ PerlIO *file, I32 level, const char * const indent, SV* const invlist)
 {
-    /* Dumps out the ranges in an inversion list.  The string 'header'
-     * if present is output on a line before the first range */
+    /* Designed to be called only by do_sv_dump().  Dumps out the ranges of the
+     * inversion list 'invlist' to 'file' at 'level'  Each line is prefixed by
+     * the string 'indent'.  The output looks like this:
+         [0] 0x000A .. 0x000D
+         [2] 0x0085
+         [4] 0x2028 .. 0x2029
+         [6] 0x3104 .. INFINITY
+     * This means that the first range of code points matched by the list are
+     * 0xA through 0xD; the second range contains only the single code point
+     * 0x85, etc.  An inversion list is an array of UVs.  Two array elements
+     * are used to define each range (except if the final range extends to
+     * infinity, only a single element is needed).  The array index of the
+     * first element for the corresponding range is given in brackets. */
 
     UV start, end;
+    STRLEN count = 0;
 
     PERL_ARGS_ASSERT__INVLIST_DUMP;
 
-    if (header && strlen(header)) {
-	PerlIO_printf(Perl_debug_log, "%s\n", header);
-    }
     if (invlist_is_iterating(invlist)) {
-        PerlIO_printf(Perl_debug_log, "Can't dump because is in middle of iterating\n");
+        Perl_dump_indent(aTHX_ level, file,
+             "%sCan't dump inversion list because is in middle of iterating\n",
+             indent);
         return;
     }
 
     invlist_iterinit(invlist);
     while (invlist_iternext(invlist, &start, &end)) {
 	if (end == UV_MAX) {
-	    PerlIO_printf(Perl_debug_log, "0x%04"UVXf" .. INFINITY\n", start);
+	    Perl_dump_indent(aTHX_ level, file,
+                                            "%s[%d] 0x%04"UVXf" .. INFINITY\n",
+                                        indent, count, start);
 	}
 	else if (end != start) {
-	    PerlIO_printf(Perl_debug_log, "0x%04"UVXf" .. 0x%04"UVXf"\n",
-		                                 start,         end);
+	    Perl_dump_indent(aTHX_ level, file,
+                                         "%s[%d] 0x%04"UVXf" .. 0x%04"UVXf"\n",
+		                     indent, count, start,         end);
 	}
 	else {
-	    PerlIO_printf(Perl_debug_log, "0x%04"UVXf"\n", start);
+	    Perl_dump_indent(aTHX_ level, file, "%s[%d] 0x%04"UVXf"\n",
+                                            indent, count, start);
 	}
+        count += 2;
     }
 }
-#endif
 
 #ifdef PERL_ARGS_ASSERT__INVLISTEQ
 bool

@@ -950,6 +950,9 @@
 #define scan_commit(a,b,c,d)	S_scan_commit(aTHX_ a,b,c,d)
 #define study_chunk(a,b,c,d,e,f,g,h,i,j,k)	S_study_chunk(aTHX_ a,b,c,d,e,f,g,h,i,j,k)
 #  endif
+#  if defined(PERL_IN_REGCOMP_C) || defined (PERL_IN_DUMP_C)
+#define _invlist_dump(a,b,c,d)	Perl__invlist_dump(aTHX_ a,b,c,d)
+#  endif
 #  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_UTF8_C)
 #define _get_swash_invlist(a)	Perl__get_swash_invlist(aTHX_ a)
 #define _invlist_contains_cp(a,b)	S__invlist_contains_cp(aTHX_ a,b)
