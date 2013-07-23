@@ -6984,7 +6984,7 @@ S_sv_pos_u2b_cached(pTHX_ SV *const sv, MAGIC **const mgp, const U8 *const start
 /*
 =for apidoc sv_pos_u2b_flags
 
-Converts the value pointed to by offsetp from a count of UTF-8 chars from
+Converts the offset from a count of UTF-8 chars from
 the start of the string, to a count of the equivalent number of bytes; if
 lenp is non-zero, it does the same to lenp, but this time starting from
 the offset, rather than from the start
