@@ -27,6 +27,14 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 B<-F> now implies B<-a> and B<-a> implies B<-n>
+
+Previously B<-F> without B<-a> was a no-op, and B<-a> without B<-n> or
+B<-p> was a no-op, with this change, if you supply B<-F> then both
+B<-a> and B<-n> are implied and if you supply B<-a> then B<-n> is implied.
+
+You can still use B<-p> for its extra behaviour. [perl #116190]
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
