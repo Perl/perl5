@@ -121,6 +121,14 @@ sub _Perl_Non_Final_Folds {
     return mk_invlist_from_cp_list(\@is_non_final_fold);
 }
 
+sub UpperLatin1 {
+    my @upper_latin1;
+    for my $i (0 .. 255) {  # Complicated because of EBCDIC
+        push @upper_latin1, $i if chr($i) =~ /[[:^ascii:]]/;
+    }
+    return mk_invlist_from_cp_list(\@upper_latin1);
+}
+
 output_invlist("Latin1", [ 0, 256 ]);
 output_invlist("AboveLatin1", [ 256 ]);
 
@@ -180,6 +188,7 @@ for my $prop (qw(
                     XPosixXDigit
                 &NonL1_Perl_Non_Final_Folds
                 &_Perl_Multi_Char_Folds
+                &UpperLatin1
     )
 ) {
 

@@ -772,4 +772,18 @@ static const UV _Perl_Multi_Char_Folds_invlist[] = {
 
 #endif
 
+#ifndef PERL_IN_XSUB_RE
+
+static const UV UpperLatin1_invlist[] = {
+	3,	/* Number of elements */
+	148565664, /* Version and data structure type */
+	1,	/* 0 if the list starts at 0;
+		   1 if it starts at the element beyond 0 */
+	0,
+	128,
+	256
+};
+
+#endif
+
 /* ex: set ro: */

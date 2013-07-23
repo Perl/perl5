@@ -5547,6 +5547,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 	PL_AboveLatin1 = _new_invlist_C_array(AboveLatin1_invlist);
 	PL_ASCII = _new_invlist_C_array(ASCII_invlist);
 	PL_Latin1 = _new_invlist_C_array(Latin1_invlist);
+	PL_UpperLatin1 = _new_invlist_C_array(UpperLatin1_invlist);
 
 	PL_L1Posix_ptrs[_CC_ALPHANUMERIC]
                                 = _new_invlist_C_array(L1PosixAlnum_invlist);
@@ -13755,10 +13756,8 @@ parseit:
             /* Under /d, we put into a separate list the Latin1 things that
              * match only when the target string is utf8 */
             SV* nonascii_but_latin1_properties = NULL;
-            _invlist_intersection(posixes, PL_Latin1,
+            _invlist_intersection(posixes, PL_UpperLatin1,
                                   &nonascii_but_latin1_properties);
-            _invlist_subtract(nonascii_but_latin1_properties, PL_ASCII,
-                              &nonascii_but_latin1_properties);
             _invlist_subtract(posixes, nonascii_but_latin1_properties,
                               &posixes);
             if (cp_list) {
