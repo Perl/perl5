@@ -1,3 +1,10 @@
+6.72 Wed Jul 24 18:38:19 BST 2013
+    No changes from 6.71_01
+
+6.71_01 Wed Jul 24 09:31:07 BST 2013
+    Bug Fixes:
+    * Resolved more regressions in parse_version code
+
 6.70 Tue Jul 23 21:55:23 BST 2013
     No changes from 6.69_09
 
