@@ -223,8 +223,8 @@ This is especially handy for the handles that Perl has already opened for you.
 You can also pass C<binmode> an explicit encoding to change it on the fly.
 This isn't exactly "binary" mode, but we still use C<binmode> to do it:
 
-    binmode(STDIN,  ":encoding(MacRoman)")  || die "cannot binmode STDIN";
-    binmode(STDOUT, ":encoding(UTF-8)")     || die "cannot binmode STDOUT";
+  binmode(STDIN,  ":encoding(MacRoman)") || die "cannot binmode STDIN";
+  binmode(STDOUT, ":encoding(UTF-8)")    || die "cannot binmode STDOUT";
 
 Once you have your binary file properly opened in the right mode, you can
 use all the same Perl I/O functions as you used on text files.  However,
@@ -239,8 +239,10 @@ Here's an example of how to copy a binary file:
 
     my($in_fh, $out_fh, $buffer);
 
-    open($in_fh,  "<", $name_in)   || die "$0: cannot open $name_in for reading: $!";
-    open($out_fh, ">", $name_out)  || die "$0: cannot open $name_out for writing: $!";
+    open($in_fh,  "<", $name_in)
+        || die "$0: cannot open $name_in for reading: $!";
+    open($out_fh, ">", $name_out)
+        || die "$0: cannot open $name_out for writing: $!";
 
     for my $fh ($in_fh, $out_fh)  {
         binmode($fh)               || die "binmode failed";
