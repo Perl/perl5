@@ -4763,6 +4763,7 @@ regen/embed.pl			Produces {embed,embedvar,proto}.h
 regen/feature.pl		Generates feature.pm
 regen/genpacksizetables.pl	Generate the size tables for pack/unpack
 regen/keywords.pl		Program to write keywords.h
+regen/lib_cleanup.pl		Generate lib/.gitignore from MANIFEST
 regen/mg_vtable.pl		generate mg_vtable.h
 regen/miniperlmain.pl		generate miniperlmain.c
 regen/mk_invlists.pl		Generates charclass_invlists.h
