@@ -50,9 +50,9 @@ cmp_ok( $?, '==', 0, 'Makefile.PL exited with zero' ) ||
 
 my $make = make_run();
 my $make_out = run("$make");
-is( $?, 0,                                 '  make exited normally' ) || 
+is( $?, 0,                                 '  make exited normally' ) ||
     diag $make_out;
 
 my $test_out = run("$make test");
-is( $?, 0,                                 '  make test exited normally' ) || 
+is( $?, 0,                                 '  make test exited normally' ) ||
     diag $test_out;

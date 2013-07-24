@@ -1,3 +1,71 @@
+6.70 Tue Jul 23 21:55:23 BST 2013
+    No changes from 6.69_09
+
+6.69_09 Sun Jul 21 09:22:40 BST 2013
+    Bug Fixes:
+    * RT#86976 Fix version parsing bug introduced in 6.69_05
+      Part Deux :)
+
+6.69_08 Wed Jul 17 00:36:28 BST 2013
+    Bug Fixes:
+    * RT#86976 Fix version parsing bug introduced in 6.69_05
+
+6.69_07 Tue Jul 16 15:32:25 BST 2013
+    New features:
+    * RT#4550 report the file created after make dist
+
+    Bug Fixes:
+    * RT#66113 strip control characters from ABSTRACT
+    * RT#20662 Don't check for config.h if it doesn't exist
+
+6.69_06 Fri Jul 12 14:49:32 BST 2013
+    Bug Fixes:
+    * RT#64163 clean_subdirs infinite loop if subdir already gone
+    * RT#79348 doesn't support miniperl in installation paths
+
+    Doc Fixes:
+    * Fix META_MERGE example
+    * RT#31053 Mention configure_requires in PREREQ_FATAL documentation
+    * RT#14680 Document TEST_FILES usage with 'make test'
+    * RT#21285 Document 'make veryclean'
+
+6.69_05 Thu Jul 11 22:10:10 BST 2013
+    Bug Fixes:
+    * Resolve RT#9452 regression with
+      parse_version() (Victor Efimov)
+    * RT#28632 use LD and OPTIMIZE in recursive Makefile.PL
+      invocations (Niko Tyni)
+
+6.69_04 Wed Jul 10 11:48:22 BST 2013
+    Cygwin Fixes:
+    * Revert RT#54703 and apply patch from RT#69401 to
+      resolve /cygdrive issues (Reini Urban)
+
+6.69_03 Tue Jul  9 22:39:54 BST 2013
+    Bug Fixes:
+    * RT#61419 Avoid invisible interactive question when
+      rebuilding Makefile (Slaven Rezic)
+    * VERSION also now really handles v-strings correctly.
+
+    Cygwin Fixes:
+    * RT#54703 - Don't hardcode /cygdrive (Jerry Hedden)
+
+    Misc:
+    * Install into site when 5.12 or above
+
+6.69_02 Tue Jul  2 13:12:51 BST 2013
+    Bug Fixes:
+    * [RT#86609] VERSION_FROM now handles v-strings correctly.
+    * VERSION also now handles v-strings correctly.
+
+    Misc:
+    * Updated bundled CPAN::Meta and removed Version::Requirements
+
+6.69_01 Thu Jun 20 12:49:45 BST 2013
+    Win32 Fixes:
+    * resolve regression on Win32 introduced in 6.67_01
+      (bingos)
+
 6.68 Fri Jun 14 23:26:11 BST 2013
     No changes from 6.67_05
 

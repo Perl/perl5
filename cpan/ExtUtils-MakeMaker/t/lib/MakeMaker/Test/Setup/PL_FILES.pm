@@ -110,7 +110,7 @@ sub setup {
     return 1;
 }
 
-sub teardown { 
+sub teardown {
     foreach my $file (keys %Files) {
         my $dir = dirname($file);
         if( -e $dir ) {

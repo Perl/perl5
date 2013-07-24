@@ -83,7 +83,7 @@ my $new_mm = sub {
 
         generated_by => "ExtUtils::MakeMaker version $ExtUtils::MakeMaker::VERSION",
         'meta-spec'  => {
-            url         => 'http://module-build.sourceforge.net/META-spec-v1.4.html', 
+            url         => 'http://module-build.sourceforge.net/META-spec-v1.4.html',
             version     => 1.4
         },
     };
@@ -111,7 +111,7 @@ my $new_mm = sub {
 
         generated_by => "ExtUtils::MakeMaker version $ExtUtils::MakeMaker::VERSION",
         'meta-spec'  => {
-            url         => 'http://module-build.sourceforge.net/META-spec-v1.4.html', 
+            url         => 'http://module-build.sourceforge.net/META-spec-v1.4.html',
             version     => 1.4
         },
     }, 'rt.cpan.org 39348';
@@ -171,7 +171,7 @@ my $new_mm = sub {
 
         generated_by => "ExtUtils::MakeMaker version $ExtUtils::MakeMaker::VERSION",
         'meta-spec'  => {
-            url         => 'http://module-build.sourceforge.net/META-spec-v1.4.html', 
+            url         => 'http://module-build.sourceforge.net/META-spec-v1.4.html',
             version     => 1.4
         },
 
@@ -218,7 +218,7 @@ my $new_mm = sub {
 
         generated_by => "ExtUtils::MakeMaker version $ExtUtils::MakeMaker::VERSION",
         'meta-spec'  => {
-            url         => 'http://module-build.sourceforge.net/META-spec-v1.4.html', 
+            url         => 'http://module-build.sourceforge.net/META-spec-v1.4.html',
             version     => 1.4
         },
     };
@@ -266,7 +266,7 @@ my $new_mm = sub {
 
         generated_by => "ExtUtils::MakeMaker version $ExtUtils::MakeMaker::VERSION",
         'meta-spec'  => {
-            url         => 'http://module-build.sourceforge.net/META-spec-v1.4.html', 
+            url         => 'http://module-build.sourceforge.net/META-spec-v1.4.html',
             version     => 1.4
         },
     };
@@ -307,7 +307,7 @@ my $new_mm = sub {
 
         generated_by => "ExtUtils::MakeMaker version $ExtUtils::MakeMaker::VERSION",
         'meta-spec'  => {
-            url         => 'http://module-build.sourceforge.net/META-spec-v1.4.html', 
+            url         => 'http://module-build.sourceforge.net/META-spec-v1.4.html',
             version     => 1.4
         },
     },'CONFIGURE_REQUIRES';
@@ -348,7 +348,7 @@ my $new_mm = sub {
 
         generated_by => "ExtUtils::MakeMaker version $ExtUtils::MakeMaker::VERSION",
         'meta-spec'  => {
-            url         => 'http://module-build.sourceforge.net/META-spec-v1.4.html', 
+            url         => 'http://module-build.sourceforge.net/META-spec-v1.4.html',
             version     => 1.4
         },
     },'CONFIGURE_REQUIRES';
@@ -389,7 +389,7 @@ my $new_mm = sub {
 
         generated_by => "ExtUtils::MakeMaker version $ExtUtils::MakeMaker::VERSION",
         'meta-spec'  => {
-            url         => 'http://module-build.sourceforge.net/META-spec-v1.4.html', 
+            url         => 'http://module-build.sourceforge.net/META-spec-v1.4.html',
             version     => 1.4
         },
     },'META.yml data (META_ADD wins)';

@@ -11,7 +11,7 @@ use 5.006;
 
 use strict;
 use warnings;
-our $VERSION = '6.68';
+our $VERSION = '6.70';
 
 use ExtUtils::MakeMaker::Config;
 use Cwd 'cwd';
@@ -152,7 +152,7 @@ sub _unix_os2_ext {
             }
             elsif ( -f ( $fullname = "$thispth/lib$thislib.dll$Config_libext" ) ) {
             }
-            elsif ( -f ( $fullname = "$thispth/$thislib.dll" ) ) {
+            elsif ( $^O eq 'cygwin' && -f ( $fullname = "$thispth/$thislib.dll" ) ) {
             }
             elsif ( -f ( $fullname = "$thispth/Slib$thislib$Config_libext" ) ) {
             }

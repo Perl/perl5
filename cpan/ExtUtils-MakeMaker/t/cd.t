@@ -26,14 +26,14 @@ my @cd_args = ($dir, "command1", "command2");
 
         my @dirs = (File::Spec->updir) x 2;
         my $expected_updir = File::Spec->catdir(@dirs);
-        
+
         ::is $mm->cd(@cd_args),
 qq{cd $dir
 	command1
 	command2
 	cd $expected_updir};
     }
-    
+
     {
         local *make = sub { "dmake" };
 
@@ -51,7 +51,7 @@ qq{cd $dir && command1
 
 SKIP: {
     skip("VMS' cd requires vmspath which is only on VMS", 1) unless $Is_VMS;
-    
+
     use ExtUtils::MM_VMS;
     is +ExtUtils::MM_VMS->cd(@cd_args),
 q{startdir = F$Environment("Default")

@@ -51,7 +51,7 @@ is_even(input)
    CODE:
        RETVAL = (input % 2 == 0);
    OUTPUT:
-       RETVAL        
+       RETVAL
 END
 
              'XS-Test/t/is_even.t'          => <<'END',
@@ -84,7 +84,7 @@ sub setup_xs {
     return 1;
 }
 
-sub teardown_xs { 
+sub teardown_xs {
     foreach my $file (keys %Files) {
         my $dir = dirname($file);
         if( -e $dir ) {

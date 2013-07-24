@@ -29,7 +29,7 @@ my $Touch_Time = calibrate_mtime();
 $| = 1;
 
 ok( setup_recurs(), 'setup' );
-END { 
+END {
     ok( chdir File::Spec->updir );
     ok( teardown_recurs(), 'teardown' );
 }
@@ -100,9 +100,9 @@ ok( -e $submakefile, 'sub Makefile written' );
 
 my $inst_script = File::Spec->catdir(File::Spec->updir, 'cgi');
 ok( open(MAKEFILE, $submakefile) ) || diag("Can't open $submakefile: $!");
-{ local $/;  
-  like( <MAKEFILE>, qr/^\s*INST_SCRIPT\s*=\s*\Q$inst_script\E/m, 
-        'prepend .. not stomping WriteMakefile args' ) 
+{ local $/;
+  like( <MAKEFILE>, qr/^\s*INST_SCRIPT\s*=\s*\Q$inst_script\E/m,
+        'prepend .. not stomping WriteMakefile args' )
 }
 close MAKEFILE;
 

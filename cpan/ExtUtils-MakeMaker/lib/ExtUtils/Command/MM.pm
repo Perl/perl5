@@ -8,9 +8,9 @@ use warnings;
 require Exporter;
 our @ISA = qw(Exporter);
 
-our @EXPORT  = qw(test_harness pod2man perllocal_install uninstall 
+our @EXPORT  = qw(test_harness pod2man perllocal_install uninstall
                   warn_if_old_packlist);
-our $VERSION = '6.68';
+our $VERSION = '6.70';
 
 my $Is_VMS = $^O eq 'VMS';
 
@@ -108,7 +108,7 @@ sub pod2man {
     # our arguments into @ARGV.  Should be safe.
     my %options = ();
     Getopt::Long::config ('bundling_override');
-    Getopt::Long::GetOptions (\%options, 
+    Getopt::Long::GetOptions (\%options,
                 'section|s=s', 'release|r=s', 'center|c=s',
                 'date|d=s', 'fixed=s', 'fixedbold=s', 'fixeditalic=s',
                 'fixedbolditalic=s', 'official|o', 'quotes|q=s', 'lax|l',
@@ -174,7 +174,7 @@ PACKLIST_WARNING
 
 =item B<perllocal_install>
 
-    perl "-MExtUtils::Command::MM" -e perllocal_install 
+    perl "-MExtUtils::Command::MM" -e perllocal_install
         <type> <module name> <key> <value> ...
 
     # VMS only, key|value pairs come on STDIN
@@ -193,7 +193,7 @@ Key/value pairs are extra information about the module.  Fields include:
     installed into      which directory your module was out into
     LINKTYPE            dynamic or static linking
     VERSION             module version number
-    EXE_FILES           any executables installed in a space seperated 
+    EXE_FILES           any executables installed in a space seperated
                         list
 
 =cut
@@ -209,9 +209,9 @@ sub perllocal_install {
     my $pod;
     $pod = sprintf <<POD, scalar localtime;
  =head2 %s: C<$type> L<$name|$name>
- 
+
  =over 4
- 
+
 POD
 
     do {
@@ -219,9 +219,9 @@ POD
 
         $pod .= <<POD
  =item *
- 
+
  C<$key: $val>
- 
+
 POD
 
     } while(@mod_info);

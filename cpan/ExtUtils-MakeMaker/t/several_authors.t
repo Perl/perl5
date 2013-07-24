@@ -68,7 +68,7 @@ note "argument verification via CONFIGURE"; {
     eval {
         WriteMakefile(
             NAME             => 'Multiple::Authors',
-            CONFIGURE => sub { 
+            CONFIGURE => sub {
                return {AUTHOR => 'John Doe <jd@example.com>',};
             },
         );

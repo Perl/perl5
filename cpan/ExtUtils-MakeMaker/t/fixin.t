@@ -75,9 +75,9 @@ END
         my @lines = @_;
         unlike $lines[$shb_line_num], qr[/foo/bar/perl], "#! replaced";
         like   $lines[$shb_line_num], qr[ -w\b], "switch retained";
-        
+
         # In between might be that "not running under some shell" madness.
-               
+
         is $lines[-1], "blah blah blah\n", "Program text retained";
     }
 );

@@ -53,7 +53,7 @@ ok( chdir 'Big-Dummy', "chdir'd to Big-Dummy" ) ||
             strict  => 99999
         }
     );
-    is $warnings, 
+    is $warnings,
     sprintf("Warning: prerequisite strict 99999 not found. We have %s.\n",
             $strict::VERSION);
 
@@ -64,7 +64,7 @@ ok( chdir 'Big-Dummy', "chdir'd to Big-Dummy" ) ||
             "I::Do::Not::Exist" => 0,
         }
     );
-    is $warnings, 
+    is $warnings,
     "Warning: prerequisite I::Do::Not::Exist 0 not found.\n";
 
 
@@ -89,11 +89,11 @@ ok( chdir 'Big-Dummy', "chdir'd to Big-Dummy" ) ||
             "strict"            => 99999,
         }
     );
-    is $warnings, 
+    is $warnings,
     "Warning: prerequisite I::Do::Not::Exist 0 not found.\n".
     sprintf("Warning: prerequisite strict 99999 not found. We have %s.\n",
             $strict::VERSION);
-    
+
     $warnings = '';
     eval {
         WriteMakefile(
@@ -106,7 +106,7 @@ ok( chdir 'Big-Dummy', "chdir'd to Big-Dummy" ) ||
             PREREQ_FATAL    => 1,
         );
     };
-    
+
     is $warnings, '';
     is $@, <<'END', "PREREQ_FATAL";
 MakeMaker FATAL: prerequisites not found.
@@ -131,7 +131,7 @@ END
             PREREQ_FATAL    => 1,
         );
     };
-    
+
     is $warnings, '';
     is $@, <<'END', "PREREQ_FATAL happens before CONFIGURE";
 MakeMaker FATAL: prerequisites not found.

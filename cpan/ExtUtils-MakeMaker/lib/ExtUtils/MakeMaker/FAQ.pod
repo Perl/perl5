@@ -1,6 +1,6 @@
 package ExtUtils::MakeMaker::FAQ;
 
-our $VERSION = '6.68';
+our $VERSION = '6.70';
 
 1;
 __END__
@@ -261,9 +261,9 @@ to delete the files.  But you have to be careful.  Here's a script to
 do that.  Use at your own risk.  Have fun blowing holes in your foot.
 
     #!/usr/bin/perl -w
-    
+
     use strict;
-    
+
     use File::Spec;
     use File::Find;
     use ExtUtils::Manifest qw(maniread);
@@ -295,7 +295,7 @@ do that.  Use at your own risk.  Have fun blowing holes in your foot.
 
 =item Which tar should I use on Windows?
 
-We recommend ptar from Archive::Tar not older than 1.66 with '-C' option. 
+We recommend ptar from Archive::Tar not older than 1.66 with '-C' option.
 
 =item Which zip should I use on Windows for '[nd]make zipdist'?
 

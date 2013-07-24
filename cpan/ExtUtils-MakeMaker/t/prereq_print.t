@@ -58,7 +58,7 @@ is( $?, 0,         '  exited normally' );
 $prereq_out = run(qq{$Perl Makefile.PL "PRINT_PREREQ=1"});
 ok( !-r $Makefile, "PRINT_PREREQ produces no $Makefile" );
 is( $?, 0,         '  exited normally' );
-::like( $prereq_out, qr/^perl\(strict\) \s* >= \s* 0 \s*$/x, 
+::like( $prereq_out, qr/^perl\(strict\) \s* >= \s* 0 \s*$/x,
                                                       'prereqs dumped' );
 
 

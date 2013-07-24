@@ -18,7 +18,7 @@ perl_lib();
 
 setup;
 
-END { 
+END {
     ok( chdir File::Spec->updir );
     ok( teardown );
 }

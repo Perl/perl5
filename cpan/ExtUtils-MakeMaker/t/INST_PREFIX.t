@@ -120,8 +120,8 @@ my %Install_Vars = (
 
 while( my($type, $vars) = each %Install_Vars) {
     SKIP: {
-        skip "VMS must expand macros in INSTALL* vars", scalar @$vars 
-          if $Is_VMS;    
+        skip "VMS must expand macros in INSTALL* vars", scalar @$vars
+          if $Is_VMS;
         skip '$Config{usevendorprefix} not set', scalar @$vars
           if $type eq 'VENDOR' and !$Config{usevendorprefix};
 
@@ -134,10 +134,10 @@ while( my($type, $vars) = each %Install_Vars) {
                   if $mm->{uc $installvar} =~ /^\$\(INSTALL.*\)$/;
 
                 # support for man page skipping
-                $prefix = 'none' if $type eq 'PERL' && 
-                                    $var =~ /man/ && 
+                $prefix = 'none' if $type eq 'PERL' &&
+                                    $var =~ /man/ &&
                                     !$Config{$installvar};
-                like( $mm->{uc $installvar}, qr/^\Q$prefix\E/, 
+                like( $mm->{uc $installvar}, qr/^\Q$prefix\E/,
                       "$prefix + $var" );
             }
         }
@@ -185,9 +185,9 @@ while( my($type, $vars) = each %Install_Vars) {
                    INSTALLMAN3DIR=> 'foo/bar/baz',
                   );
 
-    is( $mm->{INSTALLVENDORMAN1DIR}, File::Spec->catdir('foo','bar'), 
+    is( $mm->{INSTALLVENDORMAN1DIR}, File::Spec->catdir('foo','bar'),
                       'installvendorman1dir (in %Config) not modified' );
-    isnt( $mm->{INSTALLVENDORMAN3DIR}, '', 
+    isnt( $mm->{INSTALLVENDORMAN3DIR}, '',
                       'installvendorman3dir (not in %Config) set'  );
 }
 
@@ -224,7 +224,7 @@ while( my($type, $vars) = each %Install_Vars) {
 }
 
 
-# Check that when usevendoprefix and installvendorman*dir aren't set in 
+# Check that when usevendoprefix and installvendorman*dir aren't set in
 # Config it leaves them unset.
 {
     _set_config(installman1dir => File::Spec->catdir('foo', 'bar') );

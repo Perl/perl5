@@ -6,6 +6,7 @@ bundled/CPAN-Meta/CPAN/Meta/Converter.pm
 bundled/CPAN-Meta/CPAN/Meta/Feature.pm
 bundled/CPAN-Meta/CPAN/Meta/History.pm
 bundled/CPAN-Meta/CPAN/Meta/Prereqs.pm
+bundled/CPAN-Meta/CPAN/Meta/Requirements.pm
 bundled/CPAN-Meta/CPAN/Meta/Spec.pm
 bundled/CPAN-Meta/CPAN/Meta/Validator.pm
 bundled/ExtUtils-Command/ExtUtils/Command.pm
@@ -25,7 +26,6 @@ bundled/Scalar-List-Utils/List/Util.pm
 bundled/Scalar-List-Utils/List/Util/PP.pm
 bundled/Scalar-List-Utils/Scalar/Util.pm
 bundled/Scalar-List-Utils/Scalar/Util/PP.pm
-bundled/Version-Requirements/Version/Requirements.pm
 bundled/version/version.pm
 bundled/version/version.pod
 bundled/version/version/Internals.pod

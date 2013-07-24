@@ -2,7 +2,7 @@ package ExtUtils::MM_Win95;
 
 use strict;
 
-our $VERSION = '6.68';
+our $VERSION = '6.70';
 
 require ExtUtils::MM_Win32;
 our @ISA = qw(ExtUtils::MM_Win32);
@@ -62,7 +62,7 @@ sub xs_cpp {
 	';
 }
 
-=item xs_o 
+=item xs_o
 
 The && problem.
 

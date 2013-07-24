@@ -12,7 +12,7 @@ use Test::More;
 BEGIN {
     plan skip_all => "miniperl test only necessary for the perl core"
       if !$ENV{PERL_CORE};
-    
+
     plan "no_plan";
 }
 
