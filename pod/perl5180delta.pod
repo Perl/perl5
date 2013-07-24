@@ -2032,7 +2032,7 @@ accepts the default value.  This helps B<perldoc> when handling ANSI escapes
 The test suite now has a section for tests that require very large amounts
 of memory.  These tests won't run by default; they can be enabled by
 setting the C<PERL_TEST_MEMORY> environment variable to the number of
-gibabytes of memory that may be safely used.
+gibibytes of memory that may be safely used.
 
 =back
 
