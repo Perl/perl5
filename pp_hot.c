@@ -1383,7 +1383,7 @@ PP(pp_match)
 	rx = PM_GETRE(pm);
     }
 
-    if (RX_MINLEN(rx) > (I32)len) {
+    if (RX_MINLEN(rx) >= 0 && (STRLEN)RX_MINLEN(rx) > len) {
         DEBUG_r(PerlIO_printf(Perl_debug_log, "String shorter than min possible regex match\n"));
 	goto nope;
     }
