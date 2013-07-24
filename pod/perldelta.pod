@@ -163,13 +163,19 @@ XXX Changes which significantly change existing files in F<pod/> go here.
 However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
 section.
 
-=head3 L<XXX>
+=head3 L<perlopentut>
 
 =over 4
 
 =item *
 
-XXX Description of the change here
+The C<open> tutorial has been completely rewriten by Tom Christiansen, and now
+focuses on covering only the basics, rather than providing a comprehensive
+reference to all things openable.  This rewrite came as the result of a
+vigorous discussion on perl5-porters kicked off by a set of improvements
+written by Alexander Hartmaier to the existing C<perlopentut>.  A "more than
+you ever wanted to know about C<open>" document may follow in subsequent
+versions of perl.
 
 =back
 
