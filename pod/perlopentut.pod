@@ -80,7 +80,7 @@ read-only mode like this:
     my $handle   = undef;     # this will be filled in on success
 
     open($handle, "< $encoding", $filename)
-        || die "$0: can't open $filename for reading: $!\n";
+        || die "$0: can't open $filename for reading: $!";
 
 As with the shell, in Perl the C<< "<" >> is used to open the file in
 read-only mode.  If it succeeds, Perl allocates a brand new filehandle for
@@ -131,7 +131,7 @@ Once you've done that, you can safely omit the encoding part of the
 open mode:
 
     open($handle, "<", $filename)
-        || die "$0: can't open $filename for reading: $!\n";
+        || die "$0: can't open $filename for reading: $!";
 
 But never use the bare C<< "<" >> without having set up a default encoding
 first.  Otherwise, Perl cannot know which of the many, many, many possible
@@ -157,7 +157,7 @@ already exist.
     my $encoding = ":encoding(UTF-8)";
 
     open($handle, ">> $encoding", $filename)
-        || die "$0: can't open $filename for appending: $!\n";
+        || die "$0: can't open $filename for appending: $!";
 
 Now you can write to that filehandle using any of C<print>, C<printf>,
 C<say>, C<write>, or C<syswrite>.
@@ -176,7 +176,7 @@ in write-only mode:
     my $encoding = ":encoding(UTF-8)";
 
     open($handle, "> $encoding", $filename)
-        || die "$0: can't open $filename in write-open mode: $!\n";
+        || die "$0: can't open $filename in write-open mode: $!";
 
 Here again Perl works just like the shell in that the C<< ">" >> clobbers
 an existing file.
@@ -203,13 +203,13 @@ And then open as before, choosing C<<< "<" >>>, C<<< ">>" >>>, or
 C<<< ">" >>> as needed:
 
     open($handle, "< $encoding", $filename)
-        || die "$0: can't open $filename for reading: $!\n";
+        || die "$0: can't open $filename for reading: $!";
 
     open($handle, ">> $encoding", $filename)
-        || die "$0: can't open $filename for appending: $!\n";
+        || die "$0: can't open $filename for appending: $!";
 
     open($handle, "> $encoding", $filename)
-        || die "$0: can't open $filename in write-open mode: $!\n";
+        || die "$0: can't open $filename in write-open mode: $!";
 
 Alternately, you can change to binary mode on an existing handle this way:
 
