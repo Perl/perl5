@@ -166,6 +166,7 @@ sub import
   require Math::BigFloat;
   Math::BigFloat->import( upgrade => 'Math::BigRat', ':constant' );
   require Math::BigRat;
+  Math::BigRat->import( @import );
 
   bigrat->accuracy($a) if defined $a;
   bigrat->precision($p) if defined $p;
