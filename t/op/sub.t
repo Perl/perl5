@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan( tests => 26 );
+plan( tests => 27 );
 
 sub empty_sub {}
 
@@ -140,6 +140,12 @@ eval { ${\not_constantm}++ };
 is $@, "", 'my sub (){42} returns a mutable value';
 eval { ${\not_constantmr}++ };
 is $@, "", 'my sub (){ return 42 } returns a mutable value';
+is eval {
+    sub Crunchy () { 1 }
+    sub Munchy { $_[0] = 2 }
+    eval "Crunchy"; # test that freeing this op does not turn off PADTMP
+    Munchy(Crunchy);
+} || $@, 2, 'freeing ops does not make sub(){42} immutable';
 
 # [perl #79908]
 {
