@@ -7000,7 +7000,7 @@ STATIC bool	S_reginclass(pTHX_ regexp * const prog, const regnode * const n, con
 #define PERL_ARGS_ASSERT_REGINCLASS	\
 	assert(n); assert(p)
 
-STATIC I32	S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
+STATIC SSize_t	S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)

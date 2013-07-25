@@ -1326,7 +1326,7 @@ PP(pp_match)
     PMOP *dynpm = pm;
     const char *s;
     const char *strend;
-    I32 curpos = 0; /* initial pos() or current $+[0] */
+    SSize_t curpos = 0; /* initial pos() or current $+[0] */
     I32 global;
     U8 r_flags = 0;
     const char *truebase;			/* Start of string  */

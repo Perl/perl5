@@ -6729,7 +6729,7 @@ Perl_reg_numbered_buff_fetch(pTHX_ REGEXP * const r, const I32 paren,
     struct regexp *const rx = ReANY(r);
     char *s = NULL;
     I32 i = 0;
-    I32 s1, t1;
+    SSize_t s1, t1;
     I32 n = paren;
 
     PERL_ARGS_ASSERT_REG_NUMBERED_BUFF_FETCH;
@@ -6787,7 +6787,7 @@ Perl_reg_numbered_buff_fetch(pTHX_ REGEXP * const r, const I32 paren,
     }          
 
     assert(s >= rx->subbeg);
-    assert(rx->sublen >= (s - rx->subbeg) + i );
+    assert((STRLEN)rx->sublen >= (STRLEN)((s - rx->subbeg) + i) );
     if (i >= 0) {
 #if NO_TAINT_SUPPORT
         sv_setpvn(sv, s, i);

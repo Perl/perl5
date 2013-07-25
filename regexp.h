@@ -55,8 +55,8 @@ struct reg_substr_data {
 /* offsets within a string of a particular /(.)/ capture */
 
 typedef struct regexp_paren_pair {
-    I32 start;
-    I32 end;
+    SSize_t start;
+    SSize_t end;
     /* 'start_tmp' records a new opening position before the matching end
      * has been found, so that the old start and end values are still
      * valid, e.g.
@@ -503,7 +503,8 @@ get_regex_charset_name(const U32 flags, STRLEN* const lenp)
 #define RX_SAVED_COPY(prog)	(ReANY(prog)->saved_copy)
 /* last match was zero-length */
 #define RX_ZERO_LEN(prog) \
-        (RX_OFFS(prog)[0].start + RX_GOFS(prog) == (UV)RX_OFFS(prog)[0].end)
+        (RX_OFFS(prog)[0].start + (SSize_t)RX_GOFS(prog) \
+          == RX_OFFS(prog)[0].end)
 
 #endif /* PLUGGABLE_RE_EXTENSION */
 

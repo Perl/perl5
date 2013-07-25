@@ -296,8 +296,8 @@ S_regcppush(pTHX_ const regexp *rex, I32 parenfloor, U32 maxopenparen)
     );
     for (p = parenfloor+1; p <= (I32)maxopenparen;  p++) {
 /* REGCP_PARENS_ELEMS are pushed per pairs of parentheses. */
-	SSPUSHINT(rex->offs[p].end);
-	SSPUSHINT(rex->offs[p].start);
+	SSPUSHIV(rex->offs[p].end);
+	SSPUSHIV(rex->offs[p].start);
 	SSPUSHINT(rex->offs[p].start_tmp);
 	DEBUG_BUFFERS_r(PerlIO_printf(Perl_debug_log,
 	    "    \\%"UVuf": %"IVdf"(%"IVdf")..%"IVdf"\n",
@@ -371,8 +371,8 @@ S_regcppop(pTHX_ regexp *rex, U32 *maxopenparen_p)
     for ( ; i > 0; i -= REGCP_PAREN_ELEMS) {
 	I32 tmps;
 	rex->offs[paren].start_tmp = SSPOPINT;
-	rex->offs[paren].start = SSPOPINT;
-	tmps = SSPOPINT;
+	rex->offs[paren].start = SSPOPIV;
+	tmps = SSPOPIV;
 	if (paren <= rex->lastparen)
 	    rex->offs[paren].end = tmps;
 	DEBUG_BUFFERS_r( PerlIO_printf(Perl_debug_log,
@@ -2097,8 +2097,8 @@ S_reg_set_capture_string(pTHX_ REGEXP * const rx,
         } else
 #endif
         {
-            I32 min = 0;
-            I32 max = strend - strbeg;
+            SSize_t min = 0;
+            SSize_t max = strend - strbeg;
             I32 sublen;
 
             if (    (flags & REXEC_COPY_SKIP_POST)
@@ -2938,7 +2938,7 @@ S_regtry(pTHX_ regmatch_info *reginfo, char **startposp)
     CHECKPOINT lastcp;
     REGEXP *const rx = reginfo->prog;
     regexp *const prog = ReANY(rx);
-    I32 result;
+    SSize_t result;
     RXi_GET_DECL(prog,progi);
     GET_RE_DEBUG_FLAGS_DECL;
 
@@ -3583,7 +3583,7 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
 }
 
 /* returns -1 on failure, $+[0] on success */
-STATIC I32
+STATIC SSize_t
 S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 {
 #if PERL_VERSION < 9 && !defined(PERL_CORE)
