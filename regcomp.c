@@ -8312,7 +8312,7 @@ Perl__invlist_dump(pTHX_ SV* const invlist, const char * const header)
 }
 #endif
 
-#if 0
+#ifdef PERL_ARGS_ASSERT__INVLISTEQ
 bool
 S__invlistEQ(pTHX_ SV* const a, SV* const b, const bool complement_b)
 {
