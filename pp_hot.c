@@ -1384,7 +1384,9 @@ PP(pp_match)
     }
 
     if (RX_MINLEN(rx) >= 0 && (STRLEN)RX_MINLEN(rx) > len) {
-        DEBUG_r(PerlIO_printf(Perl_debug_log, "String shorter than min possible regex match\n"));
+        DEBUG_r(PerlIO_printf(Perl_debug_log, "String shorter than min possible regex match (%"
+                                              UVuf" < %"IVdf")\n",
+                                              (UV)len, (IV)RX_MINLEN(rx)));
 	goto nope;
     }
 
