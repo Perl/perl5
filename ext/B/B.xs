@@ -1380,7 +1380,6 @@ IVX(sv)
 	B::IO::IoFLAGS = PVIO_flags_ix
 	B::AV::MAX = PVAV_max_ix
 	B::CV::STASH = PVCV_stash_ix
-	B::CV::GV = PVCV_gv_ix
 	B::CV::FILE = PVCV_file_ix
 	B::CV::OUTSIDE = PVCV_outside_ix
 	B::CV::OUTSIDE_SEQ = PVCV_outside_seq_ix
@@ -1872,6 +1871,27 @@ const_sv(cv)
 	B::CV	cv
     PPCODE:
 	PUSHs(make_sv_object(aTHX_ (SV *)cv_const_sv(cv)));
+
+void
+GV(cv)
+	B::CV cv
+    PREINIT:
+        GV *gv;
+    CODE:
+	gv = CvGV(cv);
+	ST(0) = gv ? make_sv_object((SV*)gv) : &PL_sv_undef;
+
+#if PERL_VERSION > 17
+
+SV *
+NAME_HEK(cv)
+	B::CV cv
+    CODE:
+	RETVAL = CvNAMED(cv) ? newSVhek(CvNAME_HEK(cv)) : &PL_sv_undef;
+    OUTPUT:
+	RETVAL
+
+#endif
 
 MODULE = B	PACKAGE = B::HV		PREFIX = Hv
 
