@@ -15,7 +15,7 @@ require Exporter;
 # walkoptree comes from B.xs
 
 BEGIN {
-    $B::VERSION = '1.44';
+    $B::VERSION = '1.45';
     @B::EXPORT_OK = ();
 
     # Our BOOT code needs $VERSION set, and will append to @EXPORT_OK.
@@ -1018,6 +1018,10 @@ For constant subroutines, returns the constant SV returned by the subroutine.
 =item CvFLAGS
 
 =item const_sv
+
+=item NAME_HEK
+
+Returns the name of a lexical sub, otherwise C<undef>.
 
 =back
 

@@ -376,4 +376,43 @@ SKIP: {
     is($op->name, "leavesub", "overlay: orig name");
 }
 
+{ # [perl #118525]
+    {
+        sub foo {}
+	my $cv = B::svref_2object(\&foo);
+	ok($cv, "make a B::CV from a non-anon sub reference");
+	isa_ok($cv, "B::CV");
+	my $gv = $cv->GV;
+	ok($gv, "we get a GV from a GV on a normal sub");
+	isa_ok($gv, "B::GV");
+	is($gv->NAME, "foo", "check the GV name");
+      SKIP:
+	{ # do we need these version checks?
+	    skip "no HEK before 5.18", 1 if $] < 5.018;
+	    is($cv->NAME_HEK, undef, "no hek for a global sub");
+	}
+    }
+
+SKIP:
+    {
+        skip "no HEK before 5.18", 4 if $] < 5.018;
+        eval <<'EOS'
+    {
+        use feature 'lexical_subs';
+        no warnings 'experimental::lexical_subs';
+        my sub bar {};
+        my $cv = B::svref_2object(\&bar);
+        ok($cv, "make a B::CV from a lexical sub reference");
+        isa_ok($cv, "B::CV");
+        my $gv = $cv->GV;
+        is($gv, undef, "GV on a lexical sub is NULL");
+        my $hek = $cv->NAME_HEK;
+        is($hek, "bar", "check the NAME_HEK");
+    }
+    1;
+EOS
+	  or die "lexical_subs test failed to compile: $@";
+    }
+}
+
 done_testing();
