@@ -661,21 +661,21 @@ Perl_magic_regdatum_get(pTHX_ SV *sv, MAGIC *mg)
 	const REGEXP * const rx = PM_GETRE(PL_curpm);
 	if (rx) {
 	    const I32 paren = mg->mg_len;
-	    I32 s;
-	    I32 t;
+	    SSize_t s;
+	    SSize_t t;
 	    if (paren < 0)
 		return 0;
 	    if (paren <= (I32)RX_NPARENS(rx) &&
 		(s = RX_OFFS(rx)[paren].start) != -1 &&
 		(t = RX_OFFS(rx)[paren].end) != -1)
 		{
-		    I32 i;
+		    SSize_t i;
 		    if (mg->mg_obj)		/* @+ */
 			i = t;
 		    else			/* @- */
 			i = s;
 
-		    if (i > 0 && RX_MATCH_UTF8(rx)) {
+		    if (RX_MATCH_UTF8(rx)) {
 			const char * const b = RX_SUBBEG(rx);
 			if (b)
 			    i = RX_SUBCOFFSET(rx) +
@@ -683,7 +683,7 @@ Perl_magic_regdatum_get(pTHX_ SV *sv, MAGIC *mg)
                                         (U8*)(b-RX_SUBOFFSET(rx)+i));
 		    }
 
-		    sv_setiv(sv, i);
+		    sv_setuv(sv, i);
 		}
 	}
     }

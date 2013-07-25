@@ -12,7 +12,7 @@ $ENV{PERL_TEST_MEMORY} >= 2
 $Config{ptrsize} >= 8
     or skip_all("Need 64-bit pointers for this test");
 
-plan(4);
+plan(5);
 
 # [perl #116907]
 # ${\2} to defeat constant folding, which in this case actually slows
@@ -31,3 +31,5 @@ is $result," -a-b-c-d-", 'scalar //g hopping past the 2**31 threshold';
 pos $x = 2**31+3;
 $x =~ /./g;
 is "$'", 'efg', q "$' after match against long string";
+is "$-[0],$+[0]", '2147483651,2147483652',
+   '@- and @+ after matches past 2**31';
