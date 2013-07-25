@@ -124,7 +124,7 @@ struct reg_code_block {
 	/* saved or original string so \digit works forever. */		\
 	char *subbeg;							\
 	SV_SAVED_COPY	/* If non-NULL, SV which is COW from original */\
-	I32 sublen;	/* Length of string pointed by subbeg */	\
+	SSize_t sublen;	/* Length of string pointed by subbeg */	\
 	I32 suboffset;	/* byte offset of subbeg from logical start of str */ \
 	I32 subcoffset;	/* suboffset equiv, but in chars (for @-/@+) */ \
 	/* Information about the match that isn't often used */		\

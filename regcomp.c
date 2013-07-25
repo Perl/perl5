@@ -6728,7 +6728,7 @@ Perl_reg_numbered_buff_fetch(pTHX_ REGEXP * const r, const I32 paren,
 {
     struct regexp *const rx = ReANY(r);
     char *s = NULL;
-    I32 i = 0;
+    SSize_t i = 0;
     SSize_t s1, t1;
     I32 n = paren;
 
