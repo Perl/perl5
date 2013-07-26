@@ -146,6 +146,13 @@ L<bignum> has been upgraded from version 0.35 to 0.36.
 L<bigrat> wasn't correctly updating an internal variable when C<use>d
 with a C<lib> option.
 
+=item *
+
+L<Exporter> has been upgraded from version 5.68 to 5.69.
+
+L<Exporter> would ignore custom C<$SIG{__WARN__}> handlers in
+C<Exporter::Heavy>. [perl #39739]
+
 =back
 
 =head2 Removed Modules and Pragmata
