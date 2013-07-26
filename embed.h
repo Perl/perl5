@@ -1069,6 +1069,7 @@
 #define croak_popstack		Perl_croak_popstack
 #define cv_ckproto_len_flags(a,b,c,d,e)	Perl_cv_ckproto_len_flags(aTHX_ a,b,c,d,e)
 #define cv_clone_into(a,b)	Perl_cv_clone_into(aTHX_ a,b)
+#define cv_const_sv_or_av(a)	Perl_cv_const_sv_or_av(aTHX_ a)
 #define cv_forget_slab(a)	Perl_cv_forget_slab(aTHX_ a)
 #define cvgv_set(a,b)		Perl_cvgv_set(aTHX_ a,b)
 #define cvstash_set(a,b)	Perl_cvstash_set(aTHX_ a,b)
@@ -1182,7 +1183,7 @@
 #define nextargv(a)		Perl_nextargv(aTHX_ a)
 #define oopsAV(a)		Perl_oopsAV(aTHX_ a)
 #define oopsHV(a)		Perl_oopsHV(aTHX_ a)
-#define op_const_sv(a,b)	Perl_op_const_sv(aTHX_ a,b)
+#define op_const_sv(a)		Perl_op_const_sv(aTHX_ a)
 #define op_unscope(a)		Perl_op_unscope(aTHX_ a)
 #define package_version(a)	Perl_package_version(aTHX_ a)
 #define pad_block_start(a)	Perl_pad_block_start(aTHX_ a)

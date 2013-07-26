@@ -2022,8 +2022,12 @@ PP(pp_iter)
                 *itersvp = NULL;
                 Perl_croak(aTHX_ "Use of freed value in iteration");
             }
-            SvTEMP_off(sv);
-            SvREFCNT_inc_simple_void_NN(sv);
+            if (SvPADTMP(sv) && !IS_PADGV(sv))
+                sv = newSVsv(sv);
+            else {
+                SvTEMP_off(sv);
+                SvREFCNT_inc_simple_void_NN(sv);
+            }
         }
         else
             sv = &PL_sv_undef;
@@ -2553,6 +2557,10 @@ PP(pp_grepwhile)
 	SAVEVPTR(PL_curpm);
 
 	src = PL_stack_base[*PL_markstack_ptr];
+	if (SvPADTMP(src) && !IS_PADGV(src)) {
+	    src = PL_stack_base[*PL_markstack_ptr] = sv_mortalcopy(src);
+	    PL_tmps_floor++;
+	}
 	SvTEMP_off(src);
 	if (PL_op->op_private & OPpGREP_LEX)
 	    PAD_SVl(PL_op->op_targ) = src;
@@ -2698,7 +2706,6 @@ PP(pp_entersub)
     }
 
     ENTER;
-    SAVETMPS;
 
   retry:
     if (CvCLONE(cv) && ! CvCLONED(cv))
@@ -2798,12 +2805,18 @@ try_autoload:
 	    Copy(MARK,AvARRAY(av),items,SV*);
 	    AvFILLp(av) = items - 1;
 	
+	    MARK = AvARRAY(av);
 	    while (items--) {
 		if (*MARK)
+		{
+		    if (SvPADTMP(*MARK) && !IS_PADGV(*MARK))
+			*MARK = sv_mortalcopy(*MARK);
 		    SvTEMP_off(*MARK);
+		}
 		MARK++;
 	    }
 	}
+	SAVETMPS;
 	if ((cx->blk_u16 & OPpENTERSUB_LVAL_MASK) == OPpLVAL_INTRO &&
 	    !CvLVALUE(cv))
 	    DIE(aTHX_ "Can't modify non-lvalue subroutine call");
@@ -2819,6 +2832,7 @@ try_autoload:
     else {
 	I32 markix = TOPMARK;
 
+	SAVETMPS;
 	PUTBACK;
 
 	if (((PL_op->op_private

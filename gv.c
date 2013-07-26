@@ -154,7 +154,7 @@ Perl_gv_const_sv(pTHX_ GV *gv)
 
     if (SvTYPE(gv) == SVt_PVGV)
 	return cv_const_sv(GvCVu(gv));
-    return SvROK(gv) ? SvRV(gv) : NULL;
+    return SvROK(gv) && SvTYPE(SvRV(gv)) != SVt_PVAV ? SvRV(gv) : NULL;
 }
 
 GP *
@@ -346,7 +346,6 @@ Perl_gv_init_pvn(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, U32 flag
     if (has_constant) {
 	/* The constant has to be a simple scalar type.  */
 	switch (SvTYPE(has_constant)) {
-	case SVt_PVAV:
 	case SVt_PVHV:
 	case SVt_PVCV:
 	case SVt_PVFM:

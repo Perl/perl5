@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan( tests => 16 );
+plan( tests => 27 );
 
 sub empty_sub {}
 
@@ -85,3 +85,83 @@ undef *foo;
 undef *bar;
 print "ok\n";
 end
+
+# The outer call sets the scalar returned by ${\""}.${\""} to the current
+# package name.
+# The inner call sets it to "road".
+# Each call records the value twice, the outer call surrounding the inner
+# call.  In 5.10-5.18 under ithreads, what gets pushed is
+# qw(main road road road) because the inner call is clobbering the same
+# scalar.  If __PACKAGE__ is changed to "main", it works, the last element
+# becoming "main".
+my @scratch;
+sub a {
+  for (${\""}.${\""}) {
+    $_ = $_[0];
+    push @scratch, $_;
+    a("road",1) unless $_[1];
+    push @scratch, $_;
+  }
+}
+a(__PACKAGE__);
+require Config;
+is "@scratch", "main road road main",
+   'recursive calls do not share shared-hash-key TARGs';
+
+# Another test for the same bug, that does not rely on foreach.  It depends
+# on ref returning a shared hash key TARG.
+undef @scratch;
+sub b {
+    my ($pack, $depth) = @_;
+    my $o = bless[], $pack;
+    $pack++;
+    push @scratch, (ref $o, $depth||b($pack,$depth+1))[0];
+}
+b('n',0);
+is "@scratch", "o n", 
+   'recursive calls do not share shared-hash-key TARGs (2)';
+
+# [perl #78194] @_ aliasing op return values
+sub { is \$_[0], \$_[0],
+        '[perl #78194] \$_[0] == \$_[0] when @_ aliases "$x"' }
+ ->("${\''}");
+
+# The return statement should make no difference in this case:
+sub not_constant () {        42 }
+sub not_constantr() { return 42 }
+use feature 'lexical_subs'; no warnings 'experimental::lexical_subs';
+my sub not_constantm () {        42 }
+my sub not_constantmr() { return 42 }
+eval { ${\not_constant}++ };
+is $@, "", 'sub (){42} returns a mutable value';
+eval { ${\not_constantr}++ };
+is $@, "", 'sub (){ return 42 } returns a mutable value';
+eval { ${\not_constantm}++ };
+is $@, "", 'my sub (){42} returns a mutable value';
+eval { ${\not_constantmr}++ };
+is $@, "", 'my sub (){ return 42 } returns a mutable value';
+is eval {
+    sub Crunchy () { 1 }
+    sub Munchy { $_[0] = 2 }
+    eval "Crunchy"; # test that freeing this op does not turn off PADTMP
+    Munchy(Crunchy);
+} || $@, 2, 'freeing ops does not make sub(){42} immutable';
+
+# [perl #79908]
+{
+    my $x = 5;
+    *_79908 = sub (){$x};
+    $x = 7;
+    is eval "_79908", 7, 'sub(){$x} does not break closures';
+    isnt eval '\_79908', \$x, 'sub(){$x} returns a copy';
+
+    # Test another thing that was broken by $x inlinement
+    my $y;
+    no warnings 'once';
+    local *time = sub():method{$y};
+    my $w;
+    local $SIG{__WARN__} = sub { $w .= shift };
+    eval "()=time";
+    is $w, undef,
+      '*keyword = sub():method{$y} does not cause ambiguity warnings';
+}

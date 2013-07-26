@@ -1483,6 +1483,7 @@ PP(pp_sort)
     OP* const nextop = PL_op->op_next;
     I32 overloading = 0;
     bool hasargs = FALSE;
+    bool copytmps;
     I32 is_xsub = 0;
     I32 sorting_av = 0;
     const U8 priv = PL_op->op_private;
@@ -1604,8 +1605,11 @@ PP(pp_sort)
     /* shuffle stack down, removing optional initial cv (p1!=p2), plus
      * any nulls; also stringify or converting to integer or number as
      * required any args */
+    copytmps = !sorting_av && PL_sortcop;
     for (i=max; i > 0 ; i--) {
 	if ((*p1 = *p2++)) {			/* Weed out nulls. */
+	    if (copytmps && SvPADTMP(*p1) && !IS_PADGV(*p1))
+		*p1 = sv_mortalcopy(*p1);
 	    SvTEMP_off(*p1);
 	    if (!PL_sortcop) {
 		if (priv & OPpSORT_NUMERIC) {

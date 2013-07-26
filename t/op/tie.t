@@ -1368,3 +1368,12 @@ undef
 undef
 no
 no
+########
+
+# [perl #78194] Passing op return values to tie constructors
+sub TIEARRAY{
+    print \$_[1] == \$_[1] ? "ok\n" : "not ok\n";
+};
+tie @a, "", "$a$b";
+EXPECT
+ok

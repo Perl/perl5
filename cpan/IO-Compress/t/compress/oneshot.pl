@@ -183,7 +183,7 @@ sub run
                 use Config;
 
                 skip 'readonly + threads', 1
-                    if $Config{useithreads};
+                    if $Config{useithreads} || $] >= 5.019003;
 
                 
                 eval { $a = $Func->(\$in, \$out, TrailingData => \"abc") ;} ;

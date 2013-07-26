@@ -527,12 +527,13 @@ my $x = "foo";
 EXPECT
 foo
 ########
+# [perl #3066]
 sub C () { 1 }
-sub M { $_[0] = 2; }
+sub M { print "$_[0]\n" }
 eval "C";
 M(C);
 EXPECT
-Modification of a read-only value attempted at - line 2.
+1
 ########
 print qw(ab a\b a\\b);
 EXPECT

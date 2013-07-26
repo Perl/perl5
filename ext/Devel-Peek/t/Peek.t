@@ -153,7 +153,8 @@ my $type = do_test('result of addition',
         $c + $d,
 'SV = ([NI])V\\($ADDR\\) at $ADDR
   REFCNT = 1
-  FLAGS = \\(PADTMP,\1OK,p\1OK\\)
+  FLAGS = \\(PADTMP,\1OK,p\1OK\\)		# $] < 5.019003
+  FLAGS = \\(\1OK,p\1OK\\)			# $] >=5.019003
   \1V = 456');
 
 ($d = "789") += 0.1;
@@ -442,7 +443,8 @@ do_test('string with Unicode',
 	chr(256).chr(0).chr(512),
 'SV = PV\\($ADDR\\) at $ADDR
   REFCNT = 1
-  FLAGS = \\((?:$PADTMP,)?POK,READONLY,pPOK,UTF8\\)
+  FLAGS = \\((?:$PADTMP,)?POK,READONLY,pPOK,UTF8\\)	# $] < 5.019003
+  FLAGS = \\((?:$PADTMP,)?POK,pPOK,UTF8\\)		# $] >=5.019003
   PV = $ADDR "\\\214\\\101\\\0\\\235\\\101"\\\0 \[UTF8 "\\\x\{100\}\\\x\{0\}\\\x\{200\}"\]
   CUR = 5
   LEN = \\d+');
@@ -451,7 +453,8 @@ do_test('string with Unicode',
 	chr(256).chr(0).chr(512),
 'SV = PV\\($ADDR\\) at $ADDR
   REFCNT = 1
-  FLAGS = \\((?:$PADTMP,)?POK,READONLY,pPOK,UTF8\\)
+  FLAGS = \\((?:$PADTMP,)?POK,READONLY,pPOK,UTF8\\)	# $] < 5.019003
+  FLAGS = \\((?:$PADTMP,)?POK,pPOK,UTF8\\)		# $] >=5.019003
   PV = $ADDR "\\\304\\\200\\\0\\\310\\\200"\\\0 \[UTF8 "\\\x\{100\}\\\x\{0\}\\\x\{200\}"\]
   CUR = 5
   LEN = \\d+');

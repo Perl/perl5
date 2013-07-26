@@ -221,6 +221,7 @@ S_clear_yystack(pTHX_  const yy_parser *parser)
 	    if (ps->compcv != PL_compcv) {
 		PL_compcv = ps->compcv;
 		PAD_SET_CUR_NOSAVE(CvPADLIST(PL_compcv), 1);
+		PL_comppad_name = PadlistNAMES(CvPADLIST(PL_compcv));
 	    }
 	    YYDPRINTF ((Perl_debug_log, "(freeing op)\n"));
 	    op_free(ps->val.opval);

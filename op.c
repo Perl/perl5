@@ -1751,17 +1751,8 @@ S_finalize_op(pTHX_ OP* o)
 	 * Despite being a "constant", the SV is written to,
 	 * for reference counts, sv_upgrade() etc. */
 	if (cSVOPo->op_sv) {
-	    const PADOFFSET ix = pad_alloc(OP_CONST, SVs_PADTMP);
-	    if (o->op_type != OP_METHOD_NAMED &&
-		(SvPADTMP(cSVOPo->op_sv) || SvPADMY(cSVOPo->op_sv)))
-	    {
-		/* If op_sv is already a PADTMP/MY then it is being used by
-		 * some pad, so make a copy. */
-		sv_setsv(PAD_SVl(ix),cSVOPo->op_sv);
-		if (!SvIsCOW(PAD_SVl(ix))) SvREADONLY_on(PAD_SVl(ix));
-		SvREFCNT_dec(cSVOPo->op_sv);
-	    }
-	    else if (o->op_type != OP_METHOD_NAMED
+	    const PADOFFSET ix = pad_alloc(OP_CONST, SVf_READONLY);
+	    if (o->op_type != OP_METHOD_NAMED
 		&& cSVOPo->op_sv == &PL_sv_undef) {
 		/* PL_sv_undef is hack - it's unsafe to store it in the
 		   AV that is the pad, because av_fetch treats values of
@@ -1775,7 +1766,6 @@ S_finalize_op(pTHX_ OP* o)
 	    }
 	    else {
 		SvREFCNT_dec(PAD_SVl(ix));
-		SvPADTMP_on(cSVOPo->op_sv);
 		PAD_SETSV(ix, cSVOPo->op_sv);
 		/* XXX I don't know how this isn't readonly already. */
 		if (!SvIsCOW(PAD_SVl(ix))) SvREADONLY_on(PAD_SVl(ix));
@@ -3311,6 +3301,7 @@ S_fold_constants(pTHX_ OP *o)
 	    SvREFCNT_inc_simple_void(sv);
 	    SvTEMP_off(sv);
 	}
+	else { assert(SvIMMORTAL(sv)); }
 	break;
     case 3:
 	/* Something tried to die.  Abandon constant folding.  */
@@ -3342,6 +3333,7 @@ S_fold_constants(pTHX_ OP *o)
     op_free(o);
 #endif
     assert(sv);
+    if (!SvIMMORTAL(sv)) SvPADTMP_on(sv);
     if (type == OP_RV2GV)
 	newop = newGVOP(OP_GV, 0, MUTABLE_GV(sv));
     else
@@ -3362,6 +3354,8 @@ S_gen_constant_list(pTHX_ OP *o)
     dVAR;
     OP *curop;
     const I32 oldtmps_floor = PL_tmps_floor;
+    SV **svp;
+    AV *av;
 
     list(o);
     if (PL_parser && PL_parser->error_count)
@@ -3384,7 +3378,11 @@ S_gen_constant_list(pTHX_ OP *o)
     o->op_flags |= OPf_PARENS;	/* and flatten \(1..2,3) */
     o->op_opt = 0;		/* needs to be revisited in rpeep() */
     curop = ((UNOP*)o)->op_first;
-    ((UNOP*)o)->op_first = newSVOP(OP_CONST, 0, SvREFCNT_inc_NN(*PL_stack_sp--));
+    av = (AV *)SvREFCNT_inc_NN(*PL_stack_sp--);
+    ((UNOP*)o)->op_first = newSVOP(OP_CONST, 0, (SV *)av);
+    if (AvFILLp(av) != -1)
+	for (svp = AvARRAY(av) + AvFILLp(av); svp >= AvARRAY(av); --svp)
+	    SvPADTMP_on(*svp);
 #ifdef PERL_MAD
     op_getmad(curop,o,'O');
 #else
@@ -6847,6 +6845,7 @@ Perl_cv_ckproto_len_flags(pTHX_ const CV *cv, const GV *gv, const char *p,
 }
 
 static void const_sv_xsub(pTHX_ CV* cv);
+static void const_av_xsub(pTHX_ CV* cv);
 
 /*
 
@@ -6865,37 +6864,32 @@ L<perlsub/"Constant Functions">.
 SV *
 Perl_cv_const_sv(pTHX_ const CV *const cv)
 {
+    SV *sv;
     PERL_UNUSED_CONTEXT;
     if (!cv)
 	return NULL;
     if (!(SvTYPE(cv) == SVt_PVCV || SvTYPE(cv) == SVt_PVFM))
 	return NULL;
+    sv = CvCONST(cv) ? MUTABLE_SV(CvXSUBANY(cv).any_ptr) : NULL;
+    if (sv && SvTYPE(sv) == SVt_PVAV) return NULL;
+    return sv;
+}
+
+SV *
+Perl_cv_const_sv_or_av(pTHX_ const CV * const cv)
+{
+    PERL_UNUSED_CONTEXT;
+    if (!cv)
+	return NULL;
+    assert (SvTYPE(cv) == SVt_PVCV || SvTYPE(cv) == SVt_PVFM);
     return CvCONST(cv) ? MUTABLE_SV(CvXSUBANY(cv).any_ptr) : NULL;
 }
 
 /* op_const_sv:  examine an optree to determine whether it's in-lineable.
- * Can be called in 3 ways:
- *
- * !cv
- * 	look for a single OP_CONST with attached value: return the value
- *
- * cv && CvCLONE(cv) && !CvCONST(cv)
- *
- * 	examine the clone prototype, and if contains only a single
- * 	OP_CONST referencing a pad const, or a single PADSV referencing
- * 	an outer lexical, return a non-zero value to indicate the CV is
- * 	a candidate for "constizing" at clone time
- *
- * cv && CvCONST(cv)
- *
- *	We have just cloned an anon prototype that was marked as a const
- *	candidate. Try to grab the current value, and in the case of
- *	PADSV, ignore it if it has multiple references. In this case we
- *	return a newly created *copy* of the value.
  */
 
 SV *
-Perl_op_const_sv(pTHX_ const OP *o, CV *cv)
+Perl_op_const_sv(pTHX_ const OP *o)
 {
     dVAR;
     SV *sv = NULL;
@@ -6928,27 +6922,6 @@ Perl_op_const_sv(pTHX_ const OP *o, CV *cv)
 	    return NULL;
 	if (type == OP_CONST && cSVOPo->op_sv)
 	    sv = cSVOPo->op_sv;
-	else if (cv && type == OP_CONST) {
-	    sv = PAD_BASE_SV(CvPADLIST(cv), o->op_targ);
-	    if (!sv)
-		return NULL;
-	}
-	else if (cv && type == OP_PADSV) {
-	    if (CvCONST(cv)) { /* newly cloned anon */
-		sv = PAD_BASE_SV(CvPADLIST(cv), o->op_targ);
-		/* the candidate should have 1 ref from this pad and 1 ref
-		 * from the parent */
-		if (!sv || SvREFCNT(sv) != 2)
-		    return NULL;
-		sv = newSVsv(sv);
-		SvREADONLY_on(sv);
-		return sv;
-	    }
-	    else {
-		if (PAD_COMPNAME_FLAGS(o->op_targ) & SVf_FAKE)
-		    sv = &PL_sv_undef; /* an arbitrary non-null value */
-	    }
-	}
 	else {
 	    return NULL;
 	}
@@ -7117,7 +7090,7 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	)
 	const_sv = NULL;
     else
-	const_sv = op_const_sv(block, NULL);
+	const_sv = op_const_sv(block);
 
     if (cv) {
         const bool exists = CvROOT(cv) || CvXSUB(cv);
@@ -7146,6 +7119,7 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
     }
     if (const_sv) {
 	SvREFCNT_inc_simple_void_NN(const_sv);
+	SvFLAGS(const_sv) = (SvFLAGS(const_sv) & ~SVs_PADMY) | SVs_PADTMP;
 	if (cv) {
 	    assert(!CvROOT(cv) && !CvCONST(cv));
 	    cv_forget_slab(cv);
@@ -7287,12 +7261,6 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
     /* now that optimizer has done its work, adjust pad values */
 
     pad_tidy(CvCLONE(cv) ? padtidy_SUBCLONE : padtidy_SUB);
-
-    if (CvCLONE(cv)) {
-	assert(!CvCONST(cv));
-	if (ps && !*ps && op_const_sv(block, cv))
-	    CvCONST_on(cv);
-    }
 
   attrs:
     if (attrs) {
@@ -7491,7 +7459,7 @@ Perl_newATTRSUB_flags(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 	)
 	const_sv = NULL;
     else
-	const_sv = op_const_sv(block, NULL);
+	const_sv = op_const_sv(block);
 
     if (cv) {
         const bool exists = CvROOT(cv) || CvXSUB(cv);
@@ -7516,6 +7484,7 @@ Perl_newATTRSUB_flags(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
     }
     if (const_sv) {
 	SvREFCNT_inc_simple_void_NN(const_sv);
+	SvFLAGS(const_sv) = (SvFLAGS(const_sv) & ~SVs_PADMY) | SVs_PADTMP;
 	if (cv) {
 	    assert(!CvROOT(cv) && !CvCONST(cv));
 	    cv_forget_slab(cv);
@@ -7650,12 +7619,6 @@ Perl_newATTRSUB_flags(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
     /* now that optimizer has done its work, adjust pad values */
 
     pad_tidy(CvCLONE(cv) ? padtidy_SUBCLONE : padtidy_SUB);
-
-    if (CvCLONE(cv)) {
-	assert(!CvCONST(cv));
-	if (ps && !*ps && op_const_sv(block, cv))
-	    CvCONST_on(cv);
-    }
 
   attrs:
     if (attrs) {
@@ -7852,7 +7815,11 @@ Perl_newCONSTSUB_flags(pTHX_ HV *stash, const char *name, STRLEN len,
        and so doesn't get free()d.  (It's expected to be from the C pre-
        processor __FILE__ directive). But we need a dynamically allocated one,
        and we need it to get freed.  */
-    cv = newXS_len_flags(name, len, const_sv_xsub, file ? file : "", "",
+    cv = newXS_len_flags(name, len,
+			 sv && SvTYPE(sv) == SVt_PVAV
+			     ? const_av_xsub
+			     : const_sv_xsub,
+			 file ? file : "", "",
 			 &sv, XS_DYNAMIC_FILENAME | flags);
     CvXSUBANY(cv).any_ptr = SvREFCNT_inc_simple(sv);
     CvCONST_on(cv);
@@ -8576,6 +8543,7 @@ Perl_ck_rvconst(pTHX_ OP *o)
 		Perl_croak(aTHX_ "Constant is not %s reference", badtype);
 	    return o;
 	}
+	if (SvTYPE(kidsv) == SVt_PVAV) return o;
 	if ((o->op_private & HINT_STRICT_REFS) && (kid->op_private & OPpCONST_BARE)) {
 	    const char *badthing;
 	    switch (o->op_type) {
@@ -10594,7 +10562,7 @@ Perl_ck_svconst(pTHX_ OP *o)
 {
     PERL_ARGS_ASSERT_CK_SVCONST;
     PERL_UNUSED_CONTEXT;
-    if (!SvIsCOW(cSVOPo->op_sv)) SvREADONLY_on(cSVOPo->op_sv);
+    SvREADONLY_on(cSVOPo->op_sv);
     return o;
 }
 
@@ -11966,6 +11934,31 @@ const_sv_xsub(pTHX_ CV* cv)
     EXTEND(sp, 1);
     ST(0) = sv;
     XSRETURN(1);
+}
+
+static void
+const_av_xsub(pTHX_ CV* cv)
+{
+    dVAR;
+    dXSARGS;
+    AV * const av = MUTABLE_AV(XSANY.any_ptr);
+    SP -= items;
+    assert(av);
+#ifndef DEBUGGING
+    if (!av) {
+	XSRETURN(0);
+    }
+#endif
+    if (SvRMAGICAL(av))
+	Perl_croak(aTHX_ "Magical list constants are not supported");
+    if (GIMME_V != G_ARRAY) {
+	EXTEND(SP, 1);
+	ST(0) = newSViv((IV)AvFILLp(av)+1);
+	XSRETURN(1);
+    }
+    EXTEND(SP, AvFILLp(av)+1);
+    Copy(AvARRAY(av), &ST(0), AvFILLp(av)+1, SV *);
+    XSRETURN(AvFILLp(av)+1);
 }
 
 /*

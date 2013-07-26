@@ -4,7 +4,7 @@ use strict;
 use warnings::register;
 
 use vars qw($VERSION %declared);
-$VERSION = '1.27';
+$VERSION = '1.28';
 
 #=======================================================================
 
@@ -25,12 +25,22 @@ BEGIN {
     # We'd like to do use constant _CAN_PCS => $] > 5.009002
     # but that's a bit tricky before we load the constant module :-)
     # By doing this, we save 1 run time check for *every* call to import.
-    no strict 'refs';
     my $const = $] > 5.009002;
-    *_CAN_PCS = sub () {$const};
-
     my $downgrade = $] < 5.015004; # && $] >= 5.008
-    *_DOWNGRADE = sub () { $downgrade };
+    my $constarray = $] >= 5.019003;
+    if ($const) {
+	Internals::SvREADONLY($const, 1);
+	Internals::SvREADONLY($downgrade, 1);
+	$constant::{_CAN_PCS}   = \$const;
+	$constant::{_DOWNGRADE} = \$downgrade;
+	$constant::{_CAN_PCS_FOR_ARRAY} = \$constarray;
+    }
+    else {
+	no strict 'refs';
+	*{"_CAN_PCS"}   = sub () {$const};
+	*{"_DOWNGRADE"} = sub () { $downgrade };
+	*{"_CAN_PCS_FOR_ARRAY"} = sub () { $constarray };
+    }
 }
 
 #=======================================================================
@@ -128,20 +138,41 @@ sub import {
 
 		# The constant serves to optimise this entire block out on
 		# 5.8 and earlier.
-		if (_CAN_PCS && $symtab && !exists $symtab->{$name}) {
-		    # No typeglob yet, so we can use a reference as space-
-		    # efficient proxy for a constant subroutine
+		if (_CAN_PCS) {
+		    # Use a reference as a proxy for a constant subroutine.
+		    # If this is not a glob yet, it saves space.  If it is
+		    # a glob, we must still create it this way to get the
+		    # right internal flags set, as constants are distinct
+		    # from subroutines created with sub(){...}.
 		    # The check in Perl_ck_rvconst knows that inlinable
 		    # constants from cv_const_sv are read only. So we have to:
 		    Internals::SvREADONLY($scalar, 1);
-		    $symtab->{$name} = \$scalar;
-		    ++$flush_mro;
+		    if ($symtab && !exists $symtab->{$name}) {
+			$symtab->{$name} = \$scalar;
+			++$flush_mro;
+		    }
+		    else {
+			local $constant::{_dummy} = \$scalar;
+			*$full_name = \&{"_dummy"};
+		    }
 		} else {
 		    *$full_name = sub () { $scalar };
 		}
 	    } elsif (@_) {
 		my @list = @_;
-		*$full_name = sub () { @list };
+		if (_CAN_PCS_FOR_ARRAY) {
+		    Internals::SvREADONLY(@list, 1);
+		    Internals::SvREADONLY($list[$_], 1) for 0..$#list;
+		    if ($symtab && !exists $symtab->{$name}) {
+			$symtab->{$name} = \@list;
+			$flush_mro++;
+		    }
+		    else {
+			local $constant::{_dummy} = \@list;
+			*$full_name = \&{"_dummy"};
+		    }
+		}
+		else { *$full_name = sub () { @list }; }
 	    } else {
 		*$full_name = sub () { };
 	    }
@@ -335,8 +366,7 @@ used.
 
 =head1 CAVEATS
 
-In the current version of Perl, list constants are not inlined
-and some symbols may be redefined without generating a warning.
+List constants are not inlined unless you are using Perl v5.20 or higher.
 
 It is not possible to have a subroutine or a keyword with the same
 name as a constant in the same package. This is probably a Good Thing.
