@@ -6,7 +6,7 @@ BEGIN {
     require 'test.pl';
 }
 
-plan (135);
+plan (136);
 
 #
 # @foo, @bar, and @ary are also used from tie-stdarray after tie-ing them
@@ -493,5 +493,9 @@ sub {
          'error when setting alias to -1 elem of empty array';
 }->($plink[0], $plink[-2], $plink[-5], $plunk[-1]);
 
+$_ = \$#{[]};
+$$_ = \1;
+"$$_";
+pass "no assertion failure after assigning ref to arylen when ary is gone";
 
 "We're included by lib/Tie/Array/std.t so we need to return something true";
