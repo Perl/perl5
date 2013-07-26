@@ -684,9 +684,11 @@ Perl_magic_regdatum_get(pTHX_ SV *sv, MAGIC *mg)
 		    }
 
 		    sv_setuv(sv, i);
+		    return 0;
 		}
 	}
     }
+    sv_setsv(sv, NULL);
     return 0;
 }
 

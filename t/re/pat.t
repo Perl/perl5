@@ -20,7 +20,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 696;  # Update this when adding/deleting tests.
+plan tests => 698;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -703,6 +703,14 @@ sub run_tests {
         /.(a)(ba*)?/;
         is($#+, 2, $message);
         is($#-, 1, $message);
+
+        # Check that values don’t stick
+        "     "=~/()()()(.)(..)/;
+        my($m,$p) = (\$-[5], \$+[5]);
+        () = "$$_" for $m, $p; # FETCH (or eqv.)
+        " " =~ /()/;
+        is $$m, undef, 'values do not stick to @- elements';
+        is $$p, undef, 'values do not stick to @+ elements';
     }
 
     foreach ('$+[0] = 13', '$-[0] = 13', '@+ = (7, 6, 5)',
