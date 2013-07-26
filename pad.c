@@ -58,7 +58,8 @@ AV which is @_.  Other entries are storage for variables and op targets.
 Iterating over the PADNAMELIST iterates over all possible pad
 items.  Pad slots for targets (SVs_PADTMP) and GVs end up having &PL_sv_no
 "names", while slots for constants have &PL_sv_no "names" (see
-pad_alloc()).
+pad_alloc()).  That &PL_sv_no is used is an implementation detail subject
+to change.  To test for it, use C<PadnamePV(name) && !PadnameLEN(name)>.
 
 Only my/our variable (SvPADMY/PADNAME_isOUR) slots get valid names.
 The rest are op targets/GVs/constants which are statically allocated
