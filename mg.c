@@ -2105,7 +2105,7 @@ Perl_magic_getpos(pTHX_ SV *sv, MAGIC *mg)
 	    sv_setuv(sv, i);
 	    return 0;
     }
-    SvOK_off(sv);
+    sv_setsv(sv,NULL);
     return 0;
 }
 

@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 28;
+plan tests => 29;
 
 $x='banana';
 $x=~/.a/g;
@@ -121,4 +121,13 @@ $x =~ /.(?{
          'pos unchanged in re-eval after increasing size of chars in str';
     })/;
     is $w, undef, 'and no malformed utf8 warning';
+}
+
+for my $one(pos $x) {
+    for my $two(pos $x) {
+        $one = \1;
+        $two = undef;
+        is $one, undef,
+           'no assertion failure when getting pos clobbers ref with undef';
+    }
 }
