@@ -77,7 +77,7 @@ my %skip;
 @skip{
     'lib/Carp/Heavy.pm',
     'lib/Config.pm',		# no version number but contents will vary
-    'lib/Exporter/Heavy.pm',
+    'dist/Exporter/lib/Exporter/Heavy.pm',
     'win32/FindExt.pm',
 } = ();
 
