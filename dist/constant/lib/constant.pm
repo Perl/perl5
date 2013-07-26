@@ -27,7 +27,7 @@ BEGIN {
     # By doing this, we save 1 run time check for *every* call to import.
     my $const = $] > 5.009002;
     my $downgrade = $] < 5.015004; # && $] >= 5.008
-    my $constarray = $] > 5.019001;
+    my $constarray = $] >= 5.019003;
     if ($const) {
 	Internals::SvREADONLY($const, 1);
 	Internals::SvREADONLY($downgrade, 1);
@@ -366,7 +366,7 @@ used.
 
 =head1 CAVEATS
 
-List constants were not inlined unless you are using Perl v5.20 or higher.
+List constants are not inlined unless you are using Perl v5.20 or higher.
 
 It is not possible to have a subroutine or a keyword with the same
 name as a constant in the same package. This is probably a Good Thing.

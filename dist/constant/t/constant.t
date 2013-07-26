@@ -360,9 +360,8 @@ eval q{
     eval { for (immutable) { ${\$_} = 432 } };
     SKIP: {
 	require Config;
-	local $TODO;
 	if ($Config::Config{useithreads}) {
-	    skip "fails under threads", 1 if $] < 5.019001;
+	    skip "fails under threads", 1 if $] < 5.019003;
 	}
 	like $@, qr/^Modification of a read-only value attempted at /,
 	    '... and immutable through refgen, too';
@@ -383,19 +382,17 @@ like $@, qr/^Modification of a read-only value attempted at /,
     'constant created in existing stash slot is immutable';
 eval { for (existing_stash_entry) { ${\$_} = 432 } };
 SKIP: {
-    local $TODO;
     if ($Config::Config{useithreads}) {
-	skip "fails under threads", 1 if $] < 5.019001;
+	skip "fails under threads", 1 if $] < 5.019003;
     }
     like $@, qr/^Modification of a read-only value attempted at /,
 	'... and immutable through refgen, too';
 }
 
 # Test that list constants are also immutable.  This only works under
-# 5.19.2 and later (er, except it doesn’t work under that version yet,
-# either, hence the to-do status).
+# 5.19.3 and later.
 SKIP: {
-    skip "fails under 5.19.1 and earlier", 2 if $] < 5.019002;
+    skip "fails under 5.19.2 and earlier", 2 if $] < 5.019003;
     use constant constant_list => 1..2;
     for (constant_list) {
 	my $num = $_;
