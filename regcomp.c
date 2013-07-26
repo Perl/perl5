@@ -7844,11 +7844,11 @@ Perl__invlist_intersection_maybe_complement_2nd(pTHX_ SV* const a, SV* const b, 
              * must be every possible code point.  Thus the intersection is
              * simply 'a'. */
             if (*i != a) {
-                *i = invlist_clone(a);
-
                 if (*i == b) {
                     SvREFCNT_dec_NN(b);
                 }
+
+                *i = invlist_clone(a);
             }
             /* else *i is already 'a' */
             return;
