@@ -853,7 +853,7 @@ foreach $Locale (@Locale) {
     debug "# Added_alpha = ", join("",@Added_alpha), "\n";
 
     my $first_Added_alpha_test_number =  $locales_test_number + 1;
-    my $final_Added_alpha_test_number =  $first_Added_alpha_test_number + 21;
+    my $final_Added_alpha_test_number =  $first_Added_alpha_test_number + 20;
     if (@Added_alpha == 0) {
 	# If we have no Added_alpha the remaining tests are no-ops.
 	debug "# no Added_alpha, skipping tests $first_Added_alpha_test_number..$final_Added_alpha_test_number for locale '$Locale'\n";
@@ -863,28 +863,10 @@ foreach $Locale (@Locale) {
 	}
     } else {
 
-	# Test \w.
-
-        # This test is likely pointless, as everything in @Added_alpha
-        # matched \w in the first place.
-        ++$locales_test_number;
-        my @f;
-        $test_names{$locales_test_number} = 'Verify that alphas outside the C locale match \w';
-	for (@Added_alpha) {
-            if ($is_utf8_locale) {
-                use locale ':not_characters';
-                push @f, $_ unless /\w/;
-            }
-            else {
-                # Already in 'use locale'; this tests that exiting scopes works
-                push @f, $_ unless /\w/;
-            }
-        }
-        report_multi_result($Locale, $locales_test_number, \@f);
-
 	# Cross-check the whole 8-bit character set.
 
         ++$locales_test_number;
+        my @f;
         $test_names{$locales_test_number} = 'Verify that \w and [:word:] are identical';
 	for (map { chr } 0..255) {
             if ($is_utf8_locale) {
