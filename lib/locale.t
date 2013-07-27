@@ -687,7 +687,7 @@ sub report_result {
     $message = "  ($message)" if $message;
     unless ($pass_fail) {
 	$Problem{$i}{$Locale} = 1;
-	debug "# failed $i with locale '$Locale'$message\n";
+	debug "# failed $i ($test_names{$i}) with locale '$Locale'$message\n";
     } else {
 	push @{$Okay{$i}}, $Locale;
     }
@@ -1461,6 +1461,7 @@ foreach ($first_locales_test_number..$final_locales_test_number) {
             "# The locale ", (@f == 1 ? "definition" : "definitions"), "\n#\n",
 	    "#\t", $f, "\n#\n",
 	    "# on your system may have errors because the locale test $_\n",
+	    "# \"$test_names{$_}\"\n",
             "# failed in ", (@f == 1 ? "that locale" : "those locales"),
             ".\n";
 	print <<EOW;
