@@ -2221,7 +2221,6 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
     char *startpos;
     I32 minlen;		/* must match at least this many chars */
     I32 dontbother = 0;	/* how many characters not to try at end */
-    I32 end_shift = 0;			/* Same for the end. */		/* CC */
     const bool utf8_target = cBOOL(DO_UTF8(sv));
     I32 multiline;
     RXi_GET_DECL(prog,progi);
@@ -2660,7 +2659,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
 
 	/* XXXX check_substr already used to find "s", can optimize if
 	   check_substr==must. */
-	dontbother = end_shift;
+	dontbother = 0;
 	strend = HOPc(strend, -dontbother);
 	while ( (s <= last) &&
 		(s = fbm_instr((unsigned char*)HOP3(s, back_min, (back_min<0 ? strbeg : strend)),
