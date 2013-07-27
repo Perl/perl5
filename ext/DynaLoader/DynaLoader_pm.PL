@@ -85,7 +85,7 @@ package DynaLoader;
 # Tim.Bunce@ig.co.uk, August 1994
 
 BEGIN {
-    $VERSION = '1.18';
+    $VERSION = '1.19';
 }
 
 use Config;
@@ -677,6 +677,19 @@ variable added to the C code (see dlutils.c) and enabled if Perl was
 built with the B<-DDEBUGGING> flag.  This can also be set via the
 PERL_DL_DEBUG environment variable.  Set to 1 for minimal information or
 higher for more.
+
+=item $dl_dlext
+
+When specified (localised) in a module's F<.pm> file, indicates the extension
+which the module's loadable object will have. For example:
+
+    local $DynaLoader::dl_dlext = 'unusual_ext';
+
+would indicate that the module's loadable object has an extension of
+C<unusual_ext> instead of the more usual C<$Config{dlext}>.  NOTE: This also
+requires that the module's F<Makefile.PL> specify (in C<WriteMakefile()>):
+
+    DLEXT => 'unusual_ext',
 
 =item dl_findfile()
 
