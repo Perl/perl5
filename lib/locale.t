@@ -693,6 +693,19 @@ sub report_result {
     }
 }
 
+sub report_multi_result {
+    my ($Locale, $i, $results_ref) = @_;
+
+    # $results_ref points to an array, each element of which is a character that was
+    # in error for this test numbered '$i'.  If empty, the test passed
+
+    my $message = "";
+    if (@$results_ref) {
+        $message = join " ", "for", map { sprintf '\\x%02X', ord $_ } @$results_ref;
+    }
+    report_result($Locale, $i, @$results_ref == 0, $message);
+}
+
 my $first_locales_test_number = $final_without_setlocale + 1;
 my $locales_test_number;
 my $not_necessarily_a_problem_test_number;
@@ -786,21 +799,16 @@ foreach $Locale (@Locale) {
         push @failures, $x unless $ok;
         push @fold_failures, $x unless $fold_ok;
     }
-    my $message = "";
     $locales_test_number++;
     $first_casing_test_number = $locales_test_number;
     $test_names{$locales_test_number} = 'Verify that /[[:upper:]]/ matches all alpha X for which uc(X) == X and lc(X) != X';
-    $message = 'Failed for ' . join ", ", @failures if @failures;
-    report_result($Locale, $locales_test_number, scalar @failures == 0, $message);
+    report_multi_result($Locale, $locales_test_number, \@failures);
 
-    $message = "";
     $locales_test_number++;
 
     $test_names{$locales_test_number} = 'Verify that /[[:lower:]]/i matches all alpha X for which uc(X) == X and lc(X) != X';
-    $message = 'Failed for ' . join ", ", @fold_failures if @fold_failures;
-    report_result($Locale, $locales_test_number, scalar @fold_failures == 0, $message);
+    report_multi_result($Locale, $locales_test_number, \@fold_failures);
 
-    $message = "";
     undef @failures;
     undef @fold_failures;
 
@@ -823,14 +831,12 @@ foreach $Locale (@Locale) {
 
     $locales_test_number++;
     $test_names{$locales_test_number} = 'Verify that /[[:lower:]]/ matches all alpha X for which lc(X) == X and uc(X) != X';
-    $message = 'Failed for ' . join ", ", @failures if @failures;
-    report_result($Locale, $locales_test_number, scalar @failures == 0, $message);
-    $message = "";
+    report_multi_result($Locale, $locales_test_number, \@failures);
+
     $locales_test_number++;
     $final_casing_test_number = $locales_test_number;
     $test_names{$locales_test_number} = 'Verify that /[[:upper:]]/i matches all alpha X for which lc(X) == X and uc(X) != X';
-    $message = 'Failed for ' . join ", ", @fold_failures if @fold_failures;
-    report_result($Locale, $locales_test_number, scalar @fold_failures == 0, $message);
+    report_multi_result($Locale, $locales_test_number, \@fold_failures);
 
     {   # Find the alphabetic characters that are not considered alphabetics
         # in the default (C) locale.
@@ -860,22 +866,22 @@ foreach $Locale (@Locale) {
 
 	# Test \w.
 
-	my $word = join('', @Added_alpha);
-
         # This test is likely pointless, as everything in @Added_alpha
         # matched \w in the first place.
         ++$locales_test_number;
+        my @f;
         $test_names{$locales_test_number} = 'Verify that alphas outside the C locale match \w';
-        my $ok;
-        if ($is_utf8_locale) {
-            use locale ':not_characters';
-	    $ok = $word =~ /^(\w+)$/;
+	for (@Added_alpha) {
+            if ($is_utf8_locale) {
+                use locale ':not_characters';
+                push @f, $_ unless /\w/;
+            }
+            else {
+                # Already in 'use locale'; this tests that exiting scopes works
+                push @f, $_ unless /\w/;
+            }
         }
-        else {
-            # Already in 'use locale'; this tests that exiting scopes works
-	    $ok = $word =~ /^(\w+)$/;
-        }
-        report_result($Locale, $locales_test_number, $ok);
+        report_multi_result($Locale, $locales_test_number, \@f);
 
 	# Cross-check the whole 8-bit character set.
 
@@ -900,6 +906,7 @@ foreach $Locale (@Locale) {
 
 	{
 	    no locale;
+            my $ok;
 	    $a = "qwerty";
             if ($is_utf8_locale) {
                 use locale ':not_characters';
@@ -1364,10 +1371,7 @@ foreach $Locale (@Locale) {
                 push @f, $x unless lc $x eq fc $x;
             }
 	}
-	report_result($Locale, $locales_test_number, @f == 0);
-	if (@f) {
-	    print "# failed $locales_test_number locale '$Locale' characters @f\n"
-	}
+	report_multi_result($Locale, $locales_test_number, \@f);
     }
 
     # [perl #109318]
