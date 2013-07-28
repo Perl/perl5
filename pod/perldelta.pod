@@ -1,4 +1,4 @@
-=encoding utf8
+encoding utf8
 
 =head1 NAME
 
@@ -415,6 +415,10 @@ crashing [perl #118305].
 
 Undefining an inlinable lexical subroutine (C<my sub foo() { 42 } undef
 &foo>) would result in a crash if warnings were turned on.
+
+=item *
+
+Deep recursion warnings no longer crash lexical subroutines. [RT #118521]
 
 =back
 
