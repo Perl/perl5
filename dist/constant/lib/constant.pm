@@ -162,7 +162,8 @@ sub import {
 		my @list = @_;
 		if (_CAN_PCS_FOR_ARRAY) {
 		    Internals::SvREADONLY(@list, 1);
-		    Internals::SvREADONLY($list[$_], 1) for 0..$#list;
+		    # Disabled for now; see perl #119045:
+		    #Internals::SvREADONLY($list[$_], 1) for 0..$#list;
 		    if ($symtab && !exists $symtab->{$name}) {
 			$symtab->{$name} = \@list;
 			$flush_mro++;

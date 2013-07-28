@@ -393,6 +393,7 @@ SKIP: {
 # 5.19.3 and later.
 SKIP: {
     skip "fails under 5.19.2 and earlier", 2 if $] < 5.019003;
+    local $TODO = "disabled for now; breaks CPAN; see perl #119045";
     use constant constant_list => 1..2;
     for (constant_list) {
 	my $num = $_;
