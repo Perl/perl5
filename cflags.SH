@@ -327,6 +327,15 @@ for file do
         esac
       done
       ;;
+    *)
+      # clang may not be called clang
+      case "`$cc -v 2>&1`" in
+      *clang*)
+        case "$warn" in
+        *-Wno-unused-value) ;;
+        *) warn="$warn -Wno-unused-value"
+        esac
+      esac
     esac
 
 
