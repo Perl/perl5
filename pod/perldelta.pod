@@ -376,7 +376,9 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+Autovivifying a subroutine stub via C<\&$glob> started causing crashes in
+Perl 5.18.0 if the $glob was merely a copy of a real glob, i.e., a scalar
+that had had a glob assigned to it.  This has been fixed [perl #119051].
 
 =back
 
