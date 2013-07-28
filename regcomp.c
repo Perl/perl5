@@ -15526,13 +15526,37 @@ S_put_latin1_charclass_innards(pTHX_ SV *sv, char *bitmap)
             if (rangestart == -1)
                 rangestart = i;
         } else if (rangestart != -1) {
-            if (i <= rangestart + 3)
+            int j = i - 1;
+            if (i <= rangestart + 3) {  /* Individual chars in short ranges */
                 for (; rangestart < i; rangestart++)
                     put_byte(sv, rangestart);
-            else {
+            }
+            else if (   j > 255
+                     || ! isALPHANUMERIC(rangestart)
+                     || ! isALPHANUMERIC(j)
+                     || isDIGIT(rangestart) != isDIGIT(j)
+                     || isUPPER(rangestart) != isUPPER(j)
+                     || isLOWER(rangestart) != isLOWER(j)
+
+                        /* This final test should get optimized out except
+                         * on EBCDIC platforms, where it causes ranges that
+                         * cross discontinuities like i/j to be shown as hex
+                         * instead of the misleading, e.g. H-K (since that
+                         * range includes more than H, I, J, K). */
+                     || (j - rangestart)
+                         != NATIVE_TO_ASCII(j) - NATIVE_TO_ASCII(rangestart))
+            {
+                Perl_sv_catpvf(aTHX_ sv, "\\x{%02x}-\\x{%02x}",
+                               rangestart,
+                               (j < 256) ? j : 255);
+            }
+            else { /* Here, the ends of the range are both digits, or both
+                      uppercase, or both lowercase; and there's no
+                      discontinuity in the range (which could happen on EBCDIC
+                      platforms) */
                 put_byte(sv, rangestart);
                 sv_catpvs(sv, "-");
-                put_byte(sv, i - 1);
+                put_byte(sv, j);
             }
             rangestart = -1;
             has_output_anything = TRUE;
