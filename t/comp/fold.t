@@ -4,7 +4,7 @@
 # we've not yet verified that use works.
 # use strict;
 
-print "1..27\n";
+print "1..28\n";
 my $test = 0;
 
 # Historically constant folding was performed by evaluating the ops, and if
@@ -158,3 +158,10 @@ for(1+2) {
           " - 1+2 returns mutable value, just like \$a+\$b",
           "\n";
 }
+
+# [perl #119055]
+# We hide the implementation detail that qq "foo" is implemented using
+# constant folding.
+eval { ${\"hello\n"}++ };
+print "not " unless $@ =~ "Modification of a read-only value attempted at";
+print "ok ", ++$test, " - qq with no vars is a constant\n";
