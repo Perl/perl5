@@ -10568,7 +10568,9 @@ Perl_ck_svconst(pTHX_ OP *o)
 {
     PERL_ARGS_ASSERT_CK_SVCONST;
     PERL_UNUSED_CONTEXT;
-    SvREADONLY_on(cSVOPo->op_sv);
+    /* For historical reasons, shared hash scalars are not made read-only.
+     */
+    if (!SvIsCOW_shared_hash(cSVOPo->op_sv)) SvREADONLY_on(cSVOPo->op_sv);
     return o;
 }
 

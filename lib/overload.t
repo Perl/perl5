@@ -1293,16 +1293,15 @@ foreach my $op (qw(<=> == != < <= > >=)) {
 }
 
 {
-    # Check readonliness of constants, whether shared hash key
-    # scalars or no (brought up in bug #109744)
+    # Check readonliness of constants (brought up in bug #109744)
+    # For historical reasons, shared hash key scalars are exempt
     BEGIN { overload::constant integer => sub { "main" }; }
     eval { ${\5} = 'whatever' };
     like $@, qr/^Modification of a read-only value attempted at /,
 	'constant overloading makes read-only constants';
     BEGIN { overload::constant integer => sub { __PACKAGE__ }; }
     eval { ${\5} = 'whatever' };
-    like $@, qr/^Modification of a read-only value attempted at /,
-	'... even with shared hash key scalars';
+    is $@, "", 'except with shared hash key scalars';
 }
 
 {
