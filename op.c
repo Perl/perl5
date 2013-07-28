@@ -7918,13 +7918,19 @@ CV *
 Perl_newSTUB(pTHX_ GV *gv, bool fake)
 {
     CV *cv = MUTABLE_CV(newSV_type(SVt_PVCV));
+    GV *cvgv;
     PERL_ARGS_ASSERT_NEWSTUB;
     assert(!GvCVu(gv));
     GvCV_set(gv, cv);
     GvCVGEN(gv) = 0;
     if (!fake && HvENAME_HEK(GvSTASH(gv)))
 	gv_method_changed(gv);
-    CvGV_set(cv, gv);
+    if (SvFAKE(gv)) {
+	cvgv = gv_fetchsv((SV *)gv, GV_ADDMULTI, SVt_PVCV);
+	SvFAKE_off(cvgv);
+    }
+    else cvgv = gv;
+    CvGV_set(cv, cvgv);
     CvFILE_set_from_cop(cv, PL_curcop);
     CvSTASH_set(cv, PL_curstash);
     GvMULTI_on(gv);

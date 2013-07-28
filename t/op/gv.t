@@ -12,7 +12,7 @@ BEGIN {
 
 use warnings;
 
-plan( tests => 250 );
+plan( tests => 252 );
 
 # type coercion on assignment
 $foo = 'foo';
@@ -958,6 +958,20 @@ package lrcg {
 # the harness to consider this test script to have failed.)
 $::{aoeuaoeuaoeaoeu} = __PACKAGE__; # cow
 () = *{"aoeuaoeuaoeaoeu"};
+
+$x = *_119051;
+$y = \&$x;
+undef $x;
+eval { &$y };
+pass "No crash due to CvGV(vivified stub) pointing to flattened glob copy";
+# Not really supported, but this should not crash either:
+$x = *_119051again;
+delete $::{_119051again};
+$::{_119051again} = $x;    # now we have a fake glob under the right name
+$y = \&$x;                 # so when this tries to look up the right GV for
+undef $::{_119051again};   # CvGV, it still gets a fake one
+eval { $y->() };
+pass "No crash due to CvGV pointing to glob copy in the stash";
 
 __END__
 Perl
