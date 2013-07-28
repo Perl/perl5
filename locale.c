@@ -614,7 +614,6 @@ S_is_cur_LC_category_utf8(pTHX_ int category)
      * wrong result.  It errs on the side of not being a UTF-8 locale. */
 
     char *save_input_locale = NULL;
-    int has_hyphen;
     STRLEN final_pos;
 
     assert(category != LC_ALL);
