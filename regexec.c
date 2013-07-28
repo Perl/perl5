@@ -557,12 +557,8 @@ Perl_pregexec(pTHX_ REGEXP * const prog, char* stringarg, char *strend,
  * with giant delta may be not rechecked).
  */
 
-/* Assumptions: if ANCH_GPOS, then strpos is anchored. XXXX Check GPOS logic */
-
 /* If SCREAM, then SvPVX_const(sv) should be compatible with strpos and strend.
    Otherwise, only SvCUR(sv) is used to get strbeg. */
-
-/* XXXX We assume that strpos is strbeg unless sv. */
 
 /* XXXX Some places assume that there is a fixed substring.
 	An update may be needed if optimizer marks as "INTUITable"
@@ -671,14 +667,15 @@ Perl_re_intuit_start(pTHX_
         }
 	check = prog->check_substr;
     }
-    if (prog->extflags & RXf_ANCH) {	/* Match at beg-of-str or after \n */
-	ml_anch = !( (prog->extflags & RXf_ANCH_SINGLE)
+    if ((prog->extflags & RXf_ANCH)	/* Match at beg-of-str or after \n */
+	 && !(prog->extflags & RXf_ANCH_GPOS)) /* \G isn't a BOS or \n */
+    {
+        ml_anch = !( (prog->extflags & RXf_ANCH_SINGLE)
 		     || ( (prog->extflags & RXf_ANCH_BOL)
 			  && !multiline ) );	/* Check after \n? */
 
 	if (!ml_anch) {
-	  if ( !(prog->extflags & RXf_ANCH_GPOS) /* Checked by the caller */
-		&& !(prog->intflags & PREGf_IMPLICIT) /* not a real BOL */
+	  if (    !(prog->intflags & PREGf_IMPLICIT) /* not a real BOL */
 	       && (strpos != strbeg)) {
 	      DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "Not at start...\n"));
 	      goto fail;
@@ -1112,8 +1109,11 @@ Perl_re_intuit_start(pTHX_
 	/* If regstclass takes bytelength more than 1: If charlength==1, OK.
 	   This leaves EXACTF-ish only, which are dealt with in find_byclass().  */
         const U8* const str = (U8*)STRING(progi->regstclass);
+        /* XXX this value could be pre-computed */
         const int cl_l = (PL_regkind[OP(progi->regstclass)] == EXACT
-		    ? CHR_DIST(str+STR_LEN(progi->regstclass), str)
+		    ?  (reginfo->is_utf8_pat
+                        ? utf8_distance(str + STR_LEN(progi->regstclass), str)
+                        : STR_LEN(progi->regstclass))
 		    : 1);
 	char * endpos;
 	if (prog->anchored_substr || prog->anchored_utf8 || ml_anch)
@@ -2047,6 +2047,155 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
     return s;
 }
 
+/* set RX_SAVED_COPY, RX_SUBBEG etc.
+ * flags have same meanings as with regexec_flags() */
+
+static void
+S_reg_set_capture_string(pTHX_ REGEXP * const rx,
+                            char *strbeg,
+                            char *strend,
+                            SV *sv,
+                            U32 flags,
+                            bool utf8_target)
+{
+    struct regexp *const prog = ReANY(rx);
+
+    if (flags & REXEC_COPY_STR) {
+#ifdef PERL_ANY_COW
+        if (SvCANCOW(sv)) {
+            if (DEBUG_C_TEST) {
+                PerlIO_printf(Perl_debug_log,
+                              "Copy on write: regexp capture, type %d\n",
+                              (int) SvTYPE(sv));
+            }
+            /* Create a new COW SV to share the match string and store
+             * in saved_copy, unless the current COW SV in saved_copy
+             * is valid and suitable for our purpose */
+            if ((   prog->saved_copy
+                 && SvIsCOW(prog->saved_copy)
+                 && SvPOKp(prog->saved_copy)
+                 && SvIsCOW(sv)
+                 && SvPOKp(sv)
+                 && SvPVX(sv) == SvPVX(prog->saved_copy)))
+            {
+                /* just reuse saved_copy SV */
+                if (RXp_MATCH_COPIED(prog)) {
+                    Safefree(prog->subbeg);
+                    RXp_MATCH_COPIED_off(prog);
+                }
+            }
+            else {
+                /* create new COW SV to share string */
+                RX_MATCH_COPY_FREE(rx);
+                prog->saved_copy = sv_setsv_cow(prog->saved_copy, sv);
+            }
+            prog->subbeg = (char *)SvPVX_const(prog->saved_copy);
+            assert (SvPOKp(prog->saved_copy));
+            prog->sublen  = strend - strbeg;
+            prog->suboffset = 0;
+            prog->subcoffset = 0;
+        } else
+#endif
+        {
+            I32 min = 0;
+            I32 max = strend - strbeg;
+            I32 sublen;
+
+            if (    (flags & REXEC_COPY_SKIP_POST)
+                && !(prog->extflags & RXf_PMf_KEEPCOPY) /* //p */
+                && !(PL_sawampersand & SAWAMPERSAND_RIGHT)
+            ) { /* don't copy $' part of string */
+                U32 n = 0;
+                max = -1;
+                /* calculate the right-most part of the string covered
+                 * by a capture. Due to look-ahead, this may be to
+                 * the right of $&, so we have to scan all captures */
+                while (n <= prog->lastparen) {
+                    if (prog->offs[n].end > max)
+                        max = prog->offs[n].end;
+                    n++;
+                }
+                if (max == -1)
+                    max = (PL_sawampersand & SAWAMPERSAND_LEFT)
+                            ? prog->offs[0].start
+                            : 0;
+                assert(max >= 0 && max <= strend - strbeg);
+            }
+
+            if (    (flags & REXEC_COPY_SKIP_PRE)
+                && !(prog->extflags & RXf_PMf_KEEPCOPY) /* //p */
+                && !(PL_sawampersand & SAWAMPERSAND_LEFT)
+            ) { /* don't copy $` part of string */
+                U32 n = 0;
+                min = max;
+                /* calculate the left-most part of the string covered
+                 * by a capture. Due to look-behind, this may be to
+                 * the left of $&, so we have to scan all captures */
+                while (min && n <= prog->lastparen) {
+                    if (   prog->offs[n].start != -1
+                        && prog->offs[n].start < min)
+                    {
+                        min = prog->offs[n].start;
+                    }
+                    n++;
+                }
+                if ((PL_sawampersand & SAWAMPERSAND_RIGHT)
+                    && min >  prog->offs[0].end
+                )
+                    min = prog->offs[0].end;
+
+            }
+
+            assert(min >= 0 && min <= max && min <= strend - strbeg);
+            sublen = max - min;
+
+            if (RX_MATCH_COPIED(rx)) {
+                if (sublen > prog->sublen)
+                    prog->subbeg =
+                            (char*)saferealloc(prog->subbeg, sublen+1);
+            }
+            else
+                prog->subbeg = (char*)safemalloc(sublen+1);
+            Copy(strbeg + min, prog->subbeg, sublen, char);
+            prog->subbeg[sublen] = '\0';
+            prog->suboffset = min;
+            prog->sublen = sublen;
+            RX_MATCH_COPIED_on(rx);
+        }
+        prog->subcoffset = prog->suboffset;
+        if (prog->suboffset && utf8_target) {
+            /* Convert byte offset to chars.
+             * XXX ideally should only compute this if @-/@+
+             * has been seen, a la PL_sawampersand ??? */
+
+            /* If there's a direct correspondence between the
+             * string which we're matching and the original SV,
+             * then we can use the utf8 len cache associated with
+             * the SV. In particular, it means that under //g,
+             * sv_pos_b2u() will use the previously cached
+             * position to speed up working out the new length of
+             * subcoffset, rather than counting from the start of
+             * the string each time. This stops
+             *   $x = "\x{100}" x 1E6; 1 while $x =~ /(.)/g;
+             * from going quadratic */
+            if (SvPOKp(sv) && SvPVX(sv) == strbeg)
+                sv_pos_b2u(sv, &(prog->subcoffset));
+            else
+                prog->subcoffset = utf8_length((U8*)strbeg,
+                                    (U8*)(strbeg+prog->suboffset));
+        }
+    }
+    else {
+        RX_MATCH_COPY_FREE(rx);
+        prog->subbeg = strbeg;
+        prog->suboffset = 0;
+        prog->subcoffset = 0;
+        prog->sublen = strend - strbeg;
+    }
+}
+
+
+
 
 /*
  - regexec_flags - match a regexp against a string
@@ -2061,8 +2210,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
 /* sv:        SV being matched: only used for utf8 flag, pos() etc; string
  *            itself is accessed via the pointers above */
 /* data:      May be used for some additional optimizations.
-              Currently its only used, with a U32 cast, for transmitting
-              the ganch offset when doing a /g match. This will change */
+              Currently unused. */
 /* nosave:    For optimizations. */
 
 {
@@ -2070,12 +2218,10 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
     struct regexp *const prog = ReANY(rx);
     char *s;
     regnode *c;
-    char *startpos = stringarg;
+    char *startpos;
     I32 minlen;		/* must match at least this many chars */
     I32 dontbother = 0;	/* how many characters not to try at end */
     I32 end_shift = 0;			/* Same for the end. */		/* CC */
-    I32 scream_pos = -1;		/* Internal iterator of scream. */
-    char *scream_olds = NULL;
     const bool utf8_target = cBOOL(DO_UTF8(sv));
     I32 multiline;
     RXi_GET_DECL(prog,progi);
@@ -2089,16 +2235,69 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
     PERL_UNUSED_ARG(data);
 
     /* Be paranoid... */
-    if (prog == NULL || startpos == NULL) {
+    if (prog == NULL || stringarg == NULL) {
 	Perl_croak(aTHX_ "NULL regexp parameter");
 	return 0;
     }
 
     DEBUG_EXECUTE_r(
-        debug_start_match(rx, utf8_target, startpos, strend,
+        debug_start_match(rx, utf8_target, stringarg, strend,
         "Matching");
     );
 
+    startpos = stringarg;
+
+    if (prog->extflags & RXf_GPOS_SEEN) {
+        MAGIC *mg;
+
+        /* set reginfo->ganch, the position where \G can match */
+
+        reginfo->ganch =
+            (flags & REXEC_IGNOREPOS)
+            ? stringarg /* use start pos rather than pos() */
+            : (sv && (mg = mg_find_mglob(sv)) && mg->mg_len >= 0)
+            ? strbeg + mg->mg_len /* Defined pos() */
+            : strbeg; /* pos() not defined; use start of string */
+
+        DEBUG_GPOS_r(PerlIO_printf(Perl_debug_log,
+            "GPOS ganch set to strbeg[%"IVdf"]\n", reginfo->ganch - strbeg));
+
+        /* in the presence of \G, we may need to start looking earlier in
+         * the string than the suggested start point of stringarg:
+         * if gofs->prog is set, then that's a known, fixed minimum
+         * offset, such as
+         * /..\G/:   gofs = 2
+         * /ab|c\G/: gofs = 1
+         * or if the minimum offset isn't known, then we have to go back
+         * to the start of the string, e.g. /w+\G/
+         */
+
+        if (prog->extflags & RXf_ANCH_GPOS) {
+            startpos  = reginfo->ganch - prog->gofs;
+            if (startpos <
+                ((flags & REXEC_FAIL_ON_UNDERFLOW) ? stringarg : strbeg))
+            {
+                DEBUG_r(PerlIO_printf(Perl_debug_log,
+                        "fail: ganch-gofs before earliest possible start\n"));
+                return 0;
+            }
+        }
+        else if (prog->gofs) {
+            if (startpos - prog->gofs < strbeg)
+                startpos = strbeg;
+            else
+                startpos -= prog->gofs;
+        }
+        else if (prog->extflags & RXf_GPOS_FLOAT)
+            startpos = strbeg;
+    }
+
+    minlen = prog->minlen;
+    if ((startpos + minlen) > strend || startpos < strbeg) {
+        DEBUG_r(PerlIO_printf(Perl_debug_log,
+                    "Regex match can't succeed, so not even tried\n"));
+        return 0;
+    }
 
     /* at the end of this function, we'll do a LEAVE_SCOPE(oldsave),
      * which will call destuctors to reset PL_regmatch_state, free higher
@@ -2107,10 +2306,54 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
 
     oldsave = PL_savestack_ix;
 
+    s = startpos;
+
+    if ((prog->extflags & RXf_USE_INTUIT)
+        && !(flags & REXEC_CHECKED))
+    {
+	s = re_intuit_start(rx, sv, strbeg, startpos, strend,
+                                    flags, NULL);
+	if (!s)
+	    return 0;
+
+	if (prog->extflags & RXf_CHECK_ALL) {
+            /* we can match based purely on the result of INTUIT.
+             * Set up captures etc just for $& and $-[0]
+             * (an intuit-only match wont have $1,$2,..) */
+            assert(!prog->nparens);
+
+            /* s/// doesn't like it if $& is earlier than where we asked it to
+             * start searching (which can happen on something like /.\G/) */
+            if (       (flags & REXEC_FAIL_ON_UNDERFLOW)
+                    && (s < stringarg))
+            {
+                /* this should only be possible under \G */
+                assert(prog->extflags & RXf_GPOS_SEEN);
+                DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
+                    "matched, but failing for REXEC_FAIL_ON_UNDERFLOW\n"));
+                goto phooey;
+            }
+
+            /* match via INTUIT shouldn't have any captures.
+             * Let @-, @+, $^N know */
+            prog->lastparen = prog->lastcloseparen = 0;
+            RX_MATCH_UTF8_set(rx, utf8_target);
+            prog->offs[0].start = s - strbeg;
+            prog->offs[0].end = utf8_target
+                ? (char*)utf8_hop((U8*)s, prog->minlenret) - strbeg
+                : s - strbeg + prog->minlenret;
+            if ( !(flags & REXEC_NOT_FIRST) )
+                S_reg_set_capture_string(aTHX_ rx,
+                                        strbeg, strend,
+                                        sv, flags, utf8_target);
+
+	    return 1;
+        }
+    }
+
     multiline = prog->extflags & RXf_PMf_MULTILINE;
-    minlen = prog->minlen;
     
-    if (strend - startpos < (minlen+(prog->check_offset_min<0?prog->check_offset_min:0))) {
+    if (strend - s < (minlen+(prog->check_offset_min<0?prog->check_offset_min:0))) {
         DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
 			      "String too short [regexec_flags]...\n"));
 	goto phooey;
@@ -2133,7 +2376,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
     reginfo->poscache_maxiter = 0; /* not yet started a countdown */
     reginfo->strend = strend;
     /* see how far we have to get to not match where we matched before */
-    reginfo->till = startpos+minend;
+    reginfo->till = stringarg + minend;
 
     if (prog->extflags & RXf_EVAL_SEEN && SvPADTMP(sv) && !IS_PADGV(sv)) {
         /* SAVEFREESV, not sv_mortalcopy, as this SV must last until after
@@ -2198,41 +2441,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
     }
 
     /* If there is a "must appear" string, look for it. */
-    s = startpos;
 
-    if (prog->extflags & RXf_GPOS_SEEN) { /* Need to set reginfo->ganch */
-	MAGIC *mg;
-	if (flags & REXEC_IGNOREPOS){	/* Means: check only at start */
-	    reginfo->ganch = startpos + prog->gofs;
-	    DEBUG_GPOS_r(PerlIO_printf(Perl_debug_log,
-	      "GPOS IGNOREPOS: reginfo->ganch = startpos + %"UVxf"\n",(UV)prog->gofs));
-	} else if (sv && (mg = mg_find_mglob(sv))
-		  && mg->mg_len >= 0) {
-	    reginfo->ganch = strbeg + mg->mg_len;	/* Defined pos() */
-	    DEBUG_GPOS_r(PerlIO_printf(Perl_debug_log,
-		"GPOS MAGIC: reginfo->ganch = strbeg + %"IVdf"\n",(IV)mg->mg_len));
-
-	    if (prog->extflags & RXf_ANCH_GPOS) {
-	        if (s > reginfo->ganch)
-		    goto phooey;
-		s = reginfo->ganch - prog->gofs;
-	        DEBUG_GPOS_r(PerlIO_printf(Perl_debug_log,
-		     "GPOS ANCH_GPOS: s = ganch - %"UVxf"\n",(UV)prog->gofs));
-		if (s < strbeg)
-		    goto phooey;
-	    }
-	}
-	else if (data) {
-	    reginfo->ganch = strbeg + PTR2UV(data);
-            DEBUG_GPOS_r(PerlIO_printf(Perl_debug_log,
-		 "GPOS DATA: reginfo->ganch= strbeg + %"UVxf"\n",PTR2UV(data)));
-
-	} else {				/* pos() not defined */
-	    reginfo->ganch = strbeg;
-            DEBUG_GPOS_r(PerlIO_printf(Perl_debug_log,
-		 "GPOS: reginfo->ganch = strbeg\n"));
-	}
-    }
     if (PL_curpm && (PM_GETRE(PL_curpm) == rx)) {
         /* We have to be careful. If the previous successful match
            was from this regex we don't want a subsequent partially
@@ -2251,24 +2460,11 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
 	    PTR2UV(prog->offs)
 	));
     }
-    if (!(flags & REXEC_CHECKED) && (prog->check_substr != NULL || prog->check_utf8 != NULL)) {
-	re_scream_pos_data d;
-
-	d.scream_olds = &scream_olds;
-	d.scream_pos = &scream_pos;
-	s = re_intuit_start(rx, sv, strbeg, s, strend, flags, &d);
-	if (!s) {
-	    DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "Not present...\n"));
-	    goto phooey;	/* not present */
-	}
-    }
-
-
 
     /* Simplest case:  anchored match need be tried only once. */
     /*  [unless only anchor is BOL and multiline is set] */
     if (prog->extflags & (RXf_ANCH & ~RXf_ANCH_GPOS)) {
-	if (s == startpos && regtry(reginfo, &startpos))
+	if (s == startpos && regtry(reginfo, &s))
 	    goto got_it;
 	else if (multiline || (prog->intflags & PREGf_IMPLICIT)
 		 || (prog->extflags & RXf_ANCH_MBOL)) /* XXXX SBOL? */
@@ -2347,12 +2543,11 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
 	goto phooey;
     } else if (RXf_GPOS_CHECK == (prog->extflags & RXf_GPOS_CHECK)) 
     {
-        /* the warning about reginfo->ganch being used without initialization
-           is bogus -- we set it above, when prog->extflags & RXf_GPOS_SEEN 
-           and we only enter this block when the same bit is set. */
-        char *tmp_s = reginfo->ganch - prog->gofs;
-
-	if (tmp_s >= strbeg && regtry(reginfo, &tmp_s))
+        /* For anchored \G, the only position it can match from is
+         * (ganch-gofs); we already set startpos to this above; if intuit
+         * moved us on from there, we can't possibly succeed */
+        assert(startpos == reginfo->ganch - prog->gofs);
+	if (s == startpos && regtry(reginfo, &s))
 	    goto got_it;
 	goto phooey;
     }
@@ -2464,7 +2659,6 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
 
 	/* XXXX check_substr already used to find "s", can optimize if
 	   check_substr==must. */
-	scream_pos = -1;
 	dontbother = end_shift;
 	strend = HOPc(strend, -dontbother);
 	while ( (s <= last) &&
@@ -2658,6 +2852,18 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
     goto phooey;
 
 got_it:
+    /* s/// doesn't like it if $& is earlier than where we asked it to
+     * start searching (which can happen on something like /.\G/) */
+    if (       (flags & REXEC_FAIL_ON_UNDERFLOW)
+            && (prog->offs[0].start < stringarg - strbeg))
+    {
+        /* this should only be possible under \G */
+        assert(prog->extflags & RXf_GPOS_SEEN);
+        DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
+            "matched, but failing for REXEC_FAIL_ON_UNDERFLOW\n"));
+        goto phooey;
+    }
+
     DEBUG_BUFFERS_r(
 	if (swap)
 	    PerlIO_printf(Perl_debug_log,
@@ -2680,123 +2886,10 @@ got_it:
     RX_MATCH_UTF8_set(rx, utf8_target);
 
     /* make sure $`, $&, $', and $digit will work later */
-    if ( !(flags & REXEC_NOT_FIRST) ) {
-	if (flags & REXEC_COPY_STR) {
-#ifdef PERL_ANY_COW
-	    if (SvCANCOW(sv)) {
-		if (DEBUG_C_TEST) {
-		    PerlIO_printf(Perl_debug_log,
-				  "Copy on write: regexp capture, type %d\n",
-				  (int) SvTYPE(sv));
-		}
-                RX_MATCH_COPY_FREE(rx);
-		prog->saved_copy = sv_setsv_cow(prog->saved_copy, sv);
-		prog->subbeg = (char *)SvPVX_const(prog->saved_copy);
-		assert (SvPOKp(prog->saved_copy));
-                prog->sublen  = reginfo->strend - strbeg;
-                prog->suboffset = 0;
-                prog->subcoffset = 0;
-	    } else
-#endif
-	    {
-                I32 min = 0;
-                I32 max = reginfo->strend - strbeg;
-                I32 sublen;
-
-                if (    (flags & REXEC_COPY_SKIP_POST)
-                    && !(RX_EXTFLAGS(rx) & RXf_PMf_KEEPCOPY) /* //p */
-                    && !(PL_sawampersand & SAWAMPERSAND_RIGHT)
-                ) { /* don't copy $' part of string */
-                    U32 n = 0;
-                    max = -1;
-                    /* calculate the right-most part of the string covered
-                     * by a capture. Due to look-ahead, this may be to
-                     * the right of $&, so we have to scan all captures */
-                    while (n <= prog->lastparen) {
-                        if (prog->offs[n].end > max)
-                            max = prog->offs[n].end;
-                        n++;
-                    }
-                    if (max == -1)
-                        max = (PL_sawampersand & SAWAMPERSAND_LEFT)
-                                ? prog->offs[0].start
-                                : 0;
-                    assert(max >= 0 && max <= reginfo->strend - strbeg);
-                }
-
-                if (    (flags & REXEC_COPY_SKIP_PRE)
-                    && !(RX_EXTFLAGS(rx) & RXf_PMf_KEEPCOPY) /* //p */
-                    && !(PL_sawampersand & SAWAMPERSAND_LEFT)
-                ) { /* don't copy $` part of string */
-                    U32 n = 0;
-                    min = max;
-                    /* calculate the left-most part of the string covered
-                     * by a capture. Due to look-behind, this may be to
-                     * the left of $&, so we have to scan all captures */
-                    while (min && n <= prog->lastparen) {
-                        if (   prog->offs[n].start != -1
-                            && prog->offs[n].start < min)
-                        {
-                            min = prog->offs[n].start;
-                        }
-                        n++;
-                    }
-                    if ((PL_sawampersand & SAWAMPERSAND_RIGHT)
-                        && min >  prog->offs[0].end
-                    )
-                        min = prog->offs[0].end;
-
-                }
-
-                assert(min >= 0 && min <= max
-                    && min <= reginfo->strend - strbeg);
-                sublen = max - min;
-
-                if (RX_MATCH_COPIED(rx)) {
-                    if (sublen > prog->sublen)
-                        prog->subbeg =
-                                (char*)saferealloc(prog->subbeg, sublen+1);
-                }
-                else
-                    prog->subbeg = (char*)safemalloc(sublen+1);
-                Copy(strbeg + min, prog->subbeg, sublen, char);
-                prog->subbeg[sublen] = '\0';
-                prog->suboffset = min;
-                prog->sublen = sublen;
-                RX_MATCH_COPIED_on(rx);
-	    }
-            prog->subcoffset = prog->suboffset;
-            if (prog->suboffset && utf8_target) {
-                /* Convert byte offset to chars.
-                 * XXX ideally should only compute this if @-/@+
-                 * has been seen, a la PL_sawampersand ??? */
-
-                /* If there's a direct correspondence between the
-                 * string which we're matching and the original SV,
-                 * then we can use the utf8 len cache associated with
-                 * the SV. In particular, it means that under //g,
-                 * sv_pos_b2u() will use the previously cached
-                 * position to speed up working out the new length of
-                 * subcoffset, rather than counting from the start of
-                 * the string each time. This stops
-                 *   $x = "\x{100}" x 1E6; 1 while $x =~ /(.)/g;
-                 * from going quadratic */
-                if (SvPOKp(sv) && SvPVX(sv) == strbeg)
-                    sv_pos_b2u(sv, &(prog->subcoffset));
-                else
-                    prog->subcoffset = utf8_length((U8*)strbeg,
-                                        (U8*)(strbeg+prog->suboffset));
-            }
-	}
-	else {
-            RX_MATCH_COPY_FREE(rx);
-	    prog->subbeg = strbeg;
-	    prog->suboffset = 0;
-	    prog->subcoffset = 0;
-            /* use reginfo->strend, as strend may have been modified */
-	    prog->sublen = reginfo->strend - strbeg;
-	}
-    }
+    if ( !(flags & REXEC_NOT_FIRST) )
+        S_reg_set_capture_string(aTHX_ rx,
+                                    strbeg, reginfo->strend,
+                                    sv, flags, utf8_target);
 
     return 1;
 

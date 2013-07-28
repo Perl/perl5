@@ -226,14 +226,10 @@ PP(pp_substcont)
 	if (SvTAINTED(TOPs))
 	    cx->sb_rxtainted |= SUBST_TAINT_REPL;
 	sv_catsv_nomg(dstr, POPs);
-	/* XXX: adjust for positive offsets of \G for instance s/(.)\G//g with positive pos() */
-	s -= RX_GOFS(rx);
-
-	/* Are we done */
 	if (CxONCE(cx) || s < orig ||
-		!CALLREGEXEC(rx, s, cx->sb_strend, orig,
-			     (s == m) + RX_GOFS(rx), cx->sb_targ, NULL,
-                                (REXEC_IGNOREPOS|REXEC_NOT_FIRST)))
+                !CALLREGEXEC(rx, s, cx->sb_strend, orig,
+			     (s == m), cx->sb_targ, NULL,
+                    (REXEC_IGNOREPOS|REXEC_NOT_FIRST|REXEC_FAIL_ON_UNDERFLOW)))
 	{
 	    SV *targ = cx->sb_targ;
 

@@ -1333,6 +1333,8 @@ sub run_tests {
         1 while /(a+b?)(*COMMIT)(?{$count++; push @res,$1})(*FAIL)/g;
         is($count, 1, "Expect 1 with (*COMMIT)");
         is("@res", "aaab", "Adjacent (*COMMIT) works as expected");
+
+	ok("1\n2a\n" !~ /^\d+(*COMMIT)\w+/m, "COMMIT and anchors");
     }
 
     {

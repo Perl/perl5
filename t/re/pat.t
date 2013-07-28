@@ -20,7 +20,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 670;  # Update this when adding/deleting tests.
+plan tests => 694;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -726,10 +726,36 @@ sub run_tests {
         like($str, qr/^..\G/, $message);
         unlike($str, qr/^...\G/, $message);
         ok($str =~ /\G../ && $& eq 'cd', $message);
-
-        local $::TODO = $::running_as_thread;
         ok($str =~ /.\G./ && $& eq 'bc', $message);
+
     }
+
+    {
+        my $message = '\G and intuit and anchoring';
+	$_ = "abcdef";
+	pos = 0;
+	ok($_ =~ /\Gabc/, $message);
+	ok($_ =~ /^\Gabc/, $message);
+
+	pos = 3;
+	ok($_ =~ /\Gdef/, $message);
+	pos = 3;
+	ok($_ =~ /\Gdef$/, $message);
+	pos = 3;
+	ok($_ =~ /abc\Gdef$/, $message);
+	pos = 3;
+	ok($_ =~ /^abc\Gdef$/, $message);
+	pos = 3;
+	ok($_ =~ /c\Gd/, $message);
+    }
+
+    {
+        my $s = '123';
+        pos($s) = 1;
+        my @a = $s =~ /(\d)\G/g; # this infinitely looped up till 5.19.1
+        is("@a", "1", '\G looping');
+    }
+
 
     {
         my $message = 'pos inside (?{ })';
@@ -799,22 +825,19 @@ sub run_tests {
         my $message = '\G anchor checks';
         my $foo = 'aabbccddeeffgg';
         pos ($foo) = 1;
-        {
-            local $::TODO = $::running_as_thread;
-            no warnings 'uninitialized';
-            ok($foo =~ /.\G(..)/g, $message);
-            is($1, 'ab', $message);
 
-            pos ($foo) += 1;
-            ok($foo =~ /.\G(..)/g, $message);
-            is($1, 'cc', $message);
+	ok($foo =~ /.\G(..)/g, $message);
+	is($1, 'ab', $message);
 
-            pos ($foo) += 1;
-            ok($foo =~ /.\G(..)/g, $message);
-            is($1, 'de', $message);
+	pos ($foo) += 1;
+	ok($foo =~ /.\G(..)/g, $message);
+	is($1, 'cc', $message);
 
-            ok($foo =~ /\Gef/g, $message);
-        }
+	pos ($foo) += 1;
+	ok($foo =~ /.\G(..)/g, $message);
+	is($1, 'de', $message);
+
+	ok($foo =~ /\Gef/g, $message);
 
         undef pos $foo;
         ok($foo =~ /\G(..)/g, $message);
@@ -826,6 +849,36 @@ sub run_tests {
         pos ($foo) = 5;
         ok($foo =~ /\G(..)/g, $message);
         is($1, 'cd', $message);
+    }
+
+    {
+        my $message = 'basic \G floating checks';
+        my $foo = 'aabbccddeeffgg';
+        pos ($foo) = 1;
+
+	ok($foo =~ /a+\G(..)/g, "$message: a+\\G");
+	is($1, 'ab', "$message: ab");
+
+	pos ($foo) += 1;
+	ok($foo =~ /b+\G(..)/g, "$message: b+\\G");
+	is($1, 'cc', "$message: cc");
+
+	pos ($foo) += 1;
+	ok($foo =~ /d+\G(..)/g, "$message: d+\\G");
+	is($1, 'de', "$message: de");
+
+	ok($foo =~ /\Gef/g, "$message: \\Gef");
+
+        pos ($foo) = 1;
+
+	ok($foo =~ /(?=a+\G)(..)/g, "$message: (?a+\\G)");
+	is($1, 'aa', "$message: aa");
+
+        pos ($foo) = 2;
+
+	ok($foo =~ /a(?=a+\G)(..)/g, "$message: a(?=a+\\G)");
+	is($1, 'ab', "$message: ab");
+
     }
 
     {
@@ -1381,6 +1434,20 @@ EOP
             }
         }
     }
+
+    # this mixture of readonly (not COWable) and COWable strings
+    # messed up the capture buffers under COW. The actual test results
+    # are incidental; the issue is was an AddressSanitizer failure
+    {
+	my $c ='AB';
+	my $res = '';
+	for ($c, 'C', $c, 'DE') {
+	    ok(/(.)/, "COWable match");
+	    $res .= $1;
+	}
+	is($res, "ACAD");
+    }
+
 
 } # End of sub run_tests
 
