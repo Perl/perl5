@@ -15491,12 +15491,7 @@ S_put_byte(pTHX_ SV *sv, int c)
             case '\a': Perl_sv_catpvf(aTHX_ sv, "\\a"); break;
 
             default:
-                if (c < 256) {
-                    Perl_sv_catpvf(aTHX_ sv, "\\x%02x", c);
-                }
-                else {
-                    Perl_sv_catpvf(aTHX_ sv, "\\x{%x}", c);
-                }
+                Perl_sv_catpvf(aTHX_ sv, "\\x{%x}", c);
                 break;
         }
     }
