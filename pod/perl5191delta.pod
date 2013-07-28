@@ -650,6 +650,10 @@ subroutines no longer cause crashes at compile time.
 
 =item *
 
+Deep recursion warnings no longer crash lexical subroutines. [RT #118521]
+
+=item *
+
 The warning produced by C<-l $handle> now applies to IO refs and globs, not
 just to glob refs.  That warning is also now UTF8-clean. [RT #117595]
 
