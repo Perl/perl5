@@ -882,6 +882,7 @@
 #define dump_trie_interim_table(a,b,c,d,e)	S_dump_trie_interim_table(aTHX_ a,b,c,d,e)
 #define dumpuntil(a,b,c,d,e,f,g,h)	S_dumpuntil(aTHX_ a,b,c,d,e,f,g,h)
 #define put_byte(a,b)		S_put_byte(aTHX_ a,b)
+#define put_latin1_charclass_innards(a,b)	S_put_latin1_charclass_innards(aTHX_ a,b)
 #define regdump_extflags(a,b)	S_regdump_extflags(aTHX_ a,b)
 #define regdump_intflags(a,b)	S_regdump_intflags(aTHX_ a,b)
 #define regtail_study(a,b,c,d)	S_regtail_study(aTHX_ a,b,c,d)

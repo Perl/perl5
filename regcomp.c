@@ -14685,26 +14685,10 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
             )
         );
         if ( IS_ANYOF_TRIE(op) || trie->bitmap ) {
-            int i;
-            int rangestart = -1;
-            U8* bitmap = IS_ANYOF_TRIE(op) ? (U8*)ANYOF_BITMAP(o) : (U8*)TRIE_BITMAP(trie);
             sv_catpvs(sv, "[");
-            for (i = 0; i <= 256; i++) {
-                if (i < 256 && BITMAP_TEST(bitmap,i)) {
-                    if (rangestart == -1)
-                        rangestart = i;
-                } else if (rangestart != -1) {
-                    if (i <= rangestart + 3)
-                        for (; rangestart < i; rangestart++)
-                            put_byte(sv, rangestart);
-                    else {
-                        put_byte(sv, rangestart);
-                        sv_catpvs(sv, "-");
-                        put_byte(sv, i - 1);
-                    }
-                    rangestart = -1;
-                }
-            }
+            (void) put_latin1_charclass_innards(sv, IS_ANYOF_TRIE(op)
+                                                   ? ANYOF_BITMAP(o)
+                                                   : TRIE_BITMAP(trie));
             sv_catpvs(sv, "]");
         } 
 	 
@@ -14748,7 +14732,6 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
     } else if (k == LOGICAL)
 	Perl_sv_catpvf(aTHX_ sv, "[%d]", o->flags);	/* 2: embedded, otherwise 1 */
     else if (k == ANYOF) {
-	int i, rangestart = -1;
 	const U8 flags = ANYOF_FLAGS(o);
 	int do_sep = 0;
 
@@ -14762,32 +14745,19 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
 	    sv_catpvs(sv, "^");
 
 	/* output what the standard cp 0-255 bitmap matches */
-	for (i = 0; i <= 256; i++) {
-	    if (i < 256 && ANYOF_BITMAP_TEST(o,i)) {
-		if (rangestart == -1)
-		    rangestart = i;
-	    } else if (rangestart != -1) {
-		if (i <= rangestart + 3)
-		    for (; rangestart < i; rangestart++)
-			put_byte(sv, rangestart);
-		else {
-		    put_byte(sv, rangestart);
-		    sv_catpvs(sv, "-");
-		    put_byte(sv, i - 1);
-		}
-		do_sep = 1;
-		rangestart = -1;
-	    }
-	}
+        do_sep = put_latin1_charclass_innards(sv, ANYOF_BITMAP(o));
         
         EMIT_ANYOF_TEST_SEPARATOR(do_sep,sv,flags);
         /* output any special charclass tests (used entirely under use locale) */
-	if (ANYOF_CLASS_TEST_ANY_SET(o))
-	    for (i = 0; i < (int)(sizeof(anyofs)/sizeof(char*)); i++)
+	if (ANYOF_CLASS_TEST_ANY_SET(o)) {
+            int i;
+	    for (i = 0; i < (int)(sizeof(anyofs)/sizeof(char*)); i++) {
 		if (ANYOF_CLASS_TEST(o,i)) {
 		    sv_catpv(sv, anyofs[i]);
 		    do_sep = 1;
 		}
+            }
+        }
         
         EMIT_ANYOF_TEST_SEPARATOR(do_sep,sv,flags);
         
@@ -14811,6 +14781,8 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
 
 	    if (lv && lv != &PL_sv_undef) {
 		if (sw) {
+                    int rangestart = -1;
+                    int i;
 		    U8 s[UTF8_MAXBYTES_CASE+1];
 
 		    for (i = 0; i <= 256; i++) { /* Look at chars in bitmap */
@@ -15526,6 +15498,39 @@ S_put_byte(pTHX_ SV *sv, int c)
     }
 }
 
+STATIC bool
+S_put_latin1_charclass_innards(pTHX_ SV *sv, char *bitmap)
+{
+    /* Appends to 'sv' a displayable version of the innards of the bracketed
+     * character class whose bitmap is 'bitmap';  Returns 'TRUE' if it actually
+     * output anything */
+
+    int i;
+    int rangestart = -1;
+    bool has_output_anything = FALSE;
+
+    PERL_ARGS_ASSERT_PUT_LATIN1_CHARCLASS_INNARDS;
+
+    for (i = 0; i <= 256; i++) {
+        if (i < 256 && BITMAP_TEST((U8 *) bitmap,i)) {
+            if (rangestart == -1)
+                rangestart = i;
+        } else if (rangestart != -1) {
+            if (i <= rangestart + 3)
+                for (; rangestart < i; rangestart++)
+                    put_byte(sv, rangestart);
+            else {
+                put_byte(sv, rangestart);
+                sv_catpvs(sv, "-");
+                put_byte(sv, i - 1);
+            }
+            rangestart = -1;
+            has_output_anything = TRUE;
+        }
+    }
+
+    return has_output_anything;
+}
 
 #define CLEAR_OPTSTART \
     if (optstart) STMT_START { \
