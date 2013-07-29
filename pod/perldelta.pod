@@ -127,6 +127,16 @@ XXX
 
 =item *
 
+L<B> has been upgraded from version 1.44 to 1.45.
+
+Calling the C<GV> method on C<B::CV> objects created from a lexical
+sub would return nonsense, possibly crashing perl. C<GV> now returns
+C<undef> for lexical subs. [perl #118525]
+
+Added the C<NAME_HEK> method to return the name of a lexical sub.
+
+=item *
+
 L<Data::Dumper> has been upgraded from version 2.147 to 2.148.
 
 The compatbility of the XS implementation with the pure perl version
