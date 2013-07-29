@@ -32,7 +32,7 @@ Leon Brocard, Dave Mitchell, Jesse Vincent, Ricardo Signes, Steve Hay,
 Matt S Trout, David Golden, Florian Ragwitz, Tatsuhiko Miyagawa,
 Chris C<BinGOs> Williams, Zefram, Ævar Arnfjörð Bjarmason, Stevan
 Little, Dave Rolsky, Max Maischein, Abigail, Jesse Luehrs, Tony Cook,
-Dominic Hargreaves, and Aaron Crane.
+Dominic Hargreaves, Aaron Crane and Aristotle Pagaltzis.
 
 =head2 PUMPKIN?
 
