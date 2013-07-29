@@ -5680,9 +5680,9 @@ X<ref> X<reference>
 =for Pod::Functions find out the type of thing being referenced
 
 Returns a non-empty string if EXPR is a reference, the empty
-string otherwise.  If EXPR
-is not specified, C<$_> will be used.  The value returned depends on the
-type of thing the reference is a reference to.
+string otherwise.  If EXPR is not specified, C<$_> will be used.  The
+value returned depends on the type of thing the reference is a reference to.
+
 Builtin types include:
 
     SCALAR
@@ -5697,8 +5697,7 @@ Builtin types include:
     VSTRING
     Regexp
 
-If the referenced object has been blessed into a package, then that package
-name is returned instead.  You can think of C<ref> as a C<typeof> operator.
+You can think of C<ref> as a C<typeof> operator.
 
     if (ref($r) eq "HASH") {
         print "r is a reference to a hash.\n";
@@ -5714,6 +5713,17 @@ to a L<version string|perldata/"Version Strings">.
 
 The result C<Regexp> indicates that the argument is a regular expression
 resulting from C<qr//>.
+
+If the referenced object has been blessed into a package, then that package
+name is returned instead.  But don't use that, as it's now considered
+"bad practice".  For one reason, an object could be using a class called
+C<Regexp> or C<IO>, or even C<HASH>.  Also, C<ref> doesn't take into account
+subclasses, like C<isa> does.
+
+Instead, use C<blessed> (in the L<Scalar::Util> module) for boolean
+checks, C<isa> for specific class checks and C<reftype> (also from
+L<Scalar::Util>) for type checks.  (See L<perlobj> for details and a
+C<blessed/isa> example.)
 
 See also L<perlref>.
 
