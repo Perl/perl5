@@ -2953,6 +2953,8 @@ typedef pthread_key_t	perl_key;
 /* flags in PL_exit_flags for nature of exit() */
 #define PERL_EXIT_EXPECTED	0x01
 #define PERL_EXIT_DESTRUCT_END  0x02  /* Run END in perl_destruct */
+#define PERL_EXIT_WARN		0x04  /* Warn if Perl_my_exit() or Perl_my_failure_exit() called */
+#define PERL_EXIT_ABORT		0x08  /* Call abort() if Perl_my_exit() or Perl_my_failure_exit() called */
 
 #ifndef PERL_CORE
 /* format to use for version numbers in file/directory names */
