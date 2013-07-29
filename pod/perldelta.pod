@@ -144,6 +144,13 @@ under C<Useqq> has been improved. [perl #118933]
 
 =item *
 
+L<Socket> has been upgraded from version 2.010 to 2.011.
+
+Handle FreeBSD (or other platforms) returning shorter AF_UNIX sockaddr
+structures due to embedded sun_len. [cpan #86613]
+
+=item *
+
 L<Storable> has been upgraded from version 2.45 to 2.46.
 
 Avoid creating temporary objects for STORABLE_attach when they aren't
