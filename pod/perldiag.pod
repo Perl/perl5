@@ -5397,6 +5397,16 @@ enough to figure out what you really meant.
 (P) When compiling a subroutine call in lvalue context, Perl failed an
 internal consistency check.  It encountered a malformed op tree.
 
+=item Unexpected exit %u
+
+(S) exit() was called or the script otherwise finished gracefully when
+C<PERL_EXIT_WARN> was set in C<PL_exit_flags>.
+
+=item Unexpected exit failure %u
+
+(S) An uncaught die() was called when C<PERL_EXIT_WARN> was set in
+C<PL_exit_flags>.
+
 =item Unexpected ')' in regex; marked by <-- HERE in m/%s/
 
 (F) You had something like this:

@@ -4950,6 +4950,14 @@ void
 Perl_my_exit(pTHX_ U32 status)
 {
     dVAR;
+    if (PL_exit_flags & PERL_EXIT_ABORT) {
+	abort();
+    }
+    if (PL_exit_flags & PERL_EXIT_WARN) {
+	PL_exit_flags |= PERL_EXIT_ABORT; /* Protect against reentrant calls */
+	Perl_warn(aTHX_ "Unexpected exit %u", status);
+	PL_exit_flags &= ~PERL_EXIT_ABORT;
+    }
     switch (status) {
     case 0:
 	STATUS_ALL_SUCCESS;
@@ -5047,6 +5055,14 @@ Perl_my_failure_exit(pTHX)
 	    STATUS_UNIX_SET(255);
     }
 #endif
+    if (PL_exit_flags & PERL_EXIT_ABORT) {
+	abort();
+    }
+    if (PL_exit_flags & PERL_EXIT_WARN) {
+	PL_exit_flags |= PERL_EXIT_ABORT; /* Protect against reentrant calls */
+	Perl_warn(aTHX_ "Unexpected exit failure %u", PL_statusvalue);
+	PL_exit_flags &= ~PERL_EXIT_ABORT;
+    }
     my_exit_jump();
 }
 
