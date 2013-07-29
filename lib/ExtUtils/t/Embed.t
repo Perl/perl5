@@ -184,7 +184,7 @@ int main(int argc, char **argv, char **env) {
     my_puts("ok 2");
 
     perl_construct(my_perl);
-    my_perl->Iexit_flags |= PERL_EXIT_WARN;
+    PL_exit_flags |= PERL_EXIT_WARN;
 
     my_puts("ok 3");
 
