@@ -1576,15 +1576,11 @@ cpan/Module-Build/lib/Module/Build/Dumper.pm
 cpan/Module-Build/lib/Module/Build/ModuleInfo.pm
 cpan/Module-Build/lib/Module/Build/Notes.pm
 cpan/Module-Build/lib/Module/Build/Platform/aix.pm
-cpan/Module-Build/lib/Module/Build/Platform/Amiga.pm
 cpan/Module-Build/lib/Module/Build/Platform/cygwin.pm
 cpan/Module-Build/lib/Module/Build/Platform/darwin.pm
 cpan/Module-Build/lib/Module/Build/Platform/Default.pm
-cpan/Module-Build/lib/Module/Build/Platform/EBCDIC.pm
 cpan/Module-Build/lib/Module/Build/Platform/MacOS.pm
-cpan/Module-Build/lib/Module/Build/Platform/MPEiX.pm
 cpan/Module-Build/lib/Module/Build/Platform/os2.pm
-cpan/Module-Build/lib/Module/Build/Platform/RiscOS.pm
 cpan/Module-Build/lib/Module/Build/Platform/Unix.pm
 cpan/Module-Build/lib/Module/Build/Platform/VMS.pm
 cpan/Module-Build/lib/Module/Build/Platform/VOS.pm
