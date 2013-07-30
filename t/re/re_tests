@@ -1776,3 +1776,9 @@ A+(*PRUNE)BC(?{})	AAABC	y	$&	AAABC
 /[(?#](??{'b'})/	a#b	y	$&	#b
 /(?#)(?{})b/x	a#b	y	$&	b
 /(?#)(??{'b'})/x	a#b	y	$&	b
+# RT #119069: PCRE regression test: no segfault
+^(?=(a)){0}b(?1)	back	y	$&	ba
+# RT #119071: PCRE regression test: No warning of infinite regression
+(?:(a(*SKIP)b)){0}(?:(?1)|ac)	x	n	-	-
+# RT #119073: PCRE regression test: {0} => NOTHING optimization
+(?1)(?:(b)){0}	b	y	$&	b

@@ -1,6 +1,6 @@
 #!./perl
 #
-# This is a home for regular expression tests that don't fit into
+# This is a home for regular expression tests that do not fit into
 # the format supported by re/regexp.t.  If you want to add a test
 # that does fit that format, add it to re/re_tests, not here.
 
@@ -2223,6 +2223,15 @@ EOP
                       "1\n1",   # Both re's should match
                       "",
                       "get [:lower:] swash in first eval; test under /i in second");
+    }
+
+    {
+        #' RT #119075
+        local $@;
+        eval { /a{0}?/; };
+        ok(! $@,
+            "PCRE regression test: No 'Quantifier follows nothing in regex' warning");
+
     }
 
     #
