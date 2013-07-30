@@ -6688,13 +6688,23 @@ Perl_reg_numbered_buff_fetch(pTHX_ REGEXP * const r, const I32 paren,
 
     PERL_ARGS_ASSERT_REG_NUMBERED_BUFF_FETCH;
         
-    if ( (    n == RX_BUFF_IDX_CARET_PREMATCH
+    if (      n == RX_BUFF_IDX_CARET_PREMATCH
            || n == RX_BUFF_IDX_CARET_FULLMATCH
            || n == RX_BUFF_IDX_CARET_POSTMATCH
-         )
-         && !(rx->extflags & RXf_PMf_KEEPCOPY)
-    )
-        goto ret_undef;
+       )
+    {
+        bool keepcopy = cBOOL(rx->extflags & RXf_PMf_KEEPCOPY);
+        if (!keepcopy) {
+            /* on something like
+             *    $r = qr/.../;
+             *    /$qr/p;
+             * the KEEPCOPY is set on the PMOP rather than the regex */
+            if (PL_curpm && r == PM_GETRE(PL_curpm))
+                 keepcopy = cBOOL(PL_curpm->op_pmflags & PMf_KEEPCOPY);
+        }
+        if (!keepcopy)
+            goto ret_undef;
+    }
 
     if (!rx->subbeg)
         goto ret_undef;
@@ -6800,13 +6810,27 @@ Perl_reg_numbered_buff_length(pTHX_ REGEXP * const r, const SV * const sv,
 
     PERL_ARGS_ASSERT_REG_NUMBERED_BUFF_LENGTH;
 
+    if (   paren == RX_BUFF_IDX_CARET_PREMATCH
+        || paren == RX_BUFF_IDX_CARET_FULLMATCH
+        || paren == RX_BUFF_IDX_CARET_POSTMATCH
+    )
+    {
+        bool keepcopy = cBOOL(rx->extflags & RXf_PMf_KEEPCOPY);
+        if (!keepcopy) {
+            /* on something like
+             *    $r = qr/.../;
+             *    /$qr/p;
+             * the KEEPCOPY is set on the PMOP rather than the regex */
+            if (PL_curpm && r == PM_GETRE(PL_curpm))
+                 keepcopy = cBOOL(PL_curpm->op_pmflags & PMf_KEEPCOPY);
+        }
+        if (!keepcopy)
+            goto warn_undef;
+    }
+
     /* Some of this code was originally in C<Perl_magic_len> in F<mg.c> */
     switch (paren) {
       case RX_BUFF_IDX_CARET_PREMATCH: /* ${^PREMATCH} */
-         if (!(rx->extflags & RXf_PMf_KEEPCOPY))
-            goto warn_undef;
-        /*FALLTHROUGH*/
-
       case RX_BUFF_IDX_PREMATCH:       /* $` */
         if (rx->offs[0].start != -1) {
 			i = rx->offs[0].start;
@@ -6819,8 +6843,6 @@ Perl_reg_numbered_buff_length(pTHX_ REGEXP * const r, const SV * const sv,
         return 0;
 
       case RX_BUFF_IDX_CARET_POSTMATCH: /* ${^POSTMATCH} */
-         if (!(rx->extflags & RXf_PMf_KEEPCOPY))
-            goto warn_undef;
       case RX_BUFF_IDX_POSTMATCH:       /* $' */
 	    if (rx->offs[0].end != -1) {
 			i = rx->sublen - rx->offs[0].end;
@@ -6832,13 +6854,7 @@ Perl_reg_numbered_buff_length(pTHX_ REGEXP * const r, const SV * const sv,
 	    }
         return 0;
 
-      case RX_BUFF_IDX_CARET_FULLMATCH: /* ${^MATCH} */
-         if (!(rx->extflags & RXf_PMf_KEEPCOPY))
-            goto warn_undef;
-        /*FALLTHROUGH*/
-
-      /* $& / ${^MATCH}, $1, $2, ... */
-      default:
+      default: /* $& / ${^MATCH}, $1, $2, ... */
 	    if (paren <= (I32)rx->nparens &&
             (s1 = rx->offs[paren].start) != -1 &&
             (t1 = rx->offs[paren].end) != -1)
