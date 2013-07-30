@@ -11,9 +11,10 @@ use warnings;
 
 our @tests = (
     # /p      Pattern   PRE     MATCH   POST
-    [ '/p',   "345",    "12-", "345",  "-6789"],
-    [ '(?p)', "345",    "12-", "345",  "-6789"],
-    [ '(?p:)',"345",    "12-", "345",  "-6789"],
+    [ '/p',   "345",    "012-", "345",  "-6789"],
+    [ '/$r/p',"345",    "012-", "345",  "-6789"],
+    [ '(?p)', "345",    "012-", "345",  "-6789"],
+    [ '(?p:)',"345",    "012-", "345",  "-6789"],
     [ '',     "(345)",  undef,  undef,  undef ],
     [ '',     "345",    undef,  undef,  undef ],
 );
@@ -26,8 +27,10 @@ sub _u($$) { "$_[0] is ".(defined $_[1] ? "'$_[1]'" : "undef") }
 
 foreach my $test (@tests) {
     my ($p, $pat,$l,$m,$r) = @$test;
+    my $qr = qr/$pat/;
     for my $sub (0,1) {
 	my $test_name = $p eq '/p'   ? "/$pat/p"
+		      : $p eq '/$r/p'? $p
 		      : $p eq '(?p)' ? "/(?p)$pat/"
 		      : $p eq '(?p:)'? "/(?p:$pat)/"
 		      :                "/$pat/";
@@ -36,16 +39,18 @@ foreach my $test (@tests) {
 	#
 	# Cannot use if/else due to the scope invalidating ${^MATCH} and friends.
 	#
-	$_ = '12-345-6789';
+	$_ = '012-345-6789';
 	my $ok =
 		$sub ?
 			(   $p eq '/p'   ? s/$pat/abc/p
+			  : $p eq '/$r/p'? s/$qr/abc/p
 			  : $p eq '(?p)' ? s/(?p)$pat/abc/
 			  : $p eq '(?p:)'? s/(?p:$pat)/abc/
 			  :                s/$pat/abc/
 			)
 		     :
 			(   $p eq '/p'   ? /$pat/p
+			  : $p eq '/$r/p'? /$qr/p
 			  : $p eq '(?p)' ? /(?p)$pat/
 			  : $p eq '(?p:)'? /(?p:$pat)/
 			  :                /$pat/

@@ -1398,6 +1398,7 @@ PP(pp_match)
     if (       RX_NPARENS(rx)
             || PL_sawampersand
             || (RX_EXTFLAGS(rx) & (RXf_EVAL_SEEN|RXf_PMf_KEEPCOPY))
+            || (dynpm->op_pmflags & PMf_KEEPCOPY)
     )
 #endif
     {
@@ -1409,6 +1410,11 @@ PP(pp_match)
         if (! (global && gimme == G_ARRAY))
             r_flags |= REXEC_COPY_SKIP_POST;
     };
+#ifdef PERL_SAWAMPERSAND
+    if (dynpm->op_pmflags & PMf_KEEPCOPY)
+        /* handle KEEPCOPY in pmop but not rx, eg $r=qr/a/; /$r/p */
+        r_flags &= ~(REXEC_COPY_SKIP_PRE|REXEC_COPY_SKIP_POST);
+#endif
 
     s = truebase;
 
@@ -2108,6 +2114,7 @@ PP(pp_subst)
     r_flags = (    RX_NPARENS(rx)
                 || PL_sawampersand
                 || (RX_EXTFLAGS(rx) & (RXf_EVAL_SEEN|RXf_PMf_KEEPCOPY))
+                || (rpm->op_pmflags & PMf_KEEPCOPY)
               )
           ? REXEC_COPY_STR
           : 0;
