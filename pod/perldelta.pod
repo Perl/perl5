@@ -137,6 +137,10 @@ Added the C<NAME_HEK> method to return the name of a lexical sub.
 
 =item *
 
+L<Config::Perl::V> has been upgraded from version 0.18 to 0.19.
+
+=item *
+
 L<Data::Dumper> has been upgraded from version 2.147 to 2.148.
 
 The compatbility of the XS implementation with the pure perl version
