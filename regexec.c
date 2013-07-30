@@ -7271,15 +7271,18 @@ STATIC SV *
 S_core_regclass_swash(pTHX_ const regexp *prog, const regnode* node, bool doinit, SV** listsvp)
 {
     /* Returns the swash for the input 'node' in the regex 'prog'.
-     * If <doinit> is true, will attempt to create the swash if not already
+     * If <doinit> is 'true', will attempt to create the swash if not already
      *	  done.
-     * If <listsvp> is non-null, will return the swash initialization string in
-     *	  it.
+     * If <listsvp> is non-null, will return the printable contents of the
+     *    swash.  This can be used to get debugging information even before the
+     *    swash exists, by calling this function with 'doinit' set to false, in
+     *    which case the components that will be used to eventually create the
+     *    swash are returned  (in a printable form).
      * Tied intimately to how regcomp.c sets up the data structure */
 
     dVAR;
     SV *sw  = NULL;
-    SV *si  = NULL;
+    SV *si  = NULL;         /* Input swash initialization string */
     SV*  invlist = NULL;
 
     RXi_GET_DECL(prog,progi);
@@ -7332,16 +7335,18 @@ S_core_regclass_swash(pTHX_ const regexp *prog, const regnode* node, bool doinit
 	}
     }
 	
+    /* If requested, return a printable version of what this swash matches */
     if (listsvp) {
 	SV* matches_string = newSVpvn("", 0);
 
-	/* Use the swash, if any, which has to have incorporated into it all
-	 * possibilities */
+        /* The swash should be used, if possible, to get the data, as it
+         * contains the resolved data.  But this function can be called at
+         * compile-time, before everything gets resolved, in which case we
+         * return the currently best available information, which is the string
+         * that will eventually be used to do that resolving, 'si' */
 	if ((! sw || (invlist = _get_swash_invlist(sw)) == NULL)
             && (si && si != &PL_sv_undef))
         {
-
-	    /* If no swash, use the input initialization string, if available */
 	    sv_catsv(matches_string, si);
 	}
 
