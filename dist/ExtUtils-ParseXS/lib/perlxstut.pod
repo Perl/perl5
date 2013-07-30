@@ -615,7 +615,7 @@ Now we also need to create a typemap because the default Perl doesn't
 currently support the C<const char *> type.  Include a new TYPEMAP
 section in your XS code before the above function:
 
-        TYPEMAP: <<END;
+        TYPEMAP: <<END
 	const char *	T_PV
         END
 
