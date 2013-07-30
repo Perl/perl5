@@ -1419,6 +1419,8 @@ EOP
     {
         # if we have 87 capture buffers defined then \87 should refer to the 87th.
         # test that this is true for 1..100
+        # Note that this test causes the engine to recurse at runtime, and henc
+        # use a lot of C stack.
         for my $i (1..100) {
             my $capture= "a";
             $capture= "($capture)" for 1 .. $i;

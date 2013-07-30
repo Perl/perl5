@@ -26,7 +26,12 @@ require $file;
 
 note('running tests in a new thread');
 
-my $curr = threads->create(sub {
+# Currently 59*4096 is the minimum stack size to just get t/re/pat_thr.t to
+# pass on HP-UX 64bit PA-RISC. The test for capture buffers (eg \87)
+# recurses heavily, and busts the default stack size (65536 on PA-RISC)
+my $curr = threads->create({
+                            stack_size => 524288,
+                           }, sub {
 			       run_tests();
 			       return defined &curr_test ? curr_test() : ()
 			   })->join();
