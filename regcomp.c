@@ -14780,40 +14780,6 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
                                            output */
 
 	    if (lv && lv != &PL_sv_undef) {
-		if (sw) {
-                    int rangestart = -1;
-                    int i;
-		    U8 s[UTF8_MAXBYTES_CASE+1];
-
-		    for (i = 0; i <= 256; i++) { /* Look at chars in bitmap */
-			uvchr_to_utf8(s, i);
-
-			if (i < 256
-                            && ! ANYOF_BITMAP_TEST(o, i)    /* Don't duplicate
-                                                               things already
-                                                               output as part
-                                                               of the bitmap */
-                            && swash_fetch(sw, s, TRUE))
-                        {
-			    if (rangestart == -1)
-				rangestart = i;
-			} else if (rangestart != -1) {
-                            byte_output = TRUE;
-			    if (i <= rangestart + 3)
-				for (; rangestart < i; rangestart++) {
-				    put_byte(sv, rangestart);
-				}
-			    else {
-				put_byte(sv, rangestart);
-				sv_catpvs(sv, "-");
-				put_byte(sv, i-1);
-			    }
-			    rangestart = -1;
-			}
-		    }
-		}
-
-		{
 		    char *s = savesvpv(lv);
 		    char * const origs = s;
 
@@ -14854,7 +14820,6 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
 		out_dump:
 
 		    Safefree(origs);
-		}
 		SvREFCNT_dec_NN(lv);
 	    }
 	}
