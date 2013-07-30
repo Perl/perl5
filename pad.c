@@ -284,6 +284,7 @@ Perl_pad_new(pTHX_ int flags)
     else {
 	av_store(pad, 0, NULL);
 	padname = newAV();
+	AvPAD_NAMELIST_on(padname);
     }
 
     /* Most subroutines never recurse, hence only need 2 entries in the padlist
@@ -574,6 +575,7 @@ S_pad_alloc_name(pTHX_ SV *namesv, U32 flags, HV *typestash, HV *ourstash)
     }
 
     av_store(PL_comppad_name, offset, namesv);
+    PadnamelistMAXNAMED(PL_comppad_name) = offset;
     return offset;
 }
 
@@ -1178,7 +1180,7 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv,
         const AV * const nameav = PadlistARRAY(padlist)[0];
 	SV * const * const name_svp = AvARRAY(nameav);
 
-	for (offset = AvFILLp(nameav); offset > 0; offset--) {
+	for (offset = PadnamelistMAXNAMED(nameav); offset > 0; offset--) {
             const SV * const namesv = name_svp[offset];
 	    if (namesv && PadnameLEN(namesv) == namelen
                     && sv_eq_pvn_flags(aTHX_ namesv, namepv, namelen,

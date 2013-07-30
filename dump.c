@@ -1515,7 +1515,8 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	if (SvWEAKREF(sv))	sv_catpv(d, "WEAKREF,");
     }
     append_flags(d, flags, second_sv_flags_names);
-    if (flags & SVp_SCREAM && type != SVt_PVHV && !isGV_with_GP(sv)) {
+    if (flags & SVp_SCREAM && type != SVt_PVHV && !isGV_with_GP(sv)
+			   && type != SVt_PVAV) {
 	if (SvPCS_IMPORTED(sv))
 				sv_catpv(d, "PCS_IMPORTED,");
 	else
@@ -1563,6 +1564,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	if (SvPAD_STATE(sv))	sv_catpv(d, "STATE,");
 	goto evaled_or_uv;
     case SVt_PVAV:
+	if (AvPAD_NAMELIST(sv))	sv_catpvs(d, "NAMELIST,");
 	break;
     }
     /* SVphv_SHAREKEYS is also 0x20000000 */
@@ -1705,6 +1707,9 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	    HV * const ost = SvOURSTASH(sv);
 	    if (ost)
 		do_hv_dump(level, file, "  OURSTASH", ost);
+	} else if (SvTYPE(sv) == SVt_PVAV && AvPAD_NAMELIST(sv)) {
+	    Perl_dump_indent(aTHX_ level, file, "  MAXNAMED = %"UVuf"\n",
+				   (UV)PadnamelistMAXNAMED(sv));
 	} else {
 	    if (SvMAGIC(sv))
 		do_magic_dump(level, file, SvMAGIC(sv), nest+1, maxnest, dumpops, pvlim);
@@ -1730,7 +1735,11 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	    PerlIO_putc(file, '\n');
 	Perl_dump_indent(aTHX_ level, file, "  FILL = %"IVdf"\n", (IV)AvFILLp(sv));
 	Perl_dump_indent(aTHX_ level, file, "  MAX = %"IVdf"\n", (IV)AvMAX(sv));
-	Perl_dump_indent(aTHX_ level, file, "  ARYLEN = 0x%"UVxf"\n", SvMAGIC(sv) ? PTR2UV(AvARYLEN(sv)) : 0);
+	/* arylen is stored in magic, and padnamelists use SvMAGIC for
+	   something else. */
+	if (!AvPAD_NAMELIST(sv))
+	    Perl_dump_indent(aTHX_ level, file, "  ARYLEN = 0x%"UVxf"\n",
+				   SvMAGIC(sv) ? PTR2UV(AvARYLEN(sv)) : 0);
 	sv_setpvs(d, "");
 	if (AvREAL(sv))	sv_catpv(d, ",REAL");
 	if (AvREIFY(sv))	sv_catpv(d, ",REIFY");

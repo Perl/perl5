@@ -5356,6 +5356,8 @@ Perl_sv_magicext(pTHX_ SV *const sv, SV *const obj, const int how,
 
     PERL_ARGS_ASSERT_SV_MAGICEXT;
 
+    if (SvTYPE(sv)==SVt_PVAV) { assert (!AvPAD_NAMELIST(sv)); }
+
     SvUPGRADE(sv, SVt_PVMG);
     Newxz(mg, 1, MAGIC);
     mg->mg_moremagic = SvMAGIC(sv);
@@ -6211,6 +6213,9 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
 	    }
 	    else if (type == SVt_PVMG && SvPAD_OUR(sv)) {
 		SvREFCNT_dec(SvOURSTASH(sv));
+	    }
+	    else if (type == SVt_PVAV && AvPAD_NAMELIST(sv)) {
+		assert(!SvMAGICAL(sv));
 	    } else if (SvMAGIC(sv)) {
 		/* Free back-references before other types of magic. */
 		sv_unmagic(sv, PERL_MAGIC_backref);
@@ -12313,6 +12318,8 @@ S_sv_dup_common(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
 	    if (sv_type >= SVt_PVMG) {
 		if ((sv_type == SVt_PVMG) && SvPAD_OUR(dstr)) {
 		    SvOURSTASH_set(dstr, hv_dup_inc(SvOURSTASH(dstr), param));
+		} else if (sv_type == SVt_PVAV && AvPAD_NAMELIST(dstr)) {
+		    NOOP;
 		} else if (SvMAGIC(dstr))
 		    SvMAGIC_set(dstr, mg_dup(SvMAGIC(dstr), param));
 		if (SvOBJECT(dstr) && SvSTASH(dstr))
