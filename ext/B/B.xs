@@ -1909,7 +1909,7 @@ GV(cv)
         GV *gv;
     CODE:
 	gv = CvGV(cv);
-	ST(0) = gv ? make_sv_object((SV*)gv) : &PL_sv_undef;
+	ST(0) = gv ? make_sv_object(aTHX_ (SV*)gv) : &PL_sv_undef;
 
 #if PERL_VERSION > 17
 
