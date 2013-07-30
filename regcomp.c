@@ -14780,46 +14780,46 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
                                            output */
 
 	    if (lv && lv != &PL_sv_undef) {
-		    char *s = savesvpv(lv);
-		    char * const origs = s;
+                char *s = savesvpv(lv);
+                char * const origs = s;
 
-		    while (*s && *s != '\n')
-			s++;
+                while (*s && *s != '\n')
+                    s++;
 
-		    if (*s == '\n') {
-			const char * const t = ++s;
+                if (*s == '\n') {
+                    const char * const t = ++s;
 
-                        if (byte_output) {
-                            sv_catpvs(sv, " ");
+                    if (byte_output) {
+                        sv_catpvs(sv, " ");
+                    }
+
+                    while (*s) {
+                        if (*s == '\n') {
+
+                            /* Truncate very long output */
+                            if (s - origs > 256) {
+                                Perl_sv_catpvf(aTHX_ sv,
+                                               "%.*s...",
+                                               (int) (s - origs - 1),
+                                               t);
+                                goto out_dump;
+                            }
+                            *s = ' ';
                         }
+                        else if (*s == '\t') {
+                            *s = '-';
+                        }
+                        s++;
+                    }
+                    if (s[-1] == ' ')
+                        s[-1] = 0;
 
-			while (*s) {
-			    if (*s == '\n') {
+                    sv_catpv(sv, t);
+                }
 
-                                /* Truncate very long output */
-				if (s - origs > 256) {
-				    Perl_sv_catpvf(aTHX_ sv,
-						   "%.*s...",
-					           (int) (s - origs - 1),
-						   t);
-				    goto out_dump;
-				}
-				*s = ' ';
-			    }
-			    else if (*s == '\t') {
-				*s = '-';
-			    }
-			    s++;
-			}
-			if (s[-1] == ' ')
-			    s[-1] = 0;
+            out_dump:
 
-			sv_catpv(sv, t);
-		    }
-
-		out_dump:
-
-		    Safefree(origs);
+                Safefree(origs);
 		SvREFCNT_dec_NN(lv);
 	    }
 	}
