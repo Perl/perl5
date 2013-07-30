@@ -14768,17 +14768,20 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
         /* output information about the unicode matching */
 	if (flags & ANYOF_UNICODE_ALL)
 	    sv_catpvs(sv, "{unicode_all}");
-	else if (ANYOF_NONBITMAP(o))
-	    sv_catpvs(sv, "{unicode}");
-	if (flags & ANYOF_NONBITMAP_NON_UTF8)
-	    sv_catpvs(sv, "{outside bitmap}");
+	else if (ANYOF_NONBITMAP(o)) {
+            SV *lv; /* Set if there is something outside the bit map. */
 
-	if (ANYOF_NONBITMAP(o)) {
-	    SV *lv; /* Set if there is something outside the bit map */
+            if (flags & ANYOF_NONBITMAP_NON_UTF8) {
+                sv_catpvs(sv, "{outside bitmap}");
+            }
+            else {
+                sv_catpvs(sv, "{utf8}");
+            }
+
+            /* Get the stuff that wasn't in the bitmap */
 	    SV * const sw = regclass_swash(prog, o, FALSE, &lv, NULL);
             bool byte_output = FALSE;   /* If something in the bitmap has been
                                            output */
-
 	    if (lv && lv != &PL_sv_undef) {
                 char *s = savesvpv(lv);
                 char * const origs = s;
