@@ -859,6 +859,11 @@ use File::Glob qw(:case);
                 t/pod.t
                 t/sh.t
                 t/tee.t
+                t/z_kwalitee.t
+                t/z_meta.t
+                t/z_perl_minimum_version.t
+                t/z_pod-coverage.t
+                t/z_pod.t
                 ),
         ],
         'MAP' => {
