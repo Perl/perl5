@@ -6773,7 +6773,7 @@ STATIC void	S_scan_commit(pTHX_ const struct RExC_state_t *pRExC_state, struct s
 #define PERL_ARGS_ASSERT_SCAN_COMMIT	\
 	assert(pRExC_state); assert(data); assert(minlenp)
 
-STATIC I32	S_study_chunk(pTHX_ struct RExC_state_t *pRExC_state, regnode **scanp, I32 *minlenp, I32 *deltap, regnode *last, struct scan_data_t *data, I32 stopparen, U8* recursed, struct regnode_charclass_class *and_withp, U32 flags, U32 depth)
+STATIC SSize_t	S_study_chunk(pTHX_ struct RExC_state_t *pRExC_state, regnode **scanp, I32 *minlenp, SSize_t *deltap, regnode *last, struct scan_data_t *data, I32 stopparen, U8* recursed, struct regnode_charclass_class *and_withp, U32 flags, U32 depth)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3)

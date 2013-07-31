@@ -345,25 +345,25 @@ typedef struct RExC_state_t {
 typedef struct scan_data_t {
     /*I32 len_min;      unused */
     /*I32 len_delta;    unused */
-    I32 pos_min;
+    SSize_t pos_min;
     I32 pos_delta;
     SV *last_found;
     I32 last_end;	    /* min value, <0 unless valid. */
-    I32 last_start_min;
+    SSize_t last_start_min;
     I32 last_start_max;
     SV **longest;	    /* Either &l_fixed, or &l_float. */
     SV *longest_fixed;      /* longest fixed string found in pattern */
-    I32 offset_fixed;       /* offset where it starts */
+    SSize_t offset_fixed;   /* offset where it starts */
     I32 *minlen_fixed;      /* pointer to the minlen relevant to the string */
     I32 lookbehind_fixed;   /* is the position of the string modfied by LB */
     SV *longest_float;      /* longest floating string found in pattern */
-    I32 offset_float_min;   /* earliest point in string it can appear */
+    SSize_t offset_float_min; /* earliest point in string it can appear */
     I32 offset_float_max;   /* latest point in string it can appear */
     I32 *minlen_float;      /* pointer to the minlen relevant to the string */
-    I32 lookbehind_float;   /* is the position of the string modified by LB */
+    SSize_t lookbehind_float; /* is the pos of the string modified by LB */
     I32 flags;
     I32 whilem_c;
-    I32 *last_closep;
+    SSize_t *last_closep;
     struct regnode_charclass_class *start_class;
 } scan_data_t;
 
@@ -3028,9 +3028,9 @@ typedef struct scan_frame {
 
 #define SCAN_COMMIT(s, data, m) scan_commit(s, data, m, is_inf)
 
-STATIC I32
+STATIC SSize_t
 S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
-                        I32 *minlenp, I32 *deltap,
+                        I32 *minlenp, SSize_t *deltap,
 			regnode *last,
 			scan_data_t *data,
 			I32 stopparen,
@@ -3124,7 +3124,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 	        /* NOTE - There is similar code to this block below for handling
 	           TRIE nodes on a re-study.  If you change stuff here check there
 	           too. */
-		I32 max1 = 0, min1 = I32_MAX, num = 0;
+		SSize_t max1 = 0, min1 = SSize_t_MAX, num = 0;
 		struct regnode_charclass_class accum;
 		regnode * const startbranch=scan;
 
@@ -3134,7 +3134,8 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    cl_init_zero(pRExC_state, &accum);
 
 		while (OP(scan) == code) {
-		    I32 deltanext, minnext, f = 0, fake;
+		    SSize_t deltanext, minnext, fake;
+		    I32 f = 0;
 		    struct regnode_charclass_class this_class;
 
 		    num++;
@@ -3678,7 +3679,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 	    flags &= ~SCF_DO_STCLASS;
 	}
 	else if (PL_regkind[OP(scan)] == EXACT) { /* But OP != EXACT! */
-	    I32 l = STR_LEN(scan);
+	    SSize_t l = STR_LEN(scan);
 	    UV uc = *((U8*)STRING(scan));
 
 	    /* Search for fixed substrings supports EXACT only. */
@@ -3795,8 +3796,8 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 	    flags &= ~SCF_DO_STCLASS;
 	}
 	else if (REGNODE_VARIES(OP(scan))) {
-	    I32 mincount, maxcount, minnext, deltanext, fl = 0;
-	    I32 f = flags, pos_before = 0;
+	    SSize_t mincount, maxcount, minnext, deltanext;
+	    I32 fl = 0, f = flags, pos_before = 0;
 	    regnode * const oscan = scan;
 	    struct regnode_charclass_class this_class;
 	    struct regnode_charclass_class *oclass = NULL;
@@ -4373,7 +4374,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%d RHS=%d\n", -counted * deltanext + (minnext
                    In this case we can't do fixed string optimisation.
                 */
 
-                I32 deltanext, minnext, fake = 0;
+                SSize_t deltanext, minnext, fake = 0;
                 regnode *nscan;
                 struct regnode_charclass_class intrnl;
                 int f = 0;
@@ -4615,7 +4616,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%d RHS=%d\n", -counted * deltanext + (minnext
                 
                 for ( word=1 ; word <= trie->wordcount ; word++) 
                 {
-                    I32 deltanext=0, minnext=0, f = 0, fake;
+                    SSize_t deltanext=0, minnext=0, f = 0, fake;
                     struct regnode_charclass_class this_class;
                     
                     data_fake.flags = 0;
@@ -6075,11 +6076,11 @@ reStudy:
     /* testing for BRANCH here tells us whether there is "must appear"
        data in the pattern. If there is then we can use it for optimisations */
     if (!(RExC_seen & REG_TOP_LEVEL_BRANCHES)) { /*  Only one top-level choice. */
-	I32 fake;
+	SSize_t fake;
 	STRLEN longest_float_length, longest_fixed_length;
 	struct regnode_charclass_class ch_class; /* pointed to by data */
 	int stclass_flag;
-	I32 last_close = 0; /* pointed to by data */
+	SSize_t last_close = 0; /* pointed to by data */
         regnode *first= scan;
         regnode *first_next= regnext(first);
 	/*
@@ -6361,9 +6362,9 @@ reStudy:
     }
     else {
 	/* Several toplevels. Best we can is to set minlen. */
-	I32 fake;
+	SSize_t fake;
 	struct regnode_charclass_class ch_class;
-	I32 last_close = 0;
+	SSize_t last_close = 0;
 
 	DEBUG_PARSE_r(PerlIO_printf(Perl_debug_log, "\nMulti Top Level\n"));
 

@@ -12,7 +12,7 @@ $ENV{PERL_TEST_MEMORY} >= 2
 $Config{ptrsize} >= 8
     or skip_all("Need 64-bit pointers for this test");
 
-plan(5);
+plan(6);
 
 # [perl #116907]
 # ${\2} to defeat constant folding, which in this case actually slows
@@ -33,3 +33,7 @@ $x =~ /./g;
 is "$'", 'efg', q "$' after match against long string";
 is "$-[0],$+[0]", '2147483651,2147483652',
    '@- and @+ after matches past 2**31';
+
+# Substring optimisations
+is $x =~ /(?:(?:.{32766}){32766}){2}(?:.{32766}){8}.{8}ef/, 1,
+  'anchored substr past 2**31';

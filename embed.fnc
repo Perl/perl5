@@ -2045,9 +2045,9 @@ Esn	|void	|cl_and		|NN struct regnode_charclass_class *cl \
 Esn	|void	|cl_or		|NN const struct RExC_state_t *pRExC_state \
 				|NN struct regnode_charclass_class *cl \
 				|NN const struct regnode_charclass_class *or_with
-Es	|I32	|study_chunk	|NN struct RExC_state_t *pRExC_state \
+Es	|SSize_t|study_chunk	|NN struct RExC_state_t *pRExC_state \
 				|NN regnode **scanp|NN I32 *minlenp \
-				|NN I32 *deltap|NN regnode *last \
+				|NN SSize_t *deltap|NN regnode *last \
 				|NULLOK struct scan_data_t *data \
 				|I32 stopparen|NULLOK U8* recursed \
 				|NULLOK struct regnode_charclass_class *and_withp \

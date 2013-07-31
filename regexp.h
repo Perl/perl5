@@ -36,8 +36,8 @@ struct regexp_engine;
 struct regexp;
 
 struct reg_substr_datum {
-    I32 min_offset;
-    I32 max_offset;
+    SSize_t min_offset;
+    SSize_t max_offset;
     SV *substr;		/* non-utf8 variant */
     SV *utf8_substr;	/* utf8 variant */
     I32 end_shift;

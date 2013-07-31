@@ -615,7 +615,7 @@ Perl_re_intuit_start(pTHX_
 {
     dVAR;
     struct regexp *const prog = ReANY(rx);
-    I32 start_shift = 0;
+    SSize_t start_shift = 0;
     /* Should be nonnegative! */
     I32 end_shift   = 0;
     char *s;
@@ -751,7 +751,7 @@ Perl_re_intuit_start(pTHX_
        the "check" substring in the region corrected by start/end_shift. */
     
     {
-        I32 srch_start_shift = start_shift;
+        SSize_t srch_start_shift = start_shift;
         I32 srch_end_shift = end_shift;
         U8* start_point;
         U8* end_point;
