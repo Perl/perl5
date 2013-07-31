@@ -1044,7 +1044,7 @@ static const char byteorderstr_56[] = {BYTEORDER_BYTES_56, 0};
 #define BLESS(s,stash) 						\
   STMT_START {								\
 	SV *ref;								\
-	TRACEME(("blessing 0x%"UVxf" in %s", PTR2UV(s), (HvNAME_get(p)))); \
+	TRACEME(("blessing 0x%"UVxf" in %s", PTR2UV(s), (HvNAME_get(stash)))); \
 	ref = newRV_noinc(s);					\
 	if (cxt->in_retrieve_overloaded && Gv_AMG(stash)) \
 	{ \
