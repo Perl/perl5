@@ -137,6 +137,13 @@ Added the C<NAME_HEK> method to return the name of a lexical sub.
 
 =item *
 
+L<bignum> has been upgraded from version 0.35 to 0.36.
+
+L<bigrat> wasn't correctly updating an internal variable when C<use>d
+with a C<lib> option.
+
+=item *
+
 L<Config::Perl::V> has been upgraded from version 0.18 to 0.19.
 
 =item *
@@ -145,6 +152,13 @@ L<Data::Dumper> has been upgraded from version 2.147 to 2.148.
 
 The compatbility of the XS implementation with the pure perl version
 under C<Useqq> has been improved. [perl #118933]
+
+=item *
+
+L<Exporter> has been upgraded from version 5.68 to 5.69.
+
+L<Exporter> would ignore custom C<$SIG{__WARN__}> handlers in
+C<Exporter::Heavy>. [perl #39739]
 
 =item *
 
@@ -163,20 +177,6 @@ L<Storable> has been upgraded from version 2.45 to 2.46.
 
 Avoid creating temporary objects for STORABLE_attach when they aren't
 required. [perl #118907]
-
-=item *
-
-L<bignum> has been upgraded from version 0.35 to 0.36.
-
-L<bigrat> wasn't correctly updating an internal variable when C<use>d
-with a C<lib> option.
-
-=item *
-
-L<Exporter> has been upgraded from version 5.68 to 5.69.
-
-L<Exporter> would ignore custom C<$SIG{__WARN__}> handlers in
-C<Exporter::Heavy>. [perl #39739]
 
 =back
 
