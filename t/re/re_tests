@@ -1737,3 +1737,15 @@ ab[c\\\](??{"x"})]{3}d	ab\\](d	y	-	-
 m?^xy\?$?	xy?	y	$&	xy?
 
 # vim: softtabstop=0 noexpandtab
+/[#]/	a#b	y	$&	#
+/[#]b/	a#b	y	$&	#b
+/[#]/x	a#b	y	$&	#
+/[#]b/x	a#b	y	$&	#b
+/[#](?{})/x	a#b	y	$&	#
+/[#](??{'b'})/x	a#b	y	$&	#b
+/(?#)(?{})b/	a#b	y	$&	b
+/(?#)(??{'b'})/	a#b	y	$&	b
+/[(?#](?{})b/	a#b	y	$&	#b
+/[(?#](??{'b'})/	a#b	y	$&	#b
+/(?#)(?{})b/x	a#b	y	$&	b
+/(?#)(??{'b'})/x	a#b	y	$&	b
