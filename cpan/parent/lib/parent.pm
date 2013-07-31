@@ -1,7 +1,7 @@
 package parent;
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.225';
+$VERSION = '0.226';
 
 sub import {
     my $class = shift;

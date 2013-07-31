@@ -148,6 +148,10 @@ under C<Useqq> has been improved. [perl #118933]
 
 =item *
 
+L<parent> has been upgraded from version 0.225 to 0.226.
+
+=item *
+
 L<Socket> has been upgraded from version 2.010 to 2.011.
 
 Handle FreeBSD (or other platforms) returning shorter AF_UNIX sockaddr
