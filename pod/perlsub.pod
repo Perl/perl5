@@ -1385,7 +1385,7 @@ the constant folding doesn't reduce them to a single constant:
 
 If you redefine a subroutine that was eligible for inlining, you'll get
 a warning by default.  (You can use this warning to tell whether or not a
-particular subroutine is considered constant.)  The warning is
+particular subroutine is considered inlinable.)  The warning is
 considered severe enough not to be affected by the B<-w>
 switch (or its absence) because previously compiled
 invocations of the function will still be using the old value of the
