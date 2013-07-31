@@ -1764,3 +1764,15 @@ A+?(*PRUNE)BC(?{})	AAABC	y	$&	ABC
 A+(*THEN)BC(?{})	AAABC	y	$&	AAABC
 A+(*PRUNE)BC(?{})	AAABC	y	$&	AAABC
 # vim: softtabstop=0 noexpandtab
+/[#]/	a#b	y	$&	#
+/[#]b/	a#b	y	$&	#b
+/[#]/x	a#b	y	$&	#
+/[#]b/x	a#b	y	$&	#b
+/[#](?{})/x	a#b	y	$&	#
+/[#](??{'b'})/x	a#b	y	$&	#b
+/(?#)(?{})b/	a#b	y	$&	b
+/(?#)(??{'b'})/	a#b	y	$&	b
+/[(?#](?{})b/	a#b	y	$&	#b
+/[(?#](??{'b'})/	a#b	y	$&	#b
+/(?#)(?{})b/x	a#b	y	$&	b
+/(?#)(??{'b'})/x	a#b	y	$&	b
