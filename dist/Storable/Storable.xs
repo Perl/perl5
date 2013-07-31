@@ -885,6 +885,7 @@ static const char byteorderstr_56[] = {BYTEORDER_BYTES_56, 0};
 #ifdef HAS_HTONL
 #define WLEN(x)						\
   STMT_START {						\
+	ASSERT(sizeof(x) == sizeof(int), ("WLEN writing an int"));	\
 	if (cxt->netorder) {			\
 		int y = (int) htonl(x);		\
 		if (!cxt->fio)				\
@@ -2191,9 +2192,13 @@ static int store_scalar(pTHX_ stcxt_t *cxt, SV *sv)
           string:
 
 #ifdef SvVOK
-            if (SvMAGICAL(sv) && (mg = mg_find(sv, 'V')))
+            if (SvMAGICAL(sv) && (mg = mg_find(sv, 'V'))) {
+                /* The macro passes this by address, not value, and a lot of
+                   assumes that it's 32 bits without checking.  */
+                const int len = mg->mg_len;
                 STORE_PV_LEN((const char *)mg->mg_ptr,
-                             mg->mg_len, SX_VSTRING, SX_LVSTRING);
+                             len, SX_VSTRING, SX_LVSTRING);
+            }
 #endif
 
             wlen = (I32) len; /* WLEN via STORE_SCALAR expects I32 */
