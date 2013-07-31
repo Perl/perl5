@@ -1447,14 +1447,11 @@ PP(pp_match)
         if (!mg) {
             mg = sv_magicext_mglob(TARG);
         }
-        assert(RX_OFFS(rx)[0].start != -1); /* XXX get rid of next line? */
-        if (RX_OFFS(rx)[0].start != -1) {
-            mg->mg_len = RX_OFFS(rx)[0].end;
-            if (RX_ZERO_LEN(rx))
-                mg->mg_flags |= MGf_MINMATCH;
-            else
-                mg->mg_flags &= ~MGf_MINMATCH;
-        }
+        mg->mg_len = RX_OFFS(rx)[0].end;
+        if (RX_ZERO_LEN(rx))
+            mg->mg_flags |= MGf_MINMATCH;
+        else
+            mg->mg_flags &= ~MGf_MINMATCH;
     }
 
     if ((!RX_NPARENS(rx) && !global) || gimme != G_ARRAY) {
