@@ -1420,22 +1420,20 @@ PP(pp_match)
     s = truebase;
 
   play_it_again:
-    if (global) {
+    if (global)
 	s = truebase + curpos;
-    }
 
     if (!CALLREGEXEC(rx, (char*)s, (char *)strend, (char*)truebase,
 		     had_zerolen, TARG, NULL, r_flags))
 	goto nope;
 
     PL_curpm = pm;
-    if (dynpm->op_pmflags & PMf_ONCE) {
+    if (dynpm->op_pmflags & PMf_ONCE)
 #ifdef USE_ITHREADS
 	SvREADONLY_on(PL_regex_pad[dynpm->op_pmoffset]);
 #else
 	dynpm->op_pmflags |= PMf_USED;
 #endif
-    }
 
     if (rxtainted)
 	RX_MATCH_TAINTED_on(rx);
