@@ -1332,6 +1332,7 @@ PP(pp_match)
     STRLEN len;
     const I32 oldsave = PL_savestack_ix;
     I32 had_zerolen = 0;
+    MAGIC *mg = NULL;
 
     if (PL_op->op_flags & OPf_STACKED)
 	TARG = POPs;
@@ -1385,7 +1386,7 @@ PP(pp_match)
 
     /* get pos() if //g */
     if (global) {
-        MAGIC * const mg = mg_find_mglob(TARG);
+        mg = mg_find_mglob(TARG);
         if (mg && mg->mg_len >= 0) {
             curpos = mg->mg_len;
             /* last time pos() was set, it was zero-length match */
@@ -1443,10 +1444,8 @@ PP(pp_match)
     /* update pos */
 
     if (global && (gimme != G_ARRAY || (dynpm->op_pmflags & PMf_CONTINUE))) {
-        MAGIC *mg = mg_find_mglob(TARG);
-        if (!mg) {
+        if (!mg)
             mg = sv_magicext_mglob(TARG);
-        }
         mg->mg_len = RX_OFFS(rx)[0].end;
         if (RX_ZERO_LEN(rx))
             mg->mg_flags |= MGf_MINMATCH;
@@ -1498,9 +1497,10 @@ PP(pp_match)
 
 nope:
     if (global && !(dynpm->op_pmflags & PMf_CONTINUE)) {
-	    MAGIC* const mg = mg_find_mglob(TARG);
-	    if (mg)
-		mg->mg_len = -1;
+        if (!mg)
+            mg = mg_find_mglob(TARG);
+        if (mg)
+            mg->mg_len = -1;
     }
     LEAVE_SCOPE(oldsave);
     if (gimme == G_ARRAY)
