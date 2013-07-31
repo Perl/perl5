@@ -10710,25 +10710,38 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims, int re_reparse,
                          * context where the delimiter is also a metacharacter,
                          * the backslash is useless, and deprecated.  () and []
                          * are meta in any context. {} are meta only when
-                         * appearing in a quantifier or in things like '\p{'.
-                         * They also aren't meta unless there is a matching
-                         * closed, escaped char later on within the string.
-                         * If 's' points to an open, set a flag; if to a close,
-                         * test that flag, and raise a warning if it was set */
+                         * appearing in a quantifier or in things like '\p{'
+                         * (but '\\p{' isn't meta).  They also aren't meta
+                         * unless there is a matching closed, escaped char
+                         * later on within the string.  If 's' points to an
+                         * open, set a flag; if to a close, test that flag, and
+                         * raise a warning if it was set */
 
 			if (deprecate_escaped_meta) {
                             if (*s == PL_multi_open) {
                                 if (*s != '{') {
                                     escaped_open = s;
                                 }
-                                else if (regcurly(s,
-                                                  TRUE /* Look for a closing
-                                                          '\}' */)
-                                         || (s - start > 2  /* Look for e.g.
-                                                               '\x{' */
-                                             && _generic_isCC(*(s-2), _CC_BACKSLASH_FOO_LBRACE_IS_META)))
-                                {
+                                     /* Look for a closing '\}' */
+                                else if (regcurly(s, TRUE)) {
                                     escaped_open = s;
+                                }
+                                     /* Look for e.g.  '\x{' */
+                                else if (s - start > 2
+                                         && _generic_isCC(*(s-2),
+                                             _CC_BACKSLASH_FOO_LBRACE_IS_META))
+                                { /* Exclude '\\x', '\\\\x', etc. */
+                                    char *lookbehind = s - 4;
+                                    bool is_meta = TRUE;
+                                    while (lookbehind >= start
+                                           && *lookbehind == '\\')
+                                    {
+                                        is_meta = ! is_meta;
+                                        lookbehind--;
+                                    }
+                                    if (is_meta) {
+                                        escaped_open = s;
+                                    }
                                 }
                             }
                             else if (escaped_open) {
