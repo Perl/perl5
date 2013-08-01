@@ -52,7 +52,7 @@ XXX
 
 =item *
 
-L<XXX> has been upgraded from version A.xx to B.yy.
+A crashing bug in L<Digest::SHA> has been fixed. [RT #118649]
 
 =back
 
