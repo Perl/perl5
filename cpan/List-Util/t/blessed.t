@@ -34,13 +34,14 @@ $x = bless {}, "0";
 cmp_ok(blessed($x), "eq", "0",	'blessed HASH-ref');
 
 {
-  my $depth;
-  {
+  my $blessed = do {
+    my $depth;
     no warnings 'redefine';
-    *UNIVERSAL::can = sub { die "Burp!" if ++$depth > 2; blessed(shift) };
-  }
-  $x = bless {}, "DEF";
-  is(blessed($x), "DEF", 'recursion of UNIVERSAL::can');
+    local *UNIVERSAL::can = sub { die "Burp!" if ++$depth > 2; blessed(shift) };
+    $x = bless {}, "DEF";
+    blessed($x);
+  };
+  is($blessed, "DEF", 'recursion of UNIVERSAL::can');
 }
 
 {

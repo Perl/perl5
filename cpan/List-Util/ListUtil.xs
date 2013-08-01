@@ -339,7 +339,182 @@ CODE:
     XSRETURN_UNDEF;
 }
 
+void
+pairgrep(block,...)
+    SV * block
+PROTOTYPE: &@
+PPCODE:
+{
+    GV *agv,*bgv,*gv;
+    HV *stash;
+    CV *cv    = sv_2cv(block, &stash, &gv, 0);
+
+    /* This function never returns more than it consumed in arguments. So we
+     * can build the results "live", behind the arguments
+     */
+    int argi = 1; // "shift" the block
+    int reti = 0;
+
+    agv = gv_fetchpv("a", GV_ADD, SVt_PV);
+    bgv = gv_fetchpv("b", GV_ADD, SVt_PV);
+    SAVESPTR(GvSV(agv));
+    SAVESPTR(GvSV(bgv));
+
+    {
+	for(; argi < items; argi += 2) {
+	    dSP;
+	    SV *a = GvSV(agv) = ST(argi);
+	    SV *b = GvSV(bgv) = argi < items-1 ? ST(argi+1) : &PL_sv_undef;
+
+	    PUSHMARK(SP);
+	    call_sv((SV*)cv, G_SCALAR);
+
+	    SPAGAIN;
+
+            if (SvTRUEx(*PL_stack_sp)) {
+		if(GIMME_V == G_ARRAY) {
+		    ST(reti++) = sv_mortalcopy(a);
+		    ST(reti++) = sv_mortalcopy(b);
+		}
+		else if(GIMME_V == G_SCALAR)
+		    reti++;
+	    }
+	}
+    }
+
+    if(GIMME_V == G_ARRAY)
+	XSRETURN(reti);
+    else if(GIMME_V == G_SCALAR) {
+	ST(0) = newSViv(reti);
+	XSRETURN(1);
+    }
+}
+
+void
+pairmap(block,...)
+    SV * block
+PROTOTYPE: &@
+PPCODE:
+{
+    GV *agv,*bgv,*gv;
+    HV *stash;
+    CV *cv    = sv_2cv(block, &stash, &gv, 0);
+    SV **args_copy = NULL;
+
+    int argi = 1; // "shift" the block
+    int reti = 0;
+
+    agv = gv_fetchpv("a", GV_ADD, SVt_PV);
+    bgv = gv_fetchpv("b", GV_ADD, SVt_PV);
+    SAVESPTR(GvSV(agv));
+    SAVESPTR(GvSV(bgv));
+
+    {
+	for(; argi < items; argi += 2) {
+	    dSP;
+	    SV *a = GvSV(agv) = args_copy ? args_copy[argi] : ST(argi);
+	    SV *b = GvSV(bgv) = argi < items-1 ? 
+		(args_copy ? args_copy[argi+1] : ST(argi+1)) :
+		&PL_sv_undef;
+
+	    PUSHMARK(SP);
+	    int count = call_sv((SV*)cv, G_ARRAY);
+
+	    SPAGAIN;
+
+	    if(count > 2 && !args_copy) {
+		/* We can't return more than 2 results for a given input pair
+		 * without trashing the remaining argmuents on the stack still
+		 * to be processed. So, we'll copy them out to a temporary
+		 * buffer and work from there instead.
+		 * We didn't do this initially because in the common case, most
+		 * code blocks will return only 1 or 2 items so it won't be
+		 * necessary
+		 */
+		int n_args = items - argi;
+		Newx(args_copy, n_args, SV *);
+		SAVEFREEPV(args_copy);
+
+		Copy(&ST(argi), args_copy, n_args, SV *);
+
+		argi = 0;
+		items = n_args;
+	    }
+
+	    int i;
+	    for(i = 0; i < count; i++)
+		ST(reti++) = sv_mortalcopy(SP[i - count + 1]);
+
+	    PUTBACK;
+	}
+    }
+
+    XSRETURN(reti);
+}
+
 #endif
+
+void
+pairs(...)
+PROTOTYPE: @
+PPCODE:
+{
+    int argi = 0;
+    int reti = 0;
+
+    {
+	for(; argi < items; argi += 2) {
+	    SV *a = ST(argi);
+	    SV *b = argi < items-1 ? ST(argi+1) : &PL_sv_undef;
+
+	    AV *av = newAV();
+	    av_push(av, newSVsv(a));
+	    av_push(av, newSVsv(b));
+
+	    ST(reti++) = sv_2mortal(newRV_noinc((SV *)av));
+	}
+    }
+
+    XSRETURN(reti);
+}
+
+void
+pairkeys(...)
+PROTOTYPE: @
+PPCODE:
+{
+    int argi = 0;
+    int reti = 0;
+
+    {
+	for(; argi < items; argi += 2) {
+	    SV *a = ST(argi);
+
+	    ST(reti++) = sv_2mortal(newSVsv(a));
+	}
+    }
+
+    XSRETURN(reti);
+}
+
+void
+pairvalues(...)
+PROTOTYPE: @
+PPCODE:
+{
+    int argi = 0;
+    int reti = 0;
+
+    {
+	for(; argi < items; argi += 2) {
+	    SV *b = argi < items-1 ? ST(argi+1) : &PL_sv_undef;
+
+	    ST(reti++) = sv_2mortal(newSVsv(b));
+	}
+    }
+
+    XSRETURN(reti);
+}
 
 void
 shuffle(...)
