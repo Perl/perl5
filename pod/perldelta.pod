@@ -228,9 +228,14 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
+=item AIX
 
-XXX
+A rarely-encounted configuration bug in the AIX hints file has been corrected.
+
+=item MidnightBSD
+
+After a patch to the relevant hints file, perl should now build correctly on
+MidnightBSD 0.4-RELEASE.
 
 =back
 
