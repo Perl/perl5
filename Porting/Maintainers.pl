@@ -529,7 +529,7 @@ use File::Glob qw(:case);
         'DISTRIBUTION' => 'MHX/Devel-PPPort-3.20.tar.gz',
         'FILES'        => q[cpan/Devel-PPPort],
         'EXCLUDED' => ['PPPort.pm'],    # we use PPPort_pm.PL instead
-        'UPSTREAM' => 'undef', # rjbs has asked mhx to have blead be upstream
+        'UPSTREAM' => undef, # rjbs has asked mhx to have blead be upstream
     },
 
     'diagnostics' => {
