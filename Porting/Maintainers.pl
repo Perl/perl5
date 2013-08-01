@@ -1929,7 +1929,6 @@ use File::Glob qw(:case);
         'DISTRIBUTION' => 'JPEACOCK/version-0.9902.tar.gz',
         'FILES'        => q[cpan/version],
         'EXCLUDED' => [
-            qr{^t/.*\.t$},
             qr{^vutil/},
             'lib/version/typemap',
             't/survey_locales',
