@@ -266,6 +266,17 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
+Starting in v5.18.0, a construct like C</[#](?{})/x> would have its C<#>
+incorrectly interpreted as a comment.  The code block would be skipped,
+unparsed.  This has been corrected.
+
+=item *
+
+A number of memory leaks related to the new, experimental regexp bracketed
+character class feature have been plugged.
+
+=item *
+
 The OP allocation code now returns correctly aligned memory in all cases
 for C<struct pmop>. Previously it could return memory only aligned to a
 4-byte boundary, which is not correct for an ithreads build with 64 bit IVs
