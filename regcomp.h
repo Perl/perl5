@@ -191,6 +191,17 @@ struct regnode_charclass_class {
     U32 classflags;	                        /* and run-time */
 };
 
+/* Synthetic start class, is a regnode_charclass_class plus an SV* */
+struct regnode_ssc {
+    U8	flags;				/* ANYOF_CLASS bit must go here */
+    U8  type;
+    U16 next_off;
+    U32 arg1;				/* used as ptr in S_regclass */
+    char bitmap[ANYOF_BITMAP_SIZE];	/* both compile-time */
+    U32 classflags;	                /* and run-time */
+    SV* invlist;                        /* list of code points matched */
+};
+
 /* XXX fix this description.
    Impose a limit of REG_INFTY on various pattern matching operations
    to limit stack growth and to avoid "infinite" recursions.

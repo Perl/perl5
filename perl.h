@@ -3277,6 +3277,7 @@ typedef struct magic_state MGS;	/* struct magic_state defined in mg.c */
 
 struct scan_data_t;		/* Used in S_* functions in regcomp.c */
 struct regnode_charclass_class;	/* Used in S_* functions in regcomp.c */
+typedef struct regnode_ssc regnode_ssc;
 
 struct ptr_tbl_ent {
     struct ptr_tbl_ent*		next;

@@ -353,7 +353,7 @@ typedef struct scan_data_t {
     I32 flags;
     I32 whilem_c;
     SSize_t *last_closep;
-    struct regnode_charclass_class *start_class;
+    regnode_ssc *start_class;
 } scan_data_t;
 
 /* The below is perhaps overboard, but this allows us to save a test at the
@@ -813,7 +813,7 @@ S_scan_commit(pTHX_ const RExC_state_t *pRExC_state, scan_data_t *data,
 
 /* Can match anything (initialization) */
 STATIC void
-S_cl_anything(const RExC_state_t *pRExC_state, struct regnode_charclass_class *cl)
+S_cl_anything(const RExC_state_t *pRExC_state, regnode_ssc *cl)
 {
     PERL_ARGS_ASSERT_CL_ANYTHING;
 
@@ -839,7 +839,7 @@ S_cl_anything(const RExC_state_t *pRExC_state, struct regnode_charclass_class *c
 
 /* Can match anything (initialization) */
 STATIC int
-S_cl_is_anything(const struct regnode_charclass_class *cl)
+S_cl_is_anything(const regnode_ssc *cl)
 {
     int value;
 
@@ -857,11 +857,11 @@ S_cl_is_anything(const struct regnode_charclass_class *cl)
 
 /* Can match anything (initialization) */
 STATIC void
-S_cl_init(const RExC_state_t *pRExC_state, struct regnode_charclass_class *cl)
+S_cl_init(const RExC_state_t *pRExC_state, regnode_ssc *cl)
 {
     PERL_ARGS_ASSERT_CL_INIT;
 
-    Zero(cl, 1, struct regnode_charclass_class);
+    Zero(cl, 1, regnode_ssc);
     cl->type = ANYOF;
     cl_anything(pRExC_state, cl);
     ARG_SET(cl, ANYOF_NONBITMAP_EMPTY);
@@ -873,10 +873,9 @@ S_cl_init(const RExC_state_t *pRExC_state, struct regnode_charclass_class *cl)
 
 /* 'AND' a given class with another one.  Can create false positives.  'cl'
  * should not be inverted.  'and_with->flags & ANYOF_CLASS' should be 0 if
- * 'and_with' is a regnode_charclass instead of a regnode_charclass_class. */
+ * 'and_with' is a regnode_charclass instead of a regnode_ssc. */
 STATIC void
-S_cl_and(struct regnode_charclass_class *cl,
-	const struct regnode_charclass_class *and_with)
+S_cl_and(regnode_ssc *cl, const regnode_ssc *and_with)
 {
     PERL_ARGS_ASSERT_CL_AND;
 
@@ -996,9 +995,9 @@ S_cl_and(struct regnode_charclass_class *cl,
 
 /* 'OR' a given class with another one.  Can create false positives.  'cl'
  * should not be inverted.  'or_with->flags & ANYOF_CLASS' should be 0 if
- * 'or_with' is a regnode_charclass instead of a regnode_charclass_class. */
+ * 'or_with' is a regnode_charclass instead of a regnode_ssc. */
 STATIC void
-S_cl_or(const RExC_state_t *pRExC_state, struct regnode_charclass_class *cl, const struct regnode_charclass_class *or_with)
+S_cl_or(const RExC_state_t *pRExC_state, regnode_ssc *cl, const regnode_ssc *or_with)
 {
     PERL_ARGS_ASSERT_CL_OR;
 
@@ -3012,7 +3011,7 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan, UV *min_subtract, b
 
 #define INIT_AND_WITHP \
     assert(!and_withp); \
-    Newx(and_withp,1,struct regnode_charclass_class); \
+    Newx(and_withp,1, regnode_ssc); \
     SAVEFREEPV(and_withp)
 
 /* this is a chain of data about sub patterns we are processing that
@@ -3036,7 +3035,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 			scan_data_t *data,
 			I32 stopparen,
 			U8* recursed,
-			struct regnode_charclass_class *and_withp,
+			regnode_ssc *and_withp,
 			U32 flags, U32 depth)
 			/* scanp: Start here (read-write). */
 			/* deltap: Write maxlen-minlen here. */
@@ -3127,7 +3126,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 	           TRIE nodes on a re-study.  If you change stuff here check there
 	           too. */
 		SSize_t max1 = 0, min1 = SSize_t_MAX, num = 0;
-		struct regnode_charclass_class accum;
+		regnode_ssc accum;
 		regnode * const startbranch=scan;
 
 		if (flags & SCF_DO_SUBSTR)
@@ -3138,7 +3137,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		while (OP(scan) == code) {
 		    SSize_t deltanext, minnext, fake;
 		    I32 f = 0;
-		    struct regnode_charclass_class this_class;
+		    regnode_ssc this_class;
 
 		    num++;
 		    data_fake.flags = 0;
@@ -3224,11 +3223,9 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 			/* Switch to OR mode: cache the old value of
 			 * data->start_class */
 			INIT_AND_WITHP;
-			StructCopy(data->start_class, and_withp,
-				   struct regnode_charclass_class);
+			StructCopy(data->start_class, and_withp, regnode_ssc);
 			flags &= ~SCF_DO_STCLASS_AND;
-			StructCopy(&accum, data->start_class,
-				   struct regnode_charclass_class);
+			StructCopy(&accum, data->start_class, regnode_ssc);
 			flags |= SCF_DO_STCLASS_OR;
                         SET_SSC_EOS(data->start_class);
 		    }
@@ -3805,8 +3802,8 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 	    SSize_t mincount, maxcount, minnext, deltanext, pos_before = 0;
 	    I32 fl = 0, f = flags;
 	    regnode * const oscan = scan;
-	    struct regnode_charclass_class this_class;
-	    struct regnode_charclass_class *oclass = NULL;
+	    regnode_ssc this_class;
+	    regnode_ssc *oclass = NULL;
 	    I32 next_is_eval = 0;
 
 	    switch (PL_regkind[OP(scan)]) {
@@ -3906,11 +3903,9 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 			/* Switch to OR mode: cache the old value of
 			 * data->start_class */
 			INIT_AND_WITHP;
-			StructCopy(data->start_class, and_withp,
-				   struct regnode_charclass_class);
+			StructCopy(data->start_class, and_withp, regnode_ssc);
 			flags &= ~SCF_DO_STCLASS_AND;
-			StructCopy(&this_class, data->start_class,
-				   struct regnode_charclass_class);
+			StructCopy(&this_class, data->start_class, regnode_ssc);
 			flags |= SCF_DO_STCLASS_OR;
                         SET_SSC_EOS(data->start_class);
 		    }
@@ -4242,11 +4237,10 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
 		    break;
 		case ANYOF:
 		    if (flags & SCF_DO_STCLASS_AND)
-			cl_and(data->start_class,
-			       (struct regnode_charclass_class*)scan);
+			cl_and(data->start_class, (regnode_ssc*)scan);
 		    else
 			cl_or(pRExC_state, data->start_class,
-			      (struct regnode_charclass_class*)scan);
+                                                          (regnode_ssc*)scan);
 		    break;
 		case POSIXA:
                     loop_max = 128;
@@ -4371,7 +4365,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
 
                 SSize_t deltanext, minnext, fake = 0;
                 regnode *nscan;
-                struct regnode_charclass_class intrnl;
+                regnode_ssc intrnl;
                 int f = 0;
 
                 data_fake.flags = 0;
@@ -4440,7 +4434,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
                 */
                 SSize_t deltanext, fake = 0;
                 regnode *nscan;
-                struct regnode_charclass_class intrnl;
+                regnode_ssc intrnl;
                 int f = 0;
                 /* We use SAVEFREEPV so that when the full compile 
                     is finished perl will clean up the allocated 
@@ -4595,7 +4589,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
             regnode *tail= regnext(scan);
             reg_trie_data *trie = (reg_trie_data*)RExC_rxi->data->data[ ARG(scan) ];
             SSize_t max1 = 0, min1 = SSize_t_MAX;
-            struct regnode_charclass_class accum;
+            regnode_ssc accum;
 
             if (flags & SCF_DO_SUBSTR) /* XXXX Add !SUSPEND? */
                 SCAN_COMMIT(pRExC_state, data,minlenp); /* Cannot merge strings after this. */
@@ -4612,7 +4606,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
                 for ( word=1 ; word <= trie->wordcount ; word++) 
                 {
                     SSize_t deltanext=0, minnext=0, f = 0, fake;
-                    struct regnode_charclass_class this_class;
+                    regnode_ssc this_class;
                     
                     data_fake.flags = 0;
                     if (data) {
@@ -4695,11 +4689,9 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
                     /* Switch to OR mode: cache the old value of
                      * data->start_class */
 		    INIT_AND_WITHP;
-                    StructCopy(data->start_class, and_withp,
-                               struct regnode_charclass_class);
+                    StructCopy(data->start_class, and_withp, regnode_ssc);
                     flags &= ~SCF_DO_STCLASS_AND;
-                    StructCopy(&accum, data->start_class,
-                               struct regnode_charclass_class);
+                    StructCopy(&accum, data->start_class, regnode_ssc);
                     flags |= SCF_DO_STCLASS_OR;
                     SET_SSC_EOS(data->start_class);
                 }
@@ -6076,7 +6068,7 @@ reStudy:
     if (!(RExC_seen & REG_TOP_LEVEL_BRANCHES)) { /*  Only one top-level choice. */
 	SSize_t fake;
 	STRLEN longest_float_length, longest_fixed_length;
-	struct regnode_charclass_class ch_class; /* pointed to by data */
+	regnode_ssc ch_class; /* pointed to by data */
 	int stclass_flag;
 	SSize_t last_close = 0; /* pointed to by data */
         regnode *first= scan;
@@ -6315,11 +6307,10 @@ reStudy:
 	{
 	    const U32 n = add_data(pRExC_state, 1, "f");
 
-	    Newx(RExC_rxi->data->data[n], 1,
-		struct regnode_charclass_class);
+	    Newx(RExC_rxi->data->data[n], 1, regnode_ssc);
 	    StructCopy(data.start_class,
-		       (struct regnode_charclass_class*)RExC_rxi->data->data[n],
-		       struct regnode_charclass_class);
+		       (regnode_ssc*)RExC_rxi->data->data[n],
+		       regnode_ssc);
 	    ri->regstclass = (regnode*)RExC_rxi->data->data[n];
 	    r->intflags &= ~PREGf_SKIP;	/* Used in find_byclass(). */
 	    DEBUG_COMPILE_r({ SV *sv = sv_newmortal();
@@ -6360,7 +6351,7 @@ reStudy:
     else {
 	/* Several toplevels. Best we can is to set minlen. */
 	SSize_t fake;
-	struct regnode_charclass_class ch_class;
+	regnode_ssc ch_class;
 	SSize_t last_close = 0;
 
 	DEBUG_PARSE_r(PerlIO_printf(Perl_debug_log, "\nMulti Top Level\n"));
@@ -6387,11 +6378,10 @@ reStudy:
 	{
 	    const U32 n = add_data(pRExC_state, 1, "f");
 
-	    Newx(RExC_rxi->data->data[n], 1,
-		struct regnode_charclass_class);
+	    Newx(RExC_rxi->data->data[n], 1, regnode_ssc);
 	    StructCopy(data.start_class,
-		       (struct regnode_charclass_class*)RExC_rxi->data->data[n],
-		       struct regnode_charclass_class);
+		       (regnode_ssc*)RExC_rxi->data->data[n],
+		       regnode_ssc);
 	    ri->regstclass = (regnode*)RExC_rxi->data->data[n];
 	    r->intflags &= ~PREGf_SKIP;	/* Used in find_byclass(). */
 	    DEBUG_COMPILE_r({ SV* sv = sv_newmortal();
@@ -15404,9 +15394,8 @@ Perl_regdupe_internal(pTHX_ REGEXP * const rx, CLONE_PARAMS *param)
 		break;
 	    case 'f':
 		/* This is cheating. */
-		Newx(d->data[i], 1, struct regnode_charclass_class);
-		StructCopy(ri->data->data[i], d->data[i],
-			    struct regnode_charclass_class);
+		Newx(d->data[i], 1, regnode_ssc);
+		StructCopy(ri->data->data[i], d->data[i], regnode_ssc);
 		reti->regstclass = (regnode*)d->data[i];
 		break;
 	    case 'T':

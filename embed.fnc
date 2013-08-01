@@ -2048,21 +2048,21 @@ Es	|void	|scan_commit	|NN const struct RExC_state_t *pRExC_state \
 				|NN SSize_t *minlenp|int is_inf
 Es	|void	|populate_ANYOF_from_invlist|NN regnode *node|NN SV** invlist_ptr
 Esn	|void	|cl_anything	|NN const struct RExC_state_t *pRExC_state \
-				|NN struct regnode_charclass_class *cl
-EsRn	|int	|cl_is_anything	|NN const struct regnode_charclass_class *cl
+				|NN regnode_ssc *cl
+EsRn	|int	|cl_is_anything	|NN const regnode_ssc *cl
 Esn	|void	|cl_init	|NN const struct RExC_state_t *pRExC_state \
-				|NN struct regnode_charclass_class *cl
-Esn	|void	|cl_and		|NN struct regnode_charclass_class *cl \
-				|NN const struct regnode_charclass_class *and_with
+				|NN regnode_ssc *cl
+Esn	|void	|cl_and		|NN regnode_ssc *cl \
+				|NN const regnode_ssc *and_with
 Esn	|void	|cl_or		|NN const struct RExC_state_t *pRExC_state \
-				|NN struct regnode_charclass_class *cl \
-				|NN const struct regnode_charclass_class *or_with
+				|NN regnode_ssc *cl \
+				|NN const regnode_ssc *or_with
 Es	|SSize_t|study_chunk	|NN struct RExC_state_t *pRExC_state \
 				|NN regnode **scanp|NN SSize_t *minlenp \
 				|NN SSize_t *deltap|NN regnode *last \
 				|NULLOK struct scan_data_t *data \
 				|I32 stopparen|NULLOK U8* recursed \
-				|NULLOK struct regnode_charclass_class *and_withp \
+				|NULLOK regnode_ssc *and_withp \
 				|U32 flags|U32 depth
 EsRn	|U32	|add_data	|NN struct RExC_state_t *pRExC_state|U32 n \
 				|NN const char *s
