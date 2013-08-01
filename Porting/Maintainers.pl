@@ -2008,7 +2008,10 @@ use File::Glob qw(:case);
         'FILES'        => q[dist/XSLoader],
         'EXCLUDED'     => [
             qr{^eg/},
-            qw( t/pod.t
+            qw( t/00-load.t
+                t/01-api.t
+                t/distchk.t
+                t/pod.t
                 t/podcover.t
                 t/portfs.t
                 ),
