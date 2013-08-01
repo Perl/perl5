@@ -8326,17 +8326,17 @@ Perl__invlist_dump(pTHX_ PerlIO *file, I32 level, const char * const indent, SV*
     while (invlist_iternext(invlist, &start, &end)) {
 	if (end == UV_MAX) {
 	    Perl_dump_indent(aTHX_ level, file,
-                                            "%s[%d] 0x%04"UVXf" .. INFINITY\n",
-                                        indent, count, start);
+                                       "%s[%"UVuf"] 0x%04"UVXf" .. INFINITY\n",
+                                   indent, (UV)count, start);
 	}
 	else if (end != start) {
 	    Perl_dump_indent(aTHX_ level, file,
-                                         "%s[%d] 0x%04"UVXf" .. 0x%04"UVXf"\n",
-		                     indent, count, start,         end);
+                                    "%s[%"UVuf"] 0x%04"UVXf" .. 0x%04"UVXf"\n",
+		                indent, (UV)count, start,         end);
 	}
 	else {
-	    Perl_dump_indent(aTHX_ level, file, "%s[%d] 0x%04"UVXf"\n",
-                                            indent, count, start);
+	    Perl_dump_indent(aTHX_ level, file, "%s[%"UVuf"] 0x%04"UVXf"\n",
+                                            indent, (UV)count, start);
 	}
         count += 2;
     }
