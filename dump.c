@@ -1688,12 +1688,14 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
                 _invlist_dump(file, level, "    ", sv);
             }
             else {
-	    PerlIO_printf(file, "%s", pv_display(d, ptr, SvCUR(sv),
-						 re ? 0 : SvLEN(sv),
-						 pvlim));
-	    if (SvUTF8(sv)) /* the 6?  \x{....} */
-	        PerlIO_printf(file, " [UTF8 \"%s\"]", sv_uni_display(d, sv, 6 * SvCUR(sv), UNI_DISPLAY_QQ));
-	    PerlIO_printf(file, "\n");
+                PerlIO_printf(file, "%s", pv_display(d, ptr, SvCUR(sv),
+                                                     re ? 0 : SvLEN(sv),
+                                                     pvlim));
+                if (SvUTF8(sv)) /* the 6?  \x{....} */
+                    PerlIO_printf(file, " [UTF8 \"%s\"]",
+                                         sv_uni_display(d, sv, 6 * SvCUR(sv),
+                                                        UNI_DISPLAY_QQ));
+                PerlIO_printf(file, "\n");
             }
 	    Perl_dump_indent(aTHX_ level, file, "  CUR = %"IVdf"\n", (IV)SvCUR(sv));
 	    if (!re)
