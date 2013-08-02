@@ -465,9 +465,6 @@ struct regnode_charclass_class {
 #define ANYOF_CLASS_TEST_ANY_SET(p)                               \
         ((ANYOF_FLAGS(p) & ANYOF_CLASS)                           \
 	 && (((struct regnode_charclass_class*)(p))->classflags))
-/*#define ANYOF_CLASS_ADD_SKIP	(ANYOF_CLASS_SKIP - ANYOF_SKIP)
- * */
-
 
 /*
  * Utility definitions.

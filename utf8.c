@@ -3763,7 +3763,7 @@ Perl__swash_inversion_hash(pTHX_ SV* const swash)
     *
     * The returned hash would have two keys, the utf8 for 006B and the utf8 for
     * 006C.  The value for each key is an array.  For 006C, the array would
-    * have a two elements, the utf8 for itself, and for 004C.  For 006B, there
+    * have two elements, the utf8 for itself, and for 004C.  For 006B, there
     * would be three elements in its array, the utf8 for 006B, 004B and 212A.
     *
     * Essentially, for any code point, it gives all the code points that map to

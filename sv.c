@@ -8652,13 +8652,13 @@ Perl_newSVpvn_flags(pTHX_ const char *const s, const STRLEN len, const U32 flags
     new_SV(sv);
     sv_setpvn(sv,s,len);
 
-    /* This code used to a sv_2mortal(), however we now unroll the call to sv_2mortal()
-     * and do what it does ourselves here.
-     * Since we have asserted that flags can only have the SVf_UTF8 and/or SVs_TEMP flags
-     * set above we can use it to enable the sv flags directly (bypassing SvTEMP_on), which
-     * in turn means we dont need to mask out the SVf_UTF8 flag below, which means that we
-     * eliminate quite a few steps than it looks - Yves (explaining patch by gfx)
-     */
+    /* This code used to do a sv_2mortal(), however we now unroll the call to
+     * sv_2mortal() and do what it does ourselves here.  Since we have asserted
+     * that flags can only have the SVf_UTF8 and/or SVs_TEMP flags set above we
+     * can use it to enable the sv flags directly (bypassing SvTEMP_on), which
+     * in turn means we dont need to mask out the SVf_UTF8 flag below, which
+     * means that we eliminate quite a few steps than it looks - Yves
+     * (explaining patch by gfx) */
 
     SvFLAGS(sv) |= flags;
 
