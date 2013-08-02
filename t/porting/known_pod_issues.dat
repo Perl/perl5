@@ -177,8 +177,8 @@ dist/math-bigint/lib/math/bigint.pm	Verbatim line length including indents excee
 dist/math-bigint/lib/math/bigint/calcemu.pm	empty section in previous paragraph	3
 dist/math-bigrat/lib/math/bigrat.pm	Verbatim line length including indents exceeds 79 by	7
 dist/math-bigrat/lib/math/bigrat.pm	unresolved internal link	1
-dist/module-corelist/blib/script/corelist	Verbatim line length including indents exceeds 79 by	1
 dist/module-corelist/lib/module/corelist.pod	Verbatim line length including indents exceeds 79 by	4
+dist/module-corelist/lib/module/corelist/utils.pm	Verbatim line length including indents exceeds 79 by	2
 dist/net-ping/lib/net/ping.pm	Verbatim line length including indents exceeds 79 by	2
 dist/safe/safe.pm	Verbatim line length including indents exceeds 79 by	1
 dist/safe/safe.pm	empty section in previous paragraph	1
@@ -237,7 +237,7 @@ pod/perlguts.pod	? Should you be using F<...> or maybe L<...> instead of	2
 pod/perlguts.pod	? Should you be using L<...> instead of	1
 pod/perlhack.pod	? Should you be using L<...> instead of	1
 pod/perlhack.pod	Verbatim line length including indents exceeds 79 by	1
-pod/perlhist.pod	Verbatim line length including indents exceeds 79 by	2
+pod/perlhist.pod	Verbatim line length including indents exceeds 79 by	1
 pod/perlhpux.pod	Verbatim line length including indents exceeds 79 by	5
 pod/perlhurd.pod	Verbatim line length including indents exceeds 79 by	2
 pod/perlintern.pod	? Should you be using L<...> instead of	5

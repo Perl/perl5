@@ -10,13 +10,13 @@ See L<Module::CoreList> for one.
 
 =head1 SYNOPSIS
 
-    corelist -v
-    corelist [-a|-d] <ModuleName> | /<ModuleRegex>/ [<ModuleVersion>] ...
-    corelist [-v <PerlVersion>] [ <ModuleName> | /<ModuleRegex>/ ] ...
-    corelist [-r <PerlVersion>] ...
-    corelist --feature <FeatureName> [<FeatureName>] ...
-    corelist --diff PerlVersion PerlVersion
-    corelist --upstream <ModuleName>
+   corelist -v
+   corelist [-a|-d] <ModuleName> | /<ModuleRegex>/ [<ModuleVersion>] ...
+   corelist [-v <PerlVersion>] [ <ModuleName> | /<ModuleRegex>/ ] ...
+   corelist [-r <PerlVersion>] ...
+   corelist --feature <FeatureName> [<FeatureName>] ...
+   corelist --diff PerlVersion PerlVersion
+   corelist --upstream <ModuleName>
 
 =head1 OPTIONS
 
@@ -131,7 +131,7 @@ requested perl versions.
 =cut
 
 use Module::CoreList;
-use Getopt::Long;
+use Getopt::Long qw(:config no_ignore_case);
 use Pod::Usage;
 use strict;
 use warnings;

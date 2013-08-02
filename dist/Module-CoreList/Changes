@@ -1,4 +1,21 @@
-2.89
+2.95 Mon Jun 22 2013
+  - Updated for v5.19.3
+
+2.94 Sun Jun 21 2013
+  - Updated for v5.19.2
+
+2.93 Thu 20 Jun 2013
+  - Updated for v5.19.1
+
+2.92 Thu Jun 21 2013
+  - Make switches case-sensitive (keep -d and -D distinct)
+  - correct omission of Text::Soundex and File::CheckTree from deprecations
+  - switch %deprecated to a delta hash
+
+2.91 Mon May 20 2013
+  - Updated for v5.19.0
+
+2.90 Mon May 18 2013
   - Updated for v5.18.0
 
 2.88 Tue Apr 23 2013
