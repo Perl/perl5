@@ -14034,16 +14034,22 @@ parseit:
 	ARG_SET(ret, ANYOF_NONBITMAP_EMPTY);
     }
     else {
-	/* av[0] stores the character class description in its textual form:
-	 *       used later (regexec.c:Perl_regclass_swash()) to initialize the
-	 *       appropriate swash, and is also useful for dumping the regnode.
-	 * av[1] if NULL, is a placeholder to later contain the swash computed
-	 *       from av[0].  But if no further computation need be done, the
-	 *       swash is stored there now.
+        /* av[0] stores the character class description in its textual form.
+         *       This is used later (regexec.c:Perl_regclass_swash()) to
+         *       initialize the appropriate swash, and is also useful for
+         *       dumping the regnode.  This is set to &PL_sv_undef if the
+         *       textual description is not needed at run-time (as happens if
+         *       the other elements completely define the class)
+         * av[1] if &PL_sv_undef, is a placeholder to later contain the swash
+         *       computed from av[0].  But if no further computation need be
+         *       done, the swash is stored there now (and av[0] is
+         *       &PL_sv_undef).
 	 * av[2] stores the cp_list inversion list for use in addition or
-	 *       instead of av[0]; used only if av[1] is NULL
+         *       instead of av[0]; used only if cp_list exists and av[1] is
+         *       &PL_sv_undef.  (Otherwise everything needed is already in
+         *       av[0] and av[1])
 	 * av[3] is set if any component of the class is from a user-defined
-	 *       property; used only if av[1] is NULL */
+	 *       property; used only if av[2] exists */
 	AV * const av = newAV();
 	SV *rv;
 
@@ -14054,7 +14060,7 @@ parseit:
 	    SvREFCNT_dec_NN(cp_list);
 	}
 	else {
-	    av_store(av, 1, NULL);
+	    av_store(av, 1, &PL_sv_undef);
 	    if (cp_list) {
 		av_store(av, 2, cp_list);
 		av_store(av, 3, newSVuv(has_user_defined_property));
