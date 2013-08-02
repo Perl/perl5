@@ -92,7 +92,8 @@ my @tests = (
 [ "Unix->catdir('d1','d2','d3','')",    'd1/d2/d3'  ],
 [ "Unix->catdir('','d1','d2','d3')",    '/d1/d2/d3' ],
 [ "Unix->catdir('d1','d2','d3')",       'd1/d2/d3'  ],
-[ "Unix->catdir('/','d2/d3')",          '/d2/d3'    ],
+# QNX is POSIXly special
+[ "Unix->catdir('/','d2/d3')",          ( $^O =~ m!^(nto|qnx)! ? '//d2/d3' : '/d2/d3' ) ],
 
 [ "Unix->canonpath('///../../..//./././a//b/.././c/././')",   '/a/b/../c' ],
 [ "Unix->canonpath('')",                       ''               ],
