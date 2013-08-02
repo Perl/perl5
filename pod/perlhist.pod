@@ -508,6 +508,8 @@ the strings?).
  Ricardo  5.18.0-RC3    2013-May-13
  Ricardo  5.18.0-RC4    2013-May-15
  Ricardo  5.18.0        2013-May-18
+ Ricardo  5.18.1-RC1    2013-Aug-01
+ Ricardo  5.18.1        2013-Aug-09
 
  Ricardo   5.19.0       2013-May-20     The 5.19 development track
  David G   5.19.1       2013-Jun-21
