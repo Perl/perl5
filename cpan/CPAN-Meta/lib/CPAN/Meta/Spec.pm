@@ -1,13 +1,20 @@
-# vi:tw=72
+# XXX RULES FOR PATCHING THIS FILE XXX
+# Patches that fix typos or formatting are acceptable.  Patches
+# that change semantics are not acceptable without prior approval
+# by David Golden or Ricardo Signes.
+
 use 5.006;
 use strict;
 use warnings;
 package CPAN::Meta::Spec;
-our $VERSION = '2.131560'; # VERSION
+our $VERSION = '2.132140'; # VERSION
 
 1;
 
 # ABSTRACT: specification for CPAN distribution metadata
+
+
+# vi:tw=72
 
 __END__
 
@@ -21,7 +28,7 @@ CPAN::Meta::Spec - specification for CPAN distribution metadata
 
 =head1 VERSION
 
-version 2.131560
+version 2.132140
 
 =head1 SYNOPSIS
 
@@ -586,7 +593,7 @@ I<Suggestion for disuse:> Because there is currently no way for a
 distribution to specify a dependency on an optional feature of another
 dependency, the use of C<optional_feature> is discouraged.  Instead,
 create a separate, installable distribution that ensures the desired
-feature is available.  For example, if C<Foo::Bar> has a "Baz" feature,
+feature is available.  For example, if C<Foo::Bar> has a C<Baz> feature,
 release a separate C<Foo-Bar-Baz> distribution that satisfies
 requirements for the feature.
 
@@ -640,14 +647,14 @@ Example:
   provides => {
     'Foo::Bar' => {
       file    => 'lib/Foo/Bar.pm',
-      version => 0.27_02
+      version => '0.27_02',
     },
     'Foo::Bar::Blah' => {
       file    => 'lib/Foo/Bar/Blah.pm',
     },
     'Foo::Bar::Baz' => {
       file    => 'lib/Foo/Bar/Baz.pm',
-      version => 0.3,
+      version => '0.3',
     },
   }
 
@@ -735,7 +742,8 @@ is a Map with the following valid keys:
 Because a url like C<http://myrepo.example.com/> is ambiguous as to
 type, producers should provide a C<type> whenever a C<url> key is given.
 The C<type> field should be the name of the most common program used
-to work with the repository, e.g. git, svn, cvs, darcs, bzr or hg.
+to work with the repository, e.g. C<git>, C<svn>, C<cvs>, C<darcs>,
+C<bzr> or C<hg>.
 
 =back
 
@@ -996,7 +1004,7 @@ described in the L<Version Ranges> section.
 Another subtle error that can occur in resolving prerequisites comes from
 the way that modules in prerequisites are indexed to distribution files on
 CPAN.  When a module is deleted from a distribution, prerequisites calling
-for that module could indicate an older distribution should installed,
+for that module could indicate an older distribution should be installed,
 potentially overwriting files from a newer distribution.
 
 For example, as of Oct 31, 2009, the CPAN index file contained these
@@ -1137,68 +1145,6 @@ David Golden <dagolden@cpan.org>
 =item *
 
 Ricardo Signes <rjbs@cpan.org>
-
-=back
-
-=head1 CONTRIBUTORS
-
-=over 4
-
-=item *
-
-Ansgar Burchardt <ansgar@cpan.org>
-
-=item *
-
-Avar Arnfjord Bjarmason <avar@cpan.org>
-
-=item *
-
-Christopher J. Madsen <cjm@cpan.org>
-
-=item *
-
-Cory G Watson <gphat@cpan.org>
-
-=item *
-
-Damyan Ivanov <dam@cpan.org>
-
-=item *
-
-Eric Wilhelm <ewilhelm@cpan.org>
-
-=item *
-
-Gregor Hermann <gregoa@debian.org>
-
-=item *
-
-Ken Williams <kwilliams@cpan.org>
-
-=item *
-
-Kenichi Ishigaki <ishigaki@cpan.org>
-
-=item *
-
-Lars Dieckow <daxim@cpan.org>
-
-=item *
-
-Leon Timmermans <leont@cpan.org>
-
-=item *
-
-Mark Fowler <markf@cpan.org>
-
-=item *
-
-Michael G. Schwern <mschwern@cpan.org>
-
-=item *
-
-Randy Sims <randys@thepierianspring.org>
 
 =back
 

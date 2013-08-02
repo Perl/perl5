@@ -2,7 +2,7 @@ use 5.006;
 use strict;
 use warnings;
 package CPAN::Meta;
-our $VERSION = '2.131560'; # VERSION
+our $VERSION = '2.132140'; # VERSION
 
 
 use Carp qw(carp croak);
@@ -348,7 +348,7 @@ CPAN::Meta - the distribution metadata for a CPAN dist
 
 =head1 VERSION
 
-version 2.131560
+version 2.132140
 
 =head1 SYNOPSIS
 
@@ -529,7 +529,7 @@ exception will be raised.
 
   my $copy = $meta->as_struct( \%options );
 
-This method returns a deep copy of the object's metadata as an unblessed has
+This method returns a deep copy of the object's metadata as an unblessed hash
 reference.  It takes an optional hashref of options.  If the hashref contains
 a C<version> argument, the copied metadata will be converted to the version
 of the specification and returned.  For example:
@@ -691,7 +691,7 @@ L<CPAN::Meta::Validator>
 =head2 Bugs / Feature Requests
 
 Please report any bugs or feature requests through the issue tracker
-at L<http://rt.cpan.org/Public/Dist/Display.html?Name=CPAN-Meta>.
+at L<https://github.com/Perl-Toolchain-Gang/cpan-meta/issues>.
 You will be notified automatically of any progress on your issue.
 
 =head2 Source Code
@@ -699,7 +699,7 @@ You will be notified automatically of any progress on your issue.
 This is open source software.  The code repository is available for
 public review and contribution under the terms of the license.
 
-L<http://github.com/dagolden/cpan-meta>
+L<https://github.com/dagolden/cpan-meta>
 
   git clone git://github.com/dagolden/cpan-meta.git
 
@@ -751,6 +751,10 @@ Gregor Hermann <gregoa@debian.org>
 
 =item *
 
+Karen Etheridge <ether@cpan.org>
+
+=item *
+
 Ken Williams <kwilliams@cpan.org>
 
 =item *
@@ -772,6 +776,14 @@ Mark Fowler <markf@cpan.org>
 =item *
 
 Michael G. Schwern <mschwern@cpan.org>
+
+=item *
+
+Olaf Alders <olaf@wundersolutions.com>
+
+=item *
+
+Olivier Mengué <dolmen@cpan.org>
 
 =item *
 

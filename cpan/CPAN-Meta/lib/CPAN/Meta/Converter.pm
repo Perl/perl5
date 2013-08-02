@@ -2,7 +2,7 @@ use 5.006;
 use strict;
 use warnings;
 package CPAN::Meta::Converter;
-our $VERSION = '2.131560'; # VERSION
+our $VERSION = '2.132140'; # VERSION
 
 
 use CPAN::Meta::Validator;
@@ -1280,7 +1280,7 @@ CPAN::Meta::Converter - Convert CPAN distribution metadata structures
 
 =head1 VERSION
 
-version 2.131560
+version 2.132140
 
 =head1 SYNOPSIS
 
@@ -1385,68 +1385,6 @@ David Golden <dagolden@cpan.org>
 =item *
 
 Ricardo Signes <rjbs@cpan.org>
-
-=back
-
-=head1 CONTRIBUTORS
-
-=over 4
-
-=item *
-
-Ansgar Burchardt <ansgar@cpan.org>
-
-=item *
-
-Avar Arnfjord Bjarmason <avar@cpan.org>
-
-=item *
-
-Christopher J. Madsen <cjm@cpan.org>
-
-=item *
-
-Cory G Watson <gphat@cpan.org>
-
-=item *
-
-Damyan Ivanov <dam@cpan.org>
-
-=item *
-
-Eric Wilhelm <ewilhelm@cpan.org>
-
-=item *
-
-Gregor Hermann <gregoa@debian.org>
-
-=item *
-
-Ken Williams <kwilliams@cpan.org>
-
-=item *
-
-Kenichi Ishigaki <ishigaki@cpan.org>
-
-=item *
-
-Lars Dieckow <daxim@cpan.org>
-
-=item *
-
-Leon Timmermans <leont@cpan.org>
-
-=item *
-
-Mark Fowler <markf@cpan.org>
-
-=item *
-
-Michael G. Schwern <mschwern@cpan.org>
-
-=item *
-
-Randy Sims <randys@thepierianspring.org>
 
 =back
 

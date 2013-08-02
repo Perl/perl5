@@ -1,5 +1,16 @@
 Revision history for CPAN-Meta
 
+2.132140  2013-08-02 11:54:17 America/New_York
+
+  [DOCUMENTATION]
+
+  - Fixed some typos in CPAN::Meta::Spec
+
+  [OTHER]
+
+  - migrated repository to Perl-Toolchain-Gang organization on Github and
+    updated metadata accordingly
+
 2.131560  2013-06-05 15:26:36 America/New_York
 
   [DOCUMENTATION]
@@ -376,3 +387,4 @@ Revision history for CPAN-Meta
 
   - keep the old specs from getting indexed so as not to confuse people
 
+# vim: ts=2 sts=2 sw=2 et:
