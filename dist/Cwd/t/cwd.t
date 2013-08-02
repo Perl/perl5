@@ -183,7 +183,7 @@ rmtree($test_dirs[0], 0, 0);
 }
 
 SKIP: {
-    skip "no symlinks on this platform", 2+$EXTRA_ABSPATH_TESTS unless $Config{d_symlink};
+    skip "no symlinks on this platform", 2+$EXTRA_ABSPATH_TESTS unless $Config{d_symlink} && $^O !~ m!^(qnx|nto)!;
 
     my $file = "linktest";
     mkpath([$Test_Dir], 0, 0777);
