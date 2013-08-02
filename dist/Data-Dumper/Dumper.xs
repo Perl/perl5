@@ -242,7 +242,7 @@ esc_q_utf8(pTHX_ SV* sv, const char *src, STRLEN slen, I32 do_utf8, I32 useqq)
 #ifndef EBCDIC
 	} else if (useqq &&
 	    /* we can't use the short form like '\0' if followed by a digit */
-                   ((k >= 7 && k <= 10 || k == 12 || k == 13 || k == 27)
+                   (((k >= 7 && k <= 10) || k == 12 || k == 13 || k == 27)
                  || (k < 8 && (next < '0' || next > '9')))) {
 	    grow += 2;
 	} else if (useqq && k <= 31 && (next < '0' || next > '9')) {
