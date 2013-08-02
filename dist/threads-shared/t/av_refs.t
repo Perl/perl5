@@ -27,7 +27,7 @@ sub ok {
 
 BEGIN {
     $| = 1;
-    print("1..14\n");   ### Number of tests that will be run ###
+    print("1..16\n");   ### Number of tests that will be run ###
 };
 
 use threads;
@@ -89,6 +89,31 @@ ok(13, is_shared(@av), "Check for sharing");
 
 my $x :shared;
 ok(14, is_shared($x), "Check for sharing");
+
+# This is a reduction of the test case from perl #119089. Whilst the bug that
+# this exposes was fixed by a core change in 5.15.7, the variant with lvalues
+# below would still crash, and the fix for it also a fix for this bug on earlier
+# perl versions:
+
+sub elem_on_stack {
+    my @a :shared;
+    $a[0] = 6;
+    $a[0];
+}
+
+ok(15, defined elem_on_stack(), "element on stack should be defined");
+
+sub lvalue_elem_on_stack :lvalue {
+    my @a :shared;
+    $a[0];
+}
+
+if ($] >= 5.008008) {
+    lvalue_elem_on_stack() = 9;
+    ok(16, 1, "assigning to lvalue element on stack does not crash");
+} else {
+    print "ok 16 # skip $] can't return temporaries from lvalue subs\n";
+}
 
 exit(0);
 

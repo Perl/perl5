@@ -1027,6 +1027,24 @@ sharedsv_elem_mg_DELETE(pTHX_ SV *sv, MAGIC *mg)
     return (0);
 }
 
+int
+sharedsv_elem_mg_free(pTHX_ SV *sv, MAGIC *mg)
+{
+    PERL_UNUSED_ARG(sv);
+    if (mg->mg_obj) {
+        if (!PL_dirty) {
+            assert(SvROK(mg->mg_obj));
+        }
+        if (SvREFCNT(mg->mg_obj) == 1) {
+            /* If the element has the last pointer to the shared aggregate, then
+               it has to free the shared aggregate.  mg->mg_obj itself is freed
+               by Perl_mg_free()  */
+            S_sharedsv_dec(aTHX_ SHAREDSV_FROM_OBJ(mg->mg_obj));
+        }
+    }
+    return (0);
+}
+
 /* Called during cloning of PERL_MAGIC_tiedelem(p) magic in new
  * thread */
 
@@ -1044,7 +1062,7 @@ MGVTBL sharedsv_elem_vtbl = {
     sharedsv_elem_mg_STORE,     /* set */
     0,                          /* len */
     sharedsv_elem_mg_DELETE,    /* clear */
-    0,                          /* free */
+    sharedsv_elem_mg_free,      /* free */
     0,                          /* copy */
     sharedsv_elem_mg_dup,       /* dup */
 #ifdef MGf_LOCAL
@@ -1114,7 +1132,21 @@ int
 sharedsv_array_mg_free(pTHX_ SV *sv, MAGIC *mg)
 {
     PERL_UNUSED_ARG(sv);
-    S_sharedsv_dec(aTHX_ (SV*)mg->mg_ptr);
+    if (!PL_dirty) {
+        assert(mg->mg_obj);
+        assert(SvROK(mg->mg_obj));
+        assert(SvUV(SvRV(mg->mg_obj)) == PTR2UV(mg->mg_ptr));
+    }
+    if (mg->mg_obj) {
+        if (SvREFCNT(mg->mg_obj) == 1) {
+            S_sharedsv_dec(aTHX_ (SV*)mg->mg_ptr);
+        } else {
+            /* An element of this aggregate still has PERL_MAGIC_tied(p)
+               pointing to this shared aggregate.  It will take responsibility
+               for freeing the shared aggregate.  Perl_mg_free() drops the
+               reference count on mg->mg_obj.  */
+        }
+    }
     return (0);
 }
 

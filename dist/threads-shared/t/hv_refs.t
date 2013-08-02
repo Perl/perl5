@@ -27,7 +27,7 @@ sub ok {
 
 BEGIN {
     $| = 1;
-    print("1..20\n");   ### Number of tests that will be run ###
+    print("1..22\n");   ### Number of tests that will be run ###
 };
 
 use threads;
@@ -105,6 +105,28 @@ ok(10, keys %foo == 0, "And make sure we realy have deleted the values");
 
 ok(19, is_shared($foo), "Check for sharing");
 ok(20, is_shared(%foo), "Check for sharing");
+
+# See av_refs.t for a description.
+
+sub elem_on_stack {
+    my %h :shared;
+    $h{''} = 6;
+    $h{''};
+}
+
+ok(21, defined elem_on_stack(), "element on stack should be defined");
+
+sub lvalue_elem_on_stack :lvalue {
+    my %h :shared;
+    $h{''};
+}
+
+if ($] >= 5.008008) {
+    lvalue_elem_on_stack() = 9;
+    ok(22, 1, "assigning to lvalue element on stack does not crash");
+} else {
+    print "ok 22 # skip $] can't return temporaries from lvalue subs\n";
+}
 
 exit(0);
 
