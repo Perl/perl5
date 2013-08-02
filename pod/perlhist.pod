@@ -12,15 +12,15 @@ This document aims to record the Perl source code releases.
 
 Perl history in brief, by Larry Wall:
 
-    Perl 0 introduced Perl to my officemates.
-    Perl 1 introduced Perl to the world, and changed /\(...\|...\)/ to
-        /(...|...)/.  \(Dan Faigin still hasn't forgiven me. :-\)
-    Perl 2 introduced Henry Spencer's regular expression package.
-    Perl 3 introduced the ability to handle binary data (embedded nulls).
-    Perl 4 introduced the first Camel book.  Really.  We mostly just
-        switched version numbers so the book could refer to 4.000.
-    Perl 5 introduced everything else, including the ability to
-        introduce everything else.
+   Perl 0 introduced Perl to my officemates.
+   Perl 1 introduced Perl to the world, and changed /\(...\|...\)/ to
+       /(...|...)/.  \(Dan Faigin still hasn't forgiven me. :-\)
+   Perl 2 introduced Henry Spencer's regular expression package.
+   Perl 3 introduced the ability to handle binary data (embedded nulls).
+   Perl 4 introduced the first Camel book.  Really.  We mostly just
+       switched version numbers so the book could refer to 4.000.
+   Perl 5 introduced everything else, including the ability to
+       introduce everything else.
 
 =head1 THE KEEPERS OF THE PUMPKIN
 
@@ -32,7 +32,7 @@ Leon Brocard, Dave Mitchell, Jesse Vincent, Ricardo Signes, Steve Hay,
 Matt S Trout, David Golden, Florian Ragwitz, Tatsuhiko Miyagawa,
 Chris C<BinGOs> Williams, Zefram, Ævar Arnfjörð Bjarmason, Stevan
 Little, Dave Rolsky, Max Maischein, Abigail, Jesse Luehrs, Tony Cook,
-Dominic Hargreaves, and Aaron Crane.
+Dominic Hargreaves, Aaron Crane and Aristotle Pagaltzis.
 
 =head2 PUMPKIN?
 
@@ -503,11 +503,15 @@ the strings?).
  BinGOs   5.17.9        2013-Feb-20
  Max M    5.17.10       2013-Mar-21
 
- Ricardo  5.18.0-RC1    2013-May-11
+ Ricardo  5.18.0-RC1    2013-May-11     The 5.18 maintenance track
  Ricardo  5.18.0-RC2    2013-May-12
  Ricardo  5.18.0-RC3    2013-May-13
  Ricardo  5.18.0-RC4    2013-May-15
  Ricardo  5.18.0        2013-May-18
+
+ Ricardo   5.19.0       2013-May-20     The 5.19 development track
+ David G   5.19.1       2013-Jun-21
+ Aristotle 5.19.2       2013-Jul-22
 
 =head2 SELECTED RELEASE SIZES
 
