@@ -446,6 +446,8 @@ use File::Glob qw(:case);
         'UPSTREAM' => 'cpan',
     },
 
+    # Note: When updating CPAN-Meta the META.* files will need to be regenerated
+    # perl -Icpan/CPAN-Meta/lib Porting/makemeta
     'CPAN::Meta' => {
         'MAINTAINER'   => 'dagolden',
         'DISTRIBUTION' => 'DAGOLDEN/CPAN-Meta-2.132140.tar.gz',
