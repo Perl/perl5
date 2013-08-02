@@ -4987,6 +4987,7 @@ t/io/crlf_through.t		See if pipe passes data intact with :crlf
 t/io/data.t			See if DATA works
 t/io/defout.t			See if PL_defoutgv works
 t/io/dup.t			See if >& works right
+t/io/eintr_print.t		Test that print is not returning EINTR
 t/io/eintr.t			See if code called during EINTR is safe
 t/io/errnosig.t			Test case for restoration $! when leaving signal handlers
 t/io/errno.t			See if $! is correctly set
