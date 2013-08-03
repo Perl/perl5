@@ -3177,10 +3177,23 @@ S_scan_const(pTHX_ char *start)
 	}
 
 	/* likewise skip #-initiated comments in //x patterns */
-	else if (*s == '#' && PL_lex_inpat && !in_charclass &&
+	else if (*s == '#' && PL_lex_inpat &&
 	  ((PMOP*)PL_lex_inpat)->op_pmflags & RXf_PMf_EXTENDED) {
-	    while (s+1 < send && *s != '\n')
+	    while (s+1 < send && *s != '\n') {
+                /* for maint-5.18, half-fix #-in-charclass bug:
+                 *   *do* recognise codeblocks: /[#](?{})/
+                 *   *don't* recognise interpolated vars: /[#$x]/
+                 */
+                if (in_charclass && !PL_lex_casemods && s+3 < send &&
+		     s[0] == '(' &&
+		     s[1] == '?' &&
+		     (    s[2] == '{'
+		      || (s[2] == '?' && s[3] == '{')))
+                    break;
 		*d++ = NATIVE_TO_NEED(has_utf8,*s++);
+            }
+            if (s+ 1 < send && *s != '\n')
+                break; /* we stopped on (?{}), not EOL */
 	}
 
 	/* no further processing of single-quoted regex */

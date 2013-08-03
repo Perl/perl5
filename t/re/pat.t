@@ -20,7 +20,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 470;  # Update this when adding/deleting tests.
+plan tests => 472;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1361,6 +1361,23 @@ EOP
         like($c, $re, "mixed up-/downgraded pattern matches downgraded string");
         utf8::upgrade($c);
         like($c, $re, "mixed up-/downgraded pattern matches upgraded string");
+    }
+
+    {
+	# RT #119125
+	# the earlier fix for /[#](?{})/x, although correct, as a
+	# side-effect fixed another long-standing bug where /[#$x]/x
+	# didn't interpolate the var $x. Although fixing that is good,
+	# it's too big a change for maint, so keep the old buggy behaviour
+	# for now.
+
+	my $b = 'cd';
+	my $s = 'abcd$%#&';
+	$s =~ s/[a#$b%]/X/g;
+	is ($s, 'XbXX$XX&', 'RT #119125 without /x');
+	$s = 'abcd$%#&';
+	$s =~ s/[a#$b%]/X/gx;
+	is ($s, 'XXcdXXX&', 'RT #119125 with /x');
     }
 
 } # End of sub run_tests
