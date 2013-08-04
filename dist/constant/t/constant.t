@@ -9,7 +9,7 @@ END { @warnings && print STDERR join "\n- ", "accumulated warnings:", @warnings 
 
 
 use strict;
-use Test::More tests => 104;
+use Test::More tests => 105;
 my $TB = Test::More->builder;
 
 BEGIN { use_ok('constant'); }
@@ -392,7 +392,7 @@ SKIP: {
 # Test that list constants are also immutable.  This only works under
 # 5.19.3 and later.
 SKIP: {
-    skip "fails under 5.19.2 and earlier", 2 if $] < 5.019003;
+    skip "fails under 5.19.2 and earlier", 3 if $] < 5.019003;
     local $TODO = "disabled for now; breaks CPAN; see perl #119045";
     use constant constant_list => 1..2;
     for (constant_list) {
@@ -401,4 +401,16 @@ SKIP: {
 	like $@, qr/^Modification of a read-only value attempted at /,
 	    "list constant has constant elements ($num)";
     }
+    undef $TODO;
+    # Whether values are modifiable or no, modifying them should not affect
+    # future return values.
+    my @values;
+    for(1..2) {
+	for ((constant_list)[0]) {
+	    push @values, $_;
+	    eval {$_++};
+	}
+    }
+    is $values[1], $values[0],
+	'modifying list const elements does not affect future retavls';
 }

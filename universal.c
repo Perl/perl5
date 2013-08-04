@@ -921,6 +921,15 @@ XS(XS_Internals_SvREADONLY)	/* This is dangerous stuff. */
 	if (SvTRUE(ST(1))) {
 	    if (SvIsCOW(sv)) sv_force_normal(sv);
 	    SvREADONLY_on(sv);
+	    if (SvTYPE(sv) == SVt_PVAV && AvFILLp(sv) != -1) {
+		/* for constant.pm; nobody else should be calling this
+		   on arrays anyway. */
+		SV **svp;
+		for (svp = AvARRAY(sv) + AvFILLp(sv)
+		   ; svp >= AvARRAY(sv)
+		   ; --svp)
+		    if (*svp) SvPADTMP_on(*svp);
+	    }
 	    XSRETURN_YES;
 	}
 	else {
