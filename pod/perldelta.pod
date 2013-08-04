@@ -26,7 +26,17 @@ report.  See L</Reporting Bugs> below.
 
 =item *
 
-A crashing bug in L<Digest::SHA> has been fixed. [RT #118649]
+B has been upgraded from 1.42 to 1.42_01, fixing bugs related to lexical
+subroutines.
+
+=item *
+
+Digest::SHA has been upgraded from 5.84 to 5.84_01, fixing a crashing bug.
+[RT #118649]
+
+=item *
+
+Module::CoreList has been upgraded from 2.89 to 2.96.
 
 =back
 
