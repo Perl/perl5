@@ -3223,6 +3223,8 @@ especially if it could return the position of the first one.
 
 */
 
+static void S_sv_uncow(pTHX_ SV * const sv, const U32 flags);
+
 STRLEN
 Perl_sv_utf8_upgrade_flags_grow(pTHX_ SV *const sv, const I32 flags, STRLEN extra)
 {
@@ -3251,7 +3253,7 @@ Perl_sv_utf8_upgrade_flags_grow(pTHX_ SV *const sv, const I32 flags, STRLEN extr
     }
 
     if (SvIsCOW(sv)) {
-        sv_force_normal_flags(sv, 0);
+        S_sv_uncow(aTHX_ sv, 0);
     }
 
     if (PL_encoding && !(flags & SV_UTF8_NO_ENCODING)) {
@@ -3510,7 +3512,7 @@ Perl_sv_utf8_downgrade(pTHX_ SV *const sv, const bool fail_ok)
 	    int mg_flags = SV_GMAGIC;
 
             if (SvIsCOW(sv)) {
-                sv_force_normal_flags(sv, 0);
+                S_sv_uncow(aTHX_ sv, 0);
             }
 	    if (SvTYPE(sv) >= SVt_PVMG && SvMAGIC(sv)) {
 		/* update pos */
@@ -4871,18 +4873,14 @@ with flags set to 0.
 =cut
 */
 
-void
-Perl_sv_force_normal_flags(pTHX_ SV *const sv, const U32 flags)
+static void
+S_sv_uncow(pTHX_ SV * const sv, const U32 flags)
 {
     dVAR;
 
-    PERL_ARGS_ASSERT_SV_FORCE_NORMAL_FLAGS;
-
+    assert(SvIsCOW(sv));
+    {
 #ifdef PERL_ANY_COW
-    if (SvREADONLY(sv)) {
-	    Perl_croak_no_modify();
-    }
-    else if (SvIsCOW(sv)) {
 	const char * const pvx = SvPVX_const(sv);
 	const STRLEN len = SvLEN(sv);
 	const STRLEN cur = SvCUR(sv);
@@ -4935,13 +4933,7 @@ Perl_sv_force_normal_flags(pTHX_ SV *const sv, const U32 flags)
                 sv_dump(sv);
             }
 	}
-    }
 #else
-    if (SvREADONLY(sv)) {
-	    Perl_croak_no_modify();
-    }
-    else
-	if (SvIsCOW(sv)) {
 	    const char * const pvx = SvPVX_const(sv);
 	    const STRLEN len = SvCUR(sv);
 	    SvIsCOW_off(sv);
@@ -4956,8 +4948,19 @@ Perl_sv_force_normal_flags(pTHX_ SV *const sv, const U32 flags)
 		*SvEND(sv) = '\0';
 	    }
 	    unshare_hek(SvSHARED_HEK_FROM_PV(pvx));
-	}
 #endif
+    }
+}
+
+void
+Perl_sv_force_normal_flags(pTHX_ SV *const sv, const U32 flags)
+{
+    PERL_ARGS_ASSERT_SV_FORCE_NORMAL_FLAGS;
+
+    if (SvREADONLY(sv))
+	Perl_croak_no_modify();
+    else if (SvIsCOW(sv))
+	S_sv_uncow(aTHX_ sv, flags);
     if (SvROK(sv))
 	sv_unref_flags(sv, flags);
     else if (SvFAKE(sv) && isGV_with_GP(sv))
