@@ -5729,17 +5729,17 @@ STATIC void	S_gv_init_svtype(pTHX_ GV *gv, const svtype sv_type)
 #define PERL_ARGS_ASSERT_GV_INIT_SVTYPE	\
 	assert(gv)
 
+STATIC bool	S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, bool addmg, svtype sv_type)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2)
+			__attribute__nonnull__(pTHX_3);
+#define PERL_ARGS_ASSERT_GV_MAGICALIZE	\
+	assert(gv); assert(stash); assert(name)
+
 STATIC void	S_gv_magicalize_isa(pTHX_ GV *gv)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_GV_MAGICALIZE_ISA	\
 	assert(gv)
-
-STATIC GV*	S_magicalize_gv(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, bool addmg, svtype sv_type)
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2)
-			__attribute__nonnull__(pTHX_3);
-#define PERL_ARGS_ASSERT_MAGICALIZE_GV	\
-	assert(gv); assert(stash); assert(name)
 
 STATIC void	S_maybe_multimagic_gv(pTHX_ GV *gv, const char *name, const svtype sv_type)
 			__attribute__nonnull__(pTHX_1)

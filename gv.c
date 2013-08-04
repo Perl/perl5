@@ -1636,14 +1636,24 @@ S_find_default_stash(pTHX_ HV **stash, const char *name, STRLEN len,
     return TRUE;
 }
 
-/* magicalize_gv() gets called by gv_fetchpvn_flags when creating a new GV */
-PERL_STATIC_INLINE GV*
-S_magicalize_gv(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
+/* gv_magicalize() is called by gv_fetchpvn_flags when creating
+ * a new GV.
+ * Note that it does not insert the GV into the stash prior to
+ * magicalization, which some variables require need in order
+ * to work (like $[, %+, %-, %!), so callers must take care of
+ * that beforehand.
+ * 
+ * The return value has a specific meaning for gv_fetchpvn_flags:
+ * If it returns true, and the gv is empty, it indicates that its
+ * refcount should be decreased.
+ */
+PERL_STATIC_INLINE bool
+S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
                bool addmg, const svtype sv_type)
 {
     SSize_t paren;
 
-    PERL_ARGS_ASSERT_MAGICALIZE_GV;
+    PERL_ARGS_ASSERT_GV_MAGICALIZE;
     
     if (stash != PL_defstash) { /* not the main stash */
 	/* We only have to check for three names here: EXPORT, ISA
@@ -1667,7 +1677,7 @@ S_magicalize_gv(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
 	    default:
 		goto try_core;
 	    }
-	    goto add_magical_gv;
+	    return addmg;
 	}
       try_core:
 	if (len > 1 /* shortest is uc */ && HvNAMELEN_get(stash) == 4) {
@@ -1815,7 +1825,8 @@ S_magicalize_gv(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
 		/* This snippet is taken from is_gv_magical */
 		const char *end = name + len;
 		while (--end > name) {
-		    if (!isDIGIT(*end))	goto add_magical_gv;
+		    if (!isDIGIT(*end))
+                        return addmg;
 		}
                 paren = strtoul(name, NULL, 10);
                 goto storeparen;
@@ -1887,9 +1898,8 @@ S_magicalize_gv(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
             /* magicalization must be done before require_tie_mod is called */
 	    if (sv_type == SVt_PVHV || sv_type == SVt_PVGV)
 	    {
-		if (addmg) (void)hv_store(stash,name,len,(SV *)gv,0);
-		addmg = 0;
 		require_tie_mod(gv, "!", newSVpvs("Errno"), "TIEHASH", 1);
+                addmg = FALSE;
 	    }
 
 	    break;
@@ -1908,9 +1918,8 @@ S_magicalize_gv(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
 
             if (sv_type == SVt_PVHV || sv_type == SVt_PVGV)
 	    {
-		if (addmg) (void)hv_store(stash,name,len,(SV *)gv,0);
-		addmg = 0;
                 require_tie_mod(gv, name, newSVpvs("Tie::Hash::NamedCapture"), "TIEHASH", 0);
+                addmg = FALSE;
 	    }
 
             break;
@@ -1931,9 +1940,8 @@ S_magicalize_gv(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
 	case '[':		/* $[ */
 	    if ((sv_type == SVt_PV || sv_type == SVt_PVGV)
 	     && FEATURE_ARYBASE_IS_ENABLED) {
-		if (addmg) (void)hv_store(stash,name,len,(SV *)gv,0);
 		require_tie_mod(gv,name,newSVpvs("arybase"),"FETCH",0);
-		addmg = 0;
+                addmg = FALSE;
 	    }
 	    else goto magicalize;
             break;
@@ -1996,16 +2004,8 @@ S_magicalize_gv(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
 	break;
 	}
     }
-  add_magical_gv:
-    if (addmg) {
-	if (GvAV(gv) || GvHV(gv) || GvIO(gv) || GvCV(gv) || (
-	     GvSV(gv) && (SvOK(GvSV(gv)) || SvMAGICAL(GvSV(gv)))
-	   ))
-	    (void)hv_store(stash,name,len,(SV *)gv,0);
-	else SvREFCNT_dec_NN(gv), gv = NULL;
-    }
-    
-    return gv;
+
+    return addmg;
 }
 
 /* This function is called when the stash already holds the GV of the magic
@@ -2069,7 +2069,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
     const I32 no_expand = flags & GV_NOEXPAND;
     const I32 add = flags & ~GV_NOADD_MASK;
     const U32 is_utf8 = flags & SVf_UTF8;
-    bool addmg = !!(flags & GV_ADDMG);
+    bool addmg = cBOOL(flags & GV_ADDMG);
     const char *const name_end = nambeg + full_len;
     U32 faking_it;
 
@@ -2165,8 +2165,34 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
     if ( isIDFIRST_lazy_if(name, is_utf8) && !ckWARN(WARN_ONCE) )
         GvMULTI_on(gv) ;
 
+    /* First, store the gv in the symtab if we're adding magic,
+     * but only for non-empty GVs
+     */
+#define GvEMPTY(gv)      !(GvAV(gv) || GvHV(gv) || GvIO(gv) \
+                        || GvCV(gv) || (GvSV(gv) && SvOK(GvSV(gv))))
+    
+    if ( addmg && !GvEMPTY(gv) ) {
+        (void)hv_store(stash,name,len,(SV *)gv,0);
+    }
+
     /* set up magic where warranted */
-    gv = magicalize_gv(gv, stash, name, len, addmg, sv_type);
+    if ( gv_magicalize(gv, stash, name, len, addmg, sv_type) ) {
+        /* See 23496c6 */
+        if (GvEMPTY(gv)) {
+            if ( GvSV(gv) && SvMAGICAL(GvSV(gv)) ) {
+                /* The GV was and still is "empty", except that now
+                 * it has the magic flags turned on, so we want it
+                 * stored in the symtab.
+                 */
+                (void)hv_store(stash,name,len,(SV *)gv,0);
+            }
+            else {
+                /* Most likely the temporary GV created above */
+                SvREFCNT_dec_NN(gv);
+                gv = NULL;
+            }
+        }
+    }
     
     if (gv) gv_init_svtype(gv, faking_it ? SVt_PVCV : sv_type);
     return gv;
