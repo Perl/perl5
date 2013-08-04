@@ -1495,6 +1495,60 @@ S_parse_gv_stash_name(pTHX_ HV **stash, GV **gv, const char **name,
     return TRUE;
 }
 
+/* Checks if an unqualified name is in the main stash */
+PERL_STATIC_INLINE bool
+S_gv_is_in_main(pTHX_ const char *name, STRLEN len, const U32 is_utf8)
+{
+    PERL_ARGS_ASSERT_GV_IS_IN_MAIN;
+    
+    /* If it's an alphanumeric variable */
+    if ( len && isIDFIRST_lazy_if(name, is_utf8) ) {
+        /* Some "normal" variables are always in main::,
+         * like INC or STDOUT.
+         */
+        switch (len) {
+            case 1:
+            if (*name == '_')
+                return TRUE;
+            break;
+            case 3:
+            if ((name[0] == 'I' && name[1] == 'N' && name[2] == 'C')
+                || (name[0] == 'E' && name[1] == 'N' && name[2] == 'V')
+                || (name[0] == 'S' && name[1] == 'I' && name[2] == 'G'))
+                return TRUE;
+            break;
+            case 4:
+            if (name[0] == 'A' && name[1] == 'R' && name[2] == 'G'
+                && name[3] == 'V')
+                return TRUE;
+            break;
+            case 5:
+            if (name[0] == 'S' && name[1] == 'T' && name[2] == 'D'
+                && name[3] == 'I' && name[4] == 'N')
+                return TRUE;
+            break;
+            case 6:
+            if ((name[0] == 'S' && name[1] == 'T' && name[2] == 'D')
+                &&((name[3] == 'O' && name[4] == 'U' && name[5] == 'T')
+                    ||(name[3] == 'E' && name[4] == 'R' && name[5] == 'R')))
+                return TRUE;
+            break;
+            case 7:
+            if (name[0] == 'A' && name[1] == 'R' && name[2] == 'G'
+                && name[3] == 'V' && name[4] == 'O' && name[5] == 'U'
+                && name[6] == 'T')
+                return TRUE;
+            break;
+        }
+    }
+    /* *{""}, or a special variable like $@ */
+    else
+        return TRUE;
+    
+    return FALSE;
+}
+
+
 /* This function is called if parse_gv_stash_name() failed to
  * find a stash, or if GV_NOTQUAL or an empty name was passed
  * to gv_fetchpvn_flags.
@@ -1511,51 +1565,11 @@ S_find_default_stash(pTHX_ HV **stash, const char *name, STRLEN len,
     
     /* No stash in name, so see how we can default */
 
-    /* If it's an alphanumeric variable */
-    if (len && isIDFIRST_lazy_if(name, is_utf8)) {
-        bool global = FALSE;
-
-        /* Some "normal" variables are always in main::,
-         * like INC or STDOUT.
-         */
-        switch (len) {
-            case 1:
-            if (*name == '_')
-                global = TRUE;
-            break;
-            case 3:
-            if ((name[0] == 'I' && name[1] == 'N' && name[2] == 'C')
-                || (name[0] == 'E' && name[1] == 'N' && name[2] == 'V')
-                || (name[0] == 'S' && name[1] == 'I' && name[2] == 'G'))
-                global = TRUE;
-            break;
-            case 4:
-            if (name[0] == 'A' && name[1] == 'R' && name[2] == 'G'
-                && name[3] == 'V')
-                global = TRUE;
-            break;
-            case 5:
-            if (name[0] == 'S' && name[1] == 'T' && name[2] == 'D'
-                && name[3] == 'I' && name[4] == 'N')
-                global = TRUE;
-            break;
-            case 6:
-            if ((name[0] == 'S' && name[1] == 'T' && name[2] == 'D')
-                &&((name[3] == 'O' && name[4] == 'U' && name[5] == 'T')
-                    ||(name[3] == 'E' && name[4] == 'R' && name[5] == 'R')))
-                global = TRUE;
-            break;
-            case 7:
-            if (name[0] == 'A' && name[1] == 'R' && name[2] == 'G'
-                && name[3] == 'V' && name[4] == 'O' && name[5] == 'U'
-                && name[6] == 'T')
-                global = TRUE;
-            break;
-        }
-
-        if (global)
-            *stash = PL_defstash;
-        else if (IN_PERL_COMPILETIME) {
+    if ( gv_is_in_main(name, len, is_utf8) ) {
+        *stash = PL_defstash;
+    }
+    else {
+        if (IN_PERL_COMPILETIME) {
             *stash = PL_curstash;
             if (add && (PL_hints & HINT_STRICT_VARS) &&
                 sv_type != SVt_PVCV &&
@@ -1597,9 +1611,6 @@ S_find_default_stash(pTHX_ HV **stash, const char *name, STRLEN len,
             *stash = CopSTASH(PL_curcop);
         }
     }
-    /* *{""}, or a special variable like $@ */
-    else
-        *stash = PL_defstash;
 
     if (!*stash) {
         if (add && !PL_in_clean_all) {

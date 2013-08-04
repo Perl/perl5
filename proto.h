@@ -5729,6 +5729,11 @@ STATIC void	S_gv_init_svtype(pTHX_ GV *gv, const svtype sv_type)
 #define PERL_ARGS_ASSERT_GV_INIT_SVTYPE	\
 	assert(gv)
 
+STATIC bool	S_gv_is_in_main(pTHX_ const char *name, STRLEN len, const U32 is_utf8)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_GV_IS_IN_MAIN	\
+	assert(name)
+
 STATIC bool	S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, bool addmg, svtype sv_type)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
