@@ -8,7 +8,7 @@ BEGIN {
     chdir 't';
 }
 
-print "1..156\n";
+print "1..157\n";
 
 sub failed {
     my ($got, $expected, $name) = @_;
@@ -475,6 +475,11 @@ $test
 {
     local $~ = "two";
     write();
+}
+
+for(__PACKAGE__) {
+    eval '$_=42';
+    is $_, 'main', '__PACKAGE__ is read-only';
 }
 
 # Add new tests HERE (above this line)
