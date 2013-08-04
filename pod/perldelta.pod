@@ -44,11 +44,6 @@ Module::CoreList has been upgraded from 2.89 to 2.96.
 
 =head2 Platform-Specific Notes
 
-XXX List any changes for specific platforms.  This could include configuration
-and compilation changes or changes in portability/compatibility.  However,
-changes within modules for platforms should generally be listed in the
-L</Modules and Pragmata> section.
-
 =over 4
 
 =item AIX
