@@ -10046,7 +10046,7 @@ S_scan_heredoc(pTHX_ char *s)
 	    /* shared is only null if we have gone beyond the outermost
 	       lexing scope.  In a file, we will have broken out of the
 	       loop in the previous iteration.  In an eval, the string buf-
-	       fer ends with "\n;", so the while condition below will have
+	       fer ends with "\n;", so the while condition above will have
 	       evaluated to false.  So shared can never be null. */
 	    assert(shared);
 	    /* A LEXSHARED struct with a null ls_prev pointer is the outer-
