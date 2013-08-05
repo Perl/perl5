@@ -1754,6 +1754,7 @@ S_incline(pTHX_ const char *s)
     if (t - s > 0) {
 	const STRLEN len = t - s;
 	GV * const cfgv = CopFILEGV(PL_curcop);
+	GV *gv2 = NULL;
 
 	if (cfgv && !PL_rsfp && !PL_parser->filtered) {
 	    /* must copy *{"::_<(eval N)[oldfilename:L]"}
@@ -1763,7 +1764,6 @@ S_incline(pTHX_ const char *s)
 		char smallbuf[128];
 		STRLEN tmplen2 = len;
 		char *tmpbuf2;
-		GV *gv2;
 
 		if (tmplen2 + 2 <= sizeof smallbuf)
 		    tmpbuf2 = smallbuf;
@@ -1805,7 +1805,8 @@ S_incline(pTHX_ const char *s)
 		if (tmpbuf2 != smallbuf) Safefree(tmpbuf2);
 	}
 	CopFILE_free(PL_curcop);
-	CopFILE_setn(PL_curcop, s, len);
+	if (gv2) CopFILEGV_set(PL_curcop, gv2);
+	else CopFILE_setn(PL_curcop, s, len);
     }
     CopLINE_set(PL_curcop, line_num);
 }
