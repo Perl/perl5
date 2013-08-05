@@ -1,7 +1,6 @@
 #!perl
 
-@TODO = qw [ SAVEt_SAVESWITCHSTACK
-             SAVEt_STACK_CXPOS ];
+@TODO = qw [ SAVEt_SAVESWITCHSTACK ];
 @TODO{@TODO} = ();
 
 BEGIN { chdir 't'; require './test.pl' }

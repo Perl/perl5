@@ -66,7 +66,7 @@
 #define SAVEt_SAVESWITCHSTACK	39
 #define SAVEt_SHARED_PVREF	40
 #define SAVEt_SPTR		41
-#define SAVEt_STACK_CXPOS	42
+/*	UNUSED			42 */
 #define SAVEt_SV		43
 #define SAVEt_SVREF		44
 #define SAVEt_VPTR		45
@@ -290,15 +290,6 @@ scope has the given name. Name must be a literal string.
    as it simplifies the code that does the saves, and reduces the load on the
    save stack.  */
 #define SAVECOMPILEWARNINGS() save_pushptr(PL_compiling.cop_warnings, SAVEt_COMPILE_WARNINGS)
-
-#define SAVESTACK_CXPOS() \
-    STMT_START {                                   \
-        dSS_ADD;                                   \
-        SS_ADD_INT(cxstack[cxstack_ix].blk_oldsp); \
-        SS_ADD_INT(cxstack_ix);                    \
-        SS_ADD_UV(SAVEt_STACK_CXPOS);              \
-        SS_ADD_END(3);                             \
-    } STMT_END
 
 #define SAVEPARSER(p) save_pushptr((p), SAVEt_PARSER)
 

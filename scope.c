@@ -1104,9 +1104,6 @@ Perl_leave_scope(pTHX_ I32 base)
 	case SAVEt_STACK_POS:		/* Position on Perl stack */
 	    PL_stack_sp = PL_stack_base + arg0.any_i32;
 	    break;
-	case SAVEt_STACK_CXPOS:         /* blk_oldsp on context stack */
-	    cxstack[ARG0_I32].blk_oldsp = ARG1_I32;
-	    break;
 	case SAVEt_AELEM:		/* array element */
 	    svp = av_fetch(ARG2_AV, ARG1_I32, 1);
 	    if (!AvREAL(ARG2_AV) && AvREIFY(ARG2_AV)) /* undo reify guard */
