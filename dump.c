@@ -421,7 +421,7 @@ Perl_sv_peek(pTHX_ SV *sv)
     if (type == SVt_PVCV) {
         SV * const tmp = newSVpvs_flags("", SVs_TEMP);
         GV* gvcv = CvGV(sv);
-        Perl_sv_catpvf(aTHX_ t, "CV(\"%s\")", gvcv
+        Perl_sv_catpvf(aTHX_ t, "CV(%s)", gvcv
                        ? generic_pv_escape( tmp, GvNAME(gvcv), GvNAMELEN(gvcv), GvNAMEUTF8(gvcv))
                        : "");
 	goto finish;
