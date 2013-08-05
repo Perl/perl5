@@ -1753,27 +1753,27 @@ S_incline(pTHX_ const char *s)
 
     if (t - s > 0) {
 	const STRLEN len = t - s;
-	SV *const temp_sv = CopFILESV(PL_curcop);
-	const char *cf;
-	STRLEN tmplen;
-
-	if (temp_sv) {
-	    cf = SvPVX(temp_sv);
-	    tmplen = SvCUR(temp_sv);
-	} else {
-	    cf = NULL;
-	    tmplen = 0;
-	}
-
 	if (!PL_rsfp && !PL_parser->filtered) {
 	    /* must copy *{"::_<(eval N)[oldfilename:L]"}
 	     * to *{"::_<newfilename"} */
 	    /* However, the long form of evals is only turned on by the
 	       debugger - usually they're "(eval %lu)" */
+	    SV *const temp_sv = CopFILESV(PL_curcop);
+	    const char *cf;
+	    STRLEN tmplen;
 	    char smallbuf[128];
 	    char *tmpbuf;
 	    GV **gvp;
 	    STRLEN tmplen2 = len;
+
+	    if (temp_sv) {
+		cf = SvPVX(temp_sv);
+		tmplen = SvCUR(temp_sv);
+	    } else {
+		cf = NULL;
+		tmplen = 0;
+	    }
+
 	    if (tmplen + 2 <= sizeof smallbuf)
 		tmpbuf = smallbuf;
 	    else
