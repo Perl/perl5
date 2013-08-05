@@ -7812,12 +7812,7 @@ Perl_newCONSTSUB_flags(pTHX_ HV *stash, const char *name, STRLEN len,
 {
     dVAR;
     CV* cv;
-#ifdef USE_ITHREADS
     const char *const file = CopFILE(PL_curcop);
-#else
-    SV *const temp_sv = CopFILESV(PL_curcop);
-    const char *const file = temp_sv ? SvPV_nolen_const(temp_sv) : NULL;
-#endif
 
     ENTER;
 
