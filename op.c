@@ -4953,7 +4953,7 @@ Perl_newPADOP(pTHX_ I32 type, I32 flags, SV *sv)
     return CHECKOP(type, padop);
 }
 
-#endif /* !USE_ITHREADS */
+#endif /* USE_ITHREADS */
 
 /*
 =for apidoc Am|OP *|newGVOP|I32 type|I32 flags|GV *gv
