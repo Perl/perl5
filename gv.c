@@ -165,7 +165,7 @@ Perl_newGP(pTHX_ GV *const gv)
     const char *file;
     STRLEN len;
 #ifndef USE_ITHREADS
-    SV * temp_sv;
+    GV *filegv;
 #endif
     dVAR;
 
@@ -193,10 +193,10 @@ Perl_newGP(pTHX_ GV *const gv)
 #else
     if(PL_curcop)
 	gp->gp_line = CopLINE(PL_curcop); /* 0 otherwise Newxz */
-    temp_sv = CopFILESV(PL_curcop);
-    if (temp_sv) {
-	file = SvPVX(temp_sv);
-	len = SvCUR(temp_sv);
+    filegv = CopFILEGV(PL_curcop);
+    if (filegv) {
+	file = GvNAME(filegv)+2;
+	len = GvNAMELEN(filegv)-2;
     } else {
 	file = "";
 	len = 0;
