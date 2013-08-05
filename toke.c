@@ -1760,22 +1760,8 @@ S_incline(pTHX_ const char *s)
 	     * to *{"::_<newfilename"} */
 	    /* However, the long form of evals is only turned on by the
 	       debugger - usually they're "(eval %lu)" */
-	    const char *cf = GvNAME(cfgv)+2;
-	    STRLEN tmplen = GvNAMELEN(cfgv)-2;
-	    char smallbuf[128];
-	    char *tmpbuf;
-	    GV **gvp;
-	    STRLEN tmplen2 = len;
-	    if (tmplen + 2 <= sizeof smallbuf)
-		tmpbuf = smallbuf;
-	    else
-		Newx(tmpbuf, tmplen + 2, char);
-	    tmpbuf[0] = '_';
-	    tmpbuf[1] = '<';
-	    memcpy(tmpbuf + 2, cf, tmplen);
-	    tmplen += 2;
-	    gvp = (GV**)hv_fetch(PL_defstash, tmpbuf, tmplen, FALSE);
-	    if (gvp) {
+		char smallbuf[128];
+		STRLEN tmplen2 = len;
 		char *tmpbuf2;
 		GV *gv2;
 
@@ -1784,12 +1770,8 @@ S_incline(pTHX_ const char *s)
 		else
 		    Newx(tmpbuf2, tmplen2 + 2, char);
 
-		if (tmpbuf2 != smallbuf || tmpbuf != smallbuf) {
-		    /* Either they malloc'd it, or we malloc'd it,
-		       so no prefix is present in ours.  */
-		    tmpbuf2[0] = '_';
-		    tmpbuf2[1] = '<';
-		}
+		tmpbuf2[0] = '_';
+		tmpbuf2[1] = '<';
 
 		memcpy(tmpbuf2 + 2, s, tmplen2);
 		tmplen2 += 2;
@@ -1803,11 +1785,11 @@ S_incline(pTHX_ const char *s)
 		       alias the saved lines that are in the array.
 		       Otherwise alias the whole array. */
 		    if (CopLINE(PL_curcop) == line_num) {
-			GvHV(gv2) = MUTABLE_HV(SvREFCNT_inc(GvHV(*gvp)));
-			GvAV(gv2) = MUTABLE_AV(SvREFCNT_inc(GvAV(*gvp)));
+			GvHV(gv2) = MUTABLE_HV(SvREFCNT_inc(GvHV(cfgv)));
+			GvAV(gv2) = MUTABLE_AV(SvREFCNT_inc(GvAV(cfgv)));
 		    }
-		    else if (GvAV(*gvp)) {
-			AV * const av = GvAV(*gvp);
+		    else if (GvAV(cfgv)) {
+			AV * const av = GvAV(cfgv);
 			const I32 start = CopLINE(PL_curcop)+1;
 			I32 items = AvFILLp(av) - start;
 			if (items > 0) {
@@ -1821,8 +1803,6 @@ S_incline(pTHX_ const char *s)
 		}
 
 		if (tmpbuf2 != smallbuf) Safefree(tmpbuf2);
-	    }
-	    if (tmpbuf != smallbuf) Safefree(tmpbuf);
 	}
 	CopFILE_free(PL_curcop);
 	CopFILE_setn(PL_curcop, s, len);
