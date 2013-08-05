@@ -5452,24 +5452,20 @@ S_aassign_common_vars(pTHX_ OP* o)
 		    return TRUE;
 	    }
 	    else if (curop->op_type == OP_PUSHRE) {
+		GV *const gv =
 #ifdef USE_ITHREADS
-		if (((PMOP*)curop)->op_pmreplrootu.op_pmtargetoff) {
-		    GV *const gv = MUTABLE_GV(PAD_SVl(((PMOP*)curop)->op_pmreplrootu.op_pmtargetoff));
-		    if (gv == PL_defgv
-			|| (int)GvASSIGN_GENERATION(gv) == PL_generation)
-			return TRUE;
-		    GvASSIGN_GENERATION_set(gv, PL_generation);
-		}
+		    ((PMOP*)curop)->op_pmreplrootu.op_pmtargetoff
+			? MUTABLE_GV(PAD_SVl(((PMOP*)curop)->op_pmreplrootu.op_pmtargetoff))
+			: NULL;
 #else
-		GV *const gv
-		    = ((PMOP*)curop)->op_pmreplrootu.op_pmtargetgv;
+		    ((PMOP*)curop)->op_pmreplrootu.op_pmtargetgv;
+#endif
 		if (gv) {
 		    if (gv == PL_defgv
 			|| (int)GvASSIGN_GENERATION(gv) == PL_generation)
 			return TRUE;
 		    GvASSIGN_GENERATION_set(gv, PL_generation);
 		}
-#endif
 	    }
 	    else
 		return TRUE;
