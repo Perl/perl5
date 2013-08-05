@@ -1289,7 +1289,7 @@ PERL_CALLCONV GV*	Perl_gv_autoload_sv(pTHX_ HV* stash, SV* namesv, U32 flags)
 #define PERL_ARGS_ASSERT_GV_AUTOLOAD_SV	\
 	assert(namesv)
 
-PERL_CALLCONV void	Perl_gv_check(pTHX_ const HV* stash)
+PERL_CALLCONV void	Perl_gv_check(pTHX_ HV* stash)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_GV_CHECK	\
 	assert(stash)

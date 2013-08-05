@@ -2074,7 +2074,7 @@ Perl_gv_efullname4(pTHX_ SV *sv, const GV *gv, const char *prefix, bool keepmain
 }
 
 void
-Perl_gv_check(pTHX_ const HV *stash)
+Perl_gv_check(pTHX_ HV *stash)
 {
     dVAR;
     I32 i;
@@ -2085,13 +2085,16 @@ Perl_gv_check(pTHX_ const HV *stash)
 	return;
     for (i = 0; i <= (I32) HvMAX(stash); i++) {
         const HE *entry;
+	/* SvIsCOW is unused on HVs, so we can use it to mark stashes we
+	   are currently searching through recursively.  */
+	SvIsCOW_on(stash);
 	for (entry = HvARRAY(stash)[i]; entry; entry = HeNEXT(entry)) {
             GV *gv;
             HV *hv;
 	    if (HeKEY(entry)[HeKLEN(entry)-1] == ':' &&
 		(gv = MUTABLE_GV(HeVAL(entry))) && isGV(gv) && (hv = GvHV(gv)))
 	    {
-		if (hv != PL_defstash && hv != stash)
+		if (hv != PL_defstash && hv != stash && !SvIsCOW(hv))
 		     gv_check(hv);              /* nested package */
 	    }
             else if ( *HeKEY(entry) != '_'
@@ -2112,6 +2115,7 @@ Perl_gv_check(pTHX_ const HV *stash)
                             HEKfARG(GvNAME_HEK(gv)));
 	    }
 	}
+	SvIsCOW_off(stash);
     }
 }
 
