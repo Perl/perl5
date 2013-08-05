@@ -429,8 +429,8 @@ struct cop {
 #define CopFILESV(c)		(CopFILEGV(c) ? GvSV(CopFILEGV(c)) : NULL)
 #define CopFILEAV(c)		(CopFILEGV(c) ? GvAV(CopFILEGV(c)) : NULL)
 #define CopFILEAVx(c)		(assert_(CopFILEGV(c)) GvAV(CopFILEGV(c)))
-#define CopFILE(c)		(CopFILEGV(c) && GvSV(CopFILEGV(c)) \
-				    ? SvPVX(GvSV(CopFILEGV(c))) : NULL)
+#define CopFILE(c)		(CopFILEGV(c) \
+				    ? GvNAME(CopFILEGV(c))+2 : NULL)
 #define CopSTASHPV(c)		(CopSTASH(c) ? HvNAME_get(CopSTASH(c)) : NULL)
    /* cop_stash is not refcounted */
 #define CopSTASHPV_set(c,pv)	CopSTASH_set((c), gv_stashpv(pv,GV_ADD))
