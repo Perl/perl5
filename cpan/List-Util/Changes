@@ -1,3 +1,10 @@
+1.30 -- Mon Aug 05 13:09 UTC 2012
+
+  * Added pairfirst
+  * Added MULTICALL implementations to pairmap/pairgrep/pairfirst
+  * Fix declaration-after-code for C99-challenged compilers
+  * Documentation updates to List::Util
+
 1.29 -- Thu Aug 01 13:40 UTC 2013
 
   * Bugfix to pairmap/pairgrep when stack moves beneath them during operation

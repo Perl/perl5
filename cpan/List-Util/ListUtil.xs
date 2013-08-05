@@ -339,8 +339,10 @@ CODE:
     XSRETURN_UNDEF;
 }
 
+#endif
+
 void
-pairgrep(block,...)
+pairfirst(block,...)
     SV * block
 PROTOTYPE: &@
 PPCODE:
@@ -348,18 +350,45 @@ PPCODE:
     GV *agv,*bgv,*gv;
     HV *stash;
     CV *cv    = sv_2cv(block, &stash, &gv, 0);
-
-    /* This function never returns more than it consumed in arguments. So we
-     * can build the results "live", behind the arguments
-     */
+    I32 ret_gimme = GIMME_V;
     int argi = 1; // "shift" the block
-    int reti = 0;
 
     agv = gv_fetchpv("a", GV_ADD, SVt_PV);
     bgv = gv_fetchpv("b", GV_ADD, SVt_PV);
     SAVESPTR(GvSV(agv));
     SAVESPTR(GvSV(bgv));
+#ifdef dMULTICALL
+    if(!CvISXSUB(cv)) {
+	// Since MULTICALL is about to move it
+	SV **stack = PL_stack_base + ax;
 
+	dMULTICALL;
+	I32 gimme = G_SCALAR;
+
+	PUSH_MULTICALL(cv);
+	for(; argi < items; argi += 2) {
+	    SV *a = GvSV(agv) = stack[argi];
+	    SV *b = GvSV(bgv) = argi < items-1 ? stack[argi+1] : &PL_sv_undef;
+
+	    MULTICALL;
+
+            if(!SvTRUEx(*PL_stack_sp))
+		continue;
+
+	    POP_MULTICALL;
+	    if(ret_gimme == G_ARRAY) {
+		ST(0) = sv_mortalcopy(a);
+		ST(1) = sv_mortalcopy(b);
+		XSRETURN(2);
+	    }
+	    else
+		XSRETURN_YES;
+	}
+	POP_MULTICALL;
+	XSRETURN(0);
+    }
+    else
+#endif
     {
 	for(; argi < items; argi += 2) {
 	    dSP;
@@ -371,20 +400,102 @@ PPCODE:
 
 	    SPAGAIN;
 
-            if (SvTRUEx(*PL_stack_sp)) {
-		if(GIMME_V == G_ARRAY) {
+            if(!SvTRUEx(*PL_stack_sp))
+		continue;
+
+	    if(ret_gimme == G_ARRAY) {
+		ST(0) = sv_mortalcopy(a);
+		ST(1) = sv_mortalcopy(b);
+		XSRETURN(2);
+	    }
+	    else
+		XSRETURN_YES;
+	}
+    }
+
+    XSRETURN(0);
+}
+
+void
+pairgrep(block,...)
+    SV * block
+PROTOTYPE: &@
+PPCODE:
+{
+    GV *agv,*bgv,*gv;
+    HV *stash;
+    CV *cv    = sv_2cv(block, &stash, &gv, 0);
+    I32 ret_gimme = GIMME_V;
+
+    /* This function never returns more than it consumed in arguments. So we
+     * can build the results "live", behind the arguments
+     */
+    int argi = 1; // "shift" the block
+    int reti = 0;
+
+    agv = gv_fetchpv("a", GV_ADD, SVt_PV);
+    bgv = gv_fetchpv("b", GV_ADD, SVt_PV);
+    SAVESPTR(GvSV(agv));
+    SAVESPTR(GvSV(bgv));
+#ifdef dMULTICALL
+    if(!CvISXSUB(cv)) {
+	// Since MULTICALL is about to move it
+	SV **stack = PL_stack_base + ax;
+	int i;
+
+	dMULTICALL;
+	I32 gimme = G_SCALAR;
+
+	PUSH_MULTICALL(cv);
+	for(; argi < items; argi += 2) {
+	    SV *a = GvSV(agv) = stack[argi];
+	    SV *b = GvSV(bgv) = argi < items-1 ? stack[argi+1] : &PL_sv_undef;
+
+	    MULTICALL;
+
+            if(SvTRUEx(*PL_stack_sp)) {
+		if(ret_gimme == G_ARRAY) {
+		    // We can't mortalise yet or they'd be mortal too early
+		    stack[reti++] = newSVsv(a);
+		    stack[reti++] = newSVsv(b);
+		}
+		else if(ret_gimme == G_SCALAR)
+		    reti++;
+	    }
+	}
+	POP_MULTICALL;
+
+	if(ret_gimme == G_ARRAY)
+	    for(i = 0; i < reti; i++)
+		sv_2mortal(stack[i]);
+    }
+    else
+#endif
+    {
+	for(; argi < items; argi += 2) {
+	    dSP;
+	    SV *a = GvSV(agv) = ST(argi);
+	    SV *b = GvSV(bgv) = argi < items-1 ? ST(argi+1) : &PL_sv_undef;
+
+	    PUSHMARK(SP);
+	    call_sv((SV*)cv, G_SCALAR);
+
+	    SPAGAIN;
+
+            if(SvTRUEx(*PL_stack_sp)) {
+		if(ret_gimme == G_ARRAY) {
 		    ST(reti++) = sv_mortalcopy(a);
 		    ST(reti++) = sv_mortalcopy(b);
 		}
-		else if(GIMME_V == G_SCALAR)
+		else if(ret_gimme == G_SCALAR)
 		    reti++;
 	    }
 	}
     }
 
-    if(GIMME_V == G_ARRAY)
+    if(ret_gimme == G_ARRAY)
 	XSRETURN(reti);
-    else if(GIMME_V == G_SCALAR) {
+    else if(ret_gimme == G_SCALAR) {
 	ST(0) = newSViv(reti);
 	XSRETURN(1);
     }
@@ -400,6 +511,7 @@ PPCODE:
     HV *stash;
     CV *cv    = sv_2cv(block, &stash, &gv, 0);
     SV **args_copy = NULL;
+    I32 ret_gimme = GIMME_V;
 
     int argi = 1; // "shift" the block
     int reti = 0;
@@ -408,19 +520,26 @@ PPCODE:
     bgv = gv_fetchpv("b", GV_ADD, SVt_PV);
     SAVESPTR(GvSV(agv));
     SAVESPTR(GvSV(bgv));
+#ifdef dMULTICALL
+    if(!CvISXSUB(cv)) {
+	// Since MULTICALL is about to move it
+	SV **stack = PL_stack_base + ax;
+	I32 ret_gimme = GIMME_V;
+	int i;
 
-    {
+	dMULTICALL;
+	I32 gimme = G_ARRAY;
+
+	PUSH_MULTICALL(cv);
 	for(; argi < items; argi += 2) {
-	    dSP;
-	    SV *a = GvSV(agv) = args_copy ? args_copy[argi] : ST(argi);
+	    SV *a = GvSV(agv) = args_copy ? args_copy[argi] : stack[argi];
 	    SV *b = GvSV(bgv) = argi < items-1 ? 
-		(args_copy ? args_copy[argi+1] : ST(argi+1)) :
+		(args_copy ? args_copy[argi+1] : stack[argi+1]) :
 		&PL_sv_undef;
+	    int count;
 
-	    PUSHMARK(SP);
-	    int count = call_sv((SV*)cv, G_ARRAY);
-
-	    SPAGAIN;
+	    MULTICALL;
+	    count = PL_stack_sp - PL_stack_base;
 
 	    if(count > 2 && !args_copy) {
 		/* We can't return more than 2 results for a given input pair
@@ -435,13 +554,49 @@ PPCODE:
 		Newx(args_copy, n_args, SV *);
 		SAVEFREEPV(args_copy);
 
+		Copy(stack + argi, args_copy, n_args, SV *);
+
+		argi = 0;
+		items = n_args;
+	    }
+
+	    for(i = 0; i < count; i++)
+		stack[reti++] = newSVsv(PL_stack_sp[i - count + 1]);
+	}
+	POP_MULTICALL;
+
+	if(ret_gimme == G_ARRAY)
+	    for(i = 0; i < reti; i++)
+		sv_2mortal(stack[i]);
+    }
+    else
+#endif
+    {
+	for(; argi < items; argi += 2) {
+	    dSP;
+	    SV *a = GvSV(agv) = args_copy ? args_copy[argi] : ST(argi);
+	    SV *b = GvSV(bgv) = argi < items-1 ? 
+		(args_copy ? args_copy[argi+1] : ST(argi+1)) :
+		&PL_sv_undef;
+	    int count;
+	    int i;
+
+	    PUSHMARK(SP);
+	    count = call_sv((SV*)cv, G_ARRAY);
+
+	    SPAGAIN;
+
+	    if(count > 2 && !args_copy) {
+		int n_args = items - argi;
+		Newx(args_copy, n_args, SV *);
+		SAVEFREEPV(args_copy);
+
 		Copy(&ST(argi), args_copy, n_args, SV *);
 
 		argi = 0;
 		items = n_args;
 	    }
 
-	    int i;
 	    for(i = 0; i < count; i++)
 		ST(reti++) = sv_mortalcopy(SP[i - count + 1]);
 
@@ -451,8 +606,6 @@ PPCODE:
 
     XSRETURN(reti);
 }
-
-#endif
 
 void
 pairs(...)

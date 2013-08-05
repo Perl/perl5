@@ -1,8 +1,8 @@
 #!./perl
 
 use strict;
-use Test::More tests => 13;
-use List::Util qw(pairgrep pairmap pairs pairkeys pairvalues);
+use Test::More tests => 17;
+use List::Util qw(pairgrep pairfirst pairmap pairs pairkeys pairvalues);
 
 is_deeply( [ pairgrep { $b % 2 } one => 1, two => 2, three => 3 ],
            [ one => 1, three => 3 ],
@@ -21,6 +21,21 @@ is_deeply( [ pairgrep { $a } 0 => "zero", 1 => "one", 2 ],
   pairgrep { $b++ } @kvlist;
   is_deeply( \@kvlist, [ one => 2, two => 3 ], 'pairgrep aliases elements' );
 }
+
+is_deeply( [ pairfirst { length $a == 5 } one => 1, two => 2, three => 3 ],
+           [ three => 3 ],
+           'pairfirst list' );
+
+is_deeply( [ pairfirst { length $a == 4 } one => 1, two => 2, three => 3 ],
+           [],
+           'pairfirst list empty' );
+
+is( scalar( pairfirst { length $a == 5 } one => 1, two => 2, three => 3 ),
+    1,
+    'pairfirst scalar true' );
+
+ok( !scalar( pairfirst { length $a == 4 } one => 1, two => 2, three => 3 ),
+    'pairfirst scalar false' );
 
 is_deeply( [ pairmap { uc $a => $b } one => 1, two => 2, three => 3 ],
            [ ONE => 1, TWO => 2, THREE => 3 ],

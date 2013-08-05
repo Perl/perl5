@@ -162,10 +162,11 @@ C<Exporter::Heavy>. [perl #39739]
 
 =item *
 
-L<List::Util> has been upgraded from version 1.27 to 1.29
+L<List::Util> has been upgraded from version 1.27 to 1.30
 
-L<List::Util> now includes C<pairgrep>, C<pairmap>, C<pairs>, C<pairkeys>
-and C<pairvalues> functions that operate on even-sized lists of pairs.
+L<List::Util> now includes C<pairgrep>, C<pairmap>, C<pairs>, C<pairkeys>,
+C<pairvalues> and C<pairfirst> functions that operate on even-sized lists of
+pairs.
 
 =item *
 
