@@ -1213,34 +1213,34 @@ next(o)
 	/* do a direct structure offset lookup */
 
 	ptr  = (char *)o + offset;
-	switch (op_methods[ix].type) {
-	case OPp:
-	    ret = make_op_object(aTHX_ *((OP **)ptr));
-	    break;
-	case PADOFFSETp:
-	    ret = sv_2mortal(newSVuv(*((PADOFFSET*)ptr)));
-	    break;
-	case U8p:
-	    ret = sv_2mortal(newSVuv(*((U8*)ptr)));
-	    break;
-	case U32p:
-	    ret = sv_2mortal(newSVuv(*((U32*)ptr)));
-	    break;
-	case SVp:
-	    ret = make_sv_object(aTHX_ *((SV **)ptr));
-	    break;
-	case line_tp:
-	    ret = sv_2mortal(newSVuv(*((line_t *)ptr)));
-	    break;
-	case IVp:
-	    ret = sv_2mortal(newSViv(*((IV*)ptr)));
-	    break;
-	case char_pp:
-	    ret = sv_2mortal(newSVpv(*((char **)ptr), 0));
-	    break;
-	default:
-	    croak("Illegal type 0x%08x for B::*OP::%s",
-		    (unsigned)op_methods[ix].type, op_methods[ix].name);
+	    switch (op_methods[ix].type) {
+	    case OPp:
+		ret = make_op_object(aTHX_ *((OP **)ptr));
+		break;
+	    case PADOFFSETp:
+		ret = sv_2mortal(newSVuv(*((PADOFFSET*)ptr)));
+		break;
+	    case U8p:
+		ret = sv_2mortal(newSVuv(*((U8*)ptr)));
+		break;
+	    case U32p:
+		ret = sv_2mortal(newSVuv(*((U32*)ptr)));
+		break;
+	    case SVp:
+		ret = make_sv_object(aTHX_ *((SV **)ptr));
+		break;
+	    case line_tp:
+		ret = sv_2mortal(newSVuv(*((line_t *)ptr)));
+		break;
+	    case IVp:
+		ret = sv_2mortal(newSViv(*((IV*)ptr)));
+		break;
+	    case char_pp:
+		ret = sv_2mortal(newSVpv(*((char **)ptr), 0));
+		break;
+	    default:
+		croak("Illegal type 0x%08x for B::*OP::%s",
+		      (unsigned)op_methods[ix].type, op_methods[ix].name);
 
 	}
 	ST(0) = ret;
