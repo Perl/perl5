@@ -71,10 +71,10 @@ EOF
 my $data_fh;
 
 if ( $regen ) {
-  open $data_fh, '>:bytes', $customised or die "Can't open $customised";
+  open $data_fh, '>:raw', $customised or die "Can't open $customised";
 }
 else {
-  open $data_fh, '<:bytes', $customised or die "Can't open $customised";
+  open $data_fh, '<:raw', $customised or die "Can't open $customised";
   while (<$data_fh>) {
     chomp;
     my ($module,$file,$sha) = split ' ';
