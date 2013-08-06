@@ -7,7 +7,7 @@ BEGIN {
 }
 
 use strict;
-plan( tests => 120 );
+plan( tests => 121 );
 
 run_tests() unless caller;
 
@@ -247,5 +247,8 @@ use constant u => undef;
     is $w, undef, 'no warnings from compiling index($foo, undef_constant)';
 }
 is u, undef, 'undef constant is still undef';
+
+is index('the main road', __PACKAGE__), 4,
+    '[perl #119169] __PACKAGE__ as 2nd argument';
 
 } # end of sub run_tests
