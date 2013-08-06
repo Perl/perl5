@@ -111,6 +111,15 @@ These modifiers, all new in 5.14, affect which character-set semantics
 (Unicode, etc.) are used, as described below in
 L</Character set modifiers>.
 
+=item r
+X</r>
+
+Non-destructive substitution.  Unlike regular substitution, the entity to
+which the substitution is bound is B<not> modified in place.  Rather, the
+B<result> of the substitution is returned as a plain string.  See
+L<perlop/"s/PATTERN/REPLACEMENT/msixpodualgcer"> for further explanation of
+the C</r> modifier.
+
 =back
 
 Regular expression modifiers are usually written in documentation
