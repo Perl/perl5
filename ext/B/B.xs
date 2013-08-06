@@ -636,22 +636,24 @@ static XSPROTO(intrpvar_sv_common)
 
 
 
-#define SVp            0x0
-#define U32p           0x1
-#define line_tp        0x2
-#define OPp            0x3
-#define PADOFFSETp     0x4
-#define U8p            0x5
-#define IVp            0x6
-#define char_pp        0x7
+#define SVp                 0x0
+#define U32p                0x1
+#define line_tp             0x2
+#define OPp                 0x3
+#define PADOFFSETp          0x4
+#define U8p                 0x5
+#define IVp                 0x6
+#define char_pp             0x7
+/* Keep this last:  */
+#define op_offset_special   0x8
 
 /* table that drives most of the B::*OP methods */
 
 struct OP_methods {
     const char *name;
     U8 namelen;
-    U8    type;
-    I16 offset; /* if -1, access is handled on a case-by-case basis */
+    U8    type; /* if op_offset_special, access is handled on a case-by-case basis */
+    U16 offset;
 } op_methods[] = {
     STR_WITH_LEN("next"),    OPp,    offsetof(struct op, op_next),       /* 0*/
     STR_WITH_LEN("sibling"), OPp,    offsetof(struct op, op_sibling),    /* 1*/
@@ -661,7 +663,7 @@ struct OP_methods {
     STR_WITH_LEN("first"),   OPp,    offsetof(struct unop, op_first),     /* 5*/
     STR_WITH_LEN("last"),    OPp,    offsetof(struct binop, op_last),    /* 6*/
     STR_WITH_LEN("other"),   OPp,    offsetof(struct logop, op_other),   /* 7*/
-    STR_WITH_LEN("pmreplstart"), 0, -1,                                  /* 8*/
+    STR_WITH_LEN("pmreplstart"), op_offset_special, 0,                                  /* 8*/
     STR_WITH_LEN("redoop"),  OPp,    offsetof(struct loop, op_redoop),   /* 9*/
     STR_WITH_LEN("nextop"),  OPp,    offsetof(struct loop, op_nextop),   /*10*/
     STR_WITH_LEN("lastop"),  OPp,    offsetof(struct loop, op_lastop),   /*11*/
@@ -669,7 +671,7 @@ struct OP_methods {
 #if PERL_VERSION >= 17
     STR_WITH_LEN("code_list"),OPp,   offsetof(struct pmop, op_code_list),/*13*/
 #else
-    STR_WITH_LEN("code_list"),0,     -1,
+    STR_WITH_LEN("code_list"),op_offset_special, 0,
 #endif
     STR_WITH_LEN("sv"),      SVp,     offsetof(struct svop, op_sv),      /*14*/
     STR_WITH_LEN("gv"),      SVp,     offsetof(struct svop, op_sv),      /*15*/
@@ -679,59 +681,59 @@ struct OP_methods {
     STR_WITH_LEN("hints"),   U32p,    offsetof(struct cop, cop_hints),   /*19*/
 #ifdef USE_ITHREADS
     STR_WITH_LEN("pmoffset"),IVp,     offsetof(struct pmop, op_pmoffset),/*20*/
-    STR_WITH_LEN("filegv"),  0,       -1,                                /*21*/
+    STR_WITH_LEN("filegv"),  op_offset_special, 0,                       /*21*/
 #  if PERL_VERSION < 19
     STR_WITH_LEN("file"),    char_pp, offsetof(struct cop, cop_file),    /*22*/
 #  else
-    STR_WITH_LEN("file"),    0,       -1,                                /*22*/
+    STR_WITH_LEN("file"),    op_offset_special, 0,                       /*22*/
 #  endif
-    STR_WITH_LEN("stash"),   0,       -1,                                /*23*/
+    STR_WITH_LEN("stash"),   op_offset_special, 0,                       /*23*/
 #  if PERL_VERSION < 17
     STR_WITH_LEN("stashpv"), char_pp, offsetof(struct cop, cop_stashpv), /*24*/
-    STR_WITH_LEN("stashoff"),0,       -1,                                /*25*/
+    STR_WITH_LEN("stashoff"),op_offset_special, 0,                       /*25*/
 #  else
-    STR_WITH_LEN("stashpv"), 0,       -1,                                /*24*/
+    STR_WITH_LEN("stashpv"), op_offset_special, 0,                       /*24*/
     STR_WITH_LEN("stashoff"),PADOFFSETp,offsetof(struct cop, cop_stashoff),/*25*/
 #  endif
 #else
-    STR_WITH_LEN("pmoffset"),0,       -1,                                /*20*/
+    STR_WITH_LEN("pmoffset"),op_offset_special, 0,                       /*20*/
     STR_WITH_LEN("filegv"),  SVp,     offsetof(struct cop, cop_filegv),  /*21*/
-    STR_WITH_LEN("file"),    0,       -1,                                /*22*/
+    STR_WITH_LEN("file"),    op_offset_special, 0,                       /*22*/
     STR_WITH_LEN("stash"),   SVp,     offsetof(struct cop, cop_stash),   /*23*/
-    STR_WITH_LEN("stashpv"), 0,       -1,                                /*24*/
-    STR_WITH_LEN("stashoff"),0,       -1,                                /*25*/
+    STR_WITH_LEN("stashpv"), op_offset_special, 0,                       /*24*/
+    STR_WITH_LEN("stashoff"),op_offset_special, 0,                       /*25*/
 #endif
-    STR_WITH_LEN("size"),    0,       -1,                                /*26*/
-    STR_WITH_LEN("name"),    0,       -1,                                /*27*/
-    STR_WITH_LEN("desc"),    0,       -1,                                /*28*/
-    STR_WITH_LEN("ppaddr"),  0,       -1,                                /*29*/
-    STR_WITH_LEN("type"),    0,       -1,                                /*30*/
-    STR_WITH_LEN("opt"),     0,       -1,                                /*31*/
-    STR_WITH_LEN("spare"),   0,       -1,                                /*32*/
-    STR_WITH_LEN("children"),0,       -1,                                /*33*/
-    STR_WITH_LEN("pmreplroot"), 0,    -1,                                /*34*/
-    STR_WITH_LEN("pmstashpv"), 0,     -1,                                /*35*/
-    STR_WITH_LEN("pmstash"), 0,       -1,                                /*36*/
-    STR_WITH_LEN("precomp"), 0,       -1,                                /*37*/
-    STR_WITH_LEN("reflags"), 0,       -1,                                /*38*/
-    STR_WITH_LEN("sv"),      0,       -1,                                /*39*/
-    STR_WITH_LEN("gv"),      0,       -1,                                /*40*/
-    STR_WITH_LEN("pv"),      0,       -1,                                /*41*/
-    STR_WITH_LEN("label"),   0,       -1,                                /*42*/
-    STR_WITH_LEN("arybase"), 0,       -1,                                /*43*/
-    STR_WITH_LEN("warnings"),0,       -1,                                /*44*/
-    STR_WITH_LEN("io"),      0,       -1,                                /*45*/
-    STR_WITH_LEN("hints_hash"),0,     -1,                                /*46*/
+    STR_WITH_LEN("size"),    op_offset_special, 0,                       /*26*/
+    STR_WITH_LEN("name"),    op_offset_special, 0,                       /*27*/
+    STR_WITH_LEN("desc"),    op_offset_special, 0,                       /*28*/
+    STR_WITH_LEN("ppaddr"),  op_offset_special, 0,                       /*29*/
+    STR_WITH_LEN("type"),    op_offset_special, 0,                       /*30*/
+    STR_WITH_LEN("opt"),     op_offset_special, 0,                       /*31*/
+    STR_WITH_LEN("spare"),   op_offset_special, 0,                       /*32*/
+    STR_WITH_LEN("children"),op_offset_special, 0,                       /*33*/
+    STR_WITH_LEN("pmreplroot"), op_offset_special, 0,                    /*34*/
+    STR_WITH_LEN("pmstashpv"), op_offset_special, 0,                                /*35*/
+    STR_WITH_LEN("pmstash"), op_offset_special, 0,                       /*36*/
+    STR_WITH_LEN("precomp"), op_offset_special, 0,                       /*37*/
+    STR_WITH_LEN("reflags"), op_offset_special, 0,                       /*38*/
+    STR_WITH_LEN("sv"),      op_offset_special, 0,                       /*39*/
+    STR_WITH_LEN("gv"),      op_offset_special, 0,                       /*40*/
+    STR_WITH_LEN("pv"),      op_offset_special, 0,                       /*41*/
+    STR_WITH_LEN("label"),   op_offset_special, 0,                       /*42*/
+    STR_WITH_LEN("arybase"), op_offset_special, 0,                       /*43*/
+    STR_WITH_LEN("warnings"),op_offset_special, 0,                       /*44*/
+    STR_WITH_LEN("io"),      op_offset_special, 0,                       /*45*/
+    STR_WITH_LEN("hints_hash"),op_offset_special, 0,                     /*46*/
 #if PERL_VERSION >= 17
-    STR_WITH_LEN("slabbed"), 0,       -1,                                /*47*/
-    STR_WITH_LEN("savefree"),0,       -1,                                /*48*/
-    STR_WITH_LEN("static"),  0,       -1,                                /*49*/
+    STR_WITH_LEN("slabbed"), op_offset_special, 0,                       /*47*/
+    STR_WITH_LEN("savefree"),op_offset_special, 0,                       /*48*/
+    STR_WITH_LEN("static"),  op_offset_special, 0,                       /*49*/
 #if PERL_VERSION >= 19
-    STR_WITH_LEN("folded"),  0,       -1,                                /*50*/
+    STR_WITH_LEN("folded"),  op_offset_special, 0,                       /*50*/
 #endif
 #endif
 #if PERL_VERSION < 19 || !defined(USE_ITHREADS)
-    STR_WITH_LEN("filegvoff"),0,      -1,                                /*51*/
+    STR_WITH_LEN("filegvoff"),op_offset_special, 0,                      /*51*/
 #else
     STR_WITH_LEN("filegvoff"),PADOFFSETp,offsetof(struct cop, cop_filegvoff),/*51*/
 #endif
@@ -1011,9 +1013,7 @@ next(o)
 	B::OP::static        = 49
 	B::OP::folded        = 50
     PREINIT:
-	char *ptr;
 	SV *ret;
-	I16 offset;
     PPCODE:
 	if (ix < 0 || ix > 46)
 	    croak("Illegal alias %d for B::*OP::next", (int)ix);
@@ -1026,8 +1026,7 @@ next(o)
 
 	/* handle non-direct field access */
 
-	offset = op_methods[ix].offset;
-	if (offset < 0) {
+	if (op_methods[ix].type == op_offset_special)
 	    switch (ix) {
 	    case 8: /* pmreplstart */
 		ret = make_op_object(aTHX_
@@ -1205,14 +1204,9 @@ next(o)
 		break;
 	    default:
 		croak("method %s not implemented", op_methods[ix].name);
-	    }
-	    ST(0) = ret;
-	    XSRETURN(1);
-	}
-
-	/* do a direct structure offset lookup */
-
-	ptr  = (char *)o + offset;
+	} else {
+	    /* do a direct structure offset lookup */
+	    const char *const ptr = (char *)o + op_methods[ix].offset;
 	    switch (op_methods[ix].type) {
 	    case OPp:
 		ret = make_op_object(aTHX_ *((OP **)ptr));
@@ -1239,9 +1233,9 @@ next(o)
 		ret = sv_2mortal(newSVpv(*((char **)ptr), 0));
 		break;
 	    default:
-		croak("Illegal type 0x%08x for B::*OP::%s",
+		croak("Illegal type 0x%x for B::*OP::%s",
 		      (unsigned)op_methods[ix].type, op_methods[ix].name);
-
+	    }
 	}
 	ST(0) = ret;
 	XSRETURN(1);
