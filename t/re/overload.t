@@ -220,5 +220,47 @@ no  warnings 'syntax';
 
 }
 
+{
+
+    # if the pattern gets silently re-parsed, ensure that any eval'ed
+    # code blocks get the correct lexical scope. The overloading of
+    # concat, along with the modification of the text of the code block,
+    # ensures that it has to be re-compiled.
+
+    {
+	package OL_MOD;
+	use overload
+	    q{""} => sub { my ($pat) = @_; $pat->[0] },
+	    q{.}  => sub {
+			    my ($a1, $a2) = @_;
+			    $a1 = $a1->[0] if ref $a1;
+			    $a2 = $a2->[0] if ref $a2;
+			    my $s = "$a1$a2";
+			    $s =~ s/x_var/y_var/;
+			    bless [ $s ];
+		     },
+	;
+    }
+
+
+    BEGIN {
+	overload::constant qr => sub { bless [ $_[0] ], 'OL_MOD' };
+    }
+
+    $::x_var  =		# duplicate to avoid 'only used once' warning
+    $::x_var  = "ABC";
+    my $x_var = "abc";
+
+    $::y_var  =		# duplicate to avoid 'only used once' warning
+    $::y_var  = "XYZ";
+    my $y_var    = "xyz";
+
+    use re 'eval';
+    my $a = 'a';
+    ok("xyz"  =~ m{^(??{ $x_var })$},   "OL_MOD");
+    ok("xyza" =~ m{^(??{ $x_var })$a$}, "OL_MOD runtime");
+}
+
+
 
 done_testing();

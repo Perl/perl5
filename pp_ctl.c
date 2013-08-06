@@ -3281,7 +3281,11 @@ Perl_find_runcv_where(pTHX_ U8 cond, IV arg, U32 *db_seqp)
     int		 level = 0;
 
     if (db_seqp)
-	*db_seqp = PL_curcop->cop_seq;
+	*db_seqp =
+            PL_curcop == &PL_compiling
+                ? PL_cop_seqmax
+                : PL_curcop->cop_seq;
+
     for (si = PL_curstackinfo; si; si = si->si_prev) {
         I32 ix;
 	for (ix = si->si_cxix; ix >= 0; ix--) {
