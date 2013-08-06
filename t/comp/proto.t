@@ -18,7 +18,7 @@ BEGIN {
 # strict
 use strict;
 
-print "1..199\n";
+print "1..201\n";
 
 my $i = 1;
 
@@ -558,6 +558,13 @@ print "not " unless eval 'star3 STDERR; 1';
 print "ok ", $i++, " star3 STDERR\n";
 print "not " unless eval 'star4 STDERR; 1';
 print "ok ", $i++, " star4 STDERR\n";
+
+# [perl #2726]
+# Test that prototype binding is late
+print "not " unless eval 'sub l564($){ l564(); } 1';
+print "ok ", $i++, " prototype checking not done within initial definition\n";
+print "not " if eval 'sub l566($); sub l566($){ l566(); } 1';
+print "ok ", $i++, " prototype checking done if sub pre-declared\n";
 
 # test scalarref prototype
 sub sreftest (\$$) {

@@ -1338,6 +1338,16 @@ C<func()> now gets passed in a C<1>; that is, the number of elements
 in C<@foo>.  And the C<split> gets called in scalar context so it
 starts scribbling on your C<@_> parameter list.  Ouch!
 
+If a sub has both a PROTO and a BLOCK, the prototype is not applied
+until after the BLOCK is completely defined.  This means that a recursive
+function with a prototype has to be predeclared for the prototype to take
+effect, like so:
+
+	sub foo($$);
+	sub foo($$) {
+		foo 1, 2;
+	}
+
 This is all very powerful, of course, and should be used only in moderation
 to make the world a better place.
 
