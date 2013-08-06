@@ -636,22 +636,22 @@ static XSPROTO(intrpvar_sv_common)
 
 
 
-#define SVp            0x00000
-#define U32p           0x10000
-#define line_tp        0x20000
-#define OPp            0x30000
-#define PADOFFSETp     0x40000
-#define U8p            0x50000
-#define IVp            0x60000
-#define char_pp        0x70000
+#define SVp            0x0
+#define U32p           0x1
+#define line_tp        0x2
+#define OPp            0x3
+#define PADOFFSETp     0x4
+#define U8p            0x5
+#define IVp            0x6
+#define char_pp        0x7
 
 /* table that drives most of the B::*OP methods */
 
 struct OP_methods {
     const char *name;
-    STRLEN namelen;
-    I32    type;
-    size_t offset; /* if -1, access is handled on a case-by-case basis */
+    U8 namelen;
+    U8    type;
+    I16 offset; /* if -1, access is handled on a case-by-case basis */
 } op_methods[] = {
     STR_WITH_LEN("next"),    OPp,    offsetof(struct op, op_next),       /* 0*/
     STR_WITH_LEN("sibling"), OPp,    offsetof(struct op, op_sibling),    /* 1*/
@@ -1013,9 +1013,7 @@ next(o)
     PREINIT:
 	char *ptr;
 	SV *ret;
-	I32 type;
-	I32 offset;
-	STRLEN len;
+	I16 offset;
     PPCODE:
 	if (ix < 0 || ix > 46)
 	    croak("Illegal alias %d for B::*OP::next", (int)ix);
@@ -1215,35 +1213,34 @@ next(o)
 	/* do a direct structure offset lookup */
 
 	ptr  = (char *)o + offset;
-	type = op_methods[ix].type;
-	switch ((U8)(type >> 16)) {
-	case  (U8)(OPp >> 16):
+	switch (op_methods[ix].type) {
+	case OPp:
 	    ret = make_op_object(aTHX_ *((OP **)ptr));
 	    break;
-	case  (U8)(PADOFFSETp >> 16):
+	case PADOFFSETp:
 	    ret = sv_2mortal(newSVuv(*((PADOFFSET*)ptr)));
 	    break;
-	case (U8)(U8p >> 16):
+	case U8p:
 	    ret = sv_2mortal(newSVuv(*((U8*)ptr)));
 	    break;
-	case (U8)(U32p >> 16):
+	case U32p:
 	    ret = sv_2mortal(newSVuv(*((U32*)ptr)));
 	    break;
-	case (U8)(SVp >> 16):
+	case SVp:
 	    ret = make_sv_object(aTHX_ *((SV **)ptr));
 	    break;
-	case (U8)(line_tp >> 16):
+	case line_tp:
 	    ret = sv_2mortal(newSVuv(*((line_t *)ptr)));
 	    break;
-	case (U8)(IVp >> 16):
+	case IVp:
 	    ret = sv_2mortal(newSViv(*((IV*)ptr)));
 	    break;
-	case (U8)(char_pp >> 16):
+	case char_pp:
 	    ret = sv_2mortal(newSVpv(*((char **)ptr), 0));
 	    break;
 	default:
 	    croak("Illegal type 0x%08x for B::*OP::%s",
-		    (unsigned)type, op_methods[ix].name);
+		    (unsigned)op_methods[ix].type, op_methods[ix].name);
 
 	}
 	ST(0) = ret;
@@ -1735,16 +1732,16 @@ void*
 GvGP(gv)
 	B::GV	gv
 
-#define GP_sv_ix	SVp | offsetof(struct gp, gp_sv)
-#define GP_io_ix	SVp | offsetof(struct gp, gp_io)
-#define GP_cv_ix	SVp | offsetof(struct gp, gp_cv)
-#define GP_cvgen_ix	U32p | offsetof(struct gp, gp_cvgen)
-#define GP_refcnt_ix	U32p | offsetof(struct gp, gp_refcnt)
-#define GP_hv_ix	SVp | offsetof(struct gp, gp_hv)
-#define GP_av_ix	SVp | offsetof(struct gp, gp_av)
-#define GP_form_ix	SVp | offsetof(struct gp, gp_form)
-#define GP_egv_ix	SVp | offsetof(struct gp, gp_egv)
-#define GP_line_ix	line_tp | offsetof(struct gp, gp_line)
+#define GP_sv_ix	(SVp << 16) | offsetof(struct gp, gp_sv)
+#define GP_io_ix	(SVp << 16) | offsetof(struct gp, gp_io)
+#define GP_cv_ix	(SVp << 16) | offsetof(struct gp, gp_cv)
+#define GP_cvgen_ix	(U32p << 16) | offsetof(struct gp, gp_cvgen)
+#define GP_refcnt_ix	(U32p << 16) | offsetof(struct gp, gp_refcnt)
+#define GP_hv_ix	(SVp << 16) | offsetof(struct gp, gp_hv)
+#define GP_av_ix	(SVp << 16) | offsetof(struct gp, gp_av)
+#define GP_form_ix	(SVp << 16) | offsetof(struct gp, gp_form)
+#define GP_egv_ix	(SVp << 16) | offsetof(struct gp, gp_egv)
+#define GP_line_ix	(line_tp << 16) | offsetof(struct gp, gp_line)
 
 void
 SV(gv)
@@ -1772,13 +1769,13 @@ SV(gv)
 	}
 	ptr = (ix & 0xFFFF) + (char *)gp;
 	switch ((U8)(ix >> 16)) {
-	case (U8)(SVp >> 16):
+	case SVp:
 	    ret = make_sv_object(aTHX_ *((SV **)ptr));
 	    break;
-	case (U8)(U32p >> 16):
+	case U32p:
 	    ret = sv_2mortal(newSVuv(*((U32*)ptr)));
 	    break;
-	case (U8)(line_tp >> 16):
+	case line_tp:
 	    ret = sv_2mortal(newSVuv(*((line_t *)ptr)));
 	    break;
 	default:
