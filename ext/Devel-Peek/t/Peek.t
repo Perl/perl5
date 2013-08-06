@@ -962,10 +962,12 @@ unless ($Config{useithreads}) {
     do_test('regular string constant', perl,
 'SV = PV\\($ADDR\\) at $ADDR
   REFCNT = 5
-  FLAGS = \\(PADMY,POK,READONLY,pPOK\\)
+  FLAGS = \\(PADMY,POK,READONLY,pPOK\\)		# $] < 5.019003
+  FLAGS = \\(PADMY,POK,READONLY,IsCOW,pPOK\\)	# $] >=5.019003
   PV = $ADDR "rules"\\\0
   CUR = 5
   LEN = \d+
+  COW_REFCNT = 0				# $] >=5.019003
 ');
 
     eval 'index "", perl';
@@ -977,10 +979,12 @@ unless ($Config{useithreads}) {
     do_test('string constant now an FBM', perl,
 'SV = PVMG\\($ADDR\\) at $ADDR
   REFCNT = 5
-  FLAGS = \\(PADMY,SMG,POK,READONLY,pPOK,VALID,EVALED\\)
+  FLAGS = \\(PADMY,SMG,POK,READONLY,pPOK,VALID,EVALED\\)  # $] < 5.019003
+  FLAGS = \\(PADMY,SMG,POK,READONLY,IsCOW,pPOK,VALID,EVALED\\) # $] >=5.019003
   PV = $ADDR "rules"\\\0
   CUR = 5
   LEN = \d+
+  COW_REFCNT = 0				# $] >=5.019003
   MAGIC = $ADDR
     MG_VIRTUAL = &PL_vtbl_regexp
     MG_TYPE = PERL_MAGIC_bm\\(B\\)
@@ -996,10 +1000,12 @@ unless ($Config{useithreads}) {
     do_test('string constant still an FBM', perl,
 'SV = PVMG\\($ADDR\\) at $ADDR
   REFCNT = 5
-  FLAGS = \\(PADMY,SMG,POK,READONLY,pPOK,VALID,EVALED\\)
+  FLAGS = \\(PADMY,SMG,POK,READONLY,pPOK,VALID,EVALED\\)  # $] < 5.019003
+  FLAGS = \\(PADMY,SMG,POK,READONLY,IsCOW,pPOK,VALID,EVALED\\) # $] >=5.019003
   PV = $ADDR "rules"\\\0
   CUR = 5
   LEN = \d+
+  COW_REFCNT = 0				# $] >=5.019003
   MAGIC = $ADDR
     MG_VIRTUAL = &PL_vtbl_regexp
     MG_TYPE = PERL_MAGIC_bm\\(B\\)
@@ -1013,28 +1019,34 @@ unless ($Config{useithreads}) {
     do_test('regular string constant', beer,
 'SV = PV\\($ADDR\\) at $ADDR
   REFCNT = 6
-  FLAGS = \\(PADMY,POK,READONLY,pPOK\\)
+  FLAGS = \\(PADMY,POK,READONLY,pPOK\\)		# $] < 5.019003
+  FLAGS = \\(PADMY,POK,READONLY,IsCOW,pPOK\\)	# $] >=5.019003
   PV = $ADDR "foamy"\\\0
   CUR = 5
   LEN = \d+
+  COW_REFCNT = 0				# $] >=5.019003
 ');
 
     is(study beer, 1, "Our studies were successful");
 
     do_test('string constant quite unaffected', beer, 'SV = PV\\($ADDR\\) at $ADDR
   REFCNT = 6
-  FLAGS = \\(PADMY,POK,READONLY,pPOK\\)
+  FLAGS = \\(PADMY,POK,READONLY,pPOK\\)		# $] < 5.019003
+  FLAGS = \\(PADMY,POK,READONLY,IsCOW,pPOK\\)	# $] >=5.019003
   PV = $ADDR "foamy"\\\0
   CUR = 5
   LEN = \d+
+  COW_REFCNT = 0				# $] >=5.019003
 ');
 
     my $want = 'SV = PVMG\\($ADDR\\) at $ADDR
   REFCNT = 6
-  FLAGS = \\(PADMY,SMG,POK,READONLY,pPOK,VALID,EVALED\\)
+  FLAGS = \\(PADMY,SMG,POK,READONLY,pPOK,VALID,EVALED\\)  # $] < 5.019003
+  FLAGS = \\(PADMY,SMG,POK,READONLY,IsCOW,pPOK,VALID,EVALED\\) # $] >=5.019003
   PV = $ADDR "foamy"\\\0
   CUR = 5
   LEN = \d+
+  COW_REFCNT = 0				# $] >=5.019003
   MAGIC = $ADDR
     MG_VIRTUAL = &PL_vtbl_regexp
     MG_TYPE = PERL_MAGIC_bm\\(B\\)

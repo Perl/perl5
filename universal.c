@@ -912,14 +912,16 @@ XS(XS_Internals_SvREADONLY)	/* This is dangerous stuff. */
     sv = SvRV(svz);
 
     if (items == 1) {
-	 if (SvREADONLY(sv) && !SvIsCOW(sv))
+	 if (SvREADONLY(sv))
 	     XSRETURN_YES;
 	 else
 	     XSRETURN_NO;
     }
     else if (items == 2) {
 	if (SvTRUE(ST(1))) {
+#ifdef PERL_OLD_COPY_ON_WRITE
 	    if (SvIsCOW(sv)) sv_force_normal(sv);
+#endif
 	    SvREADONLY_on(sv);
 	    if (SvTYPE(sv) == SVt_PVAV && AvFILLp(sv) != -1) {
 		/* for constant.pm; nobody else should be calling this
@@ -934,7 +936,7 @@ XS(XS_Internals_SvREADONLY)	/* This is dangerous stuff. */
 	}
 	else {
 	    /* I hope you really know what you are doing. */
-	    if (!SvIsCOW(sv)) SvREADONLY_off(sv);
+	    SvREADONLY_off(sv);
 	    XSRETURN_NO;
 	}
     }
