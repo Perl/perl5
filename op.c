@@ -1789,7 +1789,7 @@ S_finalize_op(pTHX_ OP* o)
 
 	/* Make the CONST have a shared SV */
 	svp = cSVOPx_svp(((BINOP*)o)->op_last);
-	if ((!SvIsCOW(sv = *svp))
+	if ((!SvIsCOW_shared_hash(sv = *svp))
 	    && SvTYPE(sv) < SVt_PVMG && SvOK(sv) && !SvROK(sv)) {
 	    key = SvPV_const(sv, keylen);
 	    lexname = newSVpvn_share(key,
@@ -9353,7 +9353,7 @@ Perl_ck_method(pTHX_ OP *o)
 	const char * const method = SvPVX_const(sv);
 	if (!(strchr(method, ':') || strchr(method, '\''))) {
 	    OP *cmop;
-	    if (!SvIsCOW(sv)) {
+	    if (!SvIsCOW_shared_hash(sv)) {
 		sv = newSVpvn_share(method, SvUTF8(sv) ? -(I32)SvCUR(sv) : (I32)SvCUR(sv), 0);
 	    }
 	    else {
