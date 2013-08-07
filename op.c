@@ -1823,7 +1823,7 @@ S_finalize_op(pTHX_ OP* o)
 	/* Make the CONST have a shared SV */
 	svp = cSVOPx_svp(((BINOP*)o)->op_last);
 	if ((!SvIsCOW(sv = *svp))
-	    && SvTYPE(sv) < SVt_PVMG && !SvROK(sv)) {
+	    && SvTYPE(sv) < SVt_PVMG && SvOK(sv) && !SvROK(sv)) {
 	    key = SvPV_const(sv, keylen);
 	    lexname = newSVpvn_share(key,
 		SvUTF8(sv) ? -(I32)keylen : (I32)keylen,

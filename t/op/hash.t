@@ -42,7 +42,12 @@ is($destroyed, 1, 'Timely hash destruction with lvalue keys');
     tie my %h, "bar";
     () = $h{\'foo'};
     is ref $key, SCALAR =>
-     'hash keys are not stringified during compilation';
+     'ref hash keys are not stringified during compilation';
+    use constant u => undef;
+    no warnings 'uninitialized'; # work around unfixed bug #105918
+    () = $h{+u};
+    is $key, undef,
+      'undef hash keys are not stringified during compilation, either';
 }
 
 # Part of RT #85026: Deleting the current iterator in void context does not
