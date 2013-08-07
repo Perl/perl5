@@ -1377,3 +1377,15 @@ sub TIEARRAY{
 tie @a, "", "$a$b";
 EXPECT
 ok
+########
+
+# Scalar-tied locked hash keys and copy-on-write
+use Tie::Scalar;
+tie $h{foo}, Tie::StdScalar;
+$h{foo} = __PACKAGE__;
+# Moral equivalent of Hash::Util::lock_whatever, but miniperl-compatible
+Internals::SvREADONLY($h{foo},1);
+print $h{foo}, "\n";
+
+EXPECT
+main
