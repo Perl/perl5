@@ -8293,6 +8293,7 @@ Perl__invlist_contents(pTHX_ SV* const invlist)
 }
 #endif
 
+#ifndef PERL_IN_XSUB_RE
 void
 Perl__invlist_dump(pTHX_ PerlIO *file, I32 level, const char * const indent, SV* const invlist)
 {
@@ -8341,6 +8342,7 @@ Perl__invlist_dump(pTHX_ PerlIO *file, I32 level, const char * const indent, SV*
         count += 2;
     }
 }
+#endif
 
 #ifdef PERL_ARGS_ASSERT__INVLISTEQ
 bool
