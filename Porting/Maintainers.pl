@@ -998,7 +998,7 @@ use File::Glob qw(:case);
 
     'IPC::Cmd' => {
         'MAINTAINER'   => 'kane',
-        'DISTRIBUTION' => 'BINGOS/IPC-Cmd-0.82.tar.gz',
+        'DISTRIBUTION' => 'BINGOS/IPC-Cmd-0.84.tar.gz',
         'FILES'        => q[cpan/IPC-Cmd],
         'UPSTREAM'     => 'cpan',
     },

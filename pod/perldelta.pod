@@ -162,6 +162,13 @@ C<Exporter::Heavy>. [perl #39739]
 
 =item *
 
+L<IPC::Cmd> has been upgraded from version 0.82 to 0.84.
+
+C<run_forked> has various fixes/improvements, L<Socket> is only used where
+needed and a regression introduced in 0.78 has been fixed.
+
+=item *
+
 L<List::Util> has been upgraded from version 1.27 to 1.30
 
 L<List::Util> now includes C<pairgrep>, C<pairmap>, C<pairs>, C<pairkeys>,

@@ -1303,6 +1303,7 @@ cpan/IO-Zlib/Zlib.pm		IO::Zlib
 cpan/IPC-Cmd/lib/IPC/Cmd.pm			IPC::Cmd
 cpan/IPC-Cmd/t/01_IPC-Cmd.t	IPC::Cmd tests
 cpan/IPC-Cmd/t/02_Interactive.t	IPC::Cmd tests
+cpan/IPC-Cmd/t/03_run-forked.t	IPC::Cmd tests
 cpan/IPC-Cmd/t/src/child.pl	IPC::Cmd tests
 cpan/IPC-Cmd/t/src/output.pl	IPC::Cmd tests
 cpan/IPC-Cmd/t/src/x.tgz	IPC::Cmd tests
