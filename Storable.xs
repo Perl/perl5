@@ -2194,7 +2194,7 @@ static int store_scalar(pTHX_ stcxt_t *cxt, SV *sv)
 #ifdef SvVOK
             if (SvMAGICAL(sv) && (mg = mg_find(sv, 'V'))) {
                 /* The macro passes this by address, not value, and a lot of
-                   assumes that it's 32 bits without checking.  */
+                   called code assumes that it's 32 bits without checking.  */
                 const int len = mg->mg_len;
                 STORE_PV_LEN((const char *)mg->mg_ptr,
                              len, SX_VSTRING, SX_LVSTRING);
