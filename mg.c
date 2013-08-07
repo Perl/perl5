@@ -526,7 +526,7 @@ Perl_mg_localize(pTHX_ SV *sv, SV *nsv, bool setmagic)
 			    mg->mg_ptr, mg->mg_len);
 
 	/* container types should remain read-only across localization */
-	if (!SvIsCOW(sv)) SvFLAGS(nsv) |= SvREADONLY(sv);
+	SvFLAGS(nsv) |= SvREADONLY(sv);
     }
 
     if (SvTYPE(nsv) >= SVt_PVMG && SvMAGIC(nsv)) {

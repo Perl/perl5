@@ -1382,10 +1382,18 @@ ok
 # Scalar-tied locked hash keys and copy-on-write
 use Tie::Scalar;
 tie $h{foo}, Tie::StdScalar;
-$h{foo} = __PACKAGE__;
+tie $h{bar}, Tie::StdScalar;
+$h{foo} = __PACKAGE__; # COW
+$h{bar} = 1;       # not COW
 # Moral equivalent of Hash::Util::lock_whatever, but miniperl-compatible
 Internals::SvREADONLY($h{foo},1);
-print $h{foo}, "\n";
-
+Internals::SvREADONLY($h{bar},1);
+print $h{foo}, "\n"; # should not croak
+# Whether the value is COW should make no difference here (whether the
+# behaviour is ultimately correct is another matter):
+local $h{foo};
+local $h{bar};
+print "ok\n" if (eval{ $h{foo} = 1 }||$@) eq (eval{ $h{bar} = 1 }||$@);
 EXPECT
 main
+ok
