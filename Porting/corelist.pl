@@ -121,7 +121,7 @@ find(
 	'dist'
 );
 
--e 'configpm' and $lines{Config} = 'undef';
+-e 'configpm' and $lines{Config} = "$]";
 
 if ( open my $ucdv, "<", "lib/unicore/version" ) {
     chomp( my $ucd = <$ucdv> );
