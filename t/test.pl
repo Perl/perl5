@@ -554,7 +554,7 @@ USE_OK
 #   prog     => one-liner (avoid quotes)
 #   progs    => [ multi-liner (avoid quotes) ]
 #   progfile => perl script
-#   stdin    => string to feed the stdin
+#   stdin    => string to feed the stdin (or undef to redirect from /dev/null)
 #   stderr   => redirect stderr to stdout
 #   args     => [ command-line arguments to the perl program ]
 #   verbose  => print the command line
@@ -637,6 +637,28 @@ sub _create_runperl { # Create the string to qx in runperl().
 	    $runperl = qq{$Perl -e 'print qq(} .
 		$args{stdin} . q{)' | } . $runperl;
 	}
+    } elsif (exists $args{stdin}) {
+        # Using the pipe construction above can cause fun on systems which use
+        # ksh as /bin/sh, as ksh does pipes differently (with one less process)
+        # With sh, for the command line 'perl -e 'print qq()' | perl -e ...'
+        # the sh process forks two children, which use exec to start the two
+        # perl processes. The parent shell process persists for the duration of
+        # the pipeline, and the second perl process starts with no children.
+        # With ksh (and zsh), the shell saves a process by forking a child for
+        # just the first perl process, and execing itself to start the second.
+        # This means that the second perl process starts with one child which
+        # it didn't create. This causes "fun" when if the tests assume that
+        # wait (or waitpid) will only return information about processes
+        # started within the test.
+        # They also cause fun on VMS, where the pipe implementation returns
+        # the exit code of the process at the front of the pipeline, not the
+        # end. This messes up any test using OPTION FATAL.
+        # Hence it's useful to have a way to make STDIN be at eof without
+        # needing a pipeline, so that the fork tests have a sane environment
+        # without these surprises.
+
+        # /dev/null appears to be surprisingly portable.
+        $runperl = $runperl . ($is_mswin ? ' <nul' : ' </dev/null');
     }
     if (defined $args{args}) {
 	$runperl = _quote_args($runperl, $args{args});
@@ -1125,7 +1147,7 @@ sub run_multiple_progs {
 	print $fh $prog,"\n";
 	close $fh or die "Cannot close $tmpfile: $!";
 	my $results = runperl( stderr => 1, progfile => $tmpfile,
-			       stdin => '', $up
+			       stdin => undef, $up
 			       ? (switches => ["-I$up/lib", $switch], nolib => 1)
 			       : (switches => [$switch])
 			        );
