@@ -848,16 +848,6 @@ sub _fresh_perl {
     $runperl_args->{stderr}     = 1 unless exists $runperl_args->{stderr};
 
     open TEST, ">$tmpfile" or die "Cannot open $tmpfile: $!";
-
-    # VMS adjustments
-    if( $is_vms ) {
-        $prog =~ s#/dev/null#NL:#;
-
-        # VMS file locking
-        $prog =~ s{if \(-e _ and -f _ and -r _\)}
-                  {if (-e _ and -f _)}
-    }
-
     print TEST $prog;
     close TEST or die "Cannot close $tmpfile: $!";
 
