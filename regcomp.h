@@ -455,6 +455,10 @@ struct regnode_ssc {
 /* Shifts a bit to get, eg. 0x4000_0000, then subtracts 1 to get 0x3FFF_FFFF */
 #define ANYOF_CLASS_SETALL(ret) STMT_START { ((struct regnode_charclass_class*) (ret))->classflags = ((1U << ((ANYOF_MAX) - 1))) - 1; } STMT_END
 
+#define ANYOF_CLASS_TEST_ANY_SET(p)                               \
+        ((ANYOF_FLAGS(p) & ANYOF_CLASS)                           \
+	 && (((struct regnode_charclass_class*)(p))->classflags))
+
 #define ANYOF_CLASS_OR(source, dest) STMT_START { (dest)->classflags |= source->classflags ; } STMT_END
 
 #define ANYOF_BITMAP_ZERO(ret)	Zero(((struct regnode_charclass*)(ret))->bitmap, ANYOF_BITMAP_SIZE, char)
@@ -474,10 +478,6 @@ struct regnode_ssc {
 
 #define ANYOF_SKIP		((ANYOF_SIZE - 1)/sizeof(regnode))
 #define ANYOF_CLASS_SKIP	((ANYOF_CLASS_SIZE - 1)/sizeof(regnode))
-
-#define ANYOF_CLASS_TEST_ANY_SET(p)                               \
-        ((ANYOF_FLAGS(p) & ANYOF_CLASS)                           \
-	 && (((struct regnode_charclass_class*)(p))->classflags))
 
 /*
  * Utility definitions.
