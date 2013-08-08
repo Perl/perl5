@@ -1675,15 +1675,22 @@ foreach ($first_locales_test_number..$final_locales_test_number) {
             my $percent_fail = (int(.5 + (1000 * scalar(keys $Problem{$_})
                                           / scalar(@Locale))))
                                / 10;
-            if ($percent_fail < $acceptable_fold_failure_percentage) {
+            if (! $debug && $percent_fail < $acceptable_fold_failure_percentage)
+            {
                 $test_names{$_} .= 'TODO';
                 print "# ", 100 - $percent_fail, "% of locales pass the following test, so it is likely that the failures\n";
                 print "# are errors in the locale definitions.  The test is marked TODO, as the\n";
                 print "# problem is not likely to be Perl's\n";
             }
         }
-        unless ($debug) {
-            print "#\nFor more details, rerun, with environment variable PERL_DEBUG_FULL_TEST=1\n";
+        print "#\n";
+        if ($debug) {
+            print "# The code points that had this failure are given above.  Look for lines\n";
+            print "# that match 'failed $_'\n";
+        }
+        else {
+            print "# For more details, rerun, with environment variable PERL_DEBUG_FULL_TEST=1.\n";
+            print "# Then look at that output for lines that match 'failed $_'\n";
         }
 	print "not ";
     }
@@ -1897,6 +1904,7 @@ if ($didwarn) {
           "# The following locales\n#\n",
           "#\t", $F, "\n#\n",
           "# had problems.\n#\n",
+          "# For more details, rerun, with environment variable PERL_DEBUG_FULL_TEST=1.\n";
     } else {
         warn "# None of your locales were broken.\n";
     }
