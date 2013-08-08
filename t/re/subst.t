@@ -7,7 +7,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan( tests => 231 );
+plan( tests => 235 );
 
 $_ = 'david';
 $a = s/david/rules/r;
@@ -974,3 +974,24 @@ $@ = "\x{30cb}eval 18";
 $@ =~ s/eval \d+/eval 11/;
 is $@, "\x{30cb}eval 11",
   'loading utf8 tables does not interfere with matches against $@';
+
+$reftobe = 3;
+$reftobe =~ s/3/$reftobe=\ 3;4/e;
+is $reftobe, '4', 'clobbering target with ref in s//.../e';
+$locker{key} = 3;
+SKIP:{
+    skip "no Hash::Util under miniperl", 2 if is_miniperl;
+    require Hash::Util;
+    eval {
+	$locker{key} =~ s/3/
+	    $locker{key} = 3;
+	    &Hash::Util::lock_hash(\%locker);4
+	/e;
+    };
+    is $locker{key}, '3', 'locking target in $hash{key} =~ s//.../e';
+    like $@, qr/^Modification of a read-only value/, 'err msg';
+}
+delete $::{does_not_exist}; # just in case
+eval { no warnings; $::{does_not_exist}=~s/(?:)/*{"does_not_exist"}; 4/e };
+like $@, qr/^Modification of a read-only value/,
+    'vivifying stash elem in $that::{elem} =~ s//.../e';

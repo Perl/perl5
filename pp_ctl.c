@@ -250,12 +250,9 @@ PP(pp_substcont)
 		targ = dstr;
 	    }
 	    else {
-		if (SvIsCOW(targ)) {
-		    sv_force_normal_flags(targ, SV_COW_DROP_PV);
-		} else
-		{
-		    SvPV_free(targ);
-		}
+		SV_CHECK_THINKFIRST_COW_DROP(targ);
+		if (isGV(targ)) Perl_croak_no_modify();
+		SvPV_free(targ);
 		SvPV_set(targ, SvPVX(dstr));
 		SvCUR_set(targ, SvCUR(dstr));
 		SvLEN_set(targ, SvLEN(dstr));
