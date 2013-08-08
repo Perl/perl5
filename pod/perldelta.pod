@@ -9,8 +9,8 @@ perldelta - what is new for perl v5.18.1
 This document describes differences between the 5.18.0 release and the 5.18.1
 release.
 
-If you are upgrading from an earlier release such as 5.17.0, first read
-L<perl5180delta>, which describes differences between 5.17.0 and 5.18.0.
+If you are upgrading from an earlier release such as 5.16.0, first read
+L<perl5180delta>, which describes differences between 5.16.0 and 5.18.0.
 
 =head1 Incompatible Changes
 
