@@ -1697,82 +1697,6 @@ foreach ($first_locales_test_number..$final_locales_test_number) {
     print "\n";
 }
 
-# Give final advice.
-
-my $didwarn = 0;
-
-foreach ($first_locales_test_number..$final_locales_test_number) {
-    if ($Problem{$_}) {
-	my @f = sort keys %{ $Problem{$_} };
-	my $f = join(" ", @f);
-	$f =~ s/(.{50,60}) /$1\n#\t/g;
-	print
-	    "#\n",
-            "# The locale ", (@f == 1 ? "definition" : "definitions"), "\n#\n",
-	    "#\t", $f, "\n#\n",
-	    "# on your system may have errors because the locale test $_\n",
-	    "# \"$test_names{$_}\"\n",
-            "# failed in ", (@f == 1 ? "that locale" : "those locales"),
-            ".\n";
-	print <<EOW;
-#
-# If your users are not using these locales you are safe for the moment,
-# but please report this failure first to perlbug\@perl.com using the
-# perlbug script (as described in the INSTALL file) so that the exact
-# details of the failures can be sorted out first and then your operating
-# system supplier can be alerted about these anomalies.
-#
-EOW
-	$didwarn = 1;
-    }
-}
-
-# Tell which locales were okay and which were not.
-
-if ($didwarn) {
-    my (@s, @F);
-
-    foreach my $l (@Locale) {
-	my $p = 0;
-        if ($setlocale_failed{$l}) {
-            $p++;
-        }
-        else {
-            foreach my $t
-                        ($first_locales_test_number..$final_locales_test_number)
-            {
-                $p++ if $Problem{$t}{$l};
-            }
-	}
-	push @s, $l if $p == 0;
-        push @F, $l unless $p == 0;
-    }
-
-    if (@s) {
-        my $s = join(" ", @s);
-        $s =~ s/(.{50,60}) /$1\n#\t/g;
-
-        warn
-    	    "# The following locales\n#\n",
-            "#\t", $s, "\n#\n",
-	    "# tested okay.\n#\n",
-    } else {
-        warn "# None of your locales were fully okay.\n";
-    }
-
-    if (@F) {
-        my $F = join(" ", @F);
-        $F =~ s/(.{50,60}) /$1\n#\t/g;
-
-        warn
-          "# The following locales\n#\n",
-          "#\t", $F, "\n#\n",
-          "# had problems.\n#\n",
-    } else {
-        warn "# None of your locales were broken.\n";
-    }
-}
-
 $test_num = $final_locales_test_number;
 
 {   # perl #115808
@@ -1899,6 +1823,82 @@ setlocale(LC_ALL, "C");
                 }
             }
         }
+    }
+}
+
+# Give final advice.
+
+my $didwarn = 0;
+
+foreach ($first_locales_test_number..$final_locales_test_number) {
+    if ($Problem{$_}) {
+	my @f = sort keys %{ $Problem{$_} };
+	my $f = join(" ", @f);
+	$f =~ s/(.{50,60}) /$1\n#\t/g;
+	print
+	    "#\n",
+            "# The locale ", (@f == 1 ? "definition" : "definitions"), "\n#\n",
+	    "#\t", $f, "\n#\n",
+	    "# on your system may have errors because the locale test $_\n",
+	    "# \"$test_names{$_}\"\n",
+            "# failed in ", (@f == 1 ? "that locale" : "those locales"),
+            ".\n";
+	print <<EOW;
+#
+# If your users are not using these locales you are safe for the moment,
+# but please report this failure first to perlbug\@perl.com using the
+# perlbug script (as described in the INSTALL file) so that the exact
+# details of the failures can be sorted out first and then your operating
+# system supplier can be alerted about these anomalies.
+#
+EOW
+	$didwarn = 1;
+    }
+}
+
+# Tell which locales were okay and which were not.
+
+if ($didwarn) {
+    my (@s, @F);
+
+    foreach my $l (@Locale) {
+	my $p = 0;
+        if ($setlocale_failed{$l}) {
+            $p++;
+        }
+        else {
+            foreach my $t
+                        ($first_locales_test_number..$final_locales_test_number)
+            {
+                $p++ if $Problem{$t}{$l};
+            }
+	}
+	push @s, $l if $p == 0;
+        push @F, $l unless $p == 0;
+    }
+
+    if (@s) {
+        my $s = join(" ", @s);
+        $s =~ s/(.{50,60}) /$1\n#\t/g;
+
+        warn
+            "# The following locales\n#\n",
+            "#\t", $s, "\n#\n",
+	    "# tested okay.\n#\n",
+    } else {
+        warn "# None of your locales were fully okay.\n";
+    }
+
+    if (@F) {
+        my $F = join(" ", @F);
+        $F =~ s/(.{50,60}) /$1\n#\t/g;
+
+        warn
+          "# The following locales\n#\n",
+          "#\t", $F, "\n#\n",
+          "# had problems.\n#\n",
+    } else {
+        warn "# None of your locales were broken.\n";
     }
 }
 
