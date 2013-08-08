@@ -8459,6 +8459,7 @@ my %delta = (
         delta_from => 5.018000,
         changed => {
             'B'                     => '1.42_01',
+            'Config'                => '5.018001',
             'Digest::SHA'           => '5.84_01',
             'Module::CoreList'      => '2.96',
             'Module::CoreList::TieHashDelta'=> '2.96',
