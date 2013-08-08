@@ -8408,12 +8408,9 @@ Perl_ck_eval(pTHX_ OP *o)
     PL_hints |= HINT_BLOCK_SCOPE;
     if (o->op_flags & OPf_KIDS) {
 	SVOP * const kid = (SVOP*)cUNOPo->op_first;
+	assert(kid);
 
-	if (!kid) {
-	    o->op_flags &= ~OPf_KIDS;
-	    op_null(o);
-	}
-	else if (kid->op_type == OP_LINESEQ || kid->op_type == OP_STUB) {
+	if (kid->op_type == OP_LINESEQ || kid->op_type == OP_STUB) {
 	    LOGOP *enter;
 #ifdef PERL_MAD
 	    OP* const oldo = o;
