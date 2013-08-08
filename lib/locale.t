@@ -1671,8 +1671,10 @@ foreach ($first_locales_test_number..$final_locales_test_number) {
         if ($Okay{$_} && ($_ >= $first_casing_test_number
                           && $_ <= $final_casing_test_number))
         {
-            my $percent_fail = int(.5 + (100 * scalar(keys $Problem{$_})
-                                             / scalar(@{$Okay{$_}})));
+            # Round to nearest .1%
+            my $percent_fail = (int(.5 + (1000 * scalar(keys $Problem{$_})
+                                          / scalar(@Locale))))
+                               / 10;
             if ($percent_fail < $acceptable_fold_failure_percentage) {
                 $test_names{$_} .= 'TODO';
                 print "# ", 100 - $percent_fail, "% of locales pass the following test, so it is likely that the failures\n";
