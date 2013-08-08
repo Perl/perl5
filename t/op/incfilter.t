@@ -13,7 +13,7 @@ use strict;
 use Config;
 use Filter::Util::Call;
 
-plan(tests => 148);
+plan(tests => 150);
 
 unshift @INC, sub {
     no warnings 'uninitialized';
@@ -236,6 +236,14 @@ do [\'pa', \&generator_with_state,
 @lines = @origlines;
 do \&generator or die;
 is $origlines[0], "1\n+\n2\n", 'ink filters do not mangle cow buffers';
+
+@lines = ('$::the_array = "', [], '"');
+do \&generator or die;
+like ${$::{the_array}}, qr/^ARRAY\(0x.*\)\z/,
+   'setting $_ to ref in inc filter';
+@lines = ('$::the_array = "', *foo, '"');
+do \&generator or die;
+is ${$::{the_array}}, "*main::foo", 'setting $_ to glob in inc filter';
 
 # d8723a6a74b2c12e wasn't perfect, as the char * returned by SvPV*() can be
 # a temporary, freed at the next FREETMPS. And there is a FREETMPS in

@@ -5506,6 +5506,7 @@ S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
         (SvOK(upstream) || SvGMAGICAL(upstream))) {
 	sv_catsv(buf_sv, upstream);
     }
+    else if (SvOK(upstream)) (void)SvPV_force_nolen(buf_sv);
 
     if (status <= 0) {
 	IoLINES(datasv) = 0;
