@@ -169,6 +169,10 @@ needed and a regression introduced in 0.78 has been fixed.
 
 =item *
 
+The libnet module collection has been upgraded from version 1.22 to 1.22_02.
+
+=item *
+
 L<List::Util> has been upgraded from version 1.27 to 1.30
 
 L<List::Util> now includes C<pairgrep>, C<pairmap>, C<pairs>, C<pairkeys>,

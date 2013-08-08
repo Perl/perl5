@@ -9,9 +9,9 @@ package Net::Netrc;
 use Carp;
 use strict;
 use FileHandle;
-use vars qw($VERSION);
+use vars qw($VERSION $TESTING);
 
-$VERSION = "2.12";
+$VERSION = "2.13_01";
 
 my %netrc = ();
 
@@ -30,7 +30,15 @@ sub _readrc {
     # Some OS's don't have `getpwuid', so we default to $ENV{HOME}
     $home = eval { (getpwuid($>))[7] } || $ENV{HOME};
     $home ||= $ENV{HOMEDRIVE} . ($ENV{HOMEPATH} || '') if defined $ENV{HOMEDRIVE};
-    $file = $home . "/.netrc";
+    if (-e $home . "/.netrc") {
+      $file = $home . "/.netrc";
+    }
+    elsif (-e $home . "/_netrc") {
+      $file = $home . "/_netrc";
+    }
+    else {
+      return unless $TESTING;
+    }
   }
 
   my ($login, $pass, $acct) = (undef, undef, undef);
@@ -303,7 +311,7 @@ Return the account information for the netrc entry
 
 =item lpa ()
 
-Return a list of login, password and account information fir the netrc entry
+Return a list of login, password and account information for the netrc entry
 
 =back
 

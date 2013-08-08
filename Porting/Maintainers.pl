@@ -1045,16 +1045,15 @@ use File::Glob qw(:case);
 
     'libnet' => {
         'MAINTAINER'   => 'gbarr',
-        'DISTRIBUTION' => 'GBARR/libnet-1.22.tar.gz',
+        'DISTRIBUTION' => 'SHAY/libnet-1.22_02.tar.gz',
         'FILES'        => q[cpan/libnet],
         'EXCLUDED'     => [
             qw( Configure
                 install-nomake
-                Makefile.PL
                 ),
         ],
         'CUSTOMIZED' => ['Makefile.PL'],
-        'UPSTREAM'   => undef,
+        'UPSTREAM'   => 'blead',
     },
 
     'Locale-Codes' => {

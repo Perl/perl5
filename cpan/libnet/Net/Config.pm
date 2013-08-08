@@ -13,7 +13,7 @@ use strict;
 
 @EXPORT  = qw(%NetConfig);
 @ISA     = qw(Net::LocalCfg Exporter);
-$VERSION = "1.11";
+$VERSION = "1.11_01";
 
 eval { local $SIG{__DIE__}; require Net::LocalCfg };
 
@@ -274,7 +274,7 @@ FTP servers can work in passive or active mode. Active mode is when
 you want to transfer data you have to tell the server the address and
 port to connect to.  Passive mode is when the server provide the
 address and port and you establish the connection.
- 
+
 With some firewalls active mode does not work as the server cannot
 connect to your machine (because you are behind a firewall) and the firewall
 does not re-write the command. In this case you should set C<ftp_ext_passive>

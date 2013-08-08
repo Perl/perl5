@@ -1,3 +1,40 @@
+libnet 1.22_02 -- Thu Aug 08 2013
+
+  * Make Net::FTP::dataconn::close() more robust [Together with changes to
+    Net::FTP already made in 1.22_01, this resolves CPAN RT#37700]
+  * Document scalar/list context return values from Net::Cmd::message()
+  * Fix broken URL [Resolves CPAN RT#68749]
+  * Fix documentation typo in Net::Netrc
+  * Fix broken POD in Net::POP3
+  * Improve Net::SMTP documentation of new(), auth() and message() [Resolves
+    CPAN RT#36038]
+  * Add proper skips to skipped tests in ftp.t
+  * Import hostname.t fix from perl core commit #adeb94125a
+  * Add time.t, imported from perl core commit #c85707204c
+  * Add new maintainer information, with updated CPAN and GitHub links
+
+libnet 1.22_01 -- Mon May 31 09:40:25 CDT 2010
+
+  * Do not create/pass a remote name if one is not given to put_unique
+  * Add ->passive method to switch between PORT/PASV connections
+  * Accept - in command parsed from SMTP HELO response
+  * Allow group to set to a group named "0"
+  * Set $@ when ->new returns undef
+  * Add support for LocalAddr to be passed to ->new
+  * Document that timeout is in seconds
+  * Fix leading . encoding in datasend
+  * Make ->supported check ->feature
+  * Allow words other than FILE to prefix the unique name returned in info message from stou
+  * Send ALLO command just before the store command
+  * Avoid warnings when server do not prefix messages with codes
+  * Use uppercase characters for xtext encoding
+  * Catch timeout condition while doing an abort
+  * Ensure REST is sent directly before command being restarted
+  * [rt.cpan.org #49920] Fix URL [Leon Brocard]
+  * Avoid long hang on Mac OS X when hostname is *.local by not calling gethostbyname [Father Chrysostomos]
+  * Avoid infinite recursion in rmdir
+  * Allow finding _netrc on machines that do not support .netrc [Ben Bimber]
+
 libnet 1.22  -- Sun Aug 26 07:13:18 CDT 2007
 
 Bug Fixes

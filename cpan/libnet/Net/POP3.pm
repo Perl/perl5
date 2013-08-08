@@ -13,7 +13,7 @@ use Net::Cmd;
 use Carp;
 use Net::Config;
 
-$VERSION = "2.29";
+$VERSION = "2.29_01";
 
 @ISA = qw(Net::Cmd IO::Socket::INET);
 
@@ -307,26 +307,22 @@ sub _get_mailbox_count {
 }
 
 
-sub _STAT { shift->command('STAT')->response() == CMD_OK }
-sub _LIST { shift->command('LIST', @_)->response() == CMD_OK }
+sub _STAT { shift->command('STAT'       )->response() == CMD_OK }
+sub _LIST { shift->command('LIST',    @_)->response() == CMD_OK }
 sub _RETR { shift->command('RETR', $_[0])->response() == CMD_OK }
 sub _DELE { shift->command('DELE', $_[0])->response() == CMD_OK }
-sub _NOOP { shift->command('NOOP')->response() == CMD_OK }
-sub _RSET { shift->command('RSET')->response() == CMD_OK }
-sub _QUIT { shift->command('QUIT')->response() == CMD_OK }
-sub _TOP  { shift->command('TOP', @_)->response() == CMD_OK }
-sub _UIDL { shift->command('UIDL', @_)->response() == CMD_OK }
+sub _NOOP { shift->command('NOOP'       )->response() == CMD_OK }
+sub _RSET { shift->command('RSET'       )->response() == CMD_OK }
+sub _QUIT { shift->command('QUIT'       )->response() == CMD_OK }
+sub _TOP  { shift->command( 'TOP',    @_)->response() == CMD_OK }
+sub _UIDL { shift->command('UIDL',    @_)->response() == CMD_OK }
 sub _USER { shift->command('USER', $_[0])->response() == CMD_OK }
 sub _PASS { shift->command('PASS', $_[0])->response() == CMD_OK }
-sub _APOP { shift->command('APOP', @_)->response() == CMD_OK }
+sub _APOP { shift->command('APOP',    @_)->response() == CMD_OK }
 sub _PING { shift->command('PING', $_[0])->response() == CMD_OK }
-
-
 sub _RPOP { shift->command('RPOP', $_[0])->response() == CMD_OK }
-sub _LAST { shift->command('LAST')->response() == CMD_OK }
-
-
-sub _CAPA { shift->command('CAPA')->response() == CMD_OK }
+sub _LAST { shift->command('LAST'       )->response() == CMD_OK }
+sub _CAPA { shift->command('CAPA'       )->response() == CMD_OK }
 
 
 sub quit {
@@ -565,7 +561,7 @@ on the object.
 
 =over 4
 
-=item new ( [ HOST ] [, OPTIONS ] 0
+=item new ( [ HOST ] [, OPTIONS ] )
 
 This is the constructor for a new Net::POP3 object. C<HOST> is the
 name of the remote host to which an POP3 connection is required.

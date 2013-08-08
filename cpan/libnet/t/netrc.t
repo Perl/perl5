@@ -44,6 +44,7 @@ require $libnet_t;
 eval { require Net::Netrc; };
 ok( !$@, 'should be able to require() Net::Netrc safely' );
 ok( exists $INC{'Net/Netrc.pm'}, 'should be able to use Net::Netrc' );
+$Net::Netrc::TESTING=$Net::Netrc::TESTING=1;
 
 SKIP: {
 	skip('incompatible stat() handling for OS', 4), next SKIP 

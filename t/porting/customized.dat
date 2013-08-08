@@ -11,6 +11,6 @@ Text::Balanced cpan/Text-Balanced/t/07_exttag.t 5a209ed156387d4614d3003292e5fc41
 Text::Balanced cpan/Text-Balanced/t/08_extvar.t 0776ef2cbdad5b1fbefb300541d079212cc24d92
 Text::Balanced cpan/Text-Balanced/t/09_gentag.t 42361b5dfb3bb728bce20f4fb0d92ccfb27c2ba7
 Time::HiRes cpan/Time-HiRes/Makefile.PL 178c13f9fef25520cc752581b86e5e4c05a5eade
-libnet cpan/libnet/Makefile.PL 5554b71464b45f5cc002e55f2464f7ff4abd05b6
+libnet cpan/libnet/Makefile.PL 1c5fb6a4a241902ecf3b10ec39d0a5606e796ffd
 podlators cpan/podlators/scripts/pod2man.PL f81acf53f3ff46cdcc5ebdd661c5d13eb35d20d6
 podlators cpan/podlators/scripts/pod2text.PL b4693fcfe4a0a1b38a215cfb8985a65d5d025d69
