@@ -1083,4 +1083,11 @@ do_test('UTF-8 in a regular expression',
     SAVED_COPY = 0x0)?
 ');
 
+{ # perl #117793: Extend SvREFCNT* to work on any perl variable type
+  my %hash;
+  my $base_count = Devel::Peek::SvREFCNT(%hash);
+  my $ref = \%hash;
+  is(Devel::Peek::SvREFCNT(%hash), $base_count + 1, "SvREFCNT on non-scalar");
+}
+
 done_testing();

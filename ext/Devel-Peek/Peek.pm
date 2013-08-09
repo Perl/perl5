@@ -3,7 +3,7 @@
 
 package Devel::Peek;
 
-$VERSION = '1.12';
+$VERSION = '1.13';
 $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -13,7 +13,7 @@ require XSLoader;
 @ISA = qw(Exporter);
 @EXPORT = qw(Dump mstat DeadCode DumpArray DumpWithOP DumpProg
 	     fill_mstats mstats_fillhash mstats2hash runops_debug debug_flags);
-@EXPORT_OK = qw(SvREFCNT SvREFCNT_inc SvREFCNT_dec CvGV);
+@EXPORT_OK = qw(SvREFCNT CvGV);
 %EXPORT_TAGS = ('ALL' => [@EXPORT, @EXPORT_OK]);
 
 XSLoader::load();
@@ -98,8 +98,7 @@ Devel::Peek supplies a C<Dump()> function which can dump a raw Perl
 datatype, and C<mstat("marker")> function to report on memory usage
 (if perl is compiled with corresponding option).  The function
 DeadCode() provides statistics on the data "frozen" into inactive
-C<CV>.  Devel::Peek also supplies C<SvREFCNT()>, C<SvREFCNT_inc()>, and
-C<SvREFCNT_dec()> which can query, increment, and decrement reference
+C<CV>.  Devel::Peek also supplies C<SvREFCNT()> which can query reference
 counts on SVs.  This document will take a passive, and safe, approach
 to data debugging and for that it will describe only the C<Dump()>
 function.

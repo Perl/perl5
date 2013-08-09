@@ -386,31 +386,14 @@ PPCODE:
 	op_dump(PL_main_root);
 }
 
-I32
+U32
 SvREFCNT(sv)
 SV *	sv
-
-# PPCODE needed since otherwise sv_2mortal is inserted that will kill the value.
-
-SV *
-SvREFCNT_inc(sv)
-SV *	sv
-PPCODE:
-{
-    RETVAL = SvREFCNT_inc(sv);
-    PUSHs(RETVAL);
-}
-
-# PPCODE needed since by default it is void
-
-void
-SvREFCNT_dec(sv)
-SV *	sv
-PPCODE:
-{
-    SvREFCNT_dec(sv);
-    PUSHs(sv);
-}
+PROTOTYPE: \[$@%&*]
+CODE:
+    RETVAL = SvREFCNT(SvRV(sv)) - 1; /* -1 because our ref doesn't count */
+OUTPUT:
+    RETVAL
 
 SV *
 DeadCode()
