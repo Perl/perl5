@@ -5443,6 +5443,7 @@ S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
 
 	if (count > 0) {
 	    SV *out = POPs;
+	    SvGETMAGIC(out);
 	    if (SvOK(out)) {
 		status = SvIV(out);
 	    }

@@ -13,7 +13,7 @@ use strict;
 use Config;
 use Filter::Util::Call;
 
-plan(tests => 152);
+plan(tests => 153);
 
 unshift @INC, sub {
     no warnings 'uninitialized';
@@ -261,6 +261,14 @@ do sub {
     return $done = 1;
 } or die;
 is ${$::{the_scalar}}, 98732, 'tying $_ in inc filter';
+@lines = ('$::the_scalar', '= "12345"');
+tie my $ret, "main", 1;
+do sub :lvalue {
+    return 0 unless @lines;
+    $_ = shift @lines;
+    return $ret;
+} or die;
+is ${$::{the_scalar}}, 12345, 'returning tied val from inc filter';
 
 
 # d8723a6a74b2c12e wasn't perfect, as the char * returned by SvPV*() can be
