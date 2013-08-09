@@ -183,7 +183,7 @@ struct regnode_charclass {
 
 /* has runtime (locale) \d, \w, ..., [:posix:] classes */
 struct regnode_charclass_class {
-    U8	flags;				/* ANYOF_CLASS bit must go here */
+    U8	flags;				/* ANYOF_POSIXL bit must go here */
     U8  type;
     U16 next_off;
     U32 arg1;					/* used as ptr in S_regclass */
@@ -193,7 +193,7 @@ struct regnode_charclass_class {
 
 /* Synthetic start class, is a regnode_charclass_class plus an SV* */
 struct regnode_ssc {
-    U8	flags;				/* ANYOF_CLASS bit must go here */
+    U8	flags;				/* ANYOF_POSIXL bit must go here */
     U8  type;
     U16 next_off;
     U32 arg1;				/* used as ptr in S_regclass */
@@ -314,7 +314,7 @@ struct regnode_ssc {
 
 /* Flags for node->flags of ANYOF.  These are in short supply, but there is one
  * currently available.  If more than this are needed, the ANYOF_LOCALE and
- * ANYOF_CLASS bits could be shared, making a space penalty for all locale nodes.
+ * ANYOF_POSIXL bits could be shared, making a space penalty for all locale nodes.
  * Also, the UNICODE_ALL bit could be freed up by resorting to creating a swash
  * containing everything above 255.  This introduces a performance penalty.
  * Better would be to split it off into a separate node, which actually would
@@ -338,8 +338,9 @@ struct regnode_ssc {
  * and the optimizer's synthetic start class.  Non-locale \d, etc are resolved
  * at compile-time.  Could be shared with ANYOF_LOCALE, forcing all locale
  * nodes to be large */
-#define ANYOF_CLASS	         0x08
-#define ANYOF_LARGE       ANYOF_CLASS   /* Same; name retained for back compat */
+#define ANYOF_POSIXL	         0x08
+#define ANYOF_CLASS	         ANYOF_POSIXL
+#define ANYOF_LARGE              ANYOF_POSIXL
 
 /* Unused: 0x10.  When using, be sure to change ANYOF_FLAGS_ALL below */
 
@@ -361,7 +362,7 @@ struct regnode_ssc {
  * different if inverted */
 #define INVERSION_UNAFFECTED_FLAGS (ANYOF_LOCALE                        \
 	                           |ANYOF_LOC_FOLD                      \
-	                           |ANYOF_CLASS                         \
+	                           |ANYOF_POSIXL                         \
 	                           |ANYOF_NONBITMAP_NON_UTF8)
 
 /* Character classes for node->classflags of ANYOF */
@@ -414,19 +415,21 @@ struct regnode_ssc {
 #   error Problem with handy.h _HIGHEST_REGCOMP_DOT_H_SYNC #define
 #endif
 
-#define ANYOF_MAX      (ANYOF_VERTWS) /* So upper loop limit is written:
-                                       *       '< ANYOF_MAX'
-                                       * Hence doesn't include VERTWS, as that
-                                       * is a pseudo class */
-#if (ANYOF_MAX > 32)   /* Must fit in 32-bit word */
+#define ANYOF_POSIXL_MAX (ANYOF_VERTWS) /* So upper loop limit is written:
+                                         *       '< ANYOF_MAX'
+                                         * Hence doesn't include VERTWS, as that
+                                         * is a pseudo class */
+#define ANYOF_MAX      ANYOF_POSIXL_MAX
+
+#if (ANYOF_POSIXL_MAX > 32)   /* Must fit in 32-bit word */
 #   error Problem with handy.h _CC_foo #defines
 #endif
 
-#define ANYOF_HORIZWS	((ANYOF_MAX)+2) /* = (ANYOF_NVERTWS + 1) */
-#define ANYOF_NHORIZWS	((ANYOF_MAX)+3)
+#define ANYOF_HORIZWS	((ANYOF_POSIXL_MAX)+2) /* = (ANYOF_NVERTWS + 1) */
+#define ANYOF_NHORIZWS	((ANYOF_POSIXL_MAX)+3)
 
-#define ANYOF_UNIPROP   ((ANYOF_MAX)+4)  /* Used to indicate a Unicode
-                                            property: \p{} or \P{} */
+#define ANYOF_UNIPROP   ((ANYOF_POSIXL_MAX)+4)  /* Used to indicate a Unicode
+                                                   property: \p{} or \P{} */
 
 /* Backward source code compatibility. */
 
@@ -440,26 +443,36 @@ struct regnode_ssc {
 /* Utility macros for the bitmap and classes of ANYOF */
 
 #define ANYOF_SIZE		(sizeof(struct regnode_charclass))
-#define ANYOF_CLASS_SIZE	(sizeof(struct regnode_charclass_class))
+#define ANYOF_POSIXL_SIZE	(sizeof(struct regnode_charclass_class))
+#define ANYOF_CLASS_SIZE	ANYOF_POSIXL_SIZE
 
 #define ANYOF_FLAGS(p)		((p)->flags)
 
 #define ANYOF_BIT(c)		(1 << ((c) & 7))
 
-#define ANYOF_CLASS_SET(p, c)	(((struct regnode_charclass_class*) (p))->classflags |= (1U << (c)))
-#define ANYOF_CLASS_CLEAR(p, c)	(((struct regnode_charclass_class*) (p))->classflags &= ~ (1U <<(c)))
-#define ANYOF_CLASS_TEST(p, c)	(((struct regnode_charclass_class*) (p))->classflags & (1U << (c)))
+#define ANYOF_POSIXL_SET(p, c)	(((struct regnode_charclass_class*) (p))->classflags |= (1U << (c)))
+#define ANYOF_CLASS_SET(p, c)	ANYOF_POSIXL_SET((p), (c))
 
-#define ANYOF_CLASS_ZERO(ret)	STMT_START { ((struct regnode_charclass_class*) (ret))->classflags = 0; } STMT_END
+#define ANYOF_POSIXL_CLEAR(p, c) (((struct regnode_charclass_class*) (p))->classflags &= ~ (1U <<(c)))
+#define ANYOF_CLASS_CLEAR(p, c)	ANYOF_POSIXL_CLEAR((p), (c))
+
+#define ANYOF_POSIXL_TEST(p, c)	(((struct regnode_charclass_class*) (p))->classflags & (1U << (c)))
+#define ANYOF_CLASS_TEST(p, c)	ANYOF_POSIXL_TEST((p), (c))
+
+#define ANYOF_POSIXL_ZERO(ret)	STMT_START { ((struct regnode_charclass_class*) (ret))->classflags = 0; } STMT_END
+#define ANYOF_CLASS_ZERO(ret)	ANYOF_POSIXL_ZERO(ret)
 
 /* Shifts a bit to get, eg. 0x4000_0000, then subtracts 1 to get 0x3FFF_FFFF */
-#define ANYOF_CLASS_SETALL(ret) STMT_START { ((struct regnode_charclass_class*) (ret))->classflags = ((1U << ((ANYOF_MAX) - 1))) - 1; } STMT_END
+#define ANYOF_POSIXL_SETALL(ret) STMT_START { ((struct regnode_charclass_class*) (ret))->classflags = ((1U << ((ANYOF_POSIXL_MAX) - 1))) - 1; } STMT_END
+#define ANYOF_CLASS_SETALL(ret) ANYOF_POSIXL_SETALL(ret)
 
-#define ANYOF_CLASS_TEST_ANY_SET(p)                               \
-        ((ANYOF_FLAGS(p) & ANYOF_CLASS)                           \
+#define ANYOF_POSIXL_TEST_ANY_SET(p)                               \
+        ((ANYOF_FLAGS(p) & ANYOF_POSIXL)                           \
 	 && (((struct regnode_charclass_class*)(p))->classflags))
+#define ANYOF_CLASS_TEST_ANY_SET(p) ANYOF_POSIXL_TEST_ANY_SET(p)
 
-#define ANYOF_CLASS_OR(source, dest) STMT_START { (dest)->classflags |= source->classflags ; } STMT_END
+#define ANYOF_POSIXL_OR(source, dest) STMT_START { (dest)->classflags |= source->classflags ; } STMT_END
+#define ANYOF_CLASS_OR(source, dest) ANYOF_POSIXL_OR((source), (dest))
 
 #define ANYOF_BITMAP_ZERO(ret)	Zero(((struct regnode_charclass*)(ret))->bitmap, ANYOF_BITMAP_SIZE, char)
 #define ANYOF_BITMAP(p)		(((struct regnode_charclass*)(p))->bitmap)
@@ -477,7 +490,8 @@ struct regnode_ssc {
 	memEQ (ANYOF_BITMAP(p), "\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377", ANYOF_BITMAP_SIZE)
 
 #define ANYOF_SKIP		((ANYOF_SIZE - 1)/sizeof(regnode))
-#define ANYOF_CLASS_SKIP	((ANYOF_CLASS_SIZE - 1)/sizeof(regnode))
+#define ANYOF_POSIXL_SKIP	((ANYOF_POSIXL_SIZE - 1)/sizeof(regnode))
+#define ANYOF_CLASS_SKIP	ANYOF_POSIXL_SKIP
 
 /*
  * Utility definitions.

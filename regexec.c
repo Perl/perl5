@@ -7447,7 +7447,7 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
 	    {
 		match = TRUE;
 	    }
-	    else if (ANYOF_CLASS_TEST_ANY_SET(n)) {
+	    else if (ANYOF_POSIXL_TEST_ANY_SET(n)) {
 
                 /* The data structure is arranged so bits 0, 2, 4, ... are set
                  * if the class includes the Posix character class given by
@@ -7482,7 +7482,7 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
                 int count = 0;
                 int to_complement = 0;
                 while (count < ANYOF_MAX) {
-                    if (ANYOF_CLASS_TEST(n, count)
+                    if (ANYOF_POSIXL_TEST(n, count)
                         && to_complement ^ cBOOL(isFOO_lc(count/2, (U8) c)))
                     {
                         match = TRUE;
