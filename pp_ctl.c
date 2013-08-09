@@ -5458,9 +5458,13 @@ S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
 	LEAVE_with_name("call_filter_sub");
     }
 
+    if (SvGMAGICAL(upstream)) {
+	mg_get(upstream);
+	if (upstream == buf_sv) mg_free(buf_sv);
+    }
     if (SvIsCOW(upstream)) sv_force_normal(upstream);
     if(!err && SvOK(upstream)) {
-	got_p = SvPV(upstream, got_len);
+	got_p = SvPV_nomg(upstream, got_len);
 	if (umaxlen) {
 	    if (got_len > umaxlen) {
 		prune_from = got_p + umaxlen;
@@ -5504,7 +5508,7 @@ S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
     */
     if (!err && upstream != buf_sv &&
         (SvOK(upstream) || SvGMAGICAL(upstream))) {
-	sv_catsv(buf_sv, upstream);
+	sv_catsv_nomg(buf_sv, upstream);
     }
     else if (SvOK(upstream)) (void)SvPV_force_nolen(buf_sv);
 

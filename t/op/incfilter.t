@@ -13,7 +13,7 @@ use strict;
 use Config;
 use Filter::Util::Call;
 
-plan(tests => 150);
+plan(tests => 151);
 
 unshift @INC, sub {
     no warnings 'uninitialized';
@@ -244,6 +244,17 @@ like ${$::{the_array}}, qr/^ARRAY\(0x.*\)\z/,
 @lines = ('$::the_array = "', *foo, '"');
 do \&generator or die;
 is ${$::{the_array}}, "*main::foo", 'setting $_ to glob in inc filter';
+
+sub TIESCALAR { bless \(my $thing = pop), shift }
+sub FETCH {${$_[0]}}
+my $done;
+do sub {
+    return 0 if $done;
+    tie $_, "main", '$::the_scalar = 98732';
+    return $done = 1;
+} or die;
+is ${$::{the_scalar}}, 98732, 'tying $_ in inc filter';
+
 
 # d8723a6a74b2c12e wasn't perfect, as the char * returned by SvPV*() can be
 # a temporary, freed at the next FREETMPS. And there is a FREETMPS in
