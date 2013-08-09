@@ -142,6 +142,13 @@ L<bignum> has been upgraded from version 0.35 to 0.36.
 L<bigrat> wasn't correctly updating an internal variable when C<use>d
 with a C<lib> option.
 
+L<Carp> has been upgraded from 1.30 to 1.31
+
+L<Carp> now handles objects with string overloads. It also allows objects
+to specify how they appear in the stack dump with a C<CARP_TRACE> method,
+and also allows the user to specify their own formatter for objects without
+C<CARP_TRACE> as well as other references. [perl #92446]
+
 =item *
 
 L<Config::Perl::V> has been upgraded from version 0.18 to 0.19.
