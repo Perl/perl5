@@ -10,7 +10,7 @@ BEGIN {
 
 use feature qw( fc );
 
-plan tests => 128;
+plan tests => 129;
 
 is(lc(undef),	   "", "lc(undef) is ''");
 is(lcfirst(undef), "", "lcfirst(undef) is ''");
@@ -280,3 +280,16 @@ is(lc("\x{1E9E}"), "\x{df}", "lc(LATIN CAPITAL LETTER SHARP S)");
     is(uc("\xe0"), "\xe0", "uc of above-ASCII Latin1 is itself under use bytes");
     is(ucfirst("\xe0"), "\xe0", "ucfirst of above-ASCII Latin1 is itself under use bytes");
 }
+
+# Brought up in ticket #117855: Constant folding applied to uc() should use
+# the right set of hints.
+fresh_perl_like(<<'constantfolding', qr/^(\d+),\1\z/, {},
+    my $function = "uc";
+    my $char = "\xff";
+    {
+        use feature 'unicode_strings';
+        print ord uc($char), ",",
+              ord eval "$function('$char')", "\n";
+    }
+constantfolding
+    'folded uc() in string eval uses the right hints');

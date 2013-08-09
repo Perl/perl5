@@ -3275,6 +3275,7 @@ S_fold_constants(pTHX_ OP *o)
     /* Verify that we don't need to save it:  */
     assert(PL_curcop == &PL_compiling);
     StructCopy(&PL_compiling, &not_compiling, COP);
+    CopHINTS_set(&not_compiling, PL_hints);
     PL_curcop = &not_compiling;
     /* The above ensures that we run with all the correct hints of the
        currently compiling COP, but that IN_PERL_RUNTIME is not true. */
