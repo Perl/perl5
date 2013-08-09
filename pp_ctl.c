@@ -5495,7 +5495,12 @@ S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
 	if (SvUTF8(upstream)) {
 	    SvUTF8_on(cache);
 	}
-	SvCUR_set(upstream, got_len - cached_len);
+	if (SvPOK(upstream)) SvCUR_set(upstream, got_len - cached_len);
+	else
+	    /* Cannot just use sv_setpvn, as that could free the buffer
+	       before we have a chance to assign it. */
+	    sv_usepvn(upstream, savepvn(got_p, got_len - cached_len),
+		      got_len - cached_len);
 	*prune_from = 0;
 	/* Can't yet be EOF  */
 	if (status == 0)

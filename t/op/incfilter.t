@@ -13,7 +13,7 @@ use strict;
 use Config;
 use Filter::Util::Call;
 
-plan(tests => 151);
+plan(tests => 152);
 
 unshift @INC, sub {
     no warnings 'uninitialized';
@@ -244,6 +244,13 @@ like ${$::{the_array}}, qr/^ARRAY\(0x.*\)\z/,
 @lines = ('$::the_array = "', do { no warnings 'once'; *foo}, '"');
 do \&generator or die;
 is ${$::{the_array}}, "*main::foo", 'setting $_ to glob in inc filter';
+@lines = (
+    '$::the_array = "',
+     do { no strict; no warnings; *{"foo\nbar"}},
+    '"');
+do \&generator or die;
+is ${$::{the_array}}, "*main::foo\nbar",
+    'setting $_ to multiline glob in inc filter';
 
 sub TIESCALAR { bless \(my $thing = pop), shift }
 sub FETCH {${$_[0]}}
