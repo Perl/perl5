@@ -148,7 +148,7 @@ from=$from-$targetfrom
 
 cat >$run <<EOF
 #!/bin/sh
-doexit="echo \\\$?"
+doexit="echo \\\$? >$targetdir/output.status"
 env=''
 case "\$1" in
 -cwd)
@@ -177,16 +177,29 @@ $to \$exe > /dev/null 2>&1
 
 # send copy results to /dev/null as otherwise it outputs speed stats which gets in our way.
 # sometimes there is no $?, I dunno why? we then get Cross/run-adb-shell: line 39: exit: XX: numeric argument required
-foo=\`adb -s $targethost shell "sh -c '(cd \$cwd && \$env ; \$exe \$args) > $targetdir/output.stdout ; \$doexit '"\`
-# We get back Ok\r\n on android for some reason, grrr:
+adb -s $targethost shell "sh -c '(cd \$cwd && \$env ; \$exe \$args > $targetdir/output.stdout 2>$targetdir/output.stderr) ; \$doexit '" > /dev/null
+
 $from output.stdout
+$from output.stderr
+$from output.status
+
 result=\`cat output.stdout\`
-rm output.stdout
+result_err=\`cat output.stderr\`
+result_status=\`cat output.status\`
+rm output.stdout output.stderr output.status
+
+# We get back Ok\r\n on android for some reason, grrr:
 result=\`echo "\$result" | sed -e 's|\r||g'\`
-foo=\`echo \$foo | sed -e 's|\r||g'\`
-# Also, adb doesn't exit with the commands exit code, like ssh does, double-grr
+result_err=\`echo "\$result_err" | sed -e 's|\r||g'\`
+result_status=\`echo \$result_status | sed -e 's|\r||g'\`
+
 echo "\$result"
-exit \$foo
+if test "X\$result_err" != X; then
+  echo "\$result_err" >&2
+fi
+
+# Also, adb doesn't exit with the commands exit code, like ssh does, double-grr
+exit \$result_status
 
 EOF
 chmod a+rx $run
