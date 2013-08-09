@@ -241,7 +241,7 @@ is $origlines[0], "1\n+\n2\n", 'ink filters do not mangle cow buffers';
 do \&generator or die;
 like ${$::{the_array}}, qr/^ARRAY\(0x.*\)\z/,
    'setting $_ to ref in inc filter';
-@lines = ('$::the_array = "', *foo, '"');
+@lines = ('$::the_array = "', do { no warnings 'once'; *foo}, '"');
 do \&generator or die;
 is ${$::{the_array}}, "*main::foo", 'setting $_ to glob in inc filter';
 
