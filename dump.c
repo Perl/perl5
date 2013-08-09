@@ -2187,6 +2187,9 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 				PTR2UV(r->engine));
 	    Perl_dump_indent(aTHX_ level, file, "  MOTHER_RE = 0x%"UVxf"\n",
 				PTR2UV(r->mother_re));
+	    if (nest < maxnest && r->mother_re)
+		do_sv_dump(level+1, file, (SV *)r->mother_re, nest+1,
+			   maxnest, dumpops, pvlim);
 	    Perl_dump_indent(aTHX_ level, file, "  PAREN_NAMES = 0x%"UVxf"\n",
 				PTR2UV(r->paren_names));
 	    Perl_dump_indent(aTHX_ level, file, "  SUBSTRS = 0x%"UVxf"\n",
