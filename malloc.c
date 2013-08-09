@@ -1213,7 +1213,7 @@ cmp_pat_4bytes(unsigned char *s, size_t nbytes, const unsigned char *fill)
 #endif
 
 int
-S_ajust_size_and_find_bucket(size_t *nbytes_p)
+S_adjust_size_and_find_bucket(size_t *nbytes_p)
 {
   	MEM_SIZE shiftr;
 	int bucket;
@@ -1273,7 +1273,7 @@ Perl_malloc(size_t nbytes)
 	    croak("%s", "panic: malloc");
 #endif
 
-	bucket = S_ajust_size_and_find_bucket(&nbytes);
+	bucket = S_adjust_size_and_find_bucket(&nbytes);
 	MALLOC_LOCK;
 	/*
 	 * If nothing in hash bucket right now,
@@ -2173,7 +2173,7 @@ Perl_malloced_size(void *p)
 MEM_SIZE
 Perl_malloc_good_size(size_t wanted)
 {
-    return BUCKET_SIZE_REAL(S_ajust_size_and_find_bucket(&wanted));
+    return BUCKET_SIZE_REAL(S_adjust_size_and_find_bucket(&wanted));
 }
 
 #  ifdef BUCKETS_ROOT2
