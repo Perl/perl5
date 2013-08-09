@@ -471,7 +471,7 @@ struct regnode_ssc {
 	 && (((struct regnode_charclass_class*)(p))->classflags))
 #define ANYOF_CLASS_TEST_ANY_SET(p) ANYOF_POSIXL_TEST_ANY_SET(p)
 
-#define ANYOF_POSIXL_OR(source, dest) STMT_START { (dest)->classflags |= source->classflags ; } STMT_END
+#define ANYOF_POSIXL_OR(source, dest) STMT_START { (dest)->classflags |= (source)->classflags ; } STMT_END
 #define ANYOF_CLASS_OR(source, dest) ANYOF_POSIXL_OR((source), (dest))
 
 #define ANYOF_BITMAP_ZERO(ret)	Zero(((struct regnode_charclass*)(ret))->bitmap, ANYOF_BITMAP_SIZE, char)
