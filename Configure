@@ -3003,11 +3003,11 @@ do
   case "\$f" in
   /*)
     $targetmkdir \`dirname \$f\`
-    $targetto -P $targetport $q \$f $targetuser@$targethost:\$f            || exit 1
+    $targetto -P $targetport -r $q \$f $targetuser@$targethost:\$f            || exit 1
     ;;
   *)
     $targetmkdir $targetdir/\`dirname \$f\`
-    $targetto -P $targetport $q \$f $targetuser@$targethost:$targetdir/\$f || exit 1
+    $targetto -P $targetport -r $q \$f $targetuser@$targethost:$targetdir/\$f || exit 1
     ;;
   esac
 done
