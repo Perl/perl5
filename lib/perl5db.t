@@ -117,21 +117,6 @@ EOF
     like( $output, 'success' , '[perl #41461] code is run' );
 }
 
-{
-    rc(<<'EOF');
-&parse_options("NonStop=0 TTY=db.out LineInfo=db.out");
-
-sub afterinit {
-    push (@DB::typeahead,
-    't 2',
-    'c',
-    'q',
-    );
-
-}
-EOF
-}
-
 package DebugWrap;
 
 sub new {
