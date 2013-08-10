@@ -191,13 +191,17 @@ Perl_newGP(pTHX_ GV *const gv)
 	len = 0;
     }
 #else
-    if(PL_curcop)
+    if(PL_curcop) {
 	gp->gp_line = CopLINE(PL_curcop); /* 0 otherwise Newxz */
-    filegv = CopFILEGV(PL_curcop);
-    if (filegv) {
-	file = GvNAME(filegv)+2;
-	len = GvNAMELEN(filegv)-2;
-    } else {
+	filegv = CopFILEGV(PL_curcop);
+	if (filegv) {
+	    file = GvNAME(filegv)+2;
+	    len = GvNAMELEN(filegv)-2;
+	}
+	else goto no_file;
+    }
+    else {
+	no_file:
 	file = "";
 	len = 0;
     }
