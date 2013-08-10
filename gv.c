@@ -176,28 +176,20 @@ Perl_newGP(pTHX_ GV *const gv)
     gp->gp_sv = newSV(0);
 #endif
 
-#ifdef USE_ITHREADS
     if (PL_curcop) {
 	gp->gp_line = CopLINE(PL_curcop); /* 0 otherwise Newxz */
+#ifdef USE_ITHREADS
 	if (CopFILE(PL_curcop)) {
 	    file = CopFILE(PL_curcop);
 	    len = strlen(file);
 	}
-	else goto no_file;
-    }
-    else {
-	no_file:
-	file = "";
-	len = 0;
-    }
 #else
-    if(PL_curcop) {
-	gp->gp_line = CopLINE(PL_curcop); /* 0 otherwise Newxz */
 	filegv = CopFILEGV(PL_curcop);
 	if (filegv) {
 	    file = GvNAME(filegv)+2;
 	    len = GvNAMELEN(filegv)-2;
 	}
+#endif
 	else goto no_file;
     }
     else {
@@ -205,7 +197,6 @@ Perl_newGP(pTHX_ GV *const gv)
 	file = "";
 	len = 0;
     }
-#endif
 
     PERL_HASH(hash, file, len);
     gp->gp_file_hek = share_hek(file, len, hash);
