@@ -5493,8 +5493,7 @@ Perl_sv_magic(pTHX_ SV *const sv, SV *const obj, const int how,
 #endif
     if (SvREADONLY(sv)) {
 	if (
-	       IN_PERL_RUNTIME
-	    && !PERL_MAGIC_TYPE_READONLY_ACCEPTABLE(how)
+	    !PERL_MAGIC_TYPE_READONLY_ACCEPTABLE(how)
 	   )
 	{
 	    Perl_croak_no_modify();
@@ -8272,7 +8271,6 @@ Perl_sv_inc_nomg(pTHX_ SV *const sv)
 	if (SvIsCOW(sv) || isGV_with_GP(sv))
 	    sv_force_normal_flags(sv, 0);
 	if (SvREADONLY(sv)) {
-	    if (IN_PERL_RUNTIME)
 		Perl_croak_no_modify();
 	}
 	if (SvROK(sv)) {
@@ -8454,7 +8452,6 @@ Perl_sv_dec_nomg(pTHX_ SV *const sv)
 	if (SvIsCOW(sv) || isGV_with_GP(sv))
 	    sv_force_normal_flags(sv, 0);
 	if (SvREADONLY(sv)) {
-	    if (IN_PERL_RUNTIME)
 		Perl_croak_no_modify();
 	}
 	if (SvROK(sv)) {
