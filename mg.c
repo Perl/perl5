@@ -2590,6 +2590,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	break;
     case '\010':	/* ^H */
 	PL_hints = SvIV(sv);
+	CopHINTS_set(&PL_compiling, PL_hints);
 	break;
     case '\011':	/* ^I */ /* NOT \t in EBCDIC */
 	Safefree(PL_inplace);

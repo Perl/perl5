@@ -5,7 +5,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';
-    plan (tests => 179);
+    plan (tests => 180);
 }
 
 # Test that defined() returns true for magic variables created on the fly,
@@ -633,6 +633,18 @@ fresh_perl_is 'print $| = ~$|', "1\n", {switches => ['-l']},
 fresh_perl_is
  'select f; undef *f; ${q/|/}; print STDOUT qq|ok\n|', "ok\n", {},
  '[perl #115206] no crash when vivifying $| while *{+select}{IO} is undef';
+
+# ${^OPEN} and $^H interaction
+# Setting ${^OPEN} causes $^H to change, but setting $^H would only some-
+# times make ${^OPEN} change, depending on whether it was in the same BEGIN
+# block.  Don’t test actual values (subject to change); just test for
+# consistency.
+my @stuff;
+eval '
+    BEGIN { ${^OPEN} = "a\0b"; $^H = 0;          push @stuff, ${^OPEN} }
+    BEGIN { ${^OPEN} = "a\0b"; $^H = 0 } BEGIN { push @stuff, ${^OPEN} }
+1' or die $@;
+is $stuff[0], $stuff[1], '$^H modifies ${^OPEN} consistently';
 
 
 # ^^^^^^^^^ New tests go here ^^^^^^^^^
