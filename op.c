@@ -10558,6 +10558,9 @@ Perl_ck_svconst(pTHX_ OP *o)
 {
     PERL_ARGS_ASSERT_CK_SVCONST;
     PERL_UNUSED_CONTEXT;
+#ifdef PERL_OLD_COPY_ON_WRITE
+    if (SvIsCOW(cSVOPo->op_sv)) sv_force_normal(cSVOPo->op_sv);
+#endif
     SvREADONLY_on(cSVOPo->op_sv);
     return o;
 }
