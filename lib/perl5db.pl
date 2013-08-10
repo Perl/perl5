@@ -523,7 +523,7 @@ BEGIN {
 # Debugger for Perl 5.00x; perl5db.pl patch level:
 use vars qw($VERSION $header);
 
-$VERSION = '1.41';
+$VERSION = '1.42';
 
 $header = "perl5db.pl version $VERSION";
 
@@ -6143,7 +6143,11 @@ sub print_lineinfo {
     resetterm(1) if $LINEINFO eq $OUT and $term_pid != $$;
     local $\ = '';
     local $, = '';
-    print $LINEINFO @_;
+    # $LINEINFO may be undef if $noTTY is set or some other issue.
+    if ($LINEINFO)
+    {
+        print {$LINEINFO} @_;
+    }
 } ## end sub print_lineinfo
 
 =head2 C<postponed_sub>
