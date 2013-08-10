@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 23;
+plan tests => 24;
 
 # not() tests
 pass("logical negation of empty list") if not();
@@ -76,6 +76,9 @@ SKIP:
     my $c = Scalar::Util::dualvar(0,"1");
     is not($c), "", 'not(dualvar) ignores false int when string is true';
 }
+
+# test truth of regexps
+is not(${qr//}), "", 'dereferenced regexps are true';
 
 # not’s return value should be read-only, as it is the same global scalar
 # each time (and test that it is, too).
