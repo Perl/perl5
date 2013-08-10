@@ -5490,10 +5490,7 @@ Perl_sv_magic(pTHX_ SV *const sv, SV *const obj, const int how,
 #endif
     if (SvREADONLY(sv)) {
 	if (
-	    /* its okay to attach magic to shared strings */
-	    !SvIsCOW(sv)
-
-	    && IN_PERL_RUNTIME
+	       IN_PERL_RUNTIME
 	    && !PERL_MAGIC_TYPE_READONLY_ACCEPTABLE(how)
 	   )
 	{

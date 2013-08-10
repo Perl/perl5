@@ -1030,6 +1030,13 @@ EXPECT
 ok
 Modification of a read-only value attempted at - line 16.
 ########
+#
+# And one should not be able to tie read-only COWs
+for(__PACKAGE__) { tie $_, "" }
+sub TIESCALAR {bless []}
+EXPECT
+Modification of a read-only value attempted at - line 3.
+########
 
 # Similarly, read-only regexps cannot be tied.
 sub TIESCALAR { bless [] }
