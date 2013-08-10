@@ -176,6 +176,9 @@ Perl_newGP(pTHX_ GV *const gv)
     gp->gp_sv = newSV(0);
 #endif
 
+    /* PL_curcop should never be null here. */
+    assert(PL_curcop);
+    /* But for non-debugging builds play it safe */
     if (PL_curcop) {
 	gp->gp_line = CopLINE(PL_curcop); /* 0 otherwise Newxz */
 #ifdef USE_ITHREADS
