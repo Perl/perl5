@@ -925,6 +925,8 @@ S_cop_free(pTHX_ COP* cop)
     if (! specialWARN(cop->cop_warnings))
 	PerlMemShared_free(cop->cop_warnings);
     cophh_free(CopHINTHASH_get(cop));
+    if (PL_curcop == cop)
+       PL_curcop = NULL;
 }
 
 STATIC void
