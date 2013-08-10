@@ -9790,6 +9790,7 @@ Perl_sv_bless(pTHX_ SV *const sv, HV *const stash)
 
     PERL_ARGS_ASSERT_SV_BLESS;
 
+    SvGETMAGIC(sv);
     if (!SvROK(sv))
         Perl_croak(aTHX_ "Can't bless non-reference value");
     tmpRef = SvRV(sv);

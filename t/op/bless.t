@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan (111);
+plan (112);
 
 sub expected {
     my($object, $package, $type) = @_;
@@ -154,3 +154,9 @@ for(__PACKAGE__) {
     like $@, qr/^Modification of a read-only value attempted/,
          'read-only COWs cannot be blessed';
 }
+
+sub TIESCALAR { bless \(my $thing = pop), shift }
+sub FETCH { ${$_[0]} }
+tie $tied, main => $untied = [];
+eval { bless $tied };
+is ref $untied, "main", 'blessing through tied refs' or diag $@;
