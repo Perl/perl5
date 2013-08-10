@@ -185,6 +185,9 @@ Anop	|Free_t	|mfree		|Malloc_t where
 npR	|MEM_SIZE|malloced_size	|NN void *p
 npR	|MEM_SIZE|malloc_good_size	|size_t nbytes
 #endif
+#if defined(PERL_IN_MALLOC_C)
+sn	|int	|adjust_size_and_find_bucket	|NN size_t *nbytes_p
+#endif
 
 AnpR	|void*	|get_context
 Anp	|void	|set_context	|NN void *t

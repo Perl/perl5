@@ -5807,6 +5807,13 @@ STATIC char*	S_stdize_locale(pTHX_ char* locs)
 
 #  endif
 #endif
+#if defined(PERL_IN_MALLOC_C)
+STATIC int	S_adjust_size_and_find_bucket(size_t *nbytes_p)
+			__attribute__nonnull__(1);
+#define PERL_ARGS_ASSERT_ADJUST_SIZE_AND_FIND_BUCKET	\
+	assert(nbytes_p)
+
+#endif
 #if defined(PERL_IN_MG_C)
 STATIC SV*	S_magic_methcall1(pTHX_ SV *sv, const MAGIC *mg, SV *meth, U32 flags, int n, SV *val)
 			__attribute__nonnull__(pTHX_1)

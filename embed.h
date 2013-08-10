@@ -1399,6 +1399,9 @@
 #define stdize_locale(a)	S_stdize_locale(aTHX_ a)
 #    endif
 #  endif
+#  if defined(PERL_IN_MALLOC_C)
+#define adjust_size_and_find_bucket	S_adjust_size_and_find_bucket
+#  endif
 #  if defined(PERL_IN_MG_C)
 #define magic_methcall1(a,b,c,d,e,f)	S_magic_methcall1(aTHX_ a,b,c,d,e,f)
 #define magic_methpack(a,b,c)	S_magic_methpack(aTHX_ a,b,c)
