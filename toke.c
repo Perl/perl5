@@ -1753,13 +1753,14 @@ S_incline(pTHX_ const char *s)
 
     if (t - s > 0) {
 	const STRLEN len = t - s;
-	GV * const cfgv = CopFILEGV(PL_curcop);
 
-	if (cfgv && !PL_rsfp && !PL_parser->filtered) {
+	if (!PL_rsfp && !PL_parser->filtered) {
 	    /* must copy *{"::_<(eval N)[oldfilename:L]"}
 	     * to *{"::_<newfilename"} */
 	    /* However, the long form of evals is only turned on by the
 	       debugger - usually they're "(eval %lu)" */
+	    GV * const cfgv = CopFILEGV(PL_curcop);
+	    if (cfgv) {
 		char smallbuf[128];
 		STRLEN tmplen2 = len;
 		char *tmpbuf2;
@@ -1803,6 +1804,7 @@ S_incline(pTHX_ const char *s)
 		}
 
 		if (tmpbuf2 != smallbuf) Safefree(tmpbuf2);
+	    }
 	}
 	CopFILE_free(PL_curcop);
 	CopFILE_setn(PL_curcop, s, len);
