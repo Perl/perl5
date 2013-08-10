@@ -6491,9 +6491,11 @@ $! The xs_extensions symbol may be quite long
 $!
 $ WC/symbol "known_extensions='", xs_extensions, " ", nonxs_ext, " ", nonxs_ext2, "'"
 $ WC "ld='" + ld + "'"
+$ WC "ld_can_script='undef'"
 $ WC "lddlflags='/Share'"
 $ WC "ldflags='" + ldflags + "'"
 $ WC "ldflags_uselargefiles='" + "'"
+$ WC "ldlibpthname='" + "'"
 $ WC "lib_ext='" + lib_ext + "'"
 $ WC "libc='" + libc + "'"
 $ WC "libpth='/sys$share /sys$library'"
