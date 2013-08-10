@@ -271,4 +271,8 @@ isnt(scalar eval { my $pvbm = PVBM; --$pvbm }, undef, "predecrement defined");
     }
 }
 
+$_ = ${qr //};
+$_--;
+is($_, -1, 'regexp--');
+
 done_testing();

@@ -8449,8 +8449,6 @@ Perl_sv_dec_nomg(pTHX_ SV *const sv)
     if (!sv)
 	return;
     if (SvTHINKFIRST(sv)) {
-	if (SvIsCOW(sv) || isGV_with_GP(sv))
-	    sv_force_normal_flags(sv, 0);
 	if (SvREADONLY(sv)) {
 		Perl_croak_no_modify();
 	}
@@ -8462,6 +8460,7 @@ Perl_sv_dec_nomg(pTHX_ SV *const sv)
 	    sv_unref(sv);
 	    sv_setiv(sv, i);
 	}
+	else sv_force_normal_flags(sv, 0);
     }
     /* Unlike sv_inc we don't have to worry about string-never-numbers
        and keeping them magic. But we mustn't warn on punting */
