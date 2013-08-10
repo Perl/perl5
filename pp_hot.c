@@ -2058,9 +2058,6 @@ PP(pp_subst)
 	sv_force_normal_flags(TARG,0);
 #endif
     if (!(rpm->op_pmflags & PMf_NONDESTRUCT)
-#ifdef PERL_ANY_COW
-	&& !is_cow
-#endif
 	&& (SvREADONLY(TARG)
 	    || ( ((SvTYPE(TARG) == SVt_PVGV && isGV_with_GP(TARG))
 		  || SvTYPE(TARG) > SVt_PVLV)
