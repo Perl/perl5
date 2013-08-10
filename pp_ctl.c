@@ -5513,7 +5513,7 @@ S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
        concatenate it then we get a warning about use of uninitialised value.
     */
     if (!err && upstream != buf_sv &&
-        (SvOK(upstream) || SvGMAGICAL(upstream))) {
+        SvOK(upstream)) {
 	sv_catsv_nomg(buf_sv, upstream);
     }
     else if (SvOK(upstream)) (void)SvPV_force_nolen(buf_sv);
