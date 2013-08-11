@@ -4340,7 +4340,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, SV* sstr, const I32 flags)
 		? (!((sflags & CAN_COW_MASK) == CAN_COW_FLAGS
 # ifdef PERL_OLD_COPY_ON_WRITE
 		     && (SvFLAGS(dstr) & CAN_COW_MASK) == CAN_COW_FLAGS
-		     && SvTYPE(sstr) >= SVt_PVIV
+		     && SvTYPE(sstr) >= SVt_PVIV && len
 # else
 		     && !(SvFLAGS(dstr) & SVf_BREAK)
 		     && !(sflags & SVf_IsCOW)
