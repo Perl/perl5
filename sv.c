@@ -9150,9 +9150,6 @@ Perl_sv_resetpvn(pTHX_ const char *s, STRLEN len, HV * const stash)
 		if (sv && !SvREADONLY(sv)) {
 		    SV_CHECK_THINKFIRST_COW_DROP(sv);
 		    SvOK_off(sv);
-		    if (SvTYPE(sv) >= SVt_PV) {
-			SvTAINT(sv);
-		    }
 		}
 		if (GvAV(gv)) {
 		    av_clear(GvAV(gv));
