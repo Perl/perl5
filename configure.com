@@ -6224,12 +6224,14 @@ $ WC "d_select='" + d_select + "'"
 $ IF ("''F$EXTRACT(1,3, F$GETSYI(""VERSION""))'".GES."8.4")
 $ THEN
 $   WC "d_sem='define'"
+$   WC "d_semctl='define'"
 $   WC "d_semctl_semid_ds='define'"
 $   WC "d_semctl_semun='define'"
 $   WC "d_semget='define'"
 $   WC "d_semop='define'"
 $ ELSE
 $   WC "d_sem='undef'"
+$   WC "d_semctl='undef'"
 $   WC "d_semctl_semid_ds='undef'"
 $   WC "d_semctl_semun='undef'"
 $   WC "d_semget='undef'"
