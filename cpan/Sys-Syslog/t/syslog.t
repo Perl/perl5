@@ -16,8 +16,9 @@ use warnings qw(closure deprecated exiting glob io misc numeric once overflow
 # must manually disable warnings
 $^W = 0 if $] < 5.006;
 
-my $is_Win32  = $^O =~ /win32/i;
-my $is_Cygwin = $^O =~ /cygwin/i;
+my $is_Win32   = $^O =~ /win32/i;
+my $is_Cygwin  = $^O =~ /cygwin/i;
+my $is_Android = $^O =~ /android/i;
 
 # if testing in core, check that the module is at least available
 if ($ENV{PERL_CORE}) {
@@ -220,7 +221,13 @@ SKIP: {
         }
     }
     else  {
-        ok( $r, "setlogsock() should return true: '$r'" );
+        SKIP: {
+             if ( $is_Android && !grep { -w } grep { defined && length } &Sys::Syslog::_PATH_LOG, qw(/dev/log /dev/conslog) )
+            {
+                skip("setlogsock() can't find a default path on some android devices", 1);
+            }
+            ok( $r, "setlogsock() should return true: '$r'" );
+        }
     }
 
     # setlogsock() with "stream" and an empty path
