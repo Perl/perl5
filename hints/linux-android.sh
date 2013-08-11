@@ -216,11 +216,9 @@ for f in \$@
 do
   case "\$f" in
   /*)
-    $targetmkdir \`dirname \$f\`
     adb -s $targethost push \$f \$f            || exit 1
     ;;
   *)
-    $targetmkdir $targetdir/\`dirname \$f\`
     (adb -s $targethost push \$f $targetdir/\$f < /dev/null 2>&1) || exit 1
     ;;
   esac
