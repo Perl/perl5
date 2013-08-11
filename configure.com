@@ -4487,6 +4487,45 @@ $!     val="undef"
 $!   ENDIF
 $! ENDIF
 $!
+$!
+$! Check for the shm* routines.
+$!
+$ OS
+$ WS "#if defined(__DECC) || defined(__DECCXX)"
+$ WS "#include <stdlib.h>"
+$ WS "#endif"
+$ WS "#include <stdio.h>"
+$ WS "#include <sys/shm.h>"
+$ WS "#include <sys/stat.h>"
+$ WS "int shmget(key_t key, size_t size, int shmflg);"
+$ WS "void* shmat(int shmid,const void *shmaddr,int shmflg);"
+$ WS "int shmctl(int shmid,  int cmd, struct shmid_ds *buf);"
+$ WS "int shmdt(const void *shmaddr);"
+$ WS "int main() {"
+$ WS "int shm_id = shmget(IPC_PRIVATE, 8, S_IRWXU);"
+$ WS "if (shm_id == -1) printf(""0\n""); else printf (""1\n"");"
+$ WS "}"
+$ CS
+$ GOSUB compile
+$ IF tmp .EQS. "1"
+$ THEN
+$   d_shm = "define"
+$   d_shmat = "define"
+$   d_shmatprototype = "define"
+$   d_shmctl = "define"
+$   d_shmdt = "define"
+$   d_shmget = "define"
+$   shmattype = "void *"
+$ ELSE
+$   d_shm = "undef"
+$   d_shmat = "undef"
+$   d_shmatprototype = "undef"
+$   d_shmctl = "undef"
+$   d_shmdt = "undef"
+$   d_shmget = "undef"
+$   shmattype = "undef"
+$ ENDIF
+$!
 $! Check for setenv
 $!
 $ OS
@@ -6224,8 +6263,12 @@ $ WC "d_setsent='" + d_setsent + "'"
 $ WC "d_setsid='" + d_setsid + "'"
 $ WC "d_setvbuf='" + d_setvbuf + "'"
 $ WC "d_sfio='undef'"
-$ WC "d_shm='undef'"
-$ WC "d_shmatprototype='undef'"
+$ WC "d_shm='" + d_shm + "'"
+$ WC "d_shmat='" + d_shmat + "'"
+$ WC "d_shmatprototype='" + d_shmatprototype + "'"
+$ WC "d_shmctl='" + d_shmctl + "'"
+$ WC "d_shmdt='" + d_shmdt + "'"
+$ WC "d_shmget='" + d_shmget + "'"
 $ WC "d_sigaction='" + d_sigaction + "'"
 $ WC "d_signbit='" + d_signbit + "'"
 $ WC "d_sigprocmask='" + d_sigprocmask + "'"
@@ -6602,7 +6645,7 @@ $ WC "selectminbits='32'"
 $ WC "selecttype='" + selecttype + "'"
 $ WC "sh='MCR'"
 $ WC "sharpbang='#!'"
-$ WC "shmattype='" + " '"
+$ WC "shmattype='" + shmattype + "'"
 $ WC "shortsize='" + shortsize + "'"
 $ IF (f$length(sig_name) .GE. 244)
 $ THEN
