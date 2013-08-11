@@ -13330,8 +13330,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_cryptseen	= proto_perl->Icryptseen;
 #endif
 
-    PL_hints		= proto_perl->Ihints;
-
 #ifdef USE_LOCALE_COLLATE
     PL_collation_ix	= proto_perl->Icollation_ix;
     PL_collation_standard	= proto_perl->Icollation_standard;
