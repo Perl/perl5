@@ -4340,7 +4340,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, SV* sstr, const I32 flags)
 		? (!((sflags & CAN_COW_MASK) == CAN_COW_FLAGS
 # ifdef PERL_OLD_COPY_ON_WRITE
 		     && (SvFLAGS(dstr) & CAN_COW_MASK) == CAN_COW_FLAGS
-		     && SvTYPE(sstr) >= SVt_PVIV
+		     && SvTYPE(sstr) >= SVt_PVIV && len
 # else
 		     && !(SvFLAGS(dstr) & SVf_BREAK)
 		     && !(sflags & SVf_IsCOW)
@@ -5490,10 +5490,7 @@ Perl_sv_magic(pTHX_ SV *const sv, SV *const obj, const int how,
 #endif
     if (SvREADONLY(sv)) {
 	if (
-	    /* its okay to attach magic to shared strings */
-	    !SvIsCOW(sv)
-
-	    && IN_PERL_RUNTIME
+	       IN_PERL_RUNTIME
 	    && !PERL_MAGIC_TYPE_READONLY_ACCEPTABLE(how)
 	   )
 	{
@@ -9799,7 +9796,7 @@ Perl_sv_bless(pTHX_ SV *const sv, HV *const stash)
         Perl_croak(aTHX_ "Can't bless non-reference value");
     tmpRef = SvRV(sv);
     if (SvFLAGS(tmpRef) & (SVs_OBJECT|SVf_READONLY)) {
-	if (SvREADONLY(tmpRef) && !SvIsCOW(tmpRef))
+	if (SvREADONLY(tmpRef))
 	    Perl_croak_no_modify();
 	if (SvOBJECT(tmpRef)) {
 	    SvREFCNT_dec(SvSTASH(tmpRef));

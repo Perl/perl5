@@ -116,14 +116,12 @@ S_save_magic_flags(pTHX_ I32 mgs_ix, SV *sv, U32 flags)
     mgs = SSPTR(mgs_ix, MGS*);
     mgs->mgs_sv = sv;
     mgs->mgs_magical = SvMAGICAL(sv);
-    mgs->mgs_readonly = SvREADONLY(sv) && !SvIsCOW(sv);
+    mgs->mgs_readonly = SvREADONLY(sv);
     mgs->mgs_ss_ix = PL_savestack_ix;   /* points after the saved destructor */
     mgs->mgs_bumped = bumped;
 
     SvFLAGS(sv) &= ~flags;
-    /* Turning READONLY off for a copy-on-write scalar (including shared
-       hash keys) is a bad idea.  */
-    if (!SvIsCOW(sv)) SvREADONLY_off(sv);
+    SvREADONLY_off(sv);
 }
 
 #define save_magic(a,b) save_magic_flags(a,b,SVs_GMG|SVs_SMG|SVs_RMG)
@@ -528,7 +526,7 @@ Perl_mg_localize(pTHX_ SV *sv, SV *nsv, bool setmagic)
 			    mg->mg_ptr, mg->mg_len);
 
 	/* container types should remain read-only across localization */
-	if (!SvIsCOW(sv)) SvFLAGS(nsv) |= SvREADONLY(sv);
+	SvFLAGS(nsv) |= SvREADONLY(sv);
     }
 
     if (SvTYPE(nsv) >= SVt_PVMG && SvMAGIC(nsv)) {

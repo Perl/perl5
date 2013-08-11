@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan (110);
+plan (111);
 
 sub expected {
     my($object, $package, $type) = @_;
@@ -148,3 +148,9 @@ delete $::{"_117941::"};
 eval { _117941() };
 like $@, qr/^Attempt to bless into a freed package at /,
         'bless with one arg when current stash is freed';
+
+for(__PACKAGE__) {
+    eval { bless \$_ };
+    like $@, qr/^Modification of a read-only value attempted/,
+         'read-only COWs cannot be blessed';
+}

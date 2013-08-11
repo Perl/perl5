@@ -9,7 +9,7 @@ BEGIN {
 
 require 'test.pl';
 
-plan (11);
+plan (14);
 
 my $blank = "";
 eval {select undef, $blank, $blank, 0};
@@ -25,6 +25,16 @@ eval {select $blank, "", $blank, 0};
 is ($@, "", 'select $blank ""     $blank 0');
 eval {select $blank, $blank, "", 0};
 is ($@, "", 'select $blank $blank ""     0');
+
+# Test with read-only copy-on-write empty string
+my($rocow) = keys%{{""=>undef}};
+Internals::SvREADONLY($rocow,1);
+eval {select $rocow, $blank, $blank, 0};
+is ($@, "", 'select $rocow     $blank $blank 0');
+eval {select $blank, $rocow, $blank, 0};
+is ($@, "", 'select $blank $rocow     $blank 0');
+eval {select $blank, $blank, $rocow, 0};
+is ($@, "", 'select $blank $blank $rocow     0');
 
 eval {select "a", $blank, $blank, 0};
 like ($@, qr/^Modification of a read-only value attempted/,

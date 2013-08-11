@@ -7,7 +7,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan( tests => 235 );
+plan( tests => 236 );
 
 $_ = 'david';
 $a = s/david/rules/r;
@@ -995,3 +995,10 @@ delete $::{does_not_exist}; # just in case
 eval { no warnings; $::{does_not_exist}=~s/(?:)/*{"does_not_exist"}; 4/e };
 like $@, qr/^Modification of a read-only value/,
     'vivifying stash elem in $that::{elem} =~ s//.../e';
+
+# COWs should not be exempt from read-only checks.  s/// croaks on read-
+# only values even when the pattern does not match, but it was not doing so
+# for COWs.
+eval { for (__PACKAGE__) { s/b/c/; } };
+like $@, qr/^Modification of a read-only value/,
+    'read-only COW =~ s/does not match// should croak';

@@ -1112,10 +1112,11 @@ PP(pp_sselect)
 	SvGETMAGIC(sv);
 	if (!SvOK(sv))
 	    continue;
-	if (SvIsCOW(sv))
-		sv_force_normal_flags(sv, 0);
-	if (SvREADONLY(sv) && !(SvPOK(sv) && SvCUR(sv) == 0))
+	if (SvREADONLY(sv)) {
+	    if (!(SvPOK(sv) && SvCUR(sv) == 0))
 		Perl_croak_no_modify();
+	}
+	else if (SvIsCOW(sv)) sv_force_normal_flags(sv, 0);
 	if (!SvPOK(sv)) {
 	    if (!SvPOKp(sv))
 		Perl_ck_warner(aTHX_ packWARN(WARN_MISC),

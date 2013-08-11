@@ -565,17 +565,8 @@ for my $pos (0..5) {
 
 # [perl #119043] utf8::upgrade should not croak on read-only COWs
 for(__PACKAGE__) {
-    # First make sure we have a COW, otherwise this test is useless.
-    my $copy = $_;
-    my @addrs = unpack "L!L!", pack "pp", $copy, $_;
-    if ($addrs[0] != $addrs[1]) {
-	fail("__PACKAGE__ did not produce a COW - if this change was "
-	    ."intentional, please provide me with another ro COW scalar")
-    }
-    else {
 	eval { utf8::upgrade($_) };
 	is $@, "", 'no error with utf8::upgrade on read-only COW';
-    }
 }
 # This one croaks, but not because the scalar is read-only
 eval "package \x{100};\n" . <<'END'
