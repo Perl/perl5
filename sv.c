@@ -9151,9 +9151,6 @@ Perl_sv_resetpvn(pTHX_ const char *s, STRLEN len, HV * const stash)
 		    SV_CHECK_THINKFIRST_COW_DROP(sv);
 		    SvOK_off(sv);
 		    if (SvTYPE(sv) >= SVt_PV) {
-			SvCUR_set(sv, 0);
-			if (SvPVX_const(sv) != NULL)
-			    *SvPVX(sv) = '\0';
 			SvTAINT(sv);
 		    }
 		}
