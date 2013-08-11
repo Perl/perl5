@@ -17,7 +17,7 @@ BEGIN {
 use strict;
 use Config;
 
-plan tests => 797;
+plan tests => 798;
 
 $| = 1;
 
@@ -2350,6 +2350,11 @@ SKIP: {
     eval { "a" =~ /$code/ };
     like($@, qr/Eval-group in insecure regular expression/, "tainted (?{})");
 }
+
+# reset() and tainted undef (?!)
+$::x = "foo";
+$_ = "$TAINT".reset "x";
+is eval { eval $::x.1 }, 1, 'reset does not taint undef';
 
 # This may bomb out with the alarm signal so keep it last
 SKIP: {

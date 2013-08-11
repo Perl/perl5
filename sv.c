@@ -9147,35 +9147,15 @@ Perl_sv_resetpvn(pTHX_ const char *s, STRLEN len, HV * const stash)
 		    continue;
 		gv = MUTABLE_GV(HeVAL(entry));
 		sv = GvSV(gv);
-		if (sv) {
-		    if (SvTHINKFIRST(sv)) {
-			if (!SvREADONLY(sv) && SvROK(sv))
-			    sv_unref(sv);
-			/* XXX Is this continue a bug? Why should THINKFIRST
-			   exempt us from resetting arrays and hashes?  */
-			continue;
-		    }
+		if (sv && !SvREADONLY(sv)) {
+		    SV_CHECK_THINKFIRST_COW_DROP(sv);
 		    SvOK_off(sv);
-		    if (SvTYPE(sv) >= SVt_PV) {
-			SvCUR_set(sv, 0);
-			if (SvPVX_const(sv) != NULL)
-			    *SvPVX(sv) = '\0';
-			SvTAINT(sv);
-		    }
 		}
 		if (GvAV(gv)) {
 		    av_clear(GvAV(gv));
 		}
 		if (GvHV(gv) && !HvNAME_get(GvHV(gv))) {
-#if defined(VMS)
-		    Perl_die(aTHX_ "Can't reset %%ENV on this system");
-#else /* ! VMS */
 		    hv_clear(GvHV(gv));
-#  if defined(USE_ENVIRON_ARRAY)
-		    if (gv == PL_envgv)
-		        my_clearenv();
-#  endif /* USE_ENVIRON_ARRAY */
-#endif /* VMS */
 		}
 	    }
 	}
