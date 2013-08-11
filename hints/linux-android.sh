@@ -235,3 +235,6 @@ exit 0
 EOF
 $chmod a+rx $from
 
+if $test "X$hostosname" = "Xdarwin"; then
+  firstmakefile=GNUmakefile;
+fi
