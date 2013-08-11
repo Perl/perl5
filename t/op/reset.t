@@ -7,7 +7,7 @@ BEGIN {
 }
 use strict;
 
-plan tests => 32;
+plan tests => 34;
 
 package aiieee;
 
@@ -112,6 +112,12 @@ package scratch { reset 'cqgvr' }
 is join ("-", map $_//'u', $scratch::cow, $scratch::qr, $scratch::v,
                            $scratch::glob,$scratch::ro), 'u-u-u-u-1',
    'cow, qr, vstring, glob, ro test';
+
+@scratch::an_array = 1..3;
+%scratch::a_hash   = 1..4;
+package scratch { reset 'a' }
+is @scratch::an_array, 0, 'resetting an array';
+is %scratch::a_hash,   0, 'resetting a hash';
 
 # This used to crash under threaded builds, because pmops were remembering
 # their stashes by name, rather than by pointer.
