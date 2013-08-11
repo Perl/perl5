@@ -9161,15 +9161,7 @@ Perl_sv_resetpvn(pTHX_ const char *s, STRLEN len, HV * const stash)
 		    av_clear(GvAV(gv));
 		}
 		if (GvHV(gv) && !HvNAME_get(GvHV(gv))) {
-#if defined(VMS)
-		    Perl_die(aTHX_ "Can't reset %%ENV on this system");
-#else /* ! VMS */
 		    hv_clear(GvHV(gv));
-#  if defined(USE_ENVIRON_ARRAY)
-		    if (gv == PL_envgv)
-		        my_clearenv();
-#  endif /* USE_ENVIRON_ARRAY */
-#endif /* VMS */
 		}
 	    }
 	}
