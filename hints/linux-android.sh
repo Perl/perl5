@@ -189,9 +189,9 @@ result_status=\`cat output.status\`
 rm output.stdout output.stderr output.status
 
 # We get back Ok\r\n on android for some reason, grrr:
-result=\`echo "\$result" | sed -e 's|\r||g'\`
-result_err=\`echo "\$result_err" | sed -e 's|\r||g'\`
-result_status=\`echo \$result_status | sed -e 's|\r||g'\`
+result=\`echo "\$result" | $tr -d '\r'\`
+result_err=\`echo "\$result_err" | $tr -d '\r'\`
+result_status=\`echo \$result_status | $tr -d '\r'\`
 
 echo "\$result"
 if test "X\$result_err" != X; then
