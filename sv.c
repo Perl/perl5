@@ -9148,13 +9148,11 @@ Perl_sv_resetpvn(pTHX_ const char *s, STRLEN len, HV * const stash)
 		gv = MUTABLE_GV(HeVAL(entry));
 		sv = GvSV(gv);
 		if (sv) {
-		    if (SvTHINKFIRST(sv)) {
-			if (!SvREADONLY(sv) && SvROK(sv))
-			    sv_unref(sv);
+		    if (SvREADONLY(sv))
 			/* XXX Is this continue a bug? Why should THINKFIRST
 			   exempt us from resetting arrays and hashes?  */
 			continue;
-		    }
+		    SV_CHECK_THINKFIRST_COW_DROP(sv);
 		    SvOK_off(sv);
 		    if (SvTYPE(sv) >= SVt_PV) {
 			SvCUR_set(sv, 0);
