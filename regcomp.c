@@ -10744,7 +10744,7 @@ tryagain:
 
 	defchar: {
 	    STRLEN len = 0;
-	    UV ender;
+	    UV ender = 0;
 	    char *p;
 	    char *s;
 #define MAX_NODE_STRING_SIZE 127
@@ -10752,7 +10752,7 @@ tryagain:
 	    char *s0;
 	    U8 upper_parse = MAX_NODE_STRING_SIZE;
 	    STRLEN foldlen;
-            U8 node_type;
+            U8 node_type = compute_EXACTish(pRExC_state);
             bool next_is_quantifier;
             char * oldp = NULL;
 
@@ -10761,8 +10761,6 @@ tryagain:
              * which allows the optimizer more things to look for */
             bool maybe_exact;
 
-	    ender = 0;
-            node_type = compute_EXACTish(pRExC_state);
 	    ret = reg_node(pRExC_state, node_type);
 
             /* In pass1, folded, we use a temporary buffer instead of the
