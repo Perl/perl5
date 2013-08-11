@@ -10773,8 +10773,8 @@ tryagain:
 
             /* We do the EXACTFish to EXACT node only if folding, and not if in
              * locale, as whether a character folds or not isn't known until
-             * runtime */
-            maybe_exact = FOLD && ! LOC;
+             * runtime.  (And we don't need to figure this out until pass 2) */
+            maybe_exact = FOLD && ! LOC && PASS2;
 
 	    /* XXX The node can hold up to 255 bytes, yet this only goes to
              * 127.  I (khw) do not know why.  Keeping it somewhat less than
