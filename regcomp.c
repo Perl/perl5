@@ -367,6 +367,24 @@ typedef struct scan_data_t {
     struct regnode_charclass_class *start_class;
 } scan_data_t;
 
+/* The below is perhaps overboard, but this allows us to save a test at the
+ * expense of a mask.  This is because on both EBCDIC and ASCII machines, 'A'
+ * and 'a' differ by a single bit; the same with the upper and lower case of
+ * all other ASCII-range alphabetics.  On ASCII platforms, they are 32 apart;
+ * on EBCDIC, they are 64.  This uses an exclusive 'or' to find that bit and
+ * then inverts it to form a mask, with just a single 0, in the bit position
+ * where the upper- and lowercase differ.  XXX There are about 40 other
+ * instances in the Perl core where this micro-optimization could be used.
+ * Should decide if maintenance cost is worse, before changing those
+ *
+ * Returns a boolean as to whether or not 'v' is either a lowercase or
+ * uppercase instance of 'c', where 'c' is in [A-Za-z].  If 'c' is a
+ * compile-time constant, the generated code is better than some optimizing
+ * compilers figure out, amounting to a mask and test.  The results are
+ * meaningless if 'c' is not one of [A-Za-z] */
+#define isARG2_lower_or_UPPER_ARG1(c, v) \
+                              (((v) & ~('A' ^ 'a')) ==  ((c) & ~('A' ^ 'a')))
+
 /*
  * Forward declarations for pregcomp()'s friends.
  */
@@ -2938,16 +2956,6 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan, UV *min_subtract, b
              * have to find at least two characters for a multi-fold */
 	    const U8* upper = (OP(scan) == EXACTF) ? s_end : s_end -1;
 
-            /* The below is perhaps overboard, but this allows us to save a
-             * test each time through the loop at the expense of a mask.  This
-             * is because on both EBCDIC and ASCII machines, 'S' and 's' differ
-             * by a single bit.  On ASCII they are 32 apart; on EBCDIC, they
-             * are 64.  This uses an exclusive 'or' to find that bit and then
-             * inverts it to form a mask, with just a single 0, in the bit
-             * position where 'S' and 's' differ. */
-            const U8 S_or_s_mask = (U8) ~ ('S' ^ 's');
-            const U8 s_masked = 's' & S_or_s_mask;
-
 	    while (s < upper) {
                 int len = is_MULTI_CHAR_FOLD_latin1_safe(s, s_end);
                 if (! len) {    /* Not a multi-char fold. */
@@ -2960,8 +2968,8 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan, UV *min_subtract, b
                 }
 
                 if (len == 2
-                    && ((*s & S_or_s_mask) == s_masked)
-                    && ((*(s+1) & S_or_s_mask) == s_masked))
+                    && isARG2_lower_or_UPPER_ARG1('s', *s)
+                    && isARG2_lower_or_UPPER_ARG1('s', *(s+1)))
                 {
 
                     /* EXACTF nodes need to know that the minimum length
