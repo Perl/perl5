@@ -969,11 +969,13 @@ do_test('large hash',
 ');
 
 SKIP: {
-    skip "Not built with usemymalloc", 1
+    skip "Not built with usemymalloc", 2
       unless $Config{usemymalloc} eq 'y';
     my $x = __PACKAGE__;
     ok eval { fill_mstats($x); 1 }, 'fill_mstats on COW scalar'
      or diag $@;
+    my $y;
+    ok eval { fill_mstats($y); 1 }, 'fill_mstats on undef scalar';
 }
 
 # This is more a test of fbm_compile/pp_study (non) interaction than dumping
