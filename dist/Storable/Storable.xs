@@ -81,6 +81,12 @@
 #  define HvTOTALKEYS(hv)	HvKEYS(hv)
 #endif
 
+#ifdef SVf_IsCOW
+#  define SvTRULYREADONLY(sv)	SvREADONLY(sv)
+#else
+#  define SvTRULYREADONLY(sv)	(SvREADONLY(sv) && !SvIsCOW(sv))
+#endif
+
 #ifdef DEBUGME
 
 #ifndef DASSERT
@@ -2452,7 +2458,7 @@ static int store_hash(pTHX_ stcxt_t *cxt, HV *hv)
                         /* Implementation of restricted hashes isn't nicely
                            abstracted:  */
 			if ((hash_flags & SHV_RESTRICTED)
-			 && SvREADONLY(val) && !SvIsCOW(val)) {
+			 && SvTRULYREADONLY(val)) {
 				flags |= SHV_K_LOCKED;
 			}
 
@@ -2544,7 +2550,7 @@ static int store_hash(pTHX_ stcxt_t *cxt, HV *hv)
                            abstracted:  */
                         flags
                             = (((hash_flags & SHV_RESTRICTED)
-                                && SvREADONLY(val) && !SvIsCOW(val))
+                                && SvTRULYREADONLY(val))
                                              ? SHV_K_LOCKED : 0);
 
                         if (val == &PL_sv_placeholder) {
