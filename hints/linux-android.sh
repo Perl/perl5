@@ -43,14 +43,14 @@ d_getservent_r='undef'
 # getusershell setusershell endusershell
 
 # This script UU/archname.cbu will get 'called-back' by Configure.
-cat > UU/archname.cbu <<'EOCBU'
+$cat > UU/archname.cbu <<'EOCBU'
 # egrep pattern to detect a stub warning on Android.
 # Right now we're checking for:
 # Android 2.x: FIX ME! implement FUNC
 # Android 4.x: FUNC is not implemented on Android
 android_stub='FIX|Android'
 
-cat > try.c << 'EOM'
+$cat > try.c << 'EOM'
 #include <netdb.h>
 int main() { (void) getnetbyname("foo"); return(0); }
 EOM
@@ -60,7 +60,7 @@ if test "X$android_warn" != X; then
    d_getnbyname="$undef"
 fi
 
-cat > try.c << 'EOM'
+$cat > try.c << 'EOM'
 #include <netdb.h>
 int main() { (void) getnetbyaddr((uint32_t)1, AF_INET); return(0); }
 EOM
@@ -70,7 +70,7 @@ if test "X$android_warn" != X; then
    d_getnbyaddr="$undef"
 fi
 
-cat > try.c << 'EOM'
+$cat > try.c << 'EOM'
 #include <stdio.h>
 #include <mntent.h>
 #include <unistd.h>
@@ -82,7 +82,7 @@ if test "X$android_warn" != X; then
    d_getmntent="$undef"
 fi
 
-cat > try.c << 'EOM'
+$cat > try.c << 'EOM'
 #include <netdb.h>
 int main() { (void) getprotobyname("foo"); return(0); }
 EOM
@@ -92,7 +92,7 @@ if test "X$android_warn" != X; then
    d_getpbyname="$undef"
 fi
 
-cat > try.c << 'EOM'
+$cat > try.c << 'EOM'
 #include <netdb.h>
 int main() { (void) getprotobynumber(1); return(0); }
 EOM
@@ -102,7 +102,7 @@ if test "X$android_warn" != X; then
    d_getpbynumber="$undef"
 fi
 
-cat > try.c << 'EOM'
+$cat > try.c << 'EOM'
 #include <sys/types.h>
 #include <pwd.h>
 int main() { endpwent(); return(0); }
@@ -113,7 +113,7 @@ if test "X$android_warn" != X; then
    d_endpwent="$undef"
 fi
 
-cat > try.c << 'EOM'
+$cat > try.c << 'EOM'
 #include <unistd.h>
 int main() { (void) ttyname(STDIN_FILENO); return(0); }
 EOM
@@ -146,7 +146,7 @@ run=$run-$targetrun
 to=$to-$targetto
 from=$from-$targetfrom
 
-cat >$run <<EOF
+$cat >$run <<EOF
 #!/bin/sh
 doexit="echo \\\$? >$targetdir/output.status"
 env=''
@@ -183,9 +183,9 @@ $from output.stdout
 $from output.stderr
 $from output.status
 
-result=\`cat output.stdout\`
-result_err=\`cat output.stderr\`
-result_status=\`cat output.status\`
+result=\`$cat output.stdout\`
+result_err=\`$cat output.stderr\`
+result_status=\`$cat output.status\`
 rm output.stdout output.stderr output.status
 
 # We get back Ok\r\n on android for some reason, grrr:
@@ -204,13 +204,13 @@ exit \$result_status
 EOF
 chmod a+rx $run
 
-cat >$targetmkdir <<EOF
+$cat >$targetmkdir <<EOF
 #!/bin/sh
 adb -s $targethost shell "mkdir -p \$@"
 EOF
 chmod a+rx $targetmkdir
 
-cat >$to <<EOF
+$cat >$to <<EOF
 #!/bin/sh
 for f in \$@
 do
@@ -227,7 +227,7 @@ exit 0
 EOF
 chmod a+rx $to
 
-cat >$from <<EOF
+$cat >$from <<EOF
 #!/bin/sh
 for f in \$@
 do
