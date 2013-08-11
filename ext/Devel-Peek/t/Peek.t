@@ -111,20 +111,23 @@ do_test('assignment of immediate constant (string)',
 	$a = "foo",
 'SV = PV\\($ADDR\\) at $ADDR
   REFCNT = 1
-  FLAGS = \\(POK,pPOK\\)
+  FLAGS = \\(POK,(?:IsCOW,)?pPOK\\)
   PV = $ADDR "foo"\\\0
   CUR = 3
-  LEN = \\d+'
-       );
+  LEN = \\d+
+  COW_REFCNT = 1				# $] >=5.019003
+');
 
 do_test('immediate constant (string)',
         "bar",
 'SV = PV\\($ADDR\\) at $ADDR
   REFCNT = 1
-  FLAGS = \\(.*POK,READONLY,pPOK\\)
+  FLAGS = \\(.*POK,READONLY,(?:IsCOW,)?pPOK\\)
   PV = $ADDR "bar"\\\0
   CUR = 3
-  LEN = \\d+');
+  LEN = \\d+
+  COW_REFCNT = 0				# $] >=5.019003
+');
 
 do_test('assignment of immediate constant (integer)',
         $b = 123,
@@ -164,6 +167,9 @@ my $type = do_test('result of addition',
 
 do_test('floating point value',
        $d,
+       $] < 5.019003
+        || $Config{ccflags} =~ /-DPERL_(?:NO_COW|OLD_COPY_ON_WRITE)/
+       ?
 'SV = PVNV\\($ADDR\\) at $ADDR
   REFCNT = 1
   FLAGS = \\(NOK,pNOK\\)
@@ -171,7 +177,14 @@ do_test('floating point value',
   NV = 789\\.(?:1(?:000+\d+)?|0999+\d+)
   PV = $ADDR "789"\\\0
   CUR = 3
-  LEN = \\d+');
+  LEN = \\d+'
+       :
+'SV = PVNV\\($ADDR\\) at $ADDR
+  REFCNT = 1
+  FLAGS = \\(NOK,pNOK\\)
+  IV = \d+
+  NV = 789\\.(?:1(?:000+\d+)?|0999+\d+)
+  PV = 0');
 
 do_test('integer constant',
         0xabcd,
@@ -194,10 +207,12 @@ do_test('reference to scalar',
   RV = $ADDR
   SV = PV\\($ADDR\\) at $ADDR
     REFCNT = 2
-    FLAGS = \\(POK,pPOK\\)
+    FLAGS = \\(POK,(?:IsCOW,)?pPOK\\)
     PV = $ADDR "foo"\\\0
     CUR = 3
-    LEN = \\d+');
+    LEN = \\d+
+    COW_REFCNT = 1				# $] >=5.019003
+');
 
 my $c_pattern;
 if ($type eq 'N') {
@@ -475,20 +490,24 @@ do_test('string with Unicode',
 'SV = PV\\($ADDR\\) at $ADDR
   REFCNT = 1
   FLAGS = \\((?:$PADTMP,)?POK,READONLY,pPOK,UTF8\\)	# $] < 5.019003
-  FLAGS = \\((?:$PADTMP,)?POK,pPOK,UTF8\\)		# $] >=5.019003
+  FLAGS = \\((?:$PADTMP,)?POK,(?:IsCOW,)?pPOK,UTF8\\)	# $] >=5.019003
   PV = $ADDR "\\\214\\\101\\\0\\\235\\\101"\\\0 \[UTF8 "\\\x\{100\}\\\x\{0\}\\\x\{200\}"\]
   CUR = 5
-  LEN = \\d+');
+  LEN = \\d+
+  COW_REFCNT = 1					# $] >=5.019003
+');
 } else {
 do_test('string with Unicode',
 	chr(256).chr(0).chr(512),
 'SV = PV\\($ADDR\\) at $ADDR
   REFCNT = 1
   FLAGS = \\((?:$PADTMP,)?POK,READONLY,pPOK,UTF8\\)	# $] < 5.019003
-  FLAGS = \\((?:$PADTMP,)?POK,pPOK,UTF8\\)		# $] >=5.019003
+  FLAGS = \\((?:$PADTMP,)?POK,(?:IsCOW,)?pPOK,UTF8\\)	# $] >=5.019003
   PV = $ADDR "\\\304\\\200\\\0\\\310\\\200"\\\0 \[UTF8 "\\\x\{100\}\\\x\{0\}\\\x\{200\}"\]
   CUR = 5
-  LEN = \\d+');
+  LEN = \\d+
+  COW_REFCNT = 1					# $] >=5.019003
+');
 }
 
 if (ord('A') == 193) {
@@ -511,10 +530,12 @@ do_test('reference to hash containing Unicode',
     Elt "\\\214\\\101" \[UTF8 "\\\x\{100\}"\] HASH = $ADDR
     SV = PV\\($ADDR\\) at $ADDR
       REFCNT = 1
-      FLAGS = \\(POK,pPOK,UTF8\\)
+      FLAGS = \\(POK,(?:IsCOW,)?pPOK,UTF8\\)
       PV = $ADDR "\\\235\\\101"\\\0 \[UTF8 "\\\x\{200\}"\]
       CUR = 2
-      LEN = \\d+',
+      LEN = \\d+
+      COW_REFCNT = 1				# $] < 5.009
+',      '',
 	$] > 5.009
 	? $] >= 5.015
 	    ?  0
@@ -540,10 +561,12 @@ do_test('reference to hash containing Unicode',
     Elt "\\\304\\\200" \[UTF8 "\\\x\{100\}"\] HASH = $ADDR
     SV = PV\\($ADDR\\) at $ADDR
       REFCNT = 1
-      FLAGS = \\(POK,pPOK,UTF8\\)
+      FLAGS = \\(POK,(?:IsCOW,)?pPOK,UTF8\\)
       PV = $ADDR "\\\310\\\200"\\\0 \[UTF8 "\\\x\{200\}"\]
       CUR = 2
-      LEN = \\d+', '',
+      LEN = \\d+
+      COW_REFCNT = 1				# $] >= 5.019003
+',      '',
 	$] > 5.009
 	? $] >= 5.015
 	    ?  0
@@ -563,7 +586,7 @@ do_test('scalar with pos magic',
   PV = $ADDR ""\\\0
   CUR = 0
   LEN = \d+
-  COW_REFCNT = 1
+  COW_REFCNT = [12]
   MAGIC = $ADDR
     MG_VIRTUAL = &PL_vtbl_mglob
     MG_TYPE = PERL_MAGIC_regex_global\\(g\\)
@@ -652,10 +675,11 @@ do_test('constant subroutine',
     XSUBANY = $ADDR \\(CONST SV\\)
     SV = PV\\($ADDR\\) at $ADDR
       REFCNT = 1
-      FLAGS = \\(.*POK,READONLY,pPOK\\)
+      FLAGS = \\(.*POK,READONLY,(?:IsCOW,)?pPOK\\)
       PV = $ADDR "Perl rules"\\\0
       CUR = 10
       LEN = \\d+
+      COW_REFCNT = 0				# $] >=5.019003
     GVGV::GV = $ADDR\\t"main" :: "const"
     FILE = ".*\\b(?i:peek\\.t)"
     DEPTH = 0(?:
@@ -850,10 +874,11 @@ do_test('small hash',
 (?:    Elt "(?:Perl|Beer)" HASH = $ADDR
     SV = PV\\($ADDR\\) at $ADDR
       REFCNT = 1
-      FLAGS = \\(POK,pPOK\\)
+      FLAGS = \\(POK,(?:IsCOW,)?pPOK\\)
       PV = $ADDR "(?:Rules|Foamy)"\\\0
       CUR = \d+
       LEN = \d+
+      COW_REFCNT = 1				# $] >=5.019003
 ){2}');
 
 $b = keys %small;
@@ -880,10 +905,11 @@ do_test('small hash after keys',
 (?:    Elt "(?:Perl|Beer)" HASH = $ADDR
     SV = PV\\($ADDR\\) at $ADDR
       REFCNT = 1
-      FLAGS = \\(POK,pPOK\\)
+      FLAGS = \\(POK,(?:IsCOW,)?pPOK\\)
       PV = $ADDR "(?:Rules|Foamy)"\\\0
       CUR = \d+
       LEN = \d+
+      COW_REFCNT = 1				# $] >=5.019003
 ){2}');
 
 $b = %small;
@@ -910,10 +936,11 @@ do_test('small hash after keys and scalar',
 (?:    Elt "(?:Perl|Beer)" HASH = $ADDR
     SV = PV\\($ADDR\\) at $ADDR
       REFCNT = 1
-      FLAGS = \\(POK,pPOK\\)
+      FLAGS = \\(POK,(?:IsCOW,)?pPOK\\)
       PV = $ADDR "(?:Rules|Foamy)"\\\0
       CUR = \d+
       LEN = \d+
+      COW_REFCNT = 1				# $] >=5.019003
 ){2}');
 
 # This should immediately start with the FILL cached correctly.

@@ -10554,12 +10554,23 @@ Perl_ck_subr(pTHX_ OP *o)
 OP *
 Perl_ck_svconst(pTHX_ OP *o)
 {
+    SV * const sv = cSVOPo->op_sv;
     PERL_ARGS_ASSERT_CK_SVCONST;
     PERL_UNUSED_CONTEXT;
 #ifdef PERL_OLD_COPY_ON_WRITE
-    if (SvIsCOW(cSVOPo->op_sv)) sv_force_normal(cSVOPo->op_sv);
+    if (SvIsCOW(sv)) sv_force_normal(sv);
+#elif defined(PERL_NEW_COPY_ON_WRITE)
+    /* Since the read-only flag may be used to protect a string buffer, we
+       cannot do copy-on-write with existing read-only scalars that are not
+       already copy-on-write scalars.  To allow $_ = "hello" to do COW with
+       that constant, mark the constant as COWable here, if it is not
+       already read-only. */
+    if (!SvREADONLY(sv) && !SvIsCOW(sv) && SvCANCOW(sv)) {
+	SvIsCOW_on(sv);
+	CowREFCNT(sv) = 0;
+    }
 #endif
-    SvREADONLY_on(cSVOPo->op_sv);
+    SvREADONLY_on(sv);
     return o;
 }
 
