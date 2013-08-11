@@ -73,6 +73,9 @@ sub do_test {
 	    $pattern =~ s/\$RV/
 		($] < 5.011) ? 'RV' : 'IV';
 	    /mge;
+	    $pattern =~ s/^\h+COW_REFCNT = \d+\h*\n//mg
+		if $Config{ccflags} =~
+			/-DPERL_(?:OLD_COPY_ON_WRITE|NO_COW)/;
 
 	    print $pattern, "\n" if $DEBUG;
 	    my ($dump, $dump2) = split m/\*\*\*\*\*\n/, scalar <IN>;
@@ -559,8 +562,8 @@ do_test('scalar with pos magic',
   NV = 0
   PV = $ADDR ""\\\0
   CUR = 0
-  LEN = \d+(?:
-  COW_REFCNT = 1)?
+  LEN = \d+
+  COW_REFCNT = 1
   MAGIC = $ADDR
     MG_VIRTUAL = &PL_vtbl_mglob
     MG_TYPE = PERL_MAGIC_regex_global\\(g\\)
@@ -962,8 +965,7 @@ unless ($Config{useithreads}) {
     do_test('regular string constant', perl,
 'SV = PV\\($ADDR\\) at $ADDR
   REFCNT = 5
-  FLAGS = \\(PADMY,POK,READONLY,pPOK\\)		# $] < 5.019003
-  FLAGS = \\(PADMY,POK,READONLY,IsCOW,pPOK\\)	# $] >=5.019003
+  FLAGS = \\(PADMY,POK,READONLY,(?:IsCOW,)?pPOK\\)
   PV = $ADDR "rules"\\\0
   CUR = 5
   LEN = \d+
@@ -979,8 +981,7 @@ unless ($Config{useithreads}) {
     do_test('string constant now an FBM', perl,
 'SV = PVMG\\($ADDR\\) at $ADDR
   REFCNT = 5
-  FLAGS = \\(PADMY,SMG,POK,READONLY,pPOK,VALID,EVALED\\)  # $] < 5.019003
-  FLAGS = \\(PADMY,SMG,POK,READONLY,IsCOW,pPOK,VALID,EVALED\\) # $] >=5.019003
+  FLAGS = \\(PADMY,SMG,POK,READONLY,(?:IsCOW,)?pPOK,VALID,EVALED\\)
   PV = $ADDR "rules"\\\0
   CUR = 5
   LEN = \d+
@@ -1000,8 +1001,7 @@ unless ($Config{useithreads}) {
     do_test('string constant still an FBM', perl,
 'SV = PVMG\\($ADDR\\) at $ADDR
   REFCNT = 5
-  FLAGS = \\(PADMY,SMG,POK,READONLY,pPOK,VALID,EVALED\\)  # $] < 5.019003
-  FLAGS = \\(PADMY,SMG,POK,READONLY,IsCOW,pPOK,VALID,EVALED\\) # $] >=5.019003
+  FLAGS = \\(PADMY,SMG,POK,READONLY,(?:IsCOW,)?pPOK,VALID,EVALED\\)
   PV = $ADDR "rules"\\\0
   CUR = 5
   LEN = \d+
@@ -1019,8 +1019,7 @@ unless ($Config{useithreads}) {
     do_test('regular string constant', beer,
 'SV = PV\\($ADDR\\) at $ADDR
   REFCNT = 6
-  FLAGS = \\(PADMY,POK,READONLY,pPOK\\)		# $] < 5.019003
-  FLAGS = \\(PADMY,POK,READONLY,IsCOW,pPOK\\)	# $] >=5.019003
+  FLAGS = \\(PADMY,POK,READONLY,(?:IsCOW,)?pPOK\\)
   PV = $ADDR "foamy"\\\0
   CUR = 5
   LEN = \d+
@@ -1031,8 +1030,7 @@ unless ($Config{useithreads}) {
 
     do_test('string constant quite unaffected', beer, 'SV = PV\\($ADDR\\) at $ADDR
   REFCNT = 6
-  FLAGS = \\(PADMY,POK,READONLY,pPOK\\)		# $] < 5.019003
-  FLAGS = \\(PADMY,POK,READONLY,IsCOW,pPOK\\)	# $] >=5.019003
+  FLAGS = \\(PADMY,POK,READONLY,(?:IsCOW,)?pPOK\\)
   PV = $ADDR "foamy"\\\0
   CUR = 5
   LEN = \d+
@@ -1041,8 +1039,7 @@ unless ($Config{useithreads}) {
 
     my $want = 'SV = PVMG\\($ADDR\\) at $ADDR
   REFCNT = 6
-  FLAGS = \\(PADMY,SMG,POK,READONLY,pPOK,VALID,EVALED\\)  # $] < 5.019003
-  FLAGS = \\(PADMY,SMG,POK,READONLY,IsCOW,pPOK,VALID,EVALED\\) # $] >=5.019003
+  FLAGS = \\(PADMY,SMG,POK,READONLY,(?:IsCOW,)?pPOK,VALID,EVALED\\)
   PV = $ADDR "foamy"\\\0
   CUR = 5
   LEN = \d+
