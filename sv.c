@@ -1470,6 +1470,8 @@ Use the C<SvGROW> wrapper instead.
 =cut
 */
 
+static void S_sv_uncow(pTHX_ SV * const sv, const U32 flags);
+
 char *
 Perl_sv_grow(pTHX_ SV *const sv, STRLEN newlen)
 {
@@ -1502,7 +1504,7 @@ Perl_sv_grow(pTHX_ SV *const sv, STRLEN newlen)
     }
     else
     {
-	if (SvIsCOW(sv)) sv_force_normal(sv);
+	if (SvIsCOW(sv)) S_sv_uncow(aTHX_ sv, 0);
 	s = SvPVX_mutable(sv);
     }
 
@@ -3255,8 +3257,6 @@ write a fast function that counts the number of variant characters in a string,
 especially if it could return the position of the first one.
 
 */
-
-static void S_sv_uncow(pTHX_ SV * const sv, const U32 flags);
 
 STRLEN
 Perl_sv_utf8_upgrade_flags_grow(pTHX_ SV *const sv, const I32 flags, STRLEN extra)
