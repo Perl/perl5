@@ -4668,6 +4668,8 @@ EXTCONST char *const PL_phase_names[];
 #  define PL_amagic_generation PL_na
 #endif /* !PERL_CORE */
 
+#define PL_hints PL_compiling.cop_hints
+
 END_EXTERN_C
 
 /*****************************************************************************/

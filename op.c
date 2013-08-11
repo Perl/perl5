@@ -2882,7 +2882,6 @@ Perl_block_end(pTHX_ I32 floor, OP *seq)
     CALL_BLOCK_HOOKS(bhk_pre_end, &retval);
 
     LEAVE_SCOPE(floor);
-    CopHINTS_set(&PL_compiling, PL_hints);
     if (needblockscope)
 	PL_hints |= HINT_BLOCK_SCOPE; /* propagate out */
     o = pad_leavemy();
@@ -3275,7 +3274,6 @@ S_fold_constants(pTHX_ OP *o)
     /* Verify that we don't need to save it:  */
     assert(PL_curcop == &PL_compiling);
     StructCopy(&PL_compiling, &not_compiling, COP);
-    CopHINTS_set(&not_compiling, PL_hints);
     PL_curcop = &not_compiling;
     /* The above ensures that we run with all the correct hints of the
        currently compiling COP, but that IN_PERL_RUNTIME is not true. */
@@ -5697,7 +5695,6 @@ Perl_newSTATEOP(pTHX_ I32 flags, char *label, OP *o)
 #ifdef NATIVE_HINTS
     cop->op_private |= NATIVE_HINTS;
 #endif
-    CopHINTS_set(&PL_compiling, CopHINTS_get(cop));
     cop->op_next = (OP*)cop;
 
     cop->cop_seq = seq;
@@ -7692,7 +7689,6 @@ S_process_special_blocks(pTHX_ I32 floor, const char *const fullname,
 	    GvCV_set(gv,0);		/* cv has been hijacked */
 	    call_list(oldscope, PL_beginav);
 
-	    CopHINTS_set(&PL_compiling, PL_hints);
 	    LEAVE;
 	}
 	else

@@ -540,8 +540,6 @@ PERLVAR(I, padix,	I32)		/* max used index in current "register" pad */
 
 PERLVAR(I, padix_floor,	I32)		/* how low may inner block reset padix */
 
-PERLVAR(I, hints,	U32)		/* pragma-tic compile-time flags */
-
 #ifdef USE_LOCALE_COLLATE
 PERLVAR(I, collation_name, char *)	/* Name of current collation */
 PERLVAR(I, collxfrm_base, Size_t)	/* Basic overhead in *xfrm() */
