@@ -435,7 +435,8 @@ well.
 
 =item *
 
-XXX
+C<sv_pos_b2u_flags> has been added to the API.  It is similar to
+C<sv_pos_b2u>, but supports long strings on 64-bit platforms.
 
 =back
 
