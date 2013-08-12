@@ -2,7 +2,7 @@ package utf8;
 
 $utf8::hint_bits = 0x00800000;
 
-our $VERSION = '1.12';
+our $VERSION = '1.13';
 
 sub import {
     $^H |= $utf8::hint_bits;
@@ -153,7 +153,7 @@ L<Encode>.
 
 =item * $success = utf8::decode($string)
 
-Attempts to convert in-place the octet sequence in I<UTF-X> to the
+Attempts to convert in-place the octet sequence encoded as I<UTF-X> to the
 corresponding character sequence. That is, it replaces each sequence of
 characters in the string whose ords represent a valid UTF-X byte
 sequence, with the corresponding single character.  The UTF-8 flag is
