@@ -482,6 +482,12 @@ Constant folding and subroutine inlining no longer cause operations that
 would normally return new modifiable scalars to return read-only values
 instead.
 
+=item *
+
+Closures of the form C<sub () { $some_variable }> are no longer inlined,
+causing changes to the variable to be ignored by callers of the subroutine
+[perl #79908].
+
 =back
 
 =head1 Known Problems
