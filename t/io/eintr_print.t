@@ -27,6 +27,16 @@ skip_all("usleep() not implemented on this platform")
     unless Time::HiRes::d_usleep();
 skip_all("pipe not implemented on this platform")
     unless eval { pipe my $in, my $out; 1; };
+skip_all("not supposed to work with stdio")
+    if (defined $ENV{PERLIO} && $ENV{PERLIO} =~ /stdio/ );
+
+# copy OS blacklist from eintr.t ( related to perl #85842 and #84688 )
+my ($osmajmin) = $Config{osvers} =~ /^(\d+\.\d+)/;
+
+skip_all('various portability issues')
+    if ( $^O =~ /freebsd/ || $^O eq 'midnightbsd' ||
+	($^O eq 'solaris' && $Config{osvers} eq '2.8') ||
+	($^O eq 'darwin' && $osmajmin < 9) );
 
 my $sample = 'abxhrtf6';
 my $full_sample = 'abxhrtf6' x (8192-7);
@@ -47,7 +57,6 @@ if (my $pid = fork()) {
     my $child_exited = 0;
     $in->autoflush(1);
     $in->blocking(1);
-    binmode $in, ":perlio";
 
     Time::HiRes::usleep $big_delay;
 
@@ -71,7 +80,6 @@ if (my $pid = fork()) {
     local $SIG{ALRM} = sub { print "# ALRM $$\n" };
     $out->autoflush(1);
     $out->blocking(1);
-    binmode $out, ":perlio";
 
     for (1..10) { # on some iteration print() will block
 	Time::HiRes::ualarm($small_delay); # and when it block we'll get SIGALRM
@@ -79,7 +87,7 @@ if (my $pid = fork()) {
 	die "print failed [ $! ]" unless print($out $full_sample);
 	Time::HiRes::ualarm(0);
     }
-
+    Time::HiRes::usleep(500_000);
     exit(0);
 }
 
