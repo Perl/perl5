@@ -495,6 +495,12 @@ between recursive calls to the same subroutine, causing the inner call to
 modify the value returned by C<ref> in the outer call.  This has been
 fixed.
 
+=item *
+
+C<__PACKAGE__> and constants returning a package name or hash key are now
+consistently read-only.  In various previous Perl releases, they have
+become mutable under certain circumstances.
+
 =back
 
 =head1 Known Problems
