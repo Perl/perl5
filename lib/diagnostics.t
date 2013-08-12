@@ -4,7 +4,7 @@ BEGIN {
     chdir '..' if -d '../pod' && -d '../t';
     @INC = 'lib';
     require './t/test.pl';
-    plan(24);
+    plan(25);
 }
 
 BEGIN {
@@ -127,6 +127,14 @@ warn "perl: warning: Setting locale failed.\n";
 like $warning,
     qr/The whole warning/s,
     'spaces in warnings with periods at the end are matched lightly';
+
+# Wrapped links
+seek STDERR, 0,0;
+$warning = '';
+warn "Argument \"%s\" treated as 0 in increment (++)";
+like $warning,
+    qr/Auto-increment.*Auto-decrement/s,
+    'multiline links are not truncated';
 
 
 *STDERR = $old_stderr;
