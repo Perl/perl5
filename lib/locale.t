@@ -852,16 +852,6 @@ foreach $Locale (@Locale) {
 
     debug "# Added_alpha = ", join("",@Added_alpha), "\n";
 
-    my $first_Added_alpha_test_number =  $locales_test_number + 1;
-    my $final_Added_alpha_test_number =  $first_Added_alpha_test_number + 20;
-    if (@Added_alpha == 0) {
-	# If we have no Added_alpha the remaining tests are no-ops.
-	debug "# no Added_alpha, skipping tests $first_Added_alpha_test_number..$final_Added_alpha_test_number for locale '$Locale'\n";
-	foreach ($locales_test_number+1..$final_Added_alpha_test_number) {
-	    push @{$Okay{$_}}, $Locale;
-            $locales_test_number++;
-	}
-    } else {
 
 	# Cross-check the whole 8-bit character set.
 
@@ -1265,15 +1255,6 @@ foreach $Locale (@Locale) {
 		}
 	    }
 	}
-    }
-
-    if ($locales_test_number != $final_Added_alpha_test_number) {
-        die("The delta for \$final_Added_alpha needs to be updated from "
-            . ($final_Added_alpha_test_number - $first_Added_alpha_test_number)
-            . " to "
-            . ($locales_test_number - $first_Added_alpha_test_number)
-            );
-    }
 
     my $ok1;
     my $ok2;
