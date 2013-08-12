@@ -1,5 +1,9 @@
 =encoding utf8
 
+=for comment
+Stuff that needs to be done still:
+e82485c davem [MERGE] refactor pp_match(), pp_subst(), regexec()
+
 =head1 NAME
 
 [ this is a template for a new perldelta file.  Any text flagged as XXX needs
