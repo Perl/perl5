@@ -14,7 +14,7 @@ use Carp;
 use Time::Local;
 use Net::Config;
 
-$VERSION = "2.24_1";
+$VERSION = "2.25";
 @ISA     = qw(Net::Cmd IO::Socket::INET);
 
 
@@ -75,7 +75,7 @@ sub new {
     # talking to innd not nnrpd
     if ($obj->reader) {
 
-      # If reader suceeds the we need to consider this code to determine postok
+      # If reader succeeds the we need to consider this code to determine postok
       $c = $obj->code;
     }
     else {

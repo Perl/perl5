@@ -1045,7 +1045,7 @@ use File::Glob qw(:case);
 
     'libnet' => {
         'MAINTAINER'   => 'gbarr',
-        'DISTRIBUTION' => 'SHAY/libnet-1.22_02.tar.gz',
+        'DISTRIBUTION' => 'SHAY/libnet-1.23.tar.gz',
         'FILES'        => q[cpan/libnet],
         'EXCLUDED'     => [
             qw( Configure
@@ -1053,7 +1053,7 @@ use File::Glob qw(:case);
                 ),
         ],
         'CUSTOMIZED' => ['Makefile.PL'],
-        'UPSTREAM'   => 'blead',
+        'UPSTREAM'   => 'cpan',
     },
 
     'Locale-Codes' => {

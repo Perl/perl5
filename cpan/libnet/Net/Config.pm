@@ -13,7 +13,7 @@ use strict;
 
 @EXPORT  = qw(%NetConfig);
 @ISA     = qw(Net::LocalCfg Exporter);
-$VERSION = "1.11_01";
+$VERSION = "1.12";
 
 eval { local $SIG{__DIE__}; require Net::LocalCfg };
 

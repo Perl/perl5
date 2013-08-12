@@ -187,7 +187,7 @@ Net::FTP uses IO::Socket to open the connection and IO::Socket allows
 the port number to be specified as part of the hostname. So this problem
 can be resolved by either passing a Firewall option like C<"hostname:1234">
 or by setting the C<ftp_firewall> option in Net::Config to be a string
-in in the same form.
+in the same form.
 
 =head2 Is it possible to change the file permissions of a file on an FTP server ?
 

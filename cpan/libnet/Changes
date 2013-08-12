@@ -1,3 +1,7 @@
+libnet 1.23  -- Mon Aug 12 2013
+
+  * Typo fixes [David Steinbrunner; resolves CPAN RT#87681]
+
 libnet 1.22_02 -- Thu Aug 08 2013
 
   * Make Net::FTP::dataconn::close() more robust [Together with changes to

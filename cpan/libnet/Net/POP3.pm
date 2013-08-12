@@ -13,7 +13,7 @@ use Net::Cmd;
 use Carp;
 use Net::Config;
 
-$VERSION = "2.29_01";
+$VERSION = "2.30";
 
 @ISA = qw(Net::Cmd IO::Socket::INET);
 
@@ -484,9 +484,9 @@ sub auth {
     return 0;
     };
 
-  # We dont support sasl mechanisms that encrypt the socket traffic.
+  # We don't support sasl mechanisms that encrypt the socket traffic.
   # todo that we would really need to change the ISA hierarchy
-  # so we dont inherit from IO::Socket, but instead hold it in an attribute
+  # so we don't inherit from IO::Socket, but instead hold it in an attribute
 
   my @cmd = ("AUTH", $client->mechanism);
   my $code;

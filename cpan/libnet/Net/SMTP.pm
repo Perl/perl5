@@ -16,7 +16,7 @@ use IO::Socket;
 use Net::Cmd;
 use Net::Config;
 
-$VERSION = "2.31_2";
+$VERSION = "2.32";
 
 @ISA = qw(Net::Cmd IO::Socket::INET);
 
@@ -147,9 +147,9 @@ sub auth {
   my $client = $sasl->client_new('smtp', ${*$self}{'net_smtp_host'}, 0);
   my $str    = $client->client_start;
 
-  # We dont support sasl mechanisms that encrypt the socket traffic.
+  # We don't support sasl mechanisms that encrypt the socket traffic.
   # todo that we would really need to change the ISA hierarchy
-  # so we dont inherit from IO::Socket, but instead hold it in an attribute
+  # so we don't inherit from IO::Socket, but instead hold it in an attribute
 
   my @cmd = ("AUTH", $client->mechanism);
   my $code;
@@ -860,7 +860,7 @@ to extract the mail address and pass that.
 
 If C<ExactAddresses> is passed to the constructor, then addresses
 should be a valid rfc2821-quoted address, although Net::SMTP will
-accept accept the address surrounded by angle brackets.
+accept the address surrounded by angle brackets.
 
  funny user@domain      WRONG
  "funny user"@domain    RIGHT, recommended

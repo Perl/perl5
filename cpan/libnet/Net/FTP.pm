@@ -21,11 +21,11 @@ use Net::Cmd;
 use Net::Config;
 use Fcntl qw(O_WRONLY O_RDONLY O_APPEND O_CREAT O_TRUNC);
 
-$VERSION = '2.77_3';
+$VERSION = '2.78';
 @ISA     = qw(Exporter Net::Cmd IO::Socket::INET);
 
 # Someday I will "use constant", when I am not bothered to much about
-# compatability with older releases of perl
+# compatibility with older releases of perl
 
 use vars qw($TELNET_IAC $TELNET_IP $TELNET_DM);
 ($TELNET_IAC, $TELNET_IP, $TELNET_DM) = (255, 244, 242);
