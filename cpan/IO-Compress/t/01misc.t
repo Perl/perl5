@@ -79,7 +79,7 @@ sub My::testParseParameters()
         like $@, mkErr("Parameter 'fred' not writable"), 
                 "wanted writable, got readonly";
 
-        skip '\\ returns mutable value in 5.19.3', 1
+        skip '\\ returns mutable value in 5.19.3', 1 
             if $] >= 5.019003;
 
         eval { ParseParameters(1, {'fred' => [Parse_writable_scalar, 0]}, fred => \'abc') ; };

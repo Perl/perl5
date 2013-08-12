@@ -9,14 +9,14 @@ use warnings;
 #use bytes;
 
 use IO::File;
-use IO::Uncompress::RawInflate  2.061 ;
-use IO::Compress::Base::Common  2.061 qw(:Status );
-use IO::Uncompress::Adapter::Inflate  2.061 ;
-use IO::Uncompress::Adapter::Identity 2.061 ;
-use IO::Compress::Zlib::Extra 2.061 ;
-use IO::Compress::Zip::Constants 2.061 ;
+use IO::Uncompress::RawInflate  2.062 ;
+use IO::Compress::Base::Common  2.062 qw(:Status );
+use IO::Uncompress::Adapter::Inflate  2.062 ;
+use IO::Uncompress::Adapter::Identity 2.062 ;
+use IO::Compress::Zlib::Extra 2.062 ;
+use IO::Compress::Zip::Constants 2.062 ;
 
-use Compress::Raw::Zlib  2.061 () ;
+use Compress::Raw::Zlib  2.062 () ;
 
 BEGIN
 {
@@ -31,7 +31,7 @@ require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $UnzipError, %headerLookup);
 
-$VERSION = '2.061';
+$VERSION = '2.062';
 $UnzipError = '';
 
 @ISA    = qw(Exporter IO::Uncompress::RawInflate);
@@ -1343,7 +1343,7 @@ specific member from the file, say C<"data1">, use the C<Name> option
         or die "unzip failed: $UnzipError\n";
 
 Alternatively, if you want to read the  C<"data1"> member into memory, use
-a scalar reference for the C<output> partameter.
+a scalar reference for the C<output> parameter.
 
     use strict ;
     use warnings ;
@@ -1526,7 +1526,7 @@ Usage is
 
     $status = $z->read($buffer)
 
-Reads a block of compressed data (the size the the compressed block is
+Reads a block of compressed data (the size of the compressed block is
 determined by the C<Buffer> option in the constructor), uncompresses it and
 writes any uncompressed data into C<$buffer>. If the C<Append> parameter is
 set in the constructor, the uncompressed data will be appended to the
@@ -1564,7 +1564,7 @@ Usage is
 
 Reads a single line. 
 
-This method fully supports the use of of the variable C<$/> (or
+This method fully supports the use of the variable C<$/> (or
 C<$INPUT_RECORD_SEPARATOR> or C<$RS> when C<English> is in use) to
 determine what constitutes an end of line. Paragraph mode, record mode and
 file slurp mode are all supported. 
@@ -1632,7 +1632,7 @@ It is a fatal error to attempt to seek backward.
 Note that the implementation of C<seek> in this module does not provide
 true random access to a compressed file/buffer. It  works by uncompressing
 data from the current offset in the file/buffer until it reaches the
-ucompressed offset specified in the parameters to C<seek>. For very small
+uncompressed offset specified in the parameters to C<seek>. For very small
 files this may be acceptable behaviour. For large files it may cause an
 unacceptable delay.
 
@@ -1681,7 +1681,7 @@ Returns the current uncompressed line number. If C<EXPR> is present it has
 the effect of setting the line number. Note that setting the line number
 does not change the current position within the file/buffer being read.
 
-The contents of C<$/> are used to to determine what constitutes a line
+The contents of C<$/> are used to determine what constitutes a line
 terminator.
 
 =head2 fileno

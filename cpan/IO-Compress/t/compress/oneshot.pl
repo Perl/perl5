@@ -183,8 +183,10 @@ sub run
                 use Config;
 
                 skip 'readonly + threads', 1
-                    if $Config{useithreads} || $] >= 5.019003;
+                    if $Config{useithreads} ;
 
+                skip '\\ returns mutable value in 5.19.3', 1
+                    if $] >= 5.019003;
                 
                 eval { $a = $Func->(\$in, \$out, TrailingData => \"abc") ;} ;
                 like $@, mkErr("^$TopType: Parameter 'TrailingData' not writable"),

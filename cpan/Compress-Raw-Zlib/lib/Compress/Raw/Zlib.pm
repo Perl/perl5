@@ -11,7 +11,7 @@ use warnings ;
 use bytes ;
 our ($VERSION, $XS_VERSION, @ISA, @EXPORT, %EXPORT_TAGS, @EXPORT_OK, $AUTOLOAD, %DEFLATE_CONSTANTS, @DEFLATE_CONSTANTS );
 
-$VERSION = '2.061';
+$VERSION = '2.062';
 $XS_VERSION = $VERSION; 
 $VERSION = eval $VERSION;
 
@@ -1360,7 +1360,7 @@ from STDIN.
 
 The status code returned from C<inflate> will only trigger termination of
 the main processing loop if it isn't C<Z_OK>. When C<LimitOutput> has not
-been used the C<Z_OK> status means means that the end of the compressed
+been used the C<Z_OK> status means that the end of the compressed
 data stream has been reached or there has been an error in uncompression.
 
 =item *

@@ -234,18 +234,26 @@ sub ParseCONFIG
     die "The following keys are missing from $CONFIG  [@missing]\n" 
         if @missing = keys %Parsed ;
 
-    $ZLIB_INCLUDE = $ENV{'ZLIB_INCLUDE'} || $Info{'INCLUDE'} ;
-    $ZLIB_LIB = $ENV{'ZLIB_LIB'} || $Info{'LIB'} ;
+    $ZLIB_INCLUDE = defined $ENV{'ZLIB_INCLUDE'}
+                        ? $ENV{'ZLIB_INCLUDE'} 
+                        : $Info{'INCLUDE'} ;
+    $ZLIB_LIB = defined $ENV{'ZLIB_LIB'} 
+                    ?$ENV{'ZLIB_LIB'} 
+                    : $Info{'LIB'} ;
 
     if ($^O eq 'VMS') {
         $ZLIB_INCLUDE = VMS::Filespec::vmspath($ZLIB_INCLUDE);
         $ZLIB_LIB = VMS::Filespec::vmspath($ZLIB_LIB);
     }
 
-    my $y = $ENV{'OLD_ZLIB'} || $Info{'OLD_ZLIB'} ;
+    my $y = defined $ENV{'OLD_ZLIB'}
+                ? $ENV{'OLD_ZLIB'} 
+                : $Info{'OLD_ZLIB'} ;
     $OLD_ZLIB = '-DOLD_ZLIB' if $y and $y =~ /^yes|on|true|1$/i;
 
-    my $x = $ENV{'BUILD_ZLIB'} || $Info{'BUILD_ZLIB'} ;
+    my $x = defined $ENV{'BUILD_ZLIB'} 
+                ? $ENV{'BUILD_ZLIB'} 
+                : $Info{'BUILD_ZLIB'} ;
 
     if ($x and $x =~ /^yes|on|true|1$/i ) {
 

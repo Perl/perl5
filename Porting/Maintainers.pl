@@ -351,7 +351,7 @@ use File::Glob qw(:case);
 
     'Compress::Raw::Bzip2' => {
         'MAINTAINER'   => 'pmqs',
-        'DISTRIBUTION' => 'PMQS/Compress-Raw-Bzip2-2.061.tar.gz',
+        'DISTRIBUTION' => 'PMQS/Compress-Raw-Bzip2-2.062.tar.gz',
         'FILES'        => q[cpan/Compress-Raw-Bzip2],
         'EXCLUDED'     => [
             qr{^t/Test/},
@@ -362,7 +362,7 @@ use File::Glob qw(:case);
 
     'Compress::Raw::Zlib' => {
         'MAINTAINER'   => 'pmqs',
-        'DISTRIBUTION' => 'PMQS/Compress-Raw-Zlib-2.061.tar.gz',
+        'DISTRIBUTION' => 'PMQS/Compress-Raw-Zlib-2.062.tar.gz',
 
         'FILES'    => q[cpan/Compress-Raw-Zlib],
         'EXCLUDED' => [
@@ -983,7 +983,7 @@ use File::Glob qw(:case);
 
     'IO-Compress' => {
         'MAINTAINER'   => 'pmqs',
-        'DISTRIBUTION' => 'PMQS/IO-Compress-2.061.tar.gz',
+        'DISTRIBUTION' => 'PMQS/IO-Compress-2.062.tar.gz',
         'FILES'        => q[cpan/IO-Compress],
         'EXCLUDED'     => [qr{t/Test/}],
         'UPSTREAM'     => 'cpan',

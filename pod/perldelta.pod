@@ -151,6 +151,14 @@ C<CARP_TRACE> as well as other references. [perl #92446]
 
 =item *
 
+L<Compress::Raw::Bzip2> has been upgraded from 2.061 to 2.062.
+
+=item *
+
+L<Compress::Raw::Zlib> has been upgraded from 2.061 to 2.062.
+
+=item *
+
 L<Config::Perl::V> has been upgraded from version 0.18 to 0.19.
 
 =item *
@@ -173,6 +181,10 @@ L<Exporter> has been upgraded from version 5.68 to 5.69.
 
 L<Exporter> would ignore custom C<$SIG{__WARN__}> handlers in
 C<Exporter::Heavy>. [perl #39739]
+
+=item *
+
+The IO-Compress module collection has been upgraded from 2.061 to 2.062.
 
 =item *
 

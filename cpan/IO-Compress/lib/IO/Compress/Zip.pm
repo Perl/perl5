@@ -4,30 +4,30 @@ use strict ;
 use warnings;
 use bytes;
 
-use IO::Compress::Base::Common  2.061 qw(:Status );
-use IO::Compress::RawDeflate 2.061 ();
-use IO::Compress::Adapter::Deflate 2.061 ;
-use IO::Compress::Adapter::Identity 2.061 ;
-use IO::Compress::Zlib::Extra 2.061 ;
-use IO::Compress::Zip::Constants 2.061 ;
+use IO::Compress::Base::Common  2.062 qw(:Status );
+use IO::Compress::RawDeflate 2.062 ();
+use IO::Compress::Adapter::Deflate 2.062 ;
+use IO::Compress::Adapter::Identity 2.062 ;
+use IO::Compress::Zlib::Extra 2.062 ;
+use IO::Compress::Zip::Constants 2.062 ;
 
 use File::Spec();
 use Config;
 
-use Compress::Raw::Zlib  2.061 (); 
+use Compress::Raw::Zlib  2.062 (); 
 
 BEGIN
 {
     eval { require IO::Compress::Adapter::Bzip2 ; 
-           import  IO::Compress::Adapter::Bzip2 2.061 ; 
+           import  IO::Compress::Adapter::Bzip2 2.062 ; 
            require IO::Compress::Bzip2 ; 
-           import  IO::Compress::Bzip2 2.061 ; 
+           import  IO::Compress::Bzip2 2.062 ; 
          } ;
          
     eval { require IO::Compress::Adapter::Lzma ; 
-           import  IO::Compress::Adapter::Lzma 2.061 ; 
+           import  IO::Compress::Adapter::Lzma 2.062 ; 
            require IO::Compress::Lzma ; 
-           import  IO::Compress::Lzma 2.061 ; 
+           import  IO::Compress::Lzma 2.062 ; 
          } ;
 }
 
@@ -36,7 +36,7 @@ require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, %DEFLATE_CONSTANTS, $ZipError);
 
-$VERSION = '2.061';
+$VERSION = '2.062';
 $ZipError = '';
 
 @ISA = qw(Exporter IO::Compress::RawDeflate);
@@ -1328,7 +1328,7 @@ normalized filename will be passed to the sub.
 If you use C<FilterName> to modify the filename, it is your responsibility
 to keep the filename in Unix format.
 
-Although this option can be used with the OO ointerface, it is of most use
+Although this option can be used with the OO interface, it is of most use
 with the one-shot interface. For example, the code below shows how
 C<FilterName> can be used to remove the path component from a series of
 filenames before they are stored in C<$zipfile>.
@@ -1410,7 +1410,7 @@ and C<$gid>. These values correspond to the numeric User ID (UID) and Group ID
 (GID) of the owner of the files respectively.
 
 When the C<exUnixN> option is present it will trigger the creation of a
-UnixN extra field (ID is "ux") in bothe the local and central zip headers. 
+UnixN extra field (ID is "ux") in both the local and central zip headers. 
 This will be populated with C<$uid> and C<$gid>. 
 The UID & GID are stored as 32-bit integers.
 
@@ -1586,7 +1586,7 @@ Valid values are 0-9 and C<LZMA_PRESET_DEFAULT>.
 0 is the fastest compression with the lowest memory usage and the lowest
 compression.
 
-9 is the slowest compession with the highest memory usage but with the best
+9 is the slowest compression with the highest memory usage but with the best
 compression.
 
 This option is only valid if the C<Method> is ZIP_CM_LZMA. It is ignored
@@ -1833,7 +1833,7 @@ Usage is
 
 Closes the current compressed data stream and starts a new one.
 
-OPTS consists of any of the the options that are available when creating
+OPTS consists of any of the options that are available when creating
 the C<$z> object.
 
 See the L</"Constructor Options"> section for more details.

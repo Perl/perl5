@@ -8,16 +8,16 @@ use bytes;
 
 require Exporter ;
 
-use IO::Compress::RawDeflate 2.061 ();
-use IO::Compress::Adapter::Deflate 2.061 ;
+use IO::Compress::RawDeflate 2.062 ();
+use IO::Compress::Adapter::Deflate 2.062 ;
 
-use IO::Compress::Zlib::Constants 2.061 ;
-use IO::Compress::Base::Common  2.061 qw();
+use IO::Compress::Zlib::Constants 2.062 ;
+use IO::Compress::Base::Common  2.062 qw();
 
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, %DEFLATE_CONSTANTS, $DeflateError);
 
-$VERSION = '2.061';
+$VERSION = '2.062';
 $DeflateError = '';
 
 @ISA    = qw(Exporter IO::Compress::RawDeflate);
@@ -821,7 +821,7 @@ Usage is
 
 Closes the current compressed data stream and starts a new one.
 
-OPTS consists of any of the the options that are available when creating
+OPTS consists of any of the options that are available when creating
 the C<$z> object.
 
 See the L</"Constructor Options"> section for more details.
