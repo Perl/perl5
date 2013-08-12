@@ -1095,10 +1095,11 @@ unless ($Config{useithreads}) {
 
     do_test('second string also unaffected', $pie, 'SV = PV\\($ADDR\\) at $ADDR
   REFCNT = 1
-  FLAGS = \\(PADMY,POK,pPOK\\)
+  FLAGS = \\(PADMY,POK,(?:IsCOW,)?pPOK\\)
   PV = $ADDR "good"\\\0
   CUR = 4
-  LEN = \d+
+  LEN = \d+(?:
+  COW_REFCNT = 1)?
 ');
 }
 
