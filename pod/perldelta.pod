@@ -488,6 +488,13 @@ Closures of the form C<sub () { $some_variable }> are no longer inlined,
 causing changes to the variable to be ignored by callers of the subroutine
 [perl #79908].
 
+=item *
+
+Return values of certain operators such as C<ref> would sometimes be shared
+between recursive calls to the same subroutine, causing the inner call to
+modify the value returned by C<ref> in the outer call.  This has been
+fixed.
+
 =back
 
 =head1 Known Problems
