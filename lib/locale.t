@@ -852,409 +852,407 @@ foreach $Locale (@Locale) {
 
     debug "# Added_alpha = ", join("",@Added_alpha), "\n";
 
+    # Cross-check the whole 8-bit character set.
 
-	# Cross-check the whole 8-bit character set.
+    ++$locales_test_number;
+    my @f;
+    $test_names{$locales_test_number} = 'Verify that \w and [:word:] are identical';
+    for (map { chr } 0..255) {
+        if ($is_utf8_locale) {
+            use locale ':not_characters';
+            push @f, $_ unless /[[:word:]]/ == /\w/;
+        }
+        else {
+            push @f, $_ unless /[[:word:]]/ == /\w/;
+        }
+    }
+    report_multi_result($Locale, $locales_test_number, \@f);
+
+    ++$locales_test_number;
+    undef @f;
+    $test_names{$locales_test_number} = 'Verify that \d and [:digit:] are identical';
+    for (map { chr } 0..255) {
+        if ($is_utf8_locale) {
+            use locale ':not_characters';
+            push @f, $_ unless /[[:digit:]]/ == /\d/;
+        }
+        else {
+            push @f, $_ unless /[[:digit:]]/ == /\d/;
+        }
+    }
+    report_multi_result($Locale, $locales_test_number, \@f);
+
+    ++$locales_test_number;
+    undef @f;
+    $test_names{$locales_test_number} = 'Verify that \s and [:space:] are identical';
+    for (map { chr } 0..255) {
+        if ($is_utf8_locale) {
+            use locale ':not_characters';
+            push @f, $_ unless /[[:space:]]/ == /\s/;
+        }
+        else {
+            push @f, $_ unless /[[:space:]]/ == /\s/;
+        }
+    }
+    report_multi_result($Locale, $locales_test_number, \@f);
+
+    ++$locales_test_number;
+    undef @f;
+    $test_names{$locales_test_number} = 'Verify that [:posix:] and [:^posix:] are mutually exclusive';
+    for (map { chr } 0..255) {
+        if ($is_utf8_locale) {
+            use locale ':not_characters';
+            push @f, $_ unless   (/[[:alpha:]]/ xor /[[:^alpha:]]/)   ||
+                    (/[[:alnum:]]/ xor /[[:^alnum:]]/)   ||
+                    (/[[:ascii:]]/ xor /[[:^ascii:]]/)   ||
+                    (/[[:blank:]]/ xor /[[:^blank:]]/)   ||
+                    (/[[:cntrl:]]/ xor /[[:^cntrl:]]/)   ||
+                    (/[[:digit:]]/ xor /[[:^digit:]]/)   ||
+                    (/[[:graph:]]/ xor /[[:^graph:]]/)   ||
+                    (/[[:lower:]]/ xor /[[:^lower:]]/)   ||
+                    (/[[:print:]]/ xor /[[:^print:]]/)   ||
+                    (/[[:space:]]/ xor /[[:^space:]]/)   ||
+                    (/[[:upper:]]/ xor /[[:^upper:]]/)   ||
+                    (/[[:word:]]/  xor /[[:^word:]]/)    ||
+                    (/[[:xdigit:]]/ xor /[[:^xdigit:]]/) ||
+
+                    # effectively is what [:cased:] would be if it existed.
+                    (/[[:upper:]]/i xor /[[:^upper:]]/i);
+        }
+        else {
+            push @f, $_ unless   (/[[:alpha:]]/ xor /[[:^alpha:]]/)   ||
+                    (/[[:alnum:]]/ xor /[[:^alnum:]]/)   ||
+                    (/[[:ascii:]]/ xor /[[:^ascii:]]/)   ||
+                    (/[[:blank:]]/ xor /[[:^blank:]]/)   ||
+                    (/[[:cntrl:]]/ xor /[[:^cntrl:]]/)   ||
+                    (/[[:digit:]]/ xor /[[:^digit:]]/)   ||
+                    (/[[:graph:]]/ xor /[[:^graph:]]/)   ||
+                    (/[[:lower:]]/ xor /[[:^lower:]]/)   ||
+                    (/[[:print:]]/ xor /[[:^print:]]/)   ||
+                    (/[[:space:]]/ xor /[[:^space:]]/)   ||
+                    (/[[:upper:]]/ xor /[[:^upper:]]/)   ||
+                    (/[[:word:]]/  xor /[[:^word:]]/)    ||
+                    (/[[:xdigit:]]/ xor /[[:^xdigit:]]/) ||
+                    (/[[:upper:]]/i xor /[[:^upper:]]/i);
+        }
+    }
+    report_multi_result($Locale, $locales_test_number, \@f);
+
+    # The rules for the relationships are given in:
+    # http://www.opengroup.org/onlinepubs/009695399/basedefs/xbd_chap07.html
+
+    ++$locales_test_number;
+    undef @f;
+    $test_names{$locales_test_number} = 'Verify that [:lower:] is a subset of [:alpha:]';
+    for (map { chr } 0..255) {
+        if ($is_utf8_locale) {
+            use locale ':not_characters';
+            push @f, $_  if /[[:lower:]]/ and ! /[[:alpha:]]/;
+        }
+        else {
+            push @f, $_  if /[[:lower:]]/ and ! /[[:alpha:]]/;
+        }
+    }
+    report_multi_result($Locale, $locales_test_number, \@f);
+
+    ++$locales_test_number;
+    undef @f;
+    $test_names{$locales_test_number} = 'Verify that [:upper:] is a subset of [:alpha:]';
+    for (map { chr } 0..255) {
+        if ($is_utf8_locale) {
+            use locale ':not_characters';
+            push @f, $_  if /[[:upper:]]/ and ! /[[:alpha:]]/;
+        }
+        else {
+            push @f, $_ if /[[:upper:]]/  and ! /[[:alpha:]]/;
+        }
+    }
+    report_multi_result($Locale, $locales_test_number, \@f);
+
+    ++$locales_test_number;
+    undef @f;
+    $test_names{$locales_test_number} = 'Verify that /[[:lower:]]/i is a subset of [:alpha:]';
+    for (map { chr } 0..255) {
+        if ($is_utf8_locale) {
+            use locale ':not_characters';
+            push @f, $_ if /[[:lower:]]/i  and ! /[[:alpha:]]/;
+        }
+        else {
+            push @f, $_ if /[[:lower:]]/i  and ! /[[:alpha:]]/;
+        }
+    }
+    report_multi_result($Locale, $locales_test_number, \@f);
+
+    ++$locales_test_number;
+    undef @f;
+    $test_names{$locales_test_number} = 'Verify that [:alpha:] is a subset of [:alnum:]';
+    for (map { chr } 0..255) {
+        if ($is_utf8_locale) {
+            use locale ':not_characters';
+            push @f, $_ if /[[:alpha:]]/  and ! /[[:alnum:]]/;
+        }
+        else {
+            push @f, $_ if /[[:alpha:]]/  and ! /[[:alnum:]]/;
+        }
+    }
+    report_multi_result($Locale, $locales_test_number, \@f);
+
+    ++$locales_test_number;
+    undef @f;
+    $test_names{$locales_test_number} = 'Verify that [:digit:] is a subset of [:alnum:]';
+    for (map { chr } 0..255) {
+        if ($is_utf8_locale) {
+            use locale ':not_characters';
+            push @f, $_ if /[[:digit:]]/  and ! /[[:alnum:]]/;
+        }
+        else {
+            push @f, $_ if /[[:digit:]]/  and ! /[[:alnum:]]/;
+        }
+    }
+    report_multi_result($Locale, $locales_test_number, \@f);
+
+    ++$locales_test_number;
+    undef @f;
+    $test_names{$locales_test_number} = 'Verify that [:digit:] is a subset of [:xdigit:]';
+    for (map { chr } 0..255) {
+        if ($is_utf8_locale) {
+            use locale ':not_characters';
+            push @f, $_ if /[[:digit:]]/  and ! /[[:xdigit:]]/;
+        }
+        else {
+            push @f, $_ if /[[:digit:]]/  and ! /[[:xdigit:]]/;
+        }
+    }
+    report_multi_result($Locale, $locales_test_number, \@f);
+
+    ++$locales_test_number;
+    undef @f;
+    $test_names{$locales_test_number} = 'Verify that [:alnum:] is a subset of [:graph:]';
+    for (map { chr } 0..255) {
+        if ($is_utf8_locale) {
+            use locale ':not_characters';
+            push @f, $_ if /[[:alnum:]]/  and ! /[[:graph:]]/;
+        }
+        else {
+            push @f, $_ if /[[:alnum:]]/  and ! /[[:graph:]]/;
+        }
+    }
+    report_multi_result($Locale, $locales_test_number, \@f);
+
+    # Note that xdigit doesn't have to be a subset of alnum
+
+    ++$locales_test_number;
+    undef @f;
+    $test_names{$locales_test_number} = 'Verify that [:xdigit:] is a subset of [:graph:]';
+    for (map { chr } 0..255) {
+        if ($is_utf8_locale) {
+            use locale ':not_characters';
+            push @f, $_ if /[[:xdigit:]]/  and ! /[[:graph:]]/;
+        }
+        else {
+            push @f, $_ if /[[:xdigit:]]/  and ! /[[:graph:]]/;
+        }
+    }
+    report_multi_result($Locale, $locales_test_number, \@f);
+
+    ++$locales_test_number;
+    undef @f;
+    $test_names{$locales_test_number} = 'Verify that [:punct:] is a subset of [:graph:]';
+    for (map { chr } 0..255) {
+        if ($is_utf8_locale) {
+            use locale ':not_characters';
+            push @f, $_ if /[[:punct:]]/  and ! /[[:graph:]]/;
+        }
+        else {
+            push @f, $_ if /[[:punct:]]/  and ! /[[:graph:]]/;
+        }
+    }
+    report_multi_result($Locale, $locales_test_number, \@f);
+
+    ++$locales_test_number;
+    undef @f;
+    $test_names{$locales_test_number} = 'Verify that [:blank:] is a subset of [:space:]';
+    for (map { chr } 0..255) {
+        if ($is_utf8_locale) {
+            use locale ':not_characters';
+            push @f, $_ if /[[:blank:]]/  and ! /[[:space:]]/;
+        }
+        else {
+            push @f, $_ if /[[:blank:]]/  and ! /[[:space:]]/;
+        }
+    }
+    report_multi_result($Locale, $locales_test_number, \@f);
+
+    ++$locales_test_number;
+    undef @f;
+    $test_names{$locales_test_number} = 'Verify that [:graph:] is a subset of [:print:]';
+    for (map { chr } 0..255) {
+        if ($is_utf8_locale) {
+            use locale ':not_characters';
+            push @f, $_ if /[[:graph:]]/  and ! /[[:print:]]/;
+        }
+        else {
+            push @f, $_ if /[[:graph:]]/  and ! /[[:print:]]/;
+        }
+    }
+    report_multi_result($Locale, $locales_test_number, \@f);
+
+    ++$locales_test_number;
+    undef @f;
+    $test_names{$locales_test_number} = 'Verify that isn\'t both [:cntrl:] and [:print:]';
+    for (map { chr } 0..255) {
+        if ($is_utf8_locale) {
+            use locale ':not_characters';
+            push @f, $_ if (/[[:print:]]/ and /[[:cntrl:]]/);
+        }
+        else {
+            push @f, $_ if (/[[:print:]]/ and /[[:cntrl:]]/);
+        }
+    }
+    report_multi_result($Locale, $locales_test_number, \@f);
+
+    ++$locales_test_number;
+    undef @f;
+    $test_names{$locales_test_number} = 'Verify that isn\'t both [:alnum:] and [:punct:]';
+    for (map { chr } 0..255) {
+        if ($is_utf8_locale) {
+            use locale ':not_characters';
+            push @f, $_ if /[[:alnum:]]/ and /[[:punct:]]/;
+        }
+        else {
+            push @f, $_ if /[[:alnum:]]/ and /[[:punct:]]/;
+        }
+    }
+    report_multi_result($Locale, $locales_test_number, \@f);
+
+    ++$locales_test_number;
+    undef @f;
+    $test_names{$locales_test_number} = 'Verify that isn\'t both [:xdigit:] and [:punct:]';
+    for (map { chr } 0..255) {
+        if ($is_utf8_locale) {
+            use locale ':not_characters';
+            push @f, $_ if (/[[:punct:]]/ and /[[:xdigit:]]/);
+        }
+        else {
+            push @f, $_ if (/[[:punct:]]/ and /[[:xdigit:]]/);
+        }
+    }
+    report_multi_result($Locale, $locales_test_number, \@f);
+
+    ++$locales_test_number;
+    undef @f;
+    $test_names{$locales_test_number} = 'Verify that isn\'t both [:graph:] and [:space:]';
+    for (map { chr } 0..255) {
+        if ($is_utf8_locale) {
+            use locale ':not_characters';
+            push @f, $_ if (/[[:graph:]]/ and /[[:space:]]/);
+        }
+        else {
+            push @f, $_ if (/[[:graph:]]/ and /[[:space:]]/);
+        }
+    }
+    report_multi_result($Locale, $locales_test_number, \@f);
+
+    $final_casing_test_number = $locales_test_number;
+
+    # Test for read-only scalars' locale vs non-locale comparisons.
+
+    {
+        no locale;
+        my $ok;
+        $a = "qwerty";
+        if ($is_utf8_locale) {
+            use locale ':not_characters';
+            $ok = ($a cmp "qwerty") == 0;
+        }
+        else {
+            use locale;
+            $ok = ($a cmp "qwerty") == 0;
+        }
+        report_result($Locale, ++$locales_test_number, $ok);
+        $test_names{$locales_test_number} = 'Verify that cmp works with a read-only scalar; no- vs locale';
+    }
+
+    {
+        my ($from, $to, $lesser, $greater,
+            @test, %test, $test, $yes, $no, $sign);
 
         ++$locales_test_number;
-        my @f;
-        $test_names{$locales_test_number} = 'Verify that \w and [:word:] are identical';
-	for (map { chr } 0..255) {
+        $test_names{$locales_test_number} = 'Verify that "le", "ne", etc work';
+        $not_necessarily_a_problem_test_number = $locales_test_number;
+        for (0..9) {
+            # Select a slice.
+            $from = int(($_*@Alnum_)/10);
+            $to = $from + int(@Alnum_/10);
+            $to = $#Alnum_ if ($to > $#Alnum_);
+            $lesser  = join('', @Alnum_[$from..$to]);
+            # Select a slice one character on.
+            $from++; $to++;
+            $to = $#Alnum_ if ($to > $#Alnum_);
+            $greater = join('', @Alnum_[$from..$to]);
             if ($is_utf8_locale) {
                 use locale ':not_characters';
-	        push @f, $_ unless /[[:word:]]/ == /\w/;
-            }
-            else {
-	        push @f, $_ unless /[[:word:]]/ == /\w/;
-            }
-	}
-        report_multi_result($Locale, $locales_test_number, \@f);
-
-        ++$locales_test_number;
-        undef @f;
-        $test_names{$locales_test_number} = 'Verify that \d and [:digit:] are identical';
-	for (map { chr } 0..255) {
-            if ($is_utf8_locale) {
-                use locale ':not_characters';
-	        push @f, $_ unless /[[:digit:]]/ == /\d/;
-            }
-            else {
-	        push @f, $_ unless /[[:digit:]]/ == /\d/;
-            }
-	}
-        report_multi_result($Locale, $locales_test_number, \@f);
-
-        ++$locales_test_number;
-        undef @f;
-        $test_names{$locales_test_number} = 'Verify that \s and [:space:] are identical';
-	for (map { chr } 0..255) {
-            if ($is_utf8_locale) {
-                use locale ':not_characters';
-	        push @f, $_ unless /[[:space:]]/ == /\s/;
-            }
-            else {
-	        push @f, $_ unless /[[:space:]]/ == /\s/;
-            }
-	}
-        report_multi_result($Locale, $locales_test_number, \@f);
-
-        ++$locales_test_number;
-        undef @f;
-        $test_names{$locales_test_number} = 'Verify that [:posix:] and [:^posix:] are mutually exclusive';
-	for (map { chr } 0..255) {
-            if ($is_utf8_locale) {
-                use locale ':not_characters';
-	        push @f, $_ unless   (/[[:alpha:]]/ xor /[[:^alpha:]]/)   ||
-                        (/[[:alnum:]]/ xor /[[:^alnum:]]/)   ||
-                        (/[[:ascii:]]/ xor /[[:^ascii:]]/)   ||
-                        (/[[:blank:]]/ xor /[[:^blank:]]/)   ||
-                        (/[[:cntrl:]]/ xor /[[:^cntrl:]]/)   ||
-                        (/[[:digit:]]/ xor /[[:^digit:]]/)   ||
-                        (/[[:graph:]]/ xor /[[:^graph:]]/)   ||
-                        (/[[:lower:]]/ xor /[[:^lower:]]/)   ||
-                        (/[[:print:]]/ xor /[[:^print:]]/)   ||
-                        (/[[:space:]]/ xor /[[:^space:]]/)   ||
-                        (/[[:upper:]]/ xor /[[:^upper:]]/)   ||
-                        (/[[:word:]]/  xor /[[:^word:]]/)    ||
-                        (/[[:xdigit:]]/ xor /[[:^xdigit:]]/) ||
-
-                        # effectively is what [:cased:] would be
-                        # if it existed.
-                        (/[[:upper:]]/i xor /[[:^upper:]]/i);
-            }
-            else {
-	        push @f, $_ unless   (/[[:alpha:]]/ xor /[[:^alpha:]]/)   ||
-                        (/[[:alnum:]]/ xor /[[:^alnum:]]/)   ||
-                        (/[[:ascii:]]/ xor /[[:^ascii:]]/)   ||
-                        (/[[:blank:]]/ xor /[[:^blank:]]/)   ||
-                        (/[[:cntrl:]]/ xor /[[:^cntrl:]]/)   ||
-                        (/[[:digit:]]/ xor /[[:^digit:]]/)   ||
-                        (/[[:graph:]]/ xor /[[:^graph:]]/)   ||
-                        (/[[:lower:]]/ xor /[[:^lower:]]/)   ||
-                        (/[[:print:]]/ xor /[[:^print:]]/)   ||
-                        (/[[:space:]]/ xor /[[:^space:]]/)   ||
-                        (/[[:upper:]]/ xor /[[:^upper:]]/)   ||
-                        (/[[:word:]]/  xor /[[:^word:]]/)    ||
-                        (/[[:xdigit:]]/ xor /[[:^xdigit:]]/) ||
-                        (/[[:upper:]]/i xor /[[:^upper:]]/i);
-            }
-	}
-        report_multi_result($Locale, $locales_test_number, \@f);
-
-        # The rules for the relationships are given in:
-        # http://www.opengroup.org/onlinepubs/009695399/basedefs/xbd_chap07.html
-
-        ++$locales_test_number;
-        undef @f;
-        $test_names{$locales_test_number} = 'Verify that [:lower:] is a subset of [:alpha:]';
-	for (map { chr } 0..255) {
-            if ($is_utf8_locale) {
-                use locale ':not_characters';
-	        push @f, $_  if /[[:lower:]]/ and ! /[[:alpha:]]/;
-            }
-            else {
-	        push @f, $_  if /[[:lower:]]/ and ! /[[:alpha:]]/;
-            }
-	}
-        report_multi_result($Locale, $locales_test_number, \@f);
-
-        ++$locales_test_number;
-        undef @f;
-        $test_names{$locales_test_number} = 'Verify that [:upper:] is a subset of [:alpha:]';
-	for (map { chr } 0..255) {
-            if ($is_utf8_locale) {
-                use locale ':not_characters';
-	        push @f, $_  if /[[:upper:]]/ and ! /[[:alpha:]]/;
-            }
-            else {
-	        push @f, $_ if /[[:upper:]]/  and ! /[[:alpha:]]/;
-            }
-	}
-        report_multi_result($Locale, $locales_test_number, \@f);
-
-        ++$locales_test_number;
-        undef @f;
-        $test_names{$locales_test_number} = 'Verify that /[[:lower:]]/i is a subset of [:alpha:]';
-	for (map { chr } 0..255) {
-            if ($is_utf8_locale) {
-                use locale ':not_characters';
-	        push @f, $_ if /[[:lower:]]/i  and ! /[[:alpha:]]/;
-            }
-            else {
-	        push @f, $_ if /[[:lower:]]/i  and ! /[[:alpha:]]/;
-            }
-	}
-        report_multi_result($Locale, $locales_test_number, \@f);
-
-        ++$locales_test_number;
-        undef @f;
-        $test_names{$locales_test_number} = 'Verify that [:alpha:] is a subset of [:alnum:]';
-	for (map { chr } 0..255) {
-            if ($is_utf8_locale) {
-                use locale ':not_characters';
-	        push @f, $_ if /[[:alpha:]]/  and ! /[[:alnum:]]/;
-            }
-            else {
-	        push @f, $_ if /[[:alpha:]]/  and ! /[[:alnum:]]/;
-            }
-	}
-        report_multi_result($Locale, $locales_test_number, \@f);
-
-        ++$locales_test_number;
-        undef @f;
-        $test_names{$locales_test_number} = 'Verify that [:digit:] is a subset of [:alnum:]';
-	for (map { chr } 0..255) {
-            if ($is_utf8_locale) {
-                use locale ':not_characters';
-	        push @f, $_ if /[[:digit:]]/  and ! /[[:alnum:]]/;
-            }
-            else {
-	        push @f, $_ if /[[:digit:]]/  and ! /[[:alnum:]]/;
-            }
-	}
-        report_multi_result($Locale, $locales_test_number, \@f);
-
-        ++$locales_test_number;
-        undef @f;
-        $test_names{$locales_test_number} = 'Verify that [:digit:] is a subset of [:xdigit:]';
-	for (map { chr } 0..255) {
-            if ($is_utf8_locale) {
-                use locale ':not_characters';
-	        push @f, $_ if /[[:digit:]]/  and ! /[[:xdigit:]]/;
-            }
-            else {
-	        push @f, $_ if /[[:digit:]]/  and ! /[[:xdigit:]]/;
-            }
-	}
-        report_multi_result($Locale, $locales_test_number, \@f);
-
-        ++$locales_test_number;
-        undef @f;
-        $test_names{$locales_test_number} = 'Verify that [:alnum:] is a subset of [:graph:]';
-	for (map { chr } 0..255) {
-            if ($is_utf8_locale) {
-                use locale ':not_characters';
-	        push @f, $_ if /[[:alnum:]]/  and ! /[[:graph:]]/;
-            }
-            else {
-	        push @f, $_ if /[[:alnum:]]/  and ! /[[:graph:]]/;
-            }
-	}
-        report_multi_result($Locale, $locales_test_number, \@f);
-
-        # Note that xdigit doesn't have to be a subset of alnum
-
-        ++$locales_test_number;
-        undef @f;
-        $test_names{$locales_test_number} = 'Verify that [:xdigit:] is a subset of [:graph:]';
-	for (map { chr } 0..255) {
-            if ($is_utf8_locale) {
-                use locale ':not_characters';
-	        push @f, $_ if /[[:xdigit:]]/  and ! /[[:graph:]]/;
-            }
-            else {
-	        push @f, $_ if /[[:xdigit:]]/  and ! /[[:graph:]]/;
-            }
-	}
-        report_multi_result($Locale, $locales_test_number, \@f);
-
-        ++$locales_test_number;
-        undef @f;
-        $test_names{$locales_test_number} = 'Verify that [:punct:] is a subset of [:graph:]';
-	for (map { chr } 0..255) {
-            if ($is_utf8_locale) {
-                use locale ':not_characters';
-	        push @f, $_ if /[[:punct:]]/  and ! /[[:graph:]]/;
-            }
-            else {
-	        push @f, $_ if /[[:punct:]]/  and ! /[[:graph:]]/;
-            }
-	}
-        report_multi_result($Locale, $locales_test_number, \@f);
-
-        ++$locales_test_number;
-        undef @f;
-        $test_names{$locales_test_number} = 'Verify that [:blank:] is a subset of [:space:]';
-	for (map { chr } 0..255) {
-            if ($is_utf8_locale) {
-                use locale ':not_characters';
-	        push @f, $_ if /[[:blank:]]/  and ! /[[:space:]]/;
-            }
-            else {
-	        push @f, $_ if /[[:blank:]]/  and ! /[[:space:]]/;
-            }
-	}
-        report_multi_result($Locale, $locales_test_number, \@f);
-
-        ++$locales_test_number;
-        undef @f;
-        $test_names{$locales_test_number} = 'Verify that [:graph:] is a subset of [:print:]';
-	for (map { chr } 0..255) {
-            if ($is_utf8_locale) {
-                use locale ':not_characters';
-	        push @f, $_ if /[[:graph:]]/  and ! /[[:print:]]/;
-            }
-            else {
-	        push @f, $_ if /[[:graph:]]/  and ! /[[:print:]]/;
-            }
-	}
-        report_multi_result($Locale, $locales_test_number, \@f);
-
-        ++$locales_test_number;
-        undef @f;
-        $test_names{$locales_test_number} = 'Verify that isn\'t both [:cntrl:] and [:print:]';
-	for (map { chr } 0..255) {
-            if ($is_utf8_locale) {
-                use locale ':not_characters';
-	        push @f, $_ if (/[[:print:]]/ and /[[:cntrl:]]/);
-            }
-            else {
-	        push @f, $_ if (/[[:print:]]/ and /[[:cntrl:]]/);
-            }
-	}
-        report_multi_result($Locale, $locales_test_number, \@f);
-
-        ++$locales_test_number;
-        undef @f;
-        $test_names{$locales_test_number} = 'Verify that isn\'t both [:alnum:] and [:punct:]';
-	for (map { chr } 0..255) {
-            if ($is_utf8_locale) {
-                use locale ':not_characters';
-	        push @f, $_ if /[[:alnum:]]/ and /[[:punct:]]/;
-            }
-            else {
-	        push @f, $_ if /[[:alnum:]]/ and /[[:punct:]]/;
-            }
-	}
-        report_multi_result($Locale, $locales_test_number, \@f);
-
-        ++$locales_test_number;
-        undef @f;
-        $test_names{$locales_test_number} = 'Verify that isn\'t both [:xdigit:] and [:punct:]';
-	for (map { chr } 0..255) {
-            if ($is_utf8_locale) {
-                use locale ':not_characters';
-	        push @f, $_ if (/[[:punct:]]/ and /[[:xdigit:]]/);
-            }
-            else {
-	        push @f, $_ if (/[[:punct:]]/ and /[[:xdigit:]]/);
-            }
-	}
-        report_multi_result($Locale, $locales_test_number, \@f);
-
-        ++$locales_test_number;
-        undef @f;
-        $test_names{$locales_test_number} = 'Verify that isn\'t both [:graph:] and [:space:]';
-	for (map { chr } 0..255) {
-            if ($is_utf8_locale) {
-                use locale ':not_characters';
-	        push @f, $_ if (/[[:graph:]]/ and /[[:space:]]/);
-            }
-            else {
-	        push @f, $_ if (/[[:graph:]]/ and /[[:space:]]/);
-            }
-	}
-        report_multi_result($Locale, $locales_test_number, \@f);
-
-        $final_casing_test_number = $locales_test_number;
-
-	# Test for read-only scalars' locale vs non-locale comparisons.
-
-	{
-	    no locale;
-            my $ok;
-	    $a = "qwerty";
-            if ($is_utf8_locale) {
-                use locale ':not_characters';
-                $ok = ($a cmp "qwerty") == 0;
+                ($yes, $no, $sign) = ($lesser lt $greater
+                                    ? ("    ", "not ", 1)
+                                    : ("not ", "    ", -1));
             }
             else {
                 use locale;
-                $ok = ($a cmp "qwerty") == 0;
+                ($yes, $no, $sign) = ($lesser lt $greater
+                                    ? ("    ", "not ", 1)
+                                    : ("not ", "    ", -1));
             }
-            report_result($Locale, ++$locales_test_number, $ok);
-            $test_names{$locales_test_number} = 'Verify that cmp works with a read-only scalar; no- vs locale';
-	}
-
-	{
-	    my ($from, $to, $lesser, $greater,
-		@test, %test, $test, $yes, $no, $sign);
-
-            ++$locales_test_number;
-            $test_names{$locales_test_number} = 'Verify that "le", "ne", etc work';
-            $not_necessarily_a_problem_test_number = $locales_test_number;
-	    for (0..9) {
-		# Select a slice.
-		$from = int(($_*@Alnum_)/10);
-		$to = $from + int(@Alnum_/10);
-		$to = $#Alnum_ if ($to > $#Alnum_);
-		$lesser  = join('', @Alnum_[$from..$to]);
-		# Select a slice one character on.
-		$from++; $to++;
-		$to = $#Alnum_ if ($to > $#Alnum_);
-		$greater = join('', @Alnum_[$from..$to]);
+            # all these tests should FAIL (return 0).  Exact lt or gt cannot
+            # be tested because in some locales, say, eacute and E may test
+            # equal.
+            @test =
+                (
+                    $no.'    ($lesser  le $greater)',  # 1
+                    'not      ($lesser  ne $greater)', # 2
+                    '         ($lesser  eq $greater)', # 3
+                    $yes.'    ($lesser  ge $greater)', # 4
+                    $yes.'    ($lesser  ge $greater)', # 5
+                    $yes.'    ($greater le $lesser )', # 7
+                    'not      ($greater ne $lesser )', # 8
+                    '         ($greater eq $lesser )', # 9
+                    $no.'     ($greater ge $lesser )', # 10
+                    'not (($lesser cmp $greater) == -($sign))' # 11
+                    );
+            @test{@test} = 0 x @test;
+            $test = 0;
+            for my $ti (@test) {
                 if ($is_utf8_locale) {
                     use locale ':not_characters';
-                    ($yes, $no, $sign) = ($lesser lt $greater
-				      ? ("    ", "not ", 1)
-				      : ("not ", "    ", -1));
+                    $test{$ti} = eval $ti;
                 }
                 else {
-                    use locale;
-                    ($yes, $no, $sign) = ($lesser lt $greater
-				      ? ("    ", "not ", 1)
-				      : ("not ", "    ", -1));
+                    # Already in 'use locale';
+                    $test{$ti} = eval $ti;
                 }
-		# all these tests should FAIL (return 0).
-		# Exact lt or gt cannot be tested because
-		# in some locales, say, eacute and E may test equal.
-		@test =
-		    (
-		     $no.'    ($lesser  le $greater)',  # 1
-		     'not      ($lesser  ne $greater)', # 2
-		     '         ($lesser  eq $greater)', # 3
-		     $yes.'    ($lesser  ge $greater)', # 4
-		     $yes.'    ($lesser  ge $greater)', # 5
-		     $yes.'    ($greater le $lesser )', # 7
-		     'not      ($greater ne $lesser )', # 8
-		     '         ($greater eq $lesser )', # 9
-		     $no.'     ($greater ge $lesser )', # 10
-		     'not (($lesser cmp $greater) == -($sign))' # 11
-		     );
-		@test{@test} = 0 x @test;
-		$test = 0;
-		for my $ti (@test) {
-                    if ($is_utf8_locale) {
-                        use locale ':not_characters';
-                        $test{$ti} = eval $ti;
+                $test ||= $test{$ti}
+            }
+            report_result($Locale, $locales_test_number, $test == 0);
+            if ($test) {
+                debug "# lesser  = '$lesser'\n";
+                debug "# greater = '$greater'\n";
+                debug "# lesser cmp greater = ",
+                        $lesser cmp $greater, "\n";
+                debug "# greater cmp lesser = ",
+                        $greater cmp $lesser, "\n";
+                debug "# (greater) from = $from, to = $to\n";
+                for my $ti (@test) {
+                    debugf("# %-40s %-4s", $ti,
+                            $test{$ti} ? 'FAIL' : 'ok');
+                    if ($ti =~ /\(\.*(\$.+ +cmp +\$[^\)]+)\.*\)/) {
+                        debugf("(%s == %4d)", $1, eval $1);
                     }
-                    else {
-                        # Already in 'use locale';
-                        $test{$ti} = eval $ti;
-                    }
-		    $test ||= $test{$ti}
-		}
-                report_result($Locale, $locales_test_number, $test == 0);
-		if ($test) {
-		    debug "# lesser  = '$lesser'\n";
-		    debug "# greater = '$greater'\n";
-		    debug "# lesser cmp greater = ",
-		          $lesser cmp $greater, "\n";
-		    debug "# greater cmp lesser = ",
-		          $greater cmp $lesser, "\n";
-		    debug "# (greater) from = $from, to = $to\n";
-		    for my $ti (@test) {
-			debugf("# %-40s %-4s", $ti,
-			       $test{$ti} ? 'FAIL' : 'ok');
-			if ($ti =~ /\(\.*(\$.+ +cmp +\$[^\)]+)\.*\)/) {
-			    debugf("(%s == %4d)", $1, eval $1);
-			}
-			debug "\n#";
-		    }
+                    debug "\n#";
+                }
 
-		    last;
-		}
-	    }
-	}
+                last;
+            }
+        }
+    }
 
     my $ok1;
     my $ok2;
