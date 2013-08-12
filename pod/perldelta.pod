@@ -476,6 +476,12 @@ each call, unless it was the only thing in a C<foreach> loop header.  This
 meant that changes to values within the list returned would be visible the
 next time the operator was executed [perl #3105].
 
+=item *
+
+Constant folding and subroutine inlining no longer cause operations that
+would normally return new modifiable scalars to return read-only values
+instead.
+
 =back
 
 =head1 Known Problems
