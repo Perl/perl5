@@ -1,5 +1,9 @@
 Time::Piece Changes
 
+1.22      2013-08-12
+          - add explicit copyright and license statements
+          - fix encoding of .pm files and add =encoding directive
+
 1.21      2013-07-06
           - fix installation target; now installs to site in v5.12 and later
           - make Time::Seconds match its VERSION to Time::Piece

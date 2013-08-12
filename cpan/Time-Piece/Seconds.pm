@@ -2,7 +2,7 @@ package Time::Seconds;
 use strict;
 use vars qw/@EXPORT @EXPORT_OK @ISA/;
 
-our $VERSION = '1.21';
+our $VERSION = '1.22';
 
 @ISA = 'Exporter';
 
@@ -178,6 +178,8 @@ sub pretty {
 1;
 __END__
 
+=encoding utf8
+
 =head1 NAME
 
 Time::Seconds - a simple API to convert seconds to other date values
@@ -244,11 +246,14 @@ Matt Sergeant, matt@sergeant.org
 
 Tobias Brox, tobiasb@tobiasb.funcom.com
 
-Bal�zs Szab� (dLux), dlux@kapu.hu
+Balázs Szabó (dLux), dlux@kapu.hu
 
-=head1 LICENSE
+=head1 COPYRIGHT AND LICENSE
 
-Please see Time::Piece for the license.
+Copyright 2001, Larry Wall.
+
+This module is free software, you may distribute it under the same terms
+as Perl.
 
 =head1 Bugs
 

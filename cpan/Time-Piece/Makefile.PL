@@ -8,4 +8,5 @@ WriteMakefile(
     'AUTHOR' => 'Matt Sergeant',
     'ABSTRACT_FROM' => 'Piece.pm',
     'INSTALLDIRS' => ( ($] >= 5.009005 and $] < 5.011) ? 'perl' : 'site'),
+     (eval { ExtUtils::MakeMaker->VERSION(6.21) } ? (LICENSE => 'perl') : ()),
 );

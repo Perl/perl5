@@ -223,6 +223,10 @@ L<Storable> has been upgraded from version 2.45 to 2.46.
 Avoid creating temporary objects for STORABLE_attach when they aren't
 required. [perl #118907]
 
+=item *
+
+L<Time::Piece> has been upgraded from version 1.21 to 1.22.
+
 =back
 
 =head2 Removed Modules and Pragmata
