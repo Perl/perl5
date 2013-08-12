@@ -460,6 +460,15 @@ that had had a glob assigned to it.  This has been fixed [perl #119051].
 On 64-bit platforms C<pos> can now be set to a value higher than 2**31-1
 [perl #72766].
 
+=item *
+
+Perl used to leak an implementation detail when it came to referencing the
+return values of certain operators.  C<for ($a+$b) { warn \$_; warn \$_ }>
+used to display two different memory addresses, because the C<\> operator
+was copying the variable.  Under threaded builds, it would also happen for
+constants (C<for(1) { ... }>).  This has been fixed [perl #21979, #78194,
+#89188, #109746, #114838, #115388].
+
 =back
 
 =head1 Known Problems
