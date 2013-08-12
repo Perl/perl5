@@ -507,6 +507,11 @@ C<__PACKAGE__> and constants returning a package name or hash key are now
 consistently read-only.  In various previous Perl releases, they have
 become mutable under certain circumstances.
 
+=item *
+
+C</$qr/p> was broken in Perl 5.18.0; the C</p> flag was ignored.  This has
+been fixed [perl #118213].
+
 =back
 
 =head1 Known Problems
