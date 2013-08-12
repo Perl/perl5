@@ -323,6 +323,95 @@ mstats2hash(SV *sv, SV *rv, int level)
 	(SvROK(cv) && (SvTYPE(SvRV(cv))==SVt_PVCV)	\
 	 ? SvREFCNT_inc(CvGV((CV*)SvRV(cv))) : &PL_sv_undef)
 
+static void
+S_do_dump(pTHX_ SV *const sv, I32 lim)
+{
+    dVAR;
+    SV *pv_lim_sv = perl_get_sv("Devel::Peek::pv_limit", 0);
+    const STRLEN pv_lim = pv_lim_sv ? SvIV(pv_lim_sv) : 0;
+    SV *dumpop = perl_get_sv("Devel::Peek::dump_ops", 0);
+    const U16 save_dumpindent = PL_dumpindent;
+    PL_dumpindent = 2;
+    do_sv_dump(0, Perl_debug_log, sv, 0, lim,
+	       (bool)(dumpop && SvTRUE(dumpop)), pv_lim);
+    PL_dumpindent = save_dumpindent;
+}
+
+static OP *
+S_pp_dump(pTHX)
+{
+    dSP;
+    const I32 lim = PL_op->op_private == 2 ? (I32)POPi : 4;
+    dPOPss;
+    S_do_dump(aTHX_ sv, lim);
+    RETPUSHUNDEF;
+}
+
+static OP *
+S_ck_dump(pTHX_ OP *entersubop, GV *namegv, SV *cv)
+{
+    OP *aop, *prev, *first, *second = NULL;
+    BINOP *newop;
+    size_t arg = 0;
+
+    ck_entersub_args_proto(entersubop, namegv,
+			   newSVpvn_flags("$;$", 3, SVs_TEMP));
+
+    aop = cUNOPx(entersubop)->op_first;
+    if (!aop->op_sibling)
+	aop = cUNOPx(aop)->op_first;
+    prev = aop;
+    aop = aop->op_sibling;
+    while (PL_madskills && aop->op_type == OP_STUB) {
+	prev = aop;
+	aop = aop->op_sibling;
+    }
+    if (PL_madskills && aop->op_type == OP_NULL) {
+	first = ((UNOP*)aop)->op_first;
+	((UNOP*)aop)->op_first = NULL;
+	prev = aop;
+    }
+    else {
+	first = aop;
+	prev->op_sibling = first->op_sibling;
+    }
+    if (first->op_type == OP_RV2AV ||
+	first->op_type == OP_PADAV ||
+	first->op_type == OP_RV2HV ||
+	first->op_type == OP_PADHV
+    )
+	first->op_flags |= OPf_REF;
+    else
+	first->op_flags &= ~OPf_MOD;
+    aop = aop->op_sibling;
+    while (PL_madskills && aop->op_type == OP_STUB) {
+	prev = aop;
+	aop = aop->op_sibling;
+    }
+    /* aop now points to the second arg if there is one, the cvop otherwise
+     */
+    if (aop->op_sibling) {
+	prev->op_sibling = aop->op_sibling;
+	second = aop;
+	second->op_sibling = NULL;
+    }
+    first->op_sibling = second;
+
+    op_free(entersubop);
+
+    NewOp(1234, newop, 1, BINOP);
+    newop->op_type   = OP_CUSTOM;
+    newop->op_ppaddr = S_pp_dump;
+    newop->op_first  = first;
+    newop->op_last   = second;
+    newop->op_private= second ? 2 : 1;
+    newop->op_flags  = OPf_KIDS|OPf_WANT_SCALAR;
+
+    return (OP *)newop;
+}
+
+static XOP my_xop;
+
 MODULE = Devel::Peek		PACKAGE = Devel::Peek
 
 void
@@ -346,14 +435,18 @@ SV *	sv
 I32	lim
 PPCODE:
 {
-    SV *pv_lim_sv = perl_get_sv("Devel::Peek::pv_limit", 0);
-    const STRLEN pv_lim = pv_lim_sv ? SvIV(pv_lim_sv) : 0;
-    SV *dumpop = perl_get_sv("Devel::Peek::dump_ops", 0);
-    const U16 save_dumpindent = PL_dumpindent;
-    PL_dumpindent = 2;
-    do_sv_dump(0, Perl_debug_log, sv, 0, lim,
-	       (bool)(dumpop && SvTRUE(dumpop)), pv_lim);
-    PL_dumpindent = save_dumpindent;
+    S_do_dump(aTHX_ sv, lim);
+}
+
+BOOT:
+{
+    CV * const cv = get_cvn_flags("Devel::Peek::Dump", 17, 0);
+    cv_set_call_checker(cv, S_ck_dump, (SV *)cv);
+
+    XopENTRY_set(&my_xop, xop_name, "Dump");
+    XopENTRY_set(&my_xop, xop_desc, "Dump");
+    XopENTRY_set(&my_xop, xop_class, OA_BINOP);
+    Perl_custom_op_register(aTHX_ S_pp_dump, &my_xop);
 }
 
 void

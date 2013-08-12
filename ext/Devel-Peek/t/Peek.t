@@ -31,11 +31,24 @@ sub do_test {
     my $todo = $_[3];
     my $repeat_todo = $_[4];
     my $pattern = $_[2];
+    my $do_eval = $_[5];
     if (open(OUT,">peek$$")) {
 	open(STDERR, ">&OUT") or die "Can't dup OUT: $!";
-	Dump($_[1]);
-        print STDERR "*****\n";
-        Dump($_[1]); # second dump to compare with the first to make sure nothing changed.
+        if ($do_eval) {
+            my $sub = eval "sub { Dump $_[1] }";
+            $sub->();
+            print STDERR "*****\n";
+            # second dump to compare with the first to make sure nothing
+            # changed.
+            $sub->();
+        }
+        else {
+            Dump($_[1]);
+            print STDERR "*****\n";
+            # second dump to compare with the first to make sure nothing
+            # changed.
+            Dump($_[1]);
+        }
 	open(STDERR, ">&SAVERR") or die "Can't restore STDERR: $!";
 	close(OUT);
 	if (open(IN, "peek$$")) {
@@ -196,8 +209,8 @@ do_test('integer constant',
 do_test('undef',
         undef,
 'SV = NULL\\(0x0\\) at $ADDR
-  REFCNT = 1
-  FLAGS = \\(\\)');
+  REFCNT = \d+
+  FLAGS = \\(READONLY\\)');
 
 do_test('reference to scalar',
         \$a,
@@ -335,6 +348,8 @@ do_test('reference to named subroutine without prototype',
        \\d+\\. $ADDR<\\d+> \\(\\d+,\\d+\\) "\\$todo"
        \\d+\\. $ADDR<\\d+> \\(\\d+,\\d+\\) "\\$repeat_todo"
        \\d+\\. $ADDR<\\d+> \\(\\d+,\\d+\\) "\\$pattern"
+       \\d+\\. $ADDR<\\d+> \\(\\d+,\\d+\\) "\\$do_eval"
+      \\d+\\. $ADDR<\\d+> \\(\\d+,\\d+\\) "\\$sub"
       \\d+\\. $ADDR<\\d+> FAKE "\\$DEBUG"			# $] < 5.009
       \\d+\\. $ADDR<\\d+> FAKE "\\$DEBUG" flags=0x0 index=0	# $] >= 5.009
       \\d+\\. $ADDR<\\d+> \\(\\d+,\\d+\\) "\\$dump"
@@ -967,6 +982,59 @@ do_test('large hash',
     RAND = $ADDR
     Elt .*
 ');
+
+# Dump with arrays, hashes, and operator return values
+@array = 1..3;
+do_test('Dump @array', '@array', <<'ARRAY', '', '', 1);
+SV = PVAV\($ADDR\) at $ADDR
+  REFCNT = 1
+  FLAGS = \(\)
+  ARRAY = $ADDR
+  FILL = 2
+  MAX = 3
+  ARYLEN = 0x0
+  FLAGS = \(REAL\)
+  Elt No. 0
+  SV = IV\($ADDR\) at $ADDR
+    REFCNT = 1
+    FLAGS = \(IOK,pIOK\)
+    IV = 1
+  Elt No. 1
+  SV = IV\($ADDR\) at $ADDR
+    REFCNT = 1
+    FLAGS = \(IOK,pIOK\)
+    IV = 2
+  Elt No. 2
+  SV = IV\($ADDR\) at $ADDR
+    REFCNT = 1
+    FLAGS = \(IOK,pIOK\)
+    IV = 3
+ARRAY
+%hash = 1..2;
+do_test('Dump %hash', '%hash', <<'HASH', '', '', 1);
+SV = PVHV\($ADDR\) at $ADDR
+  REFCNT = 1
+  FLAGS = \(SHAREKEYS\)
+  ARRAY = $ADDR  \(0:7, 1:1\)
+  hash quality = 100.0%
+  KEYS = 1
+  FILL = 1
+  MAX = 7
+  Elt "1" HASH = $ADDR
+  SV = IV\($ADDR\) at $ADDR
+    REFCNT = 1
+    FLAGS = \(IOK,pIOK\)
+    IV = 2
+HASH
+$_ = "hello";
+do_test('rvalue substr', 'substr $_, 1, 2', <<'SUBSTR', '', '', 1);
+SV = PV\($ADDR\) at $ADDR
+  REFCNT = 1
+  FLAGS = \(PADTMP,POK,pPOK\)
+  PV = $ADDR "el"\\0
+  CUR = 2
+  LEN = \d+
+SUBSTR
 
 SKIP: {
     skip "Not built with usemymalloc", 2
