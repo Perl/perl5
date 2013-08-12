@@ -1898,7 +1898,6 @@ Below is an example module that makes use of the macros.
 
     int
     newMouse(char * name)
-        char * name;
         PREINIT:
           dMY_CXT;
         CODE:
@@ -1910,24 +1909,28 @@ Below is an example module that makes use of the macros.
               RETVAL = ++ MY_CXT.count;
               strcpy(MY_CXT.name[MY_CXT.count - 1], name);
           }
+        OUTPUT:
+          RETVAL
 
     char *
     get_mouse_name(index)
-      int index
-      CODE:
-        dMY_CXT;
-        RETVAL = MY_CXT.lives ++;
-        if (index > MY_CXT.count)
-          croak("There are only 3 blind mice.");
-        else
-          RETVAL = newSVpv(MY_CXT.name[index - 1]);
+          int index
+        PREINIT:
+          dMY_CXT;
+        CODE:
+          if (index > MY_CXT.count)
+            croak("There are only 3 blind mice.");
+          else
+            RETVAL = MY_CXT.name[index - 1];
+        OUTPUT:
+          RETVAL
 
     void
     CLONE(...)
 	CODE:
-	MY_CXT_CLONE;
+	  MY_CXT_CLONE;
 
-B<REFERENCE>
+=head3 MY_CXT REFERENCE
 
 =over 5
 
