@@ -469,6 +469,13 @@ was copying the variable.  Under threaded builds, it would also happen for
 constants (C<for(1) { ... }>).  This has been fixed [perl #21979, #78194,
 #89188, #109746, #114838, #115388].
 
+=item *
+
+The range operator C<..> was returning the same modifiable scalars with
+each call, unless it was the only thing in a C<foreach> loop header.  This
+meant that changes to values within the list returned would be visible the
+next time the operator was executed [perl #3105].
+
 =back
 
 =head1 Known Problems
