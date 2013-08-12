@@ -2,7 +2,9 @@
 
 =for comment
 Stuff that needs to be done still:
-e82485c davem [MERGE] refactor pp_match(), pp_subst(), regexec()
+e82485c [MERGE] refactor pp_match(), pp_subst(), regexec()
+6136213 [perl #52000] Warn/abort on attempted perl exit
+cccbbce Reap child in case where exception has been thrown
 
 =head1 NAME
 
