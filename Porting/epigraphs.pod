@@ -62,6 +62,34 @@ L<Announced on 2013-05-20 by Ricardo Signes|http://www.nntp.perl.org/group/perl.
   …that I can't fix…
   …with my hands…
 
+=head2 v5.18.1 - Chuck Moore
+
+L<Announced on 2013-08-12 by Ricardo Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2013/08/msg205897.html>
+
+The operating system is another concept that is curious. Operating
+systems are dauntingly complex and totally unnecessary. It’s a brilliant
+thing that Bill Gates has done in selling the world on the notion of
+operating systems. It’s probably the greatest con game the world has
+ever seen.
+
+An operating system does absolutely nothing for you. As long as you had
+something — a subroutine called disk driver, a subroutine called some
+kind of communication support, in the modern world, it doesn’t do
+anything else. In fact, Windows spends a lot of time with overlays and
+disk management all stuff like that which are irrelevant. You’ve got
+gigabyte disks; you’ve got megabyte RAMs. The world has changed in a way
+that renders the operating system unnecessary.
+
+=head2 v5.18.1-RC1 - Chuck Moore
+
+L<Announced on 2013-08-02 by Ricardo Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2013/08/msg205445.html>
+
+Compilers are probably the worst code ever written. They are written by
+someone who has never written a compiler before and will never do so
+again.  The more elaborate the language, the more complex, bug-ridden,
+and unusable is the compiler. But a simple compiler for a simple
+language is an essential tool—if only for documentation.
+
 =head2 v5.18.0 - Yevgeny Zamyatin
 
 L<Announced on 2013-05-18 by Ricardo Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2013/05/msg201940.html>
