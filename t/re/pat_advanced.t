@@ -2216,6 +2216,23 @@ EOP
             }
         }
         ok(! $failed, "Matched multi-char fold across EXACTFish node boundaries; if failed, was at count $failed");
+
+        # This tests that under /d matching that an 'ss' split across two
+        # parts of a node doesn't end up turning into something that matches
+        # \xDF unless it is in utf8.
+        $failed = 0;
+        $single = 'a';  # Is non-terminal multi-char fold char
+        for my $repeat (1 .. 300) {
+            my $string = $single x $repeat;
+            my $lhs = "$string\N{LATIN SMALL LETTER SHARP S}";
+            utf8::downgrade($lhs);
+            $string .= "s";
+            if ($lhs =~ m/${string}s/di) {
+                $failed = $repeat;
+                last;
+            }
+        }
+        ok(! $failed, "Matched multi-char fold 'ss' across EXACTF node boundaries; if failed, was at count $failed");
     }
 
     {

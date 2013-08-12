@@ -10764,6 +10764,13 @@ tryagain:
             bool next_is_quantifier;
             char * oldp = NULL;
 
+            /* We can convert EXACTF nodes to EXACTFU if they contain only
+             * characters that match identically regardless of the target
+             * string's UTF8ness.  The reason to do this is that EXACTF is not
+             * trie-able, EXACTFU is.  (We don't need to figure this out until
+             * pass 2) */
+            bool maybe_exactfu = node_type == EXACTF && PASS2;
+
             /* If a folding node contains only code points that don't
              * participate in folds, it can be changed into an EXACT node,
              * which allows the optimizer more things to look for */
@@ -11096,8 +11103,23 @@ tryagain:
                         || (node_type == EXACTFU
                             && ender == LATIN_SMALL_LETTER_SHARP_S)))
                 {
+                    if (IS_IN_SOME_FOLD_L1(ender)) {
+                        maybe_exact = FALSE;
+
+                        /* See if the character's fold differs between /d and
+                         * /u.  This includes the multi-char fold SHARP S to
+                         * 'ss' */
+                        if (maybe_exactfu
+                            && (PL_fold[ender] != PL_fold_latin1[ender]
+                                || ender == LATIN_SMALL_LETTER_SHARP_S
+                                || (len > 0
+                                   && isARG2_lower_or_UPPER_ARG1('s', ender)
+                                   && isARG2_lower_or_UPPER_ARG1('s', *(s-1)))))
+                        {
+                            maybe_exactfu = FALSE;
+                        }
+                    }
                     *(s++) = (char) ender;
-                    maybe_exact &= ! IS_IN_SOME_FOLD_L1(ender);
                 }
                 else {  /* UTF */
 
@@ -11286,6 +11308,15 @@ tryagain:
                  * do any better */
                 if (len == 0) {
                     len = full_len;
+
+                    /* If the node ends in an 's' we make sure it stays EXACTF,
+                     * as if it turns into an EXACTFU, it could later get
+                     * joined with another 's' that would then wrongly match
+                     * the sharp s */
+                    if (maybe_exactfu && isARG2_lower_or_UPPER_ARG1('s', ender))
+                    {
+                        maybe_exactfu = FALSE;
+                    }
                 } else {
 
                     /* Here, the node does contain some characters that aren't
@@ -11344,12 +11375,19 @@ tryagain:
             if (len == 0) {
                 OP(ret) = NOTHING;
             }
-            else{
-
-                /* If 'maybe_exact' is still set here, means there are no
-                 * code points in the node that participate in folds */
-                if (FOLD && maybe_exact) {
-                    OP(ret) = EXACT;
+            else {
+                if (FOLD) {
+                    /* If 'maybe_exact' is still set here, means there are no
+                     * code points in the node that participate in folds;
+                     * similarly for 'maybe_exactfu' and code points that match
+                     * differently depending on UTF8ness of the target string
+                     * */
+                    if (maybe_exact) {
+                        OP(ret) = EXACT;
+                    }
+                    else if (maybe_exactfu) {
+                        OP(ret) = EXACTFU;
+                    }
                 }
                 alloc_maybe_populate_EXACT(pRExC_state, ret, flagp, len, ender);
             }
