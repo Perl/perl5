@@ -580,6 +580,11 @@ S<(C<${ qr// }>)> false as booleans.  This has been fixed.
 Perl 5.18.0 inadvertently made C<--> and C<++> crash on dereferenced
 regular expressions, and stopped C<++> from flattening vstrings.
 
+=item *
+
+C<bless> no longer dies with "Can't bless non-reference value" if its first
+argument is a tied reference.
+
 =back
 
 =head1 Known Problems
