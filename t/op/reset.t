@@ -7,7 +7,7 @@ BEGIN {
 }
 use strict;
 
-plan tests => 37;
+plan tests => 39;
 
 package aiieee;
 
@@ -126,6 +126,19 @@ package scratch { reset 'a' }
 is @scratch::an_array, 0, 'resetting array in the same gv as a ro scalar';
 is @scratch::an_array, 0, 'resetting a hash in the same gv as a ro scalar';
 is $scratch::an_array, 1, 'reset skips ro scalars in the same gv as av/hv';
+
+for our $z (*_) {
+    {
+        local *_;
+        reset "z";
+        $z = 3;
+        () = *_{SCALAR};
+	no warnings;
+        () = "$_";   # used to crash
+    }
+    is ref\$z, "GLOB", 'reset leaves real-globs-as-scalars as GLOBs';
+    is $z, "*main::_", 'And the glob still has the right value';
+}
 
 # This used to crash under threaded builds, because pmops were remembering
 # their stashes by name, rather than by pointer.
