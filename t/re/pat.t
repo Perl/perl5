@@ -20,7 +20,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 694;  # Update this when adding/deleting tests.
+plan tests => 696;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1450,6 +1450,18 @@ EOP
 	is($res, "ACAD");
     }
 
+
+    {
+	# RT #45667
+	# /[#$x]/x didn't interpolate the var $x.
+	my $b = 'cd';
+	my $s = 'abcd$%#&';
+	$s =~ s/[a#$b%]/X/g;
+	is ($s, 'XbXX$XX&', 'RT #45667 without /x');
+	$s = 'abcd$%#&';
+	$s =~ s/[a#$b%]/X/gx;
+	is ($s, 'XbXX$XX&', 'RT #45667 with /x');
+    }
 
 } # End of sub run_tests
 
