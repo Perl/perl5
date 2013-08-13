@@ -598,6 +598,11 @@ expressions, typeglob copies, and vstrings.  Also, when encountering those
 or read-only values, it no longer skips any array or hash with the same
 name.
 
+=item *
+
+C<ucfirst> and C<lcfirst> were not respecting the bytes pragma.  This was a
+regression from v5.12 [perl #117355].
+
 =back
 
 =head1 Known Problems
