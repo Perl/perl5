@@ -148,6 +148,8 @@ L<bignum> has been upgraded from version 0.35 to 0.36.
 L<bigrat> wasn't correctly updating an internal variable when C<use>d
 with a C<lib> option.
 
+=item *
+
 L<Carp> has been upgraded from 1.30 to 1.31
 
 L<Carp> now handles objects with string overloads. It also allows objects
