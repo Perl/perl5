@@ -7,6 +7,7 @@ e82485c [MERGE] refactor pp_match(), pp_subst(), regexec()
 cccbbce Reap child in case where exception has been thrown
 70502ce [perl #119101] Extraneous warnings in Parse::ErrorString::Perl
 c3923c3 reparse compile-time /(?{})/ in right scope
+aa8c2dc Fix RT #41461 (with a test).
 
 =head1 NAME
 
