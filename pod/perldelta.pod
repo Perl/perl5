@@ -5,6 +5,7 @@ Stuff that needs to be done still:
 e82485c [MERGE] refactor pp_match(), pp_subst(), regexec()
 6136213 [perl #52000] Warn/abort on attempted perl exit
 cccbbce Reap child in case where exception has been thrown
+70502ce [perl #119101] Extraneous warnings in Parse::ErrorString::Perl
 
 =head1 NAME
 
