@@ -2211,7 +2211,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
  *            itself is accessed via the pointers above */
 /* data:      May be used for some additional optimizations.
               Currently unused. */
-/* nosave:    For optimizations. */
+/* flags:     For optimizations. See REXEC_* in regexp.h */
 
 {
     dVAR;

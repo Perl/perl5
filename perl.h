@@ -221,9 +221,9 @@
 #define CALLREGCOMP(sv, flags) Perl_pregcomp(aTHX_ (sv),(flags))
 
 #define CALLREGCOMP_ENG(prog, sv, flags) (prog)->comp(aTHX_ sv, flags)
-#define CALLREGEXEC(prog,stringarg,strend,strbeg,minend,screamer,data,flags) \
+#define CALLREGEXEC(prog,stringarg,strend,strbeg,minend,sv,data,flags) \
     RX_ENGINE(prog)->exec(aTHX_ (prog),(stringarg),(strend), \
-        (strbeg),(minend),(screamer),(data),(flags))
+        (strbeg),(minend),(sv),(data),(flags))
 #define CALLREG_INTUIT_START(prog,sv,strbeg,strpos,strend,flags,data) \
     RX_ENGINE(prog)->intuit(aTHX_ (prog), (sv), (strbeg), (strpos), \
         (strend),(flags),(data))

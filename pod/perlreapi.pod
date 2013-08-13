@@ -17,7 +17,7 @@ following format:
                          REGEXP * const rx,
                          char* stringarg,
                          char* strend, char* strbeg,
-                         I32 minend, SV* screamer,
+                         I32 minend, SV* sv,
                          void* data, U32 flags);
         char*   (*intuit) (pTHX_
                            REGEXP * const rx, SV *sv,
@@ -238,7 +238,7 @@ certain optimisations when this is set.
 
     I32 exec(pTHX_ REGEXP * const rx,
              char *stringarg, char* strend, char* strbeg,
-             I32 minend, SV* screamer,
+             I32 minend, SV* sv,
              void* data, U32 flags);
 
 Execute a regexp. The arguments are
@@ -249,9 +249,9 @@ Execute a regexp. The arguments are
 
 The regular expression to execute.
 
-=item screamer
+=item sv
 
-This strangely-named arg is the SV to be matched against.  Note that the
+This is the SV to be matched against.  Note that the
 actual char array to be matched against is supplied by the arguments
 described below; the SV is just used to determine UTF8ness, C<pos()> etc.
 
@@ -262,7 +262,7 @@ Pointer to the physical start of the string.
 =item strend
 
 Pointer to the character following the physical end of the string (i.e.
-the C<\0>).
+the C<\0>, if any).
 
 =item stringarg
 
