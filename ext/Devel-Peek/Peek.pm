@@ -76,6 +76,8 @@ Devel::Peek - A data debugging tool for the XS programmer
         use Devel::Peek;
         Dump( $a );
         Dump( $a, 5 );
+        Dump( @a );
+        Dump( %h );
         DumpArray( 5, $a, $b, ... );
 	mstat "Point 5";
 
@@ -102,6 +104,13 @@ C<CV>.  Devel::Peek also supplies C<SvREFCNT()> which can query reference
 counts on SVs.  This document will take a passive, and safe, approach
 to data debugging and for that it will describe only the C<Dump()>
 function.
+
+The C<Dump()> function takes one or two arguments: something to dump, and
+an optional limit for recursion and array elements (default is 4).  The
+first argument is evaluted in rvalue scalar context, with exceptions for
+@array and %hash, which dump the array or hash itself.  So C<Dump @array>
+works, as does C<Dump $foo>.  And C<Dump pos> will call C<pos> in rvalue
+context, whereas C<Dump ${\pos}> will call it in lvalue context.
 
 Function C<DumpArray()> allows dumping of multiple values (useful when you
 need to analyze returns of functions).
