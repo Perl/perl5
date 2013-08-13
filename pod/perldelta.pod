@@ -531,7 +531,9 @@ the variable would not interpolate.  This has been corrected [perl #45667].
 
 On non-threaded builds, setting C<${"_<filename"}> to a reference or
 typeglob no longer causes C<__FILE__> in that file to return a corrupt
-string.  Threaded builds were unaffected.
+string, and no longer prevents C<#line> directives in string evals from
+providing the source lines to the debugger.  Threaded builds were
+unaffected.
 
 =back
 
