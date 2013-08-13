@@ -535,6 +535,11 @@ corrupt string, and no longer prevents C<#line> directives in string evals
 from providing the source lines to the debugger.  Threaded builds were
 unaffected.
 
+=item *
+
+Enabling "used once" warnings no longer causes crashes on stash
+circularities created at compile time (C<*Foo::Bar::Foo:: = *Foo::>).
+
 =back
 
 =head1 Known Problems
