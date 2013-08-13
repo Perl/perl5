@@ -4331,7 +4331,7 @@
  *	This symbol, if defined, indicates that <stdbool.h> exists and
  *	can be included.
  */
-/*#define	I_STDBOOL		/ **/
+#define	I_STDBOOL		/**/
 
 /* I_SUNMATH:
  *	This symbol, if defined, indicates that <sunmath.h> exists and
