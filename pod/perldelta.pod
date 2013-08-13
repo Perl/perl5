@@ -603,6 +603,12 @@ name.
 
 =item *
 
+C<reset> with an argument now skips scalars aliased to typeglobs
+(C<for $z (*foo) { reset "z" }>).  Previously it would corrupt memory or
+crash.
+
+=item *
+
 C<ucfirst> and C<lcfirst> were not respecting the bytes pragma.  This was a
 regression from v5.12 [perl #117355].
 
