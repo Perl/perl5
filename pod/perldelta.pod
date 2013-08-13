@@ -564,6 +564,12 @@ subroutines in @INC) has been fixed in various ways.  Previously tied
 variables were mishandled, and setting $_ to a reference or typeglob could
 result in crashes.
 
+=item *
+
+The C<SvPVbyte> XS function has been fixed to work with tied scalars
+returning something other than a string.  It used to return utf8 in those
+cases where C<SvPV> would.
+
 =back
 
 =head1 Known Problems
