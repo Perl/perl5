@@ -570,6 +570,11 @@ The C<SvPVbyte> XS function has been fixed to work with tied scalars
 returning something other than a string.  It used to return utf8 in those
 cases where C<SvPV> would.
 
+=item *
+
+Perl 5.18.0 inadvertently made dereferenced regular expressions
+S<(C<${ qr// }>)> false as booleans.  This has been fixed.
+
 =back
 
 =head1 Known Problems
