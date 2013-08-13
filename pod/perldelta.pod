@@ -585,6 +585,13 @@ regular expressions, and stopped C<++> from flattening vstrings.
 C<bless> no longer dies with "Can't bless non-reference value" if its first
 argument is a tied reference.
 
+=item *
+
+C<reset> with an argument no longer skips copy-on-write scalars, regular
+expressions, typeglob copies, and vstrings.  Also, when encountering those
+or read-only values, it no longer skips any array or hash with the same
+name.
+
 =back
 
 =head1 Known Problems
