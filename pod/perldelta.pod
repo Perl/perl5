@@ -546,6 +546,11 @@ circularities created at compile time (C<*Foo::Bar::Foo:: = *Foo::>).
 Undef constants used in hash keys (C<use constant u => undef; $h{+u}>) no
 longer produce "uninitialized" warnings at compile time.
 
+=item *
+
+Modifying a substitution target inside the substitution replacement no
+longer causes crashes.
+
 =back
 
 =head1 Known Problems
