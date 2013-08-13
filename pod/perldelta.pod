@@ -541,6 +541,11 @@ unaffected.
 Enabling "used once" warnings no longer causes crashes on stash
 circularities created at compile time (C<*Foo::Bar::Foo:: = *Foo::>).
 
+=item *
+
+Undef constants used in hash keys (C<use constant u => undef; $h{+u}>) no
+longer produce "uninitialized" warnings at compile time.
+
 =back
 
 =head1 Known Problems
