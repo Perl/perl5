@@ -186,22 +186,27 @@ sub caller_info {
 }
 
 # Transform an argument to a function into a string.
-our $no_recurse;
+our $in_recurse;
 sub format_arg {
     my $arg = shift;
-    die "recursion\n" if $no_recurse;
 
     if ( ref($arg) ) {
-        local $SIG{__DIE__} = sub{}; # legitimate, let's not leak it.
-        if (do {
-                local $@; 
+         # legitimate, let's not leak it.
+        if (!$in_recurse &&
+	    do {
+                local $@;
+	        local $in_recurse = 1;
+		local $SIG{__DIE__} = sub{};
                 eval {$arg->can('CARP_TRACE') }
             })
         {
             $arg = $arg->CARP_TRACE();
         }
-        elsif (do {
+        elsif (!$in_recurse &&
+	       do {
                 local $@;
+	        local $in_recurse = 1;
+		local $SIG{__DIE__} = sub{};
                 eval {$arg = $RefArgFormatter->($arg); 1}
                 })
         {
@@ -209,16 +214,18 @@ sub format_arg {
         }
         elsif (defined($overload::VERSION))
         {
-            do {
-                local $@;
-                eval {
-                    local $no_recurse = 1;
-                    $arg = "$arg";
-                    1;
-                }
-            } or do {
-                $arg = overload::StrVal($arg);
-            };
+	    if ($in_recurse ||
+		!do {
+                    local $@;
+	            local $in_recurse = 1;
+		    local $SIG{__DIE__} = sub{};
+                    eval {
+                        $arg = "$arg";
+                        1;
+                    }
+                }) {
+	        $arg = overload::StrVal($arg);
+            }
         }
         else
         {

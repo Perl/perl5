@@ -1,6 +1,6 @@
 use warnings;
 no warnings 'once';
-use Test::More 0.98 tests => 9;
+use Test::More 0.98 tests => 10;
 
 use Carp;
 
@@ -29,11 +29,19 @@ ok($o->{called}, "CARP_TRACE called");
 like($msg, qr/'TRACE:CarpTracable=Bax'/, "CARP_TRACE output used") or diag explain $msg;
 like($msg, qr/'HASH\(0x[[:xdigit:]]+\)'/, "HASH not stringified again");
 
-$o = CarpBad->new(key => 'Zoo');
-$msg = call(\&with_longmess, $o, {bar => 'kill'});
-unlike($msg, qr/THIS SHOULD NEVER HAPPEN|Zoo/, "Didn't get the as-string version");
-like($msg, qr/CarpBad=HASH/,"Normal non-overload string conversion");
-diag explain $msg;
+{
+    my @warn;
+    local $SIG{__WARN__} = sub { push @warn, "@_" };
+    $o = CarpBad->new(key => 'Zoo');
+    $msg = call(\&with_longmess, $o, {bar => 'kill'});
+    like($msg, qr/THIS CAN NOW HAPPEN|Zoo/, "Didn't get the as-string version");
+    like($warn[0], qr/this is now allowed/, "check warning produced");
+    @warn = ();
+
+    $o = CarpBad2->new(key => 'Apple');
+    $msg = call(\&with_longmess, $o, {bar => 'kill'});
+    like($msg, qr/CarpBad2=HASH/,"Normal non-overload string conversion");
+}
 
 sub call
 {
@@ -77,8 +85,16 @@ use parent -norequire => 'Stringable';
 
 sub as_string
 {
-    Carp::cluck("woops, this isn't allowed");
-    "THIS SHOULD NEVER HAPPEN";
+    Carp::cluck("this is now allowed");
+    "THIS CAN NOW HAPPEN";
 }
 
+package CarpBad2;
 
+use parent -norequire => 'Stringable';
+
+sub as_string
+{
+    confess("this should fallback");
+    "THIS SHOULD NEVER HAPPEN";
+}
