@@ -551,6 +551,11 @@ longer produce "uninitialized" warnings at compile time.
 Modifying a substitution target inside the substitution replacement no
 longer causes crashes.
 
+=item *
+
+The first statement inside a string eval used to use the wrong pragma setting sometimes during constant folding.  C<eval 'uc chr 0xe0'> would randomly choose between Unicode, byte, and locale semantics.  This has been
+fixed.
+
 =back
 
 =head1 Known Problems
