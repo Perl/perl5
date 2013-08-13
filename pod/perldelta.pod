@@ -527,6 +527,12 @@ Starting in Perl 5.001, a regular expression like C</[#$a]/x> or
 C</[#]$a/x> would have its C<#> incorrectly interpreted as a comment, so
 the variable would not interpolate.  This has been corrected [perl #45667].
 
+=item *
+
+On non-threaded builds, setting C<${"_<filename"}> to a reference or
+typeglob no longer causes C<__FILE__> in that file to return a corrupt
+string.  Threaded builds were unaffected.
+
 =back
 
 =head1 Known Problems
