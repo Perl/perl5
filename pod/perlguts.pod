@@ -1717,9 +1717,13 @@ subroutines)--is compiled. During this time a special anonymous Perl
 array is created, which is called a scratchpad for the current unit.
 
 A scratchpad keeps SVs which are lexicals for the current unit and are
-targets for opcodes. One can deduce that an SV lives on a scratchpad
+targets for opcodes.  A previous version of this document
+stated that one can deduce that an SV lives on a scratchpad
 by looking on its flags: lexicals have C<SVs_PADMY> set, and
-I<target>s have C<SVs_PADTMP> set.
+I<target>s have C<SVs_PADTMP> set.  But this have never been fully true.
+C<SVs_PADMY> could be set on a variable that no longer resides in any pad.
+While I<target>s do have C<SVs_PADTMP> set, it can also be set on variables
+that have never resided in a pad, but nonetheless act like I<target>s.
 
 The correspondence between OPs and I<target>s is not 1-to-1. Different
 OPs in the compile tree of the unit can use the same target, if this
