@@ -2,11 +2,9 @@
 
 =for comment
 Stuff that needs to be done still:
-e82485c [MERGE] refactor pp_match(), pp_subst(), regexec()
 6136213 [perl #52000] Warn/abort on attempted perl exit
 cccbbce Reap child in case where exception has been thrown
 70502ce [perl #119101] Extraneous warnings in Parse::ErrorString::Perl
-c3923c3 reparse compile-time /(?{})/ in right scope
 aa8c2dc Fix RT #41461 (with a test).
 
 =head1 NAME
@@ -611,6 +609,19 @@ crash.
 
 C<ucfirst> and C<lcfirst> were not respecting the bytes pragma.  This was a
 regression from v5.12 [perl #117355].
+
+=item *
+
+The use of C<\G> in regular expressions, where it's not at the start of
+the pattern, is now slightly less buggy (although it is still somewhat
+problematic).
+
+=item *
+
+Where a regular expression included code blocks (C</(?{...})/>), and where
+the use of constant overloading triggered a re-compilation of the code block,
+the second compilation didn't see its outer lexical scope. This was a
+regression in 5.18.0.
 
 =back
 
