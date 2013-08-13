@@ -319,7 +319,7 @@ XXX L<message|perldiag/"message">
 =item *
 
 L<Argument "%s" treated as 0 in increment (++)|perldiag/"Argument
-E<quot>%sE<quot> treated as 0 in increment (++)">
+"%s" treated as 0 in increment (++)">
 
 (W numeric) The indicated string was fed as an argument to the C<++>
 operator which expects either a number or a string matching
