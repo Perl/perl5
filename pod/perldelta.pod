@@ -186,6 +186,9 @@ L<Devel::Peek> has been upgraded from version 1.12 to 1.13.
 The C<SvREFCNT_inc()> and C<SvREFCNT_dec()> functions have been
 removed and C<SvREFCNT()> will now work on non-scalars. [perl #117793]
 
+C<fill_mstats> no longer crashes if its argument is not already a string.
+[perl #92260]
+
 =item *
 
 L<Exporter> has been upgraded from version 5.68 to 5.69.
