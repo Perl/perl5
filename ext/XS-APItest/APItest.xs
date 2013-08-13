@@ -3459,6 +3459,9 @@ sv_mortalcopy(SV *sv)
     OUTPUT:
 	RETVAL
 
+SV *
+newRV(SV *sv)
+
 MODULE = XS::APItest PACKAGE = XS::APItest::AUTOLOADtest
 
 int

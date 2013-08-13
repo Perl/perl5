@@ -2727,6 +2727,15 @@ try_autoload:
 		PUTBACK ;		
 	    }
 	}
+	else {
+	    SV **mark = PL_stack_base + markix;
+	    I32 items = SP - mark;
+	    while (items--) {
+		mark++;
+		if (*mark && SvPADTMP(*mark) && !IS_PADGV(*mark))
+		    *mark = sv_mortalcopy(*mark);
+	    }
+	}
 	/* We assume first XSUB in &DB::sub is the called one. */
 	if (PL_curcopdb) {
 	    SAVEVPTR(PL_curcop);
