@@ -557,6 +557,13 @@ longer causes crashes.
 The first statement inside a string eval used to use the wrong pragma setting sometimes during constant folding.  C<eval 'uc chr 0xe0'> would randomly choose between Unicode, byte, and locale semantics.  This has been
 fixed.
 
+=item *
+
+The handling of return values of @INC filters (subroutines returned by
+subroutines in @INC) has been fixed in various ways.  Previously tied
+variables were mishandled, and setting $_ to a reference or typeglob could
+result in crashes.
+
 =back
 
 =head1 Known Problems
