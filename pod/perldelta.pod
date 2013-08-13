@@ -184,6 +184,12 @@ L<Devel::Peek> has been upgraded from version 1.12 to 1.13.
 The C<SvREFCNT_inc()> and C<SvREFCNT_dec()> functions have been
 removed and C<SvREFCNT()> will now work on non-scalars. [perl #117793]
 
+C<Dump> now checks its arguments at compile time.  Both arguments are now
+evaluated in scalar context, with exceptions for @arrays and %hashes,
+allowing aggregates to be dumped directly.  The first argument is evaluated
+in rvalue scalar context, allowing rvalue C<pos> and C<substr> to be
+dumped.  
+
 C<fill_mstats> no longer crashes if its argument is not already a string.
 [perl #92260]
 
