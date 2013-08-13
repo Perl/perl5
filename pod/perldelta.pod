@@ -514,6 +514,18 @@ become mutable under certain circumstances.
 C</$qr/p> was broken in Perl 5.18.0; the C</p> flag was ignored.  This has
 been fixed [perl #118213].
 
+=item *
+
+Starting in v5.18.0, a construct like C</[#](?{})/x> would have its C<#>
+incorrectly interpreted as a comment.  The code block would be skipped,
+unparsed.  This has been corrected.
+
+=item *
+
+Starting in Perl 5.001, a regular expression like C</[#$a]/x> or
+C</[#]$a/x> would have its C<#> incorrectly interpreted as a comment, so
+the variable would not interpolate.  This has been corrected [perl #45667].
+
 =back
 
 =head1 Known Problems
