@@ -575,6 +575,11 @@ cases where C<SvPV> would.
 Perl 5.18.0 inadvertently made dereferenced regular expressions
 S<(C<${ qr// }>)> false as booleans.  This has been fixed.
 
+=item *
+
+Perl 5.18.0 inadvertently made C<--> and C<++> crash on dereferenced
+regular expressions, and stopped C<++> from flattening vstrings.
+
 =back
 
 =head1 Known Problems
