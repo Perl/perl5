@@ -3,7 +3,7 @@ use strict;
 use warnings;
 no warnings 'redefine';
 
-our $VERSION = do { my @r = ( q$Revision: 2.13 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
+our $VERSION = do { my @r = ( q$Revision: 2.14 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
 use Encode qw(find_encoding encode_utf8 decode_utf8);
 use MIME::Base64;
 use Carp;
@@ -135,7 +135,7 @@ sub encode($$;$) {
             $subline .= ' ' if ($subline =~ /\?=$/ and $word =~ /^=\?/);
             $subline .= $word;
         }
-        $subline and push @subline, $subline;
+        length($subline) and push @subline, $subline;
         push @line, join( "\n " => @subline );
     }
     $_[1] = '' if $chk;

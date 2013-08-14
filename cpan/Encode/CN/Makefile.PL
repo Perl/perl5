@@ -84,7 +84,7 @@ sub post_initialize
 #define U8 U8
 #include "encode.h"
 END
-    foreach my $table (keys %tables) {
+    foreach my $table (sort keys %tables) {
     print XS qq[#include "${table}.h"\n];
     }
     print XS <<"END";
@@ -113,7 +113,7 @@ PROTOTYPES: DISABLE
 BOOT:
 {
 END
-    foreach my $table (keys %tables) {
+    foreach my $table (sort keys %tables) {
     print XS qq[#include "${table}.exh"\n];
     }
     print XS "}\n";

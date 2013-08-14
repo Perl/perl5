@@ -1,10 +1,10 @@
 #
-# $Id: Encode.pm,v 2.51 2013/04/29 22:19:11 dankogai Exp dankogai $
+# $Id: Encode.pm,v 2.52 2013/08/14 02:29:54 dankogai Exp $
 #
 package Encode;
 use strict;
 use warnings;
-our $VERSION = sprintf "%d.%02d", q$Revision: 2.51 $ =~ /(\d+)/g;
+our $VERSION = sprintf "%d.%02d", q$Revision: 2.52 $ =~ /(\d+)/g;
 use constant DEBUG => !!$ENV{PERL_ENCODE_DEBUG};
 use XSLoader ();
 XSLoader::load( __PACKAGE__, $VERSION );
@@ -53,7 +53,7 @@ our %ExtModule;
 require Encode::Config;
 #  See
 #  https://bugzilla.redhat.com/show_bug.cgi?id=435505#c2
-#  to find why sig handers inside eval{} are disabled.
+#  to find why sig handlers inside eval{} are disabled.
 eval {
     local $SIG{__DIE__};
     local $SIG{__WARN__};
@@ -471,8 +471,7 @@ internal format:
 
 B<CAVEAT>: When you run C<$string = decode("utf8", $octets)>, then $string
 I<might not be equal to> $octets.  Though both contain the same data, the
-UTF8 flag for $string is on unless $octets consists entirely of ASCII data
-on ASCII machines or EBCDIC on EBCDIC machines.  See L</"The UTF8 flag">
+UTF8 flag for $string is on.  See L</"The UTF8 flag">
 below.
 
 If the $string is C<undef>, then C<undef> is returned.

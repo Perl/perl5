@@ -195,6 +195,12 @@ C<fill_mstats> no longer crashes if its argument is not already a string.
 
 =item *
 
+L<Encode> has been upgraded from version 2.51 to 2.52.
+
+Encoding "0" with MIME-Headers no longer gets a blank string.
+
+=item *
+
 L<Exporter> has been upgraded from version 5.68 to 5.69.
 
 L<Exporter> would ignore custom C<$SIG{__WARN__}> handlers in

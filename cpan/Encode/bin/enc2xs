@@ -10,11 +10,11 @@ use warnings;
 use Getopt::Std;
 use Config;
 my @orig_ARGV = @ARGV;
-our $VERSION  = do { my @r = (q$Revision: 2.7 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION  = do { my @r = (q$Revision: 2.8 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 # These may get re-ordered.
 # RAW is a do_now as inserted by &enter
-# AGG is an aggreagated do_now, as built up by &process
+# AGG is an aggregated do_now, as built up by &process
 
 use constant {
   RAW_NEXT => 0,
@@ -50,7 +50,7 @@ use constant {
 # only the leaf "do_now"s cause output bytes, and they in turn point back to
 # the start state.
 
-# For an encoding where there are varaible length input byte sequences, you
+# For an encoding where there are variable length input byte sequences, you
 # will encounter a leaf "do_now" sooner for the shorter input sequences, but
 # as before the leaves will point back to the start state.
 
@@ -68,7 +68,7 @@ use constant {
 # single byte encoding, with  "ABCD" going "abcd". There will be
 # 4 "do_now"s, {"A" => [...,"a",...], "B" => [...,"b",...], "C"=>..., "D"=>...}
 
-# &process then walks the tree, building aggregate "do_now" structres for
+# &process then walks the tree, building aggregate "do_now" structures for
 # adjacent bytes where possible. The aggregate is for a contiguous range of
 # bytes which each produce the same length of output, each move to the
 # same next state, and each have the same fallback flag.
@@ -566,7 +566,7 @@ sub enter {
   # as current state.
   $next ||= $current;
   # Making sure it is defined seems to be faster than {no warnings;} in
-  # &process, or passing it in as 0 explicity.
+  # &process, or passing it in as 0 explicitly.
   # XXX $fallback ||= 0;
 
   # Start at the beginning and work forwards through the string to zero.
@@ -595,12 +595,12 @@ sub enter {
       $do_now->[RAW_NEXT] = $next;
       return;
     }
-    # Tail recursion. The intermdiate state may not have a name yet.
+    # Tail recursion. The intermediate state may not have a name yet.
     $current = $do_now->[RAW_NEXT];
   }
 }
 
-# This is purely for optimistation. It's just &enter hard coded for $fallback
+# This is purely for optimisation. It's just &enter hard coded for $fallback
 # of 0, using only a 3 entry array ref to save memory for every entry.
 sub enter_fb0 {
   my ($current,$inbytes,$outbytes,$next) = @_;
@@ -713,7 +713,7 @@ sub outbigstring
 
   # Make the big string in the string accumulator. Longest first, on the hope
   # that this makes it more likely that we find the short strings later on.
-  # Not sure if it helps sorting strings of the same length lexcically.
+  # Not sure if it helps sorting strings of the same length lexically.
   foreach my $s (sort {length $b <=> length $a || $a cmp $b} keys %strings) {
     my $index = index $string_acc, $s;
     if ($index >= 0) {
@@ -951,7 +951,7 @@ sub make_makefile_pl
 {
     eval { require Encode; };
     $@ and die "You need to install Encode to use enc2xs -M\nerror: $@\n";
-    # our used for variable expanstion
+    # our used for variable expansion
     $_Enc2xs = $0;
     $_Version = $VERSION;
     $_E2X = find_e2x();
@@ -978,7 +978,7 @@ sub make_configlocal_pm {
     $@ and die "Unable to require Encode: $@\n";
     eval { require File::Spec; };
 
-    # our used for variable expanstion
+    # our used for variable expantion
     my %in_core = map { $_ => 1 } (
         'ascii',      'iso-8859-1', 'utf8',
         'ascii-ctrl', 'null',       'utf-8-strict'

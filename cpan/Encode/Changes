@@ -1,8 +1,29 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 2.51 2013/04/29 22:19:11 dankogai Exp dankogai $
+# $Id: Changes,v 2.52 2013/08/14 02:29:54 dankogai Exp $
 #
-$Revision: 2.51 $ $Date: 2013/04/29 22:19:11 $
+$Revision: 2.52 $ $Date: 2013/08/14 02:29:54 $
+! ucm/*.ucm
+  Addressed:
+    Unicode Mappping tables are missing Unicode Inc. license notification
+    All files including "as long as this notice remains attached" now
+    have that notice attached in the comment section.  (cp* and mac*
+    do not since their source files do not include that notice)
+  https://rt.cpan.org/Ticket/Display.html?id=87340
+! lib/Encode/MIME/Header.pm
+  t/mime-header.t
+  Addressed: encoding "0" with MIME-Headers gets a blank string
+  https://rt.cpan.org/Ticket/Display.html?id=87831
+! Encode.pm
+  Addressed: Documentation buglet
+  https://rt.cpan.org/Ticket/Display.html?id=84992
+! Byte/Makefile.PL CN/Makefile.PL EBCDIC/Makefile.PL
+  Encode/Makefile_PL.e2x JP/Makefile.PL KR/Makefile.PL
+  Symbol/Makefile.PL TW/Makefile.PL
+  Applied: Patch to output #includes in deterministic order
+  https://rt.cpan.org/Ticket/Display.html?id=86974
+
+2.51 2013/04/29 22:19:11
 ! Encode.xs
   Addressed: Encode.xs doesn't compile with Microsoft C compiler
   https://rt.cpan.org/Public/Bug/Display.html?id=84920

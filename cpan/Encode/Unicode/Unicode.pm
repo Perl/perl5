@@ -4,7 +4,7 @@ use strict;
 use warnings;
 no warnings 'redefine';
 
-our $VERSION = do { my @r = ( q$Revision: 2.7 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
+our $VERSION = do { my @r = ( q$Revision: 2.8 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
 
 use XSLoader;
 XSLoader::load( __PACKAGE__, $VERSION );
@@ -52,7 +52,7 @@ sub renew {
     return $clone;
 }
 
-# There used to be a perl implemntation of (en|de)code but with
+# There used to be a perl implementation of (en|de)code but with
 # XS version is ripe, perl version is zapped for optimal speed
 
 *decode = \&decode_xs;

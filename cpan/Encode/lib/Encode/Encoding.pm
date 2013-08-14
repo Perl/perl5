@@ -3,7 +3,7 @@ package Encode::Encoding;
 # Base class for classes which implement encodings
 use strict;
 use warnings;
-our $VERSION = do { my @r = ( q$Revision: 2.5 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
+our $VERSION = do { my @r = ( q$Revision: 2.6 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
 
 require Encode;
 
@@ -121,14 +121,14 @@ fragment.  If perlio_ok() is true, SHOULD becomes MUST.
 
 =item *
 
-If I<$check> is is false then C<encode> MUST  make a "best effort" to
+If I<$check> is false then C<encode> MUST  make a "best effort" to
 convert the string - for example, by using a replacement character.
 
 =back
 
 =item -E<gt>decode($octets [,$check])
 
-MUST return the string that I<$octets> represents. 
+MUST return the string that I<$octets> represents.
 
 =over 2
 
