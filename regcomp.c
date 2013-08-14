@@ -813,13 +813,13 @@ S_scan_commit(pTHX_ const RExC_state_t *pRExC_state, scan_data_t *data,
 
 /* Can match anything (initialization) */
 STATIC void
-S_cl_anything(const RExC_state_t *pRExC_state, regnode_ssc *cl)
+S_ssc_anything(const RExC_state_t *pRExC_state, regnode_ssc *ssc)
 {
-    PERL_ARGS_ASSERT_CL_ANYTHING;
+    PERL_ARGS_ASSERT_SSC_ANYTHING;
 
-    ANYOF_BITMAP_SETALL(cl);
-    cl->flags = ANYOF_UNICODE_ALL;
-    SET_SSC_EOS(cl);
+    ANYOF_BITMAP_SETALL(ssc);
+    ssc->flags = ANYOF_UNICODE_ALL;
+    SET_SSC_EOS(ssc);
 
     /* If any portion of the regex is to operate under locale rules,
      * initialization includes it.  The reason this isn't done for all regexes
@@ -829,72 +829,72 @@ S_cl_anything(const RExC_state_t *pRExC_state, regnode_ssc *cl)
      * parts of it may not work properly, it is safest to avoid locale unless
      * necessary. */
     if (RExC_contains_locale) {
-	ANYOF_CLASS_SETALL(cl);	    /* /l uses class */
-	cl->flags |= ANYOF_LOCALE|ANYOF_CLASS|ANYOF_LOC_FOLD;
+	ANYOF_CLASS_SETALL(ssc);	    /* /l uses class */
+	ssc->flags |= ANYOF_LOCALE|ANYOF_CLASS|ANYOF_LOC_FOLD;
     }
     else {
-	ANYOF_CLASS_ZERO(cl);	    /* Only /l uses class now */
+	ANYOF_CLASS_ZERO(ssc);	    /* Only /l uses class now */
     }
 }
 
 /* Can match anything (initialization) */
 STATIC int
-S_cl_is_anything(const regnode_ssc *cl)
+S_ssc_is_anything(const regnode_ssc *ssc)
 {
     int value;
 
-    PERL_ARGS_ASSERT_CL_IS_ANYTHING;
+    PERL_ARGS_ASSERT_SSC_IS_ANYTHING;
 
     for (value = 0; value < ANYOF_MAX; value += 2)
-	if (ANYOF_CLASS_TEST(cl, value) && ANYOF_CLASS_TEST(cl, value + 1))
+	if (ANYOF_CLASS_TEST(ssc, value) && ANYOF_CLASS_TEST(ssc, value + 1))
 	    return 1;
-    if (!(cl->flags & ANYOF_UNICODE_ALL))
+    if (!(ssc->flags & ANYOF_UNICODE_ALL))
 	return 0;
-    if (!ANYOF_BITMAP_TESTALLSET((const void*)cl))
+    if (!ANYOF_BITMAP_TESTALLSET((const void*)ssc))
 	return 0;
     return 1;
 }
 
 /* Can match anything (initialization) */
 STATIC void
-S_cl_init(const RExC_state_t *pRExC_state, regnode_ssc *cl)
+S_ssc_init(const RExC_state_t *pRExC_state, regnode_ssc *ssc)
 {
-    PERL_ARGS_ASSERT_CL_INIT;
+    PERL_ARGS_ASSERT_SSC_INIT;
 
-    Zero(cl, 1, regnode_ssc);
-    cl->type = ANYOF;
-    cl_anything(pRExC_state, cl);
-    ARG_SET(cl, ANYOF_NONBITMAP_EMPTY);
-    OP(cl) = ANYOF_SYNTHETIC;
+    Zero(ssc, 1, regnode_ssc);
+    ssc->type = ANYOF;
+    ssc_anything(pRExC_state, ssc);
+    ARG_SET(ssc, ANYOF_NONBITMAP_EMPTY);
+    OP(ssc) = ANYOF_SYNTHETIC;
 }
 
 /* These two functions currently do the exact same thing */
-#define cl_init_zero		cl_init
+#define ssc_init_zero		ssc_init
 
-/* 'AND' a given class with another one.  Can create false positives.  'cl'
+/* 'AND' a given class with another one.  Can create false positives.  'ssc'
  * should not be inverted.  'and_with->flags & ANYOF_CLASS' should be 0 if
  * 'and_with' is a regnode_charclass instead of a regnode_ssc. */
 STATIC void
-S_cl_and(regnode_ssc *cl, const regnode_ssc *and_with)
+S_ssc_and(regnode_ssc *ssc, const regnode_ssc *and_with)
 {
-    PERL_ARGS_ASSERT_CL_AND;
+    PERL_ARGS_ASSERT_SSC_AND;
 
     assert(PL_regkind[and_with->type] == ANYOF);
 
     /* I (khw) am not sure all these restrictions are necessary XXX */
     if (!(ANYOF_CLASS_TEST_ANY_SET(and_with))
-	&& !(ANYOF_CLASS_TEST_ANY_SET(cl))
-	&& (and_with->flags & ANYOF_LOCALE) == (cl->flags & ANYOF_LOCALE)
+	&& !(ANYOF_CLASS_TEST_ANY_SET(ssc))
+	&& (and_with->flags & ANYOF_LOCALE) == (ssc->flags & ANYOF_LOCALE)
 	&& !(and_with->flags & ANYOF_LOC_FOLD)
-	&& !(cl->flags & ANYOF_LOC_FOLD)) {
+	&& !(ssc->flags & ANYOF_LOC_FOLD)) {
 	int i;
 
 	if (and_with->flags & ANYOF_INVERT)
 	    for (i = 0; i < ANYOF_BITMAP_SIZE; i++)
-		cl->bitmap[i] &= ~and_with->bitmap[i];
+		ssc->bitmap[i] &= ~and_with->bitmap[i];
 	else
 	    for (i = 0; i < ANYOF_BITMAP_SIZE; i++)
-		cl->bitmap[i] &= and_with->bitmap[i];
+		ssc->bitmap[i] &= and_with->bitmap[i];
     } /* XXXX: logic is complicated otherwise, leave it along for a moment. */
 
     if (and_with->flags & ANYOF_INVERT) {
@@ -902,23 +902,23 @@ S_cl_and(regnode_ssc *cl, const regnode_ssc *and_with)
         /* Here, the and'ed node is inverted.  Get the AND of the flags that
          * aren't affected by the inversion.  Those that are affected are
          * handled individually below */
-	U8 affected_flags = cl->flags & ~INVERSION_UNAFFECTED_FLAGS;
-	cl->flags &= (and_with->flags & INVERSION_UNAFFECTED_FLAGS);
-	cl->flags |= affected_flags;
+	U8 affected_flags = ssc->flags & ~INVERSION_UNAFFECTED_FLAGS;
+	ssc->flags &= (and_with->flags & INVERSION_UNAFFECTED_FLAGS);
+	ssc->flags |= affected_flags;
 
         /* We currently don't know how to deal with things that aren't in the
          * bitmap, but we know that the intersection is no greater than what
-         * is already in cl, so let there be false positives that get sorted
+         * is already in ssc, so let there be false positives that get sorted
          * out after the synthetic start class succeeds, and the node is
          * matched for real. */
 
         /* The inversion of these two flags indicate that the resulting
          * intersection doesn't have them */
 	if (and_with->flags & ANYOF_UNICODE_ALL) {
-	    cl->flags &= ~ANYOF_UNICODE_ALL;
+	    ssc->flags &= ~ANYOF_UNICODE_ALL;
 	}
 	if (and_with->flags & ANYOF_NON_UTF8_LATIN1_ALL) {
-	    cl->flags &= ~ANYOF_NON_UTF8_LATIN1_ALL;
+	    ssc->flags &= ~ANYOF_NON_UTF8_LATIN1_ALL;
 	}
     }
     else {   /* and'd node is not inverted */
@@ -930,43 +930,43 @@ S_cl_and(regnode_ssc *cl, const regnode_ssc *and_with)
              * (except possibly ANYOF_UNICODE_ALL), which means the
              * intersection can't either, except for ANYOF_UNICODE_ALL, in
              * which case we don't know what the intersection is, but it's no
-             * greater than what cl already has, so can just leave it alone,
+             * greater than what ssc already has, so can just leave it alone,
              * with possible false positives */
             if (! (and_with->flags & ANYOF_UNICODE_ALL)) {
-                ARG_SET(cl, ANYOF_NONBITMAP_EMPTY);
-		cl->flags &= ~ANYOF_NONBITMAP_NON_UTF8;
+                ARG_SET(ssc, ANYOF_NONBITMAP_EMPTY);
+		ssc->flags &= ~ANYOF_NONBITMAP_NON_UTF8;
             }
 	}
-	else if (! ANYOF_NONBITMAP(cl)) {
+	else if (! ANYOF_NONBITMAP(ssc)) {
 
-	    /* Here, 'and_with' does match something outside the bitmap, and cl
+	    /* Here, 'and_with' does match something outside the bitmap, and ssc
 	     * doesn't have a list of things to match outside the bitmap.  If
-             * cl can match all code points above 255, the intersection will
-             * be those above-255 code points that 'and_with' matches.  If cl
+             * ssc can match all code points above 255, the intersection will
+             * be those above-255 code points that 'and_with' matches.  If ssc
              * can't match all Unicode code points, it means that it can't
              * match anything outside the bitmap (since the 'if' that got us
              * into this block tested for that), so we leave the bitmap empty.
              */
-	    if (cl->flags & ANYOF_UNICODE_ALL) {
-		ARG_SET(cl, ARG(and_with));
+	    if (ssc->flags & ANYOF_UNICODE_ALL) {
+		ARG_SET(ssc, ARG(and_with));
 
                 /* and_with's ARG may match things that don't require UTF8.
-                 * And now cl's will too, in spite of this being an 'and'.  See
+                 * And now ssc's will too, in spite of this being an 'and'.  See
                  * the comments below about the kludge */
-		cl->flags |= and_with->flags & ANYOF_NONBITMAP_NON_UTF8;
+		ssc->flags |= and_with->flags & ANYOF_NONBITMAP_NON_UTF8;
 	    }
 	}
 	else {
-            /* Here, both 'and_with' and cl match something outside the
+            /* Here, both 'and_with' and ssc match something outside the
              * bitmap.  Currently we do not do the intersection, so just match
-             * whatever cl had at the beginning.  */
+             * whatever ssc had at the beginning.  */
 	}
 
 
         /* Take the intersection of the two sets of flags.  However, the
          * ANYOF_NONBITMAP_NON_UTF8 flag is treated as an 'or'.  This is a
          * kludge around the fact that this flag is not treated like the others
-         * which are initialized in cl_anything().  The way the optimizer works
+         * which are initialized in ssc_anything().  The way the optimizer works
          * is that the synthetic start class (SSC) is initialized to match
          * anything, and then the first time a real node is encountered, its
          * values are AND'd with the SSC's with the result being the values of
@@ -986,20 +986,20 @@ S_cl_and(regnode_ssc *cl, const regnode_ssc *and_with)
          * positives that occur by not ANDing them out when they could be
          * aren't as severe as they would be if we treated this bit like all
          * the others */
-        outside_bitmap_but_not_utf8 = (cl->flags | and_with->flags)
+        outside_bitmap_but_not_utf8 = (ssc->flags | and_with->flags)
                                       & ANYOF_NONBITMAP_NON_UTF8;
-	cl->flags &= and_with->flags;
-	cl->flags |= outside_bitmap_but_not_utf8;
+	ssc->flags &= and_with->flags;
+	ssc->flags |= outside_bitmap_but_not_utf8;
     }
 }
 
-/* 'OR' a given class with another one.  Can create false positives.  'cl'
+/* 'OR' a given class with another one.  Can create false positives.  'ssc'
  * should not be inverted.  'or_with->flags & ANYOF_CLASS' should be 0 if
  * 'or_with' is a regnode_charclass instead of a regnode_ssc. */
 STATIC void
-S_cl_or(const RExC_state_t *pRExC_state, regnode_ssc *cl, const regnode_ssc *or_with)
+S_ssc_or(const RExC_state_t *pRExC_state, regnode_ssc *ssc, const regnode_ssc *or_with)
 {
-    PERL_ARGS_ASSERT_CL_OR;
+    PERL_ARGS_ASSERT_SSC_OR;
 
     if (or_with->flags & ANYOF_INVERT) {
 
@@ -1007,7 +1007,7 @@ S_cl_or(const RExC_state_t *pRExC_state, regnode_ssc *cl, const regnode_ssc *or_
          * complement of everything not in the bitmap, but currently we don't
          * know what that is, so give up and match anything */
 	if (ANYOF_NONBITMAP(or_with)) {
-	    cl_anything(pRExC_state, cl);
+	    ssc_anything(pRExC_state, ssc);
 	}
 	/* We do not use
 	 * (B1 | CL1) | (!B2 & !CL2) = (B1 | !B2 & !CL2) | (CL1 | (!B2 & !CL2))
@@ -1018,47 +1018,47 @@ S_cl_or(const RExC_state_t *pRExC_state, regnode_ssc *cl, const regnode_ssc *or_
 	 *   (OK1(i) | OK1(i')) | !(OK1(i) | OK1(i')) =
 	 *   (OK1(i) | OK1(i')) | (!OK1(i) & !OK1(i'))
 	 */
-	else if ( (or_with->flags & ANYOF_LOCALE) == (cl->flags & ANYOF_LOCALE)
+	else if ( (or_with->flags & ANYOF_LOCALE) == (ssc->flags & ANYOF_LOCALE)
 	     && !(or_with->flags & ANYOF_LOC_FOLD)
-	     && !(cl->flags & ANYOF_LOC_FOLD) ) {
+	     && !(ssc->flags & ANYOF_LOC_FOLD) ) {
 	    int i;
 
 	    for (i = 0; i < ANYOF_BITMAP_SIZE; i++)
-		cl->bitmap[i] |= ~or_with->bitmap[i];
+		ssc->bitmap[i] |= ~or_with->bitmap[i];
 	} /* XXXX: logic is complicated otherwise */
 	else {
-	    cl_anything(pRExC_state, cl);
+	    ssc_anything(pRExC_state, ssc);
 	}
 
         /* And, we can just take the union of the flags that aren't affected
          * by the inversion */
-	cl->flags |= or_with->flags & INVERSION_UNAFFECTED_FLAGS;
+	ssc->flags |= or_with->flags & INVERSION_UNAFFECTED_FLAGS;
 
         /* For the remaining flags:
             ANYOF_UNICODE_ALL and inverted means to not match anything above
-                    255, which means that the union with cl should just be
-                    what cl has in it, so can ignore this flag
+                    255, which means that the union with ssc should just be
+                    what ssc has in it, so can ignore this flag
             ANYOF_NON_UTF8_LATIN1_ALL and inverted means if not utf8 and ord
-                    is (ASCII) 127-255 to match them, but then invert that, so
-                    the union with cl should just be what cl has in it, so can
+                    is 127-255 to match them, but then invert that, so the
+                    union with ssc should just be what ssc has in it, so can
                     ignore this flag
          */
     } else {    /* 'or_with' is not inverted */
 	/* (B1 | CL1) | (B2 | CL2) = (B1 | B2) | (CL1 | CL2)) */
-	if ( (or_with->flags & ANYOF_LOCALE) == (cl->flags & ANYOF_LOCALE)
+	if ( (or_with->flags & ANYOF_LOCALE) == (ssc->flags & ANYOF_LOCALE)
 	     && (!(or_with->flags & ANYOF_LOC_FOLD)
-		 || (cl->flags & ANYOF_LOC_FOLD)) ) {
+		 || (ssc->flags & ANYOF_LOC_FOLD)) ) {
 	    int i;
 
 	    /* OR char bitmap and class bitmap separately */
 	    for (i = 0; i < ANYOF_BITMAP_SIZE; i++)
-		cl->bitmap[i] |= or_with->bitmap[i];
+		ssc->bitmap[i] |= or_with->bitmap[i];
             if (or_with->flags & ANYOF_CLASS) {
-                ANYOF_CLASS_OR(or_with, cl);
+                ANYOF_CLASS_OR(or_with, ssc);
             }
 	}
 	else { /* XXXX: logic is complicated, leave it along for a moment. */
-	    cl_anything(pRExC_state, cl);
+	    ssc_anything(pRExC_state, ssc);
 	}
 
 	if (ANYOF_NONBITMAP(or_with)) {
@@ -1070,22 +1070,22 @@ S_cl_or(const RExC_state_t *pRExC_state, regnode_ssc *cl, const regnode_ssc *or_
 	     * inversion lists this far), give up and allow the start class to
 	     * match everything outside the bitmap.  If that stuff is all above
 	     * 255, can just set UNICODE_ALL, otherwise caould be anything. */
-	    if (! ANYOF_NONBITMAP(cl)) {
-		ARG_SET(cl, ARG(or_with));
+	    if (! ANYOF_NONBITMAP(ssc)) {
+		ARG_SET(ssc, ARG(or_with));
 	    }
-	    else if (ARG(cl) != ARG(or_with)) {
+	    else if (ARG(ssc) != ARG(or_with)) {
 
 		if ((or_with->flags & ANYOF_NONBITMAP_NON_UTF8)) {
-		    cl_anything(pRExC_state, cl);
+		    ssc_anything(pRExC_state, ssc);
 		}
 		else {
-		    cl->flags |= ANYOF_UNICODE_ALL;
+		    ssc->flags |= ANYOF_UNICODE_ALL;
 		}
 	    }
 	}
 
         /* Take the union */
-	cl->flags |= or_with->flags;
+	ssc->flags |= or_with->flags;
     }
 }
 
@@ -3132,7 +3132,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		if (flags & SCF_DO_SUBSTR)
 		    SCAN_COMMIT(pRExC_state, data, minlenp); /* Cannot merge strings after this. */
 		if (flags & SCF_DO_STCLASS)
-		    cl_init_zero(pRExC_state, &accum);
+		    ssc_init_zero(pRExC_state, &accum);
 
 		while (OP(scan) == code) {
 		    SSize_t deltanext, minnext, fake;
@@ -3154,7 +3154,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    if (code != BRANCH)
 			scan = NEXTOPER(scan);
 		    if (flags & SCF_DO_STCLASS) {
-			cl_init(pRExC_state, &this_class);
+			ssc_init(pRExC_state, &this_class);
 			data_fake.start_class = &this_class;
 			f = SCF_DO_STCLASS_AND;
 		    }
@@ -3188,7 +3188,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 			data->whilem_c = data_fake.whilem_c;
 		    }
 		    if (flags & SCF_DO_STCLASS)
-			cl_or(pRExC_state, &accum, &this_class);
+			ssc_or(pRExC_state, &accum, &this_class);
 		}
 		if (code == IFTHEN && num < 2) /* Empty ELSE branch */
 		    min1 = 0;
@@ -3208,15 +3208,15 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		else
 		    delta += max1 - min1;
 		if (flags & SCF_DO_STCLASS_OR) {
-		    cl_or(pRExC_state, data->start_class, &accum);
+		    ssc_or(pRExC_state, data->start_class, &accum);
 		    if (min1) {
-			cl_and(data->start_class, and_withp);
+			ssc_and(data->start_class, and_withp);
 			flags &= ~SCF_DO_STCLASS;
 		    }
 		}
 		else if (flags & SCF_DO_STCLASS_AND) {
 		    if (min1) {
-			cl_and(data->start_class, &accum);
+			ssc_and(data->start_class, &accum);
 			flags &= ~SCF_DO_STCLASS;
 		    }
 		    else {
@@ -3563,7 +3563,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                     }
                     is_inf = is_inf_internal = 1;
                     if (flags & SCF_DO_STCLASS_OR) /* Allow everything */
-                        cl_anything(pRExC_state, data->start_class);
+                        ssc_anything(pRExC_state, data->start_class);
                     flags &= ~SCF_DO_STCLASS;
 	        }
             } else {
@@ -3674,7 +3674,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		else
 		    data->start_class->flags |= ANYOF_UNICODE_ALL;
                 CLEAR_SSC_EOS(data->start_class);
-		cl_and(data->start_class, and_withp);
+		ssc_and(data->start_class, and_withp);
 	    }
 	    flags &= ~SCF_DO_STCLASS;
 	}
@@ -3794,7 +3794,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    }
                     CLEAR_SSC_EOS(data->start_class);
 		}
-		cl_and(data->start_class, and_withp);
+		ssc_and(data->start_class, and_withp);
 	    }
 	    flags &= ~SCF_DO_STCLASS;
 	}
@@ -3869,7 +3869,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 			data->flags |= SF_IS_INF;
 		}
 		if (flags & SCF_DO_STCLASS) {
-		    cl_init(pRExC_state, &this_class);
+		    ssc_init(pRExC_state, &this_class);
 		    oclass = data->start_class;
 		    data->start_class = &this_class;
 		    f |= SCF_DO_STCLASS_AND;
@@ -3897,7 +3897,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    data->start_class = oclass;
 		if (mincount == 0 || minnext == 0) {
 		    if (flags & SCF_DO_STCLASS_OR) {
-			cl_or(pRExC_state, data->start_class, &this_class);
+			ssc_or(pRExC_state, data->start_class, &this_class);
 		    }
 		    else if (flags & SCF_DO_STCLASS_AND) {
 			/* Switch to OR mode: cache the old value of
@@ -3911,11 +3911,11 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    }
 		} else {		/* Non-zero len */
 		    if (flags & SCF_DO_STCLASS_OR) {
-			cl_or(pRExC_state, data->start_class, &this_class);
-			cl_and(data->start_class, and_withp);
+			ssc_or(pRExC_state, data->start_class, &this_class);
+			ssc_and(data->start_class, and_withp);
 		    }
 		    else if (flags & SCF_DO_STCLASS_AND)
-			cl_and(data->start_class, &this_class);
+			ssc_and(data->start_class, &this_class);
 		    flags &= ~SCF_DO_STCLASS;
 		}
 		if (!scan) 		/* It was not CURLYX, but CURLY. */
@@ -4166,7 +4166,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
 		}
 		is_inf = is_inf_internal = 1;
 		if (flags & SCF_DO_STCLASS_OR)
-		    cl_anything(pRExC_state, data->start_class);
+		    ssc_anything(pRExC_state, data->start_class);
 		flags &= ~SCF_DO_STCLASS;
 		break;
 	    }
@@ -4186,7 +4186,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
                             ANYOF_BITMAP_SET(data->start_class, value);
                 }
                 if (flags & SCF_DO_STCLASS_OR)
-		    cl_and(data->start_class, and_withp);
+		    ssc_and(data->start_class, and_withp);
 		flags &= ~SCF_DO_STCLASS;
             }
 	    min++;
@@ -4222,7 +4222,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
 #endif
                  do_default:
 		    if (flags & SCF_DO_STCLASS_OR) /* Allow everything */
-			cl_anything(pRExC_state, data->start_class);
+			ssc_anything(pRExC_state, data->start_class);
 		    break;
 		case REG_ANY:
 		    if (OP(scan) == SANY)
@@ -4230,16 +4230,16 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
 		    if (flags & SCF_DO_STCLASS_OR) { /* Everything but \n */
 			value = (ANYOF_BITMAP_TEST(data->start_class,'\n')
 				|| ANYOF_CLASS_TEST_ANY_SET(data->start_class));
-			cl_anything(pRExC_state, data->start_class);
+			ssc_anything(pRExC_state, data->start_class);
 		    }
 		    if (flags & SCF_DO_STCLASS_AND || !value)
 			ANYOF_BITMAP_CLEAR(data->start_class,'\n');
 		    break;
 		case ANYOF:
 		    if (flags & SCF_DO_STCLASS_AND)
-			cl_and(data->start_class, (regnode_ssc*)scan);
+			ssc_and(data->start_class, (regnode_ssc*)scan);
 		    else
-			cl_or(pRExC_state, data->start_class,
+			ssc_or(pRExC_state, data->start_class,
                                                           (regnode_ssc*)scan);
 		    break;
 		case POSIXA:
@@ -4315,7 +4315,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
 		    break;
 		}
 		if (flags & SCF_DO_STCLASS_OR)
-		    cl_and(data->start_class, and_withp);
+		    ssc_and(data->start_class, and_withp);
 		flags &= ~SCF_DO_STCLASS;
 	    }
 	}
@@ -4378,7 +4378,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
 		data_fake.pos_delta = delta;
                 if ( flags & SCF_DO_STCLASS && !scan->flags
                      && OP(scan) == IFMATCH ) { /* Lookahead */
-                    cl_init(pRExC_state, &intrnl);
+                    ssc_init(pRExC_state, &intrnl);
                     data_fake.start_class = &intrnl;
                     f |= SCF_DO_STCLASS_AND;
 		}
@@ -4412,12 +4412,12 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
 			 * *** HACK *** for now just treat as "no information".
 			 * See [perl #56690].
 			 */
-			cl_init(pRExC_state, data->start_class);
+			ssc_init(pRExC_state, data->start_class);
 		    }  else {
 			/* AND before and after: combine and continue */
 			const int was = TEST_SSC_EOS(data->start_class);
 
-			cl_and(data->start_class, &intrnl);
+			ssc_and(data->start_class, &intrnl);
 			if (was)
                             SET_SSC_EOS(data->start_class);
 		    }
@@ -4463,7 +4463,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
 	            data_fake.flags |= SF_IS_INF;
                 if ( flags & SCF_DO_STCLASS && !scan->flags
                      && OP(scan) == IFMATCH ) { /* Lookahead */
-                    cl_init(pRExC_state, &intrnl);
+                    ssc_init(pRExC_state, &intrnl);
                     data_fake.start_class = &intrnl;
                     f |= SCF_DO_STCLASS_AND;
                 }
@@ -4489,7 +4489,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
                 if (f & SCF_DO_STCLASS_AND) {
                     const int was = TEST_SSC_EOS(data.start_class);
 
-                    cl_and(data->start_class, &intrnl);
+                    ssc_and(data->start_class, &intrnl);
                     if (was)
                         SET_SSC_EOS(data->start_class);
                 }
@@ -4563,7 +4563,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
 		}
 		is_inf = is_inf_internal = 1;
 		if (flags & SCF_DO_STCLASS_OR) /* Allow everything */
-		    cl_anything(pRExC_state, data->start_class);
+		    ssc_anything(pRExC_state, data->start_class);
 		flags &= ~SCF_DO_STCLASS;
 	}
 	else if (OP(scan) == GPOS) {
@@ -4594,7 +4594,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
             if (flags & SCF_DO_SUBSTR) /* XXXX Add !SUSPEND? */
                 SCAN_COMMIT(pRExC_state, data,minlenp); /* Cannot merge strings after this. */
             if (flags & SCF_DO_STCLASS)
-                cl_init_zero(pRExC_state, &accum);
+                ssc_init_zero(pRExC_state, &accum);
                 
             if (!trie->jump) {
                 min1= trie->minlen;
@@ -4617,7 +4617,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
                         data_fake.last_closep = &fake;
 		    data_fake.pos_delta = delta;
                     if (flags & SCF_DO_STCLASS) {
-                        cl_init(pRExC_state, &this_class);
+                        ssc_init(pRExC_state, &this_class);
                         data_fake.start_class = &this_class;
                         f = SCF_DO_STCLASS_AND;
                     }
@@ -4662,7 +4662,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
                         data->whilem_c = data_fake.whilem_c;
                     }
                     if (flags & SCF_DO_STCLASS)
-                        cl_or(pRExC_state, &accum, &this_class);
+                        ssc_or(pRExC_state, &accum, &this_class);
                 }
             }
             if (flags & SCF_DO_SUBSTR) {
@@ -4674,15 +4674,15 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
             min += min1;
             delta += max1 - min1;
             if (flags & SCF_DO_STCLASS_OR) {
-                cl_or(pRExC_state, data->start_class, &accum);
+                ssc_or(pRExC_state, data->start_class, &accum);
                 if (min1) {
-                    cl_and(data->start_class, and_withp);
+                    ssc_and(data->start_class, and_withp);
                     flags &= ~SCF_DO_STCLASS;
                 }
             }
             else if (flags & SCF_DO_STCLASS_AND) {
                 if (min1) {
-                    cl_and(data->start_class, &accum);
+                    ssc_and(data->start_class, &accum);
                     flags &= ~SCF_DO_STCLASS;
                 }
                 else {
@@ -4750,7 +4750,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
 	data->flags &= ~SF_IN_PAR;
     }
     if (flags & SCF_DO_STCLASS_OR)
-	cl_and(data->start_class, and_withp);
+	ssc_and(data->start_class, and_withp);
     if (flags & SCF_TRIE_RESTUDY)
         data->flags |= 	SCF_TRIE_RESTUDY;
     
@@ -6220,7 +6220,7 @@ reStudy:
 	SAVEFREESV(data.last_found);
 	first = scan;
 	if (!ri->regstclass) {
-	    cl_init(pRExC_state, &ch_class);
+	    ssc_init(pRExC_state, &ch_class);
 	    data.start_class = &ch_class;
 	    stclass_flag = SCF_DO_STCLASS_AND;
 	} else				/* XXXX Check for BOUND? */
@@ -6303,7 +6303,7 @@ reStudy:
 	if ((!(r->anchored_substr || r->anchored_utf8) || r->anchored_offset)
 	    && stclass_flag
 	    && ! TEST_SSC_EOS(data.start_class)
-	    && !cl_is_anything(data.start_class))
+	    && !ssc_is_anything(data.start_class))
 	{
 	    const U32 n = add_data(pRExC_state, 1, "f");
 
@@ -6357,7 +6357,7 @@ reStudy:
 	DEBUG_PARSE_r(PerlIO_printf(Perl_debug_log, "\nMulti Top Level\n"));
 
 	scan = ri->program + 1;
-	cl_init(pRExC_state, &ch_class);
+	ssc_init(pRExC_state, &ch_class);
 	data.start_class = &ch_class;
 	data.last_closep = &last_close;
 
@@ -6374,7 +6374,7 @@ reStudy:
 		= r->float_substr = r->float_utf8 = NULL;
 
 	if (! TEST_SSC_EOS(data.start_class)
-	    && !cl_is_anything(data.start_class))
+	    && !ssc_is_anything(data.start_class))
 	{
 	    const U32 n = add_data(pRExC_state, 1, "f");
 

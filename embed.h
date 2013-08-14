@@ -901,11 +901,6 @@
 #define add_cp_to_invlist(a,b)	S_add_cp_to_invlist(aTHX_ a,b)
 #define add_data		S_add_data
 #define alloc_maybe_populate_EXACT(a,b,c,d,e)	S_alloc_maybe_populate_EXACT(aTHX_ a,b,c,d,e)
-#define cl_and			S_cl_and
-#define cl_anything		S_cl_anything
-#define cl_init			S_cl_init
-#define cl_is_anything		S_cl_is_anything
-#define cl_or			S_cl_or
 #define compute_EXACTish(a)	S_compute_EXACTish(aTHX_ a)
 #define could_it_be_a_POSIX_class(a)	S_could_it_be_a_POSIX_class(aTHX_ a)
 #define get_invlist_iter_addr(a)	S_get_invlist_iter_addr(aTHX_ a)
@@ -949,6 +944,11 @@
 #define regwhite		S_regwhite
 #define scan_commit(a,b,c,d)	S_scan_commit(aTHX_ a,b,c,d)
 #define set_ANYOF_arg(a,b,c,d,e,f)	S_set_ANYOF_arg(aTHX_ a,b,c,d,e,f)
+#define ssc_and			S_ssc_and
+#define ssc_anything		S_ssc_anything
+#define ssc_init		S_ssc_init
+#define ssc_is_anything		S_ssc_is_anything
+#define ssc_or			S_ssc_or
 #define study_chunk(a,b,c,d,e,f,g,h,i,j,k)	S_study_chunk(aTHX_ a,b,c,d,e,f,g,h,i,j,k)
 #  endif
 #  if defined(PERL_IN_REGCOMP_C) || defined (PERL_IN_DUMP_C)

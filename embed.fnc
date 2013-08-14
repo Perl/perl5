@@ -2053,15 +2053,15 @@ Es	|void	|scan_commit	|NN const struct RExC_state_t *pRExC_state \
 				|NN struct scan_data_t *data \
 				|NN SSize_t *minlenp|int is_inf
 Es	|void	|populate_ANYOF_from_invlist|NN regnode *node|NN SV** invlist_ptr
-Esn	|void	|cl_anything	|NN const struct RExC_state_t *pRExC_state \
-				|NN regnode_ssc *cl
-EsRn	|int	|cl_is_anything	|NN const regnode_ssc *cl
-Esn	|void	|cl_init	|NN const struct RExC_state_t *pRExC_state \
-				|NN regnode_ssc *cl
-Esn	|void	|cl_and		|NN regnode_ssc *cl \
+Esn	|void	|ssc_anything	|NN const struct RExC_state_t *pRExC_state \
+				|NN regnode_ssc *ssc
+EsRn	|int	|ssc_is_anything|NN const regnode_ssc *ssc
+Esn	|void	|ssc_init	|NN const struct RExC_state_t *pRExC_state \
+				|NN regnode_ssc *ssc
+Esn	|void	|ssc_and	|NN regnode_ssc *ssc \
 				|NN const regnode_ssc *and_with
-Esn	|void	|cl_or		|NN const struct RExC_state_t *pRExC_state \
-				|NN regnode_ssc *cl \
+Esn	|void	|ssc_or		|NN const struct RExC_state_t *pRExC_state \
+				|NN regnode_ssc *ssc \
 				|NN const regnode_ssc *or_with
 Es	|SSize_t|study_chunk	|NN struct RExC_state_t *pRExC_state \
 				|NN regnode **scanp|NN SSize_t *minlenp \
