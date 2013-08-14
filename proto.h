@@ -6835,6 +6835,13 @@ STATIC void	S_scan_commit(pTHX_ const struct RExC_state_t *pRExC_state, struct s
 #define PERL_ARGS_ASSERT_SCAN_COMMIT	\
 	assert(pRExC_state); assert(data); assert(minlenp)
 
+STATIC void	S_set_ANYOF_arg(pTHX_ struct RExC_state_t* const pRExC_state, regnode* const ret, SV* const cp_list, SV* const listsv, const STRLEN initial_listsv_len, SV* const swash, const bool has_user_defined_property)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2)
+			__attribute__nonnull__(pTHX_4);
+#define PERL_ARGS_ASSERT_SET_ANYOF_ARG	\
+	assert(pRExC_state); assert(ret); assert(listsv)
+
 STATIC SSize_t	S_study_chunk(pTHX_ struct RExC_state_t *pRExC_state, regnode **scanp, SSize_t *minlenp, SSize_t *deltap, regnode *last, struct scan_data_t *data, I32 stopparen, U8* recursed, regnode_ssc *and_withp, U32 flags, U32 depth)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)

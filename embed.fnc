@@ -2004,6 +2004,13 @@ Es	|regnode*|regbranch	|NN struct RExC_state_t *pRExC_state \
 				|NN I32 *flagp|I32 first|U32 depth
 Es	|STRLEN	|reguni		|NN const struct RExC_state_t *pRExC_state \
 				|UV uv|NN char *s
+Es	|void	 |set_ANYOF_arg	|NN struct RExC_state_t* const pRExC_state \
+				|NN regnode* const ret                     \
+				|NULLOK SV* const cp_list                  \
+				|NN SV* const listsv                       \
+				|const STRLEN initial_listsv_len           \
+				|NULLOK SV* const swash                    \
+				|const bool has_user_defined_property
 Es	|regnode*|regclass	|NN struct RExC_state_t *pRExC_state \
 				|NN I32 *flagp|U32 depth|const bool stop_at_1 \
 				|bool allow_multi_fold                        \

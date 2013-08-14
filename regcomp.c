@@ -14028,6 +14028,26 @@ parseit:
 	swash = NULL;
     }
 
+    set_ANYOF_arg(pRExC_state, ret, cp_list,
+                  listsv, initial_listsv_len,
+                  swash, has_user_defined_property);
+
+    *flagp |= HASWIDTH|SIMPLE;
+    return ret;
+}
+
+STATIC void
+S_set_ANYOF_arg(pTHX_ struct RExC_state_t* const pRExC_state,
+                regnode* const ret,
+                SV* const cp_list,
+                SV* const listsv, const STRLEN initial_listsv_len,
+                SV* const swash,
+                const bool has_user_defined_property)
+{
+    UV n;
+
+    PERL_ARGS_ASSERT_SET_ANYOF_ARG;
+
     if (! cp_list
 	&& ! HAS_NONLOCALE_RUNTIME_PROPERTY_DEFINITION)
     {
@@ -14072,10 +14092,8 @@ parseit:
 	RExC_rxi->data->data[n] = (void*)rv;
 	ARG_SET(ret, n);
     }
-
-    *flagp |= HASWIDTH|SIMPLE;
-    return ret;
 }
+
 #undef HAS_NONLOCALE_RUNTIME_PROPERTY_DEFINITION
 
 
