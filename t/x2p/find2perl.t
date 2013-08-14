@@ -149,7 +149,6 @@ my @testcases =
         {
             name => "[perl #113054] mapping of ?",
             args => [ "-name", "a?c" ],
-            TODO => "perl #113054",
         },
     );
 
