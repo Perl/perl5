@@ -14029,52 +14029,57 @@ parseit:
     }
 
     set_ANYOF_arg(pRExC_state, ret, cp_list,
-                  listsv, initial_listsv_len,
+                  (HAS_NONLOCALE_RUNTIME_PROPERTY_DEFINITION)
+                   ? listsv : NULL,
                   swash, has_user_defined_property);
 
     *flagp |= HASWIDTH|SIMPLE;
     return ret;
 }
 
+#undef HAS_NONLOCALE_RUNTIME_PROPERTY_DEFINITION
+
 STATIC void
 S_set_ANYOF_arg(pTHX_ struct RExC_state_t* const pRExC_state,
-                regnode* const ret,
+                regnode* const node,
                 SV* const cp_list,
-                SV* const listsv, const STRLEN initial_listsv_len,
+                SV* const runtime_defns,
                 SV* const swash,
                 const bool has_user_defined_property)
 {
+    /* Sets the arg field of an ANYOF-type node 'node', using information about
+     * the node passed-in.  If there is nothing outside the node's bitmap, the
+     * arg is set to ANYOF_NONBITMAP_EMPTY.  Otherwise, it sets the argument to
+     * the count returned by add_data(), having allocated and stored an array,
+     * av, that that count references, as follows:
+     *  av[0] stores the character class description in its textual form.
+     *        This is used later (regexec.c:Perl_regclass_swash()) to
+     *        initialize the appropriate swash, and is also useful for dumping
+     *        the regnode.  This is set to &PL_sv_undef if the textual
+     *        description is not needed at run-time (as happens if the other
+     *        elements completely define the class)
+     *  av[1] if &PL_sv_undef, is a placeholder to later contain the swash
+     *        computed from av[0].  But if no further computation need be done,
+     *        the swash is stored there now (and av[0] is &PL_sv_undef).
+     *  av[2] stores the cp_list inversion list for use in addition or instead
+     *        of av[0]; used only if cp_list exists and av[1] is &PL_sv_undef.
+     *        (Otherwise everything needed is already in av[0] and av[1])
+     *  av[3] is set if any component of the class is from a user-defined
+     *        property; used only if av[2] exists */
+
     UV n;
 
     PERL_ARGS_ASSERT_SET_ANYOF_ARG;
 
-    if (! cp_list
-	&& ! HAS_NONLOCALE_RUNTIME_PROPERTY_DEFINITION)
-    {
-	ARG_SET(ret, ANYOF_NONBITMAP_EMPTY);
+    if (! cp_list && ! runtime_defns) {
+	ARG_SET(node, ANYOF_NONBITMAP_EMPTY);
     }
     else {
-        /* av[0] stores the character class description in its textual form.
-         *       This is used later (regexec.c:Perl_regclass_swash()) to
-         *       initialize the appropriate swash, and is also useful for
-         *       dumping the regnode.  This is set to &PL_sv_undef if the
-         *       textual description is not needed at run-time (as happens if
-         *       the other elements completely define the class)
-         * av[1] if &PL_sv_undef, is a placeholder to later contain the swash
-         *       computed from av[0].  But if no further computation need be
-         *       done, the swash is stored there now (and av[0] is
-         *       &PL_sv_undef).
-	 * av[2] stores the cp_list inversion list for use in addition or
-         *       instead of av[0]; used only if cp_list exists and av[1] is
-         *       &PL_sv_undef.  (Otherwise everything needed is already in
-         *       av[0] and av[1])
-	 * av[3] is set if any component of the class is from a user-defined
-	 *       property; used only if av[2] exists */
 	AV * const av = newAV();
 	SV *rv;
 
-	av_store(av, 0, (HAS_NONLOCALE_RUNTIME_PROPERTY_DEFINITION)
-			? SvREFCNT_inc(listsv) : &PL_sv_undef);
+	av_store(av, 0, (runtime_defns)
+			? SvREFCNT_inc(runtime_defns) : &PL_sv_undef);
 	if (swash) {
 	    av_store(av, 1, swash);
 	    SvREFCNT_dec_NN(cp_list);
@@ -14090,11 +14095,9 @@ S_set_ANYOF_arg(pTHX_ struct RExC_state_t* const pRExC_state,
 	rv = newRV_noinc(MUTABLE_SV(av));
 	n = add_data(pRExC_state, 1, "s");
 	RExC_rxi->data->data[n] = (void*)rv;
-	ARG_SET(ret, n);
+	ARG_SET(node, n);
     }
 }
-
-#undef HAS_NONLOCALE_RUNTIME_PROPERTY_DEFINITION
 
 
 /* reg_skipcomment()
