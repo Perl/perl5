@@ -68,8 +68,6 @@ $have_setlocale = 0 if ((($^O eq 'MSWin32' && !$winxp) || $^O eq 'NetWare') &&
 # UWIN seems to loop after taint tests, just skip for now
 $have_setlocale = 0 if ($^O =~ /^uwin/);
 
-sub LC_ALL ();
-
 $a = 'abc %';
 
 my $test_num = 0;
@@ -528,7 +526,7 @@ my @Alnum_;
 sub trylocale {
     my $locale = shift;
     return if grep { $locale eq $_ } @Locale;
-    return unless setlocale(LC_ALL, $locale);
+    return unless setlocale(&POSIX::LC_ALL, $locale);
     my $badutf8;
     {
         local $SIG{__WARN__} = sub {
@@ -653,7 +651,7 @@ if (-x "/usr/bin/locale" && open(LOCALES, "/usr/bin/locale -a 2>/dev/null|")) {
     }
 }
 
-setlocale(LC_ALL, "C");
+setlocale(&POSIX::LC_ALL, "C");
 
 if ($^O eq 'darwin') {
     # Darwin 8/Mac OS X 10.4 and 10.5 have bad Basque locales: perl bug #35895,
@@ -717,7 +715,7 @@ foreach $Locale (@Locale) {
     $locales_test_number = $first_locales_test_number - 1;
     debug "# Locale = $Locale\n";
 
-    unless (setlocale(LC_ALL, $Locale)) {
+    unless (setlocale(&POSIX::LC_ALL, $Locale)) {
         $setlocale_failed{$Locale} = $Locale;
 	next;
     }
@@ -1721,7 +1719,7 @@ $test_num = $final_locales_test_number;
 # the time these were added above this in this file.
 # This also tests that locale overrides unicode_strings in the same scope for
 # non-utf8 strings.
-setlocale(LC_ALL, "C");
+setlocale(&POSIX::LC_ALL, "C");
 {
     use locale;
     use feature 'unicode_strings';
