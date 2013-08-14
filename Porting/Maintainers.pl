@@ -203,7 +203,6 @@ use File::Glob qw(:case);
         'MAINTAINER'   => 'kane',
         'DISTRIBUTION' => 'BINGOS/Archive-Tar-1.92.tar.gz',
         'FILES'        => q[cpan/Archive-Tar],
-        'EXCLUDED'     => ['Makefile.PL'],
         'UPSTREAM'     => 'cpan',
         'BUGS'         => 'bug-archive-tar@rt.cpan.org',
     },
@@ -406,7 +405,6 @@ use File::Glob qw(:case);
             qr{^inc/Test/},
             qr{^t/CPAN/authors/},
             qw( lib/CPAN/Admin.pm
-                Makefile.PL
                 scripts/cpan-mirrors
                 SlayMakefile
                 t/00signature.t
@@ -602,13 +600,7 @@ use File::Glob qw(:case);
         'FILES'        => q[cpan/encoding-warnings],
         'EXCLUDED'     => [
             qr{^inc/Module/},
-            qw( t/0-signature.t
-                Makefile.PL
-                MANIFEST
-                META.yml
-                README
-                SIGNATURE
-                ),
+            qw(t/0-signature.t),
         ],
         'UPSTREAM' => undef,
     },
@@ -832,7 +824,6 @@ use File::Glob qw(:case);
         'DISTRIBUTION' => 'SMUELLER/Filter-Simple-0.88.tar.gz',
         'FILES'        => q[dist/Filter-Simple],
         'EXCLUDED'     => [
-            'Makefile.PL',
             qr{^demo/}
         ],
         'UPSTREAM' => 'blead',
