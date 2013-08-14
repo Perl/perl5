@@ -144,7 +144,7 @@ $anonhash = {};
 is (ref $anonhash, 'HASH');
 $anonhash2 = {FOO => 'BAR', ABC => 'XYZ',};
 is (join('', sort values $anonhash2->%*), 'BARXYZ'); # is (join('', sort values %$anonhash2), 'BARXYZ');
-$anonhash2{23} = 'tt';@$anonhash2{skiddoo=> 99} = qw/rr nn/;
+$anonhash2->{23} = 'tt';@$anonhash2{skiddoo=> 99} = qw/rr nn/;
 is(join(':',$anonhash2->@{23 => skiddoo => 99}), 'tt:rr:nn', 'pf hash slice');
 
 # test immediate destruction of lexical objects (op/ref.t tests LIFO order)
@@ -208,8 +208,8 @@ is ($test, $Stoogetime + 4, "no stooges outlast their scope");
     is (length $name, 1, "Name is 1 char");
     is (length $name_utf8, 3, "UTF8 representation is 3 chars");
 
-    is ($$name->$*, undef, 'Nothing before we start');
-    is ($$name_utf8->$*, undef, 'Nothing before we start');
+    is ($name->$*, undef, 'Nothing before we start');
+    is ($name_utf8->$*, undef, 'Nothing before we start');
     $name->$* = "Face";
     is ($name->$*, "Face", 'Accessing via Unicode symref works');
     is ($name_utf8->$*, undef,
@@ -273,7 +273,7 @@ is ($test, $Stoogetime + 4, "no stooges outlast their scope");
     eval q/ $ref->** /;
     is($@, '', "Glob dereference of PVIO is acceptable");
 
-    is($ref, (eval '$ref->**->{IO}'), "IO slot of the temporary glob is set correctly");
+    is($ref, (eval '$ref->*{IO}'), "IO slot of the temporary glob is set correctly");
 }
 
 # these will segfault if they fail
