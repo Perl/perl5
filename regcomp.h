@@ -333,7 +333,7 @@ struct regnode_ssc {
 
 #define ANYOF_INVERT		 0x04
 
-/* Set if this is a struct regnode_charclass_class vs a regnode_charclass.  This
+/* Set if this is a regnode_charclass_posixl vs a regnode_charclass.  This
  * is used for runtime \d, \w, [:posix:], ..., which are used only in locale
  * and the optimizer's synthetic start class.  Non-locale \d, etc are resolved
  * at compile-time.  Could be shared with ANYOF_LOCALE, forcing all locale
@@ -443,32 +443,32 @@ struct regnode_ssc {
 /* Utility macros for the bitmap and classes of ANYOF */
 
 #define ANYOF_SIZE		(sizeof(struct regnode_charclass))
-#define ANYOF_POSIXL_SIZE	(sizeof(struct regnode_charclass_class))
+#define ANYOF_POSIXL_SIZE	(sizeof(regnode_charclass_posixl))
 #define ANYOF_CLASS_SIZE	ANYOF_POSIXL_SIZE
 
 #define ANYOF_FLAGS(p)		((p)->flags)
 
 #define ANYOF_BIT(c)		(1 << ((c) & 7))
 
-#define ANYOF_POSIXL_SET(p, c)	(((struct regnode_charclass_class*) (p))->classflags |= (1U << (c)))
+#define ANYOF_POSIXL_SET(p, c)	(((regnode_charclass_posixl*) (p))->classflags |= (1U << (c)))
 #define ANYOF_CLASS_SET(p, c)	ANYOF_POSIXL_SET((p), (c))
 
-#define ANYOF_POSIXL_CLEAR(p, c) (((struct regnode_charclass_class*) (p))->classflags &= ~ (1U <<(c)))
+#define ANYOF_POSIXL_CLEAR(p, c) (((regnode_charclass_posixl*) (p))->classflags &= ~ (1U <<(c)))
 #define ANYOF_CLASS_CLEAR(p, c)	ANYOF_POSIXL_CLEAR((p), (c))
 
-#define ANYOF_POSIXL_TEST(p, c)	(((struct regnode_charclass_class*) (p))->classflags & (1U << (c)))
+#define ANYOF_POSIXL_TEST(p, c)	(((regnode_charclass_posixl*) (p))->classflags & (1U << (c)))
 #define ANYOF_CLASS_TEST(p, c)	ANYOF_POSIXL_TEST((p), (c))
 
-#define ANYOF_POSIXL_ZERO(ret)	STMT_START { ((struct regnode_charclass_class*) (ret))->classflags = 0; } STMT_END
+#define ANYOF_POSIXL_ZERO(ret)	STMT_START { ((regnode_charclass_posixl*) (ret))->classflags = 0; } STMT_END
 #define ANYOF_CLASS_ZERO(ret)	ANYOF_POSIXL_ZERO(ret)
 
 /* Shifts a bit to get, eg. 0x4000_0000, then subtracts 1 to get 0x3FFF_FFFF */
-#define ANYOF_POSIXL_SETALL(ret) STMT_START { ((struct regnode_charclass_class*) (ret))->classflags = ((1U << ((ANYOF_POSIXL_MAX) - 1))) - 1; } STMT_END
+#define ANYOF_POSIXL_SETALL(ret) STMT_START { ((regnode_charclass_posixl*) (ret))->classflags = ((1U << ((ANYOF_POSIXL_MAX) - 1))) - 1; } STMT_END
 #define ANYOF_CLASS_SETALL(ret) ANYOF_POSIXL_SETALL(ret)
 
 #define ANYOF_POSIXL_TEST_ANY_SET(p)                               \
         ((ANYOF_FLAGS(p) & ANYOF_POSIXL)                           \
-	 && (((struct regnode_charclass_class*)(p))->classflags))
+	 && (((regnode_charclass_posixl*)(p))->classflags))
 #define ANYOF_CLASS_TEST_ANY_SET(p) ANYOF_POSIXL_TEST_ANY_SET(p)
 
 #define ANYOF_POSIXL_OR(source, dest) STMT_START { (dest)->classflags |= (source)->classflags ; } STMT_END

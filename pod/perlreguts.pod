@@ -180,15 +180,15 @@ Various flags whose names begin with C<ANYOF_> are used for special
 situations.  Above Latin1 matches and things not known until run-time
 are stored in L</Perl's pprivate structure>.
 
-=item C<regnode_charclass_class>
+=item C<regnode_charclass_posixl>
 
 There is also a larger form of a char class structure used to represent
 POSIX char classes under C</l> matching,
-called C<regnode_charclass_class> which has an
+called C<regnode_charclass_posixl> which has an
 additional 32-bit bitmap indicating which POSIX char classes
 have been included.
 
-   regnode_charclass_class  U32 arg1;
+   regnode_charclass_posixl U32 arg1;
                             char bitmap[ANYOF_BITMAP_SIZE];
                             U32 classflags;
 

@@ -3277,6 +3277,11 @@ typedef struct magic_state MGS;	/* struct magic_state defined in mg.c */
 
 struct scan_data_t;		/* Used in S_* functions in regcomp.c */
 struct regnode_charclass_class;	/* Used in S_* functions in regcomp.c */
+
+/* A hopefully less confusing name.  The sub-classes are all Posix classes only
+ * used under /l matching */
+typedef struct regnode_charclass_class regnode_charclass_posixl;
+
 typedef struct regnode_ssc regnode_ssc;
 
 struct ptr_tbl_ent {
