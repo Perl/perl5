@@ -955,7 +955,7 @@ $(MINIPERL) : ..\lib\buildcustomize.pl
 	$(LINK32) -subsystem:console -out:$(MINIPERL) @<<
 	$(LINK_FLAGS) $(DELAYLOAD) $(LIBFILES) $(MINI_OBJ)
 <<
-	$(EMBED_EXE_MANI)
+	$(EMBED_EXE_MANI:..\lib\buildcustomize.pl=..\miniperl.exe)
 	$(MINIPERL) -I..\lib -f ..\write_buildcustomize.pl ..
 
 $(MINIDIR) :

@@ -1083,7 +1083,7 @@ $(MINIPERL) : ..\lib\buildcustomize.pl
 .ELSE
 	$(LINK32) -subsystem:console -out:$(MINIPERL) $(BLINK_FLAGS) \
 	    @$(mktmp $(DELAYLOAD) $(LIBFILES) $(MINI_OBJ))
-	$(EMBED_EXE_MANI)
+	$(EMBED_EXE_MANI:s/$@/$(MINIPERL)/)
 .ENDIF
 	$(MINIPERL) -I..\lib -f ..\write_buildcustomize.pl ..
 
