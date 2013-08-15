@@ -7809,8 +7809,10 @@ Perl__invlist_intersection_maybe_complement_2nd(pTHX_ SV* const a, SV* const b, 
     /* Take the intersection of two inversion lists and point <i> to it.  *i
      * SHOULD BE DEFINED upon input, and if it points to one of the two lists,
      * the reference count to that list will be decremented.
-     * If <complement_b> is TRUE, the result will be the intersection of <a>
-     * and the complement (or inversion) of <b> instead of <b> directly.
+     * The first list, <a>, may be NULL, in which case an empty list is
+     * returned.  If <complement_b> is TRUE, the result will be the
+     * intersection of <a> and the complement (or inversion) of <b> instead of
+     * <b> directly.
      *
      * The basis for this comes from "Unicode Demystified" Chapter 13 by
      * Richard Gillam, published by Addison-Wesley, and explained at some
@@ -12853,7 +12855,7 @@ parseit:
 
                     /* This code is structured into two major clauses.  The
                      * first is for classes whose complete definitions may not
-                     * already be known.  It not, the Latin1 definition
+                     * already be known.  If not, the Latin1 definition
                      * (guaranteed to already known) is used plus code is
                      * generated to load the rest at run-time (only if needed).
                      * If the complete definition is known, it drops down to
@@ -14064,7 +14066,7 @@ S_set_ANYOF_arg(pTHX_ RExC_state_t* const pRExC_state,
      *        elements completely define the class)
      *  av[1] if &PL_sv_undef, is a placeholder to later contain the swash
      *        computed from av[0].  But if no further computation need be done,
-     *        the swash is stored there now (and av[0] is &PL_sv_undef).
+     *        the swash is stored here now (and av[0] is &PL_sv_undef).
      *  av[2] stores the cp_list inversion list for use in addition or instead
      *        of av[0]; used only if cp_list exists and av[1] is &PL_sv_undef.
      *        (Otherwise everything needed is already in av[0] and av[1])
