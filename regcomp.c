@@ -4490,7 +4490,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
                 *minnextp += min;
 
                 if (f & SCF_DO_STCLASS_AND) {
-                    const int was = TEST_SSC_EOS(data.start_class);
+                    const int was = TEST_SSC_EOS(data->start_class);
 
                     ssc_and(data->start_class, &intrnl);
                     if (was)
