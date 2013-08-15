@@ -2,8 +2,6 @@
 
 =for comment
 Stuff that needs to be done still:
-6136213 [perl #52000] Warn/abort on attempted perl exit
-cccbbce Reap child in case where exception has been thrown
 70502ce [perl #119101] Extraneous warnings in Parse::ErrorString::Perl
 aa8c2dc Fix RT #41461 (with a test).
 
@@ -216,6 +214,13 @@ L<IPC::Cmd> has been upgraded from version 0.82 to 0.84.
 
 C<run_forked> has various fixes/improvements, L<Socket> is only used where
 needed and a regression introduced in 0.78 has been fixed.
+
+=item *
+
+L<IPC::Open3> has been upgradded from version 1.14 to 1.15.
+
+C<open3> would leak a zombie process if the child process I/O
+redirection or exec() failed. [perl #114722]
 
 =item *
 
@@ -467,6 +472,11 @@ well.
 
 C<sv_pos_b2u_flags> has been added to the API.  It is similar to
 C<sv_pos_b2u>, but supports long strings on 64-bit platforms.
+
+=item *
+
+C<PL_exit_flags> can now be used by perl embedders or other XS code to
+have perl warn or abort() on an attempted exit. [perl #52000]
 
 =back
 
