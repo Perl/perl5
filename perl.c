@@ -844,6 +844,8 @@ perl_destruct(pTHXx)
         return STATUS_EXIT;
     }
 
+    /* Below, do clean up for when PERL_DESTRUCT_LEVEL is not 0 */
+
 #ifdef USE_ITHREADS
     /* the syntax tree is shared between clones
      * so op_free(PL_main_root) only ReREFCNT_dec's
@@ -1012,6 +1014,11 @@ perl_destruct(pTHXx)
     SvREFCNT_dec(PL_utf8_idstart);
     SvREFCNT_dec(PL_utf8_idcont);
     SvREFCNT_dec(PL_utf8_foldclosures);
+    SvREFCNT_dec(PL_AboveLatin1);
+    SvREFCNT_dec(PL_UpperLatin1);
+    SvREFCNT_dec(PL_Latin1);
+    SvREFCNT_dec(PL_NonL1NonFinalFold);
+    SvREFCNT_dec(PL_HasMultiCharFold);
     PL_utf8_mark	= NULL;
     PL_utf8_toupper	= NULL;
     PL_utf8_totitle	= NULL;
@@ -1020,6 +1027,11 @@ perl_destruct(pTHXx)
     PL_utf8_idstart	= NULL;
     PL_utf8_idcont	= NULL;
     PL_utf8_foldclosures = NULL;
+    PL_AboveLatin1       = NULL;
+    PL_HasMultiCharFold  = NULL;
+    PL_Latin1            = NULL;
+    PL_NonL1NonFinalFold = NULL;
+    PL_UpperLatin1       = NULL;
     for (i = 0; i < POSIX_CC_COUNT; i++) {
         SvREFCNT_dec(PL_Posix_ptrs[i]);
         PL_Posix_ptrs[i] = NULL;
