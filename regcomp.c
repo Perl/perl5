@@ -1583,13 +1583,13 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
     const U8 * folder = NULL;
 
 #ifdef DEBUGGING
-    const U32 data_slot = add_data( pRExC_state, 4, "tuuu" );
+    const U32 data_slot = add_data( pRExC_state, STR_WITH_LEN("tuuu"));
     AV *trie_words = NULL;
     /* along with revcharmap, this only used during construction but both are
      * useful during debugging so we store them in the struct when debugging.
      */
 #else
-    const U32 data_slot = add_data( pRExC_state, 2, "tu" );
+    const U32 data_slot = add_data( pRExC_state, STR_WITH_LEN("tu"));
     STRLEN trie_charcount=0;
 #endif
     SV *re_trie_maxbuff;
@@ -2569,7 +2569,7 @@ S_make_trie_failtable(pTHX_ RExC_state_t *pRExC_state, regnode *source,  regnode
     U32 base = trie->states[ 1 ].trans.base;
     U32 *fail;
     reg_ac_data *aho;
-    const U32 data_slot = add_data( pRExC_state, 1, "T" );
+    const U32 data_slot = add_data( pRExC_state, STR_WITH_LEN("T"));
     GET_RE_DEBUG_FLAGS_DECL;
 
     PERL_ARGS_ASSERT_MAKE_TRIE_FAILTABLE;
@@ -4770,7 +4770,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
 }
 
 STATIC U32
-S_add_data(RExC_state_t* const pRExC_state, const U32 n, const char* const s)
+S_add_data(RExC_state_t* const pRExC_state, const char* const s, const U32 n)
 {
     U32 count = RExC_rxi->data ? RExC_rxi->data->count : 0;
 
@@ -6318,7 +6318,7 @@ reStudy:
 	    && ! TEST_SSC_EOS(data.start_class)
 	    && !ssc_is_anything(data.start_class))
 	{
-	    const U32 n = add_data(pRExC_state, 1, "f");
+	    const U32 n = add_data(pRExC_state, STR_WITH_LEN("f"));
 
 	    Newx(RExC_rxi->data->data[n], 1, regnode_ssc);
 	    StructCopy(data.start_class,
@@ -6389,7 +6389,7 @@ reStudy:
 	if (! TEST_SSC_EOS(data.start_class)
 	    && !ssc_is_anything(data.start_class))
 	{
-	    const U32 n = add_data(pRExC_state, 1, "f");
+	    const U32 n = add_data(pRExC_state, STR_WITH_LEN("f"));
 
 	    Newx(RExC_rxi->data->data[n], 1, regnode_ssc);
 	    StructCopy(data.start_class,
@@ -6455,7 +6455,7 @@ reStudy:
     }
 #ifdef DEBUGGING
     if (RExC_paren_names) {
-        ri->name_list_idx = add_data( pRExC_state, 1, "a" );
+        ri->name_list_idx = add_data( pRExC_state, STR_WITH_LEN("a"));
         ri->data->data[ri->name_list_idx] = (void*)SvREFCNT_inc(RExC_paren_name_list);
     } else
 #endif
@@ -8818,7 +8818,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 	            if ( ! internal_argval && ! SIZE_ONLY ) {
                         if (start_arg) {
                             SV *sv = newSVpvn( start_arg, RExC_parse - start_arg);
-                            ARG(ret) = add_data( pRExC_state, 1, "S" );
+                            ARG(ret) = add_data( pRExC_state, STR_WITH_LEN("S"));
                             RExC_rxi->data->data[ARG(ret)]=(void*)sv;
                             ret->flags = 0;
                         } else {
@@ -8867,7 +8867,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                         vFAIL2("Sequence %.3s... not terminated",parse_start);
 
                     if (!SIZE_ONLY) {
-                        num = add_data( pRExC_state, 1, "S" );
+                        num = add_data( pRExC_state, STR_WITH_LEN("S"));
                         RExC_rxi->data->data[num]=(void*)sv_dat;
                         SvREFCNT_inc_simple_void(sv_dat);
                     }
@@ -9143,14 +9143,14 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 		if (!SIZE_ONLY) {
 		    OP *o = cb->block;
 		    if (cb->src_regex) {
-			n = add_data(pRExC_state, 2, "rl");
+			n = add_data(pRExC_state, STR_WITH_LEN("rl"));
 			RExC_rxi->data->data[n] =
 			    (void*)SvREFCNT_inc((SV*)cb->src_regex);
 			RExC_rxi->data->data[n+1] = (void*)o;
 		    }
 		    else {
-			n = add_data(pRExC_state, 1,
-			       (RExC_pm_flags & PMf_HAS_CV) ? "L" : "l");
+			n = add_data(pRExC_state,
+			       (RExC_pm_flags & PMf_HAS_CV) ? "L" : "l", 1);
 			RExC_rxi->data->data[n] = (void*)o;
 		    }
 		}
@@ -9211,7 +9211,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                             (ch == '>' ? '<' : ch));
                     RExC_parse++;
 	            if (!SIZE_ONLY) {
-                        num = add_data( pRExC_state, 1, "S" );
+                        num = add_data( pRExC_state, STR_WITH_LEN("S"));
                         RExC_rxi->data->data[num]=(void*)sv_dat;
                         SvREFCNT_inc_simple_void(sv_dat);
                     }
@@ -10685,7 +10685,7 @@ tryagain:
                     vFAIL2("Sequence %.3s... not terminated",parse_start);
 
                 if (!SIZE_ONLY) {
-                    num = add_data( pRExC_state, 1, "S" );
+                    num = add_data( pRExC_state, STR_WITH_LEN("S"));
                     RExC_rxi->data->data[num]=(void*)sv_dat;
                     SvREFCNT_inc_simple_void(sv_dat);
                 }
@@ -14159,7 +14159,7 @@ S_set_ANYOF_arg(pTHX_ RExC_state_t* const pRExC_state,
 	}
 
 	rv = newRV_noinc(MUTABLE_SV(av));
-	n = add_data(pRExC_state, 1, "s");
+	n = add_data(pRExC_state, STR_WITH_LEN("s"));
 	RExC_rxi->data->data[n] = (void*)rv;
 	ARG_SET(node, n);
     }
