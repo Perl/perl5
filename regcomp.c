@@ -7582,10 +7582,11 @@ Perl__invlist_union_maybe_complement_2nd(pTHX_ SV* const a, SV* const b, const b
 {
     /* Take the union of two inversion lists and point <output> to it.  *output
      * SHOULD BE DEFINED upon input, and if it points to one of the two lists,
-     * the reference count to that list will be decremented.  The first list,
-     * <a>, may be NULL, in which case a copy of the second list is returned.
-     * If <complement_b> is TRUE, the union is taken of the complement
-     * (inversion) of <b> instead of b itself.
+     * the reference count to that list will be decremented if not already a
+     * temporary (mortal); otherwise *output will be made correspondingly
+     * mortal.  The first list, <a>, may be NULL, in which case a copy of the
+     * second list is returned.  If <complement_b> is TRUE, the union is taken
+     * of the complement (inversion) of <b> instead of b itself.
      *
      * The basis for this comes from "Unicode Demystified" Chapter 13 by
      * Richard Gillam, published by Addison-Wesley, and explained at some
@@ -7626,9 +7627,13 @@ Perl__invlist_union_maybe_complement_2nd(pTHX_ SV* const a, SV* const b, const b
 
     /* If either one is empty, the union is the other one */
     if (a == NULL || ((len_a = _invlist_len(a)) == 0)) {
+        bool make_temp = FALSE; /* Should we mortalize the result? */
+
 	if (*output == a) {
             if (a != NULL) {
-                SvREFCNT_dec_NN(a);
+                if (! (make_temp = SvTEMP(a))) {
+                    SvREFCNT_dec_NN(a);
+                }
             }
 	}
 	if (*output != b) {
@@ -7637,18 +7642,27 @@ Perl__invlist_union_maybe_complement_2nd(pTHX_ SV* const a, SV* const b, const b
                 _invlist_invert(*output);
             }
 	} /* else *output already = b; */
+
+        if (make_temp) {
+            sv_2mortal(*output);
+        }
 	return;
     }
     else if ((len_b = _invlist_len(b)) == 0) {
+        bool make_temp = FALSE;
 	if (*output == b) {
-	    SvREFCNT_dec_NN(b);
+            if (! (make_temp = SvTEMP(b))) {
+                SvREFCNT_dec_NN(b);
+            }
 	}
 
         /* The complement of an empty list is a list that has everything in it,
          * so the union with <a> includes everything too */
         if (complement_b) {
             if (a == *output) {
-                SvREFCNT_dec_NN(a);
+                if (! (make_temp = SvTEMP(a))) {
+                    SvREFCNT_dec_NN(a);
+                }
             }
             *output = _new_invlist(1);
             _append_range_to_invlist(*output, 0, UV_MAX);
@@ -7657,6 +7671,10 @@ Perl__invlist_union_maybe_complement_2nd(pTHX_ SV* const a, SV* const b, const b
             *output = invlist_clone(a);
         }
         /* else *output already = a; */
+
+        if (make_temp) {
+            sv_2mortal(*output);
+        }
 	return;
     }
 
@@ -7796,13 +7814,21 @@ Perl__invlist_union_maybe_complement_2nd(pTHX_ SV* const a, SV* const b, const b
 	}
     }
 
-    /*  We may be removing a reference to one of the inputs */
+    /*  We may be removing a reference to one of the inputs.  If so, the output
+     *  is made mortal if the input was.  (Mortal SVs shouldn't have their ref
+     *  count decremented) */
     if (a == *output || b == *output) {
         assert(! invlist_is_iterating(*output));
-	SvREFCNT_dec_NN(*output);
+        if ((SvTEMP(*output))) {
+            sv_2mortal(u);
+        }
+        else {
+            SvREFCNT_dec_NN(*output);
+        }
     }
 
     *output = u;
+
     return;
 }
 
@@ -7811,7 +7837,8 @@ Perl__invlist_intersection_maybe_complement_2nd(pTHX_ SV* const a, SV* const b, 
 {
     /* Take the intersection of two inversion lists and point <i> to it.  *i
      * SHOULD BE DEFINED upon input, and if it points to one of the two lists,
-     * the reference count to that list will be decremented.
+     * the reference count to that list will be decremented if not already a
+     * temporary (mortal); otherwise *i will be made correspondingly mortal.
      * The first list, <a>, may be NULL, in which case an empty list is
      * returned.  If <complement_b> is TRUE, the result will be the
      * intersection of <a> and the complement (or inversion) of <b> instead of
@@ -7853,6 +7880,7 @@ Perl__invlist_intersection_maybe_complement_2nd(pTHX_ SV* const a, SV* const b, 
     /* Special case if either one is empty */
     len_a = (a == NULL) ? 0 : _invlist_len(a);
     if ((len_a == 0) || ((len_b = _invlist_len(b)) == 0)) {
+        bool make_temp = FALSE;
 
         if (len_a != 0 && complement_b) {
 
@@ -7862,24 +7890,38 @@ Perl__invlist_intersection_maybe_complement_2nd(pTHX_ SV* const a, SV* const b, 
              * simply 'a'. */
             if (*i != a) {
                 if (*i == b) {
-                    SvREFCNT_dec_NN(b);
+                    if (! (make_temp = SvTEMP(b))) {
+                        SvREFCNT_dec_NN(b);
+                    }
                 }
 
                 *i = invlist_clone(a);
             }
             /* else *i is already 'a' */
+
+            if (make_temp) {
+                sv_2mortal(*i);
+            }
             return;
         }
 
         /* Here, 'a' or 'b' is empty and not using the complement of 'b'.  The
          * intersection must be empty */
 	if (*i == a) {
-	    SvREFCNT_dec_NN(a);
+            if (! (make_temp = SvTEMP(a))) {
+                SvREFCNT_dec_NN(a);
+            }
 	}
 	else if (*i == b) {
-	    SvREFCNT_dec_NN(b);
+            if (! (make_temp = SvTEMP(b))) {
+                SvREFCNT_dec_NN(b);
+            }
 	}
 	*i = _new_invlist(0);
+        if (make_temp) {
+            sv_2mortal(*i);
+        }
+
 	return;
     }
 
@@ -8009,13 +8051,21 @@ Perl__invlist_intersection_maybe_complement_2nd(pTHX_ SV* const a, SV* const b, 
 	}
     }
 
-    /*  We may be removing a reference to one of the inputs */
+    /*  We may be removing a reference to one of the inputs.  If so, the output
+     *  is made mortal if the input was.  (Mortal SVs shouldn't have their ref
+     *  count decremented) */
     if (a == *i || b == *i) {
         assert(! invlist_is_iterating(*i));
-	SvREFCNT_dec_NN(*i);
+        if (SvTEMP(*i)) {
+            sv_2mortal(r);
+        }
+        else {
+            SvREFCNT_dec_NN(*i);
+        }
     }
 
     *i = r;
+
     return;
 }
 
@@ -8134,7 +8184,7 @@ S_invlist_clone(pTHX_ SV* const invlist)
 {
 
     /* Return a new inversion list that is a copy of the input one, which is
-     * unchanged */
+     * unchanged.  The new list will not be mortal even if the old one was. */
 
     /* Need to allocate extra space to accommodate Perl's addition of a
      * trailing NUL to SvPV's, since it thinks they are always strings */
