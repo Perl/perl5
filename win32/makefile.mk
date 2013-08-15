@@ -13,6 +13,11 @@
 ## Make sure you read README.win32 *before* you mess with anything here!
 ##
 
+#
+# Import everything from the environment like NMAKE does.
+#
+.IMPORT : .EVERYTHING
+
 ##
 ## Build configuration.  Edit the values below to suit your needs.
 ##
@@ -302,8 +307,6 @@ BUILDOPT	+= -DPERL_IMPLICIT_CONTEXT
 .IF "$(USE_IMP_SYS)" != "undef"
 BUILDOPT	+= -DPERL_IMPLICIT_SYS
 .ENDIF
-
-.IMPORT .IGNORE : PROCESSOR_ARCHITECTURE PROCESSOR_ARCHITEW6432 WIN64 CCHOME
 
 PROCESSOR_ARCHITECTURE *= x86
 
