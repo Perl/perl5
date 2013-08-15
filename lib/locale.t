@@ -817,6 +817,8 @@ foreach $Locale (@Locale) {
     # documented deficiencies.  Non- UTF-8 locales are tested only under plain
     # 'use locale', as otherwise we would have to convert everything in them
     # to Unicode.
+    # The locale name doesn't necessarily have to have "utf8" in it to be a
+    # UTF-8 locale, but it works mostly.
     my $is_utf8_locale = $Locale =~ /UTF-?8/i;
 
     my %UPPER = ();     # All alpha X for which uc(X) == X and lc(X) != X
