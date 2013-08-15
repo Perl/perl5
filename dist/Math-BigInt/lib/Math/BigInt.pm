@@ -2533,7 +2533,7 @@ sub bround
 
 sub bfloor
   {
-  # return integer less or equal then number; no-op since it's already integer
+  # round towards minus infinity; no-op since it's already integer
   my ($self,$x,@r) = ref($_[0]) ? (undef,@_) : objectify(1,@_);
 
   $x->round(@r);
@@ -2541,11 +2541,18 @@ sub bfloor
 
 sub bceil
   {
-  # return integer greater or equal then number; no-op since it's already int
+  # round towards plus infinity; no-op since it's already int
   my ($self,$x,@r) = ref($_[0]) ? (undef,@_) : objectify(1,@_);
 
   $x->round(@r);
   }
+
+sub bint {
+    # round towards zero; no-op since it's already integer
+    my ($self,$x,@r) = ref($_[0]) ? (undef,@_) : objectify(1,@_);
+
+    $x->round(@r);
+}
 
 sub as_number
   {
@@ -3413,8 +3420,9 @@ Math::BigInt - Arbitrary size integer/float math package
   # The following do not modify their arguments in BigInt (are no-ops),
   # but do so in BigFloat:
 
-  $x->bfloor();		   # return integer less or equal than $x
-  $x->bceil();		   # return integer greater or equal than $x
+  $x->bfloor();            # round towards minus infinity
+  $x->bceil();             # round towards plus infinity
+  $x->bint();              # round towards zero
 
   # The following do not modify their arguments:
 
@@ -4132,15 +4140,24 @@ Examples:
 
 	$x->bfloor();
 
-Set $x to the integer less or equal than $x. This is a no-op in BigInt, but
-does change $x in BigFloat.
+Round $x towards minus infinity (i.e., set $x to the largest integer less than
+or equal to $x). This is a no-op in BigInt, but changes $x in BigFloat, if $x
+is not an integer.
 
 =item bceil()
 
 	$x->bceil();
 
-Set $x to the integer greater or equal than $x. This is a no-op in BigInt, but
-does change $x in BigFloat.
+Round $x towards plus infinity (i.e., set $x to the smallest integer greater
+than or equal to $x). This is a no-op in BigInt, but changes $x in BigFloat, if
+$x is not an integer.
+
+=item bint()
+
+        $x->bint();
+
+Round $x towards zero. This is a no-op in BigInt, but changes $x in BigFloat,
+if $x is not an integer.
 
 =item bgcd()
 
@@ -4747,16 +4764,16 @@ change.
 
   use Math::BigInt;
 
-  sub bint { Math::BigInt->new(shift); }
+  sub bigint { Math::BigInt->new(shift); }
 
   $x = Math::BigInt->bstr("1234")      	# string "1234"
   $x = "$x";                         	# same as bstr()
   $x = Math::BigInt->bneg("1234");   	# BigInt "-1234"
   $x = Math::BigInt->babs("-12345"); 	# BigInt "12345"
   $x = Math::BigInt->bnorm("-0.00"); 	# BigInt "0"
-  $x = bint(1) + bint(2);            	# BigInt "3"
-  $x = bint(1) + "2";                	# ditto (auto-BigIntify of "2")
-  $x = bint(1);                      	# BigInt "1"
+  $x = bigint(1) + bigint(2);           # BigInt "3"
+  $x = bigint(1) + "2";                 # ditto (auto-BigIntify of "2")
+  $x = bigint(1);                       # BigInt "1"
   $x = $x + 5 / 2;                   	# BigInt "3"
   $x = $x ** 3;                      	# BigInt "27"
   $x *= 2;                           	# BigInt "54"

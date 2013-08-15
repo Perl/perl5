@@ -3403,7 +3403,7 @@ sub bround
 
 sub bfloor
   {
-  # return integer less or equal then $x
+  # round towards minus infinity
   my ($self,$x,$a,$p,$r) = ref($_[0]) ? (ref($_[0]),@_) : objectify(1,@_);
 
   return $x if $x->modify('bfloor');
@@ -3423,7 +3423,7 @@ sub bfloor
 
 sub bceil
   {
-  # return integer greater or equal then $x
+  # round towards plus infinity
   my ($self,$x,$a,$p,$r) = ref($_[0]) ? (ref($_[0]),@_) : objectify(1,@_);
 
   return $x if $x->modify('bceil');
@@ -3436,6 +3436,24 @@ sub bceil
     $x->{_e} = $MBI->_zero();			# trunc/norm	
     $x->{_es} = '+';				# abs e
     $MBI->_inc($x->{_m}) if $x->{sign} eq '+';	# increment if positive
+    }
+  $x->round($a,$p,$r);
+  }
+
+sub bint
+  {
+  # round towards zero
+  my ($self,$x,$a,$p,$r) = ref($_[0]) ? (ref($_[0]),@_) : objectify(1,@_);
+
+  return $x if $x->modify('bint');
+  return $x if $x->{sign} !~ /^[+-]$/;  # nan, +inf, -inf
+
+  # if $x has digits after the decimal point
+  if ($x->{_es} eq '-')
+    {
+    $x->{_m} = $MBI->_rsft($x->{_m},$x->{_e},10); # cut off digits after dot
+    $x->{_e} = $MBI->_zero();                     # truncate/normalize
+    $x->{_es} = '+';                              # abs e
     }
   $x->round($a,$p,$r);
   }
@@ -3907,6 +3925,7 @@ Math::BigFloat - Arbitrary size floating point math package
 
  $x->bfloor();		 # return integer less or equal than $x
  $x->bceil();		 # return integer greater or equal than $x
+ $x->bint();             # round towards zero
 
   # The following do not modify their arguments:
 
