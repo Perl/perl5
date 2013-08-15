@@ -13254,7 +13254,7 @@ sub compile_perl() {
     $Graph->add_alias('XPosixGraph');
     $perl->add_match_table("PosixGraph",
                             Description =>
-                                '[-!"#$%&\'()*+,./:;<>?@[\\\]^_`{|}~0-9A-Za-z]',
+                                '[-!"#$%&\'()*+,./:;<=>?@[\\\]^_`{|}~0-9A-Za-z]',
                             Initialize => $Graph & $ASCII,
                             );
 
@@ -13265,7 +13265,7 @@ sub compile_perl() {
     $print->add_alias('XPosixPrint');
     $perl->add_match_table("PosixPrint",
                             Description =>
-                              '[- 0-9A-Za-z!"#$%&\'()*+,./:;<>?@[\\\]^_`{|}~]',
+                              '[- 0-9A-Za-z!"#$%&\'()*+,./:;<=>?@[\\\]^_`{|}~]',
                             Initialize => $print & $ASCII,
                             );
 
@@ -13280,7 +13280,7 @@ sub compile_perl() {
                                 Perl_Extension => 1
         );
     $perl->add_match_table('PosixPunct', Perl_Extension => 1,
-        Description => '[-!"#$%&\'()*+,./:;<>?@[\\\]^_`{|}~]',
+        Description => '[-!"#$%&\'()*+,./:;<=>?@[\\\]^_`{|}~]',
         Initialize => $ASCII & $XPosixPunct,
         );
 
