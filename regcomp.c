@@ -4159,7 +4159,14 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
 			NEXT_OFF(oscan) += NEXT_OFF(next);
 		}
 		continue;
-	    default:			/* REF, and CLUMP only? */
+
+	    default:
+#ifdef DEBUGGING
+                Perl_croak(aTHX_ "panic: unexpected varying REx opcode %d",
+                                                                    OP(scan));
+#endif
+            case REF:
+            case CLUMP:
 		if (flags & SCF_DO_SUBSTR) {
 		    SCAN_COMMIT(pRExC_state,data,minlenp);	/* Cannot expect anything... */
 		    data->longest = &(data->longest_float);
