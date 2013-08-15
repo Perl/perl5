@@ -3272,8 +3272,13 @@ struct _sublex_info {
 
 typedef struct magic_state MGS;	/* struct magic_state defined in mg.c */
 
-struct scan_data_t;		/* Used in S_* functions in regcomp.c */
-struct regnode_charclass_class;	/* Used in S_* functions in regcomp.c */
+#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C)
+
+/* These have to be predeclared, as they are used in proto.h which is #included
+ * before their definitions in regcomp.h. */
+
+struct scan_data_t;
+struct regnode_charclass_class;
 
 /* A hopefully less confusing name.  The sub-classes are all Posix classes only
  * used under /l matching */
@@ -3282,6 +3287,8 @@ typedef struct regnode_charclass_class regnode_charclass_posixl;
 typedef struct regnode_ssc regnode_ssc;
 typedef struct RExC_state_t RExC_state_t;
 struct _reg_trie_data;
+
+#endif
 
 struct ptr_tbl_ent {
     struct ptr_tbl_ent*		next;
