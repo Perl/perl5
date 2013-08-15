@@ -5274,7 +5274,7 @@ STATIC bool	S_put_latin1_charclass_innards(pTHX_ SV* sv, char* bitmap)
 
 STATIC void	S_regdump_extflags(pTHX_ const char *lead, const U32 flags);
 STATIC void	S_regdump_intflags(pTHX_ const char *lead, const U32 flags);
-STATIC U8	S_regtail_study(pTHX_ struct RExC_state_t *pRExC_state, regnode *p, const regnode *val, U32 depth)
+STATIC U8	S_regtail_study(pTHX_ RExC_state_t *pRExC_state, regnode *p, const regnode *val, U32 depth)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3);
@@ -6513,7 +6513,6 @@ STATIC SV *	S_space_join_names_mortal(pTHX_ char *const *array)
 
 #endif
 #if defined(PERL_IN_REGCOMP_C)
-PERL_CALLCONV int is_inf	(pTHX);
 STATIC void	S__append_range_to_invlist(pTHX_ SV* const invlist, const UV start, const UV end)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT__APPEND_RANGE_TO_INVLIST	\
@@ -6534,26 +6533,26 @@ STATIC SV*	S__new_invlist_C_array(pTHX_ const UV* const list)
 PERL_STATIC_INLINE SV*	S_add_cp_to_invlist(pTHX_ SV* invlist, const UV cp)
 			__attribute__warn_unused_result__;
 
-STATIC U32	S_add_data(struct RExC_state_t *pRExC_state, U32 n, const char *s)
+STATIC U32	S_add_data(RExC_state_t *pRExC_state, U32 n, const char *s)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(1)
 			__attribute__nonnull__(3);
 #define PERL_ARGS_ASSERT_ADD_DATA	\
 	assert(pRExC_state); assert(s)
 
-PERL_STATIC_INLINE void	S_alloc_maybe_populate_EXACT(pTHX_ struct RExC_state_t *pRExC_state, regnode *node, I32 *flagp, STRLEN len, UV code_point)
+PERL_STATIC_INLINE void	S_alloc_maybe_populate_EXACT(pTHX_ RExC_state_t *pRExC_state, regnode *node, I32 *flagp, STRLEN len, UV code_point)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3);
 #define PERL_ARGS_ASSERT_ALLOC_MAYBE_POPULATE_EXACT	\
 	assert(pRExC_state); assert(node); assert(flagp)
 
-PERL_STATIC_INLINE U8	S_compute_EXACTish(pTHX_ struct RExC_state_t *pRExC_state)
+PERL_STATIC_INLINE U8	S_compute_EXACTish(pTHX_ RExC_state_t *pRExC_state)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_COMPUTE_EXACTISH	\
 	assert(pRExC_state)
 
-STATIC bool	S_could_it_be_a_POSIX_class(pTHX_ struct RExC_state_t *pRExC_state)
+STATIC bool	S_could_it_be_a_POSIX_class(pTHX_ RExC_state_t *pRExC_state)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_COULD_IT_BE_A_POSIX_CLASS	\
 	assert(pRExC_state)
@@ -6570,13 +6569,13 @@ PERL_STATIC_INLINE IV*	S_get_invlist_previous_index_addr(pTHX_ SV* invlist)
 #define PERL_ARGS_ASSERT_GET_INVLIST_PREVIOUS_INDEX_ADDR	\
 	assert(invlist)
 
-STATIC bool	S_grok_bslash_N(pTHX_ struct RExC_state_t *pRExC_state, regnode** nodep, UV *valuep, I32 *flagp, U32 depth, bool in_char_class, const bool strict)
+STATIC bool	S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state, regnode** nodep, UV *valuep, I32 *flagp, U32 depth, bool in_char_class, const bool strict)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_4);
 #define PERL_ARGS_ASSERT_GROK_BSLASH_N	\
 	assert(pRExC_state); assert(flagp)
 
-STATIC regnode*	S_handle_regex_sets(pTHX_ struct RExC_state_t *pRExC_state, SV ** return_invlist, I32 *flagp, U32 depth, char * const oregcomp_parse)
+STATIC regnode*	S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV ** return_invlist, I32 *flagp, U32 depth, char * const oregcomp_parse)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_3)
 			__attribute__nonnull__(pTHX_5);
@@ -6657,7 +6656,7 @@ PERL_STATIC_INLINE void	S_invlist_trim(pTHX_ SV* const invlist)
 #define PERL_ARGS_ASSERT_INVLIST_TRIM	\
 	assert(invlist)
 
-STATIC U32	S_join_exact(pTHX_ struct RExC_state_t *pRExC_state, regnode *scan, UV *min_subtract, bool *has_exactf_sharp_s, U32 flags, regnode *val, U32 depth)
+STATIC U32	S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan, UV *min_subtract, bool *has_exactf_sharp_s, U32 flags, regnode *val, U32 depth)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3)
@@ -6665,7 +6664,7 @@ STATIC U32	S_join_exact(pTHX_ struct RExC_state_t *pRExC_state, regnode *scan, U
 #define PERL_ARGS_ASSERT_JOIN_EXACT	\
 	assert(pRExC_state); assert(scan); assert(min_subtract); assert(has_exactf_sharp_s)
 
-STATIC I32	S_make_trie(pTHX_ struct RExC_state_t *pRExC_state, regnode *startbranch, regnode *first, regnode *last, regnode *tail, U32 word_count, U32 flags, U32 depth)
+STATIC I32	S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *first, regnode *last, regnode *tail, U32 word_count, U32 flags, U32 depth)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3)
@@ -6674,19 +6673,19 @@ STATIC I32	S_make_trie(pTHX_ struct RExC_state_t *pRExC_state, regnode *startbra
 #define PERL_ARGS_ASSERT_MAKE_TRIE	\
 	assert(pRExC_state); assert(startbranch); assert(first); assert(last); assert(tail)
 
-STATIC void	S_make_trie_failtable(pTHX_ struct RExC_state_t *pRExC_state, regnode *source, regnode *stclass, U32 depth)
+STATIC void	S_make_trie_failtable(pTHX_ RExC_state_t *pRExC_state, regnode *source, regnode *stclass, U32 depth)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3);
 #define PERL_ARGS_ASSERT_MAKE_TRIE_FAILTABLE	\
 	assert(pRExC_state); assert(source); assert(stclass)
 
-STATIC char *	S_nextchar(pTHX_ struct RExC_state_t *pRExC_state)
+STATIC char *	S_nextchar(pTHX_ RExC_state_t *pRExC_state)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_NEXTCHAR	\
 	assert(pRExC_state)
 
-STATIC void	S_parse_lparen_question_flags(pTHX_ struct RExC_state_t *pRExC_state)
+STATIC void	S_parse_lparen_question_flags(pTHX_ RExC_state_t *pRExC_state)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_PARSE_LPAREN_QUESTION_FLAGS	\
 	assert(pRExC_state)
@@ -6704,13 +6703,13 @@ PERL_STATIC_NO_RET void	S_re_croak2(pTHX_ bool utf8, const char* pat1, const cha
 #define PERL_ARGS_ASSERT_RE_CROAK2	\
 	assert(pat1); assert(pat2)
 
-STATIC regnode*	S_reg(pTHX_ struct RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
+STATIC regnode*	S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_3);
 #define PERL_ARGS_ASSERT_REG	\
 	assert(pRExC_state); assert(flagp)
 
-STATIC regnode*	S_reg_node(pTHX_ struct RExC_state_t *pRExC_state, U8 op)
+STATIC regnode*	S_reg_node(pTHX_ RExC_state_t *pRExC_state, U8 op)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_REG_NODE	\
 	assert(pRExC_state)
@@ -6720,91 +6719,91 @@ STATIC UV	S_reg_recode(pTHX_ const char value, SV **encp)
 #define PERL_ARGS_ASSERT_REG_RECODE	\
 	assert(encp)
 
-STATIC SV *	S_reg_scan_name(pTHX_ struct RExC_state_t *pRExC_state, U32 flags)
+STATIC SV *	S_reg_scan_name(pTHX_ RExC_state_t *pRExC_state, U32 flags)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_REG_SCAN_NAME	\
 	assert(pRExC_state)
 
-STATIC bool	S_reg_skipcomment(pTHX_ struct RExC_state_t *pRExC_state)
+STATIC bool	S_reg_skipcomment(pTHX_ RExC_state_t *pRExC_state)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_REG_SKIPCOMMENT	\
 	assert(pRExC_state)
 
-STATIC regnode*	S_reganode(pTHX_ struct RExC_state_t *pRExC_state, U8 op, U32 arg)
+STATIC regnode*	S_reganode(pTHX_ RExC_state_t *pRExC_state, U8 op, U32 arg)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_REGANODE	\
 	assert(pRExC_state)
 
-STATIC regnode*	S_regatom(pTHX_ struct RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
+STATIC regnode*	S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_REGATOM	\
 	assert(pRExC_state); assert(flagp)
 
-STATIC regnode*	S_regbranch(pTHX_ struct RExC_state_t *pRExC_state, I32 *flagp, I32 first, U32 depth)
+STATIC regnode*	S_regbranch(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, I32 first, U32 depth)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_REGBRANCH	\
 	assert(pRExC_state); assert(flagp)
 
-STATIC regnode*	S_regclass(pTHX_ struct RExC_state_t *pRExC_state, I32 *flagp, U32 depth, const bool stop_at_1, bool allow_multi_fold, const bool silence_non_portable, SV** ret_invlist)
+STATIC regnode*	S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth, const bool stop_at_1, bool allow_multi_fold, const bool silence_non_portable, SV** ret_invlist)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_REGCLASS	\
 	assert(pRExC_state); assert(flagp)
 
-STATIC void	S_reginsert(pTHX_ struct RExC_state_t *pRExC_state, U8 op, regnode *opnd, U32 depth)
+STATIC void	S_reginsert(pTHX_ RExC_state_t *pRExC_state, U8 op, regnode *opnd, U32 depth)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_3);
 #define PERL_ARGS_ASSERT_REGINSERT	\
 	assert(pRExC_state); assert(opnd)
 
-STATIC char *	S_regpatws(struct RExC_state_t *pRExC_state, char *p, const bool recognize_comment)
+STATIC char *	S_regpatws(RExC_state_t *pRExC_state, char *p, const bool recognize_comment)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(1)
 			__attribute__nonnull__(2);
 #define PERL_ARGS_ASSERT_REGPATWS	\
 	assert(pRExC_state); assert(p)
 
-STATIC regnode*	S_regpiece(pTHX_ struct RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
+STATIC regnode*	S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_REGPIECE	\
 	assert(pRExC_state); assert(flagp)
 
-PERL_STATIC_INLINE I32	S_regpposixcc(pTHX_ struct RExC_state_t *pRExC_state, I32 value, const bool strict)
+PERL_STATIC_INLINE I32	S_regpposixcc(pTHX_ RExC_state_t *pRExC_state, I32 value, const bool strict)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_REGPPOSIXCC	\
 	assert(pRExC_state)
 
-STATIC void	S_regtail(pTHX_ struct RExC_state_t *pRExC_state, regnode *p, const regnode *val, U32 depth)
+STATIC void	S_regtail(pTHX_ RExC_state_t *pRExC_state, regnode *p, const regnode *val, U32 depth)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3);
 #define PERL_ARGS_ASSERT_REGTAIL	\
 	assert(pRExC_state); assert(p); assert(val)
 
-STATIC STRLEN	S_reguni(pTHX_ const struct RExC_state_t *pRExC_state, UV uv, char *s)
+STATIC STRLEN	S_reguni(pTHX_ const RExC_state_t *pRExC_state, UV uv, char *s)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_3);
 #define PERL_ARGS_ASSERT_REGUNI	\
 	assert(pRExC_state); assert(s)
 
-STATIC char *	S_regwhite(struct RExC_state_t *pRExC_state, char *p)
+STATIC char *	S_regwhite(RExC_state_t *pRExC_state, char *p)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(1)
 			__attribute__nonnull__(2);
 #define PERL_ARGS_ASSERT_REGWHITE	\
 	assert(pRExC_state); assert(p)
 
-STATIC void	S_scan_commit(pTHX_ const struct RExC_state_t *pRExC_state, struct scan_data_t *data, SSize_t *minlenp, int is_inf)
+STATIC void	S_scan_commit(pTHX_ const RExC_state_t *pRExC_state, struct scan_data_t *data, SSize_t *minlenp, int is_inf)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3);
 #define PERL_ARGS_ASSERT_SCAN_COMMIT	\
 	assert(pRExC_state); assert(data); assert(minlenp)
 
-STATIC void	S_set_ANYOF_arg(pTHX_ struct RExC_state_t* const pRExC_state, regnode* const node, SV* const cp_list, SV* const runtime_defns, SV* const swash, const bool has_user_defined_property)
+STATIC void	S_set_ANYOF_arg(pTHX_ RExC_state_t* const pRExC_state, regnode* const node, SV* const cp_list, SV* const runtime_defns, SV* const swash, const bool has_user_defined_property)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_SET_ANYOF_ARG	\
@@ -6816,13 +6815,13 @@ STATIC void	S_ssc_and(regnode_ssc *ssc, const regnode_ssc *and_with)
 #define PERL_ARGS_ASSERT_SSC_AND	\
 	assert(ssc); assert(and_with)
 
-STATIC void	S_ssc_anything(const struct RExC_state_t *pRExC_state, regnode_ssc *ssc)
+STATIC void	S_ssc_anything(const RExC_state_t *pRExC_state, regnode_ssc *ssc)
 			__attribute__nonnull__(1)
 			__attribute__nonnull__(2);
 #define PERL_ARGS_ASSERT_SSC_ANYTHING	\
 	assert(pRExC_state); assert(ssc)
 
-STATIC void	S_ssc_init(const struct RExC_state_t *pRExC_state, regnode_ssc *ssc)
+STATIC void	S_ssc_init(const RExC_state_t *pRExC_state, regnode_ssc *ssc)
 			__attribute__nonnull__(1)
 			__attribute__nonnull__(2);
 #define PERL_ARGS_ASSERT_SSC_INIT	\
@@ -6834,14 +6833,14 @@ STATIC int	S_ssc_is_anything(const regnode_ssc *ssc)
 #define PERL_ARGS_ASSERT_SSC_IS_ANYTHING	\
 	assert(ssc)
 
-STATIC void	S_ssc_or(const struct RExC_state_t *pRExC_state, regnode_ssc *ssc, const regnode_ssc *or_with)
+STATIC void	S_ssc_or(const RExC_state_t *pRExC_state, regnode_ssc *ssc, const regnode_ssc *or_with)
 			__attribute__nonnull__(1)
 			__attribute__nonnull__(2)
 			__attribute__nonnull__(3);
 #define PERL_ARGS_ASSERT_SSC_OR	\
 	assert(pRExC_state); assert(ssc); assert(or_with)
 
-STATIC SSize_t	S_study_chunk(pTHX_ struct RExC_state_t *pRExC_state, regnode **scanp, SSize_t *minlenp, SSize_t *deltap, regnode *last, struct scan_data_t *data, I32 stopparen, U8* recursed, regnode_ssc *and_withp, U32 flags, U32 depth)
+STATIC SSize_t	S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, SSize_t *minlenp, SSize_t *deltap, regnode *last, struct scan_data_t *data, I32 stopparen, U8* recursed, regnode_ssc *and_withp, U32 flags, U32 depth)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3)

@@ -1564,9 +1564,6 @@
 #define doform(a,b,c)		S_doform(aTHX_ a,b,c)
 #define space_join_names_mortal(a)	S_space_join_names_mortal(aTHX_ a)
 #  endif
-#  if defined(PERL_IN_REGCOMP_C)
-#define ()			(aTHX)
-#  endif
 #  if defined(PERL_IN_SCOPE_C)
 #define save_pushptri32ptr(a,b,c,d)	S_save_pushptri32ptr(aTHX_ a,b,c,d)
 #define save_scalar_at(a,b)	S_save_scalar_at(aTHX_ a,b)

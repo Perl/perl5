@@ -100,7 +100,7 @@ extern const struct regexp_engine my_reg_engine;
 #endif
 
 
-typedef struct RExC_state_t {
+struct RExC_state_t {
     U32		flags;			/* RXf_* are we folding, multilining? */
     U32		pm_flags;		/* PMf_* stuff from the calling PMOP */
     char	*precomp;		/* uncompiled string. */
@@ -160,7 +160,7 @@ typedef struct RExC_state_t {
 #define RExC_lastnum	(pRExC_state->lastnum)
 #define RExC_paren_name_list    (pRExC_state->paren_name_list)
 #endif
-} RExC_state_t;
+};
 
 #define RExC_flags	(pRExC_state->flags)
 #define RExC_pm_flags	(pRExC_state->pm_flags)
@@ -8410,7 +8410,7 @@ S__invlistEQ(pTHX_ SV* const a, SV* const b, const bool complement_b)
 /* End of inversion list object */
 
 STATIC void
-S_parse_lparen_question_flags(pTHX_ struct RExC_state_t *pRExC_state)
+S_parse_lparen_question_flags(pTHX_ RExC_state_t *pRExC_state)
 {
     /* This parses the flags that are in either the '(?foo)' or '(?foo:bar)'
      * constructs, and updates RExC_flags with them.  On input, RExC_parse
@@ -14044,7 +14044,7 @@ parseit:
 #undef HAS_NONLOCALE_RUNTIME_PROPERTY_DEFINITION
 
 STATIC void
-S_set_ANYOF_arg(pTHX_ struct RExC_state_t* const pRExC_state,
+S_set_ANYOF_arg(pTHX_ RExC_state_t* const pRExC_state,
                 regnode* const node,
                 SV* const cp_list,
                 SV* const runtime_defns,

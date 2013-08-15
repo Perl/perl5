@@ -2212,9 +2212,6 @@ int isnan(double d);
 
 #endif
 
-struct RExC_state_t;
-struct _reg_trie_data;
-
 typedef MEM_SIZE STRLEN;
 
 #ifdef PERL_MAD
@@ -3283,6 +3280,8 @@ struct regnode_charclass_class;	/* Used in S_* functions in regcomp.c */
 typedef struct regnode_charclass_class regnode_charclass_posixl;
 
 typedef struct regnode_ssc regnode_ssc;
+typedef struct RExC_state_t RExC_state_t;
+struct _reg_trie_data;
 
 struct ptr_tbl_ent {
     struct ptr_tbl_ent*		next;
