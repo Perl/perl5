@@ -522,7 +522,7 @@ if (in_utf8) {
 my @Locale;
 my $Locale;
 my @Digit_;
-my @Alnum_;
+my @Word_;
 
 sub trylocale {
     my $locale = shift;
@@ -813,13 +813,13 @@ foreach $Locale (@Locale) {
 
     if (! $is_utf8_locale) {
         use locale;
-        @Alnum_ = sort grep /\w/, map { chr } 0..255;
-        debug "# w = ", join("",@Alnum_), "\n";
+        @Word_ = sort grep /\w/, map { chr } 0..255;
+        debug "# w = ", join("",@Word_), "\n";
         @Digit_ = grep /\d/, map { chr } 0..255;
 
         # Sieve the uppercase and the lowercase.
 
-        for (@Alnum_) {
+        for (@Word_) {
             if (/[^\d_]/) { # skip digits and the _
                 if (uc($_) eq $_) {
                     $UPPER{$_} = $_;
@@ -832,10 +832,10 @@ foreach $Locale (@Locale) {
     }
     else {
         use locale ':not_characters';
-        @Alnum_ = sort grep /\w/, map { chr } 0..255;
+        @Word_ = sort grep /\w/, map { chr } 0..255;
         @Digit_ = grep /\d/, map { chr } 0..255;
-        debug "# w = ", join("",@Alnum_), "\n";
-        for (@Alnum_) {
+        debug "# w = ", join("",@Word_), "\n";
+        for (@Word_) {
             if (/[^\d_]/) { # skip digits and the _
                 if (uc($_) eq $_) {
                     $UPPER{$_} = $_;
@@ -1269,14 +1269,14 @@ foreach $Locale (@Locale) {
         $not_necessarily_a_problem_test_number = $locales_test_number;
         for (0..9) {
             # Select a slice.
-            $from = int(($_*@Alnum_)/10);
-            $to = $from + int(@Alnum_/10);
-            $to = $#Alnum_ if ($to > $#Alnum_);
-            $lesser  = join('', @Alnum_[$from..$to]);
+            $from = int(($_*@Word_)/10);
+            $to = $from + int(@Word_/10);
+            $to = $#Word_ if ($to > $#Word_);
+            $lesser  = join('', @Word_[$from..$to]);
             # Select a slice one character on.
             $from++; $to++;
-            $to = $#Alnum_ if ($to > $#Alnum_);
-            $greater = join('', @Alnum_[$from..$to]);
+            $to = $#Word_ if ($to > $#Word_);
+            $greater = join('', @Word_[$from..$to]);
             if ($is_utf8_locale) {
                 use locale ':not_characters';
                 ($yes, $no, $sign) = ($lesser lt $greater
