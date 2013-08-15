@@ -205,7 +205,7 @@ return C<0>.  If a package stash is completely
 deleted (not a normal occurrence, but it can happen
 if someone does something like C<undef %PkgName::>),
 the number will be reset to either C<0> or C<1>,
-depending on how completely package was wiped out.
+depending on how completely the package was wiped out.
 
 =head2 next::method
 
