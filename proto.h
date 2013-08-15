@@ -6809,11 +6809,12 @@ STATIC void	S_set_ANYOF_arg(pTHX_ RExC_state_t* const pRExC_state, regnode* cons
 #define PERL_ARGS_ASSERT_SET_ANYOF_ARG	\
 	assert(pRExC_state); assert(node)
 
-STATIC void	S_ssc_and(regnode_ssc *ssc, const regnode_ssc *and_with)
-			__attribute__nonnull__(1)
-			__attribute__nonnull__(2);
+STATIC void	S_ssc_and(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc, const regnode_ssc *and_with)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2)
+			__attribute__nonnull__(pTHX_3);
 #define PERL_ARGS_ASSERT_SSC_AND	\
-	assert(ssc); assert(and_with)
+	assert(pRExC_state); assert(ssc); assert(and_with)
 
 STATIC void	S_ssc_anything(const RExC_state_t *pRExC_state, regnode_ssc *ssc)
 			__attribute__nonnull__(1)

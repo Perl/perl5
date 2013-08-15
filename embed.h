@@ -944,7 +944,7 @@
 #define regwhite		S_regwhite
 #define scan_commit(a,b,c,d)	S_scan_commit(aTHX_ a,b,c,d)
 #define set_ANYOF_arg(a,b,c,d,e,f)	S_set_ANYOF_arg(aTHX_ a,b,c,d,e,f)
-#define ssc_and			S_ssc_and
+#define ssc_and(a,b,c)		S_ssc_and(aTHX_ a,b,c)
 #define ssc_anything		S_ssc_anything
 #define ssc_init		S_ssc_init
 #define ssc_is_anything		S_ssc_is_anything

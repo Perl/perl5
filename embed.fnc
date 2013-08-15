@@ -2059,7 +2059,8 @@ Esn	|void	|ssc_anything	|NN const RExC_state_t *pRExC_state \
 EsRn	|int	|ssc_is_anything|NN const regnode_ssc *ssc
 Esn	|void	|ssc_init	|NN const RExC_state_t *pRExC_state \
 				|NN regnode_ssc *ssc
-Esn	|void	|ssc_and	|NN regnode_ssc *ssc \
+Es	|void	|ssc_and	|NN const RExC_state_t *pRExC_state \
+				|NN regnode_ssc *ssc                \
 				|NN const regnode_ssc *and_with
 Esn	|void	|ssc_or		|NN const RExC_state_t *pRExC_state \
 				|NN regnode_ssc *ssc \

@@ -875,7 +875,7 @@ S_ssc_init(const RExC_state_t *pRExC_state, regnode_ssc *ssc)
  * should not be inverted.  'and_with->flags & ANYOF_POSIXL' should be 0 if
  * 'and_with' is a regnode_charclass instead of a regnode_ssc. */
 STATIC void
-S_ssc_and(regnode_ssc *ssc, const regnode_ssc *and_with)
+S_ssc_and(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc, const regnode_ssc *and_with)
 {
     PERL_ARGS_ASSERT_SSC_AND;
 
@@ -3210,13 +3210,13 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		if (flags & SCF_DO_STCLASS_OR) {
 		    ssc_or(pRExC_state, data->start_class, &accum);
 		    if (min1) {
-			ssc_and(data->start_class, and_withp);
+			ssc_and(pRExC_state, data->start_class, and_withp);
 			flags &= ~SCF_DO_STCLASS;
 		    }
 		}
 		else if (flags & SCF_DO_STCLASS_AND) {
 		    if (min1) {
-			ssc_and(data->start_class, &accum);
+			ssc_and(pRExC_state, data->start_class, &accum);
 			flags &= ~SCF_DO_STCLASS;
 		    }
 		    else {
@@ -3674,7 +3674,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		else
 		    data->start_class->flags |= ANYOF_UNICODE_ALL;
                 CLEAR_SSC_EOS(data->start_class);
-		ssc_and(data->start_class, and_withp);
+		ssc_and(pRExC_state, data->start_class, and_withp);
 	    }
 	    flags &= ~SCF_DO_STCLASS;
 	}
@@ -3794,7 +3794,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    }
                     CLEAR_SSC_EOS(data->start_class);
 		}
-		ssc_and(data->start_class, and_withp);
+		ssc_and(pRExC_state, data->start_class, and_withp);
 	    }
 	    flags &= ~SCF_DO_STCLASS;
 	}
@@ -3912,10 +3912,10 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		} else {		/* Non-zero len */
 		    if (flags & SCF_DO_STCLASS_OR) {
 			ssc_or(pRExC_state, data->start_class, &this_class);
-			ssc_and(data->start_class, and_withp);
+			ssc_and(pRExC_state, data->start_class, and_withp);
 		    }
 		    else if (flags & SCF_DO_STCLASS_AND)
-			ssc_and(data->start_class, &this_class);
+			ssc_and(pRExC_state, data->start_class, &this_class);
 		    flags &= ~SCF_DO_STCLASS;
 		}
 		if (!scan) 		/* It was not CURLYX, but CURLY. */
@@ -4186,7 +4186,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
                             ANYOF_BITMAP_SET(data->start_class, value);
                 }
                 if (flags & SCF_DO_STCLASS_OR)
-		    ssc_and(data->start_class, and_withp);
+		    ssc_and(pRExC_state, data->start_class, and_withp);
 		flags &= ~SCF_DO_STCLASS;
             }
 	    min++;
@@ -4237,7 +4237,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
 		    break;
 		case ANYOF:
 		    if (flags & SCF_DO_STCLASS_AND)
-			ssc_and(data->start_class, (regnode_ssc*)scan);
+			ssc_and(pRExC_state, data->start_class, (regnode_ssc*)scan);
 		    else
 			ssc_or(pRExC_state, data->start_class,
                                                           (regnode_ssc*)scan);
@@ -4318,7 +4318,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
 		    break;
 		}
 		if (flags & SCF_DO_STCLASS_OR)
-		    ssc_and(data->start_class, and_withp);
+		    ssc_and(pRExC_state, data->start_class, and_withp);
 		flags &= ~SCF_DO_STCLASS;
 	    }
 	}
@@ -4420,7 +4420,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
 			/* AND before and after: combine and continue */
 			const int was = TEST_SSC_EOS(data->start_class);
 
-			ssc_and(data->start_class, &intrnl);
+			ssc_and(pRExC_state, data->start_class, &intrnl);
 			if (was)
                             SET_SSC_EOS(data->start_class);
 		    }
@@ -4492,7 +4492,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
                 if (f & SCF_DO_STCLASS_AND) {
                     const int was = TEST_SSC_EOS(data->start_class);
 
-                    ssc_and(data->start_class, &intrnl);
+                    ssc_and(pRExC_state, data->start_class, &intrnl);
                     if (was)
                         SET_SSC_EOS(data->start_class);
                 }
@@ -4679,13 +4679,13 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
             if (flags & SCF_DO_STCLASS_OR) {
                 ssc_or(pRExC_state, data->start_class, &accum);
                 if (min1) {
-                    ssc_and(data->start_class, and_withp);
+                    ssc_and(pRExC_state, data->start_class, and_withp);
                     flags &= ~SCF_DO_STCLASS;
                 }
             }
             else if (flags & SCF_DO_STCLASS_AND) {
                 if (min1) {
-                    ssc_and(data->start_class, &accum);
+                    ssc_and(pRExC_state, data->start_class, &accum);
                     flags &= ~SCF_DO_STCLASS;
                 }
                 else {
@@ -4753,7 +4753,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
 	data->flags &= ~SF_IN_PAR;
     }
     if (flags & SCF_DO_STCLASS_OR)
-	ssc_and(data->start_class, and_withp);
+	ssc_and(pRExC_state, data->start_class, and_withp);
     if (flags & SCF_TRIE_RESTUDY)
         data->flags |= 	SCF_TRIE_RESTUDY;
     
