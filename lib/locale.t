@@ -680,6 +680,86 @@ my %Testing;
 my @Added_alpha;   # Alphas that aren't in the C locale.
 my %test_names;
 
+sub display_characters {
+    # This returns a display string denoting the input parameter @_, each
+    # entry of which is a single character in the range 0-255.  The first part
+    # of the output is a string of the characters in @_ that are ASCII
+    # graphics, and hence unambiguously displayable.  They are given by code
+    # point order.  The second part is the remaining code points, the ordinals
+    # of which are each displayed as 2-digit hex.  Blanks are inserted so as
+    # to keep anything from the first part looking like a 2-digit hex number.
+
+    no locale;
+    my @chars = sort { ord $a <=> ord $b } @_;
+    my $output = "";
+    my $hex = "";
+    my $range_start;
+    my $start_class;
+    push @chars, chr(258);  # This sentinel simplifies the loop termination
+                            # logic
+    foreach my $i (0 .. @chars - 1) {
+        my $char = $chars[$i];
+        my $range_end;
+        my $class;
+
+        # We avoid using [:posix:] classes, as these are being tested in this
+        # file.  Each equivalence class below is for things that can appear in
+        # a range; those that can't be in a range have class -1.  0 for those
+        # which should be output in hex; and >0 for the other ranges
+        if ($char =~ /[A-Z]/) {
+            $class = 2;
+        }
+        elsif ($char =~ /[a-z]/) {
+            $class = 3;
+        }
+        elsif ($char =~ /[0-9]/) {
+            $class = 4;
+        }
+        elsif ($char =~ /[[\]!"#\$\%&\'()*+,.\/:\\;<=>?\@\^_`{|}~-]/) {
+            $class = -1;    # Punct never appears in a range
+        }
+        else {
+            $class = 0;     # Output in hex
+        }
+
+        if (! defined $range_start) {
+            if ($class < 0) {
+                $output .= $char;
+            }
+            else {
+                $range_start = ord $char;
+                $start_class = $class;
+            }
+        } # A range ends if not consecutive, or the class-type changes
+        elsif (ord $char != ($range_end = ord($chars[$i-1])) + 1
+              || $class != $start_class)
+        {
+
+            # Here, the current character is not in the range.  This means the
+            # previous character must have been.  Output the range up through
+            # that one.
+            my $range_length = $range_end - $range_start + 1;
+            if ($start_class > 0) {
+                $output .= " " . chr($range_start);
+                $output .= "-" . chr($range_end) if $range_length > 1;
+            }
+            else {
+                $hex .= sprintf(" %02X", $range_start);
+                $hex .= sprintf("-%02X", $range_end) if $range_length > 1;
+            }
+
+            # Handle the new current character, as potentially beginning a new
+            # range
+            undef $range_start;
+            redo;
+        }
+    }
+
+    $output =~ s/^ //;
+    $hex =~ s/^ // if ! length $output;
+    return "$output$hex";
+}
+
 sub report_result {
     my ($Locale, $i, $pass_fail, $message) = @_;
     $message //= "";
@@ -700,7 +780,7 @@ sub report_multi_result {
 
     my $message = "";
     if (@$results_ref) {
-        $message = join " ", "for", map { sprintf '\\x%02X', ord $_ } @$results_ref;
+        $message = join " ", "for", display_characters(@$results_ref);
     }
     report_result($Locale, $i, @$results_ref == 0, $message);
 }
@@ -777,9 +857,9 @@ foreach $Locale (@Locale) {
 	delete $lower{$_};
     }
 
-    debug "# UPPER    = ", join("", sort keys %UPPER   ), "\n";
-    debug "# lower    = ", join("", sort keys %lower   ), "\n";
-    debug "# BoThCaSe = ", join("", sort keys %BoThCaSe), "\n";
+    debug "# UPPER    = ", display_characters(keys %UPPER), "\n";
+    debug "# lower    = ", display_characters(keys %lower), "\n";
+    debug "# BoThCaSe = ", display_characters(keys %BoThCaSe), "\n";
 
     my @failures;
     my @fold_failures;
@@ -850,7 +930,7 @@ foreach $Locale (@Locale) {
 
     @Added_alpha = sort @Added_alpha;
 
-    debug "# Added_alpha = ", join("",@Added_alpha), "\n";
+    debug "# Added_alpha = ", display_characters(@Added_alpha), "\n";
 
     # Cross-check the whole 8-bit character set.
 
