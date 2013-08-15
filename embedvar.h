@@ -40,7 +40,6 @@
 #    define vTHX	PERL_GET_INTERP
 #  endif
 
-#define PL_ASCII		(vTHX->IASCII)
 #define PL_AboveLatin1		(vTHX->IAboveLatin1)
 #define PL_Argv			(vTHX->IArgv)
 #define PL_Cmd			(vTHX->ICmd)

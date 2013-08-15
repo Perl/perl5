@@ -13710,7 +13710,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 #endif /* !USE_LOCALE_NUMERIC */
 
     /* Unicode inversion lists */
-    PL_ASCII		= sv_dup_inc(proto_perl->IASCII, param);
     PL_Latin1		= sv_dup_inc(proto_perl->ILatin1, param);
     PL_UpperLatin1	= sv_dup_inc(proto_perl->IUpperLatin1, param);
     PL_AboveLatin1	= sv_dup_inc(proto_perl->IAboveLatin1, param);
