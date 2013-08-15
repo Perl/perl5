@@ -521,6 +521,7 @@ if (in_utf8) {
 
 my @Locale;
 my $Locale;
+my @Digit_;
 my @Alnum_;
 
 sub trylocale {
@@ -733,8 +734,8 @@ foreach $Locale (@Locale) {
     if (! $is_utf8_locale) {
         use locale;
         @Alnum_ = sort grep /\w/, map { chr } 0..255;
-
         debug "# w = ", join("",@Alnum_), "\n";
+        @Digit_ = grep /\d/, map { chr } 0..255;
 
         # Sieve the uppercase and the lowercase.
 
@@ -752,6 +753,7 @@ foreach $Locale (@Locale) {
     else {
         use locale ':not_characters';
         @Alnum_ = sort grep /\w/, map { chr } 0..255;
+        @Digit_ = grep /\d/, map { chr } 0..255;
         debug "# w = ", join("",@Alnum_), "\n";
         for (@Alnum_) {
             if (/[^\d_]/) { # skip digits and the _
@@ -1011,7 +1013,13 @@ foreach $Locale (@Locale) {
 
     ++$locales_test_number;
     undef @f;
-    $test_names{$locales_test_number} = 'Verify that [:digit:] is a subset of [:xdigit:]';
+    $test_names{$locales_test_number} = 'Verify that [:digit:] matches either 10 or 20 code points';
+    report_result($Locale, $locales_test_number, @Digit_ == 10 || @Digit_ ==20);
+
+    ++$locales_test_number;
+    undef @f;
+    $test_names{$locales_test_number} = 'Verify that [:digit:] (if is 10 code points) is a subset of [:xdigit:]';
+    if (@Digit_ == 10) {
     for (map { chr } 0..255) {
         if ($is_utf8_locale) {
             use locale ':not_characters';
@@ -1020,6 +1028,7 @@ foreach $Locale (@Locale) {
         else {
             push @f, $_ if /[[:digit:]]/  and ! /[[:xdigit:]]/;
         }
+    }
     }
     report_multi_result($Locale, $locales_test_number, \@f);
 
