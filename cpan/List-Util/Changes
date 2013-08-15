@@ -1,4 +1,9 @@
-1.30 -- Mon Aug 05 13:09 UTC 2012
+1.31 -- Wed Aug 14 20:38 UTC 2013
+
+  * Bugfix pairmap to return list length in scalar context
+  * Added "Odd number of elements" warnings to all pair* functions
+
+1.30 -- Mon Aug 05 13:09 UTC 2013
 
   * Added pairfirst
   * Added MULTICALL implementations to pairmap/pairgrep/pairfirst
