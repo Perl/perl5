@@ -155,7 +155,10 @@ use File::Glob qw(:case);
 # If the file in blead matches the file in the tarball from CPAN,
 # Porting/core-cpan-diff will warn about it, as it indicates an expected
 # customization might have been lost when updating from upstream.  The
-# path should be relative to the distribution directory.
+# path should be relative to the distribution directory.  If the upstream
+# distribution should be modified to incorporate the change then be sure
+# to raise a ticket for it on rt.cpan.org and add a comment alongside the
+# list of CUSTOMIZED files noting the ticket number.
 
 # DEPRECATED contains the *first* version of Perl in which the module
 # was considered deprecated.  It should only be present if the module is
@@ -528,7 +531,17 @@ use File::Glob qw(:case);
         'MAINTAINER'   => 'mhx',
         'DISTRIBUTION' => 'MHX/Devel-PPPort-3.20.tar.gz',
         'FILES'        => q[cpan/Devel-PPPort],
-        'EXCLUDED' => ['PPPort.pm'],    # we use PPPort_pm.PL instead
+        'EXCLUDED'     => ['PPPort.pm'],    # we use PPPort_pm.PL instead
+
+        # Waiting to be merged upstream: see CPAN RT#81796,87870
+        'CUSTOMIZED'   => [
+            qw( parts/inc/misc
+                parts/inc/SvPV
+                t/misc.t
+                t/SvPV.t
+                ),
+        ],
+
         'UPSTREAM' => undef, # rjbs has asked mhx to have blead be upstream
     },
 
@@ -1043,6 +1056,8 @@ use File::Glob qw(:case);
                 install-nomake
                 ),
         ],
+        # Customized for perl since we cannot use either an auto-generated
+        # script or the version in the CPAN distro.
         'CUSTOMIZED' => ['Makefile.PL'],
         'UPSTREAM'   => 'cpan',
     },
@@ -1190,6 +1205,7 @@ use File::Glob qw(:case);
             qr{^contrib/},
             qr{^inc},
         ],
+        # Generated file, not part of the CPAN distro:
         'CUSTOMIZED' => ['lib/Module/Build/ConfigData.pm'],
         'UPSTREAM'   => 'cpan',
     },
@@ -1375,6 +1391,13 @@ use File::Glob qw(:case);
         'MAINTAINER'   => 'elizabeth',
         'DISTRIBUTION' => 'ELIZABETH/PerlIO-via-QuotedPrint-0.07.tar.gz',
         'FILES'        => q[cpan/PerlIO-via-QuotedPrint],
+
+        # Waiting to be merged upstream: see CPAN RT#54047
+        'CUSTOMIZED'   => [
+            qw( t/QuotedPrint.t
+                ),
+        ],
+
         'UPSTREAM'     => undef,
     },
 
@@ -1495,6 +1518,10 @@ use File::Glob qw(:case);
         'CUSTOMIZED' => [
             qw( scripts/pod2man.PL
                 scripts/pod2text.PL
+                ),
+
+            # Waiting to be merged upstream: see CPAN RT#87440
+            qw( pod/perlpodstyle.pod
                 ),
         ],
         'MAP' => {
@@ -1631,6 +1658,14 @@ use File::Glob qw(:case);
         'MAINTAINER'   => 'jstowe',
         'DISTRIBUTION' => 'JSTOWE/Term-Cap-1.12.tar.gz',
         'FILES'        => q[cpan/Term-Cap],
+
+        # Waiting to be merged upstream: see CPAN RT#73447
+        'CUSTOMIZED'   => [
+            qw( Cap.pm
+                test.pl
+                ),
+        ],
+
         'UPSTREAM'     => undef,
     },
 
@@ -1673,7 +1708,10 @@ use File::Glob qw(:case);
                 t/lib/if.pm
                 ),
         ],
+
+        # Waiting to be merged upstream: see CPAN RT#64353
         'CUSTOMIZED' => [ 't/source.t' ],
+
         'UPSTREAM'   => 'cpan',
     },
 
@@ -1691,9 +1729,10 @@ use File::Glob qw(:case);
                 lib/Test/Builder/IO/Scalar.pm
                 ),
         ],
-        'CUSTOMIZED' =>  [
-            't/fail-more.t', # awaiting upstream fix
-        ],
+
+        # Waiting to be merged upstream: see CPAN RT#79762
+        'CUSTOMIZED' =>  [ 't/fail-more.t' ],
+
         'UPSTREAM' => 'cpan',
     },
 
@@ -1715,6 +1754,8 @@ use File::Glob qw(:case);
                 t/99_pmv.t
                 ),
         ],
+
+        # Waiting to be merged upstream: see CPAN RT#87788
         'CUSTOMIZED'   => [
             qw( t/01_compile.t
                 t/02_extbrk.t
@@ -1727,6 +1768,7 @@ use File::Glob qw(:case);
                 t/09_gentag.t
                 ),
         ],
+
         'UPSTREAM' => 'cpan',
     },
 
@@ -1735,6 +1777,13 @@ use File::Glob qw(:case);
         'DISTRIBUTION' => 'CHORNY/Text-ParseWords-3.29.tar.gz',
         'FILES'        => q[cpan/Text-ParseWords],
         'EXCLUDED'     => ['t/pod.t'],
+
+        # Waiting to be merged upstream: see CPAN RT#50929
+        'CUSTOMIZED'   => [
+            qw( t/ParseWords.t
+                t/taint.t
+                ),
+        ],
 
         # For the benefit of make_ext.pl, we have to have this accessible:
         'MAP' => {
@@ -1852,9 +1901,10 @@ use File::Glob qw(:case);
         'MAINTAINER'   => 'zefram',
         'DISTRIBUTION' => 'ZEFRAM/Time-HiRes-1.9725.tar.gz',
         'FILES'        => q[cpan/Time-HiRes],
-        'CUSTOMIZED'   => [
-            'Makefile.PL', # awaiting patches applied upstream (see c7627e6d)
-        ],
+
+        # Waiting to be merged upstream: see CPAN RT#87858
+        'CUSTOMIZED'   => [ 'Makefile.PL' ],
+
         'UPSTREAM'     => 'cpan',
     },
 
@@ -1924,6 +1974,21 @@ use File::Glob qw(:case);
             't/survey_locales',
             'vperl/vpp.pm',
         ],
+
+        # Waiting to be merged upstream: see CPAN RT#87513
+        'CUSTOMIZED'   => [
+            qw( lib/version.pm
+                lib/version/Internals.pod
+                t/01base.t
+                t/02derived.t
+                t/03require.t
+                t/04strict_lax.t
+                t/06noop.t
+                t/07locale.t
+                t/coretests.pm
+                ),
+        ],
+
         'UPSTREAM' => undef,
     },
 
