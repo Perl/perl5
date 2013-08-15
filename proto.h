@@ -6533,7 +6533,7 @@ STATIC SV*	S__new_invlist_C_array(pTHX_ const UV* const list)
 PERL_STATIC_INLINE SV*	S_add_cp_to_invlist(pTHX_ SV* invlist, const UV cp)
 			__attribute__warn_unused_result__;
 
-STATIC U32	S_add_data(RExC_state_t *pRExC_state, U32 n, const char *s)
+STATIC U32	S_add_data(RExC_state_t* const pRExC_state, const U32 n, const char* const s)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(1)
 			__attribute__nonnull__(3);

@@ -2072,8 +2072,8 @@ Es	|SSize_t|study_chunk	|NN RExC_state_t *pRExC_state \
 				|I32 stopparen|NULLOK U8* recursed \
 				|NULLOK regnode_ssc *and_withp \
 				|U32 flags|U32 depth
-EsRn	|U32	|add_data	|NN RExC_state_t *pRExC_state|U32 n \
-				|NN const char *s
+EsRn	|U32	|add_data	|NN RExC_state_t* const pRExC_state \
+				|const U32 n|NN const char* const s
 rs	|void	|re_croak2	|bool utf8|NN const char* pat1|NN const char* pat2|...
 Ei	|I32	|regpposixcc	|NN RExC_state_t *pRExC_state \
 				|I32 value|const bool strict

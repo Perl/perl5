@@ -4763,7 +4763,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
 }
 
 STATIC U32
-S_add_data(RExC_state_t *pRExC_state, U32 n, const char *s)
+S_add_data(RExC_state_t* const pRExC_state, const U32 n, const char* const s)
 {
     U32 count = RExC_rxi->data ? RExC_rxi->data->count : 0;
 
