@@ -1020,15 +1020,15 @@ foreach $Locale (@Locale) {
     undef @f;
     $test_names{$locales_test_number} = 'Verify that [:digit:] (if is 10 code points) is a subset of [:xdigit:]';
     if (@Digit_ == 10) {
-    for (map { chr } 0..255) {
-        if ($is_utf8_locale) {
-            use locale ':not_characters';
-            push @f, $_ if /[[:digit:]]/  and ! /[[:xdigit:]]/;
+        for (map { chr } 0..255) {
+            if ($is_utf8_locale) {
+                use locale ':not_characters';
+                push @f, $_ if /[[:digit:]]/  and ! /[[:xdigit:]]/;
+            }
+            else {
+                push @f, $_ if /[[:digit:]]/  and ! /[[:xdigit:]]/;
+            }
         }
-        else {
-            push @f, $_ if /[[:digit:]]/  and ! /[[:xdigit:]]/;
-        }
-    }
     }
     report_multi_result($Locale, $locales_test_number, \@f);
 
