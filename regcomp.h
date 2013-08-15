@@ -315,13 +315,13 @@ struct regnode_ssc {
 /* Flags for node->flags of ANYOF.  These are in short supply, but there is one
  * currently available.  If more than this are needed, the ANYOF_LOCALE and
  * ANYOF_POSIXL bits could be shared, making a space penalty for all locale nodes.
- * Also, the UNICODE_ALL bit could be freed up by resorting to creating a swash
- * containing everything above 255.  This introduces a performance penalty.
- * Better would be to split it off into a separate node, which actually would
- * improve performance a bit by allowing regexec.c to test for a UTF-8
- * character being above 255 without having to call a function nor calculate
- * its code point value.  However, this solution might need to have a second
- * node type, ANYOF_SYNTHETIC_ABOVE_LATIN1_ALL */
+ * Also, the ABOVE_LATIN1_ALL bit could be freed up by resorting to creating a
+ * swash containing everything above 255.  This introduces a performance
+ * penalty.  Better would be to split it off into a separate node, which
+ * actually would improve performance a bit by allowing regexec.c to test for a
+ * UTF-8 character being above 255 without having to call a function nor
+ * calculate its code point value.  However, this solution might need to have a
+ * second node type, ANYOF_SYNTHETIC_ABOVE_LATIN1_ALL */
 
 #define ANYOF_LOCALE		 0x01	    /* /l modifier */
 
@@ -348,7 +348,8 @@ struct regnode_ssc {
 #define ANYOF_NONBITMAP_NON_UTF8 0x20
 
 /* Matches every code point 0x100 and above*/
-#define ANYOF_UNICODE_ALL	0x40
+#define ANYOF_ABOVE_LATIN1_ALL	 0x40
+#define ANYOF_UNICODE_ALL	 ANYOF_ABOVE_LATIN1_ALL
 
 /* Match all Latin1 characters that aren't ASCII when the target string is not
  * in utf8. */
@@ -358,7 +359,7 @@ struct regnode_ssc {
 
 /* These are the flags that ANYOF_INVERT being set or not doesn't affect
  * whether they are operative or not.  e.g., the node still has LOCALE
- * regardless of being inverted; whereas ANYOF_UNICODE_ALL means something
+ * regardless of being inverted; whereas ANYOF_ABOVE_LATIN1_ALL means something
  * different if inverted */
 #define INVERSION_UNAFFECTED_FLAGS (ANYOF_LOCALE                        \
 	                           |ANYOF_LOC_FOLD                      \

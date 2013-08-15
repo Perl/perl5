@@ -818,7 +818,7 @@ S_ssc_anything(const RExC_state_t *pRExC_state, regnode_ssc *ssc)
     PERL_ARGS_ASSERT_SSC_ANYTHING;
 
     ANYOF_BITMAP_SETALL(ssc);
-    ssc->flags = ANYOF_UNICODE_ALL;
+    ssc->flags = ANYOF_ABOVE_LATIN1_ALL;
     SET_SSC_EOS(ssc);
 
     /* If any portion of the regex is to operate under locale rules,
@@ -848,7 +848,7 @@ S_ssc_is_anything(const regnode_ssc *ssc)
     for (value = 0; value < ANYOF_POSIXL_MAX; value += 2)
 	if (ANYOF_POSIXL_TEST(ssc, value) && ANYOF_POSIXL_TEST(ssc, value + 1))
 	    return 1;
-    if (!(ssc->flags & ANYOF_UNICODE_ALL))
+    if (!(ssc->flags & ANYOF_ABOVE_LATIN1_ALL))
 	return 0;
     if (!ANYOF_BITMAP_TESTALLSET((const void*)ssc))
 	return 0;
@@ -914,8 +914,8 @@ S_ssc_and(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc, const regnode
 
         /* The inversion of these two flags indicate that the resulting
          * intersection doesn't have them */
-	if (and_with->flags & ANYOF_UNICODE_ALL) {
-	    ssc->flags &= ~ANYOF_UNICODE_ALL;
+	if (and_with->flags & ANYOF_ABOVE_LATIN1_ALL) {
+	    ssc->flags &= ~ANYOF_ABOVE_LATIN1_ALL;
 	}
 	if (and_with->flags & ANYOF_NON_UTF8_LATIN1_ALL) {
 	    ssc->flags &= ~ANYOF_NON_UTF8_LATIN1_ALL;
@@ -927,12 +927,12 @@ S_ssc_and(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc, const regnode
 	if (! ANYOF_NONBITMAP(and_with)) {
 
             /* Here 'and_with' doesn't match anything outside the bitmap
-             * (except possibly ANYOF_UNICODE_ALL), which means the
-             * intersection can't either, except for ANYOF_UNICODE_ALL, in
+             * (except possibly ANYOF_ABOVE_LATIN1_ALL), which means the
+             * intersection can't either, except for ANYOF_ABOVE_LATIN1_ALL, in
              * which case we don't know what the intersection is, but it's no
              * greater than what ssc already has, so can just leave it alone,
              * with possible false positives */
-            if (! (and_with->flags & ANYOF_UNICODE_ALL)) {
+            if (! (and_with->flags & ANYOF_ABOVE_LATIN1_ALL)) {
                 ARG_SET(ssc, ANYOF_NONBITMAP_EMPTY);
 		ssc->flags &= ~ANYOF_NONBITMAP_NON_UTF8;
             }
@@ -947,7 +947,7 @@ S_ssc_and(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc, const regnode
              * match anything outside the bitmap (since the 'if' that got us
              * into this block tested for that), so we leave the bitmap empty.
              */
-	    if (ssc->flags & ANYOF_UNICODE_ALL) {
+	    if (ssc->flags & ANYOF_ABOVE_LATIN1_ALL) {
 		ARG_SET(ssc, ARG(and_with));
 
                 /* and_with's ARG may match things that don't require UTF8.
@@ -1035,7 +1035,7 @@ S_ssc_or(const RExC_state_t *pRExC_state, regnode_ssc *ssc, const regnode_ssc *o
 	ssc->flags |= or_with->flags & INVERSION_UNAFFECTED_FLAGS;
 
         /* For the remaining flags:
-            ANYOF_UNICODE_ALL and inverted means to not match anything above
+            ANYOF_ABOVE_LATIN1_ALL and inverted means to not match anything above
                     255, which means that the union with ssc should just be
                     what ssc has in it, so can ignore this flag
             ANYOF_NON_UTF8_LATIN1_ALL and inverted means if not utf8 and ord
@@ -1079,7 +1079,7 @@ S_ssc_or(const RExC_state_t *pRExC_state, regnode_ssc *ssc, const regnode_ssc *o
 		    ssc_anything(pRExC_state, ssc);
 		}
 		else {
-		    ssc->flags |= ANYOF_UNICODE_ALL;
+		    ssc->flags |= ANYOF_ABOVE_LATIN1_ALL;
 		}
 	    }
 	}
@@ -3665,14 +3665,14 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		}
                 CLEAR_SSC_EOS(data->start_class);
 		if (uc < 0x100)
-		  data->start_class->flags &= ~ANYOF_UNICODE_ALL;
+		  data->start_class->flags &= ~ANYOF_ABOVE_LATIN1_ALL;
 	    }
 	    else if (flags & SCF_DO_STCLASS_OR) {
 		/* false positive possible if the class is case-folded */
 		if (uc < 0x100)
 		    ANYOF_BITMAP_SET(data->start_class, uc);
 		else
-		    data->start_class->flags |= ANYOF_UNICODE_ALL;
+		    data->start_class->flags |= ANYOF_ABOVE_LATIN1_ALL;
                 CLEAR_SSC_EOS(data->start_class);
 		ssc_and(pRExC_state, data->start_class, and_withp);
 	    }
@@ -11560,7 +11560,7 @@ S_populate_ANYOF_from_invlist(pTHX_ regnode *node, SV** invlist_ptr)
 	    int i;
 
             if (end == UV_MAX && start <= 256) {
-                ANYOF_FLAGS(node) |= ANYOF_UNICODE_ALL;
+                ANYOF_FLAGS(node) |= ANYOF_ABOVE_LATIN1_ALL;
             }
 
 	    /* Quit if are above what we should change */
@@ -11586,7 +11586,7 @@ S_populate_ANYOF_from_invlist(pTHX_ regnode *node, SV** invlist_ptr)
 	if (change_invlist) {
 	    _invlist_subtract(*invlist_ptr, PL_Latin1, invlist_ptr);
 	}
-        if (ANYOF_FLAGS(node) & ANYOF_UNICODE_ALL) {
+        if (ANYOF_FLAGS(node) & ANYOF_ABOVE_LATIN1_ALL) {
 	    _invlist_intersection(*invlist_ptr, PL_Latin1, invlist_ptr);
 	}
 
@@ -14962,7 +14962,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
 	}
 
         /* output information about the unicode matching */
-	if (flags & ANYOF_UNICODE_ALL)
+	if (flags & ANYOF_ABOVE_LATIN1_ALL)
 	    sv_catpvs(sv, "{unicode_all}");
 	else if (ANYOF_NONBITMAP(o)) {
             SV *lv; /* Set if there is something outside the bit map. */
