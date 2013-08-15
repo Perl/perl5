@@ -521,8 +521,20 @@ if (in_utf8) {
 
 my @Locale;
 my $Locale;
-my @Digit_;
 my @Word_;
+my @Digit_;
+my @Space_;
+my @Alpha_;
+my @Alnum_;
+my @Ascii_;
+my @Blank_;
+my @Cntrl_;
+my @Graph_;
+my @Lower_;
+my @Print_;
+my @Upper_;
+my @Xdigit_;
+my @Cased_;
 
 sub trylocale {
     my $locale = shift;
@@ -813,9 +825,20 @@ foreach $Locale (@Locale) {
 
     if (! $is_utf8_locale) {
         use locale;
-        @Word_ = sort grep /\w/, map { chr } 0..255;
-        debug "# w = ", join("",@Word_), "\n";
+        @Word_ = grep /\w/, map { chr } 0..255;
         @Digit_ = grep /\d/, map { chr } 0..255;
+        @Space_ = grep /\s/, map { chr } 0..255;
+        @Alpha_ = grep /[[:alpha:]]/, map {chr } 0..255;
+        @Alnum_ = grep /[[:alnum:]]/, map {chr } 0..255;
+        @Ascii_ = grep /[[:ascii:]]/, map {chr } 0..255;
+        @Blank_ = grep /[[:blank:]]/, map {chr } 0..255;
+        @Cntrl_ = grep /[[:cntrl:]]/, map {chr } 0..255;
+        @Graph_ = grep /[[:graph:]]/, map {chr } 0..255;
+        @Lower_ = grep /[[:lower:]]/, map {chr } 0..255;
+        @Print_ = grep /[[:print:]]/, map {chr } 0..255;
+        @Upper_ = grep /[[:upper:]]/, map {chr } 0..255;
+        @Xdigit_ = grep /[[:xdigit:]]/, map {chr } 0..255;
+        @Cased_ = grep /[[:upper:]]/i, map {chr } 0..255;
 
         # Sieve the uppercase and the lowercase.
 
@@ -832,9 +855,20 @@ foreach $Locale (@Locale) {
     }
     else {
         use locale ':not_characters';
-        @Word_ = sort grep /\w/, map { chr } 0..255;
+        @Word_ = grep /\w/, map { chr } 0..255;
         @Digit_ = grep /\d/, map { chr } 0..255;
-        debug "# w = ", join("",@Word_), "\n";
+        @Space_ = grep /\s/, map { chr } 0..255;
+        @Alpha_ = grep /[[:alpha:]]/, map {chr } 0..255;
+        @Alnum_ = grep /[[:alnum:]]/, map {chr } 0..255;
+        @Ascii_ = grep /[[:ascii:]]/, map {chr } 0..255;
+        @Blank_ = grep /[[:blank:]]/, map {chr } 0..255;
+        @Cntrl_ = grep /[[:cntrl:]]/, map {chr } 0..255;
+        @Graph_ = grep /[[:graph:]]/, map {chr } 0..255;
+        @Lower_ = grep /[[:lower:]]/, map {chr } 0..255;
+        @Print_ = grep /[[:print:]]/, map {chr } 0..255;
+        @Upper_ = grep /[[:upper:]]/, map {chr } 0..255;
+        @Xdigit_ = grep /[[:xdigit:]]/, map {chr } 0..255;
+        @Cased_ = grep /[[:upper:]]/i, map {chr } 0..255;
         for (@Word_) {
             if (/[^\d_]/) { # skip digits and the _
                 if (uc($_) eq $_) {
@@ -846,7 +880,24 @@ foreach $Locale (@Locale) {
             }
         }
     }
+
+    debug "# :upper:  = ", display_characters(@Upper_), "\n";
+    debug "# :lower:  = ", display_characters(@Lower_), "\n";
+    debug "# :cased:  = ", display_characters(@Cased_), "\n";
+    debug "# :alpha:  = ", display_characters(@Alpha_), "\n";
+    debug "# :alnum:  = ", display_characters(@Alnum_), "\n";
+    debug "#  w       = ", display_characters(@Word_), "\n";
+    debug "# :graph:  = ", display_characters(@Graph_), "\n";
+    debug "# :print:  = ", display_characters(@Print_), "\n";
+    debug "#  d       = ", display_characters(@Digit_), "\n";
+    debug "# :xdigit: = ", display_characters(@Xdigit_), "\n";
+    debug "# :blank:  = ", display_characters(@Blank_), "\n";
+    debug "#  s       = ", display_characters(@Space_), "\n";
+    debug "# :cntrl:  = ", display_characters(@Cntrl_), "\n";
+    debug "# :ascii:  = ", display_characters(@Ascii_), "\n";
+
     foreach (keys %UPPER) {
+
 	$BoThCaSe{$_}++ if exists $lower{$_};
     }
     foreach (keys %lower) {
