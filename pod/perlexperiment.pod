@@ -85,6 +85,9 @@ See also L<perlrun>
 
 =item There is an C<installhtml> target in the Makefile.
 
+The ticket for this feature is
+L<[perl #116487]|https://rt.perl.org/rt3/Ticket/Display.html?id=116487>.
+
 =item Unicode in Perl on EBCDIC
 
 See also: L<perlre/"Special Backtracking Control Verbs">
