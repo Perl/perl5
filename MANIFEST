@@ -3037,7 +3037,6 @@ dist/ExtUtils-ParseXS/lib/perlxstypemap.pod			Perl XS C/Perl type conversion too
 dist/ExtUtils-ParseXS/t/001-basic.t				See if ExtUtils::ParseXS works
 dist/ExtUtils-ParseXS/t/002-more.t				Extended ExtUtils::ParseXS testing
 dist/ExtUtils-ParseXS/t/003-usage.t				ExtUtils::ParseXS tests
-dist/ExtUtils-ParseXS/t/004-nolinenumbers.t			ExtUtils::ParseXS tests
 dist/ExtUtils-ParseXS/t/101-standard_typemap_locations.t	ExtUtils::ParseXS tests
 dist/ExtUtils-ParseXS/t/102-trim_whitespace.t			ExtUtils::ParseXS tests
 dist/ExtUtils-ParseXS/t/103-tidy_type.t				ExtUtils::ParseXS tests
