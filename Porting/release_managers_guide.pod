@@ -1272,9 +1272,9 @@ Finally, commit and push:
     $ git commit -a -m 'add perlXXXdelta'
     $ git push origin ....
 
-=head3 copy perlhist.pod entries to blead
+=for checklist skip BLEAD-POINT
 
-XXX probably irrelevant for BLEAD-POINT
+=head3 copy perlhist.pod entries to blead
 
 Make sure any recent F<pod/perlhist.pod> entries are copied to
 F<perlhist.pod> on blead.  e.g.
