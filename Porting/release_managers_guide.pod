@@ -694,7 +694,7 @@ If you make changes, be sure to commit them.
 =head3 remove stale perldeltas
 
 For the first RC release that is ONLY for a BLEAD-FINAL, the perldeltas
-from the BLEAD-POINT releases since the previous BLEAD_FINAL should have
+from the BLEAD-POINT releases since the previous BLEAD-FINAL should have
 now been consolidated into the current perldelta, and hence are now just
 useless clutter.  They can be removed using:
 
@@ -705,7 +705,7 @@ For example, for RC0 of 5.16.0:
     $ cd pod
     $ git rm perldelta515*.pod
 
-=for checklist skip BLEAD BLEAD-POINT
+=for checklist skip BLEAD-FINAL BLEAD-POINT
 
 =head3 add recent perldeltas
 
@@ -749,7 +749,7 @@ then configure and build perl so that you have a Makefile and porting tools:
 
     $ ./Configure -Dusedevel -des && make
 
-=for checklist skip BLEAD BLEAD-POINT
+=for checklist skip BLEAD-FINAL BLEAD-POINT
 
 =head3 synchronise from blead's perlhist.pod
 
