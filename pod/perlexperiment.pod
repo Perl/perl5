@@ -34,6 +34,9 @@ Modified in Perl 5.10.1, 5.12.0
 Using this feature triggers warnings in the category
 C<experimental::smartmatch>.
 
+The ticket for this feature is
+L<[perl #119317]|https://rt.perl.org/rt3/Ticket/Display.html?id=119317>.
+
 =item Lexical C<$_>
 
 Introduced in Perl 5.10.0
