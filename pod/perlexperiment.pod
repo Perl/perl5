@@ -22,6 +22,9 @@ Introduced in Perl 5.8.0
 
 Deprecated in Perl 5.10.0
 
+The ticket for this feature is
+L<[perl #119313]|https://rt.perl.org/rt3/Ticket/Display.html?id=119313>.
+
 =item Smart match (C<~~>)
 
 Introduced in Perl 5.10.0
