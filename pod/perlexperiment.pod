@@ -80,8 +80,6 @@ See also L<perlrun>
 
 See also: L<perlre/"Special Backtracking Control Verbs">
 
-=item Code expressions, conditional expressions, and independent expressions in regexes
-
 =back
 
 =head2 Accepted features
