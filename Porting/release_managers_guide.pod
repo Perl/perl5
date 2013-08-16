@@ -841,19 +841,9 @@ and C<< deadbeef >> commit of that tag.
 
 Then delete the temporary installation.
 
+=head3 create the release tag
 
-=head3 push the work so far
-
-XXX why do we need to do this if we're working on a release branch
-anyway?
-
-Push all your recent commits:
-
-    $ git push origin release-5.xx.yy
-
-=head3 tag the release
-
-Tag the release (e.g.):
+Create the tag identifying this release (e.g.):
 
     $ git tag v5.11.0 -m "First release of the v5.11 series!"
 
@@ -1068,14 +1058,6 @@ confirming that your uploads have been received.  IMPORTANT -- you will
 probably get an email that indexing has failed, due to module permissions.
 This is considered normal.
 
-
-=head3 publish tag
-
-Now that you've shipped the new perl release to PAUSE, it's
-time to publish the tag you created earlier to the public git repo (e.g.):
-
-    $ git push origin tag v5.11.0
-
 =for checklist skip BLEAD-POINT
 
 =head3 disarm patchlevel.h
@@ -1092,9 +1074,6 @@ Disarm the F<patchlevel.h> change; for example,
 Be sure to commit your change:
 
     $ git commit -m 'disarm RCnnn bump' patchlevel.h
-    $ git push origin ....
-
-
 
 =head3 announce to p5p
 
@@ -1106,15 +1085,21 @@ Send a carbon copy to C<noc@metacpan.org>
 
 =head3 merge release branch back to blead
 
-If you made a release branch for this release, merge it back into master now,
-and delete it.
+Merge the (local) release branch back into master now, and delete it.
 
   git checkout blead
   git pull
   git merge release-5.xx.yy
   git push
-  git push origin :release-5.xx.yy
   git branch -d release-5.xx.yy
+
+=head3 publish the release tag
+
+Now that you've shipped the new perl release to PAUSE and pushed your changes
+to the Perl master repository, it's time to publish the tag you created
+earlier too (e.g.):
+
+    $ git push origin tag v5.11.0
 
 =head3 update epigraphs.pod
 
@@ -1295,10 +1280,10 @@ Then rebuild various files:
 
     $ perl Porting/pod_rules.pl
 
-Finally, commit:
+Finally, commit and push:
 
     $ git commit -a -m 'add perlXXXdelta'
-
+    $ git push origin ....
 
 =head3 copy perlhist.pod entries to blead
 
