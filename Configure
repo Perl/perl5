@@ -28,7 +28,7 @@
 # See Porting/pumpkin.pod for more information on metaconfig.
 #
 
-# Generated on Mon Jul 15 15:52:13 CEST 2013 [metaconfig 3.5 PL0]
+# Generated on Fri Aug 16 14:21:14 CEST 2013 [metaconfig 3.5 PL0]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -15761,7 +15761,7 @@ int main() {
 #endif
 #ifdef INT16
    int16_t i =  INT16_MAX;
-  uint16_t i = UINT16_MAX;
+  uint16_t u = UINT16_MAX;
   printf("int16_t\n");
 #endif
 #ifdef INT32
