@@ -59,7 +59,6 @@ The checklist of a typical release cycle is as follows:
 
     ... the cycle continues ...
 
-
 =head1 DETAILS
 
 Some of the tasks described below apply to all four types of
@@ -68,7 +67,6 @@ release of blead). Some of these tasks apply only to a subset
 of these release types.  If a step does not apply to a given
 type of release, you will see a notation to that effect at
 the beginning of the step.
-
 
 =head2 Release types
 
@@ -321,7 +319,6 @@ it has not yet been exercised on Windows, but will certainly require a set
 of Unix tools such as Cygwin, and steps that run C<make> will need to run
 C<nmake> instead.
 
-
 =head3 dual-life CPAN module stability
 
 Ensure dual-life CPAN modules are stable, which comes down to:
@@ -344,7 +341,6 @@ Ensure dual-life CPAN modules are stable, which comes down to:
                 no - note it in perldelta as a significant bugfix
                 (also, try to inform the module's author)
 
-
 =head3 monitor smoke tests for failures
 
 Similarly, monitor the smoking of core tests, and try to fix.  See
@@ -355,7 +351,6 @@ the raw reports.
 
 Similarly, monitor the smoking of perl for compiler warnings, and try to
 fix.
-
 
 =head3 update perldelta
 
@@ -436,7 +431,6 @@ When the version number is bumped, you should also update Module::CoreList
 (as described below in L<"update Module::CoreList">) to reflect the new
 version number.
 
-
 =head3 update INSTALL
 
 Review and update INSTALL to account for the change in version number;
@@ -490,19 +484,16 @@ it locally.  Because a perl source tarballs sets many files read-only, it could
 test differently than tests run from the repository.  After you're sure
 permissions aren't a problem, delete the generated directory and tarballs.
 
-
 =head2 Building a release - on the day
 
 This section describes the actions required to make a release
 that are performed near to, or on the actual release day.
-
 
 =head3 re-check earlier actions
 
 Review all the actions in the previous section,
 L<"Building a release - advance actions"> to ensure they are all done and
 up-to-date.
-
 
 =head3 create a release branch
 
@@ -512,7 +503,6 @@ BLEAD-FINAL, MAINT, and RC releases, since blead will already be frozen in
 those cases. Create the branch by running
 
   git checkout -b release-5.xx.yy
-
 
 =head3 build a clean perl
 
@@ -853,7 +843,6 @@ wrong before you publish your newly-created tag, you can delete
 and recreate it.  Once you push your tag, we're stuck with it
 and you'll need to use a new version number for your release.
 
-
 =head3 build the tarball
 
 Before you run the following, you might want to install 7-Zip (the
@@ -893,7 +882,6 @@ here
 Finally, clean up the temporary directory, e.g.
 
     $ rm -rf ../perl-x.y.z-RC1
-
 
 =head3 test the tarball
 
@@ -1017,7 +1005,6 @@ smokers. This is why we have a RC cycle for I<MAINT> and I<BLEAD-FINAL>
 releases, but for I<BLEAD-POINT> releases sometimes the best you can do is
 to plead with people on IRC to test stuff on their platforms, fire away,
 and then hope for the best.
-
 
 =head3 upload to PAUSE
 
@@ -1294,7 +1281,6 @@ F<perlhist.pod> on blead.  e.g.
 
           5.8.9         2008-Dec-14
 
-
 =head3 bump RT version number
 
 Log into http://rt.perl.org/ and check whether the new version is in the RT
@@ -1311,7 +1297,6 @@ I<You MUST RETIRE to your preferred PUB, CAFE or SEASIDE VILLA for some
 much-needed rest and relaxation>.
 
 Thanks for releasing perl!
-
 
 =head2 Building a release - the day after
 
