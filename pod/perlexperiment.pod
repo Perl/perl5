@@ -74,94 +74,6 @@ Introduced in Perl 5.18
 
 See also L<perlrun>
 
-=item lex_start API
-
-Introduced in Perl 5.13.7
-
-=item internal API for C<%^H>
-
-Introduced in Perl 5.13.7
-
-See also C<cophh_> in L<perlapi>.
-
-=item alloccopstash
-
-Introduced in Perl 5.18.0
-
-=item av_create_and_push
-
-=item av_create_and_unshift_one
-
-=item av_create_and_unshift_one
-
-=item cop_store_label
-
-Introduced in Perl 5.16.0
-
-=item PL_keyword_plugin
-
-=item gv_fetchmethod_*_flags
-
-Introduced in Perl 5.16.0
-
-=item hv_iternext_flags
-
-=item lex_bufutf8
-
-=item lex_discard_to
-
-=item lex_grow_linestr
-
-=item lex_next_chunk
-
-=item lex_peek_unichar
-
-=item lex_read_space
-
-=item lex_read_to
-
-=item lex_read_unichar
-
-=item lex_stuff_pv
-
-=item lex_stuff_pvn
-
-=item lex_stuff_pvs
-
-=item lex_stuff_sv
-
-=item lex_unstuff
-
-=item op_scope
-
-=item op_lvalue
-
-=item parse_fullstmt
-
-=item parse_stmtseq
-
-=item PL_parser-E<gt>bufend
-
-=item PL_parser-E<gt>bufptr
-
-=item PL_parser-E<gt>linestart
-
-=item PL_parser-E<gt>linestr
-
-=item Perl_signbit
-
-=item pad_findmy
-
-=item sv_utf8_decode
-
-=item sv_utf8_downgrade
-
-=item bytes_from_utf8
-
-=item bytes_to_utf8
-
-=item utf8_to_bytes
-
 =item There is an C<installhtml> target in the Makefile.
 
 =item Unicode in Perl on EBCDIC
@@ -169,10 +81,6 @@ Introduced in Perl 5.16.0
 See also: L<perlre/"Special Backtracking Control Verbs">
 
 =item Code expressions, conditional expressions, and independent expressions in regexes
-
-=item gv_try_downgrade
-
-See also L<perlintern>
 
 =back
 
