@@ -2550,7 +2550,7 @@ S_sublex_start(pTHX)
 	return THING;
     }
     else if (op_type == OP_BACKTICK && PL_lex_op) {
-	/* readpipe() vas overridden */
+	/* readpipe() was overridden */
 	cSVOPx(cLISTOPx(cUNOPx(PL_lex_op)->op_first)->op_first->op_sibling)->op_sv = tokeq(PL_lex_stuff);
 	pl_yylval.opval = PL_lex_op;
 	PL_lex_op = NULL;
