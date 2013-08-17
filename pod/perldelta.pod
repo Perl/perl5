@@ -378,7 +378,7 @@ L<Time::Piece> has been upgraded from version 1.21 to 1.22.
 
 XXX: TODO
 
-=item 8
+=item *
 
 L<utf8> has been upgraded from version 1.12 to 1.13.
 
