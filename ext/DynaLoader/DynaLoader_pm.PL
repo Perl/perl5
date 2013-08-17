@@ -566,6 +566,7 @@ DynaLoader Interface Summary
   @dl_resolve_using
   @dl_require_symbols
   $dl_debug
+  $dl_dlext
   @dl_librefs
   @dl_modules
   @dl_shared_objects
