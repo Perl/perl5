@@ -1899,12 +1899,8 @@ use File::Glob qw(:case);
 
     'Time::HiRes' => {
         'MAINTAINER'   => 'zefram',
-        'DISTRIBUTION' => 'ZEFRAM/Time-HiRes-1.9725.tar.gz',
+        'DISTRIBUTION' => 'ZEFRAM/Time-HiRes-1.9726.tar.gz',
         'FILES'        => q[cpan/Time-HiRes],
-
-        # Waiting to be merged upstream: see CPAN RT#87858
-        'CUSTOMIZED'   => [ 'Makefile.PL' ],
-
         'UPSTREAM'     => 'cpan',
     },
 

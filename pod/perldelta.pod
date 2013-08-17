@@ -374,6 +374,13 @@ Avoid creating temporary objects for STORABLE_attach when they aren't required.
 
 =item *
 
+L<Time::HiRes> has been upgraded from version 1.9725 to 1.9726.
+
+Now provides an C<lstat> function.
+Various bugs fixed.
+
+=item *
+
 L<Time::Piece> has been upgraded from version 1.21 to 1.22.
 
 XXX: TODO

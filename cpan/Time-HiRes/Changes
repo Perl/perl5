@@ -1,5 +1,19 @@
 Revision history for the Perl extension Time::HiRes.
 
+1.9726 [2013-08-17]
+	- Correct s/us splitting of usleep(1000000) [rt.cpan.org #78266].
+	- Avoid integer overflow in itimer-based alarm() with large
+	  argument [rt.cpan.org #87160].
+	- Define PERL_NO_INLINE_FUNCTIONS during probe compilations, to
+	  avoid false negatives caused by not linking with the perl core.
+	- Be more careful about context in stat().
+	- Install into "site" directories by default on perl 5.11+
+	  [rt.cpan.org #79797].
+	- Fix a couple of doc typos [rt.cpan.org #85365].
+	- Fix function name in a doc example [rt.cpan.org #86318].
+	- Provide lstat() that yields high-res timestamps, alongside
+	  the existing high-res stat() [rt.cpan.org #78732].
+
 1.9725 [2012-02-01]
 	- Correct stack discipline in stat(), which was screwing up list
 	  operations in expressions containing calls to it [rt.cpan.org
