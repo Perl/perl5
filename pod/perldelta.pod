@@ -3,7 +3,11 @@
 =for comment
 Stuff that needs to be done still:
 70502ce [perl #119101] Extraneous warnings in Parse::ErrorString::Perl
-aa8c2dc Fix RT #41461 (with a test).
+88b3a46 PATCH (partial) [perl #107816] Performance regression since 0abd0d78
+eb40d2c [perl #2726] Prototype is not applied until BLOCK is defined
+c56ed9f [perl #119043] Allow utf8 up/downgrade on ro COWs
+8fe3c67 fix 114884 positive GPOS lookbehind regex substitution failure
+d8fe30a Avoid read-after-free in S_scan_heredoc() if the terminator line has no "\n".
 
 =head1 NAME
 
@@ -160,13 +164,32 @@ C<CARP_TRACE> as well as other references. [perl #92446]
 
 L<Compress::Raw::Bzip2> has been upgraded from 2.061 to 2.062.
 
+XXX: TODO
+
 =item *
 
 L<Compress::Raw::Zlib> has been upgraded from 2.061 to 2.062.
 
+XXX: TODO
+
 =item *
 
 L<Config::Perl::V> has been upgraded from version 0.18 to 0.19.
+
+XXX: TODO
+
+=item *
+
+L<constant> has been upgraded from version 1.27 to 1.28.
+
+Note that list constants will be inlined and may be read-only in future Perl
+versions.
+
+=item *
+
+L<CPAN::Meta> has been upgraded from version 2.131560 to 2.132140.
+
+Some documentation typos have been fixed.
 
 =item *
 
@@ -174,6 +197,12 @@ L<Data::Dumper> has been upgraded from version 2.147 to 2.148.
 
 The compatbility of the XS implementation with the pure perl version under
 C<Useqq> has been improved. [perl #118933]
+
+=item *
+
+L<DB> has been upgraded from 1.41 to 1.42.
+
+The Perl debugger no longer crashes with C<PERLDB_OPTS="noTTY frame=2">.
 
 =item *
 
@@ -192,9 +221,27 @@ C<fill_mstats> no longer crashes if its argument is not already a string.
 
 =item *
 
+L<diagnostics> has been upgraded from version 1.31 to 1.32.
+
+Wrapped links are no longer truncated.
+
+=item *
+
+L<DynaLoader> has been upgraded from version 1.18 to 1.19.
+
+The $dl_dlext variable is now documented.
+
+=item *
+
 L<Encode> has been upgraded from version 2.51 to 2.52.
 
 Encoding "0" with MIME-Headers no longer gets a blank string.
+
+=item *
+
+L<English> has been upgraded from version 1.07 to 1.08.
+
+The documentation of a performance fix has been corrected.
 
 =item *
 
@@ -210,7 +257,33 @@ The module is now partly implemented in XS, for performance.
 
 =item *
 
+L<ExtUtils::MakeMaker> has been upgraded from 6.68 to 6.72.
+
+The C<dist> target now reports the file created, an infinite loop in
+C<clean_subdirs> has been fixed, an invisible interactive question is now
+avoided when rebuilding Makefile, issues with F</cygdrive> on Cygwin have been
+resolved, C<LD> and C<OPTIMIZE> are now used in recursive F<Makefile.PL>
+invocations, C<VERSION> and C<VERSION_FROM> now handle v-strings correctly, and
+control characters are now stripped from C<ABSTRACT>.
+
+=item *
+
+L<ExtUtils::ParseXS> has been upgraded from version 3.18 to 3.21.
+
+XXX: TODO
+
+=item *
+
+L<Getopt::Std> has been upgraded from version 1.09 to 1.10.
+
+Clarified documentation of what happens when a switch is expecting an argument
+but fails to be provided with one.
+
+=item *
+
 The IO-Compress module collection has been upgraded from 2.061 to 2.062.
+
+XXX: TODO
 
 =item *
 
@@ -228,11 +301,19 @@ C<exec> failed. [perl #114722]
 
 =item *
 
-The libnet module collection has been upgraded from version 1.22 to 1.23.
+L<IPC::SysV> has been upgraded from version 2.03 to 2.04.
+
+$EXPORT_TAGS{all} has been added and a couple of typos have been fixed.
 
 =item *
 
-L<List::Util> has been upgraded from version 1.27 to 1.30
+The libnet module collection has been upgraded from version 1.22 to 1.23.
+
+XXX: TODO
+
+=item *
+
+L<List::Util> has been upgraded from version 1.27 to 1.31.
 
 L<List::Util> now includes C<pairgrep>, C<pairmap>, C<pairs>, C<pairkeys>,
 C<pairvalues> and C<pairfirst> functions that operate on even-sized lists of
@@ -240,7 +321,41 @@ pairs.
 
 =item *
 
+L<Module::Build> has been upgraded from 0.4005 to 0.4007.
+
+The test suite has been significantly sped up, Unicode man page support has
+been enhanced and hash argument parsing in subclasses has been fixed.
+
+=item *
+
+L<Module::CoreList> has been upgraded from 2.92 to 2.97.
+
+XXX: TODO
+
+=item *
+
+L<mro> has been upgraded from version 1.12 to 1.13.
+
+A minor typo has been fixed in the documentation.
+
+=item *
+
 L<parent> has been upgraded from version 0.225 to 0.226.
+
+XXX: TODO
+
+=item *
+
+L<PerlIO> has been upgraded from version 1.07 to 1.08.
+
+Although not a security vulnerability, it was possible to inject code via
+C<PerlIO-E<gt>import()>.  This has now been fixed. [perl #119287]
+
+=item *
+
+L<Pod::Functions> has been upgraded from version 1.07 to 1.08.
+
+Internal changes only have been made to the test suite.
 
 =item *
 
@@ -259,6 +374,14 @@ Avoid creating temporary objects for STORABLE_attach when they aren't required.
 =item *
 
 L<Time::Piece> has been upgraded from version 1.21 to 1.22.
+
+XXX: TODO
+
+=item 8
+
+L<utf8> has been upgraded from version 1.12 to 1.13.
+
+A minor clarification has been made in the documentation.
 
 =back
 
@@ -304,6 +427,27 @@ vigorous discussion on perl5-porters kicked off by a set of improvements
 written by Alexander Hartmaier to the existing L<perlopentut>.  A "more than
 you ever wanted to know about C<open>" document may follow in subsequent
 versions of perl.
+
+=back
+
+=head3 L<perlre>
+
+=over 4
+
+=item *
+
+The C</r> modifier (for non-destructive substitution) is now documented. [perl
+#119151]
+
+=back
+
+=head3 L<perlxs>
+
+=over 4
+
+=item *
+
+Several problems in the C<MY_CXT> example have been fixed.
 
 =back
 
