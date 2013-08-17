@@ -179,8 +179,8 @@ C<Useqq> has been improved. [perl #118933]
 
 L<Devel::Peek> has been upgraded from version 1.12 to 1.13.
 
-The C<SvREFCNT_inc()> and C<SvREFCNT_dec()> functions have been removed and
-C<SvREFCNT()> will now work on non-scalars. [perl #117793]
+C<SvREFCNT_inc> and C<SvREFCNT_dec> have been removed and C<SvREFCNT> will now
+work on non-scalars. [perl #117793]
 
 C<Dump> now checks its arguments at compile time.  Both arguments are now
 evaluated in scalar context, with exceptions for @arrays and %hashes, allowing
@@ -200,8 +200,8 @@ Encoding "0" with MIME-Headers no longer gets a blank string.
 
 L<Exporter> has been upgraded from version 5.68 to 5.69.
 
-L<Exporter> would ignore custom C<$SIG{__WARN__}> handlers in
-C<Exporter::Heavy>. [perl #39739]
+L<Exporter> would ignore custom $SIG{__WARN__} handlers in C<Exporter::Heavy>.
+[perl #39739]
 
 =item *
 
@@ -219,7 +219,7 @@ needed and a regression introduced in 0.78 has been fixed.
 L<IPC::Open3> has been upgradded from version 1.14 to 1.15.
 
 C<open3> would leak a zombie process if the child process I/O redirection or
-exec() failed. [perl #114722]
+C<exec> failed. [perl #114722]
 
 =item *
 
@@ -296,7 +296,7 @@ The C<open> tutorial has been completely rewriten by Tom Christiansen, and now
 focuses on covering only the basics, rather than providing a comprehensive
 reference to all things openable.  This rewrite came as the result of a
 vigorous discussion on perl5-porters kicked off by a set of improvements
-written by Alexander Hartmaier to the existing C<perlopentut>.  A "more than
+written by Alexander Hartmaier to the existing L<perlopentut>.  A "more than
 you ever wanted to know about C<open>" document may follow in subsequent
 versions of perl.
 
@@ -474,7 +474,7 @@ but supports long strings on 64-bit platforms.
 =item *
 
 C<PL_exit_flags> can now be used by perl embedders or other XS code to have
-perl warn or abort() on an attempted exit. [perl #52000]
+perl C<warn> or C<abort> on an attempted exit. [perl #52000]
 
 =back
 
