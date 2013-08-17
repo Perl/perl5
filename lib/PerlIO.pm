@@ -1,6 +1,6 @@
 package PerlIO;
 
-our $VERSION = '1.07';
+our $VERSION = '1.08';
 
 # Map layer name to package that defines it
 our %alias;
@@ -19,7 +19,7 @@ sub import
     {
      $layer = "${class}::$layer";
     }
-   eval "require $layer";
+   eval { require $layer =~ s{::}{/}gr . '.pm' };
    warn $@ if $@;
   }
 }
