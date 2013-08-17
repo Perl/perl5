@@ -56,6 +56,11 @@ my @tests = (
 [ "Unix->catfile('./a','b','c')",       'a/b/c'  ],
 [ "Unix->catfile('c')",                 'c' ],
 [ "Unix->catfile('./c')",               'c' ],
+[ "Unix->catfile('a', 'b'.chr(0xaf))",         'a/b'.chr(0xaf)   ],
+($] >= 5.008 ? (
+[ "Unix->catfile('a', do { my \$x = 'b'.chr(0xaf); use utf8 (); utf8::upgrade(\$x); \$x })",   'a/b'.chr(0xaf)   ],
+) : ()),
+[ "Unix->catfile(substr('foo', 2))", 'o' ],
 
 [ "Unix->splitpath('file')",            ',,file'            ],
 [ "Unix->splitpath('/d1/d2/d3/')",      ',/d1/d2/d3/,'      ],
@@ -94,17 +99,46 @@ my @tests = (
 [ "Unix->catdir('d1','d2','d3')",       'd1/d2/d3'  ],
 # QNX is POSIXly special
 [ "Unix->catdir('/','d2/d3')",          ( $^O =~ m!^(nto|qnx)! ? '//d2/d3' : '/d2/d3' ) ],
+[ "Unix->catdir('a', 'b'.chr(0xaf))",         'a/b'.chr(0xaf)   ],
+($] >= 5.008 ? (
+[ "Unix->catdir('a', do { my \$x = 'b'.chr(0xaf); use utf8 (); utf8::upgrade(\$x); \$x })",   'a/b'.chr(0xaf)   ],
+) : ()),
 
 [ "Unix->canonpath('///../../..//./././a//b/.././c/././')",   '/a/b/../c' ],
 [ "Unix->canonpath('')",                       ''               ],
 # rt.perl.org 27052
 [ "Unix->canonpath('a/../../b/c')",            'a/../../b/c'    ],
+[ "Unix->canonpath('/')",                      '/'              ],
+[ "Unix->canonpath('///')",                    '/'              ],
 [ "Unix->canonpath('/.')",                     '/'              ],
 [ "Unix->canonpath('/./')",                    '/'              ],
+[ "Unix->canonpath('///.')",                   '/'              ],
+[ "Unix->canonpath('///.///')",                '/'              ],
+[ "Unix->canonpath('///..')",                  '/'              ],
+[ "Unix->canonpath('///..///')",               '/'              ],
+[ "Unix->canonpath('///..///.///..///')",      '/'              ],
+[ "Unix->canonpath('.')",                      '.'              ],
+[ "Unix->canonpath('.///')",                   '.'              ],
+[ "Unix->canonpath('.///.')",                  '.'              ],
+[ "Unix->canonpath('.///.///')",               '.'              ],
+[ "Unix->canonpath('..')",                     '..'             ],
+[ "Unix->canonpath('..///')",                  '..'             ],
+[ "Unix->canonpath('../..')",                  '../..'          ],
+[ "Unix->canonpath('../../')",                 '../..'          ],
+[ "Unix->canonpath('..///.///..///')",         '../..'          ],
+[ "Unix->canonpath('///../../..//./././a//b/.././c/././')",   '/a/b/../c' ],
+[ "Unix->canonpath('a/../../b/c')",            'a/../../b/c'    ],
+[ "Unix->canonpath('a///..///..///b////c')",   'a/../../b/c'    ],
+[ "Unix->canonpath('.///a///.///..///.///..///.///b///.////c///.')",   'a/../../b/c'    ],
 [ "Unix->canonpath('/a/./')",                  '/a'             ],
 [ "Unix->canonpath('/a/.')",                   '/a'             ],
 [ "Unix->canonpath('/../../')",                '/'              ],
 [ "Unix->canonpath('/../..')",                 '/'              ],
+[ "Unix->canonpath('/foo', '/bar')",           '/foo'           ],
+[ "Unix->canonpath('///a'.chr(0xaf))",         '/a'.chr(0xaf)   ],
+($] >= 5.008 ? (
+[ "Unix->canonpath(do { my \$x = '///a'.chr(0xaf); use utf8 (); utf8::upgrade(\$x); \$x })",   '/a'.chr(0xaf)   ],
+) : ()),
 
 [  "Unix->abs2rel('/t1/t2/t3','/t1/t2/t3')",          '.'                  ],
 [  "Unix->abs2rel('/t1/t2/t4','/t1/t2/t3')",          '../t4'              ],
@@ -801,5 +835,7 @@ for ( @tests ) {
 	}
     }
 }
+
+is +File::Spec::Unix->canonpath(), undef;
 
 done_testing();

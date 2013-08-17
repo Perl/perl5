@@ -31,6 +31,7 @@ my @toolchain = qw(cpan/AutoLoader/lib
                    dist/Exporter/lib
                    ext/File-Find/lib
                    cpan/Text-Tabs/lib
+		   dist/constant/lib
 		   );
 
 # Used only in ExtUtils::Liblist::Kid::_win32_ext()
