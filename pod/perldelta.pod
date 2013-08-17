@@ -205,6 +205,11 @@ L<Exporter> would ignore custom $SIG{__WARN__} handlers in C<Exporter::Heavy>.
 
 =item *
 
+L<File::Spec> has been upgraded from 3.43 to 3.44.
+The module is now partly implemented in XS, for performance.
+
+=item *
+
 The IO-Compress module collection has been upgraded from 2.061 to 2.062.
 
 =item *
