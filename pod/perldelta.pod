@@ -34,9 +34,9 @@ here, but most should go in the L</Performance Enhancements> section.
 
 =head2 B<-F> now implies B<-a> and B<-a> implies B<-n>
 
-Previously B<-F> without B<-a> was a no-op, and B<-a> without B<-n> or
-B<-p> was a no-op, with this change, if you supply B<-F> then both
-B<-a> and B<-n> are implied and if you supply B<-a> then B<-n> is implied.
+Previously B<-F> without B<-a> was a no-op, and B<-a> without B<-n> or B<-p>
+was a no-op, with this change, if you supply B<-F> then both B<-a> and B<-n>
+are implied and if you supply B<-a> then B<-n> is implied.
 
 You can still use B<-p> for its extra behaviour. [perl #116190]
 
@@ -134,9 +134,9 @@ XXX
 
 L<B> has been upgraded from version 1.44 to 1.45.
 
-Calling the C<GV> method on C<B::CV> objects created from a lexical
-sub would return nonsense, possibly crashing perl. C<GV> now returns
-C<undef> for lexical subs. [perl #118525]
+Calling the C<GV> method on C<B::CV> objects created from a lexical sub would
+return nonsense, possibly crashing perl. C<GV> now returns C<undef> for lexical
+subs. [perl #118525]
 
 Added the C<NAME_HEK> method to return the name of a lexical sub.
 
@@ -144,16 +144,16 @@ Added the C<NAME_HEK> method to return the name of a lexical sub.
 
 L<bignum> has been upgraded from version 0.35 to 0.36.
 
-L<bigrat> wasn't correctly updating an internal variable when C<use>d
-with a C<lib> option.
+L<bigrat> wasn't correctly updating an internal variable when C<use>d with a
+C<lib> option.
 
 =item *
 
 L<Carp> has been upgraded from 1.30 to 1.31
 
-L<Carp> now handles objects with string overloads. It also allows objects
-to specify how they appear in the stack dump with a C<CARP_TRACE> method,
-and also allows the user to specify their own formatter for objects without
+L<Carp> now handles objects with string overloads. It also allows objects to
+specify how they appear in the stack dump with a C<CARP_TRACE> method, and also
+allows the user to specify their own formatter for objects without
 C<CARP_TRACE> as well as other references. [perl #92446]
 
 =item *
@@ -172,21 +172,20 @@ L<Config::Perl::V> has been upgraded from version 0.18 to 0.19.
 
 L<Data::Dumper> has been upgraded from version 2.147 to 2.148.
 
-The compatbility of the XS implementation with the pure perl version
-under C<Useqq> has been improved. [perl #118933]
+The compatbility of the XS implementation with the pure perl version under
+C<Useqq> has been improved. [perl #118933]
 
 =item *
 
 L<Devel::Peek> has been upgraded from version 1.12 to 1.13.
 
-The C<SvREFCNT_inc()> and C<SvREFCNT_dec()> functions have been
-removed and C<SvREFCNT()> will now work on non-scalars. [perl #117793]
+The C<SvREFCNT_inc()> and C<SvREFCNT_dec()> functions have been removed and
+C<SvREFCNT()> will now work on non-scalars. [perl #117793]
 
 C<Dump> now checks its arguments at compile time.  Both arguments are now
-evaluated in scalar context, with exceptions for @arrays and %hashes,
-allowing aggregates to be dumped directly.  The first argument is evaluated
-in rvalue scalar context, allowing rvalue C<pos> and C<substr> to be
-dumped.  
+evaluated in scalar context, with exceptions for @arrays and %hashes, allowing
+aggregates to be dumped directly.  The first argument is evaluated in rvalue
+scalar context, allowing rvalue C<pos> and C<substr> to be dumped.
 
 C<fill_mstats> no longer crashes if its argument is not already a string.
 [perl #92260]
@@ -219,8 +218,8 @@ needed and a regression introduced in 0.78 has been fixed.
 
 L<IPC::Open3> has been upgradded from version 1.14 to 1.15.
 
-C<open3> would leak a zombie process if the child process I/O
-redirection or exec() failed. [perl #114722]
+C<open3> would leak a zombie process if the child process I/O redirection or
+exec() failed. [perl #114722]
 
 =item *
 
@@ -249,8 +248,8 @@ structures due to embedded sun_len. [cpan #86613]
 
 L<Storable> has been upgraded from version 2.45 to 2.46.
 
-Avoid creating temporary objects for STORABLE_attach when they aren't
-required. [perl #118907]
+Avoid creating temporary objects for STORABLE_attach when they aren't required.
+[perl #118907]
 
 =item *
 
@@ -333,13 +332,12 @@ XXX L<message|perldiag/"message">
 
 =item *
 
-L<Argument "%s" treated as 0 in increment (++)|perldiag/"Argument
-"%s" treated as 0 in increment (++)">
+L<Argument "%s" treated as 0 in increment (++)|perldiag/"Argument "%s" treated
+as 0 in increment (++)">
 
-(W numeric) The indicated string was fed as an argument to the C<++>
-operator which expects either a number or a string matching
-C</^[a-zA-Z]*[0-9]*\z/>.  See L<perlop/Auto-increment and
-Auto-decrement> for details.
+(W numeric) The indicated string was fed as an argument to the C<++> operator
+which expects either a number or a string matching C</^[a-zA-Z]*[0-9]*\z/>.
+See L<perlop/Auto-increment and Auto-decrement> for details.
 
 =back
 
@@ -470,13 +468,13 @@ well.
 
 =item *
 
-C<sv_pos_b2u_flags> has been added to the API.  It is similar to
-C<sv_pos_b2u>, but supports long strings on 64-bit platforms.
+C<sv_pos_b2u_flags> has been added to the API.  It is similar to C<sv_pos_b2u>,
+but supports long strings on 64-bit platforms.
 
 =item *
 
-C<PL_exit_flags> can now be used by perl embedders or other XS code to
-have perl warn or abort() on an attempted exit. [perl #52000]
+C<PL_exit_flags> can now be used by perl embedders or other XS code to have
+perl warn or abort() on an attempted exit. [perl #52000]
 
 =back
 
@@ -491,9 +489,9 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-Autovivifying a subroutine stub via C<\&$glob> started causing crashes in
-Perl 5.18.0 if the $glob was merely a copy of a real glob, i.e., a scalar
-that had had a glob assigned to it.  This has been fixed [perl #119051].
+Autovivifying a subroutine stub via C<\&$glob> started causing crashes in Perl
+5.18.0 if the $glob was merely a copy of a real glob, i.e., a scalar that had
+had a glob assigned to it.  This has been fixed [perl #119051].
 
 =item *
 
@@ -503,24 +501,23 @@ On 64-bit platforms C<pos> can now be set to a value higher than 2**31-1
 =item *
 
 Perl used to leak an implementation detail when it came to referencing the
-return values of certain operators.  C<for ($a+$b) { warn \$_; warn \$_ }>
-used to display two different memory addresses, because the C<\> operator
-was copying the variable.  Under threaded builds, it would also happen for
+return values of certain operators.  C<for ($a+$b) { warn \$_; warn \$_ }> used
+to display two different memory addresses, because the C<\> operator was
+copying the variable.  Under threaded builds, it would also happen for
 constants (C<for(1) { ... }>).  This has been fixed [perl #21979, #78194,
 #89188, #109746, #114838, #115388].
 
 =item *
 
-The range operator C<..> was returning the same modifiable scalars with
-each call, unless it was the only thing in a C<foreach> loop header.  This
-meant that changes to values within the list returned would be visible the
-next time the operator was executed [perl #3105].
+The range operator C<..> was returning the same modifiable scalars with each
+call, unless it was the only thing in a C<foreach> loop header.  This meant
+that changes to values within the list returned would be visible the next time
+the operator was executed [perl #3105].
 
 =item *
 
-Constant folding and subroutine inlining no longer cause operations that
-would normally return new modifiable scalars to return read-only values
-instead.
+Constant folding and subroutine inlining no longer cause operations that would
+normally return new modifiable scalars to return read-only values instead.
 
 =item *
 
@@ -532,19 +529,18 @@ causing changes to the variable to be ignored by callers of the subroutine
 
 Return values of certain operators such as C<ref> would sometimes be shared
 between recursive calls to the same subroutine, causing the inner call to
-modify the value returned by C<ref> in the outer call.  This has been
-fixed.
+modify the value returned by C<ref> in the outer call.  This has been fixed.
 
 =item *
 
 C<__PACKAGE__> and constants returning a package name or hash key are now
-consistently read-only.  In various previous Perl releases, they have
-become mutable under certain circumstances.
+consistently read-only.  In various previous Perl releases, they have become
+mutable under certain circumstances.
 
 =item *
 
-C</$qr/p> was broken in Perl 5.18.0; the C</p> flag was ignored.  This has
-been fixed [perl #118213].
+C</$qr/p> was broken in Perl 5.18.0; the C</p> flag was ignored.  This has been
+fixed [perl #118213].
 
 =item *
 
@@ -554,22 +550,21 @@ unparsed.  This has been corrected.
 
 =item *
 
-Starting in Perl 5.001, a regular expression like C</[#$a]/x> or
-C</[#]$a/x> would have its C<#> incorrectly interpreted as a comment, so
-the variable would not interpolate.  This has been corrected [perl #45667].
+Starting in Perl 5.001, a regular expression like C</[#$a]/x> or C</[#]$a/x>
+would have its C<#> incorrectly interpreted as a comment, so the variable would
+not interpolate.  This has been corrected [perl #45667].
 
 =item *
 
-On non-threaded builds, setting C<${"_<filename"}> to a reference or
-typeglob no longer causes C<__FILE__> and some error messages to produce a
-corrupt string, and no longer prevents C<#line> directives in string evals
-from providing the source lines to the debugger.  Threaded builds were
-unaffected.
+On non-threaded builds, setting C<${"_<filename"}> to a reference or typeglob
+no longer causes C<__FILE__> and some error messages to produce a corrupt
+string, and no longer prevents C<#line> directives in string evals from
+providing the source lines to the debugger.  Threaded builds were unaffected.
 
 =item *
 
-Enabling "used once" warnings no longer causes crashes on stash
-circularities created at compile time (C<*Foo::Bar::Foo:: = *Foo::>).
+Enabling "used once" warnings no longer causes crashes on stash circularities
+created at compile time (C<*Foo::Bar::Foo:: = *Foo::>).
 
 =item *
 
@@ -578,26 +573,27 @@ longer produce "uninitialized" warnings at compile time.
 
 =item *
 
-Modifying a substitution target inside the substitution replacement no
-longer causes crashes.
+Modifying a substitution target inside the substitution replacement no longer
+causes crashes.
 
 =item *
 
-The first statement inside a string eval used to use the wrong pragma setting sometimes during constant folding.  C<eval 'uc chr 0xe0'> would randomly choose between Unicode, byte, and locale semantics.  This has been
-fixed.
+The first statement inside a string eval used to use the wrong pragma setting
+sometimes during constant folding.  C<eval 'uc chr 0xe0'> would randomly choose
+between Unicode, byte, and locale semantics.  This has been fixed.
 
 =item *
 
 The handling of return values of @INC filters (subroutines returned by
-subroutines in @INC) has been fixed in various ways.  Previously tied
-variables were mishandled, and setting $_ to a reference or typeglob could
-result in crashes.
+subroutines in @INC) has been fixed in various ways.  Previously tied variables
+were mishandled, and setting $_ to a reference or typeglob could result in
+crashes.
 
 =item *
 
-The C<SvPVbyte> XS function has been fixed to work with tied scalars
-returning something other than a string.  It used to return utf8 in those
-cases where C<SvPV> would.
+The C<SvPVbyte> XS function has been fixed to work with tied scalars returning
+something other than a string.  It used to return utf8 in those cases where
+C<SvPV> would.
 
 =item *
 
@@ -606,8 +602,8 @@ S<(C<${ qr// }>)> false as booleans.  This has been fixed.
 
 =item *
 
-Perl 5.18.0 inadvertently made C<--> and C<++> crash on dereferenced
-regular expressions, and stopped C<++> from flattening vstrings.
+Perl 5.18.0 inadvertently made C<--> and C<++> crash on dereferenced regular
+expressions, and stopped C<++> from flattening vstrings.
 
 =item *
 
@@ -617,15 +613,13 @@ argument is a tied reference.
 =item *
 
 C<reset> with an argument no longer skips copy-on-write scalars, regular
-expressions, typeglob copies, and vstrings.  Also, when encountering those
-or read-only values, it no longer skips any array or hash with the same
-name.
+expressions, typeglob copies, and vstrings.  Also, when encountering those or
+read-only values, it no longer skips any array or hash with the same name.
 
 =item *
 
 C<reset> with an argument now skips scalars aliased to typeglobs
-(C<for $z (*foo) { reset "z" }>).  Previously it would corrupt memory or
-crash.
+(C<for $z (*foo) { reset "z" }>).  Previously it would corrupt memory or crash.
 
 =item *
 
@@ -634,16 +628,16 @@ regression from v5.12 [perl #117355].
 
 =item *
 
-The use of C<\G> in regular expressions, where it's not at the start of
-the pattern, is now slightly less buggy (although it is still somewhat
+The use of C<\G> in regular expressions, where it's not at the start of the
+pattern, is now slightly less buggy (although it is still somewhat
 problematic).
 
 =item *
 
-Where a regular expression included code blocks (C</(?{...})/>), and where
-the use of constant overloading triggered a re-compilation of the code block,
-the second compilation didn't see its outer lexical scope. This was a
-regression in 5.18.0.
+Where a regular expression included code blocks (C</(?{...})/>), and where the
+use of constant overloading triggered a re-compilation of the code block, the
+second compilation didn't see its outer lexical scope. This was a regression in
+5.18.0.
 
 =back
 
