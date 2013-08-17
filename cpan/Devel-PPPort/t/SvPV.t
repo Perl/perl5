@@ -30,9 +30,9 @@ BEGIN {
     require 'testutil.pl' if $@;
   }
 
-  if (47) {
+  if (49) {
     load();
-    plan(tests => 47);
+    plan(tests => 49);
   }
 }
 
@@ -76,6 +76,7 @@ ok(&Devel::PPPort::SvPV_nolen_const($mhx), $i++);
 ok(&Devel::PPPort::SvPV_nomg($mhx), $i++);
 ok(&Devel::PPPort::SvPV_nomg_const($mhx), $i++);
 ok(&Devel::PPPort::SvPV_nomg_const_nolen($mhx), $i++);
+ok(&Devel::PPPort::SvPV_nomg_nolen($mhx), $i++);
 
 $mhx = 42; ok(&Devel::PPPort::SvPV_nolen($mhx), 0);
 $mhx = 42; ok(&Devel::PPPort::SvPV_const($mhx), 2);
@@ -99,6 +100,7 @@ $mhx = 42; ok(&Devel::PPPort::SvPV_nolen_const($mhx), 0);
 $mhx = 42; ok(&Devel::PPPort::SvPV_nomg($mhx), 2);
 $mhx = 42; ok(&Devel::PPPort::SvPV_nomg_const($mhx), 2);
 $mhx = 42; ok(&Devel::PPPort::SvPV_nomg_const_nolen($mhx), 0);
+$mhx = 42; ok(&Devel::PPPort::SvPV_nomg_nolen($mhx), 0);
 
 my $str = "";
 &Devel::PPPort::SvPV_force($str);

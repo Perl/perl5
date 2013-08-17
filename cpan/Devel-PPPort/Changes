@@ -1,3 +1,22 @@
+3.21 - 2013-08-17
+
+    * Fix cpan #87870: Merge core perl commit 90b0dc0e2e
+      (Thanks to Father Chrysostomos for the original patch and
+       to Steve Hay for forwarding it)
+    * Fix cpan #86975: Deterministically order API elements in POD
+      (Thanks to Karl Williamson for providing a patch.)
+    * Fix cpan #81796: my $_ is deprecated
+      (Thanks to Nicholas Clark for providing a patch)
+    * Fix cpan #81484: fix isASCII and isCNTRL for inputs > 255
+      (Thanks to Karl Williamson for providing a patch)
+    * Fix cpan #80314: make use of PERL_NO_GET_CONTEXT the default
+    * Fix cpan #79814: Install to 'site' for perl 5.11+
+      (Thanks to Robert Sedlacek for providing a patch)
+    * Fix cpan #78271: Need SvPV_nomg_nolen
+    * Adapt buildperl.pl for newer Perl releases
+    * Update masked_versions regex for 5.005 thread builds
+    * Some tweaks needed to support 5.003 on 64-bit platforms
+
 3.20 - 2011-09-10
 
     * fix CPAN #56749: isASCII and isCNTRL macros are buggy
