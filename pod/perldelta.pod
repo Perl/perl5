@@ -145,7 +145,7 @@ Added the C<NAME_HEK> method to return the name of a lexical sub.
 
 =item *
 
-L<bignum> has been upgraded from version 0.35 to 0.36.
+L<bignum> has been upgraded from version 0.33 to 0.36.
 
 L<bigrat> wasn't correctly updating an internal variable when C<use>d with a
 C<lib> option.
@@ -163,19 +163,20 @@ C<CARP_TRACE> as well as other references. [perl #92446]
 
 L<Compress::Raw::Bzip2> has been upgraded from 2.061 to 2.062.
 
-XXX: TODO
+No changes have been made other than the version bump to keep in sync with
+other related modules.
 
 =item *
 
 L<Compress::Raw::Zlib> has been upgraded from 2.061 to 2.062.
 
-XXX: TODO
+A minor typo has been fixed in the documentation.
 
 =item *
 
 L<Config::Perl::V> has been upgraded from version 0.18 to 0.19.
 
-XXX: TODO
+The list of build options has been updated.
 
 =item *
 
@@ -251,12 +252,6 @@ L<Exporter> would ignore custom $SIG{__WARN__} handlers in C<Exporter::Heavy>.
 
 =item *
 
-L<File::Spec> has been upgraded from 3.41 to 3.44.
-
-The module is now partly implemented in XS, for performance.
-
-=item *
-
 L<ExtUtils::MakeMaker> has been upgraded from 6.68 to 6.72.
 
 The C<dist> target now reports the file created, an infinite loop in
@@ -268,9 +263,9 @@ control characters are now stripped from C<ABSTRACT>.
 
 =item *
 
-L<ExtUtils::ParseXS> has been upgraded from version 3.18 to 3.21.
+L<File::Spec> has been upgraded from 3.41 to 3.44.
 
-XXX: TODO
+The module is now partly implemented in XS, for performance.
 
 =item *
 
@@ -283,7 +278,7 @@ but fails to be provided with one.
 
 The IO-Compress module collection has been upgraded from 2.061 to 2.062.
 
-XXX: TODO
+Some documentation typos have been fixed.
 
 =item *
 
@@ -309,7 +304,8 @@ $EXPORT_TAGS{all} has been added and a couple of typos have been fixed.
 
 The libnet module collection has been upgraded from version 1.22 to 1.23.
 
-XXX: TODO
+Numerous bug fixes and documentation improvements have been made.  See the
+F<Changes> file for full details.
 
 =item *
 
@@ -330,7 +326,7 @@ been enhanced and hash argument parsing in subclasses has been fixed.
 
 L<Module::CoreList> has been upgraded from 2.92 to 2.97.
 
-XXX: TODO
+The list of Perl versions covered has been updated.
 
 =item *
 
@@ -342,7 +338,7 @@ A minor typo has been fixed in the documentation.
 
 L<parent> has been upgraded from version 0.225 to 0.226.
 
-XXX: TODO
+Internal changes only have been made to the test suite.
 
 =item *
 
@@ -375,14 +371,14 @@ Avoid creating temporary objects for STORABLE_attach when they aren't required.
 
 L<Time::HiRes> has been upgraded from version 1.9725 to 1.9726.
 
-Now provides an C<lstat> function.
-Various bugs fixed.
+An C<lstat> function is now provided and various bugs have been fixed.  See the
+F<Changes> file for full details.
 
 =item *
 
 L<Time::Piece> has been upgraded from version 1.21 to 1.22.
 
-XXX: TODO
+A minor documentation encoding problem has been fixed.
 
 =item *
 
