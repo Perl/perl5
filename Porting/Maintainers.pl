@@ -529,20 +529,10 @@ use File::Glob qw(:case);
 
     'Devel::PPPort' => {
         'MAINTAINER'   => 'mhx',
-        'DISTRIBUTION' => 'MHX/Devel-PPPort-3.20.tar.gz',
+        'DISTRIBUTION' => 'MHX/Devel-PPPort-3.21.tar.gz',
         'FILES'        => q[cpan/Devel-PPPort],
         'EXCLUDED'     => ['PPPort.pm'],    # we use PPPort_pm.PL instead
-
-        # Waiting to be merged upstream: see CPAN RT#81796,87870
-        'CUSTOMIZED'   => [
-            qw( parts/inc/misc
-                parts/inc/SvPV
-                t/misc.t
-                t/SvPV.t
-                ),
-        ],
-
-        'UPSTREAM' => undef, # rjbs has asked mhx to have blead be upstream
+        'UPSTREAM'     => undef, # rjbs has asked mhx to have blead be upstream
     },
 
     'diagnostics' => {

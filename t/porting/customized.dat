@@ -1,7 +1,3 @@
-Devel::PPPort cpan/Devel-PPPort/parts/inc/misc 1153ab0c09a934dbb5e5d5d698a05a57ce666862
-Devel::PPPort cpan/Devel-PPPort/parts/inc/SvPV 1b1cfbc70a1b4d274b92c81a5952889e2f702a4c
-Devel::PPPort cpan/Devel-PPPort/t/misc.t b096b87d67ef615a9365e0c7fd5032c76af33ff3
-Devel::PPPort cpan/Devel-PPPort/t/SvPV.t 7e9fd0fbc55795980fa6f873f9fb095140c9af44
 Module::Build cpan/Module-Build/lib/Module/Build/ConfigData.pm 409075121c3a50488052df00e5cdeeeb5594409a
 PerlIO::via::QuotedPrint cpan/PerlIO-via-QuotedPrint/t/QuotedPrint.t ca39f0146e89de02c746e199c45dcb3e5edad691
 Term::Cap cpan/Term-Cap/Cap.pm f7645219662eafe5c263d9199c30f40bcf0ac806
