@@ -795,6 +795,12 @@ use of constant overloading triggered a re-compilation of the code block, the
 second compilation didn't see its outer lexical scope.  This was a regression
 in 5.18.0.
 
+=item *
+
+Changes to C<UNIVERSAL::DESTROY> now update DESTROY caches in all classes,
+instead of causing classes that have already had objects destroyed to
+continue using the old sub.  This was a regression in 5.18. [perl #114864]
+
 =back
 
 =head1 Known Problems
