@@ -5,7 +5,6 @@ Stuff that needs to be done still:
 70502ce [perl #119101] Extraneous warnings in Parse::ErrorString::Perl
 88b3a46 PATCH (partial) [perl #107816] Performance regression since 0abd0d78
 eb40d2c [perl #2726] Prototype is not applied until BLOCK is defined
-c56ed9f [perl #119043] Allow utf8 up/downgrade on ro COWs
 8fe3c67 fix 114884 positive GPOS lookbehind regex substitution failure
 d8fe30a Avoid read-after-free in S_scan_heredoc() if the terminator line has no "\n".
 
