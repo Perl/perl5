@@ -478,7 +478,12 @@ and New Warnings
 
 =item *
 
-XXX L<message|perldiag/"message">
+L<Magical list constants are not supported|perldiag/"Magical list constants are
+not supported">
+
+(F) You assigned a magical array to a stash element, and then tried to use the
+subroutine from the same slot.  You are asking Perl to do something it cannot
+do, details subject to change between Perl versions.
 
 =back
 
@@ -494,6 +499,20 @@ as 0 in increment (++)">
 (W numeric) The indicated string was fed as an argument to the C<++> operator
 which expects either a number or a string matching C</^[a-zA-Z]*[0-9]*\z/>.
 See L<perlop/Auto-increment and Auto-decrement> for details.
+
+=item *
+
+L<Unexpected exit %u|perldiag/"Unexpected exit %u">
+
+(S) exit() was called or the script otherwise finished gracefully when
+C<PERL_EXIT_WARN> was set in C<PL_exit_flags>.
+
+=item *
+
+L<Unexpected exit failure %u|perldiag/"Unexpected exit failure %u">
+
+(S) An uncaught die() was called when C<PERL_EXIT_WARN> was set in
+C<PL_exit_flags>.
 
 =back
 
