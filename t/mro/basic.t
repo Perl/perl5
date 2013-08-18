@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-BEGIN { require q(./test.pl); } plan(tests => 59);
+BEGIN { require q(./test.pl); } plan(tests => 60);
 
 require mro;
 
@@ -370,3 +370,17 @@ is(eval { MRO_N->testfunc() }, 123);
     }
     is "il"->can("tomatoes"), "puree", 'local *ISA=[] unwinding';
 }
+
+# Changes to UNIVERSAL::DESTROY should not leave stale DESTROY caches
+# (part of #114864)
+our $destroy_output;
+sub UNIVERSAL::DESTROY { $destroy_output = "old" }
+my $x = bless[];
+undef $x; # cache the DESTROY method
+undef *UNIVERSAL::DESTROY;
+*UNIVERSAL::DESTROY = sub { $destroy_output = "new" };
+$x = bless[];
+undef $x; # should use the new DESTROY
+is $destroy_output, "new",
+    'Changes to UNIVERSAL::DESTROY invalidate DESTROY caches';
+undef *UNIVERSAL::DESTROY;

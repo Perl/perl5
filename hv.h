@@ -81,6 +81,7 @@ struct mro_meta {
     U32     pkg_gen;         /* Bumps when local methods/@ISA change */
     const struct mro_alg *mro_which; /* which mro alg is in use? */
     HV      *isa;            /* Everything this class @ISA */
+    U32     destroy_gen;     /* Generation number of DESTROY cache */
 };
 
 #define MRO_GET_PRIVATE_DATA(smeta, which)		   \
