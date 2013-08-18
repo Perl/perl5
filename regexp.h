@@ -40,7 +40,7 @@ struct reg_substr_datum {
     SSize_t max_offset;
     SV *substr;		/* non-utf8 variant */
     SV *utf8_substr;	/* utf8 variant */
-    I32 end_shift;
+    SSize_t end_shift;
 };
 struct reg_substr_data {
     struct reg_substr_datum data[3];	/* Actual array */
@@ -63,7 +63,7 @@ typedef struct regexp_paren_pair {
      *	  "abc" =~ /(.(?{print "[$1]"}))+/
      *outputs [][a][b]
      * This field is not part of the API.  */
-    I32 start_tmp;
+    SSize_t start_tmp;
 } regexp_paren_pair;
 
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_UTF8_C)
@@ -104,9 +104,9 @@ struct reg_code_block {
 	/* Information about the match that the perl core uses to */	\
 	/* manage things */						\
 	U32 extflags;	/* Flags used both externally and internally */	\
-	I32 minlen;	/* mininum possible number of chars in string to match */\
-	I32 minlenret;	/* mininum possible number of chars in $& */		\
-	U32 gofs;	/* chars left of pos that we search from */	\
+	SSize_t minlen;	/* mininum possible number of chars in string to match */\
+	SSize_t minlenret; /* mininum possible number of chars in $& */		\
+	STRLEN gofs;	/* chars left of pos that we search from */	\
 	/* substring data about strings that must appear in the */	\
 	/* final match, used for optimisations */			\
 	struct reg_substr_data *substrs;				\
@@ -125,8 +125,8 @@ struct reg_code_block {
 	char *subbeg;							\
 	SV_SAVED_COPY	/* If non-NULL, SV which is COW from original */\
 	SSize_t sublen;	/* Length of string pointed by subbeg */	\
-	I32 suboffset;	/* byte offset of subbeg from logical start of str */ \
-	I32 subcoffset;	/* suboffset equiv, but in chars (for @-/@+) */ \
+	SSize_t suboffset; /* byte offset of subbeg from logical start of str */ \
+	SSize_t subcoffset; /* suboffset equiv, but in chars (for @-/@+) */ \
 	/* Information about the match that isn't often used */		\
 	/* offset from wrapped to the start of precomp */		\
 	PERL_BITFIELD32 pre_prefix:4;					\
@@ -146,7 +146,7 @@ typedef struct regexp {
 typedef struct re_scream_pos_data_s
 {
     char **scream_olds;		/* match pos */
-    I32 *scream_pos;		/* Internal iterator of scream. */
+    SSize_t *scream_pos;	/* Internal iterator of scream. */
 } re_scream_pos_data;
 
 /* regexp_engine structure. This is the dispatch table for regexes.
@@ -155,7 +155,7 @@ typedef struct re_scream_pos_data_s
 typedef struct regexp_engine {
     REGEXP* (*comp) (pTHX_ SV * const pattern, U32 flags);
     I32     (*exec) (pTHX_ REGEXP * const rx, char* stringarg, char* strend,
-                     char* strbeg, I32 minend, SV* sv,
+                     char* strbeg, SSize_t minend, SV* sv,
                      void* data, U32 flags);
     char*   (*intuit) (pTHX_
                         REGEXP * const rx,
@@ -606,7 +606,7 @@ typedef struct {
     STRLEN  suboffset;  /* saved suboffset  field from rex */
     STRLEN  subcoffset; /* saved subcoffset field from rex */
     MAGIC   *pos_magic; /* pos() magic attached to $_ */
-    I32     pos;        /* the original value of pos() in pos_magic */
+    SSize_t pos;        /* the original value of pos() in pos_magic */
     U8      pos_flags;  /* flags to be restored; currently only MGf_BYTES*/
 } regmatch_info_aux_eval;
 

@@ -123,7 +123,7 @@ typedef struct RExC_state_t {
     char	*start;			/* Start of input for compile */
     char	*end;			/* End of input for compile */
     char	*parse;			/* Input-scan pointer. */
-    I32		whilem_seen;		/* number of WHILEM in this expr */
+    SSize_t	whilem_seen;		/* number of WHILEM in this expr */
     regnode	*emit_start;		/* Start of emitted-code area */
     regnode	*emit_bound;		/* First regnode outside of the allocated space */
     regnode	*emit;			/* Code-emit pointer; if = &emit_dummy,
@@ -132,7 +132,7 @@ typedef struct RExC_state_t {
     I32		naughty;		/* How bad is this pattern? */
     I32		sawback;		/* Did we see \1, ...? */
     U32		seen;
-    I32		size;			/* Code size. */
+    SSize_t	size;			/* Code size. */
     I32		npar;			/* Capture buffer count, (OPEN). */
     I32		cpar;			/* Capture buffer count, (CLOSE). */
     I32		nestroot;		/* root parens we are in - used by accept */
@@ -301,7 +301,7 @@ typedef struct RExC_state_t {
   
   - max_offset
     Only used for floating strings. This is the rightmost point that
-    the string can appear at. If set to I32 max it indicates that the
+    the string can appear at. If set to SSize_t_MAX it indicates that the
     string can occur infinitely far to the right.
   
   - minlenp
@@ -346,20 +346,20 @@ typedef struct scan_data_t {
     /*I32 len_min;      unused */
     /*I32 len_delta;    unused */
     SSize_t pos_min;
-    I32 pos_delta;
+    SSize_t pos_delta;
     SV *last_found;
-    I32 last_end;	    /* min value, <0 unless valid. */
+    SSize_t last_end;	    /* min value, <0 unless valid. */
     SSize_t last_start_min;
-    I32 last_start_max;
+    SSize_t last_start_max;
     SV **longest;	    /* Either &l_fixed, or &l_float. */
     SV *longest_fixed;      /* longest fixed string found in pattern */
     SSize_t offset_fixed;   /* offset where it starts */
-    I32 *minlen_fixed;      /* pointer to the minlen relevant to the string */
+    SSize_t *minlen_fixed;  /* pointer to the minlen relevant to the string */
     I32 lookbehind_fixed;   /* is the position of the string modfied by LB */
     SV *longest_float;      /* longest floating string found in pattern */
     SSize_t offset_float_min; /* earliest point in string it can appear */
-    I32 offset_float_max;   /* latest point in string it can appear */
-    I32 *minlen_float;      /* pointer to the minlen relevant to the string */
+    SSize_t offset_float_max; /* latest point in string it can appear */
+    SSize_t *minlen_float;  /* pointer to the minlen relevant to the string */
     SSize_t lookbehind_float; /* is the pos of the string modified by LB */
     I32 flags;
     I32 whilem_c;
@@ -748,7 +748,8 @@ DEBUG_OPTIMISE_MORE_r(if(data){                                      \
    floating substrings if needed. */
 
 STATIC void
-S_scan_commit(pTHX_ const RExC_state_t *pRExC_state, scan_data_t *data, I32 *minlenp, int is_inf)
+S_scan_commit(pTHX_ const RExC_state_t *pRExC_state, scan_data_t *data,
+                    SSize_t *minlenp, int is_inf)
 {
     const STRLEN l = CHR_SVLEN(data->last_found);
     const STRLEN old_l = CHR_SVLEN(*data->longest);
@@ -772,9 +773,12 @@ S_scan_commit(pTHX_ const RExC_state_t *pRExC_state, scan_data_t *data, I32 *min
 	    data->offset_float_min = l ? data->last_start_min : data->pos_min;
 	    data->offset_float_max = (l
 				      ? data->last_start_max
-				      : (data->pos_delta == I32_MAX ? I32_MAX : data->pos_min + data->pos_delta));
-	    if (is_inf || (U32)data->offset_float_max > (U32)I32_MAX)
-		data->offset_float_max = I32_MAX;
+				      : (data->pos_delta == SSize_t_MAX
+					 ? SSize_t_MAX
+					 : data->pos_min + data->pos_delta));
+	    if (is_inf
+		 || (STRLEN)data->offset_float_max > (STRLEN)SSize_t_MAX)
+		data->offset_float_max = SSize_t_MAX;
 	    if (data->flags & SF_BEFORE_EOL)
 		data->flags
 		    |= ((data->flags & SF_BEFORE_EOL) << SF_FL_SHIFT_EOL);
@@ -3030,7 +3034,7 @@ typedef struct scan_frame {
 
 STATIC SSize_t
 S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
-                        I32 *minlenp, SSize_t *deltap,
+                        SSize_t *minlenp, SSize_t *deltap,
 			regnode *last,
 			scan_data_t *data,
 			I32 stopparen,
@@ -3046,17 +3050,18 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 			/* and_withp: Valid if flags & SCF_DO_STCLASS_OR */
 {
     dVAR;
-    I32 min = 0;    /* There must be at least this number of characters to match */
+    /* There must be at least this number of characters to match */
+    SSize_t min = 0;
     I32 pars = 0, code;
     regnode *scan = *scanp, *next;
-    I32 delta = 0;
+    SSize_t delta = 0;
     int is_inf = (flags & SCF_DO_SUBSTR) && (data->flags & SF_IS_INF);
     int is_inf_internal = 0;		/* The studied chunk is infinite */
     I32 is_par = OP(scan) == OPEN ? ARG(scan) : 0;
     scan_data_t data_fake;
     SV *re_trie_maxbuff = NULL;
     regnode *first_non_open = scan;
-    I32 stopmin = I32_MAX;
+    SSize_t stopmin = SSize_t_MAX;
     scan_frame *frame = NULL;
     GET_RE_DEBUG_FLAGS_DECL;
 
@@ -3166,9 +3171,9 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 					  stopparen, recursed, NULL, f,depth+1);
 		    if (min1 > minnext)
 			min1 = minnext;
-		    if (deltanext == I32_MAX) {
+		    if (deltanext == SSize_t_MAX) {
 			is_inf = is_inf_internal = 1;
-			max1 = I32_MAX;
+			max1 = SSize_t_MAX;
 		    } else if (max1 < minnext + deltanext)
 			max1 = minnext + deltanext;
 		    scan = next;
@@ -3193,16 +3198,17 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    min1 = 0;
 		if (flags & SCF_DO_SUBSTR) {
 		    data->pos_min += min1;
-		    if (data->pos_delta >= I32_MAX - (max1 - min1))
-		        data->pos_delta = I32_MAX;
+		    if (data->pos_delta >= SSize_t_MAX - (max1 - min1))
+		        data->pos_delta = SSize_t_MAX;
 		    else
 		        data->pos_delta += max1 - min1;
 		    if (max1 != min1 || is_inf)
 			data->longest = &(data->longest_float);
 		}
 		min += min1;
-		if (delta == I32_MAX || I32_MAX - delta - (max1 - min1) < 0)
-		    delta = I32_MAX;
+		if (delta == SSize_t_MAX
+		 || SSize_t_MAX - delta - (max1 - min1) < 0)
+		    delta = SSize_t_MAX;
 		else
 		    delta += max1 - min1;
 		if (flags & SCF_DO_STCLASS_OR) {
@@ -3590,7 +3596,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 	    }
 	}
 	else if (OP(scan) == EXACT) {
-	    I32 l = STR_LEN(scan);
+	    SSize_t l = STR_LEN(scan);
 	    UV uc;
 	    if (UTF) {
 		const U8 * const s = (U8*)STRING(scan);
@@ -3606,7 +3612,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		if (data->last_end == -1) { /* Update the start info. */
 		    data->last_start_min = data->pos_min;
  		    data->last_start_max = is_inf
- 			? I32_MAX : data->pos_min + data->pos_delta;
+ 			? SSize_t_MAX : data->pos_min + data->pos_delta;
 		}
 		sv_catpvn(data->last_found, STRING(scan), STR_LEN(scan));
 		if (UTF)
@@ -3796,8 +3802,8 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 	    flags &= ~SCF_DO_STCLASS;
 	}
 	else if (REGNODE_VARIES(OP(scan))) {
-	    SSize_t mincount, maxcount, minnext, deltanext;
-	    I32 fl = 0, f = flags, pos_before = 0;
+	    SSize_t mincount, maxcount, minnext, deltanext, pos_before = 0;
+	    I32 fl = 0, f = flags;
 	    regnode * const oscan = scan;
 	    struct regnode_charclass_class this_class;
 	    struct regnode_charclass_class *oclass = NULL;
@@ -3934,11 +3940,11 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		}
 
 		min += minnext * mincount;
-		is_inf_internal |= deltanext == I32_MAX
+		is_inf_internal |= deltanext == SSize_t_MAX
 				     || (maxcount == REG_INFTY && minnext + deltanext > 0);
 		is_inf |= is_inf_internal;
 		if (is_inf)
-		    delta = I32_MAX;
+		    delta = SSize_t_MAX;
 		else
 		    delta += (minnext + deltanext) * maxcount - minnext * mincount;
 
@@ -4068,10 +4074,10 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 
 		    if (data->last_end > 0 && mincount != 0) { /* Ends with a string. */
 #if defined(SPARC64_GCC_WORKAROUND)
-			I32 b = 0;
+			SSize_t b = 0;
 			STRLEN l = 0;
 			const char *s = NULL;
-			I32 old = 0;
+			SSize_t old = 0;
 
 			if (pos_before >= data->last_start_min)
 			    b = pos_before;
@@ -4083,11 +4089,11 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 			old = b - data->last_start_min;
 
 #else
-			I32 b = pos_before >= data->last_start_min
+			SSize_t b = pos_before >= data->last_start_min
 			    ? pos_before : data->last_start_min;
 			STRLEN l;
 			const char * const s = SvPV_const(data->last_found, l);
-			I32 old = b - data->last_start_min;
+			SSize_t old = b - data->last_start_min;
 #endif
 
 			if (UTF)
@@ -4119,20 +4125,26 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 			} else {
 			    /* start offset must point into the last copy */
 			    data->last_start_min += minnext * (mincount - 1);
-			    data->last_start_max += is_inf ? I32_MAX
+			    data->last_start_max += is_inf ? SSize_t_MAX
 				: (maxcount - 1) * (minnext + data->pos_delta);
 			}
 		    }
 		    /* It is counted once already... */
 		    data->pos_min += minnext * (mincount - counted);
 #if 0
-PerlIO_printf(Perl_debug_log, "counted=%d deltanext=%d I32_MAX=%d minnext=%d maxcount=%d mincount=%d\n",
-    counted, deltanext, I32_MAX, minnext, maxcount, mincount);
-if (deltanext != I32_MAX)
-PerlIO_printf(Perl_debug_log, "LHS=%d RHS=%d\n", -counted * deltanext + (minnext + deltanext) * maxcount - minnext * mincount, I32_MAX - data->pos_delta);
+PerlIO_printf(Perl_debug_log, "counted=%"UVdf" deltanext=%"UVdf
+                              " SSize_t_MAX=%"UVdf" minnext=%"UVdf
+                              " maxcount=%"UVdf" mincount=%"UVdf"\n",
+    (UV)counted, (UV)deltanext, (UV)SSize_t_MAX, (UV)minnext, (UV)maxcount,
+    (UV)mincount);
+if (deltanext != SSize_t_MAX)
+PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
+    (UV)(-counted * deltanext + (minnext + deltanext) * maxcount
+          - minnext * mincount), (UV)(SSize_t_MAX - data->pos_delta));
 #endif
-		    if (deltanext == I32_MAX || -counted * deltanext + (minnext + deltanext) * maxcount - minnext * mincount >= I32_MAX - data->pos_delta)
-		        data->pos_delta = I32_MAX;
+		    if (deltanext == SSize_t_MAX ||
+			-counted * deltanext + (minnext + deltanext) * maxcount - minnext * mincount >= SSize_t_MAX - data->pos_delta)
+		        data->pos_delta = SSize_t_MAX;
 		    else
 		        data->pos_delta += - counted * deltanext +
 			(minnext + deltanext) * maxcount - minnext * mincount;
@@ -4152,7 +4164,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%d RHS=%d\n", -counted * deltanext + (minnext
 			    data->last_start_min =
 				data->pos_min - CHR_SVLEN(last_str);
 			    data->last_start_max = is_inf
-				? I32_MAX
+				? SSize_t_MAX
 				: data->pos_min + data->pos_delta
 				- CHR_SVLEN(last_str);
 			}
@@ -4443,7 +4455,8 @@ PerlIO_printf(Perl_debug_log, "LHS=%d RHS=%d\n", -counted * deltanext + (minnext
                    length of the pattern, something we won't know about
                    until after the recurse.
                 */
-                I32 deltanext, fake = 0;
+                SSize_t deltanext;
+                I32 fake = 0;
                 regnode *nscan;
                 struct regnode_charclass_class intrnl;
                 int f = 0;
@@ -4453,8 +4466,8 @@ PerlIO_printf(Perl_debug_log, "LHS=%d RHS=%d\n", -counted * deltanext + (minnext
                     have to worry about freeing them when we know
                     they wont be used, which would be a pain.
                  */
-                I32 *minnextp;
-                Newx( minnextp, 1, I32 );
+                SSize_t *minnextp;
+                Newx( minnextp, 1, SSize_t );
                 SAVEFREEPV(minnextp);
 
                 if (data) {
@@ -4583,7 +4596,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%d RHS=%d\n", -counted * deltanext + (minnext
 	    {
 	        if (!(RExC_rx->extflags & RXf_ANCH) && (flags & SCF_DO_SUBSTR))
 		    RExC_rx->extflags |= RXf_ANCH_GPOS;
-	        if (RExC_rx->gofs < (U32)min)
+	        if (RExC_rx->gofs < (STRLEN)min)
 		    RExC_rx->gofs = min;
             } else {
                 RExC_rx->extflags |= RXf_GPOS_FLOAT;
@@ -4599,7 +4612,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%d RHS=%d\n", -counted * deltanext + (minnext
             regnode *trie_node= scan;
             regnode *tail= regnext(scan);
             reg_trie_data *trie = (reg_trie_data*)RExC_rxi->data->data[ ARG(scan) ];
-            I32 max1 = 0, min1 = I32_MAX;
+            SSize_t max1 = 0, min1 = SSize_t_MAX;
             struct regnode_charclass_class accum;
 
             if (flags & SCF_DO_SUBSTR) /* XXXX Add !SUSPEND? */
@@ -4650,12 +4663,12 @@ PerlIO_printf(Perl_debug_log, "LHS=%d RHS=%d\n", -counted * deltanext + (minnext
                     if (nextbranch && PL_regkind[OP(nextbranch)]==BRANCH)
                         nextbranch= regnext((regnode*)nextbranch);
                     
-                    if (min1 > (I32)(minnext + trie->minlen))
+                    if (min1 > (SSize_t)(minnext + trie->minlen))
                         min1 = minnext + trie->minlen;
-                    if (deltanext == I32_MAX) {
+                    if (deltanext == SSize_t_MAX) {
                         is_inf = is_inf_internal = 1;
-                        max1 = I32_MAX;
-                    } else if (max1 < (I32)(minnext + deltanext + trie->maxlen))
+                        max1 = SSize_t_MAX;
+                    } else if (max1 < (SSize_t)(minnext + deltanext + trie->maxlen))
                         max1 = minnext + deltanext + trie->maxlen;
                     
                     if (data_fake.flags & (SF_HAS_PAR|SF_IN_PAR))
@@ -4749,9 +4762,9 @@ PerlIO_printf(Perl_debug_log, "LHS=%d RHS=%d\n", -counted * deltanext + (minnext
     DEBUG_STUDYDATA("pre-fin:",data,depth);
 
     *scanp = scan;
-    *deltap = is_inf_internal ? I32_MAX : delta;
+    *deltap = is_inf_internal ? SSize_t_MAX : delta;
     if (flags & SCF_DO_SUBSTR && is_inf)
-	data->pos_delta = I32_MAX - data->pos_min;
+	data->pos_delta = SSize_t_MAX - data->pos_min;
     if (is_par > (I32)U8_MAX)
 	is_par = 0;
     if (is_par && pars==1 && data) {
@@ -5419,13 +5432,15 @@ S_compile_runtime_code(pTHX_ RExC_state_t * const pRExC_state,
 
 
 STATIC bool
-S_setup_longest(pTHX_ RExC_state_t *pRExC_state, SV* sv_longest, SV** rx_utf8, SV** rx_substr, I32* rx_end_shift, I32 lookbehind, I32 offset, I32 *minlen, STRLEN longest_length, bool eol, bool meol)
+S_setup_longest(pTHX_ RExC_state_t *pRExC_state, SV* sv_longest, SV** rx_utf8, SV** rx_substr, SSize_t* rx_end_shift,
+		      SSize_t lookbehind, SSize_t offset, SSize_t *minlen, STRLEN longest_length, bool eol, bool meol)
 {
     /* This is the common code for setting up the floating and fixed length
      * string data extracted from Perl_re_op_compile() below.  Returns a boolean
      * as to whether succeeded or not */
 
-    I32 t,ml;
+    I32 t;
+    SSize_t ml;
 
     if (! (longest_length
            || (eol /* Can't have SEOL and MULTI */
@@ -5450,7 +5465,7 @@ S_setup_longest(pTHX_ RExC_state_t *pRExC_state, SV* sv_longest, SV** rx_utf8, S
         follow this item. We calculate it ahead of time as once the
         lookbehind offset is added in we lose the ability to correctly
         calculate it.*/
-    ml = minlen ? *(minlen) : (I32)longest_length;
+    ml = minlen ? *(minlen) : (SSize_t)longest_length;
     *rx_end_shift = ml - offset
         - longest_length + (SvTAIL(sv_longest) != 0)
         + lookbehind;
@@ -5519,7 +5534,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     char *exp;
     regnode *scan;
     I32 flags;
-    I32 minlen = 0;
+    SSize_t minlen = 0;
     U32 rx_flags;
     SV *pat;
     SV *code_blocksv = NULL;
@@ -6274,7 +6289,7 @@ reStudy:
         {
 	    r->float_min_offset = data.offset_float_min - data.lookbehind_float;
 	    r->float_max_offset = data.offset_float_max;
-	    if (data.offset_float_max < I32_MAX) /* Don't offset infinity */
+	    if (data.offset_float_max < SSize_t_MAX) /* Don't offset infinity */
 	        r->float_max_offset -= data.lookbehind_float;
 	    SvREFCNT_inc_simple_void_NN(data.longest_float);
 	}
@@ -6477,8 +6492,8 @@ reStudy:
     });
 #ifdef RE_TRACK_PATTERN_OFFSETS
     DEBUG_OFFSETS_r(if (ri->u.offsets) {
-        const U32 len = ri->u.offsets[0];
-        U32 i;
+        const STRLEN len = ri->u.offsets[0];
+        STRLEN i;
         GET_RE_DEBUG_FLAGS_DECL;
         PerlIO_printf(Perl_debug_log, "Offsets: [%"UVuf"]\n\t", (UV)ri->u.offsets[0]);
         for (i = 1; i <= len; i++) {
@@ -6666,7 +6681,7 @@ Perl_reg_named_buff_scalar(pTHX_ REGEXP * const r, const U32 flags)
 {
     SV *ret;
     AV *av;
-    I32 length;
+    SSize_t length;
     struct regexp *const rx = ReANY(r);
 
     PERL_ARGS_ASSERT_REG_NAMED_BUFF_SCALAR;
@@ -12266,7 +12281,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
     regnode * const orig_emit = RExC_emit; /* Save the original RExC_emit in
         case we need to change the emitted regop to an EXACT. */
     const char * orig_parse = RExC_parse;
-    const I32 orig_size = RExC_size;
+    const SSize_t orig_size = RExC_size;
     GET_RE_DEBUG_FLAGS_DECL;
 
     PERL_ARGS_ASSERT_REGCLASS;
