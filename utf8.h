@@ -536,6 +536,8 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
 #define LATIN_CAPITAL_LETTER_Y_WITH_DIAERESIS 0x0178	/* Also is title case */
 #define LATIN_CAPITAL_LETTER_SHARP_S	0x1E9E
 #define LATIN_SMALL_LETTER_LONG_S   0x017F
+#define LATIN_SMALL_LIGATURE_LONG_S_T           0xFB05
+#define LATIN_SMALL_LIGATURE_ST                 0xFB06
 #define KELVIN_SIGN                 0x212A
 #define ANGSTROM_SIGN               0x212B
 

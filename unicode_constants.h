@@ -35,6 +35,9 @@
 
 #define LATIN_CAPITAL_LETTER_SHARP_S_UTF8  "\xE1\xBA\x9E"    /* U+1E9E */
 
+#define LATIN_SMALL_LIGATURE_LONG_S_T_UTF8  "\xEF\xAC\x85"    /* U+FB05 */
+#define LATIN_SMALL_LIGATURE_ST_UTF8  "\xEF\xAC\x86"    /* U+FB06 */
+
 #define HYPHEN_UTF8  "\xE2\x80\x90"    /* U+2010 */
 #define FIRST_SURROGATE_UTF8_FIRST_BYTE  0xED    /* U+D800 */
 #define BOM_UTF8_FIRST_BYTE  0xEF    /* U+FEFF */

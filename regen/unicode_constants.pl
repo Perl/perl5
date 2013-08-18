@@ -155,6 +155,9 @@ U+03C5 string
 
 U+1E9E string
 
+U+FB05 string
+U+FB06 string
+
 U+2010 string
 U+D800 first FIRST_SURROGATE
 BOM first
