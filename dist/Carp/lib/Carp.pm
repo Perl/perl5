@@ -203,6 +203,7 @@ sub format_arg {
             $arg = $arg->CARP_TRACE();
         }
         elsif (!$in_recurse &&
+	       defined($RefArgFormatter) &&
 	       do {
                 local $@;
 	        local $in_recurse = 1;
