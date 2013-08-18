@@ -532,14 +532,15 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
 #define UNICODE_GREEK_SMALL_LETTER_FINAL_SIGMA	0x03C2
 #define UNICODE_GREEK_SMALL_LETTER_SIGMA	0x03C3
 #define GREEK_SMALL_LETTER_MU                   0x03BC
-#define GREEK_CAPITAL_LETTER_MU 0x039C	/* Upper and title case of MICRON */
-#define LATIN_CAPITAL_LETTER_Y_WITH_DIAERESIS 0x0178	/* Also is title case */
-#define LATIN_CAPITAL_LETTER_SHARP_S	0x1E9E
-#define LATIN_SMALL_LETTER_LONG_S   0x017F
+#define GREEK_CAPITAL_LETTER_MU                 0x039C	/* Upper and title case
+                                                           of MICRON */
+#define LATIN_CAPITAL_LETTER_Y_WITH_DIAERESIS   0x0178	/* Also is title case */
+#define LATIN_CAPITAL_LETTER_SHARP_S	        0x1E9E
+#define LATIN_SMALL_LETTER_LONG_S               0x017F
 #define LATIN_SMALL_LIGATURE_LONG_S_T           0xFB05
 #define LATIN_SMALL_LIGATURE_ST                 0xFB06
-#define KELVIN_SIGN                 0x212A
-#define ANGSTROM_SIGN               0x212B
+#define KELVIN_SIGN                             0x212A
+#define ANGSTROM_SIGN                           0x212B
 
 #define UNI_DISPLAY_ISPRINT	0x0001
 #define UNI_DISPLAY_BACKSLASH	0x0002
