@@ -81,6 +81,7 @@ struct mro_meta {
     U32     pkg_gen;         /* Bumps when local methods/@ISA change */
     const struct mro_alg *mro_which; /* which mro alg is in use? */
     HV      *isa;            /* Everything this class @ISA */
+    HV      *super;          /* SUPER method cache */
     U32     destroy_gen;     /* Generation number of DESTROY cache */
 };
 
@@ -112,7 +113,6 @@ struct xpvhv_aux {
  */
     I32		xhv_name_count;
     struct mro_meta *xhv_mro_meta;
-    HV *	xhv_super;	/* SUPER method cache */
 #ifdef PERL_HASH_RANDOMIZE_KEYS
     U32         xhv_rand;       /* random value for hash traversal */
     U32         xhv_last_rand;  /* last random value for hash traversal,

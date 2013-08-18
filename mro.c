@@ -186,6 +186,8 @@ Perl_mro_meta_dup(pTHX_ struct mro_meta* smeta, CLONE_PARAMS* param)
 	newmeta->isa
 	    = MUTABLE_HV(sv_dup_inc((const SV *)newmeta->isa, param));
 
+    newmeta->super = NULL;
+
     return newmeta;
 }
 
