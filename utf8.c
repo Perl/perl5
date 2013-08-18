@@ -2811,13 +2811,19 @@ Perl__to_utf8_fold_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, U8 flags, b
 
 	if (flags & FOLD_FLAGS_LOCALE) {
 
-            /* Special case this character, as what normally gets returned
+            /* Special case these characters, as what normally gets returned
              * under locale doesn't work */
             if (UTF8SKIP(p) == sizeof(LATIN_CAPITAL_LETTER_SHARP_S_UTF8) - 1
                 && memEQ((char *) p, LATIN_CAPITAL_LETTER_SHARP_S_UTF8,
                           sizeof(LATIN_CAPITAL_LETTER_SHARP_S_UTF8) - 1))
             {
                 goto return_long_s;
+            }
+            else if (UTF8SKIP(p) == sizeof(LATIN_SMALL_LIGATURE_LONG_S_T) - 1
+                && memEQ((char *) p, LATIN_SMALL_LIGATURE_LONG_S_T_UTF8,
+                          sizeof(LATIN_SMALL_LIGATURE_LONG_S_T_UTF8) - 1))
+            {
+                goto return_ligature_st;
             }
 	    return check_locale_boundary_crossing(p, result, ustrp, lenp);
 	}
@@ -2826,8 +2832,8 @@ Perl__to_utf8_fold_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, U8 flags, b
 	}
 	else {
 	    /* This is called when changing the case of a utf8-encoded
-	     * character above the Latin1 range, and the result should not
-	     * contain an ASCII character. */
+             * character above the ASCII range, and the result should not
+             * contain an ASCII character. */
 
 	    UV original;    /* To store the first code point of <p> */
 
@@ -2840,10 +2846,15 @@ Perl__to_utf8_fold_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, U8 flags, b
 		    /* Crossed, have to return the original */
 		    original = valid_utf8_to_uvchr(p, lenp);
 
-                    /* But in this one instance, there is an alternative we can
+                    /* But in these instances, there is an alternative we can
                      * return that is valid */
-                    if (original == LATIN_CAPITAL_LETTER_SHARP_S) {
+                    if (original == LATIN_CAPITAL_LETTER_SHARP_S
+                        || original == LATIN_SMALL_LETTER_SHARP_S)
+                    {
                         goto return_long_s;
+                    }
+                    else if (original == LATIN_SMALL_LIGATURE_LONG_S_T) {
+                        goto return_ligature_st;
                     }
 		    Copy(p, ustrp, *lenp, char);
 		    return original;
@@ -2883,6 +2894,14 @@ Perl__to_utf8_fold_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, U8 flags, b
     Copy(LATIN_SMALL_LETTER_LONG_S_UTF8 LATIN_SMALL_LETTER_LONG_S_UTF8,
         ustrp, *lenp, U8);
     return LATIN_SMALL_LETTER_LONG_S;
+
+  return_ligature_st:
+    /* Two folds to 'st' are prohibited by the options; instead we pick one and
+     * have the other one fold to it */
+
+    *lenp = sizeof(LATIN_SMALL_LIGATURE_ST_UTF8) - 1;
+    Copy(LATIN_SMALL_LIGATURE_ST_UTF8, ustrp, *lenp, U8);
+    return LATIN_SMALL_LIGATURE_ST;
 }
 
 /* Note:
