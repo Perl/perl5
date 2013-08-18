@@ -213,7 +213,7 @@ sub format_arg {
         {
             1;
         }
-        elsif (defined($overload::VERSION))
+        elsif (defined(&overload::StrVal))
         {
 	    if ($in_recurse ||
 		!do {
