@@ -95,7 +95,7 @@ is( $info{sub_name}, "eval '$eval'", 'caller_info API' );
 
 # test for '...::CARP_NOT used only once' warning from Carp
 my $warning;
-eval {
+eval { do {
     BEGIN {
         local $SIG{__WARN__} = sub {
             if   ( defined $^S ) { warn $_[0] }
@@ -108,7 +108,7 @@ eval {
     BEGIN {
         eval { Carp::croak() };
     }
-};
+} };
 ok !$warning, q/'...::CARP_NOT used only once' warning from Carp/;
 
 # Test the location of error messages.
