@@ -4506,10 +4506,18 @@ Perl_foldEQ_utf8_flags(pTHX_ const char *s1, char **pe1, UV l1, bool u1, const c
 
     PERL_ARGS_ASSERT_FOLDEQ_UTF8_FLAGS;
 
-    /* The algorithm requires that input with the flags on the first line of
-     * the assert not be pre-folded. */
     assert( ! ((flags & (FOLDEQ_UTF8_NOMIX_ASCII | FOLDEQ_UTF8_LOCALE))
-	&& (flags & (FOLDEQ_S1_ALREADY_FOLDED | FOLDEQ_S2_ALREADY_FOLDED))));
+           && (flags & (FOLDEQ_S1_ALREADY_FOLDED | FOLDEQ_S2_ALREADY_FOLDED))));
+    /* The algorithm is to trial the folds without regard to the flags on
+     * the first line of the above assert(), and then see if the result
+     * violates them.  This means that the inputs can't be pre-folded to a
+     * violating result, hence the assert.  This could be changed, with the
+     * addition of extra tests here for the already-folded case, which would
+     * slow it down.  That cost is more than any possible gain for when these
+     * flags are specified, as the flags indicate /il or /iaa matching which
+     * is less common than /iu, and I (khw) also believe that real-world /il
+     * and /iaa matches are most likely to involve code points 0-255, and this
+     * function only under rare conditions gets called for 0-255. */
 
     if (pe1) {
         e1 = *(U8**)pe1;
