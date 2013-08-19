@@ -1,13 +1,5 @@
 =encoding utf8
 
-=for comment
-Stuff that needs to be done still:
-70502ce [perl #119101] Extraneous warnings in Parse::ErrorString::Perl
-88b3a46 PATCH (partial) [perl #107816] Performance regression since 0abd0d78
-eb40d2c [perl #2726] Prototype is not applied until BLOCK is defined
-8fe3c67 fix 114884 positive GPOS lookbehind regex substitution failure
-d8fe30a Avoid read-after-free in S_scan_heredoc() if the terminator line has no "\n".
-
 =head1 NAME
 
 [ this is a template for a new perldelta file.  Any text flagged as XXX needs
@@ -45,11 +37,11 @@ You can still use B<-p> for its extra behaviour. [perl #116190]
 
 =head1 Security
 
-XXX Any security-related notices go here.  In particular, any security
-vulnerabilities closed should be noted here rather than in the
-L</Selected Bug Fixes> section.
+=head2 Avoid possible read of free()d memory during parsing
 
-[ List each security issue as a =head2 entry ]
+It was possible that free()d memory could be read during parsing in the unusual
+circumstance of the Perl program ending with a heredoc and the last line of the
+file on disk having no terminating newline character.  This has now been fixed.
 
 =head1 Incompatible Changes
 
@@ -444,6 +436,17 @@ The C</r> modifier (for non-destructive substitution) is now documented. [perl
 
 =back
 
+=head3 L<perlsub>
+
+=over 4
+
+=item *
+
+The need to predeclare recursive functions with prototypes in order for the
+prototype to be honoured in the recursive call is now documented. [perl #2726]
+
+=back
+
 =head3 L<perlxs>
 
 =over 4
@@ -815,6 +818,19 @@ in 5.18.0.
 Changes to C<UNIVERSAL::DESTROY> now update DESTROY caches in all classes,
 instead of causing classes that have already had objects destroyed to
 continue using the old sub.  This was a regression in 5.18. [perl #114864]
+
+=item *
+
+A performance regression introduced in Perl 5.11.2 in non-Unicode
+case-insensitive pattern matching has been largely resolved.  In particular,
+the disabled optimization is now restored for every ASCII-range character.
+[perl #107816]
+
+=item *
+
+All known false-positive occurrences of the deprecation warning "Useless use of
+'\'; doesn't escape metacharacter '%c'", added in Perl 5.18.0, have been
+removed. [perl #119101]
 
 =back
 
