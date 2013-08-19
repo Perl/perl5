@@ -718,7 +718,7 @@ fixed. [perl #118213]
 
 =item *
 
-Starting in v5.18.0, a construct like C</[#](?{})/x> would have its C<#>
+Starting in Perl 5.18.0, a construct like C</[#](?{})/x> would have its C<#>
 incorrectly interpreted as a comment.  The code block would be skipped,
 unparsed.  This has been corrected.
 
@@ -798,7 +798,7 @@ C<reset> with an argument now skips scalars aliased to typeglobs
 =item *
 
 C<ucfirst> and C<lcfirst> were not respecting the bytes pragma.  This was a
-regression from v5.12. [perl #117355]
+regression from Perl 5.12. [perl #117355]
 
 =item *
 
@@ -811,13 +811,13 @@ problematic).
 Where a regular expression included code blocks (C</(?{...})/>), and where the
 use of constant overloading triggered a re-compilation of the code block, the
 second compilation didn't see its outer lexical scope.  This was a regression
-in 5.18.0.
+in Perl 5.18.0.
 
 =item *
 
 Changes to C<UNIVERSAL::DESTROY> now update DESTROY caches in all classes,
 instead of causing classes that have already had objects destroyed to
-continue using the old sub.  This was a regression in 5.18. [perl #114864]
+continue using the old sub.  This was a regression in Perl 5.18. [perl #114864]
 
 =item *
 
