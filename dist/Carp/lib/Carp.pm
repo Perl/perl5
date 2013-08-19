@@ -215,7 +215,7 @@ sub format_arg {
         }
         else
         {
-            $arg = defined($overload::VERSION) ? overload::StrVal($arg) : "$arg";
+            $arg = defined(&overload::StrVal) ? overload::StrVal($arg) : "$arg";
         }
     }
     if ( defined($arg) ) {
