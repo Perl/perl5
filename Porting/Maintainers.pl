@@ -1948,7 +1948,7 @@ use File::Glob qw(:case);
 
     'version' => {
         'MAINTAINER'   => 'jpeacock',
-        'DISTRIBUTION' => 'JPEACOCK/version-0.9902.tar.gz',
+        'DISTRIBUTION' => 'JPEACOCK/version-0.9903.tar.gz',
         'FILES'        => q[cpan/version],
         'EXCLUDED' => [
             qr{^vutil/},
@@ -1960,14 +1960,7 @@ use File::Glob qw(:case);
         # Waiting to be merged upstream: see CPAN RT#87513
         'CUSTOMIZED'   => [
             qw( lib/version.pm
-                lib/version/Internals.pod
-                t/01base.t
-                t/02derived.t
-                t/03require.t
-                t/04strict_lax.t
-                t/06noop.t
                 t/07locale.t
-                t/coretests.pm
                 ),
         ],
 

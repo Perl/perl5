@@ -309,6 +309,12 @@ L<utf8> has been upgraded from version 1.12 to 1.13.
 
 A minor clarification has been made in the documentation.
 
+=item *
+
+L<version> has been upgraded from version 0.9902 to 0.9903.
+
+Various installation, testing and documentation changes have been made.
+
 =back
 
 =head1 Documentation
