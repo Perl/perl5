@@ -9,18 +9,21 @@ use File::Temp qw/tempfile/;
 use POSIX qw/locale_h/;
 use Test::More tests => 7;
 use Config;
+my $Verbose;
 
 BEGIN {
-    use_ok('version', 0.9902);
+    use_ok('version', 0.9903);
 }
 
 SKIP: {
-        skip 'No locale testing for Perl < 5.6.0', 6 if $] < 5.006;
-        skip 'No locale testing without d_setlocale', 6 if(!$Config{d_setlocale});
+	skip 'No locale testing for Perl < 5.6.0', 6 if $] < 5.006;
+	skip 'No locale testing without d_setlocale', 6
+	    if(!$Config{d_setlocale});
+
 	# test locale handling
 	my $warning;
 
-        use locale;
+	use locale;
 
 	local $SIG{__WARN__} = sub { $warning = $_[0] };
 
@@ -28,9 +31,9 @@ SKIP: {
 	my $loc;
 	my $orig_loc = setlocale(LC_NUMERIC);
 	ok ($ver eq "1.23", 'Not using locale yet');  # Don't use is(),
-                                                      # because have to
-                                                      # evaluate in current
-                                                      # scope
+						      # because have to
+						      # evaluate in current
+						      # scope
 	while (<DATA>) {
 	    chomp;
 	    $loc = setlocale( LC_ALL, $_);
@@ -39,9 +42,9 @@ SKIP: {
 	skip 'Cannot test locale handling without a comma locale', 5
 	    unless $loc and localeconv()->{decimal_point} eq ',';
 
-	diag ("Testing locale handling with $loc") unless $ENV{PERL_CORE};
+	diag ("Testing locale handling with $loc") if $Verbose;
 
-        setlocale(LC_NUMERIC, $loc);
+	setlocale(LC_NUMERIC, $loc);
 	ok ($ver eq "1,23", "Using locale: $loc");
 	$v = version->new($ver);
 	unlike($warning, qr/Version string '1,23' contains invalid data/,

@@ -6,7 +6,7 @@ use strict;
 
 use vars qw(@ISA $VERSION $CLASS $STRICT $LAX *declare *qv);
 
-$VERSION = 0.9902;
+$VERSION = 0.9903;
 
 $CLASS = 'version';
 
@@ -131,7 +131,7 @@ sub import {
 	map { $args{$_} = 1 } @_
     }
     else { # no parameters at all on use line
-    	%args = 
+	%args =
 	(
 	    qv => 1,
 	    'UNIVERSAL::VERSION' => 1,
@@ -139,9 +139,9 @@ sub import {
     }
 
     my $callpkg = caller();
-    
+
     if (exists($args{declare})) {
-	*{$callpkg.'::declare'} = 
+	*{$callpkg.'::declare'} =
 	    sub {return $class->declare(shift) }
 	  unless defined(&{$callpkg.'::declare'});
     }

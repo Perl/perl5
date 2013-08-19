@@ -5,14 +5,15 @@
 #########################
 
 use Test::More qw/no_plan/;
+my $Verbose;
 
 BEGIN {
     (my $coretests = $0) =~ s'[^/]+\.t'coretests.pm';
     require $coretests;
-    use_ok('version', 0.9902);
+    use_ok('version', 0.9903);
 }
 
-diag "Tests with base class" unless $ENV{PERL_CORE};
+diag "Tests with base class" if $Verbose;
 
 BaseTests("version","new","qv");
 BaseTests("version","new","declare");
