@@ -2274,10 +2274,8 @@ S_sv_2iuv_common(pTHX_ SV *const sv)
 	if (isGV_with_GP(sv))
 	    return glob_2number(MUTABLE_GV(sv));
 
-	if (!SvPADTMP(sv)) {
-	    if (!PL_localizing && ckWARN(WARN_UNINITIALIZED))
+	if (!PL_localizing && ckWARN(WARN_UNINITIALIZED))
 		report_uninit(sv);
-	}
 	if (SvTYPE(sv) < SVt_IV)
 	    /* Typically the caller expects that sv_any is not NULL now.  */
 	    sv_upgrade(sv, SVt_IV);
@@ -2681,7 +2679,7 @@ Perl_sv_2nv_flags(pTHX_ SV *const sv, const I32 flags)
 	    return 0.0;
 	}
 
-	if (!PL_localizing && !SvPADTMP(sv) && ckWARN(WARN_UNINITIALIZED))
+	if (!PL_localizing && ckWARN(WARN_UNINITIALIZED))
 	    report_uninit(sv);
 	assert (SvTYPE(sv) >= SVt_NV);
 	/* Typically the caller expects that sv_any is not NULL now.  */
@@ -3025,7 +3023,7 @@ Perl_sv_2pv_flags(pTHX_ SV *const sv, STRLEN *const lp, const I32 flags)
 	    *lp = 0;
 	if (flags & SV_UNDEF_RETURNS_NULL)
 	    return NULL;
-	if (!PL_localizing && !SvPADTMP(sv) && ckWARN(WARN_UNINITIALIZED))
+	if (!PL_localizing && ckWARN(WARN_UNINITIALIZED))
 	    report_uninit(sv);
 	/* Typically the caller expects that sv_any is not NULL now.  */
 	if (!SvREADONLY(sv) && SvTYPE(sv) < SVt_PV)

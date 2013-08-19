@@ -6,7 +6,7 @@ BEGIN {
     }
 }
 
-use Test::More tests => 146;
+use Test::More tests => 148;
 
 use strict;
 use warnings;
@@ -211,6 +211,13 @@ is( sprintf("%6.3f",T_DOUBLE(52.345)), sprintf("%6.3f",52.345), "T_DOUBLE" );
 note("T_PV");
 is( T_PV("a string"), "a string");
 is( T_PV(52), 52);
+ok !defined T_PV_null, 'RETVAL = NULL returns undef for char*';
+{
+    my $uninit;
+    local $SIG{__WARN__} = sub { ++$uninit if shift =~ /uninit/ };
+    () = ''.T_PV_null;
+    is $uninit, 1, 'uninit warning from NULL returned from char* func';
+}
 
 # T_PTR
 my $t = 5;

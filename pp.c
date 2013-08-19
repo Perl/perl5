@@ -5267,8 +5267,6 @@ PP(pp_reverse)
 	    do_join(TARG, &PL_sv_no, MARK, SP);
 	else {
 	    sv_setsv(TARG, SP > MARK ? *SP : find_rundefsv());
-	    if (! SvOK(TARG) && ckWARN(WARN_UNINITIALIZED))
-		report_uninit(TARG);
 	}
 
 	up = SvPV_force(TARG, len);

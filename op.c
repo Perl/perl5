@@ -8903,9 +8903,10 @@ Perl_ck_fun(pTHX_ OP *o)
 				SV *namesv;
 				targ = pad_alloc(OP_RV2GV, SVf_READONLY);
 				namesv = PAD_SVl(targ);
-				SvUPGRADE(namesv, SVt_PV);
 				if (want_dollar && *name != '$')
 				    sv_setpvs(namesv, "$");
+				else
+				    sv_setpvs(namesv, "");
 				sv_catpvn(namesv, name, len);
                                 if ( name_utf8 ) SvUTF8_on(namesv);
 			    }

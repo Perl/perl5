@@ -571,6 +571,13 @@ T_PV( in )
  OUTPUT:
   RETVAL
 
+char *
+T_PV_null()
+ CODE:
+  RETVAL = NULL;
+ OUTPUT:
+  RETVAL
+
 
 ## T_PTR
 
