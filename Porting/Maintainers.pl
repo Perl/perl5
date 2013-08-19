@@ -950,12 +950,8 @@ use File::Glob qw(:case);
         'UPSTREAM'   => 'blead',
     },
 
-    # Sean has donated it to us.
-    # Nothing has changed since his last CPAN release.
-    # (not strictly true: there have been some trivial typo fixes; DAPM 6/2009)
     'I18N::LangTags' => {
         'MAINTAINER'   => 'p5p',
-        'DISTRIBUTION' => 'SBURKE/I18N-LangTags-0.35.tar.gz',
         'FILES'        => q[dist/I18N-LangTags],
         'UPSTREAM'     => 'blead',
     },
