@@ -1496,10 +1496,9 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         folder = foldEQ_latin1;	        /* /a, except the sharp s one which */
         goto do_exactf_non_utf8;	/* isn't dealt with by these */
 
-    case EXACTF:
+    case EXACTF:   /* This node only generated for non-utf8 patterns */
+        assert(! is_utf8_pat);
         if (utf8_target) {
-
-            /* regcomp.c already folded this if pattern is in UTF-8 */
             utf8_fold_flags = 0;
             goto do_exactf_utf8;
         }
@@ -3526,7 +3525,9 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
                     c2 = PL_fold_locale[c1];
                     break;
 
-                case EXACTF:
+                case EXACTF:   /* This node only generated for non-utf8
+                                  patterns */
+                    assert(! is_utf8_pat);
                     if (! utf8_target) {    /* /d rules */
                         c2 = PL_fold[c1];
                         break;
@@ -4229,7 +4230,9 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    fold_utf8_flags = FOLDEQ_UTF8_NOMIX_ASCII;
 	    goto do_exactf;
 
-	case EXACTF:             /*  /abc/i       */
+        case EXACTF:             /*  /abc/i    This node only generated for
+                                               non-utf8 patterns */
+            assert(! is_utf8_pat);
 	    folder = foldEQ;
 	    fold_array = PL_fold;
 	    fold_utf8_flags = 0;
@@ -6899,7 +6902,8 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
 	utf8_flags = FOLDEQ_UTF8_LOCALE;
 	goto do_exactf;
 
-    case EXACTF:
+    case EXACTF:   /* This node only generated for non-utf8 patterns */
+        assert(! reginfo->is_utf8_pat);
 	    utf8_flags = 0;
 	    goto do_exactf;
 
