@@ -1466,13 +1466,16 @@ is the recommended Unicode-aware way of saying
 	}								   \
         } STMT_END
 
-#define TRIE_READ_CHAR STMT_START {                                                     \
-    wordlen++;                                                                          \
-    if ( UTF ) {                                                                        \
-        /* if it is UTF then it is either already folded, or does not need folding */   \
-        uvc = utf8n_to_uvchr( (const U8*) uc, UTF8_MAXLEN, &len, uniflags);             \
-    }                                                                                   \
-    else if (folder == PL_fold_latin1) {                                                \
+/* This gets the next character from the input, folding it if not already
+ * folded. */
+#define TRIE_READ_CHAR STMT_START {                                           \
+    wordlen++;                                                                \
+    if ( UTF ) {                                                              \
+        /* if it is UTF then it is either already folded, or does not need    \
+         * folding */                                                         \
+        uvc = utf8n_to_uvuni( (const U8*) uc, UTF8_MAXLEN, &len, uniflags);   \
+    }                                                                         \
+    else if (folder == PL_fold_latin1) {                                      \
         /* This folder implies Unicode rules, which in the range expressible  \
          *  by not UTF is the lower case, with the two exceptions, one of     \
          *  which should have been taken care of before calling this */       \
@@ -1480,11 +1483,11 @@ is the recommended Unicode-aware way of saying
         uvc = toLOWER_L1(*uc);                                                \
         if (UNLIKELY(uvc == MICRO_SIGN)) uvc = GREEK_SMALL_LETTER_MU;         \
         len = 1;                                                              \
-    } else {                                                                            \
-        /* raw data, will be folded later if needed */                                  \
-        uvc = (U32)*uc;                                                                 \
-        len = 1;                                                                        \
-    }                                                                                   \
+    } else {                                                                  \
+        /* raw data, will be folded later if needed */                        \
+        uvc = (U32)*uc;                                                       \
+        len = 1;                                                              \
+    }                                                                         \
 } STMT_END
 
 
