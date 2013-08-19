@@ -1473,19 +1473,13 @@ is the recommended Unicode-aware way of saying
         uvc = utf8n_to_uvchr( (const U8*) uc, UTF8_MAXLEN, &len, uniflags);             \
     }                                                                                   \
     else if (folder == PL_fold_latin1) {                                                \
-        /* if we use this folder we have to obey unicode rules on latin-1 data */       \
-        if ( foldlen > 0 ) {                                                            \
-           uvc = utf8n_to_uvchr( (const U8*) scan, UTF8_MAXLEN, &len, uniflags );       \
-           foldlen -= len;                                                              \
-           scan += len;                                                                 \
-           len = 0;                                                                     \
-        } else {                                                                        \
-            len = 1;                                                                    \
-            uvc = _to_fold_latin1( (U8) *uc, foldbuf, &foldlen, FOLD_FLAGS_FULL);       \
-            skiplen = UNISKIP(uvc);                                                     \
-            foldlen -= skiplen;                                                         \
-            scan = foldbuf + skiplen;                                                   \
-        }                                                                               \
+        /* This folder implies Unicode rules, which in the range expressible  \
+         *  by not UTF is the lower case, with the two exceptions, one of     \
+         *  which should have been taken care of before calling this */       \
+        assert(*uc != LATIN_SMALL_LETTER_SHARP_S);                            \
+        uvc = toLOWER_L1(*uc);                                                \
+        if (UNLIKELY(uvc == MICRO_SIGN)) uvc = GREEK_SMALL_LETTER_MU;         \
+        len = 1;                                                              \
     } else {                                                                            \
         /* raw data, will be folded later if needed */                                  \
         uvc = (U32)*uc;                                                                 \
@@ -1682,9 +1676,6 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
         const U8 *uc = (U8*)STRING( noper );
         const U8 *e  = uc + STR_LEN( noper );
         STRLEN foldlen = 0;
-        U8 foldbuf[ UTF8_MAXBYTES_CASE + 1 ];
-        STRLEN skiplen = 0;
-        const U8 *scan = (U8*)NULL;
         U32 wordlen      = 0;         /* required init */
         STRLEN chars = 0;
         bool set_bit = trie->bitmap ? 1 : 0; /*store the first char in the bitmap?*/
@@ -1845,11 +1836,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
             const U8 *e      = uc + STR_LEN( noper );
 	    U32 state        = 1;         /* required init */
 	    U16 charid       = 0;         /* sanity init */
-	    U8 *scan         = (U8*)NULL; /* sanity init */
-	    STRLEN foldlen   = 0;         /* required init */
             U32 wordlen      = 0;         /* required init */
-	    U8 foldbuf[ UTF8_MAXBYTES_CASE + 1 ];
-            STRLEN skiplen   = 0;
 
             if (OP(noper) == NOTHING) {
                 regnode *noper_next= regnext(noper);
@@ -2055,12 +2042,8 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
 
             U16 charid       = 0;         /* sanity init */
             U32 accept_state = 0;         /* sanity init */
-            U8 *scan         = (U8*)NULL; /* sanity init */
 
-            STRLEN foldlen   = 0;         /* required init */
             U32 wordlen      = 0;         /* required init */
-            STRLEN skiplen   = 0;
-            U8 foldbuf[ UTF8_MAXBYTES_CASE + 1 ];
 
             if (OP(noper) == NOTHING) {
                 regnode *noper_next= regnext(noper);
