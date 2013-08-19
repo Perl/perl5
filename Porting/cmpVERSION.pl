@@ -79,6 +79,7 @@ my %skip;
     'lib/Config.pm',		# no version number but contents will vary
     'dist/Exporter/lib/Exporter/Heavy.pm',
     'win32/FindExt.pm',
+    'dist/Attribute-Handlers/demo/MyClass.pm', # it's just demonstration code
 } = ();
 
 # Files to skip just for particular version(s),
