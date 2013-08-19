@@ -34,7 +34,6 @@
          "dist/ExtUtils-ParseXS",
          "dist/Filter-Simple",
          "dist/I18N-Collate",
-         "dist/I18N-LangTags",
          "dist/if",
          "dist/IO/",
          "dist/lib/",
