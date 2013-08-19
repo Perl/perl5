@@ -213,24 +213,9 @@ sub format_arg {
         {
             1;
         }
-        elsif (defined(&overload::StrVal))
-        {
-	    if ($in_recurse ||
-		!do {
-                    local $@;
-	            local $in_recurse = 1;
-		    local $SIG{__DIE__} = sub{};
-                    eval {
-                        $arg = "$arg";
-                        1;
-                    }
-                }) {
-	        $arg = overload::StrVal($arg);
-            }
-        }
         else
         {
-            $arg = "$arg";
+            $arg = defined($overload::VERSION) ? overload::StrVal($arg) : "$arg";
         }
     }
     if ( defined($arg) ) {
@@ -615,7 +600,7 @@ its parameters.  For simple scalars, this is sufficient.  For complex
 data types, such as objects and other references, this can simply
 display C<'HASH(0x1ab36d8)'>.
 
-Carp gives three ways to control this.
+Carp gives two ways to control this.
 
 =over 4
 
@@ -633,22 +618,13 @@ For any type of reference, C<$Carp::RefArgFormatter> is checked (see below).
 This variable is expected to be a code reference, and the current parameter
 is passed in.  If this function doesn't exist (the variable is undef), or
 it recurses into C<Carp>, or it otherwise throws an exception, this is
-skipped, and Carp moves on to the next option, otherwise checking stops 
+skipped, and Carp moves on to the next option, otherwise checking stops
 and the string returned is used.
 
-=item 3.
+=item 3
 
-The reference is stringified.  If overloading is being used on the object,
-that overloading is called.  If that overload recurses into C<Carp>, or it
-otherwise throws an exception, this is skipped, and Carp moves on to the next
-option, otherwise checking stops and the string returned is used.
-
-=item 4.
-
-To get this far, L<overload> must be loaded because the object failed
-to stringify normally.  L<overload>::StrVal is called to stringify the
-object without any overloading to produce a value where all of the above
-has failed.
+Otherwise, if neither C<CARP_TRACE> nor C<$Carp::RefArgFormatter> is
+available, stringify the value ignoring any overloading.
 
 =back
 
