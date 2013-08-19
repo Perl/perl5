@@ -137,6 +137,13 @@ C<fill_mstats> no longer crashes if its argument is not already a string.
 
 =item *
 
+L<Devel::PPPort> has been upgraded from version 3.20 to 3.21.
+
+Numerous updates and bug fixes are incorporated.  See the F<Changes> file for
+full details.
+
+=item *
+
 L<diagnostics> has been upgraded from version 1.31 to 1.32.
 
 Wrapped links are no longer truncated.
