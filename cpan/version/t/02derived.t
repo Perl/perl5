@@ -6,7 +6,7 @@
 
 use Test::More qw/no_plan/;
 use File::Temp qw/tempfile/;
-my $Verbose;
+our $Verbose;
 
 BEGIN {
     (my $coretests = $0) =~ s'[^/]+\.t'coretests.pm';

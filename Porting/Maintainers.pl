@@ -1960,7 +1960,12 @@ use File::Glob qw(:case);
         # Waiting to be merged upstream: see CPAN RT#87513
         'CUSTOMIZED'   => [
             qw( lib/version.pm
+                t/01base.t
+                t/02derived.t
+                t/03require.t
+                t/04strict_lax.t
                 t/07locale.t
+                t/coretests.pm
                 ),
         ],
 

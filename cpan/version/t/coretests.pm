@@ -2,7 +2,7 @@
 package main;
 require Test::Harness;
 *Verbose = \$Test::Harness::Verbose;
-*Verbose = 0 if $ENV{PERL_CORE};
+$Verbose = 0 if $ENV{PERL_CORE};
 use Data::Dumper;
 use File::Temp qw/tempfile/;
 use File::Basename;

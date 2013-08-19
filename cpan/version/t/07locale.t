@@ -9,7 +9,7 @@ use File::Temp qw/tempfile/;
 use POSIX qw/locale_h/;
 use Test::More tests => 7;
 use Config;
-my $Verbose;
+our $Verbose;
 
 BEGIN {
     use_ok('version', 0.9903);

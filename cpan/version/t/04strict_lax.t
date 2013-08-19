@@ -5,7 +5,6 @@
 #########################
 
 use Test::More qw/no_plan/;
-my $Verbose;
 
 # do strict lax tests in a sub to isolate a package to test importing
 SKIP: {

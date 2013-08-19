@@ -5,7 +5,7 @@
 #########################
 
 use Test::More qw/no_plan/;
-my $Verbose;
+our $Verbose;
 
 BEGIN {
     (my $coretests = $0) =~ s'[^/]+\.t'coretests.pm';
