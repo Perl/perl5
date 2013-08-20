@@ -558,6 +558,7 @@ U;
 qq/"	\n/;
 5 || print "bad\n";	# test OPpCONST_SHORTCIRCUIT
 print "boo\n" if U;	# test OPpCONST_SHORTCIRCUIT
+if($foo){}elsif(""){}	# test OPpCONST_SHORTCIRCUIT
 no warnings 'void' ;
 "abc"; # OP_CONST
 7 ; # OP_CONST

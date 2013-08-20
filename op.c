@@ -5901,8 +5901,8 @@ S_new_logop(pTHX_ I32 type, I32 flags, OP** firstp, OP** otherp)
 	    }
 
 	    *otherp = NULL;
-	    if (first->op_type == OP_CONST)
-		first->op_private |= OPpCONST_SHORTCIRCUIT;
+	    if (cstop->op_type == OP_CONST)
+		cstop->op_private |= OPpCONST_SHORTCIRCUIT;
 	    if (PL_madskills) {
 		first = newUNOP(OP_NULL, 0, first);
 		op_getmad(other, first, '2');
