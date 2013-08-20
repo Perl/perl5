@@ -321,6 +321,29 @@ Various installation, testing and documentation changes have been made.
 
 =head2 Changes to Existing Documentation
 
+=head3 L<perlfunc>
+
+=over 4
+
+=item *
+
+The documentation of C<ref> has been updated to recommend the use of
+C<blessed>, C<isa> and C<reftype> when dealing with references to blessed
+objects.
+
+=back
+
+=head3 L<perlguts>
+
+=over 4
+
+=item *
+
+The explanation of the use of the C<SVs_PADMY> and C<SVs_PADTMP> flags in
+determining whether an SV lives on a scratchpad has been clarified.
+
+=back
+
 =head3 L<perlopentut>
 
 =over 4
@@ -356,6 +379,17 @@ The C</r> modifier (for non-destructive substitution) is now documented. [perl
 
 The need to predeclare recursive functions with prototypes in order for the
 prototype to be honoured in the recursive call is now documented. [perl #2726]
+
+=back
+
+=head3 L<perlvar>
+
+=over 4
+
+=item *
+
+A new section explaining the performance issues of $`, $& and $', including
+workarounds and changes in different versions of Perl, has been added.
 
 =back
 
