@@ -516,6 +516,7 @@ the strings?).
  Ricardo   5.19.0       2013-May-20     The 5.19 development track
  David G   5.19.1       2013-Jun-21
  Aristotle 5.19.2       2013-Jul-22
+ Steve     5.19.3       2013-Aug-20
 
 =head2 SELECTED RELEASE SIZES
 
