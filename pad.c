@@ -1773,16 +1773,16 @@ Perl_pad_tidy(pTHX_ padtidy_type type)
 	for (ix = AvFILLp(PL_comppad); ix > 0; ix--) {
 	    SV *namesv;
 
-	    if (SvIMMORTAL(PL_curpad[ix]) || IS_PADGV(PL_curpad[ix]) || IS_PADCONST(PL_curpad[ix]))
-		continue;
 	    /*
 	     * The only things that a clonable function needs in its
-	     * pad are anonymous subs.
+	     * pad are anonymous subs, constants and GVs.
 	     * The rest are created anew during cloning.
 	     */
+	    if (SvIMMORTAL(PL_curpad[ix]) || IS_PADGV(PL_curpad[ix]))
+		continue;
 	    if (!((namesv = namep[ix]) != NULL &&
-		  namesv != &PL_sv_undef &&
-		   *SvPVX_const(namesv) == '&'))
+		  PadnamePV(namesv) &&
+		   (!PadnameLEN(namesv) || *SvPVX_const(namesv) == '&')))
 	    {
 		SvREFCNT_dec(PL_curpad[ix]);
 		PL_curpad[ix] = NULL;
@@ -2120,7 +2120,7 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside, bool newcv)
 		    SvPADSTALE_on(sv);
 	    }
 	}
-	else if (IS_PADGV(ppad[ix]) || IS_PADCONST(ppad[ix])) {
+	else if (IS_PADGV(ppad[ix]) || (namesv && PadnamePV(namesv))) {
 	    sv = SvREFCNT_inc_NN(ppad[ix]);
 	}
 	else {

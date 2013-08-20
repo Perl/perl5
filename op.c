@@ -4268,7 +4268,7 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 
 	swash = MUTABLE_SV(swash_init("utf8", "", listsv, bits, none));
 #ifdef USE_ITHREADS
-	cPADOPo->op_padix = pad_alloc(OP_TRANS, SVs_PADTMP);
+	cPADOPo->op_padix = pad_alloc(OP_TRANS, SVf_READONLY);
 	SvREFCNT_dec(PAD_SVl(cPADOPo->op_padix));
 	PAD_SETSV(cPADOPo->op_padix, swash);
 	SvPADTMP_on(swash);

@@ -12,7 +12,7 @@ BEGIN {
 
 use warnings;
 
-plan( tests => 253 );
+plan( tests => 254 );
 
 # type coercion on assignment
 $foo = 'foo';
@@ -650,6 +650,20 @@ sub r {
 is join(' ', r(4)),
   '*main::$fh *main::$fh *main::$fh *main::$fh *main::$fh',
   'recursion does not cause lex handles to lose their names';
+
+# And sub cloning, too; not just recursion
+my $close_over_me;
+is join(' ', sub {
+    () = $close_over_me;
+    my @output;
+    @output = CORE::__SUB__->($_[0]-1) if $_[0];
+    open my $fh, "TEST";
+    push @output, $$fh;
+    close $fh;
+    @output;
+   }->(4)),
+  '*main::$fh *main::$fh *main::$fh *main::$fh *main::$fh',
+  'sub cloning does not cause lex handles to lose their names';
 
 # [perl #71254] - Assigning a glob to a variable that has a current
 # match position. (We are testing that Perl_magic_setmglob respects globs'
