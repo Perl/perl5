@@ -12,7 +12,7 @@ BEGIN {
 
 use warnings;
 
-plan( tests => 252 );
+plan( tests => 253 );
 
 # type coercion on assignment
 $foo = 'foo';
@@ -636,6 +636,20 @@ foreach my $type (qw(integer number string)) {
     is($str,  '*__ANON__::__ANONIO__',
 	"RT #65582/#96326 anon glob stringification");
 }
+
+# Another stringification bug: Test that recursion does not cause lexical
+# handles to lose their names.
+sub r {
+    my @output;
+    @output = r($_[0]-1) if $_[0];
+    open my $fh, "TEST";
+    push @output, $$fh;
+    close $fh;
+    @output;
+}
+is join(' ', r(4)),
+  '*main::$fh *main::$fh *main::$fh *main::$fh *main::$fh',
+  'recursion does not cause lex handles to lose their names';
 
 # [perl #71254] - Assigning a glob to a variable that has a current
 # match position. (We are testing that Perl_magic_setmglob respects globs'

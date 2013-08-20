@@ -8901,7 +8901,7 @@ Perl_ck_fun(pTHX_ OP *o)
 			    }
 			    if (name) {
 				SV *namesv;
-				targ = pad_alloc(OP_RV2GV, SVs_PADTMP);
+				targ = pad_alloc(OP_RV2GV, SVf_READONLY);
 				namesv = PAD_SVl(targ);
 				SvUPGRADE(namesv, SVt_PV);
 				if (want_dollar && *name != '$')
