@@ -32,7 +32,7 @@ note('running tests in a new thread');
 # On Mac OS X under gcc and g++, the default stack size is also too small.
 my $curr = threads->create({
                             stack_size => $^O eq 'hpux'   ? 524288 :
-                                          $^O eq 'darwin' ? 847873 : 0,
+                                          $^O eq 'darwin' ? 1000000: 0,
                            }, sub {
 			       run_tests();
 			       return defined &curr_test ? curr_test() : ()
