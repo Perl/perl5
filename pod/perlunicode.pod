@@ -1496,7 +1496,7 @@ For Perls earlier than those described above, or when a string is passed
 to a function outside the subpragma's scope, a workaround is to always
 call C<utf8::upgrade($string)>,
 or to use the standard module L<Encode>.   Also, a scalar that has any characters
-whose ordinal is above 0x100, or which were specified using either of the
+whose ordinal is 0x100 or above, or which were specified using either of the
 C<\N{...}> notations, will automatically have character semantics.
 
 =head2 Forcing Unicode in Perl (Or Unforcing Unicode in Perl)
