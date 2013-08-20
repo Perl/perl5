@@ -697,7 +697,16 @@ foreach my $test (sort { numerically } keys %tests) {
           }
 
           # See if works on what could be a simple trie.
-          $eval = "my \$c = \"$lhs\"; my \$p = qr/$rhs|xyz/i$charset;$upgrade_target$upgrade_pattern \$c $op \$p";
+          my $alternate;
+          {
+            # Keep the alternate | branch the same length as the tested one so
+            # that it's length doesn't influence things
+            my $evaled = eval "\"$rhs\"";   # Convert e.g. \x{foo} into its
+                                            # chr equivalent
+            use bytes;
+            $alternate = 'q' x length $evaled;
+          }
+          $eval = "my \$c = \"$lhs\"; my \$p = qr/$rhs|$alternate/i$charset;$upgrade_target$upgrade_pattern \$c $op \$p";
           run_test($eval, "", "");
 
           # Check that works when the folded character follows something that
