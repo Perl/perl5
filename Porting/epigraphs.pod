@@ -17,6 +17,32 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.19.3 - Andrew Hodges, "Alan Turing: The Enigma"
+
+L<Announced on 2013-08-20 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2013/08/msg206318.html>
+
+=over
+
+E.M. Forster, outdoing the King's heresy with grand bravura, had
+written in 1938 that if he were faced with the choice between
+betraying his country and betraying his friends, he hoped he would
+have the courage to betray his country.  He would always put the
+personal above the political.  But for Alan Turing, unlike Forster, or
+Wittgenstein, or G.H. Hardy, it was more than a theoretical question.
+For him not only had the personal become the political, but the
+political was the personal.  He had chosen and promised for himself in
+working for the government.  The choice for him therefore was that
+between betraying one part of himself and betraying another part.  And
+however much he wavered between these alternatives, there was a solid
+logic to the mind of security, one that could not be expected to take
+an interest in notions of freedom and development.  He had no rights
+to such things, as he would have had to admit.  He might have
+outwitted the Home Guard, but when it came to questions that mattered,
+there was no doubt that he had placed himself under military law.
+There was a war on; there was always a war on now.
+
+=back
+
 =head2 v5.19.2 - Fred Brooks, "The Mythical Man-Month"
 
 L<Announced on 2013-07-22 by Aristotle Pagaltzis|http://www.nntp.perl.org/group/perl.perl5.porters/2013/07/msg204905.html>
