@@ -1680,7 +1680,8 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
         const U8 *e  = uc + STR_LEN( noper );
         STRLEN foldlen = 0;
         U32 wordlen      = 0;         /* required init */
-        STRLEN chars = 0;
+        STRLEN minbytes = 0;
+        STRLEN maxbytes = 0;
         bool set_bit = trie->bitmap ? 1 : 0; /*store the first char in the bitmap?*/
 
         if (OP(noper) == NOTHING) {
@@ -1707,7 +1708,8 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
         for ( ; uc < e ; uc += len ) {
             TRIE_CHARCOUNT(trie)++;
             TRIE_READ_CHAR;
-            chars++;
+            minbytes++;
+            maxbytes++;
             if ( uvc < 256 ) {
                 if ( folder ) {
                     U8 folded= folder[ (U8) uvc ];
@@ -1754,12 +1756,12 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
             }
         }
         if( cur == first ) {
-            trie->minlen = chars;
-            trie->maxlen = chars;
-        } else if (chars < trie->minlen) {
-            trie->minlen = chars;
-        } else if (chars > trie->maxlen) {
-            trie->maxlen = chars;
+            trie->minlen = minbytes;
+            trie->maxlen = maxbytes;
+        } else if (minbytes < trie->minlen) {
+            trie->minlen = minbytes;
+        } else if (maxbytes > trie->maxlen) {
+            trie->maxlen = maxbytes;
         }
         if (OP( noper ) == EXACTFU_SS) {
             /* XXX: workaround - 'ss' could match "\x{DF}" so minlen could be 1 and not 2*/
