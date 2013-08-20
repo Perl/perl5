@@ -2315,9 +2315,8 @@ PP(pp_complement)
 	I32 anum;
 	STRLEN len;
 
-	(void)SvPV_nomg_const(sv,len); /* force check for uninit var */
-	sv_setsv_nomg(TARG, sv);
-	tmps = (U8*)SvPV_force_nomg(TARG, len);
+	sv_copypv_nomg(TARG, sv);
+	tmps = (U8*)SvPV_nomg(TARG, len);
 	anum = len;
 	if (SvUTF8(TARG)) {
 	  /* Calculate exact length, let's not estimate. */
