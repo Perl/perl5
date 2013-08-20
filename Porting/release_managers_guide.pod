@@ -395,11 +395,10 @@ correct choice of earlier version to declare incompatibility with.
 
 When doing a BLEAD-POINT or BLEAD-FINAL release, also make sure the
 C<PERL_API_*> constants in F<patchlevel.h> are in sync with the version
-you're releasing, unless you're
-absolutely sure the release you're about to make is 100% binary compatible
-to an earlier release. When releasing a MAINT perl version, the C<PERL_API_*>
-constants C<MUST NOT> be changed as we aim to guarantee binary compatibility
-in maint branches.
+you're releasing, unless you're absolutely sure the release you're about to
+make is 100% binary compatible to an earlier release. When releasing a MAINT
+perl version, the C<PERL_API_*> constants C<MUST NOT> be changed as we aim
+to guarantee binary compatibility in maint branches.
 
 After editing, regenerate uconfig.h (this must be run on a system with a
 /bin/sh available):
@@ -424,7 +423,7 @@ Commit your changes:
     $ git commit -a -m 'Bump the perl version in various places for 5.x.y'
 
 At this point you may want to compare the commit with a previous bump to
-see if they look similar.  See commit 0e79a3d1bc for an example of a
+see if they look similar.  See commit f7cf42bb69 for an example of a
 previous version bump.
 
 When the version number is bumped, you should also update Module::CoreList
@@ -553,8 +552,8 @@ Then change to your perl checkout, and if necessary,
 
 Before updating Module::CoreList, first edit
 F<dist/Module-CoreList/lib/Module/CoreList.pm> and delete any existing
-entries for this version from the C<%released> and C<%version> hashes:
-they will have a key like C<5.010001> for 5.10.1.
+entries for this version from the C<%released>, C<%delta> and
+C<%deprecated> hashes: they will have a key like C<5.010001> for 5.10.1.
 
 XXX the edit-in-place functionality of Porting/corelist.pl should
 be fixed to handle this automatically.
@@ -576,8 +575,9 @@ Check that file over carefully:
 
     $ git diff dist/Module-CoreList/lib/Module/CoreList.pm
 
-XXX I'm not sure if this updates Module::CoreList::Utils, so double
-check that file carefully.
+Also check for changes to other files, in particular
+F<dist/Module-CoreList/lib/Module/CoreList.pod> and possibly
+F<dist/Module-CoreList/lib/Module/CoreList/Utils.pm> as well.
 
 =head4 Bump C<$Module::CoreList::VERSION>
 
@@ -867,9 +867,9 @@ the tarball and directory name:
     $ perl Porting/makerel -b                   # for a final release
 
 This creates the  directory F<../perl-x.y.z-RC1> or similar, copies all
-the MANIFEST files into it, sets the correct permissions on them,
-adds DOS line endings to some, then tars it up as
-F<../perl-x.y.z-RC1.tar.gz>. With C<-b>, it also creates a C<tar.bz2> file.
+the MANIFEST files into it, sets the correct permissions on them, then
+tars it up as F<../perl-x.y.z-RC1.tar.gz>. With C<-b>, it also creates a
+C<tar.bz2> file.
 
 If you're getting your tarball suffixed with -uncommitted and you're sure
 your changes were all committed, you can override the suffix with:
@@ -1149,7 +1149,7 @@ When C<make test_porting> passes, commit the new perldelta.
 =back
 
 At this point you may want to compare the commit with a previous bump to
-see if they look similar.  See commit 4eabcf701b for an example of a
+see if they look similar.  See commit ba03bc34a4 for an example of a
 previous version bump.
 
 =for checklist skip MAINT RC
@@ -1330,10 +1330,10 @@ to ensure that the tarballs are available on the website.
 =item *
 
 Check C</src> on CPAN (on a fast mirror) to ensure that links to
-the new tarballs have appeared.  There should be links in C</src/5.0>
-(which is accumulating all new versions), and an appropriate mention in
-C</src/README.html> (which describes the latest versions in each branch,
-with links). BLEAD-POINT releases will not be mentioned.
+the new tarballs have appeared: There should be links in C</src/5.0>
+(which is accumulating all new versions), and (for BLEAD-FINAL and
+MAINT only) an appropriate mention in C</src/README.html> (which describes
+the latest versions in each stable branch, with links).
 
 The C</src/5.0> links should appear automatically, some hours after upload.
 If they don't, or the C</src> description is inadequate,
