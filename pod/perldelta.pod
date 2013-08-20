@@ -111,7 +111,7 @@ Some documentation typos have been fixed.
 
 L<Data::Dumper> has been upgraded from version 2.147 to 2.148.
 
-The compatbility of the XS implementation with the pure perl version under
+The compatibility of the XS implementation with the pure perl version under
 C<Useqq> has been improved. [perl #118933]
 
 =item *
@@ -212,7 +212,7 @@ needed and a regression introduced in 0.78 has been fixed.
 
 =item *
 
-L<IPC::Open3> has been upgradded from version 1.14 to 1.15.
+L<IPC::Open3> has been upgraded from version 1.14 to 1.15.
 
 C<open3> would leak a zombie process if the child process I/O redirection or
 C<exec> failed. [perl #114722]
@@ -350,7 +350,7 @@ determining whether an SV lives on a scratchpad has been clarified.
 
 =item *
 
-The C<open> tutorial has been completely rewriten by Tom Christiansen, and now
+The C<open> tutorial has been completely rewritten by Tom Christiansen, and now
 focuses on covering only the basics, rather than providing a comprehensive
 reference to all things openable.  This rewrite came as the result of a
 vigorous discussion on perl5-porters kicked off by a set of improvements
@@ -565,9 +565,9 @@ not interpolate.  This has been corrected. [perl #45667]
 
 =item *
 
-On non-threaded builds, setting C<${"_<filename"}> to a reference or typeglob
-no longer causes C<__FILE__> and some error messages to produce a corrupt
-string, and no longer prevents C<#line> directives in string evals from
+On non-threaded builds, setting C<${"_E<lt>filename"}> to a reference or
+typeglob no longer causes C<__FILE__> and some error messages to produce a
+corrupt string, and no longer prevents C<#line> directives in string evals from
 providing the source lines to the debugger.  Threaded builds were unaffected.
 
 =item *
@@ -577,7 +577,7 @@ created at compile time (C<*Foo::Bar::Foo:: = *Foo::>).
 
 =item *
 
-Undef constants used in hash keys (C<use constant u => undef; $h{+u}>) no
+Undef constants used in hash keys (C<use constant u =E<gt> undef; $h{+u}>) no
 longer produce "uninitialized" warnings at compile time.
 
 =item *
@@ -651,8 +651,8 @@ in Perl 5.18.0.
 =item *
 
 Changes to C<UNIVERSAL::DESTROY> now update DESTROY caches in all classes,
-instead of causing classes that have already had objects destroyed to
-continue using the old sub.  This was a regression in Perl 5.18. [perl #114864]
+instead of causing classes that have already had objects destroyed to continue
+using the old sub.  This was a regression in Perl 5.18. [perl #114864]
 
 =item *
 
@@ -664,9 +664,34 @@ removed. [perl #119101]
 
 =head1 Acknowledgements
 
-XXX Generate this with:
+Perl 5.19.3 represents approximately 4 weeks of development since Perl 5.19.2
+and contains approximately 24,000 lines of changes across 710 files from 36
+authors.
 
-  perl Porting/acknowledgements.pl v5.19.2..HEAD
+Perl continues to flourish into its third decade thanks to a vibrant community
+of users and developers.  The following people are known to have contributed
+the improvements that became Perl 5.19.3:
+
+Alexander Voronov, Andy Dougherty, Aristotle Pagaltzis, Brendan Byrd, Chris
+'BinGOs' Williams, Colin Kuskie, Craig A. Berry, Daniel Dragan, Darin McBride,
+David Mitchell, Father Chrysostomos, H.Merijn Brand, James E Keenan, John
+Gardiner Myers, John Peacock, Karl Williamson, Lukas Mai, Marcus
+Holland-Moritz, Nathan Trapuzzano, Neil Bowers, Nicholas Clark, Peter Martini,
+Philip Boulain, Ricardo Signes, Sergey Alekseev, Shlomi Fish, Smylers, Steffen
+Müller, Steve Hay, Tom Christiansen, Tony Cook, Victor Efimov, Viktor Turskyi,
+Vladimir Timofeev, Yves Orton, Zefram.
+
+The list above is almost certainly incomplete as it is automatically generated
+from version control history.  In particular, it does not include the names of
+the (very much appreciated) contributors who reported issues to the Perl bug
+tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core.  We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please see
+the F<AUTHORS> file in the Perl source distribution.
 
 =head1 Reporting Bugs
 
