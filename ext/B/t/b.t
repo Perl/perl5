@@ -405,7 +405,7 @@ SKIP:
         ok($cv, "make a B::CV from a lexical sub reference");
         isa_ok($cv, "B::CV");
         my $gv = $cv->GV;
-        is($gv, undef, "GV on a lexical sub is NULL");
+        isa_ok($gv, "B::SPECIAL", "GV on a lexical sub is NULL");
         my $hek = $cv->NAME_HEK;
         is($hek, "bar", "check the NAME_HEK");
     }
