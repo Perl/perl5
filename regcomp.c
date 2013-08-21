@@ -1708,8 +1708,55 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
         for ( ; uc < e ; uc += len ) {
             TRIE_CHARCOUNT(trie)++;
             TRIE_READ_CHAR;
-            minbytes++;
-            maxbytes++;
+
+            /* Acummulate to the current values, the range in the number of
+             * bytes that this character could match.  The max is presumed to
+             * be the same as the folded input (which TRIE_READ_CHAR returns),
+             * except that when this is not in UTF-8, it could be matched
+             * against a string which is UTF-8, and the variant characters
+             * could be 2 bytes instead of the 1 here.  Likewise, for the
+             * minimum number of bytes when not folded.  When folding, the min
+             * is assumed to be 1 byte could fold to match the single character
+             * here, or in the case of a multi-char fold, 1 byte can fold to
+             * the whole sequence.  'foldlen' is used to denote whether we are
+             * in such a sequence, skipping the min setting if so.  XXX TODO
+             * Use the exact list of what folds to each character, from
+             * PL_utf8_foldclosures */
+            if (UTF) {
+                maxbytes += UTF8SKIP(uc);
+                if (! folder) {
+                    /* A non-UTF-8 string could be 1 byte to match our 2 */
+                    minbytes += (UTF8_IS_DOWNGRADEABLE_START(*uc))
+                                ? 1
+                                : UTF8SKIP(uc);
+                }
+                else {
+                    if (foldlen) {
+                        foldlen -= UTF8SKIP(uc);
+                    }
+                    else {
+                        foldlen = is_MULTI_CHAR_FOLD_utf8_safe(uc, e);
+                        minbytes++;
+                    }
+                }
+            }
+            else {
+                maxbytes += (UNI_IS_INVARIANT(*uc))
+                             ? 1
+                             : 2;
+                if (! folder) {
+                    minbytes++;
+                }
+                else {
+                    if (foldlen) {
+                        foldlen--;
+                    }
+                    else {
+                        foldlen = is_MULTI_CHAR_FOLD_latin1_safe(uc, e);
+                        minbytes++;
+                    }
+                }
+            }
             if ( uvc < 256 ) {
                 if ( folder ) {
                     U8 folded= folder[ (U8) uvc ];
