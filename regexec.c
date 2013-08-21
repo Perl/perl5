@@ -165,13 +165,13 @@ static const char* const non_utf8_target_but_utf8_required
 #define LOAD_UTF8_CHARCLASS_ALNUM() LOAD_UTF8_CHARCLASS_DEBUG_TEST(           \
                                         PL_utf8_swash_ptrs[_CC_WORDCHAR],     \
                                         swash_property_names[_CC_WORDCHAR],   \
-                                        GREEK_SMALL_LETTER_IOTA_UTF8)
+                                        LATIN_CAPITAL_LETTER_SHARP_S_UTF8);
 
 #define LOAD_UTF8_CHARCLASS_GCB()  /* Grapheme cluster boundaries */          \
     STMT_START {                                                              \
 	LOAD_UTF8_CHARCLASS_DEBUG_TEST(PL_utf8_X_regular_begin,               \
                                        "_X_regular_begin",                    \
-                                       GREEK_SMALL_LETTER_IOTA_UTF8);         \
+                                       LATIN_CAPITAL_LETTER_SHARP_S_UTF8);    \
 	LOAD_UTF8_CHARCLASS_DEBUG_TEST(PL_utf8_X_extend,                      \
                                        "_X_extend",                           \
                                        COMBINING_GRAVE_ACCENT_UTF8);          \

@@ -23,15 +23,9 @@
 #define LATIN_SMALL_LETTER_LONG_S_UTF8  "\xC5\xBF"    /* U+017F */
 
 #define COMBINING_GRAVE_ACCENT_UTF8  "\xCC\x80"    /* U+0300 */
-#define COMBINING_ACUTE_ACCENT_UTF8  "\xCC\x81"    /* U+0301 */
-#define COMBINING_DIAERESIS_UTF8  "\xCC\x88"    /* U+0308 */
 
 #define GREEK_CAPITAL_LETTER_IOTA_UTF8  "\xCE\x99"    /* U+0399 */
 #define GREEK_SMALL_LETTER_MU_UTF8  "\xCE\xBC"    /* U+03BC */
-
-#define GREEK_SMALL_LETTER_IOTA_UTF8  "\xCE\xB9"    /* U+03B9 */
-
-#define GREEK_SMALL_LETTER_UPSILON_UTF8  "\xCF\x85"    /* U+03C5 */
 
 #define LATIN_CAPITAL_LETTER_SHARP_S_UTF8  "\xE1\xBA\x9E"    /* U+1E9E */
 
