@@ -642,7 +642,7 @@ it recurses into C<Carp>, or it otherwise throws an exception, this is
 skipped, and Carp moves on to the next option, otherwise checking stops
 and the string returned is used.
 
-=item 3
+=item 3.
 
 Otherwise, if neither C<CARP_TRACE> nor C<$Carp::RefArgFormatter> is
 available, stringify the value ignoring any overloading.
