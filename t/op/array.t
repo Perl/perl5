@@ -6,7 +6,7 @@ BEGIN {
     require 'test.pl';
 }
 
-plan (127);
+plan (129);
 
 #
 # @foo, @bar, and @ary are also used from tie-stdarray after tie-ing them
@@ -465,6 +465,13 @@ package peen {
     ::is eval { pling peen }, 'pling',
 	'arylen_p magic does not stop isa magic from being copied';
 }
+
+# Test that &PL_sv_undef is not special in arrays
+sub {
+    ok exists $_[0],
+      'exists returns true for &PL_sv_undef elem [perl #7508]';
+    is \$_[0], \undef, 'undef preserves identity in array [perl #109726]';
+}->(undef);
 
 
 "We're included by lib/Tie/Array/std.t so we need to return something true";
