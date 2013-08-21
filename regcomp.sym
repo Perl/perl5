@@ -100,7 +100,6 @@ EXACTFL     EXACT,      str       ; Match this string (not guaranteed to be fold
 EXACTFU     EXACT,      str	  ; Match this string (folded iff in UTF-8, length in folding doesn't change if not in UTF-8) using /iu rules (w/len).
 EXACTFA     EXACT,      str	  ; Match this string (not guaranteed to be folded) using /iaa rules (w/len).
 EXACTFU_SS  EXACT,      str	  ; Match this string (folded iff in UTF-8, length in folding may change even if not in UTF-8) using /iu rules (w/len).
-EXACTFU_TRICKYFOLD EXACT,  str	  ; Match this folded UTF-8 string using /iu rules
 
 #*Do nothing types
 

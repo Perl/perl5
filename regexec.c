@@ -207,13 +207,13 @@ static const char* const non_utf8_target_but_utf8_required
 /* Currently these are only used when PL_regkind[OP(rn)] == EXACT so
    we don't need this definition. */
 #define IS_TEXT(rn)   ( OP(rn)==EXACT   || OP(rn)==REF   || OP(rn)==NREF   )
-#define IS_TEXTF(rn)  ( OP(rn)==EXACTFU || OP(rn)==EXACTFU_SS || OP(rn)==EXACTFU_TRICKYFOLD || OP(rn)==EXACTFA || OP(rn)==EXACTF || OP(rn)==REFF  || OP(rn)==NREFF )
+#define IS_TEXTF(rn)  ( OP(rn)==EXACTFU || OP(rn)==EXACTFU_SS || OP(rn)==EXACTFA || OP(rn)==EXACTF || OP(rn)==REFF  || OP(rn)==NREFF )
 #define IS_TEXTFL(rn) ( OP(rn)==EXACTFL || OP(rn)==REFFL || OP(rn)==NREFFL )
 
 #else
 /* ... so we use this as its faster. */
 #define IS_TEXT(rn)   ( OP(rn)==EXACT   )
-#define IS_TEXTFU(rn)  ( OP(rn)==EXACTFU || OP(rn)==EXACTFU_SS || OP(rn)==EXACTFU_TRICKYFOLD || OP(rn) == EXACTFA)
+#define IS_TEXTFU(rn)  ( OP(rn)==EXACTFU || OP(rn)==EXACTFU_SS || OP(rn) == EXACTFA)
 #define IS_TEXTF(rn)  ( OP(rn)==EXACTF  )
 #define IS_TEXTFL(rn) ( OP(rn)==EXACTFL )
 
@@ -1521,7 +1521,6 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         }
         goto do_exactf_utf8;
 
-    case EXACTFU_TRICKYFOLD:
     case EXACTFU:
         if (is_utf8_pat || utf8_target) {
             utf8_fold_flags = is_utf8_pat ? FOLDEQ_S2_ALREADY_FOLDED : 0;
@@ -3536,7 +3535,6 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
                     /* /u rules for all these.  This happens to work for
                      * EXACTFA as nothing in Latin1 folds to ASCII */
                 case EXACTFA:
-                case EXACTFU_TRICKYFOLD:
                 case EXACTFU_SS:
                 case EXACTFU:
                     c2 = PL_fold_latin1[c1];
@@ -4217,7 +4215,6 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    goto do_exactf;
 
 	case EXACTFU_SS:         /*  /\x{df}/iu   */
-	case EXACTFU_TRICKYFOLD: /*  /\x{390}/iu  */
 	case EXACTFU:            /*  /abc/iu      */
 	    folder = foldEQ_latin1;
 	    fold_array = PL_fold_latin1;
@@ -6908,7 +6905,6 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
 	    goto do_exactf;
 
     case EXACTFU_SS:
-    case EXACTFU_TRICKYFOLD:
     case EXACTFU:
 	utf8_flags = reginfo->is_utf8_pat ? FOLDEQ_S2_ALREADY_FOLDED : 0;
 

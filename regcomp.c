@@ -1607,7 +1607,6 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
         case EXACT: break;
 	case EXACTFA:
         case EXACTFU_SS:
-        case EXACTFU_TRICKYFOLD:
 	case EXACTFU: folder = PL_fold_latin1; break;
 	case EXACTF:  folder = PL_fold; break;
 	case EXACTFL: folder = PL_fold_locale; break;
@@ -1810,18 +1809,6 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
         } else if (maxbytes > trie->maxlen) {
             trie->maxlen = maxbytes;
         }
-        if (OP( noper ) == EXACTFU_SS) {
-            /* XXX: workaround - 'ss' could match "\x{DF}" so minlen could be 1 and not 2*/
-	    if (trie->minlen > 1)
-                trie->minlen= 1;
-        }
-	if (OP( noper ) == EXACTFU_TRICKYFOLD) {
-	    /* XXX: workround - things like "\x{1FBE}\x{0308}\x{0301}" can match "\x{0390}" 
-	     *		      - We assume that any such sequence might match a 2 byte string */
-            if (trie->minlen > 2 )
-                trie->minlen= 2;
-        }
-
     } /* end first pass */
     DEBUG_TRIE_COMPILE_r(
         PerlIO_printf( Perl_debug_log, "%*sTRIE(%s): W:%d C:%d Uq:%d Min:%d Max:%d\n",
@@ -2715,8 +2702,8 @@ S_make_trie_failtable(pTHX_ RExC_state_t *pRExC_state, regnode *source,  regnode
  * that is "sss".
  *
  * It turns out that there are problems with all multi-character folds, and not
- * just these three.  Now the code is general, for all such cases, but the
- * three still have some special handling.  The approach taken is:
+ * just these three.  Now the code is general, for all such cases.  The
+ * approach taken is:
  * 1)   This routine examines each EXACTFish node that could contain multi-
  *      character fold sequences.  It returns in *min_subtract how much to
  *      subtract from the the actual length of the string to get a real minimum
@@ -2724,10 +2711,7 @@ S_make_trie_failtable(pTHX_ RExC_state_t *pRExC_state, regnode *source,  regnode
  *      used by the caller to adjust the min length of the match, and the delta
  *      between min and max, so that the optimizer doesn't reject these
  *      possibilities based on size constraints.
- * 2)   Certain of these sequences require special handling by the trie code,
- *      so, if found, this code changes the joined node type to special ops:
- *      EXACTFU_TRICKYFOLD and EXACTFU_SS.
- * 3)   For the sequence involving the Sharp s (\xDF), the node type EXACTFU_SS
+ * 2)   For the sequence involving the Sharp s (\xDF), the node type EXACTFU_SS
  *      is used for an EXACTFU node that contains at least one "ss" sequence in
  *      it.  For non-UTF-8 patterns and strings, this is the only case where
  *      there is a possible fold length change.  That means that a regular
@@ -2905,31 +2889,6 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan, UV *min_subtract, b
                     count = 2;
                     OP(scan) = EXACTFU_SS;
                     s += 2;
-                }
-                else if (len == 6   /* len is the same in both ASCII and EBCDIC
-                                       for these */
-                         && (memEQ(s, GREEK_SMALL_LETTER_IOTA_UTF8
-                                      COMBINING_DIAERESIS_UTF8
-                                      COMBINING_ACUTE_ACCENT_UTF8,
-                                   6)
-                             || memEQ(s, GREEK_SMALL_LETTER_UPSILON_UTF8
-                                         COMBINING_DIAERESIS_UTF8
-                                         COMBINING_ACUTE_ACCENT_UTF8,
-                                     6)))
-                {
-                    count = 3;
-
-                    /* These two folds require special handling by trie's, so
-                     * change the node type to indicate this.  If EXACTFA and
-                     * EXACTFL were ever to be handled by trie's, this would
-                     * have to be changed.  If this node has already been
-                     * changed to EXACTFU_SS in this loop, leave it as is.  (I
-                     * (khw) think it doesn't matter in regexec.c for UTF
-                     * patterns, but no need to change it */
-                    if (OP(scan) == EXACTFU) {
-                        OP(scan) = EXACTFU_TRICKYFOLD;
-                    }
-                    s += 6;
                 }
                 else { /* Here is a generic multi-char fold. */
                     const U8* multi_end  = s + len;
@@ -3394,14 +3353,13 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                                 EXACT           | EXACT
                                 EXACTFU         | EXACTFU
                                 EXACTFU_SS      | EXACTFU
-                                EXACTFU_TRICKYFOLD | EXACTFU
                                 EXACTFA         | 0
 
 
                         */
 #define TRIE_TYPE(X) ( ( NOTHING == (X) ) ? NOTHING :   \
                        ( EXACT == (X) )   ? EXACT :        \
-                       ( EXACTFU == (X) || EXACTFU_SS == (X) || EXACTFU_TRICKYFOLD == (X) ) ? EXACTFU :        \
+                       ( EXACTFU == (X) || EXACTFU_SS == (X) ) ? EXACTFU :        \
                        0 )
 
                         /* dont use tail as the end marker for this traverse */
@@ -14480,7 +14438,6 @@ S_regtail_study(pTHX_ RExC_state_t *pRExC_state, regnode *p, const regnode *val,
                 case EXACTFA:
                 case EXACTFU:
                 case EXACTFU_SS:
-                case EXACTFU_TRICKYFOLD:
                 case EXACTFL:
                         if( exact == PSEUDO )
                             exact= OP(scan);
