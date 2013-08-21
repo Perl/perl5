@@ -78,16 +78,12 @@ as an updated module in the L</Modules and Pragmata> section.
 
 =head1 Performance Enhancements
 
-XXX Changes which enhance performance without changing behaviour go here.
-There may well be none in a stable release.
-
-[ List each enhancement as a =item entry ]
-
 =over 4
 
 =item *
 
-XXX
+The trie performance enhancement for regular expressions has now been
+extended to those compiled under C</iaa>.
 
 =back
 

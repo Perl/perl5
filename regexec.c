@@ -207,13 +207,13 @@ static const char* const non_utf8_target_but_utf8_required
 /* Currently these are only used when PL_regkind[OP(rn)] == EXACT so
    we don't need this definition. */
 #define IS_TEXT(rn)   ( OP(rn)==EXACT   || OP(rn)==REF   || OP(rn)==NREF   )
-#define IS_TEXTF(rn)  ( OP(rn)==EXACTFU || OP(rn)==EXACTFU_SS || OP(rn)==EXACTFA || OP(rn)==EXACTF || OP(rn)==REFF  || OP(rn)==NREFF )
+#define IS_TEXTF(rn)  ( OP(rn)==EXACTFU || OP(rn)==EXACTFU_SS || OP(rn)==EXACTFA || OP(rn)==EXACTFA_NO_TRIE || OP(rn)==EXACTF || OP(rn)==REFF  || OP(rn)==NREFF )
 #define IS_TEXTFL(rn) ( OP(rn)==EXACTFL || OP(rn)==REFFL || OP(rn)==NREFFL )
 
 #else
 /* ... so we use this as its faster. */
 #define IS_TEXT(rn)   ( OP(rn)==EXACT   )
-#define IS_TEXTFU(rn)  ( OP(rn)==EXACTFU || OP(rn)==EXACTFU_SS || OP(rn) == EXACTFA)
+#define IS_TEXTFU(rn)  ( OP(rn)==EXACTFU || OP(rn)==EXACTFU_SS || OP(rn) == EXACTFA || OP(rn) == EXACTFA_NO_TRIE)
 #define IS_TEXTF(rn)  ( OP(rn)==EXACTF  )
 #define IS_TEXTFL(rn) ( OP(rn)==EXACTFL )
 
@@ -1227,15 +1227,22 @@ Perl_re_intuit_start(pTHX_
 }
 
 #define DECL_TRIE_TYPE(scan) \
-    const enum { trie_plain, trie_utf8, trie_utf8_fold, trie_latin_utf8_fold } \
+    const enum { trie_plain, trie_utf8, trie_utf8_fold, trie_latin_utf8_fold, \
+                 trie_utf8_exactfa_fold, trie_latin_utf8_exactfa_fold } \
                     trie_type = ((scan->flags == EXACT) \
                               ? (utf8_target ? trie_utf8 : trie_plain) \
-                              : (utf8_target ? trie_utf8_fold : trie_latin_utf8_fold))
+                              : (scan->flags == EXACTFA) \
+                                ? (utf8_target ? trie_utf8_exactfa_fold : trie_latin_utf8_exactfa_fold) \
+                                : (utf8_target ? trie_utf8_fold : trie_latin_utf8_fold))
 
 #define REXEC_TRIE_READ_CHAR(trie_type, trie, widecharmap, uc, uscan, len, uvc, charid, foldlen, foldbuf, uniflags) \
 STMT_START {                               \
     STRLEN skiplen;                                                                 \
+    U8 flags = FOLD_FLAGS_FULL; \
     switch (trie_type) {                                                            \
+    case trie_utf8_exactfa_fold:                                                            \
+        flags |= FOLD_FLAGS_NOMIX_ASCII; \
+        /* FALL THROUGH */ \
     case trie_utf8_fold:                                                            \
         if ( foldlen>0 ) {                                                          \
             uvc = utf8n_to_uvchr( (const U8*) uscan, UTF8_MAXLEN, &len, uniflags ); \
@@ -1243,13 +1250,16 @@ STMT_START {                               \
             uscan += len;                                                           \
             len=0;                                                                  \
         } else {                                                                    \
-            uvc = to_utf8_fold( (const U8*) uc, foldbuf, &foldlen );                \
+            uvc = _to_utf8_fold_flags( (const U8*) uc, foldbuf, &foldlen, flags, NULL);                \
             len = UTF8SKIP(uc);                                                     \
             skiplen = UNISKIP( uvc );                                               \
             foldlen -= skiplen;                                                     \
             uscan = foldbuf + skiplen;                                              \
         }                                                                           \
         break;                                                                      \
+    case trie_latin_utf8_exactfa_fold: \
+        flags |= FOLD_FLAGS_NOMIX_ASCII; \
+        /* FALL THROUGH */ \
     case trie_latin_utf8_fold:                                                      \
         if ( foldlen>0 ) {                                                          \
             uvc = utf8n_to_uvchr( (const U8*) uscan, UTF8_MAXLEN, &len, uniflags ); \
@@ -1258,7 +1268,7 @@ STMT_START {                               \
             len=0;                                                                  \
         } else {                                                                    \
             len = 1;                                                                \
-            uvc = _to_fold_latin1( (U8) *uc, foldbuf, &foldlen, FOLD_FLAGS_FULL);   \
+            uvc = _to_fold_latin1( (U8) *uc, foldbuf, &foldlen, flags);   \
             skiplen = UNISKIP( uvc );                                               \
             foldlen -= skiplen;                                                     \
             uscan = foldbuf + skiplen;                                              \
@@ -1487,6 +1497,9 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         );
         break;
 
+    case EXACTFA_NO_TRIE:   /* This node only generated for non-utf8 patterns */
+        assert(! is_utf8_pat);
+	/* FALL THROUGH */
     case EXACTFA:
         if (is_utf8_pat || utf8_target) {
             utf8_fold_flags = FOLDEQ_UTF8_NOMIX_ASCII;
@@ -3485,7 +3498,8 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
                      * which is the one above 255 */
                     if ((c1 < 256) != (c2 < 256)) {
                         if (OP(text_node) == EXACTFL
-                            || (OP(text_node) == EXACTFA
+                            || ((OP(text_node) == EXACTFA
+                                 || OP(text_node) == EXACTFA_NO_TRIE)
                                 && (isASCII(c1) || isASCII(c2))))
                         {
                             if (c1 < 256) {
@@ -3503,7 +3517,9 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
              if (utf8_target
                  && HAS_NONLATIN1_FOLD_CLOSURE(c1)
                  && OP(text_node) != EXACTFL
-                 && (OP(text_node) != EXACTFA || ! isASCII(c1)))
+                 && ((OP(text_node) != EXACTFA
+                      && OP(text_node) != EXACTFA_NO_TRIE)
+                     || ! isASCII(c1)))
         {
             /* Here, there could be something above Latin1 in the target which
              * folds to this character in the pattern.  All such cases except
@@ -3534,6 +3550,10 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
                     /* FALLTHROUGH */
                     /* /u rules for all these.  This happens to work for
                      * EXACTFA as nothing in Latin1 folds to ASCII */
+                case EXACTFA_NO_TRIE:   /* This node only generated for
+                                           non-utf8 patterns */
+                    assert(! is_utf8_pat);
+                    /* FALL THROUGH */
                 case EXACTFA:
                 case EXACTFU_SS:
                 case EXACTFU:
@@ -4221,6 +4241,10 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    fold_utf8_flags = is_utf8_pat ? FOLDEQ_S1_ALREADY_FOLDED : 0;
 	    goto do_exactf;
 
+        case EXACTFA_NO_TRIE:   /* This node only generated for non-utf8
+                                   patterns */
+            assert(! is_utf8_pat);
+            /* FALL THROUGH */
 	case EXACTFA:            /*  /abc/iaa     */
 	    folder = foldEQ_latin1;
 	    fold_array = PL_fold_latin1;
@@ -6890,8 +6914,11 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
 	}
 	break;
 
+    case EXACTFA_NO_TRIE:   /* This node only generated for non-utf8 patterns */
+        assert(! reginfo->is_utf8_pat);
+        /* FALL THROUGH */
     case EXACTFA:
-	utf8_flags = FOLDEQ_UTF8_NOMIX_ASCII;
+        utf8_flags = FOLDEQ_UTF8_NOMIX_ASCII;
 	goto do_exactf;
 
     case EXACTFL:
@@ -6901,8 +6928,8 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
 
     case EXACTF:   /* This node only generated for non-utf8 patterns */
         assert(! reginfo->is_utf8_pat);
-	    utf8_flags = 0;
-	    goto do_exactf;
+        utf8_flags = 0;
+        goto do_exactf;
 
     case EXACTFU_SS:
     case EXACTFU:

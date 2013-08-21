@@ -636,6 +636,9 @@ will be lost.
  EXACTFU_SS       str        Match this string (folded iff in UTF-8,
                              length in folding may change even if not in
                              UTF-8) using /iu rules (w/len).
+ EXACTFA_NO_TRIE  str        Match this string (which is not trie-able;
+                             not guaranteed to be folded) using /iaa
+                             rules (w/len).
 
  # Do nothing types
 
