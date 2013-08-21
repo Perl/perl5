@@ -85,7 +85,7 @@ package DynaLoader;
 # Tim.Bunce@ig.co.uk, August 1994
 
 BEGIN {
-    $VERSION = '1.19';
+    $VERSION = '1.20';
 }
 
 use Config;
@@ -779,9 +779,10 @@ Syntax:
 
 Dynamically unload $libref, which must be an opaque 'library reference' as
 returned from dl_load_file.  Returns one on success and zero on failure.
-
 This function is optional and may not necessarily be provided on all platforms.
-If it is defined, it is called automatically when the interpreter exits for
+
+If it is defined and perl is compiled with the C macro C<DL_UNLOAD_ALL_AT_EXIT>
+defined, then it is called automatically when the interpreter exits for
 every shared object or library loaded by DynaLoader::bootstrap.  All such
 library references are stored in @dl_librefs by DynaLoader::Bootstrap as it
 loads the libraries.  The files are unloaded in last-in, first-out order.
