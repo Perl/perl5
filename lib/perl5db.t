@@ -2694,7 +2694,7 @@ SKIP:
     $^O eq "linux"
         or skip "man errors aren't especially portable", 1;
     local $ENV{LANG} = "C";
-    local $ENV{LC_MESSAGE} = "C";
+    local $ENV{LC_MESSAGES} = "C";
     local $ENV{LC_ALL} = "C";
     my $wrapper = DebugWrap->new(
         {
