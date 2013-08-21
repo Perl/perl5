@@ -217,13 +217,13 @@ Most of these are built within the directories F<utils> and F<x2p>.
 entries for each change
 Use L<XXX> with program names to get proper documentation linking. ]
 
-=head3 L<XXX>
+=head3 L<find2perl>
 
 =over 4
 
 =item *
 
-XXX
+L<find2perl> now handler C<?> wildcards correctly. [perl #113054]
 
 =back
 
