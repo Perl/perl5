@@ -3,6 +3,27 @@ package Carp;
 { use 5.006; }
 use strict;
 use warnings;
+BEGIN {
+    # Very old versions of warnings.pm load Carp.  This can go wrong due
+    # to the circular dependency.  If warnings is invoked before Carp,
+    # then warnings starts by loading Carp, then Carp (above) tries to
+    # invoke warnings, and gets nothing because warnings is in the process
+    # of loading and hasn't defined its import method yet.  If we were
+    # only turning on warnings ("use warnings" above) this wouldn't be too
+    # bad, because Carp would just gets the state of the -w switch and so
+    # might not get some warnings that it wanted.  The real problem is
+    # that we then want to turn off Unicode warnings, but "no warnings
+    # 'utf8'" won't be effective if we're in this circular-dependency
+    # situation.  So, if warnings.pm is an affected version, we turn
+    # off all warnings ourselves by directly setting ${^WARNING_BITS}.
+    # On unaffected versions, we turn off just Unicode warnings, via
+    # the proper API.
+    if(!defined($warnings::VERSION) || eval($warnings::VERSION) < 1.06) {
+	${^WARNING_BITS} = "";
+    } else {
+	"warnings"->unimport("utf8");
+    }
+}
 
 BEGIN {
     no strict "refs";
@@ -24,7 +45,7 @@ BEGIN {
     }
 }
 
-our $VERSION = '1.31';
+our $VERSION = '1.32';
 
 our $MaxEvalLen = 0;
 our $Verbose    = 0;
