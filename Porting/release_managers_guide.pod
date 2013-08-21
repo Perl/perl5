@@ -569,15 +569,13 @@ Otherwise, run:
 This will chug for a while, possibly reporting various warnings about
 badly-indexed CPAN modules unrelated to the modules actually in core.
 Assuming all goes well, it will update
-F<dist/Module-CoreList/lib/Module/CoreList.pm>.
+F<dist/Module-CoreList/lib/Module/CoreList.pm> and possibly
+F<dist/Module-CoreList/lib/Module/CoreList.pod>.
 
-Check that file over carefully:
+Check those files over carefully:
 
     $ git diff dist/Module-CoreList/lib/Module/CoreList.pm
-
-Also check for changes to other files, in particular
-F<dist/Module-CoreList/lib/Module/CoreList.pod> and possibly
-F<dist/Module-CoreList/lib/Module/CoreList/Utils.pm> as well.
+    $ git diff dist/Module-CoreList/lib/Module/CoreList.pod
 
 =head4 Bump C<$Module::CoreList::VERSION>
 
@@ -1305,15 +1303,79 @@ Thanks for releasing perl!
 Add, to your quote to F<Porting/epigraphs.pod>, a link to the release
 announcement in the web-visible mailing list archive.  Commit it.
 
-=head3 Update Module::CoreList
+=for checklist skip BLEAD-FINAL, MAINT, RC
 
-XXX -- experimental in response to [perl #118195]
+=head3 update Module::CoreList
 
 I<After a BLEAD-POINT release only>
 
 After Module::CoreList has shipped to CPAN by the maintainer, update
 Module::CoreList in the source so that it reflects the new blead
-version number.
+version number:
+
+=over 4
+
+=item *
+
+Update F<Porting/Maintainers.pl> to list the new DISTRIBUTION on CPAN,
+which should be identical to what is currently in blead.
+
+=item *
+
+Bump the $VERSION in F<dist/Module-CoreList/lib/Module/CoreList.pm>,
+F<dist/Module-CoreList/lib/Module/CoreList/TieHashDelta.pm> and
+F<dist/Module-CoreList/lib/Module/CoreList/Utils.pm>.
+
+=item *
+
+If you have a local CPAN mirror, run:
+
+    $ ./perl -Ilib Porting/corelist.pl ~/my-cpan-mirror
+
+Otherwise, run:
+
+    $ ./perl -Ilib Porting/corelist.pl cpan
+
+This will update F<dist/Module-CoreList/lib/Module/CoreList.pm> and
+F<dist/Module-CoreList/lib/Module/CoreList.pod> as it did before, but
+this time adding new sections for the next BLEAD-POINT release.
+
+=item *
+
+Manually edit F<dist/Module-CoreList/lib/Module/CoreList/Utils.pm> to
+add a similar entry for that up-coming version to C<%delta>.
+
+XXX Porting/corelist.pl should have done that itself.
+
+=item *
+
+Add the new $Module::CoreList::VERSION to
+F<dist/Module-CoreList/Changes>.
+
+=item *
+
+Update F<pod/perldelta.pod> to mention the upgrade to Module::CoreList.
+
+=item *
+
+Remake perl to get your changed .pm files propagated into F<lib/> and
+then run at least the F<dist/Module-CoreList/t/*.t> tests and the
+test_porting makefile target to check that they're ok.
+
+=item *
+
+Run
+
+    $ ./perl -Ilib -MModule::CoreList -le 'print Module::CoreList->find_version($]) ? "ok" : "not ok"'
+
+and check that it outputs "ok" to prove that Module::CoreList now knows
+about blead's current version.
+
+=item *
+
+Commit and push your changes.
+
+=back
 
 =head3 check tarball availability
 
