@@ -1,7 +1,9 @@
 # set -x
 
 # Install the perl and its libraries anywhere:
-userelocatableinc='define'
+case "$userelocatableinc" in
+'') userelocatableinc='define' ;;
+esac
 
 # The Android linker has some unusual behavior: No matter what
 # path is passed in to dlopen(), it'll only use the path's
