@@ -11,7 +11,7 @@ package Module::Metadata;
 
 use strict;
 use vars qw($VERSION);
-$VERSION = '1.000014';
+$VERSION = '1.000016';
 $VERSION = eval $VERSION;
 
 use Carp qw/croak/;
@@ -345,7 +345,7 @@ sub new_from_module {
     }
 
     # Normalize versions.  Can't use exists() here because of bug in YAML::Node.
-    # XXX "bug in YAML::Node" comment seems irrelvant -- dagolden, 2009-05-18
+    # XXX "bug in YAML::Node" comment seems irrelevant -- dagolden, 2009-05-18
     for (grep defined $_->{version}, values %prime) {
       $_->{version} = $normalize_version->( $_->{version} );
     }
@@ -800,8 +800,10 @@ Module::Metadata - Gather package and POD information from perl module files
 
 =head1 DESCRIPTION
 
-This module provides a standard way to gather metadata about a .pm file
-without executing unsafe code.
+This module provides a standard way to gather metadata about a .pm file through
+(mostly) static analysis and (some) code execution.  When determining the
+version of a module, the C<$VERSION> assignment is C<eval>ed, as is traditional
+in the CPAN toolchain.
 
 =head1 USAGE
 

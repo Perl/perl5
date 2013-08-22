@@ -130,6 +130,13 @@ L<Module::CoreList> has been upgraded from version 2.97 to 2.98.
 
 The list of Perl versions covered has been updated.
 
+=item *
+
+L<Module::Metadata> has been upgraded from version 1.000014 to 1.000016.
+
+The module's DESCRIPTION has been re-worded regarding safety/security to
+satisfy CVE-2013-1437.
+
 =back
 
 =head2 Removed Modules and Pragmata
