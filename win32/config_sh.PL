@@ -93,8 +93,8 @@ else {
 
 if (exists $opt{cc}) {
     # cl version detection borrowed from Test::Smoke's configsmoke.pl
-    if ($opt{cc} eq 'cl') {
-        my $output = `cl --version 2>&1`;
+    if ($opt{cc} =~ /\bcl/) { #MSVC can come as clarm.exe
+        my $output = `$opt{cc} --version 2>&1`;
         $opt{ccversion} = $output =~ /^.*Version\s+([\d.]+)/ ? $1 : '?';
     }
     elsif ($opt{cc} =~ /\bgcc\b/) {
@@ -115,7 +115,7 @@ $opt{libpth} = mungepath($opt{libpth}) if exists $opt{libpth};
 $opt{incpath} = mungepath($opt{incpath}) if exists $opt{incpath};
 
 my($int64, $int64f);
-if ($opt{cc} eq 'cl') {
+if ($opt{cc} =~ /\bcl/) {
     $int64  = '__int64';
     $int64f = 'I64';
 }
@@ -195,7 +195,7 @@ else {
 # change the s{GM|LOCAL}TIME_{min|max} for VS2005 (aka VC 8) and
 # VS2008 (aka VC 9) or higher (presuming that later versions will have
 # at least the range of that).
-if ($opt{cc} eq 'cl' and $opt{ccversion} =~ /^(\d+)/) {
+if ($opt{cc} =~ /\bcl/ and $opt{ccversion} =~ /^(\d+)/) {
     my $ccversion = $1;
     if ($ccversion >= 14) {
 	$opt{sGMTIME_max} = 32535291599;

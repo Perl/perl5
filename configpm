@@ -1118,6 +1118,13 @@ sub import {
     # 'configpm; was invoked with --cross option
     $platform = '***replace-marker***';
   }
+  #a Perl debugger can load a bunch of modules before -MCross with PERL5DB env
+  #var, stopping a cross compile Config.pm from being loaded because the native
+  #Config.pm was already use'd
+  if(exists $INC{'Config.pm'}) {
+    warn "Cross.pm found Config.pm is already loaded, reload required, will delete from %INC";
+    delete $INC{'Config.pm'};
+  }
   @INC = map {/\blib\b/?(do{local $_=$_;s/\blib\b/xlib\/$platform/;$_},$_):($_)} @INC;
   $::Cross::platform = $platform;
 }
