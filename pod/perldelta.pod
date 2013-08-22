@@ -137,6 +137,12 @@ L<Module::Metadata> has been upgraded from version 1.000014 to 1.000016.
 The module's DESCRIPTION has been re-worded regarding safety/security to
 satisfy CVE-2013-1437.
 
+=item *
+
+L<Perl::OSType> has been upgraded from 1.003 to 1.004.
+
+The Unix OSType 'bitrig' has been added.
+
 =back
 
 =head2 Removed Modules and Pragmata

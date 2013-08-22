@@ -2,7 +2,7 @@ use strict;
 use warnings;
 package Perl::OSType;
 # ABSTRACT: Map Perl operating system names to generic types
-our $VERSION = '1.003'; # VERSION
+our $VERSION = '1.004'; # VERSION
 
 require Exporter;
 our @ISA = qw(Exporter);
@@ -18,6 +18,7 @@ my %OSTYPES = qw(
   aix         Unix
   bsdos       Unix
   beos        Unix
+  bitrig      Unix
   dgux        Unix
   dragonfly   Unix
   dynixptx    Unix
@@ -86,13 +87,15 @@ __END__
 
 =pod
 
+=encoding utf-8
+
 =head1 NAME
 
 Perl::OSType - Map Perl operating system names to generic types
 
 =head1 VERSION
 
-version 1.003
+version 1.004
 
 =head1 SYNOPSIS
 
@@ -176,6 +179,10 @@ David Golden <dagolden@cpan.org>
 =item *
 
 Jonas B. Nielsen <jonasbn@hoarfrost.local>
+
+=item *
+
+Owain G. Ainsworth <oga@nicotinebsd.org>
 
 =item *
 
