@@ -121,8 +121,10 @@ XXX
 
 L<Carp> has been upgraded from version 1.31 to 1.32.
 
-Carp now avoids some unwanted Unicode warnings on older Perls; doesn't
-affect behaviour with current Perl.
+Carp now won't vivify the C<overload::StrVal> glob or subroutine or the
+C<overload> stash.
+It also avoids some unwanted Unicode warnings on older Perls (which
+doesn't affect behaviour with current Perl).
 
 =item *
 

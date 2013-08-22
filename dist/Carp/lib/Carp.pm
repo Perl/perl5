@@ -236,7 +236,11 @@ sub format_arg {
         }
         else
         {
-            $arg = defined(&overload::StrVal) ? overload::StrVal($arg) : "$arg";
+	    no strict "refs";
+	    $arg = exists($::{"overload::"}) &&
+		    exists(*{$::{"overload::"}}{HASH}->{"StrVal"}) &&
+		    defined(*{*{$::{"overload::"}}{HASH}->{"StrVal"}}{CODE}) ?
+		&{"overload::StrVal"}($arg) : "$arg";
         }
     }
     if ( defined($arg) ) {
