@@ -86,7 +86,7 @@ sub do_test {
 	    $pattern =~ s/\$RV/
 		($] < 5.011) ? 'RV' : 'IV';
 	    /mge;
-	    $pattern =~ s/^\h+COW_REFCNT = \d+\h*\n//mg
+	    $pattern =~ s/^\h+COW_REFCNT = .*\n//mg
 		if $Config{ccflags} =~
 			/-DPERL_(?:OLD_COPY_ON_WRITE|NO_COW)/;
 
