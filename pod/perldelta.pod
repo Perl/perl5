@@ -121,10 +121,13 @@ XXX
 
 L<Carp> has been upgraded from version 1.31 to 1.32.
 
-Carp now won't vivify the C<overload::StrVal> glob or subroutine or the
+C<Carp> now won't vivify the C<overload::StrVal> glob or subroutine or the
 C<overload> stash.
 It also avoids some unwanted Unicode warnings on older Perls (which
 doesn't affect behaviour with current Perl).
+C<Carp::Heavy> detects version mismatch with C<Carp>, to give a good
+error message if a current (stub) C<Carp::Heavy> gets loaded by an old
+C<Carp> that expects C<Carp::Heavy> to provide subroutines.
 
 =item *
 
