@@ -2232,9 +2232,9 @@ PP(pp_subst)
 		    d += clen;
 		}
 		s = RX_OFFS(rx)[0].end + orig;
-	    } while (CALLREGEXEC(rx, s, strend, orig, s == m,
+	    } while (CALLREGEXEC(rx, s, strend, orig,
+				 s == m, /* don't match same null twice */
 				 TARG, NULL,
-				 /* don't match same null twice */
                      REXEC_NOT_FIRST|REXEC_IGNOREPOS|REXEC_FAIL_ON_UNDERFLOW));
 	    if (s != d) {
                 I32 i = strend - s;
