@@ -8,7 +8,7 @@ BEGIN {
     chdir 't';
 }
 
-print "1..158\n";
+print "1..160\n";
 
 sub failed {
     my ($got, $expected, $name) = @_;
@@ -505,6 +505,11 @@ sub check ($$$) {
 }
 
 my $this_file = qr/parser\.t(?:\.[bl]eb?)?$/;
+#line 3
+1 unless
+1;
+check($this_file, 5, "[perl #118931]");
+
 #line 3
 check($this_file, 3, "bare line");
 

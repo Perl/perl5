@@ -753,9 +753,9 @@ Perl_lex_start(pTHX_ SV *line, PerlIO *rsfp, U32 flags)
 	parser->linestr = flags & LEX_START_COPIED
 			    ? SvREFCNT_inc_simple_NN(line)
 			    : newSVpvn_flags(s, len, SvUTF8(line));
-	sv_catpvs(parser->linestr, "\n;");
+	sv_catpvn(parser->linestr, "\n;", rsfp ? 1 : 2);
     } else {
-	parser->linestr = newSVpvs("\n;");
+	parser->linestr = newSVpvn("\n;", rsfp ? 1 : 2);
     }
     parser->oldoldbufptr =
 	parser->oldbufptr =
@@ -1869,13 +1869,11 @@ STATIC char *
 S_skipspace2(pTHX_ char *s, SV **svp)
 {
     char *start;
-    const I32 bufptroff = PL_bufptr - SvPVX(PL_linestr);
     const I32 startoff = s - SvPVX(PL_linestr);
 
     PERL_ARGS_ASSERT_SKIPSPACE2;
 
     s = skipspace(s);
-    PL_bufptr = SvPVX(PL_linestr) + bufptroff;
     if (!PL_madskills || !svp)
 	return s;
     start = SvPVX(PL_linestr) + startoff;
@@ -5600,7 +5598,11 @@ Perl_yylex(pTHX)
 		    while (d < PL_bufend && *d != '\n')
 			d++;
 		    if (d < PL_bufend)
+		    {
 			d++;
+			if (d < PL_bufend)
+			    incline(s);
+		    }
 		    else if (d > PL_bufend) /* Found by Ilya: feed random input to Perl. */
 		      Perl_croak(aTHX_ "panic: input overflow");
 		    if (PL_madskills && CopLINE(PL_curcop) >= 1) {
@@ -5621,7 +5623,12 @@ Perl_yylex(pTHX)
 	    while (s < PL_bufend && *s != '\n')
 		s++;
 	    if (s < PL_bufend)
+	    {
 		s++;
+		if (s < PL_bufend)
+		    incline(s);
+	    }
+		
 	    else if (s > PL_bufend) /* Found by Ilya: feed random input to Perl. */
 	      Perl_croak(aTHX_ "panic: input overflow");
 #endif
