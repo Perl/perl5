@@ -276,7 +276,16 @@ L</Platform Support> section, instead.
 
 =item *
 
-XXX
+The F<Makefile.PL> for C<SDBM_File> now generates a better F<Makefile>,
+which avoids a race condition during parallel makes, which could cause the
+build to fail. This is the last known parallel make problem (on *nix
+platforms), and therefore we believe that a parallel make should now always
+be error free.
+
+=for comment
+
+Strictly only for a build where build files such as F<Makefile.SH> have not
+been updated by C<git> in an already configured and built tree.
 
 =back
 
