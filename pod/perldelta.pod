@@ -300,9 +300,9 @@ source tree.
 
 =over 4
 
-=item XXX-some-platform
+=item Bitrig
 
-XXX
+Compile support has been added for Bitrig, a fork of OpenBSD
 
 =back
 
