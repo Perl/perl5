@@ -2159,7 +2159,6 @@ PP(pp_subst)
 	&& !is_cow
 #endif
         && (I32)clen <= RX_MINLENRET(rx)
-        && (once || !(r_flags & REXEC_COPY_STR))
         && !(RX_EXTFLAGS(rx) & RXf_NO_INPLACE_SUBST)
 	&& (!doutf8 || SvUTF8(TARG))
 	&& !(rpm->op_pmflags & PMf_NONDESTRUCT))
