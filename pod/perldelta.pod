@@ -131,6 +131,15 @@ C<Carp> that expects C<Carp::Heavy> to provide subroutines.
 
 =item *
 
+L<Math::BigInt> has been upgraded from version 1.9992 to 1.9993.
+
+Cleaned up the L<Math::BigInt> and L<Math::BigFloat> documentation to
+be more consistent with other perl documentation. [perl #86686]
+
+Added a bint() method for rounding towards zero. [perl #85296]
+
+=item *
+
 L<Module::CoreList> has been upgraded from version 2.97 to 2.98.
 
 The list of Perl versions covered has been updated.
