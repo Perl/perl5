@@ -4160,12 +4160,12 @@ differences:
 
 =item accuracy()
 
-      $x->accuracy(5);             # local for $x
-      CLASS->accuracy(5);          # global for all members of CLASS
-                                   # Note: This also applies to new()!
+      $x->accuracy(5);           # local for $x
+      CLASS->accuracy(5);        # global for all members of CLASS
+                                 # Note: This also applies to new()!
 
-      $A = $x->accuracy();         # read out accuracy that affects $x
-      $A = CLASS->accuracy();      # read out global accuracy
+      $A = $x->accuracy();       # read out accuracy that affects $x
+      $A = CLASS->accuracy();    # read out global accuracy
 
 Set or get the global or local accuracy, aka how many significant digits the
 results have. If you set a global accuracy, then this also applies to new()!
@@ -4187,15 +4187,15 @@ to the math operation as additional parameter:
 
       $x->precision(-2);      # local for $x, round at the second
                               # digit right of the dot
-      $x->precision(2);       # ditto, round at the second digit left
-                              # of the dot
+      $x->precision(2);       # ditto, round at the second digit
+                              # left of the dot
 
       CLASS->precision(5);    # Global for all members of CLASS
                               # This also applies to new()!
       CLASS->precision(-5);   # ditto
 
-      $P = CLASS->precision();    # read out global precision
-      $P = $x->precision();       # read out precision that affects $x
+      $P = CLASS->precision();  # read out global precision
+      $P = $x->precision();     # read out precision that affects $x
 
 Note: You probably want to use L</accuracy()> instead. With L</accuracy()> you
 set the number of digits each result should have, with L</precision()> you
@@ -4405,7 +4405,8 @@ It prints both quotient and remainder since print works in list context. Also,
 bdiv() will modify $c, so be careful. You probably want to use
 
     print $c / 123.456,"\n";
-    print scalar $c->bdiv(123.456),"\n";  # or if you want to modify $c
+    # or if you want to modify $c:
+    print scalar $c->bdiv(123.456),"\n";
 
 instead.
 
@@ -4469,14 +4470,14 @@ Replacing L</precision()> with L</accuracy()> is probably not what you want, eit
 
     use Math::BigFloat;
 
-    Math::BigFloat->accuracy(4);	    # enables global rounding:
-    my $x = Math::BigFloat->new(123456);    # rounded immediately
-                                            #   to "12350"
-    print "$x\n";			    # print "123500"
-    my $y = Math::BigFloat->new(3);	    # rounded to "3
-    print "$y\n";			    # print "3"
-    print $z = $x->copy()->bdiv($y),"\n";   # 41170
-    print $z->accuracy(),"\n";		    # 4
+    Math::BigFloat->accuracy(4);	  # enables global rounding:
+    my $x = Math::BigFloat->new(123456);  # rounded immediately
+                                          #   to "12350"
+    print "$x\n";			  # print "123500"
+    my $y = Math::BigFloat->new(3);	  # rounded to "3
+    print "$y\n";			  # print "3"
+    print $z = $x->copy()->bdiv($y),"\n"; # 41170
+    print $z->accuracy(),"\n";		  # 4
 
 What you want to use instead is:
 
