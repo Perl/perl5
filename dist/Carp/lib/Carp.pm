@@ -25,20 +25,29 @@ BEGIN {
     }
 }
 
+sub _fetch_sub { # fetch sub without autovivifying
+    my($pack, $sub) = @_;
+    $pack .= '::';
+    # only works with top-level packages
+    return unless exists($::{$pack});
+    for ($::{$pack}) {
+	return unless ref \$_ eq 'GLOB' && *$_{HASH} && exists $$_{$sub};
+	for ($$_{$sub}) {
+	    return ref \$_ eq 'GLOB' ? *$_{CODE} : undef
+	}
+    }
+}
+
 BEGIN {
-    no strict "refs";
-    if(exists($::{"utf8::"}) && exists(*{$::{"utf8::"}}{HASH}->{"is_utf8"}) &&
-	    defined(*{*{$::{"utf8::"}}{HASH}->{"is_utf8"}}{CODE})) {
-	*is_utf8 = \&{"utf8::is_utf8"};
+    if(defined(my $sub = _fetch_sub utf8 => 'is_utf8')) {
+	*is_utf8 = $sub;
     } else {
 	*is_utf8 = sub { 0 };
     }
 }
 
 BEGIN {
-    no strict "refs";
-    if(exists($::{"utf8::"}) && exists(*{$::{"utf8::"}}{HASH}->{"downgrade"}) &&
-	    defined(*{*{$::{"utf8::"}}{HASH}->{"downgrade"}}{CODE})) {
+    if(defined(my $sub = _fetch_sub utf8 => 'downgrade')) {
 	*downgrade = \&{"utf8::downgrade"};
     } else {
 	*downgrade = sub {};
@@ -167,10 +176,7 @@ sub caller_info {
             my $where = eval {
                 my $func    = $cgc or return '';
                 my $gv      =
-                    *{
-                        ( $::{"B::"} || return '')       # B stash
-                          ->{svref_2object} || return '' # entry in stash
-                     }{CODE}                             # coderef in entry
+                    (_fetch_sub B => 'svref_2object' or return '')
                         ->($func)->GV;
                 my $package = $gv->STASH->NAME;
                 my $subname = $gv->NAME;
@@ -236,11 +242,8 @@ sub format_arg {
         }
         else
         {
-	    no strict "refs";
-	    $arg = exists($::{"overload::"}) &&
-		    exists(*{$::{"overload::"}}{HASH}->{"StrVal"}) &&
-		    defined(*{*{$::{"overload::"}}{HASH}->{"StrVal"}}{CODE}) ?
-		&{"overload::StrVal"}($arg) : "$arg";
+	    my $sub = _fetch_sub(overload => 'StrVal');
+	    $arg = $sub ? &$sub($arg) : "$arg";
         }
     }
     if ( defined($arg) ) {
