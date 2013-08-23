@@ -3,7 +3,7 @@ no warnings "once";
 use Config;
 
 use IPC::Open3 1.0103 qw(open3);
-use Test::More tests => 63;
+use Test::More tests => 62;
 
 sub runperl {
     my(%args) = @_;
@@ -416,25 +416,6 @@ SKIP:
       ),
       qr/aaaaa/,
       'Carp can handle UTF8-flagged strings after a syntax error',
-    );
-}
-
-SKIP:
-{
-    skip "IPC::Open3::open3 needs porting", 1 if $Is_VMS;
-    skip("B:: always created when static", 1)
-      if $Config{static_ext} =~ /\bB\b/;
-    is(
-      runperl(
-	prog => q<
-	  use Carp;
-	  $SIG{__WARN__} = sub{};
-	  carp (qq(A duck, but which duck?));
-	  print q(ok) unless exists $::{q(B::)};
-	>,
-      ),
-      'ok',
-      'Carp does not autovivify *B::',
     );
 }
 
