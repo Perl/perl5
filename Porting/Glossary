@@ -3027,11 +3027,6 @@ i_dirent (i_dirent.U):
 	This variable conditionally defines I_DIRENT, which indicates
 	to the C program that it should include <dirent.h>.
 
-i_dld (i_dld.U):
-	This variable conditionally defines the I_DLD symbol, which
-	indicates to the C program that <dld.h> (GNU dynamic loading)
-	exists and should be included.
-
 i_dlfcn (i_dlfcn.U):
 	This variable conditionally defines the I_DLFCN symbol, which
 	indicates to the C program that <dlfcn.h> exists and should

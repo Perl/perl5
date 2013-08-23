@@ -122,7 +122,7 @@ $!: full support for void wanted by default            !sfn
 $!defvoidused=15                                       !sfn
 $!: List of libraries we want.                         !sfn
 $!libswanted='net socket inet nsl nm ndbm gdbm dbm db malloc dl' !sfn
-$!libswanted="$libswanted dld ld sun m c cposix posix ndir dir crypt" !sfn
+$!libswanted="$libswanted ld sun m c cposix posix ndir dir crypt" !sfn
 $!libswanted="$libswanted ucb bsd BSD PW x"            !sfn
 $!: We probably want to search /usr/shlib before most other libraries. !sfn
 $!: This is only used by the lib/ExtUtils/MakeMaker.pm routine extliblist. !sfn
@@ -6461,7 +6461,6 @@ $ WC "i_crypt='undef'"
 $ WC "i_db='undef'"
 $ WC "i_dbm='undef'"
 $ WC "i_dirent='undef'"	! we roll our own
-$ WC "i_dld='undef'"
 $ WC "i_dlfcn='undef'"
 $ WC "i_fcntl='" + i_fcntl + "'"
 $ WC "i_float='define'"

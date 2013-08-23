@@ -887,7 +887,6 @@ i_rpcsvcdbm=''
 d_dirnamlen=''
 direntrytype=''
 i_dirent=''
-i_dld=''
 i_dlfcn=''
 i_fcntl=''
 i_float=''
@@ -1381,7 +1380,7 @@ libswanted_uselargefiles=''
 : set usesocks on the Configure command line to enable socks.
 : List of libraries we want.
 : If anyone needs extra -lxxx, put those in a hint file.
-libswanted="sfio socket bind inet nsl nm ndbm gdbm dbm db malloc dl dld ld sun"
+libswanted="sfio socket bind inet nsl nm ndbm gdbm dbm db malloc dl ld sun"
 libswanted="$libswanted m crypt sec util c cposix posix ucb bsd BSD"
 : We probably want to search /usr/shlib before most other libraries.
 : This is only used by the lib/ExtUtils/MakeMaker.pm routine extliblist.
@@ -7810,10 +7809,6 @@ esac
 esac
 $rm -f libnames libpath
 
-: see if dld is available
-set dld.h i_dld
-eval $inhdr
-
 : Check if we are using C++
 echo " "
 echo "Checking for C++..." >&4
@@ -7948,9 +7943,6 @@ $undef|n|false)
 	case "$d_dlopen" in
 	    $define) dflt='y' ;;
 	esac
-	case "$i_dld" in
-	    $define) dflt='y' ;;
-	esac
 	: Does a dl_xxx.xs file exist for this operating system
 	$test -f $rsrc/$dldir/dl_${osname}.xs && dflt='y'
 	;;
@@ -7967,8 +7959,6 @@ y*) usedl="$define"
 			dflt="$dldir/dl_${osname}.xs"
 		elif $test "$d_dlopen" = "$define" ; then
 			dflt="$dldir/dl_dlopen.xs"
-		elif $test "$i_dld" = "$define" ; then
-			dflt="$dldir/dl_dld.xs"
 		else
 			dflt=''
 		fi
@@ -23540,7 +23530,6 @@ i_crypt='$i_crypt'
 i_db='$i_db'
 i_dbm='$i_dbm'
 i_dirent='$i_dirent'
-i_dld='$i_dld'
 i_dlfcn='$i_dlfcn'
 i_fcntl='$i_fcntl'
 i_float='$i_float'

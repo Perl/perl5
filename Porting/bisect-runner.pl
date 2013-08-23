@@ -1259,7 +1259,7 @@ unless (extract_from_file('Configure', 'ignore_versioned_solibs')) {
     my @libs;
     # This is the current libswanted list from Configure, less the libs removed
     # by current hints/linux.sh
-    foreach my $lib (qw(sfio socket inet nsl nm ndbm gdbm dbm db malloc dl dld
+    foreach my $lib (qw(sfio socket inet nsl nm ndbm gdbm dbm db malloc dl
 			ld sun m crypt sec util c cposix posix ucb BSD)) {
 	foreach my $dir (@paths) {
             # Note the wonderful consistency of dot-or-not in the config vars:
