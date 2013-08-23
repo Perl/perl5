@@ -5593,17 +5593,19 @@ Perl_yylex(pTHX)
 		s = SKIPSPACE0(s);
 	    }
 	    else {
-		    d = s;
-		    while (d < PL_bufend && *d != '\n')
-			d++;
-		    if (d < PL_bufend)
+#endif
+		    if (PL_madskills) d = s;
+		    while (s < PL_bufend && *s != '\n')
+			s++;
+		    if (s < PL_bufend)
 		    {
-			d++;
-			if (d < PL_bufend)
-			    incline(d);
+			s++;
+			if (s < PL_bufend)
+			    incline(s);
 		    }
-		    else if (d > PL_bufend) /* Found by Ilya: feed random input to Perl. */
+		    else if (s > PL_bufend) /* Found by Ilya: feed random input to Perl. */
 		      Perl_croak(aTHX_ "panic: input overflow");
+#ifdef PERL_MAD
 		    if (PL_madskills && CopLINE(PL_curcop) >= 1) {
 			if (!PL_thiswhite)
 			    PL_thiswhite = newSVpvs("");
@@ -5611,22 +5613,9 @@ Perl_yylex(pTHX)
 			    sv_setpvs(PL_thiswhite, "");
 			    PL_faketokens = 0;
 			}
-			sv_catpvn(PL_thiswhite, s, d - s);
+			sv_catpvn(PL_thiswhite, d, s - d);
 		    }
-		    s = d;
 	    }
-#else
-	    while (s < PL_bufend && *s != '\n')
-		s++;
-	    if (s < PL_bufend)
-	    {
-		s++;
-		if (s < PL_bufend)
-		    incline(s);
-	    }
-		
-	    else if (s > PL_bufend) /* Found by Ilya: feed random input to Perl. */
-	      Perl_croak(aTHX_ "panic: input overflow");
 #endif
 	}
 	goto retry;
