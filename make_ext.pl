@@ -45,6 +45,7 @@ my $ext_dirs_re = '(?:' . join('|', @ext_dirs) . ')';
 # If any extensions are listed with a '+' char then only those
 # extensions will be built, but only if they aren't countermanded
 # by an '!ext' and are appropriate to the type of building being done.
+# An extensions follows the format of Foo/Bar, which would be extension Foo::Bar
 
 # It may be deleted in a later release of perl so try to
 # avoid using it for other purposes.

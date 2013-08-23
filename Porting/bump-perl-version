@@ -197,6 +197,13 @@ my @maps =  (
         qr/uconfig/,
     ],
 
+    # win32/Makefile.ce
+    [
+        qr/(PV\s*=\s*)(\d\d{2})\b$/,
+        sub { $2, "$1$newx$newy" },
+        "$oldx$oldy",
+        qr/Makefile\.ce/,
+    ],
 );
 
 
