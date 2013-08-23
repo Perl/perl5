@@ -1,4 +1,4 @@
-# This file is the data file for porting/podcheck.t.
+# This file is the data file for t/porting/podcheck.t.
 # There are three types of lines.
 # Comment lines are white-space only or begin with a '#', like this one.  Any
 #   changes you make to the comment lines will be lost when the file is
@@ -192,7 +192,7 @@ YAML::Syck
 YAML::Tiny
 dist/data-dumper/dumper.pm	? Should you be using L<...> instead of	1
 dist/extutils-parsexs/lib/perlxstut.pod	Verbatim line length including indents exceeds 79 by	9
-dist/math-bigint/lib/math/bigint.pm	Verbatim line length including indents exceeds 79 by	77
+dist/math-bigint/lib/math/bigint.pm	Verbatim line length including indents exceeds 79 by	71
 dist/math-bigrat/lib/math/bigrat.pm	Verbatim line length including indents exceeds 79 by	7
 dist/module-corelist/lib/module/corelist.pod	Verbatim line length including indents exceeds 79 by	4
 dist/module-corelist/lib/module/corelist/utils.pm	Verbatim line length including indents exceeds 79 by	2
