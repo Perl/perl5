@@ -5601,7 +5601,7 @@ Perl_yylex(pTHX)
 		    {
 			d++;
 			if (d < PL_bufend)
-			    incline(s);
+			    incline(d);
 		    }
 		    else if (d > PL_bufend) /* Found by Ilya: feed random input to Perl. */
 		      Perl_croak(aTHX_ "panic: input overflow");

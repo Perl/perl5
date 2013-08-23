@@ -8,7 +8,7 @@ BEGIN {
     chdir 't';
 }
 
-print "1..160\n";
+print "1..162\n";
 
 sub failed {
     my ($got, $expected, $name) = @_;
@@ -586,6 +586,11 @@ check('parser\.t', 535, 'after here-doc in quotes');
 ${check('parser\.t', 537, 'first line of interp in here-doc');;
   check('parser\.t', 538, 'second line of interp in here-doc');}
 EOW
+
+time
+#line 42
+;check('parser\.t', 42, 'line number after "nullary\n#line"');
+
 
 __END__
 # Don't add new tests HERE. See note above
