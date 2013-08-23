@@ -112,87 +112,87 @@ eval { do {
 ok !$warning, q/'...::CARP_NOT used only once' warning from Carp/;
 
 # Test the location of error messages.
-like( A::short(), qr/^Error at C/, "Short messages skip carped package" );
+like( XA::short(), qr/^Error at XC/, "Short messages skip carped package" );
 
 {
-    local @C::ISA = "D";
-    like( A::short(), qr/^Error at B/, "Short messages skip inheritance" );
+    local @XC::ISA = "XD";
+    like( XA::short(), qr/^Error at XB/, "Short messages skip inheritance" );
 }
 
 {
-    local @D::ISA = "C";
-    like( A::short(), qr/^Error at B/, "Short messages skip inheritance" );
+    local @XD::ISA = "XC";
+    like( XA::short(), qr/^Error at XB/, "Short messages skip inheritance" );
 }
 
 {
-    local @D::ISA = "B";
-    local @B::ISA = "C";
-    like( A::short(), qr/^Error at A/, "Inheritance is transitive" );
+    local @XD::ISA = "XB";
+    local @XB::ISA = "XC";
+    like( XA::short(), qr/^Error at XA/, "Inheritance is transitive" );
 }
 
 {
-    local @B::ISA = "D";
-    local @C::ISA = "B";
-    like( A::short(), qr/^Error at A/, "Inheritance is transitive" );
+    local @XB::ISA = "XD";
+    local @XC::ISA = "XB";
+    like( XA::short(), qr/^Error at XA/, "Inheritance is transitive" );
 }
 
 {
-    local @C::CARP_NOT = "D";
-    like( A::short(), qr/^Error at B/, "Short messages see \@CARP_NOT" );
+    local @XC::CARP_NOT = "XD";
+    like( XA::short(), qr/^Error at XB/, "Short messages see \@CARP_NOT" );
 }
 
 {
-    local @D::CARP_NOT = "C";
-    like( A::short(), qr/^Error at B/, "Short messages see \@CARP_NOT" );
+    local @XD::CARP_NOT = "XC";
+    like( XA::short(), qr/^Error at XB/, "Short messages see \@CARP_NOT" );
 }
 
 {
-    local @D::CARP_NOT = "B";
-    local @B::CARP_NOT = "C";
-    like( A::short(), qr/^Error at A/, "\@CARP_NOT is transitive" );
+    local @XD::CARP_NOT = "XB";
+    local @XB::CARP_NOT = "XC";
+    like( XA::short(), qr/^Error at XA/, "\@CARP_NOT is transitive" );
 }
 
 {
-    local @B::CARP_NOT = "D";
-    local @C::CARP_NOT = "B";
-    like( A::short(), qr/^Error at A/, "\@CARP_NOT is transitive" );
+    local @XB::CARP_NOT = "XD";
+    local @XC::CARP_NOT = "XB";
+    like( XA::short(), qr/^Error at XA/, "\@CARP_NOT is transitive" );
 }
 
 {
-    local @D::ISA      = "C";
-    local @D::CARP_NOT = "B";
-    like( A::short(), qr/^Error at C/, "\@CARP_NOT overrides inheritance" );
+    local @XD::ISA      = "XC";
+    local @XD::CARP_NOT = "XB";
+    like( XA::short(), qr/^Error at XC/, "\@CARP_NOT overrides inheritance" );
 }
 
 {
-    local @D::ISA      = "B";
-    local @D::CARP_NOT = "C";
-    like( A::short(), qr/^Error at B/, "\@CARP_NOT overrides inheritance" );
+    local @XD::ISA      = "XB";
+    local @XD::CARP_NOT = "XC";
+    like( XA::short(), qr/^Error at XB/, "\@CARP_NOT overrides inheritance" );
 }
 
 # %Carp::Internal
 {
-    local $Carp::Internal{C} = 1;
-    like( A::short(), qr/^Error at B/, "Short doesn't report Internal" );
+    local $Carp::Internal{XC} = 1;
+    like( XA::short(), qr/^Error at XB/, "Short doesn't report Internal" );
 }
 
 {
-    local $Carp::Internal{D} = 1;
-    like( A::long(), qr/^Error at C/, "Long doesn't report Internal" );
+    local $Carp::Internal{XD} = 1;
+    like( XA::long(), qr/^Error at XC/, "Long doesn't report Internal" );
 }
 
 # %Carp::CarpInternal
 {
-    local $Carp::CarpInternal{D} = 1;
+    local $Carp::CarpInternal{XD} = 1;
     like(
-        A::short(), qr/^Error at B/,
+        XA::short(), qr/^Error at XB/,
         "Short doesn't report calls to CarpInternal"
     );
 }
 
 {
-    local $Carp::CarpInternal{D} = 1;
-    like( A::long(), qr/^Error at C/, "Long doesn't report CarpInternal" );
+    local $Carp::CarpInternal{XD} = 1;
+    like( XA::long(), qr/^Error at XC/, "Long doesn't report CarpInternal" );
 }
 
 # tests for global variables
@@ -355,10 +355,10 @@ for my $bodge_job ( 2, 1, 0 ) { SKIP: {
     like( $accum, qr/main::fakecaller/,
         "test CORE::GLOBAL::caller override in eval" );
     $accum = '';
-    my $got = A::long(42);
+    my $got = XA::long(42);
     like( $accum, qr/main::fakecaller/,
         "test CORE::GLOBAL::caller override in Carp" );
-    my $package = 'A';
+    my $package = 'XA';
     my $where = $bodge_job == 1 ? ' in &main::__ANON__' : '';
     my $warning
         = $bodge_job
@@ -374,8 +374,8 @@ for my $bodge_job ( 2, 1, 0 ) { SKIP: {
     }
     my $arg = $bodge_job ? $warning : 42;
     like(
-        $got, qr!A::long\($arg\) called at.+\b(?i:carp\.t) line \d+!,
-        'Correct arguments for A'
+        $got, qr!XA::long\($arg\) called at.+\b(?i:carp\.t) line \d+!,
+        'Correct arguments for XA'
     );
 } }
 
@@ -391,12 +391,12 @@ SKIP: {
 	}
     };
 
-    my $got = A::long(42);
+    my $got = XA::long(42);
 
     like(
 	$got,
-	qr!A::long\(\Q** Incomplete caller override detected; \E\@DB::args\Q were not set **\E\) called at.+\b(?i:carp\.t) line \d+!,
-	'Correct arguments for A'
+	qr!XA::long\(\Q** Incomplete caller override detected; \E\@DB::args\Q were not set **\E\) called at.+\b(?i:carp\.t) line \d+!,
+	'Correct arguments for XA'
     );
 }
 
@@ -420,7 +420,7 @@ SKIP:
 }
 
 # [perl #96672]
-<D::DATA> for 1..2;
+<XD::DATA> for 1..2;
 eval { croak 'heek' };
 $@ =~ s/\n.*//; # just check first line
 is $@, "heek at ".__FILE__." line ".(__LINE__-2).", <DATA> line 2.\n",
@@ -464,41 +464,41 @@ SKIP:
 
 # New tests go here
 
-# line 1 "A"
-package A;
+# line 1 "XA"
+package XA;
 
 sub short {
-    B::short();
+    XB::short();
 }
 
 sub long {
-    B::long();
+    XB::long();
 }
 
-# line 1 "B"
-package B;
+# line 1 "XB"
+package XB;
 
 sub short {
-    C::short();
+    XC::short();
 }
 
 sub long {
-    C::long();
+    XC::long();
 }
 
-# line 1 "C"
-package C;
+# line 1 "XC"
+package XC;
 
 sub short {
-    D::short();
+    XD::short();
 }
 
 sub long {
-    D::long();
+    XD::long();
 }
 
-# line 1 "D"
-package D;
+# line 1 "XD"
+package XD;
 
 sub short {
     eval { Carp::croak("Error") };
