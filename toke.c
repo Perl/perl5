@@ -5593,7 +5593,6 @@ Perl_yylex(pTHX)
 		s = SKIPSPACE0(s);
 	    }
 	    else {
-/*		if (PL_madskills && PL_lex_formbrack) { */
 		    d = s;
 		    while (d < PL_bufend && *d != '\n')
 			d++;
@@ -5615,9 +5614,6 @@ Perl_yylex(pTHX)
 			sv_catpvn(PL_thiswhite, s, d - s);
 		    }
 		    s = d;
-/*		}
-		*s = '\0';
-		PL_bufend = s; */
 	    }
 #else
 	    while (s < PL_bufend && *s != '\n')
