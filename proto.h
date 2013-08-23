@@ -5797,15 +5797,13 @@ PERL_CALLCONV SV*	Perl_hfree_next_entry(pTHX_ HV *hv, STRLEN *indexp)
 	assert(hv); assert(indexp)
 
 #endif
-#if defined(PERL_IN_LOCALE_C)
-#  if defined(USE_LOCALE_NUMERIC) || defined(USE_LOCALE_COLLATE)
+#if defined(PERL_IN_LOCALE_C) && defined(USE_LOCALE)
 STATIC bool	S_is_cur_LC_category_utf8(pTHX_ int category);
 STATIC char*	S_stdize_locale(pTHX_ char* locs)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_STDIZE_LOCALE	\
 	assert(locs)
 
-#  endif
 #endif
 #if defined(PERL_IN_MALLOC_C)
 STATIC int	S_adjust_size_and_find_bucket(size_t *nbytes_p)

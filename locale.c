@@ -34,6 +34,8 @@
 
 #include "reentr.h"
 
+#ifdef USE_LOCALE
+
 /*
  * Standardize the locale name from a string returned by 'setlocale'.
  *
@@ -75,6 +77,8 @@ S_stdize_locale(pTHX_ char *locs)
 
     return locs;
 }
+
+#endif
 
 void
 Perl_set_numeric_radix(pTHX)
@@ -507,9 +511,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 
     }
 
-#endif /* USE_LOCALE */
-
-#ifdef USE_PERLIO
+#if defined(USE_PERLIO) && defined(USE_LOCALE_CTYPE)
     {
       /* Set PL_utf8locale to TRUE if using PerlIO _and_
          the current LC_CTYPE locale is UTF-8.
@@ -539,6 +541,9 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 #ifdef USE_LOCALE_NUMERIC
     Safefree(curnum);
 #endif /* USE_LOCALE_NUMERIC */
+
+#endif /* USE_LOCALE */
+
     return ok;
 }
 
@@ -605,6 +610,8 @@ Perl_mem_collxfrm(pTHX_ const char *s, STRLEN len, STRLEN *xlen)
 
 #endif /* USE_LOCALE_COLLATE */
 
+#ifdef USE_LOCALE
+
 STATIC bool
 S_is_cur_LC_category_utf8(pTHX_ int category)
 {
@@ -616,7 +623,9 @@ S_is_cur_LC_category_utf8(pTHX_ int category)
     char *save_input_locale = NULL;
     STRLEN final_pos;
 
+#ifdef LC_ALL
     assert(category != LC_ALL);
+#endif
 
     /* First dispose of the trivial cases */
     save_input_locale = stdize_locale(setlocale(category, NULL));
@@ -887,7 +896,7 @@ S_is_cur_LC_category_utf8(pTHX_ int category)
     return FALSE;
 }
 
-
+#endif
 
 /*
  * Local variables:
