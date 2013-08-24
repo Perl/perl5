@@ -1081,6 +1081,21 @@ foreach $Locale (@Locale) {
     # The rules for the relationships are given in:
     # http://www.opengroup.org/onlinepubs/009695399/basedefs/xbd_chap07.html
 
+
+    ++$locales_test_number;
+    undef @f;
+    $test_names{$locales_test_number} = 'Verify that [:lower:] contains at least a-z';
+    for ('a' .. 'z') {
+        if ($is_utf8_locale) {
+            use locale ':not_characters';
+            push @f, $_  unless /[[:lower:]]/;
+        }
+        else {
+            push @f, $_  unless /[[:lower:]]/;
+        }
+    }
+    report_multi_result($Locale, $locales_test_number, \@f);
+
     ++$locales_test_number;
     undef @f;
     $test_names{$locales_test_number} = 'Verify that [:lower:] is a subset of [:alpha:]';
@@ -1091,6 +1106,20 @@ foreach $Locale (@Locale) {
         }
         else {
             push @f, $_  if /[[:lower:]]/ and ! /[[:alpha:]]/;
+        }
+    }
+    report_multi_result($Locale, $locales_test_number, \@f);
+
+    ++$locales_test_number;
+    undef @f;
+    $test_names{$locales_test_number} = 'Verify that [:upper:] contains at least A-Z';
+    for ('A' .. 'Z') {
+        if ($is_utf8_locale) {
+            use locale ':not_characters';
+            push @f, $_  unless /[[:upper:]]/;
+        }
+        else {
+            push @f, $_  unless /[[:upper:]]/;
         }
     }
     report_multi_result($Locale, $locales_test_number, \@f);
@@ -1139,6 +1168,20 @@ foreach $Locale (@Locale) {
 
     ++$locales_test_number;
     undef @f;
+    $test_names{$locales_test_number} = 'Verify that [:digit:] contains at least 0-9';
+    for ('0' .. '9') {
+        if ($is_utf8_locale) {
+            use locale ':not_characters';
+            push @f, $_  unless /[[:digit:]]/;
+        }
+        else {
+            push @f, $_  unless /[[:digit:]]/;
+        }
+    }
+    report_multi_result($Locale, $locales_test_number, \@f);
+
+    ++$locales_test_number;
+    undef @f;
     $test_names{$locales_test_number} = 'Verify that [:digit:] is a subset of [:alnum:]';
     for (map { chr } 0..255) {
         if ($is_utf8_locale) {
@@ -1158,35 +1201,81 @@ foreach $Locale (@Locale) {
 
     ++$locales_test_number;
     undef @f;
-    $test_names{$locales_test_number} = 'Verify that [:digit:] (if is 10 code points) is a subset of [:xdigit:]';
-    if (@{$posixes{'digit'}} == 10) {
+    $test_names{$locales_test_number} = 'Verify that if there is a second set of digits in [:digit:], they are consecutive';
+    if (@{$posixes{'digit'}} == 20) {
+        my $previous_ord;
         for (map { chr } 0..255) {
-            if ($is_utf8_locale) {
-                use locale ':not_characters';
-                push @f, $_ if /[[:digit:]]/  and ! /[[:xdigit:]]/;
+            next unless /[[:digit:]]/;
+            next if /[0-9]/;
+            if (defined $previous_ord) {
+                if ($is_utf8_locale) {
+                    use locale ':not_characters';
+                    push @f, $_ if ord $_ != $previous_ord + 1;
+                }
+                else {
+                    push @f, $_ if ord $_ != $previous_ord + 1;
+                }
             }
-            else {
-                push @f, $_ if /[[:digit:]]/  and ! /[[:xdigit:]]/;
-            }
+            $previous_ord = ord $_;
         }
     }
     report_multi_result($Locale, $locales_test_number, \@f);
 
     ++$locales_test_number;
     undef @f;
-    $test_names{$locales_test_number} = 'Verify that [:alnum:] is a subset of [:graph:]';
+    $test_names{$locales_test_number} = 'Verify that [:digit:] is a subset of [:xdigit:]';
     for (map { chr } 0..255) {
         if ($is_utf8_locale) {
             use locale ':not_characters';
-            push @f, $_ if /[[:alnum:]]/  and ! /[[:graph:]]/;
+            push @f, $_ if /[[:digit:]]/  and ! /[[:xdigit:]]/;
         }
         else {
-            push @f, $_ if /[[:alnum:]]/  and ! /[[:graph:]]/;
+            push @f, $_ if /[[:digit:]]/  and ! /[[:xdigit:]]/;
         }
     }
     report_multi_result($Locale, $locales_test_number, \@f);
 
-    # Note that xdigit doesn't have to be a subset of alnum
+    ++$locales_test_number;
+    undef @f;
+    $test_names{$locales_test_number} = 'Verify that [:xdigit:] contains at least A-F, a-f';
+    for ('A' .. 'F', 'a' .. 'f') {
+        if ($is_utf8_locale) {
+            use locale ':not_characters';
+            push @f, $_  unless /[[:xdigit:]]/;
+        }
+        else {
+            push @f, $_  unless /[[:xdigit:]]/;
+        }
+    }
+    report_multi_result($Locale, $locales_test_number, \@f);
+
+    ++$locales_test_number;
+    undef @f;
+    $test_names{$locales_test_number} = 'Verify that any additional members of [:xdigit:], are in groups of 6 consecutive code points';
+    my $previous_ord;
+    my $count = 0;
+    for (map { chr } 0..255) {
+        next unless /[[:xdigit:]]/;
+        next if /[[:digit:]]/;
+        next if /[A-Fa-f]/;
+        if (defined $previous_ord) {
+            if ($is_utf8_locale) {
+                use locale ':not_characters';
+                push @f, $_ if ord $_ != $previous_ord + 1;
+            }
+            else {
+                push @f, $_ if ord $_ != $previous_ord + 1;
+            }
+        }
+        $count++;
+        if ($count == 6) {
+            undef $previous_ord;
+        }
+        else {
+            $previous_ord = ord $_;
+        }
+    }
+    report_multi_result($Locale, $locales_test_number, \@f);
 
     ++$locales_test_number;
     undef @f;
@@ -1202,6 +1291,8 @@ foreach $Locale (@Locale) {
     }
     report_multi_result($Locale, $locales_test_number, \@f);
 
+    # Note that xdigit doesn't have to be a subset of alnum
+
     ++$locales_test_number;
     undef @f;
     $test_names{$locales_test_number} = 'Verify that [:punct:] is a subset of [:graph:]';
@@ -1212,6 +1303,46 @@ foreach $Locale (@Locale) {
         }
         else {
             push @f, $_ if /[[:punct:]]/  and ! /[[:graph:]]/;
+        }
+    }
+    report_multi_result($Locale, $locales_test_number, \@f);
+
+    ++$locales_test_number;
+    undef @f;
+    $test_names{$locales_test_number} = 'Verify that the space character is not in [:graph:]';
+    if ($is_utf8_locale) {
+        use locale ':not_characters';
+        push @f, " " if " " =~ /[[:graph:]]/;
+    }
+    else {
+        push @f, " " if " " =~ /[[:graph:]]/;
+    }
+    report_multi_result($Locale, $locales_test_number, \@f);
+
+    ++$locales_test_number;
+    undef @f;
+    $test_names{$locales_test_number} = 'Verify that [:space:] contains at least [\f\n\r\t\cK ]';
+    for (' ', "\f", "\n", "\r", "\t", "\cK") {
+        if ($is_utf8_locale) {
+            use locale ':not_characters';
+            push @f, $_  unless /[[:space:]]/;
+        }
+        else {
+            push @f, $_  unless /[[:space:]]/;
+        }
+    }
+    report_multi_result($Locale, $locales_test_number, \@f);
+
+    ++$locales_test_number;
+    undef @f;
+    $test_names{$locales_test_number} = 'Verify that [:blank:] contains at least [\t ]';
+    for (' ', "\t") {
+        if ($is_utf8_locale) {
+            use locale ':not_characters';
+            push @f, $_  unless /[[:blank:]]/;
+        }
+        else {
+            push @f, $_  unless /[[:blank:]]/;
         }
     }
     report_multi_result($Locale, $locales_test_number, \@f);
@@ -1246,6 +1377,18 @@ foreach $Locale (@Locale) {
 
     ++$locales_test_number;
     undef @f;
+    $test_names{$locales_test_number} = 'Verify that the space character is in [:print:]';
+    if ($is_utf8_locale) {
+        use locale ':not_characters';
+        push @f, " " if " " !~ /[[:print:]]/;
+    }
+    else {
+        push @f, " " if " " !~ /[[:print:]]/;
+    }
+    report_multi_result($Locale, $locales_test_number, \@f);
+
+    ++$locales_test_number;
+    undef @f;
     $test_names{$locales_test_number} = 'Verify that isn\'t both [:cntrl:] and [:print:]';
     for (map { chr } 0..255) {
         if ($is_utf8_locale) {
@@ -1254,6 +1397,20 @@ foreach $Locale (@Locale) {
         }
         else {
             push @f, $_ if (/[[:print:]]/ and /[[:cntrl:]]/);
+        }
+    }
+    report_multi_result($Locale, $locales_test_number, \@f);
+
+    ++$locales_test_number;
+    undef @f;
+    $test_names{$locales_test_number} = 'Verify that isn\'t both [:alpha:] and [:digit:]';
+    for (map { chr } 0..255) {
+        if ($is_utf8_locale) {
+            use locale ':not_characters';
+            push @f, $_ if /[[:alpha:]]/ and /[[:digit:]]/;
+        }
+        else {
+            push @f, $_ if /[[:alpha:]]/ and /[[:digit:]]/;
         }
     }
     report_multi_result($Locale, $locales_test_number, \@f);
