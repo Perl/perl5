@@ -1574,12 +1574,17 @@ foreach $Locale (@Locale) {
     my $ok14;
     my $ok15;
     my $ok16;
+    my $ok17;
+    my $ok18;
 
     my $c;
     my $d;
     my $e;
     my $f;
     my $g;
+    my $h;
+    my $i;
+    my $j;
 
     if (! $is_utf8_locale) {
         use locale;
@@ -1623,6 +1628,9 @@ foreach $Locale (@Locale) {
 
             $f = "1.23";
             $g = 2.34;
+            $h = 1.5;
+            $i = 1.25;
+            $j = "$h:$i";
 
             $ok9 = $f == 1.23;
             $ok10 = $f == $x;
@@ -1631,6 +1639,11 @@ foreach $Locale (@Locale) {
             $ok13 = $w == 0;
             $ok14 = $ok15 = $ok16 = 1;  # Skip for non-utf8 locales
         }
+        {
+            no locale;
+            $ok17 = "1.5:1.25" eq sprintf("%g:%g", $h, $i);
+        }
+        $ok18 = $j eq sprintf("%g:%g", $h, $i);
     }
     else {
         use locale ':not_characters';
@@ -1667,6 +1680,9 @@ foreach $Locale (@Locale) {
 
             $f = "1.23";
             $g = 2.34;
+            $h = 1.5;
+            $i = 1.25;
+            $j = "$h:$i";
 
             $ok9 = $f == 1.23;
             $ok10 = $f == $x;
@@ -1709,6 +1725,11 @@ foreach $Locale (@Locale) {
             $ok15 = $utf8_string_g eq $string_g;
             $ok16 = $utf8_sprintf_g eq $string_g;
         }
+        {
+            no locale;
+            $ok17 = "1.5:1.25" eq sprintf("%g:%g", $h, $i);
+        }
+        $ok18 = $j eq sprintf("%g:%g", $h, $i);
     }
 
     report_result($Locale, ++$locales_test_number, $ok1);
@@ -1769,6 +1790,12 @@ foreach $Locale (@Locale) {
 
     report_result($Locale, ++$locales_test_number, $ok16);
     $test_names{$locales_test_number} = 'Verify that a sprintf of a number with a UTF-8 radix yields UTF-8';
+
+    report_result($Locale, ++$locales_test_number, $ok17);
+    $test_names{$locales_test_number} = 'Verify that a sprintf of a number outside locale scope uses a dot radix';
+
+    report_result($Locale, ++$locales_test_number, $ok18);
+    $test_names{$locales_test_number} = 'Verify that a sprintf of a number back within locale scope uses locale radix';
 
     debug "# $first_f_test..$locales_test_number: \$f = $f, \$g = $g, back to locale = $Locale\n";
 

@@ -37,13 +37,23 @@ L</Selected Bug Fixes> section.
 
 =head1 Incompatible Changes
 
-XXX For a release on a stable branch, this section aspires to be:
+=head2 Locale decimal point character no longer leaks outside of S<C<use locale>> scope
+(with the exception of C<$!>)
 
-    There are no changes intentionally incompatible with 5.XXX.XXX
-    If any exist, they are bugs, and we request that you submit a
-    report.  See L</Reporting Bugs> below.
+This is actually a bug fix, but some code has come to rely on the bug
+being present, so this change is listed here.  The current locale that
+the program is running under is not supposed to be visible to Perl code
+except within the scope of a S<C<use locale>>.  However, until now under
+certain circumstances, the character used for a decimal point (often a
+comma) leaked outside the scope.
 
-[ List each incompatible change as a =head2 entry ]
+This continues the work released in Perl v5.19.1.  It turns out that
+that did not catch all the leaks, including C<printf> and C<sprintf> not
+respecting S<C<use locale>>.  If your code is affected by this change,
+simply add a S<C<use locale>>.
+
+Now, the only known place where C<'use locale'> is not respected is in
+the stringification of L<$!|perlvar/$!>.
 
 =head1 Deprecations
 
