@@ -376,6 +376,9 @@ my $dl_ext  = $Config{'dlext'};   $dl_ext  =~ tr/.//d;
 my %excluded_files = (
                         canonicalize("lib/unicore/mktables") => 1,
                         canonicalize("Porting/make-rmg-checklist") => 1,
+                        # this one is a POD, but unfinished, so skip
+                        # it for now
+                        canonicalize("Porting/perl5200delta.pod") => 1,
                         canonicalize("Porting/perldelta_template.pod") => 1,
                         canonicalize("regen/feature.pl") => 1,
                         canonicalize("autodoc.pl") => 1,
