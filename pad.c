@@ -2073,6 +2073,10 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside, bool newcv)
 	SV* const namesv = (ix <= fname) ? pname[ix] : NULL;
 	SV *sv = NULL;
 	if (namesv && PadnameLEN(namesv)) { /* lexical */
+	  if (PadnameIsOUR(namesv)) { /* or maybe not so lexical */
+		NOOP;
+	  }
+	  else {
 	    if (SvFAKE(namesv)) {   /* lexical from outside? */
 		/* formats may have an inactive, or even undefined, parent;
 		   but state vars are always available. */
@@ -2126,6 +2130,7 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside, bool newcv)
 		if (sigil != '&' && SvPAD_STATE(namesv))
 		    SvPADSTALE_on(sv);
 	    }
+	  }
 	}
 	else if (IS_PADGV(ppad[ix]) || (namesv && PadnamePV(namesv))) {
 	    sv = SvREFCNT_inc_NN(ppad[ix]);
