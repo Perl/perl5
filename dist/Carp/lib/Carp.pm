@@ -860,9 +860,9 @@ distribution.
 
 =head1 COPYRIGHT
 
-Copyright (C) 1994-2012 Larry Wall
+Copyright (C) 1994-2013 Larry Wall
 
-Copyright (C) 2011, 2012 Andrew Main (Zefram) <zefram@fysh.org>
+Copyright (C) 2011, 2012, 2013 Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 LICENSE
 
