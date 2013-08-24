@@ -203,7 +203,7 @@ sub w { cluck @_ }
 {
     my $aref = [
         qr/t at \S*(?i:carp.t) line \d+\./,
-        qr/t at \S*(?i:carp.t) line \d+\.\n\s*main::x\('t'\) called at \S*(?i:carp.t) line \d+/
+        qr/t at \S*(?i:carp.t) line \d+\.\n\s*main::x\("t"\) called at \S*(?i:carp.t) line \d+/
     ];
     my $i = 0;
 
@@ -241,8 +241,8 @@ sub w { cluck @_ }
         my $arg = 'testtest';
         local $Carp::MaxArgLen = $_;
         local $SIG{__WARN__} = sub {
-            "@_" =~ /'(.+?)'/;
-            is length($1),
+            "@_" =~ /"(.+?)"(\.*)/;
+            is length($1)+length($2),
                 length( $_ ? substr( $arg, 0, $_ ) : substr( $arg, 0 ) ),
                 'MaxArgLen';
         };
@@ -315,7 +315,7 @@ sub cluck_undef {
 
     local $SIG{__WARN__} = sub {
         like $_[0],
-            qr/^Bang! at.+\b(?i:carp\.t) line \d+\.\n\tmain::cluck_undef\(0, 'undef', 2, undef, 4\) called at.+\b(?i:carp\.t) line \d+$/,
+            qr/^Bang! at.+\b(?i:carp\.t) line \d+\.\n\tmain::cluck_undef\(0, "undef", 2, undef, 4\) called at.+\b(?i:carp\.t) line \d+$/,
             "cluck doesn't quote undef";
     };
 

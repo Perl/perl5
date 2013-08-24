@@ -5,7 +5,7 @@ our $has_overload; BEGIN { $has_overload = exists($::{"overload::"}); }
 our $has_B; BEGIN { $has_B = exists($::{"B::"}); }
 
 use Carp;
-sub { Carp::longmess() }->(\1);
+sub { sub { Carp::longmess("x") }->() }->(\1, "\x{2603}");
 
 print !(exists($::{"utf8::"}) xor $has_utf8) ? "" : "not ", "ok 1\n";
 print !(exists($::{"overload::"}) xor $has_overload) ? "" : "not ", "ok 2\n";

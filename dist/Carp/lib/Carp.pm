@@ -38,19 +38,52 @@ sub _fetch_sub { # fetch sub without autovivifying
     }
 }
 
+# UTF8_REGEXP_PROBLEM is a compile-time constant indicating whether Carp
+# must avoid applying a regular expression to an upgraded (is_utf8)
+# string.  There are multiple problems, on different Perl versions,
+# that require this to be avoided.  All versions prior to 5.13.8 will
+# load utf8_heavy.pl for the swash system, even if the regexp doesn't
+# use character classes.  Perl 5.6 and Perls [5.11.2, 5.13.11) exhibit
+# specific problems when Carp is being invoked in the aftermath of a
+# syntax error.
+BEGIN {
+    if("$]" < 5.013011) {
+	*UTF8_REGEXP_PROBLEM = sub () { 1 };
+    } else {
+	*UTF8_REGEXP_PROBLEM = sub () { 0 };
+    }
+}
+
+# is_utf8() is essentially the utf8::is_utf8() function, which indicates
+# whether a string is represented in the upgraded form (using UTF-8
+# internally).  As utf8::is_utf8() is only available from Perl 5.8
+# onwards, extra effort is required here to make it work on Perl 5.6.
 BEGIN {
     if(defined(my $sub = _fetch_sub utf8 => 'is_utf8')) {
 	*is_utf8 = $sub;
     } else {
-	*is_utf8 = sub { 0 };
+	# black magic for perl 5.6
+	*is_utf8 = sub { unpack("C", "\xaa".$_[0]) != 170 };
     }
 }
 
+# The downgrade() function defined here is to be used for attempts to
+# downgrade where it is acceptable to fail.  It must be called with a
+# second argument that is a true value.
 BEGIN {
     if(defined(my $sub = _fetch_sub utf8 => 'downgrade')) {
 	*downgrade = \&{"utf8::downgrade"};
     } else {
-	*downgrade = sub {};
+	*downgrade = sub {
+	    my $r = "";
+	    my $l = length($_[0]);
+	    for(my $i = 0; $i != $l; $i++) {
+		my $o = ord(substr($_[0], $i, 1));
+		return if $o > 255;
+		$r .= chr($o);
+	    }
+	    $_[0] = $r;
+	};
     }
 }
 
@@ -227,7 +260,7 @@ sub format_arg {
                 eval {$arg->can('CARP_TRACE') }
             })
         {
-            $arg = $arg->CARP_TRACE();
+            return $arg->CARP_TRACE();
         }
         elsif (!$in_recurse &&
 	       defined($RefArgFormatter) &&
@@ -238,35 +271,45 @@ sub format_arg {
                 eval {$arg = $RefArgFormatter->($arg); 1}
                 })
         {
-            1;
+            return $arg;
         }
         else
         {
 	    my $sub = _fetch_sub(overload => 'StrVal');
-	    $arg = $sub ? &$sub($arg) : "$arg";
+	    return $sub ? &$sub($arg) : "$arg";
         }
     }
-    if ( defined($arg) ) {
-        $arg =~ s/'/\\'/g;
-        $arg = str_len_trim( $arg, $MaxArgLen );
-
-        # Quote it?
-        # Downgrade, and use [0-9] rather than \d, to avoid loading
-        # Unicode tables, which would be liable to fail if we're
-        # processing a syntax error.
-        downgrade($arg, 1);
-        $arg = "'$arg'" unless $arg =~ /^-?[0-9.]+\z/;
+    return "undef" if !defined($arg);
+    downgrade($arg, 1);
+    return $arg if !(UTF8_REGEXP_PROBLEM && is_utf8($arg)) &&
+	    $arg =~ /\A-?[0-9]+(?:\.[0-9]*)?(?:[eE][-+]?[0-9]+)?\z/;
+    my $suffix = "";
+    if ( 2 < $MaxArgLen and $MaxArgLen < length($arg) ) {
+        substr ( $arg, $MaxArgLen - 3 ) = "";
+	$suffix = "...";
     }
-    else {
-        $arg = 'undef';
+    if(UTF8_REGEXP_PROBLEM && is_utf8($arg)) {
+	print "len = @{[length($arg)]}\n";
+	for(my $i = length($arg); $i--; ) {
+	    my $c = substr($arg, $i, 1);
+	    my $x = substr($arg, 0, 0);   # work around bug on Perl 5.8.{1,2}
+	    if($c eq "\"" || $c eq "\\" || $c eq "\$" || $c eq "\@") {
+		substr $arg, $i, 0, "\\";
+		next;
+	    }
+	    my $o = ord($c);
+	    print "i=$i o=$o\n";
+	    print "arg=<$arg>\n";
+	    substr $arg, $i, 1, sprintf("\\x{%x}", $o)
+		if $o < 0x20 || $o > 0x7f;
+	    print "arg=<$arg>\n";
+	}
+    } else {
+	$arg =~ s/([\"\\\$\@])/\\$1/g;
+	$arg =~ s/([^ -~])/sprintf("\\x{%x}",ord($1))/eg;
     }
-
-    # The following handling of "control chars" is direct from
-    # the original code - it is broken on Unicode though.
-    # Suggestions?
-    is_utf8($arg)
-        or $arg =~ s/([[:cntrl:]]|[[:^ascii:]])/sprintf("\\x{%x}",ord($1))/eg;
-    return $arg;
+    downgrade($arg, 1);
+    return "\"".$arg."\"".$suffix;
 }
 
 # Takes an inheritance cache and a package and returns
@@ -791,6 +834,17 @@ Defaults to C<0>.
 The Carp routines don't handle exception objects currently.
 If called with a first argument that is a reference, they simply
 call die() or warn(), as appropriate.
+
+If a subroutine argument in a stack trace is a reference to a regexp
+object, the manner in which it is shown in the stack trace depends on
+whether the L<overload> module has been loaded.  This happens because
+regexp objects effectively have overloaded stringification behaviour
+without using the L<overload> module.  As a workaround, deliberately
+loading the L<overload> module will mean that Carp consistently provides
+the intended behaviour (of bypassing the overloading).
+
+Some of the Carp code assumes that Perl's basic character encoding is
+ASCII, and will go wrong on an EBCDIC platform.
 
 =head1 SEE ALSO
 

@@ -121,13 +121,31 @@ XXX
 
 L<Carp> has been upgraded from version 1.31 to 1.32.
 
+=over 4
+
+=item *
+
+In stack traces, subroutine arguments that are strings are now quoted
+in a consistent manner, regardless of what characters they contain and
+how they're internally represented.
+
+=item *
+
 C<Carp> now won't vivify the C<overload::StrVal> glob or subroutine or the
 C<overload> stash.
-It also avoids some unwanted Unicode warnings on older Perls (which
-doesn't affect behaviour with current Perl).
+
+=item *
+
+C<Carp> now avoids some unwanted Unicode warnings on older Perls.  This
+doesn't affect behaviour with current Perl.
+
+=item *
+
 C<Carp::Heavy> detects version mismatch with C<Carp>, to give a good
 error message if a current (stub) C<Carp::Heavy> gets loaded by an old
 C<Carp> that expects C<Carp::Heavy> to provide subroutines.
+
+=back
 
 =item *
 
