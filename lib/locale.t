@@ -695,7 +695,6 @@ sub display_characters {
     no locale;
     my @chars = sort { ord $a <=> ord $b } @_;
     my $output = "";
-    my $hex = "";
     my $range_start;
     my $start_class;
     push @chars, chr(258);  # This sentinel simplifies the loop termination
@@ -718,16 +717,17 @@ sub display_characters {
         elsif ($char =~ /[0-9]/) {
             $class = 4;
         }
-        elsif ($char =~ /[[\]!"#\$\%&\'()*+,.\/:\\;<=>?\@\^_`{|}~-]/) {
-            $class = -1;    # Punct never appears in a range
-        }
+        # Uncomment to get literal punctuation displayed instead of hex
+        #elsif ($char =~ /[[\]!"#\$\%&\'()*+,.\/:\\;<=>?\@\^_`{|}~-]/) {
+        #    $class = -1;    # Punct never appears in a range
+        #}
         else {
             $class = 0;     # Output in hex
         }
 
         if (! defined $range_start) {
             if ($class < 0) {
-                $output .= $char;
+                $output .= " " . $char;
             }
             else {
                 $range_start = ord $char;
@@ -747,8 +747,8 @@ sub display_characters {
                 $output .= "-" . chr($range_end) if $range_length > 1;
             }
             else {
-                $hex .= sprintf(" %02X", $range_start);
-                $hex .= sprintf("-%02X", $range_end) if $range_length > 1;
+                $output .= sprintf(" %02X", $range_start);
+                $output .= sprintf("-%02X", $range_end) if $range_length > 1;
             }
 
             # Handle the new current character, as potentially beginning a new
@@ -759,8 +759,7 @@ sub display_characters {
     }
 
     $output =~ s/^ //;
-    $hex =~ s/^ // if ! length $output;
-    return "$output$hex";
+    return $output;
 }
 
 sub report_result {
@@ -797,6 +796,7 @@ my %setlocale_failed;   # List of locales that setlocale() didn't work on
 
 foreach $Locale (@Locale) {
     $locales_test_number = $first_locales_test_number - 1;
+    debug "#\n";
     debug "# Locale = $Locale\n";
 
     unless (setlocale(&POSIX::LC_ALL, $Locale)) {
