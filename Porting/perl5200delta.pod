@@ -354,7 +354,27 @@ platform specific bugs also go here.
 
 =item *
 
-XXX
+The following modules are known to have test failures with this version of
+Perl.  Patches have been submitted, so there will hopefully be new releases
+soon:
+
+XXX Go through this list just before the release of 5.20 and remove any
+modules that have been fixed.
+
+=over
+
+=item *
+ L<HTML::StripScripts> version 1.05
+
+=item *
+
+L<LaTeX::Encode> version 0.08
+
+=item
+
+L<Mail::SpamAssasin> version 3.3.2
+
+=back
 
 =back
 
