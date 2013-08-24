@@ -525,20 +525,7 @@ if (in_utf8) {
 
 my @Locale;
 my $Locale;
-my @Word_;
-my @Digit_;
-my @Space_;
-my @Alpha_;
-my @Alnum_;
-my @Ascii_;
-my @Blank_;
-my @Cntrl_;
-my @Graph_;
-my @Lower_;
-my @Print_;
-my @Upper_;
-my @Xdigit_;
-my @Cased_;
+my %posixes;
 
 sub trylocale {
     my $locale = shift;
@@ -831,24 +818,24 @@ foreach $Locale (@Locale) {
 
     if (! $is_utf8_locale) {
         use locale;
-        @Word_ = grep /\w/, map { chr } 0..255;
-        @Digit_ = grep /\d/, map { chr } 0..255;
-        @Space_ = grep /\s/, map { chr } 0..255;
-        @Alpha_ = grep /[[:alpha:]]/, map {chr } 0..255;
-        @Alnum_ = grep /[[:alnum:]]/, map {chr } 0..255;
-        @Ascii_ = grep /[[:ascii:]]/, map {chr } 0..255;
-        @Blank_ = grep /[[:blank:]]/, map {chr } 0..255;
-        @Cntrl_ = grep /[[:cntrl:]]/, map {chr } 0..255;
-        @Graph_ = grep /[[:graph:]]/, map {chr } 0..255;
-        @Lower_ = grep /[[:lower:]]/, map {chr } 0..255;
-        @Print_ = grep /[[:print:]]/, map {chr } 0..255;
-        @Upper_ = grep /[[:upper:]]/, map {chr } 0..255;
-        @Xdigit_ = grep /[[:xdigit:]]/, map {chr } 0..255;
-        @Cased_ = grep /[[:upper:]]/i, map {chr } 0..255;
+        @{$posixes{'word'}} = grep /\w/, map { chr } 0..255;
+        @{$posixes{'digit'}} = grep /\d/, map { chr } 0..255;
+        @{$posixes{'space'}} = grep /\s/, map { chr } 0..255;
+        @{$posixes{'alpha'}} = grep /[[:alpha:]]/, map {chr } 0..255;
+        @{$posixes{'alnum'}} = grep /[[:alnum:]]/, map {chr } 0..255;
+        @{$posixes{'ascii'}} = grep /[[:ascii:]]/, map {chr } 0..255;
+        @{$posixes{'blank'}} = grep /[[:blank:]]/, map {chr } 0..255;
+        @{$posixes{'cntrl'}} = grep /[[:cntrl:]]/, map {chr } 0..255;
+        @{$posixes{'graph'}} = grep /[[:graph:]]/, map {chr } 0..255;
+        @{$posixes{'lower'}} = grep /[[:lower:]]/, map {chr } 0..255;
+        @{$posixes{'print'}} = grep /[[:print:]]/, map {chr } 0..255;
+        @{$posixes{'upper'}} = grep /[[:upper:]]/, map {chr } 0..255;
+        @{$posixes{'xdigit'}} = grep /[[:xdigit:]]/, map {chr } 0..255;
+        @{$posixes{'cased'}} = grep /[[:upper:]]/i, map {chr } 0..255;
 
         # Sieve the uppercase and the lowercase.
 
-        for (@Word_) {
+        for (@{$posixes{'word'}}) {
             if (/[^\d_]/) { # skip digits and the _
                 if (uc($_) eq $_) {
                     $UPPER{$_} = $_;
@@ -861,21 +848,21 @@ foreach $Locale (@Locale) {
     }
     else {
         use locale ':not_characters';
-        @Word_ = grep /\w/, map { chr } 0..255;
-        @Digit_ = grep /\d/, map { chr } 0..255;
-        @Space_ = grep /\s/, map { chr } 0..255;
-        @Alpha_ = grep /[[:alpha:]]/, map {chr } 0..255;
-        @Alnum_ = grep /[[:alnum:]]/, map {chr } 0..255;
-        @Ascii_ = grep /[[:ascii:]]/, map {chr } 0..255;
-        @Blank_ = grep /[[:blank:]]/, map {chr } 0..255;
-        @Cntrl_ = grep /[[:cntrl:]]/, map {chr } 0..255;
-        @Graph_ = grep /[[:graph:]]/, map {chr } 0..255;
-        @Lower_ = grep /[[:lower:]]/, map {chr } 0..255;
-        @Print_ = grep /[[:print:]]/, map {chr } 0..255;
-        @Upper_ = grep /[[:upper:]]/, map {chr } 0..255;
-        @Xdigit_ = grep /[[:xdigit:]]/, map {chr } 0..255;
-        @Cased_ = grep /[[:upper:]]/i, map {chr } 0..255;
-        for (@Word_) {
+        @{$posixes{'word'}} = grep /\w/, map { chr } 0..255;
+        @{$posixes{'digit'}} = grep /\d/, map { chr } 0..255;
+        @{$posixes{'space'}} = grep /\s/, map { chr } 0..255;
+        @{$posixes{'alpha'}} = grep /[[:alpha:]]/, map {chr } 0..255;
+        @{$posixes{'alnum'}} = grep /[[:alnum:]]/, map {chr } 0..255;
+        @{$posixes{'ascii'}} = grep /[[:ascii:]]/, map {chr } 0..255;
+        @{$posixes{'blank'}} = grep /[[:blank:]]/, map {chr } 0..255;
+        @{$posixes{'cntrl'}} = grep /[[:cntrl:]]/, map {chr } 0..255;
+        @{$posixes{'graph'}} = grep /[[:graph:]]/, map {chr } 0..255;
+        @{$posixes{'lower'}} = grep /[[:lower:]]/, map {chr } 0..255;
+        @{$posixes{'print'}} = grep /[[:print:]]/, map {chr } 0..255;
+        @{$posixes{'upper'}} = grep /[[:upper:]]/, map {chr } 0..255;
+        @{$posixes{'xdigit'}} = grep /[[:xdigit:]]/, map {chr } 0..255;
+        @{$posixes{'cased'}} = grep /[[:upper:]]/i, map {chr } 0..255;
+        for (@{$posixes{'word'}}) {
             if (/[^\d_]/) { # skip digits and the _
                 if (uc($_) eq $_) {
                     $UPPER{$_} = $_;
@@ -887,20 +874,22 @@ foreach $Locale (@Locale) {
         }
     }
 
-    debug "# :upper:  = ", display_characters(@Upper_), "\n";
-    debug "# :lower:  = ", display_characters(@Lower_), "\n";
-    debug "# :cased:  = ", display_characters(@Cased_), "\n";
-    debug "# :alpha:  = ", display_characters(@Alpha_), "\n";
-    debug "# :alnum:  = ", display_characters(@Alnum_), "\n";
-    debug "#  w       = ", display_characters(@Word_), "\n";
-    debug "# :graph:  = ", display_characters(@Graph_), "\n";
-    debug "# :print:  = ", display_characters(@Print_), "\n";
-    debug "#  d       = ", display_characters(@Digit_), "\n";
-    debug "# :xdigit: = ", display_characters(@Xdigit_), "\n";
-    debug "# :blank:  = ", display_characters(@Blank_), "\n";
-    debug "#  s       = ", display_characters(@Space_), "\n";
-    debug "# :cntrl:  = ", display_characters(@Cntrl_), "\n";
-    debug "# :ascii:  = ", display_characters(@Ascii_), "\n";
+    # Ordered, where possible,  in groups of "this is a subset of the next
+    # one"
+    debug "# :upper:  = ", display_characters(@{$posixes{'upper'}}), "\n";
+    debug "# :lower:  = ", display_characters(@{$posixes{'lower'}}), "\n";
+    debug "# :cased:  = ", display_characters(@{$posixes{'cased'}}), "\n";
+    debug "# :alpha:  = ", display_characters(@{$posixes{'alpha'}}), "\n";
+    debug "# :alnum:  = ", display_characters(@{$posixes{'alnum'}}), "\n";
+    debug "#  w       = ", display_characters(@{$posixes{'word'}}), "\n";
+    debug "# :graph:  = ", display_characters(@{$posixes{'graph'}}), "\n";
+    debug "# :print:  = ", display_characters(@{$posixes{'print'}}), "\n";
+    debug "#  d       = ", display_characters(@{$posixes{'digit'}}), "\n";
+    debug "# :xdigit: = ", display_characters(@{$posixes{'xdigit'}}), "\n";
+    debug "# :blank:  = ", display_characters(@{$posixes{'blank'}}), "\n";
+    debug "#  s       = ", display_characters(@{$posixes{'space'}}), "\n";
+    debug "# :cntrl:  = ", display_characters(@{$posixes{'cntrl'}}), "\n";
+    debug "# :ascii:  = ", display_characters(@{$posixes{'ascii'}}), "\n";
 
     foreach (keys %UPPER) {
 
@@ -1151,12 +1140,12 @@ foreach $Locale (@Locale) {
     ++$locales_test_number;
     undef @f;
     $test_names{$locales_test_number} = 'Verify that [:digit:] matches either 10 or 20 code points';
-    report_result($Locale, $locales_test_number, @Digit_ == 10 || @Digit_ ==20);
+    report_result($Locale, $locales_test_number, @{$posixes{'digit'}} == 10 || @{$posixes{'digit'}} == 20);
 
     ++$locales_test_number;
     undef @f;
     $test_names{$locales_test_number} = 'Verify that [:digit:] (if is 10 code points) is a subset of [:xdigit:]';
-    if (@Digit_ == 10) {
+    if (@{$posixes{'digit'}} == 10) {
         for (map { chr } 0..255) {
             if ($is_utf8_locale) {
                 use locale ':not_characters';
@@ -1326,14 +1315,14 @@ foreach $Locale (@Locale) {
         $not_necessarily_a_problem_test_number = $locales_test_number;
         for (0..9) {
             # Select a slice.
-            $from = int(($_*@Word_)/10);
-            $to = $from + int(@Word_/10);
-            $to = $#Word_ if ($to > $#Word_);
-            $lesser  = join('', @Word_[$from..$to]);
+            $from = int(($_*@{$posixes{'word'}})/10);
+            $to = $from + int(@{$posixes{'word'}}/10);
+            $to = $#{$posixes{'word'}} if ($to > $#{$posixes{'word'}});
+            $lesser  = join('', @{$posixes{'word'}}[$from..$to]);
             # Select a slice one character on.
             $from++; $to++;
-            $to = $#Word_ if ($to > $#Word_);
-            $greater = join('', @Word_[$from..$to]);
+            $to = $#{$posixes{'word'}} if ($to > $#{$posixes{'word'}});
+            $greater = join('', @{$posixes{'word'}}[$from..$to]);
             if ($is_utf8_locale) {
                 use locale ':not_characters';
                 ($yes, $no, $sign) = ($lesser lt $greater
