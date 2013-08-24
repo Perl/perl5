@@ -829,6 +829,7 @@ foreach $Locale (@Locale) {
         @{$posixes{'graph'}} = grep /[[:graph:]]/, map {chr } 0..255;
         @{$posixes{'lower'}} = grep /[[:lower:]]/, map {chr } 0..255;
         @{$posixes{'print'}} = grep /[[:print:]]/, map {chr } 0..255;
+        @{$posixes{'punct'}} = grep /[[:punct:]]/, map {chr } 0..255;
         @{$posixes{'upper'}} = grep /[[:upper:]]/, map {chr } 0..255;
         @{$posixes{'xdigit'}} = grep /[[:xdigit:]]/, map {chr } 0..255;
         @{$posixes{'cased'}} = grep /[[:upper:]]/i, map {chr } 0..255;
@@ -859,6 +860,7 @@ foreach $Locale (@Locale) {
         @{$posixes{'graph'}} = grep /[[:graph:]]/, map {chr } 0..255;
         @{$posixes{'lower'}} = grep /[[:lower:]]/, map {chr } 0..255;
         @{$posixes{'print'}} = grep /[[:print:]]/, map {chr } 0..255;
+        @{$posixes{'punct'}} = grep /[[:punct:]]/, map {chr } 0..255;
         @{$posixes{'upper'}} = grep /[[:upper:]]/, map {chr } 0..255;
         @{$posixes{'xdigit'}} = grep /[[:xdigit:]]/, map {chr } 0..255;
         @{$posixes{'cased'}} = grep /[[:upper:]]/i, map {chr } 0..255;
@@ -888,6 +890,7 @@ foreach $Locale (@Locale) {
     debug "# :xdigit: = ", display_characters(@{$posixes{'xdigit'}}), "\n";
     debug "# :blank:  = ", display_characters(@{$posixes{'blank'}}), "\n";
     debug "#  s       = ", display_characters(@{$posixes{'space'}}), "\n";
+    debug "# :punct:  = ", display_characters(@{$posixes{'punct'}}), "\n";
     debug "# :cntrl:  = ", display_characters(@{$posixes{'cntrl'}}), "\n";
     debug "# :ascii:  = ", display_characters(@{$posixes{'ascii'}}), "\n";
 
