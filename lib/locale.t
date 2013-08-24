@@ -906,9 +906,20 @@ foreach $Locale (@Locale) {
 	delete $lower{$_};
     }
 
+    my %Unassigned;
+    foreach my $ord ( 0 .. 255 ) {
+        $Unassigned{chr $ord} = 1;
+    }
+    foreach my $class (keys %posixes) {
+        foreach my $char (@{$posixes{$class}}) {
+            delete $Unassigned{$char};
+        }
+    }
+
     debug "# UPPER    = ", display_characters(keys %UPPER), "\n";
     debug "# lower    = ", display_characters(keys %lower), "\n";
     debug "# BoThCaSe = ", display_characters(keys %BoThCaSe), "\n";
+    debug "# Unassigned = ", display_characters(sort { ord $a <=> ord $b } keys %Unassigned), "\n";
 
     my @failures;
     my @fold_failures;
