@@ -64,7 +64,7 @@
 #define SAVEt_SAVESWITCHSTACK	39
 #define SAVEt_SHARED_PVREF	40
 #define SAVEt_SPTR		41
-/*	UNUSED			42 */
+#define SAVEt_STRLEN		42
 #define SAVEt_SV		43
 #define SAVEt_SVREF		44
 #define SAVEt_VPTR		45
@@ -186,7 +186,8 @@ scope has the given name. Name must be a literal string.
 =cut
 */
 
-#define SAVETMPS save_int((int*)&PL_tmps_floor), PL_tmps_floor = PL_tmps_ix
+#define SAVETMPS Perl_save_strlen(aTHX_ (STRLEN *)&PL_tmps_floor), \
+		 PL_tmps_floor = PL_tmps_ix
 #define FREETMPS if (PL_tmps_ix > PL_tmps_floor) free_tmps()
 
 #ifdef DEBUGGING

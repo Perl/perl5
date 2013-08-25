@@ -12891,6 +12891,7 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 	    TOPINT(nss,ix) = i;
 	    break;
 	case SAVEt_IV:				/* IV reference */
+	case SAVEt_STRLEN:			/* STRLEN/size_t ref */
 	    ptr = POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = any_dup(ptr, proto_perl);
 	    iv = POPIV(ss,ix);

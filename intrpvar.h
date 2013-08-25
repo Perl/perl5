@@ -53,9 +53,9 @@ PERLVAR(I, scopestack_ix, I32)
 PERLVAR(I, scopestack_max, I32)
 
 PERLVAR(I, tmps_stack,	SV **)		/* mortals we've made */
-PERLVARI(I, tmps_ix,	I32,	-1)
-PERLVARI(I, tmps_floor,	I32,	-1)
-PERLVAR(I, tmps_max,	I32)
+PERLVARI(I, tmps_ix,	SSize_t,	-1)
+PERLVARI(I, tmps_floor,	SSize_t,	-1)
+PERLVAR(I, tmps_max,	SSize_t)
 
 PERLVARI(I, sub_generation, U32, 1)	/* incr to invalidate method cache */
 

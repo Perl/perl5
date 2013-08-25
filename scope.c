@@ -141,7 +141,7 @@ Perl_savestack_grow_cnt(pTHX_ I32 need)
 #undef GROW
 
 void
-Perl_tmps_grow(pTHX_ I32 n)
+Perl_tmps_grow(pTHX_ SSize_t n)
 {
     dVAR;
 #ifndef STRESS_REALLOC
@@ -158,7 +158,7 @@ Perl_free_tmps(pTHX)
 {
     dVAR;
     /* XXX should tmps_floor live in cxstack? */
-    const I32 myfloor = PL_tmps_floor;
+    const SSize_t myfloor = PL_tmps_floor;
     while (PL_tmps_ix > myfloor) {      /* clean up after last statement */
 	SV* const sv = PL_tmps_stack[PL_tmps_ix--];
 #ifdef PERL_POISON
@@ -455,6 +455,20 @@ Perl_save_I32(pTHX_ I32 *intp)
     SS_ADD_PTR(intp);
     SS_ADD_UV(type);
     SS_ADD_END(size);
+}
+
+void
+Perl_save_strlen(pTHX_ STRLEN *ptr)
+{
+    dVAR;
+    dSS_ADD;
+
+    PERL_ARGS_ASSERT_SAVE_STRLEN;
+
+    SS_ADD_IV(*ptr);
+    SS_ADD_PTR(ptr);
+    SS_ADD_UV(SAVEt_STRLEN);
+    SS_ADD_END(3);
 }
 
 /* Cannot use save_sptr() to store a char* since the SV** cast will
@@ -913,6 +927,9 @@ Perl_leave_scope(pTHX_ I32 base)
 	    break;
 	case SAVEt_INT:				/* int reference */
 	    *(int*)ARG0_PTR = (int)ARG1_I32;
+	    break;
+	case SAVEt_STRLEN:			/* STRLEN/size_t ref */
+	    *(STRLEN*)ARG0_PTR = (STRLEN)arg1.any_iv;
 	    break;
 	case SAVEt_BOOL:			/* bool reference */
 	    *(bool*)ARG0_PTR = cBOOL(uv >> 8);

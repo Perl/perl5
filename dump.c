@@ -504,7 +504,7 @@ Perl_sv_peek(pTHX_ SV *sv)
     }
     else if (DEBUG_R_TEST_) {
 	int is_tmp = 0;
-	I32 ix;
+	SSize_t ix;
 	/* is this SV on the tmps stack? */
 	for (ix=PL_tmps_ix; ix>=0; ix--) {
 	    if (PL_tmps_stack[ix] == sv) {
@@ -2757,7 +2757,7 @@ Perl_sv_xmlpeek(pTHX_ SV *sv)
     }
     else if (DEBUG_R_TEST_) {
 	int is_tmp = 0;
-	I32 ix;
+	SSize_t ix;
 	/* is this SV on the tmps stack? */
 	for (ix=PL_tmps_ix; ix>=0; ix--) {
 	    if (PL_tmps_stack[ix] == sv) {

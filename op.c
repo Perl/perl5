@@ -3355,7 +3355,7 @@ S_gen_constant_list(pTHX_ OP *o)
 {
     dVAR;
     OP *curop;
-    const I32 oldtmps_floor = PL_tmps_floor;
+    const SSize_t oldtmps_floor = PL_tmps_floor;
     SV **svp;
     AV *av;
 

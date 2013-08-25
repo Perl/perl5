@@ -3667,6 +3667,11 @@ PERL_CALLCONV void	Perl_save_sptr(pTHX_ SV** sptr)
 #define PERL_ARGS_ASSERT_SAVE_SPTR	\
 	assert(sptr)
 
+PERL_CALLCONV void	Perl_save_strlen(pTHX_ STRLEN* ptr)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_SAVE_STRLEN	\
+	assert(ptr)
+
 PERL_CALLCONV SV*	Perl_save_svref(pTHX_ SV** sptr)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_SAVE_SVREF	\
@@ -4576,7 +4581,7 @@ PERL_CALLCONV OP *	Perl_tied_method(pTHX_ SV *methname, SV **sp, SV *const sv, c
 #define PERL_ARGS_ASSERT_TIED_METHOD	\
 	assert(methname); assert(sp); assert(sv); assert(mg)
 
-PERL_CALLCONV void	Perl_tmps_grow(pTHX_ I32 n);
+PERL_CALLCONV void	Perl_tmps_grow(pTHX_ SSize_t n);
 /* PERL_CALLCONV UV	Perl_to_uni_fold(pTHX_ UV c, U8 *p, STRLEN *lenp)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3); */

@@ -1226,6 +1226,7 @@ Ap	|void	|save_vptr	|NN void *ptr
 Ap	|void	|save_re_context
 Ap	|void	|save_padsv_and_mortalize|PADOFFSET off
 Ap	|void	|save_sptr	|NN SV** sptr
+Xp	|void	|save_strlen	|NN STRLEN* ptr
 Ap	|SV*	|save_svref	|NN SV** sptr
 Ap	|void	|save_pushptr	|NULLOK void *const ptr|const int type
 Ap	|void	|save_pushi32ptr|const I32 i|NULLOK void *const ptr|const int type
@@ -1692,7 +1693,7 @@ Apd	|void	|sv_utf8_encode |NN SV *const sv
 ApdM	|bool	|sv_utf8_decode |NN SV *const sv
 Apdmb	|void	|sv_force_normal|NN SV *sv
 Apd	|void	|sv_force_normal_flags|NN SV *const sv|const U32 flags
-Ap	|void	|tmps_grow	|I32 n
+Ap	|void	|tmps_grow	|SSize_t n
 Apd	|SV*	|sv_rvweaken	|NN SV *const sv
 : This is indirectly referenced by globals.c. This is somewhat annoying.
 p	|int	|magic_killbackrefs|NN SV *sv|NN MAGIC *mg
