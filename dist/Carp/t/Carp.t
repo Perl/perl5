@@ -3,7 +3,7 @@ no warnings "once";
 use Config;
 
 use IPC::Open3 1.0103 qw(open3);
-use Test::More tests => 62;
+use Test::More tests => 60;
 
 sub runperl {
     my(%args) = @_;
@@ -232,23 +232,6 @@ sub w { cluck @_ }
         };
         eval "$txt";
         $test_num++;
-    }
-}
-
-# $Carp::MaxArgLen
-{
-    for ( 0, 4 ) {
-        my $arg = 'testtest';
-        local $Carp::MaxArgLen = $_;
-        local $SIG{__WARN__} = sub {
-            "@_" =~ /"(.+?)"(\.*)/;
-            is length($1)+length($2),
-                length( $_ ? substr( $arg, 0, $_ ) : substr( $arg, 0 ) ),
-                'MaxArgLen';
-        };
-
-        package Z;
-        main::w($arg);
     }
 }
 

@@ -1,7 +1,7 @@
 use warnings;
 use strict;
 
-use Test::More tests => 14;
+use Test::More tests => 32;
 
 use Carp ();
 
@@ -22,5 +22,22 @@ like lm("\x{666}b"), qr/main::lm\("\\x\{666\}b"\)/;
 like lm("a\x{666}"), qr/main::lm\("a\\x\{666\}"\)/;
 like lm("L\xe9on"), qr/main::lm\("L\\x\{e9\}on"\)/;
 like lm("L\xe9on \x{2603} !"), qr/main::lm\("L\\x\{e9\}on \\x\{2603\} !"\)/;
+
+$Carp::MaxArgLen = 5;
+foreach my $arg ("foo bar baz", "foo bar ba", "foo bar b", "foo bar ", "foo bar", "foo ba") {
+    like lm($arg), qr/main::lm\("fo"\.\.\.\)/;
+}
+foreach my $arg ("foo b", "foo ", "foo", "fo", "f", "") {
+    like lm($arg), qr/main::lm\("\Q$arg\E"\)/;
+}
+like lm("L\xe9on \x{2603} !"), qr/main::lm\("L\\x\{e9\}"\.\.\.\)/;
+like lm("L\xe9on\x{2603}"), qr/main::lm\("L\\x\{e9\}on\\x\{2603\}"\)/;
+like lm("foo\x{2603}"), qr/main::lm\("foo\\x\{2603\}"\)/;
+
+$Carp::MaxArgLen = 0;
+foreach my $arg ("wibble." x 20, "foo bar baz") {
+    like lm($arg), qr/main::lm\("\Q$arg\E"\)/;
+}
+like lm("L\xe9on\x{2603}"), qr/main::lm\("L\\x\{e9\}on\\x\{2603\}"\)/;
 
 1;
