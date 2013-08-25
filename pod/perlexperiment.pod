@@ -87,6 +87,9 @@ Introduced in Perl 5.18
 
 =item The <:win32> IO pseudolayer
 
+The ticket for this feature is
+L<[perl #119453]|https://rt.perl.org/rt3/Ticket/Display.html?id=119453>.
+
 See also L<perlrun>
 
 =item There is an C<installhtml> target in the Makefile.
