@@ -3187,7 +3187,7 @@ PERL_CALLCONV REGEXP*	Perl_pregcomp(pTHX_ SV * const pattern, const U32 flags)
 #define PERL_ARGS_ASSERT_PREGCOMP	\
 	assert(pattern)
 
-PERL_CALLCONV I32	Perl_pregexec(pTHX_ REGEXP * const prog, char* stringarg, char* strend, char* strbeg, I32 minend, SV* screamer, U32 nosave)
+PERL_CALLCONV I32	Perl_pregexec(pTHX_ REGEXP * const prog, char* stringarg, char* strend, char* strbeg, SSize_t minend, SV* screamer, U32 nosave)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3)
@@ -3409,7 +3409,7 @@ PERL_CALLCONV void	Perl_regdump(pTHX_ const regexp* r)
 #define PERL_ARGS_ASSERT_REGDUMP	\
 	assert(r)
 
-PERL_CALLCONV I32	Perl_regexec_flags(pTHX_ REGEXP *const rx, char *stringarg, char *strend, char *strbeg, I32 minend, SV *sv, void *data, U32 flags)
+PERL_CALLCONV I32	Perl_regexec_flags(pTHX_ REGEXP *const rx, char *stringarg, char *strend, char *strbeg, SSize_t minend, SV *sv, void *data, U32 flags)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3)
@@ -6766,14 +6766,14 @@ STATIC char *	S_regwhite(struct RExC_state_t *pRExC_state, char *p)
 #define PERL_ARGS_ASSERT_REGWHITE	\
 	assert(pRExC_state); assert(p)
 
-STATIC void	S_scan_commit(pTHX_ const struct RExC_state_t *pRExC_state, struct scan_data_t *data, I32 *minlenp, int is_inf)
+STATIC void	S_scan_commit(pTHX_ const struct RExC_state_t *pRExC_state, struct scan_data_t *data, SSize_t *minlenp, int is_inf)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3);
 #define PERL_ARGS_ASSERT_SCAN_COMMIT	\
 	assert(pRExC_state); assert(data); assert(minlenp)
 
-STATIC I32	S_study_chunk(pTHX_ struct RExC_state_t *pRExC_state, regnode **scanp, I32 *minlenp, I32 *deltap, regnode *last, struct scan_data_t *data, I32 stopparen, U8* recursed, struct regnode_charclass_class *and_withp, U32 flags, U32 depth)
+STATIC SSize_t	S_study_chunk(pTHX_ struct RExC_state_t *pRExC_state, regnode **scanp, SSize_t *minlenp, SSize_t *deltap, regnode *last, struct scan_data_t *data, I32 stopparen, U8* recursed, struct regnode_charclass_class *and_withp, U32 flags, U32 depth)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3)
@@ -6979,14 +6979,14 @@ STATIC CHECKPOINT	S_regcppush(pTHX_ const regexp *rex, I32 parenfloor, U32 maxop
 #define PERL_ARGS_ASSERT_REGCPPUSH	\
 	assert(rex)
 
-STATIC U8*	S_reghop3(U8 *s, I32 off, const U8 *lim)
+STATIC U8*	S_reghop3(U8 *s, SSize_t off, const U8 *lim)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(1)
 			__attribute__nonnull__(3);
 #define PERL_ARGS_ASSERT_REGHOP3	\
 	assert(s); assert(lim)
 
-STATIC U8*	S_reghopmaybe3(U8 *s, I32 off, const U8 *lim)
+STATIC U8*	S_reghopmaybe3(U8 *s, SSize_t off, const U8 *lim)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(1)
 			__attribute__nonnull__(3);
@@ -7000,7 +7000,7 @@ STATIC bool	S_reginclass(pTHX_ regexp * const prog, const regnode * const n, con
 #define PERL_ARGS_ASSERT_REGINCLASS	\
 	assert(n); assert(p)
 
-STATIC I32	S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
+STATIC SSize_t	S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
@@ -7035,7 +7035,7 @@ STATIC void	S_to_utf8_substr(pTHX_ regexp * prog)
 	assert(prog)
 
 #  if defined(XXX_dmq)
-STATIC U8*	S_reghop4(U8 *s, I32 off, const U8 *llim, const U8 *rlim)
+STATIC U8*	S_reghop4(U8 *s, SSize_t off, const U8 *llim, const U8 *rlim)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(1)
 			__attribute__nonnull__(3)

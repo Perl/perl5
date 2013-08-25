@@ -1096,8 +1096,8 @@ EMsR	|SV*	|_new_invlist_C_array|NN const UV* const list
 : Not used currently: EXMs	|bool	|_invlistEQ	|NN SV* const a|NN SV* const b|const bool complement_b
 #endif
 Ap	|I32	|pregexec	|NN REGEXP * const prog|NN char* stringarg \
-				|NN char* strend|NN char* strbeg|I32 minend \
-				|NN SV* screamer|U32 nosave
+				|NN char* strend|NN char* strbeg \
+				|SSize_t minend |NN SV* screamer|U32 nosave
 Ap	|void	|pregfree	|NULLOK REGEXP* r
 Ap	|void	|pregfree2	|NN REGEXP *rx
 : FIXME - is anything in re using this now?
@@ -1128,8 +1128,9 @@ EiPR	|I32	|regcurly	|NN const char *s                   \
 				|const bool rbrace_must_be_escaped
 #endif
 Ap	|I32	|regexec_flags	|NN REGEXP *const rx|NN char *stringarg \
-				|NN char *strend|NN char *strbeg|I32 minend \
-				|NN SV *sv|NULLOK void *data|U32 flags
+				|NN char *strend|NN char *strbeg \
+				|SSize_t minend|NN SV *sv \
+				|NULLOK void *data|U32 flags
 ApR	|regnode*|regnext	|NULLOK regnode* p
 EXp |SV*|reg_named_buff          |NN REGEXP * const rx|NULLOK SV * const key \
                                  |NULLOK SV * const value|const U32 flags
@@ -2033,8 +2034,8 @@ Ei	|U8   |compute_EXACTish|NN struct RExC_state_t *pRExC_state
 Es	|char *	|nextchar	|NN struct RExC_state_t *pRExC_state
 Es	|bool	|reg_skipcomment|NN struct RExC_state_t *pRExC_state
 Es	|void	|scan_commit	|NN const struct RExC_state_t *pRExC_state \
-				|NN struct scan_data_t *data|NN I32 *minlenp \
-				|int is_inf
+				|NN struct scan_data_t *data \
+				|NN SSize_t *minlenp|int is_inf
 Esn	|void	|cl_anything	|NN const struct RExC_state_t *pRExC_state \
 				|NN struct regnode_charclass_class *cl
 EsRn	|int	|cl_is_anything	|NN const struct regnode_charclass_class *cl
@@ -2045,9 +2046,9 @@ Esn	|void	|cl_and		|NN struct regnode_charclass_class *cl \
 Esn	|void	|cl_or		|NN const struct RExC_state_t *pRExC_state \
 				|NN struct regnode_charclass_class *cl \
 				|NN const struct regnode_charclass_class *or_with
-Es	|I32	|study_chunk	|NN struct RExC_state_t *pRExC_state \
-				|NN regnode **scanp|NN I32 *minlenp \
-				|NN I32 *deltap|NN regnode *last \
+Es	|SSize_t|study_chunk	|NN struct RExC_state_t *pRExC_state \
+				|NN regnode **scanp|NN SSize_t *minlenp \
+				|NN SSize_t *deltap|NN regnode *last \
 				|NULLOK struct scan_data_t *data \
 				|I32 stopparen|NULLOK U8* recursed \
 				|NULLOK struct regnode_charclass_class *and_withp \
@@ -2091,7 +2092,7 @@ Es	|U8	|regtail_study	|NN struct RExC_state_t *pRExC_state \
 #if defined(PERL_IN_REGEXEC_C)
 ERs	|bool	|isFOO_lc	|const U8 classnum|const U8 character
 ERs	|bool	|isFOO_utf8_lc	|const U8 classnum|NN const U8* character
-ERs	|I32	|regmatch	|NN regmatch_info *reginfo|NN char *startpos|NN regnode *prog
+ERs	|SSize_t|regmatch	|NN regmatch_info *reginfo|NN char *startpos|NN regnode *prog
 ERs	|I32	|regrepeat	|NN regexp *prog|NN char **startposp \
 				|NN const regnode *p \
 				|NN regmatch_info *const reginfo \
@@ -2104,15 +2105,15 @@ Es	|CHECKPOINT|regcppush	|NN const regexp *rex|I32 parenfloor\
 				|U32 maxopenparen
 Es	|void	|regcppop	|NN regexp *rex\
 				|NN U32 *maxopenparen_p
-ERsn	|U8*	|reghop3	|NN U8 *s|I32 off|NN const U8 *lim
+ERsn	|U8*	|reghop3	|NN U8 *s|SSize_t off|NN const U8 *lim
 ERsM	|SV*	|core_regclass_swash|NULLOK const regexp *prog \
 				|NN const struct regnode *node|bool doinit \
 				|NULLOK SV **listsvp
 #ifdef XXX_dmq
-ERsn	|U8*	|reghop4	|NN U8 *s|I32 off|NN const U8 *llim \
+ERsn	|U8*	|reghop4	|NN U8 *s|SSize_t off|NN const U8 *llim \
 				|NN const U8 *rlim
 #endif
-ERsn	|U8*	|reghopmaybe3	|NN U8 *s|I32 off|NN const U8 *lim
+ERsn	|U8*	|reghopmaybe3	|NN U8 *s|SSize_t off|NN const U8 *lim
 ERs	|char*	|find_byclass	|NN regexp * prog|NN const regnode *c \
 				|NN char *s|NN const char *strend \
 				|NULLOK regmatch_info *reginfo

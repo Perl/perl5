@@ -1326,7 +1326,7 @@ PP(pp_match)
     PMOP *dynpm = pm;
     const char *s;
     const char *strend;
-    I32 curpos = 0; /* initial pos() or current $+[0] */
+    SSize_t curpos = 0; /* initial pos() or current $+[0] */
     I32 global;
     U8 r_flags = 0;
     const char *truebase;			/* Start of string  */
@@ -1383,7 +1383,7 @@ PP(pp_match)
 	rx = PM_GETRE(pm);
     }
 
-    if (RX_MINLEN(rx) > (I32)len) {
+    if (RX_MINLEN(rx) >= 0 && (STRLEN)RX_MINLEN(rx) > len) {
         DEBUG_r(PerlIO_printf(Perl_debug_log, "String shorter than min possible regex match\n"));
 	goto nope;
     }
