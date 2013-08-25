@@ -10,7 +10,7 @@ BEGIN {
     require 'test.pl';		# we use runperl from 'test.pl', so can't use Test::More
 }
 
-plan tests => 160;
+plan tests => 161;
 
 require_ok("B::Concise");
 
@@ -454,5 +454,12 @@ $out =
   switches => ["-MO=Concise,-nobanner,foo"], prog=>'sub foo{}', stderr => 1
  );
 unlike $out, 'main::foo', '-nobanner';
+
+# glob
+$out =
+ runperl(
+  switches => ["-MO=Concise"], prog=>'<.>', stderr => 1
+ );
+like $out, '\*<none>::', '<.>';
 
 __END__
