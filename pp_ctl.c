@@ -1594,7 +1594,7 @@ Perl_qerror(pTHX_ SV *err)
 
     if (PL_in_eval) {
 	if (PL_in_eval & EVAL_KEEPERR) {
-		Perl_ck_warner(aTHX_ packWARN(WARN_MISC), "\t(in cleanup) %"SVf,
+		Perl_warn(aTHX_ "\t(in cleanup) %"SVf,
                                                     SVfARG(err));
 	}
 	else
@@ -1655,7 +1655,7 @@ Perl_die_unwind(pTHX_ SV *msv)
 	}
 
 	if (in_eval & EVAL_KEEPERR) {
-	    Perl_ck_warner(aTHX_ packWARN(WARN_MISC), "\t(in cleanup) %"SVf,
+	    Perl_warn(aTHX_ "\t(in cleanup) %"SVf,
 			   SVfARG(exceptsv));
 	}
 

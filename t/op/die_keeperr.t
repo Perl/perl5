@@ -32,7 +32,7 @@ foreach my $inx ("", "aabbcc\n", [qw(aa bb cc)]) {
     my $warn = "";
     local $SIG{__WARN__} = sub { $warn .= $_[0] };
     { my $e = end { no warnings "misc"; die "aa\n"; }; }
-    is $warn, "";
+    is $warn, "\t(in cleanup) aa\n";
 }
 
 {
@@ -47,7 +47,7 @@ foreach my $inx ("", "aabbcc\n", [qw(aa bb cc)]) {
     my $warn = "";
     local $SIG{__WARN__} = sub { $warn .= $_[0] };
     { my $e = end { no warnings "misc"; die "aa\n"; }; }
-    is $warn, "";
+    is $warn, "\t(in cleanup) aa\n";
 }
 
 {
@@ -62,7 +62,7 @@ foreach my $inx ("", "aabbcc\n", [qw(aa bb cc)]) {
     my $warn = "";
     local $SIG{__WARN__} = sub { $warn .= $_[0] };
     { my $e = end { no warnings "misc"; die "aa\n"; }; }
-    is $warn, "";
+    is $warn, "\t(in cleanup) aa\n";
 }
 
 {

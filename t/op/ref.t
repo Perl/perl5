@@ -383,6 +383,7 @@ curr_test($test + 2);
     package C;
     sub new { bless {}, shift }
     DESTROY { $_[0] = 'foo' }
+    local $SIG{__WARN__} = sub{};
     {
 	print "# should generate an error...\n";
 	my $c = C->new;

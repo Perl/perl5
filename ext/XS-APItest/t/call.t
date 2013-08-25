@@ -182,7 +182,7 @@ foreach my $inx ("", "aabbcc\n", [qw(aa bb cc)]) {
     my $warn = "";
     local $SIG{__WARN__} = sub { $warn .= $_[0] };
     call_sv(sub { die "aa\n" }, G_VOID|G_EVAL|G_KEEPERR);
-    is $warn, "";
+    is $warn, "\t(in cleanup) aa\n";
 }
 
 {
