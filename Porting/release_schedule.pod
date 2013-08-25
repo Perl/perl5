@@ -25,7 +25,7 @@ Code freezes (which happen in the 5.19.X series)
 Release schedule (with release manager):
 
   2013-05-18  5.18.0 ✓        Ricardo Signes
-  2013-07-??  5.18.1          Ricardo Signes
+  2013-08-12  5.18.1 ✓        Ricardo Signes
   2013-11-??  5.18.2          Ricardo Signes
 
 (RC0 will be released once we think that all the blockers have been
@@ -40,17 +40,6 @@ Release schedule (with release managers):
   2012-11-01  5.16.2 ✓        Ricardo Signes
   2013-03-11  5.16.3 ✓        Ricardo Signes
   ????-??-??  5.16.4          ??
-
-=head2 Perl 5.14
-
-Release schedule (with release managers):
-
-  2011-05-14  5.14.0 (final)  Jesse Vincent
-  2011-06-16  5.14.1 ✓        Jesse Vincent
-  2011-09-14  5.14.2 ✓        Florian Ragwitz
-  2012-10-12  5.14.3 ✓        Dominic Hargreaves
-  2013-03-10  5.14.4 ✓        David Mitchell
-  ????-??-??  5.14.5          ??
 
 =head1 DEVELOPMENT RELEASE SCHEDULE
 
