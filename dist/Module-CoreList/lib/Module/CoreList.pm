@@ -8813,6 +8813,7 @@ for my $version (sort { $a <=> $b } keys %delta) {
 
     5.019    => {
         delta_from => 5.018,
+        changed => { 'Module::Build' => 1 },
         removed => { map { $_ => 1 } qw/
             Archive::Extract
             B::Lint
