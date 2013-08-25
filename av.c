@@ -63,7 +63,7 @@ extended.
 */
 
 void
-Perl_av_extend(pTHX_ AV *av, I32 key)
+Perl_av_extend(pTHX_ AV *av, SSize_t key)
 {
     dVAR;
     MAGIC *mg;
@@ -84,7 +84,7 @@ Perl_av_extend(pTHX_ AV *av, I32 key)
 
 /* The guts of av_extend.  *Not* for general use! */
 void
-Perl_av_extend_guts(pTHX_ AV *av, I32 key, SSize_t *maxp, SV ***allocp,
+Perl_av_extend_guts(pTHX_ AV *av, SSize_t key, SSize_t *maxp, SV ***allocp,
 			  SV ***arrayp)
 {
     dVAR;
@@ -93,8 +93,8 @@ Perl_av_extend_guts(pTHX_ AV *av, I32 key, SSize_t *maxp, SV ***allocp,
 
     if (key > *maxp) {
 	SV** ary;
-	I32 tmp;
-	I32 newmax;
+	SSize_t tmp;
+	SSize_t newmax;
 
 	if (av && *allocp != *arrayp) {
 	    ary = *allocp + AvFILLp(av) + 1;

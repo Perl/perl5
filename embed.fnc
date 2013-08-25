@@ -209,8 +209,9 @@ ApM	|void	|apply_attrs_string|NN const char *stashpv|NN CV *cv|NN const char *at
 Apd	|void	|av_clear	|NN AV *av
 Apd	|SV*	|av_delete	|NN AV *av|I32 key|I32 flags
 ApdR	|bool	|av_exists	|NN AV *av|I32 key
-Apd	|void	|av_extend	|NN AV *av|I32 key
-p	|void	|av_extend_guts	|NULLOK AV *av|I32 key|NN SSize_t *maxp \
+Apd	|void	|av_extend	|NN AV *av|SSize_t key
+p	|void	|av_extend_guts	|NULLOK AV *av|SSize_t key \
+				|NN SSize_t *maxp \
 				|NN SV ***allocp|NN SV ***arrayp
 ApdR	|SV**	|av_fetch	|NN AV *av|I32 key|I32 lval
 Apd	|void	|av_fill	|NN AV *av|I32 fill
@@ -1265,7 +1266,7 @@ Anp	|Signal_t |csighandler	|int sig|NULLOK siginfo_t *info|NULLOK void *uap
 np	|Signal_t |sighandler	|int sig
 Anp	|Signal_t |csighandler	|int sig
 #endif
-Ap	|SV**	|stack_grow	|NN SV** sp|NN SV** p|int n
+Ap	|SV**	|stack_grow	|NN SV** sp|NN SV** p|SSize_t n
 Ap	|I32	|start_subparse	|I32 is_format|U32 flags
 : Used in pp_ctl.c
 p	|void	|sub_crush_depth|NN CV* cv

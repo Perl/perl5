@@ -27,7 +27,7 @@
 #include "perl.h"
 
 SV**
-Perl_stack_grow(pTHX_ SV **sp, SV **p, int n)
+Perl_stack_grow(pTHX_ SV **sp, SV **p, SSize_t n)
 {
     dVAR;
 

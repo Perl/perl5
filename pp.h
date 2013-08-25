@@ -156,7 +156,7 @@ Pops a long off the stack.
 /* Go to some pains in the rare event that we must extend the stack. */
 
 /*
-=for apidoc Am|void|EXTEND|SP|int nitems
+=for apidoc Am|void|EXTEND|SP|SSize_t nitems
 Used to extend the argument stack for an XSUB's return values. Once
 used, guarantees that there is room for at least C<nitems> to be pushed
 onto the stack.
@@ -278,13 +278,13 @@ Does not use C<TARG>.  See also C<XPUSHu>, C<mPUSHu> and C<PUSHu>.
 =cut
 */
 
-#define EXTEND(p,n)    (void)(UNLIKELY(PL_stack_max - p < (int)(n)) &&         \
-			    (sp = stack_grow(sp,p, (int) (n))))
+#define EXTEND(p,n)    (void)(UNLIKELY(PL_stack_max - p < (SSize_t)(n)) &&     \
+			    (sp = stack_grow(sp,p, (SSize_t) (n))))
 
 /* Same thing, but update mark register too. */
 #define MEXTEND(p,n)   STMT_START {if (UNLIKELY(PL_stack_max - p < (int)(n))) {\
                            const int markoff = mark - PL_stack_base;           \
-                           sp = stack_grow(sp,p,(int) (n));                    \
+                           sp = stack_grow(sp,p,(SSize_t) (n));                \
                            mark = PL_stack_base + markoff;                     \
                        } } STMT_END
 

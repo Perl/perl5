@@ -160,12 +160,12 @@ PERL_CALLCONV bool	Perl_av_exists(pTHX_ AV *av, I32 key)
 #define PERL_ARGS_ASSERT_AV_EXISTS	\
 	assert(av)
 
-PERL_CALLCONV void	Perl_av_extend(pTHX_ AV *av, I32 key)
+PERL_CALLCONV void	Perl_av_extend(pTHX_ AV *av, SSize_t key)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_AV_EXTEND	\
 	assert(av)
 
-PERL_CALLCONV void	Perl_av_extend_guts(pTHX_ AV *av, I32 key, SSize_t *maxp, SV ***allocp, SV ***arrayp)
+PERL_CALLCONV void	Perl_av_extend_guts(pTHX_ AV *av, SSize_t key, SSize_t *maxp, SV ***allocp, SV ***arrayp)
 			__attribute__nonnull__(pTHX_3)
 			__attribute__nonnull__(pTHX_4)
 			__attribute__nonnull__(pTHX_5);
@@ -3794,7 +3794,7 @@ PERL_CALLCONV void	Perl_sortsv_flags(pTHX_ SV** array, size_t num_elts, SVCOMPAR
 #define PERL_ARGS_ASSERT_SORTSV_FLAGS	\
 	assert(cmp)
 
-PERL_CALLCONV SV**	Perl_stack_grow(pTHX_ SV** sp, SV** p, int n)
+PERL_CALLCONV SV**	Perl_stack_grow(pTHX_ SV** sp, SV** p, SSize_t n)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_STACK_GROW	\
