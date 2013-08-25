@@ -308,6 +308,31 @@ sub format_arg {
     return "\"".$arg."\"".$suffix;
 }
 
+sub Regexp::CARP_TRACE {
+    my $arg = "$_[0]";
+    downgrade($arg, 1);
+    if(UTF8_REGEXP_PROBLEM && is_utf8($arg)) {
+	for(my $i = length($arg); $i--; ) {
+	    my $o = ord(substr($arg, $i, 1));
+	    my $x = substr($arg, 0, 0);   # work around bug on Perl 5.8.{1,2}
+	    substr $arg, $i, 1, sprintf("\\x{%x}", $o)
+		if $o < 0x20 || $o > 0x7f;
+	}
+    } else {
+	$arg =~ s/([^ -~])/sprintf("\\x{%x}",ord($1))/eg;
+    }
+    downgrade($arg, 1);
+    my $suffix = "";
+    if($arg =~ /\A\(\?\^?([a-z]*)(?:-[a-z]*)?:(.*)\)\z/s) {
+	($suffix, $arg) = ($1, $2);
+    }
+    if ( 2 < $MaxArgLen and $MaxArgLen < length($arg) ) {
+        substr ( $arg, $MaxArgLen - 3 ) = "";
+	$suffix = "...".$suffix;
+    }
+    return "qr($arg)$suffix";
+}
+
 # Takes an inheritance cache and a package and returns
 # an anon hash of known inheritances and anon array of
 # inheritances which consequences have not been figured
@@ -830,14 +855,6 @@ Defaults to C<0>.
 The Carp routines don't handle exception objects currently.
 If called with a first argument that is a reference, they simply
 call die() or warn(), as appropriate.
-
-If a subroutine argument in a stack trace is a reference to a regexp
-object, the manner in which it is shown in the stack trace depends on
-whether the L<overload> module has been loaded.  This happens because
-regexp objects effectively have overloaded stringification behaviour
-without using the L<overload> module.  As a workaround, deliberately
-loading the L<overload> module will mean that Carp consistently provides
-the intended behaviour (of bypassing the overloading).
 
 Some of the Carp code assumes that Perl's basic character encoding is
 ASCII, and will go wrong on an EBCDIC platform.

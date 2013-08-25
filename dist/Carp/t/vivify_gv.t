@@ -7,7 +7,7 @@ our $has_strval; BEGIN { $has_strval = exists($overload::{"StrVal"}); }
 our $has_sv2obj; BEGIN { $has_sv2obj = exists($B::{"svref_2object"}); }
 
 use Carp;
-sub { sub { Carp::longmess("x") }->() }->(\1, "\x{2603}");
+sub { sub { Carp::longmess("x") }->() }->(\1, "\x{2603}", qr/\x{2603}/);
 
 print !(exists($utf8::{"is_utf8"}) xor $has_is_utf8) ? "" : "not ", "ok 1\n";
 print !(exists($utf8::{"downgrade"}) xor $has_dgrade) ? "" : "not ", "ok 2\n";
