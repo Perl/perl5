@@ -119,6 +119,15 @@ XXX
 
 =item *
 
+L<B> has been upgraded from 1.45 to 1.46.
+
+The fix for [perl #118525] introduced a regression in the behaviour of
+C<B::CV::GV>, changing the return value from a C<B::SPECIAL> object on
+a C<NULL> C<CvGV> to C<undef>.  C<B::CV::GV> again returns a
+C<B::SPECIAL> object in this case. [perl #119351]
+
+=item *
+
 L<Carp> has been upgraded from version 1.31 to 1.32.
 
 =over 4
