@@ -49,6 +49,9 @@ L<[perl #119315]|https://rt.perl.org/rt3/Ticket/Display.html?id=119315>.
 
 =item Pluggable keywords
 
+The ticket for this feature is
+L<[perl #119455]|https://rt.perl.org/rt3/Ticket/Display.html?id=119455>.
+
 See L<perlapi/PL_keyword_plugin> for the mechanism.
 
 Introduced in: Perl 5.11.2
