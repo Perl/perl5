@@ -289,7 +289,6 @@ sub format_arg {
 	$suffix = "...";
     }
     if(UTF8_REGEXP_PROBLEM && is_utf8($arg)) {
-	print "len = @{[length($arg)]}\n";
 	for(my $i = length($arg); $i--; ) {
 	    my $c = substr($arg, $i, 1);
 	    my $x = substr($arg, 0, 0);   # work around bug on Perl 5.8.{1,2}
@@ -298,11 +297,8 @@ sub format_arg {
 		next;
 	    }
 	    my $o = ord($c);
-	    print "i=$i o=$o\n";
-	    print "arg=<$arg>\n";
 	    substr $arg, $i, 1, sprintf("\\x{%x}", $o)
 		if $o < 0x20 || $o > 0x7f;
-	    print "arg=<$arg>\n";
 	}
     } else {
 	$arg =~ s/([\"\\\$\@])/\\$1/g;
