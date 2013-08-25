@@ -7567,21 +7567,12 @@ Perl_yylex(pTHX)
 	case KEY___END__: {
 	    GV *gv;
 	    if (PL_rsfp && (!PL_in_eval || PL_tokenbuf[2] == 'D')) {
-		const char *pname = "main";
-		STRLEN plen = 4;
-		U32 putf8 = 0;
-		if (PL_tokenbuf[2] == 'D')
-		{
-		    HV * const stash =
-			PL_curstash ? PL_curstash : PL_defstash;
-		    pname = HvNAME_get(stash);
-		    plen  = HvNAMELEN (stash);
-		    if(HvNAMEUTF8(stash)) putf8 = SVf_UTF8;
-		}
-		gv = gv_fetchpvn_flags(
-			Perl_form(aTHX_ "%*s::DATA", (int)plen, pname),
-			plen+6, GV_ADD|putf8, SVt_PVIO
-		);
+		HV * const stash = PL_tokenbuf[2] == 'D' && PL_curstash
+					? PL_curstash
+					: PL_defstash;
+		gv = (GV *)*hv_fetchs(stash, "DATA", 1);
+		if (!isGV(gv))
+		    gv_init(gv,stash,"DATA",4,0);
 		GvMULTI_on(gv);
 		if (!GvIO(gv))
 		    GvIOp(gv) = newIO();
