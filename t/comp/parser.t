@@ -108,7 +108,8 @@ like( $@, qr/error/, 'lexical block discarded by yacc' );
 
 # bug #18573, used to corrupt memory
 eval q{ "\c" };
-like( $@, qr/^Missing control char name in \\c/, q("\c" string) );
+like( $@, qr/^Can't find string terminator '"' anywhere before EOF/,
+      q("\c" string) );
 
 eval q{ qq(foo$) };
 like( $@, qr/Final \$ should be \\\$ or \$name/, q($ at end of "" string) );

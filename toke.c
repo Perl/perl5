@@ -3738,6 +3738,7 @@ S_scan_const(pTHX_ char *start)
 		    *d++ = grok_bslash_c(*s++, has_utf8, 1);
 		}
 		else {
+		    assert(0);
 		    yyerror("Missing control char name in \\c");
 		}
 		continue;
@@ -5885,7 +5886,7 @@ Perl_yylex(pTHX)
 		}
 		sv = newSVpvn_flags(s, len, UTF ? SVf_UTF8 : 0);
 		if (*d == '(') {
-		    d = scan_str(d,TRUE,TRUE,FALSE, FALSE);
+		    d = scan_str(d,TRUE,TRUE,FALSE,FALSE,0);
 		    if (!d) {
 			/* MUST advance bufptr here to avoid bogus
 			   "at end of line" context messages from yyerror().
@@ -6788,7 +6789,7 @@ Perl_yylex(pTHX)
 	TERM(THING);
 
     case '\'':
-	s = scan_str(s,!!PL_madskills,FALSE,FALSE, FALSE);
+	s = scan_str(s,!!PL_madskills,FALSE,FALSE,FALSE,0);
 	DEBUG_T( { printbuf("### Saw string before %s\n", s); } );
 	if (PL_expect == XOPERATOR) {
 	    if (PL_lex_formbrack && PL_lex_brackets == PL_lex_formbrack) {
@@ -6803,7 +6804,7 @@ Perl_yylex(pTHX)
 	TERM(sublex_start());
 
     case '"':
-	s = scan_str(s,!!PL_madskills,FALSE,FALSE, FALSE);
+	s = scan_str(s,!!PL_madskills,FALSE,FALSE,FALSE,1);
 	DEBUG_T( { printbuf("### Saw string before %s\n", s); } );
 	if (PL_expect == XOPERATOR) {
 	    if (PL_lex_formbrack && PL_lex_brackets == PL_lex_formbrack) {
@@ -6826,7 +6827,7 @@ Perl_yylex(pTHX)
 	TERM(sublex_start());
 
     case '`':
-	s = scan_str(s,!!PL_madskills,FALSE,FALSE, FALSE);
+	s = scan_str(s,!!PL_madskills,FALSE,FALSE,FALSE,1);
 	DEBUG_T( { printbuf("### Saw backtick string before %s\n", s); } );
 	if (PL_expect == XOPERATOR)
 	    no_op("Backticks",s);
@@ -8300,7 +8301,7 @@ Perl_yylex(pTHX)
 	    LOP(OP_PIPE_OP,XTERM);
 
 	case KEY_q:
-	    s = scan_str(s,!!PL_madskills,FALSE,FALSE, FALSE);
+	    s = scan_str(s,!!PL_madskills,FALSE,FALSE,FALSE,0);
 	    if (!s)
 		missingterm(NULL);
 	    pl_yylval.ival = OP_CONST;
@@ -8311,7 +8312,7 @@ Perl_yylex(pTHX)
 
 	case KEY_qw: {
 	    OP *words = NULL;
-	    s = scan_str(s,!!PL_madskills,FALSE,FALSE, FALSE);
+	    s = scan_str(s,!!PL_madskills,FALSE,FALSE,FALSE,0);
 	    if (!s)
 		missingterm(NULL);
 	    PL_expect = XOPERATOR;
@@ -8361,7 +8362,7 @@ Perl_yylex(pTHX)
 	}
 
 	case KEY_qq:
-	    s = scan_str(s,!!PL_madskills,FALSE,FALSE, FALSE);
+	    s = scan_str(s,!!PL_madskills,FALSE,FALSE,FALSE,1);
 	    if (!s)
 		missingterm(NULL);
 	    pl_yylval.ival = OP_STRINGIFY;
@@ -8374,7 +8375,7 @@ Perl_yylex(pTHX)
 	    TERM(sublex_start());
 
 	case KEY_qx:
-	    s = scan_str(s,!!PL_madskills,FALSE,FALSE, FALSE);
+	    s = scan_str(s,!!PL_madskills,FALSE,FALSE,FALSE,2);
 	    if (!s)
 		missingterm(NULL);
 	    readpipe_override();
@@ -8691,7 +8692,7 @@ Perl_yylex(pTHX)
 
 		/* Look for a prototype */
 		if (*s == '(') {
-		    s = scan_str(s,!!PL_madskills,FALSE,FALSE, FALSE);
+		    s = scan_str(s,!!PL_madskills,FALSE,FALSE,FALSE,0);
 		    if (!s)
 			Perl_croak(aTHX_ "Prototype not terminated");
 		    (void)validate_proto(PL_subname, PL_lex_stuff, ckWARN(WARN_ILLEGALPROTO));
@@ -9594,7 +9595,7 @@ S_scan_pat(pTHX_ char *start, I32 type)
     PERL_ARGS_ASSERT_SCAN_PAT;
 
     s = scan_str(start,!!PL_madskills,FALSE, (PL_in_eval & EVAL_RE_REPARSING),
-                       TRUE /* look for escaped bracketed metas */ );
+                       TRUE /* look for escaped bracketed metas */, 1 );
 
     if (!s) {
 	const char * const delimiter = skipspace(start);
@@ -9687,7 +9688,7 @@ S_scan_subst(pTHX_ char *start)
     pl_yylval.ival = OP_NULL;
 
     s = scan_str(start,!!PL_madskills,FALSE,FALSE,
-                 TRUE /* look for escaped bracketed metas */ );
+                 TRUE /* look for escaped bracketed metas */, 1 );
 
     if (!s)
 	Perl_croak(aTHX_ "Substitution pattern not terminated");
@@ -9705,7 +9706,7 @@ S_scan_subst(pTHX_ char *start)
 #endif
 
     first_start = PL_multi_start;
-    s = scan_str(s,!!PL_madskills,FALSE,FALSE, FALSE);
+    s = scan_str(s,!!PL_madskills,FALSE,FALSE,FALSE,2);
     if (!s) {
 	if (PL_lex_stuff) {
 	    SvREFCNT_dec(PL_lex_stuff);
@@ -9791,7 +9792,7 @@ S_scan_trans(pTHX_ char *start)
 
     pl_yylval.ival = OP_NULL;
 
-    s = scan_str(start,!!PL_madskills,FALSE,FALSE, FALSE);
+    s = scan_str(start,!!PL_madskills,FALSE,FALSE,FALSE,0);
     if (!s)
 	Perl_croak(aTHX_ "Transliteration pattern not terminated");
 
@@ -9807,7 +9808,7 @@ S_scan_trans(pTHX_ char *start)
     }
 #endif
 
-    s = scan_str(s,!!PL_madskills,FALSE,FALSE, FALSE);
+    s = scan_str(s,!!PL_madskills,FALSE,FALSE,FALSE,0);
     if (!s) {
 	if (PL_lex_stuff) {
 	    SvREFCNT_dec(PL_lex_stuff);
@@ -10259,7 +10260,7 @@ S_scan_inputsymbol(pTHX_ char *start)
 
     if (d - PL_tokenbuf != len) {
 	pl_yylval.ival = OP_GLOB;
-	s = scan_str(start,!!PL_madskills,FALSE,FALSE, FALSE);
+	s = scan_str(start,!!PL_madskills,FALSE,FALSE,FALSE,1);
 	if (!s)
 	   Perl_croak(aTHX_ "Glob not terminated");
 	return s;
@@ -10365,6 +10366,7 @@ intro_sym:
 	deprecate_escaped_meta	issue a deprecation warning for cer-
 				tain paired metacharacters that appear
 				escaped within it
+	skip_cntrl		1 = skip over \c; 2 = skip if delim ne "'"
    returns: position to continue reading from buffer
    side-effects: multi_start, multi_close, lex_repl or lex_stuff, and
    	updates the read buffer.
@@ -10406,7 +10408,7 @@ intro_sym:
 
 STATIC char *
 S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims, int re_reparse,
-		 bool deprecate_escaped_meta
+		 bool deprecate_escaped_meta, int skip_cntrl
     )
 {
     dVAR;
@@ -10457,6 +10459,9 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims, int re_reparse,
 	if (!UTF8_IS_INVARIANT(term))
 	    has_utf8 = TRUE;
     }
+
+    if (skip_cntrl == 2 && termcode == '\'')
+	skip_cntrl = 0;
 
     /* mark where we are */
     PL_multi_start = CopLINE(PL_curcop);
@@ -10620,8 +10625,14 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims, int re_reparse,
 	    	/* embedded newlines increment the current line number */
 		if (*s == '\n' && !PL_rsfp && !PL_parser->filtered)
 		    COPLINE_INC_WITH_HERELINES;
+		if (skip_cntrl && *s == '\\' && s+2 < PL_bufend &&
+		    term != '\\' && term != 'c' && s[1]=='c')
+		{
+		    *to++ = *s++; /* \ */
+		    *to++ = *s++; /* c */
+		}		    
 		/* handle quoted delimiters */
-		if (*s == '\\' && s+1 < PL_bufend && term != '\\') {
+		else if (*s == '\\' && s+1 < PL_bufend && term != '\\') {
 		    if (!keep_quoted
 		        && (s[1] == term
 			    || (re_reparse && s[1] == '\\'))

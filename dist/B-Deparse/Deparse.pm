@@ -3970,7 +3970,7 @@ my %unctrl = # portable to EBCDIC
      "\cY" => '\cY',
      "\cZ" => '\cZ',
      "\c[" => '\c[',	# unused
-     "\c\\" => '\c\\',	# unused
+     eval '"\c\\"' || eval '"\c\"' => '\c\\',	# unused
      "\c]" => '\c]',	# unused
      "\c_" => '\c_',	# unused
     );
