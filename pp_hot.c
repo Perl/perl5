@@ -326,11 +326,11 @@ STATIC void
 S_pushav(pTHX_ AV* const av)
 {
     dSP;
-    const I32 maxarg = AvFILL(av) + 1;
+    const SSize_t maxarg = AvFILL(av) + 1;
     EXTEND(SP, maxarg);
     if (SvRMAGICAL(av)) {
-        U32 i;
-        for (i=0; i < (U32)maxarg; i++) {
+        PADOFFSET i;
+        for (i=0; i < (PADOFFSET)maxarg; i++) {
             SV ** const svp = av_fetch(av, i, FALSE);
             /* See note in pp_helem, and bug id #27839 */
             SP[i+1] = svp
@@ -339,8 +339,8 @@ S_pushav(pTHX_ AV* const av)
         }
     }
     else {
-        U32 i;
-        for (i=0; i < (U32)maxarg; i++) {
+        PADOFFSET i;
+        for (i=0; i < (PADOFFSET)maxarg; i++) {
             SV * const sv = AvARRAY(av)[i];
             SP[i+1] = sv ? sv : &PL_sv_undef;
         }
@@ -924,7 +924,7 @@ PP(pp_rv2av)
 	}
 	else if (gimme == G_SCALAR) {
 	    dTARGET;
-	    const I32 maxarg = AvFILL(av) + 1;
+	    const SSize_t maxarg = AvFILL(av) + 1;
 	    SETi(maxarg);
 	}
     } else {
@@ -994,7 +994,7 @@ PP(pp_aassign)
 
     I32 gimme;
     HV *hash;
-    I32 i;
+    SSize_t i;
     int magic;
     U32 lval = 0;
 

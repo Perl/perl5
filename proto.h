@@ -149,12 +149,12 @@ PERL_CALLCONV SV**	Perl_av_create_and_unshift_one(pTHX_ AV **const avp, SV *cons
 #define PERL_ARGS_ASSERT_AV_CREATE_AND_UNSHIFT_ONE	\
 	assert(avp); assert(val)
 
-PERL_CALLCONV SV*	Perl_av_delete(pTHX_ AV *av, I32 key, I32 flags)
+PERL_CALLCONV SV*	Perl_av_delete(pTHX_ AV *av, SSize_t key, I32 flags)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_AV_DELETE	\
 	assert(av)
 
-PERL_CALLCONV bool	Perl_av_exists(pTHX_ AV *av, I32 key)
+PERL_CALLCONV bool	Perl_av_exists(pTHX_ AV *av, SSize_t key)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_AV_EXISTS	\
@@ -172,13 +172,13 @@ PERL_CALLCONV void	Perl_av_extend_guts(pTHX_ AV *av, SSize_t key, SSize_t *maxp,
 #define PERL_ARGS_ASSERT_AV_EXTEND_GUTS	\
 	assert(maxp); assert(allocp); assert(arrayp)
 
-PERL_CALLCONV SV**	Perl_av_fetch(pTHX_ AV *av, I32 key, I32 lval)
+PERL_CALLCONV SV**	Perl_av_fetch(pTHX_ AV *av, SSize_t key, I32 lval)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_AV_FETCH	\
 	assert(av)
 
-PERL_CALLCONV void	Perl_av_fill(pTHX_ AV *av, I32 fill)
+PERL_CALLCONV void	Perl_av_fill(pTHX_ AV *av, SSize_t fill)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_AV_FILL	\
 	assert(av)
@@ -188,13 +188,13 @@ PERL_CALLCONV IV*	Perl_av_iter_p(pTHX_ AV *av)
 #define PERL_ARGS_ASSERT_AV_ITER_P	\
 	assert(av)
 
-PERL_CALLCONV I32	Perl_av_len(pTHX_ AV *av)
+PERL_CALLCONV SSize_t	Perl_av_len(pTHX_ AV *av)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_AV_LEN	\
 	assert(av)
 
-PERL_CALLCONV AV*	Perl_av_make(pTHX_ I32 size, SV **strp)
+PERL_CALLCONV AV*	Perl_av_make(pTHX_ SSize_t size, SV **strp)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_AV_MAKE	\
@@ -222,16 +222,16 @@ PERL_CALLCONV SV*	Perl_av_shift(pTHX_ AV *av)
 #define PERL_ARGS_ASSERT_AV_SHIFT	\
 	assert(av)
 
-PERL_CALLCONV SV**	Perl_av_store(pTHX_ AV *av, I32 key, SV *val)
+PERL_CALLCONV SV**	Perl_av_store(pTHX_ AV *av, SSize_t key, SV *val)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_AV_STORE	\
 	assert(av)
 
-/* PERL_CALLCONV I32	Perl_av_tindex(pTHX_ AV *av)
+/* PERL_CALLCONV SSize_t	Perl_av_tindex(pTHX_ AV *av)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1); */
 
-PERL_STATIC_INLINE I32	S_av_top_index(pTHX_ AV *av)
+PERL_STATIC_INLINE SSize_t	S_av_top_index(pTHX_ AV *av)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_AV_TOP_INDEX	\
@@ -242,7 +242,7 @@ PERL_CALLCONV void	Perl_av_undef(pTHX_ AV *av)
 #define PERL_ARGS_ASSERT_AV_UNDEF	\
 	assert(av)
 
-PERL_CALLCONV void	Perl_av_unshift(pTHX_ AV *av, I32 num)
+PERL_CALLCONV void	Perl_av_unshift(pTHX_ AV *av, SSize_t num)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_AV_UNSHIFT	\
 	assert(av)
@@ -3506,16 +3506,16 @@ PERL_CALLCONV void	Perl_save_I8(pTHX_ I8* bytep)
 #define PERL_ARGS_ASSERT_SAVE_I8	\
 	assert(bytep)
 
-PERL_CALLCONV void	Perl_save_adelete(pTHX_ AV *av, I32 key)
+PERL_CALLCONV void	Perl_save_adelete(pTHX_ AV *av, SSize_t key)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_SAVE_ADELETE	\
 	assert(av)
 
-/* PERL_CALLCONV void	Perl_save_aelem(pTHX_ AV* av, I32 idx, SV **sptr)
+/* PERL_CALLCONV void	Perl_save_aelem(pTHX_ AV* av, SSize_t idx, SV **sptr)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_3); */
 
-PERL_CALLCONV void	Perl_save_aelem_flags(pTHX_ AV* av, I32 idx, SV **sptr, const U32 flags)
+PERL_CALLCONV void	Perl_save_aelem_flags(pTHX_ AV* av, SSize_t idx, SV **sptr, const U32 flags)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_3);
 #define PERL_ARGS_ASSERT_SAVE_AELEM_FLAGS	\

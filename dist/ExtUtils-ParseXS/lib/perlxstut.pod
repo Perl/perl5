@@ -1089,8 +1089,8 @@ Mytest.xs:
 	    SV * paths
 	INIT:
 	    AV * results;
-	    I32 numpaths = 0;
-	    int i, n;
+	    SSize_t numpaths = 0, n;
+	    int i;
 	    struct statfs buf;
 
 	    SvGETMAGIC(paths);

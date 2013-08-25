@@ -3886,12 +3886,12 @@ Perl__swash_inversion_hash(pTHX_ SV* const swash)
 						 &char_to, &to_len)))
 	{
 	    if (av_len(from_list) > 0) {
-		int i;
+		SSize_t i;
 
 		/* We iterate over all combinations of i,j to place each code
 		 * point on each list */
 		for (i = 0; i <= av_len(from_list); i++) {
-		    int j;
+		    SSize_t j;
 		    AV* i_list = newAV();
 		    SV** entryp = av_fetch(from_list, i, FALSE);
 		    if (entryp == NULL) {

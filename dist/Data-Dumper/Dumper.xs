@@ -393,7 +393,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
         int use_sparse_seen_hash, I32 useqq)
 {
     char tmpbuf[128];
-    U32 i;
+    Size_t i;
     char *c, *r, *realpack;
 #ifdef DD_USE_OLD_ID_FORMAT
     char id[128];
@@ -641,8 +641,8 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	}
 	else if (realtype == SVt_PVAV) {
 	    SV *totpad;
-	    I32 ix = 0;
-	    const I32 ixmax = av_len((AV *)ival);
+	    SSize_t ix = 0;
+	    const SSize_t ixmax = av_len((AV *)ival);
 	
 	    SV * const ixsv = newSViv(0);
 	    /* allowing for a 24 char wide array index */
@@ -819,7 +819,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		bool do_utf8 = FALSE;
 
                if (sortkeys) {
-                   if (!(keys && (I32)i <= av_len(keys))) break;
+                   if (!(keys && (SSize_t)i <= av_len(keys))) break;
                } else {
                    if (!(entry = hv_iternext((HV *)ival))) break;
                }
@@ -1209,7 +1209,8 @@ Data_Dumper_Dumpxs(href, ...)
 	    HV *seenhv = NULL;
 	    AV *postav, *todumpav, *namesav;
 	    I32 level = 0;
-	    I32 indent, terse, useqq, i, imax, postlen;
+	    I32 indent, terse, useqq;
+	    SSize_t i, imax, postlen;
 	    SV **svp;
 	    SV *val, *name, *pad, *xpad, *apad, *sep, *pair, *varname;
 	    SV *freezer, *toaster, *bless, *sortkeys;
@@ -1395,7 +1396,7 @@ Data_Dumper_Dumpxs(href, ...)
 		    sv_catsv(retval, valstr);
 		    sv_catsv(retval, sep);
 		    if (postlen >= 0) {
-			I32 i;
+			SSize_t i;
 			sv_catsv(retval, pad);
 			for (i = 0; i <= postlen; ++i) {
 			    SV *elem;

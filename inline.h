@@ -14,7 +14,7 @@
 
 /* ------------------------------- av.h ------------------------------- */
 
-PERL_STATIC_INLINE I32
+PERL_STATIC_INLINE SSize_t
 S_av_top_index(pTHX_ AV *av)
 {
     PERL_ARGS_ASSERT_AV_TOP_INDEX;

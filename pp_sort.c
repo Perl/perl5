@@ -1474,7 +1474,7 @@ PP(pp_sort)
 {
     dVAR; dSP; dMARK; dORIGMARK;
     SV **p1 = ORIGMARK+1, **p2;
-    I32 max, i;
+    SSize_t max, i;
     AV* av = NULL;
     HV *stash;
     GV *gv;

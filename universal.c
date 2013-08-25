@@ -1042,9 +1042,9 @@ XS(XS_PerlIO_get_layers)
 	if (gv && (io = GvIO(gv))) {
 	     AV* const av = PerlIO_get_layers(aTHX_ input ?
 					IoIFP(io) : IoOFP(io));
-	     I32 i;
-	     const I32 last = av_len(av);
-	     I32 nitem = 0;
+	     SSize_t i;
+	     const SSize_t last = av_len(av);
+	     SSize_t nitem = 0;
 	     
 	     for (i = last; i >= 0; i -= 3) {
 		  SV * const * const namsvp = av_fetch(av, i - 2, FALSE);
@@ -1186,8 +1186,8 @@ XS(XS_re_regnames)
     U32 flags;
     SV *ret;
     AV *av;
-    I32 length;
-    I32 i;
+    SSize_t length;
+    SSize_t i;
     SV **entry;
 
     if (items > 1)

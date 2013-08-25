@@ -207,28 +207,28 @@ Apd	|OP*	|op_prepend_elem|I32 optype|NULLOK OP* first|NULLOK OP* last
 p	|I32	|apply		|I32 type|NN SV** mark|NN SV** sp
 ApM	|void	|apply_attrs_string|NN const char *stashpv|NN CV *cv|NN const char *attrstr|STRLEN len
 Apd	|void	|av_clear	|NN AV *av
-Apd	|SV*	|av_delete	|NN AV *av|I32 key|I32 flags
-ApdR	|bool	|av_exists	|NN AV *av|I32 key
+Apd	|SV*	|av_delete	|NN AV *av|SSize_t key|I32 flags
+ApdR	|bool	|av_exists	|NN AV *av|SSize_t key
 Apd	|void	|av_extend	|NN AV *av|SSize_t key
 p	|void	|av_extend_guts	|NULLOK AV *av|SSize_t key \
 				|NN SSize_t *maxp \
 				|NN SV ***allocp|NN SV ***arrayp
-ApdR	|SV**	|av_fetch	|NN AV *av|I32 key|I32 lval
-Apd	|void	|av_fill	|NN AV *av|I32 fill
-ApdR	|I32	|av_len		|NN AV *av
-ApdR	|AV*	|av_make	|I32 size|NN SV **strp
+ApdR	|SV**	|av_fetch	|NN AV *av|SSize_t key|I32 lval
+Apd	|void	|av_fill	|NN AV *av|SSize_t fill
+ApdR	|SSize_t|av_len		|NN AV *av
+ApdR	|AV*	|av_make	|SSize_t size|NN SV **strp
 Apd	|SV*	|av_pop		|NN AV *av
 ApdoxM	|void	|av_create_and_push|NN AV **const avp|NN SV *const val
 Apd	|void	|av_push	|NN AV *av|NN SV *val
 : Used in scope.c, and by Data::Alias
 EXp	|void	|av_reify	|NN AV *av
 ApdR	|SV*	|av_shift	|NN AV *av
-Apd	|SV**	|av_store	|NN AV *av|I32 key|NULLOK SV *val
-AidR	|I32	|av_top_index	|NN AV *av
-AmpdR	|I32	|av_tindex	|NN AV *av
+Apd	|SV**	|av_store	|NN AV *av|SSize_t key|NULLOK SV *val
+AidR	|SSize_t|av_top_index	|NN AV *av
+AmpdR	|SSize_t|av_tindex	|NN AV *av
 Apd	|void	|av_undef	|NN AV *av
 ApdoxM	|SV**	|av_create_and_unshift_one|NN AV **const avp|NN SV *const val
-Apd	|void	|av_unshift	|NN AV *av|I32 num
+Apd	|void	|av_unshift	|NN AV *av|SSize_t num
 Apo	|SV**	|av_arylen_p	|NN AV *av
 Apo	|IV*	|av_iter_p	|NN AV *av
 #if defined(PERL_IN_AV_C)
@@ -1184,8 +1184,9 @@ Apda	|char*	|savesharedsvpv	|NN SV *sv
 Apda	|char*	|savesvpv	|NN SV* sv
 Ap	|void	|savestack_grow
 Ap	|void	|savestack_grow_cnt	|I32 need
-Amp	|void	|save_aelem	|NN AV* av|I32 idx|NN SV **sptr
-Ap	|void	|save_aelem_flags|NN AV* av|I32 idx|NN SV **sptr|const U32 flags
+Amp	|void	|save_aelem	|NN AV* av|SSize_t idx|NN SV **sptr
+Ap	|void	|save_aelem_flags|NN AV* av|SSize_t idx|NN SV **sptr \
+				 |const U32 flags
 Ap	|I32	|save_alloc	|I32 size|I32 pad
 Ap	|void	|save_aptr	|NN AV** aptr
 Ap	|AV*	|save_ary	|NN GV* gv
@@ -1193,7 +1194,7 @@ Ap	|void	|save_bool	|NN bool* boolp
 Ap	|void	|save_clearsv	|NN SV** svp
 Ap	|void	|save_delete	|NN HV *hv|NN char *key|I32 klen
 Ap	|void	|save_hdelete	|NN HV *hv|NN SV *keysv
-Ap	|void	|save_adelete	|NN AV *av|I32 key
+Ap	|void	|save_adelete	|NN AV *av|SSize_t key
 Ap	|void	|save_destructor|DESTRUCTORFUNC_NOCONTEXT_t f|NN void* p
 Ap	|void	|save_destructor_x|DESTRUCTORFUNC_t f|NULLOK void* p
 Apmb	|void	|save_freesv	|NULLOK SV* sv

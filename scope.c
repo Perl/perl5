@@ -597,14 +597,18 @@ Perl_save_hdelete(pTHX_ HV *hv, SV *keysv)
 }
 
 void
-Perl_save_adelete(pTHX_ AV *av, I32 key)
+Perl_save_adelete(pTHX_ AV *av, SSize_t key)
 {
     dVAR;
+    dSS_ADD;
 
     PERL_ARGS_ASSERT_SAVE_ADELETE;
 
     SvREFCNT_inc_void(av);
-    save_pushi32ptr(key, av, SAVEt_ADELETE);
+    SS_ADD_UV(key);
+    SS_ADD_PTR(av);
+    SS_ADD_IV(SAVEt_ADELETE);
+    SS_ADD_END(3);
 }
 
 void
@@ -661,16 +665,20 @@ S_save_pushptri32ptr(pTHX_ void *const ptr1, const I32 i, void *const ptr2,
 }
 
 void
-Perl_save_aelem_flags(pTHX_ AV *av, I32 idx, SV **sptr, const U32 flags)
+Perl_save_aelem_flags(pTHX_ AV *av, SSize_t idx, SV **sptr,
+			    const U32 flags)
 {
-    dVAR;
+    dVAR; dSS_ADD;
     SV *sv;
 
     PERL_ARGS_ASSERT_SAVE_AELEM_FLAGS;
 
     SvGETMAGIC(*sptr);
-    save_pushptri32ptr(SvREFCNT_inc_simple(av), idx, SvREFCNT_inc(*sptr),
-		       SAVEt_AELEM);
+    SS_ADD_PTR(SvREFCNT_inc_simple(av));
+    SS_ADD_IV(idx);
+    SS_ADD_PTR(SvREFCNT_inc(*sptr));
+    SS_ADD_UV(SAVEt_AELEM);
+    SS_ADD_END(4);
     /* The array needs to hold a reference count on its new element, so it
        must be AvREAL. */
     if (!AvREAL(av) && AvREIFY(av))
@@ -1107,7 +1115,7 @@ Perl_leave_scope(pTHX_ I32 base)
 	    Safefree(arg2.any_ptr);
 	    break;
 	case SAVEt_ADELETE:
-	    (void)av_delete(ARG0_AV, ARG1_I32, G_DISCARD);
+	    (void)av_delete(ARG0_AV, arg1.any_iv, G_DISCARD);
 	    SvREFCNT_dec(ARG0_AV);
 	    break;
 	case SAVEt_DESTRUCTOR_X:
@@ -1122,7 +1130,7 @@ Perl_leave_scope(pTHX_ I32 base)
 	    PL_stack_sp = PL_stack_base + arg0.any_i32;
 	    break;
 	case SAVEt_AELEM:		/* array element */
-	    svp = av_fetch(ARG2_AV, ARG1_I32, 1);
+	    svp = av_fetch(ARG2_AV, arg1.any_iv, 1);
 	    if (!AvREAL(ARG2_AV) && AvREIFY(ARG2_AV)) /* undo reify guard */
 		SvREFCNT_dec(ARG0_SV);
 	    if (svp) {

@@ -829,7 +829,7 @@ preprocessing token; the type of I<arg> depends on I<which>.
 #define CALL_BLOCK_HOOKS(which, arg) \
     STMT_START { \
 	if (PL_blockhooks) { \
-	    I32 i; \
+	    SSize_t i; \
 	    for (i = av_len(PL_blockhooks); i >= 0; i--) { \
 		SV *sv = AvARRAY(PL_blockhooks)[i]; \
 		BHK *hk; \
