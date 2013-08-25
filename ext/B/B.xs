@@ -1896,11 +1896,8 @@ const_sv(cv)
 void
 GV(cv)
 	B::CV cv
-    PREINIT:
-        GV *gv;
     CODE:
-	gv = CvGV(cv);
-	ST(0) = gv ? make_sv_object(aTHX_ (SV*)gv) : &PL_sv_undef;
+	ST(0) = make_sv_object(aTHX_ (SV*)CvGV(cv));
 
 #if PERL_VERSION > 17
 
