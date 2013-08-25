@@ -6,7 +6,7 @@ BEGIN {
     require 'test.pl';
 }
 
-plan (136);
+plan (137);
 
 #
 # @foo, @bar, and @ary are also used from tie-stdarray after tie-ing them
@@ -472,6 +472,10 @@ sub {
       'exists returns true for &PL_sv_undef elem [perl #7508]';
     is \$_[0], \undef, 'undef preserves identity in array [perl #109726]';
 }->(undef);
+# and that padav also knows how to handle the resulting NULLs
+@_ = sub { my @a; $a[1]=1; @a }->();
+is join (" ", map $_//"undef", @_), "undef 1",
+  'returning my @a with nonexistent elements'; 
 
 # [perl #118691]
 @plink=@plunk=();

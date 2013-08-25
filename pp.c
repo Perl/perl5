@@ -98,7 +98,11 @@ PP(pp_padav)
 	    }
 	}
 	else {
-	    Copy(AvARRAY((const AV *)TARG), SP+1, maxarg, SV*);
+	    PADOFFSET i;
+	    for (i=0; i < (PADOFFSET)maxarg; i++) {
+		SV * const sv = AvARRAY((const AV *)TARG)[i];
+		SP[i+1] = sv ? sv : &PL_sv_undef;
+	    }
 	}
 	SP += maxarg;
     }
