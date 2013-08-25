@@ -10356,11 +10356,15 @@ intro_sym:
 
 
 /* scan_str
-   takes: start position in buffer
-	  keep_quoted preserve \ on the embedded delimiter(s)
-	  keep_delims preserve the delimiters around the string
-	  re_reparse  compiling a run-time /(?{})/:
-			collapse // to /,  and skip encoding src
+   takes:
+	start			position in buffer
+	keep_quoted		preserve \ on the embedded delimiter(s)
+	keep_delims		preserve the delimiters around the string
+	re_reparse		compiling a run-time /(?{})/:
+				   collapse // to /,  and skip encoding src
+	deprecate_escaped_meta	issue a deprecation warning for cer-
+				tain paired metacharacters that appear
+				escaped within it
    returns: position to continue reading from buffer
    side-effects: multi_start, multi_close, lex_repl or lex_stuff, and
    	updates the read buffer.
@@ -10402,9 +10406,7 @@ intro_sym:
 
 STATIC char *
 S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims, int re_reparse,
-        bool deprecate_escaped_meta /* Should we issue a deprecation warning
-                                       for certain paired metacharacters that
-                                       appear escaped within it */
+		 bool deprecate_escaped_meta
     )
 {
     dVAR;
