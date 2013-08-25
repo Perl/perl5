@@ -1237,6 +1237,8 @@ PP(pp_flop)
 	    max = SvIV_nomg(right);
 	    if (max >= i) {
 		j = max - i + 1;
+		if (j > SSize_t_MAX)
+		    Perl_croak(aTHX_ "Out of memory during list extend");
 		EXTEND_MORTAL(j);
 		EXTEND(SP, j);
 	    }

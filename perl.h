@@ -1601,6 +1601,8 @@ typedef UVTYPE UV;
 #  endif
 #endif
 
+#define SSize_t_MAX (SSize_t)(~(size_t)0 >> 1)
+
 #ifndef HAS_QUAD
 # undef PERL_NEED_MY_HTOLE64
 # undef PERL_NEED_MY_LETOH64
