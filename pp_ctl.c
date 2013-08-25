@@ -1230,8 +1230,10 @@ PP(pp_flop)
 	if (RANGE_IS_NUMERIC(left,right)) {
 	    IV i, j;
 	    IV max;
-	    if ((SvOK(left) && SvNV_nomg(left) < IV_MIN) ||
-		(SvOK(right) && SvNV_nomg(right) > IV_MAX))
+	    if ((SvOK(left) && !SvIOK(left) && SvNV_nomg(left) < IV_MIN) ||
+		(SvOK(right) && (SvIOK(right)
+				 ? SvIsUV(right) && SvUV(right) > IV_MAX
+				 : SvNV_nomg(right) > IV_MAX)))
 		DIE(aTHX_ "Range iterator outside integer range");
 	    i = SvIV_nomg(left);
 	    max = SvIV_nomg(right);
