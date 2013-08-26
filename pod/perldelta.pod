@@ -419,7 +419,8 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+The value of C<$^E> is now saved across signal handlers on
+Win32. [perl #85104]
 
 =back
 
