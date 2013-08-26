@@ -252,6 +252,8 @@ will be lost.
          |                 |
          |                 +- pipe
          |                 |
+         |                 +- syscalls
+         |                 |
          |                 +- unopened
          |
          +- misc

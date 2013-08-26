@@ -366,3 +366,35 @@ open ᶠᚻ2, ">doiowarn.tmp"; close ᶠᚻ2;
 unlink "doiowarn.tmp";
 EXPECT
 Filehandle STDIN reopened as ᶠᚻ1 only for output at - line 16.
+########
+open(my $i, "foo\0bar");
+use warnings 'io';
+open(my $i, "foo\0bar");
+EXPECT
+Invalid \0 character in pathname for open: foo\0bar at - line 3.
+########
+chmod(0, "foo\0bar");
+use warnings 'io';
+chmod(0, "foo\0bar");
+EXPECT
+Invalid \0 character in pathname for chmod: foo\0bar at - line 3.
+########
+unlink("foo\0bar", "foo\0bar2");
+use warnings 'io';
+unlink("foo\0bar", "foo\0bar2");
+EXPECT
+Invalid \0 character in pathname for unlink: foo\0bar at - line 3.
+Invalid \0 character in pathname for unlink: foo\0bar2 at - line 3.
+########
+utime(-1, -1, "foo\0bar", "foo\0bar2");
+use warnings 'io';
+utime(-1, -1, "foo\0bar", "foo\0bar2");
+EXPECT
+Invalid \0 character in pathname for utime: foo\0bar at - line 3.
+Invalid \0 character in pathname for utime: foo\0bar2 at - line 3.
+########
+my @foo = glob "foo\0bar";
+use warnings 'io';
+my @bar = glob "foo\0bar";
+EXPECT
+Invalid \0 character in pattern for glob: foo\0bar at - line 3.

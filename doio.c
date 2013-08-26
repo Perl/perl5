@@ -216,6 +216,9 @@ Perl_do_openn(pTHX_ GV *gv, const char *oname, I32 len, int as_raw,
 		goto say_false;
 	    }
 #endif /* USE_STDIO */
+	    if (!IS_SAFE_PATHNAME(*svp, "open"))
+                goto say_false;
+
 	    name = (SvOK(*svp) || SvGMAGICAL(*svp)) ?
 			savesvpv (*svp) : savepvs ("");
 	    SAVEFREEPV(name);
@@ -1660,8 +1663,10 @@ Perl_apply(pTHX_ I32 type, SV **mark, SV **sp)
 		else {
 		    const char *name = SvPV_nomg_const_nolen(*mark);
 		    APPLY_TAINT_PROPER();
-		    if (PerlLIO_chmod(name, val))
-			tot--;
+                    if (!IS_SAFE_PATHNAME(*mark, "chmod") ||
+                        PerlLIO_chmod(name, val)) {
+                        tot--;
+                    }
 		}
 	    }
 	}
@@ -1694,8 +1699,10 @@ Perl_apply(pTHX_ I32 type, SV **mark, SV **sp)
 		else {
 		    const char *name = SvPV_nomg_const_nolen(*mark);
 		    APPLY_TAINT_PROPER();
-		    if (PerlLIO_chown(name, val, val2))
+                    if (!IS_SAFE_PATHNAME(*mark, "chown") ||
+                        PerlLIO_chown(name, val, val2)) {
 			tot--;
+                    }
 		}
 	    }
 	}
@@ -1795,7 +1802,10 @@ nothing in the core.
 	while (++mark <= sp) {
 	    s = SvPV_nolen_const(*mark);
 	    APPLY_TAINT_PROPER();
-	    if (PerlProc_geteuid() || PL_unsafe) {
+	    if (!IS_SAFE_PATHNAME(*mark, "unlink")) {
+                tot--;
+            }
+	    else if (PerlProc_geteuid() || PL_unsafe) {
 		if (UNLINK(s))
 		    tot--;
 	    }
@@ -1873,6 +1883,10 @@ nothing in the core.
 		else {
 		    const char * const name = SvPV_nomg_const_nolen(*mark);
 		    APPLY_TAINT_PROPER();
+		    if (!IS_SAFE_PATHNAME(*mark, "utime")) {
+                        tot--;
+                    }
+                    else
 #ifdef HAS_FUTIMES
 		    if (utimes(name, (struct timeval *)utbufp))
 #else
@@ -2364,6 +2378,9 @@ Perl_start_glob (pTHX_ SV *tmpglob, IO *io)
     PerlIO *fp;
 
     PERL_ARGS_ASSERT_START_GLOB;
+
+    if (!IS_SAFE_SYSCALL(tmpglob, "pattern", "glob"))
+        return NULL;
 
     ENTER;
     SAVEFREESV(tmpcmd);

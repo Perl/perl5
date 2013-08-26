@@ -1601,6 +1601,8 @@ Am	|I32	|whichsig	|NN const char* sig
 Ap     |I32    |whichsig_sv    |NN SV* sigsv
 Ap     |I32    |whichsig_pv    |NN const char* sig
 Ap     |I32    |whichsig_pvn   |NN const char* sig|STRLEN len
+: used to check for NULs in pathnames and other names
+AiR	|bool	|is_safe_syscall|NN SV *pv|NN const char *what|NN const char *op_name
 : Used in pp_ctl.c
 p	|void	|write_to_stderr|NN SV* msv
 : Used in op.c
@@ -2280,7 +2282,7 @@ s	|void	|printbuf	|NN const char *const fmt|NN const char *const s
 EXMp	|bool	|validate_proto	|NN SV *name|NULLOK SV *proto|bool warn
 
 #if defined(PERL_IN_UNIVERSAL_C)
-s	|bool|isa_lookup	|NN HV *stash|NN const char * const name \
+s	|bool	|isa_lookup	|NN HV *stash|NN const char * const name \
                                         |STRLEN len|U32 flags
 #endif
 
@@ -2292,7 +2294,7 @@ s	|bool	|is_cur_LC_category_utf8|int category
 #if defined(PERL_IN_UTIL_C)
 s	|const COP*|closest_cop	|NN const COP *cop|NULLOK const OP *o
 s	|SV*	|mess_alloc
-s	|SV *|with_queued_errors|NN SV *ex
+s	|SV *	|with_queued_errors|NN SV *ex
 s	|bool	|invoke_exception_hook|NULLOK SV *ex|bool warn
 #if defined(PERL_MEM_LOG) && !defined(PERL_MEM_LOG_NOIMPL)
 sn	|void	|mem_log_common	|enum mem_log_type mlt|const UV n|const UV typesize \

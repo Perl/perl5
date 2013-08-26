@@ -19,7 +19,7 @@
 #
 # This script is normally invoked from regen.pl.
 
-$VERSION = '1.02_03';
+$VERSION = '1.02_05';
 
 BEGIN {
     require 'regen/regen_lib.pl';
@@ -40,6 +40,7 @@ my $tree = {
        				'newline'	=> [ 5.008, DEFAULT_OFF],
        				'exec'		=> [ 5.008, DEFAULT_OFF],
        				'layer'		=> [ 5.008, DEFAULT_OFF],
+				'syscalls'      => [ 5.019, DEFAULT_OFF],
 			   }],
      	'syntax'	=> [ 5.008, { 	
 				'ambiguous'	=> [ 5.008, DEFAULT_OFF],
@@ -59,7 +60,7 @@ my $tree = {
 	 			'internal'	=> [ 5.008, DEFAULT_OFF],
          			'debugging'	=> [ 5.008, DEFAULT_ON],
          			'malloc'	=> [ 5.008, DEFAULT_ON],
-	 		   }],
+			   }],
         'deprecated'	=> [ 5.008, DEFAULT_ON],
        	'void'		=> [ 5.008, DEFAULT_OFF],
        	'recursion'	=> [ 5.008, DEFAULT_OFF],
@@ -465,7 +466,7 @@ close_and_rename($lexwarn);
 __END__
 package warnings;
 
-our $VERSION = '1.18';
+our $VERSION = '1.19';
 
 # Verify that we're called correctly so that warnings will work.
 # see also strict.pm.

@@ -3586,9 +3586,20 @@ S_check_type_and_open(pTHX_ SV *name)
 {
     Stat_t st;
     const char *p = SvPV_nolen_const(name);
-    const int st_rc = PerlLIO_stat(p, &st);
+    int st_rc;
 
     PERL_ARGS_ASSERT_CHECK_TYPE_AND_OPEN;
+
+    /* checking here captures a reasonable error message when
+     * PERL_DISABLE_PMC is true, but when PMC checks are enabled, the
+     * user gets a confusing message about looking for the .pmc file
+     * rather than for the .pm file.
+     * This check prevents a \0 in @INC causing problems.
+     */
+    if (!IS_SAFE_PATHNAME(name, "require"))
+        return NULL;
+
+    st_rc = PerlLIO_stat(p, &st);
 
     if (st_rc < 0 || S_ISDIR(st.st_mode) || S_ISBLK(st.st_mode)) {
 	return NULL;
@@ -3609,6 +3620,13 @@ S_doopen_pm(pTHX_ SV *name)
     const char *p = SvPV_const(name, namelen);
 
     PERL_ARGS_ASSERT_DOOPEN_PM;
+
+    /* check the name before trying for the .pmc name to avoid the
+     * warning referring to the .pmc which the user probably doesn't
+     * know or care about
+     */
+    if (!IS_SAFE_PATHNAME(name, "require"))
+        return NULL;
 
     if (namelen > 3 && memEQs(p + namelen - 3, 3, ".pm")) {
 	SV *const pmcsv = sv_newmortal();
@@ -3742,6 +3760,12 @@ PP(pp_require)
     name = SvPV_const(sv, len);
     if (!(name && len > 0 && *name))
 	DIE(aTHX_ "Null filename used");
+    if (!IS_SAFE_PATHNAME(sv, "require")) {
+        DIE(aTHX_ "Can't locate %s:   %s",
+            pv_escape(newSVpvs_flags("",SVs_TEMP),SvPVX(sv),SvCUR(sv),
+                      SvCUR(sv)*2,NULL, SvUTF8(sv)?PERL_PV_ESCAPE_UNI:0),
+            Strerror(ENOENT));
+    }
     TAINT_PROPER("require");
 
     path_searchable = path_is_searchable(name);

@@ -227,7 +227,9 @@ csh_glob(pTHX_ AV *entries, SV *patsv)
 
 	assert(SvTYPE(entries) != SVt_PVAV);
 	sv_upgrade((SV *)entries, SVt_PVAV);
-	
+        if (!IS_SAFE_SYSCALL(patsv, "pattern", "glob"))
+            return FALSE;
+
 	if (patav) {
 	    I32 items = AvFILLp(patav) + 1;
 	    SV **svp = AvARRAY(patav);

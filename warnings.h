@@ -95,9 +95,13 @@
 #define WARN_EXPERIMENTAL__REGEX_SETS 54
 #define WARN_EXPERIMENTAL__SMARTMATCH 55
 
-#define WARNsize		14
-#define WARN_ALLstring		"\125\125\125\125\125\125\125\125\125\125\125\125\125\125"
-#define WARN_NONEstring		"\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
+/* Warnings Categories added in Perl 5.019 */
+
+#define WARN_SYSCALLS		 56
+
+#define WARNsize		15
+#define WARN_ALLstring		"\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125"
+#define WARN_NONEstring		"\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
 
 #define isLEXWARN_on 	(PL_curcop->cop_warnings != pWARN_STD)
 #define isLEXWARN_off	(PL_curcop->cop_warnings == pWARN_STD)

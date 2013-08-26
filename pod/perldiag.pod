@@ -2505,6 +2505,12 @@ the indicated name isn't valid.  See L<charnames/CUSTOM ALIASES>.
 (F) Only certain characters are valid for character names.  The
 indicated one isn't.  See L<charnames/CUSTOM ALIASES>.
 
+=item Invalid \0 character in %s for %s: %s\0%s
+
+(W syscalls) Embedded \0 characters in pathnames or other syscall
+arguments create a warning since 5.20. The parts after the \0 were
+formerly ignored by syscalls.
+
 =item Invalid conversion in %s: "%s"
 
 (W printf) Perl does not understand the given format conversion.  See
