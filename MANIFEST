@@ -5514,6 +5514,7 @@ t/uni/variables.t		See that the rules for variable names work
 t/uni/write.t			See if Unicode formats work
 t/win32/fs.t			Test Win32 link for compatibility
 t/win32/runenv.t		Test if Win* perl honors its env variables
+t/win32/signal.t		Test Win32 signal emulation
 t/win32/system.t		See if system works in Win*
 t/win32/system_tests		Test runner for system.t
 t/x2p/find2perl.t		Test find2perl
