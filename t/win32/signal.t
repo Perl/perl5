@@ -70,7 +70,7 @@ EOS
 	}
 	print "# signaled after $count loops\n";
 	print $! != 0 ? "not " : "", "ok 3 # \$! preserved\n";
-	print $^E != 0 ? "not " : "", "ok 4 # TODO \$^E preserved\n"
+	print $^E != 0 ? "not " : "", "ok 4 # \$^E preserved\n"
 	    or print STDERR "# \$^E = ", 0+$^E, "\n";
 	exit;
     }
