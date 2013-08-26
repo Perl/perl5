@@ -156,6 +156,11 @@ C<Carp> that expects C<Carp::Heavy> to provide subroutines.
 
 =back
 
+L<File::Glob> has been upgraded from version 1.20 to 1.21.
+
+C<glob()> now warns in the context of C<use warnings "syscalls";> if
+the supplied pattern has an internal NUL (C<"\0">) character.
+
 =item *
 
 L<Math::BigInt> has been upgraded from version 1.9992 to 1.9993.
@@ -255,7 +260,11 @@ XXX L<message|perldiag/"message">
 
 =item *
 
-XXX L<message|perldiag/"message">
+L<Invalid \0 character in %s for %s: %s\0%s|perldiag/"Invalid \0 character in %s for %s: %s\0%s">
+
+(W syscalls) Embedded \0 characters in pathnames or other syscall
+arguments create a warning since 5.20. The parts after the \0 were
+formerly ignored by syscalls.
 
 =back
 
