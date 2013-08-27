@@ -48,6 +48,7 @@ push @B::EXPORT_OK, (qw(minus_c ppname save_BEGINs
 @B::PVNV::ISA = qw(B::PVIV B::NV);
 @B::PVMG::ISA = 'B::PVNV';
 @B::REGEXP::ISA = 'B::PVMG' if $] >= 5.011;
+@B::INVLIST::ISA = 'B::PV'  if $] >= 5.019;
 @B::PVLV::ISA = 'B::GV';
 @B::BM::ISA = 'B::GV';
 @B::AV::ISA = 'B::PVMG';

@@ -21,13 +21,18 @@ typedef FILE * InputStream;
 
 static const char* const svclassnames[] = {
     "B::NULL",
+#if PERL_VERSION < 19
+    "B::BIND",
+#endif
     "B::IV",
     "B::NV",
 #if PERL_VERSION <= 10
     "B::RV",
 #endif
     "B::PV",
+#if PERL_VERSION >= 19
     "B::INVLIST",
+#endif
     "B::PVIV",
     "B::PVNV",
     "B::PVMG",
