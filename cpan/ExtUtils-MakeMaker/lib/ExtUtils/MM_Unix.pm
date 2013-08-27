@@ -15,7 +15,7 @@ use ExtUtils::MakeMaker qw($Verbose neatvalue);
 
 # If we make $VERSION an our variable parse_version() breaks
 use vars qw($VERSION);
-$VERSION = '6.72';
+$VERSION = '6.74';
 $VERSION = eval $VERSION;  ## no critic [BuiltinFunctions::ProhibitStringyEval]
 
 require ExtUtils::MM_Any;
@@ -583,7 +583,6 @@ sub init_dist {
 
     ($self->{DISTNAME} = $self->{NAME}) =~ s{::}{-}g unless $self->{DISTNAME};
     $self->{DISTVNAME} ||= $self->{DISTNAME}.'-'.$self->{VERSION};
-
 }
 
 =item dist (o)
@@ -601,6 +600,9 @@ sub dist {
     my($self, %attribs) = @_;
 
     my $make = '';
+    if ( $attribs{SUFFIX} && $attribs{SUFFIX} !~ m!^\.! ) {
+      $attribs{SUFFIX} = '.' . $attribs{SUFFIX};
+    }
     foreach my $key (qw(
             TAR TARFLAGS ZIP ZIPFLAGS COMPRESS SUFFIX SHAR
             PREOP POSTOP TO_UNIX
@@ -2522,8 +2524,12 @@ $(OBJECT) : $(FIRST_MAKEFILE)
 
     my $newer_than_target = $Is{VMS} ? '$(MMS$SOURCE_LIST)' : '$?';
     my $mpl_args = join " ", map qq["$_"], @ARGV;
-
-    $m .= sprintf <<'MAKE_FRAG', $newer_than_target, $mpl_args;
+    my $cross = '';
+    if (defined $::Cross::platform) {
+        # Inherited from win32/buildext.pl
+        $cross = "-MCross=$::Cross::platform ";
+    }
+    $m .= sprintf <<'MAKE_FRAG', $newer_than_target, $cross, $mpl_args;
 # We take a very conservative approach here, but it's worth it.
 # We move Makefile to Makefile.old here to avoid gnu make looping.
 $(FIRST_MAKEFILE) : Makefile.PL $(CONFIGDEP)
@@ -2532,7 +2538,7 @@ $(FIRST_MAKEFILE) : Makefile.PL $(CONFIGDEP)
 	-$(NOECHO) $(RM_F) $(MAKEFILE_OLD)
 	-$(NOECHO) $(MV)   $(FIRST_MAKEFILE) $(MAKEFILE_OLD)
 	- $(MAKE) $(USEMAKEFILE) $(MAKEFILE_OLD) clean $(DEV_NULL)
-	$(PERLRUN) Makefile.PL %s
+	$(PERLRUN) %sMakefile.PL %s
 	$(NOECHO) $(ECHO) "==> Your Makefile has been rebuilt. <=="
 	$(NOECHO) $(ECHO) "==> Please rerun the $(MAKE) command.  <=="
 	$(FALSE)
@@ -2645,15 +2651,11 @@ sub parse_version {
         next if $inpod || /^\s*#/;
         chop;
         next if /^\s*(if|unless|elsif)/;
-        s{\;\s*(?<![\\\$])\#.+?$}{}g;
         if ( m{^ \s* package \s+ \w[\w\:\']* \s+ (v?[0-9._]+) \s* ;  }x ) {
             local $^W = 0;
             $result = $1;
         }
-        elsif ( m{(?<!\\) ([\$*]) (([\w\:\']*) \bVERSION)\b .* [!><=][!><=]}x ) {
-            next;
-        }
-        elsif ( m{(?<!\\) ([\$*]) (([\w\:\']*) \bVERSION)\b .* =}x ) {
+        elsif ( m{(?<!\\) ([\$*]) (([\w\:\']*) \bVERSION)\b .* (?<![<>=!])\=[^=]}x ) {
 			$result = $self->get_version($parsefile, $1, $2);
         }
         else {

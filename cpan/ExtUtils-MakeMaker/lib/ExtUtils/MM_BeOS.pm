@@ -26,7 +26,7 @@ require ExtUtils::MM_Any;
 require ExtUtils::MM_Unix;
 
 our @ISA = qw( ExtUtils::MM_Any ExtUtils::MM_Unix );
-our $VERSION = '6.72';
+our $VERSION = '6.74';
 
 
 =item os_flavor

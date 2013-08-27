@@ -1,3 +1,68 @@
+6.74 Tue Aug 27 12:43:05 BST 2013
+    No changes from 6.73_12
+
+6.73_12 Fri Aug 23 10:49:13 BST 2013
+    Bug Fixes:
+    * Preserve runtime requires when PREREQ_PM argument is empty or undef
+      (miyagawa)
+    * RT#88037 regen run of Makefile.PL will use same -MCross arg as
+      initial .PL run (bulk88)
+
+6.73_11 Sat Aug 17 22:51:14 BST 2013
+    Bug Fixes:
+    * RT#87911 prepend SUFFIX with a '.' if one isn't supplied
+
+6.73_10 Fri Aug 16 16:40:09 BST 2013
+    Bug Fixes:
+    * RT#87839 resolve bootstrap problems when required prereqs
+      are missing
+
+6.73_09 Fri Aug  9 19:58:32 BST 2013
+    Bug Fixes:
+    * Bundle code from Text::ParseWords to handle splitting
+      PERL_MM_OPT (actually removing Text::ParseWords this time).
+
+6.73_08 Fri Aug  9 19:49:27 BST 2013
+    Bug Fixes:
+    * Bundle code from Text::ParseWords to handle splitting
+      PERL_MM_OPT.
+
+6.73_07 Wed Aug  7 16:07:04 BST 2013
+    Bug Fixes:
+    * Set ACTIVEPERL_CONFIG_SILENT=1 during tests to make
+      ActivePerl less vocal about things
+
+6.73_06 Tue Aug  6 00:50:08 BST 2013
+    New features:
+    * RT#70201 replace -M with Time::HiRes::stat
+
+    Bug Fixes:
+    * Split PERL_MM_OPT like a shell would, instead of split ' '
+
+    Win32 Fixes:
+    * Correct an oversight with Liblist Kid fix
+
+6.73_05 Mon Aug  5 17:44:00 BST 2013
+    Win32 fixes:
+    * Fix hash randomisation problems with Liblist Kid
+
+6.73_04 Thu Aug  1 22:34:31 BST 2013
+    Doc fixes:
+    * Corrected example for PM => {}
+
+6.73_03 Tue Jul 30 22:09:52 BST 2013
+    Bug Fixes:
+    * Fix clean_subdirs target that was generating
+      warning on BSD
+
+6.73_02 Fri Jul 26 13:32:43 BST 2013
+    Misc:
+    * Updated bundled Parse::CPAN::Meta
+
+6.73_01 Wed Jul 24 23:49:56 BST 2013
+    Bug Fixes:
+    * Robustified parse_version()
+
 6.72 Wed Jul 24 18:38:19 BST 2013
     No changes from 6.71_01
 

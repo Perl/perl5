@@ -10,10 +10,14 @@ our @ISA = qw(Exporter);
 
 our @EXPORT  = qw(test_harness pod2man perllocal_install uninstall
                   warn_if_old_packlist);
-our $VERSION = '6.72';
+our $VERSION = '6.74';
 
 my $Is_VMS = $^O eq 'VMS';
 
+eval "require Time::HiRes";
+*mtime = $@ ?
+ sub { [             stat($_[0])]->[9] } :
+ sub { [Time::HiRes::stat($_[0])]->[9] } ;
 
 =head1 NAME
 
@@ -131,8 +135,8 @@ sub pod2man {
         my ($pod, $man) = splice(@ARGV, 0, 2);
 
         next if ((-e $man) &&
-                 (-M $man < -M $pod) &&
-                 (-M $man < -M "Makefile"));
+                 (mtime($man) > mtime($pod)) &&
+                 (mtime($man) > mtime("Makefile")));
 
         print "Manifying $man\n";
 

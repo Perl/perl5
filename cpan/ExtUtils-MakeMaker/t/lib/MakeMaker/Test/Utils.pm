@@ -38,6 +38,9 @@ our @EXPORT = qw(which_perl perl_lib makefile_name makefile_backup
     # Inform the BSDPAN hacks not to register modules installed for testing.
     $default_env_keys{PORTOBJFORMAT} = 1 if $Is_FreeBSD;
 
+    # https://github.com/Perl-Toolchain-Gang/ExtUtils-MakeMaker/issues/65
+    $default_env_keys{ACTIVEPERL_CONFIG_SILENT} = 1;
+
     # Remember the ENV values because on VMS %ENV is global
     # to the user, not the process.
     my %restore_env_keys;

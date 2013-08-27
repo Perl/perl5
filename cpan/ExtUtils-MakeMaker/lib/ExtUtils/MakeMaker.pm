@@ -18,7 +18,7 @@ our @Overridable;
 my @Prepend_parent;
 my %Recognized_Att_Keys;
 
-our $VERSION = '6.72';
+our $VERSION = '6.74';
 $VERSION = eval $VERSION;  ## no critic [BuiltinFunctions::ProhibitStringyEval]
 
 # Emulate something resembling CVS $Revision$
@@ -585,8 +585,9 @@ END
         }
         my @fm = grep /^FIRST_MAKEFILE=/, @ARGV;
         parse_args($self,@fm) if @fm;
-    } else {
-        parse_args($self,split(' ', $ENV{PERL_MM_OPT} || ''),@ARGV);
+    }
+    else {
+        parse_args($self, _shellwords($ENV{PERL_MM_OPT} || ''),@ARGV);
     }
 
 
@@ -799,6 +800,83 @@ END
     return @result;
 }
 
+# _shellwords and _parseline borrowed from Text::ParseWords
+sub _shellwords {
+    my (@lines) = @_;
+    my @allwords;
+
+    foreach my $line (@lines) {
+      $line =~ s/^\s+//;
+      my @words = _parse_line('\s+', 0, $line);
+      pop @words if (@words and !defined $words[-1]);
+      return() unless (@words || !length($line));
+      push(@allwords, @words);
+    }
+    return(@allwords);
+}
+
+sub _parse_line {
+    my($delimiter, $keep, $line) = @_;
+    my($word, @pieces);
+
+    no warnings 'uninitialized';  # we will be testing undef strings
+
+    while (length($line)) {
+        # This pattern is optimised to be stack conservative on older perls.
+        # Do not refactor without being careful and testing it on very long strings.
+        # See Perl bug #42980 for an example of a stack busting input.
+        $line =~ s/^
+                    (?:
+                        # double quoted string
+                        (")                             # $quote
+                        ((?>[^\\"]*(?:\\.[^\\"]*)*))"   # $quoted
+        | # --OR--
+                        # singe quoted string
+                        (')                             # $quote
+                        ((?>[^\\']*(?:\\.[^\\']*)*))'   # $quoted
+                    |   # --OR--
+                        # unquoted string
+            (                               # $unquoted
+                            (?:\\.|[^\\"'])*?
+                        )
+                        # followed by
+            (                               # $delim
+                            \Z(?!\n)                    # EOL
+                        |   # --OR--
+                            (?-x:$delimiter)            # delimiter
+                        |   # --OR--
+                            (?!^)(?=["'])               # a quote
+                        )
+        )//xs or return;    # extended layout
+        my ($quote, $quoted, $unquoted, $delim) = (($1 ? ($1,$2) : ($3,$4)), $5, $6);
+
+
+  return() unless( defined($quote) || length($unquoted) || length($delim));
+
+        if ($keep) {
+      $quoted = "$quote$quoted$quote";
+  }
+        else {
+      $unquoted =~ s/\\(.)/$1/sg;
+      if (defined $quote) {
+    $quoted =~ s/\\(.)/$1/sg if ($quote eq '"');
+    #$quoted =~ s/\\([\\'])/$1/g if ( $PERL_SINGLE_QUOTE && $quote eq "'");
+            }
+  }
+        $word .= substr($line, 0, 0); # leave results tainted
+        $word .= defined $quote ? $quoted : $unquoted;
+
+        if (length($delim)) {
+            push(@pieces, $word);
+            push(@pieces, $delim) if ($keep eq 'delimiters');
+            undef $word;
+        }
+        if (!length($line)) {
+            push(@pieces, $word);
+  }
+    }
+    return(@pieces);
+}
 
 sub check_manifest {
     print "Checking if your kit is complete...\n";
@@ -2284,7 +2362,7 @@ is there for backwards compatibility (and it's somewhat DWIM).
 
 Hashref of .pm files and *.pl files to be installed.  e.g.
 
-  {'name_of_file.pm' => '$(INST_LIBDIR)/install_as.pm'}
+  {'name_of_file.pm' => '$(INST_LIB)/install_as.pm'}
 
 By default this will include *.pm and *.pl and the files found in
 the PMLIBDIRS directories.  Defining PM in the
@@ -2921,8 +2999,10 @@ If no $default is provided an empty string will be used instead.
 =item PERL_MM_OPT
 
 Command line options used by C<MakeMaker-E<gt>new()>, and thus by
-C<WriteMakefile()>.  The string is split on whitespace, and the result
+C<WriteMakefile()>.  The string is split as the shell would, and the result
 is processed before any actual command line arguments are processed.
+
+  PERL_MM_OPT='CCFLAGS="-Wl,-rpath -Wl,/foo/bar/lib" LIBS="-lwibble -lwobble"'
 
 =item PERL_MM_USE_DEFAULT
 
