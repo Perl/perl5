@@ -9,7 +9,7 @@ BEGIN { require "./test.pl"; }
 
 # This test depends on t/lib/Devel/switchd*.pm.
 
-plan(tests => 11);
+plan(tests => 12);
 
 my $r;
 
@@ -174,3 +174,17 @@ like(
                          # miniperl tacks a BEGIN block on to the same line
  'Copy on write does not mangle ${"_<-e"}[0] [perl #118627]',
 );
+
+# PERL5DB with embedded newlines
+{
+    local $ENV{PERL5DB} = "sub DB::DB{}\ndie";
+    like(
+      runperl(
+       switches => [ '-Ilib', '-ld' ],
+       prog     => 'print qq|not ok|',
+       stderr   => 1
+      ),
+      qr /Died/,
+     'PERL5DB with embedded newlines',
+    );
+}
