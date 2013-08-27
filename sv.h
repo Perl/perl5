@@ -1081,27 +1081,30 @@ sv_force_normal does nothing.
 
 #if defined (DEBUGGING) && defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
 #  define SvVALID(sv)		({ const SV *const _svvalid = (const SV*)(sv); \
-				   if (SvFLAGS(_svvalid) & SVpbm_VALID)	\
+				   if (SvFLAGS(_svvalid) & SVpbm_VALID && !SvSCREAM(_svvalid)) \
 				       assert(!isGV_with_GP(_svvalid));	\
 				   (SvFLAGS(_svvalid) & SVpbm_VALID);	\
 				})
 #  define SvVALID_on(sv)	({ SV *const _svvalid = MUTABLE_SV(sv);	\
 				   assert(!isGV_with_GP(_svvalid));	\
+				   assert(!SvSCREAM(_svvalid));		\
 				   (SvFLAGS(_svvalid) |= SVpbm_VALID);	\
 				})
 #  define SvVALID_off(sv)	({ SV *const _svvalid = MUTABLE_SV(sv);	\
 				   assert(!isGV_with_GP(_svvalid));	\
+				   assert(!SvSCREAM(_svvalid));		\
 				   (SvFLAGS(_svvalid) &= ~SVpbm_VALID);	\
 				})
 
 #  define SvTAIL(sv)	({ const SV *const _svtail = (const SV *)(sv);	\
-			    assert(SvTYPE(_svtail) != SVt_PVAV);		\
-			    assert(SvTYPE(_svtail) != SVt_PVHV);		\
+			    assert(SvTYPE(_svtail) != SVt_PVAV);	\
+			    assert(SvTYPE(_svtail) != SVt_PVHV);	\
+			    assert(!SvSCREAM(_svtail));			\
 			    (SvFLAGS(sv) & (SVpbm_TAIL|SVpbm_VALID))	\
 				== (SVpbm_TAIL|SVpbm_VALID);		\
 			})
 #else
-#  define SvVALID(sv)		(SvFLAGS(sv) & SVpbm_VALID)
+#  define SvVALID(sv)		((SvFLAGS(sv) & SVpbm_VALID) && !SvSCREAM(sv))
 #  define SvVALID_on(sv)	(SvFLAGS(sv) |= SVpbm_VALID)
 #  define SvVALID_off(sv)	(SvFLAGS(sv) &= ~SVpbm_VALID)
 #  define SvTAIL(sv)	    ((SvFLAGS(sv) & (SVpbm_TAIL|SVpbm_VALID))	\
