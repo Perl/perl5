@@ -156,6 +156,8 @@ C<Carp> that expects C<Carp::Heavy> to provide subroutines.
 
 =back
 
+=item *
+
 L<File::Glob> has been upgraded from version 1.20 to 1.21.
 
 C<glob()> now warns in the context of C<use warnings "syscalls";> if
