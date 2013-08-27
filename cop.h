@@ -648,6 +648,7 @@ struct block_format {
 
 #define POPSUB(cx,sv)							\
     STMT_START {							\
+	const I32 olddepth = cx->blk_sub.olddepth;			\
 	RETURN_PROBE(CvNAMED(cx->blk_sub.cv)				\
 			? HEK_KEY(CvNAME_HEK(cx->blk_sub.cv))		\
 			: GvENAME(CvGV(cx->blk_sub.cv)),		\
@@ -671,7 +672,8 @@ struct block_format {
 	    }								\
 	}								\
 	sv = MUTABLE_SV(cx->blk_sub.cv);				\
-	if (sv && (CvDEPTH((const CV*)sv) = cx->blk_sub.olddepth))	\
+	LEAVE_SCOPE(PL_scopestack[cx->blk_oldscopesp-1]);		\
+	if (sv && (CvDEPTH((const CV*)sv) = olddepth))			\
 	    sv = NULL;						\
     } STMT_END
 
@@ -681,11 +683,15 @@ struct block_format {
     } STMT_END
 
 #define POPFORMAT(cx)							\
-	setdefout(cx->blk_format.dfoutgv);				\
-	CvDEPTH(cx->blk_format.cv)--;					\
-	if (!CvDEPTH(cx->blk_format.cv))				\
+    STMT_START {							\
+	CV * const cv = cx->blk_format.cv;				\
+	GV * const dfuot = cx->blk_format.dfoutgv;			\
+	setdefout(dfuot);						\
+	LEAVE_SCOPE(PL_scopestack[cx->blk_oldscopesp-1]);		\
+	if (!--CvDEPTH(cv))						\
 	    SvREFCNT_dec_NN(cx->blk_format.cv);				\
-	SvREFCNT_dec_NN(cx->blk_format.dfoutgv);
+	SvREFCNT_dec_NN(dfuot);						\
+    } STMT_END
 
 /* eval context */
 struct block_eval {

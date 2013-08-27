@@ -2460,8 +2460,8 @@ PP(pp_return)
 	}
 	break;
     case CXt_FORMAT:
-	POPFORMAT(cx);
 	retop = cx->blk_sub.retop;
+	POPFORMAT(cx);
 	break;
     default:
 	DIE(aTHX_ "panic: return, type=%u", (unsigned) CxTYPE(cx));
@@ -2550,8 +2550,8 @@ PP(pp_leavesublv)
     S_return_lvalues(aTHX_ newsp, SP, newsp, gimme, cx, newpm);
 
     LEAVE;
-    cxstack_ix--;
     POPSUB(cx,sv);	/* Stack values are safe: release CV and @_ ... */
+    cxstack_ix--;
     PL_curpm = newpm;	/* ... and pop $1 et al */
 
     LEAVESUB(sv);

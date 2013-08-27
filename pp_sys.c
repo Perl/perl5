@@ -1493,8 +1493,8 @@ PP(pp_leavewrite)
 
   forget_top:
     POPBLOCK(cx,PL_curpm);
-    POPFORMAT(cx);
     retop = cx->blk_sub.retop;
+    POPFORMAT(cx);
     SP = newsp; /* ignore retval of formline */
     LEAVE;
 
