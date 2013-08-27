@@ -119,12 +119,18 @@ XXX
 
 =item *
 
-L<B> has been upgraded from 1.45 to 1.46.
+L<B> has been upgraded from version 1.45 to 1.46.
 
 The fix for [perl #118525] introduced a regression in the behaviour of
 C<B::CV::GV>, changing the return value from a C<B::SPECIAL> object on
 a C<NULL> C<CvGV> to C<undef>.  C<B::CV::GV> again returns a
 C<B::SPECIAL> object in this case. [perl #119351]
+
+=item *
+
+L<B::Concise> has been upgraded from version 0.98 to 0.99.
+
+XXX TODO
 
 =item *
 
@@ -158,10 +164,34 @@ C<Carp> that expects C<Carp::Heavy> to provide subroutines.
 
 =item *
 
+L<Data::Dumper> has been upgraded from version 2.148 to 2.149.
+
+XXX TODO
+
+=item *
+
+L<Devel::Peek> has been upgraded from version 1.13 to 1.14.
+
+XXX TODO
+
+=item *
+
+L<DynaLoader> has been upgraded from version 1.19 to 1.20.
+
+XXX TODO
+
+=item *
+
 L<File::Glob> has been upgraded from version 1.20 to 1.21.
 
 C<glob()> now warns in the context of C<use warnings "syscalls";> if
 the supplied pattern has an internal NUL (C<"\0">) character.
+
+=item *
+
+L<IPC::Open3> has been upgraded from 1.15 to 1.16.
+
+XXX TODO
 
 =item *
 
@@ -171,6 +201,12 @@ Cleaned up the L<Math::BigInt> and L<Math::BigFloat> documentation to
 be more consistent with other perl documentation. [perl #86686]
 
 Added a bint() method for rounding towards zero. [perl #85296]
+
+=item *
+
+L<Math::BigInt::FastCalc> has been upgraded from version 0.30 to 0.31.
+
+XXX TODO
 
 =item *
 
@@ -187,9 +223,37 @@ satisfy CVE-2013-1437.
 
 =item *
 
-L<Perl::OSType> has been upgraded from 1.003 to 1.004.
+L<mro> has been upgraded from 1.13 to 1.14.
+
+XXX TODO
+
+=item *
+
+L<Perl::OSType> has been upgraded from version 1.003 to 1.004.
 
 The Unix OSType 'bitrig' has been added.
+
+=item *
+
+L<re> has been upgraded from version 0.25 to 0.26.
+
+XXX TODO
+
+=item *
+
+L<Storable> has been upgraded from version 2.46 to 2.47.
+
+XXX TODO
+
+=item *
+
+L<warnings> has been upgraded from version 1.18 to 1.19.
+
+XXX TODO
+
+=item *
+
+L<XS::Typemap> has been upgraded from version 0.10 to 0.11.
 
 =back
 
@@ -341,7 +405,19 @@ that they represent may be covered elsewhere.
 
 =item *
 
-XXX
+F<t/bigmem/regexp.t> XXX TODO
+
+=item *
+
+F<t/op/rt119311.t> XXX TODO
+
+=item *
+
+F<t/win32/signal.t> XXX TODO
+
+=item *
+
+F<t/x2p/find2perl.t> XXX TODO
 
 =back
 
@@ -388,9 +464,9 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
+=item WinCE
 
-XXX
+XXX TODO
 
 =back
 
