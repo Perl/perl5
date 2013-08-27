@@ -1196,6 +1196,7 @@ use File::Glob qw(:case);
         ],
         # Generated file, not part of the CPAN distro:
         'CUSTOMIZED' => ['lib/Module/Build/ConfigData.pm'],
+        'DEPRECATED' => '5.019000',
         'UPSTREAM'   => 'cpan',
     },
 
