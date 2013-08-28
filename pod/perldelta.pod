@@ -130,7 +130,7 @@ C<B::SPECIAL> object in this case. [perl #119351]
 
 L<B::Concise> has been upgraded from version 0.98 to 0.99.
 
-XXX TODO
+The handling of the C<glob> operator, broken since Perl 5.17.6, has been fixed.
 
 =item *
 
@@ -166,19 +166,32 @@ C<Carp> that expects C<Carp::Heavy> to provide subroutines.
 
 L<Data::Dumper> has been upgraded from version 2.148 to 2.149.
 
-XXX TODO
+This upgrade is part of a larger change to make the array interface 64-bit safe
+by using SSize_t instead of I32 for array indices.
 
 =item *
 
 L<Devel::Peek> has been upgraded from version 1.13 to 1.14.
 
-XXX TODO
+This upgrade is part of a larger change to preserve referential identity when
+passing C<undef> to a subroutine by using NULL rather than &PL_sv_undef for
+nonexistent array elements.
 
 =item *
 
 L<DynaLoader> has been upgraded from version 1.19 to 1.20.
 
-XXX TODO
+The documentation now makes it clear, as has always been the case, that
+C<dl_unload_file> is only called automatically to unload all loaded shared
+objects if the perl interpreter was built with the C macro
+DL_UNLOAD_ALL_AT_EXIT defined.
+
+=item *
+
+L<ExtUtils::MakeMaker> has been upgraded from version 6.72 to 6.74.
+
+Numerous updates and bug fixes are incorporated.  See the F<Changes> file for
+full details.
 
 =item *
 
@@ -191,7 +204,9 @@ the supplied pattern has an internal NUL (C<"\0">) character.
 
 L<IPC::Open3> has been upgraded from 1.15 to 1.16.
 
-XXX TODO
+This upgrade is part of a larger change to preserve referential identity when
+passing C<undef> to a subroutine by using NULL rather than &PL_sv_undef for
+nonexistent array elements.
 
 =item *
 
@@ -206,7 +221,8 @@ Added a bint() method for rounding towards zero. [perl #85296]
 
 L<Math::BigInt::FastCalc> has been upgraded from version 0.30 to 0.31.
 
-XXX TODO
+This upgrade is part of a larger change to make the array interface 64-bit safe
+by using SSize_t instead of I32 for array indices.
 
 =item *
 
@@ -225,7 +241,8 @@ satisfy CVE-2013-1437.
 
 L<mro> has been upgraded from 1.13 to 1.14.
 
-XXX TODO
+This upgrade is part of a larger change to make the array interface 64-bit safe
+by using SSize_t instead of I32 for array indices.
 
 =item *
 
@@ -237,19 +254,22 @@ The Unix OSType 'bitrig' has been added.
 
 L<re> has been upgraded from version 0.25 to 0.26.
 
-XXX TODO
+A function signature has been corrected in the XS implementation.
 
 =item *
 
 L<Storable> has been upgraded from version 2.46 to 2.47.
 
-XXX TODO
+This upgrade is part of a larger change to preserve referential identity when
+passing C<undef> to a subroutine by using NULL rather than &PL_sv_undef for
+nonexistent array elements.
 
 =item *
 
 L<warnings> has been upgraded from version 1.18 to 1.19.
 
-XXX TODO
+The C<syscalls> warnings category has been added to check for embedded NUL
+(C<"\0">) characters in path names and string arguments to syscalls.
 
 =item *
 
@@ -405,19 +425,23 @@ that they represent may be covered elsewhere.
 
 =item *
 
-F<t/bigmem/regexp.t> XXX TODO
+The test script F<t/bigmem/regexp.t> has been added to test that regular
+expression matches on very large strings now succeeds as expected.
 
 =item *
 
-F<t/op/rt119311.t> XXX TODO
+Various cases of C<die>, C<last>, C<goto> and C<exit> triggering C<DESTROY> are
+now tested by the new test script F<t/op/rt119311.t>.
 
 =item *
 
-F<t/win32/signal.t> XXX TODO
+The new test script F<t/win32/signal.t> tests that C<$!> and C<$^E> are now
+preserved across signal handlers by the Win32 signal emulation code.
 
 =item *
 
-F<t/x2p/find2perl.t> XXX TODO
+The test script F<t/x2p/find2perl.t> has been added to test the F<find2perl>
+program on platforms where it is practical to do so.
 
 =back
 
@@ -466,7 +490,10 @@ L</Modules and Pragmata> section.
 
 =item WinCE
 
-XXX TODO
+The building of XS modules has largely been restored. Several still cannot
+(yet) be built but it is now possible to build Perl on WinCE with only a couple
+of further patches (to L<Socket> and L<ExtUtils::MakeMaker>), hopefully to be
+incorporated soon.
 
 =back
 
