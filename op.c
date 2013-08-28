@@ -5706,7 +5706,7 @@ Perl_newSTATEOP(pTHX_ I32 flags, char *label, OP *o)
 	SAVEFREEPV(label);
     }
 
-    if (PL_parser && PL_parser->copline == NOLINE)
+    if (PL_parser->copline == NOLINE)
         CopLINE_set(cop, CopLINE(PL_curcop));
     else {
 	CopLINE_set(cop, PL_parser->copline);
