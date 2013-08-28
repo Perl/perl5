@@ -502,6 +502,7 @@ the strings?).
  Aaron    5.17.8        2013-Jan-20
  BinGOs   5.17.9        2013-Feb-20
  Max M    5.17.10       2013-Mar-21
+ Ricardo  5.17.11       2013-Apr-20
 
  Ricardo  5.18.0-RC1    2013-May-11     The 5.18 maintenance track
  Ricardo  5.18.0-RC2    2013-May-12
