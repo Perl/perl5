@@ -426,7 +426,7 @@ that they represent may be covered elsewhere.
 =item *
 
 The test script F<t/bigmem/regexp.t> has been added to test that regular
-expression matches on very large strings now succeeds as expected.
+expression matches on very large strings now succeed as expected.
 
 =item *
 
