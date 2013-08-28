@@ -1871,7 +1871,9 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 		while (--end > name) {
 		    if (!isDIGIT(*end))	goto add_magical_gv;
 		}
-		goto magicalize;
+                sv_magic(GvSVn(gv), MUTABLE_SV(gv), PERL_MAGIC_sv, NULL,
+                         strtoul(name, NULL, 10));
+            break;
 	    }
 	    }
 	}
@@ -1897,7 +1899,23 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
                                 : SAWAMPERSAND_RIGHT;
                 }
 #endif
-	    goto magicalize;
+            if (*name != '&')
+                goto magicalize;
+            /* FALL THROUGH */
+        case '1':               /* $1 */
+        case '2':               /* $2 */
+        case '3':               /* $3 */
+        case '4':               /* $4 */
+        case '5':               /* $5 */
+        case '6':               /* $6 */
+        case '7':               /* $7 */
+        case '8':               /* $8 */
+        case '9':               /* $9 */
+            /* Flag the capture variables with a NULL mg_ptr
+               Use mg_len for the array index to lookup.  */
+            sv_magic(GvSVn(gv), MUTABLE_SV(gv), PERL_MAGIC_sv, NULL,
+                     *name == '&' ? 0 : *name - '0');
+            break;
 
 	case ':':		/* $: */
 	    sv_setpv(GvSVn(gv),PL_chopset);
@@ -1973,15 +1991,6 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	    SvREADONLY_on(GvSVn(gv));
 	    /* FALL THROUGH */
 	case '0':		/* $0 */
-	case '1':		/* $1 */
-	case '2':		/* $2 */
-	case '3':		/* $3 */
-	case '4':		/* $4 */
-	case '5':		/* $5 */
-	case '6':		/* $6 */
-	case '7':		/* $7 */
-	case '8':		/* $8 */
-	case '9':		/* $9 */
 	case '^':		/* $^ */
 	case '~':		/* $~ */
 	case '=':		/* $= */

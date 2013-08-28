@@ -752,10 +752,23 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
     const char *s = NULL;
     REGEXP *rx;
     const char * const remaining = mg->mg_ptr + 1;
-    const char nextchar = *remaining;
+    char nextchar;
 
     PERL_ARGS_ASSERT_MAGIC_GET;
 
+    if (!mg->mg_ptr) {
+        /* Numbered buffers and $&  */
+        paren = mg->mg_len;
+      do_numbuf_fetch:
+        if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
+            CALLREG_NUMBUF_FETCH(rx,paren,sv);
+        } else {
+            sv_setsv(sv,&PL_sv_undef);
+        }
+        return 0;
+    }
+
+    nextchar = *remaining;
     switch (*mg->mg_ptr) {
     case '\001':		/* ^A */
 	if (SvOK(PL_bodytarget)) sv_copypv(sv, PL_bodytarget);
@@ -938,21 +951,6 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
             paren = RX_BUFF_IDX_CARET_FULLMATCH;
 	    goto do_numbuf_fetch;
         }
-
-    case '1': case '2': case '3': case '4':
-    case '5': case '6': case '7': case '8': case '9': case '&':
-        /*
-         * Pre-threads, this was paren = atoi(GvENAME((const GV *)mg->mg_obj));
-         * XXX Does the new way break anything?
-         */
-        paren = atoi(mg->mg_ptr); /* $& is in [0] */
-      do_numbuf_fetch:
-        if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
-            CALLREG_NUMBUF_FETCH(rx,paren,sv);
-            break;
-        }
-        sv_setsv(sv,&PL_sv_undef);
-	break;
     case '+':
 	if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
 	    paren = RX_LASTPAREN(rx);
@@ -2496,10 +2494,30 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 
     PERL_ARGS_ASSERT_MAGIC_SET;
 
+    if (!mg->mg_ptr) {
+        paren = mg->mg_len ? mg->mg_len : RX_BUFF_IDX_FULLMATCH;
+      setparen:
+	if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
+          setparen_got_rx:
+            CALLREG_NUMBUF_STORE((REGEXP * const)rx,paren,sv);
+	} else {
+            /* Croak with a READONLY error when a numbered match var is
+             * set without a previous pattern match. Unless it's C<local $1>
+             */
+          croakparen:
+            if (!PL_localizing) {
+                Perl_croak_no_modify();
+            }
+        }
+        return 0;
+    }
+
     switch (*mg->mg_ptr) {
     case '\015': /* $^MATCH */
-      if (strEQ(remaining, "ATCH"))
-          goto do_match;
+      if (strEQ(remaining, "ATCH")) {
+        paren = RX_BUFF_IDX_FULLMATCH;
+        goto setparen;
+      }
     case '`': /* ${^PREMATCH} caught below */
       do_prematch:
       paren = RX_BUFF_IDX_PREMATCH;
@@ -2508,27 +2526,6 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
       do_postmatch:
       paren = RX_BUFF_IDX_POSTMATCH;
       goto setparen;
-    case '&':
-      do_match:
-      paren = RX_BUFF_IDX_FULLMATCH;
-      goto setparen;
-    case '1': case '2': case '3': case '4':
-    case '5': case '6': case '7': case '8': case '9':
-      paren = atoi(mg->mg_ptr);
-      setparen:
-	if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
-      setparen_got_rx:
-            CALLREG_NUMBUF_STORE((REGEXP * const)rx,paren,sv);
-	} else {
-            /* Croak with a READONLY error when a numbered match var is
-             * set without a previous pattern match. Unless it's C<local $1>
-             */
-      croakparen:
-            if (!PL_localizing) {
-                Perl_croak_no_modify();
-            }
-        }
-        break;
     case '\001':	/* ^A */
 	if (SvOK(sv)) sv_copypv(PL_bodytarget, sv);
 	else SvOK_off(PL_bodytarget);
