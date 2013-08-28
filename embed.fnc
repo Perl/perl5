@@ -2670,7 +2670,9 @@ Xop	|bool	|feature_is_enabled|NN const char *const name \
 
 : Some static inline functions need predeclaration because they are used
 : inside other static inline functions.
+#if defined(PERL_CORE) || defined (PERL_EXT)
 Ei	|STRLEN	|sv_or_pv_pos_u2b|NN SV *sv|NN const char *pv|STRLEN pos \
 				 |NULLOK STRLEN *lenp
+#endif
 
 : ex: set ts=8 sts=4 sw=4 noet:
