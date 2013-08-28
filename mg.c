@@ -1985,12 +1985,19 @@ int
 Perl_magic_setdbline(pTHX_ SV *sv, MAGIC *mg)
 {
     dVAR;
-    GV * const gv = PL_DBline;
-    const I32 i = SvTRUE(sv);
-    SV ** const svp = av_fetch(GvAV(gv),
-		     atoi(MgPV_nolen_const(mg)), FALSE);
+    SV **svp;
 
     PERL_ARGS_ASSERT_MAGIC_SETDBLINE;
+
+    /* The magic ptr/len for the debugger's hash should always be an SV.  */
+    if (UNLIKELY(mg->mg_len != HEf_SVKEY)) {
+        Perl_croak(aTHX_ "panic: magic_setdbline len=%"IVdf", ptr='%s'",
+                   mg->mg_len, mg->mg_ptr);
+    }
+
+    /* Use sv_2iv instead of SvIV() as the former generates smaller code, and
+       setting/clearing debugger breakpoints is not a hot path.  */
+    svp = av_fetch(GvAV(PL_DBline), sv_2iv(MUTABLE_SV((mg)->mg_ptr)), FALSE);
 
     if (svp && SvIOKp(*svp)) {
 	OP * const o = INT2PTR(OP*,SvIVX(*svp));
@@ -1999,7 +2006,7 @@ Perl_magic_setdbline(pTHX_ SV *sv, MAGIC *mg)
 	    Slab_to_rw(OpSLAB(o));
 #endif
 	    /* set or clear breakpoint in the relevant control op */
-	    if (i)
+	    if (SvTRUE(sv))
 		o->op_flags |= OPf_SPECIAL;
 	    else
 		o->op_flags &= ~OPf_SPECIAL;
