@@ -2343,9 +2343,9 @@ Ap	|int	|PerlIO_eof		|NULLOK PerlIO *f
 Ap	|int	|PerlIO_error		|NULLOK PerlIO *f
 Ap	|int	|PerlIO_flush		|NULLOK PerlIO *f
 Ap	|void	|PerlIO_clearerr	|NULLOK PerlIO *f
-Ap	|void	|PerlIO_set_cnt		|NULLOK PerlIO *f|int cnt
+Ap	|void	|PerlIO_set_cnt		|NULLOK PerlIO *f|SSize_t cnt
 Ap	|void	|PerlIO_set_ptrcnt	|NULLOK PerlIO *f|NULLOK STDCHAR *ptr \
-					|int cnt
+					|SSize_t cnt
 Ap	|void	|PerlIO_setlinebuf	|NULLOK PerlIO *f
 Ap	|SSize_t|PerlIO_read		|NULLOK PerlIO *f|NN void *vbuf \
 					|Size_t count
@@ -2358,8 +2358,8 @@ Ap	|int	|PerlIO_seek		|NULLOK PerlIO *f|Off_t offset|int whence
 
 Ap	|STDCHAR *|PerlIO_get_base	|NULLOK PerlIO *f
 Ap	|STDCHAR *|PerlIO_get_ptr	|NULLOK PerlIO *f
-ApR	|int	  |PerlIO_get_bufsiz	|NULLOK PerlIO *f
-ApR	|int	  |PerlIO_get_cnt	|NULLOK PerlIO *f
+ApR	|SSize_t	  |PerlIO_get_bufsiz	|NULLOK PerlIO *f
+ApR	|SSize_t	  |PerlIO_get_cnt	|NULLOK PerlIO *f
 
 ApR	|PerlIO *|PerlIO_stdin
 ApR	|PerlIO *|PerlIO_stdout

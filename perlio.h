@@ -313,19 +313,19 @@ PERL_EXPORT_C int PerlIO_canset_cnt(PerlIO *);
 PERL_EXPORT_C STDCHAR *PerlIO_get_ptr(PerlIO *);
 #endif
 #ifndef PerlIO_get_cnt
-PERL_EXPORT_C int PerlIO_get_cnt(PerlIO *);
+PERL_EXPORT_C SSize_t PerlIO_get_cnt(PerlIO *);
 #endif
 #ifndef PerlIO_set_cnt
-PERL_EXPORT_C void PerlIO_set_cnt(PerlIO *, int);
+PERL_EXPORT_C void PerlIO_set_cnt(PerlIO *, SSize_t);
 #endif
 #ifndef PerlIO_set_ptrcnt
-PERL_EXPORT_C void PerlIO_set_ptrcnt(PerlIO *, STDCHAR *, int);
+PERL_EXPORT_C void PerlIO_set_ptrcnt(PerlIO *, STDCHAR *, SSize_t);
 #endif
 #ifndef PerlIO_get_base
 PERL_EXPORT_C STDCHAR *PerlIO_get_base(PerlIO *);
 #endif
 #ifndef PerlIO_get_bufsiz
-PERL_EXPORT_C int PerlIO_get_bufsiz(PerlIO *);
+PERL_EXPORT_C SSize_t PerlIO_get_bufsiz(PerlIO *);
 #endif
 #ifndef PerlIO_tmpfile
 PERL_EXPORT_C PerlIO *PerlIO_tmpfile(void);

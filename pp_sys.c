@@ -3288,7 +3288,7 @@ PP(pp_fttext)
 {
     dVAR;
     I32 i;
-    I32 len;
+    SSize_t len;
     I32 odd = 0;
     STDCHAR tbuf[512];
     STDCHAR *s;

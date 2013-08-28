@@ -1877,9 +1877,10 @@ Perl_PerlIO_get_base(pTHX_ PerlIO *f)
      Perl_PerlIO_or_fail(f, Get_base, NULL, (aTHX_ f));
 }
 
-int
+SSize_t
 Perl_PerlIO_get_bufsiz(pTHX_ PerlIO *f)
 {
+    /* Note that Get_bufsiz returns a Size_t */
      Perl_PerlIO_or_fail(f, Get_bufsiz, -1, (aTHX_ f));
 }
 
@@ -1889,20 +1890,20 @@ Perl_PerlIO_get_ptr(pTHX_ PerlIO *f)
      Perl_PerlIO_or_fail(f, Get_ptr, NULL, (aTHX_ f));
 }
 
-int
+SSize_t
 Perl_PerlIO_get_cnt(pTHX_ PerlIO *f)
 {
      Perl_PerlIO_or_fail(f, Get_cnt, -1, (aTHX_ f));
 }
 
 void
-Perl_PerlIO_set_cnt(pTHX_ PerlIO *f, int cnt)
+Perl_PerlIO_set_cnt(pTHX_ PerlIO *f, SSize_t cnt)
 {
      Perl_PerlIO_or_fail_void(f, Set_ptrcnt, (aTHX_ f, NULL, cnt));
 }
 
 void
-Perl_PerlIO_set_ptrcnt(pTHX_ PerlIO *f, STDCHAR * ptr, int cnt)
+Perl_PerlIO_set_ptrcnt(pTHX_ PerlIO *f, STDCHAR * ptr, SSize_t cnt)
 {
      Perl_PerlIO_or_fail_void(f, Set_ptrcnt, (aTHX_ f, ptr, cnt));
 }
