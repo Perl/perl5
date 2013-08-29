@@ -184,10 +184,24 @@ DL_UNLOAD_ALL_AT_EXIT defined.
 
 =item *
 
+L<Encode> has been upgraded from version 2.52 to 2.54.
+
+An erroneous early return in C<decode_utf8> has been removed, and a bug in
+C<_utf8_on> under COW has been fixed.
+
+=item *
+
 L<ExtUtils::MakeMaker> has been upgraded from version 6.72 to 6.74.
 
 Numerous updates and bug fixes are incorporated.  See the F<Changes> file for
 full details.
+
+=item *
+
+L<ExtUtils::ParseXS> has been upgraded from version 3.21 to 3.22.
+
+No changes have been made other than the version bump to keep in sync with the
+latest CPAN release.
 
 =item *
 
