@@ -4117,11 +4117,9 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	    rend = r + len;
 	}
 
-/* There are several snags with this code on EBCDIC:
-   1. 0xFF is a legal UTF-EBCDIC byte (there are no illegal bytes).
-   2. scan_const() in toke.c has encoded chars in native encoding which makes
-      ranges at least in EBCDIC 0..255 range the bottom odd.
-*/
+/* There is a  snag with this code on EBCDIC: scan_const() in toke.c has
+ * encoded chars in native encoding which makes ranges in the EBCDIC 0..255
+ * odd.  */
 
 	if (complement) {
 	    U8 tmpbuf[UTF8_MAXBYTES+1];
@@ -4131,11 +4129,11 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	    i = 0;
 	    transv = newSVpvs("");
 	    while (t < tend) {
-		cp[2*i] = utf8n_to_uvuni(t, tend-t, &ulen, flags);
+		cp[2*i] = utf8n_to_uvchr(t, tend-t, &ulen, flags);
 		t += ulen;
-		if (t < tend && NATIVE_TO_UTF(*t) == 0xff) {
+		if (t < tend && *t == ILLEGAL_UTF8_BYTE) {
 		    t++;
-		    cp[2*i+1] = utf8n_to_uvuni(t, tend-t, &ulen, flags);
+		    cp[2*i+1] = utf8n_to_uvchr(t, tend-t, &ulen, flags);
 		    t += ulen;
 		}
 		else {
@@ -4148,11 +4146,11 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 		UV  val = cp[2*j];
 		diff = val - nextmin;
 		if (diff > 0) {
-		    t = uvuni_to_utf8(tmpbuf,nextmin);
+		    t = uvchr_to_utf8(tmpbuf,nextmin);
 		    sv_catpvn(transv, (char*)tmpbuf, t - tmpbuf);
 		    if (diff > 1) {
-			U8  range_mark = UTF_TO_NATIVE(0xff);
-			t = uvuni_to_utf8(tmpbuf, val - 1);
+			U8  range_mark = ILLEGAL_UTF8_BYTE;
+			t = uvchr_to_utf8(tmpbuf, val - 1);
 			sv_catpvn(transv, (char *)&range_mark, 1);
 			sv_catpvn(transv, (char*)tmpbuf, t - tmpbuf);
 		    }
@@ -4161,13 +4159,13 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 		if (val >= nextmin)
 		    nextmin = val + 1;
 	    }
-	    t = uvuni_to_utf8(tmpbuf,nextmin);
+	    t = uvchr_to_utf8(tmpbuf,nextmin);
 	    sv_catpvn(transv, (char*)tmpbuf, t - tmpbuf);
 	    {
-		U8 range_mark = UTF_TO_NATIVE(0xff);
+		U8 range_mark = ILLEGAL_UTF8_BYTE;
 		sv_catpvn(transv, (char *)&range_mark, 1);
 	    }
-	    t = uvuni_to_utf8(tmpbuf, 0x7fffffff);
+	    t = uvchr_to_utf8(tmpbuf, 0x7fffffff);
 	    sv_catpvn(transv, (char*)tmpbuf, t - tmpbuf);
 	    t = (const U8*)SvPVX_const(transv);
 	    tlen = SvCUR(transv);
@@ -4188,11 +4186,11 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	while (t < tend || tfirst <= tlast) {
 	    /* see if we need more "t" chars */
 	    if (tfirst > tlast) {
-		tfirst = (I32)utf8n_to_uvuni(t, tend - t, &ulen, flags);
+		tfirst = (I32)utf8n_to_uvchr(t, tend - t, &ulen, flags);
 		t += ulen;
-		if (t < tend && NATIVE_TO_UTF(*t) == 0xff) {	/* illegal utf8 val indicates range */
+		if (t < tend && *t == ILLEGAL_UTF8_BYTE) {	/* illegal utf8 val indicates range */
 		    t++;
-		    tlast = (I32)utf8n_to_uvuni(t, tend - t, &ulen, flags);
+		    tlast = (I32)utf8n_to_uvchr(t, tend - t, &ulen, flags);
 		    t += ulen;
 		}
 		else
@@ -4202,11 +4200,11 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	    /* now see if we need more "r" chars */
 	    if (rfirst > rlast) {
 		if (r < rend) {
-		    rfirst = (I32)utf8n_to_uvuni(r, rend - r, &ulen, flags);
+		    rfirst = (I32)utf8n_to_uvchr(r, rend - r, &ulen, flags);
 		    r += ulen;
-		    if (r < rend && NATIVE_TO_UTF(*r) == 0xff) {	/* illegal utf8 val indicates range */
+		    if (r < rend && *r == ILLEGAL_UTF8_BYTE) {	/* illegal utf8 val indicates range */
 			r++;
-			rlast = (I32)utf8n_to_uvuni(r, rend - r, &ulen, flags);
+			rlast = (I32)utf8n_to_uvchr(r, rend - r, &ulen, flags);
 			r += ulen;
 		    }
 		    else

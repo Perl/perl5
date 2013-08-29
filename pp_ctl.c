@@ -587,7 +587,7 @@ PP(pp_formline)
 			    itembytes = len;
 			send = chophere = s + itembytes;
 			while (s < send) {
-			    if (*s & ~31)
+			    if (! isCNTRL(*s))
 				gotsome = TRUE;
 			    else if (*s == '\n')
 				break;
@@ -604,7 +604,7 @@ PP(pp_formline)
 		    itemsize = fieldsize;
 		send = chophere = s + itemsize;
 		while (s < send) {
-		    if (*s & ~31)
+		    if (! isCNTRL(*s))
 			gotsome = TRUE;
 		    else if (*s == '\n')
 			break;
@@ -630,8 +630,9 @@ PP(pp_formline)
 				    chophere = s;
 				    break;
 				}
-				if (*s++ & ~31)
+				if (! isCNTRL(*s))
 				    gotsome = TRUE;
+                                s++;
 			    }
 			}
 			else {
@@ -648,7 +649,7 @@ PP(pp_formline)
 					break;
 				}
 				else {
-				    if (*s & ~31)
+				    if (! isCNTRL(*s))
 					gotsome = TRUE;
 				    if (strchr(PL_chopset, *s))
 					chophere = s + 1;
@@ -671,8 +672,9 @@ PP(pp_formline)
 			    chophere = s;
 			    break;
 			}
-			if (*s++ & ~31)
+			if (! isCNTRL(*s))
 			    gotsome = TRUE;
+                        s++;
 		    }
 		}
 		else {
@@ -687,7 +689,7 @@ PP(pp_formline)
 				break;
 			}
 			else {
-			    if (*s & ~31)
+			    if (! isCNTRL(*s))
 				gotsome = TRUE;
 			    if (strchr(PL_chopset, *s))
 				chophere = s + 1;
@@ -829,13 +831,7 @@ PP(pp_formline)
 		    U8 *send = s + to_copy;
 		    while (s < send) {
 			const int ch = *s;
-			if (trans == '~' ? (ch == '~') :
-#ifdef EBCDIC
-			       iscntrl(ch)
-#else
-			       (!(ch & ~31))
-#endif
-			)
+			if (trans == '~' ? (ch == '~') : isCNTRL(ch))
 			    *s = ' ';
 			s++;
 		    }

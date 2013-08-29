@@ -3319,9 +3319,9 @@ PP(pp_ord)
         argsv = tmpsv;
     }
 
-    XPUSHu(DO_UTF8(argsv) ?
-	   utf8n_to_uvchr(s, UTF8_MAXBYTES, 0, UTF8_ALLOW_ANYUV) :
-	   (UV)(*s & 0xff));
+    XPUSHu(DO_UTF8(argsv)
+           ? utf8n_to_uvchr(s, UTF8_MAXBYTES, 0, UTF8_ALLOW_ANYUV)
+           : (UV)(*s & 0xff));
 
     RETURN;
 }
@@ -4091,7 +4091,7 @@ PP(pp_quotemeta)
 		    /* In locale, we quote all non-ASCII Latin1 chars.
 		     * Otherwise use the quoting rules */
 		    if (IN_LOCALE_RUNTIME
-			|| _isQUOTEMETA(TWO_BYTE_UTF8_TO_UNI(*s, *(s + 1))))
+			|| _isQUOTEMETA(TWO_BYTE_UTF8_TO_NATIVE(*s, *(s + 1))))
 		    {
 			to_quote = TRUE;
 		    }
@@ -4244,7 +4244,7 @@ PP(pp_fc)
                     for (; s < send; s++) {
                         STRLEN ulen;
                         UV fc = _to_uni_fold_flags(*s, tmpbuf, &ulen, flags);
-                        if UNI_IS_INVARIANT(fc) {
+                        if NATIVE_IS_INVARIANT(fc) {
                             if (full_folding
                                 && *s == LATIN_SMALL_LETTER_SHARP_S)
                             {

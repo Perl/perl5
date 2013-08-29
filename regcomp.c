@@ -1041,8 +1041,8 @@ S_cl_or(const RExC_state_t *pRExC_state, struct regnode_charclass_class *cl, con
                     255, which means that the union with cl should just be
                     what cl has in it, so can ignore this flag
             ANYOF_NON_UTF8_LATIN1_ALL and inverted means if not utf8 and ord
-                    is 127-255 to match them, but then invert that, so the
-                    union with cl should just be what cl has in it, so can
+                    is (ASCII) 127-255 to match them, but then invert that, so
+                    the union with cl should just be what cl has in it, so can
                     ignore this flag
          */
     } else {    /* 'or_with' is not inverted */
@@ -1443,7 +1443,7 @@ and would end up looking like:
    8: EXACT <baz>(10)
   10: END(0)
 
-    d = uvuni_to_utf8_flags(d, uv, 0);
+    d = uvchr_to_utf8_flags(d, uv, 0);
 
 is the recommended Unicode-aware way of saying
 
@@ -1455,7 +1455,7 @@ is the recommended Unicode-aware way of saying
 	if (UTF) {							   \
             SV *zlopp = newSV(7); /* XXX: optimize me */                   \
 	    unsigned char *flrbbbbb = (unsigned char *) SvPVX(zlopp);	   \
-            unsigned const char *const kapow = uvuni_to_utf8(flrbbbbb, val); \
+            unsigned const char *const kapow = uvchr_to_utf8(flrbbbbb, val); \
 	    SvCUR_set(zlopp, kapow - flrbbbbb);				   \
 	    SvPOK_on(zlopp);						   \
 	    SvUTF8_on(zlopp);						   \
@@ -1470,12 +1470,12 @@ is the recommended Unicode-aware way of saying
     wordlen++;                                                                          \
     if ( UTF ) {                                                                        \
         /* if it is UTF then it is either already folded, or does not need folding */   \
-        uvc = utf8n_to_uvuni( (const U8*) uc, UTF8_MAXLEN, &len, uniflags);             \
+        uvc = utf8n_to_uvchr( (const U8*) uc, UTF8_MAXLEN, &len, uniflags);             \
     }                                                                                   \
     else if (folder == PL_fold_latin1) {                                                \
         /* if we use this folder we have to obey unicode rules on latin-1 data */       \
         if ( foldlen > 0 ) {                                                            \
-           uvc = utf8n_to_uvuni( (const U8*) scan, UTF8_MAXLEN, &len, uniflags );       \
+           uvc = utf8n_to_uvchr( (const U8*) scan, UTF8_MAXLEN, &len, uniflags );       \
            foldlen -= len;                                                              \
            scan += len;                                                                 \
            len = 0;                                                                     \
@@ -1707,7 +1707,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
                                           regardless of encoding */
             if (OP( noper ) == EXACTFU_SS) {
                 /* false positives are ok, so just set this */
-                TRIE_BITMAP_SET(trie,0xDF);
+                TRIE_BITMAP_SET(trie, LATIN_SMALL_LETTER_SHARP_S);
             }
         }
         for ( ; uc < e ; uc += len ) {
@@ -1737,7 +1737,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
 		    if ( !UTF ) {
 			/* store first byte of utf8 representation of
 			   variant codepoints */
-			if (! UNI_IS_INVARIANT(uvc)) {
+			if (! NATIVE_IS_INVARIANT(uvc)) {
 			    TRIE_BITMAP_SET(trie, UTF8_TWO_BYTE_HI(uvc));
 			}
 		    }
@@ -4276,8 +4276,8 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
 			if (!(data->start_class->flags & ANYOF_LOCALE)) {
 			    ANYOF_CLASS_CLEAR(data->start_class, classnum_to_namedclass(classnum) + 1);
                             for (value = 0; value < loop_max; value++) {
-                                if (! _generic_isCC(UNI_TO_NATIVE(value), classnum)) {
-                                    ANYOF_BITMAP_CLEAR(data->start_class, UNI_TO_NATIVE(value));
+                                if (! _generic_isCC(LATIN1_TO_NATIVE(value), classnum)) {
+                                    ANYOF_BITMAP_CLEAR(data->start_class, LATIN1_TO_NATIVE(value));
                                 }
                             }
 			}
@@ -4292,8 +4292,8 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
 			 * in case it isn't a true locale-node.  This will
 			 * create false positives if it truly is locale */
                         for (value = 0; value < loop_max; value++) {
-                            if (_generic_isCC(UNI_TO_NATIVE(value), classnum)) {
-                                ANYOF_BITMAP_SET(data->start_class, UNI_TO_NATIVE(value));
+                            if (_generic_isCC(LATIN1_TO_NATIVE(value), classnum)) {
+                                ANYOF_BITMAP_SET(data->start_class, LATIN1_TO_NATIVE(value));
                             }
                         }
                         }
@@ -4310,8 +4310,8 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
 			if (!(data->start_class->flags & ANYOF_LOCALE)) {
 			    ANYOF_CLASS_CLEAR(data->start_class, classnum_to_namedclass(classnum));
                             for (value = 0; value < loop_max; value++) {
-                                if (_generic_isCC(UNI_TO_NATIVE(value), classnum)) {
-                                    ANYOF_BITMAP_CLEAR(data->start_class, UNI_TO_NATIVE(value));
+                                if (_generic_isCC(LATIN1_TO_NATIVE(value), classnum)) {
+                                    ANYOF_BITMAP_CLEAR(data->start_class, LATIN1_TO_NATIVE(value));
                                 }
                             }
 			}
@@ -4326,8 +4326,8 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
 			 * case it isn't a true locale-node.  This will create
 			 * false positives if it truly is locale */
                         for (value = 0; value < loop_max; value++) {
-                            if (! _generic_isCC(UNI_TO_NATIVE(value), classnum)) {
-                                ANYOF_BITMAP_SET(data->start_class, UNI_TO_NATIVE(value));
+                            if (! _generic_isCC(LATIN1_TO_NATIVE(value), classnum)) {
+                                ANYOF_BITMAP_SET(data->start_class, LATIN1_TO_NATIVE(value));
                             }
                         }
                         if (PL_regkind[OP(scan)] == NPOSIXD) {
@@ -4950,12 +4950,11 @@ S_pat_upgrade_to_utf8(pTHX_ RExC_state_t * const pRExC_state,
     Newx(dst, *plen_p * 2 + 1, U8);
 
     while (s < *plen_p) {
-        const UV uv = NATIVE_TO_ASCII(src[s]);
-        if (UNI_IS_INVARIANT(uv))
-            dst[d]   = (U8)UTF_TO_NATIVE(uv);
+        if (NATIVE_IS_INVARIANT(src[s]))
+            dst[d]   = src[s];
         else {
-            dst[d++] = (U8)UTF8_EIGHT_BIT_HI(uv);
-            dst[d]   = (U8)UTF8_EIGHT_BIT_LO(uv);
+            dst[d++] = UTF8_EIGHT_BIT_HI(src[s]);
+            dst[d]   = UTF8_EIGHT_BIT_LO(src[s]);
         }
         if (n < num_code_blocks) {
             if (!do_end && pRExC_state->code_blocks[n].start == s) {
@@ -10184,7 +10183,7 @@ S_alloc_maybe_populate_EXACT(pTHX_ RExC_state_t *pRExC_state, regnode *node, I32
     if (! len_passed_in) {
         if (UTF) {
             if (FOLD && (! LOC || code_point > 255)) {
-                _to_uni_fold_flags(NATIVE_TO_UNI(code_point),
+                _to_uni_fold_flags(code_point,
                                    character,
                                    &len,
                                    FOLD_FLAGS_FULL | ((LOC)
@@ -10918,7 +10917,7 @@ tryagain:
 			p++;
 			break;
 		    case 'a':
-			  ender = ASCII_TO_NATIVE('\007');
+			  ender = '\a';
 			p++;
 			break;
 		    case 'o':
@@ -11112,8 +11111,7 @@ tryagain:
                         REGC((char)ender, s++);
                     }
                 }
-                else /* FOLD */
-                     if (! ( UTF
+                else /* FOLD */ if (! ( UTF
                         /* See comments for join_exact() as to why we fold this
                          * non-UTF at compile time */
                         || (node_type == EXACTFU
@@ -11145,7 +11143,7 @@ tryagain:
                      * utf8.  If we start to fold non-UTF patterns, be sure to
                      * update join_exact() */
                     if (LOC && ender < 256) {
-                        if (UNI_IS_INVARIANT(ender)) {
+                        if (NATIVE_IS_INVARIANT(ender)) {
                             *s = (U8) ender;
                             foldlen = 1;
                         } else {
@@ -11286,8 +11284,8 @@ tryagain:
                             /* No Latin1 characters participate in multi-char
                              * folds under /l */
                             if (LOC
-                                || ! IS_NON_FINAL_FOLD(TWO_BYTE_UTF8_TO_UNI(
-                                                                *s, *(s+1))))
+                                || ! IS_NON_FINAL_FOLD(TWO_BYTE_UTF8_TO_NATIVE(
+                                                                  *s, *(s+1))))
                             {
                                 break;
                             }
@@ -12579,7 +12577,7 @@ parseit:
 	    case 'f':	value = '\f';			break;
 	    case 'b':	value = '\b';			break;
 	    case 'e':	value = ASCII_TO_NATIVE('\033');break;
-	    case 'a':	value = ASCII_TO_NATIVE('\007');break;
+	    case 'a':	value = '\a';                   break;
 	    case 'o':
 		RExC_parse--;	/* function expects to be pointed at the 'o' */
 		{
@@ -13190,9 +13188,11 @@ parseit:
              * included.  literal_endpoint==2 means both ends of the range used
              * a literal character, not \x{foo} */
 	    if (literal_endpoint == 2
-                && (prevvalue >= 'a' && value <= 'z')
-                    || (prevvalue >= 'A' && value <= 'Z'))
+                && ((prevvalue >= 'a' && value <= 'z')
+                    || (prevvalue >= 'A' && value <= 'Z')))
             {
+                _invlist_intersection(this_range, PL_ASCII,
+                                      &this_range);
                 _invlist_intersection(this_range, PL_Posix_ptrs[_CC_ALPHA],
                                       &this_range);
             }
@@ -13489,7 +13489,7 @@ parseit:
                     /* If the folds haven't been read in, call a fold function
                      * to force that */
                     if (! PL_utf8_tofold) {
-                        U8 dummy[UTF8_MAXBYTES+1];
+                        U8 dummy[UTF8_MAXBYTES_CASE+1];
 
                         /* This string is just a short named one above \xff */
                         to_utf8_fold((U8*) HYPHEN_UTF8, dummy, NULL);

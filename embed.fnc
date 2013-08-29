@@ -899,6 +899,8 @@ pX	|I32	|my_stat_flags	|NULLOK const U32 flags
 Ap	|char *	|my_strftime	|NN const char *fmt|int sec|int min|int hour|int mday|int mon|int year|int wday|int yday|int isdst
 : Used in pp_ctl.c
 p	|void	|my_unexec
+ADMnoPR	|UV	|NATIVE_TO_NEED	|const UV enc|const UV ch
+ADMnoPR	|UV	|ASCII_TO_NEED	|const UV enc|const UV ch
 Apa	|OP*	|newANONLIST	|NULLOK OP* o
 Apa	|OP*	|newANONHASH	|NULLOK OP* o
 Ap	|OP*	|newANONSUB	|I32 floor|NULLOK OP* proto|NULLOK OP* block
@@ -1540,30 +1542,21 @@ ApMd	|U8*	|bytes_from_utf8|NN const U8 *s|NN STRLEN *len|NULLOK bool *is_utf8
 ApMd	|U8*	|bytes_to_utf8	|NN const U8 *s|NN STRLEN *len
 ApdD	|UV	|utf8_to_uvchr	|NN const U8 *s|NULLOK STRLEN *retlen
 ApdD	|UV	|utf8_to_uvuni	|NN const U8 *s|NULLOK STRLEN *retlen
-ApM	|UV	|valid_utf8_to_uvuni	|NN const U8 *s|NULLOK STRLEN *retlen
-Apd	|UV	|utf8_to_uvchr_buf	|NN const U8 *s|NN const U8 *send|NULLOK STRLEN *retlen
-Apd	|UV	|utf8_to_uvuni_buf	|NN const U8 *s|NN const U8 *send|NULLOK STRLEN *retlen
+ApMD	|UV	|valid_utf8_to_uvuni	|NN const U8 *s|NULLOK STRLEN *retlen
+Amd	|UV	|utf8_to_uvchr_buf	|NN const U8 *s|NN const U8 *send|NULLOK STRLEN *retlen
+ApdD	|UV	|utf8_to_uvuni_buf	|NN const U8 *s|NN const U8 *send|NULLOK STRLEN *retlen
 pM	|bool	|check_utf8_print	|NN const U8 *s|const STRLEN len
 
-#ifdef EBCDIC
 Adp	|UV	|utf8n_to_uvchr	|NN const U8 *s|STRLEN curlen|NULLOK STRLEN *retlen|U32 flags
 ApM	|UV	|valid_utf8_to_uvchr	|NN const U8 *s|NULLOK STRLEN *retlen
-#else
-Adpbm	|UV	|utf8n_to_uvchr	|NN const U8 *s|STRLEN curlen|NULLOK STRLEN *retlen|U32 flags
-ApbmM	|UV	|valid_utf8_to_uvchr	|NN const U8 *s|NULLOK STRLEN *retlen
-#endif
 
-Adp	|UV	|utf8n_to_uvuni	|NN const U8 *s|STRLEN curlen|NULLOK STRLEN *retlen|U32 flags
+Ap	|UV	|utf8n_to_uvuni|NN const U8 *s|STRLEN curlen|NULLOK STRLEN *retlen|U32 flags
 
-#ifdef EBCDIC
-Apd	|U8*	|uvchr_to_utf8	|NN U8 *d|UV uv
-#else
-Apdbm	|U8*	|uvchr_to_utf8	|NN U8 *d|UV uv
-#endif
-
-Apbm	|U8*	|uvuni_to_utf8	|NN U8 *d|UV uv
-Ap	|U8*	|uvchr_to_utf8_flags	|NN U8 *d|UV uv|UV flags
-Apd	|U8*	|uvuni_to_utf8_flags	|NN U8 *d|UV uv|UV flags
+Adm	|U8*	|uvchr_to_utf8	|NN U8 *d|UV uv
+Ap	|U8*	|uvuni_to_utf8	|NN U8 *d|UV uv
+Adm	|U8*	|uvchr_to_utf8_flags	|NN U8 *d|UV uv|UV flags
+Apd	|U8*	|uvoffuni_to_utf8_flags	|NN U8 *d|UV uv|UV flags
+Ap	|U8*	|uvuni_to_utf8_flags	|NN U8 *d|UV uv|UV flags
 Apd	|char*	|pv_uni_display	|NN SV *dsv|NN const U8 *spv|STRLEN len|STRLEN pvlim|UV flags
 ApdR	|char*	|sv_uni_display	|NN SV *dsv|NN SV *ssv|STRLEN pvlim|UV flags
 : Used by Data::Alias
@@ -2315,6 +2308,8 @@ sRM	|UV	|check_locale_boundary_crossing|NN const U8* const p|const UV result|NN 
 iR	|bool	|is_utf8_common	|NN const U8 *const p|NN SV **swash|NN const char * const swashname
 sR	|SV*	|swatch_get	|NN SV* swash|UV start|UV span
 #endif
+
+AiMn	|void	|append_utf8_from_native_byte|const U8 byte|NN U8** dest
 
 Apd	|void	|sv_setsv_flags	|NN SV *dstr|NULLOK SV *sstr|const I32 flags
 Apd	|void	|sv_catpvn_flags|NN SV *const dstr|NN const char *sstr|const STRLEN len \

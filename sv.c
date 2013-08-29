@@ -1749,10 +1749,12 @@ S_sv_display(pTHX_ SV *const sv, char *tmpbuf, STRLEN tmpbuf_size) {
 	  const char * const end = s + SvCUR(sv);
 	  for ( ; s < end && d < limit; s++ ) {
 	       int ch = *s & 0xFF;
-	       if (ch & 128 && !isPRINT_LC(ch)) {
+	       if (! isASCII(ch) && !isPRINT_LC(ch)) {
 		    *d++ = 'M';
 		    *d++ = '-';
-		    ch &= 127;
+
+                    /* Map to ASCII "equivalent" of Latin1 */
+		    ch = LATIN1_TO_NATIVE(NATIVE_TO_LATIN1(ch) & 127);
 	       }
 	       if (ch == '\n') {
 		    *d++ = '\\';
@@ -3422,13 +3424,8 @@ must_be_utf8:
 		}
 
 		while (t < e) {
-		    const UV uv = NATIVE8_TO_UNI(*t++);
-		    if (UNI_IS_INVARIANT(uv))
-			*d++ = (U8)UNI_TO_NATIVE(uv);
-		    else {
-			*d++ = (U8)UTF8_EIGHT_BIT_HI(uv);
-			*d++ = (U8)UTF8_EIGHT_BIT_LO(uv);
-		    }
+                    append_utf8_from_native_byte(*t, &d);
+                    t++;
 		}
 		*d = '\0';
 		SvPV_free(sv); /* No longer using pre-existing string */
@@ -3474,13 +3471,13 @@ must_be_utf8:
 
 		e--;
 		while (e >= t) {
-		    const U8 ch = NATIVE8_TO_UNI(*e--);
-		    if (UNI_IS_INVARIANT(ch)) {
-			*d-- = UNI_TO_NATIVE(ch);
+		    if (NATIVE_IS_INVARIANT(*e)) {
+			*d-- = *e;
 		    } else {
-			*d-- = (U8)UTF8_EIGHT_BIT_LO(ch);
-			*d-- = (U8)UTF8_EIGHT_BIT_HI(ch);
+			*d-- = UTF8_EIGHT_BIT_LO(*e);
+			*d-- = UTF8_EIGHT_BIT_HI(*e);
 		    }
+                    e--;
 		}
 	    }
 
@@ -5200,13 +5197,8 @@ Perl_sv_catpvn_flags(pTHX_ SV *const dsv, const char *sstr, const STRLEN slen, c
 	d = (U8 *)SvPVX(dsv) + dlen;
 
 	while (sstr < send) {
-	    const UV uv = NATIVE_TO_ASCII((U8)*sstr++);
-	    if (UNI_IS_INVARIANT(uv))
-		*d++ = (U8)UTF_TO_NATIVE(uv);
-	    else {
-		*d++ = (U8)UTF8_EIGHT_BIT_HI(uv);
-		*d++ = (U8)UTF8_EIGHT_BIT_LO(uv);
-	    }
+            append_utf8_from_native_byte(*sstr, &d);
+	    sstr++;
 	}
 	SvCUR_set(dsv, d-(const U8 *)SvPVX(dsv));
     }
@@ -10866,7 +10858,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 		goto unknown;
 	    uv = (args) ? va_arg(*args, int) : SvIV(argsv);
 	    if ((uv > 255 ||
-		 (!UNI_IS_INVARIANT(uv) && SvUTF8(sv)))
+		 (!NATIVE_IS_INVARIANT(uv) && SvUTF8(sv)))
 		&& !IN_BYTES) {
 		eptr = (char*)utf8buf;
 		elen = uvchr_to_utf8((U8*)eptr, uv) - utf8buf;

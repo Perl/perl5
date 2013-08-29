@@ -586,7 +586,7 @@ S_missingterm(pTHX_ char *s)
 	if (nl)
 	    *nl = '\0';
     }
-    else if (isCNTRL(PL_multi_close)) {
+    else if ((U8) PL_multi_close < 32) {
 	*tmpbuf = '^';
 	tmpbuf[1] = (char)toCTRL(PL_multi_close);
 	tmpbuf[2] = '\0';
@@ -1053,7 +1053,7 @@ Perl_lex_stuff_pvn(pTHX_ const char *pv, STRLEN len, U32 flags)
 		    ENTER;
 		    SAVESPTR(PL_warnhook);
 		    PL_warnhook = PERL_WARNHOOK_FATAL;
-		    utf8n_to_uvuni((U8*)p, e-p, NULL, 0);
+		    utf8n_to_uvchr((U8*)p, e-p, NULL, 0);
 		    LEAVE;
 		}
 	    }
@@ -1073,7 +1073,7 @@ Perl_lex_stuff_pvn(pTHX_ const char *pv, STRLEN len, U32 flags)
 		}
 		else {
                     assert(p < e -1 );
-		    *bufptr++ = TWO_BYTE_UTF8_TO_UNI(*p, *(p+1));
+		    *bufptr++ = TWO_BYTE_UTF8_TO_NATIVE(*p, *(p+1));
 		    p += 2;
                 }
 	    }
@@ -1437,13 +1437,13 @@ Perl_lex_peek_unichar(pTHX_ U32 flags)
 		bufend = PL_parser->bufend;
 	    }
 	}
-	unichar = utf8n_to_uvuni((U8*)s, bufend-s, &retlen, UTF8_CHECK_ONLY);
+	unichar = utf8n_to_uvchr((U8*)s, bufend-s, &retlen, UTF8_CHECK_ONLY);
 	if (retlen == (STRLEN)-1) {
 	    /* malformed UTF-8 */
 	    ENTER;
 	    SAVESPTR(PL_warnhook);
 	    PL_warnhook = PERL_WARNHOOK_FATAL;
-	    utf8n_to_uvuni((U8*)s, bufend-s, NULL, 0);
+	    utf8n_to_uvchr((U8*)s, bufend-s, NULL, 0);
 	    LEAVE;
 	}
 	return unichar;
@@ -2761,7 +2761,7 @@ S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e)
     {
         /* If warnings are on, this will print a more detailed analysis of what
          * is wrong than the error message below */
-        utf8n_to_uvuni(first_bad_char_loc,
+        utf8n_to_uvchr(first_bad_char_loc,
                        e - ((char *) first_bad_char_loc),
                        NULL, 0);
 
@@ -2836,7 +2836,7 @@ S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e)
             }
             s++;
         } else if (UTF8_IS_DOWNGRADEABLE_START(*s)) {
-            if (! isALPHAU(UNI_TO_NATIVE(TWO_BYTE_UTF8_TO_UNI(*s, *(s+1))))) {
+            if (! isALPHAU(TWO_BYTE_UTF8_TO_NATIVE(*s, *(s+1)))) {
                 goto bad_charname;
             }
             s += 2;
@@ -2869,8 +2869,7 @@ S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e)
                 s++;
             }
             else if (UTF8_IS_DOWNGRADEABLE_START(*s)) {
-                if (! isCHARNAME_CONT(UNI_TO_NATIVE(TWO_BYTE_UTF8_TO_UNI(*s,
-                                                                    *(s+1)))))
+                if (! isCHARNAME_CONT(TWO_BYTE_UTF8_TO_NATIVE(*s, *(s+1))))
                 {
                     goto bad_charname;
                 }
@@ -2904,7 +2903,7 @@ S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e)
         if (! is_utf8_string_loc((U8 *) str, len, &first_bad_char_loc)) {
             /* If warnings are on, this will print a more detailed analysis of
              * what is wrong than the error message below */
-            utf8n_to_uvuni(first_bad_char_loc,
+            utf8n_to_uvchr(first_bad_char_loc,
                            (char *) first_bad_char_loc - str,
                            NULL, 0);
 
@@ -3105,7 +3104,7 @@ S_scan_const(pTHX_ char *start)
 		    char *e = d++;
 		    while (e-- > c)
 			*(e + 1) = *e;
-		    *c = (char)UTF_TO_NATIVE(0xff);
+		    *c = (char) ILLEGAL_UTF8_BYTE;
 		    /* mark the range as done, and continue */
 		    dorange = FALSE;
 		    didrange = TRUE;
@@ -3159,16 +3158,12 @@ S_scan_const(pTHX_ char *start)
 
 #ifdef EBCDIC
 		if (literal_endpoint == 2 &&
-		    ((isLOWER(min) && isLOWER(max)) ||
-		     (isUPPER(min) && isUPPER(max)))) {
-		    if (isLOWER(min)) {
-			for (i = min; i <= max; i++)
-			    if (isLOWER(i))
-				*d++ = NATIVE_TO_NEED(has_utf8,i);
-		    } else {
-			for (i = min; i <= max; i++)
-			    if (isUPPER(i))
-				*d++ = NATIVE_TO_NEED(has_utf8,i);
+		    ((isLOWER_A(min) && isLOWER_A(max)) ||
+		     (isUPPER_A(min) && isUPPER_A(max))))
+                {
+                    for (i = min; i <= max; i++) {
+                        if (isALPHA_A(i))
+                            *d++ = i;
 		    }
 		}
 		else
@@ -3176,13 +3171,7 @@ S_scan_const(pTHX_ char *start)
 		    for (i = min; i <= max; i++)
 #ifdef EBCDIC
                         if (has_utf8) {
-                            const U8 ch = (U8)NATIVE_TO_UTF(i);
-                            if (UNI_IS_INVARIANT(ch))
-                                *d++ = (U8)i;
-                            else {
-                                *d++ = (U8)UTF8_EIGHT_BIT_HI(ch);
-                                *d++ = (U8)UTF8_EIGHT_BIT_LO(ch);
-                            }
+                            append_utf8_from_native_byte(i, &d);
                         }
                         else
 #endif
@@ -3192,7 +3181,7 @@ S_scan_const(pTHX_ char *start)
                 if (uvmax) {
                     d = (char*)uvchr_to_utf8((U8*)d, 0x100);
                     if (uvmax > 0x101)
-                        *d++ = (char)UTF_TO_NATIVE(0xff);
+                        *d++ = (char) ILLEGAL_UTF8_BYTE;
                     if (uvmax > 0x100)
                         d = (char*)uvchr_to_utf8((U8*)d, uvmax);
                 }
@@ -3217,7 +3206,7 @@ S_scan_const(pTHX_ char *start)
 		    && !native_range
 #endif
 		    ) {
-		    *d++ = (char)UTF_TO_NATIVE(0xff);	/* use illegal utf8 byte--see pmtrans */
+		    *d++ = (char) ILLEGAL_UTF8_BYTE;	/* use illegal utf8 byte--see pmtrans */
 		    s++;
 		    continue;
 		}
@@ -3260,7 +3249,7 @@ S_scan_const(pTHX_ char *start)
 	else if (*s == '(' && PL_lex_inpat && s[1] == '?' && !in_charclass) {
 	    if (s[2] == '#') {
 		while (s+1 < send && *s != ')')
-		    *d++ = NATIVE_TO_NEED(has_utf8,*s++);
+		    *d++ = *s++;
 	    }
 	    else if (!PL_lex_casemods &&
 		     (    s[2] == '{' /* This should match regcomp.c */
@@ -3274,7 +3263,7 @@ S_scan_const(pTHX_ char *start)
 	else if (*s == '#' && PL_lex_inpat && !in_charclass &&
 	  ((PMOP*)PL_lex_inpat)->op_pmflags & RXf_PMf_EXTENDED) {
 	    while (s+1 < send && *s != '\n')
-		*d++ = NATIVE_TO_NEED(has_utf8,*s++);
+		*d++ = *s++;
 	}
 
 	/* no further processing of single-quoted regex */
@@ -3349,7 +3338,7 @@ S_scan_const(pTHX_ char *start)
 			|| s[1] != '{'
 			|| regcurly(s + 1, FALSE)))
 	    {
-		*d++ = NATIVE_TO_NEED(has_utf8,'\\');
+		*d++ = '\\';
 		goto default_action;
 	    }
 
@@ -3378,7 +3367,7 @@ S_scan_const(pTHX_ char *start)
 		{
                     I32 flags = PERL_SCAN_SILENT_ILLDIGIT;
                     STRLEN len = 3;
-		    uv = NATIVE_TO_UNI(grok_oct(s, &len, &flags, NULL));
+		    uv = grok_oct(s, &len, &flags, NULL);
 		    s += len;
                     if (len < 3 && s < send && isDIGIT(*s)
                         && ckWARN(WARN_MISC))
@@ -3430,9 +3419,8 @@ S_scan_const(pTHX_ char *start)
 		 * UTF-8 sequence they can end up as, except if they force us
 		 * to recode the rest of the string into utf8 */
 		
-		/* Here uv is the ordinal of the next character being added in
-		 * unicode (converted from native). */
-		if (!UNI_IS_INVARIANT(uv)) {
+		/* Here uv is the ordinal of the next character being added */
+		if (!NATIVE_IS_INVARIANT(uv)) {
 		    if (!has_utf8 && uv > 255) {
 			/* Might need to recode whatever we have accumulated so
 			 * far if it contains any chars variant in utf8 or
@@ -3450,7 +3438,7 @@ S_scan_const(pTHX_ char *start)
                     }
 
                     if (has_utf8) {
-		        d = (char*)uvuni_to_utf8((U8*)d, uv);
+		        d = (char*)uvchr_to_utf8((U8*)d, uv);
 			if (PL_lex_inwhat == OP_TRANS &&
 			    PL_sublex_info.sub_op) {
 			    PL_sublex_info.sub_op->op_private |=
@@ -3482,16 +3470,6 @@ S_scan_const(pTHX_ char *start)
 		 * to get the value from the charnames that is in effect right
 		 * now, while preserving the fact that it was a named character
 		 * so that the regex compiler knows this */
-
-		/* This section of code doesn't generally use the
-		 * NATIVE_TO_NEED() macro to transform the input.  I (khw) did
-		 * a close examination of this macro and determined it is a
-		 * no-op except on utfebcdic variant characters.  Every
-		 * character generated by this that would normally need to be
-		 * enclosed by this macro is invariant, so the macro is not
-		 * needed, and would complicate use of copy().  XXX There are
-		 * other parts of this file where the macro is used
-		 * inconsistently, but are saved by it being a no-op */
 
 		/* The structure of this section of code (besides checking for
 		 * errors and upgrading to utf8) is:
@@ -3580,11 +3558,13 @@ S_scan_const(pTHX_ char *start)
 			    has_utf8 = TRUE;
 			}
 
-			/* Add the string to the output */
+                        /* Add the (Unicode) code point to the output. */
 			if (UNI_IS_INVARIANT(uv)) {
-			    *d++ = (char) uv;
+			    *d++ = (char) LATIN1_TO_NATIVE(uv);
 			}
-			else d = (char*)uvuni_to_utf8((U8*)d, uv);
+			else {
+                            d = (char*) uvoffuni_to_utf8_flags((U8*)d, uv, 0);
+                        }
 		    }
 		}
 		else /* Here is \N{NAME} but not \N{U+...}. */
@@ -3644,19 +3624,16 @@ S_scan_const(pTHX_ char *start)
                                 char hex_string[2 * UTF8_MAXBYTES + 5];
 
                                 /* Get the first character of the result. */
-                                U32 uv = utf8n_to_uvuni((U8 *) str,
+                                U32 uv = utf8n_to_uvchr((U8 *) str,
                                                         len,
                                                         &char_length,
                                                         UTF8_ALLOW_ANYUV);
                                 /* Convert first code point to hex, including
-                                 * the boiler plate before it.  For all these,
-                                 * we convert to native format so that
-                                 * downstream code can continue to assume the
-                                 * input is native */
+                                 * the boiler plate before it. */
                                 output_length =
                                     my_snprintf(hex_string, sizeof(hex_string),
-                                            "\\N{U+%X",
-                                            (unsigned int) UNI_TO_NATIVE(uv));
+                                                "\\N{U+%X",
+                                                (unsigned int) uv);
 
                                 /* Make sure there is enough space to hold it */
                                 d = off + SvGROW(sv, off
@@ -3671,15 +3648,15 @@ S_scan_const(pTHX_ char *start)
                                 * its ordinal in hex */
                                 while ((str += char_length) < str_end) {
                                     const STRLEN off = d - SvPVX_const(sv);
-                                    U32 uv = utf8n_to_uvuni((U8 *) str,
+                                    U32 uv = utf8n_to_uvchr((U8 *) str,
                                                             str_end - str,
                                                             &char_length,
                                                             UTF8_ALLOW_ANYUV);
                                     output_length =
                                         my_snprintf(hex_string,
-                                            sizeof(hex_string),
-                                            ".%X",
-                                            (unsigned int) UNI_TO_NATIVE(uv));
+                                                    sizeof(hex_string),
+                                                    ".%X",
+                                                    (unsigned int) uv);
 
                                     d = off + SvGROW(sv, off
                                                         + output_length
@@ -3744,25 +3721,25 @@ S_scan_const(pTHX_ char *start)
 
 	    /* printf-style backslashes, formfeeds, newlines, etc */
 	    case 'b':
-		*d++ = NATIVE_TO_NEED(has_utf8,'\b');
+		*d++ = '\b';
 		break;
 	    case 'n':
-		*d++ = NATIVE_TO_NEED(has_utf8,'\n');
+		*d++ = '\n';
 		break;
 	    case 'r':
-		*d++ = NATIVE_TO_NEED(has_utf8,'\r');
+		*d++ = '\r';
 		break;
 	    case 'f':
-		*d++ = NATIVE_TO_NEED(has_utf8,'\f');
+		*d++ = '\f';
 		break;
 	    case 't':
-		*d++ = NATIVE_TO_NEED(has_utf8,'\t');
+		*d++ = '\t';
 		break;
 	    case 'e':
-		*d++ = ASCII_TO_NEED(has_utf8,'\033');
+		*d++ = ASCII_TO_NATIVE('\033');
 		break;
 	    case 'a':
-		*d++ = ASCII_TO_NEED(has_utf8,'\007');
+		*d++ = '\a';
 		break;
 	    } /* end switch */
 
@@ -3788,8 +3765,10 @@ S_scan_const(pTHX_ char *start)
 	     * routine that does the conversion checks for errors like
 	     * malformed utf8 */
 
-	    const UV nextuv   = (this_utf8) ? utf8n_to_uvchr((U8*)s, send - s, &len, 0) : (UV) ((U8) *s);
-	    const STRLEN need = UNISKIP(NATIVE_TO_UNI(nextuv));
+	    const UV nextuv   = (this_utf8)
+                                ? utf8n_to_uvchr((U8*)s, send - s, &len, 0)
+                                : (UV) ((U8) *s);
+	    const STRLEN need = UNISKIP(nextuv);
 	    if (!has_utf8) {
 		SvCUR_set(sv, d - SvPVX_const(sv));
 		SvPOK_on(sv);
@@ -3816,7 +3795,7 @@ S_scan_const(pTHX_ char *start)
 #endif
 	}
 	else {
-	    *d++ = NATIVE_TO_NEED(has_utf8,*s++);
+	    *d++ = *s++;
 	}
     } /* while loop to process each character */
 
@@ -5281,7 +5260,7 @@ Perl_yylex(pTHX)
 	     * check if it in fact is. */
 	    if (bof && PL_rsfp &&
 		     (*s == 0 ||
-		      *(U8*)s == 0xEF ||
+		      *(U8*)s == BOM_UTF8_FIRST_BYTE ||
 		      *(U8*)s >= 0xFE ||
 		      s[1] == 0)) {
 		Off_t offset = (IV)PerlIO_tell(PL_rsfp);
@@ -8882,17 +8861,9 @@ Perl_yylex(pTHX)
 	    FUN0(OP_WANTARRAY);
 
 	case KEY_write:
-#ifdef EBCDIC
-	{
-	    char ctl_l[2];
-	    ctl_l[0] = toCTRL('L');
-	    ctl_l[1] = '\0';
-	    gv_fetchpvn_flags(ctl_l, 1, GV_ADD|GV_NOTQUAL, SVt_PV);
-	}
-#else
-	    /* Make sure $^L is defined */
-	    gv_fetchpvs("\f", GV_ADD|GV_NOTQUAL, SVt_PV);
-#endif
+            /* Make sure $^L is defined. 0x0C is CTRL-L on ASCII platforms, and
+             * we use the same number on EBCDIC */
+	    gv_fetchpvs("\x0C", GV_ADD|GV_NOTQUAL, SVt_PV);
 	    UNI(OP_ENTERWRITE);
 
 	case KEY_x:
@@ -9373,10 +9344,17 @@ S_scan_ident(pTHX_ char *s, const char *send, char *dest, STRLEN destlen, I32 ck
 	   s++;
     }
 
-#define VALID_LEN_ONE_IDENT(d, u)     (isPUNCT_A((U8)(d))     \
-                                        || isCNTRL_A((U8)(d)) \
-                                        || isDIGIT_A((U8)(d)) \
-                                        || (!(u) && !UTF8_IS_INVARIANT((U8)(d))))
+/*  \c?, \c\, \c^, \c_, and \cA..\cZ minus the ones that have traditionally
+ *  been matched by \s on ASCII platforms, are the legal control char names
+ *  here, that is \c? plus 1-32 minus the \s ones. */
+#define VALID_LEN_ONE_IDENT(d, u) (isPUNCT_A((U8)(d))                       \
+                                   || isDIGIT_A((U8)(d))                    \
+                                   || (!(u) && !isASCII((U8)(d)))           \
+                                   || ((((U8)(d)) < 32)                     \
+                                       && (((((U8)(d)) >= 14)               \
+                                           || (((U8)(d)) <= 8 && (d) != 0) \
+                                           || (((U8)(d)) == 13))))          \
+                                   || (((U8)(d)) == toCTRL('?')))
     if (s < send
         && (isIDFIRST_lazy_if(s, is_utf8) || VALID_LEN_ONE_IDENT(*s, is_utf8)))
     {
@@ -11556,12 +11534,14 @@ S_swallow_bom(pTHX_ U8 *s)
 #endif
 	}
 	break;
-    case 0xEF:
-	if (slen > 2 && s[1] == 0xBB && s[2] == 0xBF) {
-	    if (DEBUG_p_TEST || DEBUG_T_TEST) PerlIO_printf(Perl_debug_log, "UTF-8 script encoding (BOM)\n");
-	    s += 3;                      /* UTF-8 */
-	}
-	break;
+    case BOM_UTF8_FIRST_BYTE: {
+        const STRLEN len = sizeof(BOM_UTF8_TAIL) - 1; /* Exclude trailing NUL */
+        if (slen > len && memEQ(s+1, BOM_UTF8_TAIL, len)) {
+            if (DEBUG_p_TEST || DEBUG_T_TEST) PerlIO_printf(Perl_debug_log, "UTF-8 script encoding (BOM)\n");
+            s += len + 1;                      /* UTF-8 */
+        }
+        break;
+    }
     case 0:
 	if (slen > 3) {
 	     if (s[1] == 0) {
@@ -11584,14 +11564,6 @@ S_swallow_bom(pTHX_ U8 *s)
 #endif
 	     }
 	}
-#ifdef EBCDIC
-    case 0xDD:
-        if (slen > 3 && s[1] == 0x73 && s[2] == 0x66 && s[3] == 0x73) {
-            if (DEBUG_p_TEST || DEBUG_T_TEST) PerlIO_printf(Perl_debug_log, "UTF-8 script encoding (BOM)\n");
-            s += 4;                      /* UTF-8 */
-        }
-        break;
-#endif
 
     default:
 	 if (slen > 3 && s[1] == 0 && s[2] != 0 && s[3] == 0) {
@@ -11836,7 +11808,7 @@ Perl_scan_vstring(pTHX_ const char *s, const char *const e, SV *sv)
 	    /* Append native character for the rev point */
 	    tmpend = uvchr_to_utf8(tmpbuf, rev);
 	    sv_catpvn(sv, (const char*)tmpbuf, tmpend - tmpbuf);
-	    if (!UNI_IS_INVARIANT(NATIVE_TO_UNI(rev)))
+	    if (!NATIVE_IS_INVARIANT(rev))
 		 SvUTF8_on(sv);
 	    if (pos + 1 < e && *pos == '.' && isDIGIT(pos[1]))
 		 s = ++pos;

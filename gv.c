@@ -1746,7 +1746,13 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	    /* Nothing else to do.
 	       The compiler will probably turn the switch statement into a
 	       branch table. Make sure we avoid even that small overhead for
-	       the common case of lower case variable names.  */
+               the common case of lower case variable names.  (On EBCDIC
+               platforms, we can't just do:
+                 if (NATIVE_TO_ASCII(*name) > NATIVE_TO_ASCII('V') ) {
+               because cases like '\027' in the switch statement below are
+               C1 (non-ASCII) controls on those platforms, so the remapping
+               would make them larger than 'V')
+             */
 	} else
 #endif
 	{

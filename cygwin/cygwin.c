@@ -156,7 +156,7 @@ wide_to_utf8(const wchar_t *wbuf)
     char *oldlocale = setlocale(LC_CTYPE, NULL);
     setlocale(LC_CTYPE, "utf-8");
 
-    /* uvuni_to_utf8(buf, chr) or Encoding::_bytes_to_utf8(sv, "UCS-2BE"); */
+    /* uvchr_to_utf8(buf, chr) or Encoding::_bytes_to_utf8(sv, "UCS-2BE"); */
     wlen = wcsrtombs(NULL, (const wchar_t **)&wbuf, wlen, NULL);
     buf = (char *) safemalloc(wlen+1);
     wcsrtombs(buf, (const wchar_t **)&wbuf, wlen, NULL);
@@ -176,7 +176,7 @@ utf8_to_wide(const char *buf)
 
     setlocale(LC_CTYPE, "utf-8");
     wbuf = (wchar_t *) safemalloc(wlen);
-    /* utf8_to_uvuni_buf(pathname, pathname + wlen, wpath) or Encoding::_utf8_to_bytes(sv, "UCS-2BE"); */
+    /* utf8_to_uvchr_buf(pathname, pathname + wlen, wpath) or Encoding::_utf8_to_bytes(sv, "UCS-2BE"); */
     wlen = mbsrtowcs(wbuf, (const char**)&buf, wlen, &mbs);
 
     if (oldlocale) setlocale(LC_CTYPE, oldlocale);
@@ -283,7 +283,7 @@ XS(XS_Cygwin_win_to_posix_path)
 	    mbstate_t mbs;
             char *oldlocale = setlocale(LC_CTYPE, NULL);
             setlocale(LC_CTYPE, "utf-8");
-	    /* utf8_to_uvuni_buf(src_path, src_path + wlen, wpath) or Encoding::_utf8_to_bytes(sv, "UCS-2BE"); */
+	    /* utf8_to_uvchr_buf(src_path, src_path + wlen, wpath) or Encoding::_utf8_to_bytes(sv, "UCS-2BE"); */
 	    wlen = mbsrtowcs(wpath, (const char**)&src_path, wlen, &mbs);
 	    if (wlen > 0)
 		err = cygwin_conv_path(what, wpath, wbuf, wlen);
@@ -370,7 +370,7 @@ XS(XS_Cygwin_posix_to_win_path)
 	setlocale(LC_CTYPE, "utf-8");
 	if (!IN_BYTES) {
 	    mbstate_t mbs;
-	    /* utf8_to_uvuni_buf(src_path, src_path + wlen, wpath) or Encoding::_utf8_to_bytes(sv, "UCS-2BE"); */
+	    /* utf8_to_uvchr_buf(src_path, src_path + wlen, wpath) or Encoding::_utf8_to_bytes(sv, "UCS-2BE"); */
 	    wlen = mbsrtowcs(wpath, (const char**)&src_path, wlen, &mbs);
 	    if (wlen > 0)
 		err = cygwin_conv_path(what, wpath, wbuf, wlen);

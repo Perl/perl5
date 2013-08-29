@@ -41,6 +41,7 @@
 #define _to_utf8_upper_flags(a,b,c,d,e)	Perl__to_utf8_upper_flags(aTHX_ a,b,c,d,e)
 #define amagic_call(a,b,c,d)	Perl_amagic_call(aTHX_ a,b,c,d)
 #define amagic_deref_call(a,b)	Perl_amagic_deref_call(aTHX_ a,b)
+#define append_utf8_from_native_byte	S_append_utf8_from_native_byte
 #define apply_attrs_string(a,b,c,d)	Perl_apply_attrs_string(aTHX_ a,b,c,d)
 #define atfork_lock		Perl_atfork_lock
 #define atfork_unlock		Perl_atfork_unlock
@@ -692,12 +693,14 @@
 #define utf8_length(a,b)	Perl_utf8_length(aTHX_ a,b)
 #define utf8_to_bytes(a,b)	Perl_utf8_to_bytes(aTHX_ a,b)
 #define utf8_to_uvchr(a,b)	Perl_utf8_to_uvchr(aTHX_ a,b)
-#define utf8_to_uvchr_buf(a,b,c)	Perl_utf8_to_uvchr_buf(aTHX_ a,b,c)
 #define utf8_to_uvuni(a,b)	Perl_utf8_to_uvuni(aTHX_ a,b)
 #define utf8_to_uvuni_buf(a,b,c)	Perl_utf8_to_uvuni_buf(aTHX_ a,b,c)
+#define utf8n_to_uvchr(a,b,c,d)	Perl_utf8n_to_uvchr(aTHX_ a,b,c,d)
 #define utf8n_to_uvuni(a,b,c,d)	Perl_utf8n_to_uvuni(aTHX_ a,b,c,d)
-#define uvchr_to_utf8_flags(a,b,c)	Perl_uvchr_to_utf8_flags(aTHX_ a,b,c)
+#define uvoffuni_to_utf8_flags(a,b,c)	Perl_uvoffuni_to_utf8_flags(aTHX_ a,b,c)
+#define uvuni_to_utf8(a,b)	Perl_uvuni_to_utf8(aTHX_ a,b)
 #define uvuni_to_utf8_flags(a,b,c)	Perl_uvuni_to_utf8_flags(aTHX_ a,b,c)
+#define valid_utf8_to_uvchr(a,b)	Perl_valid_utf8_to_uvchr(aTHX_ a,b)
 #define valid_utf8_to_uvuni(a,b)	Perl_valid_utf8_to_uvuni(aTHX_ a,b)
 #define vcmp(a,b)		Perl_vcmp(aTHX_ a,b)
 #define vcroak(a,b)		Perl_vcroak(aTHX_ a,b)
@@ -757,11 +760,6 @@
 #endif
 #if defined(DUMP_FDS)
 #define dump_fds(a)		Perl_dump_fds(aTHX_ a)
-#endif
-#if defined(EBCDIC)
-#define utf8n_to_uvchr(a,b,c,d)	Perl_utf8n_to_uvchr(aTHX_ a,b,c,d)
-#define uvchr_to_utf8(a,b)	Perl_uvchr_to_utf8(aTHX_ a,b)
-#define valid_utf8_to_uvchr(a,b)	Perl_valid_utf8_to_uvchr(aTHX_ a,b)
 #endif
 #if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
 #define csighandler		Perl_csighandler
