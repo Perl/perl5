@@ -1142,7 +1142,7 @@ where a pointer is expected. The read(2) system call comes to mind:
 After reading L<perlfunc> explaining how to use C<syscall> we can write
 this Perl function copying a file to standard output:
 
-    require 'syscall.ph';
+    require 'syscall.ph'; # run h2ph to generate this file
     sub cat($){
         my $path = shift();
         my $size = -s $path;
