@@ -28,7 +28,7 @@
 # See Porting/pumpkin.pod for more information on metaconfig.
 #
 
-# Generated on Fri Aug 16 14:21:14 CEST 2013 [metaconfig 3.5 PL0]
+# Generated on Thu Aug 29 09:37:19 CEST 2013 [metaconfig 3.5 PL0]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -3255,6 +3255,9 @@ EOM
 			*) osvers=$tmp;;
 			esac
 			;;
+		bitrig) osname=bitrig
+			osvers="$3"
+			;;
 		bsd386) osname=bsd386
 			osvers=`$uname -r`
 			;;
@@ -3312,9 +3315,6 @@ EOM
 			;;
 		next*) osname=next ;;
 		nonstop-ux) osname=nonstopux ;;
-		bitrig) osname=bitrig
-			osvers="$3"
-			;;
 		openbsd) osname=openbsd
                 	osvers="$3"
                 	;;
@@ -5863,7 +5863,7 @@ case "$use64bitint" in
 	: other platforms:
 	echo " "
 	echo "Checking if your C library has broken 64-bit functions..." >&4
-	$cat >try.c <<EOCP
+	cat >try.c <<EOCP
 #include <stdio.h>
 typedef $uquadtype myULL;
 int main (void)
@@ -5897,7 +5897,7 @@ EOCP
 	    echo "Assuming that your C library's 64-bit functions are ok."
 	    libcquad="ok"
 	fi
-	$rm -f try.c try
+	$rm_try
 
 	case "$libcquad" in
 	    buggy*)
