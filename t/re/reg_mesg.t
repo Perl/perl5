@@ -223,9 +223,7 @@ my @death_utf8 = mark_as_utf8(
 
  '/ネ(?ネ)ネ/' => 'Sequence (?ネ...) not recognized {#} m/ネ(?ネ{#})ネ/',
 
-# TODO S_nextchar() deals in chars, not in characters, which leaves
-# this broken.
-# '/ネ(?(1ネ))ネ/' => 'Switch condition not recognized {#} m/ネ(?(1ネ{#}))ネ/',
+ '/ネ(?(1ネ))ネ/' => 'Switch condition not recognized {#} m/ネ(?(1ネ{#}))ネ/',
 
  '/(?(1)ネ|y|ヌ)/' => 'Switch (?(condition)... contains too many branches {#} m/(?(1)ネ|y|{#}ヌ)/',
 

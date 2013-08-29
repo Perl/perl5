@@ -9240,6 +9240,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 		else if (RExC_parse[0] >= '1' && RExC_parse[0] <= '9' ) {
                     /* (?(1)...) */
 		    char c;
+		    char *tmp;
 		    parno = atoi(RExC_parse++);
 
 		    while (isDIGIT(*RExC_parse))
@@ -9247,8 +9248,17 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                     ret = reganode(pRExC_state, GROUPP, parno);
 
                  insert_if_check_paren:
-		    if ((c = *nextchar(pRExC_state)) != ')')
+		    if (*(tmp = nextchar(pRExC_state)) != ')') {
+                        if ( UTF ) {
+                        /* Like the name implies, nextchar deals in chars,
+                         * not characters, so if under UTF, undo its work
+                         * and skip over the the next character.
+                         */
+		            RExC_parse = tmp;
+		            RExC_parse += UTF8SKIP(RExC_parse);
+		        }
 			vFAIL("Switch condition not recognized");
+		    }
 		  insert_if:
                     REGTAIL(pRExC_state, ret, reganode(pRExC_state, IFTHEN, 0));
                     br = regbranch(pRExC_state, &flags, 1,depth+1);
