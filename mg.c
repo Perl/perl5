@@ -757,7 +757,6 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
     PERL_ARGS_ASSERT_MAGIC_GET;
 
     if (!mg->mg_ptr) {
-        /* Numbered buffers and $&  */
         paren = mg->mg_len;
       do_numbuf_fetch:
         if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
@@ -2495,7 +2494,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
     PERL_ARGS_ASSERT_MAGIC_SET;
 
     if (!mg->mg_ptr) {
-        paren = mg->mg_len ? mg->mg_len : RX_BUFF_IDX_FULLMATCH;
+        paren = mg->mg_len;
       setparen:
 	if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
           setparen_got_rx:
