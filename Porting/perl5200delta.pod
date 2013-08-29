@@ -364,7 +364,20 @@ modules that have been fixed.
 =over
 
 =item *
- L<HTML::StripScripts> version 1.05
+
+L<Dancer> version 1.3117
+
+=item *
+
+L<Error> version 0.17020
+
+=item *
+
+L<Function::Parameters> version 1.0201
+
+=item *
+
+L<HTML::StripScripts> version 1.05
 
 =item *
 
