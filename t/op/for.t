@@ -4,7 +4,7 @@ BEGIN {
     require "test.pl";
 }
 
-plan(104);
+plan(105);
 
 # A lot of tests to check that reversed for works.
 
@@ -562,3 +562,9 @@ TODO: {
         todo_skip("RT #2166: foreach spuriously autovivifies");
     }
 }
+
+sub {
+    foreach (@_) {
+        is eval { \$_ }, \undef, 'foreach (@array_containing_undef)'
+    }
+}->(undef);

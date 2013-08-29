@@ -1918,10 +1918,7 @@ PP(pp_iter)
                 SvREFCNT_inc_simple_void_NN(sv);
             }
         }
-        else
-            sv = &PL_sv_undef;
-
-        if (!av_is_stack && sv == &PL_sv_undef) {
+        else if (!av_is_stack) {
             SV *lv = newSV_type(SVt_PVLV);
             LvTYPE(lv) = 'y';
             sv_magic(lv, NULL, PERL_MAGIC_defelem, NULL, 0);
@@ -1930,6 +1927,8 @@ PP(pp_iter)
             LvTARGLEN(lv) = (STRLEN)UV_MAX;
             sv = lv;
         }
+        else
+            sv = &PL_sv_undef;
 
         oldsv = *itersvp;
         *itersvp = sv;
