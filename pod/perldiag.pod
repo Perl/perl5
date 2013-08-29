@@ -2507,9 +2507,9 @@ indicated one isn't.  See L<charnames/CUSTOM ALIASES>.
 
 =item Invalid \0 character in %s for %s: %s\0%s
 
-(W syscalls) Embedded \0 characters in pathnames or other syscall
-arguments create a warning since 5.20. The parts after the \0 were
-formerly ignored by syscalls.
+(W syscalls) Embedded \0 characters in pathnames or other system call
+arguments produce a warning as of 5.20.  The parts after the \0 were
+formerly ignored by system calls.
 
 =item Invalid conversion in %s: "%s"
 
