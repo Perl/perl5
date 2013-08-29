@@ -422,6 +422,15 @@ test_proto 'dbmopen';
   $db{1} = 2; $db{3} = 4;
   &mydbmclose(\%db);
   is scalar keys %db, 0, '&dbmopen and &dbmclose';
+  my $Dfile = "$filename.pag";
+  if (! -e $Dfile) {
+    ($Dfile) = <$filename*>;
+  }
+  if ($^O eq 'VMS') {
+    unlink "$filename.sdbm_dir", $Dfile;
+  } else {
+    unlink "$filename.dir", $Dfile;
+  }
 }
 
 test_proto 'die';
