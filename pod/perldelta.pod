@@ -269,7 +269,7 @@ nonexistent array elements.
 L<warnings> has been upgraded from version 1.18 to 1.19.
 
 The C<syscalls> warnings category has been added to check for embedded NUL
-(C<"\0">) characters in path names and string arguments to syscalls.
+(C<"\0">) characters in pathnames and string arguments to other system calls.
 
 =item *
 
@@ -348,9 +348,9 @@ XXX L<message|perldiag/"message">
 
 L<Invalid \0 character in %s for %s: %s\0%s|perldiag/"Invalid \0 character in %s for %s: %s\0%s">
 
-(W syscalls) Embedded \0 characters in pathnames or other syscall
-arguments create a warning since 5.20. The parts after the \0 were
-formerly ignored by syscalls.
+(W syscalls) Embedded \0 characters in pathnames or other system call arguments
+produce a warning as of 5.20. The parts after the \0 were formerly ignored by
+system calls.
 
 =back
 
