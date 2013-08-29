@@ -1,5 +1,5 @@
 /*
- $Id: Encode.xs,v 2.23 2013/04/29 22:19:11 dankogai Exp $
+ $Id: Encode.xs,v 2.24 2013/08/29 16:47:39 dankogai Exp dankogai $
  */
 
 #define PERL_NO_GET_CONTEXT
@@ -837,6 +837,10 @@ CODE:
 OUTPUT:
     RETVAL
 
+#ifndef SvIsCOW
+# define SvIsCOW (SvREADONLY(sv) && SvFAKE(sv))
+#endif
+
 SV *
 _utf8_on(sv)
 SV *	sv
@@ -845,6 +849,7 @@ CODE:
     if (SvPOK(sv)) {
     SV *rsv = newSViv(SvUTF8(sv));
     RETVAL = rsv;
+    if (SvIsCOW(sv)) sv_force_normal(sv);
     SvUTF8_on(sv);
     } else {
     RETVAL = &PL_sv_undef;
@@ -861,6 +866,7 @@ CODE:
     if (SvPOK(sv)) {
     SV *rsv = newSViv(SvUTF8(sv));
     RETVAL = rsv;
+    if (SvIsCOW(sv)) sv_force_normal(sv);
     SvUTF8_off(sv);
     } else {
     RETVAL = &PL_sv_undef;

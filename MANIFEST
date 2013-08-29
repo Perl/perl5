@@ -837,6 +837,8 @@ cpan/Encode/t/big5-eten.utf		test data
 cpan/Encode/t/big5-hkscs.enc		test data
 cpan/Encode/t/big5-hkscs.utf		test data
 cpan/Encode/t/CJKT.t			test script
+cpan/Encode/t/cow.t
+cpan/Encode/t/decode.t
 cpan/Encode/t/enc_data.t		test script for utf8 DATA
 cpan/Encode/t/enc_eucjp.t		test script
 cpan/Encode/t/enc_module.enc		test data for t/enc_module.t

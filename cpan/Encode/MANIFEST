@@ -67,6 +67,8 @@ t/big5-eten.enc	test data
 t/big5-eten.utf	test data
 t/big5-hkscs.enc	test data
 t/big5-hkscs.utf	test data
+t/cow.t                 test script
+t/decode.t              test script
 t/enc_data.t		test script for encoding.pm vs. DATA fh
 t/enc_eucjp.t	test script
 t/enc_module.enc test data for t/enc_module.t

@@ -1,10 +1,10 @@
 #
-# $Id: Encode.pm,v 2.52 2013/08/14 02:29:54 dankogai Exp $
+# $Id: Encode.pm,v 2.54 2013/08/29 16:47:39 dankogai Exp dankogai $
 #
 package Encode;
 use strict;
 use warnings;
-our $VERSION = sprintf "%d.%02d", q$Revision: 2.52 $ =~ /(\d+)/g;
+our $VERSION = sprintf "%d.%02d", q$Revision: 2.54 $ =~ /(\d+)/g;
 use constant DEBUG => !!$ENV{PERL_ENCODE_DEBUG};
 use XSLoader ();
 XSLoader::load( __PACKAGE__, $VERSION );
@@ -209,7 +209,6 @@ my $utf8enc;
 
 sub decode_utf8($;$) {
     my ( $octets, $check ) = @_;
-    return $octets if is_utf8($octets);
     return undef unless defined $octets;
     $octets .= '' if ref $octets;
     $check   ||= 0;
