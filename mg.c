@@ -2381,7 +2381,7 @@ Perl_vivify_defelem(pTHX_ SV *sv)
 	    LvTARG(sv) = NULL;	/* array can't be extended */
 	else {
 	    SV* const * const svp = av_fetch(av, LvSTARGOFF(sv), TRUE);
-	    if (!svp || (value = *svp) == &PL_sv_undef)
+	    if (!svp || !(value = *svp))
 		Perl_croak(aTHX_ PL_no_aelem, LvSTARGOFF(sv));
 	}
     }

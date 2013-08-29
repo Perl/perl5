@@ -3462,6 +3462,11 @@ sv_mortalcopy(SV *sv)
 SV *
 newRV(SV *sv)
 
+void
+alias_av(AV *av, IV ix, SV *sv)
+    CODE:
+	av_store(av, ix, SvREFCNT_inc(sv));
+
 MODULE = XS::APItest PACKAGE = XS::APItest::AUTOLOADtest
 
 int

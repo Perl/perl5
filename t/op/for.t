@@ -4,7 +4,7 @@ BEGIN {
     require "test.pl";
 }
 
-plan(105);
+plan(106);
 
 # A lot of tests to check that reversed for works.
 
@@ -568,3 +568,14 @@ sub {
         is eval { \$_ }, \undef, 'foreach (@array_containing_undef)'
     }
 }->(undef);
+
+SKIP: {
+    skip "No XS::APItest under miniperl", 1, if is_miniperl;
+    my @a;
+    sub {
+        require XS::APItest;
+        XS::APItest::alias_av(\@a, 0, undef);
+        eval { \$_[0] }
+    }->($a[0]);
+    is $@, "", 'vivify_defelem does not croak on &PL_sv_undef elements';
+}
