@@ -1823,6 +1823,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
             case '\015':        /* $^MATCH */
                 if (strEQ(name2, "ATCH"))
 		    goto magicalize;
+                break;
 	    case '\017':	/* $^OPEN */
 		if (strEQ(name2, "PEN"))
 		    goto magicalize;
