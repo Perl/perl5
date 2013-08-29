@@ -3147,10 +3147,10 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	function used to generate normalized random numbers.
  *	Values include 15, 16, 31, and 48.
  */
-#define Drand01()		Perl_drand48()		/**/
-#define Rand_seed_t		U32		/**/
-#define seedDrand01(x)	Perl_drand48_init((Rand_seed_t)x)	/**/
-#define RANDBITS		48		/**/
+#define Drand01()              $drand01                /**/
+#define Rand_seed_t            $randseedtype           /**/
+#define seedDrand01(x) $seedfunc((Rand_seed_t)x)       /**/
+#define RANDBITS               $randbits               /**/
 
 /* Select_fd_set_t:
  *	This symbol holds the type used for the 2nd, 3rd, and 4th
