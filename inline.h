@@ -250,11 +250,9 @@ S_is_safe_syscall(pTHX_ SV *pv, const char *what, const char *op_name) {
         char *null_at;
         if (UNLIKELY((null_at = (char *)memchr(p, 0, SvCUR(pv)-1)) != NULL)) {
                 SETERRNO(ENOENT, LIB_INVARG);
-                if (ckWARN(WARN_SYSCALLS)) {
-                    Perl_ck_warner(aTHX_ packWARN(WARN_SYSCALLS),
+                Perl_ck_warner(aTHX_ packWARN(WARN_SYSCALLS),
                                    "Invalid \\0 character in %s for %s: %s\\0%s",
                                    what, op_name, p, null_at+1);
-                }
                 return FALSE;
         }
     }
