@@ -878,13 +878,6 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
     case '\020':
 	if (nextchar == '\0') {       /* ^P */
 	    sv_setiv(sv, (IV)PL_perldb);
-	} else if (strEQ(remaining, "REMATCH")) { /* $^PREMATCH */
-
-            paren = RX_BUFF_IDX_CARET_PREMATCH;
-	    goto do_numbuf_fetch;
-	} else if (strEQ(remaining, "OSTMATCH")) { /* $^POSTMATCH */
-            paren = RX_BUFF_IDX_CARET_POSTMATCH;
-	    goto do_numbuf_fetch;
 	}
 	break;
     case '\023':		/* ^S */
@@ -945,11 +938,6 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	    }
 	}
 	break;
-    case '\015': /* $^MATCH */
-	if (strEQ(remaining, "ATCH")) {
-            paren = RX_BUFF_IDX_CARET_FULLMATCH;
-	    goto do_numbuf_fetch;
-        }
     case '+':
 	if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
 	    paren = RX_LASTPAREN(rx);
@@ -966,12 +954,6 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	}
 	sv_setsv(sv,&PL_sv_undef);
 	break;
-    case '`':
-        paren = RX_BUFF_IDX_PREMATCH;
-        goto do_numbuf_fetch;
-    case '\'':
-        paren = RX_BUFF_IDX_POSTMATCH;
-        goto do_numbuf_fetch;
     case '.':
 	if (GvIO(PL_last_in_gv)) {
 	    sv_setiv(sv, (IV)IoLINES(GvIOp(PL_last_in_gv)));
@@ -2495,7 +2477,6 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 
     if (!mg->mg_ptr) {
         paren = mg->mg_len;
-      setparen:
 	if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
           setparen_got_rx:
             CALLREG_NUMBUF_STORE((REGEXP * const)rx,paren,sv);
@@ -2512,19 +2493,6 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
     }
 
     switch (*mg->mg_ptr) {
-    case '\015': /* $^MATCH */
-      if (strEQ(remaining, "ATCH")) {
-        paren = RX_BUFF_IDX_FULLMATCH;
-        goto setparen;
-      }
-    case '`': /* ${^PREMATCH} caught below */
-      do_prematch:
-      paren = RX_BUFF_IDX_PREMATCH;
-      goto setparen;
-    case '\'': /* ${^POSTMATCH} caught below */
-      do_postmatch:
-      paren = RX_BUFF_IDX_POSTMATCH;
-      goto setparen;
     case '\001':	/* ^A */
 	if (SvOK(sv)) sv_copypv(PL_bodytarget, sv);
 	else SvOK_off(PL_bodytarget);
@@ -2638,10 +2606,6 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
           if (PL_perldb && !PL_DBsingle)
               init_debugger();
           break;
-      } else if (strEQ(remaining, "REMATCH")) { /* $^PREMATCH */
-          goto do_prematch;
-      } else if (strEQ(remaining, "OSTMATCH")) { /* $^POSTMATCH */
-          goto do_postmatch;
       }
       break;
     case '\024':	/* ^T */
