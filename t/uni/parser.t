@@ -117,9 +117,7 @@ is ${"main::\345\225\217"}, undef, "..and using the encoded form doesn't";
        "...and nul-clean"
     );
 
-    TODO: {
-        local $::TODO = "Unrecognized character thrown from a re-eval not UTF8/nul clean yet";
-        
+    {
         use re 'eval';
         my $f = qq{(?{\$ネ+ 1; \x{1F42A} })};
         eval { "a" =~ /^a$f/ };
