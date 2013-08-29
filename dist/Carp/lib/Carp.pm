@@ -134,6 +134,7 @@ sub _cgc {
 }
 
 sub longmess {
+    local($!, $^E);
     # Icky backwards compatibility wrapper. :-(
     #
     # The story is that the original implementation hard-coded the
@@ -154,6 +155,7 @@ sub longmess {
 our @CARP_NOT;
 
 sub shortmess {
+    local($!, $^E);
     my $cgc = _cgc();
 
     # Icky backwards compatibility wrapper. :-(
@@ -614,6 +616,13 @@ For a shorter message you can use C<carp()> or C<croak()> which report the
 error as being from where your module was called.  C<shortmess()> returns the
 contents of this error message.  There is no guarantee that that is where the
 error was, but it is a good educated guess.
+
+C<Carp> takes care not to clobber the status variables C<$!> and C<$^E>
+in the course of assembling its error messages.  This means that a
+C<$SIG{__DIE__}> or C<$SIG{__WARN__}> handler can capture the error
+information held in those variables, if it is required to augment the
+error message, and if the code calling C<Carp> left useful values there.
+Of course, C<Carp> can't guarantee the latter.
 
 You can also alter the way the output and logic of C<Carp> works, by
 changing some global variables in the C<Carp> namespace. See the
