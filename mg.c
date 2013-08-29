@@ -758,8 +758,8 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 
     if (!mg->mg_ptr) {
         paren = mg->mg_len;
-      do_numbuf_fetch:
         if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
+          do_numbuf_fetch:
             CALLREG_NUMBUF_FETCH(rx,paren,sv);
         } else {
             sv_setsv(sv,&PL_sv_undef);
@@ -876,12 +876,10 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	}
 	break;
     case '\020':
-	if (nextchar == '\0') {       /* ^P */
-	    sv_setiv(sv, (IV)PL_perldb);
-	}
+        sv_setiv(sv, (IV)PL_perldb);
 	break;
     case '\023':		/* ^S */
-	if (nextchar == '\0') {
+        {
 	    if (PL_parser && PL_parser->lex_state != LEX_NOTPARSING)
 		SvOK_off(sv);
 	    else if (PL_in_eval)
@@ -2468,7 +2466,6 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
     const char *s;
     I32 paren;
     const REGEXP * rx;
-    const char * const remaining = mg->mg_ptr + 1;
     I32 i;
     STRLEN len;
     MAGIC *tmg;
@@ -2601,12 +2598,9 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	}
 	break;
     case '\020':	/* ^P */
-      if (*remaining == '\0') { /* ^P */
           PL_perldb = SvIV(sv);
           if (PL_perldb && !PL_DBsingle)
               init_debugger();
-          break;
-      }
       break;
     case '\024':	/* ^T */
 #ifdef BIG_TIME
