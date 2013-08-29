@@ -1,5 +1,9 @@
 Revision history for Perl extension ExtUtils::ParseXS.
 
+3.22 - Thu Aug 29 19:30:00 CET 2013
+  - Fix parallel testing crashes.
+  - Explicitly require new-enough Exporter.
+
 3.21 - Fri Aug  9 19:08:00 CET 2013
   - stop "sv_2mortal(&PL_sv_yes)" and "(void)sv_newmortal()" for immortal
     typemap entries [perl #116152]
