@@ -385,4 +385,5 @@ is($failed, undef);
 
     like( $@, qr/utf8 "\\xEF" does not map to Unicode .+ <F> chunk 1/,
 	  "<:utf8 readline (fixed) must warn about bad utf8");
+    close F;
 }
