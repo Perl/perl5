@@ -182,10 +182,6 @@ static const char* const lex_state_names[] = {
 };
 #endif
 
-#ifdef ff_next
-#undef ff_next
-#endif
-
 #include "keywords.h"
 
 /* CLINE is a macro that ensures PL_copline has a sane value */

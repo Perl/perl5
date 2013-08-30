@@ -1482,10 +1482,6 @@ EXTERN_C char *crypt(const char *, const char *);
 #   define S_IEXEC S_IXUSR
 #endif
 
-#ifdef ff_next
-#   undef ff_next
-#endif
-
 #if defined(cray) || defined(gould) || defined(i860) || defined(pyr)
 #   define SLOPPYDIVIDE
 #endif
