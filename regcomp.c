@@ -215,9 +215,6 @@ typedef struct RExC_state_t {
 #define	ISMULT2(s)	((*s) == '*' || (*s) == '+' || (*s) == '?' || \
 	((*s) == '{' && regcurly(s, FALSE)))
 
-#ifdef SPSTART
-#undef SPSTART		/* dratted cpp namespace... */
-#endif
 /*
  * Flags to be passed up and down.
  */
