@@ -44,18 +44,30 @@ sub fixup_expect {
 ## Because we don't "use utf8" in this file, we need to do some extra legwork
 ## for the utf8 tests: Append 'use utf8' to the pattern, and mark the strings
 ## to check against as UTF-8
+##
+## This also creates a second variant of the tests to check if the
+## latin1 error messages are working correctly.
+my $l1   = "\x{ef}";
+my $utf8 = "\x{30cd}";
+utf8::encode($utf8);
+
 sub mark_as_utf8 {
     my @ret;
     while ( my ($pat, $msg) = splice(@_, 0, 2) ) {
+        my $l1_pat = $pat =~ s/$utf8/$l1/gr;
+        my $l1_msg;
         $pat = "use utf8; $pat";
         
         if (ref $msg) {
-            @$msg = map { my $c = $_; utf8::decode($c); $c } @$msg;
+            $l1_msg = [ map { s/$utf8/$l1/gr } @$msg ];
+            @$msg   = map { my $c = $_; utf8::decode($c); $c } @$msg;
         }
         else {
+            $l1_msg = $msg =~ s/$utf8/$l1/gr;
             utf8::decode($msg);
         }
         push @ret, $pat => $msg;
+        push @ret, $l1_pat => $l1_msg unless $l1_pat =~ /#no latin1/;
     }
     return @ret;
 }
@@ -244,7 +256,7 @@ my @death_utf8 = mark_as_utf8(
 
  '/(ネ)\2ネ/' => 'Reference to nonexistent group {#} m/(ネ)\2{#}ネ/',
 
- '/\g{ネ/' => 'Sequence \g{... not terminated {#} m/\g{ネ{#}/',
+ '/\g{ネ/; #no latin1' => 'Sequence \g{... not terminated {#} m/\g{ネ{#}/',
 
  'my $m = "ネ\\\"; $m =~ $m', => 'Trailing \ in regex m/ネ\/',
 
