@@ -1479,13 +1479,6 @@ Perl_sv_grow(pTHX_ SV *const sv, STRLEN newlen)
 
     PERL_ARGS_ASSERT_SV_GROW;
 
-#ifdef HAS_64K_LIMIT
-    if (newlen >= 0x10000) {
-	PerlIO_printf(Perl_debug_log,
-		      "Allocation too large: %"UVxf"\n", (UV)newlen);
-	my_exit(1);
-    }
-#endif /* HAS_64K_LIMIT */
     if (SvROK(sv))
 	sv_unref(sv);
     if (SvTYPE(sv) < SVt_PV) {
@@ -1497,10 +1490,6 @@ Perl_sv_grow(pTHX_ SV *const sv, STRLEN newlen)
 	s = SvPVX_mutable(sv);
 	if (newlen > SvLEN(sv))
 	    newlen += 10 * (newlen - SvCUR(sv)); /* avoid copy each time */
-#ifdef HAS_64K_LIMIT
-	if (newlen >= 0x10000)
-	    newlen = 0xFFFF;
-#endif
     }
     else
     {

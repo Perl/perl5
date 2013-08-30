@@ -76,13 +76,6 @@ Perl_safesysmalloc(MEM_SIZE size)
     dTHX;
 #endif
     Malloc_t ptr;
-#ifdef HAS_64K_LIMIT
-	if (size > 0xffff) {
-	    PerlIO_printf(Perl_error_log,
-			  "Allocation too large: %lx\n", size) FLUSH;
-	    my_exit(1);
-	}
-#endif /* HAS_64K_LIMIT */
 #ifdef PERL_TRACK_MEMPOOL
     size += sTHX;
 #endif
@@ -143,13 +136,6 @@ Perl_safesysrealloc(Malloc_t where,MEM_SIZE size)
     Malloc_t PerlMem_realloc();
 #endif /* !defined(STANDARD_C) && !defined(HAS_REALLOC_PROTOTYPE) */
 
-#ifdef HAS_64K_LIMIT
-    if (size > 0xffff) {
-	PerlIO_printf(Perl_error_log,
-		      "Reallocation too large: %lx\n", size) FLUSH;
-	my_exit(1);
-    }
-#endif /* HAS_64K_LIMIT */
     if (!size) {
 	safesysfree(where);
 	return NULL;
@@ -289,13 +275,13 @@ Perl_safesyscalloc(MEM_SIZE count, MEM_SIZE size)
     dTHX;
 #endif
     Malloc_t ptr;
-#if defined(PERL_TRACK_MEMPOOL) || defined(HAS_64K_LIMIT) || defined(DEBUGGING)
+#if defined(PERL_TRACK_MEMPOOL) || defined(DEBUGGING)
     MEM_SIZE total_size = 0;
 #endif
 
     /* Even though calloc() for zero bytes is strange, be robust. */
     if (size && (count <= MEM_SIZE_MAX / size)) {
-#if defined(PERL_TRACK_MEMPOOL) || defined(HAS_64K_LIMIT) || defined(DEBUGGING)
+#if defined(PERL_TRACK_MEMPOOL) || defined(DEBUGGING)
 	total_size = size * count;
 #endif
     }
@@ -307,13 +293,6 @@ Perl_safesyscalloc(MEM_SIZE count, MEM_SIZE size)
     else
 	croak_memory_wrap();
 #endif
-#ifdef HAS_64K_LIMIT
-    if (total_size > 0xffff) {
-	PerlIO_printf(Perl_error_log,
-		      "Allocation too large: %lx\n", total_size) FLUSH;
-	my_exit(1);
-    }
-#endif /* HAS_64K_LIMIT */
 #ifdef DEBUGGING
     if ((SSize_t)size < 0 || (SSize_t)count < 0)
 	Perl_croak_nocontext("panic: calloc, size=%"UVuf", count=%"UVuf,

@@ -755,16 +755,7 @@ static const char bucket_of[] =
 #  define POW2_OPTIMIZE_SURPLUS(bucket) 0
 #endif /* !TWO_POT_OPTIMIZE */
 
-#ifdef HAS_64K_LIMIT
-#  define BARK_64K_LIMIT(what,nbytes,size)				\
-	if (nbytes > 0xffff) {						\
-		PerlIO_printf(PerlIO_stderr(),				\
-			      "%s too large: %lx\n", what, size);	\
-		my_exit(1);						\
-	}
-#else /* !HAS_64K_LIMIT */
-#  define BARK_64K_LIMIT(what,nbytes,size)
-#endif /* !HAS_64K_LIMIT */
+#define BARK_64K_LIMIT(what,nbytes,size)
 
 #ifndef MIN_SBRK
 #  define MIN_SBRK 2048
