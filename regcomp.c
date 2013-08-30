@@ -95,10 +95,6 @@ extern const struct regexp_engine my_reg_engine;
 #define IS_NON_FINAL_FOLD(c) _IS_NON_FINAL_FOLD_ONLY_FOR_USE_BY_REGCOMP_DOT_C(c)
 #define IS_IN_SOME_FOLD_L1(c) _IS_IN_SOME_FOLD_ONLY_FOR_USE_BY_REGCOMP_DOT_C(c)
 
-#ifdef op
-#undef op
-#endif /* op */
-
 #ifdef MSDOS
 #  if defined(BUGGY_MSC6)
  /* MSC 6.00A breaks on op/regexp.t test 85 unless we turn this off */
