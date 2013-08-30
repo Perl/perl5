@@ -462,8 +462,8 @@ unlike $out, 'main::foo', '-nobanner';
 # glob
 $out =
  runperl(
-  switches => ["-MO=Concise"], prog=>'<.>', stderr => 1
+  switches => ["-MO=Concise"], prog=>'glob(q{.})', stderr => 1
  );
-like $out, '\*<none>::', '<.>';
+like $out, '\*<none>::', 'glob(q{.})';
 
 __END__
