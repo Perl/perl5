@@ -391,13 +391,8 @@ static const scan_data_t zero_scan_data =
 #define SF_FIX_BEFORE_EOL	(SF_FIX_BEFORE_SEOL|SF_FIX_BEFORE_MEOL)
 #define SF_FL_BEFORE_EOL	(SF_FL_BEFORE_SEOL|SF_FL_BEFORE_MEOL)
 
-#ifdef NO_UNARY_PLUS
-#  define SF_FIX_SHIFT_EOL	(0+2)
-#  define SF_FL_SHIFT_EOL		(0+4)
-#else
-#  define SF_FIX_SHIFT_EOL	(+2)
-#  define SF_FL_SHIFT_EOL		(+4)
-#endif
+#define SF_FIX_SHIFT_EOL	(+2)
+#define SF_FL_SHIFT_EOL		(+4)
 
 #define SF_FIX_BEFORE_SEOL	(SF_BEFORE_SEOL << SF_FIX_SHIFT_EOL)
 #define SF_FIX_BEFORE_MEOL	(SF_BEFORE_MEOL << SF_FIX_SHIFT_EOL)
