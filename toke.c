@@ -10452,8 +10452,8 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims, int re_reparse,
      * happen for <>, as they aren't metas. */
     if (deprecate_escaped_meta
         && (PL_multi_open == PL_multi_close
-            || ! ckWARN_d(WARN_DEPRECATED)
-            || PL_multi_open == '<'))
+            || PL_multi_open == '<'
+            || ! ckWARN_d(WARN_DEPRECATED)))
     {
         deprecate_escaped_meta = FALSE;
     }
