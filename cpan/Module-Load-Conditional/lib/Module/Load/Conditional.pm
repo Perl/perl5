@@ -20,7 +20,7 @@ BEGIN {
                         $FIND_VERSION $ERROR $CHECK_INC_HASH];
     use Exporter;
     @ISA            = qw[Exporter];
-    $VERSION        = '0.54';
+    $VERSION        = '0.56';
     $VERBOSE        = 0;
     $DEPRECATED     = 0;
     $FIND_VERSION   = 1;
@@ -195,7 +195,7 @@ sub check_install {
         }
     }
 
-    ### we didnt find the filename yet by looking in %INC,
+    ### we didn't find the filename yet by looking in %INC,
     ### so scan the dirs
     unless( $filename ) {
 
@@ -495,12 +495,15 @@ sub requires {
     }
 
     my $lib = join " ", map { qq["-I$_"] } @INC;
-    my $cmd = qq["$^X" $lib -M$who -e"print(join(qq[\\n],keys(%INC)))"];
+    my $oneliner = 'sub foo(_){q[BONG=].shift} print(join(qq[\n],map foo,keys(%INC)),qq[\n])';
+    my $cmd = qq["$^X" $lib -M$who -e"$oneliner"];
 
     return  sort
                 grep { !/^$who$/  }
                 map  { chomp; s|/|::|g; $_ }
                 grep { s|\.pm$||i; }
+                map  { s!^BONG\=!!; $_ }
+                grep { m!^BONG\=! }
             `$cmd`;
 }
 

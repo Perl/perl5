@@ -242,6 +242,12 @@ The list of Perl versions covered has been updated.
 
 =item *
 
+L<Module::Load::Conditional> has been upgraded from version 0.54 to 0.56.
+
+C<requires> has been made more robust. [cpan #83728]
+
+=item *
+
 L<Module::Metadata> has been upgraded from version 1.000014 to 1.000016.
 
 The module's DESCRIPTION has been re-worded regarding safety/security to
