@@ -186,9 +186,6 @@ static const char* const lex_state_names[] = {
 
 /* CLINE is a macro that ensures PL_copline has a sane value */
 
-#ifdef CLINE
-#undef CLINE
-#endif
 #define CLINE (PL_copline = (CopLINE(PL_curcop) < PL_copline ? CopLINE(PL_curcop) : PL_copline))
 
 #ifdef PERL_MAD
