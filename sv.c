@@ -2987,10 +2987,6 @@ Perl_sv_2pv_flags(pTHX_ SV *const sv, STRLEN *const lp, const I32 flags)
 	    RESTORE_ERRNO;
 	    while (*s) s++;
 	}
-#ifdef hcx
-	if (s[-1] == '.')
-	    *--s = '\0';
-#endif
     }
     else if (isGV_with_GP(sv)) {
 	GV *const gv = MUTABLE_GV(sv);
