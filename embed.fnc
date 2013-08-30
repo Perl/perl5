@@ -2053,7 +2053,7 @@ Es	|SSize_t|study_chunk	|NN struct RExC_state_t *pRExC_state \
 				|U32 flags|U32 depth
 EsRn	|U32	|add_data	|NN struct RExC_state_t *pRExC_state|U32 n \
 				|NN const char *s
-rs	|void	|re_croak2	|NN const char* pat1|NN const char* pat2|...
+rs	|void	|re_croak2	|bool utf8|NN const char* pat1|NN const char* pat2|...
 Ei	|I32	|regpposixcc	|NN struct RExC_state_t *pRExC_state \
 				|I32 value|const bool strict
 Es	|I32	|make_trie	|NN struct RExC_state_t *pRExC_state \
