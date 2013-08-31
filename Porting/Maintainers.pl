@@ -467,7 +467,7 @@ use File::Glob qw(:case);
 
     'CPAN::Meta::Requirements' => {
         'MAINTAINER'   => 'dagolden',
-        'DISTRIBUTION' => 'DAGOLDEN/CPAN-Meta-Requirements-2.122.tar.gz',
+        'DISTRIBUTION' => 'DAGOLDEN/CPAN-Meta-Requirements-2.123.tar.gz',
         'FILES'        => q[cpan/CPAN-Meta-Requirements],
         'EXCLUDED'     => [
             qw(t/00-compile.t),

@@ -1,5 +1,13 @@
 Revision history for CPAN-Meta-Requirements
 
+2.123     2013-08-30 12:17:14 America/New_York
+
+    [Fixed]
+
+    - On Perls prior to v5.12, CPAN::Meta::Requirements will be installed
+      into the 'core' library path to avoid an older version bundled with
+      ExtUtils::MakeMaker and installed there taking precedence.
+
 2.122     2012-05-02 17:29:17 America/New_York
 
     [Fixed]
