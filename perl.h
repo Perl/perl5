@@ -1325,13 +1325,6 @@ EXTERN_C char *crypt(const char *, const char *);
 #   endif
 #endif
 
-#ifdef FPUTS_BOTCH
-/* work around botch in SunOS 4.0.1 and 4.0.2 */
-#   ifndef fputs
-#	define fputs(sv,fp) fprintf(fp,"%s",sv)
-#   endif
-#endif
-
 /*
  * The following gobbledygook brought to you on behalf of __STDC__.
  * (I could just use #ifndef __STDC__, but this is more bulletproof
