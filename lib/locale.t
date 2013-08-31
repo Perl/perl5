@@ -1699,13 +1699,7 @@ foreach $Locale (@Locale) {
                 $! = eval "&Errno::$err";   # Convert to strerror() output
                 my $strerror = "$!";
                 if ("$strerror" =~ /\P{ASCII}/) {
-                    my $utf8_strerror = $strerror;
-                    utf8::upgrade($utf8_strerror);
-
-                    # If $! was already in UTF-8, the upgrade was a no-op;
-                    # otherwise they will be different byte strings.
-                    use bytes;
-                    $ok14 = $utf8_strerror eq $strerror;
+                    $ok14 = utf8::is_utf8($strerror);
                     last;
                 }
             }
@@ -1715,15 +1709,10 @@ foreach $Locale (@Locale) {
             # stringification.
 
             my $string_g = "$g";
+            my $sprintf_g = sprintf("%g", $g);
 
-            my $utf8_string_g = "$g";
-            utf8::upgrade($utf8_string_g);
-
-            my $utf8_sprintf_g = sprintf("%g", $g);
-            utf8::upgrade($utf8_sprintf_g);
-            use bytes;
-            $ok15 = $utf8_string_g eq $string_g;
-            $ok16 = $utf8_sprintf_g eq $string_g;
+            $ok15 = $string_g =~ / ^ \p{ASCII}+ $ /x || utf8::is_utf8($string_g);
+            $ok16 = $sprintf_g eq $string_g;
         }
         {
             no locale;
