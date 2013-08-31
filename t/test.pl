@@ -606,8 +606,16 @@ sub _create_runperl { # Create the string to qx in runperl().
 	die "test.pl:runperl(): 'progs' must be an ARRAYREF " . _where()
 	    unless ref $args{progs} eq "ARRAY";
         foreach my $prog (@{$args{progs}}) {
-	    if ($prog =~ tr/'"// && !$args{non_portable}) {
-		warn "quotes in prog >>$prog<< are not portable";
+	    if (!$args{non_portable}) {
+		if ($prog =~ tr/'"//) {
+		    warn "quotes in prog >>$prog<< are not portable";
+		}
+		if ($prog =~ /^([<>|]|2>)/) {
+		    warn "Initial $1 in prog >>$prog<< is not portable";
+		}
+		if ($prog =~ /&\z/) {
+		    warn "Trailing & in prog >>$prog<< is not portable";
+		}
 	    }
             if ($is_mswin || $is_netware || $is_vms) {
                 $runperl = $runperl . qq ( -e "$prog" );
