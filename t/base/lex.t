@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..94\n";
+print "1..91\n";
 
 $x = 'x';
 
@@ -127,16 +127,6 @@ my $test = 31;
   $ {$CX} = 17;
   $ {$CXY} = 23;
   if ($ {^XY} != 23) { print "not "  }
-  print "ok $test\n"; $test++;
- 
-# Does the syntax where we use the literal control character still work?
-  if (eval "\$ {\cX}" != 17 or $@) { print "not "  }
-  print "ok $test\n"; $test++;
-
-  eval "\$\cQ = 24";                 # Literal control character
-  if ($@ or ${"\cQ"} != 24) {  print "not "  }
-  print "ok $test\n"; $test++;
-  if ($^Q != 24) {  print "not "  }  # Control character escape sequence
   print "ok $test\n"; $test++;
  
 # Does the old UNBRACED syntax still do what it used to?

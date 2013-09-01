@@ -9437,6 +9437,10 @@ S_scan_ident(pTHX_ char *s, const char *send, char *dest, STRLEN destlen, I32 ck
     if (s < send
         && (isIDFIRST_lazy_if(s, is_utf8) || VALID_LEN_ONE_IDENT(*s, is_utf8)))
     {
+        if ( isCNTRL_A((U8)*s) ) {
+            deprecate("literal control characters in variable names");
+        }
+        
         if (is_utf8) {
             const STRLEN skip = UTF8SKIP(s);
             STRLEN i;

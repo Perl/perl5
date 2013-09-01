@@ -207,6 +207,9 @@ property, like C<$!> or C<%+>.
 
 =back
 
+Note that as of Perl 5.20, literal control characters in variable names
+are deprecated.
+
 =head2 Context
 X<context> X<scalar context> X<list context>
 
