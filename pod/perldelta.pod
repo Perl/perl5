@@ -139,7 +139,18 @@ numeric values under the hood.)
 
 =head1 Deprecations
 
-XXX Any deprecated features, syntax, modules etc. should be listed here.
+=head2 Literal control characters in variable names
+
+This deprecation affects things like C<$\cT>, where \cT is a literal
+control in the source code.  Surprisingly, it appears that originally
+this was intended as the canonical way of accessing variables like
+C<$^T>, with the caret form only being added as an alternative.
+
+The literal control form is being deprecated for two main reasons: It
+has what are likely unfixable bugs, such as C<$\cI> not working as an
+alias for C<$^I>, and their usage not being portable to non-ASCII
+platforms: While C<$^T> will work everywhere, C<\cT> is whitespace in
+EBCDIC.
 
 =head2 Module removals
 
