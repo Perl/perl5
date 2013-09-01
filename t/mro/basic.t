@@ -8,7 +8,7 @@ BEGIN {
     @INC = '../lib';
     require q(./test.pl);
 }
-plan(tests => 60);
+plan(tests => 61);
 
 require mro;
 
@@ -389,3 +389,9 @@ undef $x; # should use the new DESTROY
 is $destroy_output, "new",
     'Changes to UNIVERSAL::DESTROY invalidate DESTROY caches';
 undef *UNIVERSAL::DESTROY;
+
+{
+    no warnings 'uninitialized';
+    $#_119433::ISA++;
+    pass "no crash when ISA contains nonexistent elements";
+}
