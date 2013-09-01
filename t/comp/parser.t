@@ -8,7 +8,7 @@ BEGIN {
     chdir 't';
 }
 
-print "1..162\n";
+print "1..166\n";
 
 sub failed {
     my ($got, $expected, $name) = @_;
@@ -591,6 +591,14 @@ time
 #line 42
 ;check('parser\.t', 42, 'line number after "nullary\n#line"');
 
+"${
+#line 53
+_}";
+check('parser\.t', 54, 'line number after qq"${#line}"');
+
+#line 24
+"
+${check('parser\.t', 25, 'line number inside qq/<newline>${...}/')}";
 
 __END__
 # Don't add new tests HERE. See note above
