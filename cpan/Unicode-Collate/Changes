@@ -1,5 +1,11 @@
 Revision history for Perl module Unicode::Collate.
 
+0.99  Sun Sep  1 12:46:14 2013
+    - by default out-of-range values are treated as if it were U+FFFD
+      when UCA_Version >= 22.
+    - supported overriding out-of-range values (see 'overrideOut' in POD).
+    - modified tests: override.t, illegal.t in t.
+
 0.98  Sat Jun 15 19:44:06 2013
     - typo (see [rt.cpan.org #85655] typo fixes)
 

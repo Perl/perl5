@@ -14,7 +14,7 @@ use File::Spec;
 
 no warnings 'utf8';
 
-our $VERSION = '0.98';
+our $VERSION = '0.99';
 our $PACKAGE = __PACKAGE__;
 
 ### begin XS only ###
@@ -106,7 +106,7 @@ my (%VariableOK);
 our @ChangeOK = qw/
     alternate backwards level normalization rearrange
     katakana_before_hiragana upper_before_lower ignore_level2
-    overrideHangul overrideCJK preprocess UCA_Version
+    overrideCJK overrideHangul overrideOut preprocess UCA_Version
     hangul_terminator variable identical highestFFFF minimalFFFE
   /;
 
@@ -497,7 +497,7 @@ sub splitEnt
 
     # remove a code point marked as a completely ignorable.
     for (my $i = 0; $i < @src; $i++) {
-	if (_isIllegal($src[$i]) || $vers <= 20 && _isNonchar($src[$i])) {
+	if ($vers <= 20 && _isIllegal($src[$i])) {
 	    $src[$i] = undef;
 	} elsif ($ver9) {
 	    $src[$i] = undef if $map->{ $src[$i] }
@@ -621,25 +621,27 @@ sub getWt
     my $u    = shift;
     my $map  = $self->{mapping};
     my $der  = $self->{derivCode};
+    my $out  = $self->{overrideOut};
     my $uXS  = $self->{__useXS}; ### XS only
 
     return if !defined $u;
     return $self->varCE($HighestVCE) if $u eq 0xFFFF && $self->{highestFFFF};
     return $self->varCE($minimalVCE) if $u eq 0xFFFE && $self->{minimalFFFE};
-    return map($self->varCE($_), @{ $map->{$u} }) if $map->{$u};
-### begin XS only ###
-    return map($self->varCE($_), _fetch_simple($u))
-	if $uXS && _exists_simple($u);
-### end XS only ###
+    $u = 0xFFFD if $u !~ /;/ && 0x10FFFF < $u && !$out;
 
-    # JCPS must not be a contraction, then it's a code point.
-    if (Hangul_SIni <= $u && $u <= Hangul_SFin) {
+    my @ce;
+    if ($map->{$u}) {
+	@ce = @{ $map->{$u} }; # $u may be a contraction
+### begin XS only ###
+    } elsif ($uXS && _exists_simple($u)) {
+	@ce = _fetch_simple($u);
+### end XS only ###
+    } elsif (Hangul_SIni <= $u && $u <= Hangul_SFin) {
 	my $hang = $self->{overrideHangul};
-	my @hangulCE;
 	if ($hang) {
-	    @hangulCE = map _pack_override($_, $u, $der), $hang->($u);
+	    @ce = map _pack_override($_, $u, $der), $hang->($u);
 	} elsif (!defined $hang) {
-	    @hangulCE = $der->($u);
+	    @ce = $der->($u);
 	} else {
 	    my $max  = $self->{maxlength};
 	    my @decH = _decompHangul($u);
@@ -665,25 +667,26 @@ sub getWt
 		}
 	    }
 
-	    @hangulCE = map({
+	    @ce = map({
 		    $map->{$_} ? @{ $map->{$_} } :
 		$uXS && _exists_simple($_) ? _fetch_simple($_) : ### XS only
 		    $der->($_);
 		} @decH);
 	}
-	return map $self->varCE($_), @hangulCE;
+    } elsif ($out && 0x10FFFF < $u) {
+	@ce = map _pack_override($_, $u, $der), $out->($u);
     } else {
 	my $cjk  = $self->{overrideCJK};
 	my $vers = $self->{UCA_Version};
 	if ($cjk && _isUIdeo($u, $vers)) {
-	    my @cjkCE = map _pack_override($_, $u, $der), $cjk->($u);
-	    return map $self->varCE($_), @cjkCE;
+	    @ce = map _pack_override($_, $u, $der), $cjk->($u);
+	} elsif ($vers == 8 && defined $cjk && _isUIdeo($u, 0)) {
+	    @ce = _uideoCE_8($u);
+	} else {
+	    @ce = $der->($u);
 	}
-	if ($vers == 8 && defined $cjk && _isUIdeo($u, 0)) {
-	    return map $self->varCE($_), _uideoCE_8($u);
-	}
-	return map $self->varCE($_), $der->($u);
     }
+    return map $self->varCE($_), @ce;
 }
 
 
@@ -1095,6 +1098,9 @@ The following revisions are supported.  The default is 26.
 * Noncharacters (e.g. U+FFFF) are not ignored, and can be overridden
 since C<UCA_Version> 22.
 
+* Out-of-range codepoints (greater than U+10FFFF) are not ignored,
+and can be overridden since C<UCA_Version> 22.
+
 * Fully ignorable characters were ignored, and would not interrupt
 contractions with C<UCA_Version> 9 and 11.
 
@@ -1216,7 +1222,8 @@ almost, but the latter has a problem that you should know which letter is
 next to C<c>. For a certain language where C<ch> as the next letter,
 C<"abch"> is greater than C<"abc\x{FFFF}">, but less than C<"abd">.
 
-Note: This is equivalent to C<entry =E<gt> 'FFFF ; [.FFFE.0020.0005.FFFF]'>.
+Note:
+This is equivalent to C<(entry =E<gt> 'FFFF ; [.FFFE.0020.0005.FFFF]')>.
 Any other character than C<U+FFFF> can be tailored by C<entry>.
 
 =item identical
@@ -1325,7 +1332,8 @@ then C<$a2> and C<$b2> at level 1, as followed.
         "b\x{FFFE}aaa"
         "bbb\x{FFFE}a"
 
-Note: This is equivalent to C<entry =E<gt> 'FFFE ; [.0001.0020.0005.FFFE]'>.
+Note:
+This is equivalent to C<(entry =E<gt> 'FFFE ; [.0001.0020.0005.FFFE]')>.
 Any other character than C<U+FFFE> can be tailored by C<entry>.
 
 =item normalization
@@ -1425,10 +1433,16 @@ ex. ignores all CJK unified ideographs.
    # where ->eq("Pe\x{4E00}rl", "Perl") is true
    # as U+4E00 is a CJK unified ideograph and to be ignorable.
 
-If C<undef> is passed explicitly as the value for this key,
-weights for CJK unified ideographs are treated as undefined.
+If a false value (including C<undef>) is passed, C<overrideCJK>
+has no effect.
+C<$Collator-E<gt>change(overrideCJK =E<gt> 0)> resets the old one.
+
 But assignment of weight for CJK unified ideographs
 in C<table> or C<entry> is still valid.
+If C<undef> is passed explicitly as the value for this key,
+weights for CJK unified ideographs are treated as undefined.
+However when C<UCA_Version> E<gt> 8, C<(overrideCJK =E<gt> undef)>
+has no special meaning.
 
 B<Note:> In addition to them, 12 CJK compatibility ideographs (C<U+FA0E>,
 C<U+FA0F>, C<U+FA11>, C<U+FA13>, C<U+FA14>, C<U+FA1F>, C<U+FA21>, C<U+FA23>,
@@ -1452,11 +1466,53 @@ NFD and NFKD are not appropriate, since NFD and NFKD will decompose
 Hangul syllables before overriding. FCD may decompose Hangul syllables
 as the case may be.
 
+If a false value (but not C<undef>) is passed, C<overrideHangul>
+has no effect.
+C<$Collator-E<gt>change(overrideHangul =E<gt> 0)> resets the old one.
+
 If C<undef> is passed explicitly as the value for this key,
 weight for Hangul syllables is treated as undefined
 without decomposition into Hangul Jamo.
 But definition of weight for Hangul syllables
 in C<table> or C<entry> is still valid.
+
+=item overrideOut
+
+-- see 7.1.1 Handling Ill-Formed Code Unit Sequences, UTS #10.
+
+Perl seems to allow out-of-range values (greater than 0x10FFFF).
+By default, out-of-range values are replaced with C<U+FFFD>
+(REPLACEMENT CHARACTER) when C<UCA_Version> E<gt>= 22,
+or ignored when C<UCA_Version> E<lt>= 20.
+
+When C<UCA_Version> E<gt>= 22, the weights of out-of-range values
+can be overridden. Though C<table> or C<entry> are available for them,
+out-of-range values are too many.
+
+C<overrideOut> can perform it algorithmically.
+This parameter works like C<overrideCJK>, so see there for examples.
+
+ex. ignores all out-of-range values.
+
+  overrideOut => sub {()}, # CODEREF returning empty list
+
+If a false value (including C<undef>) is passed, C<overrideOut>
+has no effect.
+C<$Collator-E<gt>change(overrideOut =E<gt> 0)> resets the old one.
+
+UCA recommends that out-of-range values should not be ignored for security
+reasons. Say, C<"pe\x{110000}rl"> should not be equal to C<"perl">.
+However, C<U+FFFD> is wrongly mapped to a variable collation element
+in DUCET for Unicode 6.0.0 to 6.2.0, that means out-of-range values will be
+ignored when C<variable> isn't C<Non-ignorable>.
+
+Unicode 6.3.0 will correct the mapping of C<U+FFFD>.
+see L<http://www.unicode.org/reports/tr10/tr10-27.html#Trailing_Weights>.
+Such a correction is reproduced by this.
+
+  overrideOut => sub { 0xFFFD }, # CODEREF returning a very large integer
+
+Since Unicode 6.3.0, C<(overrideOut =E<gt> sub { 0xFFFD })> may be unnecesssary.
 
 =item preprocess
 
@@ -1559,7 +1615,7 @@ may be better to avoid namespace conflict.
 
 B<NOTE>: When XSUB is used, the DUCET is compiled on building this
 module, and it may save time at the run time.
-Explicit saying C<table =E<gt> 'allkeys.txt'> (or using another table),
+Explicit saying C<(table =E<gt> 'allkeys.txt')>, or using another table,
 or using C<ignoreChar>, C<ignoreName>, C<undefChar>, C<undefName> or
 C<rewrite> will prevent this module from using the compiled DUCET.
 
@@ -1934,7 +1990,7 @@ module (see L<Unicode::Normalize>).
 
 If you need not it (say, in the case when you need not
 handle any combining characters),
-assign C<normalization =E<gt> undef> explicitly.
+assign C<(normalization =E<gt> undef)> explicitly.
 
 -- see 6.5 Avoiding Normalization, UTS #10.
 

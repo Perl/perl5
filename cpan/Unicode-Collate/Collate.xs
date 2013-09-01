@@ -210,22 +210,8 @@ _isIllegal (sv)
 	XSRETURN_YES;
     uv = SvUVX(sv);
     RETVAL = boolSV(
-	   0x10FFFF < uv		   /* out of range */
-    );
-OUTPUT:
-    RETVAL
-
-
-SV*
-_isNonchar (sv)
-    SV* sv
-  PREINIT:
-    UV uv;
-  CODE:
-    /* should be called only if ! _isIllegal(sv). */
-    uv = SvUVX(sv);
-    RETVAL = boolSV(
-	   ((uv & 0xFFFE) == 0xFFFE)       /* ??FFF[EF] (cf. utf8.c) */
+	   0x10FFFF < uv                   /* out of range */
+	|| ((uv & 0xFFFE) == 0xFFFE)       /* ??FFF[EF] (cf. utf8.c) */
 	|| (0xD800 <= uv && uv <= 0xDFFF)  /* unpaired surrogates */
 	|| (0xFDD0 <= uv && uv <= 0xFDEF)  /* other non-characters */
     );

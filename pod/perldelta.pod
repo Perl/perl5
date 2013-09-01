@@ -298,6 +298,12 @@ nonexistent array elements.
 
 =item *
 
+L<Unicode::Collate> has been upgraded from version 0.98 to 0.99.
+
+TODO
+
+=item *
+
 L<warnings> has been upgraded from version 1.18 to 1.19.
 
 The C<syscalls> warnings category has been added to check for embedded NUL

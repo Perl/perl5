@@ -25,7 +25,7 @@ BEGIN {
 
 use strict;
 use warnings;
-BEGIN { $| = 1; print "1..65\n"; }
+BEGIN { $| = 1; print "1..127\n"; } # 77 + 5 x @Versions
 my $count = 0;
 sub ok ($;$) {
     my $p = my $r = shift;
@@ -125,7 +125,7 @@ ok($nonch->lt("", "\x{FDD0}"));
 ok($nonch->lt("", "\x{FDEF}"));
 ok($nonch->lt("", "\x02"));
 ok($nonch->lt("", "\x{10FFFF}"));
-ok($nonch->eq("", "\x{110000}"));
+ok($nonch->lt("", "\x{110000}"));
 
 # 38..47
 ok($nonch->lt("\x00",     "\x01"));
@@ -137,7 +137,7 @@ ok($nonch->lt("\x{DFFF}", "\x{FDD0}"));
 ok($nonch->lt("\x{FDD0}", "\x{FDEF}"));
 ok($nonch->lt("\x{FDEF}", "\x02"));
 ok($nonch->lt("\x02",     "\x{10FFFF}"));
-ok($nonch->gt("\x{10FFFF}", "\x{110000}"));
+ok($nonch->lt("\x{10FFFF}", "\x{110000}"));
 
 # 48..51
 ok($nonch->lt("A",   "A\x{FFFF}"));
@@ -177,4 +177,48 @@ for my $ret (@ret) {
     my($match) = $Collator->match($str, "pe");
     ok($match eq $ret);
 }
+
+##################
+
+my $out = Unicode::Collate->new(
+    level => 1,
+    table => undef,
+    normalization => undef,
+    overrideOut => sub { 0xFFFD },
+);
+
+my @Versions = (8, 9, 11, 14, 16, 18, 20, 22, 24, 26);
+
+for my $v (@Versions) {
+    $out->change(UCA_Version => $v);
+    ok($out->cmp('',           "\x{10FFFF}") == ($v >= 22 ? -1 : 0));
+    ok($out->cmp('',           "\x{110000}") == ($v >= 22 ? -1 : 0));
+    ok($out->cmp('ABC',        "\x{110000}") == ($v >= 22 ? -1 : 1));
+    ok($out->cmp("\x{10FFFD}", "\x{110000}") == ($v >= 22 ? -1 : 1));
+    ok($out->cmp("\x{11FFFD}", "\x{110000}") == ($v >= 22 ?  0 : 0));
+}
+
+# x+66..x+77
+ok($out->lt('ABC',      "\x{123456}"));
+ok($out->lt("\x{FFFD}", "\x{123456}"));
+
+$out->change(overrideOut => sub {()});
+
+ok($out->eq('',         "\x{123456}"));
+ok($out->gt('ABC',      "\x{123456}"));
+ok($out->gt("\x{FFFD}", "\x{123456}"));
+
+$out->change(overrideOut => undef);
+ok($out->lt('',         "\x{123456}"));
+ok($out->eq("\x{FFFD}", "\x{123456}"));
+
+$out->change(overrideOut => sub { 0xFFFD });
+
+ok($out->lt('',         "\x{123456}"));
+ok($out->lt('ABC',      "\x{123456}"));
+ok($out->lt("\x{FFFD}", "\x{123456}"));
+
+$out->change(overrideOut => 0);
+ok($out->lt('',         "\x{123456}"));
+ok($out->eq("\x{FFFD}", "\x{123456}"));
 
