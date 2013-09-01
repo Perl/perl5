@@ -58,7 +58,7 @@ is( $Eval2::VERSION, '1.02' );
 
 my $expected= q{/^Can't locate reallyReAlLyNotexists.pm in \@INC \(\@INC contains:/};
 $expected= q{/^Can't locate reallyReAlLyNotexists.pm in \@INC \(you may need to install the reallyReAlLyNotexists module\) \(\@INC contains:/}
-    if 5.018 <= $];
+    if 5.017005 <= $];
 
 eval q{use parent 'reallyReAlLyNotexists'};
 like( $@, $expected, 'baseclass that does not exist');
