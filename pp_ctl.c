@@ -1811,6 +1811,7 @@ PP(pp_caller)
     const HEK *stash_hek;
     I32 count = 0;
     bool has_arg = MAXARG && TOPs;
+    const COP *lcop;
 
     if (MAXARG) {
       if (has_arg)
@@ -1854,7 +1855,11 @@ PP(pp_caller)
 	PUSHTARG;
     }
     mPUSHs(newSVpv(OutCopFILE(cx->blk_oldcop), 0));
-    mPUSHi((I32)CopLINE(cx->blk_oldcop));
+    lcop = closest_cop(cx->blk_oldcop, cx->blk_oldcop->op_sibling,
+		       cx->blk_sub.retop, TRUE);
+    if (!lcop)
+	lcop = cx->blk_oldcop;
+    mPUSHi((I32)CopLINE(lcop));
     if (!has_arg)
 	RETURN;
     if (CxTYPE(cx) == CXt_SUB || CxTYPE(cx) == CXt_FORMAT) {

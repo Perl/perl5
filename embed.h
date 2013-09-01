@@ -1067,6 +1067,7 @@
 #define ck_svconst(a)		Perl_ck_svconst(aTHX_ a)
 #define ck_tell(a)		Perl_ck_tell(aTHX_ a)
 #define ck_trunc(a)		Perl_ck_trunc(aTHX_ a)
+#define closest_cop(a,b,c,d)	Perl_closest_cop(aTHX_ a,b,c,d)
 #define convert(a,b,c)		Perl_convert(aTHX_ a,b,c)
 #define core_prototype(a,b,c,d)	Perl_core_prototype(aTHX_ a,b,c,d)
 #define coresub_op(a,b,c)	Perl_coresub_op(aTHX_ a,b,c)
@@ -1667,7 +1668,6 @@
 #  endif
 #  if defined(PERL_IN_UTIL_C)
 #define ckwarn_common(a)	S_ckwarn_common(aTHX_ a)
-#define closest_cop(a,b)	S_closest_cop(aTHX_ a,b)
 #define invoke_exception_hook(a,b)	S_invoke_exception_hook(aTHX_ a,b)
 #define mess_alloc()		S_mess_alloc(aTHX)
 #define with_queued_errors(a)	S_with_queued_errors(aTHX_ a)

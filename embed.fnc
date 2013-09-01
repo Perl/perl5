@@ -258,6 +258,8 @@ ApR	|UV	|cast_uv	|NV f
 #if !defined(HAS_TRUNCATE) && !defined(HAS_CHSIZE) && defined(F_FREESP)
 ApR	|I32	|my_chsize	|int fd|Off_t length
 #endif
+p	|const COP*|closest_cop	|NN const COP *cop|NULLOK const OP *o \
+				|NULLOK const OP *curop|bool opnext
 : Used in perly.y
 pR	|OP*	|convert	|I32 optype|I32 flags|NULLOK OP* o
 : Used in op.c and perl.c
@@ -2285,7 +2287,6 @@ s	|bool	|is_cur_LC_category_utf8|int category
 #endif
 
 #if defined(PERL_IN_UTIL_C)
-s	|const COP*|closest_cop	|NN const COP *cop|NULLOK const OP *o
 s	|SV*	|mess_alloc
 s	|SV *	|with_queued_errors|NN SV *ex
 s	|bool	|invoke_exception_hook|NULLOK SV *ex|bool warn

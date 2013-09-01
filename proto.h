@@ -663,6 +663,11 @@ PERL_CALLCONV void	Perl_ck_warner_d(pTHX_ U32 err, const char* pat, ...)
 
 PERL_CALLCONV bool	Perl_ckwarn(pTHX_ U32 w);
 PERL_CALLCONV bool	Perl_ckwarn_d(pTHX_ U32 w);
+PERL_CALLCONV const COP*	Perl_closest_cop(pTHX_ const COP *cop, const OP *o, const OP *curop, bool opnext)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_CLOSEST_COP	\
+	assert(cop)
+
 PERL_CALLCONV OP*	Perl_convert(pTHX_ I32 optype, I32 flags, OP* o)
 			__attribute__warn_unused_result__;
 
@@ -7519,11 +7524,6 @@ PERL_CALLCONV UV	Perl__to_fold_latin1(pTHX_ const U8 c, U8 *p, STRLEN *lenp, con
 #endif
 #if defined(PERL_IN_UTIL_C)
 STATIC bool	S_ckwarn_common(pTHX_ U32 w);
-STATIC const COP*	S_closest_cop(pTHX_ const COP *cop, const OP *o)
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_CLOSEST_COP	\
-	assert(cop)
-
 STATIC bool	S_invoke_exception_hook(pTHX_ SV *ex, bool warn);
 STATIC SV*	S_mess_alloc(pTHX);
 STATIC SV *	S_with_queued_errors(pTHX_ SV *ex)

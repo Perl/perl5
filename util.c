@@ -1178,15 +1178,20 @@ Perl_mess(pTHX_ const char *pat, ...)
     return retval;
 }
 
-STATIC const COP*
-S_closest_cop(pTHX_ const COP *cop, const OP *o)
+const COP*
+Perl_closest_cop(pTHX_ const COP *cop, const OP *o, const OP *curop,
+		       bool opnext)
 {
     dVAR;
-    /* Look for PL_op starting from o.  cop is the last COP we've seen. */
+    /* Look for curop starting from o.  cop is the last COP we've seen. */
+    /* opnext means that curop is actually the ->op_next of the op we are
+       seeking. */
 
     PERL_ARGS_ASSERT_CLOSEST_COP;
 
-    if (!o || o == PL_op)
+    if (!o || !curop || (
+	opnext ? o->op_next == curop && o->op_type != OP_SCOPE : o == curop
+    ))
 	return cop;
 
     if (o->op_flags & OPf_KIDS) {
@@ -1202,7 +1207,7 @@ S_closest_cop(pTHX_ const COP *cop, const OP *o)
 
 	    /* Keep searching, and return when we've found something. */
 
-	    new_cop = closest_cop(cop, kid);
+	    new_cop = closest_cop(cop, kid, curop, opnext);
 	    if (new_cop)
 		return new_cop;
 	}
@@ -1272,7 +1277,8 @@ Perl_mess_sv(pTHX_ SV *basemsg, bool consume)
 	 * from the sibling of PL_curcop.
 	 */
 
-	const COP *cop = closest_cop(PL_curcop, PL_curcop->op_sibling);
+	const COP *cop =
+	    closest_cop(PL_curcop, PL_curcop->op_sibling, PL_op, FALSE);
 	if (!cop)
 	    cop = PL_curcop;
 
