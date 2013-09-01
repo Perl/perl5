@@ -1,3 +1,10 @@
+1.32 -- Sun Aug 31 23:48 UTC 2013
+
+  * Skip pairmap()'s MULTICALL implementation 5.8.9 / 5.10.0 as it doesn't
+    work (RT87857)
+  * Comment on the fact that package "0" is defined but false (RT88201)
+  * TODO test in t/readonly.t now passes since 5.19.3 (RT88223)
+
 1.31 -- Wed Aug 14 20:38 UTC 2013
 
   * Bugfix pairmap to return list length in scalar context

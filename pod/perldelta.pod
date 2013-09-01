@@ -230,6 +230,12 @@ nonexistent array elements.
 
 =item *
 
+L<List::Util> and L<Scalar::Util> have been upgraded from version 1.31 to 1.32.
+
+TODO
+
+=item *
+
 L<Math::BigInt> has been upgraded from version 1.9992 to 1.9993.
 
 Cleaned up the L<Math::BigInt> and L<Math::BigFloat> documentation to

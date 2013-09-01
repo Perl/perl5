@@ -1546,7 +1546,7 @@ use File::Glob qw(:case);
 
     'Scalar-List-Utils' => {
         'MAINTAINER'   => 'gbarr',
-        'DISTRIBUTION' => 'PEVANS/Scalar-List-Utils-1.31.tar.gz',
+        'DISTRIBUTION' => 'PEVANS/Scalar-List-Utils-1.32.tar.gz',
         'FILES'    => q[cpan/List-Util],
         'EXCLUDED' => [
             qr{^inc/Module/},

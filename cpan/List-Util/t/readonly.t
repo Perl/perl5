@@ -45,7 +45,9 @@ sub try
 
 $var = 123;
 {
-    local $TODO = $Config::Config{useithreads} ? "doesn't work with threads" : undef;
+    # This used not to work with ithreads, but seems to be working since 5.19.3
+    local $TODO = ( $Config::Config{useithreads} && $] < 5.019003 ) ?
+      "doesn't work with threads" : undef;
     ok( try ("abc"), 'reference a constant in a sub');
 }
 ok( !try ($var), 'reference a non-constant in a sub');
