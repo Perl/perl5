@@ -1560,6 +1560,7 @@ Perl_lex_read_space(pTHX_ U32 flags)
 	    s++;
 	} else if (c == 0 && s == bufend) {
 	    bool got_more;
+	    line_t l;
 #ifdef PERL_MAD
 	    if (PL_madskills)
 		sv_catpvn(PL_skipwhite, PL_parser->bufptr, s-PL_parser->bufptr);
@@ -1567,9 +1568,10 @@ Perl_lex_read_space(pTHX_ U32 flags)
 	    if (flags & LEX_NO_NEXT_CHUNK)
 		break;
 	    PL_parser->bufptr = s;
-	    if (can_incline) COPLINE_INC_WITH_HERELINES;
+	    l = CopLINE(PL_curcop);
+	    CopLINE(PL_curcop) += PL_parser->lex_shared->herelines + 1;
 	    got_more = lex_next_chunk(flags);
-	    if (can_incline) CopLINE_dec(PL_curcop);
+	    CopLINE_set(PL_curcop, l);
 	    s = PL_parser->bufptr;
 	    bufend = PL_parser->bufend;
 	    if (!got_more)
@@ -7097,12 +7099,15 @@ Perl_yylex(pTHX)
 	 && (!anydelim || *s != '#')) {
 	    /* no override, and not s### either; skipspace is safe here
 	     * check for => on following line */
+	    bool arrow;
 	    STRLEN bufoff = PL_bufptr - SvPVX(PL_linestr);
 	    STRLEN   soff = s         - SvPVX(PL_linestr);
 	    s = skipspace_flags(s, LEX_NO_INCLINE);
-	    if (*s == '=' && s[1] == '>') goto fat_arrow;
+	    arrow = *s == '=' && s[1] == '>';
 	    PL_bufptr = SvPVX(PL_linestr) + bufoff;
 	    s         = SvPVX(PL_linestr) +   soff;
+	    if (arrow)
+		goto fat_arrow;
 	}
 
       reserved_word:
