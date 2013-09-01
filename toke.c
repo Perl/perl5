@@ -3991,7 +3991,10 @@ S_intuit_more(pTHX_ char *s)
 		weight -= seen[un_char] * 10;
 		if (isWORDCHAR_lazy_if(s+1,UTF)) {
 		    int len;
-		    scan_ident(s, send, tmpbuf, sizeof tmpbuf, FALSE);
+                    char *tmp = PL_bufend;
+                    PL_bufend = (char*)send;
+                    scan_ident(s, tmpbuf, sizeof tmpbuf, FALSE);
+                    PL_bufend = tmp;
 		    len = (int)strlen(tmpbuf);
 		    if (len > 1 && gv_fetchpvn_flags(tmpbuf, len,
                                                     UTF ? SVf_UTF8 : 0, SVt_PV))
@@ -5788,7 +5791,7 @@ Perl_yylex(pTHX)
 
     case '*':
 	if (PL_expect != XOPERATOR) {
-	    s = scan_ident(s, PL_bufend, PL_tokenbuf, sizeof PL_tokenbuf, TRUE);
+	    s = scan_ident(s, PL_tokenbuf, sizeof PL_tokenbuf, TRUE);
 	    PL_expect = XOPERATOR;
 	    force_ident(PL_tokenbuf, '*');
 	    if (!*PL_tokenbuf)
@@ -5824,7 +5827,7 @@ Perl_yylex(pTHX)
 	    Mop(OP_MODULO);
 	}
 	PL_tokenbuf[0] = '%';
-	s = scan_ident(s, PL_bufend, PL_tokenbuf + 1,
+	s = scan_ident(s, PL_tokenbuf + 1,
 		sizeof PL_tokenbuf - 1, FALSE);
 	pl_yylval.ival = 0;
 	if (!PL_tokenbuf[1]) {
@@ -6332,7 +6335,7 @@ Perl_yylex(pTHX)
 	}
 
 	PL_tokenbuf[0] = '&';
-	s = scan_ident(s - 1, PL_bufend, PL_tokenbuf + 1,
+	s = scan_ident(s - 1, PL_tokenbuf + 1,
 		       sizeof PL_tokenbuf - 1, TRUE);
 	if (PL_tokenbuf[1]) {
 	    PL_expect = XOPERATOR;
@@ -6565,7 +6568,7 @@ Perl_yylex(pTHX)
 
 	if (s[1] == '#' && (isIDFIRST_lazy_if(s+2,UTF) || strchr("{$:+-@", s[2]))) {
 	    PL_tokenbuf[0] = '@';
-	    s = scan_ident(s + 1, PL_bufend, PL_tokenbuf + 1,
+	    s = scan_ident(s + 1, PL_tokenbuf + 1,
 			   sizeof PL_tokenbuf - 1, FALSE);
 	    if (PL_expect == XOPERATOR)
 		no_op("Array length", s);
@@ -6577,7 +6580,7 @@ Perl_yylex(pTHX)
 	}
 
 	PL_tokenbuf[0] = '$';
-	s = scan_ident(s, PL_bufend, PL_tokenbuf + 1,
+	s = scan_ident(s, PL_tokenbuf + 1,
 		       sizeof PL_tokenbuf - 1, FALSE);
 	if (PL_expect == XOPERATOR)
 	    no_op("Scalar", s);
@@ -6696,7 +6699,7 @@ Perl_yylex(pTHX)
 	if (PL_expect == XOPERATOR)
 	    no_op("Array", s);
 	PL_tokenbuf[0] = '@';
-	s = scan_ident(s, PL_bufend, PL_tokenbuf + 1, sizeof PL_tokenbuf - 1, FALSE);
+	s = scan_ident(s, PL_tokenbuf + 1, sizeof PL_tokenbuf - 1, FALSE);
 	pl_yylval.ival = 0;
 	if (!PL_tokenbuf[1]) {
 	    PREREF('@');
@@ -7979,8 +7982,7 @@ Perl_yylex(pTHX)
 		    p += 3;
 		p = PEEKSPACE(p);
 		if (isIDFIRST_lazy_if(p,UTF)) {
-		    p = scan_ident(p, PL_bufend,
-			PL_tokenbuf, sizeof PL_tokenbuf, TRUE);
+		    p = scan_ident(p, PL_tokenbuf, sizeof PL_tokenbuf, TRUE);
 		    p = PEEKSPACE(p);
 		}
 		if (*p != '$')
@@ -9366,7 +9368,7 @@ S_scan_word(pTHX_ char *s, char *dest, STRLEN destlen, int allow_package, STRLEN
 }
 
 STATIC char *
-S_scan_ident(pTHX_ char *s, const char *send, char *dest, STRLEN destlen, I32 ck_uni)
+S_scan_ident(pTHX_ char *s, char *dest, STRLEN destlen, I32 ck_uni)
 {
     dVAR;
     char *bracket = NULL;
@@ -9414,7 +9416,7 @@ S_scan_ident(pTHX_ char *s, const char *send, char *dest, STRLEN destlen, I32 ck
     if (*s == '{') {
 	bracket = s;
 	s++;
-        while (s < send && ( SPACE_OR_TAB(*s) || *s == '\n' ))
+        while (s < PL_bufend && ( SPACE_OR_TAB(*s) || *s == '\n' ))
 	   s++;
     }
 
@@ -9434,7 +9436,7 @@ S_scan_ident(pTHX_ char *s, const char *send, char *dest, STRLEN destlen, I32 ck
                                            || (((U8)(d)) <= 8 && (d) != 0) \
                                            || (((U8)(d)) == 13))))          \
                                    || (((U8)(d)) == toCTRL('?')))
-    if (s < send
+    if (s < PL_bufend
         && (isIDFIRST_lazy_if(s, is_utf8) || VALID_LEN_ONE_IDENT(*s, is_utf8)))
     {
         if ( isCNTRL_A((U8)*s) ) {
@@ -9472,7 +9474,7 @@ S_scan_ident(pTHX_ char *s, const char *send, char *dest, STRLEN destlen, I32 ck
         d += is_utf8 ? UTF8SKIP(d) : 1;
         parse_ident(&s, &d, e, 1, is_utf8);
 	    *d = '\0';
-	    while (s < send && SPACE_OR_TAB(*s))
+	    while (s < PL_bufend && SPACE_OR_TAB(*s))
 		s++;
 	    if ((*s == '[' || (*s == '{' && strNE(dest, "sub")))) {
                 /* ${foo[0]} and ${foo{bar}} notation.  */
@@ -9505,7 +9507,7 @@ S_scan_ident(pTHX_ char *s, const char *send, char *dest, STRLEN destlen, I32 ck
 	    *d = '\0';
 	}
 
-        while (s < send && ( SPACE_OR_TAB(*s) || *s == '\n' ))
+        while (s < PL_bufend && ( SPACE_OR_TAB(*s) || *s == '\n' ))
 	    s++;
 
         /* Expect to find a closing } after consuming any trailing whitespace.
