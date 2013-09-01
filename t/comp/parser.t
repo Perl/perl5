@@ -8,7 +8,7 @@ BEGIN {
     chdir 't';
 }
 
-print "1..166\n";
+print "1..159\n";
 
 sub failed {
     my ($got, $expected, $name) = @_;
@@ -576,29 +576,35 @@ eval <<'EOSTANZA'; die $@ if $@;
 check(qr/^Great hail!.*no more\.$/, 61, "Overflow both small buffer checks");
 EOSTANZA
 
+sub check_line ($$) {
+    my ($line, $name) =  @_;
+    my (undef, undef, $got_line) = caller;
+    is ($got_line, $line, $name);
+}
+
 #line 531 parser.t
-<<EOU; check('parser\.t', 531, 'on same line as heredoc');
+<<EOU; check_line(531, 'on same line as heredoc');
 EOU
 s//<<EOV/e if 0;
 EOV
-check('parser\.t', 535, 'after here-doc in quotes');
+check_line(535, 'after here-doc in quotes');
 <<EOW;
-${check('parser\.t', 537, 'first line of interp in here-doc');;
-  check('parser\.t', 538, 'second line of interp in here-doc');}
+${check_line(537, 'first line of interp in here-doc');;
+  check_line(538, 'second line of interp in here-doc');}
 EOW
 
 time
 #line 42
-;check('parser\.t', 42, 'line number after "nullary\n#line"');
+;check_line(42, 'line number after "nullary\n#line"');
 
 "${
 #line 53
 _}";
-check('parser\.t', 54, 'line number after qq"${#line}"');
+check_line(54, 'line number after qq"${#line}"');
 
 #line 24
 "
-${check('parser\.t', 25, 'line number inside qq/<newline>${...}/')}";
+${check_line(25, 'line number inside qq/<newline>${...}/')}";
 
 __END__
 # Don't add new tests HERE. See note above
