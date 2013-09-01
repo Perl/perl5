@@ -2236,7 +2236,7 @@ iR	|SV*	|get_and_check_backslash_N_name|NN const char* s \
 				|NN const char* const e
 sR	|char*	|scan_formline	|NN char *s
 sR	|char*	|scan_heredoc	|NN char *s
-s	|char*	|scan_ident	|NN char *s|NN const char *send|NN char *dest \
+s	|char*	|scan_ident	|NN char *s|NN char *dest \
 				|STRLEN destlen|I32 ck_uni
 sR	|char*	|scan_inputsymbol|NN char *start
 sR	|char*	|scan_pat	|NN char *start|I32 type
