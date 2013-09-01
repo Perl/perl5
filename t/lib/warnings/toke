@@ -168,9 +168,9 @@ EXPECT
 Use of literal control characters in variable names is deprecated at (eval 1) line 1.
 Use of literal control characters in variable names is deprecated at (eval 2) line 1.
 Use of literal control characters in variable names is deprecated at (eval 3) line 1.
-Use of literal control characters in variable names is deprecated at (eval 4) line 1.
+Use of literal control characters in variable names is deprecated at (eval 4) line 2.
 Use of literal control characters in variable names is deprecated at (eval 5) line 1.
-Use of literal control characters in variable names is deprecated at (eval 6) line 1.
+Use of literal control characters in variable names is deprecated at (eval 6) line 2.
 ok
 ########
 # toke.c
@@ -402,6 +402,37 @@ EXPECT
 Ambiguous use of ${time{...}} resolved to $time{...} at - line 3.
 ########
 # toke.c
+use warnings 'ambiguous' ;
+$a = ${
+
+    time
+        {2}
+};
+warn "after";
+EXPECT
+Ambiguous use of ${time{...}} resolved to $time{...} at - line 5.
+after at - line 8.
+########
+# toke.c
+use warnings 'ambiguous' ;
+$a = ${
+
+time[2]
+
+};
+$a = ${
+
+time    
+   [2]
+
+};
+warn "after";
+EXPECT
+Ambiguous use of ${time[...]} resolved to $time[...] at - line 5.
+Ambiguous use of ${time[...]} resolved to $time[...] at - line 10.
+after at - line 14.
+########
+# toke.c
 no warnings 'ambiguous' ;
 $a = ${time{2}};
 EXPECT
@@ -429,6 +460,38 @@ Ambiguous use of @{time} resolved to @time at - line 5.
 Ambiguous use of %{time} resolved to %time at - line 6.
 Ambiguous use of *{time} resolved to *time at - line 7.
 Ambiguous use of &{time} resolved to &time at - line 8.
+########
+# toke.c
+use warnings 'ambiguous' ;
+$a = ${
+time
+} ;
+$a = @{
+time
+} ;
+$a = $#{
+time
+} ;
+$a = %{
+time
+} ;
+$a = *{
+time
+} ;
+$a = defined &{
+time
+
+
+} ;
+warn "last";
+EXPECT
+Ambiguous use of ${time} resolved to $time at - line 4.
+Ambiguous use of @{time} resolved to @time at - line 7.
+Ambiguous use of @{time} resolved to @time at - line 10.
+Ambiguous use of %{time} resolved to %time at - line 13.
+Ambiguous use of *{time} resolved to *time at - line 16.
+Ambiguous use of &{time} resolved to &time at - line 19.
+last at - line 23.
 ########
 # toke.c
 use warnings 'ambiguous' ;
