@@ -3855,8 +3855,8 @@ S_scan_const(pTHX_ char *start)
     }
 
     /* return the substring (via pl_yylval) only if we parsed anything */
-    if (s > PL_bufptr) {
-	char *s2 = PL_bufptr;
+    if (s > start) {
+	char *s2 = start;
 	for (; s2 < s; s2++) {
 	    if (*s2 == '\n')
 		COPLINE_INC_WITH_HERELINES;
