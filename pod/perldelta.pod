@@ -170,6 +170,12 @@ C<Carp> that expects C<Carp::Heavy> to provide subroutines.
 
 =item *
 
+L<CPAN::Meta::Requirements> has been upgraded from version 2.122 to 2.123.
+
+TODO
+
+=item *
+
 L<Data::Dumper> has been upgraded from version 2.148 to 2.149.
 
 This upgrade is part of a larger change to make the array interface 64-bit safe
