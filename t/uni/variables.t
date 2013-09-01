@@ -12,7 +12,7 @@ use utf8;
 use open qw( :utf8 :std );
 no warnings qw(misc reserved);
 
-plan (tests => 65869);
+plan (tests => 65873);
 
 # ${single:colon} should not be valid syntax
 {
@@ -202,7 +202,7 @@ EOP
     }
 }
 
-{
+{    
     # bleadperl v5.17.9-109-g3283393 breaks JEREMY/File-Signature-1.009.tar.gz
     # https://rt.perl.org/rt3/Ticket/Display.html?id=117145
     local $@;
@@ -226,4 +226,23 @@ EOP
             is($@, '', "\${ $var } works" );
         }
     }
+}
+
+{
+    is(
+        "".eval "*{\nOIN}",
+        "*main::OIN",
+        "Newlines at the start of an identifier should be skipped over"
+    );
+    
+    
+    is(
+        "".eval "*{^JOIN}",
+        "*main::\nOIN",
+        "...but \$^J is still legal"
+    );
+    
+    my $ret = eval "\${\cT\n}";
+    is($@, "", 'No errors from using ${\n\cT\n}');
+    is($ret, $^T, "...and we got the right value");
 }

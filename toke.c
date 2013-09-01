@@ -9414,7 +9414,7 @@ S_scan_ident(pTHX_ char *s, const char *send, char *dest, STRLEN destlen, I32 ck
     if (*s == '{') {
 	bracket = s;
 	s++;
-	while (s < send && SPACE_OR_TAB(*s))
+        while (s < send && ( SPACE_OR_TAB(*s) || *s == '\n' ))
 	   s++;
     }
 
@@ -9501,7 +9501,7 @@ S_scan_ident(pTHX_ char *s, const char *send, char *dest, STRLEN destlen, I32 ck
 	    *d = '\0';
 	}
 
-        while (s < send && SPACE_OR_TAB(*s))
+        while (s < send && ( SPACE_OR_TAB(*s) || *s == '\n' ))
 	    s++;
 
         /* Expect to find a closing } after consuming any trailing whitespace.
