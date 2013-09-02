@@ -1596,14 +1596,31 @@ and start from the very beginning.  This time, unless you are sure of
 what you are doing, accept the default list of libraries suggested by
 Configure.
 
+If the libs variable is missing -lm, there is a chance that libm.so.1
+is available, but the required (symbolic) link to libm.so is missing.
+(same could be the case for other libraries like libcrypt.so).  You
+should check your installation for packages that create that link, and
+if no package is installed that supplies that link or you cannot install
+them, make the symbolic link yourself e.g.:
+
+  $ rpm -qf /usr/lib64/libm.so
+  glibc-devel-2.15-22.17.1.x86_64
+  $ ls -lgo /usr/lib64/libm.so
+  lrwxrwxrwx 1 16 Jan  7  2013 /usr/lib64/libm.so -> /lib64/libm.so.6
+
+  or
+
+  $ sudo ln -s /lib64/libm.so.6 /lib64/libm.so
+
 If the libs variable looks correct, you might have the
 L<"nm extraction"> problem discussed above.
 
 If you still have missing routines or undefined symbols, you probably
-need to add some library or other, or you need to undefine some feature
-that Configure thought was there but is defective or incomplete.  If
-you used a hint file, see if it has any relevant advice.  You can also
-look through through config.h for likely suspects.
+need to add some library or other, make a symbolic link like described
+above, or you need to undefine some feature that Configure thought was
+there but is defective or incomplete.  If you used a hint file, see if
+it has any relevant advice.  You can also look through through config.h
+for likely suspects.
 
 =item toke.c
 
