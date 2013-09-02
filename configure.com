@@ -5777,7 +5777,8 @@ $     d_signbit = "undef"
 $     echo4 "Nope."
 $ ENDIF
 $!
-$ echo4 "Checking if kill() uses SYS$FORCEX or can't be called from a signal handler..."
+$ echo4 "Checking if kill() uses SYS$FORCEX, can't be called from a signal handler,"
+$ echo4 "or fails to handle a signal value of zero..."
 $ kill_by_sigprc = "undef"
 $ OS
 $ WS "#include <stdio.h>"
@@ -5791,12 +5792,13 @@ $ WS "    signal(1,handler1);"
 $ WS "    signal(2,handler2);"
 $ WS "    kill(getpid(),1);"
 $ WS "    sleep(1);"
-$ WS "    printf(""\n"");"
+$ WS "    kill(getpid(),0);"
+$ WS "    printf(""3\n"");"
 $ WS "}"
 $ CS
 $ ON ERROR THEN CONTINUE
 $ GOSUB compile
-$ IF tmp .NES. "012"
+$ IF tmp .NES. "0123"
 $ THEN 
 $   echo4 "Yes, it has at least one of those limitations."
 $   echo4 "Checking whether we can use SYS$SIGPRC instead..."
