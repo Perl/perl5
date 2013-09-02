@@ -385,7 +385,7 @@ case "`uname -m`" in
 	    libspth="/opt/local/lib /opt/lib $libspth"
 	    loclibpth="/opt/local/lib /opt/lib $loclibpth"
 	    # POSIX will not link without the pthread lib
-	    libswanted="$libswanted pthread m crypt"
+	    libswanted="$libswanted pthread"
 	    echo "$libswanted" >&4
 	fi
 	;;
