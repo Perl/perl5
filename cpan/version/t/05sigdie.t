@@ -13,9 +13,8 @@ BEGIN {
     };
 }
 
-
 BEGIN {
-    use version 0.9903;
+    use version 0.9904;
 }
 
 pass "Didn't get caught by the wrong DIE handler, which is a good thing";

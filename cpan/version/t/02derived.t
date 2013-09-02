@@ -6,12 +6,11 @@
 
 use Test::More qw/no_plan/;
 use File::Temp qw/tempfile/;
-our $Verbose;
 
 BEGIN {
     (my $coretests = $0) =~ s'[^/]+\.t'coretests.pm';
     require $coretests;
-    use_ok("version", 0.9903);
+    use_ok("version", 0.9904);
     # If we made it this far, we are ok.
 }
 
@@ -58,8 +57,6 @@ sub main_reset {
     undef &declare; undef *::declare; # avoid 'used once' warning
 }
 
-diag "Tests with empty derived class"  if $Verbose;
-
 use_ok($package, 0.001);
 my $testobj = $package->new(1.002_003);
 isa_ok( $testobj, $package );
@@ -81,7 +78,6 @@ main_reset;
 use_ok($package, 0.001, "declare");
 BaseTests($package, "parse", "declare");
 
-diag "tests with bad subclass"  if $Verbose;
 $testobj = version::Bad->new(1.002_003);
 isa_ok( $testobj, "version::Bad" );
 eval { my $string = $testobj->numify };

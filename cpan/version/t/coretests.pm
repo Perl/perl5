@@ -1,8 +1,6 @@
 #! /usr/local/perl -w
 package main;
 require Test::Harness;
-*Verbose = \$Test::Harness::Verbose;
-$Verbose = 0 if $ENV{PERL_CORE};
 use Data::Dumper;
 use File::Temp qw/tempfile/;
 use File::Basename;
@@ -27,21 +25,18 @@ sub BaseTests {
     # its man page ( perldoc Test ) for help writing this test script.
 
     # Test bare number processing
-    diag "tests with bare numbers" if $Verbose;
     $version = $CLASS->$method(5.005_03);
     is ( "$version" , "5.00503" , '5.005_03 eq 5.00503' );
     $version = $CLASS->$method(1.23);
     is ( "$version" , "1.23" , '1.23 eq "1.23"' );
 
     # Test quoted number processing
-    diag "tests with quoted numbers" if $Verbose;
     $version = $CLASS->$method("5.005_03");
     is ( "$version" , "5.005_03" , '"5.005_03" eq "5.005_03"' );
     $version = $CLASS->$method("v1.23");
     is ( "$version" , "v1.23" , '"v1.23" eq "v1.23"' );
 
     # Test stringify operator
-    diag "tests with stringify" if $Verbose;
     $version = $CLASS->$method("5.005");
     is ( "$version" , "5.005" , '5.005 eq "5.005"' );
     $version = $CLASS->$method("5.006.001");
@@ -51,7 +46,6 @@ sub BaseTests {
     is ( "$version" , "v1.2.3_4" , 'alpha version 1.2.3_4 eq v1.2.3_4' );
 
     # test illegal formats
-    diag "test illegal formats" if $Verbose;
     eval {my $version = $CLASS->$method("1.2_3_4")};
     like($@, qr/multiple underscores/,
 	"Invalid version format (multiple underscores)");
@@ -93,7 +87,6 @@ sub BaseTests {
     isa_ok ( $version, $CLASS );
 
     # Test comparison operators with self
-    diag "tests with self" if $Verbose;
     is ( $version <=> $version, 0, '$version <=> $version == 0' );
     ok ( $version == $version, '$version == $version' );
 
@@ -101,7 +94,6 @@ sub BaseTests {
     # test first with non-object
     $version = $CLASS->$method("5.006.001");
     $new_version = "5.8.0";
-    diag "numeric tests with non-objects" if $Verbose;
     ok ( $version == $version, '$version == $version' );
     ok ( $version < $new_version, '$version < $new_version' );
     ok ( $new_version > $version, '$new_version > $version' );
@@ -109,20 +101,17 @@ sub BaseTests {
 
     # now test with existing object
     $new_version = $CLASS->$method($new_version);
-    diag "numeric tests with objects" if $Verbose;
     ok ( $version < $new_version, '$version < $new_version' );
     ok ( $new_version > $version, '$new_version > $version' );
     ok ( $version != $new_version, '$version != $new_version' );
 
     # now test with actual numbers
-    diag "numeric tests with numbers" if $Verbose;
     ok ( $version->numify() == 5.006001, '$version->numify() == 5.006001' );
     ok ( $version->numify() <= 5.006001, '$version->numify() <= 5.006001' );
     ok ( $version->numify() < 5.008, '$version->numify() < 5.008' );
     #ok ( $version->numify() > v5.005_02, '$version->numify() > 5.005_02' );
 
     # test with long decimals
-    diag "Tests with extended decimal versions" if $Verbose;
     $version = $CLASS->$method(1.002003);
     ok ( $version == "1.2.3", '$version == "1.2.3"');
     ok ( $version->numify == 1.002003, '$version->numify == 1.002003');
@@ -134,14 +123,11 @@ sub BaseTests {
     # now test with alpha version form with string
     $version = $CLASS->$method("1.2.3");
     $new_version = "1.2.3_4";
-    diag "numeric tests with alpha-style non-objects" if $Verbose;
     ok ( $version < $new_version, '$version < $new_version' );
     ok ( $new_version > $version, '$new_version > $version' );
     ok ( $version != $new_version, '$version != $new_version' );
 
     $version = $CLASS->$method("1.2.4");
-    diag "numeric tests with alpha-style non-objects"
-	if $Verbose;
     ok ( $version > $new_version, '$version > $new_version' );
     ok ( $new_version < $version, '$new_version < $version' );
     ok ( $version != $new_version, '$version != $new_version' );
@@ -149,7 +135,6 @@ sub BaseTests {
     # now test with alpha version form with object
     $version = $CLASS->$method("1.2.3");
     $new_version = $CLASS->$method("1.2.3_4");
-    diag "tests with alpha-style objects" if $Verbose;
     ok ( $version < $new_version, '$version < $new_version' );
     ok ( $new_version > $version, '$new_version > $version' );
     ok ( $version != $new_version, '$version != $new_version' );
@@ -157,20 +142,16 @@ sub BaseTests {
     ok ( $new_version->is_alpha, '$new_version->is_alpha');
 
     $version = $CLASS->$method("1.2.4");
-    diag "tests with alpha-style objects" if $Verbose;
     ok ( $version > $new_version, '$version > $new_version' );
     ok ( $new_version < $version, '$new_version < $version' );
     ok ( $version != $new_version, '$version != $new_version' );
 
     $version = $CLASS->$method("1.2.3.4");
     $new_version = $CLASS->$method("1.2.3_4");
-    diag "tests with alpha-style objects with same subversion"
-	if $Verbose;
     ok ( $version > $new_version, '$version > $new_version' );
     ok ( $new_version < $version, '$new_version < $version' );
     ok ( $version != $new_version, '$version != $new_version' );
 
-    diag "test implicit [in]equality" if $Verbose;
     $version = $CLASS->$method("v1.2.3");
     $new_version = $CLASS->$method("1.2.3.0");
     ok ( $version == $new_version, '$version == $new_version' );
@@ -183,7 +164,6 @@ sub BaseTests {
     $new_version = $CLASS->$method("1.1.999");
     ok ( $version > $new_version, '$version > $new_version' );
 
-    diag "test with version class names" if $Verbose;
     $version = $CLASS->$method("v1.2.3");
     eval { () = $version < 'version' };
     # this test, and only this test, I have to do this or else $@ gets
@@ -192,7 +172,6 @@ sub BaseTests {
     like $err, qr/^Invalid version format/, "error with $version < 'version'";
 
     # that which is not expressly permitted is forbidden
-    diag "forbidden operations" if $Verbose;
     ok ( !eval { ++$version }, "noop ++" );
     ok ( !eval { --$version }, "noop --" );
     ok ( !eval { $version/1 }, "noop /" );
@@ -203,7 +182,6 @@ SKIP: {
     skip "version require'd instead of use'd, cannot test $qv_declare", 3
 	unless defined $qv_declare;
     # test the $qv_declare() sub
-    diag "testing $qv_declare" if $Verbose;
     $version = $CLASS->$qv_declare("1.2");
     is ( "$version", "v1.2", $qv_declare.'("1.2") == "1.2.0"' );
     $version = $CLASS->$qv_declare(1.2);
@@ -212,7 +190,6 @@ SKIP: {
 }
 
     # test creation from existing version object
-    diag "create new from existing version" if $Verbose;
     ok (eval {$new_version = $CLASS->$method($version)},
 	    "new from existing object");
     ok ($new_version == $version, "class->$method($version) identical");
@@ -223,21 +200,18 @@ SKIP: {
     is ($new_version, "1.2.3" , '$version->$method("1.2.3") works too');
 
     # test the CVS revision mode
-    diag "testing CVS Revision" if $Verbose;
     $version = new $CLASS qw$Revision: 1.2$;
     ok ( $version == "1.2.0", 'qw$Revision: 1.2$ == 1.2.0' );
     $version = new $CLASS qw$Revision: 1.2.3.4$;
     ok ( $version == "1.2.3.4", 'qw$Revision: 1.2.3.4$ == 1.2.3.4' );
 
     # test the CPAN style reduced significant digit form
-    diag "testing CPAN-style versions" if $Verbose;
     $version = $CLASS->$method("1.23_01");
     is ( "$version" , "1.23_01", "CPAN-style alpha version" );
     ok ( $version > 1.23, "1.23_01 > 1.23");
     ok ( $version < 1.24, "1.23_01 < 1.24");
 
     # test reformed UNIVERSAL::VERSION
-    diag "Replacement UNIVERSAL::VERSION tests" if $Verbose;
 
     my $error_regex = $] < 5.006
 	? 'version \d required'
@@ -355,7 +329,6 @@ SKIP:    { # https://rt.perl.org/rt3/Ticket/Display.html?id=95544
 SKIP: 	{
 	skip 'Cannot test bare v-strings with Perl < 5.6.0', 4
 		if $] < 5.006_000;
-	diag "Tests with v-strings" if $Verbose;
 	$version = $CLASS->$method(1.2.3);
 	ok("$version" eq "v1.2.3", '"$version" eq 1.2.3');
 	$version = $CLASS->$method(1.0.0);
@@ -370,14 +343,11 @@ SKIP: 	{
 SKIP: 	{
 	skip 'Cannot test bare alpha v-strings with Perl < 5.8.1', 2
 		if $] lt 5.008_001;
-	diag "Tests with bare alpha v-strings" if $Verbose;
 	$version = $CLASS->$method(v1.2.3_4);
 	is($version, "v1.2.3_4", '"$version" eq "v1.2.3_4"');
 	$version = $CLASS->$method(eval "v1.2.3_4");
 	is($version, "v1.2.3_4", '"$version" eq "v1.2.3_4" (from eval)');
     }
-
-    diag "Tests with real-world (malformed) data" if $Verbose;
 
     # trailing zero testing (reported by Andreas Koenig).
     $version = $CLASS->$method("1");

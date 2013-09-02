@@ -9,10 +9,9 @@ use File::Temp qw/tempfile/;
 use POSIX qw/locale_h/;
 use Test::More tests => 7;
 use Config;
-our $Verbose;
 
 BEGIN {
-    use_ok('version', 0.9903);
+    use_ok('version', 0.9904);
 }
 
 SKIP: {
@@ -41,8 +40,6 @@ SKIP: {
 	}
 	skip 'Cannot test locale handling without a comma locale', 5
 	    unless $loc and localeconv()->{decimal_point} eq ',';
-
-	diag ("Testing locale handling with $loc") if $Verbose;
 
 	setlocale(LC_NUMERIC, $loc);
 	ok ($ver eq "1,23", "Using locale: $loc");

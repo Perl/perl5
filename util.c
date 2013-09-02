@@ -4468,10 +4468,10 @@ Perl_upg_version(pTHX_ SV *ver, bool qv)
 	char *buf;
 #ifdef USE_LOCALE_NUMERIC
 	char *loc = NULL;
-        if (! PL_numeric_standard) {
-            loc = savepv(setlocale(LC_NUMERIC, NULL));
-            setlocale(LC_NUMERIC, "C");
-        }
+	if (! PL_numeric_standard) {
+	    loc = savepv(setlocale(LC_NUMERIC, NULL));
+	    setlocale(LC_NUMERIC, "C");
+	}
 #endif
 	if (sv) {
 	    Perl_sv_setpvf(aTHX_ sv, "%.9"NVff, SvNVX(ver));
@@ -4482,10 +4482,10 @@ Perl_upg_version(pTHX_ SV *ver, bool qv)
 	    buf = tbuf;
 	}
 #ifdef USE_LOCALE_NUMERIC
-        if (loc) {
-            setlocale(LC_NUMERIC, loc);
-            Safefree(loc);
-        }
+	if (loc) {
+	    setlocale(LC_NUMERIC, loc);
+	    Safefree(loc);
+	}
 #endif
 	while (buf[len-1] == '0' && len > 0) len--;
 	if ( buf[len-1] == '.' ) len--; /* eat the trailing decimal */
@@ -4792,7 +4792,7 @@ converted into version objects.
 int
 Perl_vcmp(pTHX_ SV *lhv, SV *rhv)
 {
-    I32 i,l,m,r;
+    SSize_t i,l,m,r;
     I32 retval;
     bool lalpha = FALSE;
     bool ralpha = FALSE;

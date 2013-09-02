@@ -508,6 +508,10 @@ XS(XS_version_new)
         STRLEN len;
         const char *classname;
         U32 flags;
+
+	/* Just in case this is something like a tied hash */
+	SvGETMAGIC(vs);
+
         if ( sv_isobject(ST(0)) ) { /* get the class if called as an object method */
             const HV * stash = SvSTASH(SvRV(ST(0)));
             classname = HvNAME(stash);
@@ -725,8 +729,14 @@ XS(XS_version_qv)
         STRLEN len = 0;
         const char * classname = "";
         U32 flags = 0;
-        if ( items == 2 && SvOK(ST(1)) ) {
-            ver = ST(1);
+        if ( items == 2 ) {
+	    SvGETMAGIC(ST(1));
+	    if (SvOK(ST(1))) {
+		ver = ST(1);
+	    }
+	    else {
+		Perl_croak(aTHX_ "Invalid version format (version required)");
+	    }
             if ( sv_isobject(ST(0)) ) { /* class called as an object method */
                 const HV * stash = SvSTASH(SvRV(ST(0)));
                 classname = HvNAME(stash);
