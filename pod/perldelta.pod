@@ -564,7 +564,11 @@ well.
 
 =item *
 
-XXX
+The internal representation has changed for the match variables C<$1>, C<$2>
+I<etc.>, C<$`>, C<$&>, C<$'>, C<${^PREMATCH}>, C<${^MATCH}> and
+C<${^POSTMATCH>.  It uses slightly less memory, avoids string comparisons
+and numeric conversions during lookup, and uses 23 fewer lines of C.  This
+change should not affect any external code.
 
 =back
 

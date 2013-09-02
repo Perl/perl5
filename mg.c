@@ -752,10 +752,22 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
     const char *s = NULL;
     REGEXP *rx;
     const char * const remaining = mg->mg_ptr + 1;
-    const char nextchar = *remaining;
+    char nextchar;
 
     PERL_ARGS_ASSERT_MAGIC_GET;
 
+    if (!mg->mg_ptr) {
+        paren = mg->mg_len;
+        if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
+          do_numbuf_fetch:
+            CALLREG_NUMBUF_FETCH(rx,paren,sv);
+        } else {
+            sv_setsv(sv,&PL_sv_undef);
+        }
+        return 0;
+    }
+
+    nextchar = *remaining;
     switch (*mg->mg_ptr) {
     case '\001':		/* ^A */
 	if (SvOK(PL_bodytarget)) sv_copypv(sv, PL_bodytarget);
@@ -864,19 +876,10 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	}
 	break;
     case '\020':
-	if (nextchar == '\0') {       /* ^P */
-	    sv_setiv(sv, (IV)PL_perldb);
-	} else if (strEQ(remaining, "REMATCH")) { /* $^PREMATCH */
-
-            paren = RX_BUFF_IDX_CARET_PREMATCH;
-	    goto do_numbuf_fetch;
-	} else if (strEQ(remaining, "OSTMATCH")) { /* $^POSTMATCH */
-            paren = RX_BUFF_IDX_CARET_POSTMATCH;
-	    goto do_numbuf_fetch;
-	}
+        sv_setiv(sv, (IV)PL_perldb);
 	break;
     case '\023':		/* ^S */
-	if (nextchar == '\0') {
+        {
 	    if (PL_parser && PL_parser->lex_state != LEX_NOTPARSING)
 		SvOK_off(sv);
 	    else if (PL_in_eval)
@@ -933,26 +936,6 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	    }
 	}
 	break;
-    case '\015': /* $^MATCH */
-	if (strEQ(remaining, "ATCH")) {
-            paren = RX_BUFF_IDX_CARET_FULLMATCH;
-	    goto do_numbuf_fetch;
-        }
-
-    case '1': case '2': case '3': case '4':
-    case '5': case '6': case '7': case '8': case '9': case '&':
-        /*
-         * Pre-threads, this was paren = atoi(GvENAME((const GV *)mg->mg_obj));
-         * XXX Does the new way break anything?
-         */
-        paren = atoi(mg->mg_ptr); /* $& is in [0] */
-      do_numbuf_fetch:
-        if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
-            CALLREG_NUMBUF_FETCH(rx,paren,sv);
-            break;
-        }
-        sv_setsv(sv,&PL_sv_undef);
-	break;
     case '+':
 	if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
 	    paren = RX_LASTPAREN(rx);
@@ -969,12 +952,6 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	}
 	sv_setsv(sv,&PL_sv_undef);
 	break;
-    case '`':
-        paren = RX_BUFF_IDX_PREMATCH;
-        goto do_numbuf_fetch;
-    case '\'':
-        paren = RX_BUFF_IDX_POSTMATCH;
-        goto do_numbuf_fetch;
     case '.':
 	if (GvIO(PL_last_in_gv)) {
 	    sv_setiv(sv, (IV)IoLINES(GvIOp(PL_last_in_gv)));
@@ -2489,46 +2466,30 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
     const char *s;
     I32 paren;
     const REGEXP * rx;
-    const char * const remaining = mg->mg_ptr + 1;
     I32 i;
     STRLEN len;
     MAGIC *tmg;
 
     PERL_ARGS_ASSERT_MAGIC_SET;
 
-    switch (*mg->mg_ptr) {
-    case '\015': /* $^MATCH */
-      if (strEQ(remaining, "ATCH"))
-          goto do_match;
-    case '`': /* ${^PREMATCH} caught below */
-      do_prematch:
-      paren = RX_BUFF_IDX_PREMATCH;
-      goto setparen;
-    case '\'': /* ${^POSTMATCH} caught below */
-      do_postmatch:
-      paren = RX_BUFF_IDX_POSTMATCH;
-      goto setparen;
-    case '&':
-      do_match:
-      paren = RX_BUFF_IDX_FULLMATCH;
-      goto setparen;
-    case '1': case '2': case '3': case '4':
-    case '5': case '6': case '7': case '8': case '9':
-      paren = atoi(mg->mg_ptr);
-      setparen:
+    if (!mg->mg_ptr) {
+        paren = mg->mg_len;
 	if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
-      setparen_got_rx:
+          setparen_got_rx:
             CALLREG_NUMBUF_STORE((REGEXP * const)rx,paren,sv);
 	} else {
             /* Croak with a READONLY error when a numbered match var is
              * set without a previous pattern match. Unless it's C<local $1>
              */
-      croakparen:
+          croakparen:
             if (!PL_localizing) {
                 Perl_croak_no_modify();
             }
         }
-        break;
+        return 0;
+    }
+
+    switch (*mg->mg_ptr) {
     case '\001':	/* ^A */
 	if (SvOK(sv)) sv_copypv(PL_bodytarget, sv);
 	else SvOK_off(PL_bodytarget);
@@ -2637,16 +2598,9 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	}
 	break;
     case '\020':	/* ^P */
-      if (*remaining == '\0') { /* ^P */
           PL_perldb = SvIV(sv);
           if (PL_perldb && !PL_DBsingle)
               init_debugger();
-          break;
-      } else if (strEQ(remaining, "REMATCH")) { /* $^PREMATCH */
-          goto do_prematch;
-      } else if (strEQ(remaining, "OSTMATCH")) { /* $^POSTMATCH */
-          goto do_postmatch;
-      }
       break;
     case '\024':	/* ^T */
 #ifdef BIG_TIME

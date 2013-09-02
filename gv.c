@@ -1419,6 +1419,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
     const char *const name_end = nambeg + full_len;
     const char *const name_em1 = name_end - 1;
     U32 faking_it;
+    SSize_t paren;
 
     PERL_ARGS_ASSERT_GV_FETCHPVN_FLAGS;
 
@@ -1827,16 +1828,24 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 		    goto ro_magicalize;
 		break;
             case '\015':        /* $^MATCH */
-                if (strEQ(name2, "ATCH"))
-		    goto magicalize;
+                if (strEQ(name2, "ATCH")) {
+                    paren = RX_BUFF_IDX_CARET_FULLMATCH;
+                    goto storeparen;
+                }
                 break;
 	    case '\017':	/* $^OPEN */
 		if (strEQ(name2, "PEN"))
 		    goto magicalize;
 		break;
 	    case '\020':        /* $^PREMATCH  $^POSTMATCH */
-	        if (strEQ(name2, "REMATCH") || strEQ(name2, "OSTMATCH"))
-		    goto magicalize;
+                if (strEQ(name2, "REMATCH")) {
+                    paren = RX_BUFF_IDX_CARET_PREMATCH;
+                    goto storeparen;
+                }
+	        if (strEQ(name2, "OSTMATCH")) {
+                    paren = RX_BUFF_IDX_CARET_POSTMATCH;
+                    goto storeparen;
+                }
 		break;
 	    case '\024':	/* ${^TAINT} */
 		if (strEQ(name2, "AINT"))
@@ -1871,7 +1880,8 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 		while (--end > name) {
 		    if (!isDIGIT(*end))	goto add_magical_gv;
 		}
-		goto magicalize;
+                paren = strtoul(name, NULL, 10);
+                goto storeparen;
 	    }
 	    }
 	}
@@ -1880,8 +1890,14 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	   be case '\0' in this switch statement (ie a default case)  */
 	switch (*name) {
 	case '&':		/* $& */
+            paren = RX_BUFF_IDX_FULLMATCH;
+            goto sawampersand;
 	case '`':		/* $` */
+            paren = RX_BUFF_IDX_PREMATCH;
+            goto sawampersand;
 	case '\'':		/* $' */
+            paren = RX_BUFF_IDX_POSTMATCH;
+        sawampersand:
 #ifdef PERL_SAWAMPERSAND
 	    if (!(
 		sv_type == SVt_PVAV ||
@@ -1897,7 +1913,23 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
                                 : SAWAMPERSAND_RIGHT;
                 }
 #endif
-	    goto magicalize;
+            goto storeparen;
+        case '1':               /* $1 */
+        case '2':               /* $2 */
+        case '3':               /* $3 */
+        case '4':               /* $4 */
+        case '5':               /* $5 */
+        case '6':               /* $6 */
+        case '7':               /* $7 */
+        case '8':               /* $8 */
+        case '9':               /* $9 */
+            paren = *name - '0';
+
+        storeparen:
+            /* Flag the capture variables with a NULL mg_ptr
+               Use mg_len for the array index to lookup.  */
+            sv_magic(GvSVn(gv), MUTABLE_SV(gv), PERL_MAGIC_sv, NULL, paren);
+            break;
 
 	case ':':		/* $: */
 	    sv_setpv(GvSVn(gv),PL_chopset);
@@ -1973,15 +2005,6 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	    SvREADONLY_on(GvSVn(gv));
 	    /* FALL THROUGH */
 	case '0':		/* $0 */
-	case '1':		/* $1 */
-	case '2':		/* $2 */
-	case '3':		/* $3 */
-	case '4':		/* $4 */
-	case '5':		/* $5 */
-	case '6':		/* $6 */
-	case '7':		/* $7 */
-	case '8':		/* $8 */
-	case '9':		/* $9 */
 	case '^':		/* $^ */
 	case '~':		/* $~ */
 	case '=':		/* $= */
