@@ -37,23 +37,23 @@ L</Selected Bug Fixes> section.
 
 =head1 Incompatible Changes
 
-=head2 Locale decimal point character no longer leaks outside of S<C<use locale>> scope
-(with the exception of C<$!>)
+=head2 Locale decimal point character no longer leaks outside of
+S<C<use locale>> scope (with the exception of C<$!>)
 
-This is actually a bug fix, but some code has come to rely on the bug
-being present, so this change is listed here.  The current locale that
-the program is running under is not supposed to be visible to Perl code
-except within the scope of a S<C<use locale>>.  However, until now under
-certain circumstances, the character used for a decimal point (often a
-comma) leaked outside the scope.
+This is actually a bug fix, but some code has come to rely on the bug being
+present, so this change is listed here.  The current locale that the program is
+running under is not supposed to be visible to Perl code except within the
+scope of a S<C<use locale>>.  However, until now under certain circumstances,
+the character used for a decimal point (often a comma) leaked outside the
+scope.
 
-This continues the work released in Perl v5.19.1.  It turns out that
-that did not catch all the leaks, including C<printf> and C<sprintf> not
-respecting S<C<use locale>>.  If your code is affected by this change,
-simply add a S<C<use locale>>.
+This continues the work released in Perl 5.19.1.  It turns out that that did
+not catch all the leaks, including C<printf> and C<sprintf> not respecting
+S<C<use locale>>.  If your code is affected by this change, simply add a
+S<C<use locale>>.
 
-Now, the only known place where C<'use locale'> is not respected is in
-the stringification of L<$!|perlvar/$!>.
+Now, the only known place where C<'use locale'> is not respected is in the
+stringification of L<$!|perlvar/$!>.
 
 =head1 Deprecations
 
@@ -92,8 +92,8 @@ as an updated module in the L</Modules and Pragmata> section.
 
 =item *
 
-The trie performance enhancement for regular expressions has now been
-extended to those compiled under C</iaa>.
+The trie performance enhancement for regular expressions has now been extended
+to those compiled under C</iaa>.
 
 =back
 
@@ -128,9 +128,9 @@ XXX
 L<B> has been upgraded from version 1.45 to 1.46.
 
 The fix for [perl #118525] introduced a regression in the behaviour of
-C<B::CV::GV>, changing the return value from a C<B::SPECIAL> object on
-a C<NULL> C<CvGV> to C<undef>.  C<B::CV::GV> again returns a
-C<B::SPECIAL> object in this case. [perl #119351]
+C<B::CV::GV>, changing the return value from a C<B::SPECIAL> object on a
+C<NULL> C<CvGV> to C<undef>.  C<B::CV::GV> again returns a C<B::SPECIAL>
+object in this case. [perl #119351]
 
 =item *
 
@@ -146,9 +146,9 @@ L<Carp> has been upgraded from version 1.31 to 1.32.
 
 =item *
 
-In stack traces, subroutine arguments that are strings are now quoted
-in a consistent manner, regardless of what characters they contain and
-how they're internally represented.
+In stack traces, subroutine arguments that are strings are now quoted in a
+consistent manner, regardless of what characters they contain and how they're
+internally represented.
 
 =item *
 
@@ -157,14 +157,14 @@ C<overload> stash.
 
 =item *
 
-C<Carp> now avoids some unwanted Unicode warnings on older Perls.  This
-doesn't affect behaviour with current Perl.
+C<Carp> now avoids some unwanted Unicode warnings on older Perls.  This doesn't
+affect behaviour with current Perl.
 
 =item *
 
-C<Carp::Heavy> detects version mismatch with C<Carp>, to give a good
-error message if a current (stub) C<Carp::Heavy> gets loaded by an old
-C<Carp> that expects C<Carp::Heavy> to provide subroutines.
+C<Carp::Heavy> detects version mismatch with C<Carp>, to give a good error
+message if a current (stub) C<Carp::Heavy> gets loaded by an old C<Carp> that
+expects C<Carp::Heavy> to provide subroutines.
 
 =back
 
@@ -172,7 +172,8 @@ C<Carp> that expects C<Carp::Heavy> to provide subroutines.
 
 L<CPAN::Meta::Requirements> has been upgraded from version 2.122 to 2.123.
 
-TODO
+No changes have been made to the installed code other than the version bump to
+keep in sync with the latest CPAN release.
 
 =item *
 
@@ -223,12 +224,12 @@ latest CPAN release.
 
 L<File::Glob> has been upgraded from version 1.20 to 1.21.
 
-C<glob()> now warns in the context of C<use warnings "syscalls";> if
-the supplied pattern has an internal NUL (C<"\0">) character.
+C<glob()> now warns in the context of C<use warnings "syscalls";> if the
+supplied pattern has an internal NUL (C<"\0">) character.
 
 =item *
 
-L<IPC::Open3> has been upgraded from 1.15 to 1.16.
+L<IPC::Open3> has been upgraded from version 1.15 to 1.16.
 
 This upgrade is part of a larger change to preserve referential identity when
 passing C<undef> to a subroutine by using NULL rather than &PL_sv_undef for
@@ -236,16 +237,10 @@ nonexistent array elements.
 
 =item *
 
-L<List::Util> and L<Scalar::Util> have been upgraded from version 1.31 to 1.32.
-
-TODO
-
-=item *
-
 L<Math::BigInt> has been upgraded from version 1.9992 to 1.9993.
 
-Cleaned up the L<Math::BigInt> and L<Math::BigFloat> documentation to
-be more consistent with other perl documentation. [perl #86686]
+Cleaned up the L<Math::BigInt> and L<Math::BigFloat> documentation to be more
+consistent with other perl documentation. [perl #86686]
 
 Added a bint() method for rounding towards zero. [perl #85296]
 
@@ -277,10 +272,17 @@ satisfy CVE-2013-1437.
 
 =item *
 
-L<mro> has been upgraded from 1.13 to 1.14.
+L<mro> has been upgraded from version 1.13 to 1.14.
 
 This upgrade is part of a larger change to make the array interface 64-bit safe
 by using SSize_t instead of I32 for array indices.
+
+=item *
+
+L<parent> has been upgraded from version 0.226 to 0.227.
+
+No changes have been made to the installed code other than the version bump to
+keep in sync with the latest CPAN release.
 
 =item *
 
@@ -296,6 +298,13 @@ A function signature has been corrected in the XS implementation.
 
 =item *
 
+L<Scalar::Util> has been upgraded from version 1.31 to 1.32.
+
+The documentation of C<blessed> has been improved to mention the fact that
+package "0" is defined but false.
+
+=item *
+
 L<Storable> has been upgraded from version 2.46 to 2.47.
 
 This upgrade is part of a larger change to preserve referential identity when
@@ -306,7 +315,10 @@ nonexistent array elements.
 
 L<Unicode::Collate> has been upgraded from version 0.98 to 0.99.
 
-TODO
+By default, out-of-range values are replaced with C<U+FFFD> (REPLACEMENT
+CHARACTER) when C<UCA_Version> E<gt>= 22, or ignored when C<UCA_Version> E<lt>=
+20.  When C<UCA_Version> E<gt>= 22, the weights of out-of-range values can be
+overridden.
 
 =item *
 
@@ -442,11 +454,10 @@ L</Platform Support> section, instead.
 
 =item *
 
-The F<Makefile.PL> for C<SDBM_File> now generates a better F<Makefile>,
-which avoids a race condition during parallel makes, which could cause the
-build to fail. This is the last known parallel make problem (on *nix
-platforms), and therefore we believe that a parallel make should now always
-be error free.
+The F<Makefile.PL> for C<SDBM_File> now generates a better F<Makefile>, which
+avoids a race condition during parallel makes, which could cause the build to
+fail.  This is the last known parallel make problem (on *nix platforms), and
+therefore we believe that a parallel make should now always be error free.
 
 =for comment
 
@@ -568,8 +579,7 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-The value of C<$^E> is now saved across signal handlers on
-Win32. [perl #85104]
+The value of C<$^E> is now saved across signal handlers on Win32. [perl #85104]
 
 =back
 
