@@ -9389,9 +9389,14 @@ S_scan_ident(pTHX_ char *s, const char *send, char *dest, STRLEN destlen, I32 ck
 	   s++;
     }
 
-/*  \c?, \c\, \c^, \c_, and \cA..\cZ minus the ones that have traditionally
- *  been matched by \s on ASCII platforms, are the legal control char names
- *  here, that is \c? plus 1-32 minus the \s ones. */
+/* Is the byte 'd' a legal single character identifier name?  'u' is true
+ * iff Unicode semantics are to be used.  The legal ones are any of:
+ *  a) ASCII digits
+ *  b) ASCII punctuation
+ *  c) When not under Unicode rules, any upper Latin1 character
+ *  d) \c?, \c\, \c^, \c_, and \cA..\cZ, minus the ones that have traditionally
+ *     been matched by \s on ASCII platforms.  That is: \c?, plus 1-32, minus
+ *     the \s ones. */
 #define VALID_LEN_ONE_IDENT(d, u) (isPUNCT_A((U8)(d))                       \
                                    || isDIGIT_A((U8)(d))                    \
                                    || (!(u) && !isASCII((U8)(d)))           \
