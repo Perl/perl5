@@ -133,8 +133,10 @@ sub get_files {
 	     ) {
 	# Some Linuxes have weird errno.hs which generate
 	# no #file or #line directives
-	my $linux_errno_h = -e '/usr/include/errno.h' ?
-	    '/usr/include/errno.h' : '/usr/local/include/errno.h';
+	my ($linux_errno_h) = grep { -e $_ } map { "$_/errno.h" }
+	    "/usr/include", "/usr/local/include",
+	    split / / => $Config{locincpth} or
+		die "Cannot find errno.h";
 	$file{$linux_errno_h} = 1;
     } elsif ($^O eq 'haiku') {
 	# hidden in a special place
@@ -252,8 +254,8 @@ sub write_errno_pm {
 		$err{$name} = hex $expr;
 	    }
 	    else {
-	    $err{$name} = eval $expr;
-	}
+		$err{$name} = eval $expr;
+	    }
 	    delete $err{$name} unless defined $err{$name};
 	}
 	close(CPPO);
@@ -261,7 +263,7 @@ sub write_errno_pm {
 
     # escape $Config{'archname'}
     my $archname = $Config{'archname'};
-    $archname =~ s/([@%\$])/\\\1/g;
+    $archname =~ s/([@%\$])/\\$1/g;
 
     # Write Errno.pm
 
