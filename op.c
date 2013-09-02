@@ -11153,8 +11153,8 @@ Perl_rpeep(pTHX_ OP *o)
                             && (   p->op_next->op_type == OP_NEXTSTATE
                                 || p->op_next->op_type == OP_DBSTATE)
                             && count < OPpPADRANGE_COUNTMASK
+                            && base + count == p->op_targ
                     ) {
-                        assert(base + count == p->op_targ);
                         count++;
                         followop = p->op_next;
                     }
