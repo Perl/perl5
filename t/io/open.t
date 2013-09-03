@@ -419,21 +419,17 @@ pass("no crash when open autovivifies glob in freed package");
     like($WARN, qr/^Invalid \\0 character in pathname for chmod: $temp_match\\0\.invalid/,
          "also on chmod"); $WARN = '';
 
-    $TODO = "broken for overloading";
     is(chmod(0444, $fno), 0, "chmod fails with \\0 in name (overload)");
     like($WARN, qr/^Invalid \\0 character in pathname for chmod: $temp_match\\0\.overload/,
          "also on chmod"); $WARN = '';
-    undef $TODO;
 
     is (glob($fn), undef, "glob fails with \\0 in name");
     like($WARN, qr/^Invalid \\0 character in pattern for glob: $temp_match\\0\.invalid/,
          "also on glob"); $WARN = '';
 
-    $TODO = "broken for overloading";
     is (glob($fno), undef, "glob fails with \\0 in name (overload)");
     like($WARN, qr/^Invalid \\0 character in pattern for glob: $temp_match\\0\.overload/,
          "also on glob"); $WARN = '';
-    undef $TODO;
 
     {
         no warnings 'syscalls';
@@ -465,12 +461,10 @@ pass("no crash when open autovivifies glob in freed package");
     like($WARN, qr/^Invalid \\0 character in pathname for unlink: $temp_match\\0\.invalid/,
          "also on unlink"); $WARN = '';
 
-    $TODO = "broken for overloading";
     is (unlink($fno), 0, "unlink fails with \\0 in name (overload)");
     like($WARN, qr/^Invalid \\0 character in pathname for unlink: $temp_match\\0\.overload/,
          "also on unlink"); $WARN = '';
 
-    local $TODO = "this is broken for overloading";
     ok(-f $temp, "nothing removed the temp file");
     is((stat $temp)[2], $final_mode, "nothing changed its mode");
     is((stat $temp)[9], $final_mtime, "nothing changes its mtime");

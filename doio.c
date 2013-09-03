@@ -206,6 +206,8 @@ Perl_do_openn(pTHX_ GV *gv, const char *oname, I32 len, int as_raw,
 	    *--tend = '\0';
 
 	if (num_svs) {
+            const char *p;
+            STRLEN nlen = 0;
 	    /* New style explicit name, type is just mode and layer info */
 #ifdef USE_STDIO
 	    if (SvROK(*svp) && !strchr(oname,'&')) {
@@ -216,11 +218,13 @@ Perl_do_openn(pTHX_ GV *gv, const char *oname, I32 len, int as_raw,
 		goto say_false;
 	    }
 #endif /* USE_STDIO */
-	    if (!IS_SAFE_PATHNAME(*svp, "open"))
+            p = (SvOK(*svp) || SvGMAGICAL(*svp)) ? SvPV(*svp, nlen) : NULL;
+
+	    if (p && !IS_SAFE_PATHNAME(p, nlen, "open"))
                 goto say_false;
 
-	    name = (SvOK(*svp) || SvGMAGICAL(*svp)) ?
-			savesvpv (*svp) : savepvs ("");
+	    name = p ? savepvn(p, nlen) : savepvs("");
+
 	    SAVEFREEPV(name);
 	}
 	else {
@@ -1661,9 +1665,9 @@ Perl_apply(pTHX_ I32 type, SV **mark, SV **sp)
 		    }
 		}
 		else {
-		    const char *name = SvPV_nomg_const_nolen(*mark);
+		    const char *name = SvPV_nomg_const(*mark, len);
 		    APPLY_TAINT_PROPER();
-                    if (!IS_SAFE_PATHNAME(*mark, "chmod") ||
+                    if (!IS_SAFE_PATHNAME(name, len, "chmod") ||
                         PerlLIO_chmod(name, val)) {
                         tot--;
                     }
@@ -1697,9 +1701,9 @@ Perl_apply(pTHX_ I32 type, SV **mark, SV **sp)
 		    }
 		}
 		else {
-		    const char *name = SvPV_nomg_const_nolen(*mark);
+		    const char *name = SvPV_nomg_const(*mark, len);
 		    APPLY_TAINT_PROPER();
-                    if (!IS_SAFE_PATHNAME(*mark, "chown") ||
+                    if (!IS_SAFE_PATHNAME(name, len, "chown") ||
                         PerlLIO_chown(name, val, val2)) {
 			tot--;
                     }
@@ -1800,9 +1804,9 @@ nothing in the core.
 	APPLY_TAINT_PROPER();
 	tot = sp - mark;
 	while (++mark <= sp) {
-	    s = SvPV_nolen_const(*mark);
+	    s = SvPV_const(*mark, len);
 	    APPLY_TAINT_PROPER();
-	    if (!IS_SAFE_PATHNAME(*mark, "unlink")) {
+	    if (!IS_SAFE_PATHNAME(s, len, "unlink")) {
                 tot--;
             }
 	    else if (PerlProc_geteuid() || PL_unsafe) {
@@ -1881,9 +1885,9 @@ nothing in the core.
 		    }
 		}
 		else {
-		    const char * const name = SvPV_nomg_const_nolen(*mark);
+		    const char * const name = SvPV_nomg_const(*mark, len);
 		    APPLY_TAINT_PROPER();
-		    if (!IS_SAFE_PATHNAME(*mark, "utime")) {
+		    if (!IS_SAFE_PATHNAME(name, len, "utime")) {
                         tot--;
                     }
                     else
@@ -2376,10 +2380,12 @@ Perl_start_glob (pTHX_ SV *tmpglob, IO *io)
     dVAR;
     SV * const tmpcmd = newSV(0);
     PerlIO *fp;
+    STRLEN len;
+    const char *s = SvPV(tmpglob, len);
 
     PERL_ARGS_ASSERT_START_GLOB;
 
-    if (!IS_SAFE_SYSCALL(tmpglob, "pattern", "glob"))
+    if (!IS_SAFE_SYSCALL(s, len, "pattern", "glob"))
         return NULL;
 
     ENTER;

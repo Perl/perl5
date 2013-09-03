@@ -231,7 +231,7 @@
 #define instr			Perl_instr
 #define is_ascii_string		Perl_is_ascii_string
 #define is_lvalue_sub()		Perl_is_lvalue_sub(aTHX)
-#define is_safe_syscall(a,b,c)	S_is_safe_syscall(aTHX_ a,b,c)
+#define is_safe_syscall(a,b,c,d)	S_is_safe_syscall(aTHX_ a,b,c,d)
 #define is_uni_alnum(a)		Perl_is_uni_alnum(aTHX_ a)
 #define is_uni_alnum_lc(a)	Perl_is_uni_alnum_lc(aTHX_ a)
 #define is_uni_alnumc(a)	Perl_is_uni_alnumc(aTHX_ a)

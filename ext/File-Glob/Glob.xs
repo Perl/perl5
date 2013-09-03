@@ -136,6 +136,12 @@ csh_glob(pTHX_ AV *entries, SV *patsv)
 	else pat = SvPV_nomg(patsv,len), is_utf8 = !!SvUTF8(patsv);
 	patend = pat + len;
 
+	assert(SvTYPE(entries) != SVt_PVAV);
+	sv_upgrade((SV *)entries, SVt_PVAV);
+
+        if (!IS_SAFE_SYSCALL(pat, len, "pattern", "glob"))
+            return FALSE;
+
 	/* extract patterns */
 	s = pat-1;
 	while (++s < patend) {
@@ -224,11 +230,6 @@ csh_glob(pTHX_ AV *entries, SV *patsv)
 	    }
 	}
       end_of_parsing:
-
-	assert(SvTYPE(entries) != SVt_PVAV);
-	sv_upgrade((SV *)entries, SVt_PVAV);
-        if (!IS_SAFE_SYSCALL(patsv, "pattern", "glob"))
-            return FALSE;
 
 	if (patav) {
 	    I32 items = AvFILLp(patav) + 1;
