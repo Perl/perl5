@@ -2,10 +2,9 @@ use ExtUtils::MakeMaker;
 use Config;
 use strict;
 
-our $VERSION = "1.19";
+our $VERSION = "1.20";
 
 my %err = ();
-my %wsa = ();
 
 # Symbian cross-compiling environment.
 my $IsSymbian = exists $ENV{SDK} && -d "$ENV{SDK}\\epoc32";
@@ -84,10 +83,6 @@ sub process_file {
     while(<FH>) {
 	$err{$1} = 1
 	    if /^\s*#\s*define\s+(E\w+)\s+/;
-	if ($IsMSWin32) {
-	    $wsa{$1} = 1
-		if /^\s*#\s*define\s+WSA(E\w+)\s+/;
-	}
     }
 
     close(FH);
@@ -161,8 +156,7 @@ sub get_files {
 	} else {
 	    print CPPI "#include <errno.h>\n";
 	    if ($IsMSWin32) {
-		print CPPI "#define _WINSOCKAPI_\n"; # don't drag in everything
-		print CPPI "#include <winsock.h>\n";
+		print CPPI qq[#include "../../win32/include/sys/errno2.h"\n];
 	    }
 	}
 
@@ -216,15 +210,7 @@ sub write_errno_pm {
     }
     if ($IsMSWin32) {
 	print CPPI "#include <winsock.h>\n";
-	foreach $err (keys %wsa) {
-	    print CPPI "#if defined($err) && $err >= 100\n";
-	    print CPPI "#undef $err\n";
-	    print CPPI "#endif\n";
-	    print CPPI "#ifndef $err\n";
-	    print CPPI "#define $err WSA$err\n";
-	    print CPPI "#endif\n";
-	    $err{$err} = 1;
-	}
+	print CPPI qq[#include "../../win32/include/sys/errno2.h"\n];
     }
  
     foreach $err (keys %err) {

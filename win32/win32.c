@@ -2513,7 +2513,7 @@ win32_flock(int fd, int oper)
     }
     if (i == -1) {
         if (GetLastError() == ERROR_LOCK_VIOLATION)
-            errno = WSAEWOULDBLOCK;
+            errno = EWOULDBLOCK;
         else
             errno = EINVAL;
     }
