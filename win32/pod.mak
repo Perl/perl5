@@ -115,6 +115,7 @@ POD = perl.pod	\
 	perlref.pod	\
 	perlreftut.pod	\
 	perlreguts.pod	\
+	perlrepository.pod	\
 	perlrequick.pod	\
 	perlreref.pod	\
 	perlretut.pod	\
@@ -242,6 +243,7 @@ MAN = perl.man	\
 	perlref.man	\
 	perlreftut.man	\
 	perlreguts.man	\
+	perlrepository.man	\
 	perlrequick.man	\
 	perlreref.man	\
 	perlretut.man	\
@@ -369,6 +371,7 @@ HTML = perl.html	\
 	perlref.html	\
 	perlreftut.html	\
 	perlreguts.html	\
+	perlrepository.html	\
 	perlrequick.html	\
 	perlreref.html	\
 	perlretut.html	\
@@ -496,6 +499,7 @@ TEX = perl.tex	\
 	perlref.tex	\
 	perlreftut.tex	\
 	perlreguts.tex	\
+	perlrepository.tex	\
 	perlrequick.tex	\
 	perlreref.tex	\
 	perlretut.tex	\
