@@ -63,7 +63,7 @@ doglob(pTHX_ const char *pattern, int flags)
 }
 
 static void
-iterate(pTHX_ bool(*globber)(pTHX_ AV *entries, SV *patsv))
+iterate(pTHX_ bool(*globber)(pTHX_ AV *entries, const char *pat, STRLEN len, bool is_utf8))
 {
     dSP;
     dMY_CXT;
@@ -80,8 +80,34 @@ iterate(pTHX_ bool(*globber)(pTHX_ AV *entries, SV *patsv))
 
     /* if we're just beginning, do it all first */
     if (SvTYPE(entries) != SVt_PVAV) {
+        const char *pat;
+        STRLEN len;
+        bool is_utf8;
+
+        /* glob without args defaults to $_ */
+        SvGETMAGIC(patsv);
+        if (
+            !SvOK(patsv)
+              && (patsv = DEFSV, SvGETMAGIC(patsv), !SvOK(patsv))
+            ) {
+            pat = "";
+            len = 0;
+            is_utf8 = 0;
+        }
+        else {
+            pat = SvPV_nomg(patsv,len);
+            is_utf8 = !!SvUTF8(patsv);
+        }
+
+        if (!IS_SAFE_SYSCALL(pat, len, "pattern", "glob")) {
+            if (gimme != G_ARRAY)
+                PUSHs(&PL_sv_undef);
+            PUTBACK;
+            return;
+        }
+
 	PUTBACK;
-	on_stack = globber(aTHX_ entries, patsv);
+	on_stack = globber(aTHX_ entries, pat, len, is_utf8);
 	SPAGAIN;
     }
 
@@ -111,10 +137,9 @@ iterate(pTHX_ bool(*globber)(pTHX_ AV *entries, SV *patsv))
 /* returns true if the items are on the stack already, but only in
    list context */
 static bool
-csh_glob(pTHX_ AV *entries, SV *patsv)
+csh_glob(pTHX_ AV *entries, const char *pat, STRLEN len, bool is_utf8)
 {
 	dSP;
-	const char *pat;
 	AV *patav = NULL;
 	const char *patend;
 	const char *s = NULL;
@@ -122,25 +147,12 @@ csh_glob(pTHX_ AV *entries, SV *patsv)
 	SV *word = NULL;
 	int const flags =
 	    (int)SvIV(get_sv("File::Glob::DEFAULT_FLAGS", GV_ADD));
-	bool is_utf8;
-	STRLEN len;
 	U32 const gimme = GIMME_V;
 
-	/* glob without args defaults to $_ */
-	SvGETMAGIC(patsv);
-	if (
-	    !SvOK(patsv)
-	 && (patsv = DEFSV, SvGETMAGIC(patsv), !SvOK(patsv))
-	)
-	     pat = "", len = 0, is_utf8 = 0;
-	else pat = SvPV_nomg(patsv,len), is_utf8 = !!SvUTF8(patsv);
 	patend = pat + len;
 
 	assert(SvTYPE(entries) != SVt_PVAV);
 	sv_upgrade((SV *)entries, SVt_PVAV);
-
-        if (!IS_SAFE_SYSCALL(pat, len, "pattern", "glob"))
-            return FALSE;
 
 	/* extract patterns */
 	s = pat-1;
@@ -179,7 +191,7 @@ csh_glob(pTHX_ AV *entries, SV *patsv)
 		    while (isSPACE(*(patend-1))) patend--;
 		    /* bsd_glob expects a trailing null, but we cannot mod-
 		       ify the original */
-		    if (patend < SvEND(patsv)) {
+		    if (patend < pat + len) {
 			if (word) sv_setpvn(word, pat, patend-pat);
 			else
 			    word = newSVpvn_flags(
@@ -285,20 +297,11 @@ csh_glob_iter(pTHX)
 
 /* wrapper around doglob that can be passed to the iterator */
 static bool
-doglob_iter_wrapper(pTHX_ AV *entries, SV *patsv)
+doglob_iter_wrapper(pTHX_ AV *entries, const char *pattern, STRLEN len, bool is_utf8)
 {
     dSP;
-    const char *pattern;
     int const flags =
 	    (int)SvIV(get_sv("File::Glob::DEFAULT_FLAGS", GV_ADD));
-
-    SvGETMAGIC(patsv);
-    if (
-	    !SvOK(patsv)
-	 && (patsv = DEFSV, SvGETMAGIC(patsv), !SvOK(patsv))
-    )
-	 pattern = "";
-    else pattern = SvPV_nomg_nolen(patsv);
 
     PUSHMARK(SP);
     PUTBACK;
@@ -342,12 +345,17 @@ GLOB_ERROR()
 	RETVAL
 
 void
-bsd_glob(pattern,...)
-    char *pattern
+bsd_glob(pattern_sv,...)
+    SV *pattern_sv
 PREINIT:
     int flags = 0;
+    char *pattern;
+    STRLEN len;
 PPCODE:
     {
+        pattern = SvPV(pattern_sv, len);
+        if (!IS_SAFE_SYSCALL(pattern, len, "pattern", "bsd_glob"))
+            XSRETURN(0);
 	/* allow for optional flags argument */
 	if (items > 1) {
 	    flags = (int) SvIV(ST(1));
