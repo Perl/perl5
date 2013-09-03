@@ -20,10 +20,6 @@ libnet cpan/libnet/Makefile.PL 6b10ac98e672bfebb8f49b9720a93442645208b3
 podlators cpan/podlators/scripts/pod2man.PL f81acf53f3ff46cdcc5ebdd661c5d13eb35d20d6
 podlators cpan/podlators/scripts/pod2text.PL b4693fcfe4a0a1b38a215cfb8985a65d5d025d69
 podlators pod/perlpodstyle.pod dcf4b8f67d963e215f0e2e1cd214246705163a79
-version cpan/version/lib/version.pm b85a5137501de9be734c475d3b0bcaba95f92b1f
-version cpan/version/t/01base.t 10b3cee80d3028797fc5bd4fdbfaf582b791e8dc
-version cpan/version/t/02derived.t 304eca7c9ba2bcf4a2adc4a4713a80deda2d1a3f
-version cpan/version/t/03require.t 39c905bbb6ef69902655bf8c4cfab756cef17c27
-version cpan/version/t/04strict_lax.t 4bc2722e914d98a7cbd948704288d4be977a0e29
-version cpan/version/t/07locale.t 53a04fd4985e1f6f157523c9f470dceaa23400bd
-version cpan/version/t/coretests.pm 71efdf84f5011c045596fcc569a12850778e2317
+version cpan/version/lib/version.pm e9d5df9a053ac6882c6e73f7e29db74e01b15841
+version cpan/version/t/07locale.t c7e86c2706622d5055b617a4b0119ea874be8a7b
+version cpan/version/t/08_corelist.t bd1c900f8be98e87dbf88896b8337f0694e4b4d3

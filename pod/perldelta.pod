@@ -322,6 +322,13 @@ overridden.
 
 =item *
 
+L<version> has been upgraded from version 0.9903 to 0.9904.
+
+No changes have been made to the installed code other than the version bump to
+keep in sync with the latest CPAN release.
+
+=item *
+
 L<warnings> has been upgraded from version 1.18 to 1.19.
 
 The C<syscalls> warnings category has been added to check for embedded NUL
