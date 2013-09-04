@@ -88,8 +88,8 @@ sub do_test {
 	    /mge;
 	    $pattern =~ s/^\h+COW_REFCNT = .*\n//mg
 		if $Config{ccflags} =~
-			/-DPERL_(?:OLD_COPY_ON_WRITE|NO_COW)/;
-
+			/-DPERL_(?:OLD_COPY_ON_WRITE|NO_COW)/
+			    || $] < 5.019003;
 	    print $pattern, "\n" if $DEBUG;
 	    my ($dump, $dump2) = split m/\*\*\*\*\*\n/, scalar <IN>;
 	    print $dump, "\n"    if $DEBUG;
@@ -128,7 +128,7 @@ do_test('assignment of immediate constant (string)',
   PV = $ADDR "foo"\\\0
   CUR = 3
   LEN = \\d+
-  COW_REFCNT = 1				# $] >=5.019003
+  COW_REFCNT = 1
 ');
 
 do_test('immediate constant (string)',
@@ -139,7 +139,7 @@ do_test('immediate constant (string)',
   PV = $ADDR "bar"\\\0
   CUR = 3
   LEN = \\d+
-  COW_REFCNT = 0				# $] >=5.019003
+  COW_REFCNT = 0
 ');
 
 do_test('assignment of immediate constant (integer)',
@@ -224,7 +224,7 @@ do_test('reference to scalar',
     PV = $ADDR "foo"\\\0
     CUR = 3
     LEN = \\d+
-    COW_REFCNT = 1				# $] >=5.019003
+    COW_REFCNT = 1
 ');
 
 my $c_pattern;
@@ -509,7 +509,7 @@ do_test('string with Unicode',
   PV = $ADDR "\\\214\\\101\\\0\\\235\\\101"\\\0 \[UTF8 "\\\x\{100\}\\\x\{0\}\\\x\{200\}"\]
   CUR = 5
   LEN = \\d+
-  COW_REFCNT = 1					# $] >=5.019003
+  COW_REFCNT = 1
 ');
 } else {
 do_test('string with Unicode',
@@ -521,7 +521,7 @@ do_test('string with Unicode',
   PV = $ADDR "\\\304\\\200\\\0\\\310\\\200"\\\0 \[UTF8 "\\\x\{100\}\\\x\{0\}\\\x\{200\}"\]
   CUR = 5
   LEN = \\d+
-  COW_REFCNT = 1					# $] >=5.019003
+  COW_REFCNT = 1
 ');
 }
 
@@ -549,7 +549,7 @@ do_test('reference to hash containing Unicode',
       PV = $ADDR "\\\235\\\101"\\\0 \[UTF8 "\\\x\{200\}"\]
       CUR = 2
       LEN = \\d+
-      COW_REFCNT = 1				# $] < 5.009
+      COW_REFCNT = 1
 ',      '',
 	$] > 5.009
 	? $] >= 5.015
@@ -580,7 +580,7 @@ do_test('reference to hash containing Unicode',
       PV = $ADDR "\\\310\\\200"\\\0 \[UTF8 "\\\x\{200\}"\]
       CUR = 2
       LEN = \\d+
-      COW_REFCNT = 1				# $] >= 5.019003
+      COW_REFCNT = 1
 ',      '',
 	$] > 5.009
 	? $] >= 5.015
@@ -697,7 +697,7 @@ do_test('constant subroutine',
       PV = $ADDR "Perl rules"\\\0
       CUR = 10
       LEN = \\d+
-      COW_REFCNT = 0				# $] >=5.019003
+      COW_REFCNT = 0
     GVGV::GV = $ADDR\\t"main" :: "const"
     FILE = ".*\\b(?i:peek\\.t)"
     DEPTH = 0(?:
@@ -896,7 +896,7 @@ do_test('small hash',
       PV = $ADDR "(?:Rules|Foamy)"\\\0
       CUR = \d+
       LEN = \d+
-      COW_REFCNT = 1				# $] >=5.019003
+      COW_REFCNT = 1
 ){2}');
 
 $b = keys %small;
@@ -927,7 +927,7 @@ do_test('small hash after keys',
       PV = $ADDR "(?:Rules|Foamy)"\\\0
       CUR = \d+
       LEN = \d+
-      COW_REFCNT = 1				# $] >=5.019003
+      COW_REFCNT = 1
 ){2}');
 
 $b = %small;
@@ -958,7 +958,7 @@ do_test('small hash after keys and scalar',
       PV = $ADDR "(?:Rules|Foamy)"\\\0
       CUR = \d+
       LEN = \d+
-      COW_REFCNT = 1				# $] >=5.019003
+      COW_REFCNT = 1
 ){2}');
 
 # This should immediately start with the FILL cached correctly.
@@ -1075,7 +1075,7 @@ unless ($Config{useithreads}) {
   PV = $ADDR "rules"\\\0
   CUR = 5
   LEN = \d+
-  COW_REFCNT = 0				# $] >=5.019003
+  COW_REFCNT = 0
 ');
 
     eval 'index "", perl';
@@ -1091,7 +1091,7 @@ unless ($Config{useithreads}) {
   PV = $ADDR "rules"\\\0
   CUR = 5
   LEN = \d+
-  COW_REFCNT = 0				# $] >=5.019003
+  COW_REFCNT = 0
   MAGIC = $ADDR
     MG_VIRTUAL = &PL_vtbl_regexp
     MG_TYPE = PERL_MAGIC_bm\\(B\\)
@@ -1111,7 +1111,7 @@ unless ($Config{useithreads}) {
   PV = $ADDR "rules"\\\0
   CUR = 5
   LEN = \d+
-  COW_REFCNT = 0				# $] >=5.019003
+  COW_REFCNT = 0
   MAGIC = $ADDR
     MG_VIRTUAL = &PL_vtbl_regexp
     MG_TYPE = PERL_MAGIC_bm\\(B\\)
@@ -1129,7 +1129,7 @@ unless ($Config{useithreads}) {
   PV = $ADDR "foamy"\\\0
   CUR = 5
   LEN = \d+
-  COW_REFCNT = 0				# $] >=5.019003
+  COW_REFCNT = 0
 ');
 
     is(study beer, 1, "Our studies were successful");
@@ -1140,7 +1140,7 @@ unless ($Config{useithreads}) {
   PV = $ADDR "foamy"\\\0
   CUR = 5
   LEN = \d+
-  COW_REFCNT = 0				# $] >=5.019003
+  COW_REFCNT = 0
 ');
 
     my $want = 'SV = PVMG\\($ADDR\\) at $ADDR
@@ -1149,7 +1149,7 @@ unless ($Config{useithreads}) {
   PV = $ADDR "foamy"\\\0
   CUR = 5
   LEN = \d+
-  COW_REFCNT = 0				# $] >=5.019003
+  COW_REFCNT = 0
   MAGIC = $ADDR
     MG_VIRTUAL = &PL_vtbl_regexp
     MG_TYPE = PERL_MAGIC_bm\\(B\\)
