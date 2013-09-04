@@ -80,6 +80,17 @@ will submit your patch via email.
 The porters appreciate the time you spent helping to make Perl better.
 Thank you!
 
+=item * Next time
+
+The next time you wish to make a patch, you need to start from the
+latest perl in a pristine state. Check you don't have any local changes
+or added files in your perl check-out which you wish to keep, then run
+these commands:
+
+  % git pull
+  % git reset --hard origin/blead
+  % git clean -dxf
+
 =back
 
 =head1 BUG REPORTING
