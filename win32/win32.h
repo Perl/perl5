@@ -369,6 +369,8 @@ extern char *		win32_get_vendorlib(const char *pl, STRLEN *const len);
 extern void		win32_delete_internal_host(void *h);
 #endif
 
+extern int		win32_get_errno(int err);
+
 extern const char * const		staticlinkmodules[];
 
 END_EXTERN_C

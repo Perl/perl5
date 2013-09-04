@@ -47,6 +47,7 @@
 
 #define SOCKET_TEST_ERROR(x) SOCKET_TEST(x, SOCKET_ERROR)
 
+static int get_last_socket_error(void);
 static struct servent* win32_savecopyservent(struct servent*d,
                                              struct servent*s,
                                              const char *proto);
@@ -60,24 +61,28 @@ EndSockets(void)
 	WSACleanup();
 }
 
-int
+static int
 get_last_socket_error(void)
 {
-    int err = WSAGetLastError();
+    return convert_wsa_error_to_errno(WSAGetLastError());
+}
 
-    /* Translate WSAExxx values to corresponding Exxx values. Not all WSAExxx
-     * constants have corresponding Exxx constants in <errno.h> (even in VC++
-     * 2010 and above, which have expanded <errno.h> with more values), but any
-     * missing constants are provided by win32/include/sys/errno2.h.
-     * The list of possible WSAExxx values used here comes from the MSDN page
-     * titled "Windows Sockets Error Codes".
-     * (Note: Only the WSAExxx values are handled here; other WSAxxx values are
-     * returned unchanged. The return value normally ends up in errno/$! and at
-     * the Perl code level may be tested against the Exxx constants exported by
-     * the Errno and POSIX modules, which have never handled the other WSAxxx
-     * values themselves, apparently without any ill effect so far.)
-     */
-    switch (err) {
+/* Translate WSAExxx values to corresponding Exxx values. Not all WSAExxx
+ * constants have corresponding Exxx constants in <errno.h> (even in VC++
+ * 2010 and above, which have expanded <errno.h> with more values), but any
+ * missing constants are provided by win32/include/sys/errno2.h.
+ * The list of possible WSAExxx values used here comes from the MSDN page
+ * titled "Windows Sockets Error Codes".
+ * (Note: Only the WSAExxx values are handled here; other WSAxxx values are
+ * returned unchanged. The return value normally ends up in errno/$! and at
+ * the Perl code level may be tested against the Exxx constants exported by
+ * the Errno and POSIX modules, which have never handled the other WSAxxx
+ * values themselves, apparently without any ill effect so far.)
+ */
+int
+convert_wsa_error_to_errno(int wsaerr)
+{
+    switch (wsaerr) {
     case WSAEINTR:
 	return EINTR;
     case WSAEBADF:
@@ -180,7 +185,7 @@ get_last_socket_error(void)
 	return EREFUSED;
     }
 
-    return err;
+    return wsaerr;
 }
 
 void

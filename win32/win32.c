@@ -2522,6 +2522,19 @@ win32_flock(int fd, int oper)
 
 #undef LK_LEN
 
+/* Get the errno value corresponding to the given err. This function is not
+ * intended to handle conversion of general GetLastError() codes. It only exists
+ * to translate Windows sockets error codes from WSAGetLastError(). Such codes
+ * used to be assigned to errno/$! in earlier versions of perl; this function is
+ * used to catch any old Perl code which is still trying to assign such values
+ * to $! and convert them to errno values instead.
+ */
+int
+win32_get_errno(int err)
+{
+    return convert_wsa_error_to_errno(err);
+}
+
 /*
  *  redirected io subsystem for all XS modules
  *
