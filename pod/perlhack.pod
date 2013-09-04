@@ -119,8 +119,8 @@ Perl core.
 =head1 GETTING THE PERL SOURCE
 
 All of Perl's source code is kept centrally in a Git repository at
-I<perl5.git.perl.org>.  The repository contains many Perl revisions from
-Perl 1 onwards and all the revisions from Perforce, the previous
+I<perl5.git.perl.org>.  The repository contains many Perl revisions
+from Perl 1 onwards and all the revisions from Perforce, the previous
 version control system.
 
 For much more detail on using git with the Perl repository, please see
@@ -206,9 +206,9 @@ in a month.  Please remember that the Perl 5 developers are all
 volunteers, and be polite.
 
 Changes are always applied directly to the main development branch,
-called "blead".  Some patches may be backported to a maintenance branch.
-If you think your patch is appropriate for the maintenance branch,
-please explain why when you submit it.
+called "blead".  Some patches may be backported to a maintenance
+branch. If you think your patch is appropriate for the maintenance
+branch, please explain why when you submit it.
 
 =head2 Getting your patch accepted
 
@@ -220,8 +220,8 @@ can do to help the Perl 5 Porters accept your patch.
 If you used git to check out the Perl source, then using C<git
 format-patch> will produce a patch in a style suitable for Perl.  The
 C<format-patch> command produces one patch file for each commit you
-made.  If you prefer to send a single patch for all commits, you can use
-C<git diff>.
+made.  If you prefer to send a single patch for all commits, you can
+use C<git diff>.
 
   % git checkout blead
   % git pull
@@ -305,12 +305,12 @@ readers understand what you did and why you did it.
 
 =head3 Comments, Comments, Comments
 
-Be sure to adequately comment your code.  While commenting every line is
-unnecessary, anything that takes advantage of side effects of
+Be sure to adequately comment your code.  While commenting every line
+is unnecessary, anything that takes advantage of side effects of
 operators, that creates changes that will be felt outside of the
 function being patched, or that others may find confusing should be
-documented.  If you are going to err, it is better to err on the side of
-adding too many comments than too few.
+documented.  If you are going to err, it is better to err on the side
+of adding too many comments than too few.
 
 The best comments explain I<why> the code does what it does, not I<what
 it does>.
@@ -393,8 +393,8 @@ In-line functions that are in headers that are accessible to XS code
 need to be able to compile without warnings with commonly used extra
 compilation flags, such as gcc's C<-Wswitch-default> which warns
 whenever a switch statement does not have a "default" case.  The use of
-these extra flags is to catch potential problems in legal C code, and is
-often used by Perl aggregators, such as Linux distributors.
+these extra flags is to catch potential problems in legal C code, and
+is often used by Perl aggregators, such as Linux distributors.
 
 =back
 
@@ -508,8 +508,8 @@ core.
 
 For changes significant enough to warrant a F<pod/perldelta.pod> entry,
 the porters will greatly appreciate it if you submit a delta entry
-along with your actual change.  Significant changes include, but are not
-limited to:
+along with your actual change.  Significant changes include, but are
+not limited to:
 
 =over 4
 
@@ -692,9 +692,9 @@ authors, ... Perl is supposed to be easy.
 Working code is always preferred to pie-in-the-sky ideas.  A patch to
 add a feature stands a much higher chance of making it to the language
 than does a random feature request, no matter how fervently argued the
-request might be.  This ties into "Will it be useful?", as the fact that
-someone took the time to make the patch demonstrates a strong desire
-for the feature.
+request might be.  This ties into "Will it be useful?", as the fact
+that someone took the time to make the patch demonstrates a strong
+desire for the feature.
 
 =head1 TESTING
 
@@ -703,10 +703,11 @@ The core uses the same testing style as the rest of Perl, a simple
 considerations.
 
 There are three ways to write a test in the core: L<Test::More>,
-F<t/test.pl> and ad hoc C<print $test ? "ok 42\n" : "not ok 42\n">.  The
-decision of which to use depends on what part of the test suite you're
-working on.  This is a measure to prevent a high-level failure (such as
-Config.pm breaking) from causing basic functionality tests to fail.
+F<t/test.pl> and ad hoc C<print $test ? "ok 42\n" : "not ok 42\n">.
+The decision of which to use depends on what part of the test suite
+you're working on.  This is a measure to prevent a high-level failure
+(such as Config.pm breaking) from causing basic functionality tests to
+fail.
 
 The F<t/test.pl> library provides some of the features of
 L<Test::More>, but avoids loading most modules and uses as few core
@@ -721,9 +722,9 @@ Protocol|http://testanything.org>.
 
 Since we don't know if require works, or even subroutines, use ad hoc
 tests for these three.  Step carefully to avoid using the feature being
-tested.  Tests in F<t/opbasic>, for instance, have been placed there rather
-than in F<t/op> because they test functionality which F<t/test.pl> presumes
-has already been demonstrated to work.
+tested.  Tests in F<t/opbasic>, for instance, have been placed there
+rather than in F<t/op> because they test functionality which
+F<t/test.pl> presumes has already been demonstrated to work.
 
 =item * F<t/cmd>, F<t/run>, F<t/io> and F<t/op>
 
@@ -741,10 +742,10 @@ used.  You can also use the full suite of core modules in the tests.
 =back
 
 When you say "make test", Perl uses the F<t/TEST> program to run the
-test suite (except under Win32 where it uses F<t/harness> instead).  All
-tests are run from the F<t/> directory, B<not> the directory which
-contains the test.  This causes some problems with the tests in F<lib/>,
-so here's some opportunity for some patching.
+test suite (except under Win32 where it uses F<t/harness> instead).
+All tests are run from the F<t/> directory, B<not> the directory which
+contains the test.  This causes some problems with the tests in
+F<lib/>, so here's some opportunity for some patching.
 
 You must be triply conscious of cross-platform concerns.  This usually
 boils down to using L<File::Spec> and avoiding things like C<fork()>
@@ -782,8 +783,8 @@ Run the test suite with the F<t/harness> controlling program, instead
 of F<t/TEST>.  F<t/harness> is more sophisticated, and uses the
 L<Test::Harness> module, thus using this test target supposes that perl
 mostly works.  The main advantage for our purposes is that it prints a
-detailed summary of failed tests at the end.  Also, unlike F<t/TEST>, it
-doesn't redirect stderr to stdout.
+detailed summary of failed tests at the end.  Also, unlike F<t/TEST>,
+it doesn't redirect stderr to stdout.
 
 Note that under Win32 F<t/harness> is always used instead of F<t/TEST>,
 so there is no special "test_harness" target.
@@ -816,8 +817,8 @@ non-conflicting test scripts itself, and there is no standard interface
 to C<make> utilities to interact with their job schedulers.
 
 Note that currently some test scripts may fail when run in parallel
-(most notably F<ext/IO/t/io_dir.t>).  If necessary, run just the failing
-scripts again sequentially and see if the failures go away.
+(most notably F<ext/IO/t/io_dir.t>).  If necessary, run just the
+failing scripts again sequentially and see if the failures go away.
 
 =head2 Running tests by hand
 
@@ -858,9 +859,9 @@ Run the torture tests as well as the normal set.
 
 =item * -re=PATTERN
 
-Filter the file list so that all the test files run match PATTERN.  Note
-that this form is distinct from the B<-re LIST OF PATTERNS> form below
-in that it allows the file list to be provided as well.
+Filter the file list so that all the test files run match PATTERN.
+Note that this form is distinct from the B<-re LIST OF PATTERNS> form
+below in that it allows the file list to be provided as well.
 
 =item * -re LIST OF PATTERNS
 
@@ -898,9 +899,9 @@ F<./perl>).
 
 =item * PERL_SKIP_TTY_TEST
 
-if set, tells to skip the tests that need a terminal.  It's actually set
-automatically by the Makefile, but can also be forced artificially by
-running 'make test_notty'.
+if set, tells to skip the tests that need a terminal.  It's actually
+set automatically by the Makefile, but can also be forced artificially
+by running 'make test_notty'.
 
 =back
 
@@ -925,8 +926,8 @@ This sets a variable in op/numconvert.t.
 =item * PERL_TEST_MEMORY
 
 Setting this variable includes the tests in F<t/bigmem/>.  This should
-be set to the number of gigabytes of memory available for testing,
-eg. C<PERL_TEST_MEMORY=4> indicates that tests that require 4GiB of
+be set to the number of gigabytes of memory available for testing, eg.
+C<PERL_TEST_MEMORY=4> indicates that tests that require 4GiB of
 available memory can be run safely.
 
 =back
@@ -1040,8 +1041,8 @@ README if you find anything missing or changed over a new OS release.
 =item *
 
 Find an area of Perl that seems interesting to you, and see if you can
-work out how it works.  Scan through the source, and step over it in the
-debugger.  Play, poke, investigate, fiddle! You'll probably get to
+work out how it works.  Scan through the source, and step over it in
+the debugger.  Play, poke, investigate, fiddle! You'll probably get to
 understand not just your chosen area but a much wider range of
 F<perl>'s activity as well, and probably sooner than you'd think.
 
