@@ -1175,8 +1175,8 @@ unless ($Config{useithreads}) {
   FLAGS = \\(PADMY,POK,(?:IsCOW,)?pPOK\\)
   PV = $ADDR "good"\\\0
   CUR = 4
-  LEN = \d+(?:
-  COW_REFCNT = 1)?
+  LEN = \d+
+  COW_REFCNT = 1
 ');
 }
 
