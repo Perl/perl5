@@ -305,6 +305,12 @@ package "0" is defined but false.
 
 =item *
 
+L<Socket> has been upgraded from version 2.011 to 2.012.
+
+Syntax errors when building on the WinCE platform have been fixed. [cpan #87389]
+
+=item *
+
 L<Storable> has been upgraded from version 2.46 to 2.47.
 
 This upgrade is part of a larger change to preserve referential identity when

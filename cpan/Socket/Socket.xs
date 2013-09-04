@@ -47,7 +47,7 @@
 #  include <netinet/tcp.h>
 #endif
 
-#ifdef WIN32
+#if defined(WIN32) && !defined(UNDER_CE)
 # include <ws2tcpip.h>
 #endif
 
@@ -330,6 +330,11 @@ my_inet_aton(register const char *cp, struct in_addr *addr)
 /* The definitions in Socket.pm and Socket.xs must match */
 #define NIx_NOHOST   (1 << 0)
 #define NIx_NOSERV   (1 << 1)
+
+/* On Windows, ole2.h defines a macro called "interface". We don't need that,
+ * and it will complicate the variables in pack_ip_mreq() etc. (RT87389)
+ */
+#undef interface
 
 
 static int
@@ -1133,9 +1138,9 @@ unpack_ip_mreq_source(mreq_sv)
 	}
 
 void
-pack_ipv6_mreq(multiaddr, interface)
+pack_ipv6_mreq(multiaddr, ifindex)
 	SV *	multiaddr
-	unsigned int	interface
+	unsigned int	ifindex
 	CODE:
 	{
 #ifdef HAS_IPV6_MREQ
@@ -1150,7 +1155,7 @@ pack_ipv6_mreq(multiaddr, interface)
 		      "Socket::pack_ipv6_mreq", (UV)len, (UV)sizeof(mreq.ipv6mr_multiaddr));
 	Zero(&mreq, sizeof(mreq), char);
 	Copy(multiaddrbytes, &mreq.ipv6mr_multiaddr, sizeof(mreq.ipv6mr_multiaddr), char);
-	mreq.ipv6mr_interface = interface;
+	mreq.ipv6mr_interface = ifindex;
 	ST(0) = sv_2mortal(newSVpvn((char *)&mreq, sizeof(mreq)));
 #else
 	not_here("pack_ipv6_mreq");
