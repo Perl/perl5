@@ -61,7 +61,7 @@ writes the file as a MIME attachment, and sends it with a meaningful
 subject:
 
   % git format-patch -1 --attach
-  % perlbug -s "[PATCH] $(git log -1 --oneline HEAD)" -f 0001-*.patch
+  % ./perl -Ilib utils/perlbug -s "[PATCH] $(git log -1 --oneline HEAD)" -f 0001-*.patch
 
 The perlbug program will ask you a few questions about your email
 address and the patch you're submitting.  Once you've answered them it
