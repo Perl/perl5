@@ -86,6 +86,43 @@ my ($target, $match) = @options{qw(target match)};
     if $options{validate} && !@ARGV;
 
 pod2usage(exitval => 0, verbose => 2) if $options{usage};
+
+# This needs to be done before the next arguments check, as it's populating
+# @ARGV
+if (defined $target && $target =~ /\.t\z/) {
+    # t/TEST don't have a reliable way to run the test script under valgrind
+    # The $ENV{VALGRIND} code was only added after v5.8.0, and is more
+    # geared to logging than to exiting on failure if errors are found.
+    # I guess one could fudge things by replacing the symlink t/perl with a
+    # wrapper script which invokes valgrind, but leave doing that until
+    # someone needs it. (If that's you, then patches welcome.)
+    foreach (qw(valgrind match validate test-build one-liner)) {
+        die_255("$0: Test-case targets can't be run with --$_")
+            if $options{$_};
+    }
+    die_255("$0: Test-case targets can't be combined with an explict test")
+        if @ARGV;
+
+    # Needing this unless is a smell suggesting that this implementation of
+    # test-case targets is not really in the right place.
+    unless ($options{'check-args'}) {
+        # The top level sanity tests refuse to start or end a test run at a
+        # revision which skips, hence this test ensures reasonable sanity at
+        # automatically picking a suitable start point for both normal operation
+        # and --expect-fail
+        skip("Test case $target is not a readable file")
+            unless -f $target && -r _;
+    }
+
+    # t/TEST runs from and takes pathnames relative to t/, so need to strip
+    # out a leading t, or add ../ otherwise
+    unless ($target =~ s!\At/!!) {
+        $target = "../$target";
+    }
+    @ARGV = ('sh', '-c', "cd t && ./perl TEST " . quotemeta $target);
+    $target = 'test_prep';
+}
+
 pod2usage(exitval => 255, verbose => 1)
     unless @ARGV || $match || $options{'test-build'} || defined $options{'one-liner'};
 pod2usage(exitval => 255, verbose => 1)
@@ -106,14 +143,14 @@ bisect.pl - use git bisect to pinpoint changes
     .../Porting/bisect.pl -e 'my $a := 2;'
     # When did this stop being an error?
     .../Porting/bisect.pl --expect-fail -e '1 // 2'
+    # When did this test start failing?
+    .../Porting/bisect.pl --target t/op/sort.t
     # When were all lines matching this pattern removed from all files?
     .../Porting/bisect.pl --match '\b(?:PL_)hash_seed_set\b'
     # When was some line matching this pattern added to some file?
     .../Porting/bisect.pl --expect-fail --match '\buseithreads\b'
     # When did this test program stop exiting 0?
     .../Porting/bisect.pl -- ./perl -Ilib ../test_prog.pl
-    # When did this test start failing?
-    .../Porting/bisect.pl -- ./perl -Ilib t/TEST op/sort.t
     # When did this first become valid syntax?
     .../Porting/bisect.pl --target=miniperl --end=v5.10.0 \
          --expect-fail -e 'my $a := 2;'
@@ -154,12 +191,21 @@ end revisions.
 By default F<bisect.pl> will process all options, then use the rest of the
 command line as arguments to list C<system> to run a test case. By default,
 the test case should pass (exit with 0) on earlier perls, and fail (exit
-non-zero) on I<blead> (note that running most of perl's test files directly
-won't do this, you'll need to run them through a harness to get the proper
-error code). F<bisect.pl> will use F<bisect-runner.pl> to find the earliest
-stable perl version on which the test case passes, check that it fails on
-blead, and then use F<bisect-runner.pl> with C<git bisect run> to find the
-commit which caused the failure.
+non-zero) on I<blead>. F<bisect.pl> will use F<bisect-runner.pl> to find the
+earliest stable perl version on which the test case passes, check that it
+fails on blead, and then use F<bisect-runner.pl> with C<git bisect run> to
+find the commit which caused the failure.
+
+Many of perl's own test scripts exit 0 even if their TAP reports test
+failures, and some need particular setup (such as running from the right
+directory, or adding C<-T> to the command line). Hence if you want to bisect
+a test script, you can specify it with the I<--target> option, and it will
+be invoked using F<t/TEST> which performs all the setup, and exits non-zero
+if the TAP reports failures. This works for any file ending C<.t>, so you can
+use it with a file outside of the working checkout, for example to test a
+particular version of a test script, as a path inside the repository will
+(of course) be testing the version of the script checked out for the current
+revision, which may be too early to have the test you are interested in.
 
 Because the test case is the complete argument to C<system>, it is easy to
 run something other than the F<perl> built, if necessary. If you need to run
@@ -284,6 +330,14 @@ XS modules. For older F<Makefile>s, the previous name of C<test-prep>
 is automatically substituted. For very old F<Makefile>s, C<make test> is
 run, as there is no target provided to just get things ready, and for 5.004
 and earlier the tests run very quickly.
+
+=item *
+
+A file ending C<.t>
+
+Build everything needed to run the tests, and then run this test script using
+F<t/TEST>. This is actually implemented internally by using the target
+I<test_prep>, and setting the test case to "sh", "-c", "cd t && ./TEST ..."
 
 =back
 
