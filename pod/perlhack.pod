@@ -75,6 +75,23 @@ The perlbug program will ask you a few questions about your email
 address and the patch you're submitting.  Once you've answered them it
 will submit your patch via email.
 
+If your changes are in multiple commits, generate a patch for each of
+them:
+
+  % git format-patch origin/blead --attach
+
+Run perlbug without any attachments:
+
+  % ./perl -Ilib utils/perlbug
+
+Follow the prompts, picking a subject that summarizes your changes
+overall and has "[PATCH]" at the beginning. Describe your changes in the
+editor window that opens.  Instead of sending the report, press 'f' to
+save the message to a file, then quit.
+
+Now create an email using the headers and body from the
+perlbug-generated file, and attach your patches.
+
 =item * Thank you
 
 The porters appreciate the time you spent helping to make Perl better.
