@@ -4975,14 +4975,18 @@ PP(pp_splice)
 
 	MARK = ORIGMARK + 1;
 	if (GIMME == G_ARRAY) {			/* copy return vals to stack */
+	    const bool real = cBOOL(AvREAL(ary));
 	    MEXTEND(MARK, length);
-	    Copy(AvARRAY(ary)+offset, MARK, length, SV*);
-	    if (AvREAL(ary)) {
+	    if (real)
 		EXTEND_MORTAL(length);
-		for (i = length, dst = MARK; i; i--) {
+	    for (i = 0, dst = MARK; i < length; i++) {
+		if ((*dst = AvARRAY(ary)[i+offset])) {
+		  if (real)
 		    sv_2mortal(*dst);	/* free them eventually */
-		    dst++;
 		}
+		else
+		    *dst = &PL_sv_undef;
+		dst++;
 	    }
 	    MARK += length - 1;
 	}
@@ -5068,13 +5072,16 @@ PP(pp_splice)
 	MARK = ORIGMARK + 1;
 	if (GIMME == G_ARRAY) {			/* copy return vals to stack */
 	    if (length) {
-		Copy(tmparyval, MARK, length, SV*);
-		if (AvREAL(ary)) {
+		const bool real = cBOOL(AvREAL(ary));
+		if (real)
 		    EXTEND_MORTAL(length);
-		    for (i = length, dst = MARK; i; i--) {
+		for (i = 0, dst = MARK; i < length; i++) {
+		    if ((*dst = tmparyval[i])) {
+		      if (real)
 			sv_2mortal(*dst);	/* free them eventually */
-			dst++;
 		    }
+		    else *dst = &PL_sv_undef;
+		    dst++;
 		}
 	    }
 	    MARK += length - 1;

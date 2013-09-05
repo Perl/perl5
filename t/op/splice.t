@@ -92,4 +92,14 @@ ok( !oo->isa('Bar'), 'splice @ISA and make Foo a Bar');
 eval { splice( $new_arrayref, 0, 0, 1, 2, 3 ) };
 like($@, qr/Not an ARRAY/, 'undefined first argument to splice');
 
+# Test arrays with nonexistent elements (crashes when it fails)
+@a = ();
+$#a++;
+is sprintf("%s", splice @a, 0, 1), "",
+  'splice handles nonexistent elems when shrinking the array';
+@a = ();
+$#a++;
+is sprintf("%s", splice @a, 0, 1, undef), "",
+  'splice handles nonexistent elems when array len stays the same';
+
 done_testing;
