@@ -2755,7 +2755,7 @@ Perl_my_pclose(pTHX_ PerlIO *ptr)
     svp = av_fetch(PL_fdpid,fd,TRUE);
     pid = (SvTYPE(*svp) == SVt_IV) ? SvIVX(*svp) : -1;
     SvREFCNT_dec(*svp);
-    *svp = &PL_sv_undef;
+    *svp = NULL;
 #ifdef OS2
     if (pid == -1) {			/* Opened by popen. */
 	return my_syspclose(ptr);
