@@ -268,10 +268,10 @@ aux a2p c2ph h2ph h2xs perlbug pl2pm pod2html pod2man s2p splain xsubpp
 
     perlboot		
     perlbot		
+    perlrepository
     perltodo
     perltooc		
     perltoot		
-    perlrepository
 
 =for buildtoc __END__
 
