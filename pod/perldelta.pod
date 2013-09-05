@@ -197,7 +197,7 @@ L<DynaLoader> has been upgraded from version 1.19 to 1.20.
 The documentation now makes it clear, as has always been the case, that
 C<dl_unload_file> is only called automatically to unload all loaded shared
 objects if the perl interpreter was built with the C macro
-DL_UNLOAD_ALL_AT_EXIT defined.
+DL_UNLOAD_ALL_AT_EXIT defined.  Support for GNU DLD has also been removed.
 
 =item *
 
