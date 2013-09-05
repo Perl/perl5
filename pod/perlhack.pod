@@ -90,7 +90,10 @@ editor window that opens.  Instead of sending the report, press 'f' to
 save the message to a file, then quit.
 
 Now create an email using the headers and body from the
-perlbug-generated file, and attach your patches.
+perlbug-generated file, and attach your patches. If you use Mutt, this
+command will do that:
+
+  % mutt -H perlbug.rep -a *.patch
 
 =item * Thank you
 
