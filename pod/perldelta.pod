@@ -237,6 +237,13 @@ nonexistent array elements.
 
 =item *
 
+L<Locale::Codes> has been upgraded from version 3.26 to 3.27.
+
+New codes have been added and the (deprecated) set of FIPS-10 country codes has
+been removed.
+
+=item *
+
 L<Math::BigInt> has been upgraded from version 1.9992 to 1.9993.
 
 Cleaned up the L<Math::BigInt> and L<Math::BigFloat> documentation to be more
