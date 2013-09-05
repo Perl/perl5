@@ -248,9 +248,12 @@ use File::Glob qw(:case);
                 t/system.t
                 )
         ],
-	# Test got broken by Carp change; update to be merged upstream
-	# [rt.cpan.org #88076].
-        'CUSTOMIZED' => ['t/backcompat.t'],
+        'CUSTOMIZED'   => [
+            # Waiting to be merged upstream: see CPAN RT#88076
+            qw(	t/backcompat.t ),
+            # Waiting to be merged upstream: see CPAN RT#88444
+            qw(	t/utime.t ),
+        ],
         'UPSTREAM'   => 'cpan',
     },
 
