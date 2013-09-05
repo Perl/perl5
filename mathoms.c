@@ -704,14 +704,6 @@ Perl_init_i18nl14n(pTHX_ int printwarn)
     return init_i18nl10n(printwarn);
 }
 
-U8 *
-Perl_uvuni_to_utf8(pTHX_ U8 *d, UV uv)
-{
-    PERL_ARGS_ASSERT_UVUNI_TO_UTF8;
-
-    return Perl_uvoffuni_to_utf8_flags(aTHX_ d, uv, 0);
-}
-
 bool
 Perl_is_utf8_string_loc(pTHX_ const U8 *s, STRLEN len, const U8 **ep)
 {
@@ -1225,52 +1217,6 @@ ASCII_TO_NEED(const UV enc, const UV ch)
 {
     PERL_UNUSED_ARG(enc);
     return ch;
-}
-
-/*
-=for apidoc uvuni_to_utf8_flags
-
-Instead you almost certainly want to use L</uvchr_to_utf8> or
-L</uvchr_to_utf8_flags>>.
-
-This function is a deprecated synonym for L</uvoffuni_to_utf8_flags>,
-which itself, while not deprecated, should be used only in isolated
-circumstances.  These functions were useful for code that wanted to handle
-both EBCDIC and ASCII platforms with Unicode properties, but starting in Perl
-v5.20, the distinctions between the platforms have mostly been made invisible
-to most code, so this function is quite unlikely to be what you want.
-
-=cut
-*/
-
-U8 *
-Perl_uvuni_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
-{
-    PERL_ARGS_ASSERT_UVUNI_TO_UTF8_FLAGS;
-
-    return uvoffuni_to_utf8_flags(d, uv, flags);
-}
-
-/*
-=for apidoc utf8n_to_uvuni
-
-Instead use L</utf8_to_uvchr_buf>, or rarely, L</utf8n_to_uvchr>.
-
-This function was usefulfor code that wanted to handle both EBCDIC and
-ASCII platforms with Unicode properties, but starting in Perl v5.20, the
-distinctions between the platforms have mostly been made invisible to most
-code, so this function is quite unlikely to be what you want.
-C<L<NATIVE_TO_UNI(utf8_to_uvchr_buf(...))|/utf8_to_uvchr_buf>> instead.
-
-=cut
-*/
-
-UV
-Perl_utf8n_to_uvuni(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
-{
-    PERL_ARGS_ASSERT_UTF8N_TO_UVUNI;
-
-    return NATIVE_TO_UNI(utf8n_to_uvchr(s, curlen, retlen, flags));
 }
 
 END_EXTERN_C
