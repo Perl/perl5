@@ -285,7 +285,7 @@ they are not necessarily one-to-one, there may be some confusion
 about the relationship between codes from different code sets.
 
 For example, ISO 3166 assigns one code to the country "United States
-Minor Outlying Islands", but the FIPS 10 codes give different codes
+Minor Outlying Islands", but the IANA codes give different codes
 to different islands (Baker Island, Howland Island, etc.).
 
 This may cause some confusion... I've done the best that I could do

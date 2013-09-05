@@ -1,8 +1,9 @@
-package Locale::Codes::Country_Codes;
+package #
+Locale::Codes::Country_Codes;
 
 # This file was automatically generated.  Any changes to this file will
 # be lost the next time 'get_codes' is run.
-#    Generated on: Mon Jun  3 09:46:20 EDT 2013
+#    Generated on: Tue Sep  3 14:24:45 EDT 2013
 
 =pod
 
@@ -38,9 +39,9 @@ use warnings;
 use utf8;
 
 our($VERSION);
-$VERSION='3.26';
+$VERSION='3.27';
 
-$Locale::Codes::Data{'country'}{'id'} = '0294';
+$Locale::Codes::Data{'country'}{'id'} = '0256';
 
 $Locale::Codes::Data{'country'}{'id2names'} = {
    q(0001) => [
@@ -93,8 +94,8 @@ $Locale::Codes::Data{'country'}{'id2names'} = {
       ],
    q(0017) => [
       q(Bahamas),
-      q(Bahamas, The),
       q(The Bahamas),
+      q(Bahamas, The),
       ],
    q(0018) => [
       q(Bahrain),
@@ -202,8 +203,8 @@ $Locale::Codes::Data{'country'}{'id2names'} = {
       ],
    q(0051) => [
       q(Congo),
-      q(Congo (Brazzaville)),
       q(Congo, Republic of the),
+      q(Congo (Brazzaville)),
       q(The Republic of the Congo),
       ],
    q(0052) => [
@@ -466,16 +467,16 @@ $Locale::Codes::Data{'country'}{'id2names'} = {
    q(0131) => [
       q(Macao),
       q(China, Macao Special Administrative Region),
-      q(Macau),
       q(Macau S.A.R),
       q(Macau S.A.R.),
+      q(Macau),
       q(Macao Special Administrative Region of China),
       ],
    q(0132) => [
       q(Macedonia, The Former Yugoslav Republic of),
       q(The former Yugoslav Republic of Macedonia),
-      q(Macedonia),
       q(Macedonia, Former Yugoslav Republic of),
+      q(Macedonia),
       ],
    q(0133) => [
       q(Madagascar),
@@ -613,8 +614,8 @@ $Locale::Codes::Data{'country'}{'id2names'} = {
       ],
    q(0176) => [
       q(Pitcairn),
-      q(Pitcairn Islands),
       q(Pitcairn Island),
+      q(Pitcairn Islands),
       ],
    q(0177) => [
       q(Poland),
@@ -657,8 +658,8 @@ $Locale::Codes::Data{'country'}{'id2names'} = {
    q(0189) => [
       q(Saint Martin (French part)),
       q(Saint-Martin (French part)),
-      q(Saint Martin),
       q(Saint-Martin),
+      q(Saint Martin),
       ],
    q(0190) => [
       q(Saint Pierre and Miquelon),
@@ -869,129 +870,15 @@ $Locale::Codes::Data{'country'}{'id2names'} = {
       q(Sark),
       ],
    q(0252) => [
-      q(Akrotiri),
-      ],
-   q(0253) => [
-      q(Ashmore and Cartier Islands),
-      ],
-   q(0254) => [
-      q(Baker Island),
-      ],
-   q(0255) => [
-      q(Bassas da India),
-      ],
-   q(0256) => [
-      q(Clipperton Island),
-      ],
-   q(0257) => [
-      q(Congo (Kinshasa)),
-      ],
-   q(0258) => [
-      q(Coral Sea Islands),
-      ],
-   q(0259) => [
-      q(Dhekelia),
-      ],
-   q(0260) => [
-      q(Etorofu, Habomai, Kunashiri, and Shikotan Islands),
-      ],
-   q(0261) => [
-      q(Europa Island),
-      ],
-   q(0262) => [
-      q(Gaza Strip),
-      ],
-   q(0263) => [
-      q(Glorioso Islands),
-      ],
-   q(0264) => [
-      q(Heard Island and McDonald  Islands),
-      ],
-   q(0265) => [
-      q(Howland Island),
-      ],
-   q(0266) => [
-      q(Jan Mayen),
-      ],
-   q(0267) => [
-      q(Jarvis Island),
-      ],
-   q(0268) => [
-      q(Johnston Atoll),
-      ],
-   q(0269) => [
-      q(Juan de Nova Island),
-      ],
-   q(0270) => [
-      q(Kingman Reef),
-      ],
-   q(0271) => [
-      q(Korea, North),
-      ],
-   q(0272) => [
-      q(Korea, South),
-      ],
-   q(0273) => [
-      q(Kosovo),
-      ],
-   q(0274) => [
-      q(Laos),
-      ],
-   q(0275) => [
-      q(Midway Islands),
-      ],
-   q(0276) => [
-      q(Moldova),
-      ],
-   q(0277) => [
-      q(Navassa Island),
-      ],
-   q(0278) => [
-      q(Palmyra Atoll),
-      ],
-   q(0279) => [
-      q(Paracel Islands),
-      ],
-   q(0280) => [
-      q(Russia),
-      ],
-   q(0281) => [
-      q(Saint Helena, Ascension, and Tristan da Cunha),
-      ],
-   q(0282) => [
-      q(Sint Maarten),
-      ],
-   q(0283) => [
-      q(South Georgia and South Sandwich Islands),
-      ],
-   q(0284) => [
-      q(Spratly Islands),
-      ],
-   q(0285) => [
-      q(Svalbard),
-      ],
-   q(0286) => [
-      q(Tanzania),
-      ],
-   q(0287) => [
-      q(Tromelin Island),
-      ],
-   q(0288) => [
-      q(Wake Island),
-      ],
-   q(0289) => [
-      q(West Bank),
-      ],
-   q(0290) => [
       q(Ascension Island),
       ],
-   q(0291) => [
+   q(0253) => [
       q(Netherlands Antilles),
       ],
-   q(0292) => [
+   q(0254) => [
       q(European Union),
       ],
-   q(0293) => [
+   q(0255) => [
       q(USSR),
       ],
 };
@@ -999,10 +886,6 @@ $Locale::Codes::Data{'country'}{'id2names'} = {
 $Locale::Codes::Data{'country'}{'alias2id'} = {
    q(afghanistan) => [
       q(0001),
-      q(0),
-      ],
-   q(akrotiri) => [
-      q(0252),
       q(0),
       ],
    q(aland islands) => [
@@ -1054,11 +937,7 @@ $Locale::Codes::Data{'country'}{'alias2id'} = {
       q(0),
       ],
    q(ascension island) => [
-      q(0290),
-      q(0),
-      ],
-   q(ashmore and cartier islands) => [
-      q(0253),
+      q(0252),
       q(0),
       ],
    q(australia) => [
@@ -1079,14 +958,10 @@ $Locale::Codes::Data{'country'}{'alias2id'} = {
       ],
    q(bahamas, the) => [
       q(0017),
-      q(1),
+      q(2),
       ],
    q(bahrain) => [
       q(0018),
-      q(0),
-      ],
-   q(baker island) => [
-      q(0254),
       q(0),
       ],
    q(bangladesh) => [
@@ -1095,10 +970,6 @@ $Locale::Codes::Data{'country'}{'alias2id'} = {
       ],
    q(barbados) => [
       q(0020),
-      q(0),
-      ],
-   q(bassas da india) => [
-      q(0255),
       q(0),
       ],
    q(belarus) => [
@@ -1241,10 +1112,6 @@ $Locale::Codes::Data{'country'}{'alias2id'} = {
       q(0047),
       q(0),
       ],
-   q(clipperton island) => [
-      q(0256),
-      q(0),
-      ],
    q(cocos (keeling) islands) => [
       q(0048),
       q(0),
@@ -1267,11 +1134,7 @@ $Locale::Codes::Data{'country'}{'alias2id'} = {
       ],
    q(congo (brazzaville)) => [
       q(0051),
-      q(1),
-      ],
-   q(congo (kinshasa)) => [
-      q(0257),
-      q(0),
+      q(2),
       ],
    q(congo, democratic republic of the) => [
       q(0052),
@@ -1279,7 +1142,7 @@ $Locale::Codes::Data{'country'}{'alias2id'} = {
       ],
    q(congo, republic of the) => [
       q(0051),
-      q(2),
+      q(1),
       ],
    q(congo, the democratic republic of the) => [
       q(0052),
@@ -1287,10 +1150,6 @@ $Locale::Codes::Data{'country'}{'alias2id'} = {
       ],
    q(cook islands) => [
       q(0053),
-      q(0),
-      ],
-   q(coral sea islands) => [
-      q(0258),
       q(0),
       ],
    q(costa rica) => [
@@ -1331,10 +1190,6 @@ $Locale::Codes::Data{'country'}{'alias2id'} = {
       ],
    q(denmark) => [
       q(0061),
-      q(0),
-      ],
-   q(dhekelia) => [
-      q(0259),
       q(0),
       ],
    q(djibouti) => [
@@ -1381,16 +1236,8 @@ $Locale::Codes::Data{'country'}{'alias2id'} = {
       q(0071),
       q(0),
       ],
-   q(etorofu, habomai, kunashiri, and shikotan islands) => [
-      q(0260),
-      q(0),
-      ],
-   q(europa island) => [
-      q(0261),
-      q(0),
-      ],
    q(european union) => [
-      q(0292),
+      q(0254),
       q(0),
       ],
    q(faeroe islands) => [
@@ -1453,10 +1300,6 @@ $Locale::Codes::Data{'country'}{'alias2id'} = {
       q(0081),
       q(1),
       ],
-   q(gaza strip) => [
-      q(0262),
-      q(0),
-      ],
    q(georgia) => [
       q(0082),
       q(0),
@@ -1471,10 +1314,6 @@ $Locale::Codes::Data{'country'}{'alias2id'} = {
       ],
    q(gibraltar) => [
       q(0085),
-      q(0),
-      ],
-   q(glorioso islands) => [
-      q(0263),
       q(0),
       ],
    q(golan heights (israeli-occupied)) => [
@@ -1529,10 +1368,6 @@ $Locale::Codes::Data{'country'}{'alias2id'} = {
       q(0096),
       q(0),
       ],
-   q(heard island and mcdonald  islands) => [
-      q(0264),
-      q(0),
-      ],
    q(heard island and mcdonald islands) => [
       q(0097),
       q(0),
@@ -1564,10 +1399,6 @@ $Locale::Codes::Data{'country'}{'alias2id'} = {
    q(hong kong special administrative region of china) => [
       q(0100),
       q(3),
-      ],
-   q(howland island) => [
-      q(0265),
-      q(0),
       ],
    q(hungary) => [
       q(0101),
@@ -1621,32 +1452,16 @@ $Locale::Codes::Data{'country'}{'alias2id'} = {
       q(0111),
       q(0),
       ],
-   q(jan mayen) => [
-      q(0266),
-      q(0),
-      ],
    q(japan) => [
       q(0112),
-      q(0),
-      ],
-   q(jarvis island) => [
-      q(0267),
       q(0),
       ],
    q(jersey) => [
       q(0113),
       q(0),
       ],
-   q(johnston atoll) => [
-      q(0268),
-      q(0),
-      ],
    q(jordan) => [
       q(0114),
-      q(0),
-      ],
-   q(juan de nova island) => [
-      q(0269),
       q(0),
       ],
    q(kazakhstan) => [
@@ -1665,10 +1480,6 @@ $Locale::Codes::Data{'country'}{'alias2id'} = {
       q(0116),
       q(0),
       ],
-   q(kingman reef) => [
-      q(0270),
-      q(0),
-      ],
    q(kiribati) => [
       q(0117),
       q(0),
@@ -1677,20 +1488,8 @@ $Locale::Codes::Data{'country'}{'alias2id'} = {
       q(0118),
       q(0),
       ],
-   q(korea, north) => [
-      q(0271),
-      q(0),
-      ],
    q(korea, republic of) => [
       q(0119),
-      q(0),
-      ],
-   q(korea, south) => [
-      q(0272),
-      q(0),
-      ],
-   q(kosovo) => [
-      q(0273),
       q(0),
       ],
    q(kuwait) => [
@@ -1703,10 +1502,6 @@ $Locale::Codes::Data{'country'}{'alias2id'} = {
       ],
    q(lao people's democratic republic) => [
       q(0122),
-      q(0),
-      ],
-   q(laos) => [
-      q(0274),
       q(0),
       ],
    q(latvia) => [
@@ -1751,23 +1546,23 @@ $Locale::Codes::Data{'country'}{'alias2id'} = {
       ],
    q(macau) => [
       q(0131),
-      q(2),
+      q(4),
       ],
    q(macau s.a.r) => [
       q(0131),
-      q(3),
+      q(2),
       ],
    q(macau s.a.r.) => [
       q(0131),
-      q(4),
+      q(3),
       ],
    q(macedonia) => [
       q(0132),
-      q(2),
+      q(3),
       ],
    q(macedonia, former yugoslav republic of) => [
       q(0132),
-      q(3),
+      q(2),
       ],
    q(macedonia, the former yugoslav republic of) => [
       q(0132),
@@ -1829,14 +1624,6 @@ $Locale::Codes::Data{'country'}{'alias2id'} = {
       q(0145),
       q(0),
       ],
-   q(midway islands) => [
-      q(0275),
-      q(0),
-      ],
-   q(moldova) => [
-      q(0276),
-      q(0),
-      ],
    q(moldova, republic of) => [
       q(0146),
       q(0),
@@ -1877,10 +1664,6 @@ $Locale::Codes::Data{'country'}{'alias2id'} = {
       q(0155),
       q(0),
       ],
-   q(navassa island) => [
-      q(0277),
-      q(0),
-      ],
    q(nepal) => [
       q(0156),
       q(0),
@@ -1890,7 +1673,7 @@ $Locale::Codes::Data{'country'}{'alias2id'} = {
       q(0),
       ],
    q(netherlands antilles) => [
-      q(0291),
+      q(0253),
       q(0),
       ],
    q(new caledonia) => [
@@ -1949,20 +1732,12 @@ $Locale::Codes::Data{'country'}{'alias2id'} = {
       q(0170),
       q(0),
       ],
-   q(palmyra atoll) => [
-      q(0278),
-      q(0),
-      ],
    q(panama) => [
       q(0171),
       q(0),
       ],
    q(papua new guinea) => [
       q(0172),
-      q(0),
-      ],
-   q(paracel islands) => [
-      q(0279),
       q(0),
       ],
    q(paraguay) => [
@@ -1983,11 +1758,11 @@ $Locale::Codes::Data{'country'}{'alias2id'} = {
       ],
    q(pitcairn island) => [
       q(0176),
-      q(2),
+      q(1),
       ],
    q(pitcairn islands) => [
       q(0176),
-      q(1),
+      q(2),
       ],
    q(poland) => [
       q(0177),
@@ -2021,10 +1796,6 @@ $Locale::Codes::Data{'country'}{'alias2id'} = {
       q(0182),
       q(0),
       ],
-   q(russia) => [
-      q(0280),
-      q(0),
-      ],
    q(russian federation) => [
       q(0183),
       q(0),
@@ -2045,10 +1816,6 @@ $Locale::Codes::Data{'country'}{'alias2id'} = {
       q(0186),
       q(0),
       ],
-   q(saint helena, ascension, and tristan da cunha) => [
-      q(0281),
-      q(0),
-      ],
    q(saint kitts and nevis) => [
       q(0187),
       q(0),
@@ -2059,7 +1826,7 @@ $Locale::Codes::Data{'country'}{'alias2id'} = {
       ],
    q(saint martin) => [
       q(0189),
-      q(2),
+      q(3),
       ],
    q(saint martin (french part)) => [
       q(0189),
@@ -2079,7 +1846,7 @@ $Locale::Codes::Data{'country'}{'alias2id'} = {
       ],
    q(saint-martin) => [
       q(0189),
-      q(3),
+      q(2),
       ],
    q(saint-martin (french part)) => [
       q(0189),
@@ -2125,10 +1892,6 @@ $Locale::Codes::Data{'country'}{'alias2id'} = {
       q(0200),
       q(0),
       ],
-   q(sint maarten) => [
-      q(0282),
-      q(0),
-      ],
    q(sint maarten (dutch part)) => [
       q(0201),
       q(0),
@@ -2153,10 +1916,6 @@ $Locale::Codes::Data{'country'}{'alias2id'} = {
       q(0206),
       q(0),
       ],
-   q(south georgia and south sandwich islands) => [
-      q(0283),
-      q(0),
-      ],
    q(south georgia and the islands) => [
       q(0207),
       q(1),
@@ -2177,10 +1936,6 @@ $Locale::Codes::Data{'country'}{'alias2id'} = {
       q(0209),
       q(0),
       ],
-   q(spratly islands) => [
-      q(0284),
-      q(0),
-      ],
    q(sri lanka) => [
       q(0210),
       q(0),
@@ -2195,10 +1950,6 @@ $Locale::Codes::Data{'country'}{'alias2id'} = {
       ],
    q(suriname) => [
       q(0212),
-      q(0),
-      ],
-   q(svalbard) => [
-      q(0285),
       q(0),
       ],
    q(svalbard and jan mayen) => [
@@ -2241,10 +1992,6 @@ $Locale::Codes::Data{'country'}{'alias2id'} = {
       q(0219),
       q(0),
       ],
-   q(tanzania) => [
-      q(0286),
-      q(0),
-      ],
    q(tanzania, united republic of) => [
       q(0220),
       q(0),
@@ -2255,7 +2002,7 @@ $Locale::Codes::Data{'country'}{'alias2id'} = {
       ],
    q(the bahamas) => [
       q(0017),
-      q(2),
+      q(1),
       ],
    q(the democratic republic of the congo) => [
       q(0052),
@@ -2287,10 +2034,6 @@ $Locale::Codes::Data{'country'}{'alias2id'} = {
       ],
    q(trinidad and tobago) => [
       q(0226),
-      q(0),
-      ],
-   q(tromelin island) => [
-      q(0287),
       q(0),
       ],
    q(tunisia) => [
@@ -2370,7 +2113,7 @@ $Locale::Codes::Data{'country'}{'alias2id'} = {
       q(3),
       ],
    q(ussr) => [
-      q(0293),
+      q(0255),
       q(0),
       ],
    q(uzbekistan) => [
@@ -2425,10 +2168,6 @@ $Locale::Codes::Data{'country'}{'alias2id'} = {
       q(0244),
       q(0),
       ],
-   q(wake island) => [
-      q(0288),
-      q(0),
-      ],
    q(wallis and futuna) => [
       q(0245),
       q(0),
@@ -2436,10 +2175,6 @@ $Locale::Codes::Data{'country'}{'alias2id'} = {
    q(wallis and futuna islands) => [
       q(0245),
       q(1),
-      ],
-   q(west bank) => [
-      q(0289),
-      q(0),
       ],
    q(western sahara) => [
       q(0246),
@@ -4418,7 +4153,7 @@ $Locale::Codes::Data{'country'}{'code2id'} = {
       },
    q(dom) => {
       q(ac) => [
-         q(0290),
+         q(0252),
          q(0),
          ],
       q(ad) => [
@@ -4450,7 +4185,7 @@ $Locale::Codes::Data{'country'}{'code2id'} = {
          q(0),
          ],
       q(an) => [
-         q(0291),
+         q(0253),
          q(0),
          ],
       q(ao) => [
@@ -4702,7 +4437,7 @@ $Locale::Codes::Data{'country'}{'code2id'} = {
          q(0),
          ],
       q(eu) => [
-         q(0292),
+         q(0254),
          q(0),
          ],
       q(fi) => [
@@ -5266,7 +5001,7 @@ $Locale::Codes::Data{'country'}{'code2id'} = {
          q(0),
          ],
       q(su) => [
-         q(0293),
+         q(0255),
          q(0),
          ],
       q(sv) => [
@@ -5434,1092 +5169,6 @@ $Locale::Codes::Data{'country'}{'code2id'} = {
          q(0),
          ],
       q(zw) => [
-         q(0249),
-         q(0),
-         ],
-      },
-   q(fips-10) => {
-      q(AA) => [
-         q(0013),
-         q(0),
-         ],
-      q(AC) => [
-         q(0010),
-         q(0),
-         ],
-      q(AE) => [
-         q(0234),
-         q(0),
-         ],
-      q(AF) => [
-         q(0001),
-         q(0),
-         ],
-      q(AG) => [
-         q(0004),
-         q(0),
-         ],
-      q(AJ) => [
-         q(0016),
-         q(0),
-         ],
-      q(AL) => [
-         q(0003),
-         q(0),
-         ],
-      q(AM) => [
-         q(0012),
-         q(0),
-         ],
-      q(AN) => [
-         q(0006),
-         q(0),
-         ],
-      q(AO) => [
-         q(0007),
-         q(0),
-         ],
-      q(AQ) => [
-         q(0005),
-         q(0),
-         ],
-      q(AR) => [
-         q(0011),
-         q(0),
-         ],
-      q(AS) => [
-         q(0014),
-         q(0),
-         ],
-      q(AT) => [
-         q(0253),
-         q(0),
-         ],
-      q(AU) => [
-         q(0015),
-         q(0),
-         ],
-      q(AV) => [
-         q(0008),
-         q(0),
-         ],
-      q(AX) => [
-         q(0252),
-         q(0),
-         ],
-      q(AY) => [
-         q(0009),
-         q(0),
-         ],
-      q(BA) => [
-         q(0018),
-         q(0),
-         ],
-      q(BB) => [
-         q(0020),
-         q(0),
-         ],
-      q(BC) => [
-         q(0030),
-         q(0),
-         ],
-      q(BD) => [
-         q(0025),
-         q(0),
-         ],
-      q(BE) => [
-         q(0022),
-         q(0),
-         ],
-      q(BF) => [
-         q(0017),
-         q(1),
-         ],
-      q(BG) => [
-         q(0019),
-         q(0),
-         ],
-      q(BH) => [
-         q(0023),
-         q(0),
-         ],
-      q(BK) => [
-         q(0029),
-         q(0),
-         ],
-      q(BL) => [
-         q(0027),
-         q(2),
-         ],
-      q(BM) => [
-         q(0153),
-         q(1),
-         ],
-      q(BN) => [
-         q(0024),
-         q(0),
-         ],
-      q(BO) => [
-         q(0021),
-         q(0),
-         ],
-      q(BP) => [
-         q(0204),
-         q(0),
-         ],
-      q(BQ) => [
-         q(0277),
-         q(0),
-         ],
-      q(BR) => [
-         q(0032),
-         q(0),
-         ],
-      q(BS) => [
-         q(0255),
-         q(0),
-         ],
-      q(BT) => [
-         q(0026),
-         q(0),
-         ],
-      q(BU) => [
-         q(0035),
-         q(0),
-         ],
-      q(BV) => [
-         q(0031),
-         q(0),
-         ],
-      q(BX) => [
-         q(0034),
-         q(1),
-         ],
-      q(BY) => [
-         q(0037),
-         q(0),
-         ],
-      q(CA) => [
-         q(0040),
-         q(0),
-         ],
-      q(CB) => [
-         q(0038),
-         q(0),
-         ],
-      q(CD) => [
-         q(0044),
-         q(0),
-         ],
-      q(CE) => [
-         q(0210),
-         q(0),
-         ],
-      q(CF) => [
-         q(0051),
-         q(1),
-         ],
-      q(CG) => [
-         q(0257),
-         q(0),
-         ],
-      q(CH) => [
-         q(0046),
-         q(0),
-         ],
-      q(CI) => [
-         q(0045),
-         q(0),
-         ],
-      q(CJ) => [
-         q(0042),
-         q(0),
-         ],
-      q(CK) => [
-         q(0048),
-         q(0),
-         ],
-      q(CM) => [
-         q(0039),
-         q(0),
-         ],
-      q(CN) => [
-         q(0050),
-         q(0),
-         ],
-      q(CO) => [
-         q(0049),
-         q(0),
-         ],
-      q(CQ) => [
-         q(0165),
-         q(0),
-         ],
-      q(CR) => [
-         q(0258),
-         q(0),
-         ],
-      q(CS) => [
-         q(0054),
-         q(0),
-         ],
-      q(CT) => [
-         q(0043),
-         q(0),
-         ],
-      q(CU) => [
-         q(0057),
-         q(0),
-         ],
-      q(CV) => [
-         q(0041),
-         q(0),
-         ],
-      q(CW) => [
-         q(0053),
-         q(0),
-         ],
-      q(CY) => [
-         q(0059),
-         q(0),
-         ],
-      q(DA) => [
-         q(0061),
-         q(0),
-         ],
-      q(DJ) => [
-         q(0062),
-         q(0),
-         ],
-      q(DO) => [
-         q(0063),
-         q(0),
-         ],
-      q(DQ) => [
-         q(0267),
-         q(0),
-         ],
-      q(DR) => [
-         q(0064),
-         q(0),
-         ],
-      q(DX) => [
-         q(0259),
-         q(0),
-         ],
-      q(EC) => [
-         q(0065),
-         q(0),
-         ],
-      q(EG) => [
-         q(0066),
-         q(0),
-         ],
-      q(EI) => [
-         q(0107),
-         q(0),
-         ],
-      q(EK) => [
-         q(0068),
-         q(0),
-         ],
-      q(EN) => [
-         q(0070),
-         q(0),
-         ],
-      q(ER) => [
-         q(0069),
-         q(0),
-         ],
-      q(ES) => [
-         q(0067),
-         q(0),
-         ],
-      q(ET) => [
-         q(0071),
-         q(0),
-         ],
-      q(EU) => [
-         q(0261),
-         q(0),
-         ],
-      q(EZ) => [
-         q(0060),
-         q(0),
-         ],
-      q(FG) => [
-         q(0077),
-         q(0),
-         ],
-      q(FI) => [
-         q(0075),
-         q(0),
-         ],
-      q(FJ) => [
-         q(0074),
-         q(0),
-         ],
-      q(FK) => [
-         q(0072),
-         q(1),
-         ],
-      q(FM) => [
-         q(0145),
-         q(0),
-         ],
-      q(FO) => [
-         q(0073),
-         q(0),
-         ],
-      q(FP) => [
-         q(0078),
-         q(0),
-         ],
-      q(FQ) => [
-         q(0254),
-         q(0),
-         ],
-      q(FR) => [
-         q(0076),
-         q(0),
-         ],
-      q(FS) => [
-         q(0079),
-         q(1),
-         ],
-      q(GA) => [
-         q(0081),
-         q(1),
-         ],
-      q(GB) => [
-         q(0080),
-         q(0),
-         ],
-      q(GG) => [
-         q(0082),
-         q(0),
-         ],
-      q(GH) => [
-         q(0084),
-         q(0),
-         ],
-      q(GI) => [
-         q(0085),
-         q(0),
-         ],
-      q(GJ) => [
-         q(0088),
-         q(0),
-         ],
-      q(GK) => [
-         q(0092),
-         q(0),
-         ],
-      q(GL) => [
-         q(0087),
-         q(0),
-         ],
-      q(GM) => [
-         q(0083),
-         q(0),
-         ],
-      q(GO) => [
-         q(0263),
-         q(0),
-         ],
-      q(GP) => [
-         q(0089),
-         q(0),
-         ],
-      q(GQ) => [
-         q(0090),
-         q(0),
-         ],
-      q(GR) => [
-         q(0086),
-         q(0),
-         ],
-      q(GT) => [
-         q(0091),
-         q(0),
-         ],
-      q(GV) => [
-         q(0093),
-         q(0),
-         ],
-      q(GY) => [
-         q(0095),
-         q(0),
-         ],
-      q(GZ) => [
-         q(0262),
-         q(0),
-         ],
-      q(HA) => [
-         q(0096),
-         q(0),
-         ],
-      q(HK) => [
-         q(0100),
-         q(0),
-         ],
-      q(HM) => [
-         q(0264),
-         q(0),
-         ],
-      q(HO) => [
-         q(0099),
-         q(0),
-         ],
-      q(HQ) => [
-         q(0265),
-         q(0),
-         ],
-      q(HR) => [
-         q(0056),
-         q(0),
-         ],
-      q(HU) => [
-         q(0101),
-         q(0),
-         ],
-      q(IC) => [
-         q(0102),
-         q(0),
-         ],
-      q(ID) => [
-         q(0104),
-         q(0),
-         ],
-      q(IM) => [
-         q(0108),
-         q(0),
-         ],
-      q(IN) => [
-         q(0103),
-         q(0),
-         ],
-      q(IO) => [
-         q(0033),
-         q(0),
-         ],
-      q(IP) => [
-         q(0256),
-         q(0),
-         ],
-      q(IR) => [
-         q(0105),
-         q(2),
-         ],
-      q(IS) => [
-         q(0109),
-         q(0),
-         ],
-      q(IT) => [
-         q(0110),
-         q(0),
-         ],
-      q(IV) => [
-         q(0055),
-         q(0),
-         ],
-      q(IZ) => [
-         q(0106),
-         q(0),
-         ],
-      q(JA) => [
-         q(0112),
-         q(0),
-         ],
-      q(JE) => [
-         q(0113),
-         q(0),
-         ],
-      q(JM) => [
-         q(0111),
-         q(0),
-         ],
-      q(JN) => [
-         q(0266),
-         q(0),
-         ],
-      q(JO) => [
-         q(0114),
-         q(0),
-         ],
-      q(JQ) => [
-         q(0268),
-         q(0),
-         ],
-      q(JU) => [
-         q(0269),
-         q(0),
-         ],
-      q(KE) => [
-         q(0116),
-         q(0),
-         ],
-      q(KG) => [
-         q(0121),
-         q(0),
-         ],
-      q(KN) => [
-         q(0271),
-         q(0),
-         ],
-      q(KQ) => [
-         q(0270),
-         q(0),
-         ],
-      q(KR) => [
-         q(0117),
-         q(0),
-         ],
-      q(KS) => [
-         q(0272),
-         q(0),
-         ],
-      q(KT) => [
-         q(0047),
-         q(0),
-         ],
-      q(KU) => [
-         q(0120),
-         q(0),
-         ],
-      q(KV) => [
-         q(0273),
-         q(0),
-         ],
-      q(KZ) => [
-         q(0115),
-         q(0),
-         ],
-      q(LA) => [
-         q(0274),
-         q(0),
-         ],
-      q(LE) => [
-         q(0124),
-         q(0),
-         ],
-      q(LG) => [
-         q(0123),
-         q(0),
-         ],
-      q(LH) => [
-         q(0129),
-         q(0),
-         ],
-      q(LI) => [
-         q(0126),
-         q(0),
-         ],
-      q(LO) => [
-         q(0202),
-         q(0),
-         ],
-      q(LQ) => [
-         q(0278),
-         q(0),
-         ],
-      q(LS) => [
-         q(0128),
-         q(0),
-         ],
-      q(LT) => [
-         q(0125),
-         q(0),
-         ],
-      q(LU) => [
-         q(0130),
-         q(0),
-         ],
-      q(LY) => [
-         q(0127),
-         q(0),
-         ],
-      q(MA) => [
-         q(0133),
-         q(0),
-         ],
-      q(MB) => [
-         q(0140),
-         q(0),
-         ],
-      q(MC) => [
-         q(0131),
-         q(2),
-         ],
-      q(MD) => [
-         q(0276),
-         q(0),
-         ],
-      q(MF) => [
-         q(0143),
-         q(0),
-         ],
-      q(MG) => [
-         q(0148),
-         q(0),
-         ],
-      q(MH) => [
-         q(0150),
-         q(0),
-         ],
-      q(MI) => [
-         q(0134),
-         q(0),
-         ],
-      q(MJ) => [
-         q(0149),
-         q(0),
-         ],
-      q(MK) => [
-         q(0132),
-         q(2),
-         ],
-      q(ML) => [
-         q(0137),
-         q(0),
-         ],
-      q(MN) => [
-         q(0147),
-         q(0),
-         ],
-      q(MO) => [
-         q(0151),
-         q(0),
-         ],
-      q(MP) => [
-         q(0142),
-         q(0),
-         ],
-      q(MQ) => [
-         q(0275),
-         q(0),
-         ],
-      q(MR) => [
-         q(0141),
-         q(0),
-         ],
-      q(MT) => [
-         q(0138),
-         q(0),
-         ],
-      q(MU) => [
-         q(0167),
-         q(0),
-         ],
-      q(MV) => [
-         q(0136),
-         q(0),
-         ],
-      q(MX) => [
-         q(0144),
-         q(0),
-         ],
-      q(MY) => [
-         q(0135),
-         q(0),
-         ],
-      q(MZ) => [
-         q(0152),
-         q(0),
-         ],
-      q(NC) => [
-         q(0158),
-         q(0),
-         ],
-      q(NE) => [
-         q(0163),
-         q(0),
-         ],
-      q(NF) => [
-         q(0164),
-         q(0),
-         ],
-      q(NG) => [
-         q(0161),
-         q(0),
-         ],
-      q(NH) => [
-         q(0240),
-         q(0),
-         ],
-      q(NI) => [
-         q(0162),
-         q(0),
-         ],
-      q(NL) => [
-         q(0157),
-         q(0),
-         ],
-      q(NN) => [
-         q(0282),
-         q(0),
-         ],
-      q(NO) => [
-         q(0166),
-         q(0),
-         ],
-      q(NP) => [
-         q(0156),
-         q(0),
-         ],
-      q(NR) => [
-         q(0155),
-         q(0),
-         ],
-      q(NS) => [
-         q(0212),
-         q(0),
-         ],
-      q(NU) => [
-         q(0160),
-         q(0),
-         ],
-      q(NZ) => [
-         q(0159),
-         q(0),
-         ],
-      q(OD) => [
-         q(0208),
-         q(0),
-         ],
-      q(PA) => [
-         q(0173),
-         q(0),
-         ],
-      q(PC) => [
-         q(0176),
-         q(1),
-         ],
-      q(PE) => [
-         q(0174),
-         q(0),
-         ],
-      q(PF) => [
-         q(0279),
-         q(0),
-         ],
-      q(PG) => [
-         q(0284),
-         q(0),
-         ],
-      q(PJ) => [
-         q(0260),
-         q(0),
-         ],
-      q(PK) => [
-         q(0168),
-         q(0),
-         ],
-      q(PL) => [
-         q(0177),
-         q(0),
-         ],
-      q(PM) => [
-         q(0171),
-         q(0),
-         ],
-      q(PO) => [
-         q(0178),
-         q(0),
-         ],
-      q(PP) => [
-         q(0172),
-         q(0),
-         ],
-      q(PS) => [
-         q(0169),
-         q(0),
-         ],
-      q(PU) => [
-         q(0094),
-         q(0),
-         ],
-      q(QA) => [
-         q(0180),
-         q(0),
-         ],
-      q(RE) => [
-         q(0181),
-         q(0),
-         ],
-      q(RI) => [
-         q(0197),
-         q(0),
-         ],
-      q(RM) => [
-         q(0139),
-         q(0),
-         ],
-      q(RN) => [
-         q(0189),
-         q(2),
-         ],
-      q(RO) => [
-         q(0182),
-         q(0),
-         ],
-      q(RP) => [
-         q(0175),
-         q(0),
-         ],
-      q(RQ) => [
-         q(0179),
-         q(0),
-         ],
-      q(RS) => [
-         q(0280),
-         q(0),
-         ],
-      q(RW) => [
-         q(0184),
-         q(0),
-         ],
-      q(SA) => [
-         q(0195),
-         q(0),
-         ],
-      q(SB) => [
-         q(0190),
-         q(0),
-         ],
-      q(SC) => [
-         q(0187),
-         q(0),
-         ],
-      q(SE) => [
-         q(0198),
-         q(0),
-         ],
-      q(SF) => [
-         q(0206),
-         q(0),
-         ],
-      q(SG) => [
-         q(0196),
-         q(0),
-         ],
-      q(SH) => [
-         q(0281),
-         q(0),
-         ],
-      q(SI) => [
-         q(0203),
-         q(0),
-         ],
-      q(SL) => [
-         q(0199),
-         q(0),
-         ],
-      q(SM) => [
-         q(0193),
-         q(0),
-         ],
-      q(SN) => [
-         q(0200),
-         q(0),
-         ],
-      q(SO) => [
-         q(0205),
-         q(0),
-         ],
-      q(SP) => [
-         q(0209),
-         q(0),
-         ],
-      q(ST) => [
-         q(0188),
-         q(0),
-         ],
-      q(SU) => [
-         q(0211),
-         q(0),
-         ],
-      q(SV) => [
-         q(0285),
-         q(0),
-         ],
-      q(SW) => [
-         q(0215),
-         q(0),
-         ],
-      q(SX) => [
-         q(0283),
-         q(0),
-         ],
-      q(SY) => [
-         q(0217),
-         q(1),
-         ],
-      q(SZ) => [
-         q(0216),
-         q(0),
-         ],
-      q(TB) => [
-         q(0185),
-         q(0),
-         ],
-      q(TD) => [
-         q(0226),
-         q(0),
-         ],
-      q(TE) => [
-         q(0287),
-         q(0),
-         ],
-      q(TH) => [
-         q(0221),
-         q(0),
-         ],
-      q(TI) => [
-         q(0219),
-         q(0),
-         ],
-      q(TK) => [
-         q(0230),
-         q(0),
-         ],
-      q(TL) => [
-         q(0224),
-         q(0),
-         ],
-      q(TN) => [
-         q(0225),
-         q(0),
-         ],
-      q(TO) => [
-         q(0223),
-         q(0),
-         ],
-      q(TP) => [
-         q(0194),
-         q(0),
-         ],
-      q(TS) => [
-         q(0227),
-         q(0),
-         ],
-      q(TT) => [
-         q(0222),
-         q(0),
-         ],
-      q(TU) => [
-         q(0228),
-         q(0),
-         ],
-      q(TV) => [
-         q(0231),
-         q(0),
-         ],
-      q(TW) => [
-         q(0218),
-         q(1),
-         ],
-      q(TX) => [
-         q(0229),
-         q(0),
-         ],
-      q(TZ) => [
-         q(0286),
-         q(0),
-         ],
-      q(UC) => [
-         q(0058),
-         q(0),
-         ],
-      q(UG) => [
-         q(0232),
-         q(0),
-         ],
-      q(UK) => [
-         q(0235),
-         q(0),
-         ],
-      q(UP) => [
-         q(0233),
-         q(0),
-         ],
-      q(US) => [
-         q(0236),
-         q(0),
-         ],
-      q(UV) => [
-         q(0036),
-         q(0),
-         ],
-      q(UY) => [
-         q(0238),
-         q(0),
-         ],
-      q(UZ) => [
-         q(0239),
-         q(0),
-         ],
-      q(VC) => [
-         q(0191),
-         q(0),
-         ],
-      q(VE) => [
-         q(0241),
-         q(2),
-         ],
-      q(VI) => [
-         q(0243),
-         q(0),
-         ],
-      q(VM) => [
-         q(0242),
-         q(1),
-         ],
-      q(VQ) => [
-         q(0244),
-         q(0),
-         ],
-      q(VT) => [
-         q(0098),
-         q(2),
-         ],
-      q(WA) => [
-         q(0154),
-         q(0),
-         ],
-      q(WE) => [
-         q(0289),
-         q(0),
-         ],
-      q(WF) => [
-         q(0245),
-         q(0),
-         ],
-      q(WI) => [
-         q(0246),
-         q(0),
-         ],
-      q(WQ) => [
-         q(0288),
-         q(0),
-         ],
-      q(WS) => [
-         q(0192),
-         q(0),
-         ],
-      q(WZ) => [
-         q(0214),
-         q(0),
-         ],
-      q(YM) => [
-         q(0247),
-         q(0),
-         ],
-      q(ZA) => [
-         q(0248),
-         q(0),
-         ],
-      q(ZI) => [
          q(0249),
          q(0),
          ],
@@ -8235,283 +6884,10 @@ $Locale::Codes::Data{'country'}{'id2code'} = {
       q(0247) => q(ye),
       q(0248) => q(zm),
       q(0249) => q(zw),
-      q(0290) => q(ac),
-      q(0291) => q(an),
-      q(0292) => q(eu),
-      q(0293) => q(su),
-      },
-   q(fips-10) => {
-      q(0001) => q(AF),
-      q(0003) => q(AL),
-      q(0004) => q(AG),
-      q(0005) => q(AQ),
-      q(0006) => q(AN),
-      q(0007) => q(AO),
-      q(0008) => q(AV),
-      q(0009) => q(AY),
-      q(0010) => q(AC),
-      q(0011) => q(AR),
-      q(0012) => q(AM),
-      q(0013) => q(AA),
-      q(0014) => q(AS),
-      q(0015) => q(AU),
-      q(0016) => q(AJ),
-      q(0017) => q(BF),
-      q(0018) => q(BA),
-      q(0019) => q(BG),
-      q(0020) => q(BB),
-      q(0021) => q(BO),
-      q(0022) => q(BE),
-      q(0023) => q(BH),
-      q(0024) => q(BN),
-      q(0025) => q(BD),
-      q(0026) => q(BT),
-      q(0027) => q(BL),
-      q(0029) => q(BK),
-      q(0030) => q(BC),
-      q(0031) => q(BV),
-      q(0032) => q(BR),
-      q(0033) => q(IO),
-      q(0034) => q(BX),
-      q(0035) => q(BU),
-      q(0036) => q(UV),
-      q(0037) => q(BY),
-      q(0038) => q(CB),
-      q(0039) => q(CM),
-      q(0040) => q(CA),
-      q(0041) => q(CV),
-      q(0042) => q(CJ),
-      q(0043) => q(CT),
-      q(0044) => q(CD),
-      q(0045) => q(CI),
-      q(0046) => q(CH),
-      q(0047) => q(KT),
-      q(0048) => q(CK),
-      q(0049) => q(CO),
-      q(0050) => q(CN),
-      q(0051) => q(CF),
-      q(0053) => q(CW),
-      q(0054) => q(CS),
-      q(0055) => q(IV),
-      q(0056) => q(HR),
-      q(0057) => q(CU),
-      q(0058) => q(UC),
-      q(0059) => q(CY),
-      q(0060) => q(EZ),
-      q(0061) => q(DA),
-      q(0062) => q(DJ),
-      q(0063) => q(DO),
-      q(0064) => q(DR),
-      q(0065) => q(EC),
-      q(0066) => q(EG),
-      q(0067) => q(ES),
-      q(0068) => q(EK),
-      q(0069) => q(ER),
-      q(0070) => q(EN),
-      q(0071) => q(ET),
-      q(0072) => q(FK),
-      q(0073) => q(FO),
-      q(0074) => q(FJ),
-      q(0075) => q(FI),
-      q(0076) => q(FR),
-      q(0077) => q(FG),
-      q(0078) => q(FP),
-      q(0079) => q(FS),
-      q(0080) => q(GB),
-      q(0081) => q(GA),
-      q(0082) => q(GG),
-      q(0083) => q(GM),
-      q(0084) => q(GH),
-      q(0085) => q(GI),
-      q(0086) => q(GR),
-      q(0087) => q(GL),
-      q(0088) => q(GJ),
-      q(0089) => q(GP),
-      q(0090) => q(GQ),
-      q(0091) => q(GT),
-      q(0092) => q(GK),
-      q(0093) => q(GV),
-      q(0094) => q(PU),
-      q(0095) => q(GY),
-      q(0096) => q(HA),
-      q(0098) => q(VT),
-      q(0099) => q(HO),
-      q(0100) => q(HK),
-      q(0101) => q(HU),
-      q(0102) => q(IC),
-      q(0103) => q(IN),
-      q(0104) => q(ID),
-      q(0105) => q(IR),
-      q(0106) => q(IZ),
-      q(0107) => q(EI),
-      q(0108) => q(IM),
-      q(0109) => q(IS),
-      q(0110) => q(IT),
-      q(0111) => q(JM),
-      q(0112) => q(JA),
-      q(0113) => q(JE),
-      q(0114) => q(JO),
-      q(0115) => q(KZ),
-      q(0116) => q(KE),
-      q(0117) => q(KR),
-      q(0120) => q(KU),
-      q(0121) => q(KG),
-      q(0123) => q(LG),
-      q(0124) => q(LE),
-      q(0125) => q(LT),
-      q(0126) => q(LI),
-      q(0127) => q(LY),
-      q(0128) => q(LS),
-      q(0129) => q(LH),
-      q(0130) => q(LU),
-      q(0131) => q(MC),
-      q(0132) => q(MK),
-      q(0133) => q(MA),
-      q(0134) => q(MI),
-      q(0135) => q(MY),
-      q(0136) => q(MV),
-      q(0137) => q(ML),
-      q(0138) => q(MT),
-      q(0139) => q(RM),
-      q(0140) => q(MB),
-      q(0141) => q(MR),
-      q(0142) => q(MP),
-      q(0143) => q(MF),
-      q(0144) => q(MX),
-      q(0145) => q(FM),
-      q(0147) => q(MN),
-      q(0148) => q(MG),
-      q(0149) => q(MJ),
-      q(0150) => q(MH),
-      q(0151) => q(MO),
-      q(0152) => q(MZ),
-      q(0153) => q(BM),
-      q(0154) => q(WA),
-      q(0155) => q(NR),
-      q(0156) => q(NP),
-      q(0157) => q(NL),
-      q(0158) => q(NC),
-      q(0159) => q(NZ),
-      q(0160) => q(NU),
-      q(0161) => q(NG),
-      q(0162) => q(NI),
-      q(0163) => q(NE),
-      q(0164) => q(NF),
-      q(0165) => q(CQ),
-      q(0166) => q(NO),
-      q(0167) => q(MU),
-      q(0168) => q(PK),
-      q(0169) => q(PS),
-      q(0171) => q(PM),
-      q(0172) => q(PP),
-      q(0173) => q(PA),
-      q(0174) => q(PE),
-      q(0175) => q(RP),
-      q(0176) => q(PC),
-      q(0177) => q(PL),
-      q(0178) => q(PO),
-      q(0179) => q(RQ),
-      q(0180) => q(QA),
-      q(0181) => q(RE),
-      q(0182) => q(RO),
-      q(0184) => q(RW),
-      q(0185) => q(TB),
-      q(0187) => q(SC),
-      q(0188) => q(ST),
-      q(0189) => q(RN),
-      q(0190) => q(SB),
-      q(0191) => q(VC),
-      q(0192) => q(WS),
-      q(0193) => q(SM),
-      q(0194) => q(TP),
-      q(0195) => q(SA),
-      q(0196) => q(SG),
-      q(0197) => q(RI),
-      q(0198) => q(SE),
-      q(0199) => q(SL),
-      q(0200) => q(SN),
-      q(0202) => q(LO),
-      q(0203) => q(SI),
-      q(0204) => q(BP),
-      q(0205) => q(SO),
-      q(0206) => q(SF),
-      q(0208) => q(OD),
-      q(0209) => q(SP),
-      q(0210) => q(CE),
-      q(0211) => q(SU),
-      q(0212) => q(NS),
-      q(0214) => q(WZ),
-      q(0215) => q(SW),
-      q(0216) => q(SZ),
-      q(0217) => q(SY),
-      q(0218) => q(TW),
-      q(0219) => q(TI),
-      q(0221) => q(TH),
-      q(0222) => q(TT),
-      q(0223) => q(TO),
-      q(0224) => q(TL),
-      q(0225) => q(TN),
-      q(0226) => q(TD),
-      q(0227) => q(TS),
-      q(0228) => q(TU),
-      q(0229) => q(TX),
-      q(0230) => q(TK),
-      q(0231) => q(TV),
-      q(0232) => q(UG),
-      q(0233) => q(UP),
-      q(0234) => q(AE),
-      q(0235) => q(UK),
-      q(0236) => q(US),
-      q(0238) => q(UY),
-      q(0239) => q(UZ),
-      q(0240) => q(NH),
-      q(0241) => q(VE),
-      q(0242) => q(VM),
-      q(0243) => q(VI),
-      q(0244) => q(VQ),
-      q(0245) => q(WF),
-      q(0246) => q(WI),
-      q(0247) => q(YM),
-      q(0248) => q(ZA),
-      q(0249) => q(ZI),
-      q(0252) => q(AX),
-      q(0253) => q(AT),
-      q(0254) => q(FQ),
-      q(0255) => q(BS),
-      q(0256) => q(IP),
-      q(0257) => q(CG),
-      q(0258) => q(CR),
-      q(0259) => q(DX),
-      q(0260) => q(PJ),
-      q(0261) => q(EU),
-      q(0262) => q(GZ),
-      q(0263) => q(GO),
-      q(0264) => q(HM),
-      q(0265) => q(HQ),
-      q(0266) => q(JN),
-      q(0267) => q(DQ),
-      q(0268) => q(JQ),
-      q(0269) => q(JU),
-      q(0270) => q(KQ),
-      q(0271) => q(KN),
-      q(0272) => q(KS),
-      q(0273) => q(KV),
-      q(0274) => q(LA),
-      q(0275) => q(MQ),
-      q(0276) => q(MD),
-      q(0277) => q(BQ),
-      q(0278) => q(LQ),
-      q(0279) => q(PF),
-      q(0280) => q(RS),
-      q(0281) => q(SH),
-      q(0282) => q(NN),
-      q(0283) => q(SX),
-      q(0284) => q(PG),
-      q(0285) => q(SV),
-      q(0286) => q(TZ),
-      q(0287) => q(TE),
-      q(0288) => q(WQ),
-      q(0289) => q(WE),
+      q(0252) => q(ac),
+      q(0253) => q(an),
+      q(0254) => q(eu),
+      q(0255) => q(su),
       },
    q(numeric) => {
       q(0001) => q(004),
