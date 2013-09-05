@@ -2727,7 +2727,9 @@ slightly differently.  A flag in the SV, C<SVf_UTF8>, indicates that the
 string is internally encoded as UTF-8.  Without it, the byte value is the
 codepoint number and vice versa (in other words, the string is encoded
 as iso-8859-1, but C<use feature 'unicode_strings'> is needed to get iso-8859-1
-semantics).  You can check and manipulate this flag with the
+semantics).  This flag is only meaningful if the SV is C<SvPOK>
+or immediately after stringification via C<SvPV> or a similar
+macro.  You can check and manipulate this flag with the
 following macros:
 
     SvUTF8(sv)
@@ -2758,7 +2760,8 @@ manipulating SVs.  More specifically, you cannot expect to do this:
 
 The C<char*> string does not tell you the whole story, and you can't
 copy or reconstruct an SV just by copying the string value.  Check if the
-old SV has the UTF8 flag set, and act accordingly:
+old SV has the UTF8 flag set (I<after> the C<SvPV> call), and act
+accordingly:
 
     p = SvPV(sv, len);
     frobnicate(p);
@@ -2807,7 +2810,8 @@ Not really.  Just remember these things:
 =item *
 
 There's no way to tell if a string is UTF-8 or not.  You can tell if an SV
-is UTF-8 by looking at its C<SvUTF8> flag.  Don't forget to set the flag if
+is UTF-8 by looking at its C<SvUTF8> flag after stringifying it
+with C<SvPV> or a similar macro.  Don't forget to set the flag if
 something should be UTF-8.  Treat the flag as part of the PV, even though
 it's not - if you pass on the PV to somewhere, pass on the flag too.
 
