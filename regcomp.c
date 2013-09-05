@@ -1473,7 +1473,7 @@ is the recommended Unicode-aware way of saying
     if ( UTF ) {                                                              \
         /* if it is UTF then it is either already folded, or does not need    \
          * folding */                                                         \
-        uvc = utf8n_to_uvuni( (const U8*) uc, UTF8_MAXLEN, &len, uniflags);   \
+        uvc = valid_utf8_to_uvchr( (const U8*) uc, &len);                     \
     }                                                                         \
     else if (folder == PL_fold_latin1) {                                      \
         /* This folder implies Unicode rules, which in the range expressible  \
@@ -1573,7 +1573,6 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
     HV *widecharmap = NULL;
     AV *revcharmap = newAV();
     regnode *cur;
-    const U32 uniflags = UTF8_ALLOW_DEFAULT;
     STRLEN len = 0;
     UV uvc = 0;
     U16 curword = 0;
