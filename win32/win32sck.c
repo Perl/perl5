@@ -61,12 +61,6 @@ EndSockets(void)
 	WSACleanup();
 }
 
-static int
-get_last_socket_error(void)
-{
-    return convert_wsa_error_to_errno(WSAGetLastError());
-}
-
 /* Translate WSAExxx values to corresponding Exxx values. Not all WSAExxx
  * constants have corresponding Exxx constants in <errno.h> (even in VC++
  * 2010 and above, which have expanded <errno.h> with more values), but any
@@ -174,7 +168,7 @@ convert_wsa_error_to_errno(int wsaerr)
     case WSAENOMORE:
 	return ENOMORE;
     case WSAECANCELLED:
-	return ECANCELLED;
+	return ECANCELED;
     case WSAEINVALIDPROCTABLE:
 	return EINVALIDPROCTABLE;
     case WSAEINVALIDPROVIDER:
@@ -186,6 +180,110 @@ convert_wsa_error_to_errno(int wsaerr)
     }
 
     return wsaerr;
+}
+
+/* Translate Exxx values in the POSIX supplement range defined in VC++ 2010 and
+ * above (EADDRINUSE <= err <= EWOULDBLOCK) to corresponding WSAExxx values. Not
+ * all such Exxx constants have corresponding WSAExxx constants in <winsock2.h>;
+ * we just use ERROR_INVALID_FUNCTION for those that are missing but do not
+ * really expect to encounter them anyway.
+ * Other Exxx values (err < sys_nerr) are returned unchanged.
+ */
+int
+convert_errno_to_wsa_error(int err)
+{
+    switch (err) {
+    case EADDRINUSE:
+	return WSAEADDRINUSE;
+    case EADDRNOTAVAIL:
+	return WSAEADDRNOTAVAIL;
+    case EAFNOSUPPORT:
+	return WSAEAFNOSUPPORT;
+    case EALREADY:
+	return WSAEALREADY;
+    case EBADMSG:
+	return ERROR_INVALID_FUNCTION;
+    case ECANCELED:
+	return WSAECANCELLED;
+    case ECONNABORTED:
+	return WSAECONNABORTED;
+    case ECONNREFUSED:
+	return WSAECONNREFUSED;
+    case ECONNRESET:
+	return WSAECONNRESET;
+    case EDESTADDRREQ:
+	return WSAEDESTADDRREQ;
+    case EHOSTUNREACH:
+	return WSAEHOSTUNREACH;
+    case EIDRM:
+	return ERROR_INVALID_FUNCTION;
+    case EINPROGRESS:
+	return WSAEINPROGRESS;
+    case EISCONN:
+	return WSAEISCONN;
+    case ELOOP:
+	return WSAELOOP;
+    case EMSGSIZE:
+	return WSAEMSGSIZE;
+    case ENETDOWN:
+	return WSAENETDOWN;
+    case ENETRESET:
+	return WSAENETRESET;
+    case ENETUNREACH:
+	return WSAENETUNREACH;
+    case ENOBUFS:
+	return WSAENOBUFS;
+    case ENODATA:
+	return ERROR_INVALID_FUNCTION;
+    case ENOLINK:
+	return ERROR_INVALID_FUNCTION;
+    case ENOMSG:
+	return ERROR_INVALID_FUNCTION;
+    case ENOPROTOOPT:
+	return WSAENOPROTOOPT;
+    case ENOSR:
+	return ERROR_INVALID_FUNCTION;
+    case ENOSTR:
+	return ERROR_INVALID_FUNCTION;
+    case ENOTCONN:
+	return WSAENOTCONN;
+    case ENOTRECOVERABLE:
+	return ERROR_INVALID_FUNCTION;
+    case ENOTSOCK:
+	return WSAENOTSOCK;
+    case ENOTSUP:
+	return ERROR_INVALID_FUNCTION;
+    case EOPNOTSUPP:
+	return WSAEOPNOTSUPP;
+    case EOTHER:
+	return ERROR_INVALID_FUNCTION;
+    case EOVERFLOW:
+	return ERROR_INVALID_FUNCTION;
+    case EOWNERDEAD:
+	return ERROR_INVALID_FUNCTION;
+    case EPROTO:
+	return ERROR_INVALID_FUNCTION;
+    case EPROTONOSUPPORT:
+	return WSAEPROTONOSUPPORT;
+    case EPROTOTYPE:
+	return WSAEPROTOTYPE;
+    case ETIME:
+	return ERROR_INVALID_FUNCTION;
+    case ETIMEDOUT:
+	return WSAETIMEDOUT;
+    case ETXTBSY:
+	return ERROR_INVALID_FUNCTION;
+    case EWOULDBLOCK:
+	return WSAEWOULDBLOCK;
+    }
+
+    return err;
+}
+
+static int
+get_last_socket_error(void)
+{
+    return convert_wsa_error_to_errno(WSAGetLastError());
 }
 
 void

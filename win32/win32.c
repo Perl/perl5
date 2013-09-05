@@ -2522,6 +2522,8 @@ win32_flock(int fd, int oper)
 
 #undef LK_LEN
 
+extern int convert_wsa_error_to_errno(int wsaerr); /* in win32sck.c */
+
 /* Get the errno value corresponding to the given err. This function is not
  * intended to handle conversion of general GetLastError() codes. It only exists
  * to translate Windows sockets error codes from WSAGetLastError(). Such codes
@@ -2584,10 +2586,14 @@ win32_feof(FILE *fp)
     return (feof(fp));
 }
 
+extern int convert_errno_to_wsa_error(int err); /* in win32sck.c */
+
 /*
  * Since the errors returned by the socket error function
  * WSAGetLastError() are not known by the library routine strerror
- * we have to roll our own.
+ * we have to roll our own to cover the case of socket errors
+ * that could not be converted to regular errno values by
+ * get_last_socket_error() in win32/win32sck.c.
  */
 
 DllExport char *
@@ -2601,6 +2607,18 @@ win32_strerror(int e)
         dTHXa(NULL);
 	if (e < 0)
 	    e = GetLastError();
+#if EADDRINUSE != WSAEADDRINUSE
+	/* VC10+ define a "POSIX supplement" of errno values ranging from
+	 * EADDRINUSE (100) to EWOULDBLOCK (140), but sys_nerr is still 43 and
+	 * strerror() returns "Unknown error" for them. We must therefore still
+	 * roll our own messages for these codes, and additionally map them to
+	 * corresponding Windows (sockets) error codes first to avoid getting
+	 * the wrong system message.
+	 */
+	else if (e >= EADDRINUSE && e <= EWOULDBLOCK) {
+	    e = convert_errno_to_wsa_error(e);
+	}
+#endif
 
 	aTHXa(PERL_GET_THX);
 	if (FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM
