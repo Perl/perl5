@@ -967,8 +967,7 @@ Perl_utf8_to_uvchr_buf(pTHX_ const U8 *s, const U8 *send, STRLEN *retlen)
 
 /* Like L</utf8_to_uvchr_buf>(), but should only be called when it is known that
  * there are no malformations in the input UTF-8 string C<s>.  surrogates,
- * non-character code points, and non-Unicode code points are allowed.  A macro
- * in utf8.h is used to normally avoid this function wrapper */
+ * non-character code points, and non-Unicode code points are allowed. */
 
 UV
 Perl_valid_utf8_to_uvchr(pTHX_ const U8 *s, STRLEN *retlen)
