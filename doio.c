@@ -2447,6 +2447,12 @@ Perl_vms_start_glob
     fp = IoIFP(io);
 #endif /* !VMS */
     LEAVE;
+
+    if (!fp && ckWARN(WARN_GLOB)) {
+        Perl_warner(aTHX_ packWARN(WARN_GLOB), "glob failed (can't start child: %s)",
+                    Strerror(errno));
+    }
+
     return fp;
 }
 
