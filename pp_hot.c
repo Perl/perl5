@@ -2640,7 +2640,7 @@ try_autoload:
     if (!(CvISXSUB(cv))) {
 	/* This path taken at least 75% of the time   */
 	dMARK;
-	I32 items = SP - MARK;
+	SSize_t items = SP - MARK;
 	PADLIST * const padlist = CvPADLIST(cv);
 	PUSHBLOCK(cx, CXt_SUB, MARK);
 	PUSHSUB(cx);
@@ -2703,7 +2703,7 @@ try_autoload:
 	RETURNOP(CvSTART(cv));
     }
     else {
-	I32 markix = TOPMARK;
+	SSize_t markix = TOPMARK;
 
 	SAVETMPS;
 	PUTBACK;
@@ -2719,7 +2719,7 @@ try_autoload:
 	     * switch stack to @_, and copy return values
 	     * back. This would allow popping @_ in XSUB, e.g.. XXXX */
 	    AV * const av = GvAV(PL_defgv);
-	    const I32 items = AvFILLp(av) + 1;   /* @_ is not tieable */
+	    const SSize_t items = AvFILLp(av) + 1;  /* @_ is not tieable */
 
 	    if (items) {
 		SSize_t i = 0;
@@ -2736,7 +2736,7 @@ try_autoload:
 	}
 	else {
 	    SV **mark = PL_stack_base + markix;
-	    I32 items = SP - mark;
+	    SSize_t items = SP - mark;
 	    while (items--) {
 		mark++;
 		if (*mark && SvPADTMP(*mark) && !IS_PADGV(*mark))

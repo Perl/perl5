@@ -2909,7 +2909,7 @@ PP(pp_goto) /* also pp_dump */
 		mark = SP;
 		SP += items;
 		if (items && AvREAL(arg)) {
-		    I32 index;
+		    SSize_t index;
 		    for (index=0; index<items; index++)
 			if (SP[-index])
 			    SvREFCNT_inc_void_NN(sv_2mortal(SP[-index]));
