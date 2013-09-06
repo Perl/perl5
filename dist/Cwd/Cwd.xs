@@ -251,9 +251,7 @@ int Perl_getcwd_sv(pTHX_ SV *sv)
 {
 #ifndef PERL_MICRO
 
-#ifndef INCOMPLETE_TAINTS
     SvTAINTED_on(sv);
-#endif
 
 #ifdef HAS_GETCWD
     {
@@ -551,9 +549,7 @@ PPCODE:
 	croak_xs_usage(cv,  "");
     getcwd_sv(TARG);
     XSprePUSH; PUSHTARG;
-#ifndef INCOMPLETE_TAINTS
     SvTAINTED_on(TARG);
-#endif
 }
 
 void
@@ -580,9 +576,7 @@ PPCODE:
         sv_setsv(TARG, &PL_sv_undef);
 
     XSprePUSH; PUSHs(TARG);
-#ifndef INCOMPLETE_TAINTS
     SvTAINTED_on(TARG);
-#endif
 }
 
 #if defined(WIN32) && !defined(UNDER_CE)
@@ -617,9 +611,7 @@ PPCODE:
     Safefree(dir);
 
     XSprePUSH; PUSHs(TARG);
-#ifndef INCOMPLETE_TAINTS
     SvTAINTED_on(TARG);
-#endif
 }
 
 #endif

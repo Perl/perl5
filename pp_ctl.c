@@ -168,12 +168,10 @@ PP(pp_regcomp)
     }
 
 
-#ifndef INCOMPLETE_TAINTS
     if (TAINTING_get && TAINT_get) {
 	SvTAINTED_on((SV*)new_re);
         RX_TAINT_on(new_re);
     }
-#endif
 
 #if !defined(USE_ITHREADS)
     /* can't change the optree at runtime either */

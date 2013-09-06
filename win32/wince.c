@@ -2449,9 +2449,7 @@ XS(w32_GetCwd)
   EXTEND(SP,1);
   SvPOK_on(sv);
   ST(0) = sv;
-#ifndef INCOMPLETE_TAINTS
   SvTAINTED_on(ST(0));
-#endif
   XSRETURN(1);
 }
 
