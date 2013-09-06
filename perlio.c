@@ -653,7 +653,7 @@ PerlIO_clone_list(pTHX_ PerlIO_list_t *proto, CLONE_PARAMS *param)
 	list = PerlIO_list_alloc(aTHX);
 	for (i=0; i < proto->cur; i++) {
 	    SV *arg = proto->array[i].arg;
-#ifdef sv_dup
+#ifdef USE_ITHREADS
 	    if (arg && param)
 		arg = sv_dup(arg, param);
 #else
@@ -2259,7 +2259,7 @@ PerlIO_sv_dup(pTHX_ SV *arg, CLONE_PARAMS *param)
 {
     if (!arg)
 	return NULL;
-#ifdef sv_dup
+#ifdef USE_ITHREADS
     if (param) {
 	arg = sv_dup(arg, param);
 	SvREFCNT_inc_simple_void_NN(arg);
