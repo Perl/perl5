@@ -19,7 +19,7 @@ our %EXPORT_TAGS = (
     ':override' => 'internal',
     );
 
-our $VERSION = '1.22';
+our $VERSION = '1.23';
 
 bootstrap Time::Piece $VERSION;
 
@@ -639,7 +639,7 @@ Time::Piece - Object Oriented time objects
 
 =head1 DESCRIPTION
 
-This module replaces the standard localtime and gmtime functions with
+This module replaces the standard C<localtime> and C<gmtime> functions with
 implementations that return objects. It does so in a backwards
 compatible manner, so that using localtime/gmtime in the way documented
 in perlfunc will still return what you expect.
@@ -716,6 +716,11 @@ following methods are available on the object:
     Time::Piece->strptime(STRING, FORMAT)
                             # see strptime man page. Creates a new
                             # Time::Piece object
+
+Note that C<localtime> and C<gmtime> are not listed above.  If called as
+methods on a Time::Piece object, they act as constructors, returning a new
+Time::Piece object for the current time.  In other words: they're not useful as
+methods.
 
 =head2 Local Locales
 

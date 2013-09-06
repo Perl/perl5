@@ -1912,7 +1912,7 @@ use File::Glob qw(:case);
 
     'Time::Piece' => {
         'MAINTAINER'   => 'msergeant',
-        'DISTRIBUTION' => 'RJBS/Time-Piece-1.22.tar.gz',
+        'DISTRIBUTION' => 'RJBS/Time-Piece-1.23.tar.gz',
         'FILES'        => q[cpan/Time-Piece],
         'UPSTREAM'     => undef,
     },

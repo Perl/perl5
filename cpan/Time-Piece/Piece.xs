@@ -584,6 +584,7 @@ label:
 				return 0;
 
 			tm->tm_yday = i - 1;
+			tm->tm_mday = 0;
 			break;
 
 		case 'M':
