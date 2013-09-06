@@ -466,13 +466,6 @@ static const scan_data_t zero_scan_data =
                 UTF8fARG(UTF, offset, RExC_precomp), \
                 UTF8fARG(UTF, RExC_end - RExC_precomp - offset, RExC_precomp + offset)
 
-/* The preprocessor won't allow
- * vFAIL4("%"UTF8f, UTF8fARG(a, b, c))
- * but will allow
- * APPLY(vFAIL4, ("%"UTF8f, UTF8fARG(a, b, c)))
- */
-#define APPLY(F, X) F X
-                
 /*
  * Calls SAVEDESTRUCTOR_X if needed, then calls Perl_croak with the given
  * arg. Show regex, up to a maximum length. If it's too long, chop and add
@@ -569,6 +562,14 @@ static const scan_data_t zero_scan_data =
 	SAVEFREESV(RExC_rx_sv);				\
     Simple_vFAIL4(m, a1, a2, a3);			\
 } STMT_END
+
+/* A specialized version of vFAIL2 that works with UTF8f */
+#define vFAIL2utf8f(m, a1) STMT_START { \
+    if (!SIZE_ONLY)                     \
+        SAVEFREESV(RExC_rx_sv);         \
+    Simple_vFAIL4(m, a1);               \
+} STMT_END
+
 
 /* m is not necessarily a "literal string", in this macro */
 #define reg_warn_non_literal_string(loc, m) STMT_START {                \
@@ -8646,9 +8647,8 @@ S_parse_lparen_question_flags(pTHX_ struct RExC_state_t *pRExC_state)
             default:
             fail_modifiers:
                 RExC_parse += UTF ? UTF8SKIP(RExC_parse) : 1;
-                APPLY(vFAIL4,
-                      ("Sequence (%"UTF8f"...) not recognized",
-                      UTF8fARG(UTF, RExC_parse-seqstart, seqstart)));
+                vFAIL2utf8f("Sequence (%"UTF8f"...) not recognized",
+                      UTF8fARG(UTF, RExC_parse-seqstart, seqstart));
                 /*NOTREACHED*/
         }
 
@@ -8792,9 +8792,9 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 	    }
 	    if ( ! op ) {
 	        RExC_parse += UTF ? UTF8SKIP(RExC_parse) : 1;
-                APPLY(vFAIL4, (
+                vFAIL2utf8f(
                     "Unknown verb pattern '%"UTF8f"'",
-                    UTF8fARG(UTF, verb_len, start_verb)));
+                    UTF8fARG(UTF, verb_len, start_verb));
 	    }
 	    if ( argok ) {
                 if ( start_arg && internal_argval ) {
@@ -9102,9 +9102,9 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 		is_logical = 1;
 		if (*RExC_parse != '{') {
 		    RExC_parse++;
-                    APPLY(vFAIL4, (
+                    vFAIL2utf8f(
                         "Sequence (%"UTF8f"...) not recognized",
-                        UTF8fARG(UTF, RExC_parse-seqstart, seqstart)));
+                        UTF8fARG(UTF, RExC_parse-seqstart, seqstart));
 		    /*NOTREACHED*/
 		}
 		*flagp |= POSTPONED;
@@ -9836,10 +9836,10 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
   nest_check:
     if (!SIZE_ONLY && !(flags&(HASWIDTH|POSTPONED)) && max > REG_INFTY/3) {
 	SAVEFREESV(RExC_rx_sv); /* in case of fatal warnings */
-	APPLY(ckWARN4reg, (RExC_parse,
+	ckWARN2reg(RExC_parse,
 		   "%"UTF8f" matches null string many times",
 		   UTF8fARG(UTF, (RExC_parse >= origparse ? RExC_parse - origparse : 0),
-		   origparse)));
+		   origparse));
 	(void)ReREFCNT_inc(RExC_rx_sv);
     }
 
@@ -11633,9 +11633,9 @@ S_regpposixcc(pTHX_ RExC_state_t *pRExC_state, I32 value, const bool strict)
 		    }
 
 		    if (namedclass == OOB_NAMEDCLASS)
-			APPLY(vFAIL4, (
+			vFAIL2utf8f(
                             "POSIX class [:%"UTF8f":] unknown",
-			    UTF8fARG(UTF, t - s - 1, s + 1)));
+			    UTF8fARG(UTF, t - s - 1, s + 1));
 
                     /* The #defines are structured so each complement is +1 to
                      * the normal one */
@@ -12553,9 +12553,9 @@ parseit:
                          * otherwise add it to the list for run-time look up */
                         if (ret_invlist) {
                             RExC_parse = e + 1;
-                            APPLY(vFAIL4, (
+                            vFAIL2utf8f(
                                 "Property '%"UTF8f"' is unknown",
-                                UTF8fARG(UTF, n, name)));
+                                UTF8fARG(UTF, n, name));
                         }
                         Perl_sv_catpvf(aTHX_ listsv, "%cutf8::%"UTF8f"\n",
                                         (value == 'p' ? '+' : '!'),
@@ -12759,15 +12759,15 @@ parseit:
                                   ? RExC_parse - rangebegin
                                   : 0;
                     if (strict) {
-                        APPLY(vFAIL4, (
+                        vFAIL2utf8f(
                             "False [] range \"%"UTF8f"\"",
-                            UTF8fARG(UTF, w, rangebegin)));
+                            UTF8fARG(UTF, w, rangebegin));
                     }
                     else {
                         SAVEFREESV(RExC_rx_sv); /* in case of fatal warnings */
-                        APPLY(ckWARN4reg, (RExC_parse,
+                        ckWARN2reg(RExC_parse,
                             "False [] range \"%"UTF8f"\"",
-                            UTF8fARG(UTF, w, rangebegin)));
+                            UTF8fARG(UTF, w, rangebegin));
                         (void)ReREFCNT_inc(RExC_rx_sv);
                         cp_list = add_cp_to_invlist(cp_list, '-');
                         cp_list = add_cp_to_invlist(cp_list, prevvalue);
@@ -13058,9 +13058,9 @@ parseit:
 	if (range) {
 	    if (prevvalue > value) /* b-a */ {
 		const int w = RExC_parse - rangebegin;
-                APPLY(vFAIL4, (
+                vFAIL2utf8f(
                     "Invalid [] range \"%"UTF8f"\"",
-                    UTF8fARG(UTF, w, rangebegin)));
+                    UTF8fARG(UTF, w, rangebegin));
 		range = 0; /* not a valid range */
 	    }
 	}
