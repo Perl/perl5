@@ -4737,9 +4737,6 @@ S_check_scalar_slice(pTHX_ char *s)
 */
 
 
-#ifdef __SC__
-#pragma segment Perl_yylex
-#endif
 int
 Perl_yylex(pTHX)
 {
@@ -8951,9 +8948,6 @@ Perl_yylex(pTHX)
 	}
     }}
 }
-#ifdef __SC__
-#pragma segment Main
-#endif
 
 /*
   S_pending_ident
@@ -11464,9 +11458,6 @@ Perl_start_subparse(pTHX_ I32 is_format, U32 flags)
     return oldsavestack_ix;
 }
 
-#ifdef __SC__
-#pragma segment Perl_yylex
-#endif
 static int
 S_yywarn(pTHX_ const char *const s, U32 flags)
 {
@@ -11598,9 +11589,6 @@ Perl_yyerror_pvn(pTHX_ const char *const s, STRLEN len, U32 flags)
     PL_in_my_stash = NULL;
     return 0;
 }
-#ifdef __SC__
-#pragma segment Main
-#endif
 
 STATIC char*
 S_swallow_bom(pTHX_ U8 *s)
