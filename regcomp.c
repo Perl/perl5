@@ -95,15 +95,6 @@ extern const struct regexp_engine my_reg_engine;
 #define IS_NON_FINAL_FOLD(c) _IS_NON_FINAL_FOLD_ONLY_FOR_USE_BY_REGCOMP_DOT_C(c)
 #define IS_IN_SOME_FOLD_L1(c) _IS_IN_SOME_FOLD_ONLY_FOR_USE_BY_REGCOMP_DOT_C(c)
 
-#ifdef MSDOS
-#  if defined(BUGGY_MSC6)
- /* MSC 6.00A breaks on op/regexp.t test 85 unless we turn this off */
-#    pragma optimize("a",off)
- /* But MSC 6.00A is happy with 'w', for aliases only across function calls*/
-#    pragma optimize("w",on )
-#  endif /* BUGGY_MSC6 */
-#endif /* MSDOS */
-
 #ifndef STATIC
 #define	STATIC	static
 #endif

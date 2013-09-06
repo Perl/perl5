@@ -957,9 +957,6 @@ EXTERN_C int usleep(unsigned int);
 	extern int memcmp (char*, char*, int);
 #    endif
 #  endif
-#  ifdef BUGGY_MSC
-#    pragma function(memcmp)
-#  endif
 #else
 #   ifndef memcmp
 #	define memcmp 	my_memcmp
