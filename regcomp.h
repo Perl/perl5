@@ -292,7 +292,7 @@ struct regnode_ssc {
 
 #define REG_MAGIC 0234
 
-#define SIZE_ONLY (RExC_emit == &RExC_emit_dummy)
+#define SIZE_ONLY (RExC_emit == (regnode *) & RExC_emit_dummy)
 #define PASS1 SIZE_ONLY
 #define PASS2 (! SIZE_ONLY)
 

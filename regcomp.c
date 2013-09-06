@@ -115,7 +115,10 @@ struct RExC_state_t {
     regnode	*emit_bound;		/* First regnode outside of the allocated space */
     regnode	*emit;			/* Code-emit pointer; if = &emit_dummy,
                                            implies compiling, so don't emit */
-    regnode	emit_dummy;		/* placeholder for emit to point to */
+    regnode_ssc	emit_dummy;		/* placeholder for emit to point to;
+                                           large enough for the largest
+                                           non-EXACTish node, so can use it as
+                                           scratch in pass1 */
     I32		naughty;		/* How bad is this pattern? */
     I32		sawback;		/* Did we see \1, ...? */
     U32		seen;
@@ -5813,7 +5816,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     RExC_npar = 1;
     RExC_nestroot = 0;
     RExC_size = 0L;
-    RExC_emit = &RExC_emit_dummy;
+    RExC_emit = (regnode *) &RExC_emit_dummy;
     RExC_whilem_seen = 0;
     RExC_open_parens = NULL;
     RExC_close_parens = NULL;
