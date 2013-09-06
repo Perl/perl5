@@ -2142,7 +2142,38 @@ Caveats:
 
 =back
 
-=head1 EOL Platforms (Perl 5.14)
+=head1 EOL Platforms 
+
+=head2 (Perl 5.20)
+
+The following platforms were supported by a previous version of
+Perl but have been officially removed from Perl's source code
+as of 5.20:
+
+=over
+
+=item AT&T 3b1
+
+=back
+
+=head2 (Perl 5.14)
+
+The following platforms were supported up to 5.10.  They may still
+have worked in 5.12, but supporting code has been removed for 5.14:
+
+=over
+
+=item Windows 95
+
+=item Windows 98
+
+=item Windows ME
+
+=item Windows NT4
+
+=back
+
+=head2 (Perl 5.12)
 
 The following platforms were supported by a previous version of
 Perl but have been officially removed from Perl's source code
@@ -2160,20 +2191,6 @@ as of 5.12:
 
 =back
 
-The following platforms were supported up to 5.10.  They may still
-have worked in 5.12, but supporting code has been removed for 5.14:
-
-=over
-
-=item Windows 95
-
-=item Windows 98
-
-=item Windows ME
-
-=item Windows NT4
-
-=back
 
 =head1 Supported Platforms (Perl 5.8)
 

@@ -546,11 +546,16 @@ Compile support has been added for Bitrig, a fork of OpenBSD
 
 XXX List any platforms that this version of perl no longer compiles on.
 
+Configure hints and conditional code for several very old platforms
+has been removed.  We have not received reports for these in many years,
+typically not since perl-5.6.0.
+
 =over 4
 
-=item XXX-some-platform
+=item AT&T 3b1
 
-XXX
+Configure support for the 3b1, also known as the AT&T Unix PC (and the
+similar AT&T 7300), has been removed.
 
 =back
 
