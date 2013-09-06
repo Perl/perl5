@@ -10,11 +10,11 @@ our @ISA = qw(Exporter);
 
 our @EXPORT  = qw(test_harness pod2man perllocal_install uninstall
                   warn_if_old_packlist);
-our $VERSION = '6.74';
+our $VERSION = '6.76';
 
 my $Is_VMS = $^O eq 'VMS';
 
-eval "require Time::HiRes";
+eval {  require Time::HiRes; die unless Time::HiRes->can("stat"); };
 *mtime = $@ ?
  sub { [             stat($_[0])]->[9] } :
  sub { [Time::HiRes::stat($_[0])]->[9] } ;

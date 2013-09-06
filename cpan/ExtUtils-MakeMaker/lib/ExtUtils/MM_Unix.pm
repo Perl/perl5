@@ -15,7 +15,7 @@ use ExtUtils::MakeMaker qw($Verbose neatvalue);
 
 # If we make $VERSION an our variable parse_version() breaks
 use vars qw($VERSION);
-$VERSION = '6.74';
+$VERSION = '6.76';
 $VERSION = eval $VERSION;  ## no critic [BuiltinFunctions::ProhibitStringyEval]
 
 require ExtUtils::MM_Any;
@@ -471,7 +471,7 @@ PERL_ARCHIVE_AFTER = $self->{PERL_ARCHIVE_AFTER}
 
 TO_INST_PM = ".$self->wraplist(sort keys %{$self->{PM}})."
 
-PM_TO_BLIB = ".$self->wraplist(%{$self->{PM}})."
+PM_TO_BLIB = ".$self->wraplist(map { ($_ => $self->{PM}->{$_}) } sort keys %{$self->{PM}})."
 ";
 
     join('',@m);
@@ -2059,9 +2059,15 @@ doc__install : doc_site_install
 
 pure_perl_install :: all
 	$(NOECHO) $(MOD_INSTALL) \
-		read }.$self->catfile('$(PERL_ARCHLIB)','auto','$(FULLEXT)','.packlist').q{ \
+};
+
+    push @m,
+q{		read }.$self->catfile('$(PERL_ARCHLIB)','auto','$(FULLEXT)','.packlist').q{ \
 		write }.$self->catfile('$(DESTINSTALLARCHLIB)','auto','$(FULLEXT)','.packlist').q{ \
-		$(INST_LIB) $(DESTINSTALLPRIVLIB) \
+} unless $self->{NO_PACKLIST};
+
+    push @m,
+q{		$(INST_LIB) $(DESTINSTALLPRIVLIB) \
 		$(INST_ARCHLIB) $(DESTINSTALLARCHLIB) \
 		$(INST_BIN) $(DESTINSTALLBIN) \
 		$(INST_SCRIPT) $(DESTINSTALLSCRIPT) \
@@ -2073,9 +2079,14 @@ pure_perl_install :: all
 
 pure_site_install :: all
 	$(NOECHO) $(MOD_INSTALL) \
-		read }.$self->catfile('$(SITEARCHEXP)','auto','$(FULLEXT)','.packlist').q{ \
+};
+    push @m,
+q{		read }.$self->catfile('$(SITEARCHEXP)','auto','$(FULLEXT)','.packlist').q{ \
 		write }.$self->catfile('$(DESTINSTALLSITEARCH)','auto','$(FULLEXT)','.packlist').q{ \
-		$(INST_LIB) $(DESTINSTALLSITELIB) \
+} unless $self->{NO_PACKLIST};
+
+    push @m,
+q{		$(INST_LIB) $(DESTINSTALLSITELIB) \
 		$(INST_ARCHLIB) $(DESTINSTALLSITEARCH) \
 		$(INST_BIN) $(DESTINSTALLSITEBIN) \
 		$(INST_SCRIPT) $(DESTINSTALLSITESCRIPT) \
@@ -2086,15 +2097,35 @@ pure_site_install :: all
 
 pure_vendor_install :: all
 	$(NOECHO) $(MOD_INSTALL) \
-		read }.$self->catfile('$(VENDORARCHEXP)','auto','$(FULLEXT)','.packlist').q{ \
+};
+    push @m,
+q{		read }.$self->catfile('$(VENDORARCHEXP)','auto','$(FULLEXT)','.packlist').q{ \
 		write }.$self->catfile('$(DESTINSTALLVENDORARCH)','auto','$(FULLEXT)','.packlist').q{ \
-		$(INST_LIB) $(DESTINSTALLVENDORLIB) \
+} unless $self->{NO_PACKLIST};
+
+    push @m,
+q{		$(INST_LIB) $(DESTINSTALLVENDORLIB) \
 		$(INST_ARCHLIB) $(DESTINSTALLVENDORARCH) \
 		$(INST_BIN) $(DESTINSTALLVENDORBIN) \
 		$(INST_SCRIPT) $(DESTINSTALLVENDORSCRIPT) \
 		$(INST_MAN1DIR) $(DESTINSTALLVENDORMAN1DIR) \
 		$(INST_MAN3DIR) $(DESTINSTALLVENDORMAN3DIR)
 
+};
+
+    push @m, q{
+doc_perl_install :: all
+	$(NOECHO) $(NOOP)
+
+doc_site_install :: all
+	$(NOECHO) $(NOOP)
+
+doc_vendor_install :: all
+	$(NOECHO) $(NOOP)
+
+} if $self->{NO_PERLLOCAL};
+
+    push @m, q{
 doc_perl_install :: all
 	$(NOECHO) $(ECHO) Appending installation info to $(DESTINSTALLARCHLIB)/perllocal.pod
 	-$(NOECHO) $(MKPATH) $(DESTINSTALLARCHLIB)
@@ -2128,7 +2159,7 @@ doc_vendor_install :: all
 		EXE_FILES "$(EXE_FILES)" \
 		>> }.$self->catfile('$(DESTINSTALLARCHLIB)','perllocal.pod').q{
 
-};
+} unless $self->{NO_PERLLOCAL};
 
     push @m, q{
 uninstall :: uninstall_from_$(INSTALLDIRS)dirs
@@ -2807,7 +2838,8 @@ pm_to_blib : $(FIRST_MAKEFILE) $(TO_INST_PM)
 pm_to_blib({\@ARGV}, '$autodir', q[\$(PM_FILTER)], '\$(PERM_DIR)')
 CODE
 
-    my @cmds = $self->split_command($pm_to_blib, %{$self->{PM}});
+    my @cmds = $self->split_command($pm_to_blib,
+                  map { ($_, $self->{PM}->{$_}) } sort keys %{$self->{PM}});
 
     $r .= join '', map { "\t\$(NOECHO) $_\n" } @cmds;
     $r .= qq{\t\$(NOECHO) \$(TOUCH) pm_to_blib\n};
@@ -3347,7 +3379,10 @@ sub test {
 
     my($self, %attribs) = @_;
     my $tests = $attribs{TESTS} || '';
-    if (!$tests && -d 't') {
+    if (!$tests && -d 't' && defined $attribs{RECURSIVE_TEST_FILES}) {
+        $tests = $self->find_tests_recursive;
+    }
+    elsif (!$tests && -d 't') {
         $tests = $self->find_tests;
     }
     # note: 'test.pl' name is also hardcoded in init_dirscan()

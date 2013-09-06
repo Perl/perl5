@@ -45,11 +45,13 @@ my $mm = WriteMakefile(
     PERL_CORE     => $ENV{PERL_CORE},
 );
 like( $stdout->read, qr{
+                        Generating\ a\ \w+?-style\ Makefile\n
                         Writing\ $Makefile\ for\ Big::Liar\n
                         (?:Writing\ MYMETA.yml\ and\ MYMETA.json\n)?
                         Big::Liar's\ vars\n
                         INST_LIB\ =\ \S+\n
                         INST_ARCHLIB\ =\ \S+\n
+                        Generating\ a\ \w+?-style\ Makefile\n
                         Writing\ $Makefile\ for\ Big::Dummy\n
                         (?:Writing\ MYMETA.yml\ and\ MYMETA.json\n)?
 }x );
@@ -127,11 +129,13 @@ $mm = WriteMakefile(
     INST_MAN1DIR         => 'none',
 );
 like( $stdout->read, qr{
+                        Generating\ a\ \w+?-style\ Makefile\n
                         Writing\ $Makefile\ for\ Big::Liar\n
                         (?:Writing\ MYMETA.yml\ and\ MYMETA.json\n)?
                         Big::Liar's\ vars\n
                         INST_LIB\ =\ \S+\n
                         INST_ARCHLIB\ =\ \S+\n
+                        Generating\ a\ \w+?-style\ Makefile\n
                         Writing\ $Makefile\ for\ Big::Dummy\n
                         (?:Writing\ MYMETA.yml\ and\ MYMETA.json\n)?
 }x );

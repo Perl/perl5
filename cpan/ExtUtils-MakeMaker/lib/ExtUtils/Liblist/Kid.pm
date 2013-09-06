@@ -11,7 +11,7 @@ use 5.006;
 
 use strict;
 use warnings;
-our $VERSION = '6.74';
+our $VERSION = '6.76';
 
 use ExtUtils::MakeMaker::Config;
 use Cwd 'cwd';
@@ -59,7 +59,7 @@ sub _unix_os2_ext {
     foreach my $thislib ( split ' ', $potential_libs ) {
 
         # Handle possible linker path arguments.
-        if ( $thislib =~ s/^(-[LR]|-Wl,-R)// ) {    # save path flag type
+        if ( $thislib =~ s/^(-[LR]|-Wl,-R|-Wl,-rpath,)// ) {    # save path flag type
             my ( $ptype ) = $1;
             unless ( -d $thislib ) {
                 warn "$ptype$thislib ignored, directory does not exist\n"
@@ -67,8 +67,8 @@ sub _unix_os2_ext {
                 next;
             }
             my ( $rtype ) = $ptype;
-            if ( ( $ptype eq '-R' ) or ( $ptype eq '-Wl,-R' ) ) {
-                if ( $Config{'lddlflags'} =~ /-Wl,-R/ ) {
+            if ( ( $ptype eq '-R' ) or ( $ptype =~ m!^-Wl,-[Rr]! ) ) {
+                if ( $Config{'lddlflags'} =~ /-Wl,-[Rr]/ ) {
                     $rtype = '-Wl,-R';
                 }
                 elsif ( $Config{'lddlflags'} =~ /-R/ ) {
@@ -82,6 +82,12 @@ sub _unix_os2_ext {
             push( @searchpath, $thislib );
             push( @extralibs,  "$ptype$thislib" );
             push( @ldloadlibs, "$rtype$thislib" );
+            next;
+        }
+
+        if ( $thislib =~ m!^-Wl,! ) {
+            push( @extralibs,  $thislib );
+            push( @ldloadlibs, $thislib );
             next;
         }
 

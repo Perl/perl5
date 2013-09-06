@@ -1,3 +1,40 @@
+6.76 Fri Sep  6 13:32:42 BST 2013
+
+    No changes from 6.75_04
+
+6.75_04 Thu Sep  5 12:07:59 BST 2013
+    Bug fixes:
+    * Sanitise make on MSWin32 when reporting Makefile type
+
+6.75_03 Tue Sep  3 00:24:23 BST 2013
+    New features:
+    * Added RECURSIVE_TEST_FILES attribute to 'test'
+    * Report the type of Makefile being generated
+
+    Bug fixes:
+    * RT#17041 more sortification of hashes to Makefile
+
+6.75_02 Sun Sep  1 21:50:48 BST 2013
+    Bug fixes:
+    * RT#49043 binmode STDIN breaks prompt() on MSWin32
+    * RT#14505 Handle -Wl,-rpath correctly
+    * RT#17041 Sort manification and copying events for perceptive
+      cleanliness
+
+6.75_01 Thu Aug 29 15:06:27 BST 2013
+    New features:
+    * Added NO_PERLLOCAL option to allow suppression of writing
+      installs to perllocal.pod
+    * Added NO_PACKLIST option to allow suppression of writing
+      packlist files for installations
+
+    Bug Fixes:
+    * RT#32894 deal with legitimate linker flags correctly
+    * RT#88222 check that Time::HiRes has 'stat' before using it
+
+    Doc Fixes:
+    * RT#87350 Document DLEXT parameter (sisyphus)
+
 6.74 Tue Aug 27 12:43:05 BST 2013
     No changes from 6.73_12
 

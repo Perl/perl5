@@ -1,7 +1,7 @@
 package ExtUtils::MM_Any;
 
 use strict;
-our $VERSION = '6.74';
+our $VERSION = '6.76';
 
 use Carp;
 use File::Spec;
@@ -519,7 +519,7 @@ sub clean {
 clean :: clean_subdirs
 ');
 
-    my @files = values %{$self->{XS}}; # .c files from *.xs files
+    my @files = sort values %{$self->{XS}}; # .c files from *.xs files
     my @dirs  = qw(blib);
 
     # Normally these are all under blib but they might have been
@@ -570,8 +570,8 @@ clean :: clean_subdirs
     push @dirs, $self->extra_clean_files;
 
     # Occasionally files are repeated several times from different sources
-    { my(%f) = map { ($_ => 1) } @files; @files = keys %f; }
-    { my(%d) = map { ($_ => 1) } @dirs;  @dirs  = keys %d; }
+    { my(%f) = map { ($_ => 1) } @files; @files = sort keys %f; }
+    { my(%d) = map { ($_ => 1) } @dirs;  @dirs  = sort keys %d; }
 
     push @m, map "\t$_\n", $self->split_command('- $(RM_F)',  @files);
     push @m, map "\t$_\n", $self->split_command('- $(RM_RF)', @dirs);
@@ -770,7 +770,7 @@ sub manifypods_target {
     my $dependencies  = '';
 
     # populate manXpods & dependencies:
-    foreach my $name (keys %{$self->{MAN1PODS}}, keys %{$self->{MAN3PODS}}) {
+    foreach my $name (sort keys %{$self->{MAN1PODS}}, sort keys %{$self->{MAN3PODS}}) {
         $dependencies .= " \\\n\t$name";
     }
 
@@ -781,7 +781,7 @@ END
     my @man_cmds;
     foreach my $section (qw(1 3)) {
         my $pods = $self->{"MAN${section}PODS"};
-        push @man_cmds, $self->split_command(<<CMD, %$pods);
+        push @man_cmds, $self->split_command(<<CMD, map {($_,$pods->{$_})} sort keys %$pods);
 	\$(NOECHO) \$(POD2MAN) --section=$section --perm_rw=\$(PERM_RW)
 CMD
     }
@@ -2510,6 +2510,44 @@ sub find_tests {
     return -d 't' ? 't/*.t' : '';
 }
 
+=head3 find_tests_recursive
+
+  my $tests = $mm->find_tests_recursive;
+
+Returns a string suitable for feeding to the shell to return all
+tests in t/ but recursively.
+
+=cut
+
+sub find_tests_recursive {
+    my($self) = shift;
+    return '' unless -d 't';
+
+    require File::Find;
+
+    my %testfiles;
+
+    my $wanted = sub {
+        return unless m!\.t$!;
+        my ($volume,$directories,$file) =
+            File::Spec->splitpath( $File::Find::name  );
+        my @dirs = File::Spec->splitdir( $directories );
+        for ( @dirs ) {
+          next if $_ eq 't';
+          unless ( $_ ) {
+            $_ = '*.t';
+            next;
+          }
+          $_ = '*';
+        }
+        my $testfile = join '/', @dirs;
+        $testfiles{ $testfile } = 1;
+    };
+
+    File::Find::find( $wanted, 't' );
+
+    return join ' ', sort keys %testfiles;
+}
 
 =head3 extra_clean_files
 
