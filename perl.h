@@ -633,11 +633,7 @@
 #  include <pthread.h>
 #endif
 
-#ifndef _TYPES_		/* If types.h defines this it's easy. */
-#   ifndef major		/* Does everyone's types.h define this? */
-#	include <sys/types.h>
-#   endif
-#endif
+#include <sys/types.h>
 
 #ifdef __cplusplus
 #  ifndef I_STDARG
