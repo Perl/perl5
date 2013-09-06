@@ -2730,12 +2730,6 @@ PP(pp_getpeername)
 #endif
 	break;
     }
-#ifdef BOGUS_GETNAME_RETURN
-    /* Interactive Unix, getpeername() and getsockname()
-      does not return valid namelen */
-    if (len == BOGUS_GETNAME_RETURN)
-	len = sizeof(struct sockaddr);
-#endif
     SvCUR_set(sv, len);
     *SvEND(sv) ='\0';
     PUSHs(sv);
