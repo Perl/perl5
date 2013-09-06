@@ -3060,15 +3060,6 @@ typedef pthread_key_t	perl_key;
 
 #ifdef PERL_CORE
 /* not used; but needed for backward compatibility with XS code? - RMB */
-#  undef VDf
-#else
-#  ifndef VDf
-#    define VDf "vd"
-#  endif
-#endif
-
-#ifdef PERL_CORE
-/* not used; but needed for backward compatibility with XS code? - RMB */
 #  undef UVf
 #else
 #  ifndef UVf
