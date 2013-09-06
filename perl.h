@@ -714,9 +714,6 @@ struct op *Perl_op asm(stringify(OP_IN_REGISTER));
 #include <setjmp.h>
 
 #ifdef I_SYS_PARAM
-#   ifdef PARAM_NEEDS_TYPES
-#	include <sys/types.h>
-#   endif
 #   include <sys/param.h>
 #endif
 

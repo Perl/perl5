@@ -140,9 +140,6 @@ extern long sdbm_hash proto((const char *, int));
 
 #ifdef I_SYS_PARAM
 #   if !defined(MSDOS) && !defined(WIN32) && !defined(VMS)
-#       ifdef PARAM_NEEDS_TYPES
-#	    include <sys/types.h>
-#       endif
 #       include <sys/param.h>
 #   endif
 #endif

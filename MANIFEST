@@ -4068,7 +4068,6 @@ hints/aix.sh			Hints for named architecture
 hints/altos486.sh		Hints for named architecture
 hints/amigaos.sh		Hints for named architecture
 hints/atheos.sh			Hints for named architecture
-hints/aux_3.sh			Hints for named architecture
 hints/bitrig.sh			Hints for named architecture
 hints/broken-db.msg		Warning message for systems with broken DB library
 hints/bsdos.sh			Hints for named architecture
