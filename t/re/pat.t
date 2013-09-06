@@ -20,7 +20,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 698;  # Update this when adding/deleting tests.
+plan tests => 699;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1469,6 +1469,14 @@ EOP
 	$s = 'abcd$%#&';
 	$s =~ s/[a#$b%]/X/gx;
 	is ($s, 'XbXX$XX&', 'RT #45667 with /x');
+    }
+
+    {
+	no warnings "uninitialized";
+	my @a;
+	$a[1]++;
+	/@a/;
+	pass('no crash with /@a/ when array has nonexistent elems');
     }
 
 } # End of sub run_tests

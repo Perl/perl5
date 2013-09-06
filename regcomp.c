@@ -5030,6 +5030,7 @@ S_concat_pat(pTHX_ RExC_state_t * const pRExC_state,
         STRLEN orig_patlen = 0;
         bool code = 0;
         SV *msv = use_delim ? delim : *svp;
+        if (!msv) msv = &PL_sv_undef;
 
         /* if we've got a delimiter, we go round the loop twice for each
          * svp slot (except the last), using the delimiter the second
