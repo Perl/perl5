@@ -170,6 +170,12 @@ expects C<Carp::Heavy> to provide subroutines.
 
 =item *
 
+L<charnames> has been upgraded from version 1.38 to 1.39.
+
+This module now works on EBCDIC platforms.
+
+=item *
+
 L<CPAN::Meta::Requirements> has been upgraded from version 2.122 to 2.123.
 
 No changes have been made to the installed code other than the version bump to
@@ -208,7 +214,7 @@ C<_utf8_on> under COW has been fixed.
 
 =item *
 
-L<ExtUtils::MakeMaker> has been upgraded from version 6.72 to 6.74.
+L<ExtUtils::MakeMaker> has been upgraded from version 6.72 to 6.76.
 
 Numerous updates and bug fixes are incorporated.  See the F<Changes> file for
 full details.
@@ -226,6 +232,13 @@ L<File::Glob> has been upgraded from version 1.20 to 1.21.
 
 C<glob()> now warns in the context of C<use warnings "syscalls";> if the
 supplied pattern has an internal NUL (C<"\0">) character.
+
+=item *
+
+L<I18N::LangTags> has been upgraded from version 0.39 to 0.40.
+
+Bosnian has now joined Croatian and Serbian in the lists of mutually
+intelligible Slavic languages. [perl #72594]
 
 =item *
 
@@ -326,12 +339,24 @@ nonexistent array elements.
 
 =item *
 
+L<Time::Piece> has been upgraded from version 1.22 to 1.23.
+
+Day of year parsing (like "%y%j") has been fixed.
+
+=item *
+
 L<Unicode::Collate> has been upgraded from version 0.98 to 0.99.
 
 By default, out-of-range values are replaced with C<U+FFFD> (REPLACEMENT
 CHARACTER) when C<UCA_Version> E<gt>= 22, or ignored when C<UCA_Version> E<lt>=
 20.  When C<UCA_Version> E<gt>= 22, the weights of out-of-range values can be
 overridden.
+
+=item *
+
+L<Unicode::UCD> has been upgraded from version 0.53 to 0.54.
+
+This module now works on EBCDIC platforms.
 
 =item *
 
