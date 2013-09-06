@@ -2728,9 +2728,20 @@ try_autoload:
 	    const I32 items = AvFILLp(av) + 1;   /* @_ is not tieable */
 
 	    if (items) {
+		SSize_t i = 0;
 		/* Mark is at the end of the stack. */
 		EXTEND(SP, items);
-		Copy(AvARRAY(av), SP + 1, items, SV*);
+		for (; i < items; ++i)
+		    if (AvARRAY(av)[i]) SP[i+1] = AvARRAY(av)[i];
+		    else {
+			SV * const lv = sv_2mortal(newSV_type(SVt_PVLV));
+			SP[i+1] = lv;
+			LvTYPE(lv) = 'y';
+			sv_magic(lv, NULL, PERL_MAGIC_defelem, NULL, 0);
+			LvTARG(lv) = SvREFCNT_inc_simple_NN(av);
+			LvSTARGOFF(lv) = i;
+			LvTARGLEN(lv) = 1;
+		    }
 		SP += items;
 		PUTBACK ;		
 	    }

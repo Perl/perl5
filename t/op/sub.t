@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan( tests => 27 );
+plan( tests => 29 );
 
 sub empty_sub {}
 
@@ -164,4 +164,14 @@ is eval {
     eval "()=time";
     is $w, undef,
       '*keyword = sub():method{$y} does not cause ambiguity warnings';
+}
+
+# &xsub when @_ has nonexistent elements
+{
+    no warnings "uninitialized";
+    local @_ = ();
+    $#_++;
+    &utf8::encode;
+    is @_, 1, 'num of elems in @_ after &xsub with nonexistent $_[0]';
+    is $_[0], "", 'content of nonexistent $_[0] is modified by &xsub';
 }

@@ -2907,7 +2907,18 @@ PP(pp_goto)
 		if (AvREAL(arg)) {
 		    I32 index;
 		    for (index=0; index<items; index++)
-			SvREFCNT_inc_void(sv_2mortal(SP[-index]));
+			if (SP[-index])
+			    SvREFCNT_inc_void_NN(sv_2mortal(SP[-index]));
+			else {
+			    SV * const lv =
+				sv_2mortal(newSV_type(SVt_PVLV));
+			    SP[-index] = lv;
+			    LvTYPE(lv) = 'y';
+			    sv_magic(lv,NULL,PERL_MAGIC_defelem,NULL,0);
+			    LvTARG(lv) = SvREFCNT_inc_simple_NN(arg);
+			    LvSTARGOFF(lv) = AvFILLp(arg) - index;
+			    LvTARGLEN(lv) = 1;
+			}
 		}
 		SvREFCNT_dec(arg);
 		if (CxTYPE(cx) == CXt_SUB && CxHASARGS(cx)) {

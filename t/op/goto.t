@@ -10,7 +10,7 @@ BEGIN {
 
 use warnings;
 use strict;
-plan tests => 89;
+plan tests => 91;
 our $TODO;
 
 my $deprecated = 0;
@@ -481,6 +481,15 @@ is "@__", chr 256, 'goto &xsub with replaced *_{ARRAY}';
 sub { *__ = \@_;  goto &null } -> ("rough and tubbery");
 is ${*__}[0], 'rough and tubbery', 'goto &foo leaves reified @_ alone';
 
+# goto &xsub when @_ has nonexistent elements
+{
+    no warnings "uninitialized";
+    local @_ = ();
+    $#_++;
+    & {sub { goto &utf8::encode }};
+    is @_, 1, 'num of elems in @_ after goto &xsub with nonexistent $_[0]';
+    is $_[0], "", 'content of nonexistent $_[0] is modified by goto &xsub';
+}
 
 # [perl #36521] goto &foo in warn handler could defeat recursion avoider
 
