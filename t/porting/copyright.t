@@ -12,6 +12,10 @@ C<perl -v> output match each other.
 If the test fails, update at least one of README and perl.c so that they match
 reality.
 
+Optionally you can pass the C<--now> option to check they are at the current
+year. This isn't checked by default, so that it doesn't fail for people
+working on older releases. It should be run before making a new release.
+
 =cut
 
 
@@ -20,9 +24,25 @@ use strict;
 BEGIN { require 'test.pl' }
 
 
+my ($opt) = @ARGV;
+
 my $readme_year = readme_year();
 my $v_year = v_year();
-is $readme_year, $v_year, 'README and perl -v copyright dates match';
+
+# Check that both copyright dates are up-to-date, but only if requested, so
+# that tests still pass for people intentionally working on older versions:
+if ($opt eq '--now')
+{
+  my $current_year = (gmtime)[5] + 1900;
+  is $v_year, $current_year, 'perl -v copyright includes current year';
+  is $readme_year, $current_year, 'README copyright includes current year';
+}
+
+# Otherwise simply check that the two copyright dates match each other:
+else
+{
+  is $readme_year, $v_year, 'README and perl -v copyright dates match';
+}
 
 done_testing;
 

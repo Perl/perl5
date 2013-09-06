@@ -446,6 +446,16 @@ release, this would be 5.13.11).
 For BLEAD-POINT releases, it needs to refer to the previous BLEAD-POINT
 release (so for 5.15.3 this would be 5.15.2).
 
+=head3 Check copyright years
+
+Check that the copyright years are up to date by running:
+
+ $ ./perl t/porting/copyright.t --now
+
+Remedy any test failures by editing README or perl.c accordingly (search for
+the "Copyright"). If updating perl.c, check if the file's own copyright date in
+the C comment at the top needs updating, as well as the one printed by C<-v>.
+
 =head3 Check more build configurations
 
 Try running the full test suite against multiple Perl configurations. Here are
