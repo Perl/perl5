@@ -1769,20 +1769,6 @@ PP(pp_sysread)
 	}
     }
     else
-#ifdef HAS_SOCKET__bad_code_maybe
-    if (IoTYPE(io) == IoTYPE_SOCKET) {
-	Sock_size_t bufsize;
-	char namebuf[MAXPATHLEN];
-#if defined(VMS_DO_SOCKETS) && defined(DECCRTL_SOCKETS)
-	bufsize = sizeof (struct sockaddr_in);
-#else
-	bufsize = sizeof namebuf;
-#endif
-	count = PerlSock_recvfrom(PerlIO_fileno(IoIFP(io)), buffer, length, 0,
-			  (struct sockaddr *)namebuf, &bufsize);
-    }
-    else
-#endif
     {
 	count = PerlIO_read(IoIFP(io), buffer, length);
 	/* PerlIO_read() - like fread() returns 0 on both error and EOF */
