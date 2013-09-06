@@ -2641,17 +2641,6 @@ S_make_trie_failtable(pTHX_ RExC_state_t *pRExC_state, regnode *source,  regnode
 }
 
 
-/*
- * There are strange code-generation bugs caused on sparc64 by gcc-2.95.2.
- * These need to be revisited when a newer toolchain becomes available.
- */
-#if defined(__sparc64__) && defined(__GNUC__)
-#   if __GNUC__ < 2 || (__GNUC__ == 2 && __GNUC_MINOR__ < 96)
-#       undef  SPARC64_GCC_WORKAROUND
-#       define SPARC64_GCC_WORKAROUND 1
-#   endif
-#endif
-
 #define DEBUG_PEEP(str,scan,depth) \
     DEBUG_OPTIMISE_r({if (scan){ \
        SV * const mysv=sv_newmortal(); \
@@ -4078,28 +4067,11 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    int counted = mincount != 0;
 
 		    if (data->last_end > 0 && mincount != 0) { /* Ends with a string. */
-#if defined(SPARC64_GCC_WORKAROUND)
-			SSize_t b = 0;
-			STRLEN l = 0;
-			const char *s = NULL;
-			SSize_t old = 0;
-
-			if (pos_before >= data->last_start_min)
-			    b = pos_before;
-			else
-			    b = data->last_start_min;
-
-			l = 0;
-			s = SvPV_const(data->last_found, l);
-			old = b - data->last_start_min;
-
-#else
 			SSize_t b = pos_before >= data->last_start_min
 			    ? pos_before : data->last_start_min;
 			STRLEN l;
 			const char * const s = SvPV_const(data->last_found, l);
 			SSize_t old = b - data->last_start_min;
-#endif
 
 			if (UTF)
 			    old = utf8_hop((U8*)s, old) - (U8*)s;
