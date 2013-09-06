@@ -2895,18 +2895,20 @@ PP(pp_goto) /* also pp_dump */
 		OP* const retop = cx->blk_sub.retop;
 		SV **newsp;
 		I32 gimme;
-		const SSize_t items = AvFILLp(arg) + 1;
+		const SSize_t items = arg ? AvFILLp(arg) + 1 : 0;
 		SV** mark;
 
                 PERL_UNUSED_VAR(newsp);
                 PERL_UNUSED_VAR(gimme);
 
 		/* put GvAV(defgv) back onto stack */
-		EXTEND(SP, items+1); /* @_ could have been extended. */
-		Copy(AvARRAY(arg), SP + 1, items, SV*);
+		if (items) {
+		    EXTEND(SP, items+1); /* @_ could have been extended. */
+		    Copy(AvARRAY(arg), SP + 1, items, SV*);
+		}
 		mark = SP;
 		SP += items;
-		if (AvREAL(arg)) {
+		if (items && AvREAL(arg)) {
 		    I32 index;
 		    for (index=0; index<items; index++)
 			if (SP[-index])

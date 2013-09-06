@@ -2714,7 +2714,7 @@ try_autoload:
 	    !CvLVALUE(cv))
 	    DIE(aTHX_ "Can't modify non-lvalue subroutine call");
 
-	if (!hasargs) {
+	if (!hasargs && GvAV(PL_defgv)) {
 	    /* Need to copy @_ to stack. Alternative may be to
 	     * switch stack to @_, and copy return values
 	     * back. This would allow popping @_ in XSUB, e.g.. XXXX */

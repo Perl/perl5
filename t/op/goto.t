@@ -10,7 +10,7 @@ BEGIN {
 
 use warnings;
 use strict;
-plan tests => 91;
+plan tests => 92;
 our $TODO;
 
 my $deprecated = 0;
@@ -490,6 +490,13 @@ is ${*__}[0], 'rough and tubbery', 'goto &foo leaves reified @_ alone';
     is @_, 1, 'num of elems in @_ after goto &xsub with nonexistent $_[0]';
     is $_[0], "", 'content of nonexistent $_[0] is modified by goto &xsub';
 }
+
+# goto &xsub when @_ itself does not exist
+undef *_;
+eval { & { sub { goto &utf8::encode } } };
+# The main thing we are testing is that it did not crash.  But make sure 
+# *_{ARRAY} was untouched, too.
+is *_{ARRAY}, undef, 'goto &xsub when @_ does not exist';
 
 # [perl #36521] goto &foo in warn handler could defeat recursion avoider
 
