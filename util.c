@@ -3424,7 +3424,7 @@ Perl_report_evil_fh(pTHX_ const GV *gv)
  *
  */
 
-#ifdef HAS_GNULIBC
+#ifdef __GLIBC__
 # ifndef STRUCT_TM_HASZONE
 #    define STRUCT_TM_HASZONE
 # endif
