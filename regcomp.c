@@ -5049,7 +5049,7 @@ S_concat_pat(pTHX_ RExC_state_t * const pRExC_state,
              * The code in this block is based on S_pushav() */
 
             AV *const av = (AV*)msv;
-            const I32 maxarg = AvFILL(av) + 1;
+            const SSize_t maxarg = AvFILL(av) + 1;
             SV **array;
 
             if (oplist) {
@@ -5059,11 +5059,11 @@ S_concat_pat(pTHX_ RExC_state_t * const pRExC_state,
             }
 
             if (SvRMAGICAL(av)) {
-                U32 i;
+                SSize_t i;
 
                 Newx(array, maxarg, SV*);
                 SAVEFREEPV(array);
-                for (i=0; i < (U32)maxarg; i++) {
+                for (i=0; i < maxarg; i++) {
                     SV ** const svp = av_fetch(av, i, FALSE);
                     array[i] = svp ? *svp : &PL_sv_undef;
                 }
