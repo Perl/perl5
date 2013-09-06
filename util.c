@@ -2507,25 +2507,6 @@ Perl_my_fork(void)
 #endif /* HAS_FORK */
 }
 
-#ifdef DUMP_FDS
-void
-Perl_dump_fds(pTHX_ const char *const s)
-{
-    int fd;
-    Stat_t tmpstatbuf;
-
-    PERL_ARGS_ASSERT_DUMP_FDS;
-
-    PerlIO_printf(Perl_debug_log,"%s", s);
-    for (fd = 0; fd < 32; fd++) {
-	if (PerlLIO_fstat(fd,&tmpstatbuf) >= 0)
-	    PerlIO_printf(Perl_debug_log," %d",fd);
-    }
-    PerlIO_printf(Perl_debug_log,"\n");
-    return;
-}
-#endif	/* DUMP_FDS */
-
 #ifndef HAS_DUP2
 int
 dup2(int oldfd, int newfd)

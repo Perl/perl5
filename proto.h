@@ -5329,13 +5329,6 @@ PERL_CALLCONV void	Perl_dump_sv_child(pTHX_ SV *sv)
 	assert(sv)
 
 #endif
-#if defined(DUMP_FDS)
-PERL_CALLCONV void	Perl_dump_fds(pTHX_ char* s)
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_DUMP_FDS	\
-	assert(s)
-
-#endif
 #if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
 PERL_CALLCONV I32	Perl_do_ipcctl(pTHX_ I32 optype, SV** mark, SV** sp)
 			__attribute__nonnull__(pTHX_2)

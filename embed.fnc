@@ -421,9 +421,6 @@ ApR	|I32	|dowantarray
 Ap	|void	|dump_all
 p	|void	|dump_all_perl	|bool justperl
 Ap	|void	|dump_eval
-#if defined(DUMP_FDS)
-Ap	|void	|dump_fds	|NN char* s
-#endif
 Ap	|void	|dump_form	|NN const GV* gv
 Ap	|void	|gv_dump	|NN GV* gv
 Ap	|void	|op_dump	|NN const OP *o

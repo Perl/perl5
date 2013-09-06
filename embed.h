@@ -758,9 +758,6 @@
 #define pad_setsv(a,b)		Perl_pad_setsv(aTHX_ a,b)
 #define pad_sv(a)		Perl_pad_sv(aTHX_ a)
 #endif
-#if defined(DUMP_FDS)
-#define dump_fds(a)		Perl_dump_fds(aTHX_ a)
-#endif
 #if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
 #define csighandler		Perl_csighandler
 #endif
