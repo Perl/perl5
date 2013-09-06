@@ -61,12 +61,15 @@ EndSockets(void)
 	WSACleanup();
 }
 
-/* Translate WSAExxx values to corresponding Exxx values. Not all WSAExxx
- * constants have corresponding Exxx constants in <errno.h> (even in VC++
- * 2010 and above, which have expanded <errno.h> with more values), but any
- * missing constants are provided by win32/include/sys/errno2.h.
+/* Translate WSAExxx values to corresponding Exxx values where possible. Not all
+ * WSAExxx constants have corresponding Exxx constants in <errno.h> (even in
+ * VC++ 2010 and above, which have expanded <errno.h> with more values), but
+ * most missing constants are provided by win32/include/sys/errno2.h. The few
+ * that are not are returned unchanged.
+ *
  * The list of possible WSAExxx values used here comes from the MSDN page
  * titled "Windows Sockets Error Codes".
+ *
  * (Note: Only the WSAExxx values are handled here; other WSAxxx values are
  * returned unchanged. The return value normally ends up in errno/$! and at
  * the Perl code level may be tested against the Exxx constants exported by
@@ -148,7 +151,7 @@ convert_wsa_error_to_errno(int wsaerr)
     case WSAENAMETOOLONG:
 	return ENAMETOOLONG;
     case WSAEHOSTDOWN:
-	return EHOSTDOWN;
+	return WSAEHOSTDOWN;		/* EHOSTDOWN is not defined */
     case WSAEHOSTUNREACH:
 	return EHOSTUNREACH;
     case WSAENOTEMPTY:
@@ -164,19 +167,19 @@ convert_wsa_error_to_errno(int wsaerr)
     case WSAEREMOTE:
 	return EREMOTE;
     case WSAEDISCON:
-	return EDISCON;
+	return WSAEDISCON;		/* EDISCON is not defined */
     case WSAENOMORE:
-	return ENOMORE;
+	return WSAENOMORE;		/* ENOMORE is not defined */
     case WSAECANCELLED:
 	return ECANCELED;
     case WSAEINVALIDPROCTABLE:
-	return EINVALIDPROCTABLE;
+	return WSAEINVALIDPROCTABLE;	/* EINVALIDPROCTABLE is not defined */
     case WSAEINVALIDPROVIDER:
-	return EINVALIDPROVIDER;
+	return WSAEINVALIDPROVIDER;	/* EINVALIDPROVIDER is not defined */
     case WSAEPROVIDERFAILEDINIT:
-	return EPROVIDERFAILEDINIT;
+	return WSAEPROVIDERFAILEDINIT;	/* EPROVIDERFAILEDINIT is not defined */
     case WSAEREFUSED:
-	return EREFUSED;
+	return WSAEREFUSED;		/* EREFUSED is not defined */
     }
 
     return wsaerr;

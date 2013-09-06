@@ -4,166 +4,156 @@
 #define _WINSOCKAPI_	/* Don't drag in everything */
 #include <winsock.h>
 
-/* Ensure all the Exxx constants required by get_last_socket_error() in
- * win32/win32sck.c are defined. Many are defined in <errno.h> already (more in
- * VC++ 2010 and above) so, for the sake of compatibility with third-party code
- * linked into XS modules, we must be careful not to redefine them; for the
- * remainder we define our own values, namely the corresponding WSAExxx values.
+/* Ensure all the Exxx constants required by convert_wsa_error_to_errno() in
+ * win32/win32sck.c are defined. Many are defined in <errno.h> already (more so
+ * in VC++ 2010 and above, which have an extra "POSIX supplement") so, for the
+ * sake of compatibility with third-party code linked into XS modules, we must
+ * be careful not to redefine them; for the remainder we define our own values,
+ * namely the corresponding WSAExxx values.
+ *
  * These definitions are also used as a supplement to the use of <errno.h> in
  * the Errno and POSIX modules, both of which may be used to test the value of
- * $!, which may have these values assigned to it (via win32/win32sck.c). It
- * also provides numerous otherwise missing values in the (hard-coded) list of
- * Exxx constants exported by POSIX.
+ * $!, which may have these values assigned to it (via code in win32/win32sck.c
+ * and the $! case in Perl_magic_set()). It also provides numerous otherwise
+ * missing values in the (hard-coded) list of Exxx constants exported by POSIX.
+ * Finally, three of the non-standard errno.h values (actually all now in the
+ * POSIX supplement in VC10+) are used in the perl core.
+ *
+ * This list is in the same order as that in convert_wsa_error_to_errno(). A
+ * handful of WSAExxx constants used by that function have no corresponding Exxx
+ * constant in any errno.h so there is no point in making up values for them;
+ * they are just returned unchanged by that function so we do not need to worry
+ * about them here.
  */
-#ifndef EINTR
-#  define EINTR			WSAEINTR
-#endif
-#ifndef EBADF
-#  define EBADF			WSAEBADF
-#endif
-#ifndef EACCES
-#  define EACCES		WSAEACCES
-#endif
-#ifndef EFAULT
-#  define EFAULT		WSAEFAULT
-#endif
-#ifndef EINVAL
-#  define EINVAL		WSAEINVAL
-#endif
-#ifndef EMFILE
-#  define EMFILE		WSAEMFILE
-#endif
-#ifndef EWOULDBLOCK
+
+/* EINTR is a standard errno.h value */
+/* EBADF is a standard errno.h value */
+/* EACCES is a standard errno.h value */
+/* EFAULT is a standard errno.h value */
+/* EINVAL is a standard errno.h value */
+/* EMFILE is a standard errno.h value */
+
+#ifndef EWOULDBLOCK		/* New in VC10 */
 #  define EWOULDBLOCK		WSAEWOULDBLOCK
 #endif
-#ifndef EINPROGRESS
+#ifndef EINPROGRESS		/* New in VC10 */
 #  define EINPROGRESS		WSAEINPROGRESS
 #endif
-#ifndef EALREADY
+#ifndef EALREADY		/* New in VC10 */
 #  define EALREADY		WSAEALREADY
 #endif
-#ifndef ENOTSOCK
+#ifndef ENOTSOCK		/* New in VC10 and needed in doio.c */
 #  define ENOTSOCK		WSAENOTSOCK
 #endif
-#ifndef EDESTADDRREQ
+#ifndef EDESTADDRREQ		/* New in VC10 */
 #  define EDESTADDRREQ		WSAEDESTADDRREQ
 #endif
-#ifndef EMSGSIZE
+#ifndef EMSGSIZE		/* New in VC10 */
 #  define EMSGSIZE		WSAEMSGSIZE
 #endif
-#ifndef EPROTOTYPE
+#ifndef EPROTOTYPE		/* New in VC10 */
 #  define EPROTOTYPE		WSAEPROTOTYPE
 #endif
-#ifndef ENOPROTOOPT
+#ifndef ENOPROTOOPT		/* New in VC10 */
 #  define ENOPROTOOPT		WSAENOPROTOOPT
 #endif
-#ifndef EPROTONOSUPPORT
+#ifndef EPROTONOSUPPORT		/* New in VC10 */
 #  define EPROTONOSUPPORT	WSAEPROTONOSUPPORT
 #endif
-#ifndef ESOCKTNOSUPPORT
+#ifndef ESOCKTNOSUPPORT		/* Not in errno.h but wanted by POSIX.pm */
 #  define ESOCKTNOSUPPORT	WSAESOCKTNOSUPPORT
 #endif
-#ifndef EOPNOTSUPP
+#ifndef EOPNOTSUPP		/* New in VC10 */
 #  define EOPNOTSUPP		WSAEOPNOTSUPP
 #endif
-#ifndef EPFNOSUPPORT
+#ifndef EPFNOSUPPORT		/* Not in errno.h but wanted by POSIX.pm */
 #  define EPFNOSUPPORT		WSAEPFNOSUPPORT
 #endif
-#ifndef EAFNOSUPPORT
+#ifndef EAFNOSUPPORT		/* New in VC10 and needed in util.c */
 #  define EAFNOSUPPORT		WSAEAFNOSUPPORT
 #endif
-#ifndef EADDRINUSE
+#ifndef EADDRINUSE		/* New in VC10 */
 #  define EADDRINUSE		WSAEADDRINUSE
 #endif
-#ifndef EADDRNOTAVAIL
+#ifndef EADDRNOTAVAIL		/* New in VC10 */
 #  define EADDRNOTAVAIL		WSAEADDRNOTAVAIL
 #endif
-#ifndef ENETDOWN
+#ifndef ENETDOWN		/* New in VC10 */
 #  define ENETDOWN		WSAENETDOWN
 #endif
-#ifndef ENETUNREACH
+#ifndef ENETUNREACH		/* New in VC10 */
 #  define ENETUNREACH		WSAENETUNREACH
 #endif
-#ifndef ENETRESET
+#ifndef ENETRESET		/* New in VC10 */
 #  define ENETRESET		WSAENETRESET
 #endif
-#ifndef ECONNABORTED
+#ifndef ECONNABORTED		/* New in VC10 and needed in util.c */
 #  define ECONNABORTED		WSAECONNABORTED
 #endif
-#ifndef ECONNRESET
+#ifndef ECONNRESET		/* New in VC10 */
 #  define ECONNRESET		WSAECONNRESET
 #endif
-#ifndef ENOBUFS
+#ifndef ENOBUFS			/* New in VC10 */
 #  define ENOBUFS		WSAENOBUFS
 #endif
-#ifndef EISCONN
+#ifndef EISCONN			/* New in VC10 */
 #  define EISCONN		WSAEISCONN
 #endif
-#ifndef ENOTCONN
+#ifndef ENOTCONN		/* New in VC10 */
 #  define ENOTCONN		WSAENOTCONN
 #endif
-#ifndef ESHUTDOWN
+#ifndef ESHUTDOWN		/* Not in errno.h but wanted by POSIX.pm */
 #  define ESHUTDOWN		WSAESHUTDOWN
 #endif
-#ifndef ETOOMANYREFS
+#ifndef ETOOMANYREFS		/* Not in errno.h but wanted by POSIX.pm */
 #  define ETOOMANYREFS		WSAETOOMANYREFS
 #endif
-#ifndef ETIMEDOUT
+#ifndef ETIMEDOUT		/* New in VC10 */
 #  define ETIMEDOUT		WSAETIMEDOUT
 #endif
-#ifndef ECONNREFUSED
+#ifndef ECONNREFUSED		/* New in VC10 */
 #  define ECONNREFUSED		WSAECONNREFUSED
 #endif
-#ifndef ELOOP
+#ifndef ELOOP			/* New in VC10 */
 #  define ELOOP			WSAELOOP
 #endif
-#ifndef ENAMETOOLONG
-#  define ENAMETOOLONG		WSAENAMETOOLONG
-#endif
-#ifndef EHOSTDOWN
-#  define EHOSTDOWN		WSAEHOSTDOWN
-#endif
-#ifndef EHOSTUNREACH
+
+/* ENAMETOOLONG is a standard errno.h value */
+
+/* EHOSTDOWN is not an errno.h value at all (on Windows, anyway) */
+
+#ifndef EHOSTUNREACH		/* New in VC10 */
 #  define EHOSTUNREACH		WSAEHOSTUNREACH
 #endif
-#ifndef ENOTEMPTY
-#  define ENOTEMPTY		WSAENOTEMPTY
-#endif
-#ifndef EPROCLIM
+
+/* ENOTEMPTY is a standard errno.h value */
+
+#ifndef EPROCLIM		/* Not in errno.h but wanted by POSIX.pm */
 #  define EPROCLIM		WSAEPROCLIM
 #endif
-#ifndef EUSERS
+#ifndef EUSERS			/* Not in errno.h but wanted by POSIX.pm */
 #  define EUSERS		WSAEUSERS
 #endif
-#ifndef EDQUOT
+#ifndef EDQUOT			/* Not in errno.h but wanted by POSIX.pm */
 #  define EDQUOT		WSAEDQUOT
 #endif
-#ifndef ESTALE
+#ifndef ESTALE			/* Not in errno.h but wanted by POSIX.pm */
 #  define ESTALE		WSAESTALE
 #endif
-#ifndef EREMOTE
+#ifndef EREMOTE			/* Not in errno.h but wanted by POSIX.pm */
 #  define EREMOTE		WSAEREMOTE
 #endif
-#ifndef EDISCON
-#  define EDISCON		WSAEDISCON
-#endif
-#ifndef ENOMORE
-#  define ENOMORE		WSAENOMORE
-#endif
-#ifndef ECANCELED
+
+/* EDISCON is not an errno.h value at all */
+/* ENOMORE is not an errno.h value at all */
+
+#ifndef ECANCELED		/* New in VC10 */
 #  define ECANCELED		WSAECANCELLED
 #endif
-#ifndef EINVALIDPROCTABLE
-#  define EINVALIDPROCTABLE	WSAEINVALIDPROCTABLE
-#endif
-#ifndef EINVALIDPROVIDER
-#  define EINVALIDPROVIDER	WSAEINVALIDPROVIDER
-#endif
-#ifndef EPROVIDERFAILEDINIT
-#  define EPROVIDERFAILEDINIT	WSAEPROVIDERFAILEDINIT
-#endif
-#ifndef EREFUSED
-#  define EREFUSED		WSAEREFUSED
-#endif
+
+/* EINVALIDPROCTABLE is not an errno.h value at all */
+/* EINVALIDPROVIDER is not an errno.h value at all */
+/* EPROVIDERFAILEDINIT is not an errno.h value at all */
+/* EREFUSED is not an errno.h value at all */
 
 #endif /* _INC_SYS_ERRNO2 */
