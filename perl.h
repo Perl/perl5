@@ -434,14 +434,6 @@
 #  endif
 #endif
 
-#ifdef OP_IN_REGISTER
-#  ifdef __GNUC__
-#    define stringify_immed(s) #s
-#    define stringify(s) stringify_immed(s)
-struct op *Perl_op asm(stringify(OP_IN_REGISTER));
-#  endif
-#endif
-
 /* gcc (-ansi) -pedantic doesn't allow gcc statement expressions,
  * g++ allows them but seems to have problems with them
  * (insane errors ensue).

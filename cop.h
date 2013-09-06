@@ -38,14 +38,6 @@ struct jmpenv {
 
 typedef struct jmpenv JMPENV;
 
-#ifdef OP_IN_REGISTER
-#define OP_REG_TO_MEM	PL_opsave = op
-#define OP_MEM_TO_REG	op = PL_opsave
-#else
-#define OP_REG_TO_MEM	NOOP
-#define OP_MEM_TO_REG	NOOP
-#endif
-
 /*
  * How to build the first jmpenv.
  *
@@ -107,9 +99,7 @@ typedef struct jmpenv JMPENV;
 	    Perl_deb(aTHX_ "JUMPENV_PUSH level=%d at %s:%d\n",		\
 		         i,  __FILE__, __LINE__);})			\
 	cur_env.je_prev = PL_top_env;					\
-	OP_REG_TO_MEM;							\
 	cur_env.je_ret = PerlProc_setjmp(cur_env.je_buf, SCOPE_SAVES_SIGNAL_MASK);		\
-	OP_MEM_TO_REG;							\
 	PL_top_env = &cur_env;						\
 	cur_env.je_mustcatch = FALSE;					\
 	(v) = cur_env.je_ret;						\
@@ -133,7 +123,6 @@ typedef struct jmpenv JMPENV;
 	    while (p) { i++; p = p->je_prev; }			\
 	    Perl_deb(aTHX_ "JUMPENV_JUMP(%d) level=%d at %s:%d\n", \
 		         (int)v, i, __FILE__, __LINE__);})	\
-	OP_REG_TO_MEM;						\
 	if (PL_top_env->je_prev)				\
 	    PerlProc_longjmp(PL_top_env->je_buf, (v));		\
 	if ((v) == 2)						\

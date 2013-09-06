@@ -33,11 +33,7 @@
  * Important ones in the first cache line (if alignment is done right) */
 
 PERLVAR(I, stack_sp,	SV **)		/* top of the stack */
-#ifdef OP_IN_REGISTER
-PERLVAR(I, opsave,	OP *)
-#else
 PERLVAR(I, op,		OP *)		/* currently executing op */
-#endif
 PERLVAR(I, curpad,	SV **)		/* active pad (lexicals+tmps) */
 
 PERLVAR(I, stack_base,	SV **)

@@ -218,7 +218,6 @@
 #define PL_op_exec_cnt		(vTHX->Iop_exec_cnt)
 #define PL_op_mask		(vTHX->Iop_mask)
 #define PL_opfreehook		(vTHX->Iopfreehook)
-#define PL_opsave		(vTHX->Iopsave)
 #define PL_origalen		(vTHX->Iorigalen)
 #define PL_origargc		(vTHX->Iorigargc)
 #define PL_origargv		(vTHX->Iorigargv)
