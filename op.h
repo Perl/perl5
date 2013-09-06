@@ -143,6 +143,7 @@ Deprecated.  Use C<GIMME_V> instead.
 				    - After ck_glob, use Perl glob function
 			         */
                                 /*  On OP_PADRANGE, push @_ */
+                                /*  On OP_DUMP, has no label */
 
 /* old names; don't use in new code, but don't break them, either */
 #define OPf_LIST	OPf_WANT_LIST

@@ -2776,7 +2776,7 @@ S_dofindlabel(pTHX_ OP *o, const char *label, STRLEN len, U32 flags, OP **opstac
     return 0;
 }
 
-PP(pp_goto)
+PP(pp_goto) /* also pp_dump */
 {
     dVAR; dSP;
     OP *retop = NULL;
@@ -2791,6 +2791,8 @@ PP(pp_goto)
     static const char* const must_have_label = "goto must have label";
 
     if (PL_op->op_flags & OPf_STACKED) {
+        /* goto EXPR  or  goto &foo */
+
 	SV * const sv = POPs;
 	SvGETMAGIC(sv);
 
@@ -2986,11 +2988,13 @@ PP(pp_goto)
 	    }
 	}
 	else {
+            /* goto EXPR */
 	    label       = SvPV_nomg_const(sv, label_len);
             label_flags = SvUTF8(sv);
 	}
     }
     else if (!(PL_op->op_flags & OPf_SPECIAL)) {
+        /* goto LABEL  or  dump LABEL */
  	label       = cPVOP->op_pv;
         label_flags = (cPVOP->op_private & OPpPV_IS_UTF8) ? SVf_UTF8 : 0;
         label_len   = strlen(label);
