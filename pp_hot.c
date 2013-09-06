@@ -2848,7 +2848,7 @@ PP(pp_aelem)
 	    sv_upgrade(lv, SVt_PVLV);
 	    LvTYPE(lv) = 'y';
 	    sv_magic(lv, NULL, PERL_MAGIC_defelem, NULL, 0);
-	    LvTARG(lv) = SvREFCNT_inc_simple(av);
+	    LvTARG(lv) = SvREFCNT_inc_simple_NN(av);
 	    /* Resolve a negative index now, unless it points before the
 	       beginning of the array, in which case record it for error
 	       reporting in magic_setdefelem. */
