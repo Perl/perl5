@@ -9661,6 +9661,19 @@ Perl_newSVrv(pTHX_ SV *const rv, const char *const classname)
     return sv;
 }
 
+SV *
+Perl_newSVavdefelem(pTHX_ AV *av, SSize_t ix, bool extendible)
+{
+    SV * const lv = newSV_type(SVt_PVLV);
+    PERL_ARGS_ASSERT_NEWSVAVDEFELEM;
+    LvTYPE(lv) = 'y';
+    sv_magic(lv, NULL, PERL_MAGIC_defelem, NULL, 0);
+    LvTARG(lv) = SvREFCNT_inc_simple_NN(av);
+    LvSTARGOFF(lv) = ix;
+    LvTARGLEN(lv) = extendible ? 1 : (STRLEN)UV_MAX;
+    return lv;
+}
+
 /*
 =for apidoc sv_setref_pv
 

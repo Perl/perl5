@@ -966,6 +966,7 @@ Apda	|SV*	|newRV_noinc	|NN SV *const sv
 Apda	|SV*	|newSV		|const STRLEN len
 Apa	|OP*	|newSVREF	|NN OP* o
 Apda	|OP*	|newSVOP	|I32 type|I32 flags|NN SV* sv
+pa	|SV*	|newSVavdefelem	|NN AV *av|SSize_t ix|bool extendible
 Apda	|SV*	|newSViv	|const IV i
 Apda	|SV*	|newSVuv	|const UV u
 Apda	|SV*	|newSVnv	|const NV n

@@ -1919,13 +1919,7 @@ PP(pp_iter)
             }
         }
         else if (!av_is_stack) {
-            SV *lv = newSV_type(SVt_PVLV);
-            LvTYPE(lv) = 'y';
-            sv_magic(lv, NULL, PERL_MAGIC_defelem, NULL, 0);
-            LvTARG(lv) = SvREFCNT_inc_simple(av);
-            LvTARGOFF(lv) = ix;
-            LvTARGLEN(lv) = (STRLEN)UV_MAX;
-            sv = lv;
+            sv = newSVavdefelem(av, ix, 0);
         }
         else
             sv = &PL_sv_undef;
@@ -2734,13 +2728,7 @@ try_autoload:
 		for (; i < items; ++i)
 		    if (AvARRAY(av)[i]) SP[i+1] = AvARRAY(av)[i];
 		    else {
-			SV * const lv = sv_2mortal(newSV_type(SVt_PVLV));
-			SP[i+1] = lv;
-			LvTYPE(lv) = 'y';
-			sv_magic(lv, NULL, PERL_MAGIC_defelem, NULL, 0);
-			LvTARG(lv) = SvREFCNT_inc_simple_NN(av);
-			LvSTARGOFF(lv) = i;
-			LvTARGLEN(lv) = 1;
+			SP[i+1] = newSVavdefelem(av, i, 1);
 		    }
 		SP += items;
 		PUTBACK ;		
@@ -2850,23 +2838,16 @@ PP(pp_aelem)
 	 }
 #endif
 	if (!svp || !*svp) {
-	    SV* lv;
 	    IV len;
 	    if (!defer)
 		DIE(aTHX_ PL_no_aelem, elem);
 	    len = av_len(av);
-	    lv = sv_newmortal();
-	    sv_upgrade(lv, SVt_PVLV);
-	    LvTYPE(lv) = 'y';
-	    sv_magic(lv, NULL, PERL_MAGIC_defelem, NULL, 0);
-	    LvTARG(lv) = SvREFCNT_inc_simple_NN(av);
+	    mPUSHs(newSVavdefelem(av,
 	    /* Resolve a negative index now, unless it points before the
 	       beginning of the array, in which case record it for error
 	       reporting in magic_setdefelem. */
-	    LvSTARGOFF(lv) =
-		elem < 0 && len + elem >= 0 ? len + elem : elem;
-	    LvTARGLEN(lv) = 1;
-	    PUSHs(lv);
+		elem < 0 && len + elem >= 0 ? len + elem : elem,
+		1));
 	    RETURN;
 	}
 	if (localizing) {
