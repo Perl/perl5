@@ -2655,7 +2655,7 @@ S_sublex_push(pTHX)
     PL_lex_starts = 0;
     PL_lex_state = LEX_INTERPCONCAT;
     if (is_heredoc)
-	CopLINE_inc(PL_curcop);
+	CopLINE_set(PL_curcop, (line_t)PL_multi_start);
     PL_copline = NOLINE;
     
     Newxz(shared, 1, LEXSHARED);
@@ -9935,6 +9935,7 @@ S_scan_heredoc(pTHX_ char *s)
     char *e;
     char *peek;
     const bool infile = PL_rsfp || PL_parser->filtered;
+    const line_t origline = CopLINE(PL_curcop);
     LEXSHARED *shared = PL_parser->lex_shared;
 #ifdef PERL_MAD
     I32 stuffstart = s - SvPVX(PL_linestr);
@@ -10036,7 +10037,7 @@ S_scan_heredoc(pTHX_ char *s)
 	SvIV_set(tmpstr, '\\');
     }
 
-    PL_multi_start = CopLINE(PL_curcop) + 1;
+    PL_multi_start = origline + 1;
     PL_multi_open = PL_multi_close = '<';
     /* inside a string eval or quote-like operator */
     if (!infile || PL_lex_inwhat) {
@@ -10077,6 +10078,7 @@ S_scan_heredoc(pTHX_ char *s)
 	    s = (char*)memchr((void*)s, '\n', PL_bufend - s);
 	    assert(s);
 	}
+	PL_multi_start += shared->herelines;
 	linestr = shared->ls_linestr;
 	bufend = SvEND(linestr);
 	d = s;
@@ -10139,6 +10141,7 @@ S_scan_heredoc(pTHX_ char *s)
     {
       SV *linestr_save;
      streaming:
+      PL_multi_start += shared->herelines;
       sv_setpvs(tmpstr,"");   /* avoid "uninitialized" warning */
       term = PL_tokenbuf[1];
       len--;
@@ -10158,13 +10161,13 @@ S_scan_heredoc(pTHX_ char *s)
 #endif
 	PL_bufptr = PL_bufend;
 	CopLINE_set(PL_curcop,
-		    PL_multi_start + shared->herelines);
+		    origline + 1 + shared->herelines);
 	if (!lex_next_chunk(LEX_NO_TERM)
 	 && (!SvCUR(tmpstr) || SvEND(tmpstr)[-1] != '\n')) {
 	    SvREFCNT_dec(linestr_save);
 	    goto interminable;
 	}
-	CopLINE_set(PL_curcop, (line_t)PL_multi_start - 1);
+	CopLINE_set(PL_curcop, origline);
 	if (!SvCUR(PL_linestr) || PL_bufend[-1] != '\n') {
             s = lex_grow_linestr(SvLEN(PL_linestr) + 3);
             /* ^That should be enough to avoid this needing to grow:  */
@@ -10222,7 +10225,7 @@ S_scan_heredoc(pTHX_ char *s)
 
   interminable:
     SvREFCNT_dec(tmpstr);
-    CopLINE_set(PL_curcop, (line_t)PL_multi_start - 1);
+    CopLINE_set(PL_curcop, origline);
     missingterm(PL_tokenbuf + 1);
 }
 

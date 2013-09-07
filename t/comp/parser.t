@@ -8,7 +8,7 @@ BEGIN {
     chdir 't';
 }
 
-print "1..159\n";
+print "1..165\n";
 
 sub failed {
     my ($got, $expected, $name) = @_;
@@ -588,10 +588,23 @@ EOU
 s//<<EOV/e if 0;
 EOV
 check_line(535, 'after here-doc in quotes');
-<<EOW;
+<<EOW; <<EOX;
 ${check_line(537, 'first line of interp in here-doc');;
   check_line(538, 'second line of interp in here-doc');}
 EOW
+${check_line(540, 'first line of interp in second here-doc on same line');;
+  check_line(541, 'second line of interp in second heredoc on same line');}
+EOX
+eval <<'EVAL';
+#line 545
+"${<<EOY; <<EOZ}";
+${check_line(546, 'first line of interp in here-doc in quotes in eval');;
+  check_line(547, 'second line of interp in here-doc in quotes in eval');}
+EOY
+${check_line(549, '1st line of interp in 2nd hd, same line in q in eval');;
+  check_line(550, '2nd line of interp in 2nd hd, same line in q in eval');}
+EOZ
+EVAL
 
 time
 #line 42
