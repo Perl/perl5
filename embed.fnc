@@ -219,7 +219,7 @@ ApdR	|SSize_t|av_len		|NN AV *av
 ApdR	|AV*	|av_make	|SSize_t size|NN SV **strp
 Apd	|SV*	|av_pop		|NN AV *av
 ApdoxM	|void	|av_create_and_push|NN AV **const avp|NN SV *const val
-Apd	|void	|av_push	|NN AV *av|NN SV *val
+Apd	|void	|av_push	|NN AV *av|NULLOK SV *val
 : Used in scope.c, and by Data::Alias
 EXp	|void	|av_reify	|NN AV *av
 ApdR	|SV*	|av_shift	|NN AV *av
