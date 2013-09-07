@@ -2,7 +2,7 @@
 #define _INC_SYS_ERRNO2
 
 #define _WINSOCKAPI_	/* Don't drag in everything */
-#include <winsock.h>
+#include <winsock2.h>
 
 /* Ensure all the Exxx constants required by convert_wsa_error_to_errno() in
  * win32/win32sck.c are defined. Many are defined in <errno.h> already (more so
