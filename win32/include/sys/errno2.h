@@ -120,7 +120,8 @@
 
 /* ENAMETOOLONG is a standard errno.h value */
 
-/* EHOSTDOWN is not an errno.h value at all (on Windows, anyway) */
+/* EHOSTDOWN is not in errno.h and despite being wanted by POSIX.pm we cannot
+ * provide any sane value since there is no WSAEHOSTDOWN */
 
 #ifndef EHOSTUNREACH		/* New in VC10 */
 #  define EHOSTUNREACH		WSAEHOSTUNREACH
