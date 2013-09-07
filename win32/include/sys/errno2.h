@@ -1,8 +1,15 @@
 #ifndef _INC_SYS_ERRNO2
 #define _INC_SYS_ERRNO2
 
-#define _WINSOCKAPI_	/* Don't drag in everything */
-#include <winsock2.h>
+/* Too late to include winsock2.h if winsock.h has already been loaded */
+#ifndef _WINSOCKAPI_
+#  if defined(UNDER_CE) && UNDER_CE <= 300
+     /* winsock2 only for 4.00+ */
+#    include <winsock.h>
+#  else
+#    include <winsock2.h>
+#  endif
+#endif
 
 /* Ensure all the Exxx constants required by convert_wsa_error_to_errno() in
  * win32/win32sck.c are defined. Many are defined in <errno.h> already (more so
@@ -149,7 +156,9 @@
 /* ENOMORE is not an errno.h value at all */
 
 #ifndef ECANCELED		/* New in VC10 */
-#  define ECANCELED		WSAECANCELLED
+#  ifdef WSAECANCELLED		/* New in WinSock2 */
+#    define ECANCELED		WSAECANCELLED
+#  endif
 #endif
 
 /* EINVALIDPROCTABLE is not an errno.h value at all */

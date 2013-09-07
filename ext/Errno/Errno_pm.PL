@@ -209,7 +209,6 @@ sub write_errno_pm {
 	print CPPI "#include <errno.h>\n";
     }
     if ($IsMSWin32) {
-	print CPPI "#include <winsock.h>\n";
 	print CPPI qq[#include "../../win32/include/sys/errno2.h"\n];
     }
  

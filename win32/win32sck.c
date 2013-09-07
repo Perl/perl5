@@ -170,8 +170,10 @@ convert_wsa_error_to_errno(int wsaerr)
 	return WSAEDISCON;		/* EDISCON is not defined */
     case WSAENOMORE:
 	return WSAENOMORE;		/* ENOMORE is not defined */
-    case WSAECANCELLED:
+#ifdef WSAECANCELLED
+    case WSAECANCELLED:			/* New in WinSock2 */
 	return ECANCELED;
+#endif
     case WSAEINVALIDPROCTABLE:
 	return WSAEINVALIDPROCTABLE;	/* EINVALIDPROCTABLE is not defined */
     case WSAEINVALIDPROVIDER:
@@ -188,7 +190,7 @@ convert_wsa_error_to_errno(int wsaerr)
 #ifdef ERRNO_HAS_POSIX_SUPPLEMENT
 /* Translate Exxx values in the POSIX supplement range defined in VC++ 2010 and
  * above (EADDRINUSE <= err <= EWOULDBLOCK) to corresponding WSAExxx values. Not
- * all such Exxx constants have corresponding WSAExxx constants in <winsock2.h>;
+ * all such Exxx constants have corresponding WSAExxx constants in <winsock*.h>;
  * we just use ERROR_INVALID_FUNCTION for those that are missing but do not
  * really expect to encounter them anyway in the context in which this function
  * is called.
@@ -209,7 +211,11 @@ convert_errno_to_wsa_error(int err)
     case EBADMSG:
 	return ERROR_INVALID_FUNCTION;
     case ECANCELED:
-	return WSAECANCELLED;
+#ifdef WSAECANCELLED
+	return WSAECANCELLED;		/* New in WinSock2 */
+#else
+	return ERROR_INVALID_FUNCTION;
+#endif
     case ECONNABORTED:
 	return WSAECONNABORTED;
     case ECONNREFUSED:
