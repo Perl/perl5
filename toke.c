@@ -4770,11 +4770,9 @@ Perl_yylex(pTHX)
     } );
 
     switch (PL_lex_state) {
-#ifdef COMMENTARY
-    case LEX_NORMAL:		/* Some compilers will produce faster */
-    case LEX_INTERPNORMAL:	/* code if we comment these out. */
+    case LEX_NORMAL:
+    case LEX_INTERPNORMAL:
 	break;
-#endif
 
     /* when we've already built the next token, just pull it out of the queue */
     case LEX_KNOWNEXT:
