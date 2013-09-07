@@ -4881,7 +4881,7 @@ Perl_current_re_engine(pTHX)
 	HV * const table = GvHV(PL_hintgv);
 	SV **ptr;
 
-	if (!table)
+	if (!table || !(PL_hints & HINT_LOCALIZE_HH))
 	    return &PL_core_reg_engine;
 	ptr = hv_fetchs(table, "regcomp", FALSE);
 	if ( !(ptr && SvIOK(*ptr) && SvIV(*ptr)))
