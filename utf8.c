@@ -366,10 +366,8 @@ Perl_is_utf8_char_buf(const U8 *buf, const U8* buf_end)
 	len = UTF8SKIP(buf);
     }
 
-#ifdef IS_UTF8_CHAR
     if (IS_UTF8_CHAR_FAST(len))
         return IS_UTF8_CHAR(buf, len) ? len : 0;
-#endif /* #ifdef IS_UTF8_CHAR */
     return is_utf8_char_slow(buf, len);
 }
 
