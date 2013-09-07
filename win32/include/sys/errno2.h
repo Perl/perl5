@@ -156,4 +156,13 @@
 /* EPROVIDERFAILEDINIT is not an errno.h value at all */
 /* EREFUSED is not an errno.h value at all */
 
+/* Set a flag indicating whether <errno.h> has the POSIX supplement (the first
+ * constant in which is EADDRINUSE). If so then we won't have just defined it as
+ * WSAEADDRINUSE above.
+ */
+#undef ERRNO_HAS_POSIX_SUPPLEMENT
+#if EADDRINUSE != WSAEADDRINUSE
+#  define ERRNO_HAS_POSIX_SUPPLEMENT
+#endif
+
 #endif /* _INC_SYS_ERRNO2 */

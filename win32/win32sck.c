@@ -185,11 +185,13 @@ convert_wsa_error_to_errno(int wsaerr)
     return wsaerr;
 }
 
+#ifdef ERRNO_HAS_POSIX_SUPPLEMENT
 /* Translate Exxx values in the POSIX supplement range defined in VC++ 2010 and
  * above (EADDRINUSE <= err <= EWOULDBLOCK) to corresponding WSAExxx values. Not
  * all such Exxx constants have corresponding WSAExxx constants in <winsock2.h>;
  * we just use ERROR_INVALID_FUNCTION for those that are missing but do not
- * really expect to encounter them anyway.
+ * really expect to encounter them anyway in the context in which this function
+ * is called.
  * Other Exxx values (err < sys_nerr) are returned unchanged.
  */
 int
@@ -282,6 +284,7 @@ convert_errno_to_wsa_error(int err)
 
     return err;
 }
+#endif /* ERRNO_HAS_POSIX_SUPPLEMENT */
 
 static int
 get_last_socket_error(void)

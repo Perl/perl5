@@ -2586,7 +2586,9 @@ win32_feof(FILE *fp)
     return (feof(fp));
 }
 
+#ifdef ERRNO_HAS_POSIX_SUPPLEMENT
 extern int convert_errno_to_wsa_error(int err); /* in win32sck.c */
+#endif
 
 /*
  * Since the errors returned by the socket error function
@@ -2607,7 +2609,7 @@ win32_strerror(int e)
         dTHXa(NULL);
 	if (e < 0)
 	    e = GetLastError();
-#if EADDRINUSE != WSAEADDRINUSE
+#ifdef ERRNO_HAS_POSIX_SUPPLEMENT
 	/* VC10+ define a "POSIX supplement" of errno values ranging from
 	 * EADDRINUSE (100) to EWOULDBLOCK (140), but sys_nerr is still 43 and
 	 * strerror() returns "Unknown error" for them. We must therefore still
