@@ -2303,7 +2303,7 @@ PerlIOBase_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param, int flags)
 	if (self && self->Getarg)
 	    arg = (*self->Getarg)(aTHX_ o, param, flags);
 	f = PerlIO_push(aTHX_ f, self, PerlIO_modestr(o,buf), arg);
-	if (PerlIOBase(o)->flags & PERLIO_F_UTF8)
+	if (f && PerlIOBase(o)->flags & PERLIO_F_UTF8)
 	    PerlIOBase(f)->flags |= PERLIO_F_UTF8;
 	SvREFCNT_dec(arg);
     }
