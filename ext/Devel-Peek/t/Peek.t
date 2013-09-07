@@ -1039,6 +1039,12 @@ SV = PV\($ADDR\) at $ADDR
   LEN = \d+
 SUBSTR
 
+# Dump with no arguments
+eval 'Dump';
+like $@, qr/^Not enough arguments for Devel::Peek::Dump/, 'Dump;';
+eval 'Dump()';
+like $@, qr/^Not enough arguments for Devel::Peek::Dump/, 'Dump()';
+
 SKIP: {
     skip "Not built with usemymalloc", 2
       unless $Config{usemymalloc} eq 'y';
