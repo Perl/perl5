@@ -1371,7 +1371,7 @@ prime_env_iter(void)
       my_strlcpy(cmd, "Show Logical *", sizeof(cmd));
       if (str$case_blind_compare(env_tables[i],&fildevdsc)) {
         my_strlcat(cmd," /Table=", sizeof(cmd));
-        cmddsc.dsc$w_length = my_strlcat(cmd, env_tables[i]->dsc$a_pointer, env_tables[i]->dsc$w_length + 1);
+        cmddsc.dsc$w_length = my_strlcat(cmd, env_tables[i]->dsc$a_pointer, sizeof(cmd));
       }
       else cmddsc.dsc$w_length = 14;  /* N.B. We test this below */
       flags = defflags | CLI$M_NOCLISYM;
@@ -9658,11 +9658,12 @@ vms_image_init(int *argcp, char ***argvp)
     }
     tabvec[tabidx] = (struct dsc$descriptor_s *) PerlMem_malloc(sizeof(struct dsc$descriptor_s));
     if (tabvec[tabidx] == NULL) _ckvmssts_noperl(SS$_INSFMEM);
-    tabvec[tabidx]->dsc$w_length  = 0;
+    tabvec[tabidx]->dsc$w_length  = len;
     tabvec[tabidx]->dsc$b_dtype   = DSC$K_DTYPE_T;
-    tabvec[tabidx]->dsc$b_class   = DSC$K_CLASS_D;
-    tabvec[tabidx]->dsc$a_pointer = NULL;
-    _ckvmssts_noperl(lib$scopy_r_dx(&len,eqv,tabvec[tabidx]));
+    tabvec[tabidx]->dsc$b_class   = DSC$K_CLASS_S;
+    tabvec[tabidx]->dsc$a_pointer = PerlMem_malloc(len + 1);
+    if (tabvec[tabidx]->dsc$a_pointer == NULL) _ckvmssts_noperl(SS$_INSFMEM);
+    my_strlcpy(tabvec[tabidx]->dsc$a_pointer, eqv, len + 1);
   }
   if (tabidx) { tabvec[tabidx] = NULL; env_tables = tabvec; }
 
