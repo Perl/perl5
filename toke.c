@@ -2594,12 +2594,8 @@ S_sublex_push(pTHX)
 {
     dVAR;
     LEXSHARED *shared;
-    const bool is_heredoc =
-	CopLINE(PL_curcop) == (line_t)PL_multi_start - 1;
+    const bool is_heredoc = PL_multi_close == '<';
     ENTER;
-
-    assert(CopLINE(PL_curcop) == (line_t)PL_multi_start
-	|| CopLINE(PL_curcop) == (line_t)PL_multi_start - 1);
 
     PL_lex_state = PL_sublex_info.super_state;
     SAVEBOOL(PL_lex_dojoin);
