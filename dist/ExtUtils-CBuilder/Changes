@@ -430,6 +430,13 @@ Revision history for Perl extension ExtUtils::CBuilder.
    function from Text::ParseWords (a core module since 5.0), which
    does a much better job than the split() we were using.
 
+0.280210 - 2013-09-06
+
+  Fixed:
+
+  - Update INSTALLDIRS to favor installation under 'site' (perl 116479)
+    [James E Keenan]
+
 
 0.03  Fri May 14 23:12:23 CDT 2004
 
