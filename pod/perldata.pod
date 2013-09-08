@@ -193,7 +193,8 @@ C<$1>, or C<$10000>.
 
 =item A sigil, followed by either a caret and a single POSIX uppercase letter,
 like C<$^V> or C<$^W>, or a sigil followed by a literal control character
-matching the C<\p{POSIX_Cntrl}> property. Due to a historical oddity, if not
+matching the C<\p{POSIX_Cntrl}> property.
+Due to a historical oddity, if not
 running under C<use utf8>, the 128 extra controls in the C<[0x80-0xff]> range
 may also be used in length one variables.
 
@@ -457,7 +458,7 @@ $0 and the $s variables in the (presumably) non-existent package
 C<who>.
 
 In fact, a simple identifier within such curlies is forced to be
-a string, and likewise within a hash subscript. Neither need
+a string, and likewise within a hash subscript.  Neither need
 quoting.  Our earlier example, C<$days{'Feb'}> can be written as
 C<$days{Feb}> and the quotes will be assumed automatically.  But
 anything more complicated in the subscript will be interpreted as an
@@ -925,7 +926,7 @@ return list of key/value pairs rather than just values:
     %sub = %h{'foo', 'bar'}; # key/value hash slice
 
 However, result of such slice can not be localized, deleted or used
-in assignment. Otherwise very much consistent with hash slices.
+in assignment.  Otherwise very much consistent with hash slices.
 
 =head3 Index/value array slices
 
