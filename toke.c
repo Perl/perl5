@@ -737,7 +737,7 @@ Perl_lex_start(pTHX_ SV *line, PerlIO *rsfp, U32 flags)
     parser->nexttoke = 0;
 #endif
     parser->error_count = oparser ? oparser->error_count : 0;
-    parser->copline = NOLINE;
+    parser->copline = parser->preambling = NOLINE;
     parser->lex_state = LEX_NORMAL;
     parser->expect = XSTATE;
     parser->rsfp = rsfp;
@@ -1384,6 +1384,10 @@ Perl_lex_next_chunk(pTHX_ U32 flags)
 	PL_parser->last_uni = buf + last_uni_pos;
     if (PL_parser->last_lop)
 	PL_parser->last_lop = buf + last_lop_pos;
+    if (PL_parser->preambling != NOLINE) {
+	CopLINE_set(PL_curcop, PL_parser->preambling + 1);
+	PL_parser->preambling = NOLINE;
+    }
     if (got_some_for_debugger && (PERLDB_LINE || PERLDB_SAVESRC) &&
 	    PL_curstash != PL_debstash) {
 	/* debugger active and we're not compiling the debugger code,
@@ -1909,14 +1913,23 @@ S_update_debugger_info(pTHX_ SV *orig_sv, const char *const buf, STRLEN len)
 {
     AV *av = CopFILEAVx(PL_curcop);
     if (av) {
-	SV * const sv = newSV_type(SVt_PVMG);
+	SV * sv;
+	if (PL_parser->preambling == NOLINE) sv = newSV_type(SVt_PVMG);
+	else {
+	    sv = *av_fetch(av, 0, 1);
+	    SvUPGRADE(sv, SVt_PVMG);
+	}
+	if (!SvPOK(sv)) sv_setpvs(sv,"");
 	if (orig_sv)
-	    sv_setsv_flags(sv, orig_sv, 0); /* no cow */
+	    sv_catsv(sv, orig_sv);
 	else
-	    sv_setpvn(sv, buf, len);
-	(void)SvIOK_on(sv);
-	SvIV_set(sv, 0);
-	av_store(av, CopLINE(PL_curcop), sv);
+	    sv_catpvn(sv, buf, len);
+	if (!SvIOK(sv)) {
+	    (void)SvIOK_on(sv);
+	    SvIV_set(sv, 0);
+	}
+	if (PL_parser->preambling == NOLINE)
+	    av_store(av, CopLINE(PL_curcop), sv);
     }
 }
 
@@ -5217,6 +5230,7 @@ Perl_yylex(pTHX)
 		    SETERRNO(0,SS_NORMAL);
 		    sv_setpvs(PL_linestr, "BEGIN { require 'perl5db.pl' };");
 		}
+		PL_parser->preambling = CopLINE(PL_curcop);
 	    } else
 		sv_setpvs(PL_linestr,"");
 	    if (PL_preambleav) {
@@ -11523,7 +11537,10 @@ Perl_yyerror_pvn(pTHX_ const char *const s, STRLEN len, U32 flags)
     }
     msg = newSVpvn_flags(s, len, (flags & SVf_UTF8) | SVs_TEMP);
     Perl_sv_catpvf(aTHX_ msg, " at %s line %"IVdf", ",
-        OutCopFILE(PL_curcop), (IV)CopLINE(PL_curcop));
+        OutCopFILE(PL_curcop),
+        (IV)(PL_parser->preambling == NOLINE
+               ? CopLINE(PL_curcop)
+               : PL_parser->preambling));
     if (context)
 	Perl_sv_catpvf(aTHX_ msg, "near \"%"UTF8f"\"\n",
 			     UTF8fARG(UTF, contlen, context));

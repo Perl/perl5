@@ -9,7 +9,7 @@ BEGIN { require "./test.pl"; }
 
 # This test depends on t/lib/Devel/switchd*.pm.
 
-plan(tests => 12);
+plan(tests => 13);
 
 my $r;
 
@@ -69,6 +69,17 @@ cmp_ok(
   0,
  'The debugger can see the lines of the main program under #!perl -d',
 );
+
+like
+  runperl(
+   switches => [ '"-Mless ++INC->{q-Devel/_.pm-}"' ],
+   progs    => [
+    '#!perl -d:_',
+    'sub DB::DB{} print line=>__LINE__',
+   ],
+  ),
+  qr/line2/,
+ '#!perl -d:whatever does not throw line numbers off';
 
 # [perl #48332]
 like(
@@ -177,14 +188,15 @@ like(
 
 # PERL5DB with embedded newlines
 {
-    local $ENV{PERL5DB} = "sub DB::DB{}\ndie";
-    like(
+    local $ENV{PERL5DB} = "sub DB::DB{}\nwarn";
+    is(
       runperl(
        switches => [ '-Ilib', '-ld' ],
-       prog     => 'print qq|not ok|',
+       prog     => 'warn',
        stderr   => 1
       ),
-      qr /Died/,
+      "Warning: something's wrong.\n"
+     ."Warning: something's wrong at -e line 1.\n",
      'PERL5DB with embedded newlines',
     );
 }

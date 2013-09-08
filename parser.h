@@ -123,6 +123,7 @@ typedef struct yy_parser {
     COP		*saved_curcop;	/* the previous PL_curcop */
     char	tokenbuf[256];
     line_t	herelines;	/* number of lines in here-doc */
+    line_t	preambling;	/* line # when processing $ENV{PERL5DB} */
     U8		lex_fakeeof;	/* precedence at which to fake EOF */
     U8		lex_flags;
     PERL_BITFIELD16	in_pod:1;      /* lexer is within a =pod section */
