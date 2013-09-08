@@ -3941,7 +3941,6 @@ ext/XS-APItest/README		XS::APItest extension
 ext/XS-APItest/t/addissub.t	test op check wrapping
 ext/XS-APItest/t/arrayexpr.t	test recursive descent expression parsing
 ext/XS-APItest/t/autoload.t	Test XS AUTOLOAD routines
-ext/XS-APItest/t/av.t		Test AV functions
 ext/XS-APItest/t/BHK.pm		Helper for ./blockhooks.t
 ext/XS-APItest/t/blockasexpr.t	test recursive descent block parsing
 ext/XS-APItest/t/blockhooks-csc.t	XS::APItest: more tests for PL_blockhooks

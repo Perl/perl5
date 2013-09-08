@@ -221,9 +221,10 @@ PERL_CALLCONV SV*	Perl_av_pop(pTHX_ AV *av)
 	assert(av)
 
 PERL_CALLCONV void	Perl_av_push(pTHX_ AV *av, SV *val)
-			__attribute__nonnull__(pTHX_1);
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_AV_PUSH	\
-	assert(av)
+	assert(av); assert(val)
 
 PERL_CALLCONV void	Perl_av_reify(pTHX_ AV *av)
 			__attribute__nonnull__(pTHX_1);

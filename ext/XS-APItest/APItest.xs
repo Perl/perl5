@@ -3467,11 +3467,6 @@ alias_av(AV *av, IV ix, SV *sv)
     CODE:
 	av_store(av, ix, SvREFCNT_inc(sv));
 
-void
-av_pushnull(AV *av)
-    CODE:
-	av_push(av, NULL);
-
 MODULE = XS::APItest PACKAGE = XS::APItest::AUTOLOADtest
 
 int
