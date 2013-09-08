@@ -29,7 +29,6 @@ typedef struct yy_lexshared {
     char		*ls_bufptr;	/* mirrors PL_parser->bufptr */
     char		*re_eval_start;	/* start of "(?{..." text */
     SV			*re_eval_str;	/* "(?{...})" text */
-    line_t		herelines;	/* number of lines in here-doc */
 } LEXSHARED;
 
 typedef struct yy_parser {
@@ -123,7 +122,7 @@ typedef struct yy_parser {
 
     COP		*saved_curcop;	/* the previous PL_curcop */
     char	tokenbuf[256];
-
+    line_t	herelines;	/* number of lines in here-doc */
     U8		lex_fakeeof;	/* precedence at which to fake EOF */
     U8		lex_flags;
     PERL_BITFIELD16	in_pod:1;      /* lexer is within a =pod section */

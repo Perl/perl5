@@ -303,9 +303,9 @@ static const char* const lex_state_names[] = {
 #define COPLINE_INC_WITH_HERELINES		    \
     STMT_START {				     \
 	CopLINE_inc(PL_curcop);			      \
-	if (PL_parser->lex_shared->herelines)	       \
-	    CopLINE(PL_curcop) += PL_parser->lex_shared->herelines, \
-	    PL_parser->lex_shared->herelines = 0;		     \
+	if (PL_parser->herelines)		       \
+	    CopLINE(PL_curcop) += PL_parser->herelines, \
+	    PL_parser->herelines = 0;			 \
     } STMT_END
 /* Called after scan_str to update CopLINE(PL_curcop), but only when there
  * is no sublex_push to follow. */
@@ -313,7 +313,7 @@ static const char* const lex_state_names[] = {
     STMT_START {			       \
 	CopLINE_set(PL_curcop, PL_multi_end);	\
 	if (PL_multi_end != PL_multi_start)	 \
-	    PL_parser->lex_shared->herelines = 0; \
+	    PL_parser->herelines = 0;		  \
     } STMT_END
 
 
@@ -1569,7 +1569,7 @@ Perl_lex_read_space(pTHX_ U32 flags)
 		break;
 	    PL_parser->bufptr = s;
 	    l = CopLINE(PL_curcop);
-	    CopLINE(PL_curcop) += PL_parser->lex_shared->herelines + 1;
+	    CopLINE(PL_curcop) += PL_parser->herelines + 1;
 	    got_more = lex_next_chunk(flags);
 	    CopLINE_set(PL_curcop, l);
 	    s = PL_parser->bufptr;
@@ -2613,6 +2613,8 @@ S_sublex_push(pTHX)
     {
 	SAVECOPLINE(PL_curcop);
 	SAVEI32(PL_multi_end);
+	SAVEI32(PL_parser->herelines);
+	PL_parser->herelines = 0;
     }
     SAVEI8(PL_multi_close);
     SAVEPPTR(PL_bufptr);
@@ -2665,10 +2667,6 @@ S_sublex_push(pTHX)
     Newxz(shared, 1, LEXSHARED);
     shared->ls_prev = PL_parser->lex_shared;
     PL_parser->lex_shared = shared;
-    if (!is_heredoc && PL_multi_start != PL_multi_end) {
-	shared->herelines = shared->ls_prev->herelines;
-	shared->ls_prev->herelines = 0;
-    }
 
     PL_lex_inwhat = PL_sublex_info.sub_inwhat;
     if (PL_lex_inwhat == OP_TRANSR) PL_lex_inwhat = OP_TRANS;
@@ -2736,8 +2734,8 @@ S_sublex_done(pTHX)
 	if (SvTYPE(PL_linestr) >= SVt_PVNV) {
 	    CopLINE(PL_curcop) +=
 		((XPVNV*)SvANY(PL_linestr))->xnv_u.xpad_cop_seq.xlow
-		 + PL_parser->lex_shared->herelines;
-	    PL_parser->lex_shared->herelines = 0;
+		 + PL_parser->herelines;
+	    PL_parser->herelines = 0;
 	}
 	return ',';
     }
@@ -2759,7 +2757,7 @@ S_sublex_done(pTHX)
 #endif
 	LEAVE;
 	if (PL_multi_close == '<')
-	    PL_parser->lex_shared->herelines += l - PL_multi_end;
+	    PL_parser->herelines += l - PL_multi_end;
 	PL_bufend = SvPVX(PL_linestr);
 	PL_bufend += SvCUR(PL_linestr);
 	PL_expect = XOPERATOR;
@@ -10044,7 +10042,7 @@ S_scan_heredoc(pTHX_ char *s)
 	SvIV_set(tmpstr, '\\');
     }
 
-    PL_multi_start = origline + 1;
+    PL_multi_start = origline + 1 + PL_parser->herelines;
     PL_multi_open = PL_multi_close = '<';
     /* inside a string eval or quote-like operator */
     if (!infile || PL_lex_inwhat) {
@@ -10085,14 +10083,13 @@ S_scan_heredoc(pTHX_ char *s)
 	    s = (char*)memchr((void*)s, '\n', PL_bufend - s);
 	    assert(s);
 	}
-	PL_multi_start += shared->herelines;
 	linestr = shared->ls_linestr;
 	bufend = SvEND(linestr);
 	d = s;
 	while (s < bufend - len + 1 &&
           memNE(s,PL_tokenbuf,len) ) {
 	    if (*s++ == '\n')
-		++shared->herelines;
+		++PL_parser->herelines;
 	}
 	if (s >= bufend - len + 1) {
 	    goto interminable;
@@ -10109,7 +10106,7 @@ S_scan_heredoc(pTHX_ char *s)
 #endif
 	s += len - 1;
 	/* the preceding stmt passes a newline */
-	shared->herelines++;
+	PL_parser->herelines++;
 
 	/* s now points to the newline after the heredoc terminator.
 	   d points to the newline before the body of the heredoc.
@@ -10148,7 +10145,6 @@ S_scan_heredoc(pTHX_ char *s)
     {
       SV *linestr_save;
      streaming:
-      PL_multi_start += shared->herelines;
       sv_setpvs(tmpstr,"");   /* avoid "uninitialized" warning */
       term = PL_tokenbuf[1];
       len--;
@@ -10168,7 +10164,7 @@ S_scan_heredoc(pTHX_ char *s)
 #endif
 	PL_bufptr = PL_bufend;
 	CopLINE_set(PL_curcop,
-		    origline + 1 + shared->herelines);
+		    origline + 1 + PL_parser->herelines);
 	if (!lex_next_chunk(LEX_NO_TERM)
 	 && (!SvCUR(tmpstr) || SvEND(tmpstr)[-1] != '\n')) {
 	    SvREFCNT_dec(linestr_save);
@@ -10186,7 +10182,7 @@ S_scan_heredoc(pTHX_ char *s)
 #ifdef PERL_MAD
 	stuffstart = s - SvPVX(PL_linestr);
 #endif
-	shared->herelines++;
+	PL_parser->herelines++;
 	PL_last_lop = PL_last_uni = NULL;
 #ifndef PERL_STRICT_CR
 	if (PL_bufend - PL_linestart >= 2) {
@@ -10216,7 +10212,7 @@ S_scan_heredoc(pTHX_ char *s)
 	}
       }
     }
-    PL_multi_end = origline + shared->herelines;
+    PL_multi_end = origline + PL_parser->herelines;
     if (SvCUR(tmpstr) + 5 < SvLEN(tmpstr)) {
 	SvPV_shrink_to_cur(tmpstr);
     }
@@ -10504,7 +10500,7 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims, int re_reparse,
     /* mark where we are */
     PL_multi_start = CopLINE(PL_curcop);
     PL_multi_open = term;
-    herelines = PL_parser->lex_shared->herelines;
+    herelines = PL_parser->herelines;
 
     /* find corresponding closing delimiter */
     if (term && (tmps = strchr("([{< )]}> )]}>",term)))
@@ -10859,7 +10855,7 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims, int re_reparse,
 
     PL_multi_end = CopLINE(PL_curcop);
     CopLINE_set(PL_curcop, PL_multi_start);
-    PL_parser->lex_shared->herelines = herelines;
+    PL_parser->herelines = herelines;
 
     /* if we allocated too much space, give some back */
     if (SvCUR(sv) + 5 < SvLEN(sv)) {
