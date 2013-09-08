@@ -8309,14 +8309,14 @@ Perl_ck_delete(pTHX_ OP *o)
 	case OP_HELEM:
 	    break;
 	case OP_KVASLICE:
-	    Perl_croak(aTHX_ "%s argument is index/value array slice, use array slice",
-		  OP_DESC(o));
+	    Perl_croak(aTHX_ "delete argument is index/value array slice,"
+			     " use array slice");
 	case OP_KVHSLICE:
-	    Perl_croak(aTHX_ "%s argument is key/value hash slice, use hash slice",
-		  OP_DESC(o));
+	    Perl_croak(aTHX_ "delete argument is key/value hash slice, use"
+			     " hash slice");
 	default:
-	    Perl_croak(aTHX_ "%s argument is not a HASH or ARRAY element or slice",
-		  OP_DESC(o));
+	    Perl_croak(aTHX_ "delete argument is not a HASH or ARRAY "
+			     "element or slice");
 	}
 	if (kid->op_private & OPpLVAL_INTRO)
 	    o->op_private |= OPpLVAL_INTRO;
@@ -8480,15 +8480,15 @@ Perl_ck_exists(pTHX_ OP *o)
 	    (void) ref(kid, o->op_type);
 	    if (kid->op_type != OP_RV2CV
 			&& !(PL_parser && PL_parser->error_count))
-		Perl_croak(aTHX_ "%s argument is not a subroutine name",
-			    OP_DESC(o));
+		Perl_croak(aTHX_
+			  "exists argument is not a subroutine name");
 	    o->op_private |= OPpEXISTS_SUB;
 	}
 	else if (kid->op_type == OP_AELEM)
 	    o->op_flags |= OPf_SPECIAL;
 	else if (kid->op_type != OP_HELEM)
-	    Perl_croak(aTHX_ "%s argument is not a HASH or ARRAY element or a subroutine",
-		        OP_DESC(o));
+	    Perl_croak(aTHX_ "exists argument is not a HASH or ARRAY "
+			     "element or a subroutine");
 	op_null(kid);
     }
     return o;

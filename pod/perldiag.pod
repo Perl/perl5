@@ -170,34 +170,6 @@ alternatives.
 
 (F) msgsnd() requires a string at least as long as sizeof(long).
 
-=item %s argument is not a HASH or ARRAY element or a subroutine
-
-(F) The argument to exists() must be a hash or array element or a
-subroutine with an ampersand, such as:
-
-    $foo{$bar}
-    $ref->{"susie"}[12]
-    &do_something
-
-=item %s argument is not a HASH or ARRAY element or slice
-
-(F) The argument to delete() must be either a hash or array element,
-such as:
-
-    $foo{$bar}
-    $ref->{"susie"}[12]
-
-or a hash or array slice, such as:
-
-    @foo[$bar, $baz, $xyzzy]
-    @{$ref->[12]}{"susie", "queue"}
-
-=item %s argument is not a subroutine name
-
-(F) The argument to exists() for C<exists &sub> must be a subroutine
-name, and not a subroutine call.  C<exists &sub()> will generate this
-error.
-
 =item Argument "%s" isn't numeric%s
 
 (W numeric) The indicated string was fed as an argument to an operator
@@ -1690,6 +1662,19 @@ discovered.
 (F) You said something like "use Module 42" but in the Module file
 there are neither package declarations nor a C<$VERSION>.
 
+=item delete argument is not a HASH or ARRAY element or slice
+
+(F) The argument to delete() must be either a hash or array element,
+such as:
+
+    $foo{$bar}
+    $ref->{"susie"}[12]
+
+or a hash or array slice, such as:
+
+    @foo[$bar, $baz, $xyzzy]
+    @{$ref->[12]}{"susie", "queue"}
+
 =item Delimiter for here document is too long
 
 (F) In a here document construct like C<<<FOO>, the label C<FOO> is too
@@ -1903,6 +1888,21 @@ OS.  See L<perlport>.
 =item Execution of %s aborted due to compilation errors.
 
 (F) The final summary message when a Perl compilation fails.
+
+=item exists argument is not a HASH or ARRAY element or a subroutine
+
+(F) The argument to exists() must be a hash or array element or a
+subroutine with an ampersand, such as:
+
+    $foo{$bar}
+    $ref->{"susie"}[12]
+    &do_something
+
+=item exists argument is not a subroutine name
+
+(F) The argument to exists() for C<exists &sub> must be a subroutine
+name, and not a subroutine call.  C<exists &sub()> will generate this
+error.
 
 =item Exiting eval via %s
 
