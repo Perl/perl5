@@ -4800,7 +4800,7 @@ PP(pp_hslice)
 
 PP(pp_kvhslice)
 {
-    dVAR; dSP; dMARK; dORIGMARK;
+    dVAR; dSP; dMARK;
     HV * const hv = MUTABLE_HV(POPs);
     I32 lval = (PL_op->op_flags & OPf_MOD);
     I32 items = SP - MARK;
