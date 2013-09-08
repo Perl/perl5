@@ -188,6 +188,8 @@ L<Data::Dumper> has been upgraded from version 2.148 to 2.149.
 This upgrade is part of a larger change to make the array interface 64-bit safe
 by using SSize_t instead of I32 for array indices.
 
+In addition, an EBCDIC fix has been applied.
+
 =item *
 
 L<Devel::Peek> has been upgraded from version 1.13 to 1.14.
@@ -195,6 +197,9 @@ L<Devel::Peek> has been upgraded from version 1.13 to 1.14.
 This upgrade is part of a larger change to preserve referential identity when
 passing C<undef> to a subroutine by using NULL rather than &PL_sv_undef for
 nonexistent array elements.
+
+In addition, C<Dump> with no args was broken in Perl 5.19.3, but has now been
+fixed.
 
 =item *
 
@@ -211,6 +216,13 @@ L<Encode> has been upgraded from version 2.52 to 2.54.
 
 An erroneous early return in C<decode_utf8> has been removed, and a bug in
 C<_utf8_on> under COW has been fixed.
+
+=item *
+
+L<ExtUtils::CBuilder> has been upgraded from version 0.280205 to 0.280210.
+
+No changes have been made other than the version bump to keep in sync with the
+latest CPAN release.
 
 =item *
 
@@ -336,6 +348,12 @@ L<Storable> has been upgraded from version 2.46 to 2.47.
 This upgrade is part of a larger change to preserve referential identity when
 passing C<undef> to a subroutine by using NULL rather than &PL_sv_undef for
 nonexistent array elements.
+
+=item *
+
+L<Term::ReadLine> has been upgraded from version 1.10 to 1.14.
+
+Term::ReadLine::EditLine support has been added.
 
 =item *
 
