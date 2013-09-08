@@ -4361,6 +4361,7 @@ PP(pp_kvaslice)
        const I32 flags = is_lvalue_sub();
        if (flags) {
            if (!(flags & OPpENTERSUB_INARGS))
+               /* diag_listed_as: Can't modify %s in %s */
 	       Perl_croak(aTHX_ "Can't modify index/value array slice in list assignment");
 	   lval = flags;
        }
@@ -4808,6 +4809,7 @@ PP(pp_kvhslice)
        const I32 flags = is_lvalue_sub();
        if (flags) {
            if (!(flags & OPpENTERSUB_INARGS))
+               /* diag_listed_as: Can't modify %s in %s */
 	       Perl_croak(aTHX_ "Can't modify key/value hash slice in list assignment");
 	   lval = flags;
        }
