@@ -79,6 +79,7 @@ plan tests => 39;
 
 # ref of a slice produces list
 {
+    no warnings 'syntax';
     my %h = map { $_ => uc $_ } 'a'..'z';
     my @a = \%h{ qw'c d e' };
 
