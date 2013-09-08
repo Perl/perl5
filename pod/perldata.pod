@@ -918,7 +918,7 @@ On the other hand, the leading symbol ('$' or '@') on the array or
 hash indicates whether you are getting back a singular value (a
 scalar) or a plural one (a list).
 
-=head3 Key/value hash slices
+=head3 Key/Value Hash Slices
 
 A key/value hash slice operation is variant of slice operation that
 return list of key/value pairs rather than just values:
@@ -928,7 +928,7 @@ return list of key/value pairs rather than just values:
 However, result of such slice can not be localized, deleted or used
 in assignment.  Otherwise very much consistent with hash slices.
 
-=head3 Index/value array slices
+=head3 Index/Value Array Slices
 
 Like for hash the following returns list of pairs, but with
 index/value pairs:
