@@ -4355,7 +4355,7 @@ PP(pp_kvaslice)
     dVAR; dSP; dMARK;
     AV *const av = MUTABLE_AV(POPs);
     I32 lval = (PL_op->op_flags & OPf_MOD);
-    I32 items = SP - MARK;
+    SSize_t items = SP - MARK;
 
     if (PL_op->op_private & OPpMAYBE_LVSUB) {
        const I32 flags = is_lvalue_sub();
@@ -4803,7 +4803,7 @@ PP(pp_kvhslice)
     dVAR; dSP; dMARK;
     HV * const hv = MUTABLE_HV(POPs);
     I32 lval = (PL_op->op_flags & OPf_MOD);
-    I32 items = SP - MARK;
+    SSize_t items = SP - MARK;
 
     if (PL_op->op_private & OPpMAYBE_LVSUB) {
        const I32 flags = is_lvalue_sub();
