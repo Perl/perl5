@@ -5264,6 +5264,8 @@ t/op/lexsub.t			See if lexical subroutines work
 t/op/lex.t			Tests too complex for t/base/lex.t
 t/op/lfs.t			See if large files work for perlio
 t/op/list.t			See if lists and list slices work
+t/op/kvaslice.t			See if index/value array slices work
+t/op/kvhslice.t			See if key/value hash slices work
 t/op/localref.t			See if local ${deref} works
 t/op/local.t			See if local works
 t/op/lock.t			Tests for lock args & retval (no threads)
