@@ -920,20 +920,25 @@ scalar) or a plural one (a list).
 
 =head3 Key/Value Hash Slices
 
-A key/value hash slice operation is variant of slice operation that
-return list of key/value pairs rather than just values:
+A hash slice operation with the % symbol is a variant of slice operation
+returning a list of key/value pairs rather than just values:
 
-    %sub = %h{'foo', 'bar'}; # key/value hash slice
+    %h = (blonk => 2, foo => 3, squink => 5, bar => 8);
+    %subset = %h{'foo', 'bar'}; # key/value hash slice
+    # %subset is now (foo => 3, bar => 8)
 
-However, result of such slice can not be localized, deleted or used
-in assignment.  Otherwise very much consistent with hash slices.
+However, the result of such a slice cannot be localized, deleted or used
+in assignment.  These are otherwise very much consistent with hash slices
+using the @ symbol.
 
 =head3 Index/Value Array Slices
 
-Like for hash the following returns list of pairs, but with
-index/value pairs:
+Similar to key/value hash slices, the % array slice syntax returns a list
+of index/value pairs:
 
-    @list = %a[3,4,5];
+    @a = "a".."z";
+    @list = %a[3,4,6];
+    # @list is now (3, "d", 4, "e", 6, "g")
 
 =head2 Typeglobs and Filehandles
 X<typeglob> X<filehandle> X<*>
