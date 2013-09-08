@@ -4775,10 +4775,6 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg, I32 floor)
     if (repl) {
 	OP *curop = repl;
 	bool konst;
-	if (pm->op_pmflags & PMf_EVAL) {
-	    if (CopLINE(PL_curcop) < (line_t)PL_parser->multi_end)
-		CopLINE_set(PL_curcop, (line_t)PL_parser->multi_end);
-	}
 	/* If we are looking at s//.../e with a single statement, get past
 	   the implicit do{}. */
 	if (curop->op_type == OP_NULL && curop->op_flags & OPf_KIDS

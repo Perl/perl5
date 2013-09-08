@@ -2610,7 +2610,11 @@ S_sublex_push(pTHX)
     SAVEVPTR(PL_lex_inpat);
     SAVEI16(PL_lex_inwhat);
     if (is_heredoc)
+    {
 	SAVECOPLINE(PL_curcop);
+	SAVEI32(PL_multi_end);
+    }
+    SAVEI8(PL_multi_close);
     SAVEPPTR(PL_bufptr);
     SAVEPPTR(PL_bufend);
     SAVEPPTR(PL_oldbufptr);
@@ -2738,6 +2742,7 @@ S_sublex_done(pTHX)
 	return ',';
     }
     else {
+	const line_t l = CopLINE(PL_curcop);
 #ifdef PERL_MAD
 	if (PL_madskills) {
 	    if (PL_thiswhite) {
@@ -2753,6 +2758,8 @@ S_sublex_done(pTHX)
 	}
 #endif
 	LEAVE;
+	if (PL_multi_close == '<')
+	    PL_parser->lex_shared->herelines += l - PL_multi_end;
 	PL_bufend = SvPVX(PL_linestr);
 	PL_bufend += SvCUR(PL_linestr);
 	PL_expect = XOPERATOR;
@@ -10209,7 +10216,7 @@ S_scan_heredoc(pTHX_ char *s)
 	}
       }
     }
-    PL_multi_end = CopLINE(PL_curcop);
+    PL_multi_end = origline + shared->herelines;
     if (SvCUR(tmpstr) + 5 < SvLEN(tmpstr)) {
 	SvPV_shrink_to_cur(tmpstr);
     }

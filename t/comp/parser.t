@@ -8,7 +8,7 @@ BEGIN {
     chdir 't';
 }
 
-print "1..165\n";
+print "1..166\n";
 
 sub failed {
     my ($got, $expected, $name) = @_;
@@ -618,6 +618,13 @@ check_line(54, 'line number after qq"${#line}"');
 #line 24
 "
 ${check_line(25, 'line number inside qq/<newline>${...}/')}";
+
+<<"END";
+${;
+#line 625
+}
+END
+check_line(627, 'line number after heredoc containing #line');
 
 __END__
 # Don't add new tests HERE. See note above
