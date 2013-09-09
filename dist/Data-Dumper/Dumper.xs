@@ -1195,7 +1195,7 @@ MODULE = Data::Dumper		PACKAGE = Data::Dumper         PREFIX = Data_Dumper_
 #
 # This is the exact equivalent of Dump.  Well, almost. The things that are
 # different as of now (due to Laziness):
-#   * doesn't do double-quotes yet.
+#   * doesn't deparse yet.
 #
 
 void
