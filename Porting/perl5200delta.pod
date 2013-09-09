@@ -365,10 +365,6 @@ modules that have been fixed.
 
 =item *
 
-L<Dancer> version 1.3117
-
-=item *
-
 L<Data::Alias> version 1.17
 
 =item *
@@ -385,10 +381,6 @@ L<Devel::NYTProf> version 5.05
 
 =item *
 
-L<Error> version 0.17020
-
-=item *
-
 L<Glib> version 1.301
 
 =item *
@@ -401,7 +393,7 @@ L<LaTeX::Encode> version 0.08
 
 =item
 
-L<Mail::SpamAssasin> version 3.3.2
+L<Mail::SpamAssassin> version 3.3.2
 
 =item
 
