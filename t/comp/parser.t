@@ -8,7 +8,7 @@ BEGIN {
     chdir 't';
 }
 
-print "1..166\n";
+print "1..167\n";
 
 sub failed {
     my ($got, $expected, $name) = @_;
@@ -486,6 +486,14 @@ $file = __FILE__;
 BEGIN{ ${"_<".__FILE__} = \1 }
 is __FILE__, $file,
     'no __FILE__ corruption when setting CopFILESV to a ref';
+
+eval 'Fooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo'
+    .'oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo'
+    .'oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo'
+    .'oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo'
+    .'oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo'
+    .'ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo';
+like $@, "^Identifier too long at ", 'ident buffer overflow';
 
 # Add new tests HERE (above this line)
 
