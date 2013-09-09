@@ -313,7 +313,7 @@ PerlIO_openn(pTHX_ const char *layers, const char *mode, int fd,
 	    return PerlIO_tmpfile();
 	else {
             STRLEN len;
-	    const char *name = SvPV_nolen_const(*args, len);
+	    const char *name = SvPV_const(*args, len);
             if (!IS_SAFE_PATHNAME(name, len, "open"))
                 return NULL;
 
