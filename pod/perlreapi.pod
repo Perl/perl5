@@ -418,7 +418,7 @@ doesn't have to modify the value.  This is exactly how tied variables
 behave in the same situation:
 
     package CaptureVar;
-    use base 'Tie::Scalar';
+    use parent 'Tie::Scalar';
 
     sub TIESCALAR { bless [] }
     sub FETCH { undef }
