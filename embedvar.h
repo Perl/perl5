@@ -243,6 +243,7 @@
 #define PL_psig_pend		(vTHX->Ipsig_pend)
 #define PL_psig_ptr		(vTHX->Ipsig_ptr)
 #define PL_ptr_table		(vTHX->Iptr_table)
+#define PL_random_state		(vTHX->Irandom_state)
 #define PL_reentrant_buffer	(vTHX->Ireentrant_buffer)
 #define PL_reentrant_retint	(vTHX->Ireentrant_retint)
 #define PL_reg_curpm		(vTHX->Ireg_curpm)

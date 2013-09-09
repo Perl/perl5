@@ -52,6 +52,33 @@ This is a synonym for (! foldEQ_locale())
 #define ibcmp(s1, s2, len)         cBOOL(! foldEQ(s1, s2, len))
 #define ibcmp_locale(s1, s2, len)  cBOOL(! foldEQ_locale(s1, s2, len))
 
+/* perl.h undefs HAS_QUAD if IV isn't 64-bit */
+#ifdef U64TYPE
+/* use a faster implementation when quads are available */
+#define PERL_DRAND48_QUAD
+#endif
+
+#ifdef PERL_DRAND48_QUAD
+
+/* U64 is only defined under PERL_CORE, but this needs to be visible
+ * elsewhere so the definition of PerlInterpreter is complete.
+ */
+typedef U64TYPE perl_drand48_t;
+
+#else
+
+struct PERL_DRAND48_T {
+    U16 seed[3];
+};
+
+typedef struct PERL_DRAND48_T perl_drand48_t;
+
+#endif
+
+#define PL_RANDOM_STATE_TYPE perl_drand48_t
+
+#define Perl_drand48_init(seed) (Perl_drand48_init_r(&PL_random_state, (seed)))
+#define Perl_drand48() (Perl_drand48_r(&PL_random_state))
 
 /*
  * Local variables:

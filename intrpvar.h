@@ -784,6 +784,8 @@ PERLVARA(I, op_exec_cnt, OP_max+2, UV)	/* Counts of executed OPs of the given ty
                                            DEBUGGING is enabled, too. */
 #endif
 
+PERLVAR(I, random_state, PL_RANDOM_STATE_TYPE)
+
 /* If you are adding a U8 or U16, check to see if there are 'Space' comments
  * above on where there are gaps which currently will be structure padding.  */
 
