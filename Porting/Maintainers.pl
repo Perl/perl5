@@ -660,7 +660,7 @@ use File::Glob qw(:case);
 
     'ExtUtils::Command' => {
         'MAINTAINER'   => 'p5p',
-        'DISTRIBUTION' => 'FLORA/ExtUtils-Command-1.17.tar.gz',
+        'DISTRIBUTION' => 'FLORA/ExtUtils-Command-1.18.tar.gz',
         'FILES'        => q[dist/ExtUtils-Command],
         'EXCLUDED'     => [qr{^t/release-}],
         'UPSTREAM'     => 'blead',
