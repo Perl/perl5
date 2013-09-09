@@ -3,7 +3,7 @@
 # Checks if the parser behaves correctly in edge cases
 # (including weird syntax errors)
 
-print "1..154\n";
+print "1..155\n";
 
 sub failed {
     my ($got, $expected, $name) = @_;
@@ -449,6 +449,14 @@ is 1,1, ' no crash for "no ... syntax error"';
 for my $pkg(()){}
 $pkg = 3;
 is $pkg, 3, '[perl #114942] for my $foo()){} $foo';
+
+eval 'Fooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo'
+    .'oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo'
+    .'oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo'
+    .'oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo'
+    .'oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo'
+    .'ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo';
+like $@, "^Identifier too long at ", 'ident buffer overflow';
 
 # Add new tests HERE (above this line)
 

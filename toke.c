@@ -9244,7 +9244,7 @@ S_parse_ident(pTHX_ char **s, char **d, char * const e, int allow_package, bool 
         else if ( isWORDCHAR_A(**s) ) {
             do {
                 *(*d)++ = *(*s)++;
-            } while isWORDCHAR_A(**s);
+            } while (isWORDCHAR_A(**s) && *d < e);
         }
         else if (allow_package && **s == '\'' && isIDFIRST_lazy_if(*s+1,is_utf8)) {
             *(*d)++ = ':';
