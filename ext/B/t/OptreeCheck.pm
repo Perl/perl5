@@ -1,11 +1,11 @@
 package OptreeCheck;
-use base 'Exporter';
+use parent 'Exporter';
 use strict;
 use warnings;
 use vars qw($TODO $Level $using_open);
 require "test.pl";
 
-our $VERSION = '0.10';
+our $VERSION = '0.11';
 
 # now export checkOptree, and those test.pl functions used by tests
 our @EXPORT = qw( checkOptree plan skip skip_all pass is like unlike
