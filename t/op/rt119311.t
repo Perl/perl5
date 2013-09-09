@@ -4,7 +4,7 @@
 
 # When a subroutine is called recursively, it gets a new pad indexed by its
 # recursion depth (CvDEPTH).  If the sub is called at the same recursion
-# depth again, the pad is reused.  Pad entries are localise on the
+# depth again, the pad is reused.  Pad entries are localised on the
 # savestack when ‘my’ is encountered.
 #
 # When a die/last/goto/exit unwinds the stack, it can trigger a DESTROY
