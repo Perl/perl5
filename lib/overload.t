@@ -2065,11 +2065,11 @@ fresh_perl_is
     }
 
     package NCmp;
-    use base 'CmpBase';
+    use parent '-norequire', 'CmpBase';
     use overload '<=>' => 'cmp';
 
     package SCmp;
-    use base 'CmpBase';
+    use parent '-norequire', 'CmpBase';
     use overload 'cmp' => 'cmp';
 
     package main;
@@ -2133,7 +2133,7 @@ fresh_perl_is
                 ? $nomethod . "=>'nomethod'," : '';
             eval qq{
                     package NuMB$fall$nomethod;
-                    use base qw/NuMB/;
+                    use parent '-norequire', qw/NuMB/;
                     use overload $nomethod_decl
                     fallback => $fall;
                 };
