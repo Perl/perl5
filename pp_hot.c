@@ -2715,17 +2715,26 @@ try_autoload:
 	     * switch stack to @_, and copy return values
 	     * back. This would allow popping @_ in XSUB, e.g.. XXXX */
 	    AV * const av = GvAV(PL_defgv);
-	    const SSize_t items = AvFILLp(av) + 1;  /* @_ is not tieable */
+	    const SSize_t items = AvFILL(av) + 1;
 
 	    if (items) {
 		SSize_t i = 0;
+		const bool m = cBOOL(SvRMAGICAL(av));
 		/* Mark is at the end of the stack. */
 		EXTEND(SP, items);
 		for (; i < items; ++i)
-		    if (AvARRAY(av)[i]) SP[i+1] = AvARRAY(av)[i];
+		{
+		    SV *sv;
+		    if (m) {
+			SV ** const svp = av_fetch(av, i, 0);
+			sv = svp ? *svp : NULL;
+		    }
+		    else sv = AvARRAY(av)[i];
+		    if (sv) SP[i+1] = sv;
 		    else {
 			SP[i+1] = newSVavdefelem(av, i, 1);
 		    }
+		}
 		SP += items;
 		PUTBACK ;		
 	    }

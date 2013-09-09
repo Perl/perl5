@@ -1404,3 +1404,21 @@ print "ok\n" if (eval{ $h{foo} = 1 }||$@) eq (eval{ $h{bar} = 1 }||$@);
 EXPECT
 main
 ok
+########
+
+# &xsub and goto &xsub with tied @_
+use Tie::Array;
+tie @_, Tie::StdArray;
+@_ = "\xff";
+&utf8::encode;
+printf "%x\n", $_ for map ord, split //, $_[0];
+print "--\n";
+@_ = "\xff";
+& {sub { goto &utf8::encode }};
+printf "%x\n", $_ for map ord, split //, $_[0];
+EXPECT
+c3
+bf
+--
+c3
+bf

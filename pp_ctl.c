@@ -2895,7 +2895,8 @@ PP(pp_goto) /* also pp_dump */
 		OP* const retop = cx->blk_sub.retop;
 		SV **newsp;
 		I32 gimme;
-		const SSize_t items = arg ? AvFILLp(arg) + 1 : 0;
+		const SSize_t items = arg ? AvFILL(arg) + 1 : 0;
+		const bool m = arg ? SvRMAGICAL(arg) : 0;
 		SV** mark;
 
                 PERL_UNUSED_VAR(newsp);
@@ -2904,20 +2905,25 @@ PP(pp_goto) /* also pp_dump */
 		/* put GvAV(defgv) back onto stack */
 		if (items) {
 		    EXTEND(SP, items+1); /* @_ could have been extended. */
-		    Copy(AvARRAY(arg), SP + 1, items, SV*);
 		}
 		mark = SP;
-		SP += items;
-		if (items && AvREAL(arg)) {
+		if (items) {
 		    SSize_t index;
+		    bool r = cBOOL(AvREAL(arg));
 		    for (index=0; index<items; index++)
-			if (SP[-index])
-			    SvREFCNT_inc_void_NN(sv_2mortal(SP[-index]));
-			else {
-			    SP[-index] = sv_2mortal(newSVavdefelem(arg,
-						 AvFILLp(arg) - index, 1));
+		    {
+			SV *sv;
+			if (m) {
+			    SV ** const svp = av_fetch(arg, index, 0);
+			    sv = svp ? *svp : NULL;
 			}
+			else sv = AvARRAY(arg)[index];
+			SP[index+1] = sv
+			    ? r ? SvREFCNT_inc_NN(sv_2mortal(sv)) : sv
+			    : sv_2mortal(newSVavdefelem(arg, index, 1));
+		    }
 		}
+		SP += items;
 		SvREFCNT_dec(arg);
 		if (CxTYPE(cx) == CXt_SUB && CxHASARGS(cx)) {
 		    /* Restore old @_ */
