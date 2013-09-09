@@ -3597,7 +3597,8 @@ STATIC PerlIO *
 S_check_type_and_open(pTHX_ SV *name)
 {
     Stat_t st;
-    const char *p = SvPV_nolen_const(name);
+    STRLEN len;
+    const char *p = SvPV_const(name, len);
     int st_rc;
 
     PERL_ARGS_ASSERT_CHECK_TYPE_AND_OPEN;
@@ -3608,7 +3609,7 @@ S_check_type_and_open(pTHX_ SV *name)
      * rather than for the .pm file.
      * This check prevents a \0 in @INC causing problems.
      */
-    if (!IS_SAFE_PATHNAME(name, "require"))
+    if (!IS_SAFE_PATHNAME(p, len, "require"))
         return NULL;
 
     st_rc = PerlLIO_stat(p, &st);
@@ -3637,7 +3638,7 @@ S_doopen_pm(pTHX_ SV *name)
      * warning referring to the .pmc which the user probably doesn't
      * know or care about
      */
-    if (!IS_SAFE_PATHNAME(name, "require"))
+    if (!IS_SAFE_PATHNAME(p, namelen, "require"))
         return NULL;
 
     if (namelen > 3 && memEQs(p + namelen - 3, 3, ".pm")) {
@@ -3772,7 +3773,7 @@ PP(pp_require)
     name = SvPV_const(sv, len);
     if (!(name && len > 0 && *name))
 	DIE(aTHX_ "Null filename used");
-    if (!IS_SAFE_PATHNAME(sv, "require")) {
+    if (!IS_SAFE_PATHNAME(name, len, "require")) {
         DIE(aTHX_ "Can't locate %s:   %s",
             pv_escape(newSVpvs_flags("",SVs_TEMP),SvPVX(sv),SvCUR(sv),
                       SvCUR(sv)*2,NULL, SvUTF8(sv)?PERL_PV_ESCAPE_UNI:0),

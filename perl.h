@@ -5692,9 +5692,9 @@ extern void moncontrol(int);
 
 /* check embedded \0 characters in pathnames passed to syscalls,
    but allow one ending \0 */
-#define IS_SAFE_SYSCALL(pv, what, op_name) (S_is_safe_syscall(aTHX_ (pv), (what), (op_name)))
+#define IS_SAFE_SYSCALL(p, len, what, op_name) (S_is_safe_syscall(aTHX_ (p), (len), (what), (op_name)))
 
-#define IS_SAFE_PATHNAME(pv, op_name) IS_SAFE_SYSCALL((pv), "pathname", (op_name))
+#define IS_SAFE_PATHNAME(p, len, op_name) IS_SAFE_SYSCALL((p), (len), "pathname", (op_name))
 
 #if defined(OEMVS)
 #define NO_ENV_ARRAY_IN_MAIN

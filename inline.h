@@ -288,7 +288,7 @@ S_isALNUM_lazy(pTHX_ const char* p)
 /* ------------------------------- perl.h ----------------------------- */
 
 /*
-=for apidoc AiR|bool|is_safe_syscall|SV *pv|const char *what|const char *op_name
+=for apidoc AiR|bool|is_safe_syscall|const char *pv|STRLEN len|const char *what|const char *op_name
 
 Test that the given C<pv> doesn't contain any internal NUL characters.
 If it does, set C<errno> to ENOENT, optionally warn, and return FALSE.
@@ -301,21 +301,20 @@ Used by the IS_SAFE_SYSCALL() macro.
 */
 
 PERL_STATIC_INLINE bool
-S_is_safe_syscall(pTHX_ SV *pv, const char *what, const char *op_name) {
+S_is_safe_syscall(pTHX_ const char *pv, STRLEN len, const char *what, const char *op_name) {
     /* While the Windows CE API provides only UCS-16 (or UTF-16) APIs
      * perl itself uses xce*() functions which accept 8-bit strings.
      */
 
     PERL_ARGS_ASSERT_IS_SAFE_SYSCALL;
 
-    if (SvPOK(pv) && SvCUR(pv) >= 1) {
-        char *p = SvPVX(pv);
+    if (pv && len > 1) {
         char *null_at;
-        if (UNLIKELY((null_at = (char *)memchr(p, 0, SvCUR(pv)-1)) != NULL)) {
+        if (UNLIKELY((null_at = (char *)memchr(pv, 0, len-1)) != NULL)) {
                 SETERRNO(ENOENT, LIB_INVARG);
                 Perl_ck_warner(aTHX_ packWARN(WARN_SYSCALLS),
                                    "Invalid \\0 character in %s for %s: %s\\0%s",
-                                   what, op_name, p, null_at+1);
+                                   what, op_name, pv, null_at+1);
                 return FALSE;
         }
     }

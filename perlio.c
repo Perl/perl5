@@ -312,8 +312,9 @@ PerlIO_openn(pTHX_ const char *layers, const char *mode, int fd,
 	if (*args == &PL_sv_undef)
 	    return PerlIO_tmpfile();
 	else {
-	    const char *name = SvPV_nolen_const(*args);
-            if (!IS_SAFE_PATHNAME(*args, "open"))
+            STRLEN len;
+	    const char *name = SvPV_nolen_const(*args, len);
+            if (!IS_SAFE_PATHNAME(name, len, "open"))
                 return NULL;
 
 	    if (*mode == IoTYPE_NUMERIC) {
@@ -2725,8 +2726,9 @@ PerlIOUnix_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers,
 #endif
 	}
 	if (imode != -1) {
-	    const char *path = SvPV_nolen_const(*args);
-	    if (!IS_SAFE_PATHNAME(*args, "open"))
+            STRLEN len;
+	    const char *path = SvPV_const(*args, len);
+	    if (!IS_SAFE_PATHNAME(path, len, "open"))
                 return NULL;
 	    fd = PerlLIO_open3(path, imode, perm);
 	}
@@ -3039,10 +3041,11 @@ PerlIOStdio_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers,
 {
     char tmode[8];
     if (PerlIOValid(f)) {
-	const char * const path = SvPV_nolen_const(*args);
+        STRLEN len;
+	const char * const path = SvPV_const(*args, len);
 	PerlIOStdio * const s = PerlIOSelf(f, PerlIOStdio);
 	FILE *stdio;
-	if (!IS_SAFE_PATHNAME(*args, "open"))
+	if (!IS_SAFE_PATHNAME(path, len, "open"))
             return NULL;
 	PerlIOUnix_refcnt_dec(fileno(s->stdio));
 	stdio = PerlSIO_freopen(path, (mode = PerlIOStdio_mode(mode, tmode)),
@@ -3055,8 +3058,9 @@ PerlIOStdio_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers,
     }
     else {
 	if (narg > 0) {
-	    const char * const path = SvPV_nolen_const(*args);
-            if (!IS_SAFE_PATHNAME(*args, "open"))
+            STRLEN len;
+	    const char * const path = SvPV_const(*args, len);
+            if (!IS_SAFE_PATHNAME(path, len, "open"))
                 return NULL;
 	    if (*mode == IoTYPE_NUMERIC) {
 		mode++;

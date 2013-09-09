@@ -1569,14 +1569,10 @@ Perl_do_readline(pTHX)
     }
     if (!fp) {
 	if ((!io || !(IoFLAGS(io) & IOf_START))
-	    && ckWARN2(WARN_GLOB, WARN_CLOSED))
+	    && ckWARN(WARN_CLOSED)
+            && type != OP_GLOB)
 	{
-	    if (type == OP_GLOB)
-		Perl_ck_warner_d(aTHX_ packWARN(WARN_GLOB),
-			    "glob failed (can't start child: %s)",
-			    Strerror(errno));
-	    else
-		report_evil_fh(PL_last_in_gv);
+	    report_evil_fh(PL_last_in_gv);
 	}
 	if (gimme == G_SCALAR) {
 	    /* undef TARG, and push that undefined value */
