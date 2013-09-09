@@ -6835,7 +6835,13 @@ Perl_yylex(pTHX)
 
     case '"':
 	s = scan_str(s,!!PL_madskills,FALSE,FALSE, FALSE);
-	DEBUG_T( { printbuf("### Saw string before %s\n", s); } );
+	DEBUG_T( {
+	    if (s)
+		printbuf("### Saw string before %s\n", s);
+	    else
+		PerlIO_printf(Perl_debug_log,
+			     "### Saw unterminated string\n");
+	} );
 	if (PL_expect == XOPERATOR) {
 	    if (PL_lex_formbrack && PL_lex_brackets == PL_lex_formbrack) {
 		return deprecate_commaless_var_list();
