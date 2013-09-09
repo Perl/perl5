@@ -176,6 +176,13 @@ This module now works on EBCDIC platforms.
 
 =item *
 
+L<CPAN::Meta> has been upgraded from version 2.132140 to 2.132510.
+
+No changes have been made to the installed code other than the version bump to
+keep in sync with the latest CPAN release.
+
+=item *
+
 L<CPAN::Meta::Requirements> has been upgraded from version 2.122 to 2.123.
 
 No changes have been made to the installed code other than the version bump to

@@ -2,7 +2,7 @@ use 5.006;
 use strict;
 use warnings;
 package CPAN::Meta;
-our $VERSION = '2.132140'; # VERSION
+our $VERSION = '2.132510'; # VERSION
 
 
 use Carp qw(carp croak);
@@ -348,7 +348,7 @@ CPAN::Meta - the distribution metadata for a CPAN dist
 
 =head1 VERSION
 
-version 2.132140
+version 2.132510
 
 =head1 SYNOPSIS
 
@@ -691,7 +691,7 @@ L<CPAN::Meta::Validator>
 =head2 Bugs / Feature Requests
 
 Please report any bugs or feature requests through the issue tracker
-at L<https://github.com/Perl-Toolchain-Gang/cpan-meta/issues>.
+at L<https://github.com/Perl-Toolchain-Gang/CPAN-Meta/issues>.
 You will be notified automatically of any progress on your issue.
 
 =head2 Source Code
@@ -699,9 +699,9 @@ You will be notified automatically of any progress on your issue.
 This is open source software.  The code repository is available for
 public review and contribution under the terms of the license.
 
-L<https://github.com/dagolden/cpan-meta>
+L<https://github.com/Perl-Toolchain-Gang/CPAN-Meta>
 
-  git clone git://github.com/dagolden/cpan-meta.git
+  git clone https://github.com/Perl-Toolchain-Gang/CPAN-Meta.git
 
 =head1 AUTHORS
 

@@ -457,11 +457,12 @@ use File::Glob qw(:case);
     # perl -Icpan/CPAN-Meta/lib Porting/makemeta
     'CPAN::Meta' => {
         'MAINTAINER'   => 'dagolden',
-        'DISTRIBUTION' => 'DAGOLDEN/CPAN-Meta-2.132140.tar.gz',
+        'DISTRIBUTION' => 'DAGOLDEN/CPAN-Meta-2.132510.tar.gz',
         'FILES'        => q[cpan/CPAN-Meta],
         'EXCLUDED'     => [
             qw(t/00-compile.t),
             qw[t/00-report-prereqs.t],
+            qw(cpanfile),
             qr{^xt},
             qr{^history},
         ],

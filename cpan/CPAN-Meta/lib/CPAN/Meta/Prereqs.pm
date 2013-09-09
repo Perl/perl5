@@ -2,7 +2,7 @@ use 5.006;
 use strict;
 use warnings;
 package CPAN::Meta::Prereqs;
-our $VERSION = '2.132140'; # VERSION
+our $VERSION = '2.132510'; # VERSION
 
 
 use Carp qw(confess);
@@ -151,7 +151,7 @@ CPAN::Meta::Prereqs - a set of distribution prerequisites by phase and type
 
 =head1 VERSION
 
-version 2.132140
+version 2.132510
 
 =head1 DESCRIPTION
 
