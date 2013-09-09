@@ -6,7 +6,8 @@ BEGIN {
     require './test.pl';
 }
 
-plan (112);
+plan (114);
+# Please do not eliminate the plan.  We have tests in DESTROY blocks.
 
 sub expected {
     my($object, $package, $type) = @_;
@@ -160,3 +161,20 @@ sub FETCH { ${$_[0]} }
 tie $tied, main => $untied = [];
 eval { bless $tied };
 is ref $untied, "main", 'blessing through tied refs' or diag $@;
+
+bless \$victim, "Food";
+eval 'bless \$Food::bard, "Bard"';
+sub Bard::DESTROY {
+    isnt ref(\$victim), '__ANON__',
+        'reblessing does not leave an object in limbo temporarily';
+    bless \$victim
+}
+undef *Food::;
+{
+    my $w;
+    # This should catch ‘Attempt to free unreferenced scalar’.
+    local $SIG{__WARN__} = sub { $w .= shift };
+    bless \$victim;
+    is $w, undef,
+       'no warnings when reblessing inside DESTROY triggered by reblessing'
+}

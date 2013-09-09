@@ -9811,6 +9811,7 @@ Perl_sv_bless(pTHX_ SV *const sv, HV *const stash)
 {
     dVAR;
     SV *tmpRef;
+    HV *oldstash = NULL;
 
     PERL_ARGS_ASSERT_SV_BLESS;
 
@@ -9822,12 +9823,13 @@ Perl_sv_bless(pTHX_ SV *const sv, HV *const stash)
 	if (SvREADONLY(tmpRef))
 	    Perl_croak_no_modify();
 	if (SvOBJECT(tmpRef)) {
-	    SvREFCNT_dec(SvSTASH(tmpRef));
+	    oldstash = SvSTASH(tmpRef);
 	}
     }
     SvOBJECT_on(tmpRef);
     SvUPGRADE(tmpRef, SVt_PVMG);
     SvSTASH_set(tmpRef, MUTABLE_HV(SvREFCNT_inc_simple(stash)));
+    SvREFCNT_dec(oldstash);
 
     if(SvSMAGICAL(tmpRef))
         if(mg_find(tmpRef, PERL_MAGIC_ext) || mg_find(tmpRef, PERL_MAGIC_uvar))
