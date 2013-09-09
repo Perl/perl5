@@ -41,8 +41,6 @@
 # include <stdint.h>
 #endif
 
-#define FCALL *f
-
 #ifdef __Lynx__
 /* Missing proto on LynxOS */
   char *gconvert(double, int, int,  char *);
@@ -419,7 +417,7 @@ S_visit(pTHX_ SVFUNC_t f, const U32 flags, const U32 mask)
 		    && (sv->sv_flags & mask) == flags
 		    && SvREFCNT(sv))
 	    {
-		(FCALL)(aTHX_ sv);
+		(*f)(aTHX_ sv);
 		++visited;
 	    }
 	}
