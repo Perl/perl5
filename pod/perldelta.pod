@@ -325,6 +325,13 @@ keep in sync with the latest CPAN release.
 
 =item *
 
+L<Parse::CPAN::Meta> has been upgraded from version 1.4405 to 1.4407.
+
+No changes have been made to the installed code other than the version bump to
+keep in sync with the latest CPAN release.
+
+=item *
+
 L<Perl::OSType> has been upgraded from version 1.003 to 1.004.
 
 The Unix OSType 'bitrig' has been added.

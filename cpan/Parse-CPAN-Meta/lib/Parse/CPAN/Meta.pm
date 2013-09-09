@@ -1,7 +1,7 @@
 use strict;
 package Parse::CPAN::Meta;
 # ABSTRACT: Parse META.yml and META.json CPAN metadata files
-our $VERSION = '1.4405'; # VERSION
+our $VERSION = '1.4407'; # VERSION
 
 use Carp 'croak';
 
@@ -136,7 +136,7 @@ Parse::CPAN::Meta - Parse META.yml and META.json CPAN metadata files
 
 =head1 VERSION
 
-version 1.4405
+version 1.4407
 
 =head1 SYNOPSIS
 
@@ -271,7 +271,7 @@ will be thrown.
 =head2 Bugs / Feature Requests
 
 Please report any bugs or feature requests through the issue tracker
-at L<https://rt.cpan.org/Public/Dist/Display.html?Name=Parse-CPAN-Meta>.
+at L<http://rt.cpan.org/Public/Dist/Display.html?Name=Parse-CPAN-Meta>.
 You will be notified automatically of any progress on your issue.
 
 =head2 Source Code
@@ -279,13 +279,23 @@ You will be notified automatically of any progress on your issue.
 This is open source software.  The code repository is available for
 public review and contribution under the terms of the license.
 
-L<http://github.com/Perl-Toolchain-Gang/Parse-CPAN-Meta>
+L<https://github.com/Perl-Toolchain-Gang/Parse-CPAN-Meta>
 
-  git clone git://github.com/Perl-Toolchain-Gang/Parse-CPAN-Meta.git
+  git clone https://github.com/Perl-Toolchain-Gang/Parse-CPAN-Meta.git
 
-=head1 AUTHOR
+=head1 AUTHORS
+
+=over 4
+
+=item *
 
 Adam Kennedy <adamk@cpan.org>
+
+=item *
+
+David Golden <dagolden@cpan.org>
+
+=back
 
 =head1 CONTRIBUTORS
 
@@ -293,11 +303,11 @@ Adam Kennedy <adamk@cpan.org>
 
 =item *
 
-David Golden <dagolden@cpan.org>
+Joshua ben Jore <jjore@cpan.org>
 
 =item *
 
-Joshua ben Jore <jjore@cpan.org>
+Neil Bowers <neil@bowers.com>
 
 =item *
 
