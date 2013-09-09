@@ -475,6 +475,7 @@ use File::Glob qw(:case);
         'FILES'        => q[cpan/CPAN-Meta-Requirements],
         'EXCLUDED'     => [
             qw(t/00-compile.t),
+            qw(t/00-report-prereqs.t),
             qr{^xt},
             qr{^history},
         ],
