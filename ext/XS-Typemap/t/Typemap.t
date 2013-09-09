@@ -17,13 +17,13 @@ pass();
 # Some inheritance trees to check ISA relationships
 BEGIN {
   package intObjPtr::SubClass;
-  use base qw/ intObjPtr /;
+  use parent '-norequire', qw/ intObjPtr /;
   sub xxx { 1; }
 }
 
 BEGIN {
   package intRefIvPtr::SubClass;
-  use base qw/ intRefIvPtr /;
+  use parent '-norequire', qw/ intRefIvPtr /;
   sub xxx { 1 }
 }
 
