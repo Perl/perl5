@@ -103,11 +103,11 @@ use File::Glob qw(:case);
 @IGNORABLE = qw(
     .cvsignore .dualLivedDiffConfig .gitignore
     ANNOUNCE Announce Artistic AUTHORS BENCHMARK BUGS Build.PL
-    CHANGELOG ChangeLog Changelog CHANGES Changes COPYING Copying CREDITS
-    dist.ini GOALS HISTORY INSTALL INSTALL.SKIP LICENSE Makefile.PL
-    MANIFEST MANIFEST.SKIP META.yml MYMETA.yml META.json MYMETA.json
+    CHANGELOG ChangeLog Changelog CHANGES Changes CONTRIBUTING COPYING Copying
+    CREDITS dist.ini GOALS HISTORY INSTALL INSTALL.SKIP LICENSE Makefile.PL
+    MANIFEST MANIFEST.SKIP META.json META.yml MYMETA.json MYMETA.yml
     NEW NOTES perlcritic.rc ppport.h README README.PATCHING SIGNATURE
-    THANKS TODO Todo VERSION WHATSNEW CONTRIBUTING
+    THANKS TODO Todo VERSION WHATSNEW
 );
 
 # Each entry in the  %Modules hash roughly represents a distribution,
