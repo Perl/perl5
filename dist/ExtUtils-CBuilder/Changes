@@ -1,5 +1,25 @@
 Revision history for Perl extension ExtUtils::CBuilder.
 
+0.280212 - 2013-09-08
+
+  Fixed:
+
+  - Reversion all modules.  
+
+0.280211 - 2013-09-08
+
+  Fixed:
+
+  - Missing dependency Perl::OSType [Leon Timmermans]
+  - Fixed repository location [Alberto Simões]
+
+0.280210 - 2013-09-06
+
+  Fixed:
+
+  - Update INSTALLDIRS to favor installation under 'site' (perl 116479)
+    [James E Keenan]
+
 0.280209 - 2012-10-20 (Perl v5.17.5)
 
   Fixed:
@@ -131,7 +151,7 @@ Revision history for Perl extension ExtUtils::CBuilder.
 
  Bugs fixed:
  - compile() now accepts both string & array for 'include_dirs'
-   argument, as documented.(RT#54606) [Alberto Sim�es]
+   argument, as documented.(RT#54606) [Alberto Simões]
 
 0.27 - Thu Oct 29 21:29:56 EDT 2009
 
@@ -429,13 +449,6 @@ Revision history for Perl extension ExtUtils::CBuilder.
  - Changed the split_like_shell() method to use the shellwords()
    function from Text::ParseWords (a core module since 5.0), which
    does a much better job than the split() we were using.
-
-0.280210 - 2013-09-06
-
-  Fixed:
-
-  - Update INSTALLDIRS to favor installation under 'site' (perl 116479)
-    [James E Keenan]
 
 
 0.03  Fri May 14 23:12:23 CDT 2004

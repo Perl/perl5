@@ -649,8 +649,12 @@ use File::Glob qw(:case);
 
     'ExtUtils::CBuilder' => {
         'MAINTAINER'   => 'ambs',
-        'DISTRIBUTION' => 'AMBS/ExtUtils/ExtUtils-CBuilder-0.280210.tar.gz',
+        'DISTRIBUTION' => 'AMBS/ExtUtils/ExtUtils-CBuilder-0.280212.tar.gz',
         'FILES'        => q[dist/ExtUtils-CBuilder],
+        'EXCLUDED'     => [
+            qw(README.mkdn),
+            qr{^xt},
+        ],
         'UPSTREAM'     => 'blead',
     },
 
