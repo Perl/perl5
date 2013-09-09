@@ -3,7 +3,7 @@ use strict;
 require Exporter;
 
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK);
-$VERSION = 1.20;
+$VERSION = 1.21;
 @ISA = qw(Exporter);
 @EXPORT = qw(pod2html htmlify);
 @EXPORT_OK = qw(anchorify);
@@ -709,7 +709,7 @@ sub _unixify {
 package Pod::Simple::XHTML::LocalPodLinks;
 use strict;
 use warnings;
-use base 'Pod::Simple::XHTML';
+use parent 'Pod::Simple::XHTML';
 
 use File::Spec;
 use File::Spec::Unix;
