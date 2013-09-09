@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use Scalar::Util qw( reftype);
 
-our $VERSION = '1.12';
+our $VERSION = '1.13';
 
 require Exporter;
 our @ISA = qw(Exporter);
@@ -714,7 +714,7 @@ incompatibility of object bodies.
 
     {
         package Name;
-        use base 'Name_id';  # define here which implementation to run
+        use parent 'Name_id';  # define here which implementation to run
     }
 
 
@@ -737,8 +737,8 @@ incompatibility of object bodies.
 
     # Definition of NamedFile
     package NamedFile;
-    use base 'Name';
-    use base 'IO::File';
+    use parent 'Name';
+    use parent 'IO::File';
 
     sub init {
         my $obj = shift;
