@@ -19489,26 +19489,7 @@ esac
 
 : How can we generate normalized random numbers ?
 echo " "
-echo "Looking for a random number function..." >&4
-case "$randfunc" in
-'')
-	if set drand48 val -f; eval $csym; $val; then
-		dflt="drand48"
-		echo "Good, found drand48()." >&4
-	elif set random val -f; eval $csym; $val; then
-		dflt="random"
-		echo "OK, found random()." >&4
-	else
-		dflt="rand"
-		echo "Yuck, looks like I have to use rand()." >&4
-	fi
-	echo " "
-	;;
-*)
-	dflt="$randfunc"
-	;;
-esac
-cont=true
+echo "Using our internal random number implementation..." >&4
 
 case "$ccflags" in
 *-Dmy_rand=*|*-Dmy_srand=*)
@@ -19519,103 +19500,11 @@ case "$ccflags" in
 	;;
 esac
 
-while $test "$cont"; do
-	rp="Use which function to generate random numbers?"
-	. ./myread
-	if $test "$ans" = "$dflt"; then
-		: null
-	else
-		randbits=''
-	fi
-	randfunc="$ans"
-	if set $ans val -f; eval $csym; $val; then
-		cont=''
-	else
-		dflt=y
-		rp="I cannot find function $ans. Use that name anyway?"
-		. ./myread
-		dflt=rand
-		case "$ans" in
-			[yY]*) cont='';;
-		esac
-	fi
-	case "$cont" in
-	'')
-		case "$randfunc" in
-		drand48)
-			drand01="drand48()"
-			seedfunc="srand48"
-			randbits=48
-			randseedtype=long
-			;;
-		rand|random)
-			case "$randbits" in
-			'')
-echo "Checking to see how many bits your $randfunc() function produces..." >&4
-				$cat >try.c <<EOCP
-#$i_unistd I_UNISTD
-#$i_stdlib I_STDLIB
-#include <stdio.h>
-#ifdef I_UNISTD
-#  include <unistd.h>
-#endif
-#ifdef I_STDLIB
-#  include <stdlib.h>
-#endif
-int main()
-{
-	int i;
-	unsigned long tmp;
-	unsigned long max = 0L;
-
-	for (i = 1000; i; i--) {
-		tmp = (unsigned long) $randfunc();
-		if (tmp > max) max = tmp;
-	}
-	for (i = 0; max; i++)
-		max /= 2;
-	printf("%d\n",i);
-}
-EOCP
-				set try
-				if eval $compile_ok; then
-					dflt=`try`
-				else
-					dflt='?'
-					echo "(I can't seem to compile the test program...)"
-				fi
-				;;
-			*)
-				dflt="$randbits"
-				;;
-			esac
-			rp="How many bits does your $randfunc() function produce?"
-			. ./myread
-			randbits="$ans"
-			$rm_try
-			drand01="($randfunc() / (double) ((unsigned long)1 << $randbits))"
-			seedfunc="s$randfunc"
-			randseedtype=unsigned
-			;;
-		*)
-			dflt="31"
-			rp="How many bits does your $randfunc() function produce?"
-			. ./myread
-			randbits="$ans"
-			seedfunc="s$randfunc"
-			drand01="($randfunc() / (double) ((unsigned long)1 << $randbits))"
-			if set $seedfunc val -f; eval $csym; $val; then
-				echo "(Using $seedfunc() to seed random generator)"
-			else
-				echo "(Warning: no $seedfunc() to seed random generator)"
-				seedfunc=rand
-			fi
-			randseedtype=unsigned
-			;;
-		esac
-		;;
-	esac
-done
+randfunc=Perl_drand48
+drand01="Perl_drand48()"
+seedfunc="Perl_drand48_init"
+randbits=48
+randseedtype=U32
 
 : Check how to flush
 echo " "
