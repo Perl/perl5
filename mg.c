@@ -837,6 +837,56 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	 else if (strEQ(remaining, "NCODING"))
 	      sv_setsv(sv, PL_encoding);
 	 break;
+
+    case '!':
+	{
+	dSAVE_ERRNO;
+#ifdef VMS
+	sv_setnv(sv, (NV)((errno == EVMSERR) ? vaxc$errno : errno));
+#else
+	sv_setnv(sv, (NV)errno);
+#endif
+#ifdef OS2
+	if (errno == errno_isOS2 || errno == errno_isOS2_set)
+	    sv_setpv(sv, os2error(Perl_rc));
+	else
+#endif
+	if (! errno) {
+            sv_setpvs(sv, "");
+        }
+        else {
+
+            /* Strerror can return NULL on some platforms, which will result in
+             * 'sv' not being considered SvOK.  The SvNOK_on() below will cause
+             * just the number part to be valid */
+            sv_setpv(sv, Strerror(errno));
+
+            /* In some locales the error string may come back as UTF-8, in
+             * which case we should turn on that flag.  This didn't use to
+             * happen, and to avoid any possible backward compatibility issues,
+             * we don't turn on the flag unless we have to.  So the flag stays
+             * off for an entirely ASCII string.  We assume that if the string
+             * looks like UTF-8, it really is UTF-8:  "text in any other
+             * encoding that uses bytes with the high bit set is extremely
+             * unlikely to pass a UTF-8 validity test"
+             * (http://en.wikipedia.org/wiki/Charset_detection).  There is a
+             * potential that we will get it wrong however, especially on short
+             * error message text.  (If it turns out to be necessary, we could
+             * also keep track if the current LC_MESSAGES locale is UTF-8) */
+            if (SvOK(sv)    /* It could be that Strerror returned invalid */
+                && ! is_ascii_string((U8*) SvPVX_const(sv), SvCUR(sv))
+                && is_utf8_string((U8*) SvPVX_const(sv), SvCUR(sv)))
+            {
+                SvUTF8_on(sv);
+            }
+        }
+	RESTORE_ERRNO;
+	}
+
+	SvRTRIM(sv);
+	SvNOK_on(sv);	/* what a wonderful hack! */
+	break;
+
     case '\006':		/* ^F */
 	sv_setiv(sv, (IV)PL_maxsysfd);
 	break;
@@ -1024,55 +1074,6 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	    }
 	    /* else a value has been assigned manually, so do nothing */
 	}
-	break;
-
-    case '!':
-	{
-	dSAVE_ERRNO;
-#ifdef VMS
-	sv_setnv(sv, (NV)((errno == EVMSERR) ? vaxc$errno : errno));
-#else
-	sv_setnv(sv, (NV)errno);
-#endif
-#ifdef OS2
-	if (errno == errno_isOS2 || errno == errno_isOS2_set)
-	    sv_setpv(sv, os2error(Perl_rc));
-	else
-#endif
-	if (! errno) {
-            sv_setpvs(sv, "");
-        }
-        else {
-
-            /* Strerror can return NULL on some platforms, which will result in
-             * 'sv' not being considered SvOK.  The SvNOK_on() below will cause
-             * just the number part to be valid */
-            sv_setpv(sv, Strerror(errno));
-
-            /* In some locales the error string may come back as UTF-8, in
-             * which case we should turn on that flag.  This didn't use to
-             * happen, and to avoid any possible backward compatibility issues,
-             * we don't turn on the flag unless we have to.  So the flag stays
-             * off for an entirely ASCII string.  We assume that if the string
-             * looks like UTF-8, it really is UTF-8:  "text in any other
-             * encoding that uses bytes with the high bit set is extremely
-             * unlikely to pass a UTF-8 validity test"
-             * (http://en.wikipedia.org/wiki/Charset_detection).  There is a
-             * potential that we will get it wrong however, especially on short
-             * error message text.  (If it turns out to be necessary, we could
-             * also keep track if the current LC_MESSAGES locale is UTF-8) */
-            if (SvOK(sv)    /* It could be that Strerror returned invalid */
-                && ! is_ascii_string((U8*) SvPVX_const(sv), SvCUR(sv))
-                && is_utf8_string((U8*) SvPVX_const(sv), SvCUR(sv)))
-            {
-                SvUTF8_on(sv);
-            }
-        }
-	RESTORE_ERRNO;
-	}
-
-	SvRTRIM(sv);
-	SvNOK_on(sv);	/* what a wonderful hack! */
 	break;
     case '<':
         sv_setuid(sv, PerlProc_getuid());
