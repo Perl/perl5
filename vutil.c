@@ -1,6 +1,19 @@
 /* This file is part of the "version" CPAN distribution.  Please avoid
    editing it in the perl core. */
 
+#ifndef PERL_CORE
+#  include "EXTERN.h"
+#  include "perl.h"
+#  include "XSUB.h"
+#  define NEED_my_snprintf
+#  define NEED_newRV_noinc
+#  define NEED_vnewSVpvf
+#  define NEED_newSVpvn_flags_GLOBAL
+#  define NEED_warner
+#  include "ppport.h"
+#endif
+#include "vutil.h"
+
 #define VERSION_MAX 0x7FFFFFFF
 
 /*
@@ -14,7 +27,11 @@ some time when tokenizing.
 =cut
 */
 const char *
+#if VUTIL_REPLACE_CORE
+Perl_prescan_version2(pTHX_ const char *s, bool strict,
+#else
 Perl_prescan_version(pTHX_ const char *s, bool strict,
+#endif
 		     const char **errstr,
 		     bool *sqv, int *ssaw_decimal, int *swidth, bool *salpha) {
     bool qv = (sqv ? *sqv : FALSE);
@@ -241,7 +258,11 @@ it doesn't.
 */
 
 const char *
+#if VUTIL_REPLACE_CORE
+Perl_scan_version2(pTHX_ const char *s, SV *rv, bool qv)
+#else
 Perl_scan_version(pTHX_ const char *s, SV *rv, bool qv)
+#endif
 {
     const char *start = s;
     const char *pos;
@@ -259,7 +280,7 @@ Perl_scan_version(pTHX_ const char *s, SV *rv, bool qv)
     while (isSPACE(*s)) /* leading whitespace is OK */
 	s++;
 
-    last = prescan_version(s, FALSE, &errstr, &qv, &saw_decimal, &width, &alpha);
+    last = PRESCAN_VERSION(s, FALSE, &errstr, &qv, &saw_decimal, &width, &alpha);
     if (errstr) {
 	/* "undef" is a special case and not an error */
 	if ( ! ( *s == 'u' && strEQ(s,"undef")) ) {
@@ -432,13 +453,16 @@ want to upgrade the SV.
 */
 
 SV *
+#if VUTIL_REPLACE_CORE
+Perl_new_version2(pTHX_ SV *ver)
+#else
 Perl_new_version(pTHX_ SV *ver)
+#endif
 {
     dVAR;
     SV * const rv = newSV(0);
     PERL_ARGS_ASSERT_NEW_VERSION;
-    if ( sv_isobject(ver) && sv_derived_from(ver, "version") )
-	 /* can just copy directly */
+    if ( ISA_CLASS_OBJ(ver,"version") ) /* can just copy directly */
     {
 	SSize_t key;
 	AV * const av = newAV();
@@ -502,7 +526,7 @@ Perl_new_version(pTHX_ SV *ver)
 	}
     }
 #endif
-    return upg_version(rv, FALSE);
+    return UPG_VERSION(rv, FALSE);
 }
 
 /*
@@ -519,7 +543,11 @@ to force this SV to be interpreted as an "extended" version.
 */
 
 SV *
+#if VUTIL_REPLACE_CORE
+Perl_upg_version2(pTHX_ SV *ver, bool qv)
+#else
 Perl_upg_version(pTHX_ SV *ver, bool qv)
+#endif
 {
     const char *version, *s;
 #ifdef SvVOK
@@ -610,7 +638,7 @@ Perl_upg_version(pTHX_ SV *ver, bool qv)
 #endif
     }
 
-    s = scan_version(version, ver, qv);
+    s = SCAN_VERSION(version, ver, qv);
     if ( *s != '\0' ) 
 	Perl_ck_warner(aTHX_ packWARN(WARN_MISC), 
 		       "Version string '%s' contains invalid data; "
@@ -646,7 +674,11 @@ confused by derived classes which may contain additional hash entries):
 */
 
 SV *
+#if VUTIL_REPLACE_CORE
+Perl_vverify2(pTHX_ SV *vs)
+#else
 Perl_vverify(pTHX_ SV *vs)
+#endif
 {
     SV *sv;
 
@@ -682,7 +714,11 @@ The SV returned has a refcount of 1.
 */
 
 SV *
+#if VUTIL_REPLACE_CORE
+Perl_vnumify2(pTHX_ SV *vs)
+#else
 Perl_vnumify(pTHX_ SV *vs)
+#endif
 {
     SSize_t i, len;
     I32 digit;
@@ -694,7 +730,7 @@ Perl_vnumify(pTHX_ SV *vs)
     PERL_ARGS_ASSERT_VNUMIFY;
 
     /* extract the HV from the object */
-    vs = vverify(vs);
+    vs = VVERIFY(vs);
     if ( ! vs )
 	Perl_croak(aTHX_ "Invalid version object");
 
@@ -764,7 +800,11 @@ The SV returned has a refcount of 1.
 */
 
 SV *
+#if VUTIL_REPLACE_CORE
+Perl_vnormal2(pTHX_ SV *vs)
+#else
 Perl_vnormal(pTHX_ SV *vs)
+#endif
 {
     I32 i, len, digit;
     bool alpha = FALSE;
@@ -774,7 +814,7 @@ Perl_vnormal(pTHX_ SV *vs)
     PERL_ARGS_ASSERT_VNORMAL;
 
     /* extract the HV from the object */
-    vs = vverify(vs);
+    vs = VVERIFY(vs);
     if ( ! vs )
 	Perl_croak(aTHX_ "Invalid version object");
 
@@ -825,12 +865,16 @@ The SV returned has a refcount of 1.
 */
 
 SV *
+#if VUTIL_REPLACE_CORE
+Perl_vstringify2(pTHX_ SV *vs)
+#else
 Perl_vstringify(pTHX_ SV *vs)
+#endif
 {
     PERL_ARGS_ASSERT_VSTRINGIFY;
 
     /* extract the HV from the object */
-    vs = vverify(vs);
+    vs = VVERIFY(vs);
     if ( ! vs )
 	Perl_croak(aTHX_ "Invalid version object");
 
@@ -844,9 +888,9 @@ Perl_vstringify(pTHX_ SV *vs)
     }
     else {
 	if ( hv_exists(MUTABLE_HV(vs), "qv", 2) )
-	    return vnormal(vs);
+	    return VNORMAL(vs);
 	else
-	    return vnumify(vs);
+	    return VNUMIFY(vs);
     }
 }
 
@@ -860,7 +904,11 @@ converted into version objects.
 */
 
 int
+#if VUTIL_REPLACE_CORE
+Perl_vcmp2(pTHX_ SV *lhv, SV *rhv)
+#else
 Perl_vcmp(pTHX_ SV *lhv, SV *rhv)
+#endif
 {
     SSize_t i,l,m,r;
     I32 retval;
@@ -873,8 +921,8 @@ Perl_vcmp(pTHX_ SV *lhv, SV *rhv)
     PERL_ARGS_ASSERT_VCMP;
 
     /* extract the HVs from the objects */
-    lhv = vverify(lhv);
-    rhv = vverify(rhv);
+    lhv = VVERIFY(lhv);
+    rhv = VVERIFY(rhv);
     if ( ! ( lhv && rhv ) )
 	Perl_croak(aTHX_ "Invalid version object");
 

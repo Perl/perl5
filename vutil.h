@@ -1,4 +1,9 @@
-#include "ppport.h"
+/* This file is part of the "version" CPAN distribution.  Please avoid
+   editing it in the perl core. */
+
+#ifndef PERL_CORE
+#  include "ppport.h"
+#endif
 
 /* The MUTABLE_*() macros cast pointers to the types shown, in such a way
  * (compiler permitting) that casting away const-ness will give a warning;
@@ -80,7 +85,7 @@ Perl_ck_warner(pTHX_ U32 err, const char* pat, ...)
 
 #define ISA_CLASS_OBJ(v,c) (sv_isobject(v) && sv_derived_from(v,c))
 
-#if PERL_VERSION_GE(5,9,0)
+#if PERL_VERSION_GE(5,9,0) && !defined(PERL_CORE)
 
 #  define VUTIL_REPLACE_CORE 1
 
@@ -131,10 +136,14 @@ const char * Perl_prescan_version(pTHX_ const char *s, bool strict, const char**
 #  define VCMP(a,b)		Perl_vcmp(aTHX_ a,b)
 
 #  define PRESCAN_VERSION(a,b,c,d,e,f,g)	Perl_prescan_version(aTHX_ a,b,c,d,e,f,g)
-#  define is_LAX_VERSION(a,b) \
+#  ifndef is_LAX_VERSION
+#    define is_LAX_VERSION(a,b) \
 	(a != Perl_prescan_version(aTHX_ a, FALSE, b, NULL, NULL, NULL, NULL))
-#  define is_STRICT_VERSION(a,b) \
+#  endif
+#  ifndef is_STRICT_VERSION
+#    define is_STRICT_VERSION(a,b) \
 	(a != Perl_prescan_version(aTHX_ a, TRUE, b, NULL, NULL, NULL, NULL))
+#  endif
 
 #endif
 
