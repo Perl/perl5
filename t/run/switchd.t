@@ -9,7 +9,7 @@ BEGIN { require "./test.pl"; }
 
 # This test depends on t/lib/Devel/switchd*.pm.
 
-plan(tests => 13);
+plan(tests => 14);
 
 my $r;
 
@@ -200,3 +200,14 @@ like(
      'PERL5DB with embedded newlines',
     );
 }
+
+# test that DB::goto works
+is(
+  runperl(
+   switches => [ '-Ilib', '-d:switchd_goto' ],
+   prog => 'sub baz { print qq|hello;| } sub foo { goto &baz } foo()',
+   stderr => 1,
+  ),
+  "goto<main::baz>;hello;",
+  "DB::goto"
+);
