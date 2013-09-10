@@ -565,9 +565,11 @@ static const scan_data_t zero_scan_data =
 
 /* A specialized version of vFAIL2 that works with UTF8f */
 #define vFAIL2utf8f(m, a1) STMT_START { \
-    if (!SIZE_ONLY)                     \
-        SAVEFREESV(RExC_rx_sv);         \
-    Simple_vFAIL4(m, a1);               \
+    const IV offset = RExC_parse - RExC_precomp;   \
+    if (!SIZE_ONLY)                                \
+        SAVEFREESV(RExC_rx_sv);                    \
+    S_re_croak2(aTHX_ UTF, m, REPORT_LOCATION, a1, \
+            REPORT_LOCATION_ARGS(offset));         \
 } STMT_END
 
 
