@@ -788,7 +788,11 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	sv_setiv(sv, (IV)(PL_debug & DEBUG_MASK));
 	break;
     case '\005':  /* ^E */
-	 if (nextchar == '\0') {
+	 if (nextchar != '\0') {
+            if (strEQ(remaining, "NCODING"))
+                sv_setsv(sv, PL_encoding);
+        }
+        else {
 #if defined(VMS)
 	     {
 		  char msg[255];
@@ -834,8 +838,6 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	     SvRTRIM(sv);
 	     SvNOK_on(sv);	/* what a wonderful hack! */
 	 }
-	 else if (strEQ(remaining, "NCODING"))
-	      sv_setsv(sv, PL_encoding);
 	 break;
 
     case '!':
