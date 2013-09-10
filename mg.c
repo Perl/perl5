@@ -791,9 +791,11 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	 if (nextchar != '\0') {
             if (strEQ(remaining, "NCODING"))
                 sv_setsv(sv, PL_encoding);
+            break;
         }
-        else {
-#if defined(VMS)
+
+#if defined(VMS) || defined(OS2) || defined(WIN32)
+#   if defined(VMS)
 	     {
 		  char msg[255];
 		  $DESCRIPTOR(msgdsc,msg);
@@ -816,7 +818,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 		  sv_setnv(sv, (NV)Perl_rc);
 		  sv_setpv(sv, os2error(Perl_rc));
 	     }
-#elif defined(WIN32)
+#   elif defined(WIN32)
 	     {
 		  const DWORD dwErr = GetLastError();
 		  sv_setnv(sv, (NV)dwErr);
@@ -827,18 +829,14 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 		       sv_setpvs(sv, "");
 		  SetLastError(dwErr);
 	     }
-#else
-	     {
-		 dSAVE_ERRNO;
-		 sv_setnv(sv, (NV)errno);
-		 sv_setpv(sv, errno ? Strerror(errno) : "");
-		 RESTORE_ERRNO;
-	     }
-#endif
+#   else
+#   error Missing code for platform
+#   endif
 	     SvRTRIM(sv);
 	     SvNOK_on(sv);	/* what a wonderful hack! */
-	 }
 	 break;
+#endif  /* End of platforms with special handling for $^E; others just fall
+           through to $! */
 
     case '!':
 	{
