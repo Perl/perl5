@@ -272,6 +272,19 @@ C<BINMODE>, C<CLEARERR>, C<CLOSE>, C<EOF>, C<ERROR>, C<FDOPEN>, C<FILENO>,
 C<FILL>, C<FLUSH>, C<OPEN>, C<POPPED>, C<PUSHED>, C<READ>, C<SEEK>, 
 C<SETLINEBUF>, C<SYSOPEN>, C<TELL>, C<UNREAD>, C<UTF8>, C<WRITE>
 
+=item documented in L<perlfunc>
+
+L<< C<import> | perlfunc/use >>, L<< C<unimport> | perlfunc/use >>,
+L<< C<INC> | perlfunc/require >>
+
+=item documented in L<UNIVERSAL>
+
+C<VERSION>
+
+=item documented in L<perldebguts>
+
+C<DB::DB>, C<DB::sub>, C<DB::lsub>, C<DB::goto>, C<DB::postponed>
+
 =item undocumented, used internally by the L<overload> feature
 
 any starting with C<(>
