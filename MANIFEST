@@ -1142,7 +1142,6 @@ cpan/HTTP-Tiny/t/000_load.t
 cpan/HTTP-Tiny/t/001_api.t
 cpan/HTTP-Tiny/t/002_croakage.t
 cpan/HTTP-Tiny/t/003_agent.t
-cpan/HTTP-Tiny/t/00-compile.t
 cpan/HTTP-Tiny/t/010_url.t
 cpan/HTTP-Tiny/t/020_headers.t
 cpan/HTTP-Tiny/t/030_response.t
@@ -1178,6 +1177,7 @@ cpan/HTTP-Tiny/t/cases/form-01.txt
 cpan/HTTP-Tiny/t/cases/form-02.txt
 cpan/HTTP-Tiny/t/cases/form-03.txt
 cpan/HTTP-Tiny/t/cases/form-04.txt
+cpan/HTTP-Tiny/t/cases/form-05.txt
 cpan/HTTP-Tiny/t/cases/get-01.txt
 cpan/HTTP-Tiny/t/cases/get-02.txt
 cpan/HTTP-Tiny/t/cases/get-03.txt

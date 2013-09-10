@@ -267,6 +267,14 @@ supplied pattern has an internal NUL (C<"\0">) character.
 
 =item *
 
+L<HTTP::Tiny> has been upgraded from version 0.34 to 0.35.
+
+Encoded data from C<post_form> now preserves term order if data is provided as
+an array reference.  (They are still sorted for consistency if provided as a
+hash reference.)
+
+=item *
+
 L<I18N::LangTags> has been upgraded from version 0.39 to 0.40.
 
 Bosnian has now joined Croatian and Serbian in the lists of mutually
