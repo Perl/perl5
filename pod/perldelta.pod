@@ -226,7 +226,20 @@ C<_utf8_on> under COW has been fixed.
 
 =item *
 
+L<Exporter> has been upgraded from version 5.69 to 5.70.
+
+A number of typos have been corrected in the documentation.
+
+=item *
+
 L<ExtUtils::CBuilder> has been upgraded from version 0.280205 to 0.280212.
+
+No changes have been made to the installed code other than the version bump to
+keep in sync with the latest CPAN release.
+
+=item *
+
+L<ExtUtils::Command> has been upgraded from version 1.17 to 1.18.
 
 No changes have been made to the installed code other than the version bump to
 keep in sync with the latest CPAN release.
@@ -242,8 +255,8 @@ full details.
 
 L<ExtUtils::ParseXS> has been upgraded from version 3.21 to 3.22.
 
-No changes have been made other than the version bump to keep in sync with the
-latest CPAN release.
+No changes have been made to the installed code other than the version bump to
+keep in sync with the latest CPAN release.
 
 =item *
 
