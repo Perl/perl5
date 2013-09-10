@@ -2896,7 +2896,7 @@ PP(pp_goto) /* also pp_dump */
 		SV **newsp;
 		I32 gimme;
 		const SSize_t items = arg ? AvFILL(arg) + 1 : 0;
-		const bool m = arg ? SvRMAGICAL(arg) : 0;
+		const bool m = arg ? cBOOL(SvRMAGICAL(arg)) : 0;
 		SV** mark;
 
                 PERL_UNUSED_VAR(newsp);
