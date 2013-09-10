@@ -65,6 +65,10 @@ you should reset the version numbers to the next blead series.
   2013-10-20  5.19.5          Peter Rabbitson
   2013-11-20  5.19.6          Chris Williams
   2013-12-20  5.19.7          Abigail
+  2014-01-20  5.19.8          ?
+  2014-02-20  5.19.9          ?
+  2014-03-20  5.19.10         ?
+  2014-04-20  5.20.0-RC1      Ricardo Signes
 
 =head1 VICTIMS
 
