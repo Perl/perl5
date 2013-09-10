@@ -5478,6 +5478,8 @@ vos/configure_full_perl.sh	VOS shell script to configure "full" perl before buil
 vos/make_full_perl.sh		VOS shell script to build and test "full" perl
 vos/vos.c			VOS emulations for missing POSIX functions
 vos/vosish.h			VOS-specific header file
+vutil.c				Version object C functions
+vxs.inc				Version object XS methods
 warnings.h			The warning numbers
 win32/bin/exetype.pl		Set executable type to CONSOLE or WINDOWS
 win32/bin/perlglob.pl		Win32 globbing
