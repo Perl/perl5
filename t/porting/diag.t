@@ -35,7 +35,7 @@ foreach (@{(setup_embed())[0]}) {
 
 my $regcomp_re = "(?<routine>(?:ckWARN(?:\\d+)?reg\\w*|vWARN\\d+))";
 my $function_re = join '|', @functions;
-my $regcomp_fail_re = '\b(?:(?:Simple_)?v)?FAIL[2-4]?\b';
+my $regcomp_fail_re = '\b(?:(?:Simple_)?v)?FAIL[2-4]?(?:utf8f)?\b';
 my $source_msg_re =
    "(?<routine>\\bDIE\\b|$function_re|$regcomp_fail_re)";
 my $text_re = '"(?<text>(?:\\\\"|[^"]|"\s*[A-Z_]+\s*")*)"';

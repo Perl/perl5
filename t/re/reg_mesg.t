@@ -8,6 +8,7 @@ BEGIN {
 }
 
 use strict;
+use open qw(:utf8 :std);
 
 ##
 ## If the markers used are changed (search for "MARKER1" in regcomp.c),
@@ -40,6 +41,37 @@ sub fixup_expect {
     return wantarray ? @expect : join "", @expect;
 }
 
+## Because we don't "use utf8" in this file, we need to do some extra legwork
+## for the utf8 tests: Append 'use utf8' to the pattern, and mark the strings
+## to check against as UTF-8
+##
+## This also creates a second variant of the tests to check if the
+## latin1 error messages are working correctly.
+my $l1   = "\x{ef}";
+my $utf8 = "\x{30cd}";
+utf8::encode($utf8);
+
+sub mark_as_utf8 {
+    my @ret;
+    while ( my ($pat, $msg) = splice(@_, 0, 2) ) {
+        my $l1_pat = $pat =~ s/$utf8/$l1/gr;
+        my $l1_msg;
+        $pat = "use utf8; $pat";
+        
+        if (ref $msg) {
+            $l1_msg = [ map { s/$utf8/$l1/gr } @$msg ];
+            @$msg   = map { my $c = $_; utf8::decode($c); $c } @$msg;
+        }
+        else {
+            $l1_msg = $msg =~ s/$utf8/$l1/gr;
+            utf8::decode($msg);
+        }
+        push @ret, $pat => $msg;
+        push @ret, $l1_pat => $l1_msg unless $l1_pat =~ /#no latin1/;
+    }
+    return @ret;
+}
+
 my $inf_m1 = ($Config::Config{reg_infty} || 32767) - 1;
 my $inf_p1 = $inf_m1 + 2;
 
@@ -62,7 +94,7 @@ my @death =
 
  '/(?(1)x|y|z)/' => 'Switch (?(condition)... contains too many branches {#} m/(?(1)x|y|{#}z)/',
 
- '/(?(x)y|x)/' => 'Unknown switch condition (?(x) {#} m/(?({#}x)y|x)/',
+ '/(?(x)y|x)/' => 'Unknown switch condition (?(...)) {#} m/(?(x{#})y|x)/',
 
  '/(?/' => 'Sequence (? incomplete {#} m/(?{#}/',
 
@@ -180,7 +212,90 @@ my @death =
  'm/\87/' => 'Reference to nonexistent group {#} m/\87{#}/',
  'm/a\87/' => 'Reference to nonexistent group {#} m/a\87{#}/',
  'm/a\97/' => 'Reference to nonexistent group {#} m/a\97{#}/',
+ 'm/(*DOOF)/' => 'Unknown verb pattern \'DOOF\' {#} m/(*DOOF){#}/'
 );
+
+my @death_utf8 = mark_as_utf8(
+ '/ネ[[=ネ=]]ネ/' => 'POSIX syntax [= =] is reserved for future extensions {#} m/ネ[[=ネ=]{#}]ネ/',
+ '/ネ(?<= .*)/' =>  'Variable length lookbehind not implemented in regex m/ネ(?<= .*)/',
+
+ '/(?<= ネ{1000})/' => 'Lookbehind longer than 255 not implemented in regex m/(?<= ネ{1000})/',
+
+ '/ネ(?ネ)ネ/' => 'Sequence (?ネ...) not recognized {#} m/ネ(?ネ{#})ネ/',
+
+ '/ネ(?(1ネ))ネ/' => 'Switch condition not recognized {#} m/ネ(?(1ネ{#}))ネ/',
+
+ '/(?(1)ネ|y|ヌ)/' => 'Switch (?(condition)... contains too many branches {#} m/(?(1)ネ|y|{#}ヌ)/',
+
+ '/(?(ネ)y|ネ)/' => 'Unknown switch condition (?(...)) {#} m/(?(ネ{#})y|ネ)/',
+
+ '/ネ(?/' => 'Sequence (? incomplete {#} m/ネ(?{#}/',
+
+ '/ネ(?;ネ/' => 'Sequence (?;...) not recognized {#} m/ネ(?;{#}ネ/',
+ '/ネ(?<;ネ/' => 'Group name must start with a non-digit word character {#} m/ネ(?<;{#}ネ/',
+ '/ネ(?\ixネ/' => 'Sequence (?\...) not recognized {#} m/ネ(?\{#}ixネ/',
+ '/ネ(?^lu:ネ)/' => 'Regexp modifiers "l" and "u" are mutually exclusive {#} m/ネ(?^lu{#}:ネ)/',
+'/ネ(?lil:ネ)/' => 'Regexp modifier "l" may not appear twice {#} m/ネ(?lil{#}:ネ)/',
+'/ネ(?aaia:ネ)/' => 'Regexp modifier "a" may appear a maximum of twice {#} m/ネ(?aaia{#}:ネ)/',
+'/ネ(?i-l:ネ)/' => 'Regexp modifier "l" may not appear after the "-" {#} m/ネ(?i-l{#}:ネ)/',
+
+ '/ネ((ネ)/' => 'Unmatched ( {#} m/ネ({#}(ネ)/',
+
+ "/ネ{$inf_p1}ネ/" => "Quantifier in {,} bigger than $inf_m1 {#} m/ネ{{#}$inf_p1}ネ/",
+
+
+ '/ネ**ネ/' => 'Nested quantifiers {#} m/ネ**{#}ネ/',
+
+ '/ネ[ネ/' => 'Unmatched [ {#} m/ネ[{#}ネ/',
+
+ '/*ネ/', => 'Quantifier follows nothing {#} m/*{#}ネ/',
+
+ '/ネ\p{ネ/' => 'Missing right brace on \p{} {#} m/ネ\p{{#}ネ/',
+
+ '/(ネ)\2ネ/' => 'Reference to nonexistent group {#} m/(ネ)\2{#}ネ/',
+
+ '/\g{ネ/; #no latin1' => 'Sequence \g{... not terminated {#} m/\g{ネ{#}/',
+
+ 'my $m = "ネ\\\"; $m =~ $m', => 'Trailing \ in regex m/ネ\/',
+
+ '/\x{ネ/' => 'Missing right brace on \x{} {#} m/\x{{#}ネ/',
+ '/ネ[\x{ネ]ネ/' => 'Missing right brace on \x{} {#} m/ネ[\x{{#}ネ]ネ/',
+ '/ネ[\x{ネ]/' => 'Missing right brace on \x{} {#} m/ネ[\x{{#}ネ]/',
+
+ '/ネ\o{ネ/' => 'Missing right brace on \o{ {#} m/ネ\o{{#}ネ/',
+ '/ネ[[:ネ:]]ネ/' => 'POSIX class [:ネ:] unknown {#} m/ネ[[:ネ:]{#}]ネ/',
+
+ '/ネ[[=ネ=]]ネ/' => 'POSIX syntax [= =] is reserved for future extensions {#} m/ネ[[=ネ=]{#}]ネ/',
+
+ '/ネ[[.ネ.]]ネ/' => 'POSIX syntax [. .] is reserved for future extensions {#} m/ネ[[.ネ.]{#}]ネ/',
+
+ '/[ネ-a]ネ/' => 'Invalid [] range "ネ-a" {#} m/[ネ-a{#}]ネ/',
+
+ '/ネ\p{}ネ/' => 'Empty \p{} {#} m/ネ\p{{#}}ネ/',
+
+ '/ネ(?[[[:ネ]]])ネ/' => "Unmatched ':' in POSIX class {#} m/ネ(?[[[:ネ{#}]]])ネ/",
+ '/ネ(?[[[:ネ: ])ネ/' => "Unmatched '[' in POSIX class {#} m/ネ(?[[[:ネ:{#} ])ネ/",
+ '/ネ(?[[[::]]])ネ/' => "POSIX class [::] unknown {#} m/ネ(?[[[::]{#}]])ネ/",
+ '/ネ(?[[[:ネ:]]])ネ/' => "POSIX class [:ネ:] unknown {#} m/ネ(?[[[:ネ:]{#}]])ネ/",
+ '/ネ(?[[:ネ:]])ネ/' => "POSIX class [:ネ:] unknown {#} m/ネ(?[[:ネ:]{#}])ネ/",
+ '/ネ(?[ネ])ネ/' =>  'Unexpected character {#} m/ネ(?[ネ{#}])ネ/',
+ '/ネ(?[ネ])/l' => '(?[...]) not valid in locale {#} m/ネ(?[{#}ネ])/',
+ '/ネ(?[ + [ネ] ])/' => 'Unexpected binary operator \'+\' with no preceding operand {#} m/ネ(?[ +{#} [ネ] ])/',
+ '/ネ(?[ \cK - ( + [ネ] ) ])/' => 'Unexpected binary operator \'+\' with no preceding operand {#} m/ネ(?[ \cK - ( +{#} [ネ] ) ])/',
+ '/ネ(?[ \cK ( [ネ] ) ])/' => 'Unexpected \'(\' with no preceding operator {#} m/ネ(?[ \cK ({#} [ネ] ) ])/',
+ '/ネ(?[ \cK [ネ] ])ネ/' => 'Operand with no preceding operator {#} m/ネ(?[ \cK [ネ{#}] ])ネ/',
+ '/ネ(?[ \0004 ])ネ/' => 'Need exactly 3 octal digits {#} m/ネ(?[ \0004 {#}])ネ/',
+ '/(?[ \o{ネ} ])ネ/' => 'Non-octal character {#} m/(?[ \o{ネ{#}} ])ネ/',
+ '/ネ(?[ \o{} ])ネ/' => 'Number with no digits {#} m/ネ(?[ \o{}{#} ])ネ/',
+ '/(?[ \x{ネ} ])ネ/' => 'Non-hex character {#} m/(?[ \x{ネ{#}} ])ネ/',
+ '/(?[ \p{ネ} ])/' => 'Property \'ネ\' is unknown {#} m/(?[ \p{ネ}{#} ])/',
+ '/(?[ \p{ ネ = bar } ])/' => 'Property \'ネ = bar\' is unknown {#} m/(?[ \p{ ネ = bar }{#} ])/',
+ '/ネ(?[ \t ]/' => 'Syntax error in (?[...]) in regex m/ネ(?[ \t ]/',
+ '/(?[ \t + \e # ネ This was supposed to be a comment ])/' => 'Syntax error in (?[...]) in regex m/(?[ \t + \e # ネ This was supposed to be a comment ])/',
+ 'm/(*ネ)ネ/' => q<Unknown verb pattern 'ネ' {#} m/(*ネ){#}ネ/>
+);
+push @death, @death_utf8;
+
 # Tests involving a user-defined charnames translator are in pat_advanced.t
 
 # In the following arrays of warnings, the value can be an array of things to
@@ -191,7 +306,6 @@ my @death =
 ##
 my @warning = (
     'm/\b*/' => '\b* matches null string many times {#} m/\b*{#}/',
-
     'm/[:blank:]/' => 'POSIX syntax [: :] belongs inside character classes {#} m/[:blank:]{#}/',
 
     "m'[\\y]'"     => 'Unrecognized escape \y in character class passed through {#} m/[\y{#}]/',
@@ -255,14 +369,39 @@ my @warning = (
                   ],
 );
 
+my @warnings_utf8 = mark_as_utf8(
+    'm/ネ\b*ネ/' => '\b* matches null string many times {#} m/ネ\b*{#}ネ/',
+    '/(?=ネ)*/' => '(?=ネ)* matches null string many times {#} m/(?=ネ)*{#}/',
+    'm/ネ[:foo:]ネ/' => 'POSIX syntax [: :] belongs inside character classes {#} m/ネ[:foo:]{#}ネ/',
+    "m'ネ[\\y]ネ'" => 'Unrecognized escape \y in character class passed through {#} m/ネ[\y{#}]ネ/',
+    'm/ネ[ネ-\d]ネ/' => 'False [] range "ネ-\d" {#} m/ネ[ネ-\d{#}]ネ/',
+    'm/ネ[\w-ネ]ネ/' => 'False [] range "\w-" {#} m/ネ[\w-{#}ネ]ネ/',
+    'm/ネ[ネ-\pM]ネ/' => 'False [] range "ネ-\pM" {#} m/ネ[ネ-\pM{#}]ネ/',
+    '/ネ[ネ-[:digit:]]ネ/' => 'False [] range "ネ-[:digit:]" {#} m/ネ[ネ-[:digit:]{#}]ネ/',
+    '/ネ[\d-\s]ネ/' => 'False [] range "\d-" {#} m/ネ[\d-{#}\s]ネ/',
+    '/ネ[a\zb]ネ/' => 'Unrecognized escape \z in character class passed through {#} m/ネ[a\z{#}b]ネ/',
+    '/ネ(?c)ネ/' => 'Useless (?c) - use /gc modifier {#} m/ネ(?c{#})ネ/',    
+    '/utf8 ネ (?ogc) ネ/' => [
+        'Useless (?o) - use /o modifier {#} m/utf8 ネ (?o{#}gc) ネ/',
+        'Useless (?g) - use /g modifier {#} m/utf8 ネ (?og{#}c) ネ/',
+        'Useless (?c) - use /gc modifier {#} m/utf8 ネ (?ogc{#}) ネ/',
+    ],
+
+);
+
+push @warning, @warnings_utf8;
+
 my @experimental_regex_sets = (
     '/(?[ \t ])/' => 'The regex_sets feature is experimental {#} m/(?[{#} \t ])/',
+    'use utf8; /utf8 ネ (?[ [\tネ] ])/' => do { use utf8; 'The regex_sets feature is experimental {#} m/utf8 ネ (?[{#} [\tネ] ])/' },
+    '/noutf8 ネ (?[ [\tネ] ])/' => 'The regex_sets feature is experimental {#} m/noutf8 ネ (?[{#} [\tネ] ])/',
 );
 
 my @deprecated = (
     '/a\b{cde/' => '"\b{" is deprecated; use "\b\{" or "\b[{]" instead {#} m/a\{#}b{cde/',
     '/a\B{cde/' => '"\B{" is deprecated; use "\B\{" or "\B[{]" instead {#} m/a\{#}B{cde/',
-    'use utf8; /(?x)\\/' => 'Escape literal pattern white space under /x {#} m/(?x)\{#}\/',
+    "/(?x)latin1\\\x{85}\x{85}\\\x{85}/" => 'Escape literal pattern white space under /x {#} ' . "m/(?x)latin1\\\x{85}\x{85}{#}\\\x{85}/",
+    'use utf8; /(?x)utf8\\/' => 'Escape literal pattern white space under /x {#} ' . "m/(?x)utf8\\\N{NEXT LINE}\N{NEXT LINE}{#}\\\N{NEXT LINE}/",
     '/((?# This is a comment in the middle of a token)?:foo)/' => 'In \'(?...)\', splitting the initial \'(?\' is deprecated {#} m/((?# This is a comment in the middle of a token)?{#}:foo)/',
     '/((?# This is a comment in the middle of a token)*FAIL)/' => 'In \'(*VERB...)\', splitting the initial \'(*\' is deprecated {#} m/((?# This is a comment in the middle of a token)*{#}FAIL)/',
 );

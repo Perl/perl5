@@ -508,7 +508,25 @@ XXX Changes (i.e. rewording) of diagnostic messages go here
 
 =item *
 
-XXX Describe change here
+Warnings and errors from the regexp engine are now UTF-8 clean
+
+=item *
+
+The "Unknown switch condition" error message has some slight changes.
+This error triggers when there is an unknown condition in a (?(foo))
+conditional; The error message used to read:
+
+    Unknown switch condition (?(%s in regex;
+
+But what %s could be was mostly up to luck; For (?(foobar)), you
+might've seen "fo" or "f".  For Unicode characters, you'd generally
+get a corrupted string.
+The message was changed to read:
+
+    Unknown switch condition (?(...)) in regex;
+
+And additionally, the '<-- HERE' marker in the error will now point
+to the correct spot in the regex.
 
 =back
 
