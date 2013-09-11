@@ -478,7 +478,6 @@ union _xnvu {
 	U32 xlow;
 	U32 xhigh;
     }	    xpad_cop_seq;	/* used by pad.c for cop_sequence */
-    I32	    xbm_useful;
 };
 
 union _xivu {
@@ -1391,13 +1390,13 @@ sv_force_normal does nothing.
 #if defined (DEBUGGING) && defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
 #  define BmUSEFUL(sv)							\
 	(*({ SV *const _bmuseful = MUTABLE_SV(sv);			\
-	    assert(SvTYPE(_bmuseful) == SVt_PVMG);			\
+	    assert(SvTYPE(_bmuseful) >= SVt_PVIV);			\
 	    assert(SvVALID(_bmuseful));					\
-	    assert(!SvNOK(_bmuseful));					\
-	    &(((XPVMG*) SvANY(_bmuseful))->xnv_u.xbm_useful);		\
+	    assert(!SvIOK(_bmuseful));					\
+	    &(((XPVIV*) SvANY(_bmuseful))->xiv_u.xivu_iv);              \
 	 }))
 #else
-#  define BmUSEFUL(sv)		((XPVMG*) SvANY(sv))->xnv_u.xbm_useful
+#  define BmUSEFUL(sv)          ((XPVIV*) SvANY(sv))->xiv_u.xivu_uv
 
 #endif
 
