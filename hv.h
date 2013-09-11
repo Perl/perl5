@@ -367,7 +367,9 @@ C<SV*>.
 				 ((HeKLEN(he) == HEf_SVKEY) ?		\
 				  HeKEY_sv(he) :			\
 				  newSVpvn_flags(HeKEY(he),		\
-						 HeKLEN(he), SVs_TEMP)) : \
+                                                 HeKLEN(he),            \
+                                                 SVs_TEMP |             \
+                                      ( HeKUTF8(he) ? SVf_UTF8 : 0 ))) : \
 				 &PL_sv_undef)
 #define HeSVKEY_set(he,sv)	((HeKLEN(he) = HEf_SVKEY), (HeKEY_sv(he) = sv))
 

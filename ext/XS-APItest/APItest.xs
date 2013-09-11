@@ -1534,6 +1534,22 @@ refcounted_he_fetch(key, level=0)
 
 #endif
 
+void
+test_force_keys(HV *hv)
+    PREINIT:
+        HE *he;
+	STRLEN count = 0;
+    PPCODE:
+        hv_iterinit(hv);
+        he = hv_iternext(hv);
+        while (he) {
+	    SV *sv = HeSVKEY_force(he);
+	    ++count;
+	    EXTEND(SP, count);
+	    PUSHs(sv_mortalcopy(sv));
+            he = hv_iternext(hv);
+        }
+
 =pod
 
 sub TIEHASH  { bless {}, $_[0] }
