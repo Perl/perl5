@@ -42,8 +42,9 @@ is($@, "Alarm!\n", 'after the second loop');
 SKIP: {
     skip('We can\'t test blocking without sigprocmask', 17)
 	if is_miniperl() || !$Config{d_sigprocmask};
-    skip('This doesn\'t work on $^O threaded builds RT#88814', 17)
-        if $^O =~ /openbsd|cygwin/ && $Config{useithreads};
+    skip("This doesn\'t work on $^O threaded builds RT#88814", 17)
+        if ($^O =~ /cygwin/ || $^O eq "openbsd" && $Config{osvers} < 5.2)
+	    && $Config{useithreads};
 
     require POSIX;
     my $pending = POSIX::SigSet->new();
