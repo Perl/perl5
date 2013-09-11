@@ -5479,6 +5479,7 @@ vos/make_full_perl.sh		VOS shell script to build and test "full" perl
 vos/vos.c			VOS emulations for missing POSIX functions
 vos/vosish.h			VOS-specific header file
 vutil.c				Version object C functions
+vutil.h				Version object headers
 vxs.inc				Version object XS methods
 warnings.h			The warning numbers
 win32/bin/exetype.pl		Set executable type to CONSOLE or WINDOWS
