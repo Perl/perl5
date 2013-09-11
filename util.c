@@ -6033,6 +6033,26 @@ Perl_xs_apiversion_bootcheck(pTHX_ SV *module, const char *api_p,
 	Perl_croak_sv(aTHX_ xpt);
 }
 
+/*
+=for apidoc my_strlcat
+
+The C library C<strlcat> if available, or a Perl implementation of it.
+This operates on C NUL-terminated strings.
+
+C<my_strlcat()> appends string C<src> to the end of C<dst>.  It will append at
+most S<C<size - strlen(dst) - 1>> characters.  It will then NUL-terminate,
+unless C<size> is 0 or the original C<dst> string was longer than C<size> (in
+practice this should not happen as it means that either C<size> is incorrect or
+that C<dst> is not a proper NUL-terminated string).
+
+Note that C<size> is the full size of the destination buffer and
+the result is guaranteed to be NUL-terminated if there is room.  Note that room
+for the NUL should be included in C<size>.
+
+=cut
+
+Description stolen from http://www.openbsd.org/cgi-bin/man.cgi?query=strlcat
+*/
 #ifndef HAS_STRLCAT
 Size_t
 Perl_my_strlcat(char *dst, const char *src, Size_t size)
@@ -6050,6 +6070,20 @@ Perl_my_strlcat(char *dst, const char *src, Size_t size)
 }
 #endif
 
+
+/*
+=for apidoc my_strlcpy
+
+The C library C<strlcpy> if available, or a Perl implementation of it.
+This operates on C NUL-terminated strings.
+
+C<my_strlcpy()> copies up to S<C<size - 1>> characters from the string C<src>
+to C<dst>, NUL-terminating the result if C<size> is not 0.
+
+=cut
+
+Description stolen from http://www.openbsd.org/cgi-bin/man.cgi?query=strlcpy
+*/
 #ifndef HAS_STRLCPY
 Size_t
 Perl_my_strlcpy(char *dst, const char *src, Size_t size)

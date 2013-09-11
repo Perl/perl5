@@ -2549,11 +2549,11 @@ Xpo	|void	|xs_apiversion_bootcheck|NN SV *module|NN const char *api_p \
 				|STRLEN api_len
 
 #ifndef HAS_STRLCAT
-Apno	|Size_t	|my_strlcat	|NULLOK char *dst|NULLOK const char *src|Size_t size
+Apnod	|Size_t	|my_strlcat	|NULLOK char *dst|NULLOK const char *src|Size_t size
 #endif
 
 #ifndef HAS_STRLCPY
-Apno     |Size_t |my_strlcpy     |NULLOK char *dst|NULLOK const char *src|Size_t size
+Apnod     |Size_t |my_strlcpy     |NULLOK char *dst|NULLOK const char *src|Size_t size
 #endif
 
 #ifdef PERL_MAD
