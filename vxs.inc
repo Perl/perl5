@@ -1,36 +1,50 @@
 /* This file is part of the "version" CPAN distribution.  Please avoid
    editing it in the perl core. */
 
+#ifdef PERL_CORE
+#  define VXS_CLASS "version"
+#else
+#  define VXS_CLASS "version::vxs"
+#endif
+
 #ifdef VXS_XSUB_DETAILS
+#  ifdef PERL_CORE
     {"UNIVERSAL::VERSION", XS_UNIVERSAL_VERSION, NULL},
-    {"version::()", XS_version_noop, NULL},
-    {"version::new", XS_version_new, NULL},
-    {"version::parse", XS_version_new, NULL},
-    {"version::(\"\"", XS_version_stringify, NULL},
-    {"version::stringify", XS_version_stringify, NULL},
-    {"version::(0+", XS_version_numify, NULL},
-    {"version::numify", XS_version_numify, NULL},
-    {"version::normal", XS_version_normal, NULL},
-    {"version::(cmp", XS_version_vcmp, NULL},
-    {"version::(<=>", XS_version_vcmp, NULL},
-    {"version::vcmp", XS_version_vcmp, NULL},
-    {"version::(bool", XS_version_boolean, NULL},
-    {"version::boolean", XS_version_boolean, NULL},
-    {"version::(+", XS_version_noop, NULL},
-    {"version::(-", XS_version_noop, NULL},
-    {"version::(*", XS_version_noop, NULL},
-    {"version::(/", XS_version_noop, NULL},
-    {"version::(+=", XS_version_noop, NULL},
-    {"version::(-=", XS_version_noop, NULL},
-    {"version::(*=", XS_version_noop, NULL},
-    {"version::(/=", XS_version_noop, NULL},
-    {"version::(abs", XS_version_noop, NULL},
-    {"version::(nomethod", XS_version_noop, NULL},
-    {"version::noop", XS_version_noop, NULL},
-    {"version::is_alpha", XS_version_is_alpha, NULL},
-    {"version::qv", XS_version_qv, NULL},
-    {"version::declare", XS_version_qv, NULL},
-    {"version::is_qv", XS_version_is_qv, NULL},
+#  else
+    {VXS_CLASS "::_VERSION", XS_UNIVERSAL_VERSION, NULL},
+#  endif
+    {VXS_CLASS "::()", XS_version_noop, NULL},
+    {VXS_CLASS "::new", XS_version_new, NULL},
+    {VXS_CLASS "::parse", XS_version_new, NULL},
+    {VXS_CLASS "::(\"\"", XS_version_stringify, NULL},
+    {VXS_CLASS "::stringify", XS_version_stringify, NULL},
+    {VXS_CLASS "::(0+", XS_version_numify, NULL},
+    {VXS_CLASS "::numify", XS_version_numify, NULL},
+    {VXS_CLASS "::normal", XS_version_normal, NULL},
+    {VXS_CLASS "::(cmp", XS_version_vcmp, NULL},
+    {VXS_CLASS "::(<=>", XS_version_vcmp, NULL},
+#  ifdef PERL_CORE
+    {VXS_CLASS "::vcmp", XS_version_vcmp, NULL},
+#  else
+    {VXS_CLASS "::VCMP", XS_version_vcmp, NULL},
+#  endif
+    {VXS_CLASS "::(bool", XS_version_boolean, NULL},
+    {VXS_CLASS "::boolean", XS_version_boolean, NULL},
+    {VXS_CLASS "::(+", XS_version_noop, NULL},
+    {VXS_CLASS "::(-", XS_version_noop, NULL},
+    {VXS_CLASS "::(*", XS_version_noop, NULL},
+    {VXS_CLASS "::(/", XS_version_noop, NULL},
+    {VXS_CLASS "::(+=", XS_version_noop, NULL},
+    {VXS_CLASS "::(-=", XS_version_noop, NULL},
+    {VXS_CLASS "::(*=", XS_version_noop, NULL},
+    {VXS_CLASS "::(/=", XS_version_noop, NULL},
+    {VXS_CLASS "::(abs", XS_version_noop, NULL},
+    {VXS_CLASS "::(nomethod", XS_version_noop, NULL},
+    {VXS_CLASS "::noop", XS_version_noop, NULL},
+    {VXS_CLASS "::is_alpha", XS_version_is_alpha, NULL},
+    {VXS_CLASS "::qv", XS_version_qv, NULL},
+    {VXS_CLASS "::declare", XS_version_qv, NULL},
+    {VXS_CLASS "::is_qv", XS_version_is_qv, NULL},
 #else
 
 XS(XS_UNIVERSAL_VERSION)
