@@ -1764,7 +1764,6 @@ cpan/Module-Metadata/t/lib/ENDPOD.pm
 cpan/Module-Metadata/t/lib/MBTest.pm
 cpan/Module-Metadata/t/lib/Tie/CPHash.pm
 cpan/Module-Metadata/t/metadata.t
-cpan/Module-Metadata/t/taint.t
 cpan/Module-Metadata/t/version.t
 cpan/NEXT/lib/NEXT.pm		Pseudo-class NEXT for method redispatch
 cpan/NEXT/t/actual.t		NEXT
