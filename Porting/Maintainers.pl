@@ -1939,7 +1939,7 @@ use File::Glob qw(:case);
                 mklocale
                 ),
         ],
-        'UPSTREAM' => 'first-come',
+        'UPSTREAM' => 'cpan',
     },
 
     'Unicode::Normalize' => {
@@ -1953,7 +1953,7 @@ use File::Glob qw(:case);
                 enableXS
                 ),
         ],
-        'UPSTREAM' => 'first-come',
+        'UPSTREAM' => 'cpan',
     },
 
     'Unicode::UCD' => {
