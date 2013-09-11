@@ -465,14 +465,8 @@
 #   define STMT_START	(void)(	/* gcc supports "({ STATEMENTS; })" */
 #   define STMT_END	)
 # else
-   /* Now which other defined()s do we need here ??? */
-#  if (defined(sun) || defined(__sun__)) && !defined(__GNUC__)
-#   define STMT_START	if (1)
-#   define STMT_END	else (void)0
-#  else
 #   define STMT_START	do
 #   define STMT_END	while (0)
-#  endif
 # endif
 #endif
 
