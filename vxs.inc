@@ -274,19 +274,19 @@ XS(XS_version_normal)
 {
      dVAR;
      dXSARGS;
-     if (items < 1)
-	 croak_xs_usage(cv, "lobj, ...");
+     if (items != 1)
+	 croak_xs_usage(cv, "ver, ...");
      SP -= items;
      {
-	  SV *	lobj = ST(0);
+	  SV *	ver = ST(0);
 
-	  if (sv_isobject(lobj) && sv_derived_from(lobj, "version")) {
-	       lobj = SvRV(lobj);
+	  if (sv_isobject(ver) && sv_derived_from(ver, "version")) {
+	       ver = SvRV(ver);
 	  }
 	  else
-	       Perl_croak(aTHX_ "lobj is not of type version");
+	       Perl_croak(aTHX_ "ver is not of type version");
 
-	  mPUSHs(vnormal(lobj));
+	  mPUSHs(vnormal(ver));
 
 	  PUTBACK;
 	  return;
