@@ -436,8 +436,8 @@ XS(XS_version_qv)
 	} else {
 	    rv = sv_2mortal(new_version(ver));
 	}
-	if ( items == 2
-                && strnNE(classname,"version", len) ) { /* inherited new() */
+	if ( items == 2 && (len != 7
+               || strnNE(classname,"version", len)) ) { /* inherited new() */
 	    sv_bless(rv, gv_stashpvn(classname, len, GV_ADD | flags));
         }
 	PUSHs(rv);
