@@ -47,6 +47,10 @@
     {VXS_CLASS "::is_qv", XS_version_is_qv, NULL},
 #else
 
+#ifndef dVAR
+#  define dVAR
+#endif
+
 XS(XS_UNIVERSAL_VERSION)
 {
     dVAR;
