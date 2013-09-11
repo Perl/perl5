@@ -12,7 +12,7 @@ package Module::Metadata;
 use strict;
 use warnings;
 
-our $VERSION = '1.000017';
+our $VERSION = '1.000018';
 $VERSION = eval $VERSION;
 
 use Carp qw/croak/;
