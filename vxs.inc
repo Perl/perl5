@@ -51,6 +51,19 @@
 #  define dVAR
 #endif
 
+#ifdef HvNAME_HEK
+typedef HEK HVNAME;
+#  ifndef HEKf
+#    define HEKfARG(arg)	((void*)(sv_2mortal(newSVhek(arg))))
+#    define HEKf		SVf
+#  endif
+#else
+typedef char HVNAME;
+#  define HvNAME_HEK	HvNAME_get
+#  define HEKfARG(arg)	arg
+#  define HEKf		"s"
+#endif
+
 XS(XS_UNIVERSAL_VERSION)
 {
     dVAR;
@@ -58,6 +71,7 @@ XS(XS_UNIVERSAL_VERSION)
     HV *pkg;
     GV **gvp;
     GV *gv;
+    SV *ret;
     SV *sv;
     const char *undef;
     PERL_UNUSED_ARG(cv);
@@ -65,29 +79,28 @@ XS(XS_UNIVERSAL_VERSION)
     if (items < 1)
        Perl_croak(aTHX_ "Usage: UNIVERSAL::VERSION(sv, ...)");
 
-    if (SvROK(ST(0))) {
-        sv = MUTABLE_SV(SvRV(ST(0)));
+    sv = ST(0);
+
+    if (SvROK(sv)) {
+        sv = (SV*)SvRV(sv);
         if (!SvOBJECT(sv))
             Perl_croak(aTHX_ "Cannot find version of an unblessed reference");
         pkg = SvSTASH(sv);
     }
     else {
-        pkg = gv_stashsv(ST(0), 0);
+        pkg = gv_stashsv(sv, FALSE);
     }
 
-    gvp = pkg ? (GV**)hv_fetchs(pkg, "VERSION", FALSE) : NULL;
+    gvp = pkg ? (GV**)hv_fetchs(pkg,"VERSION",FALSE) : (GV**)NULL;
 
     if (gvp && isGV(gv = *gvp) && (sv = GvSV(gv)) && SvOK(sv)) {
-        SV * const nsv = sv_newmortal();
-        sv_setsv(nsv, sv);
-        sv = nsv;
-	if ( !sv_isobject(sv) || !sv_derived_from(sv, "version"))
-	    upg_version(sv, FALSE);
-
+        sv = sv_mortalcopy(sv);
+	if ( ! ISA_CLASS_OBJ(sv, "version::vxs"))
+	    UPG_VERSION(sv, FALSE);
         undef = NULL;
     }
     else {
-        sv = &PL_sv_undef;
+        sv = ret = &PL_sv_undef;
         undef = "(undef)";
     }
 
@@ -96,42 +109,55 @@ XS(XS_UNIVERSAL_VERSION)
 
 	if (undef) {
 	    if (pkg) {
-		const HEK * const name = HvNAME_HEK(pkg);
+		const HVNAME* const name = HvNAME_HEK(pkg);
+#if PERL_VERSION == 5
+		Perl_croak(aTHX_ "%s version %s required--this is only version ",
+			    name, SvPVx_nolen_const(req));
+#else
 		Perl_croak(aTHX_
 			   "%"HEKf" does not define $%"HEKf
 			   "::VERSION--version check failed",
 			   HEKfARG(name), HEKfARG(name));
-	    } else {
+#endif
+	    }
+	    else {
+#if PERL_VERSION >= 8
 		Perl_croak(aTHX_
 			     "%"SVf" defines neither package nor VERSION--version check failed",
-			     SVfARG(ST(0)) );
+			     (void*)(ST(0)) );
+#else
+		Perl_croak(aTHX_ "%s does not define $%s::VERSION--version check failed",
+			   SvPVx_nolen_const(ST(0)),
+			   SvPVx_nolen_const(ST(0)) );
+#endif
 	    }
 	}
 
-	if ( !sv_isobject(req) || !sv_derived_from(req, "version")) {
+	if ( ! ISA_CLASS_OBJ(req, "version")) {
 	    /* req may very well be R/O, so create a new object */
-	    req = sv_2mortal( new_version(req) );
+	    req = sv_2mortal( NEW_VERSION(req) );
 	}
 
-	if ( vcmp( req, sv ) > 0 ) {
+	if ( VCMP( req, sv ) > 0 ) {
 	    if ( hv_exists(MUTABLE_HV(SvRV(req)), "qv", 2 ) ) {
-		Perl_croak(aTHX_ "%"HEKf" version %"SVf" required--"
-		       "this is only version %"SVf"",
-                       HEKfARG(HvNAME_HEK(pkg)),
-		       SVfARG(sv_2mortal(vnormal(req))),
-		       SVfARG(sv_2mortal(vnormal(sv))));
-	    } else {
-		Perl_croak(aTHX_ "%"HEKf" version %"SVf" required--"
-		       "this is only version %"SVf,
-                       HEKfARG(HvNAME_HEK(pkg)),
-		       SVfARG(sv_2mortal(vstringify(req))),
-		       SVfARG(sv_2mortal(vstringify(sv))));
+		req = VNORMAL(req);
+		sv  = VNORMAL(sv);
 	    }
+	    else {
+		req = VSTRINGIFY(req);
+		sv  = VSTRINGIFY(sv);
+	    }
+	    Perl_croak(aTHX_ "%"HEKf" version %"SVf" required--"
+		"this is only version %"SVf"", HEKfARG(HvNAME_HEK(pkg)),
+		SVfARG(sv_2mortal(req)),
+		SVfARG(sv_2mortal(sv)));
 	}
     }
+    ST(0) = ret;
 
-    if ( SvOK(sv) && sv_derived_from(sv, "version") ) {
-	ST(0) = sv_2mortal(vstringify(sv));
+    /* if the package's $VERSION is not undef, it is upgraded to be a version object */
+    if (ISA_CLASS_OBJ(sv, "version")) {
+	ST(0) = sv_2mortal(VSTRINGIFY(sv));
     } else {
 	ST(0) = sv;
     }
