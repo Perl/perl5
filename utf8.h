@@ -233,7 +233,9 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
     (((UV) UTF_CONTINUATION_MASK) << ((sizeof(UV) * CHARBITS)           \
            - UTF_ACCUMULATION_SHIFT))
 
-#ifdef HAS_QUAD
+#if UVSIZE >= 8
+#  define UTF8_QUAD_MAX UINT64_C(0x1000000000)
+
 /* Input is a true Unicode (not-native) code point */
 #define OFFUNISKIP(uv) ( (uv) < 0x80        ? 1 : \
 		      (uv) < 0x800          ? 2 : \
@@ -520,10 +522,6 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
 			|| ((((c & 0xFFFE) == 0xFFFE)) && ! UNICODE_IS_SUPER(c)))
 #define UNICODE_IS_SUPER(c)		((c) > PERL_UNICODE_MAX)
 #define UNICODE_IS_FE_FF(c)		((c) > 0x7FFFFFFF)
-
-#ifdef HAS_QUAD
-#    define UTF8_QUAD_MAX	UINT64_C(0x1000000000)
-#endif
 
 #define LATIN_SMALL_LETTER_SHARP_S      LATIN_SMALL_LETTER_SHARP_S_NATIVE
 #define LATIN_SMALL_LETTER_Y_WITH_DIAERESIS                                  \
