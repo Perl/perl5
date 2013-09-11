@@ -1632,7 +1632,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 		PUSHs(newSVpvn_flags(aptr, len, SVs_TEMP));
 	    }
 	    break;
-#ifdef HAS_QUAD
+#if IVSIZE >= 8
 	case 'q':
 	    while (len-- > 0) {
 		Quad_t aquad;
@@ -1659,7 +1659,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 		    cuv += auquad;
 	    }
 	    break;
-#endif /* HAS_QUAD */
+#endif
 	/* float and double added gnb@melba.bby.oz.au 22/11/89 */
 	case 'f':
 	    while (len-- > 0) {
@@ -2982,7 +2982,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
                 PUSH32(utf8, cur, &ai32, needs_swap);
 	    }
 	    break;
-#ifdef HAS_QUAD
+#if IVSIZE >= 8
 	case 'Q':
 	    while (len-- > 0) {
 		Uquad_t auquad;
@@ -2999,7 +2999,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
                 PUSH_VAR(utf8, cur, aquad, needs_swap);
 	    }
 	    break;
-#endif /* HAS_QUAD */
+#endif
 	case 'P':
 	    len = 1;		/* assume SV is correct length */
 	    GROWING(utf8, cat, start, cur, sizeof(char *));

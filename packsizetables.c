@@ -34,7 +34,7 @@ STATIC const packprops_t packprops[512] = {
     0,
     /* N */ SIZE32,
     0, 0,
-#if defined(HAS_QUAD)
+#if IVSIZE >= 8
     /* Q */ sizeof(Uquad_t),
 #else
     0,
@@ -59,7 +59,7 @@ STATIC const packprops_t packprops[512] = {
     /* n */ SIZE16,
     0,
     /* p */ sizeof(char *) | PACK_SIZE_CANNOT_CSUM,
-#if defined(HAS_QUAD)
+#if IVSIZE >= 8
     /* q */ sizeof(Quad_t),
 #else
     0,
@@ -141,7 +141,7 @@ STATIC const packprops_t packprops[512] = {
     /* n */ SIZE16,
     0,
     /* p */ sizeof(char *) | PACK_SIZE_CANNOT_CSUM,
-#if defined(HAS_QUAD)
+#if IVSIZE >= 8
     /* q */ sizeof(Quad_t),
 #else
     0,
@@ -170,7 +170,7 @@ STATIC const packprops_t packprops[512] = {
     0,
     /* N */ SIZE32,
     0, 0,
-#if defined(HAS_QUAD)
+#if IVSIZE >= 8
     /* Q */ sizeof(Uquad_t),
 #else
     0,
