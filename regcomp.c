@@ -12513,6 +12513,7 @@ parseit:
 		}
 		if (!SIZE_ONLY) {
                     SV* invlist;
+                    char* formatted;
                     char* name;
 
 		    if (UCHARAT(RExC_parse) == '^') {
@@ -12533,14 +12534,14 @@ parseit:
                      * will have its name be <__NAME_i>.  The design is
                      * discussed in commit
                      * 2f833f5208e26b208886e51e09e2c072b5eabb46 */
-                    Newx(name, n + sizeof("_i__\n"), char);
-
-                    sprintf(name, "%s%.*s%s\n",
-                                    (FOLD) ? "__" : "",
-                                    (int)n,
-                                    RExC_parse,
-                                    (FOLD) ? "_i" : ""
-                    );
+                    formatted = Perl_form(aTHX_
+                                          "%s%.*s%s\n",
+                                          (FOLD) ? "__" : "",
+                                          (int)n,
+                                          RExC_parse,
+                                          (FOLD) ? "_i" : ""
+                                );
+                    name = savepvn(formatted, strlen(formatted));
 
                     /* Look up the property name, and get its swash and
                      * inversion list, if the property is found  */
