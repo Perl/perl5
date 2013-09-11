@@ -576,6 +576,11 @@ SKIP: {
 	is $v->numify, '0.520', 'Correctly nummified';
     }
 
+    { # https://rt.cpan.org/Ticket/Display.html?id=88495
+	@ver::ISA = "version";
+	is ref(ver->new), 'ver', 'ver can inherit from version';
+    }
+
 }
 
 1;

@@ -204,7 +204,8 @@ XS(XS_version_new)
 	}
 
 	rv = new_version(vs);
-	if ( strnNE(classname,"version", len) ) /* inherited new() */
+	if ( len != 7
+	  || strnNE(classname,"version", len) ) /* inherited new() */
 	    sv_bless(rv, gv_stashpvn(classname, len, GV_ADD | flags));
 
 	mPUSHs(rv);
