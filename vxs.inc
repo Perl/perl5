@@ -224,6 +224,15 @@ XS(XS_version_new)
     return;
 }
 
+#define VTYPECHECK(var, val, varname) \
+    STMT_START {							\
+	if (ISA_CLASS_OBJ(val, "version")) {				\
+	    (var) = SvRV(val);						\
+	}								\
+	else								\
+	    Perl_croak(aTHX_ varname " is not of type version");	\
+    } STMT_END
+
 XS(XS_version_stringify)
 {
      dVAR;
@@ -232,15 +241,10 @@ XS(XS_version_stringify)
 	 croak_xs_usage(cv, "lobj, ...");
      SP -= items;
      {
-	  SV *	lobj = ST(0);
+	  SV *	lobj;
+	  VTYPECHECK(lobj, ST(0), "lobj");
 
-	  if (sv_isobject(lobj) && sv_derived_from(lobj, "version")) {
-	       lobj = SvRV(lobj);
-	  }
-	  else
-	       Perl_croak(aTHX_ "lobj is not of type version");
-
-	  mPUSHs(vstringify(lobj));
+	  mPUSHs(VSTRINGIFY(lobj));
 
 	  PUTBACK;
 	  return;
@@ -255,16 +259,9 @@ XS(XS_version_numify)
 	 croak_xs_usage(cv, "lobj, ...");
      SP -= items;
      {
-	  SV *	lobj = ST(0);
-
-	  if (sv_isobject(lobj) && sv_derived_from(lobj, "version")) {
-	       lobj = SvRV(lobj);
-	  }
-	  else
-	       Perl_croak(aTHX_ "lobj is not of type version");
-
-	  mPUSHs(vnumify(lobj));
-
+	  SV *	lobj;
+	  VTYPECHECK(lobj, ST(0), "lobj");
+	  mPUSHs(VNUMIFY(lobj));
 	  PUTBACK;
 	  return;
      }
@@ -275,18 +272,13 @@ XS(XS_version_normal)
      dVAR;
      dXSARGS;
      if (items != 1)
-	 croak_xs_usage(cv, "ver, ...");
+	 croak_xs_usage(cv, "ver");
      SP -= items;
      {
-	  SV *	ver = ST(0);
+	  SV *	ver;
+	  VTYPECHECK(ver, ST(0), "ver");
 
-	  if (sv_isobject(ver) && sv_derived_from(ver, "version")) {
-	       ver = SvRV(ver);
-	  }
-	  else
-	       Perl_croak(aTHX_ "ver is not of type version");
-
-	  mPUSHs(vnormal(ver));
+	  mPUSHs(VNORMAL(ver));
 
 	  PUTBACK;
 	  return;
@@ -301,34 +293,28 @@ XS(XS_version_vcmp)
 	 croak_xs_usage(cv, "lobj, ...");
      SP -= items;
      {
-	  SV *	lobj = ST(0);
-
-	  if (sv_isobject(lobj) && sv_derived_from(lobj, "version")) {
-	       lobj = SvRV(lobj);
-	  }
-	  else
-	       Perl_croak(aTHX_ "lobj is not of type version");
-
+	  SV *	lobj;
+	  VTYPECHECK(lobj, ST(0), "lobj");
 	  {
 	       SV	*rs;
 	       SV	*rvs;
 	       SV * robj = ST(1);
 	       const IV	 swap = (IV)SvIV(ST(2));
 
-	       if ( !sv_isobject(robj) || !sv_derived_from(robj, "version") )
+	       if ( !ISA_CLASS_OBJ(robj, "version::vxs") )
 	       {
-		    robj = new_version(SvOK(robj) ? robj : newSVpvs_flags("0", SVs_TEMP));
+		    robj = NEW_VERSION(SvOK(robj) ? robj : newSVpvs_flags("0", SVs_TEMP));
 		    sv_2mortal(robj);
 	       }
 	       rvs = SvRV(robj);
 
 	       if ( swap )
 	       {
-		    rs = newSViv(vcmp(rvs,lobj));
+		    rs = newSViv(VCMP(rvs,lobj));
 	       }
 	       else
 	       {
-		    rs = newSViv(vcmp(lobj,rvs));
+		    rs = newSViv(VCMP(lobj,rvs));
 	       }
 
 	       mPUSHs(rs);
@@ -343,14 +329,15 @@ XS(XS_version_boolean)
 {
     dVAR;
     dXSARGS;
+    SV *lobj;
     if (items < 1)
 	croak_xs_usage(cv, "lobj, ...");
     SP -= items;
-    if (sv_isobject(ST(0)) && sv_derived_from(ST(0), "version")) {
-	SV * const lobj = SvRV(ST(0));
+    VTYPECHECK(lobj, ST(0), "lobj");
+    {
 	SV * const rs =
-	    newSViv( vcmp(lobj,
-			  sv_2mortal(new_version(
+	    newSViv( VCMP(lobj,
+			  sv_2mortal(NEW_VERSION(
 					sv_2mortal(newSVpvs("0"))
 				    ))
 			 )
@@ -359,8 +346,6 @@ XS(XS_version_boolean)
 	PUTBACK;
 	return;
     }
-    else
-	Perl_croak(aTHX_ "lobj is not of type version");
 }
 
 XS(XS_version_noop)
@@ -369,13 +354,11 @@ XS(XS_version_noop)
     dXSARGS;
     if (items < 1)
 	croak_xs_usage(cv, "lobj, ...");
-    if (sv_isobject(ST(0)) && sv_derived_from(ST(0), "version"))
+    if (ISA_CLASS_OBJ(ST(0), "version"))
 	Perl_croak(aTHX_ "operation not supported with version object");
     else
 	Perl_croak(aTHX_ "lobj is not of type version");
-#ifndef HASATTRIBUTE_NORETURN
     XSRETURN_EMPTY;
-#endif
 }
 
 XS(XS_version_is_alpha)
@@ -385,8 +368,9 @@ XS(XS_version_is_alpha)
     if (items != 1)
 	croak_xs_usage(cv, "lobj");
     SP -= items;
-    if (sv_isobject(ST(0)) && sv_derived_from(ST(0), "version")) {
-	SV * const lobj = ST(0);
+    {
+	SV *lobj;
+	VTYPECHECK(lobj, ST(0), "lobj");
 	if ( hv_exists(MUTABLE_HV(SvRV(lobj)), "alpha", 5 ) )
 	    XSRETURN_YES;
 	else
@@ -394,8 +378,6 @@ XS(XS_version_is_alpha)
 	PUTBACK;
 	return;
     }
-    else
-	Perl_croak(aTHX_ "lobj is not of type version");
 }
 
 XS(XS_version_qv)
@@ -420,25 +402,31 @@ XS(XS_version_qv)
 	    }
             if ( sv_isobject(ST(0)) ) { /* class called as an object method */
                 const HV * stash = SvSTASH(SvRV(ST(0)));
-                classname = HvNAME(stash);
-                len       = HvNAMELEN(stash);
+                classname = HvNAME_get(stash);
+                len       = HvNAMELEN_get(stash);
+#ifdef HvNAMEUTF8
                 flags     = HvNAMEUTF8(stash) ? SVf_UTF8 : 0;
+#endif
             }
             else {
 	       classname = SvPV(ST(0), len);
                 flags     = SvUTF8(ST(0));
             }
-        }
+	}
 	if ( !SvVOK(ver) ) { /* not already a v-string */
 	    rv = sv_newmortal();
 	    sv_setsv(rv,ver); /* make a duplicate */
-	    upg_version(rv, TRUE);
+	    UPG_VERSION(rv, TRUE);
 	} else {
-	    rv = sv_2mortal(new_version(ver));
+	    rv = sv_2mortal(NEW_VERSION(ver));
 	}
 	if ( items == 2 && (len != 7
-               || strnNE(classname,"version", len)) ) { /* inherited new() */
+                || strcmp(classname,"version")) ) { /* inherited new() */
+#if PERL_VERSION == 5
+	    sv_bless(rv, gv_stashpv((char *)classname, GV_ADD));
+#else
 	    sv_bless(rv, gv_stashpvn(classname, len, GV_ADD | flags));
+#endif
         }
 	PUSHs(rv);
     }
@@ -453,8 +441,9 @@ XS(XS_version_is_qv)
     if (items != 1)
 	croak_xs_usage(cv, "lobj");
     SP -= items;
-    if (sv_isobject(ST(0)) && sv_derived_from(ST(0), "version")) {
-	SV * const lobj = ST(0);
+    {
+	SV *lobj;
+	VTYPECHECK(lobj, ST(0), "lobj");
 	if ( hv_exists(MUTABLE_HV(SvRV(lobj)), "qv", 2 ) )
 	    XSRETURN_YES;
 	else
@@ -462,8 +451,6 @@ XS(XS_version_is_qv)
 	PUTBACK;
 	return;
     }
-    else
-	Perl_croak(aTHX_ "lobj is not of type version");
 }
 
 #endif
