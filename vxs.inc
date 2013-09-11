@@ -169,49 +169,59 @@ XS(XS_version_new)
 {
     dVAR;
     dXSARGS;
-    if (items > 3 || items < 1)
-	croak_xs_usage(cv, "class, version");
+    PERL_UNUSED_VAR(cv);
+    SV *vs = items ? ST(1) : &PL_sv_undef;
+    SV *rv;
+    const char * classname = "";
+    STRLEN len;
+    U32 flags = 0;
     SP -= items;
-    {
-        SV *vs = ST(1);
-	SV *rv;
-        STRLEN len;
-        const char *classname;
-        U32 flags;
 
-	/* Just in case this is something like a tied hash */
-	SvGETMAGIC(vs);
+    if (items > 3 || items == 0)
+        Perl_croak(aTHX_ "Usage: version::new(class, version)");
 
-        if ( sv_isobject(ST(0)) ) { /* get the class if called as an object method */
-            const HV * stash = SvSTASH(SvRV(ST(0)));
-            classname = HvNAME(stash);
-            len       = HvNAMELEN(stash);
-            flags     = HvNAMEUTF8(stash) ? SVf_UTF8 : 0;
-        }
-        else {
-	    classname = SvPV(ST(0), len);
-            flags     = SvUTF8(ST(0));
-        }
+    /* Just in case this is something like a tied hash */
+    SvGETMAGIC(vs);
 
-	if ( items == 1 || ! SvOK(vs) ) { /* no param or explicit undef */
-	    /* create empty object */
-	    vs = sv_newmortal();
-	    sv_setpvs(vs, "0");
-	}
-	else if ( items == 3 ) {
-	    vs = sv_newmortal();
-	    Perl_sv_setpvf(aTHX_ vs,"v%s",SvPV_nolen_const(ST(2)));
-	}
-
-	rv = new_version(vs);
-	if ( len != 7
-	  || strnNE(classname,"version", len) ) /* inherited new() */
-	    sv_bless(rv, gv_stashpvn(classname, len, GV_ADD | flags));
-
-	mPUSHs(rv);
-	PUTBACK;
-	return;
+    if ( items == 1 || ! SvOK(vs) ) { /* no param or explicit undef */
+        /* create empty object */
+        vs = sv_newmortal();
+        sv_setpvs(vs,"undef");
     }
+    else if (items == 3 ) {
+        vs = sv_newmortal();
+#if PERL_VERSION == 5
+        sv_setpvf(vs,"v%s",SvPV_nolen_const(ST(2)));
+#else
+        Perl_sv_setpvf(aTHX_ vs,"v%s",SvPV_nolen_const(ST(2)));
+#endif
+    }
+    if ( sv_isobject(ST(0)) ) {
+	/* get the class if called as an object method */
+	const HV * stash = SvSTASH(SvRV(ST(0)));
+	classname = HvNAME_get(stash);
+	len	  = HvNAMELEN_get(stash);
+#ifdef HvNAMEUTF8
+	flags	  = HvNAMEUTF8(stash) ? SVf_UTF8 : 0;
+#endif
+    }
+    else {
+	classname = SvPV(ST(0), len);
+	flags     = SvUTF8(ST(0));
+    }
+
+    rv = NEW_VERSION(vs);
+    if ( len != sizeof(VXS_CLASS)-1
+      || strcmp(classname,VXS_CLASS) != 0 ) /* inherited new() */
+#if PERL_VERSION == 5
+        sv_bless(rv, gv_stashpv((char *)classname, GV_ADD));
+#else
+        sv_bless(rv, gv_stashpvn(classname, len, GV_ADD | flags));
+#endif
+
+    mPUSHs(rv);
+    PUTBACK;
+    return;
 }
 
 XS(XS_version_stringify)
