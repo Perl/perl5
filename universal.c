@@ -996,6 +996,7 @@ XS(XS_re_regexp_pattern)
     /* NOT-REACHED */
 }
 
+#include "vutil.h"
 #include "vxs.inc"
 
 struct xsub_details {
