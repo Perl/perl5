@@ -3169,7 +3169,7 @@ PerlIOStdio_invalidate_fileno(pTHX_ FILE *f)
      */	
     f->_fileno = -1;
     return 1;
-#  elif defined(__sun__)
+#  elif defined(__sun)
     PERL_UNUSED_ARG(f);
     return 0;
 #  elif defined(__hpux)

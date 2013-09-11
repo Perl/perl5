@@ -4028,7 +4028,7 @@ EXT char *** environ_pointer;
    /* VMS and some other platforms don't use the environ array */
 #  ifdef USE_ENVIRON_ARRAY
 #    if !defined(DONT_DECLARE_STD) || \
-        (defined(__svr4__) && defined(__GNUC__) && defined(sun)) || \
+        (defined(__svr4__) && defined(__GNUC__) && defined(__sun)) || \
         defined(__sgi)
 extern char **	environ;	/* environment variables supplied via exec */
 #    endif
