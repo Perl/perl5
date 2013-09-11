@@ -1,15 +1,14 @@
 use strict;
 use warnings;
+
 package Perl::OSType;
 # ABSTRACT: Map Perl operating system names to generic types
-our $VERSION = '1.004'; # VERSION
+our $VERSION = '1.005'; # VERSION
 
 require Exporter;
 our @ISA = qw(Exporter);
 
-our %EXPORT_TAGS = (
-  all => [ qw( os_type is_os_type ) ]
-);
+our %EXPORT_TAGS = ( all => [qw( os_type is_os_type )] );
 
 our @EXPORT_OK = @{ $EXPORT_TAGS{all} };
 
@@ -69,21 +68,19 @@ my %OSTYPES = qw(
 );
 
 sub os_type {
-  my ($os) = @_;
-  $os = $^O unless defined $os;
-  return $OSTYPES{ $os } || q{};
+    my ($os) = @_;
+    $os = $^O unless defined $os;
+    return $OSTYPES{$os} || q{};
 }
 
 sub is_os_type {
-  my ($type, $os) = @_;
-  return unless $type;
-  $os = $^O unless defined $os;
-  return os_type($os) eq $type;
+    my ( $type, $os ) = @_;
+    return unless $type;
+    $os = $^O unless defined $os;
+    return os_type($os) eq $type;
 }
 
 1;
-
-__END__
 
 =pod
 
@@ -95,7 +92,7 @@ Perl::OSType - Map Perl operating system names to generic types
 
 =head1 VERSION
 
-version 1.004
+version 1.005
 
 =head1 SYNOPSIS
 
@@ -156,7 +153,7 @@ L<Devel::CheckOS>
 =head2 Bugs / Feature Requests
 
 Please report any bugs or feature requests through the issue tracker
-at L<https://github.com/dagolden/perl-ostype/issues>.
+at L<https://github.com/dagolden/Perl-OSType/issues>.
 You will be notified automatically of any progress on your issue.
 
 =head2 Source Code
@@ -164,9 +161,9 @@ You will be notified automatically of any progress on your issue.
 This is open source software.  The code repository is available for
 public review and contribution under the terms of the license.
 
-L<https://github.com/dagolden/perl-ostype>
+L<https://github.com/dagolden/Perl-OSType>
 
-  git clone git://github.com/dagolden/perl-ostype.git
+  git clone https://github.com/dagolden/Perl-OSType.git
 
 =head1 AUTHOR
 
@@ -198,3 +195,8 @@ This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
 
 =cut
+
+__END__
+
+
+# vim: ts=4 sts=4 sw=4 et:

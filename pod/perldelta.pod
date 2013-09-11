@@ -354,7 +354,7 @@ keep in sync with the latest CPAN release.
 
 =item *
 
-L<Perl::OSType> has been upgraded from version 1.003 to 1.004.
+L<Perl::OSType> has been upgraded from version 1.003 to 1.005.
 
 The Unix OSType 'bitrig' has been added.
 
