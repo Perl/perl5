@@ -22,11 +22,6 @@
 #define USE_STDIO
 #endif /* PERL_FOR_X2P */
 
-#ifdef VOIDUSED
-#   undef VOIDUSED
-#endif
-#define VOIDUSED 1
-
 #ifdef PERL_MICRO
 #   include "uconfig.h"
 #else
