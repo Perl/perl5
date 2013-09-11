@@ -3,6 +3,7 @@
 # vim:ts=8:sw=2:et:sta:sts=2
 
 use strict;
+use warnings;
 use lib 't/lib';
 use IO::File;
 use MBTest;

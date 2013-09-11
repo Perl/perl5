@@ -10,8 +10,9 @@ package Module::Metadata;
 # parrot future to look at other types of modules).
 
 use strict;
-use vars qw($VERSION);
-$VERSION = '1.000016';
+use warnings;
+
+our $VERSION = '1.000017';
 $VERSION = eval $VERSION;
 
 use Carp qw/croak/;
@@ -649,7 +650,7 @@ sub _evaluate_version_line {
   # compiletime/runtime issues with local()
   my $vsub;
   $pn++; # everybody gets their own package
-  my $eval = qq{BEGIN { q#  Hide from _packages_inside()
+  my $eval = qq{BEGIN { my \$dummy = q#  Hide from _packages_inside()
     #; package Module::Metadata::_version::p$pn;
     use version;
     no strict;
@@ -661,6 +662,8 @@ sub _evaluate_version_line {
         \$$var
       };
   }};
+
+  $eval = $1 if $eval =~ m{^(.+)}s;
 
   local $^W;
   # Try to get the $VERSION
