@@ -62,6 +62,9 @@ XS(XS_UNIVERSAL_VERSION)
     const char *undef;
     PERL_UNUSED_ARG(cv);
 
+    if (items < 1)
+       Perl_croak(aTHX_ "Usage: UNIVERSAL::VERSION(sv, ...)");
+
     if (SvROK(ST(0))) {
         sv = MUTABLE_SV(SvRV(ST(0)));
         if (!SvOBJECT(sv))
