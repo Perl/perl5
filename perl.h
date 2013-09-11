@@ -90,7 +90,7 @@
 #   define USE_HEAP_INSTEAD_OF_STACK
 #endif
 
-#/* Use the reentrant APIs like localtime_r and getpwent_r */
+/* Use the reentrant APIs like localtime_r and getpwent_r */
 /* Win32 has naturally threadsafe libraries, no need to use any _r variants. */
 #if defined(USE_ITHREADS) && !defined(USE_REENTRANT_API) && !defined(NETWARE) && !defined(WIN32) && !defined(PERL_DARWIN)
 #   define USE_REENTRANT_API
