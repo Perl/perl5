@@ -267,6 +267,12 @@ keep in sync with the latest CPAN release.
 
 =item *
 
+L<File::Find> has been upgraded from version 1.24 to 1.25.
+
+Better diagnostics are now provided in the case of a failed C<chdir>.
+
+=item *
+
 L<File::Glob> has been upgraded from version 1.20 to 1.21.
 
 C<glob()> now warns in the context of C<use warnings "syscalls";> if the
@@ -286,6 +292,12 @@ L<I18N::LangTags> has been upgraded from version 0.39 to 0.40.
 
 Bosnian has now joined Croatian and Serbian in the lists of mutually
 intelligible Slavic languages. [perl #72594]
+
+=item *
+
+L<IO> has been upgraded from version 1.28 to 1.29.
+
+A minor internals-only change has been made to the XS code.
 
 =item *
 
