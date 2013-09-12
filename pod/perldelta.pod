@@ -125,6 +125,13 @@ XXX
 
 =item *
 
+L<autodie> has been upgraded from version 2.20 to 2.21.
+
+Numerous improvements have been made, many speed-related.  See the F<Changes>
+file in the CPAN distribution for full details.
+
+=item *
+
 L<B> has been upgraded from version 1.45 to 1.46.
 
 The fix for [perl #118525] introduced a regression in the behaviour of

@@ -225,10 +225,9 @@ use File::Glob qw(:case);
 
     'autodie' => {
         'MAINTAINER'   => 'pjf',
-        'DISTRIBUTION' => 'PJF/autodie-2.20.tar.gz',
+        'DISTRIBUTION' => 'PJF/autodie-2.21.tar.gz',
         'FILES'        => q[cpan/autodie],
         'EXCLUDED'     => [
-            qr{^inc/Module/},
             qr{benchmarks},
             # All these tests depend upon external
             # modules that don't exist when we're
@@ -249,8 +248,6 @@ use File::Glob qw(:case);
                 )
         ],
         'CUSTOMIZED'   => [
-            # Waiting to be merged upstream: see CPAN RT#88076
-            qw(	t/backcompat.t ),
             # Waiting to be merged upstream: see CPAN RT#88444
             qw(	t/utime.t ),
         ],
