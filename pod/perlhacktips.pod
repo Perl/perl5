@@ -605,7 +605,15 @@ Do not use sprintf() or vsprintf()
 If you really want just plain byte strings, use my_snprintf() and
 my_vsnprintf() instead, which will try to use snprintf() and
 vsnprintf() if those safer APIs are available.  If you want something
-fancier than a plain byte string, use SVs and Perl_sv_catpvf().
+fancier than a plain byte string, use
+L<C<Perl_form>()|perlapi/form> or SVs and
+L<C<Perl_sv_catpvf()>|perlapi/sv_catpvf>.
+
+Note that some versions of all the C<sprintf()> forms are buggy in
+glibc as of version 2.17.  They won't allow a C<%s> format to create a
+string that isn't valid UTF-8 if the current underlying locale of the
+program is UTF-8.  What happens is that the C<%s> and its operand are
+simply skipped without any notice.
 
 =back
 
