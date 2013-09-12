@@ -53,9 +53,12 @@
  * The original code was written in conjunction with BSD Computer Software
  * Research Group at University of California, Berkeley.
  *
- * See also: "Optimistic Merge Sort" (SODA '92)
+ * See also: "Optimistic Sorting and Information Theoretic Complexity"
+ *           Peter McIlroy
+ *           SODA (Fourth Annual ACM-SIAM Symposium on Discrete Algorithms),
+ *           pp 467-474, Austin, Texas, 25-27 January 1993.
  *
- * The integration to Perl is by John P. Linderman <jpl@research.att.com>.
+ * The integration to Perl is by John P. Linderman <jpl.jpl@gmail.com>.
  *
  * The code can be distributed under the same terms as Perl itself.
  *
