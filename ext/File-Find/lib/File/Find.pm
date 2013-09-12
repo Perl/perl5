@@ -3,7 +3,7 @@ use 5.006;
 use strict;
 use warnings;
 use warnings::register;
-our $VERSION = '1.24';
+our $VERSION = '1.25';
 require Exporter;
 require Cwd;
 
@@ -809,7 +809,7 @@ sub _find_dir($$$) {
 		else {
 		    $tmp = join('/',('..') x ($CdLvl-$Level));
 		}
-		die "Can't cd to $tmp from $dir_name"
+		die "Can't cd to $tmp from $dir_name: $!"
 		    unless chdir ($tmp);
 		$CdLvl = $Level;
 	    }
