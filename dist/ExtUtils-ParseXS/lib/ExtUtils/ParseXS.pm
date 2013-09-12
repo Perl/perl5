@@ -1702,7 +1702,7 @@ sub fetch_para {
     # which support a HEREdoc-alike block syntax.
     # This is special cased from the usual paragraph-handler logic
     # due to the HEREdoc-ish syntax.
-    if ($self->{lastline} =~ /^TYPEMAP\s*:\s*<<\s*(?:(["'])(.+?)\1|([^\s'"]+))\s*;?\s*$/) {
+    if ($self->{lastline} =~ /^TYPEMAP\s*:\s*<<\s*(?:(["'])(.+?)\1|([^\s'"]+?))\s*;?\s*$/) {
       my $end_marker = quotemeta(defined($1) ? $2 : $3);
       my @tmaplines;
       while (1) {

@@ -9,7 +9,7 @@ use ExtUtils::CBuilder;
 use attributes;
 use overload;
 
-plan tests => 28;
+plan tests => 29;
 
 my ($source_file, $obj_file, $lib_file);
 
@@ -95,6 +95,7 @@ SKIP: {
   is XSMore::typemaptest1(), 42, 'Simple embedded typemap works';
   is XSMore::typemaptest2(), 42, 'Simple embedded typemap works with funny end marker';
   is XSMore::typemaptest3(12, 13, 14), 12, 'Simple embedded typemap works for input, too';
+  is XSMore::typemaptest6(5), 5, '<<END; (with semicolon) matches delimiter "END"';
 
   # Win32 needs to close the DLL before it can unlink it, but unfortunately
   # dl_unload_file was missing on Win32 prior to perl change #24679!
