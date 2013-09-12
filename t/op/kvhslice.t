@@ -8,7 +8,7 @@ BEGIN {
 
 # use strict;
 
-plan tests => 39;
+plan tests => 38;
 
 # simple use cases
 {
@@ -50,7 +50,8 @@ plan tests => 39;
         eval 'is( scalar %h{i}, "I", "correct value");';
 
         is (scalar @warn, 1);
-        like ($warn[0], qr/^Scalar value \%h\{i\} better written as \$h\{i\}/);
+        like ($warn[0],
+              qr/^Scalar value \%h\{"i"\} better written as \$h\{"i"\}/);
     }
 }
 
@@ -79,7 +80,6 @@ plan tests => 39;
 
 # ref of a slice produces list
 {
-    no warnings 'syntax';
     my %h = map { $_ => uc $_ } 'a'..'z';
     my @a = \%h{ qw'c d e' };
 
@@ -146,9 +146,10 @@ plan tests => 39;
     my %h = map { $_ => uc $_ } 'a'..'c';
     {
         @warn = ();
-        my ($v) = eval '%h{a}';
+        my $v = eval '%h{a}';
         is (scalar @warn, 1, 'warning in scalar context');
-        like $warn[0], qr{^Scalar value %h{a} better written as \$h{a}},
+        like $warn[0],
+             qr{^Scalar value %h{"a"} better written as \$h{"a"}},
             "correct warning text";
     }
     {
@@ -156,9 +157,7 @@ plan tests => 39;
         my ($k,$v) = eval '%h{a}';
         is ($k, 'a');
         is ($v, 'A');
-        is (scalar @warn, 1, 'warning, even in list context');
-        like $warn[0], qr{^Scalar value %h{a} better written as \$h{a}},
-            "correct warning text";
+        is (scalar @warn, 0, 'no warning in list context');
     }
 
     # deprecated syntax

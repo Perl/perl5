@@ -1185,6 +1185,72 @@ Perl_scalar(pTHX_ OP *o)
     case OP_SORT:
 	Perl_ck_warner(aTHX_ packWARN(WARN_VOID), "Useless use of sort in scalar context");
 	break;
+    case OP_KVHSLICE:
+    case OP_KVASLICE:
+	if (o->op_private & OPpSLICEWARNING) {
+	    OP *kid = cLISTOPo->op_first;
+	    if (kid) {
+		kid = kid->op_sibling; /* get past pushmark */
+		/* weed out false positives: op_list and op_entersub */
+		if (kid->op_type != OP_LIST && kid->op_type != OP_ENTERSUB
+		 && kid->op_sibling) {
+		    OP *xvref = kid->op_sibling;
+		    const char funny =
+			o->op_type == OP_KVHSLICE ? '%' : '@';
+		    const char lbrack =
+			o->op_type == OP_KVHSLICE ? '{' : '[';
+		    const char rbrack =
+			o->op_type == OP_KVHSLICE ? '}' : ']';
+		    GV *gv;
+		    SV * const name =
+			   (  xvref->op_type == OP_RV2AV
+			   || xvref->op_type == OP_RV2HV  )
+			&& cUNOPx(xvref)->op_first->op_type == OP_GV
+			&& (gv = cGVOPx_gv(cUNOPx(xvref)->op_first))
+			    ? varname(gv, funny, 0, NULL, 0, 1)
+		      :    xvref->op_type == OP_PADAV
+			|| xvref->op_type == OP_PADHV
+			    ? varname(MUTABLE_GV(PL_compcv), funny,
+				      xvref->op_targ, NULL, 0, 1)
+		      :	      NULL;
+		    SV *keysv;
+		    const char *key = NULL;
+		    if (!name) /* XS module fiddling with the op tree */
+			break;
+		    if (kid->op_type == OP_CONST) {
+			keysv = kSVOP_sv;
+			if (SvPOK(kSVOP_sv)) {
+			    SV *sv = keysv;
+			    keysv = sv_newmortal();
+			    pv_pretty(keysv, SvPVX_const(sv), SvCUR(sv),
+				      32, NULL, NULL,
+				      PERL_PV_PRETTY_DUMP
+				     |PERL_PV_ESCAPE_UNI_DETECT);
+			}
+			else if (!SvOK(keysv))
+			    key = "undef";
+		    }
+		    else key = "...";
+		    assert(name);
+		    assert(SvPOK(name));
+		    sv_chop(name,SvPVX(name)+1);
+		    if (key)
+			Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
+				   "Scalar value %%%"SVf
+				   "%c%s%c better written as $%"SVf
+				   "%c%s%c",
+				    SVfARG(name), lbrack, key, rbrack,
+				    SVfARG(name), lbrack, key, rbrack);
+		    else
+			Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
+				   "Scalar value %%%"SVf"%c%"SVf
+				   "%c better written as $%"SVf
+				   "%c%"SVf"%c",
+				    SVfARG(name), lbrack, keysv, rbrack,
+				    SVfARG(name), lbrack, keysv, rbrack);
+		}
+	    }
+	}
     }
     return o;
 }

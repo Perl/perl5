@@ -8,7 +8,7 @@ BEGIN {
 
 # use strict;
 
-plan tests => 35;
+plan tests => 34;
 
 # simple use cases
 {
@@ -149,7 +149,7 @@ plan tests => 35;
     my @a = 'a'..'c';
     {
         @warn = ();
-        my ($v) = eval '%a[0]';
+        my $v = eval '%a[0]';
         is (scalar @warn, 1, 'warning in scalar context');
         like $warn[0], qr{^Scalar value %a\[0\] better written as \$a\[0\]},
             "correct warning text";
@@ -159,9 +159,7 @@ plan tests => 35;
         my ($k,$v) = eval '%a[0]';
         is ($k, 0);
         is ($v, 'a');
-        is (scalar @warn, 1, 'warning, even in list context');
-        like $warn[0], qr{^Scalar value %a\[0\] better written as \$a\[0\]},
-            "correct warning text";
+        is (scalar @warn, 0, 'no warning in list context');
     }
 }
 

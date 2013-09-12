@@ -1210,6 +1210,9 @@ term	:	termbinop
 				    newLISTOP(OP_KVASLICE, 0,
 					list($3),
 					ref(oopsAV($1), OP_KVASLICE)));
+			  if ($$ && $1)
+			      $$->op_private |=
+				  $1->op_private & OPpSLICEWARNING;
 			  TOKEN_GETMAD($2,$$,'[');
 			  TOKEN_GETMAD($4,$$,']');
 			}
@@ -1230,6 +1233,9 @@ term	:	termbinop
 				    newLISTOP(OP_KVHSLICE, 0,
 					list($3),
 					ref($1, OP_KVHSLICE)));
+			  if ($$ && $1)
+			      $$->op_private |=
+				  $1->op_private & OPpSLICEWARNING;
 			    PL_parser->expect = XOPERATOR;
 			  TOKEN_GETMAD($2,$$,'{');
 			  TOKEN_GETMAD($4,$$,';');
@@ -1435,6 +1441,7 @@ ary	:	'@' indirob
 
 hsh	:	'%' indirob
 			{ $$ = newHVREF($2);
+			  if ($$) $$->op_private |= IVAL($1);
 			  TOKEN_GETMAD($1,$$,'%');
 			}
 	;

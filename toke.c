@@ -5800,6 +5800,7 @@ Perl_yylex(pTHX)
 	Mop(OP_MULTIPLY);
 
     case '%':
+    {
 	if (PL_expect == XOPERATOR) {
 	    if (s[1] == '=' && !PL_lex_allbrackets &&
 		    PL_lex_fakeeof >= LEX_FAKEEOF_ASSIGN)
@@ -5811,6 +5812,7 @@ Perl_yylex(pTHX)
 	PL_tokenbuf[0] = '%';
 	s = scan_ident(s, PL_bufend, PL_tokenbuf + 1,
 		sizeof PL_tokenbuf - 1, FALSE);
+	pl_yylval.ival = 0;
 	if (!PL_tokenbuf[1]) {
 	    PREREF('%');
 	}
@@ -5822,26 +5824,23 @@ Perl_yylex(pTHX)
 	    if (*s == '[' || *s == '{') {
 		if (ckWARN(WARN_SYNTAX)) {
 		    const char *t = s + 1;
+		    while (*t == ' ') t++;
+		    if (*t == 'q' && t[1] == 'w'
+		     && !isWORDCHAR_lazy_if(t+2,UTF))
+			goto no_qw_warning;
 		    while (*t && (isWORDCHAR_lazy_if(t,UTF) || strchr(" \t$#+-'\"", *t)))
 			t += UTF ? UTF8SKIP(t) : 1;
 		    if (*t == '}' || *t == ']') {
-			t++;
-			PL_bufptr = PEEKSPACE(PL_bufptr); /* XXX can realloc */
-       /* diag_listed_as: Scalar value @%s[%s] better written as $%s[%s] */
-			Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
-			    "Scalar value %"SVf" better written as $%"SVf,
-			    SVfARG(newSVpvn_flags(PL_bufptr, (STRLEN)(t-PL_bufptr),
-                                                SVs_TEMP | (UTF ? SVf_UTF8 : 0 ))),
-                            SVfARG(newSVpvn_flags(PL_bufptr+1, (STRLEN)(t-PL_bufptr-1),
-                                                SVs_TEMP | (UTF ? SVf_UTF8 : 0 ))));
+			pl_yylval.ival = OPpSLICEWARNING;
 		    }
 		}
 	    }
 	}
+      no_qw_warning:
 	PL_expect = XOPERATOR;
 	force_ident_maybe_lex('%');
 	TERM('%');
-
+    }
     case '^':
 	if (!PL_lex_allbrackets && PL_lex_fakeeof >=
 		(s[1] == '=' ? LEX_FAKEEOF_ASSIGN : LEX_FAKEEOF_BITWISE))
