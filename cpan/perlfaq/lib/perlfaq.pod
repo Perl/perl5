@@ -97,6 +97,10 @@ How stable is Perl?
 
 =item *
 
+How often are new versions of Perl released?
+
+=item *
+
 Is Perl difficult to learn?
 
 =item *
@@ -1049,6 +1053,10 @@ How can I use a variable as a variable name?
 
 What does "bad interpreter" mean?
 
+=item *
+
+Do I need to recompile XS modules when there is a change in the C library?
+
 =back
 
 
@@ -1253,6 +1261,10 @@ How do I add the directory my program lives in to the module/library search path
 =item *
 
 How do I add a directory to my include path (@INC) at runtime?
+
+=item *
+
+Where are modules installed?
 
 =item *
 

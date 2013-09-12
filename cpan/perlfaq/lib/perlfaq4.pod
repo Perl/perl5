@@ -2430,7 +2430,7 @@ Usually a hash ref, perhaps like this:
 References are documented in L<perlref> and L<perlreftut>.
 Examples of complex data structures are given in L<perldsc> and
 L<perllol>. Examples of structures and object-oriented classes are
-in L<perltoot>.
+in L<perlootut>.
 
 =head2 How can I use a reference as a hash key?
 

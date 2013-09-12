@@ -367,6 +367,14 @@ The Unix OSType 'bitrig' has been added.
 
 =item *
 
+L<perlfaq> has been upgraded from version 5.0150043 to 5.0150044.
+
+The use of C<gensym> in a number of examples has been removed, the use of C<&>
+in subroutine calls is now clarified and several new questions have been
+answered.
+
+=item *
+
 L<re> has been upgraded from version 0.25 to 0.26.
 
 A function signature has been corrected in the XS implementation.

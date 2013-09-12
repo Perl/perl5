@@ -370,8 +370,9 @@ the tool runs on Windows 9x/NT/2000/XP or later.
 
 L<http://kephra.sf.net>
 
-GUI Editor written in Perl using wxWidgets and Scintilla with lots of smaller features.
-Aims for an UI based on Perls principles like TIMTWTDI and "easy things should be ..".
+GUI editor written in Perl using wxWidgets and Scintilla with lots of smaller features.
+Aims for a UI based on Perl principles like TIMTOWTDI and "easy things should be easy,
+hard things should be possible".
 
 =item Komodo
 
@@ -1097,8 +1098,8 @@ simple CGI scripts.
 
 =head2 Where can I learn about object-oriented Perl programming?
 
-A good place to start is L<perltoot>, and you can use L<perlobj>,
-L<perlboot>, L<perltoot>, L<perltooc>, and L<perlbot> for reference.
+A good place to start is L<perlootut>, and you can use L<perlobj> for
+reference.
 
 A good book on OO on Perl is the "Object-Oriented Perl"
 by Damian Conway from Manning Publications, or "Intermediate Perl"
