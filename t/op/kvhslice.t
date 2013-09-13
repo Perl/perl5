@@ -8,7 +8,7 @@ BEGIN {
 
 # use strict;
 
-plan tests => 38;
+plan tests => 43;
 
 # simple use cases
 {
@@ -189,3 +189,21 @@ plan tests => 38;
     ok( !exists $h{e}, "no autovivification" );
 }
 
+# keys/value/each treat argument as scalar
+{
+    my %h = 'a'..'b';
+    my %i = (foo => \%h);
+    my ($k,$v) = each %i{foo=>}; # => suppresses "Scalar better written as"
+    is $k, 'a', 'key returned by each %hash{key}';
+    is $v, 'b', 'val returned by each %hash{key}';
+    %h = 1..10;
+    is join('-', sort keys %i{foo=>}), '1-3-5-7-9', 'keys %hash{key}';
+    is join('-', sort values %i{foo=>}), '10-2-4-6-8', 'values %hash{key}';
+}
+
+# \% prototype expects hash deref
+sub nowt_but_hash(\%) {}
+eval 'nowt_but_hash %INC{bar}';
+like $@, qr`^Type of arg 1 to main::nowt_but_hash must be hash \(not(?x:
+           ) key/value hash slice\) at `,
+    '\% prototype';

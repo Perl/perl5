@@ -8,7 +8,7 @@ BEGIN {
 
 # use strict;
 
-plan tests => 34;
+plan tests => 39;
 
 # simple use cases
 {
@@ -175,3 +175,21 @@ plan tests => 34;
     ok( !exists $a[3], "no autovivification" );
 }
 
+# keys/value/each treat argument as scalar
+{
+    my %h = 'a'..'b';
+    my @i = \%h;
+    my ($k,$v) = each %i[(0)]; # parens suppress "Scalar better written as"
+    is $k, 'a', 'key returned by each %array[ix]';
+    is $v, 'b', 'val returned by each %array[ix]';
+    %h = 1..10;
+    is join('-', sort keys %i[(0)]), '1-3-5-7-9', 'keys %array[ix]';
+    is join('-', sort values %i[(0)]), '10-2-4-6-8', 'values %array[ix]';
+}
+
+# \% prototype expects hash deref
+sub nowt_but_hash(\%) {}
+eval 'nowt_but_hash %_[0]';
+like $@, qr`^Type of arg 1 to main::nowt_but_hash must be hash \(not(?x:
+           ) index/value array slice\) at `,
+    '\% prototype';
