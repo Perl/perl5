@@ -217,6 +217,7 @@ aelemfast	constant array element	ck_null		s$	A S
 aelemfast_lex	constant lexical array element	ck_null		d0	A S
 aelem		array element		ck_null		s2	A S
 aslice		array slice		ck_null		m@	A L
+kvaslice	index/value array slice	ck_null		m@	A L
 
 aeach		each on array		ck_each		%	A
 akeys		keys on array		ck_each		t%	A
@@ -232,6 +233,7 @@ exists		exists			ck_exists	is%	S
 rv2hv		hash dereference	ck_rvconst	dt1	
 helem		hash element		ck_null		s2	H S
 hslice		hash slice		ck_null		m@	H L
+kvhslice	key/value hash slice	ck_null		m@	H L
 
 # Explosives and implosives.
 

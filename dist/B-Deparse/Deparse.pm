@@ -20,7 +20,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
          CVf_METHOD CVf_LVALUE
 	 PMf_KEEP PMf_GLOBAL PMf_CONTINUE PMf_EVAL PMf_ONCE
 	 PMf_MULTILINE PMf_SINGLELINE PMf_FOLD PMf_EXTENDED);
-$VERSION = '1.22';
+$VERSION = '1.23';
 use strict;
 use vars qw/$AUTOLOAD/;
 use warnings ();
@@ -3567,11 +3567,15 @@ sub slice {
     } else {
 	$list = $self->elem_or_slice_single_index($kid);
     }
-    return "\@" . $array . $left . $list . $right;
+    my $lead = '@';
+    $lead = '%' if $op->name =~ /^kv/i;
+    return $lead . $array . $left . $list . $right;
 }
 
-sub pp_aslice { maybe_local(@_, slice(@_, "[", "]", "rv2av", "padav")) }
-sub pp_hslice { maybe_local(@_, slice(@_, "{", "}", "rv2hv", "padhv")) }
+sub pp_aslice   { maybe_local(@_, slice(@_, "[", "]", "rv2av", "padav")) }
+sub pp_kvaslice {                 slice(@_, "[", "]", "rv2av", "padav")  }
+sub pp_hslice   { maybe_local(@_, slice(@_, "{", "}", "rv2hv", "padhv")) }
+sub pp_kvhslice {                 slice(@_, "{", "}", "rv2hv", "padhv")  }
 
 sub pp_lslice {
     my $self = shift;

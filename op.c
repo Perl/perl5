@@ -1185,6 +1185,74 @@ Perl_scalar(pTHX_ OP *o)
     case OP_SORT:
 	Perl_ck_warner(aTHX_ packWARN(WARN_VOID), "Useless use of sort in scalar context");
 	break;
+    case OP_KVHSLICE:
+    case OP_KVASLICE:
+	if (o->op_private & OPpSLICEWARNING) {
+	    OP *kid = cLISTOPo->op_first;
+	    if (kid) {
+		kid = kid->op_sibling; /* get past pushmark */
+		/* weed out false positives: op_list and op_entersub */
+		if (kid->op_type != OP_LIST && kid->op_type != OP_ENTERSUB
+		 && kid->op_sibling) {
+		    OP *xvref = kid->op_sibling;
+		    const char funny =
+			o->op_type == OP_KVHSLICE ? '%' : '@';
+		    const char lbrack =
+			o->op_type == OP_KVHSLICE ? '{' : '[';
+		    const char rbrack =
+			o->op_type == OP_KVHSLICE ? '}' : ']';
+		    GV *gv;
+		    SV * const name =
+			   (  xvref->op_type == OP_RV2AV
+			   || xvref->op_type == OP_RV2HV  )
+			&& cUNOPx(xvref)->op_first->op_type == OP_GV
+			&& (gv = cGVOPx_gv(cUNOPx(xvref)->op_first))
+			    ? varname(gv, funny, 0, NULL, 0, 1)
+		      :    xvref->op_type == OP_PADAV
+			|| xvref->op_type == OP_PADHV
+			    ? varname(MUTABLE_GV(PL_compcv), funny,
+				      xvref->op_targ, NULL, 0, 1)
+		      :	      NULL;
+		    SV *keysv;
+		    const char *key = NULL;
+		    if (!name) /* XS module fiddling with the op tree */
+			break;
+		    if (kid->op_type == OP_CONST) {
+			keysv = kSVOP_sv;
+			if (SvPOK(kSVOP_sv)) {
+			    SV *sv = keysv;
+			    keysv = sv_newmortal();
+			    pv_pretty(keysv, SvPVX_const(sv), SvCUR(sv),
+				      32, NULL, NULL,
+				      PERL_PV_PRETTY_DUMP
+				     |PERL_PV_ESCAPE_UNI_DETECT);
+			}
+			else if (!SvOK(keysv))
+			    key = "undef";
+		    }
+		    else key = "...";
+		    assert(name);
+		    assert(SvPOK(name));
+		    sv_chop(name,SvPVX(name)+1);
+		    if (key)
+       /* diag_listed_as: Scalar value %%s[%s] better written as $%s[%s] */
+			Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
+				   "Scalar value %%%"SVf
+				   "%c%s%c better written as $%"SVf
+				   "%c%s%c",
+				    SVfARG(name), lbrack, key, rbrack,
+				    SVfARG(name), lbrack, key, rbrack);
+		    else
+       /* diag_listed_as: Scalar value %%s[%s] better written as $%s[%s] */
+			Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
+				   "Scalar value %%%"SVf"%c%"SVf
+				   "%c better written as $%"SVf
+				   "%c%"SVf"%c",
+				    SVfARG(name), lbrack, keysv, rbrack,
+				    SVfARG(name), lbrack, keysv, rbrack);
+		}
+	    }
+	}
     }
     return o;
 }
@@ -1276,8 +1344,10 @@ Perl_scalarvoid(pTHX_ OP *o)
     case OP_AELEMFAST:
     case OP_AELEMFAST_LEX:
     case OP_ASLICE:
+    case OP_KVASLICE:
     case OP_HELEM:
     case OP_HSLICE:
+    case OP_KVHSLICE:
     case OP_UNPACK:
     case OP_PACK:
     case OP_JOIN:
@@ -2061,6 +2131,11 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
     case OP_DBSTATE:
        PL_modcount = RETURN_UNLIMITED_NUMBER;
 	break;
+    case OP_KVHSLICE:
+    case OP_KVASLICE:
+	if (type == OP_LEAVESUBLV)
+	    o->op_private |= OPpMAYBE_LVSUB;
+        goto nomod;
     case OP_AV2ARYLEN:
 	PL_hints |= HINT_BLOCK_SCOPE;
 	if (type == OP_LEAVESUBLV)
@@ -5349,7 +5424,8 @@ S_is_list_assignment(pTHX_ const OP *o)
 
     if (type == OP_LIST || flags & OPf_PARENS ||
 	type == OP_RV2AV || type == OP_RV2HV ||
-	type == OP_ASLICE || type == OP_HSLICE)
+	type == OP_ASLICE || type == OP_HSLICE ||
+        type == OP_KVASLICE || type == OP_KVHSLICE)
 	return TRUE;
 
     if (type == OP_PADAV || type == OP_PADHV)
@@ -6557,7 +6633,9 @@ S_ref_array_or_hash(pTHX_ OP *cond)
 
     else if(cond
     && (cond->op_type == OP_ASLICE
-    ||  cond->op_type == OP_HSLICE)) {
+    ||  cond->op_type == OP_KVASLICE
+    ||  cond->op_type == OP_HSLICE
+    ||  cond->op_type == OP_KVHSLICE)) {
 
 	/* anonlist now needs a list from this op, was previously used in
 	 * scalar context */
@@ -8038,11 +8116,13 @@ Perl_oopsAV(pTHX_ OP *o)
 
     switch (o->op_type) {
     case OP_PADSV:
+    case OP_PADHV:
 	o->op_type = OP_PADAV;
 	o->op_ppaddr = PL_ppaddr[OP_PADAV];
 	return ref(o, OP_RV2AV);
 
     case OP_RV2SV:
+    case OP_RV2HV:
 	o->op_type = OP_RV2AV;
 	o->op_ppaddr = PL_ppaddr[OP_RV2AV];
 	ref(o, OP_RV2AV);
@@ -8296,9 +8376,15 @@ Perl_ck_delete(pTHX_ OP *o)
 	    /* FALL THROUGH */
 	case OP_HELEM:
 	    break;
+	case OP_KVASLICE:
+	    Perl_croak(aTHX_ "delete argument is index/value array slice,"
+			     " use array slice");
+	case OP_KVHSLICE:
+	    Perl_croak(aTHX_ "delete argument is key/value hash slice, use"
+			     " hash slice");
 	default:
-	    Perl_croak(aTHX_ "%s argument is not a HASH or ARRAY element or slice",
-		  OP_DESC(o));
+	    Perl_croak(aTHX_ "delete argument is not a HASH or ARRAY "
+			     "element or slice");
 	}
 	if (kid->op_private & OPpLVAL_INTRO)
 	    o->op_private |= OPpLVAL_INTRO;
@@ -8462,15 +8548,15 @@ Perl_ck_exists(pTHX_ OP *o)
 	    (void) ref(kid, o->op_type);
 	    if (kid->op_type != OP_RV2CV
 			&& !(PL_parser && PL_parser->error_count))
-		Perl_croak(aTHX_ "%s argument is not a subroutine name",
-			    OP_DESC(o));
+		Perl_croak(aTHX_
+			  "exists argument is not a subroutine name");
 	    o->op_private |= OPpEXISTS_SUB;
 	}
 	else if (kid->op_type == OP_AELEM)
 	    o->op_flags |= OPf_SPECIAL;
 	else if (kid->op_type != OP_HELEM)
-	    Perl_croak(aTHX_ "%s argument is not a HASH or ARRAY element or a subroutine",
-		        OP_DESC(o));
+	    Perl_croak(aTHX_ "exists argument is not a HASH or ARRAY "
+			     "element or a subroutine");
 	op_null(kid);
     }
     return o;

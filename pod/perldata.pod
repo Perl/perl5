@@ -193,7 +193,8 @@ C<$1>, or C<$10000>.
 
 =item A sigil, followed by either a caret and a single POSIX uppercase letter,
 like C<$^V> or C<$^W>, or a sigil followed by a literal control character
-matching the C<\p{POSIX_Cntrl}> property. Due to a historical oddity, if not
+matching the C<\p{POSIX_Cntrl}> property.
+Due to a historical oddity, if not
 running under C<use utf8>, the 128 extra controls in the C<[0x80-0xff]> range
 may also be used in length one variables.
 
@@ -457,7 +458,7 @@ $0 and the $s variables in the (presumably) non-existent package
 C<who>.
 
 In fact, a simple identifier within such curlies is forced to be
-a string, and likewise within a hash subscript. Neither need
+a string, and likewise within a hash subscript.  Neither need
 quoting.  Our earlier example, C<$days{'Feb'}> can be written as
 C<$days{Feb}> and the quotes will be assumed automatically.  But
 anything more complicated in the subscript will be interpreted as an
@@ -916,6 +917,28 @@ or curly) governs whether it's an array or a hash being looked at.
 On the other hand, the leading symbol ('$' or '@') on the array or
 hash indicates whether you are getting back a singular value (a
 scalar) or a plural one (a list).
+
+=head3 Key/Value Hash Slices
+
+A hash slice operation with the % symbol is a variant of slice operation
+returning a list of key/value pairs rather than just values:
+
+    %h = (blonk => 2, foo => 3, squink => 5, bar => 8);
+    %subset = %h{'foo', 'bar'}; # key/value hash slice
+    # %subset is now (foo => 3, bar => 8)
+
+However, the result of such a slice cannot be localized, deleted or used
+in assignment.  These are otherwise very much consistent with hash slices
+using the @ symbol.
+
+=head3 Index/Value Array Slices
+
+Similar to key/value hash slices, the % array slice syntax returns a list
+of index/value pairs:
+
+    @a = "a".."z";
+    @list = %a[3,4,6];
+    # @list is now (3, "d", 4, "e", 6, "g")
 
 =head2 Typeglobs and Filehandles
 X<typeglob> X<filehandle> X<*>

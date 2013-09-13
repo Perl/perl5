@@ -4350,6 +4350,51 @@ PP(pp_aslice)
     RETURN;
 }
 
+PP(pp_kvaslice)
+{
+    dVAR; dSP; dMARK;
+    AV *const av = MUTABLE_AV(POPs);
+    I32 lval = (PL_op->op_flags & OPf_MOD);
+    SSize_t items = SP - MARK;
+
+    if (PL_op->op_private & OPpMAYBE_LVSUB) {
+       const I32 flags = is_lvalue_sub();
+       if (flags) {
+           if (!(flags & OPpENTERSUB_INARGS))
+               /* diag_listed_as: Can't modify %s in %s */
+	       Perl_croak(aTHX_ "Can't modify index/value array slice in list assignment");
+	   lval = flags;
+       }
+    }
+
+    MEXTEND(SP,items);
+    while (items > 1) {
+	*(MARK+items*2-1) = *(MARK+items);
+	items--;
+    }
+    items = SP-MARK;
+    SP += items;
+
+    while (++MARK <= SP) {
+        SV **svp;
+
+	svp = av_fetch(av, SvIV(*MARK), lval);
+        if (lval) {
+            if (!svp || !*svp || *svp == &PL_sv_undef) {
+                DIE(aTHX_ PL_no_aelem, SvIV(*MARK));
+            }
+	    *MARK = sv_mortalcopy(*MARK);
+        }
+	*++MARK = svp ? *svp : &PL_sv_undef;
+    }
+    if (GIMME != G_ARRAY) {
+	MARK = SP - items*2;
+	*++MARK = items > 0 ? *SP : &PL_sv_undef;
+	SP = MARK;
+    }
+    RETURN;
+}
+
 /* Smart dereferencing for keys, values and each */
 PP(pp_rkeys)
 {
@@ -4748,6 +4793,55 @@ PP(pp_hslice)
     if (GIMME != G_ARRAY) {
 	MARK = ORIGMARK;
 	*++MARK = SP > ORIGMARK ? *SP : &PL_sv_undef;
+	SP = MARK;
+    }
+    RETURN;
+}
+
+PP(pp_kvhslice)
+{
+    dVAR; dSP; dMARK;
+    HV * const hv = MUTABLE_HV(POPs);
+    I32 lval = (PL_op->op_flags & OPf_MOD);
+    SSize_t items = SP - MARK;
+
+    if (PL_op->op_private & OPpMAYBE_LVSUB) {
+       const I32 flags = is_lvalue_sub();
+       if (flags) {
+           if (!(flags & OPpENTERSUB_INARGS))
+               /* diag_listed_as: Can't modify %s in %s */
+	       Perl_croak(aTHX_ "Can't modify key/value hash slice in list assignment");
+	   lval = flags;
+       }
+    }
+
+    MEXTEND(SP,items);
+    while (items > 1) {
+	*(MARK+items*2-1) = *(MARK+items);
+	items--;
+    }
+    items = SP-MARK;
+    SP += items;
+
+    while (++MARK <= SP) {
+        SV * const keysv = *MARK;
+        SV **svp;
+        HE *he;
+
+        he = hv_fetch_ent(hv, keysv, lval, 0);
+        svp = he ? &HeVAL(he) : NULL;
+
+        if (lval) {
+            if (!svp || !*svp || *svp == &PL_sv_undef) {
+                DIE(aTHX_ PL_no_helem_sv, SVfARG(keysv));
+            }
+	    *MARK = sv_mortalcopy(*MARK);
+        }
+        *++MARK = svp && *svp ? *svp : &PL_sv_undef;
+    }
+    if (GIMME != G_ARRAY) {
+	MARK = SP - items*2;
+	*++MARK = items > 0 ? *SP : &PL_sv_undef;
 	SP = MARK;
     }
     RETURN;

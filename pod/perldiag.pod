@@ -170,34 +170,6 @@ alternatives.
 
 (F) msgsnd() requires a string at least as long as sizeof(long).
 
-=item %s argument is not a HASH or ARRAY element or a subroutine
-
-(F) The argument to exists() must be a hash or array element or a
-subroutine with an ampersand, such as:
-
-    $foo{$bar}
-    $ref->{"susie"}[12]
-    &do_something
-
-=item %s argument is not a HASH or ARRAY element or slice
-
-(F) The argument to delete() must be either a hash or array element,
-such as:
-
-    $foo{$bar}
-    $ref->{"susie"}[12]
-
-or a hash or array slice, such as:
-
-    @foo[$bar, $baz, $xyzzy]
-    @{$ref->[12]}{"susie", "queue"}
-
-=item %s argument is not a subroutine name
-
-(F) The argument to exists() for C<exists &sub> must be a subroutine
-name, and not a subroutine call.  C<exists &sub()> will generate this
-error.
-
 =item Argument "%s" isn't numeric%s
 
 (W numeric) The indicated string was fed as an argument to an operator
@@ -1690,6 +1662,30 @@ discovered.
 (F) You said something like "use Module 42" but in the Module file
 there are neither package declarations nor a C<$VERSION>.
 
+=item delete argument is index/value array slice, use array slice
+
+(F) You used index/value array slice syntax (C<%array[...]>) as
+the argument to C<delete>.  You probably meant C<@array[...]> with
+an @ symbol instead.
+
+=item delete argument is key/value hash slice, use hash slice
+
+(F) You used key/value hash slice syntax (C<%hash{...}>) as the argument to
+C<delete>.  You probably meant C<@hash{...}> with an @ symbol instead.
+
+=item delete argument is not a HASH or ARRAY element or slice
+
+(F) The argument to delete() must be either a hash or array element,
+such as:
+
+    $foo{$bar}
+    $ref->{"susie"}[12]
+
+or a hash or array slice, such as:
+
+    @foo[$bar, $baz, $xyzzy]
+    @{$ref->[12]}{"susie", "queue"}
+
 =item Delimiter for here document is too long
 
 (F) In a here document construct like C<<<FOO>, the label C<FOO> is too
@@ -1903,6 +1899,21 @@ OS.  See L<perlport>.
 =item Execution of %s aborted due to compilation errors.
 
 (F) The final summary message when a Perl compilation fails.
+
+=item exists argument is not a HASH or ARRAY element or a subroutine
+
+(F) The argument to exists() must be a hash or array element or a
+subroutine with an ampersand, such as:
+
+    $foo{$bar}
+    $ref->{"susie"}[12]
+    &do_something
+
+=item exists argument is not a subroutine name
+
+(F) The argument to exists() for C<exists &sub> must be a subroutine
+name, and not a subroutine call.  C<exists &sub()> will generate this
+error.
 
 =item Exiting eval via %s
 
@@ -4601,6 +4612,28 @@ On the other hand, if you were actually hoping to treat the hash element
 as a list, you need to look into how references work, because Perl will
 not magically convert between scalars and lists for you.  See
 L<perlref>.
+
+=item Scalar value %%s[%s] better written as $%s[%s]
+
+(W syntax) In scalar context, you've used an array index/value slice
+(indicated by %) to select a single element of an array.  Generally
+it's better to ask for a scalar value (indicated by $).  The difference
+is that C<$foo[&bar]> always behaves like a scalar, both in the value it
+returns and when evaluating its argument, while C<%foo[&bar]> provides
+a list context to its subscript, which can do weird things if you're
+expecting only one subscript.  When called in list context, it also
+returns the index (what C<&bar> returns) in addition to the value.
+
+=item Scalar value %%s{%s} better written as $%s{%s}
+
+(W syntax) In scalar context, you've used a hash key/value slice
+(indicated by %) to select a single element of a hash.  Generally it's
+better to ask for a scalar value (indicated by $).  The difference
+is that C<$foo{&bar}> always behaves like a scalar, both in the value
+it returns and when evaluating its argument, while C<@foo{&bar}> and
+provides a list context to its subscript, which can do weird things
+if you're expecting only one subscript.  When called in list context,
+it also returns the key in addition to the value.
 
 =item Search pattern not terminated
 

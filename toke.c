@@ -5800,6 +5800,7 @@ Perl_yylex(pTHX)
 	Mop(OP_MULTIPLY);
 
     case '%':
+    {
 	if (PL_expect == XOPERATOR) {
 	    if (s[1] == '=' && !PL_lex_allbrackets &&
 		    PL_lex_fakeeof >= LEX_FAKEEOF_ASSIGN)
@@ -5811,13 +5812,35 @@ Perl_yylex(pTHX)
 	PL_tokenbuf[0] = '%';
 	s = scan_ident(s, PL_bufend, PL_tokenbuf + 1,
 		sizeof PL_tokenbuf - 1, FALSE);
+	pl_yylval.ival = 0;
 	if (!PL_tokenbuf[1]) {
 	    PREREF('%');
 	}
+	if ((PL_expect != XREF || PL_oldoldbufptr == PL_last_lop) && intuit_more(s)) {
+	    if (*s == '[')
+		PL_tokenbuf[0] = '@';
+
+	    /* Warn about % where they meant $. */
+	    if (*s == '[' || *s == '{') {
+		if (ckWARN(WARN_SYNTAX)) {
+		    const char *t = s + 1;
+		    while (*t == ' ') t++;
+		    if (*t == 'q' && t[1] == 'w'
+		     && !isWORDCHAR_lazy_if(t+2,UTF))
+			goto no_qw_warning;
+		    while (*t && (isWORDCHAR_lazy_if(t,UTF) || strchr(" \t$#+-'\"", *t)))
+			t += UTF ? UTF8SKIP(t) : 1;
+		    if (*t == '}' || *t == ']') {
+			pl_yylval.ival = OPpSLICEWARNING;
+		    }
+		}
+	    }
+	}
+      no_qw_warning:
 	PL_expect = XOPERATOR;
 	force_ident_maybe_lex('%');
 	TERM('%');
-
+    }
     case '^':
 	if (!PL_lex_allbrackets && PL_lex_fakeeof >=
 		(s[1] == '=' ? LEX_FAKEEOF_ASSIGN : LEX_FAKEEOF_BITWISE))
