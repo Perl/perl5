@@ -27,6 +27,18 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 rand() now uses a consistent random number generator
+
+Previously perl would use a platform specific random number generator,
+varying between the libc C<rand()>, C<random()> or C<drand48()>.
+
+This meant that the quality of perl's random numbers would vary from
+platform to platform, from the 15 bits of C<rand()> on Win32 to
+48-bits on POSIX platforms such as Linux with C<drand48()>.
+
+Perl now uses its own internal C<drand48()> implementation on all
+platforms.  [perl #115928]
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
