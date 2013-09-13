@@ -12,6 +12,10 @@ use Config;
 use ExtUtils::Embed;
 use File::Spec;
 
+if ( $Config{'usecrosscompile'} ) {
+    print "1..0 # SKIP no toolchain installed when cross-compiling\n";
+    exit 0;
+}
 open(my $fh,">embed_test.c") || die "Cannot open embed_test.c:$!";
 print $fh <DATA>;
 close($fh);
