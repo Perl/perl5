@@ -96,7 +96,7 @@ else {
 
     # open for writing only
     {
-        sysopen my $fh, $file, O_CREAT|O_WRONLY;
+        sysopen my $fh, $file, O_CREAT|O_TRUNC|O_WRONLY;
 
         my @layers = PerlIO::get_layers($fh);
         ok( (grep { $_ eq 'utf8' } @layers), "open write honors open pragma" ) or diag join ", ", @layers;

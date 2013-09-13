@@ -250,6 +250,8 @@ use File::Glob qw(:case);
         'CUSTOMIZED'   => [
             # Waiting to be merged upstream: see CPAN RT#88444
             qw(	t/utime.t ),
+            # Waiting to be merged upstream: see CPAN RT#87237
+            qw(	t/utf8_open.t ),
         ],
         'UPSTREAM'   => 'cpan',
     },
