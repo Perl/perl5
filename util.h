@@ -54,8 +54,11 @@ This is a synonym for (! foldEQ_locale())
 
 /* perl.h undefs HAS_QUAD if IV isn't 64-bit */
 #ifdef U64TYPE
-/* use a faster implementation when quads are available */
-#define PERL_DRAND48_QUAD
+#  if !defined(_MSC_VER) || _MSC_VER >= 1300
+/* use a faster implementation when quads are available,
+ * but not with VC6 on Windows */
+#    define PERL_DRAND48_QUAD
+#  endif
 #endif
 
 #ifdef PERL_DRAND48_QUAD

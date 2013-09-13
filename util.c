@@ -6287,6 +6287,7 @@ Perl_drand48_r(perl_drand48_t *random_state)
 
     return ldexp(*random_state, -48);
 #else
+    {
     U32 accu;
     U16 temp[2];
 
@@ -6308,6 +6309,7 @@ Perl_drand48_r(perl_drand48_t *random_state)
     return ldexp((double) random_state->seed[0], -48) +
            ldexp((double) random_state->seed[1], -32) +
            ldexp((double) random_state->seed[2], -16);
+    }
 #endif
 }
  
