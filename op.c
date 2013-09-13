@@ -1123,6 +1123,27 @@ S_scalarboolean(pTHX_ OP *o)
     return scalar(o);
 }
 
+static SV *
+S_op_varname(pTHX_ const OP *o)
+{
+    assert(o);
+    assert(o->op_type == OP_PADAV || o->op_type == OP_RV2AV ||
+	   o->op_type == OP_PADHV || o->op_type == OP_RV2HV);
+    {
+	const char funny  = o->op_type == OP_PADAV
+			 || o->op_type == OP_RV2AV ? '@' : '%';
+	if (o->op_type == OP_RV2AV || o->op_type == OP_RV2HV) {
+	    GV *gv;
+	    if (cUNOPo->op_first->op_type != OP_GV
+	     || !(gv = cGVOPx_gv(cUNOPo->op_first)))
+		return NULL;
+	    return varname(gv, funny, 0, NULL, 0, 1);
+	}
+	return
+	    varname(MUTABLE_GV(PL_compcv), funny, o->op_targ, NULL, 0, 1);
+    }
+}
+
 OP *
 Perl_scalar(pTHX_ OP *o)
 {
@@ -1194,25 +1215,11 @@ Perl_scalar(pTHX_ OP *o)
 		/* weed out false positives: op_list and op_entersub */
 		if (kid->op_type != OP_LIST && kid->op_type != OP_ENTERSUB
 		 && kid->op_sibling) {
-		    OP *xvref = kid->op_sibling;
-		    const char funny =
-			o->op_type == OP_KVHSLICE ? '%' : '@';
 		    const char lbrack =
 			o->op_type == OP_KVHSLICE ? '{' : '[';
 		    const char rbrack =
 			o->op_type == OP_KVHSLICE ? '}' : ']';
-		    GV *gv;
-		    SV * const name =
-			   (  xvref->op_type == OP_RV2AV
-			   || xvref->op_type == OP_RV2HV  )
-			&& cUNOPx(xvref)->op_first->op_type == OP_GV
-			&& (gv = cGVOPx_gv(cUNOPx(xvref)->op_first))
-			    ? varname(gv, funny, 0, NULL, 0, 1)
-		      :    xvref->op_type == OP_PADAV
-			|| xvref->op_type == OP_PADHV
-			    ? varname(MUTABLE_GV(PL_compcv), funny,
-				      xvref->op_targ, NULL, 0, 1)
-		      :	      NULL;
+		    SV * const name = S_op_varname(aTHX_ kid->op_sibling);
 		    SV *keysv;
 		    const char *key = NULL;
 		    if (!name) /* XS module fiddling with the op tree */
@@ -2782,16 +2789,8 @@ Perl_bind_match(pTHX_ I32 type, OP *left, OP *right)
 		       )
 		       ? (int)rtype : OP_MATCH];
       const bool isary = ltype == OP_RV2AV || ltype == OP_PADAV;
-      GV *gv;
       SV * const name =
-       (ltype == OP_RV2AV || ltype == OP_RV2HV)
-        ?    cUNOPx(left)->op_first->op_type == OP_GV
-          && (gv = cGVOPx_gv(cUNOPx(left)->op_first))
-              ? varname(gv, isary ? '@' : '%', 0, NULL, 0, 1)
-              : NULL
-        : varname(
-           (GV *)PL_compcv, isary ? '@' : '%', left->op_targ, NULL, 0, 1
-          );
+	S_op_varname(aTHX_ left);
       if (name)
 	Perl_warner(aTHX_ packWARN(WARN_MISC),
              "Applying %s to %"SVf" will act on scalar(%"SVf")",
@@ -10753,19 +10752,9 @@ Perl_ck_length(pTHX_ OP *o)
             switch (kid->op_type) {
                 case OP_PADHV:
                 case OP_PADAV:
-                    name = varname(
-                        (GV *)PL_compcv, hash ? '%' : '@', kid->op_targ,
-                        NULL, 0, 1
-                    );
-                    break;
                 case OP_RV2HV:
                 case OP_RV2AV:
-                    if (cUNOPx(kid)->op_first->op_type != OP_GV) break;
-                    {
-                        GV *gv = cGVOPx_gv(cUNOPx(kid)->op_first);
-                        if (!gv) break;
-                        name = varname(gv, hash?'%':'@', 0, NULL, 0, 1);
-                    }
+		    name = S_op_varname(aTHX_ kid);
                     break;
                 default:
                     return o;
