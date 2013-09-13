@@ -37,6 +37,9 @@
 #endif
 #endif
 
+#include <math.h>
+#include <stdlib.h>
+
 #ifdef __Lynx__
 /* Missing protos on LynxOS */
 int putenv(char *);
@@ -6211,6 +6214,103 @@ Perl_get_re_arg(pTHX_ SV *sv) {
  
     return NULL;
 }
+
+/*
+ * This code is derived from drand48() implementation from FreeBSD,
+ * found in lib/libc/gen/_rand48.c.
+ *
+ * The U64 implementation is original, based on the POSIX
+ * specification for drand48().
+ */
+
+/*
+* Copyright (c) 1993 Martin Birgmeier
+* All rights reserved.
+*
+* You may redistribute unmodified or modified versions of this source
+* code provided that the above copyright notice and this and the
+* following conditions are retained.
+*
+* This software is provided ``as is'', and comes with no warranties
+* of any kind. I shall in no event be liable for anything that happens
+* to anyone/anything when using this software.
+*/
+
+#define FREEBSD_DRAND48_SEED_0   (0x330e)
+
+#ifdef PERL_DRAND48_QUAD
+
+#define DRAND48_MULT 0x5deece66d
+#define DRAND48_ADD  0xb
+#define DRAND48_MASK 0xffffffffffff
+
+#else
+
+#define FREEBSD_DRAND48_SEED_1   (0xabcd)
+#define FREEBSD_DRAND48_SEED_2   (0x1234)
+#define FREEBSD_DRAND48_MULT_0   (0xe66d)
+#define FREEBSD_DRAND48_MULT_1   (0xdeec)
+#define FREEBSD_DRAND48_MULT_2   (0x0005)
+#define FREEBSD_DRAND48_ADD      (0x000b)
+
+const unsigned short _rand48_mult[3] = {
+                FREEBSD_DRAND48_MULT_0,
+                FREEBSD_DRAND48_MULT_1,
+                FREEBSD_DRAND48_MULT_2
+};
+const unsigned short _rand48_add = FREEBSD_DRAND48_ADD;
+
+#endif
+
+void
+Perl_drand48_init_r(perl_drand48_t *random_state, U32 seed)
+{
+    PERL_ARGS_ASSERT_DRAND48_INIT_R;
+
+#ifdef PERL_DRAND48_QUAD
+    *random_state = FREEBSD_DRAND48_SEED_0 + ((U64TYPE)seed << 16);
+#else
+    random_state->seed[0] = FREEBSD_DRAND48_SEED_0;
+    random_state->seed[1] = (U16) seed;
+    random_state->seed[2] = (U16) (seed >> 16);
+#endif
+}
+
+double
+Perl_drand48_r(perl_drand48_t *random_state)
+{
+    PERL_ARGS_ASSERT_DRAND48_R;
+
+#ifdef PERL_DRAND48_QUAD
+    *random_state = (*random_state * DRAND48_MULT + DRAND48_ADD)
+        & DRAND48_MASK;
+
+    return ldexp(*random_state, -48);
+#else
+    U32 accu;
+    U16 temp[2];
+
+    accu = (U32) _rand48_mult[0] * (U32) random_state->seed[0]
+         + (U32) _rand48_add;
+    temp[0] = (U16) accu;        /* lower 16 bits */
+    accu >>= sizeof(U16) * 8;
+    accu += (U32) _rand48_mult[0] * (U32) random_state->seed[1]
+          + (U32) _rand48_mult[1] * (U32) random_state->seed[0];
+    temp[1] = (U16) accu;        /* middle 16 bits */
+    accu >>= sizeof(U16) * 8;
+    accu += _rand48_mult[0] * random_state->seed[2]
+          + _rand48_mult[1] * random_state->seed[1]
+          + _rand48_mult[2] * random_state->seed[0];
+    random_state->seed[0] = temp[0];
+    random_state->seed[1] = temp[1];
+    random_state->seed[2] = (U16) accu;
+
+    return ldexp((double) random_state->seed[0], -48) +
+           ldexp((double) random_state->seed[1], -32) +
+           ldexp((double) random_state->seed[2], -16);
+#endif
+}
+ 
 
 /*
  * Local variables:

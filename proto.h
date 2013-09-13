@@ -1024,6 +1024,16 @@ PERL_CALLCONV void	Perl_dounwind(pTHX_ I32 cxix);
 PERL_CALLCONV I32	Perl_dowantarray(pTHX)
 			__attribute__warn_unused_result__;
 
+PERL_CALLCONV void	Perl_drand48_init_r(perl_drand48_t *random_state, U32 seed)
+			__attribute__nonnull__(1);
+#define PERL_ARGS_ASSERT_DRAND48_INIT_R	\
+	assert(random_state)
+
+PERL_CALLCONV double	Perl_drand48_r(perl_drand48_t *random_state)
+			__attribute__nonnull__(1);
+#define PERL_ARGS_ASSERT_DRAND48_R	\
+	assert(random_state)
+
 PERL_CALLCONV void	Perl_dump_all(pTHX);
 PERL_CALLCONV void	Perl_dump_all_perl(pTHX_ bool justperl);
 PERL_CALLCONV void	Perl_dump_eval(pTHX);

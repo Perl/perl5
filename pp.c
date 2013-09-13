@@ -2712,10 +2712,6 @@ PP(pp_sin)
    --Jarkko Hietaniemi	27 September 1998
  */
 
-#ifndef HAS_DRAND48_PROTO
-extern double drand48 (void);
-#endif
-
 PP(pp_rand)
 {
     dVAR;
