@@ -1235,6 +1235,7 @@ Perl_scalar(pTHX_ OP *o)
 		    assert(SvPOK(name));
 		    sv_chop(name,SvPVX(name)+1);
 		    if (key)
+       /* diag_listed_as: Scalar value %%s[%s] better written as $%s[%s] */
 			Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
 				   "Scalar value %%%"SVf
 				   "%c%s%c better written as $%"SVf
@@ -1242,6 +1243,7 @@ Perl_scalar(pTHX_ OP *o)
 				    SVfARG(name), lbrack, key, rbrack,
 				    SVfARG(name), lbrack, key, rbrack);
 		    else
+       /* diag_listed_as: Scalar value %%s[%s] better written as $%s[%s] */
 			Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
 				   "Scalar value %%%"SVf"%c%"SVf
 				   "%c better written as $%"SVf
