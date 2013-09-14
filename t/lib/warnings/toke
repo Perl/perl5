@@ -35,10 +35,6 @@ toke.c	AOK
      You need to quote \"%s\"" 
 	sub fred {} ; $SIG{TERM} = fred;
 
-     Scalar value %.*s better written as $%.*s" 
-	@a[3] = 2;
-	@a{3} = 2;
-
      Can't use \\%c to mean $%c in expression 
 	$_ = "ab" ; s/(ab)/\1/e;
 
@@ -275,43 +271,6 @@ no warnings 'syntax' ;
 $SIG{TERM} = ふれど;
 EXPECT
 You need to quote "ふれど" at - line 5.
-########
-# toke.c
-use warnings 'syntax' ;
-@a[3] = 2;
-@a{3} = 2;
-no warnings 'syntax' ;
-@a[3] = 2;
-@a{3} = 2;
-EXPECT
-Scalar value @a[3] better written as $a[3] at - line 3.
-Scalar value @a{3} better written as $a{3} at - line 4.
-########
-# toke.c
-use utf8;
-use open qw( :utf8 :std );
-use warnings 'syntax' ;
-@à[3] = 2;
-@à{3} = 2;
-no warnings 'syntax' ;
-@à[3] = 2;
-@à{3} = 2;
-EXPECT
-Scalar value @à[3] better written as $à[3] at - line 5.
-Scalar value @à{3} better written as $à{3} at - line 6.
-########
-# toke.c
-use utf8;
-use open qw( :utf8 :std );
-use warnings 'syntax' ;
-@ぁ[3] = 2;
-@ぁ{3} = 2;
-no warnings 'syntax' ;
-@ぁ[3] = 2;
-@ぁ{3} = 2;
-EXPECT
-Scalar value @ぁ[3] better written as $ぁ[3] at - line 5.
-Scalar value @ぁ{3} better written as $ぁ{3} at - line 6.
 ########
 # toke.c
 use warnings 'syntax' ;

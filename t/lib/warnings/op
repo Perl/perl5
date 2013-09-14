@@ -6,6 +6,10 @@
      Found = in conditional, should be ==
 	1 if $a = 1 ;
 
+     Scalar value %.*s better written as $%.*s" 
+	@a[3] = 2;
+	@a{3} = 2;
+
      Useless use of time in void context
      Useless use of a variable in void context
      Useless use of a constant in void context
@@ -137,6 +141,43 @@ use constant foo => 1;
 no warnings 'syntax' ;
 1 if $a = foo ;
 EXPECT
+########
+# op.c
+use warnings 'syntax' ;
+@a[3] = 2;
+@a{3} = 2;
+no warnings 'syntax' ;
+@a[3] = 2;
+@a{3} = 2;
+EXPECT
+Scalar value @a[3] better written as $a[3] at - line 3.
+Scalar value @a{3} better written as $a{3} at - line 4.
+########
+# op.c
+use utf8;
+use open qw( :utf8 :std );
+use warnings 'syntax' ;
+@à[3] = 2;
+@à{3} = 2;
+no warnings 'syntax' ;
+@à[3] = 2;
+@à{3} = 2;
+EXPECT
+Scalar value @à[3] better written as $à[3] at - line 5.
+Scalar value @à{3} better written as $à{3} at - line 6.
+########
+# op.c
+use utf8;
+use open qw( :utf8 :std );
+use warnings 'syntax' ;
+@ぁ[3] = 2;
+@ぁ{3} = 2;
+no warnings 'syntax' ;
+@ぁ[3] = 2;
+@ぁ{3} = 2;
+EXPECT
+Scalar value @ぁ[3] better written as $ぁ[3] at - line 5.
+Scalar value @ぁ{3} better written as $ぁ{3} at - line 6.
 ########
 # op.c
 my (@foo, %foo);
