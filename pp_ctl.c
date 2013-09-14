@@ -3969,6 +3969,8 @@ PP(pp_require)
 			dirlen = 0;
 		    }
 
+		    if (!IS_SAFE_SYSCALL(dir, dirlen, "@INC entry", "require"))
+			continue;
 #ifdef VMS
 		    if (((unixdirbuf = SvPVX(sv_2mortal(newSVpv("", VMS_MAXRSS-1)))) == NULL)
 			|| ((unixdir = tounixpath(dir, unixdirbuf)) == NULL))
