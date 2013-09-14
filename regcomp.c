@@ -4432,8 +4432,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
                    length of the pattern, something we won't know about
                    until after the recurse.
                 */
-                SSize_t deltanext;
-                I32 fake = 0;
+                SSize_t deltanext, fake = 0;
                 regnode *nscan;
                 struct regnode_charclass_class intrnl;
                 int f = 0;
