@@ -31,7 +31,10 @@
          }
       },
       "runtime" : {
-         "requires" : {}
+         "requires" : {
+            "Exporter" : "5.57",
+            "parent" : "0.221"
+         }
       }
    },
    "release_status" : "stable",
@@ -40,5 +43,5 @@
          "url" : "https://github.com/dankogai/p5-encode"
       }
    },
-   "version" : "2.54"
+   "version" : "2.55"
 }

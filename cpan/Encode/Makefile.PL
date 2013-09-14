@@ -1,5 +1,5 @@
 #
-# $Id: Makefile.PL,v 2.11 2013/08/29 15:20:31 dankogai Exp $
+# $Id: Makefile.PL,v 2.12 2013/09/14 07:51:59 dankogai Exp dankogai $
 #
 use 5.007003;
 use strict;
@@ -44,6 +44,10 @@ WriteMakefile(
     },
     INC         => '-I' . File::Spec->catfile( '.', 'Encode' ),
     LICENSE     => 'perl',
+    PREREQ_PM   => {
+        Exporter   => '5.57',   # use Exporter 'import';
+	parent     => '0.221',  # version bundled with 5.10.1
+    },
     PMLIBDIRS   => \@pmlibdirs,
     INSTALLDIRS => ($] < 5.011 ? 'perl' : 'site'),
     META_MERGE        => {

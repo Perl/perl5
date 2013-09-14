@@ -3,7 +3,7 @@ package Encode::Encoding;
 # Base class for classes which implement encodings
 use strict;
 use warnings;
-our $VERSION = do { my @r = ( q$Revision: 2.6 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
+our $VERSION = do { my @r = ( q$Revision: 2.7 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
 
 require Encode;
 
@@ -81,7 +81,7 @@ Encode::Encoding - Encode Implementation Base Class
 =head1 SYNOPSIS
 
   package Encode::MyEncoding;
-  use base qw(Encode::Encoding);
+  use parent qw(Encode::Encoding);
 
   __PACKAGE__->Define(qw(myCanonical myAlias));
 
@@ -251,7 +251,7 @@ is assumed.
 
   package Encode::ROT13;
   use strict;
-  use base qw(Encode::Encoding);
+  use parent qw(Encode::Encoding);
 
   __PACKAGE__->Define('rot13');
 
@@ -290,7 +290,7 @@ C<Encode::Encoding> as a base class. This allows that class to define
 additional behaviour for all encoding objects.
 
   package Encode::MyEncoding;
-  use base qw(Encode::Encoding);
+  use parent qw(Encode::Encoding);
 
   __PACKAGE__->Define(qw(myCanonical myAlias));
 

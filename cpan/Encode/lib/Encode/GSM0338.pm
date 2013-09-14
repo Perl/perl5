@@ -1,5 +1,5 @@
 #
-# $Id: GSM0338.pm,v 2.4 2013/08/14 02:29:54 dankogai Exp $
+# $Id: GSM0338.pm,v 2.5 2013/09/14 07:51:59 dankogai Exp dankogai $
 #
 package Encode::GSM0338;
 
@@ -8,11 +8,11 @@ use warnings;
 use Carp;
 
 use vars qw($VERSION);
-$VERSION = do { my @r = ( q$Revision: 2.4 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
+$VERSION = do { my @r = ( q$Revision: 2.5 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
 
 use Encode qw(:fallbacks);
 
-use base qw(Encode::Encoding);
+use parent qw(Encode::Encoding);
 __PACKAGE__->Define('gsm0338');
 
 sub needs_lines { 1 }

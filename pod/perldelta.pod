@@ -238,10 +238,11 @@ DL_UNLOAD_ALL_AT_EXIT defined.  Support for GNU DLD has also been removed.
 
 =item *
 
-L<Encode> has been upgraded from version 2.52 to 2.54.
+L<Encode> has been upgraded from version 2.52 to 2.55.
 
 An erroneous early return in C<decode_utf8> has been removed, and a bug in
-C<_utf8_on> under COW has been fixed.
+C<_utf8_on> under COW has been fixed.  Encode also now uses L<parent> rather
+than L<base> throughout.
 
 =item *
 

@@ -2,10 +2,10 @@ package Encode::Alias;
 use strict;
 use warnings;
 no warnings 'redefine';
-our $VERSION = do { my @r = ( q$Revision: 2.17 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
+our $VERSION = do { my @r = ( q$Revision: 2.18 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
 use constant DEBUG => !!$ENV{PERL_ENCODE_DEBUG};
 
-use base qw(Exporter);
+use Exporter 'import';
 
 # Public, encouraged API is exported by default
 

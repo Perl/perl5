@@ -5,11 +5,11 @@ use warnings;
 use utf8 ();
 
 use vars qw($VERSION);
-$VERSION = do { my @r = ( q$Revision: 2.6 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
+$VERSION = do { my @r = ( q$Revision: 2.7 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
 
 use Encode qw(:fallbacks);
 
-use base qw(Encode::Encoding);
+use parent qw(Encode::Encoding);
 __PACKAGE__->Define('hz');
 
 # HZ is a combination of ASCII and escaped GB, so we implement it

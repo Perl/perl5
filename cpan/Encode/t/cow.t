@@ -1,5 +1,5 @@
 #
-# $Id: cow.t,v 1.1 2013/08/29 16:47:39 dankogai Exp dankogai $
+# $Id: cow.t,v 1.1 2013/08/29 16:47:39 dankogai Exp $
 #
 use strict;
 use Encode ();

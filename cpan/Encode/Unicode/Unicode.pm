@@ -4,7 +4,7 @@ use strict;
 use warnings;
 no warnings 'redefine';
 
-our $VERSION = do { my @r = ( q$Revision: 2.8 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
+our $VERSION = do { my @r = ( q$Revision: 2.9 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
 
 use XSLoader;
 XSLoader::load( __PACKAGE__, $VERSION );
@@ -42,7 +42,7 @@ for my $name (
     } => __PACKAGE__;
 }
 
-use base qw(Encode::Encoding);
+use parent qw(Encode::Encoding);
 
 sub renew {
     my $self = shift;

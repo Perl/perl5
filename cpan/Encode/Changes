@@ -1,8 +1,30 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 2.54 2013/08/29 16:47:39 dankogai Exp dankogai $
+# $Id: Changes,v 2.55 2013/09/14 07:51:59 dankogai Exp dankogai $
 #
-$Revision: 2.54 $ $Date: 2013/08/29 16:47:39 $
+$Revision: 2.55 $ $Date: 2013/09/14 07:51:59 $
+! Encode.pm
+  Makefile.PL
+  Unicode/Unicode.pm
+  lib/Encode/Alias.pm
+  lib/Encode/CN/HZ.pm
+  lib/Encode/Encoder.pm
+  lib/Encode/Encoding.pm
+  lib/Encode/GSM0338.pm
+  lib/Encode/Guess.pm
+  lib/Encode/JP/JIS7.pm
+  lib/Encode/KR/2022_KR.pm
+  lib/Encode/MIME/Header.pm
+  lib/Encode/MIME/Header/ISO_2022_JP.pm
+  lib/Encode/Unicode/UTF7.pm
+  t/Encoder.t
+  replaced 'use base' with 'use parent'
+    base.pm is an heavy module for what it is used for. 
+    Fortunately it has a tiny replacement, parent.pm 
+    that is on CPAN but also in perl core since 5.10.1.
+  https://github.com/dankogai/p5-encode/pull/15
+
+2.54 2013/08/29 16:47:39
 ! Encode.xs
 + t/cow.t
   Addressed: COW breakage with _utf8_on()
