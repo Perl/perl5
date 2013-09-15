@@ -130,9 +130,7 @@ use File::Glob qw(:case);
 # that this hasn't been discussed for the module at hand.
 # "blead" indicates that the copy of the module in the blead
 # sources is to be considered canonical, "cpan" means that the
-# module on CPAN is to be patched first. "first-come" means
-# that blead can be patched freely if it is in sync with the
-# latest release on CPAN.
+# module on CPAN is to be patched first.
 
 # BUGS is an email or url to post bug reports.  For modules with
 # UPSTREAM => 'blead', use perl5-porters@perl.org.  rt.cpan.org
@@ -710,7 +708,7 @@ use File::Glob qw(:case);
             qr{^t/liblist/},
             qr{^\.perlcriticrc},
         ],
-        'UPSTREAM' => 'first-come',
+        'UPSTREAM' => 'cpan',
     },
 
     'ExtUtils::Manifest' => {

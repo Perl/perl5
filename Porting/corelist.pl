@@ -183,7 +183,7 @@ while ( my ( $module, $file ) = each %module_to_file ) {
     $module_to_deprecated{$module} = 1 if $Modules{$M}{DEPRECATED};
     next
         if defined $module_to_upstream{$module}
-            && $module_to_upstream{$module} =~ /^(?:blead|first-come)$/;
+            && $module_to_upstream{$module} eq 'blead';
     my $dist = $modlist{$module};
     unless ($dist) {
         warn "Can't find a distribution for $module\n";
@@ -263,8 +263,7 @@ my $tracker = "%bug_tracker = (\n";
 foreach my $module ( sort keys %module_to_upstream ) {
     my $upstream = defined $module_to_upstream{$module};
     next
-        if defined $upstream
-            and $upstream eq 'blead' || $upstream eq 'first-come';
+        if defined $upstream and $upstream eq 'blead';
 
     my $bug_tracker;
 
