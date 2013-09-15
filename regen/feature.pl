@@ -30,6 +30,7 @@ my %feature = (
     array_base      => 'arybase',
     current_sub     => '__SUB__',
     lexical_subs    => 'lexsubs',
+    postderef_qq    => 'postderef_qq',
     unicode_eval    => 'unieval',
     unicode_strings => 'unicode',
     fc              => 'fc',

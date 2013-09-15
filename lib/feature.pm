@@ -17,6 +17,7 @@ our %feature = (
     array_base      => 'feature_arybase',
     current_sub     => 'feature___SUB__',
     lexical_subs    => 'feature_lexsubs',
+    postderef_qq    => 'feature_postderef_qq',
     unicode_eval    => 'feature_unieval',
     unicode_strings => 'feature_unicode',
 );
@@ -25,7 +26,7 @@ our %feature_bundle = (
     "5.10"    => [qw(array_base say state switch)],
     "5.11"    => [qw(array_base say state switch unicode_strings)],
     "5.15"    => [qw(current_sub evalbytes fc say state switch unicode_eval unicode_strings)],
-    "all"     => [qw(array_base current_sub evalbytes fc lexical_subs postderef say state switch unicode_eval unicode_strings)],
+    "all"     => [qw(array_base current_sub evalbytes fc lexical_subs postderef postderef_qq say state switch unicode_eval unicode_strings)],
     "default" => [qw(array_base)],
 );
 
