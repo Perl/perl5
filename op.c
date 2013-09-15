@@ -3440,7 +3440,7 @@ S_fold_constants(pTHX_ OP *o)
     else
     {
 	newop = newSVOP(OP_CONST, 0, MUTABLE_SV(sv));
-	newop->op_folded = 1;
+	if (type != OP_STRINGIFY) newop->op_folded = 1;
     }
     op_getmad(o,newop,'f');
     return newop;
