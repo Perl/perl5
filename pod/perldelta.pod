@@ -39,6 +39,12 @@ platform to platform, from the 15 bits of C<rand()> on Win32 to
 Perl now uses its own internal C<drand48()> implementation on all
 platforms.  [perl #115928]
 
+=head2 64-bit array offsets
+
+On 64-bit platforms, the internal array functions now use 64-bit offsets,
+allowing Perl arrays to hold more than 2**31 elements, if you have the
+memory available.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
