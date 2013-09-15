@@ -94,7 +94,7 @@
 
 %type <opval> stmtseq fullstmt labfullstmt barestmt block mblock else
 %type <opval> expr term subscripted scalar ary hsh arylen star amper sideff
-%type <opval> sliceme gelem
+%type <opval> sliceme kvslice gelem
 %type <opval> listexpr nexpr texpr iexpr mexpr mnexpr miexpr
 %type <opval> optlistexpr optexpr indirob listop method
 %type <opval> formname subname proto subbody cont my_scalar formblock
@@ -1208,7 +1208,7 @@ term	:	termbinop
 			  TOKEN_GETMAD($2,$$,'[');
 			  TOKEN_GETMAD($4,$$,']');
 			}
-	|	hsh '[' expr ']'                     /* array key/value slice */
+	|	kvslice '[' expr ']'                 /* array key/value slice */
 			{ $$ = op_prepend_elem(OP_KVASLICE,
 				newOP(OP_PUSHMARK, 0),
 				    newLISTOP(OP_KVASLICE, 0,
@@ -1234,7 +1234,7 @@ term	:	termbinop
 			  TOKEN_GETMAD($4,$$,';');
 			  TOKEN_GETMAD($5,$$,'}');
 			}
-	|	hsh '{' expr ';' '}'                 /* %hash{@keys} */
+	|	kvslice '{' expr ';' '}'                 /* %hash{@keys} */
 			{ $$ = op_prepend_elem(OP_KVHSLICE,
 				newOP(OP_PUSHMARK, 0),
 				    newLISTOP(OP_KVHSLICE, 0,
@@ -1490,6 +1490,13 @@ star	:	'*' indirob
 sliceme	:	ary
 	|	term ARROW '@'
 			{ $$ = newAVREF($1);
+			  TOKEN_GETMAD($3,$$,'@');
+			}
+	;
+
+kvslice	:	hsh
+	|	term ARROW '%'
+			{ $$ = newHVREF($1);
 			  TOKEN_GETMAD($3,$$,'@');
 			}
 	;

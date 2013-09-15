@@ -1839,28 +1839,35 @@ case 2:
 
   case 233:
 #line 1499 "perly.y"
+    { (yyval.opval) = newHVREF((ps[(1) - (3)].val.opval));
+			  TOKEN_GETMAD((ps[(3) - (3)].val.i_tkval),(yyval.opval),'@');
+			;}
+    break;
+
+  case 235:
+#line 1506 "perly.y"
     { (yyval.opval) = newGVREF(0,(ps[(1) - (3)].val.opval));
 			  TOKEN_GETMAD((ps[(3) - (3)].val.i_tkval),(yyval.opval),'*');
 			;}
     break;
 
-  case 234:
-#line 1506 "perly.y"
-    { (yyval.opval) = scalar((ps[(1) - (1)].val.opval)); ;}
-    break;
-
-  case 235:
-#line 1508 "perly.y"
-    { (yyval.opval) = scalar((ps[(1) - (1)].val.opval)); ;}
-    break;
-
   case 236:
-#line 1510 "perly.y"
-    { (yyval.opval) = op_scope((ps[(1) - (1)].val.opval)); ;}
+#line 1513 "perly.y"
+    { (yyval.opval) = scalar((ps[(1) - (1)].val.opval)); ;}
     break;
 
   case 237:
-#line 1513 "perly.y"
+#line 1515 "perly.y"
+    { (yyval.opval) = scalar((ps[(1) - (1)].val.opval)); ;}
+    break;
+
+  case 238:
+#line 1517 "perly.y"
+    { (yyval.opval) = op_scope((ps[(1) - (1)].val.opval)); ;}
+    break;
+
+  case 239:
+#line 1520 "perly.y"
     { (yyval.opval) = (ps[(1) - (1)].val.opval); ;}
     break;
 
@@ -1871,6 +1878,6 @@ case 2:
     
 
 /* Generated from:
- * 3291ccd173f79d1ee1490bd5e07445713edcf8cbb091ae54165016bd846e2682 perly.y
+ * 1197382d22c31fcdde494b49bf64759ffa9ecf45fb2536cefae6300977d788aa perly.y
  * 5c9d2a0262457fe9b70073fc8ad6c188f812f38ad57712b7e2f53daa01b297cc regen_perly.pl
  * ex: set ro: */

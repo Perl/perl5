@@ -16,7 +16,7 @@ BEGIN {
 
 use strict qw(refs subs);
 
-plan(94);
+plan(96);
 
 {
     no strict 'refs';
@@ -312,4 +312,7 @@ ok (!eval { $pvbm->%* }, 'PVBM is not a HASH ref');
  eval { my $foo; !$foo->%* ? 1 : 0;    }; ok !$@, '!%$undef ? 1 : 0';
 }
 
+# Postfix key/value slices
+is join(" ", {1..10}->%{1, 7, 3}), "1 2 7 8 3 4", '->%{';
+is join(" ", ['a'..'z']->%[1, 7, 3]), "1 b 7 h 3 d", '->%[';
 
