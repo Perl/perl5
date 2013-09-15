@@ -619,7 +619,7 @@ $priv{$_}{8} = "LVSUB"
   for qw(rv2av rv2gv rv2hv padav padhv aelem helem aslice hslice
          av2arylen keys rkeys substr pos vec);
 $priv{$_}{4} = "SLICEWARN"
-  for qw(rv2hv rv2av kvhslice kvaslice padav padhv);
+  for qw(rv2hv rv2av kvhslice kvaslice padav padhv hslice aslice);
 @{$priv{$_}}{32,64} = qw(BOOL BOOL?) for qw(rv2hv padhv);
 $priv{substr}{16} = "REPL1ST";
 $priv{$_}{16} = "TARGMY"

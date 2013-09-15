@@ -956,6 +956,7 @@ S_op_private_to_names(pTHX_ SV *tmpsv, U32 optype, U32 op_private) {
                            (UV)(oppriv & OPpPADRANGE_COUNTMASK));       \
         if (  (o->op_type == OP_RV2HV || o->op_type == OP_RV2AV ||      \
                o->op_type == OP_PADAV || o->op_type == OP_PADHV ||      \
+               o->op_type == OP_ASLICE || o->op_type == OP_HSLICE ||    \
                o->op_type == OP_KVHSLICE || o->op_type == OP_KVASLICE)  \
            && oppriv & OPpSLICEWARNING  )                               \
             sv_catpvs(tmpsv, ",SLICEWARNING");                          \

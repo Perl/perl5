@@ -144,24 +144,40 @@ EXPECT
 ########
 # op.c
 use warnings 'syntax' ;
-@a[3] = 2;
-@a{3} = 2;
+@a[3];
+@a{3};
+@a["]"];
+@a{"]"};
+@a["}"];
+@a{"}"};
+@a{$_};
+@a{--$_};
+@a[$_];
+@a[--$_];
 no warnings 'syntax' ;
-@a[3] = 2;
-@a{3} = 2;
+@a[3];
+@a{3};
 EXPECT
 Scalar value @a[3] better written as $a[3] at - line 3.
 Scalar value @a{3} better written as $a{3} at - line 4.
+Scalar value @a["]"] better written as $a["]"] at - line 5.
+Scalar value @a{"]"} better written as $a{"]"} at - line 6.
+Scalar value @a["}"] better written as $a["}"] at - line 7.
+Scalar value @a{"}"} better written as $a{"}"} at - line 8.
+Scalar value @a{...} better written as $a{...} at - line 9.
+Scalar value @a{...} better written as $a{...} at - line 10.
+Scalar value @a[...] better written as $a[...] at - line 11.
+Scalar value @a[...] better written as $a[...] at - line 12.
 ########
 # op.c
 use utf8;
 use open qw( :utf8 :std );
 use warnings 'syntax' ;
-@à[3] = 2;
-@à{3} = 2;
+@à[3];
+@à{3};
 no warnings 'syntax' ;
-@à[3] = 2;
-@à{3} = 2;
+@à[3];
+@à{3};
 EXPECT
 Scalar value @à[3] better written as $à[3] at - line 5.
 Scalar value @à{3} better written as $à{3} at - line 6.
@@ -170,14 +186,120 @@ Scalar value @à{3} better written as $à{3} at - line 6.
 use utf8;
 use open qw( :utf8 :std );
 use warnings 'syntax' ;
-@ぁ[3] = 2;
-@ぁ{3} = 2;
+@ぁ[3];
+@ぁ{3};
 no warnings 'syntax' ;
-@ぁ[3] = 2;
-@ぁ{3} = 2;
+@ぁ[3];
+@ぁ{3};
 EXPECT
 Scalar value @ぁ[3] better written as $ぁ[3] at - line 5.
 Scalar value @ぁ{3} better written as $ぁ{3} at - line 6.
+########
+# op.c
+# "Scalar value better written as" false positives
+# [perl #28380] and [perl #114024]
+use warnings 'syntax';
+
+# hashes
+@h{qw"a b c"} = 1..3;
+@h{qw'a b c'} = 1..3;
+@h{qw$a b c$} = 1..3;
+@h{qw-a b c-} = 1..3;
+@h{qw#a b c#} = 1..3;
+@h{ qw#a b c#} = 1..3;
+@h{	qw#a b c#} = 1..3; # tab before qw
+@h{qw "a"};
+@h{ qw "a"};
+@h{	qw "a"};
+sub foo() { qw/abc def ghi/ }
+@X{+foo} = ( 1 .. 3 );
+$_ = "abc"; @X{split ""} = ( 1 .. 3 );
+my @s = @f{"}", "a"};
+my @s = @f{"]", "a"};
+@a{$],0};
+@_{0} = /(.*)/;
+@h{m "$re"};
+@h{qx ""} if 0;
+@h{glob ""};
+@h{readline ""};
+@h{m ""};
+use constant phoo => 1..3;
+@h{+phoo}; # rv2av
+{
+    no warnings 'deprecated';
+    @h{each H};
+    @h{values H};
+    @h{keys H};
+}
+@h{sort foo};
+@h{reverse foo};
+@h{caller 0};
+@h{lstat ""};
+@h{stat ""};
+@h{readdir ""};
+@h{system ""} if 0;
+@h{+times} if 0;
+@h{localtime 0};
+@h{gmtime 0};
+@h{eval ""};
+@h{each $foo} if 0;
+@h{keys $foo} if 0;
+@h{values $foo} if 0;
+
+# arrays
+@h[qw"a b c"] = 1..3;
+@h[qw'a b c'] = 1..3;
+@h[qw$a b c$] = 1..3;
+@h[qw-a b c-] = 1..3;
+@h[qw#a b c#] = 1..3;
+@h[ qw#a b c#] = 1..3;
+@h[	qw#a b c#] = 1..3; # tab before qw
+@h[qw "a"];
+@h[ qw "a"];
+@h[	qw "a"];
+sub foo() { qw/abc def ghi/ }
+@X[+foo] = ( 1 .. 3 );
+$_ = "abc"; @X[split ""] = ( 1 .. 3 );
+my @s = @f["}", "a"];
+my @s = @f["]", "a"];
+@a[$],0];
+@_[0] = /(.*)/;
+@h[m "$re"];
+@h[qx ""] if 0;
+@h[glob ""];
+@h[readline ""];
+@h[m ""];
+use constant phoo => 1..3;
+@h[+phoo]; # rv2av
+{
+    no warnings 'deprecated';
+    @h[each H];
+    @h[values H];
+    @h[keys H];
+}
+@h[sort foo];
+@h[reverse foo];
+@h[caller 0];
+@h[lstat ""];
+@h[stat ""];
+@h[readdir ""];
+@h[system ""] if 0;
+@h[+times] if 0;
+@h[localtime 0];
+@h[gmtime 0];
+@h[eval ""];
+@h[each $foo] if 0;
+@h[keys $foo] if 0;
+@h[values $foo] if 0;
+EXPECT
+########
+# op.c
+# "Scalar value better written as" should not trigger for syntax errors
+use warnings 'syntax';
+@a[]
+EXPECT
+syntax error at - line 4, near "[]"
+Execution of - aborted due to compilation errors.
 ########
 # op.c
 my (@foo, %foo);
