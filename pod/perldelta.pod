@@ -888,9 +888,21 @@ markers occur on the same line.
 
 =item *
 
+Starting with Perl 5.12, line numbers were off by one if the B<-d> switch
+was used on the #! line.  Now they are correct.
+
+=item *
+
 Perl 5.19.2 inadvertently stopped some lines of code from being available
 to the debugger if C<< => >> occurred at the beginning of a line and the
 previous line ended with a keyword.  This is now fixed.
+
+=item *
+
+Perl 5.19.2 allowed the PERL5DB environment variable to contain multiple
+lines of code.  But those lines were not made available to the debugger.
+Now the are all stuffed into line number 0, accessible via C<$dbline[0]>
+in the debugger.
 
 =item *
 
