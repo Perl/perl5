@@ -202,6 +202,32 @@ Deprecated.  Use C<GIMME_V> instead.
 #define OPpDEREF_HV		64	/*   Want ref to HV. */
 #define OPpDEREF_SV		(32|64)	/*   Want ref to SV. */
 
+/* OP_ENTERSUB and OP_RV2CV flags
+
+Flags are set on entersub and rv2cv in three phases:
+  parser  - the parser passes the flag to the op constructor
+  check   - the check routine called by the op constructor sets the flag
+  context - application of scalar/ref/lvalue context applies the flag
+
+In the third stage, an entersub op might turn into an rv2cv op (undef &foo,
+\&foo, lock &foo, exists &foo, defined &foo).  The two places where that
+happens (op_lvalue_flags and doref in op.c) need to make sure the flags do
+not conflict.  Flags applied in the context phase are only set when there
+is no conversion of op type.
+
+  bit  entersub flag       phase   rv2cv flag             phase
+  ---  -------------       -----   ----------             -----
+    1  OPpENTERSUB_INARGS  context OPpMAY_RETURN_CONSTANT context
+    2  HINT_STRICT_REFS    check   HINT_STRICT_REFS       check
+    4  OPpENTERSUB_HASTARG check
+    8                              OPpENTERSUB_AMPER      parser
+   16  OPpENTERSUB_DB      check
+   32  OPpDEREF_AV         context
+   64  OPpDEREF_HV         context
+  128  OPpLVAL_INTRO       context OPpENTERSUB_NOPAREN    parser
+
+*/
+
   /* OP_ENTERSUB only */
 #define OPpENTERSUB_DB		16	/* Debug subroutine. */
 #define OPpENTERSUB_HASTARG	4	/* Called from OP tree. */
