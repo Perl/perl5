@@ -411,7 +411,8 @@ answered.
 
 L<re> has been upgraded from version 0.25 to 0.26.
 
-A function signature has been corrected in the XS implementation.
+This upgrade is part of a larger change to support 64-bit string lengths in
+the regular expression engine.
 
 =item *
 
