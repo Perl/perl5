@@ -3,6 +3,8 @@
 =for comment
 To do:
 3f40aba3 Merge branch 'ebcdic' into blead
+df8c7dee Fix segfault in filehandle duplication
+b66f3475 Fix PerlIO_get_cnt and friends
 
 =head1 NAME
 
