@@ -934,6 +934,13 @@ C<&xsub> and C<goto &xsub> now work with tied @_.
 Overlong identifiers no longer cause a buffer overflow (and a crash).  They
 started doing so in Perl 5.18.
 
+=item *
+
+The warning "Scalar value @hash{foo} better written as $hash{foo}" now
+produces far fewer false positives.  In particular,
+C<@hash{+function_returning_a_list}> and C<@hash{ qw "foo bar baz" }> no
+longer warn.  The same applies to array slices.  [perl #28380, #114024]
+
 =back
 
 =head1 Known Problems
