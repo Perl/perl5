@@ -26,6 +26,7 @@ my %feature = (
     state           => 'state',
     switch          => 'switch',
     evalbytes       => 'evalbytes',
+    postderef       => 'postderef',
     array_base      => 'arybase',
     current_sub     => '__SUB__',
     lexical_subs    => 'lexsubs',
