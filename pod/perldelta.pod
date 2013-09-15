@@ -175,7 +175,14 @@ in this case.  [perl #119351]
 
 L<B::Concise> has been upgraded from version 0.98 to 0.99.
 
-The handling of the C<glob> operator, broken since Perl 5.17.6, has been fixed.
+The handling of the C<glob> operator, broken since Perl 5.17.6, has been fixed
+and handling of the new kvaslice and kvhslice operators have been added.
+
+=item *
+
+L<B::Deparse> has been upgraded from version 1.22 to 1.23.
+
+The new kvaslice and kvhslice operators have been added.
 
 =item *
 
@@ -317,6 +324,18 @@ pattern has an internal NUL (C<"\0">) character.
 
 =item *
 
+L<FileCache> has been upgraded from version 1.08 to 1.09.
+
+This upgrade is part of a larger change to use L<parent> rather than L<base>.
+
+=item *
+
+L<Hash::Util::FieldHash> has been upgraded from version 1.12 to 1.13.
+
+This upgrade is part of a larger change to use L<parent> rather than L<base>.
+
+=item *
+
 L<HTTP::Tiny> has been upgraded from version 0.034 to 0.035.
 
 Encoded data from C<post_form> now preserves term order if data is provided as
@@ -396,6 +415,12 @@ by using SSize_t instead of I32 for array indices.
 
 =item *
 
+L<Opcode> has been upgraded from version 1.25 to 1.26.
+
+The new kvaslice and kvhslice operators have been added.
+
+=item *
+
 L<parent> has been upgraded from version 0.226 to 0.227.
 
 No changes have been made to the installed code other than the version bump to
@@ -421,6 +446,12 @@ L<perlfaq> has been upgraded from version 5.0150043 to 5.0150044.
 The use of C<gensym> in a number of examples has been removed, the use of C<&>
 in subroutine calls is now clarified and several new questions have been
 answered.
+
+=item *
+
+L<Pod::Html> has been upgraded from version 1.20 to 1.21.
+
+This upgrade is part of a larger change to use L<parent> rather than L<base>.
 
 =item *
 
