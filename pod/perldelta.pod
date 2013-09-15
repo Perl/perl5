@@ -760,6 +760,11 @@ Perl 5.19.3 accidentally extended the previous bug to all closures, even
 when not called recursively; i.e., lexical handles in closure would always
 be called "main::" or "MyPackage::" etc.  This has been fixed.
 
+=item *
+
+Uninitialized values returned by XSUBs are no longer exempt from
+uninitialized warnings.  [perl #118693]
+
 =back
 
 =head1 Known Problems
