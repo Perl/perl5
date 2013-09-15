@@ -12745,12 +12745,12 @@ parseit:
 
         /* What matches in a locale is not known until runtime.  This includes
          * what the Posix classes (like \w, [:space:]) match.  Room must be
-         * reserved (one time per class) to store such classes, either if Perl
-         * is compiled so that locale nodes always should have this space, or
-         * if there is such class info to be stored.  The space will contain a
-         * bit for each named class that is to be matched against.  This isn't
-         * needed for \p{} and pseudo-classes, as they are not affected by
-         * locale, and hence are dealt with separately */
+         * reserved (one time per outer bracketed class) to store such classes,
+         * either if Perl is compiled so that locale nodes always should have
+         * this space, or if there is such posix class info to be stored.  The
+         * space will contain a bit for each named class that is to be matched
+         * against.  This isn't needed for \p{} and pseudo-classes, as they are
+         * not affected by locale, and hence are dealt with separately */
         if (LOC
             && ! need_class
             && (ANYOF_LOCALE == ANYOF_CLASS
