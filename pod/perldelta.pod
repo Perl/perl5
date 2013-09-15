@@ -896,6 +896,11 @@ loaded, then lexical variables declared in separate statements following a C<my(
 C<&xsub> and C<goto &xsub> calls now allow the called subroutine to
 autovivify elements of @_.
 
+=item *
+
+C<&xsub> and C<goto &xsub> no longer crash if C<*_> has been undefined and
+has no ARRAY entry (i.e., @_ does not exist).
+
 =back
 
 =head1 Known Problems
