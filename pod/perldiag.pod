@@ -1675,7 +1675,7 @@ C<delete>.  You probably meant C<@hash{...}> with an @ symbol instead.
 
 =item delete argument is not a HASH or ARRAY element or slice
 
-(F) The argument to delete() must be either a hash or array element,
+(F) The argument to C<delete> must be either a hash or array element,
 such as:
 
     $foo{$bar}
@@ -1902,7 +1902,7 @@ OS.  See L<perlport>.
 
 =item exists argument is not a HASH or ARRAY element or a subroutine
 
-(F) The argument to exists() must be a hash or array element or a
+(F) The argument to C<exists> must be a hash or array element or a
 subroutine with an ampersand, such as:
 
     $foo{$bar}
@@ -1911,7 +1911,7 @@ subroutine with an ampersand, such as:
 
 =item exists argument is not a subroutine name
 
-(F) The argument to exists() for C<exists &sub> must be a subroutine
+(F) The argument to C<exists> for C<exists &sub> must be a subroutine
 name, and not a subroutine call.  C<exists &sub()> will generate this
 error.
 

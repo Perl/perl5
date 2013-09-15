@@ -612,7 +612,49 @@ and New Warnings
 
 =item *
 
-XXX L<message|perldiag/"message">
+L<delete argument is index/value array slice, use array slice|perldiag/"delete argument is index/value array slice, use array slice">
+
+(F) You used index/value array slice syntax (C<%array[...]>) as the argument to
+C<delete>.  You probably meant C<@array[...]> with an @ symbol instead.
+
+=item *
+
+L<delete argument is key/value hash slice, use hash slice|perldiag/"delete argument is key/value hash slice, use hash slice">
+
+(F) You used key/value hash slice syntax (C<%hash{...}>) as the argument to
+C<delete>.  You probably meant C<@hash{...}> with an @ symbol instead.
+
+=item *
+
+L<delete argument is not a HASH or ARRAY element or slice|perldiag/"delete argument is not a HASH or ARRAY element or slice">
+
+(F) The argument to C<delete> must be either a hash or array element, such as:
+
+    $foo{$bar}
+    $ref->{"susie"}[12]
+
+or a hash or array slice, such as:
+
+    @foo[$bar, $baz, $xyzzy]
+    @{$ref->[12]}{"susie", "queue"}
+
+=item *
+
+L<exists argument is not a HASH or ARRAY element or a subroutine|perldiag/"exists argument is not a HASH or ARRAY element or a subroutine">
+
+(F) The argument to C<exists> must be a hash or array element or a subroutine
+with an ampersand, such as:
+
+    $foo{$bar}
+    $ref->{"susie"}[12]
+    &do_something
+
+=item *
+
+L<exists argument is not a subroutine name|perldiag/"exists argument is not a subroutine name">
+
+(F) The argument to C<exists> for C<exists &sub> must be a subroutine name, and
+not a subroutine call.  C<exists &sub()> will generate this error.
 
 =back
 
@@ -627,6 +669,54 @@ L<Invalid \0 character in %s for %s: %s\0%s|perldiag/"Invalid \0 character in %s
 (W syscalls) Embedded \0 characters in pathnames or other system call arguments
 produce a warning as of 5.20.  The parts after the \0 were formerly ignored by
 system calls.
+
+=item *
+
+L<Possible precedence issue with control flow operator|perldiag/"Possible precedence issue with control flow operator">
+
+(W syntax) There is a possible problem with the mixing of a control flow
+operator (e.g. C<return>) and a low-precedence operator like C<or>.  Consider:
+
+    sub { return $a or $b; }
+
+This is parsed as:
+
+    sub { (return $a) or $b; }
+
+Which is effectively just:
+
+    sub { return $a; }
+
+Either use parentheses or the high-precedence variant of the operator.
+
+Note this may be also triggered for constructs like:
+
+    sub { 1 if die; }
+
+=item *
+
+L<Scalar value %%s[%s] better written as $%s[%s]|perldiag/"Scalar value %%s[%s] better written as $%s[%s]">
+
+(W syntax) In scalar context, you've used an array index/value slice (indicated
+by %) to select a single element of an array.  Generally it's better to ask for
+a scalar value (indicated by $).  The difference is that C<$foo[&bar]> always
+behaves like a scalar, both in the value it returns and when evaluating its
+argument, while C<%foo[&bar]> provides a list context to its subscript, which
+can do weird things if you're expecting only one subscript.  When called in
+list context, it also returns the index (what C<&bar> returns) in addition to
+the value.
+
+=item *
+
+L<Scalar value %%s{%s} better written as $%s{%s}|perldiag/"Scalar value %%s{%s} better written as $%s{%s}">
+
+(W syntax) In scalar context, you've used a hash key/value slice (indicated by
+%) to select a single element of a hash.  Generally it's better to ask for a
+scalar value (indicated by $).  The difference is that C<$foo{&bar}> always
+behaves like a scalar, both in the value it returns and when evaluating its
+argument, while C<@foo{&bar}> and provides a list context to its subscript,
+which can do weird things if you're expecting only one subscript.  When called
+in list context, it also returns the key in addition to the value.
 
 =back
 
@@ -656,6 +746,11 @@ string.  The message has been changed to read:
 
 Additionally, the C<'E<lt>-- HERE'> marker in the error will now point to the
 correct spot in the regex.
+
+=item *
+
+The "%s "\x%X" does not map to Unicode" warning is now correctly listed as a
+severe warning rather than as a fatal error.
 
 =back
 
