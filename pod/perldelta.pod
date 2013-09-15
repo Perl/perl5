@@ -922,6 +922,10 @@ has no ARRAY entry (i.e., @_ does not exist).
 
 =item *
 
+C<&xsub> and C<goto &xsub> now work with tied @_.
+
+=item *
+
 Overlong identifiers no longer cause a buffer overflow (and a crash).  They
 started doing so in Perl 5.18.
 
