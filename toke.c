@@ -2164,9 +2164,6 @@ S_force_next(pTHX_ I32 type)
  * been emitted.  @* $* etc. are emitted as two separate token right here.
  * @[ @{ %[ %{ *{ are emitted also as two tokens, but this function emits
  * only the first, leaving yylex to find the next.
- * %[ and %{ are currently unrecognized by the parser, causing syntax
- * errors.  If/when they are added to the parser, no change will be neces-
- * sary here.
  */
 
 static int
