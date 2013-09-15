@@ -797,6 +797,16 @@ Assigning references or globs to the scalar returned by C<$#foo> after the
 @foo array has been freed no longer causes assertion failures on debugging
 builds and memory leaks on regular builds.
 
+=item *
+
+Perl 5.19.2 threw line numbers off after some cases of line breaks
+following keywords, such as
+
+   1 unless
+   1;
+
+This has been fixed.  [perl #118931]
+
 =back
 
 =head1 Known Problems
