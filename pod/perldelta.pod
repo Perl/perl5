@@ -818,6 +818,11 @@ This has been fixed.  [perl #118931]
 On 64-bit platforms, large ranges like 1..1000000000000 no longer crash,
 but eat up all your memory instead.  [perl #119161]
 
+=item *
+
+C<__DATA__> now puts the C<DATA> handle in the right package, even if the
+current package has been renamed through glob assignment.
+
 =back
 
 =head1 Known Problems
