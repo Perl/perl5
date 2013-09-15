@@ -866,6 +866,11 @@ instead of being undefined as they should.  This has been fixed.
 
 C<${^MPEN>} is no longer treated as a synonym for C<${^MATCH}>.
 
+=item *
+
+Perl now tries a little harder to return the correct line number in
+C<(caller)[2]>.  [perl #115768]
+
 =back
 
 =head1 Known Problems
