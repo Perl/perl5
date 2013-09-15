@@ -823,6 +823,12 @@ but eat up all your memory instead.  [perl #119161]
 C<__DATA__> now puts the C<DATA> handle in the right package, even if the
 current package has been renamed through glob assignment.
 
+=item *
+
+The string position set by C<pos> could shift if the string changed
+representation internally to or from utf8.  This could happen, e.g., with
+references to objects with string overloading.
+
 =back
 
 =head1 Known Problems
