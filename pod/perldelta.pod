@@ -853,6 +853,10 @@ variables inside the sub would start out having values from the outer call,
 instead of being undefined as they should.  This has been fixed.
 [perl #119311].
 
+=item *
+
+C<${^MPEN>} is no longer treated as a synonym for C<${^MATCH}>.
+
 =back
 
 =head1 Known Problems
