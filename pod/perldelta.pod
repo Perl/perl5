@@ -527,7 +527,9 @@ The C<syscalls> warnings category has been added to check for embedded NUL
 
 L<XS::Typemap> has been upgraded from version 0.10 to 0.11.
 
-XXX TODO
+This upgrade is part of the change to remove the uninitialized warnings
+exemption for uninitialized values returned by XSUBs (see the L</Selected Bug
+Fixes> section).
 
 =back
 
