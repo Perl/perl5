@@ -700,8 +700,19 @@ expression matches on very large strings now succeed as expected.
 
 =item *
 
+The new test scripts F<t/op/kvaslice.t> and F<t/op/kvhslice.t> test the new
+index/value array slice and key/value hash slice syntax respectively.
+
+=item *
+
 Various cases of C<die>, C<last>, C<goto> and C<exit> triggering C<DESTROY> are
 now tested by the new test script F<t/op/rt119311.t>.
+
+=item *
+
+The latest copyright years in the top-level F<README> file and the B<perl -v>
+output are now tested as matching each other by the new test script
+F<t/porting/copyright.t>
 
 =item *
 
