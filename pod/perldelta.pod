@@ -293,10 +293,10 @@ full details.
 
 =item *
 
-L<ExtUtils::ParseXS> has been upgraded from version 3.21 to 3.22.
+L<ExtUtils::ParseXS> has been upgraded from version 3.21 to 3.23.
 
-No changes have been made to the installed code other than the version bump to
-keep in sync with the latest CPAN release.
+Unquoted "here-doc" markers for typemaps can now be optionally followed by
+a semicolon, just like quoted markers.  [perl #119761]
 
 =item *
 
