@@ -783,6 +783,14 @@ C<elsif ("")> no longer erroneous produces a warning about void context.
 Passing C<undef> to a subroutine now causes @_ to contain the same read-only undefined scalar that C<undef> returns.  Furthermore, C<exists $_[0]> will now return true if C<undef> was the first argument.
 [perl #7508, #109726].
 
+=item *
+
+Passing a nonexistent array element to a subroutine does not usually
+autovivify it unless the subroutine modifies its argument.  This did not
+work correctly with negative indices and with nonexistent elements within
+the array.  The element would be vivified immediately.  The delayed
+vivification has been extended to work with those.  [perl #118691]
+
 =back
 
 =head1 Known Problems
