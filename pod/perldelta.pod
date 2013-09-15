@@ -794,7 +794,8 @@ vivification has been extended to work with those.  [perl #118691]
 =item *
 
 Assigning references or globs to the scalar returned by C<$#foo> after the
-@foo array has been freed no longer causes crashes.
+@foo array has been freed no longer causes assertion failures on debugging
+builds and memory leaks on regular builds.
 
 =back
 
