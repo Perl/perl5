@@ -832,6 +832,12 @@ The string position set by C<pos> could shift if the string changed
 representation internally to or from utf8.  This could happen, e.g., with
 references to objects with string overloading.
 
+=item *
+
+Elements of C<@-> and C<@+> now update correctly when they refer to
+nonexistent captures.  Previously, a referenced element (C<$ref = \$-[1]>) 
+could refer to the wrong match after subsequent matches.
+
 =back
 
 =head1 Known Problems
