@@ -754,6 +754,12 @@ based on the current package and the name of the variable; e.g.,
 "main::$fh".  Under recursion, the filehandle was losing the "$fh" part of
 the name.  This has been fixed.
 
+=item *
+
+Perl 5.19.3 accidentally extended the previous bug to all closures, even
+when not called recursively; i.e., lexical handles in closure would always
+be called "main::" or "MyPackage::" etc.  This has been fixed.
+
 =back
 
 =head1 Known Problems
