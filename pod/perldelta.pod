@@ -765,6 +765,11 @@ be called "main::" or "MyPackage::" etc.  This has been fixed.
 Uninitialized values returned by XSUBs are no longer exempt from
 uninitialized warnings.  [perl #118693]
 
+=item *
+
+C<elsif ("")> no longer erroneous produces a warning about void context.
+[perl #118753]
+
 =back
 
 =head1 Known Problems
