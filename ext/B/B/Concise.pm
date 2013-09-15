@@ -633,7 +633,7 @@ $priv{$_}{16} = "TARGMY"
          link symlink mkdir rmdir wait waitpid system exec kill getppid
          getpgrp setpgrp getpriority setpriority time sleep);
 $priv{$_}{4} = "REVERSED" for qw(enteriter iter);
-@{$priv{const}}{2,4,8,16,64,128} = qw(NOVER SHORT STRICT ENTERED BARE FOLD);
+@{$priv{const}}{2,4,8,16,64} = qw(NOVER SHORT STRICT ENTERED BARE);
 $priv{$_}{64} = "LINENUM" for qw(flip flop);
 $priv{list}{64} = "GUESSED";
 $priv{delete}{64} = "SLICE";
@@ -916,6 +916,10 @@ sub concise_op {
     $h{flags} = op_flags($op->flags);
     $h{privval} = $op->private;
     $h{private} = private_flags($h{name}, $op->private);
+    if ($op->folded) {
+      $h{private} &&= "$h{private},";
+      $h{private} .= "FOLD";
+    }
     if ($op->can("hints")) {
       $h{hintsval} = $op->hints;
       $h{hints} = hints_flags($h{hintsval});

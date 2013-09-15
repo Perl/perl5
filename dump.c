@@ -744,7 +744,6 @@ const struct flag_to_name op_const_names[] = {
     {OPpCONST_SHORTCIRCUIT, ",SHORTCIRCUIT"},
     {OPpCONST_STRICT, ",STRICT"},
     {OPpCONST_ENTERED, ",ENTERED"},
-    {OPpCONST_FOLDED, ",FOLDED"},
     {OPpCONST_BARE, ",BARE"}
 };
 

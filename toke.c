@@ -7412,7 +7412,7 @@ Perl_yylex(pTHX)
 			    pl_yylval.opval = newUNOP(OP_RV2AV, OPf_PARENS,
 						      pl_yylval.opval);
 			else {
-			    pl_yylval.opval->op_private = OPpCONST_FOLDED;
+			    pl_yylval.opval->op_private = 0;
 			    pl_yylval.opval->op_folded = 1;
 			    pl_yylval.opval->op_flags |= OPf_SPECIAL;
 			}

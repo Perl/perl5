@@ -288,8 +288,6 @@ is no conversion of op type.
 #define	OPpCONST_STRICT		8	/* bareword subject to strict 'subs' */
 #define OPpCONST_ENTERED	16	/* Has been entered as symbol. */
 #define OPpCONST_BARE		64	/* Was a bare word (filehandle?). */
-/* Replaced by op_folded in perl itself, still used by B/B::Concise etc. */
-#define OPpCONST_FOLDED		128	/* Result of constant folding */
 
 /* Private for OP_FLIP/FLOP */
 #define OPpFLIP_LINENUM		64	/* Range arg potentially a line num. */
