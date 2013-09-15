@@ -377,10 +377,6 @@ L<Data::Util> version 0.62
 
 =item *
 
-L<Devel::NYTProf> version 5.05
-
-=item *
-
 L<Glib> version 1.301
 
 =item *
