@@ -54,6 +54,11 @@ memory available.
 The regular expression engine now supporst strings longer than 2**31
 characters.  [perl #112790, #116907]
 
+=head2 New slice syntax
+
+The new C<%hash{...}> and C<@array[...]> syntax returns a list of key/value
+(or index/value) pairs.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
