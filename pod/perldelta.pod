@@ -411,8 +411,7 @@ answered.
 
 L<re> has been upgraded from version 0.25 to 0.26.
 
-This upgrade is part of a larger change to support 64-bit string lengths in
-the regular expression engine.
+A function signature has been corrected in the XS implementation.
 
 =item *
 
@@ -844,6 +843,15 @@ could result in assertion failures or memory leaks.
 Elements of C<@-> and C<@+> now update correctly when they refer to
 nonexistent captures.  Previously, a referenced element (C<$ref = \$-[1]>) 
 could refer to the wrong match after subsequent matches.
+
+=item *
+
+When C<die>, C<last>, C<next>, C<redo>, C<goto> and C<exit> unwind the
+scope, it is possible for DESTROY recursively to call a subroutine or
+format that is currently being exited.  It that case, sometimes the lexical
+variables inside the sub would start out having values from the outer call,
+instead of being undefined as they should.  This has been fixed.
+[perl #119311].
 
 =back
 
