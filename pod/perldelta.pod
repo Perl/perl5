@@ -768,6 +768,10 @@ The building of XS modules has largely been restored.  Several still cannot
 of further patches (to L<Socket> and L<ExtUtils::MakeMaker>), hopefully to be
 incorporated soon.
 
+=item GNU/Hurd
+
+The BSD compatibility library C<libbsd> is no longer required for builds.
+
 =back
 
 =head1 Internal Changes
