@@ -883,6 +883,11 @@ C<#line> directives inside code embedded in quote-like operators are now respect
 
 =item *
 
+Line numbers are now correct inside the second here-doc when two here-doc
+markers occur on the same line.
+
+=item *
+
 Perl 5.19.2 inadvertently stopped some lines of code from being available
 to the debugger if C<< => >> occurred at the beginning of a line and the
 previous line ended with a keyword.  This is now fixed.
