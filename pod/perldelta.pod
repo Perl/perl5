@@ -791,6 +791,11 @@ work correctly with negative indices and with nonexistent elements within
 the array.  The element would be vivified immediately.  The delayed
 vivification has been extended to work with those.  [perl #118691]
 
+=item *
+
+Assigning references or globs to the scalar returned by C<$#foo> after the
+@foo array has been freed no longer causes crashes.
+
 =back
 
 =head1 Known Problems
