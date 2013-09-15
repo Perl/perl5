@@ -920,7 +920,8 @@ scalar) or a plural one (a list).
 
 =head3 Key/Value Hash Slices
 
-A hash slice operation with the % symbol is a variant of slice operation
+Starting in Perl 5.20, a hash slice operation
+with the % symbol is a variant of slice operation
 returning a list of key/value pairs rather than just values:
 
     %h = (blonk => 2, foo => 3, squink => 5, bar => 8);
@@ -933,7 +934,8 @@ using the @ symbol.
 
 =head3 Index/Value Array Slices
 
-Similar to key/value hash slices, the % array slice syntax returns a list
+Similar to key/value hash slices (and also introduced
+in Perl 5.20), the % array slice syntax returns a list
 of index/value pairs:
 
     @a = "a".."z";
