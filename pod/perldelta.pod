@@ -732,6 +732,14 @@ C<${^POSTMATCH>.  It uses slightly less memory, avoids string comparisons
 and numeric conversions during lookup, and uses 23 fewer lines of C.  This
 change should not affect any external code.
 
+=item *
+
+Arrays now use NULL internally to represent unused slots, instead of
+C<&PL_sv_undef>.  C<&PL_sv_undef> is no longer treated as a special value,
+so C<av_store(av, 0, &PL_sv_undef)> will cause element 0 of that array to
+hold a read-only undefined scalar.  C<$array[0] = anything> will croak and
+C<\$array[0]> will compare equal to C<\undef>.
+
 =back
 
 =head1 Selected Bug Fixes
@@ -769,6 +777,11 @@ uninitialized warnings.  [perl #118693]
 
 C<elsif ("")> no longer erroneous produces a warning about void context.
 [perl #118753]
+
+=item *
+
+Passing C<undef> to a subroutine now causes @_ to contain the same read-only undefined scalar that C<undef> returns.  Furthermore, C<exists $_[0]> will now return true if C<undef> was the first argument.
+[perl #7508, #109726].
 
 =back
 
