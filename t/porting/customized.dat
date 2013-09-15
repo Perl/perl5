@@ -1,8 +1,13 @@
+JSON::PP cpan/JSON-PP/lib/JSON/PP.pm 2a6ec0388f452719c2043d20210f6d155696a8d3
 Module::Build cpan/Module-Build/lib/Module/Build/ConfigData.pm 409075121c3a50488052df00e5cdeeeb5594409a
 PerlIO::via::QuotedPrint cpan/PerlIO-via-QuotedPrint/t/QuotedPrint.t ca39f0146e89de02c746e199c45dcb3e5edad691
 Term::Cap cpan/Term-Cap/Cap.pm f7645219662eafe5c263d9199c30f40bcf0ac806
 Term::Cap cpan/Term-Cap/test.pl 1685137e2770c6d496169299627cf4cbcee869e9
 Test::Harness cpan/Test-Harness/t/source.t 884890970fb850874213159df263ba483bac62e9
+Test::Simple cpan/Test-Simple/lib/Test/Builder.pm c47b1e7cf900bbb2e1979e53b12a3d91d145e5de
+Test::Simple cpan/Test-Simple/lib/Test/Builder/Module.pm d81a1720397a7dc8f2e06d79586add6a6e0b3645
+Test::Simple cpan/Test-Simple/lib/Test/More.pm 2d6499ed5cb2d5db1b5469fdde04792f4b79f631
+Test::Simple cpan/Test-Simple/lib/Test/Simple.pm 3d165907712c0f4850126dfed16d1430482f5de3
 Test::Simple cpan/Test-Simple/t/fail-more.t 851583390f26786131535e2837dae1113d72c41a
 Text::Balanced cpan/Text-Balanced/t/01_compile.t 1598cf491a48fa546260a2ec41142abe84da533d
 Text::Balanced cpan/Text-Balanced/t/02_extbrk.t 6ba1b64a4604e822dc2260b8ffcea6b406339ee8

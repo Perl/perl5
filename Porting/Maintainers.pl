@@ -1029,6 +1029,12 @@ use File::Glob qw(:case);
         'EXCLUDED'     => [
             't/900_pod.t',    # Pod testing
         ],
+
+        # Waiting to be merged upstream: see PERL RT#119825
+        'CUSTOMIZED'   => [
+            'lib/JSON/PP.pm',
+        ],
+
         'UPSTREAM' => 'cpan',
     },
 
@@ -1729,8 +1735,16 @@ use File::Glob qw(:case);
                 ),
         ],
 
-        # Waiting to be merged upstream: see CPAN RT#79762
-        'CUSTOMIZED' =>  [ 't/fail-more.t' ],
+        'CUSTOMIZED'   => [
+            # Waiting to be merged upstream: see CPAN RT#79762
+            't/fail-more.t',
+
+            # Waiting to be merged upstream: see PERL RT#119825
+            'lib/Test/Builder.pm',
+            'lib/Test/Builder/Module.pm',
+            'lib/Test/More.pm',
+            'lib/Test/Simple.pm',
+        ],
 
         'UPSTREAM' => 'cpan',
     },
