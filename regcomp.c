@@ -12399,6 +12399,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
         case we need to change the emitted regop to an EXACT. */
     const char * orig_parse = RExC_parse;
     const SSize_t orig_size = RExC_size;
+    bool posixl_matches_all = FALSE; /* Does /l class have both e.g. \W,\w ? */
     GET_RE_DEBUG_FLAGS_DECL;
 
     PERL_ARGS_ASSERT_REGCLASS;
@@ -12831,12 +12832,13 @@ parseit:
             }
             else {
                 RExC_emit += ANYOF_POSIXL_SKIP - ANYOF_SKIP;
-                ANYOF_POSIXL_ZERO(ret);
             }
+            ANYOF_POSIXL_ZERO(ret);
             ANYOF_FLAGS(ret) |= ANYOF_POSIXL;
         }
 
 	if (namedclass > OOB_NAMEDCLASS) { /* this is a named class \blah */
+            U8 classnum;
 
 	    /* a bad range like a-\d, a-[:digit:].  The '-' is taken as a
 	     * literal, as is the character that began the false range, i.e.
@@ -12866,8 +12868,30 @@ parseit:
                 element_count += 2; /* So counts for three values */
 	    }
 
-	    if (! SIZE_ONLY) {
-                U8 classnum = namedclass_to_classnum(namedclass);
+            classnum = namedclass_to_classnum(namedclass);
+
+	    if (LOC && namedclass < ANYOF_POSIXL_MAX
+#ifndef HAS_ISASCII
+                && classnum != _CC_ASCII
+#endif
+#ifndef HAS_ISBLANK
+                && classnum != _CC_BLANK
+#endif
+            ) {
+                if ((ANYOF_FLAGS(ret) & ANYOF_POSIXL)
+                    && ANYOF_POSIXL_TEST(ret, namedclass + ((namedclass % 2)
+                                                            ? -1
+                                                            : 1)))
+                {
+                    posixl_matches_all = TRUE;
+                    break;
+                }
+                ANYOF_POSIXL_SET(ret, namedclass);
+            }
+            /* XXX After have made all the posix classes known at compile time
+             * we can move the LOC handling below to above */
+
+            if (! SIZE_ONLY) {
                 if (namedclass >= ANYOF_POSIXL_MAX) {  /* If a special class */
                     if (namedclass != ANYOF_UNIPROP) { /* UNIPROP = \p and \P */
 
@@ -13411,12 +13435,18 @@ parseit:
     /* If the character class contains only a single element, it may be
      * optimizable into another node type which is smaller and runs faster.
      * Check if this is the case for this class */
-    if (element_count == 1 && ! ret_invlist) {
+    if ((element_count == 1 && ! ret_invlist)
+        || UNLIKELY(posixl_matches_all))
+    {
         U8 op = END;
         U8 arg = 0;
 
-        if (namedclass > OOB_NAMEDCLASS) { /* this is a named class, like \w or
-                                              [:digit:] or \p{foo} */
+        if (UNLIKELY(posixl_matches_all)) {
+            op = SANY;
+        }
+        else if (namedclass > OOB_NAMEDCLASS) { /* this is a named class, like
+                                                   \w or [:digit:] or \p{foo}
+                                                 */
 
             /* All named classes are mapped into POSIXish nodes, with its FLAG
              * argument giving which class it is */
