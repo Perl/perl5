@@ -2511,16 +2511,16 @@ recognized by Perl or by a user-supplied handler.  See L<attributes>.
 the C<:alias> option to C<use charnames> and the specified character in
 the indicated name isn't valid.  See L<charnames/CUSTOM ALIASES>.
 
-=item Invalid character in \N{...}; marked by <-- HERE in \N{%s}
-
-(F) Only certain characters are valid for character names.  The
-indicated one isn't.  See L<charnames/CUSTOM ALIASES>.
-
 =item Invalid \0 character in %s for %s: %s\0%s
 
 (W syscalls) Embedded \0 characters in pathnames or other system call
 arguments produce a warning as of 5.20.  The parts after the \0 were
 formerly ignored by system calls.
+
+=item Invalid character in \N{...}; marked by <-- HERE in \N{%s}
+
+(F) Only certain characters are valid for character names.  The
+indicated one isn't.  See L<charnames/CUSTOM ALIASES>.
 
 =item Invalid conversion in %s: "%s"
 
@@ -4247,18 +4247,6 @@ Perl guesses a reasonable buffer size, but puts a sentinel byte at the
 end of the buffer just in case.  This sentinel byte got clobbered, and
 Perl assumes that memory is now corrupted.  See L<perlfunc/ioctl>.
 
-=item Possible precedence problem on bitwise %c operator
-
-(W precedence) Your program uses a bitwise logical operator in conjunction
-with a numeric comparison operator, like this :
-
-    if ($x & $y == 0) { ... }
-
-This expression is actually equivalent to C<$x & ($y == 0)>, due to the
-higher precedence of C<==>.  This is probably not what you want.  (If you
-really meant to write this, disable the warning, or, better, put the
-parentheses explicitly and write C<$x & ($y == 0)>).
-
 =item Possible precedence issue with control flow operator
 
 (W syntax) There is a possible problem with the mixing of a control
@@ -4280,6 +4268,18 @@ Either use parentheses or the high-precedence variant of the operator.
 Note this may be also triggered for constructs like:
 
     sub { 1 if die; }
+
+=item Possible precedence problem on bitwise %c operator
+
+(W precedence) Your program uses a bitwise logical operator in conjunction
+with a numeric comparison operator, like this :
+
+    if ($x & $y == 0) { ... }
+
+This expression is actually equivalent to C<$x & ($y == 0)>, due to the
+higher precedence of C<==>.  This is probably not what you want.  (If you
+really meant to write this, disable the warning, or, better, put the
+parentheses explicitly and write C<$x & ($y == 0)>).
 
 =item Possible unintended interpolation of $\ in regex
 
