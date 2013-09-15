@@ -1,5 +1,9 @@
 =encoding utf8
 
+=for comment
+To do:
+3f40aba3 Merge branch 'ebcdic' into blead
+
 =head1 NAME
 
 [ this is a template for a new perldelta file.  Any text flagged as XXX needs
