@@ -16,7 +16,33 @@ BEGIN {
 
 use strict qw(refs subs);
 
-plan(96);
+plan(106);
+
+{
+    no warnings qw 'deprecated syntax';
+    eval '[]->$*';
+    like $@, qr/Can't call method/, '->$* outside of feature scope';
+    eval '[]->@*';
+    like $@, qr/syntax error/, '->@* outside of feature scope';
+    eval '[]->@[1]';
+    like $@, qr/syntax error/, '->@[ outside of feature scope';
+    eval '[]->@{1}';
+    like $@, qr/syntax error/, '->@{ outside of feature scope';
+    eval '[]->%*';
+    like $@, qr/syntax error/, '->%* outside of feature scope';
+    eval '[]->%[1]';
+    like $@, qr/syntax error/, '->%[ outside of feature scope';
+    eval '[]->%{1}';
+    like $@, qr/syntax error/, '->%{ outside of feature scope';
+    eval '[]->&*';
+    like $@, qr/syntax error/, '->&* outside of feature scope';
+    eval '[]->**';
+    like $@, qr/syntax error/, '->** outside of feature scope';
+    eval '[]->*{';
+    like $@, qr/syntax error/, '->*{ outside of feature scope';
+}
+
+use feature 'postderef';
 
 {
     no strict 'refs';
