@@ -184,6 +184,11 @@ internally represented.
 
 =item *
 
+C<Carp> now takes care not to clobber the status variables C<$!> and
+C<$^E>.
+
+=item *
+
 C<Carp> now won't vivify the C<overload::StrVal> glob or subroutine or the
 C<overload> stash.
 
