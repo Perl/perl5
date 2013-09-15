@@ -1396,7 +1396,7 @@ sv_force_normal does nothing.
 	    &(((XPVIV*) SvANY(_bmuseful))->xiv_u.xivu_iv);              \
 	 }))
 #else
-#  define BmUSEFUL(sv)          ((XPVIV*) SvANY(sv))->xiv_u.xivu_uv
+#  define BmUSEFUL(sv)          ((XPVIV*) SvANY(sv))->xiv_u.xivu_iv
 
 #endif
 
