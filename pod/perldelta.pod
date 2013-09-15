@@ -885,6 +885,12 @@ Perl 5.19.2 inadvertently stopped some lines of code from being available
 to the debugger if C<< => >> occurred at the beginning of a line and the
 previous line ended with a keyword.  This is now fixed.
 
+=item *
+
+An optimisation in Perl 5.18 made incorrect assumptions causing a bad
+interaction with the L<Devel::CallParser> CPAN module.  If the module was
+loaded, then lexical variables declared in separate statements following a C<my(...)> list might fail to be cleared on scope exit.
+
 =back
 
 =head1 Known Problems
