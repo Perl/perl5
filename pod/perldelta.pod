@@ -834,6 +834,12 @@ references to objects with string overloading.
 
 =item *
 
+Taking references to the return values of two C<pos> calls with the same
+argument, and then assigning a reference to one and C<undef> to the other,
+could result in assertion failures or memory leaks.
+
+=item *
+
 Elements of C<@-> and C<@+> now update correctly when they refer to
 nonexistent captures.  Previously, a referenced element (C<$ref = \$-[1]>) 
 could refer to the wrong match after subsequent matches.
