@@ -550,25 +550,45 @@ file and be sure to link to the appropriate page, e.g. L<perlfunc>.
 
 =head2 New Documentation
 
-XXX Changes which create B<new> files in F<pod/> go here.
+=head3 L<perlrepository>
 
-=head3 L<XXX>
-
-XXX Description of the purpose of the new file here
+This document was removed (actually, renamed L<perlgit> and given a major
+overhaul) in Perl 5.13.10, causing Perl documentation websites to show the now
+out of date version in Perl 5.12 as the latest version.  It has now been
+restored in stub form, directing readers to current information.
 
 =head2 Changes to Existing Documentation
 
-XXX Changes which significantly change existing files in F<pod/> go here.
-However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
-section.
-
-=head3 L<XXX>
+=head3 L<perldata>
 
 =over 4
 
 =item *
 
-XXX Description of the change here
+New sections have been added to document the new index/value array slice and
+key/value hash slice syntax.
+
+=back
+
+=head3 L<perlguts>
+
+=over 4
+
+=item *
+
+Numerous minor changes have been made to reflect changes made to the perl
+internals in this release.
+
+=back
+
+=head3 L<perlhack>
+
+=over 4
+
+=item *
+
+The L<SUPER QUICK PATCH GUIDE|perlhack/SUPER QUICK PATCH GUIDE> section has
+been updated.
 
 =back
 
