@@ -675,7 +675,7 @@ source tree.
 
 =item Bitrig
 
-Compile support has been added for Bitrig, a fork of OpenBSD
+Compile support has been added for Bitrig, a fork of OpenBSD.
 
 =back
 
