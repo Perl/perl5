@@ -747,6 +747,13 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 The value of C<$^E> is now saved across signal handlers on Win32. [perl #85104]
 
+=item *
+
+A lexical filehandle (as in C<open my $fh...>) is usually given a name
+based on the current package and the name of the variable; e.g.,
+"main::$fh".  Under recursion, the filehandle was losing the "$fh" part of
+the name.  This has been fixed.
+
 =back
 
 =head1 Known Problems
