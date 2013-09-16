@@ -16,7 +16,7 @@ BEGIN {
 
 use strict qw(refs subs);
 
-plan(118);
+plan(121);
 
 {
     no warnings qw 'deprecated syntax';
@@ -367,4 +367,7 @@ is "$_->@{foo}", "foo->7 8 9", '->@{ does not interpolate without feature';
     is "foo$_->@*bar", "foo7 8 9bar", '->@* interpolated w/other stuff';
     is "foo$_->@[0,1]bar", "foo7 8bar", '->@[ interpolated w/other stuff';
     is "foo$_->@{foo}bar", "foooofbar", '->@{ interpolated w/other stuff';
+    is "@{[foo->@*]}", "7 8 9", '->@* inside "@{...}"';
+    is "@{[foo->@[0,1]]}", "7 8", '->@[ inside "@{...}"';
+    is "@{[foo->@{foo}]}", "oof", '->@{ inside "@{...}"';
 }

@@ -2186,7 +2186,9 @@ S_postderef(pTHX_ char const funny, char const next)
 	PL_bufptr+=2;
     }
     else {
-	if ('@' == funny) PL_lex_dojoin = 2;
+	if ('@' == funny && PL_lex_state == LEX_INTERPNORMAL
+	 && !PL_lex_brackets)
+	    PL_lex_dojoin = 2;
 	PL_expect = XOPERATOR;
 	PL_bufptr++;
     }
