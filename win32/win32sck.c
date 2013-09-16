@@ -42,11 +42,12 @@
     STMT_START {					\
 	StartSockets();					\
 	if((x) == (y))					\
-	    errno = WSAGetLastError();			\
+	    errno = get_last_socket_error();		\
     } STMT_END
 
 #define SOCKET_TEST_ERROR(x) SOCKET_TEST(x, SOCKET_ERROR)
 
+static int get_last_socket_error(void);
 static struct servent* win32_savecopyservent(struct servent*d,
                                              struct servent*s,
                                              const char *proto);
@@ -58,6 +59,243 @@ EndSockets(void)
 {
     if (wsock_started)
 	WSACleanup();
+}
+
+/* Translate WSAExxx values to corresponding Exxx values where possible. Not all
+ * WSAExxx constants have corresponding Exxx constants in <errno.h> (even in
+ * VC++ 2010 and above, which have expanded <errno.h> with more values), but
+ * most missing constants are provided by win32/include/sys/errno2.h. The few
+ * that are not are returned unchanged.
+ *
+ * The list of possible WSAExxx values used here comes from the MSDN page
+ * titled "Windows Sockets Error Codes".
+ *
+ * (Note: Only the WSAExxx values are handled here; other WSAxxx values are
+ * returned unchanged. The return value normally ends up in errno/$! and at
+ * the Perl code level may be tested against the Exxx constants exported by
+ * the Errno and POSIX modules, which have never handled the other WSAxxx
+ * values themselves, apparently without any ill effect so far.)
+ */
+int
+convert_wsa_error_to_errno(int wsaerr)
+{
+    switch (wsaerr) {
+    case WSAEINTR:
+	return EINTR;
+    case WSAEBADF:
+	return EBADF;
+    case WSAEACCES:
+	return EACCES;
+    case WSAEFAULT:
+	return EFAULT;
+    case WSAEINVAL:
+	return EINVAL;
+    case WSAEMFILE:
+	return EMFILE;
+    case WSAEWOULDBLOCK:
+	return EWOULDBLOCK;
+    case WSAEINPROGRESS:
+	return EINPROGRESS;
+    case WSAEALREADY:
+	return EALREADY;
+    case WSAENOTSOCK:
+	return ENOTSOCK;
+    case WSAEDESTADDRREQ:
+	return EDESTADDRREQ;
+    case WSAEMSGSIZE:
+	return EMSGSIZE;
+    case WSAEPROTOTYPE:
+	return EPROTOTYPE;
+    case WSAENOPROTOOPT:
+	return ENOPROTOOPT;
+    case WSAEPROTONOSUPPORT:
+	return EPROTONOSUPPORT;
+    case WSAESOCKTNOSUPPORT:
+	return ESOCKTNOSUPPORT;
+    case WSAEOPNOTSUPP:
+	return EOPNOTSUPP;
+    case WSAEPFNOSUPPORT:
+	return EPFNOSUPPORT;
+    case WSAEAFNOSUPPORT:
+	return EAFNOSUPPORT;
+    case WSAEADDRINUSE:
+	return EADDRINUSE;
+    case WSAEADDRNOTAVAIL:
+	return EADDRNOTAVAIL;
+    case WSAENETDOWN:
+	return ENETDOWN;
+    case WSAENETUNREACH:
+	return ENETUNREACH;
+    case WSAENETRESET:
+	return ENETRESET;
+    case WSAECONNABORTED:
+	return ECONNABORTED;
+    case WSAECONNRESET:
+	return ECONNRESET;
+    case WSAENOBUFS:
+	return ENOBUFS;
+    case WSAEISCONN:
+	return EISCONN;
+    case WSAENOTCONN:
+	return ENOTCONN;
+    case WSAESHUTDOWN:
+	return ESHUTDOWN;
+    case WSAETOOMANYREFS:
+	return ETOOMANYREFS;
+    case WSAETIMEDOUT:
+	return ETIMEDOUT;
+    case WSAECONNREFUSED:
+	return ECONNREFUSED;
+    case WSAELOOP:
+	return ELOOP;
+    case WSAENAMETOOLONG:
+	return ENAMETOOLONG;
+    case WSAEHOSTDOWN:
+	return WSAEHOSTDOWN;		/* EHOSTDOWN is not defined */
+    case WSAEHOSTUNREACH:
+	return EHOSTUNREACH;
+    case WSAENOTEMPTY:
+	return ENOTEMPTY;
+    case WSAEPROCLIM:
+	return EPROCLIM;
+    case WSAEUSERS:
+	return EUSERS;
+    case WSAEDQUOT:
+	return EDQUOT;
+    case WSAESTALE:
+	return ESTALE;
+    case WSAEREMOTE:
+	return EREMOTE;
+    case WSAEDISCON:
+	return WSAEDISCON;		/* EDISCON is not defined */
+    case WSAENOMORE:
+	return WSAENOMORE;		/* ENOMORE is not defined */
+#ifdef WSAECANCELLED
+    case WSAECANCELLED:			/* New in WinSock2 */
+	return ECANCELED;
+#endif
+    case WSAEINVALIDPROCTABLE:
+	return WSAEINVALIDPROCTABLE;	/* EINVALIDPROCTABLE is not defined */
+    case WSAEINVALIDPROVIDER:
+	return WSAEINVALIDPROVIDER;	/* EINVALIDPROVIDER is not defined */
+    case WSAEPROVIDERFAILEDINIT:
+	return WSAEPROVIDERFAILEDINIT;	/* EPROVIDERFAILEDINIT is not defined */
+    case WSAEREFUSED:
+	return WSAEREFUSED;		/* EREFUSED is not defined */
+    }
+
+    return wsaerr;
+}
+
+#ifdef ERRNO_HAS_POSIX_SUPPLEMENT
+/* Translate Exxx values in the POSIX supplement range defined in VC++ 2010 and
+ * above (EADDRINUSE <= err <= EWOULDBLOCK) to corresponding WSAExxx values. Not
+ * all such Exxx constants have corresponding WSAExxx constants in <winsock*.h>;
+ * we just use ERROR_INVALID_FUNCTION for those that are missing but do not
+ * really expect to encounter them anyway in the context in which this function
+ * is called.
+ * Other Exxx values (err < sys_nerr) are returned unchanged.
+ */
+int
+convert_errno_to_wsa_error(int err)
+{
+    switch (err) {
+    case EADDRINUSE:
+	return WSAEADDRINUSE;
+    case EADDRNOTAVAIL:
+	return WSAEADDRNOTAVAIL;
+    case EAFNOSUPPORT:
+	return WSAEAFNOSUPPORT;
+    case EALREADY:
+	return WSAEALREADY;
+    case EBADMSG:
+	return ERROR_INVALID_FUNCTION;
+    case ECANCELED:
+#ifdef WSAECANCELLED
+	return WSAECANCELLED;		/* New in WinSock2 */
+#else
+	return ERROR_INVALID_FUNCTION;
+#endif
+    case ECONNABORTED:
+	return WSAECONNABORTED;
+    case ECONNREFUSED:
+	return WSAECONNREFUSED;
+    case ECONNRESET:
+	return WSAECONNRESET;
+    case EDESTADDRREQ:
+	return WSAEDESTADDRREQ;
+    case EHOSTUNREACH:
+	return WSAEHOSTUNREACH;
+    case EIDRM:
+	return ERROR_INVALID_FUNCTION;
+    case EINPROGRESS:
+	return WSAEINPROGRESS;
+    case EISCONN:
+	return WSAEISCONN;
+    case ELOOP:
+	return WSAELOOP;
+    case EMSGSIZE:
+	return WSAEMSGSIZE;
+    case ENETDOWN:
+	return WSAENETDOWN;
+    case ENETRESET:
+	return WSAENETRESET;
+    case ENETUNREACH:
+	return WSAENETUNREACH;
+    case ENOBUFS:
+	return WSAENOBUFS;
+    case ENODATA:
+	return ERROR_INVALID_FUNCTION;
+    case ENOLINK:
+	return ERROR_INVALID_FUNCTION;
+    case ENOMSG:
+	return ERROR_INVALID_FUNCTION;
+    case ENOPROTOOPT:
+	return WSAENOPROTOOPT;
+    case ENOSR:
+	return ERROR_INVALID_FUNCTION;
+    case ENOSTR:
+	return ERROR_INVALID_FUNCTION;
+    case ENOTCONN:
+	return WSAENOTCONN;
+    case ENOTRECOVERABLE:
+	return ERROR_INVALID_FUNCTION;
+    case ENOTSOCK:
+	return WSAENOTSOCK;
+    case ENOTSUP:
+	return ERROR_INVALID_FUNCTION;
+    case EOPNOTSUPP:
+	return WSAEOPNOTSUPP;
+    case EOTHER:
+	return ERROR_INVALID_FUNCTION;
+    case EOVERFLOW:
+	return ERROR_INVALID_FUNCTION;
+    case EOWNERDEAD:
+	return ERROR_INVALID_FUNCTION;
+    case EPROTO:
+	return ERROR_INVALID_FUNCTION;
+    case EPROTONOSUPPORT:
+	return WSAEPROTONOSUPPORT;
+    case EPROTOTYPE:
+	return WSAEPROTOTYPE;
+    case ETIME:
+	return ERROR_INVALID_FUNCTION;
+    case ETIMEDOUT:
+	return WSAETIMEDOUT;
+    case ETXTBSY:
+	return ERROR_INVALID_FUNCTION;
+    case EWOULDBLOCK:
+	return WSAEWOULDBLOCK;
+    }
+
+    return err;
+}
+#endif /* ERRNO_HAS_POSIX_SUPPLEMENT */
+
+static int
+get_last_socket_error(void)
+{
+    return convert_wsa_error_to_errno(WSAGetLastError());
 }
 
 void
@@ -401,7 +639,7 @@ win32_socket(int af, int type, int protocol)
     StartSockets();
 
     if((s = open_ifs_socket(af, type, protocol)) == INVALID_SOCKET)
-	errno = WSAGetLastError();
+	errno = get_last_socket_error();
     else
 	s = OPEN_SOCKET(s);
 
@@ -429,8 +667,8 @@ int my_close(int fd)
 	    return 0;
 	}
 	else if (err == SOCKET_ERROR) {
-	    err = WSAGetLastError();
-	    if (err != WSAENOTSOCK) {
+	    err = get_last_socket_error();
+	    if (err != ENOTSOCK) {
 		(void)close(fd);
 		errno = err;
 		return EOF;
@@ -457,8 +695,8 @@ my_fclose (FILE *pf)
 	    return 0;
 	}
 	else if (err == SOCKET_ERROR) {
-	    err = WSAGetLastError();
-	    if (err != WSAENOTSOCK) {
+	    err = get_last_socket_error();
+	    if (err != ENOTSOCK) {
 		(void)fclose(pf);
 		errno = err;
 		return EOF;
@@ -558,11 +796,12 @@ win32_ioctl(int i, unsigned int u, char *data)
     memcpy(data, &u_long_arg, sizeof u_long_arg);
     
     if (retval == SOCKET_ERROR) {
-	if (WSAGetLastError() == WSAENOTSOCK) {
+	int err = get_last_socket_error();
+	if (err == ENOTSOCK) {
 	    Perl_croak_nocontext("ioctl implemented only on sockets");
 	    /* NOTREACHED */
 	}
-	errno = WSAGetLastError();
+	errno = err;
     }
     return retval;
 }
