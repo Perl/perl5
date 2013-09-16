@@ -4301,6 +4301,21 @@ but there was no array C<@foo> in scope at the time.  If you wanted a
 literal @foo, then write it as \@foo; otherwise find out what happened
 to the array you apparently lost track of.
 
+=item Postfix dereference is experimental
+
+(S experimental::postderef) This warning is emitted if you use
+the experimental postfix dereference syntax.  Simply suppress the
+warning if you want to use the feature, but know that in doing
+so you are taking the risk of using an experimental feature which
+may change or be removed in a future Perl version:
+
+    no warnings "experimental::postderef";
+    use feature "postderef", "postderef_qq";
+    $ref->$*;
+    $aref->@*;
+    $aref->@[@indices];
+    ... etc ...
+
 =item Precedence problem: open %s should be open(%s)
 
 (S precedence) The old irregular construct

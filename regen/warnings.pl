@@ -97,6 +97,8 @@ my $tree = {
                                     [ 5.017, DEFAULT_ON ],
                                 'experimental::smartmatch' =>
                                     [ 5.017, DEFAULT_ON ],
+                                'experimental::postderef' =>
+                                    [ 5.019, DEFAULT_ON ],
                         }],
 
        	 #'default'	=> [ 5.008, DEFAULT_ON ],
