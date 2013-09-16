@@ -87,6 +87,42 @@ S<C<use locale>>.
 Now, the only known place where S<C<use locale>> is not respected is in the
 stringification of L<$!|perlvar/$!>.
 
+=head2 Assignments of Windows sockets error codes to $! now prefer F<errno.h> values over WSAGetLastError() values
+
+In previous versions of Perl, Windows sockets error codes as returned by
+WSAGetLastError() were assigned to $!, and some constants such as ECONNABORTED,
+not in F<errno.h> in VC++ (or the various Windows ports of gcc) were defined to
+corresponding WSAE* values to allow $! to be tested against the E* constants
+exported by L<Errno> and L<POSIX>.
+
+This worked well until VC++ 2010 and later, which introduced new E* constants
+with values E<gt> 100 into F<errno.h>, including some being (re)defined by perl
+to WSAE* values.  That caused problems when linking XS code against other
+libraries which used the original definitions of F<errno.h> constants.
+
+To avoid this incompatibility, perl now maps WSAE* error codes to E* values
+where possible, and assigns those values to $!.  The E* constants exported by
+L<Errno> and L<POSIX> are updated to match so that testing $! against them,
+wherever previously possible, will continue to work as expected, and all E*
+constants found in F<errno.h> are now exported from those modules with their
+original F<errno.h> values
+
+In order to avoid breakage in existing Perl code which assigns WSAE* values to
+$!, perl now intercepts the assignment and performs the same mapping to E*
+values as it uses internally when assigning to $! itself.
+
+However, one backwards-incompatibility remains: existing Perl code which
+compares $! against the numeric values of the WSAE* error codes that were
+previously assigned to $! will now be broken in those cases where a
+corresponding E* value has been assigned instead.  This is only an issue for
+those E* values E<lt> 100, which were always exported from L<Errno> and
+L<POSIX> with their original F<errno.h> values, and therefore could not be used
+for WSAE* error code tests (e.g. WSAEINVAL is 10022, but the corresponding
+EINVAL is 22).  (E* values E<gt> 100, if present, were redefined to WSAE*
+values anyway, so compatibility can be achieved by using the E* constants,
+which will work both before and after this change, albeit using different
+numeric values under the hood.)
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.
@@ -277,6 +313,14 @@ than L<base> throughout.
 
 =item *
 
+L<Errno> has been upgraded from version 1.19 to 1.20.
+
+The list of E* constants exported on Windows has been updated to reflect the
+changes made in the assignment of sockets error codes to $! (see
+L</Incompatible Changes>).
+
+=item *
+
 L<Exporter> has been upgraded from version 5.69 to 5.70.
 
 A number of typos have been corrected in the documentation.
@@ -452,6 +496,14 @@ answered.
 L<Pod::Html> has been upgraded from version 1.20 to 1.21.
 
 This upgrade is part of a larger change to use L<parent> rather than L<base>.
+
+=item *
+
+L<POSIX> has been upgraded from version 1.34 to 1.35.
+
+The list of E* constants exported on Windows has been updated to reflect the
+changes made in the assignment of sockets error codes to $! (see
+L</Incompatible Changes>).
 
 =item *
 
