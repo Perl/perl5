@@ -3138,6 +3138,12 @@ win32_link(const char *oldname, const char *newname)
     case ERROR_NOT_SAME_DEVICE:
       errno = EXDEV;
       break;
+    case ERROR_DISK_FULL:
+      errno = ENOSPC;
+      break;
+    case ERROR_NOT_ENOUGH_QUOTA:
+      errno = EDQUOT;
+      break;
     default:
       /* ERROR_INVALID_FUNCTION - eg. on a FAT volume */
       errno = EINVAL;
@@ -3171,6 +3177,12 @@ win32_rename(const char *oname, const char *newname)
         case ERROR_NO_MORE_FILES:
         case ERROR_PATH_NOT_FOUND:
             errno = ENOENT;
+            break;
+        case ERROR_DISK_FULL:
+            errno = ENOSPC;
+            break;
+        case ERROR_NOT_ENOUGH_QUOTA:
+            errno = EDQUOT;
             break;
         default:
             errno = EACCES;
