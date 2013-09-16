@@ -127,7 +127,7 @@
 %left <i_tkval> MATCHOP
 %right <i_tkval> '!' '~' UMINUS REFGEN
 %right <i_tkval> POWOP
-%nonassoc <i_tkval> PREINC PREDEC POSTINC POSTDEC
+%nonassoc <i_tkval> PREINC PREDEC POSTINC POSTDEC POSTJOIN
 %left <i_tkval> ARROW
 %nonassoc <i_tkval> ')'
 %left <i_tkval> '('
@@ -1051,6 +1051,18 @@ termunop : '-' term %prec UMINUS                       /* -$x */
 	|	term POSTDEC                           /* $x-- */
 			{ $$ = newUNOP(OP_POSTDEC, 0,
 					op_lvalue(scalar($1), OP_POSTDEC));
+			  TOKEN_GETMAD($2,$$,'o');
+			}
+	|	term POSTJOIN    /* implicit join after interpolated ->@ */
+			{ $$ = convert(OP_JOIN, 0,
+				       op_append_elem(
+					OP_LIST,
+					newSVREF(scalar(
+					    newSVOP(OP_CONST,0,
+						    newSVpvs("\""))
+					)),
+					$1
+				       ));
 			  TOKEN_GETMAD($2,$$,'o');
 			}
 	|	PREINC term                            /* ++$x */

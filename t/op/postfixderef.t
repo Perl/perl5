@@ -16,7 +16,7 @@ BEGIN {
 
 use strict qw(refs subs);
 
-plan(106);
+plan(118);
 
 {
     no warnings qw 'deprecated syntax';
@@ -342,3 +342,28 @@ ok (!eval { $pvbm->%* }, 'PVBM is not a HASH ref');
 is join(" ", {1..10}->%{1, 7, 3}), "1 2 7 8 3 4", '->%{';
 is join(" ", ['a'..'z']->%[1, 7, 3]), "1 b 7 h 3 d", '->%[';
 
+# Interpolation
+$_ = "foo";
+@foo = 7..9;
+%foo = qw( foo oof );
+{
+    no warnings 'deprecated';
+    $* = 42;
+    is "$_->$*", 'foo->42', '->$* interpolation without feature';
+}
+is "$_->@*", 'foo->@*', '->@* does not interpolate without feature';
+is "$_->@[0]", 'foo->@[0]', '->@[ does not interpolate without feature';
+is "$_->@{foo}", "foo->7 8 9", '->@{ does not interpolate without feature';
+{
+    use feature 'postderef_qq';
+    no strict 'refs';
+    $foo = 43;
+    is "$_->$*", "43", '->$* interpolated';
+    is "$_->@*", "7 8 9", '->@* interpolated';
+    is "$_->@[0,1]", "7 8", '->@[ interpolated';
+    is "$_->@{foo}", "oof", '->@{ interpolated';
+    is "foo$_->$*bar", "foo43bar", '->$* interpolated w/other stuff';
+    is "foo$_->@*bar", "foo7 8 9bar", '->@* interpolated w/other stuff';
+    is "foo$_->@[0,1]bar", "foo7 8bar", '->@[ interpolated w/other stuff';
+    is "foo$_->@{foo}bar", "foooofbar", '->@{ interpolated w/other stuff';
+}

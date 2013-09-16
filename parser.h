@@ -54,7 +54,8 @@ typedef struct yy_parser {
     char	*lex_brackstack;/* what kind of brackets to pop */
     char	*lex_casestack;	/* what kind of case mods in effect */
     U8		lex_defer;	/* state after determined token */
-    bool	lex_dojoin;	/* doing an array interpolation */
+    U8		lex_dojoin;	/* doing an array interpolation
+				   1 = @{...}  2 = ->@ */
     U8		lex_expect;	/* expect after determined token */
     U8		expect;		/* how to interpret ambiguous tokens */
     I32		lex_formbrack;	/* bracket count at outer format level */
