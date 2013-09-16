@@ -3762,16 +3762,14 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    sayNO_SILENT;
 	    assert(0); /*NOTREACHED*/
 
-	case EOL: /* /..$/  */
-		goto seol;
-
 	case MEOL: /* /..$/m  */
 	    if (!NEXTCHR_IS_EOS && nextchr != '\n')
 		sayNO;
 	    break;
 
+	case EOL: /* /..$/  */
+            /* FALL THROUGH */
 	case SEOL: /* /..$/s  */
-	  seol:
 	    if (!NEXTCHR_IS_EOS && nextchr != '\n')
 		sayNO;
 	    if (reginfo->strend - locinput > 1)
