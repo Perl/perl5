@@ -43,7 +43,7 @@ to platform, from the 15 bits of rand() on Windows to 48-bits on POSIX
 platforms such as Linux with drand48().
 
 Perl now uses its own internal drand48() implementation on all platforms.
-[perl #115928]
+This does not make perl's rand() cryptographically secure.  [perl #115928]
 
 =head2 Better 64-bit support
 
