@@ -686,38 +686,6 @@ L<delete argument is keyE<sol>value hash slice, use hash slice|perldiag/"delete 
 (F) You used key/value hash slice syntax (C<%hash{...}>) as the argument to
 C<delete>.  You probably meant C<@hash{...}> with an @ symbol instead.
 
-=item *
-
-L<delete argument is not a HASH or ARRAY element or slice|perldiag/"delete argument is not a HASH or ARRAY element or slice">
-
-(F) The argument to C<delete> must be either a hash or array element, such as:
-
-    $foo{$bar}
-    $ref->{"susie"}[12]
-
-or a hash or array slice, such as:
-
-    @foo[$bar, $baz, $xyzzy]
-    @{$ref->[12]}{"susie", "queue"}
-
-=item *
-
-L<exists argument is not a HASH or ARRAY element or a subroutine|perldiag/"exists argument is not a HASH or ARRAY element or a subroutine">
-
-(F) The argument to C<exists> must be a hash or array element or a subroutine
-with an ampersand, such as:
-
-    $foo{$bar}
-    $ref->{"susie"}[12]
-    &do_something
-
-=item *
-
-L<exists argument is not a subroutine name|perldiag/"exists argument is not a subroutine name">
-
-(F) The argument to C<exists> for C<exists &sub> must be a subroutine name, and
-not a subroutine call.  C<exists &sub()> will generate this error.
-
 =back
 
 =head3 New Warnings
