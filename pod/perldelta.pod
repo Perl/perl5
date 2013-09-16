@@ -568,6 +568,16 @@ restored in stub form, directing readers to current information.
 New sections have been added to document the new index/value array slice and
 key/value hash slice syntax.
 
+=item *
+
+Briefly documented the C<&DB::goto> and C<&DB::lsub> debugger
+subroutines in L<perldebguts> [perl #77680]
+
+=item *
+
+L<perlsub> now includes a list of subroutine names used by the perl
+implementation. [perl #77680]
+
 =back
 
 =head3 L<perlguts>
