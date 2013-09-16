@@ -239,8 +239,57 @@ Subroutines whose names are in all upper case are reserved to the Perl
 core, as are modules whose names are in all lower case.  A subroutine in
 all capitals is a loosely-held convention meaning it will be called
 indirectly by the run-time system itself, usually due to a triggered event.
-Subroutines that do special, pre-defined things include C<AUTOLOAD>, C<CLONE>,
-C<DESTROY> plus all functions mentioned in L<perltie> and L<PerlIO::via>.
+Subroutines whose name start with a left parenthesis are also reserved the 
+same way. The following is a list of some subroutines that currently do 
+special, pre-defined things.
+
+=over
+
+=item documented later in this document
+
+C<AUTOLOAD>
+
+=item documented in L<perlmod>
+
+C<CLONE>, C<CLONE_SKIP>, 
+
+=item documented in L<perlobj>
+
+C<DESTROY>
+
+=item documented in L<perltie>
+
+C<BINMODE>, C<CLEAR>, C<CLOSE>, C<DELETE>, C<DESTROY>, C<EOF>, C<EXISTS>, 
+C<EXTEND>, C<FETCH>, C<FETCHSIZE>, C<FILENO>, C<FIRSTKEY>, C<GETC>, 
+C<NEXTKEY>, C<OPEN>, C<POP>, C<PRINT>, C<PRINTF>, C<PUSH>, C<READ>, 
+C<READLINE>, C<SCALAR>, C<SEEK>, C<SHIFT>, C<SPLICE>, C<STORE>, 
+C<STORESIZE>, C<TELL>, C<TIEARRAY>, C<TIEHANDLE>, C<TIEHASH>, 
+C<TIESCALAR>, C<UNSHIFT>, C<UNTIE>, C<WRITE>
+
+=item documented in L<PerlIO::via>
+
+C<BINMODE>, C<CLEARERR>, C<CLOSE>, C<EOF>, C<ERROR>, C<FDOPEN>, C<FILENO>, 
+C<FILL>, C<FLUSH>, C<OPEN>, C<POPPED>, C<PUSHED>, C<READ>, C<SEEK>, 
+C<SETLINEBUF>, C<SYSOPEN>, C<TELL>, C<UNREAD>, C<UTF8>, C<WRITE>
+
+=item documented in L<perlfunc>
+
+L<< C<import> | perlfunc/use >>, L<< C<unimport> | perlfunc/use >>,
+L<< C<INC> | perlfunc/require >>
+
+=item documented in L<UNIVERSAL>
+
+C<VERSION>
+
+=item documented in L<perldebguts>
+
+C<DB::DB>, C<DB::sub>, C<DB::lsub>, C<DB::goto>, C<DB::postponed>
+
+=item undocumented, used internally by the L<overload> feature
+
+any starting with C<(>
+
+=back
 
 The C<BEGIN>, C<UNITCHECK>, C<CHECK>, C<INIT> and C<END> subroutines
 are not so much subroutines as named special code blocks, of which you
