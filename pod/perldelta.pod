@@ -927,6 +927,12 @@ av_store(av, 0, &PL_sv_undef) will cause element 0 of that array to hold a
 read-only undefined scalar.  C<$array[0] = anything> will croak and
 C<\$array[0]> will compare equal to C<\undef>.
 
+=item *
+
+The SV returned by HeSVKEY_force() now correctly reflects the UTF8ness
+of the underlying hash key when that key is not stored as a SV.  [perl
+#79074]
+
 =back
 
 =head1 Selected Bug Fixes
