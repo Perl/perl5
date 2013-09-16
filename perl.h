@@ -22,11 +22,6 @@
 #define USE_STDIO
 #endif /* PERL_FOR_X2P */
 
-#ifdef VOIDUSED
-#   undef VOIDUSED
-#endif
-#define VOIDUSED 1
-
 #ifdef PERL_MICRO
 #   include "uconfig.h"
 #else
@@ -474,7 +469,7 @@ struct op *Perl_op asm(stringify(OP_IN_REGISTER));
 #   define STMT_END	)
 # else
    /* Now which other defined()s do we need here ??? */
-#  if (VOIDFLAGS) && (defined(sun) || defined(__sun__)) && !defined(__GNUC__)
+#  if (defined(sun) || defined(__sun__)) && !defined(__GNUC__)
 #   define STMT_START	if (1)
 #   define STMT_END	else (void)0
 #  else
