@@ -102,6 +102,7 @@ USE_LARGE_FILES	*= define
 # Uncomment this if you're building a 32-bit perl and want 64-bit integers.
 # (If you're building a 64-bit perl then you will have 64-bit integers whether
 # or not this is uncommented.)
+# Note: This option is not supported in 32-bit MSVC60 builds.
 #USE_64_BIT_INT	*= define
 
 #
@@ -333,6 +334,12 @@ USE_64_BIT_INT	= define
 # not against a compiler specific versioned runtime.
 .IF "$(WIN64)" == "define" && "$(CCTYPE)" == "MSVC60"
 CCTYPE		= SDK2003SP1
+.ENDIF
+
+# Disable the 64-bit-int option for (32-bit) MSVC60 builds since that compiler
+# does not support it.
+.IF "$(CCTYPE)" == "MSVC60"
+USE_64_BIT_INT	!= undef
 .ENDIF
 
 ARCHITECTURE = $(PROCESSOR_ARCHITECTURE)
