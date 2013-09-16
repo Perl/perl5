@@ -3112,10 +3112,10 @@
  *	function used to generate normalized random numbers.
  *	Values include 15, 16, 31, and 48.
  */
-#define Drand01()              Perl_drand48()                /**/
-#define Rand_seed_t            U32           /**/
-#define seedDrand01(x) Perl_drand48_init((Rand_seed_t)x)       /**/
-#define RANDBITS               48               /**/
+#define Drand01()		Perl_drand48()		/**/
+#define Rand_seed_t		U32		/**/
+#define seedDrand01(x)	Perl_drand48_init((Rand_seed_t)x)	/**/
+#define RANDBITS		48		/**/
 
 /* Select_fd_set_t:
  *	This symbol holds the type used for the 2nd, 3rd, and 4th
@@ -3329,31 +3329,6 @@
  */
 /*#define PERL_VENDORLIB_EXP ""		/ **/
 /*#define PERL_VENDORLIB_STEM ""		/ **/
-
-/* VOIDFLAGS:
- *	This symbol indicates how much support of the void type is given by this
- *	compiler.  What various bits mean:
- *
- *	    1 = supports declaration of void
- *	    2 = supports arrays of pointers to functions returning void
- *	    4 = supports comparisons between pointers to void functions and
- *		    addresses of void functions
- *	    8 = supports declaration of generic void pointers
- *
- *	The package designer should define VOIDUSED to indicate the requirements
- *	of the package.  This can be done either by #defining VOIDUSED before
- *	including config.h, or by defining defvoidused in Myinit.U.  If the
- *	latter approach is taken, only those flags will be tested.  If the
- *	level of void support necessary is not present, defines void to int.
- */
-#ifndef VOIDUSED
-#define VOIDUSED 1
-#endif
-#define VOIDFLAGS 1
-#if (VOIDFLAGS & VOIDUSED) != VOIDUSED
-#define void int		/* is void to be avoided? */
-#define M_VOID			/* Xenix strikes again */
-#endif
 
 /* PERL_USE_DEVEL:
  *	This symbol, if defined, indicates that Perl was configured with
@@ -4188,8 +4163,10 @@
 /*#define USE_DYNAMIC_LOADING		/ **/
 
 /* FFLUSH_NULL:
- *	This symbol, if defined, tells that fflush(NULL) does flush
- *	all pending stdio output.
+ *	This symbol, if defined, tells that fflush(NULL) correctly
+ *	flushes all pending stdio output without side effects. In
+ *	particular, on some platforms calling fflush(NULL) *still*
+ *	corrupts STDIN if it is a pipe.
  */
 /* FFLUSH_ALL:
  *	This symbol, if defined, tells that to flush
@@ -4753,6 +4730,6 @@
 #endif
 
 /* Generated from:
- * fd2554fe3bee85bee863afd558a83caa6c1a317e9a044639199eda0827db903e config_h.SH
- * 2a46be0c2dea164ef0186898854f667c064d678c6927d13e926c1bb37d9d4d0e uconfig.sh
+ * a5419b542988f62ae47b915c24316f8127992c16da312dc275d2f68fdd37a3ea config_h.SH
+ * e9bb6377fb6bf7c21e01a97266c80d028aaecf5bf71f855ca6cca3b30d94882c uconfig.sh
  * ex: set ro: */

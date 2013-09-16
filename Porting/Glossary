@@ -2552,9 +2552,6 @@ db_version_patch (i_db.U):
 	Berkeley DB found in the <db.h> header file.
 	For DB version 1 this is always 0.
 
-defvoidused (voidflags.U):
-	This variable contains the default value of the VOIDUSED symbol (15).
-
 direntrytype (i_dirent.U):
 	This symbol is set to 'struct direct' or 'struct dirent' depending on
 	whether dirent is available or not. You should use this pseudo type to
@@ -2685,8 +2682,10 @@ fflushall (fflushall.U):
 	even be probed for and will be left undefined.
 
 fflushNULL (fflushall.U):
-	This symbol, if defined, tells that fflush(NULL) does flush
-	all pending stdio output.
+	This symbol, if defined, tells that fflush(NULL) correctly
+	flushes all pending stdio output without side effects. In
+	particular, on some platforms calling fflush(NULL) *still*
+	corrupts STDIN if it is a pipe.
 
 find (Loc.U):
 	This variable is defined but not used by Configure.
@@ -5344,11 +5343,6 @@ versiononly (versiononly.U):
 vi (Loc.U):
 	This variable is defined but not used by Configure.
 	The value is the empty string and is not useful.
-
-voidflags (voidflags.U):
-	This variable contains the eventual value of the VOIDFLAGS symbol,
-	which indicates how much support of the void type is given by this
-	compiler.  See VOIDFLAGS for more info.
 
 xlibpth (libpth.U):
 	This variable holds extra path (space-separated) used to find

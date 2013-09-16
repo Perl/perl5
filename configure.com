@@ -118,8 +118,6 @@ $!: Private path used by Configure to find libraries.  Its value !sfn
 $!: is prepended to libpth. This variable takes care of special !sfn
 $!: machines, like the mips.  Usually, it should be empty. !sfn
 $!plibpth=''                                           !sfn
-$!: full support for void wanted by default            !sfn
-$!defvoidused=15                                       !sfn
 $!: List of libraries we want.                         !sfn
 $!libswanted='net socket inet nsl nm ndbm gdbm dbm db malloc dl' !sfn
 $!libswanted="$libswanted ld sun m c cposix posix ndir dir crypt" !sfn
@@ -6405,7 +6403,6 @@ $ WC "db_version_major='" + "'"
 $ WC "db_version_minor='" + "'"
 $ WC "db_version_patch='" + "'"
 $ WC "dbgprefix='" + dbgprefix + "'"
-$ WC "defvoidused='15'"
 $ WC "devtype='" + devtype + "'"
 $ WC "direntrytype='struct dirent'"
 $ WC "dlext='" + dlext + "'"
@@ -6803,7 +6800,6 @@ $ WC "version_patchlevel_string='" + version_patchlevel_string + "'"
 $ WC "vms_cc_type='" + vms_cc_type + "'" ! VMS specific
 $ WC "vms_prefix='" + vms_prefix + "'" ! VMS specific
 $ WC "vms_ver='" + vms_ver + "'" ! VMS specific
-$ WC "voidflags='15'"
 $!
 $! ## The UNIXy POSIXy reentrantey thingys ##
 $! See "Appendix B, Version-Dependency Tables" in the C RTL

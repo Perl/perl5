@@ -28,7 +28,7 @@
 # See Porting/pumpkin.pod for more information on metaconfig.
 #
 
-# Generated on Thu Aug 29 09:37:19 CEST 2013 [metaconfig 3.5 PL0]
+# Generated on Mon Sep 16 14:37:58 CEST 2013 [metaconfig 3.5 PL0]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -1283,8 +1283,6 @@ installvendorscript=''
 vendorscript=''
 vendorscriptexp=''
 versiononly=''
-defvoidused=''
-voidflags=''
 yacc=''
 yaccflags=''
 CONFIG=''
@@ -1362,9 +1360,6 @@ libswanted=''
 ignore_versioned_solibs=''
 : set usethreads on the Configure command line to enable threads.
 usereentrant='undef'
-: full support for void wanted by default
-defvoidused=15
-
 ccname=''
 ccversion=''
 perllibs=''
@@ -6666,102 +6661,6 @@ fi
 $rm_try
 set i_malloc
 eval $setvar
-
-: check for void type
-echo " "
-echo "Checking to see how well your C compiler groks the void type..." >&4
-case "$voidflags" in
-'')
-	$cat >try.c <<EOCP
-#$i_stdlib I_STDLIB
-#ifdef I_STDLIB
-#include <stdlib.h>
-#endif
-#if TRY & 1
-void sub() {
-#else
-sub() {
-#endif
-	extern void moo();	/* function returning void */
-	void (*goo)();		/* ptr to func returning void */
-#if TRY & 8
-	void *hue;		/* generic ptr */
-#endif
-#if TRY & 2
-	void (*foo[10])();
-#endif
-
-#if TRY & 4
-	if(goo == moo) {
-		exit(0);
-	}
-#endif
-	exit(0);
-}
-int main() { sub(); }
-EOCP
-	if $cc $ccflags -c -DTRY=$defvoidused try.c >.out 2>&1 ; then
-		voidflags=$defvoidused
-	echo "Good.  It appears to support void to the level $package wants.">&4
-		if $contains warning .out >/dev/null 2>&1; then
-			echo "However, you might get some warnings that look like this:"
-			$cat .out
-		fi
-	else
-echo "Hmm, your compiler has some difficulty with void. Checking further..." >&4
-		if $cc $ccflags -c -DTRY=1 try.c >/dev/null 2>&1; then
-			echo "It supports 1..."
-			if $cc $ccflags -c -DTRY=3 try.c >/dev/null 2>&1; then
-				echo "It also supports 2..."
-				if $cc $ccflags -c -DTRY=7 try.c >/dev/null 2>&1; then
-					voidflags=7
-					echo "And it supports 4 but not 8 definitely."
-				else
-					echo "It doesn't support 4..."
-					if $cc $ccflags -c -DTRY=11 try.c >/dev/null 2>&1; then
-						voidflags=11
-						echo "But it supports 8."
-					else
-						voidflags=3
-						echo "Neither does it support 8."
-					fi
-				fi
-			else
-				echo "It does not support 2..."
-				if $cc $ccflags -c -DTRY=13 try.c >/dev/null 2>&1; then
-					voidflags=13
-					echo "But it supports 4 and 8."
-				else
-					if $cc $ccflags -c -DTRY=5 try.c >/dev/null 2>&1; then
-						voidflags=5
-						echo "And it supports 4 but has not heard about 8."
-					else
-						echo "However it supports 8 but not 4."
-					fi
-				fi
-			fi
-		else
-			echo "There is no support at all for void."
-			voidflags=0
-		fi
-	fi
-esac
-case "$voidflags" in
-"$defvoidused") ;;
-*)	$cat >&4 <<'EOM'
-  Support flag bits are:
-    1: basic void declarations.
-    2: arrays of pointers to functions returning void.
-    4: operations between pointers to and addresses of void functions.
-    8: generic void pointers.
-EOM
-	dflt="$voidflags";
-	rp="Your void support flags add up to what?"
-	. ./myread
-	voidflags="$ans"
-	;;
-esac
-$rm_try
 
 : check for length of pointer
 echo " "
@@ -23318,7 +23217,6 @@ db_prefixtype='$db_prefixtype'
 db_version_major='$db_version_major'
 db_version_minor='$db_version_minor'
 db_version_patch='$db_version_patch'
-defvoidused='$defvoidused'
 direntrytype='$direntrytype'
 dlext='$dlext'
 dlsrc='$dlsrc'
@@ -23858,7 +23756,6 @@ version='$version'
 version_patchlevel_string='$version_patchlevel_string'
 versiononly='$versiononly'
 vi='$vi'
-voidflags='$voidflags'
 xlibpth='$xlibpth'
 yacc='$yacc'
 yaccflags='$yaccflags'
