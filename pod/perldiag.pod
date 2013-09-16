@@ -1911,9 +1911,8 @@ subroutine with an ampersand, such as:
 
 =item exists argument is not a subroutine name
 
-(F) The argument to C<exists> for C<exists &sub> must be a subroutine
-name, and not a subroutine call.  C<exists &sub()> will generate this
-error.
+(F) The argument to C<exists> for C<exists &sub> must be a subroutine name,
+and not a subroutine call.  C<exists &sub()> will generate this error.
 
 =item Exiting eval via %s
 
