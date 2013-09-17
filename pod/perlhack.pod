@@ -236,7 +236,7 @@ volunteers, and be polite.
 Changes are always applied directly to the main development branch,
 called "blead".  Some patches may be backported to a maintenance
 branch. If you think your patch is appropriate for the maintenance
-branch (see MAINTENANCE BRANCHES in perlpolicy), please explain why
+branch (see L<perlpolicy/MAINTENANCE BRANCHES>), please explain why
 when you submit it.
 
 =head2 Getting your patch accepted
