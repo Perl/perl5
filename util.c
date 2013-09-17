@@ -2796,9 +2796,16 @@ Perl_wait4pid(pTHX_ Pid_t pid, int *statusp, int flags)
     dVAR;
     I32 result = 0;
     PERL_ARGS_ASSERT_WAIT4PID;
-    if (!pid)
-	return -1;
 #ifdef PERL_USES_PL_PIDSTATUS
+    if (!pid) {
+        /* PERL_USES_PL_PIDSTATUS is only defined when neither
+           waitpid() nor wait4() is available, or on OS/2, which
+           doesn't appear to support waiting for a progress group
+           member, so we can only treat a 0 pid as an unknown child.
+        */
+        errno = ECHILD;
+        return -1;
+    }
     {
 	if (pid > 0) {
 	    /* The keys in PL_pidstatus are now the raw 4 (or 8) bytes of the
@@ -2845,7 +2852,7 @@ Perl_wait4pid(pTHX_ Pid_t pid, int *statusp, int flags)
     goto finish;
 #endif
 #if !defined(HAS_WAITPID) && defined(HAS_WAIT4)
-    result = wait4((pid==-1)?0:pid,statusp,flags,NULL);
+    result = wait4(pid,statusp,flags,NULL);
     goto finish;
 #endif
 #ifdef PERL_USES_PL_PIDSTATUS
