@@ -28,7 +28,7 @@
 # See Porting/pumpkin.pod for more information on metaconfig.
 #
 
-# Generated on Mon Sep 16 14:37:58 CEST 2013 [metaconfig 3.5 PL0]
+# Generated on Tue Sep 17 10:34:33 CEST 2013 [metaconfig 3.5 PL0]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -1312,6 +1312,9 @@ elif test -f "/system/gnu_library/bin/ar.pm"; then
 elif test -n "$DJGPP"; then
 : DOS DJGPP
     _exe=".exe"
+elif test -f /kern/cookiejar; then
+: MiNT
+    _exe=""
 elif test -d c:/. -o -n "$is_os2" ; then
 : OS/2 or cygwin
     _exe=".exe"
