@@ -950,6 +950,16 @@ L</Modules and Pragmata> section.
 
 =over 4
 
+=head3 Win32
+
+=over
+
+=item *
+
+C<rename> and C<link> on Win32 now set C<$!> to ENOSPC and EDQUOT when appropriate. [perl #119857]
+
+=back
+
 =item WinCE
 
 The building of XS modules has largely been restored.  Several still cannot
