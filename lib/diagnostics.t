@@ -4,7 +4,7 @@ BEGIN {
     chdir '..' if -d '../pod' && -d '../t';
     @INC = 'lib';
     require './t/test.pl';
-    plan(25);
+    plan(28);
 }
 
 BEGIN {
@@ -136,6 +136,48 @@ like $warning,
     qr/Auto-increment.*Auto-decrement/s,
     'multiline links are not truncated';
 
+{
+# Find last warning in perldiag.pod, and last items if any
+    my $lw;
+    my $inlast;
+    my $item;
+
+    open(my $f, '<', "pod/perldiag.pod")
+        or die "failed to open pod/perldiag.pod for reading: $!";
+
+    while (<$f>) {
+        if ( /^=item\s+(.*)/) {
+            $lw = $1;
+        } elsif (/^=back/) {
+	    $inlast = 1;
+        } elsif ($inlast) {
+            # Skip headings
+            next if /^=/;
+
+            # Strip specials
+            $_ =~ s/\w<(.*?)>/$1/g;
+
+            # And whitespace
+            $_ =~ s/(^\s+|\s+$)//g;
+
+            if ($_) {
+                $item = $_;
+
+                last;
+            }
+        }
+    }
+    close($f);
+
+    ok($item, "(sanity...) found an item to check with ($item)");
+    seek STDERR, 0,0;
+    $warning = '';
+    warn $lw;
+    ok($warning, '(sanity...) got a warning');
+    unlike $warning,
+        qr/\Q$item\E/,
+        "Junk after =back doesn't show up in last warning";
+}
 
 *STDERR = $old_stderr;
 

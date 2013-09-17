@@ -186,7 +186,7 @@ use 5.009001;
 use Carp;
 $Carp::Internal{__PACKAGE__.""}++;
 
-our $VERSION = '1.32';
+our $VERSION = '1.33';
 our $DEBUG;
 our $VERBOSE;
 our $PRETTY;
@@ -393,7 +393,13 @@ my %msg;
 	    }
 	    elsif( s/^=for\s+diagnostics\s*\n(.*?)\s*\z// ) {
 		$for_item = $1;
-	    } 
+	    }
+	    elsif( /^=back/ ) { # Stop processing body here
+		undef $header;
+		undef $for_item;
+		$seen_body = 0;
+		next;
+	    }
 	    next;
 	}
 
