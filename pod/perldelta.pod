@@ -426,11 +426,25 @@ A minor internals-only change has been made to the XS code.
 
 =item *
 
+L<IO::Socket> has been upgraded from version 1.36 to 1.37.
+
+The C<connect> method has been updated in the light of changes made in the
+assignment of sockets error codes to $! on Windows (see L</Incompatible
+Changes>).
+
+=item *
+
 L<IPC::Open3> has been upgraded from version 1.15 to 1.16.
 
 This upgrade is part of a larger change to preserve referential identity when
 passing C<undef> to a subroutine by using NULL rather than &PL_sv_undef for
 nonexistent array elements.
+
+=item *
+
+L<JSON::PP> has been patched from version 2.27202 to 2.27202_01.
+
+A precedence issue has been fixed in the return value of a private subroutine.
 
 =item *
 
@@ -564,6 +578,13 @@ nonexistent array elements.
 L<Term::ReadLine> has been upgraded from version 1.10 to 1.14.
 
 Term::ReadLine::EditLine support has been added.
+
+=item *
+
+L<Test::Simple> has been patched from version 0.98 to 0.98_06.
+
+A precedence issue has been fixed in the return value of a private subroutine
+in L<Test::Builder>.
 
 =item *
 
