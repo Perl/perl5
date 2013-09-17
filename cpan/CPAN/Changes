@@ -1,3 +1,66 @@
+2013-09-15  k  <andk@cpan.org>
+
+	* release 2.03-TRIAL
+
+	* load META.yml not META.json (Tatsuhiko Miyagawa)
+
+	* support numerics in cpan IDs (Tatsuhiko Miyagawa)
+
+	* address #88565: fix unreachable core bug (Father Chrysostomos, David
+	Golden)
+
+	* address #76831: spaces on Win32 combined with
+	make_install_make_command (Reini Urban, Steve Hay)
+
+	* address #86405, #86406: fix typos, clarify comments (found by Cavid
+	Steinbrunner)
+
+	* address #86915: upgrade build method from "make" to "test" on
+	dependencies declared as build_requires (Andreas Koenig)
+
+2013-06-23  Andreas Koenig  <k@UX31A>
+
+	* release 2.02-TRIAL
+
+	* the production of META.json was missing in 2.01
+
+2013-06-22  Andreas Koenig  <k@UX31A>
+
+	* release 2.01-TRIAL
+
+	* add binmode in two places in CPAN::Tarzip (Dave Saville via RT #86328)
+
+	* make distroprefs tolerant against missing prefs dir (akoenig)
+
+	* regain 5.6.2 compatibility (akoenig)
+
+	* add PAUSE key up to 2015 (akoenig)
+
+2013-06-18  Andreas Koenig  <k@UX31A>
+
+	* Use CPAN::Mirrors correctly (brian d foy)
+
+	* Add default_mirror(), clean up docs a bit (brian d foy)
+
+	* allow subdirectories in distroprefs (Alexandr Ciornii)
+
+	* www.cpan.org is now the default CPAN mirror (David Golden)
+
+	* Adds recommends_policy and suggests_policy to support recommended and
+	suggested prerequisites (David Golden; incomplete because partially
+	reverted)
+
+	* Adds recommends_policy and suggests_policy to support (David Golden;
+	incomplete because partially reverted)
+
+	* Fix various prerequisite resolution bugs (David Golden)
+
+	* Internal: Split 'make' method into 'prepare' and 'make' methods
+	  (Matt S. Trout and David Golden)
+
+	* Internal: Refactor get/prepare/make/test/install shortcut logic
+	  and return values (David Golden)
+
 2013-04-12  Andreas Koenig  <k@UX31A>
 
 	* release 2.00 (at Lancester #QA2013)

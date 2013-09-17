@@ -206,7 +206,7 @@ sub a {
 sub globls {
     my($self,$s,$pragmas) = @_;
     # ls is really very different, but we had it once as an ordinary
-    # command in the Shell (upto rev. 321) and we could not handle
+    # command in the Shell (up to rev. 321) and we could not handle
     # force well then
     my(@accept,@preexpand);
     if ($s =~ /[\*\?\/]/) {
@@ -604,7 +604,7 @@ sub _reload_this {
     CPAN->debug("file[$file]") if $CPAN::DEBUG;
     my @inc = @INC;
     unless ($file && -f $file) {
-        # this thingie is not in the INC path, maybe CPAN/MyConfig.pm?
+        # this thingy is not in the INC path, maybe CPAN/MyConfig.pm?
         $file = $INC{$f};
         unless (CPAN->has_inst("File::Basename")) {
             @inc = File::Basename::dirname($file);
@@ -626,9 +626,12 @@ sub _reload_this {
     if ($must_reload) {
         my $fh = FileHandle->new($file) or
             $CPAN::Frontend->mydie("Could not open $file: $!");
-        local($/);
-        local $^W = 1;
-        my $content = <$fh>;
+        my $content;
+        {
+            local($/);
+            local $^W = 1;
+            $content = <$fh>;
+        }
         CPAN->debug(sprintf("reload file[%s] content[%s...]",$file,substr($content,0,128)))
             if $CPAN::DEBUG;
         delete $INC{$f};
@@ -1103,6 +1106,9 @@ sub failed {
     } else {
         $scope = "this session";
     }
+    ### XXX need to flag optional modules as '(optional)' if they are
+    # from recommends/suggests -- i.e. *show* failure, but make it clear
+    # it was failure of optional module -- xdg, 2012-04-01
     if (@failed) {
         my $print;
         my $debug = 0;
@@ -1461,7 +1467,7 @@ sub print_ornamented {
     }
     if ($self->colorize_output) {
         if ( $CPAN::DEBUG && $swhat =~ /^Debug\(/ ) {
-            # if you want to have this configurable, please file a bugreport
+            # if you want to have this configurable, please file a bug report
             $ornament = $CPAN::Config->{colorize_debug} || "black on_cyan";
         }
         my $color_on = eval { Term::ANSIColor::color($ornament) } || "";
@@ -1812,11 +1818,18 @@ to find objects with matching identifiers.
             }
             CPAN->debug("Going to panic. meth[$meth]s[$s]") if $CPAN::DEBUG;
             $CPAN::Frontend->mydie("Panic: obj[$serialized] cannot meth[$meth]");
-        } elsif ($obj->$meth()) {
-            CPAN::Queue->delete($s);
-            CPAN->debug("From queue deleted. meth[$meth]s[$s]") if $CPAN::DEBUG;
         } else {
-            CPAN->debug("Failed. pragma[@pragma]meth[$meth]") if $CPAN::DEBUG;
+            my $upgraded_meth = $meth;
+            if ( $meth eq "make" and $obj->{reqtype} eq "b" ) {
+                # rt 86915
+                $upgraded_meth = "test";
+            }
+            if ($obj->$upgraded_meth()) {
+                CPAN::Queue->delete($s);
+                CPAN->debug("Succeeded and deleted from queue. pragma[@pragma]meth[$meth][s][$s]") if $CPAN::DEBUG;
+            } else {
+                CPAN->debug("Failed. pragma[@pragma]meth[$meth]s[$s]") if $CPAN::DEBUG;
+            }
         }
 
         $obj->undelay;

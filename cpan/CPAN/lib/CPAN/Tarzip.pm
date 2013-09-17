@@ -73,6 +73,7 @@ sub gzip {
         my $cwd = `pwd`;
         my $gz = Compress::Zlib::gzopen($write, "wb")
             or $CPAN::Frontend->mydie("Cannot gzopen $write: $! (pwd is $cwd)\n");
+        binmode($fhw);
         $gz->gzwrite($buffer)
             while read($fhw,$buffer,4096) > 0 ;
         $gz->gzclose() ;
@@ -94,8 +95,9 @@ sub gunzip {
             or $CPAN::Frontend->mydie("Could not open >$write: $!");
         my $gz = Compress::Zlib::gzopen($read, "rb")
             or $CPAN::Frontend->mydie("Cannot gzopen $read: $!\n");
+        binmode($fhw);
         $fhw->print($buffer)
-        while $gz->gzread($buffer) > 0 ;
+            while $gz->gzread($buffer) > 0 ;
         $CPAN::Frontend->mydie("Error reading from $read: $!\n")
             if $gz->gzerror != Compress::Zlib::Z_STREAM_END();
         $gz->gzclose() ;

@@ -267,7 +267,7 @@ sub clean   { shift->rematein('clean',@_); }
 #-> sub CPAN::Bundle::uptodate ;
 sub uptodate {
     my($self) = @_;
-    return 0 unless $self->SUPER::uptodate; # we mut have the current Bundle def
+    return 0 unless $self->SUPER::uptodate; # we must have the current Bundle def
     my $c;
     foreach $c ($self->contains) {
         my $obj = CPAN::Shell->expandany($c);

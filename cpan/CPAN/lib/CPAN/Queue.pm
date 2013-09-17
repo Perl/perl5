@@ -99,9 +99,13 @@ sub delete_first {
     for my $i (0..$#All) {
         if (  $All[$i]->{qmod} eq $what ) {
             splice @All, $i, 1;
-            return;
+            last;
         }
     }
+    CPAN->debug(sprintf("after delete_first mod[%s] All[%s]",
+                        $what,
+                        join("",map {sprintf " %s\[%s]\n",$_->{qmod},$_->{reqtype}} @All)
+                       )) if $CPAN::DEBUG;
 }
 
 # CPAN::Queue::jumpqueue ;

@@ -404,7 +404,7 @@ use File::Glob qw(:case);
 
     'CPAN' => {
         'MAINTAINER'   => 'andk',
-        'DISTRIBUTION' => 'ANDK/CPAN-2.00.tar.gz',
+        'DISTRIBUTION' => 'ANDK/CPAN-2.03-TRIAL.tar.gz',
         'FILES'        => q[cpan/CPAN],
         'EXCLUDED'     => [
             qr{^distroprefs/},
@@ -412,6 +412,7 @@ use File::Glob qw(:case);
             qr{^t/CPAN/authors/},
             qw( lib/CPAN/Admin.pm
                 scripts/cpan-mirrors
+                PAUSE2015.pub
                 SlayMakefile
                 t/00signature.t
                 t/04clean_load.t
@@ -430,6 +431,7 @@ use File::Glob qw(:case);
                 t/52podcover.t
                 t/60credentials.t
                 t/70_critic.t
+                t/71_minimumversion.t
                 t/CPAN/CpanTestDummies-1.55.pm
                 t/CPAN/TestConfig.pm
                 t/CPAN/TestMirroredBy

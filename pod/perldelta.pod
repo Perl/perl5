@@ -271,6 +271,13 @@ This module now works on EBCDIC platforms.
 
 =item *
 
+L<CPAN> has been upgraded from version 2.00 to 2.03-TRIAL.
+
+Numerous updates and bug fixes are incorporated.  See the F<Changes> file for
+full details.
+
+=item *
+
 L<CPAN::Meta> has been upgraded from version 2.132140 to 2.132510.
 
 No changes have been made to the installed code other than the version bump to
