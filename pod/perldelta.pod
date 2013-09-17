@@ -321,6 +321,14 @@ fixed.
 
 =item *
 
+L<diagnostics> has been upgraded from version 1.32 to 1.33.
+
+C<=back> is now treated as the end of a warning description, thus keeping any
+trailing data in the file from showing up as part of the last warning's
+description.  [perl #119817]
+
+=item *
+
 L<DynaLoader> has been upgraded from version 1.19 to 1.20.
 
 The documentation now makes it clear, as has always been the case, that
