@@ -1177,6 +1177,11 @@ far fewer false positives.  In particular, C<@hash{+function_returning_a_list}>
 and C<@hash{ qw "foo bar baz" }> no longer warn.  The same applies to array
 slices.  [perl #28380, #114024]
 
+=item *
+
+C< $! = EINVAL; waitpid(0, WNOHANG); > no longer goes into an internal
+infinite loop. [perl #85228]
+
 =back
 
 =head1 Known Problems
