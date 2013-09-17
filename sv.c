@@ -10808,10 +10808,10 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	    q++;
 	    break;
 #endif
-#if defined(HAS_QUAD) || defined(HAS_LONG_DOUBLE)
+#if IVSIZE >= 8 || defined(HAS_LONG_DOUBLE)
 	case 'L':			/* Ld */
 	    /*FALLTHROUGH*/
-#ifdef HAS_QUAD
+#if IVSIZE >= 8
 	case 'q':			/* qd */
 #endif
 	    intsize = 'q';
@@ -10820,7 +10820,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 #endif
 	case 'l':
 	    ++q;
-#if defined(HAS_QUAD) || defined(HAS_LONG_DOUBLE)
+#if IVSIZE >= 8 || defined(HAS_LONG_DOUBLE)
 	    if (*q == 'l') {	/* lld, llf */
 		intsize = 'q';
 		++q;
@@ -10980,7 +10980,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 		case 'j':	iv = va_arg(*args, intmax_t); break;
 #endif
 		case 'q':
-#ifdef HAS_QUAD
+#if IVSIZE >= 8
 				iv = va_arg(*args, Quad_t); break;
 #else
 				goto unknown;
@@ -10996,7 +10996,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 		case 'V':
 		default:	iv = tiv; break;
 		case 'q':
-#ifdef HAS_QUAD
+#if IVSIZE >= 8
 				iv = (Quad_t)tiv; break;
 #else
 				goto unknown;
@@ -11078,7 +11078,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 #endif
 		default:   uv = va_arg(*args, unsigned); break;
 		case 'q':
-#ifdef HAS_QUAD
+#if IVSIZE >= 8
 			   uv = va_arg(*args, Uquad_t); break;
 #else
 			   goto unknown;
@@ -11094,7 +11094,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 		case 'V':
 		default:	uv = tuv; break;
 		case 'q':
-#ifdef HAS_QUAD
+#if IVSIZE >= 8
 				uv = (Uquad_t)tuv; break;
 #else
 				goto unknown;
@@ -11418,7 +11418,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 		case 'j':	*(va_arg(*args, intmax_t*)) = i; break;
 #endif
 		case 'q':
-#ifdef HAS_QUAD
+#if IVSIZE >= 8
 				*(va_arg(*args, Quad_t*)) = i; break;
 #else
 				goto unknown;

@@ -190,7 +190,7 @@ Perl_uvoffuni_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
 	*d++ = (U8)(( uv        & 0x3f) | 0x80);
 	return d;
     }
-#ifdef HAS_QUAD
+#ifdef UTF8_QUAD_MAX
     if (uv < UTF8_QUAD_MAX)
 #endif
     {
@@ -203,7 +203,7 @@ Perl_uvoffuni_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
 	*d++ = (U8)(( uv        & 0x3f) | 0x80);
 	return d;
     }
-#ifdef HAS_QUAD
+#ifdef UTF8_QUAD_MAX
     {
 	*d++ =                            0xff;		/* Can't match U+FFFE! */
 	*d++ =                            0x80;		/* 6 Reserved bits */

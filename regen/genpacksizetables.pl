@@ -13,7 +13,6 @@ sub make_text {
     $text .= ",";
 
     if ($condition) {
-        $condition = join " && ", map {"defined($_)"} split ' ', $condition;
         $text = "#if $condition
 $text
 #else
@@ -121,9 +120,9 @@ N!			=SIZE32
 L			=SIZE32
 p		*	char *
 w	*	*	char
-q			Quad_t	HAS_QUAD
-Q			Uquad_t	HAS_QUAD
+q			Quad_t	IVSIZE >= 8
+Q			Uquad_t	IVSIZE >= 8
 f			float
 d			double
 F			=NVSIZE
-D			=LONG_DOUBLESIZE	HAS_LONG_DOUBLE USE_LONG_DOUBLE
+D			=LONG_DOUBLESIZE	defined(HAS_LONG_DOUBLE) && defined(USE_LONG_DOUBLE)
