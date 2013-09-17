@@ -2,7 +2,6 @@
 
 =for comment
 To do:
-3f40aba3 Merge branch 'ebcdic' into blead
 df8c7dee Fix segfault in filehandle duplication
 b66f3475 Fix PerlIO_get_cnt and friends
 
@@ -58,6 +57,16 @@ characters.  [perl #112790, #116907]
 
 The new C<%hash{...}> and C<@array[...]> syntax returns a list of key/value (or
 index/value) pairs.
+
+=head2 EBCDIC support
+
+Core Perl now mostly works on EBCDIC platforms.   This is not true of
+many modules, including some which are shipped with this release.  If
+you have resources to help continue this process, including test
+machines, send email to L<mailto:perl-mvs@perl.org>.
+
+As a result of this, certain C<XS> functions are now deprecated; see
+L</Internal Changes>.
 
 =head1 Security
 
@@ -974,6 +983,21 @@ C<\$array[0]> will compare equal to C<\undef>.
 The SV returned by HeSVKEY_force() now correctly reflects the UTF8ness
 of the underlying hash key when that key is not stored as a SV.  [perl
 #79074]
+
+=item *
+
+Certain rarely used functions and macros available to C<XS> code are
+now, or are planned to be deprecated.  These are:
+C<utf8n_to_uvuni> (use C<utf8_to_uvchr_buf> instead),
+C<utf8_to_uni_buf> (use C<utf8_to_uvchr_buf> instead),
+C<valid_utf8_to_uvuni> (use C<utf8_to_uvchr_buf> instead),
+C<uvuni_to_utf8> (use C<uvchr_to_utf8> instead),
+C<NATIVE_TO_NEED> (this did not work properly anyway),
+and C<ASCII_TO_NEED>  (this did not work properly anyway).
+
+Starting in this release, almost never does application code need to
+distinguish between the platform's character set and Latin1, on which the
+lowest 256 characters of Unicode are based.
 
 =back
 
