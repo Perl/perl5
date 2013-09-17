@@ -4,7 +4,7 @@
 # we've not yet verified that use works.
 # use strict;
 
-print "1..28\n";
+print "1..29\n";
 my $test = 0;
 
 # Historically constant folding was performed by evaluating the ops, and if
@@ -165,3 +165,9 @@ for(1+2) {
 eval { ${\"hello\n"}++ };
 print "not " unless $@ =~ "Modification of a read-only value attempted at";
 print "ok ", ++$test, " - qq with no vars is a constant\n";
+
+# [perl #119501]
+my @values;
+for (1,2) { for (\(1+3)) { push @values, $$_; $$_++ } }
+is "@values", "4 4",
+   '\1+3 folding making modification affect future retvals';

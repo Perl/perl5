@@ -3347,6 +3347,11 @@ S_fold_constants(pTHX_ OP *o)
 	break;
     case OP_REPEAT:
 	if (o->op_private & OPpREPEAT_DOLIST) goto nope;
+	break;
+    case OP_SREFGEN:
+	if (cUNOPx(cUNOPo->op_first)->op_first->op_type != OP_CONST
+	 || SvPADTMP(cSVOPx_sv(cUNOPx(cUNOPo->op_first)->op_first)))
+	    goto nope;
     }
 
     if (PL_parser && PL_parser->error_count)
