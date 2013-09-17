@@ -520,14 +520,6 @@ use File::Glob qw(:case);
         'UPSTREAM'   => 'blead',
     },
 
-    'Devel::SelfStubber' => {
-        'MAINTAINER'   => 'p5p',
-        'DISTRIBUTION' => 'FLORA/Devel-SelfStubber-1.05.tar.gz',
-        'FILES'        => q[dist/Devel-SelfStubber],
-        'EXCLUDED'     => [qr{^t/release-.*\.t}],
-        'UPSTREAM'     => 'blead',
-    },
-
     'Devel::Peek' => {
         'MAINTAINER' => 'p5p',
         'FILES'      => q[ext/Devel-Peek],
@@ -540,6 +532,14 @@ use File::Glob qw(:case);
         'FILES'        => q[cpan/Devel-PPPort],
         'EXCLUDED'     => ['PPPort.pm'],    # we use PPPort_pm.PL instead
         'UPSTREAM'     => undef, # rjbs has asked mhx to have blead be upstream
+    },
+
+    'Devel::SelfStubber' => {
+        'MAINTAINER'   => 'p5p',
+        'DISTRIBUTION' => 'FLORA/Devel-SelfStubber-1.05.tar.gz',
+        'FILES'        => q[dist/Devel-SelfStubber],
+        'EXCLUDED'     => [qr{^t/release-.*\.t}],
+        'UPSTREAM'     => 'blead',
     },
 
     'diagnostics' => {
@@ -728,17 +728,10 @@ use File::Glob qw(:case);
         'UPSTREAM'     => 'blead',
     },
 
-    'perlfaq' => {
-        'MAINTAINER'   => 'perlfaq',
-        'DISTRIBUTION' => 'LLAP/perlfaq-5.0150044.tar.gz',
-        'FILES'        => q[cpan/perlfaq],
-        'EXCLUDED'     => [
-            qw( t/release-pod-syntax.t
-                t/release-eol.t
-                t/release-no-tabs.t
-                )
-        ],
-        'UPSTREAM' => 'cpan',
+    'Fcntl' => {
+        'MAINTAINER' => 'p5p',
+        'FILES'      => q[ext/Fcntl],
+        'UPSTREAM'   => 'blead',
     },
 
     'File::Basename' => {
@@ -894,12 +887,6 @@ use File::Glob qw(:case);
         'UPSTREAM'   => 'blead',
     },
 
-    'Fcntl' => {
-        'MAINTAINER' => 'p5p',
-        'FILES'      => q[ext/Fcntl],
-        'UPSTREAM'   => 'blead',
-    },
-
     'Getopt::Long' => {
         'MAINTAINER'   => 'jv',
         'DISTRIBUTION' => 'JV/Getopt-Long-2.41.tar.gz',
@@ -920,15 +907,15 @@ use File::Glob qw(:case);
         'UPSTREAM'   => 'blead',
     },
 
-    'Hash::Util::FieldHash' => {
-        'MAINTAINER' => 'p5p',
-        'FILES'      => q[ext/Hash-Util-FieldHash],
-        'UPSTREAM'   => 'blead',
-    },
-
     'Hash::Util' => {
         'MAINTAINER' => 'p5p',
         'FILES'      => q[ext/Hash-Util],
+        'UPSTREAM'   => 'blead',
+    },
+
+    'Hash::Util::FieldHash' => {
+        'MAINTAINER' => 'p5p',
+        'FILES'      => q[ext/Hash-Util-FieldHash],
         'UPSTREAM'   => 'blead',
     },
 
@@ -1352,6 +1339,14 @@ use File::Glob qw(:case);
         # directory.
     },
 
+    'Perl::OSType' => {
+        'MAINTAINER'   => 'dagolden',
+        'DISTRIBUTION' => 'DAGOLDEN/Perl-OSType-1.005.tar.gz',
+        'FILES'        => q[cpan/Perl-OSType],
+        'EXCLUDED'     => [qw(cpanfile), qr/^xt/, qr{^t/00-}],
+        'UPSTREAM'     => 'cpan',
+    },
+
     'perldtrace' => {
         'MAINTAINER' => 'sartak',
         'FILES'      => q[pod/perldtrace.pod],
@@ -1362,6 +1357,19 @@ use File::Glob qw(:case);
         'MAINTAINER' => 'pvhp',
         'FILES'      => q[pod/perlebcdic.pod],
         'UPSTREAM'   => undef,
+    },
+
+    'perlfaq' => {
+        'MAINTAINER'   => 'perlfaq',
+        'DISTRIBUTION' => 'LLAP/perlfaq-5.0150044.tar.gz',
+        'FILES'        => q[cpan/perlfaq],
+        'EXCLUDED'     => [
+            qw( t/release-pod-syntax.t
+                t/release-eol.t
+                t/release-no-tabs.t
+                )
+        ],
+        'UPSTREAM' => 'cpan',
     },
 
     'PerlIO' => {
@@ -1406,14 +1414,6 @@ use File::Glob qw(:case);
         ],
 
         'UPSTREAM'     => undef,
-    },
-
-    'Perl::OSType' => {
-        'MAINTAINER'   => 'dagolden',
-        'DISTRIBUTION' => 'DAGOLDEN/Perl-OSType-1.005.tar.gz',
-        'FILES'        => q[cpan/Perl-OSType],
-        'EXCLUDED'     => [qw(cpanfile), qr/^xt/, qr{^t/00-}],
-        'UPSTREAM'     => 'cpan',
     },
 
     'perlpacktut' => {
@@ -1552,6 +1552,12 @@ use File::Glob qw(:case);
         'MAINTAINER' => 'p5p',
         'FILES'      => q[ext/re],
         'UPSTREAM'   => 'blead',
+    },
+
+    's2p' => {
+        'MAINTAINER' => 'laun',
+        'FILES'      => q[x2p/s2p.PL],
+        'UPSTREAM'   => undef,
     },
 
     'Safe' => {
@@ -2078,12 +2084,6 @@ use File::Glob qw(:case);
         ],
         # Revert UPSTREAM to 'blead' after 0.17 is released
         'UPSTREAM' => undef,
-    },
-
-    's2p' => {
-        'MAINTAINER' => 'laun',
-        'FILES'      => q[x2p/s2p.PL],
-        'UPSTREAM'   => undef,
     },
 
     # this pseudo-module represents all the files under ext/ and lib/
