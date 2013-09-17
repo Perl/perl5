@@ -868,6 +868,11 @@ expression matches on very large strings now succeed as expected.
 
 =item *
 
+A bug that was fixed in Perl 5.15.4 is now tested by the new test script
+F<t/io/eintr_print.t>.  [perl #119097]
+
+=item *
+
 The new test scripts F<t/op/kvaslice.t> and F<t/op/kvhslice.t> test the new
 index/value array slice and key/value hash slice syntax respectively.
 
@@ -875,6 +880,11 @@ index/value array slice and key/value hash slice syntax respectively.
 
 Various cases of C<die>, C<last>, C<goto> and C<exit> triggering C<DESTROY> are
 now tested by the new test script F<t/op/rt119311.t>.
+
+=item *
+
+The new test script F<t/op/waitpid.t> tests the fix for [perl #85228] (see
+L</Selected Bug Fixes>).
 
 =item *
 
@@ -1179,8 +1189,8 @@ slices.  [perl #28380, #114024]
 
 =item *
 
-C< $! = EINVAL; waitpid(0, WNOHANG); > no longer goes into an internal
-infinite loop. [perl #85228]
+C< $! = EINVAL; waitpid(0, WNOHANG); > no longer goes into an internal infinite
+loop.  [perl #85228]
 
 =back
 
