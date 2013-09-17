@@ -490,7 +490,7 @@ The new kvaslice and kvhslice operators have been added.
 
 =item *
 
-L<parent> has been upgraded from version 0.226 to 0.227.
+L<parent> has been upgraded from version 0.226 to 0.228.
 
 No changes have been made to the installed code other than the version bump to
 keep in sync with the latest CPAN release.
