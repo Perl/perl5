@@ -37,6 +37,7 @@ sub leak {
 # if the name is absent.
 sub eleak {
     my ($n,$delta,$code,@rest) = @_;
+    no warnings 'deprecated'; # Silence the literal control character warning
     leak $n, $delta, sub { eval $code },
          @rest ? @rest : $code
 }

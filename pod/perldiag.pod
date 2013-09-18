@@ -6077,6 +6077,13 @@ startup.
 In code that currently says C<use AutoLoader; @ISA = qw(AutoLoader);>
 you should remove AutoLoader from @ISA and change C<use AutoLoader;> to
 C<use AutoLoader 'AUTOLOAD';>.
+ 
+=item Use of literal control characters in variable names is deprecated
+
+(D deprecated) Using literal control characters in the source to refer
+to the ^FOO variables, like C<$^X> and C<${^GLOBAL_PHASE}> is now
+deprecated.  This only affects code like C<$\cT>, where \cT is a control in
+the source code: C<${"\cT"}> and C<$^T> remain valid.
 
 =item Use of %s in printf format not supported
 
