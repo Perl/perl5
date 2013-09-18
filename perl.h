@@ -1610,6 +1610,9 @@ typedef UVTYPE UV;
    breakage on CPAN for too little gain. (See RT #119753)
    However, we do need HAS_QUAD in the core for use by the drand48 code.  */
 #    undef HAS_QUAD
+#elif defined(_MSC_VER) && _MSC_VER < 1300
+/* Undef HAS_QUAD in core for Win32 VC6 because it has poor __int64 support. */
+#    undef HAS_QUAD
 #endif
 #  endif
 #endif
