@@ -143,9 +143,9 @@ print "ok 23\n" ;
     print "ok 24 - added socket\n";
     close $fh;
     print "not " unless $sel->remove($fh) == 1;
-    print "ok 25 - removed closed socket # TODO code doesn't update count\n";
+    print "ok 25 - removed closed socket\n";
     print "not " unless $sel->count == 1;
     print "ok 26 - count() updated\n";
     print "not " unless $sel->bits ne $oldbits;
-    print "ok 27 - bits() updated # TODO code doesn't update bits\n";
+    print "ok 27 - bits() updated\n";
 }
