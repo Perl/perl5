@@ -60,7 +60,7 @@ characters.  [perl #112790, #116907]
 
 =head2 New slice syntax
 
-The new C<%hash{...}> and C<@array[...]> syntax returns a list of key/value (or
+The new C<%hash{...}> and C<%array[...]> syntax returns a list of key/value (or
 index/value) pairs.
 
 =head2 EBCDIC support
