@@ -3,7 +3,7 @@ use strict;
 use vars qw/$VERSION %released %version %families %upstream
 	    %bug_tracker %deprecated/;
 use Module::CoreList::TieHashDelta;
-$VERSION = '2.98';
+$VERSION = '2.99';
 
 my $dumpinc = 0;
 sub import {
@@ -8650,6 +8650,46 @@ my %delta = (
         }
     },
 );
+
+sub is_core
+{
+    my $module = shift;
+    $module = shift if eval { $module->isa(__PACKAGE__) } && @_ > 0 && defined($_[0]) && $_[0] =~ /^\w/;
+    my ($module_version, $perl_version);
+
+    $module_version = shift if @_ > 0;
+    $perl_version   = @_ > 0 ? shift : $^V;
+
+    my $first_release = first_release($module);
+
+    return 0 if !defined($first_release) || $first_release > $perl_version;
+
+    my $final_release = removed_from($module);
+
+    return 0 if defined($final_release) && $perl_version > $final_release;
+
+    # If a minimum version of the module was specified:
+    # Step through all perl release numbers ($prn)
+    # in order, so we can find what version of the module
+    # was included in the specified version of perl.
+    # On the way if we pass the required module version, we can
+    # short-circuit and return true
+    if (defined($module_version)) {
+        RELEASE:
+        foreach my $prn (sort keys %delta) {
+            next RELEASE if $prn <= $first_release;
+            last RELEASE if $prn > $perl_version;
+            next unless defined(my $next_module_version
+                                   = $delta{$prn}->{changed}->{$module});
+            return 1 if $next_module_version >= $module_version;
+        }
+        return 0;
+    }
+
+    return 1 if !defined($final_release);
+
+    return $perl_version <= $final_release;
+}
 
 for my $version (sort { $a <=> $b } keys %delta) {
     my $data = $delta{$version};

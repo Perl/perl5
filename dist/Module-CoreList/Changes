@@ -1,6 +1,9 @@
 2.99
   - fixed Module::Build core deprecation
   - changes_between now has the same API as all other functions
+  - added is_core() which returns true if a module is/was core
+    in a specific version of Perl. Can optionally specify minimum
+    version of the module.
 
 2.98 Wed Aug 21 2013
   - Prepared for v5.19.4

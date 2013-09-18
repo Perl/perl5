@@ -489,9 +489,14 @@ by using SSize_t instead of I32 for array indices.
 
 =item *
 
-L<Module::CoreList> has been upgraded from version 2.97 to 2.98.
+L<Module::CoreList> has been upgraded from version 2.97 to 2.99.
 
 The list of Perl versions covered has been updated.
+
+A function C<is_core()> has been added, which returns true if the
+specified module was bundled with Perl. Optionally you can specify
+a minimum version of the module, and the specific version of Perl
+you're interested in (defaults to C<$^V>, the running version of Perl).
 
 =item *
 
