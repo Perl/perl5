@@ -22,7 +22,7 @@ sub syscopy;
 sub cp;
 sub mv;
 
-$VERSION = '2.27';
+$VERSION = '2.28';
 
 require Exporter;
 @ISA = qw(Exporter);
@@ -461,8 +461,10 @@ argument may be a string, a FileHandle reference or a FileHandle
 glob. Obviously, if the first argument is a filehandle of some
 sort, it will be read from, and if it is a file I<name> it will
 be opened for reading. Likewise, the second argument will be
-written to (and created if need be).  Trying to copy a file on top
-of itself is an error.
+written to. If the second argument does not exist but the parent
+directory does exist, then it will be created. Trying to copy
+a file into a non-existent directory is an error.
+Trying to copy a file on top of itself is also an error.
 
 If the destination (second argument) already exists and is a directory,
 and the source (first argument) is not a filehandle, then the source
