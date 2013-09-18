@@ -9,7 +9,7 @@
 
 /* Package name      : perl5
  * Source directory  : 
- * Configuration time: Tue Aug 13 14:20:46 2013
+ * Configuration time: Wed Sep 18 14:03:46 2013
  * Configured by     : shay
  * Target system     : 
  */
@@ -892,6 +892,15 @@
 #define OSNAME "MSWin32"		/**/
 #define OSVERS "6.1"		/**/
 
+/* MULTIARCH:
+ *	This symbol, if defined, signifies that the build
+ *	process will produce some binary files that are going to be
+ *	used in a cross-platform environment.  This is the case for
+ *	example with the NeXT "fat" binaries that contain executables
+ *	for several CPUs.
+ */
+/*#define MULTIARCH		/ **/
+
 /* USE_CROSS_COMPILE:
  *	This symbol, if defined, indicates that Perl is being cross-compiled.
  */
@@ -903,15 +912,6 @@
 /*#define	USE_CROSS_COMPILE	/ **/
 #define	PERL_TARGETARCH	""	/**/
 #endif
-
-/* MULTIARCH:
- *	This symbol, if defined, signifies that the build
- *	process will produce some binary files that are going to be
- *	used in a cross-platform environment.  This is the case for
- *	example with the NeXT "fat" binaries that contain executables
- *	for several CPUs.
- */
-/*#define MULTIARCH		/ **/
 
 /* MEM_ALIGNBYTES:
  *	This symbol contains the number of bytes required to align a
@@ -3118,10 +3118,10 @@
  *	function used to generate normalized random numbers.
  *	Values include 15, 16, 31, and 48.
  */
-#define Drand01()		(rand()/(double)((unsigned)1<<RANDBITS))		/**/
-#define Rand_seed_t		unsigned		/**/
-#define seedDrand01(x)	srand((Rand_seed_t)x)	/**/
-#define RANDBITS		15		/**/
+#define Drand01()		Perl_drand48()		/**/
+#define Rand_seed_t		U32		/**/
+#define seedDrand01(x)	Perl_drand48_init((Rand_seed_t)x)	/**/
+#define RANDBITS		48		/**/
 
 /* Select_fd_set_t:
  *	This symbol holds the type used for the 2nd, 3rd, and 4th
@@ -4169,8 +4169,10 @@
 #define USE_DYNAMIC_LOADING		/**/
 
 /* FFLUSH_NULL:
- *	This symbol, if defined, tells that fflush(NULL) does flush
- *	all pending stdio output.
+ *	This symbol, if defined, tells that fflush(NULL) correctly
+ *	flushes all pending stdio output without side effects. In
+ *	particular, on some platforms calling fflush(NULL) *still*
+ *	corrupts STDIN if it is a pipe.
  */
 /* FFLUSH_ALL:
  *	This symbol, if defined, tells that to flush
