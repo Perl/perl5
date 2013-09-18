@@ -110,7 +110,9 @@ sub removed_raw {
 }
 
 sub changes_between {
-  my ($left_ver, $right_ver) = @_;
+  my $left_ver = shift;
+  $left_ver = shift if eval { $left_ver->isa(__PACKAGE__) };
+  my $right_ver = shift;
 
   my $left  = $version{ $left_ver };
   my $right = $version{ $right_ver };
