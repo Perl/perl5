@@ -9418,7 +9418,7 @@ S_scan_ident(pTHX_ char *s, char *dest, STRLEN destlen, I32 ck_uni)
 	bracket = s;
 	s++;
 	orig_copline = CopLINE(PL_curcop);
-        while (s < PL_bufend && isSPACE(*s)) {
+        if (s < PL_bufend && isSPACE(*s)) {
             s = PEEKSPACE(s);
         }
     }
@@ -9478,7 +9478,7 @@ S_scan_ident(pTHX_ char *s, char *dest, STRLEN destlen, I32 ck_uni)
         parse_ident(&s, &d, e, 1, is_utf8);
 	    *d = '\0';
             tmp_copline = CopLINE(PL_curcop);
-            while (s < PL_bufend && isSPACE(*s)) {
+            if (s < PL_bufend && isSPACE(*s)) {
                 s = PEEKSPACE(s);
             }
 	    if ((*s == '[' || (*s == '{' && strNE(dest, "sub")))) {
@@ -9517,7 +9517,7 @@ S_scan_ident(pTHX_ char *s, char *dest, STRLEN destlen, I32 ck_uni)
 
         if ( !tmp_copline )
             tmp_copline = CopLINE(PL_curcop);
-        while (s < PL_bufend && isSPACE(*s)) {
+        if (s < PL_bufend && isSPACE(*s)) {
             s = PEEKSPACE(s);
         }
 	    
