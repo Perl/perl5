@@ -9,7 +9,6 @@ e94bb470 install useful Regexp::CARP_TRACE from Carp
 9d32676e [perl #117265] fix various problems with safesyscalls
 9c7618be regcomp.c: Use Perl_form() instead of buggy sprintf
 531d75b0 [perl #89502]: Add support for Atari FreeMiNT platform
-acb34050 [perl #119501] \(1+2) always referencing the same sv
 
 =head1 NAME
 
@@ -1244,6 +1243,12 @@ slices.  [perl #28380, #114024]
 
 C< $! = EINVAL; waitpid(0, WNOHANG); > no longer goes into an internal infinite
 loop.  [perl #85228]
+
+=item *
+
+Perl 5.19.3 accidentally caused C<\(1+2)> to return a reference to the same
+mutable scalar each time, so that modifications affect future evaluations.
+This has been fixed.  [perl #119501]
 
 =back
 
