@@ -20,8 +20,12 @@ require 'regen/regen_lib.pl';
 
 open MANIFEST, '<', 'MANIFEST'
     or die "Can't open MANIFEST: $!";
-my @files = grep m#(?:\.pm|\.pod|_pm\.PL)#, map {s/\s.*//s; $_}
-    grep { m#^(lib|ext|dist|cpan)/# && !m#/(?:t|demo)/# } <MANIFEST>;
+my @files =
+    grep !m#/perl.*\.pod#,
+    grep m#(?:\.pm|\.pod|_pm\.PL)#,
+    map {s/\s.*//s; $_}
+    grep { m#^(lib|ext|dist|cpan)/# && !m#/(?:t|demo)/# }
+    <MANIFEST>;
 close MANIFEST
     or die "$0: failed to close MANIFEST: $!";
 
