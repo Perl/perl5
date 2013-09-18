@@ -136,7 +136,7 @@ sub connect {
 	    }
 	    elsif (!connect($sock,$addr) &&
                 not ($!{EISCONN} || ($^O eq 'MSWin32' &&
-                $! == ($] < 5.019004) ? 10022 : Errno::EINVAL))
+                ($! == ($] < 5.019004) ? 10022 : Errno::EINVAL)))
             ) {
 		# Some systems refuse to re-connect() to
 		# an already open socket and set errno to EISCONN.
