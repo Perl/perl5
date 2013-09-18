@@ -1605,7 +1605,12 @@ typedef UVTYPE UV;
 #  else
 #    undef IV_IS_QUAD
 #    undef UV_IS_QUAD
+#ifndef PERL_CORE
+/* We think that removing this decade-old undef this will cause too much
+   breakage on CPAN for too little gain. (See RT #119753)
+   However, we do need HAS_QUAD in the core for use by the drand48 code.  */
 #    undef HAS_QUAD
+#endif
 #  endif
 #endif
 
