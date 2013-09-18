@@ -1,3 +1,7 @@
+2.99
+  - fixed Module::Build core deprecation
+  - changes_between now has the same API as all other functions
+
 2.98 Wed Aug 21 2013
   - Prepared for v5.19.4
 
