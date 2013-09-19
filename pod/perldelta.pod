@@ -396,6 +396,13 @@ semicolon, just like quoted markers.  [perl #119761]
 
 =item *
 
+L<File::Copy> has been upgraded from version 2.27 to 2.28.
+
+The documentation of C<copy> now makes it clear that trying to copy a file into
+a non-existent directory is not supported.  [perl #119539]
+
+=item *
+
 L<File::Find> has been upgraded from version 1.24 to 1.25.
 
 Better diagnostics are now provided in the case of a failed C<chdir>.
