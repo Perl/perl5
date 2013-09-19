@@ -1524,16 +1524,18 @@ chunk will not be discarded.
 =cut
 */
 
-#define LEX_NO_INCLINE    0x40000000
-#define LEX_NO_NEXT_CHUNK 0x80000000
+#define LEX_NO_SWALLOW_COMMENTS 0x20000000
+#define LEX_NO_INCLINE          0x40000000
+#define LEX_NO_NEXT_CHUNK       0x80000000
 
 void
 Perl_lex_read_space(pTHX_ U32 flags)
 {
     char *s, *bufend;
     const bool can_incline = !(flags & LEX_NO_INCLINE);
+    const bool swallow_comments = !(flags & LEX_NO_SWALLOW_COMMENTS);
     bool need_incline = 0;
-    if (flags & ~(LEX_KEEP_PREVIOUS|LEX_NO_NEXT_CHUNK|LEX_NO_INCLINE))
+    if (flags & ~(LEX_KEEP_PREVIOUS|LEX_NO_NEXT_CHUNK|LEX_NO_INCLINE|LEX_NO_SWALLOW_COMMENTS))
 	Perl_croak(aTHX_ "Lexing code internal error (%s)", "lex_read_space");
 #ifdef PERL_MAD
     if (PL_skipwhite) {
@@ -1547,7 +1549,7 @@ Perl_lex_read_space(pTHX_ U32 flags)
     bufend = PL_parser->bufend;
     while (1) {
 	char c = *s;
-	if (c == '#') {
+	if (swallow_comments && c == '#') {
 	    do {
 		c = *++s;
 	    } while (!(c == '\n' || (c == 0 && s == bufend)));
@@ -1574,7 +1576,7 @@ Perl_lex_read_space(pTHX_ U32 flags)
 	    PL_parser->bufptr = s;
 	    l = CopLINE(PL_curcop);
 	    CopLINE(PL_curcop) += PL_parser->herelines + 1;
-	    got_more = lex_next_chunk(flags);
+	    got_more = lex_next_chunk(flags & ~LEX_NO_SWALLOW_COMMENTS);
 	    CopLINE_set(PL_curcop, l);
 	    s = PL_parser->bufptr;
 	    bufend = PL_parser->bufend;
