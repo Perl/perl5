@@ -146,7 +146,7 @@ foreach my $key (sort keys $delta_data->{changed}) {
 $versions_in_release .= "        },\n";
 $versions_in_release .= "        removed => {\n";
 for my $key (sort keys($delta_data->{removed} || {})) {
-  $versions_in_release .= sprintf "           %-24s=> %s,\n", "'$key'", 1;
+  $versions_in_release .= sprintf "            %-24s=> %s,\n", "'$key'", 1;
 }
 $versions_in_release .= "        }\n";
 $versions_in_release .= "    },\n";
