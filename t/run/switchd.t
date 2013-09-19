@@ -205,9 +205,9 @@ like(
 is(
   runperl(
    switches => [ '-Ilib', '-d:switchd_goto' ],
-   prog => 'sub baz { print qq|hello;| } sub foo { goto &baz } foo()',
+   prog => 'sub baz { print qq|hello;\n| } sub foo { goto &baz } foo()',
    stderr => 1,
   ),
-  "goto<main::baz>;hello;",
+  "goto<main::baz>;hello;\n",
   "DB::goto"
 );
