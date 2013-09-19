@@ -1619,13 +1619,6 @@ typedef UVTYPE UV;
 
 #define SSize_t_MAX (SSize_t)(~(size_t)0 >> 1)
 
-#ifndef HAS_QUAD
-# undef PERL_NEED_MY_HTOLE64
-# undef PERL_NEED_MY_LETOH64
-# undef PERL_NEED_MY_HTOBE64
-# undef PERL_NEED_MY_BETOH64
-#endif
-
 #define IV_DIG (BIT_DIGITS(IVSIZE * 8))
 #define UV_DIG (BIT_DIGITS(UVSIZE * 8))
 
