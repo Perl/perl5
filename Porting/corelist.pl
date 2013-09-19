@@ -82,7 +82,6 @@ if ($cpan) {
     }
 }
 
-
 find(
     sub {
         /(\.pm|_pm\.PL)$/ or return;
@@ -308,21 +307,18 @@ unless ( $pod =~ /and $perl_vstring releases of perl/ ) {
 
 write_corelist($pod,$pod_file);
 
-warn "All done. Please check over $corelist_file and $pod_file carefully before committing. Thanks!\n";
-
-my %utils = map { ( $_ => 1 ) } parse_utils_lst();
-
 open( my $utils_fh, '<', $utils_file );
 my $utils = join( '', <$utils_fh> );
 close $utils_fh;
 
+my %utils = map { ( $_ => 1 ) } parse_utils_lst();
+
 my $delta_utils = make_coreutils_delta($perl_vnum, \%utils);
 
-use Data::Dumper; local $Data::Dumper::Indent=1;
-warn Dumper( $delta_utils );
-exit 0;
-
 write_corelist($utils,$utils_file);
+
+warn "All done. Please check over the following files carefully before committing.\nThanks!\n";
+warn "$corelist_file\n$pod_file\n$utils_file\n";
 
 sub write_corelist {
     my $content = shift;
@@ -357,7 +353,7 @@ sub make_corelist_delta {
   my %deltas;
   # Search for the release with the least amount of changes (this avoids having
   # to ask for where this perl was branched from).
-  for my $previous(reverse sort keys %$existing) {
+  for my $previous (reverse sort keys %$existing) {
     # Shouldn't happen, but ensure we don't load weird data...
     next if $previous > $version || $previous == $version && $previous eq $version;
 
@@ -368,7 +364,7 @@ sub make_corelist_delta {
 
   my $smallest = (sort {
       (keys($deltas{$a}->{changed}) + keys($deltas{$a}->{removed})) <=>
-      (keys($deltas{$b}->{changed})+ keys($deltas{$b}->{removed}))
+      (keys($deltas{$b}->{changed}) + keys($deltas{$b}->{removed}))
     } keys %deltas)[0];
 
   return {
@@ -390,7 +386,7 @@ sub make_coreutils_delta {
   my %deltas;
   # Search for the release with the least amount of changes (this avoids having
   # to ask for where this perl was branched from).
-  for my $previous(reverse sort keys %Module::CoreList::version) {
+  for my $previous (reverse sort keys %Module::CoreList::version) {
     # Shouldn't happen, but ensure we don't load weird data...
     next if $previous > $version || $previous == $version && $previous eq $version;
 
@@ -401,7 +397,7 @@ sub make_coreutils_delta {
 
   my $smallest = (sort {
       (keys($deltas{$a}->{changed}) + keys($deltas{$a}->{removed})) <=>
-      (keys($deltas{$b}->{changed})+ keys($deltas{$b}->{removed}))
+      (keys($deltas{$b}->{changed}) + keys($deltas{$b}->{removed}))
     } keys %deltas)[0];
 
   return {
