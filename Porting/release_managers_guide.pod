@@ -560,14 +560,6 @@ Then change to your perl checkout, and if necessary,
 
     $ make
 
-Before updating Module::CoreList, first edit
-F<dist/Module-CoreList/lib/Module/CoreList.pm> and delete any existing
-entries for this version from the C<%released>, C<%delta> and
-C<%deprecated> hashes: they will have a key like C<5.010001> for 5.10.1.
-
-XXX the edit-in-place functionality of Porting/corelist.pl should
-be fixed to handle this automatically.
-
 Then, If you have a local CPAN mirror, run:
 
     $ ./perl -Ilib Porting/corelist.pl ~/my-cpan-mirror
@@ -580,12 +572,14 @@ This will chug for a while, possibly reporting various warnings about
 badly-indexed CPAN modules unrelated to the modules actually in core.
 Assuming all goes well, it will update
 F<dist/Module-CoreList/lib/Module/CoreList.pm> and possibly
-F<dist/Module-CoreList/lib/Module/CoreList.pod>.
+F<dist/Module-CoreList/lib/Module/CoreList.pod> and/or
+F<dist/Module-CoreList/lib/Module/CoreList/Utils.pm>.
 
 Check those files over carefully:
 
     $ git diff dist/Module-CoreList/lib/Module/CoreList.pm
     $ git diff dist/Module-CoreList/lib/Module/CoreList.pod
+    $ git diff dist/Module-CoreList/lib/Module/CoreList/Utils.pm
 
 =head4 Bump C<$Module::CoreList::VERSION>
 
@@ -654,7 +648,7 @@ Finally, commit the new version of Module::CoreList:
 (unless this is for MAINT; in which case commit it to blead first, then
 cherry-pick it back).
 
-    $ git commit -m 'Update Module::CoreList for 5.x.y' dist/Module-CoreList/lib/Module/CoreList.pm dist/Module-CoreList/lib/Module/CoreList.pod
+    $ git commit -m 'Update Module::CoreList for 5.x.y' dist/Module-CoreList/lib/Module/CoreList.pm dist/Module-CoreList/lib/Module/CoreList.pod dist/Module-CoreList/lib/Module/CoreList/Utils.pm
 
 =head4 Rebuild and test
 
@@ -1348,16 +1342,10 @@ Otherwise, run:
 
     $ ./perl -Ilib Porting/corelist.pl cpan
 
-This will update F<dist/Module-CoreList/lib/Module/CoreList.pm> and
-F<dist/Module-CoreList/lib/Module/CoreList.pod> as it did before, but
-this time adding new sections for the next BLEAD-POINT release.
-
-=item *
-
-Manually edit F<dist/Module-CoreList/lib/Module/CoreList/Utils.pm> to
-add a similar entry for that up-coming version to C<%delta>.
-
-XXX Porting/corelist.pl should have done that itself.
+This will update F<dist/Module-CoreList/lib/Module/CoreList.pm>,
+F<dist/Module-CoreList/lib/Module/CoreList.pod> and
+F<dist/Module-CoreList/lib/Module/CoreList/Utils.pm> as it did before,
+but this time adding new sections for the next BLEAD-POINT release.
 
 =item *
 
