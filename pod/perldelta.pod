@@ -63,13 +63,13 @@ index/value) pairs.
 
 =head2 EBCDIC support
 
-Core Perl now mostly works on EBCDIC platforms.   This is not true of
-many modules, including some which are shipped with this release.  If
-you have resources to help continue this process, including test
-machines, send email to L<mailto:perl-mvs@perl.org>.
+Core Perl now mostly works on EBCDIC platforms.  This is not true of many
+modules, including some which are shipped with this release.  If you have
+resources to help continue this process, including test machines, send email to
+L<mailto:perl-mvs@perl.org>.
 
-As a result of this, certain C<XS> functions are now deprecated; see
-L</Internal Changes>.
+As a result of this, certain XS functions are now deprecated; see L</Internal
+Changes>.
 
 =head1 Security
 
@@ -139,16 +139,15 @@ numeric values under the hood.)
 
 =head2 Literal control characters in variable names
 
-This deprecation affects things like C<$\cT>, where \cT is a literal
-control in the source code.  Surprisingly, it appears that originally
-this was intended as the canonical way of accessing variables like
-C<$^T>, with the caret form only being added as an alternative.
+This deprecation affects things like $\cT, where \cT is a literal control in
+the source code.  Surprisingly, it appears that originally this was intended as
+the canonical way of accessing variables like $^T, with the caret form only
+being added as an alternative.
 
-The literal control form is being deprecated for two main reasons: It
-has what are likely unfixable bugs, such as C<$\cI> not working as an
-alias for C<$^I>, and their usage not being portable to non-ASCII
-platforms: While C<$^T> will work everywhere, C<\cT> is whitespace in
-EBCDIC.
+The literal control form is being deprecated for two main reasons.  It has what
+are likely unfixable bugs, such as $\cI not working as an alias for $^I, and
+their usage not being portable to non-ASCII platforms: While $^T will work
+everywhere, \cT is whitespace in EBCDIC.
 
 =head2 Module removals
 
@@ -230,9 +229,9 @@ C<B::CV::GV>, changing the return value from a C<B::SPECIAL> object on a
 C<NULL> C<CvGV> to C<undef>.  C<B::CV::GV> again returns a C<B::SPECIAL> object
 in this case.  [perl #119351]
 
-B version 1.44 (perl 5.19.2) introduced three new B::OP methods,
-C<slabbed>, C<savefree>, C<static> and C<folded>, but these have never
-actually worked until now.  They used to croak.
+B version 1.44 (Perl 5.19.2) introduced four new B::OP methods, C<slabbed>,
+C<savefree>, C<static> and C<folded>, but these have never actually worked
+until now.  They used to croak.
 
 =item *
 
@@ -492,10 +491,10 @@ L<Module::CoreList> has been upgraded from version 2.97 to 2.99.
 
 The list of Perl versions covered has been updated.
 
-A function C<is_core()> has been added, which returns true if the
-specified module was bundled with Perl. Optionally you can specify
-a minimum version of the module, and the specific version of Perl
-you're interested in (defaults to C<$^V>, the running version of Perl).
+A function C<is_core> has been added, which returns true if the specified
+module was bundled with Perl.  Optionally you can specify a minimum version of
+the module, and the specific version of Perl you're interested in (defaults to
+$^V, the running version of Perl).
 
 =item *
 
@@ -1011,12 +1010,13 @@ L</Modules and Pragmata> section.
 
 =item VMS
 
-The C<PERL_ENV_TABLES> feature to control the population of C<%ENV> at Perl
-start-up was broken in 5.16.0 but has now been fixed.
+The C<PERL_ENV_TABLES> feature to control the population of %ENV at perl
+start-up was broken in Perl 5.16.0 but has now been fixed.
 
 =item Win32
 
-C<rename> and C<link> on Win32 now set C<$!> to ENOSPC and EDQUOT when appropriate. [perl #119857]
+C<rename> and C<link> on Win32 now set $! to ENOSPC and EDQUOT when
+appropriate.  [perl #119857]
 
 =item WinCE
 
@@ -1067,8 +1067,8 @@ of the underlying hash key when that key is not stored as a SV.  [perl
 
 =item *
 
-Certain rarely used functions and macros available to C<XS> code are
-now, or are planned to be deprecated.  These are:
+Certain rarely used functions and macros available to XS code are now, or are
+planned to be, deprecated.  These are:
 C<utf8n_to_uvuni> (use C<utf8_to_uvchr_buf> instead),
 C<utf8_to_uni_buf> (use C<utf8_to_uvchr_buf> instead),
 C<valid_utf8_to_uvuni> (use C<utf8_to_uvchr_buf> instead),
@@ -1260,7 +1260,7 @@ slices.  [perl #28380, #114024]
 
 =item *
 
-C< $! = EINVAL; waitpid(0, WNOHANG); > no longer goes into an internal infinite
+C<$! = EINVAL; waitpid(0, WNOHANG);> no longer goes into an internal infinite
 loop.  [perl #85228]
 
 =item *
