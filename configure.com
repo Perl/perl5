@@ -5275,58 +5275,15 @@ $  endif
 $!
 $! Check rand48 and its ilk
 $!
-$ echo4 "Looking for a random number function..."
-$ OS
-$ WS "#if defined(__DECC) || defined(__DECCXX)"
-$ WS "#include <stdlib.h>"
-$ WS "#endif"
-$ WS "#include <stdio.h>"
-$ WS "int main()"
-$ WS "{"
-$ WS "srand48(12L);"
-$ WS "exit(0);"
-$ WS "}"
-$ CS
-$ GOSUB link_ok
-$ IF compile_status .EQ. good_compile .AND. link_status .EQ. good_link
-$ THEN
-$   drand01 = "drand48()"
-$   randbits = "48"
-$   randfunc = "drand48"
-$   randseedtype = "long int"
-$   seedfunc = "srand48"
-$   echo4 "Good, found drand48()."
-$   d_drand48proto = "define"
-$ ELSE
-$   d_drand48proto = "undef"
-$   drand01="random()"
-$   randbits = "31"
-$   randfunc = "random"
-$   randseedtype = "unsigned"
-$   seedfunc = "srandom"
-$   OS
-$   WS "#if defined(__DECC) || defined(__DECCXX)"
-$   WS "#include <stdlib.h>"
-$   WS "#endif"
-$   WS "#include <stdio.h>"
-$   WS "int main()"
-$   WS "{"
-$   WS "srandom(12);"
-$   WS "exit(0);"
-$   WS "}"
-$   CS
-$   GOSUB link_ok
-$   IF compile_status .EQ. good_compile .AND. link_status .EQ. good_link
-$   THEN
-$     echo4 "OK, found random()."
-$   ELSE
-$     drand01="(((float)rand())*MY_INV_RAND_MAX)"
-$     randfunc = "rand"
-$     randseedtype = "unsigned"
-$     seedfunc = "srand"
-$     echo4 "Yick, looks like I have to use rand()."
-$   ENDIF
-$ ENDIF
+$ echo4 "Using our internal random number implementation..."
+$!
+$ randfunc = "Perl_drand48"
+$ drand01 = "Perl_drand48()"
+$ seedfunc = "Perl_drand48_init"
+$ randbits = "48"
+$ randseedtype = "U32"
+$ d_drand48proto = "define"
+$!
 $! Done with compiler checks. Clean up.
 $ IF F$SEARCH("try.c")  .NES."" THEN DELETE/NOLOG/NOCONFIRM try.c;*
 $ IF F$SEARCH("try.obj").NES."" THEN DELETE/NOLOG/NOCONFIRM try.obj;*
