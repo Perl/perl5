@@ -378,21 +378,21 @@ sub make_coreutils_delta {
   my($version, $lines) = @_;
   # Trust core perl, if someone does use a weird version number the worst that
   # can happen is an extra delta entry for a module.
-  my %versions = map { $_ => eval $lines->{$_} } keys %$lines;
+  my %utilities = map { $_ => eval $lines->{$_} } keys %$lines;
 
   # Ensure we have the corelist data loaded from this perl checkout, not the system one.
-  require $corelist_file;
+  require $utils_file;
 
   my %deltas;
   # Search for the release with the least amount of changes (this avoids having
   # to ask for where this perl was branched from).
-  for my $previous (reverse sort keys %Module::CoreList::version) {
+  for my $previous (reverse sort keys %Module::CoreList::Utils::utilities) {
     # Shouldn't happen, but ensure we don't load weird data...
     next if $previous > $version || $previous == $version && $previous eq $version;
 
     my $delta = $deltas{$previous} = {};
     ($delta->{changed}, $delta->{removed}) = calculate_delta(
-      $Module::CoreList::version{$previous}, \%versions);
+      $Module::CoreList::Utils::utilities{$previous}, \%utilities);
   }
 
   my $smallest = (sort {
