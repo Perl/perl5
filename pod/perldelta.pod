@@ -255,7 +255,7 @@ L<Devel::Peek> has been upgraded from version 1.13 to 1.14.
 
 This upgrade is part of a larger change to preserve referential identity when
 passing C<undef> to a subroutine by using NULL rather than &PL_sv_undef for
-nonexistent array elements.
+non-existent array elements.
 
 In addition, C<Dump> with no args was broken in Perl 5.19.3, but has now been
 fixed.
@@ -394,7 +394,7 @@ L<IPC::Open3> has been upgraded from version 1.15 to 1.16.
 
 This upgrade is part of a larger change to preserve referential identity when
 passing C<undef> to a subroutine by using NULL rather than &PL_sv_undef for
-nonexistent array elements.
+non-existent array elements.
 
 =item *
 
@@ -532,7 +532,7 @@ L<Storable> has been upgraded from version 2.46 to 2.47.
 
 This upgrade is part of a larger change to preserve referential identity when
 passing C<undef> to a subroutine by using NULL rather than &PL_sv_undef for
-nonexistent array elements.
+non-existent array elements.
 
 =item *
 
@@ -1013,11 +1013,11 @@ return true if C<undef> was the first argument.  [perl #7508, #109726]
 
 =item *
 
-Passing a nonexistent array element to a subroutine does not usually autovivify
-it unless the subroutine modifies its argument.  This did not work correctly
-with negative indices and with nonexistent elements within the array.  The
-element would be vivified immediately.  The delayed vivification has been
-extended to work with those.  [perl #118691]
+Passing a non-existent array element to a subroutine does not usually
+autovivify it unless the subroutine modifies its argument.  This did not work
+correctly with negative indices and with non-existent elements within the
+array.  The element would be vivified immediately.  The delayed vivification
+has been extended to work with those.  [perl #118691]
 
 =item *
 
@@ -1059,7 +1059,7 @@ could result in assertion failures or memory leaks.
 
 =item *
 
-Elements of @- and @+ now update correctly when they refer to nonexistent
+Elements of @- and @+ now update correctly when they refer to non-existent
 captures.  Previously, a referenced element (C<$ref = \$-[1]>) could refer to
 the wrong match after subsequent matches.
 
