@@ -55,12 +55,10 @@ This is a synonym for (! foldEQ_locale())
 /* outside the core, perl.h undefs HAS_QUAD if IV isn't 64-bit
    We can't swap this to HAS_QUAD, because the logic here affects the type of
    perl_drand48_t below, and that is visible outside of the core.  */
-#ifdef U64TYPE
-#  if !defined(_MSC_VER) || _MSC_VER >= 1300
+#if defined(U64TYPE) && !defined(USING_MSVC6)
 /* use a faster implementation when quads are available,
  * but not with VC6 on Windows */
 #    define PERL_DRAND48_QUAD
-#  endif
 #endif
 
 #ifdef PERL_DRAND48_QUAD
