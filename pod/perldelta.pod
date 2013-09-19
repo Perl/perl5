@@ -6,7 +6,6 @@ df8c7dee Fix segfault in filehandle duplication
 b66f3475 Fix PerlIO_get_cnt and friends
 e94bb470 install useful Regexp::CARP_TRACE from Carp
 9d32676e [perl #117265] fix various problems with safesyscalls
-9c7618be regcomp.c: Use Perl_form() instead of buggy sprintf
 531d75b0 [perl #89502]: Add support for Atari FreeMiNT platform
 
 =head1 NAME
