@@ -134,7 +134,6 @@ if ($scr_ext) { @scripts = map { "$_$scr_ext" } @scripts; }
 my %archpms = (
     Config => 1,
     lib => 1,
-    Cwd => 1,
 );
 
 if ($^O eq 'dos') {
