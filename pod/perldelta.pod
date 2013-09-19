@@ -1,13 +1,5 @@
 =encoding utf8
 
-=for comment
-To do:
-df8c7dee Fix segfault in filehandle duplication
-b66f3475 Fix PerlIO_get_cnt and friends
-e94bb470 install useful Regexp::CARP_TRACE from Carp
-9d32676e [perl #117265] fix various problems with safesyscalls
-531d75b0 [perl #89502]: Add support for Atari FreeMiNT platform
-
 =head1 NAME
 
 [ this is a template for a new perldelta file.  Any text flagged as XXX needs
@@ -55,6 +47,10 @@ available.
 
 The regular expression engine now supports strings longer than 2**31
 characters.  [perl #112790, #116907]
+
+The functions PerlIO_get_bufsiz, PerlIO_get_cnt, PerlIO_set_cnt and
+PerlIO_set_ptrcnt now have SSize_t, rather than int, return values and
+parameters.
 
 =head2 New slice syntax
 
@@ -257,6 +253,11 @@ L<Carp> has been upgraded from version 1.31 to 1.32.
 In stack traces, subroutine arguments that are strings are now quoted in a
 consistent manner, regardless of what characters they contain and how they're
 internally represented.
+
+=item *
+
+C<Carp> also now shows subroutine arguments that are references to regexp
+objects in a consistent manner in stack traces.
 
 =item *
 
@@ -648,6 +649,7 @@ L<warnings> has been upgraded from version 1.18 to 1.19.
 
 The C<syscalls> warnings category has been added to check for embedded NUL
 (C<"\0">) characters in pathnames and string arguments to other system calls.
+[perl #117265]
 
 =item *
 
@@ -994,6 +996,12 @@ source tree.
 
 =over 4
 
+=item FreeMiNT
+
+Support has been added for FreeMiNT, a free open-source OS for the Atari ST
+system and its successors, based on the original MiNT that was officially
+adopted by Atari.
+
 =item Bitrig
 
 Compile support has been added for Bitrig, a fork of OpenBSD.
@@ -1284,6 +1292,10 @@ loop.  [perl #85228]
 Perl 5.19.3 accidentally caused C<\(1+2)> to return a reference to the same
 mutable scalar each time, so that modifications affect future evaluations.
 This has been fixed.  [perl #119501]
+
+=item *
+
+A possible segmentation fault in filehandle duplication has been fixed.
 
 =back
 
