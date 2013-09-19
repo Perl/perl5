@@ -25,7 +25,7 @@ sub FETCH {
 package main;
 require './test.pl';
 
-plan( tests => 8 );
+plan( tests => 10 );
 
 
 my ($a, $b, $c);
@@ -66,3 +66,20 @@ $c = $a || $b;
     local $TODO = 'Double FETCH';
     is($c, 1,   '   $tied || $var');
 }
+
+my $aa, $bb, $cc;
+$bb = 1;
+
+my $res = 0;
+# Well, really testing OP_DOR I guess
+unless ($aa || $bb // $cc) {
+	$res = 1;
+}
+is($res, 0, "res is 0 after mixed OR/DOR");
+
+$res = 0;
+unless ($aa // $bb || $cc) {
+	$res = 1;
+}
+is($res, 0, "res is 0 after mixed DOR/OR");
+
