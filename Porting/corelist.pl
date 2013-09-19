@@ -22,6 +22,7 @@ use HTTP::Tiny;
 use IO::Uncompress::Gunzip;
 
 my $corelist_file = 'dist/Module-CoreList/lib/Module/CoreList.pm';
+my $utils_file = 'dist/Module-CoreList/lib/Module/CoreList/Utils.pm';
 my $pod_file = 'dist/Module-CoreList/lib/Module/CoreList.pod';
 
 my %lines;
@@ -80,6 +81,7 @@ if ($cpan) {
         $modlist{$1} = $2;
     }
 }
+
 
 find(
     sub {
@@ -308,6 +310,19 @@ write_corelist($pod,$pod_file);
 
 warn "All done. Please check over $corelist_file and $pod_file carefully before committing. Thanks!\n";
 
+my %utils = map { ( $_ => 1 ) } parse_utils_lst();
+
+open( my $utils_fh, '<', $utils_file );
+my $utils = join( '', <$utils_fh> );
+close $utils_fh;
+
+my $delta_utils = make_corelist_delta($perl_vnum, \%utils);
+
+use Data::Dumper; local $Data::Dumper::Indent=1;
+warn Dumper( $delta_utils );
+exit 0;
+
+write_corelist($utils,$utils_file);
 
 sub write_corelist {
     my $content = shift;
@@ -394,4 +409,21 @@ sub quote {
     # the simplest possible thing that'll allow me to release 5.17.7.  --rafl
     $str =~ s/'/\\'/g;
     "'${str}'";
+}
+
+sub parse_utils_lst {
+  require File::Spec::Unix;
+  my @scripts;
+  open my $fh, '<', 'utils.lst' or die "$!\n";
+  while (<$fh>) {
+    chomp;
+    my ($file,$extra) = split m!#!;
+    $file =~ s!\s+!!g;
+    push @scripts, $file;
+    $extra =~ s!\s+!!g if $extra;
+    if ( $extra and my ($link) = $extra =~ m!^link=(.+?)$! ) {
+      push @scripts, $link;
+    }
+  }
+  return map { +( File::Spec::Unix->splitpath( $_ ) )[-1] } @scripts;
 }
