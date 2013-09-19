@@ -315,6 +315,25 @@ my %utils = map { ( $_ => 1 ) } parse_utils_lst();
 
 my $delta_utils = make_coreutils_delta($perl_vnum, \%utils);
 
+my $utilities_in_release = "    " . $perl_vnum . " => {\n";
+$utilities_in_release .= "        delta_from => $delta_utils->{delta_from},\n";
+$utilities_in_release .= "        changed => {\n";
+foreach my $key (sort keys $delta_utils->{changed}) {
+  $utilities_in_release .= sprintf "            %-24s=> %s,\n", "'$key'",
+      defined $delta_utils->{changed}{$key} ? "'"
+        . $delta_utils->{changed}{$key} . "'" : "undef";
+}
+$utilities_in_release .= "        },\n";
+$utilities_in_release .= "        removed => {\n";
+for my $key (sort keys($delta_utils->{removed} || {})) {
+  $utilities_in_release .= sprintf "            %-24s=> %s,\n", "'$key'", 1;
+}
+$utilities_in_release .= "        }\n";
+$utilities_in_release .= "    },\n";
+
+$utils =~ s/^(my %delta\s*=\s*.*?)^\s*$perl_vnum\s*=>\s*{.*?},\s*(^\);)$/$1$2/ism;
+$utils =~ s/^(my %delta\s*=\s*.*?)(^\);)$/$1$utilities_in_release$2/ism;
+
 write_corelist($utils,$utils_file);
 
 warn "All done. Please check over the following files carefully before committing.\nThanks!\n";
