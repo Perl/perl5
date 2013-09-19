@@ -147,7 +147,7 @@ being added as an alternative.
 The literal control form is being deprecated for two main reasons.  It has what
 are likely unfixable bugs, such as $\cI not working as an alias for $^I, and
 their usage not being portable to non-ASCII platforms: While $^T will work
-everywhere, \cT is whitespace in EBCDIC.
+everywhere, \cT is whitespace in EBCDIC.  [perl #119123]
 
 =head2 Module removals
 
@@ -833,6 +833,15 @@ behaves like a scalar, both in the value it returns and when evaluating its
 argument, while C<@foo{&bar}> and provides a list context to its subscript,
 which can do weird things if you're expecting only one subscript.  When called
 in list context, it also returns the key in addition to the value.
+
+=item *
+
+L<Use of literal control characters in variable names is deprecated|perldiag/"Use of literal control characters in variable names is deprecated">
+
+(D deprecated) Using literal control characters in the source to refer to the
+^FOO variables, like $^X and ${^GLOBAL_PHASE} is now deprecated.  This only
+affects code like $\cT, where \cT is a control in the source code: ${"\cT"} and
+$^T remain valid.
 
 =back
 
