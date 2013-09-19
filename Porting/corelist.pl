@@ -382,8 +382,9 @@ sub make_corelist_delta {
   }
 
   my $smallest = (sort {
-      (keys($deltas{$a}->{changed}) + keys($deltas{$a}->{removed})) <=>
-      (keys($deltas{$b}->{changed}) + keys($deltas{$b}->{removed}))
+      ((keys($deltas{$a}->{changed}) + keys($deltas{$a}->{removed})) <=>
+       (keys($deltas{$b}->{changed}) + keys($deltas{$b}->{removed}))) ||
+      $b <=> $a
     } keys %deltas)[0];
 
   return {
@@ -415,8 +416,9 @@ sub make_coreutils_delta {
   }
 
   my $smallest = (sort {
-      (keys($deltas{$a}->{changed}) + keys($deltas{$a}->{removed})) <=>
-      (keys($deltas{$b}->{changed}) + keys($deltas{$b}->{removed}))
+      ((keys($deltas{$a}->{changed}) + keys($deltas{$a}->{removed})) <=>
+       (keys($deltas{$b}->{changed}) + keys($deltas{$b}->{removed}))) ||
+      $b <=> $a
     } keys %deltas)[0];
 
   return {
