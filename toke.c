@@ -3995,7 +3995,7 @@ S_intuit_more(pTHX_ char *s)
 		    int len;
                     char *tmp = PL_bufend;
                     PL_bufend = (char*)send;
-                    scan_ident(s, tmpbuf, sizeof tmpbuf, FALSE);
+                    scan_ident(s, tmpbuf, sizeof tmpbuf, FALSE, LEX_NO_NEXT_CHUNK);
                     PL_bufend = tmp;
 		    len = (int)strlen(tmpbuf);
 		    if (len > 1 && gv_fetchpvn_flags(tmpbuf, len,
@@ -5793,7 +5793,7 @@ Perl_yylex(pTHX)
 
     case '*':
 	if (PL_expect != XOPERATOR) {
-	    s = scan_ident(s, PL_tokenbuf, sizeof PL_tokenbuf, TRUE);
+	    s = scan_ident(s, PL_tokenbuf, sizeof PL_tokenbuf, TRUE, 0);
 	    PL_expect = XOPERATOR;
 	    force_ident(PL_tokenbuf, '*');
 	    if (!*PL_tokenbuf)
@@ -5830,7 +5830,7 @@ Perl_yylex(pTHX)
 	}
 	PL_tokenbuf[0] = '%';
 	s = scan_ident(s, PL_tokenbuf + 1,
-		sizeof PL_tokenbuf - 1, FALSE);
+		sizeof PL_tokenbuf - 1, FALSE, 0);
 	pl_yylval.ival = 0;
 	if (!PL_tokenbuf[1]) {
 	    PREREF('%');
@@ -6338,7 +6338,7 @@ Perl_yylex(pTHX)
 
 	PL_tokenbuf[0] = '&';
 	s = scan_ident(s - 1, PL_tokenbuf + 1,
-		       sizeof PL_tokenbuf - 1, TRUE);
+		       sizeof PL_tokenbuf - 1, TRUE, 0);
 	if (PL_tokenbuf[1]) {
 	    PL_expect = XOPERATOR;
 	    force_ident_maybe_lex('&');
@@ -6571,7 +6571,7 @@ Perl_yylex(pTHX)
 	if (s[1] == '#' && (isIDFIRST_lazy_if(s+2,UTF) || strchr("{$:+-@", s[2]))) {
 	    PL_tokenbuf[0] = '@';
 	    s = scan_ident(s + 1, PL_tokenbuf + 1,
-			   sizeof PL_tokenbuf - 1, FALSE);
+			   sizeof PL_tokenbuf - 1, FALSE, 0);
 	    if (PL_expect == XOPERATOR)
 		no_op("Array length", s);
 	    if (!PL_tokenbuf[1])
@@ -6583,7 +6583,7 @@ Perl_yylex(pTHX)
 
 	PL_tokenbuf[0] = '$';
 	s = scan_ident(s, PL_tokenbuf + 1,
-		       sizeof PL_tokenbuf - 1, FALSE);
+		       sizeof PL_tokenbuf - 1, FALSE, 0);
 	if (PL_expect == XOPERATOR)
 	    no_op("Scalar", s);
 	if (!PL_tokenbuf[1]) {
@@ -6701,7 +6701,7 @@ Perl_yylex(pTHX)
 	if (PL_expect == XOPERATOR)
 	    no_op("Array", s);
 	PL_tokenbuf[0] = '@';
-	s = scan_ident(s, PL_tokenbuf + 1, sizeof PL_tokenbuf - 1, FALSE);
+	s = scan_ident(s, PL_tokenbuf + 1, sizeof PL_tokenbuf - 1, FALSE, 0);
 	pl_yylval.ival = 0;
 	if (!PL_tokenbuf[1]) {
 	    PREREF('@');
@@ -7984,7 +7984,7 @@ Perl_yylex(pTHX)
 		    p += 3;
 		p = PEEKSPACE(p);
 		if (isIDFIRST_lazy_if(p,UTF)) {
-		    p = scan_ident(p, PL_tokenbuf, sizeof PL_tokenbuf, TRUE);
+		    p = scan_ident(p, PL_tokenbuf, sizeof PL_tokenbuf, TRUE, 0);
 		    p = PEEKSPACE(p);
 		}
 		if (*p != '$')
@@ -9370,7 +9370,7 @@ S_scan_word(pTHX_ char *s, char *dest, STRLEN destlen, int allow_package, STRLEN
 }
 
 STATIC char *
-S_scan_ident(pTHX_ char *s, char *dest, STRLEN destlen, I32 ck_uni)
+S_scan_ident(pTHX_ char *s, char *dest, STRLEN destlen, I32 ck_uni, U32 flags)
 {
     dVAR;
     char *bracket = NULL;
@@ -9420,9 +9420,7 @@ S_scan_ident(pTHX_ char *s, char *dest, STRLEN destlen, I32 ck_uni)
 	bracket = s;
 	s++;
 	orig_copline = CopLINE(PL_curcop);
-        if (s < PL_bufend && isSPACE(*s)) {
-            s = PEEKSPACE(s);
-        }
+        s = skipspace_flags(s, flags|LEX_NO_SWALLOW_COMMENTS);
     }
 
 /* Is the byte 'd' a legal single character identifier name?  'u' is true
@@ -9480,9 +9478,7 @@ S_scan_ident(pTHX_ char *s, char *dest, STRLEN destlen, I32 ck_uni)
         parse_ident(&s, &d, e, 1, is_utf8);
 	    *d = '\0';
             tmp_copline = CopLINE(PL_curcop);
-            if (s < PL_bufend && isSPACE(*s)) {
-                s = PEEKSPACE(s);
-            }
+            s = skipspace_flags(s, flags);
 	    if ((*s == '[' || (*s == '{' && strNE(dest, "sub")))) {
                 /* ${foo[0]} and ${foo{bar}} notation.  */
 		if (ckWARN(WARN_AMBIGUOUS) && keyword(dest, d - dest, 0)) {
@@ -9519,9 +9515,7 @@ S_scan_ident(pTHX_ char *s, char *dest, STRLEN destlen, I32 ck_uni)
 
         if ( !tmp_copline )
             tmp_copline = CopLINE(PL_curcop);
-        if (s < PL_bufend && isSPACE(*s)) {
-            s = PEEKSPACE(s);
-        }
+        s = skipspace_flags(s, flags);
 	    
         /* Expect to find a closing } after consuming any trailing whitespace.
          */
