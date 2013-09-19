@@ -1925,6 +1925,7 @@ cpan/Pod-Perldoc/lib/Pod/Perldoc/ToTerm.pm	convert POD to terminal output
 cpan/Pod-Perldoc/lib/Pod/Perldoc/ToText.pm	convert POD to plain text
 cpan/Pod-Perldoc/lib/Pod/Perldoc/ToTk.pm	convert POD via Tk::Pod
 cpan/Pod-Perldoc/lib/Pod/Perldoc/ToXml.pm	convert POD to XML
+cpan/Pod-Perldoc/Makefile.PL
 cpan/Pod-Perldoc/perldoc.pod
 cpan/Pod-Perldoc/t/load.t			test file for Pod-Perldoc
 cpan/Pod-Perldoc/t/man/_get_columns.t		test file for Pod-Perldoc
