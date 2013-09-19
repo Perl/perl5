@@ -283,7 +283,7 @@ $corelist =~ s/^%bug_tracker .*? ;/$tracker/eismx;
 unless (
     $corelist =~ /^%released \s* = \s* \(
         .*?
-        $perl_vnum => .*?
+        $perl_vnum \s* => \s* .*?
         \);/ismx
     )
 {
