@@ -2,7 +2,7 @@ use 5.006;
 use strict;
 use warnings;
 package CPAN::Meta::Validator;
-our $VERSION = '2.132510'; # VERSION
+our $VERSION = '2.132620'; # VERSION
 
 
 #--------------------------------------------------------------------------#
@@ -78,10 +78,10 @@ my %definitions = (
   '2' => {
     # REQUIRED
     'abstract'            => { mandatory => 1, value => \&string  },
-    'author'              => { mandatory => 1, lazylist => { value => \&string } },
+    'author'              => { mandatory => 1, list => { value => \&string } },
     'dynamic_config'      => { mandatory => 1, value => \&boolean },
     'generated_by'        => { mandatory => 1, value => \&string  },
-    'license'             => { mandatory => 1, lazylist => { value => \&license } },
+    'license'             => { mandatory => 1, list => { value => \&license } },
     'meta-spec' => {
       mandatory => 1,
       'map' => {
@@ -96,7 +96,7 @@ my %definitions = (
 
     # OPTIONAL
     'description' => { value => \&string },
-    'keywords'    => { lazylist => { value => \&string } },
+    'keywords'    => { list => { value => \&string } },
     'no_index'    => $no_index_2,
     'optional_features'   => {
       'map'       => {
@@ -125,7 +125,7 @@ my %definitions = (
     },
     'resources'   => {
       'map'       => {
-        license    => { lazylist => { value => \&url } },
+        license    => { list => { value => \&url } },
         homepage   => { value => \&url },
         bugtracker => {
           'map' => {
@@ -452,7 +452,7 @@ sub errors {
 
 
 my $spec_error = "Missing validation action in specification. "
-  . "Must be one of 'map', 'list', 'lazylist', or 'value'";
+  . "Must be one of 'map', 'list', or 'value'";
 
 sub check_map {
     my ($self,$spec,$data) = @_;
@@ -484,8 +484,6 @@ sub check_map {
                 $self->check_map($spec->{$key}{'map'},$data->{$key});
             } elsif($spec->{$key}{'list'}) {
                 $self->check_list($spec->{$key}{'list'},$data->{$key});
-            } elsif($spec->{$key}{'lazylist'}) {
-                $self->check_lazylist($spec->{$key}{'lazylist'},$data->{$key});
             } else {
                 $self->_error( "$spec_error for '$key'" );
             }
@@ -498,8 +496,6 @@ sub check_map {
                 $self->check_map($spec->{':key'}{'map'},$data->{$key});
             } elsif($spec->{':key'}{'list'}) {
                 $self->check_list($spec->{':key'}{'list'},$data->{$key});
-            } elsif($spec->{':key'}{'lazylist'}) {
-                $self->check_lazylist($spec->{':key'}{'lazylist'},$data->{$key});
             } else {
                 $self->_error( "$spec_error for ':key'" );
             }
@@ -510,17 +506,6 @@ sub check_map {
         }
         pop @{$self->{stack}};
     }
-}
-
-# if it's a string, make it into a list and check the list
-sub check_lazylist {
-    my ($self,$spec,$data) = @_;
-
-    if ( defined $data && ! ref($data) ) {
-      $data = [ $data ];
-    }
-
-    $self->check_list($spec,$data);
 }
 
 sub check_list {
@@ -545,8 +530,6 @@ sub check_list {
             $self->check_map($spec->{'map'},$value);
         } elsif(defined $spec->{'list'}) {
             $self->check_list($spec->{'list'},$value);
-        } elsif(defined $spec->{'lazylist'}) {
-            $self->check_lazylist($spec->{'lazylist'},$value);
         } elsif ($spec->{':key'}) {
             $self->check_map($spec,$value);
         } else {
@@ -840,7 +823,7 @@ CPAN::Meta::Validator - validate CPAN distribution metadata structures
 
 =head1 VERSION
 
-version 2.132510
+version 2.132620
 
 =head1 SYNOPSIS
 
@@ -903,10 +886,6 @@ Checks whether a list (or array) part of the data structure conforms to
 the appropriate specification definition.
 
 =item *
-
-check_lazylist($spec,$data)
-
-Checks whether a list conforms, but converts strings to a single-element list
 
 =back
 
@@ -1016,7 +995,7 @@ Validates that a given key is in an acceptable module name format, e.g.
 
 =end :internals
 
-=for Pod::Coverage anything boolean check_lazylist check_list custom_1 custom_2 exversion file
+=for Pod::Coverage anything boolean check_list custom_1 custom_2 exversion file
 identifier license module phase relation release_status string string_or_undef
 url urlspec version header check_map
 

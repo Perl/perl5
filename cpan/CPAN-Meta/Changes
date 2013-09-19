@@ -1,5 +1,14 @@
 Revision history for CPAN-Meta
 
+2.132620  2013-09-19 11:18:33 America/New_York
+
+  [CHANGED]
+
+  - META validation used to allow a scalar value when a list (i.e. array
+    reference) was required for a field. This has been tightened and
+    validation will now fail if a scalar value is given.  Conversion will
+    continue to turn scalars into an array reference as it previously did.
+
 2.132510  2013-09-08 10:17:29 America/New_York
 
   [FIXED]

@@ -4,7 +4,7 @@ author:
   - perl5-porters@perl.org
 build_requires: {}
 dynamic_config: 1
-generated_by: 'CPAN::Meta version 2.132510, CPAN::Meta::Converter version 2.132510'
+generated_by: 'CPAN::Meta version 2.132620, CPAN::Meta::Converter version 2.132620'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
