@@ -9371,6 +9371,7 @@ STATIC char *
 S_scan_ident(pTHX_ char *s, char *dest, STRLEN destlen, I32 ck_uni)
 {
     dVAR;
+    I32 herelines = PL_parser->herelines;
     SSize_t bracket = -1;
     char funny = *s++;
     char *d = dest;
@@ -9552,6 +9553,7 @@ S_scan_ident(pTHX_ char *s, char *dest, STRLEN destlen, I32 ck_uni)
                state such that the next thing to process is the opening { and */
 	    s = SvPVX(PL_linestr) + bracket; /* let the parser handle it */
             CopLINE_set(PL_curcop, orig_copline);
+            PL_parser->herelines = herelines;
 	    *dest = '\0';
 	}
     }

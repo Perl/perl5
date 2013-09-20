@@ -8,7 +8,7 @@ BEGIN {
     chdir 't';
 }
 
-print "1..167\n";
+print "1..168\n";
 
 sub failed {
     my ($got, $expected, $name) = @_;
@@ -633,6 +633,14 @@ ${;
 }
 END
 check_line(627, 'line number after heredoc containing #line');
+
+#line 638
+<<ENE . ${
+
+ENE
+"bar"};
+check_line(642, 'line number after ${expr} surrounding heredoc body');
+
 
 __END__
 # Don't add new tests HERE. See note above
