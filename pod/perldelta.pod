@@ -131,7 +131,7 @@ everywhere, \cT is whitespace in EBCDIC.  [perl #119123]
 =item *
 
 The trie performance enhancement for regular expressions has now been extended
-to those compiled under C</iaa>.
+to those compiled under /iaa.
 
 =back
 
@@ -188,28 +188,28 @@ internally represented.
 
 =item *
 
-C<Carp> also now shows subroutine arguments that are references to regexp
+L<Carp> also now shows subroutine arguments that are references to regexp
 objects in a consistent manner in stack traces.
 
 =item *
 
-C<Carp> now takes care not to clobber the status variables $! and $^E.
+L<Carp> now takes care not to clobber the status variables $! and $^E.
 
 =item *
 
-C<Carp> now won't vivify the C<overload::StrVal> glob or subroutine or the
-C<overload> stash.
+L<Carp> now won't vivify the C<overload::StrVal> glob or subroutine or the
+L<overload> stash.
 
 =item *
 
-C<Carp> now avoids some unwanted Unicode warnings on older Perls.  This doesn't
+L<Carp> now avoids some unwanted Unicode warnings on older Perls.  This doesn't
 affect behaviour with current Perls.
 
 =item *
 
-C<Carp::Heavy> detects version mismatch with C<Carp>, to give a good error
-message if a current (stub) C<Carp::Heavy> gets loaded by an old C<Carp> that
-expects C<Carp::Heavy> to provide subroutines.
+Carp::Heavy detects version mismatch with L<Carp>, to give a good error message
+if a current (stub) Carp::Heavy gets loaded by an old L<Carp> that expects
+Carp::Heavy to provide subroutines.
 
 =back
 
@@ -557,7 +557,7 @@ Day of year parsing (like "%y%j") has been fixed.
 
 L<Unicode::Collate> has been upgraded from version 0.98 to 0.99.
 
-By default, out-of-range values are replaced with C<U+FFFD> (REPLACEMENT
+By default, out-of-range values are replaced with U+FFFD (REPLACEMENT
 CHARACTER) when C<UCA_Version> E<gt>= 22, or ignored when C<UCA_Version> E<lt>=
 20.  When C<UCA_Version> E<gt>= 22, the weights of out-of-range values can be
 overridden.
@@ -623,8 +623,8 @@ key/value hash slice syntax.
 
 =item *
 
-The C<&DB::goto> and C<&DB::lsub> debugger subroutines are now documented.
-[perl #77680]
+The C<DB::goto> and C<DB::lsub> debugger subroutines are now documented.  [perl
+#77680]
 
 =back
 
@@ -810,7 +810,7 @@ L<find2perl> now handles C<?> wildcards correctly.  [perl #113054]
 
 =item *
 
-The F<Makefile.PL> for C<SDBM_File> now generates a better F<Makefile>, which
+The F<Makefile.PL> for L<SDBM_File> now generates a better F<Makefile>, which
 avoids a race condition during parallel makes, which could cause the build to
 fail.  This is the last known parallel make problem (on *nix platforms), and
 therefore we believe that a parallel make should now always be error free.
@@ -1169,9 +1169,35 @@ referenced elsewhere, giving random results.
 
 =head1 Acknowledgements
 
-XXX Generate this with:
+Perl 5.19.4 represents approximately 4 weeks of development since Perl 5.19.3
+and contains approximately 31,000 lines of changes across 580 files from 42
+authors.
 
-  perl Porting/acknowledgements.pl v5.19.3..HEAD
+Perl continues to flourish into its third decade thanks to a vibrant community
+of users and developers.  The following people are known to have contributed
+the improvements that became Perl 5.19.4:
+
+Andy Dougherty, Brian Fraser, Chris 'BinGOs' Williams, Christian Millour, Craig
+A. Berry, Daniel Dragan, David Golden, David Leadbeater, David Mitchell, Father
+Chrysostomos, Florian Ragwitz, François Perrad, H.Merijn Brand, James E
+Keenan, John Goodyear, John P. Linderman, John Peacock, Karl Williamson, kevin
+dawson, Leon Timmermans, Marco Peereboom, Matthew Horsfall, Nathan Glenn, Neil
+Bowers, Nicholas Clark, Niels Thykier, Niko Tyni, Owain G. Ainsworth, Peter
+John Acklam, Reini Urban, Ricardo Signes, Ruslan Zakirov, Slaven Rezic,
+Smylers, Steve Hay, Sullivan Beck, Toby Inkster, Tokuhiro Matsuno, Tony Cook,
+Victor Efimov, Zefram, Zsbán Ambrus.
+
+The list above is almost certainly incomplete as it is automatically generated
+from version control history.  In particular, it does not include the names of
+the (very much appreciated) contributors who reported issues to the Perl bug
+tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core.  We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please see
+the F<AUTHORS> file in the Perl source distribution.
 
 =head1 Reporting Bugs
 
