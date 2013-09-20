@@ -17,6 +17,32 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.19.4 - Washington Irving, "The Widow and Her Son"
+
+L<Announced on 2013-09-20 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2013/09/msg207969.html>
+
+=over
+
+There is something in sickness that breaks down the pride of manhood;
+that softens the heart and brings it back to the feelings of infancy.
+Who that has languished, even in advanced life, in sickness and
+despondency — who that has pined on a weary bed in the neglect and
+loneliness of a foreign land — but has thought on the mother "that
+looked on his childhood," that smoothed his pillow and administered to
+his helplessness.  — Oh! there is an enduring tenderness in the love
+of a mother to her son that transcends all other affections of the
+heart.  It is neither to be chilled by selfishness — nor daunted by
+danger — nor weakened by worthlessness — nor stifled by ingratitude.
+She will sacrifice every comfort to his convenience — she will
+surrender every pleasure to his enjoyment — she will glory in his fame
+and exult in his prosperity.  And if misfortune overtake him he will
+be the dearer to her from misfortune — and if disgrace settle upon his
+name, she will still love and cherish him in spite of his disgrace —
+and if all the world beside cast him off, she will be all the world to
+him.
+
+=back
+
 =head2 v5.19.3 - Andrew Hodges, "Alan Turing: The Enigma"
 
 L<Announced on 2013-08-20 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2013/08/msg206318.html>
