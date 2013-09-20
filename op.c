@@ -1910,9 +1910,7 @@ S_finalize_op(pTHX_ OP* o)
 	fields = (GV**)hv_fetchs(SvSTASH(lexname), "FIELDS", FALSE);
 	if (!fields || !GvHV(*fields))
 	    break;
-	key = SvPV_const(*svp, keylen);
-	if (!hv_fetch(GvHV(*fields), key,
-		SvUTF8(*svp) ? -(I32)keylen : (I32)keylen, FALSE)) {
+        if (!hv_fetch_ent(GvHV(*fields), *svp, FALSE, 0)) {
 	    Perl_croak(aTHX_ "No such class field \"%"SVf"\" " 
 			   "in variable %"SVf" of type %"HEKf, 
 		      SVfARG(*svp), SVfARG(lexname),
@@ -1926,8 +1924,6 @@ S_finalize_op(pTHX_ OP* o)
 	SV *lexname;
 	GV **fields;
 	SV **svp;
-	const char *key;
-	STRLEN keylen;
 	SVOP *first_key_op, *key_op;
 
 	S_scalar_slice_warning(aTHX_ o);
@@ -1968,9 +1964,7 @@ S_finalize_op(pTHX_ OP* o)
 	    if (key_op->op_type != OP_CONST)
 		continue;
 	    svp = cSVOPx_svp(key_op);
-	    key = SvPV_const(*svp, keylen);
-	    if (!hv_fetch(GvHV(*fields), key,
-		    SvUTF8(*svp) ? -(I32)keylen : (I32)keylen, FALSE)) {
+            if (!hv_fetch_ent(GvHV(*fields), *svp, FALSE, 0)) {
 		Perl_croak(aTHX_ "No such class field \"%"SVf"\" " 
 			   "in variable %"SVf" of type %"HEKf, 
 		      SVfARG(*svp), SVfARG(lexname),
