@@ -527,7 +527,21 @@ then configure and build perl so that you have a Makefile and porting tools:
 
 =head3 update Module::CoreList
 
-Update C<Module::CoreList> with module version data for the new release.
+=head4 Bump Module::CoreList* $VERSIONs
+
+If necessary, bump C<$Module::CoreList::VERSION> (there's no need to do this for
+every RC; in RC1, bump the version to a new clean number that will
+appear in the final release, and leave as-is for the later RCs and final).
+It may also happen that C<Module::CoreList> has been modified in blead, and
+hence has a new version number already.  (But make sure it is not the same
+number as a CPAN release.)
+
+C<$Module::CoreList::TieHashDelta::VERSION> and
+C<$Module::CoreList::Utils::VERSION> should always be equal to
+C<$Module::CoreList::VERSION>. If necessary, bump those two versions to match
+before proceeding.
+
+=head4 Update C<Module::CoreList> with module version data for the new release.
 
 Note that if this is a MAINT release, you should run the following actions
 from the maint branch, but commit the C<CoreList.pm> changes in
@@ -547,7 +561,6 @@ If you can devise a workable system, feel free to try it out, and to
 update the RMG accordingly!
 
 DAPM May 2013 ]
-
 
 F<corelist.pl> uses ftp.funet.fi to verify information about dual-lived
 modules on CPAN. It can use a full, local CPAN mirror and/or fall back
@@ -581,42 +594,9 @@ Check those files over carefully:
     $ git diff dist/Module-CoreList/lib/Module/CoreList.pod
     $ git diff dist/Module-CoreList/lib/Module/CoreList/Utils.pm
 
-=head4 Bump C<$Module::CoreList::VERSION>
-
-If necessary, bump C<$Module::CoreList::VERSION> (there's no need to do this for
-every RC; in RC1, bump the version to a new clean number that will
-appear in the final release, and leave as-is for the later RCs and final).
-It may also happen that C<Module::CoreList> has been modified in blead, and
-hence has a new version number already.  (But make sure it is not the same
-number as a CPAN release.)
-
-Edit the version number in the new C<< 'Module::CoreList' => 'X.YZ' >>
-entry, as that is likely to reflect the previous version number.
-
-=head4 Bump C<$Module::CoreList::TieHashDelta::VERSION>
-
-C<$Module::CoreList::TieHashDelta::VERSION> should always be equal to
-C<$Module::CoreList::VERSION>. Make sure the two versions match before
-proceeding.
-
-Edit the version number in the new
-C<< 'Module::CoreList::TieHashDelta' => 'X.YZ' >> entry, as that is likely to
-reflect the previous version number.
-
-=head4 Bump C<$Module::CoreList::Utils::VERSION>
-
-C<$Module::CoreList::Utils::VERSION> should always be equal to
-C<$Module::CoreList::VERSION>. Make sure the two versions match before
-proceeding.
-
-Edit the version number in the new
-C<< 'Module::CoreList::Utils' => 'X.YZ' >> entry, as that is likely to
-reflect the previous version number.
-
 =head4 Bump version in Module::CoreList F<Changes>
 
-Also edit Module::CoreList's new version number in its F<Changes>
-file.
+Also edit Module::CoreList's new version number in its F<Changes> file.
 
 =head4 Add Module::CoreList version bump to perldelta
 
@@ -648,7 +628,7 @@ Finally, commit the new version of Module::CoreList:
 (unless this is for MAINT; in which case commit it to blead first, then
 cherry-pick it back).
 
-    $ git commit -m 'Update Module::CoreList for 5.x.y' dist/Module-CoreList/lib/Module/CoreList.pm dist/Module-CoreList/lib/Module/CoreList.pod dist/Module-CoreList/lib/Module/CoreList/Utils.pm
+    $ git commit -m 'Update Module::CoreList for 5.x.y' dist/Module-CoreList/Changes dist/Module-CoreList/lib/Module/CoreList.pm dist/Module-CoreList/lib/Module/CoreList.pod dist/Module-CoreList/lib/Module/CoreList/Utils.pm
 
 =head4 Rebuild and test
 
