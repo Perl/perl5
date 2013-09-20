@@ -9371,7 +9371,7 @@ STATIC char *
 S_scan_ident(pTHX_ char *s, char *dest, STRLEN destlen, I32 ck_uni)
 {
     dVAR;
-    char *bracket = NULL;
+    SSize_t bracket = -1;
     char funny = *s++;
     char *d = dest;
     char * const e = d + destlen - 3;    /* two-character token, ending NUL */
@@ -9415,7 +9415,7 @@ S_scan_ident(pTHX_ char *s, char *dest, STRLEN destlen, I32 ck_uni)
     }
     /* Handle the opening { of @{...}, &{...}, *{...}, %{...}, ${...}  */
     if (*s == '{') {
-	bracket = s;
+	bracket = s - SvPVX(PL_linestr);
 	s++;
 	orig_copline = CopLINE(PL_curcop);
         if (s < PL_bufend && isSPACE(*s)) {
@@ -9466,9 +9466,9 @@ S_scan_ident(pTHX_ char *s, char *dest, STRLEN destlen, I32 ck_uni)
     /* Warn about ambiguous code after unary operators if {...} notation isn't
        used.  There's no difference in ambiguity; it's merely a heuristic
        about when not to warn.  */
-    else if (ck_uni && !bracket)
+    else if (ck_uni && bracket == -1)
 	check_uni();
-    if (bracket) {
+    if (bracket != -1) {
         /* If we were processing {...} notation then...  */
 	if (isIDFIRST_lazy_if(d,is_utf8)) {
             /* if it starts as a valid identifier, assume that it is one.
@@ -9550,7 +9550,7 @@ S_scan_ident(pTHX_ char *s, char *dest, STRLEN destlen, I32 ck_uni)
 	else {
             /* Didn't find the closing } at the point we expected, so restore
                state such that the next thing to process is the opening { and */
-	    s = bracket;		/* let the parser handle it */
+	    s = SvPVX(PL_linestr) + bracket; /* let the parser handle it */
             CopLINE_set(PL_curcop, orig_copline);
 	    *dest = '\0';
 	}
