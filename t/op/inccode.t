@@ -21,7 +21,7 @@ unless (is_miniperl()) {
 
 use strict;
 
-plan(tests => 60 + !is_miniperl() * (3 + 14 * $can_fork));
+plan(tests => 61 + !is_miniperl() * (3 + 14 * $can_fork));
 
 sub get_temp_fh {
     my $f = tempfile();
@@ -260,6 +260,12 @@ shift @INC;
 
     shift @INC;
 }
+
+unshift @INC, sub { \(my $tmp = '$_ = "are temps freed prematurely?"') };
+eval { require foom };
+is $_||$@, "are temps freed prematurely?",
+           "are temps freed prematurely when returned from inc filters?";
+shift @INC;
 
 exit if is_miniperl();
 

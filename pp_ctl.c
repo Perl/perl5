@@ -3931,9 +3931,15 @@ PP(pp_require)
 			SP--;
 		    }
 
+		    /* FREETMPS may free our filter_cache */
+		    SvREFCNT_inc_simple_void(filter_cache);
+
 		    PUTBACK;
 		    FREETMPS;
 		    LEAVE_with_name("call_INC");
+
+		    /* Now re-mortalize it. */
+		    sv_2mortal(filter_cache);
 
 		    /* Adjust file name if the hook has set an %INC entry.
 		       This needs to happen after the FREETMPS above.  */
