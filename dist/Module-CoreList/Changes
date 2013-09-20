@@ -1,4 +1,5 @@
 2.99
+  - Updated for v5.19.4
   - fixed Module::Build core deprecation
   - changes_between now has the same API as all other functions
   - added is_core() which returns true if a module is/was core
