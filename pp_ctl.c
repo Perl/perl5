@@ -2616,7 +2616,6 @@ PP(pp_last)
 
     POPBLOCK(cx,newpm);
     cxstack_ix++; /* temporarily protect top context */
-    mark = newsp;
     switch (CxTYPE(cx)) {
     case CXt_LOOP_LAZYIV:
     case CXt_LOOP_LAZYSV:
@@ -2643,8 +2642,7 @@ PP(pp_last)
     }
 
     TAINT_NOT;
-    PL_stack_sp = adjust_stack_on_leave(newsp, PL_stack_sp, MARK, gimme,
-				pop2 == CXt_SUB ? SVs_TEMP : 0);
+    PL_stack_sp = newsp;
 
     LEAVE;
     cxstack_ix--;
