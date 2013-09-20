@@ -157,7 +157,7 @@ C<B::CV::GV>, changing the return value from a C<B::SPECIAL> object on a
 C<NULL> C<CvGV> to C<undef>.  C<B::CV::GV> again returns a C<B::SPECIAL> object
 in this case.  [perl #119351]
 
-B version 1.44 (Perl 5.19.2) introduced four new B::OP methods, C<slabbed>,
+L<B> version 1.44 (Perl 5.19.2) introduced four new B::OP methods, C<slabbed>,
 C<savefree>, C<static> and C<folded>, but these have never actually worked
 until now.  They used to croak.
 
@@ -301,7 +301,7 @@ A number of typos have been corrected in the documentation.
 
 =item *
 
-L<ExtUtils::CBuilder> has been upgraded from version 0.280205 to 0.280212.
+L<ExtUtils::CBuilder> has been upgraded from version 0.280210 to 0.280212.
 
 No changes have been made to the installed code other than the version bump to
 keep in sync with the latest CPAN release.
@@ -536,7 +536,7 @@ non-existent array elements.
 
 =item *
 
-L<Term::ReadLine> has been upgraded from version 1.10 to 1.14.
+L<Term::ReadLine> has been upgraded from version 1.13 to 1.14.
 
 Term::ReadLine::EditLine support has been added.
 
@@ -953,9 +953,8 @@ C<\$array[0]> will compare equal to C<\undef>.
 
 =item *
 
-The SV returned by HeSVKEY_force() now correctly reflects the UTF8ness
-of the underlying hash key when that key is not stored as a SV.  [perl
-#79074]
+The SV returned by HeSVKEY_force() now correctly reflects the UTF8ness of the
+underlying hash key when that key is not stored as a SV.  [perl #79074]
 
 =item *
 
@@ -1114,7 +1113,7 @@ all stuffed into line number 0, accessible via C<$dbline[0]> in the debugger.
 
 =item *
 
-An optimisation in Perl 5.18 made incorrect assumptions causing a bad
+An optimization in Perl 5.18 made incorrect assumptions causing a bad
 interaction with the L<Devel::CallParser> CPAN module.  If the module was
 loaded then lexical variables declared in separate statements following a
 C<my(...)> list might fail to be cleared on scope exit.
