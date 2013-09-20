@@ -1161,9 +1161,9 @@ A possible segmentation fault in filehandle duplication has been fixed.
 
 =item *
 
-A subroutine in @INC can return a reference to a scalar containing the
-initial contents of the file.  However, that scalar was freed prematurely
-if not referenced elsewhere, giving random results.
+A subroutine in @INC can return a reference to a scalar containing the initial
+contents of the file.  However, that scalar was freed prematurely if not
+referenced elsewhere, giving random results.
 
 =back
 
