@@ -43,6 +43,19 @@ if ( !-f 'MANIFEST' ) {
 
 open( my $corelist_fh, '<', $corelist_file );
 my $corelist = join( '', <$corelist_fh> );
+close $corelist_fh;
+
+unless (
+    $corelist =~ /^%released \s* = \s* \(
+        .*?
+        $perl_vnum \s* => \s* .*?
+        \);/ismx
+    )
+{
+    warn "Adding $perl_vnum to the list of released perl versions. Please consider adding a release date.\n";
+    $corelist =~ s/^(%released \s* = \s* .*?) ( \) )
+                /$1  $perl_vnum => '????-??-??',\n  $2/ismx;
+}
 
 if ($cpan) {
     my $modlistfile = File::Spec->catfile( $cpan, 'modules', '02packages.details.txt' );
@@ -282,18 +295,6 @@ foreach my $module ( sort keys %module_to_upstream ) {
 $tracker .= ");";
 
 $corelist =~ s/^%bug_tracker .*? ;/$tracker/eismx;
-
-unless (
-    $corelist =~ /^%released \s* = \s* \(
-        .*?
-        $perl_vnum \s* => \s* .*?
-        \);/ismx
-    )
-{
-    warn "Adding $perl_vnum to the list of released perl versions. Please consider adding a release date.\n";
-    $corelist =~ s/^(%released \s* = \s* .*?) ( \) )
-                /$1  $perl_vnum => '????-??-??',\n  $2/ismx;
-}
 
 write_corelist($corelist,$corelist_file);
 
