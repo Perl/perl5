@@ -2422,42 +2422,22 @@ typedef SV PADNAME;
 #   else
 #       include "dosish.h"
 #   endif
-#   define ISHISH "dos"
-#endif
-
-#if defined(VMS)
+#elif defined(VMS)
 #   include "vmsish.h"
-#   define ISHISH "vms"
-#endif
-
-#if defined(PLAN9)
+#elif defined(PLAN9)
 #   include "./plan9/plan9ish.h"
-#   define ISHISH "plan9"
-#endif
-
-#if defined(__VOS__)
+#elif defined(__VOS__)
 #   ifdef __GNUC__
 #     include "./vos/vosish.h"
 #   else
 #     include "vos/vosish.h"
 #   endif
-#   define ISHISH "vos"
-#endif
-
-#ifdef __SYMBIAN32__
+#elif defined(__SYMBIAN32__)
 #   include "symbian/symbianish.h"
-#   define ISHISH "symbian"
-#endif
-
-
-#if defined(__HAIKU__)
+#elif defined(__HAIKU__)
 #   include "haiku/haikuish.h"
-#   define ISHISH "haiku"
-#endif
-
-#ifndef ISHISH
+#else
 #   include "unixish.h"
-#   define ISHISH "unix"
 #endif
 
 /* NSIG logic from Configure --> */
