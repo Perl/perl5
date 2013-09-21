@@ -12,7 +12,7 @@ use utf8;
 use open qw( :utf8 :std );
 no warnings qw(misc reserved);
 
-plan (tests => 65878);
+plan (tests => 65880);
 
 # ${single:colon} should not be valid syntax
 {
@@ -272,4 +272,19 @@ EOP
     is(${"\cQ"}, 24, "...and the assignment works");
     is($^Q, 24, "...even if we access the variable through the caret name");
     is(\${"\cQ"}, \$^Q, '\${\cQ} == \$^Q');
+}
+
+{
+    # Prior to 5.19.4, the following changed behavior depending
+    # on the presence of the newline after '@{'.
+    sub foo (&) { [1] }
+    my %foo = (a=>2);
+    my $ret = @{ foo { "a" } };
+    is($ret, $foo{a}, '@{ foo { "a" } } is parsed as @foo{a}');
+    
+    $ret = @{
+            foo { "a" }
+        };
+    is($ret, $foo{a}, '@{\nfoo { "a" } } is still parsed as @foo{a}');
+
 }
