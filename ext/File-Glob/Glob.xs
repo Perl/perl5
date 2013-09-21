@@ -9,6 +9,9 @@
 #define MY_CXT_KEY "File::Glob::_guts" XS_VERSION
 
 typedef struct {
+#ifdef USE_ITHREADS
+    tTHX interp;
+#endif
     int		x_GLOB_ERROR;
     HV *	x_GLOB_ENTRIES;
     Perl_ophook_t	x_GLOB_OLD_OPHOOK;
@@ -385,6 +388,33 @@ PPCODE:
     iterate(aTHX_ doglob_iter_wrapper);
     SPAGAIN;
 
+#ifdef USE_ITHREADS
+
+void
+CLONE(...)
+INIT:
+    HV *glob_entries_clone = NULL;
+CODE:
+    PERL_UNUSED_ARG(items);
+    {
+        dMY_CXT;
+        if ( MY_CXT.x_GLOB_ENTRIES ) {
+            CLONE_PARAMS param;
+            param.stashes    = NULL;
+            param.flags      = 0;
+            param.proto_perl = MY_CXT.interp;
+            
+            glob_entries_clone = MUTABLE_HV(sv_dup_inc((SV*)MY_CXT.x_GLOB_ENTRIES, &param));
+        }
+    }
+    {
+        MY_CXT_CLONE;
+        MY_CXT.x_GLOB_ENTRIES = glob_entries_clone;
+        MY_CXT.interp = aTHX;
+    }
+
+#endif
+
 BOOT:
 {
 #ifndef PERL_EXTERNAL_GLOB
@@ -400,6 +430,9 @@ BOOT:
 	dMY_CXT;
 	MY_CXT.x_GLOB_ENTRIES = NULL;
 	MY_CXT.x_GLOB_OLD_OPHOOK = PL_opfreehook;
+#ifdef USE_ITHREADS
+        MY_CXT.interp = aTHX;
+#endif
 	PL_opfreehook = glob_ophook;
     }  
 }
