@@ -1,7 +1,7 @@
 package Module::CoreList;
 use strict;
 use vars qw/$VERSION %released %version %families %upstream
-	    %bug_tracker %deprecated/;
+	    %bug_tracker %deprecated %delta/;
 use Module::CoreList::TieHashDelta;
 $VERSION = '3.00';
 
@@ -247,7 +247,7 @@ for my $version ( sort { $a <=> $b } keys %released ) {
     push @{ $families{ $family }} , $version;
 }
 
-my %delta = (
+%delta = (
     5 => {
         changed => {
             'AnyDBM_File'           => undef,
