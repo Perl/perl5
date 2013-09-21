@@ -42,7 +42,7 @@ parameters.
 =head2 New slice syntax
 
 The new C<%hash{...}> and C<%array[...]> syntax returns a list of key/value (or
-index/value) pairs.
+index/value) pairs.  See L<perldata/"Key/Value Hash Slices">.
 
 =head2 EBCDIC support
 
