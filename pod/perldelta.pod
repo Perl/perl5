@@ -119,6 +119,13 @@ XXX
 
 =item *
 
+L<autodie> has been upgraded from version 2.21 to 2.22.
+
+No changes have been made to the installed code other than the version bump to
+keep in sync with the latest CPAN release.
+
+=item *
+
 L<Module::CoreList> has been upgraded from version 2.99 to 3.00.
 
 The list of Perl versions covered has been updated.

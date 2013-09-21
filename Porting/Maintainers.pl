@@ -223,7 +223,7 @@ use File::Glob qw(:case);
 
     'autodie' => {
         'MAINTAINER'   => 'pjf',
-        'DISTRIBUTION' => 'PJF/autodie-2.21.tar.gz',
+        'DISTRIBUTION' => 'PJF/autodie-2.22.tar.gz',
         'FILES'        => q[cpan/autodie],
         'EXCLUDED'     => [
             qr{benchmarks},
@@ -231,8 +231,8 @@ use File::Glob qw(:case);
             # modules that don't exist when we're
             # building the core.  Hence, they can
             # never run, and should not be merged.
-            qw( t/boilerplate.t
-                t/author-critic.t
+            qw( t/author-critic.t
+                t/boilerplate.t
                 t/critic.t
                 t/fork.t
                 t/kwalitee.t
@@ -246,8 +246,6 @@ use File::Glob qw(:case);
                 )
         ],
         'CUSTOMIZED'   => [
-            # Waiting to be merged upstream: see CPAN RT#88444
-            qw(	t/utime.t ),
             # Waiting to be merged upstream: see CPAN RT#87237
             qw(	t/utf8_open.t ),
         ],
