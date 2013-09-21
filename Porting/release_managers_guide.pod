@@ -1062,6 +1062,12 @@ Merge the (local) release branch back into master now, and delete it.
   git push
   git branch -d release-5.xx.yy
 
+Note: The merge will create a merge commit if other changes have been pushed
+to blead while you've been working on your release branch. Do NOT rebase your
+branch to avoid the merge commit (as you might normally do when merging a
+small branch into blead) since doing so will invalidate the tag that you
+created earlier.
+
 =head3 publish the release tag
 
 Now that you've shipped the new perl release to PAUSE and pushed your changes
