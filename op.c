@@ -11265,9 +11265,14 @@ Perl_rpeep(pTHX_ OP *o)
 
                         old_count
                             = (oldoldop->op_private & OPpPADRANGE_COUNTMASK);
-                        assert(oldoldop->op_targ + old_count == base);
 
-                        if (old_count < OPpPADRANGE_COUNTMASK - count) {
+                       /* Do not assume pad offsets for $c and $d are con-
+                          tiguous in
+                            my ($a,$b,$c);
+                            my ($d,$e,$f);
+                        */
+                        if (  oldoldop->op_targ + old_count == base
+                           && old_count < OPpPADRANGE_COUNTMASK - count) {
                             base = oldoldop->op_targ;
                             count += old_count;
                             reuse = 1;
