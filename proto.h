@@ -6827,11 +6827,10 @@ STATIC void	S_ssc_and(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc, c
 #define PERL_ARGS_ASSERT_SSC_AND	\
 	assert(pRExC_state); assert(ssc); assert(and_with)
 
-STATIC void	S_ssc_anything(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc)
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2);
+STATIC void	S_ssc_anything(pTHX_ regnode_ssc *ssc)
+			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_SSC_ANYTHING	\
-	assert(pRExC_state); assert(ssc)
+	assert(ssc)
 
 PERL_STATIC_INLINE void	S_ssc_clear_locale(pTHX_ regnode_ssc *ssc)
 			__attribute__nonnull__(pTHX_1);

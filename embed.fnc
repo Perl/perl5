@@ -2054,8 +2054,7 @@ Es	|void	|scan_commit	|NN const RExC_state_t *pRExC_state \
 				|NN SSize_t *minlenp		    \
 				|int is_inf
 Es	|void	|populate_ANYOF_from_invlist|NN regnode *node|NN SV** invlist_ptr
-Es	|void	|ssc_anything	|NN const RExC_state_t *pRExC_state \
-				|NN regnode_ssc *ssc
+Es	|void	|ssc_anything	|NN regnode_ssc *ssc
 EsR	|int	|ssc_is_anything|NN const regnode_ssc *ssc
 Es	|void	|ssc_init	|NN const RExC_state_t *pRExC_state \
 				|NN regnode_ssc *ssc

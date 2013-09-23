@@ -1043,7 +1043,7 @@ S_scan_commit(pTHX_ const RExC_state_t *pRExC_state, scan_data_t *data,
  * list that describes which code points it matches */
 
 STATIC void
-S_ssc_anything(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc)
+S_ssc_anything(pTHX_ regnode_ssc *ssc)
 {
     /* Set the SSC 'ssc' to match an empty string or any code point */
 
@@ -1109,7 +1109,7 @@ S_ssc_init(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc)
     Zero(ssc, 1, regnode_ssc);
     OP(ssc) = ANYOF_SYNTHETIC;
     ARG_SET(ssc, ANYOF_NONBITMAP_EMPTY);
-    ssc_anything(pRExC_state, ssc);
+    ssc_anything(ssc);
 
     /* If any portion of the regex is to operate under locale rules,
      * initialization includes it.  The reason this isn't done for all regexes
@@ -3823,7 +3823,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                     }
                     is_inf = is_inf_internal = 1;
                     if (flags & SCF_DO_STCLASS_OR) /* Allow everything */
-                        ssc_anything(pRExC_state, data->start_class);
+                        ssc_anything(data->start_class);
                     flags &= ~SCF_DO_STCLASS;
 	        }
             } else {
@@ -4400,7 +4400,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
                         ssc_match_all_cp(data->start_class);
                     }
                     else {
-                        ssc_anything(pRExC_state, data->start_class);
+                        ssc_anything(data->start_class);
                     }
                 }
 		flags &= ~SCF_DO_STCLASS;
@@ -4837,7 +4837,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
 		}
 		is_inf = is_inf_internal = 1;
 		if (flags & SCF_DO_STCLASS_OR) /* Allow everything */
-		    ssc_anything(pRExC_state, data->start_class);
+		    ssc_anything(data->start_class);
 		flags &= ~SCF_DO_STCLASS;
 	}
 	else if (OP(scan) == GPOS) {
