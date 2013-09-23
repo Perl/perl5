@@ -8842,14 +8842,23 @@ sub is_core
     return 0 if defined($final_release) && $perl_version > $final_release;
 
     # If a minimum version of the module was specified:
-    # Step through all perl release numbers ($prn)
-    # in order, so we can find what version of the module
+    # Step through all perl releases ($prn)
+    # so we can find what version of the module
     # was included in the specified version of perl.
     # On the way if we pass the required module version, we can
     # short-circuit and return true
     if (defined($module_version)) {
+        # The Perl releases aren't a linear sequence, but a tree. We need to build the path
+        # of releases from 5 to the specified release, and follow the module's version(s)
+        # along that path.
+        my @releases = ($perl_version);
+        my $rel = $perl_version;
+        while (defined($rel)) {
+            $rel = $delta{$rel}->{delta_from};
+            unshift(@releases, $rel) if defined($rel);
+        }
         RELEASE:
-        foreach my $prn (sort keys %delta) {
+        foreach my $prn (@releases) {
             next RELEASE if $prn <= $first_release;
             last RELEASE if $prn > $perl_version;
             next unless defined(my $next_module_version

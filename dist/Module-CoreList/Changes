@@ -1,6 +1,8 @@
 3.00
   - Prepared for v5.19.5
   - exported %delta
+  - fixed bug in is_core(): it was naively assuming a linear sequence of releases,
+    rather than the tree with multiple branches.
 
 2.99 Fri Sep 20 2013
   - Updated for v5.19.4

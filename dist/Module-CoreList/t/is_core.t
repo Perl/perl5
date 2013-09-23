@@ -1,7 +1,7 @@
 #!perl -w
 use strict;
 use Module::CoreList;
-use Test::More tests => 23;
+use Test::More tests => 33;
 
 BEGIN { require_ok('Module::CoreList'); }
 
@@ -50,3 +50,18 @@ ok(Module::CoreList->is_core('encoding', '2.01', '5.008007'), "encoding 2.01 was
 ok(!Module::CoreList::is_core('Module::CoreList', undef, '5.007003'), "Module::CoreList wasn't core in perl 5.7.3");
 ok(!Module::CoreList->is_core('Module::CoreList', undef, '5.007003'), "Module::CoreList wasn't core in perl 5.7.3 (class method)");
 
+# Test for situations where different branches on the perl
+# release tree had different versions of a module, and a naive
+# checking of perl release number will trip you up
+ok(Module::CoreList->is_core('Text::Soundex', '1.01', '5.008007'), "Text::Soundex 1.01 was first included in 5.007003");
+ok(Module::CoreList->is_core('Text::Soundex', '3.03', '5.008009'), "Text::Soundex 3.03 was included in 5.008009");
+ok(!Module::CoreList->is_core('Text::Soundex', '3.03', '5.009003'), "5.009003 still had Text::Soundex 1.01");
+ok(Module::CoreList->is_core('Text::Soundex', '1.01', '5.009003'), "5.009003 still had Text::Soundex 1.01");
+ok(!Module::CoreList->is_core('Text::Soundex', '3.03', '5.009005'), "5.009005 still had Text::Soundex 3.02");
+ok(Module::CoreList->is_core('Text::Soundex', '3.02', '5.009005'), "5.009005 had Text::Soundex 3.02");
+ok(Module::CoreList->is_core('Text::Soundex', '3.03', '5.01'), "5.01 had Text::Soundex 3.03");
+
+# 5.002 was the first perl release where core modules had a version number
+ok(Module::CoreList->is_core('DB_File', '1.01', '5.002'), "DB_File 1.01 was included in 5.002");
+ok(!Module::CoreList->is_core('DB_File', '1.03', '5.002'), "DB_File 1.03 wasn't included in 5.002");
+ok(Module::CoreList->is_core('DB_File', '1.03', '5.00307'), "DB_File 1.03 was included in 5.00307");
