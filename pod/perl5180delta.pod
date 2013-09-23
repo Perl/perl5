@@ -3672,6 +3672,11 @@ set of lexical variables [perl #115742].
 C<*_{ARRAY}> returned from a subroutine no longer spontaneously
 becomes empty.
 
+=item *
+
+When using C<say> to print to a tied filehandle, the value of C<$\> is
+correctly localized, even if it was previously undef.  [perl #119927]
+
 =back
 
 =head1 Known Problems
