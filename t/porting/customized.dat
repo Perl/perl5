@@ -24,7 +24,6 @@ autodie cpan/autodie/t/utf8_open.t 5295851351c49f939008c5aca6a798742b1e503d
 libnet cpan/libnet/Makefile.PL 6b10ac98e672bfebb8f49b9720a93442645208b3
 podlators cpan/podlators/scripts/pod2man.PL f81acf53f3ff46cdcc5ebdd661c5d13eb35d20d6
 podlators cpan/podlators/scripts/pod2text.PL b4693fcfe4a0a1b38a215cfb8985a65d5d025d69
-podlators pod/perlpodstyle.pod dcf4b8f67d963e215f0e2e1cd214246705163a79
 version cpan/version/lib/version.pm e9d5df9a053ac6882c6e73f7e29db74e01b15841
 version cpan/version/t/07locale.t c7e86c2706622d5055b617a4b0119ea874be8a7b
 version cpan/version/t/08_corelist.t bd1c900f8be98e87dbf88896b8337f0694e4b4d3

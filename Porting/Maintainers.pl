@@ -1513,7 +1513,7 @@ use File::Glob qw(:case);
 
     'podlators' => {
         'MAINTAINER'   => 'rra',
-        'DISTRIBUTION' => 'RRA/podlators-2.5.1.tar.gz',
+        'DISTRIBUTION' => 'RRA/podlators-2.5.2.tar.gz',
         'FILES'        => q[cpan/podlators pod/perlpodstyle.pod],
 
         # The perl distribution has pod2man.PL and pod2text.PL,  which are
@@ -1523,10 +1523,6 @@ use File::Glob qw(:case);
         'CUSTOMIZED' => [
             qw( scripts/pod2man.PL
                 scripts/pod2text.PL
-                ),
-
-            # Waiting to be merged upstream: see CPAN RT#87440
-            qw( pod/perlpodstyle.pod
                 ),
         ],
         'MAP' => {

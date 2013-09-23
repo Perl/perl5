@@ -1850,6 +1850,7 @@ cpan/podlators/t/basic.txt			podlators test
 cpan/podlators/t/color.t			podlators test
 cpan/podlators/t/devise-date.t			podlators test
 cpan/podlators/t/filehandle.t			podlators test
+cpan/podlators/t/man-empty.t			podlators test
 cpan/podlators/t/man-heading.t			podlators test
 cpan/podlators/t/man-options.t			podlators test
 cpan/podlators/t/man-perlio.t				podlators test
@@ -1861,6 +1862,7 @@ cpan/podlators/t/pod-parser.t			podlators test
 cpan/podlators/t/pod-spelling.t			podlators test
 cpan/podlators/t/pod.t				podlators test
 cpan/podlators/t/termcap.t			podlators test
+cpan/podlators/t/text-empty.t			podlators test
 cpan/podlators/t/text-encoding.t		podlators test
 cpan/podlators/t/text-options.t			podlators test
 cpan/podlators/t/text-perlio.t			podlators test
