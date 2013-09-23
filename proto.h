@@ -6557,6 +6557,12 @@ STATIC bool	S_could_it_be_a_POSIX_class(pTHX_ RExC_state_t *pRExC_state)
 #define PERL_ARGS_ASSERT_COULD_IT_BE_A_POSIX_CLASS	\
 	assert(pRExC_state)
 
+STATIC SV*	S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state, const regnode_charclass_posixl* const node)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_GET_ANYOF_CP_LIST_FOR_SSC	\
+	assert(pRExC_state); assert(node)
+
 PERL_STATIC_INLINE STRLEN*	S_get_invlist_iter_addr(pTHX_ SV* invlist)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
@@ -6809,6 +6815,11 @@ STATIC void	S_set_ANYOF_arg(pTHX_ RExC_state_t* const pRExC_state, regnode* cons
 #define PERL_ARGS_ASSERT_SET_ANYOF_ARG	\
 	assert(pRExC_state); assert(node)
 
+PERL_STATIC_INLINE void	S_ssc_add_range(pTHX_ regnode_ssc *ssc, UV const start, UV const end)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_SSC_ADD_RANGE	\
+	assert(ssc)
+
 STATIC void	S_ssc_and(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc, const regnode_ssc *and_with)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
@@ -6822,11 +6833,38 @@ STATIC void	S_ssc_anything(const RExC_state_t *pRExC_state, regnode_ssc *ssc)
 #define PERL_ARGS_ASSERT_SSC_ANYTHING	\
 	assert(pRExC_state); assert(ssc)
 
+PERL_STATIC_INLINE void	S_ssc_clear_locale(pTHX_ regnode_ssc *ssc)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_SSC_CLEAR_LOCALE	\
+	assert(ssc)
+
+PERL_STATIC_INLINE void	S_ssc_cp_and(pTHX_ regnode_ssc *ssc, UV const cp)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_SSC_CP_AND	\
+	assert(ssc)
+
+STATIC void	S_ssc_finalize(pTHX_ RExC_state_t *pRExC_state, regnode_ssc *ssc)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_SSC_FINALIZE	\
+	assert(pRExC_state); assert(ssc)
+
+STATIC void	S_ssc_flags_and(regnode_ssc *ssc, const U8 and_with)
+			__attribute__nonnull__(1);
+#define PERL_ARGS_ASSERT_SSC_FLAGS_AND	\
+	assert(ssc)
+
 STATIC void	S_ssc_init(const RExC_state_t *pRExC_state, regnode_ssc *ssc)
 			__attribute__nonnull__(1)
 			__attribute__nonnull__(2);
 #define PERL_ARGS_ASSERT_SSC_INIT	\
 	assert(pRExC_state); assert(ssc)
+
+PERL_STATIC_INLINE void	S_ssc_intersection(pTHX_ regnode_ssc *ssc, SV* const invlist, const bool invert_2nd)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_SSC_INTERSECTION	\
+	assert(ssc); assert(invlist)
 
 STATIC int	S_ssc_is_anything(const regnode_ssc *ssc)
 			__attribute__warn_unused_result__
@@ -6834,12 +6872,25 @@ STATIC int	S_ssc_is_anything(const regnode_ssc *ssc)
 #define PERL_ARGS_ASSERT_SSC_IS_ANYTHING	\
 	assert(ssc)
 
+STATIC int	S_ssc_is_cp_posixl_init(pTHX_ const RExC_state_t *pRExC_state, const regnode_ssc *ssc)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_SSC_IS_CP_POSIXL_INIT	\
+	assert(pRExC_state); assert(ssc)
+
 STATIC void	S_ssc_or(const RExC_state_t *pRExC_state, regnode_ssc *ssc, const regnode_ssc *or_with)
 			__attribute__nonnull__(1)
 			__attribute__nonnull__(2)
 			__attribute__nonnull__(3);
 #define PERL_ARGS_ASSERT_SSC_OR	\
 	assert(pRExC_state); assert(ssc); assert(or_with)
+
+PERL_STATIC_INLINE void	S_ssc_union(pTHX_ regnode_ssc *ssc, SV* const invlist, const bool invert_2nd)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_SSC_UNION	\
+	assert(ssc); assert(invlist)
 
 STATIC SSize_t	S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, SSize_t *minlenp, SSize_t *deltap, regnode *last, struct scan_data_t *data, I32 stopparen, U8* recursed, regnode_ssc *and_withp, U32 flags, U32 depth)
 			__attribute__nonnull__(pTHX_1)

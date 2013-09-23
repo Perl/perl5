@@ -365,6 +365,9 @@ struct regnode_ssc {
 	                           |ANYOF_LOC_FOLD                      \
 	                           |ANYOF_POSIXL                         \
 	                           |ANYOF_NONBITMAP_NON_UTF8)
+#define ANYOF_LOCALE_FLAGS (ANYOF_LOCALE                        \
+                           |ANYOF_LOC_FOLD                      \
+                           |ANYOF_POSIXL)
 
 /* Character classes for node->classflags of ANYOF */
 /* Should be synchronized with a table in regprop() */
@@ -471,6 +474,10 @@ struct regnode_ssc {
         ((ANYOF_FLAGS(p) & ANYOF_POSIXL)                           \
 	 && (((regnode_charclass_posixl*)(p))->classflags))
 #define ANYOF_CLASS_TEST_ANY_SET(p) ANYOF_POSIXL_TEST_ANY_SET(p)
+
+#define ANYOF_POSIXL_TEST_ALL_SET(p)                               \
+        ((ANYOF_FLAGS(p) & ANYOF_POSIXL)                           \
+         && ((regnode_charclass_posixl*) (p))->classflags == ((1U << ((ANYOF_POSIXL_MAX) - 1))) - 1)
 
 #define ANYOF_POSIXL_OR(source, dest) STMT_START { (dest)->classflags |= (source)->classflags ; } STMT_END
 #define ANYOF_CLASS_OR(source, dest) ANYOF_POSIXL_OR((source), (dest))

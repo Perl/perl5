@@ -2059,12 +2059,29 @@ Esn	|void	|ssc_anything	|NN const RExC_state_t *pRExC_state \
 EsRn	|int	|ssc_is_anything|NN const regnode_ssc *ssc
 Esn	|void	|ssc_init	|NN const RExC_state_t *pRExC_state \
 				|NN regnode_ssc *ssc
+EsR	|int	|ssc_is_cp_posixl_init|NN const RExC_state_t *pRExC_state \
+				|NN const regnode_ssc *ssc
 Es	|void	|ssc_and	|NN const RExC_state_t *pRExC_state \
 				|NN regnode_ssc *ssc                \
 				|NN const regnode_ssc *and_with
+Esn	|void	|ssc_flags_and	|NN regnode_ssc *ssc|const U8 and_with
 Esn	|void	|ssc_or		|NN const RExC_state_t *pRExC_state \
 				|NN regnode_ssc *ssc \
 				|NN const regnode_ssc *or_with
+Es	|SV*	|get_ANYOF_cp_list_for_ssc                                 \
+				|NN const RExC_state_t *pRExC_state \
+				|NN const regnode_charclass_posixl* const node
+Ei	|void	|ssc_intersection|NN regnode_ssc *ssc \
+				|NN SV* const invlist|const bool invert_2nd
+Ei	|void	|ssc_union	|NN regnode_ssc *ssc \
+				|NN SV* const invlist|const bool invert_2nd
+Ei	|void	|ssc_add_range	|NN regnode_ssc *ssc \
+				|UV const start|UV const end
+Ei	|void	|ssc_cp_and	|NN regnode_ssc *ssc \
+				|UV const cp
+Ei	|void	|ssc_clear_locale|NN regnode_ssc *ssc
+Es	|void	|ssc_finalize	|NN RExC_state_t *pRExC_state \
+				|NN regnode_ssc *ssc
 Es	|SSize_t|study_chunk	|NN RExC_state_t *pRExC_state \
 				|NN regnode **scanp|NN SSize_t *minlenp \
 				|NN SSize_t *deltap|NN regnode *last \

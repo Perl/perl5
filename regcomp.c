@@ -259,6 +259,227 @@ struct RExC_state_t {
 #define _invlist_intersection_complement_2nd(a, b, output) \
                  _invlist_intersection_maybe_complement_2nd(a, b, TRUE, output)
 
+STATIC void
+S_ssc_flags_and(regnode_ssc *ssc, const U8 and_with)
+{
+    /* Take the flags 'and_with' and accumulate them anded into the flags for
+     * the SSC 'ssc'.  The non-SSC related flags in 'and_with' are ignored. */
+
+    const U8 ssc_only_flags = ANYOF_FLAGS(ssc) & ~ANYOF_LOCALE_FLAGS;
+
+    PERL_ARGS_ASSERT_SSC_FLAGS_AND;
+
+    /* Use just the SSC-related flags from 'and_with' */
+    ANYOF_FLAGS(ssc) &= (and_with & ANYOF_LOCALE_FLAGS);
+    ANYOF_FLAGS(ssc) |= ssc_only_flags;
+}
+
+STATIC int
+S_ssc_is_cp_posixl_init(pTHX_ const RExC_state_t *pRExC_state,
+                              const regnode_ssc *ssc)
+{
+    /* Returns TRUE if the SSC 'ssc' is in its initial state with regard only
+     * to the list of code points matched, and locale posix classes; hence does
+     * not check its flags) */
+
+    UV start, end;
+    bool ret;
+
+    PERL_ARGS_ASSERT_SSC_IS_CP_POSIXL_INIT;
+
+    assert(OP(ssc) == ANYOF_SYNTHETIC);
+
+    invlist_iterinit(ssc->invlist);
+    ret = invlist_iternext(ssc->invlist, &start, &end)
+          && start == 0
+          && end == UV_MAX;
+
+    invlist_iterfinish(ssc->invlist);
+
+    if (! ret) {
+        return FALSE;
+    }
+
+    if (RExC_contains_locale) {
+        if (! (ANYOF_FLAGS(ssc) & ANYOF_LOCALE)
+            || ! (ANYOF_FLAGS(ssc) & ANYOF_POSIXL)
+            || ! ANYOF_POSIXL_TEST_ALL_SET(ssc))
+        {
+            return FALSE;
+        }
+    }
+
+    return TRUE;
+}
+
+STATIC SV*
+S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state,
+                                  const regnode_charclass_posixl* const node)
+{
+    /* Returns a mortal inversion list defining which code points are matched
+     * by 'node', which is of type ANYOF.  Handles complementing the result if
+     * appropriate.  If some code points aren't knowable at this time, the
+     * returned list must, and will, contain every possible code point. */
+
+    SV* invlist = sv_2mortal(_new_invlist(0));
+    unsigned int i;
+    const U32 n = ARG(node);
+
+    PERL_ARGS_ASSERT_GET_ANYOF_CP_LIST_FOR_SSC;
+
+    /* Look at the data structure created by S_set_ANYOF_arg() */
+    if (n != ANYOF_NONBITMAP_EMPTY) {
+        SV * const rv = MUTABLE_SV(RExC_rxi->data->data[n]);
+        AV * const av = MUTABLE_AV(SvRV(rv));
+        SV **const ary = AvARRAY(av);
+        assert(RExC_rxi->data->what[n] == 's');
+
+        if (ary[1] && ary[1] != &PL_sv_undef) { /* Has compile-time swash */
+            invlist = sv_2mortal(invlist_clone(_get_swash_invlist(ary[1])));
+        }
+        else if (ary[0] && ary[0] != &PL_sv_undef) {
+
+            /* Here, no compile-time swash, and there are things that won't be
+             * known until runtime -- we have to assume it could be anything */
+            return _add_range_to_invlist(invlist, 0, UV_MAX);
+        }
+        else {
+
+            /* Here no compile-time swash, and no run-time only data.  Use the
+             * node's inversion list */
+            invlist = sv_2mortal(invlist_clone(ary[2]));
+        }
+    }
+
+    /* An ANYOF node contains a bitmap for the first 256 code points, and an
+     * inversion list for the others, but if there are code points that should
+     * match only conditionally on the target string being UTF-8, those are
+     * placed in the inversion list, and not the bitmap.  Since there are
+     * circumstances under which they could match, they are included in the
+     * SSC.  But if the ANYOF node is to be inverted, we have to exclude them
+     * here, so that when we invert below, the end result actually does include
+     * them.  (Think about "\xe0" =~ /[^\xc0]/di;).  We have to do this here
+     * before we add the unconditionally matched code points */
+    if (ANYOF_FLAGS(node) & ANYOF_INVERT) {
+        _invlist_intersection_complement_2nd(invlist,
+                                             PL_UpperLatin1,
+                                             &invlist);
+    }
+
+    /* Add in the points from the bit map */
+    for (i = 0; i < 256; i++) {
+        if (ANYOF_BITMAP_TEST(node, i)) {
+            invlist = add_cp_to_invlist(invlist, i);
+        }
+    }
+
+    /* If this can match all upper Latin1 code points, have to add them
+     * as well */
+    if (ANYOF_FLAGS(node) & ANYOF_NON_UTF8_LATIN1_ALL) {
+        _invlist_union(invlist, PL_UpperLatin1, &invlist);
+    }
+
+    /* Similarly for these */
+    if (ANYOF_FLAGS(node) & ANYOF_ABOVE_LATIN1_ALL) {
+        invlist = _add_range_to_invlist(invlist, 256, UV_MAX);
+    }
+
+    if (ANYOF_FLAGS(node) & ANYOF_INVERT) {
+        _invlist_invert(invlist);
+    }
+
+    return invlist;
+}
+
+PERL_STATIC_INLINE void
+S_ssc_union(pTHX_ regnode_ssc *ssc, SV* const invlist, const bool invert2nd)
+{
+    PERL_ARGS_ASSERT_SSC_UNION;
+
+    assert(OP(ssc) == ANYOF_SYNTHETIC);
+
+    _invlist_union_maybe_complement_2nd(ssc->invlist,
+                                        invlist,
+                                        invert2nd,
+                                        &ssc->invlist);
+}
+
+PERL_STATIC_INLINE void
+S_ssc_intersection(pTHX_ regnode_ssc *ssc,
+                         SV* const invlist,
+                         const bool invert2nd)
+{
+    PERL_ARGS_ASSERT_SSC_INTERSECTION;
+
+    assert(OP(ssc) == ANYOF_SYNTHETIC);
+
+    _invlist_intersection_maybe_complement_2nd(ssc->invlist,
+                                               invlist,
+                                               invert2nd,
+                                               &ssc->invlist);
+}
+
+PERL_STATIC_INLINE void
+S_ssc_add_range(pTHX_ regnode_ssc *ssc, const UV start, const UV end)
+{
+    PERL_ARGS_ASSERT_SSC_ADD_RANGE;
+
+    assert(OP(ssc) == ANYOF_SYNTHETIC);
+
+    ssc->invlist = _add_range_to_invlist(ssc->invlist, start, end);
+}
+
+PERL_STATIC_INLINE void
+S_ssc_cp_and(pTHX_ regnode_ssc *ssc, const UV cp)
+{
+    /* AND just the single code point 'cp' into the SSC 'ssc' */
+
+    SV* cp_list = _new_invlist(2);
+
+    PERL_ARGS_ASSERT_SSC_CP_AND;
+
+    assert(OP(ssc) == ANYOF_SYNTHETIC);
+
+    cp_list = add_cp_to_invlist(cp_list, cp);
+    ssc_intersection(ssc, cp_list,
+                     FALSE /* Not inverted */
+                     );
+    SvREFCNT_dec_NN(cp_list);
+}
+
+PERL_STATIC_INLINE void
+S_ssc_clear_locale(pTHX_ regnode_ssc *ssc)
+{
+    /* Set the SSC 'ssc' to not match any locale things */
+
+    PERL_ARGS_ASSERT_SSC_CLEAR_LOCALE;
+
+    assert(OP(ssc) == ANYOF_SYNTHETIC);
+
+    ANYOF_POSIXL_ZERO(ssc);
+    ANYOF_FLAGS(ssc) &= ~ANYOF_LOCALE_FLAGS;
+}
+
+STATIC void
+S_ssc_finalize(pTHX_ RExC_state_t *pRExC_state, regnode_ssc *ssc)
+{
+    /* The inversion list in the SSC is marked mortal; now we need a more
+     * permanent copy, which is stored the same way that is done in a regular
+     * ANYOF node, with the first 256 code points in a bit map */
+
+    SV* invlist = invlist_clone(ssc->invlist);
+
+    PERL_ARGS_ASSERT_SSC_FINALIZE;
+
+    assert(OP(ssc) == ANYOF_SYNTHETIC);
+
+    populate_ANYOF_from_invlist( (regnode *) ssc, &invlist);
+
+    set_ANYOF_arg(pRExC_state, (regnode *) ssc, invlist, NULL, NULL, FALSE);
+
+    assert(! (ANYOF_FLAGS(ssc) & ANYOF_LOCALE) || RExC_contains_locale);
+}
+
 /* About scan_data_t.
 
   During optimisation we recurse through the regexp program performing
