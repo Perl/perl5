@@ -2253,6 +2253,31 @@ EOP
 
     }
 
+    {
+        unlike("\xB5", qr/^_?\p{IsMyRuntimeProperty}\z/, "yadayada");
+        like("\xB6", qr/^_?\p{IsMyRuntimeProperty}\z/, "yadayada");
+        unlike("\xB7", qr/^_?\p{IsMyRuntimeProperty}\z/, "yadayada");
+        like("\xB5", qr/^_?\P{IsMyRuntimeProperty}\z/, "yadayada");
+        unlike("\xB6", qr/^_?\P{IsMyRuntimeProperty}\z/, "yadayada");
+        like("\xB7", qr/^_?\P{IsMyRuntimeProperty}\z/, "yadayada");
+
+        unlike("_\xB5", qr/^_?\p{IsMyRuntimeProperty}\z/, "yadayada");
+        like("_\xB6", qr/^_?\p{IsMyRuntimeProperty}\z/, "yadayada");
+        unlike("_\xB7", qr/^_?\p{IsMyRuntimeProperty}\z/, "yadayada");
+        like("_\xB5", qr/^_?\P{IsMyRuntimeProperty}\z/, "yadayada");
+        unlike("_\xB6", qr/^_?\P{IsMyRuntimeProperty}\z/, "yadayada");
+        like("_\xB7", qr/^_?\P{IsMyRuntimeProperty}\z/, "yadayada");
+    }
+
+    # These are defined later, so won't be known at regex compile time above
+    sub IsMyRuntimeProperty {
+        return "B6\n";
+    }
+
+    sub IsntMyRuntimeProperty {
+        return "!B6\n";
+    }
+
     #
     # Keep the following tests last -- they may crash perl
     #

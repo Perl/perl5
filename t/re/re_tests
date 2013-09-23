@@ -1736,8 +1736,18 @@ ab[c\\\](??{"x"})]{3}d	ab\\](d	y	-	-
 # [ perl #114272]
 \Vn	\xFFn/	y	$&	\xFFn
 
+# These mostly exercize various paths in the optimizer
 /(?l:a?\w)/	b	y	$&	b
+/(?l:a?\D)/	b	y	$&	b
+^_?[^\S_0-9]\w*\z	\t	y	$&	\t
 m?^xy\?$?	xy?	y	$&	xy?
+a?\X	a\x{100}	y	$&	a\x{100}
+a?\R	a\n	y	$&	a\n
+^a?\N$	a\n	y	$&	a
+\N?a	\na	y	$&	a
+/\s?\s/l	\t	y	$&	\t
+/\s?\d/l	3	y	$&	3
+/\s?\S/l	A	y	$&	A
 
 # check we have the right utf8ness as we switch back and forth between
 # patterns
