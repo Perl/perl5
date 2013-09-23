@@ -16,7 +16,9 @@ use MakeMaker::Test::Setup::BFD;
 
 use ExtUtils::MakeMaker;
 
-chdir 't';
+use File::Temp qw[tempdir];
+my $tmpdir = tempdir( DIR => 't', CLEANUP => 1 );
+chdir $tmpdir;
 
 perl_lib();
 
@@ -247,7 +249,7 @@ VERIFY
           VERSION    => '1.00',
       );
 
-      is( $mm->{CCFLAGS}, "-Wl,-rpath -Wl,/foo/bar/lib", 'parse_args() splits like shell' );
+      like( $mm->{CCFLAGS}, qr{-Wl,-rpath -Wl,/foo/bar/lib}, 'parse_args() splits like shell' );
       is_deeply( $mm->{LIBS}, ['-lwibble -lwobble'], 'parse_args() splits like shell' );
     }
 

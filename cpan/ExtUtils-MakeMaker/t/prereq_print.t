@@ -8,6 +8,7 @@ use strict;
 use Config;
 
 use Test::More;
+use File::Temp qw[tempdir];
 
 unless( eval { require Data::Dumper } ) {
     plan skip_all => 'Data::Dumper not available';
@@ -27,7 +28,9 @@ my $Perl = which_perl();
 my $Makefile = makefile_name();
 my $Is_VMS = $^O eq 'VMS';
 
-chdir 't';
+my $tmpdir = tempdir( DIR => 't', CLEANUP => 1 );
+chdir $tmpdir;
+
 perl_lib;
 
 $| = 1;

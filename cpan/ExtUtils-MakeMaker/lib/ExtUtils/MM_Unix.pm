@@ -15,7 +15,7 @@ use ExtUtils::MakeMaker qw($Verbose neatvalue);
 
 # If we make $VERSION an our variable parse_version() breaks
 use vars qw($VERSION);
-$VERSION = '6.76';
+$VERSION = '6.78';
 $VERSION = eval $VERSION;  ## no critic [BuiltinFunctions::ProhibitStringyEval]
 
 require ExtUtils::MM_Any;
@@ -1878,7 +1878,7 @@ sub init_PERL {
 
     my @perls = ($thisperl);
     push @perls, map { "$_$Config{exe_ext}" }
-                     ('perl', 'perl5', "perl$Config{version}");
+                     ("perl$Config{version}", 'perl5', 'perl');
 
     # miniperl has priority over all but the canonical perl when in the
     # core.  Otherwise its a last resort.
@@ -2640,9 +2640,15 @@ sub parse_abstract {
         $inpod = /^=(?!cut)/ ? 1 : /^=cut/ ? 0 : $inpod;
         next if !$inpod;
         chop;
-        next unless /^($package(?:\.pm)? \s+ -+ \s+)(.*)/x;
-        $result = $2;
-        last;
+        if ( /^($package(?:\.pm)? \s+ -+ \s+)(.*)/x ) {
+          $result = $2;
+          next;
+        }
+        next unless $result;
+        if ( $result && ( /^\s*$/ || /^\=/ ) ) {
+          last;
+        }
+        $result = join ' ', $result, $_;
     }
     close $fh;
 
@@ -2727,6 +2733,7 @@ sub get_version
 		};
 		\$$name;
 	};
+  $eval = $1 if $eval =~ m{^(.+)}s;
 	local $^W = 0;
 	my $result = eval($eval);  ## no critic
 	warn "Could not eval '$eval' in $parsefile: $@" if $@;

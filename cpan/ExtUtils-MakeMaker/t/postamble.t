@@ -13,7 +13,9 @@ use MakeMaker::Test::Setup::BFD;
 use ExtUtils::MakeMaker;
 use TieOut;
 
-chdir 't';
+use File::Temp qw[tempdir];
+my $tmpdir = tempdir( DIR => 't', CLEANUP => 1 );
+chdir $tmpdir;
 perl_lib;
 $| = 1;
 

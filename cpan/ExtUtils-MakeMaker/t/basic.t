@@ -11,17 +11,22 @@ use strict;
 use Config;
 use ExtUtils::MakeMaker;
 
-use Test::More tests => 171;
+use Test::More
+    $ENV{PERL_CORE} && $Config{'usecrosscompile'}
+    ? (skip_all => "no toolchain installed when cross-compiling")
+    : (tests => 171);
 use MakeMaker::Test::Utils;
 use MakeMaker::Test::Setup::BFD;
 use File::Find;
 use File::Spec;
 use File::Path;
+use File::Temp qw[tempdir];
 
 my $perl = which_perl();
 my $Is_VMS = $^O eq 'VMS';
 
-chdir 't';
+my $tmpdir = tempdir( DIR => 't', CLEANUP => 1 );
+chdir $tmpdir;
 
 perl_lib;
 

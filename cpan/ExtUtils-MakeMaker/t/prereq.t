@@ -9,6 +9,7 @@ BEGIN {
 
 use strict;
 use Test::More tests => 16;
+use File::Temp qw[tempdir];
 
 use TieOut;
 use MakeMaker::Test::Utils;
@@ -16,7 +17,8 @@ use MakeMaker::Test::Setup::BFD;
 
 use ExtUtils::MakeMaker;
 
-chdir 't';
+my $tmpdir = tempdir( DIR => 't', CLEANUP => 1 );
+chdir $tmpdir;
 
 perl_lib();
 

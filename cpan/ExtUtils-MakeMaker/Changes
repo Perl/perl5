@@ -1,3 +1,46 @@
+6.78 Mon Sep 23 13:44:39 BST 2013
+
+    No changes from 6.77_08
+
+6.77_08 Sun Sep 22 18:43:23 BST 2013
+    New feature:
+    * Made UNINST an attribute, so removing shadowed modules
+      can be set 'perl Makefile.PL UNINST=1'
+
+6.77_07 Sat Sep 21 09:44:19 BST 2013
+    Bug fixes:
+    * do not set default switches in Test::Harness; not even -w
+
+6.77_06 Thu Sep 19 15:36:59 BST 2013
+    Dist fixes:
+    * Previous tarball was corrupted
+
+6.77_05 Thu Sep 19 14:09:00 BST 2013
+    Bug fixes:
+    * Fix 3 more tests to work in parallel. Now works with HARNESS_OPTIONS=j64
+
+6.77_04 Wed Sep 18 19:23:38 BST 2013
+    Bug fixes:
+    * Fixed PERL_SRC for core tests after parallelisation
+      enhancements were made in 6.77_01
+
+6.77_03 Mon Sep 16 12:20:25 BST 2013
+    VMS fixes:
+    * CCFLAGS may have appendages not from PERL_MM_OPT
+
+6.77_02 Thu Sep 12 21:21:12 BST 2013
+    Bug fixes:
+    * Support 'perl' as a PREREQ_PM target
+    * RT#77029 Support linefeeds in abstract parsing
+    * Skip some tests when cross-compiling core
+
+6.77_01 Tue Sep 10 15:20:42 BST 2013
+    Bug fixes:
+    * RT#7248 warn if NAME is not valid package name
+    * Perl#36539 reverse search order for finding perl
+    * parse_version() should work with taint mode now
+    * RT#69590 enable tests to be run in parallel
+
 6.76 Fri Sep  6 13:32:42 BST 2013
 
     No changes from 6.75_04

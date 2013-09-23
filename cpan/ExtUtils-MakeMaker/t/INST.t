@@ -18,7 +18,9 @@ use File::Spec;
 use TieOut;
 use Config;
 
-chdir 't';
+use File::Temp qw[tempdir];
+my $tmpdir = tempdir( DIR => 't', CLEANUP => 1 );
+chdir $tmpdir;
 
 perl_lib;
 
@@ -71,7 +73,7 @@ is( !!$mm->{PERL_CORE}, !!$ENV{PERL_CORE}, 'PERL_CORE' );
 
 my($perl_src, $mm_perl_src);
 if( $ENV{PERL_CORE} ) {
-    $perl_src = File::Spec->catdir($Updir, $Updir, $Updir, $Updir);
+    $perl_src = File::Spec->catdir($Updir, $Updir, $Updir, $Updir, $Updir);
     $perl_src = File::Spec->canonpath($perl_src);
     $mm_perl_src = File::Spec->canonpath($mm->{PERL_SRC});
 }

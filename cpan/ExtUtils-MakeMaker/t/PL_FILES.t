@@ -6,7 +6,11 @@ BEGIN {
 chdir 't';
 
 use strict;
-use Test::More tests => 9;
+use Config;
+use Test::More
+    $ENV{PERL_CORE} && $Config{'usecrosscompile'}
+    ? (skip_all => "no toolchain installed when cross-compiling")
+    : (tests => 9);
 
 use File::Spec;
 use MakeMaker::Test::Setup::PL_FILES;

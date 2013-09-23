@@ -8,7 +8,11 @@ BEGIN {
 }
 
 use strict;
-use Test::More tests => 20;
+use Config;
+use Test::More
+    $ENV{PERL_CORE} && $Config{'usecrosscompile'}
+    ? (skip_all => "no toolchain installed when cross-compiling")
+    : (tests => 20);
 
 use TieOut;
 use MakeMaker::Test::Utils;

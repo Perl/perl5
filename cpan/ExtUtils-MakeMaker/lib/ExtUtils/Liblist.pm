@@ -2,7 +2,7 @@ package ExtUtils::Liblist;
 
 use strict;
 
-our $VERSION = '6.76';
+our $VERSION = '6.78';
 
 use File::Spec;
 require ExtUtils::Liblist::Kid;
