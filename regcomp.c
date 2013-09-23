@@ -144,6 +144,7 @@ struct RExC_state_t {
     I32		recurse_count;		/* Number of recurse regops */
     I32		in_lookbehind;
     I32		contains_locale;
+    I32		contains_i;
     I32		override_recoding;
     I32		in_multi_char_class;
     struct reg_code_block *code_blocks;	/* positions of literal (?{})
@@ -201,6 +202,7 @@ struct RExC_state_t {
 #define RExC_recurse_count	(pRExC_state->recurse_count)
 #define RExC_in_lookbehind	(pRExC_state->in_lookbehind)
 #define RExC_contains_locale	(pRExC_state->contains_locale)
+#define RExC_contains_i (pRExC_state->contains_i)
 #define RExC_override_recoding (pRExC_state->override_recoding)
 #define RExC_in_multi_char_class (pRExC_state->in_multi_char_class)
 
@@ -1118,7 +1120,10 @@ S_ssc_init(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc)
      * necessary. */
     if (RExC_contains_locale) {
 	ANYOF_POSIXL_SETALL(ssc);
-	ANYOF_FLAGS(ssc) |= ANYOF_LOCALE_FLAGS;
+	ANYOF_FLAGS(ssc) |= ANYOF_LOCALE|ANYOF_POSIXL;
+        if (RExC_contains_i) {
+            ANYOF_FLAGS(ssc) |= ANYOF_LOC_FOLD;
+        }
     }
     else {
 	ANYOF_POSIXL_ZERO(ssc);
@@ -5985,6 +5990,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     RExC_utf8 = RExC_orig_utf8 = (plen == 0 || IN_BYTES) ? 0 : SvUTF8(pat);
     RExC_uni_semantics = 0;
     RExC_contains_locale = 0;
+    RExC_contains_i = 0;
     pRExC_state->runtime_code_qr = NULL;
 
     DEBUG_COMPILE_r({
@@ -6027,6 +6033,9 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 
     rx_flags = orig_rx_flags;
 
+    if (rx_flags & PMf_FOLD) {
+        RExC_contains_i = 1;
+    }
     if (initial_charset == REGEX_LOCALE_CHARSET) {
 	RExC_contains_locale = 1;
     }
@@ -8917,6 +8926,9 @@ S_parse_lparen_question_flags(pTHX_ RExC_state_t *pRExC_state)
                 RExC_flags |= posflags;
                 RExC_flags &= ~negflags;
                 set_regex_charset(&RExC_flags, cs);
+                if (RExC_flags & RXf_PMf_FOLD) {
+                    RExC_contains_i = 1;
+                }
                 return;
                 /*NOTREACHED*/
             default:
