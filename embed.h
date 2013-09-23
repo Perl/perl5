@@ -947,16 +947,16 @@
 #define set_ANYOF_arg(a,b,c,d,e,f)	S_set_ANYOF_arg(aTHX_ a,b,c,d,e,f)
 #define ssc_add_range(a,b,c)	S_ssc_add_range(aTHX_ a,b,c)
 #define ssc_and(a,b,c)		S_ssc_and(aTHX_ a,b,c)
-#define ssc_anything		S_ssc_anything
+#define ssc_anything(a,b)	S_ssc_anything(aTHX_ a,b)
 #define ssc_clear_locale(a)	S_ssc_clear_locale(aTHX_ a)
 #define ssc_cp_and(a,b)		S_ssc_cp_and(aTHX_ a,b)
 #define ssc_finalize(a,b)	S_ssc_finalize(aTHX_ a,b)
 #define ssc_flags_and		S_ssc_flags_and
-#define ssc_init		S_ssc_init
+#define ssc_init(a,b)		S_ssc_init(aTHX_ a,b)
 #define ssc_intersection(a,b,c)	S_ssc_intersection(aTHX_ a,b,c)
-#define ssc_is_anything		S_ssc_is_anything
+#define ssc_is_anything(a)	S_ssc_is_anything(aTHX_ a)
 #define ssc_is_cp_posixl_init(a,b)	S_ssc_is_cp_posixl_init(aTHX_ a,b)
-#define ssc_or			S_ssc_or
+#define ssc_or(a,b,c)		S_ssc_or(aTHX_ a,b,c)
 #define ssc_union(a,b,c)	S_ssc_union(aTHX_ a,b,c)
 #define study_chunk(a,b,c,d,e,f,g,h,i,j,k)	S_study_chunk(aTHX_ a,b,c,d,e,f,g,h,i,j,k)
 #  endif

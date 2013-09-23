@@ -357,14 +357,6 @@ struct regnode_ssc {
 
 #define ANYOF_FLAGS_ALL		(0xff & ~0x10)
 
-/* These are the flags that ANYOF_INVERT being set or not doesn't affect
- * whether they are operative or not.  e.g., the node still has LOCALE
- * regardless of being inverted; whereas ANYOF_ABOVE_LATIN1_ALL means something
- * different if inverted */
-#define INVERSION_UNAFFECTED_FLAGS (ANYOF_LOCALE                        \
-	                           |ANYOF_LOC_FOLD                      \
-	                           |ANYOF_POSIXL                         \
-	                           |ANYOF_NONBITMAP_NON_UTF8)
 #define ANYOF_LOCALE_FLAGS (ANYOF_LOCALE                        \
                            |ANYOF_LOC_FOLD                      \
                            |ANYOF_POSIXL)
@@ -481,6 +473,8 @@ struct regnode_ssc {
 
 #define ANYOF_POSIXL_OR(source, dest) STMT_START { (dest)->classflags |= (source)->classflags ; } STMT_END
 #define ANYOF_CLASS_OR(source, dest) ANYOF_POSIXL_OR((source), (dest))
+
+#define ANYOF_POSIXL_AND(source, dest) STMT_START { (dest)->classflags &= (source)->classflags ; } STMT_END
 
 #define ANYOF_BITMAP_ZERO(ret)	Zero(((struct regnode_charclass*)(ret))->bitmap, ANYOF_BITMAP_SIZE, char)
 #define ANYOF_BITMAP(p)		(((struct regnode_charclass*)(p))->bitmap)

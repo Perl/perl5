@@ -6827,9 +6827,9 @@ STATIC void	S_ssc_and(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc, c
 #define PERL_ARGS_ASSERT_SSC_AND	\
 	assert(pRExC_state); assert(ssc); assert(and_with)
 
-STATIC void	S_ssc_anything(const RExC_state_t *pRExC_state, regnode_ssc *ssc)
-			__attribute__nonnull__(1)
-			__attribute__nonnull__(2);
+STATIC void	S_ssc_anything(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_SSC_ANYTHING	\
 	assert(pRExC_state); assert(ssc)
 
@@ -6854,9 +6854,9 @@ STATIC void	S_ssc_flags_and(regnode_ssc *ssc, const U8 and_with)
 #define PERL_ARGS_ASSERT_SSC_FLAGS_AND	\
 	assert(ssc)
 
-STATIC void	S_ssc_init(const RExC_state_t *pRExC_state, regnode_ssc *ssc)
-			__attribute__nonnull__(1)
-			__attribute__nonnull__(2);
+STATIC void	S_ssc_init(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_SSC_INIT	\
 	assert(pRExC_state); assert(ssc)
 
@@ -6866,9 +6866,9 @@ PERL_STATIC_INLINE void	S_ssc_intersection(pTHX_ regnode_ssc *ssc, SV* const inv
 #define PERL_ARGS_ASSERT_SSC_INTERSECTION	\
 	assert(ssc); assert(invlist)
 
-STATIC int	S_ssc_is_anything(const regnode_ssc *ssc)
+STATIC int	S_ssc_is_anything(pTHX_ const regnode_ssc *ssc)
 			__attribute__warn_unused_result__
-			__attribute__nonnull__(1);
+			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_SSC_IS_ANYTHING	\
 	assert(ssc)
 
@@ -6879,10 +6879,10 @@ STATIC int	S_ssc_is_cp_posixl_init(pTHX_ const RExC_state_t *pRExC_state, const 
 #define PERL_ARGS_ASSERT_SSC_IS_CP_POSIXL_INIT	\
 	assert(pRExC_state); assert(ssc)
 
-STATIC void	S_ssc_or(const RExC_state_t *pRExC_state, regnode_ssc *ssc, const regnode_ssc *or_with)
-			__attribute__nonnull__(1)
-			__attribute__nonnull__(2)
-			__attribute__nonnull__(3);
+STATIC void	S_ssc_or(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc, const regnode_ssc *or_with)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2)
+			__attribute__nonnull__(pTHX_3);
 #define PERL_ARGS_ASSERT_SSC_OR	\
 	assert(pRExC_state); assert(ssc); assert(or_with)
 

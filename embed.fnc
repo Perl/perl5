@@ -2054,10 +2054,10 @@ Es	|void	|scan_commit	|NN const RExC_state_t *pRExC_state \
 				|NN SSize_t *minlenp		    \
 				|int is_inf
 Es	|void	|populate_ANYOF_from_invlist|NN regnode *node|NN SV** invlist_ptr
-Esn	|void	|ssc_anything	|NN const RExC_state_t *pRExC_state \
+Es	|void	|ssc_anything	|NN const RExC_state_t *pRExC_state \
 				|NN regnode_ssc *ssc
-EsRn	|int	|ssc_is_anything|NN const regnode_ssc *ssc
-Esn	|void	|ssc_init	|NN const RExC_state_t *pRExC_state \
+EsR	|int	|ssc_is_anything|NN const regnode_ssc *ssc
+Es	|void	|ssc_init	|NN const RExC_state_t *pRExC_state \
 				|NN regnode_ssc *ssc
 EsR	|int	|ssc_is_cp_posixl_init|NN const RExC_state_t *pRExC_state \
 				|NN const regnode_ssc *ssc
@@ -2065,7 +2065,7 @@ Es	|void	|ssc_and	|NN const RExC_state_t *pRExC_state \
 				|NN regnode_ssc *ssc                \
 				|NN const regnode_ssc *and_with
 Esn	|void	|ssc_flags_and	|NN regnode_ssc *ssc|const U8 and_with
-Esn	|void	|ssc_or		|NN const RExC_state_t *pRExC_state \
+Es	|void	|ssc_or		|NN const RExC_state_t *pRExC_state \
 				|NN regnode_ssc *ssc \
 				|NN const regnode_ssc *or_with
 Es	|SV*	|get_ANYOF_cp_list_for_ssc                                 \
