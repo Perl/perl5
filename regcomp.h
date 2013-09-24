@@ -191,7 +191,9 @@ struct regnode_charclass_class {
     U32 classflags;	                        /* and run-time */
 };
 
-/* Synthetic start class, is a regnode_charclass_class plus an SV* */
+/* Synthetic start class; is a regnode_charclass_class plus an SV*.  Note that
+ * the 'next_off' field is unused, as the SSC stands alone, so there is never a
+ * next node. */
 struct regnode_ssc {
     U8	flags;				/* ANYOF_POSIXL bit must go here */
     U8  type;
@@ -314,14 +316,16 @@ struct regnode_ssc {
 
 /* Flags for node->flags of ANYOF.  These are in short supply, but there is one
  * currently available.  If more than this are needed, the ANYOF_LOCALE and
- * ANYOF_POSIXL bits could be shared, making a space penalty for all locale nodes.
- * Also, the ABOVE_LATIN1_ALL bit could be freed up by resorting to creating a
- * swash containing everything above 255.  This introduces a performance
- * penalty.  Better would be to split it off into a separate node, which
- * actually would improve performance a bit by allowing regexec.c to test for a
- * UTF-8 character being above 255 without having to call a function nor
+ * ANYOF_POSIXL bits could be shared, making a space penalty for all locale
+ * nodes.  Also, the ABOVE_LATIN1_ALL bit could be freed up by resorting to
+ * creating a swash containing everything above 255.  This introduces a
+ * performance penalty.  Better would be to split it off into a separate node,
+ * which actually would improve performance a bit by allowing regexec.c to test
+ * for a UTF-8 character being above 255 without having to call a function nor
  * calculate its code point value.  However, this solution might need to have a
- * second node type, ANYOF_SYNTHETIC_ABOVE_LATIN1_ALL */
+ * second node type, ANYOF_SYNTHETIC_ABOVE_LATIN1_ALL.  Several flags are not
+ * used in synthetic start class (SSC) nodes, so could be shared should new
+ * flags be needed for SSCs. */
 
 #define ANYOF_LOCALE		 0x01	    /* /l modifier */
 
@@ -332,6 +336,11 @@ struct regnode_ssc {
 #define ANYOF_LOC_FOLD           0x02
 
 #define ANYOF_INVERT		 0x04
+
+/* For the SSC node only, which cannot be inverted, so is shared with that bit.
+ * This means "Does this SSC match an empty string?"  This is used only during
+ * regex compilation. */
+#define ANYOF_EMPTY_STRING       ANYOF_INVERT
 
 /* Set if this is a regnode_charclass_posixl vs a regnode_charclass.  This
  * is used for runtime \d, \w, [:posix:], ..., which are used only in locale

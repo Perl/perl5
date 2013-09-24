@@ -805,19 +805,6 @@ S_scan_commit(pTHX_ const RExC_state_t *pRExC_state, scan_data_t *data,
     DEBUG_STUDYDATA("commit: ",data,0);
 }
 
-/* These macros set, clear and test whether the synthetic start class ('SSC',
- * given by the parameter) matches an empty string (EOS).  This uses the
- * 'next_off' field in the node, to save a bit in the flags field.  The ssc
- * stands alone, so there is never a next_off, so this field is otherwise
- * unused.  The EOS information is used only for compilation, but theoretically
- * it could be passed on to the execution code.  This could be used to store
- * more than one bit of information, but only this one is currently used.  This
- * flag could be moved back to the bitmap instead, shared with INVERT, as no
- * SSC is ever inverted */
-#define SET_SSC_EOS(node)   STMT_START { (node)->next_off = TRUE; } STMT_END
-#define CLEAR_SSC_EOS(node) STMT_START { (node)->next_off = FALSE; } STMT_END
-#define TEST_SSC_EOS(node)  cBOOL((node)->next_off)
-
 /* An SSC is just a regnode_charclass_posix with an extra field: the inversion
  * list that describes which code points it matches */
 
@@ -832,7 +819,7 @@ S_ssc_anything(pTHX_ regnode_ssc *ssc)
 
     ssc->invlist = sv_2mortal(_new_invlist(2)); /* mortalize so won't leak */
     _append_range_to_invlist(ssc->invlist, 0, UV_MAX);
-    SET_SSC_EOS(ssc);                /* Plus match empty string */
+    ANYOF_FLAGS(ssc) |= ANYOF_EMPTY_STRING;    /* Plus match empty string */
 }
 
 STATIC int
@@ -848,7 +835,7 @@ S_ssc_is_anything(pTHX_ const regnode_ssc *ssc)
 
     assert(OP(ssc) == ANYOF_SYNTHETIC);
 
-    if (! TEST_SSC_EOS(ssc)) {
+    if (! ANYOF_FLAGS(ssc) & ANYOF_EMPTY_STRING) {
         return FALSE;
     }
 
@@ -1039,7 +1026,9 @@ STATIC void
 S_ssc_flags_and(regnode_ssc *ssc, const U8 and_with)
 {
     /* Take the flags 'and_with' and accumulate them anded into the flags for
-     * the SSC 'ssc'.  The non-SSC related flags in 'and_with' are ignored. */
+     * the SSC 'ssc'.  The non-SSC related flags in 'and_with' are ignored.
+     * The flags 'and_with' should not come from another SSC (otherwise the
+     * EMPTY_STRING flag won't work) */
 
     const U8 ssc_only_flags = ANYOF_FLAGS(ssc) & ~ANYOF_LOCALE_FLAGS;
 
@@ -1061,17 +1050,26 @@ S_ssc_and(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
     /* Accumulate into SSC 'ssc' its 'AND' with 'and_with', which is either
      * another SSC or a regular ANYOF class.  Can create false positives. */
 
-    /* If 'and_with' is an SSC, we already have its inversion list; otherwise
-     * have to calculate it */
-    SV* anded_cp_list = (OP(and_with) == ANYOF_SYNTHETIC)
-                        ? and_with->invlist
-                        : get_ANYOF_cp_list_for_ssc(pRExC_state,
-                                        (regnode_charclass_posixl*) and_with);
+    SV* anded_cp_list;
+    U8  anded_flags;
 
     PERL_ARGS_ASSERT_SSC_AND;
 
     assert(OP(ssc) == ANYOF_SYNTHETIC);
-    assert(! (ANYOF_FLAGS(ssc) & ANYOF_INVERT)); /* SSCs are never inverted */
+
+    /* 'and_with' is used as-is if it too is an SSC; otherwise have to extract
+     * the code point inversion list and just the relevant flags */
+    if (OP(and_with) == ANYOF_SYNTHETIC) {
+        anded_cp_list = and_with->invlist;
+        anded_flags = ANYOF_FLAGS(and_with);
+    }
+    else {
+        anded_cp_list = get_ANYOF_cp_list_for_ssc(pRExC_state,
+                                        (regnode_charclass_posixl*) and_with);
+        anded_flags = ANYOF_FLAGS(and_with) & ANYOF_LOCALE_FLAGS;
+    }
+
+    ANYOF_FLAGS(ssc) &= anded_flags;
 
     /* Below, C1 is the list of code points in 'ssc'; P1, its posix classes.
      * C2 is the list of code points in 'and-with'; P2, its posix classes.
@@ -1104,10 +1102,10 @@ S_ssc_and(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
      *                         <=  (C1 & ~C2) | (P1 & ~P2)
      * */
 
-    if (ANYOF_FLAGS(and_with) & ANYOF_INVERT) {
+    if ((ANYOF_FLAGS(and_with) & ANYOF_INVERT)
+        && OP(and_with) != ANYOF_SYNTHETIC)
+    {
         unsigned int i;
-
-        assert(OP(and_with) != ANYOF_SYNTHETIC);
 
         ssc_intersection(ssc,
                          anded_cp_list,
@@ -1191,8 +1189,6 @@ S_ssc_and(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
             ssc_intersection(ssc, anded_cp_list, FALSE);
         }
     }
-
-    ssc_flags_and(ssc, ANYOF_FLAGS(and_with));
 }
 
 STATIC void
@@ -1203,17 +1199,26 @@ S_ssc_or(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
      * another SSC or a regular ANYOF class.  Can create false positives if
      * 'or_with' is to be inverted. */
 
-    /* If 'or_with' is an SSC, we already have its inversion list; otherwise
-     * have to calculate it */
-    SV* ored_cp_list = (OP(or_with) == ANYOF_SYNTHETIC)
-                        ? or_with->invlist
-                        : get_ANYOF_cp_list_for_ssc(pRExC_state,
-                                        (regnode_charclass_posixl*) or_with);
+    SV* ored_cp_list;
+    U8 ored_flags;
 
     PERL_ARGS_ASSERT_SSC_OR;
 
     assert(OP(ssc) == ANYOF_SYNTHETIC);
-    assert(! (ANYOF_FLAGS(ssc) & ANYOF_INVERT));
+
+    /* 'or_with' is used as-is if it too is an SSC; otherwise have to extract
+     * the code point inversion list and just the relevant flags */
+    if (OP(or_with) == ANYOF_SYNTHETIC) {
+        ored_cp_list = or_with->invlist;
+        ored_flags = ANYOF_FLAGS(or_with);
+    }
+    else {
+        ored_cp_list = get_ANYOF_cp_list_for_ssc(pRExC_state,
+                                        (regnode_charclass_posixl*) or_with);
+        ored_flags = ANYOF_FLAGS(or_with) & ANYOF_LOCALE_FLAGS;
+    }
+
+    ANYOF_FLAGS(ssc) |= ored_flags;
 
     /* Below, C1 is the list of code points in 'ssc'; P1, its posix classes.
      * C2 is the list of code points in 'or-with'; P2, its posix classes.
@@ -1233,11 +1238,9 @@ S_ssc_or(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
      * (which results in actually simpler code than the non-inverted case)
      * */
 
-    /* Use just the SSC-related flags from 'or_with' */
-    ANYOF_FLAGS(ssc) |= (ANYOF_FLAGS(or_with) & ANYOF_LOCALE_FLAGS);
-
-    if (ANYOF_FLAGS(or_with) & ANYOF_INVERT) {
-        assert(OP(or_with) != ANYOF_SYNTHETIC);
+    if ((ANYOF_FLAGS(or_with) & ANYOF_INVERT)
+        && OP(or_with) != ANYOF_SYNTHETIC)
+    {
         /* We ignore P2, leaving P1 going forward */
     }
     else {  /* Not inverted */
@@ -1345,6 +1348,11 @@ S_ssc_finalize(pTHX_ RExC_state_t *pRExC_state, regnode_ssc *ssc)
     PERL_ARGS_ASSERT_SSC_FINALIZE;
 
     assert(OP(ssc) == ANYOF_SYNTHETIC);
+
+    /* The code in this file assumes that all but these flags aren't relevant
+     * to the SSC, except ANYOF_EMPTY_STRING, which should be cleared by the
+     * time we reach here */
+    assert(! (ANYOF_FLAGS(ssc) & ~ANYOF_LOCALE_FLAGS));
 
     populate_ANYOF_from_invlist( (regnode *) ssc, &invlist);
 
@@ -3921,7 +3929,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
              * can't match null string */
 	    if (flags & SCF_DO_STCLASS_AND) {
                 ssc_cp_and(data->start_class, uc);
-                CLEAR_SSC_EOS(data->start_class);
+                ANYOF_FLAGS(data->start_class) &= ~ANYOF_EMPTY_STRING;
                 ssc_clear_locale(data->start_class);
 	    }
 	    else if (flags & SCF_DO_STCLASS_OR) {
@@ -4039,7 +4047,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                 }
             }
 	    if (flags & SCF_DO_STCLASS_AND) {
-                CLEAR_SSC_EOS(data->start_class);
+                ANYOF_FLAGS(data->start_class) &= ~ANYOF_EMPTY_STRING;
                 ANYOF_POSIXL_ZERO(data->start_class);
                 ssc_intersection(data->start_class, EXACTF_invlist, FALSE);
 	    }
@@ -4443,7 +4451,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
                     ssc_intersection(data->start_class,
                                     PL_XPosix_ptrs[_CC_VERTSPACE], FALSE);
                     ssc_clear_locale(data->start_class);
-                    CLEAR_SSC_EOS(data->start_class); /* No match on empty */
+                    ANYOF_FLAGS(data->start_class) &= ~ANYOF_EMPTY_STRING;
                 }
                 else if (flags & SCF_DO_STCLASS_OR) {
                     ssc_union(data->start_class,
@@ -4476,7 +4484,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
                 U8 namedclass;
 
                 if (flags & SCF_DO_STCLASS_AND) {
-                    CLEAR_SSC_EOS(data->start_class); /* No match on empty */
+                    ANYOF_FLAGS(data->start_class) &= ~ANYOF_EMPTY_STRING;
                 }
 
 		/* Some of the logic below assumes that switching
@@ -4720,11 +4728,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
 			ssc_init(pRExC_state, data->start_class);
 		    }  else {
 			/* AND before and after: combine and continue */
-			const int was = TEST_SSC_EOS(data->start_class);
-
 			ssc_and(pRExC_state, data->start_class, &intrnl);
-			if (was)
-                            SET_SSC_EOS(data->start_class);
 		    }
                 }
 	    }
@@ -4792,11 +4796,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
                 *minnextp += min;
 
                 if (f & SCF_DO_STCLASS_AND) {
-                    const int was = TEST_SSC_EOS(data->start_class);
-
                     ssc_and(pRExC_state, data->start_class, &intrnl);
-                    if (was)
-                        SET_SSC_EOS(data->start_class);
                 }
                 if (data) {
                     if (data_fake.flags & (SF_HAS_PAR|SF_IN_PAR))
@@ -6613,7 +6613,7 @@ reStudy:
 
 	if ((!(r->anchored_substr || r->anchored_utf8) || r->anchored_offset)
 	    && stclass_flag
-	    && ! TEST_SSC_EOS(data.start_class)
+	    && ! ANYOF_FLAGS(data.start_class) & ANYOF_EMPTY_STRING
 	    && !ssc_is_anything(data.start_class))
 	{
 	    const U32 n = add_data(pRExC_state, STR_WITH_LEN("f"));
@@ -6687,7 +6687,7 @@ reStudy:
 	r->check_substr = r->check_utf8 = r->anchored_substr = r->anchored_utf8
 		= r->float_substr = r->float_utf8 = NULL;
 
-	if (! TEST_SSC_EOS(data.start_class)
+	if (! ANYOF_FLAGS(data.start_class) & ANYOF_EMPTY_STRING
 	    && !ssc_is_anything(data.start_class))
 	{
 	    const U32 n = add_data(pRExC_state, STR_WITH_LEN("f"));
