@@ -15102,16 +15102,6 @@ Perl_regdump(pTHX_ const regexp *r)
 /*
 - regprop - printable representation of opcode
 */
-#define EMIT_ANYOF_TEST_SEPARATOR(do_sep,sv,flags) \
-STMT_START { \
-        if (do_sep) {                           \
-            Perl_sv_catpvf(aTHX_ sv,"%s][%s",PL_colors[1],PL_colors[0]); \
-            if (flags & ANYOF_INVERT)           \
-                /*make sure the invert info is in each */ \
-                sv_catpvs(sv, "^");             \
-            do_sep = 0;                         \
-        }                                       \
-} STMT_END
 
 void
 Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
@@ -15130,10 +15120,10 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
     || _CC_VERTSPACE != 16
   #error Need to adjust order of anyofs[]
 #endif
-        "[\\w]",
-        "[\\W]",
-        "[\\d]",
-        "[\\D]",
+        "\\w",
+        "\\W",
+        "\\d",
+        "\\D",
         "[:alpha:]",
         "[:^alpha:]",
         "[:lower:]",
@@ -15150,8 +15140,8 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
         "[:^graph:]",
         "[:cased:]",
         "[:^cased:]",
-        "[\\s]",
-        "[\\S]",
+        "\\s",
+        "\\S",
         "[:blank:]",
         "[:^blank:]",
         "[:xdigit:]",
@@ -15162,8 +15152,8 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
         "[:^cntrl:]",
         "[:ascii:]",
         "[:^ascii:]",
-        "[\\v]",
-        "[\\V]"
+        "\\v",
+        "\\V"
     };
     RXi_GET_DECL(prog,progi);
     GET_RE_DEBUG_FLAGS_DECL;
@@ -15280,8 +15270,8 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
 	/* output what the standard cp 0-255 bitmap matches */
         do_sep = put_latin1_charclass_innards(sv, ANYOF_BITMAP(o));
         
-        EMIT_ANYOF_TEST_SEPARATOR(do_sep,sv,flags);
-        /* output any special charclass tests (used entirely under use locale) */
+        /* output any special charclass tests (used entirely under use
+         * locale) * */
 	if (ANYOF_POSIXL_TEST_ANY_SET(o)) {
             int i;
 	    for (i = 0; i < ANYOF_POSIXL_MAX; i++) {
@@ -15292,7 +15282,15 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
             }
         }
         
-        EMIT_ANYOF_TEST_SEPARATOR(do_sep,sv,flags);
+	if (flags & (ANYOF_ABOVE_LATIN1_ALL|ANYOF_ABOVE_LATIN1_ALL)
+            || ANYOF_NONBITMAP(o))
+        {
+            if (do_sep) {
+                Perl_sv_catpvf(aTHX_ sv,"%s][%s",PL_colors[1],PL_colors[0]);
+                if (flags & ANYOF_INVERT)
+                    /*make sure the invert info is in each */
+                    sv_catpvs(sv, "^");
+            }
         
 	if (flags & ANYOF_NON_UTF8_LATIN1_ALL) {
 	    sv_catpvs(sv, "{non-utf8-latin1-all}");
@@ -15359,6 +15357,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
 		SvREFCNT_dec_NN(lv);
 	    }
 	}
+	}
 
 	Perl_sv_catpvf(aTHX_ sv, "%s]", PL_colors[1]);
     }
@@ -15368,7 +15367,13 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
             Perl_sv_catpvf(aTHX_ sv, "[illegal type=%d])", index);
         }
         else {
+            if (*anyofs[index] != '[')  {
+                sv_catpv(sv, "[");
+            }
             sv_catpv(sv, anyofs[index]);
+            if (*anyofs[index] != '[')  {
+                sv_catpv(sv, "]");
+            }
         }
     }
     else if (k == BRANCHJ && (OP(o) == UNLESSM || OP(o) == IFMATCH))
