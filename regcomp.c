@@ -15284,7 +15284,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
         /* output any special charclass tests (used entirely under use locale) */
 	if (ANYOF_POSIXL_TEST_ANY_SET(o)) {
             int i;
-	    for (i = 0; i < (int)(sizeof(anyofs)/sizeof(char*)); i++) {
+	    for (i = 0; i < ANYOF_POSIXL_MAX; i++) {
 		if (ANYOF_POSIXL_TEST(o,i)) {
 		    sv_catpv(sv, anyofs[i]);
 		    do_sep = 1;
