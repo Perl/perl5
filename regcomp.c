@@ -3496,7 +3496,6 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 			flags &= ~SCF_DO_STCLASS_AND;
 			StructCopy(&accum, data->start_class, regnode_ssc);
 			flags |= SCF_DO_STCLASS_OR;
-                        SET_SSC_EOS(data->start_class);
 		    }
 		}
 
@@ -4160,7 +4159,6 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 			flags &= ~SCF_DO_STCLASS_AND;
 			StructCopy(&this_class, data->start_class, regnode_ssc);
 			flags |= SCF_DO_STCLASS_OR;
-                        SET_SSC_EOS(data->start_class);
 		    }
 		} else {		/* Non-zero len */
 		    if (flags & SCF_DO_STCLASS_OR) {
@@ -5000,7 +4998,6 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
                     flags &= ~SCF_DO_STCLASS_AND;
                     StructCopy(&accum, data->start_class, regnode_ssc);
                     flags |= SCF_DO_STCLASS_OR;
-                    SET_SSC_EOS(data->start_class);
                 }
             }
             scan= tail;
