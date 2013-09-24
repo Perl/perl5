@@ -87,7 +87,10 @@ There may well be none in a stable release.
 
 =item *
 
-XXX
+Perl has an optimizer for regular expression patterns.  It analyzes the
+pattern to find things such as the minimum length a string has to be to
+match, etc.  It now better handles code points that are above the Latin1
+range.
 
 =back
 
