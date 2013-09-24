@@ -3926,7 +3926,6 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                 ssc_clear_locale(data->start_class);
 	    }
 	    else if (flags & SCF_DO_STCLASS_OR) {
-                CLEAR_SSC_EOS(data->start_class);
                 ssc_add_cp(data->start_class, uc);
 		ssc_and(pRExC_state, data->start_class, and_withp);
 	    }
@@ -4046,7 +4045,6 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                 ssc_intersection(data->start_class, EXACTF_invlist, FALSE);
 	    }
 	    else if (flags & SCF_DO_STCLASS_OR) {
-                CLEAR_SSC_EOS(data->start_class);
                 ssc_union(data->start_class, EXACTF_invlist, FALSE);
 		ssc_and(pRExC_state, data->start_class, and_withp);
 	    }
@@ -4454,7 +4452,6 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
                               PL_XPosix_ptrs[_CC_VERTSPACE],
                               FALSE);
 		    ssc_and(pRExC_state, data->start_class, and_withp);
-                    CLEAR_SSC_EOS(data->start_class); /* No match on empty */
                 }
 		flags &= ~SCF_DO_STCLASS;
             }
@@ -4480,7 +4477,9 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
                 U8 classnum;
                 U8 namedclass;
 
-                CLEAR_SSC_EOS(data->start_class); /* No match on empty */
+                if (flags & SCF_DO_STCLASS_AND) {
+                    CLEAR_SSC_EOS(data->start_class); /* No match on empty */
+                }
 
 		/* Some of the logic below assumes that switching
 		   locale on will only add false positives. */
