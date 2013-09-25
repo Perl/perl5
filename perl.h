@@ -98,17 +98,6 @@
 
 /* <--- here ends the logic shared by perl.h and makedef.pl */
 
-/*
- * PERL_DARWIN for MacOSX (__APPLE__ exists but is not officially sanctioned)
- * (The -DPERL_DARWIN comes from the hints/darwin.sh.)
- * __bsdi__ for BSD/OS
- */
-#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(PERL_DARWIN) || defined(__bsdi__) || defined(BSD41) || defined(BSD42) || defined(BSD43) || defined(BSD44)
-#   ifndef BSDish
-#       define BSDish
-#   endif
-#endif
-
 /* Microsoft Visual C++ 6.0 needs special treatment in numerous places */
 #if defined(WIN32) && defined(_MSC_VER) && _MSC_VER >= 1200 && _MSC_VER < 1300
 #  define USING_MSVC6
@@ -702,6 +691,16 @@
 #   include <sys/param.h>
 #endif
 
+/* On BSD-derived systems, <sys/param.h> defines BSD to a year-month
+   value something like 199306.  This may be useful if no more-specific
+   feature test is available.
+*/
+#if defined(BSD)
+#   ifndef BSDish
+#       define BSDish
+#   endif
+#endif
+
 /* Use all the "standard" definitions? */
 #if defined(STANDARD_C) && defined(I_STDLIB)
 #   include <stdlib.h>
@@ -1112,7 +1111,7 @@ EXTERN_C char **environ;
 #endif
 
 #if defined(__cplusplus)
-#  if defined(__OpenBSD__) || defined(__FreeBSD__) || defined(__NetBSD__)
+#  if defined(BSDish)
 EXTERN_C char **environ;
 #  elif defined(__CYGWIN__)
 EXTERN_C char *crypt(const char *, const char *);
