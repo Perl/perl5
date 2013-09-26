@@ -5,7 +5,7 @@ use 5.008;
 use strict;
 use warnings;
 
-our $VERSION = '1.87';
+our $VERSION = '1.88';
 my $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -134,7 +134,7 @@ threads - Perl interpreter-based threads
 
 =head1 VERSION
 
-This document describes threads version 1.87
+This document describes threads version 1.88
 
 =head1 SYNOPSIS
 
@@ -428,7 +428,8 @@ This I<private> method returns the memory location of the internal thread
 structure associated with a threads object.  For Win32, this is a pointer to
 the C<HANDLE> value returned by C<CreateThread> (i.e., C<HANDLE *>); for other
 platforms, it is a pointer to the C<pthread_t> structure used in the
-C<pthread_create> call (i.e., C<pthread_t *>).
+C<pthread_create> call (i.e., C<pthread_t *>). The pointer is numeric (UV) and
+not packed. It can not be direct passed to C<unpack('P[4]', >.
 
 This method is of no use for general Perl threads programming.  Its intent is
 to provide other (XS-based) thread modules with the capability to access, and
