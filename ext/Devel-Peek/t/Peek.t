@@ -1266,7 +1266,6 @@ do_test('UTF-8 in a regular expression',
   my $ref = \%hash;
   is(Devel::Peek::SvREFCNT(%hash), $base_count + 1, "SvREFCNT on non-scalar");
 }
-
 {
 # utf8 tests
 use utf8;
@@ -1274,12 +1273,13 @@ use utf8;
 sub _dump {
    open(OUT,">peek$$") or die $!;
    open(STDERR, ">&OUT") or die "Can't dup OUT: $!";
-   Dump($_[1]);
+   Dump($_[0]);
    open(STDERR, ">&SAVERR") or die "Can't restore STDERR: $!";
    close(OUT);
    open(IN, "peek$$") or die $!;
    my $dump = do { local $/; <IN> };
    close(IN);
+   1 while unlink "peek$$";
    return $dump;
 }
 
@@ -1388,11 +1388,10 @@ EOP
 
 sub get_outside {
    eval "sub $_[0] { my \$x; \$x++; return sub { eval q{\$x} } } $_[0]()";
-   
 }
-sub food { my $x; return sub { $x } }
+sub basic { my $x; return eval q{sub { eval q{$x} }} }
 like(
-    _dump(food()),
+    _dump(basic()),
     qr/OUTSIDE = 0x[[:xdigit:]]+\s+\Q(basic)/,
     'OUTSIDE works'
 );
