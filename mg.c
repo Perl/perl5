@@ -1969,7 +1969,7 @@ Perl_magic_setdbline(pTHX_ SV *sv, MAGIC *mg)
     /* The magic ptr/len for the debugger's hash should always be an SV.  */
     if (UNLIKELY(mg->mg_len != HEf_SVKEY)) {
         Perl_croak(aTHX_ "panic: magic_setdbline len=%"IVdf", ptr='%s'",
-                   mg->mg_len, mg->mg_ptr);
+                   (IV)mg->mg_len, mg->mg_ptr);
     }
 
     /* Use sv_2iv instead of SvIV() as the former generates smaller code, and

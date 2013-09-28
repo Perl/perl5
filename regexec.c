@@ -2283,7 +2283,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
             : strbeg; /* pos() not defined; use start of string */
 
         DEBUG_GPOS_r(PerlIO_printf(Perl_debug_log,
-            "GPOS ganch set to strbeg[%"IVdf"]\n", reginfo->ganch - strbeg));
+            "GPOS ganch set to strbeg[%"IVdf"]\n", (IV)(reginfo->ganch - strbeg)));
 
         /* in the presence of \G, we may need to start looking earlier in
          * the string than the suggested start point of stringarg:
