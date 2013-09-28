@@ -368,7 +368,8 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
  * These expand identically to the TWO_BYTE versions on ASCII platforms, but
  * use to/from LATIN1 instead of UNI, which on EBCDIC eliminates tests */
 #define UTF8_EIGHT_BIT_HI(c)	I8_TO_NATIVE_UTF8((NATIVE_TO_LATIN1(c)          \
-                        >> UTF_ACCUMULATION_SHIFT) | UTF_START_MARK(2))
+                                                    >> UTF_ACCUMULATION_SHIFT)  \
+                                                | UTF_START_MARK(2))
 #define UTF8_EIGHT_BIT_LO(c)	I8_TO_NATIVE_UTF8((NATIVE_TO_LATIN1(c)          \
                                                   & UTF_CONTINUATION_MASK)      \
                                                 | UTF_CONTINUATION_MARK)
