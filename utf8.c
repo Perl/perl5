@@ -2609,8 +2609,8 @@ Perl__to_utf8_upper_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, const bool
 	*lenp = 1;
     }
     else {
-	*ustrp = UTF8_EIGHT_BIT_HI(result);
-	*(ustrp + 1) = UTF8_EIGHT_BIT_LO(result);
+	*ustrp = UTF8_EIGHT_BIT_HI((U8) result);
+	*(ustrp + 1) = UTF8_EIGHT_BIT_LO((U8) result);
 	*lenp = 2;
     }
 
@@ -2675,8 +2675,8 @@ Perl__to_utf8_title_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, const bool
 	*lenp = 1;
     }
     else {
-	*ustrp = UTF8_EIGHT_BIT_HI(result);
-	*(ustrp + 1) = UTF8_EIGHT_BIT_LO(result);
+	*ustrp = UTF8_EIGHT_BIT_HI((U8) result);
+	*(ustrp + 1) = UTF8_EIGHT_BIT_LO((U8) result);
 	*lenp = 2;
     }
 
@@ -2740,8 +2740,8 @@ Perl__to_utf8_lower_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, const bool
 	*lenp = 1;
     }
     else {
-	*ustrp = UTF8_EIGHT_BIT_HI(result);
-	*(ustrp + 1) = UTF8_EIGHT_BIT_LO(result);
+	*ustrp = UTF8_EIGHT_BIT_HI((U8) result);
+	*(ustrp + 1) = UTF8_EIGHT_BIT_LO((U8) result);
 	*lenp = 2;
     }
 
@@ -2870,8 +2870,8 @@ Perl__to_utf8_fold_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, U8 flags, b
 	*lenp = 1;
     }
     else {
-	*ustrp = UTF8_EIGHT_BIT_HI(result);
-	*(ustrp + 1) = UTF8_EIGHT_BIT_LO(result);
+	*ustrp = UTF8_EIGHT_BIT_HI((U8) result);
+	*(ustrp + 1) = UTF8_EIGHT_BIT_LO((U8) result);
 	*lenp = 2;
     }
 
