@@ -626,6 +626,8 @@ do_test('scalar with pos magic',
 # ENV hashes is also not always null terminated.
 #
 if (${^TAINT}) {
+  # Save and restore PATH, since fresh_perl ends up using that in Windows.
+  my $path = $ENV{PATH};
   do_test('tainted value in %ENV',
           $ENV{PATH}=@ARGV,  # scalar(@ARGV) is a handy known tainted value
 'SV = PVMG\\($ADDR\\) at $ADDR
@@ -653,6 +655,7 @@ if (${^TAINT}) {
   MAGIC = $ADDR
     MG_VIRTUAL = &PL_vtbl_taint
     MG_TYPE = PERL_MAGIC_taint\\(t\\)');
+    $ENV{PATH} = $path;
 }
 
 do_test('blessed reference',
