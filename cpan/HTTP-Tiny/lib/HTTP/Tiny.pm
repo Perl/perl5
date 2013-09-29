@@ -3,7 +3,7 @@ package HTTP::Tiny;
 use strict;
 use warnings;
 # ABSTRACT: A small, simple, correct HTTP/1.1 client
-our $VERSION = '0.035'; # VERSION
+our $VERSION = '0.036'; # VERSION
 
 use Carp ();
 
@@ -1008,7 +1008,7 @@ HTTP::Tiny - A small, simple, correct HTTP/1.1 client
 
 =head1 VERSION
 
-version 0.035
+version 0.036
 
 =head1 SYNOPSIS
 
@@ -1520,7 +1520,7 @@ public review and contribution under the terms of the license.
 
 L<https://github.com/chansen/p5-http-tiny>
 
-  git clone git://github.com/chansen/p5-http-tiny.git
+  git clone https://github.com/chansen/p5-http-tiny.git
 
 =head1 AUTHORS
 

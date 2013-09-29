@@ -919,7 +919,7 @@ use File::Glob qw(:case);
 
     'HTTP::Tiny' => {
         'MAINTAINER'   => 'dagolden',
-        'DISTRIBUTION' => 'DAGOLDEN/HTTP-Tiny-0.035.tar.gz',
+        'DISTRIBUTION' => 'DAGOLDEN/HTTP-Tiny-0.036.tar.gz',
         'FILES'        => q[cpan/HTTP-Tiny],
         'EXCLUDED'     => [
             'cpanfile',
