@@ -1339,9 +1339,9 @@ use File::Glob qw(:case);
 
     'Perl::OSType' => {
         'MAINTAINER'   => 'dagolden',
-        'DISTRIBUTION' => 'DAGOLDEN/Perl-OSType-1.005.tar.gz',
+        'DISTRIBUTION' => 'DAGOLDEN/Perl-OSType-1.006.tar.gz',
         'FILES'        => q[cpan/Perl-OSType],
-        'EXCLUDED'     => [qw(cpanfile), qr/^xt/, qr{^t/00-}],
+        'EXCLUDED'     => [qw(cpanfile), qw(tidyall.ini), qr/^xt/, qr{^t/00-}],
         'UPSTREAM'     => 'cpan',
     },
 

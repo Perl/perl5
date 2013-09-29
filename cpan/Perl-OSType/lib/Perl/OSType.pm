@@ -3,7 +3,7 @@ use warnings;
 
 package Perl::OSType;
 # ABSTRACT: Map Perl operating system names to generic types
-our $VERSION = '1.005'; # VERSION
+our $VERSION = '1.006'; # VERSION
 
 require Exporter;
 our @ISA = qw(Exporter);
@@ -92,7 +92,7 @@ Perl::OSType - Map Perl operating system names to generic types
 
 =head1 VERSION
 
-version 1.005
+version 1.006
 
 =head1 SYNOPSIS
 
