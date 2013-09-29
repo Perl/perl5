@@ -104,10 +104,10 @@ use File::Glob qw(:case);
     .cvsignore .dualLivedDiffConfig .gitignore
     ANNOUNCE Announce Artistic AUTHORS BENCHMARK BUGS Build.PL
     CHANGELOG ChangeLog Changelog CHANGES Changes CONTRIBUTING COPYING Copying
-    CREDITS dist.ini GOALS HISTORY INSTALL INSTALL.SKIP LICENSE Makefile.PL
-    MANIFEST MANIFEST.SKIP META.json META.yml MYMETA.json MYMETA.yml
-    NEW NOTES perlcritic.rc ppport.h README README.PATCHING SIGNATURE
-    THANKS TODO Todo VERSION WHATSNEW
+    cpanfile CREDITS dist.ini GOALS HISTORY INSTALL INSTALL.SKIP LICENSE
+    Makefile.PL MANIFEST MANIFEST.SKIP META.json META.yml MYMETA.json
+    MYMETA.yml NEW NOTES perlcritic.rc ppport.h README README.PATCHING
+    SIGNATURE THANKS TODO Todo VERSION WHATSNEW
 );
 
 # Each entry in the  %Modules hash roughly represents a distribution,
@@ -799,7 +799,7 @@ use File::Glob qw(:case);
 
     'File::Temp' => {
         'MAINTAINER'   => 'tjenness',
-        'DISTRIBUTION' => 'DAGOLDEN/File-Temp-0.2301.tar.gz',
+        'DISTRIBUTION' => 'DAGOLDEN/File-Temp-0.2302.tar.gz',
         'FILES'        => q[cpan/File-Temp],
         'EXCLUDED'     => [
             qw( misc/benchmark.pl
