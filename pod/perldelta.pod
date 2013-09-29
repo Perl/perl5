@@ -308,9 +308,10 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
-
-XXX
+=item VMS
+ 
+The C<PERL_ENV_TABLES> feature to control the population of %ENV at perl
+start-up was broken in Perl 5.16.0 but has now been fixed.
 
 =back
 
