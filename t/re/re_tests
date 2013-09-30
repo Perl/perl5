@@ -1794,6 +1794,8 @@ A+(*PRUNE)BC(?{})	AAABC	y	$&	AAABC
 (?:(a(*SKIP)b)){0}(?:(?1)|ac)	x	n	-	-
 # RT #119073: PCRE regression test: {0} => NOTHING optimization
 (?1)(?:(b)){0}	b	y	$&	b
+# RT #120041
+^A*\z		y	$&	
 
 # Keep these lines at the end of the file
 # vim: softtabstop=0 noexpandtab

@@ -835,7 +835,7 @@ S_ssc_is_anything(pTHX_ const regnode_ssc *ssc)
 
     assert(OP(ssc) == ANYOF_SYNTHETIC);
 
-    if (! ANYOF_FLAGS(ssc) & ANYOF_EMPTY_STRING) {
+    if (! (ANYOF_FLAGS(ssc) & ANYOF_EMPTY_STRING)) {
         return FALSE;
     }
 
@@ -4167,6 +4167,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 			flags &= ~SCF_DO_STCLASS_AND;
 			StructCopy(&this_class, data->start_class, regnode_ssc);
 			flags |= SCF_DO_STCLASS_OR;
+                        ANYOF_FLAGS(data->start_class) |= ANYOF_EMPTY_STRING;
 		    }
 		} else {		/* Non-zero len */
 		    if (flags & SCF_DO_STCLASS_OR) {
@@ -6613,7 +6614,7 @@ reStudy:
 
 	if ((!(r->anchored_substr || r->anchored_utf8) || r->anchored_offset)
 	    && stclass_flag
-	    && ! ANYOF_FLAGS(data.start_class) & ANYOF_EMPTY_STRING
+            && ! (ANYOF_FLAGS(data.start_class) & ANYOF_EMPTY_STRING)
 	    && !ssc_is_anything(data.start_class))
 	{
 	    const U32 n = add_data(pRExC_state, STR_WITH_LEN("f"));
@@ -6687,9 +6688,9 @@ reStudy:
 	r->check_substr = r->check_utf8 = r->anchored_substr = r->anchored_utf8
 		= r->float_substr = r->float_utf8 = NULL;
 
-	if (! ANYOF_FLAGS(data.start_class) & ANYOF_EMPTY_STRING
-	    && !ssc_is_anything(data.start_class))
-	{
+        if (! (ANYOF_FLAGS(data.start_class) & ANYOF_EMPTY_STRING)
+            && ! ssc_is_anything(data.start_class))
+        {
 	    const U32 n = add_data(pRExC_state, STR_WITH_LEN("f"));
 
             ssc_finalize(pRExC_state, data.start_class);
