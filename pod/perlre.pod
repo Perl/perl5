@@ -472,7 +472,8 @@ X<\> X<^> X<.> X<$> X<|> X<(> X<()> X<[> X<[]>
     \        Quote the next metacharacter
     ^        Match the beginning of the line
     .        Match any character (except newline)
-    $        Match the end of the line (or before newline at the end)
+    $        Match the end of the string (or before newline at the end
+             of the string)
     |        Alternation
     ()       Grouping
     []       Bracketed Character class
