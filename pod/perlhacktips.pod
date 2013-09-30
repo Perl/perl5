@@ -717,6 +717,27 @@ Run until the end of the current function, then stop again.
 Just pressing Enter will do the most recent operation again - it's a
 blessing when stepping through miles of source code.
 
+=item * ptype
+
+Prints the C definition of the argument given.
+
+  (gdb) ptype PL_op
+  type = struct op {
+      OP *op_next;
+      OP *op_sibling;
+      OP *(*op_ppaddr)(void);
+      PADOFFSET op_targ;
+      unsigned int op_type : 9;
+      unsigned int op_opt : 1;
+      unsigned int op_slabbed : 1;
+      unsigned int op_savefree : 1;
+      unsigned int op_static : 1;
+      unsigned int op_folded : 1;
+      unsigned int op_spare : 2;
+      U8 op_flags;
+      U8 op_private;
+  } *
+
 =item * print
 
 Execute the given C code and print its results. B<WARNING>: Perl makes
@@ -794,12 +815,14 @@ C<SvNV>.
 Since we don't have an NV for C<$b>, we'll have to use C<sv_2nv> to
 convert it. If we step again, we'll find ourselves there:
 
+    (gdb) step
     Perl_sv_2nv (sv=0xa0675d0) at sv.c:1669
     1669        if (!sv)
     (gdb)
 
 We can now use C<Perl_sv_dump> to investigate the SV:
 
+    (gdb) print Perl_sv_dump(sv)
     SV = PV(0xa057cc0) at 0xa0675d0
     REFCNT = 1
     FLAGS = (POK,pPOK)
@@ -820,6 +843,7 @@ We can also dump out this op: the current op is always stored in
 C<PL_op>, and we can dump it with C<Perl_op_dump>. This'll give us
 similar output to L<B::Debug|B::Debug>.
 
+    (gdb) print Perl_op_dump(PL_op)
     {
     13  TYPE = add  ===> 14
         TARG = 1
@@ -836,6 +860,46 @@ similar output to L<B::Debug|B::Debug>.
         }
 
 # finish this later #
+
+=head2 Using gdb to look at specific parts of a program
+
+With the example above, you knew to look for C<Perl_pp_add>, but what if 
+there were multiple calls to it all over the place, or you didn't know what 
+the op was you were looking for?
+
+One way to do this is to inject a rare call somewhere near what you're looking 
+for. For example, you could add C<study> before your method:
+
+    study;
+
+And in gdb do:
+
+    (gdb) break Perl_pp_study
+
+And then step until you hit what you're looking for. This works well in a loop 
+if you want to only break at certain iterations:
+
+    for my $c (1..100) {
+        study if $c == 50;
+    }
+
+=head2 Using gdb to look at what the parser/lexer are doing
+
+If you want to see what perl is doing when parsing/lexing your code, you can 
+use C<<BEGIN {}>>:
+
+    print "Before\n";
+    BEGIN { study; }
+    print "After\n";
+
+And in gdb:
+
+    (gdb) break Perl_pp_study
+
+If you want to see what the parser/lexer is doing inside of C<if> blocks and
+the like you need to be a little trickier:
+
+    if ($a && $b && do { BEGIN { study } 1 } && $c) { ... } 
 
 =head1 SOURCE CODE STATIC ANALYSIS
 
