@@ -95,15 +95,6 @@ In Perl 5.20 and higher this is ignored. Due to a new copy-on-write
 mechanism, ${^PREMATCH}, ${^MATCH}, and ${^POSTMATCH} will be available
 after the match regardless of the modifier.
 
-=item g and c
-X</g> X</c>
-
-Global matching, and keep the Current position after failed matching.
-Unlike i, m, s and x, these two flags affect the way the regex is used
-rather than the regex itself. See
-L<perlretut/"Using regular expressions in Perl"> for further explanation
-of the g and c modifiers.
-
 =item a, d, l and u
 X</a> X</d> X</l> X</u>
 
@@ -111,14 +102,27 @@ These modifiers, all new in 5.14, affect which character-set semantics
 (Unicode, etc.) are used, as described below in
 L</Character set modifiers>.
 
-=item r
-X</r>
+=item Other Modifiers
 
-Non-destructive substitution.  Unlike regular substitution, the entity to
-which the substitution is bound is B<not> modified in place.  Rather, the
-B<result> of the substitution is returned as a plain string.  See
-L<perlop/"s/PATTERN/REPLACEMENT/msixpodualgcer"> for further explanation of
-the C</r> modifier.
+There are a number of flags that can be found at the end of regular
+expression constructs that are I<not> generic regular expression flags, but
+apply to the operation being performed, like matching or substitution (C<m//>
+or C<s///> respectively).
+
+Flags described further in
+L<perlretut/"Using regular expressions in Perl"> are:
+
+  c  - keep the current position during repeated matching
+  g  - globally match the pattern repeatedly in the string
+
+Substitution-specific modifiers described in
+
+L<perlop/"s/PATTERN/REPLACEMENT/msixpodualgcer"> are:
+
+  e  - evaluate the right-hand side as an expression
+  ee - evaluate the right side as a string then eval the result
+  o  - pretend to optimize your code, but actually introduce bugs
+  r  - perform non-destructive substitution and return the new value
 
 =back
 
