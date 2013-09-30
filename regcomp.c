@@ -825,8 +825,10 @@ S_ssc_anything(pTHX_ regnode_ssc *ssc)
 STATIC int
 S_ssc_is_anything(pTHX_ const regnode_ssc *ssc)
 {
-    /* Returns TRUE if the SSC 'ssc' can match the empty string or any code
-     * point */
+    /* Returns TRUE if the SSC 'ssc' can match the empty string and any code
+     * point; FALSE otherwise.  Thus, this is used to see if using 'ssc' buys
+     * us anything: if the function returns TRUE, 'ssc' hasn't been restricted
+     * in any way, so there's no point in using it */
 
     UV start, end;
     bool ret;
