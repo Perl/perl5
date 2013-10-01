@@ -1,9 +1,9 @@
-#!/usr/bin/perl
-
 use strict;
+use warnings;
+
 BEGIN {
-	$|  = 1;
-	$^W = 1;
+    $|  = 1;
+    $^W = 1;
 }
 
 use File::Spec::Functions ':ALL';
@@ -28,7 +28,7 @@ my $yaml      = eval { CPAN::Meta::YAML->read_string( $yaml_copy ); };
 is( $@, '', "$name: CPAN::Meta::YAML parses without error" );
 is( $yaml_copy, $sample, "$name: CPAN::Meta::YAML does not modify the input string" );
 SKIP: {
-	skip( "Shortcutting after failure", 2 ) if $@;
-	is( $yaml, undef, "file not parsed" );
-	is( CPAN::Meta::YAML->errstr, "Stream has a non UTF-8 BOM", "correct error" );
+    skip( "Shortcutting after failure", 2 ) if $@;
+    is( $yaml, undef, "file not parsed" );
+    is( CPAN::Meta::YAML->errstr, "Stream has a non UTF-8 BOM", "correct error" );
 }

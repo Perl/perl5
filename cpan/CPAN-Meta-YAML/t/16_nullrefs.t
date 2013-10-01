@@ -1,11 +1,11 @@
-#!/usr/bin/perl
-
 # Testing for null references
 
 use strict;
+use warnings;
+
 BEGIN {
-	$|  = 1;
-	$^W = 1;
+    $|  = 1;
+    $^W = 1;
 }
 
 use File::Spec::Functions ':ALL';
@@ -21,10 +21,10 @@ use CPAN::Meta::YAML;
 # Example Empty References
 
 yaml_ok(
-	<<'END_YAML',
+    <<'END_YAML',
 --- []
 --- {}
 END_YAML
-	[ [], {} ],
-	'Empty references',
+    [ [], {} ],
+    'Empty references',
 );

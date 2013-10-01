@@ -1,11 +1,11 @@
-#!/usr/bin/perl
-
 # Load testing for CPAN::Meta::YAML
 
 use strict;
+use warnings;
+
 BEGIN {
-	$|  = 1;
-	$^W = 1;
+    $|  = 1;
+    $^W = 1;
 }
 
 use File::Spec::Functions ':ALL';

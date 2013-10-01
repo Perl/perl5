@@ -1,11 +1,11 @@
-#!/usr/bin/perl
-
 # Testing of META.yml containing AVAR's name
 
 use strict;
+use warnings;
+
 BEGIN {
-	$|  = 1;
-	$^W = 1;
+    $|  = 1;
+    $^W = 1;
 }
 
 use File::Spec::Functions ':ALL';
@@ -30,23 +30,23 @@ my $yaml      = eval { CPAN::Meta::YAML->read_string( $yaml_copy ); };
 is( $@, '', "$name: CPAN::Meta::YAML parses without error" );
 is( $yaml_copy, $sample, "$name: CPAN::Meta::YAML does not modify the input string" );
 SKIP: {
-	skip( "Shortcutting after failure", 2 ) if $@;
-	isa_ok( $yaml, 'CPAN::Meta::YAML' );
-	is_deeply( $yaml->[0]->{build_requires}, {
-		'Config'     => 0,
-		'Test::More' => 0,
-		'XSLoader'   => 0,
-	}, 'build_requires ok' );
+    skip( "Shortcutting after failure", 2 ) if $@;
+    isa_ok( $yaml, 'CPAN::Meta::YAML' );
+    is_deeply( $yaml->[0]->{build_requires}, {
+        'Config'     => 0,
+        'Test::More' => 0,
+        'XSLoader'   => 0,
+    }, 'build_requires ok' );
 }
 
 SKIP: {
-	unless ( CPAN::Meta::YAML::HAVE_UTF8() ) {
-		skip("no utf8 support", 2 );
-	}
-	eval { utf8::is_utf8('') };
-	if ( $@ ) {
-		skip("no is_utf8 to test with until 5.8.1", 2);
-	}
-	ok( utf8::is_utf8($yaml->[0]->{author}), "utf8 decoded" );
-	is( length($yaml->[0]->{author}), 39, "utf8 decoded as characters" );
+    unless ( CPAN::Meta::YAML::HAVE_UTF8() ) {
+        skip("no utf8 support", 2 );
+    }
+    eval { utf8::is_utf8('') };
+    if ( $@ ) {
+        skip("no is_utf8 to test with until 5.8.1", 2);
+    }
+    ok( utf8::is_utf8($yaml->[0]->{author}), "utf8 decoded" );
+    is( length($yaml->[0]->{author}), 39, "utf8 decoded as characters" );
 }

@@ -1,11 +1,11 @@
-#!/usr/bin/perl
-
 # Testing Plagger config samples from Miyagawa-san's YAPC::NA 2006 talk
 
 use strict;
+use warnings;
+
 BEGIN {
-	$|  = 1;
-	$^W = 1;
+    $|  = 1;
+    $^W = 1;
 }
 
 use File::Spec::Functions ':ALL';
@@ -21,7 +21,7 @@ use CPAN::Meta::YAML;
 # Example Plagger Configuration 1
 
 yaml_ok(
-	<<'END_YAML',
+    <<'END_YAML',
 plugins:
   - module: Subscription::Bloglines
     config:
@@ -37,28 +37,28 @@ plugins:
         via: smtp
         host: smtp.example.com
 END_YAML
-	[ { plugins => [
-		{
-			module => 'Subscription::Bloglines',
-			config => {
-				username  => 'you@example.pl',
-				password  => 'foobar',
-				mark_read => 1,
-			},
-		},
-		{
-			module => 'Publish::Gmail',
-			config => {
-				mailto    => 'example@gmail.com',
-				mailfrom  => 'miyagawa@example.com',
-				mailroute => {
-					via  => 'smtp',
-					host => 'smtp.example.com',
-				},
-			},
-		},
-	] } ],
-	'Plagger',
+    [ { plugins => [
+        {
+            module => 'Subscription::Bloglines',
+            config => {
+                username  => 'you@example.pl',
+                password  => 'foobar',
+                mark_read => 1,
+            },
+        },
+        {
+            module => 'Publish::Gmail',
+            config => {
+                mailto    => 'example@gmail.com',
+                mailfrom  => 'miyagawa@example.com',
+                mailroute => {
+                    via  => 'smtp',
+                    host => 'smtp.example.com',
+                },
+            },
+        },
+    ] } ],
+    'Plagger',
 );
 
 
@@ -69,7 +69,7 @@ END_YAML
 # Example Plagger Configuration 2
 
 yaml_ok(
-	<<'END_YAML',
+    <<'END_YAML',
 plugins:
  - module: Subscription::Config
    config:
@@ -95,33 +95,33 @@ plugins:
        - '#plagger-ja'
        - '#plagger'
 
-   
+
 END_YAML
-	[ { plugins => [ {
-		module => 'Subscription::Config',
-		config => {
-			feed => [ 'http://plagger.org/.../rss' ],
-		},
-	}, {
-		module => 'Filter::Rule',
-		rule   => {
-			module => 'Fresh',
-			mtime  => {
-				path => '/tmp/rssbot.time',
-				autoupdate => 1,
-			},
-		},
-	}, {
-		module => 'Notify::IRC',
-		config => {
-			daemon_port     => 9999,
-			nickname        => 'plaggerbot',
-			server_host     => 'chat.freenode.net',
-			server_channels => [
-				'#plagger-ja',
-				'#plagger',
-			],
-		},
-	} ] } ],
-	'plagger2',
-);			
+    [ { plugins => [ {
+        module => 'Subscription::Config',
+        config => {
+            feed => [ 'http://plagger.org/.../rss' ],
+        },
+    }, {
+        module => 'Filter::Rule',
+        rule   => {
+            module => 'Fresh',
+            mtime  => {
+                path => '/tmp/rssbot.time',
+                autoupdate => 1,
+            },
+        },
+    }, {
+        module => 'Notify::IRC',
+        config => {
+            daemon_port     => 9999,
+            nickname        => 'plaggerbot',
+            server_host     => 'chat.freenode.net',
+            server_channels => [
+                '#plagger-ja',
+                '#plagger',
+            ],
+        },
+    } ] } ],
+    'plagger2',
+);

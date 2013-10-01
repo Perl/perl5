@@ -1,20 +1,20 @@
-#!/usr/bin/perl
-
 # Testing of common META.yml examples
 
 use strict;
+use warnings;
+
 BEGIN {
-	$|  = 1;
-	$^W = 1;
+    $|  = 1;
+    $^W = 1;
 }
 
 use File::Spec::Functions ':ALL';
 use t::lib::Test;
 use Test::More tests(37, 0, 13);
 use CPAN::Meta::YAML qw{
-	Load     Dump
-	LoadFile DumpFile
-	freeze   thaw
+    Load     Dump
+    LoadFile DumpFile
+    freeze   thaw
 };
 
 
@@ -40,17 +40,17 @@ ok( defined(&thaw),     'Found exported thaw functiona'    );
 
 # Hash key legally containing a colon
 yaml_ok(
-	"---\nFoo::Bar: 1\n",
-	[ { 'Foo::Bar' => 1 } ],
-	'module_hash_key',
+    "---\nFoo::Bar: 1\n",
+    [ { 'Foo::Bar' => 1 } ],
+    'module_hash_key',
 );
 
 # Hash indented
 yaml_ok(
-	  "---\n"
-	. "  foo: bar\n",
-	[ { foo => "bar" } ],
-	'hash_indented',
+      "---\n"
+    . "  foo: bar\n",
+    [ { foo => "bar" } ],
+    'hash_indented',
 );
 
 
@@ -62,25 +62,25 @@ yaml_ok(
 
 # Declarative multi-line scalar
 yaml_ok(
-	  "---\n"
-	. "  foo: >\n"
-	. "     bar\n"
-	. "     baz\n",
-	[ { foo => "bar baz\n" } ],
-	'simple_multiline',
+      "---\n"
+    . "  foo: >\n"
+    . "     bar\n"
+    . "     baz\n",
+    [ { foo => "bar baz\n" } ],
+    'simple_multiline',
 );
 
 # Piped multi-line scalar
 yaml_ok(
-	<<'END_YAML',
+    <<'END_YAML',
 ---
 - |
   foo
   bar
 - 1
 END_YAML
-	[ [ "foo\nbar\n", 1 ] ],
-	'indented',
+    [ [ "foo\nbar\n", 1 ] ],
+    'indented',
 );
 
 # ... with a pointless hyphen
@@ -91,8 +91,8 @@ yaml_ok( <<'END_YAML',
   bar
 - 1
 END_YAML
-	[ [ "foo\nbar", 1 ] ],
-	'indented',
+    [ [ "foo\nbar", 1 ] ],
+    'indented',
 );
 
 
@@ -104,60 +104,60 @@ END_YAML
 
 # Simple inline case (comment variant)
 yaml_ok(
-	<<'END_YAML',
+    <<'END_YAML',
 --- #YAML:1.0
 foo: bar
 END_YAML
-	[ { foo => 'bar' } ],
-	'simple_doctype_comment',
-	nosyck   => 1,
+    [ { foo => 'bar' } ],
+    'simple_doctype_comment',
+    nosyck   => 1,
 );
 
 # Simple inline case (percent variant)
 yaml_ok(
-	<<'END_YAML',
+    <<'END_YAML',
 --- %YAML:1.0
 foo: bar
 END_YAML
-	[ { foo => 'bar' } ],
-	'simple_doctype_percent',
-	noyamlpm   => 1,
-	noxs       => 1,
-	noyamlperl => 1,
+    [ { foo => 'bar' } ],
+    'simple_doctype_percent',
+    noyamlpm   => 1,
+    noxs       => 1,
+    noyamlperl => 1,
 );
 
 # Simple header (comment variant)
 yaml_ok(
-	<<'END_YAML',
+    <<'END_YAML',
 %YAML:1.0
 ---
 foo: bar
 END_YAML
-	[ { foo => 'bar' } ],
-	'predocument_1_0',
-	noyamlpm   => 1,
-	nosyck     => 1,
-	noxs       => 1,
-	noyamlperl => 1,
+    [ { foo => 'bar' } ],
+    'predocument_1_0',
+    noyamlpm   => 1,
+    nosyck     => 1,
+    noxs       => 1,
+    noyamlperl => 1,
 );
 
 # Simple inline case (comment variant)
 yaml_ok(
-	<<'END_YAML',
+    <<'END_YAML',
 %YAML 1.1
 ---
 foo: bar
 END_YAML
-	[ { foo => 'bar' } ],
-	'predocument_1_1',
-	noyamlpm   => 1,
-	nosyck     => 1,
-	noyamlperl => 1,
+    [ { foo => 'bar' } ],
+    'predocument_1_1',
+    noyamlpm   => 1,
+    nosyck     => 1,
+    noyamlperl => 1,
 );
 
 # Multiple inline documents (comment variant)
 yaml_ok(
-	<<'END_YAML',
+    <<'END_YAML',
 --- #YAML:1.0
 foo: bar
 --- #YAML:1.0
@@ -165,33 +165,33 @@ foo: bar
 --- #YAML:1.0
 foo: bar
 END_YAML
-	[ { foo => 'bar' }, [ 1 ], { foo => 'bar' } ],
-	'multi_doctype_comment',
+    [ { foo => 'bar' }, [ 1 ], { foo => 'bar' } ],
+    'multi_doctype_comment',
 );
 
 # Simple pre-document case (comment variant)
 yaml_ok(
-	<<'END_YAML',
+    <<'END_YAML',
 %YAML 1.1
 ---
 foo: bar
 END_YAML
-	[ { foo => 'bar' } ],
-	'predocument_percent',
-	noyamlpm   => 1,
-	nosyck     => 1,
-	noyamlperl => 1,
+    [ { foo => 'bar' } ],
+    'predocument_percent',
+    noyamlpm   => 1,
+    nosyck     => 1,
+    noyamlperl => 1,
 );
 
 # Simple pre-document case (comment variant)
 yaml_ok(
-	<<'END_YAML',
+    <<'END_YAML',
 #YAML 1.1
 ---
 foo: bar
 END_YAML
-	[ { foo => 'bar' } ],
-	'predocument_comment',
+    [ { foo => 'bar' } ],
+    'predocument_comment',
 );
 
 
@@ -202,12 +202,12 @@ END_YAML
 # Hitchhiker Scalar
 
 yaml_ok(
-	<<'END_YAML',
+    <<'END_YAML',
 --- 42
 END_YAML
-	[ 42 ],
-	'hitchhiker scalar',
-	serializes => 1,
+    [ 42 ],
+    'hitchhiker scalar',
+    serializes => 1,
 );
 
 
@@ -218,45 +218,45 @@ END_YAML
 # Null HASH/ARRAY
 
 yaml_ok(
-	<<'END_YAML',
+    <<'END_YAML',
 ---
 - foo
 - {}
 - bar
 END_YAML
-	[ [ 'foo', {}, 'bar' ] ],
-	'null hash in array',
+    [ [ 'foo', {}, 'bar' ] ],
+    'null hash in array',
 );
 
 yaml_ok(
-	<<'END_YAML',
+    <<'END_YAML',
 ---
 - foo
 - []
 - bar
 END_YAML
-	[ [ 'foo', [], 'bar' ] ],
-	'null array in array',
+    [ [ 'foo', [], 'bar' ] ],
+    'null array in array',
 );
 
 yaml_ok(
-	<<'END_YAML',
+    <<'END_YAML',
 ---
 foo: {}
 bar: 1
 END_YAML
-	[  { foo => {}, bar => 1 } ],
-	'null hash in hash',
+    [  { foo => {}, bar => 1 } ],
+    'null hash in hash',
 );
 
 yaml_ok(
-	<<'END_YAML',
+    <<'END_YAML',
 ---
 foo: []
 bar: 1
 END_YAML
-	[  { foo => [], bar => 1 } ],
-	'null array in hash',
+    [  { foo => [], bar => 1 } ],
+    'null array in hash',
 );
 
 
@@ -266,22 +266,22 @@ END_YAML
 # Trailing Whitespace
 
 yaml_ok(
-	<<'END_YAML',
+    <<'END_YAML',
 ---
-abstract: Generate fractal curves 
-foo: ~ 
+abstract: Generate fractal curves
+foo: ~
 arr:
-  - foo 
+  - foo
   - ~
-  - 'bar'  
+  - 'bar'
 END_YAML
-	[ {
-		abstract => 'Generate fractal curves',
-		foo      => undef,
-		arr      => [ 'foo', undef, 'bar' ],
-	} ],
-	'trailing whitespace',
-	noyamlperl => 1,
+    [ {
+        abstract => 'Generate fractal curves',
+        foo      => undef,
+        arr      => [ 'foo', undef, 'bar' ],
+    } ],
+    'trailing whitespace',
+    noyamlperl => 1,
 );
 
 
@@ -292,13 +292,13 @@ END_YAML
 # Quote vs Hash
 
 yaml_ok(
-	<<'END_YAML',
+    <<'END_YAML',
 ---
 author:
   - 'mst: Matt S. Trout <mst@shadowcatsystems.co.uk>'
 END_YAML
-	[ { author => [ 'mst: Matt S. Trout <mst@shadowcatsystems.co.uk>' ] } ],
-	'hash-like quote',
+    [ { author => [ 'mst: Matt S. Trout <mst@shadowcatsystems.co.uk>' ] } ],
+    'hash-like quote',
 );
 
 
@@ -309,33 +309,33 @@ END_YAML
 # Quote and Escaping Idiosyncracies
 
 yaml_ok(
-	<<'END_YAML',
+    <<'END_YAML',
 ---
 name1: 'O''Reilly'
 name2: 'O''Reilly O''Tool'
 name3: 'Double '''' Quote'
 END_YAML
-	[ {
-		name1 => "O'Reilly",
-		name2 => "O'Reilly O'Tool",
-		name3 => "Double '' Quote",
-	} ],
-	'single quote subtleties',
+    [ {
+        name1 => "O'Reilly",
+        name2 => "O'Reilly O'Tool",
+        name3 => "Double '' Quote",
+    } ],
+    'single quote subtleties',
 );
 
 yaml_ok(
-	<<'END_YAML',
+    <<'END_YAML',
 ---
 slash1: '\\'
 slash2: '\\foo'
 slash3: '\\foo\\\\'
 END_YAML
-	[ {
-		slash1 => "\\\\",
-		slash2 => "\\\\foo",
-		slash3 => "\\\\foo\\\\\\\\",
-	} ],
-	'single quote subtleties',
+    [ {
+        slash1 => "\\\\",
+        slash2 => "\\\\foo",
+        slash3 => "\\\\foo\\\\\\\\",
+    } ],
+    'single quote subtleties',
 );
 
 
@@ -346,29 +346,29 @@ END_YAML
 # Empty Values and Premature EOF
 
 yaml_ok(
-	<<'END_YAML',
+    <<'END_YAML',
 ---
 foo:    0
 requires:
 build_requires:
 END_YAML
-	[ { foo => 0, requires => undef, build_requires => undef } ],
-	'empty hash keys',
-	noyamlpm   => 1,
-	noyamlperl => 1,
+    [ { foo => 0, requires => undef, build_requires => undef } ],
+    'empty hash keys',
+    noyamlpm   => 1,
+    noyamlperl => 1,
 );
 
 yaml_ok(
-	<<'END_YAML',
+    <<'END_YAML',
 ---
 - foo
 -
 -
 END_YAML
-	[ [ 'foo', undef, undef ] ],
-	'empty array keys',
-	noyamlpm   => 1,
-	noyamlperl => 1,
+    [ [ 'foo', undef, undef ] ],
+    'empty array keys',
+    noyamlpm   => 1,
+    noyamlperl => 1,
 );
 
 
@@ -379,14 +379,14 @@ END_YAML
 # Comment on the Document Line
 
 yaml_ok(
-	<<'END_YAML',
+    <<'END_YAML',
 --- # Comment
 foo: bar
 END_YAML
-	[ { foo => 'bar' } ],
-	'comment header',
-	noyamlpm   => 1,
-	noyamlperl => 1,
+    [ { foo => 'bar' } ],
+    'comment header',
+    noyamlpm   => 1,
+    noyamlperl => 1,
 );
 
 
@@ -398,11 +398,11 @@ END_YAML
 # Newlines and tabs
 
 yaml_ok(
-	<<'END_YAML',
+    <<'END_YAML',
 foo: "foo\\\n\tbar"
 END_YAML
-	[ { foo => "foo\\\n\tbar" } ],
-	'special characters',
+    [ { foo => "foo\\\n\tbar" } ],
+    'special characters',
 );
 
 
@@ -413,22 +413,22 @@ END_YAML
 # Circular Reference Protection
 
 SCOPE: {
-	my $foo = { a => 'b' };
-	my $bar = [ $foo, 2 ];
-	$foo->{c} = $bar;
-	my $circ = CPAN::Meta::YAML->new( [ $foo, $bar ] );
-	isa_ok( $circ, 'CPAN::Meta::YAML' );
+    my $foo = { a => 'b' };
+    my $bar = [ $foo, 2 ];
+    $foo->{c} = $bar;
+    my $circ = CPAN::Meta::YAML->new( [ $foo, $bar ] );
+    isa_ok( $circ, 'CPAN::Meta::YAML' );
 
-	# When we try to serialize, it should NOT infinite loop
-	my $string = undef;
-	   $string = eval { $circ->write_string; };
-	is( $string, undef, '->write_string does not return a value' );
-	ok( $@, 'Error string is defined' );
-	ok(
-		$@ =~ /does not support circular references/,
-		'Got the expected error message',
-	);
-}	
+    # When we try to serialize, it should NOT infinite loop
+    my $string = undef;
+       $string = eval { $circ->write_string; };
+    is( $string, undef, '->write_string does not return a value' );
+    ok( $@, 'Error string is defined' );
+    ok(
+        $@ =~ /does not support circular references/,
+        'Got the expected error message',
+    );
+}
 
 
 
@@ -438,7 +438,7 @@ SCOPE: {
 # Confirm we can read the synopsis
 
 yaml_ok(
-	<<'END_YAML',
+    <<'END_YAML',
 ---
 rootproperty: blah
 section:
@@ -447,17 +447,17 @@ section:
   Foo: Bar
   empty: ~
 END_YAML
-	[ {
-		rootproperty => 'blah',
-		section      => {
-			one   => 'two',
-			three => 'four',
-			Foo   => 'Bar',
-			empty => undef,
-		},
-	} ],
-	'synopsis',
-	noyamlperl => 1,
+    [ {
+        rootproperty => 'blah',
+        section      => {
+            one   => 'two',
+            three => 'four',
+            Foo   => 'Bar',
+            empty => undef,
+        },
+    } ],
+    'synopsis',
+    noyamlperl => 1,
 );
 
 
@@ -481,13 +481,13 @@ yaml_ok(
 # Empty Quote Line
 
 yaml_ok(
-	<<'END_YAML',
+    <<'END_YAML',
 ---
 - foo
 #
 - bar
 END_YAML
-	[ [ "foo", "bar" ] ],
+    [ [ "foo", "bar" ] ],
 );
 
 
@@ -498,7 +498,7 @@ END_YAML
 # Indentation after empty hash value
 
 yaml_ok(
-	<<'END_YAML',
+    <<'END_YAML',
 ---
 Test:
   optmods:
@@ -514,28 +514,28 @@ _meta:
   name: 'test profile'
   note: 'note this test profile'
 END_YAML
-	[ {
-		Test => {
-			optmods => {
-				Bad => 0,
-				Foo => 1,
-				Long => 0,
-			},
-			version => 5,
-		},
-		Test_IncludeA => {
-			optmods => undef,
-		},
-		Test_IncludeB => {
-			optmods => undef,
-		},
-		_meta => {
-			name => 'test profile',
-			note => 'note this test profile',
-		},
-	} ],
-	'Indentation after empty hash value',
-	noyamlperl => 1,
+    [ {
+        Test => {
+            optmods => {
+                Bad => 0,
+                Foo => 1,
+                Long => 0,
+            },
+            version => 5,
+        },
+        Test_IncludeA => {
+            optmods => undef,
+        },
+        Test_IncludeB => {
+            optmods => undef,
+        },
+        _meta => {
+            name => 'test profile',
+            note => 'note this test profile',
+        },
+    } ],
+    'Indentation after empty hash value',
+    noyamlperl => 1,
 );
 
 
@@ -546,11 +546,11 @@ END_YAML
 # Spaces in the Key
 
 yaml_ok(
-	<<'END_YAML',
+    <<'END_YAML',
 ---
 the key: the value
 END_YAML
-	[ { 'the key' => 'the value' } ],
+    [ { 'the key' => 'the value' } ],
 );
 
 
@@ -563,13 +563,13 @@ END_YAML
 # Tests a particular pathological case
 
 yaml_ok(
-	<<'END_YAML',
+    <<'END_YAML',
 ---
 - value
 - '><'
 END_YAML
-	[ [ 'value', '><' ] ],
-	'Pathological >< case',
+    [ [ 'value', '><' ] ],
+    'Pathological >< case',
 );
 
 
@@ -580,11 +580,11 @@ END_YAML
 # Special Characters
 
 #yaml_ok(
-#	<<'END_YAML',
+#    <<'END_YAML',
 #---
 #- "Ingy d\xC3\xB6t Net"
 #END_YAML
-#	[ [ "Ingy d\xC3\xB6t Net" ] ],
+#    [ [ "Ingy d\xC3\xB6t Net" ] ],
 #);
 
 
@@ -596,16 +596,16 @@ END_YAML
 # Non-Indenting Sub-List
 
 yaml_ok(
-	<<'END_YAML',
+    <<'END_YAML',
 ---
 foo:
 - list
 bar: value
 END_YAML
-	[ { foo => [ 'list' ], bar => 'value' } ],
-	'Non-indenting sub-list',
-	noyamlpm   => 1,
-	noyamlperl => 1,
+    [ { foo => [ 'list' ], bar => 'value' } ],
+    'Non-indenting sub-list',
+    noyamlpm   => 1,
+    noyamlperl => 1,
 );
 
 
@@ -618,23 +618,23 @@ END_YAML
 
 # RT #42119: write of two single quotes
 yaml_ok(
-	"--- \"A'B'C\"\n",
-	[ "A'B'C" ],
-	'Multiple escaping of quote ok',
+    "--- \"A'B'C\"\n",
+    [ "A'B'C" ],
+    'Multiple escaping of quote ok',
 );
 
 # Escapes without whitespace
 yaml_ok(
-	"--- A\\B\\C\n",
-	[ "A\\B\\C" ],
-	'Multiple escaping of escape ok',
+    "--- A\\B\\C\n",
+    [ "A\\B\\C" ],
+    'Multiple escaping of escape ok',
 );
 
 # Escapes with whitespace
 yaml_ok(
-	"--- 'A\\B \\C'\n",
-	[ "A\\B \\C" ],
-	'Multiple escaping of escape with whitespace ok',
+    "--- 'A\\B \\C'\n",
+    [ "A\\B \\C" ],
+    'Multiple escaping of escape with whitespace ok',
 );
 
 
@@ -645,14 +645,14 @@ yaml_ok(
 # Check illegal characters that are in legal places
 
 yaml_ok(
-	"--- 'Wow!'\n",
-	[ "Wow!" ],
-	'Bang in a quote',
+    "--- 'Wow!'\n",
+    [ "Wow!" ],
+    'Bang in a quote',
 );
 yaml_ok(
-	"--- 'This&that'\n",
-	[ "This&that" ],
-	'Ampersand in a quote',
+    "--- 'This&that'\n",
+    [ "This&that" ],
+    'Ampersand in a quote',
 );
 
 
@@ -663,16 +663,16 @@ yaml_ok(
 # Check for unescaped boolean keywords
 
 is_deeply(
-	CPAN::Meta::YAML->new( 'True' )->write_string,
-	"--- 'True'\n",
-	'Idiomatic trivial boolean string is escaped',
+    CPAN::Meta::YAML->new( 'True' )->write_string,
+    "--- 'True'\n",
+    'Idiomatic trivial boolean string is escaped',
 );
 
 is_deeply( CPAN::Meta::YAML->new( [ qw{
-	null Null NULL
-	y Y yes Yes YES n N no No NO
-	true True TRUE false False FALSE
-	on On ON off Off OFF
+    null Null NULL
+    y Y yes Yes YES n N no No NO
+    true True TRUE false False FALSE
+    on On ON off Off OFF
 } ] )->write_string, <<'END_YAML' );
 ---
 - 'null'
@@ -710,7 +710,7 @@ END_YAML
 # Always quote for scalars ending with :
 
 is_deeply(
-	CPAN::Meta::YAML->new( [ 'A:' ] )->write_string,
-	"---\n- 'A:'\n",
-	'Simple scalar ending in a colon is correctly quoted',
+    CPAN::Meta::YAML->new( [ 'A:' ] )->write_string,
+    "---\n- 'A:'\n",
+    'Simple scalar ending in a colon is correctly quoted',
 );

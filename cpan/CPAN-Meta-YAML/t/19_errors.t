@@ -1,11 +1,11 @@
-#!/usr/bin/perl
-
 # Testing documents that should fail
 
 use strict;
+use warnings;
+
 BEGIN {
-	$|  = 1;
-	$^W = 1;
+    $|  = 1;
+    $^W = 1;
 }
 
 use File::Spec::Functions ':ALL';
@@ -35,10 +35,10 @@ END_YAML
 
 yaml_error( <<'END_YAML', $FEATURE );
 ---
-version: !!perl/hash:version 
+version: !!perl/hash:version
   original: v2.0.2
   qv: 1
-  version: 
+  version:
     - 2
     - 0
     - 2
