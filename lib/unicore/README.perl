@@ -118,11 +118,11 @@ mv Unihan_Variants.txt UnihanVariants.txt
 #
 # The code in regexec.c for the \X match construct is intimately tied to the
 # regular expression in UAX #29 (http://www.unicode.org/reports/tr29/).  You
-# should see if it has changed, and if so regexec.c should be modified.  The
+# should see if it has changed, and if so, regexec.c should be modified.  The
 # current one is
 # ( CRLF
-# | Prepend* ( Hangul-syllable | !Control )
-#   ( Grapheme_Extend | Spacing_Mark)*
+# | Prepend* ( RI-sequence | Hangul-Syllable | !Control )
+#   ( Grapheme_Extend | SpacingMark )*
 # | . )
 #
 # mktables has many checks to warn you if there are unexpected or novel things
