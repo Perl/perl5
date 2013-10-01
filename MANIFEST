@@ -4345,6 +4345,7 @@ lib/unicore/auxiliary/GCBTest.txt	Unicode character database
 lib/unicore/auxiliary/GraphemeBreakProperty.txt	Unicode character database
 lib/unicore/auxiliary/SentenceBreakProperty.txt	Unicode character database
 lib/unicore/auxiliary/WordBreakProperty.txt	Unicode character database
+lib/unicore/BidiBrackets.txt			Unicode character database
 lib/unicore/BidiMirroring.txt			Unicode character database
 lib/unicore/Blocks.txt				Unicode character database
 lib/unicore/CaseFolding.txt			Unicode character database

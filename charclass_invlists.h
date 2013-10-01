@@ -111,7 +111,7 @@ static const UV PerlSpace_invlist[] = {
 #ifndef PERL_IN_XSUB_RE
 
 static const UV XPerlSpace_invlist[] = {
-	23,	/* Number of elements */
+	21,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -126,8 +126,6 @@ static const UV XPerlSpace_invlist[] = {
 	161,
 	5760,
 	5761,
-	6158,
-	6159,
 	8192,
 	8203,
 	8232,
@@ -253,7 +251,7 @@ static const UV PosixBlank_invlist[] = {
 #ifndef PERL_IN_XSUB_RE
 
 static const UV XPosixBlank_invlist[] = {
-	19,	/* Number of elements */
+	17,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -266,8 +264,6 @@ static const UV XPosixBlank_invlist[] = {
 	161,
 	5760,
 	5761,
-	6158,
-	6159,
 	8192,
 	8203,
 	8239,
@@ -493,7 +489,7 @@ static const UV PosixSpace_invlist[] = {
 #ifndef PERL_IN_XSUB_RE
 
 static const UV XPosixSpace_invlist[] = {
-	23,	/* Number of elements */
+	21,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
 		   1 if it starts at the element beyond 0 */
@@ -508,8 +504,6 @@ static const UV XPosixSpace_invlist[] = {
 	161,
 	5760,
 	5761,
-	6158,
-	6159,
 	8192,
 	8203,
 	8232,

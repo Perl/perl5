@@ -285,7 +285,7 @@ starting in Perl v5.18, but prior to that, the sole difference was that the
 vertical tab (C<"\cK">) was not matched by C<\s>.
 
 The following table is a complete listing of characters matched by
-C<\s>, C<\h> and C<\v> as of Unicode 6.0.
+C<\s>, C<\h> and C<\v> as of Unicode 6.3.
 
 The first column gives the Unicode code point of the character (in hex format),
 the second column gives the (Unicode) name. The third column indicates
@@ -301,7 +301,6 @@ effect that changes the C<\s> matching).
  0x0085             NEXT LINE (NEL)    vs  [2]
  0x00a0              NO-BREAK SPACE   h s  [2]
  0x1680            OGHAM SPACE MARK   h s
- 0x180e   MONGOLIAN VOWEL SEPARATOR   h s
  0x2000                     EN QUAD   h s
  0x2001                     EM QUAD   h s
  0x2002                    EN SPACE   h s

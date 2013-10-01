@@ -9153,6 +9153,7 @@ for my $version (sort { $a <=> $b } keys %delta) {
     5.019005 => {
         delta_from => 5.019004,
         changed => {
+            'Unicode'               => '6.3.0',
         },
         removed => {
         }

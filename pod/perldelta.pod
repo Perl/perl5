@@ -27,6 +27,13 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 Unicode 6.3 now supported
+
+Perl now supports and is shipped with Unicode 6.3 (though Perl may be
+recompiled with any previous Unicode release as well).  A detailed
+list of Unicode 6.3 changes is at
+L<http://www.unicode.org/versions/Unicode6.3.0/>.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security

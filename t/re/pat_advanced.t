@@ -636,14 +636,14 @@ sub run_tests {
           ok "<\x{100}\x{00A0}>" =~ /<\x{100}\s>/, '\x{00A0} in \s';
           ok        "<\x{00A0}>" =~        /<\h>/, '\x{00A0} in \h';
         }
-        my @h = map {sprintf "%05x" => $_} 0x01680, 0x0180E, 0x02000 .. 0x0200A,
+        my @h = map {sprintf "%05x" => $_} 0x01680, 0x02000 .. 0x0200A,
                                            0x0202F, 0x0205F, 0x03000;
         my @v = map {sprintf "%05x" => $_} 0x02028, 0x02029;
 
         my @H = map {sprintf "%05x" => $_} 0x01361,   0x0200B, 0x02408, 0x02420,
-                                           0x0303F,   0xE0020;
+                                           0x0303F,   0xE0020, 0x180E;
         my @V = map {sprintf "%05x" => $_} 0x0008A .. 0x0008D, 0x00348, 0x10100,
-                                           0xE005F,   0xE007C;
+                                           0xE005F,   0xE007C, 0x180E;
 
         for my $hex (@h) {
             my $str = eval qq ["<\\x{$hex}>"];
@@ -1613,7 +1613,7 @@ sub run_tests {
 
     {
         # Various whitespace special patterns
-        my @h = map {chr $_}   0x09,   0x20,   0xa0, 0x1680, 0x180e, 0x2000,
+        my @h = map {chr $_}   0x09,   0x20,   0xa0, 0x1680, 0x2000,
                              0x2001, 0x2002, 0x2003, 0x2004, 0x2005, 0x2006,
                              0x2007, 0x2008, 0x2009, 0x200a, 0x202f, 0x205f,
                              0x3000;

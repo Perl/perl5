@@ -805,9 +805,9 @@ my $v_version = pack "C*", split /\./, $string_version;        # v string
 # are known to not match any code points in some versions of Unicode, but that
 # may change in the future so they should be matchable, hence an empty file is
 # generated for them.
-my @tables_that_may_be_empty = (
-                                'Joining_Type=Left_Joining',
-                                );
+my @tables_that_may_be_empty;
+push @tables_that_may_be_empty, 'Joining_Type=Left_Joining'
+                                                    if $v_version lt v6.3.0;
 push @tables_that_may_be_empty, 'Script=Common' if $v_version le v4.0.1;
 push @tables_that_may_be_empty, 'Title' if $v_version lt v2.0.0;
 push @tables_that_may_be_empty, 'Script=Katakana_Or_Hiragana'
@@ -17700,6 +17700,13 @@ my @input_file_objects = (
                     Property => 'Indic_Syllabic_Category',
                     Has_Missings_Defaults => $NOT_IGNORED,
                     Skip => "Provisional; for the analysis and processing of Indic scripts",
+                    ),
+    Input_file->new('BidiBrackets.txt', v6.3.0,
+                    Properties => [ 'Bidi_Paired_Bracket', 'Bidi_Paired_Bracket_Type' ],
+                    Has_Missings_Defaults => $NO_DEFAULTS,
+                    ),
+    Input_file->new("BidiCharacterTest.txt", v6.3.0,
+                    Skip => 'Validation Tests',
                     ),
 );
 
