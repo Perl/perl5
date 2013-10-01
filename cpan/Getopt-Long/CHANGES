@@ -1,3 +1,8 @@
+Changes in version 2.42
+-----------------------
+
+* Fix bug https://rt.cpan.org/Ticket/Display.html?id=88707
+
 Changes in version 2.41
 -----------------------
 

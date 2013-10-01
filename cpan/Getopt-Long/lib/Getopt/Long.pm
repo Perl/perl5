@@ -4,8 +4,8 @@
 # Author          : Johan Vromans
 # Created On      : Tue Sep 11 15:00:12 1990
 # Last Modified By: Johan Vromans
-# Last Modified On: Mon Jul  8 08:22:51 2013
-# Update Count    : 1644
+# Last Modified On: Tue Oct  1 08:25:52 2013
+# Update Count    : 1651
 # Status          : Released
 
 ################ Module Preamble ################
@@ -17,10 +17,10 @@ use 5.004;
 use strict;
 
 use vars qw($VERSION);
-$VERSION        =  2.41;
+$VERSION        =  2.42;
 # For testing versions only.
 use vars qw($VERSION_STRING);
-$VERSION_STRING = "2.41";
+$VERSION_STRING = "2.42";
 
 use Exporter;
 use vars qw(@ISA @EXPORT @EXPORT_OK);
@@ -251,7 +251,7 @@ use constant PAT_XINT  =>
   "|".
 	  "0[0-7_]*".
   ")";
-use constant PAT_FLOAT => "[-+]?[0-9._]+(\.[0-9_]+)?([eE][-+]?[0-9_]+)?";
+use constant PAT_FLOAT => "[-+]?[0-9_]+(\.[0-9_]+)?([eE][-+]?[0-9_]+)?";
 
 sub GetOptions(@) {
     # Shift in default array.
@@ -1200,7 +1200,6 @@ sub FindOption ($$$$$) {
     elsif ( $type eq 'f' ) { # real number, int is also ok
 	# We require at least one digit before a point or 'e',
 	# and at least one digit following the point and 'e'.
-	# [-]NN[.NN][eNN]
 	my $o_valid = PAT_FLOAT;
 	if ( $bundling && defined $rest &&
 	     $rest =~ /^($key_valid)($o_valid)(.*)$/s ) {
