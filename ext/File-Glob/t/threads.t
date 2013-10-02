@@ -28,7 +28,7 @@ use File::Glob qw(csh_glob);
 my($dir) = tempdir(CLEANUP => 1)
     or die "Could not create temporary directory";
 
-my @temp_files = qw(1_file 2_file 3_file);
+my @temp_files = qw(1_file.tmp 2_file.tmp 3_file.tmp);
 for my $file (@temp_files) {
     open my $fh, ">", File::Spec->catfile($dir, $file)
         or die "Could not create file $dir/$file: $!";
