@@ -468,7 +468,7 @@ close_and_rename($lexwarn);
 __END__
 package warnings;
 
-our $VERSION = '1.19';
+our $VERSION = '1.20';
 
 # Verify that we're called correctly so that warnings will work.
 # see also strict.pm.
