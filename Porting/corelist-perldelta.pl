@@ -279,13 +279,25 @@ sub do_check {
   sub _parse_updated_section {
     my ($self, $section) = @_;
 
+    $self->{updated_modules} = [];
+    return unless $section;
     $self->{updated_modules} = $self->_parse_section($section => sub {
       my ($el) = @_;
 
       my ($first, $second) = @{ $el }[2, 3];
       my $module = $first->[2];
+
+      # the regular expression matches the following:
+      #   from VERSION_NUMBER to VERSION_NUMBER
+      #   from VERSION_NUMBER to VERSION_NUMBER.
+      #   from version VERSION_NUMBER to version VERSION_NUMBER.
+      #   from VERSION_NUMBER to VERSION_NUMBER and MODULE from VERSION_NUMBER to VERSION_NUMBER
+      #   from VERSION_NUMBER to VERSION_NUMBER, and MODULE from VERSION_NUMBER to VERSION_NUMBER
+      #
+      # some perldelta contain more than one module listed in an entry, this only attempts to match the
+      # first module
       my ($old, $new) = $second =~
-          /from\s+(?:version\s+)?(\d[^\s]+)\s+to\s+(\d[^\s]+?)\.?$/;
+          /from\s+(?:version\s+)?(\d[^\s]+)\s+to\s+(?:version\s+)?(\d[^\s,]+?)(?=[\s,]|\.\s|\.$|$).*/s;
 
       warn "Unable to extract old or new version of $module from perldelta"
         if !defined $old || !defined $new;
