@@ -1257,9 +1257,9 @@ use File::Glob qw(:case);
     },
 
     'perlreapi' => {
-        MAINTAINER => 'AVAR',
-        FILES      => q[pod/perlreapi.pod],
-        'UPSTREAM' => undef,
+        'MAINTAINER' => 'AVAR',
+        'FILES'      => q[pod/perlreapi.pod],
+        'UPSTREAM'   => undef,
     },
 
     'perlreftut' => {
