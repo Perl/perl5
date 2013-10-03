@@ -294,8 +294,10 @@ sub do_check {
   my $delta = DeltaParser->new($in);
   my ($added, $removed, $updated) = corelist_delta($old => $new);
 
+  # because of the difficulty in identifying the distribution for removed modules
+  # don't bother checking them
   for my $ck ([ 'new', $delta->new_modules, $added ],
-              [ 'removed', $delta->removed_modules, $removed ],
+              #[ 'removed', $delta->removed_modules, $removed ],
               [ 'updated', $delta->updated_modules, $updated ] ) {
     my @delta = @{ $ck->[1] };
     my @corelist = sort { lc $a->[0] cmp lc $b->[0] } values %{ $ck->[2] };
@@ -318,9 +320,9 @@ sub do_check {
         $sep = "---\n";
         printf "%d,%dc%d,%d\n", $diff->Get(qw( Min1 Max1 Min2 Max2 ));
       }
-      print "< $_\n" for $diff->Items(1);
+      print "Delta< $_\n" for $diff->Items(1);
       print $sep;
-      print "> $_\n" for $diff->Items(2);
+      print "Corelist> $_\n" for $diff->Items(2);
     }
 
     print "\n";
