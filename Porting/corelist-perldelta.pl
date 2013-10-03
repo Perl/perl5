@@ -224,6 +224,10 @@ sub do_check {
     return $self;
   }
 
+  # creates the accessor methods:
+  #   new_modules
+  #   updated_modules
+  #   removed_modules
   for my $k (keys %sections) {
     no strict 'refs';
     my $m = "${k}_modules";
@@ -233,29 +237,17 @@ sub do_check {
   sub _parse_delta {
     my ($self, $pod) = @_;
 
-    map {
-        my ($t, $s) = @{ $_ };
-        
-        # Keep the section title if it has one:
-        if( $s->[0]->[0] eq 'head2' ) {
-          #warn "Keeping section title '$s->[0]->[2]'";
-          $titles{ $t } = $s->[0]->[2]
-              if $s->[0]->[2];
-        };
+    my $new_section     = $self->_look_for_section( $pod, $sections{new} );
+    my $updated_section = $self->_look_for_section( $pod, $sections{updated} );
+    my $removed_section = $self->_look_for_section( $pod, $sections{removed} );
 
-        $self->${\"_parse_${t}_section"}($s)
-    } map {
-        my $s = $self->_look_for_section($pod => $sections{$_})
-            or die "failed to parse $_ section";
-        [$_, $s];
-    } keys %sections;
+    $self->_parse_new_section($new_section);
+    $self->_parse_updated_section($updated_section);
+    $self->_parse_removed_section($removed_section);
 
-    for my $s (keys %sections) {
-      my $m = "${s}_modules";
-
-      $self->{$m} = [sort {
-        lc $a->[0] cmp lc $b->[0]
-      } @{ $self->{$m} }];
+    for (qw/new_modules updated_modules removed_modules/) {
+      $self->{$_} =
+        [ sort { lc $a->[0] cmp lc $b->[0] } @{ $self->{$_} } ];
     }
 
     return;
@@ -264,6 +256,8 @@ sub do_check {
   sub _parse_new_section {
     my ($self, $section) = @_;
 
+    $self->{new_modules} = [];
+    return unless $section;
     $self->{new_modules} = $self->_parse_section($section => sub {
       my ($el) = @_;
 
@@ -310,6 +304,9 @@ sub do_check {
 
   sub _parse_removed_section {
     my ($self, $section) = @_;
+
+    $self->{removed_modules} = [];
+    return unless $section;
     $self->{removed_modules} = $self->_parse_section($section => sub {
       my ($el) = @_;
 
