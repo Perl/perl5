@@ -317,7 +317,7 @@ sub do_check {
       my ($el) = @_;
       return unless ref $el && $el->[0] =~ /^item-/
           && @{ $el } > 2 && ref $el->[2];
-      return unless $el->[2]->[0] eq 'C';
+      return unless $el->[2]->[0] =~ /C|L/;
 
       return 1;
     });
