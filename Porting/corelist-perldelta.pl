@@ -113,35 +113,146 @@ sub run {
   exit 0;
 }
 
+# Given two perl versions, it returns a list describing the core distributions that have changed.
+# The first three elements are hashrefs corresponding to new, updated, and removed modules
+# and are of the form (mostly, see the special remarks about removed):
+#   'Distribution Name' => ['Distribution Name', previous version number, current version number]
+# where the version number is undef if the distribution did not exist the fourth element is
+# an arrayref of core distribution names of those distribution for which it is unknown whether
+# they have changed and therefore need to be manually checked.
+#
+# In most cases, the distribution name in %Modules corresponds to the module that is representative
+# of the distribution as listed in Module::CoreList. However, there are a few distribution names
+# that do not correspond to a module. %distToModules, has been created which maps the distribution
+# name to a representative module. The representative module was chosen by either looking at the
+# Makefile of the distribution or by seeing which module the distribution has been traditionally
+# listed under in past perldelta.
+#
+# There are a few distributions for which there is no single representative module (e.g. libnet).
+# These distributions are returned as the last element of the list.
+#
+# %Modules contains a final key, _PERLLIB, which contains a list of modules that are owned by p5p.
+# This list contains modules and pragmata that may also be present in Module::CoreList.
+# A list of modules are in the list @unclaimedModules, which were manually listed based on whether
+# they were independent modules and whether they have been listed in past perldelta.
+# The pragmata were found by doing something like:
+#   say for sort grep { $_ eq lc $_ and !exists $Modules{$_}}
+#     keys %{$Module::CoreList::version{'5.019003'}}
+# and manually filtering out pragamata that were already covered.
+#
+# It is currently not possible to differentiate between a removed module and a removed
+# distribution. Therefore, the removed hashref contains every module that has been removed, even if
+# the module's corresponding distribution has not been removed.
+
 sub corelist_delta {
   my ($old, $new) = @_;
   my $corelist = \%Module::CoreList::version;
-
+  my %changes = Module::CoreList::changes_between( $old, $new );
   $deprecated = $Module::CoreList::deprecated{$new};
 
-  my (@new,@deprecated,@removed,@pragmas,@modules);
+  my $getModifyType = sub {
+    my $data = shift;
+    if ( exists $data->{left} and exists $data->{right} ) {
+      return 'updated';
+    }
+    elsif ( !exists $data->{left} and exists $data->{right} ) {
+      return 'new';
+    }
+    elsif ( exists $data->{left} and !exists $data->{right} ) {
+      return 'removed';
+    }
+    return undef;
+  };
+
+  my @unclaimedModules = qw/AnyDBM_File B B::Concise B::Deparse Benchmark Class::Struct Config::Extensions DB DBM_Filter Devel::Peek DirHandle DynaLoader English Errno ExtUtils::Embed ExtUtils::Miniperl ExtUtils::Typemaps ExtUtils::XSSymSet Fcntl File::Basename File::Compare File::Copy File::DosGlob File::Find File::Glob File::stat FileCache FileHandle FindBin GDBM_File Getopt::Std Hash::Util Hash::Util::FieldHash I18N::Langinfo IPC::Open3 NDBM_File ODBM_File Opcode PerlIO PerlIO::encoding PerlIO::mmap PerlIO::scalar PerlIO::via Pod::Functions Pod::Html POSIX SDBM_File SelectSaver Symbol Sys::Hostname Thread Tie::Array Tie::Handle Tie::Hash Tie::Hash::NamedCapture Tie::Memoize Tie::Scalar Tie::StdHandle Tie::SubstrHash Time::gmtime Time::localtime Time::tm Unicode::UCD UNIVERSAL User::grent User::pwent VMS::DCLsym VMS::Filespec VMS::Stdio XS::Typemap Win32CORE/;
+  my @unclaimedPragmata = qw/_charnames arybase attributes blib bytes charnames deprecate diagnostics encoding feature fields filetest inc::latest integer less locale mro open ops overload overloading re sigtrap sort strict subs utf8 vars vmsish/;
+  my @unclaimed = (@unclaimedModules, @unclaimedPragmata);
+
+  my %distToModules = (
+    'IO-Compress' => [
+      {
+        'name' => 'IO-Compress',
+        'modification' => $getModifyType->( $changes{'IO::Compress::Base'} ),
+        'data' => $changes{'IO::Compress::Base'}
+      }
+    ],
+    'Locale-Codes' => [
+      {
+        'name'         => 'Locale::Codes',
+        'modification' => $getModifyType->( $changes{'Locale::Codes'} ),
+        'data'         => $changes{'Locale::Codes'}
+      }
+    ],
+    'PathTools' => [
+      {
+        'name'         => 'File::Spec',
+        'modification' => $getModifyType->( $changes{'Cwd'} ),
+        'data'         => $changes{'Cwd'}
+      }
+    ],
+    'Scalar-List-Utils' => [
+      {
+        'name'         => 'List::Util',
+        'modification' => $getModifyType->( $changes{'List::Util'} ),
+        'data'         => $changes{'List::Util'}
+      },
+      {
+        'name'         => 'Scalar::Util',
+        'modification' => $getModifyType->( $changes{'Scalar::Util'} ),
+        'data'         => $changes{'Scalar::Util'}
+      }
+    ],
+    'Text-Tabs+Wrap' => [
+      {
+        'name'         => 'Text::Tabs',
+        'modification' => $getModifyType->( $changes{'Text::Tabs'} ),
+        'data'         => $changes{'Text::Tabs'}
+      },
+      {
+        'name'         => 'Text::Wrap',
+        'modification' => $getModifyType->( $changes{'Text::Wrap'} ),
+        'data'         => $changes{'Text::Wrap'}
+      }
+    ],
+  );
+
+  # structure is (new|removed|updated) => [ [ModuleName, previousVersion, newVersion] ]
+  my $deltaGrouping = {};
+
+  # list of distributions listed in %Modules that need to be manually checked because there is no module that represents it
+  my @manuallyCheck;
 
   # %Modules defines what is currently in core
   for my $k ( keys %Modules ) {
-    next unless exists $corelist->{$new}{$k};
-    my $old_ver = $corelist->{$old}{$k};
-    my $new_ver = $corelist->{$new}{$k};
-    # in core but not in last corelist
-    if ( ! exists $corelist->{$old}{$k} ) {
-      push @new, [$k, undef, $new_ver];
+    next if $k eq '_PERLLIB'; #these are taken care of by being listed in @unclaimed
+    next if Module::CoreList::is_core($k) and !exists $changes{$k}; #modules that have not changed
+
+    my ( $distName, $modifyType, $data );
+
+    if ( exists $changes{$k} ) {
+      $distName   = $k;
+      $modifyType = $getModifyType->( $changes{$k} );
+      $data       = $changes{$k};
     }
-    # otherwise just pragmas or modules
+    elsif ( exists $distToModules{$k} ) {
+      # modification will be undef if the distribution has not changed
+      my @modules = grep { $_->{modification} } @{ $distToModules{$k} };
+      for (@modules) {
+        $deltaGrouping->{ $_->{modification} }->{ $_->{name} } = [ $_->{name}, $_->{data}->{left}, $_->{data}->{right} ];
+      }
+      next;
+    }
     else {
-      my $old_ver = $corelist->{$old}{$k};
-      my $new_ver = $corelist->{$new}{$k};
-      next unless defined $old_ver && defined $new_ver && $old_ver ne $new_ver;
-      my $tuple = [ $k, $old_ver, $new_ver ];
-      if ( $k eq lc $k ) {
-        push @pragmas, $tuple;
-      }
-      else {
-        push @modules, $tuple;
-      }
+      push @manuallyCheck, $k and next;
+    }
+
+    $deltaGrouping->{$modifyType}->{$distName} = [ $distName, $data->{left}, $data->{right} ];
+  }
+
+  for my $k (@unclaimed) {
+    if ( exists $changes{$k} ) {
+      $deltaGrouping->{ $getModifyType->( $changes{$k} ) }->{$k} =
+        [ $k, $changes{$k}->{left}, $changes{$k}->{right} ];
     }
   }
 
@@ -151,33 +262,43 @@ sub corelist_delta {
   # important. That's the best we can do without a historical Maintainers.pl
   for my $k ( keys %{ $corelist->{$old} } ) {
     if ( ! exists $corelist->{$new}{$k} ) {
-      push @removed, [$k, $corelist->{$old}{$k}, undef];
+      $deltaGrouping->{'removed'}->{$k} = [ $k, $corelist->{$old}{$k}, undef ];
     }
   }
 
-  return (\@new, \@removed, \@pragmas, \@modules);
+  return (
+    \%{ $deltaGrouping->{'new'} },
+    \%{ $deltaGrouping->{'removed'} },
+    \%{ $deltaGrouping->{'updated'} },
+    \@manuallyCheck
+  );
 }
 
 sub do_generate {
   my ($old, $new) = @_;
-  my ($added, $removed, $pragmas, $modules) = corelist_delta($old => $new);
+  my ($added, $removed, $updated, $manuallyCheck) = corelist_delta($old => $new);
 
-  generate_section($titles{new}, \&added, @{ $added });
-  generate_section($titles{updated}, \&updated, @{ $pragmas }, @{ $modules });
-  generate_section($titles{removed}, \&removed, @{ $removed });
+  if ($manuallyCheck) {
+    say "\nXXXPlease check whether the following distributions have been modified and list accordingly";
+    say "\t$_" for @{$manuallyCheck};
+  }
+
+  generate_section( $titles{new},     \&added,   values %{$added} );
+  generate_section( $titles{updated}, \&updated, values %{$updated} );
+  generate_section( $titles{removed}, \&removed, values %{$removed} );
 }
 
 sub do_check {
   my ($in, $old, $new) = @_;
 
   my $delta = DeltaParser->new($in);
-  my ($added, $removed, $pragmas, $modules) = corelist_delta($old => $new);
+  my ($added, $removed, $updated) = corelist_delta($old => $new);
 
-  for my $ck (['new',     $delta->new_modules, $added],
-              ['removed', $delta->removed_modules, $removed],
-              ['updated', $delta->updated_modules, [@{ $modules }, @{ $pragmas }]]) {
+  for my $ck ([ 'new', $delta->new_modules, $added ],
+              [ 'removed', $delta->removed_modules, $removed ],
+              [ 'updated', $delta->updated_modules, $updated ] ) {
     my @delta = @{ $ck->[1] };
-    my @corelist = sort { lc $a->[0] cmp lc $b->[0] } @{ $ck->[2] };
+    my @corelist = sort { lc $a->[0] cmp lc $b->[0] } values %{ $ck->[2] };
 
     printf $ck->[0] . ":\n";
 
