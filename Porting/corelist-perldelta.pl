@@ -26,7 +26,7 @@ The part to check the diff wants to be run with a Perl that has an up-to-date
 L<Module::CoreList>, but needs the outside L<Algorithm::Diff>.
 
 Ideally, the program will be split into two separate programs, one
-to generate the text and one to show the diff between the 
+to generate the text and one to show the diff between the
 corelist sections of the last perldelta and the next perldelta.
 
 =cut
@@ -350,7 +350,7 @@ sub do_check {
       sub {
         my ($el) = @_;
         my ($heading) = $el->[0] =~ /^head(\d)$/;
-        my $f = $heading && $el->[2] =~ /^$section/;        
+        my $f = $heading && $el->[2] =~ /^$section/;
         $level = $heading if $f && !$level;
         return $f;
       },
