@@ -46,7 +46,8 @@ my %style =
     "gt_#seq ",
     "(?(#seq)?)#noise#arg(?([#targarg])?)"],
    "debug" =>
-   ["#class (#addr)\n\top_next\t\t#nextaddr\n\top_sibling\t#sibaddr\n\t"
+   ["#class (#addr)\n\top_next\t\t#nextaddr\n\t(?(op_other\t#otheraddr\n\t)?)"
+    . "op_sibling\t#sibaddr\n\t"
     . "op_ppaddr\tPL_ppaddr[OP_#NAME]\n\top_type\t\t#typenum\n"
     . "\top_flags\t#flagval\n\top_private\t#privval\t#hintsval\n"
     . "(?(\top_first\t#firstaddr\n)?)(?(\top_last\t\t#lastaddr\n)?)"
@@ -887,6 +888,7 @@ sub concise_op {
     } elsif ($h{class} eq "LOGOP") {
 	undef $lastnext;
 	$h{arg} = "(other->" . seq($op->other) . ")";
+	$h{otheraddr} = sprintf("%#x", $ {$op->other});
     }
     elsif ($h{class} eq "SVOP" or $h{class} eq "PADOP") {
 	unless ($h{name} eq 'aelemfast' and $op->flags & OPf_SPECIAL) {

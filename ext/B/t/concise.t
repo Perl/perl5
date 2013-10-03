@@ -10,7 +10,7 @@ BEGIN {
     require 'test.pl';		# we use runperl from 'test.pl', so can't use Test::More
 }
 
-plan tests => 161;
+plan tests => 163;
 
 require_ok("B::Concise");
 
@@ -465,5 +465,43 @@ $out =
   switches => ["-MO=Concise"], prog=>'glob(q{.})', stderr => 1
  );
 like $out, '\*<none>::', 'glob(q{.})';
+
+# Test op_other in -debug
+$out = runperl(
+    switches => ["-MO=Concise,-debug,xx"],
+    prog => q{sub xx { if ($a) { return $b } }},
+    stderr => 1,
+);
+
+$out =~s/\r\n/\n/g;
+
+# Look for OP_AND
+$end = <<'EOF';
+LOGOP \(0x\w+\)
+	op_next		0x\w+
+	op_other	(0x\w+)
+	op_sibling	0
+	op_ppaddr	PL_ppaddr\[OP_AND\]
+EOF
+
+$end =~ s/\r\n/\n/g;
+
+like $out, $end, 'OP_AND has op_other';
+
+# like(..) above doesn't fill in $1
+$out =~ $end;
+my $next = $1;
+
+# Check it points to a PUSHMARK
+$end = <<'EOF';
+OP \(<NEXT>\)
+	op_next		0x\w+
+	op_sibling	0x\w+
+	op_ppaddr	PL_ppaddr\[OP_PUSHMARK\]
+EOF
+
+$end =~ s/<NEXT>/$next/;
+
+like $out, $end, 'OP_AND->op_other points correctly';
 
 __END__
