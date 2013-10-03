@@ -193,7 +193,7 @@ my %module_to_deprecated;
 while ( my ( $module, $file ) = each %module_to_file ) {
     my $M = $file_to_M->{$file};
     next unless $M;
-    next if $Modules{$M}{MAINTAINER} && $Modules{$M}{MAINTAINER} eq 'p5p';
+    next if $Modules{$M}{MAINTAINER} && $Modules{$M}{MAINTAINER} eq 'P5P';
     $module_to_upstream{$module} = $Modules{$M}{UPSTREAM};
     $module_to_deprecated{$module} = 1 if $Modules{$M}{DEPRECATED};
     next

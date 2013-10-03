@@ -12,19 +12,19 @@ use utf8;
 use File::Glob qw(:case);
 
 %Maintainers = (
-    'abigail'   => 'Abigail <abigail@abigail.be>',
-    'avar'      => 'Ævar Arnfjörð Bjarmason <avar@cpan.org>',
-    'craig'     => 'Craig Berry <craigberry@mac.com>',
-    'elizabeth' => 'Elizabeth Mattijsen <liz@dijkmat.nl>',
-    'jand'      => 'Jan Dubois <jand@activestate.com>',
+    'ABIGAIL'   => 'Abigail <abigail@abigail.be>',
+    'AVAR'      => 'Ævar Arnfjörð Bjarmason <avar@cpan.org>',
+    'CBERRY'    => 'Craig Berry <craigberry@mac.com>',
+    'ELIZABETH' => 'Elizabeth Mattijsen <liz@dijkmat.nl>',
+    'JDB'       => 'Jan Dubois <jand@activestate.com>',
     'laun'      => 'Wolfgang Laun <Wolfgang.Laun@alcatel.at>',
-    'lwall'     => 'Larry Wall <lwall@cpan.org>',
-    'mjd'       => 'Mark-Jason Dominus <mjd@plover.com>',
-    'pmqs'      => 'Paul Marquess <pmqs@cpan.org>',
-    'pvhp'      => 'Peter Prymmer <pvhp@best.com>',
-    'sartak'    => 'Shawn M Moore <sartak@gmail.com>',
-    'sburke'    => 'Sean Burke <sburke@cpan.org>',
-    'smccam'    => 'Stephen McCamant <smccam@cpan.org>',
+    'LWALL'     => 'Larry Wall <lwall@cpan.org>',
+    'MJD'       => 'Mark-Jason Dominus <mjd@plover.com>',
+    'PMQS'      => 'Paul Marquess <pmqs@cpan.org>',
+    'PVHP'      => 'Peter Prymmer <pvhp@best.com>',
+    'SARTAK'    => 'Shawn M Moore <sartak@gmail.com>',
+    'SBURKE'    => 'Sean Burke <sburke@cpan.org>',
+    'SMCCAM'    => 'Stephen McCamant <smccam@cpan.org>',
 );
 
 # IGNORABLE: files which, if they appear in the root of a CPAN
@@ -214,7 +214,7 @@ use File::Glob qw(:case);
     },
 
     'B::Concise' => {
-        'MAINTAINER' => 'smccam',
+        'MAINTAINER' => 'SMCCAM',
         'FILES'      => q[ext/B/B/Concise.pm ext/B/t/concise.t],
         'UPSTREAM'   => 'blead',
     },
@@ -227,7 +227,7 @@ use File::Glob qw(:case);
     },
 
     'B::Deparse' => {
-        'MAINTAINER' => 'smccam',
+        'MAINTAINER' => 'SMCCAM',
         'FILES'      => q[dist/B-Deparse],
         'UPSTREAM'   => 'blead',
     },
@@ -945,7 +945,7 @@ use File::Glob qw(:case);
     },
 
     'mad' => {
-        'MAINTAINER' => 'lwall',
+        'MAINTAINER' => 'LWALL',
         'FILES'      => q[mad],
         'UPSTREAM'   => undef,
     },
@@ -1176,13 +1176,13 @@ use File::Glob qw(:case);
     },
 
     'perldtrace' => {
-        'MAINTAINER' => 'sartak',
+        'MAINTAINER' => 'SARTAK',
         'FILES'      => q[pod/perldtrace.pod],
         'UPSTREAM'   => 'blead',
     },
 
     'perlebcdic' => {
-        'MAINTAINER' => 'pvhp',
+        'MAINTAINER' => 'PVHP',
         'FILES'      => q[pod/perlebcdic.pod],
         'UPSTREAM'   => undef,
     },
@@ -1244,32 +1244,32 @@ use File::Glob qw(:case);
     },
 
     'perlpodspec' => {
-        'MAINTAINER' => 'sburke',
+        'MAINTAINER' => 'SBURKE',
         'FILES'      => q[pod/perlpodspec.pod],
         'UPSTREAM'   => undef,
     },
 
     'perlre' => {
-        'MAINTAINER' => 'abigail',
+        'MAINTAINER' => 'ABIGAIL',
         'FILES'      => q[pod/perlrecharclass.pod
                  pod/perlrebackslash.pod],
         'UPSTREAM' => undef,
     },
 
     'perlreapi' => {
-        MAINTAINER => 'avar',
+        MAINTAINER => 'AVAR',
         FILES      => q[pod/perlreapi.pod],
         'UPSTREAM' => undef,
     },
 
     'perlreftut' => {
-        'MAINTAINER' => 'mjd',
+        'MAINTAINER' => 'MJD',
         'FILES'      => q[pod/perlreftut.pod],
         'UPSTREAM'   => 'blead',
     },
 
     'perlthrtut' => {
-        'MAINTAINER' => 'elizabeth',
+        'MAINTAINER' => 'ELIZABETH',
         'FILES'      => q[pod/perlthrtut.pod],
         'UPSTREAM'   => undef,
     },
@@ -1773,13 +1773,13 @@ use File::Glob qw(:case);
     },
 
     'vms' => {
-        'MAINTAINER' => 'craig',
+        'MAINTAINER' => 'CBERRY',
         'FILES'      => q[vms configure.com README.vms],
         'UPSTREAM'   => undef,
     },
 
     'VMS::DCLsym' => {
-        'MAINTAINER' => 'craig',
+        'MAINTAINER' => 'CBERRY',
         'FILES'      => q[ext/VMS-DCLsym],
         'UPSTREAM'   => undef,
     },
@@ -1790,13 +1790,13 @@ use File::Glob qw(:case);
     },
 
     'VMS::Stdio' => {
-        'MAINTAINER' => 'craig',
+        'MAINTAINER' => 'CBERRY',
         'FILES'      => q[ext/VMS-Stdio],
         'UPSTREAM'   => undef,
     },
 
     'warnings' => {
-        'MAINTAINER' => 'pmqs',
+        'MAINTAINER' => 'PMQS',
         'FILES'      => q[regen/warnings.pl
                  lib/warnings.{pm,t}
                  lib/warnings
@@ -1806,7 +1806,7 @@ use File::Glob qw(:case);
     },
 
     'win32' => {
-        'MAINTAINER' => 'jand',
+        'MAINTAINER' => 'JDB',
         'FILES'      => q[win32 t/win32 README.win32 ext/Win32CORE],
         'UPSTREAM'   => undef,
     },
@@ -1941,8 +1941,8 @@ for ( values %Modules ) {
 for ( values %Modules ) {
     next if exists $_->{MAINTAINER};
     if (not exists $_->{DISTRIBUTION} or (defined $_->{UPSTREAM} and $_->{UPSTREAM} eq 'blead')) {
-        $_->{MAINTAINER} = 'p5p';
-        $Maintainers{p5p} = 'perl5-porters <perl5-porters@perl.org>';
+        $_->{MAINTAINER} = 'P5P';
+        $Maintainers{P5P} = 'perl5-porters <perl5-porters@perl.org>';
     }
     else {
         (my $pause_id = $_->{DISTRIBUTION}) =~ s{/.*$}{};
