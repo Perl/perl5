@@ -380,7 +380,6 @@ use File::Glob qw(:case);
         'EXCLUDED'     => [
             qw(t/00-compile.t),
             qw[t/00-report-prereqs.t],
-            qw(cpanfile),
             qr{^xt},
             qr{^history},
         ],
@@ -793,7 +792,6 @@ use File::Glob qw(:case);
         'DISTRIBUTION' => 'DAGOLDEN/HTTP-Tiny-0.036.tar.gz',
         'FILES'        => q[cpan/HTTP-Tiny],
         'EXCLUDED'     => [
-            'cpanfile',
             't/00-compile.t',
             't/00-report-prereqs.t',
             't/200_live.t',
@@ -1150,7 +1148,6 @@ use File::Glob qw(:case);
         'EXCLUDED'     => [
             qw(t/00-compile.t),
             qw[t/00-report-prereqs.t],
-            qw(cpanfile),
             qr{^xt},
         ],
         'UPSTREAM'     => 'cpan',
@@ -1171,7 +1168,7 @@ use File::Glob qw(:case);
     'Perl::OSType' => {
         'DISTRIBUTION' => 'DAGOLDEN/Perl-OSType-1.006.tar.gz',
         'FILES'        => q[cpan/Perl-OSType],
-        'EXCLUDED'     => [qw(cpanfile), qw(tidyall.ini), qr/^xt/, qr{^t/00-}],
+        'EXCLUDED'     => [qw(tidyall.ini), qr/^xt/, qr{^t/00-}],
         'UPSTREAM'     => 'cpan',
     },
 
