@@ -243,9 +243,9 @@ unless ($tarball) {
         } or system wget => $package_url, '-qO', $package_file;
     }
 
-    my  $new_line = `grep '^$cpan_mod ' $package_file`
+    open my $fh, '<', $package_file;
+    (my $new_line) = grep {/^$cpan_mod/} <$fh> # Yes, this needs a lot of memory
                      or die "Cannot find $cpan_mod on CPAN\n";
-    chomp $new_line;
     (undef, $new_version, my $new_path) = split ' ', $new_line;
     if (defined $version) {
         $new_path =~ s/-$new_version\./-$version\./;
@@ -476,7 +476,9 @@ my @tests = glob 'porting/*.t';
 chomp @tests;
 my @failed;
 foreach my $t (@tests) {
-    my @not = `./perl -I../lib -I.. $t | grep ^not | grep -v "# TODO"`;
+    my @not = grep {!/# TODO/ }
+              grep { /^not/ }
+              `${exe_dir}perl -I../lib -I.. $t`;
     print @not ? '!' : '.';
     push @failed => $t if @not;
 }
