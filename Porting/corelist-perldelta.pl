@@ -4,6 +4,7 @@ use strict;
 use warnings;
 use lib 'Porting';
 use Maintainers qw/%Modules/;
+use lib 'dist/Module-CoreList/lib';
 use Module::CoreList;
 use Getopt::Long;
 
