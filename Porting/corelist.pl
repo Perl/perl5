@@ -165,8 +165,8 @@ for my $key (sort keys($delta_data->{removed} || {})) {
 $versions_in_release .= "        }\n";
 $versions_in_release .= "    },\n";
 
-$corelist =~ s/^(my %delta\s*=\s*.*?)^\s*$perl_vnum\s*=>\s*{.*?},\s*(^\);)$/$1$2/ism;
-$corelist =~ s/^(my %delta\s*=\s*.*?)(^\);)$/$1$versions_in_release$2/ism;
+$corelist =~ s/^(%delta\s*=\s*.*?)^\s*$perl_vnum\s*=>\s*{.*?},\s*(^\);)$/$1$2/ism;
+$corelist =~ s/^(%delta\s*=\s*.*?)(^\);)$/$1$versions_in_release$2/ism;
 
 exit unless %modlist;
 
