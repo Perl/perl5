@@ -114,7 +114,7 @@ Handle complicated C<FILES>
 
 This is an initial version; no attempt has been made yet to make this
 portable. It shells out instead of trying to find a Perl solution.
-In particular, it assumes wget, git, tar, chmod, perl, make, and rm
+In particular, it assumes git, chmod, perl, and make
 to be available.
 
 =cut
@@ -128,6 +128,7 @@ use strict;
 use warnings;
 use Getopt::Long;
 use Archive::Tar;
+use File::Path qw( remove_tree );
 
 $| = 1;
 
@@ -301,7 +302,7 @@ FILE: for my $file ( `find $new_dir -type f` ) {
 
     rename $old_file => $file;
 }
-system 'rm', '-rf', $new_dir;
+remove_tree( $new_dir );
 
 if (-f "$old_dir/.gitignore") {
     say "Restoring .gitignore";
@@ -416,16 +417,15 @@ print "done\n";
 #
 print "About to clean up; hit return or abort (^C) "; <STDIN>;
 
-chdir "cpan";
-system rm => '-r', $old_dir;
-unlink $new_file unless $tarball;
+remove_tree( "cpan/$old_dir" );
+unlink "cpan/$new_file" unless $tarball;
 
 
 #
 # Run the tests. First the test belonging to the module, followed by the
 # the tests in t/porting
 #
-chdir "../t";
+chdir "t";
 say "Running module tests";
 my @test_files = `find ../cpan/$pkg_dir -name '*.t' -type f`;
 chomp @test_files;
