@@ -72,6 +72,9 @@ See also: L<perlsub/Lexical Subroutines>
 Using this feature triggers warnings in the category
 C<experimental::lexical_subs>.
 
+The ticket for this feature is
+L<[perl #120085]|https://rt.perl.org/rt3/Ticket/Display.html?id=120085>.
+
 =item Regular Expression Set Operations
 
 Introduced in: Perl 5.18
