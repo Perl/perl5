@@ -129,6 +129,7 @@ use warnings;
 use Getopt::Long;
 use Archive::Tar;
 use File::Path qw( remove_tree );
+use File::Find;
 
 $| = 1;
 
@@ -144,9 +145,11 @@ require "Porting/Maintainers.pl";
 
 my %IGNORABLE    = map {$_ => 1} @IGNORABLE;
 
+my $tmpdir= $ENV{ TEMP } // '/tmp';
+
 my $package      = "02packages.details.txt";
 my $package_url  = "http://www.cpan.org/modules/$package";
-my $package_file = "/tmp/$package";
+my $package_file = "$tmpdir/$package"; # this is a cache
 
 my @problematic = (
     'podlators', # weird CUSTOMIZED section due to .PL files
@@ -159,6 +162,16 @@ GetOptions ('tarball=s'  =>  \my $tarball,
         or  die "Failed to parse arguments";
 
 die "Usage: $0 module [args] [cpan package]" unless @ARGV == 1 || @ARGV == 2;
+
+sub find_type_f {
+    my @res;
+    find( { no_chdir => 1, wanted => sub {
+        my $file= $File::Find::name;
+        return unless -f $file;
+        push @res, $file
+    }}, @_ );
+    @res
+};
 
 my ($module)  = shift;
 my  $cpan_mod = @ARGV ? shift : $module;
@@ -245,7 +258,12 @@ Archive::Tar->extract_archive( $new_file );
 
 (my $new_dir = $new_file) =~ s/\.tar\.gz//;
 # ensure 'make' will update all files
-system('find', $new_dir, '-exec', 'touch', '{}', ';');
+my $t= time;
+for my $file (find_type_f($new_dir)) {
+    open(my $fh,">>$file") || die "Cannot write $file:$!";
+    close($fh);
+    utime($t,$t,$file);
+};
 
 say "Renaming directories";
 rename $pkg_dir => $old_dir;
@@ -264,8 +282,7 @@ if ($$info {EXCLUDED}) {
     }
 }
 
-FILE: for my $file ( `find $new_dir -type f` ) {
-    chomp $file;
+FILE: for my $file ( find_type_f( $new_dir )) {
     my $old_file = $file;
     $file =~ s{^$new_dir/}{};
 
@@ -309,14 +326,12 @@ if (-f "$old_dir/.gitignore") {
     system git => 'checkout', "$pkg_dir/.gitignore";
 }
 
-my @new_files = `find $pkg_dir -type f`;
-chomp @new_files;
+my @new_files = find_type_f( $pkg_dir );
 @new_files = grep {$_ ne $pkg_dir} @new_files;
 s!^[^/]+/!! for @new_files;
 my %new_files = map {$_ => 1} @new_files;
 
-my @old_files = `find $old_dir -type f`;
-chomp @old_files;
+my @old_files = find_type_f( $old_dir );
 @old_files = grep {$_ ne $old_dir} @old_files;
 s!^[^/]+/!! for @old_files;
 my %old_files = map {$_ => 1} @old_files;
@@ -343,8 +358,7 @@ foreach my $file (@old_files) {
 #
 # Find all files with an exec bit
 #
-my @exec = `find $pkg_dir -type f -perm +111`;
-chomp @exec;
+my @exec = find_type_f( $pkg_dir );
 my @de_exec;
 foreach my $file (@exec) {
     # Remove leading dir
@@ -408,7 +422,7 @@ if (@commit) {
 
 
 print "Running a make ... ";
-system "make > make.log 2>&1" and die "Running make failed, see make.log";
+system "$Config{make} > make.log 2>&1" and die "Running make failed, see make.log";
 print "done\n";
 
 #
@@ -427,16 +441,16 @@ unlink "cpan/$new_file" unless $tarball;
 #
 chdir "t";
 say "Running module tests";
-my @test_files = `find ../cpan/$pkg_dir -name '*.t' -type f`;
-chomp @test_files;
-my $output = `./perl TEST @test_files`;
+my @test_files = grep { /\.t$/ } find_type_f( $pkg_dir );
+my $exe_dir= $^O =~ /MSWin/ ? "..\\" : './';
+my $output = `${exe_dir}perl$Config{_exe} TEST @test_files`;
 unless ($output =~ /All tests successful/) {
     say $output;
     exit 1;
 }
 
 print "Running tests in t/porting ";
-my @tests = `ls porting/*.t`;
+my @tests = glob 'porting/*.t';
 chomp @tests;
 my @failed;
 foreach my $t (@tests) {
