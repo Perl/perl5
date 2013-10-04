@@ -2607,7 +2607,6 @@ PP(pp_last)
     OP *nextop = NULL;
     SV **newsp;
     PMOP *newpm;
-    SV **mark;
     SV *sv = NULL;
 
     S_unwind_loop(aTHX_ "last");
