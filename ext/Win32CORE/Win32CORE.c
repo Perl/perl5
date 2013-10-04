@@ -32,7 +32,7 @@ XS(w32_CORE_all){
     const char *function  = (const char *) XSANY.any_ptr;
     Perl_load_module(aTHX_ PERL_LOADMOD_NOIMPORT, newSVpvn("Win32",5), newSVnv(0.27));
     SetLastError(err);
-    SPAGAIN;
+    assert(sp == PL_stack_sp);
     PUSHMARK(SP-items);
     call_pv(function, GIMME_V);
 }
