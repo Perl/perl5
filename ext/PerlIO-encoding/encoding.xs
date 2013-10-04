@@ -649,11 +649,9 @@ BOOT:
 	/* This would just be an irritant now loading works */
 	Perl_warner(aTHX_ packWARN(WARN_IO), ":encoding without 'use Encode'");
 #endif
-	ENTER;
 	/* The SV is magically freed by load_module */
 	load_module(PERL_LOADMOD_NOIMPORT, newSVpvn("Encode", 6), Nullsv, Nullsv);
 	assert(sp == PL_stack_sp);
-	LEAVE;
     }
     PUSHMARK(sp);
     PUTBACK;
