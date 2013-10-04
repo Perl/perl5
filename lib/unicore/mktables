@@ -8084,10 +8084,10 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
             $type{$addr} = $NON_STRING;
         }
         elsif ($type{$addr} != $ENUM && $type{$addr} != $FORCED_BINARY) {
-            if (scalar main::uniques(values %{$table_ref{$addr}}) > 2
-                && $type{$addr} == $BINARY)
-            {
-                Carp::my_carp("$self now has more than 2 tables (with the addition of '$name'), and so is no longer binary.  Changing its type to 'enum'.  Bad News.");
+            if (scalar main::uniques(values %{$table_ref{$addr}}) > 2) {
+                if ($type{$addr} == $BINARY) {
+                    Carp::my_carp("$self now has more than 2 tables (with the addition of '$name'), and so is no longer binary.  Changing its type to 'enum'.  Bad News.");
+                }
                 $type{$addr} = $ENUM;
             }
         }
@@ -8399,8 +8399,8 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
             {
                 my $tables = $self->tables;
                 my $count = $self->count;
-                if ($verbosity && $count > 500 && $tables/$count > .1) {
-                    Carp::my_carp_bug("It appears that $self should be a \$STRING property, not an \$ENUM because it has too many match tables: $count\n");
+                if ($verbosity && $tables > 500 && $tables/$count > .1) {
+                    Carp::my_carp_bug("It appears that $self should be a \$STRING property, not an \$ENUM because it has too many match tables: $tables\n");
                 }
                 $self->set_type($ENUM);
             }
@@ -12678,6 +12678,7 @@ END
         }
 
         # We should have enough data now to compute the type of the property.
+        my $property_name = $property->name;
         $property->compute_type;
         my $property_type = $property->type;
 
@@ -12688,8 +12689,14 @@ END
         # The Unicode db always (so far, and they claim into the future) have
         # the default for missing entries in binary properties be 'N' (unless
         # there is a '@missing' line that specifies otherwise)
-        if ($property_type == $BINARY && ! defined $property->default_map) {
-            $property->set_default_map('N');
+        if (! defined $property->default_map) {
+            if ($property_type == $BINARY) {
+                $property->set_default_map('N');
+            }
+            elsif ($property_type == $ENUM) {
+                Carp::my_carp("Property '$property_name doesn't have a default mapping.  Using a fake one");
+                $property->set_default_map('XXX This makes sure there is a default map');
+            }
         }
 
         # Add any remaining code points to the mapping, using the default for
@@ -12725,7 +12732,6 @@ END
         }
 
         # Have all we need to populate the match tables.
-        my $property_name = $property->name;
         my $maps_should_be_defined = $property->pre_declared_maps;
         foreach my $range ($property->ranges) {
             my $map = $range->value;
