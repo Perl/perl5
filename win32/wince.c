@@ -146,7 +146,7 @@ get_regstr_from(HKEY hkey, const char *valuename, SV **svp)
 	if (retval == ERROR_SUCCESS && type == REG_SZ) {
 	    dTHX;
 	    if (!*svp)
-		*svp = sv_2mortal(newSVpvn("",0));
+		*svp = sv_2mortal(newSVpvs(""));
 	    SvGROW(*svp, datalen);
 	    retval = XCERegQueryValueExA(handle, valuename, 0, NULL,
 				     (PBYTE)SvPVX(*svp), &datalen);
@@ -226,7 +226,7 @@ get_emd_part(SV **prev_pathp, STRLEN *const len, char *trailing_path, ...)
 	/* directory exists */
 	dTHX;
 	if (!*prev_pathp)
-	    *prev_pathp = sv_2mortal(newSVpvn("",0));
+	    *prev_pathp = sv_2mortal(newSVpvs(""));
 	sv_catpvn(*prev_pathp, ";", 1);
 	sv_catpv(*prev_pathp, mod_name);
 	if(len)

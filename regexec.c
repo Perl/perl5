@@ -7650,7 +7650,7 @@ Perl__get_regclass_nonbitmap_data(pTHX_ const regexp *prog,
 	
     /* If requested, return a printable version of what this swash matches */
     if (listsvp) {
-	SV* matches_string = newSVpvn("", 0);
+	SV* matches_string = newSVpvs("");
 
         /* The swash should be used, if possible, to get the data, as it
          * contains the resolved data.  But this function can be called at

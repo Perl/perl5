@@ -650,7 +650,7 @@ BOOT:
 	Perl_warner(aTHX_ packWARN(WARN_IO), ":encoding without 'use Encode'");
 #endif
 	/* The SV is magically freed by load_module */
-	load_module(PERL_LOADMOD_NOIMPORT, newSVpvn("Encode", 6), Nullsv, Nullsv);
+	load_module(PERL_LOADMOD_NOIMPORT, newSVpvs("Encode"), Nullsv, Nullsv);
 	assert(sp == PL_stack_sp);
     }
     PUSHMARK(sp);

@@ -2433,7 +2433,7 @@ my_caller(level)
         ST(4) = cop_hints_fetch_pvs(cx->blk_oldcop, "foo", 0);
         ST(5) = cop_hints_fetch_pvn(cx->blk_oldcop, "foo", 3, 0, 0);
         ST(6) = cop_hints_fetch_sv(cx->blk_oldcop, 
-                sv_2mortal(newSVpvn("foo", 3)), 0, 0);
+                sv_2mortal(newSVpvs("foo")), 0, 0);
 
         hv = cop_hints_2hv(cx->blk_oldcop, 0);
         ST(7) = hv ? sv_2mortal(newRV_noinc((SV *)hv)) : &PL_sv_undef;

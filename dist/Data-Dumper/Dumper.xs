@@ -379,7 +379,7 @@ static SV *
 sv_x(pTHX_ SV *sv, const char *str, STRLEN len, I32 n)
 {
     if (!sv)
-	sv = newSVpvn("", 0);
+	sv = newSVpvs("");
 #ifdef DEBUGGING
     else
 	assert(SvTYPE(sv) >= SVt_PV);
@@ -539,11 +539,11 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	    else {   /* store our name and continue */
 		SV *namesv;
 		if (name[0] == '@' || name[0] == '%') {
-		    namesv = newSVpvn("\\", 1);
+		    namesv = newSVpvs("\\");
 		    sv_catpvn(namesv, name, namelen);
 		}
 		else if (realtype == SVt_PVCV && name[0] == '*') {
-		    namesv = newSVpvn("\\", 2);
+		    namesv = newSVpvs("\\");
 		    sv_catpvn(namesv, name, namelen);
 		    (SvPVX(namesv))[1] = '&';
 		}
@@ -668,7 +668,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		realtype <= SVt_PVMG
 #endif
 	) {			     /* scalar ref */
-	    SV * const namesv = newSVpvn("${", 2);
+	    SV * const namesv = newSVpvs("${");
 	    sv_catpvn(namesv, name, namelen);
 	    sv_catpvn(namesv, "}", 1);
 	    if (realpack) {				     /* blessed */
@@ -689,7 +689,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	    SvREFCNT_dec(namesv);
 	}
 	else if (realtype == SVt_PVGV) {		     /* glob ref */
-	    SV * const namesv = newSVpvn("*{", 2);
+	    SV * const namesv = newSVpvs("*{");
 	    sv_catpvn(namesv, name, namelen);
 	    sv_catpvn(namesv, "}", 1);
 	    sv_catpvn(retval, "\\", 1);
@@ -828,7 +828,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	    if (sortkeys) {
 		if (sortkeys == &PL_sv_yes) {
 #if PERL_VERSION < 8
-                    sortkeys = sv_2mortal(newSVpvn("Data::Dumper::_sortkeys", 23));
+                    sortkeys = sv_2mortal(newSVpvs("Data::Dumper::_sortkeys"));
 #else
 		    keys = newAV();
 		    (void)hv_iterinit((HV*)ival);
@@ -1079,7 +1079,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
              * Note that we'd have to check for weak-refs, too, but this is
              * already the branch for non-refs only. */
 	    else if (val != &PL_sv_undef && (!use_sparse_seen_hash || SvREFCNT(val) > 1)) {
-		SV * const namesv = newSVpvn("\\", 1);
+		SV * const namesv = newSVpvs("\\");
 		sv_catpvn(namesv, name, namelen);
 		seenentry = newAV();
 		av_push(seenentry, namesv);
@@ -1160,8 +1160,8 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		static const char* const entries[] = { "{SCALAR}", "{ARRAY}", "{HASH}" };
 		static const STRLEN sizes[] = { 8, 7, 6 };
 		SV *e;
-		SV * const nname = newSVpvn("", 0);
-		SV * const newapad = newSVpvn("", 0);
+		SV * const nname = newSVpvs("");
+		SV * const newapad = newSVpvs("");
 		GV * const gv = (GV*)val;
 		I32 j;
 		
@@ -1260,7 +1260,7 @@ MODULE = Data::Dumper		PACKAGE = Data::Dumper         PREFIX = Data_Dumper_
 #
 # This is the exact equivalent of Dump.  Well, almost. The things that are
 # different as of now (due to Laziness):
-#   * doesn't deparse yet.
+#   * doesn't deparse yet.'
 #
 
 void
@@ -1319,7 +1319,7 @@ Data_Dumper_Dumpxs(href, ...)
 	    terse = purity = deepcopy = useqq = 0;
 	    quotekeys = 1;
 	
-	    retval = newSVpvn("", 0);
+	    retval = newSVpvs("");
 	    if (SvROK(href)
 		&& (hv = (HV*)SvRV((SV*)href))
 		&& SvTYPE(hv) == SVt_PVHV)		{
@@ -1383,7 +1383,7 @@ Data_Dumper_Dumpxs(href, ...)
 		    imax = av_len(todumpav);
 		else
 		    imax = -1;
-		valstr = newSVpvn("",0);
+		valstr = newSVpvs("");
 		for (i = 0; i <= imax; ++i) {
 		    SV *newapad;
 		
@@ -1482,7 +1482,7 @@ Data_Dumper_Dumpxs(href, ...)
 		    if (gimme == G_ARRAY) {
 			XPUSHs(sv_2mortal(retval));
 			if (i < imax)	/* not the last time thro ? */
-			    retval = newSVpvn("",0);
+			    retval = newSVpvs("");
 		    }
 		}
 		SvREFCNT_dec(postav);

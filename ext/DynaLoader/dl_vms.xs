@@ -368,7 +368,7 @@ CLONE(...)
      * using Perl variables that belong to another thread, we create our 
      * own for this thread.
      */
-    MY_CXT.x_dl_last_error = newSVpvn("", 0);
+    MY_CXT.x_dl_last_error = newSVpvs("");
     dl_require_symbols = get_av("DynaLoader::dl_require_symbols", GV_ADDMULTI);
 
 #endif

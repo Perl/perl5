@@ -5720,7 +5720,7 @@ S_concat_pat(pTHX_ RExC_state_t * const pRExC_state,
     /* if we know we have at least two args, create an empty string,
      * then concatenate args to that. For no args, return an empty string */
     if (!pat && pat_count != 1) {
-        pat = newSVpvn("", 0);
+        pat = newSVpvs("");
         SAVEFREESV(pat);
         alloced = TRUE;
     }
@@ -14088,7 +14088,7 @@ parseit:
                         AV* this_array;
                         STRLEN cp_count = utf8_length(foldbuf,
                                                       foldbuf + foldlen);
-                        SV* multi_fold = sv_2mortal(newSVpvn("", 0));
+                        SV* multi_fold = sv_2mortal(newSVpvs(""));
 
                         Perl_sv_catpvf(aTHX_ multi_fold, "\\x{%"UVXf"}", value);
 

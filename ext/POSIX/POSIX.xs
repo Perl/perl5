@@ -1475,7 +1475,7 @@ tmpnam()
 	STRLEN i;
 	int len;
     CODE:
-	RETVAL = newSVpvn("", 0);
+	RETVAL = newSVpvs("");
 	SvGROW(RETVAL, L_tmpnam);
 	/* Yes, we know tmpnam() is bad.  So bad that some compilers
 	 * and linkers warn against using it.  But it is here for

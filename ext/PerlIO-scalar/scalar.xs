@@ -46,7 +46,7 @@ PerlIOScalar_pushed(pTHX_ PerlIO * f, const char *mode, SV * arg,
 	}
     }
     else {
-	s->var = newSVpvn("", 0);
+	s->var = newSVpvs("");
     }
     SvUPGRADE(s->var, SVt_PV);
 

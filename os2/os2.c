@@ -3855,7 +3855,7 @@ XS(XS_OS2__headerInfo)
 
 	if (size <= 0)
 	    Perl_croak(aTHX_ "OS2::_headerInfo(): unexpected size: %d", (int)size);
-	ST(0) = newSVpvn("",0);
+	ST(0) = newSVpvs("");
 	SvGROW(ST(0), size + 1);
 	sv_2mortal(ST(0));
 
@@ -3885,7 +3885,7 @@ XS(XS_OS2_libPath)
 	    Perl_croak(aTHX_ "OS2::_headerInfo(%ld,%ld,%ld,%ld) error: %s",
 		       DQHI_QUERYLIBPATHSIZE, sizeof(size), 0, 0,
 		       os2error(Perl_rc));
-	ST(0) = newSVpvn("",0);
+	ST(0) = newSVpvs("");
 	SvGROW(ST(0), size + 1);
 	sv_2mortal(ST(0));
 

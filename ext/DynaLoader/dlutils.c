@@ -92,7 +92,7 @@ dl_generic_private_init(pTHX)	/* called by dl_*.xs dl_private_init() */
     char *perl_dl_nonlazy;
     MY_CXT_INIT;
 
-    MY_CXT.x_dl_last_error = newSVpvn("", 0);
+    MY_CXT.x_dl_last_error = newSVpvs("");
     dl_nonlazy = 0;
 #ifdef DL_LOADONCEONLY
     dl_loaded_files = NULL;

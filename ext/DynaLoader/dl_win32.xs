@@ -48,7 +48,7 @@ OS_Error_String(pTHX)
     DWORD err = GetLastError();
     STRLEN len;
     if (!dl_error_sv)
-	dl_error_sv = newSVpvn("",0);
+	dl_error_sv = newSVpvs("");
     PerlProc_GetOSError(dl_error_sv,err);
     return SvPV(dl_error_sv,len);
 }
@@ -207,7 +207,7 @@ CLONE(...)
      * using Perl variables that belong to another thread, we create our 
      * own for this thread.
      */
-    MY_CXT.x_dl_last_error = newSVpvn("", 0);
+    MY_CXT.x_dl_last_error = newSVpvs("");
 
 #endif
 

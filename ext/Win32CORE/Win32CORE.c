@@ -33,7 +33,7 @@ XS(w32_CORE_all){
      * subs
      */
     const char *function  = (const char *) XSANY.any_ptr;
-    Perl_load_module(aTHX_ PERL_LOADMOD_NOIMPORT, newSVpvn("Win32",5), newSVnv(0.27));
+    Perl_load_module(aTHX_ PERL_LOADMOD_NOIMPORT, newSVpvs("Win32"), newSVnv(0.27));
     SetLastError(err);
     errno = saved_errno;
     /* mark and SP from caller are passed through unchanged */
