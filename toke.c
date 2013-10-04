@@ -9192,7 +9192,7 @@ S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, STRLEN keylen,
 			    newSVpvs(":full"),
 			    newSVpvs(":short"),
 			    NULL);
-	    SPAGAIN;
+            assert(sp == PL_stack_sp);
 	    table = GvHV(PL_hintgv);
 	    if (table
 		&& (PL_hints & HINT_LOCALIZE_HH)
