@@ -2053,7 +2053,9 @@ package Input_file;
 #
 # You can also set up handlers to
 #   1) call before the first line is read, for pre processing
-#   2) call to adjust each line of the input before the main handler gets them
+#   2) call to adjust each line of the input before the main handler gets
+#      them.  This can be automatically generated, if appropriately simple
+#      enough, by specifiying a Properties parameter in the constructor.
 #   3) call upon EOF before the main handler exits its loop
 #   4) call at the end, for post processing
 #
@@ -2139,12 +2141,25 @@ sub trace { return main::trace(@_); }
     # 'handler'
     main::set_access('each_line_handler', \%each_line_handler, 'c');
 
+    my %properties; # Optional ordered list of the properties that occur in each
+    # meaningful line of the input file.  If present, an appropriate
+    # each_line_handler() is automatically generated and pushed onto the stack
+    # of such handlers.  This is useful when a file contains multiple
+    # proerties per line, but no other special considerations are necessary.
+    # The special value "<ignored>" means to discard the corresponding input
+    # field.
+    # Any @missing lines in the file should also match this syntax; no such
+    # files exist as of 6.3.  But if it happens in a future release, the code
+    # could be expanded to properly parse them.
+    main::set_access('properties', \%properties, qw{ c r });
+
     my %has_missings_defaults;
     # ? Are there lines in the file giving default values for code points
     # missing from it?.  Defaults to NO_DEFAULTS.  Otherwise NOT_IGNORED is
     # the norm, but IGNORED means it has such lines, but the handler doesn't
     # use them.  Having these three states allows us to catch changes to the
-    # UCD that this program should track
+    # UCD that this program should track.  XXX This could be expanded to
+    # specify the syntax for such lines, like %properties above.
     main::set_access('has_missings_defaults',
                                         \%has_missings_defaults, qw{ c r });
 
@@ -2265,6 +2280,40 @@ sub trace { return main::trace(@_); }
         if ($skip{$addr}) {
             $optional{$addr} = 1;
             $skipped_files{$file{$addr}} = $skip{$addr}
+        }
+        elsif ($properties{$addr}) {
+
+            # Add a handler for each line in the input so that it creates a
+            # separate input line for each property in those input lines, thus
+            # making them suitable for process_generic_property_file().
+
+            push @{$each_line_handler{$addr}},
+                 sub {
+                    my $file = shift;
+                    Carp::carp_extra_args(\@_) if main::DEBUG && @_;
+
+                    my @fields = split /\s*;\s*/, $_, -1;
+
+                    if (@fields - 1 > @{$properties{$addr}}) {
+                        $file->carp_bad_line('Extra fields');
+                        $_ = "";
+                        return;
+                    }
+                    my $range = shift @fields;  # 0th element is always the
+                                                # range
+
+                    # The next fields in the input line correspond
+                    # respectively to the stored properties.
+                    for my $i (0 ..  @{$properties{$addr}} - 1) {
+                        my $property_name = $properties{$addr}[$i];
+                        next if $property_name eq '<ignored>';
+                        $file->insert_adjusted_lines(
+                              "$range; $property_name; $fields[$i]");
+                    }
+                    $_ = "";
+
+                    return;
+                };
         }
 
         {   # On non-ascii platforms, we use a special handler
@@ -11342,31 +11391,6 @@ sub filter_old_style_arabic_shaping {
     return;
 }
 
-sub filter_arabic_shaping_line {
-    # ArabicShaping.txt has entries that look like:
-    # 062A; TEH; D; BEH
-    # The field containing 'TEH' is not used.  The next field is Joining_Type
-    # and the last is Joining_Group
-    # This generates two lines to pass on, one for each property on the input
-    # line.
-
-    my $file = shift;
-    Carp::carp_extra_args(\@_) if main::DEBUG && @_;
-
-    my @fields = split /\s*;\s*/, $_, -1; # -1 => retain trailing null fields
-
-    if (@fields > 4) {
-        $file->carp_bad_line('Extra fields');
-        $_ = "";
-        return;
-    }
-
-    $file->insert_adjusted_lines("$fields[0]; Joining_Group; $fields[3]");
-    $_ = "$fields[0]; Joining_Type; $fields[2]";
-
-    return;
-}
-
 { # Closure
     my $lc; # Table for lowercase mapping
     my $tc;
@@ -17477,11 +17501,12 @@ my @input_file_objects = (
                     ),
     Input_file->new('ArabicShaping.txt', v2.0.0,
                     Each_Line_Handler =>
-                        [ ($v_version lt 4.1.0)
+                        ($v_version lt 4.1.0)
                                     ? \&filter_old_style_arabic_shaping
                                     : undef,
-                        \&filter_arabic_shaping_line,
-                        ],
+                    # The first field after the range is a "schematic name"
+                    # not used by Perl
+                    Properties => [ '<ignored>', 'Joining_Type', 'Joining_Group' ],
                     Has_Missings_Defaults => $NOT_IGNORED,
                     ),
     Input_file->new('Blocks.txt', v2.0.0,
