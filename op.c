@@ -7957,8 +7957,10 @@ S_process_special_blocks(pTHX_ I32 floor, const char *const fullname,
     if (*name == 'B') {
 	if (strEQ(name, "BEGIN")) {
 	    const I32 oldscope = PL_scopestack_ix;
+            dSP;
 	    if (floor) LEAVE_SCOPE(floor);
 	    ENTER;
+            PUSHSTACKi(PERLSI_REQUIRE);
 	    SAVECOPFILE(&PL_compiling);
 	    SAVECOPLINE(&PL_compiling);
 	    SAVEVPTR(PL_curcop);
@@ -7968,6 +7970,7 @@ S_process_special_blocks(pTHX_ I32 floor, const char *const fullname,
 	    GvCV_set(gv,0);		/* cv has been hijacked */
 	    call_list(oldscope, PL_beginav);
 
+            POPSTACK;
 	    LEAVE;
 	}
 	else
