@@ -2548,7 +2548,6 @@ S_apply_attrs(pTHX_ HV *stash, SV *target, OP *attrs)
     PERL_ARGS_ASSERT_APPLY_ATTRS;
 
     /* fake up C<use attributes $pkg,$rv,@attrs> */
-    ENTER;		/* need to protect against side-effects of 'use' */
 
 #define ATTRSMODULE "attributes"
 #define ATTRSMODULE_PM "attributes.pm"
@@ -2562,7 +2561,6 @@ S_apply_attrs(pTHX_ HV *stash, SV *target, OP *attrs)
 						   newSVOP(OP_CONST, 0,
 							   newRV(target)),
 						   dup_attrlist(attrs))));
-    LEAVE;
 }
 
 STATIC void
@@ -2582,7 +2580,6 @@ S_apply_attrs_my(pTHX_ HV *stash, OP *target, OP *attrs, OP **imopsp)
 	   target->op_type == OP_PADAV);
 
     /* Ensure that attributes.pm is loaded. */
-    ENTER;		/* need to protect against side-effects of 'use' */
     /* Don't force the C<use> if we don't need it. */
     svp = hv_fetchs(GvHVn(PL_incgv), ATTRSMODULE_PM, FALSE);
     if (svp && *svp != &PL_sv_undef)
@@ -2590,7 +2587,6 @@ S_apply_attrs_my(pTHX_ HV *stash, OP *target, OP *attrs, OP **imopsp)
     else
 	Perl_load_module(aTHX_ PERL_LOADMOD_NOIMPORT,
 			       newSVpvs(ATTRSMODULE), NULL);
-    LEAVE;
 
     /* Need package name for method call. */
     pack = newSVOP(OP_CONST, 0, newSVpvs(ATTRSMODULE));
@@ -5366,7 +5362,8 @@ Perl_vload_module(pTHX_ U32 flags, SV *name, SV *ver, va_list *args)
      * that it has a PL_parser to play with while doing that, and also
      * that it doesn't mess with any existing parser, by creating a tmp
      * new parser with lex_start(). This won't actually be used for much,
-     * since pp_require() will create another parser for the real work. */
+     * since pp_require() will create another parser for the real work.
+     * The ENTER/LEAVE pair protect callers from any side effects of use.  */
 
     ENTER;
     SAVEVPTR(PL_curcop);
