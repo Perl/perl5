@@ -6831,18 +6831,20 @@ The following equivalences hold (assuming C<< $#a >= $i >> )
     unshift(@a,$x,$y)   splice(@a,0,0,$x,$y)
     $a[$i] = $y         splice(@a,$i,1,$y)
 
-Example, assuming array lengths are passed before arrays:
+C<splice> can be used, for example, to implement n-ary queue processing:
 
-    sub aeq {  # compare two list values
-        my(@a) = splice(@_,0,shift);
-        my(@b) = splice(@_,0,shift);
-        return 0 unless @a == @b;  # same len?
-        while (@a) {
-            return 0 if pop(@a) ne pop(@b);
-        }
-        return 1;
+    sub nary_print {
+      my $n = shift;
+      while (my @next_n = splice @_, 0, $n) {
+        say join q{ -- }, @next_n;
+      }
     }
-    if (&aeq($len,@foo[1..$len],0+@bar,@bar)) { ... }
+
+    nary_print(3, qw(a b c d e f g h));
+    # prints:
+    #   a -- b -- c
+    #   d -- e -- f
+    #   g -- h
 
 Starting with Perl 5.14, C<splice> can take scalar EXPR, which must hold a
 reference to an unblessed array.  The argument will be dereferenced
