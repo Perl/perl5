@@ -3187,7 +3187,6 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
     PL_op = (OP *) &myop;
     if (PERLDB_SUB && PL_curstash != PL_debstash)
 	PL_op->op_private |= OPpENTERSUB_DB;
-    PUTBACK;
     Perl_pp_pushmark(aTHX);
 
     EXTEND(SP, notfound + 5);
