@@ -60,7 +60,6 @@ PerlIOEncode_getarg(pTHX_ PerlIO * f, CLONE_PARAMS * param, int flags)
 	dSP;
 	/* Not 100% sure stack swap is right thing to do during dup ... */
 	PUSHSTACKi(PERLSI_MAGIC);
-	SPAGAIN;
 	ENTER;
 	SAVETMPS;
 	PUSHMARK(sp);
@@ -87,8 +86,6 @@ PerlIOEncode_pushed(pTHX_ PerlIO * f, const char *mode, SV * arg, PerlIO_funcs *
     SV *result = Nullsv;
 
     PUSHSTACKi(PERLSI_MAGIC);
-    SPAGAIN;
-
     ENTER;
     SAVETMPS;
 
@@ -239,7 +236,6 @@ PerlIOEncode_fill(pTHX_ PerlIO * f)
 	}
     }
     PUSHSTACKi(PERLSI_MAGIC);
-    SPAGAIN;
     ENTER;
     SAVETMPS;
   retry:
@@ -413,7 +409,6 @@ PerlIOEncode_flush(pTHX_ PerlIO * f)
 	    if (e->inEncodeCall) return 0;
 	    /* Write case - encode the buffer and write() to layer below */
 	    PUSHSTACKi(PERLSI_MAGIC);
-	    SPAGAIN;
 	    ENTER;
 	    SAVETMPS;
 	    PUSHMARK(sp);
@@ -476,7 +471,6 @@ PerlIOEncode_flush(pTHX_ PerlIO * f)
 		   re-encode and unread() to layer below
 		 */
 		PUSHSTACKi(PERLSI_MAGIC);
-		SPAGAIN;
 		ENTER;
 		SAVETMPS;
 		str = sv_newmortal();
@@ -650,7 +644,6 @@ BOOT:
      * is invoked without prior "use Encode". -- dankogai
      */
     PUSHSTACKi(PERLSI_MAGIC);
-    SPAGAIN;
     if (!get_cvs(OUR_DEFAULT_FB, 0)) {
 #if 0
 	/* This would just be an irritant now loading works */

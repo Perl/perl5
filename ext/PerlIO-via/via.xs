@@ -79,7 +79,6 @@ PerlIOVia_method(pTHX_ PerlIO * f, const char *method, CV ** save, int flags,
 	SV *arg;
 	PUSHSTACKi(PERLSI_MAGIC);
 	ENTER;
-	SPAGAIN;
 	PUSHMARK(sp);
 	XPUSHs(s->obj);
 	while ((arg = va_arg(ap, SV *))) {
