@@ -2697,7 +2697,7 @@ static int store_code(pTHX_ stcxt_t *cxt, CV *cv)
 	 * blessed code references.
 	 */
 	/* Ownership of both SVs is passed to load_module, which frees them. */
-	load_module(PERL_LOADMOD_NOIMPORT, newSVpvn("B::Deparse",10), newSVnv(0.61));
+	load_module(PERL_LOADMOD_NOIMPORT, newSVpvs("B::Deparse"), newSVnv(0.61));
         SPAGAIN;
 
 	ENTER;
@@ -5630,7 +5630,7 @@ static SV *retrieve_code(pTHX_ stcxt_t *cxt, const char *cname)
 	 * prepend "sub " to the source
 	 */
 
-	sub = newSVpvn("sub ", 4);
+	sub = newSVpvs("sub ");
 	if (SvUTF8(text))
 		SvUTF8_on(sub);
 	sv_catpv(sub, SvPV_nolen(text)); /* XXX no sv_catsv! */
