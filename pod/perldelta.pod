@@ -34,6 +34,32 @@ recompiled with any previous Unicode release as well).  A detailed
 list of Unicode 6.3 changes is at
 L<http://www.unicode.org/versions/Unicode6.3.0/>.
 
+=head2 Experimental Postfix Dereferencing
+
+When the C<postderef> feature is in effect, the following syntactical
+equivalencies are set up:
+
+  $sref->$*;  # same as ${ $sref }  # interpolates
+  $aref->@*;  # same as @{ $aref }  # interpolates
+  $href->%*;  # same as %{ $href }
+  $cref->&*;  # same as &{ $cref }
+  $gref->&*;  # same as *{ $cref }
+
+  $gref->*{ $slot }; # same as *{ $gref }{ $slot }
+
+  $aref->@[ ... ];  # same as @$aref[ ... ]  # interpolates
+  $href->@{ ... };  # same as @$href{ ... }
+  $aref->%[ ... ];  # same as %$aref[ ... ]
+  $href->%{ ... };  # same as %$href{ ... }
+
+Those marked as interpolating only interpolate if the associated
+C<postderef_qq> feature is also enabled.  This feature is B<experimental> and
+will trigger C<experimental::postderef>-category warnings when used, unless
+they are suppressed.
+
+For more information, consult L<the Postfix Dereference Syntax section of
+perlref|perlref/Postfix Dereference Syntax>.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
