@@ -130,6 +130,7 @@ use Getopt::Long;
 use Archive::Tar;
 use File::Path qw( remove_tree );
 use File::Find;
+use Config qw( %Config );
 
 $| = 1;
 
@@ -184,6 +185,16 @@ sub de_exec {
 }
 
 sub make {
+    my @args= @_;
+    if( $^O eq 'MSWin32') {
+        chdir "Win32";
+        system "$Config{make} @args> ..\\make.log 2>&1" and die "Running make failed, see make.log";
+        chdir '..';
+    } else {
+        system "$Config{make} @args> make.log 2>&1" and die "Running make failed, see make.log";
+    };
+};
+
 my ($module)  = shift;
 my  $cpan_mod = @ARGV ? shift : $module;
 
@@ -433,7 +444,8 @@ if (@commit) {
 
 
 print "Running a make ... ";
-system "$Config{make} > make.log 2>&1" and die "Running make failed, see make.log";
+# Prepare for running (selected) tests
+make 'test-prep';
 print "done\n";
 
 #
@@ -444,7 +456,6 @@ print "About to clean up; hit return or abort (^C) "; <STDIN>;
 
 remove_tree( "cpan/$old_dir" );
 unlink "cpan/$new_file" unless $tarball;
-
 
 #
 # Run the tests. First the test belonging to the module, followed by the
