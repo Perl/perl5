@@ -771,7 +771,7 @@ left-to-right.  The following equivalencies are defined:
   $aref->@*;  # same as @{ $aref }
   $href->%*;  # same as %{ $href }
   $cref->&*;  # same as &{ $cref }
-  $gref->&*;  # same as *{ $cref }
+  $gref->**;  # same as *{ $gref }
 
 Note especially that C<< $cref->&* >> is I<not> equivalent to C<<
 $cref->() >>, and can serve different purposes.
