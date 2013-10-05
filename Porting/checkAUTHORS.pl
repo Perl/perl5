@@ -618,6 +618,7 @@ gfuji\100cpan.org                       g.psy.va\100gmail.com
 gerard\100ggoossen.net                  gerard\100tty.nl
 gibreel\100pobox.com                    stephen.zander\100interlock.mckesson.com
 +                                       srz\100loopback
+gideon\100cpan.org                      gidisrael\100gmail.com
 gnat\100frii.com                        gnat\100prometheus.frii.com
 gp\100familiehaase.de                   gerrit\100familiehaase.de
 grazz\100pobox.com                      grazz\100nyc.rr.com
