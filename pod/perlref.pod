@@ -771,10 +771,14 @@ left-to-right.  The following equivalencies are defined:
   $aref->@*;  # same as @{ $aref }
   $href->%*;  # same as %{ $href }
   $cref->&*;  # same as &{ $cref }
+  $gref->&*;  # same as *{ $cref }
 
 Note especially that C<< $cref->&* >> is I<not> equivalent to C<<
-$cref->() >>, and can serve different purposes.  C<< $gref->** >> is not
-(yet?) implemented.
+$cref->() >>, and can serve different purposes.
+
+Glob elements can be extracted through the postfix dereferencing feature:
+
+  $gref->*{SCALAR}; # same as *{ $gref }{SCALAR}
 
 Postfix array and scalar dereferencing I<can> be used in interpolating
 strings (double quotes or the C<qq> operator), but only if the
@@ -788,15 +792,16 @@ dereferencing notation, with the following equivalencies:
   $aref->@[ ... ];  # same as @$aref[ ... ]
   $href->@{ ... };  # same as @$href{ ... }
 
-Postfix key/value pair slicing is not I<yet> implemented, but will
-behave as expected:
+Postfix key/value pair slicing, added in 5.20.0 and documented in
+L<the KeyE<sol>Value Hash Slices section of perldata|perldata/"Key/Value Hash
+Slices">, also behaves as expected:
 
   $aref->%[ ... ];  # same as %$aref[ ... ]
   $href->%{ ... };  # same as %$href{ ... }
 
 As with postfix array, postfix value slice dereferencing I<can> be used
 in interpolating strings (double quotes or the C<qq> operator), but only
-if the additional C<postderef_qq> feature is enabled.
+if the additional C<postderef_qq> L<feature> is enabled.
 
 =head1 SEE ALSO
 
