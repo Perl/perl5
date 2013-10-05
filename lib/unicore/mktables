@@ -2455,6 +2455,15 @@ END
                 return 0;
             }
             $handle{$addr} = $file_handle; # Cache the open file handle
+
+            if ($v_version ge v3.2.0 && lc($file) ne 'unicodedata.txt') {
+                $_ = <$file_handle>;
+                if ($_ !~ / - $string_version \. /x) {
+                    chomp;
+                    $_ =~ s/^#\s*//;
+                    die Carp::my_carp("File '$file' is version '$_'.  It should be version $string_version");
+                }
+            }
         }
 
         if ($verbosity >= $PROGRESS) {
