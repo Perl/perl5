@@ -114,7 +114,7 @@ Handle complicated C<FILES>
 
 This is an initial version; no attempt has been made yet to make this
 portable. It shells out instead of trying to find a Perl solution.
-In particular, it assumes git, chmod, perl, and make
+In particular, it assumes git, perl, and make
 to be available.
 
 =cut
@@ -173,6 +173,17 @@ sub find_type_f {
     @res
 };
 
+# Equivalent of `chmod a-x`
+sub de_exec {
+    for my $filename ( @_ ) {
+        my $mode= (stat $filename)[2] & 0777;
+        if( $mode & 0111 ) { # exec-bit set
+            chmod $mode & 0666, $filename;
+        };
+    }
+}
+
+sub make {
 my ($module)  = shift;
 my  $cpan_mod = @ARGV ? shift : $module;
 
@@ -394,7 +405,7 @@ print "Hit return to continue; ^C to abort "; <STDIN>;
 unlink "$pkg_dir/$_"                      for @delete;
 system git   => 'add', "$pkg_dir/$_"      for @commit;
 system git   => 'rm', '-f', "$pkg_dir/$_" for @gone;
-system chmod => 'a-x', "$pkg_dir/$_"      for @de_exec;
+de_exec( "$pkg_dir/$_" )                  for @de_exec;
 
 #
 # Restore anything that is customized.
@@ -495,7 +506,7 @@ while (<$Maintainers_pl>) {
 if ($found) {
     unlink 'Porting/Maintainers.pl';
     rename 'Maintainers.pl' => 'Porting/Maintainers.pl';
-    system chmod => 'a+x', 'Porting/Maintainers.pl';
+    chmod 0755 => 'Porting/Maintainers.pl';
 }
 else {
     say "Could not update Porting/Maintainers.pl.";
