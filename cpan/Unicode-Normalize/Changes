@@ -1,5 +1,8 @@
 Revision history for Perl extension Unicode::Normalize.
 
+1.17  Sat Oct  5 11:36:43 2013
+    - assertion using unpack
+
 1.16  Sun Nov  4 17:23:03 2012
     - XSUB: use PERL_NO_GET_CONTEXT (see perlguts)
       (see [rt.cpan.org #80312])

@@ -79,6 +79,8 @@ toke.c	AOK
     Useless use of \\E.
         $a = "abcd\E" ;
 
+    Postfix dereference is experimental
+
     %s number > %s non-portable
         my $a =  0b011111111111111111111111111111110 ;
         $a =  0b011111111111111111111111111111111 ;
@@ -1039,6 +1041,17 @@ no warnings 'misc' ;
 $a = "abcd\E" ;
 EXPECT
 Useless use of \E at - line 3.
+########
+# toke.c
+use feature 'postderef', 'postderef_qq';
+(\$_)->$*;
+"$_->$*";
+no warnings 'experimental::postderef';
+(\$_)->$*;
+"$_->$*";
+EXPECT
+Postfix dereference is experimental at - line 3.
+Postfix dereference is experimental at - line 4.
 ########
 # toke.c
 use warnings 'portable' ;

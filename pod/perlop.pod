@@ -153,6 +153,10 @@ variable containing either the method name or a subroutine reference,
 and the left side must be either an object (a blessed reference)
 or a class name (that is, a package name).  See L<perlobj>.
 
+The dereferencing cases (as opposed to method-calling cases) are
+somewhat extended by the experimental C<postderef> feature.  For the
+details of that feature, consult L<perlref/Postfix Dereference Syntax>.
+
 =head2 Auto-increment and Auto-decrement
 X<increment> X<auto-increment> X<++> X<decrement> X<auto-decrement> X<-->
 

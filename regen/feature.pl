@@ -26,9 +26,11 @@ my %feature = (
     state           => 'state',
     switch          => 'switch',
     evalbytes       => 'evalbytes',
+    postderef       => 'postderef',
     array_base      => 'arybase',
     current_sub     => '__SUB__',
     lexical_subs    => 'lexsubs',
+    postderef_qq    => 'postderef_qq',
     unicode_eval    => 'unieval',
     unicode_strings => 'unicode',
     fc              => 'fc',
@@ -358,7 +360,7 @@ read_only_bottom_close_and_rename($h);
 __END__
 package feature;
 
-our $VERSION = '1.33';
+our $VERSION = '1.34';
 
 FEATURES
 

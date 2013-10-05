@@ -120,12 +120,13 @@
      REFGEN = 329,
      UMINUS = 330,
      POWOP = 331,
-     POSTDEC = 332,
-     POSTINC = 333,
-     PREDEC = 334,
-     PREINC = 335,
-     ARROW = 336,
-     PEG = 337
+     POSTJOIN = 332,
+     POSTDEC = 333,
+     POSTINC = 334,
+     PREDEC = 335,
+     PREINC = 336,
+     ARROW = 337,
+     PEG = 338
    };
 #endif
 /* Tokens.  */
@@ -203,12 +204,13 @@
 #define REFGEN 329
 #define UMINUS 330
 #define POWOP 331
-#define POSTDEC 332
-#define POSTINC 333
-#define PREDEC 334
-#define PREINC 335
-#define ARROW 336
-#define PEG 337
+#define POSTJOIN 332
+#define POSTDEC 333
+#define POSTINC 334
+#define PREDEC 335
+#define PREINC 336
+#define ARROW 337
+#define PEG 338
 
 
 
@@ -266,6 +268,6 @@ typedef union YYSTYPE
 
 
 /* Generated from:
- * 5b290f371f373fb17e073f602c676e436e9d457a1d4db67d192e3cfa0eeb36d7 perly.y
+ * 020be75832dcc7c18bd88434c3ba0e24a136dc093c4b8bf2cef9efa5875c9a29 perly.y
  * 5c9d2a0262457fe9b70073fc8ad6c188f812f38ad57712b7e2f53daa01b297cc regen_perly.pl
  * ex: set ro: */

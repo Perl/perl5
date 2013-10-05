@@ -211,6 +211,7 @@ static const char* const lex_state_names[] = {
  * PRETERMBLOCK : beginning a non-code-defining {} block (eg, hash ref)
  * PREREF       : *EXPR where EXPR is not a simple identifier
  * TERM         : expression term
+ * POSTDEREF    : postfix dereference (->$* ->@[...] etc.)
  * LOOPX        : loop exiting command (goto, last, dump, etc)
  * FTST         : file test operator
  * FUN0         : zero-argument function
@@ -242,6 +243,7 @@ static const char* const lex_state_names[] = {
 #define PRETERMBLOCK(retval) return (PL_expect = XTERMBLOCK,PL_bufptr = s, REPORT(retval))
 #define PREREF(retval) return (PL_expect = XREF,PL_bufptr = s, REPORT(retval))
 #define TERM(retval) return (CLINE, PL_expect = XOPERATOR, PL_bufptr = s, REPORT(retval))
+#define POSTDEREF(f) return (PL_bufptr = s, S_postderef(aTHX_ REPORT(f),s[1]))
 #define LOOPX(f) return (pl_yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, REPORT((int)LOOPEX))
 #define FTST(f)  return (pl_yylval.ival=f, PL_expect=XTERMORDORDOR, PL_bufptr=s, REPORT((int)UNIOP))
 #define FUN0(f)  return (pl_yylval.ival=f, PL_expect=XOPERATOR, PL_bufptr=s, REPORT((int)FUNC0))
@@ -377,6 +379,7 @@ static struct debug_tokens {
     { PLUGEXPR,		TOKENTYPE_OPVAL,	"PLUGEXPR" },
     { PLUGSTMT,		TOKENTYPE_OPVAL,	"PLUGSTMT" },
     { PMFUNC,		TOKENTYPE_OPVAL,	"PMFUNC" },
+    { POSTJOIN,		TOKENTYPE_NONE,		"POSTJOIN" },
     { POSTDEC,		TOKENTYPE_NONE,		"POSTDEC" },
     { POSTINC,		TOKENTYPE_NONE,		"POSTINC" },
     { POWOP,		TOKENTYPE_OPNUM,	"POWOP" },
@@ -2155,6 +2158,43 @@ S_force_next(pTHX_ I32 type)
 #endif
 }
 
+/*
+ * S_postderef
+ *
+ * This subroutine handles postfix deref syntax after the arrow has already
+ * been emitted.  @* $* etc. are emitted as two separate token right here.
+ * @[ @{ %[ %{ *{ are emitted also as two tokens, but this function emits
+ * only the first, leaving yylex to find the next.
+ */
+
+static int
+S_postderef(pTHX_ char const funny, char const next)
+{
+    dVAR;
+    assert(strchr("$@%&*", funny));
+    assert(strchr("*[{", next));
+    if (next == '*') {
+	PL_expect = XOPERATOR;
+	if (PL_lex_state == LEX_INTERPNORMAL && !PL_lex_brackets) {
+	    assert('@' == funny || '$' == funny);
+	    PL_lex_state = LEX_INTERPEND;
+	    start_force(PL_curforce);
+	    force_next(POSTJOIN);
+	}
+	start_force(PL_curforce);
+	force_next(next);
+	PL_bufptr+=2;
+    }
+    else {
+	if ('@' == funny && PL_lex_state == LEX_INTERPNORMAL
+	 && !PL_lex_brackets)
+	    PL_lex_dojoin = 2;
+	PL_expect = XOPERATOR;
+	PL_bufptr++;
+    }
+    return funny;
+}
+
 void
 Perl_yyunlex(pTHX)
 {
@@ -2604,7 +2644,7 @@ S_sublex_push(pTHX)
     ENTER;
 
     PL_lex_state = PL_sublex_info.super_state;
-    SAVEBOOL(PL_lex_dojoin);
+    SAVEI8(PL_lex_dojoin);
     SAVEI32(PL_lex_brackets);
     SAVEI32(PL_lex_allbrackets);
     SAVEI32(PL_lex_formbrack);
@@ -3907,6 +3947,7 @@ S_scan_const(pTHX_ char *start)
  * It deals with "$foo[3]" and /$foo[3]/ and /$foo[0123456789$]+/
  *
  * ->[ and ->{ return TRUE
+ * ->$* ->@* ->@[ and ->@{ return TRUE if postfix_interpolate is enabled
  * { and [ outside a pattern are always subscripts, so return TRUE
  * if we're outside a pattern and it's not { or [, then return FALSE
  * if we're in a pattern and the first char is a {
@@ -3931,6 +3972,11 @@ S_intuit_more(pTHX_ char *s)
     if (PL_lex_brackets)
 	return TRUE;
     if (*s == '-' && s[1] == '>' && (s[2] == '[' || s[2] == '{'))
+	return TRUE;
+    if (*s == '-' && s[1] == '>'
+     && FEATURE_POSTDEREF_QQ_IS_ENABLED
+     && ( (s[2] == '$' && s[3] == '*')
+	||(s[2] == '@' && strchr("*[{",s[3])) ))
 	return TRUE;
     if (*s != '{' && *s != '[')
 	return FALSE;
@@ -4664,7 +4710,7 @@ S_tokenize_use(pTHX_ int is_use, char *s) {
 #ifdef DEBUGGING
     static const char* const exp_name[] =
 	{ "OPERATOR", "TERM", "REF", "STATE", "BLOCK", "ATTRBLOCK",
-	  "ATTRTERM", "TERMBLOCK", "TERMORDORDOR"
+	  "ATTRTERM", "TERMBLOCK", "POSTDEREF", "TERMORDORDOR"
 	};
 #endif
 
@@ -5027,6 +5073,7 @@ Perl_yylex(pTHX)
 
     case LEX_INTERPEND:
 	if (PL_lex_dojoin) {
+	    const U8 dojoin_was = PL_lex_dojoin;
 	    PL_lex_dojoin = FALSE;
 	    PL_lex_state = LEX_INTERPCONCAT;
 #ifdef PERL_MAD
@@ -5037,7 +5084,7 @@ Perl_yylex(pTHX)
 	    }
 #endif
 	    PL_lex_allbrackets--;
-	    return REPORT(')');
+	    return REPORT(dojoin_was == 1 ? ')' : POSTJOIN);
 	}
 	if (PL_lex_inwhat == OP_SUBST && PL_linestr == PL_lex_repl
 	    && SvEVALED(PL_lex_repl))
@@ -5728,6 +5775,19 @@ Perl_yylex(pTHX)
 	    else if (*s == '>') {
 		s++;
 		s = SKIPSPACE1(s);
+		if (FEATURE_POSTDEREF_IS_ENABLED && (
+		    ((*s == '$' || *s == '&') && s[1] == '*')
+		  ||((*s == '@' || *s == '%') && strchr("*[{", s[1]))
+		  ||(*s == '*' && (s[1] == '*' || s[1] == '{'))
+		 ))
+		{
+		    Perl_ck_warner_d(aTHX_
+			packWARN(WARN_EXPERIMENTAL__POSTDEREF),
+			"Postfix dereference is experimental"
+		    );
+		    PL_expect = XPOSTDEREF;
+		    TOKEN(ARROW);
+		}
 		if (isIDFIRST_lazy_if(s,UTF)) {
 		    s = force_word(s,METHOD,FALSE,TRUE);
 		    TOKEN(ARROW);
@@ -5778,6 +5838,7 @@ Perl_yylex(pTHX)
 	}
 
     case '*':
+	if (PL_expect == XPOSTDEREF) POSTDEREF('*');
 	if (PL_expect != XOPERATOR) {
 	    s = scan_ident(s, PL_tokenbuf, sizeof PL_tokenbuf, TRUE);
 	    PL_expect = XOPERATOR;
@@ -5814,6 +5875,7 @@ Perl_yylex(pTHX)
 	    PL_parser->saw_infix_sigil = 1;
 	    Mop(OP_MODULO);
 	}
+	else if (PL_expect == XPOSTDEREF) POSTDEREF('%');
 	PL_tokenbuf[0] = '%';
 	s = scan_ident(s, PL_tokenbuf + 1,
 		sizeof PL_tokenbuf - 1, FALSE);
@@ -6295,6 +6357,7 @@ Perl_yylex(pTHX)
 	}
 	TOKEN(';');
     case '&':
+	if (PL_expect == XPOSTDEREF) POSTDEREF('&');
 	s++;
 	if (*s++ == '&') {
 	    if (!PL_lex_allbrackets && PL_lex_fakeeof >=
@@ -6553,6 +6616,7 @@ Perl_yylex(pTHX)
 		return deprecate_commaless_var_list();
 	    }
 	}
+	else if (PL_expect == XPOSTDEREF) POSTDEREF('$');
 
 	if (s[1] == '#' && (isIDFIRST_lazy_if(s+2,UTF) || strchr("{$:+-@", s[2]))) {
 	    PL_tokenbuf[0] = '@';
@@ -6686,6 +6750,7 @@ Perl_yylex(pTHX)
     case '@':
 	if (PL_expect == XOPERATOR)
 	    no_op("Array", s);
+	else if (PL_expect == XPOSTDEREF) POSTDEREF('@');
 	PL_tokenbuf[0] = '@';
 	s = scan_ident(s, PL_tokenbuf + 1, sizeof PL_tokenbuf - 1, FALSE);
 	pl_yylval.ival = 0;

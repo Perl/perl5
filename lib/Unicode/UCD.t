@@ -343,7 +343,7 @@ is($bt->{AL}, 'Right-to-Left Arabic', 'AL is Right-to-Left Arabic');
 
 # If this fails, then maybe one should look at the Unicode changes to see
 # what else might need to be updated.
-is(Unicode::UCD::UnicodeVersion, '6.2.0', 'UnicodeVersion');
+is(Unicode::UCD::UnicodeVersion, '6.3.0', 'UnicodeVersion');
 
 use Unicode::UCD qw(compexcl);
 

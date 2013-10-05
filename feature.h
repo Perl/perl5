@@ -27,7 +27,7 @@
 	   & HINT_LOCALIZE_HH)						  \
 	    ? Perl_feature_is_enabled(aTHX_ STR_WITH_LEN(name)) : FALSE)
 /* The longest string we pass in.  */
-#define MAX_FEATURE_LEN (sizeof("evalbytes")-1)
+#define MAX_FEATURE_LEN (sizeof("postderef_qq")-1)
 
 #define FEATURE_FC_IS_ENABLED \
     ( \
@@ -67,6 +67,12 @@
 	 FEATURE_IS_ENABLED("evalbytes")) \
     )
 
+#define FEATURE_POSTDEREF_IS_ENABLED \
+    ( \
+	CURRENT_FEATURE_BUNDLE == FEATURE_BUNDLE_CUSTOM && \
+	 FEATURE_IS_ENABLED("postderef") \
+    )
+
 #define FEATURE_ARYBASE_IS_ENABLED \
     ( \
 	CURRENT_FEATURE_BUNDLE <= FEATURE_BUNDLE_511 \
@@ -85,6 +91,12 @@
     ( \
 	CURRENT_FEATURE_BUNDLE == FEATURE_BUNDLE_CUSTOM && \
 	 FEATURE_IS_ENABLED("lexsubs") \
+    )
+
+#define FEATURE_POSTDEREF_QQ_IS_ENABLED \
+    ( \
+	CURRENT_FEATURE_BUNDLE == FEATURE_BUNDLE_CUSTOM && \
+	 FEATURE_IS_ENABLED("postderef_qq") \
     )
 
 #define FEATURE_UNIEVAL_IS_ENABLED \
