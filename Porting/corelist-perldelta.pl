@@ -11,7 +11,7 @@ use Getopt::Long;
 =head1 USAGE
 
   # generate the module changes for the Perl you are currently building
-  ./perl Porting/corelist-perldelta.pl
+  ./perl -Ilib Porting/corelist-perldelta.pl
   
   # generate a diff between the corelist sections of two perldelta* files:
   perl Porting/corelist-perldelta.pl --mode=check 5.017001 5.017002 <perl5172delta.pod
