@@ -944,21 +944,21 @@ listed below, it is used directly as a boolean.
 
 =over 4
 
-=item 1.
+=item Z<>1.
 
 A user-defined subroutine call or a method invocation.
 
-=item 2.
+=item Z<>2.
 
 A regular expression match in the form of C</REGEX/>, C<$foo =~ /REGEX/>,
 or C<$foo =~ EXPR>.  Also, a negated regular expression match in
 the form C<!/REGEX/>, C<$foo !~ /REGEX/>, or C<$foo !~ EXPR>.
 
-=item 3.
+=item Z<>3.
 
 A smart match that uses an explicit C<~~> operator, such as C<EXPR ~~ EXPR>.
 
-=item 4.
+=item Z<>4.
 
 A boolean comparison operator such as C<$_ E<lt> 10> or C<$x eq "abc">.  The
 relational operators that this applies to are the six numeric comparisons
@@ -969,24 +969,24 @@ B<NOTE:> You will often have to use C<$c ~~ $_> because
 the default case uses C<$_ ~~ $c> , which is frequently
 the opposite of what you want.
 
-=item 5.
+=item Z<>5.
 
 At least the three builtin functions C<defined(...)>, C<exists(...)>, and
 C<eof(...)>.  We might someday add more of these later if we think of them.
 
-=item 6.
+=item Z<>6.
 
 A negated expression, whether C<!(EXPR)> or C<not(EXPR)>, or a logical
 exclusive-or, C<(EXPR1) xor (EXPR2)>.  The bitwise versions (C<~> and C<^>)
 are not included.
 
-=item 7.
+=item Z<>7.
 
 A filetest operator, with exactly 4 exceptions: C<-s>, C<-M>, C<-A>, and
 C<-C>, as these return numerical values, not boolean ones.  The C<-z>
 filetest operator is not included in the exception list.
 
-=item 8.
+=item Z<>8.
 
 The C<..> and C<...> flip-flop operators.  Note that the C<...> flip-flop
 operator is completely different from the C<...> elliptical statement
@@ -1003,7 +1003,7 @@ above test to the operands:
 
 =over 4
 
-=item 9.
+=item Z<>9.
 
 If EXPR is C<EXPR1 && EXPR2> or C<EXPR1 and EXPR2>, the test is applied
 I<recursively> to both EXPR1 and EXPR2.
@@ -1011,7 +1011,7 @@ Only if I<both> operands also pass the
 test, I<recursively>, will the expression be treated as boolean.  Otherwise,
 smartmatching is used.
 
-=item 10.
+=item Z<>10.
 
 If EXPR is C<EXPR1 || EXPR2>, C<EXPR1 // EXPR2>, or C<EXPR1 or EXPR2>, the
 test is applied I<recursively> to EXPR1 only (which might itself be a

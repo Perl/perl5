@@ -38,11 +38,11 @@ ExtUtils::Install - install files from here to there
 
 =head1 VERSION
 
-1.60
+1.61
 
 =cut
 
-$VERSION = '1.60';  # <-- do not forget to update the POD section just above this line!
+$VERSION = '1.61';  # <-- do not forget to update the POD section just above this line!
 $VERSION = eval $VERSION;
 
 =pod
@@ -246,8 +246,6 @@ a derivative of the original in the same directory) so that the caller can
 use it to install under. In all other cases of success returns $file.
 On failure throws a fatal error.
 
-=back
-
 =end _private
 
 =cut
@@ -294,6 +292,8 @@ sub _unlink_or_rename { #XXX OS-SPECIFIC
 
 
 =pod
+
+=back
 
 =head2 Functions
 
@@ -540,7 +540,11 @@ sub _chdir {
 
 =pod
 
+=back
+
 =end _private
+
+=over 
 
 =item B<install>
 

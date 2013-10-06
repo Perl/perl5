@@ -1016,12 +1016,12 @@ The reasons for most important skipped tests are:
 
 =over 4
 
-=item 18
+=item Z<>18
 
 Checks C<atime> and C<mtime> of C<stat()> - unfortunately, HPFS
 provides only 2sec time granularity (for compatibility with FAT?).
 
-=item 25
+=item Z<>25
 
 Checks C<truncate()> on a filehandle just opened for write - I do not
 know why this should or should not work.
