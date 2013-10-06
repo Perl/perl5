@@ -12,7 +12,10 @@ use Getopt::Long;
 
   # generate the module changes for the Perl you are currently building
   ./perl -Ilib Porting/corelist-perldelta.pl
-  
+
+  # update the module changes for the Perl you are currently building
+  perl Porting/corelist-perldelta.pl --mode=update Porting/perldelta.pod
+
   # generate a diff between the corelist sections of two perldelta* files:
   perl Porting/corelist-perldelta.pl --mode=check 5.017001 5.017002 <perl5172delta.pod
 
@@ -91,7 +94,7 @@ sub run {
   my %opt = (mode => 'generate');
 
   GetOptions(\%opt,
-    'mode|m:s', # 'generate', 'check'
+    'mode|m:s', # 'generate', 'check', 'update'
   );
 
   # by default, compare latest two version in CoreList;
@@ -105,6 +108,9 @@ sub run {
   }
   elsif ( $opt{mode} eq 'check' ) {
     do_check(\*ARGV, $old => $new);
+  }
+  elsif ( $opt{mode} eq 'update' ) {
+    do_update_existing(shift @ARGV, $old => $new);
   }
   else {
     die "Unrecognized mode '$opt{mode}'\n";
@@ -274,6 +280,28 @@ sub corelist_delta {
   );
 }
 
+# currently does not update the Removed Module section
+sub do_update_existing {
+  my ( $existing, $old, $new ) = @_;
+
+  my ( $added, $removed, $updated, $manuallyCheck ) = corelist_delta( $old => $new );
+  if ($manuallyCheck) {
+    say "Please check whether the following distributions have been modified and list accordingly";
+    say "\t* $_" for sort @{$manuallyCheck};
+  }
+
+  my $data = {
+    new      => $added,
+    updated  => $updated,
+    #removed => $removed, ignore removed for now
+  };
+
+  my $text = DeltaUpdater::transform_pod( $existing, $data );
+  open my $out, '>', $existing or die "can't open perldelta file $existing: $!";
+  print $out $text;
+  close $out;
+}
+
 sub do_generate {
   my ($old, $new) = @_;
   my ($added, $removed, $updated, $manuallyCheck) = corelist_delta($old => $new);
@@ -327,6 +355,391 @@ sub do_check {
 
     print "\n";
   }
+}
+
+{
+
+  package DeltaUpdater;
+  use List::Util 'reduce';
+
+  sub get_section_name_from_heading {
+    my $heading = shift;
+    while (my ($key, $expression) = each %sections) {
+      if ($heading =~ $expression) {
+        return $titles{$key};
+      }
+    }
+    die "$heading did not match any section";
+  }
+
+  sub is_desired_section_name {
+    for (values %sections) {
+      return 1 if $_[0] =~ $_;
+    }
+    return 0;
+  }
+
+  # verify the module and pragmata in the section, changing the stated version if necessary
+  # this subroutine warns if the module name cannot be parsed or if it is not listed in
+  # the results returned from corelist_delta()
+  #
+  # a side-effect of calling this function is that modules present in the section are
+  # removed from $data, resulting in $data containing only those modules and pragmata
+  # that were not listed in the perldelta file. This means we can then pass $data to
+  # add_to_section() without worrying about filtering out duplicates
+  sub update_section {
+    my ( $section, $data, $title ) = @_;
+    my @items = @{ $section->{items} };
+
+    for my $item (@items) {
+
+      my $content = $item->{text};
+      my $module  = $item->{name};
+
+      say "Could not parse module name; line is:\n\t$content" and next unless $module;
+      say "$module is not in Module::CoreList; check to see that it is not covered by another section" and next
+        unless $data->{$title}{$module};
+
+      if ( $title eq 'new' ) {
+        my ($new) = $content =~ /(\d[^\s]+)\s+has\s+been.*$/m;
+        say "Could not parse new version for $module; line is:\n\t$content" and next unless $new;
+        if ( $data->{$title}{$module}[2] ne $new ) {
+            say "$module: new version differs; version in pod: $new; version in corelist: " . $data->{$title}{$module}[2];
+        }
+        $content =~ s/\d[^\s]+(\s+has\s+been.*$)/$data->{$title}{$module}[2].$1/me;
+      }
+
+      elsif ( $title eq 'updated' ) {
+        my ( $prev, $new ) = $content =~ /from\s+(?:version\s+)?(\d[^\s]+)\s+to\s+(?:version\s+)?(\d[^\s,]+?)(?=[\s,]|\.\s|\.$|$).*/s;
+        say "Could not parse old and new version for $module; line is:\n\t$content" and next
+          unless $prev and $new;
+        if ( $data->{$title}{$module}[1] ne $prev ) {
+          say "$module: previous version differs; version in pod: $prev; version in corelist: " . $data->{$title}{$module}[1];
+        }
+        if ( $data->{$title}{$module}[2] ne $new ) {
+          say "$module: new version differs; version in pod: $new; version in corelist: " . $data->{$title}{$module}[2];
+        }
+        $content =~
+          s/(from\s+(?:version\s+)?)\d[^\s]+(\s+to\s+(?:version\s+)?)\d[^\s,]+?(?=[\s,]|\.\s|\.$|$)(.*)/$1.$data->{$title}{$module}[1].$2.$data->{$title}{$module}[2].$3/se;
+      }
+
+      elsif ( $title eq 'removed' ) {
+        my ($prev) = $content =~ /^.*?was\s+(\d[^\s]+?)/m;
+        say "Could not parse old version for $module; line is:\n\t$content" and next unless $prev;
+        if ( $data->{$title}{$module}[1] ne $prev ) {
+          say "$module: previous version differs; $prev " . $data->{$title}{$module}[1];
+        }
+        $content =~ s/(^.*?was\s+)\d[^\s]+?/$1.$data->{$title}{$module}[1]/me;
+      }
+
+      delete $data->{$title}{$module};
+      $item->{text} = $content;
+    }
+    return $section;
+  }
+
+  # add modules and pragmata present in $data to the section
+  sub add_to_section {
+    my ( $section, $data, $title ) = @_;
+
+    #undef is a valid version name in Module::CoreList so supress warnings about concatenating undef values
+    no warnings 'uninitialized';
+    for ( values %{ $data->{$title} } ) {
+      my ( $mod, $old_v, $new_v ) = @{$_};
+      my ( $item, $text );
+
+      $item = { name => $mod, text => "=item *\n" };
+      if ( $title eq 'new' ) {
+        $text = "L<$mod> $new_v has been added to the Perl core.\n";
+      }
+
+      elsif ( $title eq 'updated' ) {
+        $text = "L<$mod> has been upgraded from version $old_v to $new_v.\n";
+        if ( $deprecated->{$mod} ) {
+          $text .= "NOTE: L<$mod> is deprecated and may be removed from a future version of Perl.\n";
+        }
+      }
+
+      elsif ( $title eq 'removed' ) {
+        $text = "C<$mod> has been removed from the Perl core.  Prior version was $old_v.\n";
+      }
+
+      $item->{text} .= "\n$text\n";
+      push @{ $section->{items} }, $item;
+    }
+    return $section;
+  }
+
+  sub sort_items_in_section {
+    my ($section) = @_;
+
+    # if we could not parse the module name, it will be uninitalized
+    # in sort. This is not a problem as it will just result in these
+    # sections being placed near the begining of the section
+    no warnings 'uninitialized';
+    $section->{items} =
+      [ sort { lc $a->{name} cmp lc $b->{name} } @{ $section->{items} } ];
+    return $section;
+  }
+
+  # given a hashref of the form returned by corelist_delta()
+  # and a hash structured as documented in transform_pod(), it returns
+  # a pod string representation of the sections, creating sections
+  # if necessary
+  sub sections_to_pod {
+    my ( $data, %sections ) = @_;
+    my $out = '';
+
+    for (
+        (
+          [ 'New Modules and Pragmata',     'new' ],
+          [ 'Updated Modules and Pragmata', 'updated' ],
+          [ 'Removed Modules and Pragmata', 'removed' ]
+        )
+      )
+    {
+      my ( $section_name, $title ) = @{$_};
+
+      my $section = $sections{$section_name} // {
+          name            => $section_name,
+          preceeding_text => "=head2 $_->[0]\n=over 4\n",
+          following_text  => "=back\n",
+          items           => [],
+          manual          => 1
+      };
+
+      $section = update_section( $section, $data, $title );
+      $section = add_to_section( $section, $data, $title );
+      $section = sort_items_in_section( $section );
+
+      next if $section->{manual} and scalar @{ $section->{items} } == 0;
+
+      my $items = reduce { no warnings 'once'; $a . $b->{text} }
+        ( '', @{ $section->{items} } );
+      $out .=
+        ( $section->{preceeding_text} // '' )
+        . $items
+        . ( $section->{following_text} // '' );
+    }
+    return $out;
+  }
+
+  # given a filename corresponding to an existing perldelta file
+  # and a hashref of the form returned by corelist_delta(), it
+  # returns a string of the resulting file after the module
+  # information has been added.
+  sub transform_pod {
+    my ( $existing, $data ) = @_;
+
+    # will contain hashrefs corresponding to new, updated and removed
+    # modules and pragmata keyed by section name
+    # each section is hashref of the structure
+    #   preceeding_text => Text occuring before and including the over
+    #                      region containing the list of modules,
+    #   items           => [Arrayref of hashrefs corresponding to a module
+    #                       entry],
+    #     an entry has the form:
+    #       name => Module name or undef if the name could not be determined
+    #       text => The text of the entry, including the item heading
+    #
+    #   following_text  => Any text not corresponding to a module
+    #                      that occurs after the first module
+    #
+    # the sections are converted to a pod string by calling sections_to_pod()
+    my %sections;
+
+    # we are in the Modules_and_Pragmata's section
+    my $in_Modules_and_Pragmata;
+    # we are the Modules_and_Pragmata's section but have not
+    # encountered any of the desired sections. We use this
+    # flag to determine whether we should append the text to $out
+    # or we need to delay appending until the module listings are
+    # processed and instead append to $append_to_out
+    my $in_Modules_and_Pragmata_preamble;
+    my $done_processing_Modules_and_Pragmata;
+
+    my $current_section;
+    # $nested_element_level == 0 : not in an over region, treat lines as text
+    # $nested_element_level == 1 : presumably in the top over region that
+    #                              corresponds to the module listing. Treat
+    #                              each item as a module
+    # $nested_element_level > 1  : we only consider these values when we are in an item
+    #                              We treat lines as the text of the current item.
+    my $nested_element_level = 0;
+    my $current_item;
+    my $need_to_parse_module_name;
+
+    my $out = '';
+    my $append_to_out = '';
+
+    open my $fh, '<', $existing or die "can't open perldelta file $existing: $!";
+
+    while (<$fh>) {
+      # treat the rest of the file as plain text
+      if ($done_processing_Modules_and_Pragmata) {
+        $out .= $_;
+        next;
+      }
+
+      elsif ( !$in_Modules_and_Pragmata ) {
+        # entering Modules and Pragmata
+        if (/^=head1 Modules and Pragmata/) {
+          $in_Modules_and_Pragmata          = 1;
+          $in_Modules_and_Pragmata_preamble = 1;
+        }
+        $out .= $_;
+        next;
+      }
+
+      # leaving Modules and Pragmata
+      elsif (/^=head1/) {
+        if ($current_section) {
+          push @{ $current_section->{items} }, $current_item
+            if $current_item;
+          $sections{ $current_section->{name} } = $current_section;
+        }
+        $done_processing_Modules_and_Pragmata = 1;
+        $out .=
+          sections_to_pod( $data, %sections ) . $append_to_out . $_;
+        next;
+      }
+
+      # new section in Modules and Pragmata
+      elsif (/^=head2 (.*?)$/) {
+        my $name = $1;
+        if ($current_section) {
+          push @{ $current_section->{items} }, $current_item
+            if $current_item;
+          $sections{ $current_section->{name} } = $current_section;
+          undef $current_section;
+        }
+
+        if ( is_desired_section_name($name) ) {
+          undef $in_Modules_and_Pragmata_preamble;
+          if ( $nested_element_level > 0 ) {
+            die "Unexpected head2 at line no. $.";
+          }
+          my $title = get_section_name_from_heading($name);
+          if ( exists $sections{$title} ) {
+            die "$name occured twice at line no. $.";
+          }
+          $current_section                    = {};
+          $current_section->{name}            = $title;
+          $current_section->{preceeding_text} = $_;
+          $current_section->{items}           = [];
+          $nested_element_level               = 0;
+          next;
+        }
+
+        # otherwise treat section as plain text
+        else {
+          if ($in_Modules_and_Pragmata_preamble) {
+            $out .= $_;
+          }
+          else {
+            $append_to_out .= $_;
+          }
+          next;
+        }
+      }
+
+      elsif ($current_section) {
+
+        # not in an over region
+        if ( $nested_element_level == 0 ) {
+          if (/^=over/) {
+            $nested_element_level++;
+          }
+          if ( scalar @{ $current_section->{items} } > 0 ) {
+            $current_section->{following_text} .= $_;
+          }
+          else {
+            $current_section->{preceeding_text} .= $_;
+          }
+          next;
+        }
+
+        if ($current_item) {
+          if ($need_to_parse_module_name) {
+            # the item may not have a parsable module name, which means that
+            # $current_item->{name} will never be defined.
+            if (/^(?:L|C)<(.+?)>/) {
+              $current_item->{name} = $1;
+              undef $need_to_parse_module_name;
+            }
+            # =item or =back signals the end of an item
+            # block, which we handle below
+            if ( !/^=(?:item|back)/ ) {
+              $current_item->{text} .= $_;
+              next;
+            }
+          }
+          # currently in an over region
+          # treat text inside region as plain text
+          if ( $nested_element_level > 1 ) {
+            if (/^=back/) {
+              $nested_element_level--;
+            }
+            elsif (/^=over/) {
+              $nested_element_level++;
+            }
+            $current_item->{text} .= $_;
+            next;
+          }
+          # entering over region
+          if (/^=over/) {
+            $nested_element_level++;
+            $current_item->{text} .= $_;
+            next;
+          }
+          # =item or =back signals the end of an item
+          # block, which we handle below
+          if ( !/^=(?:item|back)/ ) {
+            $current_item->{text} .= $_;
+            next;
+          }
+        }
+
+        if (/^=item \*/) {
+          push @{ $current_section->{items} }, $current_item
+            if $current_item;
+          $current_item = { text => $_ };
+          $need_to_parse_module_name = 1;
+          next;
+        }
+
+        if (/^=back/) {
+          push @{ $current_section->{items} }, $current_item
+            if $current_item;
+          undef $current_item;
+          $nested_element_level--;
+        }
+
+        if ( scalar @{ $current_section->{items} } == 0 ) {
+          $current_section->{preceeding_text} .= $_;
+        }
+        else {
+          $current_section->{following_text} .= $_;
+        }
+        next;
+      }
+
+      # text in Modules and Pragmata not in a head2 region
+      else {
+        if ($in_Modules_and_Pragmata_preamble) {
+          $out .= $_;
+        }
+        else {
+          $append_to_out .= $_;
+        }
+        next;
+      }
+    }
+    close $fh;
+    die 'Never saw Modules and Pragmata section' unless $in_Modules_and_Pragmata;
+    return $out;
+  }
+
 }
 
 {
