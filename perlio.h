@@ -281,10 +281,6 @@ PERL_EXPORT_C void PerlIO_setlinebuf(PerlIO *);
 PERL_EXPORT_C int PerlIO_printf(PerlIO *, const char *, ...)
     __attribute__format__(__printf__, 2, 3);
 #endif
-#ifndef PerlIO_sprintf
-PERL_EXPORT_C int PerlIO_sprintf(char *, int, const char *, ...)
-    __attribute__format__(__printf__, 3, 4);
-#endif
 #ifndef PerlIO_vprintf
 PERL_EXPORT_C int PerlIO_vprintf(PerlIO *, const char *, va_list);
 #endif

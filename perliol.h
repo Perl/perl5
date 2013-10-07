@@ -158,8 +158,6 @@ PERL_EXPORT_C PerlIO_list_t * PerlIO_resolve_layers(pTHX_ const char *layers, co
 PERL_EXPORT_C PerlIO_funcs * PerlIO_default_layer(pTHX_ I32 n);
 PERL_EXPORT_C PerlIO_list_t * PerlIO_default_layers(pTHX);
 PERL_EXPORT_C PerlIO * PerlIO_reopen(const char *path, const char *mode, PerlIO *f);
-PERL_EXPORT_C int PerlIO_vsprintf(char *s, int n, const char *fmt, va_list ap)
-                __attribute__format__(__printf__,3,0);
 
 PERL_EXPORT_C PerlIO_list_t *PerlIO_list_alloc(pTHX);
 PERL_EXPORT_C PerlIO_list_t *PerlIO_clone_list(pTHX_ PerlIO_list_t *proto, CLONE_PARAMS *param);

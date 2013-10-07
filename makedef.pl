@@ -677,7 +677,6 @@ if ($define{'USE_PERLIO'}) {
 			 PerlIO_set_cnt
 			 PerlIO_set_ptrcnt
 			 PerlIO_setlinebuf
-			 PerlIO_sprintf
 			 PerlIO_stderr
 			 PerlIO_stdin
 			 PerlIO_stdout
@@ -805,9 +804,7 @@ try_symbols(qw(
 		    PerlIO_getpos
 		    PerlIO_init
 		    PerlIO_setpos
-		    PerlIO_sprintf
 		    PerlIO_tmpfile
-		    PerlIO_vsprintf
 	     ));
 
 if ($ARGS{PLATFORM} eq 'win32') {

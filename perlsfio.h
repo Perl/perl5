@@ -43,7 +43,6 @@ extern int	_stdprintf _ARG_((const char*, ...));
 #define PerlIO_puts(f,s)		sfputr(f,s,-1)
 #define PerlIO_putc(f,c)		sfputc(f,c)
 #define PerlIO_ungetc(f,c)		sfungetc(f,c)
-#define PerlIO_sprintf			sfsprintf
 #define PerlIO_getc(f)			sfgetc(f)
 #define PerlIO_eof(f)			sfeof(f)
 #define PerlIO_error(f)			sferror(f)
