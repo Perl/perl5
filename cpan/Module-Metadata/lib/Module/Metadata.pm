@@ -12,7 +12,7 @@ package Module::Metadata;
 use strict;
 use warnings;
 
-our $VERSION = '1.000018';
+our $VERSION = '1.000019';
 $VERSION = eval $VERSION;
 
 use Carp qw/croak/;
@@ -654,6 +654,7 @@ sub _evaluate_version_line {
     #; package Module::Metadata::_version::p$pn;
     use version;
     no strict;
+    no warnings;
 
       \$vsub = sub {
         local $sigil$var;

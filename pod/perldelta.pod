@@ -173,6 +173,12 @@ The list of Perl versions covered has been updated.
 
 =item *
 
+L<Module::Metadata> has been upgraded from version 1.000018 to 1.000019.
+
+Warnings are now disabled during version evaluation.
+
+=item *
+
 The podlators modules have been upgraded from version 2.5.1 to 2.5.2.
 
 Numerous updates and bug fixes are incorporated.  See the F<Changes> file in

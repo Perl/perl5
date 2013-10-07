@@ -210,6 +210,12 @@ package Simple v1.2.3_4 {
   1;
 }
 ---
+  '0' => <<'---', # set from separately-initialised variable
+package Simple;
+  our $CVSVERSION   = '$Revision: 1.7 $';
+  our ($VERSION)    = ($CVSVERSION =~ /(\d+\.\d+)/);
+}
+---
 );
 my %modules = reverse @modules;
 
