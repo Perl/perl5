@@ -27,7 +27,7 @@ sub ok {
 
 BEGIN {
     $| = 1;
-    print("1..16\n");   ### Number of tests that will be run ###
+    print("1..19\n");   ### Number of tests that will be run ###
 };
 
 use threads;
@@ -114,6 +114,24 @@ if ($] >= 5.008008) {
 } else {
     print "ok 16 # skip $] can't return temporaries from lvalue subs\n";
 }
+
+my $r;
+{
+    my @a :shared;
+    $r = \$a[0];
+}
+$$r = 1;
+ok(17, 1, 'Assignment to a reference to an out-of-scope array does not crash');
+
+my $a;
+{
+    my @a :shared;
+    $a = \@a;
+    $a->[0] = 2;
+}
+ok(18, $a->[0] == 2, 'Array has expected value');
+$$r = 3;
+ok(19, $a->[0] == 2, 'Array was not changed by unrelated scalar');
 
 exit(0);
 

@@ -27,7 +27,7 @@ sub ok {
 
 BEGIN {
     $| = 1;
-    print("1..22\n");   ### Number of tests that will be run ###
+    print("1..25\n");   ### Number of tests that will be run ###
 };
 
 use threads;
@@ -127,6 +127,24 @@ if ($] >= 5.008008) {
 } else {
     print "ok 22 # skip $] can't return temporaries from lvalue subs\n";
 }
+
+my $r;
+{
+    my %h :shared;
+    $r = \$h{k};
+}
+$$r = 1;
+ok(23, 1, 'Assignment to a reference to an out-of-scope hash does not crash');
+
+my $h;
+{
+    my %h :shared;
+    $h = \%h;
+    $h->{k} = 2;
+}
+ok(24, $h->{k} == 2, 'Hash has expected value');
+$$r = 3;
+ok(25, $h->{k} == 2, 'Hash was not changed by unrelated scalar');
 
 exit(0);
 
