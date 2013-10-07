@@ -78,6 +78,11 @@ XXX For a release on a stable branch, this section aspires to be:
 
 [ List each incompatible change as a =head2 entry ]
 
+=head2 Functions C<PerlIO_vsprintf> and C<PerlIO_sprintf> have been removed
+
+These two functions, undocumented, unused in CPAN, and problematic have
+been removed.
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.

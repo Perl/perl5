@@ -5183,36 +5183,6 @@ vfprintf(FILE *fd, char *pat, char *args)
 
 #endif
 
-#ifndef PerlIO_vsprintf
-int
-PerlIO_vsprintf(char *s, int n, const char *fmt, va_list ap)
-{
-    dTHX; 
-    const int val = my_vsnprintf(s, n > 0 ? n : 0, fmt, ap);
-    PERL_UNUSED_CONTEXT;
-
-#ifndef PERL_MY_VSNPRINTF_GUARDED
-    if (val < 0 || (n > 0 ? val >= n : 0)) {
-	Perl_croak(aTHX_ "panic: my_vsnprintf overflow in PerlIO_vsprintf\n");
-    }
-#endif
-    return val;
-}
-#endif
-
-#ifndef PerlIO_sprintf
-int
-PerlIO_sprintf(char *s, int n, const char *fmt, ...)
-{
-    va_list ap;
-    int result;
-    va_start(ap, fmt);
-    result = PerlIO_vsprintf(s, n, fmt, ap);
-    va_end(ap);
-    return result;
-}
-#endif
-
 /*
  * Local variables:
  * c-indentation-style: bsd
