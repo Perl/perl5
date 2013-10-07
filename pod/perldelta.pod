@@ -179,7 +179,7 @@ Warnings are now disabled during version evaluation.
 
 =item *
 
-The podlators modules have been upgraded from version 2.5.1 to 2.5.2.
+The podlators modules have been upgraded from version 2.5.1 to 2.5.3.
 
 Numerous updates and bug fixes are incorporated.  See the F<Changes> file in
 the CPAN distribution for full details.

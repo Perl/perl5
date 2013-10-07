@@ -808,7 +808,7 @@ not to throw an exception.  C<pod> says to include a POD ERRORS section
 in the resulting documentation summarizing the errors.  C<none> ignores
 POD errors entirely, as much as possible.
 
-The default is C<output>.
+The default is C<pod>.
 
 =item indent
 

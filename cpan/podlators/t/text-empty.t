@@ -33,10 +33,20 @@ local $SIG{__WARN__} = sub { die $_[0] };
 ok (eval { $parser->parse_string_document("=\xa0") },
     'Parsed invalid document');
 is ($@, '', '...with no errors');
-like ($output, qr{POD ERRORS}, '...and output contains a POD ERRORS section');
+SKIP: {
+    skip 'Pod::Simple does not produce errors for invalid commands', 1
+        if $output eq q{};
+    like ($output, qr{POD ERRORS},
+          '...and output contains a POD ERRORS section');
+}
 
 # Try with a document containing only =cut.
 ok (eval { $parser->parse_string_document("=cut") },
     'Parsed invalid document');
 is ($@, '', '...with no errors');
-like ($output, qr{POD ERRORS}, '...and output contains a POD ERRORS section');
+SKIP: {
+    skip 'Pod::Simple does not produce errors for invalid commands', 1
+        if $output eq q{};
+    like ($output, qr{POD ERRORS},
+          '...and output contains a POD ERRORS section');
+}
