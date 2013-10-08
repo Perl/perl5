@@ -562,7 +562,7 @@ Recognise (or not) a number.  The type of the number is returned
 IS_NUMBER_IN_UV, IS_NUMBER_GREATER_THAN_UV_MAX, IS_NUMBER_NOT_INT,
 IS_NUMBER_NEG, IS_NUMBER_INFINITY, IS_NUMBER_NAN (defined in perl.h).
 
-If the value of the number can fit an in UV, it is returned in the *valuep
+If the value of the number can fit in a UV, it is returned in the *valuep
 IS_NUMBER_IN_UV will be set to indicate that *valuep is valid, IS_NUMBER_IN_UV
 will never be set unless *valuep is valid, but *valuep may have been assigned
 to during processing even though IS_NUMBER_IN_UV is not set on return.
