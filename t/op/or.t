@@ -25,7 +25,7 @@ sub FETCH {
 package main;
 require './test.pl';
 
-plan( tests => 9 );
+plan( tests => 11 );
 
 
 my ($a, $b, $c);
@@ -72,3 +72,19 @@ for (pos $x || pos $y) {
     eval { $_++ };
 }
 is(pos($y) || $@, 1, "|| propagates lvaluish context");
+
+my $aa, $bb, $cc;
+$bb = 1;
+
+my $res = 0;
+# Well, really testing OP_DOR I guess
+unless ($aa || $bb // $cc) {
+	$res = 1;
+}
+is($res, 0, "res is 0 after mixed OR/DOR");
+
+$res = 0;
+unless ($aa // $bb || $cc) {
+	$res = 1;
+}
+is($res, 0, "res is 0 after mixed DOR/OR");
