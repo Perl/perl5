@@ -1,6 +1,7 @@
 #!./miniperl
 use strict;
 use warnings;
+use constant IS_CROSS => defined $::Cross::platform ? 1 : 0;
 use Config;
 
 my $is_Win32 = $^O eq 'MSWin32';
@@ -155,7 +156,7 @@ if ($is_Win32) {
     unless (-f "$pl2bat.bat") {
 	my @args = ($perl, "-I$topdir\\lib", ("$pl2bat.pl") x 2);
 	print "@args\n";
-	system(@args) unless defined $::Cross::platform;
+	system(@args) unless IS_CROSS;
     }
 
     print "In $build";
@@ -299,12 +300,43 @@ sub build_extension {
 	    require ExtUtils::MM_Unix;
 	    defined (my $newv = parse_version MM $vmod) or last;
 	    if ($newv ne $oldv) {
-		1 while unlink $makefile
+		close $mfh or die "close $makefile: $!";
+		_unlink($makefile);
+		{
+		    no warnings 'deprecated';
+		    goto NO_MAKEFILE;
+		}
 	    }
+	}
+	if(IS_CROSS){
+	    seek($mfh, 0, 0) or die "Cannot seek $makefile: $!";
+	    while (<$mfh>) {
+		#this is used to stop the while loop early for efficiency when
+		#the line is reached, and possibly match a cross build
+		my $header = quotemeta '# These definitions are from config.sh (via ';
+		if(/^$header.+?
+		    (xlib[\/\\]
+		    $::Cross::platform\Q\/Config.pm\E)?\)\./x) {
+		    unless (defined $1){
+			print "Deleting non-Cross makefile\n";
+			close $mfh or die "close $makefile: $!";
+			_unlink($makefile);
+			{
+			    no warnings 'deprecated';
+			    goto NO_MAKEFILE;
+			}
+		    } else { #have a cross makefile
+			goto CROSS_OK_MF;
+		    }
+		}
+	    } #catch breakage from future changes
+	    die "non-standard makefile found in $mname";
+	    CROSS_OK_MF:
 	}
     }
 
     if (!-f $makefile) {
+	NO_MAKEFILE:
 	if (!-f 'Makefile.PL') {
 	    print "\nCreating Makefile.PL in $ext_dir for $mname\n";
 	    my ($fromname, $key, $value);
@@ -408,7 +440,7 @@ EOM
 
 	# Presumably this can be simplified
 	my @cross;
-	if (defined $::Cross::platform) {
+	if (IS_CROSS) {
 	    # Inherited from win32/buildext.pl
 	    @cross = "-MCross=$::Cross::platform";
 	} elsif ($opts{cross}) {
@@ -503,4 +535,12 @@ sub _quote_args {
         }
     } @{$args}
     ;
+}
+
+#guarentee that a file is deleted or die, void _unlink($filename)
+#xxx replace with _unlink_or_rename from EU::Install?
+sub _unlink {
+    1 while unlink $_[0];
+    my $err = $!;
+    die "Can't unlink $_[0]: $err" if -f $_[0];
 }

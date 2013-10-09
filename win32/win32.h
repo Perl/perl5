@@ -243,6 +243,9 @@ typedef unsigned short	mode_t;
 #pragma  warning(disable: 4102)	/* "unreferenced label" */
 
 #define isnan		_isnan
+#ifdef UNDER_CE /* revisit what function this becomes celib vs corelibc, prv warning here*/
+#  undef snprintf
+#endif
 #define snprintf	_snprintf
 #define vsnprintf	_vsnprintf
 
