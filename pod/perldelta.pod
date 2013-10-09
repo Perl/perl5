@@ -43,12 +43,12 @@ equivalencies are set up:
   $aref->@*;  # same as @{ $aref }  # interpolates
   $href->%*;  # same as %{ $href }
   $cref->&*;  # same as &{ $cref }
-  $gref->&*;  # same as *{ $cref }
+  $gref->**;  # same as *{ $gref }
 
   $gref->*{ $slot }; # same as *{ $gref }{ $slot }
 
   $aref->@[ ... ];  # same as @$aref[ ... ]  # interpolates
-  $href->@{ ... };  # same as @$href{ ... }
+  $href->@{ ... };  # same as @$href{ ... }  # interpolates
   $aref->%[ ... ];  # same as %$aref[ ... ]
   $href->%{ ... };  # same as %$href{ ... }
 
