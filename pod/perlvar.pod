@@ -2174,10 +2174,8 @@ See L<perldiag> for details about error messages.
 
 =over 8
 
-=item $OFMT
-
 =item $#
-X<$#> X<$OFMT>
+X<$#>
 
 C<$#> was a variable that could be used to format printed numbers.
 After a deprecation cycle, its magic was removed in Perl v5.10.0 and
@@ -2203,10 +2201,8 @@ Deprecated in Perl 5.
 
 Removed in Perl v5.10.0.
 
-=item $ARRAY_BASE
-
 =item $[
-X<$[> X<$ARRAY_BASE>
+X<$[>
 
 This variable stores the index of the first element in an array, and
 of the first character in a substring.  The default is 0, but you could
@@ -2234,10 +2230,8 @@ Mnemonic: [ begins subscripts.
 
 Deprecated in Perl v5.12.0.
 
-=item $OLD_PERL_VERSION
-
 =item $]
-X<$]> X<$OLD_PERL_VERSION>
+X<$]>
 
 See L</$^V> for a more modern representation of the Perl version that allows
 accurate string comparisons.
