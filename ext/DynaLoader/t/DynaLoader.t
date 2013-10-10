@@ -117,6 +117,8 @@ SKIP: {
     # looks pretty much Unix-like.
     skip "dl_findfile test not appropriate on $^O", 1
 	unless -d '/usr' && -f '/bin/ls';
+    skip "dl_findfile test not always appropriate when cross-compiling", 1
+        if $Config{usecrosscompile};
     cmp_ok( scalar @files, '>=', 1, "array should contain one result result or more: libc => (@files)" );
 }
 
