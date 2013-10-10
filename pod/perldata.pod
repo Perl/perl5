@@ -917,26 +917,21 @@ values of the array or hash.
         s/(\w+)/\u\L$1/g;   # "titlecase" words
     }
 
-A slice of an empty list is still an empty list.  Thus:
+As a special exception, when you slice a list (but not an array or a hash),
+if the list evaluates to empty, then taking a slice of that empty list will
+always yield the empty list in turn.  Thus:
 
-    @a = ()[1,0];           # @a has no elements
-    @b = (@a)[0,1];         # @b has no elements
-
-But:
-
-    @a = (1)[1,0];          # @a has two elements
-    @b = (1,undef)[1,0,2];  # @b has three elements
-
-More generally, a slice yields the empty list if it indexes only
-beyond the end of a list:
-
-    @a = (1)[  1,2];        # @a has no elements
-    @b = (1)[0,1,2];        # @b has three elements
+    @a = ()[0,1];          # @a has no elements
+    @b = (@a)[0,1];        # @b has no elements
+    @c = (sub{}->())[0,1]; # @c has no elements
+    @d = ('a','b')[0,1];   # @d has two elements
+    @e = (@d)[0,1,8,9];    # @e has four elements
+    @f = (@d)[8,9];        # @f has two elements
 
 This makes it easy to write loops that terminate when a null list
 is returned:
 
-    while ( ($home, $user) = (getpwent)[7,0]) {
+    while ( ($home, $user) = (getpwent)[7,0] ) {
         printf "%-8s %s\n", $user, $home;
     }
 
