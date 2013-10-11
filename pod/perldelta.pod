@@ -167,6 +167,14 @@ keep in sync with the latest CPAN release.
 
 =item *
 
+L<CPAN::Meta> has been upgraded from version 2.132661 to 2.132830.
+
+L<CPAN::Meta::Prereqs> now has a C<merged_requirements> method for combining
+requirements across multiple phases and types, and an invalid 'meta-spec' is no
+longer a fatal error.
+
+=item *
+
 L<File::Temp> has been upgraded from version 0.2302 to 0.2304.
 
 Required versions of other modules used are now listed more explicitly.

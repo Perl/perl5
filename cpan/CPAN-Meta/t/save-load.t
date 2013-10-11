@@ -84,7 +84,7 @@ ok( my $loaded = Parse::CPAN::Meta->load_file($metafile), 'load saved file' );
 is($loaded->{name},     'Module-Build', 'name correct');
 
 
-ok( $loaded = Parse::CPAN::Meta->load_file('t/data/META-1_4.yml'), 'load META-1.4' );
+ok( $loaded = Parse::CPAN::Meta->load_file('t/data-test/META-1_4.yml'), 'load META-1.4' );
 is($loaded->{name},     'Module-Build', 'name correct');
 
 # Test saving with conversion

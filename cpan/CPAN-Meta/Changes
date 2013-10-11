@@ -1,5 +1,19 @@
 Revision history for CPAN-Meta
 
+2.132830  2013-10-10 16:04:30 America/New_York
+
+  [ADDED]
+
+  - CPAN::Meta::Prereqs now has a 'merged_requirements' method for
+    combining requirements across multiple phases and types
+
+  [FIXED]
+
+  - Invalid 'meta-spec' is no longer a fatal error: instead, it will
+    usually be treated as spec version "1.0" (prior to formalization of the
+    meta-spec field).  Conversion has some heuristics for guessing a
+    version depending on other fields if 'meta-spec' is missing or invalid.
+
 2.132661  2013-09-23 13:27:46 America/New_York
 
   [FIXED]

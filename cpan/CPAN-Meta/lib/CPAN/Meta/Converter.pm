@@ -2,7 +2,7 @@ use 5.006;
 use strict;
 use warnings;
 package CPAN::Meta::Converter;
-our $VERSION = '2.132661'; # VERSION
+our $VERSION = '2.132830'; # VERSION
 
 
 use CPAN::Meta::Validator;
@@ -60,7 +60,7 @@ sub _generated_by {
   my $sig = __PACKAGE__ . " version " . (__PACKAGE__->VERSION || "<dev>");
 
   return $sig unless defined $gen and length $gen;
-  return $gen if $gen =~ /(, )\Q$sig/;
+  return $gen if $gen =~ /\Q$sig/;
   return "$gen, $sig";
 }
 
@@ -88,9 +88,10 @@ sub _no_prefix_ucfirst_custom {
 
 sub _change_meta_spec {
   my ($element, undef, undef, $version) = @_;
-  $element->{version} = $version;
-  $element->{url} = $known_specs{$version};
-  return $element;
+  return {
+    version => $version,
+    url => $known_specs{$version},
+  };
 }
 
 my @valid_licenses_1 = (
@@ -1206,11 +1207,31 @@ sub new {
   # create an attributes hash
   my $self = {
     'data'    => $data,
-    'spec'    => $data->{'meta-spec'}{'version'} || "1.0",
+    'spec'    => _extract_spec_version($data),
   };
 
   # create the object
   return bless $self, $class;
+}
+
+sub _extract_spec_version {
+    my ($data) = @_;
+    my $spec = $data->{'meta-spec'};
+
+    # is meta-spec there and valid?
+    return "1.0" unless defined $spec && ref $spec eq 'HASH'; # before meta-spec?
+
+    # does the version key look like a valid version?
+    my $v = $spec->{version};
+    if ( defined $v && $v =~ /^\d+(?:\.\d+)?$/ ) {
+        return $v if defined $v && grep { $v eq $_ } keys %known_specs; # known spec
+        return $v+0 if defined $v && grep { $v == $_ } keys %known_specs; # 2.0 => 2
+    }
+
+    # otherwise, use heuristics: look for 1.x vs 2.0 fields
+    return "2" if exists $data->{prereqs};
+    return "1.4" if exists $data->{configure_requires};
+    return "1.2"; # when meta-spec was first defined
 }
 
 
@@ -1280,7 +1301,7 @@ CPAN::Meta::Converter - Convert CPAN distribution metadata structures
 
 =head1 VERSION
 
-version 2.132661
+version 2.132830
 
 =head1 SYNOPSIS
 

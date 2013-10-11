@@ -375,11 +375,12 @@ use File::Glob qw(:case);
     # Note: When updating CPAN-Meta the META.* files will need to be regenerated
     # perl -Icpan/CPAN-Meta/lib Porting/makemeta
     'CPAN::Meta' => {
-        'DISTRIBUTION' => 'DAGOLDEN/CPAN-Meta-2.132661.tar.gz',
+        'DISTRIBUTION' => 'DAGOLDEN/CPAN-Meta-2.132830.tar.gz',
         'FILES'        => q[cpan/CPAN-Meta],
         'EXCLUDED'     => [
             qw(t/00-compile.t),
             qw[t/00-report-prereqs.t],
+            qr{t/README-data.txt},
             qr{^xt},
             qr{^history},
         ],

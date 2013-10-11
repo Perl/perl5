@@ -7,7 +7,7 @@ use 5.006;
 use strict;
 use warnings;
 package CPAN::Meta::Spec;
-our $VERSION = '2.132661'; # VERSION
+our $VERSION = '2.132830'; # VERSION
 
 1;
 
@@ -28,7 +28,7 @@ CPAN::Meta::Spec - specification for CPAN distribution metadata
 
 =head1 VERSION
 
-version 2.132661
+version 2.132830
 
 =head1 SYNOPSIS
 

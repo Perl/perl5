@@ -2,7 +2,7 @@ use 5.006;
 use strict;
 use warnings;
 package CPAN::Meta;
-our $VERSION = '2.132661'; # VERSION
+our $VERSION = '2.132830'; # VERSION
 
 
 use Carp qw(carp croak);
@@ -348,7 +348,7 @@ CPAN::Meta - the distribution metadata for a CPAN dist
 
 =head1 VERSION
 
-version 2.132661
+version 2.132830
 
 =head1 SYNOPSIS
 
@@ -546,7 +546,7 @@ of options.  If the hashref contains a C<version> argument, the copied metadata
 will be converted to the version of the specification and returned.  For
 example:
 
-  my $string = $meta->as_struct( {version => "1.4"} );
+  my $string = $meta->as_string( {version => "1.4"} );
 
 For C<version> greater than or equal to 2, the string will be serialized as
 JSON.  For C<version> less than 2, the string will be serialized as YAML.  In
@@ -735,6 +735,10 @@ Christopher J. Madsen <cjm@cpan.org>
 
 =item *
 
+Chuck Adams <cja987@gmail.com>
+
+=item *
+
 Cory G Watson <gphat@cpan.org>
 
 =item *
@@ -783,7 +787,7 @@ Olaf Alders <olaf@wundersolutions.com>
 
 =item *
 
-Olivier Mengué <dolmen@cpan.org>
+Olivier Mengue <dolmen@cpan.org>
 
 =item *
 
