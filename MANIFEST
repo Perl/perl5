@@ -335,12 +335,12 @@ cpan/CPAN-Meta/t/data-fixable/284247103-META.yml
 cpan/CPAN-Meta/t/data-fixable/344981821-META.yml
 cpan/CPAN-Meta/t/data-fixable/35478989-META.yml
 cpan/CPAN-Meta/t/data-fixable/98042513-META.yml
+cpan/CPAN-Meta/t/data-fixable/invalid-meta-spec-version.json
+cpan/CPAN-Meta/t/data-fixable/invalid-meta-spec-version.yml
 cpan/CPAN-Meta/t/data-fixable/META-1_2.yml
 cpan/CPAN-Meta/t/data-fixable/META-1_3.yml
 cpan/CPAN-Meta/t/data-fixable/META-1_4.yml
 cpan/CPAN-Meta/t/data-fixable/META-2.json
-cpan/CPAN-Meta/t/data-fixable/invalid-meta-spec-version.json
-cpan/CPAN-Meta/t/data-fixable/invalid-meta-spec-version.yml
 cpan/CPAN-Meta/t/data-fixable/meta-spec-version-trailing-zeros.json
 cpan/CPAN-Meta/t/data-fixable/meta-spec-version-trailing-zeros.yml
 cpan/CPAN-Meta/t/data-fixable/restrictive-2.json
