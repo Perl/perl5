@@ -38,8 +38,6 @@ END
             );
 
 sub setup_recurs {
-    setup_mm_test_root();
-    chdir 'MM_TEST_ROOT:[t]' if $^O eq 'VMS';
 
     while(my($file, $text) = each %Files) {
         # Convert to a relative, native file path.

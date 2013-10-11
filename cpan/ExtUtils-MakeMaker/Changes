@@ -1,3 +1,7 @@
+6.79_01 Tue Oct  1 14:59:27 BST 2013
+    VMS fixes:
+    * Remove MM_TEST_ROOT feature for VMS test support
+
 6.78 Mon Sep 23 13:44:39 BST 2013
 
     No changes from 6.77_08

@@ -593,7 +593,7 @@ use File::Glob qw(:case);
     },
 
     'ExtUtils::MakeMaker' => {
-        'DISTRIBUTION' => 'BINGOS/ExtUtils-MakeMaker-6.78.tar.gz',
+        'DISTRIBUTION' => 'BINGOS/ExtUtils-MakeMaker-6.79_01.tar.gz',
         'FILES'        => q[cpan/ExtUtils-MakeMaker],
         'EXCLUDED'     => [
             qr{^t/lib/Test/},
