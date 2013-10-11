@@ -1,7 +1,7 @@
 package App::Prove::State;
 
 use strict;
-use vars qw($VERSION @ISA);
+use warnings;
 
 use File::Find;
 use File::Spec;
@@ -10,10 +10,9 @@ use Carp;
 use App::Prove::State::Result;
 use TAP::Parser::YAMLish::Reader ();
 use TAP::Parser::YAMLish::Writer ();
-use TAP::Base;
+use parent 'TAP::Base';
 
 BEGIN {
-    @ISA = qw( TAP::Base );
     __PACKAGE__->mk_methods('result_class');
 }
 
@@ -26,11 +25,11 @@ App::Prove::State - State storage for the C<prove> command.
 
 =head1 VERSION
 
-Version 3.28
+Version 3.29
 
 =cut
 
-$VERSION = '3.28';
+our $VERSION = '3.29';
 
 =head1 DESCRIPTION
 

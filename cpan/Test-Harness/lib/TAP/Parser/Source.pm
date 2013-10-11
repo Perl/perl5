@@ -1,14 +1,12 @@
 package TAP::Parser::Source;
 
 use strict;
-use vars qw($VERSION @ISA);
+use warnings;
 
-use TAP::Object ();
 use File::Basename qw( fileparse );
+use parent 'TAP::Object';
 
 use constant BLK_SIZE => 512;
-
-@ISA = qw(TAP::Object);
 
 =head1 NAME
 
@@ -16,11 +14,11 @@ TAP::Parser::Source - a TAP source & meta data about it
 
 =head1 VERSION
 
-Version 3.28
+Version 3.29
 
 =cut
 
-$VERSION = '3.28';
+our $VERSION = '3.29';
 
 =head1 SYNOPSIS
 

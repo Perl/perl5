@@ -1,5 +1,16 @@
 Revision history for Test-Harness
 
+3.29    2013-08-10
+        - Get rid of use vars in favor of our in all modules (Leon Timmermans)
+          and tests (Karen Etheridge)
+        - Added use warnings to all modules (Leon Timmermans) and tests (Karen
+          Etheridge)
+        - Use parent instead of @ISA in all modules (Leon Timmermans) and
+          tests (Karen Etheridge)
+        - Fix failing test on VMS (Craig Berry)
+        - Improve error message on loading failure (Leon Timmermans, #77730)
+        - Use Text::ParseWords, deprecate TAP::Parser::Utils
+
 3.28    2013-05-02
         - Bugfix: Fix taint failures on Windows (Jan Dubois)
 
@@ -9,6 +20,7 @@ Revision history for Test-Harness
           Reduces memory usage (Nick Clark, RT #84939)
         - PERL5LIB is always propogated to a test's @INC, even with taint more
           (Schwern, RT #84377)
+        - restore "always add -w to switches" behavior
 
 3.26    2013-01-16
         - Renamed env.opts.t to env_opts.t (for VMS)
@@ -28,6 +40,7 @@ Revision history for Test-Harness
           test more gracefully.
         - Make the test summary 'ok' line overrideable so that it can be
           changed to a plugin to make the output of prove idempotent.
+        - Stop adding '-w' to perl switches by default
         - Apply upstream patch:
 
             http://perl5.git.perl.org/perl.git/commit \
@@ -41,6 +54,7 @@ Revision history for Test-Harness
           running it feels like a bad idea, given that the file's name is as predictable
           as process IDs, as there's a race condition to break into the account running
           perl's tests.
+
 
 3.23    2011-02-20
         - Merge in changes from core. Thanks BinGOs.

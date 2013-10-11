@@ -1,18 +1,17 @@
 package TAP::Parser::SourceHandler::Perl;
 
 use strict;
+use warnings;
 use Config;
-use vars qw($VERSION @ISA);
 
 use constant IS_WIN32 => ( $^O =~ /^(MS)?Win32$/ );
 use constant IS_VMS => ( $^O eq 'VMS' );
 
-use TAP::Parser::SourceHandler::Executable ();
 use TAP::Parser::IteratorFactory           ();
 use TAP::Parser::Iterator::Process         ();
-use TAP::Parser::Utils qw( split_shell );
+use Text::ParseWords qw(shellwords);
 
-@ISA = 'TAP::Parser::SourceHandler::Executable';
+use parent 'TAP::Parser::SourceHandler::Executable';
 
 TAP::Parser::IteratorFactory->register_handler(__PACKAGE__);
 
@@ -22,11 +21,11 @@ TAP::Parser::SourceHandler::Perl - Stream TAP from a Perl executable
 
 =head1 VERSION
 
-Version 3.28
+Version 3.29
 
 =cut
 
-$VERSION = '3.28';
+our $VERSION = '3.29';
 
 =head1 SYNOPSIS
 
@@ -167,12 +166,12 @@ sub _mangle_switches {
     # PERL5LIB as -I switches and place PERL5OPT on the command line
     # in order that it be seen.
     if ( $class->_has_taint_switch($switches) ) {
-        my @perl5lib = split /$Config{path_sep}/, $ENV{PERL5LIB};
+        my @perl5lib = defined $ENV{PERL5LIB} ? split /$Config{path_sep}/, $ENV{PERL5LIB} : ();
         return (
             $libs,
             [   @{$switches},
                 $class->_libs2switches([@$libs, @perl5lib]),
-                split_shell( $ENV{PERL5OPT} )
+                defined $ENV{PERL5OPT} ? shellwords( $ENV{PERL5OPT} ) : ()
             ],
         );
     }
@@ -342,11 +341,10 @@ Please see L<TAP::Parser/SUBCLASSING> for a subclassing overview.
   package MyPerlSourceHandler;
 
   use strict;
-  use vars '@ISA';
 
   use TAP::Parser::SourceHandler::Perl;
 
-  @ISA = qw( TAP::Parser::SourceHandler::Perl );
+  use parent 'TAP::Parser::SourceHandler::Perl';
 
   # use the version of perl from the shebang line in the test file
   sub get_perl {

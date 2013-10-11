@@ -30,6 +30,7 @@ lib/TAP/Formatter/File/Session.pm
 lib/TAP/Formatter/Session.pm
 lib/TAP/Harness.pm
 lib/TAP/Harness/Beyond.pod
+lib/TAP/Harness/Env.pm
 lib/TAP/Object.pm
 lib/TAP/Parser.pm
 lib/TAP/Parser/Aggregator.pm
@@ -60,7 +61,6 @@ lib/TAP/Parser/SourceHandler/File.pm
 lib/TAP/Parser/SourceHandler/Handle.pm
 lib/TAP/Parser/SourceHandler/Perl.pm
 lib/TAP/Parser/SourceHandler/RawTAP.pm
-lib/TAP/Parser/Utils.pm
 lib/TAP/Parser/YAMLish/Reader.pm
 lib/TAP/Parser/YAMLish/Writer.pm
 lib/Test/Harness.pm
@@ -224,7 +224,6 @@ t/subclass_tests/perl_source
 t/taint.t
 t/testargs.t
 t/unicode.t
-t/utils.t
 t/yamlish-output.t
 t/yamlish-writer.t
 t/yamlish.t

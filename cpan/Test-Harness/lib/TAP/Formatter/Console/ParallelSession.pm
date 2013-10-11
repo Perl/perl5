@@ -1,15 +1,14 @@
 package TAP::Formatter::Console::ParallelSession;
 
 use strict;
+use warnings;
 use File::Spec;
 use File::Path;
-use TAP::Formatter::Console::Session;
 use Carp;
 
-use constant WIDTH => 72;    # Because Eric says
-use vars qw($VERSION @ISA);
+use parent 'TAP::Formatter::Console::Session';
 
-@ISA = qw(TAP::Formatter::Console::Session);
+use constant WIDTH => 72;    # Because Eric says
 
 my %shared;
 
@@ -42,11 +41,11 @@ TAP::Formatter::Console::ParallelSession - Harness output delegate for parallel 
 
 =head1 VERSION
 
-Version 3.28
+Version 3.29
 
 =cut
 
-$VERSION = '3.28';
+our $VERSION = '3.29';
 
 =head1 DESCRIPTION
 

@@ -1,17 +1,14 @@
 package TAP::Harness;
 
 use strict;
+use warnings;
 use Carp;
 
 use File::Spec;
 use File::Path;
 use IO::Handle;
 
-use TAP::Base;
-
-use vars qw($VERSION @ISA);
-
-@ISA = qw(TAP::Base);
+use parent 'TAP::Base';
 
 =head1 NAME
 
@@ -19,11 +16,11 @@ TAP::Harness - Run test scripts with statistics
 
 =head1 VERSION
 
-Version 3.28
+Version 3.29
 
 =cut
 
-$VERSION = '3.28';
+our $VERSION = '3.29';
 
 $ENV{HARNESS_ACTIVE}  = 1;
 $ENV{HARNESS_VERSION} = $VERSION;
@@ -248,7 +245,7 @@ I<NEW to 3.18>.
 
 If set, C<sources> must be a hashref containing the names of the
 L<TAP::Parser::SourceHandler>s to load and/or configure.  The values are a
-hash of configuration that will be accessible to to the source handlers via
+hash of configuration that will be accessible to the source handlers via
 L<TAP::Parser::Source/config_for>.
 
 For example:

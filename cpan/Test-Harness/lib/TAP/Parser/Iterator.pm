@@ -1,11 +1,9 @@
 package TAP::Parser::Iterator;
 
 use strict;
-use vars qw($VERSION @ISA);
+use warnings;
 
-use TAP::Object ();
-
-@ISA = qw(TAP::Object);
+use parent 'TAP::Object';
 
 =head1 NAME
 
@@ -13,18 +11,17 @@ TAP::Parser::Iterator - Base class for TAP source iterators
 
 =head1 VERSION
 
-Version 3.28
+Version 3.29
 
 =cut
 
-$VERSION = '3.28';
+our $VERSION = '3.29';
 
 =head1 SYNOPSIS
 
   # to subclass:
-  use vars qw(@ISA);
   use TAP::Parser::Iterator ();
-  @ISA = qw(TAP::Parser::Iterator);
+  use parent 'TAP::Parser::Iterator';
   sub _initialize {
     # see TAP::Object...
   }

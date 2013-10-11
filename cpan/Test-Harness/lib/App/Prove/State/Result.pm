@@ -1,10 +1,10 @@
 package App::Prove::State::Result;
 
 use strict;
+use warnings;
 use Carp 'croak';
 
 use App::Prove::State::Result::Test;
-use vars qw($VERSION);
 
 use constant STATE_VERSION => 1;
 
@@ -14,11 +14,11 @@ App::Prove::State::Result - Individual test suite results.
 
 =head1 VERSION
 
-Version 3.28
+Version 3.29
 
 =cut
 
-$VERSION = '3.28';
+our $VERSION = '3.29';
 
 =head1 DESCRIPTION
 

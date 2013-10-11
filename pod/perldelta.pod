@@ -198,6 +198,13 @@ The podlators modules have been upgraded from version 2.5.1 to 2.5.3.
 Numerous updates and bug fixes are incorporated.  See the F<Changes> file in
 the CPAN distribution for full details.
 
+=item *
+
+L<Test::Harness> has been upgraded from version 3.28 to 3.29.
+
+All modules now use C<our> rather than C<use vars>, have C<use warnings>
+enabled and C<use parent> instead of @ISA.
+
 =back
 
 =head2 Removed Modules and Pragmata

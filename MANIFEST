@@ -2197,6 +2197,7 @@ cpan/Test-Harness/lib/TAP/Formatter/File.pm		A parser for Test Anything Protocol
 cpan/Test-Harness/lib/TAP/Formatter/File/Session.pm	A parser for Test Anything Protocol
 cpan/Test-Harness/lib/TAP/Formatter/Session.pm		A parser for Test Anything Protocol
 cpan/Test-Harness/lib/TAP/Harness/Beyond.pod
+cpan/Test-Harness/lib/TAP/Harness/Env.pm		A parser for Test Anything Protocol
 cpan/Test-Harness/lib/TAP/Harness.pm			A parser for Test Anything Protocol
 cpan/Test-Harness/lib/TAP/Object.pm			A parser for Test Anything Protocol
 cpan/Test-Harness/lib/TAP/Parser/Aggregator.pm		A parser for Test Anything Protocol
@@ -2228,7 +2229,6 @@ cpan/Test-Harness/lib/TAP/Parser/SourceHandler/Perl.pm
 cpan/Test-Harness/lib/TAP/Parser/SourceHandler.pm		A parser for Test Anything Protocol
 cpan/Test-Harness/lib/TAP/Parser/SourceHandler/RawTAP.pm
 cpan/Test-Harness/lib/TAP/Parser/Source.pm		A parser for Test Anything Protocol
-cpan/Test-Harness/lib/TAP/Parser/Utils.pm		A parser for Test Anything Protocol
 cpan/Test-Harness/lib/TAP/Parser/YAMLish/Reader.pm	A parser for Test Anything Protocol
 cpan/Test-Harness/lib/TAP/Parser/YAMLish/Writer.pm	A parser for Test Anything Protocol
 cpan/Test-Harness/lib/Test/Harness.pm			A test harness
@@ -2382,7 +2382,6 @@ cpan/Test-Harness/t/subclass_tests/perl_source		Test data for Test::Harness
 cpan/Test-Harness/t/taint.t				Test::Harness test
 cpan/Test-Harness/t/testargs.t				Test::Harness test
 cpan/Test-Harness/t/unicode.t				Test::Harness test
-cpan/Test-Harness/t/utils.t				Test::Harness test
 cpan/Test-Harness/t/yamlish-output.t			Test::Harness test
 cpan/Test-Harness/t/yamlish.t				Test::Harness test
 cpan/Test-Harness/t/yamlish-writer.t			Test::Harness test

@@ -1,6 +1,7 @@
 #!/usr/bin/perl -w
 
 use strict;
+use warnings;
 use App::Prove;
 
 my $app = App::Prove->new;
@@ -272,7 +273,7 @@ which are run in parallel, if the C<--jobs> option is specified. The option may
 be specified multiple times, and the order matters.
 
 The most practical use is likely to specify that some tests are not
-"parallel-ready".  Since mentioning a file with --rules doens't cause it to
+"parallel-ready".  Since mentioning a file with --rules doesn't cause it to
 selected to run as a test, you can "set and forget" some rules preferences in
 your .proverc file. Then you'll be able to take maximum advantage of the
 performance benefits of parallel testing, while some exceptions are still run
@@ -288,7 +289,7 @@ in parallel.
 
 =head3 --rules resolution
 
-=over4
+=over 4
 
 =item * By default, all tests are eligible to be run in parallel. Specifying any of your own rules removes this one.
 

@@ -1494,7 +1494,7 @@ use File::Glob qw(:case);
     },
 
     'Test::Harness' => {
-        'DISTRIBUTION' => 'OVID/Test-Harness-3.28.tar.gz',
+        'DISTRIBUTION' => 'OVID/Test-Harness-3.29.tar.gz',
         'FILES'        => q[cpan/Test-Harness],
         'EXCLUDED'     => [
             qr{^examples/},
@@ -1508,10 +1508,6 @@ use File::Glob qw(:case);
                 t/lib/if.pm
                 ),
         ],
-
-        # Waiting to be merged upstream: see CPAN RT#64353
-        'CUSTOMIZED' => [ 't/source.t' ],
-
         'UPSTREAM'   => 'cpan',
     },
 

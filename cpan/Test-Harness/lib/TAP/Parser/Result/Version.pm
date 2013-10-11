@@ -1,10 +1,9 @@
 package TAP::Parser::Result::Version;
 
 use strict;
+use warnings;
 
-use vars qw($VERSION @ISA);
-use TAP::Parser::Result;
-@ISA = 'TAP::Parser::Result';
+use parent 'TAP::Parser::Result';
 
 =head1 NAME
 
@@ -12,11 +11,11 @@ TAP::Parser::Result::Version - TAP syntax version token.
 
 =head1 VERSION
 
-Version 3.28
+Version 3.29
 
 =cut
 
-$VERSION = '3.28';
+our $VERSION = '3.29';
 
 =head1 DESCRIPTION
 

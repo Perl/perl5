@@ -1,7 +1,8 @@
 package TAP::Parser::Scheduler;
 
 use strict;
-use vars qw($VERSION);
+use warnings;
+
 use Carp;
 use TAP::Parser::Scheduler::Job;
 use TAP::Parser::Scheduler::Spinner;
@@ -12,11 +13,11 @@ TAP::Parser::Scheduler - Schedule tests during parallel testing
 
 =head1 VERSION
 
-Version 3.28
+Version 3.29
 
 =cut
 
-$VERSION = '3.28';
+our $VERSION = '3.29';
 
 =head1 SYNOPSIS
 

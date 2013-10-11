@@ -1,7 +1,7 @@
 package TAP::Parser::Scheduler::Job;
 
 use strict;
-use vars qw($VERSION);
+use warnings;
 use Carp;
 
 =head1 NAME
@@ -10,11 +10,11 @@ TAP::Parser::Scheduler::Job - A single testing job.
 
 =head1 VERSION
 
-Version 3.28
+Version 3.29
 
 =cut
 
-$VERSION = '3.28';
+our $VERSION = '3.29';
 
 =head1 SYNOPSIS
 

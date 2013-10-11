@@ -7,6 +7,7 @@ BEGIN {
 # Test that environment options are propagated to tainted tests
 
 use strict;
+use warnings;
 use Test::More ( $^O eq 'VMS' ? ( skip_all => 'VMS' ) : ( tests => 2 ) );
 
 use Config;
