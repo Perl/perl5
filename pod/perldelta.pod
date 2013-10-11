@@ -167,10 +167,9 @@ keep in sync with the latest CPAN release.
 
 =item *
 
-L<File::Temp> has been upgraded from version 0.2302 to 0.2303.
+L<File::Temp> has been upgraded from version 0.2302 to 0.2304.
 
-No changes have been made to the installed code other than the version bump to
-keep in sync with the latest CPAN release.
+Required versions of other modules used are now listed more explicitly.
 
 =item *
 

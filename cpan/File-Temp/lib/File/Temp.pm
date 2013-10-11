@@ -1,16 +1,17 @@
 package File::Temp;
 # ABSTRACT: return name and handle of a temporary file safely
-our $VERSION = '0.2302'; # VERSION
+our $VERSION = '0.2304'; # VERSION
 
 
-# 5.6.0 gives us S_IWOTH, S_IWGRP, our and auto-vivifying filehandles
-# People would like a version on 5.004 so give them what they want :-)
-use 5.004;
+# Toolchain targets v5.8.1, but we'll try to support back to v5.6 anyway.
+# It might be possible to make this v5.5, but many v5.6isms are creeping
+# into the code and tests.
+use 5.006;
 use strict;
 use Carp;
 use File::Spec 0.8;
 use Cwd ();
-use File::Path qw/ rmtree /;
+use File::Path 2.06 qw/ rmtree /;
 use Fcntl 1.03;
 use IO::Seekable;               # For SEEK_*
 use Errno;
@@ -28,7 +29,7 @@ eval { require Carp::Heavy; };
 require Symbol if $] < 5.006;
 
 ### For the OO interface
-use parent qw/ IO::Handle IO::Seekable /;
+use parent 0.221 qw/ IO::Handle IO::Seekable /;
 use overload '""' => "STRINGIFY", '0+' => "NUMIFY",
   fallback => 1;
 
@@ -40,7 +41,7 @@ $KEEP_ALL = 0;
 
 # We are exporting functions
 
-use Exporter 'import';   # Requires 5.57+
+use Exporter 5.57 'import';   # 5.57 lets us import 'import'
 
 # Export list - to allow fine tuning of export table
 
@@ -1632,7 +1633,7 @@ File::Temp - return name and handle of a temporary file safely
 
 =head1 VERSION
 
-version 0.2302
+version 0.2304
 
 =head1 SYNOPSIS
 
