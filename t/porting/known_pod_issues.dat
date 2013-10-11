@@ -227,6 +227,7 @@ pod/perlcygwin.pod	Verbatim line length including indents exceeds 79 by	25
 pod/perldebguts.pod	Verbatim line length including indents exceeds 79 by	34
 pod/perldebtut.pod	Verbatim line length including indents exceeds 79 by	22
 pod/perldebug.pod	Verbatim line length including indents exceeds 79 by	3
+pod/perldelta.pod	Apparent broken link	1
 pod/perldsc.pod	Verbatim line length including indents exceeds 79 by	4
 pod/perldtrace.pod	Verbatim line length including indents exceeds 79 by	26
 pod/perlebcdic.pod	Verbatim line length including indents exceeds 79 by	3
@@ -236,6 +237,7 @@ pod/perlgpl.pod	Verbatim line length including indents exceeds 79 by	50
 pod/perlguts.pod	? Should you be using F<...> or maybe L<...> instead of	2
 pod/perlguts.pod	? Should you be using L<...> instead of	1
 pod/perlhack.pod	? Should you be using L<...> instead of	1
+pod/perlhack.pod	Apparent broken link	1
 pod/perlhist.pod	Verbatim line length including indents exceeds 79 by	1
 pod/perlhpux.pod	Verbatim line length including indents exceeds 79 by	5
 pod/perlhurd.pod	Verbatim line length including indents exceeds 79 by	2
@@ -277,3 +279,4 @@ lib/config.pod	? Should you be using L<...> instead of	-1
 lib/extutils/embed.pm	Verbatim line length including indents exceeds 79 by	2
 lib/perl5db.pl	? Should you be using L<...> instead of	1
 lib/pod/text/overstrike.pm	Verbatim line length including indents exceeds 79 by	1
+lib/tap/harness/beyond.pod	Pod NAME already used	1
