@@ -2825,12 +2825,14 @@ $define|true|[yY]*)
 	$echo "Cross-compiling..."
         croak=''
     	case "$cc" in
-	*-*-gcc) # A cross-compiling gcc, probably.
-	    targetarch=`$echo $cc|$sed 's/-gcc$//'`
-	    ar=$targetarch-ar
-	    # leave out ld, choosing it is more complex
-	    nm=$targetarch-nm
-	    ranlib=$targetarch-ranlib
+        *-gcc*|*-g++*) # A cross-compiling gcc, probably.
+            # arm-linux-androideabi-gcc  -> arm-linux-androideabi
+            # x86_64-w64-mingw32-gcc.exe -> x86_64-w64-mingw32
+            targetarch=`$echo $cc|$sed 's/-g[c\+][c\+].*$//'`
+            ar=`$echo $cc|$sed 's/-g[c\+][c\+]/-ar/'`
+            # leave out ld, choosing it is more complex
+            nm=`$echo $cc|$sed 's/-g[c\+][c\+]/-nm/'`
+            ranlib=`$echo $cc|$sed 's/-g[c\+][c\+]/-ranlib/'`
 	    ;;
 	esac
 	case "$targetarch" in
