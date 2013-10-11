@@ -2962,10 +2962,18 @@ case "$targethost" in
 	ssh|rsh)
 	    cat >$run <<EOF
 #!/bin/sh
+env=''
 case "\$1" in
 -cwd)
   shift
   cwd=\$1
+  shift
+  ;;
+esac
+case "\$1" in
+-env)
+  shift
+  env=\$1
   shift
   ;;
 esac
@@ -2975,7 +2983,7 @@ esac
 exe=\$1
 shift
 $to \$exe
-$targetrun -p $targetport -l $targetuser $targethost "cd \$cwd && ./\$exe \$@"
+$targetrun -p $targetport -l $targetuser $targethost "cd \$cwd && \$env ./\$exe \$@"
 EOF
 	    ;;
 	*)  echo "Unknown targetrun '$targetrun'" >&4
