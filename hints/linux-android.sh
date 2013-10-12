@@ -124,6 +124,8 @@ fi
 
 EOCBU
 
+if $test "X$targetrun" = "Xadb"; then
+
 case "$src" in
     /*) run=$src/Cross/run
             targetmkdir=$src/Cross/mkdir
@@ -137,7 +139,7 @@ case "$src" in
             from=$pwd/Cross/from
                ;;
 esac
-    
+
 targetrun=adb-shell
 targetto=adb-push
 targetfrom=adb-pull
@@ -236,6 +238,8 @@ done
 exit 0
 EOF
 $chmod a+rx $from
+
+fi # Cross-compiling with adb
 
 if $test "X$hostosname" = "Xdarwin"; then
   firstmakefile=GNUmakefile;
