@@ -1,3 +1,8 @@
+1.33 -- Sun Oct 13 01:35 UTC 2013
+
+  * Added any, all, none, notall list reduction functions
+    (inspired by List::MoreUtils)
+
 1.32 -- Sun Aug 31 23:48 UTC 2013
 
   * Skip pairmap()'s MULTICALL implementation 5.8.9 / 5.10.0 as it doesn't

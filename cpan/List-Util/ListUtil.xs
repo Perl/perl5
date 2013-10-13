@@ -342,6 +342,67 @@ CODE:
 #endif
 
 void
+any(block,...)
+    SV * block
+ALIAS:
+    all = 1
+    none = 2
+    notall = 3
+PROTOTYPE: &@
+PPCODE:
+{
+    int ret    = (ix == 0 || ix == 3);
+    int invert = (ix == 1 || ix == 3);
+    GV *gv;
+    HV *stash;
+    SV **args = &PL_stack_base[ax];
+    CV *cv    = sv_2cv(block, &stash, &gv, 0);
+    if (cv == Nullcv) {
+       croak("Not a subroutine reference");
+    }
+
+    SAVESPTR(GvSV(PL_defgv));
+#ifdef dMULTICALL
+    if(!CvISXSUB(cv)) {
+	dMULTICALL;
+	I32 gimme = G_SCALAR;
+	int index;
+
+	PUSH_MULTICALL(cv);
+	for(index = 1; index < items; index++) {
+	    GvSV(PL_defgv) = args[index];
+
+	    MULTICALL;
+	    if (SvTRUEx(*PL_stack_sp) ^ invert) {
+		POP_MULTICALL;
+		ST(0) = newSViv(ret);
+		XSRETURN(1);
+	    }
+	}
+	POP_MULTICALL;
+    }
+    else
+#endif
+    {
+	int index;
+	for(index = 1; index < items; index++) {
+	    dSP;
+	    GvSV(PL_defgv) = args[index];
+
+	    PUSHMARK(SP);
+	    call_sv((SV*)cv, G_SCALAR);
+	    if (SvTRUEx(*PL_stack_sp) ^ invert) {
+		ST(0) = newSViv(ret);
+		XSRETURN(1);
+	    }
+	}
+    }
+
+    ST(0) = newSViv(!ret);
+    XSRETURN(1);
+}
+
+void
 pairfirst(block,...)
     SV * block
 PROTOTYPE: &@

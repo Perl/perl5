@@ -12,13 +12,29 @@ use strict;
 require Exporter;
 
 our @ISA        = qw(Exporter);
-our @EXPORT_OK  = qw(first min max minstr maxstr reduce sum sum0 shuffle pairmap pairgrep pairfirst pairs pairkeys pairvalues);
-our $VERSION    = "1.32";
+our @EXPORT_OK  = qw(
+  all any first min max minstr maxstr none notall reduce sum sum0 shuffle
+  pairmap pairgrep pairfirst pairs pairkeys pairvalues
+);
+our $VERSION    = "1.33";
 our $XS_VERSION = $VERSION;
 $VERSION    = eval $VERSION;
 
 require XSLoader;
 XSLoader::load('List::Util', $XS_VERSION);
+
+sub import
+{
+  my $pkg = caller;
+
+  # (RT88848) Touch the caller's $a and $b, to avoid the warning of
+  #   Name "main::a" used only once: possible typo" warning
+  no strict 'refs';
+  ${"${pkg}::a"} = ${"${pkg}::a"};
+  ${"${pkg}::b"} = ${"${pkg}::b"};
+
+  goto &Exporter::import;
+}
 
 sub sum0
 {
@@ -80,6 +96,34 @@ C<undef> being returned
 
 The remaining list-reduction functions are all specialisations of this
 generic idea.
+
+=head2 any BLOCK LIST
+
+Similar to C<grep> in that it evaluates BLOCK setting C<$_> to each element
+of LIST in turn. C<any> returns true if any element makes the BLOCK return a
+true value. If BLOCK never returns true or LIST was empty then it returns
+false.
+
+Many cases of using C<grep> in a conditional can be written using C<any>
+instead, as it can short-circuit after the first true result.
+
+    if( any { length > 10 } @strings ) {
+        # at least one string has more than 10 characters
+    }
+
+=head2 all BLOCK LIST
+
+Similar to C<any>, except that it requires all elements of the LIST to make
+the BLOCK return true. If any element returns false, then it returns true. If
+the BLOCK never returns false or the LIST was empty then it returns true.
+
+=head2 none BLOCK LIST
+
+=head2 notall BLOCK LIST
+
+Similar to C<any> and C<all>, but with the return sense inverted. C<none>
+returns true if no value in the LIST causes the BLOCK to return true, and
+C<notall> returns true if not all of the values do.
 
 =head2 first BLOCK LIST
 
@@ -292,22 +336,6 @@ reduce.t failing.
 
 The following are additions that have been requested, but I have been reluctant
 to add due to them being very simple to implement in perl
-
-  # One argument is true
-
-  sub any { $_ && return 1 for @_; 0 }
-
-  # All arguments are true
-
-  sub all { $_ || return 0 for @_; 1 }
-
-  # All arguments are false
-
-  sub none { $_ && return 0 for @_; 1 }
-
-  # One argument is false
-
-  sub notall { $_ || return 1 for @_; 0 }
 
   # How many elements are true
 

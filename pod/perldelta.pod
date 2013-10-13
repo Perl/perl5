@@ -181,6 +181,13 @@ Required versions of other modules used are now listed more explicitly.
 
 =item *
 
+L<List::Util> has been upgraded from version 1.32 to 1.33.
+
+The list reduction functions C<any>, C<all>, C<none> and C<notall> have been
+added.
+
+=item *
+
 L<Module::CoreList> has been upgraded from version 2.99 to 3.00.
 
 The list of Perl versions covered has been updated.
