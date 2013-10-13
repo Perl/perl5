@@ -13,24 +13,24 @@ use Test::More tests => 15;
 BEGIN {
     require autouse;
     eval {
-        "autouse"->import('List::Util' => 'List::Util::first(&@)');
+        "autouse"->import('Scalar::Util' => 'Scalar::Util::set_prototype(&$)');
     };
     ok( !$@ );
 
     eval {
-        "autouse"->import('List::Util' => 'Foo::min');
+        "autouse"->import('Scalar::Util' => 'Foo::min');
     };
     ok( $@, qr/^autouse into different package attempted/ );
 
-    "autouse"->import('List::Util' => qw(max first(&@)));
+    "autouse"->import('Scalar::Util' => qw(isdual set_prototype(&$)));
 }
 
-my @a = (1,2,3,4,5.5);
-is( max(@a), 5.5);
+ok( isdual($!) );
 
 
-# first() has a prototype of &@.  Make sure that's preserved.
-is( (first { $_ > 3 } @a), 4);
+# set_prototype() has a prototype of &$.  Make sure that's preserved.
+sub sum { return $_[0] + $_[1] };
+is( (set_prototype \&sum, '$$'), \&sum);
 
 
 # Example from the docs.
