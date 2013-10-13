@@ -300,7 +300,7 @@ p	|SV *	|core_prototype	|NULLOK SV *sv|NN const char *name \
 p	|OP *	|coresub_op	|NN SV *const coreargssv|const int code \
 				|const int opnum
 : Used in sv.c
-p	|void	|cv_ckproto_len_flags	|NN const CV* cv|NULLOK const GV* gv\
+EMXp	|void	|cv_ckproto_len_flags	|NN const CV* cv|NULLOK const GV* gv\
 				|NULLOK const char* p|const STRLEN len \
                                 |const U32 flags
 : Used in pp.c and pp_sys.c
@@ -862,6 +862,7 @@ poX	|OP*	|op_lvalue_flags|NULLOK OP* o|I32 type|U32 flags
 p	|void	|finalize_optree		|NN OP* o
 #if defined(PERL_IN_OP_C)
 s	|void	|finalize_op	|NN OP* o
+s	|void	|move_proto_attr|NN OP **proto|NN OP **attrs|NN const GV *name
 #endif
 : Used in op.c and pp_sys.c
 p	|int	|mode_from_discipline|NULLOK const char* s|STRLEN len

@@ -1189,7 +1189,9 @@ Notice to pass back just the bare *FH, not its reference.
 X<prototype> X<subroutine, prototype>
 
 Perl supports a very limited kind of compile-time argument checking
-using function prototyping.  If you declare
+using function prototyping.  This can be declared in either the PROTO
+section or with a L<prototype attribute|attributes/Built-in Attributes>.
+If you declare
 
     sub mypush (+@)
 

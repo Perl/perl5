@@ -2668,6 +2668,98 @@ Perl_apply_attrs_string(pTHX_ const char *stashpv, CV *cv,
                                                attrs)));
 }
 
+STATIC void
+S_move_proto_attr(pTHX_ OP **proto, OP **attrs, const GV * name)
+{
+    OP *new_proto = NULL;
+    STRLEN pvlen;
+    char *pv;
+    OP *o;
+
+    PERL_ARGS_ASSERT_MOVE_PROTO_ATTR;
+
+    if (!*attrs)
+        return;
+
+    o = *attrs;
+    if (o->op_type == OP_CONST) {
+        pv = SvPV(cSVOPo_sv, pvlen);
+        if (pvlen >= 10 && memEQ(pv, "prototype(", 10)) {
+            SV * const tmpsv = newSVpvn_flags(pv + 10, pvlen - 11, SvUTF8(cSVOPo_sv));
+            SV ** const tmpo = cSVOPx_svp(o);
+            SvREFCNT_dec(cSVOPo_sv);
+            *tmpo = tmpsv;
+            new_proto = o;
+            *attrs = NULL;
+        }
+    } else if (o->op_type == OP_LIST) {
+        OP * lasto = NULL;
+        assert(o->op_flags & OPf_KIDS);
+        assert(cLISTOPo->op_first->op_type == OP_PUSHMARK);
+        /* Counting on the first op to hit the lasto = o line */
+        for (o = cLISTOPo->op_first; o; o=o->op_sibling) {
+            if (o->op_type == OP_CONST) {
+                pv = SvPV(cSVOPo_sv, pvlen);
+                if (pvlen >= 10 && memEQ(pv, "prototype(", 10)) {
+                    SV * const tmpsv = newSVpvn_flags(pv + 10, pvlen - 11, SvUTF8(cSVOPo_sv));
+                    SV ** const tmpo = cSVOPx_svp(o);
+                    SvREFCNT_dec(cSVOPo_sv);
+                    *tmpo = tmpsv;
+                    if (new_proto && ckWARN(WARN_MISC)) {
+                        STRLEN new_len;
+                        const char * newp = SvPV(cSVOPo_sv, new_len);
+                        Perl_warner(aTHX_ packWARN(WARN_MISC),
+                            "Attribute prototype(%"UTF8f") discards earlier prototype attribute in same sub",
+                            UTF8fARG(SvUTF8(cSVOPo_sv), new_len, newp));
+                        op_free(new_proto);
+                    }
+                    else if (new_proto)
+                        op_free(new_proto);
+                    new_proto = o;
+                    lasto->op_sibling = o->op_sibling;
+                    continue;
+                }
+            }
+            lasto = o;
+        }
+        /* If the list is now just the PUSHMARK, scrap the whole thing; otherwise attributes.xs
+           would get pulled in with no real need */
+        if (!cLISTOPx(*attrs)->op_first->op_sibling) {
+            op_free(*attrs);
+            *attrs = NULL;
+        }
+    }
+
+    if (new_proto) {
+        SV *svname;
+        if (isGV(name)) {
+            svname = sv_newmortal();
+            gv_efullname3(svname, name, NULL);
+        }
+        else if (SvPOK(name) && *SvPVX((SV *)name) == '&')
+            svname = newSVpvn_flags(SvPVX((SV *)name)+1, SvCUR(name)-1, SvUTF8(name)|SVs_TEMP);
+        else
+            svname = (SV *)name;
+        if (ckWARN(WARN_ILLEGALPROTO))
+            (void)validate_proto(svname, cSVOPx_sv(new_proto), TRUE);
+        if (*proto && ckWARN(WARN_PROTOTYPE)) {
+            STRLEN old_len, new_len;
+            const char * oldp = SvPV(cSVOPx_sv(*proto), old_len);
+            const char * newp = SvPV(cSVOPx_sv(new_proto), new_len);
+
+            Perl_warner(aTHX_ packWARN(WARN_PROTOTYPE),
+                "Prototype '%"UTF8f"' overridden by attribute 'prototype(%"UTF8f")'"
+                " in %"SVf,
+                UTF8fARG(SvUTF8(cSVOPx_sv(*proto)), old_len, oldp),
+                UTF8fARG(SvUTF8(cSVOPx_sv(new_proto)), new_len, newp),
+                SVfARG(svname));
+        }
+        if (*proto)
+            op_free(*proto);
+        *proto = new_proto;
+    }
+}
+
 STATIC OP *
 S_my_kid(pTHX_ OP *o, OP *attrs, OP **imopsp)
 {
@@ -7161,6 +7253,9 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 			[CvDEPTH(outcv) ? CvDEPTH(outcv) : 1])[pax];
     spot = (CV **)svspot;
 
+    if (!(PL_parser && PL_parser->error_count))
+        move_proto_attr(&proto, &attrs, (GV *)name);
+
     if (proto) {
 	assert(proto->op_type == OP_CONST);
 	ps = SvPV_const(((SVOP*)proto)->op_sv, ps_len);
@@ -7502,14 +7597,6 @@ Perl_newATTRSUB_flags(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
     OPSLAB *slab = NULL;
 #endif
 
-    if (proto) {
-	assert(proto->op_type == OP_CONST);
-	ps = SvPV_const(((SVOP*)proto)->op_sv, ps_len);
-        ps_utf8 = SvUTF8(((SVOP*)proto)->op_sv);
-    }
-    else
-	ps = NULL;
-
     if (o_is_gv) {
 	gv = (GV*)o;
 	o = NULL;
@@ -7531,6 +7618,17 @@ Perl_newATTRSUB_flags(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 	gv = gv_fetchpvs("__ANON__::__ANON__", gv_fetch_flags, SVt_PVCV);
 	has_name = FALSE;
     }
+
+    if (!ec)
+        move_proto_attr(&proto, &attrs, gv);
+
+    if (proto) {
+	assert(proto->op_type == OP_CONST);
+	ps = SvPV_const(((SVOP*)proto)->op_sv, ps_len);
+        ps_utf8 = SvUTF8(((SVOP*)proto)->op_sv);
+    }
+    else
+	ps = NULL;
 
     if (!PL_madskills) {
 	if (o)

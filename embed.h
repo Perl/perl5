@@ -855,6 +855,7 @@
 #if defined(PERL_CORE) || defined(PERL_EXT)
 #define av_reify(a)		Perl_av_reify(aTHX_ a)
 #define current_re_engine()	Perl_current_re_engine(aTHX)
+#define cv_ckproto_len_flags(a,b,c,d,e)	Perl_cv_ckproto_len_flags(aTHX_ a,b,c,d,e)
 #define mg_find_mglob(a)	Perl_mg_find_mglob(aTHX_ a)
 #define op_clear(a)		Perl_op_clear(aTHX_ a)
 #define qerror(a)		Perl_qerror(aTHX_ a)
@@ -1082,7 +1083,6 @@
 #define create_eval_scope(a)	Perl_create_eval_scope(aTHX_ a)
 #define croak_no_mem		Perl_croak_no_mem
 #define croak_popstack		Perl_croak_popstack
-#define cv_ckproto_len_flags(a,b,c,d,e)	Perl_cv_ckproto_len_flags(aTHX_ a,b,c,d,e)
 #define cv_clone_into(a,b)	Perl_cv_clone_into(aTHX_ a,b)
 #define cv_const_sv_or_av(a)	Perl_cv_const_sv_or_av(aTHX_ a)
 #define cv_forget_slab(a)	Perl_cv_forget_slab(aTHX_ a)
@@ -1457,6 +1457,7 @@
 #define listkids(a)		S_listkids(aTHX_ a)
 #define looks_like_bool(a)	S_looks_like_bool(aTHX_ a)
 #define modkids(a,b)		S_modkids(aTHX_ a,b)
+#define move_proto_attr(a,b,c)	S_move_proto_attr(aTHX_ a,b,c)
 #define my_kid(a,b,c)		S_my_kid(aTHX_ a,b,c)
 #define newDEFSVOP()		S_newDEFSVOP(aTHX)
 #define newGIVWHENOP(a,b,c,d,e)	S_newGIVWHENOP(aTHX_ a,b,c,d,e)

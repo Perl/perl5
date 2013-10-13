@@ -59,6 +59,13 @@ they are suppressed.
 For more information, consult L<the Postfix Dereference Syntax section of
 perlref|perlref/Postfix Dereference Syntax>.
 
+=head2 C<sub>s now take a C<prototype> attribute
+
+When declaring or defining a C<sub>, the prototype can now be specified
+inside of a C<prototype> attribute instead of in parens following the name.
+
+For example, C<sub foo($$){}> could be rewritten as C<sub foo : prototype($$){}>
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
@@ -314,6 +321,12 @@ using C<pack>.)
 L<warnings> has been upgraded from version 1.19 to 1.20.
 
 The new warnings category C<experimental::postderef> has been added.
+
+=item *
+
+L<attributes> has been upgraded from version 0.21 to 0.22
+
+Added support for the C<prototype> attribute.
 
 =back
 
