@@ -567,7 +567,17 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+C<last> no longer returns values that the same statement has accumulated so
+far, fixing amongst other things the long-standing bug that C<push @a, last>
+would try to return the @a, copying it like a scalar in the process and
+resulting in the error, "Bizarre copy of ARRAY in last."  [perl #3112]
+
+=item *
+
+An optimization in Perl 5.18 made incorrect assumptions causing a bad
+interaction with the L<Devel::CallParser> CPAN module.  This was partially
+fixed in Perl 5.19.4, but the fix was not sufficient and another fault has now
+been corrected.
 
 =back
 
