@@ -410,7 +410,19 @@ XXX L<message|perldiag/"message">
 
 =item *
 
-XXX L<message|perldiag/"message">
+L<Postfix dereference is experimental|perldiag/"Postfix dereference is experimental">
+
+(S experimental::postderef) This warning is emitted if you use the experimental
+postfix dereference syntax.  Simply suppress the warning if you want to use the
+feature, but know that in doing so you are taking the risk of using an
+experimental feature which may change or be removed in a future Perl version:
+
+    no warnings "experimental::postderef";
+    use feature "postderef", "postderef_qq";
+    $ref->$*;
+    $aref->@*;
+    $aref->@[@indices];
+    ... etc ...
 
 =back
 
