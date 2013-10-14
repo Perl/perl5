@@ -30,9 +30,8 @@ here, but most should go in the L</Performance Enhancements> section.
 =head2 Unicode 6.3 now supported
 
 Perl now supports and is shipped with Unicode 6.3 (though Perl may be
-recompiled with any previous Unicode release as well).  A detailed
-list of Unicode 6.3 changes is at
-L<http://www.unicode.org/versions/Unicode6.3.0/>.
+recompiled with any previous Unicode release as well).  A detailed list of
+Unicode 6.3 changes is at L<http://www.unicode.org/versions/Unicode6.3.0/>.
 
 =head2 Experimental Postfix Dereferencing
 
@@ -80,8 +79,8 @@ XXX For a release on a stable branch, this section aspires to be:
 
 =head2 Functions C<PerlIO_vsprintf> and C<PerlIO_sprintf> have been removed
 
-These two functions, undocumented, unused in CPAN, and problematic have
-been removed.
+These two functions, undocumented, unused in CPAN, and problematic have been
+removed.
 
 =head1 Deprecations
 
@@ -125,10 +124,9 @@ There may well be none in a stable release.
 
 =item *
 
-Perl has an optimizer for regular expression patterns.  It analyzes the
-pattern to find things such as the minimum length a string has to be to
-match, etc.  It now better handles code points that are above the Latin1
-range.
+Perl has an optimizer for regular expression patterns.  It analyzes the pattern
+to find things such as the minimum length a string has to be to match, etc.  It
+now better handles code points that are above the Latin1 range.
 
 =back
 
