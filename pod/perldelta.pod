@@ -297,7 +297,7 @@ enabled and C<use parent> instead of @ISA.
 
 =item *
 
-L<threads> has been upgraded from verion 1.87 to 1.89.
+L<threads> has been upgraded from version 1.87 to 1.89.
 
 The documentation of C<alarm> and C<_handle> has been updated.
 
