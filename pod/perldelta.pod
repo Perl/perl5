@@ -348,13 +348,35 @@ XXX Changes which significantly change existing files in F<pod/> go here.
 However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
 section.
 
-=head3 L<XXX>
+=head3 L<perlref>
 
 =over 4
 
 =item *
 
-XXX Description of the change here
+Documentation of the new postfix dereference syntax has been added.
+
+=back
+
+=head3 L<perlreguts>
+
+=over 4
+
+=item *
+
+The documentation has been updated in the light of recent changes to
+F<regcomp.c>.
+
+=back
+
+=head3 L<perlvar>
+
+=over 4
+
+=item *
+
+Three L<English> variable names which have long been documented but do not
+actually exist have been removed from the documentation.
 
 =back
 
