@@ -167,7 +167,7 @@ keep in sync with the latest CPAN release.
 
 =item *
 
-L<CPAN::Meta> has been upgraded from version 2.132661 to 2.132830.
+L<CPAN::Meta> has been upgraded from version 2.132620 to 2.132830.
 
 L<CPAN::Meta::Prereqs> now has a C<merged_requirements> method for combining
 requirements across multiple phases and types, and an invalid 'meta-spec' is no
@@ -175,9 +175,78 @@ longer a fatal error.
 
 =item *
 
-L<File::Temp> has been upgraded from version 0.2302 to 0.2304.
+L<CPAN::Meta::Requirements> has been upgraded from version 2.123 to 2.125.
 
-Required versions of other modules used are now listed more explicitly.
+No changes have been made to the installed code other than the version bump to
+keep in sync with the latest CPAN release.
+
+=item *
+
+L<CPAN::Meta::YAML> has been upgraded from version 0.008 to 0.010.
+
+No material changes have been made to the installed code other than the version
+bump to keep in sync with the latest CPAN release.
+
+=item *
+
+L<Cwd> has been upgraded from version 3.44 to 3.45.
+
+An obsolete #define has been removed from the XS code.
+
+=item *
+
+L<ExtUtils::Install> has been upgraded from version 1.60 to 1.61.
+
+Some POD formatting errors in the documentation have been corrected.
+
+=item *
+
+L<ExtUtils::MakeMaker> has been upgraded from version 6.76 to 6.79_01.
+
+Numerous updates and bug fixes are incorporated.  See the F<Changes> file for
+full details.
+
+=item *
+
+L<feature> has been upgraded from version 1.33 to 1.34.
+
+The new features C<postderef> and C<postderef_qq> have been added.
+
+=item *
+
+L<File::Fetch> has been upgraded from version 0.42 to 0.44.
+
+No changes have been made to the installed code other than the version bump to
+keep in sync with the latest CPAN release.
+
+=item *
+
+L<File::Glob> has been upgraded from version 1.21 to 1.22.
+
+Since Perl 5.16, code that used C<glob> inside a thread had been
+unintentionally sharing state between threads.  This has now been fixed.  [perl
+#119897/#117823]
+
+=item *
+
+L<File::Temp> has been upgraded from version 0.2301 to 0.2304.
+
+Required versions of other modules used are now listed more explicitly, L<base>
+is now used instead of L<parent>, and L<Exporter> is no longer inherited from.
+
+=item *
+
+L<Getopt::Long> has been upgraded from version 2.41 to 2.42.
+
+The floating point specifier C<name=f> no longer erroneously accepts values
+like 1.2.3.  [cpan #88707]
+
+=item *
+
+L<HTTP::Tiny> has been upgraded from version 0.035 to 0.036.
+
+No changes have been made to the installed code other than the version bump to
+keep in sync with the latest CPAN release.
 
 =item *
 
@@ -190,13 +259,29 @@ added.
 
 L<Module::CoreList> has been upgraded from version 2.99 to 3.00.
 
-The list of Perl versions covered has been updated.
+The list of Perl versions covered has been updated, %delta is now exported, and
+a bug in C<is_core> whereby it wrongly assumed a linear list of releases has
+been fixed.
 
 =item *
 
 L<Module::Metadata> has been upgraded from version 1.000018 to 1.000019.
 
 Warnings are now disabled during version evaluation.
+
+=item *
+
+L<Parse::CPAN::Meta> has been upgraded from version 1.4407 to 1.4409.
+
+No changes have been made to the installed code other than the version bump to
+keep in sync with the latest CPAN release.
+
+=item *
+
+L<Perl::OSType> has been upgraded from version 1.005 to 1.006.
+
+No changes have been made to the installed code other than the version bump to
+keep in sync with the latest CPAN release.
 
 =item *
 
@@ -211,6 +296,26 @@ L<Test::Harness> has been upgraded from version 3.28 to 3.29.
 
 All modules now use C<our> rather than C<use vars>, have C<use warnings>
 enabled and C<use parent> instead of @ISA.
+
+=item *
+
+L<threads> has been upgraded from verion 1.87 to 1.89.
+
+The documentation of C<alarm> and C<_handle> has been updated.
+
+=item *
+
+L<Unicode::Normalize> has been upgraded from version 1.16 to 1.17.
+
+The module now C<die>s if it cannot get Unicode code points using C<unpack>.
+(There is already a similar C<die> if Unicode code points cannot be stringified
+using C<pack>.)
+
+=item *
+
+L<warnings> has been upgraded from version 1.19 to 1.20.
+
+The new warnings category C<experimental::postderef> has been added.
 
 =back
 
