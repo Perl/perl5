@@ -454,7 +454,8 @@ that they represent may be covered elsewhere.
 
 =item *
 
-XXX
+The new postfix dereference syntax is tested by a new test script,
+F<t/op/postfixderef.t>.
 
 =back
 
