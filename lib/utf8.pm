@@ -2,7 +2,7 @@ package utf8;
 
 $utf8::hint_bits = 0x00800000;
 
-our $VERSION = '1.13';
+our $VERSION = '1.14';
 
 sub import {
     $^H |= $utf8::hint_bits;
@@ -41,6 +41,14 @@ utf8 - Perl pragma to enable/disable UTF-8 (or UTF-EBCDIC) in source code
 
  utf8::encode($string);  # "\x{100}"  becomes "\xc4\x80"
  utf8::decode($string);  # "\xc4\x80" becomes "\x{100}"
+
+ # Convert a code point from the platform native character set to
+ # Unicode, and vice-versa.
+ $unicode = utf8::native_to_unicode(ord('A')); # returns 65 on both
+                                               # ASCII and EBCDIC
+                                               # platforms
+ $native = utf8::unicode_to_native(65);       # returns 65 on ASCII
+                                              # platforms; 193 on EBCDIC
 
  $flag = utf8::is_utf8($string); # since Perl 5.8.1
  $flag = utf8::valid($string);
@@ -144,8 +152,8 @@ individual I<UTF-X> bytes of the character.  The UTF8 flag is turned off.
 Returns nothing.
 
  my $a = "\x{100}"; # $a contains one character, with ord 0x100
- utf8::encode($a);  # $a contains two characters, with ords 0xc4 and
-                    # 0x80
+ utf8::encode($a);  # $a contains two characters, with ords (on
+                    # ASCII platforms) 0xc4 and 0x80
 
 B<Note that this function does not handle arbitrary encodings.>
 Therefore Encode is recommended for the general purposes; see also
@@ -161,13 +169,40 @@ turned on only if the source string contains multiple-byte I<UTF-X>
 characters.  If I<$string> is invalid as I<UTF-X>, returns false;
 otherwise returns true.
 
-    my $a = "\xc4\x80"; # $a contains two characters, with ords
-                        # 0xc4 and 0x80
-    utf8::decode($a);   # $a contains one character, with ord 0x100
+ my $a = "\xc4\x80"; # $a contains two characters, with ords
+                     # 0xc4 and 0x80
+ utf8::decode($a);   # On ASCII platforms, $a contains one char,
+                     # with ord 0x100.   On EBCDIC platforms, $a
+                     # is unchanged and the function returns FALSE.
+
+(C<"\xc4\x80"> is not a valid sequence of bytes in any UTF-8-encoded
+character(s) in the EBCDIC code pages that Perl supports, which is why the
+above example returns failure on them.  What does decode into C<\x{100}>
+depends on the platform.  It is C<"\x8C\x41"> in IBM-1047.)
 
 B<Note that this function does not handle arbitrary encodings.>
 Therefore Encode is recommended for the general purposes; see also
 L<Encode>.
+
+=item * C<$unicode = utf8::native_to_unicode($code_point)>
+
+This takes an unsigned integer (which represents the ordinal number of a
+character (or a code point) on the platform the program is being run on) and
+returns its Unicode equivalent value.  Since ASCII platforms natively use the
+Unicode code points, this function returns its input on them.  On EBCDIC
+platforms it converts from EBCIDC to Unicode.
+
+A meaningless value will currently be returned if the input is not an unsigned
+integer.
+
+=item * C<$native = utf8::unicode_to_native($code_point)>
+
+This is the inverse of C<utf8::native_to_unicode()>, converting the other
+direction.  Again, on ASCII platforms, this returns its input, but on EBCDIC
+platforms it will find the native platform code point, given any Unicode one.
+
+A meaningless value will currently be returned if the input is not an unsigned
+integer.
 
 =item * C<$flag = utf8::is_utf8($string)>
 
