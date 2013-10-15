@@ -99,7 +99,7 @@ you should not say that unless you really want to have UTF-8 source code.
 
 =over 4
 
-=item * $num_octets = utf8::upgrade($string)
+=item * C<$num_octets = utf8::upgrade($string)>
 
 Converts in-place the internal representation of the string from an octet
 sequence in the native encoding (Latin-1 or EBCDIC) to I<UTF-X>. The
@@ -114,7 +114,7 @@ B<Note that this function does not handle arbitrary encodings.>
 Therefore Encode is recommended for the general purposes; see also
 L<Encode>.
 
-=item * $success = utf8::downgrade($string[, $fail_ok])
+=item * C<$success = utf8::downgrade($string[, $fail_ok])>
 
 Converts in-place the internal representation of the string from
 I<UTF-X> to the equivalent octet sequence in the native encoding (Latin-1
@@ -135,7 +135,7 @@ B<Note that this function does not handle arbitrary encodings.>
 Therefore Encode is recommended for the general purposes; see also
 L<Encode>.
 
-=item * utf8::encode($string)
+=item * C<utf8::encode($string)>
 
 Converts in-place the character sequence to the corresponding octet
 sequence in I<UTF-X>. That is, every (possibly wide) character gets
@@ -151,7 +151,7 @@ B<Note that this function does not handle arbitrary encodings.>
 Therefore Encode is recommended for the general purposes; see also
 L<Encode>.
 
-=item * $success = utf8::decode($string)
+=item * C<$success = utf8::decode($string)>
 
 Attempts to convert in-place the octet sequence encoded as I<UTF-X> to the
 corresponding character sequence. That is, it replaces each sequence of
@@ -169,12 +169,12 @@ B<Note that this function does not handle arbitrary encodings.>
 Therefore Encode is recommended for the general purposes; see also
 L<Encode>.
 
-=item * $flag = utf8::is_utf8($string)
+=item * C<$flag = utf8::is_utf8($string)>
 
 (Since Perl 5.8.1)  Test whether I<$string> is marked internally as encoded in
 UTF-8.  Functionally the same as Encode::is_utf8().
 
-=item * $flag = utf8::valid($string)
+=item * C<$flag = utf8::valid($string)>
 
 [INTERNAL] Test whether I<$string> is in a consistent state regarding
 UTF-8.  Will return true if it is well-formed UTF-8 and has the UTF-8 flag
