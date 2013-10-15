@@ -1,3 +1,19 @@
+6.80 Tue Oct 15 16:04:50 BST 2013
+
+    No changes from 6.79_04
+
+6.79_04 Fri Oct 11 18:57:51 BST 2013
+    Bug fixes:
+    * Add CP_NONEMPTY to the list of tools in Makefile
+
+6.79_03 Fri Oct 11 13:56:53 BST 2013
+    Bug fixes:
+    * don't copy .bs portably :)
+
+6.79_02 Fri Oct 11 12:58:01 BST 2013
+    Bug fixes:
+    * RT#28992 don't copy .bs files if they are empty
+
 6.79_01 Tue Oct  1 14:59:27 BST 2013
     VMS fixes:
     * Remove MM_TEST_ROOT feature for VMS test support

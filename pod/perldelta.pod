@@ -199,7 +199,7 @@ Some POD formatting errors in the documentation have been corrected.
 
 =item *
 
-L<ExtUtils::MakeMaker> has been upgraded from version 6.76 to 6.79_01.
+L<ExtUtils::MakeMaker> has been upgraded from version 6.76 to 6.80.
 
 Numerous updates and bug fixes are incorporated.  See the F<Changes> file for
 full details.
