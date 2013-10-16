@@ -10594,6 +10594,22 @@ S_alloc_maybe_populate_EXACT(pTHX_ RExC_state_t *pRExC_state, regnode *node, I32
     }
 }
 
+
+/* return atoi(p), unless it's too big to sensibly be a backref,
+ * in which case return I32_MAX (rather than possibly 32-bit wrapping) */
+
+static I32
+S_backref_value(char *p)
+{
+    char *q = p;
+
+    for (;isDIGIT(*q); q++); /* calculate length of num */
+    if (q - p == 0 || q - p > 9)
+        return I32_MAX;
+    return atoi(p);
+}
+
+
 /*
  - regatom - the lowest level
 
@@ -11027,10 +11043,11 @@ tryagain:
 	case '5': case '6': case '7': case '8': case '9':
 	    {
 		I32 num;
-		bool isg = *RExC_parse == 'g';
-		bool isrel = 0; 
 		bool hasbrace = 0;
-		if (isg) {
+
+		if (*RExC_parse == 'g') {
+                    bool isrel = 0;
+
 		    RExC_parse++;
 		    if (*RExC_parse == '{') {
 		        RExC_parse++;
@@ -11044,25 +11061,36 @@ tryagain:
 		        if (isrel) RExC_parse--;
                         RExC_parse -= 2;		            
 		        goto parse_named_seq;
-		}   }
-		num = atoi(RExC_parse);
-		if (isg && num == 0) {
-	            if (*RExC_parse == '0') {
+                    }
+
+                    num = S_backref_value(RExC_parse);
+                    if (num == 0)
                         vFAIL("Reference to invalid group 0");
+                    else if (num == I32_MAX) {
+                         if (isDIGIT(*RExC_parse))
+			    vFAIL("Reference to nonexistent group");
+                        else
+                            vFAIL("Unterminated \\g... pattern");
                     }
-                    else {
-	                vFAIL("Unterminated \\g... pattern");
+
+                    if (isrel) {
+                        num = RExC_npar - num;
+                        if (num < 1)
+                            vFAIL("Reference to nonexistent or unclosed group");
                     }
                 }
-                if (isrel) {
-                    num = RExC_npar - num;
-                    if (num < 1)
-                        vFAIL("Reference to nonexistent or unclosed group");
+                else {
+                    num = S_backref_value(RExC_parse);
+                    /* bare \NNN might be backref or octal */
+                    if (num == I32_MAX || (num > 9 && num >= RExC_npar
+                            && *RExC_parse != '8' && *RExC_parse != '9'))
+                        /* Probably a character specified in octal, e.g. \35 */
+                        goto defchar;
                 }
-                if (!isg && num > 9 && num >= RExC_npar && *RExC_parse != '8' && *RExC_parse != '9')
-                    /* Probably a character specified in octal, e.g. \35 */
-		    goto defchar;
-		else {
+
+                /* at this point RExC_parse definitely points to a backref
+                 * number */
+		{
 #ifdef RE_TRACK_PATTERN_OFFSETS
 		    char * const parse_start = RExC_parse - 1; /* MJD */
 #endif
@@ -11358,7 +11386,7 @@ tryagain:
                          * 118 OR as "\11" . "8" depending on whether there
                          * were 118 capture buffers defined already in the
                          * pattern.  */
-                        if ( !isDIGIT(p[1]) || atoi(p) <= RExC_npar )
+                        if ( !isDIGIT(p[1]) || S_backref_value(p) <= RExC_npar)
                         {  /* Not to be treated as an octal constant, go
                                    find backref */
                             --p;

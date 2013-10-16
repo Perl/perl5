@@ -1493,6 +1493,47 @@ abc\N{def	-	c	-	\\N{NAME} must be resolved by the lexer
 a\87	a87	c	-	Reference to nonexistent group in regex
 a\97	a97	c	-	Reference to nonexistent group in regex
 
+# avoid problems with 32-bit signed integer overflow
+
+(.)\g2147483648}	x	c	-	Reference to nonexistent group in regex
+(.)\g2147483649}	x	c	-	Reference to nonexistent group in regex
+(.)\g2147483650}	x	c	-	Reference to nonexistent group in regex
+(.)\g4294967296}	x	c	-	Reference to nonexistent group in regex
+(.)\g4294967297}	x	c	-	Reference to nonexistent group in regex
+(.)\g4294967298}	x	c	-	Reference to nonexistent group in regex
+a(.)\g2147483648}	x	c	-	Reference to nonexistent group in regex
+a(.)\g2147483649}	x	c	-	Reference to nonexistent group in regex
+a(.)\g2147483650}	x	c	-	Reference to nonexistent group in regex
+a(.)\g4294967296}	x	c	-	Reference to nonexistent group in regex
+a(.)\g4294967297}	x	c	-	Reference to nonexistent group in regex
+a(.)\g4294967298}	x	c	-	Reference to nonexistent group in regex
+
+(.)\g{2147483648}	x	c	-	Reference to nonexistent group in regex
+(.)\g{2147483649}	x	c	-	Reference to nonexistent group in regex
+(.)\g{2147483650}	x	c	-	Reference to nonexistent group in regex
+(.)\g{4294967296}	x	c	-	Reference to nonexistent group in regex
+(.)\g{4294967297}	x	c	-	Reference to nonexistent group in regex
+(.)\g{4294967298}	x	c	-	Reference to nonexistent group in regex
+a(.)\g{2147483648}	x	c	-	Reference to nonexistent group in regex
+a(.)\g{2147483649}	x	c	-	Reference to nonexistent group in regex
+a(.)\g{2147483650}	x	c	-	Reference to nonexistent group in regex
+a(.)\g{4294967296}	x	c	-	Reference to nonexistent group in regex
+a(.)\g{4294967297}	x	c	-	Reference to nonexistent group in regex
+a(.)\g{4294967298}	x	c	-	Reference to nonexistent group in regex
+
+(.)\2147483648	b\o{214}7483648	y	$1	b
+(.)\2147483649	b\o{214}7483649	y	$1	b
+(.)\2147483650	b\o{214}7483650	y	$1	b
+(.)\4294967296	b\o{42}94967296	y	$1	b
+(.)\4294967297	b\o{42}94967297	y	$1	b
+(.)\4294967298	b\o{42}94967298	y	$1	b
+a(.)\2147483648	ab\o{214}7483648	y	$1	b
+a(.)\2147483649	ab\o{214}7483649	y	$1	b
+a(.)\2147483650	ab\o{214}7483650	y	$1	b
+a(.)\4294967296	ab\o{42}94967296	y	$1	b
+a(.)\4294967297	ab\o{42}94967297	y	$1	b
+a(.)\4294967298	ab\o{42}94967298	y	$1	b
+
 # The below was inserting a NULL into the character class.
 [\8\9]	\000	Sn	-	-
 [\8\9]	-	sc	$&	Unrecognized escape \\8 in character class
