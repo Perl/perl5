@@ -4,7 +4,7 @@
 # This program is free software; you can redistribute it and/or
 # modify it under the same terms as Perl itself.
 #
-# This module is normally only loaded if the XS module is not available
+# Maintained since 2013 by Paul Evans <leonerd@leonerd.org.uk>
 
 package List::Util;
 
@@ -16,7 +16,7 @@ our @EXPORT_OK  = qw(
   all any first min max minstr maxstr none notall reduce sum sum0 shuffle
   pairmap pairgrep pairfirst pairs pairkeys pairvalues
 );
-our $VERSION    = "1.33";
+our $VERSION    = "1.34";
 our $XS_VERSION = $VERSION;
 $VERSION    = eval $VERSION;
 
@@ -83,10 +83,27 @@ Returns the result of the last call to BLOCK. If LIST is empty then
 C<undef> is returned. If LIST only contains one element then that
 element is returned and BLOCK is not executed.
 
+The following examples all demonstrate how C<reduce> could be used to
+implement the other list-reduction functions in this module. (They are
+not in fact implemented like this, but instead in a more efficient
+manner in individual C functions).
+
+    $foo = reduce { defined($a)            ? $a :
+                    $code->(local $_ = $b) ? $b :
+                                             undef } undef, @list # first
+
+    $foo = reduce { $a > $b ? $a : $b } 1..10       # max
+    $foo = reduce { $a gt $b ? $a : $b } 'A'..'Z'   # maxstr
     $foo = reduce { $a < $b ? $a : $b } 1..10       # min
     $foo = reduce { $a lt $b ? $a : $b } 'aa'..'zz' # minstr
     $foo = reduce { $a + $b } 1 .. 10               # sum
     $foo = reduce { $a . $b } @bar                  # concat
+
+    $foo = reduce { $a || $code->(local $_ = $b) } 0, @bar   # any
+    $foo = reduce { $a && $code->(local $_ = $b) } 1, @bar   # all
+    $foo = reduce { $a && !$code->(local $_ = $b) } 1, @bar  # none
+    $foo = reduce { $a || !$code->(local $_ = $b) } 0, @bar  # notall
+       # Note that these implementations do not fully short-circuit
 
 If your algorithm requires that C<reduce> produce an identity value, then
 make sure that you always pass that identity value as the first argument to prevent
@@ -136,13 +153,6 @@ C<undef> is returned.
     $foo = first { $_ > $value } @list    # first value in @list which
                                           # is greater than $value
 
-This function could be implemented using C<reduce> like this
-
-    $foo = reduce { defined($a) ? $a : wanted($b) ? $b : undef } undef, @list
-
-for example wanted() could be defined() which would return the first
-defined value in @list
-
 =head2 max LIST
 
 Returns the entry in the list with the highest numerical value. If the
@@ -151,10 +161,6 @@ list is empty then C<undef> is returned.
     $foo = max 1..10                # 10
     $foo = max 3,9,12               # 12
     $foo = max @bar, @baz           # whatever
-
-This function could be implemented using C<reduce> like this
-
-    $foo = reduce { $a > $b ? $a : $b } 1..10
 
 =head2 maxstr LIST
 
@@ -166,10 +172,6 @@ If the list is empty then C<undef> is returned.
     $foo = maxstr "hello","world"   # "world"
     $foo = maxstr @bar, @baz        # whatever
 
-This function could be implemented using C<reduce> like this
-
-    $foo = reduce { $a gt $b ? $a : $b } 'A'..'Z'
-
 =head2 min LIST
 
 Similar to C<max> but returns the entry in the list with the lowest
@@ -178,10 +180,6 @@ numerical value. If the list is empty then C<undef> is returned.
     $foo = min 1..10                # 1
     $foo = min 3,9,12               # 3
     $foo = min @bar, @baz           # whatever
-
-This function could be implemented using C<reduce> like this
-
-    $foo = reduce { $a < $b ? $a : $b } 1..10
 
 =head2 minstr LIST
 
@@ -193,10 +191,6 @@ If the list is empty then C<undef> is returned.
     $foo = minstr "hello","world"   # "hello"
     $foo = minstr @bar, @baz        # whatever
 
-This function could be implemented using C<reduce> like this
-
-    $foo = reduce { $a lt $b ? $a : $b } 'A'..'Z'
-
 =head2 sum LIST
 
 Returns the sum of all the elements in LIST. If LIST is empty then
@@ -205,10 +199,6 @@ C<undef> is returned.
     $foo = sum 1..10                # 55
     $foo = sum 3,9,12               # 24
     $foo = sum @bar, @baz           # whatever
-
-This function could be implemented using C<reduce> like this
-
-    $foo = reduce { $a + $b } 1..10
 
 =head2 sum0 LIST
 

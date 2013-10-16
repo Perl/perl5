@@ -1495,6 +1495,7 @@ cpan/List-Util/Makefile.PL		Util extension
 cpan/List-Util/multicall.h		Util extension
 cpan/List-Util/README			Util extension
 cpan/List-Util/t/00version.t		Scalar::Util
+cpan/List-Util/t/any-all.t		List::Util
 cpan/List-Util/t/blessed.t		Scalar::Util
 cpan/List-Util/t/dualvar.t		Scalar::Util
 cpan/List-Util/t/first.t		List::Util

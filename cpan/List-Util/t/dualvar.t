@@ -49,7 +49,7 @@ ok( isdual($var),	'Is a dualvar');
 ok( $var == $numstr,	'NV');
 
 SKIP: {
-  skip("dualvar with UV value known to fail with $]",2) if $] < 5.006_001;
+  skip("dualvar with UV value known to fail with $]",3) if $] < 5.006_001;
   my $bits = ($Config{'use64bitint'}) ? 63 : 31;
   $var = dualvar(1<<$bits, "");
   ok( isdual($var),		'Is a dualvar');
@@ -78,22 +78,38 @@ ok($var eq 'ok',	'Tied str');
 
 
 SKIP: {
-  skip("need utf8::is_utf8",3) unless defined &utf8::is_utf8;
+  skip("need utf8::is_utf8",2) unless defined &utf8::is_utf8;
   ok(!!utf8::is_utf8(dualvar(1,chr(400))), 'utf8');
   ok( !utf8::is_utf8(dualvar(1,"abc")),    'not utf8');
 }
 
+BEGIN {
+  if($Config{'useithreads'}) {
+    require threads; import threads;
+    require threads::shared; import threads::shared;
+    require constant; import constant HAVE_THREADS => 1;
+  }
+  else {
+    require constant; import constant HAVE_THREADS => 0;
+  }
+}
 
 SKIP: {
-  skip("Perl not compiled with 'useithreads'",20) unless ($Config{'useithreads'});
-  require threads; import threads;
-  require threads::shared; import threads::shared;
+  skip("Perl not compiled with 'useithreads'",20) unless HAVE_THREADS;
   skip("Requires threads::shared v1.42 or later",20) unless ($threads::shared::VERSION >= 1.42);
 
-  my $siv :shared = dualvar(42, 'Fourty-Two');
-  my $snv :shared = dualvar(3.14, 'PI');
+  my $siv;
+  share($siv);
+  $siv = dualvar(42, 'Fourty-Two');
+
+  my $snv;
+  share($snv);
+  $snv = dualvar(3.14, 'PI');
+
+  my $suv;
+  share($suv);
   my $bits = ($Config{'use64bitint'}) ? 63 : 31;
-  my $suv :shared = dualvar(1<<$bits, 'Large unsigned int');
+  $suv = dualvar(1<<$bits, 'Large unsigned int');
 
   ok($siv == 42, 'Shared IV number preserved');
   ok($siv eq 'Fourty-Two', 'Shared string preserved');
@@ -106,7 +122,8 @@ SKIP: {
   ok($suv eq 'Large unsigned int', 'Shared string preserved');
   ok(isdual($suv), 'Is a dualvar');
 
-  my @ary :shared;
+  my @ary;
+  share(@ary);
   $ary[0] = $siv;
   $ary[1] = $snv;
   $ary[2] = $suv;

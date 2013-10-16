@@ -255,7 +255,7 @@ keep in sync with the latest CPAN release.
 
 =item *
 
-L<List::Util> has been upgraded from version 1.32 to 1.33.
+L<List::Util> has been upgraded from version 1.32 to 1.34.
 
 The list reduction functions C<any>, C<all>, C<none> and C<notall> have been
 added.

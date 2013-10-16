@@ -412,7 +412,7 @@ PPCODE:
     HV *stash;
     CV *cv    = sv_2cv(block, &stash, &gv, 0);
     I32 ret_gimme = GIMME_V;
-    int argi = 1; // "shift" the block
+    int argi = 1; /* "shift" the block */
 
     if(!(items % 2) && ckWARN(WARN_MISC))
 	warn("Odd number of elements in pairfirst");
@@ -423,7 +423,7 @@ PPCODE:
     SAVESPTR(GvSV(bgv));
 #ifdef dMULTICALL
     if(!CvISXSUB(cv)) {
-	// Since MULTICALL is about to move it
+	/* Since MULTICALL is about to move it */
 	SV **stack = PL_stack_base + ax;
 
 	dMULTICALL;
@@ -494,7 +494,7 @@ PPCODE:
     /* This function never returns more than it consumed in arguments. So we
      * can build the results "live", behind the arguments
      */
-    int argi = 1; // "shift" the block
+    int argi = 1; /* "shift" the block */
     int reti = 0;
 
     if(!(items % 2) && ckWARN(WARN_MISC))
@@ -506,7 +506,7 @@ PPCODE:
     SAVESPTR(GvSV(bgv));
 #ifdef dMULTICALL
     if(!CvISXSUB(cv)) {
-	// Since MULTICALL is about to move it
+	/* Since MULTICALL is about to move it */
 	SV **stack = PL_stack_base + ax;
 	int i;
 
@@ -522,7 +522,7 @@ PPCODE:
 
             if(SvTRUEx(*PL_stack_sp)) {
 		if(ret_gimme == G_ARRAY) {
-		    // We can't mortalise yet or they'd be mortal too early
+		    /* We can't mortalise yet or they'd be mortal too early */
 		    stack[reti++] = newSVsv(a);
 		    stack[reti++] = newSVsv(b);
 		}
@@ -580,7 +580,7 @@ PPCODE:
     SV **args_copy = NULL;
     I32 ret_gimme = GIMME_V;
 
-    int argi = 1; // "shift" the block
+    int argi = 1; /* "shift" the block */
     int reti = 0;
 
     if(!(items % 2) && ckWARN(WARN_MISC))
@@ -595,7 +595,7 @@ PPCODE:
  */
 #if defined(dMULTICALL) && (PERL_BCDVERSION > 0x5010000 || PERL_BCDVERSION < 0x5008009)
     if(!CvISXSUB(cv)) {
-	// Since MULTICALL is about to move it
+	/* Since MULTICALL is about to move it */
 	SV **stack = PL_stack_base + ax;
 	I32 ret_gimme = GIMME_V;
 	int i;
