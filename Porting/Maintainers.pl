@@ -443,7 +443,10 @@ use File::Glob qw(:case);
         'DISTRIBUTION' => 'MHX/Devel-PPPort-3.21.tar.gz',
         'FILES'        => q[cpan/Devel-PPPort],
         'EXCLUDED'     => ['PPPort.pm'],    # we use PPPort_pm.PL instead
-        'UPSTREAM'     => undef, # rjbs has asked mhx to have blead be upstream
+
+        # RJBS has asked MHX to have UPSTREAM be 'blead'
+        # (move this from cpan/ to dist/ if that happens)
+        'UPSTREAM'     => 'cpan',
     },
 
     'Devel::SelfStubber' => {
@@ -514,7 +517,7 @@ use File::Glob qw(:case);
             qr{^inc/Module/},
             qw(t/0-signature.t),
         ],
-        'UPSTREAM' => undef,
+        'UPSTREAM' => 'cpan',
     },
 
     'English' => {
@@ -575,7 +578,7 @@ use File::Glob qw(:case);
                 examples/perl_regcomp_posix_keyword.pl
                 ),
         ],
-        'UPSTREAM' => undef,
+        'UPSTREAM' => 'cpan',
     },
 
     'ExtUtils::Install' => {
@@ -672,7 +675,7 @@ use File::Glob qw(:case);
             ''   => 'cpan/File-Path/lib/File/',
             't/' => 'cpan/File-Path/t/',
         },
-        'UPSTREAM' => undef,
+        'UPSTREAM' => 'cpan',
     },
 
     'File::stat' => {
@@ -843,7 +846,7 @@ use File::Glob qw(:case);
     'IO::Zlib' => {
         'DISTRIBUTION' => 'TOMHUGHES/IO-Zlib-1.10.tar.gz',
         'FILES'        => q[cpan/IO-Zlib],
-        'UPSTREAM'     => undef,
+        'UPSTREAM'     => 'cpan',
     },
 
     'IPC::Cmd' => {
@@ -1139,7 +1142,7 @@ use File::Glob qw(:case);
     'parent' => {
         'DISTRIBUTION' => 'CORION/parent-0.228.tar.gz',
         'FILES'        => q[cpan/parent],
-        'UPSTREAM'     => undef,
+        'UPSTREAM'     => 'cpan',
     },
 
     'Parse::CPAN::Meta' => {
@@ -1231,7 +1234,7 @@ use File::Glob qw(:case);
                 ),
         ],
 
-        'UPSTREAM'     => undef,
+        'UPSTREAM'     => 'cpan',
     },
 
     'perlpacktut' => {
@@ -1280,7 +1283,7 @@ use File::Glob qw(:case);
     'Pod::Escapes' => {
         'DISTRIBUTION' => 'SBURKE/Pod-Escapes-1.04.tar.gz',
         'FILES'        => q[cpan/Pod-Escapes],
-        'UPSTREAM'     => undef,
+        'UPSTREAM'     => 'cpan',
     },
 
     'Pod::Functions' => {
@@ -1470,7 +1473,7 @@ use File::Glob qw(:case);
                 ),
         ],
 
-        'UPSTREAM'     => undef,
+        'UPSTREAM'     => 'cpan',
     },
 
     'Term::Complete' => {
@@ -1590,7 +1593,7 @@ use File::Glob qw(:case);
             'ParseWords.pm' => 'cpan/Text-ParseWords/lib/Text/ParseWords.pm',
             ''              => 'cpan/Text-ParseWords/',
         },
-        'UPSTREAM' => undef,
+        'UPSTREAM' => 'cpan',
     },
 
     'Text-Tabs+Wrap' => {
@@ -1708,7 +1711,7 @@ use File::Glob qw(:case);
     'Time::Piece' => {
         'DISTRIBUTION' => 'RJBS/Time-Piece-1.23.tar.gz',
         'FILES'        => q[cpan/Time-Piece],
-        'UPSTREAM'     => undef,
+        'UPSTREAM'     => 'cpan',
     },
 
     'Unicode::Collate' => {
@@ -1762,7 +1765,8 @@ use File::Glob qw(:case);
                 ),
         ],
 
-        'UPSTREAM' => undef,
+        # Change to 'cpan' when [cpan #88458] is resolved
+        'UPSTREAM' => 'blead',
     },
 
     'vms' => {
