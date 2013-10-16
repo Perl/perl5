@@ -61,10 +61,11 @@ perlref|perlref/Postfix Dereference Syntax>.
 
 =head2 C<sub>s now take a C<prototype> attribute
 
-When declaring or defining a C<sub>, the prototype can now be specified
-inside of a C<prototype> attribute instead of in parens following the name.
+When declaring or defining a C<sub>, the prototype can now be specified inside
+of a C<prototype> attribute instead of in parens following the name.
 
-For example, C<sub foo($$){}> could be rewritten as C<sub foo : prototype($$){}>
+For example, C<sub foo($$){}> could be rewritten as
+C<sub foo : prototype($$){}>.
 
 =head1 Security
 
@@ -162,6 +163,12 @@ XXX
 =head2 Updated Modules and Pragmata
 
 =over 4
+
+=item *
+
+L<attributes> has been upgraded from version 0.21 to 0.22.
+
+Support has been added for the C<prototype> attribute.
 
 =item *
 
@@ -322,12 +329,6 @@ L<warnings> has been upgraded from version 1.19 to 1.20.
 
 The new warnings category C<experimental::postderef> has been added.
 
-=item *
-
-L<attributes> has been upgraded from version 0.21 to 0.22
-
-Added support for the C<prototype> attribute.
-
 =back
 
 =head2 Removed Modules and Pragmata
@@ -421,6 +422,14 @@ XXX L<message|perldiag/"message">
 
 =item *
 
+L<Attribute prototype(%s) discards earlier prototype attribute in same sub|perldiag/"Attribute prototype(%s) discards earlier prototype attribute in same sub">
+
+(W misc) A sub was declared as sub foo : prototype(A) : prototype(B) {}, for
+example.  Since each sub can only have one prototype, the earlier
+declaration(s) are discarded while the last one is applied.
+
+=item *
+
 L<Postfix dereference is experimental|perldiag/"Postfix dereference is experimental">
 
 (S experimental::postderef) This warning is emitted if you use the experimental
@@ -434,6 +443,15 @@ experimental feature which may change or be removed in a future Perl version:
     $aref->@*;
     $aref->@[@indices];
     ... etc ...
+
+=item *
+
+L<Prototype '%s' overridden by attribute 'prototype(%s)' in %s|perldiag/"Prototype '%s' overridden by attribute 'prototype(%s)' in %s">
+
+(W prototype) A prototype was declared in both the parentheses after the sub
+name and via the prototype attribute.  The prototype in parentheses is useless,
+since it will be replaced by the prototype from the attribute before it's ever
+used.
 
 =back
 
