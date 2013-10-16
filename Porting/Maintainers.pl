@@ -1201,7 +1201,7 @@ use File::Glob qw(:case);
 
     'PerlIO' => {
         'FILES'      => q[lib/PerlIO.pm],
-        'UPSTREAM'   => undef,
+        'UPSTREAM'   => 'blead',
     },
 
     'PerlIO::encoding' => {
