@@ -1778,18 +1778,18 @@ use File::Glob qw(:case);
     'VMS::DCLsym' => {
         'MAINTAINER' => 'CBERRY',
         'FILES'      => q[ext/VMS-DCLsym],
-        'UPSTREAM'   => undef,
+        'UPSTREAM'   => 'blead',
     },
 
     'VMS::Filespec' => {
         'FILES'      => q[ext/VMS-Filespec],
-        'UPSTREAM'   => undef,
+        'UPSTREAM'   => 'blead',
     },
 
     'VMS::Stdio' => {
         'MAINTAINER' => 'CBERRY',
         'FILES'      => q[ext/VMS-Stdio],
-        'UPSTREAM'   => undef,
+        'UPSTREAM'   => 'blead',
     },
 
     'warnings' => {
@@ -1804,7 +1804,7 @@ use File::Glob qw(:case);
 
     'win32' => {
         'MAINTAINER' => 'JDB',
-        'FILES'      => q[win32 t/win32 README.win32 ext/Win32CORE],
+        'FILES'      => q[win32 t/win32 README.win32],
         'UPSTREAM'   => undef,
     },
 
@@ -1822,6 +1822,12 @@ use File::Glob qw(:case);
             't/pod.t',
         ],
         'UPSTREAM' => 'cpan',
+    },
+
+    'Win32CORE' => {
+        'MAINTAINER' => 'JDB',
+        'FILES'      => q[ext/Win32CORE],
+        'UPSTREAM'   => 'blead',
     },
 
     'XS::Typemap' => {
