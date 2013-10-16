@@ -1843,8 +1843,7 @@ use File::Glob qw(:case);
                 ),
             'XSLoader.pm',    # we use XSLoader_pm.PL
         ],
-        # Revert UPSTREAM to 'blead' after 0.17 is released
-        'UPSTREAM' => undef,
+        'UPSTREAM' => 'blead',
     },
 
     # this pseudo-module represents all the files under ext/ and lib/
