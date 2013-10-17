@@ -262,9 +262,9 @@ keep in sync with the latest CPAN release.
 
 =item *
 
-L<JSON::PP> has been upgraded from version 2.27202 to 2.27203
+L<JSON::PP> has been upgraded from version 2.27202 to 2.27203.
 
-Fixed return/or in C<_incr_parse>.
+A return/or precedence issue in C<_incr_parse> has been fixed.
 
 =item *
 
@@ -571,9 +571,11 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
+=item Windows
 
-XXX
+The Windows MinGW/gcc build was broken in Perl 5.19.4 for some recent versions
+of gcc-4.8, including those from http://mingw-w64.sourceforge.net/ .  This has
+now been fixed.  [perl #120236]
 
 =back
 
@@ -618,11 +620,17 @@ been corrected.
 
 =item *
 
-In some cases, closing file handled opened to pipe to or from a process, which
+In some cases, closing file handles opened to pipe to or from a process, which
 had been duplicated into a standard handle, would call perl's internal waitpid
 wrapper with a pid of zero.  With the fix for [perl #85228] this zero pid was
-passed to waitpid(), possibly blocking the process.  This wait for process
+passed to C<waitpid>, possibly blocking the process.  This wait for process
 zero no longer occurs.  [perl #119893]
+
+=item *
+
+The code that parses regex backrefs (or ambiguous backref/octals) such as \123
+did a simple atoi(), which could wrap round to negative values on long digit
+strings and cause segmentation faults.  This has now been fixed.  [perl #119505]
 
 =back
 
