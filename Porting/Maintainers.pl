@@ -877,12 +877,6 @@ use File::Glob qw(:case);
         'EXCLUDED'     => [
             't/900_pod.t',    # Pod testing
         ],
-
-        # Waiting to be merged upstream: see PERL RT#119825
-        'CUSTOMIZED'   => [
-            'lib/JSON/PP.pm',
-        ],
-
         'UPSTREAM' => 'cpan',
     },
 
