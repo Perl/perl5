@@ -48,7 +48,12 @@ PerlIOScalar_pushed(pTHX_ PerlIO * f, const char *mode, SV * arg,
     else {
 	s->var = newSVpvn("", 0);
     }
-    SvUPGRADE(s->var, SVt_PV);
+    if (SvROK(s->var))
+        /* force refs, overload etc to be plain strings */
+        (void)SvPV_force_nomg_nolen(s->var);
+    else
+        SvUPGRADE(s->var, SVt_PV);
+
     code = PerlIOBase_pushed(aTHX_ f, mode, Nullsv, tab);
     if (!SvOK(s->var) || (PerlIOBase(f)->flags) & PERLIO_F_TRUNCATE)
     {

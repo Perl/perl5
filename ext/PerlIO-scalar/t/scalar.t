@@ -16,7 +16,7 @@ use Fcntl qw(SEEK_SET SEEK_CUR SEEK_END); # Not 0, 1, 2 everywhere.
 
 $| = 1;
 
-use Test::More tests => 108;
+use Test::More tests => 109;
 
 my $fh;
 my $var = "aaa\n";
@@ -461,4 +461,13 @@ my $byte_warning = "Strings with code points over 0xFF may not be mapped into in
     use warnings "utf8";
     ok(!(print $fh "B"), "write to an non-downgradable SV (and warn)");
     is_deeply(\@warnings, [ $byte_warning ], "check warning");
+}
+
+#  RT #119529: non-string should be forced into a string
+
+{
+    my $x = \42;
+    open my $fh, "<", \$x;
+    my $got = <$fh>; # this used to loop
+    like($got, qr/^SCALAR\(0x[0-9a-f]+\)$/, "ref to a ref");
 }
