@@ -610,6 +610,14 @@ interaction with the L<Devel::CallParser> CPAN module.  This was partially
 fixed in Perl 5.19.4, but the fix was not sufficient and another fault has now
 been corrected.
 
+=item *
+
+In some cases, closing file handled opened to pipe to or from a process, which
+had been duplicated into a standard handle, would call perl's internal waitpid
+wrapper with a pid of zero.  With the fix for [perl #85228] this zero pid was
+passed to waitpid(), possibly blocking the process.  This wait for process
+zero no longer occurs.  [perl #119893]
+
 =back
 
 =head1 Known Problems
