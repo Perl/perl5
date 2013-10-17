@@ -2706,19 +2706,21 @@ Perl_my_pclose(pTHX_ PerlIO *ptr)
     bool close_failed;
     dSAVEDERRNO;
     const int fd = PerlIO_fileno(ptr);
-
-#ifdef USE_PERLIO
-    /* Find out whether the refcount is low enough for us to wait for the
-       child proc without blocking. */
-    const bool should_wait = PerlIOUnix_refcnt(fd) == 1;
-#else
-    const bool should_wait = 1;
-#endif
+    bool should_wait;
 
     svp = av_fetch(PL_fdpid,fd,TRUE);
     pid = (SvTYPE(*svp) == SVt_IV) ? SvIVX(*svp) : -1;
     SvREFCNT_dec(*svp);
     *svp = NULL;
+
+#ifdef USE_PERLIO
+    /* Find out whether the refcount is low enough for us to wait for the
+       child proc without blocking. */
+    should_wait = PerlIOUnix_refcnt(fd) == 1 && pid > 0;
+#else
+    should_wait = pid > 0;
+#endif
+
 #ifdef OS2
     if (pid == -1) {			/* Opened by popen. */
 	return my_syspclose(ptr);
