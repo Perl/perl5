@@ -1465,7 +1465,7 @@ foreach my $prop (sort keys %props) {
                 my ($start, $end, $value) = / ^ (.+?) \t (.*?) \t (.+?)
                                                 \s* ( \# .* )? $ /x;
                 $end = $start if $end eq "";
-                push @list, [ hex $start, hex $end, $value ];
+                push @list, [ hex $start, hex $end, hex $value ];
             }
 
             # For these mappings, the file contains all the simple mappings,
@@ -1523,10 +1523,10 @@ foreach my $prop (sort keys %props) {
             for my $element (@list) {
                 $official .= "\n" if $official;
                 if ($element->[1] == $element->[0]) {
-                    $official .= sprintf "%04X\t\t%s", $element->[0], $element->[2];
+                    $official .= sprintf "%04X\t\t%X", $element->[0], $element->[2];
                 }
                 else {
-                    $official .= sprintf "%04X\t%04X\t%s", $element->[0], $element->[1], $element->[2];
+                    $official .= sprintf "%04X\t%04X\t%X", $element->[0], $element->[1], $element->[2];
                 }
             }
         }
@@ -1645,6 +1645,11 @@ foreach my $prop (sort keys %props) {
                     diag("Can't handle format '$format'");
                     next PROPERTY;
                 }
+            }
+            elsif ($full_name =~    # These maps are in hex
+                    /(Simple_)?(Case_Folding|(Lower|Title|Upper)case_Mapping)/)
+            {
+                $invmap_ref->[$i] = sprintf("%X", $invmap_ref->[$i]);
             }
             elsif ($format eq 'ad' || $format eq 'ale') {
 

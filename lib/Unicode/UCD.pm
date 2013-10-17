@@ -5,7 +5,7 @@ use warnings;
 no warnings 'surrogate';    # surrogates can be inputs to this
 use charnames ();
 
-our $VERSION = '0.54';
+our $VERSION = '0.55';
 
 require Exporter;
 
@@ -548,7 +548,7 @@ sub _read_table ($;$) {
     my $property = $table =~ s/\.pl//r;
     $property = $utf8::file_to_swash_name{$property};
     my $to_adjust = defined $property
-                    && $utf8::SwashInfo{$property}{'format'} eq 'a';
+                    && $utf8::SwashInfo{$property}{'format'} =~ / ^ a /x;
 
     for (split /^/m, $list) {
         my ($start, $end, $value) = / ^ (.+?) \t (.*?) \t (.+?)
@@ -556,6 +556,8 @@ sub _read_table ($;$) {
                                         $ /x;
         my $decimal_start = hex $start;
         my $decimal_end = ($end eq "") ? $decimal_start : hex $end;
+        $value = hex $value if $to_adjust
+                               && $utf8::SwashInfo{$property}{'format'} eq 'ax';
         if ($return_hash) {
             foreach my $i ($decimal_start .. $decimal_end) {
                 $return{$i} = ($to_adjust)
@@ -3360,7 +3362,7 @@ RETRY:
             # Otherwise, convert hex formatted list entries to decimal; add a
             # 'Y' map for the missing value in binary properties, or
             # otherwise, use the input map unchanged.
-            $map = ($format eq 'x')
+            $map = ($format eq 'x' || $format eq 'ax')
                 ? hex $map
                 : $format eq 'b'
                   ? 'Y'

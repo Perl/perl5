@@ -3424,20 +3424,10 @@ S_swash_scan_list_line(pTHX_ U8* l, U8* const lend, UV* min, UV* max, UV* val,
 	    *max = *min;
 
 	/* Non-binary tables have a third entry: what the first element of the
-	 * range maps to */
+	 * range maps to.  The map for those currently read here is in hex */
 	if (wants_value) {
 	    if (isBLANK(*l)) {
 		++l;
-
-		/* The ToLc, etc table mappings are not in hex, and must be
-		 * corrected by adding the code point to them */
-		if (typeto) {
-		    char *after_strtol = (char *) lend;
-		    *val = Strtol((char *)l, &after_strtol, 10);
-		    l = (U8 *) after_strtol;
-		}
-		else { /* Other tables are in hex, and are the correct result
-			  without tweaking */
 		    flags = PERL_SCAN_SILENT_ILLDIGIT
 			| PERL_SCAN_DISALLOW_PREFIX
 			| PERL_SCAN_SILENT_NON_PORTABLE;
@@ -3447,7 +3437,6 @@ S_swash_scan_list_line(pTHX_ U8* l, U8* const lend, UV* min, UV* max, UV* val,
 			l += numlen;
 		    else
 			*val = 0;
-		}
 	    }
 	    else {
 		*val = 0;

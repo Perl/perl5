@@ -1320,6 +1320,7 @@ my $HEX_FORMAT = 'x';
 my $RATIONAL_FORMAT = 'r';
 my $STRING_FORMAT = 's';
 my $ADJUST_FORMAT = 'a';
+my $HEX_ADJUST_FORMAT = 'ax';
 my $DECOMP_STRING_FORMAT = 'c';
 my $STRING_WHITE_SPACE_LIST = 'sw';
 
@@ -1332,6 +1333,7 @@ my %map_table_formats = (
     $RATIONAL_FORMAT => 'rational: an integer or a fraction',
     $STRING_FORMAT => 'string',
     $ADJUST_FORMAT => 'some entries need adjustment',
+    $HEX_ADJUST_FORMAT => 'mapped value in hex; some entries need adjustment',
     $DECOMP_STRING_FORMAT => 'Perl\'s internal (Normalize.pm) decomposition mapping',
     $STRING_WHITE_SPACE_LIST => 'string, but some elements are interpreted as a list; white space occurs only as list item separators'
 );
@@ -5601,6 +5603,9 @@ END
             my $next_value;
             my $offset = 0;
 
+            my $output_value_in_hex = $self->isa('Map_Table')
+                                      && $self->format eq $HEX_ADJUST_FORMAT;
+
             # Output each range as part of the here document.
             RANGE:
             for my $set ($range_list{$addr}->ranges) {
@@ -5678,7 +5683,14 @@ END
                     # output
                     if ($start != $end && ! $range_size_1) {
                         push @OUT, sprintf "%04X\t%04X", $start, $end;
-                        $OUT[-1] .= "\t$value" if $value ne "";
+                        if ($value ne "") {
+                            if ($output_value_in_hex) {
+                                $OUT[-1] .= sprintf "\t%X", $value;
+                            }
+                            else {
+                                $OUT[-1] .= "\t$value";
+                            }
+                        }
 
                         # Add a comment with the size of the range, if
                         # requested.  Expand Tabs to make sure they all start
@@ -5715,7 +5727,12 @@ END
 
                             # Here, caller is ok with default output.
                             for (my $i = $start; $i <= $end; $i++) {
-                                push @OUT, sprintf "%04X\t\t%s\n", $i, $value;
+                                if ($output_value_in_hex) {
+                                    push @OUT, sprintf "%04X\t\t%X\n", $i, $value;
+                                }
+                                else {
+                                    push @OUT, sprintf "%04X\t\t%s\n", $i, $value;
+                                }
                             }
                         }
                     }
@@ -6890,11 +6907,16 @@ END
         }
 
         # If the output is to be adjusted, the format of the table that gets
-        # output is actually 'a' instead of whatever it is stored internally
-        # as.
+        # output is actually 'a' or 'ax' instead of whatever it is stored
+        # internally as.
         my $output_adjusted = ($self->to_output_map == $OUTPUT_ADJUSTED);
         if ($output_adjusted) {
-            $format = $ADJUST_FORMAT;
+            if ($default_map eq $CODE_POINT) {
+                $format = $HEX_ADJUST_FORMAT;
+            }
+            else {
+                $format = $ADJUST_FORMAT;
+            }
         }
 
         $self->_set_format($format);
