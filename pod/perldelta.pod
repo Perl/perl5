@@ -303,6 +303,13 @@ keep in sync with the latest CPAN release.
 
 =item *
 
+L<PerlIO::scalar> has been upgraded from version 0.16 to 0.17.
+
+An infinite loop when reading from a filehandle opened from a reference has
+been fixed by first stringifying the reference.  [perl #119529]
+
+=item *
+
 The podlators modules have been upgraded from version 2.5.1 to 2.5.3.
 
 Numerous updates and bug fixes are incorporated.  See the F<Changes> file in
