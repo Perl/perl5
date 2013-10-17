@@ -68,8 +68,7 @@ use File::Glob qw(:case);
 # names to be recursed down, which collectively generate a complete list
 # of the files associated with the distribution.
 
-# UPSTREAM indicates where patches should go. undef implies
-# that this hasn't been discussed for the module at hand.
+# UPSTREAM indicates where patches should go.
 # "blead" indicates that the copy of the module in the blead
 # sources is to be considered canonical, "cpan" means that the
 # module on CPAN is to be patched first.
@@ -939,12 +938,6 @@ use File::Glob qw(:case);
         'UPSTREAM'     => 'cpan',
     },
 
-    'mad' => {
-        'MAINTAINER' => 'LWALL',
-        'FILES'      => q[mad],
-        'UPSTREAM'   => undef,
-    },
-
     'Math::BigInt' => {
         'DISTRIBUTION' => 'PJACKLAM/Math-BigInt-1.997.tar.gz',
         'FILES'        => q[dist/Math-BigInt],
@@ -1169,18 +1162,6 @@ use File::Glob qw(:case);
         'UPSTREAM'     => 'cpan',
     },
 
-    'perldtrace' => {
-        'MAINTAINER' => 'SARTAK',
-        'FILES'      => q[pod/perldtrace.pod],
-        'UPSTREAM'   => 'blead',
-    },
-
-    'perlebcdic' => {
-        'MAINTAINER' => 'PVHP',
-        'FILES'      => q[pod/perlebcdic.pod],
-        'UPSTREAM'   => undef,
-    },
-
     'perlfaq' => {
         'DISTRIBUTION' => 'LLAP/perlfaq-5.0150044.tar.gz',
         'FILES'        => q[cpan/perlfaq],
@@ -1229,43 +1210,6 @@ use File::Glob qw(:case);
         ],
 
         'UPSTREAM'     => 'cpan',
-    },
-
-    'perlpacktut' => {
-        'MAINTAINER' => 'laun',
-        'FILES'      => q[pod/perlpacktut.pod],
-        'UPSTREAM'   => undef,
-    },
-
-    'perlpodspec' => {
-        'MAINTAINER' => 'SBURKE',
-        'FILES'      => q[pod/perlpodspec.pod],
-        'UPSTREAM'   => undef,
-    },
-
-    'perlre' => {
-        'MAINTAINER' => 'ABIGAIL',
-        'FILES'      => q[pod/perlrecharclass.pod
-                 pod/perlrebackslash.pod],
-        'UPSTREAM' => undef,
-    },
-
-    'perlreapi' => {
-        'MAINTAINER' => 'AVAR',
-        'FILES'      => q[pod/perlreapi.pod],
-        'UPSTREAM'   => undef,
-    },
-
-    'perlreftut' => {
-        'MAINTAINER' => 'MJD',
-        'FILES'      => q[pod/perlreftut.pod],
-        'UPSTREAM'   => 'blead',
-    },
-
-    'perlthrtut' => {
-        'MAINTAINER' => 'ELIZABETH',
-        'FILES'      => q[pod/perlthrtut.pod],
-        'UPSTREAM'   => undef,
     },
 
     'Pod::Checker' => {
@@ -1357,7 +1301,7 @@ use File::Glob qw(:case);
     's2p' => {
         'MAINTAINER' => 'laun',
         'FILES'      => q[x2p/s2p.PL],
-        'UPSTREAM'   => undef,
+        'UPSTREAM'   => 'blead',
     },
 
     'Safe' => {
@@ -1763,12 +1707,6 @@ use File::Glob qw(:case);
         'UPSTREAM' => 'blead',
     },
 
-    'vms' => {
-        'MAINTAINER' => 'CBERRY',
-        'FILES'      => q[vms configure.com README.vms],
-        'UPSTREAM'   => undef,
-    },
-
     'VMS::DCLsym' => {
         'MAINTAINER' => 'CBERRY',
         'FILES'      => q[ext/VMS-DCLsym],
@@ -1794,12 +1732,6 @@ use File::Glob qw(:case);
                  t/lib/warnings
                 ],
         'UPSTREAM' => 'blead',
-    },
-
-    'win32' => {
-        'MAINTAINER' => 'JDB',
-        'FILES'      => q[win32 t/win32 README.win32],
-        'UPSTREAM'   => undef,
     },
 
     'Win32' => {
