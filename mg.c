@@ -762,7 +762,8 @@ S_fixup_errno_string(pTHX_ SV* sv)
      * potential that we will get it wrong however, especially on short
      * error message text.  (If it turns out to be necessary, we could
      * also keep track if the current LC_MESSAGES locale is UTF-8) */
-    if (! is_ascii_string((U8*) SvPVX_const(sv), SvCUR(sv))
+    if (! IN_BYTES  /* respect 'use bytes' */
+        && ! is_ascii_string((U8*) SvPVX_const(sv), SvCUR(sv))
         && is_utf8_string((U8*) SvPVX_const(sv), SvCUR(sv)))
     {
         SvUTF8_on(sv);
