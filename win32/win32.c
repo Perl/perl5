@@ -2610,12 +2610,12 @@ win32_strerror(int e)
 	if (e < 0)
 	    e = GetLastError();
 #ifdef ERRNO_HAS_POSIX_SUPPLEMENT
-	/* VC10+ define a "POSIX supplement" of errno values ranging from
-	 * EADDRINUSE (100) to EWOULDBLOCK (140), but sys_nerr is still 43 and
-	 * strerror() returns "Unknown error" for them. We must therefore still
-	 * roll our own messages for these codes, and additionally map them to
-	 * corresponding Windows (sockets) error codes first to avoid getting
-	 * the wrong system message.
+	/* VC10+ and some MinGW/gcc-4.8+ define a "POSIX supplement" of errno
+	 * values ranging from EADDRINUSE (100) to EWOULDBLOCK (140), but
+	 * sys_nerr is still 43 and strerror() returns "Unknown error" for them.
+	 * We must therefore still roll our own messages for these codes, and
+	 * additionally map them to corresponding Windows (sockets) error codes
+	 * first to avoid getting the wrong system message.
 	 */
 	else if (e >= EADDRINUSE && e <= EWOULDBLOCK) {
 	    e = convert_errno_to_wsa_error(e);

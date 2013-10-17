@@ -13,10 +13,10 @@
 
 /* Ensure all the Exxx constants required by convert_wsa_error_to_errno() in
  * win32/win32sck.c are defined. Many are defined in <errno.h> already (more so
- * in VC++ 2010 and above, which have an extra "POSIX supplement") so, for the
- * sake of compatibility with third-party code linked into XS modules, we must
- * be careful not to redefine them; for the remainder we define our own values,
- * namely the corresponding WSAExxx values.
+ * in VC++ 2010 and above and some MinGW/gcc-4.8 and above, which have an extra
+ * "POSIX supplement") so, for the sake of compatibility with third-party code
+ * linked into XS modules, we must be careful not to redefine them; for the
+ * remainder we define our own values, namely the corresponding WSAExxx values.
  *
  * These definitions are also used as a supplement to the use of <errno.h> in
  * the Errno and POSIX modules, both of which may be used to test the value of
@@ -24,7 +24,7 @@
  * and the $! case in Perl_magic_set()). It also provides numerous otherwise
  * missing values in the (hard-coded) list of Exxx constants exported by POSIX.
  * Finally, three of the non-standard errno.h values (actually all now in the
- * POSIX supplement in VC10+) are used in the perl core.
+ * POSIX supplement in VC10+ and some MinGW/gcc-4.8+) are used in the perl core.
  *
  * This list is in the same order as that in convert_wsa_error_to_errno(). A
  * handful of WSAExxx constants used by that function have no corresponding Exxx

@@ -194,6 +194,10 @@ convert_wsa_error_to_errno(int wsaerr)
  * we just use ERROR_INVALID_FUNCTION for those that are missing but do not
  * really expect to encounter them anyway in the context in which this function
  * is called.
+ * Some versions of MinGW/gcc-4.8 and above also define most, but not all, of
+ * these extra Exxx values. The missing ones are all cases for which there is no
+ * corresponding WSAExxx constant anyway, so we simply omit the cases for them
+ * here.
  * Other Exxx values (err < sys_nerr) are returned unchanged.
  */
 int
@@ -208,8 +212,10 @@ convert_errno_to_wsa_error(int err)
 	return WSAEAFNOSUPPORT;
     case EALREADY:
 	return WSAEALREADY;
-    case EBADMSG:
+#ifdef EBADMSG
+    case EBADMSG:			/* Not defined in gcc-4.8.0 */
 	return ERROR_INVALID_FUNCTION;
+#endif
     case ECANCELED:
 #ifdef WSAECANCELLED
 	return WSAECANCELLED;		/* New in WinSock2 */
@@ -226,8 +232,10 @@ convert_errno_to_wsa_error(int err)
 	return WSAEDESTADDRREQ;
     case EHOSTUNREACH:
 	return WSAEHOSTUNREACH;
-    case EIDRM:
+#ifdef EIDRM
+    case EIDRM:				/* Not defined in gcc-4.8.0 */
 	return ERROR_INVALID_FUNCTION;
+#endif
     case EINPROGRESS:
 	return WSAEINPROGRESS;
     case EISCONN:
@@ -244,30 +252,44 @@ convert_errno_to_wsa_error(int err)
 	return WSAENETUNREACH;
     case ENOBUFS:
 	return WSAENOBUFS;
-    case ENODATA:
+#ifdef ENODATA
+    case ENODATA:			/* Not defined in gcc-4.8.0 */
 	return ERROR_INVALID_FUNCTION;
-    case ENOLINK:
+#endif
+#ifdef ENOLINK
+    case ENOLINK:			/* Not defined in gcc-4.8.0 */
 	return ERROR_INVALID_FUNCTION;
-    case ENOMSG:
+#endif
+#ifdef ENOMSG
+    case ENOMSG:			/* Not defined in gcc-4.8.0 */
 	return ERROR_INVALID_FUNCTION;
+#endif
     case ENOPROTOOPT:
 	return WSAENOPROTOOPT;
-    case ENOSR:
+#ifdef ENOSR
+    case ENOSR:				/* Not defined in gcc-4.8.0 */
 	return ERROR_INVALID_FUNCTION;
-    case ENOSTR:
+#endif
+#ifdef ENOSTR
+    case ENOSTR:			/* Not defined in gcc-4.8.0 */
 	return ERROR_INVALID_FUNCTION;
+#endif
     case ENOTCONN:
 	return WSAENOTCONN;
-    case ENOTRECOVERABLE:
+#ifdef ENOTRECOVERABLE
+    case ENOTRECOVERABLE:		/* Not defined in gcc-4.8.0 */
 	return ERROR_INVALID_FUNCTION;
+#endif
     case ENOTSOCK:
 	return WSAENOTSOCK;
     case ENOTSUP:
 	return ERROR_INVALID_FUNCTION;
     case EOPNOTSUPP:
 	return WSAEOPNOTSUPP;
-    case EOTHER:
+#ifdef EOTHER
+    case EOTHER:			/* Not defined in gcc-4.8.0 */
 	return ERROR_INVALID_FUNCTION;
+#endif
     case EOVERFLOW:
 	return ERROR_INVALID_FUNCTION;
     case EOWNERDEAD:
@@ -278,12 +300,16 @@ convert_errno_to_wsa_error(int err)
 	return WSAEPROTONOSUPPORT;
     case EPROTOTYPE:
 	return WSAEPROTOTYPE;
-    case ETIME:
+#ifdef ETIME
+    case ETIME:				/* Not defined in gcc-4.8.0 */
 	return ERROR_INVALID_FUNCTION;
+#endif
     case ETIMEDOUT:
 	return WSAETIMEDOUT;
-    case ETXTBSY:
+#ifdef ETXTBSY
+    case ETXTBSY:			/* Not defined in gcc-4.8.0 */
 	return ERROR_INVALID_FUNCTION;
+#endif
     case EWOULDBLOCK:
 	return WSAEWOULDBLOCK;
     }
