@@ -1421,6 +1421,7 @@
 #define adjust_size_and_find_bucket	S_adjust_size_and_find_bucket
 #  endif
 #  if defined(PERL_IN_MG_C)
+#define fixup_errno_string(a)	S_fixup_errno_string(aTHX_ a)
 #define magic_methcall1(a,b,c,d,e,f)	S_magic_methcall1(aTHX_ a,b,c,d,e,f)
 #define magic_methpack(a,b,c)	S_magic_methpack(aTHX_ a,b,c)
 #define restore_magic(a)	S_restore_magic(aTHX_ a)

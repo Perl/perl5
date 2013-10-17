@@ -5883,6 +5883,11 @@ STATIC int	S_adjust_size_and_find_bucket(size_t *nbytes_p)
 
 #endif
 #if defined(PERL_IN_MG_C)
+STATIC void	S_fixup_errno_string(pTHX_ SV* sv)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_FIXUP_ERRNO_STRING	\
+	assert(sv)
+
 STATIC SV*	S_magic_methcall1(pTHX_ SV *sv, const MAGIC *mg, SV *meth, U32 flags, int n, SV *val)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
