@@ -3428,15 +3428,15 @@ S_swash_scan_list_line(pTHX_ U8* l, U8* const lend, UV* min, UV* max, UV* val,
 	if (wants_value) {
 	    if (isBLANK(*l)) {
 		++l;
-		    flags = PERL_SCAN_SILENT_ILLDIGIT
-			| PERL_SCAN_DISALLOW_PREFIX
-			| PERL_SCAN_SILENT_NON_PORTABLE;
-		    numlen = lend - l;
-		    *val = grok_hex((char *)l, &numlen, &flags, NULL);
-		    if (numlen)
-			l += numlen;
-		    else
-			*val = 0;
+                flags = PERL_SCAN_SILENT_ILLDIGIT
+                    | PERL_SCAN_DISALLOW_PREFIX
+                    | PERL_SCAN_SILENT_NON_PORTABLE;
+                numlen = lend - l;
+                *val = grok_hex((char *)l, &numlen, &flags, NULL);
+                if (numlen)
+                    l += numlen;
+                else
+                    *val = 0;
 	    }
 	    else {
 		*val = 0;
