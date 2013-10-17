@@ -10,7 +10,7 @@ BEGIN {
     require "./test.pl";
 }
 
-plan tests => 142;
+plan tests => 144;
 
 $a = {};
 bless $a, "Bob";
@@ -343,3 +343,10 @@ ok(Undeclared->can("foo"));
 ok(!Undeclared->can("something_else"));
 
 ok(Undeclared->isa("UNIVERSAL"));
+
+# keep this at the end to avoid messing up earlier tests, since it modifies
+# @UNIVERSAL::ISA
+@UNIVERSAL::ISA = ('UniversalParent');
+{ package UniversalIsaTest1; }
+ok(UniversalIsaTest1->isa('UniversalParent'));
+ok(UniversalIsaTest2->isa('UniversalParent'));

@@ -160,15 +160,19 @@ Perl_sv_derived_from_pvn(pTHX_ SV *sv, const char *const name, const STRLEN len,
         type = sv_reftype(sv,0);
 	if (type && strEQ(type,name))
 	    return TRUE;
-	stash = SvOBJECT(sv) ? SvSTASH(sv) : NULL;
+        if (!SvOBJECT(sv))
+            return FALSE;
+	stash = SvSTASH(sv);
     }
     else {
         stash = gv_stashsv(sv, 0);
-        if (!stash)
-            stash = gv_stashpvs("UNIVERSAL", 0);
     }
 
-    return stash ? isa_lookup(stash, name, len, flags) : FALSE;
+    if (stash && isa_lookup(stash, name, len, flags))
+        return TRUE;
+
+    stash = gv_stashpvs("UNIVERSAL", 0);
+    return stash && isa_lookup(stash, name, len, flags);
 }
 
 /*
