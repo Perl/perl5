@@ -12,18 +12,10 @@ use utf8;
 use File::Glob qw(:case);
 
 %Maintainers = (
-    'ABIGAIL'   => 'Abigail <abigail@abigail.be>',
-    'AVAR'      => 'Ævar Arnfjörð Bjarmason <avar@cpan.org>',
     'CBERRY'    => 'Craig Berry <craigberry@mac.com>',
-    'ELIZABETH' => 'Elizabeth Mattijsen <liz@dijkmat.nl>',
     'JDB'       => 'Jan Dubois <jand@activestate.com>',
     'laun'      => 'Wolfgang Laun <Wolfgang.Laun@alcatel.at>',
-    'LWALL'     => 'Larry Wall <lwall@cpan.org>',
-    'MJD'       => 'Mark-Jason Dominus <mjd@plover.com>',
     'PMQS'      => 'Paul Marquess <pmqs@cpan.org>',
-    'PVHP'      => 'Peter Prymmer <pvhp@best.com>',
-    'SARTAK'    => 'Shawn M Moore <sartak@gmail.com>',
-    'SBURKE'    => 'Sean Burke <sburke@cpan.org>',
     'SMCCAM'    => 'Stephen McCamant <smccam@cpan.org>',
 );
 
