@@ -262,6 +262,12 @@ keep in sync with the latest CPAN release.
 
 =item *
 
+L<JSON::PP> has been upgraded from version 2.27202 to 2.27203
+
+Fixed return/or in C<_incr_parse>.
+
+=item *
+
 L<List::Util> has been upgraded from version 1.32 to 1.34.
 
 The list reduction functions C<any>, C<all>, C<none> and C<notall> have been
