@@ -5728,10 +5728,12 @@ END
                             # Here, caller is ok with default output.
                             for (my $i = $start; $i <= $end; $i++) {
                                 if ($output_value_in_hex) {
-                                    push @OUT, sprintf "%04X\t\t%X\n", $i, $value;
+                                    push @OUT, sprintf "%04X\t\t%X\n",
+                                                       $i, $value;
                                 }
                                 else {
-                                    push @OUT, sprintf "%04X\t\t%s\n", $i, $value;
+                                    push @OUT, sprintf "%04X\t\t%s\n",
+                                                        $i, $value;
                                 }
                             }
                         }
