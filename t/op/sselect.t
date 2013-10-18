@@ -9,7 +9,7 @@ BEGIN {
 
 require 'test.pl';
 
-plan (14);
+plan (15);
 
 my $blank = "";
 eval {select undef, $blank, $blank, 0};
@@ -74,3 +74,20 @@ $t1 = time;
 $diff = $t1-$t0;
 ok($diff >= $sleep-$under, "select(\$e,u,u,\$sleep): at least $sleep seconds have passed");
 note("diff=$diff under=$under");
+
+# [perl #120102] CORE::select ignoring timeout var's magic
+
+{
+    package RT120102;
+
+    my $count = 0;
+
+    sub TIESCALAR { bless [] }
+    sub FETCH { $count++; 0.1 }
+
+    my $sleep;
+
+    tie $sleep, 'RT120102';
+    select (undef, undef, undef, $sleep);
+    ::is($count, 1, 'RT120102');
+}

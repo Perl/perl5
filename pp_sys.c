@@ -1159,8 +1159,9 @@ PP(pp_sselect)
 #  endif
 
     sv = SP[4];
+    SvGETMAGIC(sv);
     if (SvOK(sv)) {
-	value = SvNV(sv);
+	value = SvNV_nomg(sv);
 	if (value < 0.0)
 	    value = 0.0;
 	timebuf.tv_sec = (long)value;
