@@ -121,27 +121,6 @@ cpan/AutoLoader/t/01AutoLoader.t	See if AutoLoader works
 cpan/AutoLoader/t/02AutoSplit.t		See if AutoSplit works
 cpan/B-Debug/Debug.pm	Compiler Debug backend
 cpan/B-Debug/t/debug.t	See if B::Debug works
-cpan/CGI/examples/caution.xbm		CGI example
-cpan/CGI/examples/clickable_image.cgi	CGI example
-cpan/CGI/examples/cookie.cgi		CGI example
-cpan/CGI/examples/crash.cgi		CGI example
-cpan/CGI/examples/customize.cgi		CGI example
-cpan/CGI/examples/diff_upload.cgi	CGI example
-cpan/CGI/examples/dna.small.gif		Small image for CGI examples
-cpan/CGI/examples/file_upload.cgi	CGI example
-cpan/CGI/examples/frameset.cgi		CGI example
-cpan/CGI/examples/index.html		Index page for CGI examples
-cpan/CGI/examples/internal_links.cgi	CGI example
-cpan/CGI/examples/javascript.cgi	CGI example
-cpan/CGI/examples/make_links.pl		CGI example
-cpan/CGI/examples/monty.cgi		CGI example
-cpan/CGI/examples/multiple_forms.cgi	CGI example
-cpan/CGI/examples/nph-clock.cgi		CGI example
-cpan/CGI/examples/nph-multipart.cgi	CGI example
-cpan/CGI/examples/popup.cgi		CGI example
-cpan/CGI/examples/save_state.cgi	CGI example
-cpan/CGI/examples/tryit.cgi		CGI example
-cpan/CGI/examples/wilogo.gif		CGI example
 cpan/CGI/lib/CGI/Apache.pm		Support for Apache's Perl module
 cpan/CGI/lib/CGI/Carp.pm		Log server errors with helpful context
 cpan/CGI/lib/CGI/Cookie.pm		Interface to Netscape Cookies
@@ -216,8 +195,6 @@ cpan/Compress-Raw-Bzip2/t/99pod.t
 cpan/Compress-Raw-Bzip2/t/compress/CompTestUtils.pm
 cpan/Compress-Raw-Bzip2/typemap
 cpan/Compress-Raw-Zlib/config.in		Compress::Raw::Zlib
-cpan/Compress-Raw-Zlib/examples/filtdef		Compress::Raw::Zlib
-cpan/Compress-Raw-Zlib/examples/filtinf		Compress::Raw::Zlib
 cpan/Compress-Raw-Zlib/fallback/constants.h	Compress::Raw::Zlib
 cpan/Compress-Raw-Zlib/fallback/constants.xs	Compress::Raw::Zlib
 cpan/Compress-Raw-Zlib/lib/Compress/Raw/Zlib.pm	Compress::Raw::Zlib
@@ -673,7 +650,6 @@ cpan/Devel-PPPort/ppport_h.PL		Devel::PPPort ppport.h writer
 cpan/Devel-PPPort/PPPort_pm.PL		Devel::PPPort PPPort.pm writer
 cpan/Devel-PPPort/PPPort.xs		Devel::PPPort dummy PPPort.xs
 cpan/Devel-PPPort/PPPort_xs.PL		Devel::PPPort RealPPPort.xs writer
-cpan/Devel-PPPort/README.md		Devel::PPPort GitHub Readme
 cpan/Devel-PPPort/soak			Devel::PPPort Test Harness to run under various Perls
 cpan/Devel-PPPort/t/call.t		Devel::PPPort test file
 cpan/Devel-PPPort/t/cop.t		Devel::PPPort test file
@@ -1005,8 +981,6 @@ cpan/ExtUtils-MakeMaker/lib/ExtUtils/MM_Win32.pm		MakeMaker methods for Win32
 cpan/ExtUtils-MakeMaker/lib/ExtUtils/MM_Win95.pm		MakeMaker methods for Win95
 cpan/ExtUtils-MakeMaker/lib/ExtUtils/MY.pm			MakeMaker user override class
 cpan/ExtUtils-MakeMaker/lib/ExtUtils/testlib.pm			Fixes up @INC to use just-built extension
-cpan/ExtUtils-MakeMaker/PATCHING				Suggestions for patching MakeMaker
-cpan/ExtUtils-MakeMaker/README.packaging			MakeMaker packaging README
 cpan/ExtUtils-MakeMaker/t/00compile.t				See if MakeMaker modules compile
 cpan/ExtUtils-MakeMaker/t/01perl_bugs.t
 cpan/ExtUtils-MakeMaker/t/arch_check.t				Test MakeMaker's arch_check()
@@ -1196,19 +1170,6 @@ cpan/HTTP-Tiny/t/cases/redirect-09.txt
 cpan/HTTP-Tiny/t/SimpleCookieJar.pm
 cpan/HTTP-Tiny/t/Util.pm
 cpan/IO-Compress/bin/zipdetails				IO::Compress
-cpan/IO-Compress/examples/compress-zlib/filtdef		IO::Compress
-cpan/IO-Compress/examples/compress-zlib/filtinf		IO::Compress
-cpan/IO-Compress/examples/compress-zlib/gzcat		IO::Compress
-cpan/IO-Compress/examples/compress-zlib/gzgrep		IO::Compress
-cpan/IO-Compress/examples/compress-zlib/gzstream	IO::Compress
-cpan/IO-Compress/examples/io/anycat			IO::Compress
-cpan/IO-Compress/examples/io/bzip2/bzcat		IO::Compress
-cpan/IO-Compress/examples/io/bzip2/bzgrep		IO::Compress
-cpan/IO-Compress/examples/io/bzip2/bzstream		IO::Compress
-cpan/IO-Compress/examples/io/gzip/gzappend		IO::Compress
-cpan/IO-Compress/examples/io/gzip/gzcat			IO::Compress
-cpan/IO-Compress/examples/io/gzip/gzgrep		IO::Compress
-cpan/IO-Compress/examples/io/gzip/gzstream		IO::Compress
 cpan/IO-Compress/lib/Compress/Zlib.pm			IO::Compress
 cpan/IO-Compress/lib/File/GlobMapper.pm			IO::Compress
 cpan/IO-Compress/lib/IO/Compress/Adapter/Bzip2.pm	IO::Compress
@@ -1253,8 +1214,6 @@ cpan/IO-Compress/t/002any-zip.t				IO::Compress
 cpan/IO-Compress/t/004gziphdr.t				IO::Compress
 cpan/IO-Compress/t/005defhdr.t				IO::Compress
 cpan/IO-Compress/t/006zip.t				IO::Compress
-cpan/IO-Compress/t/010examples-bzip2.t			IO::Compress
-cpan/IO-Compress/t/010examples-zlib.t			IO::Compress
 cpan/IO-Compress/t/01misc.t				IO::Compress
 cpan/IO-Compress/t/020isize.t				IO::Compress
 cpan/IO-Compress/t/050interop-gzip.t			IO::Compress
@@ -1335,7 +1294,6 @@ cpan/IO-Compress/t/compress/truncate.pl			Compress::Zlib
 cpan/IO-Compress/t/compress/zlib-generic.pl		Compress::Zlib
 cpan/IO-Compress/t/cz-01version.t			IO::Compress
 cpan/IO-Compress/t/cz-03zlib-v1.t			IO::Compress
-cpan/IO-Compress/t/cz-05examples.t			IO::Compress
 cpan/IO-Compress/t/cz-06gzsetp.t			IO::Compress
 cpan/IO-Compress/t/cz-08encoding.t			IO::Compress
 cpan/IO-Compress/t/cz-14gzopen.t			IO::Compress
@@ -1412,13 +1370,6 @@ cpan/JSON-PP/t/115_tie_ixhash.t
 cpan/JSON-PP/t/116_incr_parse_fixed.t
 cpan/JSON-PP/t/_unicode_handling.pm
 cpan/libnet/Config.eg		libnet
-cpan/libnet/demos/ftp		libnet
-cpan/libnet/demos/inetd		libnet
-cpan/libnet/demos/nntp		libnet
-cpan/libnet/demos/nntp.mirror	libnet
-cpan/libnet/demos/pop3		libnet
-cpan/libnet/demos/smtp.self	libnet
-cpan/libnet/demos/time		libnet
 cpan/libnet/Hostname.pm.eg	libnet
 cpan/libnet/Makefile.PL
 cpan/libnet/Net/Cmd.pm		libnet
@@ -1520,7 +1471,6 @@ cpan/Locale-Codes/lib/Locale/Language.pm	Locale::Codes
 cpan/Locale-Codes/lib/Locale/Language.pod	Locale::Codes documentation
 cpan/Locale-Codes/lib/Locale/Script.pm		Locale::Codes
 cpan/Locale-Codes/lib/Locale/Script.pod		Locale::Codes documentation
-cpan/Locale-Codes/README.first			Locale::Codes
 cpan/Locale-Codes/t/alias_code_old.t	Locale::Codes tests
 cpan/Locale-Codes/t/alias_code.t		Locale::Codes tests
 cpan/Locale-Codes/t/code2country_old.t	Locale::Codes tests
@@ -2103,7 +2053,6 @@ cpan/Sys-Syslog/fallback/const-c.inc	Sys::Syslog constants fallback file
 cpan/Sys-Syslog/fallback/const-xs.inc	Sys::Syslog constants fallback file
 cpan/Sys-Syslog/fallback/syslog.h	Sys::Syslog header fallback file
 cpan/Sys-Syslog/Makefile.PL		Sys::Syslog extension makefile writer
-cpan/Sys-Syslog/README.win32		README for Sys::Syslog on Windows
 cpan/Sys-Syslog/Syslog.pm		Sys::Syslog extension Perl module
 cpan/Sys-Syslog/Syslog.xs		Sys::Syslog extension external subroutines
 cpan/Sys-Syslog/t/00-load.t		test for Sys::Syslog
@@ -2325,8 +2274,6 @@ cpan/Test-Harness/t/yamlish-output.t			Test::Harness test
 cpan/Test-Harness/t/yamlish.t				Test::Harness test
 cpan/Test-Harness/t/yamlish-writer.t			Test::Harness test
 cpan/Test/lib/Test.pm		A simple framework for writing test scripts
-cpan/Test-Simple/examples/indent.pl			Test::Simple examples
-cpan/Test-Simple/examples/subtest.t			Test::Simple examples
 cpan/Test-Simple/lib/Test/Builder/Module.pm		Base class for test modules
 cpan/Test-Simple/lib/Test/Builder.pm			For writing new test libraries
 cpan/Test-Simple/lib/Test/Builder/Tester/Color.pm	Turn on color in Test::Builder::Tester

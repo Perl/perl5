@@ -229,8 +229,8 @@ use File::Glob qw(:case);
         'DISTRIBUTION' => 'MARKSTOS/CGI.pm-3.63.tar.gz',
         'FILES'        => q[cpan/CGI],
         'EXCLUDED'     => [
+            qr{^examples/},
             qw( cgi_docs.html
-                examples/WORLD_WRITABLE/18.157.1.253.sav
                 t/gen-tests/gen-start-end-tags.pl
                 t/fast.t
                 ),
@@ -251,6 +251,7 @@ use File::Glob qw(:case);
 
         'FILES'    => q[cpan/Compress-Raw-Zlib],
         'EXCLUDED' => [
+            qr{^examples/},
             qr{^t/Test/},
             qw( t/000prereq.t
                 t/99pod.t
@@ -382,7 +383,10 @@ use File::Glob qw(:case);
         # RJBS has asked MHX to have UPSTREAM be 'blead'
         # (i.e. move this from cpan/ to dist/)
         'FILES'        => q[cpan/Devel-PPPort],
-        'EXCLUDED'     => ['PPPort.pm'],    # we use PPPort_pm.PL instead
+        'EXCLUDED'     => [
+            'PPPort.pm',    # we use PPPort_pm.PL instead
+            'README.md',
+        ]
     },
 
     'Devel::SelfStubber' => {
@@ -505,6 +509,8 @@ use File::Glob qw(:case);
             qr{^t/Liblist_Kid.t},
             qr{^t/liblist/},
             qr{^\.perlcriticrc},
+            'PATCHING',
+            'README.packaging',
         ],
     },
 
@@ -645,7 +651,13 @@ use File::Glob qw(:case);
     'IO-Compress' => {
         'DISTRIBUTION' => 'PMQS/IO-Compress-2.062.tar.gz',
         'FILES'        => q[cpan/IO-Compress],
-        'EXCLUDED'     => [qr{t/Test/}],
+        'EXCLUDED'     => [
+            qr{^examples/},
+            qr{^t/Test/},
+            't/010examples-bzip2.t',
+            't/010examples-zlib.t',
+            't/cz-05examples.t',
+        ],
     },
 
     'IO::Zlib' => {
@@ -693,6 +705,7 @@ use File::Glob qw(:case);
             qw( Configure
                 install-nomake
                 ),
+            qr(^demos/),
         ],
         # Customized for perl since we cannot use either an auto-generated
         # script or the version in the CPAN distro.
@@ -703,7 +716,8 @@ use File::Glob qw(:case);
         'DISTRIBUTION' => 'SBECK/Locale-Codes-3.27.tar.gz',
         'FILES'        => q[cpan/Locale-Codes],
         'EXCLUDED'     => [
-            qw( t/pod_coverage.t
+            qw( README.first
+                t/pod_coverage.t
                 t/pod.t),
             qr{^t/runtests},
             qr{^t/runtests\.bat},
@@ -1034,7 +1048,8 @@ use File::Glob qw(:case);
         'FILES'        => q[cpan/Sys-Syslog],
         'EXCLUDED'     => [
             qr{^eg/},
-            qw( t/data-validation.t
+            qw( README.win32
+                t/data-validation.t
                 t/distchk.t
                 t/pod.t
                 t/podcover.t
@@ -1119,6 +1134,8 @@ use File::Glob qw(:case);
         'EXCLUDED'     => [
             qw( .perlcriticrc
                 .perltidyrc
+                examples/indent.pl
+                examples/subtest.t
                 t/00compile.t
                 t/pod.t
                 t/pod-coverage.t
