@@ -8035,7 +8035,7 @@ Perl_yylex(pTHX)
 		    p += 3;
 		p = PEEKSPACE(p);
 		if (isIDFIRST_lazy_if(p,UTF)) {
-		    p = scan_ident(p, PL_tokenbuf, sizeof PL_tokenbuf, TRUE);
+		    p = scan_word(p, PL_tokenbuf, sizeof PL_tokenbuf, TRUE, &len);
 		    p = PEEKSPACE(p);
 		}
 		if (*p != '$')

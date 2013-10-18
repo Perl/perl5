@@ -8,7 +8,7 @@ BEGIN {
     chdir 't';
 }
 
-print "1..168\n";
+print "1..169\n";
 
 sub failed {
     my ($got, $expected, $name) = @_;
@@ -333,10 +333,10 @@ like($@, qr/BEGIN failed--compilation aborted/, 'BEGIN 7' );
   eval qq[ *$xFD ];
   like($@, qr/Identifier too long/, "too long id in glob ctx");
 
-  eval qq[ for $xFD ];
+  eval qq[ for $xFC ];
   like($@, qr/Missing \$ on loop variable/,
-       "253 char id ok, but a different error");
-  eval qq[ for $xFE; ];
+       "252 char id ok, but a different error");
+  eval qq[ for $xFD; ];
   like($@, qr/Identifier too long/, "too long id in for ctx");
 
   # the specific case from the ticket
@@ -494,6 +494,10 @@ eval 'Fooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo'
     .'oooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo'
     .'ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo';
 like $@, "^Identifier too long at ", 'ident buffer overflow';
+
+eval 'for my a1b $i (1) {}';
+# ng: 'Missing $ on loop variable'
+like $@, "^No such class a1b at ", 'TYPE of my of for statement';
 
 # Add new tests HERE (above this line)
 
