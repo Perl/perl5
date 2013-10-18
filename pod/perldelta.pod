@@ -496,13 +496,14 @@ Most of these are built within the directories F<utils> and F<x2p>.
 entries for each change
 Use L<XXX> with program names to get proper documentation linking. ]
 
-=head3 L<XXX>
+=head3 L<a2p>
 
 =over 4
 
 =item *
 
-XXX
+A possible crash from an off-by-one error when trying to access before the
+beginning of a buffer has been fixed.  [perl #120244]
 
 =back
 
@@ -644,7 +645,20 @@ zero no longer occurs.  [perl #119893]
 
 The code that parses regex backrefs (or ambiguous backref/octals) such as \123
 did a simple atoi(), which could wrap round to negative values on long digit
-strings and cause segmentation faults.  This has now been fixed.  [perl #119505]
+strings and cause segmentation faults.  This has now been fixed.  [perl
+#119505]
+
+=item *
+
+C<select> used to ignore magic on the fourth (timeout) argument, leading to
+effects such as C<select> blocking indefinitely rather than the expected sleep
+time.  This has now been fixed.  [perl #120102]
+
+=item *
+
+The class name in C<for my class $foo> is now parsed correctly.  In the case of
+the second character of the class name being followed by a digit (e.g. 'a1b')
+this used to give the error "Missing $ on loop variable".  [perl #120112]
 
 =back
 
