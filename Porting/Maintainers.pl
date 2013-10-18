@@ -14,7 +14,6 @@ use File::Glob qw(:case);
 %Maintainers = (
     'CBERRY'    => 'Craig Berry <craigberry@mac.com>',
     'JDB'       => 'Jan Dubois <jand@activestate.com>',
-    'laun'      => 'Wolfgang Laun <Wolfgang.Laun@alcatel.at>',
     'PMQS'      => 'Paul Marquess <pmqs@cpan.org>',
     'SMCCAM'    => 'Stephen McCamant <smccam@cpan.org>',
 );
@@ -1078,12 +1077,6 @@ use File::Glob qw(:case);
             'pod/perlpodstyle.pod' => 'pod/perlpodstyle.pod',
         },
         'UPSTREAM' => 'cpan',
-    },
-
-    's2p' => {
-        'MAINTAINER' => 'laun',
-        'FILES'      => q[x2p/s2p.PL],
-        'UPSTREAM'   => 'blead',
     },
 
     'Safe' => {
