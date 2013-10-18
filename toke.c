@@ -8034,6 +8034,7 @@ Perl_yylex(pTHX)
 		    strnEQ(p, "our", 3) && isSPACE(*(p + 3)))
 		    p += 3;
 		p = PEEKSPACE(p);
+                /* skip optional package name, as in "for my abc $x (..)" */
 		if (isIDFIRST_lazy_if(p,UTF)) {
 		    p = scan_word(p, PL_tokenbuf, sizeof PL_tokenbuf, TRUE, &len);
 		    p = PEEKSPACE(p);
