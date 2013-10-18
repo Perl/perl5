@@ -3663,7 +3663,6 @@ ext/Opcode/t/Opcode.t		See if Opcode works
 ext/Opcode/t/ops.t		See if Opcode works
 ext/PerlIO-encoding/encoding.pm	PerlIO::encoding
 ext/PerlIO-encoding/encoding.xs	PerlIO::encoding
-ext/PerlIO-encoding/MANIFEST	PerlIO::encoding list of files
 ext/PerlIO-encoding/t/encoding.t	See if PerlIO encoding conversion works
 ext/PerlIO-encoding/t/fallback.t	See if PerlIO fallbacks work
 ext/PerlIO-encoding/t/nolooping.t	Tests for PerlIO::encoding
@@ -3820,10 +3819,8 @@ ext/XS-APItest/core.c		Test API functions when PERL_CORE is defined
 ext/XS-APItest/core_or_not.inc	Code common to core.c and notcore.c
 ext/XS-APItest/exception.c	XS::APItest extension
 ext/XS-APItest/Makefile.PL	XS::APItest extension
-ext/XS-APItest/MANIFEST		XS::APItest extension
 ext/XS-APItest/notcore.c	Test API functions when PERL_CORE is not defined
 ext/XS-APItest/numeric.xs	XS::APItest wrappers for numeric.c
-ext/XS-APItest/README		XS::APItest extension
 ext/XS-APItest/t/addissub.t	test op check wrapping
 ext/XS-APItest/t/arrayexpr.t	test recursive descent expression parsing
 ext/XS-APItest/t/autoload.t	Test XS AUTOLOAD routines
@@ -4067,7 +4064,6 @@ lib/Config/Extensions.pm	Convenient hash lookup for built extensions
 lib/Config/Extensions.t		See if Config::Extensions works
 lib/Config.t			See if Config works
 lib/CORE.pod			document the CORE namespace
-lib/DBM_Filter/Changes		DBM Filter Change history
 lib/DBM_Filter/compress.pm	DBM Filter to compress keys/values
 lib/DBM_Filter/encode.pm	DBM Filter for encoding
 lib/DBM_Filter/int32.pm		DBM Filter for creating int32 keys/values
