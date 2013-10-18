@@ -30,7 +30,6 @@ my @Modules = qw(
 
 # Modules which are known to be broken
 my %Broken = map { $_ => 1 } qw(
-    Test::Class
 );
 
 TODO: for my $name (@ARGV ? @ARGV : @Modules) {

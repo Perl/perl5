@@ -324,6 +324,13 @@ enabled and C<use parent> instead of @ISA.
 
 =item *
 
+L<Test::Simple> has been upgraded from version 0.98 to 0.99.
+
+Numerous updates and bug fixes are incorporated.  See the F<Changes> file for
+full details.
+
+=item *
+
 L<threads> has been upgraded from version 1.87 to 1.89.
 
 The documentation of C<alarm> and C<_handle> has been updated.

@@ -1,3 +1,98 @@
+0.99     Sat Oct 12 15:05:41 EDT 2013
+    * no changes since 0.98_06
+
+0.98_06  Fri Sep 27 10:11:05 EDT 2013
+    Bug Fixes
+    * Fix precedence error with (return ... and ...)
+      (nthykier) [github #385]
+
+0.98_05  Tue Apr 23 17:33:51 PDT 2013
+    Doc Changes
+    * Add a shorter work around for the UTF-8 output problem.
+      (Michael G Schwern)
+
+    Bug Fixes
+    * Test::Builder::Tester now works with subtests.
+      (Michael G Schwern) [github 350]
+    * Fix test_fail() inside a do statement.
+      (nnutter) [github #369]
+
+    New Features
+    * A subtest will put its name at the front of its results to make
+      subtests easier to read. [github #290] [github #364]
+      (Brendan Byrd)
+
+    Feature Changes
+    * like() and unlike() no longer warn about undef. [github #335]
+      (Michael G Schwern)
+
+
+0.98_04  Sun Apr 14 10:54:13 BST 2013
+    Distribution Changes
+    * Scalar::Util 1.13 (ships with Perl 5.8.1) is now required.
+      (Michael G Schwern)
+
+    Feature Changes
+    * The default name and diagnostics for isa_ok() and new_ok() have
+      changed. (Michael G Schwern)
+
+    Docs Fixes
+    * Added a COMPATIBILITY section so users know what major features were
+      added with what version of Test::More or perl. [github 343] [github 344]
+      (pdl)
+    * Fix the ok() example with grep(). (derek.mead@gmail.com)
+
+    Bug Fixes
+    * A test with no plan and missing done_testing() now exits with non-zero.
+      [github #341] (tokuhirom)
+    * isa_ok() tests were broken in 5.17 because of a change in
+      method resolution. [github #353] (Michael G Schwern)
+
+
+0.98_03  Thu Jun 21 13:04:19 PDT 2012
+    New Features
+    * cmp_ok() will error when used with something which is not a
+      comparison operator, including =, += and the like.
+      [github 141] (Matthew Horsfall)
+
+    Bug Fixes
+    * use_ok() was calling class->import without quoting which could
+      cause problems if "class" is also a function.
+
+    Doc Fixes
+    * use_ok() has been discouraged and de-emphasized as a general
+      replacement for `use` in tests. [github #288]
+    * $thing is now $this in the docs to avoid confusing users of
+      other languages. [Karen Etheridge]
+
+    Incompatible Changes With Previous Alphas (0.98_01)
+    * use_ok() will no longer apply lexical pragams.  The incompatibilities
+      and extra complexity is not worth the marginal use.
+      [github #287]
+
+
+0.98_02  Thu Nov 24 01:13:53 PST 2011
+    Bug Fixes
+    * use_ok() in 0.98_01 was leaking pragmas from inside Test::More.
+      This looked like Test::More was forcing strict. [rt.cpan.org 67538]
+      (Father Chrysostomos)
+
+
+0.98_01  Tue Nov  8 17:07:58 PST 2011
+    Bug Fixes
+    * BAIL_OUT works inside a subtest. (Larry Leszczynski) [github #138]
+    * subtests now work with threads turned on. [github #145]
+
+    Feature Changes
+    * use_ok() will now apply lexical effects. [rt.cpan.org 67538]
+      (Father Chrysostomos)
+
+    Misc
+    * Test::More, Test::Simple and Test::Builder::Module now require
+      a minimum version of Test::Builder.  This avoids Test::More and
+      Test::Builder from getting out of sync. [github #89]
+
+
 0.98  Wed, 23 Feb 2011 14:38:02 +1100
     Bug Fixes
     * subtest() should not fail if $? is non-zero. (Aaron Crane)

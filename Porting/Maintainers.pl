@@ -1220,7 +1220,7 @@ use File::Glob qw(:case);
     },
 
     'Test::Simple' => {
-        'DISTRIBUTION' => 'MSCHWERN/Test-Simple-0.98.tar.gz',
+        'DISTRIBUTION' => 'RJBS/Test-Simple-0.99.tar.gz',
         'FILES'        => q[cpan/Test-Simple],
         'EXCLUDED'     => [
             qw( .perlcriticrc
@@ -1232,18 +1232,6 @@ use File::Glob qw(:case);
                 lib/Test/Builder/IO/Scalar.pm
                 ),
         ],
-
-        'CUSTOMIZED'   => [
-            # Waiting to be merged upstream: see CPAN RT#79762
-            't/fail-more.t',
-
-            # Waiting to be merged upstream: see PERL RT#119825
-            'lib/Test/Builder.pm',
-            'lib/Test/Builder/Module.pm',
-            'lib/Test/More.pm',
-            'lib/Test/Simple.pm',
-        ],
-
         'UPSTREAM' => 'cpan',
     },
 

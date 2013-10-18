@@ -2467,7 +2467,9 @@ cpan/Test-Simple/t/lib/Test/Simple/sample_tests/exit.plx			for exit.t
 cpan/Test-Simple/t/lib/Test/Simple/sample_tests/extras.plx		for exit.t
 cpan/Test-Simple/t/lib/Test/Simple/sample_tests/five_fail.plx		for exit.t
 cpan/Test-Simple/t/lib/Test/Simple/sample_tests/last_minute_death.plx	for exit.t
+cpan/Test-Simple/t/lib/Test/Simple/sample_tests/missing_done_testing.plx	for exit.t
 cpan/Test-Simple/t/lib/Test/Simple/sample_tests/one_fail.plx		for exit.t
+cpan/Test-Simple/t/lib/Test/Simple/sample_tests/one_fail_without_plan.plx	for exit.t
 cpan/Test-Simple/t/lib/Test/Simple/sample_tests/pre_plan_death.plx	for exit.t
 cpan/Test-Simple/t/lib/Test/Simple/sample_tests/require.plx		for exit.t
 cpan/Test-Simple/t/lib/Test/Simple/sample_tests/success.plx		for exit.t
@@ -2496,6 +2498,7 @@ cpan/Test-Simple/t/simple.t				Test::Simple test, basic stuff
 cpan/Test-Simple/t/skipall.t				Test::More test, skip all tests
 cpan/Test-Simple/t/skip.t				Test::More test, SKIP tests
 cpan/Test-Simple/t/subtest/args.t			Test::More test
+cpan/Test-Simple/t/subtest/bail_out.t			Test::More test
 cpan/Test-Simple/t/subtest/basic.t			Test::More test
 cpan/Test-Simple/t/subtest/die.t			Test::More test
 cpan/Test-Simple/t/subtest/do.t				Test::More test
@@ -2507,6 +2510,7 @@ cpan/Test-Simple/t/subtest/line_numbers.t			Test::Builder tests
 cpan/Test-Simple/t/subtest/plan.t			Test::Builder tests
 cpan/Test-Simple/t/subtest/predicate.t			Test::Builder tests
 cpan/Test-Simple/t/subtest/singleton.t			Test::More test
+cpan/Test-Simple/t/subtest/threads.t			Test::More test
 cpan/Test-Simple/t/subtest/todo.t			Test::Builder tests
 cpan/Test-Simple/t/subtest/wstat.t			Test::More test
 cpan/Test-Simple/t/tbm_doesnt_set_exported_to.t		Test::Builder::Module test
@@ -2517,6 +2521,9 @@ cpan/Test-Simple/t/Tester/tbt_04line_num.t		Test::Builder::Tester test
 cpan/Test-Simple/t/Tester/tbt_05faildiag.t		Test::Builder::Tester test
 cpan/Test-Simple/t/Tester/tbt_06errormess.t		Test::Builder::Tester test
 cpan/Test-Simple/t/Tester/tbt_07args.t			Test::Builder::Tester test
+cpan/Test-Simple/t/Tester/tbt_08subtest.t		Test::Builder::Tester test
+cpan/Test-Simple/t/Tester/tbt_09do_script.pl		Test::Builder::Tester test
+cpan/Test-Simple/t/Tester/tbt_09do.t			Test::Builder::Tester test
 cpan/Test-Simple/t/threads.t				Test::Builder thread-safe checks
 cpan/Test-Simple/t/thread_taint.t			Test::Simple test
 cpan/Test-Simple/t/todo.t				Test::More test, TODO tests
