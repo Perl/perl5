@@ -401,6 +401,8 @@ use File::Glob qw(:case);
         'DISTRIBUTION' => 'GAAS/Digest-MD5-2.53.tar.gz',
         'FILES'        => q[cpan/Digest-MD5],
         'EXCLUDED'     => ['rfc1321.txt'],
+        # Waiting to be merged upstream: see CPAN RT#TODO
+        'CUSTOMIZED'   => ['t/files.t'],
     },
 
     'Digest::SHA' => {
@@ -1101,9 +1103,11 @@ use File::Glob qw(:case);
             qr{^t/lib/Test/},
             qr{^xt/},
             qw( Changes-2.64
+                MANIFEST.CUMMULATIVE
                 NotBuild.PL
                 HACKING.pod
                 perlcriticrc
+                t/000-load.t
                 t/lib/if.pm
                 ),
         ],

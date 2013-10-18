@@ -44,7 +44,8 @@ for (split /^/, $EXPECT) {
      my $base = $file;
 #     print "# $base\n";
      if ($ENV{PERL_CORE}) {
-         if ($file eq 'rfc1321.txt') { # Don't have it in core.
+         # Don't have these in core.
+         if ($file eq 'rfc1321.txt' or $file eq 'README') {
 	     print "ok ", ++$testno, " # Skip: PERL_CORE\n";
 	     next;
 	 }
