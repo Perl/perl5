@@ -405,7 +405,7 @@ use File::Glob qw(:case);
         'DISTRIBUTION' => 'GAAS/Digest-MD5-2.53.tar.gz',
         'FILES'        => q[cpan/Digest-MD5],
         'EXCLUDED'     => ['rfc1321.txt'],
-        # Waiting to be merged upstream: see CPAN RT#TODO
+        # Waiting to be merged upstream: see CPAN RT#89612
         'CUSTOMIZED'   => ['t/files.t'],
     },
 
