@@ -5624,7 +5624,7 @@ END
                     # that next time through are set up just below in the
                     # scalars whose names begin with '$next_'.
 
-                    if ($use_adjustments) {
+                    if ($use_adjustments && ! $range_size_1) {
 
                         # When converting to use adjustments, we can handle
                         # only single element ranges.  Set up so that this
@@ -5812,6 +5812,8 @@ END
                                 # indentation
                                 my $comment_indent;
 
+                                my $output_value = $value;
+
                                 # Determine the annotation
                                 if ($format eq $DECOMP_STRING_FORMAT) {
 
@@ -5823,7 +5825,8 @@ END
                                     # strings, one of the printable
                                     # characters, and one of their official
                                     # names.
-                                    (my $map = $value) =~ s/ \ * < .*? > \ +//x;
+                                    (my $map = $output_value)
+                                                    =~ s/ \ * < .*? > \ +//x;
                                     my $tostr = "";
                                     my $to_name = "";
                                     my $to_chr = "";
@@ -5842,26 +5845,42 @@ END
                                                             # experiment
                                 }
                                 else {
+                                    $output_value = CORE::hex $value
+                                           if $format eq $HEX_FORMAT
+                                              || $format eq $HEX_ADJUST_FORMAT;
+                                    $output_value += $offset
+                                                   if $use_adjustments
+                                                       # Don't try to adjust a
+                                                       # non-integer
+                                                   && $output_value !~ /[-\D]/;
 
                                     # Assume that any table that has hex
                                     # format is a mapping of one code point to
                                     # another.
-                                    if ($format eq $HEX_FORMAT) {
-                                        my $decimal_value = CORE::hex $value;
-                                        main::populate_char_info($decimal_value)
-                                        if ! defined $viacode[$decimal_value];
+                                    if ($format eq $HEX_FORMAT
+                                        || $format eq $HEX_ADJUST_FORMAT)
+                                    {
+                                        main::populate_char_info($output_value)
+                                        if ! defined $viacode[$output_value];
                                         $comment .= "=> '"
-                                        . chr($decimal_value)
-                                        . "'; " if $printable[$decimal_value];
+                                        . chr($output_value)
+                                        . "'; " if $printable[$output_value];
                                     }
                                     $comment .= $viacode[$i] if $include_name
                                                             && $viacode[$i];
-                                    if ($format eq $HEX_FORMAT) {
-                                        my $decimal_value = CORE::hex $value;
+                                    if ($format eq $HEX_FORMAT
+                                        || $format eq $HEX_ADJUST_FORMAT)
+                                    {
                                         $comment .=
-                                            " => $viacode[$decimal_value]"
-                                                if $viacode[$decimal_value];
+                                            " => $viacode[$output_value]"
+                                                if $viacode[$output_value];
                                     }
+
+                                    $output_value = sprintf("%X", $output_value)
+                                        if  $format eq $HEX_ADJUST_FORMAT
+                                            || ($format eq $HEX_FORMAT
+                                                && $self->full_name
+                                                        !~ / ^ Legacy /x);
 
                                     # If including the name, no need to
                                     # indent, as the name will already be way
@@ -5872,12 +5891,14 @@ END
                                 # Use any passed in routine to output the base
                                 # part of the line.
                                 if (ref $range_size_1 eq 'CODE') {
-                                    my $base_part=&{$range_size_1}($i, $value);
+                                    my $base_part=&{$range_size_1}
+                                                        ($i, $output_value);
                                     chomp $base_part;
                                     push @OUT, $base_part;
                                 }
                                 else {
-                                    push @OUT, sprintf "%04X\t\t%s", $i, $value;
+                                    push @OUT, sprintf "%04X\t\t%s",
+                                                        $i, $output_value;
                                 }
 
                                 # And add the annotation.
