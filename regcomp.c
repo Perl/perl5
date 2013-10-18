@@ -4545,8 +4545,9 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
                     classnum = FLAGS(scan);
                     namedclass = classnum_to_namedclass(classnum) + invert;
                     if (flags & SCF_DO_STCLASS_AND) {
-                        bool was_there = ANYOF_POSIXL_TEST(data->start_class,
-                                                           namedclass);
+                        bool was_there = cBOOL(
+                                          ANYOF_POSIXL_TEST(data->start_class,
+                                                                 namedclass));
                         ANYOF_POSIXL_ZERO(data->start_class);
                         if (was_there) {    /* Do an AND */
                             ANYOF_POSIXL_SET(data->start_class, namedclass);
@@ -7945,7 +7946,7 @@ Perl__invlist_union_maybe_complement_2nd(pTHX_ SV* const a, SV* const b, const b
 
 	if (*output == a) {
             if (a != NULL) {
-                if (! (make_temp = SvTEMP(a))) {
+                if (! (make_temp = cBOOL(SvTEMP(a)))) {
                     SvREFCNT_dec_NN(a);
                 }
             }
@@ -7965,7 +7966,7 @@ Perl__invlist_union_maybe_complement_2nd(pTHX_ SV* const a, SV* const b, const b
     else if ((len_b = _invlist_len(b)) == 0) {
         bool make_temp = FALSE;
 	if (*output == b) {
-            if (! (make_temp = SvTEMP(b))) {
+            if (! (make_temp = cBOOL(SvTEMP(b)))) {
                 SvREFCNT_dec_NN(b);
             }
 	}
@@ -7974,7 +7975,7 @@ Perl__invlist_union_maybe_complement_2nd(pTHX_ SV* const a, SV* const b, const b
          * so the union with <a> includes everything too */
         if (complement_b) {
             if (a == *output) {
-                if (! (make_temp = SvTEMP(a))) {
+                if (! (make_temp = cBOOL(SvTEMP(a)))) {
                     SvREFCNT_dec_NN(a);
                 }
             }
@@ -8204,7 +8205,7 @@ Perl__invlist_intersection_maybe_complement_2nd(pTHX_ SV* const a, SV* const b, 
              * simply 'a'. */
             if (*i != a) {
                 if (*i == b) {
-                    if (! (make_temp = SvTEMP(b))) {
+                    if (! (make_temp = cBOOL(SvTEMP(b)))) {
                         SvREFCNT_dec_NN(b);
                     }
                 }
@@ -8222,12 +8223,12 @@ Perl__invlist_intersection_maybe_complement_2nd(pTHX_ SV* const a, SV* const b, 
         /* Here, 'a' or 'b' is empty and not using the complement of 'b'.  The
          * intersection must be empty */
 	if (*i == a) {
-            if (! (make_temp = SvTEMP(a))) {
+            if (! (make_temp = cBOOL(SvTEMP(a)))) {
                 SvREFCNT_dec_NN(a);
             }
 	}
 	else if (*i == b) {
-            if (! (make_temp = SvTEMP(b))) {
+            if (! (make_temp = cBOOL(SvTEMP(b)))) {
                 SvREFCNT_dec_NN(b);
             }
 	}
