@@ -170,19 +170,6 @@ use File::Glob qw(:case);
         'EXCLUDED'     => [qr{^t/release-.*\.t}],
     },
 
-    'B' => {
-        'FILES'      => q[ext/B],
-        'EXCLUDED'   => [
-            qw( B/Concise.pm
-                t/concise.t
-                ),
-        ],
-    },
-
-    'B::Concise' => {
-        'FILES'      => q[ext/B/B/Concise.pm ext/B/t/concise.t],
-    },
-
     'B::Debug' => {
         'DISTRIBUTION' => 'RURBAN/B-Debug-1.18.tar.gz',
         'FILES'        => q[cpan/B-Debug],
@@ -1371,6 +1358,7 @@ use File::Glob qw(:case);
 
     '_PERLLIB' => {
         'FILES'    => q[
+                ext/B/
                 ext/Devel-Peek/
                 ext/DynaLoader/
                 ext/Errno/
