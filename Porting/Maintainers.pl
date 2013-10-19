@@ -1011,13 +1011,8 @@ use File::Glob qw(:case);
     },
 
     'Scalar-List-Utils' => {
-        'DISTRIBUTION' => 'PEVANS/Scalar-List-Utils-1.34.tar.gz',
+        'DISTRIBUTION' => 'PEVANS/Scalar-List-Utils-1.35.tar.gz',
         'FILES'    => q[cpan/List-Util],
-        'EXCLUDED' => [
-            qr{^inc/Module/},
-            qr{^inc/Test/},
-            'mytypemap',
-        ],
     },
 
     'Search::Dict' => {

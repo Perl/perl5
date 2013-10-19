@@ -268,10 +268,11 @@ A return/or precedence issue in C<_incr_parse> has been fixed.
 
 =item *
 
-L<List::Util> has been upgraded from version 1.32 to 1.34.
+L<List::Util> has been upgraded from version 1.32 to 1.35.
 
-The list reduction functions C<any>, C<all>, C<none> and C<notall> have been
-added.
+The list functions C<any>, C<all>, C<none>, C<notall> and C<product> have been
+added, and C<reduce> and C<first> are now implemented even in the absence of
+MULTICALL.
 
 =item *
 

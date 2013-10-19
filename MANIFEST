@@ -1418,6 +1418,7 @@ cpan/List-Util/t/min.t			List::Util
 cpan/List-Util/t/multicall-refcount.t
 cpan/List-Util/t/openhan.t		Scalar::Util
 cpan/List-Util/t/pair.t
+cpan/List-Util/t/product.t		List::Util
 cpan/List-Util/t/proto.t		Scalar::Util
 cpan/List-Util/t/readonly.t		Scalar::Util
 cpan/List-Util/t/reduce.t		List::Util
