@@ -177,6 +177,13 @@ keep in sync with the latest CPAN release.
 
 =item *
 
+L<IPC::Cmd> has been upgraded from version 0.84 to 0.84_01.
+
+No changes have been made to the installed code, but a test script has been
+fixed for Solaris (and potentially other SVR* variants).
+
+=item *
+
 L<JSON::PP> has been upgraded from version 2.27202_01 to 2.27203.
 
 A return/or precedence issue in C<_incr_parse> has been fixed.

@@ -653,6 +653,11 @@ use File::Glob qw(:case);
     'IPC::Cmd' => {
         'DISTRIBUTION' => 'BINGOS/IPC-Cmd-0.84.tar.gz',
         'FILES'        => q[cpan/IPC-Cmd],
+        # Waiting to be merged upstream: no ticket, but customized by maintainer
+        'CUSTOMIZED'   => [
+            'lib/IPC/Cmd.pm',
+            't/03_run-forked.t',
+        ],
     },
 
     'IPC::SysV' => {
