@@ -31,9 +31,9 @@ unless ( $true and $false and $echo and $sleep ) {
 my $r;
 
 $r = run_forked($true);
-ok($r->{'exit_code'} eq 0, "$true returns 0");
+ok($r->{'exit_code'} eq '0', "$true returns 0");
 $r = run_forked($false);
-ok($r->{'exit_code'} eq 1, "$false returns 1");
+ok($r->{'exit_code'} ne '0', "$false returns 1");
 
 $r = run_forked([$echo, "test"]);
 ok($r->{'stdout'} =~ /test/, "arrayref cmd: https://rt.cpan.org/Ticket/Display.html?id=70530");
