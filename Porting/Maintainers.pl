@@ -11,13 +11,6 @@ package Maintainers;
 use utf8;
 use File::Glob qw(:case);
 
-%Maintainers = (
-    'CBERRY'    => 'Craig Berry <craigberry@mac.com>',
-    'JDB'       => 'Jan Dubois <jand@activestate.com>',
-    'PMQS'      => 'Paul Marquess <pmqs@cpan.org>',
-    'SMCCAM'    => 'Stephen McCamant <smccam@cpan.org>',
-);
-
 # IGNORABLE: files which, if they appear in the root of a CPAN
 # distribution, need not appear in core (i.e. core-cpan-diff won't
 # complain if it can't find them)
@@ -51,15 +44,13 @@ use File::Glob qw(:case);
 # modules with files in cpan/ are understood to have UPSTREAM 'cpan',
 # meaning that the module on CPAN is to be patched first.
 
-# MAINTAINER indicates who the current maintainer of the module is.  For
-# modules with no MAINTAINER field given, this is understood to be either
-# the Perl 5 Porters if UPSTREAM is 'blead', or else the CPAN author whose
-# PAUSE user ID forms the first part of the DISTRIBUTION value, e.g.
-# 'BINGOS' in the case of 'BINGOS/Archive-Tar-1.92.tar.gz'.  (PAUSE's View
-# Permissions page may be consulted to find other authors who have owner
-# or co-maint permissions for the module in question.)  The few explicitly
-# listed MAINTAINERs refer to authors whose email address is listed in the
-# %Maintainers hash above.
+# MAINTAINER has previously been used to indicate who the current maintainer
+# of the module is, but this is no longer stated explicitly. It is now
+# understood to be either the Perl 5 Porters if UPSTREAM is 'blead', or else
+# the CPAN author whose PAUSE user ID forms the first part of the DISTRIBUTION
+# value, e.g. 'BINGOS' in the case of 'BINGOS/Archive-Tar-1.92.tar.gz'.
+# (PAUSE's View Permissions page may be consulted to find other authors who
+# have owner or co-maint permissions for the module in question.)
 
 # FILES is a list of filenames, glob patterns, and directory
 # names to be recursed down, which collectively generate a complete list
@@ -189,7 +180,6 @@ use File::Glob qw(:case);
     },
 
     'B::Concise' => {
-        'MAINTAINER' => 'SMCCAM',
         'FILES'      => q[ext/B/B/Concise.pm ext/B/t/concise.t],
     },
 
@@ -200,7 +190,6 @@ use File::Glob qw(:case);
     },
 
     'B::Deparse' => {
-        'MAINTAINER' => 'SMCCAM',
         'FILES'      => q[dist/B-Deparse],
     },
 
@@ -1332,18 +1321,7 @@ use File::Glob qw(:case);
         'UPSTREAM' => 'blead',
     },
 
-    'VMS::DCLsym' => {
-        'MAINTAINER' => 'CBERRY',
-        'FILES'      => q[ext/VMS-DCLsym],
-    },
-
-    'VMS::Stdio' => {
-        'MAINTAINER' => 'CBERRY',
-        'FILES'      => q[ext/VMS-Stdio],
-    },
-
     'warnings' => {
-        'MAINTAINER' => 'PMQS',
         'FILES'      => q[
                  lib/warnings
                  lib/warnings.{pm,t}
@@ -1364,11 +1342,6 @@ use File::Glob qw(:case);
             qr{^ex/},
             't/pod.t',
         ],
-    },
-
-    'Win32CORE' => {
-        'MAINTAINER' => 'JDB',
-        'FILES'      => q[ext/Win32CORE],
     },
 
     'XSLoader' => {
@@ -1425,7 +1398,10 @@ use File::Glob qw(:case);
                 ext/Sys-Hostname/
                 ext/Tie-Hash-NamedCapture/
                 ext/Tie-Memoize/
+                ext/VMS-DCLsym/
                 ext/VMS-Filespec/
+                ext/VMS-Stdio/
+                ext/Win32CORE/
                 ext/XS-APItest/
                 ext/XS-Typemap/
                 ext/arybase/
@@ -1543,7 +1519,7 @@ for ( keys %Modules ) {
 
 # legacy MAINTAINER field
 for ( keys %Modules ) {
-    # Honour any existing MAINTAINER flag for now, but we'd like to remove them
+    # Keep any existing MAINTAINER flag so that "overrides" can be applied
     next if exists $Modules{$_}{MAINTAINER};
 
     if ($Modules{$_}{UPSTREAM} eq 'blead') {
