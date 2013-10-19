@@ -87,7 +87,7 @@ XXX For a release on a stable branch, this section aspires to be:
 
 =head2 Functions C<PerlIO_vsprintf> and C<PerlIO_sprintf> have been removed
 
-These two functions, undocumented, unused in CPAN, and problematic have been
+These two functions, undocumented, unused in CPAN, and problematic, have been
 removed.
 
 =head1 Deprecations
@@ -215,8 +215,8 @@ Some POD formatting errors in the documentation have been corrected.
 
 L<ExtUtils::MakeMaker> has been upgraded from version 6.76 to 6.80.
 
-Numerous updates and bug fixes are incorporated.  See the F<Changes> file for
-full details.
+Numerous updates and bug fixes are incorporated.  See the F<Changes> file in
+the CPAN distribution for full details.
 
 =item *
 
@@ -262,7 +262,7 @@ keep in sync with the latest CPAN release.
 
 =item *
 
-L<JSON::PP> has been upgraded from version 2.27202 to 2.27203.
+L<JSON::PP> has been upgraded from version 2.27202_01 to 2.27203.
 
 A return/or precedence issue in C<_incr_parse> has been fixed.
 
@@ -325,16 +325,23 @@ enabled and C<use parent> instead of @ISA.
 
 =item *
 
-L<Test::Simple> has been upgraded from version 0.98 to 0.99.
+L<Test::Simple> has been upgraded from version 0.98_06 to 0.99.
 
-Numerous updates and bug fixes are incorporated.  See the F<Changes> file for
-full details.
+Numerous updates and bug fixes are incorporated.  See the F<Changes> file in
+the CPAN distribution for full details.
 
 =item *
 
 L<threads> has been upgraded from version 1.87 to 1.89.
 
 The documentation of C<alarm> and C<_handle> has been updated.
+
+=item *
+
+L<Unicode::UCD> has been upgraded from version 0.54 to 0.55.
+
+An internals-only change has been made to handle changes in format within some
+character database tables.
 
 =item *
 
@@ -536,6 +543,17 @@ that they represent may be covered elsewhere.
 [ List each test improvement as a =item entry ]
 
 =over 4
+
+=item *
+
+The new prototype attribute syntax is tested by a new test script,
+F<t/op/attrproto.t>.
+
+=item *
+
+The new test script F<t/io/closepid.t> tests that C<close> on the original of a
+popen handle dupped to a standard handle no longer blocks internally on
+C<waitpid(0, ...)>.
 
 =item *
 
