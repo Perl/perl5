@@ -2837,9 +2837,6 @@ dist/base/t/lib/HasSigDie.pm	Module for testing base.pm
 dist/base/t/sigdie.t		See if base works with SIGDIE
 dist/base/t/version.t		See if base works with versions
 dist/base/t/warnings.t		See if base works with warnings
-dist/B-Deparse/Deparse.pm	Compiler Deparse backend
-dist/B-Deparse/t/core.t		See if B::Deparse knows when to use CORE::
-dist/B-Deparse/t/deparse.t	See if B::Deparse works
 dist/bignum/lib/bigint.pm		bigint
 dist/bignum/lib/bignum.pm		bignum
 dist/bignum/lib/bigrat.pm		bigrat
@@ -4049,6 +4046,9 @@ keywords.h			The keyword numbers
 l1_char_class_tab.h		256 word bit table of character classes (for handy.h)
 lib/AnyDBM_File.pm		Perl module to emulate dbmopen
 lib/AnyDBM_File.t		See if AnyDBM_File works
+lib/B/Deparse-core.t		See if B::Deparse knows when to use CORE::
+lib/B/Deparse.pm		Compiler Deparse backend
+lib/B/Deparse.t			See if B::Deparse works
 lib/Benchmark.pm		Measure execution time
 lib/Benchmark.t			See if Benchmark works
 lib/blib.pm			For "use blib"

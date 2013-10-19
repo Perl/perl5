@@ -14,7 +14,11 @@
 /AutoLoader.pm
 /AutoSplit.pm
 /B.pm
-/B/
+/B/Concise.pm
+/B/Debug.pm
+/B/Showlex.pm
+/B/Terse.pm
+/B/Xref.pm
 /CGI.pm
 /CGI/
 /CPAN.pm

@@ -338,7 +338,7 @@ SKIP:
 {
     skip "sanity checks when not PERL_CORE", 1 unless defined $ENV{PERL_CORE};
     my $count = 0;
-    my $file = '../../regen/keywords.pl';
+    my $file = '../regen/keywords.pl';
     my $pass = 1;
     if (open my $fh, '<', $file) {
 	while (<$fh>) {

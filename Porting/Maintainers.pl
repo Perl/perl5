@@ -189,10 +189,6 @@ use File::Glob qw(:case);
         'EXCLUDED'     => ['t/pod.t'],
     },
 
-    'B::Deparse' => {
-        'FILES'      => q[dist/B-Deparse],
-    },
-
     'base' => {
         'DISTRIBUTION' => 'RGARCIA/base-2.18.tar.gz',
         'FILES'        => q[dist/base],
@@ -1410,6 +1406,7 @@ use File::Glob qw(:case);
                 ext/re/
                 lib/AnyDBM_File.{pm,t}
                 lib/Benchmark.{pm,t}
+                lib/B/Deparse{.pm,.t,-core.t}
                 lib/CORE.pod
                 lib/Class/Struct.{pm,t}
                 lib/Config.t
