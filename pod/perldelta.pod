@@ -260,18 +260,18 @@ The documentation of C<alarm> and C<_handle> has been updated.
 
 =item *
 
-L<Unicode::UCD> has been upgraded from version 0.54 to 0.55.
-
-An internals-only change has been made to handle changes in format within some
-character database tables.
-
-=item *
-
 L<Unicode::Normalize> has been upgraded from version 1.16 to 1.17.
 
 The module now C<die>s if it cannot get Unicode code points using C<unpack>.
 (There is already a similar C<die> if Unicode code points cannot be stringified
 using C<pack>.)
+
+=item *
+
+L<Unicode::UCD> has been upgraded from version 0.54 to 0.55.
+
+An internals-only change has been made to handle changes in format within some
+character database tables.
 
 =item *
 
