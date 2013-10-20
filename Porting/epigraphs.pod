@@ -17,6 +17,71 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.19.5 - Charles Baudelaire, "The Flowers of Evil", 51. The Cat
+
+L<Announced on 2013-10-20 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2013/10/msg208752.html>
+
+=over
+
+  I
+
+  A cat is strolling through my mind
+  Acting as though he owned the place,
+  A lovely cat -- strong, charming, sweet.
+  When he meows, one scarcely hears,
+
+  So tender and discreet his tone;
+  But whether he should growl or purr
+  His voice is always rich and deep.
+  That is the secret of his charm.
+
+  This purling voice that filters down
+  Into my darkest depths of soul
+  Fulfils me like a balanced verse,
+  Delights me as a potion would.
+
+  It puts to sleep the cruellest ills
+  And keeps a rein on ecstasies --
+  Without the need for any words
+  It can pronounce the longest phrase.
+
+  Oh no, there is no bow that draws
+  Across my heart, fine instrument,
+  And makes to sing so royally
+  The strongest and the purest chord,
+
+  More than your voice, mysterious cat,
+  Exotic cat, seraphic cat,
+  In whom all is, angelically,
+  As subtle as harmonious.
+
+  II
+
+  From his soft fur, golden and brown,
+  Goes out so sweet a scent, one night
+  I might have been embalmed in it
+  By giving him one little pet.
+
+  He is my household's guardian soul;
+  He judges, he presides, inspires
+  All matters in hos royal realm;
+  Might he be fairy? or a god?
+
+  When my eyes, to this cat I love
+  Drawn as by a magnet's force,
+  Turn tamely back from that appeal,
+  And when I look within myself,
+
+  I notice with astonishment
+  The fire of his opal eyes,
+  Clear beacons glowing, living jewels,
+  Taking my measure, steadily.
+
+  -- Charles Baudelaire, /The Flowers of Evil, 51. The Cat/,
+     trans. James McGowan
+
+=back
+
 =head2 v5.19.4 - Washington Irving, "The Widow and Her Son"
 
 L<Announced on 2013-09-20 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2013/09/msg207969.html>
