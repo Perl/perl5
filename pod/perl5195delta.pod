@@ -1,0 +1,525 @@
+=encoding utf8
+
+=head1 NAME
+
+perl5195delta - what is new for perl v5.19.5
+
+=head1 DESCRIPTION
+
+This document describes differences between the 5.19.4 release and the 5.19.5
+release.
+
+If you are upgrading from an earlier release such as 5.19.3, first read
+L<perl5194delta>, which describes differences between 5.19.3 and 5.19.4.
+
+=head1 Core Enhancements
+
+=head2 Unicode 6.3 now supported
+
+Perl now supports and is shipped with Unicode 6.3 (though Perl may be
+recompiled with any previous Unicode release as well).  A detailed list of
+Unicode 6.3 changes is at L<http://www.unicode.org/versions/Unicode6.3.0/>.
+
+=head2 Experimental Postfix Dereferencing
+
+When the C<postderef> feature is in effect, the following syntactical
+equivalencies are set up:
+
+  $sref->$*;  # same as ${ $sref }  # interpolates
+  $aref->@*;  # same as @{ $aref }  # interpolates
+  $href->%*;  # same as %{ $href }
+  $cref->&*;  # same as &{ $cref }
+  $gref->**;  # same as *{ $gref }
+
+  $gref->*{ $slot }; # same as *{ $gref }{ $slot }
+
+  $aref->@[ ... ];  # same as @$aref[ ... ]  # interpolates
+  $href->@{ ... };  # same as @$href{ ... }  # interpolates
+  $aref->%[ ... ];  # same as %$aref[ ... ]
+  $href->%{ ... };  # same as %$href{ ... }
+
+Those marked as interpolating only interpolate if the associated
+C<postderef_qq> feature is also enabled.  This feature is B<experimental> and
+will trigger C<experimental::postderef>-category warnings when used, unless
+they are suppressed.
+
+For more information, consult L<the Postfix Dereference Syntax section of
+perlref|perlref/Postfix Dereference Syntax>.
+
+=head2 C<sub>s now take a C<prototype> attribute
+
+When declaring or defining a C<sub>, the prototype can now be specified inside
+of a C<prototype> attribute instead of in parens following the name.
+
+For example, C<sub foo($$){}> could be rewritten as
+C<sub foo : prototype($$){}>.
+
+=head1 Incompatible Changes
+
+=head2 Functions C<PerlIO_vsprintf> and C<PerlIO_sprintf> have been removed
+
+These two functions, undocumented, unused in CPAN, and problematic, have been
+removed.
+
+=head1 Performance Enhancements
+
+=over 4
+
+=item *
+
+Perl has an optimizer for regular expression patterns.  It analyzes the pattern
+to find things such as the minimum length a string has to be to match, etc.  It
+now better handles code points that are above the Latin1 range.
+
+=back
+
+=head1 Modules and Pragmata
+
+=head2 Updated Modules and Pragmata
+
+=over 4
+
+=item *
+
+L<attributes> has been upgraded from version 0.21 to 0.22.
+
+Support has been added for the C<prototype> attribute.
+
+=item *
+
+L<autodie> has been upgraded from version 2.21 to 2.22.
+
+No changes have been made to the installed code other than the version bump to
+keep in sync with the latest CPAN release.
+
+=item *
+
+L<CPAN::Meta> has been upgraded from version 2.132620 to 2.132830.
+
+L<CPAN::Meta::Prereqs> now has a C<merged_requirements> method for combining
+requirements across multiple phases and types, and an invalid 'meta-spec' is no
+longer a fatal error.
+
+=item *
+
+L<CPAN::Meta::Requirements> has been upgraded from version 2.123 to 2.125.
+
+No changes have been made to the installed code other than the version bump to
+keep in sync with the latest CPAN release.
+
+=item *
+
+L<CPAN::Meta::YAML> has been upgraded from version 0.008 to 0.010.
+
+No material changes have been made to the installed code other than the version
+bump to keep in sync with the latest CPAN release.
+
+=item *
+
+L<Cwd> has been upgraded from version 3.44 to 3.45.
+
+An obsolete #define has been removed from the XS code.
+
+=item *
+
+L<ExtUtils::Install> has been upgraded from version 1.60 to 1.61.
+
+Some POD formatting errors in the documentation have been corrected.
+
+=item *
+
+L<ExtUtils::MakeMaker> has been upgraded from version 6.76 to 6.80.
+
+Numerous updates and bug fixes are incorporated.  See the F<Changes> file in
+the CPAN distribution for full details.
+
+=item *
+
+L<feature> has been upgraded from version 1.33 to 1.34.
+
+The new features C<postderef> and C<postderef_qq> have been added.
+
+=item *
+
+L<File::Fetch> has been upgraded from version 0.42 to 0.44.
+
+No changes have been made to the installed code other than the version bump to
+keep in sync with the latest CPAN release.
+
+=item *
+
+L<File::Glob> has been upgraded from version 1.21 to 1.22.
+
+Since Perl 5.16, code that used C<glob> inside a thread had been
+unintentionally sharing state between threads.  This has now been fixed.  [perl
+#119897/#117823]
+
+=item *
+
+L<File::Temp> has been upgraded from version 0.2301 to 0.2304.
+
+Required versions of other modules used are now listed more explicitly, L<base>
+is now used instead of L<parent>, and L<Exporter> is no longer inherited from.
+
+=item *
+
+L<Getopt::Long> has been upgraded from version 2.41 to 2.42.
+
+The floating point specifier C<name=f> no longer erroneously accepts values
+like 1.2.3.  [cpan #88707]
+
+=item *
+
+L<HTTP::Tiny> has been upgraded from version 0.035 to 0.036.
+
+No changes have been made to the installed code other than the version bump to
+keep in sync with the latest CPAN release.
+
+=item *
+
+L<IPC::Cmd> has been upgraded from version 0.84 to 0.84_01.
+
+No changes have been made to the installed code, but a test script has been
+fixed for Solaris (and potentially other SVR* variants).
+
+=item *
+
+L<JSON::PP> has been upgraded from version 2.27202_01 to 2.27203.
+
+A return/or precedence issue in C<_incr_parse> has been fixed.
+
+=item *
+
+L<List::Util> has been upgraded from version 1.32 to 1.35.
+
+The list functions C<any>, C<all>, C<none>, C<notall> and C<product> have been
+added, and C<reduce> and C<first> are now implemented even in the absence of
+MULTICALL.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 2.99 to 3.00.
+
+The list of Perl versions covered has been updated, %delta is now exported, and
+a bug in C<is_core> whereby it wrongly assumed a linear list of releases has
+been fixed.
+
+=item *
+
+L<Module::Metadata> has been upgraded from version 1.000018 to 1.000019.
+
+Warnings are now disabled during version evaluation.
+
+=item *
+
+L<Parse::CPAN::Meta> has been upgraded from version 1.4407 to 1.4409.
+
+No changes have been made to the installed code other than the version bump to
+keep in sync with the latest CPAN release.
+
+=item *
+
+L<Perl::OSType> has been upgraded from version 1.005 to 1.006.
+
+No changes have been made to the installed code other than the version bump to
+keep in sync with the latest CPAN release.
+
+=item *
+
+L<PerlIO::scalar> has been upgraded from version 0.16 to 0.17.
+
+An infinite loop when reading from a filehandle opened from a reference has
+been fixed by first stringifying the reference.  [perl #119529]
+
+=item *
+
+The podlators modules have been upgraded from version 2.5.1 to 2.5.3.
+
+Numerous updates and bug fixes are incorporated.  See the F<Changes> file in
+the CPAN distribution for full details.
+
+=item *
+
+L<Test::Harness> has been upgraded from version 3.28 to 3.29.
+
+All modules now use C<our> rather than C<use vars>, have C<use warnings>
+enabled and C<use parent> instead of @ISA.
+
+=item *
+
+L<Test::Simple> has been upgraded from version 0.98_06 to 0.99.
+
+Numerous updates and bug fixes are incorporated.  See the F<Changes> file in
+the CPAN distribution for full details.
+
+=item *
+
+L<threads> has been upgraded from version 1.87 to 1.89.
+
+The documentation of C<alarm> and C<_handle> has been updated.
+
+=item *
+
+L<Unicode::Normalize> has been upgraded from version 1.16 to 1.17.
+
+The module now C<die>s if it cannot get Unicode code points using C<unpack>.
+(There is already a similar C<die> if Unicode code points cannot be stringified
+using C<pack>.)
+
+=item *
+
+L<Unicode::UCD> has been upgraded from version 0.54 to 0.55.
+
+An internals-only change has been made to handle changes in format within some
+character database tables.
+
+=item *
+
+L<warnings> has been upgraded from version 1.19 to 1.20.
+
+The new warnings category C<experimental::postderef> has been added.
+
+=back
+
+=head1 Documentation
+
+=head2 Changes to Existing Documentation
+
+=head3 L<perlref>
+
+=over 4
+
+=item *
+
+Documentation of the new postfix dereference syntax has been added.
+
+=back
+
+=head3 L<perlreguts>
+
+=over 4
+
+=item *
+
+The documentation has been updated in the light of recent changes to
+F<regcomp.c>.
+
+=back
+
+=head3 L<perlvar>
+
+=over 4
+
+=item *
+
+Three L<English> variable names which have long been documented but do not
+actually exist have been removed from the documentation.
+
+=back
+
+=head1 Diagnostics
+
+The following additions or changes have been made to diagnostic output,
+including warnings and fatal error messages.  For the complete list of
+diagnostic messages, see L<perldiag>.
+
+=head2 New Diagnostics
+
+=head3 New Warnings
+
+=over 4
+
+=item *
+
+L<Attribute prototype(%s) discards earlier prototype attribute in same sub|perldiag/"Attribute prototype(%s) discards earlier prototype attribute in same sub">
+
+(W misc) A sub was declared as sub foo : prototype(A) : prototype(B) {}, for
+example.  Since each sub can only have one prototype, the earlier
+declaration(s) are discarded while the last one is applied.
+
+=item *
+
+L<Postfix dereference is experimental|perldiag/"Postfix dereference is experimental">
+
+(S experimental::postderef) This warning is emitted if you use the experimental
+postfix dereference syntax.  Simply suppress the warning if you want to use the
+feature, but know that in doing so you are taking the risk of using an
+experimental feature which may change or be removed in a future Perl version:
+
+    no warnings "experimental::postderef";
+    use feature "postderef", "postderef_qq";
+    $ref->$*;
+    $aref->@*;
+    $aref->@[@indices];
+    ... etc ...
+
+=item *
+
+L<Prototype '%s' overridden by attribute 'prototype(%s)' in %s|perldiag/"Prototype '%s' overridden by attribute 'prototype(%s)' in %s">
+
+(W prototype) A prototype was declared in both the parentheses after the sub
+name and via the prototype attribute.  The prototype in parentheses is useless,
+since it will be replaced by the prototype from the attribute before it's ever
+used.
+
+=back
+
+=head1 Utility Changes
+
+=head3 L<a2p>
+
+=over 4
+
+=item *
+
+A possible crash from an off-by-one error when trying to access before the
+beginning of a buffer has been fixed.  [perl #120244]
+
+=back
+
+=head1 Testing
+
+=over 4
+
+=item *
+
+The new prototype attribute syntax is tested by a new test script,
+F<t/op/attrproto.t>.
+
+=item *
+
+The new test script F<t/io/closepid.t> tests that C<close> on the original of a
+popen handle dupped to a standard handle no longer blocks internally on
+C<waitpid(0, ...)>.
+
+=item *
+
+The new postfix dereference syntax is tested by a new test script,
+F<t/op/postfixderef.t>.
+
+=back
+
+=head1 Platform Support
+
+=head2 Platform-Specific Notes
+
+=over 4
+
+=item Windows
+
+The Windows MinGW/gcc build was broken in Perl 5.19.4 for some recent versions
+of gcc-4.8, including those from http://mingw-w64.sourceforge.net/ .  This has
+now been fixed.  [perl #120236]
+
+=back
+
+=head1 Selected Bug Fixes
+
+=over 4
+
+=item *
+
+C<last> no longer returns values that the same statement has accumulated so
+far, fixing amongst other things the long-standing bug that C<push @a, last>
+would try to return the @a, copying it like a scalar in the process and
+resulting in the error, "Bizarre copy of ARRAY in last."  [perl #3112]
+
+=item *
+
+An optimization in Perl 5.18 made incorrect assumptions causing a bad
+interaction with the L<Devel::CallParser> CPAN module.  This was partially
+fixed in Perl 5.19.4, but the fix was not sufficient and another fault has now
+been corrected.
+
+=item *
+
+In some cases, closing file handles opened to pipe to or from a process, which
+had been duplicated into a standard handle, would call perl's internal waitpid
+wrapper with a pid of zero.  With the fix for [perl #85228] this zero pid was
+passed to C<waitpid>, possibly blocking the process.  This wait for process
+zero no longer occurs.  [perl #119893]
+
+=item *
+
+The code that parses regex backrefs (or ambiguous backref/octals) such as \123
+did a simple atoi(), which could wrap round to negative values on long digit
+strings and cause segmentation faults.  This has now been fixed.  [perl
+#119505]
+
+=item *
+
+C<select> used to ignore magic on the fourth (timeout) argument, leading to
+effects such as C<select> blocking indefinitely rather than the expected sleep
+time.  This has now been fixed.  [perl #120102]
+
+=item *
+
+The class name in C<for my class $foo> is now parsed correctly.  In the case of
+the second character of the class name being followed by a digit (e.g. 'a1b')
+this used to give the error "Missing $ on loop variable".  [perl #120112]
+
+=back
+
+=head1 Acknowledgements
+
+Perl 5.19.5 represents approximately 4 weeks of development since Perl 5.19.4
+and contains approximately 76,000 lines of changes across 710 files from 27
+authors.
+
+Perl continues to flourish into its third decade thanks to a vibrant community
+of users and developers. The following people are known to have contributed the
+improvements that became Perl 5.19.5:
+
+Andy Dougherty, Brian Fraser, Chris 'BinGOs' Williams, Craig A. Berry, Dagfinn
+Ilmari Mannsåker, Daniel Dragan, David Golden, David Mitchell, David Nicol,
+Dominic Hargreaves, Eric Brine, Father Chrysostomos, Gideon Israel Dsouza, Hio,
+James E Keenan, Jerry D. Hedden, Jesse Luehrs, Karl Williamson, Matthew
+Horsfall, Max Maischein, Neil Bowers, Nicholas Clark, Peter Martini, Philip
+Guenther, Ricardo Signes, Steve Hay, Tony Cook.
+
+The list above is almost certainly incomplete as it is automatically generated
+from version control history. In particular, it does not include the names of
+the (very much appreciated) contributors who reported issues to the Perl bug
+tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please see
+the F<AUTHORS> file in the Perl source distribution.
+
+=head1 Reporting Bugs
+
+If you find what you think is a bug, you might check the articles recently
+posted to the comp.lang.perl.misc newsgroup and the perl bug database at
+http://rt.perl.org/perlbug/ .  There may also be information at
+http://www.perl.org/ , the Perl Home Page.
+
+If you believe you have an unreported bug, please run the L<perlbug> program
+included with your release.  Be sure to trim your bug down to a tiny but
+sufficient test case.  Your bug report, along with the output of C<perl -V>,
+will be sent off to perlbug@perl.org to be analysed by the Perl porting team.
+
+If the bug you are reporting has security implications, which make it
+inappropriate to send to a publicly archived mailing list, then please send it
+to perl5-security-report@perl.org.  This points to a closed subscription
+unarchived mailing list, which includes all the core committers, who will be
+able to help assess the impact of issues, figure out a resolution, and help
+co-ordinate the release of patches to mitigate or fix the problem across all
+platforms on which Perl is supported.  Please only use this address for
+security issues in the Perl core, not for modules independently distributed on
+CPAN.
+
+=head1 SEE ALSO
+
+The F<Changes> file for an explanation of how to view exhaustive details on
+what changed.
+
+The F<INSTALL> file for how to build Perl.
+
+The F<README> file for general stuff.
+
+The F<Artistic> and F<Copying> files for copyright information.
+
+=cut
