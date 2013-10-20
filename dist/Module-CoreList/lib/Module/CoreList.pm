@@ -3,7 +3,7 @@ use strict;
 use vars qw/$VERSION %released %version %families %upstream
 	    %bug_tracker %deprecated %delta/;
 use Module::CoreList::TieHashDelta;
-$VERSION = '3.00';
+$VERSION = '3.01';
 
 my $dumpinc = 0;
 sub import {
@@ -240,6 +240,7 @@ sub changes_between {
     5.019003 => '2013-08-20',
     5.019004 => '2013-09-20',
     5.019005 => '2013-10-20',
+    5.019006 => '????-??-??',
   );
 
 for my $version ( sort { $a <=> $b } keys %released ) {
@@ -8953,6 +8954,17 @@ for my $version ( sort { $a <=> $b } keys %released ) {
             'TAP::Parser::Utils'    => 1,
         }
     },
+    5.019006 => {
+        delta_from => 5.019005,
+        changed => {
+            'Config'                => '5.019006',
+            'Module::CoreList'      => '3.01',
+            'Module::CoreList::TieHashDelta'=> '3.01',
+            'Module::CoreList::Utils'=> '3.01',
+        },
+        removed => {
+        }
+    },
 );
 
 sub is_core
@@ -9283,6 +9295,13 @@ for my $version (sort { $a <=> $b } keys %delta) {
     },
     5.019005 => {
         delta_from => 5.019004,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.019006 => {
+        delta_from => 5.019005,
         changed => {
         },
         removed => {
