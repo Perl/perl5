@@ -2026,7 +2026,8 @@ foreach ($first_locales_test_number..$final_locales_test_number) {
 
 $test_num = $final_locales_test_number;
 
-{   # perl #115808
+unless ( $^O eq 'dragonfly' ) {
+    # perl #115808
     use warnings;
     my $warned = 0;
     local $SIG{__WARN__} = sub {
