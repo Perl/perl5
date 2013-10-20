@@ -519,6 +519,7 @@ the strings?).
  Aristotle 5.19.2       2013-Jul-22
  Steve     5.19.3       2013-Aug-20
  Steve     5.19.4       2013-Sep-20
+ Steve     5.19.5       2013-Oct-20
 
 =head2 SELECTED RELEASE SIZES
 
