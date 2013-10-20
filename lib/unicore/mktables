@@ -5624,11 +5624,30 @@ END
                               && $value eq $suppress_value;
 
                 {   # This bare block encloses the scope where we may need to
-                    # split a range (when outputting adjusteds), and each time
-                    # through we handle the next portion of the original by
-                    # ending the block with a 'redo'.   The values to use for
-                    # that next time through are set up just below in the
-                    # scalars whose names begin with '$next_'.
+                    # 'redo' to.  Consider the table that contains the
+                    # lowercasing maps.  mktables stores the ASCII range ones
+                    # as 26 ranges:
+                    #       ord('A') => ord('a'), .. ord('Z') => ord('z')
+                    # For compactness, the table that gets written has this as
+                    # just one range
+                    #       ( ord('A') .. ord('Z') ) => ord('a')
+                    # and the software that reads the tables is smart enough
+                    # to "connect the dots".  This change is accomplished in
+                    # this loop by looking to see if the current iteration
+                    # fits the paradigm of the previous iteration, and if so,
+                    # we merge them by replacing the final output item with
+                    # the merged data.  Repeated 25 times, this gets A-Z.  But
+                    # we also have to make sure we don't screw up cases where
+                    # we have internally stored
+                    #       ( 0x1C4 .. 0x1C6 ) => 0x1C5
+                    # This single internal range has to be output as 3 ranges.
+                    # (There are very few of these, so the gain of doing the
+                    # combining of other ranges far outweighs the splitting of
+                    # these.)  To accomplish this, we have to split the range,
+                    # and each time through we handle the next portion of the
+                    # original by ending this block with a 'redo'.   The
+                    # values to use for that next time through are set up just
+                    # below in the scalars whose names begin with '$next_'.
 
                     if ($use_adjustments && ! $range_size_1) {
 
