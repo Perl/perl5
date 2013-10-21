@@ -482,7 +482,7 @@ our(@ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS, $VERSION);
 	      clearcache clearallcache disablecache enablecache);
 %EXPORT_TAGS=( all => [ @EXPORT, @EXPORT_OK ] ) ;
 
-$VERSION = 1.17;
+$VERSION = 1.18;
 
 # --- ':hireswallclock' special handling
 
@@ -772,11 +772,23 @@ sub countit {
     # First find the minimum $n that gives a significant timing.
     my $zeros=0;
     for ($n = 1; ; $n *= 2 ) {
+	my $t0 = Benchmark->new(0);
 	my $td = timeit($n, $code);
+	my $t1 = Benchmark->new(0);
 	$tc = $td->[1] + $td->[2];
 	if ( $tc <= 0 and $n > 1024 ) {
-	    ++$zeros > 16
-	        and die "Timing is consistently zero in estimation loop, cannot benchmark. N=$n\n";
+	    my $d = timediff($t1, $t0);
+	    # note that $d is the total CPU time taken to call timeit(),
+	    # while $tc is is difference in CPU secs between the empty run
+	    # and the code run. If the code is trivial, its possible
+	    # for $d to get large while $tc is still zero (or slightly
+	    # negative). Bail out once timeit() starts taking more than a
+	    # few seconds without noticeable difference.
+	    if ($d->[1] + $d->[2] > 8
+		|| ++$zeros > 16)
+	    {
+	        die "Timing is consistently zero in estimation loop, cannot benchmark. N=$n\n";
+            }
 	} else {
 	    $zeros = 0;
 	}
