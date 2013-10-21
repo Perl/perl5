@@ -401,7 +401,9 @@ sub check_graph {
 {
     select(OUT);
     my $start = times;
-    my $chart = cmpthese( -0.1, { a => "++\$i", b => "\$i = sqrt(\$i++)" }, "auto" ) ;
+    my $chart = cmpthese( -0.1, { a => "\$i = sqrt(\$i++) * sqrt(\$i)",
+                                  b => "\$i = sqrt(\$i++)",
+                                }, "auto" ) ;
     my $end = times;
     select(STDOUT);
     ok (($end - $start) > 0.05, "benchmarked code ran for over 0.05 seconds");
@@ -423,7 +425,8 @@ sub check_graph {
 {
     select(OUT);
     my $start = times;
-    my $chart = cmpthese( -0.1, { a => "++\$i", b => "\$i = sqrt(\$i++)" } ) ;
+    my $chart = cmpthese( -0.1, { a => "\$i = sqrt(\$i++) * sqrt(\$i)",
+                                  b => "\$i = sqrt(\$i++)" });
     my $end = times;
     select(STDOUT);
     ok (($end - $start) > 0.05, "benchmarked code ran for over 0.05 seconds");
