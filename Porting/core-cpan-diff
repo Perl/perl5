@@ -397,6 +397,24 @@ EOF
                 print $outfh "  Perl only: $_\n" unless $use_diff;
             }
         }
+        if ( $verbose ) {
+            foreach my $exclude (@$excluded) {
+                my $seen = 0;
+                foreach my $cpan_file (@cpan_files) {
+                    # may be a simple string to match exactly, or a pattern
+                    if ( ref $exclude ) {
+                        $seen = 1 if $cpan_file =~ $exclude;
+                    }
+                    else {
+                        $seen = 1 if $cpan_file eq $exclude;
+                    }
+                    last if $seen;
+                }
+                if ( not $seen ) {
+                    print $outfh "  Unnecessary exclusion: $exclude\n";
+                }
+            }
+        }
     }
 }
 

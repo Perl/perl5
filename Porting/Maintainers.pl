@@ -319,7 +319,6 @@ use File::Glob qw(:case);
             qw(t/00-compile.t),
             qw(t/00-report-prereqs.t),
             qr{^xt},
-            qr{^history},
         ],
     },
 
@@ -555,7 +554,6 @@ use File::Glob qw(:case);
                 t/decrypt.t
                 t/exec.t
                 t/order.t
-                t/pod.t
                 t/sh.t
                 t/tee.t
                 t/z_kwalitee.t
@@ -660,9 +658,6 @@ use File::Glob qw(:case);
     'JSON::PP' => {
         'DISTRIBUTION' => 'MAKAMAKA/JSON-PP-2.27203.tar.gz',
         'FILES'        => q[cpan/JSON-PP],
-        'EXCLUDED'     => [
-            't/900_pod.t',    # Pod testing
-        ],
     },
 
     'lib' => {
@@ -718,7 +713,6 @@ use File::Glob qw(:case);
     'Locale::Maketext::Simple' => {
         'DISTRIBUTION' => 'JESSE/Locale-Maketext-Simple-0.21.tar.gz',
         'FILES'        => q[cpan/Locale-Maketext-Simple],
-        'EXCLUDED'     => [qr{^inc/}],
     },
 
     'Math::BigInt' => {
@@ -864,7 +858,6 @@ use File::Glob qw(:case);
 
     'Params::Check' => {
         'DISTRIBUTION' => 'BINGOS/Params-Check-0.38.tar.gz',
-        'EXCLUDED'     => ['Params-Check-0.26.tar.gz'],
         'FILES'        => q[cpan/Params-Check],
     },
 
@@ -995,7 +988,6 @@ use File::Glob qw(:case);
     'Search::Dict' => {
         'DISTRIBUTION' => 'DAGOLDEN/Search-Dict-1.07.tar.gz',
         'FILES'        => q[dist/Search-Dict],
-        'EXCLUDED'     => [qr{^t/release-.*\.t},qr{^README\..*}],
     },
 
     'SelfLoader' => {
@@ -1012,7 +1004,6 @@ use File::Glob qw(:case);
     'Storable' => {
         'DISTRIBUTION' => 'AMS/Storable-2.45.tar.gz',
         'FILES'        => q[dist/Storable],
-        'EXCLUDED'     => [qr{^t/Test/}],
     },
 
     'Sys::Syslog' => {
@@ -1036,7 +1027,6 @@ use File::Glob qw(:case);
         'DISTRIBUTION' => 'RRA/Term-ANSIColor-4.02.tar.gz',
         'FILES'        => q[cpan/Term-ANSIColor],
         'EXCLUDED'     => [
-            qr{^tests/},
             qr{^examples/},
             qr{^t/data/},
             qw( t/aliases-env.t
@@ -1152,7 +1142,6 @@ use File::Glob qw(:case);
     'Text::ParseWords' => {
         'DISTRIBUTION' => 'CHORNY/Text-ParseWords-3.29.tar.gz',
         'FILES'        => q[cpan/Text-ParseWords],
-        'EXCLUDED'     => ['t/pod.t'],
 
         # Waiting to be merged upstream: see CPAN RT#50929
         'CUSTOMIZED'   => [
@@ -1249,9 +1238,6 @@ use File::Glob qw(:case);
         'DISTRIBUTION' => 'DROLSKY/Time-Local-1.2300.tar.gz',
         'FILES'        => q[cpan/Time-Local],
         'EXCLUDED'     => [
-            qw( t/pod-coverage.t
-                t/pod.t
-                ),
             qr{^t/release-.*\.t},
         ],
     },
