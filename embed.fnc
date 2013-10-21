@@ -1276,7 +1276,7 @@ Ap	|I32	|start_subparse	|I32 is_format|U32 flags
 : Used in pp_ctl.c
 p	|void	|sub_crush_depth|NN CV* cv
 Amd	|bool	|sv_2bool	|NN SV *const sv
-Apd	|bool	|sv_2bool_flags	|NN SV *const sv|const I32 flags
+Apd	|bool	|sv_2bool_flags	|NN SV *sv|I32 flags
 Apd	|CV*	|sv_2cv		|NULLOK SV* sv|NN HV **const st|NN GV **const gvp \
 				|const I32 lref
 Apd	|IO*	|sv_2io		|NN SV *const sv

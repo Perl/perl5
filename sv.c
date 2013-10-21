@@ -3152,12 +3152,13 @@ contain SV_GMAGIC, then it does an mg_get() first.
 */
 
 bool
-Perl_sv_2bool_flags(pTHX_ SV *const sv, const I32 flags)
+Perl_sv_2bool_flags(pTHX_ SV *sv, I32 flags)
 {
     dVAR;
 
     PERL_ARGS_ASSERT_SV_2BOOL_FLAGS;
 
+    restart:
     if(flags & SV_GMAGIC) SvGETMAGIC(sv);
 
     if (!SvOK(sv))
@@ -3165,8 +3166,30 @@ Perl_sv_2bool_flags(pTHX_ SV *const sv, const I32 flags)
     if (SvROK(sv)) {
 	if (SvAMAGIC(sv)) {
 	    SV * const tmpsv = AMG_CALLunary(sv, bool__amg);
-	    if (tmpsv && (!SvROK(tmpsv) || (SvRV(tmpsv) != SvRV(sv))))
-		return cBOOL(SvTRUE(tmpsv));
+	    if (tmpsv && (!SvROK(tmpsv) || (SvRV(tmpsv) != SvRV(sv)))) {
+                bool svb;
+                sv = tmpsv;
+                if(SvGMAGICAL(sv)) {
+                    flags = SV_GMAGIC;
+                    goto restart; /* call sv_2bool */
+                }
+                /* expanded SvTRUE_common(sv, (flags = 0, goto restart)) */
+                else if(!SvOK(sv)) {
+                    svb = 0;
+                }
+                else if(SvPOK(sv)) {
+                    svb = SvPVXtrue(sv);
+                }
+                else if((SvFLAGS(sv) & (SVf_IOK|SVf_NOK))) {
+                    svb = (SvIOK(sv) && SvIVX(sv) != 0)
+                        || (SvNOK(sv) && SvNVX(sv) != 0.0);
+                }
+                else {
+                    flags = 0;
+                    goto restart; /* call sv_2bool_nomg */
+                }
+                return cBOOL(svb);
+            }
 	}
 	return SvRV(sv) != 0;
     }

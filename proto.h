@@ -3866,7 +3866,7 @@ PERL_CALLCONV void	Perl_sub_crush_depth(pTHX_ CV* cv)
 /* PERL_CALLCONV bool	sv_2bool(pTHX_ SV *const sv)
 			__attribute__nonnull__(pTHX_1); */
 
-PERL_CALLCONV bool	Perl_sv_2bool_flags(pTHX_ SV *const sv, const I32 flags)
+PERL_CALLCONV bool	Perl_sv_2bool_flags(pTHX_ SV *sv, I32 flags)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_SV_2BOOL_FLAGS	\
 	assert(sv)
