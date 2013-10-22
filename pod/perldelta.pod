@@ -307,9 +307,13 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
+=item WinCE
 
-XXX
+Perl can now be built in one shot with no user intervention on WinCE by running
+C<nmake -f Makefile.ce all>.
+
+Support for building with EVC (Embedded Visual C++) 4 has been restored.  Perl
+can also be built using Smart Devices for Visual C++ 2005 or 2008.
 
 =back
 
