@@ -48,48 +48,6 @@ my %titles = (
 
 my $deprecated;
 
-#--------------------------------------------------------------------------#
-
-sub added {
-  my ($mod, $old_v, $new_v) = @_;
-  say "=item *\n";
-  say "L<$mod> $new_v has been added to the Perl core.\n";
-}
-
-sub updated {
-  my ($mod, $old_v, $new_v) = @_;
-  say "=item *\n";
-  say "L<$mod> has been upgraded from version $old_v to $new_v.\n";
-  if ( $deprecated->{$mod} ) {
-    say "NOTE: L<$mod> is deprecated and may be removed from a future version of Perl.\n";
-  }
-}
-
-sub removed {
-  my ($mod, $old_v, $new_v) = @_;
-  say "=item *\n";
-  say "C<$mod> has been removed from the Perl core.  Prior version was $old_v.\n";
-}
-
-sub generate_section {
-  my ($title, $item_sub, @mods ) = @_;
-  return unless @mods;
-
-  say "=head2 $title\n";
-  say "=over 4\n";
-
-  for my $tuple ( sort { lc($a->[0]) cmp lc($b->[0]) } @mods ) {
-    my ($mod,$old_v,$new_v) = @$tuple;
-    $old_v //= q('undef');
-    $new_v //= q('undef');
-    $item_sub->($mod, $old_v, $new_v);
-  }
-
-  say "=back\n";
-}
-
-#--------------------------------------------------------------------------#
-
 sub run {
   my %opt = (mode => 'generate');
 
@@ -311,9 +269,13 @@ sub do_generate {
     say "\t$_" for @{$manuallyCheck};
   }
 
-  generate_section( $titles{new},     \&added,   values %{$added} );
-  generate_section( $titles{updated}, \&updated, values %{$updated} );
-  generate_section( $titles{removed}, \&removed, values %{$removed} );
+  my $data = {
+    new      => $added,
+    updated  => $updated,
+    #removed => $removed, ignore removed for now
+  };
+
+  say DeltaUpdater::sections_to_pod($data)
 }
 
 sub do_check {
