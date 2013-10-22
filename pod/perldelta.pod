@@ -307,6 +307,12 @@ L</Modules and Pragmata> section.
 
 =over 4
 
+=item Windows
+
+Support for building with Visual C++ 2013 has been added.  There are currently
+two possible test failures (see L<perlwin32/"Testing Perl on Windows">) which
+will hopefully be resolved soon.
+
 =item WinCE
 
 Perl can now be built in one shot with no user intervention on WinCE by running

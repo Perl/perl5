@@ -132,6 +132,10 @@ USE_LARGE_FILES	*= define
 #CCTYPE		= MSVC110
 # Visual C++ 2012 Express Edition (aka Visual C++ 11.x) (free version)
 #CCTYPE		= MSVC110FREE
+# Visual C++ 2013 (aka Visual C++ 12.x) (full version)
+#CCTYPE		= MSVC120
+# Visual C++ 2013 Express Edition (aka Visual C++ 12.x) (free version)
+#CCTYPE		= MSVC120FREE
 # MinGW or mingw-w64 with gcc-3.2 or later
 CCTYPE		*= GCC
 

@@ -242,7 +242,9 @@ typedef unsigned short	mode_t;
 
 #pragma  warning(disable: 4102)	/* "unreferenced label" */
 
-#define isnan		_isnan
+#if _MSC_VER < 1800
+#define isnan		_isnan	/* Defined already in VC++ 12.0 */
+#endif
 #ifdef UNDER_CE /* revisit what function this becomes celib vs corelibc, prv warning here*/
 #  undef snprintf
 #endif
