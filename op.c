@@ -3206,7 +3206,7 @@ S_op_integerize(pTHX_ OP *o)
     if ((PL_opargs[type] & OA_OTHERINT) && (PL_hints & HINT_INTEGER))
     {
 	dVAR;
-	o->op_ppaddr = PL_ppaddr[type = ++(o->op_type)];
+	o->op_ppaddr = PL_ppaddr[++(o->op_type)];
     }
 
     if (type == OP_NEGATE)
