@@ -57,6 +57,15 @@ NOOP	   = @echo
 # keep this untouched!
 NULL	   =
 
+#
+# uncomment exactly one of the following
+#
+# Embedded Visual C++ 4 and older
+CCTYPE		= MSVC60
+# Smart Devices for Visual C++ 2005 (aka Visual C++ 8.x) (full version)
+#CCTYPE		= MSVC80
+# Smart Devices for Visual C++ 2008 (aka Visual C++ 9.x) (full version)
+#CCTYPE		= MSVC90
 
 #CFG=DEBUG
 CFG=RELEASE
@@ -76,6 +85,7 @@ MACHINE=wince-arm-hpc-wce300
 #MACHINE=wince-sh3-palm-wce211
 #MACHINE=wince-x86em-palm-wce211
 #MACHINE=wince-x86-hpc-wce300
+#MACHINE=wince-arm-pocket-wce400
 !endif
 
 # set this to your email address
@@ -348,11 +358,31 @@ STARTOBJS  = $(CECONSOLEDIR)/$(MACHINE)/wmain.obj \
              $(CECONSOLEDIR)/$(MACHINE)/w32console.obj
 !endif
 
+!if "$(MACHINE)" == "wince-arm-pocket-wce400"
+#CC         = clarm.exe #set in WCEARMV4.BAT
+ARCH       = ARM
+CPU        = ARM
+TARGETCPU  = ARM
+CEVersion  = 400
+#OSVERSION  = WCE300 #set in WCEARMV4.BAT
+PLATFORM   = MS Pocket PC
+MCFLAGS    = -D ARM -D arm -D _ARM_ -D _arm_ -DPROCESSOR_ARM \
+             -D _MT -D _DLL -DPALM_SIZE -DPOCKET_SIZE \
+             -I $(CELIBDLLDIR)\inc
+MACH       = -machine:arm
+SUBSYS     = -subsystem:windowsce,4.00
+CELIBPATH  = $(CELIBDLLDIR)\$(MACHINE)-release
+LDLIBPATH  = -libpath:$(CELIBPATH)
+STARTOBJS  = $(CECONSOLEDIR)/$(MACHINE)/wmain.obj \
+             $(CECONSOLEDIR)/$(MACHINE)/w32console.obj
+!endif
+
+
 ######################################################################
 # common section
 
 CEDEFS    = -D_WINDOWS -D_WIN32_WCE=$(CEVersion) -DUNDER_CE=$(CEVersion) \
-            $(MCFLAGS) -D PERL -GS-
+            $(MCFLAGS) -D PERL
 
 CECFLAGS  = $(CEDEFS) -Zi
 
@@ -365,9 +395,16 @@ CECFLAGS  = $(CECFLAGS) -Od
 # Also the dll cannot be loaded by perl.exe...
 !if "$(CPU)" == "SH3"
 !else
-CECFLAGS  = $(CECFLAGS) -O1 -GL
+CECFLAGS  = $(CECFLAGS) -O1
 !endif
-
+!  IF "$(CCTYPE)" != "MSVC60"
+#turn on LTCG optimization for CCs that have it
+CECFLAGS	= $(CECFLAGS) -GL
+!  ENDIF
+!  IF "$(CCTYPE)" == "MSVC80" || "$(CCTYPE)" == "MSVC90"
+#no stack security cookie for CCs where its on by default
+CECFLAGS	= $(CECFLAGS) -GS-
+!  ENDIF
 !endif
 
 RCDEFS    = /l 0x407 /r /d "UNICODE" /d UNDER_CE=$(CEVersion) \
@@ -507,6 +544,11 @@ CFLAGS		= -nologo -GF -W3 $(INCLUDES) $(DEFINES) $(LOCDEFS) \
 		$(PCHFLAGS) $(OPTIMIZE)
 
 LINK_FLAGS	= -nologo -debug -opt:ref,icf -machine:$(PROCESSOR_ARCHITECTURE)
+
+!if "$(CFG)" == "RELEASE" && "$(CCTYPE)" != "MSVC60"
+#see matching flag in CECFLAGS
+LINK_FLAGS	= $(LINK_FLAGS) -ltcg
+!endif
 
 OBJOUT_FLAG	= -Fo
 EXEOUT_FLAG	= -Fe
@@ -798,7 +840,7 @@ clean: Extensions_clean
   -@$(DEL) .\$(MACHINE)\*.lib
         -@$(DEL) .\$(MACHINE)\*.exp
         -@$(DEL) .\$(MACHINE)\*.pdb
-  -@$(DEL) ..\Cross\config-$(MACHINE).sh ..\lib\Config.pm
+  -@$(DEL) ..\Cross\config-$(MACHINE).sh
         -if exist ..\xlib rmdir /s /q ..\xlib
         -if exist .\$(MACHINE) rmdir /s /q .\$(MACHINE)
   -@$(DEL) config.h xconfig.h perl.res
