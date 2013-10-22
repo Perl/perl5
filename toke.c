@@ -5708,7 +5708,6 @@ Perl_yylex(pTHX)
 		DEBUG_T( { printbuf("### Saw unary minus before =>, forcing word %s\n", s); } );
 		OPERATOR('-');		/* unary minus */
 	    }
-	    PL_last_uni = PL_oldbufptr;
 	    switch (tmp) {
 	    case 'r': ftst = OP_FTEREAD;	break;
 	    case 'w': ftst = OP_FTEWRITE;	break;
@@ -5747,6 +5746,7 @@ Perl_yylex(pTHX)
 		break;
 	    }
 	    if (ftst) {
+                PL_last_uni = PL_oldbufptr;
 		PL_last_lop_op = (OPCODE)ftst;
 		DEBUG_T( { PerlIO_printf(Perl_debug_log,
                         "### Saw file test %c\n", (int)tmp);
