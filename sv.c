@@ -5702,12 +5702,10 @@ Perl_sv_add_backref(pTHX_ SV *const tsv, SV *const sv)
     if (SvTYPE(tsv) == SVt_PVHV) {
 	svp = (SV**)Perl_hv_backreferences_p(aTHX_ MUTABLE_HV(tsv));
     } else {
-	if (! ((mg =
-	    (SvMAGICAL(tsv) ? mg_find(tsv, PERL_MAGIC_backref) : NULL))))
-	{
-	    sv_magic(tsv, NULL, PERL_MAGIC_backref, NULL, 0);
-	    mg = mg_find(tsv, PERL_MAGIC_backref);
-	}
+        if (SvMAGICAL(tsv))
+            mg = mg_find(tsv, PERL_MAGIC_backref);
+	if (!mg)
+            mg = sv_magicext(tsv, NULL, PERL_MAGIC_backref, &PL_vtbl_backref, NULL, 0);
 	svp = &(mg->mg_obj);
     }
 
@@ -5717,32 +5715,32 @@ Perl_sv_add_backref(pTHX_ SV *const tsv, SV *const sv)
 	|| (*svp && SvTYPE(*svp) != SVt_PVAV)
     ) {
 	/* create array */
+	if (mg)
+	    mg->mg_flags |= MGf_REFCOUNTED;
 	av = newAV();
 	AvREAL_off(av);
-	SvREFCNT_inc_simple_void(av);
+	SvREFCNT_inc_simple_void_NN(av);
 	/* av now has a refcnt of 2; see discussion above */
+	av_extend(av, *svp ? 2 : 1);
 	if (*svp) {
 	    /* move single existing backref to the array */
-	    av_extend(av, 1);
 	    AvARRAY(av)[++AvFILLp(av)] = *svp; /* av_push() */
 	}
 	*svp = (SV*)av;
-	if (mg)
-	    mg->mg_flags |= MGf_REFCOUNTED;
     }
-    else
+    else {
 	av = MUTABLE_AV(*svp);
-
-    if (!av) {
-	/* optimisation: store single backref directly in HvAUX or mg_obj */
-	*svp = sv;
-	return;
+        if (!av) {
+            /* optimisation: store single backref directly in HvAUX or mg_obj */
+            *svp = sv;
+            return;
+        }
+        assert(SvTYPE(av) == SVt_PVAV);
+        if (AvFILLp(av) >= AvMAX(av)) {
+            av_extend(av, AvFILLp(av)+1);
+        }
     }
     /* push new backref */
-    assert(SvTYPE(av) == SVt_PVAV);
-    if (AvFILLp(av) >= AvMAX(av)) {
-        av_extend(av, AvFILLp(av)+1);
-    }
     AvARRAY(av)[++AvFILLp(av)] = sv; /* av_push() */
 }
 
