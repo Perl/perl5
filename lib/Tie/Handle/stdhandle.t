@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-use Test::More tests => 25;
+use Test::More tests => 27;
 
 use_ok('Tie::StdHandle');
 
@@ -32,6 +32,8 @@ ok(print($f "ABCDEF\n"), "print ABCDEF");        # line 3
     local $\ = "X\n";
     ok(print($f "rhubarb"), "print rhubarb");    # line 4
 }
+
+ok(syswrite($f, "123456789\n", 3, 7), "syswrite");# line 5
 
 # read some lines back
 
@@ -64,6 +66,11 @@ ok(!eof($f), "eof");
 
 $b = <$f>;
 is($b, "rhubarbX\n", "b eq rhubarbX");
+
+# line 5
+
+$b = <$f>;
+is($b, "89\n", "b eq 89");
 
 ok(eof($f), "eof");
 ok(close($f), "close");
