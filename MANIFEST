@@ -1198,7 +1198,6 @@ cpan/IO-Compress/lib/IO/Uncompress/Gunzip.pm		IO::Compress
 cpan/IO-Compress/lib/IO/Uncompress/Inflate.pm		IO::Compress
 cpan/IO-Compress/lib/IO/Uncompress/RawInflate.pm	IO::Compress
 cpan/IO-Compress/lib/IO/Uncompress/Unzip.pm		IO::Compress
-cpan/IO-Compress/Makefile.PL				IO::Compress
 cpan/IO-Compress/private/MakeUtil.pm			IO::Compress
 cpan/IO-Compress/t/000prereq.t				IO::Compress
 cpan/IO-Compress/t/001bzip2.t				IO::Compress
@@ -1511,7 +1510,6 @@ cpan/Locale-Maketext-Simple/t/po_without_i_default/en.po	Locale::Simple tests
 cpan/Locale-Maketext-Simple/t/po_without_i_default/fr.po	Locale::Simple tests
 cpan/Math-Complex/lib/Math/Complex.pm	A Complex package
 cpan/Math-Complex/lib/Math/Trig.pm	A simple interface to complex trigonometry
-cpan/Math-Complex/Makefile.PL		Math-Complex building
 cpan/Math-Complex/t/Complex.t		See if Math::Complex works
 cpan/Math-Complex/t/Trig.t		See if Math::Trig works
 cpan/Math-Complex/t/underbar.t		See if Math::Complex works
@@ -1544,7 +1542,6 @@ cpan/Memoize/t/tie.t			Memoize tied file test
 cpan/Memoize/t/unmemoize.t		Memoize 'unmemoize' function test
 cpan/MIME-Base64/Base64.pm		MIME::Base64 extension
 cpan/MIME-Base64/Base64.xs		MIME::Base64 extension
-cpan/MIME-Base64/Makefile.PL		MIME::Base64 extension
 cpan/MIME-Base64/QuotedPrint.pm		MIME::Base64 extension
 cpan/MIME-Base64/t/base64.t		See whether MIME::Base64 works
 cpan/MIME-Base64/t/length.t	See whether MIME::QuotedPrint works
@@ -2488,7 +2485,6 @@ cpan/Time-HiRes/t/Watchdog.pm		Test for Time::HiRes
 cpan/Time-HiRes/typemap			Time::HiRes extension
 cpan/Time-Local/lib/Time/Local.pm	Reverse translation of localtime, gmtime
 cpan/Time-Local/t/Local.t		See if Time::Local works
-cpan/Time-Piece/Makefile.PL	Time::Piece extension
 cpan/Time-Piece/Piece.pm	Time::Piece extension
 cpan/Time-Piece/Piece.xs	Time::Piece extension
 cpan/Time-Piece/Seconds.pm	Time::Piece extension
@@ -3522,7 +3518,6 @@ ext/B/t/walkoptree.t	See if B::walkoptree (and friends) work
 ext/B/t/xref.t		See if B::Xref works
 ext/B/typemap			Compiler backend interface types
 ext/Devel-Peek/Changes		Data debugging tool, changelog
-ext/Devel-Peek/Makefile.PL	Data debugging tool, makefile writer
 ext/Devel-Peek/Peek.pm		Data debugging tool, module and pod
 ext/Devel-Peek/Peek.xs		Data debugging tool, externals
 ext/Devel-Peek/t/Peek.t		See if Devel::Peek works
