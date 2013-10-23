@@ -5,7 +5,7 @@ use strict;
 use Tie::Handle;
 use vars qw(@ISA $VERSION);
 @ISA = 'Tie::Handle';
-$VERSION = '4.3';
+$VERSION = '4.4';
 
 =head1 NAME
 
