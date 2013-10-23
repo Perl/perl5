@@ -64,6 +64,7 @@ sub GETC     { getc($_[0]) }
 sub WRITE
 {
  my $fh = $_[0];
+ local $\; # don't print any line terminator
  print $fh substr($_[1],0,$_[2])
 }
 

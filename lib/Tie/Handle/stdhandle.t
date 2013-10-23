@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-use Test::More tests => 19;
+use Test::More tests => 25;
 
 use_ok('Tie::StdHandle');
 
@@ -22,25 +22,50 @@ ok(binmode($f), "binmode")
 
 ok(-f "afile", "-f afile");
 
-ok(print($f "SomeData\n"), "print");
+# write some lines
+
+ok(print($f "SomeData\n"), "print SomeData");    # line 1
 is(tell($f), 9, "tell");
-ok(printf($f "Some %d value\n",1234), "printf");
+ok(printf($f "Some %d value\n",1234), "printf"); # line 2
+ok(print($f "ABCDEF\n"), "print ABCDEF");        # line 3
+{
+    local $\ = "X\n";
+    ok(print($f "rhubarb"), "print rhubarb");    # line 4
+}
+
+# read some lines back
+
 ok(seek($f,0,0), "seek");
 
+# line 1
+#
 $b = <$f>;
 is($b, "SomeData\n", "b eq SomeData");
 ok(!eof($f), "!eof");
 
+#line 2
+
 is(read($f,($b=''),4), 4, "read(4)");
 is($b, 'Some', "b eq Some");
 is(getc($f), ' ', "getc");
+$b = <$f>;
+is($b, "1234 value\n", "b eq 1234 value");
+ok(!eof($f), "eof");
+
+# line 3
+
+is(read($f,($b='scrinches'),4,4), 4, "read(4,4)"); # with offset
+is($b, 'scriABCD', "b eq scriABCD");
+$b = <$f>;
+is($b, "EF\n", "EF");
+ok(!eof($f), "eof");
+
+# line 4
 
 $b = <$f>;
-ok(eof($f), "eof");
-ok(seek($f,0,0), "seek");
-is(read($f,($b='scrinches'),4,4), 4, "read(4,4)"); # with offset
-is($b, 'scriSome', "b eq scriSome");
+is($b, "rhubarbX\n", "b eq rhubarbX");
 
+ok(eof($f), "eof");
 ok(close($f), "close");
 
 unlink("afile");
