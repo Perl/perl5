@@ -13,7 +13,7 @@ tie *tst,Tie::StdHandle;
 
 $f = 'tst';
 
-unlink("afile.new") if -f "afile";
+unlink("afile") if -f "afile";
 
 ok(open($f,"+>afile"), "open +>afile");
 ok(open($f, "+<", "afile"), "open +<, afile");
