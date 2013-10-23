@@ -1618,8 +1618,8 @@ Like C<SvPV>, but converts sv to byte representation first if necessary.
 Guarantees to evaluate sv only once; use the more efficient C<SvPVbyte>
 otherwise.
 
-=for apidoc Am|bool|SvIsCOW|SV* sv
-Returns a boolean indicating whether the SV is Copy-On-Write (either shared
+=for apidoc Am|U32|SvIsCOW|SV* sv
+Returns a U32 value indicating whether the SV is Copy-On-Write (either shared
 hash key scalars, or full Copy On Write scalars if 5.9.0 is configured for
 COW).
 
