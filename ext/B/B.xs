@@ -1143,6 +1143,8 @@ next(o)
 			}
 			else {
 			    sv_setpvn(ret, RX_PRECOMP(rx), RX_PRELEN(rx));
+                            if (RX_UTF8(rx))
+                                SvUTF8_on(ret);
 			}
 		    }
 		}

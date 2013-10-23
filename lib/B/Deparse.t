@@ -13,7 +13,7 @@ use warnings;
 use strict;
 use Test::More;
 
-my $tests = 19; # not counting those in the __DATA__ section
+my $tests = 20; # not counting those in the __DATA__ section
 
 use B::Deparse;
 my $deparse = B::Deparse->new();
@@ -269,6 +269,13 @@ format STDOUT =
 x(); z()
 .
 EOCODH
+
+# literal big chars under 'use utf8'
+is($deparse->coderef2text(sub{ use utf8; /€/; }),
+'{
+    /\x{20ac}/;
+}',
+"qr/euro/");
 
 
 done_testing($tests);
