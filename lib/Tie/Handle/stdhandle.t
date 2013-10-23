@@ -5,47 +5,42 @@ BEGIN {
     @INC = '../lib';
 }
 
-use Tie::StdHandle;
+use Test::More tests => 19;
+
+use_ok('Tie::StdHandle');
+
 tie *tst,Tie::StdHandle;
 
 $f = 'tst';
 
-print "1..14\n";
-
-# my $file tests
-
 unlink("afile.new") if -f "afile";
-print "$!\nnot " unless open($f,"+>afile") && open($f, "+<", "afile");
-print "ok 1\n";
-print "$!\nnot " unless binmode($f);
-print "ok 2\n";
-print "not " unless -f "afile";
-print "ok 3\n";
-print "not " unless print $f "SomeData\n";
-print "ok 4\n";
-print "not " unless tell($f) == 9;
-print "ok 5\n";
-print "not " unless printf $f "Some %d value\n",1234;
-print "ok 6\n";
-print "not " unless seek($f,0,0);
-print "ok 7\n";
+
+ok(open($f,"+>afile"), "open +>afile");
+ok(open($f, "+<", "afile"), "open +<, afile");
+ok(binmode($f), "binmode")
+    or diag("binmode: $!\n");
+
+ok(-f "afile", "-f afile");
+
+ok(print($f "SomeData\n"), "print");
+is(tell($f), 9, "tell");
+ok(printf($f "Some %d value\n",1234), "printf");
+ok(seek($f,0,0), "seek");
+
 $b = <$f>;
-print "not " unless $b eq "SomeData\n";
-print "ok 8\n";
-print "not " if eof($f);
-print "ok 9\n";
-read($f,($b=''),4);
-print "'$b' not " unless $b eq 'Some';
-print "ok 10\n";
-print "not " unless getc($f) eq ' ';
-print "ok 11\n";
+is($b, "SomeData\n", "b eq SomeData");
+ok(!eof($f), "!eof");
+
+is(read($f,($b=''),4), 4, "read(4)");
+is($b, 'Some', "b eq Some");
+is(getc($f), ' ', "getc");
+
 $b = <$f>;
-print "not " unless eof($f);
-print "ok 12\n";
-seek($f,0,0);
-read($f,($b='scrinches'),4,4); # with offset
-print "'$b' not " unless $b eq 'scriSome';
-print "ok 13\n";
-print "not " unless close($f);
-print "ok 14\n";
+ok(eof($f), "eof");
+ok(seek($f,0,0), "seek");
+is(read($f,($b='scrinches'),4,4), 4, "read(4,4)"); # with offset
+is($b, 'scriSome', "b eq scriSome");
+
+ok(close($f), "close");
+
 unlink("afile");
