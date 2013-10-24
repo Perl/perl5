@@ -854,6 +854,7 @@ use File::Glob qw(:case);
     'Package::Constants' => {
         'DISTRIBUTION' => 'KANE/Package-Constants-0.02.tar.gz',
         'FILES'        => q[cpan/Package-Constants],
+        'DEPRECATED'   => '5.019006',
     },
 
     'Params::Check' => {

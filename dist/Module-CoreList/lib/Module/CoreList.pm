@@ -9303,6 +9303,7 @@ for my $version (sort { $a <=> $b } keys %delta) {
     5.019006 => {
         delta_from => 5.019005,
         changed => {
+            'Package::Constants'   => '1',
         },
         removed => {
         }
