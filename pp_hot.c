@@ -941,7 +941,6 @@ PP(pp_rv2av)
 	else if (gimme == G_SCALAR) {
 	    dTARG;
 	    TARG = Perl_hv_scalar(aTHX_ MUTABLE_HV(sv));
-	    SPAGAIN;
 	    SETTARG;
 	}
     }
