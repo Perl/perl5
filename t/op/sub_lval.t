@@ -3,7 +3,7 @@ BEGIN {
     @INC = '../lib';
     require './test.pl';
 }
-plan tests=>201;
+plan tests=>203;
 
 sub a : lvalue { my $a = 34; ${\(bless \$a)} }  # Return a temporary
 sub b : lvalue { ${\shift} }
@@ -1008,3 +1008,12 @@ sub unless119797 : lvalue {
 eval { (unless119797(0)) = 4..6 };
 is $@, "", '$@ after writing to array returned by unless';
 is "@119797", "4 5 6", 'writing to array returned by unless';
+sub bare119797 : lvalue {
+    {;
+	@119797
+    }
+}
+@119797 = ();
+eval { (bare119797(0)) = 4..6 };
+is $@, "", '$@ after writing to array returned by bare block';
+is "@119797", "4 5 6", 'writing to array returned by bare block';

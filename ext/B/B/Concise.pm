@@ -598,7 +598,7 @@ $priv{$_}{128} = "LVINTRO"
          aelem helem aslice hslice padsv padav padhv enteriter entersub
          padrange pushmark);
 $priv{$_}{64} = "REFC" for qw(leave leavesub leavesublv leavewrite);
-$priv{leave}{128} = "LV";
+$priv{$_}{128} = "LV" for qw(leave leaveloop);
 @{$priv{aassign}}{32,64} = qw(STATE COMMON);
 @{$priv{sassign}}{32,64,128} = qw(STATE BKWARD CV2GV);
 $priv{$_}{64} = "RTIME" for qw(match subst substcont qr);

@@ -2253,6 +2253,7 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 	break;
 
     case OP_LEAVE:
+    case OP_LEAVELOOP:
 	o->op_private |= OPpLVALUE;
     case OP_SCOPE:
     case OP_ENTER:

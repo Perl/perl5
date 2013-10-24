@@ -2277,7 +2277,8 @@ PP(pp_leaveloop)
     newsp = PL_stack_base + cx->blk_loop.resetsp;
 
     TAINT_NOT;
-    SP = adjust_stack_on_leave(newsp, SP, MARK, gimme, 0, FALSE);
+    SP = adjust_stack_on_leave(newsp, SP, MARK, gimme, 0,
+			       PL_op->op_private & OPpLVALUE);
     PUTBACK;
 
     POPLOOP(cx);	/* Stack values are safe: release loop vars ... */
