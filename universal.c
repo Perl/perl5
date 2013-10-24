@@ -1353,7 +1353,7 @@ struct xsub_details {
     const char *proto;
 };
 
-const struct xsub_details details[] = {
+static const struct xsub_details details[] = {
     {"UNIVERSAL::isa", XS_UNIVERSAL_isa, NULL},
     {"UNIVERSAL::can", XS_UNIVERSAL_can, NULL},
     {"UNIVERSAL::DOES", XS_UNIVERSAL_DOES, NULL},
