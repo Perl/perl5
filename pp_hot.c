@@ -939,7 +939,7 @@ PP(pp_rv2av)
 	      && (!SvRMAGICAL(sv) || !mg_find(sv, PERL_MAGIC_tied)))
 	    SETs(HvUSEDKEYS(sv) ? &PL_sv_yes : sv_2mortal(newSViv(0)));
 	else if (gimme == G_SCALAR) {
-	    dTARGET;
+	    dTARG;
 	    TARG = Perl_hv_scalar(aTHX_ MUTABLE_HV(sv));
 	    SPAGAIN;
 	    SETTARG;
