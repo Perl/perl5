@@ -2033,8 +2033,13 @@ PP(pp_dbstate)
 	return NORMAL;
 }
 
+/* SVs on the stack that have any of the flags passed in are left as is.
+   Other SVs are protected via the mortals stack if lvalue is true, and
+   copied otherwise. */
+
 STATIC SV **
-S_adjust_stack_on_leave(pTHX_ SV **newsp, SV **sp, SV **mark, I32 gimme, U32 flags)
+S_adjust_stack_on_leave(pTHX_ SV **newsp, SV **sp, SV **mark, I32 gimme,
+			      U32 flags, bool lvalue)
 {
     bool padtmp = 0;
     PERL_ARGS_ASSERT_ADJUST_STACK_ON_LEAVE;
@@ -2046,7 +2051,10 @@ S_adjust_stack_on_leave(pTHX_ SV **newsp, SV **sp, SV **mark, I32 gimme, U32 fla
     if (gimme == G_SCALAR) {
 	if (MARK < SP)
 	    *++newsp = ((SvFLAGS(*SP) & flags) || (padtmp && SvPADTMP(*SP)))
-			    ? *SP : sv_mortalcopy(*SP);
+			    ? *SP
+			    : lvalue
+				? sv_2mortal(SvREFCNT_inc_simple_NN(*SP))
+				: sv_mortalcopy(*SP);
 	else {
 	    /* MEXTEND() only updates MARK, so reuse it instead of newsp. */
 	    MARK = newsp;
@@ -2061,7 +2069,9 @@ S_adjust_stack_on_leave(pTHX_ SV **newsp, SV **sp, SV **mark, I32 gimme, U32 fla
 	    if ((SvFLAGS(*MARK) & flags) || (padtmp && SvPADTMP(*MARK)))
 		*++newsp = *MARK;
 	    else {
-		*++newsp = sv_mortalcopy(*MARK);
+		*++newsp = lvalue
+			    ? sv_2mortal(SvREFCNT_inc_simple_NN(*MARK))
+			    : sv_mortalcopy(*MARK);
 		TAINT_NOT;	/* Each item is independent */
 	    }
 	}
@@ -2104,7 +2114,8 @@ PP(pp_leave)
     gimme = OP_GIMME(PL_op, (cxstack_ix >= 0) ? gimme : G_SCALAR);
 
     TAINT_NOT;
-    SP = adjust_stack_on_leave(newsp, SP, newsp, gimme, SVs_PADTMP|SVs_TEMP);
+    SP = adjust_stack_on_leave(newsp, SP, newsp, gimme, SVs_PADTMP|SVs_TEMP,
+			       PL_op->op_private & OPpLVALUE);
     PL_curpm = newpm;	/* Don't pop $1 et al till now */
 
     LEAVE_with_name("block");
@@ -2266,7 +2277,7 @@ PP(pp_leaveloop)
     newsp = PL_stack_base + cx->blk_loop.resetsp;
 
     TAINT_NOT;
-    SP = adjust_stack_on_leave(newsp, SP, MARK, gimme, 0);
+    SP = adjust_stack_on_leave(newsp, SP, MARK, gimme, 0, FALSE);
     PUTBACK;
 
     POPLOOP(cx);	/* Stack values are safe: release loop vars ... */
@@ -4315,7 +4326,7 @@ PP(pp_leaveeval)
 
     TAINT_NOT;
     SP = adjust_stack_on_leave((gimme == G_VOID) ? SP : newsp, SP, newsp,
-				gimme, SVs_TEMP);
+				gimme, SVs_TEMP, FALSE);
     PL_curpm = newpm;	/* Don't pop $1 et al till now */
 
 #ifdef DEBUGGING
@@ -4413,7 +4424,8 @@ PP(pp_leavetry)
     PERL_UNUSED_VAR(optype);
 
     TAINT_NOT;
-    SP = adjust_stack_on_leave(newsp, SP, newsp, gimme, SVs_PADTMP|SVs_TEMP);
+    SP = adjust_stack_on_leave(newsp, SP, newsp, gimme,
+			       SVs_PADTMP|SVs_TEMP, FALSE);
     PL_curpm = newpm;	/* Don't pop $1 et al till now */
 
     LEAVE_with_name("eval_scope");
@@ -4459,7 +4471,8 @@ PP(pp_leavegiven)
     assert(CxTYPE(cx) == CXt_GIVEN);
 
     TAINT_NOT;
-    SP = adjust_stack_on_leave(newsp, SP, newsp, gimme, SVs_PADTMP|SVs_TEMP);
+    SP = adjust_stack_on_leave(newsp, SP, newsp, gimme,
+			       SVs_PADTMP|SVs_TEMP, FALSE);
     PL_curpm = newpm;	/* Don't pop $1 et al till now */
 
     LEAVE_with_name("given");
@@ -5037,7 +5050,8 @@ PP(pp_leavewhen)
     assert(CxTYPE(cx) == CXt_WHEN);
 
     TAINT_NOT;
-    SP = adjust_stack_on_leave(newsp, SP, newsp, gimme, SVs_PADTMP|SVs_TEMP);
+    SP = adjust_stack_on_leave(newsp, SP, newsp, gimme,
+			       SVs_PADTMP|SVs_TEMP, FALSE);
     PL_curpm = newpm;   /* pop $1 et al */
 
     LEAVE_with_name("when");

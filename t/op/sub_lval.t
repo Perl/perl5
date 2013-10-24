@@ -3,7 +3,7 @@ BEGIN {
     @INC = '../lib';
     require './test.pl';
 }
-plan tests=>193;
+plan tests=>201;
 
 sub a : lvalue { my $a = 34; ${\(bless \$a)} }  # Return a temporary
 sub b : lvalue { ${\shift} }
@@ -972,3 +972,39 @@ for (sub : lvalue { "$x" }->()) {
 eval { &{\&utf8::is_utf8}("") = 3 };
 like $@, qr/^Can't modify non-lvalue subroutine call at /,
         'XSUB not seen at compile time dies in lvalue context';
+
+# [perl #119797] else implicitly returning value
+# This used to cause Bizarre copy of ARRAY in pp_leave
+sub else119797 : lvalue {
+    if ($_[0]) {
+	1; # two statements force a leave op
+	@119797
+    }
+    else {
+	@119797
+    }
+}
+eval { (else119797(0)) = 1..3 };
+is $@, "", '$@ after writing to array returned by else';
+is "@119797", "1 2 3", 'writing to array returned by else';
+eval { (else119797(1)) = 4..6 };
+is $@, "", '$@ after writing to array returned by if (with else)';
+is "@119797", "4 5 6", 'writing to array returned by if (with else)';
+sub if119797 : lvalue {
+    if ($_[0]) {
+	@119797
+    }
+}
+@119797 = ();
+eval { (if119797(1)) = 4..6 };
+is $@, "", '$@ after writing to array returned by if';
+is "@119797", "4 5 6", 'writing to array returned by if';
+sub unless119797 : lvalue {
+    unless ($_[0]) {
+	@119797
+    }
+}
+@119797 = ();
+eval { (unless119797(0)) = 4..6 };
+is $@, "", '$@ after writing to array returned by unless';
+is "@119797", "4 5 6", 'writing to array returned by unless';

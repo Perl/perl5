@@ -2252,8 +2252,9 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 	PL_modcount++;
 	break;
 
-    case OP_SCOPE:
     case OP_LEAVE:
+	o->op_private |= OPpLVALUE;
+    case OP_SCOPE:
     case OP_ENTER:
     case OP_LINESEQ:
 	localize = 0;
@@ -2288,6 +2289,14 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 
     case OP_COREARGS:
 	return o;
+
+    case OP_AND:
+    case OP_OR:
+	if (type == OP_LEAVESUBLV) {
+	    op_lvalue(cLOGOPo->op_first,	     type);
+	    op_lvalue(cLOGOPo->op_first->op_sibling, type);
+	}
+	goto nomod;
     }
 
     /* [20011101.069] File test operators interpret OPf_REF to mean that
