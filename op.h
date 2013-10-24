@@ -172,6 +172,9 @@ Deprecated.  Use C<GIMME_V> instead.
 /* Private for OP_LEAVE, OP_LEAVESUB, OP_LEAVESUBLV and OP_LEAVEWRITE */
 #define OPpREFCOUNTED		64	/* op_targ carries a refcount */
 
+/* Private for OP_LEAVE only */
+#define OPpLVALUE		128	/* Do not copy return value */
+
 /* Private for OP_AASSIGN */
 #define OPpASSIGN_COMMON	64	/* Left & right have syms in common. */
 

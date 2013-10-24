@@ -774,6 +774,11 @@ const struct flag_to_name op_sassign_names[] = {
     {OPpASSIGN_CV_TO_GV,  ",CV2GV"}
 };
 
+const struct flag_to_name op_leave_names[] = {
+    {OPpREFCOUNTED, ",REFCOUNTED"},
+    {OPpLVALUE,	    ",LVALUE"}
+};
+
 #define OP_PRIVATE_ONCE(op, flag, name) \
     const struct flag_to_name CAT2(op, _names)[] = {	\
 	{(flag), (name)} \
@@ -799,7 +804,7 @@ struct op_private_by_op {
 
 const struct op_private_by_op op_private_names[] = {
     {OP_LEAVESUB, C_ARRAY_LENGTH(op_leavesub_names), op_leavesub_names },
-    {OP_LEAVE, C_ARRAY_LENGTH(op_leavesub_names), op_leavesub_names },
+    {OP_LEAVE, C_ARRAY_LENGTH(op_leave_names), op_leave_names },
     {OP_LEAVESUBLV, C_ARRAY_LENGTH(op_leavesub_names), op_leavesub_names },
     {OP_LEAVEWRITE, C_ARRAY_LENGTH(op_leavesub_names), op_leavesub_names },
     {OP_DIE, C_ARRAY_LENGTH(op_die_names), op_die_names },
