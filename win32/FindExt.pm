@@ -115,6 +115,10 @@ sub scan_ext
         $this_ext =~ s!-!/!g;
         $leaf =~ s/.*-//;
 
+        # List/Util.xs lives in Scalar-List-Utils, Cwd.xs lives in PathTools
+        $this_ext = 'List/Util' if $this_ext eq 'Scalar/List/Utils';
+        $this_ext = 'Cwd'       if $this_ext eq 'PathTools';
+
 	# Temporary hack to cope with smokers that are not clearing directories:
         next if $ext{$this_ext};
 

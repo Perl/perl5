@@ -20,7 +20,7 @@ my $file = 'lib/buildcustomize.pl';
 
 my @toolchain = qw(cpan/AutoLoader/lib
 		   dist/Carp/lib
-		   dist/Cwd dist/Cwd/lib
+		   dist/PathTools dist/PathTools/lib
 		   dist/ExtUtils-Command/lib
 		   dist/ExtUtils-Install/lib
 		   cpan/ExtUtils-MakeMaker/lib

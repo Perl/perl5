@@ -19,7 +19,6 @@ no_index:
     - dist/bignum
     - dist/Carp
     - dist/constant
-    - dist/Cwd
     - dist/Data-Dumper
     - dist/Devel-SelfStubber
     - dist/Dumpvalue
@@ -41,6 +40,7 @@ no_index:
     - dist/Math-BigRat
     - dist/Module-CoreList
     - dist/Net-Ping
+    - dist/PathTools
     - dist/Safe
     - dist/Search-Dict
     - dist/SelfLoader

@@ -232,6 +232,11 @@ foreach my $spec (@extspec)  {
     # Try new style ext/Data-Dumper/ first
     my $copy = $spec;
     $copy =~ tr!/!-!;
+
+    # List/Util.xs lives in Scalar-List-Utils, Cwd.xs lives in PathTools
+    $copy = 'Scalar-List-Utils' if $copy eq 'List-Util';
+    $copy = 'PathTools'         if $copy eq 'Cwd';
+
     foreach my $dir (@ext_dirs) {
 	if (-d "$dir/$copy") {
 	    $ext_pathname = "$dir/$copy";
