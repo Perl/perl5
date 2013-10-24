@@ -3,7 +3,7 @@ BEGIN {
     @INC = '../lib';
     require './test.pl';
 }
-plan tests=>203;
+plan tests=>205;
 
 sub a : lvalue { my $a = 34; ${\(bless \$a)} }  # Return a temporary
 sub b : lvalue { ${\shift} }
@@ -317,6 +317,31 @@ EOE
 
 like($_, qr/Can\'t return a temporary from lvalue subroutine/,
     'returning a PADTMP explicitly (list context)');
+
+# These next two tests are not necessarily normative.  But this way we will
+# know if this discrepancy changes.
+
+$_ = undef;
+eval <<'EOE' or $_ = $@;
+  sub scalarray : lvalue { @a || $b }
+  @a = 1;
+  (scalarray) = (2,3);
+  1;
+EOE
+
+like($_, qr/Can\'t return a temporary from lvalue subroutine/,
+    'returning a scalar-context array via ||');
+
+$_ = undef;
+eval <<'EOE' or $_ = $@;
+  use warnings "FATAL" => "all";
+  sub myscalarray : lvalue { my @a = 1; @a || $b }
+  (myscalarray) = (2,3);
+  1;
+EOE
+
+like($_, qr/Useless assignment to a temporary/,
+    'returning a scalar-context lexical array via ||');
 
 $_ = undef;
 sub lv2t : lvalue { shift }

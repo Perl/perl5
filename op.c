@@ -2164,7 +2164,11 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 	localize = 1;
 	/* FALL THROUGH */
     case OP_AASSIGN:
-	if (type == OP_LEAVESUBLV)
+	/* Do not apply the lvsub flag for rv2[ah]v in scalar context.  */
+	if (type == OP_LEAVESUBLV && (
+		(o->op_type != OP_RV2AV && o->op_type != OP_RV2HV)
+	     || (o->op_flags & OPf_WANT) != OPf_WANT_SCALAR
+	   ))
 	    o->op_private |= OPpMAYBE_LVSUB;
 	/* FALL THROUGH */
     case OP_NEXTSTATE:
@@ -2208,7 +2212,8 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 	    return o;		/* Treat \(@foo) like ordinary list. */
 	if (scalar_mod_type(o, type))
 	    goto nomod;
-	if (type == OP_LEAVESUBLV)
+	if ((o->op_flags & OPf_WANT) != OPf_WANT_SCALAR
+	  && type == OP_LEAVESUBLV)
 	    o->op_private |= OPpMAYBE_LVSUB;
 	/* FALL THROUGH */
     case OP_PADSV:
