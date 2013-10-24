@@ -25,7 +25,7 @@ sub FETCH {
 package main;
 require './test.pl';
 
-plan( tests => 8 );
+plan( tests => 9 );
 
 
 my ($a, $b, $c);
@@ -66,3 +66,9 @@ $c = $a || $b;
     local $TODO = 'Double FETCH';
     is($c, 1,   '   $tied || $var');
 }
+
+$y = " ";
+for (pos $x || pos $y) {
+    eval { $_++ };
+}
+is(pos($y) || $@, 1, "|| propagates lvaluish context");

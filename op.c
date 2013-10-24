@@ -2298,10 +2298,8 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 
     case OP_AND:
     case OP_OR:
-	if (type == OP_LEAVESUBLV) {
-	    op_lvalue(cLOGOPo->op_first,	     type);
-	    op_lvalue(cLOGOPo->op_first->op_sibling, type);
-	}
+	op_lvalue(cLOGOPo->op_first,		 type);
+	op_lvalue(cLOGOPo->op_first->op_sibling, type);
 	goto nomod;
     }
 
