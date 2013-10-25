@@ -3,48 +3,51 @@
 
 #ifdef PERL_CORE
 #  define VXS_CLASS "version"
+#  define VXSp(name) XS_##name
 #else
 #  define VXS_CLASS "version::vxs"
+#  define VXSp(name) VXS_##name
 #endif
+#define VXS(name) XS(VXSp(name))
 
 #ifdef VXS_XSUB_DETAILS
 #  ifdef PERL_CORE
     {"UNIVERSAL::VERSION", XS_UNIVERSAL_VERSION, NULL},
 #  else
-    {VXS_CLASS "::_VERSION", XS_UNIVERSAL_VERSION, NULL},
+    {VXS_CLASS "::_VERSION", VXS_UNIVERSAL_VERSION, NULL},
 #  endif
-    {VXS_CLASS "::()", XS_version_noop, NULL},
-    {VXS_CLASS "::new", XS_version_new, NULL},
-    {VXS_CLASS "::parse", XS_version_new, NULL},
-    {VXS_CLASS "::(\"\"", XS_version_stringify, NULL},
-    {VXS_CLASS "::stringify", XS_version_stringify, NULL},
-    {VXS_CLASS "::(0+", XS_version_numify, NULL},
-    {VXS_CLASS "::numify", XS_version_numify, NULL},
-    {VXS_CLASS "::normal", XS_version_normal, NULL},
-    {VXS_CLASS "::(cmp", XS_version_vcmp, NULL},
-    {VXS_CLASS "::(<=>", XS_version_vcmp, NULL},
+    {VXS_CLASS "::()", VXSp(version_noop), NULL},
+    {VXS_CLASS "::new", VXSp(version_new), NULL},
+    {VXS_CLASS "::parse", VXSp(version_new), NULL},
+    {VXS_CLASS "::(\"\"", VXSp(version_stringify), NULL},
+    {VXS_CLASS "::stringify", VXSp(version_stringify), NULL},
+    {VXS_CLASS "::(0+", VXSp(version_numify), NULL},
+    {VXS_CLASS "::numify", VXSp(version_numify), NULL},
+    {VXS_CLASS "::normal", VXSp(version_normal), NULL},
+    {VXS_CLASS "::(cmp", VXSp(version_vcmp), NULL},
+    {VXS_CLASS "::(<=>", VXSp(version_vcmp), NULL},
 #  ifdef PERL_CORE
     {VXS_CLASS "::vcmp", XS_version_vcmp, NULL},
 #  else
-    {VXS_CLASS "::VCMP", XS_version_vcmp, NULL},
+    {VXS_CLASS "::VCMP", VXS_version_vcmp, NULL},
 #  endif
-    {VXS_CLASS "::(bool", XS_version_boolean, NULL},
-    {VXS_CLASS "::boolean", XS_version_boolean, NULL},
-    {VXS_CLASS "::(+", XS_version_noop, NULL},
-    {VXS_CLASS "::(-", XS_version_noop, NULL},
-    {VXS_CLASS "::(*", XS_version_noop, NULL},
-    {VXS_CLASS "::(/", XS_version_noop, NULL},
-    {VXS_CLASS "::(+=", XS_version_noop, NULL},
-    {VXS_CLASS "::(-=", XS_version_noop, NULL},
-    {VXS_CLASS "::(*=", XS_version_noop, NULL},
-    {VXS_CLASS "::(/=", XS_version_noop, NULL},
-    {VXS_CLASS "::(abs", XS_version_noop, NULL},
-    {VXS_CLASS "::(nomethod", XS_version_noop, NULL},
-    {VXS_CLASS "::noop", XS_version_noop, NULL},
-    {VXS_CLASS "::is_alpha", XS_version_is_alpha, NULL},
-    {VXS_CLASS "::qv", XS_version_qv, NULL},
-    {VXS_CLASS "::declare", XS_version_qv, NULL},
-    {VXS_CLASS "::is_qv", XS_version_is_qv, NULL},
+    {VXS_CLASS "::(bool", VXSp(version_boolean), NULL},
+    {VXS_CLASS "::boolean", VXSp(version_boolean), NULL},
+    {VXS_CLASS "::(+", VXSp(version_noop), NULL},
+    {VXS_CLASS "::(-", VXSp(version_noop), NULL},
+    {VXS_CLASS "::(*", VXSp(version_noop), NULL},
+    {VXS_CLASS "::(/", VXSp(version_noop), NULL},
+    {VXS_CLASS "::(+=", VXSp(version_noop), NULL},
+    {VXS_CLASS "::(-=", VXSp(version_noop), NULL},
+    {VXS_CLASS "::(*=", VXSp(version_noop), NULL},
+    {VXS_CLASS "::(/=", VXSp(version_noop), NULL},
+    {VXS_CLASS "::(abs", VXSp(version_noop), NULL},
+    {VXS_CLASS "::(nomethod", VXSp(version_noop), NULL},
+    {VXS_CLASS "::noop", VXSp(version_noop), NULL},
+    {VXS_CLASS "::is_alpha", VXSp(version_is_alpha), NULL},
+    {VXS_CLASS "::qv", VXSp(version_qv), NULL},
+    {VXS_CLASS "::declare", VXSp(version_qv), NULL},
+    {VXS_CLASS "::is_qv", VXSp(version_is_qv), NULL},
 #else
 
 #ifndef dVAR
@@ -64,7 +67,7 @@ typedef char HVNAME;
 #  define HEKf		"s"
 #endif
 
-XS(XS_UNIVERSAL_VERSION)
+VXS(UNIVERSAL_VERSION)
 {
     dVAR;
     dXSARGS;
@@ -165,7 +168,7 @@ XS(XS_UNIVERSAL_VERSION)
     XSRETURN(1);
 }
 
-XS(XS_version_new)
+VXS(version_new)
 {
     dVAR;
     dXSARGS;
@@ -233,7 +236,7 @@ XS(XS_version_new)
 	    Perl_croak(aTHX_ varname " is not of type version");	\
     } STMT_END
 
-XS(XS_version_stringify)
+VXS(version_stringify)
 {
      dVAR;
      dXSARGS;
@@ -251,7 +254,7 @@ XS(XS_version_stringify)
      }
 }
 
-XS(XS_version_numify)
+VXS(version_numify)
 {
      dVAR;
      dXSARGS;
@@ -267,7 +270,7 @@ XS(XS_version_numify)
      }
 }
 
-XS(XS_version_normal)
+VXS(version_normal)
 {
      dVAR;
      dXSARGS;
@@ -285,7 +288,7 @@ XS(XS_version_normal)
      }
 }
 
-XS(XS_version_vcmp)
+VXS(version_vcmp)
 {
      dVAR;
      dXSARGS;
@@ -325,7 +328,7 @@ XS(XS_version_vcmp)
      }
 }
 
-XS(XS_version_boolean)
+VXS(version_boolean)
 {
     dVAR;
     dXSARGS;
@@ -348,7 +351,7 @@ XS(XS_version_boolean)
     }
 }
 
-XS(XS_version_noop)
+VXS(version_noop)
 {
     dVAR;
     dXSARGS;
@@ -361,7 +364,7 @@ XS(XS_version_noop)
     XSRETURN_EMPTY;
 }
 
-XS(XS_version_is_alpha)
+VXS(version_is_alpha)
 {
     dVAR;
     dXSARGS;
@@ -380,7 +383,7 @@ XS(XS_version_is_alpha)
     }
 }
 
-XS(XS_version_qv)
+VXS(version_qv)
 {
     dVAR;
     dXSARGS;
@@ -434,7 +437,7 @@ XS(XS_version_qv)
     return;
 }
 
-XS(XS_version_is_qv)
+VXS(version_is_qv)
 {
     dVAR;
     dXSARGS;
