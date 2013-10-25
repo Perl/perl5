@@ -55,6 +55,7 @@ PerlIOScalar_pushed(pTHX_ PerlIO * f, const char *mode, SV * arg,
     {
 	sv_force_normal(s->var);
 	SvCUR_set(s->var, 0);
+	if (SvPOK(s->var)) *SvPVX(s->var) = 0;
     }
     if (SvUTF8(s->var) && !sv_utf8_downgrade(s->var, TRUE)) {
 	if (ckWARN(WARN_UTF8))

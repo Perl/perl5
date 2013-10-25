@@ -16,7 +16,7 @@ use Fcntl qw(SEEK_SET SEEK_CUR SEEK_END); # Not 0, 1, 2 everywhere.
 
 $| = 1;
 
-use Test::More tests => 112;
+use Test::More tests => 113;
 
 my $fh;
 my $var = "aaa\n";
@@ -340,7 +340,7 @@ sub has_trailing_nul(\$) {
 }
 SKIP: {
     if ($Config::Config{'extensions'} !~ m!\bPerlIO/scalar\b!) {
-	skip "no B", 3;
+	skip "no B", 4;
     }
     require B;
 
@@ -359,6 +359,10 @@ SKIP: {
     print $fh "abc";
     ok has_trailing_nul $memfile,
 	 'write appends null when growing string after seek past end';
+
+    open $fh, ">", \($memfile = "hello");
+    ok has_trailing_nul $memfile,
+	 'initial truncation in ">" mode provides trailing null';
 }
 
 # [perl #112780] Cloning of in-memory handles
