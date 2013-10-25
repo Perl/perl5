@@ -767,8 +767,11 @@ Perl_lex_start(pTHX_ SV *line, PerlIO *rsfp, U32 flags)
 	parser->linestart = SvPVX(parser->linestr);
     parser->bufend = parser->bufptr + SvCUR(parser->linestr);
     parser->last_lop = parser->last_uni = NULL;
-    parser->lex_flags = flags & (LEX_IGNORE_UTF8_HINTS|LEX_EVALBYTES
-				 |LEX_DONT_CLOSE_RSFP);
+
+    assert(FITS_IN_8_BITS(LEX_IGNORE_UTF8_HINTS|LEX_EVALBYTES
+                                                        |LEX_DONT_CLOSE_RSFP));
+    parser->lex_flags = (U8) (flags & (LEX_IGNORE_UTF8_HINTS|LEX_EVALBYTES
+                                                        |LEX_DONT_CLOSE_RSFP));
 
     parser->in_pod = parser->filtered = 0;
 }
@@ -4791,7 +4794,7 @@ Perl_yylex(pTHX)
     char *d;
     STRLEN len;
     bool bof = FALSE;
-    const bool saw_infix_sigil = PL_parser->saw_infix_sigil;
+    const bool saw_infix_sigil = cBOOL(PL_parser->saw_infix_sigil);
     U8 formbrack = 0;
     U32 fake_eof = 0;
 

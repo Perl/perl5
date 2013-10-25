@@ -5982,7 +5982,7 @@ PP(pp_coreargs)
 		const bool constr = PL_op->op_private & whicharg;
 		PUSHs(S_rv2gv(aTHX_
 		    svp && *svp ? *svp : &PL_sv_undef,
-		    constr, CopHINTS_get(PL_curcop) & HINT_STRICT_REFS,
+		    constr, cBOOL(CopHINTS_get(PL_curcop) & HINT_STRICT_REFS),
 		    !constr
 		));
 	    }
