@@ -159,7 +159,7 @@ use File::Glob qw(:case);
     },
 
     'AutoLoader' => {
-        'DISTRIBUTION' => 'SMUELLER/AutoLoader-5.73.tar.gz',
+        'DISTRIBUTION' => 'SMUELLER/AutoLoader-5.74.tar.gz',
         'FILES'        => q[cpan/AutoLoader],
         'EXCLUDED'     => ['t/00pod.t'],
     },
