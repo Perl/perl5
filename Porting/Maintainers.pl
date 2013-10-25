@@ -1262,7 +1262,9 @@ use File::Glob qw(:case);
         'DISTRIBUTION' => 'JPEACOCK/version-0.9904.tar.gz',
         'FILES'        => q[cpan/version],
         'EXCLUDED' => [
-            qr{^vutil/},
+            qr{^vutil/lib/},
+            'vutil/ppport.h',
+            'vutil/vxs.xs',
             'lib/version/typemap',
             't/survey_locales',
             'vperl/vpp.pm',
@@ -1276,8 +1278,12 @@ use File::Glob qw(:case);
                 ),
         ],
 
-        # Remove this (so it reverts to 'cpan') when [cpan #88458] is resolved
-        'UPSTREAM' => 'blead',
+        'MAP' => {
+            'vutil.c'        => 'vutil.c',
+            'vutil.h'        => 'vutil.h',
+            'vxs.inc'        => 'vxs.inc',
+            ''               => 'cpan/version/',
+        },
     },
 
     'warnings' => {
