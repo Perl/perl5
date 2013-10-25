@@ -20,7 +20,8 @@ use File::Spec::Functions;
 my $not_installed = qr{^(?:
   \.\./cpan/Encode/bin/u(?:cm(?:2table|lint|sort)|nidump)
    |
-  \.\./cpan/Module-Build/MB-[\w\d]+/Simple/(?:test_install/)?bin/.*
+  \.\./cpan/Module-(?:Metadata|Build)
+                               /MB-[\w\d]+/Simple/(?:test_install/)?bin/.*
 )\z}ix;
 
 my %dist_dir_exe;
