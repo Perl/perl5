@@ -115,7 +115,7 @@
    "release_status" : "unstable",
    "resources" : {
       "bugtracker" : {
-         "web" : "http://rt.perl.org/perlbug/"
+         "web" : "https://rt.perl.org/"
       },
       "homepage" : "http://www.perl.org/",
       "license" : [
