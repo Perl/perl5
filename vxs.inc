@@ -374,7 +374,7 @@ VXS(version_is_alpha)
     {
 	SV *lobj;
 	VTYPECHECK(lobj, ST(0), "lobj");
-	if ( hv_exists(MUTABLE_HV(SvRV(lobj)), "alpha", 5 ) )
+	if ( hv_exists(MUTABLE_HV(lobj), "alpha", 5 ) )
 	    XSRETURN_YES;
 	else
 	    XSRETURN_NO;
@@ -447,7 +447,7 @@ VXS(version_is_qv)
     {
 	SV *lobj;
 	VTYPECHECK(lobj, ST(0), "lobj");
-	if ( hv_exists(MUTABLE_HV(SvRV(lobj)), "qv", 2 ) )
+	if ( hv_exists(MUTABLE_HV(lobj), "qv", 2 ) )
 	    XSRETURN_YES;
 	else
 	    XSRETURN_NO;
