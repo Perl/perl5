@@ -3000,6 +3000,9 @@ $to \$exe
 $targetrun -p $targetport -l $targetuser $targethost "cd \$cwd && \$env \$exe \$@"
 EOF
 	    ;;
+	adb)
+	    $touch $run
+	    ;;
 	*)  echo "Unknown targetrun '$targetrun'" >&4
 	    exit 1
 	    ;;
