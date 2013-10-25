@@ -16,7 +16,7 @@ use Fcntl qw(SEEK_SET SEEK_CUR SEEK_END); # Not 0, 1, 2 everywhere.
 
 $| = 1;
 
-use Test::More tests => 109;
+use Test::More tests => 112;
 
 my $fh;
 my $var = "aaa\n";
@@ -463,11 +463,22 @@ my $byte_warning = "Strings with code points over 0xFF may not be mapped into in
     is_deeply(\@warnings, [ $byte_warning ], "check warning");
 }
 
-#  RT #119529: non-string should be forced into a string
+#  RT #119529: Reading refs should not loop
 
 {
     my $x = \42;
     open my $fh, "<", \$x;
     my $got = <$fh>; # this used to loop
     like($got, qr/^SCALAR\(0x[0-9a-f]+\)$/, "ref to a ref");
+    is ref $x, "SCALAR", "target scalar is still a reference";
+}
+
+# Appending to refs
+{
+    my $x = \42;
+    my $as_string = "$x";
+    open my $refh, ">>", \$x;
+    is ref $x, "SCALAR", 'still a ref after opening for appending';
+    print $refh "boo\n";
+    is $x, $as_string."boo\n", 'string gets appended to ref';
 }

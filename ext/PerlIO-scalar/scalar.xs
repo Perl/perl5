@@ -48,11 +48,7 @@ PerlIOScalar_pushed(pTHX_ PerlIO * f, const char *mode, SV * arg,
     else {
 	s->var = newSVpvn("", 0);
     }
-    if (SvROK(s->var))
-        /* force refs, overload etc to be plain strings */
-        (void)SvPV_force_nomg_nolen(s->var);
-    else
-        SvUPGRADE(s->var, SVt_PV);
+    SvUPGRADE(s->var, SVt_PV);
 
     code = PerlIOBase_pushed(aTHX_ f, mode, Nullsv, tab);
     if (!SvOK(s->var) || (PerlIOBase(f)->flags) & PERLIO_F_TRUNCATE)
@@ -69,10 +65,7 @@ PerlIOScalar_pushed(pTHX_ PerlIO * f, const char *mode, SV * arg,
 	return -1;
     }
     if ((PerlIOBase(f)->flags) & PERLIO_F_APPEND)
-    {
-	sv_force_normal(s->var);
-	s->posn = SvCUR(s->var);
-    }
+	s->posn = sv_len(s->var);
     else
 	s->posn = 0;
     SvSETMAGIC(s->var);
@@ -270,10 +263,7 @@ PerlIOScalar_get_cnt(pTHX_ PerlIO * f)
     if (PerlIOBase(f)->flags & PERLIO_F_CANREAD) {
 	PerlIOScalar *s = PerlIOSelf(f, PerlIOScalar);
 	STRLEN len;
-	SvGETMAGIC(s->var);
-	if (isGV_with_GP(s->var))
-	    (void)SvPV(s->var,len);
-	else len = SvCUR(s->var);
+	(void)SvPV(s->var,len);
 	if (len > (STRLEN) s->posn)
 	    return len - (STRLEN)s->posn;
 	else
@@ -299,9 +289,7 @@ PerlIOScalar_set_ptrcnt(pTHX_ PerlIO * f, STDCHAR * ptr, SSize_t cnt)
     PerlIOScalar *s = PerlIOSelf(f, PerlIOScalar);
     STRLEN len;
     PERL_UNUSED_ARG(ptr);
-    SvGETMAGIC(s->var);
-    if (isGV_with_GP(s->var)) (void)SvPV(s->var,len);
-    else len = SvCUR(s->var);
+    (void)SvPV(s->var,len);
     s->posn = len - cnt;
 }
 
