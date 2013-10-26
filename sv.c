@@ -13620,9 +13620,9 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_errgv		= gv_dup(proto_perl->Ierrgv, param);
 
     /* shortcuts to debugging objects */
-    PL_DBgv		= gv_dup(proto_perl->IDBgv, param);
-    PL_DBline		= gv_dup(proto_perl->IDBline, param);
-    PL_DBsub		= gv_dup(proto_perl->IDBsub, param);
+    PL_DBgv		= gv_dup_inc(proto_perl->IDBgv, param);
+    PL_DBline		= gv_dup_inc(proto_perl->IDBline, param);
+    PL_DBsub		= gv_dup_inc(proto_perl->IDBsub, param);
     PL_DBsingle		= sv_dup(proto_perl->IDBsingle, param);
     PL_DBtrace		= sv_dup(proto_perl->IDBtrace, param);
     PL_DBsignal		= sv_dup(proto_perl->IDBsignal, param);

@@ -9,7 +9,7 @@ BEGIN { require "./test.pl"; }
 
 # This test depends on t/lib/Devel/switchd*.pm.
 
-plan(tests => 14);
+plan(tests => 15);
 
 my $r;
 
@@ -146,6 +146,16 @@ like(
   ),
   qr/^No DB::DB routine defined/,
   "No crash when &DB::DB exists but isn't actually defined",
+);
+# or seen and defined later
+is(
+  runperl(
+    switches => [ '-Ilib', '-d:nodb' ], # nodb.pm contains *DB::DB...if 0
+    prog     => 'warn; sub DB::DB { print qq-ok\n-; exit }',
+    stderr   => 1,
+  ),
+  "ok\n",
+  "DB::DB works after '*DB::DB if 0'",
 );
 
 # [perl #115742] Recursive DB::DB clobbering its own pad

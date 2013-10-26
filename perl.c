@@ -959,15 +959,19 @@ perl_destruct(pTHXx)
     PL_stderrgv = NULL;
     PL_last_in_gv = NULL;
     PL_replgv = NULL;
-    PL_DBgv = NULL;
-    PL_DBline = NULL;
-    PL_DBsub = NULL;
     PL_DBsingle = NULL;
     PL_DBtrace = NULL;
     PL_DBsignal = NULL;
     PL_DBcv = NULL;
     PL_dbargs = NULL;
     PL_debstash = NULL;
+
+    SvREFCNT_dec(PL_DBgv);
+    SvREFCNT_dec(PL_DBline);
+    SvREFCNT_dec(PL_DBsub);
+    PL_DBgv = NULL;
+    PL_DBline = NULL;
+    PL_DBsub = NULL;
 
     SvREFCNT_dec(PL_argvout_stack);
     PL_argvout_stack = NULL;
@@ -4043,9 +4047,15 @@ Perl_init_debugger(pTHX)
     PL_curstash = (HV *)SvREFCNT_inc_simple(PL_debstash);
 
     Perl_init_dbargs(aTHX);
-    PL_DBgv = gv_fetchpvs("DB::DB", GV_ADDMULTI, SVt_PVGV);
-    PL_DBline = gv_fetchpvs("DB::dbline", GV_ADDMULTI, SVt_PVAV);
-    PL_DBsub = gv_HVadd(gv_fetchpvs("DB::sub", GV_ADDMULTI, SVt_PVHV));
+    PL_DBgv = MUTABLE_GV(
+	SvREFCNT_inc(gv_fetchpvs("DB::DB", GV_ADDMULTI, SVt_PVGV))
+    );
+    PL_DBline = MUTABLE_GV(
+	SvREFCNT_inc(gv_fetchpvs("DB::dbline", GV_ADDMULTI, SVt_PVAV))
+    );
+    PL_DBsub = MUTABLE_GV(SvREFCNT_inc(
+	gv_HVadd(gv_fetchpvs("DB::sub", GV_ADDMULTI, SVt_PVHV))
+    ));
     PL_DBsingle = GvSV((gv_fetchpvs("DB::single", GV_ADDMULTI, SVt_PV)));
     if (!SvIOK(PL_DBsingle))
 	sv_setiv(PL_DBsingle, 0);
