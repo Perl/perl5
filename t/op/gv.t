@@ -12,7 +12,7 @@ BEGIN {
 
 use warnings;
 
-plan( tests => 254 );
+plan( tests => 255 );
 
 # type coercion on assignment
 $foo = 'foo';
@@ -975,6 +975,17 @@ package lrcg {
   my $ref = \&{"yz\0a"};
   ::ok !exists $lrcg::{yz},
     'constants w/nulls in their names point 2 the right GVs when promoted';
+}
+
+{
+  no warnings 'io';
+  stat *{"try_downgrade"};
+  -T _;
+  $bang = $!;
+  eval "*try_downgrade if 0";
+  -T _;
+  is "$!",$bang,
+     'try_downgrade does not touch PL_statgv (last stat handle)';
 }
 
 # Look away, please.

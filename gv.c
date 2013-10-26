@@ -3322,6 +3322,7 @@ Perl_gv_try_downgrade(pTHX_ GV *gv)
 	    !GvSV(gv) && !GvAV(gv) && !GvHV(gv) && !GvIOp(gv) && !GvFORM(gv) &&
 	    GvEGVx(gv) == gv && (stash = GvSTASH(gv))))
 	return;
+    if (gv == PL_statgv) return;
     if (SvMAGICAL(gv)) {
         MAGIC *mg;
 	/* only backref magic is allowed */
