@@ -4250,11 +4250,10 @@ Perl_init_argv_symbols(pTHX_ int argc, char **argv)
     }
     if ((PL_argvgv = gv_fetchpvs("ARGV", GV_ADD|GV_NOTQUAL, SVt_PVAV))) {
 	GvMULTI_on(PL_argvgv);
-	(void)gv_AVadd(PL_argvgv);
 	av_clear(GvAVn(PL_argvgv));
 	for (; argc > 0; argc--,argv++) {
 	    SV * const sv = newSVpv(argv[0],0);
-	    av_push(GvAVn(PL_argvgv),sv);
+	    av_push(GvAV(PL_argvgv),sv);
 	    if (!(PL_unicode & PERL_UNICODE_LOCALE_FLAG) || PL_utf8locale) {
 		 if (PL_unicode & PERL_UNICODE_ARGV_FLAG)
 		      SvUTF8_on(sv);
