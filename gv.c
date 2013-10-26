@@ -82,10 +82,12 @@ Perl_gv_add_by_type(pTHX_ GV *gv, svtype type)
     }
 
     if (!*where)
+    {
 	*where = newSV_type(type);
-    if (type == SVt_PVAV && GvNAMELEN(gv) == 3
-     && strnEQ(GvNAME(gv), "ISA", 3))
-	sv_magic(*where, (SV *)gv, PERL_MAGIC_isa, NULL, 0);
+	    if (type == SVt_PVAV && GvNAMELEN(gv) == 3
+	     && strnEQ(GvNAME(gv), "ISA", 3))
+	    sv_magic(*where, (SV *)gv, PERL_MAGIC_isa, NULL, 0);
+    }
     return gv;
 }
 
