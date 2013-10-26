@@ -949,7 +949,6 @@ perl_destruct(pTHXx)
     PL_initav = NULL;
 
     /* shortcuts just get cleared */
-    PL_envgv = NULL;
     PL_incgv = NULL;
     PL_hintgv = NULL;
     PL_errgv = NULL;
@@ -966,9 +965,11 @@ perl_destruct(pTHXx)
     PL_dbargs = NULL;
     PL_debstash = NULL;
 
+    SvREFCNT_dec(PL_envgv);
     SvREFCNT_dec(PL_DBgv);
     SvREFCNT_dec(PL_DBline);
     SvREFCNT_dec(PL_DBsub);
+    PL_envgv = NULL;
     PL_DBgv = NULL;
     PL_DBline = NULL;
     PL_DBsub = NULL;
@@ -4303,6 +4304,7 @@ S_init_postdump_symbols(pTHX_ int argc, char **argv, char **env)
     if ((PL_envgv = gv_fetchpvs("ENV", GV_ADD|GV_NOTQUAL, SVt_PVHV))) {
 	HV *hv;
 	bool env_is_not_environ;
+	SvREFCNT_inc_simple_void_NN(PL_envgv);
 	GvMULTI_on(PL_envgv);
 	hv = GvHVn(PL_envgv);
 	hv_magic(hv, NULL, PERL_MAGIC_env);

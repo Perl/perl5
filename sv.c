@@ -13565,7 +13565,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PerlIO_clone(aTHX_ proto_perl, param);
 #endif
 
-    PL_envgv		= gv_dup(proto_perl->Ienvgv, param);
+    PL_envgv		= gv_dup_inc(proto_perl->Ienvgv, param);
     PL_incgv		= gv_dup(proto_perl->Iincgv, param);
     PL_hintgv		= gv_dup(proto_perl->Ihintgv, param);
     PL_origfilename	= SAVEPV(proto_perl->Iorigfilename);

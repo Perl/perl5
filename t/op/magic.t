@@ -5,7 +5,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';
-    plan (tests => 184);
+    plan (tests => 185);
 }
 
 # Test that defined() returns true for magic variables created on the fly,
@@ -200,6 +200,10 @@ END
 @val2 = values(%ENV);
 is join(':',@val1), join(':',@val2);
 cmp_ok @val1, '>', 1;
+
+# deleting $::{ENV}
+is runperl(prog => 'delete $::{ENV}; chdir; print qq-ok\n-'), "ok\n",
+  'deleting $::{ENV}';
 
 # regex vars
 'foobarbaz' =~ /b(a)r/;
