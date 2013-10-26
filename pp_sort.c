@@ -1656,10 +1656,14 @@ PP(pp_sort)
 	    CATCH_SET(TRUE);
 	    PUSHSTACKi(PERLSI_SORT);
 	    if (!hasargs && !is_xsub) {
-		SAVESPTR(PL_firstgv);
-		SAVESPTR(PL_secondgv);
-		PL_firstgv = gv_fetchpvs("a", GV_ADD|GV_NOTQUAL, SVt_PV);
-		PL_secondgv = gv_fetchpvs("b", GV_ADD|GV_NOTQUAL, SVt_PV);
+		SAVEGENERICSV(PL_firstgv);
+		SAVEGENERICSV(PL_secondgv);
+		PL_firstgv = MUTABLE_GV(SvREFCNT_inc(
+		    gv_fetchpvs("a", GV_ADD|GV_NOTQUAL, SVt_PV)
+		));
+		PL_secondgv = MUTABLE_GV(SvREFCNT_inc(
+		    gv_fetchpvs("b", GV_ADD|GV_NOTQUAL, SVt_PV)
+		));
 		SAVESPTR(GvSV(PL_firstgv));
 		SAVESPTR(GvSV(PL_secondgv));
 	    }

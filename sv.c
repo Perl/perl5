@@ -13845,8 +13845,8 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_errors		= sv_dup_inc(proto_perl->Ierrors, param);
 
     PL_sortcop		= (OP*)any_dup(proto_perl->Isortcop, proto_perl);
-    PL_firstgv		= gv_dup(proto_perl->Ifirstgv, param);
-    PL_secondgv		= gv_dup(proto_perl->Isecondgv, param);
+    PL_firstgv		= gv_dup_inc(proto_perl->Ifirstgv, param);
+    PL_secondgv		= gv_dup_inc(proto_perl->Isecondgv, param);
 
     PL_stashcache       = newHV();
 

@@ -6,7 +6,7 @@ BEGIN {
     require 'test.pl';
 }
 use warnings;
-plan( tests => 181 );
+plan( tests => 182 );
 
 # these shouldn't hang
 {
@@ -1011,3 +1011,8 @@ is $#a, 10, 'sort block modifying $a and $b';
 () = sort {
     is \$a, \$a, '[perl #78194] op return values passed to sort'; 0
 } "${\''}", "${\''}";
+
+package deletions {
+    @_=sort { delete $deletions::{a}; delete $deletions::{b}; 3 } 1..3;
+}
+pass "no crash when sort block deletes *a and *b";
