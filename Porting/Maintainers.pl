@@ -1043,16 +1043,8 @@ use File::Glob qw(:case);
     },
 
     'Term::Cap' => {
-        'DISTRIBUTION' => 'JSTOWE/Term-Cap-1.12.tar.gz',
+        'DISTRIBUTION' => 'JSTOWE/Term-Cap-1.15.tar.gz',
         'FILES'        => q[cpan/Term-Cap],
-
-        # Waiting to be merged upstream: see CPAN RT#73447
-        'CUSTOMIZED'   => [
-            qw( Cap.pm
-                test.pl
-                ),
-        ],
-
     },
 
     'Term::Complete' => {
