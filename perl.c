@@ -956,7 +956,6 @@ perl_destruct(pTHXx)
     PL_stdingv = NULL;
     PL_stderrgv = NULL;
     PL_last_in_gv = NULL;
-    PL_replgv = NULL;
     PL_DBsingle = NULL;
     PL_DBtrace = NULL;
     PL_DBsignal = NULL;
@@ -966,11 +965,13 @@ perl_destruct(pTHXx)
 
     SvREFCNT_dec(PL_envgv);
     SvREFCNT_dec(PL_argvgv);
+    SvREFCNT_dec(PL_replgv);
     SvREFCNT_dec(PL_DBgv);
     SvREFCNT_dec(PL_DBline);
     SvREFCNT_dec(PL_DBsub);
     PL_envgv = NULL;
     PL_argvgv = NULL;
+    PL_replgv = NULL;
     PL_DBgv = NULL;
     PL_DBline = NULL;
     PL_DBsub = NULL;
@@ -3724,6 +3725,7 @@ S_init_main_stash(pTHX)
     SvREFCNT_inc_simple_void(PL_errgv);
     GvMULTI_on(PL_errgv);
     PL_replgv = gv_fetchpvs("\022", GV_ADD|GV_NOTQUAL, SVt_PV); /* ^R */
+    SvREFCNT_inc_simple_void(PL_replgv);
     GvMULTI_on(PL_replgv);
     (void)Perl_form(aTHX_ "%240s","");	/* Preallocate temp - for immediate signals. */
 #ifdef PERL_DONT_CREATE_GVSV

@@ -13614,7 +13614,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_argvout_stack	= av_dup_inc(proto_perl->Iargvout_stack, param);
 
     /* shortcuts to regexp stuff */
-    PL_replgv		= gv_dup(proto_perl->Ireplgv, param);
+    PL_replgv		= gv_dup_inc(proto_perl->Ireplgv, param);
 
     /* shortcuts to misc objects */
     PL_errgv		= gv_dup(proto_perl->Ierrgv, param);

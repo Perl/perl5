@@ -20,7 +20,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 699;  # Update this when adding/deleting tests.
+plan tests => 700;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1477,6 +1477,12 @@ EOP
 	$a[1]++;
 	/@a/;
 	pass('no crash with /@a/ when array has nonexistent elems');
+    }
+
+    {
+	is runperl(prog => 'delete $::{qq-\cR-}; //; print qq-ok\n-'),
+	   "ok\n",
+	   'deleting *^R does not result in crashes'
     }
 
 } # End of sub run_tests
