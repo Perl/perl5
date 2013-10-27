@@ -13609,7 +13609,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_stdingv		= gv_dup(proto_perl->Istdingv, param);
     PL_stderrgv		= gv_dup(proto_perl->Istderrgv, param);
     PL_defgv		= gv_dup(proto_perl->Idefgv, param);
-    PL_argvgv		= gv_dup(proto_perl->Iargvgv, param);
+    PL_argvgv		= gv_dup_inc(proto_perl->Iargvgv, param);
     PL_argvoutgv	= gv_dup(proto_perl->Iargvoutgv, param);
     PL_argvout_stack	= av_dup_inc(proto_perl->Iargvout_stack, param);
 

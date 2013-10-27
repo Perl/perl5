@@ -952,7 +952,6 @@ perl_destruct(pTHXx)
     PL_incgv = NULL;
     PL_hintgv = NULL;
     PL_errgv = NULL;
-    PL_argvgv = NULL;
     PL_argvoutgv = NULL;
     PL_stdingv = NULL;
     PL_stderrgv = NULL;
@@ -966,10 +965,12 @@ perl_destruct(pTHXx)
     PL_debstash = NULL;
 
     SvREFCNT_dec(PL_envgv);
+    SvREFCNT_dec(PL_argvgv);
     SvREFCNT_dec(PL_DBgv);
     SvREFCNT_dec(PL_DBline);
     SvREFCNT_dec(PL_DBsub);
     PL_envgv = NULL;
+    PL_argvgv = NULL;
     PL_DBgv = NULL;
     PL_DBline = NULL;
     PL_DBsub = NULL;
@@ -4261,6 +4262,7 @@ Perl_init_argv_symbols(pTHX_ int argc, char **argv)
 	}
     }
     if ((PL_argvgv = gv_fetchpvs("ARGV", GV_ADD|GV_NOTQUAL, SVt_PVAV))) {
+	SvREFCNT_inc_simple_void_NN(PL_argvgv);
 	GvMULTI_on(PL_argvgv);
 	av_clear(GvAVn(PL_argvgv));
 	for (; argc > 0; argc--,argv++) {
