@@ -5,7 +5,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';
-    plan (tests => 185);
+    plan (tests => 186);
 }
 
 # Test that defined() returns true for magic variables created on the fly,
@@ -247,6 +247,8 @@ isnt $?, 0;
 
 eval { die "foo\n" };
 is $@, "foo\n";
+
+ok !*@{HASH}, 'no %@';
 
 cmp_ok($$, '>', 0);
 my $pid = $$;
