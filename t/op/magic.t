@@ -5,7 +5,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';
-    plan (tests => 186);
+    plan (tests => 187);
 }
 
 # Test that defined() returns true for magic variables created on the fly,
@@ -651,6 +651,11 @@ eval '
     BEGIN { ${^OPEN} = "a\0b"; $^H = 0 } BEGIN { push @stuff, ${^OPEN} }
 1' or die $@;
 is $stuff[0], $stuff[1], '$^H modifies ${^OPEN} consistently';
+
+# deleting $::{"\cH"}
+is runperl(prog => 'delete $::{qq-\cH-}; ${^OPEN}=foo; print qq-ok\n-'),
+  "ok\n",
+  'deleting $::{"\cH"}';
 
 # Tests for some non-magic names:
 is ${^MPE}, undef, '${^MPE} starts undefined';
