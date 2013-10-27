@@ -12,7 +12,7 @@ BEGIN {
 
 use warnings;
 
-plan( tests => 256 );
+plan( tests => 257 );
 
 # type coercion on assignment
 $foo = 'foo';
@@ -986,6 +986,10 @@ package lrcg {
   -T _;
   is "$!",$bang,
      'try_downgrade does not touch PL_statgv (last stat handle)';
+  readline *{"try_downgrade2"};
+  my $lastfh = "${^LAST_FH}";
+  eval "*try_downgrade2 if 0";
+  is ${^LAST_FH}, $lastfh, 'try_downgrade does not touch PL_last_in_gv';
 }
 
 is runperl(prog => '$s = STDERR; close $s; undef *$s;'
