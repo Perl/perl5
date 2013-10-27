@@ -470,6 +470,12 @@ C<SV*>.
     (MUTABLE_SV(hv_common_key_len((hv), (key), (klen),			\
 				  (flags) | HV_DELETE, NULL, 0)))
 
+#ifdef PERL_CORE
+# define hv_deletehek(hv, hek, flags) \
+    hv_common(hv, NULL, HEK_KEY(hek), HEK_LEN(hek), HEK_UTF8(hek), \
+	      (flags)|HV_DELETE, NULL, HEK_HASH(hek))
+#endif
+
 /* This refcounted he structure is used for storing the hints used for lexical
    pragmas. Without threads, it's basically struct he + refcount.
    With threads, life gets more complex as the structure needs to be shared

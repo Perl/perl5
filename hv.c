@@ -1752,7 +1752,6 @@ Perl_hv_undef_flags(pTHX_ HV *hv, U32 flags)
 {
     dVAR;
     XPVHV* xhv;
-    const char *name;
     const bool save = !!SvREFCNT(hv);
 
     if (!hv)
@@ -1770,14 +1769,11 @@ Perl_hv_undef_flags(pTHX_ HV *hv, U32 flags)
        if they will be freed anyway. */
     /* note that the code following prior to hfreeentries is duplicated
      * in sv_clear(), and changes here should be done there too */
-    if (PL_phase != PERL_PHASE_DESTRUCT && (name = HvNAME(hv))) {
+    if (PL_phase != PERL_PHASE_DESTRUCT && HvNAME(hv)) {
         if (PL_stashcache) {
             DEBUG_o(Perl_deb(aTHX_ "hv_undef_flags clearing PL_stashcache for '%"
                              HEKf"'\n", HvNAME_HEK(hv)));
-	    (void)hv_delete(PL_stashcache, name,
-                            HEK_UTF8(HvNAME_HEK(hv)) ? -HvNAMELEN_get(hv) : HvNAMELEN_get(hv),
-                            G_DISCARD
-                           );
+	    (void)hv_deletehek(PL_stashcache, HvNAME_HEK(hv), G_DISCARD);
         }
 	hv_name_set(hv, NULL, 0, 0);
     }
@@ -1789,18 +1785,15 @@ Perl_hv_undef_flags(pTHX_ HV *hv, U32 flags)
     if (SvOOK(hv)) {
       struct xpvhv_aux * const aux = HvAUX(hv);
       struct mro_meta *meta;
+      const char *name;
 
-      if ((name = HvENAME_get(hv))) {
+      if (HvENAME_get(hv)) {
 	if (PL_phase != PERL_PHASE_DESTRUCT)
 	    mro_isa_changed_in(hv);
         if (PL_stashcache) {
             DEBUG_o(Perl_deb(aTHX_ "hv_undef_flags clearing PL_stashcache for effective name '%"
                              HEKf"'\n", HvENAME_HEK(hv)));
-	    (void)hv_delete(
-	            PL_stashcache, name,
-                    HEK_UTF8(HvENAME_HEK(hv)) ? -HvENAMELEN_get(hv) : HvENAMELEN_get(hv),
-                    G_DISCARD
-	          );
+	    (void)hv_deletehek(PL_stashcache, HvENAME_HEK(hv), G_DISCARD);
         }
       }
 
@@ -1811,7 +1804,7 @@ Perl_hv_undef_flags(pTHX_ HV *hv, U32 flags)
         if (name && PL_stashcache) {
             DEBUG_o(Perl_deb(aTHX_ "hv_undef_flags clearing PL_stashcache for name '%"
                              HEKf"'\n", HvNAME_HEK(hv)));
-	    (void)hv_delete(PL_stashcache, name, (HEK_UTF8(HvNAME_HEK(hv)) ? -HvNAMELEN_get(hv) : HvNAMELEN_get(hv)), G_DISCARD);
+	    (void)hv_deletehek(PL_stashcache, HvNAME_HEK(hv), G_DISCARD);
         }
 	hv_name_set(hv, NULL, 0, flags);
       }

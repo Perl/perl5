@@ -2379,9 +2379,7 @@ Perl_gp_free(pTHX_ GV *gv)
         const HEK *hvname_hek = HvNAME_HEK(hv);
         DEBUG_o(Perl_deb(aTHX_ "gp_free clearing PL_stashcache for '%"HEKf"'\n", hvname_hek));
         if (PL_stashcache && hvname_hek)
-           (void)hv_delete(PL_stashcache, HEK_KEY(hvname_hek),
-                      (HEK_UTF8(hvname_hek) ? -HEK_LEN(hvname_hek) : HEK_LEN(hvname_hek)),
-                      G_DISCARD);
+           (void)hv_deletehek(PL_stashcache, hvname_hek, G_DISCARD);
 	SvREFCNT_dec(hv);
       }
       SvREFCNT_dec(io);
@@ -3336,8 +3334,7 @@ Perl_gv_try_downgrade(pTHX_ GV *gv)
     cv = GvCV(gv);
     if (!cv) {
 	HEK *gvnhek = GvNAME_HEK(gv);
-	(void)hv_delete(stash, HEK_KEY(gvnhek),
-	    HEK_UTF8(gvnhek) ? -HEK_LEN(gvnhek) : HEK_LEN(gvnhek), G_DISCARD);
+	(void)hv_deletehek(stash, gvnhek, G_DISCARD);
     } else if (GvMULTI(gv) && cv &&
 	    !SvOBJECT(cv) && !SvMAGICAL(cv) && !SvREADONLY(cv) &&
 	    CvSTASH(cv) == stash && CvGV(cv) == gv &&

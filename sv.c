@@ -6301,8 +6301,8 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
 		    if (PL_stashcache) {
                     DEBUG_o(Perl_deb(aTHX_ "sv_clear clearing PL_stashcache for '%"SVf"'\n",
                                      sv));
-			(void)hv_delete(PL_stashcache, name,
-			    HvNAMEUTF8((HV*)sv) ? -HvNAMELEN_get((HV*)sv) : HvNAMELEN_get((HV*)sv), G_DISCARD);
+			(void)hv_deletehek(PL_stashcache,
+					   HvNAME_HEK((HV*)sv), G_DISCARD);
                     }
 		    hv_name_set((HV*)sv, NULL, 0, 0);
 		}
