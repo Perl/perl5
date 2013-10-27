@@ -9,7 +9,7 @@ BEGIN { require "./test.pl"; }
 
 # This test depends on t/lib/Devel/switchd*.pm.
 
-plan(tests => 15);
+plan(tests => 16);
 
 my $r;
 
@@ -220,4 +220,15 @@ is(
   ),
   "goto<main::baz>;hello;\n",
   "DB::goto"
+);
+
+# Test that %DB::lsub is not vivified
+is(
+  runperl(
+   switches => [ '-Ilib', '-d:switchd_empty' ],
+   progs => ['sub DB::sub {} sub foo : lvalue {} foo();',
+             'print qq-ok\n- unless defined *DB::lsub{HASH}'],
+  ),
+  "ok\n",
+  "%DB::lsub is not vivified"
 );
