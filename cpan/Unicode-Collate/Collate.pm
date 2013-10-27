@@ -4,6 +4,9 @@ BEGIN {
     unless ("A" eq pack('U', 0x41)) {
 	die "Unicode::Collate cannot stringify a Unicode code point\n";
     }
+    unless (0x41 == unpack('U', 'A')) {
+	die "Unicode::Collate cannot get a Unicode code point\n";
+    }
 }
 
 use 5.006;
@@ -14,7 +17,7 @@ use File::Spec;
 
 no warnings 'utf8';
 
-our $VERSION = '0.99';
+our $VERSION = '1.00';
 our $PACKAGE = __PACKAGE__;
 
 ### begin XS only ###
@@ -608,6 +611,7 @@ sub _pack_override ($$$) {
     } elsif (defined $r) {
 	return pack(VCE_TEMPLATE, NON_VAR, $r, Min2Wt, Min3Wt, $u);
     } else {
+	$u = 0xFFFD if 0x10FFFF < $u;
 	return $der->($u);
     }
 }
@@ -1500,19 +1504,21 @@ If a false value (including C<undef>) is passed, C<overrideOut>
 has no effect.
 C<$Collator-E<gt>change(overrideOut =E<gt> 0)> resets the old one.
 
+B<NOTE ABOUT U+FFFD:>
+
 UCA recommends that out-of-range values should not be ignored for security
 reasons. Say, C<"pe\x{110000}rl"> should not be equal to C<"perl">.
 However, C<U+FFFD> is wrongly mapped to a variable collation element
 in DUCET for Unicode 6.0.0 to 6.2.0, that means out-of-range values will be
 ignored when C<variable> isn't C<Non-ignorable>.
 
-Unicode 6.3.0 will correct the mapping of C<U+FFFD>.
-see L<http://www.unicode.org/reports/tr10/tr10-27.html#Trailing_Weights>.
-Such a correction is reproduced by this.
+The mapping of C<U+FFFD> is corrected in Unicode 6.3.0.
+see L<http://www.unicode.org/reports/tr10/tr10-28.html#Trailing_Weights>
+(7.1.4 Trailing Weights). Such a correction is reproduced by this.
 
   overrideOut => sub { 0xFFFD }, # CODEREF returning a very large integer
 
-Since Unicode 6.3.0, C<(overrideOut =E<gt> sub { 0xFFFD })> may be unnecesssary.
+This workaround is unnecessary since Unicode 6.3.0.
 
 =item preprocess
 

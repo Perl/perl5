@@ -1,8 +1,11 @@
 
 BEGIN {
-    unless ("A" eq pack('U', 0x41)) {
-	print "1..0 # Unicode::Collate " .
-	    "cannot stringify a Unicode code point\n";
+    unless ('A' eq pack('U', 0x41)) {
+	print "1..0 # Unicode::Collate cannot pack a Unicode code point\n";
+	exit 0;
+    }
+    unless (0x41 == unpack('U', 'A')) {
+	print "1..0 # Unicode::Collate cannot get a Unicode code point\n";
 	exit 0;
     }
     if ($ENV{PERL_CORE}) {
@@ -25,7 +28,7 @@ BEGIN {
 
 use strict;
 use warnings;
-BEGIN { $| = 1; print "1..127\n"; } # 77 + 5 x @Versions
+BEGIN { $| = 1; print "1..131\n"; } # 81 + 5 x @Versions
 my $count = 0;
 sub ok ($;$) {
     my $p = my $r = shift;
@@ -221,4 +224,10 @@ ok($out->lt("\x{FFFD}", "\x{123456}"));
 $out->change(overrideOut => 0);
 ok($out->lt('',         "\x{123456}"));
 ok($out->eq("\x{FFFD}", "\x{123456}"));
+
+$out->change(overrideOut => sub { undef });
+ok($out->lt('',         "\x{123456}"));
+ok($out->eq("\x{FFFD}", "\x{123456}"));
+ok($out->eq("\x{FFFD}", "\x{21FFFFF}"));
+ok($out->eq("\x{FFFD}", "\x{2200000}"));
 
