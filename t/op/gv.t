@@ -12,7 +12,7 @@ BEGIN {
 
 use warnings;
 
-plan( tests => 255 );
+plan( tests => 256 );
 
 # type coercion on assignment
 $foo = 'foo';
@@ -987,6 +987,11 @@ package lrcg {
   is "$!",$bang,
      'try_downgrade does not touch PL_statgv (last stat handle)';
 }
+
+is runperl(prog => '$s = STDERR; close $s; undef *$s;'
+                  .'eval q-*STDERR if 0-; *$s = *STDOUT{IO}; warn'),
+  "Warning: something's wrong at -e line 1.\n",
+  "try_downgrade does not touch PL_stderrgv";
 
 # Look away, please.
 # This violates perl's internal structures by fiddling with stashes in a
