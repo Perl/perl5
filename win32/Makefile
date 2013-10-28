@@ -449,10 +449,11 @@ LINK_DBG	= -debug -opt:ref,icf
 # installed to get better stack traces from just the PDB symbols, so we
 # avoid the bloat of COFF symbols by default.
 #LINK_DBG	= $(LINK_DBG) -debugtype:both
-!  IF "$(WIN64)" == "define"
+!  IF "$(CCTYPE)" != "MSVC60"
 # enable Whole Program Optimizations (WPO) and Link Time Code Generation (LTCG)
 OPTIMIZE	= $(OPTIMIZE) -GL
 LINK_DBG	= $(LINK_DBG) -ltcg
+LIB_FLAGS	= -ltcg
 !  ENDIF
 !ENDIF
 
@@ -504,7 +505,7 @@ CFLAGS		= $(EXTRACFLAGS) $(INCLUDES) $(DEFINES) $(LOCDEFS) \
 LINK_FLAGS	= -nologo -nodefaultlib $(LINK_DBG) \
 		-libpath:"$(INST_COREDIR)" \
 		-machine:$(PROCESSOR_ARCHITECTURE)
-LIB_FLAGS	= -nologo
+LIB_FLAGS	= $(LIB_FLAGS) -nologo
 OBJOUT_FLAG	= -Fo
 EXEOUT_FLAG	= -Fe
 

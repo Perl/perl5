@@ -201,12 +201,17 @@ if ($opt{cc} =~ /\bcl/ and $opt{ccversion} =~ /^(\d+)/) {
 	$opt{sGMTIME_max} = 32535291599;
 	$opt{sLOCALTIME_max} = 32535244799;
     }
+    if($ccversion < 13) { #VC6
+	$opt{ar} ='lib';
+    }
 }
 
 if ($opt{useithreads} eq 'define' && $opt{ccflags} =~ /-DPERL_IMPLICIT_SYS\b/) {
     $opt{d_pseudofork} = 'define';
 }
 
+#if the fields above are defined, they override the defaults in the premade
+#config file
 while (<>) {
     s/~([\w_]+)~/exists $opt{$1} ? $opt{$1} : ''/eg;
     if (/^([\w_]+)=(.*)$/) {
