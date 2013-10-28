@@ -1440,7 +1440,7 @@ foreach my $prop (sort keys %props) {
         # get a reference to them.
         my $swash_name = $utf8::file_to_swash_name{$base_file};
         my $specials_ref;
-        my $file_format;
+        my $file_format;    # The 'format' given inside the file
         if ($swash_name) {
             $specials_ref = $utf8::SwashInfo{$swash_name}{'specials_name'};
             if ($specials_ref) {
@@ -1515,8 +1515,8 @@ foreach my $prop (sort keys %props) {
                 # element of the range...
                 if ($cp == $list[$i][0]) {
 
-                    # ... and there are other elements in the range, just shorten
-                    # the range to exclude this code point.
+                    # ... and there are other elements in the range, just
+                    # shorten the range to exclude this code point.
                     if ($list[$i][1] > $list[$i][0]) {
                         $list[$i][0]++;
                     }
@@ -1600,9 +1600,10 @@ foreach my $prop (sort keys %props) {
                 if ($format eq 'sl') {
 
                     # At the time of this writing, there are two types of 'sl'
-                    # format  One, in Name_Alias, has multiple separate entries
-                    # for each code point; the other, in Script_Extension, is space
-                    # separated.  Assume the latter for non-Name_Alias.
+                    # format  One, in Name_Alias, has multiple separate
+                    # entries for each code point; the other, in
+                    # Script_Extension, is space separated.  Assume the latter
+                    # for non-Name_Alias.
                     if ($full_name ne 'Name_Alias') {
                         $invmap_ref->[$i] = join " ", @{$invmap_ref->[$i]};
                     }
@@ -1622,7 +1623,8 @@ foreach my $prop (sort keys %props) {
                             my $hex_cp = sprintf("%X", $invlist_ref->[$i]);
                             my $concatenated = $invmap_ref->[$i][0];
                             for (my $j = 1; $j < @{$invmap_ref->[$i]}; $j++) {
-                                $concatenated .= "\n$hex_cp\t\t" . $invmap_ref->[$i][$j];
+                                $concatenated .= "\n$hex_cp\t\t"
+                                              .  $invmap_ref->[$i][$j];
                             }
                             $invmap_ref->[$i] = $concatenated;
                         }
@@ -1630,11 +1632,13 @@ foreach my $prop (sort keys %props) {
                 }
                 elsif ($format =~ / ^ al e? $/x) {
 
-                    # For a al property, the stringified result should be in
+                    # For an al property, the stringified result should be in
                     # the specials hash.  The key is the packed code point,
                     # and the value is the packed map.
                     my $value;
-                    if (! defined ($value = delete $specials{pack("C0U", $invlist_ref->[$i]) })) {
+                    if (! defined ($value = delete $specials{pack("C0U",
+                                                        $invlist_ref->[$i]) }))
+                    {
                         fail("prop_invmap('$mod_prop')");
                         diag(sprintf "There was no specials element for %04X", $invlist_ref->[$i]);
                         next PROPERTY;
@@ -1662,7 +1666,8 @@ foreach my $prop (sort keys %props) {
 
                     # The decomposition mapping file has the code points as
                     # a string of space-separated hex constants.
-                    $invmap_ref->[$i] = join " ", map { sprintf "%04X", $_ } @{$invmap_ref->[$i]};
+                    $invmap_ref->[$i] = join " ", map { sprintf "%04X", $_ }
+                                                           @{$invmap_ref->[$i]};
                 }
                 else {
                     fail("prop_invmap('$mod_prop')");
@@ -1709,7 +1714,9 @@ foreach my $prop (sort keys %props) {
                     # should be in the specials hash, with the key the packed
                     # code point, and the map just empty.
                     my $value;
-                    if (! defined ($value = delete $specials{pack("C0U", $invlist_ref->[$i]) })) {
+                    if (! defined ($value = delete $specials{pack("C0U",
+                                                        $invlist_ref->[$i]) }))
+                    {
                         fail("prop_invmap('$mod_prop')");
                         diag(sprintf "There was no specials element for %04X", $invlist_ref->[$i]);
                         next PROPERTY;
