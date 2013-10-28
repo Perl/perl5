@@ -1483,6 +1483,7 @@ EOP
 	is runperl(prog => 'delete $::{qq-\cR-}; //; print qq-ok\n-'),
 	   "ok\n",
 	   'deleting *^R does not result in crashes';
+	no warnings 'once';
 	*^R = *caretRglobwithnoscalar;
 	"" =~ /(?{42})/;
 	is $^R, 42, 'assigning to *^R does not result in a crash';
