@@ -9,7 +9,7 @@ BEGIN { require "./test.pl"; }
 
 # This test depends on t/lib/Devel/switchd*.pm.
 
-plan(tests => 16);
+plan(tests => 17);
 
 my $r;
 
@@ -231,4 +231,25 @@ is(
   ),
   "ok\n",
   "%DB::lsub is not vivified"
+);
+
+# Test setting of breakpoints without *DB::dbline aliased
+is(
+  runperl(
+   switches => [ '-Ilib', '-d:nodb' ],
+   progs => [ split "\n",
+    'sub DB::DB {
+      $DB::single = 0, return if $DB::single; print qq[ok\n]; exit
+     }
+     ${q(_<).__FILE__}{6} = 1; # set a breakpoint
+     sub foo {
+         die; # line 6
+     }
+     foo();
+    '
+   ],
+   stderr => 1
+  ),
+  "ok\n",
+  "setting breakpoints without *DB::dbline aliased"
 );

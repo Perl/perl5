@@ -1974,7 +1974,8 @@ Perl_magic_setdbline(pTHX_ SV *sv, MAGIC *mg)
 
     /* Use sv_2iv instead of SvIV() as the former generates smaller code, and
        setting/clearing debugger breakpoints is not a hot path.  */
-    svp = av_fetch(GvAV(PL_DBline), sv_2iv(MUTABLE_SV((mg)->mg_ptr)), FALSE);
+    svp = av_fetch(MUTABLE_AV(mg->mg_obj),
+		   sv_2iv(MUTABLE_SV((mg)->mg_ptr)), FALSE);
 
     if (svp && SvIOKp(*svp)) {
 	OP * const o = INT2PTR(OP*,SvIVX(*svp));
