@@ -3,7 +3,7 @@ package HTTP::Tiny;
 use strict;
 use warnings;
 # ABSTRACT: A small, simple, correct HTTP/1.1 client
-our $VERSION = '0.036'; # VERSION
+our $VERSION = '0.037'; # VERSION
 
 use Carp ();
 
@@ -393,6 +393,8 @@ sub _split_url {
     $authority = (length($authority)) ? $authority : 'localhost';
     if ( $authority =~ /@/ ) {
         ($auth,$host) = $authority =~ m/\A([^@]*)@(.*)\z/;   # user:pass@host
+        # userinfo might be percent escaped, so recover real auth info
+        $auth =~ s/%([0-9A-Fa-f]{2})/chr(hex($1))/eg;
     }
     else {
         $host = $authority;
@@ -1000,7 +1002,7 @@ __END__
 
 =pod
 
-=encoding utf-8
+=encoding UTF-8
 
 =head1 NAME
 
@@ -1008,7 +1010,7 @@ HTTP::Tiny - A small, simple, correct HTTP/1.1 client
 
 =head1 VERSION
 
-version 0.036
+version 0.037
 
 =head1 SYNOPSIS
 
@@ -1188,6 +1190,11 @@ authorization headers.  (Authorization headers will not be included in a
 redirected request.) For example:
 
     $http->request('GET', 'http://Aladdin:open sesame@example.com/');
+
+If the "user:password" stanza contains reserved characters, they must
+be percent-escaped:
+
+    $http->request('GET', 'http://john%40example.com:password@example.com/');
 
 A hashref of options may be appended to modify the request.
 
@@ -1473,9 +1480,17 @@ There is no support for IPv6 of any kind.
 
 =back
 
+Despite the limitations listed above, HTTP::Tiny is considered nearly
+feature-complete.  If there are enhancements unrelated to the underlying
+transport, please consider them for L<HTTP::Tiny::UA> instead.
+
 =head1 SEE ALSO
 
 =over 4
+
+=item *
+
+L<HTTP::Tiny::UA> — Higher level UA features for HTTP::Tiny
 
 =item *
 
