@@ -20,7 +20,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 700;  # Update this when adding/deleting tests.
+plan tests => 701;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1482,7 +1482,10 @@ EOP
     {
 	is runperl(prog => 'delete $::{qq-\cR-}; //; print qq-ok\n-'),
 	   "ok\n",
-	   'deleting *^R does not result in crashes'
+	   'deleting *^R does not result in crashes';
+	*^R = *caretRglobwithnoscalar;
+	"" =~ /(?{42})/;
+	is $^R, 42, 'assigning to *^R does not result in a crash';
     }
 
 } # End of sub run_tests
