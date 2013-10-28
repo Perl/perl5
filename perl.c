@@ -949,7 +949,6 @@ perl_destruct(pTHXx)
     PL_initav = NULL;
 
     /* shortcuts just get cleared */
-    PL_incgv = NULL;
     PL_hintgv = NULL;
     PL_errgv = NULL;
     PL_argvoutgv = NULL;
@@ -964,12 +963,14 @@ perl_destruct(pTHXx)
     PL_debstash = NULL;
 
     SvREFCNT_dec(PL_envgv);
+    SvREFCNT_dec(PL_incgv);
     SvREFCNT_dec(PL_argvgv);
     SvREFCNT_dec(PL_replgv);
     SvREFCNT_dec(PL_DBgv);
     SvREFCNT_dec(PL_DBline);
     SvREFCNT_dec(PL_DBsub);
     PL_envgv = NULL;
+    PL_incgv = NULL;
     PL_argvgv = NULL;
     PL_replgv = NULL;
     PL_DBgv = NULL;
