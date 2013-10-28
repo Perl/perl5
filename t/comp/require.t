@@ -34,7 +34,7 @@ if (grep -e, @files_to_delete) {
 
 my $Is_EBCDIC = (ord('A') == 193) ? 1 : 0;
 my $Is_UTF8   = (${^OPEN} || "") =~ /:utf8/;
-my $total_tests = 55;
+my $total_tests = 56;
 if ($Is_EBCDIC || $Is_UTF8) { $total_tests -= 3; }
 print "1..$total_tests\n";
 
@@ -283,6 +283,21 @@ EOT
     } else {
 	print "not ok $pmc_dies - pmc_dies\n";
     }
+}
+
+
+{
+    # if we 'require "op"', since we're in the t/ directory and '.' is the
+    # first thing in @INC, it will try to load t/op/; it should fail and
+    # move onto the next path; however, the previous value of $! was
+    # leaking into implementation if it was EACCES and we're accessing a
+    # directory.
+
+    $! = eval 'use Errno qw(EACCES); EACCES' || 0;
+    eval q{require 'op'};
+    $i++;
+    print "not " if $@ =~ /Permission denied/;
+    print "ok $i - require op\n";
 }
 
 # Test "require func()" with abs path when there is no .pmc file.

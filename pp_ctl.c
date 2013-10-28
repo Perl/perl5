@@ -3625,6 +3625,11 @@ S_check_type_and_open(pTHX_ SV *name)
     if (!IS_SAFE_PATHNAME(p, len, "require"))
         return NULL;
 
+    /* we use the value of errno later to see how stat() or open() failed.
+     * We don't want it set if the stat succeeded but we still failed,
+     * such as if the name exists, but is a directory */
+    errno = 0;
+
     st_rc = PerlLIO_stat(p, &st);
 
     if (st_rc < 0 || S_ISDIR(st.st_mode) || S_ISBLK(st.st_mode)) {
