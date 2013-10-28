@@ -1672,10 +1672,11 @@ Each hash or array has its own internal iterator, accessed by C<each>,
 C<keys>, and C<values>.  The iterator is implicitly reset when C<each> has
 reached the end as just described; it can be explicitly reset by calling
 C<keys> or C<values> on the hash or array.  If you add or delete a hash's
-elements while iterating over it, entries may be skipped or duplicated--so
-don't do that.  Exception: In the current implementation, it is always safe
-to delete the item most recently returned by C<each()>, so the following
-code works properly:
+elements while iterating over it, the effect on the iterator is
+unspecified; for example, entries may be skipped or duplicated--so don't
+do that.  Exception: In the current implementation, it is always safe to
+delete the item most recently returned by C<each()>, so the following code
+works properly:
 
         while (($key, $value) = each %hash) {
           print $key, "\n";
