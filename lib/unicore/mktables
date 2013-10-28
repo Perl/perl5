@@ -5607,6 +5607,13 @@ END
 
             my $output_value_in_hex = $self->isa('Map_Table')
                                       && $self->format eq $HEX_ADJUST_FORMAT;
+            # Use leading zeroes just for files whose format should not be
+            # changed from what it has been.  Otherwise, they just take up
+            # space and time to process.
+            my $hex_format = ($self->isa('Map_Table')
+                              && $self->to_output_map == $EXTERNAL_MAP)
+                             ? "%04X"
+                             : "%X";
 
             # Output each range as part of the here document.
             RANGE:
@@ -5703,10 +5710,11 @@ END
                     # If there is a range and doesn't need a single point range
                     # output
                     if ($start != $end && ! $range_size_1) {
-                        push @OUT, sprintf "%04X\t%04X", $start, $end;
+                        push @OUT, sprintf "$hex_format\t$hex_format",
+                                             $start,       $end;
                         if ($value ne "") {
                             if ($output_value_in_hex) {
-                                $OUT[-1] .= sprintf "\t%X", $value;
+                                $OUT[-1] .= sprintf "\t$hex_format", $value;
                             }
                             else {
                                 $OUT[-1] .= "\t$value";
@@ -5749,11 +5757,12 @@ END
                             # Here, caller is ok with default output.
                             for (my $i = $start; $i <= $end; $i++) {
                                 if ($output_value_in_hex) {
-                                    push @OUT, sprintf "%04X\t\t%X\n",
-                                                       $i, $value;
+                                    push @OUT,
+                                        sprintf "$hex_format\t\t$hex_format\n",
+                                                 $i,            $value;
                                 }
                                 else {
-                                    push @OUT, sprintf "%04X\t\t%s\n",
+                                    push @OUT, sprintf "$hex_format\t\t%s\n",
                                                         $i, $value;
                                 }
                             }
@@ -5791,9 +5800,9 @@ END
                                 # Here is to output a range.  We don't allow a
                                 # caller-specified output format--just use the
                                 # standard one.
-                                push @OUT, sprintf "%04X\t%04X\t%s\t#", $i,
-                                                                $range_end,
-                                                                $value;
+                                push @OUT, sprintf
+                                            "$hex_format\t$hex_format\t%s\t#",
+                                              $i,         $range_end,  $value;
                                 my $range_name = $viacode[$i];
 
                                 # For the code points which end in their hex
@@ -5801,7 +5810,7 @@ END
                                 # annotation, and capitalize only the first
                                 # letter of each word.
                                 if ($type == $CP_IN_NAME) {
-                                    my $hex = sprintf "%04X", $i;
+                                    my $hex = sprintf $hex_format, $i;
                                     $range_name =~ s/-$hex$//;
                                     my @words = split " ", $range_name;
                                     for my $word (@words) {
@@ -5901,7 +5910,8 @@ END
                                                 if $viacode[$output_value];
                                     }
 
-                                    $output_value = sprintf("%X", $output_value)
+                                    $output_value = sprintf($hex_format,
+                                                            $output_value)
                                         if  $format eq $HEX_ADJUST_FORMAT
                                             || ($format eq $HEX_FORMAT
                                                 && $self->full_name
@@ -5922,7 +5932,7 @@ END
                                     push @OUT, $base_part;
                                 }
                                 else {
-                                    push @OUT, sprintf "%04X\t\t%s",
+                                    push @OUT, sprintf "$hex_format\t\t%s",
                                                         $i, $output_value;
                                 }
 

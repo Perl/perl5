@@ -1082,9 +1082,9 @@ foreach my $set_of_tables (\%utf8::stricter_to_file_of, \%utf8::loose_to_file_of
         # Now construct a string from the list that should match the file.
         # The file gives ranges of code points with starting and ending values
         # in hex, like this:
-        # 0041\t005A
-        # 0061\t007A
-        # 00AA
+        # 41\t5A
+        # 61\t7A
+        # AA
         # Our list has even numbered elements start ranges that are in the
         # list, and odd ones that aren't in the list.  Therefore the odd
         # numbered ones are one beyond the end of the previous range, but
@@ -1095,10 +1095,10 @@ foreach my $set_of_tables (\%utf8::stricter_to_file_of, \%utf8::loose_to_file_of
             my $start = $tested[$i];
             my $end = $tested[$i+1] - 1;
             if ($start == $end) {
-                $tested .= sprintf("%04X\n", $start);
+                $tested .= sprintf("%X\n", $start);
             }
             else {
-                $tested .= sprintf "%04X\t%04X\n", $start, $end;
+                $tested .= sprintf "%X\t%X\n", $start, $end;
             }
         }
 
@@ -1106,7 +1106,7 @@ foreach my $set_of_tables (\%utf8::stricter_to_file_of, \%utf8::loose_to_file_of
         # whereas the prop_invlist() ones go as high as necessary.  The
         # comparison is only valid through max Unicode.
         if ($i == @tested - 1 && $tested[$i] <= 0x10FFFF) {
-            $tested .= sprintf("%04X\t10FFFF\n", $tested[$i]);
+            $tested .= sprintf("%X\t10FFFF\n", $tested[$i]);
         }
         local $/ = "\n";
         chomp $tested;
@@ -1182,6 +1182,12 @@ is(@list, 0, "prop_invmap('Perl_Decomposition_Mapping') returns <undef> since in
 is(@list, 0, "prop_invmap('Perl_Charnames') returns <undef> since internal-Perl-only");
 @list = prop_invmap("Is_Is_Any");
 is(@list, 0, "prop_invmap('Is_Is_Any') returns <undef> since two is's");
+
+# The files for these properties shouldn't have their formats changed in case
+# applications use them (though such use is deprecated).
+my @legacy_file_format = qw( Bidi_Mirroring_Glyph
+                             NFKC_Casefold
+                           );
 
 # The set of properties to test on has already been compiled into %props by
 # the prop_aliases() tests.
@@ -1371,7 +1377,7 @@ foreach my $prop (sort keys %props) {
             {
                 # Translate the charblocks() data structure to what the file
                 # would like.
-                $official .= sprintf"%04X\t%04X\t%s\n",
+                $official .= sprintf"%X\t%X\t%s\n",
                              $range->[0][0],
                              $range->[0][1],
                              $range->[0][2];
@@ -1420,7 +1426,7 @@ foreach my $prop (sort keys %props) {
                     # easier below.
                     if ($end ne "") {
                         for my $i (hex($start) + 1 .. hex $end) {
-                            $official .= sprintf "%04X\t\t%s\n", $i, $value;
+                            $official .= sprintf "%X\t\t%s\n", $i, $value;
                         }
                     }
                 }
@@ -1446,6 +1452,19 @@ foreach my $prop (sort keys %props) {
 
             $file_format = $utf8::SwashInfo{$swash_name}{'format'};
         }
+
+        # Leading zeros used to be used with the values in the files that give,
+        # ranges, but these have been mostly stripped off, except for some
+        # files whose formats should not change in any way.
+        my $file_range_format = (grep { $full_name eq $_ } @legacy_file_format)
+                              ? "%04X"
+                              : "%X";
+        # Currently this property still has leading zeroes in the mapped-to
+        # values, but otherwise, those values follow the same rules as the
+        # ranges.
+        my $file_map_format = ($full_name eq 'Decomposition_Mapping')
+                              ? "%04X"
+                              : $file_range_format;
 
         # Certain of the proxy properties have to be adjusted to match the
         # real ones.
@@ -1523,10 +1542,15 @@ foreach my $prop (sort keys %props) {
             for my $element (@list) {
                 $official .= "\n" if $official;
                 if ($element->[1] == $element->[0]) {
-                    $official .= sprintf "%04X\t\t%X", $element->[0], $element->[2];
+                    $official
+                        .= sprintf "$file_range_format\t\t$file_map_format",
+                                    $element->[0],        $element->[2];
                 }
                 else {
-                    $official .= sprintf "%04X\t%04X\t%X", $element->[0], $element->[1], $element->[2];
+                    $official .= sprintf "$file_range_format\t$file_range_format\t$file_map_format",
+                                         $element->[0],
+                                         $element->[1],
+                                         $element->[2];
                 }
             }
         }
@@ -1595,7 +1619,7 @@ foreach my $prop (sort keys %props) {
                         # other property; thus the special handling of the
                         # first line.
                         if (ref $invmap_ref->[$i]) {
-                            my $hex_cp = sprintf("%04X", $invlist_ref->[$i]);
+                            my $hex_cp = sprintf("%X", $invlist_ref->[$i]);
                             my $concatenated = $invmap_ref->[$i][0];
                             for (my $j = 1; $j < @{$invmap_ref->[$i]}; $j++) {
                                 $concatenated .= "\n$hex_cp\t\t" . $invmap_ref->[$i][$j];
@@ -1664,7 +1688,8 @@ foreach my $prop (sort keys %props) {
                     && $invmap_ref->[$i] != 0)
                 {
                     my $next = $invmap_ref->[$i] + 1;
-                    $invmap_ref->[$i] = sprintf("%04X", $invmap_ref->[$i]);
+                    $invmap_ref->[$i] = sprintf($file_map_format,
+                                                $invmap_ref->[$i]);
 
                     # If there are other elements in this range they need to
                     # be adjusted; they must individually be re-mapped.  Do
@@ -1746,15 +1771,16 @@ foreach my $prop (sort keys %props) {
             # be.  Append the line to the running string.
             my $start = $invlist_ref->[$i];
             my $end = $invlist_ref->[$i+1] - 1;
-            $end = ($start == $end) ? "" : sprintf("%04X", $end);
+            $end = ($start == $end) ? "" : sprintf($file_range_format, $end);
             if ($invmap_ref->[$i] ne "") {
-                $tested_map .= sprintf "%04X\t%s\t%s\n", $start, $end, $invmap_ref->[$i];
+                $tested_map .= sprintf "$file_range_format\t%s\t%s\n",
+                                        $start, $end, $invmap_ref->[$i];
             }
             elsif ($end ne "") {
-                $tested_map .= sprintf "%04X\t%s\n", $start, $end;
+                $tested_map .= sprintf "$file_range_format\t%s\n", $start, $end;
             }
             else {
-                $tested_map .= sprintf "%04X\n", $start;
+                $tested_map .= sprintf "$file_range_format\n", $start;
             }
         } # End of looping over all elements.
 
