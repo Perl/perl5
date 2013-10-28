@@ -1221,8 +1221,6 @@ EXTERN_C char *crypt(const char *, const char *);
 # define SAVE_DEFSV SAVESPTR(GvSV(PL_defgv))
 #endif
 
-#define ERRHV GvHV(PL_errgv)	/* XXX unused, here for compatibility */
-
 #ifndef errno
 	extern int errno;     /* ANSI allows errno to be an lvalue expr.
 			       * For example in multithreaded environments
