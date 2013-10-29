@@ -461,8 +461,8 @@ UTF-8 encoded.  A C<use open ':encoding(utf8)'> would have avoided the
 bug, or explicitly opening also the F<file> for input as UTF-8.
 
 B<NOTE>: the C<:utf8> and C<:encoding> features work only if your
-Perl has been built with the new PerlIO feature (which is the default
-on most systems).
+Perl has been built with L<PerlIO>, which is the default
+on most systems.
 
 =head2 Displaying Unicode As Text
 

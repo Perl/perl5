@@ -8253,7 +8253,7 @@ Portability issues: L<perlport/times>.
 =for Pod::Functions transliterate a string
 
 The transliteration operator.  Same as C<y///>.  See
-L<perlop/"Quote and Quote-like Operators">.
+L<perlop/"Quote-Like Operators">.
 
 =item truncate FILEHANDLE,LENGTH
 X<truncate>
@@ -9137,7 +9137,7 @@ Note that write is I<not> the opposite of C<read>.  Unfortunately.
 =for Pod::Functions transliterate a string
 
 The transliteration operator.  Same as C<tr///>.  See
-L<perlop/"Quote and Quote-like Operators">.
+L<perlop/"Quote-Like Operators">.
 
 =back
 
