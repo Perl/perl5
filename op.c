@@ -5930,7 +5930,7 @@ Perl_newSTATEOP(pTHX_ I32 flags, char *label, OP *o)
 #endif
     CopSTASH_set(cop, PL_curstash);
 
-    if ((PERLDB_LINE || PERLDB_SAVESRC) && PL_curstash != PL_debstash) {
+    if (cop->op_type == OP_DBSTATE) {
 	/* this line can have a breakpoint - store the cop in IV */
 	AV *av = CopFILEAVx(PL_curcop);
 	if (av) {
