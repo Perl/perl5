@@ -101,6 +101,12 @@ END_EXTERN_C
 
 #undef  PL_appctx
 #define PL_appctx		(*Perl_Gappctx_ptr(NULL))
+#undef  PL_breakpoints
+#define PL_breakpoints		(*Perl_Gbreakpoints_ptr(NULL))
+#undef  PL_breakpointseq
+#define PL_breakpointseq	(*Perl_Gbreakpointseq_ptr(NULL))
+#undef  PL_breakpointslen
+#define PL_breakpointslen	(*Perl_Gbreakpointslen_ptr(NULL))
 #undef  PL_check
 #define PL_check		(*Perl_Gcheck_ptr(NULL))
 #undef  PL_check_mutex
