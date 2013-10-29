@@ -5762,8 +5762,9 @@ END
                                                  $i,            $value;
                                 }
                                 else {
-                                    push @OUT, sprintf "$hex_format\t\t%s\n",
-                                                        $i, $value;
+                                    push @OUT, sprintf $hex_format, $i;
+                                    $OUT[-1] .= "\t\t$value" if $value ne "";
+                                    $OUT[-1] .= "\n";
                                 }
                             }
                         }
