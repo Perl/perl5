@@ -5922,12 +5922,28 @@ Perl_newSTATEOP(pTHX_ I32 flags, char *label, OP *o)
 
     flags &= ~SVf_UTF8;
 
-    NewOp(1101, cop, 1, COP);
     if (PERLDB_LINE && CopLINE(PL_curcop) && PL_curstash != PL_debstash) {
+	size_t sz, seq;
+	NewOp(1101, *(struct dbop **)&cop, 1, struct dbop);
 	cop->op_type = OP_DBSTATE;
 	cop->op_ppaddr = PL_ppaddr[ OP_DBSTATE ];
+	OP_REFCNT_LOCK;
+	sz = PL_breakpointseq+8/8;
+	if (!PL_breakpoints) {
+	    PL_breakpoints = (U8 *)PerlMemShared_malloc(sz);
+	    PL_breakpointslen = sz;
+	}
+	else if (PL_breakpointslen < sz) {
+	    PL_breakpoints =
+		(U8 *)PerlMemShared_realloc(PL_breakpoints,sz);
+	    PL_breakpointslen = sz;
+	}
+	seq = ((struct dbop *)cop)->dbop_seq = PL_breakpointseq++;
+	PL_breakpoints[seq/8] &= ~(U8)(1 << seq%8);
+	OP_REFCNT_UNLOCK;
     }
     else {
+	NewOp(1101, cop, 1, COP);
 	cop->op_type = OP_NEXTSTATE;
 	cop->op_ppaddr = PL_ppaddr[ OP_NEXTSTATE ];
     }
@@ -5972,13 +5988,13 @@ Perl_newSTATEOP(pTHX_ I32 flags, char *label, OP *o)
     CopSTASH_set(cop, PL_curstash);
 
     if (cop->op_type == OP_DBSTATE) {
-	/* this line can have a breakpoint - store the cop in IV */
+	/* this line can have a breakpoint - store the dbop seq in IV */
 	AV *av = CopFILEAVx(PL_curcop);
 	if (av) {
 	    SV * const * const svp = av_fetch(av, CopLINE(cop), FALSE);
 	    if (svp && *svp != &PL_sv_undef ) {
 		(void)SvIOK_on(*svp);
-		SvIV_set(*svp, PTR2IV(cop));
+		SvUV_set(*svp, ((struct dbop *)cop)->dbop_seq);
 	    }
 	}
     }

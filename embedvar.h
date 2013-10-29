@@ -357,6 +357,12 @@
 
 #define PL_appctx		(my_vars->Gappctx)
 #define PL_Gappctx		(my_vars->Gappctx)
+#define PL_breakpoints		(my_vars->Gbreakpoints)
+#define PL_Gbreakpoints		(my_vars->Gbreakpoints)
+#define PL_breakpointseq	(my_vars->Gbreakpointseq)
+#define PL_Gbreakpointseq	(my_vars->Gbreakpointseq)
+#define PL_breakpointslen	(my_vars->Gbreakpointslen)
+#define PL_Gbreakpointslen	(my_vars->Gbreakpointslen)
 #define PL_check		(my_vars->Gcheck)
 #define PL_Gcheck		(my_vars->Gcheck)
 #define PL_check_mutex		(my_vars->Gcheck_mutex)

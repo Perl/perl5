@@ -1929,6 +1929,7 @@ PP(pp_reset)
 PP(pp_dbstate)
 {
     dVAR;
+    size_t const seq = ((struct dbop *)PL_op)->dbop_seq;
     PL_curcop = (COP*)PL_op;
     TAINT_NOT;		/* Each statement is presumed innocent */
     PL_stack_sp = PL_stack_base + cxstack[cxstack_ix].blk_oldsp;
@@ -1936,7 +1937,8 @@ PP(pp_dbstate)
 
     PERL_ASYNC_CHECK();
 
-    if (PL_op->op_flags & OPf_SPECIAL /* breakpoint */
+    assert(seq+8/8 <= PL_breakpointslen);
+    if (PL_breakpoints[seq/8] & 1 << seq%8
 	    || SvIV(PL_DBsingle) || SvIV(PL_DBsignal) || SvIV(PL_DBtrace))
     {
 	dSP;
