@@ -43,7 +43,7 @@ SKIP: {
 }
 
 SKIP: {
-  skip "no dynamic loading", 24
+  skip "no dynamic loading", 25
     if !$b->have_compiler || !$Config{usedl};
   my $module = 'XSMore';
   $lib_file = $b->link( objects => $obj_file, module_name => $module );
