@@ -304,6 +304,9 @@ You need to quote "ふれど" at - line 5.
 use warnings 'syntax' ;
 $_ = "ab" ; 
 s/(ab)/\1/e;
+s//\(2)/e; # should be exempt
+s/${\2}//; # same here
+()="${\2}"; # metoo
 no warnings 'syntax' ;
 $_ = "ab" ; 
 s/(ab)/\1/e;

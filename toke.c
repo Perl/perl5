@@ -6943,7 +6943,8 @@ Perl_yylex(pTHX)
 
     case '\\':
 	s++;
-	if (PL_lex_inwhat && isDIGIT(*s))
+	if (PL_lex_inwhat == OP_SUBST && PL_lex_repl == PL_linestr
+	 && isDIGIT(*s))
 	    Perl_ck_warner(aTHX_ packWARN(WARN_SYNTAX),"Can't use \\%c to mean $%c in expression",
 			   *s, *s);
 	if (PL_expect == XOPERATOR)
