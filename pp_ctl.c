@@ -534,13 +534,13 @@ PP(pp_formline)
 		PerlIO_printf(Perl_debug_log, "%-16s\n", name);
 	} );
 	switch (*fpc++) {
-	case FF_LINEMARK:
+	case FF_LINEMARK: /* start (or end) of a line */
 	    linemark = t - SvPVX(PL_formtarget);
 	    lines++;
 	    gotsome = FALSE;
 	    break;
 
-	case FF_LITERAL:
+	case FF_LITERAL: /* append <arg> literal chars */
 	    to_copy = *fpc++;
 	    source = (U8 *)f;
 	    f += to_copy;
@@ -548,11 +548,11 @@ PP(pp_formline)
 	    item_is_utf8 = targ_is_utf8 ? !!DO_UTF8(formsv) : !!SvUTF8(formsv);
 	    goto append;
 
-	case FF_SKIP:
+	case FF_SKIP: /* skip <arg> chars in format */
 	    f += *fpc++;
 	    break;
 
-	case FF_FETCH:
+	case FF_FETCH: /* get next item and set field size to <arg> */
 	    arg = *fpc++;
 	    f += arg;
 	    fieldsize = arg;
@@ -567,7 +567,7 @@ PP(pp_formline)
 		SvTAINTED_on(PL_formtarget);
 	    break;
 
-	case FF_CHECKNL:
+	case FF_CHECKNL: /* find max len of item (up to \n) that fits field */
 	    {
 		const char *send;
 		const char *s = item = SvPV_const(sv, len);
@@ -612,7 +612,7 @@ PP(pp_formline)
 		break;
 	    }
 
-	case FF_CHECKCHOP:
+	case FF_CHECKCHOP: /* like CHECKNL, but up to highest split point */
 	    {
 		const char *s = item = SvPV_const(sv, len);
 		itemsize = len;
@@ -699,7 +699,7 @@ PP(pp_formline)
 		break;
 	    }
 
-	case FF_SPACE:
+	case FF_SPACE: /* append padding space (diff of field, item size) */
 	    arg = fieldsize - itemsize;
 	    if (arg) {
 		fieldsize -= arg;
@@ -708,7 +708,7 @@ PP(pp_formline)
 	    }
 	    break;
 
-	case FF_HALFSPACE:
+	case FF_HALFSPACE: /* like FF_SPACE, but only append half as many */
 	    arg = fieldsize - itemsize;
 	    if (arg) {
 		arg /= 2;
@@ -718,7 +718,7 @@ PP(pp_formline)
 	    }
 	    break;
 
-	case FF_ITEM:
+	case FF_ITEM: /* append a text item, while blanking ctrl chars */
 	    to_copy = itemsize;
 	    source = (U8 *)item;
 	    trans = 1;
@@ -731,7 +731,7 @@ PP(pp_formline)
 	    }
 	    goto append;
 
-	case FF_CHOP:
+	case FF_CHOP: /* (for ^*) chop the current item */
 	    {
 		const char *s = chophere;
 		if (chopspace) {
@@ -743,9 +743,10 @@ PP(pp_formline)
 		break;
 	    }
 
-	case FF_LINESNGL:
+	case FF_LINESNGL: /* process ^*  */
 	    chopspace = 0;
-	case FF_LINEGLOB:
+
+	case FF_LINEGLOB: /* process @*  */
 	    {
 		const bool oneline = fpc[-1] == FF_LINESNGL;
 		const char *s = item = SvPV_const(sv, len);
@@ -842,7 +843,7 @@ PP(pp_formline)
 		break;
 	    }
 
-	case FF_0DECIMAL:
+	case FF_0DECIMAL: /* like FF_DECIMAL but for 0### */
 	    arg = *fpc++;
 #if defined(USE_LONG_DOUBLE)
 	    fmt = (const char *)
@@ -854,7 +855,8 @@ PP(pp_formline)
 		 "%#0*.*f"              : "%0*.*f");
 #endif
 	    goto ff_dec;
-	case FF_DECIMAL:
+
+	case FF_DECIMAL: /* do @##, ^##, where <arg>=(precision|flags) */
 	    arg = *fpc++;
 #if defined(USE_LONG_DOUBLE)
  	    fmt = (const char *)
@@ -891,14 +893,14 @@ PP(pp_formline)
 	    t += fieldsize;
 	    break;
 
-	case FF_NEWLINE:
+	case FF_NEWLINE: /* delete trailing spaces, then append \n */
 	    f++;
 	    while (t-- > (SvPVX(PL_formtarget) + linemark) && *t == ' ') ;
 	    t++;
 	    *t++ = '\n';
 	    break;
 
-	case FF_BLANK:
+	case FF_BLANK: /* for arg==0: do '~'; for arg>0 : do '~~' */
 	    arg = *fpc++;
 	    if (gotsome) {
 		if (arg) {		/* repeat until fields exhausted? */
@@ -912,7 +914,7 @@ PP(pp_formline)
 	    }
 	    break;
 
-	case FF_MORE:
+	case FF_MORE: /* replace long end of string with '...' */
 	    {
 		const char *s = chophere;
 		const char *send = item + len;
@@ -939,7 +941,8 @@ PP(pp_formline)
 		}
 		break;
 	    }
-	case FF_END:
+
+	case FF_END: /* tidy up, then return */
 	end:
 	    assert(t < SvPVX_const(PL_formtarget) + SvLEN(PL_formtarget));
 	    *t = '\0';
