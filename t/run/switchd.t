@@ -205,7 +205,7 @@ like(
        prog     => 'warn',
        stderr   => 1
       ),
-      "Warning: something's wrong.\n"
+      "Warning: something's wrong in preamble.\n"
      ."Warning: something's wrong at -e line 1.\n",
      'PERL5DB with embedded newlines',
     );

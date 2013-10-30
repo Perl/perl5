@@ -11624,11 +11624,10 @@ Perl_yyerror_pvn(pTHX_ const char *const s, STRLEN len, U32 flags)
 	    Perl_sv_catpvf(aTHX_ where_sv, "\\%03o", yychar & 255);
     }
     msg = newSVpvn_flags(s, len, (flags & SVf_UTF8) | SVs_TEMP);
-    Perl_sv_catpvf(aTHX_ msg, " at %s line %"IVdf", ",
-        OutCopFILE(PL_curcop),
-        (IV)(PL_parser->preambling == NOLINE
-               ? CopLINE(PL_curcop)
-               : PL_parser->preambling));
+    if (PL_parser->preambling == NOLINE && CopLINE(PL_curcop))
+	Perl_sv_catpvf(aTHX_ msg, " at %s line %"IVdf", ",
+        	       OutCopFILE(PL_curcop), (IV)CopLINE(PL_curcop));
+    else sv_catpvs(msg, " in preamble");
     if (context)
 	Perl_sv_catpvf(aTHX_ msg, "near \"%"UTF8f"\"\n",
 			     UTF8fARG(UTF, contlen, context));

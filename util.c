@@ -1267,6 +1267,7 @@ Perl_mess_sv(pTHX_ SV *basemsg, bool consume)
 	if (CopLINE(cop))
 	    Perl_sv_catpvf(aTHX_ sv, " at %s line %"IVdf,
 	    OutCopFILE(cop), (IV)CopLINE(cop));
+	else sv_catpvs(sv, " in preamble");
 	/* Seems that GvIO() can be untrustworthy during global destruction. */
 	if (GvIO(PL_last_in_gv) && (SvTYPE(GvIOp(PL_last_in_gv)) == SVt_PVIO)
 		&& IoLINES(GvIOp(PL_last_in_gv)))
