@@ -10267,7 +10267,8 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state, regnode** node_p, UV *valuep, I
     assert(cBOOL(node_p) ^ cBOOL(valuep));  /* Exactly one should be set */
 
     /* The [^\n] meaning of \N ignores spaces and comments under the /x
-     * modifier.  The other meaning does not */
+     * modifier.  The other meaning does not, so use a temporary until we find
+     * out which we are being called with */
     p = (RExC_flags & RXf_PMf_EXTENDED)
 	? regwhite( pRExC_state, RExC_parse )
 	: RExC_parse;
@@ -10277,7 +10278,7 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state, regnode** node_p, UV *valuep, I
     if (*p != '{' || regcurly(p, FALSE)) {
 	RExC_parse = p;
 	if (! node_p) {
-	    /* no bare \N in a charclass */
+	    /* no bare \N allowed in a charclass */
             if (in_char_class) {
                 vFAIL("\\N in a character class must be a named character: \\N{...}");
             }
