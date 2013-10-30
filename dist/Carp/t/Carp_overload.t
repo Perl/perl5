@@ -1,6 +1,6 @@
 use warnings;
 no warnings 'once';
-use Test::More 0.98 tests => 7;
+use Test::More tests => 7;
 
 use Carp;
 
