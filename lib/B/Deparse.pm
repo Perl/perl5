@@ -249,6 +249,9 @@ BEGIN {
 # subs_deparsed
 # Keeps track of fully qualified names of all deparsed subs.
 #
+# in_subst_repl
+# True when deparsing the replacement part of a substitution.
+#
 # parens: -p
 # linenums: -l
 # unquote: -q
@@ -4198,7 +4201,11 @@ sub const {
 	    }
 	}
 	
-	return $self->maybe_parens("\\" . $self->const($ref, 20), $cx, 20);
+	my $const = $self->const($ref, 20);
+	if ($self->{in_subst_repl} && $const =~ /^[0-9]/) {
+	    $const = "($const)";
+	}
+	return $self->maybe_parens("\\$const", $cx, 20);
     } elsif ($sv->FLAGS & SVf_POK) {
 	my $str = $sv->PV;
 	if ($str =~ /[[:^print:]]/) {
@@ -4869,10 +4876,13 @@ sub pp_subst {
 	    $repl = $repl->first;
 	    $flags .= "e";
     }
-    if ($pmflags & PMf_EVAL) {
+    {
+	local $self->{in_subst_repl} = 1;
+	if ($pmflags & PMf_EVAL) {
 	    $repl = $self->deparse($repl->first, 0);
-    } else {
+	} else {
 	    $repl = $self->dq($repl);	
+	}
     }
     my $extended = ($pmflags & PMf_EXTENDED);
     if (null $kid) {

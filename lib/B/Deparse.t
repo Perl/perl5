@@ -954,6 +954,9 @@ print /a/u, s/b/c/u;
     print /a/d, s/b/c/d;
 }
 ####
+# [perl #119807] s//\(3)/ge should not warn when deparsed (\3 warns)
+s/foo/\(3);/eg;
+####
 # Test @threadsv_names under 5005threads
 foreach $' (1, 2) {
     sleep $';
