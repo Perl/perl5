@@ -69,7 +69,7 @@ Null SV pointer. (No longer available when C<PERL_CORE> is defined.)
 #define MUTABLE_IO(p)	((IO *)MUTABLE_PTR(p))
 #define MUTABLE_SV(p)	((SV *)MUTABLE_PTR(p))
 
-#ifdef I_STDBOOL
+#if defined(I_STDBOOL) && !defined(PERL_BOOL_AS_CHAR)
 #  include <stdbool.h>
 #  ifndef HAS_BOOL
 #    define HAS_BOOL 1
@@ -85,9 +85,11 @@ Null SV pointer. (No longer available when C<PERL_CORE> is defined.)
    Andy Dougherty	February 2000
 */
 #ifdef __GNUG__		/* GNU g++ has bool built-in */
+# ifndef PERL_BOOL_AS_CHAR
 #  ifndef HAS_BOOL
 #    define HAS_BOOL 1
 #  endif
+# endif
 #endif
 
 /* The NeXT dynamic loader headers will not build with the bool macro
@@ -104,6 +106,9 @@ Null SV pointer. (No longer available when C<PERL_CORE> is defined.)
 #endif /* NeXT || __NeXT__ */
 
 #ifndef HAS_BOOL
+# ifdef bool
+#  undef bool
+# endif
 # define bool char
 # define HAS_BOOL 1
 #endif

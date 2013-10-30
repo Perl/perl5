@@ -42,10 +42,6 @@
 #  include <sys/sysctl.h>
 #endif
 
-#ifdef USE_NSGETEXECUTABLEPATH
-#  include <mach-o/dyld.h>
-#endif
-
 #ifdef DEBUG_LEAKING_SCALARS_FORK_DUMP
 #  ifdef I_SYSUIO
 #    include <sys/uio.h>

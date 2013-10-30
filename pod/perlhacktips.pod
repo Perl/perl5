@@ -1329,6 +1329,18 @@ op slabs belonging to C<BEGIN> blocks.
 However, as an 80% solution it is still effective, as it has caught
 bugs in the past.
 
+=head2 When is a bool not a bool?
+
+On pre-C99 compilers, C<bool> is defined as equivalent to C<char>.
+Consequently assignment of any larger type to a C<bool> is unsafe and may
+be truncated.  The C<cBOOL> macro exists to cast it correctly.
+
+On those platforms and compilers where C<bool> really is a boolean (C++,
+C99), it is easy to forget the cast.  You can force C<bool> to be a C<char>
+by compiling with C<-Accflags=-DPERL_BOOL_AS_CHAR>.  You may also wish to
+add C<-Accflags=-Werror=conversion> or your compiler's equivalent to make
+it impossible to ignore the unsafe truncations.
+
 =head2 The .i Targets
 
 You can expand the macros in a F<foo.c> file by saying
