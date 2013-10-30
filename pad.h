@@ -179,7 +179,9 @@ The C array of a padlist, containing the pads.  Only subscript it with
 numbers >= 1, as the 0th entry is not guaranteed to remain usable.
 
 =for apidoc Amx|SSize_t|PadlistMAX|PADLIST padlist
-The index of the last pad in the padlist.
+The index of the last allocated space in the padlist.  Note that the last
+pad may be in an earlier slot.  Any entries following it will be NULL in
+that case.
 
 =for apidoc Amx|PADNAMELIST *|PadlistNAMES|PADLIST padlist
 The names associated with pad entries.
