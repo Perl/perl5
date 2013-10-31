@@ -402,7 +402,8 @@ except for those in the "syntax" category.
 
     use warnings FATAL => 'all', NONFATAL => 'syntax';
 
-B<NOTE:> Users of FATAL warnings, especially those using C<FATAL => 'all'>
+B<NOTE:> Users of FATAL warnings, especially
+those using C<< FATAL => 'all' >>
 should be fully aware that they are risking future portability of their
 programs by doing so. Perl makes absolutely no commitments to not
 introduce new warnings, or warnings categories in the future, and indeed
@@ -417,7 +418,7 @@ the documentation of the features they use to ensure they do not exploit
 features that are documented as risky, deprecated, or unspecified, or where
 the documentation says "so don't do that", or anything with the same sense
 and spirit. Use of such features in combination with FATAL warnings is
-ENTIRELY AT THE USERS RISK.
+ENTIRELY AT THE USER'S RISK.
 
 =head2 Reporting Warnings from a Module
 X<warning, reporting> X<warning, registering>
