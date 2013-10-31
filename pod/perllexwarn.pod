@@ -6,14 +6,14 @@ perllexwarn - Perl Lexical Warnings
 =head1 DESCRIPTION
 
 The C<use warnings> pragma enables to control precisely what warnings are
-to be enabled in which parts of a Perl program. It's a more flexible
+to be enabled in which parts of a Perl program.  It's a more flexible
 alternative for both the command line flag B<-w> and the equivalent Perl
 variable, C<$^W>.
 
 This pragma works just like the C<strict> pragma.
 This means that the scope of the warning pragma is limited to the
-enclosing block. It also means that the pragma setting will not
-leak across files (via C<use>, C<require> or C<do>). This allows
+enclosing block.  It also means that the pragma setting will not
+leak across files (via C<use>, C<require> or C<do>).  This allows
 authors to independently define the degree of warning checks that will
 be applied to their module.
 
@@ -41,7 +41,7 @@ For example, consider the code below:
     my $c = @a[0];
 
 The code in the enclosing block has warnings enabled, but the inner
-block has them disabled. In this case that means the assignment to the
+block has them disabled.  In this case that means the assignment to the
 scalar C<$c> will trip the C<"Scalar value @a[0] better written as $a[0]">
 warning, but the assignment to the scalar C<$b> will not.
 
@@ -58,9 +58,9 @@ warning about the "2:".
     my $a = "2:" + 3;
 
 With the introduction of lexical warnings, mandatory warnings now become
-I<default> warnings. The difference is that although the previously
+I<default> warnings.  The difference is that although the previously
 mandatory warnings are still enabled by default, they can then be
-subsequently enabled or disabled with the lexical warning pragma. For
+subsequently enabled or disabled with the lexical warning pragma.  For
 example, in the code below, an C<"isn't numeric"> warning will only
 be reported for the C<$a> variable.
 
@@ -69,20 +69,20 @@ be reported for the C<$a> variable.
     my $b = "2:" + 3;
 
 Note that neither the B<-w> flag or the C<$^W> can be used to
-disable/enable default warnings. They are still mandatory in this case.
+disable/enable default warnings.  They are still mandatory in this case.
 
 =head2 What's wrong with B<-w> and C<$^W>
 
 Although very useful, the big problem with using B<-w> on the command
-line to enable warnings is that it is all or nothing. Take the typical
-scenario when you are writing a Perl program. Parts of the code you
+line to enable warnings is that it is all or nothing.  Take the typical
+scenario when you are writing a Perl program.  Parts of the code you
 will write yourself, but it's very likely that you will make use of
-pre-written Perl modules. If you use the B<-w> flag in this case, you
+pre-written Perl modules.  If you use the B<-w> flag in this case, you
 end up enabling warnings in pieces of code that you haven't written.
 
 Similarly, using C<$^W> to either disable or enable blocks of code is
-fundamentally flawed. For a start, say you want to disable warnings in
-a block of code. You might expect this to be enough to do the trick:
+fundamentally flawed.  For a start, say you want to disable warnings in
+a block of code.  You might expect this to be enough to do the trick:
 
      {
          local ($^W) = 0;
@@ -93,7 +93,7 @@ a block of code. You might expect this to be enough to do the trick:
 When this code is run with the B<-w> flag, a warning will be produced
 for the C<$a> line:  C<"Reversed += operator">.
 
-The problem is that Perl has both compile-time and run-time warnings. To
+The problem is that Perl has both compile-time and run-time warnings.  To
 disable compile-time warnings you need to rewrite the code like this:
 
      {
@@ -103,7 +103,7 @@ disable compile-time warnings you need to rewrite the code like this:
      }
 
 The other big problem with C<$^W> is the way you can inadvertently
-change the warning setting in unexpected places in your code. For example,
+change the warning setting in unexpected places in your code.  For example,
 when the code below is run (without the B<-w> flag), the second call
 to C<doit> will trip a C<"Use of uninitialized value"> warning, whereas
 the first will not.
@@ -135,9 +135,9 @@ warnings are (or aren't) produced:
 =item B<-w>
 X<-w>
 
-This is  the existing flag. If the lexical warnings pragma is B<not>
+This is  the existing flag.  If the lexical warnings pragma is B<not>
 used in any of you code, or any of the modules that you use, this flag
-will enable warnings everywhere. See L<Backward Compatibility> for
+will enable warnings everywhere.  See L<Backward Compatibility> for
 details of how this flag interacts with lexical warnings.
 
 =item B<-W>
@@ -145,7 +145,8 @@ X<-W>
 
 If the B<-W> flag is used on the command line, it will enable all warnings
 throughout the program regardless of whether warnings were disabled
-locally using C<no warnings> or C<$^W =0>. This includes all files that get
+locally using C<no warnings> or C<$^W =0>.
+This includes all files that get
 included via C<use>, C<require> or C<do>.
 Think of it as the Perl equivalent of the "lint" command.
 
@@ -177,7 +178,7 @@ will work unchanged.
 
 =item 2.
 
-The B<-w> flag just sets the global C<$^W> variable as in 5.005. This
+The B<-w> flag just sets the global C<$^W> variable as in 5.005.  This
 means that any legacy code that currently relies on manipulating C<$^W>
 to control warning behavior will still work as is. 
 
@@ -354,7 +355,7 @@ To determine which category a specific warning has been assigned to see
 L<perldiag>.
 
 Note: In Perl 5.6.1, the lexical warnings category "deprecated" was a
-sub-category of the "syntax" category. It is now a top-level category
+sub-category of the "syntax" category.  It is now a top-level category
 in its own right.
 
 =head2 Fatal Warnings
@@ -362,7 +363,7 @@ X<warning, fatal>
 
 The presence of the word "FATAL" in the category list will escalate any
 warnings detected from the categories specified in the lexical scope
-into fatal errors. In the code below, the use of C<time>, C<length>
+into fatal errors.  In the code below, the use of C<time>, C<length>
 and C<join> can all produce a C<"Useless use of xxx in void context">
 warning.
 
@@ -396,7 +397,7 @@ in the example above, either of these will do the trick:
     no warnings FATAL => qw(void);
 
 If you want to downgrade a warning that has been escalated into a fatal
-error back to a normal warning, you can use the "NONFATAL" keyword. For
+error back to a normal warning, you can use the "NONFATAL" keyword.  For
 example, the code below will promote all warnings into fatal errors,
 except for those in the "syntax" category.
 
@@ -405,26 +406,26 @@ except for those in the "syntax" category.
 B<NOTE:> Users of FATAL warnings, especially
 those using C<< FATAL => 'all' >>
 should be fully aware that they are risking future portability of their
-programs by doing so. Perl makes absolutely no commitments to not
+programs by doing so.  Perl makes absolutely no commitments to not
 introduce new warnings, or warnings categories in the future, and indeed
-we explicitly reserve the right to do so. Code that may not warn now may
+we explicitly reserve the right to do so.  Code that may not warn now may
 warn in a future release of Perl if the Perl5 development team deems it
 in the best interests of the community to do so.  Should code using FATAL
 warnings break due to the introduction of a new warning we will NOT
-consider it an incompatible change. Users of FATAL warnings should take
+consider it an incompatible change.  Users of FATAL warnings should take
 special caution during upgrades to check to see if their code triggers
 any new warnings and should pay particular attention to the fine print of
 the documentation of the features they use to ensure they do not exploit
 features that are documented as risky, deprecated, or unspecified, or where
 the documentation says "so don't do that", or anything with the same sense
-and spirit. Use of such features in combination with FATAL warnings is
+and spirit.  Use of such features in combination with FATAL warnings is
 ENTIRELY AT THE USER'S RISK.
 
 =head2 Reporting Warnings from a Module
 X<warning, reporting> X<warning, registering>
 
 The C<warnings> pragma provides a number of functions that are useful for
-module authors. These are used when you want to report a module-specific
+module authors.  These are used when you want to report a module-specific
 warning to a calling module has enabled warnings via the C<warnings>
 pragma.
 
@@ -447,8 +448,8 @@ Consider the module C<MyMod::Abc> below.
 
 The call to C<warnings::register> will create a new warnings category
 called "MyMod::Abc", i.e. the new category name matches the current
-package name. The C<open> function in the module will display a warning
-message if it gets given a relative path as a parameter. This warnings
+package name.  The C<open> function in the module will display a warning
+message if it gets given a relative path as a parameter.  This warnings
 will only be displayed if the code that uses C<MyMod::Abc> has actually
 enabled them with the C<warnings> pragma like below.
 
@@ -458,7 +459,7 @@ enabled them with the C<warnings> pragma like below.
     abc::open("../fred.txt");
 
 It is also possible to test whether the pre-defined warnings categories are
-set in the calling module with the C<warnings::enabled> function. Consider
+set in the calling module with the C<warnings::enabled> function.  Consider
 this snippet of code:
 
     package MyMod::Abc;
@@ -475,7 +476,7 @@ this snippet of code:
 
 The function C<open> has been deprecated, so code has been included to
 display a warning message whenever the calling module has (at least) the
-"deprecated" warnings category enabled. Something like this, say.
+"deprecated" warnings category enabled.  Something like this, say.
 
     use warnings 'deprecated';
     use MyMod::Abc;
@@ -483,9 +484,9 @@ display a warning message whenever the calling module has (at least) the
     MyMod::Abc::open($filename);
 
 Either the C<warnings::warn> or C<warnings::warnif> function should be
-used to actually display the warnings message. This is because they can
+used to actually display the warnings message.  This is because they can
 make use of the feature that allows warnings to be escalated into fatal
-errors. So in this case
+errors.  So in this case
 
     use MyMod::Abc;
     use warnings FATAL => 'MyMod::Abc';
@@ -497,7 +498,7 @@ displaying the warning message.
 
 The three warnings functions, C<warnings::warn>, C<warnings::warnif>
 and C<warnings::enabled> can optionally take an object reference in place
-of a category name. In this case the functions will use the class name
+of a category name.  In this case the functions will use the class name
 of the object as the warnings category.
 
 Consider this example:
