@@ -136,18 +136,36 @@ the C<(?...)> construct, see L</Extended Patterns> below.
 
 C</x> tells
 the regular expression parser to ignore most whitespace that is neither
-backslashed nor within a character class.  You can use this to break up
-your regular expression into (slightly) more readable parts.  The C<#>
-character is also treated as a metacharacter introducing a comment,
-just as in ordinary Perl code.  This also means that if you want real
-whitespace or C<#> characters in the pattern (outside a character
-class, where they are unaffected by C</x>), then you'll either have to
+backslashed nor within a bracketed character class.  You can use this to
+break up your regular expression into (slightly) more readable parts.
+Also, the C<#> character is treated as a metacharacter introducing a
+comment that runs up to the pattern's closing delimiter, or to the end
+of the current line if the pattern extends onto the next line.  Hence,
+this is very much like an ordinary Perl code comment.  (You can include
+the closing delimiter within the comment only if you precede it with a
+backslash, so be careful!)
+
+Use of C</x> means that if you want real
+whitespace or C<#> characters in the pattern (outside a bracketed character
+class, which is unaffected by C</x>), then you'll either have to
 escape them (using backslashes or C<\Q...\E>) or encode them using octal,
-hex, or C<\N{}> escapes.  Taken together, these features go a long way towards
-making Perl's regular expressions more readable.  Note that you have to
-be careful not to include the pattern delimiter in the comment--perl has
-no way of knowing you did not intend to close the pattern early.  See
-the C-comment deletion code in L<perlop>.  Also note that anything inside
+hex, or C<\N{}> escapes.
+
+You can use L</(?#text)> to create a comment that ends earlier than the
+end of the current line, but C<text> also can't contain the closing
+delimiter unless escaped with a backslash.
+
+Taken together, these features go a long way towards
+making Perl's regular expressions more readable.  Here's an example:
+
+    # Delete (most) C comments.
+    $program =~ s {
+	/\*	# Match the opening delimiter.
+	.*?	# Match a minimal number of characters.
+	\*/	# Match the closing delimiter.
+    } []gsx;
+
+Note that anything inside
 a C<\Q...\E> stays unaffected by C</x>.  And note that C</x> doesn't affect
 space interpretation within a single multi-character construct.  For
 example in C<\x{...}>, regardless of the C</x> modifier, there can be no
@@ -995,10 +1013,13 @@ expressions, and 2) whenever you see one, you should stop and
 =item C<(?#text)>
 X<(?#)>
 
-A comment.  The text is ignored.  If the C</x> modifier enables
-whitespace formatting, a simple C<#> will suffice.  Note that Perl closes
+A comment.  The text is ignored.
+Note that Perl closes
 the comment as soon as it sees a C<)>, so there is no way to put a literal
-C<)> in the comment.
+C<)> in the comment.  The pattern's closing delimiter must be escaped by
+a backslash if it appears in the comment.
+
+See L</E<sol>x> for another way to have comments in patterns.
 
 =item C<(?adlupimsx-imsx)>
 
