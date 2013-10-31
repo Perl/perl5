@@ -1837,6 +1837,8 @@ A+(*PRUNE)BC(?{})	AAABC	y	$&	AAABC
 (?1)(?:(b)){0}	b	y	$&	b
 # RT #120041
 ^A*\z		y	$&	
+/\N* /x	ab	y	$&	ab	         # Under /x was ignoring the '*'
+/\N (?#comment) * /x	ab	y	$&	ab	# likewise
 
 # Keep these lines at the end of the file
 # vim: softtabstop=0 noexpandtab
