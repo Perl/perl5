@@ -616,9 +616,10 @@ PP(pp_bless)
 	const char *ptr;
 
 	if (!ssv) goto curstash;
-	if (!SvGMAGICAL(ssv) && !SvAMAGIC(ssv) && SvROK(ssv))
+	SvGETMAGIC(ssv);
+	if (!SvAMAGIC(ssv) && SvROK(ssv))
 	    Perl_croak(aTHX_ "Attempt to bless into a reference");
-	ptr = SvPV_const(ssv,len);
+	ptr = SvPV_nomg_const(ssv,len);
 	if (len == 0)
 	    Perl_ck_warner(aTHX_ packWARN(WARN_MISC),
 			   "Explicit blessing to '' (assuming package main)");
