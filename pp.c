@@ -617,9 +617,18 @@ PP(pp_bless)
 
 	if (!ssv) goto curstash;
 	SvGETMAGIC(ssv);
-	if (!SvAMAGIC(ssv) && SvROK(ssv))
+	if (SvROK(ssv)) {
+	  if (!SvAMAGIC(ssv)) {
+	   frog:
 	    Perl_croak(aTHX_ "Attempt to bless into a reference");
-	ptr = SvPV_nomg_const(ssv,len);
+	  }
+	  /* SvAMAGIC is on here, but it only means potentially overloaded,
+	     so after stringification: */
+	  ptr = SvPV_nomg_const(ssv,len);
+	  /* We need to check the flag again: */
+	  if (!SvAMAGIC(ssv)) goto frog;
+	}
+	else ptr = SvPV_nomg_const(ssv,len);
 	if (len == 0)
 	    Perl_ck_warner(aTHX_ packWARN(WARN_MISC),
 			   "Explicit blessing to '' (assuming package main)");

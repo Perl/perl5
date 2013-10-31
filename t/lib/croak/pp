@@ -12,3 +12,8 @@ $/ = \1;
 bless [], $/
 EXPECT
 Attempt to bless into a reference at - line 2.
+########
+# NAME Attempt to bless into a reference after method changes
+sub foo{} bless [], bless []
+EXPECT
+Attempt to bless into a reference at - line 1.
