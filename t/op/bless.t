@@ -118,7 +118,7 @@ expected(bless([]), 'main', "ARRAY");
 # class is a ref
 $a1 = bless {}, "A4";
 $b1 = eval { bless {}, $a1 };
-isnt ($@, '', "class is a ref");
+like ($@, qr/^Attempt to bless into a reference at /, "class is a ref");
 
 # class is an overloaded ref
 {
