@@ -533,13 +533,13 @@ perl_destruct(pTHXx)
     {
 	const char * const s = PerlEnv_getenv("PERL_DESTRUCT_LEVEL");
 	if (s) {
-        const int i = atoi(s);
+            const int i = atoi(s);
 #ifdef DEBUGGING
 	    if (destruct_level < i) destruct_level = i;
 #endif
 #ifdef PERL_TRACK_MEMPOOL
-        /* RT #114496, for perl_free */
-        PL_perl_destruct_level = i;
+            /* RT #114496, for perl_free */
+            PL_perl_destruct_level = i;
 #endif
 	}
     }
