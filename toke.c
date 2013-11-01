@@ -2513,18 +2513,17 @@ S_tokeq(pTHX_ SV *sv)
     char *s;
     char *send;
     char *d;
-    STRLEN len = 0;
     SV *pv = sv;
 
     PERL_ARGS_ASSERT_TOKEQ;
 
-    if (!SvLEN(sv))
-	goto finish;
-
-    s = SvPV_force(sv, len);
+    assert (SvPOK(sv));
+    assert (SvLEN(sv));
+    assert (!SvIsCOW(sv));
     if (SvTYPE(sv) >= SVt_PVIV && SvIVX(sv) == -1)
 	goto finish;
-    send = s + len;
+    s = SvPVX(sv);
+    send = SvEND(sv);
     /* This is relying on the SV being "well formed" with a trailing '\0'  */
     while (s < send && !(*s == '\\' && s[1] == '\\'))
 	s++;
@@ -2532,7 +2531,8 @@ S_tokeq(pTHX_ SV *sv)
 	goto finish;
     d = s;
     if ( PL_hints & HINT_NEW_STRING ) {
-	pv = newSVpvn_flags(SvPVX_const(pv), len, SVs_TEMP | SvUTF8(sv));
+	pv = newSVpvn_flags(SvPVX_const(pv), SvCUR(sv),
+			    SVs_TEMP | SvUTF8(sv));
     }
     while (s < send) {
 	if (*s == '\\') {
