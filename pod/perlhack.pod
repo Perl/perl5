@@ -92,7 +92,7 @@ Thank you!
 =item * Next time
 
 The next time you wish to make a patch, you need to start from the
-latest perl in a pristine state. Check you don't have any local changes
+latest perl in a pristine state.  Check you don't have any local changes
 or added files in your perl check-out which you wish to keep, then run
 these commands:
 
@@ -235,7 +235,7 @@ volunteers, and be polite.
 
 Changes are always applied directly to the main development branch,
 called "blead".  Some patches may be backported to a maintenance
-branch. If you think your patch is appropriate for the maintenance
+branch.  If you think your patch is appropriate for the maintenance
 branch (see L<perlpolicy/MAINTENANCE BRANCHES>), please explain why
 when you submit it.
 
