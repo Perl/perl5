@@ -1780,6 +1780,12 @@ void Perl_mem_log_del_sv(const SV *sv, const char *filename, const int linenumbe
 #define PoisonFree(d,n,t)	PoisonWith(d,n,t,0xEF)
 #define Poison(d,n,t)		PoisonFree(d,n,t)
 
+#ifdef PERL_POISON
+#  define PERL_POISON_EXPR(x) x
+#else
+#  define PERL_POISON_EXPR(x)
+#endif
+
 #ifdef USE_STRUCT_COPY
 #define StructCopy(s,d,t) (*((t*)(d)) = *((t*)(s)))
 #else

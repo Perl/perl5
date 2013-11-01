@@ -31,7 +31,7 @@
 
 struct jmpenv {
     struct jmpenv *	je_prev;
-    Sigjmp_buf		je_buf;		/* only for use if !je_throw */
+    Sigjmp_buf		je_buf;		/* uninit if je_prev is NULL */
     int			je_ret;		/* last exception thrown */
     bool		je_mustcatch;	/* need to call longjmp()? */
 };
@@ -50,10 +50,11 @@ typedef struct jmpenv JMPENV;
 
 #define JMPENV_BOOTSTRAP \
     STMT_START {				\
-	Zero(&PL_start_env, 1, JMPENV);		\
+	PERL_POISON_EXPR(PoisonNew(&PL_start_env, 1, JMPENV));\
+	PL_top_env = &PL_start_env;		\
+	PL_start_env.je_prev = NULL;		\
 	PL_start_env.je_ret = -1;		\
 	PL_start_env.je_mustcatch = TRUE;	\
-	PL_top_env = &PL_start_env;		\
     } STMT_END
 
 /*
