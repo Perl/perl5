@@ -2520,7 +2520,7 @@ S_tokeq(pTHX_ SV *sv)
     assert (SvPOK(sv));
     assert (SvLEN(sv));
     assert (!SvIsCOW(sv));
-    if (SvTYPE(sv) >= SVt_PVIV && SvIVX(sv) == -1)
+    if (SvTYPE(sv) >= SVt_PVIV && SvIVX(sv) == -1) /* <<'heredoc' */
 	goto finish;
     s = SvPVX(sv);
     send = SvEND(sv);
