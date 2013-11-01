@@ -521,6 +521,38 @@ If you want access to threads, you must C<use threads> before you
 C<use threads::shared>.  L<threads> will emit a warning if you use it after
 L<threads::shared>.
 
+=head1 WARNINGS
+
+=over 4
+
+=item cond_broadcast() called on unlocked variable
+
+Within a thread-enabled program, you tried to call cond_broadcast() on a
+variable which wasn't locked.  The cond_broadcast() function is used to
+wake up another thread that is waiting in a cond_wait().  To ensure that
+the signal isn't sent before the other thread has a chance to enter the
+wait, it is usual for the signaling thread first to wait for a lock on
+variable.  This lock attempt will only succeed after the other thread has
+entered cond_wait() and thus relinquished the lock.
+
+=item cond_signal() called on unlocked variable
+
+Within a thread-enabled program, you tried to call cond_signal() on a
+variable which wasn't locked.  The cond_signal() function is used to wake
+up another thread that is waiting in a cond_wait().  To ensure that the
+signal isn't sent before the other thread has a chance to enter the wait,
+it is usual for the signaling thread first to wait for a lock on variable.
+This lock attempt will only succeed after the other thread has entered
+cond_wait() and thus relinquished the lock.
+
+=back
+
+If needed, thread warnings can be suppressed by using:
+
+    no warnings 'threads';
+
+in the appropriate scope.
+
 =head1 BUGS AND LIMITATIONS
 
 When C<share> is used on arrays, hashes, array refs or hash refs, any data
