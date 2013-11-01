@@ -527,31 +527,11 @@ L<threads::shared>.
 
 =item cond_broadcast() called on unlocked variable
 
-Within a thread-enabled program, you tried to call cond_broadcast() on a
-variable which wasn't locked.  The cond_broadcast() function is used to
-wake up another thread that is waiting in a cond_wait().  To ensure that
-the signal isn't sent before the other thread has a chance to enter the
-wait, it is usual for the signaling thread first to wait for a lock on
-variable.  This lock attempt will only succeed after the other thread has
-entered cond_wait() and thus relinquished the lock.
-
 =item cond_signal() called on unlocked variable
 
-Within a thread-enabled program, you tried to call cond_signal() on a
-variable which wasn't locked.  The cond_signal() function is used to wake
-up another thread that is waiting in a cond_wait().  To ensure that the
-signal isn't sent before the other thread has a chance to enter the wait,
-it is usual for the signaling thread first to wait for a lock on variable.
-This lock attempt will only succeed after the other thread has entered
-cond_wait() and thus relinquished the lock.
+See L</"cond_signal VARIABLE">, above.
 
 =back
-
-If needed, thread warnings can be suppressed by using:
-
-    no warnings 'threads';
-
-in the appropriate scope.
 
 =head1 BUGS AND LIMITATIONS
 
