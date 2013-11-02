@@ -17,7 +17,7 @@ use File::Spec;
 
 no warnings 'utf8';
 
-our $VERSION = '1.00';
+our $VERSION = '1.01';
 our $PACKAGE = __PACKAGE__;
 
 ### begin XS only ###
@@ -89,9 +89,9 @@ my $DefaultRearrange = [ 0x0E40..0x0E44, 0x0EC0..0x0EC4 ];
 my $HighestVCE = pack(VCE_TEMPLATE, 0, 0xFFFE, 0x20, 0x5, 0xFFFF);
 my $minimalVCE = pack(VCE_TEMPLATE, 0,      1, 0x20, 0x5, 0xFFFE);
 
-sub UCA_Version { "26" }
+sub UCA_Version { "28" }
 
-sub Base_Unicode_Version { "6.2.0" }
+sub Base_Unicode_Version { "6.3.0" }
 
 ######
 
@@ -182,6 +182,7 @@ my %DerivCode = (
    22 => \&_derivCE_22,
    24 => \&_derivCE_24,
    26 => \&_derivCE_24, # 26 == 24
+   28 => \&_derivCE_24, # 28 == 24
 );
 
 sub checkCollator {
@@ -1084,7 +1085,7 @@ If the revision (previously "tracking version") number of UCA is given,
 behavior of that revision is emulated on collating.
 If omitted, the return value of C<UCA_Version()> is used.
 
-The following revisions are supported.  The default is 26.
+The following revisions are supported.  The default is 28.
 
      UCA       Unicode Standard         DUCET (@version)
    -------------------------------------------------------
@@ -1098,6 +1099,7 @@ The following revisions are supported.  The default is 26.
      22             6.0.0               6.0.0 (6.0.0)
      24             6.1.0               6.1.0 (6.1.0)
      26             6.2.0               6.2.0 (6.2.0)
+     28             6.3.0               6.3.0 (6.3.0)
 
 * Noncharacters (e.g. U+FFFF) are not ignored, and can be overridden
 since C<UCA_Version> 22.
@@ -1394,12 +1396,12 @@ those in the CJK Unified Ideographs Extension A etc.
     U+4E00..U+9FBB if UCA_Version is 14 or 16.
     U+4E00..U+9FC3 if UCA_Version is 18.
     U+4E00..U+9FCB if UCA_Version is 20 or 22.
-    U+4E00..U+9FCC if UCA_Version is 24 or 26.
+    U+4E00..U+9FCC if UCA_Version is 24 or later.
 
     In the CJK Unified Ideographs Extension blocks:
     Ext.A (U+3400..U+4DB5) and Ext.B (U+20000..U+2A6D6) in any UCA_Version.
-    Ext.C (U+2A700..U+2B734) if UCA_Version is 20 or greater.
-    Ext.D (U+2B740..U+2B81D) if UCA_Version is 22 or greater.
+    Ext.C (U+2A700..U+2B734) if UCA_Version is 20 or later.
+    Ext.D (U+2B740..U+2B81D) if UCA_Version is 22 or later.
 
 Through C<overrideCJK>, ordering of CJK unified ideographs (including
 extensions) can be overridden.

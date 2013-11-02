@@ -34,8 +34,8 @@ ok(1);
 #########################
 
 # Fix me when UCA and/or keys.txt is upgraded.
-my $UCA_Version = "26";
-my $Base_Unicode_Version = "6.2.0";
+my $UCA_Version = "28";
+my $Base_Unicode_Version = "6.3.0";
 my $Key_Version = "3.1.1";
 
 ok(Unicode::Collate::UCA_Version, $UCA_Version);
