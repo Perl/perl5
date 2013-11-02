@@ -3,7 +3,6 @@ package Compress::Raw::Zlib;
 
 require 5.006 ;
 require Exporter;
-use AutoLoader;
 use Carp ;
 
 use strict ;
@@ -11,7 +10,7 @@ use warnings ;
 use bytes ;
 our ($VERSION, $XS_VERSION, @ISA, @EXPORT, %EXPORT_TAGS, @EXPORT_OK, $AUTOLOAD, %DEFLATE_CONSTANTS, @DEFLATE_CONSTANTS );
 
-$VERSION = '2.062';
+$VERSION = '2.063';
 $XS_VERSION = $VERSION; 
 $VERSION = eval $VERSION;
 
@@ -592,8 +591,6 @@ sub Compress::Raw::Zlib::deflateStream::deflateParams
 
 }
 
-
-# Autoload methods go after __END__, and are processed by the autosplit program.
 
 1;
 __END__
