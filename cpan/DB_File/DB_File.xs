@@ -1497,7 +1497,10 @@ SV *   sv ;
 	}
 
         if (status)
+	{
+	    db_close(RETVAL); // close **dbp handle to prevent mem.leak
 	    RETVAL->dbp = NULL ;
+	}
 
     }
 

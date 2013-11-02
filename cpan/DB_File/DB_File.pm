@@ -9,7 +9,7 @@
 
 package DB_File::HASHINFO ;
 
-require 5.00404;
+require 5.00504;
 
 use warnings;
 use strict;
@@ -163,7 +163,7 @@ our ($db_version, $use_XSLoader, $splice_end_array_no_length, $splice_end_array,
 use Carp;
 
 
-$VERSION = "1.829" ;
+$VERSION = "1.830" ;
 $VERSION = eval $VERSION; # needed for dev releases
 
 {
@@ -186,7 +186,6 @@ $DB_RECNO = new DB_File::RECNOINFO ;
 
 require Tie::Hash;
 require Exporter;
-use AutoLoader;
 BEGIN {
     $use_XSLoader = 1 ;
     { local $SIG{__DIE__} ; eval { require XSLoader } ; }
@@ -256,9 +255,6 @@ if ($use_XSLoader)
   { XSLoader::load("DB_File", $VERSION)}
 else
   { bootstrap DB_File $VERSION }
-
-# Preloaded methods go here.  Autoload methods go after __END__, and are
-# processed by the autosplit program.
 
 sub tie_hash_or_array
 {
