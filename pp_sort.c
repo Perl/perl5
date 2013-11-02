@@ -1479,7 +1479,6 @@ PP(pp_sort)
     SV **p1 = ORIGMARK+1, **p2;
     SSize_t max, i;
     AV* av = NULL;
-    HV *stash;
     GV *gv;
     CV *cv = NULL;
     I32 gimme = GIMME;
@@ -1517,10 +1516,10 @@ PP(pp_sort)
 	    kid = kUNOP->op_first;			/* pass rv2gv */
 	    kid = kUNOP->op_first;			/* pass leave */
 	    PL_sortcop = kid->op_next;
-	    stash = CopSTASH(PL_curcop);
 	}
 	else {
 	    GV *autogv = NULL;
+	    HV *stash;
 	    cv = sv_2cv(*++MARK, &stash, &gv, GV_ADD);
 	  check_cv:
 	    if (cv && SvPOK(cv)) {
@@ -1568,7 +1567,6 @@ PP(pp_sort)
     }
     else {
 	PL_sortcop = NULL;
-	stash = CopSTASH(PL_curcop);
     }
 
     /* optimiser converts "@a = sort @a" to "sort \@a";
