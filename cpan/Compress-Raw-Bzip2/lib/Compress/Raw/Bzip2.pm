@@ -6,13 +6,12 @@ use warnings ;
 
 require 5.006 ;
 require Exporter;
-use AutoLoader;
 use Carp ;
 
 use bytes ;
 our ($VERSION, $XS_VERSION, @ISA, @EXPORT, $AUTOLOAD);
 
-$VERSION = '2.062';
+$VERSION = '2.063';
 $XS_VERSION = $VERSION; 
 $VERSION = eval $VERSION;
 
