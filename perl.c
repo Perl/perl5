@@ -38,10 +38,6 @@
 #include "nwutil.h"	
 #endif
 
-#ifdef USE_KERN_PROC_PATHNAME
-#  include <sys/sysctl.h>
-#endif
-
 #ifdef DEBUG_LEAKING_SCALARS_FORK_DUMP
 #  ifdef I_SYSUIO
 #    include <sys/uio.h>
@@ -1418,85 +1414,6 @@ Perl_call_atexit(pTHX_ ATEXIT_t fn, void *ptr)
     ++PL_exitlistlen;
 }
 
-STATIC void
-S_set_caret_X(pTHX) {
-    dVAR;
-    GV* tmpgv = gv_fetchpvs("\030", GV_ADD|GV_NOTQUAL, SVt_PV); /* $^X */
-    if (tmpgv) {
-	SV *const caret_x = GvSV(tmpgv);
-#if defined(OS2)
-	sv_setpv(caret_x, os2_execname(aTHX));
-#else
-#  ifdef USE_KERN_PROC_PATHNAME
-	size_t size = 0;
-	int mib[4];
-	mib[0] = CTL_KERN;
-	mib[1] = KERN_PROC;
-	mib[2] = KERN_PROC_PATHNAME;
-	mib[3] = -1;
-
-	if (sysctl(mib, 4, NULL, &size, NULL, 0) == 0
-	    && size > 0 && size < MAXPATHLEN * MAXPATHLEN) {
-	    sv_grow(caret_x, size);
-
-	    if (sysctl(mib, 4, SvPVX(caret_x), &size, NULL, 0) == 0
-		&& size > 2) {
-		SvPOK_only(caret_x);
-		SvCUR_set(caret_x, size - 1);
-		SvTAINT(caret_x);
-		return;
-	    }
-	}
-#  elif defined(USE_NSGETEXECUTABLEPATH)
-	char buf[1];
-	uint32_t size = sizeof(buf);
-
-	_NSGetExecutablePath(buf, &size);
-	if (size < MAXPATHLEN * MAXPATHLEN) {
-	    sv_grow(caret_x, size);
-	    if (_NSGetExecutablePath(SvPVX(caret_x), &size) == 0) {
-		char *const tidied = realpath(SvPVX(caret_x), NULL);
-		if (tidied) {
-		    sv_setpv(caret_x, tidied);
-		    free(tidied);
-		} else {
-		    SvPOK_only(caret_x);
-		    SvCUR_set(caret_x, size);
-		}
-		return;
-	    }
-	}
-#  elif defined(HAS_PROCSELFEXE)
-	char buf[MAXPATHLEN];
-	int len = readlink(PROCSELFEXE_PATH, buf, sizeof(buf) - 1);
-
-	/* On Playstation2 Linux V1.0 (kernel 2.2.1) readlink(/proc/self/exe)
-	   includes a spurious NUL which will cause $^X to fail in system
-	   or backticks (this will prevent extensions from being built and
-	   many tests from working). readlink is not meant to add a NUL.
-	   Normal readlink works fine.
-	*/
-	if (len > 0 && buf[len-1] == '\0') {
-	    len--;
-	}
-
-	/* FreeBSD's implementation is acknowledged to be imperfect, sometimes
-	   returning the text "unknown" from the readlink rather than the path
-	   to the executable (or returning an error from the readlink). Any
-	   valid path has a '/' in it somewhere, so use that to validate the
-	   result. See http://www.freebsd.org/cgi/query-pr.cgi?pr=35703
-	*/
-	if (len > 0 && memchr(buf, '/', len)) {
-	    sv_setpvn(caret_x, buf, len);
-	    return;
-	}
-#  endif
-	/* Fallback to this:  */
-	sv_setpv(caret_x, PL_origargv[0]);
-#endif
-    }
-}
-
 /*
 =for apidoc perl_parse
 
@@ -1646,7 +1563,7 @@ perl_parse(pTHXx_ XSINIT_t xsinit, int argc, char **argv, char **env)
 	init_ids();
 	assert (!TAINT_get);
 	TAINT;
-	S_set_caret_X(aTHX);
+	set_caret_X();
 	TAINT_NOT;
 	init_postdump_symbols(argc,argv,env);
 	return 0;
@@ -2121,7 +2038,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
     /* and for SITELIB_EXP in USE_SITECUSTOMIZE                            */
     assert (!TAINT_get);
     TAINT;
-    S_set_caret_X(aTHX);
+    set_caret_X();
     TAINT_NOT;
 
 #if defined(USE_SITECUSTOMIZE)

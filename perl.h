@@ -2298,13 +2298,6 @@ typedef SV PADNAME;
 # define PERL_SAWAMPERSAND
 #endif
 
-/* Include mach-o/dyld.h here for perl.c’s sake, since it may #define bool,
-   and handy.h needs to be able to re#define it under
-  -Accflags=-DPERL_BOOL_AS_CHAR. */
-#if defined(USE_NSGETEXECUTABLEPATH) && defined(PERL_IN_PERL_C)
-# include <mach-o/dyld.h>
-#endif
-
 #include "handy.h"
 
 #if defined(USE_LARGE_FILES) && !defined(NO_64_BIT_RAWIO)

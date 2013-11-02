@@ -3811,6 +3811,7 @@ PERL_CALLCONV char*	Perl_screaminstr(pTHX_ SV *bigstr, SV *littlestr, I32 start_
 	assert(bigstr); assert(littlestr); assert(old_posp)
 
 PERL_CALLCONV U32	Perl_seed(pTHX);
+PERL_CALLCONV void	Perl_set_caret_X(pTHX);
 PERL_CALLCONV void	Perl_set_context(void *t)
 			__attribute__nonnull__(1);
 #define PERL_ARGS_ASSERT_SET_CONTEXT	\
