@@ -619,7 +619,7 @@ use File::Glob qw(:case);
     },
 
     'IO-Compress' => {
-        'DISTRIBUTION' => 'PMQS/IO-Compress-2.062.tar.gz',
+        'DISTRIBUTION' => 'PMQS/IO-Compress-2.063.tar.gz',
         'FILES'        => q[cpan/IO-Compress],
         'EXCLUDED'     => [
             qr{^examples/},
