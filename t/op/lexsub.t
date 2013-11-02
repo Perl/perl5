@@ -8,7 +8,7 @@ BEGIN {
     *bar::like = *like;
 }
 no warnings 'deprecated';
-plan 138;
+plan 139;
 
 # -------------------- Errors with feature disabled -------------------- #
 
@@ -716,3 +716,14 @@ like runperl(
      ),
      qr/Constant subroutine foo undefined at /,
     'constant undefinition warnings for lexical subs do not crash';
+
+{
+  my sub foo;
+  *AutoloadTestSuper::blah = \&foo;
+  sub AutoloadTestSuper::AUTOLOAD {
+    is $AutoloadTestSuper::AUTOLOAD, "AutoloadTestSuper::blah",
+      "Autoloading via inherited lex stub";
+  }
+  @AutoloadTest::ISA = AutoloadTestSuper::;
+  AutoloadTest->blah;
+}
