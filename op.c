@@ -9620,7 +9620,8 @@ OP *
 Perl_ck_open(pTHX_ OP *o)
 {
     dVAR;
-    HV * const table = GvHV(PL_hintgv);
+    HV * const table =
+	PL_hints & HINT_LOCALIZE_HH ? GvHV(PL_hintgv) : NULL;;
 
     PERL_ARGS_ASSERT_CK_OPEN;
 
