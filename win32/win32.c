@@ -160,6 +160,9 @@ static void	win32_csighandler(int sig);
 START_EXTERN_C
 HANDLE	w32_perldll_handle = INVALID_HANDLE_VALUE;
 char	w32_module_name[MAX_PATH+1];
+#ifdef WIN32_DYN_IOINFO_SIZE
+Size_t	w32_ioinfo_size;/* avoid 0 extend op b4 mul, otherwise could be a U8 */
+#endif
 END_EXTERN_C
 
 static OSVERSIONINFO g_osver = {0, 0, 0, 0, 0, ""};
@@ -4414,6 +4417,18 @@ Perl_win32_init(int *argcp, char ***argvp)
 
     g_osver.dwOSVersionInfoSize = sizeof(g_osver);
     GetVersionEx(&g_osver);
+
+#ifdef WIN32_DYN_IOINFO_SIZE
+    {
+	Size_t ioinfo_size = _msize((void*)__pioinfo[0]);;
+	if((SSize_t)ioinfo_size <= 0) { /* -1 is err */
+	    fprintf(stderr, "panic: invalid size for ioinfo\n"); /* no interp */
+	    exit(1);
+	}
+	ioinfo_size /= IOINFO_ARRAY_ELTS;
+	w32_ioinfo_size = ioinfo_size;
+    }
+#endif
 
     ansify_path();
 }
