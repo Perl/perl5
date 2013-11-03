@@ -1924,14 +1924,16 @@ S_finalize_op(pTHX_ OP* o)
 	SV *lexname;
 	GV **fields;
 	SV **svp;
-	SVOP *first_key_op, *key_op;
+	SVOP *key_op;
+	OP *kid;
 
 	S_scalar_slice_warning(aTHX_ o);
 
 	if ((o->op_private & (OPpLVAL_INTRO))
 	    /* I bet there's always a pushmark... */
-	    || ((LISTOP*)o)->op_first->op_sibling->op_type != OP_LIST)
-	    /* hmmm, no optimization if list contains only one key. */
+	    ||(  (kid = cLISTOPo->op_first->op_sibling)->op_type != OP_LIST
+	      && kid->op_type != OP_CONST)
+           )
 	    break;
 	rop = (UNOP*)((LISTOP*)o)->op_last;
 	if (rop->op_type != OP_RV2HV)
@@ -1956,10 +1958,10 @@ S_finalize_op(pTHX_ OP* o)
 	fields = (GV**)hv_fetchs(SvSTASH(lexname), "FIELDS", FALSE);
 	if (!fields || !isGV(*fields) || !GvHV(*fields))
 	    break;
-	/* Again guessing that the pushmark can be jumped over.... */
-	first_key_op = (SVOP*)((LISTOP*)((LISTOP*)o)->op_first->op_sibling)
-	    ->op_first->op_sibling;
-	for (key_op = first_key_op; key_op;
+	key_op = (SVOP*)(kid->op_type == OP_CONST
+				? kid
+				: kLISTOP->op_first->op_sibling);
+	for (; key_op;
 	     key_op = (SVOP*)key_op->op_sibling) {
 	    if (key_op->op_type != OP_CONST)
 		continue;

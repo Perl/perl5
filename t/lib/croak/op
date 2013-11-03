@@ -29,6 +29,13 @@ my Foo $f = Foo->new;
 EXPECT
 No such class field "c" in variable $f of type Foo at - line 8.
 ########
+# NAME Single OP_HSLICE field
+%FIELDS; # vivify it, but leave it empty, so all fields are invalid
+my main $f;
+@$f{"a"};
+EXPECT
+No such class field "a" in variable $f of type main at - line 3.
+########
 # NAME delete BAD
 delete $x;
 EXPECT
