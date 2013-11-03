@@ -1902,9 +1902,19 @@ S_finalize_op(pTHX_ OP* o)
 	    break;
 
 	rop = (UNOP*)((BINOP*)o)->op_first;
-	if (rop->op_type != OP_RV2HV || rop->op_first->op_type != OP_PADSV)
+	if (rop->op_type != OP_RV2HV)
 	    break;
-	lexname = *av_fetch(PL_comppad_name, rop->op_first->op_targ, TRUE);
+	if (rop->op_first->op_type == OP_PADSV)
+	    /* $$hash{key} */
+	    rop = (UNOP*)rop->op_first;
+	else if (rop->op_first->op_type == OP_SCOPE
+	     && cLISTOPx(rop->op_first)->op_last->op_type == OP_PADSV)
+	    /* ${$hash}{key} */
+	    rop = (UNOP*)cLISTOPx(rop->op_first)->op_last;
+	else
+	    break;
+
+	lexname = *av_fetch(PL_comppad_name, rop->op_targ, TRUE);
 	if (!SvPAD_TYPED(lexname))
 	    break;
 	fields = (GV**)hv_fetchs(SvSTASH(lexname), "FIELDS", FALSE);

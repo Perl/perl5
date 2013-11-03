@@ -17,6 +17,13 @@ $f->{c} = 1;
 EXPECT
 No such class field "c" in variable $f of type Foo at - line 8.
 ########
+# NAME "No such field" with block: ${$ref}{key}
+%FIELDS; # empty hash so all keys are invalid
+my main $r;
+${$r}{key};
+EXPECT
+No such class field "key" in variable $r of type main at - line 3.
+########
 # NAME OP_HSLICE fields
 package Foo;
 use fields qw(a b);
