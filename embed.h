@@ -1429,7 +1429,7 @@
 #define translate_substr_offsets(a,b,c,d,e,f,g)	Perl_translate_substr_offsets(aTHX_ a,b,c,d,e,f,g)
 #  endif
 #  if defined(PERL_IN_MRO_C)
-#define mro_clean_isarev(a,b,c,d,e)	S_mro_clean_isarev(aTHX_ a,b,c,d,e)
+#define mro_clean_isarev(a,b,c,d,e,f)	S_mro_clean_isarev(aTHX_ a,b,c,d,e,f)
 #define mro_gather_and_rename(a,b,c,d,e)	S_mro_gather_and_rename(aTHX_ a,b,c,d,e)
 #define mro_get_linear_isa_dfs(a,b)	S_mro_get_linear_isa_dfs(aTHX_ a,b)
 #  endif
