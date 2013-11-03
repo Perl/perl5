@@ -1422,3 +1422,20 @@ bf
 --
 c3
 bf
+########
+
+# Defelem pointing to nonexistent element of tied array
+
+use Tie::Array;
+# This sub is called with a deferred element.  Inside the sub, $_[0] pros-
+# pectively points to element 10000 of @a.
+sub {
+  tie @a, "Tie::StdArray";  # now @a is tied
+  $#a = 20000;  # and FETCHSIZE/AvFILL will now return a big number
+  $a[10000] = "crumpets\n";
+  $_ = "$_[0]"; # but defelems don’t expect tied arrays and try to read
+                # AvARRAY[10000], which crashes
+}->($a[10000]);
+print
+EXPECT
+crumpets

@@ -2299,7 +2299,14 @@ Perl_defelem_target(pTHX_ SV *sv, MAGIC *mg)
 	else if (LvSTARGOFF(sv) >= 0) {
 	    AV *const av = MUTABLE_AV(LvTARG(sv));
 	    if (LvSTARGOFF(sv) <= AvFILL(av))
+	    {
+	      if (SvRMAGICAL(av)) {
+		SV * const * const svp = av_fetch(av, LvSTARGOFF(sv), 0);
+		targ = svp ? *svp : NULL;
+	      }
+	      else
 		targ = AvARRAY(av)[LvSTARGOFF(sv)];
+	    }
 	}
 	if (targ && (targ != &PL_sv_undef)) {
 	    /* somebody else defined it for us */
