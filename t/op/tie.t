@@ -1341,6 +1341,16 @@ Can't call method "FETCHSIZE" on an undefined value at - line 7.
 Can't call method "FETCHSIZE" on an undefined value at - line 8.
 ########
 
+# Crash when reading negative index when NEGATIVE_INDICES stub exists
+sub NEGATIVE_INDICES;
+sub TIEARRAY{bless[]};
+sub FETCHSIZE{}
+tie @a, "";
+print "ok\n" if ! defined $a[-1];
+EXPECT
+ok
+########
+
 # Assigning vstrings to tied scalars
 sub TIESCALAR{bless[]};
 sub STORE { print ref \$_[1], "\n" }

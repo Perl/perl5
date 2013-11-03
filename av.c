@@ -201,7 +201,8 @@ S_adjust_index(pTHX_ AV *av, const MAGIC *mg, SSize_t *keyp)
 	    SV * const * const negative_indices_glob =
 		hv_fetchs(SvSTASH(SvRV(ref)), NEGATIVE_INDICES_VAR, 0);
 
-	    if (negative_indices_glob && SvTRUE(GvSV(*negative_indices_glob)))
+	    if (negative_indices_glob && isGV(*negative_indices_glob)
+	     && SvTRUE(GvSV(*negative_indices_glob)))
 		adjust_index = 0;
 	}
     }
