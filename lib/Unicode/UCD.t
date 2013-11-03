@@ -1019,7 +1019,7 @@ foreach my $set_of_tables (\%utf8::stricter_to_file_of, \%utf8::loose_to_file_of
         }
         else {  # Single-form.
 
-            # Like above, use looose if required, and insert underscores
+            # Like above, use loose if required, and insert underscores
             # between digits if strict.
             if ($set_of_tables == \%utf8::loose_to_file_of) {
                 $mod_table = "$extra_chars$table";
@@ -1674,7 +1674,7 @@ foreach my $prop (sort keys %props) {
                     diag("Can't handle format '$format'");
                     next PROPERTY;
                 }
-            }
+            } # Otherwise, the map is to a simple scalar
             elsif ($full_name =~    # These maps are in hex
                     /(Simple_)?(Case_Folding|(Lower|Title|Upper)case_Mapping)/)
             {

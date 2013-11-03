@@ -11664,7 +11664,7 @@ END
                                              . $object->full_name
                                              . "; $fields[$i]");
 
-                # ... and, the The regular table, in which it is additional,
+                # ... and the regular table, in which it is additional,
                 # beyond the simple mapping.
                 $file->insert_adjusted_lines("$fields[0]; "
                                              . $object->name
