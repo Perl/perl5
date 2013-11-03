@@ -472,7 +472,7 @@ C<SV*>.
 
 #ifdef PERL_CORE
 # define hv_deletehek(hv, hek, flags) \
-    hv_common(hv, NULL, HEK_KEY(hek), HEK_LEN(hek), HEK_UTF8(hek), \
+    hv_common((hv), NULL, HEK_KEY(hek), HEK_LEN(hek), HEK_UTF8(hek), \
 	      (flags)|HV_DELETE, NULL, HEK_HASH(hek))
 #endif
 
