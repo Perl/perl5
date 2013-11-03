@@ -1926,22 +1926,22 @@ S_finalize_op(pTHX_ OP* o)
 	SV **svp;
 	SVOP *key_op;
 	OP *kid;
+	bool check_fields;
 
 	S_scalar_slice_warning(aTHX_ o);
 
-	if ((o->op_private & (OPpLVAL_INTRO))
-	    /* I bet there's always a pushmark... */
-	    ||(  (kid = cLISTOPo->op_first->op_sibling)->op_type != OP_LIST
+	if (/* I bet there's always a pushmark... */
+	        (kid = cLISTOPo->op_first->op_sibling)->op_type != OP_LIST
 	      && kid->op_type != OP_CONST)
-           )
 	    break;
-	rop = (UNOP*)((LISTOP*)o)->op_last;
-	if (rop->op_type != OP_RV2HV)
-	    break;
-	if (rop->op_first->op_type == OP_PADSV)
+	if (!(o->op_private & OPpLVAL_INTRO)) {
+	  rop = (UNOP*)((LISTOP*)o)->op_last;
+	  if (rop->op_type != OP_RV2HV)
+	    rop = NULL;
+	  else if (rop->op_first->op_type == OP_PADSV)
 	    /* @$hash{qw(keys here)} */
 	    rop = (UNOP*)rop->op_first;
-	else {
+	  else {
 	    /* @{$hash}{qw(keys here)} */
 	    if (rop->op_first->op_type == OP_SCOPE
 		&& cLISTOPx(rop->op_first)->op_last->op_type == OP_PADSV)
@@ -1949,24 +1949,40 @@ S_finalize_op(pTHX_ OP* o)
 		    rop = (UNOP*)cLISTOPx(rop->op_first)->op_last;
 		}
 	    else
-		break;
+		rop = NULL;
+	  }
 	}
+	else rop = NULL;
 
-	lexname = *av_fetch(PL_comppad_name, rop->op_targ, TRUE);
-	if (!SvPAD_TYPED(lexname))
-	    break;
-	fields = (GV**)hv_fetchs(SvSTASH(lexname), "FIELDS", FALSE);
-	if (!fields || !isGV(*fields) || !GvHV(*fields))
-	    break;
+	check_fields =
+	    rop
+	 && (lexname = *av_fetch(PL_comppad_name, rop->op_targ, TRUE),
+	     SvPAD_TYPED(lexname))
+	 && (fields = (GV**)hv_fetchs(SvSTASH(lexname), "FIELDS", FALSE))
+	 && isGV(*fields) && GvHV(*fields);
 	key_op = (SVOP*)(kid->op_type == OP_CONST
 				? kid
 				: kLISTOP->op_first->op_sibling);
 	for (; key_op;
 	     key_op = (SVOP*)key_op->op_sibling) {
+	    SV *sv;
 	    if (key_op->op_type != OP_CONST)
 		continue;
 	    svp = cSVOPx_svp(key_op);
-            if (!hv_fetch_ent(GvHV(*fields), *svp, FALSE, 0)) {
+
+	    /* Make the CONST have a shared SV */
+	    if ((!SvIsCOW_shared_hash(sv = *svp))
+	     && SvTYPE(sv) < SVt_PVMG && SvOK(sv) && !SvROK(sv)) {
+		SSize_t keylen;
+		const char * const key = SvPV_const(sv, *(STRLEN*)&keylen);
+		SV *nsv = newSVpvn_share(key,
+					 SvUTF8(sv) ? -keylen : keylen,	0);
+		SvREFCNT_dec_NN(sv);
+		*svp = nsv;
+	    }
+
+	    if (check_fields
+	     && !hv_fetch_ent(GvHV(*fields), *svp, FALSE, 0)) {
 		Perl_croak(aTHX_ "No such class field \"%"SVf"\" " 
 			   "in variable %"SVf" of type %"HEKf, 
 		      SVfARG(*svp), SVfARG(lexname),
