@@ -1044,7 +1044,6 @@
 #define ck_eval(a)		Perl_ck_eval(aTHX_ a)
 #define ck_exec(a)		Perl_ck_exec(aTHX_ a)
 #define ck_exists(a)		Perl_ck_exists(aTHX_ a)
-#define ck_exit(a)		Perl_ck_exit(aTHX_ a)
 #define ck_ftst(a)		Perl_ck_ftst(aTHX_ a)
 #define ck_fun(a)		Perl_ck_fun(aTHX_ a)
 #define ck_glob(a)		Perl_ck_glob(aTHX_ a)

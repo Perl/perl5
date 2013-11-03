@@ -1533,7 +1533,7 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	Perl_ck_null,		/* redo */
 	Perl_ck_null,		/* dump */
 	Perl_ck_null,		/* goto */
-	Perl_ck_exit,		/* exit */
+	Perl_ck_fun,		/* exit */
 	Perl_ck_null,		/* method_named */
 	Perl_ck_null,		/* entergiven */
 	Perl_ck_null,		/* leavegiven */

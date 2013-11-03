@@ -457,12 +457,6 @@ PERL_CALLCONV OP *	Perl_ck_exists(pTHX_ OP *o)
 #define PERL_ARGS_ASSERT_CK_EXISTS	\
 	assert(o)
 
-PERL_CALLCONV OP *	Perl_ck_exit(pTHX_ OP *o)
-			__attribute__warn_unused_result__
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_CK_EXIT	\
-	assert(o)
-
 PERL_CALLCONV OP *	Perl_ck_ftst(pTHX_ OP *o)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);

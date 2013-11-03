@@ -8755,22 +8755,6 @@ Perl_ck_eval(pTHX_ OP *o)
 }
 
 OP *
-Perl_ck_exit(pTHX_ OP *o)
-{
-    PERL_ARGS_ASSERT_CK_EXIT;
-
-#ifdef VMS
-    HV * const table = GvHV(PL_hintgv);
-    if (table) {
-       SV * const * const svp = hv_fetchs(table, "vmsish_exit", FALSE);
-       if (svp && *svp && SvTRUE(*svp))
-           o->op_private |= OPpEXIT_VMSISH;
-    }
-#endif
-    return ck_fun(o);
-}
-
-OP *
 Perl_ck_exec(pTHX_ OP *o)
 {
     PERL_ARGS_ASSERT_CK_EXEC;

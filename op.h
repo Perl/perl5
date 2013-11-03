@@ -331,9 +331,6 @@ is no conversion of op type.
 				128
  */
 
-/* Private for OP_EXIT */
-#define OPpEXIT_VMSISH		128	/* exit(0) vs. exit(1) vmsish mode*/
-
 /* Private for OP_FTXXX */
 #define OPpFT_ACCESS		2	/* use filetest 'access' */
 #define OPpFT_STACKED		4	/* stacked filetest, as "-f" in "-f -x $f" */

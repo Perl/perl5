@@ -764,10 +764,6 @@ const struct flag_to_name op_open_names[] = {
     {OPpOPEN_OUT_CRLF, ",OUT_CRLF"}
 };
 
-const struct flag_to_name op_exit_names[] = {
-    {OPpEXIT_VMSISH, ",EXIT_VMSISH"}
-};
-
 const struct flag_to_name op_sassign_names[] = {
     {OPpASSIGN_BACKWARDS, ",BACKWARDS"},
     {OPpASSIGN_CV_TO_GV,  ",CV2GV"}
@@ -810,7 +806,6 @@ const struct op_private_by_op op_private_names[] = {
     {OP_DIE, C_ARRAY_LENGTH(op_die_names), op_die_names },
     {OP_DELETE, C_ARRAY_LENGTH(op_delete_names), op_delete_names },
     {OP_EXISTS, C_ARRAY_LENGTH(op_exists_names), op_exists_names },
-    {OP_EXIT, C_ARRAY_LENGTH(op_exit_names), op_exit_names },
     {OP_FLIP, C_ARRAY_LENGTH(op_flip_names), op_flip_names },
     {OP_FLOP, C_ARRAY_LENGTH(op_flip_names), op_flip_names },
     {OP_GV, C_ARRAY_LENGTH(op_gv_names), op_gv_names },
