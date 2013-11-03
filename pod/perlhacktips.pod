@@ -1340,7 +1340,7 @@ C99), it is easy to forget the cast.  You can force C<bool> to be a C<char>
 by compiling with C<-Accflags=-DPERL_BOOL_AS_CHAR>.  You may also wish to
 run C<Configure> with something like
 
-     C<-Accflags='-Wconversion -Wno-sign-conversion -Wno-shorten-64-to-32'> 
+    -Accflags='-Wconversion -Wno-sign-conversion -Wno-shorten-64-to-32'
 
 or your compiler's equivalent to make it easier to spot any unsafe truncations
 that show up.
