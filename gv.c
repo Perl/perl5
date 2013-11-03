@@ -902,16 +902,16 @@ means yes, look for AUTOLOAD; zero means no, don't look for AUTOLOAD.
 Calling C<gv_fetchmethod> is equivalent to calling C<gv_fetchmethod_autoload>
 with a non-zero C<autoload> parameter.
 
-These functions grant C<"SUPER"> token as a prefix of the method name. Note
+These functions grant C<"SUPER"> token
+as a prefix of the method name.  Note
 that if you want to keep the returned glob for a long time, you need to
 check for it being "AUTOLOAD", since at the later time the call may load a
-different subroutine due to $AUTOLOAD changing its value. Use the glob
-created via a side effect to do this.
+different subroutine due to $AUTOLOAD changing its value.  Use the glob
+created as a side effect to do this.
 
-These functions have the same side-effects and as C<gv_fetchmeth> with
-C<level==0>.  C<name> should be writable if contains C<':'> or C<'
-''>. The warning against passing the GV returned by C<gv_fetchmeth> to
-C<call_sv> apply equally to these functions.
+These functions have the same side-effects as C<gv_fetchmeth> with
+C<level==0>.  The warning against passing the GV returned by
+C<gv_fetchmeth> to C<call_sv> applies equally to these functions.
 
 =cut
 */
