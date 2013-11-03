@@ -1151,7 +1151,7 @@ S_mro_gather_and_rename(pTHX_ HV * const stashes, HV * const seen_stashes,
 
 		    if(
 		        (
-		            stashentry && *stashentry
+		            stashentry && *stashentry && isGV(*stashentry)
 		         && (substash = GvHV(*stashentry))
 		        )
 		     || (oldsubstash && HvENAME_get(oldsubstash))
