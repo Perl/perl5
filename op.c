@@ -1908,7 +1908,7 @@ S_finalize_op(pTHX_ OP* o)
 	if (!SvPAD_TYPED(lexname))
 	    break;
 	fields = (GV**)hv_fetchs(SvSTASH(lexname), "FIELDS", FALSE);
-	if (!fields || !GvHV(*fields))
+	if (!fields || !isGV(*fields) || !GvHV(*fields))
 	    break;
         if (!hv_fetch_ent(GvHV(*fields), *svp, FALSE, 0)) {
 	    Perl_croak(aTHX_ "No such class field \"%"SVf"\" " 
@@ -1954,7 +1954,7 @@ S_finalize_op(pTHX_ OP* o)
 	if (!SvPAD_TYPED(lexname))
 	    break;
 	fields = (GV**)hv_fetchs(SvSTASH(lexname), "FIELDS", FALSE);
-	if (!fields || !GvHV(*fields))
+	if (!fields || !isGV(*fields) || !GvHV(*fields))
 	    break;
 	/* Again guessing that the pushmark can be jumped over.... */
 	first_key_op = (SVOP*)((LISTOP*)((LISTOP*)o)->op_first->op_sibling)
