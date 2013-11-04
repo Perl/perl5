@@ -8,7 +8,7 @@ BEGIN {
     require 'Config_heavy.pl'; # since runperl will need them
 }
 
-plan tests => 31;
+plan tests => 32;
 
 #
 # This file tries to test builtin override using CORE::GLOBAL
@@ -159,3 +159,6 @@ is runperl(prog => 'sub CORE::GLOBAL::do; do file; print qq-ok\n-'),
 is runperl(prog => 'sub CORE::GLOBAL::glob; glob; print qq-ok\n-'),
   "ok\n",
   'no crash with CORE::GLOBAL::glob stub';
+is runperl(prog => 'sub CORE::GLOBAL::require; require re; print qq-o\n-'),
+  "o\n",
+  'no crash with CORE::GLOBAL::require stub';

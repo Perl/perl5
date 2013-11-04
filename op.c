@@ -9744,6 +9744,8 @@ Perl_ck_require(pTHX_ OP *o)
 	if (!(gv && GvCVu(gv) && GvIMPORTED_CV(gv))) {
 	    GV * const * const gvp = (GV**)hv_fetchs(PL_globalstash, "require", FALSE);
 	    gv = gvp ? *gvp : NULL;
+	    if (gv && !isGV(gv))
+		gv_init(gv, PL_globalstash, "require", 7, 0);
 	}
     }
 
