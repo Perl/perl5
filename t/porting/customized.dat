@@ -1,10 +1,6 @@
 Digest::MD5 cpan/Digest-MD5/t/files.t bdbe05b705d9da305fedce7a9f4b6ba63250c7cf
-IPC::Cmd cpan/IPC-Cmd/lib/IPC/Cmd.pm 0d7f353e9785ddef36f029362638f7692b40a361
-IPC::Cmd cpan/IPC-Cmd/t/03_run-forked.t c2d838287458bdc7ea5880a58ebcc0c607c210f5
-Module::Build cpan/Module-Build/lib/Module/Build/ConfigData.pm 409075121c3a50488052df00e5cdeeeb5594409a
+Module::Build cpan/Module-Build/lib/Module/Build/ConfigData.pm 59addfa9ac0720c45c70e53cb272ec8e66cc8b69
 PerlIO::via::QuotedPrint cpan/PerlIO-via-QuotedPrint/t/QuotedPrint.t ca39f0146e89de02c746e199c45dcb3e5edad691
-Term::Cap cpan/Term-Cap/Cap.pm f7645219662eafe5c263d9199c30f40bcf0ac806
-Term::Cap cpan/Term-Cap/test.pl 1685137e2770c6d496169299627cf4cbcee869e9
 Text::Balanced cpan/Text-Balanced/t/01_compile.t 1598cf491a48fa546260a2ec41142abe84da533d
 Text::Balanced cpan/Text-Balanced/t/02_extbrk.t 6ba1b64a4604e822dc2260b8ffcea6b406339ee8
 Text::Balanced cpan/Text-Balanced/t/03_extcbk.t 3307c980af28963414cab799c427b359ef3b8657

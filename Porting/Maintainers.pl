@@ -788,7 +788,7 @@ use File::Glob qw(:case);
     #
 
     'Module::Build' => {
-        'DISTRIBUTION' => 'LEONT/Module-Build-0.4007.tar.gz',
+        'DISTRIBUTION' => 'LEONT/Module-Build-0.4008.tar.gz',
         'FILES'        => q[cpan/Module-Build],
         'EXCLUDED'     => [
             qw( t/par.t

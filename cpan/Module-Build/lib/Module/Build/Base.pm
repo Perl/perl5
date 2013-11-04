@@ -6,7 +6,7 @@ use strict;
 use vars qw($VERSION);
 use warnings;
 
-$VERSION = '0.4007';
+$VERSION = '0.4008';
 $VERSION = eval $VERSION;
 BEGIN { require 5.006001 }
 
@@ -2760,28 +2760,9 @@ sub run_tap_harness {
 sub run_test_harness {
     my ($self, $tests) = @_;
     require Test::Harness;
-    my $p = $self->{properties};
 
-    # Work around a Test::Harness bug that loses the particular perl
-    # we're running under.  $self->perl is trustworthy, but $^X isn't.
-    local $^X = $self->perl;
-
-    # Do everything in our power to work with all versions of Test::Harness
-    local ($Test::Harness::verbose,
-           $Test::Harness::Verbose,
-           $ENV{TEST_VERBOSE},
-           $ENV{HARNESS_VERBOSE}) = ($p->{verbose} || 0) x 4;
-
-    my @harness_switches = $self->harness_switches;
-    return Test::Harness::runtests(@$tests) unless @harness_switches;  # Nothing to modify
-
-    local $Test::Harness::switches    = join ' ', grep defined, $Test::Harness::switches, @harness_switches;
-    local $Test::Harness::Switches    = join ' ', grep defined, $Test::Harness::Switches, @harness_switches;
-    local $ENV{HARNESS_PERL_SWITCHES} = join ' ', grep defined, $ENV{HARNESS_PERL_SWITCHES}, @harness_switches;
-
-    $Test::Harness::switches = undef   unless length $Test::Harness::switches;
-    $Test::Harness::Switches = undef   unless defined $Test::Harness::Switches and length $Test::Harness::Switches;
-    delete $ENV{HARNESS_PERL_SWITCHES} unless length $ENV{HARNESS_PERL_SWITCHES};
+    local $Test::Harness::verbose = $self->verbose || 0;
+    local $Test::Harness::switches = join ' ', $self->harness_switches;
 
     Test::Harness::runtests(@$tests);
 }

@@ -18,7 +18,7 @@ use Module::Build::Base;
 
 use vars qw($VERSION @ISA);
 @ISA = qw(Module::Build::Base);
-$VERSION = '0.4007';
+$VERSION = '0.4008';
 $VERSION = eval $VERSION;
 
 # Inserts the given module into the @ISA hierarchy between

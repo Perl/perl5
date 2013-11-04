@@ -24,7 +24,7 @@ use Test::Harness;
 {
   package MB::Subclass;
   use base qw(Module::Build);
-  sub harness_switches { }
+  sub harness_switches { return }
 }
 
 {
@@ -35,19 +35,19 @@ use Test::Harness;
   no warnings qw[redefine once];
 
   # This runs run_test_harness with Test::Harness::switches = undef and harness_switches() returning empty list,
-  # ensure there are no warnings, and output is undef too
+  # ensure there are no warnings, and output is empty too
   {
     my $mb = MB::Subclass->new( module_name => $dist->name );
     local *Test::Harness::runtests = sub {
       is shift(), $mock1, "runtests ran with expected parameters";
       is shift(), $mock2, "runtests ran with expected parameters";
-      is $Test::Harness::switches, undef, "switches are undef";
-      is $Test::Harness::Switches, undef, "switches are undef";
+      is $Test::Harness::switches, '', "switches are undef";
+      is $Test::Harness::Switches, '', "switches are undef";
     };
 
     # $Test::Harness::switches and $Test::Harness::switches are aliases, but we pretend we don't know this
-    local $Test::Harness::switches = undef;
-    local $Test::Harness::switches = undef;
+    local $Test::Harness::switches = '';
+    local $Test::Harness::switches = '';
     $mb->run_test_harness([$mock1, $mock2]);
 
     ok 1, "run_test_harness should not produce warning if Test::Harness::[Ss]witches are undef and harness_switches() return empty list";
