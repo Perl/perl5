@@ -22,7 +22,7 @@ use File::Glob qw(:case);
     cpanfile CREDITS dist.ini GOALS HISTORY INSTALL INSTALL.SKIP LICENSE
     Makefile.PL MANIFEST MANIFEST.SKIP META.json META.yml MYMETA.json
     MYMETA.yml NEW NOTES perlcritic.rc ppport.h README README.PATCHING
-    SIGNATURE THANKS TODO Todo VERSION WHATSNEW
+    SIGNATURE THANKS TODO Todo VERSION WHATSNEW .perlcriticrc.perltidyrc
 );
 
 # Each entry in the  %Modules hash roughly represents a distribution,
@@ -1079,9 +1079,10 @@ use File::Glob qw(:case);
     },
 
     'Test::Simple' => {
-        'DISTRIBUTION' => 'RJBS/Test-Simple-0.99.tar.gz',
+        'DISTRIBUTION' => 'RJBS/Test-Simple-1.001002.tar.gz',
         'FILES'        => q[cpan/Test-Simple],
         'EXCLUDED'     => [
+            qr{^t/xt},
             qw( .perlcriticrc
                 .perltidyrc
                 examples/indent.pl
