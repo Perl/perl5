@@ -530,10 +530,11 @@ CELIB           = celib.lib
 CELIBS          = -nodefaultlib \
                   ws2.lib $(CELIB) coredll.lib
 
+#this libc's purpose is WinCE entrypoint to main wrapper, not a real C std lib
 !if $(CEVersion) > 200
-CELIBS          = $(CELIBS) corelibc.lib
+LIBC          = corelibc.lib
 !else
-CELIBS          = $(CELIBS) msvcrt.lib
+LIBC          = msvcrt.lib
 !endif
 
 LIBBASEFILES	= $(CRYPT_LIB) $(CELIBS)
@@ -899,6 +900,26 @@ XDLLOBJS	= $(XDLLOBJS) $(DLLDIR)\malloc.obj
 XDLLOBJS	= $(XDLLOBJS) $(DLLDIR)\fcrypt.obj
 !ENDIF
 
+#sanity checks to make sure all our external files (celib, w32console, and
+#MS CE SDK) are locatable
+lib_check :
+    @if not exist $(CECONSOLEDIR)\$(MACHINE)\w32console.obj cmd /k \
+        "echo w32console.obj doesn't seem to exist, check your w32console directory \
+        & exit 1"
+    @if not exist $(CELIBDLLDIR)\$(MACHINE)-release\celib.lib cmd /k \
+        "echo celib.lib doesn't seem to exist, check your celib directory \
+        & exit 1"
+    @for %X in ( $(LIBC) ) do @if exist %~^$LIB:X ( exit 0 ) \
+        else ( echo $(LIBC) doesn't seem to exist, check your build enviroment & exit 1 )
+
+#specific header files to check picked at random
+header_check  :
+    @if not exist $(CELIBDLLDIR)\inc\cewin32.h  cmd /k \
+        "echo cewin32.h doesn't seem to exist, check your celib directory \
+        & exit 1"
+    @for %X in (ceconfig.h) do @if exist %~^$INCLUDE:X ( exit 0 ) \
+        else ( echo ceconfig.h doesn't seem to exist, check your build enviroment & exit 1 )
+
 {$(SRCDIR)}.c{$(DLLDIR)}.obj:
     $(CC) -c $(CFLAGS_O) -DPERL_EXTERNAL_GLOB -Fo$(DLLDIR)\ $<
 
@@ -923,7 +944,7 @@ perldll.def : $(HPERL) $(CONFIGPM) ..\embed.fnc ..\makedef.pl create_perllibst_h
 	$(HPERL) -I..\lib -MCross -w ..\makedef.pl PLATFORM=wince $(OPTIMIZE) $(DEFINES) $(BUILDOPT) \
 	    CCTYPE=$(CCTYPE) -DPERL_DLL=$(PERLDLL) TARG_DIR=..\ > perldll.def
 
-$(PERLDLL) : $(DLLDIR) perldll.def $(XDLLOBJS) $(PERLDLL_RES)
+$(PERLDLL) : header_check lib_check $(DLLDIR) perldll.def $(XDLLOBJS) $(PERLDLL_RES)
 	$(LINK32) -dll -def:perldll.def -base:0x28000000 -out:$@ \
                   $(SUBSYS) $(LDLIBPATH) \
 		  $(LINK_FLAGS) $(LIBFILES) \
