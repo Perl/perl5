@@ -18,7 +18,7 @@ our @Overridable;
 my @Prepend_parent;
 my %Recognized_Att_Keys;
 
-our $VERSION = '6.80';
+our $VERSION = '6.82';
 $VERSION = eval $VERSION;  ## no critic [BuiltinFunctions::ProhibitStringyEval]
 
 # Emulate something resembling CVS $Revision$
@@ -1119,16 +1119,19 @@ sub flush {
     my $self = shift;
 
     # This needs a bit more work for more wacky OSen
-    my $type = 'GNU-style';
+    my $type = 'Unix-style';
     if ( $self->os_flavor_is('Win32') ) {
       my $make = $self->make;
       $make = +( File::Spec->splitpath( $make ) )[-1];
       $make =~ s!\.exe$!!i;
       $type = $make . '-style';
     }
-    print "Generating a $type Makefile\n";
+    elsif ( $Is_VMS ) {
+        $type = $Config{make} . '-style';
+    }
 
     my $finalname = $self->{MAKEFILE};
+    print "Generating a $type $finalname\n";
     print "Writing $finalname for $self->{NAME}\n";
 
     unlink($finalname, "MakeMaker.tmp", $Is_VMS ? 'Descrip.MMS' : ());
@@ -2690,8 +2693,9 @@ that purpose.
 
 =item XSPROTOARG
 
-May be set to an empty string, which is identical to C<-prototypes>, or
-C<-noprototypes>. See the xsubpp documentation for details. MakeMaker
+May be set to C<-protoypes>, C<-noprototypes> or the empty string.  The
+empty string is equivalent to the xsubpp default, or C<-noprototypes>.
+See the xsubpp documentation for details.  MakeMaker
 defaults to the empty string.
 
 =item XS_VERSION

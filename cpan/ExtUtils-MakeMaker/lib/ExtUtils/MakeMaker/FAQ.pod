@@ -1,6 +1,6 @@
 package ExtUtils::MakeMaker::FAQ;
 
-our $VERSION = '6.80';
+our $VERSION = '6.82';
 
 1;
 __END__
@@ -184,9 +184,12 @@ Its primary advantages are:
 
 =back
 
-Module::Build is the official heir apparent to MakeMaker and we
-encourage people to work on M::B rather than spending time adding features
-to MakeMaker.
+Module::Build was long the official heir apparent to MakeMaker.  The rate of
+both its development and adoption has slowed in recent years, though, and it is
+unclear what the future holds for it.  That said, Module::Build set the stage
+for I<something> to become the heir to MakeMaker.  MakeMaker's maintainers have
+long said that it is a dead end and should be kept functioning, but not
+extended with new features.  It's complicated enough as it is!
 
 =back
 
