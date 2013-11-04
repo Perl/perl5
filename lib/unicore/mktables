@@ -11512,9 +11512,12 @@ sub filter_old_style_arabic_shaping {
         $uc = property_ref('uc');
 
         # For each of the case change mappings...
-        foreach my $full_table ($lc, $tc, $uc) {
-            my $full_name = $full_table->name;
-            unless (defined $full_table && ! $full_table->is_empty) {
+        foreach my $full_casing_table ($lc, $tc, $uc) {
+            my $full_casing_name = $full_casing_table->name;
+            my $full_casing_full_name = $full_casing_table->full_name;
+            unless (defined $full_casing_table
+                    && ! $full_casing_table->is_empty)
+            {
                 Carp::my_carp_bug("Need to process UnicodeData before SpecialCasing.  Only special casing will be generated.");
             }
 
@@ -11529,18 +11532,18 @@ sub filter_old_style_arabic_shaping {
             # full maps so that as we handle those, we can override the simple
             # maps for them in the legacy table, and merely add them in the
             # new-style one.
-            my $legacy = Property->new("Legacy_" . $full_table->full_name,
-                                        File => $full_table->full_name =~
-                                                            s/case_Mapping//r,
+            my $legacy = Property->new("Legacy_" . $full_casing_full_name,
+                                        File => $full_casing_full_name
+                                                          =~ s/case_Mapping//r,
                                         Range_Size_1 => 1,
                                         Format => $HEX_FORMAT,
                                         Default_Map => $CODE_POINT,
                                         UCD => 0,
-                                        Initialize => $full_table,
+                                        Initialize => $full_casing_table,
                                         To_Output_Map => $EXTERNAL_MAP,
             );
 
-            $full_table->add_comment(join_lines( <<END
+            $full_casing_table->add_comment(join_lines( <<END
 This file includes both the simple and full case changing maps.  The simple
 ones are in the main body of the table below, and the full ones adding to or
 overriding them are in the hash.
@@ -11549,9 +11552,9 @@ END
 
             # The simple version's name in each mapping merely has an 's' in
             # front of the full one's
-            my $simple_name = 's' . $full_name;
+            my $simple_name = 's' . $full_casing_name;
             my $simple = property_ref($simple_name);
-            $simple->initialize($full_table) if $simple->to_output_map();
+            $simple->initialize($full_casing_table) if $simple->to_output_map();
         }
 
         return;
