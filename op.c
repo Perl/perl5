@@ -5464,25 +5464,28 @@ Perl_vload_module(pTHX_ U32 flags, SV *name, SV *ver, va_list *args)
     LEAVE;
 }
 
+GV *
+S_override(pTHX_ const char * const name, const STRLEN len)
+{
+    GV *gv = gv_fetchpvn(name, len, GV_NOTQUAL, SVt_PVCV);
+    GV * const *gvp;
+    if (gv && GvCVu(gv) && GvIMPORTED_CV(gv)) return gv;
+    gvp = (GV**)hv_fetch(PL_globalstash, name, len, FALSE);
+    gv = gvp ? *gvp : NULL;
+    if (gv && !isGV(gv)) gv_init(gv, PL_globalstash, name, len, 0);
+    return gv && GvCVu(gv) && GvIMPORTED_CV(gv) ? gv : NULL;
+}
+
 OP *
 Perl_dofile(pTHX_ OP *term, I32 force_builtin)
 {
     dVAR;
     OP *doop;
-    GV *gv = NULL;
+    GV *gv;
 
     PERL_ARGS_ASSERT_DOFILE;
 
-    if (!force_builtin) {
-	gv = gv_fetchpvs("do", GV_NOTQUAL, SVt_PVCV);
-	if (!(gv && GvCVu(gv) && GvIMPORTED_CV(gv))) {
-	    GV * const * const gvp = (GV**)hv_fetchs(PL_globalstash, "do", FALSE);
-	    gv = gvp ? *gvp : NULL;
-	    if (gv && !isGV(gv)) gv_init(gv, PL_globalstash, "do", 2, 0);
-	}
-    }
-
-    if (gv && GvCVu(gv) && GvIMPORTED_CV(gv)) {
+    if (!force_builtin && (gv = S_override(aTHX_ "do", 2))) {
 	doop = newUNOP(OP_ENTERSUB, OPf_STACKED,
 			       op_append_elem(OP_LIST, term,
 					   scalar(newUNOP(OP_RV2CV, 0,
@@ -9210,7 +9213,6 @@ Perl_ck_glob(pTHX_ OP *o)
 {
     dVAR;
     GV *gv;
-    const bool core = o->op_flags & OPf_SPECIAL;
 
     PERL_ARGS_ASSERT_CK_GLOB;
 
@@ -9218,17 +9220,8 @@ Perl_ck_glob(pTHX_ OP *o)
     if ((o->op_flags & OPf_KIDS) && !cLISTOPo->op_first->op_sibling)
 	op_append_elem(OP_GLOB, o, newDEFSVOP()); /* glob() => glob($_) */
 
-    if (core) gv = NULL;
-    else if (!((gv = gv_fetchpvs("glob", GV_NOTQUAL, SVt_PVCV))
-	  && GvCVu(gv) && GvIMPORTED_CV(gv)))
+    if (!(o->op_flags & OPf_SPECIAL) && (gv = S_override(aTHX_ "glob", 4)))
     {
-	GV * const * const gvp =
-	    (GV **)hv_fetchs(PL_globalstash, "glob", FALSE);
-	gv = gvp ? *gvp : NULL;
-	if (gv && !isGV(gv)) gv_init(gv, PL_globalstash, "glob", 4, 0);
-    }
-
-    if (gv && GvCVu(gv) && GvIMPORTED_CV(gv)) {
 	/* convert
 	 *     glob
 	 *       \ null - const(wildcard)
@@ -9703,7 +9696,7 @@ OP *
 Perl_ck_require(pTHX_ OP *o)
 {
     dVAR;
-    GV* gv = NULL;
+    GV* gv;
 
     PERL_ARGS_ASSERT_CK_REQUIRE;
 
@@ -9738,18 +9731,9 @@ Perl_ck_require(pTHX_ OP *o)
 	}
     }
 
-    if (!(o->op_flags & OPf_SPECIAL)) { /* Wasn't written as CORE::require */
+    if (!(o->op_flags & OPf_SPECIAL) /* Wasn't written as CORE::require */
 	/* handle override, if any */
-	gv = gv_fetchpvs("require", GV_NOTQUAL, SVt_PVCV);
-	if (!(gv && GvCVu(gv) && GvIMPORTED_CV(gv))) {
-	    GV * const * const gvp = (GV**)hv_fetchs(PL_globalstash, "require", FALSE);
-	    gv = gvp ? *gvp : NULL;
-	    if (gv && !isGV(gv))
-		gv_init(gv, PL_globalstash, "require", 7, 0);
-	}
-    }
-
-    if (gv && GvCVu(gv) && GvIMPORTED_CV(gv)) {
+     && (gv = S_override(aTHX_ "require", 7))) {
 	OP *kid, *newop;
 	if (o->op_flags & OPf_KIDS) {
 	    kid = cUNOPo->op_first;
