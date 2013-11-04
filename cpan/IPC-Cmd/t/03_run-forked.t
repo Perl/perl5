@@ -22,9 +22,10 @@ my $true = IPC::Cmd::can_run('true');
 my $false = IPC::Cmd::can_run('false');
 my $echo = IPC::Cmd::can_run('echo');
 my $sleep = IPC::Cmd::can_run('sleep');
+my $cat = IPC::Cmd::can_run('cat');
 
-unless ( $true and $false and $echo and $sleep ) {
-  ok(1, 'Either "true" or "false" "echo" or "sleep" is missing on this platform');
+unless ( $true and $false and $echo and $sleep and $cat ) {
+  ok(1, 'Either "true" or "false" "echo" or "sleep" or "cat" is missing on this platform');
   exit;
 }
 
@@ -33,13 +34,13 @@ my $r;
 $r = run_forked($true);
 ok($r->{'exit_code'} eq '0', "$true returns 0");
 $r = run_forked($false);
-ok($r->{'exit_code'} ne '0', "$false returns 1");
+ok($r->{'exit_code'} ne '0', "$false returns not 0");
 
 $r = run_forked([$echo, "test"]);
 ok($r->{'stdout'} =~ /test/, "arrayref cmd: https://rt.cpan.org/Ticket/Display.html?id=70530");
 
 $r = run_forked("$sleep 5", {'timeout' => 2});
-ok($r->{'timeout'}, "[sleep 5] runs longer than 2 seconds");
+ok($r->{'timeout'}, "[$sleep 5] runs longer than 2 seconds");
 
 
 # https://rt.cpan.org/Ticket/Display.html?id=85912
@@ -62,3 +63,32 @@ ok($retval->{"stdout"} =~ /blahblah/, "https://rt.cpan.org/Ticket/Display.html?i
 ok($retval->{"stdout"} =~ /Hello sailor/, "https://rt.cpan.org/Ticket/Display.html?id=85912 stdout 2");
 ok($retval->{"stderr"} =~ /Boo/, "https://rt.cpan.org/Ticket/Display.html?id=85912 stderr 1");
 ok($retval->{"stderr"} =~ /eek/, "https://rt.cpan.org/Ticket/Display.html?id=85912 stderr 2");
+
+$r = run_forked("$echo yes i know this is the way", {'discard_output' => 1});
+ok($r->{'stdout'} eq '', "discard_output stdout");
+ok($r->{'stderr'} eq '', "discard_output stderr");
+ok($r->{'merged'} eq '', "discard_output merged");
+ok($r->{'err_msg'} eq '', "discard_output err_msg");
+
+my $filename = "/tmp/03_run_forked.t.$$";
+my $one_line = "in Montenegro with Katyusha\n";
+my $fh;
+open($fh, ">$filename");
+for (my $i = 0; $i < 10240; $i++) {
+  print $fh $one_line;
+}
+close($fh);
+
+for (my $i = 0; $i < 100; $i++) {
+  my $f_ipc_cmd = IPC::Cmd::run_forked("$cat $filename");
+  my $f_backticks = `$cat $filename`;
+  if ($f_ipc_cmd->{'stdout'} ne $f_backticks) {
+    fail ("reading $filename: run_forked output length [" . length($f_ipc_cmd->{'stdout'}) . "], backticks output length [" . length ($f_backticks) . "]");
+    #print Data::Dumper::Dumper($f_ipc_cmd);
+    die;
+  }
+  else {
+    pass ("$i: reading $filename");
+  }
+}
+unlink($filename);
