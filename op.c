@@ -5478,6 +5478,7 @@ Perl_dofile(pTHX_ OP *term, I32 force_builtin)
 	if (!(gv && GvCVu(gv) && GvIMPORTED_CV(gv))) {
 	    GV * const * const gvp = (GV**)hv_fetchs(PL_globalstash, "do", FALSE);
 	    gv = gvp ? *gvp : NULL;
+	    if (gv && !isGV(gv)) gv_init(gv, PL_globalstash, "do", 2, 0);
 	}
     }
 

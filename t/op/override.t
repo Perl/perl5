@@ -4,9 +4,11 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';
+    require Config; # load these before we mess with *CORE::GLOBAL::require
+    require 'Config_heavy.pl'; # since runperl will need them
 }
 
-plan tests => 29;
+plan tests => 30;
 
 #
 # This file tries to test builtin override using CORE::GLOBAL
@@ -150,3 +152,7 @@ BEGIN { package other; *::caller = \&::caller }
 sub caller() { 42 }
 caller; # inline the constant
 is caller, 42, 'constant inlining does not undo "use subs" on keywords';
+
+is runperl(prog => 'sub CORE::GLOBAL::do; do file; print qq-ok\n-'),
+  "ok\n",
+  'no crash with CORE::GLOBAL::do stub';
