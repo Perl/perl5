@@ -1880,78 +1880,38 @@ S_finalize_op(pTHX_ OP* o)
 	SV *lexname;
 	GV **fields;
 	SV **svp, *sv;
-	const char *key = NULL;
-	STRLEN keylen;
-
-	if (((BINOP*)o)->op_last->op_type != OP_CONST)
-	    break;
-
-	/* Make the CONST have a shared SV */
-	svp = cSVOPx_svp(((BINOP*)o)->op_last);
-	if ((!SvIsCOW_shared_hash(sv = *svp))
-	    && SvTYPE(sv) < SVt_PVMG && SvOK(sv) && !SvROK(sv)) {
-	    key = SvPV_const(sv, keylen);
-	    lexname = newSVpvn_share(key,
-		SvUTF8(sv) ? -(I32)keylen : (I32)keylen,
-		0);
-	    SvREFCNT_dec_NN(sv);
-	    *svp = lexname;
-	}
-
-	if ((o->op_private & (OPpLVAL_INTRO)))
-	    break;
-
-	rop = (UNOP*)((BINOP*)o)->op_first;
-	if (rop->op_type != OP_RV2HV)
-	    break;
-	if (rop->op_first->op_type == OP_PADSV)
-	    /* $$hash{key} */
-	    rop = (UNOP*)rop->op_first;
-	else if (rop->op_first->op_type == OP_SCOPE
-	     && cLISTOPx(rop->op_first)->op_last->op_type == OP_PADSV)
-	    /* ${$hash}{key} */
-	    rop = (UNOP*)cLISTOPx(rop->op_first)->op_last;
-	else
-	    break;
-
-	lexname = *av_fetch(PL_comppad_name, rop->op_targ, TRUE);
-	if (!SvPAD_TYPED(lexname))
-	    break;
-	fields = (GV**)hv_fetchs(SvSTASH(lexname), "FIELDS", FALSE);
-	if (!fields || !isGV(*fields) || !GvHV(*fields))
-	    break;
-        if (!hv_fetch_ent(GvHV(*fields), *svp, FALSE, 0)) {
-	    Perl_croak(aTHX_ "No such class field \"%"SVf"\" " 
-			   "in variable %"SVf" of type %"HEKf, 
-		      SVfARG(*svp), SVfARG(lexname),
-                      HEKfARG(HvNAME_HEK(SvSTASH(lexname))));
-	}
-	break;
-    }
-
-    case OP_HSLICE: {
-	UNOP *rop;
-	SV *lexname;
-	GV **fields;
-	SV **svp;
 	SVOP *key_op;
 	OP *kid;
 	bool check_fields;
 
+	if ((key_op = cSVOPx(((BINOP*)o)->op_last))->op_type != OP_CONST)
+	    break;
+
+	rop = (UNOP*)((BINOP*)o)->op_first;
+
+	goto check_keys;
+
+    case OP_HSLICE:
 	S_scalar_slice_warning(aTHX_ o);
 
 	if (/* I bet there's always a pushmark... */
 	        (kid = cLISTOPo->op_first->op_sibling)->op_type != OP_LIST
 	      && kid->op_type != OP_CONST)
 	    break;
-	if (!(o->op_private & OPpLVAL_INTRO)) {
-	  rop = (UNOP*)((LISTOP*)o)->op_last;
-	  if (rop->op_type != OP_RV2HV)
+
+	key_op = (SVOP*)(kid->op_type == OP_CONST
+				? kid
+				: kLISTOP->op_first->op_sibling);
+
+	rop = (UNOP*)((LISTOP*)o)->op_last;
+
+      check_keys:	
+	if (o->op_private & OPpLVAL_INTRO || rop->op_type != OP_RV2HV)
 	    rop = NULL;
-	  else if (rop->op_first->op_type == OP_PADSV)
+	else if (rop->op_first->op_type == OP_PADSV)
 	    /* @$hash{qw(keys here)} */
 	    rop = (UNOP*)rop->op_first;
-	  else {
+	else {
 	    /* @{$hash}{qw(keys here)} */
 	    if (rop->op_first->op_type == OP_SCOPE
 		&& cLISTOPx(rop->op_first)->op_last->op_type == OP_PADSV)
@@ -1960,9 +1920,7 @@ S_finalize_op(pTHX_ OP* o)
 		}
 	    else
 		rop = NULL;
-	  }
 	}
-	else rop = NULL;
 
 	check_fields =
 	    rop
@@ -1970,12 +1928,9 @@ S_finalize_op(pTHX_ OP* o)
 	     SvPAD_TYPED(lexname))
 	 && (fields = (GV**)hv_fetchs(SvSTASH(lexname), "FIELDS", FALSE))
 	 && isGV(*fields) && GvHV(*fields);
-	key_op = (SVOP*)(kid->op_type == OP_CONST
-				? kid
-				: kLISTOP->op_first->op_sibling);
 	for (; key_op;
 	     key_op = (SVOP*)key_op->op_sibling) {
-	    SV *sv;
+	    SV **svp, *sv;
 	    if (key_op->op_type != OP_CONST)
 		continue;
 	    svp = cSVOPx_svp(key_op);
