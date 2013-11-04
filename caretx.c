@@ -38,6 +38,12 @@
 # include <mach-o/dyld.h>
 #endif
 
+/* Note: Functions in this file must not have bool parameters.  When
+   PERL_BOOL_AS_CHAR is #defined, mach-o/dyld.h overrides it in this file
+   by #including stdbool.h, so the function parameters here would conflict
+   with those in proto.h.
+*/
+
 void
 Perl_set_caret_X(pTHX) {
     dVAR;
