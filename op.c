@@ -5472,7 +5472,11 @@ S_override(pTHX_ const char * const name, const STRLEN len)
     if (gv && GvCVu(gv) && GvIMPORTED_CV(gv)) return gv;
     gvp = (GV**)hv_fetch(PL_globalstash, name, len, FALSE);
     gv = gvp ? *gvp : NULL;
-    if (gv && !isGV(gv)) gv_init(gv, PL_globalstash, name, len, 0);
+    if (gv && !isGV(gv)) {
+	if (!SvPCS_IMPORTED(gv)) return NULL;
+	gv_init(gv, PL_globalstash, name, len, 0);
+	return gv;
+    }
     return gv && GvCVu(gv) && GvIMPORTED_CV(gv) ? gv : NULL;
 }
 
