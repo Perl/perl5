@@ -9225,6 +9225,7 @@ Perl_ck_glob(pTHX_ OP *o)
 	GV * const * const gvp =
 	    (GV **)hv_fetchs(PL_globalstash, "glob", FALSE);
 	gv = gvp ? *gvp : NULL;
+	if (gv && !isGV(gv)) gv_init(gv, PL_globalstash, "glob", 4, 0);
     }
 
     if (gv && GvCVu(gv) && GvIMPORTED_CV(gv)) {

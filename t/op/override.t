@@ -8,7 +8,7 @@ BEGIN {
     require 'Config_heavy.pl'; # since runperl will need them
 }
 
-plan tests => 30;
+plan tests => 31;
 
 #
 # This file tries to test builtin override using CORE::GLOBAL
@@ -156,3 +156,6 @@ is caller, 42, 'constant inlining does not undo "use subs" on keywords';
 is runperl(prog => 'sub CORE::GLOBAL::do; do file; print qq-ok\n-'),
   "ok\n",
   'no crash with CORE::GLOBAL::do stub';
+is runperl(prog => 'sub CORE::GLOBAL::glob; glob; print qq-ok\n-'),
+  "ok\n",
+  'no crash with CORE::GLOBAL::glob stub';
