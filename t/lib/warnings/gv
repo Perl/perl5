@@ -130,6 +130,10 @@ $x = 1;
 if ($x) {
     print $y;
 }
+$a++; # These two should
+$b++; # be exempt.
+$Foo::a++;
+$Foo::b++;
 EXPECT
 Name "main::y" used only once: possible typo at - line 5.
 Use of uninitialized value $y in print at - line 5.

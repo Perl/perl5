@@ -1670,10 +1670,10 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
     PERL_ARGS_ASSERT_GV_MAGICALIZE;
     
     if (stash != PL_defstash) { /* not the main stash */
-	/* We only have to check for three names here: EXPORT, ISA
+	/* We only have to check for a few names here: a, b, EXPORT, ISA
 	   and VERSION. All the others apply only to the main stash or to
 	   CORE (which is checked right after this). */
-	if (len > 2) {
+	if (len) {
 	    const char * const name2 = name + 1;
 	    switch (*name) {
 	    case 'E':
@@ -1688,6 +1688,11 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
 		if (strEQ(name2, "ERSION"))
 		    GvMULTI_on(gv);
 		break;
+	    case 'a':
+	    case 'b':
+		if (len == 1 && sv_type == SVt_PV)
+		    GvMULTI_on(gv);
+		/* FALL THROUGH */
 	    default:
 		goto try_core;
 	    }
@@ -2016,6 +2021,10 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
 	    SvREFCNT_dec(sv);
 	}
 	break;
+	case 'a':
+	case 'b':
+	    if (len == 1 && sv_type == SVt_PV)
+		GvMULTI_on(gv);
 	}
     }
 
