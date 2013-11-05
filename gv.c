@@ -3351,8 +3351,7 @@ Perl_gv_try_downgrade(pTHX_ GV *gv)
 	    CvCONST(cv) && !CvMETHOD(cv) && !CvLVALUE(cv) && !CvUNIQUE(cv) &&
 	    !CvNODEBUG(cv) && !CvCLONE(cv) && !CvCLONED(cv) && !CvANON(cv) &&
 	    (namehek = GvNAME_HEK(gv)) &&
-	    (gvp = hv_fetch(stash, HEK_KEY(namehek),
-			HEK_LEN(namehek)*(HEK_UTF8(namehek) ? -1 : 1), 0)) &&
+	    (gvp = hv_fetchhek(stash, namehek, 0)) &&
 	    *gvp == (SV*)gv) {
 	SV *value = SvREFCNT_inc(CvXSUBANY(cv).any_ptr);
 	const bool imported = !!GvIMPORTED_CV(gv);
