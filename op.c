@@ -5464,22 +5464,6 @@ Perl_vload_module(pTHX_ U32 flags, SV *name, SV *ver, va_list *args)
     LEAVE;
 }
 
-GV *
-S_override(pTHX_ const char * const name, const STRLEN len)
-{
-    GV *gv = gv_fetchpvn(name, len, GV_NOTQUAL, SVt_PVCV);
-    GV * const *gvp;
-    if (gv && GvCVu(gv) && GvIMPORTED_CV(gv)) return gv;
-    gvp = (GV**)hv_fetch(PL_globalstash, name, len, FALSE);
-    gv = gvp ? *gvp : NULL;
-    if (gv && !isGV(gv)) {
-	if (!SvPCS_IMPORTED(gv)) return NULL;
-	gv_init(gv, PL_globalstash, name, len, 0);
-	return gv;
-    }
-    return gv && GvCVu(gv) && GvIMPORTED_CV(gv) ? gv : NULL;
-}
-
 OP *
 Perl_dofile(pTHX_ OP *term, I32 force_builtin)
 {
@@ -5489,7 +5473,7 @@ Perl_dofile(pTHX_ OP *term, I32 force_builtin)
 
     PERL_ARGS_ASSERT_DOFILE;
 
-    if (!force_builtin && (gv = S_override(aTHX_ "do", 2))) {
+    if (!force_builtin && (gv = gv_override("do", 2))) {
 	doop = newUNOP(OP_ENTERSUB, OPf_STACKED,
 			       op_append_elem(OP_LIST, term,
 					   scalar(newUNOP(OP_RV2CV, 0,
@@ -9224,7 +9208,7 @@ Perl_ck_glob(pTHX_ OP *o)
     if ((o->op_flags & OPf_KIDS) && !cLISTOPo->op_first->op_sibling)
 	op_append_elem(OP_GLOB, o, newDEFSVOP()); /* glob() => glob($_) */
 
-    if (!(o->op_flags & OPf_SPECIAL) && (gv = S_override(aTHX_ "glob", 4)))
+    if (!(o->op_flags & OPf_SPECIAL) && (gv = gv_override("glob", 4)))
     {
 	/* convert
 	 *     glob
@@ -9737,7 +9721,7 @@ Perl_ck_require(pTHX_ OP *o)
 
     if (!(o->op_flags & OPf_SPECIAL) /* Wasn't written as CORE::require */
 	/* handle override, if any */
-     && (gv = S_override(aTHX_ "require", 7))) {
+     && (gv = gv_override("require", 7))) {
 	OP *kid, *newop;
 	if (o->op_flags & OPf_KIDS) {
 	    kid = cUNOPo->op_first;

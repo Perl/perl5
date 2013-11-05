@@ -4483,17 +4483,7 @@ S_readpipe_override(pTHX)
     GV **gvp;
     GV *gv_readpipe = gv_fetchpvs("readpipe", GV_NOTQUAL, SVt_PVCV);
     pl_yylval.ival = OP_BACKTICK;
-    if ((gv_readpipe
-		&& GvCVu(gv_readpipe) && GvIMPORTED_CV(gv_readpipe))
-	    ||
-	    ((gvp = (GV**)hv_fetchs(PL_globalstash, "readpipe", FALSE))
-	     && (gv_readpipe = *gvp) && (
-		isGV_with_GP(gv_readpipe)
-		    ? GvCVu(gv_readpipe) && GvIMPORTED_CV(gv_readpipe)
-		    :   SvPCS_IMPORTED(gv_readpipe)
-		     && (gv_init(gv_readpipe, PL_globalstash, "readpipe",
-				 8, 0), 1)
-	     )))
+    if ((gv_readpipe = gv_override("readpipe",8)))
     {
 	COPLINE_SET_FROM_MULTI_END;
 	PL_lex_op = (OP*)newUNOP(OP_ENTERSUB, OPf_STACKED,
@@ -10431,17 +10421,7 @@ S_scan_inputsymbol(pTHX_ char *start)
 
 	/* Check whether readline() is overriden */
 	gv_readline = gv_fetchpvs("readline", GV_NOTQUAL, SVt_PVCV);
-	if ((gv_readline
-		&& GvCVu(gv_readline) && GvIMPORTED_CV(gv_readline))
-		||
-		((gvp = (GV**)hv_fetchs(PL_globalstash, "readline", FALSE))
-		 && (gv_readline = *gvp) && (
-		    isGV_with_GP(gv_readline)
-			? GvCVu(gv_readline) && GvIMPORTED_CV(gv_readline)
-			:   SvPCS_IMPORTED(gv_readline)
-			 && (gv_init(gv_readline, PL_globalstash,
-				    "readline", 8, 0), 1)
-		)))
+	if ((gv_readline = gv_override("readline",8)))
 	    readline_overriden = TRUE;
 
 	/* if <$fh>, create the ops to turn the variable into a

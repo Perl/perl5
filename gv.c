@@ -3366,6 +3366,23 @@ Perl_gv_try_downgrade(pTHX_ GV *gv)
     }
 }
 
+GV *
+Perl_gv_override(pTHX_ const char * const name, const STRLEN len)
+{
+    GV *gv = gv_fetchpvn(name, len, GV_NOTQUAL, SVt_PVCV);
+    GV * const *gvp;
+    PERL_ARGS_ASSERT_GV_OVERRIDE;
+    if (gv && GvCVu(gv) && GvIMPORTED_CV(gv)) return gv;
+    gvp = (GV**)hv_fetch(PL_globalstash, name, len, FALSE);
+    gv = gvp ? *gvp : NULL;
+    if (gv && !isGV(gv)) {
+	if (!SvPCS_IMPORTED(gv)) return NULL;
+	gv_init(gv, PL_globalstash, name, len, 0);
+	return gv;
+    }
+    return gv && GvCVu(gv) && GvIMPORTED_CV(gv) ? gv : NULL;
+}
+
 #include "XSUB.h"
 
 static void
