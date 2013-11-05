@@ -667,16 +667,24 @@ Perl_re_intuit_start(pTHX_
         }
 	check = prog->check_substr;
     }
-    if ((prog->extflags & RXf_ANCH)	/* Match at beg-of-str or after \n */
-	 && !(prog->extflags & RXf_ANCH_GPOS)) /* \G isn't a BOS or \n */
-    {
-        ml_anch = !( (prog->extflags & RXf_ANCH_SINGLE)
+    if (prog->extflags & RXf_ANCH) { /* Match at \G, beg-of-str or after \n */
+	ml_anch = !( (prog->extflags & RXf_ANCH_SINGLE)
 		     || ( (prog->extflags & RXf_ANCH_BOL)
 			  && !multiline ) );	/* Check after \n? */
 
 	if (!ml_anch) {
-	  if (    !(prog->intflags & PREGf_IMPLICIT) /* not a real BOL */
-	       && (strpos != strbeg)) {
+          /* we are only allowed to match at BOS or \G */
+
+	  if (prog->extflags & RXf_ANCH_GPOS) {
+            /* in this case, we hope(!) that the caller has already
+             * set strpos to pos()-gofs, and will already have checked
+             * that this anchor position is legal
+             */
+            ;
+          }
+          else if (!(prog->intflags & PREGf_IMPLICIT) /* not a real BOL */
+		&& (strpos != strbeg))
+          {
 	      DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "Not at start...\n"));
 	      goto fail;
 	  }
@@ -2277,7 +2285,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
 
         /* in the presence of \G, we may need to start looking earlier in
          * the string than the suggested start point of stringarg:
-         * if gofs->prog is set, then that's a known, fixed minimum
+         * if prog->gofs is set, then that's a known, fixed minimum
          * offset, such as
          * /..\G/:   gofs = 2
          * /ab|c\G/: gofs = 1
