@@ -2023,7 +2023,7 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
 	break;
 	case 'a':
 	case 'b':
-	    if (len == 1 && sv_type == SVt_PV)
+	    if (sv_type == SVt_PV)
 		GvMULTI_on(gv);
 	}
     }
