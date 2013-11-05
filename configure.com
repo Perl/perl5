@@ -4569,6 +4569,29 @@ $ ELSE
 $   i_niin="undef"
 $ ENDIF
 $!
+$! Check for <arpa/inet.h>
+$!
+$ IF Has_Dec_C_Sockets
+$ THEN
+$   tmp = "arpa/inet.h"
+$   GOSUB inhdr
+$   i_arpainet = tmp
+$ ELSE
+$   i_arpainet="undef"
+$ ENDIF
+$!
+$! Check for <sys/un.h>
+$!
+$ IF Has_Dec_C_Sockets
+$ THEN
+$   tmp = "sys/un.h"
+$   GOSUB inhdr
+$   i_sysun = tmp
+$ ELSE
+$   i_sysun="undef"
+$ ENDIF
+$!
+$!
 $! Check for <netinet/tcp.h>
 $!
 $ IF Has_Dec_C_Sockets
@@ -6418,7 +6441,7 @@ $ WC "i64size='" + i64size + "'"
 $ WC "i64type='" + i64type + "'"
 $ WC "i8size='" + i8size + "'"
 $ WC "i8type='" + i8type + "'"
-$ WC "i_arpainet='undef'"
+$ WC "i_arpainet='" + i_arpainet + "'"
 $ WC "i_assert='define'"
 $ WC "i_bsdioctl='undef'"
 $ WC "i_crypt='undef'"
@@ -6497,7 +6520,7 @@ $ WC "i_systimek='undef'"
 $ WC "i_systimes='undef'"
 $ WC "i_systypes='define'"
 $ WC "i_sysuio='" + i_sysuio + "'"
-$ WC "i_sysun='undef'"
+$ WC "i_sysun='" + i_sysun + "'"
 $ WC "i_sysutsname='" + i_sysutsname + "'"
 $ WC "i_sysvfs='undef'"
 $ WC "i_syswait='undef'"
