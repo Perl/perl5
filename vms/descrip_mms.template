@@ -227,7 +227,7 @@ FULLLIBS2 = $(LIBS2)|$(THRLIBS1)|$(THRLIBS2)
 
 #### End of system configuration section. ####
 
-c0 = $(MALLOC_C) av.c caretx.x deb.c doio.c doop.c dump.c globals.c gv.c hv.c mro.c
+c0 = $(MALLOC_C) av.c caretx.c deb.c doio.c doop.c dump.c globals.c gv.c hv.c mro.c
 c1 = mg.c locale.c mathoms.c miniperlmain.c numeric.c op.c pad.c perl.c perlapi.c perlio.c
 c2 = perly.c pp.c pp_ctl.c pp_hot.c pp_pack.c pp_sort.c pp_sys.c regcomp.c regexec.c reentr.c
 c3 = run.c scope.c sv.c taint.c toke.c universal.c utf8.c util.c vms.c keywords.c
