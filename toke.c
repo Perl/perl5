@@ -2866,8 +2866,8 @@ S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e)
      * validation. */
     table = GvHV(PL_hintgv);		 /* ^H */
     cvp = hv_fetchs(table, "charnames", FALSE);
-    if (cvp && (cv = *cvp) && SvROK(cv) && ((rv = SvRV(cv)) != NULL)
-        && SvTYPE(rv) == SVt_PVCV && ((stash = CvSTASH(rv)) != NULL))
+    if (cvp && (cv = *cvp) && SvROK(cv) && (rv = SvRV(cv),
+        SvTYPE(rv) == SVt_PVCV) && ((stash = CvSTASH(rv)) != NULL))
     {
         const char * const name = HvNAME(stash);
         if strEQ(name, "_charnames") {
