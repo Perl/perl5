@@ -849,6 +849,7 @@ clean: Extensions_clean
 
 XDLLOBJS = \
 $(DLLDIR)\av.obj \
+$(DLLDIR)\caretx.obj \
 $(DLLDIR)\deb.obj \
 $(DLLDIR)\doio.obj \
 $(DLLDIR)\doop.obj \
