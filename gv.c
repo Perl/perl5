@@ -3345,7 +3345,7 @@ Perl_gv_try_downgrade(pTHX_ GV *gv)
     if (!cv) {
 	HEK *gvnhek = GvNAME_HEK(gv);
 	(void)hv_deletehek(stash, gvnhek, G_DISCARD);
-    } else if (GvMULTI(gv) && cv &&
+    } else if (GvMULTI(gv) && cv && SvREFCNT(cv) == 1 &&
 	    !SvOBJECT(cv) && !SvMAGICAL(cv) && !SvREADONLY(cv) &&
 	    CvSTASH(cv) == stash && CvGV(cv) == gv &&
 	    CvCONST(cv) && !CvMETHOD(cv) && !CvLVALUE(cv) && !CvUNIQUE(cv) &&

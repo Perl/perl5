@@ -12,7 +12,7 @@ BEGIN {
 
 use warnings;
 
-plan( tests => 257 );
+plan( tests => 258 );
 
 # type coercion on assignment
 $foo = 'foo';
@@ -996,6 +996,12 @@ is runperl(prog => '$s = STDERR; close $s; undef *$s;'
                   .'eval q-*STDERR if 0-; *$s = *STDOUT{IO}; warn'),
   "Warning: something's wrong at -e line 1.\n",
   "try_downgrade does not touch PL_stderrgv";
+
+is runperl(prog =>
+             'use constant foo=>1; BEGIN { $x = \&foo } undef &$x; $x->()',
+           stderr=>1),
+  "Undefined subroutine &main::foo called at -e line 1.\n",
+  "gv_try_downgrade does not anonymise CVs referenced elsewhere";
 
 # Look away, please.
 # This violates perl's internal structures by fiddling with stashes in a
