@@ -4487,8 +4487,13 @@ S_readpipe_override(pTHX)
 		&& GvCVu(gv_readpipe) && GvIMPORTED_CV(gv_readpipe))
 	    ||
 	    ((gvp = (GV**)hv_fetchs(PL_globalstash, "readpipe", FALSE))
-	     && (gv_readpipe = *gvp) && isGV_with_GP(gv_readpipe)
-	     && GvCVu(gv_readpipe) && GvIMPORTED_CV(gv_readpipe)))
+	     && (gv_readpipe = *gvp) && (
+		isGV_with_GP(gv_readpipe)
+		    ? GvCVu(gv_readpipe) && GvIMPORTED_CV(gv_readpipe)
+		    :   SvPCS_IMPORTED(gv_readpipe)
+		     && (gv_init(gv_readpipe, PL_globalstash, "readpipe",
+				 8, 0), 1)
+	     )))
     {
 	COPLINE_SET_FROM_MULTI_END;
 	PL_lex_op = (OP*)newUNOP(OP_ENTERSUB, OPf_STACKED,

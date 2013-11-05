@@ -8,7 +8,7 @@ BEGIN {
     require 'Config_heavy.pl'; # since runperl will need them
 }
 
-plan tests => 32;
+plan tests => 33;
 
 #
 # This file tries to test builtin override using CORE::GLOBAL
@@ -162,3 +162,10 @@ is runperl(prog => 'sub CORE::GLOBAL::glob; glob; print qq-ok\n-'),
 is runperl(prog => 'sub CORE::GLOBAL::require; require re; print qq-o\n-'),
   "o\n",
   'no crash with CORE::GLOBAL::require stub';
+
+like runperl(prog => 'use constant foo=>1; '
+                    .'BEGIN { *{q|CORE::GLOBAL::readpipe|} = \&{q|foo|};1}'
+                    .'warn ``',
+             stderr => 1),
+     qr/Too many arguments/,
+    '`` does not ignore &CORE::GLOBAL::readpipe aliased to a constant';
