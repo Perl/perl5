@@ -8,7 +8,7 @@ BEGIN {
     require 'Config_heavy.pl'; # since runperl will need them
 }
 
-plan tests => 33;
+plan tests => 34;
 
 #
 # This file tries to test builtin override using CORE::GLOBAL
@@ -169,3 +169,10 @@ like runperl(prog => 'use constant foo=>1; '
              stderr => 1),
      qr/Too many arguments/,
     '`` does not ignore &CORE::GLOBAL::readpipe aliased to a constant';
+
+is runperl(prog => 'use constant t=>42; '
+                  .'BEGIN { *{q|CORE::GLOBAL::time|} = \&{q|t|};1}'
+                  .'print time, chr 10',
+          stderr => 1),
+   "42\n",
+   'keywords respect global constant overrides';

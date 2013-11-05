@@ -7157,8 +7157,13 @@ Perl_yylex(pTHX)
 		if (!ogv &&
 		    (gvp = (GV**)hv_fetch(PL_globalstash, PL_tokenbuf,
                                             UTF ? -(I32)len : (I32)len, FALSE)) &&
-		    (gv = *gvp) && isGV_with_GP(gv) &&
-		    GvCVu(gv) && GvIMPORTED_CV(gv))
+		    (gv = *gvp) && (
+			isGV_with_GP(gv)
+			    ? GvCVu(gv) && GvIMPORTED_CV(gv)
+			    :   SvPCS_IMPORTED(gv)
+			     && (gv_init(gv, PL_globalstash, PL_tokenbuf,
+					 len, 0), 1)
+		   ))
 		{
 		    ogv = gv;
 		}
