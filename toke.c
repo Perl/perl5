@@ -10435,8 +10435,13 @@ S_scan_inputsymbol(pTHX_ char *start)
 		&& GvCVu(gv_readline) && GvIMPORTED_CV(gv_readline))
 		||
 		((gvp = (GV**)hv_fetchs(PL_globalstash, "readline", FALSE))
-		 && (gv_readline = *gvp) && isGV_with_GP(gv_readline)
-		&& GvCVu(gv_readline) && GvIMPORTED_CV(gv_readline)))
+		 && (gv_readline = *gvp) && (
+		    isGV_with_GP(gv_readline)
+			? GvCVu(gv_readline) && GvIMPORTED_CV(gv_readline)
+			:   SvPCS_IMPORTED(gv_readline)
+			 && (gv_init(gv_readline, PL_globalstash,
+				    "readline", 8, 0), 1)
+		)))
 	    readline_overriden = TRUE;
 
 	/* if <$fh>, create the ops to turn the variable into a
