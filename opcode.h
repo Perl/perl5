@@ -1357,7 +1357,7 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	Perl_ck_null,		/* srefgen */
 	Perl_ck_fun,		/* ref */
 	Perl_ck_fun,		/* bless */
-	Perl_ck_open,		/* backtick */
+	Perl_ck_backtick,	/* backtick */
 	Perl_ck_glob,		/* glob */
 	Perl_ck_readline,	/* readline */
 	Perl_ck_null,		/* rcatline */

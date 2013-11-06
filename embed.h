@@ -1033,6 +1033,7 @@
 #define cando(a,b,c)		Perl_cando(aTHX_ a,b,c)
 #define check_utf8_print(a,b)	Perl_check_utf8_print(aTHX_ a,b)
 #define ck_anoncode(a)		Perl_ck_anoncode(aTHX_ a)
+#define ck_backtick(a)		Perl_ck_backtick(aTHX_ a)
 #define ck_bitop(a)		Perl_ck_bitop(aTHX_ a)
 #define ck_cmp(a)		Perl_ck_cmp(aTHX_ a)
 #define ck_concat(a)		Perl_ck_concat(aTHX_ a)

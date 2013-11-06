@@ -8409,6 +8409,53 @@ Perl_ck_anoncode(pTHX_ OP *o)
     return o;
 }
 
+static void
+S_io_hints(pTHX_ OP *o)
+{
+    HV * const table =
+	PL_hints & HINT_LOCALIZE_HH ? GvHV(PL_hintgv) : NULL;;
+    if (table) {
+	SV **svp = hv_fetchs(table, "open_IN", FALSE);
+	if (svp && *svp) {
+	    STRLEN len = 0;
+	    const char *d = SvPV_const(*svp, len);
+	    const I32 mode = mode_from_discipline(d, len);
+	    if (mode & O_BINARY)
+		o->op_private |= OPpOPEN_IN_RAW;
+	    else if (mode & O_TEXT)
+		o->op_private |= OPpOPEN_IN_CRLF;
+	}
+
+	svp = hv_fetchs(table, "open_OUT", FALSE);
+	if (svp && *svp) {
+	    STRLEN len = 0;
+	    const char *d = SvPV_const(*svp, len);
+	    const I32 mode = mode_from_discipline(d, len);
+	    if (mode & O_BINARY)
+		o->op_private |= OPpOPEN_OUT_RAW;
+	    else if (mode & O_TEXT)
+		o->op_private |= OPpOPEN_OUT_CRLF;
+	}
+    }
+}
+
+OP *
+Perl_ck_backtick(pTHX_ OP *o)
+{
+    PERL_ARGS_ASSERT_CK_BACKTICK;
+    S_io_hints(aTHX_ o);
+    if (!(o->op_flags & OPf_KIDS)) {
+	OP * const newop = newUNOP(OP_BACKTICK, 0, newDEFSVOP());
+#ifdef PERL_MAD
+	op_getmad(o,newop,'O');
+#else
+	op_free(o);
+#endif
+	return newop;
+    }
+    return o;
+}
+
 OP *
 Perl_ck_bitop(pTHX_ OP *o)
 {
@@ -9603,46 +9650,10 @@ OP *
 Perl_ck_open(pTHX_ OP *o)
 {
     dVAR;
-    HV * const table =
-	PL_hints & HINT_LOCALIZE_HH ? GvHV(PL_hintgv) : NULL;;
 
     PERL_ARGS_ASSERT_CK_OPEN;
 
-    if (table) {
-	SV **svp = hv_fetchs(table, "open_IN", FALSE);
-	if (svp && *svp) {
-	    STRLEN len = 0;
-	    const char *d = SvPV_const(*svp, len);
-	    const I32 mode = mode_from_discipline(d, len);
-	    if (mode & O_BINARY)
-		o->op_private |= OPpOPEN_IN_RAW;
-	    else if (mode & O_TEXT)
-		o->op_private |= OPpOPEN_IN_CRLF;
-	}
-
-	svp = hv_fetchs(table, "open_OUT", FALSE);
-	if (svp && *svp) {
-	    STRLEN len = 0;
-	    const char *d = SvPV_const(*svp, len);
-	    const I32 mode = mode_from_discipline(d, len);
-	    if (mode & O_BINARY)
-		o->op_private |= OPpOPEN_OUT_RAW;
-	    else if (mode & O_TEXT)
-		o->op_private |= OPpOPEN_OUT_CRLF;
-	}
-    }
-    if (o->op_type == OP_BACKTICK) {
-	if (!(o->op_flags & OPf_KIDS)) {
-	    OP * const newop = newUNOP(OP_BACKTICK, 0, newDEFSVOP());
-#ifdef PERL_MAD
-	    op_getmad(o,newop,'O');
-#else
-	    op_free(o);
-#endif
-	    return newop;
-	}
-	return o;
-    }
+    S_io_hints(aTHX_ o);
     {
 	 /* In case of three-arg dup open remove strictness
 	  * from the last arg if it is a bareword. */
