@@ -2071,6 +2071,7 @@ foreach my $prop (sort keys %props) {
 
         fail("prop_invmap('$mod_prop')");
         diag("Unknown format '$format'");
+        next PROPERTY;
     }
 
     pass("prop_invmap('$mod_prop')");
