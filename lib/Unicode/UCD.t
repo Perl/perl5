@@ -1183,6 +1183,18 @@ is(@list, 0, "prop_invmap('Perl_Charnames') returns <undef> since internal-Perl-
 @list = prop_invmap("Is_Is_Any");
 is(@list, 0, "prop_invmap('Is_Is_Any') returns <undef> since two is's");
 
+my @legacy_props = qw( Legacy_Case_Folding
+                       Legacy_Lowercase_Mapping
+                       Legacy_Titlecase_Mapping
+                       Legacy_Uppercase_Mapping
+                       Legacy_Perl_Decimal_Digit
+                     );
+
+foreach my $legacy_prop (@legacy_props) {
+    @list = prop_invmap($legacy_prop);
+    is(@list, 0, "'$legacy_prop' is unknown to prop_invmap");
+}
+
 # The files for these properties shouldn't have their formats changed in case
 # applications use them (though such use is deprecated).
 my @legacy_file_format = qw( Bidi_Mirroring_Glyph

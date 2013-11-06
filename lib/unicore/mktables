@@ -1307,10 +1307,14 @@ my $MAP_PROXIED = 1;    # The map table for the property isn't written out,
                         # reconstruct this table
 my $INTERNAL_ONLY = 2;  # The file for this table is written out, but it is
                         # for Perl's internal use only
-my $SUPPRESSED = 3;     # The file for this table is not written out, and as a
+my $LEGACY_ONLY = 3;    # Like $INTERNAL_ONLY, but not actually used by Perl.
+                        # Is for backwards compatibility for applications that
+                        # read the file directly, so it's format is
+                        # unchangeable.
+my $SUPPRESSED = 4;     # The file for this table is not written out, and as a
                         # result, we don't bother to do many computations on
                         # it.
-my $PLACEHOLDER = 4;    # Like $SUPPRESSED, but we go through all the
+my $PLACEHOLDER = 5;    # Like $SUPPRESSED, but we go through all the
                         # computations anyway, as the values are needed for
                         # things to work.  This happens when we have Perl
                         # extensions that depend on Unicode tables that
@@ -5915,8 +5919,7 @@ END
                                                             $output_value)
                                         if  $format eq $HEX_ADJUST_FORMAT
                                             || ($format eq $HEX_FORMAT
-                                                && $self->full_name
-                                                        !~ / ^ Legacy /x);
+                                                && $self->replacement_property);
 
                                     # If including the name, no need to
                                     # indent, as the name will already be way
@@ -6178,13 +6181,22 @@ sub trace { return main::trace(@_); }
                     \%anomalous_entries,
                     'readable_array');
 
+    my %replacement_property;
+    # Certain files are unused by Perl itself, and are kept only for backwards
+    # compatibility for programs that used them before Unicode::UCD existed.
+    # These are termed legacy properties.  At some point they may be removed,
+    # but for now mark them as legacy.  If non empty, this is the name of the
+    # property to use instead (i.e., the modern equivalent).
+    main::set_access('replacement_property', \%replacement_property, 'r');
+
     my %to_output_map;
     # Enum as to whether or not to write out this map table, and how:
     #   0               don't output
     #   $EXTERNAL_MAP   means its existence is noted in the documentation, and
     #                   it should not be removed nor its format changed.  This
     #                   is done for those files that have traditionally been
-    #                   output.
+    #                   output.  Maps of legacy-only properties default to
+    #                   this.
     #   $INTERNAL_MAP   means Perl reserves the right to do anything it wants
     #                   with this file
     #   $OUTPUT_ADJUSTED means that it is an $INTERNAL_MAP, and instead of
@@ -6209,9 +6221,17 @@ sub trace { return main::trace(@_); }
         my $default_map = delete $args{'Default_Map'};
         my $property = delete $args{'_Property'};
         my $full_name = delete $args{'Full_Name'};
+        my $replacement_property = delete $args{'Replacement_Property'} // "";
         my $to_output_map = delete $args{'To_Output_Map'};
 
-        # Rest of parameters passed on
+        # Rest of parameters passed on; legacy properties have several common
+        # other attributes
+        if ($replacement_property) {
+            $args{"Fate"} = $LEGACY_ONLY;
+            $args{"Range_Size_1"} = 1;
+            $args{"Perl_Extension"} = 1;
+            $args{"UCD"} = 0;
+        }
 
         my $range_list = Range_Map->new(Owner => $property);
 
@@ -6227,6 +6247,9 @@ sub trace { return main::trace(@_); }
 
         $anomalous_entries{$addr} = [];
         $default_map{$addr} = $default_map;
+        $replacement_property{$addr} = $replacement_property;
+        $to_output_map = $EXTERNAL_MAP if ! defined $to_output_map
+                                          && $replacement_property;
         $to_output_map{$addr} = $to_output_map;
 
         $self->initialize($initialize) if defined $initialize;
@@ -6448,7 +6471,13 @@ sub trace { return main::trace(@_); }
             $return .= $INTERNAL_ONLY_HEADER;
         }
         else {
-            my $property_name = $self->property->full_name =~ s/Legacy_//r;
+            my $property_name = $self->property->replacement_property;
+
+            # The legacy-only properties were gotten above; but there are some
+            # other properties whose files are in current use that have fixed
+            # formats.
+            $property_name = $self->property->full_name unless $property_name;
+
             $return .= <<END;
 
 # !!!!!!!   IT IS DEPRECATED TO USE THIS FILE   !!!!!!!
@@ -8263,10 +8292,13 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
 
         my $addr = do { no overloading; pack 'J', $self; };
 
-        # Swash names are used only on regular map tables; otherwise there
-        # should be no access to the property map table from other parts of
-        # Perl.
-        return if $map{$addr}->fate != $ORDINARY;
+        # Swash names are used only on either
+        # 1) legacy-only properties, because the formats for these are
+        #    unchangeable, and they have had these lines in them; or
+        # 2) regular map tables; otherwise there should be no access to the
+        #    property map table from other parts of Perl.
+        return if $map{$addr}->fate != $ORDINARY
+                  && $map{$addr}->fate != $LEGACY_ONLY;
 
         return $file{$addr} if defined $file{$addr};
         return $map{$addr}->external_name;
@@ -8551,6 +8583,7 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
                     initialize
                     inverse_list
                     is_empty
+                    replacement_property
                     name
                     note
                     perl_extension
@@ -11535,12 +11568,10 @@ sub filter_old_style_arabic_shaping {
             my $legacy = Property->new("Legacy_" . $full_casing_full_name,
                                         File => $full_casing_full_name
                                                           =~ s/case_Mapping//r,
-                                        Range_Size_1 => 1,
                                         Format => $HEX_FORMAT,
                                         Default_Map => $CODE_POINT,
-                                        UCD => 0,
                                         Initialize => $full_casing_table,
-                                        To_Output_Map => $EXTERNAL_MAP,
+                                Replacement_Property => $full_casing_full_name,
             );
 
             $full_casing_table->add_comment(join_lines( <<END
@@ -12947,13 +12978,10 @@ END
     # backwards compatibility with applications that read them directly.
     my $Digit = Property->new("Legacy_Perl_Decimal_Digit",
                               Default_Map => "",
-                              Perl_Extension => 1,
                               File => 'Digit',    # Trad. location
                               Directory => $map_directory,
-                              UCD => 0,
                               Type => $STRING,
-                              To_Output_Map => $EXTERNAL_MAP,
-                              Range_Size_1 => 1,
+                              Replacement_Property => "Perl_Decimal_Digit",
                               Initialize => property_ref('Perl_Decimal_Digit'),
                             );
     $Digit->add_comment(join_lines(<<END
@@ -12969,10 +12997,8 @@ END
                     File => "Fold",
                     Directory => $map_directory,
                     Default_Map => $CODE_POINT,
-                    UCD => 0,
-                    Range_Size_1 => 1,
                     Type => $STRING,
-                    To_Output_Map => $EXTERNAL_MAP,
+                    Replacement_Property => "Case_Folding",
                     Format => $HEX_FORMAT,
                     Initialize => property_ref('cf'),
     );
@@ -16786,7 +16812,8 @@ sub write_all_tables() {
 
                 # We also create for Unicode::UCD a list of aliases for
                 # the property.  The list starts with the property name;
-                # then its full name.
+                # then its full name.  Legacy properties are not listed in
+                # Unicode::UCD.
                 my @property_list;
                 my @standard_list;
                 if ( $property->fate <= $MAP_PROXIED) {
