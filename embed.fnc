@@ -2258,7 +2258,6 @@ s	|char*	|force_strict_version	|NN char *s
 s	|char*	|force_word	|NN char *start|int token|int check_keyword \
 				|int allow_pack
 s	|SV*	|tokeq		|NN SV *sv
-s	|void	|readpipe_override|
 sR	|char*	|scan_const	|NN char *start
 iR	|SV*	|get_and_check_backslash_N_name|NN const char* s \
 				|NN const char* const e

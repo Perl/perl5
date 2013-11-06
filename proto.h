@@ -7469,7 +7469,6 @@ STATIC void	S_parse_ident(pTHX_ char **s, char **d, char * const e, int allow_pa
 	assert(s); assert(d); assert(e)
 
 STATIC int	S_pending_ident(pTHX);
-STATIC void	S_readpipe_override(pTHX);
 STATIC char*	S_scan_const(pTHX_ char *start)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);

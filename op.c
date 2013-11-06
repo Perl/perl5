@@ -8442,10 +8442,22 @@ S_io_hints(pTHX_ OP *o)
 OP *
 Perl_ck_backtick(pTHX_ OP *o)
 {
+    GV *gv;
+    OP *newop = NULL;
     PERL_ARGS_ASSERT_CK_BACKTICK;
-    S_io_hints(aTHX_ o);
-    if (!(o->op_flags & OPf_KIDS)) {
-	OP * const newop = newUNOP(OP_BACKTICK, 0, newDEFSVOP());
+    /* qx and `` have a null pushmark; CORE::readpipe has only one kid. */
+    if (o->op_flags & OPf_KIDS && cUNOPo->op_first->op_sibling
+     && (gv = gv_override("readpipe",8))) {
+	newop = newUNOP(OP_ENTERSUB, OPf_STACKED,
+			op_append_elem(OP_LIST,
+				       cUNOPo->op_first->op_sibling,
+				       newCVREF(0, newGVOP(OP_GV, 0, gv))
+				      ));
+	cUNOPo->op_first->op_sibling = NULL;
+    }
+    else if (!(o->op_flags & OPf_KIDS))
+	newop = newUNOP(OP_BACKTICK, 0,	newDEFSVOP());
+    if (newop) {
 #ifdef PERL_MAD
 	op_getmad(o,newop,'O');
 #else
@@ -8453,6 +8465,7 @@ Perl_ck_backtick(pTHX_ OP *o)
 #endif
 	return newop;
     }
+    S_io_hints(aTHX_ o);
     return o;
 }
 
