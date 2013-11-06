@@ -2588,7 +2588,7 @@ S_sublex_start(pTHX)
 	PL_lex_op = NULL;
 	return THING;
     }
-    if (op_type == OP_CONST || op_type == OP_READLINE) {
+    if (op_type == OP_CONST) {
 	SV *sv = tokeq(PL_lex_stuff);
 
 	if (SvTYPE(sv) == SVt_PVIV) {
@@ -2601,9 +2601,6 @@ S_sublex_start(pTHX)
 	}
 	pl_yylval.opval = (OP*)newSVOP(op_type, 0, sv);
 	PL_lex_stuff = NULL;
-	/* Allow <FH> // "foo" */
-	if (op_type == OP_READLINE)
-	    PL_expect = XTERMORDORDOR;
 	return THING;
     }
 
