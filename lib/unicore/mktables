@@ -11566,11 +11566,11 @@ sub filter_old_style_arabic_shaping {
             # maps for them in the legacy table, and merely add them in the
             # new-style one.
             my $legacy = Property->new("Legacy_" . $full_casing_full_name,
-                                        File => $full_casing_full_name
+                                File => $full_casing_full_name
                                                           =~ s/case_Mapping//r,
-                                        Format => $HEX_FORMAT,
-                                        Default_Map => $CODE_POINT,
-                                        Initialize => $full_casing_table,
+                                Format => $HEX_FORMAT,
+                                Default_Map => $CODE_POINT,
+                                Initialize => $full_casing_table,
                                 Replacement_Property => $full_casing_full_name,
             );
 
