@@ -37,10 +37,12 @@
 #include "re_top.h"
 #endif
 
+#ifdef DEBUGGING
 /* At least one required character in the target string is expressible only in
  * UTF-8. */
 static const char* const non_utf8_target_but_utf8_required
                 = "Can't match, because target string needs to be in UTF-8\n";
+#endif
 
 #define NON_UTF8_TARGET_BUT_UTF8_REQUIRED(target) STMT_START { \
     DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "%s", non_utf8_target_but_utf8_required));\
