@@ -1241,15 +1241,15 @@ foreach my $prop (sort keys %props) {
 
     # Add in the characters that are supposed to be ignored to test loose
     # matching, which the tested function applies to all properties
-    my $mod_prop = "$extra_chars$prop";
+    my $display_prop = "$extra_chars$prop";
 
-    my ($invlist_ref, $invmap_ref, $format, $missing) = prop_invmap($mod_prop);
+    my ($invlist_ref, $invmap_ref, $format, $missing) = prop_invmap($display_prop);
     my $return_ref = [ $invlist_ref, $invmap_ref, $format, $missing ];
 
     # If have already tested this property under a different name, merely
     # compare the return from now with the saved one from before.
     if (exists $tested_invmaps{$name}) {
-        is_deeply($return_ref, $tested_invmaps{$name}, "prop_invmap('$mod_prop') gave same results as its synonym, '$name'");
+        is_deeply($return_ref, $tested_invmaps{$name}, "prop_invmap('$display_prop') gave same results as its synonym, '$name'");
         next PROPERTY;
     }
     $tested_invmaps{$name} = dclone $return_ref;
@@ -1258,20 +1258,20 @@ foreach my $prop (sort keys %props) {
     # not generated.
     if ($suppressed) {
         if (defined $format) {
-            fail("prop_invmap('$mod_prop')");
+            fail("prop_invmap('$display_prop')");
             diag("did not return undef for suppressed property $prop");
         }
         next PROPERTY;
     }
     elsif (!defined $format) {
-        fail("prop_invmap('$mod_prop')");
+        fail("prop_invmap('$display_prop')");
         diag("'$prop' is unknown to prop_invmap()");
         next PROPERTY;
     }
 
     # The two parallel arrays must have the same number of elements.
     if (@$invlist_ref != @$invmap_ref) {
-        fail("prop_invmap('$mod_prop')");
+        fail("prop_invmap('$display_prop')");
         diag("invlist has "
              . scalar @$invlist_ref
              . " while invmap has "
@@ -1283,19 +1283,19 @@ foreach my $prop (sort keys %props) {
     # The last element must be for the above-Unicode code points, and must be
     # for the default value.
     if ($invlist_ref->[-1] != 0x110000) {
-        fail("prop_invmap('$mod_prop')");
+        fail("prop_invmap('$display_prop')");
         diag("The last inversion list element is not 0x110000");
         next PROPERTY;
     }
     if ($invmap_ref->[-1] ne $missing) {
-        fail("prop_invmap('$mod_prop')");
+        fail("prop_invmap('$display_prop')");
         diag("The last inversion list element is '$invmap_ref->[-1]', and should be '$missing'");
         next PROPERTY;
     }
 
     if ($name eq 'bmg') {   # This one has an atypical $missing
         if ($missing ne "") {
-            fail("prop_invmap('$mod_prop')");
+            fail("prop_invmap('$display_prop')");
             diag("The missings should be \"\"; got '$missing'");
             next PROPERTY;
         }
@@ -1303,19 +1303,19 @@ foreach my $prop (sort keys %props) {
     elsif ($format =~ /^ a (?!r) /x) {
         if ($full_name eq 'Perl_Decimal_Digit') {
             if ($missing ne "") {
-                fail("prop_invmap('$mod_prop')");
+                fail("prop_invmap('$display_prop')");
                 diag("The missings should be \"\"; got '$missing'");
                 next PROPERTY;
             }
         }
         elsif ($missing ne "0") {
-            fail("prop_invmap('$mod_prop')");
+            fail("prop_invmap('$display_prop')");
             diag("The missings should be '0'; got '$missing'");
             next PROPERTY;
         }
     }
     elsif ($missing =~ /[<>]/) {
-        fail("prop_invmap('$mod_prop')");
+        fail("prop_invmap('$display_prop')");
         diag("The missings should NOT be something with <...>'");
         next PROPERTY;
 
@@ -1340,14 +1340,14 @@ foreach my $prop (sort keys %props) {
             $proxy_prop = lc $1 . "c";
         }
         if ($format ne "a") {
-            fail("prop_invmap('$mod_prop')");
+            fail("prop_invmap('$display_prop')");
             diag("The format should be 'a'; got '$format'");
             next PROPERTY;
         }
     }
 
     if ($format !~ / ^ (?: a [der]? | ale? | n | sl? ) $ /x) {
-        fail("prop_invmap('$mod_prop')");
+        fail("prop_invmap('$display_prop')");
         diag("Unknown format '$format'");
         next PROPERTY;
     }
@@ -1651,13 +1651,13 @@ foreach my $prop (sort keys %props) {
                     if (! defined ($value = delete $specials{pack("C0U",
                                                         $invlist_ref->[$i]) }))
                     {
-                        fail("prop_invmap('$mod_prop')");
+                        fail("prop_invmap('$display_prop')");
                         diag(sprintf "There was no specials element for %04X", $invlist_ref->[$i]);
                         next PROPERTY;
                     }
                     my $packed = pack "U*", @{$invmap_ref->[$i]};
                     if ($value ne $packed) {
-                        fail("prop_invmap('$mod_prop')");
+                        fail("prop_invmap('$display_prop')");
                         diag(sprintf "For %04X, expected the mapping to be '$packed', but got '$value'");
                         next PROPERTY;
                     }
@@ -1668,7 +1668,7 @@ foreach my $prop (sort keys %props) {
                     if (($i > 0 && $invlist_ref->[$i] <= $invlist_ref->[$i-1])
                         || $invlist_ref->[$i] >= $invlist_ref->[$i+1])
                     {
-                        fail("prop_invmap('$mod_prop')");
+                        fail("prop_invmap('$display_prop')");
                         diag(sprintf "Range beginning at %04X is out-of-order.", $invlist_ref->[$i]);
                         next PROPERTY;
                     }
@@ -1682,7 +1682,7 @@ foreach my $prop (sort keys %props) {
                                                            @{$invmap_ref->[$i]};
                 }
                 else {
-                    fail("prop_invmap('$mod_prop')");
+                    fail("prop_invmap('$display_prop')");
                     diag("Can't handle format '$format'");
                     next PROPERTY;
                 }
@@ -1729,12 +1729,12 @@ foreach my $prop (sort keys %props) {
                     if (! defined ($value = delete $specials{pack("C0U",
                                                         $invlist_ref->[$i]) }))
                     {
-                        fail("prop_invmap('$mod_prop')");
+                        fail("prop_invmap('$display_prop')");
                         diag(sprintf "There was no specials element for %04X", $invlist_ref->[$i]);
                         next PROPERTY;
                     }
                     if ($value ne "") {
-                        fail("prop_invmap('$mod_prop')");
+                        fail("prop_invmap('$display_prop')");
                         diag(sprintf "For %04X, expected the mapping to be \"\", but got '$value'", $invlist_ref->[$i]);
                         next PROPERTY;
                     }
@@ -1745,7 +1745,7 @@ foreach my $prop (sort keys %props) {
                     if (($i > 0 && $invlist_ref->[$i] <= $invlist_ref->[$i-1])
                         || $invlist_ref->[$i] >= $invlist_ref->[$i+1])
                     {
-                        fail("prop_invmap('$mod_prop')");
+                        fail("prop_invmap('$display_prop')");
                         diag(sprintf "Range beginning at %04X is out-of-order.", $invlist_ref->[$i]);
                         next PROPERTY;
                     }
@@ -1763,7 +1763,7 @@ foreach my $prop (sort keys %props) {
                 if (($i > 0 && $invlist_ref->[$i] <= $invlist_ref->[$i-1])
                     || $invlist_ref->[$i] >= $invlist_ref->[$i+1])
                 {
-                    fail("prop_invmap('$mod_prop')");
+                    fail("prop_invmap('$display_prop')");
                     diag(sprintf "Range beginning at %04X is out-of-order.", $invlist_ref->[$i]);
                     next PROPERTY;
                 }
@@ -1779,7 +1779,7 @@ foreach my $prop (sort keys %props) {
                 if (($i > 0 && $invlist_ref->[$i] <= $invlist_ref->[$i-1])
                     || $invlist_ref->[$i] >= $invlist_ref->[$i+1])
                 {
-                    fail("prop_invmap('$mod_prop')");
+                    fail("prop_invmap('$display_prop')");
                     diag(sprintf "Range beginning at %04X is out-of-order.", $invlist_ref->[$i]);
                     next PROPERTY;
                 }
@@ -1811,13 +1811,13 @@ foreach my $prop (sort keys %props) {
 
         # And compare.
         if ($tested_map ne $official) {
-            fail_with_diff($mod_prop, $official, $tested_map, "prop_invmap");
+            fail_with_diff($display_prop, $official, $tested_map, "prop_invmap");
             next PROPERTY;
         }
 
         # There shouldn't be any specials unaccounted for.
         if (keys %specials) {
-            fail("prop_invmap('$mod_prop')");
+            fail("prop_invmap('$display_prop')");
             diag("Unexpected specials: " . join ", ", keys %specials);
             next PROPERTY;
         }
@@ -1831,7 +1831,7 @@ foreach my $prop (sort keys %props) {
         # but the Name in order to do the comparison.
 
         if ($missing ne "") {
-            fail("prop_invmap('$mod_prop')");
+            fail("prop_invmap('$display_prop')");
             diag("The missings should be \"\"; got \"missing\"");
             next PROPERTY;
         }
@@ -1896,7 +1896,7 @@ foreach my $prop (sort keys %props) {
                 if (($i > 0 && $invlist_ref->[$i] <= $invlist_ref->[$i-1])
                     || $invlist_ref->[$i] >= $invlist_ref->[$i+1])
                 {
-                    fail("prop_invmap('$mod_prop')");
+                    fail("prop_invmap('$display_prop')");
                     diag(sprintf "Range beginning at %04X is out-of-order.", $invlist_ref->[$i]);
                     next PROPERTY;
                 }
@@ -1908,29 +1908,29 @@ foreach my $prop (sort keys %props) {
                 if (($i > 0 && $invlist_ref->[$i] <= $invlist_ref->[$i-1])
                     || $invlist_ref->[$i] >= $invlist_ref->[$i+1])
                 {
-                    fail("prop_invmap('$mod_prop')");
+                    fail("prop_invmap('$display_prop')");
                     diag(sprintf "Range beginning at %04X is out-of-order.", $invlist_ref->[$i]);
                     next PROPERTY;
                 }
                 if ($type eq "<hangul syllable>") {
                     if ($name ne "") {
-                        fail("prop_invmap('$mod_prop')");
+                        fail("prop_invmap('$display_prop')");
                         diag("Unexpected text in $invmap_ref->[$i]");
                         next PROPERTY;
                     }
                     if ($start != 0xAC00) {
-                        fail("prop_invmap('$mod_prop')");
+                        fail("prop_invmap('$display_prop')");
                         diag(sprintf("<hangul syllables> should begin at 0xAC00, got %04X", $start));
                         next PROPERTY;
                     }
                     if ($end != $start + 11172 - 1) {
-                        fail("prop_invmap('$mod_prop')");
+                        fail("prop_invmap('$display_prop')");
                         diag(sprintf("<hangul syllables> should end at %04X, got %04X", $start + 11172 -1, $end));
                         next PROPERTY;
                     }
                 }
                 elsif ($type ne "<code point>") {
-                    fail("prop_invmap('$mod_prop')");
+                    fail("prop_invmap('$display_prop')");
                     diag("Unexpected text '$type' in $invmap_ref->[$i]");
                     next PROPERTY;
                 }
@@ -1950,7 +1950,7 @@ foreach my $prop (sort keys %props) {
                             last;
                         }
                         else {
-                            fail("prop_invmap('$mod_prop')");
+                            fail("prop_invmap('$display_prop')");
                             diag("Unexpected code-point-in-name line '$invmap_ref->[$i]'");
                             next PROPERTY;
                         }
@@ -1971,11 +1971,11 @@ foreach my $prop (sort keys %props) {
         chomp $tested_map;
         $/ = $input_record_separator;
         if ($tested_map ne $official) {
-            fail_with_diff($mod_prop, $official, $tested_map, "prop_invmap");
+            fail_with_diff($display_prop, $official, $tested_map, "prop_invmap");
             next PROPERTY;
         }
         if (@code_point_in_names) {
-            fail("prop_invmap('$mod_prop')");
+            fail("prop_invmap('$display_prop')");
             use Data::Dumper;
             diag("Missing code-point-in-name line(s)" . Dumper \@code_point_in_names);
             next PROPERTY;
@@ -2008,7 +2008,7 @@ foreach my $prop (sort keys %props) {
             if (($i > 0 && $range_start <= $invlist_ref->[$i-1])
                 || $range_start >= $invlist_ref->[$i+1])
             {
-                fail("prop_invmap('$mod_prop')");
+                fail("prop_invmap('$display_prop')");
                 diag(sprintf "Range beginning at %04X is out-of-order.", $invlist_ref->[$i]);
                 next PROPERTY;
             }
@@ -2050,17 +2050,17 @@ foreach my $prop (sort keys %props) {
                        : @{$maps{$map}};
             for my $i (0 .. $min- 1) {
                 if ($i > @off_invlist - 1) {
-                    fail("prop_invmap('$mod_prop')");
+                    fail("prop_invmap('$display_prop')");
                     diag("There is no element [$i] for $prop=$map from prop_invlist(), while [$i] in the implicit one constructed from prop_invmap() is '$maps{$map}[$i]'");
                     next PROPERTY;
                 }
                 elsif ($i > @{$maps{$map}} - 1) {
-                    fail("prop_invmap('$mod_prop')");
+                    fail("prop_invmap('$display_prop')");
                     diag("There is no element [$i] from the implicit $prop=$map constructed from prop_invmap(), while [$i] in the one from prop_invlist() is '$off_invlist[$i]'");
                     next PROPERTY;
                 }
                 elsif ($maps{$map}[$i] ne $off_invlist[$i]) {
-                    fail("prop_invmap('$mod_prop')");
+                    fail("prop_invmap('$display_prop')");
                     diag("Element [$i] of the implicit $prop=$map constructed from prop_invmap() is '$maps{$map}[$i]', and the one from prop_invlist() is '$off_invlist[$i]'");
                     next PROPERTY;
                 }
@@ -2069,12 +2069,12 @@ foreach my $prop (sort keys %props) {
     }
     else {  # Don't know this property nor format.
 
-        fail("prop_invmap('$mod_prop')");
+        fail("prop_invmap('$display_prop')");
         diag("Unknown format '$format'");
         next PROPERTY;
     }
 
-    pass("prop_invmap('$mod_prop')");
+    pass("prop_invmap('$display_prop')");
 }
 
 # A few tests of search_invlist
