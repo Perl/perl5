@@ -1514,7 +1514,7 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	Perl_ck_null,		/* leavesublv */
 	Perl_ck_fun,		/* caller */
 	Perl_ck_fun,		/* warn */
-	Perl_ck_die,		/* die */
+	Perl_ck_fun,		/* die */
 	Perl_ck_fun,		/* reset */
 	Perl_ck_null,		/* lineseq */
 	Perl_ck_null,		/* nextstate */

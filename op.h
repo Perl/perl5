@@ -323,8 +323,15 @@ is no conversion of op type.
 #define OPpOPEN_OUT_RAW		64	/* binmode(F,":raw") on output fh */
 #define OPpOPEN_OUT_CRLF	128	/* binmode(F,":crlf") on output fh */
 
-/* Private for OP_EXIT, HUSH also for OP_DIE */
-#define OPpHUSH_VMSISH		64	/* hush DCL exit msg vmsish mode*/
+/* Private for COPs */
+#define OPpHUSH_VMSISH		32	/* hush DCL exit msg vmsish mode*/
+/* Note: Used for NATIVE_HINTS (shifted from the values in PL_hints),
+	 currently defined by vms/vmsish.h:
+				64
+				128
+ */
+
+/* Private for OP_EXIT */
 #define OPpEXIT_VMSISH		128	/* exit(0) vs. exit(1) vmsish mode*/
 
 /* Private for OP_FTXXX */

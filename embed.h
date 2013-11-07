@@ -1039,7 +1039,6 @@
 #define ck_concat(a)		Perl_ck_concat(aTHX_ a)
 #define ck_defined(a)		Perl_ck_defined(aTHX_ a)
 #define ck_delete(a)		Perl_ck_delete(aTHX_ a)
-#define ck_die(a)		Perl_ck_die(aTHX_ a)
 #define ck_each(a)		Perl_ck_each(aTHX_ a)
 #define ck_eof(a)		Perl_ck_eof(aTHX_ a)
 #define ck_eval(a)		Perl_ck_eval(aTHX_ a)

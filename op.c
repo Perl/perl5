@@ -5915,6 +5915,9 @@ Perl_newSTATEOP(pTHX_ I32 flags, char *label, OP *o)
 #ifdef NATIVE_HINTS
     cop->op_private |= NATIVE_HINTS;
 #endif
+#ifdef VMS
+    if (VMSISH_HUSHED) cop->op_private |= OPpHUSH_VMSISH;
+#endif
     cop->op_next = (OP*)cop;
 
     cop->cop_seq = seq;
@@ -8656,17 +8659,6 @@ Perl_ck_delete(pTHX_ OP *o)
 }
 
 OP *
-Perl_ck_die(pTHX_ OP *o)
-{
-    PERL_ARGS_ASSERT_CK_DIE;
-
-#ifdef VMS
-    if (VMSISH_HUSHED) o->op_private |= OPpHUSH_VMSISH;
-#endif
-    return ck_fun(o);
-}
-
-OP *
 Perl_ck_eof(pTHX_ OP *o)
 {
     dVAR;
@@ -8774,7 +8766,6 @@ Perl_ck_exit(pTHX_ OP *o)
        if (svp && *svp && SvTRUE(*svp))
            o->op_private |= OPpEXIT_VMSISH;
     }
-    if (VMSISH_HUSHED) o->op_private |= OPpHUSH_VMSISH;
 #endif
     return ck_fun(o);
 }
