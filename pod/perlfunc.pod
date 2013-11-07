@@ -4491,11 +4491,11 @@ TEMPLATE (the second column lists letters for which the modifier is valid):
     !   sSlLiI     Forces native (short, long, int) sizes instead
                    of fixed (16-/32-bit) sizes.
 
-        xX         Make x and X act as alignment commands.
+    !   xX         Make x and X act as alignment commands.
 
-        nNvV       Treat integers as signed instead of unsigned.
+    !   nNvV       Treat integers as signed instead of unsigned.
 
-        @.         Specify position as byte offset in the internal
+    !   @.         Specify position as byte offset in the internal
                    representation of the packed string.  Efficient
                    but dangerous.
 
