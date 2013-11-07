@@ -1083,6 +1083,16 @@ sub run_tests {
             like ($@, qr/Trailing white-space in a charnames alias definition is deprecated/, "... same under utf8");
         }
 
+        {
+            BEGIN { no strict; *CnameTest:: = *{"_charnames\0A::" } }
+            package CnameTest { sub translator { pop } }
+            BEGIN { $^H{charnames} = \&CnameTest::translator }
+            undef $w;
+            () = eval q ["\N{TOO  MANY SPACES}"];
+            like ($w, qr/A sequence of multiple spaces/,
+                 'translators in _charnames\0* packages get validated');
+        }
+
         # If remove the limitation in regcomp code these should work
         # differently
         undef $w;

@@ -2859,7 +2859,8 @@ S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e)
         SvTYPE(rv) == SVt_PVCV) && ((stash = CvSTASH(rv)) != NULL))
     {
         const char * const name = HvNAME(stash);
-        if strEQ(name, "_charnames") {
+        if (HvNAMELEN(stash) == sizeof("_charnames")-1
+         && strEQ(name, "_charnames")) {
            return res;
        }
     }
