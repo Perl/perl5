@@ -645,7 +645,8 @@ $priv{reverse}{8} = "INPLACE";
 $priv{threadsv}{64} = "SVREFd";
 @{$priv{$_}}{16,32,64,128} = qw(INBIN INCR OUTBIN OUTCR)
   for qw(open backtick);
-@{$priv{exit}}{64,128} = qw(HUSH VMS);
+$priv{$_}{32} = "HUSH" for qw(nextstate dbstate);
+$priv{exit}{128} = "VMS";
 $priv{$_}{2} = "FTACCESS"
   for qw(ftrread ftrwrite ftrexec fteread ftewrite fteexec);
 @{$priv{entereval}}{2,4,8,16} = qw(HAS_HH UNI BYTES COPHH);
