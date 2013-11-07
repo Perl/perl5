@@ -7004,8 +7004,10 @@ Perl_yylex(pTHX)
 	anydelim = word_takes_any_delimeter(PL_tokenbuf, len);
 
 	/* x::* is just a word, unless x is "CORE" */
-	if (!anydelim && *s == ':' && s[1] == ':' && strNE(PL_tokenbuf, "CORE"))
+	if (!anydelim && *s == ':' && s[1] == ':') {
+	    if (strEQ(PL_tokenbuf, "CORE")) goto case_KEY_CORE;
 	    goto just_a_word;
+	}
 
 	d = s;
 	while (d < PL_bufend && isSPACE(*d))
@@ -7144,7 +7146,7 @@ Perl_yylex(pTHX)
 		}
 		gv = NULL;
 		gvp = 0;
-		if (hgv && tmp != KEY_x && tmp != KEY_CORE)	/* never ambiguous */
+		if (hgv && tmp != KEY_x)	/* never ambiguous */
 		    Perl_ck_warner(aTHX_ packWARN(WARN_AMBIGUOUS),
 				   "Ambiguous call resolved as CORE::%s(), "
 				   "qualify as such or use &",
@@ -7750,8 +7752,8 @@ Perl_yylex(pTHX)
 	    }
 	    goto just_a_word;
 
-	case KEY_CORE:
-	    if (*s == ':' && s[1] == ':') {
+	case_KEY_CORE:
+	    {
 		STRLEN olen = len;
 		d = s;
 		s += 2;
@@ -7775,7 +7777,6 @@ Perl_yylex(pTHX)
 		    orig_keyword = tmp;
 		goto reserved_word;
 	    }
-	    goto just_a_word;
 
 	case KEY_abs:
 	    UNI(OP_ABS);

@@ -493,7 +493,7 @@ PP(pp_prototype)
 	const char * s = SvPVX_const(TOPs);
 	if (strnEQ(s, "CORE::", 6)) {
 	    const int code = keyword(s + 6, SvCUR(TOPs) - 6, 1);
-	    if (!code || code == -KEY_CORE)
+	    if (!code)
 		DIE(aTHX_ "Can't find an opnumber for \"%"UTF8f"\"",
 		   UTF8fARG(SvFLAGS(TOPs) & SVf_UTF8, SvCUR(TOPs)-6, s+6));
 	    {

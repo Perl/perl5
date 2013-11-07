@@ -11881,7 +11881,7 @@ Perl_custom_op_register(pTHX_ Perl_ppaddr_t ppaddr, const XOP *xop)
 This function assigns the prototype of the named core function to C<sv>, or
 to a new mortal SV if C<sv> is NULL.  It returns the modified C<sv>, or
 NULL if the core function has no prototype.  C<code> is a code as returned
-by C<keyword()>.  It must not be equal to 0 or -KEY_CORE.
+by C<keyword()>.  It must not be equal to 0.
 
 =cut
 */
@@ -11898,7 +11898,7 @@ Perl_core_prototype(pTHX_ SV *sv, const char *name, const int code,
 
     PERL_ARGS_ASSERT_CORE_PROTOTYPE;
 
-    assert (code && code != -KEY_CORE);
+    assert (code);
 
     if (!sv) sv = sv_newmortal();
 
