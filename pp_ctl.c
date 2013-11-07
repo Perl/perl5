@@ -466,7 +466,8 @@ PP(pp_formline)
     I32 arg;
     SV *sv = NULL; /* current item */
     const char *item = NULL;/* string value of current item */
-    I32 itemsize  = 0;	    /* length of current item, possibly truncated */
+    I32 itemsize  = 0;	    /* length (chars) of item, possibly truncated */
+    I32 itembytes = 0;	    /* as itemsize, but length in bytes */
     I32 fieldsize = 0;	    /* width of current field */
     I32 lines = 0;	    /* number of lines that have been output */
     bool chopspace = (strchr(PL_chopset, ' ') != NULL); /* does $: have space */
@@ -474,7 +475,7 @@ PP(pp_formline)
     STRLEN linemark = 0;    /* pos of start of line in output */
     NV value;
     bool gotsome = FALSE;   /* seen at least one non-blank item on this line */
-    STRLEN len;
+    STRLEN len;             /* length of current sv */
     STRLEN linemax;	    /* estimate of output size in bytes */
     bool item_is_utf8 = FALSE;
     bool targ_is_utf8 = FALSE;
@@ -569,133 +570,85 @@ PP(pp_formline)
 
 	case FF_CHECKNL: /* find max len of item (up to \n) that fits field */
 	    {
-		const char *send;
 		const char *s = item = SvPV_const(sv, len);
-		itemsize = len;
-		if (DO_UTF8(sv)) {
-		    itemsize = sv_len_utf8(sv);
-		    if (itemsize != (I32)len) {
-			I32 itembytes;
-			if (itemsize > fieldsize) {
-			    itemsize = fieldsize;
-			    itembytes = itemsize;
-			    sv_pos_u2b(sv, &itembytes, 0);
-			}
-			else
-			    itembytes = len;
-			send = chophere = s + itembytes;
-			while (s < send) {
-			    if (! isCNTRL(*s))
-				gotsome = TRUE;
-			    else if (*s == '\n')
-				break;
-			    s++;
-			}
-			item_is_utf8 = TRUE;
-			itemsize = s - item;
-			sv_pos_b2u(sv, &itemsize);
-			break;
-		    }
-		}
-		item_is_utf8 = FALSE;
-		if (itemsize > fieldsize)
-		    itemsize = fieldsize;
-		send = chophere = s + itemsize;
-		while (s < send) {
-		    if (! isCNTRL(*s))
-			gotsome = TRUE;
-		    else if (*s == '\n')
-			break;
-		    s++;
-		}
-		itemsize = s - item;
+		const char *send = s + len;
+
+                itemsize = 0;
+		item_is_utf8 = DO_UTF8(sv);
+                while (s < send) {
+                    if (!isCNTRL(*s))
+                        gotsome = TRUE;
+                    else if (*s == '\n')
+                        break;
+
+                    if (item_is_utf8)
+                        s += UTF8SKIP(s);
+                    else
+                        s++;
+                    itemsize++;
+                    if (itemsize == fieldsize)
+                        break;
+                }
+                itembytes = s - item;
 		break;
 	    }
 
 	case FF_CHECKCHOP: /* like CHECKNL, but up to highest split point */
 	    {
 		const char *s = item = SvPV_const(sv, len);
-		itemsize = len;
-		if (DO_UTF8(sv)) {
-		    itemsize = sv_len_utf8(sv);
-		    if (itemsize != (I32)len) {
-			I32 itembytes;
-			if (itemsize <= fieldsize) {
-			    const char *send = chophere = s + itemsize;
-			    while (s < send) {
-				if (*s == '\r') {
-				    itemsize = s - item;
-				    chophere = s;
-				    break;
-				}
-				if (! isCNTRL(*s))
-				    gotsome = TRUE;
-                                s++;
-			    }
-			}
-			else {
-			    const char *send;
-			    itemsize = fieldsize;
-			    itembytes = itemsize;
-			    sv_pos_u2b(sv, &itembytes, 0);
-			    send = chophere = s + itembytes;
-			    while (s < send || (s == send && isSPACE(*s))) {
-				if (isSPACE(*s)) {
-				    if (chopspace)
-					chophere = s;
-				    if (*s == '\r')
-					break;
-				}
-				else {
-				    if (! isCNTRL(*s))
-					gotsome = TRUE;
-				    if (strchr(PL_chopset, *s))
-					chophere = s + 1;
-				}
-				s++;
-			    }
-			    itemsize = chophere - item;
-			    sv_pos_b2u(sv, &itemsize);
-			}
-			item_is_utf8 = TRUE;
-			break;
-		    }
-		}
-		item_is_utf8 = FALSE;
-		if (itemsize <= fieldsize) {
-		    const char *const send = chophere = s + itemsize;
-		    while (s < send) {
-			if (*s == '\r') {
-			    itemsize = s - item;
-			    chophere = s;
-			    break;
-			}
-			if (! isCNTRL(*s))
-			    gotsome = TRUE;
+		const char *send = s + len;
+                I32 size = 0;
+
+                chophere = NULL;
+		item_is_utf8 = DO_UTF8(sv);
+                while (s < send) {
+                    /* look for a legal split position */
+                    if (isSPACE(*s)) {
+                        if (*s == '\r') {
+                            chophere = s;
+                            itemsize = size;
+                            break;
+                        }
+                        if (chopspace) {
+                            /* provisional split point */
+                            chophere = s;
+                            itemsize = size;
+                        }
+                        /* we delay testing fieldsize until after we've
+                         * processed the possible split char directly
+                         * following the last field char; so if fieldsize=3
+                         * and item="a b cdef", we consume "a b", not "a".
+                         * Ditto further down.
+                         */
+                        if (size == fieldsize)
+                            break;
+                    }
+                    else {
+                        if (strchr(PL_chopset, *s)) {
+                            /* provisional split point */
+                            /* for a non-space split char, we include
+                             * the split char; hence the '+1' */
+                            chophere = s + 1;
+                            itemsize = size;
+                        }
+                        if (size == fieldsize)
+                            break;
+                        if (!isCNTRL(*s))
+                            gotsome = TRUE;
+                    }
+
+                    if (item_is_utf8)
+                        s += UTF8SKIP(s);
+                    else
                         s++;
-		    }
-		}
-		else {
-		    const char *send;
-		    itemsize = fieldsize;
-		    send = chophere = s + itemsize;
-		    while (s < send || (s == send && isSPACE(*s))) {
-			if (isSPACE(*s)) {
-			    if (chopspace)
-				chophere = s;
-			    if (*s == '\r')
-				break;
-			}
-			else {
-			    if (! isCNTRL(*s))
-				gotsome = TRUE;
-			    if (strchr(PL_chopset, *s))
-				chophere = s + 1;
-			}
-			s++;
-		    }
-		    itemsize = chophere - item;
-		}
+                    size++;
+                }
+                if (!chophere || s == send) {
+                    chophere = s;
+                    itemsize = size;
+                }
+                itembytes = chophere - item;
+
 		break;
 	    }
 
@@ -719,16 +672,9 @@ PP(pp_formline)
 	    break;
 
 	case FF_ITEM: /* append a text item, while blanking ctrl chars */
-	    to_copy = itemsize;
+	    to_copy = itembytes;
 	    source = (U8 *)item;
 	    trans = 1;
-	    if (item_is_utf8) {
-		/* convert to_copy from chars to bytes */
-		U8 *s = source;
-		while (to_copy--)
-		   s += UTF8SKIP(s);
-		to_copy = s - source;
-	    }
 	    goto append;
 
 	case FF_CHOP: /* (for ^*) chop the current item */
@@ -738,7 +684,12 @@ PP(pp_formline)
 		    while (isSPACE(*s))
 			s++;
 		}
-		sv_chop(sv,s);
+                if (SvPOKp(sv))
+                    sv_chop(sv,s);
+                else
+                    /* tied, overloaded or similar strangeness.
+                     * Do it the hard way */
+                    sv_setpvn(sv, s, len - (s-item));
 		SvSETMAGIC(sv);
 		break;
 	    }
@@ -763,7 +714,7 @@ PP(pp_formline)
 		while (s < send) {
 		    if (*s++ == '\n') {
 			if (oneline) {
-			    to_copy = s - SvPVX_const(sv) - 1;
+			    to_copy = s - item - 1;
 			    chophere = s;
 			    break;
 			} else {
