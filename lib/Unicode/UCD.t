@@ -2070,7 +2070,7 @@ foreach my $prop (sort keys %props) {
     else {  # Don't know this property nor format.
 
         fail("prop_invmap('$display_prop')");
-        diag("Unknown format '$format'");
+        diag("Unknown property '$display_prop' or format '$format'");
         next PROPERTY;
     }
 
