@@ -172,7 +172,7 @@ typedef struct {
     I32                 locks;
     perl_cond           cond;
 #ifdef DEBUG_LOCKS
-    char *              file;
+    const char *        file;
     int                 line;
 #endif
 } recursive_lock_t;
@@ -208,7 +208,7 @@ recursive_lock_release(pTHX_ recursive_lock_t *lock)
 }
 
 void
-recursive_lock_acquire(pTHX_ recursive_lock_t *lock, char *file, int line)
+recursive_lock_acquire(pTHX_ recursive_lock_t *lock, const char *file, int line)
 {
     PERL_UNUSED_ARG(file);
     PERL_UNUSED_ARG(line);
