@@ -1603,14 +1603,14 @@ should check your installation for packages that create that link, and
 if no package is installed that supplies that link or you cannot install
 them, make the symbolic link yourself e.g.:
 
-  $ rpm -qf /usr/lib64/libm.so
-  glibc-devel-2.15-22.17.1.x86_64
-  $ ls -lgo /usr/lib64/libm.so
-  lrwxrwxrwx 1 16 Jan  7  2013 /usr/lib64/libm.so -> /lib64/libm.so.6
+ $ rpm -qf /usr/lib64/libm.so
+ glibc-devel-2.15-22.17.1.x86_64
+ $ ls -lgo /usr/lib64/libm.so
+ lrwxrwxrwx 1 16 Jan  7  2013 /usr/lib64/libm.so -> /lib64/libm.so.6
 
-  or
+ or
 
-  $ sudo ln -s /lib64/libm.so.6 /lib64/libm.so
+ $ sudo ln -s /lib64/libm.so.6 /lib64/libm.so
 
 If the libs variable looks correct, you might have the
 L<"nm extraction"> problem discussed above.
