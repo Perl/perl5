@@ -1879,7 +1879,6 @@ S_finalize_op(pTHX_ OP* o)
 	UNOP *rop;
 	SV *lexname;
 	GV **fields;
-	SV **svp, *sv;
 	SVOP *key_op;
 	OP *kid;
 	bool check_fields;

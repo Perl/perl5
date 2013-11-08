@@ -10382,7 +10382,6 @@ S_scan_inputsymbol(pTHX_ char *start)
     else {
 	bool readline_overriden = FALSE;
 	GV *gv_readline;
-	GV **gvp;
     	/* we're in a filehandle read situation */
 	d = PL_tokenbuf;
 
