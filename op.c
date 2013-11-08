@@ -1145,15 +1145,31 @@ S_op_varname(pTHX_ const OP *o)
 }
 
 static void
+S_op_pretty(pTHX_ const OP *o, SV **retsv, const char **retpv)
+{ /* or not so pretty :-) */
+    const char *key = NULL;
+    if (o->op_type == OP_CONST) {
+	*retsv = cSVOPo_sv;
+	if (SvPOK(*retsv)) {
+	    SV *sv = *retsv;
+	    *retsv = sv_newmortal();
+	    pv_pretty(*retsv, SvPVX_const(sv), SvCUR(sv), 32, NULL, NULL,
+		      PERL_PV_PRETTY_DUMP |PERL_PV_ESCAPE_UNI_DETECT);
+	}
+	else if (!SvOK(*retsv))
+	    *retpv = "undef";
+    }
+    else *retpv = "...";
+}
+
+static void
 S_scalar_slice_warning(pTHX_ const OP *o)
 {
     OP *kid;
     const char lbrack =
-	o->op_type == OP_KVHSLICE || o->op_type == OP_HSLICE ? '{' : '[';
+	o->op_type == OP_HSLICE ? '{' : '[';
     const char rbrack =
-	o->op_type == OP_KVHSLICE || o->op_type == OP_HSLICE ? '}' : ']';
-    const char funny =
-	o->op_type == OP_ASLICE || o->op_type == OP_HSLICE ? '@' : '%';
+	o->op_type == OP_HSLICE ? '}' : ']';
     SV *name;
     SV *keysv = NULL; /* just to silence compiler warnings */
     const char *key = NULL;
@@ -1199,33 +1215,22 @@ S_scalar_slice_warning(pTHX_ const OP *o)
     name = S_op_varname(aTHX_ kid->op_sibling);
     if (!name) /* XS module fiddling with the op tree */
 	return;
-    if (kid->op_type == OP_CONST) {
-	keysv = kSVOP_sv;
-	if (SvPOK(kSVOP_sv)) {
-	    SV *sv = keysv;
-	    keysv = sv_newmortal();
-	    pv_pretty(keysv, SvPVX_const(sv), SvCUR(sv), 32, NULL, NULL,
-		      PERL_PV_PRETTY_DUMP |PERL_PV_ESCAPE_UNI_DETECT);
-	}
-	else if (!SvOK(keysv))
-	    key = "undef";
-    }
-    else key = "...";
+    S_op_pretty(aTHX_ kid, &keysv, &key);
     assert(SvPOK(name));
     sv_chop(name,SvPVX(name)+1);
     if (key)
-       /* diag_listed_as: Scalar value %%s[%s] better written as $%s[%s] */
+       /* diag_listed_as: Scalar value @%s[%s] better written as $%s[%s] */
 	Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
-		   "Scalar value %c%"SVf"%c%s%c better written as $%"SVf
+		   "Scalar value @%"SVf"%c%s%c better written as $%"SVf
 		   "%c%s%c",
-		    funny, SVfARG(name), lbrack, key, rbrack, SVfARG(name),
+		    SVfARG(name), lbrack, key, rbrack, SVfARG(name),
 		    lbrack, key, rbrack);
     else
-       /* diag_listed_as: Scalar value %%s[%s] better written as $%s[%s] */
+       /* diag_listed_as: Scalar value @%s[%s] better written as $%s[%s] */
 	Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
-		   "Scalar value %c%"SVf"%c%"SVf"%c better written as $%"
+		   "Scalar value @%"SVf"%c%"SVf"%c better written as $%"
 		    SVf"%c%"SVf"%c",
-		    funny, SVfARG(name), lbrack, keysv, rbrack,
+		    SVfARG(name), lbrack, keysv, rbrack,
 		    SVfARG(name), lbrack, keysv, rbrack);
 }
 
@@ -1293,7 +1298,44 @@ Perl_scalar(pTHX_ OP *o)
 	break;
     case OP_KVHSLICE:
     case OP_KVASLICE:
-	S_scalar_slice_warning(aTHX_ o);
+    {
+	/* Warn about scalar context */
+	const char lbrack = o->op_type == OP_KVHSLICE ? '{' : '[';
+	const char rbrack = o->op_type == OP_KVHSLICE ? '}' : ']';
+	SV *name;
+	SV *keysv;
+	const char *key = NULL;
+
+	/* This warning can be nonsensical when there is a syntax error. */
+	if (PL_parser && PL_parser->error_count)
+	    break;
+
+	if (!ckWARN(WARN_SYNTAX)) break;
+
+	kid = cLISTOPo->op_first;
+	kid = kid->op_sibling; /* get past pushmark */
+	assert(kid->op_sibling);
+	name = S_op_varname(aTHX_ kid->op_sibling);
+	if (!name) /* XS module fiddling with the op tree */
+	    break;
+	S_op_pretty(aTHX_ kid, &keysv, &key);
+	assert(SvPOK(name));
+	sv_chop(name,SvPVX(name)+1);
+	if (key)
+  /* diag_listed_as: %%s[%s] in scalar context better written as $%s[%s] */
+	    Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
+		       "%%%"SVf"%c%s%c in scalar context better written "
+		       "as $%"SVf"%c%s%c",
+			SVfARG(name), lbrack, key, rbrack, SVfARG(name),
+			lbrack, key, rbrack);
+	else
+  /* diag_listed_as: %%s[%s] in scalar context better written as $%s[%s] */
+	    Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
+		       "%%%"SVf"%c%"SVf"%c in scalar context better "
+		       "written as $%"SVf"%c%"SVf"%c",
+			SVfARG(name), lbrack, keysv, rbrack,
+			SVfARG(name), lbrack, keysv, rbrack);
+    }
     }
     return o;
 }
@@ -9011,7 +9053,7 @@ Perl_ck_fun(pTHX_ OP *o)
 		{
 		    return too_many_arguments_pv(o,PL_op_desc[type], 0);
 		}
-		scalar(kid);
+		if (type != OP_DELETE) scalar(kid);
 		break;
 	    case OA_LIST:
 		if (oa < 16) {

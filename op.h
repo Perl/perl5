@@ -250,8 +250,8 @@ is no conversion of op type.
 #define OPpEARLY_CV		32	/* foo() called before sub foo was parsed */
   /* OP_?ELEM only */
 #define OPpLVAL_DEFER		16	/* Defer creation of array/hash elem */
-  /* OP_RV2[AH]V OP_KV[AH]SLICE OP_[AH]SLICE */
-#define OPpSLICEWARNING		4	/* warn about %hash{$scalar} */
+  /* OP_RV2[AH]V OP_[AH]SLICE */
+#define OPpSLICEWARNING		4	/* warn about @hash{$scalar} */
   /* OP_RV2[SAH]V, OP_GVSV, OP_ENTERITER only */
 #define OPpOUR_INTRO		16	/* Variable was in an our() */
   /* OP_RV2[AGH]V, OP_PAD[AH]V, OP_[AH]ELEM, OP_[AH]SLICE OP_AV2ARYLEN,

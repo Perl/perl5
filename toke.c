@@ -5853,13 +5853,6 @@ Perl_yylex(pTHX)
 	if ((PL_expect != XREF || PL_oldoldbufptr == PL_last_lop) && intuit_more(s)) {
 	    if (*s == '[')
 		PL_tokenbuf[0] = '@';
-
-	    /* Warn about % where they meant $. */
-	    if (*s == '[' || *s == '{') {
-		if (ckWARN(WARN_SYNTAX)) {
-		    S_check_scalar_slice(aTHX_ s);
-		}
-	    }
 	}
 	PL_expect = XOPERATOR;
 	force_ident_maybe_lex('%');

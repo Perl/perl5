@@ -8,7 +8,7 @@ BEGIN {
 
 # use strict;
 
-plan tests => 39;
+plan tests => 40;
 
 # simple use cases
 {
@@ -41,17 +41,19 @@ plan tests => 39;
 
 # scalar context
 {
+    my @warn;
+    local $SIG{__WARN__} = sub {push @warn, "@_"};
+
     my @a = 'a'..'z';
-    is scalar %a[4,5,6], 'g', 'last element in scalar context';
+    is eval'scalar %a[4,5,6]', 'g', 'last element in scalar context';
 
-    {
-        my @warn;
-        local $SIG{__WARN__} = sub {push @warn, "@_"};
-        eval 'is( scalar %a[5], "f", "correct value");';
+    like ($warn[0],
+     qr/^\%a\[\.\.\.\] in scalar context better written as \$a\[\.\.\.\]/);
 
-        is (scalar @warn, 1);
-        like ($warn[0], qr/^Scalar value \%a\[5\] better written as \$a\[5\]/);
-    }
+    eval 'is( scalar %a[5], "f", "correct value");';
+
+    is (scalar @warn, 2);
+    like ($warn[1], qr/^\%a\[5\] in scalar context better written as \$a\[5\]/);
 }
 
 # autovivification
@@ -151,7 +153,8 @@ plan tests => 39;
         @warn = ();
         my $v = eval '%a[0]';
         is (scalar @warn, 1, 'warning in scalar context');
-        like $warn[0], qr{^Scalar value %a\[0\] better written as \$a\[0\]},
+        like $warn[0],
+             qr{^%a\[0\] in scalar context better written as \$a\[0\]},
             "correct warning text";
     }
     {
@@ -179,7 +182,8 @@ plan tests => 39;
 {
     my %h = 'a'..'b';
     my @i = \%h;
-    my ($k,$v) = each %i[(0)]; # parens suppress "Scalar better written as"
+    no warnings 'syntax';
+    my ($k,$v) = each %i[0];
     is $k, 'a', 'key returned by each %array[ix]';
     is $v, 'b', 'val returned by each %array[ix]';
     %h = 1..10;

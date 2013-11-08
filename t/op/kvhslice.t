@@ -8,7 +8,7 @@ BEGIN {
 
 # use strict;
 
-plan tests => 43;
+plan tests => 44;
 
 # simple use cases
 {
@@ -41,18 +41,20 @@ plan tests => 43;
 
 # scalar context
 {
+    my @warn;
+    local $SIG{__WARN__} = sub {push @warn, "@_"};
+
     my %h = map { $_ => uc $_ } 'a'..'z';
-    is scalar %h{'c','d','e'}, 'E', 'last element in scalar context';
+    is scalar eval"%h{'c','d','e'}", 'E', 'last element in scalar context';
 
-    {
-        my @warn;
-        local $SIG{__WARN__} = sub {push @warn, "@_"};
-        eval 'is( scalar %h{i}, "I", "correct value");';
+    like ($warn[0],
+     qr/^\%h\{\.\.\.\} in scalar context better written as \$h\{\.\.\.\}/);
 
-        is (scalar @warn, 1);
-        like ($warn[0],
-              qr/^Scalar value \%h\{"i"\} better written as \$h\{"i"\}/);
-    }
+    eval 'is( scalar %h{i}, "I", "correct value");';
+
+    is (scalar @warn, 2);
+    like ($warn[1],
+          qr/^\%h\{"i"\} in scalar context better written as \$h\{"i"\}/);
 }
 
 # autovivification
@@ -149,7 +151,7 @@ plan tests => 43;
         my $v = eval '%h{a}';
         is (scalar @warn, 1, 'warning in scalar context');
         like $warn[0],
-             qr{^Scalar value %h{"a"} better written as \$h{"a"}},
+             qr{^%h{"a"} in scalar context better written as \$h{"a"}},
             "correct warning text";
     }
     {
@@ -193,7 +195,8 @@ plan tests => 43;
 {
     my %h = 'a'..'b';
     my %i = (foo => \%h);
-    my ($k,$v) = each %i{foo=>}; # => suppresses "Scalar better written as"
+    no warnings 'syntax';
+    my ($k,$v) = each %i{foo=>};
     is $k, 'a', 'key returned by each %hash{key}';
     is $v, 'b', 'val returned by each %hash{key}';
     %h = 1..10;
