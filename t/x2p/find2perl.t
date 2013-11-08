@@ -152,9 +152,12 @@ my @testcases =
         },
     );
 
+plan(tests => 1 + 4 * @testcases);
+
 my $find2perl = File::Spec->catfile(File::Spec->updir(), "x2p", "find2perl");
+ok (-x $find2perl, "find2perl exists");
 our $TODO;
-plan(tests => scalar @testcases);
+
 for my $test (@testcases) {
  SKIP:
     {
@@ -166,14 +169,12 @@ for my $test (@testcases) {
 
         my $skip = $test->{SKIP} && $test->{SKIP}->();
         $skip
-            and skip($skip, 1);
+            and skip($skip, 4);
 
         my $code = runperl(args => [ $find2perl, $tmpdir, @$args ]);
 
-        unless ($code) {
-            fail("$name: failed to run findperl");
-            next;
-        }
+        ok($code, "$name: run findperl")
+            or skip("", 3);
 
         open my $script_fh, ">", $script
             or die "Cannot create $script: $!";
@@ -182,6 +183,10 @@ for my $test (@testcases) {
             or die "Cannot close $script: $!";
 
         my $files = runperl(progfile => $script);
+
+        ok(length $files, "$name: run output script")
+            or skip("", 2);
+
         my $find_files;
         my $source;
         if ($test->{expect}) {
@@ -189,6 +194,8 @@ for my $test (@testcases) {
                 map { $_ eq "" ? $tmpdir : "$tmpdir/$_" }
                 @{$test->{expect}};
             $source = "expected";
+            # to balance the ok() in the other branch
+            pass("$name: got files ok");
         }
         else {
             my $findcmd = "find $tmpdir ". join " ", map "'$_'", @$args;
@@ -196,6 +203,8 @@ for my $test (@testcases) {
             # make sure PERL_UNICODE doesn't reinterpret the output of find
             use open IN => ':raw';
             $find_files = `$findcmd`;
+            ok(length $find_files, "$name: run find")
+                or skip("", 1);
             $source = "find";
         }
 
