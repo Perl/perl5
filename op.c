@@ -1155,7 +1155,7 @@ S_scalar_slice_warning(pTHX_ const OP *o)
     const char funny =
 	o->op_type == OP_ASLICE || o->op_type == OP_HSLICE ? '@' : '%';
     SV *name;
-    SV *keysv;
+    SV *keysv = NULL; /* just to silence compiler warnings */
     const char *key = NULL;
 
     if (!(o->op_private & OPpSLICEWARNING))
@@ -1921,6 +1921,7 @@ S_finalize_op(pTHX_ OP* o)
 		rop = NULL;
 	}
 
+        lexname = NULL; /* just to silence compiler warnings */
 	check_fields =
 	    rop
 	 && (lexname = *av_fetch(PL_comppad_name, rop->op_targ, TRUE),
