@@ -599,7 +599,7 @@ Perl_grok_number(pTHX_ const char *pv, STRLEN len, UV *valuep)
     numtype = IS_NUMBER_NEG;
   }
   else if (*s == '+')
-  s++;
+    s++;
 
   if (s == send)
     return 0;
