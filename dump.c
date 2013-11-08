@@ -475,7 +475,7 @@ Perl_sv_peek(pTHX_ SV *sv)
 		!(~SvFLAGS(sv) & (SVf_POK|SVf_NOK|SVf_READONLY|
 				  SVp_POK|SVp_NOK)) &&
 		SvCUR(sv) == 0 &&
-		SvNVX(sv) == 0.0)
+		NV_eq_nowarn(SvNVX(sv), 0.0))
 		goto finish;
 	}
 	else if (sv == &PL_sv_yes) {
@@ -486,7 +486,7 @@ Perl_sv_peek(pTHX_ SV *sv)
 				  SVp_POK|SVp_NOK)) &&
 		SvCUR(sv) == 1 &&
 		SvPVX_const(sv) && *SvPVX_const(sv) == '1' &&
-		SvNVX(sv) == 1.0)
+		NV_eq_nowarn(SvNVX(sv), 1.0))
 		goto finish;
 	}
 	else {

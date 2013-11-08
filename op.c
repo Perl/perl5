@@ -1533,7 +1533,8 @@ Perl_scalarvoid(pTHX_ OP *o)
 		/* the constants 0 and 1 are permitted as they are
 		   conventionally used as dummies in constructs like
 		        1 while some_condition_with_side_effects;  */
-		else if (SvNIOK(sv) && (SvNV(sv) == 0.0 || SvNV(sv) == 1.0))
+		else if (SvNIOK(sv) && (NV_eq_nowarn(SvNV(sv), 0.0) ||
+                                        NV_eq_nowarn(SvNV(sv), 1.0)))
 		    useless = NULL;
 		else if (SvPOK(sv)) {
                     SV * const dsv = newSVpvs("");

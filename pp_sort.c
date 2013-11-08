@@ -1931,7 +1931,7 @@ S_sv_i_ncmp(pTHX_ SV *const a, SV *const b)
 	? amagic_call(left, right, meth, 0) \
 	: NULL;
 
-#define SORT_NORMAL_RETURN_VALUE(val)  (((val) > 0) ? 1 : ((val) ? -1 : 0))
+#define SORT_NORMAL_RETURN_VALUE(val)  (((val) > 0) ? 1 : ((val < 0) ? -1 : 0))
 
 static I32
 S_amagic_ncmp(pTHX_ SV *const a, SV *const b)

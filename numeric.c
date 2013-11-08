@@ -780,8 +780,8 @@ S_mulexp10(NV value, I32 exponent)
 
     if (exponent == 0)
 	return value;
-    if (value == 0)
-	return (NV)0;
+    if (NV_eq_nowarn(value, 0.0))
+	return (NV)0.0;
 
     /* On OpenVMS VAX we by default use the D_FLOAT double format,
      * and that format does not have *easy* capabilities [1] for

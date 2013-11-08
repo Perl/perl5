@@ -1982,7 +1982,7 @@ S_sv_2iuv_non_preserve(pTHX_ SV *const sv
        sv_2iv  */
     if (SvNVX(sv) <= (UV)IV_MAX) {
         SvIV_set(sv, I_V(SvNVX(sv)));
-        if ((NV)(SvIVX(sv)) == SvNVX(sv)) {
+        if (NV_eq_nowarn((NV)(SvIVX(sv)), SvNVX(sv))) {
             SvIOK_on(sv); /* Integer is precise. NOK, IOK */
         } else {
             /* Integer is imprecise. NOK, IOKp */
@@ -1991,7 +1991,7 @@ S_sv_2iuv_non_preserve(pTHX_ SV *const sv
     }
     SvIsUV_on(sv);
     SvUV_set(sv, U_V(SvNVX(sv)));
-    if ((NV)(SvUVX(sv)) == SvNVX(sv)) {
+    if (NV_eq_nowarn((NV)(SvUVX(sv)), SvNVX(sv))) {
         if (SvUVX(sv) == UV_MAX) {
             /* As we know that NVs don't preserve UVs, UV_MAX cannot
                possibly be preserved by NV. Hence, it must be overflow.
@@ -2037,7 +2037,7 @@ S_sv_2iuv_common(pTHX_ SV *const sv)
 #endif
 	if (SvNVX(sv) < (NV)IV_MAX + 0.5) {
 	    SvIV_set(sv, I_V(SvNVX(sv)));
-	    if (SvNVX(sv) == (NV) SvIVX(sv)
+	    if (NV_eq_nowarn(SvNVX(sv), (NV)SvIVX(sv))
 #ifndef NV_PRESERVES_UV
 		&& (((UV)1 << NV_PRESERVES_UV_BITS) >
 		    (UV)(SvIVX(sv) > 0 ? SvIVX(sv) : -SvIVX(sv)))
@@ -2080,7 +2080,7 @@ S_sv_2iuv_common(pTHX_ SV *const sv)
 	else {
 	    SvUV_set(sv, U_V(SvNVX(sv)));
 	    if (
-		(SvNVX(sv) == (NV) SvUVX(sv))
+		(NV_eq_nowarn(SvNVX(sv), (NV) SvUVX(sv)))
 #ifndef  NV_PRESERVES_UV
 		/* Make sure it's not 0xFFFFFFFFFFFFFFFF */
 		/*&& (SvUVX(sv) != UV_MAX) irrelevant with code below */
@@ -2226,7 +2226,7 @@ S_sv_2iuv_common(pTHX_ SV *const sv)
                     (void)SvIOKp_on(sv);
                     SvNOK_on(sv);
                     SvIV_set(sv, I_V(SvNVX(sv)));
-                    if ((NV)(SvIVX(sv)) == SvNVX(sv))
+                    if (NV_eq_nowarn((NV)(SvIVX(sv)), SvNVX(sv)))
                         SvIOK_on(sv);
                     /* Assumption: first non-preserved integer is < IV_MAX,
                        this NV is in the preserved range, therefore: */
@@ -2936,7 +2936,7 @@ Perl_sv_2pv_flags(pTHX_ SV *const sv, STRLEN *const lp, const I32 flags)
     else if (SvNOK(sv)) {
 	if (SvTYPE(sv) < SVt_PVNV)
 	    sv_upgrade(sv, SVt_PVNV);
-	if (SvNVX(sv) == 0.0) {
+	if (NV_eq_nowarn(SvNVX(sv), 0.0)) {
 	    s = SvGROW_mutable(sv, 2);
 	    *s++ = '0';
 	    *s = '\0';
@@ -3182,7 +3182,7 @@ Perl_sv_2bool_flags(pTHX_ SV *sv, I32 flags)
                 }
                 else if((SvFLAGS(sv) & (SVf_IOK|SVf_NOK))) {
                     svb = (SvIOK(sv) && SvIVX(sv) != 0)
-                        || (SvNOK(sv) && SvNVX(sv) != 0.0);
+                        || (SvNOK(sv) && NV_ne_nowarn(SvNVX(sv), 0.0));
                 }
                 else {
                     flags = 0;
@@ -8348,8 +8348,8 @@ Perl_sv_inc_nomg(pTHX_ SV *const sv)
     }
     if (flags & SVp_NOK) {
 	const NV was = SvNVX(sv);
-	if (NV_OVERFLOWS_INTEGERS_AT &&
-	    was >= NV_OVERFLOWS_INTEGERS_AT) {
+	if (NV_OVERFLOWS_INTEGERS_AT > 0 &&
+	    !(was < NV_OVERFLOWS_INTEGERS_AT)) {
 	    /* diag_listed_as: Lost precision when %s %f by 1 */
 	    Perl_ck_warner(aTHX_ packWARN(WARN_IMPRECISION),
 			   "Lost precision when incrementing %" NVff " by 1",
@@ -8533,8 +8533,8 @@ Perl_sv_dec_nomg(pTHX_ SV *const sv)
     oops_its_num:
 	{
 	    const NV was = SvNVX(sv);
-	    if (NV_OVERFLOWS_INTEGERS_AT &&
-		was <= -NV_OVERFLOWS_INTEGERS_AT) {
+	    if (NV_OVERFLOWS_INTEGERS_AT > 0 &&
+		!(was > -NV_OVERFLOWS_INTEGERS_AT)) {
 		/* diag_listed_as: Lost precision when %s %f by 1 */
 		Perl_ck_warner(aTHX_ packWARN(WARN_IMPRECISION),
 			       "Lost precision when decrementing %" NVff " by 1",
@@ -9370,7 +9370,7 @@ Perl_sv_true(pTHX_ SV *const sv)
 	    return SvIVX(sv) != 0;
 	else {
 	    if (SvNOK(sv))
-		return SvNVX(sv) != 0.0;
+		return NV_ne_nowarn(SvNVX(sv), 0.0);
 	    else
 		return sv_2bool(sv);
 	}
@@ -10335,7 +10335,7 @@ S_F0convert(NV nv, char *const endbuf, STRLEN *const len)
 	char *p = endbuf;
 	nv += 0.5;
 	uv = (UV)nv;
-	if (uv & 1 && uv == nv)
+	if (uv & 1 && NV_eq_nowarn(uv, nv))
 	    uv--;			/* Round to even */
 	do {
 	    const unsigned dig = uv % 10;

@@ -4466,7 +4466,7 @@ PP(pp_gmtime)
     else {
 	NV input = Perl_floor(POPn);
 	when = (Time64_T)input;
-	if (when != input) {
+	if (NV_ne_nowarn(when, input)) {
 	    /* diag_listed_as: gmtime(%f) too large */
 	    Perl_ck_warner(aTHX_ packWARN(WARN_OVERFLOW),
 			   "%s(%.0" NVff ") too large", opname, input);

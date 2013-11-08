@@ -1492,7 +1492,7 @@ PP(pp_divide)
 #if defined(NAN_COMPARE_BROKEN) && defined(Perl_isnan)
 	if (! Perl_isnan(right) && right == 0.0)
 #else
-	if (right == 0.0)
+	if (NV_eq_nowarn(right, 0.0))
 #endif
 	    DIE(aTHX_ "Illegal division by zero");
 	PUSHn( left / right );
@@ -1592,11 +1592,11 @@ PP(pp_modulo)
 	if (use_double) {
 	    NV dans;
 
-	    if (!dright)
+	    if (NV_eq_nowarn(dright, 0.0))
 		DIE(aTHX_ "Illegal modulus zero");
 
 	    dans = Perl_fmod(dleft, dright);
-	    if ((left_neg != right_neg) && dans)
+	    if ((left_neg != right_neg) && NV_ne_nowarn(dans, 0.0))
 		dans = dright - dans;
 	    if (right_neg)
 		dans = -dans;
@@ -2072,7 +2072,7 @@ Perl_do_ncmp(pTHX_ SV* const left, SV * const right)
 	return -1;
       if (lnv > rnv)
 	return 1;
-      if (lnv == rnv)
+      if (NV_eq_nowarn(lnv, rnv))
 	return 0;
       return 2;
 #endif
@@ -2746,7 +2746,7 @@ PP(pp_rand)
 		value = SvNV(sv);
 	}
     /* 1 of 2 things can be carried through SvNV, SP or TARG, SP was carried */
-	if (value == 0.0)
+	if (NV_eq_nowarn(value, 0.0))
 	    value = 1.0;
 	{
 	    dTARGET;

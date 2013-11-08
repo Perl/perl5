@@ -1762,7 +1762,7 @@ Like sv_utf8_upgrade, but doesn't do magic on C<sv>.
 	? SvPVXtrue(sv)					\
     : (SvFLAGS(sv) & (SVf_IOK|SVf_NOK))			\
 	? (   (SvIOK(sv) && SvIVX(sv) != 0)		\
-	   || (SvNOK(sv) && SvNVX(sv) != 0.0))		\
+	   || (SvNOK(sv) && NV_ne_nowarn(SvNVX(sv), 0.0))) \
     : (fallback))
 
 #if defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)

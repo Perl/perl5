@@ -474,6 +474,16 @@
 #undef  ASCIIish
 #endif
 
+
+/* with gcc -Wfloat-equal, the test (nv == 0.0) generates an 'unsafe'
+ * warning. This disable the warning on the odd occasion we need to
+ * compare to a fixed value.  On gcc at least, the double comparison is
+ * optimised back to a simple ==.
+ */
+#define NV_ne_nowarn(a,b) ((a) < (b) || (a) > (b))
+#define NV_eq_nowarn(a,b) (!NV_ne_nowarn(a,b))
+
+
 /*
  * The following contortions are brought to you on behalf of all the
  * standards, semi-standards, de facto standards, not-so-de-facto standards
