@@ -265,16 +265,15 @@ XXX
 
 =head1 Platform Support
 
-XXX Any changes to platform support should be listed in the sections below.
-
-[ Within the sections, list each platform as a =item entry with specific
-changes as paragraphs below it. ]
+=over 4
 
 =item arm5tel
 
 Platforms based on cheap ARM CPU's (like the Marvell Kirkwood mv6282) not
 meant for workstations or development boxes should build now. The basic
 problems are the non-standard location for tools.
+
+=back
 
 =head2 New Platforms
 
