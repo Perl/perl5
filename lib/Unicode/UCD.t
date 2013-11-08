@@ -1287,10 +1287,10 @@ foreach my $prop (sort(keys %props), sort keys %legacy_props) {
             $is_legacy = 1;
         }
         else {
-        if (! $suppressed) {
-            fail("prop_invmap('$prop')");
-            diag("is unknown to prop_aliases(), and we need it in order to test prop_invmap");
-        }
+            if (! $suppressed) {
+                fail("prop_invmap('$prop')");
+                diag("is unknown to prop_aliases(), and we need it in order to test prop_invmap");
+            }
         next PROPERTY;
         }
     }
