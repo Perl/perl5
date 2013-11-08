@@ -723,6 +723,12 @@ PERL_CALLCONV const char *	Perl_custom_op_desc(pTHX_ const OP *o)
 #define PERL_ARGS_ASSERT_CUSTOM_OP_DESC	\
 	assert(o)
 
+PERL_CALLCONV XOPRETANY	Perl_custom_op_get_field(pTHX_ const OP *o, const xop_flags_enum field)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_CUSTOM_OP_GET_FIELD	\
+	assert(o)
+
 PERL_CALLCONV const char *	Perl_custom_op_name(pTHX_ const OP *o)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
@@ -735,11 +741,9 @@ PERL_CALLCONV void	Perl_custom_op_register(pTHX_ Perl_ppaddr_t ppaddr, const XOP
 #define PERL_ARGS_ASSERT_CUSTOM_OP_REGISTER	\
 	assert(ppaddr); assert(xop)
 
-PERL_CALLCONV const XOP *	Perl_custom_op_xop(pTHX_ const OP *o)
+/* PERL_CALLCONV const XOP *	Perl_custom_op_xop(pTHX_ const OP *o)
 			__attribute__pure__
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_CUSTOM_OP_XOP	\
-	assert(o)
+			__attribute__nonnull__(pTHX_1); */
 
 PERL_CALLCONV void	Perl_cv_ckproto_len_flags(pTHX_ const CV* cv, const GV* gv, const char* p, const STRLEN len, const U32 flags)
 			__attribute__nonnull__(pTHX_1);

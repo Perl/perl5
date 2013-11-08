@@ -3085,9 +3085,9 @@ typedef pthread_key_t	perl_key;
    appropriate to call return.  In either case, include the lint directive.
  */
 #ifdef HASATTRIBUTE_NORETURN
-#  define NORETURN_FUNCTION_END assert(0); /* NOTREACHED */
+#  define NORETURN_FUNCTION_END NOT_REACHED; /* NOTREACHED */
 #else
-#  define NORETURN_FUNCTION_END assert(0); /* NOTREACHED */ return 0
+#  define NORETURN_FUNCTION_END NOT_REACHED; /* NOTREACHED */ return 0
 #endif
 
 /* Some OS warn on NULL format to printf */
@@ -3107,6 +3107,39 @@ typedef pthread_key_t	perl_key;
 #ifdef HAS_BUILTIN_CHOOSE_EXPR
 /* placeholder */
 #endif
+
+
+#ifndef __has_builtin
+#  define __has_builtin(x) 0 /* not a clang style compiler */
+#endif
+
+/* ASSUME is like assert(), but it has a benefit in a release build. It is a
+   hint to a compiler about a statement of fact in a function call free
+   expression, which allows the compiler to generate better machine code.
+   In a debug build, ASSUME(x) is a synonym for assert(x). ASSUME(0) means
+   the control path is unreachable. In a for loop, ASSUME can be used to hint
+   that a loop will run atleast X times. ASSUME is based off MSVC's __assume
+   intrinsic function, see its documents for more details.
+*/
+
+#ifndef DEBUGGING
+#  if __has_builtin(__builtin_unreachable) \
+     || (__GNUC__ == 4 && __GNUC_MINOR__ >= 5 || __GNUC__ > 5) /* 4.5 -> */
+#    define ASSUME(x) ((x) ? (void) 0 : __builtin_unreachable())
+#  elif defined(_MSC_VER)
+#    define ASSUME(x) __assume(x)
+#  elif defined(__ARMCC_VERSION) /* untested */
+#    define ASSUME(x) __promise(x)
+#  else
+/* a random compiler might define assert to its own special optimization token
+   so pass it through to C lib as a last resort */
+#    define ASSUME(x) assert(x)
+#  endif
+#else
+#  define ASSUME(x) assert(x)
+#endif
+
+#define NOT_REACHED ASSUME(0)
 
 /* Some unistd.h's give a prototype for pause() even though
    HAS_PAUSE ends up undefined.  This causes the #define
@@ -3156,6 +3189,7 @@ UNION_ANY_DEFINITION;
 union any {
     void*	any_ptr;
     I32		any_i32;
+    U32		any_u32;
     IV		any_iv;
     UV		any_uv;
     long	any_long;

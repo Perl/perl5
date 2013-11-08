@@ -1151,14 +1151,14 @@ const char*
 Perl_custom_op_name(pTHX_ const OP* o)
 {
     PERL_ARGS_ASSERT_CUSTOM_OP_NAME;
-    return XopENTRY(Perl_custom_op_xop(aTHX_ o), xop_name);
+    return XopENTRYCUSTOM(o, xop_name);
 }
 
 const char*
 Perl_custom_op_desc(pTHX_ const OP* o)
 {
     PERL_ARGS_ASSERT_CUSTOM_OP_DESC;
-    return XopENTRY(Perl_custom_op_xop(aTHX_ o), xop_desc);
+    return XopENTRYCUSTOM(o, xop_desc);
 }
 
 CV *

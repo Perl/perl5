@@ -1752,6 +1752,28 @@ xop_build_optree ()
     OUTPUT:
         RETVAL
 
+IV
+xop_from_custom_op ()
+    CODE:
+/* author note: this test doesn't imply Perl_custom_op_xop is or isn't public
+   API or that Perl_custom_op_xop is known to be used outside the core */
+        UNOP *unop;
+        XOP *xop;
+
+        NewOp(1102, unop, 1, UNOP);
+        unop->op_type       = OP_CUSTOM;
+        unop->op_ppaddr     = pp_xop;
+        unop->op_flags      = OPf_KIDS;
+        unop->op_private    = 0;
+        unop->op_first      = NULL;
+        unop->op_next       = NULL;
+
+        xop = Perl_custom_op_xop(aTHX_ (OP *)unop);
+        FreeOp(unop);
+        RETVAL = PTR2IV(xop);
+    OUTPUT:
+        RETVAL
+
 BOOT:
 {
     MY_CXT_INIT;

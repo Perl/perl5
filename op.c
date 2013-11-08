@@ -11782,7 +11782,7 @@ Perl_rpeep(pTHX_ OP *o)
 
 	case OP_CUSTOM: {
 	    Perl_cpeep_t cpeep = 
-		XopENTRY(Perl_custom_op_xop(aTHX_ o), xop_peep);
+		XopENTRYCUSTOM(o, xop_peep);
 	    if (cpeep)
 		cpeep(aTHX_ o, oldop);
 	    break;
@@ -11805,14 +11805,16 @@ Perl_peep(pTHX_ OP *o)
 =head1 Custom Operators
 
 =for apidoc Ao||custom_op_xop
-Return the XOP structure for a given custom op. This function should be
+Return the XOP structure for a given custom op. This macro should be
 considered internal to OP_NAME and the other access macros: use them instead.
+This macro does call a function. Prior to 5.19.6, this was implemented as a
+function.
 
 =cut
 */
 
-const XOP *
-Perl_custom_op_xop(pTHX_ const OP *o)
+XOPRETANY
+Perl_custom_op_get_field(pTHX_ const OP *o, const xop_flags_enum field)
 {
     SV *keysv;
     HE *he = NULL;
@@ -11820,7 +11822,7 @@ Perl_custom_op_xop(pTHX_ const OP *o)
 
     static const XOP xop_null = { 0, 0, 0, 0, 0 };
 
-    PERL_ARGS_ASSERT_CUSTOM_OP_XOP;
+    PERL_ARGS_ASSERT_CUSTOM_OP_GET_FIELD;
     assert(o->op_type == OP_CUSTOM);
 
     /* This is wrong. It assumes a function pointer can be cast to IV,
@@ -11852,13 +11854,59 @@ Perl_custom_op_xop(pTHX_ const OP *o)
 	    XopENTRY_set(xop, xop_desc, savepvn(pv, l));
 	}
 	Perl_custom_op_register(aTHX_ o->op_ppaddr, xop);
-	return xop;
     }
-
-    if (!he) return &xop_null;
-
-    xop = INT2PTR(XOP *, SvIV(HeVAL(he)));
-    return xop;
+    else {
+	if (!he)
+	    xop = (XOP *)&xop_null;
+	else
+	    xop = INT2PTR(XOP *, SvIV(HeVAL(he)));
+    }
+    {
+	XOPRETANY any;
+	if(field == XOPe_xop_ptr) {
+	    any.xop_ptr = xop;
+	} else {
+	    const U32 flags = XopFLAGS(xop);
+	    if(flags & field) {
+		switch(field) {
+		case XOPe_xop_name:
+		    any.xop_name = xop->xop_name;
+		    break;
+		case XOPe_xop_desc:
+		    any.xop_desc = xop->xop_desc;
+		    break;
+		case XOPe_xop_class:
+		    any.xop_class = xop->xop_class;
+		    break;
+		case XOPe_xop_peep:
+		    any.xop_peep = xop->xop_peep;
+		    break;
+		default:
+		    NOT_REACHED;
+		    break;
+		}
+	    } else {
+		switch(field) {
+		case XOPe_xop_name:
+		    any.xop_name = XOPd_xop_name;
+		    break;
+		case XOPe_xop_desc:
+		    any.xop_desc = XOPd_xop_desc;
+		    break;
+		case XOPe_xop_class:
+		    any.xop_class = XOPd_xop_class;
+		    break;
+		case XOPe_xop_peep:
+		    any.xop_peep = XOPd_xop_peep;
+		    break;
+		default:
+		    NOT_REACHED;
+		    break;
+		}
+	    }
+	}
+	return any;
+    }
 }
 
 /*
