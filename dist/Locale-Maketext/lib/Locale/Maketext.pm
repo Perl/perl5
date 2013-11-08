@@ -27,7 +27,7 @@ BEGIN {
 }
 
 
-$VERSION = '1.24';
+$VERSION = '1.25';
 @ISA = ();
 
 $MATCH_SUPERS = 1;
@@ -570,6 +570,7 @@ sub _compile {
                             $c[-1] = ''; # reuse this slot
                         }
                         else {
+                            $c[-1] =~ s/\\\\/\\/g;
                             push @code, ' $c[' . $#c . "],\n";
                             push @c, ''; # new chunk
                         }
