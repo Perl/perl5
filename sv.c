@@ -770,19 +770,19 @@ is "not there", because you'll be overwriting the last members of the
 preceding structure in memory.)
 
 We calculate the correction using the STRUCT_OFFSET macro on the first
-member present. If the allocated structure is smaller (no initial NV
+member present.  If the allocated structure is smaller (no initial NV
 actually allocated) then the net effect is to subtract the size of the NV
 from the pointer, to return a new pointer as if an initial NV were actually
-allocated. (We were using structures named *_allocated for this, but
+allocated.  (We were using structures named *_allocated for this, but
 this turned out to be a subtle bug, because a structure without an NV
 could have a lower alignment constraint, but the compiler is allowed to
 optimised accesses based on the alignment constraint of the actual pointer
 to the full structure, for example, using a single 64 bit load instruction
 because it "knows" that two adjacent 32 bit members will be 8-byte aligned.)
 
-This is the same trick as was used for NV and IV bodies. Ironically it
+This is the same trick as was used for NV and IV bodies.  Ironically it
 doesn't need to be used for NV bodies any more, because NV is now at
-the start of the structure. IV bodies don't need it either, because
+the start of the structure.  IV bodies don't need it either, because
 they are no longer allocated.
 
 In turn, the new_body_* allocators call S_new_body(), which invokes
@@ -3663,7 +3663,8 @@ Perl_sv_utf8_decode(pTHX_ SV *const sv)
 Copies the contents of the source SV C<ssv> into the destination SV
 C<dsv>.  The source SV may be destroyed if it is mortal, so don't use this
 function if the source SV needs to be reused.  Does not handle 'set' magic on
-destination SV. Calls 'get' magic on source SV. Loosely speaking, it performs a
+destination SV. C alls 'get' magic on
+source SV.  Loosely speaking, it performs a
 copy-by-value, obliterating any previous content of the destination.
 
 You probably want to use one of the assortment of wrappers, such as
@@ -7932,8 +7933,8 @@ S_sv_gets_read_record(pTHX_ SV *const sv, PerlIO *const fp, I32 append)
 =for apidoc sv_gets
 
 Get a line from the filehandle and store it into the SV, optionally
-appending to the currently-stored string. If C<append> is not 0, the
-line is appended to the SV instead of overwriting it. C<append> should
+appending to the currently-stored string.  If C<append> is not 0, the
+line is appended to the SV instead of overwriting it.  C<append> should
 be set to the byte offset that the appended string should start at
 in the SV (typically, C<SvCUR(sv)> is a suitable choice).
 
@@ -9626,7 +9627,7 @@ Perl_sv_isa(pTHX_ SV *sv, const char *const name)
 Creates a new SV for the existing RV, C<rv>, to point to.  If C<rv> is not an
 RV then it will be upgraded to one.  If C<classname> is non-null then the new
 SV will be blessed in the specified package.  The new SV is returned and its
-reference count is 1. The reference count 1 is owned by C<rv>.
+reference count is 1.  The reference count 1 is owned by C<rv>.
 
 =cut
 */
