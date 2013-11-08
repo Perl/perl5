@@ -1566,7 +1566,8 @@ foreach my $prop (sort keys %props) {
                 }
             }
         }
-        elsif ($full_name =~ /Simple_(Case_Folding|(Lower|Title|Upper)case_Mapping)/)
+        elsif ($full_name
+            =~ / ^ Simple_(Case_Folding|(Lower|Title|Upper)case_Mapping) $ /x)
         {
 
             # These properties have everything in the regular array, and the
@@ -1688,7 +1689,10 @@ foreach my $prop (sort keys %props) {
                 }
             } # Otherwise, the map is to a simple scalar
             elsif ($full_name =~    # These maps are in hex
-                    /(Simple_)?(Case_Folding|(Lower|Title|Upper)case_Mapping)/)
+                    / ^ ( Simple_ )? ( Case_Folding
+                                       | ( Lower
+                                           | Title
+                                           | Upper ) case_Mapping ) $ /x)
             {
                 $invmap_ref->[$i] = sprintf("%X", $invmap_ref->[$i]);
             }
