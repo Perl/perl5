@@ -1147,7 +1147,6 @@ S_op_varname(pTHX_ const OP *o)
 static void
 S_op_pretty(pTHX_ const OP *o, SV **retsv, const char **retpv)
 { /* or not so pretty :-) */
-    const char *key = NULL;
     if (o->op_type == OP_CONST) {
 	*retsv = cSVOPo_sv;
 	if (SvPOK(*retsv)) {
