@@ -1032,14 +1032,14 @@ push FRED;
 EXPECT
 Array @FRED missing the @ in argument 1 of push() at - line 2.
 ########
-# op.c
+# op.c [Perl_ck_fun]
 $fred = [];
 push $fred;
 pop $fred;
 shift $fred;
 unshift $fred;
 splice $fred;
-no warnings 'deprecated' ;
+no warnings 'experimental::aggref' ;
 push $fred;
 pop $fred;
 shift $fred;
@@ -1381,7 +1381,7 @@ $fred = {};
 keys $fred;
 values $fred;
 each $fred;
-no warnings 'deprecated' ;
+no warnings 'experimental::aggref' ;
 keys $fred;
 values $fred;
 each $fred;
