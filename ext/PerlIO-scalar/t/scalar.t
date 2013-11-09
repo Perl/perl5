@@ -16,7 +16,7 @@ use Fcntl qw(SEEK_SET SEEK_CUR SEEK_END); # Not 0, 1, 2 everywhere.
 
 $| = 1;
 
-use Test::More tests => 113;
+use Test::More tests => 114;
 
 my $fh;
 my $var = "aaa\n";
@@ -109,6 +109,11 @@ is(<$fh>, "shazam", "reading from magic scalars");
     print $fh "foo";
     close $fh;
     is($warn, 0, "no warnings when writing to an undefined scalar");
+    undef $scalar;
+    open $fh, '>>', \$scalar;
+    print $fh "oof";
+    close $fh;
+    is($warn, 0, "no warnings when appending to an undefined scalar");
 }
 
 {

@@ -66,7 +66,7 @@ PerlIOScalar_pushed(pTHX_ PerlIO * f, const char *mode, SV * arg,
 	return -1;
     }
     if ((PerlIOBase(f)->flags) & PERLIO_F_APPEND)
-	s->posn = sv_len(s->var);
+	s->posn = SvOK(s->var) ? sv_len(s->var) : 0;
     else
 	s->posn = 0;
     SvSETMAGIC(s->var);
