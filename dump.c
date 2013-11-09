@@ -764,11 +764,6 @@ const struct flag_to_name op_open_names[] = {
     {OPpOPEN_OUT_CRLF, ",OUT_CRLF"}
 };
 
-const struct flag_to_name op_exit_names[] = {
-    {OPpEXIT_VMSISH, ",EXIT_VMSISH"},
-    {OPpHUSH_VMSISH, ",HUSH_VMSISH"}
-};
-
 const struct flag_to_name op_sassign_names[] = {
     {OPpASSIGN_BACKWARDS, ",BACKWARDS"},
     {OPpASSIGN_CV_TO_GV,  ",CV2GV"}
@@ -795,6 +790,7 @@ OP_PRIVATE_ONCE(op_delete, OPpSLICE, ",SLICE");
 OP_PRIVATE_ONCE(op_exists, OPpEXISTS_SUB, ",EXISTS_SUB");
 OP_PRIVATE_ONCE(op_die, OPpHUSH_VMSISH, ",HUSH_VMSISH");
 OP_PRIVATE_ONCE(op_split, OPpSPLIT_IMPLIM, ",IMPLIM");
+OP_PRIVATE_ONCE(op_dbstate, OPpHUSH_VMSISH, ",HUSH_VMSISH");
 
 struct op_private_by_op {
     U16 op_type;
@@ -810,7 +806,6 @@ const struct op_private_by_op op_private_names[] = {
     {OP_DIE, C_ARRAY_LENGTH(op_die_names), op_die_names },
     {OP_DELETE, C_ARRAY_LENGTH(op_delete_names), op_delete_names },
     {OP_EXISTS, C_ARRAY_LENGTH(op_exists_names), op_exists_names },
-    {OP_EXIT, C_ARRAY_LENGTH(op_exit_names), op_exit_names },
     {OP_FLIP, C_ARRAY_LENGTH(op_flip_names), op_flip_names },
     {OP_FLOP, C_ARRAY_LENGTH(op_flip_names), op_flip_names },
     {OP_GV, C_ARRAY_LENGTH(op_gv_names), op_gv_names },
@@ -823,6 +818,8 @@ const struct op_private_by_op op_private_names[] = {
     {OP_SORT, C_ARRAY_LENGTH(op_sort_names), op_sort_names },
     {OP_OPEN, C_ARRAY_LENGTH(op_open_names), op_open_names },
     {OP_SPLIT, C_ARRAY_LENGTH(op_split_names), op_split_names },
+    {OP_DBSTATE, C_ARRAY_LENGTH(op_dbstate_names), op_dbstate_names },
+    {OP_NEXTSTATE, C_ARRAY_LENGTH(op_dbstate_names), op_dbstate_names },
     {OP_BACKTICK, C_ARRAY_LENGTH(op_open_names), op_open_names }
 };
 

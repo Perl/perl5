@@ -476,7 +476,8 @@ PP(pp_die)
     SV *exsv;
     STRLEN len;
 #ifdef VMS
-    VMSISH_HUSHED  = VMSISH_HUSHED || (PL_op->op_private & OPpHUSH_VMSISH);
+    VMSISH_HUSHED  =
+	VMSISH_HUSHED || (PL_curcop->op_private & OPpHUSH_VMSISH);
 #endif
     if (SP - MARK != 1) {
 	dTARGET;

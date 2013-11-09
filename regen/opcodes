@@ -286,7 +286,7 @@ leavesub	subroutine exit		ck_null		1
 leavesublv	lvalue subroutine return	ck_null		1	
 caller		caller			ck_fun		t%	S?
 warn		warn			ck_fun		imst@	L
-die		die			ck_die		dimst@	L
+die		die			ck_fun		dimst@	L
 reset		symbol reset		ck_fun		is%	S?
 
 lineseq		line sequence		ck_null		@	
@@ -306,7 +306,7 @@ next		next			ck_null		ds}
 redo		redo			ck_null		ds}	
 dump		dump			ck_null		ds}	
 goto		goto			ck_null		ds}	
-exit		exit			ck_exit		ds%	S?
+exit		exit			ck_fun		ds%	S?
 method_named	method with known name	ck_null		d$
 
 entergiven	given()			ck_null		d|

@@ -3173,9 +3173,11 @@ PP(pp_exit)
     else {
 	anum = SvIVx(POPs);
 #ifdef VMS
-        if (anum == 1 && (PL_op->op_private & OPpEXIT_VMSISH))
+	if (anum == 1
+	 && SvTRUE(cop_hints_fetch_pvs(PL_curcop, "vmsish_exit", 0)))
 	    anum = 0;
-        VMSISH_HUSHED  = VMSISH_HUSHED || (PL_op->op_private & OPpHUSH_VMSISH);
+        VMSISH_HUSHED  =
+            VMSISH_HUSHED || (PL_curcop->op_private & OPpHUSH_VMSISH);
 #endif
     }
     PL_exit_flags |= PERL_EXIT_EXPECTED;
