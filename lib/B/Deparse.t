@@ -10,7 +10,6 @@ BEGIN {
 }
 
 use warnings;
-no  warnings 'experimental::aggref';
 use strict;
 use Test::More;
 
@@ -977,6 +976,7 @@ tr/a/b/r;
 <a,>;
 ####
 # [perl #91008]
+# CONTEXT no warnings 'experimental::aggref';
 each $@;
 keys $~;
 values $!;
