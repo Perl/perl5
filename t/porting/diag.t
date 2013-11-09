@@ -234,7 +234,7 @@ sub check_file {
 
     my $multiline = 0;
     # Loop to accumulate the message text all on one line.
-    if (m/(?:$source_msg_re(?:_nocontext)?|$regcomp_re)\s*\(/) {
+    if (m/\b(?:$source_msg_re(?:_nocontext)?|$regcomp_re)\s*\(/) {
       while (not m/\);$/) {
         my $nextline = <$codefh>;
         # Means we fell off the end of the file.  Not terribly surprising;
@@ -266,7 +266,7 @@ sub check_file {
     # diag($_);
     # DIE is just return Perl_die
     my ($name, $category, $routine);
-    if (/$source_msg_call_re/) {
+    if (/\b$source_msg_call_re/) {
       ($name, $category, $routine) = ($+{'text'}, $+{'category'}, $+{'routine'});
       # Sometimes the regexp will pick up too much for the category
       # e.g., WARN_UNINITIALIZED), PL_warn_uninit_sv ... up to the next )
