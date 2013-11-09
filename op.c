@@ -9105,7 +9105,14 @@ Perl_ck_fun(pTHX_ OP *o)
 		/* Defer checks to run-time if we have a scalar arg */
 		if (kid->op_type == OP_RV2AV || kid->op_type == OP_PADAV)
 		    op_lvalue(kid, type);
-		else scalar(kid);
+		else {
+		    scalar(kid);
+		    /* diag_listed_as: push on reference is experimental */
+		    Perl_ck_warner_d(aTHX_
+				     packWARN(WARN_EXPERIMENTAL__AGGREF),
+				    "%s on reference is experimental",
+				     PL_op_desc[type]);
+		}
 		break;
 	    case OA_HVREF:
 		if (kid->op_type == OP_CONST &&
@@ -10944,7 +10951,13 @@ Perl_ck_each(pTHX_ OP *o)
 	}
     }
     /* if treating as a reference, defer additional checks to runtime */
-    return o->op_type == ref_type ? o : ck_fun(o);
+    if (o->op_type == ref_type) {
+	/* diag_listed_as: keys on reference is experimental */
+	Perl_ck_warner_d(aTHX_ packWARN(WARN_EXPERIMENTAL__AGGREF),
+			      "%s is experimental", PL_op_desc[ref_type]);
+	return o;
+    }
+    return ck_fun(o);
 }
 
 OP *

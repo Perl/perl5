@@ -64,6 +64,12 @@
      Array @%s missing the @ in argument %d of %s() 
 	push fred ;
  
+     push on reference is experimental			[ck_fun]
+     pop on reference is experimental
+     shift on reference is experimental
+     unshift on reference is experimental
+     splice on reference is experimental
+ 
      Hash %%%s missing the %% in argument %d of %s() 
 	keys joe ;
  
@@ -83,6 +89,10 @@
      "my %s" used in sort comparison
 
      $[ used in comparison (did you mean $] ?)
+
+     each on reference is experimental			[ck_each]
+     keys on reference is experimental
+     values on reference is experimental
 
      length() used on @array (did you mean "scalar(@array)"?)
      length() used on %hash (did you mean "scalar(keys %hash)"?)
@@ -242,9 +252,12 @@ use constant phoo => 1..3;
 @h{localtime 0};
 @h{gmtime 0};
 @h{eval ""};
-@h{each $foo} if 0;
-@h{keys $foo} if 0;
-@h{values $foo} if 0;
+{
+    no warnings 'experimental::aggref';
+    @h{each $foo} if 0;
+    @h{keys $foo} if 0;
+    @h{values $foo} if 0;
+}
 
 # arrays
 @h[qw"a b c"] = 1..3;
@@ -288,9 +301,12 @@ use constant phoo => 1..3;
 @h[localtime 0];
 @h[gmtime 0];
 @h[eval ""];
-@h[each $foo] if 0;
-@h[keys $foo] if 0;
-@h[values $foo] if 0;
+{
+    no warnings 'experimental::aggref';
+    @h[each $foo] if 0;
+    @h[keys $foo] if 0;
+    @h[values $foo] if 0;
+}
 EXPECT
 ########
 # op.c
@@ -1017,6 +1033,26 @@ EXPECT
 Array @FRED missing the @ in argument 1 of push() at - line 2.
 ########
 # op.c
+$fred = [];
+push $fred;
+pop $fred;
+shift $fred;
+unshift $fred;
+splice $fred;
+no warnings 'deprecated' ;
+push $fred;
+pop $fred;
+shift $fred;
+unshift $fred;
+splice $fred;
+EXPECT
+push on reference is experimental at - line 3.
+pop on reference is experimental at - line 4.
+shift on reference is experimental at - line 5.
+unshift on reference is experimental at - line 6.
+splice on reference is experimental at - line 7.
+########
+# op.c
 @a = keys FRED ;
 no warnings 'deprecated' ;
 @a = keys FRED ;
@@ -1339,6 +1375,20 @@ $[ used in numeric lt (<) (did you mean $] ?) at - line 17.
 $[ used in numeric gt (>) (did you mean $] ?) at - line 18.
 $[ used in numeric le (<=) (did you mean $] ?) at - line 19.
 $[ used in numeric ge (>=) (did you mean $] ?) at - line 20.
+########
+# op.c [Perl_ck_each]
+$fred = {};
+keys $fred;
+values $fred;
+each $fred;
+no warnings 'deprecated' ;
+keys $fred;
+values $fred;
+each $fred;
+EXPECT
+keys on reference is experimental at - line 3.
+values on reference is experimental at - line 4.
+each on reference is experimental at - line 5.
 ########
 # op.c [Perl_ck_length]
 use warnings 'syntax' ;

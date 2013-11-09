@@ -97,8 +97,9 @@
 
 /* Warnings Categories added in Perl 5.019 */
 
-#define WARN_EXPERIMENTAL__POSTDEREF 56
-#define WARN_SYSCALLS		 57
+#define WARN_EXPERIMENTAL__AGGREF 56
+#define WARN_EXPERIMENTAL__POSTDEREF 57
+#define WARN_SYSCALLS		 58
 
 #define WARNsize		15
 #define WARN_ALLstring		"\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125"

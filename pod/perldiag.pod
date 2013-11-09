@@ -1761,6 +1761,14 @@ already been freed.
 (W unpack) You have applied the same modifier more than once after a
 type in a pack template.  See L<perlfunc/pack>.
 
+=item each on reference is experimental
+
+(S experimental::aggref) C<each> with a scalar argument is experimental and
+may change or be removed in a future Perl version.  If you want to take
+the risk of using this feature, simply disable this warning:
+
+    no warnings "experimental::aggref";
+
 =item elseif should be elsif
 
 (S syntax) There is no keyword "elseif" in Perl because Larry thinks
@@ -2692,6 +2700,14 @@ line.  See L<perlrun> for more details.
 =item Junk on end of regexp in regex m/%s/
 
 (P) The regular expression parser is confused.
+
+=item keys on reference is experimental
+
+(S experimental::aggref) C<keys> with a scalar argument is experimental and
+may change or be removed in a future Perl version.  If you want to take
+the risk of using this feature, simply disable this warning:
+
+    no warnings "experimental::aggref";
 
 =item Label not found for "last %s"
 
@@ -4180,7 +4196,15 @@ fine from VMS' perspective, it's probably not what you intended.
 
 (F) The unpack format P must have an explicit size, not "*".
 
-=item POSIX class [:%s:] unknown in regex; marked by S<<-- HERE> in m/%s/
+=item pop on reference is experimental
+
+(S experimental::aggref) C<pop> with a scalar argument is experimental and
+may change or be removed in a future Perl version.  If you want to take
+the risk of using this feature, simply disable this warning:
+
+    no warnings "experimental::aggref";
+
+=item POSIX class [:%s:] unknown in regex; marked by S<< <-- HERE in m/%s/ >>
 
 (F) The class in the character class [: :] syntax is unknown.  The S<<-- HERE>
 shows whereabouts in the regular expression the problem was discovered.
@@ -4438,7 +4462,15 @@ is true for "LATIN SMALL LETTER Y WITH DIAERESIS", but since the upper
 case of that character is not in Latin1, in that locale it doesn't
 change when upper cased.
 
-=item Quantifier follows nothing in regex; marked by S<<-- HERE> in m/%s/
+=item push on reference is experimental
+
+(S experimental::aggref) C<push> with a scalar argument is experimental and
+may change or be removed in a future Perl version.  If you want to take
+the risk of using this feature, simply disable this warning:
+
+    no warnings "experimental::aggref";
+
+=item Quantifier follows nothing in regex; marked by S<< <-- HERE in m/%s/ >>
 
 (F) You started a regular expression with a quantifier.  Backslash it if
 you meant it literally.  The S<<-- HERE> shows whereabouts in the regular
@@ -4894,6 +4926,14 @@ didn't think so.
 forget to check the return value of your socket() call?  See
 L<perlfunc/setsockopt>.
 
+=item shift on reference is experimental
+
+(S experimental::aggref) C<shift> with a scalar argument is experimental
+and may change or be removed in a future Perl version.  If you want to
+take the risk of using this feature, simply disable this warning:
+
+    no warnings "experimental::aggref";
+
 =item shm%s not implemented
 
 (F) You don't have System V shared memory IPC on your system.
@@ -4977,6 +5017,14 @@ the array passed to splice().  Splicing will instead commence at the
 end of the array, rather than past it.  If this isn't what you want,
 try explicitly pre-extending the array by assigning $#array = $offset.
 See L<perlfunc/splice>.
+
+=item splice on reference is experimental
+
+(S experimental::aggref) C<splice> with a scalar argument is experimental
+and may change or be removed in a future Perl version.  If you want to
+take the risk of using this feature, simply disable this warning:
+
+    no warnings "experimental::aggref";
 
 =item Split loop
 
@@ -5795,6 +5843,14 @@ on your system.
 think you didn't do that, check the #! line to see if it's supplying the
 bad switch on your behalf.)
 
+=item unshift on reference is experimental
+
+(S experimental::aggref) C<unshift> with a scalar argument is experimental
+and may change or be removed in a future Perl version.  If you want to
+take the risk of using this feature, simply disable this warning:
+
+    no warnings "experimental::aggref";
+
 =item Unsuccessful %s on filename containing newline
 
 (W newline) A file operation was attempted on a filename, and that
@@ -6339,6 +6395,14 @@ C<defined> operator.
 %ENV element from a CLI symbol table, and found a resultant string
 longer than 1024 characters.  The return value has been truncated to
 1024 characters.
+
+=item values on reference is experimental
+
+(S experimental::aggref) C<values> with a scalar argument is experimental
+and may change or be removed in a future Perl version.  If you want to
+take the risk of using this feature, simply disable this warning:
+
+    no warnings "experimental::aggref";
 
 =item Variable "%s" is not available
 

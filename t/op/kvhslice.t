@@ -195,7 +195,7 @@ plan tests => 44;
 {
     my %h = 'a'..'b';
     my %i = (foo => \%h);
-    no warnings 'syntax';
+    no warnings 'syntax', 'experimental::aggref';
     my ($k,$v) = each %i{foo=>};
     is $k, 'a', 'key returned by each %hash{key}';
     is $v, 'b', 'val returned by each %hash{key}';

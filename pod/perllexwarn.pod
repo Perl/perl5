@@ -229,6 +229,8 @@ will be lost.
          |
          +- experimental --+
          |                 |
+         |                 +- experimental::aggref
+         |                 |
          |                 +- experimental::lexical_subs
          |                 |
          |                 +- experimental::lexical_topic

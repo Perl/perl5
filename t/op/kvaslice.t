@@ -182,7 +182,7 @@ plan tests => 40;
 {
     my %h = 'a'..'b';
     my @i = \%h;
-    no warnings 'syntax';
+    no warnings 'syntax', 'experimental::aggref';
     my ($k,$v) = each %i[0];
     is $k, 'a', 'key returned by each %array[ix]';
     is $v, 'b', 'val returned by each %array[ix]';

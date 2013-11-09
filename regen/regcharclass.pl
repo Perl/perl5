@@ -4,6 +4,7 @@ use strict;
 use 5.008;
 use warnings;
 use warnings FATAL => 'all';
+no warnings 'experimental::aggref';
 use Text::Wrap qw(wrap);
 use Data::Dumper;
 $Data::Dumper::Useqq= 1;

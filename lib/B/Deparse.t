@@ -10,6 +10,7 @@ BEGIN {
 }
 
 use warnings;
+no  warnings 'experimental::aggref';
 use strict;
 use Test::More;
 
