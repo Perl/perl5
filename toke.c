@@ -8140,7 +8140,7 @@ Perl_yylex(pTHX)
 
 	case KEY_glob:
 	    LOP(
-	     orig_keyword==KEY_glob ? (orig_keyword=0, -OP_GLOB) : OP_GLOB,
+	     orig_keyword==KEY_glob ? -OP_GLOB : OP_GLOB,
 	     XTERM
 	    );
 
