@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan( tests => 30 );
+plan( tests => 32 );
 
 sub empty_sub {}
 
@@ -182,3 +182,21 @@ eval { &utf8::encode };
 # The main thing we are testing is that it did not crash.  But make sure 
 # *_{ARRAY} was untouched, too.
 is *_{ARRAY}, undef, 'goto &xsub when @_ does not exist';
+
+# We do not want re.pm loaded at this point.  Move this test up or find
+# another XSUB if this fails.
+ok !exists $INC{"re.pm"}, 're.pm not loaded yet';
+{
+    local $^W; # Suppress redef warnings
+    sub re::regmust{}
+    bless \&re::regmust;
+    DESTROY {
+        my $str1 = "$_[0]";
+        *re::regmust = sub{}; # GvSV had no refcount, so this freed it
+        my $str2 = "$_[0]";   # used to be UNKNOWN(0x7fdda29310e0)
+        @str = ($str1, $str2);
+    }
+    require re;
+    is $str[1], $str[0],
+      'XSUB clobbering sub whose DESTROY assigns to the glob';
+}

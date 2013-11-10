@@ -8140,6 +8140,7 @@ Perl_newXS_len_flags(pTHX_ const char *name, STRLEN len,
                                         ),
                                         cv, const_svp);
                 }
+                GvCV_set(gv,NULL);
                 SvREFCNT_dec_NN(cv);
                 cv = NULL;
             }
