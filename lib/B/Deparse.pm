@@ -1811,7 +1811,6 @@ my %feature_keywords = (
 # keywords that are strong and also have a prototype
 #
 my %strong_proto_keywords = map { $_ => 1 } qw(
-    glob
     pos
     prototype
     scalar
@@ -2810,13 +2809,19 @@ sub pp_syscall { listop(@_, "syscall") }
 sub pp_glob {
     my $self = shift;
     my($op, $cx) = @_;
-    my $text = $self->dq($op->first->sibling);  # skip pushmark
+    my $kid = $op->first->sibling;  # skip pushmark
     my $keyword =
 	$op->flags & OPf_SPECIAL ? 'glob' : $self->keyword('glob');
-    if ($text =~ /^\$?(\w|::|\`)+$/ # could look like a readline
-	or $keyword =~ /^CORE::/
+    my $text;
+    if ($keyword =~ /^CORE::/
+	or $kid->name ne 'const'
+	or ($text = $self->dq($kid))
+	     =~ /^\$?(\w|::|\`)+$/ # could look like a readline
         or $text =~ /[<>]/) {
-	return "$keyword(" . single_delim('qq', '"', $text) . ')';
+	$text = $self->deparse($kid);
+	return $cx >= 5 || $self->{'parens'}
+	    ? "$keyword($text)"
+	    : "$keyword $text";
     } else {
 	return '<' . $text . '>';
     }

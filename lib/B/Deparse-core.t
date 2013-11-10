@@ -36,7 +36,7 @@ BEGIN {
 
 use strict;
 use Test::More;
-plan tests => 2063;
+plan tests => 2071;
 
 use feature (sprintf(":%vd", $^V)); # to avoid relying on the feature
                                     # logic to add CORE::
@@ -62,8 +62,6 @@ sub testit {
     for my $lex (0, 1, 2) {
 	if ($lex) {
 	    next if $keyword =~ /local|our|state|my/;
-	    # XXX glob(my $x) incorrectly becomes <my $x>
-	    next if $keyword eq 'glob';
 	}
 	my $vars = $lex == 1 ? 'my($a, $b, $c, $d, $e);' . "\n    " : "";
 
@@ -225,13 +223,10 @@ testit exists   => 'exists $h{\'foo\'};',       'exists $h{\'foo\'};';
 
 testit exec     => 'CORE::exec($foo $bar);';
 
-# glob($x) gets deparsed as glob("$x").
-# Whether this is correct, I don't know; but I didn't want
-# to start messing with the whole glob/readline/<> mess - DAPM.
-testit glob     => 'glob;',                       'glob("$_");';
-testit glob     => 'CORE::glob;',                 'glob("$_");';
-testit glob     => 'glob $a;',                    'glob("$a");';
-testit glob     => 'CORE::glob $a;',              'glob("$a");';
+testit glob     => 'glob;',                       'glob($_);';
+testit glob     => 'CORE::glob;',                 'CORE::glob($_);';
+testit glob     => 'glob $a;',                    'glob($a);';
+testit glob     => 'CORE::glob $a;',              'CORE::glob($a);';
 
 testit grep     => 'CORE::grep { $a } $b, $c',    'grep({$a;} $b, $c);';
 
