@@ -78,7 +78,7 @@ BEGIN {
     $::HaveCoreList = ($@ eq "");
 };
 
-my $Version = "1.39";
+my $Version = "1.40";
 
 #TODO:
 #       make sure failure (transmission-wise) of Mail::Send is accounted for.
@@ -90,7 +90,7 @@ my( $file, $usefile, $cc, $address, $bugaddress, $testaddress, $thanksaddress,
     $fh, $me, $body, $andcc, %REP, $ok, $thanks, $progname,
     $Is_MSWin32, $Is_Linux, $Is_VMS, $Is_OpenBSD,
     $report_about_module, $category, $severity,
-    %opt,
+    %opt, $have_attachment, $attachments, $has_patch, $mime_boundary
 );
 
 my $perl_version = $^V ? sprintf("%vd", $^V) : $];
@@ -188,7 +188,7 @@ sub Init {
     $Is_Linux = lc($^O) eq 'linux';
     $Is_OpenBSD = lc($^O) eq 'openbsd';
 
-    if (!getopts("Adhva:s:b:f:F:r:e:SCc:to:n:T", \%opt)) { Help(); exit; };
+    if (!getopts("Adhva:s:b:f:F:r:e:SCc:to:n:T:p:", \%opt)) { Help(); exit; };
 
     # This comment is needed to notify metaconfig that we are
     # using the $perladmin, $cf_by, and $cf_time definitions.
@@ -233,6 +233,21 @@ sub Init {
 
     # File to send as report
     $file = $opt{f} || "";
+
+    # We have one or more attachments
+    $have_attachment = ($opt{p} || 0);
+    $mime_boundary = ('-' x 12) . "$Version.perlbug" if $have_attachment;
+
+    # Comma-separated list of attachments
+    $attachments = $opt{p} || "";
+    $has_patch = 0; # TBD based on file type
+
+    for my $attachment (split /\s*,\s*/, $attachments) {
+        unless (-f $attachment && -r $attachment) {
+            die "The attachment $attachment is not a readable file: $!\n";
+        }
+        $has_patch = 1 if $attachment =~ m/\.(patch|diff)$/;
+    }
 
     # File to output to
     $outfile = $opt{F} || "";
@@ -380,6 +395,8 @@ EOF
 	    }
 	} while (TrivialSubject($subject));
     }
+    $subject = '[PATCH] ' . $subject
+        if $has_patch && ($subject !~ m/^\[PATCH/i);
 
     # Prompt for return address, if needed
     unless ($opt{r}) {
@@ -648,6 +665,13 @@ Flags:
     severity=$severity
 EFF
 
+    if ($has_patch) {
+        print OUT <<EFF;
+    Type=Patch
+    PatchStatus=HasPatch
+EFF
+    }
+
     if ($report_about_module ) { 
         print OUT <<EFF;
     module=$report_about_module
@@ -810,6 +834,10 @@ EOF
 		open(REP, "<$filename") or die "Couldn't open file '$filename': $!\n";
 		while (<REP>) { print $_ }
 		close(REP) or die "Error closing report file '$filename': $!";
+		if ($have_attachment) {
+		    print "\n\n---\nAttachment(s):\n";
+		    for my $att (split /\s*,\s*/, $attachments) { print "    $att\n"; }
+		}
 	    } elsif ($action =~ /^su/i) { # <Su>bject
 		my $reply = _prompt( "Subject: $subject", "If the above subject is fine, press Enter. Otherwise, type a replacement now\nSubject");
 		if ($reply ne '') {
@@ -909,6 +937,7 @@ Advanced usage:
 
 $0  [-v] [-a address] [-s subject] [-b body | -f inpufile ] [ -F outputfile ]
     [-r returnaddress] [-e editor] [-c adminaddress | -C] [-S] [-t] [-h]
+    [-p patchfile ]
 $0  [-v] [-r returnaddress] [-A] [-ok | -okay | -nok | -nokay]
 
 
@@ -917,6 +946,8 @@ Options:
   -v    Include Verbose configuration data in the report
   -f    File containing the body of the report. Use this to
         quickly send a prepared message.
+  -p    File containing a patch or other text attachment. Separate
+        multiple files with commas.
   -F    File to output the resulting mail message to, instead of mailing.
   -S    Send without asking for confirmation.
   -a    Address to send the report to. Defaults to '$address'.
@@ -1004,14 +1035,54 @@ sub _message_headers {
     $headers{'Message-Id'} = $messageid if ($messageid);
     $headers{'Reply-To'}   = $from      if ($from);
     $headers{'From'}       = $from      if ($from);
+    if ($have_attachment) {
+        $headers{'MIME-Version'} = '1.0';
+        $headers{'Content-Type'} = qq{multipart/mixed; boundary=\"$mime_boundary\"};
+    }
     return \%headers;
+}
+
+sub _add_body_start {
+    my $body_start = <<"BODY_START";
+This is a multi-part message in MIME format.
+--$mime_boundary
+Content-Type: text/plain; charset=UTF-8; format=fixed
+Content-Transfer-Encoding: 8bit
+
+BODY_START
+    return $body_start;
+}
+
+sub _add_attachments {
+    my $attach = '';
+    for my $attachment (split /\s*,\s*/, $attachments) {
+        my $attach_file = basename($attachment);
+        $attach .= <<"ATTACHMENT";
+
+--$mime_boundary
+Content-Type: text/x-patch; name="$attach_file"
+Content-Transfer-Encoding: 8bit
+Content-Disposition: attachment; filename="$attach_file"
+
+ATTACHMENT
+
+        open my $attach_fh, '<', $attachment
+            or die "Couldn't open attachment '$attachment': $!\n";
+        while (<$attach_fh>) { $attach .= $_; }
+        close($attach_fh) or die "Error closing attachment '$attachment': $!";
+    }
+
+    $attach .= "\n--$mime_boundary--\n";
+    return $attach;
 }
 
 sub build_complete_message {
     my $content = _build_header(%{_message_headers()}) . "\n\n";
+    $content .= _add_body_start() if $have_attachment;
     open( REP, "<$filename" ) or die "Couldn't open file '$filename': $!\n";
     while (<REP>) { $content .= $_; }
     close(REP) or die "Error closing report file '$filename': $!";
+    $content .= _add_attachments() if $have_attachment;
     return $content;
 }
 
@@ -1052,9 +1123,11 @@ sub _send_message_mailsend {
     }
 
     $fh = $msg->open;
+    print $fh _add_body_start() if $have_attachment;
     open(REP, "<$filename") or die "Couldn't open '$filename': $!\n";
     while (<REP>) { print $fh $_ }
     close(REP) or die "Error closing $filename: $!";
+    print $fh _add_attachments() if $have_attachment;
     $fh->close or die "Error sending mail: $!";
 
     print "\nMessage sent.\n";
@@ -1274,11 +1347,11 @@ will help a great deal.  In other words, try to analyze the problem
 
 =item Can you fix the bug yourself?
 
-A bug report which I<includes a patch to fix it> will almost
-definitely be fixed.  When sending a patch, please use the C<diff>
-program with the C<-u> option to generate "unified" diff files.
-Bug reports with patches are likely to receive significantly more
-attention and interest than those without patches.
+If so, that's great news; bug reports with patches are likely to
+receive significantly more attention and interest than those without
+patches.  Please attach your patch to the report using the C<-p> option.
+When sending a patch, create it using C<git format-patch> if possible,
+though a unified diff created with C<diff -pu> will do nearly as well.
 
 Your patch may be returned with requests for changes, or requests for more
 detailed explanations about your fix.
@@ -1287,10 +1360,10 @@ Here are a few hints for creating high-quality patches:
 
 Make sure the patch is not reversed (the first argument to diff is
 typically the original file, the second argument your changed file).
-Make sure you test your patch by applying it with the C<patch>
-program before you send it on its way.  Try to follow the same style
-as the code you are trying to patch.  Make sure your patch really
-does work (C<make test>, if the thing you're patching is covered
+Make sure you test your patch by applying it with C<git am> or the
+C<patch> program before you send it on its way.  Try to follow the
+same style as the code you are trying to patch.  Make sure your patch
+really does work (C<make test>, if the thing you're patching is covered
 by Perl's test suite).
 
 =item Can you use C<perlbug> to submit the report?
@@ -1416,6 +1489,11 @@ days old.
 
 As B<-nok> except it will report on older systems.
 
+=item B<-p>
+
+The names of one or more patch files or other text attachments to be
+included with the report.  Multiple files must be separated with commas.
+
 =item B<-r>
 
 Your return address.  The program will ask you to confirm its default
@@ -1454,8 +1532,8 @@ Mike Guy (E<lt>mjtg@cam.ac.ukE<gt>), Dominic Dunlop
 (E<lt>domo@computer.orgE<gt>), Hugo van der Sanden (E<lt>hv@crypt.orgE<gt>),
 Jarkko Hietaniemi (E<lt>jhi@iki.fiE<gt>), Chris Nandor
 (E<lt>pudge@pobox.comE<gt>), Jon Orwant (E<lt>orwant@media.mit.eduE<gt>,
-Richard Foley (E<lt>richard.foley@rfi.netE<gt>), and Jesse Vincent
-(E<lt>jesse@bestpractical.comE<gt>).
+Richard Foley (E<lt>richard.foley@rfi.netE<gt>), Jesse Vincent
+(E<lt>jesse@bestpractical.comE<gt>), and Craig A. Berry (E<lt>craigberry@mac.comE<gt>).
 
 =head1 SEE ALSO
 
