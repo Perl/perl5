@@ -176,6 +176,13 @@ sub find_git_or_skip {
 	    }
 	    $source_dir = $where;
 	}
+    } elsif (exists $ENV{GIT_DIR}) {
+	my $commit = '8d063cd8450e59ea1c611a2f4f5a21059a2804f1';
+	my $out = `git rev-parse --verify --quiet '$commit^{commit}'`;
+	chomp $out;
+	if($out eq $commit) {
+	    $source_dir = '.'
+	}
     }
     if ($source_dir) {
 	my $version_string = `git --version`;

@@ -32,7 +32,7 @@ unless (GetOptions('diffs' => \$diffs,
 die "$0: This does not look like a Perl directory\n"
     unless -f "perl.h" && -d "Porting";
 die "$0: 'This is a Perl directory but does not look like Git working directory\n"
-    unless -d ".git";
+    unless (-d ".git" || (exists $ENV{GIT_DIR} && -d $ENV{GIT_DIR}));
 
 my $null = devnull();
 
