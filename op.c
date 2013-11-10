@@ -5506,6 +5506,15 @@ Perl_vload_module(pTHX_ U32 flags, SV *name, SV *ver, va_list *args)
     LEAVE;
 }
 
+PERL_STATIC_INLINE OP *
+S_new_entersubop(pTHX_ GV *gv, OP *arg)
+{
+    return newUNOP(OP_ENTERSUB, OPf_STACKED,
+		   newLISTOP(OP_LIST, 0, arg,
+			     newUNOP(OP_RV2CV, 0,
+				     newGVOP(OP_GV, 0, gv))));
+}
+
 OP *
 Perl_dofile(pTHX_ OP *term, I32 force_builtin)
 {
@@ -5516,10 +5525,7 @@ Perl_dofile(pTHX_ OP *term, I32 force_builtin)
     PERL_ARGS_ASSERT_DOFILE;
 
     if (!force_builtin && (gv = gv_override("do", 2))) {
-	doop = newUNOP(OP_ENTERSUB, OPf_STACKED,
-			       op_append_elem(OP_LIST, term,
-					   scalar(newUNOP(OP_RV2CV, 0,
-							  newGVOP(OP_GV, 0, gv)))));
+	doop = S_new_entersubop(aTHX_ gv, term);
     }
     else {
 	doop = newUNOP(OP_DOFILE, 0, scalar(term));
@@ -8493,11 +8499,7 @@ Perl_ck_backtick(pTHX_ OP *o)
     /* qx and `` have a null pushmark; CORE::readpipe has only one kid. */
     if (o->op_flags & OPf_KIDS && cUNOPo->op_first->op_sibling
      && (gv = gv_override("readpipe",8))) {
-	newop = newUNOP(OP_ENTERSUB, OPf_STACKED,
-			op_append_elem(OP_LIST,
-				       cUNOPo->op_first->op_sibling,
-				       newCVREF(0, newGVOP(OP_GV, 0, gv))
-				      ));
+	newop = S_new_entersubop(aTHX_ gv, cUNOPo->op_first->op_sibling);
 	cUNOPo->op_first->op_sibling = NULL;
     }
     else if (!(o->op_flags & OPf_KIDS))
@@ -9301,11 +9303,7 @@ Perl_ck_glob(pTHX_ OP *o)
 	 */
 	o->op_flags |= OPf_SPECIAL;
 	o->op_targ = pad_alloc(OP_GLOB, SVs_PADTMP);
-	o = newLISTOP(OP_LIST, 0, o, NULL);
-	o = newUNOP(OP_ENTERSUB, OPf_STACKED,
-		    op_append_elem(OP_LIST, o,
-				scalar(newUNOP(OP_RV2CV, 0,
-					       newGVOP(OP_GV, 0, gv)))));
+	o = S_new_entersubop(aTHX_ gv, o);
 	o = newUNOP(OP_NULL, 0, o);
 	o->op_targ = OP_GLOB; /* hint at what it used to be: eg in newWHILEOP */
 	return o;
@@ -9774,11 +9772,7 @@ Perl_ck_require(pTHX_ OP *o)
 #ifndef PERL_MAD
 	op_free(o);
 #endif
-	newop = newUNOP(OP_ENTERSUB, OPf_STACKED,
-				op_append_elem(OP_LIST, kid,
-					    scalar(newUNOP(OP_RV2CV, 0,
-							   newGVOP(OP_GV, 0,
-								   gv)))));
+	newop = S_new_entersubop(aTHX_ gv, kid);
 	op_getmad(o,newop,'O');
 	return newop;
     }
