@@ -12,7 +12,7 @@ BEGIN {
 
 use warnings;
 
-plan( tests => 258 );
+plan( tests => 259 );
 
 # type coercion on assignment
 $foo = 'foo';
@@ -945,6 +945,21 @@ ok eval {
  }
  ok $survived,
   'no error when gp_free calls a destructor that assigns to the gv';
+}
+
+# This is a similar test, for destructors seeing a GV without a reference
+# count on its gp.
+sub undefine_me_if_you_dare {}
+bless \&undefine_me_if_you_dare, "Undefiner";
+sub Undefiner::DESTROY {
+    undef *undefine_me_if_you_dare;
+}
+{
+    my $w;
+    local $SIG{__WARN__} = sub { $w .= shift };
+    undef *undefine_me_if_you_dare;
+    is $w, undef,
+      'undeffing a gv in DESTROY triggered by undeffing the same gv'
 }
 
 # *{undef}

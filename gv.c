@@ -2351,9 +2351,10 @@ Perl_gp_free(pTHX_ GV *gv)
 			 pTHX__FORMAT pTHX__VALUE);
         return;
     }
-    if (--gp->gp_refcnt > 0) {
+    if (gp->gp_refcnt > 1) {
 	if (gp->gp_egv == gv)
 	    gp->gp_egv = 0;
+	gp->gp_refcnt--;
 	GvGP_set(gv, NULL);
         return;
     }
@@ -2411,6 +2412,7 @@ Perl_gp_free(pTHX_ GV *gv)
       }
     }
 
+    gp->gp_refcnt--;
     Safefree(gp);
     GvGP_set(gv, NULL);
 }
