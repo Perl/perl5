@@ -17,7 +17,7 @@ use File::Spec;
 
 no warnings 'utf8';
 
-our $VERSION = '1.01';
+our $VERSION = '1.02';
 our $PACKAGE = __PACKAGE__;
 
 ### begin XS only ###
@@ -1808,19 +1808,18 @@ If C<$substring> does not match any part of C<$string>,
 returns C<-1> in scalar context and
 an empty list in list context.
 
-e.g. you say
+e.g. when the content of C<$str> is C<"Ich mu>E<szlig>C< studieren Perl.">,
+you say the following where C<$sub> is C<"M>E<uuml>C<SS">,
 
   my $Collator = Unicode::Collate->new( normalization => undef, level => 1 );
                                      # (normalization => undef) is REQUIRED.
-  my $str = "Ich muß studieren Perl.";
-  my $sub = "MÜSS";
   my $match;
   if (my($pos,$len) = $Collator->index($str, $sub)) {
       $match = substr($str, $pos, $len);
   }
 
-and get C<"muß"> in C<$match> since C<"muß">
-is primary equal to C<"MÜSS">.
+and get C<"mu>E<szlig>C<"> in C<$match>, since C<"mu>E<szlig>C<">
+is primary equal to C<"M>E<uuml>C<SS">.
 
 =item C<$match_ref = $Collator-E<gt>match($string, $substring)>
 
@@ -2031,7 +2030,7 @@ This module is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
 
 The file Unicode/Collate/allkeys.txt was copied verbatim
-from L<http://www.unicode.org/Public/UCA/6.2.0/allkeys.txt>.
+from L<http://www.unicode.org/Public/UCA/6.3.0/allkeys.txt>.
 For this file, Copyright (c) 2001-2012 Unicode, Inc.
 Distributed under the Terms of Use in L<http://www.unicode.org/copyright.html>.
 

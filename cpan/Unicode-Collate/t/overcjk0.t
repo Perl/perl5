@@ -16,7 +16,7 @@ BEGIN {
 
 use strict;
 use warnings;
-BEGIN { $| = 1; print "1..316\n"; } # 6 + 31 x @Versions
+BEGIN { $| = 1; print "1..347\n"; } # 6 + 31 x @Versions
 my $count = 0;
 sub ok ($;$) {
     my $p = my $r = shift;
@@ -65,7 +65,7 @@ ok($ignoreCJK->lt("Pe\x{5B57}rl", "Perl")); # 'r' is unassigned.
 # 2A700..2B734 are CJK UI Ext.C since UCA_Version 20 (Unicode 5.2).
 # 2B740..2B81D are CJK UI Ext.D since UCA_Version 22 (Unicode 6.0).
 
-my @Versions = (8, 9, 11, 14, 16, 18, 20, 22, 24, 26);
+my @Versions = (8, 9, 11, 14, 16, 18, 20, 22, 24, 26, 28);
 
 for my $v (@Versions) {
     $ignoreCJK->change(UCA_Version => $v);

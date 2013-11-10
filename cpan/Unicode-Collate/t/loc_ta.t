@@ -33,15 +33,15 @@ ok(1);
 
 #########################
 
-my $Kssa = "\x{B95}\x{BCD}\x{BB7}";
-my $v    = "\x{BCD}";
-
 my $objTa = Unicode::Collate::Locale->
     new(locale => 'TA', normalization => undef);
 
 ok($objTa->getlocale, 'ta');
 
 $objTa->change(level => 1);
+
+my $Kssa = "\x{B95}\x{BCD}\x{BB7}";
+my $v    = "\x{BCD}";
 
 for my $h (0, 1) {
     no warnings 'utf8';
@@ -100,3 +100,5 @@ for my $h (0, 1) {
     ok($objTa->lt("${Kssa}$v$t", "${Kssa}"));
     ok($objTa->lt("${Kssa}$t",   "\x{BBE}"));
 }
+
+# 104

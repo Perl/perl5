@@ -16,7 +16,7 @@ BEGIN {
 
 use strict;
 use warnings;
-BEGIN { $| = 1; print "1..421\n"; } # 1 + 42 x @Versions
+BEGIN { $| = 1; print "1..463\n"; } # 1 + 42 x @Versions
 my $count = 0;
 sub ok ($;$) {
     my $p = my $r = shift;
@@ -52,7 +52,7 @@ my $coll = Unicode::Collate->new(
 # 2A700..2B734 are CJK UI Ext.C since UCA_Version 20 (Unicode 5.2).
 # 2B740..2B81D are CJK UI Ext.D since UCA_Version 22 (Unicode 6.0).
 
-my @Versions = (8, 9, 11, 14, 16, 18, 20, 22, 24, 26);
+my @Versions = (8, 9, 11, 14, 16, 18, 20, 22, 24, 26, 28);
 
 for my $v (@Versions) {
     $coll->change(UCA_Version => $v);

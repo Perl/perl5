@@ -4,7 +4,7 @@ use 5.006;
 use strict;
 use Unicode::Collate;
 
-our $VERSION = '0.93';
+our $VERSION = '1.02';
 
 my %jamo2prim = (
     0x1100, 0x3152,   0x1101, 0x3153,   0x1102, 0x3154,   0x1103, 0x3155,
