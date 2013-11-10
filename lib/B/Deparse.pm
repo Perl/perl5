@@ -2664,7 +2664,6 @@ sub listop {
 		: $self->keyword($name) . '()' x (7 < $cx);
     }
     my $first;
-    $name = "socketpair" if $name eq "sockpair";
     my $fullname = $self->keyword($name);
     my $proto = prototype("CORE::$name");
     if (
@@ -2763,7 +2762,7 @@ sub pp_fcntl { listop(@_, "fcntl") }
 sub pp_ioctl { listop(@_, "ioctl") }
 sub pp_flock { maybe_targmy(@_, \&listop, "flock") }
 sub pp_socket { listop(@_, "socket") }
-sub pp_sockpair { listop(@_, "sockpair") }
+sub pp_sockpair { listop(@_, "socketpair") }
 sub pp_bind { listop(@_, "bind") }
 sub pp_connect { listop(@_, "connect") }
 sub pp_listen { listop(@_, "listen") }
