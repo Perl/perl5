@@ -131,6 +131,12 @@ L<Module::CoreList> has been upgraded from version 3.00 to 3.01.
 
 The list of Perl versions covered has been updated.
 
+=item *
+
+L<Tie::StdHandle> has been upgraded from version 4.3 to 4.4.
+
+It no longer prints C<$\> twice.  [perl #120202]
+
 =back
 
 =head2 Removed Modules and Pragmata
