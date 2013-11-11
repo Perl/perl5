@@ -344,6 +344,12 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 XXX
 
+=item *
+
+C<-a> at the start of a line (or a hyphen with any single letter that is
+not a filetest operator) no longer produces an erroneous 'Use of "-a"
+without parentheses is ambiguous' warning.  [perl #120288]
+
 =back
 
 =head1 Known Problems
