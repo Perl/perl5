@@ -367,6 +367,13 @@ C<-a> at the start of a line (or a hyphen with any single letter that is
 not a filetest operator) no longer produces an erroneous 'Use of "-a"
 without parentheses is ambiguous' warning.  [perl #120288]
 
+=item *
+
+Lvalue context is now properly propagated into bare blocks and C<if> and
+C<else> blocks in lvalue subroutines.  Previously, arrays and hashes would
+sometimes incorrectly be flattened when returned in lvalue list context, or
+"Bizarre copy" errors could occur.  [perl #119797]
+
 =back
 
 =head1 Known Problems
