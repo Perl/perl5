@@ -374,6 +374,13 @@ C<else> blocks in lvalue subroutines.  Previously, arrays and hashes would
 sometimes incorrectly be flattened when returned in lvalue list context, or
 "Bizarre copy" errors could occur.  [perl #119797]
 
+=item *
+
+Lvalue context is now propagated to the branches of C<||> and C<&&> (and
+their alphabetic equivalents, C<or> and C<and>).  This means
+C<foreach (pos $x || pos $y) {...}> now allows C<pos> to be modified
+through $_.
+
 =back
 
 =head1 Known Problems
