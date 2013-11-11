@@ -137,6 +137,8 @@ L<Tie::StdHandle> has been upgraded from version 4.3 to 4.4.
 
 It no longer prints C<$\> twice.  [perl #120202]
 
+It no longer ignores the offset passed to C<syswrite>.
+
 =back
 
 =head2 Removed Modules and Pragmata
