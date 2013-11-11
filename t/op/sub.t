@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan( tests => 32 );
+plan( tests => 33 );
 
 sub empty_sub {}
 
@@ -199,4 +199,19 @@ ok !exists $INC{"re.pm"}, 're.pm not loaded yet';
     require re;
     is $str[1], $str[0],
       'XSUB clobbering sub whose DESTROY assigns to the glob';
+}
+{
+    no warnings 'redefine';
+    sub foo {}
+    bless \&foo, 'newATTRSUBbug';
+    sub newATTRSUBbug::DESTROY {
+        my $str1 = "$_[0]";
+        *foo = sub{}; # GvSV had no refcount, so this freed it
+        my $str2 = "$_[0]";   # used to be UNKNOWN(0x7fdda29310e0)
+        @str = ($str1, $str2);
+    }
+    splice @str;
+    eval "sub foo{}";
+    is $str[1], $str[0],
+      'Pure-Perl sub clobbering sub whose DESTROY assigns to the glob';
 }

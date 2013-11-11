@@ -7195,7 +7195,8 @@ Perl_op_const_sv(pTHX_ const OP *o)
 
 static bool
 S_already_defined(pTHX_ CV *const cv, OP * const block, OP * const o,
-			PADNAME * const name, SV ** const const_svp)
+			PADNAME * const name, SV ** const const_svp,
+			GV * const gv)
 {
     assert (cv);
     assert (o || name);
@@ -7246,6 +7247,7 @@ S_already_defined(pTHX_ CV *const cv, OP * const block, OP * const o,
 #endif
     {
 	/* (PL_madskills unset in used file.) */
+	if (gv) GvCV_set(gv,NULL);
 	SvREFCNT_dec(cv);
     }
     return TRUE;
@@ -7370,7 +7372,7 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
             cv_ckproto_len_flags(cv, (GV *)name, ps, ps_len, ps_utf8);
 	/* already defined? */
 	if (exists) {
-	    if (S_already_defined(aTHX_ cv, block, NULL, name, &const_sv))
+	    if (S_already_defined(aTHX_ cv,block,NULL,name,&const_sv,NULL))
 		cv = NULL;
 	    else {
 		if (attrs) goto attrs;
@@ -7742,7 +7744,7 @@ Perl_newATTRSUB_flags(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
             cv_ckproto_len_flags(cv, gv, ps, ps_len, ps_utf8);
 	/* already defined (or promised)? */
 	if (exists || GvASSUMECV(gv)) {
-	    if (S_already_defined(aTHX_ cv, block, o, NULL, &const_sv))
+	    if (S_already_defined(aTHX_ cv, block, o, NULL, &const_sv, gv))
 		cv = NULL;
 	    else {
 		if (attrs) goto attrs;
