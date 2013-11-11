@@ -118,6 +118,15 @@ XXX
 
 =item *
 
+L<B> has been upgraded from version 1.46 to 1.47.
+
+C<< B::PMOP->precomp >> now preserves the internal UTF8 flag correctly, so
+chr 256 remains chr 256, instead of turning into "\xc4\x80".  This allows
+L<B::Deparse> to deparse Unicode regular expression correctly.
+[perl #120182]
+
+=item *
+
 L<Module::CoreList> has been upgraded from version 3.00 to 3.01.
 
 The list of Perl versions covered has been updated.
