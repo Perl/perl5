@@ -265,28 +265,16 @@ XXX
 
 =head1 Platform Support
 
-=over 4
-
-=item arm5tel
-
-Platforms based on cheap ARM CPU's (like the Marvell Kirkwood mv6282) not
-meant for workstations or development boxes should build now. The basic
-problems are the non-standard location for tools.
-
-=back
-
 =head2 New Platforms
 
-XXX List any platforms that this version of perl compiles on, that previous
-versions did not.  These will either be enabled by new files in the F<hints/>
-directories, or new subdirectories and F<README> files at the top level of the
-source tree.
-
 =over 4
 
-=item XXX-some-platform
+=item Synology
 
-XXX
+Synology ships its NAS boxes with a lean Linux distribution (DSM) on relative
+cheap CPU's (like the Marvell Kirkwood mv6282 - ARMv5tel or Freescale QorIQ
+P1022 ppc - e500v2) not meant for workstations or development. These boxes
+should build now. The basic problems are the non-standard location for tools.
 
 =back
 

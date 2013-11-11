@@ -361,35 +361,33 @@ if [ -r /usr/lib/libndbm.so  -a  -x /usr/bin/nm ] ; then
    fi
 fi
 
-# Linux on ARM. This is just one case, possibly needs more exceptions
-case "`uname -m`" in
-    arm*tel)
-	if [ -d /opt/arm-none-linux-gnueabi ]; then
-	    # Tested on Synology DS213
-	    # CPU model Marvell Kirkwood mv6282 ARMv5te
-	    # Linux 2.6.32.12 #3211 Tue Apr 16 20:04:57 CST 2013 armv5tel GNU/Linux
-	    # All development stuff is installed in /opt, which is probably a
-	    # symbolic link to /volum1/@opt
-	    # Without /opt/* nothing works. The devel tools installed with ipkg
-	    # all end up in /opt
-	    export LD_LIBRARY_PATH=/opt/local/lib:/opt/lib:/usr/local/lib:/usr/lib:/lib:${LD_LIBRARY_PATH:-}
-	    if [ "$LANG" = "" -o "$LANG" = "C" ]; then
-		echo 'Your LANG is safe'
-	    else
-		echo 'Please set $LANG to "C". All other $LANG settings will cause havoc' >&4
-		LANG=C
-	    fi
-	    echo 'Setting up to use /opt/*' >&4
-	    locincpth="/opt/local/include /opt/include $locincpth"
-	    libpth="/opt/local/lib /opt/lib $libpth"
-	    libspth="/opt/local/lib /opt/lib $libspth"
-	    loclibpth="/opt/local/lib /opt/lib $loclibpth"
-	    # POSIX will not link without the pthread lib
-	    libswanted="$libswanted pthread"
-	    echo "$libswanted" >&4
-	fi
-	;;
-esac
+# Linux on Synology.
+if [ -f /etc/synoinfo.conf -a -d /usr/syno ]; then
+    # Tested on Synology DS213 and DS413
+    #  OS version info in /etc.defaults/VERSION
+    #  http://forum.synology.com/wiki/index.php/What_kind_of_CPU_does_my_NAS_have
+    # Synology DS213 running DSM 4.3-3810-0 (2013-11-06)
+    #  CPU model Marvell Kirkwood mv6282 ARMv5te
+    #  Linux 2.6.32.12 #3810 Wed Nov 6 05:13:41 CST 2013 armv5tel GNU/Linux
+    # Synology DS413 running DSM 4.3-3810-0 (2013-11-06)
+    #  CPU model Freescale QorIQ P1022 ppc (e500v2)
+    #  linux 2.6.32.12 #3810 ppc GNU/Linux
+    # All development stuff installed with ipkg is in /opt
+    if [ "$LANG" = "" -o "$LANG" = "C" ]; then
+	echo 'Your LANG is safe'
+    else
+	echo 'Please set $LANG to "C". All other $LANG settings will cause havoc' >&4
+	LANG=C
+    fi
+    echo 'Setting up to use /opt/*' >&4
+    locincpth="/opt/include $locincpth"
+    libpth="/opt/lib $libpth"
+    libspth="/opt/lib $libspth"
+    loclibpth="/opt/lib $loclibpth"
+    # POSIX will not link without the pthread lib
+    libswanted="$libswanted pthread"
+    echo "$libswanted" >&4
+fi
 
 # This script UU/usethreads.cbu will get 'called-back' by Configure
 # after it has prompted the user for whether to use threads.
