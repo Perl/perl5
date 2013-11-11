@@ -358,7 +358,8 @@ platform specific bugs also go here.
 
 =item *
 
-XXX
+Perl 5.18.0 accidentally disallowed C<-bareword> under C<use strict> and
+C<use integer>.  This has been fixed.  [perl #120288]
 
 =back
 
