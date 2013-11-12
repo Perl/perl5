@@ -365,7 +365,9 @@ well.
 
 =item *
 
-XXX
+Compiling with C<-Accflags=-PERL_BOOL_AS_CHAR> now allows C99 and C++
+compilers to emulate the aliasing of C<bool> to C<char> that perl does for
+C89 compilers.  [perl #120314]
 
 =back
 
