@@ -443,6 +443,13 @@ on the right-hand (replacement) part of a substitution.  Formerly it could
 happen in code embedded in the left-hand side, or in any other quote-like
 operator.
 
+=item *
+
+The C<\N> regular expression escape, when used without the curly braces (to
+mean C<[^\n]>), was ignoring a following C<*> if followed by whitespace
+under /x.  It had been this way since C<\N> to mean C<[^\n]> was introduced
+in 5.12.0.
+
 =back
 
 =head1 Known Problems
