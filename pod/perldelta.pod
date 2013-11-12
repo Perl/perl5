@@ -396,6 +396,11 @@ their alphabetic equivalents, C<or> and C<and>).  This means
 C<foreach (pos $x || pos $y) {...}> now allows C<pos> to be modified
 through $_.
 
+=item *
+
+C<*DB::DB = sub {} if 0> no longer stops Perl's debugging mode from finding
+C<DB::DB> subs declared thereafter.
+
 =back
 
 =head1 Known Problems
