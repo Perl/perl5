@@ -403,9 +403,10 @@ C<DB::DB> subs declared thereafter.
 
 =item *
 
-C<stat> remembers the last handle used, and the special C<_> filehandle
-will reuse that handle.  C<eval "*foo if 0"> where *foo was the last handle
-passed to C<stat> could cause C<stat> to forget its last handle if the
+C<stat> and C<readline> remember the last handle used; the former
+for the special C<_> filehandle, the latter for C<${^LAST_FH}>.
+C<eval "*foo if 0"> where *foo was the last handle passed to C<stat>
+or C<readline> could cause that handle to be forgotten if the
 handle were not opened yet.  This has been fixed.
 
 =item *
