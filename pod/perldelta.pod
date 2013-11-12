@@ -458,6 +458,13 @@ Blessing into a reference (C<bless $thisref, $thatref>) has long been
 disallowed, but magical scalars for the second like C<$/> and those tied
 were exempt.  They no longer are.  [perl #119809]
 
+=item *
+
+Blessing into a reference was accidentally allowed in 5.18 if the class
+argument were a blessed reference with stale method caches (i.e., whose
+class had had subs defined since the last method call).  They are
+disallowed once more, as in 5.16.
+
 =back
 
 =head1 Known Problems
