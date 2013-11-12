@@ -514,6 +514,18 @@ corresponding functions crash.
 Aliasing CORE::GLOBAL:: functions to constants stopped working in Perl 5.10
 but has now been fixed.
 
+=item *
+
+When C<`...`> or C<qx/.../> calls a C<readpipe> override, double-quotish
+interpolation now happens, as is the case when there is no override.
+Previously, the presence of an override would make these quote-like
+operators act like C<q{}>, suppressing interpolation.  [perl #115330]
+
+=item *
+
+C<<<`...`> here-docs (with backticks as the delimiters) now call
+C<readpipe> overrides.  [perl #119827]
+
 =back
 
 =head1 Known Problems
