@@ -429,6 +429,13 @@ rather than whichever array C<@DB::dbline> is aliased to.  [perl #119799]
 Setting C<$!> to EACCESS before calling C<require> could affect
 C<require>'s behaviour.  This has been fixed.
 
+=item *
+
+The "Can't use \1 to mean $1 in expression" warning message now only occurs
+on the right-hand (replacement) part of a substitution.  Formerly it could
+happen in code embedded in the left-hand side, or in any other quote-like
+operator.
+
 =back
 
 =head1 Known Problems
