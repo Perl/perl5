@@ -472,6 +472,11 @@ disallowed once more, as in 5.16.
 
 An undefined lexical sub used as an inherited method no longer crashes.
 
+=item *
+
+C<< $x->{key} >> where $x was declared as C<my Class $x> no longer crashes
+if a Class::FIELDS subroutine stub has been declared.
+
 =back
 
 =head1 Known Problems
