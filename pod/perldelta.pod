@@ -133,6 +133,14 @@ The list of Perl versions covered has been updated.
 
 =item *
 
+L<PerlIO::scalar> has been upgraded from version 0.17 to 0.18.
+
+A bug fix in 0.17 caused references to be stringified as soon as a handle
+to it was opened, even if it was opened only for reading.  It also croaked
+on read-only references.  This has been fixed.  [perl #119529]
+
+=item *
+
 L<Tie::StdHandle> has been upgraded from version 4.3 to 4.4.
 
 It no longer prints C<$\> twice.  [perl #120202]
