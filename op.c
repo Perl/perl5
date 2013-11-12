@@ -1935,6 +1935,7 @@ S_finalize_op(pTHX_ OP* o)
     case OP_HSLICE:
 	S_scalar_slice_warning(aTHX_ o);
 
+    case OP_KVHSLICE:
 	if (/* I bet there's always a pushmark... */
 	        (kid = cLISTOPo->op_first->op_sibling)->op_type != OP_LIST
 	      && kid->op_type != OP_CONST)
