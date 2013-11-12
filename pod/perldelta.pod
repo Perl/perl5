@@ -496,6 +496,12 @@ crash.
 Declaring a subroutine stub named NEGATIVE_INDICES no longer makes negative
 array indices crash when the current package is a tied array class.
 
+=item *
+
+Declaring a C<require>, C<glob>, or C<do> subroutine stub in the
+CORE::GLOBAL:: package no longer makes compilation of calls to the
+corresponding functions crash.
+
 =back
 
 =head1 Known Problems
