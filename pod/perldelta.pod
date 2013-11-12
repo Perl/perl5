@@ -133,6 +133,13 @@ B<-debug> output now includes C<op_other> pointers.
 
 =item *
 
+L<B::Deparse> has been upgraded from version 1.23 to 1.24.
+
+C<s//\(3)/e> is now deparsed in a way that does not issue warnings when
+parsed again.  [perl #119807]
+
+=item *
+
 L<Module::CoreList> has been upgraded from version 3.00 to 3.01.
 
 The list of Perl versions covered has been updated.
