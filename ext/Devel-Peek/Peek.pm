@@ -3,7 +3,7 @@
 
 package Devel::Peek;
 
-$VERSION = '1.14';
+$VERSION = '1.15';
 $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 

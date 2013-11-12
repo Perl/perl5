@@ -353,7 +353,8 @@ S_ck_dump(pTHX_ OP *entersubop, GV *namegv, SV *cv)
 {
     OP *aop, *prev, *first, *second = NULL;
     BINOP *newop;
-    size_t arg = 0;
+
+    PERL_UNUSED_ARG(cv);
 
     ck_entersub_args_proto(entersubop, namegv,
 			   newSVpvn_flags("$;$", 3, SVs_TEMP));
