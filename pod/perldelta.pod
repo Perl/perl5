@@ -127,6 +127,12 @@ L<B::Deparse> to deparse Unicode regular expression correctly.
 
 =item *
 
+L<B::Concise> has been upgraded from version 0.99 to 0.991.
+
+B<-debug> output now includes C<op_other> pointers.
+
+=item *
+
 L<Module::CoreList> has been upgraded from version 3.00 to 3.01.
 
 The list of Perl versions covered has been updated.
