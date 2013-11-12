@@ -536,6 +536,10 @@ C<readpipe> overrides.  [perl #119827]
 The presence of a lexical sub named "CORE" no longer stops the CORE::
 prefix from working.
 
+=item *
+
+C<&CORE::exit()> and C<&CORE::die()> now respect L<vmsish> hints.
+
 =back
 
 =head1 Known Problems
