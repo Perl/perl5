@@ -30,6 +30,13 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 $a and $b warnings exemption
+
+The special variables $a and $b, used in C<sort>, are now exempt from "used
+once" warnings, even where C<sort> is not used.  This makes it easier for
+CPAN modules to provide functions using $a and $b for similar purposes.
+[perl #120462]
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
