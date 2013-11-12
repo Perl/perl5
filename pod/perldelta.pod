@@ -465,6 +465,10 @@ argument were a blessed reference with stale method caches (i.e., whose
 class had had subs defined since the last method call).  They are
 disallowed once more, as in 5.16.
 
+=item *
+
+An undefined lexical sub used as an inherited method no longer crashes.
+
 =back
 
 =head1 Known Problems
