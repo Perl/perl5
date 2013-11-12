@@ -89,7 +89,10 @@ There may well be none in a stable release.
 
 =item *
 
-XXX
+Constant hash key lookups (C<$hash{key}> as opposed to C<$hash{$key}>) have
+long had the internal hash value computed at compile time, to speed up
+lookup.  This optimisation has only now been applied to hash slices as
+well.
 
 =back
 
