@@ -408,6 +408,11 @@ will reuse that handle.  C<eval "*foo if 0"> where *foo was the last handle
 passed to C<stat> could cause C<stat> to forget its last handle if the
 handle were not opened yet.  This has been fixed.
 
+=item *
+
+Various cases of C<delete $::{a}>, C<delete $::{ENV}> etc. causing a crash
+have been fixed.  [perl #54044]
+
 =back
 
 =head1 Known Problems
