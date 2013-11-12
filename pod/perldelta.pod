@@ -509,6 +509,11 @@ Declaring a C<require>, C<glob>, or C<do> subroutine stub in the
 CORE::GLOBAL:: package no longer makes compilation of calls to the
 corresponding functions crash.
 
+=item *
+
+Aliasing CORE::GLOBAL:: functions to constants stopped working in Perl 5.10
+but has now been fixed.
+
 =back
 
 =head1 Known Problems
