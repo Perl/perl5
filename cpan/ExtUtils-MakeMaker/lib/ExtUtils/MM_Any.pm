@@ -1633,14 +1633,7 @@ sub init_INST {
     # you to build directly into, say $Config{privlibexp}.
     unless ($self->{INST_LIB}){
         if ($self->{PERL_CORE}) {
-            if (defined $Cross::platform) {
-                $self->{INST_LIB} = $self->{INST_ARCHLIB} =
-                  $self->catdir($self->{PERL_LIB},"..","xlib",
-                                     $Cross::platform);
-            }
-            else {
-                $self->{INST_LIB} = $self->{INST_ARCHLIB} = $self->{PERL_LIB};
-            }
+            $self->{INST_LIB} = $self->{INST_ARCHLIB} = $self->{PERL_LIB};
         } else {
             $self->{INST_LIB} = $self->catdir($Curdir,"blib","lib");
         }

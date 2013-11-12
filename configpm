@@ -128,19 +128,10 @@ if ($Opts{chdir}) {
 my ($Config_SH, $Config_PM, $Config_heavy, $Config_POD);
 my $Glossary = 'Porting/Glossary';
 
-if ($Opts{cross}) {
-  # creating cross-platform config file
-  mkdir "xlib";
-  mkdir "xlib/$Opts{cross}";
-  $Config_PM = "xlib/$Opts{cross}/Config.pm";
-  $Config_POD = "xlib/$Opts{cross}/Config.pod";
-  $Config_SH = "Cross/config-$Opts{cross}.sh";
-}
-else {
-  $Config_PM = "lib/Config.pm";
-  $Config_POD = "lib/Config.pod";
-  $Config_SH = "config.sh";
-}
+$Config_PM = "lib/Config.pm";
+$Config_POD = "lib/Config.pod";
+$Config_SH = "config.sh";
+
 ($Config_heavy = $Config_PM) =~ s/\.pm$/_heavy.pl/;
 die "Can't automatically determine name for Config_heavy.pl from '$Config_PM'"
   if $Config_heavy eq $Config_PM;
@@ -1101,43 +1092,6 @@ if ($orig_config_txt ne $config_txt or $orig_heavy_txt ne $heavy_txt) {
     close(CONFIG);
     print "updated $Config_PM\n";
     print "updated $Config_heavy\n";
-}
-
-
-# Now create Cross.pm if needed
-if ($Opts{cross}) {
-  open CROSS, ">lib/Cross.pm" or die "Can not open >lib/Cross.pm: $!";
-  my $cross = <<'EOS';
-# typical invocation:
-#   perl -MCross Makefile.PL
-#   perl -MCross=wince -V:cc
-package Cross;
-
-sub import {
-  my ($package,$platform) = @_;
-  unless (defined $platform) {
-    # if $platform is not specified, then use last one when
-    # 'configpm; was invoked with --cross option
-    $platform = '***replace-marker***';
-  }
-  #a Perl debugger can load a bunch of modules before -MCross with PERL5DB env
-  #var, stopping a cross compile Config.pm from being loaded because the native
-  #Config.pm was already use'd
-  if(exists $INC{'Config.pm'}) {
-    warn "Cross.pm found Config.pm is already loaded, reload required, will delete from %INC";
-    delete $INC{'Config.pm'};
-  }
-  @INC = map {/\blib\b/?(do{local $_=$_;s/\blib\b/xlib\/$platform/;$_},$_):($_)} @INC;
-  $::Cross::platform = $platform;
-}
-
-1;
-EOS
-  $cross =~ s/\*\*\*replace-marker\*\*\*/$Opts{cross}/g;
-  print CROSS $cross;
-  close CROSS;
-  print "written lib/Cross.pm\n";
-  unshift(@INC,"xlib/$Opts{cross}");
 }
 
 # Now do some simple tests on the Config.pm file we have created
