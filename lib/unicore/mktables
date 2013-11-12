@@ -1463,6 +1463,7 @@ my $MIN_FRACTION_LENGTH = 3; # How many digits of a floating point number at
 my $MAX_FLOATING_SLOP = 10 ** - $MIN_FRACTION_LENGTH; # And in floating terms
 
 # These store references to certain commonly used property objects
+my $ccc;
 my $gc;
 my $perl;
 my $block;
@@ -5844,7 +5845,7 @@ END
 
                                 # When outputting the names of each character,
                                 # use the character itself if printable
-                                $comment .= "'" . chr($i) . "' "
+                                $comment .= "'" . main::display_chr($i) . "' "
                                                             if $printable[$i];
 
                                 # To make it more readable, use a minimum
@@ -5872,7 +5873,7 @@ END
                                     foreach my $to (split " ", $map) {
                                         $to = CORE::hex $to;
                                         $to_name .= " + " if $to_name;
-                                        $to_chr .= chr($to);
+                                        $to_chr .= main::display_chr($to);
                                         main::populate_char_info($to)
                                                     if ! defined $viacode[$to];
                                         $to_name .=  $viacode[$to];
@@ -5901,8 +5902,8 @@ END
                                     {
                                         main::populate_char_info($output_value)
                                         if ! defined $viacode[$output_value];
-                                        $comment .= "=> '"
-                                        . chr($output_value)
+                                        $comment .= " => '"
+                                        . main::display_chr($output_value)
                                         . "'; " if $printable[$output_value];
                                     }
                                     $comment .= $viacode[$i] if $include_name
@@ -6762,7 +6763,7 @@ END
                     $to = CORE::hex $to;
                     if ($annotate) {
                         $to_name .= " + " if $to_name;
-                        $to_chr .= chr($to);
+                        $to_chr .= main::display_chr($to);
                         main::populate_char_info($to)
                                             if ! defined $viacode[$to];
                         $to_name .=  $viacode[$to];
@@ -6786,7 +6787,7 @@ END
                     main::populate_char_info($code_point)
                                     if ! defined $viacode[$code_point];
                     $multi_code_point_maps[-1] .= " '"
-                        . chr($code_point)
+                        . main::display_chr($code_point)
                         . "' => '$to_chr'; $viacode[$code_point] => $to_name";
                 }
             }
@@ -8627,6 +8628,16 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
 
 package main;
 
+    sub display_chr {
+        # Converts an ordinal character value to a displayable string, using a
+        # NBSP to hold combining characters.
+
+        my $ord = shift;
+        my $chr = chr $ord;
+        return $chr if $ccc->table(0)->contains($ord);
+        return chr(utf8::unicode_to_native(0xA0)) . $chr;
+    }
+
 sub join_lines($) {
     # Returns lines of the input joined together, so that they can be folded
     # properly.
@@ -9317,7 +9328,7 @@ sub finish_property_setup {
     $gc->add_alias('Category');
 
     # Unicode::Normalize expects this file with this name and directory.
-    my $ccc = property_ref('Canonical_Combining_Class');
+    $ccc = property_ref('Canonical_Combining_Class');
     if (defined $ccc) {
         $ccc->set_file('CombiningClass');
         $ccc->set_directory(File::Spec->curdir());
