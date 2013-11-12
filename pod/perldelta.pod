@@ -401,6 +401,13 @@ through $_.
 C<*DB::DB = sub {} if 0> no longer stops Perl's debugging mode from finding
 C<DB::DB> subs declared thereafter.
 
+=item *
+
+C<stat> remembers the last handle used, and the special C<_> filehandle
+will reuse that handle.  C<eval "*foo if 0"> where *foo was the last handle
+passed to C<stat> could cause C<stat> to forget its last handle if the
+handle were not opened yet.  This has been fixed.
+
 =back
 
 =head1 Known Problems
