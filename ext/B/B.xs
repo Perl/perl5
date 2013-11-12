@@ -660,78 +660,78 @@ struct OP_methods {
     U8    type; /* if op_offset_special, access is handled on a case-by-case basis */
     U16 offset;
 } op_methods[] = {
-    STR_WITH_LEN("next"),    OPp,    offsetof(struct op, op_next),       /* 0*/
-    STR_WITH_LEN("sibling"), OPp,    offsetof(struct op, op_sibling),    /* 1*/
-    STR_WITH_LEN("targ"),    PADOFFSETp, offsetof(struct op, op_targ),   /* 2*/
-    STR_WITH_LEN("flags"),   U8p,    offsetof(struct op, op_flags),      /* 3*/
-    STR_WITH_LEN("private"), U8p,    offsetof(struct op, op_private),    /* 4*/
-    STR_WITH_LEN("first"),   OPp,    offsetof(struct unop, op_first),     /* 5*/
-    STR_WITH_LEN("last"),    OPp,    offsetof(struct binop, op_last),    /* 6*/
-    STR_WITH_LEN("other"),   OPp,    offsetof(struct logop, op_other),   /* 7*/
-    STR_WITH_LEN("pmreplstart"), op_offset_special, 0,                                  /* 8*/
-    STR_WITH_LEN("redoop"),  OPp,    offsetof(struct loop, op_redoop),   /* 9*/
-    STR_WITH_LEN("nextop"),  OPp,    offsetof(struct loop, op_nextop),   /*10*/
-    STR_WITH_LEN("lastop"),  OPp,    offsetof(struct loop, op_lastop),   /*11*/
-    STR_WITH_LEN("pmflags"), U32p,   offsetof(struct pmop, op_pmflags),  /*12*/
+  { STR_WITH_LEN("next"),    OPp,    offsetof(struct op, op_next),     },/* 0*/
+  { STR_WITH_LEN("sibling"), OPp,    offsetof(struct op, op_sibling),  },/* 1*/
+  { STR_WITH_LEN("targ"),    PADOFFSETp, offsetof(struct op, op_targ), },/* 2*/
+  { STR_WITH_LEN("flags"),   U8p,    offsetof(struct op, op_flags),    },/* 3*/
+  { STR_WITH_LEN("private"), U8p,    offsetof(struct op, op_private),  },/* 4*/
+  { STR_WITH_LEN("first"),   OPp,    offsetof(struct unop, op_first),  },/* 5*/
+  { STR_WITH_LEN("last"),    OPp,    offsetof(struct binop, op_last),  },/* 6*/
+  { STR_WITH_LEN("other"),   OPp,    offsetof(struct logop, op_other), },/* 7*/
+  { STR_WITH_LEN("pmreplstart"), op_offset_special, 0,                 },/* 8*/
+  { STR_WITH_LEN("redoop"),  OPp,    offsetof(struct loop, op_redoop), },/* 9*/
+  { STR_WITH_LEN("nextop"),  OPp,    offsetof(struct loop, op_nextop), },/*10*/
+  { STR_WITH_LEN("lastop"),  OPp,    offsetof(struct loop, op_lastop), },/*11*/
+  { STR_WITH_LEN("pmflags"), U32p,   offsetof(struct pmop, op_pmflags),},/*12*/
 #if PERL_VERSION >= 17
-    STR_WITH_LEN("code_list"),OPp,   offsetof(struct pmop, op_code_list),/*13*/
+  { STR_WITH_LEN("code_list"),OPp,   offsetof(struct pmop, op_code_list),},/*13*/
 #else
-    STR_WITH_LEN("code_list"),op_offset_special, 0,
+  { STR_WITH_LEN("code_list"),op_offset_special, 0,
 #endif
-    STR_WITH_LEN("sv"),      SVp,     offsetof(struct svop, op_sv),      /*14*/
-    STR_WITH_LEN("gv"),      SVp,     offsetof(struct svop, op_sv),      /*15*/
-    STR_WITH_LEN("padix"),   PADOFFSETp,offsetof(struct padop, op_padix),/*16*/
-    STR_WITH_LEN("cop_seq"), U32p,    offsetof(struct cop, cop_seq),     /*17*/
-    STR_WITH_LEN("line"),    line_tp, offsetof(struct cop, cop_line),    /*18*/
-    STR_WITH_LEN("hints"),   U32p,    offsetof(struct cop, cop_hints),   /*19*/
+  { STR_WITH_LEN("sv"),      SVp,     offsetof(struct svop, op_sv),    },/*14*/
+  { STR_WITH_LEN("gv"),      SVp,     offsetof(struct svop, op_sv),    },/*15*/
+  { STR_WITH_LEN("padix"),   PADOFFSETp,offsetof(struct padop, op_padix),},/*16*/
+  { STR_WITH_LEN("cop_seq"), U32p,    offsetof(struct cop, cop_seq),   },/*17*/
+  { STR_WITH_LEN("line"),    line_tp, offsetof(struct cop, cop_line),  },/*18*/
+  { STR_WITH_LEN("hints"),   U32p,    offsetof(struct cop, cop_hints), },/*19*/
 #ifdef USE_ITHREADS
-    STR_WITH_LEN("pmoffset"),IVp,     offsetof(struct pmop, op_pmoffset),/*20*/
-    STR_WITH_LEN("filegv"),  op_offset_special, 0,                       /*21*/
-    STR_WITH_LEN("file"),    char_pp, offsetof(struct cop, cop_file),    /*22*/
-    STR_WITH_LEN("stash"),   op_offset_special, 0,                       /*23*/
+  { STR_WITH_LEN("pmoffset"),IVp,     offsetof(struct pmop, op_pmoffset),},/*20*/
+  { STR_WITH_LEN("filegv"),  op_offset_special, 0,                     },/*21*/
+  { STR_WITH_LEN("file"),    char_pp, offsetof(struct cop, cop_file),  },/*22*/
+  { STR_WITH_LEN("stash"),   op_offset_special, 0,                     },/*23*/
 #  if PERL_VERSION < 17
-    STR_WITH_LEN("stashpv"), char_pp, offsetof(struct cop, cop_stashpv), /*24*/
-    STR_WITH_LEN("stashoff"),op_offset_special, 0,                       /*25*/
+  { STR_WITH_LEN("stashpv"), char_pp, offsetof(struct cop, cop_stashpv),}, /*24*/
+  { STR_WITH_LEN("stashoff"),op_offset_special, 0,                     },/*25*/
 #  else
-    STR_WITH_LEN("stashpv"), op_offset_special, 0,                       /*24*/
-    STR_WITH_LEN("stashoff"),PADOFFSETp,offsetof(struct cop, cop_stashoff),/*25*/
+  { STR_WITH_LEN("stashpv"), op_offset_special, 0,                     },/*24*/
+  { STR_WITH_LEN("stashoff"),PADOFFSETp,offsetof(struct cop,cop_stashoff),},/*25*/
 #  endif
 #else
-    STR_WITH_LEN("pmoffset"),op_offset_special, 0,                       /*20*/
-    STR_WITH_LEN("filegv"),  SVp,     offsetof(struct cop, cop_filegv),  /*21*/
-    STR_WITH_LEN("file"),    op_offset_special, 0,                       /*22*/
-    STR_WITH_LEN("stash"),   SVp,     offsetof(struct cop, cop_stash),   /*23*/
-    STR_WITH_LEN("stashpv"), op_offset_special, 0,                       /*24*/
-    STR_WITH_LEN("stashoff"),op_offset_special, 0,                       /*25*/
+  { STR_WITH_LEN("pmoffset"),op_offset_special, 0,                     },/*20*/
+  { STR_WITH_LEN("filegv"),  SVp,     offsetof(struct cop, cop_filegv),},/*21*/
+  { STR_WITH_LEN("file"),    op_offset_special, 0,                     },/*22*/
+  { STR_WITH_LEN("stash"),   SVp,     offsetof(struct cop, cop_stash), },/*23*/
+  { STR_WITH_LEN("stashpv"), op_offset_special, 0,                     },/*24*/
+  { STR_WITH_LEN("stashoff"),op_offset_special, 0,                     },/*25*/
 #endif
-    STR_WITH_LEN("size"),    op_offset_special, 0,                       /*26*/
-    STR_WITH_LEN("name"),    op_offset_special, 0,                       /*27*/
-    STR_WITH_LEN("desc"),    op_offset_special, 0,                       /*28*/
-    STR_WITH_LEN("ppaddr"),  op_offset_special, 0,                       /*29*/
-    STR_WITH_LEN("type"),    op_offset_special, 0,                       /*30*/
-    STR_WITH_LEN("opt"),     op_offset_special, 0,                       /*31*/
-    STR_WITH_LEN("spare"),   op_offset_special, 0,                       /*32*/
-    STR_WITH_LEN("children"),op_offset_special, 0,                       /*33*/
-    STR_WITH_LEN("pmreplroot"), op_offset_special, 0,                    /*34*/
-    STR_WITH_LEN("pmstashpv"), op_offset_special, 0,                                /*35*/
-    STR_WITH_LEN("pmstash"), op_offset_special, 0,                       /*36*/
-    STR_WITH_LEN("precomp"), op_offset_special, 0,                       /*37*/
-    STR_WITH_LEN("reflags"), op_offset_special, 0,                       /*38*/
-    STR_WITH_LEN("sv"),      op_offset_special, 0,                       /*39*/
-    STR_WITH_LEN("gv"),      op_offset_special, 0,                       /*40*/
-    STR_WITH_LEN("pv"),      op_offset_special, 0,                       /*41*/
-    STR_WITH_LEN("label"),   op_offset_special, 0,                       /*42*/
-    STR_WITH_LEN("arybase"), op_offset_special, 0,                       /*43*/
-    STR_WITH_LEN("warnings"),op_offset_special, 0,                       /*44*/
-    STR_WITH_LEN("io"),      op_offset_special, 0,                       /*45*/
-    STR_WITH_LEN("hints_hash"),op_offset_special, 0,                     /*46*/
+  { STR_WITH_LEN("size"),    op_offset_special, 0,                     },/*26*/
+  { STR_WITH_LEN("name"),    op_offset_special, 0,                     },/*27*/
+  { STR_WITH_LEN("desc"),    op_offset_special, 0,                     },/*28*/
+  { STR_WITH_LEN("ppaddr"),  op_offset_special, 0,                     },/*29*/
+  { STR_WITH_LEN("type"),    op_offset_special, 0,                     },/*30*/
+  { STR_WITH_LEN("opt"),     op_offset_special, 0,                     },/*31*/
+  { STR_WITH_LEN("spare"),   op_offset_special, 0,                     },/*32*/
+  { STR_WITH_LEN("children"),op_offset_special, 0,                     },/*33*/
+  { STR_WITH_LEN("pmreplroot"), op_offset_special, 0,                  },/*34*/
+  { STR_WITH_LEN("pmstashpv"), op_offset_special, 0,                   },/*35*/
+  { STR_WITH_LEN("pmstash"), op_offset_special, 0,                     },/*36*/
+  { STR_WITH_LEN("precomp"), op_offset_special, 0,                     },/*37*/
+  { STR_WITH_LEN("reflags"), op_offset_special, 0,                     },/*38*/
+  { STR_WITH_LEN("sv"),      op_offset_special, 0,                     },/*39*/
+  { STR_WITH_LEN("gv"),      op_offset_special, 0,                     },/*40*/
+  { STR_WITH_LEN("pv"),      op_offset_special, 0,                     },/*41*/
+  { STR_WITH_LEN("label"),   op_offset_special, 0,                     },/*42*/
+  { STR_WITH_LEN("arybase"), op_offset_special, 0,                     },/*43*/
+  { STR_WITH_LEN("warnings"),op_offset_special, 0,                     },/*44*/
+  { STR_WITH_LEN("io"),      op_offset_special, 0,                     },/*45*/
+  { STR_WITH_LEN("hints_hash"),op_offset_special, 0,                   },/*46*/
 #if PERL_VERSION >= 17
-    STR_WITH_LEN("slabbed"), op_offset_special, 0,                       /*47*/
-    STR_WITH_LEN("savefree"),op_offset_special, 0,                       /*48*/
-    STR_WITH_LEN("static"),  op_offset_special, 0,                       /*49*/
-#if PERL_VERSION >= 19
-    STR_WITH_LEN("folded"),  op_offset_special, 0,                       /*50*/
-#endif
+  { STR_WITH_LEN("slabbed"), op_offset_special, 0,                     },/*47*/
+  { STR_WITH_LEN("savefree"),op_offset_special, 0,                     },/*48*/
+  { STR_WITH_LEN("static"),  op_offset_special, 0,                     },/*49*/
+#  if PERL_VERSION >= 19
+  { STR_WITH_LEN("folded"),  op_offset_special, 0,                     },/*50*/
+#  endif
 #endif
 };
 
@@ -1011,7 +1011,7 @@ next(o)
     PREINIT:
 	SV *ret;
     PPCODE:
-	if (ix < 0 || ix >= C_ARRAY_LENGTH(op_methods))
+	if (ix < 0 || (U32)ix >= C_ARRAY_LENGTH(op_methods))
 	    croak("Illegal alias %d for B::*OP::next", (int)ix);
 	ret = get_overlay_object(aTHX_ o,
 			    op_methods[ix].name, op_methods[ix].namelen);
@@ -1688,10 +1688,26 @@ MODULE = B	PACKAGE = B::BM		PREFIX = Bm
 U32
 BmPREVIOUS(sv)
 	B::BM	sv
+    CODE:
+#if PERL_VERSION >= 19
+        PERL_UNUSED_VAR(sv);
+#endif
+	RETVAL = BmPREVIOUS(sv);
+    OUTPUT:
+        RETVAL
+
 
 U8
 BmRARE(sv)
 	B::BM	sv
+    CODE:
+#if PERL_VERSION >= 19
+        PERL_UNUSED_VAR(sv);
+#endif
+	RETVAL = BmRARE(sv);
+    OUTPUT:
+        RETVAL
+
 
 MODULE = B	PACKAGE = B::GV		PREFIX = Gv
 
@@ -1838,12 +1854,15 @@ AvARRAYelt(av, idx)
 
 MODULE = B	PACKAGE = B::FM		PREFIX = Fm
 
-#undef FmLINES
-#define FmLINES(sv) 0
-
 IV
-FmLINES(form)
-	B::FM	form
+FmLINES(format)
+	B::FM	format
+    CODE:
+        PERL_UNUSED_VAR(format);
+       RETVAL = 0;
+    OUTPUT:
+        RETVAL
+
 
 MODULE = B	PACKAGE = B::CV		PREFIX = Cv
 
@@ -1983,7 +2002,7 @@ PadlistARRAY(padlist)
     PPCODE:
 	if (PadlistMAX(padlist) >= 0) {
 	    PAD **padp = PadlistARRAY(padlist);
-	    PADOFFSET i;
+            SSize_t i;
 	    for (i = 0; i <= PadlistMAX(padlist); i++)
 		XPUSHs(make_sv_object(aTHX_ (SV *)padp[i]));
 	}
@@ -1991,7 +2010,7 @@ PadlistARRAY(padlist)
 void
 PadlistARRAYelt(padlist, idx)
 	B::PADLIST	padlist
-	PADOFFSET	idx
+	SSize_t 	idx
     PPCODE:
 	if (PadlistMAX(padlist) >= 0
 	 && idx <= PadlistMAX(padlist))
@@ -2004,6 +2023,7 @@ U32
 PadlistREFCNT(padlist)
 	B::PADLIST	padlist
     CODE:
+        PERL_UNUSED_VAR(padlist);
 	RETVAL = PadlistREFCNT(padlist);
     OUTPUT:
 	RETVAL
