@@ -485,6 +485,12 @@ if a Class::FIELDS subroutine stub has been declared.
 C<@$obj{'key'}> and C<${$obj}{key}> used to be exempt from compile-time
 field checking ("No such class field"; see L<fields>) but no longer are.
 
+=item *
+
+A nonexistent array element with a large index passed to a subroutine that
+ties the array and then tries to access the element no longer results in a
+crash.
+
 =back
 
 =head1 Known Problems
