@@ -477,6 +477,11 @@ An undefined lexical sub used as an inherited method no longer crashes.
 C<< $x->{key} >> where $x was declared as C<my Class $x> no longer crashes
 if a Class::FIELDS subroutine stub has been declared.
 
+=item *
+
+C<@$obj{'key'}> and C<${$obj}{key}> used to be exempt from compile-time
+field checking ("No such class field"; see L<fields>) but no longer are.
+
 =back
 
 =head1 Known Problems
