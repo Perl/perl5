@@ -1,3 +1,6 @@
+=for todo
+b47a847f62 win32/win32sck.c: dont close() a freed socket os handle
+
 =encoding utf8
 
 =head1 NAME
