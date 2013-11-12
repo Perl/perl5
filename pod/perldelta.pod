@@ -359,7 +359,8 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+Perl 5.18.0 accidentally disallowed C<-bareword> under C<use strict> and
+C<use integer>.  This has been fixed.  [perl #120288]
 
 =item *
 
@@ -395,8 +396,7 @@ platform specific bugs also go here.
 
 =item *
 
-Perl 5.18.0 accidentally disallowed C<-bareword> under C<use strict> and
-C<use integer>.  This has been fixed.  [perl #120288]
+XXX
 
 =back
 
