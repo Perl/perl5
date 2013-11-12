@@ -81,9 +81,9 @@ my $mb = Module::Build->new_from_context;
   is $node->{version}, $metadata{dist_version};
   is $node->{abstract}, $metadata{dist_abstract};
   is_deeply $node->{author}, $metadata{dist_author};
-  is $node->{license}, $metadata{license};
-  is_deeply $node->{configure_requires}, $mb_config_req, 'Add M::B to configure_requires';
-  is_deeply $node->{test_requires}, {
+  is_deeply $node->{license}, [ 'perl_5' ];
+  is_deeply $node->{prereqs}{configure}{requires}, $mb_config_req, 'Add M::B to configure_requires';
+  is_deeply $node->{prereqs}{test}{requires}, {
       'Test::More' => '0.49',
   }, 'Test::More was required by ->new';
   like $node->{generated_by}, qr{Module::Build};
@@ -102,7 +102,7 @@ my $mb = Module::Build->new_from_context;
 
 
   # exists() doesn't seem to work here
-  is_deeply $node->{configure_requires}, $mb_prereq, 'Add M::B to configure_requires';
+  is_deeply $node->{prereqs}{configure}{requires}, $mb_prereq, 'Add M::B to configure_requires';
 }
 
 $dist->clean;

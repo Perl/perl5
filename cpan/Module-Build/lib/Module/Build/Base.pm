@@ -6,7 +6,7 @@ use strict;
 use vars qw($VERSION);
 use warnings;
 
-$VERSION = '0.4008';
+$VERSION = '0.4200';
 $VERSION = eval $VERSION;
 BEGIN { require 5.006001 }
 
@@ -1904,53 +1904,27 @@ sub create_mymeta {
   if ( $self->try_require("CPAN::Meta", "2.110420") ) {
     for my $file ( @metafiles ) {
       next unless -f $file;
-      $meta_obj = eval { CPAN::Meta->load_file($file) };
+      $meta_obj = eval { CPAN::Meta->load_file($file, { lazy_validation => 0 }) };
       last if $meta_obj;
     }
   }
 
   # maybe get a copy in spec v2 format (regardless of original source)
-  $mymeta = $meta_obj->as_struct
-    if $meta_obj;
 
+  my $mymeta_obj = $self->_get_meta_object(quiet => 0, dynamic => 0, fatal => 1, auto => 0);
   # if we have metadata, just update it
-  if ( defined $mymeta ) {
-    my $prereqs = $self->_normalize_prereqs;
-    # XXX refactor this mapping somewhere
-    $mymeta->{prereqs}{runtime}{requires} = $prereqs->{requires};
-    $mymeta->{prereqs}{build}{requires} = $prereqs->{build_requires};
-    $mymeta->{prereqs}{test}{requires} = $prereqs->{test_requires};
-    $mymeta->{prereqs}{runtime}{recommends} = $prereqs->{recommends};
-    $mymeta->{prereqs}{runtime}{conflicts} = $prereqs->{conflicts};
-    # delete empty entries
-    for my $phase ( keys %{$mymeta->{prereqs}} ) {
-      if ( ref $mymeta->{prereqs}{$phase} eq 'HASH' ) {
-        for my $type ( keys %{$mymeta->{prereqs}{$phase}} ) {
-          if ( ! defined $mymeta->{prereqs}{$phase}{$type}
-            || ! keys %{$mymeta->{prereqs}{$phase}{$type}}
-          ) {
-            delete $mymeta->{prereqs}{$phase}{$type};
-          }
-        }
-      }
-      if ( ! defined $mymeta->{prereqs}{$phase}
-        || ! keys %{$mymeta->{prereqs}{$phase}}
-      ) {
-        delete $mymeta->{prereqs}{$phase};
-      }
-    }
-    $mymeta->{dynamic_config} = 0;
-    $mymeta->{generated_by} = "Module::Build version $Module::Build::VERSION";
-    eval { $meta_obj = CPAN::Meta->new( $mymeta, { lazy_validation => 1 } ) }
-  }
-  # or generate from scratch, ignoring errors if META doesn't exist
-  else {
-    $meta_obj = $self->_get_meta_object(
-      quiet => 0, dynamic => 0, fatal => 0, auto => 0
+  if ($meta_obj && $mymeta_obj) {
+    my $prereqs = $mymeta_obj->effective_prereqs->with_merged_prereqs($meta_obj->effective_prereqs);
+    my %updated = (
+      %{ $meta_obj->as_struct({ version => 2.0 }) },
+      prereqs => $prereqs->as_string_hash,
+      dynamic_config => 0,
+      generated_by => "Module::Build version $Module::Build::VERSION",
     );
+    $mymeta_obj = CPAN::Meta->new( \%updated, { lazy_validation => 0 } );
   }
 
-  my @created = $self->_write_meta_files( $meta_obj, 'MYMETA' );
+  my @created = $self->_write_meta_files( $mymeta_obj, 'MYMETA' );
 
   $self->log_warn("Could not create MYMETA files\n")
     unless @created;
@@ -4567,7 +4541,7 @@ sub _get_meta_object {
       auto => $args{auto},
     );
     $data->{dynamic_config} = $args{dynamic} if defined $args{dynamic};
-    $meta = CPAN::Meta->create( $data );
+    $meta = CPAN::Meta->create($data);
   };
   if ($@ && ! $args{quiet}) {
     $self->log_warn(
@@ -4623,6 +4597,16 @@ sub normalize_version {
   return $version;
 }
 
+my %prereq_map = (
+  requires => [ qw/runtime requires/],
+  configure_requires => [qw/configure requires/],
+  build_requires => [ qw/build requires/ ],
+  test_requires => [ qw/test requires/ ],
+  test_recommends => [ qw/test recommends/ ],
+  recommends => [ qw/build recommends/ ],
+  conflicts => [ qw/build conflicts/ ],
+);
+
 sub _normalize_prereqs {
   my ($self) = @_;
   my $p = $self->{properties};
@@ -4630,46 +4614,97 @@ sub _normalize_prereqs {
   # copy prereq data structures so we can modify them before writing to META
   my %prereq_types;
   for my $type ( 'configure_requires', @{$self->prereq_action_types} ) {
-    if (exists $p->{$type}) {
+    if (exists $p->{$type} and keys %{ $p->{$type} }) {
+      my ($phase, $relation) = @{ $prereq_map{$type} };
       for my $mod ( keys %{ $p->{$type} } ) {
-        $prereq_types{$type}{$mod} =
-          $self->normalize_version($p->{$type}{$mod});
+        $prereq_types{$phase}{$relation}{$mod} = $self->normalize_version($p->{$type}{$mod});
       }
     }
   }
   return \%prereq_types;
 }
 
-# wrapper around old prepare_metadata API;
-sub get_metadata {
-  my ($self, %args) = @_;
-  my $metadata = {};
-  $self->prepare_metadata( $metadata, undef, \%args );
-  return $metadata;
+sub _get_license {
+  my $self = shift;
+
+  my $license = $self->license;
+  my ($meta_license, $meta_license_url);
+
+  my $valid_licenses = $self->valid_licenses();
+  if ( my $sl = $self->_software_license_object ) {
+    $meta_license = $sl->meta2_name;
+    $meta_license_url = $sl->url;
+  }
+  elsif ( exists $valid_licenses->{$license} ) {
+    $meta_license = $valid_licenses->{$license} ? lc $valid_licenses->{$license} : $license;
+    $meta_license_url = $self->_license_url( $license );
+  }
+  else {
+    $self->log_warn( "Can not determine license type for '" . $self->license
+      . "'\nSetting META license field to 'unknown'.\n");
+    $meta_license = 'unknown';
+  }
+  return ($meta_license, $meta_license_url);
 }
 
-# To preserve compatibility with old API, $node *must* be a hashref
-# passed in to prepare_metadata.  $keys is an arrayref holding a
-# list of keys -- it's use is optional and generally no longer needed
-# but kept for back compatibility.  $args is an optional parameter to
-# support the new 'fatal' toggle
+my %keep = map { $_ => 1 } qw/keywords dynamic_config provides no_index name version abstract/;
+my %ignore = map { $_ => 1 } qw/distribution_type/;
+my %reject = map { $_ => 1 } qw/private author license requires recommends build_requires configure_requires conflicts/;
 
-sub prepare_metadata {
-  my ($self, $node, $keys, $args) = @_;
-  unless ( ref $node eq 'HASH' ) {
-    croak "prepare_metadata() requires a hashref argument to hold output\n";
+sub _upconvert_resources {
+  my ($input) = @_;
+  my %output;
+  for my $key (keys %{$input}) {
+    my $out_key = $key =~ /^\p{Lu}/ ? "x_\l$key" : $key;
+    if ($key eq 'repository') {
+      my $name = $input->{$key} =~ m{ \A http s? :// .* (<! \.git ) \z }xms ? 'web' : 'url';
+      $output{$out_key} = { $name => $input->{$key} };
+    }
+    elsif ($key eq 'bugtracker') {
+      $output{$out_key} = { web => $input->{$key} }
+    }
+    else {
+      $output{$out_key} = $input->{$key};
+    }
   }
-  my $fatal = $args->{fatal} || 0;
+  return \%output
+}
+my %custom = (
+	resources => \&_upconvert_resources,
+);
+
+sub _upconvert_metapiece {
+  my ($input, $type) = @_;
+  return $input if exists $input->{'meta-spec'} && $input->{'meta-spec'}{version} == 2;
+
+  my %ret;
+  for my $key (keys %{$input}) {
+    if ($keep{$key}) {
+      $ret{$key} = $input->{$key};
+    }
+    elsif ($ignore{$key}) {
+      next;
+    }
+    elsif ($reject{$key}) {
+      croak "Can't $type $key, please use another mechanism";
+    }
+    elsif (my $converter = $custom{$key}) {
+      $ret{$key} = $converter->($input->{$key});
+    }
+    else {
+      warn "Unknown key $key\n" unless $key =~ / \A x_ /xi;
+    }
+  }
+  return \%ret;
+}
+
+sub get_metadata {
+  my ($self, %args) = @_;
+
+  my $fatal = $args{fatal} || 0;
   my $p = $self->{properties};
 
-  $self->auto_config_requires if $args->{auto};
-
-  # A little helper sub
-  my $add_node = sub {
-    my ($name, $val) = @_;
-    $node->{$name} = $val;
-    push @$keys, $name if $keys;
-  };
+  $self->auto_config_requires if $args{auto};
 
   # validate required fields
   foreach my $f (qw(dist_name dist_version dist_author dist_abstract license)) {
@@ -4685,80 +4720,61 @@ sub prepare_metadata {
     }
   }
 
+  my %metadata = (
+    name => $self->dist_name,
+    version => $self->normalize_version($self->dist_version),
+    author => $self->dist_author,
+    abstract => $self->dist_abstract,
+    generated_by => "Module::Build version $Module::Build::VERSION",
+    'meta-spec' => {
+      version => '2',
+      url     => 'http://search.cpan.org/perldoc?CPAN::Meta::Spec',
+    },
+    dynamic_config => exists $p->{dynamic_config} ? $p->{dynamic_config} : 1,
+    release_status => $self->release_status,
+  );
 
-  # add dist_* fields
-  foreach my $f (qw(dist_name dist_version dist_author dist_abstract)) {
-    (my $name = $f) =~ s/^dist_//;
-    $add_node->($name, $self->$f());
-  }
+  my ($meta_license, $meta_license_url) = $self->_get_license;
+  $metadata{license} = [ $meta_license ];
+  $metadata{resources}{license} = [ $meta_license_url ] if defined $meta_license_url;
 
-  # normalize version
-  $node->{version} = $self->normalize_version($node->{version});
+  $metadata{prereqs} = $self->_normalize_prereqs;
 
-  # validate license information
-  my $license = $self->license;
-  my ($meta_license, $meta_license_url);
-
-  # XXX this is still meta spec version 1 stuff
-
-  # if Software::License::* exists, then we can use it to get normalized name
-  # for META files
-
-  if ( my $sl = $self->_software_license_object ) {
-    $meta_license = $sl->meta_name;
-    $meta_license_url = $sl->url;
-  }
-  elsif ( exists $self->valid_licenses()->{$license} ) {
-    $meta_license = $license;
-    $meta_license_url = $self->_license_url( $license );
-  }
-  else {
-  # if we didn't find a license from a Software::License class,
-  # then treat it as unknown
-    $self->log_warn( "Can not determine license type for '" . $self->license
-      . "'\nSetting META license field to 'unknown'.\n");
-    $meta_license = 'unknown';
-  }
-
-  $node->{license} = $meta_license;
-  $node->{resources}{license} = $meta_license_url if defined $meta_license_url;
-
-  # add prerequisite data
-  my $prereqs = $self->_normalize_prereqs;
-  for my $t ( keys %$prereqs ) {
-      $add_node->($t, $prereqs->{$t});
-  }
-
-  if (exists $p->{dynamic_config}) {
-    $add_node->('dynamic_config', $p->{dynamic_config});
-  }
-  my $pkgs = eval { $self->find_dist_packages };
-  if ($@) {
+  if (exists $p->{no_index}) {
+    $metadata{no_index} = $p->{no_index};
+  } elsif (my $pkgs = eval { $self->find_dist_packages }) {
+    $metadata{provides} = $pkgs if %$pkgs;
+  } else {
     $self->log_warn("$@\nWARNING: Possible missing or corrupt 'MANIFEST' file.\n" .
                     "Nothing to enter for 'provides' field in metafile.\n");
-  } else {
-    $node->{provides} = $pkgs if %$pkgs;
-  }
-;
-  if (exists $p->{no_index}) {
-    $add_node->('no_index', $p->{no_index});
   }
 
-  $add_node->('generated_by', "Module::Build version $Module::Build::VERSION");
-
-  $add_node->('meta-spec',
-              {version => '1.4',
-               url     => 'http://module-build.sourceforge.net/META-spec-v1.4.html',
-              });
-
-  while (my($k, $v) = each %{$self->meta_add}) {
-    $add_node->($k, $v);
+  my $meta_add = _upconvert_metapiece($self->meta_add, 'add');
+  while (my($k, $v) = each %{$meta_add} ) {
+    $metadata{$k} = $v;
   }
 
-  while (my($k, $v) = each %{$self->meta_merge}) {
-    $self->_hash_merge($node, $k, $v);
+  my $meta_merge = _upconvert_metapiece($self->meta_merge, 'merge');
+  while (my($k, $v) = each %{$meta_merge} ) {
+    $self->_hash_merge(\%metadata, $k, $v);
   }
 
+  return \%metadata;
+}
+
+# To preserve compatibility with old API, $node *must* be a hashref
+# passed in to prepare_metadata.  $keys is an arrayref holding a
+# list of keys -- it's use is optional and generally no longer needed
+# but kept for back compatibility.  $args is an optional parameter to
+# support the new 'fatal' toggle
+
+sub prepare_metadata {
+  my ($self, $node, $keys, $args) = @_;
+  unless ( ref $node eq 'HASH' ) {
+    croak "prepare_metadata() requires a hashref argument to hold output\n";
+  }
+  croak 'Keys argument to prepare_metadata is no longer supported' if $keys;
+  %{$node} = %{ $self->get_meta(%{$args}) };
   return $node;
 }
 

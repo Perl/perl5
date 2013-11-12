@@ -1627,6 +1627,7 @@ cpan/Module-Build/t/runthrough.t
 cpan/Module-Build/t/sample.t
 cpan/Module-Build/t/script_dist.t
 cpan/Module-Build/t/test_file_exts.t
+cpan/Module-Build/t/test_reqs.t
 cpan/Module-Build/t/test_types.t
 cpan/Module-Build/t/test_type.t
 cpan/Module-Build/t/tilde.t
