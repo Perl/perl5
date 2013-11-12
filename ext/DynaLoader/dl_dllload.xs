@@ -197,6 +197,7 @@ dl_error()
 void
 CLONE(...)
     CODE:
+    PERL_UNUSED_VAR(items);
     MY_CXT_CLONE;
 
     /* MY_CXT_CLONE just does a memcpy on the whole structure, so to avoid
