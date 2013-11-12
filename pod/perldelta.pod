@@ -414,6 +414,11 @@ handle were not opened yet.  This has been fixed.
 Various cases of C<delete $::{a}>, C<delete $::{ENV}> etc. causing a crash
 have been fixed.  [perl #54044]
 
+=item *
+
+Assigning another typeglob to C<*^R> no longer makes the regular expression
+engine crash.
+
 =back
 
 =head1 Known Problems
