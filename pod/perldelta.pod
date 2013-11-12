@@ -452,6 +452,12 @@ mean C<[^\n]>), was ignoring a following C<*> if followed by whitespace
 under /x.  It had been this way since C<\N> to mean C<[^\n]> was introduced
 in 5.12.0.
 
+=item *
+
+Blessing into a reference (C<bless $thisref, $thatref>) has long been
+disallowed, but magical scalars for the second like C<$/> and those tied
+were exempt.  They no longer are.  [perl #119809]
+
 =back
 
 =head1 Known Problems
