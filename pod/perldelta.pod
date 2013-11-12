@@ -527,6 +527,11 @@ operators act like C<q{}>, suppressing interpolation.  [perl #115330]
 C<<<`...`> here-docs (with backticks as the delimiters) now call
 C<readpipe> overrides.  [perl #119827]
 
+=item *
+
+The presence of a lexical sub named "CORE" no longer stops the CORE::
+prefix from working.
+
 =back
 
 =head1 Known Problems
@@ -541,7 +546,10 @@ platform specific bugs also go here.
 
 =item *
 
-XXX
+C<do CORE()> used to call a sub named "CORE" and treat its return value as
+a file name to execute.  A bug fix inadvertently caused it to be
+interpreted as the deprecated "do-SUB" construct.  (Yes, C<do
+I<bareword>()> is inconsistent.)  This will likely be changed back.
 
 =back
 
