@@ -419,6 +419,11 @@ have been fixed.  [perl #54044]
 Assigning another typeglob to C<*^R> no longer makes the regular expression
 engine crash.
 
+=item *
+
+C<%{'_<...'}> hashes now set breakpoints on the corresponding C<@{'_<...'}>
+rather than whichever array C<@DB::dbline> is aliased to.  [perl #119799]
+
 =back
 
 =head1 Known Problems
