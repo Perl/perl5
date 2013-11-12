@@ -491,6 +491,11 @@ A nonexistent array element with a large index passed to a subroutine that
 ties the array and then tries to access the element no longer results in a
 crash.
 
+=item *
+
+Declaring a subroutine stub named NEGATIVE_INDICES no longer makes negative
+array indices crash when the current package is a tied array class.
+
 =back
 
 =head1 Known Problems
