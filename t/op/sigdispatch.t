@@ -98,8 +98,8 @@ TODO:
 	# tests on production releases
 	skip("some OSes hang here", 3) if (int($]*1000) & 1) == 0;
     
-  TODO: {
-	local $::TODO = "Issues on Android" if $^O =~ /android/;
+  SKIP: {
+	skip("Issues on Android", 3) if $^O =~ /android/;
 	my $action = POSIX::SigAction->new(sub { $gotit--, die }, POSIX::SigSet->new, 0);
 	POSIX::sigaction(&POSIX::SIGALRM, $action);
 	eval {
