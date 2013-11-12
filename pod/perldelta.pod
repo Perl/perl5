@@ -152,6 +152,12 @@ L<B::Deparse> has been upgraded from version 1.23 to 1.24.
 C<s//\(3)/e> is now deparsed in a way that does not issue warnings when
 parsed again.  [perl #119807]
 
+C<glob(my $x)> is now deparsed correctly, rather than as C<< <my $x> >> or
+similar.
+
+C<CORE::glob> is now deparsed correctly with the CORE:: prefix when there
+is a subroutine named "glob".
+
 =item *
 
 L<Module::CoreList> has been upgraded from version 3.00 to 3.01.
