@@ -463,7 +463,7 @@ PerlIO_debug(const char *fmt, ...)
 	char buffer[1024];
 	const STRLEN len1 = my_snprintf(buffer, sizeof(buffer), "%.40s:%" IVdf " ", s ? s : "(none)", (IV) CopLINE(PL_curcop));
 	const STRLEN len2 = my_vsnprintf(buffer + len1, sizeof(buffer) - len1, fmt, ap);
-	PerlLIO_write(PL_perlio_debug_fd, buffer, len1 + len2);
+	(void)PerlLIO_write(PL_perlio_debug_fd, buffer, len1 + len2);
 #else
 	const char *s = CopFILE(PL_curcop);
 	STRLEN len;
@@ -472,7 +472,7 @@ PerlIO_debug(const char *fmt, ...)
 	Perl_sv_vcatpvf(aTHX_ sv, fmt, &ap);
 
 	s = SvPV_const(sv, len);
-	PerlLIO_write(PL_perlio_debug_fd, s, len);
+	(void)PerlLIO_write(PL_perlio_debug_fd, s, len);
 	SvREFCNT_dec(sv);
 #endif
     }

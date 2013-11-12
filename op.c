@@ -1964,6 +1964,8 @@ S_finalize_op(pTHX_ OP* o)
 	}
 
         lexname = NULL; /* just to silence compiler warnings */
+        fields  = NULL; /* just to silence compiler warnings */
+
 	check_fields =
 	    rop
 	 && (lexname = *av_fetch(PL_comppad_name, rop->op_targ, TRUE),

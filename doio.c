@@ -1395,7 +1395,7 @@ S_exec_failed(pTHX_ const char *cmd, int fd, int do_report)
 	Perl_warner(aTHX_ packWARN(WARN_EXEC), "Can't exec \"%s\": %s",
 		    cmd, Strerror(e));
     if (do_report) {
-	PerlLIO_write(fd, (void*)&e, sizeof(int));
+	(void)PerlLIO_write(fd, (void*)&e, sizeof(int));
 	PerlLIO_close(fd);
     }
 }
