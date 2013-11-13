@@ -3443,30 +3443,35 @@ STATIC void
 S_minus_v(pTHX)
 {
 	PerlIO * PIO_stdout;
-	if (!sv_derived_from(PL_patchlevel, "version"))
-	    upg_version(PL_patchlevel, TRUE);
 	{
-	    SV* level= vstringify(PL_patchlevel);
+	    const char * const level_str = "v" PERL_VERSION_STRING;
+	    const STRLEN level_len = sizeof("v" PERL_VERSION_STRING)-1;
 #ifdef PERL_PATCHNUM
+	    SV* level;
 #  ifdef PERL_GIT_UNCOMMITTED_CHANGES
-	    SV *num = newSVpvs(PERL_PATCHNUM "*");
+	    static const char num [] = PERL_PATCHNUM "*";
 #  else
-	    SV *num = newSVpvs(PERL_PATCHNUM);
+	    static const char num [] = PERL_PATCHNUM;
 #  endif
 	    {
-		STRLEN level_len, num_len;
-		char * level_str, * num_str;
-		num_str = SvPV(num, num_len);
-		level_str = SvPV(level, level_len);
-		if (num_len>=level_len && strnEQ(num_str,level_str,level_len)) {
-		    SvREFCNT_dec(level);
-		    level= num;
+		const STRLEN num_len = sizeof(num)-1;
+		/* A very advanced compiler would fold away the strnEQ
+		   and this whole conditional, but most (all?) won't do it.
+		   SV level could also be replaced by with preprocessor
+		   catenation.
+		*/
+		if (num_len >= level_len && strnEQ(num,level_str,level_len)) {
+		    /* per 46807d8e80, PERL_PATCHNUM is outside of the control
+		       of the interp so it might contain format characters
+		    */
+		    level = newSVpvn(num, num_len);
 		} else {
-		    Perl_sv_catpvf(aTHX_ level, " (%"SVf")", num);
-		    SvREFCNT_dec(num);
+		    level = Perl_newSVpvf_nocontext("%s (%s)", level_str, num);
 		}
 	    }
- #endif
+#else
+	SV* level = newSVpvn(level_str, level_len);
+#endif /* #ifdef PERL_PATCHNUM */
 	PIO_stdout =  PerlIO_stdout();
 	    PerlIO_printf(PIO_stdout,
 		"\nThis is perl "	STRINGIFY(PERL_REVISION)
@@ -3474,7 +3479,7 @@ S_minus_v(pTHX)
 		", subversion "		STRINGIFY(PERL_SUBVERSION)
 		" (%"SVf") built for "	ARCHNAME, level
 		);
-	    SvREFCNT_dec(level);
+	    SvREFCNT_dec_NN(level);
 	}
 #if defined(LOCAL_PATCH_COUNT)
 	if (LOCAL_PATCH_COUNT > 0)
