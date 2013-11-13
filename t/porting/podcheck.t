@@ -389,8 +389,6 @@ my %excluded_files = (
                         canonicalize('cpan/Pod-Perldoc/corpus/perlfunc.pod') => 1,
                         canonicalize('cpan/Pod-Perldoc/corpus/utf8.pod') => 1,
                         canonicalize("lib/unicore/mktables") => 1,
-                        canonicalize("cpan/Test-Harness/lib/TAP/Harness/Beyond.pod") => 1, #XXX temporary to get blead passing
-                        canonicalize("lib/TAP/Harness/Beyond.pod") => 1, #XXX temporary to get blead passing
                     );
 
 # This list should not include anything for which case sensitivity is
