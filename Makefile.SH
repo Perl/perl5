@@ -921,13 +921,14 @@ lib/buildcustomize.pl: $& $(mini_obj) write_buildcustomize.pl
 		;;
 	*)
 		if test "X$hostperl" != X; then
-			$spitshell >>$Makefile <<'!NO!SUBS!'
-lib/buildcustomize.pl: $& $(mini_obj) write_buildcustomize.pl
+			$spitshell >>$Makefile <<!GROK!THIS!
+lib/buildcustomize.pl: \$& \$(mini_obj) write_buildcustomize.pl
 	-@rm -f miniperl.xok
-	-@rm $(MINIPERL_EXE)
-	ln -s $(HOST_PERL) $(MINIPERL_EXE)
-	$(LDLIBPTH) ./miniperl$(HOST_EXE_EXT) -w -Ilib -MExporter -e '<?>' || $(MAKE) minitest
-!NO!SUBS!
+	-@rm \$(MINIPERL_EXE)
+	\$(LNS) \$(HOST_PERL) \$(MINIPERL_EXE)
+	\$(LDLIBPTH) ./miniperl\$(HOST_EXE_EXT) -w -Ilib -Idist/Exporter/lib -MExporter -e '<?>' || sh -c 'echo >&2 Failed to build miniperl.  Please run make minitest; exit 1'
+	\$(MINIPERL) -f write_buildcustomize.pl 'osname' "$osname"
+!GROK!THIS!
 		else
 			$spitshell >>$Makefile <<'!NO!SUBS!'
 lib/buildcustomize.pl: $& $(mini_obj) write_buildcustomize.pl
