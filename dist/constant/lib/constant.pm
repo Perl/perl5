@@ -222,7 +222,7 @@ This pragma allows you to declare constants at compile-time.
 
 When you declare a constant such as C<PI> using the method shown
 above, each machine your script runs upon can have as many digits
-of accuracy as it can use. Also, your program will be easier to
+of accuracy as it can use.  Also, your program will be easier to
 read, more likely to be maintained (and maintained correctly), and
 far less likely to send a space probe to the wrong planet because
 nobody noticed the one equation in which you wrote C<3.14195>.
@@ -235,7 +235,7 @@ away if the constant is false.
 =head1 NOTES
 
 As with all C<use> directives, defining a constant happens at
-compile time. Thus, it's probably not correct to put a constant
+compile time.  Thus, it's probably not correct to put a constant
 declaration inside of a conditional statement (like C<if ($foo)
 { use constant ... }>).
 
@@ -268,8 +268,8 @@ their own constants to override those in their base class.
 The use of all caps for constant names is merely a convention,
 although it is recommended in order to make constants stand out
 and to help avoid collisions with other barewords, keywords, and
-subroutine names. Constant names must begin with a letter or
-underscore. Names beginning with a double underscore are reserved. Some
+subroutine names.  Constant names must begin with a letter or
+underscore.  Names beginning with a double underscore are reserved.  Some
 poor choices for names will generate warnings, if warnings are enabled at
 compile time.
 
@@ -344,15 +344,15 @@ constants without any problems.
 =head1 TECHNICAL NOTES
 
 In the current implementation, scalar constants are actually
-inlinable subroutines. As of version 5.004 of Perl, the appropriate
+inlinable subroutines.  As of version 5.004 of Perl, the appropriate
 scalar constant is inserted directly in place of some subroutine
-calls, thereby saving the overhead of a subroutine call. See
+calls, thereby saving the overhead of a subroutine call.  See
 L<perlsub/"Constant Functions"> for details about how and when this
 happens.
 
 In the rare case in which you need to discover at run time whether a
 particular constant has been declared via this module, you may use
-this function to examine the hash C<%constant::declared>. If the given
+this function to examine the hash C<%constant::declared>.  If the given
 constant name does not include a package name, the current package is
 used.
 
@@ -372,7 +372,7 @@ In v5.20 or higher, they are still not read-only, but that may change in
 future versions.
 
 It is not possible to have a subroutine or a keyword with the same
-name as a constant in the same package. This is probably a Good Thing.
+name as a constant in the same package.  This is probably a Good Thing.
 
 A constant with a name in the list C<STDIN STDOUT STDERR ARGV ARGVOUT
 ENV INC SIG> is not allowed anywhere but in package C<main::>, for
