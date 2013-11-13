@@ -27,6 +27,11 @@ BEGIN {
 use strict;
 require 't/test.pl';
 
+use Config;
+if ( $Config{usecrosscompile} ) {
+  skip_all( "Not all files are available during cross-compilation" );
+}
+
 my $result = runperl(switches => ['-f', '-Ilib'], 
                      progfile => 'Porting/pod_rules.pl',
                      args     => ['--tap'],

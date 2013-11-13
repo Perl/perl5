@@ -9,6 +9,11 @@ use strict;
 chdir 't';
 require './test.pl';
 
+use Config;
+if ( $Config{usecrosscompile} ) {
+  skip_all( "Not all files are available during cross-compilation" );
+}
+
 plan('no_plan');
 
 use File::Basename;

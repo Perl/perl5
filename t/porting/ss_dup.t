@@ -3,7 +3,12 @@
 @TODO = qw [ SAVEt_SAVESWITCHSTACK ];
 @TODO{@TODO} = ();
 
-BEGIN { chdir 't'; require './test.pl' }
+BEGIN { chdir 't'; unshift @INC, "../lib"; require './test.pl' }
+use Config;
+
+if ( $Config{usecrosscompile} ) {
+  skip_all( "Not all files are available during cross-compilation" );
+}
 
 sub read_cases {
   my ($file, $func) = @_;

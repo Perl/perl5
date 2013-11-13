@@ -18,6 +18,10 @@ use Scalar::Util;
 use Text::Tabs;
 
 BEGIN {
+    if ( $Config{usecrosscompile} ) {
+        print "1..0 # Not all files are available during cross-compilation\n";
+        exit 0;
+    }
     require '../regen/regen_lib.pl';
 }
 

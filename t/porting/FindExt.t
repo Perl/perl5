@@ -16,6 +16,10 @@ if ($^O eq "MSWin32" && !defined $ENV{PERL_STATIC_EXT}) {
     skip_all "PERL_STATIC_EXT must be set to the list of static extensions";
 }
 
+if ( $Config{usecrosscompile} ) {
+  skip_all( "Not all files are available during cross-compilation" );
+}
+
 require FindExt;
 
 FindExt::apply_config(\%Config);

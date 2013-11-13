@@ -21,8 +21,12 @@ working on older releases. It should be run before making a new release.
 
 use TestInit;
 use strict;
+use Config;
 BEGIN { require 'test.pl' }
 
+if ( $Config{usecrosscompile} ) {
+  skip_all( "Not all files are available during cross-compilation" );
+}
 
 my ($opt) = @ARGV;
 
