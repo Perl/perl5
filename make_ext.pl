@@ -1,8 +1,8 @@
 #!./miniperl
 use strict;
 use warnings;
-use constant IS_CROSS => defined $::Cross::platform ? 1 : 0;
 use Config;
+use constant IS_CROSS => defined $Config::Config{usecrosscompile} ? 1 : 0;
 
 my $is_Win32 = $^O eq 'MSWin32';
 my $is_VMS = $^O eq 'VMS';
@@ -310,31 +310,32 @@ sub build_extension {
 		}
 	    }
 	}
-	if(IS_CROSS){
-	    seek($mfh, 0, 0) or die "Cannot seek $makefile: $!";
-	    while (<$mfh>) {
-		#this is used to stop the while loop early for efficiency when
-		#the line is reached, and possibly match a cross build
-		my $header = quotemeta '# These definitions are from config.sh (via ';
-		if(/^$header.+?
-		    (xlib[\/\\]
-		    $::Cross::platform\Q\/Config.pm\E)?\)\./x) {
-		    unless (defined $1){
-			print "Deleting non-Cross makefile\n";
-			close $mfh or die "close $makefile: $!";
-			_unlink($makefile);
-			{
-			    no warnings 'deprecated';
-			    goto NO_MAKEFILE;
-			}
-		    } else { #have a cross makefile
-			goto CROSS_OK_MF;
-		    }
-		}
-	    } #catch breakage from future changes
-	    die "non-standard makefile found in $mname";
-	    CROSS_OK_MF:
-	}
+
+        if (IS_CROSS) {
+            # If we're cross-compiling, it's possible that the host's
+            # Makefiles are around.
+            seek($mfh, 0, 0) or die "Cannot seek $makefile: $!";
+            
+            my $cross_makefile;
+            while (<$mfh>) {
+                # XXX This might not be throughout enough.
+                # For example, it's possible to cause a false-positive
+                # if cross compiling on and for the Raspberry Pi,
+                # which is insane but plausible.
+                # False positives are really not troublesome, though;
+                # all they mean is that the module gets rebuilt.
+                if (/^CC = \Q$Config{cc}\E/) {
+                    $cross_makefile = 1;
+                    last;
+                }
+            }
+            
+            if (!$cross_makefile) {
+                print "Deleting non-Cross makefile\n";
+                close $mfh or die "close $makefile: $!";
+                _unlink($makefile);
+            }
+        }
     }
 
     if (!-f $makefile) {
@@ -441,17 +442,7 @@ EOM
 	}
 	print "\nRunning Makefile.PL in $ext_dir\n";
 
-	# Presumably this can be simplified
-	my @cross;
-	if (IS_CROSS) {
-	    # Inherited from win32/buildext.pl
-	    @cross = "-MCross=$::Cross::platform";
-	} elsif ($opts{cross}) {
-	    # Inherited from make_ext.pl
-	    @cross = '-MCross';
-	}
-
-	my @args = ("-I$lib_dir", @cross, 'Makefile.PL');
+	my @args = ("-I$lib_dir", 'Makefile.PL');
 	if ($is_VMS) {
 	    my $libd = VMS::Filespec::vmspath($lib_dir);
 	    push @args, "INST_LIB=$libd", "INST_ARCHLIB=$libd";
