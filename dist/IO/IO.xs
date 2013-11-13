@@ -350,7 +350,7 @@ ungetc(handle, c)
                  * above-Unicodes */
                 end = uvchr_to_utf8_flags(buf, v, 0);
                 len = end - buf;
-                if (PerlIO_unread(handle, &buf, len) == len)
+                if ((Size_t)PerlIO_unread(handle, &buf, len) == len)
                     XSRETURN_UV(v);
                 else
                     RETVAL = EOF;
