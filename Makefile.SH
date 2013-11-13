@@ -20,16 +20,7 @@ case $PERL_CONFIG_SH in
 	;;
 esac
 
-case $CROSS_NAME in
-'')
-	Makefile=Makefile
-	;;
-*)
-	# if cross-compilation, the Makefile named accordingly
-	Makefile=Makefile-cross-$CROSS_NAME
-	. Cross/config-${CROSS_NAME}.sh
-	;;
-esac
+Makefile=Makefile
 
 : This forces SH files to create target in same directory as SH file.
 : This is so that make depend always knows where to find SH derivatives.
@@ -425,8 +416,6 @@ EOF
 	;;
 esac
 
-case $CROSS_NAME in
-'')
 ## In the following dollars and backticks do not need the extra backslash.
 $spitshell >>$Makefile <<'!NO!SUBS!'
 
@@ -441,28 +430,6 @@ CONFIGPOD = lib/Config.pod
 
 CONFIGH = config.h
 !NO!SUBS!
-	;;
-*)
-	# if cross-compilation
-$spitshell >>$Makefile <<!GROK!THIS!
-CROSS_NAME = $CROSS_NAME
-CROSS_LIB = xlib/$CROSS_NAME
-
-CCCMD    = \`sh \$(shellflags) cflags-cross-$CROSS_NAME "optimize='\$(OPTIMIZE)'" \$@\` -I\$(CROSS_LIB)
-CCCMDSRC = \`sh \$(shellflags) cflags-cross-$CROSS_NAME "optimize='\$(OPTIMIZE)'" \$<\` -I\$(CROSS_LIB)
-CONFIGPM = xlib/\$(CROSS_NAME)/Config.pm
-CONFIGPOD = xlib/\$(CROSS_NAME)/Config.pod
-CONFIGH = xconfig.h
-
-xconfig.h: config_h.SH Cross/config-\$(CROSS_NAME).sh
-	CONFIG_SH=Cross/config-\$(CROSS_NAME).sh CONFIG_H=xconfig.h \$(SHELL) config_h.SH
-	#TODO \$(LDLIBPTH) ./miniperl$(EXE_EXT) -Ilib -MCross=\$(CROSS_NAME) config_h.PL "INST_VER=\$(INST_VER)" "CORE_DIR=\$(CROSS_LIB)" "CONFIG_H=xconfig.h"
-	cp xconfig.h \$(CROSS_LIB)/
-	cp xconfig.h \$(CROSS_LIB)/config.h
-
-!GROK!THIS!
-	;;
-esac
 
 SH_to_target() {
     echo $@ | sed -e s/\\\.SH//g -e s/_/./g
