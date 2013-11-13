@@ -100,6 +100,11 @@ iterate(pTHX_ bool(*globber)(pTHX_ AV *entries, const char *pat, STRLEN len, boo
         else {
             pat = SvPV_nomg(patsv,len);
             is_utf8 = !!SvUTF8(patsv);
+            /* the lower-level code expects a null-terminated string */
+            if (!SvPOK(patsv) || pat != SvPVX(patsv) || pat[len] != '\0') {
+                SV *newpatsv = newSVpvn_flags(pat, len, SVs_TEMP);
+                pat = SvPV_nomg(newpatsv,len);
+            }
         }
 
         if (!IS_SAFE_SYSCALL(pat, len, "pattern", "glob")) {
@@ -122,7 +127,7 @@ iterate(pTHX_ bool(*globber)(pTHX_ AV *entries, const char *pat, STRLEN len, boo
 	    SP += AvFILLp(entries)+1;
 	}
 	/* No G_DISCARD here!  It will free the stack items. */
-	hv_delete(MY_CXT.x_GLOB_ENTRIES, cxixpv, cxixlen, 0);
+	(void)hv_delete(MY_CXT.x_GLOB_ENTRIES, cxixpv, cxixlen, 0);
     }
     else {
 	if (AvFILLp(entries) + 1) {
@@ -130,7 +135,7 @@ iterate(pTHX_ bool(*globber)(pTHX_ AV *entries, const char *pat, STRLEN len, boo
 	}
 	else {
 	    /* return undef for EOL */
-	    hv_delete(MY_CXT.x_GLOB_ENTRIES, cxixpv, cxixlen, G_DISCARD);
+	    (void)hv_delete(MY_CXT.x_GLOB_ENTRIES, cxixpv, cxixlen, G_DISCARD);
 	    PUSHs(&PL_sv_undef);
 	}
     }
@@ -306,6 +311,11 @@ doglob_iter_wrapper(pTHX_ AV *entries, const char *pattern, STRLEN len, bool is_
     int const flags =
 	    (int)SvIV(get_sv("File::Glob::DEFAULT_FLAGS", GV_ADD));
 
+    PERL_UNUSED_VAR(len); /* we use \0 termination instead */
+    /* XXX we currently just use the underlying bytes of the passed SV.
+     * Some day someone needs to make glob utf8 aware */
+    PERL_UNUSED_VAR(is_utf8);
+
     PUSHMARK(SP);
     PUTBACK;
     doglob(aTHX_ pattern, flags);
@@ -330,7 +340,7 @@ glob_ophook(pTHX_ OP *o)
     dMY_CXT;
     if (MY_CXT.x_GLOB_ENTRIES
      && (o->op_type == OP_GLOB || o->op_type == OP_ENTERSUB))
-	hv_delete(MY_CXT.x_GLOB_ENTRIES, (char *)&o, sizeof(OP *),
+	(void)hv_delete(MY_CXT.x_GLOB_ENTRIES, (char *)&o, sizeof(OP *),
 		  G_DISCARD);
     if (MY_CXT.x_GLOB_OLD_OPHOOK) MY_CXT.x_GLOB_OLD_OPHOOK(aTHX_ o);
   }
