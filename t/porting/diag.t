@@ -7,8 +7,14 @@ use TestInit qw(T); # T is chdir to the top level
 
 use warnings;
 use strict;
+use Config;
 
 require 't/test.pl';
+
+if ( $Config{usecrosscompile} ) {
+  skip_all( "Not all files are available during cross-compilation" );
+}
+
 plan('no_plan');
 
 # --make-exceptions-list outputs the list of strings that don't have

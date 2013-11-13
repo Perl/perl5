@@ -15,6 +15,10 @@ $::NO_ENDING = $::NO_ENDING = 1;
 if ( $^O eq "VMS" ) {
   skip_all( "- regen.pl needs porting." );
 }
+use Config;
+if ( $Config{usecrosscompile} ) {
+  skip_all( "Not all files are available during cross-compilation" );
+}
 
 my $tests = 26; # I can't see a clean way to calculate this automatically.
 
