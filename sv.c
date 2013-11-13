@@ -3680,7 +3680,7 @@ Loosely speaking, it performs a copy-by-value, obliterating any previous
 content of the destination.
 If the C<flags> parameter has the C<SV_GMAGIC> bit set, will C<mg_get> on
 C<ssv> if appropriate, else not.  If the C<flags>
-parameter has the C<NOSTEAL> bit set then the
+parameter has the C<SV_NOSTEAL> bit set then the
 buffers of temps will not be stolen.  <sv_setsv>
 and C<sv_setsv_nomg> are implemented in terms of this function.
 
