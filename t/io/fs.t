@@ -19,6 +19,11 @@ elsif ($^O eq 'VMS') {
 elsif ($ENV{PWD}) {
     $wd = $ENV{PWD};
 }
+elsif ( $^O =~ /android/ && !$Config{d_useshellcmds} ) {
+    # On Android, pwd is a shell builtin, so unless perl was built
+    # with -DUSE_SHELL_ALWAYS, `pwd` won't cut it
+    $wd = `sh -c pwd`;
+}
 else {
     $wd = `pwd`;
 }
