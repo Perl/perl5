@@ -3563,7 +3563,10 @@ S_fold_constants(pTHX_ OP *o)
 #endif
     assert(sv);
     if (type == OP_STRINGIFY) SvPADTMP_off(sv);
-    else if (!SvIMMORTAL(sv)) SvPADTMP_on(sv);
+    else if (!SvIMMORTAL(sv)) {
+	SvPADTMP_on(sv);
+	SvREADONLY_on(sv);
+    }
     if (type == OP_RV2GV)
 	newop = newGVOP(OP_GV, 0, MUTABLE_GV(sv));
     else
@@ -3612,7 +3615,10 @@ S_gen_constant_list(pTHX_ OP *o)
     ((UNOP*)o)->op_first = newSVOP(OP_CONST, 0, (SV *)av);
     if (AvFILLp(av) != -1)
 	for (svp = AvARRAY(av) + AvFILLp(av); svp >= AvARRAY(av); --svp)
+	{
 	    SvPADTMP_on(*svp);
+	    SvREADONLY_on(*svp);
+	}
 #ifdef PERL_MAD
     op_getmad(curop,o,'O');
 #else
