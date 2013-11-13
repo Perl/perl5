@@ -17,7 +17,7 @@ use TAP::Parser::SourceHandler::Handle     ();
 
 use Carp qw( confess );
 
-use parent 'TAP::Base';
+use base 'TAP::Base';
 
 =encoding utf8
 
@@ -27,11 +27,11 @@ TAP::Parser - Parse L<TAP|Test::Harness::TAP> output
 
 =head1 VERSION
 
-Version 3.29
+Version 3.30
 
 =cut
 
-our $VERSION = '3.29';
+our $VERSION = '3.30';
 
 my $DEFAULT_TAP_VERSION = 12;
 my $MAX_TAP_VERSION     = 13;

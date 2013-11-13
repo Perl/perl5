@@ -9,6 +9,7 @@ use warnings;
 
 use Test::More tests => 79;
 
+use Config;
 use IO::File;
 use IO::Handle;
 use File::Spec;
@@ -87,6 +88,7 @@ my %file = map { $_ => File::Spec->catfile( $dir, $_ ) }
             {   name => "valid executable",
                 raw  => [
                     $perl, ( $ENV{PERL_CORE} ? '-I../../lib' : () ),
+                    (map { "-I$_" } split /$Config{path_sep}/, $ENV{PERL5LIB} || ''),
                     '-It/lib', '-T', $file{source}
                 ],
                 iclass        => 'TAP::Parser::Iterator::Process',

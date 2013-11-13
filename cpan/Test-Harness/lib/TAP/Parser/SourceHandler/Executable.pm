@@ -6,7 +6,7 @@ use warnings;
 use TAP::Parser::IteratorFactory   ();
 use TAP::Parser::Iterator::Process ();
 
-use parent 'TAP::Parser::SourceHandler';
+use base 'TAP::Parser::SourceHandler';
 
 TAP::Parser::IteratorFactory->register_handler(__PACKAGE__);
 
@@ -16,11 +16,11 @@ TAP::Parser::SourceHandler::Executable - Stream output from an executable TAP so
 
 =head1 VERSION
 
-Version 3.29
+Version 3.30
 
 =cut
 
-our $VERSION = '3.29';
+our $VERSION = '3.30';
 
 =head1 SYNOPSIS
 
@@ -159,7 +159,7 @@ Please see L<TAP::Parser/SUBCLASSING> for a subclassing overview.
   use Carp qw( croak );
   use TAP::Parser::SourceHandler::Executable;
 
-  use parent 'TAP::Parser::SourceHandler::Executable';
+  use base 'TAP::Parser::SourceHandler::Executable';
 
   # expect $handler->(['mytest.rb', 'cmdline', 'args']);
   sub make_iterator {

@@ -9,8 +9,8 @@ use MyIterator;
 use TAP::Parser::SourceHandler;
 use TAP::Parser::IteratorFactory;
 
-#use parent qw( TAP::Parser::SourceHandler MyCustom );
-use parent qw( MyCustom );
+#use base qw( TAP::Parser::SourceHandler MyCustom );
+use base qw( MyCustom );
 
 TAP::Parser::IteratorFactory->register_handler(__PACKAGE__);
 

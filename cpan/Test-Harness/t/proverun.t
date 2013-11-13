@@ -69,7 +69,7 @@ BEGIN {
 
 package FakeProve;
 
-use parent qw( App::Prove );
+use base qw( App::Prove );
 
 sub new {
     my $class = shift;

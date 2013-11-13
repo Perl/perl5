@@ -3,7 +3,7 @@ package TAP::Parser::Iterator::Stream;
 use strict;
 use warnings;
 
-use parent 'TAP::Parser::Iterator';
+use base 'TAP::Parser::Iterator';
 
 =head1 NAME
 
@@ -11,11 +11,11 @@ TAP::Parser::Iterator::Stream - Iterator for filehandle-based TAP sources
 
 =head1 VERSION
 
-Version 3.29
+Version 3.30
 
 =cut
 
-our $VERSION = '3.29';
+our $VERSION = '3.30';
 
 =head1 SYNOPSIS
 

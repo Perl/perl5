@@ -10,7 +10,7 @@ use Carp;
 use App::Prove::State::Result;
 use TAP::Parser::YAMLish::Reader ();
 use TAP::Parser::YAMLish::Writer ();
-use parent 'TAP::Base';
+use base 'TAP::Base';
 
 BEGIN {
     __PACKAGE__->mk_methods('result_class');
@@ -25,11 +25,11 @@ App::Prove::State - State storage for the C<prove> command.
 
 =head1 VERSION
 
-Version 3.29
+Version 3.30
 
 =cut
 
-our $VERSION = '3.29';
+our $VERSION = '3.30';
 
 =head1 DESCRIPTION
 

@@ -6,7 +6,7 @@ use warnings;
 use Config;
 use IO::Handle;
 
-use parent 'TAP::Parser::Iterator';
+use base 'TAP::Parser::Iterator';
 
 my $IS_WIN32 = ( $^O =~ /^(MS)?Win32$/ );
 
@@ -16,11 +16,11 @@ TAP::Parser::Iterator::Process - Iterator for process-based TAP sources
 
 =head1 VERSION
 
-Version 3.29
+Version 3.30
 
 =cut
 
-our $VERSION = '3.29';
+our $VERSION = '3.30';
 
 =head1 SYNOPSIS
 
@@ -157,9 +157,7 @@ sub _initialize {
             };
             die "Could not execute (@command): $@" if $@;
             if ( $] >= 5.006 ) {
-
-                # Kludge to avoid warning under 5.5
-                eval 'binmode($out, ":crlf")';
+                binmode($out, ":crlf");
             }
         }
         else {

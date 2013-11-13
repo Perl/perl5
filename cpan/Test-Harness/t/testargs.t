@@ -82,7 +82,7 @@ sub make_shell_test {
 
 package Test::Prove;
 
-use parent 'App::Prove';
+use base 'App::Prove';
 
 sub _runtests {
     my $self = shift;

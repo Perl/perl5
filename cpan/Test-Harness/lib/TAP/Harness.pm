@@ -8,7 +8,7 @@ use File::Spec;
 use File::Path;
 use IO::Handle;
 
-use parent 'TAP::Base';
+use base 'TAP::Base';
 
 =head1 NAME
 
@@ -16,11 +16,11 @@ TAP::Harness - Run test scripts with statistics
 
 =head1 VERSION
 
-Version 3.29
+Version 3.30
 
 =cut
 
-our $VERSION = '3.29';
+our $VERSION = '3.30';
 
 $ENV{HARNESS_ACTIVE}  = 1;
 $ENV{HARNESS_VERSION} = $VERSION;

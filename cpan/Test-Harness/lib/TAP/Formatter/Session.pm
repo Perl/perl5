@@ -3,7 +3,7 @@ package TAP::Formatter::Session;
 use strict;
 use warnings;
 
-use parent 'TAP::Base';
+use base 'TAP::Base';
 
 my @ACCESSOR;
 
@@ -23,11 +23,11 @@ TAP::Formatter::Session - Abstract base class for harness output delegate
 
 =head1 VERSION
 
-Version 3.29
+Version 3.30
 
 =cut
 
-our $VERSION = '3.29';
+our $VERSION = '3.30';
 
 =head1 METHODS
 

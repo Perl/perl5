@@ -11,7 +11,7 @@ use TAP::Parser::IteratorFactory           ();
 use TAP::Parser::Iterator::Process         ();
 use Text::ParseWords qw(shellwords);
 
-use parent 'TAP::Parser::SourceHandler::Executable';
+use base 'TAP::Parser::SourceHandler::Executable';
 
 TAP::Parser::IteratorFactory->register_handler(__PACKAGE__);
 
@@ -21,11 +21,11 @@ TAP::Parser::SourceHandler::Perl - Stream TAP from a Perl executable
 
 =head1 VERSION
 
-Version 3.29
+Version 3.30
 
 =cut
 
-our $VERSION = '3.29';
+our $VERSION = '3.30';
 
 =head1 SYNOPSIS
 
@@ -344,7 +344,7 @@ Please see L<TAP::Parser/SUBCLASSING> for a subclassing overview.
 
   use TAP::Parser::SourceHandler::Perl;
 
-  use parent 'TAP::Parser::SourceHandler::Perl';
+  use base 'TAP::Parser::SourceHandler::Perl';
 
   # use the version of perl from the shebang line in the test file
   sub get_perl {

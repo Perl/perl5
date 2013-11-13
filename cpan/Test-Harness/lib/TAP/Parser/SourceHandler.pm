@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 use TAP::Parser::Iterator ();
-use parent 'TAP::Object';
+use base 'TAP::Object';
 
 =head1 NAME
 
@@ -12,11 +12,11 @@ TAP::Parser::SourceHandler - Base class for different TAP source handlers
 
 =head1 VERSION
 
-Version 3.29
+Version 3.30
 
 =cut
 
-our $VERSION = '3.29';
+our $VERSION = '3.30';
 
 =head1 SYNOPSIS
 
@@ -25,7 +25,7 @@ our $VERSION = '3.29';
 
   # must be sub-classed for use
   package MySourceHandler;
-  use parent 'TAP::Parser::SourceHandler';
+  use base 'TAP::Parser::SourceHandler';
   sub can_handle    { return $confidence_level }
   sub make_iterator { return $iterator }
 
@@ -125,7 +125,7 @@ L<TAP::Parser::IteratorFactory/register_handler>.
   use MySourceHandler; # see TAP::Parser::SourceHandler
   use TAP::Parser::IteratorFactory;
 
-  use parent 'TAP::Parser::SourceHandler';
+  use base 'TAP::Parser::SourceHandler';
 
   TAP::Parser::IteratorFactory->register_handler( __PACKAGE__ );
 

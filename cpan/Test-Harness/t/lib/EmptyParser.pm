@@ -3,7 +3,7 @@ package EmptyParser;
 use strict;
 use warnings;
 
-use parent qw(TAP::Parser);
+use base qw(TAP::Parser);
 
 sub _initialize {
     shift->_set_defaults;

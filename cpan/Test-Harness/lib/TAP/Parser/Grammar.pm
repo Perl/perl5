@@ -6,7 +6,7 @@ use warnings;
 use TAP::Parser::ResultFactory   ();
 use TAP::Parser::YAMLish::Reader ();
 
-use parent 'TAP::Object';
+use base 'TAP::Object';
 
 =head1 NAME
 
@@ -14,11 +14,11 @@ TAP::Parser::Grammar - A grammar for the Test Anything Protocol.
 
 =head1 VERSION
 
-Version 3.29
+Version 3.30
 
 =cut
 
-our $VERSION = '3.29';
+our $VERSION = '3.30';
 
 =head1 SYNOPSIS
 

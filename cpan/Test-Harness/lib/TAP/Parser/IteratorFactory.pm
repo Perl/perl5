@@ -6,7 +6,7 @@ use warnings;
 use Carp qw( confess );
 use File::Basename qw( fileparse );
 
-use parent 'TAP::Object';
+use base 'TAP::Object';
 
 use constant handlers => [];
 
@@ -16,11 +16,11 @@ TAP::Parser::IteratorFactory - Figures out which SourceHandler objects to use fo
 
 =head1 VERSION
 
-Version 3.29
+Version 3.30
 
 =cut
 
-our $VERSION = '3.29';
+our $VERSION = '3.30';
 
 =head1 SYNOPSIS
 
@@ -301,7 +301,7 @@ But in case you find the need to...
 
   use strict;
 
-  use parent 'TAP::Parser::IteratorFactory';
+  use base 'TAP::Parser::IteratorFactory';
 
   # override source detection algorithm
   sub detect_source {

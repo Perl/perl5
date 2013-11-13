@@ -2,7 +2,7 @@ package TAP::Formatter::Console;
 
 use strict;
 use warnings;
-use parent 'TAP::Formatter::Base';
+use base 'TAP::Formatter::Base';
 use POSIX qw(strftime);
 
 =head1 NAME
@@ -11,11 +11,11 @@ TAP::Formatter::Console - Harness output delegate for default console output
 
 =head1 VERSION
 
-Version 3.29
+Version 3.30
 
 =cut
 
-our $VERSION = '3.29';
+our $VERSION = '3.30';
 
 =head1 DESCRIPTION
 

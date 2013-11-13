@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use Benchmark;
 
-use parent 'TAP::Object';
+use base 'TAP::Object';
 
 =head1 NAME
 
@@ -12,11 +12,11 @@ TAP::Parser::Aggregator - Aggregate TAP::Parser results
 
 =head1 VERSION
 
-Version 3.29
+Version 3.30
 
 =cut
 
-our $VERSION = '3.29';
+our $VERSION = '3.30';
 
 =head1 SYNOPSIS
 

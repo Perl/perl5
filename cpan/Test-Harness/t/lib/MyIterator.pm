@@ -5,7 +5,7 @@ package MyIterator;
 use strict;
 use warnings;
 
-use parent qw( TAP::Parser::Iterator MyCustom );
+use base qw( TAP::Parser::Iterator MyCustom );
 
 sub _initialize {
     my $self = shift;

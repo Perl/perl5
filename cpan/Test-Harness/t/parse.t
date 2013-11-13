@@ -804,7 +804,7 @@ END_TAP
 
     use strict;
 
-    use parent qw(TAP::Parser::Iterator);
+    use base qw(TAP::Parser::Iterator);
 
     sub next_raw {
         die 'this is the dying iterator';
@@ -899,7 +899,7 @@ END_TAP
 
     package TAP::Parser::WithBrokenState;
 
-    use parent qw( TAP::Parser );
+    use base qw( TAP::Parser );
 
     sub _make_state_table {
         return { INIT => { plan => { goto => 'FOO' } } };
@@ -936,7 +936,7 @@ END_TAP
 
     package TAP::Parser::WithBrokenIter;
 
-    use parent qw( TAP::Parser );
+    use base qw( TAP::Parser );
 
     sub _iter {return}
 

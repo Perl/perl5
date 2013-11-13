@@ -107,12 +107,12 @@ matching the pattern C<t/*.t>.
 
 =head2 Colored Test Output
 
-Colored test output is the default, but if output is not to a
-terminal, color is disabled. You can override this by adding the
-C<--color> switch.
+Colored test output using L<TAP::Formatter::Color> is the default, but 
+if output is not to a terminal, color is disabled. You can override this by 
+adding the C<--color> switch.
 
 Color support requires L<Term::ANSIColor> on Unix-like platforms and
-L<Win32::Console> windows. If the necessary module is not installed
+L<Win32::Console> on windows. If the necessary module is not installed
 colored output will not be available.
 
 =head2 Exit Code
@@ -274,7 +274,7 @@ be specified multiple times, and the order matters.
 
 The most practical use is likely to specify that some tests are not
 "parallel-ready".  Since mentioning a file with --rules doesn't cause it to
-selected to run as a test, you can "set and forget" some rules preferences in
+be selected to run as a test, you can "set and forget" some rules preferences in
 your .proverc file. Then you'll be able to take maximum advantage of the
 performance benefits of parallel testing, while some exceptions are still run
 in parallel.
@@ -299,7 +299,7 @@ in parallel.
 
 =item * The existence of a rule does not imply selecting a test. You must still specify the tests to run.
 
-=item * Specifying a rule to allow tests to run in parallel does not make the run in parallel. You still need specify the number of parallel C<jobs> in your Harness object.
+=item * Specifying a rule to allow tests to run in parallel does not make them run in parallel. You still need specify the number of parallel C<jobs> in your Harness object.
 
 =back
 
@@ -314,7 +314,7 @@ supported patterns:
     {foo,bar,baz} is any of foo, bar or baz.
     \ is an escape character
 
-=head3 More advance specifications for parallel vs sequence run rules
+=head3 More advanced specifications for parallel vs sequence run rules
 
 If you need more advanced management of what runs in parallel vs in sequence, see
 the associated 'rules' documentation in L<TAP::Harness> and L<TAP::Parser::Scheduler>.

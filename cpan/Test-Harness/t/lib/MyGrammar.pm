@@ -5,7 +5,7 @@ package MyGrammar;
 use strict;
 use warnings;
 
-use parent qw( TAP::Parser::Grammar MyCustom );
+use base qw( TAP::Parser::Grammar MyCustom );
 
 sub _initialize {
     my $self = shift;

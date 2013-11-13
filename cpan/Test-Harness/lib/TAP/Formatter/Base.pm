@@ -2,7 +2,7 @@ package TAP::Formatter::Base;
 
 use strict;
 use warnings;
-use parent 'TAP::Base';
+use base 'TAP::Base';
 use POSIX qw(strftime);
 
 my $MAX_ERRORS = 5;
@@ -58,11 +58,11 @@ TAP::Formatter::Base - Base class for harness output delegates
 
 =head1 VERSION
 
-Version 3.29
+Version 3.30
 
 =cut
 
-our $VERSION = '3.29';
+our $VERSION = '3.30';
 
 =head1 DESCRIPTION
 

@@ -7,7 +7,7 @@ use warnings;
 
 use TAP::Parser::IteratorFactory;
 
-use parent qw( TAP::Parser::SourceHandler::Perl MyCustom );
+use base qw( TAP::Parser::SourceHandler::Perl MyCustom );
 
 TAP::Parser::IteratorFactory->register_handler(__PACKAGE__);
 

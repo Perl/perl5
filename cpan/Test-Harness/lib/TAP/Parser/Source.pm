@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 use File::Basename qw( fileparse );
-use parent 'TAP::Object';
+use base 'TAP::Object';
 
 use constant BLK_SIZE => 512;
 
@@ -14,11 +14,11 @@ TAP::Parser::Source - a TAP source & meta data about it
 
 =head1 VERSION
 
-Version 3.29
+Version 3.30
 
 =cut
 
-our $VERSION = '3.29';
+our $VERSION = '3.30';
 
 =head1 SYNOPSIS
 
@@ -327,7 +327,7 @@ May be called as a class method
         open my $fh, '<', $file or die "Can't read $file: $!\n";
 
         # Might be a binary file - so read a fixed number of bytes.
-        my $got = read $fh, my $buf, BLK_SIZE;
+        my $got = read $fh, my ($buf), BLK_SIZE;
         defined $got or die "I/O error: $!\n";
         return $1 if $buf =~ /(.*)/;
         return;

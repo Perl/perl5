@@ -16,7 +16,7 @@ use TAP::Parser::SourceHandler::Perl ();
 use Text::ParseWords qw(shellwords);
 
 use Config;
-use parent 'Exporter';
+use base 'Exporter';
 
 # $ML $Last_ML_Print
 
@@ -31,11 +31,11 @@ Test::Harness - Run Perl standard test scripts with statistics
 
 =head1 VERSION
 
-Version 3.29
+Version 3.30
 
 =cut
 
-our $VERSION = '3.29';
+our $VERSION = '3.30';
 
 # Backwards compatibility for exportable variable names.
 *verbose  = *Verbose;

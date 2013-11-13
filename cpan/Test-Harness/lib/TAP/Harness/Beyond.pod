@@ -1,6 +1,6 @@
 =head1 NAME
 
-Test::Harness - Beyond make test
+Test::Harness::Beyond - Beyond make test
 
 =head1 Beyond make test
 
@@ -227,7 +227,7 @@ document:
 
   package My::TAP::Harness;
 
-  use parent 'TAP::Harness';
+  use base 'TAP::Harness';
   use YAML;
 
   sub summary {

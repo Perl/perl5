@@ -5,7 +5,7 @@ use warnings;
 
 use IO::Select;
 
-use parent 'TAP::Object';
+use base 'TAP::Object';
 
 use constant IS_WIN32 => $^O =~ /^(MS)?Win32$/;
 use constant IS_VMS => $^O eq 'VMS';
@@ -17,11 +17,11 @@ TAP::Parser::Multiplexer - Multiplex multiple TAP::Parsers
 
 =head1 VERSION
 
-Version 3.29
+Version 3.30
 
 =cut
 
-our $VERSION = '3.29';
+our $VERSION = '3.30';
 
 =head1 SYNOPSIS
 

@@ -7,7 +7,7 @@ use warnings;
 
 use MyResult;
 
-use parent qw( TAP::Parser::ResultFactory MyCustom );
+use base qw( TAP::Parser::ResultFactory MyCustom );
 
 sub make_result {
     my $class = shift;

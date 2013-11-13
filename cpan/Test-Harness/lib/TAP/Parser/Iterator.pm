@@ -3,7 +3,7 @@ package TAP::Parser::Iterator;
 use strict;
 use warnings;
 
-use parent 'TAP::Object';
+use base 'TAP::Object';
 
 =head1 NAME
 
@@ -11,17 +11,17 @@ TAP::Parser::Iterator - Base class for TAP source iterators
 
 =head1 VERSION
 
-Version 3.29
+Version 3.30
 
 =cut
 
-our $VERSION = '3.29';
+our $VERSION = '3.30';
 
 =head1 SYNOPSIS
 
   # to subclass:
   use TAP::Parser::Iterator ();
-  use parent 'TAP::Parser::Iterator';
+  use base 'TAP::Parser::Iterator';
   sub _initialize {
     # see TAP::Object...
   }

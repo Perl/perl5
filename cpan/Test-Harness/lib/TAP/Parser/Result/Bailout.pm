@@ -3,7 +3,7 @@ package TAP::Parser::Result::Bailout;
 use strict;
 use warnings;
 
-use parent 'TAP::Parser::Result';
+use base 'TAP::Parser::Result';
 
 =head1 NAME
 
@@ -11,11 +11,11 @@ TAP::Parser::Result::Bailout - Bailout result token.
 
 =head1 VERSION
 
-Version 3.29
+Version 3.30
 
 =cut
 
-our $VERSION = '3.29';
+our $VERSION = '3.30';
 
 =head1 DESCRIPTION
 

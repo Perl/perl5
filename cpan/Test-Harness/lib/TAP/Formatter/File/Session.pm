@@ -2,7 +2,7 @@ package TAP::Formatter::File::Session;
 
 use strict;
 use warnings;
-use parent 'TAP::Formatter::Session';
+use base 'TAP::Formatter::Session';
 
 =head1 NAME
 
@@ -10,11 +10,11 @@ TAP::Formatter::File::Session - Harness output delegate for file output
 
 =head1 VERSION
 
-Version 3.29
+Version 3.30
 
 =cut
 
-our $VERSION = '3.29';
+our $VERSION = '3.30';
 
 =head1 DESCRIPTION
 

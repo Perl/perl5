@@ -8,7 +8,7 @@ our ($LAST_OBJ, $CAN_HANDLE, $MAKE_ITER, $LAST_SOURCE);
 
 use TAP::Parser::IteratorFactory;
 
-use parent qw( TAP::Parser::SourceHandler::File MyCustom );
+use base qw( TAP::Parser::SourceHandler::File MyCustom );
 $LAST_OBJ    = undef;
 $CAN_HANDLE  = undef;
 $MAKE_ITER   = undef;

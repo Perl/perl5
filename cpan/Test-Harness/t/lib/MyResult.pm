@@ -5,7 +5,7 @@ package MyResult;
 use strict;
 use warnings;
 
-use parent qw( TAP::Parser::Result MyCustom );
+use base qw( TAP::Parser::Result MyCustom );
 
 sub _initialize {
     my $self = shift;

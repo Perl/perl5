@@ -3,9 +3,9 @@ package TAP::Parser::YAMLish::Reader;
 use strict;
 use warnings;
 
-use parent 'TAP::Object';
+use base 'TAP::Object';
 
-our $VERSION = '3.29';
+our $VERSION = '3.30';
 
 # TODO:
 #   Handle blessed object syntax
@@ -269,7 +269,7 @@ TAP::Parser::YAMLish::Reader - Read YAMLish data from iterator
 
 =head1 VERSION
 
-Version 3.29
+Version 3.30
 
 =head1 SYNOPSIS
 
