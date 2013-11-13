@@ -1952,14 +1952,18 @@ HvARRAY(hv)
 	B::HV	hv
     PPCODE:
 	if (HvUSEDKEYS(hv) > 0) {
-	    SV *sv;
-	    char *key;
-	    I32 len;
+	    HE *he;
 	    (void)hv_iterinit(hv);
 	    EXTEND(sp, HvUSEDKEYS(hv) * 2);
-	    while ((sv = hv_iternextsv(hv, &key, &len))) {
-		mPUSHp(key, len);
-		PUSHs(make_sv_object(aTHX_ sv));
+	    while ((he = hv_iternext(hv))) {
+                if (HeSVKEY(he)) {
+                    mPUSHs(HeSVKEY(he));
+                } else if (HeKUTF8(he)) {
+                    PUSHs(newSVpvn_flags(HeKEY(he), HeKLEN(he), SVf_UTF8|SVs_TEMP));
+                } else {
+                    mPUSHp(HeKEY(he), HeKLEN(he));
+                }
+		PUSHs(make_sv_object(aTHX_ HeVAL(he)));
 	    }
 	}
 
