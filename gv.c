@@ -2352,6 +2352,7 @@ Perl_gp_free(pTHX_ GV *gv)
         return;
     }
     if (gp->gp_refcnt > 1) {
+       borrowed:
 	if (gp->gp_egv == gv)
 	    gp->gp_egv = 0;
 	gp->gp_refcnt--;
@@ -2396,6 +2397,9 @@ Perl_gp_free(pTHX_ GV *gv)
       SvREFCNT_dec(cv);
       SvREFCNT_dec(form);
 
+      /* Possibly reallocated by a destructor */
+      gp = GvGP(gv);
+
       if (!gp->gp_file_hek
        && !gp->gp_sv
        && !gp->gp_av
@@ -2412,7 +2416,8 @@ Perl_gp_free(pTHX_ GV *gv)
       }
     }
 
-    gp->gp_refcnt--;
+    /* Possibly incremented by a destructor doing glob assignment */
+    if (gp->gp_refcnt > 1) goto borrowed;
     Safefree(gp);
     GvGP_set(gv, NULL);
 }
