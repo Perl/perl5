@@ -364,16 +364,17 @@ my $unicode_reference_url = 'http://www.unicode.org/reports/tr44/';
 # Jamo.txt or UnicodeData.txt will likely cause fatal errors.
 #
 # To compare the output tables, it may be useful to specify the -annotate
-# flag.  This causes the tables to expand so there is one entry for each
-# non-algorithmically named code point giving, currently its name, and its
-# graphic representation if printable (and you have a font that knows about
-# it).  This makes it easier to see what the particular code points are in
-# each output table.  The tables are usable, but because they don't have
-# ranges (for the most part), a Perl using them will run slower.  Non-named
-# code points are annotated with a description of their status, and contiguous
-# ones with the same description will be output as a range rather than
-# individually.  Algorithmically named characters are also output as ranges,
-# except when there are just a few contiguous ones.
+# flag.  (As of this writing, this can't be done on a clean workspace, due to
+# requirements in Text::Tabs used in this option; so first run mktables
+# without this option.)  This option adds comment lines to each table, one for
+# each non-algorithmically named character giving, currently its code point,
+# name, and graphic representation if printable (and you have a font that
+# knows about it).  This makes it easier to see what the particular code
+# points are in each output table.  Non-named code points are annotated with a
+# description of their status, and contiguous ones with the same description
+# will be output as a range rather than individually.  Algorithmically named
+# characters are also output as ranges, except when there are just a few
+# contiguous ones.
 #
 # FUTURE ISSUES
 #
@@ -766,9 +767,8 @@ usage: $0 [-c|-p|-q|-v|-w] [-C dir] [-L filelist] [ -P pod_dir ]
                 overrides -T
   -makelist   : Rewrite the file list $file_list based on current setup
   -annotate   : Output an annotation for each character in the table files;
-                useful for debugging mktables, looking at diffs; but is slow,
-                memory intensive; resulting tables are usable but are slow and
-                very large (and currently fail the Unicode::UCD.t tests).
+                useful for debugging mktables, looking at diffs; but is slow
+                and memory intensive
   -check A B  : Executes $0 only if A and B are the same
 END
     }
@@ -5504,6 +5504,28 @@ END
         return $return;
     }
 
+    sub merge_single_annotation_line ($$$) {
+        my ($output, $annotation, $annotation_column) = @_;
+
+        # This appends an annotation comment, $annotation, to $output,
+        # starting in or after column $annotation_column, removing any
+        # pre-existing comment from $output.
+
+        $annotation =~ s/^ \s* \# \  //x;
+        $output =~ s/ \s* ( \# \N* )? \n //x;
+        $output = Text::Tabs::expand($output);
+
+        my $spaces = $annotation_column - length $output;
+        $spaces = 2 if $spaces < 0;  # Have 2 blanks before the comment
+
+        $output = sprintf "%s%*s# %s",
+                            $output,
+                            $spaces,
+                            " ",
+                            $annotation;
+        return Text::Tabs::unexpand $output;
+    }
+
     sub write {
         # Write a representation of the table to its file.  It calls several
         # functions furnished by sub-classes of this abstract base class to
@@ -5574,14 +5596,12 @@ END
             my $range_size_1 = $range_size_1{$addr};
             my $format;            # Used only in $annotate option
             my $include_name;      # Used only in $annotate option
+            my $include_cp;        # Used only in $annotate option
+
+            # To make it more readable, use a minimum indentation
+            my $comment_indent = 16;
 
             if ($annotate) {
-
-                # If annotating each code point, must print 1 per line.
-                # The variable could point to a subroutine, and we don't want
-                # to lose that fact, so only set if not set already
-                $range_size_1 = 1 if ! $range_size_1;
-
                 $format = $self->format;
 
                 # The name of the character is output only for tables that
@@ -5611,7 +5631,8 @@ END
             my $offset = 0;
 
             my $output_value_in_hex = $self->isa('Map_Table')
-                                      && $self->format eq $HEX_ADJUST_FORMAT;
+                                && ($self->format eq $HEX_ADJUST_FORMAT
+                                    || $self->to_output_map == $EXTERNAL_MAP);
             # Use leading zeroes just for files whose format should not be
             # changed from what it has been.  Otherwise, they just take up
             # space and time to process.
@@ -5619,6 +5640,24 @@ END
                               && $self->to_output_map == $EXTERNAL_MAP)
                              ? "%04X"
                              : "%X";
+
+            # The values for some of these tables are stored in mktables as
+            # hex strings.  Normally, these are just output as strings without
+            # change, but when we are doing adjustments, we have to operate on
+            # these numerically, so we convert those to decimal to do that,
+            # and back to hex for output
+            my $convert_map_to_from_hex = 0;
+            my $output_map_in_hex = 0;
+            if ($self->isa('Map_Table')) {
+                $convert_map_to_from_hex
+                   = ($use_adjustments && $self->format eq $HEX_ADJUST_FORMAT)
+                      || ($annotate && $self->format eq $HEX_FORMAT);
+                $output_map_in_hex = $convert_map_to_from_hex
+                                 || $self->format eq $HEX_FORMAT;
+            }
+
+            # To store any annotations about the characters.
+            my @annotation;
 
             # Output each range as part of the here document.
             RANGE:
@@ -5635,10 +5674,22 @@ END
                 next RANGE if defined $suppress_value
                               && $value eq $suppress_value;
 
+                $value = CORE::hex $value if $convert_map_to_from_hex;
+
+
                 {   # This bare block encloses the scope where we may need to
-                    # 'redo' to.  Consider the table that contains the
-                    # lowercasing maps.  mktables stores the ASCII range ones
-                    # as 26 ranges:
+                    # 'redo' to.  Consider a table that is to be written out
+                    # using single item ranges.  This is given in the
+                    # $range_size_1 boolean.  To accomplish this, we split the
+                    # range each time through the loop into two portions, the
+                    # first item, and the rest.  We handle that first item
+                    # this time in the loop, and 'redo' to repeat the process
+                    # for the rest of the range.
+                    #
+                    # We may also have to do it, with other special handling,
+                    # if the table has adjustments.  Consider the table that
+                    # contains the lowercasing maps.  mktables stores the
+                    # ASCII range ones as 26 ranges:
                     #       ord('A') => ord('a'), .. ord('Z') => ord('z')
                     # For compactness, the table that gets written has this as
                     # just one range
@@ -5652,35 +5703,24 @@ END
                     # we also have to make sure we don't screw up cases where
                     # we have internally stored
                     #       ( 0x1C4 .. 0x1C6 ) => 0x1C5
-                    # This single internal range has to be output as 3 ranges.
-                    # (There are very few of these, so the gain of doing the
-                    # combining of other ranges far outweighs the splitting of
-                    # these.)  To accomplish this, we have to split the range,
-                    # and each time through we handle the next portion of the
-                    # original by ending this block with a 'redo'.   The
-                    # values to use for that next time through are set up just
-                    # below in the scalars whose names begin with '$next_'.
+                    # This single internal range has to be output as 3 ranges,
+                    # which is done by splitting, like we do for $range_size_1
+                    # tables.  (There are very few of such ranges that need to
+                    # be split, so the gain of doing the combining of other
+                    # ranges far outweighs the splitting of these.)  The
+                    # values to use for the redo at the end of this block are
+                    # set up just below in the scalars whose names begin with
+                    # '$next_'.
 
-                    if ($use_adjustments && ! $range_size_1) {
-
-                        # When converting to use adjustments, we can handle
-                        # only single element ranges.  Set up so that this
-                        # time through the loop, we look at the first element,
-                        # and the next time through, we start off with the
-                        # remainder.  Thus each time through we look at the
-                        # first element of the range
-                        if ($end != $start) {
+                    if (($use_adjustments || $range_size_1) && $end != $start)
+                    {
                             $next_start = $start + 1;
                             $next_end = $end;
                             $next_value = $value;
                             $end = $start;
-                        }
+                    }
 
-                        # The values for some of these tables are stored as
-                        # hex strings.  Convert those to decimal
-                        $value = hex($value)
-                                    if $self->default_map eq $CODE_POINT
-                                        && $value =~ / ^ [A-Fa-f0-9]+ $ /x;
+                    if ($use_adjustments && ! $range_size_1) {
 
                         # If this range is adjacent to the previous one, and
                         # the values in each are integers that are also
@@ -5703,7 +5743,15 @@ END
                         }
                         else {
                             $offset = 0;
+                            if (@annotation == 1) {
+                                $OUT[-1] = merge_single_annotation_line(
+                                    $OUT[-1], $annotation[0], $comment_indent);
+                            }
+                            else {
+                                push @OUT, @annotation;
+                            }
                         }
+                        undef @annotation;
 
                         # Save the current values for the next time through
                         # the loop.
@@ -5712,13 +5760,12 @@ END
                         $previous_value = $value;
                     }
 
-                    # If there is a range and doesn't need a single point range
-                    # output
-                    if ($start != $end && ! $range_size_1) {
+                    # If there is a range
+                    if ($start != $end) {
                         push @OUT, sprintf "$hex_format\t$hex_format",
                                              $start,       $end;
                         if ($value ne "") {
-                            if ($output_value_in_hex) {
+                            if ($convert_map_to_from_hex) {
                                 $OUT[-1] .= sprintf "\t$hex_format", $value;
                             }
                             else {
@@ -5746,10 +5793,7 @@ END
                             $OUT[-1] = Text::Tabs::unexpand($OUT[-1]);
                         }
                     }
-
-                        # Here to output a single code point per line.
-                        # If not to annotate, use the simple formats
-                    elsif (! $annotate) {
+                    else { # Here to output a single code point per line.
 
                         # Use any passed in subroutine to output.
                         if (ref $range_size_1 eq 'CODE') {
@@ -5761,7 +5805,7 @@ END
 
                             # Here, caller is ok with default output.
                             for (my $i = $start; $i <= $end; $i++) {
-                                if ($output_value_in_hex) {
+                                if ($convert_map_to_from_hex) {
                                     push @OUT,
                                         sprintf "$hex_format\t\t$hex_format\n",
                                                  $i,            $value;
@@ -5774,10 +5818,10 @@ END
                             }
                         }
                     }
-                    else {
 
-                        # Here, wants annotation.
+                    if ($annotate) {
                         for (my $i = $start; $i <= $end; $i++) {
+                            my $annotation = "";
 
                             # Get character information if don't have it already
                             main::populate_char_info($i)
@@ -5790,9 +5834,12 @@ END
                             # so returns $i.  Otherwise use the end of the
                             # annotation range, but no further than the
                             # maximum possible end point of the loop.
-                            my $range_end = main::min(
-                                        $annotate_ranges->value_of($i) || $i,
-                                        $end);
+                            my $range_end =
+                                        $range_size_1
+                                        ? $start
+                                        : main::min(
+                                          $annotate_ranges->value_of($i) || $i,
+                                          $end);
 
                             # Use a range if it is a range, and either is one
                             # of the special annotation ranges, or the range
@@ -5806,9 +5853,6 @@ END
                                 # Here is to output a range.  We don't allow a
                                 # caller-specified output format--just use the
                                 # standard one.
-                                push @OUT, sprintf
-                                            "$hex_format\t$hex_format\t%s\t#",
-                                              $i,         $range_end,  $value;
                                 my $range_name = $viacode[$i];
 
                                 # For the code points which end in their hex
@@ -5829,13 +5873,20 @@ END
                                     $range_name = "Hangul Syllable";
                                 }
 
-                                $OUT[-1] .= " $range_name" if $range_name;
+                                if ($i != $start || $range_end < $end) {
+                                    $annotation = sprintf "%04X..%04X",
+                                                           $i,   $range_end;
+                                }
+                                else { # Indent if not displaying code points
+                                    $annotation = " " x 4;
+                                }
+                                $annotation .= " $range_name" if $range_name;
 
                                 # Include the number of code points in the
                                 # range
                                 my $count =
                                     main::clarify_number($range_end - $i + 1);
-                                $OUT[-1] .= " [$count]\n";
+                                $annotation .= " [$count]\n";
 
                                 # Skip to the end of the range
                                 $i = $range_end;
@@ -5847,10 +5898,6 @@ END
                                 # use the character itself if printable
                                 $comment .= "'" . main::display_chr($i) . "' "
                                                             if $printable[$i];
-
-                                # To make it more readable, use a minimum
-                                # indentation
-                                my $comment_indent;
 
                                 my $output_value = $value;
 
@@ -5885,70 +5932,69 @@ END
                                                             # experiment
                                 }
                                 else {
-                                    $output_value = CORE::hex $value
-                                           if $format eq $HEX_FORMAT
-                                              || $format eq $HEX_ADJUST_FORMAT;
-                                    $output_value += $offset
+                                    $output_value += $i - $start
                                                    if $use_adjustments
                                                        # Don't try to adjust a
                                                        # non-integer
                                                    && $output_value !~ /[-\D]/;
 
-                                    # Assume that any table that has hex
-                                    # format is a mapping of one code point to
-                                    # another.
-                                    if ($format eq $HEX_FORMAT
-                                        || $format eq $HEX_ADJUST_FORMAT)
-                                    {
+                                    if ($output_map_in_hex) {
                                         main::populate_char_info($output_value)
                                         if ! defined $viacode[$output_value];
                                         $comment .= " => '"
                                         . main::display_chr($output_value)
                                         . "'; " if $printable[$output_value];
                                     }
-                                    $comment .= $viacode[$i] if $include_name
-                                                            && $viacode[$i];
-                                    if ($format eq $HEX_FORMAT
-                                        || $format eq $HEX_ADJUST_FORMAT)
-                                    {
-                                        $comment .=
-                                            " => $viacode[$output_value]"
-                                                if $viacode[$output_value];
+                                    if ($include_name && $viacode[$i]) {
+                                        $comment .= " " if $comment;
+                                        $comment .= $viacode[$i];
                                     }
-
-                                    $output_value = sprintf($hex_format,
-                                                            $output_value)
-                                        if  $format eq $HEX_ADJUST_FORMAT
-                                            || ($format eq $HEX_FORMAT
-                                                && $self->replacement_property);
-
+                                    if ($output_map_in_hex) {
+                                        $comment .=
+                                                " => $viacode[$output_value]"
+                                                    if $viacode[$output_value];
+                                        $output_value = sprintf($hex_format,
+                                                                $output_value);
+                                    }
                                     # If including the name, no need to
                                     # indent, as the name will already be way
                                     # across the line.
                                     $comment_indent = ($include_name) ? 0 : 60;
                                 }
 
-                                # Use any passed in routine to output the base
-                                # part of the line.
-                                if (ref $range_size_1 eq 'CODE') {
-                                    my $base_part=&{$range_size_1}
-                                                        ($i, $output_value);
-                                    chomp $base_part;
-                                    push @OUT, $base_part;
-                                }
-                                else {
-                                    push @OUT, sprintf "$hex_format\t\t%s",
-                                                        $i, $output_value;
+                                if ($include_cp) {
+                                    $annotation = sprintf "%04X", $i;
+                                    if ($use_adjustments) {
+                                        $annotation .= " => $output_value";
+                                    }
                                 }
 
-                                # And add the annotation.
-                                $OUT[-1] = sprintf "%-*s\t# %s",
-                                                   $comment_indent,
-                                                   $OUT[-1],
-                                                   $comment
-                                            if $comment;
-                                $OUT[-1] .= "\n";
+                                if ($comment ne "") {
+                                    $annotation .= " " if $annotation ne "";
+                                    $annotation .= $comment;
+                                }
+                                $annotation .= "\n" if $annotation ne "";
                             }
+
+                            if ($annotation ne "") {
+                                push @annotation, (" " x $comment_indent)
+                                                  .  "# $annotation";
+                            }
+                        }
+
+                        # If not adjusting, we don't have to go through the
+                        # loop again to know that the annotation comes next
+                        # in the output.
+                        if (! $use_adjustments) {
+                            if (@annotation == 1) {
+                                $OUT[-1] = merge_single_annotation_line(
+                                    $OUT[-1], $annotation[0], $comment_indent);
+                            }
+                            else {
+                                push @OUT, map { Text::Tabs::unexpand $_ }
+                                               @annotation;
+                            }
+                            undef @annotation;
                         }
                     }
 
@@ -5963,6 +6009,8 @@ END
                     }
                 }
             } # End of loop through all the table's ranges
+
+            push @OUT, @annotation; # Add orphaned annotation, if any
         }
 
         # Add anything that goes after the main body, but within the here
