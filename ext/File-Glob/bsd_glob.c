@@ -744,9 +744,6 @@ glob3(Char *pathbuf, Char *pathbuf_last, Char *pathend, Char *pathend_last,
 	int nocase;
 	char buf[MAXPATHLEN];
 
-        assert(pattern < restpattern_last);
-        assert(restpattern < restpattern_last);
-
 	/*
 	 * The readdirfunc declaration can't be prototyped, because it is
 	 * assigned, below, to two functions which are prototyped in glob.h
@@ -754,6 +751,9 @@ glob3(Char *pathbuf, Char *pathbuf_last, Char *pathend, Char *pathend_last,
 	 * structures.
 	 */
 	Direntry_t *(*readdirfunc)(DIR*);
+
+        assert(pattern < restpattern_last);
+        assert(restpattern < restpattern_last);
 
 	if (pathend > pathend_last)
 		return (1);
