@@ -2270,7 +2270,8 @@ sR	|char*	|scan_inputsymbol|NN char *start
 sR	|char*	|scan_pat	|NN char *start|I32 type
 sR	|char*	|scan_str	|NN char *start|int keep_quoted \
 				|int keep_delims|int re_reparse \
-				|bool deprecate_escaped_matching
+				|bool deprecate_escaped_matching \
+				|NULLOK char **delimp
 sR	|char*	|scan_subst	|NN char *start
 sR	|char*	|scan_trans	|NN char *start
 s	|char*	|scan_word	|NN char *s|NN char *dest|STRLEN destlen \

@@ -5945,7 +5945,7 @@ Perl_yylex(pTHX)
 		}
 		sv = newSVpvn_flags(s, len, UTF ? SVf_UTF8 : 0);
 		if (*d == '(') {
-		    d = scan_str(d,TRUE,TRUE,FALSE, FALSE);
+		    d = scan_str(d,TRUE,TRUE,FALSE,FALSE,NULL);
 		    COPLINE_SET_FROM_MULTI_END;
 		    if (!d) {
 			/* MUST advance bufptr here to avoid bogus
@@ -6842,7 +6842,7 @@ Perl_yylex(pTHX)
 	TERM(THING);
 
     case '\'':
-	s = scan_str(s,!!PL_madskills,FALSE,FALSE, FALSE);
+	s = scan_str(s,!!PL_madskills,FALSE,FALSE,FALSE,NULL);
 	COPLINE_SET_FROM_MULTI_END;
 	DEBUG_T( { printbuf("### Saw string before %s\n", s); } );
 	if (PL_expect == XOPERATOR) {
@@ -6858,7 +6858,7 @@ Perl_yylex(pTHX)
 	TERM(sublex_start());
 
     case '"':
-	s = scan_str(s,!!PL_madskills,FALSE,FALSE, FALSE);
+	s = scan_str(s,!!PL_madskills,FALSE,FALSE,FALSE,NULL);
 	DEBUG_T( {
 	    if (s)
 		printbuf("### Saw string before %s\n", s);
@@ -6889,7 +6889,7 @@ Perl_yylex(pTHX)
 	TERM(sublex_start());
 
     case '`':
-	s = scan_str(s,!!PL_madskills,FALSE,FALSE, FALSE);
+	s = scan_str(s,!!PL_madskills,FALSE,FALSE,FALSE,NULL);
 	DEBUG_T( { printbuf("### Saw backtick string before %s\n", s); } );
 	if (PL_expect == XOPERATOR)
 	    no_op("Backticks",s);
@@ -8373,7 +8373,7 @@ Perl_yylex(pTHX)
 	    LOP(OP_PIPE_OP,XTERM);
 
 	case KEY_q:
-	    s = scan_str(s,!!PL_madskills,FALSE,FALSE, FALSE);
+	    s = scan_str(s,!!PL_madskills,FALSE,FALSE,FALSE,NULL);
 	    COPLINE_SET_FROM_MULTI_END;
 	    if (!s)
 		missingterm(NULL);
@@ -8385,7 +8385,7 @@ Perl_yylex(pTHX)
 
 	case KEY_qw: {
 	    OP *words = NULL;
-	    s = scan_str(s,!!PL_madskills,FALSE,FALSE, FALSE);
+	    s = scan_str(s,!!PL_madskills,FALSE,FALSE,FALSE,NULL);
 	    COPLINE_SET_FROM_MULTI_END;
 	    if (!s)
 		missingterm(NULL);
@@ -8436,7 +8436,7 @@ Perl_yylex(pTHX)
 	}
 
 	case KEY_qq:
-	    s = scan_str(s,!!PL_madskills,FALSE,FALSE, FALSE);
+	    s = scan_str(s,!!PL_madskills,FALSE,FALSE,FALSE,NULL);
 	    if (!s)
 		missingterm(NULL);
 	    pl_yylval.ival = OP_STRINGIFY;
@@ -8449,7 +8449,7 @@ Perl_yylex(pTHX)
 	    TERM(sublex_start());
 
 	case KEY_qx:
-	    s = scan_str(s,!!PL_madskills,FALSE,FALSE, FALSE);
+	    s = scan_str(s,!!PL_madskills,FALSE,FALSE,FALSE,NULL);
 	    if (!s)
 		missingterm(NULL);
 	    pl_yylval.ival = OP_BACKTICK;
@@ -8766,7 +8766,7 @@ Perl_yylex(pTHX)
 
 		/* Look for a prototype */
 		if (*s == '(') {
-		    s = scan_str(s,!!PL_madskills,FALSE,FALSE, FALSE);
+		    s = scan_str(s,!!PL_madskills,FALSE,FALSE,FALSE,NULL);
 		    COPLINE_SET_FROM_MULTI_END;
 		    if (!s)
 			Perl_croak(aTHX_ "Prototype not terminated");
@@ -9692,7 +9692,7 @@ S_scan_pat(pTHX_ char *start, I32 type)
     PERL_ARGS_ASSERT_SCAN_PAT;
 
     s = scan_str(start,!!PL_madskills,FALSE, (PL_in_eval & EVAL_RE_REPARSING),
-                       TRUE /* look for escaped bracketed metas */ );
+                       TRUE /* look for escaped bracketed metas */, NULL);
 
     if (!s) {
 	const char * const delimiter = skipspace(start);
@@ -9780,19 +9780,19 @@ S_scan_subst(pTHX_ char *start)
 #ifdef PERL_MAD
     char *modstart;
 #endif
+    char *t;
 
     PERL_ARGS_ASSERT_SCAN_SUBST;
 
     pl_yylval.ival = OP_NULL;
 
     s = scan_str(start,!!PL_madskills,FALSE,FALSE,
-                 TRUE /* look for escaped bracketed metas */ );
+                 TRUE /* look for escaped bracketed metas */, &t);
 
     if (!s)
 	Perl_croak(aTHX_ "Substitution pattern not terminated");
 
-    if (s[-1] == PL_multi_open)
-	s--;
+    s = t;
 #ifdef PERL_MAD
     if (PL_madskills) {
 	CURMAD('q', PL_thisopen);
@@ -9805,7 +9805,7 @@ S_scan_subst(pTHX_ char *start)
 
     first_start = PL_multi_start;
     first_line = CopLINE(PL_curcop);
-    s = scan_str(s,!!PL_madskills,FALSE,FALSE, FALSE);
+    s = scan_str(s,!!PL_madskills,FALSE,FALSE,FALSE,NULL);
     if (!s) {
 	if (PL_lex_stuff) {
 	    SvREFCNT_dec(PL_lex_stuff);
@@ -9892,17 +9892,17 @@ S_scan_trans(pTHX_ char *start)
 #ifdef PERL_MAD
     char *modstart;
 #endif
+    char *t;
 
     PERL_ARGS_ASSERT_SCAN_TRANS;
 
     pl_yylval.ival = OP_NULL;
 
-    s = scan_str(start,!!PL_madskills,FALSE,FALSE, FALSE);
+    s = scan_str(start,!!PL_madskills,FALSE,FALSE,FALSE,&t);
     if (!s)
 	Perl_croak(aTHX_ "Transliteration pattern not terminated");
 
-    if (s[-1] == PL_multi_open)
-	s--;
+    s = t;
 #ifdef PERL_MAD
     if (PL_madskills) {
 	CURMAD('q', PL_thisopen);
@@ -9913,7 +9913,7 @@ S_scan_trans(pTHX_ char *start)
     }
 #endif
 
-    s = scan_str(s,!!PL_madskills,FALSE,FALSE, FALSE);
+    s = scan_str(s,!!PL_madskills,FALSE,FALSE,FALSE,NULL);
     if (!s) {
 	if (PL_lex_stuff) {
 	    SvREFCNT_dec(PL_lex_stuff);
@@ -10366,7 +10366,7 @@ S_scan_inputsymbol(pTHX_ char *start)
 
     if (d - PL_tokenbuf != len) {
 	pl_yylval.ival = OP_GLOB;
-	s = scan_str(start,!!PL_madskills,FALSE,FALSE, FALSE);
+	s = scan_str(start,!!PL_madskills,FALSE,FALSE,FALSE,NULL);
 	if (!s)
 	   Perl_croak(aTHX_ "Glob not terminated");
 	return s;
@@ -10466,6 +10466,11 @@ intro_sym:
 	deprecate_escaped_meta	issue a deprecation warning for cer-
 				tain paired metacharacters that appear
 				escaped within it
+	delimp			if non-null, this is set to the position of
+				the closing delimiter, or just after it if
+				the closing and opening delimiters differ
+				(i.e., the opening delimiter of a substitu-
+				tion replacement)
    returns: position to continue reading from buffer
    side-effects: multi_start, multi_close, lex_repl or lex_stuff, and
    	updates the read buffer.
@@ -10507,7 +10512,7 @@ intro_sym:
 
 STATIC char *
 S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims, int re_reparse,
-		 bool deprecate_escaped_meta
+		 bool deprecate_escaped_meta, char **delimp
     )
 {
     dVAR;
@@ -10934,6 +10939,7 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims, int re_reparse,
 	PL_sublex_info.repl = sv;
     else
 	PL_lex_stuff = sv;
+    if (delimp) *delimp = PL_multi_open == PL_multi_close ? s-termlen : s;
     return s;
 }
 
