@@ -65,19 +65,15 @@ dl_private_init(pTHX)
 
 	dl_resolve_using   = get_av("DynaLoader::dl_resolve_using", GV_ADDMULTI);
 	dl_require_symbols = get_av("DynaLoader::dl_require_symbols", GV_ADDMULTI);
-#ifdef __linux__
-	dlderr = dld_init("/proc/self/exe");
+	dlderr = dld_init("/kern/self/exe");
 	if (dlderr) {
-#endif
 	    dlderr = dld_init(dld_find_executable(PL_origargv[0]));
 	    if (dlderr) {
 		char *msg = dld_strerror(dlderr);
-		SaveError(aTHX_ "dld_init(%s) failed: %s", PL_origargv[0], msg);
+		SaveError(aTHX_ "dld_init(%s) failed: %s", dld_find_executable(PL_origargv[0]), msg);
 		DLDEBUG(1,PerlIO_printf(Perl_debug_log, "%s", dl_last_error));
 	    }
-#ifdef __linux__
 	}
-#endif
     }
 }
 
@@ -88,7 +84,7 @@ BOOT:
     (void)dl_private_init();
 
 
-char *
+void
 dl_load_file(filename, flags=0)
     char *	filename
     int		flags
@@ -97,7 +93,6 @@ dl_load_file(filename, flags=0)
     GV *gv;
     dMY_CXT;
     CODE:
-    RETVAL = filename;
     DLDEBUG(1,PerlIO_printf(Perl_debug_log, "dl_load_file(%s,%x):\n", filename,flags));
     if (flags & 0x01)
 	Perl_croak(aTHX_ "Can't make loaded symbols global on this platform while loading %s",filename);
@@ -139,28 +134,31 @@ dl_load_file(filename, flags=0)
 	    goto haverror;
 	}
     }
-    DLDEBUG(2,PerlIO_printf(Perl_debug_log, "libref=%s\n", RETVAL));
+    DLDEBUG(2,PerlIO_printf(Perl_debug_log, "libref=%s\n", filename));
 haverror:
     ST(0) = sv_newmortal() ;
     if (dlderr == 0)
-	sv_setiv(ST(0), PTR2IV(RETVAL));
+	sv_setiv(ST(0), PTR2IV(filename));
+    XSRETURN(1);
 
 
-void *
+void
 dl_find_symbol(libhandle, symbolname)
     void *	libhandle
     char *	symbolname
+    PREINIT:
+    void *retv;
     CODE:
     DLDEBUG(2,PerlIO_printf(Perl_debug_log, "dl_find_symbol(handle=%x, symbol=%s)\n",
 	    libhandle, symbolname));
-    RETVAL = (void *)dld_get_func(symbolname);
-    /* if RETVAL==NULL we should try looking for a non-function symbol */
-    DLDEBUG(2,PerlIO_printf(Perl_debug_log, "  symbolref = %x\n", RETVAL));
+    retv = (void *)dld_get_func(symbolname);
+    DLDEBUG(2,PerlIO_printf(Perl_debug_log, "  symbolref = %x\n", (unsigned int)retv));
     ST(0) = sv_newmortal() ;
-    if (RETVAL == NULL)
+    if (retv == NULL)
 	SaveError(aTHX_ "dl_find_symbol: Unable to find '%s' symbol", symbolname) ;
     else
-	sv_setiv(ST(0), PTR2IV(RETVAL));
+	sv_setiv(ST(0), PTR2IV(retv));
+    XSRETURN(1);
 
 
 void
@@ -191,6 +189,7 @@ dl_install_xsub(perl_name, symref, filename="$Package")
 					      (void(*)(pTHX_ CV *))symref,
 					      filename, NULL,
 					      XS_DYNAMIC_FILENAME)));
+    XSRETURN(1);
 
 char *
 dl_error()
