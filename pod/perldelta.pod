@@ -507,6 +507,11 @@ field checking ("No such class field"; see L<fields>) but no longer are.
 
 =item *
 
+That compile-time field checking also applies now to the C<%$obj{'key'}>
+syntax, added recently in Perl 5.19.4.
+
+=item *
+
 A nonexistent array element with a large index passed to a subroutine that
 ties the array and then tries to access the element no longer results in a
 crash.
