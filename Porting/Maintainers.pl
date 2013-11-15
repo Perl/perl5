@@ -636,7 +636,7 @@ use File::Glob qw(:case);
     },
 
     'IPC::Cmd' => {
-        'DISTRIBUTION' => 'BINGOS/IPC-Cmd-0.86.tar.gz',
+        'DISTRIBUTION' => 'BINGOS/IPC-Cmd-0.88.tar.gz',
         'FILES'        => q[cpan/IPC-Cmd],
     },
 
