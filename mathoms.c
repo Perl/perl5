@@ -148,6 +148,8 @@ Perl_sv_taint(pTHX_ SV *sv)
 IV
 Perl_sv_2iv(pTHX_ SV *sv)
 {
+    PERL_ARGS_ASSERT_SV_2IV;
+
     return sv_2iv_flags(sv, SV_GMAGIC);
 }
 
@@ -158,6 +160,8 @@ Perl_sv_2iv(pTHX_ SV *sv)
 UV
 Perl_sv_2uv(pTHX_ SV *sv)
 {
+    PERL_ARGS_ASSERT_SV_2UV;
+
     return sv_2uv_flags(sv, SV_GMAGIC);
 }
 
@@ -179,6 +183,8 @@ Perl_sv_2nv(pTHX_ SV *sv)
 char *
 Perl_sv_2pv(pTHX_ SV *sv, STRLEN *lp)
 {
+    PERL_ARGS_ASSERT_SV_2PV;
+
     return sv_2pv_flags(sv, lp, SV_GMAGIC);
 }
 

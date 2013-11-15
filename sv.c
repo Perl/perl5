@@ -2300,8 +2300,7 @@ Perl_sv_2iv_flags(pTHX_ SV *const sv, const I32 flags)
 {
     dVAR;
 
-    if (!sv)
-	return 0;
+    PERL_ARGS_ASSERT_SV_2IV_FLAGS;
 
     assert (SvTYPE(sv) != SVt_PVAV && SvTYPE(sv) != SVt_PVHV
 	 && SvTYPE(sv) != SVt_PVFM);
@@ -2396,8 +2395,7 @@ Perl_sv_2uv_flags(pTHX_ SV *const sv, const I32 flags)
 {
     dVAR;
 
-    if (!sv)
-	return 0;
+    PERL_ARGS_ASSERT_SV_2UV_FLAGS;
 
     if (SvGMAGICAL(sv) && (flags & SV_GMAGIC))
 	mg_get(sv);
@@ -2478,8 +2476,9 @@ NV
 Perl_sv_2nv_flags(pTHX_ SV *const sv, const I32 flags)
 {
     dVAR;
-    if (!sv)
-	return 0.0;
+
+    PERL_ARGS_ASSERT_SV_2NV_FLAGS;
+
     assert (SvTYPE(sv) != SVt_PVAV && SvTYPE(sv) != SVt_PVHV
 	 && SvTYPE(sv) != SVt_PVFM);
     if (SvGMAGICAL(sv) || SvVALID(sv) || isREGEXP(sv)) {
@@ -2782,11 +2781,8 @@ Perl_sv_2pv_flags(pTHX_ SV *const sv, STRLEN *const lp, const I32 flags)
     dVAR;
     char *s;
 
-    if (!sv) {
-	if (lp)
-	    *lp = 0;
-	return (char *)"";
-    }
+    PERL_ARGS_ASSERT_SV_2PV_FLAGS;
+
     assert (SvTYPE(sv) != SVt_PVAV && SvTYPE(sv) != SVt_PVHV
 	 && SvTYPE(sv) != SVt_PVFM);
     if (SvGMAGICAL(sv) && (flags & SV_GMAGIC))

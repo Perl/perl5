@@ -334,7 +334,28 @@ well.
 
 =item *
 
-XXX
+The C<sv> argument in L<perlapi/sv_2pv_flags>, L<perlapi/sv_2iv_flags>,
+L<perlapi/sv_2uv_flags>, and L<perlapi/sv_2nv_flags> and their older wrappers
+sv_2pv, sv_2iv, sv_2uv, sv_2nv, is now non-NULL. Passing NULL now will crash.
+When the non-NULL marker was introduced en masse in 5.9.3 the functions
+were marked non-NULL, but since the creation of the SV API in 5.0 alpha 2, if
+NULL was passed, the functions returned 0 or false-type values. The code that
+supports C<sv> argument being non-NULL dates to 5.0 alpha 2 directly, and
+indirectly to Perl 1.0 (pre 5.0 api). The lack of documentation that the
+functions accepted a NULL C<sv> was corrected in 5.11.0 and between 5.11.0
+and 5.19.5 the functions were marked NULLOK. As an optimization the NULLOK code
+has now been removed, and the functions became non-NULL marked again, because
+core getter-type macros never pass NULL to these functions and would crash
+before ever passing NULL.
+
+The only way a NULL C<sv> can be passed to sv_2*v* functions is if XS code
+directly calls sv_2*v*. This is unlikely as XS code uses Sv*V* macros to get
+the underlying value out of the SV. One possible situation which leads to
+a NULL C<sv> being passed to sv_2*v* functions, is if XS code defines its own
+getter type Sv*V* macros, which check for NULL B<before> dereferencing and
+checking the SV's flags through public API Sv*OK* macros or directly using
+private API C<SvFLAGS>, and if C<sv> is NULL, then calling the sv_2*v functions
+with a NULL litteral or passing the C<sv> containing a NULL value.
 
 =back
 
