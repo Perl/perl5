@@ -567,6 +567,11 @@ method assigns a subroutine to the same slot (C<*foo = sub {}>), C<$_[0]>
 is no longer left pointing to a freed scalar.  Now there is a memory leak
 instead. :-(
 
+=item *
+
+C<s///>, C<tr///> and C<y///> now work when a wide character is used as the
+delimiter.  [perl #120463]
+
 =back
 
 =head1 Known Problems
