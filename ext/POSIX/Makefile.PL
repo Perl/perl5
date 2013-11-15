@@ -11,7 +11,7 @@ if ($Config{sig_name} =~ /\bRTMIN\b/ && $Config{sig_name} =~ /\bRTMAX\b/) {
 }
 
 my @libs;
-if ($^O ne 'MSWin32') {
+if ($^O ne 'MSWin32' && $^O ne 'freemint') {
     @libs = ('LIBS' => ["-lm -lposix -lcposix"]);
 }
 WriteMakefile(
