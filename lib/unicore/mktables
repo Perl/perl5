@@ -5766,31 +5766,22 @@ END
                                              $start,       $end;
                         if ($value ne "") {
                             if ($convert_map_to_from_hex) {
-                                $OUT[-1] .= sprintf "\t$hex_format", $value;
+                                $OUT[-1] .= sprintf "\t$hex_format\n", $value;
                             }
                             else {
-                                $OUT[-1] .= "\t$value";
+                                $OUT[-1] .= "\t$value\n";
                             }
                         }
 
                         # Add a comment with the size of the range, if
-                        # requested.  Expand Tabs to make sure they all start
-                        # in the same column, and then unexpand to use mostly
-                        # tabs.
-                        if (! $output_range_counts{$addr}) {
-                            $OUT[-1] .= "\n";
-                        }
-                        else {
-                            $OUT[-1] = Text::Tabs::expand($OUT[-1]);
-                            my $count = main::clarify_number($end - $start + 1);
-                            use integer;
-
-                            my $width = $tab_stops * 8 - 1;
-                            $OUT[-1] = sprintf("%-*s # [%s]\n",
-                                                $width,
-                                                $OUT[-1],
-                                                $count);
-                            $OUT[-1] = Text::Tabs::unexpand($OUT[-1]);
+                        # requested.
+                        if ($output_range_counts{$addr}) {
+                            $OUT[-1] = merge_single_annotation_line(
+                                    $OUT[-1],
+                                    "# ["
+                                      . main::clarify_number($end - $start + 1)
+                                      . "]\n",
+                                    $comment_indent);
                         }
                     }
                     else { # Here to output a single code point per line.
