@@ -3778,7 +3778,9 @@ enclosing block, file, or C<eval>.  If more than one variable is listed,
 the list must be placed in parentheses.
 
 The exact semantics and interface of TYPE and ATTRS are still
-evolving.  TYPE is currently bound to the use of the C<fields> pragma,
+evolving.  TYPE may be a bareword, a constant declared
+with C<use constant>, or C<__PACKAGE__>.  It is
+currently bound to the use of the C<fields> pragma,
 and attributes are handled using the C<attributes> pragma, or starting
 from Perl 5.8.0 also via the C<Attribute::Handlers> module.  See
 L<perlsub/"Private Variables via my()"> for details, and L<fields>,
