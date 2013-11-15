@@ -5535,8 +5535,6 @@ END
 
         my $self = shift;
         my $use_adjustments = shift; # ? output in adjusted format or not
-        my $tab_stops = shift;       # The number of tab stops over to put any
-                                     # comment.
         my $suppress_value = shift;  # Optional, if the value associated with
                                      # a range equals this one, don't write
                                      # the range
@@ -5613,6 +5611,92 @@ END
                         || $property == main::property_ref('Name')
                         || $property == main::property_ref('Name_Alias')
                        );
+
+                # Don't include the code point in the annotation where all
+                # lines are a single code point, so it can be easily found in
+                # the first column
+                $include_cp = ! $range_size_1;
+
+                if ($self->isa('Map_Table')) {
+
+                    # There are just a few short ranges in this table, so no
+                    # need to include the code point in the annotation.
+                    $include_cp = 0 if $format eq $DECOMP_STRING_FORMAT;
+
+                    # We're trying to get this to look good, as the whole
+                    # point is to make human-readable tables.  It is easier to
+                    # read if almost all the annotation comments begin in the
+                    # same column.  Map tables have varying width maps, so can
+                    # create a jagged comment appearance.  This code does a
+                    # preliminary pass through these tables looking for the
+                    # maximum width map in each, and causing the comments to
+                    # begin just to the right of that.  However, if the
+                    # comments begin too far to the right of most lines, it's
+                    # hard to line them up horizontally with their real data.
+                    # Therefore we ignore the longest outliers
+                    my $ignore_longest_X_percent = 2;  # Discard longest X%
+
+                    # Each key in this hash is a width of at least one of the
+                    # maps in the table.  Its value is how many lines have
+                    # that width.
+                    my %widths;
+
+                    # We won't space things further left than one tab stop
+                    # after the rest of the line; initializing it to that
+                    # number saves some work.
+                    my $max_map_width = 8;
+
+                    # Fill in the %widths hash
+                    my $total = 0;
+                    for my $set ($range_list{$addr}->ranges) {
+                        my $value = $set->value;
+
+                        # These range types don't appear in the main table
+                        next if $set->type == 0
+                                && defined $suppress_value
+                                && $value eq $suppress_value;
+                        next if $set->type == $MULTI_CP
+                                || $set->type == $NULL;
+
+                        # Include 2 spaces before the beginning of the
+                        # comment
+                        my $this_width = length($value) + 2;
+
+                        # Ranges of the remaining non-zero types usually
+                        # occupy just one line (maybe occasionally two, but
+                        # this doesn't have to be dead accurate).  This is
+                        # because these ranges are like "unassigned code
+                        # points"
+                        my $count = ($set->type != 0)
+                                    ? 1
+                                    : $set->end - $set->start + 1;
+                        $widths{$this_width} += $count;
+                        $total += $count;
+                        $max_map_width = $this_width
+                                            if $max_map_width < $this_width;
+                    }
+
+                    # If the widest map gives us less than two tab stops
+                    # worth, just take it as-is.
+                    if ($max_map_width > 16) {
+
+                        # Otherwise go through %widths until we have included
+                        # the desired percentage of lines in the whole table.
+                        my $running_total = 0;
+                        foreach my $width (sort { $a <=> $b } keys %widths)
+                        {
+                            $running_total += $widths{$width};
+                            use integer;
+                            if ($running_total * 100 / $total
+                                            >= 100 - $ignore_longest_X_percent)
+                            {
+                                $max_map_width = $width;
+                                last;
+                            }
+                        }
+                    }
+                    $comment_indent += $max_map_width;
+                }
             }
 
             # Values for previous time through the loop.  Initialize to
@@ -5919,8 +6003,6 @@ END
 
                                     $comment .=
                                     "=> '$to_chr'; $viacode[$i] => $to_name";
-                                    $comment_indent = 25;   # Determined by
-                                                            # experiment
                                 }
                                 else {
                                     $output_value += $i - $start
@@ -5947,10 +6029,6 @@ END
                                         $output_value = sprintf($hex_format,
                                                                 $output_value);
                                     }
-                                    # If including the name, no need to
-                                    # indent, as the name will already be way
-                                    # across the line.
-                                    $comment_indent = ($include_name) ? 0 : 60;
                                 }
 
                                 if ($include_cp) {
@@ -7047,9 +7125,6 @@ END
 
         return $self->SUPER::write(
             $output_adjusted,
-            ($self->property == $block)
-                ? 7     # block file needs more tab stops
-                : 3,
             $default_map);   # don't write defaulteds
     }
 
@@ -7581,7 +7656,7 @@ sub trace { return main::trace(@_); }
         my $self = shift;
         Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
-        return $self->SUPER::write(0, 2); # No adjustments; 2 tab stops
+        return $self->SUPER::write(0); # No adjustments
     }
 
     sub set_final_comment {
