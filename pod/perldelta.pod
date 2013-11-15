@@ -548,6 +548,12 @@ prefix from working.
 
 C<&CORE::exit()> and C<&CORE::die()> now respect L<vmsish> hints.
 
+=item *
+
+Undefining a glob that triggers a DESTROY method that undefines the same
+glob is now safe.  It used to produce "Attempt to free unreferenced glob
+pointer" warnings and leak memory.
+
 =back
 
 =head1 Known Problems
