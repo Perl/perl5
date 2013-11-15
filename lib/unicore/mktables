@@ -5714,10 +5714,10 @@ END
 
                     if (($use_adjustments || $range_size_1) && $end != $start)
                     {
-                            $next_start = $start + 1;
-                            $next_end = $end;
-                            $next_value = $value;
-                            $end = $start;
+                        $next_start = $start + 1;
+                        $next_end = $end;
+                        $next_value = $value;
+                        $end = $start;
                     }
 
                     if ($use_adjustments && ! $range_size_1) {
@@ -5816,7 +5816,7 @@ END
 
                             # Get character information if don't have it already
                             main::populate_char_info($i)
-                                                if ! defined $viacode[$i];
+                                                     if ! defined $viacode[$i];
                             my $type = $annotate_char_type[$i];
 
                             # Figure out if should output the next code points
@@ -5925,13 +5925,13 @@ END
                                 else {
                                     $output_value += $i - $start
                                                    if $use_adjustments
-                                                       # Don't try to adjust a
-                                                       # non-integer
+                                                      # Don't try to adjust a
+                                                      # non-integer
                                                    && $output_value !~ /[-\D]/;
 
                                     if ($output_map_in_hex) {
                                         main::populate_char_info($output_value)
-                                        if ! defined $viacode[$output_value];
+                                          if ! defined $viacode[$output_value];
                                         $comment .= " => '"
                                         . main::display_chr($output_value)
                                         . "'; " if $printable[$output_value];
@@ -7865,14 +7865,16 @@ END
         if ($total_entries == 0) {
             Carp::my_carp("No regular expression construct can match $leader, as all names for it are the null string.  Creating file anyway.");
             $comment .= <<END;
-This file returns the $code_points in Unicode Version $string_version for
+This file returns the $code_points in Unicode Version
+$string_version for
 $leader, but it is inaccessible through Perl regular expressions, as
 "\\p{prop=}" is not recognized.
 END
 
         } else {
             $comment .= <<END;
-This file returns the $code_points in Unicode Version $string_version that
+This file returns the $code_points in Unicode Version
+$string_version that
 $match$synonyms:
 
 $matches_comment
