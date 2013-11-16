@@ -15,7 +15,7 @@ BEGIN {
 
 use Config;
 
-plan tests => 125;
+plan tests => 126;
 
 # run some code N times. If the number of SVs at the end of loop N is
 # greater than (N-1)*delta at the end of loop 1, we've got a leak
@@ -87,7 +87,7 @@ eleak(2, 0, "$all /\$\\ /", '/$\ / with fatal warnings');
 eleak(2, 0, "$all s//\\1/", 's//\1/ with fatal warnings');
 eleak(2, 0, "$all qq|\\i|", 'qq|\i| with fatal warnings');
 eleak(2, 0, "$f 'digit'; qq|\\o{9}|", 'qq|\o{9}| with fatal warnings');
-eleak(2, 0, "$f 'misc'; sub foo{} sub foo:lvalue",
+eleak(3, 1, "$f 'misc'; sub foo{} sub foo:lvalue",
      'ignored :lvalue with fatal warnings');
 eleak(2, 0, "no warnings; use feature ':all'; $f 'misc';
              my sub foo{} sub foo:lvalue",
@@ -295,6 +295,14 @@ leak(2, 0, sub { sub { local $_[0]; shift }->(1) },
     'local $_[0] on surreal @_, followed by shift');
 leak(2, 0, sub { sub { local $_[0]; \@_ }->(1) },
     'local $_[0] on surreal @_, followed by reification');
+
+sub recredef {}
+sub Recursive::Redefinition::DESTROY {
+    *recredef = sub { CORE::state $x } # state makes it cloneable
+}
+leak(2, 0, sub {
+    bless \&recredef, "Recursive::Redefinition"; eval "sub recredef{}"
+}, 'recursive sub redefinition');
 
 # Syntax errors
 eleak(2, 0, '"${<<END}"

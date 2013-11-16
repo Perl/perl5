@@ -7249,8 +7249,7 @@ S_already_defined(pTHX_ CV *const cv, OP * const block, OP * const o,
 #endif
     {
 	/* (PL_madskills unset in used file.) */
-	if (gv) GvCV_set(gv,NULL);
-	SvREFCNT_dec(cv);
+	SAVEFREESV(cv);
     }
     return TRUE;
 }
@@ -8115,6 +8114,7 @@ Perl_newXS_len_flags(pTHX_ const char *name, STRLEN len,
 			   U32 flags)
 {
     CV *cv;
+    bool interleave = FALSE;
 
     PERL_ARGS_ASSERT_NEWXS_LEN_FLAGS;
 
@@ -8144,8 +8144,9 @@ Perl_newXS_len_flags(pTHX_ const char *name, STRLEN len,
                                         ),
                                         cv, const_svp);
                 }
-                GvCV_set(gv,NULL);
-                SvREFCNT_dec_NN(cv);
+                interleave = TRUE;
+                ENTER;
+                SAVEFREESV(cv);
                 cv = NULL;
             }
         }
@@ -8180,6 +8181,7 @@ Perl_newXS_len_flags(pTHX_ const char *name, STRLEN len,
 	CvDYNFILE_on(cv);
     }
     sv_setpv(MUTABLE_SV(cv), proto);
+    if (interleave) LEAVE;
     return cv;
 }
 
