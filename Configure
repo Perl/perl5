@@ -3015,7 +3015,7 @@ do
     ;;
   *)
     $targetmkdir $targetdir/\`dirname \$f\`
-    $targetto -P $targetport -r $q \$f $targetuser@$targethost:$targetdir/\$f || exit 1
+    $targetto -P $targetport -r $q \$f $targetuser@$targethost:$targetdir/\$f  2>/dev/null || exit 1
     ;;
   esac
 done
