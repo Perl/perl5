@@ -2993,8 +2993,7 @@ character name.
 
 =item Missing ']' in prototype for %s : %s
 
-(W illegalproto) A grouping was started with C<[> but never closed with
-C<]>.
+(W illegalproto) A grouping was started with C<[> but never closed with C<]>.
 
 =item Missing name in "%s sub"
 
