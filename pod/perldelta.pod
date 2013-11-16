@@ -564,8 +564,8 @@ pointer" warnings and leak memory.
 If subroutine redefinition (C<eval 'sub foo{}'> or C<newXS> for XS code)
 triggers a DESTROY method on the sub that is being redefined, and that
 method assigns a subroutine to the same slot (C<*foo = sub {}>), C<$_[0]>
-is no longer left pointing to a freed scalar.  Now there is a memory leak
-instead. :-(
+is no longer left pointing to a freed scalar.  Now DESTROY is delayed until
+the new subroutine has been installed.
 
 =item *
 
