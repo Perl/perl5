@@ -519,7 +519,6 @@ S_maybe_add_coresub(pTHX_ HV * const stash, GV *gv,
 	cv = MUTABLE_CV(newSV_type(SVt_PVCV));
 	GvCV_set(gv,cv);
 	GvCVGEN(gv) = 0;
-	mro_method_changed_in(GvSTASH(gv));
 	CvISXSUB_on(cv);
 	CvXSUB(cv) = core_xsub;
     }
