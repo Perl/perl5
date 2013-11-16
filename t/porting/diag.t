@@ -40,7 +40,7 @@ my $source_msg_re =
    "(?<routine>\\bDIE\\b|$function_re|$regcomp_fail_re)";
 my $text_re = '"(?<text>(?:\\\\"|[^"]|"\s*[A-Z_]+\s*")*)"';
 my $source_msg_call_re = qr/$source_msg_re(?:_nocontext)? \s*
-    \(aTHX_ \s*
+    \((?:aTHX_)? \s*
     (?:packWARN\d*\((?<category>.*?)\),)? \s*
     $text_re /x;
 my $bad_version_re = qr{BADVERSION\([^"]*$text_re};
