@@ -472,7 +472,6 @@ Can't %s script `%s' with ARGV[0] being `%s'
 Can't %s "%s": %s
 Can't %s `%s' with ARGV[0] being `%s' (looking for executables only, not found)
 Can't use string ("%s"%s) as a subroutine ref while "strict refs" in use
-\%c better written as $%c
 Character(s) in '%c' format wrapped in %s
 chown not implemented!
 clear %s

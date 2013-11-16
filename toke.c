@@ -3379,6 +3379,7 @@ S_scan_const(pTHX_ char *start)
 	    if (PL_lex_inwhat == OP_SUBST && !PL_lex_inpat &&
 		isDIGIT(*s) && *s != '0' && !isDIGIT(s[1]))
 	    {
+		/* diag_listed_as: \%d better written as $%d */
 		Perl_ck_warner(aTHX_ packWARN(WARN_SYNTAX), "\\%c better written as $%c", *s, *s);
 		*--s = '$';
 		break;
