@@ -25,7 +25,7 @@ require 'regen/embed_lib.pl';
 my @functions;
 foreach (@{(setup_embed())[0]}) {
   next if @$_ < 2;
-  next unless $_->[2]  =~ /warn|err|(\b|_)die|croak/i;
+  next unless $_->[2]  =~ /warn|(?<!ov)err|(\b|_)die|croak/i;
   # The flag p means that this function may have a 'Perl_' prefix
   # The flag s means that this function may have a 'S_' prefix
   push @functions, $_->[2];
