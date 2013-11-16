@@ -6054,7 +6054,7 @@ startup.
 In code that currently says C<use AutoLoader; @ISA = qw(AutoLoader);>
 you should remove AutoLoader from @ISA and change C<use AutoLoader;> to
 C<use AutoLoader 'AUTOLOAD';>.
- 
+
 =item Use of literal control characters in variable names is deprecated
 
 (D deprecated) Using literal control characters in the source to refer
