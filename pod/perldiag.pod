@@ -3144,17 +3144,17 @@ local() if you want to localize a package variable.
 
 =item Name "%s::%s" used only once: possible typo
 
-(W once) Typographical errors often show up as unique variable names.
-If you had a good reason for having a unique name, then just mention it
-again somehow to suppress the message.  The C<our> declaration is provided
-for this purpose.
+(W once) Typographical errors often show up as unique variable
+names.  If you had a good reason for having a unique name, then
+just mention it again somehow to suppress the message.  The C<our>
+declaration is provided for this purpose.
 
-NOTE: This warning detects symbols that have been used only once so $c, @c,
-%c, *c, &c, sub c{}, c(), and c (the filehandle or format) are considered
-the same; if a program uses $c only once but also uses any of the others it
-will not trigger this warning.  Symbols beginning with an underscore and
-symbols using special identifiers (q.v. L<perldata>) are exempt from this
-warning.
+NOTE: This warning detects symbols that have been used only once
+so $c, @c, %c, *c, &c, sub c{}, c(), and c (the filehandle or
+format) are considered the same; if a program uses $c only once
+but also uses any of the others it will not trigger this warning.
+Symbols beginning with an underscore and symbols using special
+identifiers (q.v. L<perldata>) are exempt from this warning.
 
 =item Need exactly 3 octal digits in regex; marked by <-- HERE in m/%s/
 
