@@ -1097,22 +1097,27 @@ sub save_message_to_disk {
 }
 
 sub _send_message_vms {
-    if (   ( $address =~ /@/ and $address !~ /^\w+%"/ )
-        or ( $cc =~ /@/ and $cc !~ /^\w+%"/ ) ) {
-        my $prefix;
-        foreach ( qw[ IN MX SMTP UCX PONY WINS ], '' ) {
-            $prefix = "$_%", last if $ENV{"MAIL\$PROTOCOL_$_"};
+
+    my $mail_from  = $from;
+    my $rcpt_to_to = $address;
+    my $rcpt_to_cc = $cc;
+
+    map { $_ =~ s/^[^<]*<//;
+          $_ =~ s/>[^>]*//; } ($mail_from, $rcpt_to_to, $rcpt_to_cc);
+
+    if ( open my $sff_fh, '|-', 'MCR TCPIP$SYSTEM:TCPIP$SMTP_SFF.EXE SYS$INPUT:' ) {
+        print $sff_fh "MAIL FROM:<$mail_from>\n";
+        print $sff_fh "RCPT TO:<$rcpt_to_to>\n";
+        print $sff_fh "RCPT TO:<$rcpt_to_cc>\n" if $rcpt_to_cc;
+        print $sff_fh "DATA\n";
+        print $sff_fh build_complete_message();
+        my $success = close $sff_fh;
+        if ($success ) {
+            print "\nMessage sent\n";
+            return;
         }
-        $address = qq[${prefix}"$address"] unless $address =~ /^\w+%"/;
-        $cc = qq[${prefix}"$cc"] unless !$cc || $cc =~ /^\w+%"/;
     }
-    $subject =~ s/"/""/g;
-    $address =~ s/"/""/g;
-    $cc      =~ s/"/""/g;
-    my $sts = system(qq[mail/Subject="$subject" $filename. "$address","$cc"]);
-    if ($sts) {
-        die "Can't spawn off mail (leaving bug report in $filename): $sts";
-    }
+    die "Mail transport failed (leaving bug report in $filename): $^E\n";
 }
 
 sub _send_message_mailsend {
