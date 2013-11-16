@@ -89,6 +89,13 @@ C<tr/a-y//>, which was probably not what you would have expected.)
 you thought.  Normally it's pretty easy to disambiguate it by supplying
 a missing quote, operator, parenthesis pair or declaration.
 
+=item Ambiguous use of -%s resolved as -&%s()
+
+(S ambiguous) You wrote something like C<-foo>, which might be the
+string C<"-foo">, or a call to the function C<foo>, negated.  If you meant
+the string, just write C<"-foo">.  If you meant the function call,
+write C<-foo()>.
+
 =item Ambiguous use of %c resolved as operator %c
 
 (S ambiguous) C<%>, C<&>, and C<*> are both infix operators (modulus,
@@ -127,13 +134,6 @@ want, you can avoid the warning by changing C</${length[2345]}/> to the
 unsightly C</${\$length[2345]}/>, by renaming your array to something
 that does not coincide with a built-in keyword, or by simply turning
 off warnings with C<no warnings 'ambiguous';>.
-
-=item Ambiguous use of -%s resolved as -&%s()
-
-(S ambiguous) You wrote something like C<-foo>, which might be the
-string C<"-foo">, or a call to the function C<foo>, negated.  If you meant
-the string, just write C<"-foo">.  If you meant the function call,
-write C<-foo()>.
 
 =item '|' and '<' may not both be specified on command line
 
@@ -345,18 +345,18 @@ dereference it first.  See L<perlfunc/substr>.
 obsolete, has had no effect since 5005 threads were removed, and
 will be removed in a future release of Perl 5.
 
+=item Attribute prototype(%s) discards earlier prototype attribute in same sub
+
+(W misc) A sub was declared as sub foo : prototype(A) : prototype(B) {}, for
+example.  Since each sub can only have one prototype, the earlier
+declaration(s) are discarded while the last one is applied.
+
 =item Attribute "unique" is deprecated
 
 (D deprecated) You have used the attributes pragma to modify
 the "unique" attribute on an array, hash or scalar reference.
 The :unique attribute has had no effect since Perl 5.8.8, and
 will be removed in a future release of Perl 5.
-
-=item Attribute prototype(%s) discards earlier prototype attribute in same sub
-
-(W misc) A sub was declared as sub foo : prototype(A) : prototype(B) {}, for
-example.  Since each sub can only have one prototype, the earlier
-declaration(s) are discarded while the last one is applied.
 
 =item av_reify called on tied array
 
@@ -2991,6 +2991,11 @@ blank.
 (F) A double-quoted string ended with "\c", without the required control
 character name.
 
+=item Missing ']' in prototype for %s : %s
+
+(W illegalproto) A grouping was started with C<[> but never closed with
+C<]>.
+
 =item Missing name in "%s sub"
 
 (F) The reserved syntax for lexically scoped subroutines requires that
@@ -3001,11 +3006,6 @@ they have a name with which they can be found.
 (F) Apparently you've been programming in B<csh> too much.  Variables
 are always mentioned with the $ in Perl, unlike in the shells, where it
 can vary from one line to the next.
-
-=item Missing ']' in prototype for %s : %s
-
-(W illegalproto) A grouping was started with C<[> but never closed with
-C<]>.
 
 =item (Missing operator before %s?)
 
@@ -4555,8 +4555,6 @@ expression compiler gave it.
 
 =item Regexp modifier "/%c" may appear a maximum of twice
 
-=item Regexp modifier "/%c" may not appear twice
-
 (F syntax, regexp) The regular expression pattern had too many occurrences
 of the specified modifier.  Remove the extraneous ones.
 
@@ -4567,6 +4565,11 @@ HERE in m/%s/
 another one.  Perl currently doesn't allow this.  Reword the regular
 expression to use the modifier you want to turn on (and place it before
 the minus), instead of the one you want to turn off.
+
+=item Regexp modifier "/%c" may not appear twice
+
+(F syntax, regexp) The regular expression pattern had too many occurrences
+of the specified modifier.  Remove the extraneous ones.
 
 =item Regexp modifiers "/%c" and "/%c" are mutually exclusive
 
@@ -5041,10 +5044,6 @@ the regular expression the problem was discovered.  See L<perlre>.
 (F) While under the C<use filetest> pragma, we cannot switch the real
 and effective uids or gids.
 
-=item %s syntax OK
-
-(F) The final summary message when a C<perl -c> succeeds.
-
 =item syntax error
 
 (F) Probably means you had a syntax error.  Common reasons include:
@@ -5082,6 +5081,10 @@ or "my $var" or "our $var".
 
 (F) Perl could not figure out what you meant inside this construct; this
 notifies you that it is giving up trying.
+
+=item %s syntax OK
+
+(F) The final summary message when a C<perl -c> succeeds.
 
 =item sysread() on closed filehandle %s
 
@@ -5960,11 +5963,6 @@ is deprecated.  See L<perlvar/"$[">.
 (D deprecated) You are now encouraged to use the explicitly quoted
 form if you wish to use an empty line as the terminator of the here-document.
 
-=item Use of comma-less variable list is deprecated
-
-(D deprecated) The values you give to a format should be
-separated by commas, not just aligned on a line.
-
 =item Use of chdir('') or chdir(undef) as chdir() deprecated
 
 (D deprecated) chdir() with no arguments is documented to change to
@@ -5985,6 +5983,11 @@ modifier is not presently meaningful in substitutions.
 (W regexp) You used the /c modifier with a regex operand, but didn't
 use the /g modifier.  Currently, /c is meaningful only when /g is
 used.  (This may change in the future.)
+
+=item Use of comma-less variable list is deprecated
+
+(D deprecated) The values you give to a format should be
+separated by commas, not just aligned on a line.
 
 =item Use of each() on hash after insertion without resetting hash iterator results in undefined behavior
 
@@ -6055,13 +6058,6 @@ In code that currently says C<use AutoLoader; @ISA = qw(AutoLoader);>
 you should remove AutoLoader from @ISA and change C<use AutoLoader;> to
 C<use AutoLoader 'AUTOLOAD';>.
 
-=item Use of literal control characters in variable names is deprecated
-
-(D deprecated) Using literal control characters in the source to refer
-to the ^FOO variables, like C<$^X> and C<${^GLOBAL_PHASE}> is now
-deprecated.  This only affects code like C<$\cT>, where \cT is a control in
-the source code: C<${"\cT"}> and C<$^T> remain valid.
-
 =item Use of %s in printf format not supported
 
 (F) You attempted to use a feature of printf that is accessible from
@@ -6072,6 +6068,13 @@ only C.  This usually means there's a better way to do it in Perl.
 (D deprecated) The construct indicated is no longer recommended for use,
 generally because there's a better way to do it, and also because the
 old way has bad side effects.
+
+=item Use of literal control characters in variable names is deprecated
+
+(D deprecated) Using literal control characters in the source to refer
+to the ^FOO variables, like C<$^X> and C<${^GLOBAL_PHASE}> is now
+deprecated.  This only affects code like C<$\cT>, where \cT is a control in
+the source code: C<${"\cT"}> and C<$^T> remain valid.
 
 =item Use of -l on filehandle%s
 
