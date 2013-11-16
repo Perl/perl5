@@ -2998,7 +2998,7 @@ C<]>.
 
 =item Missing name in "%s sub"
 
-(F) The reserved syntax for lexically scoped subroutines requires that
+(F) The syntax for lexically scoped subroutines requires that
 they have a name with which they can be found.
 
 =item Missing $ on loop variable
