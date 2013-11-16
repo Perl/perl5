@@ -107,11 +107,6 @@ my %skip = (
 	    '.svn' => 1,
 	   );
 
-
-if ($::do_nothing || $::do_nothing) { # set by harness b4 requiring us
-    return 1;
-}
-
 $| = 1;
 
 # for testing TEST only
@@ -148,6 +143,10 @@ our $show_elapsed_time = $ENV{HARNESS_TIMER} || 0;
 	}
     }
     @ARGV = @argv;
+}
+
+if ($::do_nothing || $::do_nothing) { # set by harness b4 requiring us
+    return 1;
 }
 
 chdir 't' if -f 't/TEST';
