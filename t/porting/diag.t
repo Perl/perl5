@@ -498,6 +498,7 @@ Filehandle %s opened only for %sput
 Filehandle STD%s reopened as %s only for input
 file_type not implemented on DOS
 filter_del can only delete in reverse order (currently)
+fork() not available
 YOU HAVEN'T DISABLED SET-ID SCRIPTS IN THE KERNEL YET! FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!
 free %s
 Function "endnetent" not implemented in this version of perl.
