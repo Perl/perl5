@@ -460,12 +460,15 @@ __DATA__
 Malformed UTF-8 character (unexpected non-continuation byte 0x%x, immediately after start byte 0x%x)
 
 Cannot apply "%s" in non-PerlIO perl
+Can't find DLL name for the module `%s' by the handle %d, rc=%u=%x
 Can't find string terminator %c%s%c anywhere before EOF
 Can't fix broken locale name "%s"
 Can't get short module name from a handle
+Can't load DLL `%s', possible problematic module `%s'
 Can't locate %s:   %s
 Can't locate object method "%s" via package "%s" (perhaps you forgot to load "%s"?)
 Can't pipe "%s": %s
+Can't set type on DOS
 Can't spawn: %s
 Can't spawn "%s": %s
 Can't %s script `%s' with ARGV[0] being `%s'
@@ -479,14 +482,20 @@ Code missing after '/' in pack
 Code missing after '/' in unpack
 '%c' outside of string in pack
 Debug leaking scalars child failed%s with errno %d: %s
+detach of a thread which could not start
+detach on an already detached thread
+detach on a thread with a waiter
 '/' does not take a repeat count in %s
 -Dp not implemented on this platform
+Empty array reference given to mod2fname
+Error loading module '%s': %s'
 Error reading "%s": %s
 execl not implemented!
 EVAL without pos change exceeded limit in regex
 Filehandle opened only for %sput
 Filehandle %s opened only for %sput
 Filehandle STD%s reopened as %s only for input
+file_type not implemented on DOS
 filter_del can only delete in reverse order (currently)
 YOU HAVEN'T DISABLED SET-ID SCRIPTS IN THE KERNEL YET! FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!
 free %s
@@ -494,6 +503,7 @@ get %s %p %p %p
 getpwnam returned invalid UIC %o for user "%s"
 glob failed (can't start child: %s)
 glob failed (child exited with status %d%s)
+Got an error from DosAllocMem: %i
 Goto undefined subroutine
 Goto undefined subroutine &%s
 Got signal %d
@@ -502,6 +512,7 @@ Illegal binary digit '%c' ignored
 Illegal character %sin prototype for %s : %s
 Illegal hexadecimal digit '%c' ignored
 Illegal octal digit '%c' ignored
+INSTALL_PREFIX too long: `%s'
 Invalid argument to sv_cat_decode
 Invalid range "%c-%c" in transliteration operator
 Invalid separator character %c%c%c in PerlIO layer specification %s
@@ -511,28 +522,37 @@ Invalid type '%c' in %s
 Invalid type '%c' in unpack
 Invalid type ',' in %s
 ioctlsocket not implemented!
+join with a thread with a waiter
 killpg not implemented!
 List form of pipe open not implemented
+Looks like we have no PM; will not load DLL %s without $ENV{PERL_ASIF_PM}
 Malformed integer in [] in %s
+Malformed %s
 Malformed UTF-8 character (fatal)
 Missing (suid) fd script name
 More than one argument to open
 More than one argument to open(,':%s')
 \N{} in character class restricted to one character in regex; marked by <-- HERE in m/%s/
+No message queue
 No %s allowed while running setgid
 No %s allowed with (suid) fdscript
 Not an XSUB reference
+Not a reference given to mod2fname
+Not array reference given to mod2fname
 Operator or semicolon missing before %c%s
 Out of memory during list extend
+panic queryaddr
 PerlApp::TextQuery: no arguments, please
 POSIX syntax [%c %c] is reserved for future extensions in regex; marked by <-- HERE in m/%s/
 ptr wrong %p != %p fl=%x nl=%p e=%p for %d
+QUITing...
 Recompile perl with -DDEBUGGING to use -D switch (did you mean -d ?)
 Regexp modifier "%c" may appear a maximum of twice in regex; marked by <-- HERE in m/%s/
 Regexp modifier "%c" may not appear twice in regex; marked by <-- HERE in m/%s/
 Regexp modifiers "%c" and "%c" are mutually exclusive in regex; marked by <-- HERE in m/%s/
 Regexp *+ operand could be empty in regex; marked by <-- HERE in m/%s/
 Reversed %c= operator
+%s: Can't parse EXE/DLL name: '%s'
 %s(%f) failed
 %sCompilation failed in require
 Sequence (?%c...) not implemented in regex; marked by <-- HERE in m/%s/
@@ -541,17 +561,20 @@ Sequence %s... not terminated in regex; marked by <-- HERE in m/%s/
 Sequence (?%c... not terminated in regex; marked by <-- HERE in m/%s/
 Sequence (?(%c... not terminated in regex; marked by <-- HERE in m/%s/
 Sequence (?R) not terminated in regex m/%s/
+%s: Error stripping dirs from EXE/DLL/INSTALLDIR name
 set %s %p %p %p
 %s free() ignored (RMAGIC, PERL_CORE)
 %s has too many errors.
 SIG%s handler "%s" not defined.
 %s in %s
 Size magic not implemented
+%s: name `%s' too long
 %s number > %s non-portable
 %srealloc() %signored
 %s in regex m/%s/
 %s on %s %s
 socketpair not implemented!
+%s: %s
 Starting Full Screen process with flag=%d, mytype=%d
 Starting PM process with flag=%d, mytype=%d
 sv_2iv assumed (U_V(fabs((double)SvNVX(sv))) < (UV)IV_MAX) but SvNVX(sv)=%f U_V is 0x%x, IV_MAX is 0x%x
@@ -565,10 +588,13 @@ The flock() function is not implemented on NetWare
 The rewinddir() function is not implemented on NetWare
 The seekdir() function is not implemented on NetWare
 The telldir() function is not implemented on NetWare
+This perl was compiled without taint support. Cowardly refusing to run with -t or -T flags
+This version of OS/2 does not support %s.%s
 Too deeply nested ()-groups in %s
 Too many args on %s line of "%s"
 U0 mode on a byte string
 unable to find VMSPIPE.COM for i/o piping
+Unexpected program mode %d when morphing back from PM
 Unrecognized character %s; marked by <-- HERE after %s<-- HERE near column %d
 Unstable directory path, current directory changed unexpectedly
 Unterminated compressed integer in unpack
@@ -592,6 +618,7 @@ Wide character
 Wide character in $/
 Within []-length '*' not allowed in %s
 Within []-length '%c' not allowed in %s
+Wrong size of loadOrdinals array: expected %d, actual %d
 Wrong syntax (suid) fd script name "%s"
 'X' outside of string in %s
 'X' outside of string in unpack
