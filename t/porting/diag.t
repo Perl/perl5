@@ -588,6 +588,7 @@ POSIX syntax [%c %c] is reserved for future extensions in regex; marked by <-- H
 ptr wrong %p != %p fl=%x nl=%p e=%p for %d
 QUITing...
 Recompile perl with -DDEBUGGING to use -D switch (did you mean -d ?)
+recursion detected in %s
 Regexp *+ operand could be empty in regex; marked by <-- HERE in m/%s/
 Reversed %c= operator
 %s: Can't parse EXE/DLL name: '%s'
