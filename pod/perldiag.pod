@@ -1736,6 +1736,11 @@ define a C<$VERSION>.
 (F) You cannot put a repeat count of any kind right after the '/' code.
 See L<perlfunc/pack>.
 
+=item Don't know how to get file name
+
+(P) C<PerlIO_getname>, a perl internal I/O function specific to VMS, was
+somehow called on another platform.  This should not happen.
+
 =item Don't know how to handle magic of type \%o
 
 (P) The internal handling of magical variables has been cursed.
