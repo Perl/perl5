@@ -3218,10 +3218,10 @@ See L<mro>.
 =item \N in a character class must be a named character: \N{...} in regex; 
 marked by <-- HERE in m/%s/
 
-(F) The new (5.12) meaning of C<\N> as C<[^\n]> is not valid in
-a bracketed character class, for the same reason that C<.> in
-a character class loses its specialness: it matches almost
-everything, which is probably not what you want.
+(F) The new (as of Perl 5.12) meaning of C<\N> as C<[^\n]> is not valid in a
+bracketed character class, for the same reason that C<.> in a character
+class loses its specialness: it matches almost everything, which is
+probably not what you want.
 
 =item \N{} in character class restricted to one character in regex; marked
 by <-- HERE in m/%s/
