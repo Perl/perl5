@@ -210,7 +210,7 @@ See L<charnames/CUSTOM ALIASES>.
 
 (X) The malloc package that comes with Perl had an internal failure.
 
-=item Assertion failed: file "%s"
+=item Assertion %s failed: file "%s", line %d
 
 (X) A general assertion failed.  The file in question must be examined.
 
