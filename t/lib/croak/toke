@@ -9,6 +9,12 @@ eval "s//<<foo/e"; die $@
 EXPECT
 Can't find string terminator "foo" anywhere before EOF at (eval 1) line 1.
 ########
+# NAME /\N{/
+/\N{/
+EXPECT
+Missing right brace on \N{} or unescaped left brace after \N at - line 1, within pattern
+Execution of -e aborted due to compilation errors.
+########
 # NAME Missing name in "my sub"
 use feature 'lexical_subs'; my sub;
 EXPECT

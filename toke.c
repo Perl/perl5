@@ -3567,7 +3567,7 @@ S_scan_const(pTHX_ char *start)
 		    if (! PL_lex_inpat) {
 			yyerror("Missing right brace on \\N{}");
 		    } else {
-			yyerror("Missing right brace on \\N{} or unescaped left brace after \\N.");
+			yyerror("Missing right brace on \\N{} or unescaped left brace after \\N");
 		    }
 		    continue;
 		}
