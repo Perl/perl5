@@ -504,7 +504,7 @@ endhostent not implemented!
 endnetent not implemented!
 endprotoent not implemented!
 endservent not implemented!
-Error loading module '%s': %s'
+Error loading module '%s': %s
 Error reading "%s": %s
 execl not implemented!
 EVAL without pos change exceeded limit in regex
