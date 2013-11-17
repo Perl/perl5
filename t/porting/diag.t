@@ -79,7 +79,7 @@ while (<$diagfh>) {
         last;
       }
 
-      $cur_entry .= $_;
+      $cur_entry =~ s/ ?\z/ $_/;
     }
 
     $cur_entry =~ s/\n/ /gs; # Fix multi-line headers if they have \n's
