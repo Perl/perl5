@@ -3223,6 +3223,16 @@ a bracketed character class, for the same reason that C<.> in
 a character class loses its specialness: it matches almost
 everything, which is probably not what you want.
 
+=item \N{} in character class restricted to one character in regex; marked
+by <-- HERE in m/%s/
+
+(F) Named Unicode character escapes C<(\N{...})> may return a
+multi-character sequence.  Such an escape may not be used in
+a character class, because character classes always match one
+character of input.  Check that the correct escape has been used,
+and the correct charname handler is in scope.  The <-- HERE shows
+whereabouts in the regular expression the problem was discovered.
+
 =item \N{NAME} must be resolved by the lexer in regex; marked by <-- HERE in m/%s/
 
 (F) When compiling a regex pattern, an unresolved named character or

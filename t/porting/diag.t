@@ -556,7 +556,6 @@ Malformed UTF-8 character (fatal)
 Missing (suid) fd script name
 More than one argument to open
 More than one argument to open(,':%s')
-\N{} in character class restricted to one character in regex; marked by <-- HERE in m/%s/
 No message queue
 No %s allowed while running setgid
 No %s allowed with (suid) fdscript
