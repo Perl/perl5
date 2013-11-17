@@ -576,12 +576,6 @@ Reversed %c= operator
 %s: Can't parse EXE/DLL name: '%s'
 %s(%f) failed
 %sCompilation failed in require
-Sequence (?%c...) not implemented in regex; marked by <-- HERE in m/%s/
-Sequence (%s...) not recognized in regex; marked by <-- HERE in m/%s/
-Sequence %s... not terminated in regex; marked by <-- HERE in m/%s/
-Sequence (?%c... not terminated in regex; marked by <-- HERE in m/%s/
-Sequence (?(%c... not terminated in regex; marked by <-- HERE in m/%s/
-Sequence (?R) not terminated in regex m/%s/
 %s: Error stripping dirs from EXE/DLL/INSTALLDIR name
 set %s %p %p %p
 %s free() ignored (RMAGIC, PERL_CORE)

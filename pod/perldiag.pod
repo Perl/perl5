@@ -3956,7 +3956,7 @@ then discovered it wasn't a subroutine or eval context.
 
 (P) scan_num() got called on something that wasn't a number.
 
-=item panic: Sequence (?{...}): no code block found
+=item panic: Sequence (?{...}): no code block found in regex m/%s/
 
 (P) while compiling a pattern that has embedded (?{}) or (??{}) code
 blocks, perl couldn't locate the code block that should have already been
@@ -4729,7 +4729,7 @@ before now.  Check your control flow.
 <-- HERE shows whereabouts in the regular expression the problem was
 discovered.  See L<perlre>.
 
-=item Sequence (?%s...) not implemented in regex; marked by <-- HERE in m/%s/
+=item Sequence (?%c...) not implemented in regex; marked by <-- HERE in m/%s/
 
 (F) A proposed regular expression extension has the character reserved
 but has not yet been written.  The <-- HERE shows whereabouts in the
@@ -4750,6 +4750,21 @@ causes, see L<perlre>.
 parenthesis.  Embedded parentheses aren't allowed.  See
 L<perlre>.
 
+=item Sequence (?%c... not terminated in regex; marked by <-- HERE
+in m/%s/
+
+(F) A named group of the form C<(?'...')> or C<< (?<...>) >> was missing the final
+closing quote or angle bracket.  The <-- HERE shows whereabouts in the
+regular expression the problem was discovered.
+
+=item Sequence (?(%c... not terminated in regex; marked by <-- HERE
+in m/%s/
+
+(F) A named reference of the form C<(?('...')...)> or C<< (?(<...>)...) >> was
+missing the final closing quote or angle bracket after the name.  The
+<-- HERE shows whereabouts in the regular expression the problem was
+discovered.
+
 =item Sequence \%s... not terminated in regex; marked by <-- HERE in m/%s/
 
 (F) The regular expression expects a mandatory argument following the escape
@@ -4759,6 +4774,17 @@ sequence and this has been omitted or incorrectly written.
 
 (F) The end of the perl code contained within the {...} must be
 followed immediately by a ')'.
+
+=item Sequence ?P=... not terminated in regex; marked by <-- HERE in m/%s/
+
+(F) A named reference of the form C<(?P=...)> was missing the final
+closing parenthesis after the name.  The <-- HERE shows whereabouts
+in the regular expression the problem was discovered.
+
+=item Sequence (?R) not terminated in regex m/%s/
+
+(F) An C<(?R)> or C<(?0)> sequence in a regular expression was missing the
+final parenthesis.
 
 =item Server error (a.k.a. "500 Server error")
 
