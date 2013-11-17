@@ -4737,9 +4737,9 @@ regular expression the problem was discovered.  See L<perlre>.
 
 =item Sequence (?%s...) not recognized in regex; marked by <-- HERE in m/%s/
 
-(F) You used a regular expression extension that doesn't make sense.  The
-<-- HERE shows whereabouts in the regular expression the problem was
-discovered.  This happens when using the C<(?^...)> construct to tell
+(F) You used a regular expression extension that doesn't make sense.
+The <-- HERE shows whereabouts in the regular expression the problem was
+discovered.  This may happen when using the C<(?^...)> construct to tell
 Perl to use the default regular expression modifiers, and you
 redundantly specify a default modifier.  For other
 causes, see L<perlre>.
