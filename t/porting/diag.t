@@ -33,11 +33,12 @@ foreach (@{(setup_embed())[0]}) {
   push @functions, 'S_' . $_->[2] if $_->[0] =~ /s/;
 };
 
-my $regcomp_re = "(?<routine>(?:ckWARN(?:\\d+)?reg\\w*|vWARN\\d+))";
-my $function_re = join '|', @functions;
 my $regcomp_fail_re = '\b(?:(?:Simple_)?v)?FAIL[2-4]?(?:utf8f)?\b';
+my $regcomp_re =
+   "(?<routine>ckWARN(?:\\d+)?reg\\w*|vWARN\\d+|$regcomp_fail_re)";
+my $function_re = join '|', @functions;
 my $source_msg_re =
-   "(?<routine>\\bDIE\\b|$function_re|$regcomp_fail_re)";
+   "(?<routine>\\bDIE\\b|$function_re)";
 my $text_re = '"(?<text>(?:\\\\"|[^"]|"\s*[A-Z_]+\s*")*)"';
 my $source_msg_call_re = qr/$source_msg_re(?:_nocontext)? \s*
     \((?:aTHX_)? \s*
