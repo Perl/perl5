@@ -84,133 +84,6 @@ S_append_flags(pTHX_ SV *sv, U32 flags, const struct flag_to_name *start,
 #define append_flags(sv, f, flags) \
     S_append_flags(aTHX_ (sv), (f), (flags), C_ARRAY_END(flags))
 
-
-
-void
-Perl_dump_indent(pTHX_ I32 level, PerlIO *file, const char* pat, ...)
-{
-    va_list args;
-    PERL_ARGS_ASSERT_DUMP_INDENT;
-    va_start(args, pat);
-    dump_vindent(level, file, pat, &args);
-    va_end(args);
-}
-
-void
-Perl_dump_vindent(pTHX_ I32 level, PerlIO *file, const char* pat, va_list *args)
-{
-    dVAR;
-    PERL_ARGS_ASSERT_DUMP_VINDENT;
-    PerlIO_printf(file, "%*s", (int)(level*PL_dumpindent), "");
-    PerlIO_vprintf(file, pat, *args);
-}
-
-void
-Perl_dump_all(pTHX)
-{
-    dump_all_perl(FALSE);
-}
-
-void
-Perl_dump_all_perl(pTHX_ bool justperl)
-{
-
-    dVAR;
-    PerlIO_setlinebuf(Perl_debug_log);
-    if (PL_main_root)
-	op_dump(PL_main_root);
-    dump_packsubs_perl(PL_defstash, justperl);
-}
-
-void
-Perl_dump_packsubs(pTHX_ const HV *stash)
-{
-    PERL_ARGS_ASSERT_DUMP_PACKSUBS;
-    dump_packsubs_perl(stash, FALSE);
-}
-
-void
-Perl_dump_packsubs_perl(pTHX_ const HV *stash, bool justperl)
-{
-    dVAR;
-    I32	i;
-
-    PERL_ARGS_ASSERT_DUMP_PACKSUBS_PERL;
-
-    if (!HvARRAY(stash))
-	return;
-    for (i = 0; i <= (I32) HvMAX(stash); i++) {
-        const HE *entry;
-	for (entry = HvARRAY(stash)[i]; entry; entry = HeNEXT(entry)) {
-	    const GV * const gv = (const GV *)HeVAL(entry);
-	    if (SvTYPE(gv) != SVt_PVGV || !GvGP(gv))
-		continue;
-	    if (GvCVu(gv))
-		dump_sub_perl(gv, justperl);
-	    if (GvFORM(gv))
-		dump_form(gv);
-	    if (HeKEY(entry)[HeKLEN(entry)-1] == ':') {
-		const HV * const hv = GvHV(gv);
-		if (hv && (hv != PL_defstash))
-		    dump_packsubs_perl(hv, justperl); /* nested package */
-	    }
-	}
-    }
-}
-
-void
-Perl_dump_sub(pTHX_ const GV *gv)
-{
-    PERL_ARGS_ASSERT_DUMP_SUB;
-    dump_sub_perl(gv, FALSE);
-}
-
-void
-Perl_dump_sub_perl(pTHX_ const GV *gv, bool justperl)
-{
-    SV * sv;
-
-    PERL_ARGS_ASSERT_DUMP_SUB_PERL;
-
-    if (justperl && (CvISXSUB(GvCV(gv)) || !CvROOT(GvCV(gv))))
-	return;
-
-    sv = sv_newmortal();
-    gv_fullname3(sv, gv, NULL);
-    Perl_dump_indent(aTHX_ 0, Perl_debug_log, "\nSUB %s = ", SvPVX_const(sv));
-    if (CvISXSUB(GvCV(gv)))
-	Perl_dump_indent(aTHX_ 0, Perl_debug_log, "(xsub 0x%"UVxf" %d)\n",
-	    PTR2UV(CvXSUB(GvCV(gv))),
-	    (int)CvXSUBANY(GvCV(gv)).any_i32);
-    else if (CvROOT(GvCV(gv)))
-	op_dump(CvROOT(GvCV(gv)));
-    else
-	Perl_dump_indent(aTHX_ 0, Perl_debug_log, "<undef>\n");
-}
-
-void
-Perl_dump_form(pTHX_ const GV *gv)
-{
-    SV * const sv = sv_newmortal();
-
-    PERL_ARGS_ASSERT_DUMP_FORM;
-
-    gv_fullname3(sv, gv, NULL);
-    Perl_dump_indent(aTHX_ 0, Perl_debug_log, "\nFORMAT %s = ", SvPVX_const(sv));
-    if (CvROOT(GvFORM(gv)))
-	op_dump(CvROOT(GvFORM(gv)));
-    else
-	Perl_dump_indent(aTHX_ 0, Perl_debug_log, "<undef>\n");
-}
-
-void
-Perl_dump_eval(pTHX)
-{
-    dVAR;
-    op_dump(PL_eval_root);
-}
-
-
 /*
 =for apidoc pv_escape
 
@@ -583,6 +456,151 @@ Perl_sv_peek(pTHX_ SV *sv)
     if (TAINTING_get && SvTAINTED(sv))
 	sv_catpv(t, " [tainted]");
     return SvPV_nolen(t);
+}
+
+/*
+=head1 Debugging Utilities
+*/
+
+void
+Perl_dump_indent(pTHX_ I32 level, PerlIO *file, const char* pat, ...)
+{
+    va_list args;
+    PERL_ARGS_ASSERT_DUMP_INDENT;
+    va_start(args, pat);
+    dump_vindent(level, file, pat, &args);
+    va_end(args);
+}
+
+void
+Perl_dump_vindent(pTHX_ I32 level, PerlIO *file, const char* pat, va_list *args)
+{
+    dVAR;
+    PERL_ARGS_ASSERT_DUMP_VINDENT;
+    PerlIO_printf(file, "%*s", (int)(level*PL_dumpindent), "");
+    PerlIO_vprintf(file, pat, *args);
+}
+
+/*
+=for apidoc dump_all
+
+Dumps the entire optree of the current program starting at C<PL_main_root> to 
+C<STDERR>. Also dumps the optrees for all visible subroutines in C<PL_defstash>.
+
+=cut
+*/
+
+void
+Perl_dump_all(pTHX)
+{
+    dump_all_perl(FALSE);
+}
+
+void
+Perl_dump_all_perl(pTHX_ bool justperl)
+{
+
+    dVAR;
+    PerlIO_setlinebuf(Perl_debug_log);
+    if (PL_main_root)
+	op_dump(PL_main_root);
+    dump_packsubs_perl(PL_defstash, justperl);
+}
+
+/*
+=for apidoc dump_packsubs
+
+Dumps the optrees for all visible subroutines in C<stash>.
+
+=cut
+*/
+
+void
+Perl_dump_packsubs(pTHX_ const HV *stash)
+{
+    PERL_ARGS_ASSERT_DUMP_PACKSUBS;
+    dump_packsubs_perl(stash, FALSE);
+}
+
+void
+Perl_dump_packsubs_perl(pTHX_ const HV *stash, bool justperl)
+{
+    dVAR;
+    I32	i;
+
+    PERL_ARGS_ASSERT_DUMP_PACKSUBS_PERL;
+
+    if (!HvARRAY(stash))
+	return;
+    for (i = 0; i <= (I32) HvMAX(stash); i++) {
+        const HE *entry;
+	for (entry = HvARRAY(stash)[i]; entry; entry = HeNEXT(entry)) {
+	    const GV * const gv = (const GV *)HeVAL(entry);
+	    if (SvTYPE(gv) != SVt_PVGV || !GvGP(gv))
+		continue;
+	    if (GvCVu(gv))
+		dump_sub_perl(gv, justperl);
+	    if (GvFORM(gv))
+		dump_form(gv);
+	    if (HeKEY(entry)[HeKLEN(entry)-1] == ':') {
+		const HV * const hv = GvHV(gv);
+		if (hv && (hv != PL_defstash))
+		    dump_packsubs_perl(hv, justperl); /* nested package */
+	    }
+	}
+    }
+}
+
+void
+Perl_dump_sub(pTHX_ const GV *gv)
+{
+    PERL_ARGS_ASSERT_DUMP_SUB;
+    dump_sub_perl(gv, FALSE);
+}
+
+void
+Perl_dump_sub_perl(pTHX_ const GV *gv, bool justperl)
+{
+    SV * sv;
+
+    PERL_ARGS_ASSERT_DUMP_SUB_PERL;
+
+    if (justperl && (CvISXSUB(GvCV(gv)) || !CvROOT(GvCV(gv))))
+	return;
+
+    sv = sv_newmortal();
+    gv_fullname3(sv, gv, NULL);
+    Perl_dump_indent(aTHX_ 0, Perl_debug_log, "\nSUB %s = ", SvPVX_const(sv));
+    if (CvISXSUB(GvCV(gv)))
+	Perl_dump_indent(aTHX_ 0, Perl_debug_log, "(xsub 0x%"UVxf" %d)\n",
+	    PTR2UV(CvXSUB(GvCV(gv))),
+	    (int)CvXSUBANY(GvCV(gv)).any_i32);
+    else if (CvROOT(GvCV(gv)))
+	op_dump(CvROOT(GvCV(gv)));
+    else
+	Perl_dump_indent(aTHX_ 0, Perl_debug_log, "<undef>\n");
+}
+
+void
+Perl_dump_form(pTHX_ const GV *gv)
+{
+    SV * const sv = sv_newmortal();
+
+    PERL_ARGS_ASSERT_DUMP_FORM;
+
+    gv_fullname3(sv, gv, NULL);
+    Perl_dump_indent(aTHX_ 0, Perl_debug_log, "\nFORMAT %s = ", SvPVX_const(sv));
+    if (CvROOT(GvFORM(gv)))
+	op_dump(CvROOT(GvFORM(gv)));
+    else
+	Perl_dump_indent(aTHX_ 0, Perl_debug_log, "<undef>\n");
+}
+
+void
+Perl_dump_eval(pTHX)
+{
+    dVAR;
+    op_dump(PL_eval_root);
 }
 
 void
@@ -1167,6 +1185,14 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, const OP *o)
     }
     Perl_dump_indent(aTHX_ level-1, file, "}\n");
 }
+
+/*
+=for apidoc op_dump
+
+Dumps the optree starting at OP C<o> to C<STDERR>.
+
+=cut
+*/
 
 void
 Perl_op_dump(pTHX_ const OP *o)
@@ -2218,6 +2244,16 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
     }
     SvREFCNT_dec_NN(d);
 }
+
+/*
+=for apidoc sv_dump
+
+Dumps the contents of an SV to the C<STDERR> filehandle.
+
+For an example of its output, see L<Devel::Peek>.
+
+=cut
+*/
 
 void
 Perl_sv_dump(pTHX_ SV *sv)
