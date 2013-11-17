@@ -464,6 +464,7 @@ __DATA__
 Malformed UTF-8 character (unexpected non-continuation byte 0x%x, immediately after start byte 0x%x)
 
 Cannot apply "%s" in non-PerlIO perl
+Cannot set timer
 Can't find DLL name for the module `%s' by the handle %d, rc=%u=%x
 Can't find string terminator %c%s%c anywhere before EOF
 Can't fix broken locale name "%s"
@@ -484,6 +485,8 @@ chown not implemented!
 clear %s
 Code missing after '/' in pack
 Code missing after '/' in unpack
+Could not find version 1.1 of winsock dll
+Could not find version 2.0 of winsock dll
 '%c' outside of string in pack
 Debug leaking scalars child failed%s with errno %d: %s
 detach of a thread which could not start
@@ -492,6 +495,10 @@ detach on a thread with a waiter
 '/' does not take a repeat count in %s
 -Dp not implemented on this platform
 Empty array reference given to mod2fname
+endhostent not implemented!
+endnetent not implemented!
+endprotoent not implemented!
+endservent not implemented!
 Error loading module '%s': %s'
 Error reading "%s": %s
 execl not implemented!
@@ -504,6 +511,7 @@ filter_del can only delete in reverse order (currently)
 fork() not available
 YOU HAVEN'T DISABLED SET-ID SCRIPTS IN THE KERNEL YET! FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!
 free %s
+Free to wrong pool %p not %p
 Function "endnetent" not implemented in this version of perl.
 Function "endprotoent" not implemented in this version of perl.
 Function "endservent" not implemented in this version of perl.
@@ -528,7 +536,12 @@ Function "tcflow" not implemented in this version of perl.
 Function "tcflush" not implemented in this version of perl.
 Function "tcsendbreak" not implemented in this version of perl.
 get %s %p %p %p
+getnetbyaddr not implemented!
+getnetbyname not implemented!
+getnetent not implemented!
+getprotoent not implemented!
 getpwnam returned invalid UIC %o for user "%s"
+getservent not implemented!
 glob failed (can't start child: %s)
 glob failed (child exited with status %d%s)
 Got an error from DosAllocMem: %i
@@ -549,6 +562,7 @@ Invalid type '%c' in pack
 Invalid type '%c' in %s
 Invalid type '%c' in unpack
 Invalid type ',' in %s
+ioctl implemented only on sockets
 ioctlsocket not implemented!
 join with a thread with a waiter
 killpg not implemented!
@@ -580,13 +594,18 @@ Reversed %c= operator
 %s(%f) failed
 %sCompilation failed in require
 %s: Error stripping dirs from EXE/DLL/INSTALLDIR name
+sethostent not implemented!
+setnetent not implemented!
+setprotoent not implemented!
 set %s %p %p %p
+setservent not implemented!
 %s free() ignored (RMAGIC, PERL_CORE)
 %s has too many errors.
 SIG%s handler "%s" not defined.
 %s in %s
 Size magic not implemented
 %s: name `%s' too long
+%s not implemented!
 %s number > %s non-portable
 %srealloc() %signored
 %s in regex m/%s/
@@ -612,6 +631,7 @@ Too deeply nested ()-groups in %s
 Too many args on %s line of "%s"
 U0 mode on a byte string
 unable to find VMSPIPE.COM for i/o piping
+Unable to locate winsock library!
 Unexpected program mode %d when morphing back from PM
 Unrecognized character %s; marked by <-- HERE after %s<-- HERE near column %d
 Unstable directory path, current directory changed unexpectedly
@@ -634,6 +654,8 @@ Value of logical "%s" too long. Truncating to %i bytes
 waitpid: process %x is not a child of process %x
 Wide character
 Wide character in $/
+win32_get_osfhandle() TBD on this platform
+win32_open_osfhandle() TBD on this platform
 Within []-length '*' not allowed in %s
 Within []-length '%c' not allowed in %s
 Wrong size of loadOrdinals array: expected %d, actual %d
