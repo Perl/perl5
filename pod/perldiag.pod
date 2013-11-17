@@ -4572,7 +4572,7 @@ expression compiler gave it.
 =item Regexp modifier "%c" may appear a maximum of twice in regex; marked
 by <-- HERE in m/%s/
 
-(F syntax, regexp) The regular expression pattern had too many occurrences
+(F) The regular expression pattern had too many occurrences
 of the specified modifier.  Remove the extraneous ones.
 
 =item Regexp modifier "%c" may not appear after the "-" in regex; marked by <-- 
@@ -4588,7 +4588,7 @@ the minus), instead of the one you want to turn off.
 =item Regexp modifier "%c" may not appear twice in regex; marked by <--
 HERE in m/%s/
 
-(F syntax, regexp) The regular expression pattern had too many occurrences
+(F) The regular expression pattern had too many occurrences
 of the specified modifier.  Remove the extraneous ones.
 
 =item Regexp modifiers "/%c" and "/%c" are mutually exclusive
@@ -4596,7 +4596,7 @@ of the specified modifier.  Remove the extraneous ones.
 =item Regexp modifiers "%c" and "%c" are mutually exclusive in regex;
 marked by <-- HERE in m/%s/
 
-(F syntax, regexp) The regular expression pattern had more than one of these
+(F) The regular expression pattern had more than one of these
 mutually exclusive modifiers.  Retain only the modifier that is
 supposed to be there.
 
