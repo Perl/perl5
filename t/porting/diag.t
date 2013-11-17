@@ -17,7 +17,8 @@ plan('no_plan');
 # initially so as to not create new test failures upon the initial
 # creation of this test file.  You probably shouldn't do it again.
 # Just add the documentation instead.
-my $make_exceptions_list = ($ARGV[0]||'') eq '--make-exceptions-list';
+my $make_exceptions_list = ($ARGV[0]||'') eq '--make-exceptions-list'
+  and shift;
 
 require 'regen/embed_lib.pl';
 
@@ -177,6 +178,10 @@ my $specialformats =
  join '|', sort { length $b cmp length $a } keys %specialformats;
 my $specialformats_re = qr/%$format_modifiers"\s*($specialformats)(\s*")?/;
 
+if (@ARGV) {
+  check_file($_) for @ARGV;
+  exit;
+}
 open my $fh, '<', 'MANIFEST' or die "Can't open MANIFEST: $!";
 while (my $file = <$fh>) {
     chomp $file;
