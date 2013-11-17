@@ -6462,6 +6462,14 @@ what you want, put an & in front.)
 not get any randomness out of your system.  This usually indicates
 Something Very Wrong.
 
+=item Zero length \N{} in regex; marked by <-- HERE in m/%s/
+
+(F) Named Unicode character escapes C<(\N{...})> may return a zero-length
+sequence.  Such an escape was used in an extended character class, i.e.
+C<(?[...])>, which is not permitted.  Check that the correct escape has
+been used, and the correct charnames handler is in scope.  The <-- HERE
+shows whereabouts in the regular expression the problem was discovered.
+
 =back
 
 =head1 SEE ALSO
