@@ -323,7 +323,9 @@ that they represent may be covered elsewhere.
 
 =item *
 
-XXX
+L<ext/File-Find/t/find.t> has been converted from manual C<print>
+statements to Test::More functions.  Each test now has a description.
+[perl #120503]
 
 =back
 
