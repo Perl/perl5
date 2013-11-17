@@ -514,6 +514,7 @@ Filehandle STD%s reopened as %s only for input
 file_type not implemented on DOS
 filter_del can only delete in reverse order (currently)
 fork() not available
+fork() not implemented!
 YOU HAVEN'T DISABLED SET-ID SCRIPTS IN THE KERNEL YET! FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!
 free %s
 Free to wrong pool %p not %p
@@ -541,6 +542,7 @@ Function "tcflow" not implemented in this version of perl.
 Function "tcflush" not implemented in this version of perl.
 Function "tcsendbreak" not implemented in this version of perl.
 get %s %p %p %p
+gethostent not implemented!
 getnetbyaddr not implemented!
 getnetbyname not implemented!
 getnetent not implemented!
