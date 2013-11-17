@@ -84,6 +84,7 @@ while (<$diagfh>) {
 
     $cur_entry =~ s/\n/ /gs; # Fix multi-line headers if they have \n's
     $cur_entry =~ s/\s+\z//;
+    $cur_entry =~ s/[BCIFS](?:<<< (.*?) >>>|<< (.*?) >>|<(.*?)>)/$+/g;
 
     if (exists $entries{$cur_entry} &&  $entries{$cur_entry}{todo}
                                     && !$entries{$cur_entry}{cattodo}) {
@@ -626,7 +627,6 @@ sv_2iv assumed (U_V(fabs((double)SvNVX(sv))) < (UV)IV_MAX) but SvNVX(sv)=%f U_V 
 switching effective gid is not implemented
 switching effective uid is not implemented
 System V IPC is not implemented on this machine
--T and -B not implemented on filehandles
 Terminating on signal SIG%s(%d)
 The crypt() function is not implemented on NetWare
 The flock() function is not implemented on NetWare
