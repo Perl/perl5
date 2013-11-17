@@ -17,7 +17,8 @@ plan('no_plan');
 # initially so as to not create new test failures upon the initial
 # creation of this test file.  You probably shouldn't do it again.
 # Just add the documentation instead.
-my $make_exceptions_list = ($ARGV[0]||'') eq '--make-exceptions-list';
+my $make_exceptions_list = ($ARGV[0]||'') eq '--make-exceptions-list'
+  and shift;
 
 require 'regen/embed_lib.pl';
 
@@ -25,7 +26,7 @@ require 'regen/embed_lib.pl';
 my @functions;
 foreach (@{(setup_embed())[0]}) {
   next if @$_ < 2;
-  next unless $_->[2]  =~ /warn|err|(\b|_)die|croak/i;
+  next unless $_->[2]  =~ /warn|(?<!ov)err|(\b|_)die|croak/i;
   # The flag p means that this function may have a 'Perl_' prefix
   # The flag s means that this function may have a 'S_' prefix
   push @functions, $_->[2];
@@ -33,14 +34,15 @@ foreach (@{(setup_embed())[0]}) {
   push @functions, 'S_' . $_->[2] if $_->[0] =~ /s/;
 };
 
-my $regcomp_re = "(?<routine>(?:ckWARN(?:\\d+)?reg\\w*|vWARN\\d+))";
-my $function_re = join '|', @functions;
 my $regcomp_fail_re = '\b(?:(?:Simple_)?v)?FAIL[2-4]?(?:utf8f)?\b';
+my $regcomp_re =
+   "(?<routine>ckWARN(?:\\d+)?reg\\w*|vWARN\\d+|$regcomp_fail_re)";
+my $function_re = join '|', @functions;
 my $source_msg_re =
-   "(?<routine>\\bDIE\\b|$function_re|$regcomp_fail_re)";
+   "(?<routine>\\bDIE\\b|$function_re)";
 my $text_re = '"(?<text>(?:\\\\"|[^"]|"\s*[A-Z_]+\s*")*)"';
 my $source_msg_call_re = qr/$source_msg_re(?:_nocontext)? \s*
-    \(aTHX_ \s*
+    \((?:aTHX_)? \s*
     (?:packWARN\d*\((?<category>.*?)\),)? \s*
     $text_re /x;
 my $bad_version_re = qr{BADVERSION\([^"]*$text_re};
@@ -77,11 +79,12 @@ while (<$diagfh>) {
         last;
       }
 
-      $cur_entry .= $_;
+      $cur_entry =~ s/ ?\z/ $_/;
     }
 
     $cur_entry =~ s/\n/ /gs; # Fix multi-line headers if they have \n's
     $cur_entry =~ s/\s+\z//;
+    $cur_entry =~ s/[BCIFS](?:<<< (.*?) >>>|<< (.*?) >>|<(.*?)>)/$+/g;
 
     if (exists $entries{$cur_entry} &&  $entries{$cur_entry}{todo}
                                     && !$entries{$cur_entry}{cattodo}) {
@@ -176,13 +179,17 @@ my $specialformats =
  join '|', sort { length $b cmp length $a } keys %specialformats;
 my $specialformats_re = qr/%$format_modifiers"\s*($specialformats)(\s*")?/;
 
+if (@ARGV) {
+  check_file($_) for @ARGV;
+  exit;
+}
 open my $fh, '<', 'MANIFEST' or die "Can't open MANIFEST: $!";
 while (my $file = <$fh>) {
     chomp $file;
     $file =~ s/\s+.*//;
     next unless $file =~ /\.(?:c|cpp|h|xs|y)\z/ or $file =~ /^perly\./;
     # OS/2 extensions have never been migrated to ext/, hence the special case:
-    next if $file =~ m!\A(?:ext|dist|cpan|lib|t|os2/OS2)/!
+    next if $file =~ m!\A(?:ext|dist|cpan|lib|t|os2/OS2|x2p)/!
             && $file !~ m!\Aext/DynaLoader/!;
     check_file($file);
 }
@@ -234,7 +241,7 @@ sub check_file {
 
     my $multiline = 0;
     # Loop to accumulate the message text all on one line.
-    if (m/\b(?:$source_msg_re(?:_nocontext)?|$regcomp_re)\s*\(/) {
+    if (m/(?!^)\b(?:$source_msg_re(?:_nocontext)?|$regcomp_re)\s*\(/) {
       while (not m/\);$/) {
         my $nextline = <$codefh>;
         # Means we fell off the end of the file.  Not terribly surprising;
@@ -271,6 +278,9 @@ sub check_file {
       # Sometimes the regexp will pick up too much for the category
       # e.g., WARN_UNINITIALIZED), PL_warn_uninit_sv ... up to the next )
       $category && $category =~ s/\).*//s;
+      if (/win32_croak_not_implemented\(/) {
+        $name .= " not implemented!"
+      }
     }
     elsif (/$bad_version_re/) {
       ($name, $category) = ($+{'text'}, undef);
@@ -460,41 +470,89 @@ __DATA__
 Malformed UTF-8 character (unexpected non-continuation byte 0x%x, immediately after start byte 0x%x)
 
 Cannot apply "%s" in non-PerlIO perl
+Cannot set timer
+Can't find DLL name for the module `%s' by the handle %d, rc=%u=%x
 Can't find string terminator %c%s%c anywhere before EOF
 Can't fix broken locale name "%s"
 Can't get short module name from a handle
+Can't load DLL `%s', possible problematic module `%s'
 Can't locate %s:   %s
 Can't locate object method "%s" via package "%s" (perhaps you forgot to load "%s"?)
 Can't pipe "%s": %s
+Can't set type on DOS
 Can't spawn: %s
 Can't spawn "%s": %s
 Can't %s script `%s' with ARGV[0] being `%s'
 Can't %s "%s": %s
 Can't %s `%s' with ARGV[0] being `%s' (looking for executables only, not found)
 Can't use string ("%s"%s) as a subroutine ref while "strict refs" in use
-\%c better written as $%c
 Character(s) in '%c' format wrapped in %s
 chown not implemented!
 clear %s
 Code missing after '/' in pack
 Code missing after '/' in unpack
+Could not find version 1.1 of winsock dll
+Could not find version 2.0 of winsock dll
 '%c' outside of string in pack
 Debug leaking scalars child failed%s with errno %d: %s
+detach of a thread which could not start
+detach on an already detached thread
+detach on a thread with a waiter
 '/' does not take a repeat count in %s
 -Dp not implemented on this platform
+Empty array reference given to mod2fname
+endhostent not implemented!
+endnetent not implemented!
+endprotoent not implemented!
+endservent not implemented!
+Error loading module '%s': %s
 Error reading "%s": %s
 execl not implemented!
 EVAL without pos change exceeded limit in regex
 Filehandle opened only for %sput
 Filehandle %s opened only for %sput
 Filehandle STD%s reopened as %s only for input
+file_type not implemented on DOS
 filter_del can only delete in reverse order (currently)
+fork() not available
+fork() not implemented!
 YOU HAVEN'T DISABLED SET-ID SCRIPTS IN THE KERNEL YET! FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!
 free %s
+Free to wrong pool %p not %p
+Function "endnetent" not implemented in this version of perl.
+Function "endprotoent" not implemented in this version of perl.
+Function "endservent" not implemented in this version of perl.
+Function "getnetbyaddr" not implemented in this version of perl.
+Function "getnetbyname" not implemented in this version of perl.
+Function "getnetent" not implemented in this version of perl.
+Function "getprotobyname" not implemented in this version of perl.
+Function "getprotobynumber" not implemented in this version of perl.
+Function "getprotoent" not implemented in this version of perl.
+Function "getservbyport" not implemented in this version of perl.
+Function "getservent" not implemented in this version of perl.
+Function "getsockopt" not implemented in this version of perl.
+Function "recvmsg" not implemented in this version of perl.
+Function "sendmsg" not implemented in this version of perl.
+Function "sethostent" not implemented in this version of perl.
+Function "setnetent" not implemented in this version of perl.
+Function "setprotoent" not implemented in this version of perl.
+Function "setservent"  not implemented in this version of perl.
+Function "setsockopt" not implemented in this version of perl.
+Function "tcdrain" not implemented in this version of perl.
+Function "tcflow" not implemented in this version of perl.
+Function "tcflush" not implemented in this version of perl.
+Function "tcsendbreak" not implemented in this version of perl.
 get %s %p %p %p
+gethostent not implemented!
+getnetbyaddr not implemented!
+getnetbyname not implemented!
+getnetent not implemented!
+getprotoent not implemented!
 getpwnam returned invalid UIC %o for user "%s"
+getservent not implemented!
 glob failed (can't start child: %s)
 glob failed (child exited with status %d%s)
+Got an error from DosAllocMem: %i
 Goto undefined subroutine
 Goto undefined subroutine &%s
 Got signal %d
@@ -503,6 +561,7 @@ Illegal binary digit '%c' ignored
 Illegal character %sin prototype for %s : %s
 Illegal hexadecimal digit '%c' ignored
 Illegal octal digit '%c' ignored
+INSTALL_PREFIX too long: `%s'
 Invalid argument to sv_cat_decode
 Invalid range "%c-%c" in transliteration operator
 Invalid separator character %c%c%c in PerlIO layer specification %s
@@ -511,65 +570,77 @@ Invalid type '%c' in pack
 Invalid type '%c' in %s
 Invalid type '%c' in unpack
 Invalid type ',' in %s
+ioctl implemented only on sockets
 ioctlsocket not implemented!
+join with a thread with a waiter
 killpg not implemented!
 List form of pipe open not implemented
+Looks like we have no PM; will not load DLL %s without $ENV{PERL_ASIF_PM}
 Malformed integer in [] in %s
+Malformed %s
 Malformed UTF-8 character (fatal)
 Missing (suid) fd script name
 More than one argument to open
 More than one argument to open(,':%s')
-\N{} in character class restricted to one character in regex; marked by <-- HERE in m/%s/
+No message queue
 No %s allowed while running setgid
 No %s allowed with (suid) fdscript
 Not an XSUB reference
+Not a reference given to mod2fname
+Not array reference given to mod2fname
 Operator or semicolon missing before %c%s
 Out of memory during list extend
+panic queryaddr
 PerlApp::TextQuery: no arguments, please
 POSIX syntax [%c %c] is reserved for future extensions in regex; marked by <-- HERE in m/%s/
 ptr wrong %p != %p fl=%x nl=%p e=%p for %d
+QUITing...
 Recompile perl with -DDEBUGGING to use -D switch (did you mean -d ?)
-Regexp modifier "%c" may appear a maximum of twice in regex; marked by <-- HERE in m/%s/
-Regexp modifier "%c" may not appear twice in regex; marked by <-- HERE in m/%s/
-Regexp modifiers "%c" and "%c" are mutually exclusive in regex; marked by <-- HERE in m/%s/
+recursion detected in %s
 Regexp *+ operand could be empty in regex; marked by <-- HERE in m/%s/
 Reversed %c= operator
+%s: Can't parse EXE/DLL name: '%s'
 %s(%f) failed
 %sCompilation failed in require
-Sequence (?%c...) not implemented in regex; marked by <-- HERE in m/%s/
-Sequence (%s...) not recognized in regex; marked by <-- HERE in m/%s/
-Sequence %s... not terminated in regex; marked by <-- HERE in m/%s/
-Sequence (?%c... not terminated in regex; marked by <-- HERE in m/%s/
-Sequence (?(%c... not terminated in regex; marked by <-- HERE in m/%s/
-Sequence (?R) not terminated in regex m/%s/
+%s: Error stripping dirs from EXE/DLL/INSTALLDIR name
+sethostent not implemented!
+setnetent not implemented!
+setprotoent not implemented!
 set %s %p %p %p
+setservent not implemented!
 %s free() ignored (RMAGIC, PERL_CORE)
 %s has too many errors.
 SIG%s handler "%s" not defined.
 %s in %s
 Size magic not implemented
+%s: name `%s' too long
+%s not implemented!
 %s number > %s non-portable
 %srealloc() %signored
 %s in regex m/%s/
 %s on %s %s
 socketpair not implemented!
+%s: %s
 Starting Full Screen process with flag=%d, mytype=%d
 Starting PM process with flag=%d, mytype=%d
 sv_2iv assumed (U_V(fabs((double)SvNVX(sv))) < (UV)IV_MAX) but SvNVX(sv)=%f U_V is 0x%x, IV_MAX is 0x%x
 switching effective gid is not implemented
 switching effective uid is not implemented
 System V IPC is not implemented on this machine
--T and -B not implemented on filehandles
 Terminating on signal SIG%s(%d)
 The crypt() function is not implemented on NetWare
 The flock() function is not implemented on NetWare
 The rewinddir() function is not implemented on NetWare
 The seekdir() function is not implemented on NetWare
 The telldir() function is not implemented on NetWare
+This perl was compiled without taint support. Cowardly refusing to run with -t or -T flags
+This version of OS/2 does not support %s.%s
 Too deeply nested ()-groups in %s
 Too many args on %s line of "%s"
 U0 mode on a byte string
 unable to find VMSPIPE.COM for i/o piping
+Unable to locate winsock library!
+Unexpected program mode %d when morphing back from PM
 Unrecognized character %s; marked by <-- HERE after %s<-- HERE near column %d
 Unstable directory path, current directory changed unexpectedly
 Unterminated compressed integer in unpack
@@ -591,12 +662,14 @@ Value of logical "%s" too long. Truncating to %i bytes
 waitpid: process %x is not a child of process %x
 Wide character
 Wide character in $/
+win32_get_osfhandle() TBD on this platform
+win32_open_osfhandle() TBD on this platform
 Within []-length '*' not allowed in %s
 Within []-length '%c' not allowed in %s
+Wrong size of loadOrdinals array: expected %d, actual %d
 Wrong syntax (suid) fd script name "%s"
 'X' outside of string in %s
 'X' outside of string in unpack
-Zero length \N{} in regex; marked by <-- HERE in m/%s/
 
 __CATEGORIES__
 Code point 0x%X is not Unicode, all \p{} matches fail; all \P{} matches succeed

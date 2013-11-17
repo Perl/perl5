@@ -2979,8 +2979,10 @@ Perl_bind_match(pTHX_ I32 type, OP *left, OP *right)
     /* !~ doesn't make sense with /r, so error on it for now */
     if (rtype == OP_SUBST && (cPMOPx(right)->op_pmflags & PMf_NONDESTRUCT) &&
 	type == OP_NOT)
+	/* diag_listed_as: Using !~ with %s doesn't make sense */
 	yyerror("Using !~ with s///r doesn't make sense");
     if (rtype == OP_TRANSR && type == OP_NOT)
+	/* diag_listed_as: Using !~ with %s doesn't make sense */
 	yyerror("Using !~ with tr///r doesn't make sense");
 
     ismatchop = (rtype == OP_MATCH ||

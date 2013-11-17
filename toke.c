@@ -3379,6 +3379,7 @@ S_scan_const(pTHX_ char *start)
 	    if (PL_lex_inwhat == OP_SUBST && !PL_lex_inpat &&
 		isDIGIT(*s) && *s != '0' && !isDIGIT(s[1]))
 	    {
+		/* diag_listed_as: \%d better written as $%d */
 		Perl_ck_warner(aTHX_ packWARN(WARN_SYNTAX), "\\%c better written as $%c", *s, *s);
 		*--s = '$';
 		break;
@@ -3566,7 +3567,7 @@ S_scan_const(pTHX_ char *start)
 		    if (! PL_lex_inpat) {
 			yyerror("Missing right brace on \\N{}");
 		    } else {
-			yyerror("Missing right brace on \\N{} or unescaped left brace after \\N.");
+			yyerror("Missing right brace on \\N{} or unescaped left brace after \\N");
 		    }
 		    continue;
 		}
@@ -6088,6 +6089,7 @@ Perl_yylex(pTHX)
 	    TOKEN(0);
 	s++;
 	if (PL_lex_brackets <= 0)
+	    /* diag_listed_as: Unmatched right %s bracket */
 	    yyerror("Unmatched right square bracket");
 	else
 	    --PL_lex_brackets;
@@ -6266,6 +6268,7 @@ Perl_yylex(pTHX)
       rightbracket:
 	s++;
 	if (PL_lex_brackets <= 0)
+	    /* diag_listed_as: Unmatched right %s bracket */
 	    yyerror("Unmatched right curly bracket");
 	else
 	    PL_expect = (expectation)PL_lex_brackstack[--PL_lex_brackets];
@@ -9665,6 +9668,7 @@ S_pmflag(pTHX_ const char* const valid_flags, U32 * pmfl, char** s, char* charse
 	    yyerror(Perl_form(aTHX_ "Regexp modifiers \"/%c\" and \"/%c\" are mutually exclusive", *charset, c));
 	}
 	else if (c == 'a') {
+  /* diag_listed_as: Regexp modifier "/%c" may appear a maximum of twice */
 	    yyerror("Regexp modifier \"/a\" may appear a maximum of twice");
 	}
 	else {
