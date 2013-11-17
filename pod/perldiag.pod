@@ -3858,7 +3858,7 @@ the glob and a destructor that adds a new object to the glob.
 
 =item panic: kid popen errno read
 
-(F) forked child returned an incomprehensible message about its errno.
+(F) A forked child returned an incomprehensible message about its errno.
 
 =item panic: last, type=%u
 
@@ -3958,7 +3958,7 @@ then discovered it wasn't a subroutine or eval context.
 
 =item panic: Sequence (?{...}): no code block found in regex m/%s/
 
-(P) while compiling a pattern that has embedded (?{}) or (??{}) code
+(P) While compiling a pattern that has embedded (?{}) or (??{}) code
 blocks, perl couldn't locate the code block that should have already been
 seen and compiled by perl before control passed to the regex compiler.
 
