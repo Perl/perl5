@@ -272,6 +272,9 @@ sub check_file {
       # Sometimes the regexp will pick up too much for the category
       # e.g., WARN_UNINITIALIZED), PL_warn_uninit_sv ... up to the next )
       $category && $category =~ s/\).*//s;
+      if (/win32_croak_not_implemented\(/) {
+        $name .= " not implemented!"
+      }
     }
     elsif (/$bad_version_re/) {
       ($name, $category) = ($+{'text'}, undef);
