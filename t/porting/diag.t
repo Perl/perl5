@@ -571,9 +571,6 @@ POSIX syntax [%c %c] is reserved for future extensions in regex; marked by <-- H
 ptr wrong %p != %p fl=%x nl=%p e=%p for %d
 QUITing...
 Recompile perl with -DDEBUGGING to use -D switch (did you mean -d ?)
-Regexp modifier "%c" may appear a maximum of twice in regex; marked by <-- HERE in m/%s/
-Regexp modifier "%c" may not appear twice in regex; marked by <-- HERE in m/%s/
-Regexp modifiers "%c" and "%c" are mutually exclusive in regex; marked by <-- HERE in m/%s/
 Regexp *+ operand could be empty in regex; marked by <-- HERE in m/%s/
 Reversed %c= operator
 %s: Can't parse EXE/DLL name: '%s'
