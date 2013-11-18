@@ -4776,6 +4776,13 @@ causes, see L<perlre>.
 parenthesis.  Embedded parentheses aren't allowed.  See
 L<perlre>.
 
+=item Sequence (?&... not terminated in regex; marked by S<<-- HERE> in
+m/%s/
+
+(F) A named reference of the form C<(?&...)> was missing the final
+closing parenthesis after the name.  The S<<-- HERE> shows whereabouts
+in the regular expression the problem was discovered.
+
 =item Sequence (?%c... not terminated in regex; marked by S<<-- HERE>
 in m/%s/
 

@@ -9350,6 +9350,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
     		        SIZE_ONLY ? REG_RSN_RETURN_NULL : REG_RSN_RETURN_DATA);
     		     num = sv_dat ? *((I32 *)SvPVX(sv_dat)) : 0;
                 }
+                if (RExC_parse == RExC_end || *RExC_parse != ')')
+                    vFAIL("Sequence (?&... not terminated");
                 goto gen_recurse_regop;
                 assert(0); /* NOT REACHED */
             case '+':
