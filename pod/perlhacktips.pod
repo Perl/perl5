@@ -886,7 +886,7 @@ if you want to only break at certain iterations:
 =head2 Using gdb to look at what the parser/lexer are doing
 
 If you want to see what perl is doing when parsing/lexing your code, you can 
-use C<<BEGIN {}>>:
+use C<BEGIN {}>:
 
     print "Before\n";
     BEGIN { study; }
