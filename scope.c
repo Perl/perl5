@@ -1043,11 +1043,17 @@ Perl_leave_scope(pTHX_ I32 base)
                      * scope, we want to remove the readonlyness so that it can
                      * go out of scope quietly
                      */
-                    if (SvPADMY(sv) && !SvFAKE(sv))
-                        SvREADONLY_off(sv);
 
-                    if (SvTYPE(sv) == SVt_PVHV)
+                    if (SvTYPE(sv) == SVt_PVHV) {
+                        if (SvPADMY(sv)) {
+                            SvREADONLY_off(sv);
+                            HvRESTRICTED_off(sv);
+                        }
                         Perl_hv_kill_backrefs(aTHX_ MUTABLE_HV(sv));
+                    } else if (SvPADMY(sv) && !SvFAKE(sv)) {
+                        SvREADONLY_off(sv);
+                    }
+
                     if (SvMAGICAL(sv))
                     {
                       sv_unmagic(sv, PERL_MAGIC_backref);

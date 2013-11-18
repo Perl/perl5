@@ -383,7 +383,12 @@ perform the upgrade if necessary.  See C<svtype>.
 					  [CvEVAL(cv), CvSPECIAL(cv)]
 				       3: On a pad name SV, that slot in the
 					  frame AV is a REFCNT'ed reference
-					  to a lexical from "outside". */
+                                          to a lexical from "outside".
+                                       4: On a PVHV, READONLY hash is RESTRICTED,
+                                          fetches for missing keys will die.
+                                    */
+#define SVphv_RESTRICTED SVf_FAKE
+
 #define SVf_OOK		0x02000000  /* has valid offset value. For a PVHV this
 				       means that a hv_aux struct is present
 				       after the main array */

@@ -165,6 +165,9 @@ Both routines return a reference to the hash operated on.
 
 sub lock_ref_keys {
     my($hash, @keys) = @_;
+    my $opts;
+    $opts= shift @keys
+        if @keys and ref $keys[0];
 
     Internals::hv_clear_placeholders %$hash;
     if( @keys ) {
@@ -178,6 +181,7 @@ sub lock_ref_keys {
         foreach my $k (@keys) {
             $hash->{$k} = undef unless exists $hash->{$k};
         }
+        Internals::HvRESTRICTED %$hash, 1 unless $opts && $opts->{unrestricted};
         Internals::SvREADONLY %$hash, 1;
 
         foreach my $k (@keys) {
@@ -185,6 +189,7 @@ sub lock_ref_keys {
         }
     }
     else {
+        Internals::HvRESTRICTED %$hash, 1 unless $opts && $opts->{unrestricted};
         Internals::SvREADONLY %$hash, 1;
     }
 
@@ -195,6 +200,7 @@ sub unlock_ref_keys {
     my $hash = shift;
 
     Internals::SvREADONLY %$hash, 0;
+    Internals::HvRESTRICTED %$hash, 0;
     return $hash;
 }
 
@@ -218,6 +224,10 @@ Returns a reference to %hash
 
 sub lock_ref_keys_plus {
     my ($hash,@keys) = @_;
+    my $opts;
+    $opts= shift @keys
+        if @keys and ref $keys[0];
+
     my @delete;
     Internals::hv_clear_placeholders(%$hash);
     foreach my $key (@keys) {
@@ -226,6 +236,7 @@ sub lock_ref_keys_plus {
             push @delete,$key;
         }
     }
+    Internals::HvRESTRICTED %$hash, 1 unless $opts && $opts->{unrestricted};
     Internals::SvREADONLY(%$hash,1);
     delete @{$hash}{@delete};
     return $hash
@@ -292,9 +303,10 @@ Returns a reference to the %hash.
 =cut
 
 sub lock_hashref {
-    my $hash = shift;
+    my ($hash, $opts) = @_;
+    $opts ||= {};
 
-    lock_ref_keys($hash);
+    lock_ref_keys($hash, $opts);
 
     foreach my $value (values %$hash) {
         Internals::SvREADONLY($value,1);
@@ -304,19 +316,20 @@ sub lock_hashref {
 }
 
 sub unlock_hashref {
-    my $hash = shift;
+    my ($hash, $opts) = @_;
+    $opts ||= {};
 
     foreach my $value (values %$hash) {
         Internals::SvREADONLY($value, 0);
     }
 
-    unlock_ref_keys($hash);
+    unlock_ref_keys($hash, $opts);
 
     return $hash;
 }
 
-sub   lock_hash (\%) {   lock_hashref(@_) }
-sub unlock_hash (\%) { unlock_hashref(@_) }
+sub   lock_hash (\%;$) {   lock_hashref(@_) }
+sub unlock_hash (\%;$) { unlock_hashref(@_) }
 
 =item B<lock_hash_recurse>
 
@@ -343,13 +356,14 @@ Returns a reference to the %hash.
 =cut
 
 sub lock_hashref_recurse {
-    my $hash = shift;
+    my ($hash, $opts) = @_;
+    $opts ||= {};
 
-    lock_ref_keys($hash);
+    lock_ref_keys($hash, $opts);
     foreach my $value (values %$hash) {
         my $type = reftype($value);
         if (defined($type) and $type eq 'HASH') {
-            lock_hashref_recurse($value);
+            lock_hashref_recurse($value, $opts);
         }
         Internals::SvREADONLY($value,1);
     }
@@ -357,16 +371,17 @@ sub lock_hashref_recurse {
 }
 
 sub unlock_hashref_recurse {
-    my $hash = shift;
+    my ($hash, $opts) = @_;
+    $opts ||= {};
 
     foreach my $value (values %$hash) {
         my $type = reftype($value);
         if (defined($type) and $type eq 'HASH') {
-            unlock_hashref_recurse($value);
+            unlock_hashref_recurse($value, $opts);
         }
-        Internals::SvREADONLY($value,1);
+        Internals::SvREADONLY($value,0);
     }
-    unlock_ref_keys($hash);
+    unlock_ref_keys($hash, $opts);
     return $hash;
 }
 

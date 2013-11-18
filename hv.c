@@ -728,9 +728,17 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 #endif
 
     if (!entry && SvREADONLY(hv) && !(action & HV_FETCH_ISEXISTS)) {
-	hv_notallowed(flags, key, klen,
-			"Attempt to access disallowed key '%"SVf"' in"
-			" a restricted hash");
+        if (action & (HV_FETCH_ISSTORE|HV_FETCH_LVALUE)) {
+            hv_notallowed(flags, key, klen,
+                            "Attempt to store disallowed key '%"SVf"' in"
+                            " a readonly hash");
+        }
+        else
+        if ( HvRESTRICTED(hv) ) {
+            hv_notallowed(flags, key, klen,
+                            "Attempt to fetch disallowed key '%"SVf"' in"
+                            " a restricted hash");
+        }
     }
     if (!(action & (HV_FETCH_LVALUE|HV_FETCH_ISSTORE))) {
 	/* Not doing some form of store, so return failure.  */

@@ -914,6 +914,43 @@ XS(XS_utf8_unicode_to_native)
  XSRETURN(1);
 }
 
+XS(XS_Internals_HvRESTRICTED)        /* This is dangerous stuff. */
+{
+    dVAR;
+    dXSARGS;
+    SV * const svz = ST(0);
+    SV * sv;
+    PERL_UNUSED_ARG(cv);
+
+    /* [perl #77776] - called as &foo() not foo() */
+    if (!SvROK(svz))
+        croak_xs_usage(cv, "HASH[, ON]");
+
+    sv = SvRV(svz);
+    if (SvTYPE(sv) != SVt_PVHV) {
+        croak_xs_usage(cv, "HASH[, ON]");
+    }
+
+    if (items == 1) {
+         if (HvRESTRICTED(sv))
+             XSRETURN_YES;
+         else
+             XSRETURN_NO;
+    }
+    else if (items == 2) {
+        if (SvTRUE(ST(1))) {
+            HvRESTRICTED_on(sv);
+            XSRETURN_YES;
+        }
+        else {
+            /* I hope you really know what you are doing. */
+            HvRESTRICTED_off(sv);
+            XSRETURN_NO;
+        }
+    }
+    XSRETURN_UNDEF; /* Can't happen. */
+}
+
 XS(XS_Internals_SvREADONLY)	/* This is dangerous stuff. */
 {
     dVAR;
@@ -1398,6 +1435,7 @@ static const struct xsub_details details[] = {
     {"utf8::native_to_unicode", XS_utf8_native_to_unicode, NULL},
     {"utf8::unicode_to_native", XS_utf8_unicode_to_native, NULL},
     {"Internals::SvREADONLY", XS_Internals_SvREADONLY, "\\[$%@];$"},
+    {"Internals::HvRESTRICTED", XS_Internals_HvRESTRICTED, "\\%;$"},
     {"Internals::SvREFCNT", XS_Internals_SvREFCNT, "\\[$%@];$"},
     {"Internals::hv_clear_placeholders", XS_Internals_hv_clear_placehold, "\\%"},
     {"PerlIO::get_layers", XS_PerlIO_get_layers, "*;@"},

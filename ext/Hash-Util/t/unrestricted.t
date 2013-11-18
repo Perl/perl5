@@ -45,7 +45,7 @@ foreach my $func (@Exported_Funcs) {
 }
 
 my %hash = (foo => 42, bar => 23, locked => 'yep');
-lock_keys(%hash);
+lock_keys(%hash,{unrestricted=>1});
 eval { $hash{baz} = 99; };
 like( $@, qr/^Attempt to store disallowed key 'baz' in a readonly hash/,
                                                        'lock_keys()');
@@ -58,12 +58,12 @@ $hash{bar} = 69;
 is( $hash{bar}, 69 ,'$hash{bar} == 69');
 
 eval { () = $hash{i_dont_exist} };
-like( $@, qr/^Attempt to fetch disallowed key 'i_dont_exist' in a restricted hash/,
+unlike( $@, qr/^Attempt to fetch disallowed key 'i_dont_exist' in a restricted hash/,
       'Disallowed 1' );
 
-lock_value(%hash, 'locked');
+lock_value(%hash, {unrestricted=>1}, 'locked');
 eval { print "# oops" if $hash{four} };
-like( $@, qr/^Attempt to fetch disallowed key 'four' in a restricted hash/,
+unlike( $@, qr/^Attempt to fetch disallowed key 'four' in a restricted hash/,
       'Disallowed 2' );
 
 eval { $hash{"\x{2323}"} = 3 };
@@ -102,7 +102,7 @@ is( $hash{locked}, 42,  'unlock_value' );
 {
     my %hash = ( foo => 42, locked => 23 );
 
-    lock_keys(%hash);
+    lock_keys(%hash,{unrestricted=>1});
     eval { %hash = ( wubble => 42 ) };  # we know this will bomb
     like( $@, qr/^Attempt to store disallowed key 'wubble'/,'Disallowed 3' );
     unlock_keys(%hash);
@@ -110,7 +110,7 @@ is( $hash{locked}, 42,  'unlock_value' );
 
 {
     my %hash = (KEY => 'val', RO => 'val');
-    lock_keys(%hash);
+    lock_keys(%hash,{unrestricted=>1});
     lock_value(%hash, 'RO');
 
     eval { %hash = (KEY => 1) };
@@ -120,14 +120,14 @@ is( $hash{locked}, 42,  'unlock_value' );
 
 {
     my %hash = (KEY => 1, RO => 2);
-    lock_keys(%hash);
+    lock_keys(%hash, {unrestricted=>1});
     eval { %hash = (KEY => 1, RO => 2) };
     is( $@, '', 'No error message, as expected');
 }
 
 {
     my %hash = ();
-    lock_keys(%hash, qw(foo bar));
+    lock_keys(%hash, {unrestricted=>1}, qw(foo bar));
     is( keys %hash, 0,  'lock_keys() w/keyset shouldnt add new keys' );
     $hash{foo} = 42;
     is( keys %hash, 1, '1 element in hash' );
@@ -142,7 +142,7 @@ is( $hash{locked}, 42,  'unlock_value' );
 
 {
     my %hash = (foo => 42, bar => undef, baz => 0);
-    lock_keys(%hash, qw(foo bar baz up down));
+    lock_keys(%hash, {unrestricted=>1}, qw(foo bar baz up down));
     is( keys %hash, 3,   'lock_keys() w/keyset didnt add new keys' );
     is_deeply( \%hash, { foo => 42, bar => undef, baz => 0 },'is_deeply' );
 
@@ -156,14 +156,14 @@ is( $hash{locked}, 42,  'unlock_value' );
 
 {
     my %hash = (foo => 42, bar => undef);
-    eval { lock_keys(%hash, qw(foo baz)); };
+    eval { lock_keys(%hash, {restricted=>1}, qw(foo baz)); };
     like( $@, qr/^Hash has key 'bar' which is not in the new key set/,
                     'carp test' );
 }
 
 {
     my %hash = (foo => 42, bar => 23);
-    lock_hash( %hash );
+    lock_hash( %hash, {restricted=>1},  );
     ok( hashref_locked( \%hash ), 'hashref_locked' );
     ok( hash_locked( %hash ), 'hash_locked' );
 
@@ -185,12 +185,12 @@ is( $hash{locked}, 42,  'unlock_value' );
     ok( ! hashref_locked( { %hash } ), 'hashref_locked negated' );
     ok( ! hash_locked( %hash ), 'hash_locked negated' );
 
-    lock_hash( %hash );
+    lock_hash( %hash, {unrestricted=>1}, );
     ok( ! hashref_unlocked( \%hash ), 'hashref_unlocked negated' );
     ok( ! hash_unlocked( %hash ), 'hash_unlocked negated' );
 }
 
-lock_keys(%ENV);
+lock_keys(%ENV, {unrestricted=>1},);
 eval { () = $ENV{I_DONT_EXIST} };
 like(
     $@,
@@ -202,7 +202,7 @@ unlock_keys(%ENV); # Test::Builder cannot print test failures otherwise
 {
     my %hash;
 
-    lock_keys(%hash, 'first');
+    lock_keys(%hash, {unrestricted=>1}, 'first');
 
     is (scalar keys %hash, 0, "place holder isn't a key");
     $hash{first} = 1;
@@ -217,7 +217,7 @@ unlock_keys(%ENV); # Test::Builder cannot print test failures otherwise
     delete $hash{interregnum};
     is (scalar keys %hash, 0, "no key again");
 
-    lock_keys(%hash, 'second');
+    lock_keys(%hash, {unrestricted=>1}, 'second');
 
     is (scalar keys %hash, 0, "place holder isn't a key");
 
@@ -242,7 +242,7 @@ unlock_keys(%ENV); # Test::Builder cannot print test failures otherwise
 
     is (scalar keys %hash, 2, "two keys, values both undef");
 
-    lock_keys(%hash);
+    lock_keys(%hash,{unrestricted=>1});
 
     is (scalar keys %hash, 2, "still two keys after locking");
 
@@ -274,7 +274,7 @@ unlock_keys(%ENV); # Test::Builder cannot print test failures otherwise
       }
       my %clean = map {$_ => length $_} @usekeys;
       my %target;
-      lock_keys ( %target, @keys ) if $lock;
+      lock_keys ( %target,{unrestricted=>1}, @keys ) if $lock;
 
       while (my ($k, $v) = each %clean) {
 	$target{$k} = $v;
@@ -316,13 +316,13 @@ unlock_keys(%ENV); # Test::Builder cannot print test failures otherwise
 # Check clear works on locked empty hashes - SEGVs on 5.8.2.
 {
     my %hash;
-    lock_hash(%hash);
+    lock_hash(%hash, {unrestricted=>1});
     %hash = ();
     ok(keys(%hash) == 0, 'clear empty lock_hash() hash');
 }
 {
     my %hash;
-    lock_keys(%hash);
+    lock_keys(%hash, {unrestricted=>1});
     %hash = ();
     ok(keys(%hash) == 0, 'clear empty lock_keys() hash');
 }
@@ -330,7 +330,7 @@ unlock_keys(%ENV); # Test::Builder cannot print test failures otherwise
 # Copy-on-write scalars should not be deletable after lock_hash;
 {
     my %hash = (key=>__PACKAGE__);
-    lock_hash(%hash);
+    lock_hash(%hash, {unrestricted=>1});
     eval { delete $hash{key} };
     like $@, qr/^Attempt to delete readonly key /,
         'COW scalars are not exempt from lock_hash (delete)';
@@ -361,7 +361,7 @@ ok(defined($hash_seed) && $hash_seed ne '', "hash_seed $hash_seed");
 	$hash{a} = $a;
 	is ($counter, 1, "There is still 1 object $state");
 
-	lock_keys(%hash) if $state;
+	lock_keys(%hash, {unrestricted=>1}) if $state;
 
 	is ($counter, 1, "There is still 1 object $state");
 	undef $a;
@@ -376,7 +376,7 @@ ok(defined($hash_seed) && $hash_seed ne '', "hash_seed $hash_seed");
 }
 {
     my %hash = map {$_,$_} qw(fwiffffff foosht teeoo);
-    lock_keys(%hash);
+    lock_keys(%hash, {unrestricted=>1});
     delete $hash{fwiffffff};
     is (scalar keys %hash, 2,"Count of keys after delete on locked hash");
     unlock_keys(%hash);
@@ -384,7 +384,7 @@ ok(defined($hash_seed) && $hash_seed ne '', "hash_seed $hash_seed");
 
     my ($first, $value) = each %hash;
     is ($hash{$first}, $value, "Key has the expected value before the lock");
-    lock_keys(%hash);
+    lock_keys(%hash, {unrestricted=>1});
     is ($hash{$first}, $value, "Key has the expected value after the lock");
 
     my ($second, $v2) = each %hash;
@@ -405,7 +405,7 @@ ok(defined($hash_seed) && $hash_seed ne '', "hash_seed $hash_seed");
 {
     my %hash=map { $_ => 1 } qw( a b c d e f);
     delete $hash{c};
-    lock_keys(%hash);
+    lock_keys(%hash, {unrestricted=>1});
     ok(Internals::SvREADONLY(%hash),'lock_keys DDS/t 1');
     delete @hash{qw(b e)};
     my @hidden=sort(hidden_keys(%hash));
@@ -418,14 +418,14 @@ ok(defined($hash_seed) && $hash_seed ne '', "hash_seed $hash_seed");
 }
 {
     my %hash=(0..9);
-    lock_keys(%hash);
+    lock_keys(%hash, {unrestricted=>1});
     ok(Internals::SvREADONLY(%hash),'lock_keys DDS/t 2');
     Hash::Util::unlock_keys(%hash);
     ok(!Internals::SvREADONLY(%hash),'unlock_keys DDS/t 2');
 }
 {
     my %hash=(0..9);
-    lock_keys(%hash,keys(%hash),'a'..'f');
+    lock_keys(%hash, {unrestricted=>1},keys(%hash),'a'..'f');
     ok(Internals::SvREADONLY(%hash),'lock_keys args DDS/t');
     my @hidden=sort(hidden_keys(%hash));
     my @legal=sort(legal_keys(%hash));
@@ -437,7 +437,7 @@ ok(defined($hash_seed) && $hash_seed ne '', "hash_seed $hash_seed");
 {
     my %hash=map { $_ => 1 } qw( a b c d e f);
     delete $hash{c};
-    lock_ref_keys(\%hash);
+    lock_ref_keys(\%hash, {unrestricted=>1});
     ok(Internals::SvREADONLY(%hash),'lock_ref_keys DDS/t');
     delete @hash{qw(b e)};
     my @hidden=sort(hidden_keys(%hash));
@@ -450,7 +450,7 @@ ok(defined($hash_seed) && $hash_seed ne '', "hash_seed $hash_seed");
 }
 {
     my %hash=(0..9);
-    lock_ref_keys(\%hash,keys %hash,'a'..'f');
+    lock_ref_keys(\%hash, {unrestricted=>1},keys %hash,'a'..'f');
     ok(Internals::SvREADONLY(%hash),'lock_ref_keys args DDS/t');
     my @hidden=sort(hidden_keys(%hash));
     my @legal=sort(legal_keys(%hash));
@@ -461,7 +461,7 @@ ok(defined($hash_seed) && $hash_seed ne '', "hash_seed $hash_seed");
 }
 {
     my %hash=(0..9);
-    lock_ref_keys_plus(\%hash,'a'..'f');
+    lock_ref_keys_plus(\%hash, {unrestricted=>1},'a'..'f');
     ok(Internals::SvREADONLY(%hash),'lock_ref_keys_plus args DDS/t');
     my @hidden=sort(hidden_keys(%hash));
     my @legal=sort(legal_keys(%hash));
@@ -472,7 +472,7 @@ ok(defined($hash_seed) && $hash_seed ne '', "hash_seed $hash_seed");
 }
 {
     my %hash=(0..9, 'a' => 'alpha');
-    lock_ref_keys_plus(\%hash,'a'..'f');
+    lock_ref_keys_plus(\%hash, {unrestricted=>1},'a'..'f');
     ok(Internals::SvREADONLY(%hash),'lock_ref_keys_plus args overlap');
     my @hidden=sort(hidden_keys(%hash));
     my @legal=sort(legal_keys(%hash));
@@ -483,7 +483,7 @@ ok(defined($hash_seed) && $hash_seed ne '', "hash_seed $hash_seed");
 }
 {
     my %hash=(0..9);
-    lock_keys_plus(%hash,'a'..'f');
+    lock_keys_plus(%hash, {unrestricted=>1},'a'..'f');
     ok(Internals::SvREADONLY(%hash),'lock_keys_plus args DDS/t');
     my @hidden=sort(hidden_keys(%hash));
     my @legal=sort(legal_keys(%hash));
@@ -494,7 +494,7 @@ ok(defined($hash_seed) && $hash_seed ne '', "hash_seed $hash_seed");
 }
 {
     my %hash=(0..9, 'a' => 'alpha');
-    lock_keys_plus(%hash,'a'..'f');
+    lock_keys_plus(%hash, {unrestricted=>1},'a'..'f');
     ok(Internals::SvREADONLY(%hash),'lock_keys_plus args overlap non-ref');
     my @hidden=sort(hidden_keys(%hash));
     my @legal=sort(legal_keys(%hash));
@@ -509,7 +509,7 @@ ok(defined($hash_seed) && $hash_seed ne '', "hash_seed $hash_seed");
     my @keys = ();
     my @ph = ();
     my @lock = ('a', 'c', 'e', 'g');
-    lock_keys(%hash, @lock);
+    lock_keys(%hash, {unrestricted=>1}, @lock);
     my $ref = all_keys(%hash, @keys, @ph);
     my @crrack = sort(@keys);
     my @ooooff = qw(a c e);
@@ -528,7 +528,7 @@ ok(defined($hash_seed) && $hash_seed ne '', "hash_seed $hash_seed");
         c   => [ 'epsilon', { zeta => 'eta' }, ],
         d   => { theta => 'iota' },
     );
-    lock_hash_recurse(%hash);
+    lock_hash_recurse(%hash, {unrestricted=>1});
     ok( hash_locked(%hash),
         "lock_hash_recurse(): top-level hash locked" );
     ok( hash_locked(%{$hash{d}}),

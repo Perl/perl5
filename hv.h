@@ -318,6 +318,10 @@ C<SV*>.
 #define HvPLACEHOLDERS_get(hv)	(SvMAGIC(hv) ? Perl_hv_placeholders_get(aTHX_ (const HV *)hv) : 0)
 #define HvPLACEHOLDERS_set(hv,p)	Perl_hv_placeholders_set(aTHX_ MUTABLE_HV(hv), p)
 
+#define HvRESTRICTED(hv)        (SvFLAGS(hv) & SVphv_RESTRICTED)
+#define HvRESTRICTED_on(hv)     (SvFLAGS(hv) |= SVphv_RESTRICTED)
+#define HvRESTRICTED_off(hv)    (SvFLAGS(hv) &= ~SVphv_RESTRICTED)
+
 #define HvSHAREKEYS(hv)		(SvFLAGS(hv) & SVphv_SHAREKEYS)
 #define HvSHAREKEYS_on(hv)	(SvFLAGS(hv) |= SVphv_SHAREKEYS)
 #define HvSHAREKEYS_off(hv)	(SvFLAGS(hv) &= ~SVphv_SHAREKEYS)

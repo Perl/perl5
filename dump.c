@@ -1430,6 +1430,7 @@ const struct flag_to_name cv_flags_names[] = {
 };
 
 const struct flag_to_name hv_flags_names[] = {
+    {SVphv_RESTRICTED, "RESTRICTED,"},
     {SVphv_SHAREKEYS, "SHAREKEYS,"},
     {SVphv_LAZYDEL, "LAZYDEL,"},
     {SVphv_HASKFLAGS, "HASKFLAGS,"},
