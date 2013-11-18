@@ -199,7 +199,7 @@ PerlIOScalar_write(pTHX_ PerlIO * f, const void *vbuf, Size_t count)
 	}
 	else {
 	    STRLEN const cur = SvCUR(sv);
-	    if (s->posn > cur) {
+	    if ((STRLEN)s->posn > cur) {
 		dst = SvGROW(sv, (STRLEN)s->posn + count + 1);
 		Zero(SvPVX(sv) + cur, (STRLEN)s->posn - cur, char);
 	    }
@@ -340,7 +340,7 @@ PerlIOScalar_dup(pTHX_ PerlIO * f, PerlIO * o, CLONE_PARAMS * param,
        ing the cloned scalar to be set to the empty string by
        PerlIOScalar_pushed.  So set aside our scalar temporarily. */
     PerlIOScalar * const os = PerlIOSelf(o, PerlIOScalar);
-    PerlIOScalar *fs;
+    PerlIOScalar *fs = NULL; /* avoid "may be used uninitialized" warning */
     SV * const var = os->var;
     os->var = newSVpvs("");
     if ((f = PerlIOBase_dup(aTHX_ f, o, param, flags))) {
