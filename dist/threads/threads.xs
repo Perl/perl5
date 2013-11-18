@@ -390,7 +390,10 @@ MGVTBL ithread_vtbl = {
     0,                  /* clear */
     ithread_mg_free,    /* free */
     0,                  /* copy */
-    ithread_mg_dup      /* dup */
+    ithread_mg_dup,     /* dup */
+#if (PERL_VERSION > 8) || (PERL_VERSION == 8 && PERL_SUBVERSION > 8)
+    0                   /* local */
+#endif
 };
 
 
@@ -468,8 +471,8 @@ S_ithread_run(void * arg)
     ithread *thread = (ithread *)arg;
     int jmp_rc = 0;
     I32 oldscope;
-    int exit_app = 0;   /* Thread terminated using 'exit' */
-    int exit_code = 0;
+    volatile int exit_app = 0;   /* Thread terminated using 'exit' */
+    volatile int exit_code = 0;
     int died = 0;       /* Thread terminated abnormally */
 
     dJMPENV;
@@ -496,7 +499,7 @@ S_ithread_run(void * arg)
 
     {
         AV *params = thread->params;
-        int len = (int)av_len(params)+1;
+        volatile int len = (int)av_len(params)+1;
         int ii;
 
         dSP;
@@ -711,7 +714,8 @@ S_ithread_create(
     PERL_SET_CONTEXT(aTHX);
     if (!thread) {
         MUTEX_UNLOCK(&MY_POOL.create_destruct_mutex);
-        PerlLIO_write(PerlIO_fileno(Perl_error_log), PL_no_mem, strlen(PL_no_mem));
+        (void)PerlLIO_write(PerlIO_fileno(Perl_error_log),
+                            PL_no_mem, strlen(PL_no_mem));
         my_exit(1);
     }
     Zero(thread, 1, ithread);
