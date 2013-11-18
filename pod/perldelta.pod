@@ -141,6 +141,9 @@ chr 256 remains chr 256, instead of turning into "\xc4\x80".  This allows
 L<B::Deparse> to deparse Unicode regular expression correctly.
 [perl #120182]
 
+C<< B::HV->ARRAY >> now preserves the UTF8 flag on returned hash keys.
+[perl #120535]
+
 =item *
 
 L<B::Concise> has been upgraded from version 0.99 to 0.991.
