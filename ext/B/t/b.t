@@ -415,4 +415,12 @@ EOS
     }
 }
 
+{ # [perl #120535]
+    local $TODO = "B::HV->ARRAY doesn't preserve UTF8 flag";
+    my %h = ( "\x{100}" => 1 );
+    my $b = B::svref_2object(\%h);
+    my ($k, $v) = $b->ARRAY;
+    is($k, "\x{100}", "check utf8 preserved by B::HV::ARRAY");
+}
+
 done_testing();
