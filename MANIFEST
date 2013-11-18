@@ -1114,6 +1114,7 @@ cpan/HTTP-Tiny/t/cases/auth-01.txt
 cpan/HTTP-Tiny/t/cases/auth-02.txt
 cpan/HTTP-Tiny/t/cases/auth-03.txt
 cpan/HTTP-Tiny/t/cases/auth-04.txt
+cpan/HTTP-Tiny/t/cases/auth-05.txt
 cpan/HTTP-Tiny/t/cases/cookies-01.txt
 cpan/HTTP-Tiny/t/cases/cookies-02.txt
 cpan/HTTP-Tiny/t/cases/cookies-03.txt

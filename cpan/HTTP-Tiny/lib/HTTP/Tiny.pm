@@ -3,7 +3,7 @@ package HTTP::Tiny;
 use strict;
 use warnings;
 # ABSTRACT: A small, simple, correct HTTP/1.1 client
-our $VERSION = '0.037'; # VERSION
+our $VERSION = '0.038'; # VERSION
 
 use Carp ();
 
@@ -309,7 +309,7 @@ sub _prepare_headers_and_cb {
     }
 
     # if we have Basic auth parameters, add them
-    if ( length $auth && ! defined $request->{headers}{authentication} ) {
+    if ( length $auth && ! defined $request->{headers}{authorization} ) {
         require MIME::Base64;
         $request->{headers}{authorization} =
             "Basic " . MIME::Base64::encode_base64($auth, "");
@@ -1010,7 +1010,7 @@ HTTP::Tiny - A small, simple, correct HTTP/1.1 client
 
 =head1 VERSION
 
-version 0.037
+version 0.038
 
 =head1 SYNOPSIS
 
