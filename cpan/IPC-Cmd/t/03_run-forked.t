@@ -81,16 +81,20 @@ for (my $i = 0; $i < 10240; $i++) {
 }
 close($fh);
 
-for (my $i = 0; $i < 100; $i++) {
-  my $f_ipc_cmd = IPC::Cmd::run_forked("$cat $filename");
-  my $f_backticks = `$cat $filename`;
-  if ($f_ipc_cmd->{'stdout'} ne $f_backticks) {
-    fail ("reading $filename: run_forked output length [" . length($f_ipc_cmd->{'stdout'}) . "], backticks output length [" . length ($f_backticks) . "]");
-    #print Data::Dumper::Dumper($f_ipc_cmd);
-    die;
-  }
-  else {
-    pass ("$i: reading $filename");
+
+SKIP: {
+  skip 'Skip these tests in PERL_CORE', 100 if $ENV{PERL_CORE};
+  for (my $i = 0; $i < 100; $i++) {
+    my $f_ipc_cmd = IPC::Cmd::run_forked("$cat $filename");
+    my $f_backticks = `$cat $filename`;
+    if ($f_ipc_cmd->{'stdout'} ne $f_backticks) {
+      fail ("reading $filename: run_forked output length [" . length($f_ipc_cmd->{'stdout'}) . "], backticks output length [" . length ($f_backticks) . "]");
+      #print Data::Dumper::Dumper($f_ipc_cmd);
+      die;
+    }
+    else {
+      pass ("$i: reading $filename");
+    }
   }
 }
 unlink($filename);
