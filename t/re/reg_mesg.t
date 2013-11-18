@@ -214,6 +214,14 @@ my @death =
  'm/a\97/' => 'Reference to nonexistent group {#} m/a\97{#}/',
  'm/(*DOOF)/' => 'Unknown verb pattern \'DOOF\' {#} m/(*DOOF){#}/',
  'm/(?&a/'  => 'Sequence (?&... not terminated {#} m/(?&a{#}/',
+ 'm/(?P=/' => 'Sequence ?P=... not terminated {#} m/(?P={#}/',
+ "m/(?'/"  => "Sequence (?'... not terminated {#} m/(?'{#}/",
+ "m/(?</"  => "Sequence (?<... not terminated {#} m/(?<{#}/",
+ 'm/(?&/'  => 'Sequence (?&... not terminated {#} m/(?&{#}/',
+ 'm/(?(</' => 'Sequence (?(<... not terminated {#} m/(?(<{#}/',
+ "m/(?('/" => "Sequence (?('... not terminated {#} m/(?('{#}/",
+ 'm/\g{/'  => 'Sequence \g{... not terminated {#} m/\g{{#}/',
+ 'm/\k</'  => 'Sequence \k<... not terminated {#} m/\k<{#}/',
 );
 
 my @death_utf8 = mark_as_utf8(

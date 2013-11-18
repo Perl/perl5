@@ -7265,7 +7265,9 @@ S_reg_scan_name(pTHX_ RExC_state_t *pRExC_state, U32 flags)
 
     PERL_ARGS_ASSERT_REG_SCAN_NAME;
 
-    if (isIDFIRST_lazy_if(RExC_parse, UTF)) {
+    assert (RExC_parse <= RExC_end);
+    if (RExC_parse == RExC_end) NOOP;
+    else if (isIDFIRST_lazy_if(RExC_parse, UTF)) {
 	 /* skip IDFIRST by using do...while */
 	if (UTF)
 	    do {
@@ -9223,13 +9225,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
     		        SIZE_ONLY ?  /* reverse test from the others */
     		        REG_RSN_RETURN_NAME : 
     		        REG_RSN_RETURN_NULL);
-		    if (RExC_parse == name_start) {
-		        RExC_parse++;
-		        /* diag_listed_as: Sequence (?%s...) not recognized in regex; marked by <-- HERE in m/%s/ */
-		        vFAIL3("Sequence (%.*s...) not recognized", RExC_parse-seqstart, seqstart);
-		        /*NOTREACHED*/
-                    }
-		    if (*RExC_parse != paren)
+		    if (RExC_parse == name_start || *RExC_parse != paren)
 		        vFAIL2("Sequence (?%c... not terminated",
 		            paren=='>' ? '<' : paren);
 		    if (SIZE_ONLY) {
