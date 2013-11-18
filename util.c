@@ -6252,7 +6252,7 @@ Perl_drand48_r(perl_drand48_t *random_state)
     *random_state = (*random_state * DRAND48_MULT + DRAND48_ADD)
         & DRAND48_MASK;
 
-    return ldexp(*random_state, -48);
+    return ldexp((double)*random_state, -48);
 #else
     {
     U32 accu;
