@@ -580,6 +580,10 @@ BOOT:
     CV *cv;
     const char *file = __FILE__;
 
+
+    /* silence compiler warning about not_here() defined but not used */
+    if (0) not_here("");
+
     /* Ensure we get the function, not a macro implementation. Like the C89
        standard says we can...  */
 #undef isalnum
@@ -744,6 +748,8 @@ getiflag(termios_ref)
 	case 3:
 	    RETVAL = termios_ref->c_lflag;
 	    break;
+        default:
+	    RETVAL = 0; /* silence compiler warning */
 	}
 #else
 	not_here(GvNAME(CvGV(cv)));
