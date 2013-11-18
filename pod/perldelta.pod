@@ -1,7 +1,6 @@
 =for todo
 b47a847f62 win32/win32sck.c: dont close() a freed socket os handle
 35e037e846 Commit 1735f6f started to escape all...
-ff4a442c79 [perl #75156] fix the return value and bits for removing a...
 9b4bdfd44e fix chop formats with non PV vars
 
 =encoding utf8
@@ -162,6 +161,13 @@ similar.
 
 C<CORE::glob> is now deparsed correctly with the CORE:: prefix when there
 is a subroutine named "glob".
+
+=item *
+
+L<IO::Select> has been upgraded from version 1.21 to 1.22.
+
+Removing a closed file handle from an IO::Select object now correctly
+updates its internal state and returns the correct value.  [perl #75156]
 
 =item *
 
