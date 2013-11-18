@@ -3906,7 +3906,8 @@ references to an object.
 
 =item panic: memory wrap
 
-(P) Something tried to allocate more memory than possible.
+(P) Something tried to allocate either more memory than possible or a
+negative amount.
 
 =item panic: pad_alloc, %p!=%p
 
