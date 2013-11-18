@@ -87,7 +87,12 @@ PerlIOVia_method(pTHX_ PerlIO * f, const char *method, CV ** save, int flags,
 	}
 	if (*PerlIONext(f)) {
 	    if (!s->fh) {
-		GV *gv = newGVgen(HvNAME_get(s->stash));
+		GV *gv;
+		char *package = HvNAME_get(s->stash);
+
+                if (!package)
+                    return Nullsv; /* can this ever happen? */
+		gv = newGVgen(package);
 		GvIOp(gv) = newIO();
 		s->fh = newRV((SV *) gv);
 		s->io = GvIOp(gv);
