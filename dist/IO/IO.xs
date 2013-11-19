@@ -540,7 +540,7 @@ sockatmark (sock)
        int flag = 0;
 #   ifdef SIOCATMARK
 #     if defined(NETWARE) || defined(WIN32)
-       if (ioctl(fd, SIOCATMARK, (void*)&flag) != 0)
+       if (ioctl(fd, SIOCATMARK, (char*)&flag) != 0)
 #     else
        if (ioctl(fd, SIOCATMARK, &flag) != 0)
 #     endif
