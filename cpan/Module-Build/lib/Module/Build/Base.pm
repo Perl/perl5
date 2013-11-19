@@ -6,7 +6,7 @@ use strict;
 use vars qw($VERSION);
 use warnings;
 
-$VERSION = '0.4201';
+$VERSION = '0.4202';
 $VERSION = eval $VERSION;
 BEGIN { require 5.006001 }
 
@@ -1911,17 +1911,19 @@ sub create_mymeta {
 
   # maybe get a copy in spec v2 format (regardless of original source)
 
-  my $mymeta_obj = $self->_get_meta_object(quiet => 0, dynamic => 0, fatal => 1, auto => 0);
-  # if we have metadata, just update it
-  if ($meta_obj && $mymeta_obj) {
-    my $prereqs = $mymeta_obj->effective_prereqs->with_merged_prereqs($meta_obj->effective_prereqs);
+  my $mymeta_obj;
+  if ($meta_obj) {
+    # if we have metadata, just update it
     my %updated = (
       %{ $meta_obj->as_struct({ version => 2.0 }) },
-      prereqs => $prereqs->as_string_hash,
+      prereqs => $self->_normalize_prereqs,
       dynamic_config => 0,
       generated_by => "Module::Build version $Module::Build::VERSION",
     );
     $mymeta_obj = CPAN::Meta->new( \%updated, { lazy_validation => 0 } );
+  }
+  else {
+    $mymeta_obj = $self->_get_meta_object(quiet => 0, dynamic => 0, fatal => 1, auto => 0);
   }
 
   my @created = $self->_write_meta_files( $mymeta_obj, 'MYMETA' );

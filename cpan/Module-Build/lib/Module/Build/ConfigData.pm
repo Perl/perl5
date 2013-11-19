@@ -167,6 +167,15 @@ do{ my $x = [
        {},
        {},
        {
+         'PPM_support' => {
+                            'description' => 'Generate PPM files for distributions'
+                          },
+         'license_creation' => {
+                                 'description' => 'Create licenses automatically in distributions',
+                                 'requires' => {
+                                                 'Software::License' => 0
+                                               }
+                               },
          'dist_authoring' => {
                                'description' => 'Create new distributions',
                                'requires' => {
@@ -177,34 +186,25 @@ do{ my $x = [
                                                  'Pod::Readme' => '0.04'
                                                }
                              },
+         'inc_bundling_support' => {
+                                     'requires' => {
+                                                     'ExtUtils::Install' => '1.54',
+                                                     'ExtUtils::Installed' => '1.999'
+                                                   },
+                                     'description' => 'Bundle Module::Build in inc/'
+                                   },
          'manpage_support' => {
                                 'description' => 'Create Unix man pages',
                                 'requires' => {
                                                 'Pod::Man' => 0
                                               }
                               },
-         'PPM_support' => {
-                            'description' => 'Generate PPM files for distributions'
-                          },
          'HTML_support' => {
                              'description' => 'Create HTML documentation',
                              'requires' => {
                                              'Pod::Html' => 0
                                            }
-                           },
-         'inc_bundling_support' => {
-                                     'description' => 'Bundle Module::Build in inc/',
-                                     'requires' => {
-                                                     'ExtUtils::Install' => '1.54',
-                                                     'ExtUtils::Installed' => '1.999'
-                                                   }
-                                   },
-         'license_creation' => {
-                                 'requires' => {
-                                                 'Software::License' => 0
-                                               },
-                                 'description' => 'Create licenses automatically in distributions'
-                               }
+                           }
        }
      ];
 $x; }
