@@ -9573,14 +9573,11 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 
                  insert_if_check_paren:
 		    if (*(tmp = nextchar(pRExC_state)) != ')') {
-                        if ( UTF ) {
-                        /* Like the name implies, nextchar deals in chars,
-                         * not characters, so if under UTF, undo its work
+                        /* nextchar also skips comments, so undo its work
                          * and skip over the the next character.
                          */
-		            RExC_parse = tmp;
-		            RExC_parse += UTF8SKIP(RExC_parse);
-		        }
+                        RExC_parse = tmp;
+                        RExC_parse += UTF ? UTF8SKIP(RExC_parse) : 1;
 			vFAIL("Switch condition not recognized");
 		    }
 		  insert_if:

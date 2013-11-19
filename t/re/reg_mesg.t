@@ -91,6 +91,7 @@ my @death =
  '/(?{ 1/' => 'Missing right curly or square bracket',
 
  '/(?(1x))/' => 'Switch condition not recognized {#} m/(?(1x{#}))/',
+ '/(?(1x(?#)))/'=> 'Switch condition not recognized {#} m/(?(1x{#}(?#)))/',
 
  '/(?(1)x|y|z)/' => 'Switch (?(condition)... contains too many branches {#} m/(?(1)x|y|{#}z)/',
 
