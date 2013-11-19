@@ -592,7 +592,8 @@ delimiter.  [perl #120463]
 
 On Windows, perl no longer calls CloseHandle() on a socket handle.  This makes
 debugging easier on Windows by removing certain irrelevant bad handle
-exceptions.  It also fixes a race condition and possible test failure in
+exceptions.  It also fixes a race condition that made socket functions randomly
+fail in a Perl process with multiple OS threads, and possible test failures in
 F<dist/IO/t/cachepropagate-tcp.t>.  [perl #120091/118059]
 
 =item *
