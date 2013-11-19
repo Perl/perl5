@@ -210,9 +210,12 @@ $lc = &POSIX::setlocale(&POSIX::LC_TIME, 'C') if $Config{d_setlocale};
 try_strftime("Wed Feb 28 00:00:00 1996 059", 0,0,0, 28,1,96);
 SKIP: {
     skip("VC++ 8 and Vista's CRTs regard 60 seconds as an invalid parameter", 1)
-	if ($Is_W32 and (($Config{cc} eq 'cl' and
-	                 $Config{ccversion} =~ /^(\d+)/ and $1 >= 14) or
-	                 (Win32::GetOSVersion())[1] >= 6));
+	if ($Is_W32
+	    and (($Config{cc} eq 'cl' and
+		    $Config{ccversion} =~ /^(\d+)/ and $1 >= 14)
+		or ($Config{cc} eq 'icl' and
+		    `cl --version 2>&1` =~ /^.*Version\s+([\d.]+)/ and $1 >= 14)
+		or (Win32::GetOSVersion())[1] >= 6));
 
     try_strftime("Thu Feb 29 00:00:60 1996 060", 60,0,-24, 30,1,96);
 }

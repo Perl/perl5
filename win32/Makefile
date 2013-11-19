@@ -132,6 +132,11 @@ CCTYPE		= MSVC60
 #CCTYPE		= MSVC120FREE
 
 #
+# If you are using Intel C++ Compiler uncomment this
+#
+#__ICC		= define
+
+#
 # uncomment next line if you want debug version of perl (big,slow)
 # If not enabled, we automatically try to use maximum optimization
 # with all compilers that are known to have a working optimizer.
@@ -417,8 +422,13 @@ INST_HTML	= $(INST_TOP)$(INST_VER)\html
 # Programs to compile, build .lib files and link
 #
 
+!IF "$(__ICC)" != "define"
 CC		= cl
 LINK32		= link
+!ELSE
+CC		= icl
+LINK32		= xilink
+!ENDIF
 LIB32		= $(LINK32) -lib
 RSC		= rc
 
@@ -487,6 +497,14 @@ LIBBASEFILES	= \
 		comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib \
 		netapi32.lib uuid.lib ws2_32.lib mpr.lib winmm.lib \
 		version.lib odbc32.lib odbccp32.lib comctl32.lib
+
+# Avoid __intel_new_proc_init link error for libircmt.
+# libmmd is /MD equivelent, other variants exist.
+# libmmd is Intel C's math addon funcs to MS CRT, contains long doubles, C99,
+# and optimized C89 funcs
+!IF "$(__ICC)" == "define"
+LIBBASEFILES	= $(LIBBASEFILES) libircmt.lib libmmd.lib
+!ENDIF
 
 # The 64 bit Windows Server 2003 SP1 SDK compilers link against MSVCRT.dll, which
 # doesn't include the buffer overrun verification code used by the /GS switch.

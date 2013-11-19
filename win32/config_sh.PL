@@ -93,7 +93,7 @@ else {
 
 if (exists $opt{cc}) {
     # cl version detection borrowed from Test::Smoke's configsmoke.pl
-    if ($opt{cc} =~ /\bcl/) { #MSVC can come as clarm.exe
+    if ($opt{cc} =~ /\b(?:cl|icl)/) { #MSVC can come as clarm.exe, icl=Intel C
         my $output = `$opt{cc} --version 2>&1`;
         $opt{ccversion} = $output =~ /^.*Version\s+([\d.]+)/ ? $1 : '?';
     }
@@ -115,7 +115,7 @@ $opt{libpth} = mungepath($opt{libpth}) if exists $opt{libpth};
 $opt{incpath} = mungepath($opt{incpath}) if exists $opt{incpath};
 
 my($int64, $int64f);
-if ($opt{cc} =~ /\bcl/) {
+if ($opt{cc} =~ /\b(?:cl|icl)/) {
     $int64  = '__int64';
     $int64f = 'I64';
 }
@@ -204,6 +204,16 @@ if ($opt{cc} =~ /\bcl/ and $opt{ccversion} =~ /^(\d+)/) {
     if($ccversion < 13) { #VC6
 	$opt{ar} ='lib';
     }
+}
+#find out which MSVC this ICC is using
+elsif ($opt{cc} =~ /\bicl/) {
+    my $output = `cl --version 2>&1`;
+    my $num_ver = $output =~ /^.*Version\s+([\d.]+)/ ? $1 : '?';
+    if($num_ver =~ /^(\d+)/ && $1 >= 14) {
+	$opt{sGMTIME_max} = 32535291599;
+	$opt{sLOCALTIME_max} = 32535244799;
+    }
+    $opt{ar} ='xilib';
 }
 
 if ($opt{useithreads} eq 'define' && $opt{ccflags} =~ /-DPERL_IMPLICIT_SYS\b/) {
