@@ -81,7 +81,7 @@
 #define REG_COMP_C
 #ifdef PERL_IN_XSUB_RE
 #  include "re_comp.h"
-extern const struct regexp_engine my_reg_engine;
+EXTERN_C const struct regexp_engine my_reg_engine;
 #else
 #  include "regcomp.h"
 #endif
