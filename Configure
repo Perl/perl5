@@ -2836,7 +2836,18 @@ $define|true|[yY]*)
             # leave out ld, choosing it is more complex
             nm=`$echo $cc|$sed 's/-g[c\+][c\+]/-nm/'`
             ranlib=`$echo $cc|$sed 's/-g[c\+][c\+]/-ranlib/'`
-	    ;;
+            # We are in a weird spot. Just before us, some values
+            # were 'saved', to be restored after the hints are
+            # run.  This means that the changes we made to ar,
+            # nm and ranlib will get reverted.
+            # To avoid that, we hijack the saving mechanism and
+            # have it save our new values.
+            for file in ar nm ranlib; do
+                eval xxx=\$$file
+                eval $file=$xxx$_exe
+                eval _$file=$xxx
+            done
+        ;;
 	esac
 	case "$targetarch" in
 	'') echo "Targetarch not defined." >&4; croak=y ;;
