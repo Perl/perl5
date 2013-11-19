@@ -595,6 +595,12 @@ debugging easier on Windows by removing certain irrelevant bad handle
 exceptions.  It also fixes a race condition and possible test failure in
 F<dist/IO/t/cachepropagate-tcp.t>.  [perl #120091/118059]
 
+=item *
+
+Some cases of unterminated (?...) sequences in regular expressions (e.g.,
+C</(?</>) have been fixed to produce the proper error message instead of
+"panic: memory wrap".  Other cases (e.g., C</(?(/>) have yet to be fixed.
+
 =back
 
 =head1 Known Problems
