@@ -3,7 +3,7 @@ use 5.006;
 use strict;
 use warnings;
 use warnings::register;
-our $VERSION = '1.25';
+our $VERSION = '1.26';
 require Exporter;
 require Cwd;
 
@@ -982,14 +982,16 @@ sub _find_dir_symlnk($$$) {
 	    # ignore if invalid symlink
 	    unless (defined $new_loc) {
 	        if (!defined -l _ && $dangling_symlinks) {
+                $fullname = undef;
 	            if (ref $dangling_symlinks eq 'CODE') {
 	                $dangling_symlinks->($FN, $dir_pref);
 	            } else {
 	                warnings::warnif "$dir_pref$FN is a dangling symbolic link\n";
 	            }
 	        }
-
-	        $fullname = undef;
+            else {
+                $fullname = $loc_pref . $FN;
+            }
 	        $name = $dir_pref . $FN;
 	        $_ = ($no_chdir ? $name : $FN);
 	        { $wanted_callback->() };

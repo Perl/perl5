@@ -25,7 +25,7 @@ BEGIN {
 
 my $symlink_exists = eval { symlink("",""); 1 };
 my $test_count = 98;
-$test_count += 119 if $symlink_exists;
+$test_count += 127 if $symlink_exists;
 $test_count += 26 if $^O eq 'MSWin32';
 $test_count += 2 if $^O eq 'MSWin32' and $symlink_exists;
 
@@ -89,11 +89,14 @@ sub cleanup {
            file_path('fa', 'fac', 'faca'),
            file_path('fb', 'fb_ord'),
            file_path('fb', 'fba', 'fba_ord'),
-           file_path('fb', 'fbc', 'fbca');
+           file_path('fb', 'fbc', 'fbca'),
+           file_path('fa', 'fax', 'faz'),
+           file_path('fa', 'fay');
     rmdir dir_path('fa', 'faa');
     rmdir dir_path('fa', 'fab', 'faba');
     rmdir dir_path('fa', 'fab');
     rmdir dir_path('fa', 'fac');
+    rmdir dir_path('fa', 'fax');
     rmdir dir_path('fa');
     rmdir dir_path('fb', 'fba');
     rmdir dir_path('fb', 'fbc');
@@ -947,6 +950,31 @@ if ($symlink_exists) {
     );
 
     ok(!$dangling_symlink, "Found no dangling symlink");
+}
+
+if ($symlink_exists) {  # perl #120388
+    print "# BUG  120388\n";
+    mkdir_ok(dir_path ('fa', 'fax'), 0770);
+    create_file_ok(file_path ('fa', 'fax', 'faz'));
+    symlink_ok( file_path ('..', 'fa', 'fax', 'faz'), file_path ('fa', 'fay') );
+    my @seen;
+    File::Find::find( {wanted => sub {
+        if (/^fa[yz]$/) {
+            push @seen, $_;
+            ok(-e $File::Find::fullname,
+                "file identified by 'fullname' exists");
+            my $subdir = file_path qw/for_find fa fax faz/;
+            like(
+                $File::Find::fullname,
+                qr/\Q$subdir\E$/,
+                "fullname matches expected path"
+            );
+        }
+    }, follow => 1}, topdir('fa'));
+    # make sure "fay"(symlink) found before "faz"(real file);
+    # otherwise test invalid
+    is(join(',', @seen), 'fay,faz',
+        "symlink found before real file, as expected");
 }
 
 ##### Issue 59750 #####
