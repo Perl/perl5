@@ -103,6 +103,12 @@ long had the internal hash value computed at compile time, to speed up
 lookup.  This optimisation has only now been applied to hash slices as
 well.
 
+=item *
+
+Combined C<and> and C<or> operators in void context, like those
+generated for C<< unless ($a && $b) >> and C<< if ($a || b) >> now
+short circuit directly to the end of the statement. [perl #120128]
+
 =back
 
 =head1 Modules and Pragmata
