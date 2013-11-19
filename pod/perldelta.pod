@@ -1,5 +1,4 @@
 =for todo
-b47a847f62 win32/win32sck.c: dont close() a freed socket os handle
 35e037e846 Commit 1735f6f started to escape all...
 9b4bdfd44e fix chop formats with non PV vars
 
@@ -588,6 +587,13 @@ the new subroutine has been installed.
 
 C<s///>, C<tr///> and C<y///> now work when a wide character is used as the
 delimiter.  [perl #120463]
+
+=item *
+
+On Windows, perl no longer calls CloseHandle() on a socket handle.  This makes
+debugging easier on Windows by removing certain irrelevant bad handle
+exceptions.  It also fixes a race condition and possible test failure in
+F<dist/IO/t/cachepropagate-tcp.t>.  [perl #120091/118059]
 
 =back
 
