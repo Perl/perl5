@@ -5538,7 +5538,7 @@ internal consistency check.  It encountered a malformed op tree.
 (S) exit() was called or the script otherwise finished gracefully when
 C<PERL_EXIT_WARN> was set in C<PL_exit_flags>.
 
-=item Unexpected exit failure %u
+=item Unexpected exit failure %d
 
 (S) An uncaught die() was called when C<PERL_EXIT_WARN> was set in
 C<PL_exit_flags>.
