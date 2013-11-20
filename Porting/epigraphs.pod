@@ -17,6 +17,42 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.19.6 - Monty Python's Flying Circus, "Spam"
+
+L<Announced on 2013-11-20 by Chris 'BinGOs' Williams|http://www.nntp.perl.org/group/perl.perl5.porters/2013/11/msg210043.html>
+
+=over
+
+      Interior: cheap cafe. All the customers are Vikings. Mr and Mrs Bun enter downwards (on wires).
+
+    Mr. Bun: Morning.
+    Waitress: Morning.
+    Mr. Bun: What have you got, then?
+    Waitress: Well there's egg and bacon; egg, sausage and bacon; egg and spam; egg, bacon and spam;
+              egg, bacon, sausage and spam; spam, bacon, sausage and spam; spam, egg, spam, spam, bacon and spam;
+              spam, spam, spam, egg and spam; spam, spam, spam, spam, spam, spam, baked beans, spam, spam, spam and spam;
+              or lobster thermidor aux crevettes, with a mornay sauce garnished with truffle pate, brandy and a fried
+              egg on top and spam
+    Mrs. Bun: Have you got anything without spam in it?
+    Waitress: Well, there's spam, egg, sausage and spam. That's not got MUCH spam in it.
+    Mrs. Bun: I don't want ANY spam.
+    Mr. Bun: Why can't she have egg, bacon, spam and sausage?
+    Mrs. Bun: That's got spam in it!
+    Mr. Bun: Not as much as spam, egg, sausage and spam.
+    Mrs. Bun: Look, could I have egg, bacon, spam and sausage, without the spam.
+    Waitress: Uuuuuuggggh!
+    Mrs. Bun: What d'you mean, uugggh! I don't like spam.
+    Vikings: (singing) Spam, spam, spam, spam, spam ... spam, spam, spam, spam ... lovely spam, wonderful spam ...
+
+      (Brief shot of a Viking ship)
+
+    Waitress: Shut up. Shut up! Shut up! You can't have egg, bacon, spam and sausage without the spam.
+    Mrs. Bun: Why not?
+    Waitress: No, it wouldn't be egg, bacon, spam and sausage, would it?
+    Mrs. Bun: I don't like spam!
+
+=back
+
 =head2 v5.19.5 - Charles Baudelaire, "The Flowers of Evil", 51. The Cat
 
 L<Announced on 2013-10-20 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2013/10/msg208752.html>
