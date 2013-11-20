@@ -187,15 +187,16 @@ is *_{ARRAY}, undef, 'goto &xsub when @_ does not exist';
 # another XSUB if this fails.
 ok !exists $INC{"re.pm"}, 're.pm not loaded yet';
 {
-    local $^W; # Suppress redef warnings
     sub re::regmust{}
     bless \&re::regmust;
     DESTROY {
+        no warnings 'redefine', 'prototype';
         my $str1 = "$_[0]";
         *re::regmust = sub{}; # GvSV had no refcount, so this freed it
         my $str2 = "$_[0]";   # used to be UNKNOWN(0x7fdda29310e0)
         @str = ($str1, $str2);
     }
+    local $^W; # Suppress redef warnings in XSLoader
     require re;
     is $str[1], $str[0],
       'XSUB clobbering sub whose DESTROY assigns to the glob';
