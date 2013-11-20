@@ -520,6 +520,7 @@ the strings?).
  Steve     5.19.3       2013-Aug-20
  Steve     5.19.4       2013-Sep-20
  Steve     5.19.5       2013-Oct-20
+ BinGOs    5.19.6       2013-Nov-20
 
 =head2 SELECTED RELEASE SIZES
 
