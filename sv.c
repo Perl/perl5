@@ -4323,6 +4323,17 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, SV* sstr, const I32 flags)
 	   and doing it now facilitates the COW check.  */
 	(void)SvPOK_only(dstr);
 
+	/* This long and winding if statement is laid out like this:
+	    if ( source cannot COW
+	      && it is not swipable either (recording whether it is)
+	      && we cannot COW here (full check)
+            ) {
+		just copy the string
+	    }
+	    else {
+		swipe or cow
+	    }
+	*/
 	if (
 	    /* If we're already COW then this clause is not true, and if COW
 	       is allowed then we drop down to the else and make dest COW 
