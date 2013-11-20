@@ -575,6 +575,7 @@ d_killpg=''
 d_lchown=''
 d_ldbl_dig=''
 d_libm_lib_version=''
+d_libname_unique=''
 d_link=''
 d_localtime_r=''
 d_localtime_r_needs_tzset=''
@@ -4768,6 +4769,26 @@ EOM
 rp='What is the file extension used for shared libraries?'
 . ./myread
 so="$ans"
+
+: Does target system insist that shared library basenames are unique
+$cat << EOM
+
+Some dynamic loaders assume that the *basename* of shared
+library filenames are globally unique.
+We'll default this to undef as we assume your system is not this
+weird. Set to defined if you're on one of them.
+
+EOM
+
+dflt='n'
+rp='Make shared library basenames unique?'
+. ./myread
+case "$ans" in
+y|Y)    val="$define" ;;
+*)      val="$undef"  ;;
+esac
+set d_libname_unique
+eval $setvar
 
 : Define several unixisms.
 : Hints files or command line option can be used to override them.
@@ -22890,6 +22911,7 @@ d_killpg='$d_killpg'
 d_lchown='$d_lchown'
 d_ldbl_dig='$d_ldbl_dig'
 d_libm_lib_version='$d_libm_lib_version'
+d_libname_unique='$d_libname_unique'
 d_link='$d_link'
 d_localtime64='$d_localtime64'
 d_localtime_r='$d_localtime_r'
