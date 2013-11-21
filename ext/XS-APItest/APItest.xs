@@ -1049,7 +1049,6 @@ peep_xop(pTHX_ OP *o, OP *oldop)
 static I32
 filter_call(pTHX_ int idx, SV *buf_sv, int maxlen)
 {
-    SV   *my_sv = FILTER_DATA(idx);
     char *p;
     char *end;
     int n = FILTER_READ(idx + 1, buf_sv, maxlen);
