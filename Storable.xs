@@ -1018,7 +1018,7 @@ static const char byteorderstr_56[] = {BYTEORDER_BYTES_56, 0};
   } STMT_END
 
 /*
- * This macro is used at retrieve time, to remember where object 'y', bearing a
+ * SEEN() is used at retrieve time, to remember where object 'y', bearing a
  * given tag 'tagnum', has been retrieved. Next time we see an SX_OBJECT marker,
  * we'll therefore know where it has been retrieved and will be able to
  * share the same reference, as in the original stored memory image.
@@ -1036,18 +1036,25 @@ static const char byteorderstr_56[] = {BYTEORDER_BYTES_56, 0};
  * will bless the object.
  *
  * i should be true iff sv is immortal (ie PL_sv_yes, PL_sv_no or PL_sv_undef)
+ *
+ * SEEN0() is a short-cut where stash is always NULL.
  */
-#define SEEN(y,stash,i)						\
-  STMT_START {								\
-	if (!y)									\
+#define SEEN0(y,i)						        \
+    STMT_START {							\
+	if (!y)								\
 		return (SV *) 0;					\
 	if (av_store(cxt->aseen, cxt->tagnum++, i ? (SV*)(y) : SvREFCNT_inc(y)) == 0) \
 		return (SV *) 0;					\
-	TRACEME(("aseen(#%d) = 0x%"UVxf" (refcnt=%d)", cxt->tagnum-1, \
-		 PTR2UV(y), SvREFCNT(y)-1));		\
-	if (stash)								\
+	TRACEME(("aseen(#%d) = 0x%"UVxf" (refcnt=%d)", cxt->tagnum-1,   \
+		 PTR2UV(y), SvREFCNT(y)-1));		                \
+    } STMT_END
+
+#define SEEN(y,stash,i)						        \
+    STMT_START {							\
+        SEEN0(y,i);						        \
+	if (stash)							\
 		BLESS((SV *) (y), (HV *)(stash));			\
-  } STMT_END
+    } STMT_END
 
 /*
  * Bless 's' in 'p', via a temporary reference, required by sv_bless().
@@ -4141,7 +4148,7 @@ static SV *retrieve_hook(pTHX_ stcxt_t *cxt, const char *cname)
 	default:
 		return retrieve_other(aTHX_ cxt, 0);		/* Let it croak */
 	}
-	SEEN(sv, 0, 0);							/* Don't bless yet */
+	SEEN0(sv, 0);							/* Don't bless yet */
 
 	/*
 	 * Whilst flags tell us to recurse, do so.
@@ -4338,7 +4345,7 @@ static SV *retrieve_hook(pTHX_ stcxt_t *cxt, const char *cname)
 		SvREFCNT_dec(sv);
 		/* we need to free RV but preserve value that RV point to */
 		sv = SvRV(attached);
-		SEEN(sv, 0, 0);
+		SEEN0(sv, 0);
 		SvRV_set(attached, NULL);
 		SvREFCNT_dec(attached);
 		if (!(flags & SHF_IDX_CLASSNAME) && classname != buf)
@@ -5713,7 +5720,7 @@ static SV *old_retrieve_array(pTHX_ stcxt_t *cxt, const char *cname)
 	RLEN(len);
 	TRACEME(("size = %d", len));
 	av = newAV();
-	SEEN(av, 0, 0);				/* Will return if array not allocated nicely */
+	SEEN0(av, 0);				/* Will return if array not allocated nicely */
 	if (len)
 		av_extend(av, len);
 	else
@@ -5776,7 +5783,7 @@ static SV *old_retrieve_hash(pTHX_ stcxt_t *cxt, const char *cname)
 	RLEN(len);
 	TRACEME(("size = %d", len));
 	hv = newHV();
-	SEEN(hv, 0, 0);			/* Will return if table not allocated properly */
+	SEEN0(hv, 0);			/* Will return if table not allocated properly */
 	if (len == 0)
 		return (SV *) hv;	/* No data follow if table empty */
 	hv_ksplit(hv, len + 1);		/* pre-extend hash to save multiple splits */
