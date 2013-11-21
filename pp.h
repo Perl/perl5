@@ -270,15 +270,25 @@ Does not use C<TARG>.  See also C<XPUSHu>, C<mPUSHu> and C<PUSHu>.
 =cut
 */
 
-#define EXTEND(p,n)    (void)(UNLIKELY(PL_stack_max - p < (SSize_t)(n)) &&     \
+#ifdef STRESS_REALLOC
+# define EXTEND(p,n)	(void)(sp = stack_grow(sp,p, (SSize_t)(n)))
+/* Same thing, but update mark register too. */
+# define MEXTEND(p,n)	STMT_START {					\
+			    const int markoff = mark - PL_stack_base;	\
+			    sp = stack_grow(sp,p,(SSize_t) (n));	\
+			    mark = PL_stack_base + markoff;		\
+			} STMT_END
+#else
+# define EXTEND(p,n)   (void)(UNLIKELY(PL_stack_max - p < (SSize_t)(n)) &&     \
 			    (sp = stack_grow(sp,p, (SSize_t) (n))))
 
 /* Same thing, but update mark register too. */
-#define MEXTEND(p,n)   STMT_START {if (UNLIKELY(PL_stack_max - p < (int)(n))) {\
+# define MEXTEND(p,n)  STMT_START {if (UNLIKELY(PL_stack_max - p < (int)(n))) {\
                            const int markoff = mark - PL_stack_base;           \
                            sp = stack_grow(sp,p,(SSize_t) (n));                \
                            mark = PL_stack_base + markoff;                     \
                        } } STMT_END
+#endif
 
 #define PUSHs(s)	(*++sp = (s))
 #define PUSHTARG	STMT_START { SvSETMAGIC(TARG); PUSHs(TARG); } STMT_END

@@ -143,7 +143,16 @@ Perl_av_extend_guts(pTHX_ AV *av, SSize_t key, SSize_t *maxp, SV ***allocp,
 #endif
 		    MEM_WRAP_CHECK_1(newmax+1, SV*, oom_array_extend);
 		}
+#ifdef STRESS_REALLOC
+		{
+		    SV ** const old_alloc = *allocp;
+		    Newx(*allocp, newmax+1, SV*);
+		    Copy(old_alloc, *allocp, *maxp + 1, SV*);
+		    Safefree(old_alloc);
+		}
+#else
 		Renew(*allocp,newmax+1, SV*);
+#endif
 #ifdef Perl_safesysmalloc_size
 	      resized:
 #endif
