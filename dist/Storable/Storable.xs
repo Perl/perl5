@@ -1663,6 +1663,8 @@ static void free_context(pTHX_ stcxt_t *cxt)
  *** Predicates.
  ***/
 
+/* these two functions are currently only used within asserts */
+#ifdef DASSERT
 /*
  * is_storing
  *
@@ -1686,6 +1688,7 @@ static int is_retrieving(pTHX)
 
 	return cxt->entry && (cxt->optype & ST_RETRIEVE);
 }
+#endif
 
 /*
  * last_op_in_netorder
