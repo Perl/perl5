@@ -1278,8 +1278,8 @@ EXTCONST U32 PL_charclass[];
 #    define isWORDCHAR_LC(c) (FITS_IN_8_BITS(c)                                \
                             && (isalnum((unsigned char)(c)) || (char)(c) == '_'))
 #    define isXDIGIT_LC(c)   (FITS_IN_8_BITS(c) && isxdigit((unsigned char)(c)))
-#    define toLOWER_LC(c) (FITS_IN_8_BITS(c) ? tolower((unsigned char)(c)) : (c))
-#    define toUPPER_LC(c) (FITS_IN_8_BITS(c) ? toupper((unsigned char)(c)) : (c))
+#    define toLOWER_LC(c) (FITS_IN_8_BITS(c) ? (UV)tolower((unsigned char)(c)) : (c))
+#    define toUPPER_LC(c) (FITS_IN_8_BITS(c) ? (UV)toupper((unsigned char)(c)) : (c))
 
 #  else
 
