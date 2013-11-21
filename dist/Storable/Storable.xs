@@ -1179,9 +1179,9 @@ static const sv_retrieve_t sv_old_retrieve[] = {
 	(sv_retrieve_t)retrieve_byte,		/* SX_BYTE */
 	(sv_retrieve_t)retrieve_netint,		/* SX_NETINT */
 	(sv_retrieve_t)retrieve_scalar,		/* SX_SCALAR */
-	(sv_retrieve_t)retrieve_tied_array,	/* SX_ARRAY */
-	(sv_retrieve_t)retrieve_tied_hash,	/* SX_HASH */
-	(sv_retrieve_t)retrieve_tied_scalar,	/* SX_SCALAR */
+	(sv_retrieve_t)retrieve_tied_array,	/* SX_TIED_ARRAY */
+	(sv_retrieve_t)retrieve_tied_hash,	/* SX_TIED_HASH */
+	(sv_retrieve_t)retrieve_tied_scalar,	/* SX_TIED_SCALAR */
 	(sv_retrieve_t)retrieve_other,	/* SX_SV_UNDEF not supported */
 	(sv_retrieve_t)retrieve_other,	/* SX_SV_YES not supported */
 	(sv_retrieve_t)retrieve_other,	/* SX_SV_NO not supported */
@@ -1234,9 +1234,9 @@ static const sv_retrieve_t sv_retrieve[] = {
 	(sv_retrieve_t)retrieve_byte,		/* SX_BYTE */
 	(sv_retrieve_t)retrieve_netint,		/* SX_NETINT */
 	(sv_retrieve_t)retrieve_scalar,		/* SX_SCALAR */
-	(sv_retrieve_t)retrieve_tied_array,	/* SX_ARRAY */
-	(sv_retrieve_t)retrieve_tied_hash,	/* SX_HASH */
-	(sv_retrieve_t)retrieve_tied_scalar,	/* SX_SCALAR */
+	(sv_retrieve_t)retrieve_tied_array,	/* SX_TIED_ARRAY */
+	(sv_retrieve_t)retrieve_tied_hash,	/* SX_TIED_HASH */
+	(sv_retrieve_t)retrieve_tied_scalar,	/* SX_TIED_SCALAR */
 	(sv_retrieve_t)retrieve_sv_undef,	/* SX_SV_UNDEF */
 	(sv_retrieve_t)retrieve_sv_yes,		/* SX_SV_YES */
 	(sv_retrieve_t)retrieve_sv_no,		/* SX_SV_NO */
@@ -4686,7 +4686,7 @@ static SV *retrieve_tied_array(pTHX_ stcxt_t *cxt, const char *cname)
 
 	tv = NEWSV(10002, 0);
 	stash = cname ? gv_stashpv(cname, GV_ADD) : 0;
-	SEEN(tv, cname, 0);			/* Will return if tv is null */
+	SEEN(tv, stash, 0);			/* Will return if tv is null */
 	sv = retrieve(aTHX_ cxt, 0);		/* Retrieve <object> */
 	if (!sv)
 		return (SV *) 0;		/* Failed */
