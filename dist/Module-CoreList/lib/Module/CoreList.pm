@@ -9144,17 +9144,6 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         removed => {
         }
     },
-    5.019007 => {
-        delta_from => 5.019006,
-        changed => {
-            'Config'                => '5.019007',
-            'Module::CoreList'      => '3.02',
-            'Module::CoreList::TieHashDelta'=> '3.02',
-            'Module::CoreList::Utils'=> '3.02',
-        },
-        removed => {
-        }
-    },
 );
 
 sub is_core
@@ -9502,13 +9491,6 @@ for my $version (sort { $a <=> $b } keys %delta) {
         delta_from => 5.019005,
         changed => {
             'Package::Constants'    => '1',
-        },
-        removed => {
-        }
-    },
-    5.019007 => {
-        delta_from => 5.019006,
-        changed => {
         },
         removed => {
         }
