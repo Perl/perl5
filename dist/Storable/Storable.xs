@@ -5022,7 +5022,6 @@ static SV *retrieve_lutf8str(pTHX_ stcxt_t *cxt, const char *cname)
 static SV *retrieve_vstring(pTHX_ stcxt_t *cxt, const char *cname)
 {
 #ifdef SvVOK
-	MAGIC *mg;
 	char s[256];
 	int len;
 	SV *sv;
@@ -5054,7 +5053,6 @@ static SV *retrieve_vstring(pTHX_ stcxt_t *cxt, const char *cname)
 static SV *retrieve_lvstring(pTHX_ stcxt_t *cxt, const char *cname)
 {
 #ifdef SvVOK
-	MAGIC *mg;
 	char *s;
 	I32 len;
 	SV *sv;
@@ -6566,6 +6564,8 @@ static SV *dclone(pTHX_ SV *sv)
 static int
 storable_free(pTHX_ SV *sv, MAGIC* mg) {
 	stcxt_t *cxt = (stcxt_t *)SvPVX(sv);
+
+	PERL_UNUSED_ARG(mg);
 	if (kbuf)
 		Safefree(kbuf);
 	if (!cxt->membuf_ro && mbase)
