@@ -1,5 +1,35 @@
-2.95 Mon Jun 22 2013
+3.02
+  - Prepared for v5.19.7
+
+3.01 Wed Nov 20 2013
+  - Finalised for v5.19.6
+
+3.00 Sun Oct 20 2013
+  - Updated for v5.19.5
+  - exported %delta
+  - fixed bug in is_core(): it was naively assuming a linear sequence of releases,
+    rather than the tree with multiple branches.
+
+2.99 Fri Sep 20 2013
+  - Updated for v5.19.4
+  - fixed Module::Build core deprecation
+  - changes_between now has the same API as all other functions
+  - added is_core() which returns true if a module is/was core
+    in a specific version of Perl. Can optionally specify minimum
+    version of the module.
+
+2.98 Wed Aug 21 2013
+  - Prepared for v5.19.4
+
+2.97 Tue Aug 20 2013
   - Updated for v5.19.3
+
+2.96 Mon Aug 12 2013
+  - Utils module listing all utilities released with core
+  - Updated for v5.18.1
+
+2.95 Mon Jun 22 2013
+  - Prepared for v5.19.3
 
 2.94 Sun Jun 21 2013
   - Updated for v5.19.2

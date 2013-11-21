@@ -12,6 +12,10 @@ Module::CoreList - what modules shipped with versions of perl
  print Module::CoreList->first_release_by_date('File::Spec'); # prints 5.005
  print Module::CoreList->first_release('File::Spec', 0.82);   # prints 5.006001
 
+ if (Module::CoreList::is_core('File::Spec')) {
+   print "File::Spec is a core module\n";
+ }
+
  print join ', ', Module::CoreList->find_modules(qr/Data/);
     # prints 'Data::Dumper'
  print join ', ', Module::CoreList->find_modules(qr/test::h.*::.*s/i, 5.008008);
@@ -70,6 +74,19 @@ you may provide a list of perl versions to limit the regex search.
 
 Takes a perl version as an argument. Returns that perl version if it exists or C<undef>
 otherwise.
+
+=item C<is_core( MODULE, [ MODULE_VERSION, [ PERL_VERSION ] ] )>
+
+Available in version 2.99 and above.
+
+Returns true if MODULE was bundled with the specified version of Perl.
+You can optionally specify a minimum version of the module,
+and can also specify a version of Perl.
+If a version of Perl isn't specified,
+C<is_core()> will use the version of Perl that is running (ie C<$^V>).
+
+If you want to specify the version of Perl, but don't care about
+the version of the module, pass C<undef> for the module version:
 
 =item C<is_deprecated( MODULE, PERL_VERSION )>
 
@@ -142,6 +159,20 @@ that's what you're testing for.
 Starting with 2.10, the special module name C<Unicode> refers to the version of
 the Unicode Character Database bundled with Perl.
 
+=item C<%Module::CoreList::delta>
+
+Available in version 3.00 and above.
+
+C<%Module::CoreList::version> is implemented via C<Module::CoreList::TieHashDelta>
+using this hash of delta changes.
+
+It is a hash of hashes that is keyed on perl version. Each keyed hash will have the
+following keys:
+
+  delta_from - a previous perl version that the changes are based on
+  changed    - a hash of module/versions that have changed
+  removed    - a hash of modules that have been removed
+
 =item C<%Module::CoreList::released>
 
 Keyed on perl version this contains ISO
@@ -197,7 +228,7 @@ Module::CoreList currently covers the 5.000, 5.001, 5.002, 5.003_07,
 5.15.0, 5.15.1, 5.15.2, 5.15.3, 5.15.4, 5.15.5, 5.15.6, 5.15.7, 5.15.8,
 5.15.9, 5.16.0, 5.16.1, 5.16.2, 5.16.3, 5.17.0, 5.17.1, 5.17.2, 5.17.3,
 5.17.4, 5.17.5, 5.17.6, 5.17.7, 5.17.8, 5.17.9, 5.17.10, 5.17.11, 5.18.0,
-5.19.0, 5.19.1, 5.19.2, 5.19.3 and 5.18.1 releases of perl.
+5.19.0, 5.19.1, 5.19.2, 5.19.3, 5.19.4, 5.19.5, 5.19.6 and 5.19.7 releases of perl.
 
 =head1 HISTORY
 
