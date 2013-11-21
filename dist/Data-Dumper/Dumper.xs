@@ -585,9 +585,43 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
         if (is_regex) 
         {
             STRLEN rlen;
-	    const char *rval = SvPV(val, rlen);
-	    const char * const rend = rval+rlen;
-	    const char *slash = rval;
+	    SV *sv_pattern = NULL;
+	    SV *sv_flags = NULL;
+	    CV *re_pattern_cv;
+	    const char *rval;
+	    const char *rend;
+	    const char *slash;
+
+	    if ((re_pattern_cv = get_cv("re::regexp_pattern", 0))) {
+	      dSP;
+	      I32 count;
+	      ENTER;
+	      SAVETMPS;
+	      PUSHMARK(SP);
+	      XPUSHs(val);
+	      PUTBACK;
+	      count = call_sv((SV*)re_pattern_cv, G_ARRAY);
+	      SPAGAIN;
+	      if (count >= 2) {
+		sv_flags = POPs;
+	        sv_pattern = POPs;
+		SvREFCNT_inc(sv_flags);
+		SvREFCNT_inc(sv_pattern);
+	      }
+	      PUTBACK;
+	      FREETMPS;
+	      LEAVE;
+	      if (sv_pattern) {
+	        sv_2mortal(sv_pattern);
+	        sv_2mortal(sv_flags);
+	      }
+	    }
+	    else {
+	      sv_pattern = val;
+	    }
+	    rval = SvPV(sv_pattern, rlen);
+	    rend = rval+rlen;
+	    slash = rval;
 	    sv_catpvn(retval, "qr/", 3);
 	    for (;slash < rend; slash++) {
 	      if (*slash == '\\') { ++slash; continue; }
@@ -600,6 +634,8 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	    }
 	    sv_catpvn(retval, rval, rlen);
 	    sv_catpvn(retval, "/", 1);
+	    if (sv_flags)
+	      sv_catsv(retval, sv_flags);
 	} 
         else if (
 #if PERL_VERSION < 9

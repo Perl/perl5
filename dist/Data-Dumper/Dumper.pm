@@ -363,25 +363,15 @@ sub _dump {
 
     if ($is_regex) {
         my $pat;
-        # This really sucks, re:regexp_pattern is in ext/re/re.xs and not in
-        # universal.c, and even worse we cant just require that re to be loaded
-        # we *have* to use() it.
-        # We should probably move it to universal.c for 5.10.1 and fix this.
-        # Currently we only use re::regexp_pattern when the re is blessed into another
-        # package. This has the disadvantage of meaning that a DD dump won't round trip
-        # as the pattern will be repeatedly wrapped with the same modifiers.
-        # This is an aesthetic issue so we will leave it for now, but we could use
-        # regexp_pattern() in list context to get the modifiers separately.
-        # But since this means loading the full debugging engine in process we wont
-        # bother unless its necessary for accuracy.
-        if (($realpack ne 'Regexp') && defined(*re::regexp_pattern{CODE})) {
-          $pat = re::regexp_pattern($val);
+        my $flags = "";
+        if (defined(*re::regexp_pattern{CODE})) {
+          ($pat, $flags) = re::regexp_pattern($val);
         }
         else {
           $pat = "$val";
         }
         $pat =~ s <(\\.)|/> { $1 || '\\/' }ge;
-        $out .= "qr/$pat/";
+        $out .= "qr/$pat/$flags";
     }
     elsif ($realtype eq 'SCALAR' || $realtype eq 'REF'
     || $realtype eq 'VSTRING') {
