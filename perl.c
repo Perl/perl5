@@ -3995,8 +3995,10 @@ Perl_init_debugger(pTHX)
 
 #ifndef STRESS_REALLOC
 #define REASONABLE(size) (size)
+#define REASONABLE_but_at_least(size,min) (size)
 #else
 #define REASONABLE(size) (1) /* unreasonable */
+#define REASONABLE_but_at_least(size,min) (min)
 #endif
 
 void
@@ -4032,9 +4034,9 @@ Perl_init_stacks(pTHX)
     PL_scopestack_ix = 0;
     PL_scopestack_max = REASONABLE(32);
 
-    Newx(PL_savestack,REASONABLE(128),ANY);
+    Newx(PL_savestack,REASONABLE_but_at_least(128,SS_MAXPUSH),ANY);
     PL_savestack_ix = 0;
-    PL_savestack_max = REASONABLE(128);
+    PL_savestack_max = REASONABLE_but_at_least(128,SS_MAXPUSH);
 }
 
 #undef REASONABLE
