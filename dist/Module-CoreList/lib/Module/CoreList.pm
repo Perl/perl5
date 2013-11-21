@@ -3,7 +3,7 @@ use strict;
 use vars qw/$VERSION %released %version %families %upstream
 	    %bug_tracker %deprecated %delta/;
 use Module::CoreList::TieHashDelta;
-$VERSION = '3.02';
+$VERSION = '3.03';
 
 my $dumpinc = 0;
 sub import {
@@ -241,7 +241,7 @@ sub changes_between {
     5.019004 => '2013-09-20',
     5.019005 => '2013-10-20',
     5.019006 => '2013-11-20',
-    5.019007 => '????-??-??',
+    5.018002 => '2013-12-02',
   );
 
 for my $version ( sort { $a <=> $b } keys %released ) {
@@ -8046,6 +8046,16 @@ for my $version ( sort { $a <=> $b } keys %released ) {
            'VMS::Filespec'         => 1,
         }
     },
+    5.018002 => {
+        delta_from => 5.018001,
+        changed => {
+            'B'                     => '1.42_02',
+            'Config'                => '5.018002',
+            'Module::CoreList'      => '3.03',
+            'Module::CoreList::TieHashDelta'=> '3.03',
+            'Module::CoreList::Utils'=> '3.03',
+        },
+    },
     5.019000 => {
         delta_from => 5.018000,
         changed => {
@@ -9357,6 +9367,14 @@ for my $version (sort { $a <=> $b } keys %delta) {
         removed => {
         }
     },
+    5.018002 => {
+        delta_from => 5.018001,
+        changed => {
+        },
+        removed => {
+        }
+    },
+
 
     5.019    => {
         delta_from => 5.018,
