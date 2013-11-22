@@ -1840,5 +1840,7 @@ A+(*PRUNE)BC(?{})	AAABC	y	$&	AAABC
 /\N* /x	ab	y	$&	ab	         # Under /x was ignoring the '*'
 /\N (?#comment) * /x	ab	y	$&	ab	# likewise
 
+# RT #120600: Variable length lookbehind is not variable
+(?<W>a)(?<BB>(?=(?&W))(?<=(?&W)))(?&BB)	aa	y	$&	a	# test repeated recursive patterns
 # Keep these lines at the end of the file
 # vim: softtabstop=0 noexpandtab

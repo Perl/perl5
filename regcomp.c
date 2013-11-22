@@ -3345,8 +3345,14 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 #ifdef DEBUGGING
     StructCopy(&zero_scan_data, &data_fake, scan_data_t);
 #endif
+    if (!recursed) {
+        Newxz(recursed, (((RExC_npar + 1)>>3) + 1), U8);
+        SAVEFREEPV(recursed);
+    }
 
     if ( depth == 0 ) {
+        /* Set up a bitmask of which recursive component we have
+         * already entered. */
         while (first_non_open && OP(first_non_open) == OPEN)
             first_non_open=regnext(first_non_open);
     }
@@ -3407,6 +3413,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		SSize_t max1 = 0, min1 = SSize_t_MAX, num = 0;
 		regnode_ssc accum;
 		regnode * const startbranch=scan;
+                U8 *myrecursed= NULL;
 
 		if (flags & SCF_DO_SUBSTR)
 		    SCAN_COMMIT(pRExC_state, data, minlenp); /* Cannot merge strings after this. */
@@ -3440,10 +3447,16 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    if (flags & SCF_WHILEM_VISITED_POS)
 			f |= SCF_WHILEM_VISITED_POS;
 
+                    /* create a new recursed for this branch */
+                    if (!myrecursed) {
+                        Newx(myrecursed, (((RExC_npar + 1)>>3) + 1), U8);
+                        SAVEFREEPV(myrecursed);
+                    }
+                    Copy(recursed, myrecursed, (((RExC_npar + 1)>>3) + 1), U8);
 		    /* we suppose the run is continuous, last=next...*/
 		    minnext = study_chunk(pRExC_state, &scan, minlenp, &deltanext,
 					  next, &data_fake,
-					  stopparen, recursed, NULL, f,depth+1);
+					  stopparen, myrecursed, NULL, f,depth+1);
 		    if (min1 > minnext)
 			min1 = minnext;
 		    if (deltanext == SSize_t_MAX) {
@@ -3852,14 +3865,15 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                     start = RExC_rxi->program + 1;
                     end   = RExC_opend;
                 }
-                if (!recursed) {
-                    Newxz(recursed, (((RExC_npar)>>3) +1), U8);
-                    SAVEFREEPV(recursed);
-                }
-                if (!PAREN_TEST(recursed,paren+1)) {
-		    PAREN_SET(recursed,paren+1);
+
+                if (!PAREN_TEST(recursed,paren)) {
+                    /* we havent recursed into this paren yet, so recurse into it */
+	            DEBUG_STUDYDATA("set:", data,depth);
+                    PAREN_SET(recursed, paren);
                     Newx(newframe,1,scan_frame);
                 } else {
+	            DEBUG_STUDYDATA("inf:", data,depth);
+                    /* some form of infinite recursion, assume infinite length */
                     if (flags & SCF_DO_SUBSTR) {
                         SCAN_COMMIT(pRExC_state,data,minlenp);
                         data->longest = &(data->longest_float);
@@ -5030,6 +5044,13 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
 
 	/* Else: zero-length, ignore. */
 	scan = regnext(scan);
+    }
+    /* If we are exiting a recursion we can unset its recursed bit
+     * and allow ourselves to enter it again - no danger of an
+     * infinite loop there. */
+    if (stopparen > -1 && recursed) {
+	DEBUG_STUDYDATA("unset:", data,depth);
+        PAREN_UNSET( recursed, stopparen);
     }
     if (frame) {
         last = frame->last;
