@@ -1071,7 +1071,6 @@ EXTCONST U32 PL_charclass[];
         /* Use the native functions.  They likely will return false for all
          * non-ASCII values, but this makes sure */
 #       define isALPHA_A(c)    (isASCII(c) && isalpha(c))
-#       define isALPHA_A(c)    (isASCII(c) && isalpha(c))
 #       define isALPHANUMERIC_A(c) (isASCII(c) && isalnum(c))
 #       define isCNTRL_A(c)    (isASCII(c) && iscntrl(c))
 #       define isDIGIT_A(c)    (isASCII(c) && isdigit(c))
