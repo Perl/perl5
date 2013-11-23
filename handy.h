@@ -1553,7 +1553,11 @@ typedef U32 line_t;
 	} \
 	return a;
 
-#define READ_XDIGIT(s) (isALPHA(*(s)) ? ((*(s)++ + 9) & 0xf) : (*(s)++ & 0xf))
+/* Converts a hex digit in a string to its numeric value, advancing the
+ * pointer.  The input must be known to be 0-9, A-F, or a-f.  In both ASCII and
+ * EBCDIC the last 4 bits of the digits are 0-9; and the last 4 bits of A-F and
+ * a-f are 1-6, so adding 9 yields 10-15 */
+#define READ_XDIGIT(s)  (0xf & (isDIGIT(*(s)) ? (*(s)++) : (*(s)++ + 9)))
 
 /*
 =head1 Memory Management
