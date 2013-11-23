@@ -10,9 +10,13 @@ use strict;
 use Config;
 use ExtUtils::MakeMaker;
 
-use Test::More tests => 15;
 use MakeMaker::Test::Utils;
 use MakeMaker::Test::Setup::BFD;
+use IPC::Cmd qw(can_run);
+use Test::More
+    can_run(make())
+    ? (tests => 15)
+    : (skip_all => "make not available");
 use File::Find;
 use File::Spec;
 use File::Path;
