@@ -14072,6 +14072,7 @@ Perl_sv_recode_to_utf8(pTHX_ SV *sv, SV *encoding)
 	const char *s;
 	dSP;
 	ENTER;
+	PUSHSTACK;
 	SAVETMPS;
 	save_re_context();
 	PUSHMARK(sp);
@@ -14100,6 +14101,7 @@ Perl_sv_recode_to_utf8(pTHX_ SV *sv, SV *encoding)
 	    SvCUR_set(sv, len);
 	}
 	FREETMPS;
+	POPSTACK;
 	LEAVE;
 	if (SvTYPE(sv) >= SVt_PVMG && SvMAGIC(sv)) {
 	    /* clear pos and any utf8 cache */
