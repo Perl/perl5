@@ -2092,7 +2092,7 @@ Es	|SSize_t|study_chunk	|NN RExC_state_t *pRExC_state \
 				|NN regnode **scanp|NN SSize_t *minlenp \
 				|NN SSize_t *deltap|NN regnode *last \
 				|NULLOK struct scan_data_t *data \
-				|I32 stopparen|NULLOK U8* recursed \
+                                |I32 stopparen|U32 recursed_depth \
 				|NULLOK regnode_ssc *and_withp \
 				|U32 flags|U32 depth
 EsRn	|U32	|add_data	|NN RExC_state_t* const pRExC_state \

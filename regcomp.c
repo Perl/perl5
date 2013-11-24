@@ -123,8 +123,7 @@ struct RExC_state_t {
     I32		sawback;		/* Did we see \1, ...? */
     U32		seen;
     SSize_t	size;			/* Code size. */
-    I32		npar;			/* Capture buffer count, (OPEN). */
-    I32		cpar;			/* Capture buffer count, (CLOSE). */
+    I32                npar;                        /* Capture buffer count, (OPEN) plus one. ("par" 0 is the whole pattern)*/
     I32		nestroot;		/* root parens we are in - used by accept */
     I32		extralen;
     I32		seen_zerolen;
@@ -142,6 +141,8 @@ struct RExC_state_t {
     
     regnode	**recurse;		/* Recurse regops */
     I32		recurse_count;		/* Number of recurse regops */
+    U8          *study_chunk_recursed;  /* bitmap of which parens we have moved through */
+    U32         study_chunk_recursed_bytes;  /* bytes in bitmap */
     I32		in_lookbehind;
     I32		contains_locale;
     I32		contains_i;
@@ -200,6 +201,8 @@ struct RExC_state_t {
 #define RExC_paren_names	(pRExC_state->paren_names)
 #define RExC_recurse	(pRExC_state->recurse)
 #define RExC_recurse_count	(pRExC_state->recurse_count)
+#define RExC_study_chunk_recursed        (pRExC_state->study_chunk_recursed)
+#define RExC_study_chunk_recursed_bytes        (pRExC_state->study_chunk_recursed_bytes)
 #define RExC_in_lookbehind	(pRExC_state->in_lookbehind)
 #define RExC_contains_locale	(pRExC_state->contains_locale)
 #define RExC_contains_i (pRExC_state->contains_i)
@@ -3301,7 +3304,7 @@ typedef struct scan_frame {
     regnode *last;  /* last node to process in this frame */
     regnode *next;  /* next node to process when last is reached */
     struct scan_frame *prev; /*previous frame*/
-    U8 *prev_recursed; /*previous recursed*/
+    U32 prev_recursed_depth;
     I32 stop; /* what stopparen do we use */
 } scan_frame;
 
@@ -3314,7 +3317,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 			regnode *last,
 			scan_data_t *data,
 			I32 stopparen,
-			U8* recursed,
+                        U32 recursed_depth,
 			regnode_ssc *and_withp,
 			U32 flags, U32 depth)
 			/* scanp: Start here (read-write). */
@@ -3359,19 +3362,27 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                                    the folded version may be shorter) */
 	bool has_exactf_sharp_s = FALSE;
 	/* Peephole optimizer: */
-        DEBUG_OPTIMISE_MORE_r({
-            PerlIO_printf(Perl_debug_log,"%*sstudy_chunk stopparen=%d depth=%u recursed=%p ",
-                (depth*2),"",stopparen,depth,recursed);
-            if (recursed) {
-                int i;
-                PerlIO_printf(Perl_debug_log,"[");
-                for (i=0; i <= RExC_npar; i++)
-                    PerlIO_printf(Perl_debug_log,"%d",PAREN_TEST(recursed,i) ? 1 : 0);
-                PerlIO_printf(Perl_debug_log,"]\n");
-            } else {
-                PerlIO_printf(Perl_debug_log,"\n");
+        DEBUG_OPTIMISE_MORE_r(
+        {
+            PerlIO_printf(Perl_debug_log,"%*sstudy_chunk stopparen=%d depth=%u recursed_depth=%u ",
+                (depth*2), "", stopparen, depth, recursed_depth);
+            if (recursed_depth) {
+                U32 i;
+                U32 j;
+                for ( j = 0 ; j < recursed_depth ; j++ ) {
+                    PerlIO_printf(Perl_debug_log,"[");
+                    for ( i = 0 ; i < RExC_npar ; i++ )
+                        PerlIO_printf(Perl_debug_log,"%d",
+                            PAREN_TEST(RExC_study_chunk_recursed +
+                                       (j * RExC_study_chunk_recursed_bytes), i)
+                            ? 1 : 0
+                        );
+                    PerlIO_printf(Perl_debug_log,"]");
+                }
             }
-        });
+            PerlIO_printf(Perl_debug_log,"\n");
+        }
+        );
         DEBUG_STUDYDATA("Peep:", data, depth);
         DEBUG_PEEP("Peep", scan, depth);
 
@@ -3457,7 +3468,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    /* we suppose the run is continuous, last=next...*/
 		    minnext = study_chunk(pRExC_state, &scan, minlenp, &deltanext,
 					  next, &data_fake,
-                                          stopparen, recursed, NULL, f,depth+1);
+                                          stopparen, recursed_depth, NULL, f,depth+1);
 		    if (min1 > minnext)
 			min1 = minnext;
 		    if (deltanext == SSize_t_MAX) {
@@ -3853,10 +3864,10 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 	    I32 paren;
 	    regnode *start;
 	    regnode *end;
-            U8 *myrecursed= recursed;
+            U32 my_recursed_depth= recursed_depth;
 
 	    if (OP(scan) != SUSPEND) {
-	    /* set the pointer */
+                /* set the pointer */
 	        if (OP(scan) == GOSUB) {
 	            paren = ARG(scan);
 	            RExC_recurse[ARG2L(scan)] = scan;
@@ -3867,21 +3878,21 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                     start = RExC_rxi->program + 1;
                     end   = RExC_opend;
                 }
-
-                if (!recursed || !PAREN_TEST(recursed,paren)) {
-                    if (!recursed) {
-                        /* create a new recursed for this branch */
-                        Newxz(myrecursed, (((RExC_npar + 1)>>3) + 1), U8);
-                        SAVEFREEPV(myrecursed);
+                if (!recursed_depth
+                    ||
+                    !PAREN_TEST(RExC_study_chunk_recursed + ((recursed_depth-1) * RExC_study_chunk_recursed_bytes), paren)
+                ) {
+                    if (!recursed_depth) {
+                        Zero(RExC_study_chunk_recursed, RExC_study_chunk_recursed_bytes, U8);
                     } else {
-                        Newx(myrecursed, (((RExC_npar + 1)>>3) + 1), U8);
-                        SAVEFREEPV(myrecursed);
-                        Copy(recursed,myrecursed,(((RExC_npar + 1)>>3) + 1), U8);
+                        Copy(RExC_study_chunk_recursed + ((recursed_depth-1) * RExC_study_chunk_recursed_bytes),
+                             RExC_study_chunk_recursed + (recursed_depth * RExC_study_chunk_recursed_bytes),
+                             RExC_study_chunk_recursed_bytes, U8);
                     }
-
                     /* we havent recursed into this paren yet, so recurse into it */
 	            DEBUG_STUDYDATA("set:", data,depth);
-                    PAREN_SET(myrecursed, paren);
+                    PAREN_SET(RExC_study_chunk_recursed + (recursed_depth * RExC_study_chunk_recursed_bytes), paren);
+                    my_recursed_depth= recursed_depth + 1;
                     Newx(newframe,1,scan_frame);
                 } else {
 	            DEBUG_STUDYDATA("inf:", data,depth);
@@ -3909,7 +3920,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 	        newframe->last = last;
 	        newframe->stop = stopparen;
 	        newframe->prev = frame;
-                newframe->prev_recursed = recursed;
+                newframe->prev_recursed_depth = recursed_depth;
 
                 DEBUG_STUDYDATA("frame-new:",data,depth);
                 DEBUG_PEEP("fnew", scan, depth);
@@ -3919,7 +3930,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 	        stopparen = paren;
 	        last = end;
                 depth = depth + 1;
-                recursed= myrecursed;
+                recursed_depth= my_recursed_depth;
 
 	        continue;
 	    }
@@ -4183,7 +4194,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 
 		/* This will finish on WHILEM, setting scan, or on NULL: */
 		minnext = study_chunk(pRExC_state, &scan, minlenp, &deltanext, 
-		                      last, data, stopparen, recursed, NULL,
+                                      last, data, stopparen, recursed_depth, NULL,
 				      (mincount == 0
 					? (f & ~SCF_DO_SUBSTR) : f),depth+1);
 
@@ -4334,7 +4345,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 #endif
 			/* Optimize again: */
 			study_chunk(pRExC_state, &nxt1, minlenp, &deltanext, nxt,
-				    NULL, stopparen, recursed, NULL, 0,depth+1);
+                                    NULL, stopparen, recursed_depth, NULL, 0,depth+1);
 		    }
 		    else
 			oscan->flags = 0;
@@ -4736,7 +4747,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
                 next = regnext(scan);
                 nscan = NEXTOPER(NEXTOPER(scan));
                 minnext = study_chunk(pRExC_state, &nscan, minlenp, &deltanext, 
-                    last, &data_fake, stopparen, recursed, NULL, f, depth+1);
+                    last, &data_fake, stopparen, recursed_depth, NULL, f, depth+1);
                 if (scan->flags) {
                     if (deltanext) {
 			FAIL("Variable length lookbehind not implemented");
@@ -4818,7 +4829,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
                 nscan = NEXTOPER(NEXTOPER(scan));
 
                 *minnextp = study_chunk(pRExC_state, &nscan, minnextp, &deltanext, 
-                    last, &data_fake, stopparen, recursed, NULL, f,depth+1);
+                    last, &data_fake, stopparen, recursed_depth, NULL, f,depth+1);
                 if (scan->flags) {
                     if (deltanext) {
 			FAIL("Variable length lookbehind not implemented");
@@ -4975,7 +4986,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
                          */
                         minnext = study_chunk(pRExC_state, &scan, minlenp, 
                             &deltanext, (regnode *)nextbranch, &data_fake, 
-                            stopparen, recursed, NULL, f,depth+1);
+                            stopparen, recursed_depth, NULL, f,depth+1);
                     }
                     if (nextbranch && PL_regkind[OP(nextbranch)]==BRANCH)
                         nextbranch= regnext((regnode*)nextbranch);
@@ -5078,7 +5089,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
         last = frame->last;
         scan = frame->next;
         stopparen = frame->stop;
-        recursed = frame->prev_recursed;
+        recursed_depth = frame->prev_recursed_depth;
         depth = depth - 1;
 
         frame = frame->prev;
@@ -6171,6 +6182,8 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     RExC_paren_name_list = NULL;
 #endif
     RExC_recurse = NULL;
+    RExC_study_chunk_recursed = NULL;
+    RExC_study_chunk_recursed_bytes= 0;
     RExC_recurse_count = 0;
     pRExC_state->code_index = 0;
 
@@ -6344,12 +6357,22 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 
     r->intflags = 0;
     r->nparens = RExC_npar - 1;	/* set early to validate backrefs */
-    
+
+    /* setup various meta data about recursion, this all requires
+     * RExC_npar to be correctly set, and a bit later on we clear it */
     if (RExC_seen & REG_SEEN_RECURSE) {
         Newxz(RExC_open_parens, RExC_npar,regnode *);
         SAVEFREEPV(RExC_open_parens);
         Newxz(RExC_close_parens,RExC_npar,regnode *);
         SAVEFREEPV(RExC_close_parens);
+    }
+    if (RExC_seen & (REG_SEEN_RECURSE | REG_SEEN_GOSTART)) {
+        /* Note, RExC_npar is 1 + the number of parens in a pattern.
+         * So its 1 if there are no parens. */
+        RExC_study_chunk_recursed_bytes= (RExC_npar >> 3) +
+                                         ((RExC_npar & 0x07) != 0);
+        Newx(RExC_study_chunk_recursed, RExC_study_chunk_recursed_bytes * RExC_npar, U8);
+        SAVEFREEPV(RExC_study_chunk_recursed);
     }
 
     /* Useful during FAIL. */
@@ -6393,6 +6416,8 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 reStudy:
     r->minlen = minlen = sawlookahead = sawplus = sawopen = sawminmod = 0;
     Zero(r->substrs, 1, struct reg_substr_data);
+    if (RExC_study_chunk_recursed)
+        Zero(RExC_study_chunk_recursed, RExC_study_chunk_recursed_bytes * RExC_npar, U8);
 
 #ifdef TRIE_STUDY_OPT
     if (!restudied) {
@@ -6589,7 +6614,7 @@ reStudy:
 	data.last_closep = &last_close;
         
 	minlen = study_chunk(pRExC_state, &first, &minlen, &fake, scan + RExC_size, /* Up to end */
-            &data, -1, NULL, NULL,
+            &data, -1, 0, NULL,
             SCF_DO_SUBSTR | SCF_WHILEM_VISITED_POS | stclass_flag
                           | (restudied ? SCF_TRIE_DOING_RESTUDY : 0),
             0);
@@ -6727,7 +6752,7 @@ reStudy:
 
         
 	minlen = study_chunk(pRExC_state, &scan, &minlen, &fake, scan + RExC_size,
-	    &data, -1, NULL, NULL,
+            &data, -1, 0, NULL,
             SCF_DO_STCLASS_AND|SCF_WHILEM_VISITED_POS
                               |(restudied ? SCF_TRIE_DOING_RESTUDY : 0),
             0);
@@ -9378,6 +9403,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 		if (*RExC_parse != ')')
 		    FAIL("Sequence (?R) not terminated");
 		ret = reg_node(pRExC_state, GOSTART);
+                    RExC_seen |= REG_SEEN_GOSTART;
 		*flagp |= POSTPONED;
 		nextchar(pRExC_state);
 		return ret;
