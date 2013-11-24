@@ -879,13 +879,16 @@ Perl_nextargv(pTHX_ GV *gv)
 		(void)PerlLIO_chmod(PL_oldname,PL_filemode);
 #endif
 		if (fileuid != PL_statbuf.st_uid || filegid != PL_statbuf.st_gid) {
+                    int rc = 0;
 #ifdef HAS_FCHOWN
-		    (void)fchown(PL_lastfd,fileuid,filegid);
+		    rc = fchown(PL_lastfd,fileuid,filegid);
 #else
 #ifdef HAS_CHOWN
-		    (void)PerlLIO_chown(PL_oldname,fileuid,filegid);
+		    rc = PerlLIO_chown(PL_oldname,fileuid,filegid);
 #endif
 #endif
+                    /* XXX silently ignore failures */
+                    PERL_UNUSED_VAR(rc);
 		}
 	    }
 	    return IoIFP(GvIOp(gv));
@@ -1395,7 +1398,9 @@ S_exec_failed(pTHX_ const char *cmd, int fd, int do_report)
 	Perl_warner(aTHX_ packWARN(WARN_EXEC), "Can't exec \"%s\": %s",
 		    cmd, Strerror(e));
     if (do_report) {
-	(void)PerlLIO_write(fd, (void*)&e, sizeof(int));
+        int rc = PerlLIO_write(fd, (void*)&e, sizeof(int));
+        /* silently ignore failures */
+        PERL_UNUSED_VAR(rc);
 	PerlLIO_close(fd);
     }
 }

@@ -11762,6 +11762,7 @@ Perl_dirp_dup(pTHX_ DIR *const dp, CLONE_PARAMS *const param)
     DIR *ret;
 
 #ifdef HAS_FCHDIR
+    int rc = 0;
     DIR *pwd;
     const Direntry_t *dirent;
     char smallbuf[256];
@@ -11798,7 +11799,9 @@ Perl_dirp_dup(pTHX_ DIR *const dp, CLONE_PARAMS *const param)
     /* Now we should have two dir handles pointing to the same dir. */
 
     /* Be nice to the calling code and chdir back to where we were. */
-    fchdir(my_dirfd(pwd)); /* If this fails, then what? */
+    rc = fchdir(my_dirfd(pwd));
+    /* XXX If this fails, then what? */
+    PERL_UNUSED_VAR(rc);
 
     /* We have no need of the pwd handle any more. */
     PerlDir_close(pwd);

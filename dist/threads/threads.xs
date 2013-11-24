@@ -713,9 +713,11 @@ S_ithread_create(
     }
     PERL_SET_CONTEXT(aTHX);
     if (!thread) {
+        int rc;
         MUTEX_UNLOCK(&MY_POOL.create_destruct_mutex);
-        (void)PerlLIO_write(PerlIO_fileno(Perl_error_log),
+        rc = PerlLIO_write(PerlIO_fileno(Perl_error_log),
                             PL_no_mem, strlen(PL_no_mem));
+        PERL_UNUSED_VAR(rc);
         my_exit(1);
     }
     Zero(thread, 1, ithread);

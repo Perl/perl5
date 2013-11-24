@@ -2774,6 +2774,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	break;
     case '<':
 	{
+        int rc = 0;
 	const Uid_t new_uid = SvUID(sv);
 	PL_delaymagic_uid = new_uid;
 	if (PL_delaymagic) {
@@ -2781,31 +2782,34 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	    break;				/* don't do magic till later */
 	}
 #ifdef HAS_SETRUID
-	(void)setruid(new_uid);
+	rc = setruid(new_uid);
 #else
 #ifdef HAS_SETREUID
-	(void)setreuid(new_uid, (Uid_t)-1);
+	 rc = setreuid(new_uid, (Uid_t)-1);
 #else
 #ifdef HAS_SETRESUID
-      (void)setresuid(new_uid, (Uid_t)-1, (Uid_t)-1);
+       rc = setresuid(new_uid, (Uid_t)-1, (Uid_t)-1);
 #else
 	if (new_uid == PerlProc_geteuid()) {		/* special case $< = $> */
 #ifdef PERL_DARWIN
 	    /* workaround for Darwin's setuid peculiarity, cf [perl #24122] */
 	    if (new_uid != 0 && PerlProc_getuid() == 0)
-		(void)PerlProc_setuid(0);
+		 rc = PerlProc_setuid(0);
 #endif
-	    (void)PerlProc_setuid(new_uid);
+	     rc = PerlProc_setuid(new_uid);
 	} else {
 	    Perl_croak(aTHX_ "setruid() not implemented");
 	}
 #endif
 #endif
 #endif
+        /* XXX $< currently silently ignores failures */
+        PERL_UNUSED_VAR(rc);
 	break;
 	}
     case '>':
 	{
+        int rc = 0;
 	const Uid_t new_euid = SvUID(sv);
 	PL_delaymagic_euid = new_euid;
 	if (PL_delaymagic) {
@@ -2813,26 +2817,29 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	    break;				/* don't do magic till later */
 	}
 #ifdef HAS_SETEUID
-	(void)seteuid(new_euid);
+	rc = seteuid(new_euid);
 #else
 #ifdef HAS_SETREUID
-	(void)setreuid((Uid_t)-1, new_euid);
+	rc = setreuid((Uid_t)-1, new_euid);
 #else
 #ifdef HAS_SETRESUID
-	(void)setresuid((Uid_t)-1, new_euid, (Uid_t)-1);
+	rc = setresuid((Uid_t)-1, new_euid, (Uid_t)-1);
 #else
 	if (new_euid == PerlProc_getuid())		/* special case $> = $< */
-	    PerlProc_setuid(new_euid);
+	    rc = PerlProc_setuid(new_euid);
 	else {
 	    Perl_croak(aTHX_ "seteuid() not implemented");
 	}
 #endif
 #endif
 #endif
+        /* XXX $> currently silently ignores failures */
+        PERL_UNUSED_VAR(rc);
 	break;
 	}
     case '(':
 	{
+        int rc = 0;
 	const Gid_t new_gid = SvGID(sv);
 	PL_delaymagic_gid = new_gid;
 	if (PL_delaymagic) {
@@ -2840,26 +2847,29 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	    break;				/* don't do magic till later */
 	}
 #ifdef HAS_SETRGID
-	(void)setrgid(new_gid);
+	rc = setrgid(new_gid);
 #else
 #ifdef HAS_SETREGID
-	(void)setregid(new_gid, (Gid_t)-1);
+	rc = setregid(new_gid, (Gid_t)-1);
 #else
 #ifdef HAS_SETRESGID
-      (void)setresgid(new_gid, (Gid_t)-1, (Gid_t) -1);
+        rc = setresgid(new_gid, (Gid_t)-1, (Gid_t) -1);
 #else
 	if (new_gid == PerlProc_getegid())			/* special case $( = $) */
-	    (void)PerlProc_setgid(new_gid);
+	    rc = PerlProc_setgid(new_gid);
 	else {
 	    Perl_croak(aTHX_ "setrgid() not implemented");
 	}
 #endif
 #endif
 #endif
+        /* XXX $( currently silently ignores failures */
+        PERL_UNUSED_VAR(rc);
 	break;
 	}
     case ')':
 	{
+        int rc = 0;
 	Gid_t new_egid;
 #ifdef HAS_SETGROUPS
 	{
@@ -2891,7 +2901,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
                 gary[i] = (Groups_t)Atol(p);
             }
             if (i)
-                (void)setgroups(i, gary);
+                rc = setgroups(i, gary);
 	    Safefree(gary);
 	}
 #else  /* HAS_SETGROUPS */
@@ -2903,22 +2913,24 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	    break;				/* don't do magic till later */
 	}
 #ifdef HAS_SETEGID
-	(void)setegid(new_egid);
+	rc = setegid(new_egid);
 #else
 #ifdef HAS_SETREGID
-	(void)setregid((Gid_t)-1, new_egid);
+	rc = setregid((Gid_t)-1, new_egid);
 #else
 #ifdef HAS_SETRESGID
-	(void)setresgid((Gid_t)-1, new_egid, (Gid_t)-1);
+	rc = setresgid((Gid_t)-1, new_egid, (Gid_t)-1);
 #else
 	if (new_egid == PerlProc_getgid())			/* special case $) = $( */
-	    (void)PerlProc_setgid(new_egid);
+	    rc = PerlProc_setgid(new_egid);
 	else {
 	    Perl_croak(aTHX_ "setegid() not implemented");
 	}
 #endif
 #endif
 #endif
+        /* XXX $) currently silently ignores failures */
+        PERL_UNUSED_VAR(rc);
 	break;
 	}
     case ':':
