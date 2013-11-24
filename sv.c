@@ -46,6 +46,17 @@
   char *gconvert(double, int, int,  char *);
 #endif
 
+/* void Gconvert: on Linux at least, gcvt (which Gconvert gets deffed to),
+ * has a mandatory return value, even though that value is just the same
+ * as the buf arg */
+
+#define V_Gconvert(x,n,t,b) \
+{ \
+    char *rc = Gconvert(x,n,t,b); \
+    PERL_UNUSED_VAR(rc); \
+}
+
+
 #ifdef PERL_UTF8_CACHE_ASSERT
 /* if adding more checks watch out for the following tests:
  *   t/op/index.t t/op/length.t t/op/pat.t t/op/substr.t
@@ -2947,7 +2958,7 @@ Perl_sv_2pv_flags(pTHX_ SV *const sv, STRLEN *const lp, const I32 flags)
 	    /* some Xenix systems wipe out errno here */
 
 #ifndef USE_LOCALE_NUMERIC
-            Gconvert(SvNVX(sv), NV_DIG, 0, s);
+            V_Gconvert(SvNVX(sv), NV_DIG, 0, s);
             SvPOK_on(sv);
 #else
             /* Gconvert always uses the current locale.  That's the right thing
@@ -2957,7 +2968,7 @@ Perl_sv_2pv_flags(pTHX_ SV *const sv, STRLEN *const lp, const I32 flags)
              * But if we're already in the C locale (PL_numeric_standard is
              * TRUE in that case), no need to do any changing */
             if (PL_numeric_standard || IN_SOME_LOCALE_FORM_RUNTIME) {
-                Gconvert(SvNVX(sv), NV_DIG, 0, s);
+                V_Gconvert(SvNVX(sv), NV_DIG, 0, s);
 
                 /* If the radix character is UTF-8, and actually is in the
                  * output, turn on the UTF-8 flag for the scalar */
@@ -2971,7 +2982,7 @@ Perl_sv_2pv_flags(pTHX_ SV *const sv, STRLEN *const lp, const I32 flags)
             else {
                 char *loc = savepv(setlocale(LC_NUMERIC, NULL));
                 setlocale(LC_NUMERIC, "C");
-                Gconvert(SvNVX(sv), NV_DIG, 0, s);
+                V_Gconvert(SvNVX(sv), NV_DIG, 0, s);
                 setlocale(LC_NUMERIC, loc);
                 Safefree(loc);
 
@@ -10460,7 +10471,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 		   a Configure test for this.  */
 		if (digits && digits < sizeof(ebuf) - NV_DIG - 10) {
 		     /* 0, point, slack */
-		    Gconvert(nv, (int)digits, 0, ebuf);
+		    V_Gconvert(nv, (int)digits, 0, ebuf);
 		    sv_catpv_nomg(sv, ebuf);
 		    if (*ebuf)	/* May return an empty string for digits==0 */
 			return;
@@ -11320,7 +11331,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 		/* See earlier comment about buggy Gconvert when digits,
 		   aka precis is 0  */
 		if ( c == 'g' && precis) {
-		    Gconvert((NV)nv, (int)precis, 0, PL_efloatbuf);
+		    V_Gconvert((NV)nv, (int)precis, 0, PL_efloatbuf);
 		    /* May return an empty string for digits==0 */
 		    if (*PL_efloatbuf) {
 			elen = strlen(PL_efloatbuf);
