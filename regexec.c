@@ -5177,10 +5177,6 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 			       scalar.  */
 			    sv_magic(ret, MUTABLE_SV(re_sv), PERL_MAGIC_qr, 0, 0);
 			}
-			/* safe to do now that any $1 etc has been
-			 * interpolated into the new pattern string and
-			 * compiled */
-			S_regcp_restore(aTHX_ rex, runops_cp, &maxopenparen);
 		    }
 		    SAVEFREESV(re_sv);
 		    re = ReANY(re_sv);
