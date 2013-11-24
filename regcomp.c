@@ -3301,6 +3301,7 @@ typedef struct scan_frame {
     regnode *last;  /* last node to process in this frame */
     regnode *next;  /* next node to process when last is reached */
     struct scan_frame *prev; /*previous frame*/
+    U8 *prev_recursed; /*previous recursed*/
     I32 stop; /* what stopparen do we use */
 } scan_frame;
 
@@ -3345,14 +3346,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 #ifdef DEBUGGING
     StructCopy(&zero_scan_data, &data_fake, scan_data_t);
 #endif
-    if (!recursed) {
-        Newxz(recursed, (((RExC_npar + 1)>>3) + 1), U8);
-        SAVEFREEPV(recursed);
-    }
-
     if ( depth == 0 ) {
-        /* Set up a bitmask of which recursive component we have
-         * already entered. */
         while (first_non_open && OP(first_non_open) == OPEN)
             first_non_open=regnext(first_non_open);
     }
@@ -3365,8 +3359,22 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                                    the folded version may be shorter) */
 	bool has_exactf_sharp_s = FALSE;
 	/* Peephole optimizer: */
-	DEBUG_STUDYDATA("Peep:", data,depth);
-	DEBUG_PEEP("Peep",scan,depth);
+        DEBUG_OPTIMISE_MORE_r({
+            PerlIO_printf(Perl_debug_log,"%*sstudy_chunk stopparen=%d depth=%u recursed=%p ",
+                (depth*2),"",stopparen,depth,recursed);
+            if (recursed) {
+                int i;
+                PerlIO_printf(Perl_debug_log,"[");
+                for (i=0; i <= RExC_npar; i++)
+                    PerlIO_printf(Perl_debug_log,"%d",PAREN_TEST(recursed,i) ? 1 : 0);
+                PerlIO_printf(Perl_debug_log,"]\n");
+            } else {
+                PerlIO_printf(Perl_debug_log,"\n");
+            }
+        });
+        DEBUG_STUDYDATA("Peep:", data, depth);
+        DEBUG_PEEP("Peep", scan, depth);
+
 
         /* Its not clear to khw or hv why this is done here, and not in the
          * clauses that deal with EXACT nodes.  khw's guess is that it's
@@ -3413,7 +3421,6 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		SSize_t max1 = 0, min1 = SSize_t_MAX, num = 0;
 		regnode_ssc accum;
 		regnode * const startbranch=scan;
-                U8 *myrecursed= NULL;
 
 		if (flags & SCF_DO_SUBSTR)
 		    SCAN_COMMIT(pRExC_state, data, minlenp); /* Cannot merge strings after this. */
@@ -3447,16 +3454,10 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    if (flags & SCF_WHILEM_VISITED_POS)
 			f |= SCF_WHILEM_VISITED_POS;
 
-                    /* create a new recursed for this branch */
-                    if (!myrecursed) {
-                        Newx(myrecursed, (((RExC_npar + 1)>>3) + 1), U8);
-                        SAVEFREEPV(myrecursed);
-                    }
-                    Copy(recursed, myrecursed, (((RExC_npar + 1)>>3) + 1), U8);
 		    /* we suppose the run is continuous, last=next...*/
 		    minnext = study_chunk(pRExC_state, &scan, minlenp, &deltanext,
 					  next, &data_fake,
-					  stopparen, myrecursed, NULL, f,depth+1);
+                                          stopparen, recursed, NULL, f,depth+1);
 		    if (min1 > minnext)
 			min1 = minnext;
 		    if (deltanext == SSize_t_MAX) {
@@ -3852,6 +3853,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 	    I32 paren;
 	    regnode *start;
 	    regnode *end;
+            U8 *myrecursed= recursed;
 
 	    if (OP(scan) != SUSPEND) {
 	    /* set the pointer */
@@ -3866,10 +3868,20 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                     end   = RExC_opend;
                 }
 
-                if (!PAREN_TEST(recursed,paren)) {
+                if (!recursed || !PAREN_TEST(recursed,paren)) {
+                    if (!recursed) {
+                        /* create a new recursed for this branch */
+                        Newxz(myrecursed, (((RExC_npar + 1)>>3) + 1), U8);
+                        SAVEFREEPV(myrecursed);
+                    } else {
+                        Newx(myrecursed, (((RExC_npar + 1)>>3) + 1), U8);
+                        SAVEFREEPV(myrecursed);
+                        Copy(recursed,myrecursed,(((RExC_npar + 1)>>3) + 1), U8);
+                    }
+
                     /* we havent recursed into this paren yet, so recurse into it */
 	            DEBUG_STUDYDATA("set:", data,depth);
-                    PAREN_SET(recursed, paren);
+                    PAREN_SET(myrecursed, paren);
                     Newx(newframe,1,scan_frame);
                 } else {
 	            DEBUG_STUDYDATA("inf:", data,depth);
@@ -3897,11 +3909,17 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 	        newframe->last = last;
 	        newframe->stop = stopparen;
 	        newframe->prev = frame;
+                newframe->prev_recursed = recursed;
+
+                DEBUG_STUDYDATA("frame-new:",data,depth);
+                DEBUG_PEEP("fnew", scan, depth);
 
 	        frame = newframe;
 	        scan =  start;
 	        stopparen = paren;
 	        last = end;
+                depth = depth + 1;
+                recursed= myrecursed;
 
 	        continue;
 	    }
@@ -5047,15 +5065,22 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
     }
     /* If we are exiting a recursion we can unset its recursed bit
      * and allow ourselves to enter it again - no danger of an
-     * infinite loop there. */
+     * infinite loop there.
     if (stopparen > -1 && recursed) {
 	DEBUG_STUDYDATA("unset:", data,depth);
         PAREN_UNSET( recursed, stopparen);
     }
+    */
     if (frame) {
+        DEBUG_STUDYDATA("frame-end:",data,depth);
+        DEBUG_PEEP("fend", scan, depth);
+        /* restore previous context */
         last = frame->last;
         scan = frame->next;
         stopparen = frame->stop;
+        recursed = frame->prev_recursed;
+        depth = depth - 1;
+
         frame = frame->prev;
         goto fake_study_recurse;
     }
