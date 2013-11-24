@@ -715,6 +715,46 @@ static const scan_data_t zero_scan_data =
 #define EXPERIMENTAL_INPLACESCAN
 #endif /*PERL_ENABLE_EXPERIMENTAL_REGEX_OPTIMISATIONS*/
 
+#define DEBUG_RExC_seen() \
+        DEBUG_OPTIMISE_MORE_r({                                                     \
+            PerlIO_printf(Perl_debug_log,"RExC_seen: ");                            \
+                                                                                    \
+            if (RExC_seen & REG_SEEN_ZERO_LEN)                                      \
+                PerlIO_printf(Perl_debug_log,"REG_SEEN_ZERO_LEN ");                 \
+                                                                                    \
+            if (RExC_seen & REG_SEEN_LOOKBEHIND)                                    \
+                PerlIO_printf(Perl_debug_log,"REG_SEEN_LOOKBEHIND ");               \
+                                                                                    \
+            if (RExC_seen & REG_SEEN_GPOS)                                          \
+                PerlIO_printf(Perl_debug_log,"REG_SEEN_GPOS ");                     \
+                                                                                    \
+            if (RExC_seen & REG_SEEN_CANY)                                            \
+                PerlIO_printf(Perl_debug_log,"REG_SEEN_CANY ");                     \
+                                                                                    \
+            if (RExC_seen & REG_SEEN_RECURSE)                                       \
+                PerlIO_printf(Perl_debug_log,"REG_SEEN_RECURSE ");                  \
+                                                                                    \
+            if (RExC_seen & REG_TOP_LEVEL_BRANCHES)                                 \
+                PerlIO_printf(Perl_debug_log,"REG_TOP_LEVEL_BRANCHES ");            \
+                                                                                    \
+            if (RExC_seen & REG_SEEN_VERBARG)                                       \
+                PerlIO_printf(Perl_debug_log,"REG_SEEN_VERBARG ");                  \
+                                                                                    \
+            if (RExC_seen & REG_SEEN_CUTGROUP)                                      \
+                PerlIO_printf(Perl_debug_log,"REG_SEEN_CUTGROUP ");                 \
+                                                                                    \
+            if (RExC_seen & REG_SEEN_RUN_ON_COMMENT)                                \
+                PerlIO_printf(Perl_debug_log,"REG_SEEN_RUN_ON_COMMENT ");           \
+                                                                                    \
+            if (RExC_seen & REG_SEEN_EXACTF_SHARP_S)                                \
+                PerlIO_printf(Perl_debug_log,"REG_SEEN_EXACTF_SHARP_S ");           \
+                                                                                    \
+            if (RExC_seen & REG_SEEN_GOSTART)                                       \
+                PerlIO_printf(Perl_debug_log,"REG_SEEN_GOSTART ");                  \
+                                                                                    \
+            PerlIO_printf(Perl_debug_log,"\n");                                     \
+        });
+
 #define DEBUG_STUDYDATA(str,data,depth)                              \
 DEBUG_OPTIMISE_MORE_r(if(data){                                      \
     PerlIO_printf(Perl_debug_log,                                    \
@@ -3371,7 +3411,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                 U32 j;
                 for ( j = 0 ; j < recursed_depth ; j++ ) {
                     PerlIO_printf(Perl_debug_log,"[");
-                    for ( i = 0 ; i < RExC_npar ; i++ )
+                    for ( i = 0 ; i < (U32)RExC_npar ; i++ )
                         PerlIO_printf(Perl_debug_log,"%d",
                             PAREN_TEST(RExC_study_chunk_recursed +
                                        (j * RExC_study_chunk_recursed_bytes), i)
@@ -6613,6 +6653,7 @@ reStudy:
 	    stclass_flag = 0;
 	data.last_closep = &last_close;
         
+        DEBUG_RExC_seen();
 	minlen = study_chunk(pRExC_state, &first, &minlen, &fake, scan + RExC_size, /* Up to end */
             &data, -1, 0, NULL,
             SCF_DO_SUBSTR | SCF_WHILEM_VISITED_POS | stclass_flag
@@ -6749,8 +6790,8 @@ reStudy:
 	ssc_init(pRExC_state, &ch_class);
 	data.start_class = &ch_class;
 	data.last_closep = &last_close;
-
         
+        DEBUG_RExC_seen();
 	minlen = study_chunk(pRExC_state, &scan, &minlen, &fake, scan + RExC_size,
             &data, -1, 0, NULL,
             SCF_DO_STCLASS_AND|SCF_WHILEM_VISITED_POS
@@ -6850,6 +6891,7 @@ reStudy:
     /* assume we don't need to swap parens around before we match */
 
     DEBUG_DUMP_r({
+        DEBUG_RExC_seen();
         PerlIO_printf(Perl_debug_log,"Final program:\n");
         regdump(r);
     });
