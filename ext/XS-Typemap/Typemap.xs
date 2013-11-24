@@ -579,6 +579,28 @@ T_PV_null()
  OUTPUT:
   RETVAL
 
+void
+T_PV_mutate( in, repl, len )
+  char * in
+  char * repl
+  STRLEN len
+ PREINIT:
+  STRLEN i = 0;
+ CODE:
+  for (; i < len; i++)
+   in[i] = repl[i];
+
+
+## T_ROPV
+
+const char *
+T_ROPV( in )
+  const char * in
+ CODE:
+  RETVAL = in;
+ OUTPUT:
+  RETVAL
+
 
 ## T_PTR
 
