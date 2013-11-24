@@ -16,7 +16,9 @@ WriteMakefile
                            'Carp' => '0',
                            'File::Basename' => '0',
                            'Scalar::Util' => '0',
-                           'Test' => '0'
+                           'Test' => '0',
+                           # done_testing() is used in dist/Cwd/t/Spec.t
+                           'Test::More' => 0.88,
                          },
           'INSTALLDIRS' => 'perl',
           'EXE_FILES' => [],
