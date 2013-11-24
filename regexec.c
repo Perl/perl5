@@ -5109,8 +5109,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 			    sv = SvRV(sv);
 			if (SvTYPE(sv) == SVt_REGEXP)
 			    re_sv = (REGEXP*) sv;
-			else if (SvSMAGICAL(sv)) {
-			    MAGIC *mg = mg_find(sv, PERL_MAGIC_qr);
+			else if (SvSMAGICAL(ret)) {
+			    MAGIC *mg = mg_find(ret, PERL_MAGIC_qr);
 			    if (mg)
 				re_sv = (REGEXP *) mg->mg_obj;
 			}
