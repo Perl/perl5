@@ -2545,13 +2545,12 @@ void
 test_rv2cv_op_cv()
     PROTOTYPE:
     PREINIT:
-	GV *troc_gv, *wibble_gv;
+	GV *troc_gv;
 	CV *troc_cv;
 	OP *o;
     CODE:
 	troc_gv = gv_fetchpv("XS::APItest::test_rv2cv_op_cv", 0, SVt_PVGV);
 	troc_cv = get_cv("XS::APItest::test_rv2cv_op_cv", 0);
-	wibble_gv = gv_fetchpv("XS::APItest::wibble", 0, SVt_PVGV);
 	o = newCVREF(0, newGVOP(OP_GV, 0, troc_gv));
 	if (rv2cv_op_cv(o, 0) != troc_cv) croak_fail();
 	if (rv2cv_op_cv(o, RV2CVOPCV_RETURN_NAME_GV) != (CV*)troc_gv)
