@@ -2171,15 +2171,15 @@ S_force_next(pTHX_ I32 type)
  */
 
 static int
-S_postderef(pTHX_ char const funny, char const next)
+S_postderef(pTHX_ int const funny, char const next)
 {
     dVAR;
-    assert(strchr("$@%&*", funny));
+    assert(funny == DOLSHARP || strchr("$@%&*", funny));
     assert(strchr("*[{", next));
     if (next == '*') {
 	PL_expect = XOPERATOR;
 	if (PL_lex_state == LEX_INTERPNORMAL && !PL_lex_brackets) {
-	    assert('@' == funny || '$' == funny);
+	    assert('@' == funny || '$' == funny || DOLSHARP == funny);
 	    PL_lex_state = LEX_INTERPEND;
 	    start_force(PL_curforce);
 	    force_next(POSTJOIN);
@@ -3941,7 +3941,7 @@ S_scan_const(pTHX_ char *start)
  * It deals with "$foo[3]" and /$foo[3]/ and /$foo[0123456789$]+/
  *
  * ->[ and ->{ return TRUE
- * ->$* ->@* ->@[ and ->@{ return TRUE if postfix_interpolate is enabled
+ * ->$* ->$#* ->@* ->@[ ->@{ return TRUE if postderef_qq is enabled
  * { and [ outside a pattern are always subscripts, so return TRUE
  * if we're outside a pattern and it's not { or [, then return FALSE
  * if we're in a pattern and the first char is a {
@@ -3969,7 +3969,7 @@ S_intuit_more(pTHX_ char *s)
 	return TRUE;
     if (*s == '-' && s[1] == '>'
      && FEATURE_POSTDEREF_QQ_IS_ENABLED
-     && ( (s[2] == '$' && s[3] == '*')
+     && ( (s[2] == '$' && (s[3] == '*' || (s[3] == '#' && s[4] == '*')))
 	||(s[2] == '@' && strchr("*[{",s[3])) ))
 	return TRUE;
     if (*s != '{' && *s != '[')
@@ -5745,6 +5745,7 @@ Perl_yylex(pTHX)
 		s = SKIPSPACE1(s);
 		if (FEATURE_POSTDEREF_IS_ENABLED && (
 		    ((*s == '$' || *s == '&') && s[1] == '*')
+		  ||(*s == '$' && s[1] == '#' && s[2] == '*')
 		  ||((*s == '@' || *s == '%') && strchr("*[{", s[1]))
 		  ||(*s == '*' && (s[1] == '*' || s[1] == '{'))
 		 ))
@@ -6579,7 +6580,13 @@ Perl_yylex(pTHX)
 		return deprecate_commaless_var_list();
 	    }
 	}
-	else if (PL_expect == XPOSTDEREF) POSTDEREF('$');
+	else if (PL_expect == XPOSTDEREF) {
+	    if (s[1] == '#') {
+		s++;
+		POSTDEREF(DOLSHARP);
+	    }
+	    POSTDEREF('$');
+	}
 
 	if (s[1] == '#' && (isIDFIRST_lazy_if(s+2,UTF) || strchr("{$:+-@", s[2]))) {
 	    PL_tokenbuf[0] = '@';

@@ -16,7 +16,7 @@ BEGIN {
 
 use strict qw(refs subs);
 
-plan(121);
+plan(125);
 
 {
     no warnings qw 'deprecated syntax';
@@ -343,6 +343,12 @@ ok (!eval { $pvbm->%* }, 'PVBM is not a HASH ref');
 is join(" ", {1..10}->%{1, 7, 3}), "1 2 7 8 3 4", '->%{';
 is join(" ", ['a'..'z']->%[1, 7, 3]), "1 b 7 h 3 d", '->%[';
 
+# Array length
+is [1..10]->$#*, 9, 'rvalue ->$#*';
+@foo = 1..10;
+(\@foo)->$#*--;
+is "@foo", "1 2 3 4 5 6 7 8 9", 'lvalue ->$#*';
+
 # Interpolation
 $_ = "foo";
 @foo = 7..9;
@@ -351,6 +357,8 @@ $_ = "foo";
     no warnings 'deprecated';
     $* = 42;
     is "$_->$*", 'foo->42', '->$* interpolation without feature';
+    $# = 43;
+    is "$_->$#*", 'foo->43*', '->$#* interpolation without feature';
 }
 is "$_->@*", 'foo->@*', '->@* does not interpolate without feature';
 is "$_->@[0]", 'foo->@[0]', '->@[ does not interpolate without feature';
@@ -360,6 +368,7 @@ is "$_->@{foo}", "foo->7 8 9", '->@{ does not interpolate without feature';
     no strict 'refs';
     $foo = 43;
     is "$_->$*", "43", '->$* interpolated';
+    is "$_->$#*", "2", '->$#* interpolated';
     is "$_->@*", "7 8 9", '->@* interpolated';
     is "$_->@[0,1]", "7 8", '->@[ interpolated';
     is "$_->@{foo}", "oof", '->@{ interpolated';

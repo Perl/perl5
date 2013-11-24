@@ -1839,50 +1839,57 @@ case 2:
     break;
 
   case 230:
-#line 1497 "perly.y"
+#line 1495 "perly.y"
+    { (yyval.opval) = newAVREF((ps[(1) - (4)].val.opval));
+			  TOKEN_GETMAD((ps[(3) - (4)].val.i_tkval),(yyval.opval),'l');
+			;}
+    break;
+
+  case 231:
+#line 1501 "perly.y"
     { (yyval.opval) = newGVREF(0,(ps[(2) - (2)].val.opval));
 			  TOKEN_GETMAD((ps[(1) - (2)].val.i_tkval),(yyval.opval),'*');
 			;}
     break;
 
-  case 232:
-#line 1504 "perly.y"
+  case 233:
+#line 1508 "perly.y"
     { (yyval.opval) = newAVREF((ps[(1) - (3)].val.opval));
 			  TOKEN_GETMAD((ps[(3) - (3)].val.i_tkval),(yyval.opval),'@');
 			;}
     break;
 
-  case 234:
-#line 1511 "perly.y"
+  case 235:
+#line 1515 "perly.y"
     { (yyval.opval) = newHVREF((ps[(1) - (3)].val.opval));
 			  TOKEN_GETMAD((ps[(3) - (3)].val.i_tkval),(yyval.opval),'@');
 			;}
     break;
 
-  case 236:
-#line 1518 "perly.y"
+  case 237:
+#line 1522 "perly.y"
     { (yyval.opval) = newGVREF(0,(ps[(1) - (3)].val.opval));
 			  TOKEN_GETMAD((ps[(3) - (3)].val.i_tkval),(yyval.opval),'*');
 			;}
     break;
 
-  case 237:
-#line 1525 "perly.y"
-    { (yyval.opval) = scalar((ps[(1) - (1)].val.opval)); ;}
-    break;
-
   case 238:
-#line 1527 "perly.y"
+#line 1529 "perly.y"
     { (yyval.opval) = scalar((ps[(1) - (1)].val.opval)); ;}
     break;
 
   case 239:
-#line 1529 "perly.y"
-    { (yyval.opval) = op_scope((ps[(1) - (1)].val.opval)); ;}
+#line 1531 "perly.y"
+    { (yyval.opval) = scalar((ps[(1) - (1)].val.opval)); ;}
     break;
 
   case 240:
-#line 1532 "perly.y"
+#line 1533 "perly.y"
+    { (yyval.opval) = op_scope((ps[(1) - (1)].val.opval)); ;}
+    break;
+
+  case 241:
+#line 1536 "perly.y"
     { (yyval.opval) = (ps[(1) - (1)].val.opval); ;}
     break;
 
@@ -1893,6 +1900,6 @@ case 2:
     
 
 /* Generated from:
- * 020be75832dcc7c18bd88434c3ba0e24a136dc093c4b8bf2cef9efa5875c9a29 perly.y
+ * 570608a8d9575266e34e16588de5993f72c5756a88dcb273ffba0705beed3d8b perly.y
  * 5c9d2a0262457fe9b70073fc8ad6c188f812f38ad57712b7e2f53daa01b297cc regen_perly.pl
  * ex: set ro: */

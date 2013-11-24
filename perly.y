@@ -1491,6 +1491,10 @@ arylen	:	DOLSHARP indirob
 			{ $$ = newAVREF($2);
 			  TOKEN_GETMAD($1,$$,'l');
 			}
+	|	term ARROW DOLSHARP '*'
+			{ $$ = newAVREF($1);
+			  TOKEN_GETMAD($3,$$,'l');
+			}
 	;
 
 star	:	'*' indirob
