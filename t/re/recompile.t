@@ -22,7 +22,7 @@ BEGIN {
 }
 
 
-plan tests => 46;
+plan tests => 48;
 
 my $results = runperl(
 			switches => [ '-Dr' ],
@@ -209,4 +209,11 @@ CODE
 
 comp_n(2, <<'CODE', '(??{number})');
 "bb" =~ /(??{123})/;
+CODE
+
+comp_n(2, <<'CODE', '(??{$pvlv_regexp})');
+sub {
+   $_[0] = ${qr/abc/};
+  "bb" =~ /(??{$_[0]})/;
+}->($_[0]);
 CODE
