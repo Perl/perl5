@@ -396,9 +396,9 @@ the testsuite (many tests will be skipped).
 
 There should be no test failures.
 
-If you build with Visual C++ 2013 then two tests currently may fail with
-Daylight Saving Time related problems: F<t/io/fs.t> and
-F<cpan/HTTP-Tiny/t/110_mirror.t>.
+If you build with Visual C++ 2013 then three tests currently may fail with
+Daylight Saving Time related problems: F<t/io/fs.t>,
+F<cpan/HTTP-Tiny/t/110_mirror.t> and F<lib/File.Copy.t>.
 
 Some test failures may occur if you use a command shell other than the
 native "cmd.exe", or if you are building from a path that contains
