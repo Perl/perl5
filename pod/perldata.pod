@@ -196,11 +196,15 @@ like C<$^V> or C<$^W>, or a sigil followed by a literal control character
 matching the C<\p{POSIX_Cntrl}> property.
 Due to a historical oddity, if not
 running under C<use utf8>, the 128 extra controls in the C<[0x80-0xff]> range
-may also be used in length one variables.
+may also be used in length one variables.  The use of a literal control
+character is deprecated.  Support for this form will be removed in a future
+version of perl.
 
 =item Similar to the above, a sigil, followed by bareword text in brackets,
 where the first character is either a caret followed by an uppercase letter,
-or a literal control, like C<${^GLOBAL_PHASE}> or C<${\7LOBAL_PHASE}>.
+or a literal control, like C<${^GLOBAL_PHASE}> or C<${\7LOBAL_PHASE}>.  The use
+of a literal control character is deprecated.  Support for this form will be
+removed in a future version of perl.
 
 =item A sigil followed by a single character matching the C<\p{POSIX_Punct}>
 property, like C<$!> or C<%+>.
