@@ -5103,6 +5103,9 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		else {                   /*  /(??{})  */
 		    /*  if its overloaded, let the regex compiler handle
 		     *  it; otherwise extract regex, or stringify  */
+		    const bool gmg = cBOOL(SvGMAGICAL(ret));
+		    if (gmg)
+			ret = sv_mortalcopy(ret);
 		    if (!SvAMAGIC(ret)) {
 			SV *sv = ret;
 			if (SvROK(sv))
@@ -5115,9 +5118,9 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 				re_sv = (REGEXP *) mg->mg_obj;
 			}
 
-			/* force any magic, undef warnings here */
+			/* force any undef warnings here */
 			if (!re_sv) {
-			    ret = sv_mortalcopy(ret);
+			    if (!gmg) ret = sv_mortalcopy(ret);
 			    (void) SvPV_force_nolen(ret);
 			}
 		    }

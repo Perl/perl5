@@ -22,7 +22,7 @@ BEGIN {
 }
 
 
-plan tests => 522;  # Update this when adding/deleting tests.
+plan tests => 523;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1191,6 +1191,17 @@ sub run_tests {
 	   '(??{$x}) does not leak cached qr to (??{\$x}) (match)';
 	is scalar "abcabc" =~ /(??{$x})(??{$y})/, "",
 	   '(??{$x}) does not leak cached qr to (??{\$x}) (no match)';
+    }
+
+    {
+	sub ReEvalTieTest::TIESCALAR {bless[], "ReEvalTieTest"}
+	sub ReEvalTieTest::STORE{}
+	sub ReEvalTieTest::FETCH { "$1" }
+	tie my $t, "ReEvalTieTest";
+	$t = bless [], "o";
+	"aab" =~ /(a)((??{"b" =~ m|(.)|; $t}))/;
+	is "[$1 $2]", "[a b]",
+	   '(??{$tied_former_overload}) sees the right $1 in FETCH';
     }
 
 } # End of sub run_tests
