@@ -878,6 +878,25 @@ my_maxidx(const char *lnm)
 }
 /*}}}*/
 
+/* Routine to remove the 2-byte prefix from the translation of a
+ * process-permanent file (PPF).
+ */
+static inline unsigned short int
+S_remove_ppf_prefix(const char *lnm, char *eqv, unsigned short int eqvlen)
+{
+    if (*((int *)lnm) == *((int *)"SYS$")                    &&
+        eqvlen >= 4 && eqv[0] == 0x1b && eqv[1] == 0x00      &&
+        ( (lnm[4] == 'O' && !strcmp(lnm,"SYS$OUTPUT"))  ||
+          (lnm[4] == 'I' && !strcmp(lnm,"SYS$INPUT"))   ||
+          (lnm[4] == 'E' && !strcmp(lnm,"SYS$ERROR"))   ||
+          (lnm[4] == 'C' && !strcmp(lnm,"SYS$COMMAND")) )  ) {
+
+        memmove(eqv, eqv+4, eqvlen-4);
+        eqvlen -= 4;
+    }
+    return eqvlen;
+}
+
 /*{{{int vmstrnenv(const char *lnm, char *eqv, unsigned long int idx, struct dsc$descriptor_s **tabvec, unsigned long int flags) */
 int
 Perl_vmstrnenv(const char *lnm, char *eqv, unsigned long int idx,
@@ -995,32 +1014,21 @@ Perl_vmstrnenv(const char *lnm, char *eqv, unsigned long int idx,
             retsts = sys$trnlnm(&attr,tabvec[curtab],&lnmdsc,&acmode,lnmlst);
             if (retsts == SS$_IVLOGNAM) { ivlnm = 1; break; }
             if (retsts == SS$_NOLOGNAM) break;
-            /* PPFs have a prefix */
-            if (
-#if INTSIZE == 4
-                 *((int *)uplnm) == *((int *)"SYS$")                    &&
-#endif
-                 eqvlen >= 4 && eqv[0] == 0x1b && eqv[1] == 0x00        &&
-                 ( (uplnm[4] == 'O' && !strcmp(uplnm,"SYS$OUTPUT"))  ||
-                   (uplnm[4] == 'I' && !strcmp(uplnm,"SYS$INPUT"))   ||
-                   (uplnm[4] == 'E' && !strcmp(uplnm,"SYS$ERROR"))   ||
-                   (uplnm[4] == 'C' && !strcmp(uplnm,"SYS$COMMAND")) )  ) {
-              memmove(eqv,eqv+4,eqvlen-4);
-              eqvlen -= 4;
-            }
+            eqvlen = S_remove_ppf_prefix(uplnm, eqv, eqvlen);
             cp2 += eqvlen;
             *cp2 = '\0';
           }
           if ((retsts == SS$_IVLOGNAM) ||
               (retsts == SS$_NOLOGNAM)) { continue; }
+          eqvlen = strlen(eqv);
         }
         else {
           retsts = sys$trnlnm(&attr,tabvec[curtab],&lnmdsc,&acmode,lnmlst);
           if (retsts == SS$_IVLOGNAM) { ivlnm = 1; continue; }
           if (retsts == SS$_NOLOGNAM) continue;
+          eqvlen = S_remove_ppf_prefix(uplnm, eqv, eqvlen);
           eqv[eqvlen] = '\0';
         }
-        eqvlen = strlen(eqv);
         break;
       }
     }
