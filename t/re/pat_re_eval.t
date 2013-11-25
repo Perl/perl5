@@ -22,7 +22,7 @@ BEGIN {
 }
 
 
-plan tests => 523;  # Update this when adding/deleting tests.
+plan tests => 524;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1202,6 +1202,17 @@ sub run_tests {
 	"aab" =~ /(a)((??{"b" =~ m|(.)|; $t}))/;
 	is "[$1 $2]", "[a b]",
 	   '(??{$tied_former_overload}) sees the right $1 in FETCH';
+    }
+
+    {
+	my @matchsticks;
+	my $ref = bless \my $o, "o";
+	my $foo = sub { push @matchsticks, scalar "abc" =~ /(??{$ref})/ };
+	&$foo;
+	bless \$o;
+	() = "$ref"; # flush AMAGIC flag on main
+	&$foo;
+	is "@matchsticks", "1 ", 'qr magic is not cached on refs';
     }
 
 } # End of sub run_tests
