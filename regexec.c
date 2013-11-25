@@ -5103,8 +5103,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		else {                   /*  /(??{})  */
 		    /*  if its overloaded, let the regex compiler handle
 		     *  it; otherwise extract regex, or stringify  */
-		    const bool gmg = cBOOL(SvGMAGICAL(ret));
-		    if (gmg)
+		    if (SvGMAGICAL(ret))
 			ret = sv_mortalcopy(ret);
 		    if (!SvAMAGIC(ret)) {
 			SV *sv = ret;
@@ -5119,8 +5118,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 			}
 
 			/* force any undef warnings here */
-			if (!re_sv) {
-			    if (!gmg) ret = sv_mortalcopy(ret);
+			if (!re_sv && !SvPOK(ret) && !SvNIOK(ret)) {
+			    ret = sv_mortalcopy(ret);
 			    (void) SvPV_force_nolen(ret);
 			}
 		    }
@@ -5173,8 +5172,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                                     pm_flags);
 
 			if (!(SvFLAGS(ret)
-			      & (SVs_TEMP | SVs_PADTMP | SVf_READONLY
-				 | SVs_GMG | SVf_ROK))) {
+			      & (SVs_TEMP | SVs_GMG | SVf_ROK))
+			 && (!SvPADTMP(ret) || SvREADONLY(ret))) {
 			    /* This isn't a first class regexp. Instead, it's
 			       caching a regexp onto an existing, Perl visible
 			       scalar.  */
