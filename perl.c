@@ -4529,7 +4529,7 @@ S_mayberelocate(pTHX_ const char *const dir, STRLEN len, U32 flags)
 
 	if ((unix = tounixspec_ts(SvPV(libdir,len),NULL)) != NULL) {
 	    len = strlen(unix);
-	    while (unix[len-1] == '/') len--;  /* Cosmetic */
+	    while (len > 1 && unix[len-1] == '/') len--;  /* Cosmetic */
 	    sv_usepvn(libdir,unix,len);
 	}
 	else
