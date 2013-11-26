@@ -4620,7 +4620,6 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
 		    }
 		    break;
 
-                case ANYOF_WARN_SUPER:
                 case ANYOF:
 		    if (flags & SCF_DO_STCLASS_AND)
 			ssc_and(pRExC_state, data->start_class,
@@ -14407,7 +14406,7 @@ parseit:
         }
 
         if (warn_super) {
-            OP(ret) = ANYOF_WARN_SUPER;
+            ANYOF_FLAGS(ret) |= ANYOF_WARN_SUPER;
         }
     }
 

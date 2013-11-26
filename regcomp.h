@@ -314,8 +314,8 @@ struct regnode_ssc {
  * ANYOF_NONBITMAP_NON_UTF8 bit is also set. */
 #define ANYOF_NONBITMAP(node)	(ARG(node) != ANYOF_NONBITMAP_EMPTY)
 
-/* Flags for node->flags of ANYOF.  These are in short supply, but there is one
- * currently available.  If more than this are needed, the ANYOF_LOCALE and
+/* Flags for node->flags of ANYOF.  These are in short supply, with none
+ * currently available.  If more are needed, the ANYOF_LOCALE and
  * ANYOF_POSIXL bits could be shared, making a space penalty for all locale
  * nodes.  Also, the ABOVE_LATIN1_ALL bit could be freed up by resorting to
  * creating a swash containing everything above 255.  This introduces a
@@ -351,7 +351,9 @@ struct regnode_ssc {
 #define ANYOF_CLASS	         ANYOF_POSIXL
 #define ANYOF_LARGE              ANYOF_POSIXL
 
-/* Unused: 0x10.  When using, be sure to change ANYOF_FLAGS_ALL below */
+/* Should we raise a warning if matching against an above-Unicode code point?
+ * */
+#define ANYOF_WARN_SUPER        0x10
 
 /* Can match something outside the bitmap that isn't in utf8 */
 #define ANYOF_NONBITMAP_NON_UTF8 0x20
@@ -364,7 +366,7 @@ struct regnode_ssc {
  * in utf8. */
 #define ANYOF_NON_UTF8_LATIN1_ALL 0x80
 
-#define ANYOF_FLAGS_ALL		(0xff & ~0x10)
+#define ANYOF_FLAGS_ALL		(0xff)
 
 #define ANYOF_LOCALE_FLAGS (ANYOF_LOCALE                        \
                            |ANYOF_LOC_FOLD                      \

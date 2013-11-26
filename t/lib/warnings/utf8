@@ -643,6 +643,17 @@ Code point 0x110048 is not Unicode, all \p{} matches fail; all \P{} matches succ
 Code point 0x110049 is not Unicode, all \p{} matches fail; all \P{} matches succeed at - line 72.
 Code point 0x110049 is not Unicode, all \p{} matches fail; all \P{} matches succeed at - line 72.
 ########
+# TODO Matching Unicode property against above-Unicode code point outputs a warning even if optimizer rejects the match (in synthetic start class)
+use warnings 'non_unicode';
+"\x{110000}" =~ /b?\p{Space}/;
+EXPECT
+Code point 0x110000 is not Unicode, all \p{} matches fail; all \P{} matches succeed at - line 2.
+########
+# NAME Matching POSIX class property against above-Unicode code point doesn't output a warning
+use warnings 'non_unicode';
+"\x{110000}" =~ /b?[[:space:]]/;
+EXPECT
+########
 use warnings 'utf8';
 chr(0x110000) =~ /\p{Any}/;
 no warnings 'non_unicode';
