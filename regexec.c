@@ -7549,8 +7549,14 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
         }
     }
 
+#if ANYOF_INVERT != 1
+    /* Depending on compiler optimization cBOOL takes time, so if don't have to
+     * use it, don't */
+#   error ANYOF_INVERT needs to be set to 1, or guarded with cBOOL below,
+#endif
+
     /* The xor complements the return if to invert: 1^1 = 0, 1^0 = 1 */
-    return cBOOL(flags & ANYOF_INVERT) ^ match;
+    return (flags & ANYOF_INVERT) ^ match;
 }
 
 STATIC U8 *
