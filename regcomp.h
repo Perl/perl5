@@ -327,14 +327,6 @@ struct regnode_ssc {
  * used in synthetic start class (SSC) nodes, so could be shared should new
  * flags be needed for SSCs. */
 
-#define ANYOF_LOCALE		 0x02	    /* /l modifier */
-
-/* The fold is calculated and stored in the bitmap where possible at compile
- * time.  However under locale, the actual folding varies depending on
- * what the locale is at the time of execution, so it has to be deferred until
- * then */
-#define ANYOF_LOC_FOLD           0x04
-
 /* regexec.c is expecting this to be in the low bit */
 #define ANYOF_INVERT		 0x01
 
@@ -342,6 +334,14 @@ struct regnode_ssc {
  * This means "Does this SSC match an empty string?"  This is used only during
  * regex compilation. */
 #define ANYOF_EMPTY_STRING       ANYOF_INVERT
+
+#define ANYOF_LOCALE		 0x02	    /* /l modifier */
+
+/* The fold is calculated and stored in the bitmap where possible at compile
+ * time.  However under locale, the actual folding varies depending on
+ * what the locale is at the time of execution, so it has to be deferred until
+ * then */
+#define ANYOF_LOC_FOLD           0x04
 
 /* Set if this is a regnode_charclass_posixl vs a regnode_charclass.  This
  * is used for runtime \d, \w, [:posix:], ..., which are used only in locale
