@@ -2681,6 +2681,7 @@ PERL_CALLCONV int	Perl_my_socketpair(int family, int type, int protocol, int fd[
 /* PERL_CALLCONV I32	Perl_my_stat(pTHX); */
 PERL_CALLCONV I32	Perl_my_stat_flags(pTHX_ const U32 flags);
 PERL_CALLCONV char *	Perl_my_strftime(pTHX_ const char *fmt, int sec, int min, int hour, int mday, int mon, int year, int wday, int yday, int isdst)
+			__attribute__format__null_ok__(__strftime__,pTHX_1,0)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_MY_STRFTIME	\
 	assert(fmt)

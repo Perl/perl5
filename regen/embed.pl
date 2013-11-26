@@ -184,8 +184,13 @@ my ($embed, $core, $ext, $api) = setup_embed();
 	    my $macro	= @nonnull && $nonnull[-1] == $pat  
 				? '__attribute__format__'
 				: '__attribute__format__null_ok__';
-	    push @attrs, sprintf "%s(__printf__,%s%d,%s%d)", $macro,
-				$prefix, $pat, $prefix, $args;
+	    if ($plain_func =~ /strftime/) {
+		push @attrs, sprintf "%s(__strftime__,%s1,0)", $macro, $prefix;
+	    }
+	    else {
+		push @attrs, sprintf "%s(__printf__,%s%d,%s%d)", $macro,
+				    $prefix, $pat, $prefix, $args;
+	    }
 	}
 	if ( @nonnull ) {
 	    my @pos = map { $has_context ? "pTHX_$_" : $_ } @nonnull;

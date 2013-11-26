@@ -52,8 +52,10 @@
 :	  1) must be static to its containing file ("i" or "s" flag); or
 :         2) be combined with the "X" flag.
 :
-:   f  Function takes printf style format string, varargs (hence any entry that
-:      would otherwise go in embed.h is suppressed):
+:   f  Function takes a format string. If the function name /strftime/
+:      then its assumed to take a strftime-style format string as 1st arg;
+:      otherwise it's assumed to be a printf style format string, varargs
+:      (hence any entry that would otherwise go in embed.h is suppressed):
 :
 :         proto.h: add __attribute__format__ (or ...null_ok__)
 :
@@ -898,7 +900,7 @@ Ap	|PerlIO*|my_popen_list	|NN const char* mode|int n|NN SV ** args
 Ap	|void	|my_setenv	|NULLOK const char* nam|NULLOK const char* val
 Apmb	|I32	|my_stat
 pX	|I32	|my_stat_flags	|NULLOK const U32 flags
-Ap	|char *	|my_strftime	|NN const char *fmt|int sec|int min|int hour|int mday|int mon|int year|int wday|int yday|int isdst
+Afp	|char *	|my_strftime	|NN const char *fmt|int sec|int min|int hour|int mday|int mon|int year|int wday|int yday|int isdst
 : Used in pp_ctl.c
 p	|void	|my_unexec
 ADMnoPR	|UV	|NATIVE_TO_NEED	|const UV enc|const UV ch
