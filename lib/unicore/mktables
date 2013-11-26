@@ -5592,9 +5592,12 @@ END
         }
         else {
             my $range_size_1 = $range_size_1{$addr};
-            my $format;            # Used only in $annotate option
-            my $include_name;      # Used only in $annotate option
-            my $include_cp;        # Used only in $annotate option
+
+            # These are used only in $annotate option
+            my $format;         # e.g. $HEX_ADJUST_FORMAT
+            my $include_name;   # ? Include the character's name in the
+                                # annotation?
+            my $include_cp;     # ? Include its code point
 
             # To make it more readable, use a minimum indentation
             my $comment_indent = 16;
