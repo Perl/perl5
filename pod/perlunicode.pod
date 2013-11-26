@@ -839,12 +839,12 @@ or more newline-separated lines.  Each line must be one of the following:
 
 =item *
 
-A single hexadecimal number denoting a Unicode code point to include.
+A single hexadecimal number denoting a code point to include.
 
 =item *
 
 Two hexadecimal numbers separated by horizontal whitespace (space or
-tabular characters) denoting a range of Unicode code points to include.
+tabular characters) denoting a range of code points to include.
 
 =item *
 
@@ -1003,7 +1003,7 @@ supports not only minimal list, but all Unicode character properties (see Unicod
 
 =item [5]
 
-The experimental feature in v5.18 "(?[...])" accomplishes this.  See
+The experimental feature in v5.18 C<"(?[...])"> accomplishes this.  See
 L<perlre/(?[ ])>.  If you don't want to use an experimental feature,
 you can use one of the following:
 
