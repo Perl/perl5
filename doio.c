@@ -1821,8 +1821,12 @@ nothing in the core.
 		    tot--;
 	    }
 	    else {	/* don't let root wipe out directories without -U */
-		if (PerlLIO_lstat(s,&PL_statbuf) < 0 || S_ISDIR(PL_statbuf.st_mode))
+		if (PerlLIO_lstat(s,&PL_statbuf) < 0)
 		    tot--;
+		else if (S_ISDIR(PL_statbuf.st_mode)) {
+		    tot--;
+		    SETERRNO(EISDIR, SS$_NOPRIV);
+		}
 		else {
 		    if (UNLINK(s))
 			tot--;

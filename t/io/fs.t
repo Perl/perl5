@@ -46,7 +46,7 @@ $needs_fh_reopen = 1 if (defined &Win32::IsWin95 && Win32::IsWin95());
 my $skip_mode_checks =
     $^O eq 'cygwin' && $ENV{CYGWIN} !~ /ntsec/;
 
-plan tests => 52;
+plan tests => 55;
 
 my $tmpdir = tempfile();
 my $tmpdir1 = tempfile();
@@ -455,6 +455,37 @@ ok(-d $tmpdir1, "rename on directories working");
 
     map chown(+()), ('')x68;
     ok(1, "extend sp in pp_chown");
+}
+
+# Calling unlink on a directory as root without -U will always fail, but
+# it should set errno to EISDIR even though unlink(2) is never called.
+SKIP: {
+    skip "only test unlink(dir) when running as root", 3 if $> != 0;
+
+    require Errno;
+
+    my $tmpdir = tempfile();
+    if (($^O eq 'MSWin32') || ($^O eq 'NetWare')) {
+        `mkdir $tmpdir`;
+    }
+    elsif ($^O eq 'VMS') {
+        `create/directory [.$tmpdir]`;
+    }
+    else {
+        `mkdir $tmpdir 2>/dev/null`;
+    }
+
+    # errno should be set even though unlink(2) is not called
+    local $!;
+    is(unlink($tmpdir), 0, "can't unlink directory as root without -U");
+    is(0+$!, Errno::EISDIR(), "unlink directory as root without -U sets errno");
+
+    rmdir $tmpdir;
+
+    # errno should be set by failed lstat(2) call
+    $! = 0;
+    unlink($tmpdir);
+    is(0+$!, Errno::ENOENT(), "unlink non-existent directory as root without -U sets ENOENT");
 }
 
 # need to remove $tmpdir if rename() in test 28 failed!
