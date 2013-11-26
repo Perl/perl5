@@ -305,9 +305,10 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
+=item Windows
 
-XXX
+Experimental support for building with Intel C++ Compiler has been extended to
+cover the dmake makefile (win32/makefile.mk) as well.
 
 =back
 

@@ -40,7 +40,7 @@ system).  Currently, this port is capable of using one of the
 following compilers on the Intel x86 architecture:
 
       Microsoft Visual C++    version 6.0 or later
-      Intel C++ Compiler      (experimental, nmake only)
+      Intel C++ Compiler      (experimental)
       Gcc by mingw.org        gcc version 3.2 or later
       Gcc by mingw-w64.sf.net gcc version 4.4.3 or later
 
@@ -315,10 +315,10 @@ You also need dmake.  See L</"Make"> above on how to get it.
 
 =item Intel C++ Compiler
 
-Experimental support for using Intel C++ Compiler has been added. You must use
-nmake, not dmake. Edit win32/Makefile and pick the correct CCTYPE for the
-Visual C that Intel C was installed into. Also uncomment __ICC to enable Intel
-C on Visual C support. To set up the build enviroment, from the Start Menu run
+Experimental support for using Intel C++ Compiler has been added. Edit
+win32/Makefile and pick the correct CCTYPE for the Visual C that Intel C was
+installed into. Also uncomment __ICC to enable Intel C on Visual C support.
+To set up the build enviroment, from the Start Menu run
 IA-32 Visual Studio 20__ mode or Intel 64 Visual Studio 20__ mode as
 appropriate. Then run nmake as usually in that prompt box.
 
