@@ -972,6 +972,11 @@ You have to have two hex digits after a braceless C<\x> (use a leading
 zero to make two).  These restrictions are to lower the incidence of
 typos causing the class to not match what you thought it would.
 
+If a regular bracketed character class contains a C<\p{}> or C<\P{}> and
+is matched against a non-Unicode code point, a warning may be
+raised, as the result is not Unicode-defined.  No such warning will come
+when using this extended form.
+
 The final difference between regular bracketed character classes and
 these, is that it is not possible to get these to match a
 multi-character fold.  Thus,
