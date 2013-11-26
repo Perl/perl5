@@ -234,7 +234,7 @@ Perl_grok_bin(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result)
 
 converts a string representing a hex number to numeric form.
 
-On entry I<start> and I<*len> give the string to scan, I<*flags> gives
+On entry I<start> and I<*len_p> give the string to scan, I<*flags> gives
 conversion flags, and I<result> should be NULL or a pointer to an NV.
 The scan stops at the end of the string, or the first invalid character.
 Unless C<PERL_SCAN_SILENT_ILLDIGIT> is set in I<*flags>, encountering an
