@@ -125,6 +125,12 @@ Avoids a warning about "undefined variable in user_agent" in some cases, and
 updates L<CGI::Cookie> documentation to reflect that "HttpOnly" is widely
 supported.
 
+=item *
+
+L<File::Fetch> has been upgraded from version 0.44 to 0.46.
+
+Blacklists "ftp" on DragonflyBSD.
+
 =back
 
 =head2 Removed Modules and Pragmata

@@ -22,12 +22,13 @@ use vars    qw[ $VERBOSE $PREFER_BIN $FROM_EMAIL $USER_AGENT
                 $FTP_PASSIVE $TIMEOUT $DEBUG $WARN
             ];
 
-$VERSION        = '0.44';
+$VERSION        = '0.46';
 $VERSION        = eval $VERSION;    # avoid warnings with development releases
 $PREFER_BIN     = 0;                # XXX TODO implement
 $FROM_EMAIL     = 'File-Fetch@example.com';
 $USER_AGENT     = "File::Fetch/$VERSION";
 $BLACKLIST      = [qw|ftp|];
+push @$BLACKLIST, qw|lftp| if $^O eq 'dragonfly';
 $METHOD_FAIL    = { };
 $FTP_PASSIVE    = 1;
 $TIMEOUT        = 0;
