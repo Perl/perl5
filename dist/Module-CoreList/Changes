@@ -1,5 +1,6 @@
 3.02
   - Prepared for v5.19.7
+  - Added CGI et al deprecation status
 
 3.01 Wed Nov 20 2013
   - Finalised for v5.19.6

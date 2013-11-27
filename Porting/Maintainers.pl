@@ -207,6 +207,7 @@ use File::Glob qw(:case);
                 t/fast.t
                 ),
         ],
+        'DEPRECATED' => '5.019007',
     },
 
     'Compress::Raw::Bzip2' => {

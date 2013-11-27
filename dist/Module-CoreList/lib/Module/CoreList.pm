@@ -9491,6 +9491,15 @@ for my $version (sort { $a <=> $b } keys %delta) {
     5.019007 => {
         delta_from => 5.019006,
         changed => {
+            'CGI'           => '1',
+            'CGI::Apache'   => '1',
+            'CGI::Carp'     => '1',
+            'CGI::Cookie'   => '1',
+            'CGI::Fast'     => '1',
+            'CGI::Pretty'   => '1',
+            'CGI::Push'     => '1',
+            'CGI::Switch'   => '1',
+            'CGI::Util'     => '1',
         },
         removed => {
         }
