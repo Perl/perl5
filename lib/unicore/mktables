@@ -1469,7 +1469,7 @@ my $perl;
 my $block;
 my $perl_charname;
 my $print;
-my $Any;
+my $All;
 my $script;
 
 # Are there conflicting names because of beginning with 'In_', or 'Is_'
@@ -5568,9 +5568,9 @@ END
 
             # This is a kludge for empty tables to silence a warning in
             # utf8.c, which can't really deal with empty tables, but it can
-            # deal with a table that matches nothing, as the inverse of 'Any'
+            # deal with a table that matches nothing, as the inverse of 'All'
             # does.
-            push @OUT, "!utf8::Any\n";
+            push @OUT, "!utf8::All\n";
         }
         elsif ($self->name eq 'N'
 
@@ -13202,9 +13202,9 @@ sub compile_perl() {
     # just isn't any Posix equivalent.  'XPosix' are the Posix tables extended
     # to the full Unicode range, by our guesses as to what is appropriate.
 
-    # 'Any' is all code points.  As an error check, instead of just setting it
+    # 'All' is all code points.  As an error check, instead of just setting it
     # to be that, construct it to be the union of all the major categories
-    $Any = $perl->add_match_table('Any',
+    $All = $perl->add_match_table('All',
             Description  => "[\\x{0000}-\\x{$MAX_UNICODE_CODEPOINT_STRING}]",
             Matches_All => 1);
 
@@ -13213,19 +13213,22 @@ sub compile_perl() {
         # Major categories are the ones with single letter names.
         next if length($major_table->name) != 1;
 
-        $Any += $major_table;
+        $All += $major_table;
     }
 
-    if ($Any->max != $MAX_UNICODE_CODEPOINT) {
+    if ($All->max != $MAX_UNICODE_CODEPOINT) {
         Carp::my_carp_bug("Generated highest code point ("
-           . sprintf("%X", $Any->max)
+           . sprintf("%X", $All->max)
            . ") doesn't match expected value $MAX_UNICODE_CODEPOINT_STRING.")
     }
-    if ($Any->range_count != 1 || $Any->min != 0) {
-     Carp::my_carp_bug("Generated table 'Any' doesn't match all code points.")
+    if ($All->range_count != 1 || $All->min != 0) {
+     Carp::my_carp_bug("Generated table 'All' doesn't match all code points.")
     }
 
-    $Any->add_alias('All');
+    my $Any = $perl->add_match_table('Any',
+                                     Description  => "All Unicode code points: [\\x{0000}-\\x{10FFFF}]",
+                                     );
+    $Any->add_range(0, 0x10FFFF);
 
     # Assigned is the opposite of gc=unassigned
     my $Assigned = $perl->add_match_table('Assigned',
@@ -16679,7 +16682,7 @@ sub write_all_tables() {
     # don't care if both defined, as they had better be different anyway.)
     # The property named 'Perl' needs to be first (it doesn't have any
     # immutable file name) because empty properties are defined in terms of
-    # it's table named 'Any'.)   We also sort by the property's name.  This is
+    # it's table named 'All'.)   We also sort by the property's name.  This is
     # just for repeatability of the outputs between runs of this program, but
     # does not affect correctness.
     PROPERTY:
@@ -16798,7 +16801,7 @@ sub write_all_tables() {
                 }
 
                 # An empty table is just the complement of everything.
-                $table->set_complement($Any) if $table != $property;
+                $table->set_complement($All) if $table != $property;
             }
             elsif ($expected_empty) {
                 my $because = "";
@@ -16854,6 +16857,7 @@ sub write_all_tables() {
                 }
             }
             elsif ($count == $MAX_UNICODE_CODEPOINTS
+                   && $name ne "Any"
                    && ($table == $property || $table->leader == $table)
                    && $table->property->status ne $NORMAL)
             {
