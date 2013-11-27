@@ -1711,6 +1711,12 @@ sub clarify_number ($) {
     return $number;
 }
 
+sub clarify_code_point_count ($) {
+    # This is like clarify_number(), but the input is assumed to be a count of
+    # code points, rather than a generic number.
+
+    return clarify_number(shift);
+}
 
 package Carp;
 
@@ -5866,7 +5872,7 @@ END
                             $OUT[-1] = merge_single_annotation_line(
                                     $OUT[-1],
                                     "# ["
-                                      . main::clarify_number($end - $start + 1)
+                                      . main::clarify_code_point_count($end - $start + 1)
                                       . "]\n",
                                     $comment_indent);
                         }
@@ -5963,7 +5969,7 @@ END
                                 # Include the number of code points in the
                                 # range
                                 my $count =
-                                    main::clarify_number($range_end - $i + 1);
+                                    main::clarify_code_point_count($range_end - $i + 1);
                                 $annotation .= " [$count]\n";
 
                                 # Skip to the end of the range
@@ -6661,7 +6667,7 @@ END
 
         # Get a  string version of $count with underscores in large numbers,
         # for clarity.
-        my $string_count = main::clarify_number($count);
+        my $string_count = main::clarify_code_point_count($count);
 
         my $code_points = ($count == 1)
                         ? 'single code point'
@@ -7690,7 +7696,7 @@ END
         # Get the number of code points matched by each of the tables in this
         # file, and add underscores for clarity.
         my $count = $leader->count;
-        my $string_count = main::clarify_number($count);
+        my $string_count = main::clarify_code_point_count($count);
 
         my $loose_count = 0;        # how many aliases loosely matched
         my $compound_name = "";     # ? Are any names compound?, and if so, an
