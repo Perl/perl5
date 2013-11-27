@@ -66,7 +66,7 @@ $VERSION = '0.12';
            T_FLOAT
            T_NV
 	   T_DOUBLE
-	   T_PV T_PV_null T_PV_mutate T_ROPV
+	   T_PV T_PV_null
 	   T_PTR_IN T_PTR_OUT
 	   T_PTRREF_IN T_PTRREF_OUT
 	   T_REF_IV_REF

@@ -6,7 +6,7 @@ BEGIN {
     }
 }
 
-use Test::More tests => 152;
+use Test::More tests => 148;
 
 use strict;
 use warnings;
@@ -218,17 +218,6 @@ ok !defined T_PV_null, 'RETVAL = NULL returns undef for char*';
     () = ''.T_PV_null;
     is $uninit, 1, 'uninit warning from NULL returned from char* func';
 }
-for my $cow (keys %{{foo=>1}}) {
-    my $cow2 = $cow;
-    T_PV_mutate($cow, "bar", 2);
-    is( $cow, "bao", "mutating cows via char* param" );
-    is( $cow2, "foo", "kin kine are unaffected" );
-}
-
-# T_ROPV
-note("T_ROPV");
-is( T_ROPV("a string"), "a string");
-is( T_ROPV(52), 52);
 
 # T_PTR
 my $t = 5;

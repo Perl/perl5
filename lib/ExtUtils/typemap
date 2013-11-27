@@ -10,7 +10,7 @@ char			T_CHAR
 unsigned char		T_U_CHAR
 char *			T_PV
 unsigned char *		T_PV
-const char *		T_ROPV
+const char *		T_PV
 caddr_t			T_PV
 wchar_t *		T_PV
 wchar_t			T_IV
@@ -200,24 +200,6 @@ T_NV
 T_DOUBLE
 	$var = (double)SvNV($arg)
 T_PV
-	STMT_START {
-		SV * const t_pv_tmp_sv = $arg;
-		/* Note: This code works in 5.16 as well as 5.20, which is
-		   not strictly necessary, since this typemap is not dual-
-		   lifed.  However, keeping this extra logic will make it
-		   easier to backport if we decide to dual-life it, or if
-		   someone copies the latest typemap into a CPAN dist.  */
-		/* This takes advantage of the fact that SvIsCOW always
-		   returned 1 or 0 back when all COWs were marked read-only
-		   (pre-v5.17.5-484-ge3918bb0, when SvREADONLY did not nec-
-		   essarily actually mean read-only) and SVf_IsCOW or 0
-		   thereafter. */
-		if ((SvIsCOW(t_pv_tmp_sv) && !SvREADONLY(t_pv_tmp_sv))
-		 || SvIsCOW(t_pv_tmp_sv) == 1)
-		    sv_force_normal(t_pv_tmp_sv);
-		$var = ($type)SvPV_nolen(t_pv_tmp_sv);
-	} STMT_END
-T_ROPV
 	$var = ($type)SvPV_nolen($arg)
 T_PTR
 	$var = INT2PTR($type,SvIV($arg))
@@ -368,8 +350,6 @@ T_NV
 T_DOUBLE
 	sv_setnv($arg, (double)$var);
 T_PV
-	sv_setpv((SV*)$arg, $var);
-T_ROPV
 	sv_setpv((SV*)$arg, $var);
 T_PTR
 	sv_setiv($arg, PTR2IV($var));
