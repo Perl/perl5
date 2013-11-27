@@ -20,7 +20,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 472;  # Update this when adding/deleting tests.
+plan tests => 672;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1361,6 +1361,27 @@ EOP
         like($c, $re, "mixed up-/downgraded pattern matches downgraded string");
         utf8::upgrade($c);
         like($c, $re, "mixed up-/downgraded pattern matches upgraded string");
+    }
+
+    {
+        # if we have 87 capture buffers defined then \87 should refer to the
+        # 87th.  test that this is true for 1..100
+        # Note that this test causes the engine to recurse at runtime, and
+        # hence use a lot of C stack.
+        for my $i (1..100) {
+            my $capture= "a";
+            $capture= "($capture)" for 1 .. $i;
+            for my $mid ("","b") {
+                my $str= "a${mid}a";
+                my $backref= "\\$i";
+                eval {
+                    ok($str=~/$capture$mid$backref/,"\\$i works with $i buffers '$str'=~/...$mid$backref/");
+                    1;
+                } or do {
+                    is("$@","","\\$i works with $i buffers works with $i buffers '$str'=~/...$mid$backref/");
+                };
+            }
+        }
     }
 
     {

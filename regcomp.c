@@ -10966,6 +10966,12 @@ tryagain:
 			if (PL_encoding && ender < 0x100)
 			    goto recode_encoding;
 			break;
+                    case '8': case '9': /* These are illegal unless backrefs */
+                        if (atoi(p) <= RExC_npar) {
+                            --p;   /* backup to backslash; handle as backref */
+                            goto loopdone;
+                        }
+                        goto unrecognized;
 		    recode_encoding:
 			if (! RExC_override_recoding) {
 			    SV* enc = PL_encoding;
@@ -10980,6 +10986,7 @@ tryagain:
 			    FAIL("Trailing \\");
 			/* FALL THROUGH */
 		    default:
+                    unrecognized:
 			if (!SIZE_ONLY&& isALPHANUMERIC(*p)) {
 			    /* Include any { following the alpha to emphasize
 			     * that it could be part of an escape at some point
