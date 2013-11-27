@@ -1046,7 +1046,9 @@ you could use this instead:
 
 However, because there are I<many> other lowercase Greek characters than
 just those, to match lowercase Greek characters in a regular expression,
-you would use the pattern C</(?:(?=\p{Greek})\p{Lower})+/>.
+you could use the pattern C</(?:(?=\p{Greek})\p{Lower})+/> (or the
+L<experimental feature|perlrecharclass/Extended Bracketed Character
+Classes> C<S</(?[ \p{Greek} & \p{Lower} ])+/>>).
 
 Because each operand is evaluated in integer form, C<2.18 .. 3.14> will
 return two elements in list context.
