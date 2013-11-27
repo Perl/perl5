@@ -44,7 +44,7 @@ ok 1;
 
 is $object_file, $b->compile(source => $source_file);
 
-$lib_file = $b->lib_file($object_file);
+$lib_file = $b->lib_file($object_file, module_name => 'basict');
 ok 1;
 
 my ($lib, @temps) = $b->link(objects => $object_file,

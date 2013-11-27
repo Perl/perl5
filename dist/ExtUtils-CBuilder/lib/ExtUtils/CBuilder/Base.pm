@@ -10,7 +10,7 @@ use IPC::Cmd qw(can_run);
 use File::Temp qw(tempfile);
 
 use vars qw($VERSION);
-$VERSION = '0.280212';
+$VERSION = '0.280213';
 
 # More details about C/C++ compilers:
 # http://developers.sun.com/sunstudio/documentation/product/compiler.jsp
@@ -222,10 +222,23 @@ sub have_cplusplus {
 }
 
 sub lib_file {
-  my ($self, $dl_file) = @_;
+  my ($self, $dl_file, %args) = @_;
   $dl_file =~ s/\.[^.]+$//;
   $dl_file =~ tr/"//d;
-  return "$dl_file.$self->{config}{dlext}";
+  
+  if (defined $args{module_name} and length $args{module_name}) {
+    # Need to create with the same name as DynaLoader will load with.
+    require DynaLoader;
+    if (defined &DynaLoader::mod2fname) {
+      my $lib = DynaLoader::mod2fname([split /::/, $args{module_name}]);
+      my ($dev, $lib_dir, undef) = File::Spec->splitpath($dl_file);
+      $dl_file = File::Spec->catpath($dev, $lib_dir, $lib);
+    }
+  }
+  
+  $dl_file .= ".$self->{config}{dlext}";
+
+  return $dl_file;
 }
 
 
@@ -287,7 +300,7 @@ sub _do_link {
   
   my $objects = delete $args{objects};
   $objects = [$objects] unless ref $objects;
-  my $out = $args{$type} || $self->$type($objects->[0]);
+  my $out = $args{$type} || $self->$type($objects->[0], %args);
   
   my @temp_files;
   @temp_files =
