@@ -849,7 +849,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
             sv_setnv(sv, (NV)Perl_rc);
             sv_setpv(sv, os2error(Perl_rc));
         }
-        if (SvOK(sv) && strNE(SvPVX(sv), "")) {
+        if (strNE(SvPVX(sv), "")) {
             fixup_errno_string(sv);
         }
 #   elif defined(WIN32)
@@ -858,9 +858,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
             sv_setnv(sv, (NV)dwErr);
             if (dwErr) {
                 PerlProc_GetOSError(sv, dwErr);
-                if (SvOK(sv)) {
-                    fixup_errno_string(sv);
-                }
+                fixup_errno_string(sv);
             }
             else
                 sv_setpvs(sv, "");
