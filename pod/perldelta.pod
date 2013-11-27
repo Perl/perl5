@@ -25,7 +25,10 @@ XXX New core language features go here.  Summarize user-visible core language
 enhancements.  Particularly prominent performance optimisations could go
 here, but most should go in the L</Performance Enhancements> section.
 
-[ List each enhancement as a =head2 entry ]
+=head2 New C<\p{Unicode}> regular expression pattern property
+
+This is a synonym for C<\p{Any}> and matches the set of Unicode-defined
+code points 0 - 0x10FFFF.
 
 =head1 Security
 

@@ -13229,6 +13229,7 @@ sub compile_perl() {
                                      Description  => "All Unicode code points: [\\x{0000}-\\x{10FFFF}]",
                                      );
     $Any->add_range(0, 0x10FFFF);
+    $Any->add_alias('Unicode');
 
     # Assigned is the opposite of gc=unassigned
     my $Assigned = $perl->add_match_table('Assigned',
