@@ -13019,7 +13019,12 @@ parseit:
 		char *e;
 
                 /* We will handle any undefined properties ourselves */
-                U8 swash_init_flags = _CORE_SWASH_INIT_RETURN_IF_UNDEF;
+                U8 swash_init_flags = _CORE_SWASH_INIT_RETURN_IF_UNDEF
+                                       /* And we actually would prefer to get
+                                        * the straight inversion list of the
+                                        * swash, since we will be accessing it
+                                        * anyway, to save a little time */
+                                      |_CORE_SWASH_INIT_ACCEPT_INVLIST;
 
 		if (RExC_parse >= RExC_end)
 		    vFAIL2("Empty \\%c{}", (U8)value);
