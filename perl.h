@@ -344,7 +344,7 @@
  */
 
 #if defined(__clang) || \
-       (defined( __GNUC__) && ((__GNUC__ * 100) + __GNUC_MINOR__) >= 402)
+       (defined( __GNUC__) && ((__GNUC__ * 100) + __GNUC_MINOR__) >= 406)
 #  define GCC_DIAG_DO_PRAGMA_(x) _Pragma (#x)
 
 #  define GCC_DIAG_IGNORE(x) _Pragma("GCC diagnostic push") \
