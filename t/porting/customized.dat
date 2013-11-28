@@ -1,5 +1,5 @@
 Digest::MD5 cpan/Digest-MD5/t/files.t bdbe05b705d9da305fedce7a9f4b6ba63250c7cf
-Module::Build cpan/Module-Build/lib/Module/Build/ConfigData.pm 6268ad724d5e61b9066c26da3e78529260969f40
+Module::Build cpan/Module-Build/lib/Module/Build/ConfigData.pm 3d829dfdd1c69fc44452ba0a08e4344e2e624882
 PerlIO::via::QuotedPrint cpan/PerlIO-via-QuotedPrint/t/QuotedPrint.t ca39f0146e89de02c746e199c45dcb3e5edad691
 Text::Balanced cpan/Text-Balanced/t/01_compile.t 1598cf491a48fa546260a2ec41142abe84da533d
 Text::Balanced cpan/Text-Balanced/t/02_extbrk.t 6ba1b64a4604e822dc2260b8ffcea6b406339ee8

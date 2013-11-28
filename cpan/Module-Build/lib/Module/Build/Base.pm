@@ -6,7 +6,7 @@ use strict;
 use vars qw($VERSION);
 use warnings;
 
-$VERSION = '0.4202';
+$VERSION = '0.4203';
 $VERSION = eval $VERSION;
 BEGIN { require 5.006001 }
 
@@ -4399,9 +4399,9 @@ BEGIN { *scripts = \&script_files; }
     gpl3         => 'GPL_3',
     mit          => 'MIT',
     mozilla      => 'Mozilla_1_1',
+    restrictive  => 'Restricted',
     open_source  => undef,
     unrestricted => undef,
-    restrictive  => undef,
     unknown      => undef,
   );
 
@@ -4422,9 +4422,9 @@ BEGIN { *scripts = \&script_files; }
     gpl3         => 'http://opensource.org/licenses/gpl-3.0.html',
     mit          => 'http://opensource.org/licenses/mit-license.php',
     mozilla      => 'http://opensource.org/licenses/mozilla1.1.php',
+    restrictive  => undef,
     open_source  => undef,
     unrestricted => undef,
-    restrictive  => undef,
     unknown      => undef,
   );
   sub valid_licenses {
@@ -4605,7 +4605,7 @@ my %prereq_map = (
   build_requires => [ qw/build requires/ ],
   test_requires => [ qw/test requires/ ],
   test_recommends => [ qw/test recommends/ ],
-  recommends => [ qw/build recommends/ ],
+  recommends => [ qw/runtime recommends/ ],
   conflicts => [ qw/build conflicts/ ],
 );
 
