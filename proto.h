@@ -2681,7 +2681,7 @@ PERL_CALLCONV int	Perl_my_socketpair(int family, int type, int protocol, int fd[
 /* PERL_CALLCONV I32	Perl_my_stat(pTHX); */
 PERL_CALLCONV I32	Perl_my_stat_flags(pTHX_ const U32 flags);
 PERL_CALLCONV char *	Perl_my_strftime(pTHX_ const char *fmt, int sec, int min, int hour, int mday, int mon, int year, int wday, int yday, int isdst)
-			__attribute__format__null_ok__(__strftime__,pTHX_1,0)
+			__attribute__format__(__strftime__,pTHX_1,0)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_MY_STRFTIME	\
 	assert(fmt)
@@ -4647,6 +4647,7 @@ PERL_CALLCONV void	Perl_sys_init3(int* argc, char*** argv, char*** env)
 PERL_CALLCONV void	Perl_sys_term(void);
 PERL_CALLCONV void	Perl_taint_env(pTHX);
 PERL_CALLCONV void	Perl_taint_proper(pTHX_ const char* f, const char *const s)
+			__attribute__format__null_ok__(__printf__,pTHX_1,0)
 			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_TAINT_PROPER	\
 	assert(s)
@@ -5343,6 +5344,7 @@ STATIC void	S_del_sv(pTHX_ SV *p)
 #  endif
 #  if defined(PERL_IN_TOKE_C)
 STATIC void	S_printbuf(pTHX_ const char *const fmt, const char *const s)
+			__attribute__format__(__printf__,pTHX_1,0)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_PRINTBUF	\

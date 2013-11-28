@@ -1502,7 +1502,7 @@ EXMp	|void	|_invlist_dump	|NN PerlIO *file|I32 level   \
 				|NN SV* const invlist
 #endif
 Ap	|void	|taint_env
-Ap	|void	|taint_proper	|NULLOK const char* f|NN const char *const s
+Afp	|void	|taint_proper	|NULLOK const char* f|NN const char *const s
 Apd	|UV	|to_utf8_case	|NN const U8 *p|NN U8* ustrp|NULLOK STRLEN *lenp \
 				|NN SV **swashp|NN const char *normal|NULLOK const char *special
 Abmd	|UV	|to_utf8_lower	|NN const U8 *p|NN U8* ustrp|NULLOK STRLEN *lenp
@@ -2319,7 +2319,7 @@ s	|void	|strip_return	|NN SV *sv
 #  endif
 #  if defined(DEBUGGING)
 s	|int	|tokereport	|I32 rv|NN const YYSTYPE* lvalp
-s	|void	|printbuf	|NN const char *const fmt|NN const char *const s
+sf	|void	|printbuf	|NN const char *const fmt|NN const char *const s
 #  endif
 #endif
 EXMp	|bool	|validate_proto	|NN SV *name|NULLOK SV *proto|bool warn

@@ -482,7 +482,9 @@ S_printbuf(pTHX_ const char *const fmt, const char *const s)
 
     PERL_ARGS_ASSERT_PRINTBUF;
 
+    GCC_DIAG_IGNORE(-Wformat-nonliteral); /* fmt checked by caller */
     PerlIO_printf(Perl_debug_log, fmt, pv_display(tmp, s, strlen(s), 0, 60));
+    GCC_DIAG_RESTORE;
     SvREFCNT_dec(tmp);
 }
 
@@ -7606,8 +7608,13 @@ Perl_yylex(pTHX)
 			    while (isLOWER(*d))
 				d++;
 			    if (!*d && !gv_stashpv(PL_tokenbuf, UTF ? SVf_UTF8 : 0))
+                            {
+                                /* PL_warn_reserved is constant */
+                                GCC_DIAG_IGNORE(-Wformat-nonliteral);
 				Perl_warner(aTHX_ packWARN(WARN_RESERVED), PL_warn_reserved,
 				       PL_tokenbuf);
+                                GCC_DIAG_RESTORE;
+                            }
 			}
 		    }
 		}
@@ -9040,10 +9047,14 @@ S_pending_ident(pTHX)
             tmp = allocmy(PL_tokenbuf, tokenbuf_len, UTF ? SVf_UTF8 : 0);
         }
         else {
-            if (has_colon)
+            if (has_colon) {
+                /* PL_no_myglob is constant */
+                GCC_DIAG_IGNORE(-Wformat-nonliteral);
                 yyerror_pv(Perl_form(aTHX_ PL_no_myglob,
 			    PL_in_my == KEY_my ? "my" : "state", PL_tokenbuf),
                             UTF ? SVf_UTF8 : 0);
+                GCC_DIAG_RESTORE;
+            }
 
             pl_yylval.opval = newOP(OP_PADANY, 0);
             pl_yylval.opval->op_targ = allocmy(PL_tokenbuf, tokenbuf_len,

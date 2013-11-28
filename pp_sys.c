@@ -2814,8 +2814,14 @@ PP(pp_stat)
 	else
 	    PL_laststatval = PerlLIO_stat(SvPV_nolen_const(PL_statname), &PL_statcache);
 	if (PL_laststatval < 0) {
-	    if (ckWARN(WARN_NEWLINE) && strchr(SvPV_nolen_const(PL_statname), '\n'))
+	    if (ckWARN(WARN_NEWLINE) &&
+                    strchr(SvPV_nolen_const(PL_statname), '\n'))
+            {
+                /* PL_warn_nl is constant */
+                GCC_DIAG_IGNORE(-Wformat-nonliteral);
 		Perl_warner(aTHX_ packWARN(WARN_NEWLINE), PL_warn_nl, "stat");
+                GCC_DIAG_RESTORE;
+            }
 	    max = 0;
 	}
     }
@@ -3357,7 +3363,12 @@ PP(pp_fttext)
 	    }
 	    if (ckWARN(WARN_NEWLINE) && strchr(SvPV_nolen_const(PL_statname),
 					       '\n'))
+            {
+                /* PL_warn_nl is constant */
+                GCC_DIAG_IGNORE(-Wformat-nonliteral);
 		Perl_warner(aTHX_ packWARN(WARN_NEWLINE), PL_warn_nl, "open");
+                GCC_DIAG_RESTORE;
+            }
 	    FT_RETURNUNDEF;
 	}
 	PL_laststype = OP_STAT;

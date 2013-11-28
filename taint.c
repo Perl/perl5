@@ -54,12 +54,16 @@ Perl_taint_proper(pTHX_ const char *f, const char *const s)
             ug = " while running with -t switch";
         else
 	    ug = " while running with -T switch";
+
+        GCC_DIAG_IGNORE(-Wformat-nonliteral); /* fmt checked by caller */
 	if (PL_unsafe || TAINT_WARN_get) {
 	    Perl_ck_warner_d(aTHX_ packWARN(WARN_TAINT), f, s, ug);
         }
         else {
             Perl_croak(aTHX_ f, s, ug);
         }
+        GCC_DIAG_RESTORE;
+
     }
 }
 

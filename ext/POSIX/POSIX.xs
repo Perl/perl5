@@ -1686,7 +1686,14 @@ strftime(fmt, sec, min, hour, mday, mon, year, wday = -1, yday = -1, isdst = -1)
 	int		isdst
     CODE:
 	{
-	    char *buf = my_strftime(SvPV_nolen(fmt), sec, min, hour, mday, mon, year, wday, yday, isdst);
+	    char *buf;
+
+            /* allowing user-supplied (rather than literal) formats
+             * is normally frowned upon as a potential security risk;
+             * but this is part of the API so we have to allow it */
+            GCC_DIAG_IGNORE(-Wformat-nonliteral);
+	    buf = my_strftime(SvPV_nolen(fmt), sec, min, hour, mday, mon, year, wday, yday, isdst);
+            GCC_DIAG_RESTORE;
 	    if (buf) {
 		SV *const sv = sv_newmortal();
 		sv_usepvn_flags(sv, buf, strlen(buf), SV_HAS_TRAILING_NUL);

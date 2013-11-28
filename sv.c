@@ -11390,6 +11390,9 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                 }
 #endif
 
+                /* hopefully the above makes ptr a very constrained format
+                 * that is safe to use, even though it's not literal */
+                GCC_DIAG_IGNORE(-Wformat-nonliteral);
 #if defined(HAS_LONG_DOUBLE)
 		elen = ((intsize == 'q')
 			? my_snprintf(PL_efloatbuf, PL_efloatsize, ptr, nv)
@@ -11397,6 +11400,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 #else
 		elen = my_sprintf(PL_efloatbuf, ptr, nv);
 #endif
+                GCC_DIAG_RESTORE;
 	    }
 	float_converted:
 	    eptr = PL_efloatbuf;
@@ -14810,14 +14814,21 @@ Perl_report_uninit(pTHX_ const SV *uninit_sv)
 	    if (varname)
 		sv_insert(varname, 0, 0, " ", 1);
 	}
+        /* PL_warn_uninit_sv is constant */
+        GCC_DIAG_IGNORE(-Wformat-nonliteral);
 	/* diag_listed_as: Use of uninitialized value%s */
 	Perl_warner(aTHX_ packWARN(WARN_UNINITIALIZED), PL_warn_uninit_sv,
 		SVfARG(varname ? varname : &PL_sv_no),
 		" in ", OP_DESC(PL_op));
+        GCC_DIAG_RESTORE;
     }
-    else
+    else {
+        /* PL_warn_uninit is constant */
+        GCC_DIAG_IGNORE(-Wformat-nonliteral);
 	Perl_warner(aTHX_ packWARN(WARN_UNINITIALIZED), PL_warn_uninit,
 		    "", "", "");
+        GCC_DIAG_RESTORE;
+    }
 }
 
 /*
