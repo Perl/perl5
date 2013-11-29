@@ -2432,11 +2432,7 @@ Perl_vms_start_glob
 #else
     sv_setpv(tmpcmd, "echo ");
     sv_catsv(tmpcmd, tmpglob);
-#if 'z' - 'a' == 25
-    sv_catpv(tmpcmd, "|tr -s ' \t\f\r' '\\012\\012\\012\\012'|");
-#else
     sv_catpv(tmpcmd, "|tr -s ' \t\f\r' '\\n\\n\\n\\n'|");
-#endif
 #endif /* !CSH */
 #endif /* !DOSISH */
     {
