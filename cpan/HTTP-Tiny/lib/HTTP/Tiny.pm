@@ -3,7 +3,7 @@ package HTTP::Tiny;
 use strict;
 use warnings;
 # ABSTRACT: A small, simple, correct HTTP/1.1 client
-our $VERSION = '0.038'; # VERSION
+our $VERSION = '0.039'; # VERSION
 
 use Carp ();
 
@@ -113,13 +113,16 @@ sub mirror {
         $args->{headers}{'if-modified-since'} ||= $self->_http_date($mtime);
     }
     my $tempfile = $file . int(rand(2**31));
-    open my $fh, ">", $tempfile
-        or Carp::croak(qq/Error: Could not open temporary file $tempfile for downloading: $!\n/);
+
+    require Fcntl;
+    sysopen my $fh, $tempfile, Fcntl::O_CREAT()|Fcntl::O_EXCL()|Fcntl::O_WRONLY()
+       or Carp::croak(qq/Error: Could not create temporary file $tempfile for downloading: $!\n/);
     binmode $fh;
     $args->{data_callback} = sub { print {$fh} $_[0] };
     my $response = $self->request('GET', $url, $args);
     close $fh
-        or Carp::croak(qq/Error: Could not close temporary file $tempfile: $!\n/);
+        or Carp::croak(qq/Error: Caught error closing temporary file $tempfile: $!\n/);
+
     if ( $response->{success} ) {
         rename $tempfile, $file
             or Carp::croak(qq/Error replacing $file with $tempfile: $!\n/);
@@ -1010,7 +1013,7 @@ HTTP::Tiny - A small, simple, correct HTTP/1.1 client
 
 =head1 VERSION
 
-version 0.038
+version 0.039
 
 =head1 SYNOPSIS
 
@@ -1606,6 +1609,10 @@ Martin-Louis Bright <mlbright@gmail.com>
 =item *
 
 Mike Doherty <doherty@cpan.org>
+
+=item *
+
+Petr Písař <ppisar@redhat.com>
 
 =item *
 
