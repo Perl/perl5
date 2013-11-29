@@ -2587,7 +2587,8 @@ Perl__to_utf8_upper_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, const bool
     }
     else if UTF8_IS_DOWNGRADEABLE_START(*p) {
 	if (flags) {
-	    result = toUPPER_LC(TWO_BYTE_UTF8_TO_NATIVE(*p, *(p+1)));
+            UV c = TWO_BYTE_UTF8_TO_NATIVE(*p, *(p+1));
+	    result = toUPPER_LC(c);
 	}
 	else {
 	    return _to_upper_title_latin1(TWO_BYTE_UTF8_TO_NATIVE(*p, *(p+1)),
@@ -2653,7 +2654,8 @@ Perl__to_utf8_title_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, const bool
     }
     else if UTF8_IS_DOWNGRADEABLE_START(*p) {
 	if (flags) {
-	    result = toUPPER_LC(TWO_BYTE_UTF8_TO_NATIVE(*p, *(p+1)));
+            UV c = TWO_BYTE_UTF8_TO_NATIVE(*p, *(p+1));
+	    result = toUPPER_LC(c);
 	}
 	else {
 	    return _to_upper_title_latin1(TWO_BYTE_UTF8_TO_NATIVE(*p, *(p+1)),
@@ -2717,7 +2719,8 @@ Perl__to_utf8_lower_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, const bool
     }
     else if UTF8_IS_DOWNGRADEABLE_START(*p) {
 	if (flags) {
-	    result = toLOWER_LC(TWO_BYTE_UTF8_TO_NATIVE(*p, *(p+1)));
+            UV c = TWO_BYTE_UTF8_TO_NATIVE(*p, *(p+1));
+	    result = toLOWER_LC(c);
 	}
 	else {
 	    return to_lower_latin1(TWO_BYTE_UTF8_TO_NATIVE(*p, *(p+1)),
@@ -2795,7 +2798,8 @@ Perl__to_utf8_fold_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, U8 flags, b
     }
     else if UTF8_IS_DOWNGRADEABLE_START(*p) {
 	if (flags & FOLD_FLAGS_LOCALE) {
-	    result = toFOLD_LC(TWO_BYTE_UTF8_TO_NATIVE(*p, *(p+1)));
+            UV c = TWO_BYTE_UTF8_TO_NATIVE(*p, *(p+1));
+	    result = toFOLD_LC(c);
 	}
 	else {
 	    return _to_fold_latin1(TWO_BYTE_UTF8_TO_NATIVE(*p, *(p+1)),

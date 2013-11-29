@@ -186,11 +186,11 @@ Perl_new_ctype(pTHX_ const char *newctype)
 {
 #ifdef USE_LOCALE_CTYPE
     dVAR;
-    int i;
+    UV i;
 
     PERL_ARGS_ASSERT_NEW_CTYPE;
 
-    for (i = 0; i < 256; i++) {
+    for (i = 0; i ; i++) {
 	if (isUPPER_LC(i))
 	    PL_fold_locale[i] = toLOWER_LC(i);
 	else if (isLOWER_LC(i))

@@ -1197,8 +1197,8 @@ EXTCONST U32 PL_charclass[];
     #define toUPPER(c) (isASCII(c) ? toUPPER_LATIN1_MOD(c) : (c))
    which uses table lookup and mask instead of subtraction.  (This would
    work because the _MOD does not apply in the ASCII range) */
-#define toLOWER(c)  (isUPPER(c) ? (c) + ('a' - 'A') : (c))
-#define toUPPER(c)  (isLOWER(c) ? (c) - ('a' - 'A') : (c))
+#define toLOWER(c)  (isUPPER(c) ? (U8)((c) + ('a' - 'A')) : (c))
+#define toUPPER(c)  (isLOWER(c) ? (U8)((c) - ('a' - 'A')) : (c))
 
 /* In the ASCII range, these are equivalent to what they're here defined to be.
  * But by creating these definitions, other code doesn't have to be aware of
