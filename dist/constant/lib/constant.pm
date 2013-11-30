@@ -4,7 +4,7 @@ use strict;
 use warnings::register;
 
 use vars qw($VERSION %declared);
-$VERSION = '1.29';
+$VERSION = '1.30';
 
 #=======================================================================
 
@@ -161,9 +161,8 @@ sub import {
 	    } elsif (@_) {
 		my @list = @_;
 		if (_CAN_PCS_FOR_ARRAY) {
+		    Internals::SvREADONLY($list[$_], 1) for 0..$#list;
 		    Internals::SvREADONLY(@list, 1);
-		    # Disabled for now; see perl #119045:
-		    #Internals::SvREADONLY($list[$_], 1) for 0..$#list;
 		    if ($symtab && !exists $symtab->{$name}) {
 			$symtab->{$name} = \@list;
 			$flush_mro++;

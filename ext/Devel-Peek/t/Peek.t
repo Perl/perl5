@@ -509,7 +509,7 @@ do_test('string with Unicode',
   PV = $ADDR "\\\214\\\101\\\0\\\235\\\101"\\\0 \[UTF8 "\\\x\{100\}\\\x\{0\}\\\x\{200\}"\]
   CUR = 5
   LEN = \\d+
-  COW_REFCNT = 1
+  COW_REFCNT = 1					# $] < 5.019007
 ');
 } else {
 do_test('string with Unicode',
@@ -521,7 +521,7 @@ do_test('string with Unicode',
   PV = $ADDR "\\\304\\\200\\\0\\\310\\\200"\\\0 \[UTF8 "\\\x\{100\}\\\x\{0\}\\\x\{200\}"\]
   CUR = 5
   LEN = \\d+
-  COW_REFCNT = 1
+  COW_REFCNT = 1					# $] < 5.019007
 ');
 }
 
@@ -549,7 +549,7 @@ do_test('reference to hash containing Unicode',
       PV = $ADDR "\\\235\\\101"\\\0 \[UTF8 "\\\x\{200\}"\]
       CUR = 2
       LEN = \\d+
-      COW_REFCNT = 1
+      COW_REFCNT = 1				# $] < 5.019007
 ',      '',
 	$] > 5.009
 	? $] >= 5.015
@@ -580,7 +580,7 @@ do_test('reference to hash containing Unicode',
       PV = $ADDR "\\\310\\\200"\\\0 \[UTF8 "\\\x\{200\}"\]
       CUR = 2
       LEN = \\d+
-      COW_REFCNT = 1
+      COW_REFCNT = 1				# $] < 5.019007
 ',      '',
 	$] > 5.009
 	? $] >= 5.015
