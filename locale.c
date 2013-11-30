@@ -190,11 +190,11 @@ Perl_new_ctype(pTHX_ const char *newctype)
 
     PERL_ARGS_ASSERT_NEW_CTYPE;
 
-    for (i = 0; i ; i++) {
-	if (isUPPER_LC(i))
-	    PL_fold_locale[i] = toLOWER_LC(i);
-	else if (isLOWER_LC(i))
-	    PL_fold_locale[i] = toUPPER_LC(i);
+    for (i = 0; i < 256; i++) {
+	if (isUPPER_LC((U8) i))
+	    PL_fold_locale[i] = toLOWER_LC((U8) i);
+	else if (isLOWER_LC((U8) i))
+	    PL_fold_locale[i] = toUPPER_LC((U8) i);
 	else
 	    PL_fold_locale[i] = i;
     }
