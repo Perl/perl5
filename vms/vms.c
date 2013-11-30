@@ -4336,6 +4336,12 @@ safe_popen(pTHX_ const char *cmd, const char *in_mode, int *psts)
         
 
     } else if (*mode == 'n') {       /* separate subprocess, no Perl i/o */
+        /* Let the child inherit standard input, unless it's a directory. */
+        Stat_t st;
+        (void)my_trnlnm("SYS$INPUT", in, 0);
+        if (!flex_stat(in, &st) && S_ISDIR(st.st_mode))
+            *in = '\0';
+
         info->out = pipe_mbxtofd_setup(aTHX_ fileno(stdout), out);
         if (info->out) {
             info->out->pipe_done = &info->out_done;
