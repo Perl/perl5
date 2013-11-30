@@ -4324,9 +4324,10 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, SV* sstr, const I32 flags)
 	(void)SvPOK_only(dstr);
 
 	/* This long and winding if statement is laid out like this:
-	    if ( source cannot COW
+	    if ( source is not already a cow
+		   (or has reached its cow refcnt limit)
 	      && it is not swipable either (recording whether it is)
-	      && we cannot COW here (full check)
+	      && either source or destination cannot be upgraded to a cow
             ) {
 		just copy the string
 	    }
