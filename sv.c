@@ -52,7 +52,7 @@
 
 #define V_Gconvert(x,n,t,b) \
 { \
-    char *rc = Gconvert(x,n,t,b); \
+    char *rc = (char *)Gconvert(x,n,t,b); \
     PERL_UNUSED_VAR(rc); \
 }
 
