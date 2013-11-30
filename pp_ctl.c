@@ -838,7 +838,10 @@ PP(pp_formline)
 	    {
 		STORE_NUMERIC_STANDARD_SET_LOCAL();
 		arg &= ~(FORM_NUM_POINT|FORM_NUM_BLANK);
+                /* we generate fmt ourselves so it is safe */
+                GCC_DIAG_IGNORE(-Wformat-nonliteral);
 		my_snprintf(t, SvLEN(PL_formtarget) - (t - SvPVX(PL_formtarget)), fmt, (int) fieldsize, (int) arg, value);
+                GCC_DIAG_RESTORE;
 		RESTORE_NUMERIC_STANDARD();
 	    }
 	    t += fieldsize;
