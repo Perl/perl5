@@ -479,6 +479,7 @@ PP(pp_formline)
     STRLEN linemax;	    /* estimate of output size in bytes */
     bool item_is_utf8 = FALSE;
     bool targ_is_utf8 = FALSE;
+    const char *fmt;
     MAGIC *mg = NULL;
     U8 *source;		    /* source of bytes to append */
     STRLEN to_copy;	    /* how may bytes to append */
@@ -794,13 +795,28 @@ PP(pp_formline)
 	    }
 
 	case FF_0DECIMAL: /* like FF_DECIMAL but for 0### */
-	case FF_DECIMAL: /* do @##, ^##, where <arg>=(precision|flags) */
-        {
-            I32 form_num_point;
-
 	    arg = *fpc++;
-            form_num_point = (arg & FORM_NUM_POINT);
+#if defined(USE_LONG_DOUBLE)
+	    fmt = (const char *)
+		((arg & FORM_NUM_POINT) ?
+		 "%#0*.*" PERL_PRIfldbl : "%0*.*" PERL_PRIfldbl);
+#else
+	    fmt = (const char *)
+		((arg & FORM_NUM_POINT) ?
+		 "%#0*.*f"              : "%0*.*f");
+#endif
+	    goto ff_dec;
 
+	case FF_DECIMAL: /* do @##, ^##, where <arg>=(precision|flags) */
+	    arg = *fpc++;
+#if defined(USE_LONG_DOUBLE)
+ 	    fmt = (const char *)
+		((arg & FORM_NUM_POINT) ? "%#*.*" PERL_PRIfldbl : "%*.*" PERL_PRIfldbl);
+#else
+            fmt = (const char *)
+		((arg & FORM_NUM_POINT) ? "%#*.*f"              : "%*.*f");
+#endif
+	ff_dec:
 	    /* If the field is marked with ^ and the value is undefined,
 	       blank it out. */
 	    if ((arg & FORM_NUM_BLANK) && !SvOK(sv)) {
@@ -822,34 +838,11 @@ PP(pp_formline)
 	    {
 		STORE_NUMERIC_STANDARD_SET_LOCAL();
 		arg &= ~(FORM_NUM_POINT|FORM_NUM_BLANK);
-		my_snprintf(t,
-                            SvLEN(PL_formtarget) - (t - SvPVX(PL_formtarget)),
-                            (fpc[-2] == FF_0DECIMAL)
-                            ?
-                                form_num_point
-#if defined(USE_LONG_DOUBLE)
-                                    ? "%#0*.*" PERL_PRIfldbl
-                                    : "%0*.*" PERL_PRIfldbl
-#else
-		                    ? "%#0*.*f"
-                                    : "%0*.*f"
-#endif
-                            :
-                                form_num_point
-#if defined(USE_LONG_DOUBLE)
-                                    ? "%#*.*" PERL_PRIfldbl
-                                    : "%*.*" PERL_PRIfldbl
-#else
-                                    ? "%#*.*f"
-                                    : "%*.*f"
-#endif
-                            , (int) fieldsize, (int) arg, value);
-
+		my_snprintf(t, SvLEN(PL_formtarget) - (t - SvPVX(PL_formtarget)), fmt, (int) fieldsize, (int) arg, value);
 		RESTORE_NUMERIC_STANDARD();
 	    }
 	    t += fieldsize;
 	    break;
-        }
 
 	case FF_NEWLINE: /* delete trailing spaces, then append \n */
 	    f++;
