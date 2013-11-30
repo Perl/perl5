@@ -1,7 +1,7 @@
 package ExtUtils::MM_Any;
 
 use strict;
-our $VERSION = '6.82';
+our $VERSION = '6.84';
 
 use Carp;
 use File::Spec;
@@ -2154,6 +2154,10 @@ sub init_others {
     }
 
     if ( $self->{OBJECT} ) {
+        $self->{OBJECT} = join(" ", @{$self->{OBJECT}}) if ref $self->{OBJECT};
+        $self->{OBJECT} =~ s!\.o(bj)?\b!\$(OBJ_EXT)!g;
+    } elsif ( $self->{MAGICXS} && @{$self->{O_FILES}||[]} ) {
+        $self->{OBJECT} = join(" ", @{$self->{O_FILES}});
         $self->{OBJECT} =~ s!\.o(bj)?\b!\$(OBJ_EXT)!g;
     } else {
         # init_dirscan should have found out, if we have C files

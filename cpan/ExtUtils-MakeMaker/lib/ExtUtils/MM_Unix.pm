@@ -15,7 +15,7 @@ use ExtUtils::MakeMaker qw($Verbose neatvalue);
 
 # If we make $VERSION an our variable parse_version() breaks
 use vars qw($VERSION);
-$VERSION = '6.82';
+$VERSION = '6.84';
 $VERSION = eval $VERSION;  ## no critic [BuiltinFunctions::ProhibitStringyEval]
 
 require ExtUtils::MM_Any;
@@ -1266,7 +1266,7 @@ Called by init_main.
 
 sub init_dirscan {	# --- File and Directory Lists (.xs .pm .pod etc)
     my($self) = @_;
-    my(%dir, %xs, %c, %h, %pl_files, %pm);
+    my(%dir, %xs, %c, %o, %h, %pl_files, %pm);
 
     my %ignore = map {( $_ => 1 )} qw(Makefile.PL Build.PL test.pl t);
 
@@ -1274,10 +1274,21 @@ sub init_dirscan {	# --- File and Directory Lists (.xs .pm .pod etc)
     $Is{VMS} ? $ignore{"$self->{DISTVNAME}.dir"} = 1
             : $ignore{$self->{DISTVNAME}} = 1;
 
+    my $distprefix = $Is{VMS} ? qr/^\Q$self->{DISTNAME}\E-.*\.dir$/i
+                              : qr/^\Q$self->{DISTNAME}-/;
+
     @ignore{map lc, keys %ignore} = values %ignore if $Is{VMS};
+
+    if ( defined $self->{XS} and !defined $self->{C} ) {
+	my @c_files = grep { m/\.c(pp|xx)?\z/i } values %{$self->{XS}};
+	my @o_files = grep { m/(?:.(?:o(?:bj)?)|\$\(OBJ_EXT\))\z/i } values %{$self->{XS}};
+	%c = map { $_ => 1 } @c_files;
+	%o = map { $_ => 1 } @o_files;
+    }
 
     foreach my $name ($self->lsdir($Curdir)){
 	next if $name =~ /\#/;
+	next if $name =~ $distprefix;
 	$name = lc($name) if $Is{VMS};
 	next if $name eq $Curdir or $name eq $Updir or $ignore{$name};
 	next unless $self->libscan($name);
@@ -1319,7 +1330,8 @@ sub init_dirscan {	# --- File and Directory Lists (.xs .pm .pod etc)
     $self->{PM}         ||= \%pm;
 
     my @o_files = @{$self->{C}};
-    $self->{O_FILES} = [grep s/\.c(pp|xx|c)?\z/$self->{OBJ_EXT}/i, @o_files];
+    %o = (%o, map { $_ => 1 } grep s/\.c(pp|xx|c)?\z/$self->{OBJ_EXT}/i, @o_files);
+    $self->{O_FILES} = [sort keys %o];
 }
 
 

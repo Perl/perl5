@@ -18,7 +18,7 @@ our @Overridable;
 my @Prepend_parent;
 my %Recognized_Att_Keys;
 
-our $VERSION = '6.82';
+our $VERSION = '6.84';
 $VERSION = eval $VERSION;  ## no critic [BuiltinFunctions::ProhibitStringyEval]
 
 # Emulate something resembling CVS $Revision$
@@ -87,6 +87,7 @@ my %Special_Sigs = (
  MAN3PODS           => 'HASH',
  META_ADD           => 'HASH',
  META_MERGE         => 'HASH',
+ OBJECT             => ['ARRAY', ''],
  PL_FILES           => 'HASH',
  PM                 => 'HASH',
  PMLIBDIRS          => 'ARRAY',
@@ -278,7 +279,7 @@ sub full_setup {
     MYEXTLIB NAME NEEDS_LINKING NOECHO NO_META NO_MYMETA NO_PACKLIST NO_PERLLOCAL
     NORECURS NO_VC OBJECT OPTIMIZE PERL_MALLOC_OK PERL PERLMAINCC PERLRUN
     PERLRUNINST PERL_CORE
-    PERL_SRC PERM_DIR PERM_RW PERM_RWX
+    PERL_SRC PERM_DIR PERM_RW PERM_RWX MAGICXS
     PL_FILES PM PM_FILTER PMLIBDIRS PMLIBPARENTDIRS POLLUTE PPM_INSTALL_EXEC
     PPM_INSTALL_SCRIPT PREREQ_FATAL PREREQ_PM PREREQ_PRINT PRINT_PREREQ
     SIGN SKIP TEST_REQUIRES TYPEMAPS UNINST VERSION VERSION_FROM XS XSOPT XSPROTOARG
@@ -315,7 +316,7 @@ sub full_setup {
 
  special_targets
  c_o xs_c xs_o
- top_targets blibdirs linkext dlsyms dynamic dynamic_bs
+ top_targets blibdirs linkext dlsyms dynamic_bs dynamic
  dynamic_lib static static_lib manifypods processPL
  installbin subdirs
  clean_subdirs clean realclean_subdirs realclean
@@ -2084,6 +2085,10 @@ Defaults to "unknown".
 config.sh). Should only be used to force static linking (also see
 linkext below).
 
+=item MAGICXS
+
+When this is set to C<1>, C<OBJECT> will be automagically derived from C<XS>.
+
 =item MAKE
 
 Variant of make you intend to run the generated Makefile with.  This
@@ -2270,8 +2275,8 @@ Makefile.PL, use it interactively instead.
 =item OBJECT
 
 List of object files, defaults to '$(BASEEXT)$(OBJ_EXT)', but can be a long
-string containing all object files, e.g. "tkpBind.o
-tkpButton.o tkpCanvas.o"
+string or an array containing all object files, e.g. "tkpBind.o
+tkpButton.o tkpCanvas.o" or ["tkpBind.o", "tkpButton.o", "tkpCanvas.o"]
 
 (Where BASEEXT is the last component of NAME, and OBJ_EXT is $Config{obj_ext}.)
 

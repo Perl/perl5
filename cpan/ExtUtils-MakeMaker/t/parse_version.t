@@ -80,6 +80,10 @@ our $VERSION = 2.34;
 END
 }
 
+if ( $] > 5.009 && $] < 5.012 ) {
+  delete $versions{'$VERSION = -1.0'};
+}
+
 plan tests => (3 * keys %versions) + 4 + grep { !defined} (values %versions);
 
 for my $code ( sort keys %versions ) {
