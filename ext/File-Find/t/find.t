@@ -36,6 +36,8 @@ use Testing qw(
     create_file_ok
     mkdir_ok
     symlink_ok
+    dir_path
+    file_path
 );
 
 my %Expect_File = (); # what we expect for $_
@@ -211,65 +213,10 @@ sub my_postprocess {
     delete $Expect_Dir{ $File::Find::dir};
 }
 
-# Use dir_path() to specify a directory path that is expected for
-# $File::Find::dir (%Expect_Dir). Also use it in file operations like
-# chdir, rmdir etc.
-#
-# dir_path() concatenates directory names to form a *relative*
-# directory path, independent from the platform it is run on, although
-# there are limitations. Do not try to create an absolute path,
-# because that may fail on operating systems that have the concept of
-# volume names (e.g. Mac OS). As a special case, you can pass it a "."
-# as first argument, to create a directory path like "./fa/dir". If there is
-# no second argument, this function will return "./"
-
-sub dir_path {
-    my $first_arg = shift @_;
-
-    if ($first_arg eq '.') {
-        return './' unless @_;
-        my $path = File::Spec->catdir(@_);
-        # add leading "./"
-        $path = "./$path";
-        return $path;
-    }
-    else { # $first_arg ne '.'
-        return $first_arg unless @_; # return plain filename
-        return File::Spec->catdir($first_arg, @_); # relative path
-    }
-}
-
 # Use topdir() to specify a directory path that you want to pass to
 # find/finddepth. Historically topdir() differed on Mac OS classic.
 
 *topdir = \&dir_path;
-
-# Use file_path() to specify a file path that is expected for $_
-# (%Expect_File). Also suitable for file operations like unlink etc.
-#
-# file_path() concatenates directory names (if any) and a filename to
-# form a *relative* file path (the last argument is assumed to be a
-# file). It is independent from the platform it is run on, although
-# there are limitations. As a special case, you can pass it a "." as
-# first argument, to create a file path like "./fa/file" on operating
-# systems. If there is no second argument, this function will return the
-# string "./"
-
-sub file_path {
-    my $first_arg = shift @_;
-
-    if ($first_arg eq '.') {
-        return './' unless @_;
-        my $path = File::Spec->catfile(@_);
-        # add leading "./"
-        $path = "./$path";
-        return $path;
-    }
-    else { # $first_arg ne '.'
-        return $first_arg unless @_; # return plain filename
-        return File::Spec->catfile($first_arg, @_); # relative path
-    }
-}
 
 # Use file_path_name() to specify a file path that is expected for
 # $File::Find::Name (%Expect_Name). Note: When the no_chdir => 1

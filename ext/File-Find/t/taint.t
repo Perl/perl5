@@ -13,6 +13,8 @@ use Testing qw(
     create_file_ok
     mkdir_ok
     symlink_ok
+    dir_path
+    file_path
 );
 
 my %Expect_File = (); # what we expect for $_
@@ -139,70 +141,10 @@ sub simple_wanted {
     print "# \$_ => '$_'\n";
 }
 
-
-# Use dir_path() to specify a directory path that's expected for
-# $File::Find::dir (%Expect_Dir). Also use it in file operations like
-# chdir, rmdir etc.
-#
-# dir_path() concatenates directory names to form a *relative*
-# directory path, independent from the platform it's run on, although
-# there are limitations. Don't try to create an absolute path,
-# because that may fail on operating systems that have the concept of
-# volume names (e.g. Mac OS). As a special case, you can pass it a "."
-# as first argument, to create a directory path like "./fa/dir". If there's
-# no second argument this function will return the string "./"
-
-sub dir_path {
-    my $first_arg = shift @_;
-
-    if ($first_arg eq '.') {
-	return './' unless @_;
-	my $path = File::Spec->catdir(@_);
-	# add leading "./"
-	$path = "./$path";
-	return $path;
-    } else { # $first_arg ne '.'
-        return $first_arg unless @_; # return plain filename
-	my $fname = File::Spec->catdir($first_arg, @_); # relative path
-	$fname = VMS::Filespec::unixpath($fname) if $^O eq 'VMS';
-        return $fname;
-    }
-}
-
-
 # Use topdir() to specify a directory path that you want to pass to
 # find/finddepth. Historically topdir() differed on Mac OS classic.
 
 *topdir = \&dir_path;
-
-
-# Use file_path() to specify a file path that's expected for $_
-# (%Expect_File). Also suitable for file operations like unlink etc.
-#
-# file_path() concatenates directory names (if any) and a filename to
-# form a *relative* file path (the last argument is assumed to be a
-# file). It's independent from the platform it's run on, although
-# there are limitations. As a special case, you can pass it a "." as
-# first argument, to create a file path like "./fa/file". If there's no
-# second argument, this function will return the string "./" otherwise.
-
-sub file_path {
-    my $first_arg = shift @_;
-
-    if ($first_arg eq '.') {
-	return './' unless @_;
-	my $path = File::Spec->catfile(@_);
-	# add leading "./"
-	$path = "./$path";
-	return $path;
-    } else { # $first_arg ne '.'
-        return $first_arg unless @_; # return plain filename
-	my $fname = File::Spec->catfile($first_arg, @_); # relative path
-	$fname = VMS::Filespec::unixify($fname) if $^O eq 'VMS';
-        return $fname;
-    }
-}
-
 
 # Use file_path_name() to specify a file path that's expected for
 # $File::Find::Name (%Expect_Name). Note: When the no_chdir => 1
