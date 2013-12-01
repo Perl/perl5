@@ -155,7 +155,7 @@ sub symlink_ok($$;$) {
 }
 
 sub wanted_File_Dir {
-    printf "# \$File::Find::dir => '$File::Find::dir'\t\$_ => '$_'\n";
+    print "# \$File::Find::dir => '$File::Find::dir'\t\$_ => '$_'\n";
     s#\.$## if ($^O eq 'VMS' && $_ ne '.'); #
     s/(.dir)?$//i if ($^O eq 'VMS' && -d _);
     ok( $Expect_File{$_}, "found $_ for \$_, as expected" );

@@ -108,24 +108,30 @@ END {
     cleanup();
 }
 
-sub touch {
-    ok( open(my $T,'>',$_[0]), "Opened $_[0] successfully" );
+sub create_file_ok($;$) {
+    my $file = $_[0];
+    my $msg = $_[2] || "able to create file: $file";
+    ok( open(my $T,'>',$file), $msg )
+        or die("Unable to create file: $file");
 }
 
-sub MkDir($$) {
-    ok( mkdir($_[0],$_[1]), "Created directory $_[0] successfully" );
+sub mkdir_ok($$;$) {
+    my ($dir, $mask) = @_[0..1];
+    my $msg = $_[2] || "able to mkdir: $dir";
+    ok( mkdir($dir, $mask), $msg )
+        or die("Unable to mkdir: $dir");
 }
 
 sub wanted_File_Dir {
-    print "# \$File::Find::dir => '$File::Find::dir'\n";
-    print "# \$_ => '$_'\n";
-    s#\.$## if ($^O eq 'VMS' && $_ ne '.');
+    print "# \$File::Find::dir => '$File::Find::dir'\t\$_ => '$_'\n";
+    s#\.$## if ($^O eq 'VMS' && $_ ne '.'); #
     s/(.dir)?$//i if ($^O eq 'VMS' && -d _);
-	ok( $Expect_File{$_}, "Expected and found $File::Find::name" );
+    ok( $Expect_File{$_}, "found $_ for \$_, as expected" );
     if ( $FastFileTests_OK ) {
-        delete $Expect_File{ $_}
+        delete $Expect_File{$_}
           unless ( $Expect_Dir{$_} && ! -d _ );
-    } else {
+    }
+    else {
         delete $Expect_File{$_}
           unless ( $Expect_Dir{$_} && ! -d $_ );
     }
@@ -217,29 +223,29 @@ sub file_path {
 *file_path_name = \&file_path;
 
 
-MkDir( dir_path('for_find'), 0770 );
+mkdir_ok( dir_path('for_find'), 0770 );
 ok( chdir( dir_path('for_find')), 'successful chdir() to for_find' );
 
 $cwd = cwd(); # save cwd
 ( $cwd_untainted ) = $cwd =~ m|^(.+)$|; # untaint it
 
-MkDir( dir_path('fa'), 0770 );
-MkDir( dir_path('fb'), 0770  );
-touch( file_path('fb', 'fb_ord') );
-MkDir( dir_path('fb', 'fba'), 0770  );
-touch( file_path('fb', 'fba', 'fba_ord') );
+mkdir_ok( dir_path('fa'), 0770 );
+mkdir_ok( dir_path('fb'), 0770  );
+create_file_ok( file_path('fb', 'fb_ord') );
+mkdir_ok( dir_path('fb', 'fba'), 0770  );
+create_file_ok( file_path('fb', 'fba', 'fba_ord') );
 SKIP: {
 	skip "Creating symlink", 1, unless $symlink_exists;
 	ok( symlink('../fb','fa/fsl'), 'Created symbolic link' );
 }
-touch( file_path('fa', 'fa_ord') );
+create_file_ok( file_path('fa', 'fa_ord') );
 
-MkDir( dir_path('fa', 'faa'), 0770  );
-touch( file_path('fa', 'faa', 'faa_ord') );
-MkDir( dir_path('fa', 'fab'), 0770  );
-touch( file_path('fa', 'fab', 'fab_ord') );
-MkDir( dir_path('fa', 'fab', 'faba'), 0770  );
-touch( file_path('fa', 'fab', 'faba', 'faba_ord') );
+mkdir_ok( dir_path('fa', 'faa'), 0770  );
+create_file_ok( file_path('fa', 'faa', 'faa_ord') );
+mkdir_ok( dir_path('fa', 'fab'), 0770  );
+create_file_ok( file_path('fa', 'fab', 'fab_ord') );
+mkdir_ok( dir_path('fa', 'fab', 'faba'), 0770  );
+create_file_ok( file_path('fa', 'fab', 'faba', 'faba_ord') );
 
 print "# check untainting (no follow)\n";
 
