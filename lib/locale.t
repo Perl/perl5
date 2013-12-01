@@ -683,7 +683,7 @@ my %Testing;
 my @Added_alpha;   # Alphas that aren't in the C locale.
 my %test_names;
 
-sub display_characters {
+sub disp_chars {
     # This returns a display string denoting the input parameter @_, each
     # entry of which is a single character in the range 0-255.  The first part
     # of the output is a string of the characters in @_ that are ASCII
@@ -782,7 +782,7 @@ sub report_multi_result {
 
     my $message = "";
     if (@$results_ref) {
-        $message = join " ", "for", display_characters(@$results_ref);
+        $message = join " ", "for", disp_chars(@$results_ref);
     }
     report_result($Locale, $i, @$results_ref == 0, $message);
 }
@@ -878,21 +878,21 @@ foreach $Locale (@Locale) {
 
     # Ordered, where possible,  in groups of "this is a subset of the next
     # one"
-    debug "# :upper:  = ", display_characters(@{$posixes{'upper'}}), "\n";
-    debug "# :lower:  = ", display_characters(@{$posixes{'lower'}}), "\n";
-    debug "# :cased:  = ", display_characters(@{$posixes{'cased'}}), "\n";
-    debug "# :alpha:  = ", display_characters(@{$posixes{'alpha'}}), "\n";
-    debug "# :alnum:  = ", display_characters(@{$posixes{'alnum'}}), "\n";
-    debug "#  w       = ", display_characters(@{$posixes{'word'}}), "\n";
-    debug "# :graph:  = ", display_characters(@{$posixes{'graph'}}), "\n";
-    debug "# :print:  = ", display_characters(@{$posixes{'print'}}), "\n";
-    debug "#  d       = ", display_characters(@{$posixes{'digit'}}), "\n";
-    debug "# :xdigit: = ", display_characters(@{$posixes{'xdigit'}}), "\n";
-    debug "# :blank:  = ", display_characters(@{$posixes{'blank'}}), "\n";
-    debug "#  s       = ", display_characters(@{$posixes{'space'}}), "\n";
-    debug "# :punct:  = ", display_characters(@{$posixes{'punct'}}), "\n";
-    debug "# :cntrl:  = ", display_characters(@{$posixes{'cntrl'}}), "\n";
-    debug "# :ascii:  = ", display_characters(@{$posixes{'ascii'}}), "\n";
+    debug "# :upper:  = ", disp_chars(@{$posixes{'upper'}}), "\n";
+    debug "# :lower:  = ", disp_chars(@{$posixes{'lower'}}), "\n";
+    debug "# :cased:  = ", disp_chars(@{$posixes{'cased'}}), "\n";
+    debug "# :alpha:  = ", disp_chars(@{$posixes{'alpha'}}), "\n";
+    debug "# :alnum:  = ", disp_chars(@{$posixes{'alnum'}}), "\n";
+    debug "#  w       = ", disp_chars(@{$posixes{'word'}}), "\n";
+    debug "# :graph:  = ", disp_chars(@{$posixes{'graph'}}), "\n";
+    debug "# :print:  = ", disp_chars(@{$posixes{'print'}}), "\n";
+    debug "#  d       = ", disp_chars(@{$posixes{'digit'}}), "\n";
+    debug "# :xdigit: = ", disp_chars(@{$posixes{'xdigit'}}), "\n";
+    debug "# :blank:  = ", disp_chars(@{$posixes{'blank'}}), "\n";
+    debug "#  s       = ", disp_chars(@{$posixes{'space'}}), "\n";
+    debug "# :punct:  = ", disp_chars(@{$posixes{'punct'}}), "\n";
+    debug "# :cntrl:  = ", disp_chars(@{$posixes{'cntrl'}}), "\n";
+    debug "# :ascii:  = ", disp_chars(@{$posixes{'ascii'}}), "\n";
 
     foreach (keys %UPPER) {
 
@@ -916,10 +916,10 @@ foreach $Locale (@Locale) {
         }
     }
 
-    debug "# UPPER    = ", display_characters(keys %UPPER), "\n";
-    debug "# lower    = ", display_characters(keys %lower), "\n";
-    debug "# BoThCaSe = ", display_characters(keys %BoThCaSe), "\n";
-    debug "# Unassigned = ", display_characters(sort { ord $a <=> ord $b } keys %Unassigned), "\n";
+    debug "# UPPER    = ", disp_chars(keys %UPPER), "\n";
+    debug "# lower    = ", disp_chars(keys %lower), "\n";
+    debug "# BoThCaSe = ", disp_chars(keys %BoThCaSe), "\n";
+    debug "# Unassigned = ", disp_chars(sort { ord $a <=> ord $b } keys %Unassigned), "\n";
 
     my @failures;
     my @fold_failures;
@@ -990,7 +990,7 @@ foreach $Locale (@Locale) {
 
     @Added_alpha = sort @Added_alpha;
 
-    debug "# Added_alpha = ", display_characters(@Added_alpha), "\n";
+    debug "# Added_alpha = ", disp_chars(@Added_alpha), "\n";
 
     # Cross-check the whole 8-bit character set.
 
