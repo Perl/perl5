@@ -25,6 +25,7 @@ BEGIN {
 use strict;
 use feature 'fc';
 
+# =1 adds debugging output; =2 increases the verbosity somewhat
 my $debug = $ENV{PERL_DEBUG_FULL_TEST} // 0;
 
 # Certain tests have been shown to be problematical for a few locales.  Don't
@@ -47,6 +48,11 @@ sub debug {
   my($mess) = join "", @_;
   chop $mess;
   print $dumper->stringify($mess,1), "\n";
+}
+
+sub debug_more {
+  return unless $debug > 1;
+  return debug(@_);
 }
 
 sub debugf {
@@ -1850,9 +1856,14 @@ foreach $Locale (@Locale) {
             if (! $is_utf8_locale) {
                 my $y = lc $x;
                 next unless uc $y eq $x;
-                print "# UPPER $x lc $y ",
-                        $x =~ /$y/i ? 1 : 0, " ",
-                        $y =~ /$x/i ? 1 : 0, "\n" if 0;
+                debug_more( "# UPPER=", disp_chars(($x)),
+                            "; lc=", disp_chars(($y)), "; ",
+                            disp_chars(($x)), "=~/", disp_chars(($y)), "/i=",
+                            $x =~ /$y/i ? 1 : 0,
+                            "; ",
+                            disp_chars(($y)), "=~/", disp_chars(($x)), "/i=",
+                            $y =~ /$x/i ? 1 : 0,
+                            "\n");
                 #
                 # If $x and $y contain regular expression characters
                 # AND THEY lowercase (/i) to regular expression characters,
@@ -1892,9 +1903,14 @@ foreach $Locale (@Locale) {
                 use locale ':not_characters';
                 my $y = lc $x;
                 next unless uc $y eq $x;
-                print "# UPPER $x lc $y ",
-                        $x =~ /$y/i ? 1 : 0, " ",
-                        $y =~ /$x/i ? 1 : 0, "\n" if 0;
+                debug_more( "# UPPER=", disp_chars(($x)),
+                            "; lc=", disp_chars(($y)), "; ",
+                            disp_chars(($x)), "=~/", disp_chars(($y)), "/i=",
+                            $x =~ /$y/i ? 1 : 0,
+                            "; ",
+                            disp_chars(($y)), "=~/", disp_chars(($x)), "/i=",
+                            $y =~ /$x/i ? 1 : 0,
+                            "\n");
 
                 # Here, we can fully test things, unlike plain 'use locale',
                 # because this form does work well with Unicode
@@ -1910,9 +1926,14 @@ foreach $Locale (@Locale) {
             if (! $is_utf8_locale) {
                 my $y = uc $x;
                 next unless lc $y eq $x;
-                print "# lower $x uc $y ",
-                    $x =~ /$y/i ? 1 : 0, " ",
-                    $y =~ /$x/i ? 1 : 0, "\n" if 0;
+                debug_more( "# lower=", disp_chars(($x)),
+                            "; uc=", disp_chars(($y)), "; ",
+                            disp_chars(($x)), "=~/", disp_chars(($y)), "/i=",
+                            $x =~ /$y/i ? 1 : 0,
+                            "; ",
+                            disp_chars(($y)), "=~/", disp_chars(($x)), "/i=",
+                            $y =~ /$x/i ? 1 : 0,
+                            "\n");
                 if ($x =~ $re || $y =~ $re) { # See above.
                     print "# Regex characters in '$x' or '$y', skipping test $locales_test_number for locale '$Locale'\n";
                     next;
@@ -1927,9 +1948,14 @@ foreach $Locale (@Locale) {
                 use locale ':not_characters';
                 my $y = uc $x;
                 next unless lc $y eq $x;
-                print "# lower $x uc $y ",
-                        $x =~ /$y/i ? 1 : 0, " ",
-                        $y =~ /$x/i ? 1 : 0, "\n" if 0;
+                debug_more( "# lower=", disp_chars(($x)),
+                            "; uc=", disp_chars(($y)), "; ",
+                            disp_chars(($x)), "=~/", disp_chars(($y)), "/i=",
+                            $x =~ /$y/i ? 1 : 0,
+                            "; ",
+                            disp_chars(($y)), "=~/", disp_chars(($x)), "/i=",
+                            $y =~ /$x/i ? 1 : 0,
+                            "\n");
                 push @f, $x unless $x =~ /$y/i && $y =~ /$x/i;
 
                 push @f, $x unless lc $x eq fc $x;
