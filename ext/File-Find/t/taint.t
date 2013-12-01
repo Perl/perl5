@@ -8,6 +8,12 @@ BEGIN {
         : (skip_all => "A perl without taint support") 
     );
 }
+use lib qw( ./t/lib );
+use Testing qw(
+    create_file_ok
+    mkdir_ok
+    symlink_ok
+);
 
 my %Expect_File = (); # what we expect for $_
 my %Expect_Name = (); # what we expect for $File::Find::name/fullname
@@ -106,20 +112,6 @@ sub cleanup {
 
 END {
     cleanup();
-}
-
-sub create_file_ok($;$) {
-    my $file = $_[0];
-    my $msg = $_[2] || "able to create file: $file";
-    ok( open(my $T,'>',$file), $msg )
-        or die("Unable to create file: $file");
-}
-
-sub mkdir_ok($$;$) {
-    my ($dir, $mask) = @_[0..1];
-    my $msg = $_[2] || "able to mkdir: $dir";
-    ok( mkdir($dir, $mask), $msg )
-        or die("Unable to mkdir: $dir");
 }
 
 sub wanted_File_Dir {
