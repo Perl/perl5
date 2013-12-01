@@ -10,33 +10,6 @@
 /* This file is prepared by mkheader */
 #include "ucatbl.h"
 
-/* Perl 5.6.1 ? */
-#ifndef utf8n_to_uvuni
-#define utf8n_to_uvuni  utf8_to_uv
-#endif /* utf8n_to_uvuni */
-
-/* UTF8_ALLOW_BOM is used before Perl 5.8.0 */
-#ifndef UTF8_ALLOW_BOM
-#define UTF8_ALLOW_BOM  (0)
-#endif /* UTF8_ALLOW_BOM */
-
-#ifndef UTF8_ALLOW_SURROGATE
-#define UTF8_ALLOW_SURROGATE  (0)
-#endif /* UTF8_ALLOW_SURROGATE */
-
-#ifndef UTF8_ALLOW_FE_FF
-#define UTF8_ALLOW_FE_FF  (0)
-#endif /* UTF8_ALLOW_FE_FF */
-
-#ifndef UTF8_ALLOW_FFFF
-#define UTF8_ALLOW_FFFF  (0)
-#endif /* UTF8_ALLOW_FFFF */
-
-#define AllowAnyUTF (UTF8_ALLOW_SURROGATE|UTF8_ALLOW_BOM|UTF8_ALLOW_FE_FF|UTF8_ALLOW_FFFF)
-
-/* if utf8n_to_uvuni() sets retlen to 0 (?) */
-#define ErrRetlenIsZero "panic (Unicode::Collate): zero-length character"
-
 /* At present, char > 0x10ffff are unaffected without complaint, right? */
 #define VALID_UTF_MAX    (0x10ffff)
 #define OVER_UTF_MAX(uv) (VALID_UTF_MAX < (uv))
@@ -211,7 +184,7 @@ _isIllegal (sv)
     uv = SvUVX(sv);
     RETVAL = boolSV(
 	   0x10FFFF < uv                   /* out of range */
-	|| ((uv & 0xFFFE) == 0xFFFE)       /* ??FFF[EF] (cf. utf8.c) */
+	|| ((uv & 0xFFFE) == 0xFFFE)       /* ??FFF[EF] */
 	|| (0xD800 <= uv && uv <= 0xDFFF)  /* unpaired surrogates */
 	|| (0xFDD0 <= uv && uv <= 0xFDEF)  /* other non-characters */
     );
@@ -684,31 +657,4 @@ visualizeSortKey (self, key)
     RETVAL = dst;
 OUTPUT:
     RETVAL
-
-
-
-void
-unpack_U (src)
-    SV* src
-  PREINIT:
-    STRLEN srclen, retlen;
-    U8 *s, *p, *e;
-    UV uv;
-  PPCODE:
-    s = (U8*)SvPV(src,srclen);
-    if (!SvUTF8(src)) {
-	SV* tmpsv = sv_mortalcopy(src);
-	if (!SvPOK(tmpsv))
-	    (void)sv_pvn_force(tmpsv,&srclen);
-	sv_utf8_upgrade(tmpsv);
-	s = (U8*)SvPV(tmpsv,srclen);
-    }
-    e = s + srclen;
-
-    for (p = s; p < e; p += retlen) {
-	uv = utf8n_to_uvuni(p, e - p, &retlen, AllowAnyUTF);
-	if (!retlen)
-	    croak(ErrRetlenIsZero);
-	XPUSHs(sv_2mortal(newSVuv(uv)));
-    }
 

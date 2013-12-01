@@ -17,7 +17,7 @@ use File::Spec;
 
 no warnings 'utf8';
 
-our $VERSION = '1.02';
+our $VERSION = '1.03';
 our $PACKAGE = __PACKAGE__;
 
 ### begin XS only ###
@@ -97,6 +97,10 @@ sub Base_Unicode_Version { "6.3.0" }
 
 sub pack_U {
     return pack('U*', @_);
+}
+
+sub unpack_U {
+    return unpack('U*', shift(@_).pack('U*'));
 }
 
 ######
