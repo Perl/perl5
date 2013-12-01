@@ -1899,9 +1899,7 @@ foreach $Locale (@Locale) {
                     print "# Regex characters in '$x' or '$y', skipping test $locales_test_number for locale '$Locale'\n";
                     next;
                 }
-                # With utf8 both will fail since the locale concept
-                # of upper/lower does not work well in Unicode.
-                push @f, $x unless $x =~ /$y/i == $y =~ /$x/i;
+                push @f, $x unless $x =~ /$y/i && $y =~ /$x/i;
 
                 # fc is not a locale concept, so Perl uses lc for it.
                 push @f, $x unless lc $x eq fc $x;
@@ -1920,8 +1918,6 @@ foreach $Locale (@Locale) {
                             $y =~ /$x/i ? 1 : 0,
                             "\n");
 
-                # Here, we can fully test things, unlike plain 'use locale',
-                # because this form does work well with Unicode
                 push @f, $x unless $x =~ /$y/i && $y =~ /$x/i;
 
                 # The places where Unicode's lc is different from fc are
@@ -1947,9 +1943,7 @@ foreach $Locale (@Locale) {
                     print "# Regex characters in '$x' or '$y', skipping test $locales_test_number for locale '$Locale'\n";
                     next;
                 }
-                # With utf8 both will fail since the locale concept
-                # of upper/lower does not work well in Unicode.
-                push @f, $x unless $x =~ /$y/i == $y =~ /$x/i;
+                push @f, $x unless $x =~ /$y/i && $y =~ /$x/i;
 
                 push @f, $x unless lc $x eq fc $x;
             }
