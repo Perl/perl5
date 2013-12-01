@@ -32,6 +32,10 @@ C<B::SPECIAL> object in this case.  [perl #119413]
 L<English> has been upgraded from version 1.06 to 1.06_01.  This fixes an
 error about the performance of C<$`>, C<$&>, and c<$'>.
 
+=item *
+
+L<File::Glob> has been upgraded from version 1.20 to 1.20_01.
+
 =back
 
 =head1 Selected Bug Fixes
