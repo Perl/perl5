@@ -55,7 +55,10 @@ Perl_taint_proper(pTHX_ const char *f, const char *const s)
         else
 	    ug = " while running with -T switch";
 
-        GCC_DIAG_IGNORE(-Wformat-nonliteral); /* fmt checked by caller */
+        /* XXX because taint_proper adds extra format args, we can't
+         * get the caller to check properly; o we just silence the warning
+         * and hope the callers aren't naughty */
+        GCC_DIAG_IGNORE(-Wformat-nonliteral);
 	if (PL_unsafe || TAINT_WARN_get) {
 	    Perl_ck_warner_d(aTHX_ packWARN(WARN_TAINT), f, s, ug);
         }

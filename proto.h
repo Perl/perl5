@@ -4647,7 +4647,6 @@ PERL_CALLCONV void	Perl_sys_init3(int* argc, char*** argv, char*** env)
 PERL_CALLCONV void	Perl_sys_term(void);
 PERL_CALLCONV void	Perl_taint_env(pTHX);
 PERL_CALLCONV void	Perl_taint_proper(pTHX_ const char* f, const char *const s)
-			__attribute__format__null_ok__(__printf__,pTHX_1,0)
 			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_TAINT_PROPER	\
 	assert(s)

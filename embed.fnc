@@ -1502,7 +1502,7 @@ EXMp	|void	|_invlist_dump	|NN PerlIO *file|I32 level   \
 				|NN SV* const invlist
 #endif
 Ap	|void	|taint_env
-Afp	|void	|taint_proper	|NULLOK const char* f|NN const char *const s
+Ap	|void	|taint_proper	|NULLOK const char* f|NN const char *const s
 Apd	|UV	|to_utf8_case	|NN const U8 *p|NN U8* ustrp|NULLOK STRLEN *lenp \
 				|NN SV **swashp|NN const char *normal|NULLOK const char *special
 Abmd	|UV	|to_utf8_lower	|NN const U8 *p|NN U8* ustrp|NULLOK STRLEN *lenp
