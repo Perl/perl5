@@ -1858,6 +1858,7 @@ foreach $Locale (@Locale) {
                 next unless uc $y eq $x;
                 debug_more( "# UPPER=", disp_chars(($x)),
                             "; lc=", disp_chars(($y)), "; ",
+                            "; fc=", disp_chars((fc $x)), "; ",
                             disp_chars(($x)), "=~/", disp_chars(($y)), "/i=",
                             $x =~ /$y/i ? 1 : 0,
                             "; ",
@@ -1905,6 +1906,7 @@ foreach $Locale (@Locale) {
                 next unless uc $y eq $x;
                 debug_more( "# UPPER=", disp_chars(($x)),
                             "; lc=", disp_chars(($y)), "; ",
+                            "; fc=", disp_chars((fc $x)), "; ",
                             disp_chars(($x)), "=~/", disp_chars(($y)), "/i=",
                             $x =~ /$y/i ? 1 : 0,
                             "; ",
@@ -1928,6 +1930,7 @@ foreach $Locale (@Locale) {
                 next unless lc $y eq $x;
                 debug_more( "# lower=", disp_chars(($x)),
                             "; uc=", disp_chars(($y)), "; ",
+                            "; fc=", disp_chars((fc $x)), "; ",
                             disp_chars(($x)), "=~/", disp_chars(($y)), "/i=",
                             $x =~ /$y/i ? 1 : 0,
                             "; ",
@@ -1950,6 +1953,7 @@ foreach $Locale (@Locale) {
                 next unless lc $y eq $x;
                 debug_more( "# lower=", disp_chars(($x)),
                             "; uc=", disp_chars(($y)), "; ",
+                            "; fc=", disp_chars((fc $x)), "; ",
                             disp_chars(($x)), "=~/", disp_chars(($y)), "/i=",
                             $x =~ /$y/i ? 1 : 0,
                             "; ",
