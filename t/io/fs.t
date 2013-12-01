@@ -457,11 +457,9 @@ ok(-d $tmpdir1, "rename on directories working");
     ok(1, "extend sp in pp_chown");
 }
 
-# Calling unlink on a directory as root without -U will always fail, but
+# Calling unlink on a directory without -U and privileges will always fail, but
 # it should set errno to EISDIR even though unlink(2) is never called.
-SKIP: {
-    skip "only test unlink(dir) when running as root", 3 if $> != 0;
-
+{
     require Errno;
 
     my $tmpdir = tempfile();
@@ -477,15 +475,15 @@ SKIP: {
 
     # errno should be set even though unlink(2) is not called
     local $!;
-    is(unlink($tmpdir), 0, "can't unlink directory as root without -U");
-    is(0+$!, Errno::EISDIR(), "unlink directory as root without -U sets errno");
+    is(unlink($tmpdir), 0, "can't unlink directory without -U and privileges");
+    is(0+$!, Errno::EISDIR(), "unlink directory without -U sets errno");
 
     rmdir $tmpdir;
 
     # errno should be set by failed lstat(2) call
     $! = 0;
     unlink($tmpdir);
-    is(0+$!, Errno::ENOENT(), "unlink non-existent directory as root without -U sets ENOENT");
+    is(0+$!, Errno::ENOENT(), "unlink non-existent directory without -U sets ENOENT");
 }
 
 # need to remove $tmpdir if rename() in test 28 failed!

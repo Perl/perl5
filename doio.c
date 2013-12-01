@@ -1816,7 +1816,7 @@ nothing in the core.
 	    if (!IS_SAFE_PATHNAME(s, len, "unlink")) {
                 tot--;
             }
-	    else if (PerlProc_geteuid() || PL_unsafe) {
+	    else if (PL_unsafe) {
 		if (UNLINK(s))
 		    tot--;
 	    }
