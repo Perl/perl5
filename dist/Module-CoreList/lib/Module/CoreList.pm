@@ -8051,6 +8051,7 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         changed => {
             'B'                     => '1.42_02',
             'Config'                => '5.018002',
+            'File::Glob'            => '1.20_01',
             'Module::CoreList'      => '3.03',
             'Module::CoreList::TieHashDelta'=> '3.03',
             'Module::CoreList::Utils'=> '3.03',
