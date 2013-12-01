@@ -4305,78 +4305,60 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, SV* sstr, const I32 flags)
 	reg_temp_copy((REGEXP*)dstr, (REGEXP*)sstr);
     }
     else if (sflags & SVp_POK) {
-        bool isSwipe = 0;
 	const STRLEN cur = SvCUR(sstr);
 	const STRLEN len = SvLEN(sstr);
 
 	/*
-	 * Check to see if we can just swipe the string.  If so, it's a
-	 * possible small lose on short strings, but a big win on long ones.
-	 * It might even be a win on short strings if SvPVX_const(dstr)
-	 * has to be allocated and SvPVX_const(sstr) has to be freed.
-	 * Likewise if we can set up COW rather than doing an actual copy, we
-	 * drop to the else clause, as the swipe code and the COW setup code
-	 * have much in common.
+	 * We have three basic ways to copy the string:
+	 *
+	 *  1. Swipe
+	 *  2. Copy-on-write
+	 *  3. Actual copy
+	 * 
+	 * Which we choose is based on various factors.  The following
+	 * things are listed in order of speed, fastest to slowest:
+	 *  - Swipe
+	 *  - Copying a short string
+	 *  - Copy-on-write bookkeeping
+	 *  - malloc
+	 *  - Copying a long string
+	 * 
+	 * We swipe the string (steal the string buffer) if the SV on the
+	 * rhs is about to be freed anyway (TEMP and refcnt==1).  This is a
+	 * big win on long strings.  It should be a win on short strings if
+	 * SvPVX_const(dstr) has to be allocated.  If not, it should not 
+	 * slow things down, as SvPVX_const(sstr) would have been freed
+	 * soon anyway.
+	 * 
+	 * We also steal the buffer from a PADTMP (operator target) if it
+	 * is ‘long enough’.  For short strings, a swipe does not help
+	 * here, as it causes more malloc calls the next time the target
+	 * is used.  Benchmarks show that even if SvPVX_const(dstr) has to
+	 * be allocated it is still not worth swiping PADTMPs for short
+	 * strings, as the savings here are small.
+	 * 
+	 * If the rhs is already flagged as a copy-on-write string and COW
+	 * is possible here, we use copy-on-write and make both SVs share
+	 * the string buffer.
+	 * 
+	 * If the rhs is not flagged as copy-on-write, then we see whether
+	 * it is worth upgrading it to such.  If the lhs already has a buf-
+	 * fer big enough and the string is short, we skip it and fall back
+	 * to method 3, since memcpy is faster for short strings than the
+	 * later bookkeeping overhead that copy-on-write entails.
+	 * 
+	 * If there is no buffer on the left, or the buffer is too small,
+	 * then we use copy-on-write.
 	 */
 
 	/* Whichever path we take through the next code, we want this true,
 	   and doing it now facilitates the COW check.  */
 	(void)SvPOK_only(dstr);
 
-	/* This long and winding if statement is laid out like this:
-	    if ( source is not already a cow
-		   (or has reached its cow refcnt limit)
-	      && it is not swipable either (recording whether it is)
-	      && either source or destination cannot be upgraded to a cow
-            ) {
-		just copy the string
-	    }
-	    else {
-		swipe or cow
-	    }
-	*/
 	if (
-	    /* If we're already COW then this clause is not true, and if COW
-	       is allowed then we drop down to the else and make dest COW 
-	       with us.  If caller hasn't said that we're allowed to COW
-	       shared hash keys then we don't do the COW setup, even if the
-	       source scalar is a shared hash key scalar.  */
-            (((flags & SV_COW_SHARED_HASH_KEYS)
-	       ? !(sflags & SVf_IsCOW)
-#ifdef PERL_NEW_COPY_ON_WRITE
-		|| (len &&
-		    ((!GE_COWBUF_THRESHOLD(cur) && SvLEN(dstr) > cur)
-		   /* If this is a regular (non-hek) COW, only so many COW
-		      "copies" are possible. */
-		    || CowREFCNT(sstr) == SV_COW_REFCNT_MAX))
-#endif
-	       : 1 /* If making a COW copy is forbidden then the behaviour we
-		       desire is as if the source SV isn't actually already
-		       COW, even if it is.  So we act as if the source flags
-		       are not COW, rather than actually testing them.  */
-	      )
-#ifndef PERL_ANY_COW
-	     /* The change that added SV_COW_SHARED_HASH_KEYS makes the logic
-		when PERL_OLD_COPY_ON_WRITE is defined a little wrong.
-		Conceptually PERL_OLD_COPY_ON_WRITE being defined should
-		override SV_COW_SHARED_HASH_KEYS, because it means "always COW"
-		but in turn, it's somewhat dead code, never expected to go
-		live, but more kept as a placeholder on how to do it better
-		in a newer implementation.  */
-	     /* If we are COW and dstr is a suitable target then we drop down
-		into the else and make dest a COW of us.  */
-	     || (SvFLAGS(dstr) & SVf_BREAK)
-#endif
-	     )
-            &&
-            !(isSwipe =
                  (              /* Either ... */
-#ifdef PERL_NEW_COPY_ON_WRITE
 				/* slated for free anyway (and not COW)? */
                     (sflags & (SVs_TEMP|SVf_IsCOW)) == SVs_TEMP
-#else
-                    (sflags & SVs_TEMP)   /* slated for free anyway? */
-#endif
                                 /* or a swipable TARG */
                  || ((sflags & (SVs_PADTMP|SVf_READONLY|SVf_IsCOW))
                        == SVs_PADTMP
@@ -4389,41 +4371,55 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, SV* sstr, const I32 flags)
 					/* and we're allowed to steal temps */
                  SvREFCNT(sstr) == 1 &&   /* and no other references to it? */
                  len)             /* and really is a string */
-#ifdef PERL_ANY_COW
-            && ((flags & SV_COW_SHARED_HASH_KEYS)
-		? (!((sflags & CAN_COW_MASK) == CAN_COW_FLAGS
-# ifdef PERL_OLD_COPY_ON_WRITE
+	{	/* Passes the swipe test.  */
+	    if (SvPVX_const(dstr))	/* we know that dtype >= SVt_PV */
+		SvPV_free(dstr);
+	    SvPV_set(dstr, SvPVX_mutable(sstr));
+	    SvLEN_set(dstr, SvLEN(sstr));
+	    SvCUR_set(dstr, SvCUR(sstr));
+
+	    SvTEMP_off(dstr);
+	    (void)SvOK_off(sstr);	/* NOTE: nukes most SvFLAGS on sstr */
+	    SvPV_set(sstr, NULL);
+	    SvLEN_set(sstr, 0);
+	    SvCUR_set(sstr, 0);
+	    SvTEMP_off(sstr);
+        }
+	else if (flags & SV_COW_SHARED_HASH_KEYS
+	      &&
+#ifdef PERL_OLD_COPY_ON_WRITE
+		 (  sflags & SVf_IsCOW
+		 || (   (sflags & CAN_COW_MASK) == CAN_COW_FLAGS
 		     && (SvFLAGS(dstr) & CAN_COW_MASK) == CAN_COW_FLAGS
 		     && SvTYPE(sstr) >= SVt_PVIV && len
-# else
+		    )
+		 )
+#elif defined(PERL_NEW_COPY_ON_WRITE)
+		 (sflags & SVf_IsCOW
+		   ? (!len ||
+		       (  (GE_COWBUF_THRESHOLD(cur) || SvLEN(dstr) < cur+1)
+			  /* If this is a regular (non-hek) COW, only so
+			     many COW "copies" are possible. */
+		       && CowREFCNT(sstr) != SV_COW_REFCNT_MAX  ))
+		   : (  (sflags & CAN_COW_MASK) == CAN_COW_FLAGS
 		     && !(SvFLAGS(dstr) & SVf_BREAK)
-		     && !(sflags & SVf_IsCOW)
 		     && GE_COW_THRESHOLD(cur) && cur+1 < len
 		     && (GE_COWBUF_THRESHOLD(cur) || SvLEN(dstr) < cur+1)
-# endif
 		    ))
-		: 1)
+#else
+		 sflags & SVf_IsCOW
+	      && !(SvFLAGS(dstr) & SVf_BREAK)
 #endif
             ) {
-            /* Failed the swipe test, and it's not a shared hash key either.
-               Have to copy the string.  */
-            SvGROW(dstr, cur + 1);	/* inlined from sv_setpvn */
-            Move(SvPVX_const(sstr),SvPVX(dstr),cur,char);
-            SvCUR_set(dstr, cur);
-            *SvEND(dstr) = '\0';
-        } else {
-            /* If PERL_OLD_COPY_ON_WRITE is not defined, then isSwipe will always
-               be true in here.  */
             /* Either it's a shared hash key, or it's suitable for
-               copy-on-write or we can swipe the string.  */
+               copy-on-write.  */
             if (DEBUG_C_TEST) {
                 PerlIO_printf(Perl_debug_log, "Copy on write: sstr --> dstr\n");
                 sv_dump(sstr);
                 sv_dump(dstr);
             }
 #ifdef PERL_ANY_COW
-            if (!isSwipe) {
-                if (!(sflags & SVf_IsCOW)) {
+            if (!(sflags & SVf_IsCOW)) {
                     SvIsCOW_on(sstr);
 # ifdef PERL_OLD_COPY_ON_WRITE
                     /* Make the source SV into a loop of 1.
@@ -4432,18 +4428,14 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, SV* sstr, const I32 flags)
 # else
 		    CowREFCNT(sstr) = 0;
 # endif
-                }
             }
 #endif
-            /* Initial code is common.  */
 	    if (SvPVX_const(dstr)) {	/* we know that dtype >= SVt_PV */
 		SvPV_free(dstr);
 	    }
 
-            if (!isSwipe) {
-                /* making another shared SV.  */
 #ifdef PERL_ANY_COW
-                if (len) {
+	    if (len) {
 # ifdef PERL_OLD_COPY_ON_WRITE
 		    assert (SvTYPE(dstr) >= SVt_PVIV);
                     /* SvIsCOW_normal */
@@ -4454,9 +4446,9 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, SV* sstr, const I32 flags)
 		    CowREFCNT(sstr)++;
 # endif
                     SvPV_set(dstr, SvPVX_mutable(sstr));
-                } else
+            } else
 #endif
-		{
+            {
                     /* SvIsCOW_shared_hash */
                     DEBUG_C(PerlIO_printf(Perl_debug_log,
                                           "Copy on write: Sharing hash\n"));
@@ -4464,24 +4456,17 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, SV* sstr, const I32 flags)
 		    assert (SvTYPE(dstr) >= SVt_PV);
                     SvPV_set(dstr,
 			     HEK_KEY(share_hek_hek(SvSHARED_HEK_FROM_PV(SvPVX_const(sstr)))));
-		}
-                SvLEN_set(dstr, len);
-                SvCUR_set(dstr, cur);
-                SvIsCOW_on(dstr);
-            }
-            else
-                {	/* Passes the swipe test.  */
-                SvPV_set(dstr, SvPVX_mutable(sstr));
-                SvLEN_set(dstr, SvLEN(sstr));
-                SvCUR_set(dstr, SvCUR(sstr));
-
-                SvTEMP_off(dstr);
-                (void)SvOK_off(sstr);	/* NOTE: nukes most SvFLAGS on sstr */
-                SvPV_set(sstr, NULL);
-                SvLEN_set(sstr, 0);
-                SvCUR_set(sstr, 0);
-                SvTEMP_off(sstr);
-            }
+	    }
+	    SvLEN_set(dstr, len);
+	    SvCUR_set(dstr, cur);
+	    SvIsCOW_on(dstr);
+	} else {
+	    /* Failed the swipe test, and we cannot do copy-on-write either.
+	       Have to copy the string.  */
+	    SvGROW(dstr, cur + 1);	/* inlined from sv_setpvn */
+	    Move(SvPVX_const(sstr),SvPVX(dstr),cur,char);
+	    SvCUR_set(dstr, cur);
+	    *SvEND(dstr) = '\0';
         }
 	if (sflags & SVp_NOK) {
 	    SvNV_set(dstr, SvNVX(sstr));
