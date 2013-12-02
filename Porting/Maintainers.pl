@@ -875,13 +875,8 @@ use File::Glob qw(:case);
 
     'PathTools' => {
         'DISTRIBUTION' => 'SMUELLER/PathTools-3.40.tar.gz',
-        'FILES'        => q[dist/Cwd],
+        'FILES'        => q[dist/PathTools],
         'EXCLUDED'     => [qr{^t/lib/Test/}],
-
-        # NOTE: PathTools is in dist/Cwd/ instead of dist/PathTools because it
-        # contains Cwd.xs and something, possibly Makefile.SH, makes an assumption
-        # that the leafname of some file corresponds with the pathname of the
-        # directory.
     },
 
     'Perl::OSType' => {
@@ -979,7 +974,7 @@ use File::Glob qw(:case);
 
     'Scalar-List-Utils' => {
         'DISTRIBUTION' => 'PEVANS/Scalar-List-Utils-1.35.tar.gz',
-        'FILES'    => q[cpan/List-Util],
+        'FILES'    => q[cpan/Scalar-List-Utils],
     },
 
     'Search::Dict' => {

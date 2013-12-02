@@ -1399,39 +1399,6 @@ cpan/libnet/t/nntp.t		libnet
 cpan/libnet/t/require.t		libnet
 cpan/libnet/t/smtp.t		libnet
 cpan/libnet/t/time.t		libnet
-cpan/List-Util/lib/List/Util.pm		List::Util
-cpan/List-Util/lib/List/Util/XS.pm	List::Util
-cpan/List-Util/lib/Scalar/Util.pm	Scalar::Util
-cpan/List-Util/ListUtil.xs		Util extension
-cpan/List-Util/Makefile.PL		Util extension
-cpan/List-Util/multicall.h		Util extension
-cpan/List-Util/t/00version.t		Scalar::Util
-cpan/List-Util/t/any-all.t		List::Util
-cpan/List-Util/t/blessed.t		Scalar::Util
-cpan/List-Util/t/dualvar.t		Scalar::Util
-cpan/List-Util/t/first.t		List::Util
-cpan/List-Util/t/getmagic-once.t
-cpan/List-Util/t/isvstring.t		Scalar::Util
-cpan/List-Util/t/lln.t			Scalar::Util
-cpan/List-Util/t/maxstr.t		List::Util
-cpan/List-Util/t/max.t			List::Util
-cpan/List-Util/t/minstr.t		List::Util
-cpan/List-Util/t/min.t			List::Util
-cpan/List-Util/t/multicall-refcount.t
-cpan/List-Util/t/openhan.t		Scalar::Util
-cpan/List-Util/t/pair.t
-cpan/List-Util/t/product.t		List::Util
-cpan/List-Util/t/proto.t		Scalar::Util
-cpan/List-Util/t/readonly.t		Scalar::Util
-cpan/List-Util/t/reduce.t		List::Util
-cpan/List-Util/t/refaddr.t		Scalar::Util
-cpan/List-Util/t/reftype.t		Scalar::Util
-cpan/List-Util/t/shuffle.t		List::Util
-cpan/List-Util/t/stack-corruption.t	List::Util
-cpan/List-Util/t/sum0.t
-cpan/List-Util/t/sum.t			List::Util
-cpan/List-Util/t/tainted.t		Scalar::Util
-cpan/List-Util/t/weak.t			Scalar::Util
 cpan/Locale-Codes/lib/Locale/Codes/API.pod	Locale::Codes documentation
 cpan/Locale-Codes/lib/Locale/Codes/Changes.pod	Locale::Codes documentation
 cpan/Locale-Codes/lib/Locale/Codes/Constants.pm	Locale::Codes
@@ -2040,6 +2007,39 @@ cpan/Pod-Usage/t/pod/testcmp.pl
 cpan/Pod-Usage/t/pod/testp2pt.pl
 cpan/Pod-Usage/t/pod/usage2.pod
 cpan/Pod-Usage/t/pod/usage.pod
+cpan/Scalar-List-Utils/lib/List/Util.pm		List::Util
+cpan/Scalar-List-Utils/lib/List/Util/XS.pm	List::Util
+cpan/Scalar-List-Utils/lib/Scalar/Util.pm	Scalar::Util
+cpan/Scalar-List-Utils/ListUtil.xs		Util extension
+cpan/Scalar-List-Utils/Makefile.PL		Util extension
+cpan/Scalar-List-Utils/multicall.h		Util extension
+cpan/Scalar-List-Utils/t/00version.t		Scalar::Util
+cpan/Scalar-List-Utils/t/any-all.t		List::Util
+cpan/Scalar-List-Utils/t/blessed.t		Scalar::Util
+cpan/Scalar-List-Utils/t/dualvar.t		Scalar::Util
+cpan/Scalar-List-Utils/t/first.t		List::Util
+cpan/Scalar-List-Utils/t/getmagic-once.t
+cpan/Scalar-List-Utils/t/isvstring.t		Scalar::Util
+cpan/Scalar-List-Utils/t/lln.t			Scalar::Util
+cpan/Scalar-List-Utils/t/maxstr.t		List::Util
+cpan/Scalar-List-Utils/t/max.t			List::Util
+cpan/Scalar-List-Utils/t/minstr.t		List::Util
+cpan/Scalar-List-Utils/t/min.t			List::Util
+cpan/Scalar-List-Utils/t/multicall-refcount.t
+cpan/Scalar-List-Utils/t/openhan.t		Scalar::Util
+cpan/Scalar-List-Utils/t/pair.t
+cpan/Scalar-List-Utils/t/product.t		List::Util
+cpan/Scalar-List-Utils/t/proto.t		Scalar::Util
+cpan/Scalar-List-Utils/t/readonly.t		Scalar::Util
+cpan/Scalar-List-Utils/t/reduce.t		List::Util
+cpan/Scalar-List-Utils/t/refaddr.t		Scalar::Util
+cpan/Scalar-List-Utils/t/reftype.t		Scalar::Util
+cpan/Scalar-List-Utils/t/shuffle.t		List::Util
+cpan/Scalar-List-Utils/t/stack-corruption.t	List::Util
+cpan/Scalar-List-Utils/t/sum0.t
+cpan/Scalar-List-Utils/t/sum.t			List::Util
+cpan/Scalar-List-Utils/t/tainted.t		Scalar::Util
+cpan/Scalar-List-Utils/t/weak.t			Scalar::Util
 cpan/Socket/Makefile.PL			Socket extension makefile writer
 cpan/Socket/Socket.pm			Socket extension Perl module
 cpan/Socket/Socket.xs			Socket extension external subroutines
@@ -2884,27 +2884,6 @@ dist/Carp/t/with_warnings.t		See if Carp plays nicely with warnings
 dist/constant/lib/constant.pm	For "use constant"
 dist/constant/t/constant.t	See if compile-time constants work
 dist/constant/t/utf8.t		Test Unicode constants under utf8 pragma
-dist/Cwd/Cwd.pm				Various cwd routines (getcwd, fastcwd, chdir)
-dist/Cwd/Cwd.xs				Cwd extension external subroutines
-dist/Cwd/lib/File/Spec/Cygwin.pm	portable operations on Cygwin file names
-dist/Cwd/lib/File/Spec/Epoc.pm		portable operations on EPOC file names
-dist/Cwd/lib/File/Spec/Functions.pm	Function interface to File::Spec object methods
-dist/Cwd/lib/File/Spec/Mac.pm		portable operations on Mac file names
-dist/Cwd/lib/File/Spec/OS2.pm		portable operations on OS2 file names
-dist/Cwd/lib/File/Spec.pm		portable operations on file names
-dist/Cwd/lib/File/Spec/Unix.pm		portable operations on Unix file names
-dist/Cwd/lib/File/Spec/VMS.pm		portable operations on VMS file names
-dist/Cwd/lib/File/Spec/Win32.pm		portable operations on Win32 and NetWare file names
-dist/Cwd/Makefile.PL			makefile writer for Cwd
-dist/Cwd/t/crossplatform.t		See if File::Spec works crossplatform
-dist/Cwd/t/cwd.t			See if Cwd works
-dist/Cwd/t/Functions.t			See if File::Spec::Functions works
-dist/Cwd/t/rel2abs2rel.t		See if File::Spec->rel2abs/abs2rel works
-dist/Cwd/t/Spec.t			See if File::Spec works
-dist/Cwd/t/Spec-taint.t			See if File::Spec works with taint
-dist/Cwd/t/taint.t			See if Cwd works with taint
-dist/Cwd/t/tmpdir.t			See if File::Spec->tmpdir() works
-dist/Cwd/t/win32.t			See if Cwd works on Win32
 dist/Data-Dumper/Changes	Data pretty printer, changelog
 dist/Data-Dumper/Dumper.pm	Data pretty printer, module
 dist/Data-Dumper/Dumper.xs	Data pretty printer, externals
@@ -3260,6 +3239,27 @@ dist/Net-Ping/t/450_service.t		Ping Net::Ping
 dist/Net-Ping/t/500_ping_icmp.t		Ping Net::Ping
 dist/Net-Ping/t/510_ping_udp.t		Ping Net::Ping
 dist/Net-Ping/t/520_icmp_ttl.t		Ping Net::Ping
+dist/PathTools/Cwd.pm				Various cwd routines (getcwd, fastcwd, chdir)
+dist/PathTools/Cwd.xs				Cwd extension external subroutines
+dist/PathTools/lib/File/Spec/Cygwin.pm	portable operations on Cygwin file names
+dist/PathTools/lib/File/Spec/Epoc.pm		portable operations on EPOC file names
+dist/PathTools/lib/File/Spec/Functions.pm	Function interface to File::Spec object methods
+dist/PathTools/lib/File/Spec/Mac.pm		portable operations on Mac file names
+dist/PathTools/lib/File/Spec/OS2.pm		portable operations on OS2 file names
+dist/PathTools/lib/File/Spec.pm		portable operations on file names
+dist/PathTools/lib/File/Spec/Unix.pm		portable operations on Unix file names
+dist/PathTools/lib/File/Spec/VMS.pm		portable operations on VMS file names
+dist/PathTools/lib/File/Spec/Win32.pm		portable operations on Win32 and NetWare file names
+dist/PathTools/Makefile.PL			makefile writer for Cwd
+dist/PathTools/t/crossplatform.t		See if File::Spec works crossplatform
+dist/PathTools/t/cwd.t			See if Cwd works
+dist/PathTools/t/Functions.t			See if File::Spec::Functions works
+dist/PathTools/t/rel2abs2rel.t		See if File::Spec->rel2abs/abs2rel works
+dist/PathTools/t/Spec.t			See if File::Spec works
+dist/PathTools/t/Spec-taint.t			See if File::Spec works with taint
+dist/PathTools/t/taint.t			See if Cwd works with taint
+dist/PathTools/t/tmpdir.t			See if File::Spec->tmpdir() works
+dist/PathTools/t/win32.t			See if Cwd works on Win32
 dist/Safe/Changes		Changes for Safe.pm
 dist/Safe/Makefile.PL		Makefile.PL for Safe.pm
 dist/Safe/MANIFEST		MANIFEST for Safe.pm

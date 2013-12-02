@@ -22194,6 +22194,10 @@ find_extensions='
 	    DynaLoader|dynaload) ;;
 	    *)
 	    this_ext=`echo $xxx | $sed -e s/-/\\\//g`;
+            case "$this_ext" in
+                Scalar/List/Utils) this_ext="List/Util";;
+                PathTools)         this_ext="Cwd";;
+            esac;
 	    echo " $xs_extensions $nonxs_extensions" > $$.tmp;
 	    if $contains " $this_ext " $$.tmp; then
 		echo >&4;
