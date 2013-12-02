@@ -15,7 +15,7 @@
  * is beyond.'
  *   'Do you know the name of that high pass?' said Faramir.
  *
- *     [p.xxx of _The Lord of the Rings_, IV/xi: "The Forbidden Pool"]
+ *     [p.691 of _The Lord of the Rings_, IV/xi: "The Forbidden Pool"]
  */
 
 /* This file contains a single function, set_caret_X, to set the $^X
