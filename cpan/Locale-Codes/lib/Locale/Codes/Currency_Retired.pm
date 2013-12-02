@@ -3,35 +3,7 @@ Locale::Codes::Currency_Retired;
 
 # This file was automatically generated.  Any changes to this file will
 # be lost the next time 'deprecate_codes' is run.
-#    Generated on: Tue Sep  3 15:17:36 EDT 2013
-
-=pod
-
-=head1 NAME
-
-Locale::Codes::Currency_Retired - retired currency codes for the Locale::Codes::Currency module
-
-=head1 SYNOPSIS
-
-This module contains data used by the Locale::Codes::Currency module. It is
-not intended to be used directly, and contains no callable routines.
-
-=head1 AUTHOR
-
-See Locale::Codes for full author history.
-
-Currently maintained by Sullivan Beck (sbeck@cpan.org).
-
-=head1 COPYRIGHT
-
-   Copyright (c) 1997-2001 Canon Research Centre Europe (CRE).
-   Copyright (c) 2001-2010 Neil Bowers
-   Copyright (c) 2010-2013 Sullivan Beck
-
-This module is free software; you can redistribute it and/or
-modify it under the same terms as Perl itself.
-
-=cut
+#    Generated on: Mon Nov 25 10:41:49 EST 2013
 
 use strict;
 require 5.006;
@@ -39,7 +11,7 @@ use warnings;
 use utf8;
 
 our($VERSION);
-$VERSION='3.27';
+$VERSION='3.28';
 
 $Locale::Codes::Retired{'currency'}{'alpha'}{'code'} = {
    q(ADP) => q(Andorran Peseta),
@@ -73,6 +45,7 @@ $Locale::Codes::Retired{'currency'}{'alpha'}{'code'} = {
    q(ROL) => q(Leu),
    q(RUR) => q(Russian Ruble),
    q(SDD) => q(Sudanese Dinar),
+   q(SHP) => q(Saint Helena Pound),
    q(SIT) => q(Tolar),
    q(SKK) => q(Slovak Koruna),
    q(SRG) => q(Surinam Guilder),
@@ -93,6 +66,7 @@ $Locale::Codes::Retired{'currency'}{'alpha'}{'code'} = {
 };
 
 $Locale::Codes::Retired{'currency'}{'num'}{'code'} = {
+   q(654) => q(Saint Helena Pound),
 };
 
 $Locale::Codes::Retired{'currency'}{'alpha'}{'name'} = {
@@ -146,6 +120,7 @@ $Locale::Codes::Retired{'currency'}{'alpha'}{'name'} = {
    q(new manat) => [ q(TMT), q(New Manat) ],
    q(new zaire) => [ q(ZRN), q(New Zaire) ],
    q(portuguese escudo) => [ q(PTE), q(Portuguese Escudo) ],
+   q(saint helena pound) => [ q(SHP), q(Saint Helena Pound) ],
    q(schilling) => [ q(ATS), q(Schilling) ],
    q(sdr) => [ q(XDR), q(SDR) ],
    q(shekel) => [ q(ILS), q(Shekel) ],
@@ -160,6 +135,7 @@ $Locale::Codes::Retired{'currency'}{'alpha'}{'name'} = {
    q(tunisian dollar) => [ q(TND), q(Tunisian Dollar) ],
    q(uic-franc) => [ q(XFU), q(UIC-Franc) ],
    q(unidad de valor constante (uvc)) => [ q(ECV), q(Unidad de Valor Constante (UVC)) ],
+   q(unidades de fomento) => [ q(CLF), q(Unidades de fomento) ],
    q(unidades de formento) => [ q(CLF), q(Unidades de Formento) ],
    q(uruguay peso en unidades indexadas) => [ q(UYI), q(Uruguay Peso en Unidades Indexadas) ],
 };
@@ -170,6 +146,8 @@ $Locale::Codes::Retired{'currency'}{'num'}{'name'} = {
    q(leu) => [ q(946), q(Leu) ],
    q(metical) => [ q(943), q(Metical) ],
    q(new manat) => [ q(934), q(New Manat) ],
+   q(saint helena pound) => [ q(654), q(Saint Helena Pound) ],
+   q(unidades de fomento) => [ q(990), q(Unidades de fomento) ],
 };
 
 

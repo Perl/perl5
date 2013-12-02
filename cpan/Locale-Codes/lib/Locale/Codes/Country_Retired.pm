@@ -3,35 +3,7 @@ Locale::Codes::Country_Retired;
 
 # This file was automatically generated.  Any changes to this file will
 # be lost the next time 'deprecate_codes' is run.
-#    Generated on: Tue Sep  3 15:17:36 EDT 2013
-
-=pod
-
-=head1 NAME
-
-Locale::Codes::Country_Retired - retired country codes for the Locale::Codes::Country module
-
-=head1 SYNOPSIS
-
-This module contains data used by the Locale::Codes::Country module. It is
-not intended to be used directly, and contains no callable routines.
-
-=head1 AUTHOR
-
-See Locale::Codes for full author history.
-
-Currently maintained by Sullivan Beck (sbeck@cpan.org).
-
-=head1 COPYRIGHT
-
-   Copyright (c) 1997-2001 Canon Research Centre Europe (CRE).
-   Copyright (c) 2001-2010 Neil Bowers
-   Copyright (c) 2010-2013 Sullivan Beck
-
-This module is free software; you can redistribute it and/or
-modify it under the same terms as Perl itself.
-
-=cut
+#    Generated on: Mon Nov 25 10:41:49 EST 2013
 
 use strict;
 require 5.006;
@@ -39,7 +11,7 @@ use warnings;
 use utf8;
 
 our($VERSION);
-$VERSION='3.27';
+$VERSION='3.28';
 
 $Locale::Codes::Retired{'country'}{'alpha-2'}{'code'} = {
    q(an) => q(Netherlands Antilles),
@@ -380,6 +352,7 @@ $Locale::Codes::Retired{'country'}{'alpha-3'}{'name'} = {
    q(bolivia) => [ q(bol), q(Bolivia) ],
    q(bouvet island) => [ q(bvt), q(Bouvet Island) ],
    q(british indian ocean territory) => [ q(iot), q(British Indian Ocean Territory) ],
+   q(cape verde) => [ q(cpv), q(Cape Verde) ],
    q(christmas island) => [ q(cxr), q(Christmas Island) ],
    q(cocos (keeling) islands) => [ q(cck), q(Cocos (Keeling) Islands) ],
    q(congo, the democratic republic of the) => [ q(cod), q(Congo, The Democratic Republic of the) ],
@@ -444,6 +417,7 @@ $Locale::Codes::Retired{'country'}{'numeric'}{'name'} = {
    q(bolivia) => [ q(068), q(Bolivia) ],
    q(bouvet island) => [ q(074), q(Bouvet Island) ],
    q(british indian ocean territory) => [ q(086), q(British Indian Ocean Territory) ],
+   q(cape verde) => [ q(132), q(Cape Verde) ],
    q(christmas island) => [ q(162), q(Christmas Island) ],
    q(cocos (keeling) islands) => [ q(166), q(Cocos (Keeling) Islands) ],
    q(congo, the democratic republic of the) => [ q(180), q(Congo, The Democratic Republic of the) ],

@@ -3,35 +3,7 @@ Locale::Codes::LangVar_Codes;
 
 # This file was automatically generated.  Any changes to this file will
 # be lost the next time 'get_codes' is run.
-#    Generated on: Tue Sep  3 15:16:27 EDT 2013
-
-=pod
-
-=head1 NAME
-
-Locale::Codes::LangVar_Codes - langvar codes for the Locale::Codes::LangVar module
-
-=head1 SYNOPSIS
-
-This module contains data used by the Locale::Codes::LangVar module. It is
-not intended to be used directly, and contains no callable routines.
-
-=head1 AUTHOR
-
-See Locale::Codes for full author history.
-
-Currently maintained by Sullivan Beck (sbeck@cpan.org).
-
-=head1 COPYRIGHT
-
-   Copyright (c) 1997-2001 Canon Research Centre Europe (CRE).
-   Copyright (c) 2001-2010 Neil Bowers
-   Copyright (c) 2010-2013 Sullivan Beck
-
-This module is free software; you can redistribute it and/or
-modify it under the same terms as Perl itself.
-
-=cut
+#    Generated on: Fri Nov 22 15:26:01 EST 2013
 
 use strict;
 require 5.006;
@@ -39,9 +11,9 @@ use warnings;
 use utf8;
 
 our($VERSION);
-$VERSION='3.27';
+$VERSION='3.28';
 
-$Locale::Codes::Data{'langvar'}{'id'} = '0061';
+$Locale::Codes::Data{'langvar'}{'id'} = '0062';
 
 $Locale::Codes::Data{'langvar'}{'id2names'} = {
    q(0001) => [
@@ -90,7 +62,7 @@ $Locale::Codes::Data{'langvar'}{'id2names'} = {
       q(The Bila dialect of Resian),
       ],
    q(0015) => [
-      q(Slovene in Bohorič alphabet),
+      q(Slovene in Bohoric alphabet),
       ],
    q(0016) => [
       q(Boontling),
@@ -234,15 +206,18 @@ $Locale::Codes::Data{'langvar'}{'id2names'} = {
       q(Ulster dialect of Scots),
       ],
    q(0057) => [
-      q(Vedic Sanskrit),
+      q(Unifon phonetic alphabet),
       ],
    q(0058) => [
-      q(Valencian),
+      q(Vedic Sanskrit),
       ],
    q(0059) => [
-      q(Vallader idiom of Romansh),
+      q(Valencian),
       ],
    q(0060) => [
+      q(Vallader idiom of Romansh),
+      ],
+   q(0061) => [
       q(Wade-Giles romanization),
       ],
 };
@@ -432,7 +407,7 @@ $Locale::Codes::Data{'langvar'}{'alias2id'} = {
       q(0048),
       q(0),
       ],
-   q(slovene in bohorič alphabet) => [
+   q(slovene in bohoric alphabet) => [
       q(0015),
       q(0),
       ],
@@ -524,20 +499,24 @@ $Locale::Codes::Data{'langvar'}{'alias2id'} = {
       q(0011),
       q(0),
       ],
+   q(unifon phonetic alphabet) => [
+      q(0057),
+      q(0),
+      ],
    q(uralic phonetic alphabet) => [
       q(0020),
       q(0),
       ],
    q(valencian) => [
-      q(0058),
-      q(0),
-      ],
-   q(vallader idiom of romansh) => [
       q(0059),
       q(0),
       ],
+   q(vallader idiom of romansh) => [
+      q(0060),
+      q(0),
+      ],
    q(vedic sanskrit) => [
-      q(0057),
+      q(0058),
       q(0),
       ],
    q(volapuk nuladik) => [
@@ -557,7 +536,7 @@ $Locale::Codes::Data{'langvar'}{'alias2id'} = {
       q(0),
       ],
    q(wade-giles romanization) => [
-      q(0060),
+      q(0061),
       q(0),
       ],
    q(western armenian) => [
@@ -796,20 +775,24 @@ $Locale::Codes::Data{'langvar'}{'code2id'} = {
          q(0056),
          q(0),
          ],
-      q(vaidika) => [
+      q(unifon) => [
          q(0057),
          q(0),
          ],
-      q(valencia) => [
+      q(vaidika) => [
          q(0058),
          q(0),
          ],
-      q(vallader) => [
+      q(valencia) => [
          q(0059),
          q(0),
          ],
-      q(wadegile) => [
+      q(vallader) => [
          q(0060),
+         q(0),
+         ],
+      q(wadegile) => [
+         q(0061),
          q(0),
          ],
       },
@@ -873,10 +856,11 @@ $Locale::Codes::Data{'langvar'}{'id2code'} = {
       q(0054) => q(uccor),
       q(0055) => q(ucrcor),
       q(0056) => q(ulster),
-      q(0057) => q(vaidika),
-      q(0058) => q(valencia),
-      q(0059) => q(vallader),
-      q(0060) => q(wadegile),
+      q(0057) => q(unifon),
+      q(0058) => q(vaidika),
+      q(0059) => q(valencia),
+      q(0060) => q(vallader),
+      q(0061) => q(wadegile),
       },
 };
 

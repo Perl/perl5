@@ -22,7 +22,17 @@ September, December). I will also check on request, so if a code
 changes that you use, feel free to contact me.  Any time there are new
 codes, I will add them to the module and release a new version.
 
-=head1 VERSION 3.28  (planned 2013-12-01; sbeck)
+=head1 VERSION 3.32  (planned 2014-12-01; sbeck)
+
+=head1 VERSION 3.31  (planned 2014-09-01; sbeck)
+
+=head1 VERSION 3.30  (planned 2014-06-01; sbeck)
+
+=head1 VERSION 3.29  (planned 2014-03-01; sbeck)
+
+=head1 VERSION 3.28  (2013-12-02; sbeck)
+
+NEW CODE(s)
 
 =head1 VERSION 3.27  (2013-09-03; sbeck)
 
@@ -378,7 +388,7 @@ NEW CODE(s)
 
 =over 4
 
-=item B<New maintainer>
+=item B<(*) New maintainer>
 
 From 1997 to 2004, Locale::Codes was maintained by Neil
 Bowers. Unfortunately, no updates were made from June 2004 to January

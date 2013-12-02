@@ -1,4 +1,5 @@
-package Locale::Codes::LangFam_Retired;
+package #
+Locale::Codes::LangFam_Retired;
 
 # This file was automatically generated.  Any changes to this file will
 # be lost the next time 'deprecate_codes' is run.
@@ -37,7 +38,7 @@ use warnings;
 require 5.002;
 
 our($VERSION);
-$VERSION='3.27';
+$VERSION='3.28';
 
 $Locale::Codes::Retired{'langfam'}{'alpha'}{'code'} = {
 };

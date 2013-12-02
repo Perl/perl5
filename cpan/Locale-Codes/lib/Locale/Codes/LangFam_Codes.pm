@@ -3,35 +3,7 @@ Locale::Codes::LangFam_Codes;
 
 # This file was automatically generated.  Any changes to this file will
 # be lost the next time 'get_codes' is run.
-#    Generated on: Tue Sep  3 15:16:31 EDT 2013
-
-=pod
-
-=head1 NAME
-
-Locale::Codes::LangFam_Codes - langfam codes for the Locale::Codes::LangFam module
-
-=head1 SYNOPSIS
-
-This module contains data used by the Locale::Codes::LangFam module. It is
-not intended to be used directly, and contains no callable routines.
-
-=head1 AUTHOR
-
-See Locale::Codes for full author history.
-
-Currently maintained by Sullivan Beck (sbeck@cpan.org).
-
-=head1 COPYRIGHT
-
-   Copyright (c) 1997-2001 Canon Research Centre Europe (CRE).
-   Copyright (c) 2001-2010 Neil Bowers
-   Copyright (c) 2010-2013 Sullivan Beck
-
-This module is free software; you can redistribute it and/or
-modify it under the same terms as Perl itself.
-
-=cut
+#    Generated on: Fri Nov 22 15:26:07 EST 2013
 
 use strict;
 require 5.006;
@@ -39,7 +11,7 @@ use warnings;
 use utf8;
 
 our($VERSION);
-$VERSION='3.27';
+$VERSION='3.28';
 
 $Locale::Codes::Data{'langfam'}{'id'} = '0116';
 
