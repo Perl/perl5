@@ -823,6 +823,17 @@ S_mulexp10(NV value, I32 exponent)
     if (exponent < 0) {
 	negative = 1;
 	exponent = -exponent;
+#ifdef NV_MAX_10_EXP
+        /* for something like 1234 x 10^-309, the action of calculating
+         * the intermediate value 10^309 then returning 1234 / (10^309)
+         * will fail, since 10^309 becomes infinity. In this case try to
+         * refactor it as 123 / (10^308) etc.
+         */
+        while (value && exponent > NV_MAX_10_EXP) {
+            exponent--;
+            value /= 10;
+        }
+#endif
     }
     for (bit = 1; exponent; bit <<= 1) {
 	if (exponent & bit) {
