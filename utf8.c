@@ -279,9 +279,9 @@ the function will raise a warning, provided UTF8 warnings are enabled.  If inste
 UNICODE_DISALLOW_SURROGATE is set, the function will fail and return NULL.
 If both flags are set, the function will both warn and return NULL.
 
-The UNICODE_WARN_NONCHAR and UNICODE_DISALLOW_NONCHAR flags correspondingly
+The UNICODE_WARN_NONCHAR and UNICODE_DISALLOW_NONCHAR flags
 affect how the function handles a Unicode non-character.  And likewise, the
-UNICODE_WARN_SUPER and UNICODE_DISALLOW_SUPER flags, affect the handling of
+UNICODE_WARN_SUPER and UNICODE_DISALLOW_SUPER flags affect the handling of
 code points that are
 above the Unicode maximum of 0x10FFFF.  Code points above 0x7FFF_FFFF (which are
 even less portable) can be warned and/or disallowed even if other above-Unicode
