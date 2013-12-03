@@ -8091,8 +8091,12 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
                                 _Alias_Hash => $table_ref{$addr},
                                 _Property => $self,
 
-                                # gets property's fate and status by default
-                                Fate => $self->fate,
+                                # gets property's fate and status by default,
+                                # except if the name begind with an
+                                # underscore, default it to internal
+                                Fate => ($name =~ /^_/)
+                                         ? $INTERNAL_ONLY
+                                         : $self->fate,
                                 Status => $self->status,
                                 _Status_Info => $self->status_info,
                                 %args);
