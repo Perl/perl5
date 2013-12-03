@@ -36,6 +36,10 @@ my $debug = $ENV{PERL_DEBUG_FULL_TEST} // 0;
 # (There aren't 1000 locales currently in existence, so 99.9 works)
 my $acceptable_fold_failure_percentage = $^O eq 'MSWin32' ? 99.9 : 5;
 
+# The list of test numbers of the problematic tests.
+my @problematical_tests;
+
+
 use Dumpvalue;
 
 my $dumper = Dumpvalue->new(
@@ -797,7 +801,6 @@ my $first_locales_test_number = $final_without_setlocale + 1;
 my $locales_test_number;
 my $not_necessarily_a_problem_test_number;
 my $first_casing_test_number;
-my $final_casing_test_number;
 my %setlocale_failed;   # List of locales that setlocale() didn't work on
 
 foreach $Locale (@Locale) {
@@ -1463,7 +1466,10 @@ foreach $Locale (@Locale) {
     }
     report_multi_result($Locale, $locales_test_number, \@f);
 
-    $final_casing_test_number = $locales_test_number;
+    foreach ($first_casing_test_number..$locales_test_number) {
+        push @problematical_tests, $_;
+    }
+
 
     # Test for read-only scalars' locale vs non-locale comparisons.
 
@@ -1966,6 +1972,7 @@ foreach $Locale (@Locale) {
             }
 	}
 	report_multi_result($Locale, $locales_test_number, \@f);
+        push @problematical_tests, $locales_test_number;
     }
 
     # [perl #109318]
@@ -2018,9 +2025,7 @@ foreach $test_num ($first_locales_test_number..$final_locales_test_number) {
 	    print "# It usually indicates a problem in the environment,\n";
 	    print "# not in Perl itself.\n";
 	}
-        if ($Okay{$test_num} && ($test_num >= $first_casing_test_number
-                          && $_ <= $final_casing_test_number))
-        {
+        if ($Okay{$test_num} && grep { $_ == $test_num } @problematical_tests) {
             # Round to nearest .1%
             my $percent_fail = (int(.5 + (1000 * scalar(keys $Problem{$test_num})
                                           / scalar(@Locale))))
