@@ -6502,7 +6502,7 @@ END
         my $comment = "";
 
         my $status = $self->status;
-        if ($status && $status ne $PLACEHOLDER) {
+        if ($status ne $NORMAL) {
             my $warn = uc $status_past_participles{$status};
             $comment .= <<END;
 
@@ -16628,7 +16628,7 @@ sub write_all_tables() {
             }
             elsif ($count == $MAX_UNICODE_CODEPOINTS
                    && ($table == $property || $table->leader == $table)
-                   && $table->property->status ne $PLACEHOLDER)
+                   && $table->property->status ne $NORMAL)
             {
                     Carp::my_carp("$table unexpectedly matches all Unicode code points.  Proceeding anyway.");
             }
