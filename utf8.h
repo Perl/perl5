@@ -349,30 +349,58 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
 
 #define MAX_PORTABLE_UTF8_TWO_BYTE 0x3FF    /* constrained by EBCDIC */
 
-/* The macros in the next sets are used to generate the two utf8 or utfebcdic
- * bytes from an ordinal that is known to fit into two bytes; it must be less
- * than 0x3FF to work across both encodings. */
-/* Nocast allows these to be used in the case label of a switch statement;
- * however this won't work for ebcdic, and should be avoided.  Use
+/* The macros in the next 4 sets are used to generate the two utf8 or utfebcdic
+ * bytes from an ordinal that is known to fit into exactly two (not one) bytes;
+ * it must be less than 0x3FF to work across both encodings. */
+
+/* These two are helper macros for the other three sets, and should not be used
+ * directly anywhere else.  'translate_function' is either NATIVE_TO_LATIN1
+ * (which works for code points up to 0xFF) or NATIVE_TO_UNI which works for any
+ * code point */
+#define __BASE_TWO_BYTE_HI(c, translate_function)                               \
+            I8_TO_NATIVE_UTF8((translate_function(c) >> UTF_ACCUMULATION_SHIFT) \
+                              | UTF_START_MARK(2))
+#define __BASE_TWO_BYTE_LO(c, translate_function)                               \
+              I8_TO_NATIVE_UTF8((translate_function(c) & UTF_CONTINUATION_MASK) \
+                                 | UTF_CONTINUATION_MARK)
+
+/* This is another helper macro to avoid preprocessor issues, expanding to an
+ * assert followed by a comma under DEBUGGING (hence the comma operator).  If
+ * we didn't do this, we would get a comma with nothing before it when not
+ * DEBUGGING */
+#ifdef DEBUGGING
+#   define __ASSERT_(statement)  assert(statement),
+#else
+#   define __ASSERT_(statement)
+#endif
+
+/* The next two macros should not be used.  They were designed to be usable as
+ * the case label of a switch statement, but this doesn't work for EBCDIC.  Use
  * regen/unicode_constants.pl instead */
-#define UTF8_TWO_BYTE_HI_nocast(c)	I8_TO_NATIVE_UTF8((NATIVE_TO_UNI(c)     \
-                        >> UTF_ACCUMULATION_SHIFT) | UTF_START_MARK(2))
-#define UTF8_TWO_BYTE_LO_nocast(c)  I8_TO_NATIVE_UTF8((NATIVE_TO_UNI(c)         \
-                                                  & UTF_CONTINUATION_MASK)      \
-                                                | UTF_CONTINUATION_MARK)
+#define UTF8_TWO_BYTE_HI_nocast(c)  __BASE_TWO_BYTE_HI(c, NATIVE_TO_UNI)
+#define UTF8_TWO_BYTE_LO_nocast(c)  __BASE_TWO_BYTE_LO(c, NATIVE_TO_UNI)
 
-#define UTF8_TWO_BYTE_HI(c)	((U8) (UTF8_TWO_BYTE_HI_nocast(c)))
-#define UTF8_TWO_BYTE_LO(c)	((U8) (UTF8_TWO_BYTE_LO_nocast(c)))
+/* The next two macros are used when the source should be a single byte
+ * character; checked for under DEBUGGING */
+#define UTF8_EIGHT_BIT_HI(c) (__ASSERT_(FITS_IN_8_BITS(c))                    \
+                             ((U8) __BASE_TWO_BYTE_HI(c, NATIVE_TO_LATIN1)))
+#define UTF8_EIGHT_BIT_LO(c) (__ASSERT_(FITS_IN_8_BITS(c))                    \
+                             ((U8) __BASE_TWO_BYTE_LO(c, NATIVE_TO_LATIN1)))
 
-/* This name is used when the source is a single byte (input not checked).
- * These expand identically to the TWO_BYTE versions on ASCII platforms, but
- * use to/from LATIN1 instead of UNI, which on EBCDIC eliminates tests */
-#define UTF8_EIGHT_BIT_HI(c)	I8_TO_NATIVE_UTF8((NATIVE_TO_LATIN1(c)          \
-                                                    >> UTF_ACCUMULATION_SHIFT)  \
-                                                | UTF_START_MARK(2))
-#define UTF8_EIGHT_BIT_LO(c)	I8_TO_NATIVE_UTF8((NATIVE_TO_LATIN1(c)          \
-                                                  & UTF_CONTINUATION_MASK)      \
-                                                | UTF_CONTINUATION_MARK)
+/* These final two macros in the series are used when the source can be any
+ * code point whose UTF-8 is known to occupy 2 bytes; they are less efficient
+ * than the EIGHT_BIT versions on EBCDIC platforms.  We use the logical '~'
+ * operator instead of "<=" to avoid getting compiler warnings.
+ * MAX_PORTABLE_UTF8_TWO_BYTE should be exactly all one bits in the lower few
+ * places, so the ~ works */
+#define UTF8_TWO_BYTE_HI(c)                                                    \
+       (__ASSERT_((sizeof(c) ==  1)                                            \
+                  || !(((WIDEST_UTYPE)(c)) & ~MAX_PORTABLE_UTF8_TWO_BYTE))     \
+        ((U8) __BASE_TWO_BYTE_HI(c, NATIVE_TO_LATIN1)))
+#define UTF8_TWO_BYTE_LO(c)                                                    \
+       (__ASSERT_((sizeof(c) ==  1)                                            \
+                  || !(((WIDEST_UTYPE)(c)) & ~MAX_PORTABLE_UTF8_TWO_BYTE))     \
+        ((U8) __BASE_TWO_BYTE_LO(c, NATIVE_TO_LATIN1)))
 
 /* This is illegal in any well-formed UTF-8 in both EBCDIC and ASCII
  * as it is only in overlongs. */
