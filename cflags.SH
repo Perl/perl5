@@ -25,8 +25,8 @@ case $PERL_CONFIG_SH in
 	. $TOP/config.sh
 	;;
 esac
-: This forces SH files to create target in same directory as SH file.
-: This is so that make depend always knows where to find SH derivatives.
+# This forces SH files to create target in same directory as SH file.
+# This is so that make depend always knows where to find SH derivatives.
 case "$0" in
 */*) cd `expr X$0 : 'X\(.*\)/'` ;;
 esac
@@ -214,10 +214,10 @@ esac
 extra=''
 
 echo "Extracting cflags (with variable substitutions)"
-: This section of the file will have variable substitutions done on it.
-: Move anything that needs config subs from !NO!SUBS! section to !GROK!THIS!.
-: Protect any dollar signs and backticks that you do not want interpreted
-: by putting a backslash in front.  You may delete these comments.
+# This section of the file will have variable substitutions done on it.
+# Move anything that needs config subs from !NO!SUBS! section to !GROK!THIS!.
+# Protect any dollar signs and backticks that you do not want interpreted
+# by putting a backslash in front.  You may delete these comments.
 rm -f cflags
 $spitshell >cflags <<!GROK!THIS!
 $startsh
@@ -238,7 +238,7 @@ _exe="$_exe"
 
 !GROK!THIS!
 
-: In the following dollars and backticks do not need the extra backslash.
+# In the following dollars and backticks do not need the extra backslash.
 $spitshell >>cflags <<'!NO!SUBS!'
 case $PERL_CONFIG_SH in
 '')
@@ -254,8 +254,8 @@ case $PERL_CONFIG_SH in
 	;;
 esac
 
-: syntax: cflags [optimize=XXX] [file[.suffix]]
-: displays the compiler command line for file
+# syntax: cflags [optimize=XXX] [file[.suffix]]
+# displays the compiler command line for file
 
 case "X$1" in
 Xoptimize=*|X"optimize=*")
@@ -282,31 +282,31 @@ for file do
     *) echo $n "    $file.c	$c" ;;
     esac
 
-    : allow variables like toke_cflags to be evaluated
+    # allow variables like toke_cflags to be evaluated
 
     if echo $file | grep -v / >/dev/null
     then
       eval 'eval ${'"${file}_cflags"'-""}'
     fi
 
-    : or customize here
+    # or customize here
 
     case "$file" in
     *) ;;
 
-    *) : Customization examples follow: ;;
+    # Customization examples follow:
     av) ccflags=`echo $ccflags | sed -e s/-pipe//` ;;
     deb) ccflags="$ccflags -fno-jump-tables" ;;
     hv) warn=`echo $warn | sed -e s/-Wextra//` ;;
     toke) optimize=-O0 ;;
     esac
 
-    : The examples are intentionally unreachable as the '*)' case always
-    : matches. To use them, move before the '*)' and edit as appropriate.
-    : It is not a good idea to set ccflags to an absolute value here, as it
-    : often contains general -D defines which are needed for correct
-    : compilation. It is better to edit ccflags as shown, using interpolation
-    : to add flags, or sed to remove flags.
+    # The examples are intentionally unreachable as the '*)' case always
+    # matches. To use them, move before the '*)' and edit as appropriate.
+    # It is not a good idea to set ccflags to an absolute value here, as it
+    # often contains general -D defines which are needed for correct
+    # compilation. It is better to edit ccflags as shown, using interpolation
+    # to add flags, or sed to remove flags.
 
 
     case "$cc" in
@@ -356,7 +356,7 @@ for file do
     esac
 
 
-    : Can we perhaps use $ansi2knr here
+    # Can we perhaps use $ansi2knr here
     echo "$cc -c -DPERL_CORE $ccflags $stdflags $optimize $warn $extra"
     eval "$also "'"$cc -DPERL_CORE -c $ccflags $stdflags $optimize $warn $extra"'
 
