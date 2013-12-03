@@ -2155,11 +2155,16 @@ Perl_do_ipcctl(pTHX_ I32 optype, SV **mark, SV **sp)
 #ifdef Semctl
             union semun unsemds;
 
+            if(cmd == SETVAL) {
+                unsemds.val = PTR2nat(a);
+            }
+            else {
 #ifdef EXTRA_F_IN_SEMUN_BUF
-            unsemds.buff = (struct semid_ds *)a;
+                unsemds.buff = (struct semid_ds *)a;
 #else
-            unsemds.buf = (struct semid_ds *)a;
+                unsemds.buf = (struct semid_ds *)a;
 #endif
+            }
 	    ret = Semctl(id, n, cmd, unsemds);
 #else
 	    /* diag_listed_as: sem%s not implemented */
