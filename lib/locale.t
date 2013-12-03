@@ -2250,11 +2250,19 @@ if ($didwarn) {
         my $F = join(" ", @F);
         $F =~ s/(.{50,60}) /$1\n#\t/g;
 
+        my $details = "";
+        unless ($debug) {
+            $details = "# For more details, rerun, with environment variable PERL_DEBUG_FULL_TEST=1.\n";
+        }
+        elsif ($debug == 1) {
+            $details = "# For even more details, rerun, with environment variable PERL_DEBUG_FULL_TEST=2.\n";
+        }
+
         warn
           "# The following locales\n#\n",
           "#\t", $F, "\n#\n",
           "# had problems.\n#\n",
-          "# For more details, rerun, with environment variable PERL_DEBUG_FULL_TEST=1.\n";
+          $details;
     } else {
         warn "# None of your locales were broken.\n";
     }
