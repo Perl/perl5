@@ -353,8 +353,8 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
  * bytes from an ordinal that is known to fit into two bytes; it must be less
  * than 0x3FF to work across both encodings. */
 /* Nocast allows these to be used in the case label of a switch statement;
- * however this doesn't won't work for ebcdic, and should be avoided.  Use
- * regen/unicode_constants instead */
+ * however this won't work for ebcdic, and should be avoided.  Use
+ * regen/unicode_constants.pl instead */
 #define UTF8_TWO_BYTE_HI_nocast(c)	I8_TO_NATIVE_UTF8((NATIVE_TO_UNI(c)     \
                         >> UTF_ACCUMULATION_SHIFT) | UTF_START_MARK(2))
 #define UTF8_TWO_BYTE_LO_nocast(c)  I8_TO_NATIVE_UTF8((NATIVE_TO_UNI(c)         \
