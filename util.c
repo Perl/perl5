@@ -896,6 +896,10 @@ string which is a duplicate of C<pv>. The size of the string is
 determined by C<strlen()>. The memory allocated for the new string can
 be freed with the C<Safefree()> function.
 
+On some platforms, Windows for example, all allocated memory owned by a thread
+is deallocated when that thread ends.  So if you need that not to happen, you
+need to use the shared memory functions, such as C<L</savesharedpv>>.
+
 =cut
 */
 
@@ -922,6 +926,10 @@ Perl's version of what C<strndup()> would be if it existed. Returns a
 pointer to a newly allocated string which is a duplicate of the first
 C<len> bytes from C<pv>, plus a trailing NUL byte. The memory allocated for
 the new string can be freed with the C<Safefree()> function.
+
+On some platforms, Windows for example, all allocated memory owned by a thread
+is deallocated when that thread ends.  So if you need that not to happen, you
+need to use the shared memory functions, such as C<L</savesharedpvn>>.
 
 =cut
 */
@@ -998,6 +1006,10 @@ Perl_savesharedpvn(pTHX_ const char *const pv, const STRLEN len)
 
 A version of C<savepv()>/C<savepvn()> which gets the string to duplicate from
 the passed in SV using C<SvPV()>
+
+On some platforms, Windows for example, all allocated memory owned by a thread
+is deallocated when that thread ends.  So if you need that not to happen, you
+need to use the shared memory functions, such as C<L</savesharedsvpv>>.
 
 =cut
 */
