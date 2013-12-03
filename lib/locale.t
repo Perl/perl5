@@ -2006,28 +2006,28 @@ my $final_locales_test_number = $locales_test_number;
 
 # Recount the errors.
 
-foreach ($first_locales_test_number..$final_locales_test_number) {
+foreach $test_num ($first_locales_test_number..$final_locales_test_number) {
     if (%setlocale_failed) {
         print "not ";
     }
-    elsif ($Problem{$_} || !defined $Okay{$_} || !@{$Okay{$_}}) {
+    elsif ($Problem{$test_num} || !defined $Okay{$test_num} || !@{$Okay{$test_num}}) {
 	if (defined $not_necessarily_a_problem_test_number
-            && $_ == $not_necessarily_a_problem_test_number)
+            && $test_num == $not_necessarily_a_problem_test_number)
         {
 	    print "# The failure of test $not_necessarily_a_problem_test_number is not necessarily fatal.\n";
 	    print "# It usually indicates a problem in the environment,\n";
 	    print "# not in Perl itself.\n";
 	}
-        if ($Okay{$_} && ($_ >= $first_casing_test_number
+        if ($Okay{$test_num} && ($test_num >= $first_casing_test_number
                           && $_ <= $final_casing_test_number))
         {
             # Round to nearest .1%
-            my $percent_fail = (int(.5 + (1000 * scalar(keys $Problem{$_})
+            my $percent_fail = (int(.5 + (1000 * scalar(keys $Problem{$test_num})
                                           / scalar(@Locale))))
                                / 10;
             if (! $debug && $percent_fail < $acceptable_fold_failure_percentage)
             {
-                $test_names{$_} .= 'TODO';
+                $test_names{$test_num} .= 'TODO';
                 print "# ", 100 - $percent_fail, "% of locales pass the following test, so it is likely that the failures\n";
                 print "# are errors in the locale definitions.  The test is marked TODO, as the\n";
                 print "# problem is not likely to be Perl's\n";
@@ -2036,19 +2036,19 @@ foreach ($first_locales_test_number..$final_locales_test_number) {
         print "#\n";
         if ($debug) {
             print "# The code points that had this failure are given above.  Look for lines\n";
-            print "# that match 'failed $_'\n";
+            print "# that match 'failed $test_num'\n";
         }
         else {
             print "# For more details, rerun, with environment variable PERL_DEBUG_FULL_TEST=1.\n";
-            print "# Then look at that output for lines that match 'failed $_'\n";
+            print "# Then look at that output for lines that match 'failed $test_num'\n";
         }
 	print "not ";
     }
-    print "ok $_";
-    if (defined $test_names{$_}) {
+    print "ok $test_num";
+    if (defined $test_names{$test_num}) {
         # If TODO is in the test name, make it thus
-        my $todo = $test_names{$_} =~ s/TODO\s*//;
-        print " $test_names{$_}";
+        my $todo = $test_names{$test_num} =~ s/TODO\s*//;
+        print " $test_names{$test_num}";
         print " # TODO" if $todo;
     }
     print "\n";
