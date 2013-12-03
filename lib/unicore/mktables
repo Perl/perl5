@@ -918,7 +918,7 @@ my %why_stabilized;  # Documentation only
 my %why_obsolete;    # Documentation only
 
 {   # Closure
-    my $simple = 'Perl uses the more complete version of this property';
+    my $simple = 'Perl uses the more complete version';
     my $unihan = 'Unihan properties are by default not enabled in the Perl core.  Instead use CPAN: Unicode::Unihan';
 
     my $other_properties = 'other properties';
