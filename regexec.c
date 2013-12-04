@@ -7448,14 +7448,14 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
 	    match = TRUE;
 	}
 	else if (flags & ANYOF_LOCALE) {
-	    RXp_MATCH_TAINTED_on(prog);
-
-	    if ((flags & ANYOF_LOC_FOLD)
-		 && ANYOF_BITMAP_TEST(n, PL_fold_locale[c]))
-	    {
-		match = TRUE;
-	    }
+	    if (flags & ANYOF_LOC_FOLD) {
+                RXp_MATCH_TAINTED_on(prog);
+		 if (ANYOF_BITMAP_TEST(n, PL_fold_locale[c])) {
+                    match = TRUE;
+                }
+            }
 	    else if (ANYOF_POSIXL_TEST_ANY_SET(n)) {
+                RXp_MATCH_TAINTED_on(prog);
 
                 /* The data structure is arranged so bits 0, 2, 4, ... are set
                  * if the class includes the Posix character class given by
