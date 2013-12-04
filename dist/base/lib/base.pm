@@ -55,6 +55,23 @@ else {
     }
 }
 
+if ($] < 5.008) {
+    *_module_to_filename = sub {
+        (my $fn = $_[0]) =~ s!::!/!g;
+        $fn .= '.pm';
+        return $fn;
+    }
+}
+else {
+    *_module_to_filename = sub {
+        (my $fn = $_[0]) =~ s!::!/!g;
+        $fn .= '.pm';
+        utf8::encode($fn);
+        return $fn;
+    }
+}
+
+
 sub import {
     my $class = shift;
 
@@ -78,7 +95,10 @@ sub import {
             my $sigdie;
             {
                 local $SIG{__DIE__};
-                eval "require $base";
+                my $fn = _module_to_filename($base);
+                my $file = __FILE__;
+                my $line = __LINE__ + 1;
+                eval { require $fn };
                 # Only ignore "Can't locate" errors from our eval require.
                 # Other fatal errors (syntax etc) must be reported.
                 #
@@ -87,7 +107,8 @@ sub import {
                 # probably be using parent.pm, which doesn't try to
                 # guess whether require is needed or failed,
                 # see [perl #118561]
-                die if $@ && $@ !~ /^Can't locate .*? at \(eval /;
+                die if $@ && $@ !~ /^Can't locate \Q$fn\E .*? at \Q$file\E line \Q$line\E\.\n\z/s
+                          || $@ =~ /Compilation failed in require at \Q$file\E line \Q$line\E\.\n\z/;
                 unless (%{"$base\::"}) {
                     require Carp;
                     local $" = " ";
