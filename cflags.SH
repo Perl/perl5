@@ -254,19 +254,19 @@ case $PERL_CONFIG_SH in
 	;;
 esac
 
-# syntax: cflags [optimize=XXX] [file[.suffix]]
-# displays the compiler command line for file
+# syntax: cflags [optimize=XXX] [file[.suffix]] ...
+#   displays the proposed compiler command line for each 'file'
+#
+#   with no file, dispalys it for all *.c files.
+#   The optimise=XXX arg (if present) is evalled, setting the default
+#   value of the $optimise variable, which is output on the command line
+#   (but which may be overridden for specific files below)
 
 case "X$1" in
 Xoptimize=*|X"optimize=*")
 	eval "$1"
 	shift
 	;;
-esac
-
-also=': '
-case $# in
-1) also='echo 1>&2 "	  CCCMD = "'
 esac
 
 case $# in
@@ -358,7 +358,6 @@ for file do
 
     # Can we perhaps use $ansi2knr here
     echo "$cc -c -DPERL_CORE $ccflags $stdflags $optimize $warn $extra"
-    eval "$also "'"$cc -DPERL_CORE -c $ccflags $stdflags $optimize $warn $extra"'
 
     . $TOP/config.sh
 

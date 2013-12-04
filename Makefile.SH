@@ -409,9 +409,9 @@ case $CROSS_NAME in
 ## In the following dollars and backticks do not need the extra backslash.
 $spitshell >>$Makefile <<'!NO!SUBS!'
 
-CCCMD    = `sh $(shellflags) cflags "optimize='$(OPTIMIZE)'" $@`
+CCCMD    = sh $(shellflags) cflags "optimize='$(OPTIMIZE)'" $@
 
-CCCMDSRC = `sh $(shellflags) cflags "optimize='$(OPTIMIZE)'" $<`
+CCCMDSRC = sh $(shellflags) cflags "optimize='$(OPTIMIZE)'" $<
 
 CONFIGPM_FROM_CONFIG_SH = lib/Config.pm lib/Config_heavy.pl
 CONFIGPM = $(CONFIGPM_FROM_CONFIG_SH) lib/Config_git.pl
@@ -566,13 +566,16 @@ splintflags = \
 splintfiles = $(c1)
 
 .c$(OBJ_EXT): 
-	$(CCCMD) $(PLDLFLAGS) $*.c
+	@echo `$(CCCMD)` $(PLDLFLAGS) $*.c
+	@`$(CCCMD)` $(PLDLFLAGS) $*.c
 
 .c.i: 
-	$(CCCMDSRC) -E $*.c > $*.i
+	@echo `$(CCCMDSRC)` -E $*.c \> $*.i
+	@`$(CCCMDSRC)` -E $*.c > $*.i
 
 .c.s:
-	$(CCCMDSRC) -S $*.c
+	@echo `$(CCCMDSRC)` -S $*.c
+	@`$(CCCMDSRC)` -S $*.c
 
 all: $(FIRSTMAKEFILE) $(MINIPERL_EXE) $(generated_pods) $(private) $(unidatafiles) $(public) $(dynamic_ext) $(nonxs_ext) extras.make
 	@echo " ";
@@ -666,7 +669,8 @@ ${file}mini.c: $file.c
     $spitshell >>$Makefile <<!GROK!THIS!
 
 ${file}mini\$(OBJ_EXT): ${file}mini.c
-	\$(CCCMD) \$(PLDLFLAGS) $DPERL_IS_MINIPERL $DPERL_EXTERNAL_GLOB ${file}mini.c
+	echo @\`\$(CCCMD)\` \$(PLDLFLAGS) $DPERL_IS_MINIPERL $DPERL_EXTERNAL_GLOB ${file}mini.c
+	@\`\$(CCCMD)\` \$(PLDLFLAGS) $DPERL_IS_MINIPERL $DPERL_EXTERNAL_GLOB ${file}mini.c
 !GROK!THIS!
 done
 
