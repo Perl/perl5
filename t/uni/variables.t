@@ -55,6 +55,8 @@ plan (tests => 65880);
 
 # Checking that at least some of the special variables work
 for my $v (qw( ^V ; < > ( ) {^GLOBAL_PHASE} ^W _ 1 4 0 [ ] ! @ / \ = )) {
+  SKIP: {
+    skip_if_miniperl('No $[ under miniperl', 2) if $v eq '[';
     local $@;
     evalbytes "\$$v;";
     is $@, '', "No syntax error for \$$v";
@@ -62,6 +64,7 @@ for my $v (qw( ^V ; < > ( ) {^GLOBAL_PHASE} ^W _ 1 4 0 [ ] ! @ / \ = )) {
     local $@;
     eval "use utf8; \$$v;";
     is $@, '', "No syntax error for \$$v under use utf8";
+  }
 }
 
 # Checking if the Latin-1 range behaves as expected, and that the behavior is the
