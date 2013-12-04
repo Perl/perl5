@@ -7112,7 +7112,8 @@ Perl_yylex(pTHX)
 	    if (PL_expect != XOPERATOR && (*s != ':' || s[1] != ':')) {
 		CV *cv;
 		if ((gv = gv_fetchpvn_flags(PL_tokenbuf, len,
-                                            UTF ? SVf_UTF8 : 0, SVt_PVCV)) &&
+					    (UTF ? SVf_UTF8 : 0)|GV_NOTQUAL,
+					    SVt_PVCV)) &&
 		    (cv = GvCVu(gv)))
 		{
 		    if (GvIMPORTED_CV(gv))
