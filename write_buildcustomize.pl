@@ -47,7 +47,7 @@ require File::Spec::Functions;
 
 my $inc = join ",\n        ",
     map { "q\0$_\0" }
-    (map {File::Spec::Functions::rel2abs($_)} @toolchain, 'lib'), '.';
+    (map {File::Spec::Functions::rel2abs($_)} @toolchain, 'lib');
 
 open my $fh, '>', $file
     or die "Can't open $file: $!";
@@ -65,9 +65,9 @@ print $fh <<"EOT" or $error = "Can't print to $file: $!";
 #   Any changes made here will be lost!
 
 # We are miniperl, building extensions
-# Reset \@INC completely, adding the directories we need, and removing the
-# installed directories (which we don't need to read, and may confuse us)
-\@INC = ($inc);
+# Replace the first entry of \@INC ("lib") with the list of
+# directories we need.
+splice(\@INC, 0, 1, $inc);
 EOT
 
 if ($error) {
