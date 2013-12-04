@@ -7,6 +7,8 @@
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
+    require './test.pl';
+    skip_all_if_miniperl("No XS under miniperl");
 }
 
 use strict;
@@ -15,8 +17,6 @@ use warnings;
 use Config;
 use Time::HiRes;
 use IO::Handle;
-
-require './test.pl';
 
 skip_all("only for dev versions for now") if ((int($]*1000) & 1) == 0);
 skip_all("does not match platform whitelist")
