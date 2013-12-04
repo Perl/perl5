@@ -926,7 +926,7 @@ B<Matching operator> (C<m//>):
 
 Scalar true/false result never tainted.
 
-Subpatterns, either delivered as a list-context result or as $1 etc.
+All subpatterns, either delivered as a list-context result or as $1 etc.
 are tainted if C<use locale> (but not S<C<use locale ':not_characters'>>)
 is in effect, and the subpattern regular
 expression contains C<\w> (to match an alphanumeric character), C<\W>
