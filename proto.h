@@ -5501,6 +5501,18 @@ STATIC void	S_strip_return(pTHX_ SV *sv)
 
 #  endif
 #endif
+#if defined(PERL_DEBUG_READONLY_COW)
+PERL_CALLCONV void	Perl_sv_buf_to_ro(pTHX_ SV *sv)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_SV_BUF_TO_RO	\
+	assert(sv)
+
+PERL_CALLCONV void	Perl_sv_buf_to_rw(pTHX_ SV *sv)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_SV_BUF_TO_RW	\
+	assert(sv)
+
+#endif
 #if defined(PERL_DEBUG_READONLY_OPS)
 PERL_CALLCONV PADOFFSET	Perl_op_refcnt_dec(pTHX_ OP *o)
 			__attribute__nonnull__(pTHX_1);

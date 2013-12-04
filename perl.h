@@ -4015,12 +4015,26 @@ EXTERN_C void PerlIO_teardown(void);
 struct perl_memory_debug_header;
 struct perl_memory_debug_header {
   tTHX	interpreter;
-#  ifdef PERL_POISON
+#  if defined(PERL_POISON) || defined(PERL_DEBUG_READONLY_COW)
   MEM_SIZE size;
 #  endif
   struct perl_memory_debug_header *prev;
   struct perl_memory_debug_header *next;
+#  ifdef PERL_DEBUG_READONLY_COW
+  bool readonly;
+#  endif
 };
+
+#elif defined(PERL_DEBUG_READONLY_COW)
+
+struct perl_memory_debug_header;
+struct perl_memory_debug_header {
+  MEM_SIZE size;
+};
+
+#endif
+
+#if defined (PERL_IMPLICIT_CONTEXT) || defined (PERL_DEBUG_READONLY_COW)
 
 #  define sTHX	(sizeof(struct perl_memory_debug_header) + \
 	(MEM_ALIGNBYTES - sizeof(struct perl_memory_debug_header) \
@@ -4031,12 +4045,21 @@ struct perl_memory_debug_header {
 #endif
 
 #ifdef PERL_TRACK_MEMPOOL
+# ifdef PERL_DEBUG_READONLY_COW
+#  define INIT_TRACK_MEMPOOL(header, interp)			\
+	STMT_START {						\
+		(header).interpreter = (interp);		\
+		(header).prev = (header).next = &(header);	\
+		(header).readonly = 0;				\
+	} STMT_END
+# else
 #  define INIT_TRACK_MEMPOOL(header, interp)			\
 	STMT_START {						\
 		(header).interpreter = (interp);		\
 		(header).prev = (header).next = &(header);	\
 	} STMT_END
-#  else
+# endif
+# else
 #  define INIT_TRACK_MEMPOOL(header, interp)
 #endif
 
@@ -4048,7 +4071,7 @@ struct perl_memory_debug_header {
 #ifdef MYMALLOC
 #  define Perl_safesysmalloc_size(where)	Perl_malloced_size(where)
 #else
-#  ifdef HAS_MALLOC_SIZE
+#  if defined(HAS_MALLOC_SIZE) && !defined(PERL_DEBUG_READONLY_COW)
 #    ifdef PERL_TRACK_MEMPOOL
 #	define Perl_safesysmalloc_size(where)			\
 	    (malloc_size(((char *)(where)) - sTHX) - sTHX)
