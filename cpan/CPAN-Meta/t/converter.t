@@ -274,4 +274,25 @@ sub _normalize_reqs {
   }
 }
 
+# specific test for multiple licenses
+{
+  my $path = File::Spec->catfile('t','data-test','META-2.json');
+  my $original = Parse::CPAN::Meta->load_file( $path  );
+  ok( $original, "loaded META-2.json" );
+  my $cmc = CPAN::Meta::Converter->new( $original );
+  my $cleaned_up = $cmc->convert( version => "2" );
+  is_deeply(
+      $cleaned_up->{license},
+      [ 'perl_5', 'bsd' ],
+      "multiple license preserved (v2)"
+  );
+
+  $cleaned_up = $cmc->convert( version => "1.4" );
+  is(
+      $cleaned_up->{license},
+      'open_source',
+      "multiple license converted to open_source (v1.4)"
+  );
+}
+
 done_testing;

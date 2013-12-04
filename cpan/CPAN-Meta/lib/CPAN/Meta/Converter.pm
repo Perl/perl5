@@ -2,13 +2,14 @@ use 5.006;
 use strict;
 use warnings;
 package CPAN::Meta::Converter;
-our $VERSION = '2.132830'; # VERSION
+our $VERSION = '2.133380'; # VERSION
 
 
 use CPAN::Meta::Validator;
 use CPAN::Meta::Requirements;
 use version 0.88 ();
 use Parse::CPAN::Meta 1.4400 ();
+use List::Util 1.33 qw/all/;
 
 sub _dclone {
   my $ref = shift;
@@ -94,7 +95,7 @@ sub _change_meta_spec {
   };
 }
 
-my @valid_licenses_1 = (
+my @open_source = (
   'perl',
   'gpl',
   'apache',
@@ -106,6 +107,12 @@ my @valid_licenses_1 = (
   'mit',
   'mozilla',
   'open_source',
+);
+
+my %is_open_source = map {; $_ => 1 } @open_source;
+
+my @valid_licenses_1 = (
+  @open_source,
   'unrestricted',
   'restrictive',
   'unknown',
@@ -122,7 +129,9 @@ sub _license_1 {
   if ( $license_map_1{lc $element} ) {
     return $license_map_1{lc $element};
   }
-  return 'unknown';
+  else {
+    return 'unknown';
+  }
 }
 
 my @valid_licenses_2 = qw(
@@ -220,12 +229,20 @@ sub _downgrade_license {
     return "unknown";
   }
   elsif( ref $element eq 'ARRAY' ) {
-    if ( @$element == 1 ) {
-      return $license_downgrade_map{$element->[0]} || "unknown";
+    if ( @$element > 1) {
+      if ( all { $is_open_source{ $license_downgrade_map{lc $_} || 'unknown' } } @$element ) {
+        return 'open_source';
+      }
+      else {
+        return 'unknown';
+      }
+    }
+    elsif ( @$element == 1 ) {
+      return $license_downgrade_map{lc $element->[0]} || "unknown";
     }
   }
   elsif ( ! ref $element ) {
-    return $license_downgrade_map{$element} || "unknown";
+    return $license_downgrade_map{lc $element} || "unknown";
   }
   return "unknown";
 }
@@ -349,7 +366,7 @@ sub _version_map {
     # XXX turn this into CPAN::Meta::Requirements with bad version hook
     # and then turn it back into a hash
     my $new_map = CPAN::Meta::Requirements->new(
-      { bad_version_hook => sub { version->new(0) } } # punt
+      { bad_version_hook => \&_bad_version_hook } # punt
     );
     while ( my ($k,$v) = each %$element ) {
       next unless _is_module_name($k);
@@ -1293,7 +1310,7 @@ __END__
 
 =pod
 
-=encoding utf-8
+=encoding UTF-8
 
 =head1 NAME
 
@@ -1301,7 +1318,7 @@ CPAN::Meta::Converter - Convert CPAN distribution metadata structures
 
 =head1 VERSION
 
-version 2.132830
+version 2.133380
 
 =head1 SYNOPSIS
 

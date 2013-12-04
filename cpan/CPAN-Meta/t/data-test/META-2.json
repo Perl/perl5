@@ -22,7 +22,8 @@
    ],
    "release_status" : "stable",
    "license" : [
-      "perl_5"
+      "perl_5",
+      "bsd"
    ],
    "description" : "Module::Build is a system for building, testing, and installing Perl modules.  It is meant to be an alternative to ExtUtils::MakeMaker... blah blah blah",
    "keywords" : [
