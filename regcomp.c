@@ -16124,19 +16124,6 @@ S_put_byte(pTHX_ SV *sv, int c)
 {
     PERL_ARGS_ASSERT_PUT_BYTE;
 
-    /* Our definition of isPRINT() ignores locales, so only bytes that are
-       not part of UTF-8 are considered printable. I assume that the same
-       holds for UTF-EBCDIC.
-       Also, code point 255 is not printable in either (it's E0 in EBCDIC,
-       which Wikipedia says:
-
-       EO, or Eight Ones, is an 8-bit EBCDIC character code represented as all
-       ones (binary 1111 1111, hexadecimal FF). It is similar, but not
-       identical, to the ASCII delete (DEL) or rubout control character. ...
-       it is typically mapped to hexadecimal code 9F, in order to provide a
-       unique character mapping in both directions)
-
-       So the old condition can be simplified to !isPRINT(c)  */
     if (!isPRINT(c)) {
         switch (c) {
             case '\r': Perl_sv_catpvf(aTHX_ sv, "\\r"); break;
