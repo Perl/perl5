@@ -13,7 +13,7 @@ BEGIN {
 use strict;
 no warnings 'once';
 
-plan(tests => 141);
+plan(tests => 142);
 
 @A::ISA = 'B';
 @B::ISA = 'C';
@@ -267,6 +267,27 @@ sub OtherSouper::method { "Isidore Ropen, Draft Manager" }
     ::is eval { Mover->SUPER::dohtem; }, 'method',
         'SUPER inside moved package respects method changes';
 }
+
+package foo120694 {
+    BEGIN { our @ISA = qw(bar120694) }
+
+    sub AUTOLOAD {
+        my $self = shift;
+        local our $recursive = $recursive;
+        return "recursive" if $recursive++;
+        return if our $AUTOLOAD eq 'DESTROY';
+        $AUTOLOAD = "SUPER:" . substr $AUTOLOAD, rindex($AUTOLOAD, ':');
+        return $self->$AUTOLOAD(@_);
+    }
+}
+package bar120694 {
+    sub AUTOLOAD {
+        return "xyzzy";
+    }
+}
+is bless( [] => "foo120694" )->plugh, 'xyzzy',
+    '->SUPER::method autoloading uses parent of current pkg';
+
 
 # failed method call or UNIVERSAL::can() should not autovivify packages
 is( $::{"Foo::"} || "none", "none");  # sanity check 1

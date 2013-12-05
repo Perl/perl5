@@ -1123,7 +1123,8 @@ Perl_gv_autoload_pvn(pTHX_ HV *stash, const char *name, STRLEN len, U32 flags)
 	    packname = sv_2mortal(newSVhek(HvNAME_HEK(stash)));
 	if (flags & GV_SUPER) sv_catpvs(packname, "::SUPER");
     }
-    if (!(gv = gv_fetchmeth_pvn(stash, S_autoload, S_autolen, FALSE, is_utf8)))
+    if (!(gv = gv_fetchmeth_pvn(stash, S_autoload, S_autolen, FALSE,
+				is_utf8 | (flags & GV_SUPER))))
 	return NULL;
     cv = GvCV(gv);
 
