@@ -2400,18 +2400,18 @@ Perl_is_utf8_mark(pTHX_ const U8 *p)
 /*
 =for apidoc to_utf8_case
 
-The C<p> contains the pointer to the UTF-8 string encoding
+C<p> contains the pointer to the UTF-8 string encoding
 the character that is being converted.  This routine assumes that the character
 at C<p> is well-formed.
 
-The C<ustrp> is a pointer to the character buffer to put the
-conversion result to.  The C<lenp> is a pointer to the length
+C<ustrp> is a pointer to the character buffer to put the
+conversion result to.  C<lenp> is a pointer to the length
 of the result.
 
-The C<swashp> is a pointer to the swash to use.
+C<swashp> is a pointer to the swash to use.
 
 Both the special and normal mappings are stored in F<lib/unicore/To/Foo.pl>,
-and loaded by SWASHNEW, using F<lib/utf8_heavy.pl>.  The C<special> (usually,
+and loaded by SWASHNEW, using F<lib/utf8_heavy.pl>.  C<special> (usually,
 but not always, a multicharacter mapping), is tried first.
 
 C<special> is a string, normally C<NULL> or C<"">.  C<NULL> means to not use
@@ -2419,7 +2419,7 @@ any special mappings; C<""> means to use the special mappings.  Values other
 than these two are treated as the name of the hash containing the special
 mappings, like C<"utf8::ToSpecLower">.
 
-The C<normal> is a string like "ToLower" which means the swash
+C<normal> is a string like "ToLower" which means the swash
 %utf8::ToLower.
 
 =cut */
