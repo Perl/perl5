@@ -1735,14 +1735,14 @@ Perl__to_upper_title_latin1(pTHX_ const U8 c, U8* p, STRLEN *lenp, const char S_
  * LENP will be set to the length in bytes of the string of changed characters
  *
  * The functions return the ordinal of the first character in the string of OUTP */
-#define CALL_UPPER_CASE(INP, OUTP, LENP) Perl_to_utf8_case(aTHX_ INP, OUTP, LENP, &PL_utf8_toupper, "ToUc", "utf8::ToSpecUc")
-#define CALL_TITLE_CASE(INP, OUTP, LENP) Perl_to_utf8_case(aTHX_ INP, OUTP, LENP, &PL_utf8_totitle, "ToTc", "utf8::ToSpecTc")
-#define CALL_LOWER_CASE(INP, OUTP, LENP) Perl_to_utf8_case(aTHX_ INP, OUTP, LENP, &PL_utf8_tolower, "ToLc", "utf8::ToSpecLc")
+#define CALL_UPPER_CASE(INP, OUTP, LENP) Perl_to_utf8_case(aTHX_ INP, OUTP, LENP, &PL_utf8_toupper, "ToUc", "")
+#define CALL_TITLE_CASE(INP, OUTP, LENP) Perl_to_utf8_case(aTHX_ INP, OUTP, LENP, &PL_utf8_totitle, "ToTc", "")
+#define CALL_LOWER_CASE(INP, OUTP, LENP) Perl_to_utf8_case(aTHX_ INP, OUTP, LENP, &PL_utf8_tolower, "ToLc", "")
 
 /* This additionally has the input parameter SPECIALS, which if non-zero will
  * cause this to use the SPECIALS hash for folding (meaning get full case
  * folding); otherwise, when zero, this implies a simple case fold */
-#define CALL_FOLD_CASE(INP, OUTP, LENP, SPECIALS) Perl_to_utf8_case(aTHX_ INP, OUTP, LENP, &PL_utf8_tofold, "ToCf", (SPECIALS) ? "utf8::ToSpecCf" : NULL)
+#define CALL_FOLD_CASE(INP, OUTP, LENP, SPECIALS) Perl_to_utf8_case(aTHX_ INP, OUTP, LENP, &PL_utf8_tofold, "ToCf", (SPECIALS) ? "" : NULL)
 
 UV
 Perl_to_uni_upper(pTHX_ UV c, U8* p, STRLEN *lenp)
@@ -2414,9 +2414,10 @@ Both the special and normal mappings are stored in F<lib/unicore/To/Foo.pl>,
 and loaded by SWASHNEW, using F<lib/utf8_heavy.pl>.  The C<special> (usually,
 but not always, a multicharacter mapping), is tried first.
 
-The C<special> is a string like "utf8::ToSpecLower", which means the
-hash %utf8::ToSpecLower.  The access to the hash is through
-Perl_to_utf8_case().
+C<special> is a string, normally C<NULL> or C<"">.  C<NULL> means to not use
+any special mappings; C<""> means to use the special mappings.  Values other
+than these two are treated as the name of the hash containing the special
+mappings, like C<"utf8::ToSpecLower">.
 
 The C<normal> is a string like "ToLower" which means the swash
 %utf8::ToLower.
@@ -2461,8 +2462,20 @@ Perl_to_utf8_case(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp,
     if (special) {
          /* It might be "special" (sometimes, but not always,
 	  * a multicharacter mapping) */
-	 HV * const hv = get_hv(special, 0);
+         HV *hv = NULL;
 	 SV **svp;
+
+	 /* If passed in the specials name, use that; otherwise use any
+	  * given in the swash */
+         if (*special != '\0') {
+            hv = get_hv(special, 0);
+        }
+        else {
+            svp = hv_fetchs(MUTABLE_HV(SvRV(*swashp)), "SPECIALS", 0);
+            if (svp) {
+                hv = MUTABLE_HV(SvRV(*svp));
+            }
+        }
 
 	 if (hv &&
 	     (svp = hv_fetch(hv, (const char*)p, UNISKIP(uv1), FALSE)) &&
