@@ -124,3 +124,11 @@ filter_fetch_key(db, code)
 	SDBM_File::filter_store_value = store_value
 	CODE:
 	    DBM_setFilter(db->filter[ix], code);
+
+BOOT:
+        {
+            HV *stash = gv_stashpvs("SDBM_File", 1);
+            newCONSTSUB(stash, "PAGFEXT", newSVpvs(PAGFEXT));
+            newCONSTSUB(stash, "DIRFEXT", newSVpvs(DIRFEXT));
+            newCONSTSUB(stash, "PAIRMAX", newSVuv(PAIRMAX));
+        }

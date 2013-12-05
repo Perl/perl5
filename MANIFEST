@@ -3787,6 +3787,7 @@ ext/SDBM_File/sdbm/sdbm.c	SDBM kit
 ext/SDBM_File/sdbm/sdbm.h	SDBM kit
 ext/SDBM_File/sdbm/tune.h	SDBM kit
 ext/SDBM_File/sdbm/util.c	SDBM kit
+ext/SDBM_File/t/constants.t	See if SDBM_File constants work
 ext/SDBM_File/t/sdbm.t		See if SDBM_File works
 ext/SDBM_File/typemap		SDBM extension interface types
 ext/Sys-Hostname/Hostname.pm	Sys::Hostname extension Perl module
