@@ -462,6 +462,21 @@ of, or the locale installation in your system has problems (for example,
 some system files are broken or missing).  There are quick and temporary
 fixes to these problems, as well as more thorough and lasting fixes.
 
+=head2 Testing for broken locales
+
+If you are building Perl from source, the Perl test suite file
+F<lib/locale.t> can be used to test the locales on your system.
+Setting the environment variable C<PERL_DEBUG_FULL_TEST> to 1
+will cause it to output detailed results.  For example, on Linux, you
+could say
+
+ PERL_DEBUG_FULL_TEST=1 ./perl -T lib/locale.t > locale.log 2>&1
+
+Besides many other tests, it will test every locale it finds on your
+system to see if they conform to the POSIX standard.  If any have
+errors, it will include a summary near the end of the output of which
+locales passed all its tests, and which failed, and why.
+
 =head2 Temporarily fixing locale problems
 
 The two quickest fixes are either to render Perl silent about any
@@ -1360,7 +1375,9 @@ C<use locale> is in effect.  When confronted with such a system,
 please report in excruciating detail to <F<perlbug@perl.org>>, and
 also contact your vendor: bug fixes may exist for these problems
 in your operating system.  Sometimes such bug fixes are called an
-operating system upgrade.
+operating system upgrade.  If you have the source for Perl, include in
+the perlbug email the output of the test described above in L</Testing
+for broken locales>.
 
 =head1 SEE ALSO
 
