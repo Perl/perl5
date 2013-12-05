@@ -12640,6 +12640,19 @@ END
                             Case_Folding
                         } )
     {
+        my $comment = <<END;
+
+Note that although the Perl core uses this file, it has the standard values
+for code points from U+0000 to U+00FF compiled in, so changing this table will
+not change the core's behavior with respect to these code points.  Use
+Unicode::Casing to override this table.
+END
+        if ($map eq 'Case_Folding') {
+            $comment .= <<END;
+(/i regex matching is not overridable except by using a custom regex engine)
+END
+        }
+        property_ref($map)->add_comment(join_lines($comment));
         my $simple = property_ref("Simple_$map");
         next if ! $simple->is_empty;
         if ($simple->to_output_map) {
