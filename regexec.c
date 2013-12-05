@@ -7455,7 +7455,6 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
                 }
             }
 	    else if (ANYOF_POSIXL_TEST_ANY_SET(n)) {
-                RXp_MATCH_TAINTED_on(prog);
 
                 /* The data structure is arranged so bits 0, 2, 4, ... are set
                  * if the class includes the Posix character class given by
@@ -7489,6 +7488,8 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
 
                 int count = 0;
                 int to_complement = 0;
+
+                RXp_MATCH_TAINTED_on(prog);
                 while (count < ANYOF_MAX) {
                     if (ANYOF_POSIXL_TEST(n, count)
                         && to_complement ^ cBOOL(isFOO_lc(count/2, (U8) c)))
