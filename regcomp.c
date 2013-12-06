@@ -9335,9 +9335,9 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
             case '\'':          /* (?'...') */
     		    name_start= RExC_parse;
     		    svname = reg_scan_name(pRExC_state,
-    		        SIZE_ONLY ?  /* reverse test from the others */
-    		        REG_RSN_RETURN_NAME : 
-    		        REG_RSN_RETURN_NULL);
+                        SIZE_ONLY    /* reverse test from the others */
+                        ? REG_RSN_RETURN_NAME
+                        : REG_RSN_RETURN_NULL);
 		    if (RExC_parse == name_start || *RExC_parse != paren)
 		        vFAIL2("Sequence (?%c... not terminated",
 		            paren=='>' ? '<' : paren);
