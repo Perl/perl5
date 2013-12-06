@@ -879,10 +879,12 @@ sub _check_valgrind {
 	    warn "$0: Failed to open '$Valgrind_Log': $!\n";
 	}
     }
+    # todo: precede if clause with $ENV{VG_OPTS} &&
     if ($ENV{VG_OPTS} =~ /(cachegrind)/ or $$toolnm =~ /(perf)/) {
 	$$toolnm = $1;
 	if ($$toolnm eq 'perf') {
-	    # append perfs subcommand, not just stat
+	    # TBD: need VG_TEST=--help to pass test.valgrind when VALGRIND=/usr/bin/perf
+	    # VG_OPTS='stat -o perf-stat --append --' is also needed to run perf this way.
 	    my ($sub) = split /\s/, $ENV{VG_OPTS};
 	    $$toolnm .= "-$sub";
 	}
