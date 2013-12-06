@@ -10182,6 +10182,19 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                 ret = reg_node(pRExC_state, OPFAIL);
                 return ret;
             }
+            else if (min == max
+                     && RExC_parse < RExC_end
+                     && (*RExC_parse == '?' || *RExC_parse == '+'))
+            {
+                if (SIZE_ONLY) {
+                    ckWARN2reg(RExC_parse + 1,
+                               "Useless use of greediness modifier '%c'",
+                               *RExC_parse);
+                }
+                /* Absorb the modifier, so later code doesn't see nor use
+                    * it */
+                nextchar(pRExC_state);
+            }
 
 	do_curly:
 	    if ((flags&SIMPLE)) {

@@ -5979,6 +5979,17 @@ will have an effect, so remove them from your code.
 (W misc) You have a \E in a double-quotish string without a C<\U>,
 C<\L> or C<\Q> preceding it.
 
+=item Useless use of greediness modifier '%c' in regex; marked by S<<-- HERE> in m/%s/
+
+(W regexp) You specified something like these:
+
+ qr/a{3}?/
+ qr/b{1,1}+/
+
+The C<"?"> and C<"+"> don't have any effect, as they modify whether to
+match more or fewer when there is a choice, and by specifying to match
+exactly a given numer, there is no room left for a choice.
+
 =item Useless use of %s in void context
 
 (W void) You did something without a side effect in a context that does

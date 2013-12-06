@@ -377,6 +377,8 @@ my @warning = (
                     'Useless (?g) - use /g modifier {#} m/(?og{#}c)/',
                     'Useless (?c) - use /gc modifier {#} m/(?ogc{#})/',
                   ],
+    '/a{1,1}?/' => 'Useless use of greediness modifier \'?\' {#} m/a{1,1}?{#}/',
+    '/b{3}  +/x' => 'Useless use of greediness modifier \'+\' {#} m/b{3}  +{#}/',
 );
 
 my @warnings_utf8 = mark_as_utf8(

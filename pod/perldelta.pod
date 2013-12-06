@@ -202,7 +202,9 @@ XXX L<message|perldiag/"message">
 
 =item *
 
-XXX L<message|perldiag/"message">
+L<Useless use of greediness modifier|perldiag/"Useless use of greediness modifier '%c' in regex; marked by <-- HERE in m/%s/">
+
+This fixes [Perl #42957].
 
 =back
 
