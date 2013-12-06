@@ -643,6 +643,9 @@ Unicode, but one can be composed by using a G followed by a Unicode "COMBINING
 UPWARDS ARROW BELOW", and would be displayed by Unicode-aware software as if it
 were a single character.
 
+The match is greedy and non-backtracking, so that the cluster is never
+broken up into smaller components.
+
 Mnemonic: eI<X>tended Unicode character.
 
 =back
