@@ -1998,7 +1998,7 @@ what appears to be a single character, but may be represented internally by more
 than one.  As an example, using the Unicode full names, e.g., S<C<A + COMBINING
 RING>> is a grapheme cluster with base character C<A> and combining character
 S<C<COMBINING RING>>, which translates in Danish to A with the circle atop it,
-as in the word Angstrom.
+as in the word E<Aring>ngstrom.
 
 For the full and latest information about Unicode see the latest
 Unicode standard, or the Unicode Consortium's website L<http://www.unicode.org>
