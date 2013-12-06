@@ -22,7 +22,7 @@ package Storable; @ISA = qw(Exporter);
 
 use vars qw($canonical $forgive_me $VERSION);
 
-$VERSION = '2.51';
+$VERSION = '2.52';
 
 BEGIN {
     if (eval { local $SIG{__DIE__}; require Log::Agent; 1 }) {
@@ -1088,8 +1088,8 @@ deal with them.
 
 The store functions will C<croak> if they run into such references
 unless you set C<$Storable::forgive_me> to some C<TRUE> value. In that
-case, the fatal message is turned in a warning and some
-meaningless string is stored instead.
+case, the fatal message is converted to a warning and some meaningless
+string is stored instead.
 
 Setting C<$Storable::canonical> may not yield frozen strings that
 compare equal due to possible stringification of numbers. When the
