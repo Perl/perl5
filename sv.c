@@ -3231,35 +3231,39 @@ Always sets the SvUTF8 flag to avoid future validity checks even
 if all the bytes are invariant in UTF-8.
 If C<flags> has C<SV_GMAGIC> bit set,
 will C<mg_get> on C<sv> if appropriate, else not.
-Returns the number of bytes in the converted string
-C<sv_utf8_upgrade> and
-C<sv_utf8_upgrade_nomg> are implemented in terms of this function.
+
+If C<flags> has SV_FORCE_UTF8_UPGRADE set, this function assumes that the PV
+will expand when converted to UTF-8, and skips the extra work of checking for
+that.  Typically this flag is used by a routine that has already parsed the
+string and found such characters, and passes this information on so that the
+work doesn't have to be repeated.
+
+Returns the number of bytes in the converted string.
 
 This is not a general purpose byte encoding to Unicode interface:
 use the Encode extension for that.
 
+=for apidoc sv_utf8_upgrade_flags_grow
+
+Like sv_utf8_upgrade_flags, but has an additional parameter C<extra>, which is
+the number of unused bytes the string of 'sv' is guaranteed to have free after
+it upon return.  This allows the caller to reserve extra space that it intends
+to fill, to avoid extra grows.
+
+C<sv_utf8_upgrade>, C<sv_utf8_upgrade_nomg>, and C<sv_utf8_upgrade_flags>
+are implemented in terms of this function.
+
+Returns the number of bytes in the converted string (not including the spares).
+
 =cut
 
-The grow version is currently not externally documented.  It adds a parameter,
-extra, which is the number of unused bytes the string of 'sv' is guaranteed to
-have free after it upon return.  This allows the caller to reserve extra space
-that it intends to fill, to avoid extra grows.
-
-Also externally undocumented for the moment is the flag SV_FORCE_UTF8_UPGRADE,
-which can be used to tell this function to not first check to see if there are
-any characters that are different in UTF-8 (variant characters) which would
-force it to allocate a new string to sv, but to assume there are.  Typically
-this flag is used by a routine that has already parsed the string to find that
-there are such characters, and passes this information on so that the work
-doesn't have to be repeated.
-
 (One might think that the calling routine could pass in the position of the
-first such variant, so it wouldn't have to be found again.  But that is not the
-case, because typically when the caller is likely to use this flag, it won't be
-calling this routine unless it finds something that won't fit into a byte.
-Otherwise it tries to not upgrade and just use bytes.  But some things that
-do fit into a byte are variants in utf8, and the caller may not have been
-keeping track of these.)
+first variant character when it has set SV_FORCE_UTF8_UPGRADE, so it wouldn't
+have to be found again.  But that is not the case, because typically when the
+caller is likely to use this flag, it won't be calling this routine unless it
+finds something that won't fit into a byte.  Otherwise it tries to not upgrade
+and just use bytes.  But some things that do fit into a byte are variants in
+utf8, and the caller may not have been keeping track of these.)
 
 If the routine itself changes the string, it adds a trailing NUL.  Such a NUL
 isn't guaranteed due to having other routines do the work in some input cases,
