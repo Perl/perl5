@@ -17,7 +17,7 @@ use File::Spec;
 
 no warnings 'utf8';
 
-our $VERSION = '1.03';
+our $VERSION = '1.04';
 our $PACKAGE = __PACKAGE__;
 
 ### begin XS only ###
@@ -99,9 +99,11 @@ sub pack_U {
     return pack('U*', @_);
 }
 
-sub unpack_U {
-    return unpack('U*', shift(@_).pack('U*'));
-}
+### begin XS only ###
+*unpack_U = exists &Unicode::Collate::bootstrap &&
+	$] < 5.008 && \&unpackUfor56 && 0x41 == unpackUfor56('A')
+    ? \&unpackUfor56 : sub { return unpack('U*', shift(@_).pack('U*')) };
+### end XS only ###
 
 ######
 
