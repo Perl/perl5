@@ -4,7 +4,7 @@ use Test::More;
 BEGIN {
     plan(
         ${^TAINT}
-        ? (tests => 54)
+        ? (tests => 45)
         : (skip_all => "A perl without taint support") 
     );
 }
@@ -202,31 +202,6 @@ File::Find::find( {wanted => \&wanted_File_Dir_prune, untaint => 1,
 		   untaint_pattern => qr|^(.+)$|}, topdir('fa') );
 
 is(scalar keys %Expect_File, 0, 'Found all expected files');
-
-{
-    %Expect_File = (File::Spec->curdir => 1, file_path('fsl') =>
-                    1,file_path('fa_ord') => 1, file_path('fab') => 1,
-                    file_path('fab_ord') => 1, file_path('faba') => 1,
-                    file_path('faa') => 1, file_path('faa_ord') => 1);
-    delete $Expect_File{ file_path('fsl') } unless $symlink_exists;
-    %Expect_Name = ();
-
-    %Expect_Dir = ( dir_path('fa') => 1, dir_path('faa') => 1,
-                    dir_path('fab') => 1, dir_path('faba') => 1,
-                    dir_path('fb') => 1, dir_path('fba') => 1);
-
-    delete @Expect_Dir{ dir_path('fb'), dir_path('fba') } unless $symlink_exists;
-    local $File::Find::untaint_pattern = qr|^([@\w./\-+]+)$|;
-    File::Find::find(
-        {
-            wanted => \&wanted_File_Dir_prune,
-            untaint => 1,
-        },
-        topdir('fa')
-    );
-    is(scalar keys %Expect_File, 0,
-        'Explicitly defined $File::Find::untaint_pattern: Found all expected files');
-}
 
 # don't untaint at all, should die
 %Expect_File = ();
