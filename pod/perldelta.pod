@@ -50,6 +50,12 @@ Devel::Cover among other libraries.  This has been fixed.  [perl #119351]
 
 =item *
 
+Perl 5.18.0 introduced a regression when using ->SUPER::method with AUTOLOAD
+by looking up AUTOLOAD from the current package, rather than the current
+package’s superclass.  This has been fixed. [perl #120694]
+
+=item *
+
 The construct C<< $r=qr/.../; /$r/p >> is now handled properly, an issue which
 had been worsened by changes 5.18.0. [perl #118213]
 
