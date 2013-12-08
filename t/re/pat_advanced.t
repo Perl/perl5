@@ -2256,7 +2256,7 @@ EOP
 
     {
         #' RT #119075
-        no warnings 'regexp';
+        no warnings 'regexp';   # Silence "has useless greediness modifier"
         local $@;
         eval { /a{0}?/; };
         ok(! $@,
