@@ -1345,7 +1345,7 @@ Perl_write_to_stderr(pTHX_ SV* msv)
     else {
 #ifdef USE_SFIO
 	/* SFIO can really mess with your errno */
-	dSAVED_ERRNO;
+	dSAVE_ERRNO;
 #endif
 	PerlIO * const serr = Perl_error_log;
 
