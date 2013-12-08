@@ -287,6 +287,7 @@ check_taint_not $1, '"a" =~ /([a-z])/';
 "foo.bar_baz" =~ /^(.*)[._](.*?)$/;  # Bug 120675
 check_taint_not $1, '"foo.bar_baz" =~ /^(.*)[._](.*?)$/';
 
+# BE SURE TO COPY ANYTHING YOU ADD to the block below
 
 {   # This is just the previous tests copied here with a different
     # compile-time pragma.
@@ -450,6 +451,11 @@ check_taint_not $1, '"foo.bar_baz" =~ /^(.*)[._](.*?)$/';
     # After all this tainting $a should be cool.
 
     check_taint_not  $a;
+
+    "a" =~ /([a-z])/;
+    check_taint_not $1, '"a" =~ /([a-z])/';
+    "foo.bar_baz" =~ /^(.*)[._](.*?)$/;  # Bug 120675
+    check_taint_not $1, '"foo.bar_baz" =~ /^(.*)[._](.*?)$/';
 }
 
 # Here are in scope of 'use locale'
