@@ -416,7 +416,7 @@ FILE *
 PerlIO_findFILE(PerlIO *pio)
 {
     const int fd = PerlIO_fileno(pio);
-    FILE * const f = fdopen(fd, "r+");
+    FILE * f = fdopen(fd, "r+");
     PerlIO_flush(pio);
     if (!f && errno == EINVAL)
 	f = fdopen(fd, "w");
