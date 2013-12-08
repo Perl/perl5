@@ -29,7 +29,7 @@
 #define PERL_IN_UNIVERSAL_C
 #include "perl.h"
 
-#ifdef USE_PERLIO
+#if defined(USE_PERLIO) && !defined(USE_SFIO)
 #include "perliol.h" /* For the PERLIO_F_XXX */
 #endif
 
@@ -1026,7 +1026,7 @@ XS(XS_PerlIO_get_layers)
     dXSARGS;
     if (items < 1 || items % 2 == 0)
 	croak_xs_usage(cv, "filehandle[,args]");
-#ifdef USE_PERLIO
+#if defined(USE_PERLIO) && !defined(USE_SFIO)
     {
 	SV *	sv;
 	GV *	gv;
