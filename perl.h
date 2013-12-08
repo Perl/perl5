@@ -3976,7 +3976,7 @@ typedef Sighandler_t Sigsave_t;
 # define RUNOPS_DEFAULT Perl_runops_standard
 #endif
 
-#ifdef USE_PERLIO
+#if defined(USE_PERLIO) && !defined(USE_SFIO)
 EXTERN_C void PerlIO_teardown(void);
 # ifdef USE_ITHREADS
 #  define PERLIO_INIT MUTEX_INIT(&PL_perlio_mutex)
