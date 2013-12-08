@@ -24,7 +24,7 @@ BEGIN {
 }
 
 my $symlink_exists = eval { symlink("",""); 1 };
-my $test_count = 98;
+my $test_count = 102;
 $test_count += 127 if $symlink_exists;
 $test_count += 26 if $^O eq 'MSWin32';
 $test_count += 2 if $^O eq 'MSWin32' and $symlink_exists;
@@ -1007,4 +1007,33 @@ if ($^O eq 'MSWin32') {
         unlink("/$expected_first_file")
             or warn "can't unlink /$expected_first_file: $!\n";
     }
+}
+
+{
+    local $@;
+    eval { File::Find::find( 'foobar' ); };
+    like($@, qr/no &wanted subroutine given/,
+        "find() correctly died for lack of &wanted via either coderef or hashref");
+}
+
+{
+    local $@;
+    eval { File::Find::find( { follow => 1 } ); };
+    like($@, qr/no &wanted subroutine given/,
+        "find() correctly died for lack of &wanted via hashref");
+}
+
+{
+    local $@;
+    eval { File::Find::find( { wanted => 1 } ); };
+    like($@, qr/no &wanted subroutine given/,
+        "find() correctly died: lack of coderef as value of 'wanted' element");
+}
+
+{
+    local $@;
+    my $wanted = sub { print "hello world\n"; };
+    eval { File::Find::find( $wanted, ( undef ) ); };
+    like($@, qr/invalid top directory/,
+        "find() correctly died due to undefined top directory");
 }
