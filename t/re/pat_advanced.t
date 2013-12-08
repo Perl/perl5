@@ -2256,6 +2256,7 @@ EOP
 
     {
         #' RT #119075
+        no warnings 'regexp';
         local $@;
         eval { /a{0}?/; };
         ok(! $@,
