@@ -26,7 +26,7 @@
 #include "perl.h"
 #include "reentr.h"
 
-#if defined(USE_PERLIO) && !defined(USE_SFIO)
+#if defined(USE_PERLIO)
 #include "perliol.h" /* For PerlIOUnix_refcnt */
 #endif
 
@@ -1343,17 +1343,10 @@ Perl_write_to_stderr(pTHX_ SV* msv)
 	Perl_magic_methcall(aTHX_ MUTABLE_SV(io), mg, SV_CONST(PRINT),
 			    G_SCALAR | G_DISCARD | G_WRITING_TO_STDERR, 1, msv);
     else {
-#ifdef USE_SFIO
-	/* SFIO can really mess with your errno */
-	dSAVE_ERRNO;
-#endif
 	PerlIO * const serr = Perl_error_log;
 
 	do_print(msv, serr);
 	(void)PerlIO_flush(serr);
-#ifdef USE_SFIO
-	RESTORE_ERRNO;
-#endif
     }
 }
 
@@ -2728,7 +2721,7 @@ Perl_my_pclose(pTHX_ PerlIO *ptr)
     SvREFCNT_dec(*svp);
     *svp = NULL;
 
-#if defined(USE_PERLIO) && !defined(USE_SFIO)
+#if defined(USE_PERLIO)
     /* Find out whether the refcount is low enough for us to wait for the
        child proc without blocking. */
     should_wait = PerlIOUnix_refcnt(fd) == 1 && pid > 0;
@@ -3317,7 +3310,7 @@ Perl_get_vtbl(pTHX_ int vtbl_id)
 I32
 Perl_my_fflush_all(pTHX)
 {
-#if defined(USE_PERLIO) || defined(FFLUSH_NULL) || defined(USE_SFIO)
+#if defined(USE_PERLIO) || defined(FFLUSH_NULL)
     return PerlIO_flush(NULL);
 #else
 # if defined(HAS__FWALK)

@@ -42,7 +42,7 @@
 
 /* #include "config.h" */
 
-#if !defined(PERLIO_IS_STDIO) && !defined(USE_SFIO)
+#if !defined(PERLIO_IS_STDIO)
 #  define PerlIO FILE
 #endif
 

@@ -6,7 +6,7 @@
 
 #define OUR_DEFAULT_FB	"Encode::PERLQQ"
 
-#if defined(USE_PERLIO) && !defined(USE_SFIO)
+#if defined(USE_PERLIO)
 
 /* Define an encoding "layer" in the perliol.h sense.
 
