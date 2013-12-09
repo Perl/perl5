@@ -787,7 +787,7 @@ $(DYNALOADER)$(o) : $(DYNALOADER).c xconfig.h $(EXTDIR)\DynaLoader\dlutils.c
 #convenience target
 configpm_targ : $(CONFIGPM)
 
-$(CONFIGPM) : $(HPERL) ..\Cross\config-$(MACHINE).sh config_h.PL
+$(CONFIGPM) : $(HPERL) ..\Cross\config-$(MACHINE).sh config_h.PL ..\git_version.h
 	cd .. && $(HPERL) -Ilib configpm --cross=$(CROSS_NAME) --no-glossary
 	-mkdir $(XCOREDIR)
 	$(XCOPY) ..\*.h $(XCOREDIR)\*.*
@@ -803,6 +803,12 @@ $(CONFIGPM) : $(HPERL) ..\Cross\config-$(MACHINE).sh config_h.PL
 	$(DEL) $(XCOREDIR)\config.h
 	echo "#error This is a cross build. Use xconfig.h. \
 " > $(XCOREDIR)\config.h
+
+..\git_version.h : ..\make_patchnum.pl
+	cd .. && $(HPERL) -Ilib make_patchnum.pl && cd win32
+
+# make sure that we recompile perl.c if the git version changes
+$(DLLDIR)\perl.obj : ..\git_version.h
 
 ..\Cross\config-$(MACHINE).sh: config.ce config_sh.PL
 	$(HPERL) -I..\lib -I. config_sh.PL $(CFG_VARS) config.ce > ..\Cross\config-$(MACHINE).sh
@@ -846,6 +852,7 @@ clean: Extensions_clean
         -if exist ..\xlib rmdir /s /q ..\xlib
         -if exist .\$(MACHINE) rmdir /s /q .\$(MACHINE)
   -@$(DEL) config.h xconfig.h perl.res
+	-@$(DEL) ..\git_version.h
   -@$(DEL) ..\t\test_state
 
 XDLLOBJS = \
