@@ -951,9 +951,7 @@ config.w32 : $(CFGSH_TMPL)
 	@echo #endif>>$@
 
 ..\git_version.h : $(MINIPERL) ..\make_patchnum.pl
-	cd ..
-	miniperl -Ilib make_patchnum.pl
-	cd win32
+	cd .. && miniperl -Ilib make_patchnum.pl && cd win32
 
 # make sure that we recompile perl.c if the git version changes
 ..\perl$(o) : ..\git_version.h
