@@ -754,8 +754,10 @@ to go back before the current one.
     $wantarray, $evaltext, $is_require, $hints, $bitmask, $hinthash)
      = caller($i);
 
-Here $subroutine may be C<(eval)> if the frame is not a subroutine
-call, but an C<eval>.  In such a case additional elements $evaltext and
+Here, $subroutine is the function that the caller called (rather than the
+function containing the caller). Note that $subroutine may be C<(eval)> if
+the frame is not a subroutine call, but an C<eval>.  In such a case
+additional elements $evaltext and
 C<$is_require> are set: C<$is_require> is true if the frame is created by a
 C<require> or C<use> statement, $evaltext contains the text of the
 C<eval EXPR> statement.  In particular, for an C<eval BLOCK> statement,
