@@ -372,7 +372,9 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+C<< semctl(..., SETVAL, ...) >> would set the semaphore to the top
+32-bits of the supplied integer instead of the bottom 32-bits on
+64-bit big-endian systems. [perl #120635]
 
 =back
 
