@@ -26,7 +26,7 @@
 #include "perl.h"
 #include "reentr.h"
 
-#ifdef USE_PERLIO
+#if defined(USE_PERLIO) && !defined(USE_SFIO)
 #include "perliol.h" /* For PerlIOUnix_refcnt */
 #endif
 
@@ -2728,7 +2728,7 @@ Perl_my_pclose(pTHX_ PerlIO *ptr)
     SvREFCNT_dec(*svp);
     *svp = NULL;
 
-#ifdef USE_PERLIO
+#if defined(USE_PERLIO) && !defined(USE_SFIO)
     /* Find out whether the refcount is low enough for us to wait for the
        child proc without blocking. */
     should_wait = PerlIOUnix_refcnt(fd) == 1 && pid > 0;
