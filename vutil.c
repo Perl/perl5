@@ -596,10 +596,19 @@ Perl_upg_version(pTHX_ SV *ver, bool qv)
 	qv = TRUE;
     }
 #endif
+    else if ( (SvUOK(ver) && SvUVX(ver) > VERSION_MAX)
+	   || (SvIOK(ver) && SvIVX(ver) > VERSION_MAX) ) {
+	STRLEN len;
+	char tbuf[64];
+	len = my_snprintf(tbuf, sizeof(tbuf), "%d", VERSION_MAX);
+	version = savepvn(tbuf, len);
+	Perl_ck_warner(aTHX_ packWARN(WARN_OVERFLOW),
+		       "Integer overflow in version %d",VERSION_MAX);
+    }
     else /* must be a string or something like a string */
     {
 	STRLEN len;
-	version = savepv(SvPV(ver,len));
+	version = savepvn(SvPV(ver,len), SvCUR(ver));
 #ifndef SvVOK
 #  if PERL_VERSION > 5
 	/* This will only be executed for 5.6.0 - 5.8.0 inclusive */

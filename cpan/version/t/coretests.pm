@@ -426,13 +426,13 @@ EOF
     }
 
 SKIP: {
-    skip 'Cannot test "use parent qw(version)"  when require is used', 3
+    skip "Cannot test \"use parent $CLASS\"  when require is used", 3
 	unless defined $qv_declare;
     my ($fh, $filename) = tempfile('tXXXXXXX', SUFFIX => '.pm', UNLINK => 1);
     (my $package = basename($filename)) =~ s/\.pm$//;
     print $fh <<"EOF";
 package $package;
-use parent qw(version);
+use parent $CLASS;
 1;
 EOF
     close $fh;
@@ -490,9 +490,9 @@ EOF
 
     {
 	# http://rt.perl.org/rt3/Ticket/Display.html?id=56606
-	my $badv = bless { version => [1,2,3] }, "version";
+	my $badv = bless { version => [1,2,3] }, $CLASS;
 	is $badv, '1.002003', "Deal with badly serialized versions from YAML";
-	my $badv2 = bless { qv => 1, version => [1,2,3] }, "version";
+	my $badv2 = bless { qv => 1, version => [1,2,3] }, $CLASS;
 	is $badv2, 'v1.2.3', "Deal with badly serialized versions from YAML ";
     }
 
@@ -577,7 +577,7 @@ SKIP: {
     }
 
     { # https://rt.cpan.org/Ticket/Display.html?id=88495
-	@ver::ISA = "version";
+	@ver::ISA = $CLASS;
 	is ref(ver->new), 'ver', 'ver can inherit from version';
 	is ref(ver->qv("1.2.3")), 'ver', 'ver can inherit from version';
     }

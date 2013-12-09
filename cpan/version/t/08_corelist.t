@@ -4,17 +4,19 @@
 
 #########################
 
-use Test::More tests => 2;
-use_ok("version", 0.9904);
+use Test::More tests => 3;
+use_ok("version", 0.9905);
 
 # do strict lax tests in a sub to isolate a package to test importing
 SKIP: {
     eval "use Module::CoreList 2.76";
-    skip 'No tied hash in Modules::CoreList in Perl', 1
+    skip 'No tied hash in Modules::CoreList in Perl', 2
 	if $@;
 
     my $foo = version->parse($Module::CoreList::version{5.008_000}{base});
 
-    is $foo, $Module::CoreList::version{5.008_000}{base},
-    	'Correctly handle tied hash';
+    is $foo, 1.03, 'Correctly handle tied hash';
+
+    $foo = version->qv($Module::CoreList::version{5.008_000}{Unicode});
+    is $foo, '3.2.0', 'Correctly handle tied hash with dotted decimal';
 }

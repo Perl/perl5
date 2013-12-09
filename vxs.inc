@@ -98,7 +98,7 @@ VXS(UNIVERSAL_VERSION)
 
     if (gvp && isGV(gv = *gvp) && (sv = GvSV(gv)) && SvOK(sv)) {
         sv = sv_mortalcopy(sv);
-	if ( ! ISA_CLASS_OBJ(sv, "version::vxs"))
+	if ( ! ISA_CLASS_OBJ(sv, "version"))
 	    UPG_VERSION(sv, FALSE);
         undef = NULL;
     }
@@ -304,7 +304,7 @@ VXS(version_vcmp)
 	       SV * robj = ST(1);
 	       const IV	 swap = (IV)SvIV(ST(2));
 
-	       if ( !ISA_CLASS_OBJ(robj, "version::vxs") )
+	       if ( !ISA_CLASS_OBJ(robj, "version") )
 	       {
 		    robj = NEW_VERSION(SvOK(robj) ? robj : newSVpvs_flags("0", SVs_TEMP));
 		    sv_2mortal(robj);

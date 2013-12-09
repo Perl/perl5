@@ -11,7 +11,7 @@ use Test::More tests => 7;
 use Config;
 
 BEGIN {
-    use_ok('version', 0.9904);
+    use_ok('version', 0.9905);
 }
 
 SKIP: {
@@ -42,6 +42,7 @@ SKIP: {
 	    unless $loc and localeconv()->{decimal_point} eq ',';
 
 	setlocale(LC_NUMERIC, $loc);
+	$ver = 1.23;  # has to be floating point number
 	ok ($ver eq "1,23", "Using locale: $loc");
 	$v = version->new($ver);
 	unlike($warning, qr/Version string '1,23' contains invalid data/,
