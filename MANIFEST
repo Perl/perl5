@@ -5315,6 +5315,7 @@ Porting/release_announcement_template.txt
 Porting/release_managers_guide.pod	Release Manager's Guide
 Porting/release_schedule.pod	Schedule for future releases
 Porting/rt_list_patches		A tool to help you apply patches from RT
+Porting/security_template.pod	Template for vulnerability announcements
 Porting/sort_perldiag.pl	Keep our diagnostics orderly
 Porting/sync-with-cpan		Sync with CPAN
 Porting/timecheck.c		Test program for the 2038 fix

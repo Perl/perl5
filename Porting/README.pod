@@ -339,6 +339,11 @@ Pumpking.
 
 Shell script to list patches in RT.
 
+=head1 F<security_template.pod>
+
+Template to guide writers of a perl 5 security vulnerability
+announcement.
+
 =head2 F<sort_perldiag.pl>
 
 This is a script for sorting the warning and error messages in
