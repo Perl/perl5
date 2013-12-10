@@ -706,8 +706,6 @@ d_setservent_r=''
 setservent_r_proto=''
 d_setsid=''
 d_setvbuf=''
-d_sfio=''
-usesfio=''
 d_shm=''
 d_shmat=''
 d_shmatprototype=''
@@ -931,7 +929,6 @@ d_pwgecos=''
 d_pwpasswd=''
 d_pwquota=''
 i_pwd=''
-i_sfio=''
 i_shadow=''
 i_socks=''
 i_stdbool=''
@@ -1378,7 +1375,7 @@ libswanted_uselargefiles=''
 : set usesocks on the Configure command line to enable socks.
 : List of libraries we want.
 : If anyone needs extra -lxxx, put those in a hint file.
-libswanted="sfio socket bind inet nsl nm ndbm gdbm dbm db malloc dl ld sun"
+libswanted="socket bind inet nsl nm ndbm gdbm dbm db malloc dl ld sun"
 libswanted="$libswanted m crypt sec util c cposix posix ucb bsd BSD"
 : We probably want to search /usr/shlib before most other libraries.
 : This is only used by the lib/ExtUtils/MakeMaker.pm routine extliblist.
@@ -5330,20 +5327,7 @@ if $sh -c "$cc -o try $optimize $ccflags $ldflags try.c $libs" >>try.msg 2>&1; t
 		xxx=`$run ./try`
 		case "$xxx" in
 		"Ok") dflt=n ;;
-		*)	echo 'The program compiled OK, but produced no output.' >> try.msg
-			case " $libs " in
-			*" -lsfio "*)
-				cat >> try.msg <<'EOQS'
-If $libs contains -lsfio, and sfio is mis-configured, then it
-sometimes (apparently) runs and exits with a 0 status, but with no
-output!  It may have to do with sfio's use of _exit vs. exit.
-
-EOQS
-				rp="You have a big problem.  Shall I abort Configure"
-				dflt=y
-				;;
-			esac
-			;;
+		*)    echo 'The program compiled OK, but produced no output.' >> try.msg ;;
 		esac
 	else
 		echo "The program compiled OK, but exited with status $?." >>try.msg
@@ -17421,69 +17405,6 @@ eval $inlibc
 set setvbuf d_setvbuf
 eval $inlibc
 
-: see if sfio.h is available
-set sfio.h i_sfio
-eval $inhdr
-
-: see if sfio library is available
-case "$i_sfio" in
-$define)
-	val=''
-	set sfreserve val
-	eval $inlibc
-	;;
-*)
-	val="$undef"
-	;;
-esac
-: Ok, but do we want to use it.
-case "$val" in
-$define)
-	case "$usesfio" in
-	true|$define|[yY]*) dflt='y';;
-	*) dflt='n';;
-	esac
-	echo "$package can use the sfio library, but it is experimental."
-	rp="You seem to have sfio available, do you want to try using it?"
-	. ./myread
-	case "$ans" in
-	y|Y)	echo "Ok, turning on sfio then."
-		val="$define"
-		;;
-	*)	echo "Ok, avoiding sfio this time.  I'll use stdio instead."
-		val="$undef"
-		;;
-	esac
-	;;
-*)	case "$usesfio" in
-	true|$define|[yY]*)
-		echo "Sorry, cannot find sfio on this machine." >&4
-		echo "Ignoring your setting of usesfio=$usesfio." >&4
-		val="$undef"
-		;;
-	esac
-	;;
-esac
-set d_sfio
-eval $setvar
-case "$d_sfio" in
-$define) usesfio='true';;
-*) usesfio='false';;
-esac
-case "$d_sfio" in
-$define) ;;
-*)	: Remove sfio from list of libraries to use
-	case "$libs" in
-	*-lsfio*)
-		echo "Removing unneeded -lsfio from library list" >&4
-		set `echo X $libs | $sed -e 's/-lsfio / /' -e 's/-lsfio$//'`
-		shift
-		libs="$*"
-		echo "libs = $libs" >&4
-		;;
-	esac
-;;
-esac
 
 
 : see if shmctl exists
@@ -23112,7 +23033,6 @@ d_setsent='$d_setsent'
 d_setservent_r='$d_setservent_r'
 d_setsid='$d_setsid'
 d_setvbuf='$d_setvbuf'
-d_sfio='$d_sfio'
 d_shm='$d_shm'
 d_shmat='$d_shmat'
 d_shmatprototype='$d_shmatprototype'
@@ -23350,7 +23270,6 @@ i_prot='$i_prot'
 i_pthread='$i_pthread'
 i_pwd='$i_pwd'
 i_rpcsvcdbm='$i_rpcsvcdbm'
-i_sfio='$i_sfio'
 i_sgtty='$i_sgtty'
 i_shadow='$i_shadow'
 i_socks='$i_socks'
@@ -23723,7 +23642,6 @@ useperlio='$useperlio'
 useposix='$useposix'
 usereentrant='$usereentrant'
 userelocatableinc='$userelocatableinc'
-usesfio='$usesfio'
 useshrplib='$useshrplib'
 usesitecustomize='$usesitecustomize'
 usesocks='$usesocks'

@@ -703,12 +703,6 @@
  */
 /*#define I_NETINET_IN	/ **/
 
-/* I_SFIO:
- *	This symbol, if defined, indicates to the C program that it should
- *	include <sfio.h>.
- */
-/*#define	I_SFIO		/ **/
-
 /* I_STDDEF:
  *	This symbol, if defined, indicates that <stddef.h> exists and should
  *	be included.
@@ -3892,12 +3886,6 @@
  */
 /*#define HAS_SETPROCTITLE		/ **/
 
-/* USE_SFIO:
- *	This symbol, if defined, indicates that sfio should
- *	be used.
- */
-/*#define	USE_SFIO		/ **/
-
 /* HAS_SIGNBIT:
  *	This symbol, if defined, indicates that the signbit routine is
  *	available to check if the given number has the sign bit set.
@@ -4730,6 +4718,6 @@
 #endif
 
 /* Generated from:
- * a5419b542988f62ae47b915c24316f8127992c16da312dc275d2f68fdd37a3ea config_h.SH
- * e9bb6377fb6bf7c21e01a97266c80d028aaecf5bf71f855ca6cca3b30d94882c uconfig.sh
+ * 63850d620b5f962e8fbbf7c826eb9cba1b8ac13f3443c80eee1c9061756fae69 config_h.SH
+ * 71b0dcf437b30c409fc23b5c4c6ec2c988fc419295a650fe80f93a6d5fb0ff94 uconfig.sh
  * ex: set ro: */
