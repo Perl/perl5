@@ -244,7 +244,7 @@ S_bootstrap_ctype(U8 character, UV classnum, bool full_Latin1)
 
         default: break;
     }
-    Perl_croak(aTHX_ "panic: bootstrap_ctype() has an unexpected character class '%"UVxf"'", classnum);
+    Perl_croak(aTHX_ "panic: bootstrap_ctype() has an unexpected character class '%" UVxf "'", classnum);
 }
 #endif
 

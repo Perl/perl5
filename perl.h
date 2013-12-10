@@ -3029,7 +3029,7 @@ typedef pthread_key_t	perl_key;
 
 /* Takes three arguments: is_utf8, length, str */
 #ifndef UTF8f
-#  define UTF8f "d%"UVuf"%4p"
+#  define UTF8f "d%" UVuf "%4p"
 #endif
 #define UTF8fARG(u,l,p) (int)cBOOL(u), (UV)(l), (void*)(p)
 
@@ -4118,7 +4118,7 @@ START_EXTERN_C
 EXTCONST char PL_warn_uninit[]
   INIT("Use of uninitialized value%s%s%s");
 EXTCONST char PL_warn_uninit_sv[]
-  INIT("Use of uninitialized value%"SVf"%s%s");
+  INIT("Use of uninitialized value%" SVf "%s%s");
 EXTCONST char PL_warn_nosemi[]
   INIT("Semicolon seems to be missing");
 EXTCONST char PL_warn_reserved[]
@@ -4138,7 +4138,7 @@ EXTCONST char PL_no_usym[]
 EXTCONST char PL_no_aelem[]
   INIT("Modification of non-creatable array value attempted, subscript %d");
 EXTCONST char PL_no_helem_sv[]
-  INIT("Modification of non-creatable hash value attempted, subscript \"%"SVf"\"");
+  INIT("Modification of non-creatable hash value attempted, subscript \"%" SVf "\"");
 EXTCONST char PL_no_modify[]
   INIT("Modification of a read-only value attempted");
 EXTCONST char PL_no_mem[sizeof("Out of memory!\n")]
