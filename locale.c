@@ -22,6 +22,14 @@
 
 /* utility functions for handling locale-specific stuff like what
  * character represents the decimal point.
+ *
+ * All C programs have an underlying locale.  Perl generally doesn't pay any
+ * attention to it except within the scope of a 'use locale'.  For most
+ * categories, it accomplishes this by just using different operations if it is
+ * in such scope than if not.  However, various libc functions called by Perl
+ * are affected by the LC_NUMERIC category, so there are macros in perl.h that
+ * are used to toggle between the current locale and the C locale depending on
+ * the desired behavior of those functions at the moment.
  */
 
 #include "EXTERN.h"
@@ -37,7 +45,8 @@
 #ifdef USE_LOCALE
 
 /*
- * Standardize the locale name from a string returned by 'setlocale'.
+ * Standardize the locale name from a string returned by 'setlocale', possibly
+ * modifying that string.
  *
  * The typical return value of setlocale() is either
  * (1) "xx_YY" if the first argument of setlocale() is not LC_ALL
@@ -112,13 +121,39 @@ Perl_set_numeric_radix(pTHX)
 #endif /* USE_LOCALE_NUMERIC */
 }
 
-/*
- * Set up for a new numeric locale.
- */
 void
 Perl_new_numeric(pTHX_ const char *newnum)
 {
 #ifdef USE_LOCALE_NUMERIC
+
+    /* Called after all libc setlocale() calls affecting LC_NUMERIC, to tell
+     * core Perl this and that 'newnum' is the name of the new locale.
+     * It installs this locale as the current underlying default.
+     *
+     * The default locale and the C locale can be toggled between by use of the
+     * set_numeric_local() and set_numeric_standard() functions, which should
+     * probably not be called directly, but only via macros like
+     * SET_NUMERIC_STANDARD() in perl.h.
+     *
+     * The toggling is necessary mainly so that a non-dot radix decimal point
+     * character can be output, while allowing internal calculations to use a
+     * dot.
+     *
+     * This sets several interpreter-level variables:
+     * PL_numeric_name  The default locale's name: a copy of 'newnum'
+     * PL_numeric_local A boolean indicating if the toggled state is such
+     *                  that the current locale is the default locale
+     * PL_numeric_standard A boolean indicating if the toggled state is such
+     *                  that the current locale is the C locale
+     * Note that both of the last two variables can be true at the same time,
+     * if the underlying locale is C.  (Toggling is a no-op under these
+     * circumstances.)
+     *
+     * Any code changing the locale (outside this file) should use
+     * POSIX::setlocale, which calls this function.  Therefore this function
+     * should be called directly only from this file and from
+     * POSIX::setlocale() */
+
     char *save_newnum;
     dVAR;
 
@@ -150,6 +185,10 @@ Perl_set_numeric_standard(pTHX)
 #ifdef USE_LOCALE_NUMERIC
     dVAR;
 
+    /* Toggle the LC_NUMERIC locale to C, if not already there.  Probably
+     * should use the macros like SET_NUMERIC_STANDARD() in perl.h instead of
+     * calling this directly. */
+
     if (! PL_numeric_standard) {
 	setlocale(LC_NUMERIC, "C");
 	PL_numeric_standard = TRUE;
@@ -165,6 +204,10 @@ Perl_set_numeric_local(pTHX)
 {
 #ifdef USE_LOCALE_NUMERIC
     dVAR;
+
+    /* Toggle the LC_NUMERIC locale to the current underlying default, if not
+     * already there.  Probably should use the macros like SET_NUMERIC_LOCAL()
+     * in perl.h instead of calling this directly. */
 
     if (! PL_numeric_local) {
 	setlocale(LC_NUMERIC, PL_numeric_name);
@@ -183,6 +226,18 @@ void
 Perl_new_ctype(pTHX_ const char *newctype)
 {
 #ifdef USE_LOCALE_CTYPE
+
+    /* Called after all libc setlocale() calls affecting LC_CTYPE, to tell
+     * core Perl this and that 'newctype' is the name of the new locale.
+     *
+     * This function sets up the folding arrays for all 256 bytes, assuming
+     * that tofold() is tolc() since fold case is not a concept in POSIX,
+     *
+     * Any code changing the locale (outside this file) should use
+     * POSIX::setlocale, which calls this function.  Therefore this function
+     * should be called directly only from this file and from
+     * POSIX::setlocale() */
+
     dVAR;
     UV i;
 
@@ -203,13 +258,19 @@ Perl_new_ctype(pTHX_ const char *newctype)
     PERL_UNUSED_CONTEXT;
 }
 
-/*
- * Set up for a new collation locale.
- */
 void
 Perl_new_collate(pTHX_ const char *newcoll)
 {
 #ifdef USE_LOCALE_COLLATE
+
+    /* Called after all libc setlocale() calls affecting LC_COLLATE, to tell
+     * core Perl this and that 'newcoll' is the name of the new locale.
+     *
+     * Any code changing the locale (outside this file) should use
+     * POSIX::setlocale, which calls this function.  Therefore this function
+     * should be called directly only from this file and from
+     * POSIX::setlocale() */
+
     dVAR;
 
     if (! newcoll) {
