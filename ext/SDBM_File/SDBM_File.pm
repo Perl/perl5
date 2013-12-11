@@ -62,7 +62,8 @@ package to perform the functions of the hash.)
 
 =item 3. 
 
-The name of the file you want to tie to the hash.  
+The name of the file you want to tie to the hash.  If the page file
+name is supplied, this becomes the directory file name.
 
 =item 4.
 
@@ -94,7 +95,39 @@ The default permissions to use if a new file is created.  The actual
 permissions will be modified by the user's umask, so you should
 probably use 0666 here. (See L<perlfunc/umask>.)
 
+=item 6.
+
+Optionally, the name of the data page file (normally F<<
+I<filename>.pag >>.  If this is supplied, then the first filename is
+treated as the directory file (normally F<< I<filename>.dir >> based
+on the first filename parameter).
+
 =back
+
+=head1 EXPORTS
+
+SDBM_File optionally exports the following constants:
+
+=over
+
+=item *
+
+C<PAGFEXT> - the extension used for the page file, usually C<.pag>.
+
+=item *
+
+C<DIRFEXT> - the extension used for the directory file, C<.dir>
+everywhere but VMS, where it is C<.sdbm_dir>.
+
+=item *
+
+C<PAIRMAX> - the maximum size of a stored hash entry, including the
+length of both the key and value.
+
+=back
+
+These constants can also be used with fully qualified names,
+eg. C<SDBM_File::PAGFEXT>.
 
 =head1 DIAGNOSTICS
 
