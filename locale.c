@@ -134,14 +134,12 @@ Perl_new_numeric(pTHX_ const char *newnum)
     if (! PL_numeric_name || strNE(PL_numeric_name, save_newnum)) {
 	Safefree(PL_numeric_name);
 	PL_numeric_name = save_newnum;
-	PL_numeric_standard = ((*save_newnum == 'C' && save_newnum[1] == '\0')
-			       || strEQ(save_newnum, "POSIX"));
-	PL_numeric_local = TRUE;
-	set_numeric_radix();
     }
-    else {
-        Safefree(save_newnum);
-    }
+
+        PL_numeric_standard = ((*save_newnum == 'C' && save_newnum[1] == '\0')
+                                || strEQ(save_newnum, "POSIX"));
+        PL_numeric_local = TRUE;
+        set_numeric_radix();
 
 #endif /* USE_LOCALE_NUMERIC */
 }
