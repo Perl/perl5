@@ -48,6 +48,9 @@ fresh_perl_is("for (qw(@locales)) {\n" . <<'EOF',
 EOF
     "", {}, "no locales where LC_NUMERIC breaks");
 
+{
+    local $ENV{LC_NUMERIC};
+    local $ENV{LC_ALL}; # so it never overrides LC_NUMERIC
 fresh_perl_is("for (qw(@locales)) {\n" . <<'EOF',
     use POSIX qw(locale_h);
     use locale;
@@ -57,8 +60,8 @@ fresh_perl_is("for (qw(@locales)) {\n" . <<'EOF',
     print "$_ $s\n";
 }
 EOF
-    "", {}, "LC_NUMERIC without setlocale() has no effect in any locale");
-
+    "", {}, "LC_NUMERIC without environment nor setlocale() has no effect in any locale");
+}
 
 # try to find out a locale where LC_NUMERIC makes a difference
 my $original_locale = setlocale(LC_NUMERIC);
@@ -194,6 +197,33 @@ EOF
 	"sprintf() and printf() look at LC_NUMERIC regardless of constant folding");
     }
 
+    for ($different) {
+	local $ENV{LC_NUMERIC} = $_;
+	local $ENV{LC_ALL}; # so it never overrides LC_NUMERIC
+	fresh_perl_is(<<"EOF",
+	    use POSIX qw(locale_h);
+
+            BEGIN { setlocale(LC_NUMERIC, \"$_\"); };
+            setlocale(LC_ALL, "C");
+            use 5.008;
+            print setlocale(LC_NUMERIC);
+EOF
+	 "C", { },
+         "No compile error on v-strings when setting the locale to non-dot radix at compile time when default environment has non-dot radix");
+    }
+
+    for ($different) {
+	local $ENV{LC_NUMERIC} = $_;
+	local $ENV{LC_ALL}; # so it never overrides LC_NUMERIC
+	fresh_perl_is(<<"EOF",
+	    use POSIX qw(locale_h);
+
+            BEGIN { print setlocale(LC_NUMERIC), "\n"; };
+EOF
+	 $_, { },
+         "Passed in LC_NUMERIC is valid at compilation time");
+    }
+
     unless ($comma) {
         skip("no locale available where LC_NUMERIC is a comma", 2);
     }
@@ -240,4 +270,4 @@ EOF
 
 } # SKIP
 
-sub last { 13 }
+sub last { 15 }
