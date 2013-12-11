@@ -73,7 +73,7 @@ E<160>
 =item Category LC_MESSAGES: Error and other messages
 
 This is used by Perl itself only for accessing operating system error
-messages via L<$!|perlvar/$ERRNO>.
+messages via L<$!|perlvar/$ERRNO> and L<$^E|perlvar/$EXTENDED_OS_ERROR>.
 
 =item Category LC_COLLATE: Collation
 
