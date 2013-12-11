@@ -14,7 +14,7 @@ BEGIN {
 }
 use OptreeCheck;
 use Config;
-plan tests	=> 34;
+plan tests	=> 37;
 
 pass("GENERAL OPTREE EXAMPLES");
 
@@ -635,6 +635,22 @@ EOT_EOT
 # 4  <$> const(PV "junk") s*/FOLD >=5.017002
 # 5  <@> print vK
 # 6  <@> leave[1 ref] vKP/REFC
+EONT_EONT
+
+pass("rpeep - return \$x at end of sub");
+
+checkOptree ( name	=> '-exec sub { return 1 }',
+	      code	=> sub { return 1 },
+	      bcopts	=> '-exec',
+	      strip_open_hints => 1,
+	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
+# 1  <;> nextstate(main 1 -e:1) v
+# 2  <$> const[IV 1] s
+# 3  <1> leavesub[1 ref] K/REFC,1
+EOT_EOT
+# 1  <;> nextstate(main 1 -e:1) v
+# 2  <$> const(IV 1) s
+# 3  <1> leavesub[1 ref] K/REFC,1
 EONT_EONT
 
 __END__

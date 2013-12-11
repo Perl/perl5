@@ -1003,6 +1003,9 @@ For custom ops the type is returned from the registration, and it is up
 to the registree to ensure it is accurate. The value returned will be
 one of the OA_* constants from op.h.
 
+=for apidoc Am|bool|OP_TYPE_IS|OP *o, Optype type
+Returns true if the given OP is not NULL and if it is of the given
+type.
 =cut
 */
 
@@ -1015,6 +1018,9 @@ one of the OA_* constants from op.h.
 #define OP_CLASS(o) ((o)->op_type == OP_CUSTOM \
 		     ? XopENTRYCUSTOM(o, xop_class) \
 		     : (PL_opargs[(o)->op_type] & OA_CLASS_MASK))
+
+#define OP_TYPE_IS(o, type) ((o) && (o)->op_type == (type))
+
 
 #define newSUB(f, o, p, b)	Perl_newATTRSUB(aTHX_ (f), (o), (p), NULL, (b))
 
