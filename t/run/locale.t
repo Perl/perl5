@@ -141,7 +141,7 @@ EOF
         # this test is to prevent regression of [rt.perl.org #105784]
         fresh_perl_is(<<"EOF",
             BEGIN {
-                if($Config{d_setlocale}) {
+                if("$Config{d_setlocale}") {
                     require locale; import locale;
                 }
             }
