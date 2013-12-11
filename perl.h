@@ -5212,12 +5212,6 @@ typedef struct am_table_short AMTS;
 
 #ifdef USE_LOCALE_NUMERIC
 
-#define SET_NUMERIC_STANDARD() \
-	set_numeric_standard();
-
-#define SET_NUMERIC_LOCAL() \
-	set_numeric_local();
-
 /* Returns non-zero If the plain locale pragma without a parameter is in effect
  */
 #define IN_LOCALE_RUNTIME	(CopHINTS_get(PL_curcop) & HINT_LOCALE)
@@ -5235,6 +5229,12 @@ typedef struct am_table_short AMTS;
 #define IN_SOME_LOCALE_FORM \
 	(IN_PERL_COMPILETIME ? IN_SOME_LOCALE_FORM_COMPILETIME \
 	                     : IN_SOME_LOCALE_FORM_RUNTIME)
+
+#define SET_NUMERIC_STANDARD() \
+	set_numeric_standard();
+
+#define SET_NUMERIC_LOCAL() \
+	set_numeric_local();
 
 #define STORE_NUMERIC_LOCAL_SET_STANDARD() \
 	bool was_local = PL_numeric_local && IN_LOCALE; \
