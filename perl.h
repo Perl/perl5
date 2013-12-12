@@ -5240,8 +5240,10 @@ typedef struct am_table_short AMTS;
 	bool was_local = PL_numeric_local; \
 	if (was_local) SET_NUMERIC_STANDARD();
 
+/* Doesn't change to underlying locale unless within the scope of some form of
+ * 'use locale'.  This is the usual desired behavior. */
 #define STORE_NUMERIC_STANDARD_SET_LOCAL() \
-	bool was_standard = PL_numeric_standard && IN_LOCALE; \
+	bool was_standard = PL_numeric_standard && IN_SOME_LOCALE_FORM; \
 	if (was_standard) SET_NUMERIC_LOCAL();
 
 #define RESTORE_NUMERIC_LOCAL() \

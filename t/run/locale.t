@@ -113,6 +113,18 @@ EOF
         }
 
         {
+	    fresh_perl_is(<<'EOF', $difference, {},
+use locale ":not_characters";
+format STDOUT =
+@.#
+4.179
+.
+write;
+EOF
+	    "format() looks at LC_NUMERIC with 'use locale \":not_characters\"'");
+        }
+
+        {
 	    fresh_perl_is(<<'EOF', "4.2", {},
 format STDOUT =
 @.#
@@ -213,4 +225,4 @@ EOF
 
 } # SKIP
 
-sub last { 11 }
+sub last { 12 }
