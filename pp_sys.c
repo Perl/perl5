@@ -3858,7 +3858,7 @@ PP(pp_readdir)
     } while (gimme == G_ARRAY);
 
     if (!dp && gimme != G_ARRAY)
-        goto nope;
+        RETPUSHUNDEF;
 
     RETURN;
 
