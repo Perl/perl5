@@ -687,17 +687,17 @@ S_is_cur_LC_category_utf8(pTHX_ int category)
 #endif
 
     /* First dispose of the trivial cases */
-    save_input_locale = stdize_locale(setlocale(category, NULL));
+    save_input_locale = setlocale(category, NULL);
     if (! save_input_locale) {
         return FALSE;   /* XXX maybe should croak */
     }
+    save_input_locale = stdize_locale(savepv(save_input_locale));
     if ((*save_input_locale == 'C' && save_input_locale[1] == '\0')
         || strEQ(save_input_locale, "POSIX"))
     {
+        Safefree(save_input_locale);
         return FALSE;
     }
-
-    save_input_locale = savepv(save_input_locale);
 
 #if defined(HAS_NL_LANGINFO) && defined(CODESET) && defined(USE_LOCALE_CTYPE)
 
