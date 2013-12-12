@@ -1482,7 +1482,7 @@ strtod(str)
 	double num;
 	char *unparsed;
     PPCODE:
-	SET_NUMERIC_LOCAL();
+        STORE_NUMERIC_STANDARD_FORCE_LOCAL();
 	num = strtod(str, &unparsed);
 	PUSHs(sv_2mortal(newSVnv(num)));
 	if (GIMME == G_ARRAY) {
@@ -1492,6 +1492,7 @@ strtod(str)
 	    else
 		PUSHs(&PL_sv_undef);
 	}
+        RESTORE_NUMERIC_STANDARD();
 
 void
 strtol(str, base = 0)

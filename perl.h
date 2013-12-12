@@ -5288,6 +5288,12 @@ typedef struct am_table_short AMTS;
 	bool was_standard = PL_numeric_standard && IN_SOME_LOCALE_FORM; \
 	if (was_standard) SET_NUMERIC_LOCAL();
 
+/* Rarely, we want to change to the underlying locale even outside of 'use
+ * locale'.  This is principally in the POSIX:: functions */
+#define STORE_NUMERIC_STANDARD_FORCE_LOCAL() \
+	bool was_standard = PL_numeric_standard; \
+	if (was_standard) SET_NUMERIC_LOCAL();
+
 #define RESTORE_NUMERIC_LOCAL() \
 	if (was_local) SET_NUMERIC_LOCAL();
 

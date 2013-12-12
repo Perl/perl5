@@ -20,6 +20,7 @@ BEGIN {
 }
 use Config;
 my $have_setlocale = $Config{d_setlocale} eq 'define';
+my $have_strtod = $Config{d_strtod} eq 'define';
 $have_setlocale = 0 if $@;
 # Visual C's CRT goes silly on strings of the form "en_US.ISO8859-1"
 # and mingw32 uses said silly CRT
@@ -221,8 +222,22 @@ EOF
             print \$i, "\n";
 EOF
             "1,5\n2,5", {}, "Can do math when radix is a comma"); # [perl 115800]
+
+        unless ($have_strtod) {
+            skip("no strtod()", 1);
+        }
+        else {
+            fresh_perl_is(<<"EOF",
+                use POSIX;
+                POSIX::setlocale(POSIX::LC_NUMERIC(),"$comma");
+                my \$one_point_5 = POSIX::strtod("1,5");
+                \$one_point_5 =~ s/0+\$//;  # Remove any trailing zeros
+                print \$one_point_5, "\n";
+EOF
+            "1.5", {}, "POSIX::strtod() uses underlying locale");
+        }
     }
 
 } # SKIP
 
-sub last { 12 }
+sub last { 13 }
