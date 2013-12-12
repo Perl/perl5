@@ -1068,11 +1068,11 @@ ApdO	|AV*	|get_av		|NN const char *name|I32 flags
 ApdO	|HV*	|get_hv		|NN const char *name|I32 flags
 ApdO	|CV*	|get_cv		|NN const char* name|I32 flags
 Apd	|CV*	|get_cvn_flags	|NN const char* name|STRLEN len|I32 flags
-ApO	|int	|init_i18nl10n	|int printwarn
-ApO	|int	|init_i18nl14n	|int printwarn
-ApO	|void	|new_collate	|NULLOK const char* newcoll
-ApO	|void	|new_ctype	|NN const char* newctype
-ApO	|void	|new_numeric	|NULLOK const char* newcoll
+ApOM	|int	|init_i18nl10n	|int printwarn
+ApOM	|int	|init_i18nl14n	|int printwarn
+ApOM	|void	|new_collate	|NULLOK const char* newcoll
+ApOM	|void	|new_ctype	|NN const char* newctype
+ApOM	|void	|new_numeric	|NULLOK const char* newcoll
 Ap	|void	|set_numeric_local
 Ap	|void	|set_numeric_radix
 Ap	|void	|set_numeric_standard
