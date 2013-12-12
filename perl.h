@@ -5237,7 +5237,7 @@ typedef struct am_table_short AMTS;
 	set_numeric_local();
 
 #define STORE_NUMERIC_LOCAL_SET_STANDARD() \
-	bool was_local = PL_numeric_local && IN_LOCALE; \
+	bool was_local = PL_numeric_local; \
 	if (was_local) SET_NUMERIC_STANDARD();
 
 #define STORE_NUMERIC_STANDARD_SET_LOCAL() \
