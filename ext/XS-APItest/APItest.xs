@@ -2480,6 +2480,7 @@ utf16_to_utf8 (sv, ...)
 	SV *dest;
 	I32 got; /* Gah, badly thought out APIs */
     CODE:
+	if (ix) (void)SvPV_force_nolen(sv);
 	source = (U8 *)SvPVbyte(sv, len);
 	/* Optionally only convert part of the buffer.  */ 	
 	if (items > 1) {
