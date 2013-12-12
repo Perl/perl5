@@ -162,7 +162,10 @@ like( getcwd(), qr/$pat/, 'getcwd' );
 SKIP: { 
     skip("strtod() not present", 2) unless $Config{d_strtod};
 
-    $lc = &POSIX::setlocale(&POSIX::LC_NUMERIC, 'C') if $Config{d_setlocale};
+    if ($Config{d_setlocale}) {
+        $lc = &POSIX::setlocale(&POSIX::LC_NUMERIC);
+        &POSIX::setlocale(&POSIX::LC_NUMERIC, 'C');
+    }
 
     # we're just checking that strtod works, not how accurate it is
     ($n, $x) = &POSIX::strtod('3.14159_OR_SO');
@@ -206,7 +209,11 @@ sub try_strftime {
     is($got, $expect, "validating mini_mktime() and strftime(): $expect");
 }
 
-$lc = &POSIX::setlocale(&POSIX::LC_TIME, 'C') if $Config{d_setlocale};
+if ($Config{d_setlocale}) {
+    $lc = &POSIX::setlocale(&POSIX::LC_TIME);
+    &POSIX::setlocale(&POSIX::LC_TIME, 'C');
+}
+
 try_strftime("Wed Feb 28 00:00:00 1996 059", 0,0,0, 28,1,96);
 SKIP: {
     skip("VC++ 8 and Vista's CRTs regard 60 seconds as an invalid parameter", 1)

@@ -47,7 +47,8 @@ is(asctime(POSIX::localtime(12345678)), ctime(12345678),
    "asctime() and ctime() at 12345678");
 
 # Careful!  strftime() is locale sensitive.  Let's take care of that
-my $orig_loc = setlocale(LC_TIME, "C") || die "Cannot setlocale() to C:  $!";
+my $orig_loc = setlocale(LC_TIME) || die "Cannot get locale information:  $!";
+setlocale(LC_TIME, "C") || die "Cannot setlocale() to C:  $!";
 my $jan_16 = 15 * 86400;
 is(ctime($jan_16), strftime("%a %b %d %H:%M:%S %Y\n", CORE::localtime($jan_16)),
         "get ctime() equal to strftime()");
