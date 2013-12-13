@@ -683,58 +683,65 @@ Perl_re_intuit_start(pTHX_
 			  && !multiline ) );	/* Check after \n? */
 
 	if (!ml_anch) {
-          /* we are only allowed to match at BOS or \G */
+            /* we are only allowed to match at BOS or \G */
 
-          if (prog->intflags & PREGf_ANCH_GPOS) {
-            /* in this case, we hope(!) that the caller has already
-             * set strpos to pos()-gofs, and will already have checked
-             * that this anchor position is legal
-             */
-            ;
-          }
-          else if (!(prog->intflags & PREGf_IMPLICIT) /* not a real BOL */
-		&& (strpos != strbeg))
-          {
-	      DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "Not at start...\n"));
-	      goto fail;
-	  }
-	  if (prog->check_offset_min == prog->check_offset_max
-              && !(prog->intflags & PREGf_CANY_SEEN)
-              && ! multiline)   /* /m can cause \n's to match that aren't
-                                   accounted for in the string max length.
-                                   See [perl #115242] */
-          {
-	    /* Substring at constant offset from beg-of-str... */
-	    SSize_t slen;
-
-	    s = HOP3c(strpos, prog->check_offset_min, strend);
-	    
-	    if (SvTAIL(check)) {
-		slen = SvCUR(check);	/* >= 1 */
-
-		if ( strend - s > slen || strend - s < slen - 1
-		     || (strend - s == slen && strend[-1] != '\n')) {
-		    DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "String too long...\n"));
-		    goto fail_finish;
-		}
-		/* Now should match s[0..slen-2] */
-		slen--;
-		if (slen && (*SvPVX_const(check) != *s
-			     || (slen > 1
-				 && memNE(SvPVX_const(check), s, slen)))) {
-		  report_neq:
-		    DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "String not equal...\n"));
-		    goto fail_finish;
-		}
+	    if (prog->intflags & PREGf_ANCH_GPOS) {
+                /* in this case, we hope(!) that the caller has already
+                 * set strpos to pos()-gofs, and will already have checked
+                 * that this anchor position is legal
+                 */
+                ;
+            }
+            else if (!(prog->intflags & PREGf_IMPLICIT) /* not a real BOL */
+		     && (strpos != strbeg))
+            {
+	        DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
+                                "Not at start...\n"));
+	        goto fail;
 	    }
-	    else if (*SvPVX_const(check) != *s
-		     || ((slen = SvCUR(check)) > 1
-			 && memNE(SvPVX_const(check), s, slen)))
-		goto report_neq;
-	    check_at = s;
-	    goto success_at_start;
-	  }
+
+	    if (prog->check_offset_min == prog->check_offset_max
+                && !(prog->intflags & PREGf_CANY_SEEN)
+                && ! multiline)   /* /m can cause \n's to match that aren't
+                                     accounted for in the string max length.
+                                     See [perl #115242] */
+            {
+	        /* Substring at constant offset from beg-of-str... */
+	        SSize_t slen;
+
+	        s = HOP3c(strpos, prog->check_offset_min, strend);
+	    
+	        if (SvTAIL(check)) {
+		    slen = SvCUR(check);	/* >= 1 */
+
+		    if (   strend - s > slen || strend - s < slen - 1
+		       || (strend - s == slen && strend[-1] != '\n'))
+                    {
+                        DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
+                                            "String too long...\n"));
+                        goto fail_finish;
+                    }
+                    /* Now should match s[0..slen-2] */
+                    slen--;
+                    if (slen && (*SvPVX_const(check) != *s
+                        || (slen > 1 && memNE(SvPVX_const(check), s, slen))))
+                    {
+                      report_neq:
+                        DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
+                                        "String not equal...\n"));
+                        goto fail_finish;
+                    }
+                }
+                else if (*SvPVX_const(check) != *s
+                         || ((slen = SvCUR(check)) > 1
+                             && memNE(SvPVX_const(check), s, slen)))
+                    goto report_neq;
+
+                check_at = s;
+                goto success_at_start;
+	    }
 	}
+
 	/* Match is anchored, but substr is not anchored wrt beg-of-str. */
 	s = strpos;
 	start_shift = prog->check_offset_min; /* okay to underestimate on CC */
@@ -773,17 +780,19 @@ Perl_re_intuit_start(pTHX_
         SSize_t srch_end_shift = end_shift;
         U8* start_point;
         U8* end_point;
+
         if (srch_start_shift < 0 && strbeg - s > srch_start_shift) {
 	    srch_end_shift -= ((strbeg - s) - srch_start_shift); 
 	    srch_start_shift = strbeg - s;
 	}
-    DEBUG_OPTIMISE_MORE_r({
-        PerlIO_printf(Perl_debug_log, "Check offset min: %"IVdf" Start shift: %"IVdf" End shift %"IVdf" Real End Shift: %"IVdf"\n",
-            (IV)prog->check_offset_min,
-            (IV)srch_start_shift,
-            (IV)srch_end_shift, 
-            (IV)prog->check_end_shift);
-    });       
+
+        DEBUG_OPTIMISE_MORE_r({
+            PerlIO_printf(Perl_debug_log, "Check offset min: %"IVdf" Start shift: %"IVdf" End shift %"IVdf" Real End Shift: %"IVdf"\n",
+                (IV)prog->check_offset_min,
+                (IV)srch_start_shift,
+                (IV)srch_end_shift,
+                (IV)prog->check_end_shift);
+        });
         
         if (prog->intflags & PREGf_CANY_SEEN) {
             start_point= (U8*)(s + srch_start_shift);
@@ -792,6 +801,7 @@ Perl_re_intuit_start(pTHX_
 	    start_point= HOP3(s, srch_start_shift, srch_start_shift < 0 ? strbeg : strend);
             end_point= HOP3(strend, -srch_end_shift, strbeg);
 	}
+
 	DEBUG_OPTIMISE_MORE_r({
             PerlIO_printf(Perl_debug_log, "fbm_instr len=%d str=<%.*s>\n", 
                 (int)(end_point - start_point),
@@ -802,6 +812,7 @@ Perl_re_intuit_start(pTHX_
 	s = fbm_instr( start_point, end_point,
 		      check, multiline ? FBMrf_MULTILINE : 0);
     }
+
     /* Update the count-of-usability, remove useless subpatterns,
 	unshift s.  */
 
