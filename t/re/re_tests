@@ -1851,6 +1851,7 @@ A+(*PRUNE)BC(?{})	AAABC	y	$&	AAABC
 # utf8 cache length panics
 \x{100}[xy]\x{100}{2}	\x{100}y\x{100}\x{100}	y	$&	\x{100}y\x{100}\x{100}
 \x{100}a{2,3}	\x{100}aaa	y	$&	\x{100}aaa
+^x?abc?de	abcde	y	$&	abcde
 
 # Keep these lines at the end of the file
 # vim: softtabstop=0 noexpandtab

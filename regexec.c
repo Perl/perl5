@@ -628,6 +628,7 @@ Perl_re_intuit_start(pTHX_
     SSize_t start_shift = 0;
     /* Should be nonnegative! */
     SSize_t end_shift   = 0;
+    SSize_t max_shift   = -1; /* max char start position of floating substr */
     char *s;
     SV *check;
     char *t;
@@ -747,14 +748,8 @@ Perl_re_intuit_start(pTHX_
 	start_shift = prog->check_offset_min; /* okay to underestimate on CC */
 	end_shift = prog->check_end_shift;
 	
-	if (!ml_anch) {
-	    const SSize_t end = prog->check_offset_max + CHR_SVLEN(check)
-					 - (SvTAIL(check) != 0);
-	    const SSize_t eshift = CHR_DIST((U8*)strend, (U8*)s) - end;
-
-	    if (end_shift < eshift)
-		end_shift = eshift;
-	}
+	if (!ml_anch && prog->check_offset_max != SSize_t_MAX)
+            max_shift = prog->check_offset_max;
     }
     else {				/* Can match at random position */
 	ml_anch = 0;
@@ -795,12 +790,28 @@ Perl_re_intuit_start(pTHX_
         });
         
         if (prog->intflags & PREGf_CANY_SEEN) {
+
             start_point= (U8*)(s + srch_start_shift);
             end_point= (U8*)(strend - srch_end_shift);
         } else {
 	    start_point= HOP3(s, srch_start_shift, srch_start_shift < 0 ? strbeg : strend);
             end_point= HOP3(strend, -srch_end_shift, strbeg);
 	}
+
+        if (max_shift != -1) {
+            U8 *p = (U8*)s;
+
+            assert(max_shift >= 0);
+            if (srch_start_shift > 0)
+                p = start_point; /* don't HOP over chars already HOPed */
+            if (p < end_point)
+                p = HOP3(p,
+                        (max_shift - (srch_end_shift > 0 ? srch_start_shift : 0)
+                         + CHR_SVLEN(check) - (SvTAIL(check) != 0)),
+                        end_point);
+            if (p < end_point)
+                end_point = p;
+        }
 
 	DEBUG_OPTIMISE_MORE_r({
             PerlIO_printf(Perl_debug_log, "fbm_instr len=%d str=<%.*s>\n", 
