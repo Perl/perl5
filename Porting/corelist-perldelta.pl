@@ -57,9 +57,18 @@ sub run {
 
   # by default, compare latest two version in CoreList;
   my @versions = sort keys %Module::CoreList::version;
-  my ($old, $new) = (shift @ARGV, shift @ARGV);
-  $old ||= $versions[-2];
-  $new ||= $versions[-1];
+  my $old = $versions[-2];
+  my $new = $versions[-1];
+
+  # use the provided versions if present
+  # @ARGV >=2 means [old_version] [new_version] [path/to/file]
+  if ( @ARGV >= 2) {
+    ($old, $new) = (shift @ARGV, shift @ARGV);
+    die "$old is an invalid version\n" if not exists
+      $Module::CoreList::version{$old};
+    die "$new is an invalid verison\n" if not exists
+      $Module::CoreList::version{$new};
+  }
 
   if ( $opt{mode} eq 'generate' ) {
     do_generate($old => $new);
