@@ -2796,6 +2796,16 @@ S_move_proto_attr(pTHX_ OP **proto, OP **attrs, const GV * name)
     }
 }
 
+static void
+S_cant_declare(pTHX_ OP *o)
+{
+    yyerror(Perl_form(aTHX_ "Can't declare %s in \"%s\"",
+                             OP_DESC(o),
+                             PL_parser->in_my == KEY_our   ? "our"   :
+                             PL_parser->in_my == KEY_state ? "state" :
+                                                             "my"));
+}
+
 STATIC OP *
 S_my_kid(pTHX_ OP *o, OP *attrs, OP **imopsp)
 {
@@ -2825,11 +2835,7 @@ S_my_kid(pTHX_ OP *o, OP *attrs, OP **imopsp)
 	       type == OP_RV2AV ||
 	       type == OP_RV2HV) { /* XXX does this let anything illegal in? */
 	if (cUNOPo->op_first->op_type != OP_GV) { /* MJD 20011224 */
-	    yyerror(Perl_form(aTHX_ "Can't declare %s in \"%s\"",
-			OP_DESC(o),
-			PL_parser->in_my == KEY_our
-			    ? "our"
-			    : PL_parser->in_my == KEY_state ? "state" : "my"));
+	    S_cant_declare(aTHX_ o);
 	} else if (attrs) {
 	    GV * const gv = cGVOPx_gv(cUNOPo->op_first);
 	    PL_parser->in_my = FALSE;
@@ -2848,11 +2854,7 @@ S_my_kid(pTHX_ OP *o, OP *attrs, OP **imopsp)
 	     type != OP_PADHV &&
 	     type != OP_PUSHMARK)
     {
-	yyerror(Perl_form(aTHX_ "Can't declare %s in \"%s\"",
-			  OP_DESC(o),
-			  PL_parser->in_my == KEY_our
-			    ? "our"
-			    : PL_parser->in_my == KEY_state ? "state" : "my"));
+	S_cant_declare(aTHX_ o);
 	return o;
     }
     else if (attrs && type != OP_PUSHMARK) {
