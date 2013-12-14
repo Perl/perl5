@@ -2799,8 +2799,14 @@ S_move_proto_attr(pTHX_ OP **proto, OP **attrs, const GV * name)
 static void
 S_cant_declare(pTHX_ OP *o)
 {
+    if (o->op_type == OP_NULL
+     && (o->op_flags & (OPf_SPECIAL|OPf_KIDS)) == OPf_KIDS)
+        o = cUNOPo->op_first;
     yyerror(Perl_form(aTHX_ "Can't declare %s in \"%s\"",
-                             OP_DESC(o),
+                             o->op_type == OP_NULL
+                               && o->op_flags & OPf_SPECIAL
+                                 ? "do block"
+                                 : OP_DESC(o),
                              PL_parser->in_my == KEY_our   ? "our"   :
                              PL_parser->in_my == KEY_state ? "state" :
                                                              "my"));

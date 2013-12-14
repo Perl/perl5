@@ -50,6 +50,18 @@ my main $f;
 EXPECT
 No such class field "c" in variable $f of type main at - line 3.
 ########
+# NAME Can't declare conditional
+my($a?$b:$c)
+EXPECT
+Can't declare conditional expression in "my" at - line 1, at EOF
+Execution of - aborted due to compilation errors.
+########
+# NAME Can't declare do block
+my(do{})
+EXPECT
+Can't declare do block in "my" at - line 1, at EOF
+Execution of - aborted due to compilation errors.
+########
 # NAME delete BAD
 delete $x;
 EXPECT
