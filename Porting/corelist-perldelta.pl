@@ -368,6 +368,9 @@ sub do_check {
       my $content = $item->{text};
       my $module  = $item->{name};
 
+      #skip dummy items
+      next if !$module and $content =~ /\s*xx*\s*/i;
+
       say "Could not parse module name; line is:\n\t$content" and next unless $module;
       say "$module is not in Module::CoreList; check to see that it is not covered by another section" and next
         unless $data->{$title}{$module};
