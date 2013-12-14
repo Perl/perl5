@@ -265,6 +265,7 @@ sub do_update_existing {
 
   my $text = DeltaUpdater::transform_pod( $existing, $data );
   open my $out, '>', $existing or die "can't open perldelta file $existing: $!";
+  binmode($out);
   print $out $text;
   close $out;
 }
@@ -544,6 +545,7 @@ sub do_check {
     my $append_to_out = '';
 
     open my $fh, '<', $existing or die "can't open perldelta file $existing: $!";
+    binmode($fh);
 
     while (<$fh>) {
       # treat the rest of the file as plain text
