@@ -14,7 +14,7 @@ use Getopt::Long;
   ./perl -Ilib Porting/corelist-perldelta.pl
 
   # update the module changes for the Perl you are currently building
-  perl Porting/corelist-perldelta.pl --mode=update Porting/perldelta.pod
+  ./perl -Ilib Porting/corelist-perldelta.pl --mode=update pod/perldelta.pod
 
   # generate a diff between the corelist sections of two perldelta* files:
   perl Porting/corelist-perldelta.pl --mode=check 5.017001 5.017002 <perl5172delta.pod
@@ -32,6 +32,8 @@ Ideally, the program will be split into two separate programs, one
 to generate the text and one to show the diff between the
 corelist sections of the last perldelta and the next perldelta.
 
+Currently no information about Removed Modules is displayed in any of the
+modes.
 =cut
 
 my %sections = (
@@ -253,8 +255,10 @@ sub do_update_existing {
 
   my ( $added, $removed, $updated, $manuallyCheck ) = corelist_delta( $old => $new );
   if ($manuallyCheck) {
-    say "Please check whether the following distributions have been modified and list accordingly";
+    print "It cannot be determined whether the following distributions have changed.\n";
+    print "Please check and list accordingly:\n";
     say "\t* $_" for sort @{$manuallyCheck};
+    print "\n";
   }
 
   my $data = {
@@ -268,6 +272,8 @@ sub do_update_existing {
   binmode($out);
   print $out $text;
   close $out;
+  say "The New and Updated Modules and Pragamata sections in $existing have been updated";
+  say "Please ensure the Removed Modules and Pragmata section is up-to-date";
 }
 
 sub do_generate {
@@ -275,8 +281,10 @@ sub do_generate {
   my ($added, $removed, $updated, $manuallyCheck) = corelist_delta($old => $new);
 
   if ($manuallyCheck) {
-    say "\nXXXPlease check whether the following distributions have been modified and list accordingly";
+    print "\nXXXIt cannot be determined whether the following distributions have changed.\n";
+    print "Please check and list accordingly:\n";
     say "\t$_" for @{$manuallyCheck};
+    print "\n";
   }
 
   my $data = {
@@ -372,8 +380,13 @@ sub do_check {
       next if !$module and $content =~ /\s*xx*\s*/i;
 
       say "Could not parse module name; line is:\n\t$content" and next unless $module;
-      say "$module is not in Module::CoreList; check to see that it is not covered by another section" and next
-        unless $data->{$title}{$module};
+
+      if ( !$data->{$title}{$module} ) {
+        print "$module is not listed as being $title in Module::CoreList.\n";
+        print "Ensure Module::CoreList has been updated and\n";
+        print "check to see that the distribution is not listed under another name.\n\n";
+        next;
+      }
 
       if ( $title eq 'new' ) {
         my ($new) = $content =~ /(\d[^\s]+)\s+has\s+been.*$/m;
