@@ -6447,7 +6447,15 @@ Perl_newLOOPOP(pTHX_ I32 flags, I32 debuggable, OP *expr, OP *block)
     PERL_UNUSED_ARG(debuggable);
 
     if (expr) {
-	if (once && expr->op_type == OP_CONST && !SvTRUE(((SVOP*)expr)->op_sv))
+	if (once && (
+	      (expr->op_type == OP_CONST && !SvTRUE(((SVOP*)expr)->op_sv))
+	   || (  expr->op_type == OP_NOT
+	      && cUNOPx(expr)->op_first->op_type == OP_CONST
+	      && SvTRUE(cSVOPx_sv(cUNOPx(expr)->op_first))
+	      )
+	   ))
+	    /* Return the block now, so that S_new_logop does not try to
+	       fold it away. */
 	    return block;	/* do {} while 0 does once */
 	if (expr->op_type == OP_READLINE
 	    || expr->op_type == OP_READDIR
@@ -6486,11 +6494,19 @@ Perl_newLOOPOP(pTHX_ I32 flags, I32 debuggable, OP *expr, OP *block)
     listop = op_append_elem(OP_LINESEQ, block, newOP(OP_UNSTACK, 0));
     o = new_logop(OP_AND, 0, &expr, &listop);
 
+    if (once) {
+	ASSUME(listop);
+    }
+
     if (listop)
 	((LISTOP*)listop)->op_last->op_next = LINKLIST(o);
 
     if (once && o != listop)
+    {
+	assert(cUNOPo->op_first->op_type == OP_AND
+	    || cUNOPo->op_first->op_type == OP_OR);
 	o->op_next = ((LOGOP*)cUNOPo->op_first)->op_other;
+    }
 
     if (o == listop)
 	o = newUNOP(OP_NULL, 0, o);	/* or do {} while 1 loses outer block */
