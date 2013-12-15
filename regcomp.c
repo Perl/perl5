@@ -3405,7 +3405,8 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
         DEBUG_OPTIMISE_MORE_r(
         {
             PerlIO_printf(Perl_debug_log,"%*sstudy_chunk stopparen=%ld depth=%lu recursed_depth=%lu ",
-                ((int) depth*2), "", stopparen, depth, recursed_depth);
+                          ((int) depth*2), "", (long)stopparen,
+                          (unsigned long)depth, (unsigned long)recursed_depth);
             if (recursed_depth) {
                 U32 i;
                 U32 j;
