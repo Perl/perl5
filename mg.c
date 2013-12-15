@@ -748,7 +748,11 @@ S_fixup_errno_string(pTHX_ SV* sv)
     PERL_ARGS_ASSERT_FIXUP_ERRNO_STRING;
 
     assert(SvOK(sv));
-    assert(strNE(SvPVX(sv), ""));
+
+    if(strEQ(SvPVX(sv), "")) {
+	sv_catpv(sv, UNKNOWN_ERRNO_MSG);
+    }
+    else {
 
     /* In some locales the error string may come back as UTF-8, in
      * which case we should turn on that flag.  This didn't use to
@@ -767,6 +771,7 @@ S_fixup_errno_string(pTHX_ SV* sv)
         && is_utf8_string((U8*) SvPVX_const(sv), SvCUR(sv)))
     {
         SvUTF8_on(sv);
+    }
     }
 }
 
