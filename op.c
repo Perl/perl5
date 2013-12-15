@@ -11140,11 +11140,19 @@ Perl_rpeep(pTHX_ OP *o)
 		    && OP_TYPE_IS(sibling->op_next->op_next, OP_LEAVESUB)
 		    && cUNOPx(sibling)->op_first == next
 		    && next->op_sibling && next->op_sibling->op_next
-                    && next->op_sibling->op_next == sibling
-		    && next->op_next && sibling->op_next)
-		{
-		    next->op_sibling->op_next = sibling->op_next;
-		    o->op_next = next->op_next;
+		    && next->op_next
+		) {
+		    /* Look through the PUSHMARK's siblings for one that
+		     * points to the RETURN */
+		    OP *top = next->op_sibling;
+		    while (top && top->op_next) {
+			if (top->op_next == sibling) {
+			    top->op_next = sibling->op_next;
+			    o->op_next = next->op_next;
+			    break;
+			}
+			top = top->op_sibling;
+		    }
 		}
 	    }
 
