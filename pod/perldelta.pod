@@ -270,7 +270,9 @@ that they represent may be covered elsewhere.
 
 =item *
 
-XXX
+Various tests in F<t/porting/> are no longer skipped when the perl
+F<.git> directory is outside the perl tree and pointed to by
+C<$GIT_DIR>. [perl #120505]
 
 =back
 
