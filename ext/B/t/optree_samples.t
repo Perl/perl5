@@ -644,11 +644,11 @@ checkOptree ( name	=> '-exec sub { return 1 }',
 	      bcopts	=> '-exec',
 	      strip_open_hints => 1,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-# 1  <;> nextstate(main 1 -e:1) v
+# 1  <;> nextstate(main 1 -e:1) v:>,<,%
 # 2  <$> const[IV 1] s
 # 3  <1> leavesub[1 ref] K/REFC,1
 EOT_EOT
-# 1  <;> nextstate(main 1 -e:1) v
+# 1  <;> nextstate(main 1 -e:1) v:>,<,%
 # 2  <$> const(IV 1) s
 # 3  <1> leavesub[1 ref] K/REFC,1
 EONT_EONT
