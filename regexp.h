@@ -36,11 +36,11 @@ struct regexp_engine;
 struct regexp;
 
 struct reg_substr_datum {
-    SSize_t min_offset;
-    SSize_t max_offset;
+    SSize_t min_offset; /* min pos (in chars) that substr must appear */
+    SSize_t max_offset  /* max pos (in chars) that substr must appear */;
     SV *substr;		/* non-utf8 variant */
     SV *utf8_substr;	/* utf8 variant */
-    SSize_t end_shift;
+    SSize_t end_shift;  /* how many fixed chars must end the string */
 };
 struct reg_substr_data {
     struct reg_substr_datum data[3];	/* Actual array */
