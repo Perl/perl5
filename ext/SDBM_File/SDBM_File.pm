@@ -40,69 +40,48 @@ SDBM_File - Tied access to sdbm files
 =head1 DESCRIPTION
 
 C<SDBM_File> establishes a connection between a Perl hash variable and
-a file in SDBM_File format;.  You can manipulate the data in the file
+a file in SDBM_File format.  You can manipulate the data in the file
 just as if it were in a Perl hash, but when your program exits, the
 data will remain in the file, to be used the next time your program
 runs.
 
+=head2 Tie
+
 Use C<SDBM_File> with the Perl built-in C<tie> function to establish
-the connection between the variable and the file.  The arguments to
-C<tie> should be:
+the connection between the variable and the file.
 
-=over 4
+    tie %hash, 'SDBM_File', $basename,    $modeflags, $perms;
 
-=item 1.
+    tie %hash, 'SDBM_File', $dirfilename, $modeflags, $perms, $pagfilename;
 
-The hash variable you want to tie.
+C<$basename> is the base filename for the database.  The database is two
+files with ".dir" and ".pag" extensions appended to C<$basename>,
 
-=item 2. 
+    $basename.dir     (or .sdbm_dir on VMS, per DIRFEXT constant)
+    $basename.pag
 
-The string C<"SDBM_File">.  (Ths tells Perl to use the C<SDBM_File>
-package to perform the functions of the hash.)
+The two filenames can also be given separately in full as C<$dirfilename>
+and C<$pagfilename>.  This suits for two files without ".dir" and ".pag"
+extensions, perhaps for example two files from L<File::Temp>.
 
-=item 3. 
+C<$modeflags> can be the following constants from the C<Fcntl> module (in
+the style of the L<open(2)> system call),
 
-The name of the file you want to tie to the hash.  If the page file
-name is supplied, this becomes the directory file name.
+    O_RDONLY          read-only access
+    O_WRONLY          write-only access
+    O_RDWR            read and write access
 
-=item 4.
+If you want to create the file if it does not already exist then bitwise-OR
+(C<|>) C<O_CREAT> too.  If you omit C<O_CREAT> and the database does not
+already exist then the C<tie> call will fail.
 
-Flags.  Use one of:
+    O_CREAT           create database if doesn't already exist
 
-=over 2
-
-=item C<O_RDONLY>
-
-Read-only access to the data in the file.
-
-=item C<O_WRONLY>
-
-Write-only access to the data in the file.
-
-=item C<O_RDWR>
-
-Both read and write access.
-
-=back
-
-If you want to create the file if it does not exist, add C<O_CREAT> to
-any of these, as in the example.  If you omit C<O_CREAT> and the file
-does not already exist, the C<tie> call will fail.
-
-=item 5.
-
-The default permissions to use if a new file is created.  The actual
-permissions will be modified by the user's umask, so you should
-probably use 0666 here. (See L<perlfunc/umask>.)
-
-=item 6.
-
-Optionally, the name of the data page file (normally F<<
-I<filename>.pag >>.  If this is supplied, then the first filename is
-treated as the directory file (normally F<< I<filename>.dir >> based
-on the first filename parameter).
-
-=back
+C<$perms> is the file permissions bits to use if new database files are
+created.  This parameter is mandatory even when not creating a new database.
+The permissions will be reduced by the user's umask so the usual value here
+would be 0666, or if some very private data then 0600.  (See
+L<perlfunc/umask>.)
 
 =head1 EXPORTS
 
