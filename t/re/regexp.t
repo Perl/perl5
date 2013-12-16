@@ -31,6 +31,8 @@
 # Column 6, if present, contains a reason why the test is skipped.
 # This is printed with "skipped", for harness to pick up.
 #
+# Column 7 can be used for comments
+#
 # \n in the tests are interpolated, as are variables of the form ${\w+}.
 #
 # Blanks lines are treated as PASSING tests to keep the line numbers

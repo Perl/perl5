@@ -5,7 +5,7 @@
 # could not go in this file, and were farmed out to other .t's, where they
 # remain
 #
-# pat	string	y/n/etc	expr	expected-expr	skip-reason
+# pat	string	y/n/etc	expr	expected-expr	skip-reason	comment
 __END__
 abc	abc	y	$&	abc
 abc	abc	y	$-[0]	0
