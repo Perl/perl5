@@ -1255,6 +1255,8 @@ EXTERN_C char *crypt(const char *, const char *);
 			       * #define errno (*_errno()) */
 #endif
 
+#define UNKNOWN_ERRNO_MSG "(unknown)"
+
 #ifdef HAS_STRERROR
 #   ifndef DONT_DECLARE_STD
 #       ifdef VMS
@@ -1272,7 +1274,7 @@ EXTERN_C char *crypt(const char *, const char *);
 	extern char *sys_errlist[];
 #       ifndef Strerror
 #           define Strerror(e) \
-		((e) < 0 || (e) >= sys_nerr ? "(unknown)" : sys_errlist[e])
+		((e) < 0 || (e) >= sys_nerr ? UNKNOWN_ERRNO_MSG : sys_errlist[e])
 #       endif
 #   endif
 #endif
