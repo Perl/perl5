@@ -12687,12 +12687,21 @@ parseit:
                     }
                     else
 #endif  /* Not isascii(); just use the hard-coded definition for it */
+                    {
                         _invlist_union_maybe_complement_2nd(
                                 posixes,
                                 PL_ASCII,
                                 cBOOL(namedclass % 2), /* Complement if odd
                                                           (NASCII) */
                                 &posixes);
+
+                        /* The code points 128-255 added above will be
+                         * subtracted out below under /d, so the flag needs to
+                         * be set */
+                        if (namedclass == ANYOF_NASCII && DEPENDS_SEMANTICS) {
+                            ANYOF_FLAGS(ret) |= ANYOF_NON_UTF8_LATIN1_ALL;
+                        }
+                    }
                 }
                 else {  /* Garden variety class */
 

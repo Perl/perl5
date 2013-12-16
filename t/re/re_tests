@@ -638,6 +638,7 @@ $(?<=^(a))	a	y	$1	a
 ([[:^alpha:]]+)	ABcd01Xy__--  ${nulnul}${ffff}	y	$1	01
 ((?a)[[:^alnum:]]+)	ABcd01Xy__--  ${nulnul}${ffff}	y	$1	__--  ${nulnul}${ffff}
 ([[:^ascii:]]+)	ABcd01Xy__--  ${nulnul}${ffff}	y	$1	${ffff}
+([:[:^ascii:]]+)	ABcd01Xy__--  ${nulnul}${ffff}	y	$1	${ffff}	RT #120799
 ([[:^cntrl:]]+)	ABcd01Xy__--  ${nulnul}${ffff}	y	$1	ABcd01Xy__--  
 ([[:^digit:]]+)	ABcd01Xy__--  ${nulnul}${ffff}	y	$1	ABcd
 ([[:^lower:]]+)	ABcd01Xy__--  ${nulnul}${ffff}	y	$1	AB
