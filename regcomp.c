@@ -12819,8 +12819,12 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
     STRLEN initial_listsv_len = 0; /* Kind of a kludge to see if it is more
 				      than just initialized.  */
     SV* properties = NULL;    /* Code points that match \p{} \P{} */
-    SV* posixes = NULL;     /* Code points that match classes like, [:word:],
-                               extended beyond the Latin1 range */
+    SV* posixes = NULL;     /* Code points that match classes like [:word:],
+                               extended beyond the Latin1 range.  These have to
+                               be kept separate from other code points for much
+                               of this function because their handling  is
+                               different under /i, and for most classes under
+                               /d as well */
     UV element_count = 0;   /* Number of distinct elements in the class.
 			       Optimizations may be possible if this is tiny */
     AV * multi_char_matches = NULL; /* Code points that fold to more than one
