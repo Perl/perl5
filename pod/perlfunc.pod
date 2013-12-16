@@ -972,7 +972,7 @@ On POSIX systems, you can detect this condition this way:
     use POSIX qw(sysconf _PC_CHOWN_RESTRICTED);
     $can_chown_giveaway = not sysconf(_PC_CHOWN_RESTRICTED);
 
-Portability issues: L<perlport/chmod>.
+Portability issues: L<perlport/chown>.
 
 =item chr NUMBER
 X<chr> X<character> X<ASCII> X<Unicode>
