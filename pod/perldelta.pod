@@ -146,6 +146,13 @@ L<File::Fetch> has been upgraded from version 0.44 to 0.46.
 
 Blacklists "ftp" on DragonflyBSD.
 
+=item *
+
+L<SDBM_File> has been upgraded from 1.10 to 1.11.
+
+Added access to SDBM constants and to opening SDBM files with explicit
+page and directory file names. [perl #114350]
+
 =back
 
 =head2 Removed Modules and Pragmata
