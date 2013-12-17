@@ -134,6 +134,14 @@ supported.
 
 =item *
 
+L<Data::Dumper> has been upgraded from version 2.149 to 2.150.
+
+Regular expression objects are now dumped in a form closer to their
+original source, eg. C< qr/abc/i > is dumped as exactly that instead of
+C< qr/(?^i:abc)/ >. [perl #82948]
+
+=item *
+
 L<File::Fetch> has been upgraded from version 0.44 to 0.46.
 
 Blacklists "ftp" on DragonflyBSD.
