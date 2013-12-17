@@ -119,6 +119,13 @@ XXX
 
 =item *
 
+L<base> has been upgraded from version 2.19 to 2.20.
+
+C<base> now only ignores load failure on the requested module. [perl
+#120685]
+
+=item *
+
 L<CGI> has been upgraded from version 3.63 to 3.64.
 
 Avoids a warning about "undefined variable in user_agent" in some cases, and
