@@ -4512,9 +4512,18 @@ PERLIO_FUNCS_DECL(PerlIO_pending) = {
  * replaced by LF, or to the last CR of the buffer.  In the former case
  * the caller thinks that the buffer ends at c->nl + 1, in the latter
  * that it ends at c->nl; these two cases can be distinguished by
- * *c->nl.  c->nl is set during _getcnt() call, and unset during
+ * *c->nl.  c->nl is set during _get_cnt() call, and unset during
  * _unread() and _flush() calls.
+ *
  * It only matters for read operations.
+ *
+ * The flag PERLIO_F_CRLFSAWCR is used to allow "permissive" CRLF, for
+ * e.g. reading LF (unix) delimited files on Win32, the issue being to 
+ * prevent _unread() from translating back indiscriminately '\n' as
+ * a CR LF pair in that case (this is an issue because _unread() may
+ * be used quite a lot if there is an encoding(xxx) layer upstream).
+ * So the latter translation will be done only if this flag got set,
+ * which is done by _get_cnt() on finding a NATIVE_0xd.
  */
 
 typedef struct {
@@ -4575,6 +4584,8 @@ SSize_t
 PerlIOCrlf_unread(pTHX_ PerlIO *f, const void *vbuf, Size_t count)
 {
     PerlIOCrlf * const c = PerlIOSelf(f, PerlIOCrlf);
+    if (!(PerlIOBase(f)->flags & PERLIO_F_CRLF) || !(PerlIOBase(f)->flags & PERLIO_F_CRLFSAWCR))
+	return PerlIOBuf_unread(aTHX_ f, vbuf, count);
     if (c->nl) {	/* XXXX Shouldn't it be done only if b->ptr > c->nl? */
 	*(c->nl) = NATIVE_0xd;
 	c->nl = NULL;
@@ -4640,6 +4651,7 @@ PerlIOCrlf_get_cnt(pTHX_ PerlIO *f)
 	    while (nl < b->end && *nl != NATIVE_0xd)
 		nl++;
 	    if (nl < b->end && *nl == NATIVE_0xd) {
+                PerlIOBase(f)->flags |= PERLIO_F_CRLFSAWCR;
 	      test:
 		if (nl + 1 < b->end) {
 		    if (nl[1] == NATIVE_0xa) {

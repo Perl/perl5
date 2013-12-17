@@ -99,6 +99,7 @@ struct _PerlIO {
 #define PERLIO_F_TTY		0x00800000
 #define PERLIO_F_NOTREG         0x01000000   
 #define PERLIO_F_CLEARED        0x02000000 /* layer cleared but not freed */
+#define PERLIO_F_CRLFSAWCR      0x04000000
 
 #define PerlIOBase(f)      (*(f))
 #define PerlIOSelf(f,type) ((type *)PerlIOBase(f))
