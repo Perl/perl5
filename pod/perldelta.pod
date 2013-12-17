@@ -385,6 +385,14 @@ C<< semctl(..., SETVAL, ...) >> would set the semaphore to the top
 32-bits of the supplied integer instead of the bottom 32-bits on
 64-bit big-endian systems. [perl #120635]
 
+=item *
+
+A regression since v5.18.0 has been fixed in which C<qr/[[:^ascii:]]/d>
+failed to match any character in the range C<\x80> - C<\xFF> if its
+surrounding character class contained anything else.  (That is, the bug
+didn't happen if the C<[:^ascii:]> was the only element of the character
+class.) [perl #120799]
+
 =back
 
 =head1 Known Problems
