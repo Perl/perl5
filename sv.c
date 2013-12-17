@@ -2957,31 +2957,19 @@ Perl_sv_2pv_flags(pTHX_ SV *const sv, STRLEN *const lp, const I32 flags)
             V_Gconvert(SvNVX(sv), NV_DIG, 0, s);
             SvPOK_on(sv);
 #else
-            /* Gconvert always uses the current locale.  That's the right thing
-             * to do if we're supposed to be using locales.  But otherwise, we
-             * want the result to be based on the C locale, so we need to
-             * change to the C locale during the Gconvert and then change back.
-             * But if we're already in the C locale (PL_numeric_standard is
-             * TRUE in that case), no need to do any changing */
-            if (PL_numeric_standard || IN_SOME_LOCALE_FORM_RUNTIME) {
+            {
+                DECLARE_STORE_LC_NUMERIC_SET_TO_NEEDED();
                 V_Gconvert(SvNVX(sv), NV_DIG, 0, s);
 
                 /* If the radix character is UTF-8, and actually is in the
                  * output, turn on the UTF-8 flag for the scalar */
-                if (! PL_numeric_standard
+                if (PL_numeric_local
                     && PL_numeric_radix_sv && SvUTF8(PL_numeric_radix_sv)
                     && instr(s, SvPVX_const(PL_numeric_radix_sv)))
                 {
                     SvUTF8_on(sv);
                 }
-            }
-            else {
-                char *loc = savepv(setlocale(LC_NUMERIC, NULL));
-                setlocale(LC_NUMERIC, "C");
-                V_Gconvert(SvNVX(sv), NV_DIG, 0, s);
-                setlocale(LC_NUMERIC, loc);
-                Safefree(loc);
-
+                RESTORE_LC_NUMERIC();
             }
 
             /* We don't call SvPOK_on(), because it may come to pass that the
@@ -10423,9 +10411,8 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
     char ebuf[IV_DIG * 4 + NV_DIG + 32];
     /* large enough for "%#.#f" --chip */
     /* what about long double NVs? --jhi */
-#ifdef USE_LOCALE_NUMERIC
-    SV* oldlocale = NULL;
-#endif
+
+    DECLARATION_FOR_STORE_LC_NUMERIC_SET_TO_NEEDED;
 
     PERL_ARGS_ASSERT_SV_VCATPVFN_FLAGS;
     PERL_UNUSED_ARG(maybe_tainted);
@@ -10478,6 +10465,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 		   a Configure test for this.  */
 		if (digits && digits < sizeof(ebuf) - NV_DIG - 10) {
 		     /* 0, point, slack */
+                    STORE_LC_NUMERIC_SET_TO_NEEDED();
 		    V_Gconvert(nv, (int)digits, 0, ebuf);
 		    sv_catpv_nomg(sv, ebuf);
 		    if (*ebuf)	/* May return an empty string for digits==0 */
@@ -11338,6 +11326,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 		/* See earlier comment about buggy Gconvert when digits,
 		   aka precis is 0  */
 		if ( c == 'g' && precis) {
+                    STORE_LC_NUMERIC_SET_TO_NEEDED();
 		    V_Gconvert((NV)nv, (int)precis, 0, PL_efloatbuf);
 		    /* May return an empty string for digits==0 */
 		    if (*PL_efloatbuf) {
@@ -11387,19 +11376,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 		 * where printf() taints but print($float) doesn't.
 		 * --jhi */
 
-#ifdef USE_LOCALE_NUMERIC
-                if (! PL_numeric_standard && ! IN_SOME_LOCALE_FORM) {
-
-                    /* We use a mortal SV, so that any failures (such as if
-                     * warnings are made fatal) won't leak */
-                    char *oldlocale_string = setlocale(LC_NUMERIC, NULL);
-                    oldlocale = newSVpvn_flags(oldlocale_string,
-                                               strlen(oldlocale_string),
-                                               SVs_TEMP);
-                    PL_numeric_standard = TRUE;
-                    setlocale(LC_NUMERIC, "C");
-                }
-#endif
+                STORE_LC_NUMERIC_SET_TO_NEEDED();
 
                 /* hopefully the above makes ptr a very constrained format
                  * that is safe to use, even though it's not literal */
@@ -11581,13 +11558,8 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
     }
     SvTAINT(sv);
 
-#ifdef USE_LOCALE_NUMERIC   /* Done outside loop, so don't have to save/restore
+    RESTORE_LC_NUMERIC();   /* Done outside loop, so don't have to save/restore
                                each iteration. */
-    if (oldlocale) {
-        setlocale(LC_NUMERIC, SvPVX(oldlocale));
-        PL_numeric_standard = FALSE;
-    }
-#endif
 }
 
 /* =========================================================================
