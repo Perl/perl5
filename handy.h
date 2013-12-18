@@ -1565,6 +1565,8 @@ typedef U32 line_t;
 =for apidoc Am|void|Newx|void* ptr|int nitems|type
 The XSUB-writer's interface to the C C<malloc> function.
 
+Memory obtained by this should B<ONLY> be freed with L<"Safefree">.
+
 In 5.9.3, Newx() and friends replace the older New() API, and drops
 the first parameter, I<x>, a debug aid which allowed callers to identify
 themselves.  This aid has been superseded by a new build option,
@@ -1575,19 +1577,29 @@ there for use in XS modules supporting older perls.
 The XSUB-writer's interface to the C C<malloc> function, with
 cast.  See also C<Newx>.
 
+Memory obtained by this should B<ONLY> be freed with L<"Safefree">.
+
 =for apidoc Am|void|Newxz|void* ptr|int nitems|type
 The XSUB-writer's interface to the C C<malloc> function.  The allocated
 memory is zeroed with C<memzero>.  See also C<Newx>.
 
+Memory obtained by this should B<ONLY> be freed with L<"Safefree">.
+
 =for apidoc Am|void|Renew|void* ptr|int nitems|type
 The XSUB-writer's interface to the C C<realloc> function.
+
+Memory obtained by this should B<ONLY> be freed with L<"Safefree">.
 
 =for apidoc Am|void|Renewc|void* ptr|int nitems|type|cast
 The XSUB-writer's interface to the C C<realloc> function, with
 cast.
 
+Memory obtained by this should B<ONLY> be freed with L<"Safefree">.
+
 =for apidoc Am|void|Safefree|void* ptr
 The XSUB-writer's interface to the C C<free> function.
+
+This should B<ONLY> be used on memory obtained using L<"Newx"> and friends.
 
 =for apidoc Am|void|Move|void* src|void* dest|int nitems|type
 The XSUB-writer's interface to the C C<memmove> function.  The C<src> is the
