@@ -1,5 +1,9 @@
 =encoding utf8
 
+=for todo
+0ac75573 First steps to resolving RT #120618
+09a65838 Avoid pointer churn in study_chunk recursion bitmap allocation
+
 =head1 NAME
 
 [ this is a template for a new perldelta file.  Any text flagged as XXX needs
