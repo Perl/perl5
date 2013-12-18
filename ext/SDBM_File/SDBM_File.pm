@@ -50,9 +50,9 @@ runs.
 Use C<SDBM_File> with the Perl built-in C<tie> function to establish
 the connection between the variable and the file.
 
-    tie %hash, 'SDBM_File', $basename,    $modeflags, $perms;
+    tie %hash, 'SDBM_File', $basename, $modeflags, $perms;
 
-    tie %hash, 'SDBM_File', $dirfilename, $modeflags, $perms, $pagfilename;
+    tie %hash, 'SDBM_File', $dirfile,  $modeflags, $perms, $pagfilename;
 
 C<$basename> is the base filename for the database.  The database is two
 files with ".dir" and ".pag" extensions appended to C<$basename>,
@@ -60,7 +60,7 @@ files with ".dir" and ".pag" extensions appended to C<$basename>,
     $basename.dir     (or .sdbm_dir on VMS, per DIRFEXT constant)
     $basename.pag
 
-The two filenames can also be given separately in full as C<$dirfilename>
+The two filenames can also be given separately in full as C<$dirfile>
 and C<$pagfilename>.  This suits for two files without ".dir" and ".pag"
 extensions, perhaps for example two files from L<File::Temp>.
 
