@@ -11,7 +11,6 @@
 #    lib/Config.pm
 #    lib/Config_heavy.pl
 #    lib/Config.pod
-#    lib/Cross.pm (optionally)
 #
 #
 # from the contents of the static files
@@ -23,7 +22,6 @@
 #
 #    config.sh
 #
-# Note that output directory is xlib/[cross-name]/ for cross-compiling
 #
 # It will only update Config.pm and Config_heavy.pl if the contents of
 # either file would be different. Note that *both* files are updated in
@@ -32,7 +30,6 @@
 
 sub usage { die <<EOF }
 usage: $0  [ options ]
-    --cross=PLATFORM    cross-compile for a different platform
     --no-glossary       don't include Porting/Glossary in lib/Config.pod
     --chdir=dir         change directory before writing files
 EOF
@@ -92,7 +89,6 @@ $header_files =~ s/(?=.{64})   # If line is still overlength
 
 # allowed opts as well as specifies default and initial values
 my %Allowed_Opts = (
-    'cross'    => '', # --cross=PLATFORM - crosscompiling for PLATFORM
     'glossary' => 1,  # --no-glossary  - no glossary file inclusion,
                       #                  for compactness
     'chdir'    => '', # --chdir=dir    - change directory before writing files
@@ -1096,7 +1092,6 @@ if ($orig_config_txt ne $config_txt or $orig_heavy_txt ne $heavy_txt) {
 
 # Now do some simple tests on the Config.pm file we have created
 unshift(@INC,'lib');
-unshift(@INC,'xlib/symbian') if $Opts{cross};
 require $Config_PM;
 require $Config_heavy;
 import Config;
