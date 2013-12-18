@@ -19,7 +19,9 @@
 static I32 num_q (const char *s, STRLEN slen);
 static I32 esc_q (char *dest, const char *src, STRLEN slen);
 static I32 esc_q_utf8 (pTHX_ SV *sv, const char *src, STRLEN slen, I32 do_utf8, I32 useqq);
-static I32 needs_quote(const char *s, STRLEN len);
+static bool globname_needs_quote(const char *s, STRLEN len);
+static bool key_needs_quote(const char *s, STRLEN len);
+static bool safe_decimal_number(const char *p, STRLEN len);
 static SV *sv_x (pTHX_ SV *sv, const char *str, STRLEN len, I32 n);
 static I32 DD_dump (pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval,
 		    HV *seenhv, AV *postav, I32 *levelp, I32 indent,
@@ -91,19 +93,19 @@ Perl_utf8_to_uvchr_buf(pTHX_ U8 *s, U8 *send, STRLEN *retlen)
 #define DD_is_integer(sv) SvIOK(sv)
 #endif
 
-/* does a string need to be protected? */
-static I32
-needs_quote(const char *s, STRLEN len)
+/* does a glob name need to be protected? */
+static bool
+globname_needs_quote(const char *s, STRLEN len)
 {
     const char *send = s+len;
 TOP:
     if (s[0] == ':') {
 	if (++s<send) {
 	    if (*s++ != ':')
-		return 1;
+                return TRUE;
 	}
 	else
-	    return 1;
+	    return TRUE;
     }
     if (isIDFIRST(*s)) {
 	while (++s<send)
@@ -111,12 +113,35 @@ TOP:
 		if (*s == ':')
 		    goto TOP;
 		else
-		    return 1;
+                    return TRUE;
 	    }
     }
     else
-	return 1;
-    return 0;
+        return TRUE;
+
+    return FALSE;
+}
+
+/* does a hash key need to be quoted (to the left of => ).
+   Previously this used (globname_)needs_quote() which accepted strings
+   like '::foo', but these aren't safe as unquoted keys under strict.
+*/
+static bool
+key_needs_quote(const char *s, STRLEN len) {
+    const char *send = s+len;
+
+    if (safe_decimal_number(s, len)) {
+        return FALSE;
+    }
+    else if (isIDFIRST(*s)) {
+        while (++s<send)
+            if (!isWORDCHAR(*s))
+                return TRUE;
+    }
+    else
+        return TRUE;
+
+    return FALSE;
 }
 
 /* Check that the SV can be represented as a simple decimal integer.
@@ -124,10 +149,7 @@ TOP:
  * The perl code does this by matching against /^(?:0|-?[1-9]\d{0,8})\z/
 */
 static bool
-safe_decimal_number(pTHX_ SV *val) {
-    STRLEN len;
-    const char *p = SvPV(val, len);
-
+safe_decimal_number(const char *p, STRLEN len) {
     if (len == 1 && *p == '0')
         return TRUE;
 
@@ -883,28 +905,24 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 
                 sv_catsv(retval, totpad);
                 sv_catsv(retval, ipad);
-                /* old logic was first to check utf8 flag, and if utf8 always
+                /* The (very)
+                   old logic was first to check utf8 flag, and if utf8 always
                    call esc_q_utf8.  This caused test to break under -Mutf8,
                    because there even strings like 'c' have utf8 flag on.
                    Hence with quotekeys == 0 the XS code would still '' quote
                    them based on flags, whereas the perl code would not,
                    based on regexps.
-                   The perl code is correct.
-                   needs_quote() decides that anything that isn't a valid
-                   perl identifier needs to be quoted, hence only correctly
-                   formed strings with no characters outside [A-Za-z0-9_:]
-                   won't need quoting.  None of those characters are used in
-                   the byte encoding of utf8, so anything with utf8
-                   encoded characters in will need quoting. Hence strings
-                   with utf8 encoded characters in will end up inside do_utf8
-                   just like before, but now strings with utf8 flag set but
-                   only ascii characters will end up in the unquoted section.
 
-                   There should also be less tests for the (probably currently)
-                   more common doesn't need quoting case.
-                   The code is also smaller (22044 vs 22260) because I've been
-                   able to pull the common logic out to both sides.  */
-                if (quotekeys || needs_quote(key,keylen)) {
+                   The old logic checked that the string was a valid
+                   perl glob name (foo::bar), which isn't safe under
+                   strict, and differs from the perl code which only
+                   accepts simple identifiers.
+
+                   With the fix for [perl #120384] I chose to make
+                   their handling of key quoting compatible between XS
+                   and perl.
+                 */
+                if (quotekeys || key_needs_quote(key,keylen)) {
                     if (do_utf8 || useqq) {
                         STRLEN ocur = SvCUR(retval);
                         nlen = esc_q_utf8(aTHX_ retval, key, klen, do_utf8, useqq);
@@ -1094,7 +1112,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 #endif
 		    i = 0; else i -= 4;
 	    }
-	    if (needs_quote(c,i)) {
+            if (globname_needs_quote(c,i)) {
 #ifdef GvNAMEUTF8
 	      if (GvNAMEUTF8(val)) {
 		sv_grow(retval, SvCUR(retval)+2);
@@ -1188,18 +1206,18 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	}
 #endif
 
-	/* the pure perl and XS non-qq outputs have historically been
-	 * different in this case, but for useqq, let's try to match
-	 * the pure perl code.
-	 * see [perl #74798]
-	 */
-	else if (useqq && safe_decimal_number(aTHX_ val)) {
-	    sv_catsv(retval, val);
-	}
 	else {
         integer_came_from_string:
-	    c = SvPV(val, i);
-	    if (DO_UTF8(val) || useqq)
+            c = SvPV(val, i);
+            /* the pure perl and XS non-qq outputs have historically been
+             * different in this case, but for useqq, let's try to match
+             * the pure perl code.
+             * see [perl #74798]
+             */
+            if (useqq && safe_decimal_number(c, i)) {
+                sv_catsv(retval, val);
+            }
+	    else if (DO_UTF8(val) || useqq)
 	        i += esc_q_utf8(aTHX_ retval, c, i, DO_UTF8(val), useqq);
 	    else {
 		sv_grow(retval, SvCUR(retval)+3+2*i); /* 3: ""\0 */

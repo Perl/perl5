@@ -899,11 +899,8 @@ TEST q(Data::Dumper->new([$a])->Dumpxs;)
 #};
 EOT
 
-# perl code does keys and values as numbers if possible
-TEST q(Data::Dumper->new([$c])->Dump;);
-# XS code always does them as strings
-$WANT =~ s/ (\d+)/ '$1'/gs;
-TEST q(Data::Dumper->new([$c])->Dumpxs;)
+TEST q(Data::Dumper->new([$c])->Dump;), "sortkeys sub";
+TEST q(Data::Dumper->new([$c])->Dumpxs;), "sort keys sub (XS)"
 	if $XS;
 }
 
@@ -949,9 +946,10 @@ TEST q(Data::Dumper->new([$c])->Dumpxs;)
 #];
 EOT
 
-TEST q(Data::Dumper->new([[$c, $d]])->Dump;);
-$WANT =~ s/ (\d+)/ '$1'/gs;
-TEST q(Data::Dumper->new([[$c, $d]])->Dumpxs;)
+TEST q(Data::Dumper->new([[$c, $d]])->Dump;), "more sortkeys sub";
+# the XS code does number values as strings
+$WANT =~ s/ (\d+)(,?)$/ '$1'$2/gm;
+TEST q(Data::Dumper->new([[$c, $d]])->Dumpxs;), "more sortkeys sub (XS)"
 	if $XS;
 }
 

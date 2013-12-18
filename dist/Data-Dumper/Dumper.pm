@@ -440,8 +440,15 @@ sub _dump {
          () )
       {
         my $nk = $s->_dump($k, "");
-        $nk = $1
-          if !$s->{quotekeys} and $nk =~ /^[\"\']([A-Za-z_]\w*)[\"\']$/;
+
+        # _dump doesn't quote numbers of this form
+        if ($s->{quotekeys} && $nk =~ /^(?:0|-?[1-9][0-9]{0,8})\z/) {
+          $nk = $s->{useqq} ? qq("$nk") : qq('$nk');
+        }
+        elsif (!$s->{quotekeys} and $nk =~ /^[\"\']([A-Za-z_]\w*)[\"\']$/) {
+          $nk = $1
+        }
+
         $sname = $mname . '{' . $nk . '}';
         $out .= $pad . $ipad . $nk . $pair;
 
@@ -546,7 +553,8 @@ sub _dump {
        and ref $ref eq 'VSTRING' || eval{Scalar::Util::isvstring($val)}) {
       $out .= sprintf "%vd", $val;
     }
-    elsif ($val =~ /^(?:0|-?[1-9]\d{0,8})\z/) { # safe decimal number
+    # \d here would treat "1\x{660}" as a safe decimal number
+    elsif ($val =~ /^(?:0|-?[1-9][0-9]{0,8})\z/) { # safe decimal number
       $out .= $val;
     }
     else {                 # string
@@ -1390,7 +1398,7 @@ modify it under the same terms as Perl itself.
 
 =head1 VERSION
 
-Version 2.150  (November 21 2013)
+Version 2.150  (December 18 2013)
 
 =head1 SEE ALSO
 
