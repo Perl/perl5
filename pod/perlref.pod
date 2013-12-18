@@ -767,11 +767,12 @@ Postfix dereference should work in all circumstances where block
 syntax allows dereferencing to be written and read entirely
 left-to-right.  The following equivalencies are defined:
 
-  $sref->$*;  # same as ${ $sref }
-  $aref->@*;  # same as @{ $aref }
-  $href->%*;  # same as %{ $href }
-  $cref->&*;  # same as &{ $cref }
-  $gref->**;  # same as *{ $gref }
+  $sref->$*;  # same as  ${ $sref }
+  $aref->@*;  # same as  @{ $aref }
+  $aref->$#*; # same as $#{ $aref }
+  $href->%*;  # same as  %{ $href }
+  $cref->&*;  # same as  &{ $cref }
+  $gref->**;  # same as  *{ $gref }
 
 Note especially that C<< $cref->&* >> is I<not> equivalent to C<<
 $cref->() >>, and can serve different purposes.
