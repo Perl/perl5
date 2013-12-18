@@ -175,7 +175,7 @@ You may access the repository over the web.  This allows you to browse
 the tree, see recent commits, subscribe to RSS feeds for the changes,
 search for particular commits and more.  You may access it at
 L<http://perl5.git.perl.org/perl.git>.  A mirror of the repository is
-found at L<http://github.com/mirrors/perl>.
+found at L<https://github.com/Perl/perl5>.
 
 =head2 Read access via rsync
 
