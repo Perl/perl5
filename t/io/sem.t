@@ -24,7 +24,7 @@ use IPC::SysV qw/ IPC_PRIVATE S_IRUSR S_IWUSR IPC_RMID SETVAL GETVAL SETALL GETA
 
 my $id;
 my $nsem = 10;
-END { semctl $id, IPC_RMID, 0, 0 if defined $id }
+END { semctl $id, 0, IPC_RMID, 0 if defined $id }
 
 {
     local $SIG{SYS} = sub { skip_all("SIGSYS caught") } if exists $SIG{SYS};
