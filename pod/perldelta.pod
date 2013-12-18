@@ -431,6 +431,16 @@ C<< readdir() >> now only sets C<$!> on error.  C<$!> is no longer set
 to C<EBADF> when then terminating C<undef> is read from the directory
 unless the system call sets C<$!>. [perl #118651]
 
+=item *
+
+C<&CORE::glob> no longer causes an intermittent crash due to perl's stack
+getting corrupted. [perl #119993]
+
+=item *
+
+C<open> with layers that load modules (e.g., "<:encoding(utf8)") no longer
+runs the risk of crashing due to stack corruption.
+
 =back
 
 =head1 Known Problems
