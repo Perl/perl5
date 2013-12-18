@@ -31,6 +31,12 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 Postfix syntax for maximum array index
+
+The postfix notation C<< ->$#* >> has been added, to match the similar
+postfix operators added in 5.19.5.  C<< $foo->$#* >> is equivalent to
+C<$#$foo>.  See L<perlref>.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
