@@ -45,6 +45,18 @@ XXX For a release on a stable branch, this section aspires to be:
 
 [ List each incompatible change as a =head2 entry ]
 
+=head2 Data::Dumper's output may change
+
+Depending on the data structures dumped and the settings set for
+Data::Dumper, the dumped output may have changed from previous
+versions.
+
+If you have tests that depend on the exact output of Data::Dumper,
+they may fail.
+
+To avoid this problem in your code, test against the data structure
+from evaluating the dumped structure, instead of the dump itself.
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.
@@ -139,6 +151,11 @@ L<Data::Dumper> has been upgraded from version 2.149 to 2.150.
 Regular expression objects are now dumped in a form closer to their
 original source, eg. C< qr/abc/i > is dumped as exactly that instead of
 C< qr/(?^i:abc)/ >. [perl #82948]
+
+Dumping of hash keys is now more consistent between the XS and perl
+implementations of L<Data::Dumper>, including how the C<quotekeys>
+option behaves.  This may make tests that depend on the exact output
+of Data::Dumper to fail. [perl #120384]
 
 =item *
 
