@@ -408,6 +408,12 @@ surrounding character class contained anything else.  (That is, the bug
 didn't happen if the C<[:^ascii:]> was the only element of the character
 class.) [perl #120799]
 
+=item *
+
+C<< readdir() >> now only sets C<$!> on error.  C<$!> is no longer set
+to C<EBADF> when then terminating C<undef> is read from the directory
+unless the system call sets C<$!>. [perl #118651]
+
 =back
 
 =head1 Known Problems
