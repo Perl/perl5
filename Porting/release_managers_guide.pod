@@ -642,7 +642,12 @@ section, which can be generated with something like:
 
   $ perl Porting/acknowledgements.pl v5.15.0..HEAD
 
-Fill in the "Updated Modules" section now that Module::CoreList is updated.
+Fill in the "New/Updated Modules" sections now that Module::CoreList is updated:
+
+  $ ./perl -Ilib Porting/corelist-perldelta.pl --mode=update pod/perldelta.pod
+
+Ideally, also fill in a summary of the major changes to each module for which
+an entry has been added by F<corelist-perldelta.pl>.
 
 Re-read the perldelta to try to find any embarrassing typos and thinkos;
 remove any C<TODO> or C<XXX> flags; update the "Known Problems" section
