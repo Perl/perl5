@@ -50,6 +50,12 @@ Devel::Cover among other libraries.  This has been fixed.  [perl #119351]
 
 =item *
 
+Perl 5.18.0 introduced a regression whereby C<[:^ascii:]>, if used in the same
+character class as other qualifiers, would fail to match characters in the
+Latin-1 block.  This has been fixed.  [perl #120799]
+
+=item *
+
 Perl 5.18.0 introduced a regression when using ->SUPER::method with AUTOLOAD
 by looking up AUTOLOAD from the current package, rather than the current
 package’s superclass.  This has been fixed. [perl #120694]
