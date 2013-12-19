@@ -13953,8 +13953,9 @@ parseit:
     /* If the character class contains only a single element, it may be
      * optimizable into another node type which is smaller and runs faster.
      * Check if this is the case for this class */
-    if ((element_count == 1 && ! ret_invlist)
-        || UNLIKELY(posixl_matches_all))
+    if (! ret_invlist   /* Can't optimize if returning the constructed
+                           inversion list */
+        && (UNLIKELY(posixl_matches_all) || element_count == 1))
     {
         U8 op = END;
         U8 arg = 0;
