@@ -265,7 +265,9 @@ XXX Changes (i.e. rewording) of diagnostic messages go here
 
 =item *
 
-XXX Describe change here
+The error messages for C<my($a?$b$c)> and C<my(do{})> now mention
+"conditional expression" and "do block", respectively, instead of reading
+'Can't declare null operation in "my"'.
 
 =back
 
