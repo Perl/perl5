@@ -466,6 +466,12 @@ FETCH method.  This was not the case if a reference to an overloaded object
 was the last thing assigned to the tied variable.  Instead, the match
 variables referred to the outer pattern during the FETCH call.
 
+=item *
+
+Perl 5.18 broke autoloading via C<< ->SUPER::foo >> method calls by looking
+up AUTOLOAD from the current package rather than the current package's
+superclass.  This has been fixed. [perl #120694]
+
 =back
 
 =head1 Known Problems
