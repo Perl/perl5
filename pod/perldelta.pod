@@ -458,6 +458,14 @@ a regular expression C<(??{...})> code block, an incorrect implicit
 dereference could take place if the inner reference had been returned by
 a code block previously.
 
+=item *
+
+A tied variable returned from C<(??{...})> sees the inner values of match
+variables (i.e., the $1 etc. from any matches inside the block) in its
+FETCH method.  This was not the case if a reference to an overloaded object
+was the last thing assigned to the tied variable.  Instead, the match
+variables referred to the outer pattern during the FETCH call.
+
 =back
 
 =head1 Known Problems
