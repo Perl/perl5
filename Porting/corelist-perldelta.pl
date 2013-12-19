@@ -92,16 +92,16 @@ sub run {
 # The first three elements are hashrefs corresponding to new, updated, and removed modules
 # and are of the form (mostly, see the special remarks about removed):
 #   'Distribution Name' => ['Distribution Name', previous version number, current version number]
-# where the version number is undef if the distribution did not exist the fourth element is
-# an arrayref of core distribution names of those distribution for which it is unknown whether
-# they have changed and therefore need to be manually checked.
+# where the version number is undef if the distribution did not exist.
+# The fourth element is an arrayref of core distribution names of those distribution for which it
+# is unknown whether they have changed and therefore need to be manually checked.
 #
 # In most cases, the distribution name in %Modules corresponds to the module that is representative
 # of the distribution as listed in Module::CoreList. However, there are a few distribution names
-# that do not correspond to a module. %distToModules, has been created which maps the distribution
+# that do not correspond to a module. %distToModules has been created which maps the distribution
 # name to a representative module. The representative module was chosen by either looking at the
 # Makefile of the distribution or by seeing which module the distribution has been traditionally
-# listed under in past perldelta.
+# listed under in past perldeltas.
 #
 # There are a few distributions for which there is no single representative module (e.g. libnet).
 # These distributions are returned as the last element of the list.
@@ -109,7 +109,7 @@ sub run {
 # %Modules contains a final key, _PERLLIB, which contains a list of modules that are owned by p5p.
 # This list contains modules and pragmata that may also be present in Module::CoreList.
 # A list of modules are in the list @unclaimedModules, which were manually listed based on whether
-# they were independent modules and whether they have been listed in past perldelta.
+# they were independent modules and whether they have been listed in past perldeltas.
 # The pragmata were found by doing something like:
 #   say for sort grep { $_ eq lc $_ and !exists $Modules{$_}}
 #     keys %{$Module::CoreList::version{'5.019003'}}
@@ -489,11 +489,11 @@ sub do_check {
       my ( $section_name, $title ) = @{$_};
 
       my $section = $sections{$section_name} // {
-          name            => $section_name,
-          preceeding_text => "=head2 $_->[0]\n=over 4\n",
-          following_text  => "=back\n",
-          items           => [],
-          manual          => 1
+          name           => $section_name,
+          preceding_text => "=head2 $_->[0]\n=over 4\n",
+          following_text => "=back\n",
+          items          => [],
+          manual         => 1
       };
 
       $section = update_section( $section, $data, $title );
@@ -505,7 +505,7 @@ sub do_check {
       my $items = reduce { no warnings 'once'; $a . $b->{text} }
         ( '', @{ $section->{items} } );
       $out .=
-        ( $section->{preceeding_text} // '' )
+        ( $section->{preceding_text} // '' )
         . $items
         . ( $section->{following_text} // '' );
     }
@@ -522,31 +522,34 @@ sub do_check {
     # will contain hashrefs corresponding to new, updated and removed
     # modules and pragmata keyed by section name
     # each section is hashref of the structure
-    #   preceeding_text => Text occuring before and including the over
-    #                      region containing the list of modules,
-    #   items           => [Arrayref of hashrefs corresponding to a module
-    #                       entry],
+    #   preceding_text => Text occurring before and including the over
+    #                     region containing the list of modules,
+    #   items          => [Arrayref of hashrefs corresponding to a module
+    #                      entry],
     #     an entry has the form:
     #       name => Module name or undef if the name could not be determined
     #       text => The text of the entry, including the item heading
     #
-    #   following_text  => Any text not corresponding to a module
-    #                      that occurs after the first module
+    #   following_text => Any text not corresponding to a module
+    #                     that occurs after the first module
     #
     # the sections are converted to a pod string by calling sections_to_pod()
     my %sections;
 
     # we are in the Modules_and_Pragmata's section
     my $in_Modules_and_Pragmata;
+
     # we are the Modules_and_Pragmata's section but have not
     # encountered any of the desired sections. We use this
     # flag to determine whether we should append the text to $out
     # or we need to delay appending until the module listings are
     # processed and instead append to $append_to_out
     my $in_Modules_and_Pragmata_preamble;
+
     my $done_processing_Modules_and_Pragmata;
 
     my $current_section;
+
     # $nested_element_level == 0 : not in an over region, treat lines as text
     # $nested_element_level == 1 : presumably in the top over region that
     #                              corresponds to the module listing. Treat
@@ -554,6 +557,7 @@ sub do_check {
     # $nested_element_level > 1  : we only consider these values when we are in an item
     #                              We treat lines as the text of the current item.
     my $nested_element_level = 0;
+
     my $current_item;
     my $need_to_parse_module_name;
 
@@ -610,13 +614,13 @@ sub do_check {
           }
           my $title = get_section_name_from_heading($name);
           if ( exists $sections{$title} ) {
-            die "$name occured twice at line no. $.";
+            die "$name occurred twice at line no. $.";
           }
-          $current_section                    = {};
-          $current_section->{name}            = $title;
-          $current_section->{preceeding_text} = $_;
-          $current_section->{items}           = [];
-          $nested_element_level               = 0;
+          $current_section                   = {};
+          $current_section->{name}           = $title;
+          $current_section->{preceding_text} = $_;
+          $current_section->{items}          = [];
+         $nested_element_level               = 0;
           next;
         }
 
@@ -643,7 +647,7 @@ sub do_check {
             $current_section->{following_text} .= $_;
           }
           else {
-            $current_section->{preceeding_text} .= $_;
+            $current_section->{preceding_text} .= $_;
           }
           next;
         }
@@ -705,7 +709,7 @@ sub do_check {
         }
 
         if ( scalar @{ $current_section->{items} } == 0 ) {
-          $current_section->{preceeding_text} .= $_;
+          $current_section->{preceding_text} .= $_;
         }
         else {
           $current_section->{following_text} .= $_;
@@ -813,7 +817,7 @@ sub do_check {
       #   from VERSION_NUMBER to VERSION_NUMBER and MODULE from VERSION_NUMBER to VERSION_NUMBER
       #   from VERSION_NUMBER to VERSION_NUMBER, and MODULE from VERSION_NUMBER to VERSION_NUMBER
       #
-      # some perldelta contain more than one module listed in an entry, this only attempts to match the
+      # some perldeltas contain more than one module listed in an entry, this only attempts to match the
       # first module
       my ($old, $new) = $second =~
           /from\s+(?:version\s+)?(\d[^\s]+)\s+to\s+(?:version\s+)?(\d[^\s,]+?)(?=[\s,]|\.\s|\.$|$).*/s;
