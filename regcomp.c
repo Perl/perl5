@@ -13165,7 +13165,7 @@ parseit:
                          * would cause things in <depends_list> to match
                          * inappropriately, except that any \p{}, including
                          * this one forces Unicode semantics, which means there
-                         * is <no depends_list> */
+                         * is no <depends_list> */
                         ANYOF_FLAGS(ret) |= ANYOF_NONBITMAP_NON_UTF8;
                     }
                     else {
@@ -13950,9 +13950,16 @@ parseit:
         return ret;
     }
 
-    /* If the character class contains only a single element, it may be
-     * optimizable into another node type which is smaller and runs faster.
-     * Check if this is the case for this class */
+    /* Here, we've gone through the entire class and dealt with multi-char
+     * folds.  We are now in a position that we can do some checks to see if we
+     * can optimize this ANYOF node into a simpler one, even in Pass 1.
+     * Currently we only do two checks:
+     * 1) is in the unlikely event that the user has specified both, eg. \w and
+     *    \W under /l, then the class matches everything.  (This optimization
+     *    is done only to make the optimizer code run later work.)
+     * 2) if the character class contains only a single element (including a
+     *    single range), we see if there is an equivalent node for it.
+     * Other checks are possible */
     if (! ret_invlist   /* Can't optimize if returning the constructed
                            inversion list */
         && (UNLIKELY(posixl_matches_all) || element_count == 1))
