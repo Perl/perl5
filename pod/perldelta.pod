@@ -62,6 +62,12 @@ package’s superclass.  This has been fixed. [perl #120694]
 
 =item *
 
+Perl 5.18.0 introduced a regression whereby C<-bareword> was no longer
+permitted under the C<strict> and C<integer> pragmata when used together.  This
+has been fixed.  [perl #120288]
+
+=item *
+
 The construct C<< $r=qr/.../; /$r/p >> is now handled properly, an issue which
 had been worsened by changes 5.18.0. [perl #118213]
 
