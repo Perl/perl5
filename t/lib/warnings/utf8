@@ -661,13 +661,17 @@ chr(0x110000) =~ /\p{Any}/;
 EXPECT
 Code point 0x110000 is not Unicode, all \p{} matches fail; all \P{} matches succeed at - line 2.
 ########
-# TODO optimized regnode should still give warnings
+# NAME optimizable regnode should still give non_unicode warnings when fatalized
 use warnings 'utf8';
+use warnings FATAL => 'non_unicode';
 chr(0x110000) =~ /\p{lb=cr}/;
+EXPECT
+Code point 0x110000 is not Unicode, all \p{} matches fail; all \P{} matches succeed at - line 3.
+########
+# NAME optimizable regnode should not give non_unicode warnings when warnings are off
 no warnings 'non_unicode';
 chr(0x110000) =~ /\p{lb=cr}/;
 EXPECT
-Code point 0x110000 is not Unicode, all \p{} matches fail; all \P{} matches succeed at - line 2.
 ########
 require "../test.pl";
 use warnings 'utf8';

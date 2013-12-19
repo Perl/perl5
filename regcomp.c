@@ -430,6 +430,11 @@ static const scan_data_t zero_scan_data =
 
 #define FOLD cBOOL(RExC_flags & RXf_PMf_FOLD)
 
+/* For programs that want to be strictly Unicode compatible by dying if any
+ * attempt is made to match a non-Unicode code point against a Unicode
+ * property.  */
+#define ALWAYS_WARN_SUPER  ckDEAD(packWARN(WARN_NON_UNICODE))
+
 #define OOB_NAMEDCLASS		-1
 
 /* There is no code point that is out-of-bounds, so this is problematic.  But
@@ -14501,7 +14506,12 @@ parseit:
         && ! invert
         && ! depends_list
         && ! (ANYOF_FLAGS(ret) & ANYOF_POSIXL)
-        && ! HAS_NONLOCALE_RUNTIME_PROPERTY_DEFINITION)
+        && ! HAS_NONLOCALE_RUNTIME_PROPERTY_DEFINITION
+
+           /* We don't optimize if we are supposed to make sure all non-Unicode
+            * code points raise a warning, as only ANYOF nodes have this check.
+            * */
+        && ! ((ANYOF_FLAGS(ret) | ANYOF_WARN_SUPER) && ALWAYS_WARN_SUPER))
     {
         UV start, end;
         U8 op = END;  /* The optimzation node-type */
