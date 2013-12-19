@@ -512,7 +512,7 @@ the strings?).
  Ricardo  5.18.1-RC2    2013-Aug-03
  Ricardo  5.18.1-RC3    2013-Aug-08
  Ricardo  5.18.1        2013-Aug-12
- Ricardo  5.18.2        2013-Dec-16
+ Ricardo  5.18.2        2014-Jan-06
 
  Ricardo   5.19.0       2013-May-20     The 5.19 development track
  David G   5.19.1       2013-Jun-21
