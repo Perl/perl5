@@ -451,6 +451,13 @@ getting corrupted. [perl #119993]
 C<open> with layers that load modules (e.g., "<:encoding(utf8)") no longer
 runs the risk of crashing due to stack corruption.
 
+=item *
+
+When a reference to a reference to an overloaded object was returned from
+a regular expression C<(??{...})> code block, an incorrect implicit
+dereference could take place if the inner reference had been returned by
+a code block previously.
+
 =back
 
 =head1 Known Problems
