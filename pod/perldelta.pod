@@ -474,6 +474,13 @@ Perl 5.18 broke autoloading via C<< ->SUPER::foo >> method calls by looking
 up AUTOLOAD from the current package rather than the current package's
 superclass.  This has been fixed. [perl #120694]
 
+=item *
+
+A longstanding bug causing C<do {} until CONSTANT>, where the constant
+holds a true value, to read unallocated memory has been resolved.  This
+would usually happen after a syntax error.  In past versions of Perl it has
+crashed intermittently. [perl #72406]
+
 =back
 
 =head1 Known Problems
