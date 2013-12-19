@@ -523,7 +523,7 @@ BEGIN {
 # Debugger for Perl 5.00x; perl5db.pl patch level:
 use vars qw($VERSION $header);
 
-$VERSION = '1.39_10';
+$VERSION = '1.39_11';
 
 $header = "perl5db.pl version $VERSION";
 
@@ -9511,7 +9511,7 @@ If the package is C<::> (C<main>), create an empty list; if it's something else,
 =cut
 
         push @out, map "$prefix$_", grep /^\Q$text/,
-          ( grep /^_?[a-zA-Z]/, keys %$pack ),
+          ( grep /^_?[a-zA-Z]/, do { no strict 'refs'; keys %$pack } ),
           ( $pack eq '::' ? () : ( grep /::$/, keys %:: ) );
 
 =item *
