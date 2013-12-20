@@ -22,7 +22,7 @@ BEGIN {
 }
 
 
-plan tests => 524;  # Update this when adding/deleting tests.
+plan tests => 525;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1213,6 +1213,13 @@ sub run_tests {
 	() = "$ref"; # flush AMAGIC flag on main
 	&$foo;
 	is "@matchsticks", "1 ", 'qr magic is not cached on refs';
+    }
+
+    {
+	my ($foo, $bar) = ("foo"x1000, "bar"x1000);
+	"$foo$bar" =~ /(??{".*"})/;
+	is "$&", "foo"x1000 . "bar"x1000,
+	    'padtmp swiping does not affect "$a$b" =~ /(??{})/'
     }
 
 } # End of sub run_tests

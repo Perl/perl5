@@ -2409,7 +2409,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
            Not newSVsv, either, as it does not COW.
         */
         reginfo->sv = newSV(0);
-        sv_setsv(reginfo->sv, sv);
+        SvSetSV_nosteal(reginfo->sv, sv);
         SAVEFREESV(reginfo->sv);
     }
 
