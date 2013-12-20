@@ -71,7 +71,7 @@ view: one "character" is one Unicode code point.
 
 For some combinations of base character and modifiers, there are
 I<precomposed> characters.  There is a single character equivalent, for
-example, to the sequence C<LATIN CAPITAL LETTER A> followed by
+example, for the sequence C<LATIN CAPITAL LETTER A> followed by
 C<COMBINING ACUTE ACCENT>.  It is called  C<LATIN CAPITAL LETTER A WITH
 ACUTE>.  These precomposed characters are, however, only available for
 some combinations, and are mainly meant to support round-trip
@@ -562,7 +562,7 @@ sections on case mapping in the L<Unicode Standard|http://www.unicode.org>.
 
 As of Perl 5.8.0, the "Full" case-folding of I<Case
 Mappings/SpecialCasing> is implemented, but bugs remain in C<qr//i> with them,
-mostly fixed by 5.14.
+mostly fixed by 5.14, and essentially entirely by 5.18.
 
 =item *
 
@@ -615,7 +615,7 @@ String-To-Number Conversions
 Unicode does define several other decimal--and numeric--characters
 besides the familiar 0 to 9, such as the Arabic and Indic digits.
 Perl does not support string-to-number conversion for digits other
-than ASCII 0 to 9 (and ASCII a to f for hexadecimal).
+than ASCII C<0> to C<9> (and ASCII C<a> to C<f> for hexadecimal).
 To get safe conversions from any Unicode string, use
 L<Unicode::UCD/num()>.
 
