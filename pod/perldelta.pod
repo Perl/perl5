@@ -61,6 +61,8 @@ Avoids a warning about "undefined variable in user_agent" in some cases, and
 updates L<CGI::Cookie> documentation to reflect that "HttpOnly" is widely
 supported.
 
+NOTE: L<CGI> is deprecated and may be removed from a future version of Perl.
+
 =item *
 
 L<constant> has been upgraded from version 1.29 to 1.30.
