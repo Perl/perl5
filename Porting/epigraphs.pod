@@ -17,6 +17,30 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.19.7 - Kurt Vonnegut, "Slaughterhouse-Five"
+
+L<Announced on 2013-12-20 by Abigail|http://www.nntp.perl.org/group/perl.perl5.porters/2013/12/msg210882.html>
+
+=over
+
+  And somewhere in there was springtime. The corpse mines were closed
+  down. The soldiers all left to fight the Russians. In the suburbs,
+  the women and children dug rifle pits. Billy and the rest of his group
+  were locked up in the stable in the suburbs. And then, one morning,
+  they got up to discover that the door was unlocked. World War Two in
+  Europe was over.
+
+  Billy and the rest wandered out onto the shady street. The trees were
+  leafing out. There was nothing going on out there, no traffic of any
+  kind. There was only one vehicle, an abandoned wagon drawn by two
+  horses. The wagon was green and coffin-shaped.
+
+  Birds were talking.
+
+  One bird said to Billy Pilgrim, "Pee-tee-weet?"
+
+=back
+
 =head2 v5.19.6 - Monty Python's Flying Circus, "Spam"
 
 L<Announced on 2013-11-20 by Chris 'BinGOs' Williams|http://www.nntp.perl.org/group/perl.perl5.porters/2013/11/msg210043.html>
