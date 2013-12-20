@@ -11902,7 +11902,7 @@ Perl_peep(pTHX_ OP *o)
 =for apidoc Ao||custom_op_xop
 Return the XOP structure for a given custom op. This macro should be
 considered internal to OP_NAME and the other access macros: use them instead.
-This macro does call a function. Prior to 5.19.7, this was implemented as a
+This macro does call a function. Prior to 5.19.8, this was implemented as a
 function.
 
 =cut
