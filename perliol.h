@@ -215,7 +215,6 @@ PERL_EXPORT_C SSize_t   PerlIOCrlf_get_cnt(pTHX_ PerlIO *f);
 PERL_EXPORT_C IV        PerlIOCrlf_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg, PerlIO_funcs *tab);
 PERL_EXPORT_C void      PerlIOCrlf_set_ptrcnt(pTHX_ PerlIO *f, STDCHAR * ptr, SSize_t cnt);
 PERL_EXPORT_C SSize_t   PerlIOCrlf_unread(pTHX_ PerlIO *f, const void *vbuf, Size_t count);
-PERL_EXPORT_C SSize_t   PerlIOCrlf_unread(pTHX_ PerlIO *f, const void *vbuf, Size_t count);
 PERL_EXPORT_C SSize_t   PerlIOCrlf_write(pTHX_ PerlIO *f, const void *vbuf, Size_t count);
 
 /* Pending */
