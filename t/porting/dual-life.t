@@ -33,7 +33,7 @@ $dist_dir_exe{lc "pod2usage.PL"} = "../cpan/Pod-Usage/pod2usage";
 foreach (qw (pod2man pod2text)) {
     $dist_dir_exe{lc "$_.PL"} = "../cpan/podlators/$_";
 };
-$dist_dir_exe{'pod2html.pl'} = '../ext/Pod-Html';
+$dist_dir_exe{'pod2html.pl'} = '../dist/Pod-Html';
 
 my @programs;
 

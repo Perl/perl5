@@ -90,7 +90,7 @@ xsubpp:		xsubpp.PL ../config.sh
 
 zipdetails:	zipdetails.PL ../config.sh
 
-pod2html:	pod2html.PL ../config.sh ../ext/Pod-Html/bin/pod2html
+pod2html:	pod2html.PL ../config.sh ../dist/Pod-Html/bin/pod2html
 
 clean:
 

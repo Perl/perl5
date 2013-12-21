@@ -1353,7 +1353,7 @@ use File::Glob qw(:case);
                 ext/PerlIO-scalar/
                 ext/PerlIO-via/
                 ext/Pod-Functions/
-                ext/Pod-Html/
+                dist/Pod-Html/
                 ext/SDBM_File/
                 ext/Sys-Hostname/
                 ext/Tie-Hash-NamedCapture/

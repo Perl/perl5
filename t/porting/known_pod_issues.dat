@@ -199,6 +199,9 @@ dist/math-bigint/lib/math/bigint.pm	Verbatim line length including indents excee
 dist/math-bigrat/lib/math/bigrat.pm	Verbatim line length including indents exceeds 79 by	7
 dist/module-corelist/lib/module/corelist.pod	Verbatim line length including indents exceeds 79 by	4
 dist/module-corelist/lib/module/corelist/utils.pm	Verbatim line length including indents exceeds 79 by	2
+dist/pod-html/testdir/perlpodspec-copy.pod	Verbatim line length including indents exceeds 79 by	8
+dist/pod-html/testdir/perlvar-copy.pod	? Should you be using L<...> instead of	3
+dist/pod-html/testdir/perlvar-copy.pod	Verbatim line length including indents exceeds 79 by	6
 dist/selfloader/lib/selfloader.pm	Verbatim line length including indents exceeds 79 by	13
 dist/storable/storable.pm	Verbatim line length including indents exceeds 79 by	4
 dist/thread-queue/lib/thread/queue.pm	Verbatim line length including indents exceeds 79 by	4
@@ -208,9 +211,6 @@ ext/devel-peek/peek.pm	? Should you be using L<...> instead of	2
 ext/dynaloader/dynaloader.pm	Verbatim line length including indents exceeds 79 by	1
 ext/file-find/lib/file/find.pm	Verbatim line length including indents exceeds 79 by	1
 ext/file-glob/glob.pm	Verbatim line length including indents exceeds 79 by	15
-ext/pod-html/testdir/perlpodspec-copy.pod	Verbatim line length including indents exceeds 79 by	8
-ext/pod-html/testdir/perlvar-copy.pod	? Should you be using L<...> instead of	3
-ext/pod-html/testdir/perlvar-copy.pod	Verbatim line length including indents exceeds 79 by	6
 ext/vms-dclsym/dclsym.pm	? Should you be using L<...> instead of	1
 ext/vms-filespec/lib/vms/filespec.pm	Verbatim line length including indents exceeds 79 by	1
 install	? Should you be using F<...> or maybe L<...> instead of	1

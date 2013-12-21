@@ -35,7 +35,7 @@ use File::Spec;
 
 my $script = File::Spec->catfile(
     File::Spec->catdir(
-        File::Spec->updir, qw(ext Pod-Html bin),
+        File::Spec->updir, qw(dist Pod-Html bin),
     ),
     'pod2html',
 );

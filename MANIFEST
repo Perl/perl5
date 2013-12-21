@@ -3261,6 +3261,43 @@ dist/PathTools/t/Spec-taint.t			See if File::Spec works with taint
 dist/PathTools/t/taint.t			See if Cwd works with taint
 dist/PathTools/t/tmpdir.t			See if File::Spec->tmpdir() works
 dist/PathTools/t/win32.t			See if Cwd works on Win32
+dist/Pod-Html/bin/pod2html	Translator to turn pod into HTML
+dist/Pod-Html/lib/Pod/Html.pm	Convert POD data to HTML
+dist/Pod-Html/t/anchorify.t
+dist/Pod-Html/t/cache.pod
+dist/Pod-Html/t/cache.t
+dist/Pod-Html/t/crossref2.t
+dist/Pod-Html/t/crossref3.t
+dist/Pod-Html/t/crossref.pod
+dist/Pod-Html/t/crossref.t
+dist/Pod-Html/t/eol.t		test end of line agnosticism
+dist/Pod-Html/testdir/perlpodspec-copy.pod
+dist/Pod-Html/testdir/perlvar-copy.pod
+dist/Pod-Html/t/feature2.pod
+dist/Pod-Html/t/feature2.t
+dist/Pod-Html/t/feature.pod
+dist/Pod-Html/t/feature.t
+dist/Pod-Html/t/htmldir1.pod
+dist/Pod-Html/t/htmldir1.t
+dist/Pod-Html/t/htmldir2.pod
+dist/Pod-Html/t/htmldir2.t
+dist/Pod-Html/t/htmldir3.pod
+dist/Pod-Html/t/htmldir3.t
+dist/Pod-Html/t/htmldir4.pod
+dist/Pod-Html/t/htmldir4.t
+dist/Pod-Html/t/htmldir5.pod
+dist/Pod-Html/t/htmldir5.t
+dist/Pod-Html/t/htmlescp.pod	pod2html escape test input data
+dist/Pod-Html/t/htmlescp.t	pod2html escape test
+dist/Pod-Html/t/htmllink.pod	pod2html link test input data
+dist/Pod-Html/t/htmllink.t	pod2html link test
+dist/Pod-Html/t/htmlview.pod	pod2html render test input data
+dist/Pod-Html/t/htmlview.t	pod2html render test
+dist/Pod-Html/t/pod2html-lib.pl	pod2html testing library
+dist/Pod-Html/t/poderr.pod
+dist/Pod-Html/t/poderr.t
+dist/Pod-Html/t/podnoerr.pod
+dist/Pod-Html/t/podnoerr.t
 dist/Safe/Changes		Changes for Safe.pm
 dist/Safe/Makefile.PL		Makefile.PL for Safe.pm
 dist/Safe/MANIFEST		MANIFEST for Safe.pm
@@ -3679,43 +3716,6 @@ ext/PerlIO-via/via.xs		PerlIO layer for layers in perl
 ext/Pod-Functions/Functions_pm.PL	Writes Functions.pm
 ext/Pod-Functions/Makefile.PL		Makefile writer
 ext/Pod-Functions/t/Functions.t		See if Pod::Functions works
-ext/Pod-Html/bin/pod2html	Translator to turn pod into HTML
-ext/Pod-Html/lib/Pod/Html.pm	Convert POD data to HTML
-ext/Pod-Html/t/anchorify.t
-ext/Pod-Html/t/cache.pod
-ext/Pod-Html/t/cache.t
-ext/Pod-Html/t/crossref2.t
-ext/Pod-Html/t/crossref3.t
-ext/Pod-Html/t/crossref.pod
-ext/Pod-Html/t/crossref.t
-ext/Pod-Html/t/eol.t		test end of line agnosticism
-ext/Pod-Html/testdir/perlpodspec-copy.pod
-ext/Pod-Html/testdir/perlvar-copy.pod
-ext/Pod-Html/t/feature2.pod
-ext/Pod-Html/t/feature2.t
-ext/Pod-Html/t/feature.pod
-ext/Pod-Html/t/feature.t
-ext/Pod-Html/t/htmldir1.pod
-ext/Pod-Html/t/htmldir1.t
-ext/Pod-Html/t/htmldir2.pod
-ext/Pod-Html/t/htmldir2.t
-ext/Pod-Html/t/htmldir3.pod
-ext/Pod-Html/t/htmldir3.t
-ext/Pod-Html/t/htmldir4.pod
-ext/Pod-Html/t/htmldir4.t
-ext/Pod-Html/t/htmldir5.pod
-ext/Pod-Html/t/htmldir5.t
-ext/Pod-Html/t/htmlescp.pod	pod2html escape test input data
-ext/Pod-Html/t/htmlescp.t	pod2html escape test
-ext/Pod-Html/t/htmllink.pod	pod2html link test input data
-ext/Pod-Html/t/htmllink.t	pod2html link test
-ext/Pod-Html/t/htmlview.pod	pod2html render test input data
-ext/Pod-Html/t/htmlview.t	pod2html render test
-ext/Pod-Html/t/pod2html-lib.pl	pod2html testing library
-ext/Pod-Html/t/poderr.pod
-ext/Pod-Html/t/poderr.t
-ext/Pod-Html/t/podnoerr.pod
-ext/Pod-Html/t/podnoerr.t
 ext/POSIX/hints/bsdos.pl	Hint for POSIX for named architecture
 ext/POSIX/hints/dynixptx.pl	Hint for POSIX for named architecture
 ext/POSIX/hints/freebsd.pl	Hint for POSIX for named architecture
