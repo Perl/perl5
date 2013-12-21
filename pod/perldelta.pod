@@ -29,12 +29,34 @@ C<B::SPECIAL> object in this case.  [perl #119413]
 
 =item *
 
+L<B::Concise> has been upgraded from version 0.95 to 0.95_01.
+
+This fixes a bug in dumping unexpected SEPCIALs.
+
+=item *
+
 L<English> has been upgraded from version 1.06 to 1.06_01.  This fixes an
 error about the performance of C<$`>, C<$&>, and c<$'>.
 
 =item *
 
 L<File::Glob> has been upgraded from version 1.20 to 1.20_01.
+
+=back
+
+=head1 Documentation
+
+=head2 Changes to Existing Documentation
+
+=over 4
+
+=item *
+
+L<perlrepository> has been restored with a pointer to more useful pages.
+
+=item *
+
+L<perlhack> has been updated with the latest changes from blead.
 
 =back
 
@@ -65,6 +87,26 @@ package’s superclass.  This has been fixed. [perl #120694]
 Perl 5.18.0 introduced a regression whereby C<-bareword> was no longer
 permitted under the C<strict> and C<integer> pragmata when used together.  This
 has been fixed.  [perl #120288]
+
+=item *
+
+Previously PerlIOBase_dup didn't check if pushing the new layer succeeded
+before (optionally) setting the utf8 flag. This could cause
+segfaults-by-nullpointer.  This has been fixed.
+
+=item *
+
+A buffer overflow with very long identifiers has been fixed.
+
+=item *
+
+A regression from 5.16 in the handling of padranges led to assertion failures
+if a keyword plugin declined to handle the second ‘my’, but only after creating
+a padop.
+
+This affected, at least, Devel::CallParser under threaded builds.
+
+This has been fixed
 
 =item *
 
