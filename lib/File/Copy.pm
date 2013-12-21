@@ -332,7 +332,7 @@ sub _move {
     }
 
     my $rename_to = $to;
-    if (-$^O eq 'VMS' && -e $from) {
+    if ($^O eq 'VMS' && -e $from) {
 
         if (! -d $to && ! -d $from) {
 
