@@ -120,29 +120,21 @@ sub copy {
 	&& !($from_a_handle && $^O eq 'NetWare')
        )
     {
-	my $copy_to = $to;
+        if ($^O eq 'VMS' && -e $from
+            && ! -d $to && ! -d $from) {
 
-        if ($^O eq 'VMS' && -e $from) {
+            # VMS natively inherits path components from the source of a
+            # copy, but we want the Unixy behavior of inheriting from
+            # the current working directory.  Also, default in a trailing
+            # dot for null file types.
 
-            if (! -d $to && ! -d $from) {
+            $to = VMS::Filespec::rmsexpand(VMS::Filespec::vmsify($to), '.');
 
-                # VMS has sticky defaults on extensions, which means that
-                # if there is a null extension on the destination file, it
-                # will inherit the extension of the source file
-                # So add a '.' for a null extension.
-
-                $copy_to = VMS::Filespec::vmsify($to);
-
-                my ($vol, $dirs, $file) = File::Spec->splitpath($copy_to);
-                $file = $file . '.' unless ($file =~ /(?<!\^)\./);
-                $copy_to = File::Spec->catpath($vol, $dirs, $file);
-
-                # Get rid of the old versions to be like UNIX
-                1 while unlink $copy_to;
-            }
+            # Get rid of the old versions to be like UNIX
+            1 while unlink $to;
         }
 
-        return syscopy($from, $copy_to) || 0;
+        return syscopy($from, $to) || 0;
     }
 
     my $closefrom = 0;
@@ -272,27 +264,21 @@ sub _move {
       unlink $to;
     }
 
-    my $rename_to = $to;
-    if ($^O eq 'VMS' && -e $from) {
+    if ($^O eq 'VMS' && -e $from
+        && ! -d $to && ! -d $from) {
 
-        if (! -d $to && ! -d $from) {
+            # VMS natively inherits path components from the source of a
+            # copy, but we want the Unixy behavior of inheriting from
+            # the current working directory.  Also, default in a trailing
+            # dot for null file types.
 
-            # VMS has sticky defaults on extensions, which means that
-            # if there is a null extension on the destination file, it
-            # will inherit the extension of the source file
-            # So add a '.' for a null extension.
-
-            $rename_to = VMS::Filespec::vmsify($to);
-            my ($vol, $dirs, $file) = File::Spec->splitpath($rename_to);
-            $file = $file . '.' unless ($file =~ /(?<!\^)\./);
-            $rename_to = File::Spec->catpath($vol, $dirs, $file);
+            $to = VMS::Filespec::rmsexpand(VMS::Filespec::vmsify($to), '.');
 
             # Get rid of the old versions to be like UNIX
-            1 while unlink $rename_to;
-        }
+            1 while unlink $to;
     }
 
-    return 1 if rename $from, $rename_to;
+    return 1 if rename $from, $to;
 
     # Did rename return an error even though it succeeded, because $to
     # is on a remote NFS file system, and NFS lost the server's ack?
