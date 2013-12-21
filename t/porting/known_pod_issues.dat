@@ -46,6 +46,7 @@ Data::Types
 Date::Pcalc
 DateTime
 DB_File(3)
+DBI
 DBIx::Profile
 Devel::CallParser
 Devel::Callsite
@@ -179,6 +180,7 @@ Tk
 Tk::Pod
 tty(1)
 Unicode::Casing
+Unicode::LineBreak
 Unicode::Regex::Set
 Unicode::Semantics
 Unicode::Unihan
