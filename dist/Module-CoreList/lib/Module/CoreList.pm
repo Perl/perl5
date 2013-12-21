@@ -8051,6 +8051,7 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         delta_from => 5.018001,
         changed => {
             'B'                     => '1.42_02',
+            'B::Concise'            => '0.95_01',
             'Config'                => '5.018002',
             'File::Glob'            => '1.20_01',
             'Module::CoreList'      => '3.03',
