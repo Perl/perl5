@@ -444,10 +444,10 @@ C<LC> and C<L&> are special: both are aliases for the set consisting of everythi
 =head3 B<Bidirectional Character Types>
 
 Because scripts differ in their directionality (Hebrew and Arabic are
-written right to left, for example) Unicode supplies these properties in
-the Bidi_Class class:
+written right to left, for example) Unicode supplies a Bidi_Class property.
+Some of the values this property can have are:
 
-    Property    Meaning
+    Value    Meaning
 
     L           Left-to-Right
     LRE         Left-to-Right Embedding
@@ -471,7 +471,13 @@ the Bidi_Class class:
 
 This property is always written in the compound form.
 For example, C<\p{Bidi_Class:R}> matches characters that are normally
-written right to left.
+written right to left.  Unlike the
+General_Category property, this
+property can have more values added in a future Unicode release.  Those
+listed above comprised the complete set for many Unicode releases, but
+others were added in Unicode 6.3; you can always find what the
+current ones are in in L<perluniprops>.  And
+L<http://www.unicode.org/reports/tr9/> describes how to use them.
 
 =head3 B<Scripts>
 
