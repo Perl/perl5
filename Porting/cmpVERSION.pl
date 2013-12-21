@@ -37,10 +37,16 @@ die "$0: 'This is a Perl directory but does not look like Git working directory\
 my $null = devnull();
 
 unless (defined $tag_to_compare) {
+    my $check = 'HEAD';
+    while(1) {
+        $check = `git describe --abbrev=0 $check 2>$null`;
+        chomp $check;
+        last unless $check =~ /-RC/;
+        $check .= '^';
+    }
+    $tag_to_compare = $check;
     # Thanks to David Golden for this suggestion.
 
-    $tag_to_compare = `git describe --abbrev=0 2>$null`;
-    chomp $tag_to_compare;
 }
 
 unless (length $tag_to_compare) {
