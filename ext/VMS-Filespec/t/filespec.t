@@ -31,8 +31,9 @@ if ($^O eq 'VMS') {
 
 
 foreach $test (@tests) {
-  ($arg,$func,$expect2,$expect5) = split(/\s+/,$test);
+  ($arg,$func,$expect2,$expect5) = split(/(?<!\\)\s+/,$test);
 
+  $arg =~ s/\\//g; # to get whitespace into the argument escape with \
   $expect2 = undef if $expect2 eq 'undef';
   $expect2 = undef if $expect2 eq '^';
   $expect5 = undef if $expect5 eq 'undef';
@@ -125,6 +126,7 @@ __some_/__where_/...   vmsify  [.__some_.__where_...] ^
 ./$(macro)	vmsify	[]$(macro) ^
 ./$(m+	vmsify	[]$^(m^+	^
 foo-bar-0^.01/	vmsify [.foo-bar-0_01] [.foo-bar-0^.01]
+\ foo.tmp	vmsify ^_foo.tmp ^
 # Fileifying directory specs
 __down_:[__the_.__garden_.__path_]     fileify __down_:[__the_.__garden_]__path_.dir;1 ^
 [.__down_.__the_.__garden_.__path_]    fileify [.__down_.__the_.__garden_]__path_.dir;1 ^

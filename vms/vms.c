@@ -8537,9 +8537,6 @@ static char *int_tovmsspec
     }
     else *(cp1++) = '.';
   }
-  else {
-    *(cp1++) = *cp2;
-  }
   for (; cp2 < dirend; cp2++) {
     if (*cp2 == '/') {
       if (*(cp2-1) == '/') continue;
@@ -8597,8 +8594,7 @@ static char *int_tovmsspec
   }
   if (cp1 > rslt && *(cp1-1) == '.') cp1--; /* Unix spec ending in '/' ==> trailing '.' */
   if (hasdir) *(cp1++) = ']';
-  if (*cp2) cp2++;  /* check in case we ended with trailing '..' */
-  /* fixme for ODS5 */
+  if (*cp2 && *cp2 == '/') cp2++;  /* check in case we ended with trailing '/' */
   no_type_seen = 0;
   if (cp2 > lastdot)
     no_type_seen = 1;
@@ -8611,7 +8607,7 @@ static char *int_tovmsspec
 	  *(cp1++) = '?';
 	cp2++;
     case ' ':
-	if (cp2 > path && *(cp2-1) != '^') /* not previously escaped */
+	if (cp2 >= path && (cp2 == path || *(cp2-1) != '^')) /* not previously escaped */
 	    *(cp1)++ = '^';
 	*(cp1)++ = '_';
 	cp2++;
