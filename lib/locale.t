@@ -32,9 +32,12 @@ my $debug = $ENV{PERL_DEBUG_FULL_TEST} // 0;
 # fail them unless at least this percentage of the tested locales fail.
 # Some Windows machines are defective in every locale but the C, calling \t
 # printable; superscripts to be digits, etc.  See
-# http://markmail.org/message/5jwam4xsx4amsdnv
+# http://markmail.org/message/5jwam4xsx4amsdnv.  Also on AIX machines, many
+# locales call a no-break space a graphic.
 # (There aren't 1000 locales currently in existence, so 99.9 works)
-my $acceptable_fold_failure_percentage = $^O eq 'MSWin32' ? 99.9 : 5;
+my $acceptable_fold_failure_percentage = ($^O =~ / ^ ( MSWin32 | AIX ) $ /ix)
+                                         ? 99.9
+                                         : 5;
 
 # The list of test numbers of the problematic tests.
 my @problematical_tests;
