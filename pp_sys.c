@@ -2379,8 +2379,6 @@ PP(pp_socket)
 
     if (!io) {
 	report_evil_fh(gv);
-	if (io && IoIFP(io))
-	    do_close(gv, FALSE);
 	SETERRNO(EBADF,LIB_INVARG);
 	RETPUSHUNDEF;
     }
@@ -2413,19 +2411,22 @@ PP(pp_sockpair)
 {
 #if defined (HAS_SOCKETPAIR) || (defined (HAS_SOCKET) && defined(SOCK_DGRAM) && defined(AF_INET) && defined(PF_INET))
     dVAR; dSP;
+    int fd[2];
     const int protocol = POPi;
     const int type = POPi;
     const int domain = POPi;
-    GV * const gv2 = MUTABLE_GV(POPs);
-    GV * const gv1 = MUTABLE_GV(POPs);
-    IO * const io1 = gv1 ? GvIOn(gv1) : NULL;
-    IO * const io2 = gv2 ? GvIOn(gv2) : NULL;
-    int fd[2];
+    GV * gv1;
+    IO * io1;
 
+    GV * const gv2 = MUTABLE_GV(POPs);
+    IO * const io2 = gv2 ? GvIOn(gv2) : NULL;
+    if (!io2)
+        report_evil_fh(gv2);
+
+    gv1 = MUTABLE_GV(POPs);
+    io1 = gv1 ? GvIOn(gv1) : NULL;
     if (!io1)
 	report_evil_fh(gv1);
-    if (!io2)
-	report_evil_fh(gv2);
 
     if (io1 && IoIFP(io1))
 	do_close(gv1, FALSE);
@@ -2475,12 +2476,13 @@ PP(pp_bind)
     GV * const gv = MUTABLE_GV(POPs);
     IO * const io = GvIOn(gv);
     STRLEN len;
-    const int op_type = PL_op->op_type;
+    int op_type;
 
     if (!io || !IoIFP(io))
 	goto nuts;
 
     addr = SvPV_const(addrsv, len);
+    op_type = PL_op->op_type;
     TAINT_PROPER(PL_op_desc[op_type]);
     if ((op_type == OP_BIND
 	 ? PerlSock_bind(PerlIO_fileno(IoIFP(io)), (struct sockaddr *)addr, len)
