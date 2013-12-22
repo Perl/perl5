@@ -1942,6 +1942,81 @@ mxpushu()
 	mXPUSHu(3);
 	XSRETURN(3);
 
+void
+call_sv_C()
+PREINIT:
+    CV * i_sub;
+    GV * i_gv;
+    I32 retcnt;
+    SV * errsv;
+    char * errstr;
+    SV * miscsv = sv_newmortal();
+    HV * hv = (HV*)sv_2mortal((SV*)newHV());
+CODE:
+    i_sub = get_cv("i", 0);
+    PUSHMARK(SP);
+    /* PUTBACK not needed since this sub was called with 0 args, and is calling
+      0 args, so global SP doesn't need to be moved before a call_* */
+    retcnt = call_sv((SV*)i_sub, 0); /* try a CV* */
+    SPAGAIN;
+    SP -= retcnt; /* dont care about return count, wipe everything off */
+    sv_setpvs(miscsv, "i");
+    PUSHMARK(SP);
+    retcnt = call_sv(miscsv, 0); /* try a PV */
+    SPAGAIN;
+    SP -= retcnt;
+    /* no add and SVt_NULL are intentional, sub i should be defined already */
+    i_gv = gv_fetchpvn_flags("i", sizeof("i")-1, 0, SVt_NULL);
+    PUSHMARK(SP);
+    retcnt = call_sv((SV*)i_gv, 0); /* try a GV* */
+    SPAGAIN;
+    SP -= retcnt;
+    /* the tests below are not declaring this being public API behavior,
+       only current internal behavior, these tests can be changed in the
+       future if necessery */
+    PUSHMARK(SP);
+    retcnt = call_sv(&PL_sv_yes, 0); /* does nothing */
+    SPAGAIN;
+    SP -= retcnt;
+    PUSHMARK(SP);
+    retcnt = call_sv(&PL_sv_no, G_EVAL);
+    SPAGAIN;
+    SP -= retcnt;
+    errsv = ERRSV;
+    errstr = SvPV_nolen(errsv);
+    if(strnEQ(errstr, "Undefined subroutine &main:: called at",
+              sizeof("Undefined subroutine &main:: called at") - 1)) {
+        PUSHMARK(SP);
+        retcnt = call_sv((SV*)i_sub, 0); /* call again to increase counter */
+        SPAGAIN;
+        SP -= retcnt;
+    }
+    PUSHMARK(SP);
+    retcnt = call_sv(&PL_sv_undef,  G_EVAL);
+    SPAGAIN;
+    SP -= retcnt;
+    errsv = ERRSV;
+    errstr = SvPV_nolen(errsv);
+    if(strnEQ(errstr, "Can't use an undefined value as a subroutine reference at",
+              sizeof("Can't use an undefined value as a subroutine reference at") - 1)) {
+        PUSHMARK(SP);
+        retcnt = call_sv((SV*)i_sub, 0); /* call again to increase counter */
+        SPAGAIN;
+        SP -= retcnt;
+    }
+    PUSHMARK(SP);
+    retcnt = call_sv((SV*)hv,  G_EVAL);
+    SPAGAIN;
+    SP -= retcnt;
+    errsv = ERRSV;
+    errstr = SvPV_nolen(errsv);
+    if(strnEQ(errstr, "Not a CODE reference at",
+              sizeof("Not a CODE reference at") - 1)) {
+        PUSHMARK(SP);
+        retcnt = call_sv((SV*)i_sub, 0); /* call again to increase counter */
+        SPAGAIN;
+        SP -= retcnt;
+    }
 
 void
 call_sv(sv, flags, ...)
