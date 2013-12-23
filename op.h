@@ -1022,7 +1022,8 @@ type.
 #define OP_TYPE_IS(o, type) ((o) && (o)->op_type == (type))
 
 
-#define newSUB(f, o, p, b)	Perl_newATTRSUB(aTHX_ (f), (o), (p), NULL, (b))
+#define newATTRSUB(f, o, p, a, b) Perl_newATTRSUB_x(aTHX_  f, o, p, a, b, FALSE)
+#define newSUB(f, o, p, b)	newATTRSUB((f), (o), (p), NULL, (b))
 
 #ifdef PERL_MAD
 #  define MAD_NULL 1

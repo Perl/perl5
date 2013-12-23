@@ -7645,15 +7645,10 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
     return cv;
 }
 
+/* _x = extended */
 CV *
-Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
-{
-    return newATTRSUB_flags(floor, o, proto, attrs, block, 0);
-}
-
-CV *
-Perl_newATTRSUB_flags(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
-			    OP *block, U32 flags)
+Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
+			    OP *block, bool o_is_gv)
 {
     dVAR;
     GV *gv;
@@ -7674,7 +7669,6 @@ Perl_newATTRSUB_flags(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 	   || PL_madskills)
 	? GV_ADDMULTI : GV_ADDMULTI | GV_NOINIT;
     STRLEN namlen = 0;
-    const bool o_is_gv = flags & 1;
     const char * const name =
 	 o ? SvPV_const(o_is_gv ? (SV *)o : cSVOPo->op_sv, namlen) : NULL;
     bool has_name;

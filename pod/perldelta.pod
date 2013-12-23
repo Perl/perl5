@@ -324,6 +324,12 @@ well.
 
 =over 4
 
+=item newATTRSUB is now a macro
+
+The public API newATTRSUB was previously a macro to the private
+function Perl_newATTRSUB. Function Perl_newATTRSUB has been removed. newATTRSUB
+is now macro to a different internal function.
+
 =item *
 
 XXX

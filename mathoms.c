@@ -1170,7 +1170,7 @@ Perl_custom_op_desc(pTHX_ const OP* o)
 CV *
 Perl_newSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *block)
 {
-    return Perl_newATTRSUB(aTHX_ floor, o, proto, NULL, block);
+    return newATTRSUB(floor, o, proto, NULL, block);
 }
 
 UV

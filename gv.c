@@ -540,7 +540,7 @@ S_maybe_add_coresub(pTHX_ HV * const stash, GV *gv,
 	CvLVALUE_on(cv);
         /* newATTRSUB will free the CV and return NULL if we're still
            compiling after a syntax error */
-	if ((cv = newATTRSUB_flags(
+	if ((cv = newATTRSUB_x(
 		   oldsavestack_ix, (OP *)gv,
 	           NULL,NULL,
 	           coresub_op(
@@ -549,7 +549,7 @@ S_maybe_add_coresub(pTHX_ HV * const stash, GV *gv,
 	               : newSVpvn(name,len),
 	             code, opnum
 	           ),
-	           1
+	           TRUE
                )) != NULL) {
             assert(GvCV(gv) == orig_cv);
             if (opnum != OP_VEC && opnum != OP_SUBSTR && opnum != OP_POS
