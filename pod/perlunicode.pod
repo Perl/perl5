@@ -452,7 +452,7 @@ Because scripts differ in their directionality (Hebrew and Arabic are
 written right to left, for example) Unicode supplies a C<Bidi_Class> property.
 Some of the values this property can have are:
 
-    Value    Meaning
+    Value       Meaning
 
     L           Left-to-Right
     LRE         Left-to-Right Embedding
