@@ -330,7 +330,7 @@ The public API newATTRSUB was previously a macro to the private
 function Perl_newATTRSUB. Function Perl_newATTRSUB has been removed. newATTRSUB
 is now macro to a different internal function.
 
-=item *
+=item XXX
 
 XXX
 
