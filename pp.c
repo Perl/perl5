@@ -6016,7 +6016,6 @@ PP(pp_coreargs)
 	        )
 	       )
 		DIE(aTHX_
-		/* diag_listed_as: Type of arg %d to &CORE::%s must be %s*/
 		 "Type of arg %d to &CORE::%s must be %s",
 		  whicharg, PL_op_name[opnum],
 		  wantscalar
