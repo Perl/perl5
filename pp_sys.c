@@ -2371,14 +2371,8 @@ PP(pp_socket)
     const int type = POPi;
     const int domain = POPi;
     GV * const gv = MUTABLE_GV(POPs);
-    IO * const io = gv ? GvIOn(gv) : NULL;
+    IO * const io = GvIOn(gv);
     int fd;
-
-    if (!io) {
-	report_evil_fh(gv);
-	SETERRNO(EBADF,LIB_INVARG);
-	RETPUSHUNDEF;
-    }
 
     if (IoIFP(io))
 	do_close(gv, FALSE);
