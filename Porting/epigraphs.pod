@@ -230,7 +230,7 @@ L<Announced on 2013-06-21 by David Golden|http://www.nntp.perl.org/group/perl.pe
   Farewell, thou lob of spirits, I'll be gone;
   My queen and all her elves come here anon!
 
-=head2 v5.19.0 -- Batman, of the Joker, in "The Dark Knight Returns"
+=head2 v5.19.0 - Batman, of the Joker, in "The Dark Knight Returns"
 
 L<Announced on 2013-05-20 by Ricardo Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2013/05/msg201980.html>
 
