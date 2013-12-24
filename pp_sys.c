@@ -683,11 +683,8 @@ PP(pp_pipe_op)
     GV * const wgv = MUTABLE_GV(POPs);
     GV * const rgv = MUTABLE_GV(POPs);
 
-    if (!rgv || !wgv)
-	goto badexit;
-
-    if (!isGV_with_GP(rgv) || !isGV_with_GP(wgv))
-	DIE(aTHX_ PL_no_usym, "filehandle");
+    assert (isGV_with_GP(rgv));
+    assert (isGV_with_GP(wgv));
     rstio = GvIOn(rgv);
     wstio = GvIOn(wgv);
 
@@ -2269,11 +2266,11 @@ PP(pp_ioctl)
     const unsigned int func = POPu;
     const int optype = PL_op->op_type;
     GV * const gv = MUTABLE_GV(POPs);
-    IO * const io = gv ? GvIOn(gv) : NULL;
+    IO * const io = GvIOn(gv);
     char *s;
     IV retval;
 
-    if (!io || !argsv || !IoIFP(io)) {
+    if (!IoIFP(io)) {
 	report_evil_fh(gv);
 	SETERRNO(EBADF,RMS_IFI);	/* well, sort of... */
 	RETPUSHUNDEF;
@@ -2468,7 +2465,7 @@ PP(pp_bind)
     STRLEN len;
     int op_type;
 
-    if (!io || !IoIFP(io))
+    if (!IoIFP(io))
 	goto nuts;
 
     addr = SvPV_const(addrsv, len);
@@ -2493,9 +2490,9 @@ PP(pp_listen)
     dVAR; dSP;
     const int backlog = POPi;
     GV * const gv = MUTABLE_GV(POPs);
-    IO * const io = gv ? GvIOn(gv) : NULL;
+    IO * const io = GvIOn(gv);
 
-    if (!io || !IoIFP(io))
+    if (!IoIFP(io))
 	goto nuts;
 
     if (PerlSock_listen(PerlIO_fileno(IoIFP(io)), backlog) >= 0)
@@ -2513,7 +2510,6 @@ PP(pp_accept)
 {
     dVAR; dSP; dTARGET;
     IO *nstio;
-    IO *gstio;
     char namebuf[MAXPATHLEN];
 #if (defined(VMS_DO_SOCKETS) && defined(DECCRTL_SOCKETS)) || defined(__QNXNTO__)
     Sock_size_t len = sizeof (struct sockaddr_in);
@@ -2524,12 +2520,7 @@ PP(pp_accept)
     GV * const ngv = MUTABLE_GV(POPs);
     int fd;
 
-    if (!ngv)
-	goto badexit;
-    if (!ggv)
-	goto nuts;
-
-    gstio = GvIO(ggv);
+    IO * const gstio = GvIO(ggv);
     if (!gstio || !IoIFP(gstio))
 	goto nuts;
 
@@ -2586,7 +2577,7 @@ PP(pp_shutdown)
     GV * const gv = MUTABLE_GV(POPs);
     IO * const io = GvIOn(gv);
 
-    if (!io || !IoIFP(io))
+    if (!IoIFP(io))
 	goto nuts;
 
     PUSHi( PerlSock_shutdown(PerlIO_fileno(IoIFP(io)), how) >= 0 );
@@ -3789,9 +3780,6 @@ PP(pp_open_dir)
     GV * const gv = MUTABLE_GV(POPs);
     IO * const io = GvIOn(gv);
 
-    if (!io)
-	goto nope;
-
     if ((IoIFP(io) || IoOFP(io)))
 	Perl_ck_warner_d(aTHX_ packWARN2(WARN_IO, WARN_DEPRECATED),
 			 "Opening filehandle %"HEKf" also as a directory",
@@ -3828,7 +3816,7 @@ PP(pp_readdir)
     const Direntry_t *dp;
     IO * const io = GvIOn(gv);
 
-    if (!io || !IoDIRP(io)) {
+    if (!IoDIRP(io)) {
 	Perl_ck_warner(aTHX_ packWARN(WARN_IO),
 		       "readdir() attempted on invalid dirhandle %"HEKf,
                             HEKfARG(GvENAME_HEK(gv)));
@@ -3878,7 +3866,7 @@ PP(pp_telldir)
     GV * const gv = MUTABLE_GV(POPs);
     IO * const io = GvIOn(gv);
 
-    if (!io || !IoDIRP(io)) {
+    if (!IoDIRP(io)) {
 	Perl_ck_warner(aTHX_ packWARN(WARN_IO),
 		       "telldir() attempted on invalid dirhandle %"HEKf,
                             HEKfARG(GvENAME_HEK(gv)));
@@ -3904,7 +3892,7 @@ PP(pp_seekdir)
     GV * const gv = MUTABLE_GV(POPs);
     IO * const io = GvIOn(gv);
 
-    if (!io || !IoDIRP(io)) {
+    if (!IoDIRP(io)) {
 	Perl_ck_warner(aTHX_ packWARN(WARN_IO),
 		       "seekdir() attempted on invalid dirhandle %"HEKf,
                                 HEKfARG(GvENAME_HEK(gv)));
@@ -3929,7 +3917,7 @@ PP(pp_rewinddir)
     GV * const gv = MUTABLE_GV(POPs);
     IO * const io = GvIOn(gv);
 
-    if (!io || !IoDIRP(io)) {
+    if (!IoDIRP(io)) {
 	Perl_ck_warner(aTHX_ packWARN(WARN_IO),
 		       "rewinddir() attempted on invalid dirhandle %"HEKf,
                                 HEKfARG(GvENAME_HEK(gv)));
@@ -3953,7 +3941,7 @@ PP(pp_closedir)
     GV * const gv = MUTABLE_GV(POPs);
     IO * const io = GvIOn(gv);
 
-    if (!io || !IoDIRP(io)) {
+    if (!IoDIRP(io)) {
 	Perl_ck_warner(aTHX_ packWARN(WARN_IO),
 		       "closedir() attempted on invalid dirhandle %"HEKf,
                                 HEKfARG(GvENAME_HEK(gv)));
