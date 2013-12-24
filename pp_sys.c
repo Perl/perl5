@@ -2415,26 +2415,16 @@ PP(pp_sockpair)
     const int protocol = POPi;
     const int type = POPi;
     const int domain = POPi;
-    GV * gv1;
-    IO * io1;
 
     GV * const gv2 = MUTABLE_GV(POPs);
-    IO * const io2 = gv2 ? GvIOn(gv2) : NULL;
-    if (!io2)
-        report_evil_fh(gv2);
+    IO * const io2 = GvIOn(gv2);
+    GV * const gv1 = MUTABLE_GV(POPs);
+    IO * const io1 = GvIOn(gv1);
 
-    gv1 = MUTABLE_GV(POPs);
-    io1 = gv1 ? GvIOn(gv1) : NULL;
-    if (!io1)
-	report_evil_fh(gv1);
-
-    if (io1 && IoIFP(io1))
+    if (IoIFP(io1))
 	do_close(gv1, FALSE);
-    if (io2 && IoIFP(io2))
+    if (IoIFP(io2))
 	do_close(gv2, FALSE);
-
-    if (!io1 || !io2)
-	RETPUSHUNDEF;
 
     TAINT_PROPER("socketpair");
     if (PerlSock_socketpair(domain, type, protocol, fd) < 0)
