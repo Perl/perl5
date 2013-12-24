@@ -686,10 +686,10 @@ PP(pp_pipe_op)
     assert (isGV_with_GP(rgv));
     assert (isGV_with_GP(wgv));
     rstio = GvIOn(rgv);
-    wstio = GvIOn(wgv);
-
     if (IoIFP(rstio))
 	do_close(rgv, FALSE);
+
+    wstio = GvIOn(wgv);
     if (IoIFP(wstio))
 	do_close(wgv, FALSE);
 
@@ -1378,8 +1378,8 @@ PP(pp_enterwrite)
     SV *tmpsv = NULL;
 
     if (MAXARG == 0) {
-	gv = PL_defoutgv;
 	EXTEND(SP, 1);
+	gv = PL_defoutgv;
     }
     else {
 	gv = MUTABLE_GV(POPs);
@@ -2264,7 +2264,7 @@ PP(pp_ioctl)
     dVAR; dSP; dTARGET;
     SV * const argsv = POPs;
     const unsigned int func = POPu;
-    const int optype = PL_op->op_type;
+    int optype;
     GV * const gv = MUTABLE_GV(POPs);
     IO * const io = GvIOn(gv);
     char *s;
@@ -2293,6 +2293,7 @@ PP(pp_ioctl)
 	s = INT2PTR(char*,retval);		/* ouch */
     }
 
+    optype = PL_op->op_type;
     TAINT_PROPER(PL_op_desc[optype]);
 
     if (optype == OP_IOCTL)
@@ -2595,7 +2596,7 @@ PP(pp_ssockopt)
     int fd;
     Sock_size_t len;
 
-    if (!io || !IoIFP(io))
+    if (!IoIFP(io))
 	goto nuts;
 
     fd = PerlIO_fileno(IoIFP(io));
@@ -2665,7 +2666,7 @@ PP(pp_getpeername)
     SV *sv;
     int fd;
 
-    if (!io || !IoIFP(io))
+    if (!IoIFP(io))
 	goto nuts;
 
     sv = sv_2mortal(newSV(257));
