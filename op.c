@@ -6458,7 +6458,7 @@ Perl_newLOOPOP(pTHX_ I32 flags, I32 debuggable, OP *expr, OP *block)
     OP* listop;
     OP* o;
     const bool once = block && block->op_flags & OPf_SPECIAL &&
-      (block->op_type == OP_ENTERSUB || block->op_type == OP_NULL);
+		      block->op_type == OP_NULL;
 
     PERL_UNUSED_ARG(debuggable);
 
