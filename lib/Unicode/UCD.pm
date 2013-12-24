@@ -5,7 +5,7 @@ use warnings;
 no warnings 'surrogate';    # surrogates can be inputs to this
 use charnames ();
 
-our $VERSION = '0.55';
+our $VERSION = '0.56';
 
 require Exporter;
 
@@ -2138,21 +2138,10 @@ too high for some operations to work; you may wish to use a smaller number for
 your purposes.)
 
 Note that the inversion lists returned by this function can possibly include
-non-Unicode code points, that is anything above 0x10FFFF.  This is in
-contrast to Perl regular expression matches on those code points, in which a
-non-Unicode code point always fails to match.  For example, both of these have
-the same result:
-
- chr(0x110000) =~ \p{ASCII_Hex_Digit=True}      # Fails.
- chr(0x110000) =~ \p{ASCII_Hex_Digit=False}     # Fails!
-
-And both raise a warning that a Unicode property is being used on a
-non-Unicode code point.  It is arguable as to which is the correct thing to do
-here.  This function has chosen the way opposite to the Perl regular
-expression behavior.  This allows you to easily flip to the Perl regular
-expression way (for you to go in the other direction would be far harder).
-Simply add 0x110000 at the end of the non-empty returned list if it isn't
-already that value; and pop that value if it is; like:
+non-Unicode code points, that is anything above 0x10FFFF.  Unicode properties
+are not defined on such code points.  You might wish to change the output to
+not include these.  Simply add 0x110000 at the end of the non-empty returned
+list if it isn't already that value; and pop that value if it is; like:
 
  my @list = prop_invlist("foo");
  if (@list) {
@@ -2261,65 +2250,24 @@ sub prop_invlist ($;$) {
 
         if (defined $hex_end) { # The next item starts with the code point 1
                                 # beyond the end of the range.
-            push @invlist, hex($hex_end) + 1;
+            no warnings 'portable';
+            my $end = hex $hex_end;
+            last if $end == $Unicode::UCD::MAX_CP;
+            push @invlist, $end + 1;
         }
         else {  # No end of range, is a single code point.
             push @invlist, $begin + 1;
         }
     }
 
-    require "unicore/UCD.pl";
-    my $FIRST_NON_UNICODE = $MAX_UNICODE_CODEPOINT + 1;
-
     # Could need to be inverted: add or subtract a 0 at the beginning of the
-    # list.  And to keep it from matching non-Unicode, add or subtract the
-    # first non-unicode code point.
+    # list.
     if ($swash->{'INVERT_IT'}) {
         if (@invlist && $invlist[0] == 0) {
             shift @invlist;
         }
         else {
             unshift @invlist, 0;
-        }
-        if (@invlist && $invlist[-1] == $FIRST_NON_UNICODE) {
-            pop @invlist;
-        }
-        else {
-            push @invlist, $FIRST_NON_UNICODE;
-        }
-    }
-
-    # Here, the list is set up to include only Unicode code points.  But, if
-    # the table is the default one for the property, it should contain all
-    # non-Unicode code points.  First calculate the loose name for the
-    # property.  This is done even for strict-name properties, as the data
-    # structure that mktables generates for us is set up so that we don't have
-    # to worry about that.  The property-value needs to be split if compound,
-    # as the loose rules need to be independently calculated on each part.  We
-    # know that it is syntactically valid, or SWASHNEW would have failed.
-
-    $prop = lc $prop;
-    my ($prop_only, $table) = split /\s*[:=]\s*/, $prop;
-    if ($table) {
-
-        # May have optional prefixed 'is'
-        $prop = utf8::_loose_name($prop_only) =~ s/^is//r;
-        $prop = $utf8::loose_property_name_of{$prop};
-        $prop .= "=" . utf8::_loose_name($table);
-    }
-    else {
-        $prop = utf8::_loose_name($prop);
-    }
-    if (exists $loose_defaults{$prop}) {
-
-        # Here, is the default table.  If a range ended with 10ffff, instead
-        # continue that range to infinity, by popping the 110000; otherwise,
-        # add the range from 11000 to infinity
-        if (! @invlist || $invlist[-1] != $FIRST_NON_UNICODE) {
-            push @invlist, $FIRST_NON_UNICODE;
-        }
-        else {
-            pop @invlist;
         }
     }
 
@@ -2349,8 +2297,8 @@ or even better, C<"Gc=LC">).
 Many Unicode properties have more than one name (or alias).  C<prop_invmap>
 understands all of these, including Perl extensions to them.  Ambiguities are
 resolved as described above for L</prop_aliases()>.  The Perl internal
-property "Perl_Decimal_Digit, described below, is also accepted.  C<undef> is
-returned if the property name is unknown.
+property "Perl_Decimal_Digit, described below, is also accepted.  An empty
+list is returned if the property name is unknown.
 See L<perluniprops/Properties accessible through Unicode::UCD> for the
 properties acceptable as inputs to this function.
 
@@ -3252,6 +3200,7 @@ RETRY:
         # Find the beginning and end of the range on the line
         my ($hex_begin, $hex_end, $map) = split "\t", $range;
         my $begin = hex $hex_begin;
+        no warnings 'portable';
         my $end = (defined $hex_end && $hex_end ne "")
                   ? hex $hex_end
                   : $begin;
@@ -3375,7 +3324,7 @@ RETRY:
         # to the default value.  If there is no gap, the next iteration will
         # pop this, unless there is no next iteration, and we have filled all
         # of the Unicode code space, so check for that and skip.
-        if ($end < $MAX_UNICODE_CODEPOINT) {
+        if ($end < $Unicode::UCD::MAX_CP) {
             push @invlist, $end + 1;
             push @invmap, $missing;
         }
@@ -3388,10 +3337,15 @@ RETRY:
         push @invmap, $missing;
     }
 
-    # And add in standard element that all non-Unicode code points map to:
-    # $missing
-    push @invlist, $MAX_UNICODE_CODEPOINT + 1;
-    push @invmap, $missing;
+    # The final element is always for just the above-Unicode code points.  If
+    # not already there, add it.  It merely splits the current final range
+    # that extends to infinity into two elements, each with the same map.
+    # (This is to conform with the API that says the final element is for
+    # $MAX_UNICODE_CODEPOINT + 1 .. INFINITY.)
+    if ($invlist[-1] != $MAX_UNICODE_CODEPOINT + 1) {
+        push @invmap, $invmap[-1];
+        push @invlist, $MAX_UNICODE_CODEPOINT + 1;
+    }
 
     # The second component of the map are those values that require
     # non-standard specification, stored in SPECIALS.  These override any

@@ -40,18 +40,39 @@ L</Selected Bug Fixes> section.
 
 =head1 Incompatible Changes
 
-XXX For a release on a stable branch, this section aspires to be:
-
-    There are no changes intentionally incompatible with 5.XXX.XXX
-    If any exist, they are bugs, and we request that you submit a
-    report.  See L</Reporting Bugs> below.
-
-[ List each incompatible change as a =head2 entry ]
-
 =head2 C<do> can no longer be used to call subroutines
 
 The C<do SUBROUTINE(LIST)> form has resulted in a deprecation warning
 since Perl v5.0.0, and is now a syntax error.
+
+=head2 C<\p{}>, C<\P{}> matching has changed for non-Unicode code
+points.
+
+C<\p{}> and C<\P{}> are defined by Unicode only on Unicode-defined code
+points (C<U+0000> through C<U+10FFFF>).  Their behavior on matching
+these legal Unicode code points is unchanged, but there are changes for
+code points C<0x110000> and above.  Previously, Perl treated the result
+of matching C<\p{}> and C<\P{}> against these as C<undef>, which
+translates into "false".  For C<\P{}>, this was then complemented into
+"true".  A warning was supposed to be raised when this happened.
+However, various optimizations could prevent the warning, and the
+results were often counter-intuitive, with both a match and its seeming
+complement being false.  Now all non-Unicode code points are treated as
+typical unassigned Unicode code points.  This generally is more
+Do-What-I-Mean.  A warning is raised only if the results are arguably
+different from a strict Unicode approach, and from what Perl used to do.
+Code that needs to be strictly Unicode compliant can make this warning
+fatal, and then Perl always raises the warning.
+
+Details are in L<perlunicode/Beyond Unicode code points>.
+
+=head2 C<\p{All}> has been expanded to match all possible code points
+
+The Perl-defined regular expression pattern element C<\p{All}>, unused
+on CPAN, used to match just the Unicode code points; now it matches all
+possible code points; that is, it is equivalent to C<qr/./s>.  Thus
+C<\p{All}> is no longer synonymous with C<\p{Any}>, which continues to
+match just the Unicode code points, as Unicode says it should.
 
 =head1 Deprecations
 
@@ -199,6 +220,12 @@ XXX L<message|perldiag/"message">
 =item *
 
 XXX L<message|perldiag/"message">
+
+=item *
+
+L<Matched non-Unicode code point 0x%X against Unicode property; may not be portable|perldiag/"Matched non-Unicode code point 0x%X against Unicode property; may not be portable">.
+This replaces the message "Code point 0x%X is not Unicode, all \p{}
+matches fail; all \P{} matches succeed".
 
 =back
 

@@ -1200,6 +1200,18 @@ my $MAX_UNICODE_CODEPOINT_STRING = "10FFFF";
 my $MAX_UNICODE_CODEPOINT = hex $MAX_UNICODE_CODEPOINT_STRING;
 my $MAX_UNICODE_CODEPOINTS = $MAX_UNICODE_CODEPOINT + 1;
 
+# We work with above-Unicode code points, up to UV_MAX.   But when you get
+# that high, above IV_MAX, some operations don't work, and you can easily get
+# overflow.  Therefore for internal use, we use a much smaller number,
+# translating it to UV_MAX only for output.  The exact number is immaterial
+# (all Unicode code points are treated exactly the same), but the algorithm
+# requires it to be at least 2 * $MAX_UNICODE_CODEPOINTS + 1;
+my $MAX_WORKING_CODEPOINTS= $MAX_UNICODE_CODEPOINT * 8;
+my $MAX_WORKING_CODEPOINT = $MAX_WORKING_CODEPOINTS - 1;
+my $MAX_WORKING_CODEPOINT_STRING = sprintf("%X", $MAX_WORKING_CODEPOINT);
+
+my $MAX_PLATFORM_CODEPOINT = ~0;
+
 # Matches legal code point.  4-6 hex numbers, If there are 6, the first
 # two must be 10; if there are 5, the first must not be a 0.  Written this way
 # to decrease backtracking.  The first regex allows the code point to be at
@@ -1531,7 +1543,8 @@ my $UNASSIGNED_TYPE = -2;
 my $PRIVATE_USE_TYPE = -3;
 my $NONCHARACTER_TYPE = -4;
 my $CONTROL_TYPE = -5;
-my $UNKNOWN_TYPE = -6;  # Used only if there is a bug in this program
+my $ABOVE_UNICODE_TYPE = -6;
+my $UNKNOWN_TYPE = -7;  # Used only if there is a bug in this program
 
 sub populate_char_info ($) {
     # Used only with the $annotate option.  Populates the arrays with the
@@ -1562,7 +1575,13 @@ sub populate_char_info ($) {
     my $end;
     if (! $viacode[$i]) {
         my $nonchar;
-        if ($gc-> table('Private_use')->contains($i)) {
+        if ($i > $MAX_UNICODE_CODEPOINT) {
+            $viacode[$i] = 'Above-Unicode';
+            $annotate_char_type[$i] = $ABOVE_UNICODE_TYPE;
+            $printable[$i] = 0;
+            $end = $MAX_WORKING_CODEPOINT;
+        }
+        elsif ($gc-> table('Private_use')->contains($i)) {
             $viacode[$i] = 'Private Use';
             $annotate_char_type[$i] = $PRIVATE_USE_TYPE;
             $printable[$i] = 0;
@@ -1715,7 +1734,15 @@ sub clarify_code_point_count ($) {
     # This is like clarify_number(), but the input is assumed to be a count of
     # code points, rather than a generic number.
 
-    return clarify_number(shift);
+    my $append = "";
+
+    my $number = shift;
+    if ($number > $MAX_UNICODE_CODEPOINTS) {
+        $number -= ($MAX_WORKING_CODEPOINTS - $MAX_UNICODE_CODEPOINTS);
+        return "All above-Unicode code points" if $number == 0;
+        $append = " + all above-Unicode code points";
+    }
+    return clarify_number($number) . $append;
 }
 
 package Carp;
@@ -3450,7 +3477,7 @@ sub trace { return main::trace(@_); }
 
         # If the range list is empty, return a large value that isn't adjacent
         # to any that could be in the range list, for simpler tests
-        return $MAX_UNICODE_CODEPOINT + 2 unless scalar @{$ranges{$addr}};
+        return $MAX_WORKING_CODEPOINT + 2 unless scalar @{$ranges{$addr}};
         return $ranges{$addr}->[0]->start;
     }
 
@@ -3728,9 +3755,6 @@ sub trace { return main::trace(@_); }
         unless ($end >= $start) {
             Carp::my_carp_bug("$owner_name_of{$addr}End of range (" . sprintf("%04X", $end) . ") must not be before start (" . sprintf("%04X", $start) . ").  No action taken.");
             return;
-        }
-        if ($end > $MAX_UNICODE_CODEPOINT && $operation eq '+') {
-            Carp::my_carp("$owner_name_of{$addr}Warning: Range '" . sprintf("%04X..%04X", $start, $end) . ") is above the Unicode maximum of " . sprintf("%04X", $MAX_UNICODE_CODEPOINT) . ".  Adding it anyway");
         }
         #local $to_trace = 1 if main::DEBUG;
 
@@ -4529,8 +4553,8 @@ sub trace { return main::trace(@_); }
 
         # And finally, add the gap from the end of the table to the max
         # possible code point
-        if ($max < $MAX_UNICODE_CODEPOINT) {
-            $new->add_range($max + 1, $MAX_UNICODE_CODEPOINT);
+        if ($max < $MAX_WORKING_CODEPOINT) {
+            $new->add_range($max + 1, $MAX_WORKING_CODEPOINT);
         }
         return $new;
     }
@@ -4819,6 +4843,7 @@ sub trace { return main::trace(@_); }
                 # range.
                 my $end = $set->end;
                 return $end if is_code_point_usable($end, $try_hard);
+                $end = $MAX_UNICODE_CODEPOINT + 1 if $end > $MAX_UNICODE_CODEPOINT;
 
                 # End point didn't, work.  Start at the beginning and try
                 # every one until find one that does work.
@@ -5722,6 +5747,7 @@ END
             my $next_end;
             my $next_value;
             my $offset = 0;
+            my $invlist_count = 0;
 
             my $output_value_in_hex = $self->isa('Map_Table')
                                 && ($self->format eq $HEX_ADJUST_FORMAT
@@ -5855,9 +5881,16 @@ END
 
                     # If there is a range
                     if ($start != $end) {
-                        push @OUT, sprintf "$hex_format\t$hex_format",
-                                             $start,       $end;
-                        if ($value ne "") {
+                        if ($end == $MAX_WORKING_CODEPOINT) {
+                            push @OUT, sprintf "$hex_format\t$hex_format",
+                                                $start,
+                                                $MAX_PLATFORM_CODEPOINT;
+                        }
+                        else {
+                            push @OUT, sprintf "$hex_format\t$hex_format",
+                                                $start,       $end;
+                        }
+                        if (length $value) {
                             if ($convert_map_to_from_hex) {
                                 $OUT[-1] .= sprintf "\t$hex_format\n", $value;
                             }
@@ -5958,8 +5991,15 @@ END
                                 }
 
                                 if ($i != $start || $range_end < $end) {
-                                    $annotation = sprintf "%04X..%04X",
-                                                           $i,   $range_end;
+                                    if ($range_end < $MAX_WORKING_CODEPOINT)
+                                    {
+                                        $annotation = sprintf "%04X..%04X",
+                                                              $i,   $range_end;
+                                    }
+                                    else {
+                                        $annotation = sprintf "%04X..INFINITY",
+                                                               $i;
+                                    }
                                 }
                                 else { # Indent if not displaying code points
                                     $annotation = " " x 4;
@@ -7696,7 +7736,18 @@ END
         # Get the number of code points matched by each of the tables in this
         # file, and add underscores for clarity.
         my $count = $leader->count;
-        my $string_count = main::clarify_code_point_count($count);
+        my $unicode_count;
+        my $non_unicode_string;
+        if ($count > $MAX_UNICODE_CODEPOINTS) {
+            $unicode_count = $count - ($MAX_WORKING_CODEPOINT
+                                       - $MAX_UNICODE_CODEPOINT);
+            $non_unicode_string = "All above-Unicode code points match as well, and are also returned";
+        }
+        else {
+            $unicode_count = $count;
+            $non_unicode_string = "";
+        }
+        my $string_count = main::clarify_code_point_count($unicode_count);
 
         my $loose_count = 0;        # how many aliases loosely matched
         my $compound_name = "";     # ? Are any names compound?, and if so, an
@@ -7894,11 +7945,13 @@ END
             }
         } # End of looping through all tables
 
+        $matches_comment .= "\n$non_unicode_string\n" if $non_unicode_string;
+
 
         my $code_points;
         my $match;
         my $any_of_these;
-        if ($count == 1) {
+        if ($unicode_count == 1) {
             $match = 'matches';
             $code_points = 'single code point';
         }
@@ -12999,7 +13052,7 @@ END
                 # This fills in any missing values with the default.  It's not
                 # necessary to do this with binary properties, as the default
                 # is defined completely in terms of the Y table.
-                $property->add_map(0, $MAX_UNICODE_CODEPOINT,
+                $property->add_map(0, $MAX_WORKING_CODEPOINT,
                                    $default_map, Replace => $NO);
             }
         }
@@ -13211,8 +13264,9 @@ sub compile_perl() {
     # 'All' is all code points.  As an error check, instead of just setting it
     # to be that, construct it to be the union of all the major categories
     $All = $perl->add_match_table('All',
-            Description  => "[\\x{0000}-\\x{$MAX_UNICODE_CODEPOINT_STRING}]",
-            Matches_All => 1);
+      Description
+        => "All code points, including those above Unicode.  Same as qr/./s",
+      Matches_All => 1);
 
     foreach my $major_table ($gc->tables) {
 
@@ -13222,10 +13276,10 @@ sub compile_perl() {
         $All += $major_table;
     }
 
-    if ($All->max != $MAX_UNICODE_CODEPOINT) {
+    if ($All->max != $MAX_WORKING_CODEPOINT) {
         Carp::my_carp_bug("Generated highest code point ("
            . sprintf("%X", $All->max)
-           . ") doesn't match expected value $MAX_UNICODE_CODEPOINT_STRING.")
+           . ") doesn't match expected value $MAX_WORKING_CODEPOINT_STRING.")
     }
     if ($All->range_count != 1 || $All->min != 0) {
      Carp::my_carp_bug("Generated table 'All' doesn't match all code points.")
@@ -14284,8 +14338,9 @@ END
             $unassigned_sans_noncharacters &= $nonchars->table('N');
         }
 
-        for (my $i = 0; $i <= $MAX_UNICODE_CODEPOINT; $i++ ) {
+        for (my $i = 0; $i <= $MAX_UNICODE_CODEPOINT + 1; $i++ ) {
             $i = populate_char_info($i);    # Note sets $i so may cause skips
+
         }
     }
 
@@ -14937,7 +14992,18 @@ sub make_re_pod_entries($) {
     my $full_name = $property->full_name;
 
     my $count = $input_table->count;
-    my $string_count = clarify_number($count);
+    my $unicode_count;
+    my $non_unicode_string;
+    if ($count > $MAX_UNICODE_CODEPOINTS) {
+        $unicode_count = $count - ($MAX_WORKING_CODEPOINT
+                                    - $MAX_UNICODE_CODEPOINT);
+        $non_unicode_string = " plus all above-Unicode code points";
+    }
+    else {
+        $unicode_count = $count;
+        $non_unicode_string = "";
+    }
+    my $string_count = clarify_number($unicode_count) . $non_unicode_string;
     my $status = $input_table->status;
     my $status_info = $input_table->status_info;
     my $caseless_equivalent = $input_table->caseless_equivalent;
@@ -16840,13 +16906,13 @@ sub write_all_tables() {
 
             my $count = $table->count;
             if ($expected_full) {
-                if ($count != $MAX_UNICODE_CODEPOINTS) {
+                if ($count != $MAX_WORKING_CODEPOINTS) {
                     Carp::my_carp("$table matches only "
                     . clarify_number($count)
                     . " Unicode code points but should match "
-                    . clarify_number($MAX_UNICODE_CODEPOINTS)
+                    . clarify_number($MAX_WORKING_CODEPOINTS)
                     . " (off by "
-                    .  clarify_number(abs($MAX_UNICODE_CODEPOINTS - $count))
+                    .  clarify_number(abs($MAX_WORKING_CODEPOINTS - $count))
                     . ").  Proceeding anyway.");
                 }
 

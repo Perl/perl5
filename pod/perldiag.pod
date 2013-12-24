@@ -1426,12 +1426,9 @@ This subroutine cannot be called.
 (F) You had a (sub-)template that ends with a '/'.  There must be
 another template code following the slash.  See L<perlfunc/pack>.
 
-=item Code point 0x%X is not Unicode, all \p{} matches fail; all \P{} matches 
-succeed
-
 =item Code point 0x%X is not Unicode, may not be portable
 
-(S utf8, non_unicode) You had a code point above the Unicode maximum
+(S non_unicode) You had a code point above the Unicode maximum
 of U+10FFFF.
 
 Perl allows strings to contain a superset of Unicode code points, up
@@ -1440,27 +1437,6 @@ but these may not be accepted by other languages/systems.  At one time,
 it was legal in some standards to have code points up to 0x7FFF_FFFF,
 but not higher.  Code points above 0xFFFF_FFFF require larger than a
 32 bit word.
-
-None of the Unicode or Perl-defined properties will match a non-Unicode
-code point.  For example,
-
-    chr(0x7FF_FFFF) =~ /\p{Any}/
-
-will not match, because the code point is not in Unicode.  But
-
-    chr(0x7FF_FFFF) =~ /\P{Any}/
-
-will match.
-
-This may be counterintuitive at times, as both these fail:
-
- chr(0x110000) =~ /\p{ASCII_Hex_Digit=True}/      # Fails.
- chr(0x110000) =~ /\p{ASCII_Hex_Digit=False}/     # Also fails!
-
-and both these succeed:
-
- chr(0x110000) =~ /\P{ASCII_Hex_Digit=True}/      # Succeeds.
- chr(0x110000) =~ /\P{ASCII_Hex_Digit=False}/     # Also succeeds!
 
 =item %s: Command not found
 
@@ -2919,6 +2895,37 @@ rules and perl was unable to guess how to make more progress.
 
 (F) Perl thought it was reading UTF-16 encoded character data but while
 doing it Perl met a malformed Unicode surrogate.
+
+=item Matched non-Unicode code point 0x%X against Unicode property; may
+not be portable
+
+(S non_unicode) Perl allows strings to contain a superset of
+Unicode code points; each code point may be as large as what is storable
+in an unsigned integer on your system, but these may not be accepted by
+other languages/systems.  This message occurs when you matched a string
+containing such a code point against a regular expression pattern, and
+the code point was matched against a Unicode property, C<\p{...}> or
+C<\P{...}>.  Unicode properties are only defined on Unicode code points,
+so the result of this match is undefined by Unicode, but Perl (starting
+in v5.20) treats non-Unicode code points as if they were typical
+unassigned Unicode ones, and matched this one accordingly.  Whether a
+given property matches these code points or not is specified in
+L<perluniprops/Properties accessible through \p{} and \P{}>.
+
+This message is suppressed (unless it has been made fatal) if it is
+immaterial to the results of the match if the code point is Unicode or
+not.  For example, the property C<\p{ASCII_Hex_Digit}> only can match
+the 22 characters C<[0-9A-Fa-f]>, so obviously all other code points,
+Unicode or not, won't match it.  (And C<\P{ASCII_Hex_Digit}> will match
+every code point except these 22.)
+
+Getting this message indicates that the outcome of the match arguably
+should have been the opposite of what actually happened.  If you think
+that is the case, you may wish to make the C<non_unicode> warnings
+category fatal; if you agree with Perl's decision, you may wish to turn
+off this category.
+
+See L<perlunicode/Beyond Unicode code points> for more information.
 
 =item %s matches null string many times in regex; marked by S<<-- HERE> in
 m/%s/

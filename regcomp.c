@@ -8606,38 +8606,12 @@ Perl__invlist_invert(pTHX_ SV* const invlist)
 void
 Perl__invlist_invert_prop(pTHX_ SV* const invlist)
 {
-    /* Complement the input inversion list (which must be a Unicode property,
-     * all of which don't match above the Unicode maximum code point.)  And
-     * Perl has chosen to not have the inversion match above that either.  This
-     * adds a 0x110000 if the list didn't end with it, and removes it if it did
-     */
-
-    UV len;
-    UV* array;
+    /* Complement the input inversion list (which must be a Unicode property).
+     * Starting in v5.20, this is no different than any invert. */
 
     PERL_ARGS_ASSERT__INVLIST_INVERT_PROP;
 
     _invlist_invert(invlist);
-
-    len = _invlist_len(invlist);
-
-    if (len != 0) { /* If empty do nothing */
-	array = invlist_array(invlist);
-	if (array[len - 1] != PERL_UNICODE_MAX + 1) {
-	    /* Add 0x110000.  First, grow if necessary */
-	    len++;
-	    if (invlist_max(invlist) < len) {
-		invlist_extend(invlist, len);
-		array = invlist_array(invlist);
-	    }
-	    invlist_set_len(invlist, len, *get_invlist_offset_addr(invlist));
-	    array[len - 1] = PERL_UNICODE_MAX + 1;
-	}
-	else {  /* Remove the 0x110000 */
-	    invlist_set_len(invlist, len - 1, *get_invlist_offset_addr(invlist));
-	}
-    }
-
     return;
 }
 #endif
@@ -12899,6 +12873,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
      * Unicode range? */
     bool runtime_posix_matches_above_Unicode = FALSE;
 
+    bool warn_super = ALWAYS_WARN_SUPER;
+
     regnode * const orig_emit = RExC_emit; /* Save the original RExC_emit in
         case we need to change the emitted regop to an EXACT. */
     const char * orig_parse = RExC_parse;
@@ -13173,9 +13149,23 @@ parseit:
                         /* Here, did get the swash and its inversion list.  If
                          * the swash is from a user-defined property, then this
                          * whole character class should be regarded as such */
-                        has_user_defined_property =
-                                    (swash_init_flags
-                                     & _CORE_SWASH_INIT_USER_DEFINED_PROPERTY);
+                        if (swash_init_flags
+                            & _CORE_SWASH_INIT_USER_DEFINED_PROPERTY)
+                        {
+                            has_user_defined_property = TRUE;
+                        }
+                        else if
+                            /* We warn on matching an above-Unicode code point
+                             * if the match would return true, except don't
+                             * warn for \p{All}, which has exactly one element
+                             * = 0 */
+                            (_invlist_contains_cp(invlist, 0x110000)
+                                && (! (_invlist_len(invlist) == 1
+                                       && *invlist_array(invlist) == 0)))
+                        {
+                            warn_super = TRUE;
+                        }
+
 
                         /* Invert if asking for the complement */
                         if (value == 'P') {
@@ -14409,7 +14399,6 @@ parseit:
      * <depends_list>, because having a Unicode property forces Unicode
      * semantics */
     if (properties) {
-        bool warn_super = ! has_user_defined_property;
         if (cp_list) {
 
             /* If it matters to the final outcome, see if a non-property

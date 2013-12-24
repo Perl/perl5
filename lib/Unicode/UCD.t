@@ -1058,24 +1058,11 @@ foreach my $set_of_tables (\%utf8::stricter_to_file_of, \%utf8::loose_to_file_of
 
         # If we are to test against an inverted file, it is easier to invert
         # our array than the file.
-        # The file only is valid for Unicode code points, while the inversion
-        # list is valid for all possible code points.  Therefore, we must test
-        # just the Unicode part against the file.  Later we will test for
-        # the non-Unicode part.
-
-        my $before_invert;  # Saves the pre-inverted table.
         if ($invert) {
-            $before_invert = dclone \@tested;
             if (@tested && $tested[0] == 0) {
                 shift @tested;
             } else {
                 unshift @tested, 0;
-            }
-            if (@tested && $tested[-1] == 0x110000) {
-                pop @tested;
-            }
-            else {
-                push @tested, 0x110000;
             }
         }
 
@@ -1091,9 +1078,11 @@ foreach my $set_of_tables (\%utf8::stricter_to_file_of, \%utf8::loose_to_file_of
         # otherwise don't get reflected in the file.
         my $tested = "";
         my $i = 0;
-        for (; $i < @tested - 1; $i += 2) {
+        for (; $i < @tested; $i += 2) {
             my $start = $tested[$i];
-            my $end = $tested[$i+1] - 1;
+            my $end = ($i + 1 < @tested)
+                      ? $tested[$i+1] - 1
+                      : $Unicode::UCD::MAX_CP;
             if ($start == $end) {
                 $tested .= sprintf("%X\n", $start);
             }
@@ -1102,62 +1091,12 @@ foreach my $set_of_tables (\%utf8::stricter_to_file_of, \%utf8::loose_to_file_of
             }
         }
 
-        # As mentioned earlier, the disk files only go up through Unicode,
-        # whereas the prop_invlist() ones go as high as necessary.  The
-        # comparison is only valid through max Unicode.
-        if ($i == @tested - 1 && $tested[$i] <= 0x10FFFF) {
-            $tested .= sprintf("%X\t10FFFF\n", $tested[$i]);
-        }
         local $/ = "\n";
         chomp $tested;
         $/ = $input_record_separator;
         if ($tested ne $official) {
             fail_with_diff($mod_table, $official, $tested, "prop_invlist");
             next;
-        }
-
-        # Here, it matched the table.  Now need to check for if it is correct
-        # for beyond Unicode.  First, calculate if is the default table or
-        # not.  This is the same algorithm as used internally in
-        # prop_invlist(), so if it is wrong there, this test won't catch it.
-        my $prop = lc $table;
-        ($prop_only, $table) = split /\s*[:=]\s*/, $prop;
-        if (defined $table) {
-
-            # May have optional prefixed 'is'
-            $prop = &utf8::_loose_name($prop_only) =~ s/^is//r;
-            $prop = $utf8::loose_property_name_of{$prop};
-            $prop .= "=" . &utf8::_loose_name($table);
-        }
-        else {
-            $prop = &utf8::_loose_name($prop);
-        }
-        my $is_default = exists $Unicode::UCD::loose_defaults{$prop};
-
-        @tested = @$before_invert if $invert;    # Use the original
-        if (@tested % 2 == 0) {
-
-            # If there are an even number of elements, the final one starts a
-            # range (going to infinity) of code points that are not in the
-            # list.
-            if ($is_default) {
-                fail("prop_invlist('$mod_table')");
-                diag("default table doesn't goto infinity");
-                use Data::Dumper;
-                diag Dumper \@tested;
-                next;
-            }
-        }
-        else {
-            # An odd number of elements means the final one starts a range
-            # (going to infinity of code points that are in the list.
-            if (! $is_default) {
-                fail("prop_invlist('$mod_table')");
-                diag("non-default table needs to stop in the Unicode range");
-                use Data::Dumper;
-                diag Dumper \@tested;
-                next;
-            }
         }
 
         pass("prop_invlist('$mod_table')");
@@ -1391,7 +1330,35 @@ foreach my $prop (sort(keys %props), sort keys %legacy_props) {
         diag("The last inversion list element is not 0x110000");
         next PROPERTY;
     }
-    if ($invmap_ref->[-1] ne $missing) {
+
+    my $upper_limit_subtract;
+
+    # prop_invmap() adds an extra element not present in the disk files for
+    # the above-Unicode code points.  For almost all properties, that will be
+    # to $missing.  In that case we don't look further at it when comparing
+    # with the disk files.
+    if ($invmap_ref->[-1] eq $missing) {
+        $upper_limit_subtract = 1;
+    }
+    elsif ($invmap_ref->[-1] eq 'Y' && ! grep { $_ !~ /[YN]/ } @$invmap_ref) {
+
+        # But that's not true for a few binary properties like 'Unassigned'
+        # that are Perl extensions (in this case for Gc=Unassigned) which
+        # match above-Unicode code points (hence the 'Y' in the test above).
+        # For properties where it isn't $missing, we're going to want to look
+        # at the whole thing when comparing with the disk file.
+        $upper_limit_subtract = 0;
+
+        # In those properties like 'Unassigned, the final element should be
+        # just a repetition of the next-to-last element, and won't be in the
+        # disk file, so remove it for the comparison.  Otherwise, we will
+        # compare the whole of the array with the whole of the disk file.
+        if ($invlist_ref->[-2] <= 0x10FFFF && $invmap_ref->[-2] eq 'Y') {
+            pop @$invlist_ref;
+            pop @$invmap_ref;
+        }
+    }
+    else {
         fail("prop_invmap('$display_prop')");
         diag("The last inversion list element is '$invmap_ref->[-1]', and should be '$missing'");
         next PROPERTY;
@@ -1705,9 +1672,10 @@ foreach my $prop (sort(keys %props), sort keys %legacy_props) {
         # it's an error
         my %specials = %$specials_ref if $specials_ref;
 
-        # The extra -1 is because the final element has been tested above to
-        # be for anything above Unicode.  The file doesn't go that high.
-        for (my $i = 0; $i <  @$invlist_ref - 1; $i++) {
+        # The extra -$upper_limit_subtract is because the final element may
+        # have been tested above to be for anything above Unicode, in which
+        # case the file may not go that high.
+        for (my $i = 0; $i < @$invlist_ref - $upper_limit_subtract; $i++) {
 
             # If the map element is a reference, have to stringify it (but
             # don't do so if the format doesn't allow references, so that an
@@ -1899,7 +1867,9 @@ foreach my $prop (sort(keys %props), sort keys %legacy_props) {
             # Finally have figured out what the map column in the file should
             # be.  Append the line to the running string.
             my $start = $invlist_ref->[$i];
-            my $end = $invlist_ref->[$i+1] - 1;
+            my $end = (defined $invlist_ref->[$i+1])
+                      ? $invlist_ref->[$i+1] - 1
+                      : $Unicode::UCD::MAX_CP;
             $end = ($start == $end) ? "" : sprintf($file_range_format, $end);
             if ($invmap_ref->[$i] ne "") {
                 $tested_map .= sprintf "$file_range_format\t%s\t%s\n",
@@ -1999,7 +1969,7 @@ foreach my $prop (sort(keys %props), sort keys %legacy_props) {
         my @code_point_in_names =
                                @Unicode::UCD::code_points_ending_in_code_point;
 
-        for my $i (0 .. @$invlist_ref - 1 - 1) {
+        for my $i (0 .. @$invlist_ref - 1 - $upper_limit_subtract) {
             my $start = $invlist_ref->[$i];
             my $end = $invlist_ref->[$i+1] - 1;
             if ($invmap_ref->[$i] eq $missing) {
@@ -2105,10 +2075,7 @@ foreach my $prop (sort(keys %props), sort keys %legacy_props) {
         my %maps;
         my $previous_map;
 
-        # (The extra -1 is to not look at the final element in the loop, which
-        # we know is the one that starts just beyond Unicode and goes to
-        # infinity.)
-        for my $i (0 .. @$invlist_ref - 1 - 1) {
+        for my $i (0 .. @$invlist_ref - 1 - $upper_limit_subtract) {
             my $range_start = $invlist_ref->[$i];
 
             # Because we are sorting into buckets, things could be

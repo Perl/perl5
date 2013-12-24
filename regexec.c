@@ -7545,7 +7545,7 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
             && ckWARN_d(WARN_NON_UNICODE))
         {
             Perl_warner(aTHX_ packWARN(WARN_NON_UNICODE),
-                "Code point 0x%04"UVXf" is not Unicode, all \\p{} matches fail; all \\P{} matches succeed", c);
+                "Matched non-Unicode code point 0x%04"UVXf" against Unicode property; may not be portable", c);
         }
     }
 
