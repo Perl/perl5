@@ -260,6 +260,16 @@ SKIP: {
     isnt $@, "scrimptious scrobblings", "It was interpreted as do-file";
 }
 
+# do CORE () has always been do-file
+{
+    my $called;
+    sub CORE { $called .= "fungible" }
+    $@ = "scromptious scrimblings";
+    do CORE();
+    is $called, "fungible", "do CORE() calls &CORE";
+    isnt $@, "scromptious scrimblings", "It was interpreted as do-file";
+}
+
 # do subname() and $subname() are no longer allowed
 {
     sub subname { fail('do subname('. ($_[0] || '') .') called') };

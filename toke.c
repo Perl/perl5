@@ -7891,7 +7891,8 @@ Perl_yylex(pTHX)
 		*PL_tokenbuf = '&';
 		d = scan_word(s, PL_tokenbuf + 1, sizeof PL_tokenbuf - 1,
 			      1, &len);
-		if (len && !keyword(PL_tokenbuf + 1, len, 0)) {
+		if (len && (len != 4 || strNE(PL_tokenbuf+1, "CORE"))
+		 && !keyword(PL_tokenbuf + 1, len, 0)) {
 		    d = SKIPSPACE1(d);
 		    if (*d == '(') {
 			force_ident_maybe_lex('&');
