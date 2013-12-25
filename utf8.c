@@ -4140,6 +4140,33 @@ Perl__swash_to_invlist(pTHX_ SV* const swash)
     loc = (char *) l;
     lend = l + lcur;
 
+    if (*l == 'V') {    /*  Inversion list format */
+        char *after_strtol = (char *) lend;
+        UV element0;
+        UV* other_elements_ptr;
+
+        /* The first number is a count of the rest */
+        l++;
+        elements = Strtoul((char *)l, &after_strtol, 10);
+        l = (U8 *) after_strtol;
+
+        /* Get the 0th element, which is needed to setup the inversion list */
+        element0 = (UV) Strtoul((char *)l, &after_strtol, 10);
+        l = (U8 *) after_strtol;
+        invlist = _setup_canned_invlist(elements, element0, &other_elements_ptr);
+        elements--;
+
+        /* Then just populate the rest of the input */
+        while (elements-- > 0) {
+            if (l > lend) {
+                Perl_croak(aTHX_ "panic: Expecting %"UVuf" more elements than available", elements);
+            }
+            *other_elements_ptr++ = (UV) Strtoul((char *)l, &after_strtol, 10);
+            l = (U8 *) after_strtol;
+        }
+    }
+    else {
+
     /* Scan the input to count the number of lines to preallocate array size
      * based on worst possible case, which is each line in the input creates 2
      * elements in the inversion list: 1) the beginning of a range in the list;
@@ -4172,6 +4199,7 @@ Perl__swash_to_invlist(pTHX_ SV* const swash)
 	}
 
 	invlist = _add_range_to_invlist(invlist, start, end);
+    }
     }
 
     /* Invert if the data says it should be */

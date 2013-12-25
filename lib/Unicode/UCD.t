@@ -1067,30 +1067,19 @@ foreach my $set_of_tables (\%utf8::stricter_to_file_of, \%utf8::loose_to_file_of
         }
 
         # Now construct a string from the list that should match the file.
-        # The file gives ranges of code points with starting and ending values
-        # in hex, like this:
-        # 41\t5A
-        # 61\t7A
-        # AA
-        # Our list has even numbered elements start ranges that are in the
-        # list, and odd ones that aren't in the list.  Therefore the odd
-        # numbered ones are one beyond the end of the previous range, but
-        # otherwise don't get reflected in the file.
-        my $tested = "";
-        my $i = 0;
-        for (; $i < @tested; $i += 2) {
-            my $start = $tested[$i];
-            my $end = ($i + 1 < @tested)
-                      ? $tested[$i+1] - 1
-                      : $Unicode::UCD::MAX_CP;
-            if ($start == $end) {
-                $tested .= sprintf("%X\n", $start);
-            }
-            else {
-                $tested .= sprintf "%X\t%X\n", $start, $end;
-            }
-        }
-
+        # The file is inversion list format code points, like this:
+        # V1216
+        # 65      # [26]
+        # 91
+        # 192     # [23]
+        # ...
+        # The V indicates it's an inversion list, and is followed immediately
+        # by the number of elements (lines) that follow giving its contents.
+        # The list has even numbered elements (0th, 2nd, ...) start ranges
+        # that are in the list, and odd ones that aren't in the list.
+        # Therefore the odd numbered ones are one beyond the end of the
+        # previous range, but otherwise don't get reflected in the file.
+        my $tested =  join "\n", ("V" . scalar @tested), @tested;
         local $/ = "\n";
         chomp $tested;
         $/ = $input_record_separator;
@@ -1665,6 +1654,11 @@ foreach my $prop (sort(keys %props), sort keys %legacy_props) {
         # appends the next line to the running string.
         my $tested_map = "";
 
+        # For use with files for binary properties only, which are stored in
+        # inversion list format.  This counts the number of data lines in the
+        # file.
+        my $binary_count = 0;
+
         # Create a copy of the file's specials hash.  (It has been undef'd if
         # we know it isn't relevant to this property, so if it exists, it's an
         # error or is relevant).  As we go along, we delete from that copy.
@@ -1870,6 +1864,20 @@ foreach my $prop (sort(keys %props), sort keys %legacy_props) {
             my $end = (defined $invlist_ref->[$i+1])
                       ? $invlist_ref->[$i+1] - 1
                       : $Unicode::UCD::MAX_CP;
+            if ($is_binary) {
+
+                # Files for binary properties are in inversion list format,
+                # without ranges.
+                $tested_map .= "$start\n";
+                $binary_count++;
+
+                # If the final value is infinity, no line for it exists.
+                if ($end < $Unicode::UCD::MAX_CP) {
+                    $tested_map .= ($end + 1) . "\n";
+                    $binary_count++;
+                }
+            }
+            else {
             $end = ($start == $end) ? "" : sprintf($file_range_format, $end);
             if ($invmap_ref->[$i] ne "") {
                 $tested_map .= sprintf "$file_range_format\t%s\t%s\n",
@@ -1881,7 +1889,11 @@ foreach my $prop (sort(keys %props), sort keys %legacy_props) {
             else {
                 $tested_map .= sprintf "$file_range_format\n", $start;
             }
+            }
         } # End of looping over all elements.
+
+        # Binary property files begin with a line count line.
+        $tested_map = "V$binary_count\n$tested_map" if $binary_count;
 
         # Here are done with generating what the file should look like
 

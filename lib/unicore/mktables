@@ -5019,6 +5019,11 @@ sub trace { return main::trace(@_); }
     # The constructor can override the global flag of the same name.
     main::set_access('output_range_counts', \%output_range_counts, 'r');
 
+    my %write_as_invlist;
+    # A boolean set iff the output file for this table is to be in the form of
+    # an inversion list/map.
+    main::set_access('write_as_invlist', \%write_as_invlist, 'r');
+
     my %format;
     # The format of the entries of the table.  This is calculated from the
     # data in the table (or passed in the constructor).  This is an enum e.g.,
@@ -5055,6 +5060,7 @@ sub trace { return main::trace(@_); }
         $range_size_1{$addr} = delete $args{'Range_Size_1'} || 0;
         $caseless_equivalent{$addr} = delete $args{'Caseless_Equivalent'} || 0;
         $fate{$addr} = delete $args{'Fate'} || $ORDINARY;
+        $write_as_invlist{$addr} = delete $args{'Write_As_Invlist'};# No default
         my $ucd = delete $args{'UCD'};
 
         my $description = delete $args{'Description'};
@@ -5572,6 +5578,7 @@ END
         Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
         my $addr = do { no overloading; pack 'J', $self; };
+        my $write_as_invlist = $write_as_invlist{$addr};
 
         # Start with the header
         my @HEADER = $self->header;
@@ -5624,16 +5631,23 @@ END
         else {
             my $range_size_1 = $range_size_1{$addr};
 
+            # To make it more readable, use a minimum indentation
+            my $comment_indent;
+
             # These are used only in $annotate option
             my $format;         # e.g. $HEX_ADJUST_FORMAT
             my $include_name;   # ? Include the character's name in the
                                 # annotation?
             my $include_cp;     # ? Include its code point
 
-            # To make it more readable, use a minimum indentation
-            my $comment_indent = 16;
-
-            if ($annotate) {
+            if (! $annotate) {
+                $comment_indent = ($self->isa('Map_Table'))
+                                  ? 24
+                                  : ($write_as_invlist)
+                                    ? 8
+                                    : 16;
+            }
+            else {
                 $format = $self->format;
 
                 # The name of the character is output only for tables that
@@ -5651,7 +5665,11 @@ END
                 # the first column
                 $include_cp = ! $range_size_1;
 
-                if ($self->isa('Map_Table')) {
+                if (! $self->isa('Map_Table')) {
+                    $comment_indent = ($write_as_invlist) ? 8 : 16;
+                }
+                else {
+                    $comment_indent = 16;
 
                     # There are just a few short ranges in this table, so no
                     # need to include the code point in the annotation.
@@ -5879,8 +5897,26 @@ END
                         $previous_value = $value;
                     }
 
-                    # If there is a range
-                    if ($start != $end) {
+                    if ($write_as_invlist) {
+
+                        # Inversion list format has a single number per line,
+                        # the starting code point of a range that matches the
+                        # property
+                        push @OUT, $start, "\n";
+                        $invlist_count++;
+
+                        # Add a comment with the size of the range, if
+                        # requested.
+                        if ($output_range_counts{$addr}) {
+                            $OUT[-1] = merge_single_annotation_line(
+                                    $OUT[-1],
+                                    "# ["
+                                      . main::clarify_code_point_count($end - $start + 1)
+                                      . "]\n",
+                                    $comment_indent);
+                        }
+                    }
+                    elsif ($start != $end) { # If there is a range
                         if ($end == $MAX_WORKING_CODEPOINT) {
                             push @OUT, sprintf "$hex_format\t$hex_format",
                                                 $start,
@@ -6116,6 +6152,15 @@ END
                         }
                     }
 
+                    # Add the beginning of the range that doesn't match the
+                    # property, except if the just added match range extends
+                    # to infinity.  We do this after any annotations for the
+                    # match range.
+                    if ($write_as_invlist && $end < $MAX_WORKING_CODEPOINT) {
+                        push @OUT, $end + 1, "\n";
+                        $invlist_count++;
+                    }
+
                     # If we split the range, set up so the next time through
                     # we get the remainder, and redo.
                     if ($next_start) {
@@ -6129,6 +6174,8 @@ END
             } # End of loop through all the table's ranges
 
             push @OUT, @annotation; # Add orphaned annotation, if any
+
+            splice @OUT, 1, 0, "V$invlist_count\n" if $invlist_count;
         }
 
         # Add anything that goes after the main body, but within the here
@@ -6408,6 +6455,7 @@ sub trace { return main::trace(@_); }
                                     Full_Name => $full_name,
                                     _Property => $property,
                                     _Range_List => $range_list,
+                                    Write_As_Invlist => 0,
                                     %args);
 
         my $addr = do { no overloading; pack 'J', $self; };
@@ -7330,6 +7378,7 @@ sub trace { return main::trace(@_); }
                                       _Property => $property,
                                       _Range_List => $range_list,
                                       Format => $EMPTY_FORMAT,
+                                      Write_As_Invlist => 1,
                                       );
         my $addr = do { no overloading; pack 'J', $self; };
 
@@ -8051,14 +8100,25 @@ END
 
         if ($count) {   # The format differs if no code points, and needs no
                         # explanation in that case
+            if ($leader->write_as_invlist) {
                 $comment.= <<END;
 
-The format of the lines of this file is:
+The first data line of this file begins with the letter V to indicate it is in
+inversion list format.  The number following the V gives the number of lines
+remaining.  Each of those remaining lines is a single number representing the
+starting code point of a range which goes up to but not including the number
+on the next line; The 0th, 2nd, 4th... ranges are for code points that match
+the property; the 1st, 3rd, 5th... are ranges of code points that don't match
+the property.  The final line's range extends to the platform's infinity.
 END
-            $comment.= <<END;
+            }
+            else {
+                $comment.= <<END;
+The format of the lines of this file is:
 START\\tSTOP\\twhere START is the starting code point of the range, in hex;
 STOP is the ending point, or if omitted, the range has just one code point.
 END
+            }
             if ($leader->output_range_counts) {
                 $comment .= <<END;
 Numbers in comments in [brackets] indicate how many code points are in the

@@ -2225,6 +2225,15 @@ sub prop_invlist ($;$) {
 
     my @invlist;
 
+    if ($swash->{'LIST'} =~ /^V/) {
+
+        # A 'V' as the first character marks the input as already an inversion
+        # list, in which case, all we need to do is put the remaining lines
+        # into our array.
+        @invlist = split "\n", $swash->{'LIST'} =~ s/ \s* (?: \# .* )? $ //xmgr;
+        shift @invlist;
+    }
+    else {
     # The input lines look like:
     # 0041\t005A   # [26]
     # 005F
@@ -2258,6 +2267,7 @@ sub prop_invlist ($;$) {
         else {  # No end of range, is a single code point.
             push @invlist, $begin + 1;
         }
+    }
     }
 
     # Could need to be inverted: add or subtract a 0 at the beginning of the
@@ -3173,6 +3183,21 @@ RETRY:
 
     my $requires_adjustment = $format =~ /^a/;
 
+    if ($swash->{'LIST'} =~ /^V/) {
+        @invlist = split "\n", $swash->{'LIST'} =~ s/ \s* (?: \# .* )? $ //xmgr;
+        shift @invlist;
+        foreach my $i (0 .. @invlist - 1) {
+            $invmap[$i] = ($i % 2 == 0) ? 'Y' : 'N'
+        }
+
+        # The map includes lines for all code points; add one for the range
+        # from 0 to the first Y.
+        if ($invlist[0] != 0) {
+            unshift @invlist, 0;
+            unshift @invmap, 'N';
+        }
+    }
+    else {
     # The LIST input lines look like:
     # ...
     # 0374\t\tCommon
@@ -3328,6 +3353,7 @@ RETRY:
             push @invlist, $end + 1;
             push @invmap, $missing;
         }
+    }
     }
 
     # If the property is empty, make all code points use the value for missing
