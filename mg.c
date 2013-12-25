@@ -2002,14 +2002,19 @@ Perl_magic_setdbline(pTHX_ SV *sv, MAGIC *mg)
 		   sv_2iv(MUTABLE_SV((mg)->mg_ptr)), FALSE);
 
     if (svp && SvIOKp(*svp)) {
-	size_t off = SvUVX(*svp);
-	size_t sz  = off+8/8;
-	if (sz <= PL_breakpointslen) {
-	    /* set or clear breakpoint */
+	OP * const o = INT2PTR(OP*,SvIVX(*svp));
+	if (o) {
+#ifdef PERL_DEBUG_READONLY_OPS
+	    Slab_to_rw(OpSLAB(o));
+#endif
+	    /* set or clear breakpoint in the relevant control op */
 	    if (SvTRUE(sv))
-		PL_breakpoints[off/8] |= 1 << off%8;
+		o->op_flags |= OPf_SPECIAL;
 	    else
-		PL_breakpoints[off/8] &= ~(U8)(1 << off%8);
+		o->op_flags &= ~OPf_SPECIAL;
+#ifdef PERL_DEBUG_READONLY_OPS
+	    Slab_to_ro(OpSLAB(o));
+#endif
 	}
     }
     return 0;

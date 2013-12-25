@@ -9,7 +9,7 @@ BEGIN { require "./test.pl"; }
 
 # This test depends on t/lib/Devel/switchd*.pm.
 
-plan(tests => 18);
+plan(tests => 17);
 
 my $r;
 
@@ -252,21 +252,4 @@ is(
   ),
   "ok\n",
   "setting breakpoints without *DB::dbline aliased"
-);
-
-# Test setting breakpoints after overwriting source lines
-is(
-  runperl(
-   switches => [ '-Ilib', '-d:switchd_empty' ],
-   progs => [ split "\n",
-    '*DB::dbline = *{q(_<).__FILE__};
-     $DB::dbline[1] = 7;    # IVX used to point to the cop address
-     $DB::dbline{1} = 1;    # crash accessing cCOPx(7)->op_flags
-     print qq[ok\n];
-    '
-   ],
-   stderr => 1
-  ),
-  "ok\n",
-  'no crash when setting $DB::dbline{1} after $DB::dbline[1]'
 );

@@ -370,41 +370,27 @@ string/length pair.
 
 #include "mydtrace.h"
 
-#ifdef USE_ITHREADS
-# define _COP_STASH_N_FILE \
-    PADOFFSET	cop_stashoff;	/* offset into PL_stashpad, for the	\
-				   package the line was compiled in */	\
-    char *	cop_file;	/* file name the following line # is from */
-#else
-# define _COP_STASH_N_FILE \
-    HV *	cop_stash;	/* package line was compiled in */	\
-    GV *	cop_filegv;	/* file the following line # is from */
-#endif
-
-#define _COP_FIELDS \
-    /* On LP64 putting this here takes advantage of the fact that BASEOP \
-       isn't an exact multiple of 8 bytes to save structure padding.  */ \
-    line_t      cop_line;       /* line # of this command */		 \
-    /* label for this construct is now stored in cop_hints_hash */	 \
-    _COP_STASH_N_FILE							 \
-    U32		cop_hints;	/* hints bits from pragmata */		 \
-    U32		cop_seq;	/* parse sequence number */		 \
-    /* Beware. mg.c and warnings.pl assume the type of this		 \
-       is STRLEN *:  */							 \
-    STRLEN *	cop_warnings;	/* lexical warnings bitmask */		 \
-    /* compile time state of %^H.  See the comment in op.c for how this	 \
-       is used to recreate a hash to return from caller.  */		 \
-    COPHH *	cop_hints_hash;
-
 struct cop {
     BASEOP
-    _COP_FIELDS
-};
-
-struct dbop {
-    BASEOP
-    _COP_FIELDS
-    size_t	dbop_seq;	/* sequence number for breakpoint */
+    /* On LP64 putting this here takes advantage of the fact that BASEOP isn't
+       an exact multiple of 8 bytes to save structure padding.  */
+    line_t      cop_line;       /* line # of this command */
+    /* label for this construct is now stored in cop_hints_hash */
+#ifdef USE_ITHREADS
+    PADOFFSET	cop_stashoff;	/* offset into PL_stashpad, for the
+				   package the line was compiled in */
+    char *	cop_file;	/* file name the following line # is from */
+#else
+    HV *	cop_stash;	/* package line was compiled in */
+    GV *	cop_filegv;	/* file the following line # is from */
+#endif
+    U32		cop_hints;	/* hints bits from pragmata */
+    U32		cop_seq;	/* parse sequence number */
+    /* Beware. mg.c and warnings.pl assume the type of this is STRLEN *:  */
+    STRLEN *	cop_warnings;	/* lexical warnings bitmask */
+    /* compile time state of %^H.  See the comment in op.c for how this is
+       used to recreate a hash to return from caller.  */
+    COPHH *	cop_hints_hash;
 };
 
 #ifdef USE_ITHREADS

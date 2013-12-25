@@ -237,7 +237,3 @@ PERLVAR(G, malloc_mutex, perl_mutex)	/* Mutex for malloc */
 
 PERLVARI(G, hash_seed_set, bool, FALSE)	/* perl.c */
 PERLVARA(G, hash_seed, PERL_HASH_SEED_BYTES, unsigned char) /* perl.c and hv.h */
-
-PERLVARI(G, breakpoints, U8 *, NULL)	/* For setting DB breakpoints */
-PERLVARI(G, breakpointslen, size_t, 0)
-PERLVARI(G, breakpointseq, size_t, 0)
