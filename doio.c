@@ -2293,15 +2293,6 @@ Perl_do_semop(pTHX_ SV **mark, SV **sp)
             t++;
         }
         result = semop(id, temps, nsops);
-        t = temps;
-        o = ops;
-        i = nsops;
-        while (i--) {
-            *o++ = t->sem_num;
-            *o++ = t->sem_op;
-            *o++ = t->sem_flg;
-            t++;
-        }
         Safefree(temps);
         return result;
     }
