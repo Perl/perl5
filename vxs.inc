@@ -418,7 +418,7 @@ VXS(version_qv)
 	}
 	if ( !SvVOK(ver) ) { /* not already a v-string */
 	    rv = sv_newmortal();
-	    sv_setsv(rv,ver); /* make a duplicate */
+	    SvSetSV_nosteal(rv,ver); /* make a duplicate */
 	    UPG_VERSION(rv, TRUE);
 	} else {
 	    rv = sv_2mortal(NEW_VERSION(ver));

@@ -22,8 +22,6 @@ SKIP: {
 	# test locale handling
 	my $warning;
 
-	use locale;
-
 	local $SIG{__WARN__} = sub { $warning = $_[0] };
 
 	my $ver = 1.23;  # has to be floating point number
@@ -33,10 +31,12 @@ SKIP: {
 						      # because have to
 						      # evaluate in current
 						      # scope
+	use locale;
+
 	while (<DATA>) {
 	    chomp;
 	    $loc = setlocale( LC_ALL, $_);
-	    last if localeconv()->{decimal_point} eq ',';
+	    last if $loc && localeconv()->{decimal_point} eq ',';
 	}
 	skip 'Cannot test locale handling without a comma locale', 5
 	    unless $loc and localeconv()->{decimal_point} eq ',';
