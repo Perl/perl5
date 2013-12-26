@@ -1878,17 +1878,18 @@ foreach my $prop (sort(keys %props), sort keys %legacy_props) {
                 }
             }
             else {
-            $end = ($start == $end) ? "" : sprintf($file_range_format, $end);
-            if ($invmap_ref->[$i] ne "") {
-                $tested_map .= sprintf "$file_range_format\t%s\t%s\n",
-                                        $start, $end, $invmap_ref->[$i];
-            }
-            elsif ($end ne "") {
-                $tested_map .= sprintf "$file_range_format\t%s\n", $start, $end;
-            }
-            else {
-                $tested_map .= sprintf "$file_range_format\n", $start;
-            }
+                $end = ($start == $end) ? "" : sprintf($file_range_format, $end);
+                if ($invmap_ref->[$i] ne "") {
+                    $tested_map .= sprintf "$file_range_format\t%s\t%s\n",
+                                            $start, $end, $invmap_ref->[$i];
+                }
+                elsif ($end ne "") {
+                    $tested_map .= sprintf "$file_range_format\t%s\n",
+                                            $start,             $end;
+                }
+                else {
+                    $tested_map .= sprintf "$file_range_format\n", $start;
+                }
             }
         } # End of looping over all elements.
 
