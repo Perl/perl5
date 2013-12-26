@@ -744,21 +744,15 @@ Perl_re_intuit_start(pTHX_
 	}
 
 	/* Match is anchored, but substr is not anchored wrt beg-of-str. */
-	s = strpos;
-	start_shift = prog->check_offset_min; /* okay to underestimate on CC */
-	end_shift = prog->check_end_shift;
-	
 	if (!ml_anch && prog->check_offset_max != SSize_t_MAX)
             max_shift = prog->check_offset_max;
     }
     else {				/* Can match at random position */
 	ml_anch = 0;
-	s = strpos;
-	start_shift = prog->check_offset_min;  /* okay to underestimate on CC */
-	end_shift = prog->check_end_shift;
-	
-	/* end shift should be non negative here */
     }
+    s = strpos;
+    start_shift = prog->check_offset_min;  /* okay to underestimate on CC */
+    end_shift = prog->check_end_shift;
 
 #ifdef DEBUGGING	/* 7/99: reports of failure (with the older version) */
     if (end_shift < 0)
