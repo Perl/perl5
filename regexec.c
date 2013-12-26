@@ -632,7 +632,7 @@ Perl_re_intuit_start(pTHX_
     SV *check;
     char *t;
     const bool utf8_target = (sv && SvUTF8(sv)) ? 1 : 0; /* if no sv we have to assume bytes */
-    I32 ml_anch;
+    bool ml_anch = 0;
     char *other_last = NULL;	/* other substr checked before this */
     char *check_at = NULL;		/* check substr found at this pos */
     char *checked_upto = NULL;          /* how far into the string we have already checked using find_byclass*/
@@ -737,9 +737,6 @@ Perl_re_intuit_start(pTHX_
                 goto success_at_start;
 	    }
 	}
-    }
-    else {				/* Can match at random position */
-	ml_anch = 0;
     }
     s = strpos;
     start_shift = prog->check_offset_min;  /* okay to underestimate on CC */
