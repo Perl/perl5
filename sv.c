@@ -10171,7 +10171,7 @@ Perl_sv_catpvf_nocontext(SV *const sv, const char *const pat, ...)
     PERL_ARGS_ASSERT_SV_CATPVF_NOCONTEXT;
 
     va_start(args, pat);
-    sv_vcatpvf(sv, pat, &args);
+    sv_vcatpvfn_flags(sv, pat, strlen(pat), &args, NULL, 0, NULL, SV_GMAGIC|SV_SMAGIC);
     va_end(args);
 }
 
@@ -10189,7 +10189,8 @@ Perl_sv_catpvf_mg_nocontext(SV *const sv, const char *const pat, ...)
     PERL_ARGS_ASSERT_SV_CATPVF_MG_NOCONTEXT;
 
     va_start(args, pat);
-    sv_vcatpvf_mg(sv, pat, &args);
+    sv_vcatpvfn_flags(sv, pat, strlen(pat), &args, NULL, 0, NULL, SV_GMAGIC|SV_SMAGIC);
+    SvSETMAGIC(sv);
     va_end(args);
 }
 #endif
@@ -10215,7 +10216,7 @@ Perl_sv_catpvf(pTHX_ SV *const sv, const char *const pat, ...)
     PERL_ARGS_ASSERT_SV_CATPVF;
 
     va_start(args, pat);
-    sv_vcatpvf(sv, pat, &args);
+    sv_vcatpvfn_flags(sv, pat, strlen(pat), &args, NULL, 0, NULL, SV_GMAGIC|SV_SMAGIC);
     va_end(args);
 }
 
@@ -10235,7 +10236,7 @@ Perl_sv_vcatpvf(pTHX_ SV *const sv, const char *const pat, va_list *const args)
 {
     PERL_ARGS_ASSERT_SV_VCATPVF;
 
-    sv_vcatpvfn(sv, pat, strlen(pat), args, NULL, 0, NULL);
+    sv_vcatpvfn_flags(sv, pat, strlen(pat), args, NULL, 0, NULL, SV_GMAGIC|SV_SMAGIC);
 }
 
 /*
@@ -10254,7 +10255,8 @@ Perl_sv_catpvf_mg(pTHX_ SV *const sv, const char *const pat, ...)
     PERL_ARGS_ASSERT_SV_CATPVF_MG;
 
     va_start(args, pat);
-    sv_vcatpvf_mg(sv, pat, &args);
+    sv_vcatpvfn_flags(sv, pat, strlen(pat), &args, NULL, 0, NULL, SV_GMAGIC|SV_SMAGIC);
+    SvSETMAGIC(sv);
     va_end(args);
 }
 
