@@ -27,7 +27,7 @@ BEGIN {
     # By doing this, we save 1 run time check for *every* call to import.
     my $const = $] > 5.009002;
     my $downgrade = $] < 5.015004; # && $] >= 5.008
-    my $constarray = $] >= 5.019003;
+    my $constarray = exists &_make_const;
     if ($const) {
 	Internals::SvREADONLY($const, 1);
 	Internals::SvREADONLY($downgrade, 1);
@@ -161,8 +161,8 @@ sub import {
 	    } elsif (@_) {
 		my @list = @_;
 		if (_CAN_PCS_FOR_ARRAY) {
-		    Internals::SvREADONLY($list[$_], 1) for 0..$#list;
-		    Internals::SvREADONLY(@list, 1);
+		    _make_const($list[$_]) for 0..$#list;
+		    _make_const(@list);
 		    if ($symtab && !exists $symtab->{$name}) {
 			$symtab->{$name} = \@list;
 			$flush_mro++;

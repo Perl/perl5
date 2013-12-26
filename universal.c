@@ -940,15 +940,6 @@ XS(XS_Internals_SvREADONLY)	/* This is dangerous stuff. */
 	    if (SvIsCOW(sv)) sv_force_normal(sv);
 #endif
 	    SvREADONLY_on(sv);
-	    if (SvTYPE(sv) == SVt_PVAV && AvFILLp(sv) != -1) {
-		/* for constant.pm; nobody else should be calling this
-		   on arrays anyway. */
-		SV **svp;
-		for (svp = AvARRAY(sv) + AvFILLp(sv)
-		   ; svp >= AvARRAY(sv)
-		   ; --svp)
-		    if (*svp) SvPADTMP_on(*svp);
-	    }
 	    XSRETURN_YES;
 	}
 	else {
@@ -959,6 +950,37 @@ XS(XS_Internals_SvREADONLY)	/* This is dangerous stuff. */
     }
     XSRETURN_UNDEF; /* Can't happen. */
 }
+
+XS(XS_constant__make_const)	/* This is dangerous stuff. */
+{
+    dVAR;
+    dXSARGS;
+    SV * const svz = ST(0);
+    SV * sv;
+    PERL_UNUSED_ARG(cv);
+
+    /* [perl #77776] - called as &foo() not foo() */
+    if (!SvROK(svz) || items != 1)
+        croak_xs_usage(cv, "SCALAR");
+
+    sv = SvRV(svz);
+
+#ifdef PERL_OLD_COPY_ON_WRITE
+    if (SvIsCOW(sv)) sv_force_normal(sv);
+#endif
+    SvREADONLY_on(sv);
+    if (SvTYPE(sv) == SVt_PVAV && AvFILLp(sv) != -1) {
+	/* for constant.pm; nobody else should be calling this
+	   on arrays anyway. */
+	SV **svp;
+	for (svp = AvARRAY(sv) + AvFILLp(sv)
+	   ; svp >= AvARRAY(sv)
+	   ; --svp)
+	    if (*svp) SvPADTMP_on(*svp);
+    }
+    XSRETURN(0);
+}
+
 XS(XS_Internals_SvREFCNT)	/* This is dangerous stuff. */
 {
     dVAR;
@@ -1398,6 +1420,7 @@ static const struct xsub_details details[] = {
     {"utf8::native_to_unicode", XS_utf8_native_to_unicode, NULL},
     {"utf8::unicode_to_native", XS_utf8_unicode_to_native, NULL},
     {"Internals::SvREADONLY", XS_Internals_SvREADONLY, "\\[$%@];$"},
+    {"constant::_make_const", XS_constant__make_const, "\\[$@]"},
     {"Internals::SvREFCNT", XS_Internals_SvREFCNT, "\\[$%@];$"},
     {"Internals::hv_clear_placeholders", XS_Internals_hv_clear_placehold, "\\%"},
     {"PerlIO::get_layers", XS_PerlIO_get_layers, "*;@"},
