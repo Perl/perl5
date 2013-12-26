@@ -628,7 +628,6 @@ Perl_re_intuit_start(pTHX_
     SSize_t start_shift = 0;
     /* Should be nonnegative! */
     SSize_t end_shift   = 0;
-    SSize_t max_shift   = -1; /* max char start position of floating substr */
     char *s;
     SV *check;
     char *t;
@@ -738,10 +737,6 @@ Perl_re_intuit_start(pTHX_
                 goto success_at_start;
 	    }
 	}
-
-	/* Match is anchored, but substr is not anchored wrt beg-of-str. */
-	if (!ml_anch && prog->check_offset_max != SSize_t_MAX)
-            max_shift = prog->check_offset_max;
     }
     else {				/* Can match at random position */
 	ml_anch = 0;
@@ -788,15 +783,19 @@ Perl_re_intuit_start(pTHX_
             end_point= HOP3(strend, -srch_end_shift, strbeg);
 	}
 
-        if (max_shift != -1) {
+        if (!ml_anch
+            && prog->intflags & PREGf_ANCH
+            && prog->check_offset_max != SSize_t_MAX)
+        {
             U8 *p = (U8*)s;
 
-            assert(max_shift >= 0);
+            assert(prog->check_offset_max >= 0);
             if (srch_start_shift > 0)
                 p = start_point; /* don't HOP over chars already HOPed */
             if (p < end_point)
                 p = HOP3(p,
-                        (max_shift - (srch_end_shift > 0 ? srch_start_shift : 0)
+                        (prog->check_offset_max
+                         - (srch_end_shift > 0 ? srch_start_shift : 0)
                          + CHR_SVLEN(check) - (SvTAIL(check) != 0)),
                         end_point);
             if (p < end_point)
