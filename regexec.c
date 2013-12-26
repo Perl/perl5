@@ -708,13 +708,14 @@ Perl_re_intuit_start(pTHX_
                                      See [perl #115242] */
             {
 	        /* Substring at constant offset from beg-of-str... */
-	        SSize_t slen;
+	        SSize_t slen = SvCUR(check);
 
 	        s = HOP3c(strpos, prog->check_offset_min, strend);
 	    
 	        if (SvTAIL(check)) {
-		    slen = SvCUR(check);	/* >= 1 */
-
+                    /* In this case, the regex is anchored at the end too,
+                     * so the lengths must match exactly, give or take a \n.
+		     * NB: slen >= 1 since the last char of check is \n */
 		    if (   strend - s > slen || strend - s < slen - 1
 		       || (strend - s == slen && strend[-1] != '\n'))
                     {
@@ -724,19 +725,14 @@ Perl_re_intuit_start(pTHX_
                     }
                     /* Now should match s[0..slen-2] */
                     slen--;
-                    if (slen && (*SvPVX_const(check) != *s
-                        || (slen > 1 && memNE(SvPVX_const(check), s, slen))))
-                    {
-                      report_neq:
-                        DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
-                                        "String not equal...\n"));
-                        goto fail_finish;
-                    }
                 }
-                else if (*SvPVX_const(check) != *s
-                         || ((slen = SvCUR(check)) > 1
-                             && memNE(SvPVX_const(check), s, slen)))
-                    goto report_neq;
+                if (slen && (*SvPVX_const(check) != *s
+                    || (slen > 1 && memNE(SvPVX_const(check), s, slen))))
+                {
+                    DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
+                                    "String not equal...\n"));
+                    goto fail_finish;
+                }
 
                 check_at = s;
                 goto success_at_start;
