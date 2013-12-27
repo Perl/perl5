@@ -145,8 +145,8 @@
 #define PREGf_ANCH_SBOL         0x00001000
 #define PREGf_ANCH_GPOS         0x00002000
 
-#define PREGf_ANCH_SINGLE       ( PREGf_ANCH_SBOL | PREGf_ANCH_GPOS )
-#define PREGf_ANCH              ( PREGf_ANCH_SINGLE | PREGf_ANCH_MBOL | PREGf_ANCH_BOL )
+#define PREGf_ANCH              (PREGf_ANCH_SBOL | PREGf_ANCH_GPOS | \
+                                 PREGf_ANCH_MBOL | PREGf_ANCH_BOL )
 
 /* this is where the old regcomp.h started */
 

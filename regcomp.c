@@ -6957,7 +6957,7 @@ reStudy:
 	    r->check_substr = r->anchored_substr;
 	    r->check_utf8 = r->anchored_utf8;
 	    r->check_offset_min = r->check_offset_max = r->anchored_offset;
-            if (r->intflags & PREGf_ANCH_SINGLE)
+            if (r->intflags & (PREGf_ANCH_SBOL|PREGf_ANCH_GPOS))
                 r->intflags |= PREGf_NOSCAN;
 	}
 	else {

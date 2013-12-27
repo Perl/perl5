@@ -678,7 +678,7 @@ Perl_re_intuit_start(pTHX_
 	check = prog->check_substr;
     }
     if (prog->intflags & PREGf_ANCH) { /* Match at \G, beg-of-str or after \n */
-        ml_anch = !( (prog->intflags & PREGf_ANCH_SINGLE)
+        ml_anch = !( (prog->intflags & (PREGf_ANCH_SBOL|PREGf_ANCH_GPOS))
                      || ( (prog->intflags & PREGf_ANCH_BOL)
 			  && !multiline ) );	/* Check after \n? */
 
