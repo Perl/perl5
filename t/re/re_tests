@@ -1853,5 +1853,8 @@ A+(*PRUNE)BC(?{})	AAABC	y	$&	AAABC
 \x{100}a{2,3}	\x{100}aaa	y	$&	\x{100}aaa
 ^x?abc?de	abcde	y	$&	abcde
 
+'(?-m:^abc)'m	abcde	y	$&	abc
+'(?-m:^abc)'m	x\nabcde	n	-	-
+
 # Keep these lines at the end of the file
 # vim: softtabstop=0 noexpandtab
