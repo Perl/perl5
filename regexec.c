@@ -699,6 +699,10 @@ Perl_re_intuit_start(pTHX_
 	        goto fail;
 	    }
 
+            /* in the presence of an anchor, the anchored (relative to the
+             * start of the regex) substr must also be anchored relative
+             * to strpos. So quickly reject if substr isn't found there */
+
 	    if (prog->check_offset_min == prog->check_offset_max
                 && !(prog->intflags & PREGf_CANY_SEEN)
                 && ! multiline)   /* /m can cause \n's to match that aren't
