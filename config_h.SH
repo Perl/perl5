@@ -738,12 +738,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$i_niin I_NETINET_IN	/**/
 
-/* I_SFIO:
- *	This symbol, if defined, indicates to the C program that it should
- *	include <sfio.h>.
- */
-#$i_sfio	I_SFIO		/**/
-
 /* I_STDDEF:
  *	This symbol, if defined, indicates that <stddef.h> exists and should
  *	be included.
@@ -3926,12 +3920,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	available to set process title.
  */
 #$d_setproctitle HAS_SETPROCTITLE		/**/
-
-/* USE_SFIO:
- *	This symbol, if defined, indicates that sfio should
- *	be used.
- */
-#$d_sfio	USE_SFIO		/**/
 
 /* HAS_SIGNBIT:
  *	This symbol, if defined, indicates that the signbit routine is

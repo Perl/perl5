@@ -4454,38 +4454,6 @@ $ tmp = "setvbuf"
 $ GOSUB inlibc
 $ d_setvbuf = tmp
 $!
-$! see if sfio.h is available
-$! see if sfio library is available
-$! Ok, but do we want to use it.
-$! IF F$TYPE(usesfio) .EQS. "" THEN usesfio = "undef"
-$! IF val .EQS. "define"
-$! THEN
-$!   IF usesfio .EQS. "define"
-$!   THEN dflt = "y"
-$!   ELSE dflt = "n"
-$!   ENDIF
-$!   echo "''package' can use the sfio library, but it is experimental."
-$!   rp="You seem to have sfio available, do you want to try using it? [''dflt'] "
-$!   GOSUB myread
-$!   IF ans .EQS. "" THEN ans = dflt
-$!   IF ans
-$!   THEN
-$!     echo "Ok, turning on sfio then."
-$!     val="define"
-$!   ELSE
-$!     echo "Ok, avoiding sfio this time.  I'll use stdio instead."
-$!     val="undef"
-$!   ENDIF
-$! ELSE
-$!   IF usesfio .EQS. "define"
-$!   THEN
-$!     echo4 "Sorry, cannot find sfio on this machine."
-$!     echo4 "Ignoring your setting of usesfio=''usesfio'."
-$!     val="undef"
-$!   ENDIF
-$! ENDIF
-$!
-$!
 $! Check for the shm* routines.
 $!
 $ OS
@@ -6272,7 +6240,6 @@ $ WC "d_setruid='undef'"
 $ WC "d_setsent='" + d_setsent + "'"
 $ WC "d_setsid='" + d_setsid + "'"
 $ WC "d_setvbuf='" + d_setvbuf + "'"
-$ WC "d_sfio='undef'"
 $ WC "d_shm='" + d_shm + "'"
 $ WC "d_shmat='" + d_shmat + "'"
 $ WC "d_shmatprototype='" + d_shmatprototype + "'"
@@ -6480,7 +6447,6 @@ $ WC "i_prot='undef'"
 $ WC "i_pthread='define'"
 $ WC "i_pwd='undef'"
 $ WC "i_rpcsvcdbm='undef'"
-$ WC "i_sfio='undef'"
 $ WC "i_sgtty='undef'"
 $ WC "i_shadow='" + i_shadow + "'"
 $ WC "i_socks='" + i_socks + "'"

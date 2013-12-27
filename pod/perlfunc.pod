@@ -7883,8 +7883,7 @@ on this.
 Note that C<sysopen> depends on the fdopen() C library function.
 On many Unix systems, fdopen() is known to fail when file descriptors
 exceed a certain value, typically 255.  If you need more file
-descriptors than that, consider rebuilding Perl to use the C<sfio>
-library, or perhaps using the POSIX::open() function.
+descriptors than that, consider using the POSIX::open() function.
 
 See L<perlopentut> for a kinder, gentler explanation of opening files.
 

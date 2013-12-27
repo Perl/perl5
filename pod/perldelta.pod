@@ -272,6 +272,22 @@ XXX Any changes to platform support should be listed in the sections below.
 [ Within the sections, list each platform as a =item entry with specific
 changes as paragraphs below it. ]
 
+=over 4
+
+=item *
+
+Code related to supporting C<sfio> has been removed.
+
+Perl 5.004 added support to use the native API of C<sfio>, AT&T's Safe/Fast
+I/O library. This code still built with v5.8.0, albeit with many regression
+tests failing, but was inadvertently broken before the v5.8.1 release,
+meaning that it has not worked on any version of Perl released since then.
+In over a decade we have received no bug reports about this, hence it is clear
+that no-one is using this functionality on any version of Perl that is still
+supported to any degree.
+
+=back
+
 =head2 New Platforms
 
 XXX List any platforms that this version of perl compiles on, that previous

@@ -2047,10 +2047,6 @@ d_setvbuf (d_setvbuf.U):
 	indicates to the C program that the setvbuf() routine is available
 	to change buffering on an open stdio stream.
 
-d_sfio (d_sfio.U):
-	This variable conditionally defines the USE_SFIO symbol,
-	and indicates whether sfio is available (and should be used).
-
 d_shm (d_shm.U):
 	This variable conditionally defines the HAS_SHM symbol, which
 	indicates that the entire shm*(2) library is present.
@@ -3161,10 +3157,6 @@ i_rpcsvcdbm (i_dbm.U):
 	This variable conditionally defines the I_RPCSVC_DBM symbol, which
 	indicates to the C program that <rpcsvc/dbm.h> exists and should
 	be included.  Some System V systems might need this instead of <dbm.h>.
-
-i_sfio (i_sfio.U):
-	This variable conditionally defines the I_SFIO symbol,
-	and indicates whether a C program should include <sfio.h>.
 
 i_sgtty (i_termio.U):
 	This variable conditionally defines the I_SGTTY symbol, which
@@ -5121,13 +5113,6 @@ userelocatableinc (bin.U):
 	Any @INC paths starting ".../" are relocated relative to the directory
 	containing the perl binary, and a logical cleanup of the path is then
 	made around the join point (removing "dir/../" pairs)
-
-usesfio (d_sfio.U):
-	This variable is set to true when the user agrees to use sfio.
-	It is set to false when sfio is not available or when the user
-	explicitly requests not to use sfio.  It is here primarily so
-	that command-line settings can override the auto-detection of
-	d_sfio without running into a "WHOA THERE".
 
 useshrplib (libperl.U):
 	This variable is set to 'true' if the user wishes

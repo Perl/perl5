@@ -1016,12 +1016,6 @@ EXTERN_C int usleep(unsigned int);
 #   include <arpa/inet.h>
 #endif
 
-#if defined(SF_APPEND) && defined(USE_SFIO) && defined(I_SFIO)
-/* <sfio.h> defines SF_APPEND and <sys/stat.h> might define SF_APPEND
- * (the neo-BSD seem to do this).  */
-#   undef SF_APPEND
-#endif
-
 #ifdef I_SYS_STAT
 #   include <sys/stat.h>
 #endif
@@ -2960,7 +2954,7 @@ typedef pthread_key_t	perl_key;
  * out there, Solaris being the most prominent.
  */
 #ifndef PERL_FLUSHALL_FOR_CHILD
-# if defined(USE_PERLIO) || defined(FFLUSH_NULL) || defined(USE_SFIO)
+# if defined(USE_PERLIO) || defined(FFLUSH_NULL)
 #  define PERL_FLUSHALL_FOR_CHILD	PerlIO_flush((PerlIO*)NULL)
 # else
 #  ifdef FFLUSH_ALL
@@ -3976,7 +3970,7 @@ typedef Sighandler_t Sigsave_t;
 # define RUNOPS_DEFAULT Perl_runops_standard
 #endif
 
-#ifdef USE_PERLIO
+#if defined(USE_PERLIO)
 EXTERN_C void PerlIO_teardown(void);
 # ifdef USE_ITHREADS
 #  define PERLIO_INIT MUTEX_INIT(&PL_perlio_mutex)
@@ -4630,9 +4624,6 @@ EXTCONST char PL_bincompat_options[] =
 #  endif
 #  ifdef USE_REENTRANT_API
 			     " USE_REENTRANT_API"
-#  endif
-#  ifdef USE_SFIO
-			     " USE_SFIO"
 #  endif
 #  ifdef USE_SOCKS
 			     " USE_SOCKS"

@@ -21,13 +21,7 @@
    USE_PERLIO  - The primary Configure variable that enables PerlIO.
                  If USE_PERLIO is _NOT_ set
                    then USE_STDIO above will be set to be conservative.
-                 If USE_PERLIO is set
-                   then there are two modes determined by USE_SFIO:
-
-   USE_SFIO    - If set causes PerlIO_xxx() to be #define-d onto sfio functions.
-                 A backward compatibility mode for some specialist applications.
-
-                 If USE_SFIO is not set then PerlIO_xxx() are real functions
+                 PerlIO_xxx() are real functions
                  defined in perlio.c which implement extra functionality
                  required for utf8 support.
 
@@ -80,11 +74,6 @@
 #ifdef PERLIO_IS_STDIO
 /* #define PerlIO_xxxx() as equivalent stdio function */
 #include "perlsdio.h"
-#else				/* PERLIO_IS_STDIO */
-#ifdef USE_SFIO
-/* #define PerlIO_xxxx() as equivalent sfio function */
-#include "perlsfio.h"
-#endif				/* USE_SFIO */
 #endif				/* PERLIO_IS_STDIO */
 
 #ifndef PerlIO

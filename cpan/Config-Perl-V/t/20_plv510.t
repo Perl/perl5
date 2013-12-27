@@ -32,7 +32,6 @@ Summary of my perl5 (revision 5 version 10 subversion 0) configuration:
     config_args='-Duse64bitint -des'
     hint=recommended, useposix=true, d_sigaction=define
     useithreads=undef, usemultiplicity=undef
-    useperlio=define, d_sfio=undef, uselargefiles=define, usesocks=undef
     use64bitint=define, use64bitall=undef, uselongdouble=undef
     usemymalloc=n, bincompat5005=undef
   Compiler:

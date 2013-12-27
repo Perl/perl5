@@ -90,14 +90,7 @@ functions which call stdio. In this case I<only> PerlIO * is a FILE *.
 This has been the default implementation since the abstraction was
 introduced in perl5.003_02.
 
-=item 2. USE_SFIO
-
-A "legacy" implementation in terms of the "sfio" library. Used for
-some specialist applications on Unix machines ("sfio" is not widely
-ported away from Unix).  Most of above are #define'd to the sfio
-functions. PerlIO * is in this case Sfio_t *.
-
-=item 3. USE_PERLIO
+=item 2. USE_PERLIO
 
 Introduced just after perl5.7.0, this is a re-implementation of the
 above abstraction which allows perl more control over how IO is done

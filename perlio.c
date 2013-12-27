@@ -117,8 +117,6 @@ extern off_t ftello(FILE *);
 #define NATIVE_0xd  CR_NATIVE
 #define NATIVE_0xa  LF_NATIVE
 
-#ifndef USE_SFIO
-
 EXTERN_C int perlsio_binmode(FILE *fp, int iotype, int mode);
 
 int
@@ -157,7 +155,6 @@ perlsio_binmode(FILE *fp, int iotype, int mode)
 #  endif
 #endif
 }
-#endif /* sfio */
 
 #ifndef O_ACCMODE
 #define O_ACCMODE 3             /* Assume traditional implementation */
@@ -234,14 +231,7 @@ PerlIO_destruct(pTHX)
 int
 PerlIO_binmode(pTHX_ PerlIO *fp, int iotype, int mode, const char *names)
 {
-#ifdef USE_SFIO
-    PERL_UNUSED_ARG(iotype);
-    PERL_UNUSED_ARG(mode);
-    PERL_UNUSED_ARG(names);
-    return 1;
-#else
     return perlsio_binmode(fp, iotype, mode);
-#endif
 }
 
 PerlIO *
@@ -366,67 +356,6 @@ PerlIO_tmpfile(void)
 
 #else                           /* PERLIO_IS_STDIO */
 
-#ifdef USE_SFIO
-
-#undef HAS_FSETPOS
-#undef HAS_FGETPOS
-
-/*
- * This section is just to make sure these functions get pulled in from
- * libsfio.a
- */
-
-#undef PerlIO_tmpfile
-PerlIO *
-PerlIO_tmpfile(void)
-{
-    return sftmp(0);
-}
-
-void
-PerlIO_init(pTHX)
-{
-    PERL_UNUSED_CONTEXT;
-    /*
-     * Force this file to be included in perl binary. Which allows this
-     * file to force inclusion of other functions that may be required by
-     * loadable extensions e.g. for FileHandle::tmpfile
-     */
-
-    /*
-     * Hack sfio does its own 'autoflush' on stdout in common cases. Flush
-     * results in a lot of lseek()s to regular files and lot of small
-     * writes to pipes.
-     */
-    sfset(sfstdout, SF_SHARE, 0);
-}
-
-/* This is not the reverse of PerlIO_exportFILE(), PerlIO_releaseFILE() is. */
-PerlIO *
-PerlIO_importFILE(FILE *stdio, const char *mode)
-{
-    const int fd = fileno(stdio);
-    if (!mode || !*mode) {
-	mode = "r+";
-    }
-    return PerlIO_fdopen(fd, mode);
-}
-
-FILE *
-PerlIO_findFILE(PerlIO *pio)
-{
-    const int fd = PerlIO_fileno(pio);
-    FILE * const f = fdopen(fd, "r+");
-    PerlIO_flush(pio);
-    if (!f && errno == EINVAL)
-	f = fdopen(fd, "w");
-    if (!f && errno == EINVAL)
-	f = fdopen(fd, "r");
-    return f;
-}
-
-
-#else                           /* USE_SFIO */
 /*======================================================================================*/
 /*
  * Implement all the PerlIO interface ourselves.
@@ -5063,7 +4992,6 @@ PerlIO_tmpfile(void)
 #undef HAS_FSETPOS
 #undef HAS_FGETPOS
 
-#endif                          /* USE_SFIO */
 #endif                          /* PERLIO_IS_STDIO */
 
 /*======================================================================================*/
@@ -5166,7 +5094,7 @@ PerlIO_getpos(PerlIO *f, SV *pos)
 }
 #endif
 
-#if (defined(PERLIO_IS_STDIO) || !defined(USE_SFIO)) && !defined(HAS_VPRINTF)
+#if !defined(HAS_VPRINTF)
 
 int
 vprintf(char *pat, char *args)

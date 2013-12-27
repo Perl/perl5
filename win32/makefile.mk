@@ -856,7 +856,6 @@ CORE_NOCFG_H	=		\
 		..\perl.h	\
 		..\perlapi.h	\
 		..\perlsdio.h	\
-		..\perlsfio.h	\
 		..\perly.h	\
 		..\pp.h		\
 		..\proto.h	\
