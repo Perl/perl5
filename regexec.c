@@ -685,15 +685,14 @@ Perl_re_intuit_start(pTHX_
 	if (!ml_anch) {
             /* we are only allowed to match at BOS or \G */
 
-	    if (prog->intflags & PREGf_ANCH_GPOS) {
-                /* in this case, we hope(!) that the caller has already
-                 * set strpos to pos()-gofs, and will already have checked
-                 * that this anchor position is legal
-                 */
-                ;
-            }
-            else if (!(prog->intflags & PREGf_IMPLICIT) /* not a real BOL */
-		     && (strpos != strbeg))
+            /* trivially reject if there's a BOS anchor and we're not at BOS.
+             * In the case of \G, we hope(!) that the caller has already
+             * set strpos to pos()-gofs, and will already have checked
+             * that this anchor position is legal. So we can skip it here.
+             */
+            if (   !(prog->intflags & PREGf_ANCH_GPOS)
+                && !(prog->intflags & PREGf_IMPLICIT) /* not a real BOL */
+		&& (strpos != strbeg))
             {
 	        DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
                                 "Not at start...\n"));
