@@ -4,7 +4,7 @@ BEGIN {
     chdir '..' if -d '../pod' && -d '../t';
     @INC = 'lib';
     require './t/test.pl';
-    plan(28);
+    plan(29);
 }
 
 BEGIN {
@@ -51,6 +51,11 @@ $warning = '';
 warn 'Deep recursion on anonymous subroutine';
 like $warning, qr/W recursion/,
    'Message sharing its description with the following message';
+seek STDERR, 0,0;
+$warning = '';
+warn 'Deep recursion on subroutine "foo"';
+like $warning, qr/W recursion/,
+   'Message sharing its description with the preceding message';
 
 # Periods at end of entries in perldiag.pod get matched correctly
 seek STDERR, 0,0;
