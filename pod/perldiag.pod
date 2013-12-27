@@ -1578,6 +1578,10 @@ valid magic number.
 you have also specified an explicit size for the string.  See
 L<perlfunc/pack>.
 
+=for comment
+The following are used in lib/diagnostics.t for testing two =items that
+share the same description.  Changes here need to be propagated to there
+
 =item Deep recursion on anonymous subroutine
 
 =item Deep recursion on subroutine "%s"

@@ -48,8 +48,8 @@ like $warning, qr/lex_stuff_pvn or similar/, 'L<foo|bar/baz>';
 # Multiple messages with the same description
 seek STDERR, 0,0;
 $warning = '';
-warn 'Code point 0xBEE5 is not Unicode, may not be portable';
-like $warning, qr/S utf8/,
+warn 'Deep recursion on anonymous subroutine';
+like $warning, qr/W recursion/,
    'Message sharing its description with the following message';
 
 # Periods at end of entries in perldiag.pod get matched correctly
