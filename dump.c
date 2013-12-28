@@ -105,18 +105,19 @@ If PERL_PV_ESCAPE_ALL is set then all input chars will be output
 using C<\x01F1> style escapes, otherwise if PERL_PV_ESCAPE_NONASCII is set, only
 non-ASCII chars will be escaped using this style; otherwise, only chars above
 255 will be so escaped; other non printable chars will use octal or
-common escaped patterns like C<\n>. Otherwise, if PERL_PV_ESCAPE_NOBACKSLASH
+common escaped patterns like C<\n>.
+Otherwise, if PERL_PV_ESCAPE_NOBACKSLASH
 then all chars below 255 will be treated as printable and
 will be output as literals.
 
 If PERL_PV_ESCAPE_FIRSTCHAR is set then only the first char of the
-string will be escaped, regardless of max. If the output is to be in hex,
+string will be escaped, regardless of max.  If the output is to be in hex,
 then it will be returned as a plain hex
-sequence. Thus the output will either be a single char,
+sequence.  Thus the output will either be a single char,
 an octal escape sequence, a special escape like C<\n> or a hex value.
 
 If PERL_PV_ESCAPE_RE is set then the escape char used will be a '%' and
-not a '\\'. This is because regexes very often contain backslashed
+not a '\\'.  This is because regexes very often contain backslashed
 sequences, whereas '%' is not a particularly common character in patterns.
 
 Returns a pointer to the escaped text as held by dsv.
@@ -231,16 +232,16 @@ Converts a string into something presentable, handling escaping via
 pv_escape() and supporting quoting and ellipses.
 
 If the PERL_PV_PRETTY_QUOTE flag is set then the result will be 
-double quoted with any double quotes in the string escaped. Otherwise
+double quoted with any double quotes in the string escaped.  Otherwise
 if the PERL_PV_PRETTY_LTGT flag is set then the result be wrapped in
 angle brackets. 
 
 If the PERL_PV_PRETTY_ELLIPSES flag is set and not all characters in
 string were output then an ellipsis C<...> will be appended to the
-string. Note that this happens AFTER it has been quoted.
+string.  Note that this happens AFTER it has been quoted.
 
 If start_color is non-null then it will be inserted after the opening
-quote (if there is one) but before the escaped text. If end_color
+quote (if there is one) but before the escaped text.  If end_color
 is non-null then it will be inserted after the escaped text but before
 any quotes or ellipses.
 
@@ -485,7 +486,8 @@ Perl_dump_vindent(pTHX_ I32 level, PerlIO *file, const char* pat, va_list *args)
 =for apidoc dump_all
 
 Dumps the entire optree of the current program starting at C<PL_main_root> to 
-C<STDERR>. Also dumps the optrees for all visible subroutines in C<PL_defstash>.
+C<STDERR>.  Also dumps the optrees for all visible subroutines in
+C<PL_defstash>.
 
 =cut
 */

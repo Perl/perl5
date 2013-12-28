@@ -1050,7 +1050,7 @@ Perl_op_contextualize(pTHX_ OP *o, I32 context)
 =head1 Optree Manipulation Functions
 
 =for apidoc Am|OP*|op_linklist|OP *o
-This function is the implementation of the L</LINKLIST> macro. It should
+This function is the implementation of the L</LINKLIST> macro.  It should
 not be called directly.
 
 =cut
@@ -1812,8 +1812,8 @@ S_modkids(pTHX_ OP *o, I32 type)
 /*
 =for apidoc finalize_optree
 
-This function finalizes the optree. Should be called directly after
-the complete optree is built. It does some additional
+This function finalizes the optree.  Should be called directly after
+the complete optree is built.  It does some additional
 checking which can't be done in the normal ck_xxx functions and makes
 the tree thread-safe.
 
@@ -2030,7 +2030,7 @@ because it has no op type of its own (it is signalled by a flag on
 the lvalue op).
 
 This function detects things that can't be modified, such as C<$x+1>, and
-generates errors for them. For example, C<$x+1 = 2> would cause it to be
+generates errors for them.  For example, C<$x+1 = 2> would cause it to be
 called with an op of type OP_ADD and a C<type> argument of OP_SASSIGN.
 
 It also flags things that need to behave specially in an lvalue context,
@@ -3189,7 +3189,7 @@ Perl_block_end(pTHX_ I32 floor, OP *seq)
 =for apidoc Aox||blockhook_register
 
 Register a set of hooks to be called when the Perl lexical scope changes
-at compile time. See L<perlguts/"Compile-time scope hooks">.
+at compile time.  See L<perlguts/"Compile-time scope hooks">.
 
 =cut
 */
@@ -5437,7 +5437,8 @@ Loads the module whose name is pointed to by the string part of name.
 Note that the actual module name, not its filename, should be given.
 Eg, "Foo::Bar" instead of "Foo/Bar.pm".  flags can be any of
 PERL_LOADMOD_DENY, PERL_LOADMOD_NOIMPORT, or PERL_LOADMOD_IMPORT_OPS
-(or 0 for no flags). ver, if specified and not NULL, provides version semantics
+(or 0 for no flags).  ver, if specified
+and not NULL, provides version semantics
 similar to C<use Foo::Bar VERSION>.  The optional trailing SV*
 arguments can be used to specify arguments to the module's import()
 method, similar to C<use Foo::Bar VERSION LIST>.  They must be
@@ -7148,7 +7149,7 @@ static void const_av_xsub(pTHX_ CV* cv);
 
 =for apidoc cv_const_sv
 
-If C<cv> is a constant sub eligible for inlining. returns the constant
+If C<cv> is a constant sub eligible for inlining, returns the constant
 value returned by the sub.  Otherwise, returns NULL.
 
 Constant subs can be created with C<newCONSTSUB> or as described in
@@ -11894,9 +11895,10 @@ Perl_peep(pTHX_ OP *o)
 =head1 Custom Operators
 
 =for apidoc Ao||custom_op_xop
-Return the XOP structure for a given custom op. This macro should be
+Return the XOP structure for a given custom op.  This macro should be
 considered internal to OP_NAME and the other access macros: use them instead.
-This macro does call a function. Prior to 5.19.8, this was implemented as a
+This macro does call a function.  Prior
+to 5.19.8, this was implemented as a
 function.
 
 =cut
@@ -12000,7 +12002,7 @@ Perl_custom_op_get_field(pTHX_ const OP *o, const xop_flags_enum field)
 
 /*
 =for apidoc Ao||custom_op_register
-Register a custom op. See L<perlguts/"Custom Operators">.
+Register a custom op.  See L<perlguts/"Custom Operators">.
 
 =cut
 */

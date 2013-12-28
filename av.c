@@ -286,7 +286,7 @@ Perl_av_fetch(pTHX_ AV *av, SSize_t key, I32 lval)
 Stores an SV in an array.  The array index is specified as C<key>.  The
 return value will be NULL if the operation failed or if the value did not
 need to be actually stored within the array (as in the case of tied
-arrays). Otherwise, it can be dereferenced
+arrays).  Otherwise, it can be dereferenced
 to get the C<SV*> that was stored
 there (= C<val>)).
 

@@ -294,7 +294,7 @@ A specialised variant of C<croak()> for emitting the usage message for xsubs
     croak_xs_usage(cv, "eee_yow");
 
 works out the package name and subroutine name from C<cv>, and then calls
-C<croak()>. Hence if C<cv> is C<&ouch::awk>, it would call C<croak> as:
+C<croak()>.  Hence if C<cv> is C<&ouch::awk>, it would call C<croak> as:
 
     Perl_croak(aTHX_ "Usage: %"SVf"::%"SVf"(%s)", "ouch" "awk", "eee_yow");
 

@@ -282,13 +282,14 @@ sub output {
         print $fh "\n=head1 Undocumented functions\n\n";
     print $fh $podname eq 'perlapi' ? <<'_EOB_' : <<'_EOB_';
 The following functions have been flagged as part of the public API,
-but are currently undocumented. Use them at your own risk, as the
+but are currently undocumented.  Use them at your own risk, as the
 interfaces are subject to change.  Functions that are not listed in this
 document are not intended for public use, and should NOT be used under any
 circumstances.
 
 If you use one of the undocumented functions below, you may wish to consider
-creating and submitting documentation for it. If your patch is accepted, this
+creating and submitting documentation
+for it.  If your patch is accepted, this
 will indicate that the interface is stable (unless it is explicitly marked
 otherwise).
 

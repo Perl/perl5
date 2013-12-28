@@ -149,7 +149,7 @@ Pops a long off the stack.
 
 /*
 =for apidoc Am|void|EXTEND|SP|SSize_t nitems
-Used to extend the argument stack for an XSUB's return values. Once
+Used to extend the argument stack for an XSUB's return values.  Once
 used, guarantees that there is room for at least C<nitems> to be pushed
 onto the stack.
 

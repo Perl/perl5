@@ -136,7 +136,7 @@ struct xpvhv {
 =for apidoc AmU||HEf_SVKEY
 This flag, used in the length slot of hash entries and magic structures,
 specifies the structure contains an C<SV*> pointer where a C<char*> pointer
-is to be expected. (For information only--not to be used).
+is to be expected.  (For information only--not to be used).
 
 =head1 Handy Values
 
@@ -158,10 +158,10 @@ Returns the length of the stash's name.
 Returns true if the name is in UTF8 encoding.
 
 =for apidoc Am|char*|HvENAME|HV* stash
-Returns the effective name of a stash, or NULL if there is none. The
+Returns the effective name of a stash, or NULL if there is none.  The
 effective name represents a location in the symbol table where this stash
-resides. It is updated automatically when packages are aliased or deleted.
-A stash that is no longer in the symbol table has no effective name. This
+resides.  It is updated automatically when packages are aliased or deleted.
+A stash that is no longer in the symbol table has no effective name.  This
 name is preferable to C<HvNAME> for use in MRO linearisations and isa
 caches.
 
@@ -172,7 +172,7 @@ Returns the length of the stash's effective name.
 Returns true if the effective name is in UTF8 encoding.
 
 =for apidoc Am|void*|HeKEY|HE* he
-Returns the actual pointer stored in the key slot of the hash entry. The
+Returns the actual pointer stored in the key slot of the hash entry.  The
 pointer may be either C<char*> or C<SV*>, depending on the value of
 C<HeKLEN()>.  Can be assigned to.  The C<HePV()> or C<HeSVKEY()> macros are
 usually preferable for finding the value of a key.
@@ -180,11 +180,12 @@ usually preferable for finding the value of a key.
 =for apidoc Am|STRLEN|HeKLEN|HE* he
 If this is negative, and amounts to C<HEf_SVKEY>, it indicates the entry
 holds an C<SV*> key.  Otherwise, holds the actual length of the key.  Can
-be assigned to. The C<HePV()> macro is usually preferable for finding key
+be assigned to.  The C<HePV()> macro is usually preferable for finding key
 lengths.
 
 =for apidoc Am|SV*|HeVAL|HE* he
-Returns the value slot (type C<SV*>) stored in the hash entry. Can be assigned
+Returns the value slot (type C<SV*>)
+stored in the hash entry.  Can be assigned
 to.
 
   SV *foo= HeVAL(hv);
@@ -202,8 +203,8 @@ not care about what the length of the key is, you may use the global
 variable C<PL_na>, though this is rather less efficient than using a local
 variable.  Remember though, that hash keys in perl are free to contain
 embedded nulls, so using C<strlen()> or similar is not a good way to find
-the length of hash keys. This is very similar to the C<SvPV()> macro
-described elsewhere in this document. See also C<HeUTF8>.
+the length of hash keys.  This is very similar to the C<SvPV()> macro
+described elsewhere in this document.  See also C<HeUTF8>.
 
 If you are using C<HePV> to get values to pass to C<newSVpvn()> to create a
 new SV, you should consider using C<newSVhek(HeKEY_hek(he))> as it is more

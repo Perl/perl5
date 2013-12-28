@@ -817,7 +817,7 @@ The engine implementing the unpack() Perl function.
 Using the template pat..patend, this function unpacks the string
 s..strend into a number of mortal SVs, which it pushes onto the perl
 argument (@_) stack (so you will need to issue a C<PUTBACK> before and
-C<SPAGAIN> after the call to this function). It returns the number of
+C<SPAGAIN> after the call to this function).  It returns the number of
 pushed elements.
 
 The strend and patend pointers should point to the byte following the last

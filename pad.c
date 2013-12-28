@@ -89,9 +89,9 @@ sometimes hijacked to store the generation number during compilation.
 
 If PADNAME_OUTER (SvFAKE) is set on the
 name SV, then that slot in the frame AV is
-a REFCNT'ed reference to a lexical from "outside". In this case,
+a REFCNT'ed reference to a lexical from "outside".  In this case,
 the name SV does not use xlow and xhigh to store a cop_seq range, since it is
-in scope throughout. Instead xhigh stores some flags containing info about
+in scope throughout.  Instead xhigh stores some flags containing info about
 the real lexical (is it declared in an anon, and is it capable of being
 instantiated multiple times?), and for fake ANONs, xlow contains the index
 within the parent's pad where the lexical's value is stored, to make
@@ -328,7 +328,7 @@ Perl_pad_new(pTHX_ int flags)
 
 =for apidoc cv_undef
 
-Clear out all the active components of a CV. This can happen either
+Clear out all the active components of a CV.  This can happen either
 by an explicit C<undef &foo>, or by the reference count going to zero.
 In the former case, we keep the CvOUTSIDE pointer, so that any anonymous
 children can still follow the full lexical scope chain.
@@ -1110,20 +1110,21 @@ Perl_find_rundefsv2(pTHX_ CV *cv, U32 seq)
 /*
 =for apidoc m|PADOFFSET|pad_findlex|const char *namepv|STRLEN namelen|U32 flags|const CV* cv|U32 seq|int warn|SV** out_capture|SV** out_name_sv|int *out_flags
 
-Find a named lexical anywhere in a chain of nested pads. Add fake entries
+Find a named lexical anywhere in a chain of nested pads.  Add fake entries
 in the inner pads if it's found in an outer one.
 
 Returns the offset in the bottom pad of the lex or the fake lex.
 cv is the CV in which to start the search, and seq is the current cop_seq
-to match against. If warn is true, print appropriate warnings.  The out_*
+to match against.  If warn is true, print appropriate warnings.  The out_*
 vars return values, and so are pointers to where the returned values
-should be stored. out_capture, if non-null, requests that the innermost
+should be stored.  out_capture, if non-null, requests that the innermost
 instance of the lexical is captured; out_name_sv is set to the innermost
 matched namesv or fake namesv; out_flags returns the flags normally
 associated with the IVX field of a fake namesv.
 
 Note that pad_findlex() is recursive; it recurses up the chain of CVs,
-then comes back down, adding fake entries as it goes. It has to be this way
+then comes back down, adding fake entries
+as it goes.  It has to be this way
 because fake namesvs in anon protoypes have to store in xlow the index into
 the parent pad.
 
@@ -2221,7 +2222,7 @@ Perl_cv_clone_into(pTHX_ CV *proto, CV *target)
 =for apidoc m|void|pad_fixup_inner_anons|PADLIST *padlist|CV *old_cv|CV *new_cv
 
 For any anon CVs in the pad, change CvOUTSIDE of that CV from
-old_cv to new_cv if necessary. Needed when a newly-compiled CV has to be
+old_cv to new_cv if necessary.  Needed when a newly-compiled CV has to be
 moved to a pre-existing CV struct.
 
 =cut

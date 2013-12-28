@@ -40,7 +40,7 @@ static const char unees[] =
 =head1 Unicode Support
 
 This file contains various utility functions for manipulating UTF8-encoded
-strings. For the uninitiated, this is a method of representing arbitrary
+strings.  For the uninitiated, this is a method of representing arbitrary
 Unicode characters as a variable number of bytes, in such a way that
 characters in the ASCII range are unmodified, and a zero byte never appears
 within non-zero characters.
@@ -228,8 +228,8 @@ Perl_uvoffuni_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
 
 Adds the UTF-8 representation of the native code point C<uv> to the end
 of the string C<d>; C<d> should have at least C<UTF8_MAXBYTES+1> free
-bytes available. The return value is the pointer to the byte after the
-end of the new character. In other words,
+bytes available.  The return value is the pointer to the byte after the
+end of the new character.  In other words,
 
     d = uvchr_to_utf8(d, uv);
 
@@ -257,8 +257,8 @@ Perl_uvchr_to_utf8(pTHX_ U8 *d, UV uv)
 
 Adds the UTF-8 representation of the native code point C<uv> to the end
 of the string C<d>; C<d> should have at least C<UTF8_MAXBYTES+1> free
-bytes available. The return value is the pointer to the byte after the
-end of the new character. In other words,
+bytes available.  The return value is the pointer to the byte after the
+end of the new character.  In other words,
 
     d = uvchr_to_utf8_flags(d, uv, flags);
 
@@ -582,7 +582,8 @@ The UTF-8 encoding on ASCII platforms for these large code points begins with a
 byte containing 0xFE or 0xFF.  The UTF8_DISALLOW_FE_FF flag will cause them to
 be treated as malformations, while allowing smaller above-Unicode code points.
 (Of course UTF8_DISALLOW_SUPER will treat all above-Unicode code points,
-including these, as malformations.) Similarly, UTF8_WARN_FE_FF acts just like
+including these, as malformations.)
+Similarly, UTF8_WARN_FE_FF acts just like
 the other WARN flags, but applies just to these code points.
 
 All other code points corresponding to Unicode characters, including private
@@ -1217,12 +1218,14 @@ Perl_utf8_hop(pTHX_ const U8 *s, I32 off)
 =for apidoc bytes_cmp_utf8
 
 Compares the sequence of characters (stored as octets) in C<b>, C<blen> with the
-sequence of characters (stored as UTF-8) in C<u>, C<ulen>. Returns 0 if they are
+sequence of characters (stored as UTF-8)
+in C<u>, C<ulen>.  Returns 0 if they are
 equal, -1 or -2 if the first string is less than the second string, +1 or +2
 if the first string is greater than the second string.
 
 -1 or +1 is returned if the shorter string was identical to the start of the
-longer string. -2 or +2 is returned if the was a difference between characters
+longer string.  -2 or +2 is returned if
+there was a difference between characters
 within the strings.
 
 =cut
@@ -1337,7 +1340,7 @@ Converts a string C<s> of length C<len> from UTF-8 into native byte encoding.
 Unlike L</utf8_to_bytes> but like L</bytes_to_utf8>, returns a pointer to
 the newly-created string, and updates C<len> to contain the new
 length.  Returns the original string if no conversion occurs, C<len>
-is unchanged. Do nothing if C<is_utf8> points to 0. Sets C<is_utf8> to
+is unchanged.  Do nothing if C<is_utf8> points to 0.  Sets C<is_utf8> to
 0 if C<s> is converted or consisted entirely of characters that are invariant
 in utf8 (i.e., US-ASCII on non-EBCDIC machines).
 

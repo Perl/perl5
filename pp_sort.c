@@ -1433,11 +1433,11 @@ S_qsortsv(pTHX_ gptr *list1, size_t nmemb, SVCOMPARE_t cmp, U32 flags)
 
 =for apidoc sortsv
 
-Sort an array. Here is an example:
+Sort an array.  Here is an example:
 
     sortsv(AvARRAY(av), av_top_index(av)+1, Perl_sv_cmp_locale);
 
-Currently this always uses mergesort. See sortsv_flags for a more
+Currently this always uses mergesort.  See sortsv_flags for a more
 flexible routine.
 
 =cut

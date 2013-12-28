@@ -29,7 +29,7 @@ This section documents functions to manipulate CVs which are code-values,
 or subroutines. For more information, see L<perlguts>.
 
 =for apidoc Am|HV*|CvSTASH|CV* cv
-Returns the stash of the CV. A stash is the symbol table hash, containing
+Returns the stash of the CV.  A stash is the symbol table hash, containing
 the package-scoped variables in the package where the subroutine was defined.
 For more information, see L<perlguts>.
 

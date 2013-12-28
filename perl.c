@@ -2442,7 +2442,7 @@ S_run_body(pTHX_ I32 oldscope)
 =for apidoc p||get_sv
 
 Returns the SV of the specified Perl scalar.  C<flags> are passed to
-C<gv_fetchpv>. If C<GV_ADD> is set and the
+C<gv_fetchpv>.  If C<GV_ADD> is set and the
 Perl variable does not exist then it will be created.  If C<flags> is zero
 and the variable does not exist then NULL is returned.
 
@@ -2469,7 +2469,7 @@ Perl_get_sv(pTHX_ const char *name, I32 flags)
 
 Returns the AV of the specified Perl global or package array with the given
 name (so it won't work on lexical variables).  C<flags> are passed 
-to C<gv_fetchpv>. If C<GV_ADD> is set and the
+to C<gv_fetchpv>.  If C<GV_ADD> is set and the
 Perl variable does not exist then it will be created.  If C<flags> is zero
 and the variable does not exist then NULL is returned.
 
@@ -2498,7 +2498,7 @@ Perl_get_av(pTHX_ const char *name, I32 flags)
 =for apidoc p||get_hv
 
 Returns the HV of the specified Perl hash.  C<flags> are passed to
-C<gv_fetchpv>. If C<GV_ADD> is set and the
+C<gv_fetchpv>.  If C<GV_ADD> is set and the
 Perl variable does not exist then it will be created.  If C<flags> is zero
 and the variable does not exist then NULL is returned.
 
@@ -2525,7 +2525,7 @@ Perl_get_hv(pTHX_ const char *name, I32 flags)
 =for apidoc p||get_cvn_flags
 
 Returns the CV of the specified Perl subroutine.  C<flags> are passed to
-C<gv_fetchpvn_flags>. If C<GV_ADD> is set and the Perl subroutine does not
+C<gv_fetchpvn_flags>.  If C<GV_ADD> is set and the Perl subroutine does not
 exist then it will be declared (which has the same effect as saying
 C<sub name;>).  If C<GV_ADD> is not set and the subroutine does not exist
 then NULL is returned.
@@ -2574,7 +2574,8 @@ Perl_get_cv(pTHX_ const char *name, I32 flags)
 =for apidoc p||call_argv
 
 Performs a callback to the specified named and package-scoped Perl subroutine 
-with C<argv> (a NULL-terminated array of strings) as arguments. See L<perlcall>.
+with C<argv> (a NULL-terminated array of strings) as arguments.  See
+L<perlcall>.
 
 Approximate Perl equivalent: C<&{"$sub_name"}(@$argv)>.
 
@@ -2797,8 +2798,8 @@ Perl_call_sv(pTHX_ SV *sv, VOL I32 flags)
 /*
 =for apidoc p||eval_sv
 
-Tells Perl to C<eval> the string in the SV. It supports the same flags
-as C<call_sv>, with the obvious exception of G_EVAL. See L<perlcall>.
+Tells Perl to C<eval> the string in the SV.  It supports the same flags
+as C<call_sv>, with the obvious exception of G_EVAL.  See L<perlcall>.
 
 =cut
 */

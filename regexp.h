@@ -230,7 +230,7 @@ typedef struct regexp_engine {
 
 =for apidoc Am|REGEXP *|SvRX|SV *sv
 
-Convenience macro to get the REGEXP from a SV. This is approximately
+Convenience macro to get the REGEXP from a SV.  This is approximately
 equivalent to the following snippet:
 
     if (SvMAGICAL(sv))

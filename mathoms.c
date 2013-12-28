@@ -128,7 +128,7 @@ Perl_sv_unref(pTHX_ SV *sv)
 /*
 =for apidoc sv_taint
 
-Taint an SV. Use C<SvTAINTED_on> instead.
+Taint an SV.  Use C<SvTAINTED_on> instead.
 
 =cut
 */
@@ -191,7 +191,7 @@ Perl_sv_2pv(pTHX_ SV *sv, STRLEN *lp)
 /*
 =for apidoc sv_2pv_nolen
 
-Like C<sv_2pv()>, but doesn't return the length too. You should usually
+Like C<sv_2pv()>, but doesn't return the length too.  You should usually
 use the macro wrapper C<SvPV_nolen(sv)> instead.
 
 =cut
@@ -247,7 +247,7 @@ Perl_sv_2pvutf8_nolen(pTHX_ SV *sv)
 
 Undo various types of fakery on an SV: if the PV is a shared string, make
 a private copy; if we're a ref, stop refing; if we're a glob, downgrade to
-an xpvmg. See also C<sv_force_normal_flags>.
+an xpvmg.  See also C<sv_force_normal_flags>.
 
 =cut
 */
@@ -332,7 +332,7 @@ Perl_sv_catsv_mg(pTHX_ SV *dsv, SV *ssv)
 =for apidoc sv_iv
 
 A private implementation of the C<SvIVx> macro for compilers which can't
-cope with complex macro expressions. Always use the macro instead.
+cope with complex macro expressions.  Always use the macro instead.
 
 =cut
 */
@@ -354,7 +354,7 @@ Perl_sv_iv(pTHX_ SV *sv)
 =for apidoc sv_uv
 
 A private implementation of the C<SvUVx> macro for compilers which can't
-cope with complex macro expressions. Always use the macro instead.
+cope with complex macro expressions.  Always use the macro instead.
 
 =cut
 */
@@ -376,7 +376,7 @@ Perl_sv_uv(pTHX_ SV *sv)
 =for apidoc sv_nv
 
 A private implementation of the C<SvNVx> macro for compilers which can't
-cope with complex macro expressions. Always use the macro instead.
+cope with complex macro expressions.  Always use the macro instead.
 
 =cut
 */
@@ -399,7 +399,7 @@ Use the C<SvPV_nolen> macro instead
 =for apidoc sv_pvn
 
 A private implementation of the C<SvPV> macro for compilers which can't
-cope with complex macro expressions. Always use the macro instead.
+cope with complex macro expressions.  Always use the macro instead.
 
 =cut
 */
@@ -477,7 +477,7 @@ Use C<SvPVbyte_nolen> instead.
 =for apidoc sv_pvbyten
 
 A private implementation of the C<SvPVbyte> macro for compilers
-which can't cope with complex macro expressions. Always use the macro
+which can't cope with complex macro expressions.  Always use the macro
 instead.
 
 =cut
@@ -513,7 +513,7 @@ Use the C<SvPVutf8_nolen> macro instead
 =for apidoc sv_pvutf8n
 
 A private implementation of the C<SvPVutf8> macro for compilers
-which can't cope with complex macro expressions. Always use the macro
+which can't cope with complex macro expressions.  Always use the macro
 instead.
 
 =cut
@@ -834,9 +834,9 @@ Perl_sv_usepvn_mg(pTHX_ SV *sv, char *ptr, STRLEN len)
 /*
 =for apidoc sv_usepvn
 
-Tells an SV to use C<ptr> to find its string value. Implemented by
+Tells an SV to use C<ptr> to find its string value.  Implemented by
 calling C<sv_usepvn_flags> with C<flags> of 0, hence does not handle 'set'
-magic. See C<sv_usepvn_flags>.
+magic.  See C<sv_usepvn_flags>.
 
 =cut
 */
@@ -852,8 +852,9 @@ Perl_sv_usepvn(pTHX_ SV *sv, char *ptr, STRLEN len)
 /*
 =for apidoc unpack_str
 
-The engine implementing unpack() Perl function. Note: parameters strbeg, new_s
-and ocnt are not used. This call should not be used, use unpackstring instead.
+The engine implementing unpack() Perl function.  Note: parameters strbeg,
+new_s and ocnt are not used.  This call should not be used, use
+unpackstring instead.
 
 =cut */
 
@@ -874,8 +875,9 @@ Perl_unpack_str(pTHX_ const char *pat, const char *patend, const char *s,
 /*
 =for apidoc pack_cat
 
-The engine implementing pack() Perl function. Note: parameters next_in_list and
-flags are not used. This call should not be used; use packlist instead.
+The engine implementing pack() Perl function.  Note: parameters
+next_in_list and flags are not used.  This call should not be used; use
+packlist instead.
 
 =cut
 */
@@ -1141,12 +1143,12 @@ Perl_sv_2bool(pTHX_ SV *const sv)
 
 /*
 =for apidoc custom_op_name
-Return the name for a given custom op. This was once used by the OP_NAME
+Return the name for a given custom op.  This was once used by the OP_NAME
 macro, but is no longer: it has only been kept for compatibility, and
 should not be used.
 
 =for apidoc custom_op_desc
-Return the description of a given custom op. This was once used by the
+Return the description of a given custom op.  This was once used by the
 OP_DESC macro, but is no longer: it has only been kept for
 compatibility, and should not be used.
 

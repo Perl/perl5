@@ -25,10 +25,11 @@
 =head1 Handy Values
 
 =for apidoc AmU||Nullch
-Null character pointer. (No longer available when C<PERL_CORE> is defined.)
+Null character pointer.  (No longer available when C<PERL_CORE> is
+defined.)
 
 =for apidoc AmU||Nullsv
-Null SV pointer. (No longer available when C<PERL_CORE> is defined.)
+Null SV pointer.  (No longer available when C<PERL_CORE> is defined.)
 
 =cut
 */
@@ -420,12 +421,12 @@ the second, C<s2>.  Returns true or false.
 
 =for apidoc Am|bool|strnNE|char* s1|char* s2|STRLEN len
 Test two strings to see if they are different.  The C<len> parameter
-indicates the number of bytes to compare.  Returns true or false. (A
+indicates the number of bytes to compare.  Returns true or false.  (A
 wrapper for C<strncmp>).
 
 =for apidoc Am|bool|strnEQ|char* s1|char* s2|STRLEN len
 Test two strings to see if they are equal.  The C<len> parameter indicates
-the number of bytes to compare.  Returns true or false. (A wrapper for
+the number of bytes to compare.  Returns true or false.  (A wrapper for
 C<strncmp>).
 
 =cut
@@ -1607,7 +1608,8 @@ source, C<dest> is the destination, C<nitems> is the number of items, and
 C<type> is the type.  Can do overlapping moves.  See also C<Copy>.
 
 =for apidoc Am|void *|MoveD|void* src|void* dest|int nitems|type
-Like C<Move> but returns dest. Useful for encouraging compilers to tail-call
+Like C<Move> but returns dest.  Useful
+for encouraging compilers to tail-call
 optimise.
 
 =for apidoc Am|void|Copy|void* src|void* dest|int nitems|type
@@ -1617,7 +1619,8 @@ C<type> is the type.  May fail on overlapping copies.  See also C<Move>.
 
 =for apidoc Am|void *|CopyD|void* src|void* dest|int nitems|type
 
-Like C<Copy> but returns dest. Useful for encouraging compilers to tail-call
+Like C<Copy> but returns dest.  Useful
+for encouraging compilers to tail-call
 optimise.
 
 =for apidoc Am|void|Zero|void* dest|int nitems|type
@@ -1627,7 +1630,8 @@ destination, C<nitems> is the number of items, and C<type> is the type.
 
 =for apidoc Am|void *|ZeroD|void* dest|int nitems|type
 
-Like C<Zero> but returns dest. Useful for encouraging compilers to tail-call
+Like C<Zero> but returns dest.  Useful
+for encouraging compilers to tail-call
 optimise.
 
 =for apidoc Am|void|StructCopy|type *src|type *dest|type

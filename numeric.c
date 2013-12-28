@@ -120,13 +120,13 @@ On return I<*len> is set to the length of the scanned string,
 and I<*flags> gives output flags.
 
 If the value is <= C<UV_MAX> it is returned as a UV, the output flags are clear,
-and nothing is written to I<*result>. If the value is > UV_MAX C<grok_bin>
+and nothing is written to I<*result>.  If the value is > UV_MAX C<grok_bin>
 returns UV_MAX, sets C<PERL_SCAN_GREATER_THAN_UV_MAX> in the output flags,
 and writes the value to I<*result> (or the value is discarded if I<result>
 is NULL).
 
 The binary number may optionally be prefixed with "0b" or "b" unless
-C<PERL_SCAN_DISALLOW_PREFIX> is set in I<*flags> on entry. If
+C<PERL_SCAN_DISALLOW_PREFIX> is set in I<*flags> on entry.  If
 C<PERL_SCAN_ALLOW_UNDERSCORES> is set in I<*flags> then the binary
 number may use '_' characters to separate digits.
 
@@ -243,13 +243,13 @@ On return I<*len> is set to the length of the scanned string,
 and I<*flags> gives output flags.
 
 If the value is <= UV_MAX it is returned as a UV, the output flags are clear,
-and nothing is written to I<*result>. If the value is > UV_MAX C<grok_hex>
+and nothing is written to I<*result>.  If the value is > UV_MAX C<grok_hex>
 returns UV_MAX, sets C<PERL_SCAN_GREATER_THAN_UV_MAX> in the output flags,
 and writes the value to I<*result> (or the value is discarded if I<result>
 is NULL).
 
 The hex number may optionally be prefixed with "0x" or "x" unless
-C<PERL_SCAN_DISALLOW_PREFIX> is set in I<*flags> on entry. If
+C<PERL_SCAN_DISALLOW_PREFIX> is set in I<*flags> on entry.  If
 C<PERL_SCAN_ALLOW_UNDERSCORES> is set in I<*flags> then the hex
 number may use '_' characters to separate digits.
 
@@ -366,7 +366,7 @@ On return I<*len> is set to the length of the scanned string,
 and I<*flags> gives output flags.
 
 If the value is <= UV_MAX it is returned as a UV, the output flags are clear,
-and nothing is written to I<*result>. If the value is > UV_MAX C<grok_oct>
+and nothing is written to I<*result>.  If the value is > UV_MAX C<grok_oct>
 returns UV_MAX, sets C<PERL_SCAN_GREATER_THAN_UV_MAX> in the output flags,
 and writes the value to I<*result> (or the value is discarded if I<result>
 is NULL).
@@ -466,15 +466,15 @@ Perl_grok_oct(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result)
 /*
 =for apidoc scan_bin
 
-For backwards compatibility. Use C<grok_bin> instead.
+For backwards compatibility.  Use C<grok_bin> instead.
 
 =for apidoc scan_hex
 
-For backwards compatibility. Use C<grok_hex> instead.
+For backwards compatibility.  Use C<grok_hex> instead.
 
 =for apidoc scan_oct
 
-For backwards compatibility. Use C<grok_oct> instead.
+For backwards compatibility.  Use C<grok_oct> instead.
 
 =cut
  */

@@ -80,7 +80,7 @@ typedef PERL_BITFIELD16 Optype;
 =for apidoc Amn|U32|GIMME_V
 The XSUB-writer's equivalent to Perl's C<wantarray>.  Returns C<G_VOID>,
 C<G_SCALAR> or C<G_ARRAY> for void, scalar or list context,
-respectively. See L<perlcall> for a usage example.
+respectively.  See L<perlcall> for a usage example.
 
 =for apidoc Amn|U32|GIMME
 A backward-compatible version of C<GIMME_V> which can only return
@@ -704,9 +704,9 @@ struct loop {
 
 =for apidoc Am|OP*|LINKLIST|OP *o
 Given the root of an optree, link the tree in execution order using the
-C<op_next> pointers and return the first op executed. If this has
+C<op_next> pointers and return the first op executed.  If this has
 already been done, it will not be redone, and C<< o->op_next >> will be
-returned. If C<< o->op_next >> is not already set, I<o> should be at
+returned.  If C<< o->op_next >> is not already set, I<o> should be at
 least an C<UNOP>.
 
 =cut
@@ -805,29 +805,29 @@ struct block_hooks {
 Return the BHK's flags.
 
 =for apidoc mx|void *|BhkENTRY|BHK *hk|which
-Return an entry from the BHK structure. I<which> is a preprocessor token
-indicating which entry to return. If the appropriate flag is not set
-this will return NULL. The type of the return value depends on which
+Return an entry from the BHK structure.  I<which> is a preprocessor token
+indicating which entry to return.  If the appropriate flag is not set
+this will return NULL.  The type of the return value depends on which
 entry you ask for.
 
 =for apidoc Amx|void|BhkENTRY_set|BHK *hk|which|void *ptr
 Set an entry in the BHK structure, and set the flags to indicate it is
-valid. I<which> is a preprocessing token indicating which entry to set.
+valid.  I<which> is a preprocessing token indicating which entry to set.
 The type of I<ptr> depends on the entry.
 
 =for apidoc Amx|void|BhkDISABLE|BHK *hk|which
 Temporarily disable an entry in this BHK structure, by clearing the
-appropriate flag. I<which> is a preprocessor token indicating which
+appropriate flag.  I<which> is a preprocessor token indicating which
 entry to disable.
 
 =for apidoc Amx|void|BhkENABLE|BHK *hk|which
 Re-enable an entry in this BHK structure, by setting the appropriate
-flag. I<which> is a preprocessor token indicating which entry to enable.
+flag.  I<which> is a preprocessor token indicating which entry to enable.
 This will assert (under -DDEBUGGING) if the entry doesn't contain a valid
 pointer.
 
 =for apidoc mx|void|CALL_BLOCK_HOOKS|which|arg
-Call all the registered block hooks for type I<which>. I<which> is a
+Call all the registered block hooks for type I<which>.  I<which> is a
 preprocessing token; the type of I<arg> depends on I<which>.
 
 =cut
@@ -898,20 +898,22 @@ preprocessing token; the type of I<arg> depends on I<which>.
 Return the XOP's flags.
 
 =for apidoc Am||XopENTRY|XOP *xop|which
-Return a member of the XOP structure. I<which> is a cpp token indicating
-which entry to return. If the member is not set this will return a
-default value. The return type depends on I<which>. This macro evaluates its
-arguments more than once. If you are using C<Perl_custom_op_xop> to retreive a
+Return a member of the XOP structure.  I<which> is a cpp token
+indicating which entry to return.  If the member is not set
+this will return a default value.  The return type depends
+on I<which>.  This macro evaluates its arguments more than
+once.  If you are using C<Perl_custom_op_xop> to retreive a
 C<XOP *> from a C<OP *>, use the more efficient L</XopENTRYCUSTOM> instead.
 
 =for apidoc Am||XopENTRYCUSTOM|const OP *o|which
 Exactly like C<XopENTRY(XopENTRY(Perl_custom_op_xop(aTHX_ o), which)> but more
-efficient. The I<which> parameter is identical to L</XopENTRY>.
+efficient.  The I<which> parameter is identical to L</XopENTRY>.
 
 =for apidoc Am|void|XopENTRY_set|XOP *xop|which|value
-Set a member of the XOP structure. I<which> is a cpp token indicating
-which entry to set. See L<perlguts/"Custom Operators"> for details about
-the available members and how they are used. This macro evaluates its argument
+Set a member of the XOP structure.  I<which> is a cpp token
+indicating which entry to set.  See L<perlguts/"Custom Operators">
+for details about the available members and how
+they are used.  This macro evaluates its argument
 more than once.
 
 =for apidoc Am|void|XopDISABLE|XOP *xop|which
@@ -989,7 +991,7 @@ typedef enum {
 =head1 Optree Manipulation Functions
 
 =for apidoc Am|const char *|OP_NAME|OP *o
-Return the name of the provided OP. For core ops this looks up the name
+Return the name of the provided OP.  For core ops this looks up the name
 from the op_type; for custom ops from the op_ppaddr.
 
 =for apidoc Am|const char *|OP_DESC|OP *o
@@ -997,10 +999,10 @@ Return a short description of the provided OP.
 
 =for apidoc Am|U32|OP_CLASS|OP *o
 Return the class of the provided OP: that is, which of the *OP
-structures it uses. For core ops this currently gets the information out
+structures it uses.  For core ops this currently gets the information out
 of PL_opargs, which does not always accurately reflect the type used.
 For custom ops the type is returned from the registration, and it is up
-to the registree to ensure it is accurate. The value returned will be
+to the registree to ensure it is accurate.  The value returned will be
 one of the OA_* constants from op.h.
 
 =for apidoc Am|bool|OP_TYPE_IS|OP *o, Optype type

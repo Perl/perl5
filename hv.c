@@ -900,7 +900,8 @@ S_hv_magic_check(HV *hv, bool *needs_copy, bool *needs_store)
 /*
 =for apidoc hv_scalar
 
-Evaluates the hash in scalar context and returns the result. Handles magic when the hash is tied.
+Evaluates the hash in scalar context and returns the result.  Handles magic
+when the hash is tied.
 
 =cut
 */
@@ -1845,13 +1846,15 @@ Perl_hv_undef_flags(pTHX_ HV *hv, U32 flags)
 /*
 =for apidoc hv_fill
 
-Returns the number of hash buckets that happen to be in use. This function is
+Returns the number of hash buckets that
+happen to be in use.  This function is
 wrapped by the macro C<HvFILL>.
 
 Previously this value was always stored in the HV structure, which created an
 overhead on every hash (and pretty much every object) for something that was
-rarely used. Now we calculate it on demand the first time that it is needed,
-and cache it if that calculation is going to be costly to repeat. The cached
+rarely used.  Now we calculate it on demand the first
+time that it is needed, and cache it if that calculation
+is going to be costly to repeat.  The cached
 value is updated by insertions and deletions, but (currently) discarded if
 the hash is split.
 
@@ -2393,7 +2396,7 @@ trigger the resource deallocation.
 Returns entries from a hash iterator.  See C<hv_iterinit> and C<hv_iternext>.
 The C<flags> value will normally be zero; if HV_ITERNEXT_WANTPLACEHOLDERS is
 set the placeholders keys (for restricted hashes) will be returned in addition
-to normal keys. By default placeholders are automatically skipped over.
+to normal keys.  By default placeholders are automatically skipped over.
 Currently a placeholder is implemented with a value that is
 C<&PL_sv_placeholder>.  Note that the implementation of placeholders and
 restricted hashes may change, and the implementation currently is
@@ -3512,7 +3515,8 @@ Perl_cop_fetch_label(pTHX_ COP *const cop, STRLEN *len, U32 *flags) {
 /*
 =for apidoc cop_store_label
 
-Save a label into a C<cop_hints_hash>. You need to set flags to C<SVf_UTF8>
+Save a label into a C<cop_hints_hash>.
+You need to set flags to C<SVf_UTF8>
 for a utf-8 label.
 
 =cut

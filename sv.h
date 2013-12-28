@@ -57,7 +57,8 @@ typeglob has been assigned.  Assigning to it again will stop it from being
 a typeglob.  SVt_PVLV represents a scalar that delegates to another scalar
 behind the scenes.  It is used, e.g., for the return value of C<substr> and
 for tied hash and array elements.  It can hold any scalar value, including
-a typeglob. SVt_REGEXP is for regular expressions.  SVt_INVLIST is for Perl
+a typeglob.  SVt_REGEXP is for regular
+expressions.  SVt_INVLIST is for Perl
 core internal use only.
 
 SVt_PVMG represents a "normal" scalar (not a typeglob, regular expression,
@@ -297,7 +298,7 @@ to return a meaningful value, or check for NULLness, so it's smaller
 and faster.
 
 =for apidoc Am|void|SvREFCNT_dec|SV* sv
-Decrements the reference count of the given SV. I<sv> may be NULL.
+Decrements the reference count of the given SV.  I<sv> may be NULL.
 
 =for apidoc Am|void|SvREFCNT_dec_NN|SV* sv
 Same as SvREFCNT_dec, but can only be used if you know I<sv>
@@ -647,7 +648,7 @@ double.  Checks the B<private> setting.  Use C<SvNIOK> instead.
 Unsets the NV/IV status of an SV.
 
 =for apidoc Am|U32|SvOK|SV* sv
-Returns a U32 value indicating whether the value is defined. This is
+Returns a U32 value indicating whether the value is defined.  This is
 only meaningful for scalars.
 
 =for apidoc Am|U32|SvIOKp|SV* sv
@@ -753,7 +754,8 @@ Only use when you are sure SvNOK is true.  See also C<SvNV()>.
 
 =for apidoc Am|char*|SvPVX|SV* sv
 Returns a pointer to the physical string in the SV.  The SV must contain a
-string. Prior to 5.9.3 it is not safe to execute this macro unless the SV's
+string.  Prior to 5.9.3 it is not safe
+to execute this macro unless the SV's
 type >= SVt_PV.
 
 This is also used to store the name of an autoloaded subroutine in an XS
@@ -1455,7 +1457,7 @@ Marks an SV as tainted if tainting is enabled.
 Untaints an SV.  Be I<very> careful with this routine, as it short-circuits
 some of Perl's fundamental security features.  XS module authors should not
 use this function unless they fully understand all the implications of
-unconditionally untainting the value. Untainting should be done in the
+unconditionally untainting the value.  Untainting should be done in the
 standard perl fashion, via a carefully crafted regexp, rather than directly
 untainting variables.
 
@@ -1494,7 +1496,7 @@ only a string (C<SvPOK_only>), by hook or by crook.  You need force if you are
 going to update the C<SvPVX> directly.  Processes get magic.
 
 Note that coercing an arbitrary scalar into a plain PV will potentially
-strip useful data from it. For example if the SV was C<SvROK>, then the
+strip useful data from it.  For example if the SV was C<SvROK>, then the
 referent will have its reference count decremented, and the SV itself may
 be converted to an C<SvPOK> scalar with a string buffer containing a value
 such as C<"ARRAY(0x1234)">.
@@ -1511,7 +1513,7 @@ C<SvPVx> for a version which guarantees to evaluate sv only once.
 Note that there is no guarantee that the return value of C<SvPV()> is
 equal to C<SvPVX(sv)>, or that C<SvPVX(sv)> contains valid data, or that
 successive calls to C<SvPV(sv)> will return the same pointer value each
-time. This is due to the way that things like overloading and
+time.  This is due to the way that things like overloading and
 Copy-On-Write are handled.  In these cases, the return value may point to
 a temporary buffer or similar.  If you absolutely need the SvPVX field to
 be valid (for example, if you intend to write to it), then see
@@ -2044,7 +2046,8 @@ has been loaded.
 Expands the character buffer in the SV so that it has room for the
 indicated number of bytes (remember to reserve space for an extra trailing
 NUL character).  Calls C<sv_grow> to perform the expansion if necessary.
-Returns a pointer to the character buffer. SV must be of type >= SVt_PV. One
+Returns a pointer to the character
+buffer.  SV must be of type >= SVt_PV.  One
 alternative is to call C<sv_grow> if you are not sure of the type of SV.
 
 =cut

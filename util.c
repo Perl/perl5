@@ -891,9 +891,9 @@ Perl_foldEQ_locale(const char *s1, const char *s2, I32 len)
 
 =for apidoc savepv
 
-Perl's version of C<strdup()>. Returns a pointer to a newly allocated
-string which is a duplicate of C<pv>. The size of the string is
-determined by C<strlen()>. The memory allocated for the new string can
+Perl's version of C<strdup()>.  Returns a pointer to a newly allocated
+string which is a duplicate of C<pv>.  The size of the string is
+determined by C<strlen()>.  The memory allocated for the new string can
 be freed with the C<Safefree()> function.
 
 On some platforms, Windows for example, all allocated memory owned by a thread
@@ -922,9 +922,10 @@ Perl_savepv(pTHX_ const char *pv)
 /*
 =for apidoc savepvn
 
-Perl's version of what C<strndup()> would be if it existed. Returns a
+Perl's version of what C<strndup()> would be if it existed.  Returns a
 pointer to a newly allocated string which is a duplicate of the first
-C<len> bytes from C<pv>, plus a trailing NUL byte. The memory allocated for
+C<len> bytes from C<pv>, plus a trailing
+NUL byte.  The memory allocated for
 the new string can be freed with the C<Safefree()> function.
 
 On some platforms, Windows for example, all allocated memory owned by a thread
@@ -982,7 +983,7 @@ Perl_savesharedpv(pTHX_ const char *pv)
 =for apidoc savesharedpvn
 
 A version of C<savepvn()> which allocates the duplicate string in memory
-which is shared between threads. (With the specific difference that a NULL
+which is shared between threads.  (With the specific difference that a NULL
 pointer is not acceptable)
 
 =cut
@@ -1581,7 +1582,7 @@ Perl_croak(pTHX_ const char *pat, ...)
 =for apidoc Am|void|croak_no_modify
 
 Exactly equivalent to C<Perl_croak(aTHX_ "%s", PL_no_modify)>, but generates
-terser object code than using C<Perl_croak>. Less code used on exception code
+terser object code than using C<Perl_croak>.  Less code used on exception code
 paths reduces CPU cache pressure.
 
 =cut
@@ -5125,7 +5126,8 @@ Perl_my_socketpair (int family, int type, int protocol, int fd[2]) {
 =for apidoc sv_nosharing
 
 Dummy routine which "shares" an SV when there is no sharing module present.
-Or "locks" it. Or "unlocks" it. In other words, ignores its single SV argument.
+Or "locks" it.  Or "unlocks" it.  In other
+words, ignores its single SV argument.
 Exists to avoid test for a NULL function pointer and because it could
 potentially warn under some level of strict-ness.
 
@@ -5669,7 +5671,7 @@ Perl_mem_log_del_sv(const SV *sv,
 =for apidoc my_sprintf
 
 The C library C<sprintf>, wrapped if necessary, to ensure that it will return
-the length of the string written to the buffer. Only rare pre-ANSI systems
+the length of the string written to the buffer.  Only rare pre-ANSI systems
 need the wrapper function - usually this is a direct call to C<sprintf>.
 
 =cut
