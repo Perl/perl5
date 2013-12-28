@@ -2454,7 +2454,7 @@ $ ENDIF
 $ ! more redundant scrubbing of values
 $ prefix = prefix - "000000."
 $ IF F$LOCATE(".]",prefix) .EQ. F$LENGTH(prefix) THEN prefix = prefix - "]" + ".]"
-$ src = prefix
+$ src = prefix - "_ROOT."
 $!: determine root of directory hierarchy where package will be installed.
 $ dflt = prefix
 $ IF .NOT.silent 
