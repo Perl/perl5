@@ -7041,6 +7041,7 @@ $   DEBUG_REPLACE = "USEVMSDEBUG=__DEBUG__=1"
 $ ELSE
 $   DEBUG_REPLACE = "USEVMSDEBUG="
 $ ENDIF
+$ PREFIX_REPLACE = "PREFIX=PREFIX=''prefix'"
 $!
 $! In order not to stress the tiny command buffer on pre-7.3-2 systems,
 $! we put the following substitutions in a file and pass the file to
@@ -7063,6 +7064,7 @@ $ WC "FLAGS=FLAGS=''extra_flags'"
 $ WC "''LARGEFILE_REPLACE'"
 $ WC "ARCHNAME=ARCHNAME=''archname'"
 $ WC "''DEBUG_REPLACE'"
+$ WC "''PREFIX_REPLACE'"
 $ close CONFIG
 $!
 $ echo4 "Extracting ''defmakefile' (with variable substitutions)"
@@ -7230,25 +7232,20 @@ $ ELSE
 $ WRITE CONFIG "$! This perl configured & administered by ''perladmin'"
 $ ENDIF
 $ WRITE CONFIG "$!"
-$! HP hack to make distributing binaries easier
-$!----------------------------------------------
-$ pcsi_producer = f$trnlnm("PCSI_PRODUCER")
-$ if pcsi_producer .eqs. ""
-$ then
-$   WRITE CONFIG "$ define/translation=concealed ''vms_prefix' ''prefix'"
-$ else
-$  WRITE CONFIG "$ myproc = f$environment(""PROCEDURE"")"
-$  WRITE CONFIG "$ myroot_dev = f$parse(myproc,,,""DEVICE"",""NO_CONCEAL"")"
-$  WRITE CONFIG "$ myroot_dir = f$parse(myproc,,,""DIRECTORY"",""NO_CONCEAL"")"
-$  WRITE CONFIG "$ myroot_dir = myroot_dir - ""][000000."" - ""><000000."""
-$  WRITE CONFIG "$ myroot_dir = myroot_dir - ""][000000]"" - ""><000000>"""
-$  WRITE CONFIG "$ myroot_dir = myroot_dir - ""]["" - ""><"""
-$  WRITE CONFIG "$ myroot_dir = myroot_dir - "".]"" - "".>"" - ""["" - ""]"" - ""<"" - "">"""
-$  WRITE CONFIG "$ if f$trnlnm(""HP_BUILD_PERL_BIN_KIT"",""LNM$PROCESS_TABLE"") .EQS. """""
-$  WRITE CONFIG "$ then"
-$  WRITE CONFIG "$  define/translation=concealed ''vms_prefix' 'myroot_dev'['myroot_dir'.]"
-$  WRITE CONFIG "$ endif"
-$ endif
+$ WRITE CONFIG "$ if P1 .EQS. """""
+$ WRITE CONFIG "$ then"
+$ WRITE CONFIG "$   myproc = f$environment(""PROCEDURE"")"
+$ WRITE CONFIG "$   myroot_dev = f$parse(myproc,,,""DEVICE"",""NO_CONCEAL"")"
+$ WRITE CONFIG "$   myroot_dir = f$parse(myproc,,,""DIRECTORY"",""NO_CONCEAL"")"
+$ WRITE CONFIG "$   myroot_dir = myroot_dir - ""][000000."" - ""><000000."""
+$ WRITE CONFIG "$   myroot_dir = myroot_dir - ""][000000]"" - ""><000000>"""
+$ WRITE CONFIG "$   myroot_dir = myroot_dir - ""]["" - ""><"""
+$ WRITE CONFIG "$   myroot_dir = myroot_dir - "".]"" - "".>"" - ""["" - ""]"" - ""<"" - "">"""
+$ WRITE CONFIG "$   root_spec = myroot_dev + ""["" + myroot_dir + "".]"""
+$ WRITE CONFIG "$ else"
+$ WRITE CONFIG "$   root_spec = P1"
+$ WRITE CONFIG "$ endif"
+$ WRITE CONFIG "$ define/translation=concealed ''vms_prefix' 'root_spec'"
 $ WRITE CONFIG "$ ext = "".exe"""
 $ IF sharedperl
 $ THEN
