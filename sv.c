@@ -4955,6 +4955,10 @@ the C<flags> parameter gets passed to C<sv_unref_flags()>
 when unreffing.  C<sv_force_normal> calls this function
 with flags set to 0.
 
+This function is expected to be used to signal to perl that this SV is
+about to be written to, and any extra book-keeping needs to be taken care
+of.  Hence, it croaks on read-only values.
+
 =cut
 */
 
