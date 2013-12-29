@@ -2742,7 +2742,10 @@ cpan/Unicode-Normalize/t/tie.t		Unicode::Normalize
 cpan/version/lib/version/Internals.pod	Description of the internals of version objects
 cpan/version/lib/version.pm		Support for version objects
 cpan/version/lib/version.pod		Documentation of the version module
-cpan/version/t/01base.t			Tests for version objects`
+cpan/version/lib/version/regex.pm	Regex for matching version objects
+cpan/version/lib/version/vpp.pm		Pure Perl implementation of XS code
+cpan/version/t/00impl-pp.t		Tests for version objects
+cpan/version/t/01base.t			Tests for version objects
 cpan/version/t/02derived.t		Tests for version objects
 cpan/version/t/03require.t		Tests for version objects
 cpan/version/t/04strict_lax.t		Tests for version objects
@@ -2750,6 +2753,7 @@ cpan/version/t/05sigdie.t		Tests for version objects
 cpan/version/t/06noop.t			Tests for version objects
 cpan/version/t/07locale.t		Tests for version objects
 cpan/version/t/08_corelist.t		Tests for version objects
+cpan/version/t/09_list_util.t		Tests for version objects
 cpan/version/t/coretests.pm		Tests for version objects
 cpan/Win32API-File/buffers.h	Win32API::File extension
 cpan/Win32API-File/cFile.h	Win32API::File extension

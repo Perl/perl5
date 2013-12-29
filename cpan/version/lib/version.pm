@@ -9,48 +9,10 @@ use vars qw(@ISA $VERSION $CLASS $STRICT $LAX *declare *qv);
 $VERSION = 0.9905;
 $CLASS = 'version';
 
-{
-    local $SIG{'__DIE__'};
-    eval "use version::vxs $VERSION";
-    if ( $@ ) { # don't have the XS version installed
-	eval "use version::vpp $VERSION"; # don't tempt fate
-	die "$@" if ( $@ );
-	push @ISA, "version::vpp";
-	local $^W;
-	*version::qv = \&version::vpp::qv;
-	*version::declare = \&version::vpp::declare;
-	*version::_VERSION = \&version::vpp::_VERSION;
-	*version::vcmp = \&version::vpp::vcmp;
-	*version::new = \&version::vpp::new;
-	if ($] >= 5.009000) {
-	    no strict 'refs';
-	    *version::stringify = \&version::vpp::stringify;
-	    *{'version::(""'} = \&version::vpp::stringify;
-	    *{'version::(<=>'} = \&version::vpp::vcmp;
-	    *version::parse = \&version::vpp::parse;
-	}
-	*version::is_strict = \&version::vpp::is_strict;
-	*version::is_lax = \&version::vpp::is_lax;
-    }
-    else { # use XS module
-	push @ISA, "version::vxs";
-	local $^W;
-	*version::declare = \&version::vxs::declare;
-	*version::qv = \&version::vxs::qv;
-	*version::_VERSION = \&version::vxs::_VERSION;
-	*version::vcmp = \&version::vxs::VCMP;
-	*version::new = \&version::vxs::new;
-	if ($] >= 5.009000) {
-	    no strict 'refs';
-	    *version::stringify = \&version::vxs::stringify;
-	    *{'version::(""'} = \&version::vxs::stringify;
-	    *{'version::(<=>'} = \&version::vxs::VCMP;
-	    *version::parse = \&version::vxs::parse;
-	}
-	*version::is_strict = \&version::vxs::is_strict;
-	*version::is_lax = \&version::vxs::is_lax;
-    }
-}
+# avoid using Exporter
+use version::regex;
+*version::is_lax = \&version::regex::is_lax;
+*version::is_strict = \&version::regex::is_strict;
 
 sub import {
     no strict 'refs';
