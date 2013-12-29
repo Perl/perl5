@@ -4,13 +4,13 @@ package version;
 use 5.005_05;
 use strict;
 
-use vars qw(@ISA $VERSION $CLASS $STRICT $LAX *declare *qv);
+use vars qw(@ISA $VERSION $CLASS *declare *qv);
 
 $VERSION = 0.9905;
 $CLASS = 'version';
 
 # avoid using Exporter
-use version::regex;
+require version::regex;
 *version::is_lax = \&version::regex::is_lax;
 *version::is_strict = \&version::regex::is_strict;
 
