@@ -4204,7 +4204,7 @@ Perl__swash_to_invlist(pTHX_ SV* const swash)
 
     /* Invert if the data says it should be */
     if (invert_it_svp && SvUV(*invert_it_svp)) {
-	_invlist_invert_prop(invlist);
+	_invlist_invert(invlist);
     }
 
     /* This code is copied from swatch_get()

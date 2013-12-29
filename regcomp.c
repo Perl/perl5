@@ -8631,17 +8631,6 @@ Perl__invlist_invert(pTHX_ SV* const invlist)
     *get_invlist_offset_addr(invlist) = ! *get_invlist_offset_addr(invlist);
 }
 
-void
-Perl__invlist_invert_prop(pTHX_ SV* const invlist)
-{
-    /* Complement the input inversion list (which must be a Unicode property).
-     * Starting in v5.20, this is no different than any invert. */
-
-    PERL_ARGS_ASSERT__INVLIST_INVERT_PROP;
-
-    _invlist_invert(invlist);
-    return;
-}
 #endif
 
 PERL_STATIC_INLINE SV*
