@@ -2877,16 +2877,18 @@ $define|true|[yY]*)
     : compile a host miniperl and generate_uudmap, unless we got passed them
     if $test "X$hostperl" = X; then
       echo "Building host miniperl and generate_uudmap binaries" >&4
+      before_host=`pwd`
       cd ..
-      test -d host || mkdir host
-      cd host && rm -rf ./*
-      ../Configure -des -Dusedevel -Dmksymlinks
+      cd $src
+      src=`pwd`
+      test -d $src/host || mkdir $src/host
+      cd $src/host && rm -rf ./*
+      $src/Configure -des -Dusedevel -Dmksymlinks
       make miniperl
       make generate_uudmap
-      hostperl=host/miniperl
-      hostgenerate=host/generate_uudmap
-      cd ..
-      cd UU
+      hostperl=$src/host/miniperl
+      hostgenerate=$src/host/generate_uudmap
+      cd $before_host
     fi
     hostosname=`$hostperl -le 'print $^O'`
     ;;
