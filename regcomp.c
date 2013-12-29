@@ -4021,6 +4021,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 	    else if (flags & SCF_DO_STCLASS_OR) {
                 ssc_add_cp(data->start_class, uc);
 		ssc_and(pRExC_state, data->start_class, and_withp);
+                ANYOF_FLAGS(data->start_class) &= ~ANYOF_EMPTY_STRING;
 	    }
 	    flags &= ~SCF_DO_STCLASS;
 	}
@@ -4140,6 +4141,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 	    else if (flags & SCF_DO_STCLASS_OR) {
                 ssc_union(data->start_class, EXACTF_invlist, FALSE);
 		ssc_and(pRExC_state, data->start_class, and_withp);
+                ANYOF_FLAGS(data->start_class) &= ~ANYOF_EMPTY_STRING;
 	    }
 	    flags &= ~SCF_DO_STCLASS;
             SvREFCNT_dec(EXACTF_invlist);
@@ -4545,6 +4547,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
                               PL_XPosix_ptrs[_CC_VERTSPACE],
                               FALSE);
 		    ssc_and(pRExC_state, data->start_class, and_withp);
+                    ANYOF_FLAGS(data->start_class) &= ~ANYOF_EMPTY_STRING;
                 }
 		flags &= ~SCF_DO_STCLASS;
             }
@@ -4570,9 +4573,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
                 U8 classnum;
                 U8 namedclass;
 
-                if (flags & SCF_DO_STCLASS_AND) {
-                    ANYOF_FLAGS(data->start_class) &= ~ANYOF_EMPTY_STRING;
-                }
+                ANYOF_FLAGS(data->start_class) &= ~ANYOF_EMPTY_STRING;
 
 		/* Some of the logic below assumes that switching
 		   locale on will only add false positives. */

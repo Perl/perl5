@@ -20,7 +20,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 702;  # Update this when adding/deleting tests.
+plan tests => 710;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1504,6 +1504,24 @@ EOP
             $i++ if $s =~/\Gb/g;
         }
         is($i, 0, "RT 120446: mustn't run slowly");
+    }
+
+    # These are based on looking at the code in regcomp.c
+    # We don't look for specific code, just the existence of an SSC
+    foreach my $re (qw(     qr/a?c/
+                            qr/a?c/i
+                            qr/[ab]?c/
+                            qr/\R?c/
+                            qr/\d?c/d
+                            qr/\w?c/l
+                            qr/\s?c/a
+                            qr/[[:alpha:]]?c/u
+    )) {
+        my $prog = <<"EOP";
+use re qw(Debug COMPILE);
+$re;
+EOP
+        fresh_perl_like($prog, qr/synthetic stclass/, "stderr", "$re generates a synthetic start class");
     }
 
 
