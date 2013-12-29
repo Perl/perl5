@@ -30,6 +30,10 @@ sub BaseTests {
     $version = $CLASS->$method(1.23);
     is ( "$version" , "1.23" , '1.23 eq "1.23"' );
 
+    # Test explicit integer
+    $version = $CLASS->$method(23);
+    is ( "$version" , 23 , '23 eq "23"' );
+
     # Test quoted number processing
     $version = $CLASS->$method("5.005_03");
     is ( "$version" , "5.005_03" , '"5.005_03" eq "5.005_03"' );
@@ -580,6 +584,13 @@ SKIP: {
 	@ver::ISA = $CLASS;
 	is ref(ver->new), 'ver', 'ver can inherit from version';
 	is ref(ver->qv("1.2.3")), 'ver', 'ver can inherit from version';
+    }
+
+    { # discovered while integrating with bleadperl
+	eval {my $v = $CLASS->new([1,2,3]) };
+	like $@, qr/Invalid version format/, 'Do not crash for garbage';
+	eval {my $v = $CLASS->new({1 => 2}) };
+	like $@, qr/Invalid version format/, 'Do not crash for garbage';
     }
 
 }

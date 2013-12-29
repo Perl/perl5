@@ -674,6 +674,11 @@ sub new
 	    $qv = TRUE;
 	}
 
+	if (ref($value) =~ m/ARRAY|HASH/) {
+	    require Carp;
+	    Carp::croak("Invalid version format (non-numeric data)");
+	}
+
 	$value = _un_vstring($value);
 
 	# exponential notation
