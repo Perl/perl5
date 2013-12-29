@@ -21,7 +21,7 @@
 "Magic" is special data attached to SV structures in order to give them
 "magical" properties.  When any Perl code tries to read from, or assign to,
 an SV marked as magical, it calls the 'get' or 'set' function associated
-with that SV's magic. A get is called prior to reading an SV, in order to
+with that SV's magic.  A get is called prior to reading an SV, in order to
 give it a chance to update its internal value (get on $. writes the line
 number of the last read filehandle into to the SV's IV slot), while
 set is called after an SV has been written to, in order to allow it to make
@@ -29,9 +29,9 @@ use of its changed value (set on $/ copies the SV's new value to the
 PL_rs global variable).
 
 Magic is implemented as a linked list of MAGIC structures attached to the
-SV. Each MAGIC struct holds the type of the magic, a pointer to an array
+SV.  Each MAGIC struct holds the type of the magic, a pointer to an array
 of functions that implement the get(), set(), length() etc functions,
-plus space for some flags and pointers. For example, a tied variable has
+plus space for some flags and pointers.  For example, a tied variable has
 a MAGIC structure that contains a pointer to the object associated with the
 tie.
 
@@ -493,7 +493,8 @@ Perl_mg_copy(pTHX_ SV *sv, SV *nsv, const char *key, I32 klen)
 =for apidoc mg_localize
 
 Copy some of the magic from an existing SV to new localized version of that
-SV. Container magic (eg %ENV, $1, tie) gets copied, value magic doesn't (eg
+SV.  Container magic (eg %ENV, $1, tie)
+gets copied, value magic doesn't (eg
 taint, pos).
 
 If setmagic is false then no set magic will be called on the new (empty) SV.

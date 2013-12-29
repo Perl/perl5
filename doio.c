@@ -2363,7 +2363,7 @@ Perl_do_shmio(pTHX_ I32 optype, SV **mark, SV **sp)
 =for apidoc start_glob
 
 Function called by C<do_readline> to spawn a glob (or do the glob inside
-perl on VMS). This code used to be inline, but now perl uses C<File::Glob>
+perl on VMS).  This code used to be inline, but now perl uses C<File::Glob>
 this glob starter is only used by miniperl during the build process.
 Moving it away shrinks pp_hot.c; shrinking pp_hot.c helps speed perl up.
 

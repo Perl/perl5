@@ -30,7 +30,7 @@ the C<SP> macro.  See C<SP>.
 
 =for apidoc ms||djSP
 
-Declare Just C<SP>. This is actually identical to C<dSP>, and declares
+Declare Just C<SP>.  This is actually identical to C<dSP>, and declares
 a local copy of perl's stack pointer, available via the C<SP> macro.
 See C<SP>.  (Available for backward source code compatibility with the
 old (Perl 5.005) thread model.)

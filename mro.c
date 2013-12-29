@@ -719,7 +719,7 @@ S_mro_clean_isarev(pTHX_ HV * const isa, const char * const name,
 
 Call this function to signal to a stash that it has been assigned to
 another spot in the stash hierarchy.  C<stash> is the stash that has been
-assigned. C<oldstash> is the stash it replaces, if any.  C<gv> is the glob
+assigned.  C<oldstash> is the stash it replaces, if any.  C<gv> is the glob
 that is actually being assigned to.
 
 This can also be called with a null first argument to

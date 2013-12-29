@@ -183,7 +183,7 @@ The input record separator - C<$/> in Perl space.
 
 =for apidoc mn|GV*|PL_last_in_gv
 
-The GV which was last used for a filehandle input operation. (C<< <FH> >>)
+The GV which was last used for a filehandle input operation.  (C<< <FH> >>)
 
 =for apidoc mn|GV*|PL_ofsgv
 
