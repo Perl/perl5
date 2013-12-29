@@ -1602,73 +1602,6 @@ functions:
 For a detailed description of calling conventions from C to Perl,
 consult L<perlcall>.
 
-=head2 Memory Allocation
-
-=head3 Allocation
-
-All memory meant to be used with the Perl API functions should be manipulated
-using the macros described in this section.  The macros provide the necessary
-transparency between differences in the actual malloc implementation that is
-used within perl.
-
-It is suggested that you enable the version of malloc that is distributed
-with Perl.  It keeps pools of various sizes of unallocated memory in
-order to satisfy allocation requests more quickly.  However, on some
-platforms, it may cause spurious malloc or free errors.
-
-The following three macros are used to initially allocate memory :
-
-    Newx(pointer, number, type);
-    Newxc(pointer, number, type, cast);
-    Newxz(pointer, number, type);
-
-The first argument C<pointer> should be the name of a variable that will
-point to the newly allocated memory.
-
-The second and third arguments C<number> and C<type> specify how many of
-the specified type of data structure should be allocated.  The argument
-C<type> is passed to C<sizeof>.  The final argument to C<Newxc>, C<cast>,
-should be used if the C<pointer> argument is different from the C<type>
-argument.
-
-Unlike the C<Newx> and C<Newxc> macros, the C<Newxz> macro calls C<memzero>
-to zero out all the newly allocated memory.
-
-=head3 Reallocation
-
-    Renew(pointer, number, type);
-    Renewc(pointer, number, type, cast);
-    Safefree(pointer)
-
-These three macros are used to change a memory buffer size or to free a
-piece of memory no longer needed.  The arguments to C<Renew> and C<Renewc>
-match those of C<New> and C<Newc> with the exception of not needing the
-"magic cookie" argument.
-
-=head3 Moving
-
-    Move(source, dest, number, type);
-    Copy(source, dest, number, type);
-    Zero(dest, number, type);
-
-These three macros are used to move, copy, or zero out previously allocated
-memory.  The C<source> and C<dest> arguments point to the source and
-destination starting points.  Perl will move, copy, or zero out C<number>
-instances of the size of the C<type> data structure (using the C<sizeof>
-function).
-
-=head2 PerlIO
-
-The most recent development releases of Perl have been experimenting with
-removing Perl's dependency on the "normal" standard I/O suite and allowing
-other stdio implementations to be used.  This involves creating a new
-abstraction layer that then calls whichever implementation of stdio Perl
-was compiled with.  All XSUBs should now use the functions in the PerlIO
-abstraction layer and not make any assumptions about what kind of stdio
-is being used.
-
-For a complete description of the PerlIO abstraction, consult L<perlapio>.
-
 =head2 Putting a C value on Perl stack
 
 A lot of opcodes (this is an elementary operation in the internal perl
@@ -1763,6 +1696,73 @@ if it is, new scratchpad is created and pushed into the array.
 
 The I<target>s on this scratchpad are C<undef>s, but they are already
 marked with correct flags.
+
+=head1 Memory Allocation
+
+=head2 Allocation
+
+All memory meant to be used with the Perl API functions should be manipulated
+using the macros described in this section.  The macros provide the necessary
+transparency between differences in the actual malloc implementation that is
+used within perl.
+
+It is suggested that you enable the version of malloc that is distributed
+with Perl.  It keeps pools of various sizes of unallocated memory in
+order to satisfy allocation requests more quickly.  However, on some
+platforms, it may cause spurious malloc or free errors.
+
+The following three macros are used to initially allocate memory :
+
+    Newx(pointer, number, type);
+    Newxc(pointer, number, type, cast);
+    Newxz(pointer, number, type);
+
+The first argument C<pointer> should be the name of a variable that will
+point to the newly allocated memory.
+
+The second and third arguments C<number> and C<type> specify how many of
+the specified type of data structure should be allocated.  The argument
+C<type> is passed to C<sizeof>.  The final argument to C<Newxc>, C<cast>,
+should be used if the C<pointer> argument is different from the C<type>
+argument.
+
+Unlike the C<Newx> and C<Newxc> macros, the C<Newxz> macro calls C<memzero>
+to zero out all the newly allocated memory.
+
+=head2 Reallocation
+
+    Renew(pointer, number, type);
+    Renewc(pointer, number, type, cast);
+    Safefree(pointer)
+
+These three macros are used to change a memory buffer size or to free a
+piece of memory no longer needed.  The arguments to C<Renew> and C<Renewc>
+match those of C<New> and C<Newc> with the exception of not needing the
+"magic cookie" argument.
+
+=head2 Moving
+
+    Move(source, dest, number, type);
+    Copy(source, dest, number, type);
+    Zero(dest, number, type);
+
+These three macros are used to move, copy, or zero out previously allocated
+memory.  The C<source> and C<dest> arguments point to the source and
+destination starting points.  Perl will move, copy, or zero out C<number>
+instances of the size of the C<type> data structure (using the C<sizeof>
+function).
+
+=head1 PerlIO
+
+The most recent development releases of Perl have been experimenting with
+removing Perl's dependency on the "normal" standard I/O suite and allowing
+other stdio implementations to be used.  This involves creating a new
+abstraction layer that then calls whichever implementation of stdio Perl
+was compiled with.  All XSUBs should now use the functions in the PerlIO
+abstraction layer and not make any assumptions about what kind of stdio
+is being used.
+
+For a complete description of the PerlIO abstraction, consult L<perlapio>.
 
 =head1 Compiled code
 
