@@ -12,10 +12,9 @@
 
 #ifdef VXS_XSUB_DETAILS
 #  ifdef PERL_CORE
-    {"UNIVERSAL::VERSION", XS_UNIVERSAL_VERSION, NULL},
-#  else
-    {VXS_CLASS "::_VERSION", VXS_UNIVERSAL_VERSION, NULL},
+    {"UNIVERSAL::VERSION", VXSp(universal_version), NULL},
 #  endif
+    {VXS_CLASS "::_VERSION", VXSp(universal_version), NULL},
     {VXS_CLASS "::()", VXSp(version_noop), NULL},
     {VXS_CLASS "::new", VXSp(version_new), NULL},
     {VXS_CLASS "::parse", VXSp(version_new), NULL},
@@ -67,7 +66,7 @@ typedef char HVNAME;
 #  define HEKf		"s"
 #endif
 
-VXS(UNIVERSAL_VERSION)
+VXS(universal_version)
 {
     dVAR;
     dXSARGS;
