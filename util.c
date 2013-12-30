@@ -3403,7 +3403,8 @@ Perl_report_evil_fh(pTHX_ const GV *gv)
 	    (const char *)(OP_IS_FILETEST(op) ? "" : "()");
 	const char * const func =
 	    (const char *)
-	    (op == OP_READLINE   ? "readline"  :	/* "<HANDLE>" not nice */
+	    (op == OP_READLINE || op == OP_RCATLINE
+				 ? "readline"  :	/* "<HANDLE>" not nice */
 	     op == OP_LEAVEWRITE ? "write" :		/* "write exit" not nice */
 	     PL_op_desc[op]);
 	const char * const type =
