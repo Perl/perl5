@@ -1075,12 +1075,12 @@ S_ssc_flags_and(regnode_ssc *ssc, const U8 and_with)
      * The flags 'and_with' should not come from another SSC (otherwise the
      * EMPTY_STRING flag won't work) */
 
-    const U8 ssc_only_flags = ANYOF_FLAGS(ssc) & ~ANYOF_LOCALE_FLAGS;
+    const U8 ssc_only_flags = ANYOF_FLAGS(ssc) & ~ANYOF_COMMON_FLAGS;
 
     PERL_ARGS_ASSERT_SSC_FLAGS_AND;
 
     /* Use just the SSC-related flags from 'and_with' */
-    ANYOF_FLAGS(ssc) &= (and_with & ANYOF_LOCALE_FLAGS);
+    ANYOF_FLAGS(ssc) &= (and_with & ANYOF_COMMON_FLAGS);
     ANYOF_FLAGS(ssc) |= ssc_only_flags;
 }
 
@@ -1111,7 +1111,7 @@ S_ssc_and(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
     else {
         anded_cp_list = get_ANYOF_cp_list_for_ssc(pRExC_state,
                                         (regnode_charclass_posixl*) and_with);
-        anded_flags = ANYOF_FLAGS(and_with) & ANYOF_LOCALE_FLAGS;
+        anded_flags = ANYOF_FLAGS(and_with) & ANYOF_COMMON_FLAGS;
     }
 
     ANYOF_FLAGS(ssc) &= anded_flags;
@@ -1260,7 +1260,7 @@ S_ssc_or(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
     else {
         ored_cp_list = get_ANYOF_cp_list_for_ssc(pRExC_state,
                                         (regnode_charclass_posixl*) or_with);
-        ored_flags = ANYOF_FLAGS(or_with) & ANYOF_LOCALE_FLAGS;
+        ored_flags = ANYOF_FLAGS(or_with) & ANYOF_COMMON_FLAGS;
     }
 
     ANYOF_FLAGS(ssc) |= ored_flags;
@@ -1397,7 +1397,7 @@ S_ssc_finalize(pTHX_ RExC_state_t *pRExC_state, regnode_ssc *ssc)
     /* The code in this file assumes that all but these flags aren't relevant
      * to the SSC, except ANYOF_EMPTY_STRING, which should be cleared by the
      * time we reach here */
-    assert(! (ANYOF_FLAGS(ssc) & ~ANYOF_LOCALE_FLAGS));
+    assert(! (ANYOF_FLAGS(ssc) & ~ANYOF_COMMON_FLAGS));
 
     populate_ANYOF_from_invlist( (regnode *) ssc, &invlist);
 

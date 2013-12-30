@@ -370,6 +370,11 @@ struct regnode_ssc {
                            |ANYOF_LOC_FOLD                      \
                            |ANYOF_POSIXL)
 
+/* These are the flags that apply to both regular ANYOF nodes and synthetic
+ * start class nodes during construction of the SSC.  During finalization of
+ * the SSC, other of the flags could be added to it */
+#define ANYOF_COMMON_FLAGS    (ANYOF_LOCALE_FLAGS)
+
 /* Character classes for node->classflags of ANYOF */
 /* Should be synchronized with a table in regprop() */
 /* 2n should be the normal one, paired with its complement at 2n+1 */
