@@ -3141,13 +3141,28 @@ can happen if you are trying to open a pipe to a command that takes a
 list of arguments, but have forgotten to specify a piped open mode.
 See L<perlfunc/open> for details.
 
+=item mprotect for COW string %p %u failed with %d
+
+(S) You compiled perl with B<-D>PERL_DEBUG_READONLY_COW (see
+L<perlguts/"Copy on Write">), but a shared string buffer
+could not be made read-only.
+
 =item mprotect for %p %u failed with %d
+
+(S) You compiled perl with B<-D>PERL_DEBUG_READONLY_OPS (see L<perlhacktips>),
+but an op tree could not be made read-only.
+
+=item mprotect RW for COW string %p %u failed with %d
+
+(S) You compiled perl with B<-D>PERL_DEBUG_READONLY_COW (see
+L<perlguts/"Copy on Write">), but a read-only shared string
+buffer could not be made mutable.
 
 =item mprotect RW for %p %u failed with %d
 
 (S) You compiled perl with B<-D>PERL_DEBUG_READONLY_OPS (see
-L<perlhacktips>), but an op tree could not be made read-only, or a
-read-only op tree could not be made mutable before freeing the ops.
+L<perlhacktips>), but a read-only op tree could not be made
+mutable before freeing the ops.
 
 =item msg%s not implemented
 
