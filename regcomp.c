@@ -1107,6 +1107,25 @@ S_ssc_and(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
     if (OP(and_with) == ANYOF_SYNTHETIC) {
         anded_cp_list = and_with->invlist;
         anded_flags = ANYOF_FLAGS(and_with);
+
+        /* XXX This is a kludge around what appears to be deficiencies in the
+         * optimizer.  If we make S_ssc_anything() add in the WARN_SUPER flag,
+         * there are paths through the optimizer where it doesn't get weeded
+         * out when it should.  And if we don't make some extra provision for
+         * it like the code just below, it doesn't get added when it should.
+         * This solution is to add it only when AND'ing, which is here, and
+         * only when what is being AND'ed is the pristine, original node
+         * matching anything.  Thus it is like adding it to ssc_anything() but
+         * only when the result is to be AND'ed.  Probably the same solution
+         * could be adopted for the same problem we have with /l matching,
+         * which is solved differently in S_ssc_init(), and that would lead to
+         * fewer false positives than that solution has.  But if this solution
+         * creates bugs, the consequences are only that a warning isn't raised
+         * that should be; while the consequences for having /l bugs is
+         * incorrect matches */
+        if (ssc_is_anything(and_with)) {
+            anded_flags |= ANYOF_WARN_SUPER;
+        }
     }
     else {
         anded_cp_list = get_ANYOF_cp_list_for_ssc(pRExC_state,

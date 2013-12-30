@@ -375,7 +375,7 @@ struct regnode_ssc {
 /* These are the flags that apply to both regular ANYOF nodes and synthetic
  * start class nodes during construction of the SSC.  During finalization of
  * the SSC, other of the flags could be added to it */
-#define ANYOF_COMMON_FLAGS    (ANYOF_LOCALE_FLAGS)
+#define ANYOF_COMMON_FLAGS    (ANYOF_LOCALE_FLAGS | ANYOF_WARN_SUPER)
 
 /* Character classes for node->classflags of ANYOF */
 /* Should be synchronized with a table in regprop() */

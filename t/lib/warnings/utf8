@@ -643,7 +643,7 @@ Code point 0x110048 is not Unicode, all \p{} matches fail; all \P{} matches succ
 Code point 0x110049 is not Unicode, all \p{} matches fail; all \P{} matches succeed at - line 72.
 Code point 0x110049 is not Unicode, all \p{} matches fail; all \P{} matches succeed at - line 72.
 ########
-# TODO Matching Unicode property against above-Unicode code point outputs a warning even if optimizer rejects the match (in synthetic start class)
+# NAME Matching Unicode property against above-Unicode code point outputs a warning even if optimizer rejects the match (in synthetic start class)
 use warnings 'non_unicode';
 "\x{110000}" =~ /b?\p{Space}/;
 EXPECT
