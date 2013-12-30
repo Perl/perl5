@@ -5522,14 +5522,10 @@ END
         # affect what gets output before it, therefore pre_body() isn't called
         # until after all other processing of the table is done.
 
-        # The main body looks like a 'here' document.  If annotating, get rid
-        # of the comments before passing to the caller, as some callers, such
-        # as charnames.pm, can't cope with them.  (Outputting range counts
-        # also introduces comments, but these don't show up in the tables that
-        # can't cope with comments, and there aren't that many of them that
-        # it's worth the extra real time to get rid of them).
+        # The main body looks like a 'here' document.  If there are comments,
+        # get rid of them when processing it.
         my @OUT;
-        if ($annotate) {
+        if ($annotate || $output_range_counts) {
             # Use the line below in Perls that don't have /r
             #push @OUT, 'return join "\n",  map { s/\s*#.*//mg; $_ } split "\n", <<\'END\';' . "\n";
             push @OUT, "return <<'END' =~ s/\\s*#.*//mgr;\n";
