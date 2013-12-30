@@ -1391,7 +1391,8 @@ L<perlclib>.
 
 Under ithreads the optree is read only.  If you want to enforce this, to
 check for write accesses from buggy code, compile with
-C<-DPERL_DEBUG_READONLY_OPS> to enable code that allocates op memory
+C<-Accflags=-DPERL_DEBUG_READONLY_OPS>
+to enable code that allocates op memory
 via C<mmap>, and sets it read-only when it is attached to a subroutine.
 Any write access to an op results in a C<SIGBUS> and abort.
 
