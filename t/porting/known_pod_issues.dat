@@ -96,6 +96,7 @@ Math::Random::MT::Perl
 Math::Random::Secure
 Math::TrulyRandom
 md5sum(1)
+mmap(2)
 Module::CPANTS::Analyse
 Module::Find
 Module::Info
