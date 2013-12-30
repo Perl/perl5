@@ -1970,6 +1970,11 @@ if test "X$sysroot" != X; then
             'undef'|*)
                 ldflags="$ldflags --sysroot=$sysroot"
         esac
+        case "$cppflags" in
+            *sysroot*) ;;
+            'undef'|*)
+                cppflags="$cppflags --sysroot=$sysroot"
+        esac
         # lddlflags updated below in lddlflags section;
         # same with cccdlflags
   ;;
