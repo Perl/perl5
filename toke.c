@@ -2746,7 +2746,8 @@ S_sublex_done(pTHX)
 
     /* Is there a right-hand side to take care of? (s//RHS/ or tr//RHS/) */
     assert(PL_lex_inwhat != OP_TRANSR);
-    if (PL_lex_repl && (PL_lex_inwhat == OP_SUBST || PL_lex_inwhat == OP_TRANS)) {
+    if (PL_lex_repl) {
+	assert (PL_lex_inwhat == OP_SUBST || PL_lex_inwhat == OP_TRANS);
 	PL_linestr = PL_lex_repl;
 	PL_lex_inpat = 0;
 	PL_bufend = PL_bufptr = PL_oldbufptr = PL_oldoldbufptr = PL_linestart = SvPVX(PL_linestr);
