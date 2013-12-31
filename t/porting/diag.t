@@ -672,7 +672,6 @@ Wrong syntax (suid) fd script name "%s"
 'X' outside of string in unpack
 
 __CATEGORIES__
-Code point 0x%X is not Unicode, all \p{} matches fail; all \P{} matches succeed
 Code point 0x%X is not Unicode, may not be portable
 Illegal character \%o (carriage return)
 Missing argument in %s

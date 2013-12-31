@@ -5,7 +5,7 @@ use warnings;
 no warnings 'surrogate';    # surrogates can be inputs to this
 use charnames ();
 
-our $VERSION = '0.55';
+our $VERSION = '0.56';
 
 require Exporter;
 
@@ -2138,21 +2138,10 @@ too high for some operations to work; you may wish to use a smaller number for
 your purposes.)
 
 Note that the inversion lists returned by this function can possibly include
-non-Unicode code points, that is anything above 0x10FFFF.  This is in
-contrast to Perl regular expression matches on those code points, in which a
-non-Unicode code point always fails to match.  For example, both of these have
-the same result:
-
- chr(0x110000) =~ \p{ASCII_Hex_Digit=True}      # Fails.
- chr(0x110000) =~ \p{ASCII_Hex_Digit=False}     # Fails!
-
-And both raise a warning that a Unicode property is being used on a
-non-Unicode code point.  It is arguable as to which is the correct thing to do
-here.  This function has chosen the way opposite to the Perl regular
-expression behavior.  This allows you to easily flip to the Perl regular
-expression way (for you to go in the other direction would be far harder).
-Simply add 0x110000 at the end of the non-empty returned list if it isn't
-already that value; and pop that value if it is; like:
+non-Unicode code points, that is anything above 0x10FFFF.  Unicode properties
+are not defined on such code points.  You might wish to change the output to
+not include these.  Simply add 0x110000 at the end of the non-empty returned
+list if it isn't already that value; and pop that value if it is; like:
 
  my @list = prop_invlist("foo");
  if (@list) {
@@ -2236,90 +2225,59 @@ sub prop_invlist ($;$) {
 
     my @invlist;
 
-    # The input lines look like:
-    # 0041\t005A   # [26]
-    # 005F
+    if ($swash->{'LIST'} =~ /^V/) {
 
-    # Split into lines, stripped of trailing comments
-    foreach my $range (split "\n",
-                            $swash->{'LIST'} =~ s/ \s* (?: \# .* )? $ //xmgr)
-    {
-        # And find the beginning and end of the range on the line
-        my ($hex_begin, $hex_end) = split "\t", $range;
-        my $begin = hex $hex_begin;
+        # A 'V' as the first character marks the input as already an inversion
+        # list, in which case, all we need to do is put the remaining lines
+        # into our array.
+        @invlist = split "\n", $swash->{'LIST'} =~ s/ \s* (?: \# .* )? $ //xmgr;
+        shift @invlist;
+    }
+    else {
+        # The input lines look like:
+        # 0041\t005A   # [26]
+        # 005F
 
-        # If the new range merely extends the old, we remove the marker
-        # created the last time through the loop for the old's end, which
-        # causes the new one's end to be used instead.
-        if (@invlist && $begin == $invlist[-1]) {
-            pop @invlist;
-        }
-        else {
-            # Add the beginning of the range
-            push @invlist, $begin;
-        }
+        # Split into lines, stripped of trailing comments
+        foreach my $range (split "\n",
+                              $swash->{'LIST'} =~ s/ \s* (?: \# .* )? $ //xmgr)
+        {
+            # And find the beginning and end of the range on the line
+            my ($hex_begin, $hex_end) = split "\t", $range;
+            my $begin = hex $hex_begin;
 
-        if (defined $hex_end) { # The next item starts with the code point 1
-                                # beyond the end of the range.
-            push @invlist, hex($hex_end) + 1;
-        }
-        else {  # No end of range, is a single code point.
-            push @invlist, $begin + 1;
+            # If the new range merely extends the old, we remove the marker
+            # created the last time through the loop for the old's end, which
+            # causes the new one's end to be used instead.
+            if (@invlist && $begin == $invlist[-1]) {
+                pop @invlist;
+            }
+            else {
+                # Add the beginning of the range
+                push @invlist, $begin;
+            }
+
+            if (defined $hex_end) { # The next item starts with the code point 1
+                                    # beyond the end of the range.
+                no warnings 'portable';
+                my $end = hex $hex_end;
+                last if $end == $Unicode::UCD::MAX_CP;
+                push @invlist, $end + 1;
+            }
+            else {  # No end of range, is a single code point.
+                push @invlist, $begin + 1;
+            }
         }
     }
 
-    require "unicore/UCD.pl";
-    my $FIRST_NON_UNICODE = $MAX_UNICODE_CODEPOINT + 1;
-
     # Could need to be inverted: add or subtract a 0 at the beginning of the
-    # list.  And to keep it from matching non-Unicode, add or subtract the
-    # first non-unicode code point.
+    # list.
     if ($swash->{'INVERT_IT'}) {
         if (@invlist && $invlist[0] == 0) {
             shift @invlist;
         }
         else {
             unshift @invlist, 0;
-        }
-        if (@invlist && $invlist[-1] == $FIRST_NON_UNICODE) {
-            pop @invlist;
-        }
-        else {
-            push @invlist, $FIRST_NON_UNICODE;
-        }
-    }
-
-    # Here, the list is set up to include only Unicode code points.  But, if
-    # the table is the default one for the property, it should contain all
-    # non-Unicode code points.  First calculate the loose name for the
-    # property.  This is done even for strict-name properties, as the data
-    # structure that mktables generates for us is set up so that we don't have
-    # to worry about that.  The property-value needs to be split if compound,
-    # as the loose rules need to be independently calculated on each part.  We
-    # know that it is syntactically valid, or SWASHNEW would have failed.
-
-    $prop = lc $prop;
-    my ($prop_only, $table) = split /\s*[:=]\s*/, $prop;
-    if ($table) {
-
-        # May have optional prefixed 'is'
-        $prop = utf8::_loose_name($prop_only) =~ s/^is//r;
-        $prop = $utf8::loose_property_name_of{$prop};
-        $prop .= "=" . utf8::_loose_name($table);
-    }
-    else {
-        $prop = utf8::_loose_name($prop);
-    }
-    if (exists $loose_defaults{$prop}) {
-
-        # Here, is the default table.  If a range ended with 10ffff, instead
-        # continue that range to infinity, by popping the 110000; otherwise,
-        # add the range from 11000 to infinity
-        if (! @invlist || $invlist[-1] != $FIRST_NON_UNICODE) {
-            push @invlist, $FIRST_NON_UNICODE;
-        }
-        else {
-            pop @invlist;
         }
     }
 
@@ -2349,8 +2307,8 @@ or even better, C<"Gc=LC">).
 Many Unicode properties have more than one name (or alias).  C<prop_invmap>
 understands all of these, including Perl extensions to them.  Ambiguities are
 resolved as described above for L</prop_aliases()>.  The Perl internal
-property "Perl_Decimal_Digit, described below, is also accepted.  C<undef> is
-returned if the property name is unknown.
+property "Perl_Decimal_Digit, described below, is also accepted.  An empty
+list is returned if the property name is unknown.
 See L<perluniprops/Properties accessible through Unicode::UCD> for the
 properties acceptable as inputs to this function.
 
@@ -3225,159 +3183,182 @@ RETRY:
 
     my $requires_adjustment = $format =~ /^a/;
 
-    # The LIST input lines look like:
-    # ...
-    # 0374\t\tCommon
-    # 0375\t0377\tGreek   # [3]
-    # 037A\t037D\tGreek   # [4]
-    # 037E\t\tCommon
-    # 0384\t\tGreek
-    # ...
-    #
-    # Convert them to like
-    # 0374 => Common
-    # 0375 => Greek
-    # 0378 => $missing
-    # 037A => Greek
-    # 037E => Common
-    # 037F => $missing
-    # 0384 => Greek
-    #
-    # For binary properties, the final non-comment column is absent, and
-    # assumed to be 'Y'.
+    if ($swash->{'LIST'} =~ /^V/) {
+        @invlist = split "\n", $swash->{'LIST'} =~ s/ \s* (?: \# .* )? $ //xmgr;
+        shift @invlist;
+        foreach my $i (0 .. @invlist - 1) {
+            $invmap[$i] = ($i % 2 == 0) ? 'Y' : 'N'
+        }
 
-    foreach my $range (split "\n", $swash->{'LIST'}) {
-        $range =~ s/ \s* (?: \# .* )? $ //xg; # rmv trailing space, comments
-
-        # Find the beginning and end of the range on the line
-        my ($hex_begin, $hex_end, $map) = split "\t", $range;
-        my $begin = hex $hex_begin;
-        my $end = (defined $hex_end && $hex_end ne "")
-                  ? hex $hex_end
-                  : $begin;
-
-        # Each time through the loop (after the first):
-        # $invlist[-2] contains the beginning of the previous range processed
-        # $invlist[-1] contains the end+1 of the previous range processed
-        # $invmap[-2] contains the value of the previous range processed
-        # $invmap[-1] contains the default value for missing ranges ($missing)
+        # The map includes lines for all code points; add one for the range
+        # from 0 to the first Y.
+        if ($invlist[0] != 0) {
+            unshift @invlist, 0;
+            unshift @invmap, 'N';
+        }
+    }
+    else {
+        # The LIST input lines look like:
+        # ...
+        # 0374\t\tCommon
+        # 0375\t0377\tGreek   # [3]
+        # 037A\t037D\tGreek   # [4]
+        # 037E\t\tCommon
+        # 0384\t\tGreek
+        # ...
         #
-        # Thus, things are set up for the typical case of a new non-adjacent
-        # range of non-missings to be added.  But, if the new range is
-        # adjacent, it needs to replace the [-1] element; and if the new
-        # range is a multiple value of the previous one, it needs to be added
-        # to the [-2] map element.
+        # Convert them to like
+        # 0374 => Common
+        # 0375 => Greek
+        # 0378 => $missing
+        # 037A => Greek
+        # 037E => Common
+        # 037F => $missing
+        # 0384 => Greek
+        #
+        # For binary properties, the final non-comment column is absent, and
+        # assumed to be 'Y'.
 
-        # The first time through, everything will be empty.  If the property
-        # doesn't have a range that begins at 0, add one that maps to $missing
-        if (! @invlist) {
-            if ($begin != 0) {
-                push @invlist, 0;
-                push @invmap, $missing;
-            }
-        }
-        elsif (@invlist > 1 && $invlist[-2] == $begin) {
+        foreach my $range (split "\n", $swash->{'LIST'}) {
+            $range =~ s/ \s* (?: \# .* )? $ //xg; # rmv trailing space, comments
 
-            # Here we handle the case where the input has multiple entries for
-            # each code point.  mktables should have made sure that each such
-            # range contains only one code point.  At this point, $invlist[-1]
-            # is the $missing that was added at the end of the last loop
-            # iteration, and [-2] is the last real input code point, and that
-            # code point is the same as the one we are adding now, making the
-            # new one a multiple entry.  Add it to the existing entry, either
-            # by pushing it to the existing list of multiple entries, or
-            # converting the single current entry into a list with both on it.
-            # This is all we need do for this iteration.
+            # Find the beginning and end of the range on the line
+            my ($hex_begin, $hex_end, $map) = split "\t", $range;
+            my $begin = hex $hex_begin;
+            no warnings 'portable';
+            my $end = (defined $hex_end && $hex_end ne "")
+                    ? hex $hex_end
+                    : $begin;
 
-            if ($end != $begin) {
-                croak __PACKAGE__, ":prop_invmap: Multiple maps per code point in '$prop' require single-element ranges: begin=$begin, end=$end, map=$map";
-            }
-            if (! ref $invmap[-2]) {
-                $invmap[-2] = [ $invmap[-2], $map ];
-            }
-            else {
-                push @{$invmap[-2]}, $map;
-            }
-            $has_multiples = 1;
-            next;
-        }
-        elsif ($invlist[-1] == $begin) {
-
-            # If the input isn't in the most compact form, so that there are
-            # two adjacent ranges that map to the same thing, they should be
-            # combined (EXCEPT where the arrays require adjustments, in which
-            # case everything is already set up correctly).  This happens in
-            # our constructed dt mapping, as Element [-2] is the map for the
-            # latest range so far processed.  Just set the beginning point of
-            # the map to $missing (in invlist[-1]) to 1 beyond where this
-            # range ends.  For example, in
-            # 12\t13\tXYZ
-            # 14\t17\tXYZ
-            # we have set it up so that it looks like
-            # 12 => XYZ
-            # 14 => $missing
+            # Each time through the loop (after the first):
+            # $invlist[-2] contains the beginning of the previous range processed
+            # $invlist[-1] contains the end+1 of the previous range processed
+            # $invmap[-2] contains the value of the previous range processed
+            # $invmap[-1] contains the default value for missing ranges
+            #                                                       ($missing)
             #
-            # We now see that it should be
-            # 12 => XYZ
-            # 18 => $missing
-            if (! $requires_adjustment && @invlist > 1 && ( (defined $map)
-                                  ? $invmap[-2] eq $map
-                                  : $invmap[-2] eq 'Y'))
-            {
-                $invlist[-1] = $end + 1;
-                next;
+            # Thus, things are set up for the typical case of a new
+            # non-adjacent range of non-missings to be added.  But, if the new
+            # range is adjacent, it needs to replace the [-1] element; and if
+            # the new range is a multiple value of the previous one, it needs
+            # to be added to the [-2] map element.
+
+            # The first time through, everything will be empty.  If the
+            # property doesn't have a range that begins at 0, add one that
+            # maps to $missing
+            if (! @invlist) {
+                if ($begin != 0) {
+                    push @invlist, 0;
+                    push @invmap, $missing;
+                }
             }
+            elsif (@invlist > 1 && $invlist[-2] == $begin) {
 
-            # Here, the range started in the previous iteration that maps to
-            # $missing starts at the same code point as this range.  That
-            # means there is no gap to fill that that range was intended for,
-            # so we just pop it off the parallel arrays.
-            pop @invlist;
-            pop @invmap;
-        }
+                # Here we handle the case where the input has multiple entries
+                # for each code point.  mktables should have made sure that
+                # each such range contains only one code point.  At this
+                # point, $invlist[-1] is the $missing that was added at the
+                # end of the last loop iteration, and [-2] is the last real
+                # input code point, and that code point is the same as the one
+                # we are adding now, making the new one a multiple entry.  Add
+                # it to the existing entry, either by pushing it to the
+                # existing list of multiple entries, or converting the single
+                # current entry into a list with both on it.  This is all we
+                # need do for this iteration.
 
-        # Add the range beginning, and the range's map.
-        push @invlist, $begin;
-        if ($returned_prop eq 'ToDm') {
-
-            # The decomposition maps are either a line like <hangul syllable>
-            # which are to be taken as is; or a sequence of code points in hex
-            # and separated by blanks.  Convert them to decimal, and if there
-            # is more than one, use an anonymous array as the map.
-            if ($map =~ /^ < /x) {
-                push @invmap, $map;
-            }
-            else {
-                my @map = split " ", $map;
-                if (@map == 1) {
-                    push @invmap, $map[0];
+                if ($end != $begin) {
+                    croak __PACKAGE__, ":prop_invmap: Multiple maps per code point in '$prop' require single-element ranges: begin=$begin, end=$end, map=$map";
+                }
+                if (! ref $invmap[-2]) {
+                    $invmap[-2] = [ $invmap[-2], $map ];
                 }
                 else {
-                    push @invmap, \@map;
+                    push @{$invmap[-2]}, $map;
+                }
+                $has_multiples = 1;
+                next;
+            }
+            elsif ($invlist[-1] == $begin) {
+
+                # If the input isn't in the most compact form, so that there
+                # are two adjacent ranges that map to the same thing, they
+                # should be combined (EXCEPT where the arrays require
+                # adjustments, in which case everything is already set up
+                # correctly).  This happens in our constructed dt mapping, as
+                # Element [-2] is the map for the latest range so far
+                # processed.  Just set the beginning point of the map to
+                # $missing (in invlist[-1]) to 1 beyond where this range ends.
+                # For example, in
+                # 12\t13\tXYZ
+                # 14\t17\tXYZ
+                # we have set it up so that it looks like
+                # 12 => XYZ
+                # 14 => $missing
+                #
+                # We now see that it should be
+                # 12 => XYZ
+                # 18 => $missing
+                if (! $requires_adjustment && @invlist > 1 && ( (defined $map)
+                                    ? $invmap[-2] eq $map
+                                    : $invmap[-2] eq 'Y'))
+                {
+                    $invlist[-1] = $end + 1;
+                    next;
+                }
+
+                # Here, the range started in the previous iteration that maps
+                # to $missing starts at the same code point as this range.
+                # That means there is no gap to fill that that range was
+                # intended for, so we just pop it off the parallel arrays.
+                pop @invlist;
+                pop @invmap;
+            }
+
+            # Add the range beginning, and the range's map.
+            push @invlist, $begin;
+            if ($returned_prop eq 'ToDm') {
+
+                # The decomposition maps are either a line like <hangul
+                # syllable> which are to be taken as is; or a sequence of code
+                # points in hex and separated by blanks.  Convert them to
+                # decimal, and if there is more than one, use an anonymous
+                # array as the map.
+                if ($map =~ /^ < /x) {
+                    push @invmap, $map;
+                }
+                else {
+                    my @map = split " ", $map;
+                    if (@map == 1) {
+                        push @invmap, $map[0];
+                    }
+                    else {
+                        push @invmap, \@map;
+                    }
                 }
             }
-        }
-        else {
+            else {
 
-            # Otherwise, convert hex formatted list entries to decimal; add a
-            # 'Y' map for the missing value in binary properties, or
-            # otherwise, use the input map unchanged.
-            $map = ($format eq 'x' || $format eq 'ax')
-                ? hex $map
-                : $format eq 'b'
-                  ? 'Y'
-                  : $map;
-            push @invmap, $map;
-        }
+                # Otherwise, convert hex formatted list entries to decimal;
+                # add a 'Y' map for the missing value in binary properties, or
+                # otherwise, use the input map unchanged.
+                $map = ($format eq 'x' || $format eq 'ax')
+                    ? hex $map
+                    : $format eq 'b'
+                    ? 'Y'
+                    : $map;
+                push @invmap, $map;
+            }
 
-        # We just started a range.  It ends with $end.  The gap between it and
-        # the next element in the list must be filled with a range that maps
-        # to the default value.  If there is no gap, the next iteration will
-        # pop this, unless there is no next iteration, and we have filled all
-        # of the Unicode code space, so check for that and skip.
-        if ($end < $MAX_UNICODE_CODEPOINT) {
-            push @invlist, $end + 1;
-            push @invmap, $missing;
+            # We just started a range.  It ends with $end.  The gap between it
+            # and the next element in the list must be filled with a range
+            # that maps to the default value.  If there is no gap, the next
+            # iteration will pop this, unless there is no next iteration, and
+            # we have filled all of the Unicode code space, so check for that
+            # and skip.
+            if ($end < $Unicode::UCD::MAX_CP) {
+                push @invlist, $end + 1;
+                push @invmap, $missing;
+            }
         }
     }
 
@@ -3388,10 +3369,15 @@ RETRY:
         push @invmap, $missing;
     }
 
-    # And add in standard element that all non-Unicode code points map to:
-    # $missing
-    push @invlist, $MAX_UNICODE_CODEPOINT + 1;
-    push @invmap, $missing;
+    # The final element is always for just the above-Unicode code points.  If
+    # not already there, add it.  It merely splits the current final range
+    # that extends to infinity into two elements, each with the same map.
+    # (This is to conform with the API that says the final element is for
+    # $MAX_UNICODE_CODEPOINT + 1 .. INFINITY.)
+    if ($invlist[-1] != $MAX_UNICODE_CODEPOINT + 1) {
+        push @invmap, $invmap[-1];
+        push @invlist, $MAX_UNICODE_CODEPOINT + 1;
+    }
 
     # The second component of the map are those values that require
     # non-standard specification, stored in SPECIALS.  These override any

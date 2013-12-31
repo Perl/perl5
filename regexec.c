@@ -1489,7 +1489,6 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
     switch (OP(c)) {
     case ANYOF:
     case ANYOF_SYNTHETIC:
-    case ANYOF_WARN_SUPER:
         if (utf8_target) {
             REXEC_FBC_UTF8_CLASS_SCAN(
                       reginclass(prog, c, (U8*)s, utf8_target));
@@ -4386,7 +4385,6 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    break;
 
 	case ANYOF:  /*  /[abc]/       */
-	case ANYOF_WARN_SUPER:
             if (NEXTCHR_IS_EOS)
                 sayNO;
 	    if (utf8_target) {
@@ -7001,7 +6999,6 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
 	break;
     }
     case ANYOF:
-    case ANYOF_WARN_SUPER:
 	if (utf8_target) {
 	    while (hardcount < max
                    && scan < loceol
@@ -7544,16 +7541,22 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
 	}
 
         if (UNICODE_IS_SUPER(c)
-            && OP(n) == ANYOF_WARN_SUPER
+            && (flags & ANYOF_WARN_SUPER)
             && ckWARN_d(WARN_NON_UNICODE))
         {
             Perl_warner(aTHX_ packWARN(WARN_NON_UNICODE),
-                "Code point 0x%04"UVXf" is not Unicode, all \\p{} matches fail; all \\P{} matches succeed", c);
+                "Matched non-Unicode code point 0x%04"UVXf" against Unicode property; may not be portable", c);
         }
     }
 
+#if ANYOF_INVERT != 1
+    /* Depending on compiler optimization cBOOL takes time, so if don't have to
+     * use it, don't */
+#   error ANYOF_INVERT needs to be set to 1, or guarded with cBOOL below,
+#endif
+
     /* The xor complements the return if to invert: 1^1 = 0, 1^0 = 1 */
-    return cBOOL(flags & ANYOF_INVERT) ^ match;
+    return (flags & ANYOF_INVERT) ^ match;
 }
 
 STATIC U8 *

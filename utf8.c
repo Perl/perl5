@@ -4140,43 +4140,71 @@ Perl__swash_to_invlist(pTHX_ SV* const swash)
     loc = (char *) l;
     lend = l + lcur;
 
-    /* Scan the input to count the number of lines to preallocate array size
-     * based on worst possible case, which is each line in the input creates 2
-     * elements in the inversion list: 1) the beginning of a range in the list;
-     * 2) the beginning of a range not in the list.  */
-    while ((loc = (strchr(loc, '\n'))) != NULL) {
-	elements += 2;
-	loc++;
+    if (*l == 'V') {    /*  Inversion list format */
+        char *after_strtol = (char *) lend;
+        UV element0;
+        UV* other_elements_ptr;
+
+        /* The first number is a count of the rest */
+        l++;
+        elements = Strtoul((char *)l, &after_strtol, 10);
+        l = (U8 *) after_strtol;
+
+        /* Get the 0th element, which is needed to setup the inversion list */
+        element0 = (UV) Strtoul((char *)l, &after_strtol, 10);
+        l = (U8 *) after_strtol;
+        invlist = _setup_canned_invlist(elements, element0, &other_elements_ptr);
+        elements--;
+
+        /* Then just populate the rest of the input */
+        while (elements-- > 0) {
+            if (l > lend) {
+                Perl_croak(aTHX_ "panic: Expecting %"UVuf" more elements than available", elements);
+            }
+            *other_elements_ptr++ = (UV) Strtoul((char *)l, &after_strtol, 10);
+            l = (U8 *) after_strtol;
+        }
     }
+    else {
 
-    /* If the ending is somehow corrupt and isn't a new line, add another
-     * element for the final range that isn't in the inversion list */
-    if (! (*lend == '\n'
-	|| (*lend == '\0' && (lcur == 0 || *(lend - 1) == '\n'))))
-    {
-	elements++;
-    }
+        /* Scan the input to count the number of lines to preallocate array
+         * size based on worst possible case, which is each line in the input
+         * creates 2 elements in the inversion list: 1) the beginning of a
+         * range in the list; 2) the beginning of a range not in the list.  */
+        while ((loc = (strchr(loc, '\n'))) != NULL) {
+            elements += 2;
+            loc++;
+        }
 
-    invlist = _new_invlist(elements);
+        /* If the ending is somehow corrupt and isn't a new line, add another
+         * element for the final range that isn't in the inversion list */
+        if (! (*lend == '\n'
+            || (*lend == '\0' && (lcur == 0 || *(lend - 1) == '\n'))))
+        {
+            elements++;
+        }
 
-    /* Now go through the input again, adding each range to the list */
-    while (l < lend) {
-	UV start, end;
-	UV val;		/* Not used by this function */
+        invlist = _new_invlist(elements);
 
-	l = S_swash_scan_list_line(aTHX_ l, lend, &start, &end, &val,
-					 cBOOL(octets), typestr);
+        /* Now go through the input again, adding each range to the list */
+        while (l < lend) {
+            UV start, end;
+            UV val;		/* Not used by this function */
 
-	if (l > lend) {
-	    break;
-	}
+            l = S_swash_scan_list_line(aTHX_ l, lend, &start, &end, &val,
+                                            cBOOL(octets), typestr);
 
-	invlist = _add_range_to_invlist(invlist, start, end);
+            if (l > lend) {
+                break;
+            }
+
+            invlist = _add_range_to_invlist(invlist, start, end);
+        }
     }
 
     /* Invert if the data says it should be */
     if (invert_it_svp && SvUV(*invert_it_svp)) {
-	_invlist_invert_prop(invlist);
+	_invlist_invert(invlist);
     }
 
     /* This code is copied from swatch_get()

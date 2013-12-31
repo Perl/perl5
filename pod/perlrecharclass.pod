@@ -389,15 +389,19 @@ It is also possible to define your own properties. This is discussed in
 L<perlunicode/User-Defined Character Properties>.
 
 Unicode properties are defined (surprise!) only on Unicode code points.
-A warning is raised and all matches fail on non-Unicode code points
-(those above the legal Unicode maximum of 0x10FFFF).  This can be
-somewhat surprising,
+Starting in v5.20, when matching against C<\p> and C<\P>, Perl treats
+non-Unicode code points (those above the legal Unicode maximum of
+0x10FFFF) as if they were typical unassigned Unicode code points.
 
- chr(0x110000) =~ \p{ASCII_Hex_Digit=True}      # Fails.
- chr(0x110000) =~ \p{ASCII_Hex_Digit=False}     # Also fails!
+Prior to v5.20, Perl raised a warning and made all matches fail on
+non-Unicode code points.  This could be somewhat surprising:
 
-Even though these two matches might be thought of as complements, they
-are so only on Unicode code points.
+ chr(0x110000) =~ \p{ASCII_Hex_Digit=True}     # Fails on Perls < v5.20.
+ chr(0x110000) =~ \p{ASCII_Hex_Digit=False}    # Also fails on Perls
+                                               # < v5.20
+
+Even though these two matches might be thought of as complements, until
+v5.20 they were so only on Unicode code points.
 
 =head4 Examples
 

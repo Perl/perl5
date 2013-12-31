@@ -430,6 +430,11 @@ static const scan_data_t zero_scan_data =
 
 #define FOLD cBOOL(RExC_flags & RXf_PMf_FOLD)
 
+/* For programs that want to be strictly Unicode compatible by dying if any
+ * attempt is made to match a non-Unicode code point against a Unicode
+ * property.  */
+#define ALWAYS_WARN_SUPER  ckDEAD(packWARN(WARN_NON_UNICODE))
+
 #define OOB_NAMEDCLASS		-1
 
 /* There is no code point that is out-of-bounds, so this is problematic.  But
@@ -1075,12 +1080,12 @@ S_ssc_flags_and(regnode_ssc *ssc, const U8 and_with)
      * The flags 'and_with' should not come from another SSC (otherwise the
      * EMPTY_STRING flag won't work) */
 
-    const U8 ssc_only_flags = ANYOF_FLAGS(ssc) & ~ANYOF_LOCALE_FLAGS;
+    const U8 ssc_only_flags = ANYOF_FLAGS(ssc) & ~ANYOF_COMMON_FLAGS;
 
     PERL_ARGS_ASSERT_SSC_FLAGS_AND;
 
     /* Use just the SSC-related flags from 'and_with' */
-    ANYOF_FLAGS(ssc) &= (and_with & ANYOF_LOCALE_FLAGS);
+    ANYOF_FLAGS(ssc) &= (and_with & ANYOF_COMMON_FLAGS);
     ANYOF_FLAGS(ssc) |= ssc_only_flags;
 }
 
@@ -1107,11 +1112,30 @@ S_ssc_and(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
     if (OP(and_with) == ANYOF_SYNTHETIC) {
         anded_cp_list = and_with->invlist;
         anded_flags = ANYOF_FLAGS(and_with);
+
+        /* XXX This is a kludge around what appears to be deficiencies in the
+         * optimizer.  If we make S_ssc_anything() add in the WARN_SUPER flag,
+         * there are paths through the optimizer where it doesn't get weeded
+         * out when it should.  And if we don't make some extra provision for
+         * it like the code just below, it doesn't get added when it should.
+         * This solution is to add it only when AND'ing, which is here, and
+         * only when what is being AND'ed is the pristine, original node
+         * matching anything.  Thus it is like adding it to ssc_anything() but
+         * only when the result is to be AND'ed.  Probably the same solution
+         * could be adopted for the same problem we have with /l matching,
+         * which is solved differently in S_ssc_init(), and that would lead to
+         * fewer false positives than that solution has.  But if this solution
+         * creates bugs, the consequences are only that a warning isn't raised
+         * that should be; while the consequences for having /l bugs is
+         * incorrect matches */
+        if (ssc_is_anything(and_with)) {
+            anded_flags |= ANYOF_WARN_SUPER;
+        }
     }
     else {
         anded_cp_list = get_ANYOF_cp_list_for_ssc(pRExC_state,
                                         (regnode_charclass_posixl*) and_with);
-        anded_flags = ANYOF_FLAGS(and_with) & ANYOF_LOCALE_FLAGS;
+        anded_flags = ANYOF_FLAGS(and_with) & ANYOF_COMMON_FLAGS;
     }
 
     ANYOF_FLAGS(ssc) &= anded_flags;
@@ -1260,7 +1284,7 @@ S_ssc_or(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
     else {
         ored_cp_list = get_ANYOF_cp_list_for_ssc(pRExC_state,
                                         (regnode_charclass_posixl*) or_with);
-        ored_flags = ANYOF_FLAGS(or_with) & ANYOF_LOCALE_FLAGS;
+        ored_flags = ANYOF_FLAGS(or_with) & ANYOF_COMMON_FLAGS;
     }
 
     ANYOF_FLAGS(ssc) |= ored_flags;
@@ -1397,7 +1421,7 @@ S_ssc_finalize(pTHX_ RExC_state_t *pRExC_state, regnode_ssc *ssc)
     /* The code in this file assumes that all but these flags aren't relevant
      * to the SSC, except ANYOF_EMPTY_STRING, which should be cleared by the
      * time we reach here */
-    assert(! (ANYOF_FLAGS(ssc) & ~ANYOF_LOCALE_FLAGS));
+    assert(! (ANYOF_FLAGS(ssc) & ~ANYOF_COMMON_FLAGS));
 
     populate_ANYOF_from_invlist( (regnode *) ssc, &invlist);
 
@@ -4620,7 +4644,6 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
 		    }
 		    break;
 
-                case ANYOF_WARN_SUPER:
                 case ANYOF:
 		    if (flags & SCF_DO_STCLASS_AND)
 			ssc_and(pRExC_state, data->start_class,
@@ -8552,6 +8575,34 @@ Perl__add_range_to_invlist(pTHX_ SV* invlist, const UV start, const UV end)
     return invlist;
 }
 
+SV*
+Perl__setup_canned_invlist(pTHX_ const STRLEN size, const UV element0, UV** other_elements_ptr)
+{
+    /* Create and return an inversion list whose contents are to be populated
+     * by the caller.  The caller gives the number of elements (in 'size') and
+     * the very first element ('element0').  This function will set
+     * '*other_elements_ptr' to an array of UVs, where the remaining elements
+     * are to be placed.
+     *
+     * Obviously there is some trust involved that the caller will properly
+     * fill in the other elements of the array.
+     *
+     * (The first element needs to be passed in, as the underlying code does
+     * things differently depending on whether it is zero or non-zero) */
+
+    SV* invlist = _new_invlist(size);
+    bool offset;
+
+    PERL_ARGS_ASSERT__SETUP_CANNED_INVLIST;
+
+    _append_range_to_invlist(invlist, element0, element0);
+    offset = *get_invlist_offset_addr(invlist);
+
+    invlist_set_len(invlist, size, offset);
+    *other_elements_ptr = invlist_array(invlist) + 1;
+    return invlist;
+}
+
 #endif
 
 PERL_STATIC_INLINE SV*
@@ -8580,43 +8631,6 @@ Perl__invlist_invert(pTHX_ SV* const invlist)
     *get_invlist_offset_addr(invlist) = ! *get_invlist_offset_addr(invlist);
 }
 
-void
-Perl__invlist_invert_prop(pTHX_ SV* const invlist)
-{
-    /* Complement the input inversion list (which must be a Unicode property,
-     * all of which don't match above the Unicode maximum code point.)  And
-     * Perl has chosen to not have the inversion match above that either.  This
-     * adds a 0x110000 if the list didn't end with it, and removes it if it did
-     */
-
-    UV len;
-    UV* array;
-
-    PERL_ARGS_ASSERT__INVLIST_INVERT_PROP;
-
-    _invlist_invert(invlist);
-
-    len = _invlist_len(invlist);
-
-    if (len != 0) { /* If empty do nothing */
-	array = invlist_array(invlist);
-	if (array[len - 1] != PERL_UNICODE_MAX + 1) {
-	    /* Add 0x110000.  First, grow if necessary */
-	    len++;
-	    if (invlist_max(invlist) < len) {
-		invlist_extend(invlist, len);
-		array = invlist_array(invlist);
-	    }
-	    invlist_set_len(invlist, len, *get_invlist_offset_addr(invlist));
-	    array[len - 1] = PERL_UNICODE_MAX + 1;
-	}
-	else {  /* Remove the 0x110000 */
-	    invlist_set_len(invlist, len - 1, *get_invlist_offset_addr(invlist));
-	}
-    }
-
-    return;
-}
 #endif
 
 PERL_STATIC_INLINE SV*
@@ -12876,6 +12890,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
      * Unicode range? */
     bool runtime_posix_matches_above_Unicode = FALSE;
 
+    bool warn_super = ALWAYS_WARN_SUPER;
+
     regnode * const orig_emit = RExC_emit; /* Save the original RExC_emit in
         case we need to change the emitted regop to an EXACT. */
     const char * orig_parse = RExC_parse;
@@ -13142,7 +13158,7 @@ parseit:
                          * would cause things in <depends_list> to match
                          * inappropriately, except that any \p{}, including
                          * this one forces Unicode semantics, which means there
-                         * is <no depends_list> */
+                         * is no <depends_list> */
                         ANYOF_FLAGS(ret) |= ANYOF_NONBITMAP_NON_UTF8;
                     }
                     else {
@@ -13150,9 +13166,23 @@ parseit:
                         /* Here, did get the swash and its inversion list.  If
                          * the swash is from a user-defined property, then this
                          * whole character class should be regarded as such */
-                        has_user_defined_property =
-                                    (swash_init_flags
-                                     & _CORE_SWASH_INIT_USER_DEFINED_PROPERTY);
+                        if (swash_init_flags
+                            & _CORE_SWASH_INIT_USER_DEFINED_PROPERTY)
+                        {
+                            has_user_defined_property = TRUE;
+                        }
+                        else if
+                            /* We warn on matching an above-Unicode code point
+                             * if the match would return true, except don't
+                             * warn for \p{All}, which has exactly one element
+                             * = 0 */
+                            (_invlist_contains_cp(invlist, 0x110000)
+                                && (! (_invlist_len(invlist) == 1
+                                       && *invlist_array(invlist) == 0)))
+                        {
+                            warn_super = TRUE;
+                        }
+
 
                         /* Invert if asking for the complement */
                         if (value == 'P') {
@@ -13927,11 +13957,19 @@ parseit:
         return ret;
     }
 
-    /* If the character class contains only a single element, it may be
-     * optimizable into another node type which is smaller and runs faster.
-     * Check if this is the case for this class */
-    if ((element_count == 1 && ! ret_invlist)
-        || UNLIKELY(posixl_matches_all))
+    /* Here, we've gone through the entire class and dealt with multi-char
+     * folds.  We are now in a position that we can do some checks to see if we
+     * can optimize this ANYOF node into a simpler one, even in Pass 1.
+     * Currently we only do two checks:
+     * 1) is in the unlikely event that the user has specified both, eg. \w and
+     *    \W under /l, then the class matches everything.  (This optimization
+     *    is done only to make the optimizer code run later work.)
+     * 2) if the character class contains only a single element (including a
+     *    single range), we see if there is an equivalent node for it.
+     * Other checks are possible */
+    if (! ret_invlist   /* Can't optimize if returning the constructed
+                           inversion list */
+        && (UNLIKELY(posixl_matches_all) || element_count == 1))
     {
         U8 op = END;
         U8 arg = 0;
@@ -14378,7 +14416,6 @@ parseit:
      * <depends_list>, because having a Unicode property forces Unicode
      * semantics */
     if (properties) {
-        bool warn_super = ! has_user_defined_property;
         if (cp_list) {
 
             /* If it matters to the final outcome, see if a non-property
@@ -14407,7 +14444,7 @@ parseit:
         }
 
         if (warn_super) {
-            OP(ret) = ANYOF_WARN_SUPER;
+            ANYOF_FLAGS(ret) |= ANYOF_WARN_SUPER;
         }
     }
 
@@ -14483,7 +14520,12 @@ parseit:
         && ! invert
         && ! depends_list
         && ! (ANYOF_FLAGS(ret) & ANYOF_POSIXL)
-        && ! HAS_NONLOCALE_RUNTIME_PROPERTY_DEFINITION)
+        && ! HAS_NONLOCALE_RUNTIME_PROPERTY_DEFINITION
+
+           /* We don't optimize if we are supposed to make sure all non-Unicode
+            * code points raise a warning, as only ANYOF nodes have this check.
+            * */
+        && ! ((ANYOF_FLAGS(ret) | ANYOF_WARN_SUPER) && ALWAYS_WARN_SUPER))
     {
         UV start, end;
         U8 op = END;  /* The optimzation node-type */

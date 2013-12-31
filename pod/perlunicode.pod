@@ -371,13 +371,8 @@ of which under C</i> match C<PosixAlpha>.
 numerals, come in both upper and lower case so they are C<Cased>, but aren't considered
 letters, so they aren't C<Cased_Letter>s.)
 
-The result is undefined if you try to match a non-Unicode code point
-(that is, one above 0x10FFFF) against a Unicode property.  Currently, a
-warning is raised, and the match will fail.  In some cases, this is
-counterintuitive, as both these fail:
-
- chr(0x110000) =~ \p{ASCII_Hex_Digit=True}      # Fails.
- chr(0x110000) =~ \p{ASCII_Hex_Digit=False}     # Fails!
+See L</Beyond Unicode code points> for special considerations when
+matching Unicode properties against non-Unicode code points.
 
 =head3 B<General_Category>
 
@@ -634,8 +629,10 @@ L<Unicode Standard|http://www.unicode.org/reports/tr44>.
 
 =item B<C<\p{All}>>
 
-This matches any of the 1_114_112 Unicode code points.  It is a synonym for
-C<\p{Any}>.
+This matches every possible code point.  It is equivalent to C<qr/./s>.
+Unlike all the other non-user-defined C<\p{}> property matches, no
+warning is ever generated if this is property is matched against a
+non-Unicode code point (see L</Beyond Unicode code points> below).
 
 =item B<C<\p{Alnum}>>
 
@@ -643,8 +640,8 @@ This matches any C<\p{Alphabetic}> or C<\p{Decimal_Number}> character.
 
 =item B<C<\p{Any}>>
 
-This matches any of the 1_114_112 Unicode code points.  It is a synonym for
-C<\p{All}>.
+This matches any of the 1_114_112 Unicode code points.  It is a synonym
+for C<\p{Unicode}>.
 
 =item B<C<\p{ASCII}>>
 
@@ -795,6 +792,11 @@ Under case-sensitive matching, these both match the same code points as
 C<\p{General Category=Titlecase_Letter}> (C<\p{gc=lt}>).  The difference
 is that under C</i> caseless matching, these match the same as
 C<\p{Cased}>, whereas C<\p{gc=lt}> matches C<\p{Cased_Letter>).
+
+=item B<C<\p{Unicode}>>
+
+This matches any of the 1_114_112 Unicode code points.
+C<\p{Any}>.
 
 =item B<C<\p{VertSpace}>>
 
@@ -956,9 +958,9 @@ by two (or more) classes.  It's important to remember not to use C<"&"> for
 the first set; that would be intersecting with nothing, resulting in an
 empty set.
 
-(Note that official Unicode properties differ from these in that they
-automatically exclude non-Unicode code points and a warning is raised if
-a match is attempted on one of those.)
+Unlike non-user-defined C<\p{}> property matches, no warning is ever
+generated if these properties are matched against a non-Unicode code
+point (see L</Beyond Unicode code points> below).
 
 =head2 User-Defined Case Mappings (for serious hackers only)
 
@@ -1311,10 +1313,112 @@ operations on code points up through that.  But Perl works on code
 points up to the maximum permissible unsigned number available on the
 platform.  However, Perl will not accept these from input streams unless
 lax rules are being used, and will warn (using the warning category
-"non_unicode", which is a sub-category of "utf8") if an attempt is made to
-operate on or output them.  For example, C<uc(0x11_0000)> will generate
-this warning, returning the input parameter as its result, as the upper
-case of every non-Unicode code point is the code point itself.
+C<"non_unicode">, which is a sub-category of C<"utf8">) if any are output.
+
+Since Unicode rules are not defined on these code points, if a
+Unicode-defined operation is done on them, Perl uses what we believe are
+sensible rules, while generally warning, using the C<"non_unicode">
+category.  For example, C<uc("\x{11_0000}")> will generate such a
+warning, returning the input parameter as its result, since Perl defines
+the uppercase of every non-Unicode code point to be the code point
+itself.  In fact, all the case changing operations, not just
+uppercasing, work this way.
+
+The situation with matching Unicode properties in regular expressions,
+the C<\p{}> and C<\P{}> constructs, against these code points is not as
+clear cut, and how these are handled has changed as we've gained
+experience.
+
+One possibility is to treat any match against these code points as
+undefined.  But since Perl doesn't have the concept of a match being
+undefined, it converts this to failing or C<FALSE>.  This is almost, but
+not quite, what Perl did from v5.14 (when use of these code points
+became generally reliable) through v5.18.  The difference is that Perl
+treated all C<\p{}> matches as failing, but all C<\P{}> matches as
+succeeding.
+
+One problem with this is that it leads to unexpected, and confusting
+results in some cases:
+
+ chr(0x110000) =~ \p{ASCII_Hex_Digit=True}      # Failed on <= v5.18
+ chr(0x110000) =~ \p{ASCII_Hex_Digit=False}     # Failed! on <= v5.18
+
+That is, it treated both matches as undefined, and converted that to
+false (raising a warning on each).  The first case is the expected
+result, but the second is likely counterintuitive: "How could both be
+false when they are complements?"  Another problem was that the
+implementation optimized many Unicode property matches down to already
+existing simpler, faster operations, which don't raise the warning.  We
+chose to not forgo those optimizations, which help the vast majority of
+matches, just to generate a warning for the unlikely event that an
+above-Unicode code point is being matched against.
+
+As a result of these problems, starting in v5.20, what Perl does is
+to treat non-Unicode code points as just typical unassigned Unicode
+characters, and matches accordingly.  (Note: Unicode has atypical
+unassigned code points.  For example, it has non-character code points,
+and ones that, when they do get assigned, are destined to be written
+Right-to-left, as Arabic and Hebrew are.  Perl assumes that no
+non-Unicode code point has any atypical properties.)
+
+Perl, in most cases, will raise a warning when matching an above-Unicode
+code point against a Unicode property when the result is C<TRUE> for
+C<\p{}>, and C<FALSE> for C<\P{}>.  For example:
+
+ chr(0x110000) =~ \p{ASCII_Hex_Digit=True}      # Fails, no warning
+ chr(0x110000) =~ \p{ASCII_Hex_Digit=False}     # Succeeds, with warning
+
+In both these examples, the character being matched is non-Unicode, so
+Unicode doesn't define how it should match.  It clearly isn't an ASCII
+hex digit, so the first example clearly should fail, and so it does,
+with no warning.  But it is arguable that the second example should have
+an undefined, hence C<FALSE>, result.  So a warning is raised for it.
+
+Thus the warning is raised for many fewer cases than in earlier Perls,
+and only when what the result is could be arguable.  It turns out that
+none of the optimizations made by Perl (or are ever likely to be made)
+cause the warning to be skipped, so it solves both problems of Perl's
+earlier approach.  The most commonly used property that is affected by
+this change is C<\p{Unassigned}> which is a short form for
+C<\p{General_Category=Unassigned}>.  Starting in v5.20, all non-Unicode
+code points are considered C<Unassigned>.  In earlier releases the
+matches failed because the result was considered undefined.
+
+The only place where the warning is not raised when it might ought to
+have been is if optimizations cause the whole pattern match to not even
+be attempted.  For example, Perl may figure out that for a string to
+match a certain regular expression pattern, the string has to contain
+the substring C<"foobar">.  Before attempting the match, Perl may look
+for that substring, and if not found, immediately fail the match without
+actually trying it; so no warning gets generated even if the string
+contains an above-Unicode code point.
+
+This behavior is more "Do what I mean" than in earlier Perls for most
+applications.  But it catches fewer issues for code that needs to be
+strictly Unicode compliant.  Therefore there is an additional mode of
+operation available to accommodate such code.  This mode is enabled if a
+regular expression pattern is compiled within the lexical scope where
+the C<"non_unicode"> warning class has been made fatal, say by:
+
+ use warnings FATAL => "non_unicode"
+
+(see L<perllexwarn>).  In this mode of operation, Perl will raise the
+warning for all matches against a non-Unicode code point (not just the
+arguable ones), and it skips the optimizations that might cause the
+warning to not be output.  (It currently still won't warn if the match
+isn't even attempted, like in the C<"foobar"> example above.)
+
+In summary, Perl now normally treats non-Unicode code points as typical
+Unicode unassigned code points for regular expression matches, raising a
+warning only when it is arguable what the result should be.  However, if
+this warning has been made fatal, it isn't skipped.
+
+There is one exception to all this.  C<\p{All}> looks like a Unicode
+property, but it is a Perl extension that is defined to be true for all
+possible code points, Unicode or not, so no warning is ever generated
+when matching this against a non-Unicode code point.  (Prior to v5.20,
+it was an exact synonym for C<\p{Any}>, matching code points C<0>
+through C<0x10FFFF>.)
 
 =head2 Security Implications of Unicode
 

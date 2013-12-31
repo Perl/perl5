@@ -364,16 +364,17 @@ my $unicode_reference_url = 'http://www.unicode.org/reports/tr44/';
 # Jamo.txt or UnicodeData.txt will likely cause fatal errors.
 #
 # To compare the output tables, it may be useful to specify the -annotate
-# flag.  This causes the tables to expand so there is one entry for each
-# non-algorithmically named code point giving, currently its name, and its
-# graphic representation if printable (and you have a font that knows about
-# it).  This makes it easier to see what the particular code points are in
-# each output table.  The tables are usable, but because they don't have
-# ranges (for the most part), a Perl using them will run slower.  Non-named
-# code points are annotated with a description of their status, and contiguous
-# ones with the same description will be output as a range rather than
-# individually.  Algorithmically named characters are also output as ranges,
-# except when there are just a few contiguous ones.
+# flag.  (As of this writing, this can't be done on a clean workspace, due to
+# requirements in Text::Tabs used in this option; so first run mktables
+# without this option.)  This option adds comment lines to each table, one for
+# each non-algorithmically named character giving, currently its code point,
+# name, and graphic representation if printable (and you have a font that
+# knows about it).  This makes it easier to see what the particular code
+# points are in each output table.  Non-named code points are annotated with a
+# description of their status, and contiguous ones with the same description
+# will be output as a range rather than individually.  Algorithmically named
+# characters are also output as ranges, except when there are just a few
+# contiguous ones.
 #
 # FUTURE ISSUES
 #
@@ -679,6 +680,11 @@ my $VERBOSE = 3;
 
 my $verbosity = $NORMAL_VERBOSITY;
 
+# Stored in mktables.lst so that if this program is called with different
+# options, will regenerate even if the files otherwise look like they're
+# up-to-date.
+my $command_line_arguments = join " ", @ARGV;
+
 # Process arguments
 while (@ARGV) {
     my $arg = shift @ARGV;
@@ -761,9 +767,8 @@ usage: $0 [-c|-p|-q|-v|-w] [-C dir] [-L filelist] [ -P pod_dir ]
                 overrides -T
   -makelist   : Rewrite the file list $file_list based on current setup
   -annotate   : Output an annotation for each character in the table files;
-                useful for debugging mktables, looking at diffs; but is slow,
-                memory intensive; resulting tables are usable but are slow and
-                very large (and currently fail the Unicode::UCD.t tests).
+                useful for debugging mktables, looking at diffs; but is slow
+                and memory intensive
   -check A B  : Executes $0 only if A and B are the same
 END
     }
@@ -1178,7 +1183,8 @@ my $INTERNAL_ONLY_HEADER = <<"EOF";
 # !!!!!!!   INTERNAL PERL USE ONLY   !!!!!!!
 # This file is for internal use by core Perl only.  The format and even the
 # name or existence of this file are subject to change without notice.  Don't
-# use it directly.
+# use it directly.  Use Unicode::UCD to access the Unicode character data
+# base.
 EOF
 
 my $DEVELOPMENT_ONLY=<<"EOF";
@@ -1193,6 +1199,18 @@ EOF
 my $MAX_UNICODE_CODEPOINT_STRING = "10FFFF";
 my $MAX_UNICODE_CODEPOINT = hex $MAX_UNICODE_CODEPOINT_STRING;
 my $MAX_UNICODE_CODEPOINTS = $MAX_UNICODE_CODEPOINT + 1;
+
+# We work with above-Unicode code points, up to UV_MAX.   But when you get
+# that high, above IV_MAX, some operations don't work, and you can easily get
+# overflow.  Therefore for internal use, we use a much smaller number,
+# translating it to UV_MAX only for output.  The exact number is immaterial
+# (all Unicode code points are treated exactly the same), but the algorithm
+# requires it to be at least 2 * $MAX_UNICODE_CODEPOINTS + 1;
+my $MAX_WORKING_CODEPOINTS= $MAX_UNICODE_CODEPOINT * 8;
+my $MAX_WORKING_CODEPOINT = $MAX_WORKING_CODEPOINTS - 1;
+my $MAX_WORKING_CODEPOINT_STRING = sprintf("%X", $MAX_WORKING_CODEPOINT);
+
+my $MAX_PLATFORM_CODEPOINT = ~0;
 
 # Matches legal code point.  4-6 hex numbers, If there are 6, the first
 # two must be 10; if there are 5, the first must not be a 0.  Written this way
@@ -1301,10 +1319,14 @@ my $MAP_PROXIED = 1;    # The map table for the property isn't written out,
                         # reconstruct this table
 my $INTERNAL_ONLY = 2;  # The file for this table is written out, but it is
                         # for Perl's internal use only
-my $SUPPRESSED = 3;     # The file for this table is not written out, and as a
+my $LEGACY_ONLY = 3;    # Like $INTERNAL_ONLY, but not actually used by Perl.
+                        # Is for backwards compatibility for applications that
+                        # read the file directly, so it's format is
+                        # unchangeable.
+my $SUPPRESSED = 4;     # The file for this table is not written out, and as a
                         # result, we don't bother to do many computations on
                         # it.
-my $PLACEHOLDER = 4;    # Like $SUPPRESSED, but we go through all the
+my $PLACEHOLDER = 5;    # Like $SUPPRESSED, but we go through all the
                         # computations anyway, as the values are needed for
                         # things to work.  This happens when we have Perl
                         # extensions that depend on Unicode tables that
@@ -1453,12 +1475,13 @@ my $MIN_FRACTION_LENGTH = 3; # How many digits of a floating point number at
 my $MAX_FLOATING_SLOP = 10 ** - $MIN_FRACTION_LENGTH; # And in floating terms
 
 # These store references to certain commonly used property objects
+my $ccc;
 my $gc;
 my $perl;
 my $block;
 my $perl_charname;
 my $print;
-my $Any;
+my $All;
 my $script;
 
 # Are there conflicting names because of beginning with 'In_', or 'Is_'
@@ -1520,7 +1543,8 @@ my $UNASSIGNED_TYPE = -2;
 my $PRIVATE_USE_TYPE = -3;
 my $NONCHARACTER_TYPE = -4;
 my $CONTROL_TYPE = -5;
-my $UNKNOWN_TYPE = -6;  # Used only if there is a bug in this program
+my $ABOVE_UNICODE_TYPE = -6;
+my $UNKNOWN_TYPE = -7;  # Used only if there is a bug in this program
 
 sub populate_char_info ($) {
     # Used only with the $annotate option.  Populates the arrays with the
@@ -1551,7 +1575,13 @@ sub populate_char_info ($) {
     my $end;
     if (! $viacode[$i]) {
         my $nonchar;
-        if ($gc-> table('Private_use')->contains($i)) {
+        if ($i > $MAX_UNICODE_CODEPOINT) {
+            $viacode[$i] = 'Above-Unicode';
+            $annotate_char_type[$i] = $ABOVE_UNICODE_TYPE;
+            $printable[$i] = 0;
+            $end = $MAX_WORKING_CODEPOINT;
+        }
+        elsif ($gc-> table('Private_use')->contains($i)) {
             $viacode[$i] = 'Private Use';
             $annotate_char_type[$i] = $PRIVATE_USE_TYPE;
             $printable[$i] = 0;
@@ -1700,6 +1730,20 @@ sub clarify_number ($) {
     return $number;
 }
 
+sub clarify_code_point_count ($) {
+    # This is like clarify_number(), but the input is assumed to be a count of
+    # code points, rather than a generic number.
+
+    my $append = "";
+
+    my $number = shift;
+    if ($number > $MAX_UNICODE_CODEPOINTS) {
+        $number -= ($MAX_WORKING_CODEPOINTS - $MAX_UNICODE_CODEPOINTS);
+        return "All above-Unicode code points" if $number == 0;
+        $append = " + all above-Unicode code points";
+    }
+    return clarify_number($number) . $append;
+}
 
 package Carp;
 
@@ -3433,7 +3477,7 @@ sub trace { return main::trace(@_); }
 
         # If the range list is empty, return a large value that isn't adjacent
         # to any that could be in the range list, for simpler tests
-        return $MAX_UNICODE_CODEPOINT + 2 unless scalar @{$ranges{$addr}};
+        return $MAX_WORKING_CODEPOINT + 2 unless scalar @{$ranges{$addr}};
         return $ranges{$addr}->[0]->start;
     }
 
@@ -3711,9 +3755,6 @@ sub trace { return main::trace(@_); }
         unless ($end >= $start) {
             Carp::my_carp_bug("$owner_name_of{$addr}End of range (" . sprintf("%04X", $end) . ") must not be before start (" . sprintf("%04X", $start) . ").  No action taken.");
             return;
-        }
-        if ($end > $MAX_UNICODE_CODEPOINT && $operation eq '+') {
-            Carp::my_carp("$owner_name_of{$addr}Warning: Range '" . sprintf("%04X..%04X", $start, $end) . ") is above the Unicode maximum of " . sprintf("%04X", $MAX_UNICODE_CODEPOINT) . ".  Adding it anyway");
         }
         #local $to_trace = 1 if main::DEBUG;
 
@@ -4512,8 +4553,8 @@ sub trace { return main::trace(@_); }
 
         # And finally, add the gap from the end of the table to the max
         # possible code point
-        if ($max < $MAX_UNICODE_CODEPOINT) {
-            $new->add_range($max + 1, $MAX_UNICODE_CODEPOINT);
+        if ($max < $MAX_WORKING_CODEPOINT) {
+            $new->add_range($max + 1, $MAX_WORKING_CODEPOINT);
         }
         return $new;
     }
@@ -4802,6 +4843,7 @@ sub trace { return main::trace(@_); }
                 # range.
                 my $end = $set->end;
                 return $end if is_code_point_usable($end, $try_hard);
+                $end = $MAX_UNICODE_CODEPOINT + 1 if $end > $MAX_UNICODE_CODEPOINT;
 
                 # End point didn't, work.  Start at the beginning and try
                 # every one until find one that does work.
@@ -4977,6 +5019,11 @@ sub trace { return main::trace(@_); }
     # The constructor can override the global flag of the same name.
     main::set_access('output_range_counts', \%output_range_counts, 'r');
 
+    my %write_as_invlist;
+    # A boolean set iff the output file for this table is to be in the form of
+    # an inversion list/map.
+    main::set_access('write_as_invlist', \%write_as_invlist, 'r');
+
     my %format;
     # The format of the entries of the table.  This is calculated from the
     # data in the table (or passed in the constructor).  This is an enum e.g.,
@@ -5013,6 +5060,7 @@ sub trace { return main::trace(@_); }
         $range_size_1{$addr} = delete $args{'Range_Size_1'} || 0;
         $caseless_equivalent{$addr} = delete $args{'Caseless_Equivalent'} || 0;
         $fate{$addr} = delete $args{'Fate'} || $ORDINARY;
+        $write_as_invlist{$addr} = delete $args{'Write_As_Invlist'};# No default
         my $ucd = delete $args{'UCD'};
 
         my $description = delete $args{'Description'};
@@ -5493,6 +5541,28 @@ END
         return $return;
     }
 
+    sub merge_single_annotation_line ($$$) {
+        my ($output, $annotation, $annotation_column) = @_;
+
+        # This appends an annotation comment, $annotation, to $output,
+        # starting in or after column $annotation_column, removing any
+        # pre-existing comment from $output.
+
+        $annotation =~ s/^ \s* \# \  //x;
+        $output =~ s/ \s* ( \# \N* )? \n //x;
+        $output = Text::Tabs::expand($output);
+
+        my $spaces = $annotation_column - length $output;
+        $spaces = 2 if $spaces < 0;  # Have 2 blanks before the comment
+
+        $output = sprintf "%s%*s# %s",
+                            $output,
+                            $spaces,
+                            " ",
+                            $annotation;
+        return Text::Tabs::unexpand $output;
+    }
+
     sub write {
         # Write a representation of the table to its file.  It calls several
         # functions furnished by sub-classes of this abstract base class to
@@ -5502,14 +5572,13 @@ END
 
         my $self = shift;
         my $use_adjustments = shift; # ? output in adjusted format or not
-        my $tab_stops = shift;       # The number of tab stops over to put any
-                                     # comment.
         my $suppress_value = shift;  # Optional, if the value associated with
                                      # a range equals this one, don't write
                                      # the range
         Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
         my $addr = do { no overloading; pack 'J', $self; };
+        my $write_as_invlist = $write_as_invlist{$addr};
 
         # Start with the header
         my @HEADER = $self->header;
@@ -5522,14 +5591,10 @@ END
         # affect what gets output before it, therefore pre_body() isn't called
         # until after all other processing of the table is done.
 
-        # The main body looks like a 'here' document.  If annotating, get rid
-        # of the comments before passing to the caller, as some callers, such
-        # as charnames.pm, can't cope with them.  (Outputting range counts
-        # also introduces comments, but these don't show up in the tables that
-        # can't cope with comments, and there aren't that many of them that
-        # it's worth the extra real time to get rid of them).
+        # The main body looks like a 'here' document.  If there are comments,
+        # get rid of them when processing it.
         my @OUT;
-        if ($annotate) {
+        if ($annotate || $output_range_counts) {
             # Use the line below in Perls that don't have /r
             #push @OUT, 'return join "\n",  map { s/\s*#.*//mg; $_ } split "\n", <<\'END\';' . "\n";
             push @OUT, "return <<'END' =~ s/\\s*#.*//mgr;\n";
@@ -5541,9 +5606,9 @@ END
 
             # This is a kludge for empty tables to silence a warning in
             # utf8.c, which can't really deal with empty tables, but it can
-            # deal with a table that matches nothing, as the inverse of 'Any'
+            # deal with a table that matches nothing, as the inverse of 'All'
             # does.
-            push @OUT, "!utf8::Any\n";
+            push @OUT, "!utf8::All\n";
         }
         elsif ($self->name eq 'N'
 
@@ -5565,16 +5630,24 @@ END
         }
         else {
             my $range_size_1 = $range_size_1{$addr};
-            my $format;            # Used only in $annotate option
-            my $include_name;      # Used only in $annotate option
 
-            if ($annotate) {
+            # To make it more readable, use a minimum indentation
+            my $comment_indent;
 
-                # If annotating each code point, must print 1 per line.
-                # The variable could point to a subroutine, and we don't want
-                # to lose that fact, so only set if not set already
-                $range_size_1 = 1 if ! $range_size_1;
+            # These are used only in $annotate option
+            my $format;         # e.g. $HEX_ADJUST_FORMAT
+            my $include_name;   # ? Include the character's name in the
+                                # annotation?
+            my $include_cp;     # ? Include its code point
 
+            if (! $annotate) {
+                $comment_indent = ($self->isa('Map_Table'))
+                                  ? 24
+                                  : ($write_as_invlist)
+                                    ? 8
+                                    : 16;
+            }
+            else {
                 $format = $self->format;
 
                 # The name of the character is output only for tables that
@@ -5586,6 +5659,96 @@ END
                         || $property == main::property_ref('Name')
                         || $property == main::property_ref('Name_Alias')
                        );
+
+                # Don't include the code point in the annotation where all
+                # lines are a single code point, so it can be easily found in
+                # the first column
+                $include_cp = ! $range_size_1;
+
+                if (! $self->isa('Map_Table')) {
+                    $comment_indent = ($write_as_invlist) ? 8 : 16;
+                }
+                else {
+                    $comment_indent = 16;
+
+                    # There are just a few short ranges in this table, so no
+                    # need to include the code point in the annotation.
+                    $include_cp = 0 if $format eq $DECOMP_STRING_FORMAT;
+
+                    # We're trying to get this to look good, as the whole
+                    # point is to make human-readable tables.  It is easier to
+                    # read if almost all the annotation comments begin in the
+                    # same column.  Map tables have varying width maps, so can
+                    # create a jagged comment appearance.  This code does a
+                    # preliminary pass through these tables looking for the
+                    # maximum width map in each, and causing the comments to
+                    # begin just to the right of that.  However, if the
+                    # comments begin too far to the right of most lines, it's
+                    # hard to line them up horizontally with their real data.
+                    # Therefore we ignore the longest outliers
+                    my $ignore_longest_X_percent = 2;  # Discard longest X%
+
+                    # Each key in this hash is a width of at least one of the
+                    # maps in the table.  Its value is how many lines have
+                    # that width.
+                    my %widths;
+
+                    # We won't space things further left than one tab stop
+                    # after the rest of the line; initializing it to that
+                    # number saves some work.
+                    my $max_map_width = 8;
+
+                    # Fill in the %widths hash
+                    my $total = 0;
+                    for my $set ($range_list{$addr}->ranges) {
+                        my $value = $set->value;
+
+                        # These range types don't appear in the main table
+                        next if $set->type == 0
+                                && defined $suppress_value
+                                && $value eq $suppress_value;
+                        next if $set->type == $MULTI_CP
+                                || $set->type == $NULL;
+
+                        # Include 2 spaces before the beginning of the
+                        # comment
+                        my $this_width = length($value) + 2;
+
+                        # Ranges of the remaining non-zero types usually
+                        # occupy just one line (maybe occasionally two, but
+                        # this doesn't have to be dead accurate).  This is
+                        # because these ranges are like "unassigned code
+                        # points"
+                        my $count = ($set->type != 0)
+                                    ? 1
+                                    : $set->end - $set->start + 1;
+                        $widths{$this_width} += $count;
+                        $total += $count;
+                        $max_map_width = $this_width
+                                            if $max_map_width < $this_width;
+                    }
+
+                    # If the widest map gives us less than two tab stops
+                    # worth, just take it as-is.
+                    if ($max_map_width > 16) {
+
+                        # Otherwise go through %widths until we have included
+                        # the desired percentage of lines in the whole table.
+                        my $running_total = 0;
+                        foreach my $width (sort { $a <=> $b } keys %widths)
+                        {
+                            $running_total += $widths{$width};
+                            use integer;
+                            if ($running_total * 100 / $total
+                                            >= 100 - $ignore_longest_X_percent)
+                            {
+                                $max_map_width = $width;
+                                last;
+                            }
+                        }
+                    }
+                    $comment_indent += $max_map_width;
+                }
             }
 
             # Values for previous time through the loop.  Initialize to
@@ -5602,9 +5765,36 @@ END
             my $next_end;
             my $next_value;
             my $offset = 0;
+            my $invlist_count = 0;
 
             my $output_value_in_hex = $self->isa('Map_Table')
-                                      && $self->format eq $HEX_ADJUST_FORMAT;
+                                && ($self->format eq $HEX_ADJUST_FORMAT
+                                    || $self->to_output_map == $EXTERNAL_MAP);
+            # Use leading zeroes just for files whose format should not be
+            # changed from what it has been.  Otherwise, they just take up
+            # space and time to process.
+            my $hex_format = ($self->isa('Map_Table')
+                              && $self->to_output_map == $EXTERNAL_MAP)
+                             ? "%04X"
+                             : "%X";
+
+            # The values for some of these tables are stored in mktables as
+            # hex strings.  Normally, these are just output as strings without
+            # change, but when we are doing adjustments, we have to operate on
+            # these numerically, so we convert those to decimal to do that,
+            # and back to hex for output
+            my $convert_map_to_from_hex = 0;
+            my $output_map_in_hex = 0;
+            if ($self->isa('Map_Table')) {
+                $convert_map_to_from_hex
+                   = ($use_adjustments && $self->format eq $HEX_ADJUST_FORMAT)
+                      || ($annotate && $self->format eq $HEX_FORMAT);
+                $output_map_in_hex = $convert_map_to_from_hex
+                                 || $self->format eq $HEX_FORMAT;
+            }
+
+            # To store any annotations about the characters.
+            my @annotation;
 
             # Output each range as part of the here document.
             RANGE:
@@ -5621,33 +5811,53 @@ END
                 next RANGE if defined $suppress_value
                               && $value eq $suppress_value;
 
+                $value = CORE::hex $value if $convert_map_to_from_hex;
+
+
                 {   # This bare block encloses the scope where we may need to
-                    # split a range (when outputting adjusteds), and each time
-                    # through we handle the next portion of the original by
-                    # ending the block with a 'redo'.   The values to use for
-                    # that next time through are set up just below in the
-                    # scalars whose names begin with '$next_'.
+                    # 'redo' to.  Consider a table that is to be written out
+                    # using single item ranges.  This is given in the
+                    # $range_size_1 boolean.  To accomplish this, we split the
+                    # range each time through the loop into two portions, the
+                    # first item, and the rest.  We handle that first item
+                    # this time in the loop, and 'redo' to repeat the process
+                    # for the rest of the range.
+                    #
+                    # We may also have to do it, with other special handling,
+                    # if the table has adjustments.  Consider the table that
+                    # contains the lowercasing maps.  mktables stores the
+                    # ASCII range ones as 26 ranges:
+                    #       ord('A') => ord('a'), .. ord('Z') => ord('z')
+                    # For compactness, the table that gets written has this as
+                    # just one range
+                    #       ( ord('A') .. ord('Z') ) => ord('a')
+                    # and the software that reads the tables is smart enough
+                    # to "connect the dots".  This change is accomplished in
+                    # this loop by looking to see if the current iteration
+                    # fits the paradigm of the previous iteration, and if so,
+                    # we merge them by replacing the final output item with
+                    # the merged data.  Repeated 25 times, this gets A-Z.  But
+                    # we also have to make sure we don't screw up cases where
+                    # we have internally stored
+                    #       ( 0x1C4 .. 0x1C6 ) => 0x1C5
+                    # This single internal range has to be output as 3 ranges,
+                    # which is done by splitting, like we do for $range_size_1
+                    # tables.  (There are very few of such ranges that need to
+                    # be split, so the gain of doing the combining of other
+                    # ranges far outweighs the splitting of these.)  The
+                    # values to use for the redo at the end of this block are
+                    # set up just below in the scalars whose names begin with
+                    # '$next_'.
 
-                    if ($use_adjustments) {
+                    if (($use_adjustments || $range_size_1) && $end != $start)
+                    {
+                        $next_start = $start + 1;
+                        $next_end = $end;
+                        $next_value = $value;
+                        $end = $start;
+                    }
 
-                        # When converting to use adjustments, we can handle
-                        # only single element ranges.  Set up so that this
-                        # time through the loop, we look at the first element,
-                        # and the next time through, we start off with the
-                        # remainder.  Thus each time through we look at the
-                        # first element of the range
-                        if ($end != $start) {
-                            $next_start = $start + 1;
-                            $next_end = $end;
-                            $next_value = $value;
-                            $end = $start;
-                        }
-
-                        # The values for some of these tables are stored as
-                        # hex strings.  Convert those to decimal
-                        $value = hex($value)
-                                    if $self->default_map eq $CODE_POINT
-                                        && $value =~ / ^ [A-Fa-f0-9]+ $ /x;
+                    if ($use_adjustments && ! $range_size_1) {
 
                         # If this range is adjacent to the previous one, and
                         # the values in each are integers that are also
@@ -5670,7 +5880,15 @@ END
                         }
                         else {
                             $offset = 0;
+                            if (@annotation == 1) {
+                                $OUT[-1] = merge_single_annotation_line(
+                                    $OUT[-1], $annotation[0], $comment_indent);
+                            }
+                            else {
+                                push @OUT, @annotation;
+                            }
                         }
+                        undef @annotation;
 
                         # Save the current values for the next time through
                         # the loop.
@@ -5679,43 +5897,56 @@ END
                         $previous_value = $value;
                     }
 
-                    # If there is a range and doesn't need a single point range
-                    # output
-                    if ($start != $end && ! $range_size_1) {
-                        push @OUT, sprintf "%04X\t%04X", $start, $end;
-                        if ($value ne "") {
-                            if ($output_value_in_hex) {
-                                $OUT[-1] .= sprintf "\t%X", $value;
+                    if ($write_as_invlist) {
+
+                        # Inversion list format has a single number per line,
+                        # the starting code point of a range that matches the
+                        # property
+                        push @OUT, $start, "\n";
+                        $invlist_count++;
+
+                        # Add a comment with the size of the range, if
+                        # requested.
+                        if ($output_range_counts{$addr}) {
+                            $OUT[-1] = merge_single_annotation_line(
+                                    $OUT[-1],
+                                    "# ["
+                                      . main::clarify_code_point_count($end - $start + 1)
+                                      . "]\n",
+                                    $comment_indent);
+                        }
+                    }
+                    elsif ($start != $end) { # If there is a range
+                        if ($end == $MAX_WORKING_CODEPOINT) {
+                            push @OUT, sprintf "$hex_format\t$hex_format",
+                                                $start,
+                                                $MAX_PLATFORM_CODEPOINT;
+                        }
+                        else {
+                            push @OUT, sprintf "$hex_format\t$hex_format",
+                                                $start,       $end;
+                        }
+                        if (length $value) {
+                            if ($convert_map_to_from_hex) {
+                                $OUT[-1] .= sprintf "\t$hex_format\n", $value;
                             }
                             else {
-                                $OUT[-1] .= "\t$value";
+                                $OUT[-1] .= "\t$value\n";
                             }
                         }
 
                         # Add a comment with the size of the range, if
-                        # requested.  Expand Tabs to make sure they all start
-                        # in the same column, and then unexpand to use mostly
-                        # tabs.
-                        if (! $output_range_counts{$addr}) {
-                            $OUT[-1] .= "\n";
-                        }
-                        else {
-                            $OUT[-1] = Text::Tabs::expand($OUT[-1]);
-                            my $count = main::clarify_number($end - $start + 1);
-                            use integer;
-
-                            my $width = $tab_stops * 8 - 1;
-                            $OUT[-1] = sprintf("%-*s # [%s]\n",
-                                                $width,
-                                                $OUT[-1],
-                                                $count);
-                            $OUT[-1] = Text::Tabs::unexpand($OUT[-1]);
+                        # requested.
+                        if ($output_range_counts{$addr}) {
+                            $OUT[-1] = merge_single_annotation_line(
+                                    $OUT[-1],
+                                    "# ["
+                                      . main::clarify_code_point_count($end - $start + 1)
+                                      . "]\n",
+                                    $comment_indent);
                         }
                     }
-
-                        # Here to output a single code point per line.
-                        # If not to annotate, use the simple formats
-                    elsif (! $annotate) {
+                    else { # Here to output a single code point per line.
 
                         # Use any passed in subroutine to output.
                         if (ref $range_size_1 eq 'CODE') {
@@ -5727,23 +5958,27 @@ END
 
                             # Here, caller is ok with default output.
                             for (my $i = $start; $i <= $end; $i++) {
-                                if ($output_value_in_hex) {
-                                    push @OUT, sprintf "%04X\t\t%X\n", $i, $value;
+                                if ($convert_map_to_from_hex) {
+                                    push @OUT,
+                                        sprintf "$hex_format\t\t$hex_format\n",
+                                                 $i,            $value;
                                 }
                                 else {
-                                    push @OUT, sprintf "%04X\t\t%s\n", $i, $value;
+                                    push @OUT, sprintf $hex_format, $i;
+                                    $OUT[-1] .= "\t\t$value" if $value ne "";
+                                    $OUT[-1] .= "\n";
                                 }
                             }
                         }
                     }
-                    else {
 
-                        # Here, wants annotation.
+                    if ($annotate) {
                         for (my $i = $start; $i <= $end; $i++) {
+                            my $annotation = "";
 
                             # Get character information if don't have it already
                             main::populate_char_info($i)
-                                                if ! defined $viacode[$i];
+                                                     if ! defined $viacode[$i];
                             my $type = $annotate_char_type[$i];
 
                             # Figure out if should output the next code points
@@ -5752,9 +5987,12 @@ END
                             # so returns $i.  Otherwise use the end of the
                             # annotation range, but no further than the
                             # maximum possible end point of the loop.
-                            my $range_end = main::min(
-                                        $annotate_ranges->value_of($i) || $i,
-                                        $end);
+                            my $range_end =
+                                        $range_size_1
+                                        ? $start
+                                        : main::min(
+                                          $annotate_ranges->value_of($i) || $i,
+                                          $end);
 
                             # Use a range if it is a range, and either is one
                             # of the special annotation ranges, or the range
@@ -5768,9 +6006,6 @@ END
                                 # Here is to output a range.  We don't allow a
                                 # caller-specified output format--just use the
                                 # standard one.
-                                push @OUT, sprintf "%04X\t%04X\t%s\t#", $i,
-                                                                $range_end,
-                                                                $value;
                                 my $range_name = $viacode[$i];
 
                                 # For the code points which end in their hex
@@ -5778,7 +6013,7 @@ END
                                 # annotation, and capitalize only the first
                                 # letter of each word.
                                 if ($type == $CP_IN_NAME) {
-                                    my $hex = sprintf "%04X", $i;
+                                    my $hex = sprintf $hex_format, $i;
                                     $range_name =~ s/-$hex$//;
                                     my @words = split " ", $range_name;
                                     for my $word (@words) {
@@ -5791,13 +6026,27 @@ END
                                     $range_name = "Hangul Syllable";
                                 }
 
-                                $OUT[-1] .= " $range_name" if $range_name;
+                                if ($i != $start || $range_end < $end) {
+                                    if ($range_end < $MAX_WORKING_CODEPOINT)
+                                    {
+                                        $annotation = sprintf "%04X..%04X",
+                                                              $i,   $range_end;
+                                    }
+                                    else {
+                                        $annotation = sprintf "%04X..INFINITY",
+                                                               $i;
+                                    }
+                                }
+                                else { # Indent if not displaying code points
+                                    $annotation = " " x 4;
+                                }
+                                $annotation .= " $range_name" if $range_name;
 
                                 # Include the number of code points in the
                                 # range
                                 my $count =
-                                    main::clarify_number($range_end - $i + 1);
-                                $OUT[-1] .= " [$count]\n";
+                                    main::clarify_code_point_count($range_end - $i + 1);
+                                $annotation .= " [$count]\n";
 
                                 # Skip to the end of the range
                                 $i = $range_end;
@@ -5807,12 +6056,10 @@ END
 
                                 # When outputting the names of each character,
                                 # use the character itself if printable
-                                $comment .= "'" . chr($i) . "' "
+                                $comment .= "'" . main::display_chr($i) . "' "
                                                             if $printable[$i];
 
-                                # To make it more readable, use a minimum
-                                # indentation
-                                my $comment_indent;
+                                my $output_value = $value;
 
                                 # Determine the annotation
                                 if ($format eq $DECOMP_STRING_FORMAT) {
@@ -5825,14 +6072,15 @@ END
                                     # strings, one of the printable
                                     # characters, and one of their official
                                     # names.
-                                    (my $map = $value) =~ s/ \ * < .*? > \ +//x;
+                                    (my $map = $output_value)
+                                                    =~ s/ \ * < .*? > \ +//x;
                                     my $tostr = "";
                                     my $to_name = "";
                                     my $to_chr = "";
                                     foreach my $to (split " ", $map) {
                                         $to = CORE::hex $to;
                                         $to_name .= " + " if $to_name;
-                                        $to_chr .= chr($to);
+                                        $to_chr .= main::display_chr($to);
                                         main::populate_char_info($to)
                                                     if ! defined $viacode[$to];
                                         $to_name .=  $viacode[$to];
@@ -5840,57 +6088,77 @@ END
 
                                     $comment .=
                                     "=> '$to_chr'; $viacode[$i] => $to_name";
-                                    $comment_indent = 25;   # Determined by
-                                                            # experiment
                                 }
                                 else {
+                                    $output_value += $i - $start
+                                                   if $use_adjustments
+                                                      # Don't try to adjust a
+                                                      # non-integer
+                                                   && $output_value !~ /[-\D]/;
 
-                                    # Assume that any table that has hex
-                                    # format is a mapping of one code point to
-                                    # another.
-                                    if ($format eq $HEX_FORMAT) {
-                                        my $decimal_value = CORE::hex $value;
-                                        main::populate_char_info($decimal_value)
-                                        if ! defined $viacode[$decimal_value];
-                                        $comment .= "=> '"
-                                        . chr($decimal_value)
-                                        . "'; " if $printable[$decimal_value];
+                                    if ($output_map_in_hex) {
+                                        main::populate_char_info($output_value)
+                                          if ! defined $viacode[$output_value];
+                                        $comment .= " => '"
+                                        . main::display_chr($output_value)
+                                        . "'; " if $printable[$output_value];
                                     }
-                                    $comment .= $viacode[$i] if $include_name
-                                                            && $viacode[$i];
-                                    if ($format eq $HEX_FORMAT) {
-                                        my $decimal_value = CORE::hex $value;
+                                    if ($include_name && $viacode[$i]) {
+                                        $comment .= " " if $comment;
+                                        $comment .= $viacode[$i];
+                                    }
+                                    if ($output_map_in_hex) {
                                         $comment .=
-                                            " => $viacode[$decimal_value]"
-                                                if $viacode[$decimal_value];
+                                                " => $viacode[$output_value]"
+                                                    if $viacode[$output_value];
+                                        $output_value = sprintf($hex_format,
+                                                                $output_value);
                                     }
-
-                                    # If including the name, no need to
-                                    # indent, as the name will already be way
-                                    # across the line.
-                                    $comment_indent = ($include_name) ? 0 : 60;
                                 }
 
-                                # Use any passed in routine to output the base
-                                # part of the line.
-                                if (ref $range_size_1 eq 'CODE') {
-                                    my $base_part=&{$range_size_1}($i, $value);
-                                    chomp $base_part;
-                                    push @OUT, $base_part;
-                                }
-                                else {
-                                    push @OUT, sprintf "%04X\t\t%s", $i, $value;
+                                if ($include_cp) {
+                                    $annotation = sprintf "%04X", $i;
+                                    if ($use_adjustments) {
+                                        $annotation .= " => $output_value";
+                                    }
                                 }
 
-                                # And add the annotation.
-                                $OUT[-1] = sprintf "%-*s\t# %s",
-                                                   $comment_indent,
-                                                   $OUT[-1],
-                                                   $comment
-                                            if $comment;
-                                $OUT[-1] .= "\n";
+                                if ($comment ne "") {
+                                    $annotation .= " " if $annotation ne "";
+                                    $annotation .= $comment;
+                                }
+                                $annotation .= "\n" if $annotation ne "";
+                            }
+
+                            if ($annotation ne "") {
+                                push @annotation, (" " x $comment_indent)
+                                                  .  "# $annotation";
                             }
                         }
+
+                        # If not adjusting, we don't have to go through the
+                        # loop again to know that the annotation comes next
+                        # in the output.
+                        if (! $use_adjustments) {
+                            if (@annotation == 1) {
+                                $OUT[-1] = merge_single_annotation_line(
+                                    $OUT[-1], $annotation[0], $comment_indent);
+                            }
+                            else {
+                                push @OUT, map { Text::Tabs::unexpand $_ }
+                                               @annotation;
+                            }
+                            undef @annotation;
+                        }
+                    }
+
+                    # Add the beginning of the range that doesn't match the
+                    # property, except if the just added match range extends
+                    # to infinity.  We do this after any annotations for the
+                    # match range.
+                    if ($write_as_invlist && $end < $MAX_WORKING_CODEPOINT) {
+                        push @OUT, $end + 1, "\n";
+                        $invlist_count++;
                     }
 
                     # If we split the range, set up so the next time through
@@ -5904,6 +6172,10 @@ END
                     }
                 }
             } # End of loop through all the table's ranges
+
+            push @OUT, @annotation; # Add orphaned annotation, if any
+
+            splice @OUT, 1, 0, "V$invlist_count\n" if $invlist_count;
         }
 
         # Add anything that goes after the main body, but within the here
@@ -6123,13 +6395,22 @@ sub trace { return main::trace(@_); }
                     \%anomalous_entries,
                     'readable_array');
 
+    my %replacement_property;
+    # Certain files are unused by Perl itself, and are kept only for backwards
+    # compatibility for programs that used them before Unicode::UCD existed.
+    # These are termed legacy properties.  At some point they may be removed,
+    # but for now mark them as legacy.  If non empty, this is the name of the
+    # property to use instead (i.e., the modern equivalent).
+    main::set_access('replacement_property', \%replacement_property, 'r');
+
     my %to_output_map;
     # Enum as to whether or not to write out this map table, and how:
     #   0               don't output
     #   $EXTERNAL_MAP   means its existence is noted in the documentation, and
     #                   it should not be removed nor its format changed.  This
     #                   is done for those files that have traditionally been
-    #                   output.
+    #                   output.  Maps of legacy-only properties default to
+    #                   this.
     #   $INTERNAL_MAP   means Perl reserves the right to do anything it wants
     #                   with this file
     #   $OUTPUT_ADJUSTED means that it is an $INTERNAL_MAP, and instead of
@@ -6154,9 +6435,17 @@ sub trace { return main::trace(@_); }
         my $default_map = delete $args{'Default_Map'};
         my $property = delete $args{'_Property'};
         my $full_name = delete $args{'Full_Name'};
+        my $replacement_property = delete $args{'Replacement_Property'} // "";
         my $to_output_map = delete $args{'To_Output_Map'};
 
-        # Rest of parameters passed on
+        # Rest of parameters passed on; legacy properties have several common
+        # other attributes
+        if ($replacement_property) {
+            $args{"Fate"} = $LEGACY_ONLY;
+            $args{"Range_Size_1"} = 1;
+            $args{"Perl_Extension"} = 1;
+            $args{"UCD"} = 0;
+        }
 
         my $range_list = Range_Map->new(Owner => $property);
 
@@ -6166,12 +6455,16 @@ sub trace { return main::trace(@_); }
                                     Full_Name => $full_name,
                                     _Property => $property,
                                     _Range_List => $range_list,
+                                    Write_As_Invlist => 0,
                                     %args);
 
         my $addr = do { no overloading; pack 'J', $self; };
 
         $anomalous_entries{$addr} = [];
         $default_map{$addr} = $default_map;
+        $replacement_property{$addr} = $replacement_property;
+        $to_output_map = $EXTERNAL_MAP if ! defined $to_output_map
+                                          && $replacement_property;
         $to_output_map{$addr} = $to_output_map;
 
         $self->initialize($initialize) if defined $initialize;
@@ -6393,7 +6686,13 @@ sub trace { return main::trace(@_); }
             $return .= $INTERNAL_ONLY_HEADER;
         }
         else {
-            my $property_name = $self->property->full_name =~ s/Legacy_//r;
+            my $property_name = $self->property->replacement_property;
+
+            # The legacy-only properties were gotten above; but there are some
+            # other properties whose files are in current use that have fixed
+            # formats.
+            $property_name = $self->property->full_name unless $property_name;
+
             $return .= <<END;
 
 # !!!!!!!   IT IS DEPRECATED TO USE THIS FILE   !!!!!!!
@@ -6456,7 +6755,7 @@ END
 
         # Get a  string version of $count with underscores in large numbers,
         # for clarity.
-        my $string_count = main::clarify_number($count);
+        my $string_count = main::clarify_code_point_count($count);
 
         my $code_points = ($count == 1)
                         ? 'single code point'
@@ -6678,7 +6977,7 @@ END
                     $to = CORE::hex $to;
                     if ($annotate) {
                         $to_name .= " + " if $to_name;
-                        $to_chr .= chr($to);
+                        $to_chr .= main::display_chr($to);
                         main::populate_char_info($to)
                                             if ! defined $viacode[$to];
                         $to_name .=  $viacode[$to];
@@ -6702,7 +7001,7 @@ END
                     main::populate_char_info($code_point)
                                     if ! defined $viacode[$code_point];
                     $multi_code_point_maps[-1] .= " '"
-                        . chr($code_point)
+                        . main::display_chr($code_point)
                         . "' => '$to_chr'; $viacode[$code_point] => $to_name";
                 }
             }
@@ -6923,9 +7222,6 @@ END
 
         return $self->SUPER::write(
             $output_adjusted,
-            ($self->property == $block)
-                ? 7     # block file needs more tab stops
-                : 3,
             $default_map);   # don't write defaulteds
     }
 
@@ -7082,6 +7378,7 @@ sub trace { return main::trace(@_); }
                                       _Property => $property,
                                       _Range_List => $range_list,
                                       Format => $EMPTY_FORMAT,
+                                      Write_As_Invlist => 1,
                                       );
         my $addr = do { no overloading; pack 'J', $self; };
 
@@ -7457,7 +7754,7 @@ sub trace { return main::trace(@_); }
         my $self = shift;
         Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
-        return $self->SUPER::write(0, 2); # No adjustments; 2 tab stops
+        return $self->SUPER::write(0); # No adjustments
     }
 
     sub set_final_comment {
@@ -7488,7 +7785,18 @@ END
         # Get the number of code points matched by each of the tables in this
         # file, and add underscores for clarity.
         my $count = $leader->count;
-        my $string_count = main::clarify_number($count);
+        my $unicode_count;
+        my $non_unicode_string;
+        if ($count > $MAX_UNICODE_CODEPOINTS) {
+            $unicode_count = $count - ($MAX_WORKING_CODEPOINT
+                                       - $MAX_UNICODE_CODEPOINT);
+            $non_unicode_string = "All above-Unicode code points match as well, and are also returned";
+        }
+        else {
+            $unicode_count = $count;
+            $non_unicode_string = "";
+        }
+        my $string_count = main::clarify_code_point_count($unicode_count);
 
         my $loose_count = 0;        # how many aliases loosely matched
         my $compound_name = "";     # ? Are any names compound?, and if so, an
@@ -7686,11 +7994,13 @@ END
             }
         } # End of looping through all tables
 
+        $matches_comment .= "\n$non_unicode_string\n" if $non_unicode_string;
+
 
         my $code_points;
         my $match;
         my $any_of_these;
-        if ($count == 1) {
+        if ($unicode_count == 1) {
             $match = 'matches';
             $code_points = 'single code point';
         }
@@ -7741,14 +8051,16 @@ END
         if ($total_entries == 0) {
             Carp::my_carp("No regular expression construct can match $leader, as all names for it are the null string.  Creating file anyway.");
             $comment .= <<END;
-This file returns the $code_points in Unicode Version $string_version for
+This file returns the $code_points in Unicode Version
+$string_version for
 $leader, but it is inaccessible through Perl regular expressions, as
 "\\p{prop=}" is not recognized.
 END
 
         } else {
             $comment .= <<END;
-This file returns the $code_points in Unicode Version $string_version that
+This file returns the $code_points in Unicode Version
+$string_version that
 $match$synonyms:
 
 $matches_comment
@@ -7788,14 +8100,25 @@ END
 
         if ($count) {   # The format differs if no code points, and needs no
                         # explanation in that case
+            if ($leader->write_as_invlist) {
                 $comment.= <<END;
 
-The format of the lines of this file is:
+The first data line of this file begins with the letter V to indicate it is in
+inversion list format.  The number following the V gives the number of lines
+remaining.  Each of those remaining lines is a single number representing the
+starting code point of a range which goes up to but not including the number
+on the next line; The 0th, 2nd, 4th... ranges are for code points that match
+the property; the 1st, 3rd, 5th... are ranges of code points that don't match
+the property.  The final line's range extends to the platform's infinity.
 END
-            $comment.= <<END;
+            }
+            else {
+                $comment.= <<END;
+The format of the lines of this file is:
 START\\tSTOP\\twhere START is the starting code point of the range, in hex;
 STOP is the ending point, or if omitted, the range has just one code point.
 END
+            }
             if ($leader->output_range_counts) {
                 $comment .= <<END;
 Numbers in comments in [brackets] indicate how many code points are in the
@@ -8208,10 +8531,13 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
 
         my $addr = do { no overloading; pack 'J', $self; };
 
-        # Swash names are used only on regular map tables; otherwise there
-        # should be no access to the property map table from other parts of
-        # Perl.
-        return if $map{$addr}->fate != $ORDINARY;
+        # Swash names are used only on either
+        # 1) legacy-only properties, because the formats for these are
+        #    unchangeable, and they have had these lines in them; or
+        # 2) regular map tables; otherwise there should be no access to the
+        #    property map table from other parts of Perl.
+        return if $map{$addr}->fate != $ORDINARY
+                  && $map{$addr}->fate != $LEGACY_ONLY;
 
         return $file{$addr} if defined $file{$addr};
         return $map{$addr}->external_name;
@@ -8496,6 +8822,7 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
                     initialize
                     inverse_list
                     is_empty
+                    replacement_property
                     name
                     note
                     perl_extension
@@ -8538,6 +8865,16 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
 } # End closure
 
 package main;
+
+    sub display_chr {
+        # Converts an ordinal character value to a displayable string, using a
+        # NBSP to hold combining characters.
+
+        my $ord = shift;
+        my $chr = chr $ord;
+        return $chr if $ccc->table(0)->contains($ord);
+        return chr(utf8::unicode_to_native(0xA0)) . $chr;
+    }
 
 sub join_lines($) {
     # Returns lines of the input joined together, so that they can be folded
@@ -9229,7 +9566,7 @@ sub finish_property_setup {
     $gc->add_alias('Category');
 
     # Unicode::Normalize expects this file with this name and directory.
-    my $ccc = property_ref('Canonical_Combining_Class');
+    $ccc = property_ref('Canonical_Combining_Class');
     if (defined $ccc) {
         $ccc->set_file('CombiningClass');
         $ccc->set_directory(File::Spec->curdir());
@@ -11457,9 +11794,12 @@ sub filter_old_style_arabic_shaping {
         $uc = property_ref('uc');
 
         # For each of the case change mappings...
-        foreach my $full_table ($lc, $tc, $uc) {
-            my $full_name = $full_table->name;
-            unless (defined $full_table && ! $full_table->is_empty) {
+        foreach my $full_casing_table ($lc, $tc, $uc) {
+            my $full_casing_name = $full_casing_table->name;
+            my $full_casing_full_name = $full_casing_table->full_name;
+            unless (defined $full_casing_table
+                    && ! $full_casing_table->is_empty)
+            {
                 Carp::my_carp_bug("Need to process UnicodeData before SpecialCasing.  Only special casing will be generated.");
             }
 
@@ -11474,18 +11814,16 @@ sub filter_old_style_arabic_shaping {
             # full maps so that as we handle those, we can override the simple
             # maps for them in the legacy table, and merely add them in the
             # new-style one.
-            my $legacy = Property->new("Legacy_" . $full_table->full_name,
-                                        File => $full_table->full_name =~
-                                                            s/case_Mapping//r,
-                                        Range_Size_1 => 1,
-                                        Format => $HEX_FORMAT,
-                                        Default_Map => $CODE_POINT,
-                                        UCD => 0,
-                                        Initialize => $full_table,
-                                        To_Output_Map => $EXTERNAL_MAP,
+            my $legacy = Property->new("Legacy_" . $full_casing_full_name,
+                                File => $full_casing_full_name
+                                                          =~ s/case_Mapping//r,
+                                Format => $HEX_FORMAT,
+                                Default_Map => $CODE_POINT,
+                                Initialize => $full_casing_table,
+                                Replacement_Property => $full_casing_full_name,
             );
 
-            $full_table->add_comment(join_lines( <<END
+            $full_casing_table->add_comment(join_lines( <<END
 This file includes both the simple and full case changing maps.  The simple
 ones are in the main body of the table below, and the full ones adding to or
 overriding them are in the hash.
@@ -11494,9 +11832,9 @@ END
 
             # The simple version's name in each mapping merely has an 's' in
             # front of the full one's
-            my $simple_name = 's' . $full_name;
+            my $simple_name = 's' . $full_casing_name;
             my $simple = property_ref($simple_name);
-            $simple->initialize($full_table) if $simple->to_output_map();
+            $simple->initialize($full_casing_table) if $simple->to_output_map();
         }
 
         return;
@@ -11609,7 +11947,7 @@ END
                                              . $object->full_name
                                              . "; $fields[$i]");
 
-                # ... and, the The regular table, in which it is additional,
+                # ... and the regular table, in which it is additional,
                 # beyond the simple mapping.
                 $file->insert_adjusted_lines("$fields[0]; "
                                              . $object->name
@@ -12774,7 +13112,7 @@ END
                 # This fills in any missing values with the default.  It's not
                 # necessary to do this with binary properties, as the default
                 # is defined completely in terms of the Y table.
-                $property->add_map(0, $MAX_UNICODE_CODEPOINT,
+                $property->add_map(0, $MAX_WORKING_CODEPOINT,
                                    $default_map, Replace => $NO);
             }
         }
@@ -12889,13 +13227,10 @@ END
     # backwards compatibility with applications that read them directly.
     my $Digit = Property->new("Legacy_Perl_Decimal_Digit",
                               Default_Map => "",
-                              Perl_Extension => 1,
                               File => 'Digit',    # Trad. location
                               Directory => $map_directory,
-                              UCD => 0,
                               Type => $STRING,
-                              To_Output_Map => $EXTERNAL_MAP,
-                              Range_Size_1 => 1,
+                              Replacement_Property => "Perl_Decimal_Digit",
                               Initialize => property_ref('Perl_Decimal_Digit'),
                             );
     $Digit->add_comment(join_lines(<<END
@@ -12911,10 +13246,8 @@ END
                     File => "Fold",
                     Directory => $map_directory,
                     Default_Map => $CODE_POINT,
-                    UCD => 0,
-                    Range_Size_1 => 1,
                     Type => $STRING,
-                    To_Output_Map => $EXTERNAL_MAP,
+                    Replacement_Property => "Case_Folding",
                     Format => $HEX_FORMAT,
                     Initialize => property_ref('cf'),
     );
@@ -12988,30 +13321,35 @@ sub compile_perl() {
     # just isn't any Posix equivalent.  'XPosix' are the Posix tables extended
     # to the full Unicode range, by our guesses as to what is appropriate.
 
-    # 'Any' is all code points.  As an error check, instead of just setting it
+    # 'All' is all code points.  As an error check, instead of just setting it
     # to be that, construct it to be the union of all the major categories
-    $Any = $perl->add_match_table('Any',
-            Description  => "[\\x{0000}-\\x{$MAX_UNICODE_CODEPOINT_STRING}]",
-            Matches_All => 1);
+    $All = $perl->add_match_table('All',
+      Description
+        => "All code points, including those above Unicode.  Same as qr/./s",
+      Matches_All => 1);
 
     foreach my $major_table ($gc->tables) {
 
         # Major categories are the ones with single letter names.
         next if length($major_table->name) != 1;
 
-        $Any += $major_table;
+        $All += $major_table;
     }
 
-    if ($Any->max != $MAX_UNICODE_CODEPOINT) {
+    if ($All->max != $MAX_WORKING_CODEPOINT) {
         Carp::my_carp_bug("Generated highest code point ("
-           . sprintf("%X", $Any->max)
-           . ") doesn't match expected value $MAX_UNICODE_CODEPOINT_STRING.")
+           . sprintf("%X", $All->max)
+           . ") doesn't match expected value $MAX_WORKING_CODEPOINT_STRING.")
     }
-    if ($Any->range_count != 1 || $Any->min != 0) {
-     Carp::my_carp_bug("Generated table 'Any' doesn't match all code points.")
+    if ($All->range_count != 1 || $All->min != 0) {
+     Carp::my_carp_bug("Generated table 'All' doesn't match all code points.")
     }
 
-    $Any->add_alias('All');
+    my $Any = $perl->add_match_table('Any',
+                                     Description  => "All Unicode code points: [\\x{0000}-\\x{10FFFF}]",
+                                     );
+    $Any->add_range(0, 0x10FFFF);
+    $Any->add_alias('Unicode');
 
     # Assigned is the opposite of gc=unassigned
     my $Assigned = $perl->add_match_table('Assigned',
@@ -14060,8 +14398,9 @@ END
             $unassigned_sans_noncharacters &= $nonchars->table('N');
         }
 
-        for (my $i = 0; $i <= $MAX_UNICODE_CODEPOINT; $i++ ) {
+        for (my $i = 0; $i <= $MAX_UNICODE_CODEPOINT + 1; $i++ ) {
             $i = populate_char_info($i);    # Note sets $i so may cause skips
+
         }
     }
 
@@ -14713,7 +15052,18 @@ sub make_re_pod_entries($) {
     my $full_name = $property->full_name;
 
     my $count = $input_table->count;
-    my $string_count = clarify_number($count);
+    my $unicode_count;
+    my $non_unicode_string;
+    if ($count > $MAX_UNICODE_CODEPOINTS) {
+        $unicode_count = $count - ($MAX_WORKING_CODEPOINT
+                                    - $MAX_UNICODE_CODEPOINT);
+        $non_unicode_string = " plus all above-Unicode code points";
+    }
+    else {
+        $unicode_count = $count;
+        $non_unicode_string = "";
+    }
+    my $string_count = clarify_number($unicode_count) . $non_unicode_string;
     my $status = $input_table->status;
     my $status_info = $input_table->status_info;
     my $caseless_equivalent = $input_table->caseless_equivalent;
@@ -16465,7 +16815,7 @@ sub write_all_tables() {
     # don't care if both defined, as they had better be different anyway.)
     # The property named 'Perl' needs to be first (it doesn't have any
     # immutable file name) because empty properties are defined in terms of
-    # it's table named 'Any'.)   We also sort by the property's name.  This is
+    # it's table named 'All'.)   We also sort by the property's name.  This is
     # just for repeatability of the outputs between runs of this program, but
     # does not affect correctness.
     PROPERTY:
@@ -16584,7 +16934,7 @@ sub write_all_tables() {
                 }
 
                 # An empty table is just the complement of everything.
-                $table->set_complement($Any) if $table != $property;
+                $table->set_complement($All) if $table != $property;
             }
             elsif ($expected_empty) {
                 my $because = "";
@@ -16616,13 +16966,13 @@ sub write_all_tables() {
 
             my $count = $table->count;
             if ($expected_full) {
-                if ($count != $MAX_UNICODE_CODEPOINTS) {
+                if ($count != $MAX_WORKING_CODEPOINTS) {
                     Carp::my_carp("$table matches only "
                     . clarify_number($count)
                     . " Unicode code points but should match "
-                    . clarify_number($MAX_UNICODE_CODEPOINTS)
+                    . clarify_number($MAX_WORKING_CODEPOINTS)
                     . " (off by "
-                    .  clarify_number(abs($MAX_UNICODE_CODEPOINTS - $count))
+                    .  clarify_number(abs($MAX_WORKING_CODEPOINTS - $count))
                     . ").  Proceeding anyway.");
                 }
 
@@ -16640,6 +16990,7 @@ sub write_all_tables() {
                 }
             }
             elsif ($count == $MAX_UNICODE_CODEPOINTS
+                   && $name ne "Any"
                    && ($table == $property || $table->leader == $table)
                    && $table->property->status ne $NORMAL)
             {
@@ -16728,7 +17079,8 @@ sub write_all_tables() {
 
                 # We also create for Unicode::UCD a list of aliases for
                 # the property.  The list starts with the property name;
-                # then its full name.
+                # then its full name.  Legacy properties are not listed in
+                # Unicode::UCD.
                 my @property_list;
                 my @standard_list;
                 if ( $property->fate <= $MAP_PROXIED) {
@@ -17791,6 +18143,7 @@ File::Find::find({
 
 my @mktables_list_output_files;
 my $old_start_time = 0;
+my $old_options = "";
 
 if (! -e $file_list) {
     print "'$file_list' doesn't exist, so forcing rebuild.\n" if $verbosity >= $VERBOSE;
@@ -17813,8 +18166,13 @@ else {
         for my $list ( \@input, \@mktables_list_output_files ) {
             while (<$file_handle>) {
                 s/^ \s+ | \s+ $//xg;
-                if (/^ \s* \# .* Autogenerated\ starting\ on\ (\d+)/x) {
+                if (/^ \s* \# \s* Autogenerated\ starting\ on\ (\d+)/x) {
                     $old_start_time = $1;
+                    next;
+                }
+                if (/^ \s* \# \s* From\ options\ (.+) /x) {
+                    $old_options = $1;
+                    next;
                 }
                 next if /^ \s* (?: \# .* )? $/x;
                 last if /^ =+ $/x;
@@ -17947,7 +18305,9 @@ foreach my $in (@input_files) {
 
 my $rebuild = $write_unchanged_files    # Rebuild: if unconditional rebuild
               || ! scalar @mktables_list_output_files  # or if no outputs known
-              || $old_start_time < $most_recent;       # or out-of-date
+              || $old_start_time < $most_recent        # or out-of-date
+              || $old_options ne $command_line_arguments; # or with different
+                                                          # options
 
 # Now we check to see if any output files are older than youngest, if
 # they are, we need to continue on, otherwise we can presumably bail.
@@ -18018,6 +18378,7 @@ if ( $file_list and $make_list ) {
 # $file_list -- File list for $0.
 #
 #   Autogenerated starting on $start_time ($localtime)
+#   From options $command_line_arguments
 #
 # - First section is input files
 #   ($0 itself is not listed but is automatically considered an input)
