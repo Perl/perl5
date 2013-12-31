@@ -4696,7 +4696,7 @@ if $test -f /bin/mips && /bin/mips; then
 /bsd43
 #endif
 EOCP
-	if cc -E usr.c > usr.out && $contains / usr.out >/dev/null 2>&1; then
+	if $cc $cppflags -E usr.c > usr.out && $contains / usr.out >/dev/null 2>&1; then
 		dflt='/bsd43/usr/include'
 		incpath='/bsd43'
 		mips_type='BSD 4.3'
