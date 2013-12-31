@@ -2792,50 +2792,11 @@ $define|true|[yY]*)
 	    # leave out ld, choosing it is more complex
 	    nm=$targetarch-nm
 	    ranlib=$targetarch-ranlib
-	    $echo 'extern int foo;' > try.c
-	    set X `$cc -v -E try.c 2>&1 | $awk '/^#include </,/^End of search /'|$grep '/include'`
-	    shift
-            if $test $# -gt 0; then
-	        incpth="$incpth $*"
-		incpth="`$echo $incpth|$sed 's/^ //'`"
-                echo "Guessing incpth '$incpth'." >&4
-                for i in $*; do
-		    j="`$echo $i|$sed 's,/include$,/lib,'`"
-		    if $test -d $j; then
-			libpth="$libpth $j"
-		    fi
-                done   
-		libpth="`$echo $libpth|$sed 's/^ //'`"
-                echo "Guessing libpth '$libpth'." >&4
-	    fi
-	    $rm -f try.c
 	    ;;
 	esac
 	case "$targetarch" in
 	'') echo "Targetarch not defined." >&4; croak=y ;;
         *)  echo "Using targetarch $targetarch." >&4 ;;
-	esac
-	case "$incpth" in
-	'') echo "Incpth not defined." >&4; croak=y ;;
-        *)  echo "Using incpth '$incpth'." >&4 ;;
-	esac
-	case "$libpth" in
-	'') echo "Libpth not defined." >&4; croak=y ;;
-        *)  echo "Using libpth '$libpth'." >&4 ;;
-	esac
-	case "$usrinc" in
-	'') for i in $incpth; do
-	        if $test -f $i/errno.h -a -f $i/stdio.h -a -f $i/time.h; then
-		    usrinc=$i
-	            echo "Guessing usrinc $usrinc." >&4
-		    break
-		fi
-	    done
-	    case "$usrinc" in
-	    '') echo "Usrinc not defined." >&4; croak=y ;;
-	    esac
-            ;;
-        *)  echo "Using usrinc $usrinc." >&4 ;;
 	esac
 	case "$targethost" in
 	'') echo "Targethost not defined." >&4; croak=y ;;
@@ -4508,52 +4469,6 @@ case "$gccversion" in
     $rm -f try try.*
 esac
 
-: What should the include directory be ?
-echo " "
-$echo $n "Hmm...  $c"
-dflt='/usr/include'
-incpath=''
-mips_type=''
-if $test -f /bin/mips && /bin/mips; then
-	echo "Looks like a MIPS system..."
-	$cat >usr.c <<'EOCP'
-#ifdef SYSTYPE_BSD43
-/bsd43
-#endif
-EOCP
-	if cc -E usr.c > usr.out && $contains / usr.out >/dev/null 2>&1; then
-		dflt='/bsd43/usr/include'
-		incpath='/bsd43'
-		mips_type='BSD 4.3'
-	else
-		mips_type='System V'
-	fi
-	$rm -f usr.c usr.out
-	echo "and you're compiling with the $mips_type compiler and libraries."
-	xxx_prompt=y
-	echo "exit 0" >mips
-else
-	echo "Doesn't look like a MIPS system."
-	xxx_prompt=n
-	echo "exit 1" >mips
-fi
-chmod +x mips
-$eunicefix mips
-case "$usrinc" in
-'') ;;
-*) dflt="$usrinc";;
-esac
-case "$xxx_prompt" in
-y)	fn=d/
-	echo " "
-	rp='Where are the include files you want to use?'
-	. ./getfile
-	usrinc="$ans"
-	;;
-*)	usrinc="$dflt"
-	;;
-esac
-
 : see how we invoke the C preprocessor
 echo " "
 echo "Now, how can we feed standard input to your C preprocessor..." >&4
@@ -4701,6 +4616,118 @@ case "$cppstdin" in
 *) $rm -f $wrapper;;
 esac
 $rm -f testcpp.c testcpp.out
+
+case "$osname" in
+vos) cppfilter="tr '\\\\>' '/' |" ;; # path component separator is >
+os2) cppfilter="sed -e 's|\\\\\\\\|/|g' |" ;; # path component separator is \
+*)   cppfilter='' ;;
+esac
+
+# If using gcc or clang, we can get better values for libpth, incpth
+# and usrinc directly from the compiler.
+# Note that ccname for clang is also gcc.
+case "$ccname" in
+    gcc)
+        $echo 'extern int foo;' > try.c
+        set X `$cppstdin -v try.c 2>&1 | $awk '/^#include </,/^End of search /'|$cppfilter $grep '/include'`
+        shift
+        if $test $# -gt 0; then
+            incpth="$incpth $*"
+            incpth="`$echo $incpth|$sed 's/^ //'`"
+            for i in $*; do
+                j="`$echo $i|$sed 's,/include$,/lib,'`"
+                if $test -d $j; then
+                    libpth="$libpth $j"
+                fi
+            done
+            libpth="`$echo $libpth|$sed 's/^ //'`"
+            for xxx in $libpth $loclibpth $plibpth $glibpth; do
+                if $test -d $xxx; then
+                    case " $libpth " in
+                    *" $xxx "*) ;;
+                    *) libpth="$libpth $xxx";;
+                    esac
+                fi
+            done
+        fi
+        $rm -f try.c
+        case "$usrinc" in
+        '') for i in $incpth; do
+                if $test -f $i/errno.h -a -f $i/stdio.h -a -f $i/time.h; then
+                    usrinc="$i"
+                    break
+                fi
+            done
+            ;;
+        esac
+        
+        case "$usecrosscompile" in
+        $define|true|[yY]*)
+            case "$incpth" in
+                '') echo "Incpth not defined." >&4; croak=y ;;
+                *)  echo "Using incpth '$incpth'." >&4 ;;
+            esac
+            case "$libpth" in
+                '') echo "Libpth not defined." >&4; croak=y ;;
+                *)  echo "Using libpth '$libpth'." >&4 ;;
+            esac
+            case "$usrinc" in
+                '') echo "Usrinc not defined." >&4; croak=y ;;
+                *)  echo "Using usrinc $usrinc." >&4 ;;
+            esac
+            case "$croak" in
+                y) echo "Cannot continue, aborting." >&4; exit 1 ;;
+            esac
+            ;;
+        esac
+    ;;
+esac
+
+: What should the include directory be ?
+echo " "
+$echo $n "Hmm...  $c"
+dflt='/usr/include'
+incpath=''
+mips_type=''
+if $test -f /bin/mips && /bin/mips; then
+	echo "Looks like a MIPS system..."
+	$cat >usr.c <<'EOCP'
+#ifdef SYSTYPE_BSD43
+/bsd43
+#endif
+EOCP
+	if cc -E usr.c > usr.out && $contains / usr.out >/dev/null 2>&1; then
+		dflt='/bsd43/usr/include'
+		incpath='/bsd43'
+		mips_type='BSD 4.3'
+	else
+		mips_type='System V'
+	fi
+	$rm -f usr.c usr.out
+	echo "and you're compiling with the $mips_type compiler and libraries."
+	xxx_prompt=y
+	echo "exit 0" >mips
+else
+	echo "Doesn't look like a MIPS system."
+	xxx_prompt=n
+	echo "exit 1" >mips
+fi
+chmod +x mips
+$eunicefix mips
+case "$usrinc" in
+'') ;;
+*) dflt="$usrinc";;
+esac
+case "$xxx_prompt" in
+y)	fn=d/
+	echo " "
+	rp='Where are the include files you want to use?'
+	. ./getfile
+	usrinc="$ans"
+	;;
+*)	usrinc="$dflt"
+	;;
+esac
 
 : Set private lib path
 case "$plibpth" in
@@ -5435,11 +5462,6 @@ case $fieldn in
 esac
 echo "Your cpp writes the filename in the $pos field of the line."
 
-case "$osname" in
-vos) cppfilter="tr '\\\\>' '/' |" ;; # path component separator is >
-os2) cppfilter="sed -e 's|\\\\\\\\|/|g' |" ;; # path component separator is \
-*)   cppfilter='' ;;
-esac
 : locate header file
 $cat >findhdr <<EOF
 $startsh
