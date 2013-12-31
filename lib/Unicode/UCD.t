@@ -13,6 +13,9 @@ BEGIN {
     }
 }
 
+my @warnings;
+local $SIG{__WARN__} = sub { push @warnings, @_  };
+
 use strict;
 use Unicode::UCD;
 use Test::More;
@@ -534,6 +537,8 @@ is(prop_aliases("isgc"), undef,
     "prop_aliases('isgc') returns <undef> since is not covered Perl extension");
 is(prop_aliases("Is_Is_Any"), undef,
                 "prop_aliases('Is_Is_Any') returns <undef> since two is's");
+is(prop_aliases("ccc=vr"), undef,
+                          "prop_aliases('ccc=vr') doesn't generate a warning");
 
 require 'utf8_heavy.pl';
 require "unicore/Heavy.pl";
@@ -2177,4 +2182,9 @@ my @alpha_invlist = prop_invlist("Alpha");
 is(search_invlist(\@alpha_invlist, ord("\t")), undef, "search_invlist returns undef for code points before first one on the list");
 
 ok($/ eq $input_record_separator,  "The record separator didn't get overridden");
+
+if (! ok(@warnings == 0, "No warnings were generated")) {
+    diag(join "\n", "The warnings are:", @warnings);
+}
+
 done_testing();

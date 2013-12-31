@@ -5,7 +5,7 @@ use warnings;
 no warnings 'surrogate';    # surrogates can be inputs to this
 use charnames ();
 
-our $VERSION = '0.56';
+our $VERSION = '0.57';
 
 require Exporter;
 
@@ -1844,12 +1844,21 @@ sub prop_aliases ($) {
                 # there, the input is unknown.
                 return;
             }
-            else {
+            elsif ($loose =~ / [:=] /x) {
 
                 # Here we found the name but not its aliases, so it has to
-                # exist.  This means it must be one of the Perl single-form
-                # extensions.  First see if it is for a property-value
-                # combination in one of the following properties.
+                # exist.  Exclude property-value combinations.  (This shows up
+                # for something like ccc=vr which matches loosely, but is a
+                # synonym for ccc=9 which matches only strictly.
+                return;
+            }
+            else {
+
+                # Here it has to exist, and isn't a property-value
+                # combination.  This means it must be one of the Perl
+                # single-form extensions.  First see if it is for a
+                # property-value combination in one of the following
+                # properties.
                 my @list;
                 foreach my $property ("gc", "script") {
                     @list = prop_value_aliases($property, $loose);
