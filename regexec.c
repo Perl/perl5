@@ -7511,7 +7511,7 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
      * positive that will be resolved when the match is done again as not part
      * of the synthetic start class */
     if (!match) {
-	if (utf8_target && (flags & ANYOF_ABOVE_LATIN1_ALL) && c >= 256) {
+	if (c >= 256 && (flags & ANYOF_ABOVE_LATIN1_ALL)) {
 	    match = TRUE;	/* Everything above 255 matches */
 	}
 	else if (ANYOF_NONBITMAP(n)
