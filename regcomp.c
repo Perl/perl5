@@ -4021,6 +4021,8 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 	    else if (flags & SCF_DO_STCLASS_OR) {
                 ssc_add_cp(data->start_class, uc);
 		ssc_and(pRExC_state, data->start_class, and_withp);
+
+                /* See commit msg 749e076fceedeb708a624933726e7989f2302f6a */
                 ANYOF_FLAGS(data->start_class) &= ~ANYOF_EMPTY_STRING;
 	    }
 	    flags &= ~SCF_DO_STCLASS;
@@ -4141,6 +4143,8 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 	    else if (flags & SCF_DO_STCLASS_OR) {
                 ssc_union(data->start_class, EXACTF_invlist, FALSE);
 		ssc_and(pRExC_state, data->start_class, and_withp);
+
+                /* See commit msg 749e076fceedeb708a624933726e7989f2302f6a */
                 ANYOF_FLAGS(data->start_class) &= ~ANYOF_EMPTY_STRING;
 	    }
 	    flags &= ~SCF_DO_STCLASS;
@@ -4547,6 +4551,9 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
                               PL_XPosix_ptrs[_CC_VERTSPACE],
                               FALSE);
 		    ssc_and(pRExC_state, data->start_class, and_withp);
+
+                    /* See commit msg for
+                     * 749e076fceedeb708a624933726e7989f2302f6a */
                     ANYOF_FLAGS(data->start_class) &= ~ANYOF_EMPTY_STRING;
                 }
 		flags &= ~SCF_DO_STCLASS;
@@ -4573,6 +4580,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
                 U8 classnum;
                 U8 namedclass;
 
+                /* See commit msg 749e076fceedeb708a624933726e7989f2302f6a */
                 ANYOF_FLAGS(data->start_class) &= ~ANYOF_EMPTY_STRING;
 
 		/* Some of the logic below assumes that switching
