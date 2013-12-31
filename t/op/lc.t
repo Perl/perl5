@@ -10,7 +10,7 @@ BEGIN {
 
 use feature qw( fc );
 
-plan tests => 129;
+plan tests => 132;
 
 is(lc(undef),	   "", "lc(undef) is ''");
 is(lcfirst(undef), "", "lcfirst(undef) is ''");
@@ -256,17 +256,26 @@ for (1, 4, 9, 16, 25) {
 }
 
 # bug #43207
-my $temp = "Hello";
+my $temp = "HellO";
 for ("$temp") {
     lc $_;
-    is($_, "Hello");
+    is($_, "HellO", '[perl #43207] lc($_) modifying $_');
 }
-
-# bug #43207
-my $temp = "Hello";
 for ("$temp") {
     fc $_;
-    is($_, "Hello");
+    is($_, "HellO", '[perl #43207] fc($_) modifying $_');
+}
+for ("$temp") {
+    uc $_;
+    is($_, "HellO", '[perl #43207] uc($_) modifying $_');
+}
+for ("$temp") {
+    ucfirst $_;
+    is($_, "HellO", '[perl #43207] ucfirst($_) modifying $_');
+}
+for ("$temp") {
+    lcfirst $_;
+    is($_, "HellO", '[perl #43207] lcfirst($_) modifying $_');
 }
 
 # new in Unicode 5.1.0
