@@ -121,6 +121,14 @@ if ($outfile) {
     } else {
 	print "\nThank you for taking the time to file a bug report!\n\n";
     }
+
+    paraprint <<EOF
+Please note that mailing lists are moderated, your message may take a while to
+show up. If you do not receive an automated response acknowledging your message
+within a few hours (check your SPAM folder and outgoing mail) please consider
+sending an email directly from your mail client to perlbug\@perl.org or
+perl-thanks\@perl.org respectively.
+EOF
 }
 
 exit;
@@ -1311,11 +1319,12 @@ a duplicate of an existing report, you may not receive a personal
 reply.
 
 If it is important to you that your bug be fixed, do monitor the
-perl5-porters@perl.org mailing list and the commit logs to development
+perl5-porters@perl.org mailing list (mailing lists are moderated, your
+message may take a while to show up) and the commit logs to development
 versions of Perl, and encourage the maintainers with kind words or
 offers of frosty beverages.  (Please do be kind to the maintainers.
-Harassing or flaming them is likely to have the opposite effect of
-the one you want.)
+Harassing or flaming them is likely to have the opposite effect of the
+one you want.)
 
 Feel free to update the ticket about your bug on http://rt.perl.org
 if a new version of Perl is released and your bug is still present.
