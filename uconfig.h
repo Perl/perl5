@@ -886,15 +886,6 @@
 #define OSNAME "unknown"		/**/
 #define OSVERS "unknown"		/**/
 
-/* MULTIARCH:
- *	This symbol, if defined, signifies that the build
- *	process will produce some binary files that are going to be
- *	used in a cross-platform environment.  This is the case for
- *	example with the NeXT "fat" binaries that contain executables
- *	for several CPUs.
- */
-/*#define MULTIARCH		/ **/
-
 /* USE_CROSS_COMPILE:
  *	This symbol, if defined, indicates that Perl is being cross-compiled.
  */
@@ -906,6 +897,15 @@
 /*#define	USE_CROSS_COMPILE	/ **/
 #define	PERL_TARGETARCH	""	/**/
 #endif
+
+/* MULTIARCH:
+ *	This symbol, if defined, signifies that the build
+ *	process will produce some binary files that are going to be
+ *	used in a cross-platform environment.  This is the case for
+ *	example with the NeXT "fat" binaries that contain executables
+ *	for several CPUs.
+ */
+/*#define MULTIARCH		/ **/
 
 /* MEM_ALIGNBYTES:
  *	This symbol contains the number of bytes required to align a
@@ -4718,6 +4718,6 @@
 #endif
 
 /* Generated from:
- * 63850d620b5f962e8fbbf7c826eb9cba1b8ac13f3443c80eee1c9061756fae69 config_h.SH
+ * 01c6afba563531a39cba7bc09849f8ec6fbe74fe96e3bd2c16e543ec67e2de16 config_h.SH
  * 71b0dcf437b30c409fc23b5c4c6ec2c988fc419295a650fe80f93a6d5fb0ff94 uconfig.sh
  * ex: set ro: */

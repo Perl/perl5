@@ -28,7 +28,7 @@
 # See Porting/pumpkin.pod for more information on metaconfig.
 #
 
-# Generated on Tue Sep 17 10:34:33 CEST 2013 [metaconfig 3.5 PL0]
+# Generated on Wed Jan  1 18:06:40 CET 2014 [metaconfig 3.5 PL0]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -17405,8 +17405,6 @@ eval $inlibc
 set setvbuf d_setvbuf
 eval $inlibc
 
-
-
 : see if shmctl exists
 set shmctl d_shmctl
 eval $inlibc
@@ -22115,10 +22113,10 @@ find_extensions='
 	    DynaLoader|dynaload) ;;
 	    *)
 	    this_ext=`echo $xxx | $sed -e s/-/\\\//g`;
-            case "$this_ext" in
-                Scalar/List/Utils) this_ext="List/Util";;
-                PathTools)         this_ext="Cwd";;
-            esac;
+	    case "$this_ext" in
+		Scalar/List/Utils) this_ext="List/Util"	;;
+		PathTools)         this_ext="Cwd"	;;
+	    esac;
 	    echo " $xs_extensions $nonxs_extensions" > $$.tmp;
 	    if $contains " $this_ext " $$.tmp; then
 		echo >&4;
