@@ -1564,13 +1564,22 @@ typedef U32 line_t;
 	} \
 	return a;
 
-/* Converts a hex digit in a string to its numeric value, advancing the
- * pointer.  The input must be known to be 0-9, A-F, or a-f.  In both ASCII and
- * EBCDIC the last 4 bits of the digits are 0-9; and the last 4 bits of A-F and
- * a-f are 1-6, so adding 9 yields 10-15 */
+/* Converts a character known to represent a hexadecimal digit (0-9, A-F, or
+ * a-f) to its numeric value.  READ_XDIGIT's argument is a string pointer,
+ * which is advanced.  The input is validated only by an assert() in DEBUGGING
+ * builds.  In both ASCII and EBCDIC the last 4 bits of the digits are 0-9; and
+ * the last 4 bits of A-F and a-f are 1-6, so adding 9 yields 10-15 */
+#define XDIGIT_VALUE(c) (__ASSERT_(isXDIGIT(c)) (0xf & (isDIGIT(c)        \
+                                                        ? (c)             \
+                                                        : ((c) + 9))))
 #define READ_XDIGIT(s)  (__ASSERT_(isXDIGIT(*s)) (0xf & (isDIGIT(*(s))     \
                                                         ? (*(s)++)         \
                                                         : (*(s)++ + 9))))
+
+/* Converts a character known to represent an octal digit (0-7) to its numeric
+ * value.  The input is validated only by an assert() in DEBUGGING builds.  In
+ * both ASCII and EBCDIC the last 3 bits of the octal digits range from 0-7. */
+#define OCTAL_VALUE(c) (__ASSERT_(isOCTAL(c)) (7 & (c)))
 
 /*
 =head1 Memory Management
