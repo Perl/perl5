@@ -202,12 +202,16 @@ foreach my $test (@tests) {
     # are several orthogonal variables involved.  We test all the subclasses
     # of utf8 warnings to verify they work with and without the utf8 class,
     # and don't have effects on other sublass warnings
-    foreach my $warning (0, 'utf8', 'surrogate', 'nonchar', 'non_unicode') {
+    foreach my $warning ('utf8', 'surrogate', 'nonchar', 'non_unicode') {
         foreach my $warn_flag (0, $warn_flags) {
             foreach my $disallow_flag (0, $disallow_flags) {
+                foreach my $do_warning (0, 1) {
 
-                no warnings 'utf8';
-                my $eval_warn = $warning eq 0 ? "no warnings" : "use warnings '$warning'";
+                my $eval_warn = $do_warning
+                                ? "use warnings '$warning'"
+                                : $warning eq "utf8"
+                                  ? "no warnings 'utf8'"
+                                  : "use warnings 'utf8'; no warnings '$warning'";
 
                 # is effectively disallowed if will overflow, even if the flag
                 # indicates it is allowed, fix up test name to indicate this
@@ -239,7 +243,13 @@ foreach my $test (@tests) {
                 }
                 is($ret_ref->[1], $expected_len, "$this_name: Returns expected length");
 
-                if ($will_overflow && ! $disallow_flag && $warning eq 'utf8') {
+                if (! $do_warning && ($warning eq 'utf8' || $warning eq $category)) {
+                    if (!is(scalar @warnings, 0, "$this_name: No warnings generated"))
+                    {
+                        note "The warnings were: " . join(", ", @warnings);
+                    }
+                }
+                elsif ($will_overflow && ! $disallow_flag && $warning eq 'utf8') {
 
                     # Will get the overflow message instead of the expected
                     # message under these circumstances, as they would
@@ -264,12 +274,6 @@ foreach my $test (@tests) {
                         }
                     }
                 }
-                else {
-                    if (!is(scalar @warnings, 0, "$this_name: No warnings generated"))
-                    {
-                        note "The warnings were: " . join(", ", @warnings);
-                    }
-                }
 
                 # Check CHECK_ONLY results when the input is disallowed.  Do
                 # this when actually disallowed, not just when the
@@ -284,6 +288,7 @@ foreach my $test (@tests) {
                     }
                 }
             }
+        }
         }
     }
 }

@@ -3672,7 +3672,7 @@ the C<fallback> overloading key is specified to be true.  See L<overload>.
 
 =item Operation "%s" returns its argument for non-Unicode code point 0x%X
 
-(S utf8, non_unicode) You performed an operation requiring Unicode
+(S non_unicode) You performed an operation requiring Unicode
 semantics on a code point that is not in Unicode, so what it should do
 is not defined.  Perl has chosen to have it do nothing, and warn you.
 

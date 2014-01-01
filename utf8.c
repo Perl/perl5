@@ -831,10 +831,10 @@ Perl_utf8n_to_uvchr(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
     {
 	if (UNICODE_IS_SURROGATE(uv)) {
 	    if ((flags & (UTF8_WARN_SURROGATE|UTF8_CHECK_ONLY)) == UTF8_WARN_SURROGATE
-		&& ckWARN2_d(WARN_UTF8, WARN_SURROGATE))
+		&& ckWARN_d(WARN_SURROGATE))
 	    {
 		sv = sv_2mortal(Perl_newSVpvf(aTHX_ "UTF-16 surrogate U+%04"UVXf"", uv));
-		pack_warn = packWARN2(WARN_UTF8, WARN_SURROGATE);
+		pack_warn = packWARN(WARN_SURROGATE);
 	    }
 	    if (flags & UTF8_DISALLOW_SURROGATE) {
 		goto disallowed;
@@ -842,10 +842,10 @@ Perl_utf8n_to_uvchr(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
 	}
 	else if ((uv > PERL_UNICODE_MAX)) {
 	    if ((flags & (UTF8_WARN_SUPER|UTF8_CHECK_ONLY)) == UTF8_WARN_SUPER
-		&& ckWARN2_d(WARN_UTF8, WARN_NON_UNICODE))
+		&& ckWARN_d(WARN_NON_UNICODE))
 	    {
 		sv = sv_2mortal(Perl_newSVpvf(aTHX_ "Code point 0x%04"UVXf" is not Unicode, may not be portable", uv));
-		pack_warn = packWARN2(WARN_UTF8, WARN_NON_UNICODE);
+		pack_warn = packWARN(WARN_NON_UNICODE);
 	    }
 	    if (flags & UTF8_DISALLOW_SUPER) {
 		goto disallowed;
@@ -853,10 +853,10 @@ Perl_utf8n_to_uvchr(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
 	}
 	else if (UNICODE_IS_NONCHAR(uv)) {
 	    if ((flags & (UTF8_WARN_NONCHAR|UTF8_CHECK_ONLY)) == UTF8_WARN_NONCHAR
-		&& ckWARN2_d(WARN_UTF8, WARN_NONCHAR))
+		&& ckWARN_d(WARN_NONCHAR))
 	    {
 		sv = sv_2mortal(Perl_newSVpvf(aTHX_ "Unicode non-character U+%04"UVXf" is illegal for open interchange", uv));
-		pack_warn = packWARN2(WARN_UTF8, WARN_NONCHAR);
+		pack_warn = packWARN(WARN_NONCHAR);
 	    }
 	    if (flags & UTF8_DISALLOW_NONCHAR) {
 		goto disallowed;
