@@ -823,7 +823,7 @@ Perl_utf8n_to_uvchr(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
 	goto malformed;
     }
 
-    /* Here, the input is considered to be well-formed , but could be a
+    /* Here, the input is considered to be well-formed, but it still could be a
      * problematic code point that is not allowed by the input parameters. */
     if (uv >= UNICODE_SURROGATE_FIRST /* isn't problematic if < this */
 	&& (flags & (UTF8_DISALLOW_ILLEGAL_INTERCHANGE
