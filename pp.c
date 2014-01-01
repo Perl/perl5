@@ -3324,11 +3324,12 @@ PP(pp_ord)
     if (PL_encoding && SvPOK(argsv) && !DO_UTF8(argsv)) {
         SV * const tmpsv = sv_2mortal(newSVsv(argsv));
         s = (U8*)sv_recode_to_utf8(tmpsv, PL_encoding);
+        len = UTF8SKIP(s);  /* Should be well-formed; so this is its length */
         argsv = tmpsv;
     }
 
     XPUSHu(DO_UTF8(argsv)
-           ? utf8n_to_uvchr(s, UTF8_MAXBYTES, 0, UTF8_ALLOW_ANYUV)
+           ? utf8n_to_uvchr(s, len, 0, UTF8_ALLOW_ANYUV)
            : (UV)(*s & 0xff));
 
     RETURN;
