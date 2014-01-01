@@ -3493,7 +3493,10 @@ PP(pp_ucfirst)
     /* We may be able to get away with changing only the first character, in
      * place, but not if read-only, etc.  Later we may discover more reasons to
      * not convert in-place. */
-    inplace = SvPADTMP(source) && !SvREADONLY(source) && SvTEMP(source);
+    inplace = !SvREADONLY(source)
+	   && (  SvPADTMP(source)
+	      || (  SvTEMP(source) && !SvSMAGICAL(source)
+		 && SvREFCNT(source) == 1));
 
     /* First calculate what the changed first character should be.  This affects
      * whether we can just swap it out, leaving the rest of the string unchanged,
@@ -3706,8 +3709,11 @@ PP(pp_uc)
 
     SvGETMAGIC(source);
 
-    if (SvPADTMP(source) && !SvREADONLY(source) && !SvAMAGIC(source)
-	&& SvTEMP(source) && !DO_UTF8(source)
+    if ((SvPADTMP(source)
+	 ||
+	(SvTEMP(source) && !SvSMAGICAL(source) && SvREFCNT(source) == 1))
+	&& !SvREADONLY(source) && SvPOK(source)
+	&& !DO_UTF8(source)
 	&& (IN_LOCALE_RUNTIME || ! IN_UNI_8_BIT)) {
 
 	/* We can convert in place.  The reason we can't if in UNI_8_BIT is to
@@ -3952,8 +3958,12 @@ PP(pp_lc)
 
     SvGETMAGIC(source);
 
-    if (SvPADTMP(source) && !SvREADONLY(source) && !SvAMAGIC(source)
-	&& SvTEMP(source) && !DO_UTF8(source)) {
+    if (   (  SvPADTMP(source)
+	   || (  SvTEMP(source) && !SvSMAGICAL(source)
+	      && SvREFCNT(source) == 1  )
+	   )
+	&& !SvREADONLY(source) && SvPOK(source)
+	&& !DO_UTF8(source)) {
 
 	/* We can convert in place, as lowercasing anything in the latin1 range
 	 * (or else DO_UTF8 would have been on) doesn't lengthen it */
