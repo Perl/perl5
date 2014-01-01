@@ -4015,7 +4015,7 @@ PP(pp_lc)
 				 cBOOL(IN_LOCALE_RUNTIME), &tainted);
 
 	    /* Here is where we would do context-sensitive actions.  See the
-	     * commit message for this comment for why there isn't any */
+	     * commit message for 86510fb15 for why there isn't any */
 
 	    if (ulen > u && (SvLEN(dest) < (min += ulen - u))) {
 
