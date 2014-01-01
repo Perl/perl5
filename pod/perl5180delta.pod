@@ -1019,7 +1019,7 @@ respect the other pragma when in scope.
 =item *
 
 Using any of these three pragmata would cause C<hex> and C<oct> anywhere
-else in the program to evalute their arguments in list context and prevent
+else in the program to evaluate their arguments in list context and prevent
 them from inferring $_ when called without arguments.
 
 =item *
@@ -1424,7 +1424,7 @@ the buffer or gives it a typeglob or shared hash key scalar.
 
 L<PerlIO::scalar> has been upgraded to 0.16.
 
-The buffer scalar supplied may now only contain code pounts 0xFF or
+The buffer scalar supplied may now only contain code points 0xFF or
 lower. [perl #109828]
 
 =item *
