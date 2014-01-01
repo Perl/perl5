@@ -101,7 +101,7 @@ static const char* const non_utf8_target_but_utf8_required
 #define	STATIC	static
 #endif
 
-/* Valid for non-utf8 strings: avoids the reginclass
+/* Valid only for non-utf8 strings: avoids the reginclass
  * call if there are no complications: i.e., if everything matchable is
  * straight forward in the bitmap */
 #define REGINCLASS(prog,p,c)  (ANYOF_FLAGS(p) ? reginclass(prog,p,c,c+1,0)   \
