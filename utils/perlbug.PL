@@ -76,6 +76,8 @@ BEGIN {
     $::HaveTemp = ($@ eq "");
     eval { require Module::CoreList; };
     $::HaveCoreList = ($@ eq "");
+    eval { require encoding; };
+    $::Have_get_locale_encoding = ($@ eq "" && defined &encoding::_get_locale_encoding);
 };
 
 my $Version = "1.40";
@@ -96,6 +98,8 @@ my( $file, $usefile, $cc, $address, $bugaddress, $testaddress, $thanksaddress,
 my $perl_version = $^V ? sprintf("%vd", $^V) : $];
 
 my $config_tag2 = "$perl_version - $Config{cf_time}";
+
+my $input_encoding = $::Have_get_locale_encoding ? encoding::_get_locale_encoding() : '';
 
 Init();
 
@@ -599,7 +603,7 @@ EOF
     }
 
     # Generate report
-    open(REP,">$filename") or die "Unable to create report file '$filename': $!\n";
+    open(REP, '>:raw', $filename) or die "Unable to create report file '$filename': $!\n";
     my $reptype = !$ok ? ($thanks ? 'thank-you' : 'bug')
 	: $opt{n} ? "build failure" : "success";
 
@@ -612,7 +616,7 @@ EOF
     if ($body) {
 	print REP $body;
     } elsif ($usefile) {
-	open(F, "<$file")
+	open(F, "<:$input_encoding", $file)
 		or die "Unable to read report file from '$file': $!\n";
 	while (<F>) {
 	    print REP $_
@@ -831,7 +835,7 @@ EOF
             if ( SaveMessage() ) { exit }
 	    } elsif ($action =~ /^(d|l|sh)/i ) { # <D>isplay, <L>ist, <Sh>ow
 		# Display the message
-		open(REP, "<$filename") or die "Couldn't open file '$filename': $!\n";
+		open(REP, '<:raw', $filename) or die "Couldn't open file '$filename': $!\n";
 		while (<REP>) { print $_ }
 		close(REP) or die "Error closing report file '$filename': $!";
 		if ($have_attachment) {
@@ -1066,7 +1070,7 @@ Content-Disposition: attachment; filename="$attach_file"
 
 ATTACHMENT
 
-        open my $attach_fh, '<', $attachment
+        open my $attach_fh, '<:raw', $attachment
             or die "Couldn't open attachment '$attachment': $!\n";
         while (<$attach_fh>) { $attach .= $_; }
         close($attach_fh) or die "Error closing attachment '$attachment': $!";
@@ -1079,7 +1083,7 @@ ATTACHMENT
 sub build_complete_message {
     my $content = _build_header(%{_message_headers()}) . "\n\n";
     $content .= _add_body_start() if $have_attachment;
-    open( REP, "<$filename" ) or die "Couldn't open file '$filename': $!\n";
+    open( REP, "<:raw", $filename ) or die "Couldn't open file '$filename': $!\n";
     while (<REP>) { $content .= $_; }
     close(REP) or die "Error closing report file '$filename': $!";
     $content .= _add_attachments() if $have_attachment;
@@ -1089,7 +1093,7 @@ sub build_complete_message {
 sub save_message_to_disk {
     my $file = shift;
 
-	    open OUTFILE, ">$file" or do { warn  "Couldn't open '$file': $!\n"; return undef};
+        open OUTFILE, '>:raw', $file or do { warn  "Couldn't open '$file': $!\n"; return undef};
         print OUTFILE build_complete_message();
         close(OUTFILE) or do { warn  "Error closing $file: $!"; return undef };
 	    print "\nMessage saved.\n";
@@ -1105,7 +1109,7 @@ sub _send_message_vms {
     map { $_ =~ s/^[^<]*<//;
           $_ =~ s/>[^>]*//; } ($mail_from, $rcpt_to_to, $rcpt_to_cc);
 
-    if ( open my $sff_fh, '|-', 'MCR TCPIP$SYSTEM:TCPIP$SMTP_SFF.EXE SYS$INPUT:' ) {
+    if ( open my $sff_fh, '|-:raw', 'MCR TCPIP$SYSTEM:TCPIP$SMTP_SFF.EXE SYS$INPUT:' ) {
         print $sff_fh "MAIL FROM:<$mail_from>\n";
         print $sff_fh "RCPT TO:<$rcpt_to_to>\n";
         print $sff_fh "RCPT TO:<$rcpt_to_cc>\n" if $rcpt_to_cc;
@@ -1128,8 +1132,9 @@ sub _send_message_mailsend {
     }
 
     $fh = $msg->open;
+    binmode($fh, ':raw');
     print $fh _add_body_start() if $have_attachment;
-    open(REP, "<$filename") or die "Couldn't open '$filename': $!\n";
+    open(REP, "<:raw", $filename) or die "Couldn't open '$filename': $!\n";
     while (<REP>) { print $fh $_ }
     close(REP) or die "Error closing $filename: $!";
     print $fh _add_attachments() if $have_attachment;
@@ -1175,7 +1180,7 @@ send to '$address' with your normal mail client.
 EOF
     }
 
-    open( SENDMAIL, "|-", $sendmail, "-t", "-oi", "-f", $from )
+    open( SENDMAIL, "|-:raw", $sendmail, "-t", "-oi", "-f", $from )
         || die "'|$sendmail -t -oi -f $from' failed: $!";
     print SENDMAIL build_complete_message();
     if ( close(SENDMAIL) ) {
@@ -1197,7 +1202,7 @@ sub _fingerprint_lines_in_report {
     # we can track whether the user does any editing.
     # yes, *all* whitespace is ignored.
 
-    open(REP, "<$filename") or die "Unable to open report file '$filename': $!\n";
+    open(REP, '<:raw', $filename) or die "Unable to open report file '$filename': $!\n";
     while (my $line = <REP>) {
         $line =~ s/\s+//g;
         $new_lines++ if (!$REP{$line});
