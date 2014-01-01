@@ -3330,7 +3330,7 @@ PP(pp_ord)
 
     XPUSHu(DO_UTF8(argsv)
            ? utf8n_to_uvchr(s, len, 0, UTF8_ALLOW_ANYUV)
-           : (UV)(*s & 0xff));
+           : (UV)(*s));
 
     RETURN;
 }
