@@ -968,7 +968,8 @@ sub fresh_perl_like {
 
 # Many tests use the same format in __DATA__ or external files to specify a
 # sequence of (fresh) tests to run, extra files they may temporarily need, and
-# what the expected output is. So have excatly one copy of the code to run that
+# what the expected output is.  Putting it here allows common code to serve
+# these multiple tests.
 #
 # Each program is source code to run followed by an "EXPECT" line, followed
 # by the expected output.
