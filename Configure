@@ -4484,7 +4484,7 @@ if test ! -f cppstdin; then
 		# locations but we'll cheat by using the -M flag.
 		echo 'cat >.$$.c; rm -f .$$.u; '"$cc"' ${1+"$@"} -M -c .$$.c 2>/dev/null; test -s .$$.u && awk '"'"'$2 ~ /\.h$/ { print "# 0 \""$2"\"" }'"'"' .$$.u; rm -f .$$.o .$$.u; '"$cc"' -E ${1+"$@"} .$$.c; rm .$$.c' > cppstdin
 	else
-		echo 'cat >.$$.c; '"$cc"' -E ${1+"$@"} .$$.c; rm .$$.c' >cppstdin
+		echo 'cat >.$$.c; '"$cc $cppflags"' -E ${1+"$@"} .$$.c; rm .$$.c' >cppstdin
 	fi
 else
 	echo "Keeping your $hint cppstdin wrapper."
@@ -4527,37 +4527,37 @@ elif echo 'Maybe "'"$cc"' -E" will work...'; \
 	$cc -E <testcpp.c >testcpp.out 2>&1; \
 	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
 	echo "Yup, it does."
-	x_cpp="$cc -E"
+	x_cpp="$cc $cppflags -E"
 	x_minus='';
 elif echo 'Nope...maybe "'"$cc"' -E -" will work...'; \
 	$cc -E - <testcpp.c >testcpp.out 2>&1; \
 	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
 	echo "Yup, it does."
-	x_cpp="$cc -E"
+	x_cpp="$cc $cppflags -E"
 	x_minus='-';
 elif echo 'Nope...maybe "'"$cc"' -P" will work...'; \
 	$cc -P <testcpp.c >testcpp.out 2>&1; \
 	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
 	echo "Yipee, that works!"
-	x_cpp="$cc -P"
+	x_cpp="$cc $cppflags -P"
 	x_minus='';
 elif echo 'Nope...maybe "'"$cc"' -P -" will work...'; \
 	$cc -P - <testcpp.c >testcpp.out 2>&1; \
 	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
 	echo "At long last!"
-	x_cpp="$cc -P"
+	x_cpp="$cc $cppflags -P"
 	x_minus='-';
 elif echo 'No such luck, maybe "'$cpp'" will work...'; \
 	$cpp <testcpp.c >testcpp.out 2>&1; \
 	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
 	echo "It works!"
-	x_cpp="$cpp"
+	x_cpp="$cpp $cppflags"
 	x_minus='';
 elif echo 'Nixed again...maybe "'$cpp' -" will work...'; \
 	$cpp - <testcpp.c >testcpp.out 2>&1; \
 	$contains 'abc.*xyz' testcpp.out >/dev/null 2>&1 ; then
 	echo "Hooray, it works!  I was beginning to wonder."
-	x_cpp="$cpp"
+	x_cpp="$cpp $cppflags"
 	x_minus='-';
 elif echo 'Uh-uh.  Time to get fancy.  Trying a wrapper...'; \
 	$wrapper <testcpp.c >testcpp.out 2>&1; \
