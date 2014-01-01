@@ -270,6 +270,16 @@ typedef U64TYPE U64;
 
 #define Ctl(ch) ((ch) & 037)
 
+/* This is a helper macro to avoid preprocessor issues, expanding to an
+ * assert followed by a comma under DEBUGGING (hence the comma operator).  If
+ * we didn't do this, we would get a comma with nothing before it when not
+ * DEBUGGING */
+#ifdef DEBUGGING
+#   define __ASSERT_(statement)  assert(statement),
+#else
+#   define __ASSERT_(statement)
+#endif
+
 /*
 =head1 SV-Body Allocation
 
