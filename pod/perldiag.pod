@@ -6367,15 +6367,6 @@ no way to tie the scalar itself when it held a typeglob, and no way to
 untie a scalar that had had a typeglob assigned to it.  If you see this
 message, you must be using an older version.
 
-=item Use of ?PATTERN? without explicit operator is deprecated
-
-(D deprecated) You have written something like C<?\w?>, for a regular
-expression that matches only once.  Starting this term directly with
-the question mark delimiter is now deprecated, so that the question mark
-will be available for use in new operators in the future.  Write C<m?\w?>
-instead, explicitly using the C<m> operator: the question mark delimiter
-still invokes match-once behaviour.
-
 =item Use of reference "%s" as array index
 
 (W misc) You tried to use a reference as an array index; this probably

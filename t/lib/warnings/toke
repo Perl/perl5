@@ -1229,7 +1229,6 @@ $_ = $a = 1;
 $a !=~  /1/;
 $a !=~ m#1#;
 $a !=~/1/;
-$a !=~ ?/?;
 $a !=~ y/1//;
 $a !=~ tr/1//;
 $a !=~ s/1//;
@@ -1238,7 +1237,6 @@ no warnings "syntax";
 $a !=~  /1/;
 $a !=~ m#1#;
 $a !=~/1/;
-$a !=~ ?/?;
 $a !=~ y/1//;
 $a !=~ tr/1//;
 $a !=~ s/1//;
@@ -1249,7 +1247,6 @@ EXPECT
 !=~ should be !~ at - line 7.
 !=~ should be !~ at - line 8.
 !=~ should be !~ at - line 9.
-!=~ should be !~ at - line 10.
 ########
 # toke.c
 our $foo :unique;
@@ -1351,13 +1348,17 @@ Non-octal character '8'.  Resolved as "\o{123}" at - line 3.
 ########
 # toke.c
 use warnings;
-my $a = "foo";
-print $a =~ ?f? ? "yes\n" : "no\n" foreach 0..2;
+print ref ? "yes\n" : "no\n" foreach [], ''; # ? is unambiguosly an operator
 EXPECT
-Use of ?PATTERN? without explicit operator is deprecated at - line 4.
 yes
 no
-no
+########
+# toke .c
+use warnings;
+$a =~ ?rand?; # ? is not a regex match
+EXPECT
+syntax error at - line 3, near "=~ ?"
+Execution of - aborted due to compilation errors.
 ########
 # toke.c
 use warnings;

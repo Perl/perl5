@@ -6049,62 +6049,43 @@ Perl_yylex(pTHX)
 	TERM('@');
 
      case '/':			/* may be division, defined-or, or pattern */
-	if (PL_expect == XTERMORDORDOR && s[1] == '/') {
+	if ((PL_expect == XOPERATOR || PL_expect == XTERMORDORDOR) && s[1] == '/') {
 	    if (!PL_lex_allbrackets && PL_lex_fakeeof >=
 		    (s[2] == '=' ? LEX_FAKEEOF_ASSIGN : LEX_FAKEEOF_LOGIC))
 		TOKEN(0);
 	    s += 2;
 	    AOPERATOR(DORDOR);
 	}
-	/* FALLTHROUGH */
-     case '?':			/* may either be conditional or pattern */
-	if (PL_expect == XOPERATOR) {
-	     char tmp = *s++;
-	     if(tmp == '?') {
-		if (!PL_lex_allbrackets &&
-			PL_lex_fakeeof >= LEX_FAKEEOF_IFELSE) {
-		    s--;
-		    TOKEN(0);
-		}
-		PL_lex_allbrackets++;
-		OPERATOR('?');
-	     }
-             else {
-	         tmp = *s++;
-	         if(tmp == '/') {
-	             /* A // operator. */
-		    if (!PL_lex_allbrackets && PL_lex_fakeeof >=
-			    (*s == '=' ? LEX_FAKEEOF_ASSIGN :
-					    LEX_FAKEEOF_LOGIC)) {
-			s -= 2;
-			TOKEN(0);
-		    }
-	            AOPERATOR(DORDOR);
-	         }
-	         else {
-	             s--;
-		     if (*s == '=' && !PL_lex_allbrackets &&
-			     PL_lex_fakeeof >= LEX_FAKEEOF_ASSIGN) {
-			 s--;
-			 TOKEN(0);
-		     }
-	             Mop(OP_DIVIDE);
-	         }
-	     }
-	 }
-	 else {
-	     /* Disable warning on "study /blah/" */
-	     if (PL_oldoldbufptr == PL_last_uni
-	      && (*PL_last_uni != 's' || s - PL_last_uni < 5
-	          || memNE(PL_last_uni, "study", 5)
-	          || isWORDCHAR_lazy_if(PL_last_uni+5,UTF)
-	      ))
-	         check_uni();
-	     if (*s == '?')
-		 deprecate("?PATTERN? without explicit operator");
-	     s = scan_pat(s,OP_MATCH);
-	     TERM(sublex_start());
-	 }
+	else if (PL_expect == XOPERATOR) {
+	    s++;
+	    if (*s == '=' && !PL_lex_allbrackets &&
+		PL_lex_fakeeof >= LEX_FAKEEOF_ASSIGN) {
+		s--;
+		TOKEN(0);
+	    }
+	    Mop(OP_DIVIDE);
+        }
+	else {
+	    /* Disable warning on "study /blah/" */
+	    if (PL_oldoldbufptr == PL_last_uni
+	     && (*PL_last_uni != 's' || s - PL_last_uni < 5
+	         || memNE(PL_last_uni, "study", 5)
+	         || isWORDCHAR_lazy_if(PL_last_uni+5,UTF)
+	     ))
+	        check_uni();
+	    s = scan_pat(s,OP_MATCH);
+	    TERM(sublex_start());
+	}
+
+     case '?':			/* conditional */
+	s++;
+	if (!PL_lex_allbrackets &&
+	    PL_lex_fakeeof >= LEX_FAKEEOF_IFELSE) {
+	    s--;
+	    TOKEN(0);
+	}
+	PL_lex_allbrackets++;
+	OPERATOR('?');
 
     case '.':
 	if (PL_lex_formbrack && PL_lex_brackets == PL_lex_formbrack
