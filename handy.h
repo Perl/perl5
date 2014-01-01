@@ -1568,7 +1568,9 @@ typedef U32 line_t;
  * pointer.  The input must be known to be 0-9, A-F, or a-f.  In both ASCII and
  * EBCDIC the last 4 bits of the digits are 0-9; and the last 4 bits of A-F and
  * a-f are 1-6, so adding 9 yields 10-15 */
-#define READ_XDIGIT(s)  (0xf & (isDIGIT(*(s)) ? (*(s)++) : (*(s)++ + 9)))
+#define READ_XDIGIT(s)  (__ASSERT_(isXDIGIT(*s)) (0xf & (isDIGIT(*(s))     \
+                                                        ? (*(s)++)         \
+                                                        : (*(s)++ + 9))))
 
 /*
 =head1 Memory Management
