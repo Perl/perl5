@@ -291,15 +291,14 @@ Perl_grok_hex(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result)
     }
 
     for (; len-- && *s; s++) {
-	const char *hexdigit = strchr(PL_hexdigit, *s);
-        if (hexdigit) {
+        if (isXDIGIT(*s)) {
             /* Write it in this wonky order with a goto to attempt to get the
                compiler to make the common case integer-only loop pretty tight.
                With gcc seems to be much straighter code than old scan_hex.  */
           redo:
             if (!overflowed) {
                 if (value <= max_div_16) {
-                    value = (value << 4) | ((hexdigit - PL_hexdigit) & 15);
+                    value = (value << 4) | XDIGIT_VALUE(*s);
                     continue;
                 }
                 /* Bah. We're just overflowed.  */
@@ -316,11 +315,11 @@ Perl_grok_hex(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result)
 	     * the low-order bits anyway): we could just remember when
 	     * did we overflow and in the end just multiply value_nv by the
 	     * right amount of 16-tuples. */
-            value_nv += (NV)((hexdigit - PL_hexdigit) & 15);
+            value_nv += (NV) XDIGIT_VALUE(*s);
             continue;
         }
         if (*s == '_' && len && allow_underscores && s[1]
-		&& (hexdigit = strchr(PL_hexdigit, s[1])))
+		&& isXDIGIT(s[1]))
 	    {
 		--len;
 		++s;
@@ -395,17 +394,14 @@ Perl_grok_oct(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result)
     PERL_ARGS_ASSERT_GROK_OCT;
 
     for (; len-- && *s; s++) {
-         /* gcc 2.95 optimiser not smart enough to figure that this subtraction
-            out front allows slicker code.  */
-        int digit = *s - '0';
-        if (digit >= 0 && digit <= 7) {
+        if (isOCTAL(*s)) {
             /* Write it in this wonky order with a goto to attempt to get the
                compiler to make the common case integer-only loop pretty tight.
             */
           redo:
             if (!overflowed) {
                 if (value <= max_div_8) {
-                    value = (value << 3) | digit;
+                    value = (value << 3) | OCTAL_VALUE(*s);
                     continue;
                 }
                 /* Bah. We're just overflowed.  */
@@ -422,20 +418,19 @@ Perl_grok_oct(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result)
 	     * the low-order bits anyway): we could just remember when
 	     * did we overflow and in the end just multiply value_nv by the
 	     * right amount of 8-tuples. */
-            value_nv += (NV)digit;
+            value_nv += (NV) OCTAL_VALUE(*s);
             continue;
         }
-        if (digit == ('_' - '0') && len && allow_underscores
-            && (digit = s[1] - '0') && (digit >= 0 && digit <= 7))
-	    {
-		--len;
-		++s;
-                goto redo;
-	    }
+        if (*s == '_' && len && allow_underscores && isOCTAL(s[1])) {
+            --len;
+            ++s;
+            goto redo;
+        }
         /* Allow \octal to work the DWIM way (that is, stop scanning
          * as soon as non-octal characters are seen, complain only if
-         * someone seems to want to use the digits eight and nine). */
-        if (digit == 8 || digit == 9) {
+         * someone seems to want to use the digits eight and nine.  Since we
+         * know it is not octal, then if isDIGIT, must be an 8 or 9). */
+        if (isDIGIT(*s)) {
             if (!(*flags & PERL_SCAN_SILENT_ILLDIGIT))
                 Perl_ck_warner(aTHX_ packWARN(WARN_DIGIT),
 			       "Illegal octal digit '%c' ignored", *s);
