@@ -3480,15 +3480,7 @@ PP(pp_ucfirst)
 		     * UTF-8 or not, but in either case is the number of bytes */
     bool tainted = FALSE;
 
-    SvGETMAGIC(source);
-    if (SvOK(source)) {
-	s = (const U8*)SvPV_nomg_const(source, slen);
-    } else {
-	if (ckWARN(WARN_UNINITIALIZED))
-	    report_uninit(source);
-	s = (const U8*)"";
-	slen = 0;
-    }
+    s = (const U8*)SvPV_const(source, slen);
 
     /* We may be able to get away with changing only the first character, in
      * place, but not if read-only, etc.  Later we may discover more reasons to
@@ -3731,21 +3723,7 @@ PP(pp_uc)
 
 	dest = TARG;
 
-	/* The old implementation would copy source into TARG at this point.
-	   This had the side effect that if source was undef, TARG was now
-	   an undefined SV with PADTMP set, and they don't warn inside
-	   sv_2pv_flags(). However, we're now getting the PV direct from
-	   source, which doesn't have PADTMP set, so it would warn. Hence the
-	   little games.  */
-
-	if (SvOK(source)) {
-	    s = (const U8*)SvPV_nomg_const(source, len);
-	} else {
-	    if (ckWARN(WARN_UNINITIALIZED))
-		report_uninit(source);
-	    s = (const U8*)"";
-	    len = 0;
-	}
+	s = (const U8*)SvPV_nomg_const(source, len);
 	min = len + 1;
 
 	SvUPGRADE(dest, SVt_PV);
@@ -3975,21 +3953,7 @@ PP(pp_lc)
 
 	dest = TARG;
 
-	/* The old implementation would copy source into TARG at this point.
-	   This had the side effect that if source was undef, TARG was now
-	   an undefined SV with PADTMP set, and they don't warn inside
-	   sv_2pv_flags(). However, we're now getting the PV direct from
-	   source, which doesn't have PADTMP set, so it would warn. Hence the
-	   little games.  */
-
-	if (SvOK(source)) {
-	    s = (const U8*)SvPV_nomg_const(source, len);
-	} else {
-	    if (ckWARN(WARN_UNINITIALIZED))
-		report_uninit(source);
-	    s = (const U8*)"";
-	    len = 0;
-	}
+	s = (const U8*)SvPV_nomg_const(source, len);
 	min = len + 1;
 
 	SvUPGRADE(dest, SVt_PV);
