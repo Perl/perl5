@@ -4786,16 +4786,6 @@ construct, not just the empty search pattern.  Therefore code written
 in Perl 5.10.0 or later that uses the // as the I<defined-or> can be
 misparsed by pre-5.10.0 Perls as a non-terminated search pattern.
 
-=item Search pattern not terminated or ternary operator parsed as search pattern
-
-(F) The lexer couldn't find the final delimiter of a C<?PATTERN?>
-construct.
-
-The question mark is also used as part of the ternary operator (as in
-C<foo ? 0 : 1>) leading to some ambiguous constructions being wrongly
-parsed.  One way to disambiguate the parsing is to put parentheses around
-the conditional expression, i.e. C<(foo) ? 0 : 1>.
-
 =item seekdir() attempted on invalid dirhandle %s
 
 (W io) The dirhandle you are doing a seekdir() on is either closed or not

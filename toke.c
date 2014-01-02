@@ -8794,14 +8794,8 @@ S_scan_pat(pTHX_ char *start, I32 type)
     PERL_ARGS_ASSERT_SCAN_PAT;
 
     s = scan_str(start,TRUE,FALSE, (PL_in_eval & EVAL_RE_REPARSING), NULL);
-    if (!s) {
-	const char * const delimiter = skipspace(start);
-	Perl_croak(aTHX_
-		   (const char *)
-		   (*delimiter == '?'
-		    ? "Search pattern not terminated or ternary operator parsed as search pattern"
-		    : "Search pattern not terminated" ));
-    }
+    if (!s)
+	Perl_croak(aTHX_ "Search pattern not terminated");
 
     pm = (PMOP*)newPMOP(type, 0);
     if (PL_multi_open == '?') {
