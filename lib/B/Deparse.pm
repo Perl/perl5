@@ -4789,7 +4789,7 @@ sub matchop {
     $flags = $matchwords{$flags} if $matchwords{$flags};
     if ($pmflags & PMf_ONCE) { # only one kind of delimiter works here
 	$re =~ s/\?/\\?/g;
-	$re = "?$re?";
+	$re = "m?$re?";        # explicit 'm' is required
     } elsif ($quote) {
 	$re = single_delim($name, $delim, $re);
     }
