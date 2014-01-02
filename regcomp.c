@@ -6002,7 +6002,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 	PL_Posix_ptrs[_CC_BLANK] = _new_invlist_C_array(PosixBlank_invlist);
 	PL_XPosix_ptrs[_CC_BLANK] = _new_invlist_C_array(XPosixBlank_invlist);
 
-        /* Cased is the same as Alpha in the ASCII range */
+        /* In the ASCII range, cased is the same as Alpha */
 	PL_L1Posix_ptrs[_CC_CASED] =  _new_invlist_C_array(L1Cased_invlist);
 	PL_Posix_ptrs[_CC_CASED] =  _new_invlist_C_array(PosixAlpha_invlist);
 	PL_XPosix_ptrs[_CC_CASED] =  _new_invlist_C_array(Cased_invlist);
