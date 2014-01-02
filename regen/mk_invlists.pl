@@ -158,32 +158,42 @@ output_invlist("AboveLatin1", [ 256 ]);
 for my $prop (qw(
                 ASCII
                 L1Cased
+                Cased
 		VertSpace
                 PerlSpace
                     XPerlSpace
                 PosixAlnum
                     L1PosixAlnum
+                    XPosixAlnum
                 PosixAlpha
                     L1PosixAlpha
+                    XPosixAlpha
                 PosixBlank
                     XPosixBlank
                 PosixCntrl
                     XPosixCntrl
                 PosixDigit
+                    XPosixDigit
                 PosixGraph
                     L1PosixGraph
+                    XPosixGraph
                 PosixLower
                     L1PosixLower
+                    XPosixLower
                 PosixPrint
                     L1PosixPrint
+                    XPosixPrint
                 PosixPunct
                     L1PosixPunct
+                    XPosixPunct
                 PosixSpace
                     XPosixSpace
                 PosixUpper
                     L1PosixUpper
+                    XPosixUpper
                 PosixWord
                     L1PosixWord
+                    XPosixWord
                 PosixXDigit
                     XPosixXDigit
                 &NonL1_Perl_Non_Final_Folds
