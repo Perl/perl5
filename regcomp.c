@@ -5982,6 +5982,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 	PL_AboveLatin1 = _new_invlist_C_array(AboveLatin1_invlist);
 	PL_Latin1 = _new_invlist_C_array(Latin1_invlist);
 	PL_UpperLatin1 = _new_invlist_C_array(UpperLatin1_invlist);
+        PL_utf8_foldable = _new_invlist_C_array(_Perl_Any_Folds_invlist);
 
         PL_Posix_ptrs[_CC_ASCII] = _new_invlist_C_array(ASCII_invlist);
         PL_L1Posix_ptrs[_CC_ASCII] = _new_invlist_C_array(ASCII_invlist);
@@ -11730,14 +11731,6 @@ tryagain:
                                 /* Here the fold is the original; we have
                                  * to check further to see if anything
                                  * folds to it */
-                                if (! PL_utf8_foldable) {
-                                    SV* swash = swash_init("utf8",
-                                                       "_Perl_Any_Folds",
-                                                       &PL_sv_undef, 1, 0);
-                                    PL_utf8_foldable =
-                                                _get_swash_invlist(swash);
-                                    SvREFCNT_dec_NN(swash);
-                                }
                                 if (_invlist_contains_cp(PL_utf8_foldable,
                                                          ender))
                                 {
@@ -14034,41 +14027,21 @@ parseit:
 
 	SV* fold_intersection = NULL;
 
-        /* If the highest code point is within Latin1, we can use the
-         * compiled-in Alphas list, and not have to go out to disk.  This
-         * yields two false positives, the masculine and feminine ordinal
-         * indicators, which are weeded out below using the
-         * IS_IN_SOME_FOLD_L1() macro */
-        if (invlist_highest(cp_list) < 256) {
-            _invlist_intersection(PL_L1Posix_ptrs[_CC_ALPHA], cp_list,
-                                                           &fold_intersection);
-        }
-        else {
+        /* Only the characters in this class that participate in folds need be
+         * checked.  Get the intersection of this class and all the possible
+         * characters that are foldable.  This can quickly narrow down a large
+         * class */
+        _invlist_intersection(PL_utf8_foldable, cp_list,
+                              &fold_intersection);
 
-            /* Here, there are non-Latin1 code points, so we will have to go
-             * fetch the list of all the characters that participate in folds
-             */
-            if (! PL_utf8_foldable) {
-                SV* swash = swash_init("utf8", "_Perl_Any_Folds",
-                                       &PL_sv_undef, 1, 0);
-                PL_utf8_foldable = _get_swash_invlist(swash);
-                SvREFCNT_dec_NN(swash);
-            }
+        /* The folds for all the Latin1 characters are hard-coded into this
+         * program, but we have to go out to disk to get the others. */
+        if (invlist_highest(cp_list) >= 256) {
 
             /* This is a hash that for a particular fold gives all characters
              * that are involved in it */
             if (! PL_utf8_foldclosures) {
 
-                /* If we were unable to find any folds, then we likely won't be
-                 * able to find the closures.  So just create an empty list.
-                 * Folding will effectively be restricted to the non-Unicode
-                 * rules hard-coded into Perl.  (This case happens legitimately
-                 * during compilation of Perl itself before the Unicode tables
-                 * are generated) */
-                if (_invlist_len(PL_utf8_foldable) == 0) {
-                    PL_utf8_foldclosures = newHV();
-                }
-                else {
                     /* If the folds haven't been read in, call a fold function
                      * to force that */
                     if (! PL_utf8_tofold) {
@@ -14080,15 +14053,7 @@ parseit:
                     }
                     PL_utf8_foldclosures =
                                     _swash_inversion_hash(PL_utf8_tofold);
-                }
             }
-
-            /* Only the characters in this class that participate in folds need
-             * be checked.  Get the intersection of this class and all the
-             * possible characters that are foldable.  This can quickly narrow
-             * down a large class */
-            _invlist_intersection(PL_utf8_foldable, cp_list,
-                                  &fold_intersection);
         }
 
 	/* Now look at the foldable characters in this class individually */
@@ -14465,12 +14430,6 @@ parseit:
                         }
                     }
                     else {
-                        if (! PL_utf8_foldable) {
-                            SV* swash = swash_init("utf8", "_Perl_Any_Folds",
-                                                &PL_sv_undef, 1, 0);
-                            PL_utf8_foldable = _get_swash_invlist(swash);
-                            SvREFCNT_dec_NN(swash);
-                        }
                         if (_invlist_contains_cp(PL_utf8_foldable, value)) {
                             op = EXACT;
                         }

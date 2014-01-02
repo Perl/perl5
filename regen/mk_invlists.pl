@@ -196,6 +196,7 @@ for my $prop (qw(
                     XPosixWord
                 PosixXDigit
                     XPosixXDigit
+                _Perl_Any_Folds
                 &NonL1_Perl_Non_Final_Folds
                 &_Perl_Multi_Char_Folds
                 &UpperLatin1
