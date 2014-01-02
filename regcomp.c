@@ -4716,17 +4716,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
 		case POSIXD:
 		case POSIXU:
                     classnum = FLAGS(scan);
-
-                    /* If we know all the code points that match the class, use
-                     * that; otherwise use the Latin1 code points, plus we have
-                     * to assume that it could match anything above Latin1 */
-                    if (PL_XPosix_ptrs[classnum]) {
-                        my_invlist = invlist_clone(PL_XPosix_ptrs[classnum]);
-                    }
-                    else {
-                        _invlist_union(PL_L1Posix_ptrs[classnum],
-                                       PL_AboveLatin1, &my_invlist);
-                    }
+                    my_invlist = invlist_clone(PL_XPosix_ptrs[classnum]);
 
                     /* NPOSIXD matches all upper Latin1 code points unless the
                      * target string being matched is UTF-8, which is
