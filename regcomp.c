@@ -5991,10 +5991,13 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
                                 = _new_invlist_C_array(L1PosixAlnum_invlist);
 	PL_Posix_ptrs[_CC_ALPHANUMERIC]
                                 = _new_invlist_C_array(PosixAlnum_invlist);
+	PL_XPosix_ptrs[_CC_ALPHANUMERIC]
+                                = _new_invlist_C_array(XPosixAlnum_invlist);
 
 	PL_L1Posix_ptrs[_CC_ALPHA]
                                 = _new_invlist_C_array(L1PosixAlpha_invlist);
 	PL_Posix_ptrs[_CC_ALPHA] = _new_invlist_C_array(PosixAlpha_invlist);
+	PL_XPosix_ptrs[_CC_ALPHA] = _new_invlist_C_array(XPosixAlpha_invlist);
 
 	PL_Posix_ptrs[_CC_BLANK] = _new_invlist_C_array(PosixBlank_invlist);
 	PL_XPosix_ptrs[_CC_BLANK] = _new_invlist_C_array(XPosixBlank_invlist);
@@ -6002,24 +6005,30 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
         /* Cased is the same as Alpha in the ASCII range */
 	PL_L1Posix_ptrs[_CC_CASED] =  _new_invlist_C_array(L1Cased_invlist);
 	PL_Posix_ptrs[_CC_CASED] =  _new_invlist_C_array(PosixAlpha_invlist);
+	PL_XPosix_ptrs[_CC_CASED] =  _new_invlist_C_array(Cased_invlist);
 
 	PL_Posix_ptrs[_CC_CNTRL] = _new_invlist_C_array(PosixCntrl_invlist);
 	PL_XPosix_ptrs[_CC_CNTRL] = _new_invlist_C_array(XPosixCntrl_invlist);
 
 	PL_Posix_ptrs[_CC_DIGIT] = _new_invlist_C_array(PosixDigit_invlist);
 	PL_L1Posix_ptrs[_CC_DIGIT] = _new_invlist_C_array(PosixDigit_invlist);
+	PL_XPosix_ptrs[_CC_DIGIT] = _new_invlist_C_array(XPosixDigit_invlist);
 
 	PL_L1Posix_ptrs[_CC_GRAPH] = _new_invlist_C_array(L1PosixGraph_invlist);
 	PL_Posix_ptrs[_CC_GRAPH] = _new_invlist_C_array(PosixGraph_invlist);
+	PL_XPosix_ptrs[_CC_GRAPH] = _new_invlist_C_array(XPosixGraph_invlist);
 
 	PL_L1Posix_ptrs[_CC_LOWER] = _new_invlist_C_array(L1PosixLower_invlist);
 	PL_Posix_ptrs[_CC_LOWER] = _new_invlist_C_array(PosixLower_invlist);
+	PL_XPosix_ptrs[_CC_LOWER] = _new_invlist_C_array(XPosixLower_invlist);
 
 	PL_L1Posix_ptrs[_CC_PRINT] = _new_invlist_C_array(L1PosixPrint_invlist);
 	PL_Posix_ptrs[_CC_PRINT] = _new_invlist_C_array(PosixPrint_invlist);
+	PL_XPosix_ptrs[_CC_PRINT] = _new_invlist_C_array(XPosixPrint_invlist);
 
 	PL_L1Posix_ptrs[_CC_PUNCT] = _new_invlist_C_array(L1PosixPunct_invlist);
 	PL_Posix_ptrs[_CC_PUNCT] = _new_invlist_C_array(PosixPunct_invlist);
+	PL_XPosix_ptrs[_CC_PUNCT] = _new_invlist_C_array(XPosixPunct_invlist);
 
 	PL_Posix_ptrs[_CC_SPACE] = _new_invlist_C_array(PerlSpace_invlist);
 	PL_XPosix_ptrs[_CC_SPACE] = _new_invlist_C_array(XPerlSpace_invlist);
@@ -6028,12 +6037,14 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 
 	PL_L1Posix_ptrs[_CC_UPPER] = _new_invlist_C_array(L1PosixUpper_invlist);
 	PL_Posix_ptrs[_CC_UPPER] = _new_invlist_C_array(PosixUpper_invlist);
+	PL_XPosix_ptrs[_CC_UPPER] = _new_invlist_C_array(XPosixUpper_invlist);
 
         PL_XPosix_ptrs[_CC_VERTSPACE] = _new_invlist_C_array(VertSpace_invlist);
 
 	PL_Posix_ptrs[_CC_WORDCHAR] = _new_invlist_C_array(PosixWord_invlist);
 	PL_L1Posix_ptrs[_CC_WORDCHAR]
                                 = _new_invlist_C_array(L1PosixWord_invlist);
+	PL_XPosix_ptrs[_CC_WORDCHAR] = _new_invlist_C_array(XPosixWord_invlist);
 
 	PL_Posix_ptrs[_CC_XDIGIT] = _new_invlist_C_array(PosixXDigit_invlist);
 	PL_XPosix_ptrs[_CC_XDIGIT] = _new_invlist_C_array(XPosixXDigit_invlist);
@@ -12886,10 +12897,6 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 #endif
     bool invert = FALSE;    /* Is this class to be complemented */
 
-    /* Is there any thing like \W or [:^digit:] that matches above the legal
-     * Unicode range? */
-    bool runtime_posix_matches_above_Unicode = FALSE;
-
     bool warn_super = ALWAYS_WARN_SUPER;
 
     regnode * const orig_emit = RExC_emit; /* Save the original RExC_emit in
@@ -13467,124 +13474,6 @@ parseit:
                     /* The ascii range inversion list */
                     SV* ascii_source = PL_Posix_ptrs[classnum];
 
-                    /* The full Latin1 range inversion list */
-                    SV* l1_source = PL_L1Posix_ptrs[classnum];
-
-                    /* This code is structured into two major clauses.  The
-                     * first is for classes whose complete definitions may not
-                     * already be known.  If not, the Latin1 definition
-                     * (guaranteed to already known) is used plus code is
-                     * generated to load the rest at run-time (only if needed).
-                     * If the complete definition is known, it drops down to
-                     * the second clause, where the complete definition is
-                     * known */
-
-                    if (classnum < _FIRST_NON_SWASH_CC) {
-
-                        /* Here, the class has a swash, which may or not
-                         * already be loaded */
-
-                        /* The name of the property to use to match the full
-                         * eXtended Unicode range swash for this character
-                         * class */
-                        const char *Xname = swash_property_names[classnum];
-
-                        /* If returning the inversion list, we can't defer
-                         * getting this until runtime */
-                        if (ret_invlist && !  PL_utf8_swash_ptrs[classnum]) {
-                            PL_utf8_swash_ptrs[classnum] =
-                                _core_swash_init("utf8", Xname, &PL_sv_undef,
-                                             1, /* binary */
-                                             0, /* not tr/// */
-                                             NULL, /* No inversion list */
-                                             NULL  /* No flags */
-                                            );
-                            assert(PL_utf8_swash_ptrs[classnum]);
-                        }
-                        if ( !  PL_utf8_swash_ptrs[classnum]) {
-                            if (namedclass % 2 == 0) { /* A non-complemented
-                                                          class */
-                                /* If not /a matching, there are code points we
-                                 * don't know at compile time.  Arrange for the
-                                 * unknown matches to be loaded at run-time, if
-                                 * needed */
-                                if (! AT_LEAST_ASCII_RESTRICTED) {
-                                    Perl_sv_catpvf(aTHX_ listsv, "+utf8::%s\n",
-                                                                 Xname);
-                                }
-                                if (LOC) {  /* Under locale, set run-time
-                                               lookup */
-                                    ANYOF_POSIXL_SET(ret, namedclass);
-                                }
-                                else {
-                                    /* Add the current class's code points to
-                                     * the running total */
-                                    _invlist_union(posixes,
-                                                   (AT_LEAST_ASCII_RESTRICTED)
-                                                        ? ascii_source
-                                                        : l1_source,
-                                                   &posixes);
-                                }
-                            }
-                            else {  /* A complemented class */
-                                if (AT_LEAST_ASCII_RESTRICTED) {
-                                    /* Under /a should match everything above
-                                     * ASCII, plus the complement of the set's
-                                     * ASCII matches */
-                                    _invlist_union_complement_2nd(posixes,
-                                                                  ascii_source,
-                                                                  &posixes);
-                                }
-                                else {
-                                    /* Arrange for the unknown matches to be
-                                     * loaded at run-time, if needed */
-                                    Perl_sv_catpvf(aTHX_ listsv, "!utf8::%s\n",
-                                                                 Xname);
-                                    runtime_posix_matches_above_Unicode = TRUE;
-                                    if (LOC) {
-                                        ANYOF_POSIXL_SET(ret, namedclass);
-                                    }
-                                    else {
-
-                                        /* We want to match everything in
-                                         * Latin1, except those things that
-                                         * l1_source matches */
-                                        SV* scratch_list = NULL;
-                                        _invlist_subtract(PL_Latin1, l1_source,
-                                                          &scratch_list);
-
-                                        /* Add the list from this class to the
-                                         * running total */
-                                        if (! posixes) {
-                                            posixes = scratch_list;
-                                        }
-                                        else {
-                                            _invlist_union(posixes,
-                                                           scratch_list,
-                                                           &posixes);
-                                            SvREFCNT_dec_NN(scratch_list);
-                                        }
-                                        if (DEPENDS_SEMANTICS) {
-                                            ANYOF_FLAGS(ret)
-                                                  |= ANYOF_NON_UTF8_LATIN1_ALL;
-                                        }
-                                    }
-                                }
-                            }
-                            goto namedclass_done;
-                        }
-
-                        /* Here, there is a swash loaded for the class.  If no
-                         * inversion list for it yet, get it */
-                        if (! PL_XPosix_ptrs[classnum]) {
-                            PL_XPosix_ptrs[classnum]
-                             = _swash_to_invlist(PL_utf8_swash_ptrs[classnum]);
-                        }
-                    }
-
-                    /* Here there is an inversion list already loaded for the
-                     * entire class */
-
                     if (namedclass % 2 == 0) {  /* A non-complemented class,
                                                    like ANYOF_PUNCT */
                         if (! LOC) {
@@ -13680,7 +13569,6 @@ parseit:
                         }
                     }
                 }
-              namedclass_done:
 		continue;   /* Go get next character */
 	    }
 	} /* end of namedclass \blah */
@@ -14431,14 +14319,7 @@ parseit:
              * are using above-Unicode code points indicates they should know
              * the issues involved */
             if (warn_super) {
-                bool non_prop_matches_above_Unicode =
-                            runtime_posix_matches_above_Unicode
-                            | (invlist_highest(cp_list) > PERL_UNICODE_MAX);
-                if (invert) {
-                    non_prop_matches_above_Unicode =
-                                            !  non_prop_matches_above_Unicode;
-                }
-                warn_super = ! non_prop_matches_above_Unicode;
+                warn_super = ! (invert ^ (invlist_highest(cp_list) > PERL_UNICODE_MAX));
             }
 
             _invlist_union(properties, cp_list, &cp_list);
