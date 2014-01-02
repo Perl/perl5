@@ -1979,6 +1979,16 @@ if test "X$sysroot" != X; then
         # same with cccdlflags
   ;;
   esac
+  
+  # Adjust some defaults to also use $sysroot
+  for var in xlibpth loclibpth locincpth glibpth; do
+    eval xxx=\$$var
+    eval $var=''
+    for path in $xxx; do
+      eval $var=\"\$$var $sysroot$path\"
+    done
+  done
+
 fi
 
 : Eunice requires " " instead of "", can you believe it
