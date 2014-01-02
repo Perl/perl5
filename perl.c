@@ -1035,9 +1035,6 @@ perl_destruct(pTHXx)
         SvREFCNT_dec(PL_Posix_ptrs[i]);
         PL_Posix_ptrs[i] = NULL;
 
-        SvREFCNT_dec(PL_L1Posix_ptrs[i]);
-        PL_L1Posix_ptrs[i] = NULL;
-
         SvREFCNT_dec(PL_XPosix_ptrs[i]);
         PL_XPosix_ptrs[i] = NULL;
     }

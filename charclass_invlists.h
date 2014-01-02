@@ -48,34 +48,6 @@ static const UV ASCII_invlist[] = {
 
 #ifndef PERL_IN_XSUB_RE
 
-static const UV L1Cased_invlist[] = {
-	17,	/* Number of elements */
-	148565664, /* Version and data structure type */
-	1,	/* 0 if the list starts at 0;
-		   1 if it starts at the element beyond 0 */
-	0,
-	65,
-	91,
-	97,
-	123,
-	170,
-	171,
-	181,
-	182,
-	186,
-	187,
-	192,
-	215,
-	216,
-	247,
-	248,
-	443
-};
-
-#endif
-
-#ifndef PERL_IN_XSUB_RE
-
 static const UV Cased_invlist[] = {
 	239,	/* Number of elements */
 	148565664, /* Version and data structure type */
@@ -404,36 +376,6 @@ static const UV PosixAlnum_invlist[] = {
 	91,
 	97,
 	123
-};
-
-#endif
-
-#ifndef PERL_IN_XSUB_RE
-
-static const UV L1PosixAlnum_invlist[] = {
-	19,	/* Number of elements */
-	148565664, /* Version and data structure type */
-	1,	/* 0 if the list starts at 0;
-		   1 if it starts at the element beyond 0 */
-	0,
-	48,
-	58,
-	65,
-	91,
-	97,
-	123,
-	170,
-	171,
-	181,
-	182,
-	186,
-	187,
-	192,
-	215,
-	216,
-	247,
-	248,
-	706
 };
 
 #endif
@@ -1594,34 +1536,6 @@ static const UV PosixAlpha_invlist[] = {
 	91,
 	97,
 	123
-};
-
-#endif
-
-#ifndef PERL_IN_XSUB_RE
-
-static const UV L1PosixAlpha_invlist[] = {
-	17,	/* Number of elements */
-	148565664, /* Version and data structure type */
-	1,	/* 0 if the list starts at 0;
-		   1 if it starts at the element beyond 0 */
-	0,
-	65,
-	91,
-	97,
-	123,
-	170,
-	171,
-	181,
-	182,
-	186,
-	187,
-	192,
-	215,
-	216,
-	247,
-	248,
-	706
 };
 
 #endif
@@ -2918,22 +2832,6 @@ static const UV PosixGraph_invlist[] = {
 
 #ifndef PERL_IN_XSUB_RE
 
-static const UV L1PosixGraph_invlist[] = {
-	5,	/* Number of elements */
-	148565664, /* Version and data structure type */
-	1,	/* 0 if the list starts at 0;
-		   1 if it starts at the element beyond 0 */
-	0,
-	33,
-	127,
-	161,
-	888
-};
-
-#endif
-
-#ifndef PERL_IN_XSUB_RE
-
 static const UV XPosixGraph_invlist[] = {
 	1089,	/* Number of elements */
 	148565664, /* Version and data structure type */
@@ -4042,30 +3940,6 @@ static const UV PosixLower_invlist[] = {
 	0,
 	97,
 	123
-};
-
-#endif
-
-#ifndef PERL_IN_XSUB_RE
-
-static const UV L1PosixLower_invlist[] = {
-	13,	/* Number of elements */
-	148565664, /* Version and data structure type */
-	1,	/* 0 if the list starts at 0;
-		   1 if it starts at the element beyond 0 */
-	0,
-	97,
-	123,
-	170,
-	171,
-	181,
-	182,
-	186,
-	187,
-	223,
-	247,
-	248,
-	256
 };
 
 #endif
@@ -5334,22 +5208,6 @@ static const UV PosixPrint_invlist[] = {
 
 #ifndef PERL_IN_XSUB_RE
 
-static const UV L1PosixPrint_invlist[] = {
-	5,	/* Number of elements */
-	148565664, /* Version and data structure type */
-	1,	/* 0 if the list starts at 0;
-		   1 if it starts at the element beyond 0 */
-	0,
-	32,
-	127,
-	160,
-	888
-};
-
-#endif
-
-#ifndef PERL_IN_XSUB_RE
-
 static const UV XPosixPrint_invlist[] = {
 	1083,	/* Number of elements */
 	148565664, /* Version and data structure type */
@@ -6464,38 +6322,6 @@ static const UV PosixPunct_invlist[] = {
 
 #ifndef PERL_IN_XSUB_RE
 
-static const UV L1PosixPunct_invlist[] = {
-	21,	/* Number of elements */
-	148565664, /* Version and data structure type */
-	1,	/* 0 if the list starts at 0;
-		   1 if it starts at the element beyond 0 */
-	0,
-	33,
-	48,
-	58,
-	65,
-	91,
-	97,
-	123,
-	127,
-	161,
-	162,
-	167,
-	168,
-	171,
-	172,
-	182,
-	184,
-	187,
-	188,
-	191,
-	192
-};
-
-#endif
-
-#ifndef PERL_IN_XSUB_RE
-
 static const UV XPosixPunct_invlist[] = {
 	273,	/* Number of elements */
 	148565664, /* Version and data structure type */
@@ -6836,24 +6662,6 @@ static const UV PosixUpper_invlist[] = {
 	0,
 	65,
 	91
-};
-
-#endif
-
-#ifndef PERL_IN_XSUB_RE
-
-static const UV L1PosixUpper_invlist[] = {
-	7,	/* Number of elements */
-	148565664, /* Version and data structure type */
-	1,	/* 0 if the list starts at 0;
-		   1 if it starts at the element beyond 0 */
-	0,
-	65,
-	91,
-	192,
-	215,
-	216,
-	223
 };
 
 #endif
@@ -8106,38 +7914,6 @@ static const UV PosixWord_invlist[] = {
 	96,
 	97,
 	123
-};
-
-#endif
-
-#ifndef PERL_IN_XSUB_RE
-
-static const UV L1PosixWord_invlist[] = {
-	21,	/* Number of elements */
-	148565664, /* Version and data structure type */
-	1,	/* 0 if the list starts at 0;
-		   1 if it starts at the element beyond 0 */
-	0,
-	48,
-	58,
-	65,
-	91,
-	95,
-	96,
-	97,
-	123,
-	170,
-	171,
-	181,
-	182,
-	186,
-	187,
-	192,
-	215,
-	216,
-	247,
-	248,
-	706
 };
 
 #endif

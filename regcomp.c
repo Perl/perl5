@@ -5975,18 +5975,13 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
         PL_utf8_foldable = _new_invlist_C_array(_Perl_Any_Folds_invlist);
 
         PL_Posix_ptrs[_CC_ASCII] = _new_invlist_C_array(ASCII_invlist);
-        PL_L1Posix_ptrs[_CC_ASCII] = _new_invlist_C_array(ASCII_invlist);
         PL_XPosix_ptrs[_CC_ASCII] = _new_invlist_C_array(ASCII_invlist);
 
-	PL_L1Posix_ptrs[_CC_ALPHANUMERIC]
-                                = _new_invlist_C_array(L1PosixAlnum_invlist);
 	PL_Posix_ptrs[_CC_ALPHANUMERIC]
                                 = _new_invlist_C_array(PosixAlnum_invlist);
 	PL_XPosix_ptrs[_CC_ALPHANUMERIC]
                                 = _new_invlist_C_array(XPosixAlnum_invlist);
 
-	PL_L1Posix_ptrs[_CC_ALPHA]
-                                = _new_invlist_C_array(L1PosixAlpha_invlist);
 	PL_Posix_ptrs[_CC_ALPHA] = _new_invlist_C_array(PosixAlpha_invlist);
 	PL_XPosix_ptrs[_CC_ALPHA] = _new_invlist_C_array(XPosixAlpha_invlist);
 
@@ -5994,7 +5989,6 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 	PL_XPosix_ptrs[_CC_BLANK] = _new_invlist_C_array(XPosixBlank_invlist);
 
         /* In the ASCII range, cased is the same as Alpha */
-	PL_L1Posix_ptrs[_CC_CASED] =  _new_invlist_C_array(L1Cased_invlist);
 	PL_Posix_ptrs[_CC_CASED] =  _new_invlist_C_array(PosixAlpha_invlist);
 	PL_XPosix_ptrs[_CC_CASED] =  _new_invlist_C_array(Cased_invlist);
 
@@ -6002,22 +5996,17 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 	PL_XPosix_ptrs[_CC_CNTRL] = _new_invlist_C_array(XPosixCntrl_invlist);
 
 	PL_Posix_ptrs[_CC_DIGIT] = _new_invlist_C_array(PosixDigit_invlist);
-	PL_L1Posix_ptrs[_CC_DIGIT] = _new_invlist_C_array(PosixDigit_invlist);
 	PL_XPosix_ptrs[_CC_DIGIT] = _new_invlist_C_array(XPosixDigit_invlist);
 
-	PL_L1Posix_ptrs[_CC_GRAPH] = _new_invlist_C_array(L1PosixGraph_invlist);
 	PL_Posix_ptrs[_CC_GRAPH] = _new_invlist_C_array(PosixGraph_invlist);
 	PL_XPosix_ptrs[_CC_GRAPH] = _new_invlist_C_array(XPosixGraph_invlist);
 
-	PL_L1Posix_ptrs[_CC_LOWER] = _new_invlist_C_array(L1PosixLower_invlist);
 	PL_Posix_ptrs[_CC_LOWER] = _new_invlist_C_array(PosixLower_invlist);
 	PL_XPosix_ptrs[_CC_LOWER] = _new_invlist_C_array(XPosixLower_invlist);
 
-	PL_L1Posix_ptrs[_CC_PRINT] = _new_invlist_C_array(L1PosixPrint_invlist);
 	PL_Posix_ptrs[_CC_PRINT] = _new_invlist_C_array(PosixPrint_invlist);
 	PL_XPosix_ptrs[_CC_PRINT] = _new_invlist_C_array(XPosixPrint_invlist);
 
-	PL_L1Posix_ptrs[_CC_PUNCT] = _new_invlist_C_array(L1PosixPunct_invlist);
 	PL_Posix_ptrs[_CC_PUNCT] = _new_invlist_C_array(PosixPunct_invlist);
 	PL_XPosix_ptrs[_CC_PUNCT] = _new_invlist_C_array(XPosixPunct_invlist);
 
@@ -6026,15 +6015,12 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 	PL_Posix_ptrs[_CC_PSXSPC] = _new_invlist_C_array(PosixSpace_invlist);
 	PL_XPosix_ptrs[_CC_PSXSPC] = _new_invlist_C_array(XPosixSpace_invlist);
 
-	PL_L1Posix_ptrs[_CC_UPPER] = _new_invlist_C_array(L1PosixUpper_invlist);
 	PL_Posix_ptrs[_CC_UPPER] = _new_invlist_C_array(PosixUpper_invlist);
 	PL_XPosix_ptrs[_CC_UPPER] = _new_invlist_C_array(XPosixUpper_invlist);
 
         PL_XPosix_ptrs[_CC_VERTSPACE] = _new_invlist_C_array(VertSpace_invlist);
 
 	PL_Posix_ptrs[_CC_WORDCHAR] = _new_invlist_C_array(PosixWord_invlist);
-	PL_L1Posix_ptrs[_CC_WORDCHAR]
-                                = _new_invlist_C_array(L1PosixWord_invlist);
 	PL_XPosix_ptrs[_CC_WORDCHAR] = _new_invlist_C_array(XPosixWord_invlist);
 
 	PL_Posix_ptrs[_CC_XDIGIT] = _new_invlist_C_array(PosixXDigit_invlist);
