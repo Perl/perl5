@@ -130,8 +130,7 @@ EOF
 Please note that mailing lists are moderated, your message may take a while to
 show up. If you do not receive an automated response acknowledging your message
 within a few hours (check your SPAM folder and outgoing mail) please consider
-sending an email directly from your mail client to perlbug\@perl.org or
-perl-thanks\@perl.org respectively.
+sending an email directly from your mail client to perlbug\@perl.org.
 EOF
     }
 
