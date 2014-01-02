@@ -376,9 +376,23 @@ The public API newATTRSUB was previously a macro to the private
 function Perl_newATTRSUB. Function Perl_newATTRSUB has been removed. newATTRSUB
 is now macro to a different internal function.
 
-=item XXX
+=item Changes in warnings raised by C<utf8n_to_uvchr()>
 
-XXX
+This bottom level function decodes the first character of a UTF-8 string
+into a code point.  It is accessible to C<XS> level code, but it's
+discouraged from using it directly.  There are higher level functions
+that call this that should be used instead, such as
+L<perlapi/utf8_to_uvchr_buf>.  For completeness though, this documents
+some changes to it.  Now, tests for malformations are done before any
+tests for other potential issues.  One of those issues involves code
+points so large that they have never appeared in any official standard
+(the current standard has scaled back the highest acceptable code point
+from earlier versions).  It is possible (though not done in CPAN) to
+warn and/or forbid these code points, while accepting smaller code
+points that are still above the legal Unicode maximum.  The warning
+message for this now includes the code point if representable on the
+machine.  Previously it always displayed raw bytes, which is what it
+still does for non-representable code points.
 
 =back
 

@@ -166,7 +166,7 @@ my @tests = (
         # This code point is chosen so that it is representable in a UV on
         # 32-bit machines
         $UTF8_WARN_FE_FF, $UTF8_DISALLOW_FE_FF, 'utf8', 0x80000000, 7,
-        qr/Code point beginning with byte .* is not Unicode, and not portable/
+        qr/Code point 0x80000000 is not Unicode, and not portable/
     ],
     [ "overflow with FE/FF",
         # This tests the interaction of WARN_FE_FF/DISALLOW_FE_FF with
@@ -178,9 +178,12 @@ my @tests = (
         ($has_quad)
             ? "\xff\x80\x90\x90\x90\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf"
             : "\xfe\x86\x80\x80\x80\x80\x80",
-        $UTF8_WARN_FE_FF, $UTF8_DISALLOW_FE_FF, 'utf8', 0,
+
+        # We include both warning categories to make sure the FE_FF one has
+        # precedence
+        "$UTF8_WARN_FE_FF|$UTF8_WARN_SUPER", "$UTF8_DISALLOW_FE_FF", 'utf8', 0,
         ($has_quad) ? 13 : 7,
-        qr/Code point beginning with byte .* is not Unicode, and not portable/
+        qr/overflow at byte .*, after start byte 0xf/
     ],
 );
 
@@ -188,7 +191,7 @@ if ($has_quad) {    # All FF's will overflow on 32 bit
     push @tests,
         [ "begins with FF", "\xff\x80\x80\x80\x80\x80\x81\x80\x80\x80\x80\x80\x80",
             $UTF8_WARN_FE_FF, $UTF8_DISALLOW_FE_FF, 'utf8', $FF_ret, 13,
-            qr/Code point beginning with byte .* is not Unicode, and not portable/
+            qr/Code point 0x.* is not Unicode, and not portable/
         ];
 }
 

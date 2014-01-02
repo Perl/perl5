@@ -778,32 +778,8 @@ Perl_utf8n_to_uvchr(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
 	}
     }
 
-#ifndef EBCDIC	/* EBCDIC allows FE, FF, can't overflow */
-    if ((*s0 & 0xFE) == 0xFE	/* matches both FE, FF */
-	&& (flags & (UTF8_WARN_FE_FF|UTF8_DISALLOW_FE_FF)))
-    {
-	/* By adding UTF8_CHECK_ONLY to the test, we avoid unnecessary
-	 * generation of the sv, since no warnings are raised under CHECK */
-	if ((flags & (UTF8_WARN_FE_FF|UTF8_CHECK_ONLY)) == UTF8_WARN_FE_FF
-	    && ckWARN_d(WARN_UTF8))
-	{
-	    /* This message is deliberately not of the same syntax as the other
-	     * messages for malformations, for backwards compatibility in the
-	     * unlikely event that code is relying on its precise earlier text
-	     */
-	    sv = sv_2mortal(Perl_newSVpvf(aTHX_ "%s Code point beginning with byte 0x%02X is not Unicode, and not portable", malformed_text, *s0));
-	    pack_warn = packWARN(WARN_UTF8);
-	}
-	if (flags & UTF8_DISALLOW_FE_FF) {
-	    goto malformed;
-	}
-    }
+#ifndef EBCDIC	/* EBCDIC can't overflow */
     if (UNLIKELY(overflowed)) {
-
-	/* If the first byte is FF, it will overflow a 32-bit word.  If the
-	 * first byte is FE, it will overflow a signed 32-bit word.  The
-	 * above preserves backward compatibility, since its message was used
-	 * in earlier versions of this code in preference to overflow */
 	sv = sv_2mortal(Perl_newSVpvf(aTHX_ "%s (overflow at byte 0x%02x, after start byte 0x%02x)", malformed_text, overflow_byte, *s0));
 	goto malformed;
     }
@@ -830,6 +806,9 @@ Perl_utf8n_to_uvchr(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
 		     |UTF8_WARN_ILLEGAL_INTERCHANGE)))
     {
 	if (UNICODE_IS_SURROGATE(uv)) {
+
+            /* By adding UTF8_CHECK_ONLY to the test, we avoid unnecessary
+             * generation of the sv, since no warnings are raised under CHECK */
 	    if ((flags & (UTF8_WARN_SURROGATE|UTF8_CHECK_ONLY)) == UTF8_WARN_SURROGATE
 		&& ckWARN_d(WARN_SURROGATE))
 	    {
@@ -842,11 +821,32 @@ Perl_utf8n_to_uvchr(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
 	}
 	else if ((uv > PERL_UNICODE_MAX)) {
 	    if ((flags & (UTF8_WARN_SUPER|UTF8_CHECK_ONLY)) == UTF8_WARN_SUPER
-		&& ckWARN_d(WARN_NON_UNICODE))
+                && ckWARN_d(WARN_NON_UNICODE))
 	    {
 		sv = sv_2mortal(Perl_newSVpvf(aTHX_ "Code point 0x%04"UVXf" is not Unicode, may not be portable", uv));
 		pack_warn = packWARN(WARN_NON_UNICODE);
 	    }
+#ifndef EBCDIC	/* EBCDIC always allows FE, FF */
+
+            /* The first byte being 0xFE or 0xFF is a subset of the SUPER code
+             * points.  We test for these after the regular SUPER ones, and
+             * before possibly bailing out, so that the more dire warning
+             * overrides the regular one, if applicable */
+            if ((*s0 & 0xFE) == 0xFE	/* matches both FE, FF */
+                && (flags & (UTF8_WARN_FE_FF|UTF8_DISALLOW_FE_FF)))
+            {
+                if ((flags & (UTF8_WARN_FE_FF|UTF8_CHECK_ONLY))
+                                                            == UTF8_WARN_FE_FF
+                    && ckWARN_d(WARN_UTF8))
+                {
+                    sv = sv_2mortal(Perl_newSVpvf(aTHX_ "Code point 0x%"UVXf" is not Unicode, and not portable", uv));
+                    pack_warn = packWARN(WARN_UTF8);
+                }
+                if (flags & UTF8_DISALLOW_FE_FF) {
+                    goto disallowed;
+                }
+            }
+#endif
 	    if (flags & UTF8_DISALLOW_SUPER) {
 		goto disallowed;
 	    }
