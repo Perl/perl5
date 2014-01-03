@@ -1946,7 +1946,8 @@ queue of such routines has been prematurely ended.
 
 =item False [] range "%s" in regex; marked by S<<-- HERE> in m/%s/
 
-(W regexp)(F) A character class range must start and end at a literal
+(W regexp) (fatal within S<C<(?[   ])>>)
+A character class range must start and end at a literal
 character, not another character class like C<\d> or C<[:alpha:]>.  The "-"
 in your false range is interpreted as a literal "-".  In a C<(?[...])>
 construct, this is an error, rather than a warning.  Consider quoting
@@ -2512,7 +2513,8 @@ L<perlfunc/sprintf>.
 =item Invalid escape in the specified encoding in regex; marked by
 S<<-- HERE> in m/%s/
 
-(W regexp) The numeric escape (for example C<\xHH>) of value < 256
+(W regexp) (fatal within S<C<(?[   ])>>)
+The numeric escape (for example C<\xHH>) of value < 256
 didn't correspond to a single character through the conversion
 from the encoding specified by the encoding pragma.
 The escape was replaced with REPLACEMENT CHARACTER (U+FFFD) instead.
@@ -3684,7 +3686,7 @@ C<no warnings 'non_unicode';>.
 
 =item Operation "%s" returns its argument for UTF-16 surrogate U+%X
 
-(S utf8, surrogate) You performed an operation requiring Unicode
+(S surrogate) You performed an operation requiring Unicode
 semantics on a Unicode surrogate.  Unicode frowns upon the use of
 surrogates for anything but storing strings in UTF-16, but semantics
 are (reluctantly) defined for the surrogates, and they are to do
@@ -5577,7 +5579,7 @@ with the characters in the Lao and Thai scripts.
 
 =item Unicode non-character U+%X is illegal for open interchange
 
-(S utf8, nonchar) Certain codepoints, such as U+FFFE and U+FFFF, are
+(S nonchar) Certain codepoints, such as U+FFFE and U+FFFF, are
 defined by the Unicode standard to be non-characters.  Those are
 legal codepoints, but are reserved for internal use; so, applications
 shouldn't attempt to exchange them.  If you know what you are doing
@@ -5585,7 +5587,7 @@ you can turn off this warning by C<no warnings 'nonchar';>.
 
 =item Unicode surrogate U+%X is illegal in UTF-8
 
-(S utf8, surrogate) You had a UTF-16 surrogate in a context where they are
+(S surrogate) You had a UTF-16 surrogate in a context where they are
 not considered acceptable.  These code points, between U+D800 and
 U+DFFF (inclusive), are used by Unicode only for UTF-16.  However, Perl
 internally allows all unsigned integer code points (up to the size limit
@@ -6314,7 +6316,7 @@ modified string is usually not particularly useful.)
 
 =item UTF-16 surrogate U+%X
 
-(S utf8, surrogate) You had a UTF-16 surrogate in a context where they are
+(S surrogate) You had a UTF-16 surrogate in a context where they are
 not considered acceptable.  These code points, between U+D800 and
 U+DFFF (inclusive), are used by Unicode only for UTF-16.  However, Perl
 internally allows all unsigned integer code points (up to the size limit

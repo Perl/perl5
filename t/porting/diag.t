@@ -672,12 +672,6 @@ Wrong syntax (suid) fd script name "%s"
 'X' outside of string in unpack
 
 __CATEGORIES__
-Code point 0x%X is not Unicode, may not be portable
 Illegal character \%o (carriage return)
 Missing argument in %s
-Unicode non-character U+%X is illegal for open interchange
-Operation "%s" returns its argument for non-Unicode code point 0x%X
-Operation "%s" returns its argument for UTF-16 surrogate U+%X
-Unicode surrogate U+%X is illegal in UTF-8
-UTF-16 surrogate U+%X
 False [] range "%s" in regex; marked by <-- HERE in m/%s/
