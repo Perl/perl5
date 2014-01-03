@@ -672,6 +672,12 @@ Wrong syntax (suid) fd script name "%s"
 'X' outside of string in unpack
 
 __CATEGORIES__
+
+# This is a warning, but is currently followed immediately by a croak (toke.c)
 Illegal character \%o (carriage return)
+
+# Because uses WARN_MISSING as a synonym for WARN_UNINITIALIZED (sv.c)
 Missing argument in %s
+
+# This message can be both fatal and non-
 False [] range "%s" in regex; marked by <-- HERE in m/%s/
