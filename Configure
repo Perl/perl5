@@ -4715,7 +4715,13 @@ case "$ccname" in
                 *)  echo "Using usrinc $usrinc." >&4 ;;
             esac
             case "$croak" in
-                y) echo "Cannot continue, aborting." >&4; exit 1 ;;
+                y) 
+                if test "X$sysroot" = X; then
+                    echo "Cannot continue, aborting." >&4; exit 1
+                else
+                    echo "Cross-compiling using sysroot $sysroot, failing to guess inc/lib paths is not fatal" >&4
+                fi
+                ;;
             esac
             ;;
         esac
