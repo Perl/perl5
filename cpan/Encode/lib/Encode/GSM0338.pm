@@ -1,5 +1,5 @@
 #
-# $Id: GSM0338.pm,v 2.5 2013/09/14 07:51:59 dankogai Exp dankogai $
+# $Id: GSM0338.pm,v 2.5 2013/09/14 07:51:59 dankogai Exp $
 #
 package Encode::GSM0338;
 

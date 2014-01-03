@@ -81,7 +81,7 @@ This scheme can also handle shift encodings.
 
 A slight enhancement to the scheme also allows for look-ahead - if
 we add a flag to re-add the removed byte to the source we could handle
-  a" -> ä
+  a" -> U+00E4 (LATIN SMALL LETTER A WITH DIAERESIS)
   ab -> a (and take b back please)
 
 */

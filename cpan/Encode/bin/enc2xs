@@ -10,7 +10,7 @@ use warnings;
 use Getopt::Std;
 use Config;
 my @orig_ARGV = @ARGV;
-our $VERSION  = do { my @r = (q$Revision: 2.8 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION  = do { my @r = (q$Revision: 2.9 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 # These may get re-ordered.
 # RAW is a do_now as inserted by &enter
@@ -1080,7 +1080,7 @@ add a new encoding, just read this chapter and forget the rest.
 
 =over 4
 
-=item 0.
+=item 0.Z<>
 
 Have a .ucm file ready.  You can get it from somewhere or you can write
 your own from scratch or you can grab one from the Encode distribution
@@ -1091,7 +1091,7 @@ in I<my.ucm>.  C<$> is a shell prompt.
   $ ls -F
   my.ucm
 
-=item 1.
+=item 1.Z<>
 
 Issue a command as follows;
 
@@ -1114,7 +1114,7 @@ The following files were created.
 
 =over 4
 
-=item 1.1.
+=item 1.1.Z<>
 
 If you want *.ucm installed together with the modules, do as follows;
 
@@ -1124,20 +1124,20 @@ If you want *.ucm installed together with the modules, do as follows;
 
 =back
 
-=item 2.
+=item 2.Z<>
 
 Edit the files generated.  You don't have to if you have no time AND no
 intention to give it to someone else.  But it is a good idea to edit
 the pod and to add more tests.
 
-=item 3.
+=item 3.Z<>
 
 Now issue a command all Perl Mongers love:
 
   $ perl Makefile.PL
   Writing Makefile for Encode::My
 
-=item 4.
+=item 4.Z<>
 
 Now all you have to do is make.
 
@@ -1158,7 +1158,7 @@ The time it takes varies depending on how fast your machine is and
 how large your encoding is.  Unless you are working on something big
 like euc-tw, it won't take too long.
 
-=item 5.
+=item 5.Z<>
 
 You can "make install" already but you should test first.
 
@@ -1171,11 +1171,11 @@ You can "make install" already but you should test first.
   Files=1, Tests=2,  0 wallclock secs
    ( 0.09 cusr + 0.01 csys = 0.09 CPU)
 
-=item 6.
+=item 6.Z<>
 
 If you are content with the test result, just "make install"
 
-=item 7.
+=item 7.Z<>
 
 If you want to add your encoding to Encode's demand-loading list
 (so you don't have to "use Encode::YourEncoding"), run
