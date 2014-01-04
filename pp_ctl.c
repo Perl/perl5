@@ -3833,12 +3833,13 @@ PP(pp_require)
 		    tryname = SvPVX_const(namesv);
 		    tryrsfp = NULL;
 
-		    ENTER_with_name("call_INC");
-		    SAVETMPS;
 		    if (SvPADTMP(nsv)) {
 			nsv = sv_newmortal();
 			SvSetSV_nosteal(nsv,sv);
 		    }
+
+		    ENTER_with_name("call_INC");
+		    SAVETMPS;
 		    EXTEND(SP, 2);
 
 		    PUSHMARK(SP);

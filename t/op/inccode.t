@@ -21,7 +21,7 @@ unless (is_miniperl()) {
 
 use strict;
 
-plan(tests => 61 + !is_miniperl() * (3 + 14 * $can_fork));
+plan(tests => 62 + !is_miniperl() * (3 + 14 * $can_fork));
 
 sub get_temp_fh {
     my $f = tempfile();
@@ -266,6 +266,20 @@ eval { require foom };
 is $_||$@, "are temps freed prematurely?",
            "are temps freed prematurely when returned from inc filters?";
 shift @INC;
+
+# [perl #120657]
+sub fake_module {
+    my (undef,$module_file) = @_;
+    !1
+}
+{
+    local @INC = @INC;
+    unshift @INC, (\&fake_module)x2;
+    eval { require "${\'bralbalhablah'}" };
+    like $@, qr/^Can't locate/,
+        'require PADTMP passing freed var when @INC has multiple subs';
+}    
+
 
 exit if is_miniperl();
 
