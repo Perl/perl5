@@ -171,12 +171,13 @@ VXS(version_new)
 {
     dVAR;
     dXSARGS;
-    PERL_UNUSED_VAR(cv);
     SV *vs = items ? ST(1) : &PL_sv_undef;
     SV *rv;
     const char * classname = "";
     STRLEN len;
     U32 flags = 0;
+    PERL_UNUSED_VAR(cv);
+
     SP -= items;
 
     if (items > 3 || items == 0)
