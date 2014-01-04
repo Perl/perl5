@@ -1,10 +1,10 @@
 #!perl -w
 package version;
 
-use 5.005_05;
+use 5.005_04;
 use strict;
 
-use vars qw(@ISA $VERSION $CLASS *declare *qv);
+use vars qw(@ISA $VERSION $CLASS $STRICT $LAX *declare *qv);
 
 $VERSION = 0.9905;
 $CLASS = 'version';
