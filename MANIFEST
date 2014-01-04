@@ -1620,6 +1620,7 @@ cpan/Module-Loaded/lib/Module/Loaded.pm	Module::Loaded
 cpan/Module-Loaded/t/01_Module-Loaded.t	Module::Loaded tests
 cpan/Module-Load/lib/Module/Load.pm		Module::Load
 cpan/Module-Load/t/01_Module-Load.t		Module::Load tests
+cpan/Module-Load/t/02_Module-Load.t		Module::Load tests
 cpan/Module-Load/t/to_load/config_file		Module::Load tests
 cpan/Module-Load/t/to_load/LoadIt.pm		Module::Load tests
 cpan/Module-Load/t/to_load/LoadMe.pl		Module::Load tests
