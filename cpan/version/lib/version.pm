@@ -6,13 +6,15 @@ use strict;
 
 use vars qw(@ISA $VERSION $CLASS $STRICT $LAX *declare *qv);
 
-$VERSION = 0.9905;
+$VERSION = 0.9906;
 $CLASS = 'version';
 
 # avoid using Exporter
 require version::regex;
 *version::is_lax = \&version::regex::is_lax;
 *version::is_strict = \&version::regex::is_strict;
+*LAX = \$version::regex::LAX;
+*STRICT = \$version::regex::STRICT;
 
 sub import {
     no strict 'refs';

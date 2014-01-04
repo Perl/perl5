@@ -129,7 +129,7 @@ was used to initialize the version object.
 =head2 Regular Expressions for Version Parsing
 
 A formalized definition of the legal forms for version strings is
-included in the main F<version.pm> file.  Primitives are included for
+included in the C<version::regex> class.  Primitives are included for
 common elements, although they are scoped to the file so they are useful
 for reference purposes only.  There are two publicly accessible scalars
 that can be used in other code (not exported):

@@ -122,13 +122,15 @@ use strict;
 
 use POSIX qw/locale_h/;
 use locale;
-use vars qw($VERSION $CLASS @ISA);
-$VERSION = 0.9905;
+use vars qw($VERSION $CLASS @ISA $LAX $STRICT);
+$VERSION = 0.9906;
 $CLASS = 'version::vpp';
 
 require version::regex;
 *version::vpp::is_strict = \&version::regex::is_strict;
 *version::vpp::is_lax = \&version::regex::is_lax;
+*LAX = \$version::regex::LAX;
+*STRICT = \$version::regex::STRICT;
 
 use overload (
     '""'       => \&stringify,
