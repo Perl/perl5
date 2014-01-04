@@ -30,6 +30,10 @@ sub BaseTests {
     $version = $CLASS->$method(1.23);
     is ( "$version" , "1.23" , '1.23 eq "1.23"' );
 
+    # Test explicit integer
+    $version = $CLASS->$method(23);
+    is ( "$version" , 23 , '23 eq "23"' );
+
     # Test quoted number processing
     $version = $CLASS->$method("5.005_03");
     is ( "$version" , "5.005_03" , '"5.005_03" eq "5.005_03"' );
@@ -426,13 +430,13 @@ EOF
     }
 
 SKIP: {
-    skip 'Cannot test "use parent qw(version)"  when require is used', 3
+    skip "Cannot test \"use parent $CLASS\"  when require is used", 3
 	unless defined $qv_declare;
     my ($fh, $filename) = tempfile('tXXXXXXX', SUFFIX => '.pm', UNLINK => 1);
     (my $package = basename($filename)) =~ s/\.pm$//;
     print $fh <<"EOF";
 package $package;
-use parent qw(version);
+use parent $CLASS;
 1;
 EOF
     close $fh;
@@ -490,9 +494,9 @@ EOF
 
     {
 	# http://rt.perl.org/rt3/Ticket/Display.html?id=56606
-	my $badv = bless { version => [1,2,3] }, "version";
+	my $badv = bless { version => [1,2,3] }, $CLASS;
 	is $badv, '1.002003', "Deal with badly serialized versions from YAML";
-	my $badv2 = bless { qv => 1, version => [1,2,3] }, "version";
+	my $badv2 = bless { qv => 1, version => [1,2,3] }, $CLASS;
 	is $badv2, 'v1.2.3', "Deal with badly serialized versions from YAML ";
     }
 
@@ -574,6 +578,19 @@ SKIP: {
 	my $v = $CLASS->new("0.52_0");
 	ok $v->is_alpha, 'Just checking';
 	is $v->numify, '0.520', 'Correctly nummified';
+    }
+
+    { # https://rt.cpan.org/Ticket/Display.html?id=88495
+	@ver::ISA = $CLASS;
+	is ref(ver->new), 'ver', 'ver can inherit from version';
+	is ref(ver->qv("1.2.3")), 'ver', 'ver can inherit from version';
+    }
+
+    { # discovered while integrating with bleadperl
+	eval {my $v = $CLASS->new([1,2,3]) };
+	like $@, qr/Invalid version format/, 'Do not crash for garbage';
+	eval {my $v = $CLASS->new({1 => 2}) };
+	like $@, qr/Invalid version format/, 'Do not crash for garbage';
     }
 
 }

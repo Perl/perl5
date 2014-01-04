@@ -11,7 +11,7 @@ use Test::More tests => 7;
 use Config;
 
 BEGIN {
-    use_ok('version', 0.9904);
+    use_ok('version', 0.9905);
 }
 
 SKIP: {
@@ -22,8 +22,6 @@ SKIP: {
 	# test locale handling
 	my $warning;
 
-	use locale;
-
 	local $SIG{__WARN__} = sub { $warning = $_[0] };
 
 	my $ver = 1.23;  # has to be floating point number
@@ -33,15 +31,18 @@ SKIP: {
 						      # because have to
 						      # evaluate in current
 						      # scope
+	use locale;
+
 	while (<DATA>) {
 	    chomp;
 	    $loc = setlocale( LC_ALL, $_);
-	    last if localeconv()->{decimal_point} eq ',';
+	    last if $loc && localeconv()->{decimal_point} eq ',';
 	}
 	skip 'Cannot test locale handling without a comma locale', 5
 	    unless $loc and localeconv()->{decimal_point} eq ',';
 
 	setlocale(LC_NUMERIC, $loc);
+	$ver = 1.23;  # has to be floating point number
 	ok ($ver eq "1,23", "Using locale: $loc");
 	$v = version->new($ver);
 	unlike($warning, qr/Version string '1,23' contains invalid data/,
