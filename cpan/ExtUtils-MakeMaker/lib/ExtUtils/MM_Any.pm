@@ -1,7 +1,7 @@
 package ExtUtils::MM_Any;
 
 use strict;
-our $VERSION = '6.84';
+our $VERSION = '6.86';
 
 use Carp;
 use File::Spec;
@@ -806,9 +806,9 @@ sub _has_cpan_meta {
 
 Generate the metafile target.
 
-Writes the file META.yml YAML encoded meta-data about the module in
-the distdir.  The format follows Module::Build's as closely as
-possible.
+Writes the file META.yml (YAML encoded meta-data) and META.json
+(JSON encoded meta-data) about the module in the distdir.
+The format follows Module::Build's as closely as possible.
 
 =cut
 
@@ -959,7 +959,8 @@ sub _hash_merge {
 
     my @metadata_pairs = $mm->metafile_data(\%meta_add, \%meta_merge);
 
-Returns the data which MakeMaker turns into the META.yml file.
+Returns the data which MakeMaker turns into the META.yml file 
+and the META.json file.
 
 Values of %meta_add will overwrite any existing metadata in those
 keys.  %meta_merge will be merged with them.
@@ -994,17 +995,6 @@ sub metafile_data {
 
     # The author key is required and it takes a list.
     $meta{author}   = defined $self->{AUTHOR}    ? $self->{AUTHOR} : [];
-
-    # Check the original args so we can tell between the user setting it
-    # to an empty hash and it just being initialized.
-    if( $self->{ARGS}{CONFIGURE_REQUIRES} ) {
-        $meta{configure_requires}
-            = _normalize_prereqs($self->{CONFIGURE_REQUIRES});
-    } else {
-        $meta{configure_requires} = {
-            'ExtUtils::MakeMaker'       => 0,
-        };
-    }
 
     {
       my $vers = _metaspec_version( $meta_add, $meta_merge );
@@ -1046,6 +1036,15 @@ sub _add_requirements_to_meta_v1_4 {
 
     # Check the original args so we can tell between the user setting it
     # to an empty hash and it just being initialized.
+    if( $self->{ARGS}{CONFIGURE_REQUIRES} ) {
+        $meta{configure_requires}
+            = _normalize_prereqs($self->{CONFIGURE_REQUIRES});
+    } else {
+        $meta{configure_requires} = {
+            'ExtUtils::MakeMaker'       => 0,
+        };
+    }
+
     if( $self->{ARGS}{BUILD_REQUIRES} ) {
         $meta{build_requires} = _normalize_prereqs($self->{BUILD_REQUIRES});
     } else {
@@ -1074,6 +1073,15 @@ sub _add_requirements_to_meta_v2 {
 
     # Check the original args so we can tell between the user setting it
     # to an empty hash and it just being initialized.
+    if( $self->{ARGS}{CONFIGURE_REQUIRES} ) {
+        $meta{prereqs}{configure}{requires}
+            = _normalize_prereqs($self->{CONFIGURE_REQUIRES});
+    } else {
+        $meta{prereqs}{configure}{requires} = {
+            'ExtUtils::MakeMaker'       => 0,
+        };
+    }
+
     if( $self->{ARGS}{BUILD_REQUIRES} ) {
         $meta{prereqs}{build}{requires} = _normalize_prereqs($self->{BUILD_REQUIRES});
     } else {
@@ -1270,8 +1278,8 @@ sub metafile_file {
 
     my $make_frag = $mm->distmeta_target;
 
-Generates the distmeta target to add META.yml to the MANIFEST in the
-distdir.
+Generates the distmeta target to add META.yml and META.json to the MANIFEST
+in the distdir.
 
 =cut
 
@@ -1307,8 +1315,8 @@ MAKE
 
     my $mymeta = $mm->mymeta;
 
-Generate MYMETA information as a hash either from an existing META.yml
-or from internal data.
+Generate MYMETA information as a hash either from an existing CPAN Meta file
+(META.json or META.yml) or from internal data.
 
 =cut
 
@@ -1376,9 +1384,7 @@ sub _mymeta_from_meta {
 
     $self->write_mymeta( $mymeta );
 
-Write MYMETA information to MYMETA.yml.
-
-This will probably be refactored into a more generic YAML dumping method.
+Write MYMETA information to MYMETA.json and MYMETA.yml.
 
 =cut
 

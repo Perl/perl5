@@ -15,7 +15,7 @@ use ExtUtils::MakeMaker qw($Verbose neatvalue);
 
 # If we make $VERSION an our variable parse_version() breaks
 use vars qw($VERSION);
-$VERSION = '6.84';
+$VERSION = '6.86';
 $VERSION = eval $VERSION;  ## no critic [BuiltinFunctions::ProhibitStringyEval]
 
 require ExtUtils::MM_Any;
@@ -1594,6 +1594,8 @@ sub init_main {
     # Some systems have restrictions on files names for DLL's etc.
     # mod2fname returns appropriate file base name (typically truncated)
     # It may also edit @modparts if required.
+    # We require DynaLoader to make sure that mod2fname is loaded
+    eval { require DynaLoader };
     if (defined &DynaLoader::mod2fname) {
         $modfname = &DynaLoader::mod2fname(\@modparts);
     }
@@ -2983,6 +2985,17 @@ PPD_OUT
         }
     }
 
+    if ($self->{PPM_UNINSTALL_SCRIPT}) {
+        if ($self->{PPM_UNINSTALL_EXEC}) {
+            $ppd_xml .= sprintf qq{        <UNINSTALL EXEC="%s">%s</UNINSTALL>\n},
+                  $self->{PPM_UNINSTALL_EXEC}, $self->{PPM_UNINSTALL_SCRIPT};
+        }
+        else {
+            $ppd_xml .= sprintf qq{        <UNINSTALL>%s</UNINSTALL>\n},
+                  $self->{PPM_UNINSTALL_SCRIPT};
+        }
+    }
+
     my ($bin_location) = $self->{BINARY_LOCATION} || '';
     $bin_location =~ s/\\/\\\\/g;
 
@@ -3504,12 +3517,15 @@ sub tool_xsubpp {
     # Make sure we pick up the new xsubpp if we're building perl.
     unshift @xsubpp_dirs, $self->{PERL_LIB} if $self->{PERL_CORE};
 
+    my $foundxsubpp = 0;
     foreach my $dir (@xsubpp_dirs) {
         $xsdir = $self->catdir($dir, 'ExtUtils');
         if( -r $self->catfile($xsdir, "xsubpp") ) {
+            $foundxsubpp = 1;
             last;
         }
     }
+    die "ExtUtils::MM_Unix::tool_xsubpp : Can't find xsubpp" if !$foundxsubpp;
 
     my $tmdir   = File::Spec->catdir($self->{PERL_LIB},"ExtUtils");
     my(@tmdeps) = $self->catfile($tmdir,'typemap');

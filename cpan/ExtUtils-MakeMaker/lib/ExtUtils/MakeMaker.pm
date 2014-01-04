@@ -18,7 +18,7 @@ our @Overridable;
 my @Prepend_parent;
 my %Recognized_Att_Keys;
 
-our $VERSION = '6.84';
+our $VERSION = '6.86';
 $VERSION = eval $VERSION;  ## no critic [BuiltinFunctions::ProhibitStringyEval]
 
 # Emulate something resembling CVS $Revision$
@@ -280,8 +280,8 @@ sub full_setup {
     NORECURS NO_VC OBJECT OPTIMIZE PERL_MALLOC_OK PERL PERLMAINCC PERLRUN
     PERLRUNINST PERL_CORE
     PERL_SRC PERM_DIR PERM_RW PERM_RWX MAGICXS
-    PL_FILES PM PM_FILTER PMLIBDIRS PMLIBPARENTDIRS POLLUTE PPM_INSTALL_EXEC
-    PPM_INSTALL_SCRIPT PREREQ_FATAL PREREQ_PM PREREQ_PRINT PRINT_PREREQ
+    PL_FILES PM PM_FILTER PMLIBDIRS PMLIBPARENTDIRS POLLUTE PPM_INSTALL_EXEC PPM_UNINSTALL_EXEC
+    PPM_INSTALL_SCRIPT PPM_UNINSTALL_SCRIPT PREREQ_FATAL PREREQ_PM PREREQ_PRINT PRINT_PREREQ
     SIGN SKIP TEST_REQUIRES TYPEMAPS UNINST VERSION VERSION_FROM XS XSOPT XSPROTOARG
     XS_VERSION clean depend dist dynamic_lib linkext macro realclean
     tool_autosplit
@@ -605,6 +605,17 @@ END
         parse_args($self, _shellwords($ENV{PERL_MM_OPT} || ''),@ARGV);
     }
 
+    # RT#91540 PREREQ_FATAL not recognized on command line
+    if (%unsatisfied && $self->{PREREQ_FATAL}){
+        my $failedprereqs = join "\n", map {"    $_ $unsatisfied{$_}"}
+                            sort { $a cmp $b } keys %unsatisfied;
+        die <<"END";
+MakeMaker FATAL: prerequisites not found.
+$failedprereqs
+
+Please install these modules first and rerun 'perl Makefile.PL'.
+END
+    }
 
     $self->{NAME} ||= $self->guess_name;
 
@@ -1675,8 +1686,9 @@ Available in version 6.5503 and above.
 
 A hash of modules that are needed to build your module but not run it.
 
-This will go into the C<build_requires> field of your CPAN Meta file.
-(F<META.yml> or F<META.json>).
+This will go into the C<build_requires> field of your F<META.yml> and the C<build> of the C<prereqs> field of your F<META.json>.
+
+Defaults to C<<< { "ExtUtils::MakeMaker" => 0 } >>> if this attribute is not specified.
 
 The format is the same as PREREQ_PM.
 
@@ -1725,10 +1737,9 @@ Available in version 6.52 and above.
 A hash of modules that are required to run Makefile.PL itself, but not
 to run your distribution.
 
-This will go into the C<configure_requires> field of your CPAN Meta file
-(F<META.yml> or F<META.json>)
+This will go into the C<configure_requires> field of your F<META.yml> and the C<configure> of the C<prereqs> field of your F<META.json>.
 
-Defaults to C<<< { "ExtUtils::MakeMaker" => 0 } >>>
+Defaults to C<<< { "ExtUtils::MakeMaker" => 0 } >>> if this attribute is not specified.
 
 The format is the same as PREREQ_PM.
 
@@ -2481,6 +2492,15 @@ Name of the executable used to run C<PPM_INSTALL_SCRIPT> below. (e.g. perl)
 Name of the script that gets executed by the Perl Package Manager after
 the installation of a package.
 
+=item PPM_UNINSTALL_EXEC
+
+Name of the executable used to run C<PPM_UNINSTALL_SCRIPT> below. (e.g. perl)
+
+=item PPM_UNINSTALL_SCRIPT
+
+Name of the script that gets executed by the Perl Package Manager before
+the removal of a package.
+
 =item PREFIX
 
 This overrides all the default install locations.  Man pages,
@@ -2521,8 +2541,7 @@ A hash of modules that are needed to run your module.  The keys are
 the module names ie. Test::More, and the minimum version is the
 value. If the required version number is 0 any version will do.
 
-This will go into the C<requires> field of your CPAN Meta file
-(F<META.yml> or F<META.json>).
+This will go into the C<requires> field of your F<META.yml> and the C<runtime> of the C<prereqs> field of your F<META.json>.
 
     PREREQ_PM => {
         # Require Test::More at least 0.47
@@ -2594,8 +2613,7 @@ if you really need it.
 A hash of modules that are needed to test your module but not run or
 build it.
 
-This will go into the C<test_requires> field of your CPAN Meta file.
-(F<META.yml> or F<META.json>).
+This will go into the C<build_requires> field of your F<META.yml> and the C<test> of the C<prereqs> field of your F<META.json>.
 
 The format is the same as PREREQ_PM.
 
