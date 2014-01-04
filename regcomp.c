@@ -13388,7 +13388,13 @@ parseit:
                                e.g., \w and \W, it matches everything, and the
                                bracketed class can be optimized into qr/./s */
                 }
+
+                /* Add this class to those that should be checked at runtime */
                 ANYOF_POSIXL_SET(ret, namedclass);
+
+                /* The above-Latin1 characters are not subject to locale rules.
+                 * Just add them, in the second pass, to the
+                 * unconditionally-matched list */
                 if (! SIZE_ONLY) {
                     if (namedclass % 2 == 0) {  /* A non-complemented class,
                                                    like ANYOF_PUNCT */
@@ -13400,16 +13406,16 @@ parseit:
                                               PL_XPosix_ptrs[classnum],
                                               &scratch_list);
                         /* And set the output to it, adding instead if there
-                         * already is an output.  Checking if 'posixes' is NULL
+                         * already is an output.  Checking if 'cp_list' is NULL
                          * first saves an extra clone.  Its reference count
                          * will be decremented at the next union, etc, or if
                          * this is the only instance, at the end of the routine
                          * */
-                        if (! posixes) {
-                            posixes = scratch_list;
+                        if (! cp_list) {
+                            cp_list = scratch_list;
                         }
                         else {
-                            _invlist_union(posixes, scratch_list, &posixes);
+                            _invlist_union(cp_list, scratch_list, &cp_list);
                             SvREFCNT_dec_NN(scratch_list);
                         }
                     }
@@ -13418,11 +13424,11 @@ parseit:
                         _invlist_subtract(PL_AboveLatin1,
                                           PL_XPosix_ptrs[classnum],
                                           &scratch_list);
-                        if (! posixes) {
-                            posixes = scratch_list;
+                        if (! cp_list) {
+                            cp_list = scratch_list;
                         }
                         else {
-                            _invlist_union(posixes, scratch_list, &posixes);
+                            _invlist_union(cp_list, scratch_list, &cp_list);
                             SvREFCNT_dec_NN(scratch_list);
                         }
                     }
