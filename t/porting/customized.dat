@@ -16,6 +16,6 @@ autodie cpan/autodie/t/utf8_open.t 5295851351c49f939008c5aca6a798742b1e503d
 libnet cpan/libnet/Makefile.PL 6b10ac98e672bfebb8f49b9720a93442645208b3
 podlators cpan/podlators/scripts/pod2man.PL f81acf53f3ff46cdcc5ebdd661c5d13eb35d20d6
 podlators cpan/podlators/scripts/pod2text.PL b4693fcfe4a0a1b38a215cfb8985a65d5d025d69
-version cpan/version/lib/version.pm 65f739f72dda1a45f497f38217883facefd0c873
+version cpan/version/lib/version.pm 881dee6f24fc887c5650b9c9a8aeed4d4923cc16
 version cpan/version/t/07locale.t bbc7f94bc2ad633978aedb5732b8b4ad6b3247fb
 version cpan/version/t/08_corelist.t 1c10cc05162c99b02cd45f9b9fb9a310aa2bff10
