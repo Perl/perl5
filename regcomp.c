@@ -12854,10 +12854,14 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
      * string is in UTF-8.  (Because is under /d) */
     SV* depends_list = NULL;
 
-    /* inversion list of code points this node matches.  For much of the
-     * function, it includes only those that match regardless of the utf8ness
-     * of the target string */
+    /* Inversion list of code points this node matches regardless of things
+     * like locale, folding, utf8ness of the target string */
     SV* cp_list = NULL;
+
+    /* Inversion list of code points this node matches regardless of things
+     * like locale, utf8ness of the target string.  But code points on this
+     * list need to be checked for things that fold to/from them under /i */
+    SV* cp_foldable_list = NULL;
 
 #ifdef EBCDIC
     /* In a range, counts how many 0-2 of the ends of it came from literals,
@@ -13352,7 +13356,8 @@ parseit:
                             UTF8fARG(UTF, w, rangebegin));
                         (void)ReREFCNT_inc(RExC_rx_sv);
                         cp_list = add_cp_to_invlist(cp_list, '-');
-                        cp_list = add_cp_to_invlist(cp_list, prevvalue);
+                        cp_foldable_list = add_cp_to_invlist(cp_foldable_list,
+                                                             prevvalue);
                     }
 		}
 
@@ -13433,12 +13438,9 @@ parseit:
                 if (namedclass >= ANYOF_POSIXL_MAX) {  /* If a special class */
                     if (namedclass != ANYOF_UNIPROP) { /* UNIPROP = \p and \P */
 
-                        /* Here, should be \h, \H, \v, or \V.  Neither /d nor
-                         * /l make a difference in what these match, therefore
-                         * we just add what they match to cp_list.  There
-                         * would be problems if these characters had folds
-                         * other than themselves, as cp_list is subject to
-                         * folding. */
+                        /* Here, should be \h, \H, \v, or \V.  None of /d, /i
+                         * nor /l make a difference in what these match,
+                         * therefore we just add what they match to cp_list. */
                         if (classnum != _CC_VERTSPACE) {
                             assert(   namedclass == ANYOF_HORIZWS
                                    || namedclass == ANYOF_NHORIZWS);
@@ -13684,7 +13686,8 @@ parseit:
         /* Deal with this element of the class */
 	if (! SIZE_ONLY) {
 #ifndef EBCDIC
-            cp_list = _add_range_to_invlist(cp_list, prevvalue, value);
+            cp_foldable_list = _add_range_to_invlist(cp_foldable_list,
+                                                     prevvalue, value);
 #else
             SV* this_range = _new_invlist(1);
             _append_range_to_invlist(this_range, prevvalue, value);
@@ -13706,7 +13709,7 @@ parseit:
                 _invlist_intersection(this_range, PL_Posix_ptrs[_CC_ALPHA],
                                       &this_range);
             }
-            _invlist_union(cp_list, this_range, &cp_list);
+            _invlist_union(cp_foldable_list, this_range, &cp_foldable_list);
             literal_endpoint = 0;
 #endif
         }
@@ -13960,6 +13963,7 @@ parseit:
 
             SvREFCNT_dec(posixes);
             SvREFCNT_dec(cp_list);
+            SvREFCNT_dec(cp_foldable_list);
             return ret;
         }
     }
@@ -13970,7 +13974,8 @@ parseit:
 
     /* If folding, we calculate all characters that could fold to or from the
      * ones already on the list */
-    if (FOLD && cp_list) {
+    if (cp_foldable_list) {
+        if (FOLD) {
 	UV start, end;	/* End points of code point ranges */
 
 	SV* fold_intersection = NULL;
@@ -13979,12 +13984,12 @@ parseit:
          * checked.  Get the intersection of this class and all the possible
          * characters that are foldable.  This can quickly narrow down a large
          * class */
-        _invlist_intersection(PL_utf8_foldable, cp_list,
+        _invlist_intersection(PL_utf8_foldable, cp_foldable_list,
                               &fold_intersection);
 
         /* The folds for all the Latin1 characters are hard-coded into this
          * program, but we have to go out to disk to get the others. */
-        if (invlist_highest(cp_list) >= 256) {
+        if (invlist_highest(cp_foldable_list) >= 256) {
 
             /* This is a hash that for a particular fold gives all characters
              * that are involved in it */
@@ -14166,6 +14171,12 @@ parseit:
             }
 	}
 	SvREFCNT_dec_NN(fold_intersection);
+        }
+
+        /* Now that we have finished adding all the folds, there is no reason
+         * to keep the foldable list separate */
+        _invlist_union(cp_list, cp_foldable_list, &cp_list);
+	SvREFCNT_dec_NN(cp_foldable_list);
     }
 
     /* And combine the result (if any) with any inversion list from posix
