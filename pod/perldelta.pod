@@ -276,7 +276,12 @@ L</Platform Support> section, instead.
 
 =item *
 
-XXX
+Distinct library basenames with C<d_libname_unique>.
+
+When compiling perl with this option, the library files for XS modules are
+named something "unique" -- for example, Hash/Util/Util.so becomes
+Hash/Util/PL_Hash__Util.so.  This behavior is similar to what currently
+happens on VMS, and serves as groundwork for the Android port.
 
 =back
 
