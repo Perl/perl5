@@ -13396,30 +13396,28 @@ parseit:
                  * Just add them, in the second pass, to the
                  * unconditionally-matched list */
                 if (! SIZE_ONLY) {
-                        SV* scratch_list = NULL;
+                    SV* scratch_list = NULL;
 
-                        /* For above Latin1 code points, we use the full
-                         * Unicode range */
-                        _invlist_intersection_maybe_complement_2nd(PL_AboveLatin1,
-                                              PL_XPosix_ptrs[classnum],
+                    /* Get the list of the above-Latin1 code points this
+                     * matches */
+                    _invlist_intersection_maybe_complement_2nd(PL_AboveLatin1,
+                                          PL_XPosix_ptrs[classnum],
 
-                                              /* Odd numbers are complements,
-                                               * like NDIGIT, NASCII, ... */
-                                              namedclass % 2 != 0,
-                                              &scratch_list);
-                        /* And set the output to it, adding instead if there
-                         * already is an output.  Checking if 'cp_list' is NULL
-                         * first saves an extra clone.  Its reference count
-                         * will be decremented at the next union, etc, or if
-                         * this is the only instance, at the end of the routine
-                         * */
-                        if (! cp_list) {
-                            cp_list = scratch_list;
-                        }
-                        else {
-                            _invlist_union(cp_list, scratch_list, &cp_list);
-                            SvREFCNT_dec_NN(scratch_list);
-                        }
+                                          /* Odd numbers are complements, like
+                                           * NDIGIT, NASCII, ... */
+                                          namedclass % 2 != 0,
+                                          &scratch_list);
+                    /* Checking if 'cp_list' is NULL first saves an extra
+                     * clone.  Its reference count will be decremented at the
+                     * next union, etc, or if this is the only instance, at the
+                     * end of the routine */
+                    if (! cp_list) {
+                        cp_list = scratch_list;
+                    }
+                    else {
+                        _invlist_union(cp_list, scratch_list, &cp_list);
+                        SvREFCNT_dec_NN(scratch_list);
+                    }
                     continue;   /* Go get next character */
                 }
             }
