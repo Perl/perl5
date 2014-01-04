@@ -12828,6 +12828,10 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                                of this function because their handling  is
                                different under /i, and for most classes under
                                /d as well */
+    SV* nposixes = NULL;    /* Similarly for [:^word:].  These are kept
+                               separate for a while from the non-complemented
+                               versions because of complications with /d
+                               matching */
     UV element_count = 0;   /* Number of distinct elements in the class.
 			       Optimizations may be possible if this is tiny */
     AV * multi_char_matches = NULL; /* Code points that fold to more than one
@@ -13492,16 +13496,11 @@ parseit:
                     }
                     else {  /* A complemented class, like ANYOF_NPUNCT */
                             _invlist_union_complement_2nd(
-                                                posixes,
+                                                nposixes,
                                                 (AT_LEAST_ASCII_RESTRICTED)
                                                     ? ascii_source
                                                     : *source_ptr,
-                                                &posixes);
-                            /* Under /d, everything in the upper half of the
-                             * Latin1 range matches this complement */
-                            if (DEPENDS_SEMANTICS) {
-                                ANYOF_FLAGS(ret) |= ANYOF_NON_UTF8_LATIN1_ALL;
-                            }
+                                                &nposixes);
                     }
                 }
                 continue;   /* Go get next character */
@@ -13954,6 +13953,7 @@ parseit:
             RExC_parse = (char *) cur_parse;
 
             SvREFCNT_dec(posixes);
+            SvREFCNT_dec(nposixes);
             SvREFCNT_dec(cp_list);
             SvREFCNT_dec(cp_foldable_list);
             return ret;
@@ -14182,7 +14182,21 @@ parseit:
      * classes.  The lists are kept separate up to now because we don't want to
      * fold the classes (folding of those is automatically handled by the swash
      * fetching code) */
-    if (posixes) {
+    if (posixes || nposixes) {
+        if (nposixes) {
+            /* Under /d, everything in the upper half of the Latin1 range
+             * matches these complements */
+            if (DEPENDS_SEMANTICS) {
+                ANYOF_FLAGS(ret) |= ANYOF_NON_UTF8_LATIN1_ALL;
+            }
+            if (posixes) {
+                _invlist_union(posixes, nposixes, &posixes);
+                SvREFCNT_dec_NN(nposixes);
+            }
+            else {
+                posixes = nposixes;
+            }
+        }
         if (! DEPENDS_SEMANTICS) {
             if (cp_list) {
                 _invlist_union(cp_list, posixes, &cp_list);
