@@ -20,6 +20,7 @@ BEGIN {
 }
 use Config;
 my $have_setlocale = $Config{d_setlocale} eq 'define';
+my $have_strtod = $Config{d_strtod} eq 'define';
 $have_setlocale = 0 if $@;
 # Visual C's CRT goes silly on strings of the form "en_US.ISO8859-1"
 # and mingw32 uses said silly CRT
@@ -47,17 +48,20 @@ fresh_perl_is("for (qw(@locales)) {\n" . <<'EOF',
 EOF
     "", {}, "no locales where LC_NUMERIC breaks");
 
-fresh_perl_is("for (qw(@locales)) {\n" . <<'EOF',
-    use POSIX qw(locale_h);
-    use locale;
-    my $in = 4.2;
-    my $s = sprintf "%g", $in; # avoid any constant folding bugs
-    next if $s eq "4.2";
-    print "$_ $s\n";
-}
+{
+    local $ENV{LC_NUMERIC};
+    local $ENV{LC_ALL}; # so it never overrides LC_NUMERIC
+    fresh_perl_is("for (qw(@locales)) {\n" . <<'EOF',
+        use POSIX qw(locale_h);
+        use locale;
+        my $in = 4.2;
+        my $s = sprintf "%g", $in; # avoid any constant folding bugs
+        next if $s eq "4.2";
+        print "$_ $s\n";
+    }
 EOF
-    "", {}, "LC_NUMERIC without setlocale() has no effect in any locale");
-
+    "", {}, "LC_NUMERIC without environment nor setlocale() has no effect in any locale");
+}
 
 # try to find out a locale where LC_NUMERIC makes a difference
 my $original_locale = setlocale(LC_NUMERIC);
@@ -110,6 +114,18 @@ format STDOUT =
 write;
 EOF
 	    "format() looks at LC_NUMERIC with 'use locale'");
+        }
+
+        {
+	    fresh_perl_is(<<'EOF', $difference, {},
+use locale ":not_characters";
+format STDOUT =
+@.#
+4.179
+.
+write;
+EOF
+	    "format() looks at LC_NUMERIC with 'use locale \":not_characters\"'");
         }
 
         {
@@ -181,6 +197,33 @@ EOF
 	"sprintf() and printf() look at LC_NUMERIC regardless of constant folding");
     }
 
+    for ($different) {
+	local $ENV{LC_NUMERIC} = $_;
+	local $ENV{LC_ALL}; # so it never overrides LC_NUMERIC
+	fresh_perl_is(<<"EOF",
+	    use POSIX qw(locale_h);
+
+            BEGIN { setlocale(LC_NUMERIC, \"$_\"); };
+            setlocale(LC_ALL, "C");
+            use 5.008;
+            print setlocale(LC_NUMERIC);
+EOF
+	 "C", { },
+         "No compile error on v-strings when setting the locale to non-dot radix at compile time when default environment has non-dot radix");
+    }
+
+    for ($different) {
+	local $ENV{LC_NUMERIC} = $_;
+	local $ENV{LC_ALL}; # so it never overrides LC_NUMERIC
+	fresh_perl_is(<<"EOF",
+	    use POSIX qw(locale_h);
+
+            BEGIN { print setlocale(LC_NUMERIC), "\n"; };
+EOF
+	 $_, { },
+         "Passed in LC_NUMERIC is valid at compilation time");
+    }
+
     unless ($comma) {
         skip("no locale available where LC_NUMERIC is a comma", 2);
     }
@@ -209,8 +252,22 @@ EOF
             print \$i, "\n";
 EOF
             "1,5\n2,5", {}, "Can do math when radix is a comma"); # [perl 115800]
+
+        unless ($have_strtod) {
+            skip("no strtod()", 1);
+        }
+        else {
+            fresh_perl_is(<<"EOF",
+                use POSIX;
+                POSIX::setlocale(POSIX::LC_NUMERIC(),"$comma");
+                my \$one_point_5 = POSIX::strtod("1,5");
+                \$one_point_5 =~ s/0+\$//;  # Remove any trailing zeros
+                print \$one_point_5, "\n";
+EOF
+            "1.5", {}, "POSIX::strtod() uses underlying locale");
+        }
     }
 
 } # SKIP
 
-sub last { 11 }
+sub last { 15 }

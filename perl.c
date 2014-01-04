@@ -254,7 +254,6 @@ perl_construct(pTHXx)
     STATUS_ALL_SUCCESS;
 
     init_i18nl10n(1);
-    SET_NUMERIC_STANDARD();
 
 #if defined(LOCAL_PATCH_COUNT)
     PL_localpatches = local_patches;	/* For possible -v */

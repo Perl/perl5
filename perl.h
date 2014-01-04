@@ -5212,12 +5212,6 @@ typedef struct am_table_short AMTS;
 
 #ifdef USE_LOCALE_NUMERIC
 
-#define SET_NUMERIC_STANDARD() \
-	set_numeric_standard();
-
-#define SET_NUMERIC_LOCAL() \
-	set_numeric_local();
-
 /* Returns non-zero If the plain locale pragma without a parameter is in effect
  */
 #define IN_LOCALE_RUNTIME	(CopHINTS_get(PL_curcop) & HINT_LOCALE)
@@ -5236,12 +5230,68 @@ typedef struct am_table_short AMTS;
 	(IN_PERL_COMPILETIME ? IN_SOME_LOCALE_FORM_COMPILETIME \
 	                     : IN_SOME_LOCALE_FORM_RUNTIME)
 
+/* These macros are for toggling between the underlying locale (LOCAL) and the
+ * C locale. */
+
+/* The first set makes sure that the locale is set to C unless within a 'use
+ * locale's scope; otherwise to the default locale.  A function pointer is
+ * used, which can be declared separately by
+ * DECLARATION_FOR_STORE_LC_NUMERIC_SET_TO_NEEDED, followed by the actual
+ * setting (using STORE_LC_NUMERIC_SET_TO_NEEDED()), or the two can be combined
+ * into one call DECLARE_STORE_LC_NUMERIC_SET_TO_NEEDED().
+ * RESTORE_LC_NUMERIC() in all cases restores the locale to what it was before
+ * these were called */
+
+#define DECLARATION_FOR_STORE_LC_NUMERIC_SET_TO_NEEDED                       \
+    void (*_restore_LC_NUMERIC_function)(pTHX) = NULL;
+
+#define STORE_LC_NUMERIC_SET_TO_NEEDED()                                     \
+    if (IN_SOME_LOCALE_FORM) {                                               \
+        if (! PL_numeric_local) {                                            \
+            SET_NUMERIC_LOCAL();                                             \
+            _restore_LC_NUMERIC_function = &Perl_set_numeric_standard;       \
+        }                                                                    \
+    }                                                                        \
+    else {                                                                   \
+        if (! PL_numeric_standard) {                                         \
+            SET_NUMERIC_STANDARD();                                          \
+            _restore_LC_NUMERIC_function = &Perl_set_numeric_local;          \
+        }                                                                    \
+    }
+
+#define DECLARE_STORE_LC_NUMERIC_SET_TO_NEEDED()                             \
+    DECLARATION_FOR_STORE_LC_NUMERIC_SET_TO_NEEDED;                          \
+    STORE_LC_NUMERIC_SET_TO_NEEDED();
+
+#define RESTORE_LC_NUMERIC()                                                 \
+    if (_restore_LC_NUMERIC_function) {                                      \
+        _restore_LC_NUMERIC_function(aTHX);                                  \
+    }
+
+/* The next two macros set unconditionally.  These should be rarely used, and
+ * only after being sure that this is what is needed */
+#define SET_NUMERIC_STANDARD() \
+	set_numeric_standard();
+
+#define SET_NUMERIC_LOCAL() \
+	set_numeric_local();
+
+/* The rest of these LC_NUMERIC macros toggle to one or the other state, with
+ * the RESTORE_foo ones called to switch back, but only if need be */
 #define STORE_NUMERIC_LOCAL_SET_STANDARD() \
-	bool was_local = PL_numeric_local && IN_LOCALE; \
+	bool was_local = PL_numeric_local; \
 	if (was_local) SET_NUMERIC_STANDARD();
 
+/* Doesn't change to underlying locale unless within the scope of some form of
+ * 'use locale'.  This is the usual desired behavior. */
 #define STORE_NUMERIC_STANDARD_SET_LOCAL() \
-	bool was_standard = PL_numeric_standard && IN_LOCALE; \
+	bool was_standard = PL_numeric_standard && IN_SOME_LOCALE_FORM; \
+	if (was_standard) SET_NUMERIC_LOCAL();
+
+/* Rarely, we want to change to the underlying locale even outside of 'use
+ * locale'.  This is principally in the POSIX:: functions */
+#define STORE_NUMERIC_STANDARD_FORCE_LOCAL() \
+	bool was_standard = PL_numeric_standard; \
 	if (was_standard) SET_NUMERIC_LOCAL();
 
 #define RESTORE_NUMERIC_LOCAL() \
@@ -5259,8 +5309,14 @@ typedef struct am_table_short AMTS;
 #define IS_NUMERIC_RADIX(a, b)		(0)
 #define STORE_NUMERIC_LOCAL_SET_STANDARD()	/**/
 #define STORE_NUMERIC_STANDARD_SET_LOCAL()	/**/
+#define STORE_NUMERIC_STANDARD_FORCE_LOCAL()
 #define RESTORE_NUMERIC_LOCAL()		/**/
 #define RESTORE_NUMERIC_STANDARD()	/**/
+#define DECLARATION_FOR_STORE_LC_NUMERIC_SET_TO_NEEDED
+#define STORE_LC_NUMERIC_SET_TO_NEEDED()
+#define DECLARE_STORE_LC_NUMERIC_SET_TO_NEEDED()
+#define RESTORE_LC_NUMERIC()
+
 #define Atof				my_atof
 #define IN_LOCALE_RUNTIME		0
 #define IN_LOCALE_COMPILETIME		0

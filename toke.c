@@ -2407,15 +2407,7 @@ S_force_version(pTHX_ char *s, int guessing)
 #endif
         if (*d == ';' || isSPACE(*d) || *d == '{' || *d == '}' || !*d) {
 	    SV *ver;
-#ifdef USE_LOCALE_NUMERIC
-	    char *loc = savepv(setlocale(LC_NUMERIC, NULL));
-	    setlocale(LC_NUMERIC, "C");
-#endif
             s = scan_num(s, &pl_yylval);
-#ifdef USE_LOCALE_NUMERIC
-	    setlocale(LC_NUMERIC, loc);
-	    Safefree(loc);
-#endif
             version = pl_yylval.opval;
 	    ver = cSVOPx(version)->op_sv;
 	    if (SvPOK(ver) && !SvNIOK(ver)) {
@@ -11330,9 +11322,11 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
               floatit = TRUE;
         }
 	if (floatit) {
+            STORE_NUMERIC_LOCAL_SET_STANDARD();
 	    /* terminate the string */
 	    *d = '\0';
 	    nv = Atof(PL_tokenbuf);
+            RESTORE_NUMERIC_LOCAL();
 	    sv = newSVnv(nv);
 	}
 
