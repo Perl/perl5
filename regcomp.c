@@ -13384,16 +13384,58 @@ parseit:
                                bracketed class can be optimized into qr/./s */
                 }
                 ANYOF_POSIXL_SET(ret, namedclass);
-            }
-            /* XXX After have made all the posix classes known at compile time
-             * we can move the LOC handling below to above */
+                if (! SIZE_ONLY) {
+                    if (namedclass % 2 == 0) {  /* A non-complemented class,
+                                                   like ANYOF_PUNCT */
+                        SV* scratch_list = NULL;
 
-            if (! SIZE_ONLY) {
+                        /* For above Latin1 code points, we use the full
+                         * Unicode range */
+                        _invlist_intersection(PL_AboveLatin1,
+                                              PL_XPosix_ptrs[classnum],
+                                              &scratch_list);
+                        /* And set the output to it, adding instead if there
+                         * already is an output.  Checking if 'posixes' is NULL
+                         * first saves an extra clone.  Its reference count
+                         * will be decremented at the next union, etc, or if
+                         * this is the only instance, at the end of the routine
+                         * */
+                        if (! posixes) {
+                            posixes = scratch_list;
+                        }
+                        else {
+                            _invlist_union(posixes, scratch_list, &posixes);
+                            SvREFCNT_dec_NN(scratch_list);
+                        }
+                    }
+                    else {  /* A complemented class, like ANYOF_NPUNCT */
+                        SV* scratch_list = NULL;
+                        _invlist_subtract(PL_AboveLatin1,
+                                          PL_XPosix_ptrs[classnum],
+                                          &scratch_list);
+                        if (! posixes) {
+                            posixes = scratch_list;
+                        }
+                        else {
+                            _invlist_union(posixes, scratch_list, &posixes);
+                            SvREFCNT_dec_NN(scratch_list);
+                        }
+                    }
+                    continue;   /* Go get next character */
+                }
+            }
+            else if (! SIZE_ONLY) {
+
+                /* Here, not in pass1 (in that pass we skip calculating the
+                 * contents of this class), and is /l, or is a POSIX class for
+                 * which /l doesn't matter (or is a Unicode property, which is
+                 * skipped here). */
                 if (namedclass >= ANYOF_POSIXL_MAX) {  /* If a special class */
                     if (namedclass != ANYOF_UNIPROP) { /* UNIPROP = \p and \P */
 
                         /* Here, should be \h, \H, \v, or \V.  Neither /d nor
-                         * /l make a difference in what these match.  There
+                         * /l make a difference in what these match, therefore
+                         * we just add what they match to cp_list.  There
                          * would be problems if these characters had folds
                          * other than themselves, as cp_list is subject to
                          * folding. */
@@ -13416,13 +13458,6 @@ parseit:
                     }
                 }
                 else if (classnum == _CC_ASCII) {
-#ifdef HAS_ISASCII
-                    if (LOC) {
-                        ANYOF_POSIXL_SET(ret, namedclass);
-                    }
-                    else
-#endif  /* Not isascii(); just use the hard-coded definition for it */
-                    {
                         _invlist_union_maybe_complement_2nd(
                                 posixes,
                                 PL_Posix_ptrs[_CC_ASCII],
@@ -13436,109 +13471,46 @@ parseit:
                         if (namedclass == ANYOF_NASCII && DEPENDS_SEMANTICS) {
                             ANYOF_FLAGS(ret) |= ANYOF_NON_UTF8_LATIN1_ALL;
                         }
-                    }
                 }
                 else {  /* Garden variety class */
 
                     /* The ascii range inversion list */
                     SV* ascii_source = PL_Posix_ptrs[classnum];
 
+                    SV** source_ptr = &PL_XPosix_ptrs[classnum];
+#ifndef HAS_ISBLANK
+                    /* If the platform doesn't have isblank(), we handle locale
+                     * with the hardcoded ASII values. */
+                    if (LOC && classnum == _CC_BLANK) {
+                        _invlist_subtract(*source_ptr,
+                                          PL_UpperLatin1,
+                                          source_ptr);
+                    }
+#endif
+
                     if (namedclass % 2 == 0) {  /* A non-complemented class,
                                                    like ANYOF_PUNCT */
-                        if (! LOC) {
-                            /* For non-locale, just add it to any existing list
-                             * */
                             _invlist_union(posixes,
                                            (AT_LEAST_ASCII_RESTRICTED)
                                                ? ascii_source
-                                               : PL_XPosix_ptrs[classnum],
+                                               : *source_ptr,
                                            &posixes);
-                        }
-                        else {  /* Locale */
-                            SV* scratch_list = NULL;
-
-                            /* For above Latin1 code points, we use the full
-                             * Unicode range */
-                            _invlist_intersection(PL_AboveLatin1,
-                                                  PL_XPosix_ptrs[classnum],
-                                                  &scratch_list);
-                            /* And set the output to it, adding instead if
-                             * there already is an output.  Checking if
-                             * 'posixes' is NULL first saves an extra clone.
-                             * Its reference count will be decremented at the
-                             * next union, etc, or if this is the only
-                             * instance, at the end of the routine */
-                            if (! posixes) {
-                                posixes = scratch_list;
-                            }
-                            else {
-                                _invlist_union(posixes, scratch_list, &posixes);
-                                SvREFCNT_dec_NN(scratch_list);
-                            }
-
-#ifndef HAS_ISBLANK
-                            if (namedclass != ANYOF_BLANK) {
-#endif
-                                /* Set this class in the node for runtime
-                                 * matching */
-                                ANYOF_POSIXL_SET(ret, namedclass);
-#ifndef HAS_ISBLANK
-                            }
-                            else {
-                                /* No isblank(), use the hard-coded ASCII-range
-                                 * blanks, adding them to the running total. */
-
-                                _invlist_union(posixes, ascii_source, &posixes);
-                            }
-#endif
-                        }
                     }
                     else {  /* A complemented class, like ANYOF_NPUNCT */
-                        if (! LOC) {
                             _invlist_union_complement_2nd(
                                                 posixes,
                                                 (AT_LEAST_ASCII_RESTRICTED)
                                                     ? ascii_source
-                                                    : PL_XPosix_ptrs[classnum],
+                                                    : *source_ptr,
                                                 &posixes);
                             /* Under /d, everything in the upper half of the
                              * Latin1 range matches this complement */
                             if (DEPENDS_SEMANTICS) {
                                 ANYOF_FLAGS(ret) |= ANYOF_NON_UTF8_LATIN1_ALL;
                             }
-                        }
-                        else {  /* Locale */
-                            SV* scratch_list = NULL;
-                            _invlist_subtract(PL_AboveLatin1,
-                                              PL_XPosix_ptrs[classnum],
-                                              &scratch_list);
-                            if (! posixes) {
-                                posixes = scratch_list;
-                            }
-                            else {
-                                _invlist_union(posixes, scratch_list, &posixes);
-                                SvREFCNT_dec_NN(scratch_list);
-                            }
-#ifndef HAS_ISBLANK
-                            if (namedclass != ANYOF_NBLANK) {
-#endif
-                                ANYOF_POSIXL_SET(ret, namedclass);
-#ifndef HAS_ISBLANK
-                            }
-                            else {
-                                /* Get the list of all code points in Latin1
-                                 * that are not ASCII blanks, and add them to
-                                 * the running total */
-                                _invlist_subtract(PL_Latin1, ascii_source,
-                                                  &scratch_list);
-                                _invlist_union(posixes, scratch_list, &posixes);
-                                SvREFCNT_dec_NN(scratch_list);
-                            }
-#endif
-                        }
                     }
                 }
-		continue;   /* Go get next character */
+                continue;   /* Go get next character */
 	    }
 	} /* end of namedclass \blah */
 
