@@ -77,7 +77,16 @@ Perl_cxinc(pTHX)
     dVAR;
     const IV old_max = cxstack_max;
     cxstack_max = GROW(cxstack_max);
+#ifdef STRESS_REALLOC
+    {
+	PERL_CONTEXT * const old_cxstack = cxstack;
+	Newx(cxstack, cxstack_max+1, PERL_CONTEXT);
+	Copy(old_cxstack, cxstack, old_max + 1, PERL_CONTEXT);
+	Safefree(old_cxstack);
+    }
+#else
     Renew(cxstack, cxstack_max + 1, PERL_CONTEXT);
+#endif
     /* Without any kind of initialising deep enough recursion
      * will end up reading uninitialised PERL_CONTEXTs. */
     PoisonNew(cxstack + old_max + 1, cxstack_max - old_max, PERL_CONTEXT);
