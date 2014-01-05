@@ -13471,6 +13471,9 @@ parseit:
                         }
                 }
                 else {  /* Garden variety class */
+                    SV** posixes_ptr = namedclass % 2 == 0
+                                       ? &posixes
+                                       : &nposixes;
 
                     /* The ascii range inversion list */
                     SV* ascii_source = PL_Posix_ptrs[classnum];
@@ -13486,22 +13489,12 @@ parseit:
                     }
 #endif
 
-                    if (namedclass % 2 == 0) {  /* A non-complemented class,
-                                                   like ANYOF_PUNCT */
-                            _invlist_union(posixes,
+                    _invlist_union_maybe_complement_2nd(*posixes_ptr,
                                            (AT_LEAST_ASCII_RESTRICTED)
                                                ? ascii_source
                                                : *source_ptr,
-                                           &posixes);
-                    }
-                    else {  /* A complemented class, like ANYOF_NPUNCT */
-                            _invlist_union_complement_2nd(
-                                                nposixes,
-                                                (AT_LEAST_ASCII_RESTRICTED)
-                                                    ? ascii_source
-                                                    : *source_ptr,
-                                                &nposixes);
-                    }
+                                           namedclass % 2 != 0,
+                                           posixes_ptr);
                 }
                 continue;   /* Go get next character */
 	    }
