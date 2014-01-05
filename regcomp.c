@@ -13474,10 +13474,6 @@ parseit:
                     SV** posixes_ptr = namedclass % 2 == 0
                                        ? &posixes
                                        : &nposixes;
-
-                    /* The ascii range inversion list */
-                    SV* ascii_source = PL_Posix_ptrs[classnum];
-
                     SV** source_ptr = &PL_XPosix_ptrs[classnum];
 #ifndef HAS_ISBLANK
                     /* If the platform doesn't have isblank(), we handle locale
@@ -13489,12 +13485,11 @@ parseit:
                     }
 #endif
 
-                    _invlist_union_maybe_complement_2nd(*posixes_ptr,
-                                           (AT_LEAST_ASCII_RESTRICTED)
-                                               ? ascii_source
-                                               : *source_ptr,
-                                           namedclass % 2 != 0,
-                                           posixes_ptr);
+                    _invlist_union_maybe_complement_2nd(
+                                                     *posixes_ptr,
+                                                     *source_ptr,
+                                                     namedclass % 2 != 0,
+                                                     posixes_ptr);
                 }
                 continue;   /* Go get next character */
 	    }
@@ -14176,11 +14171,24 @@ parseit:
      * fold the classes (folding of those is automatically handled by the swash
      * fetching code) */
     if (posixes || nposixes) {
+        if (posixes && AT_LEAST_ASCII_RESTRICTED) {
+            /* Under /a and /aa, nothing above ASCII matches these */
+            _invlist_intersection(posixes,
+                                  PL_XPosix_ptrs[_CC_ASCII],
+                                  &posixes);
+        }
         if (nposixes) {
-            /* Under /d, everything in the upper half of the Latin1 range
-             * matches these complements */
             if (DEPENDS_SEMANTICS) {
+                /* Under /d, everything in the upper half of the Latin1 range
+                 * matches these complements */
                 ANYOF_FLAGS(ret) |= ANYOF_NON_UTF8_LATIN1_ALL;
+            }
+            else if (AT_LEAST_ASCII_RESTRICTED) {
+                /* Under /a and /aa, everything above ASCII matches these
+                 * complements */
+                _invlist_union_complement_2nd(nposixes,
+                                              PL_XPosix_ptrs[_CC_ASCII],
+                                              &nposixes);
             }
             if (posixes) {
                 _invlist_union(posixes, nposixes, &posixes);
