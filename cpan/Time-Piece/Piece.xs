@@ -10,14 +10,6 @@ extern "C" {
 }
 #endif
 
-#ifdef INLINE
-#  define TP_INLINE INLINE /* TP = Time::Piece */
-#elif defined(_MSC_VER)
-#  define TP_INLINE __forceinline /* __inline often doesn't work in O1 */
-#else
-#  define TP_INLINE inline
-#endif
-
 /* XXX struct tm on some systems (SunOS4/BSD) contains extra (non POSIX)
  * fields for which we don't have Configure support prior to Perl 5.8.0:
  *   char *tm_zone;   -- abbreviation of timezone name
@@ -957,15 +949,6 @@ label:
 	return (char *)buf;
 }
 
-
-TP_INLINE char *
-our_strptime(pTHX_ const char *buf, const char *fmt, struct tm *tm)
-{
-	int got_GMT = 0;
-
-	return _strptime(aTHX_ buf, fmt, tm, &got_GMT);
-}
-
 /* Saves alot of machine code.
    Takes a (auto) SP, which may or may not have been PUSHed before, puts
    tm struct members on Perl stack, then returns new, advanced, SP to caller.
@@ -1120,10 +1103,13 @@ _strptime ( string, format )
        struct tm mytm;
        time_t t;
        char * remainder;
+       int got_GMT;
   PPCODE:
        t = 0;
        mytm = *gmtime(&t);
-       remainder = (char *)our_strptime(aTHX_ string, format, &mytm);
+       got_GMT = 0;
+
+       remainder = (char *)_strptime(aTHX_ string, format, &mytm, &got_GMT);
        if (remainder == NULL) {
            croak("Error parsing time");
        }
