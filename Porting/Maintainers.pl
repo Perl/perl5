@@ -1261,12 +1261,12 @@ use File::Glob qw(:case);
     'version' => {
         'DISTRIBUTION' => 'JPEACOCK/version-0.9906.tar.gz',
         'FILES'        => q[cpan/version],
+        'FILES'        => q[cpan/version vutil.c vutil.h vxs.inc],
         'EXCLUDED' => [
             qr{^vutil/lib/},
             'vutil/ppport.h',
             'vutil/vxs.xs',
             't/survey_locales',
-            'vperl/vpp.pm',
         ],
 
         # When adding the CPAN-distributed files for version.pm, it is necessary
@@ -1274,13 +1274,13 @@ use File::Glob qw(:case);
         # only necessary with the CPAN release.
         'CUSTOMIZED'   => [
             qw( lib/version.pm
+	        vutil.c
                 ),
         ],
 
         'MAP' => {
-            'vutil.c'        => 'vutil.c',
-            'vutil.h'        => 'vutil.h',
-            'vxs.inc'        => 'vxs.inc',
+            'vperl/'         => 'cpan/version/lib/version/',
+            'vutil/'         => '',
             ''               => 'cpan/version/',
         },
     },

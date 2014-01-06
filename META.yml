@@ -107,6 +107,9 @@ no_index:
     - Porting/Maintainers.pm
     - Porting/perldelta_template.pod
     - TestInit.pm
+    - vutil.c
+    - vutil.h
+    - vxs.inc
 resources:
   bugtracker: https://rt.perl.org/
   homepage: http://www.perl.org/

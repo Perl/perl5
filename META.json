@@ -109,7 +109,10 @@
          "pod/perlpodstyle.pod",
          "Porting/Maintainers.pm",
          "Porting/perldelta_template.pod",
-         "TestInit.pm"
+         "TestInit.pm",
+         "vutil.c",
+         "vutil.h",
+         "vxs.inc"
       ]
    },
    "release_status" : "unstable",
