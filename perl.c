@@ -1032,9 +1032,6 @@ perl_destruct(pTHXx)
     PL_NonL1NonFinalFold = NULL;
     PL_UpperLatin1       = NULL;
     for (i = 0; i < POSIX_CC_COUNT; i++) {
-        SvREFCNT_dec(PL_Posix_ptrs[i]);
-        PL_Posix_ptrs[i] = NULL;
-
         SvREFCNT_dec(PL_XPosix_ptrs[i]);
         PL_XPosix_ptrs[i] = NULL;
     }
