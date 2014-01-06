@@ -151,6 +151,12 @@ L<Encode> has been upgraded from version 2.56 to 2.57.
 UTF-8 is no longer used in the C source (which some compilers didn't like), and
 some POD errors have been fixed in the documentation.
 
+=item *
+
+The libnet module collection has been upgraded from version 1.23 to 1.24.
+
+The handling of CRLF characters in L<Net::FTP> has been fixed.
+
 =back
 
 =head2 Removed Modules and Pragmata

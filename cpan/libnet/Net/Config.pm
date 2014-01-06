@@ -13,7 +13,7 @@ use strict;
 
 @EXPORT  = qw(%NetConfig);
 @ISA     = qw(Net::LocalCfg Exporter);
-$VERSION = "1.12";
+$VERSION = "1.13";
 
 eval { local $SIG{__DIE__}; require Net::LocalCfg };
 
@@ -213,23 +213,23 @@ sequence of commands that Net::FTP will use
 
 =over 4
 
-=item 0
+=item 0Z<>
 
 There is no firewall
 
-=item 1
+=item 1Z<>
 
      USER user@remote.host
      PASS pass
 
-=item 2
+=item 2Z<>
 
      USER fwuser
      PASS fwpass
      USER user@remote.host
      PASS pass
 
-=item 3
+=item 3Z<>
 
      USER fwuser
      PASS fwpass
@@ -237,7 +237,7 @@ There is no firewall
      USER user
      PASS pass
 
-=item 4
+=item 4Z<>
 
      USER fwuser
      PASS fwpass
@@ -245,19 +245,19 @@ There is no firewall
      USER user
      PASS pass
 
-=item 5
+=item 5Z<>
 
      USER user@fwuser@remote.site
      PASS pass@fwpass
 
-=item 6
+=item 6Z<>
 
      USER fwuser@remote.site
      PASS fwpass
      USER user
      PASS pass
 
-=item 7
+=item 7Z<>
 
      USER user@remote.host
      PASS pass
