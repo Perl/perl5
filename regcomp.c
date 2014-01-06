@@ -13423,7 +13423,7 @@ parseit:
                         _invlist_union_maybe_complement_2nd(
                                 cp_list,
                                 PL_XPosix_ptrs[classnum],
-                                cBOOL(namedclass % 2), /* Complement if odd
+                                namedclass % 2 != 0,    /* Complement if odd
                                                           (NHORIZWS, NVERTWS)
                                                         */
                                 &cp_list);
