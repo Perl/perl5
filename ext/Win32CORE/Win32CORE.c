@@ -23,7 +23,6 @@
 
 
 XS(w32_CORE_all){
-    dXSARGS;
     DWORD err = GetLastError();
     /* capture the XSANY value before Perl_load_module, the CV's any member will
      * be overwritten by Perl_load_module and subsequent newXSes or pure perl
@@ -32,8 +31,7 @@ XS(w32_CORE_all){
     const char *function  = (const char *) XSANY.any_ptr;
     Perl_load_module(aTHX_ PERL_LOADMOD_NOIMPORT, newSVpvn("Win32",5), newSVnv(0.27));
     SetLastError(err);
-    assert(sp == PL_stack_sp);
-    PUSHMARK(SP-items);
+    /* mark and SP from caller are passed through unchanged */
     call_pv(function, GIMME_V);
 }
 
