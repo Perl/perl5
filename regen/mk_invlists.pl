@@ -159,20 +159,20 @@ for my $prop (qw(
                 ASCII
                 Cased
 		VertSpace
-                    XPerlSpace
-                    XPosixAlnum
-                    XPosixAlpha
-                    XPosixBlank
-                    XPosixCntrl
-                    XPosixDigit
-                    XPosixGraph
-                    XPosixLower
-                    XPosixPrint
-                    XPosixPunct
-                    XPosixSpace
-                    XPosixUpper
-                    XPosixWord
-                    XPosixXDigit
+                XPerlSpace
+                XPosixAlnum
+                XPosixAlpha
+                XPosixBlank
+                XPosixCntrl
+                XPosixDigit
+                XPosixGraph
+                XPosixLower
+                XPosixPrint
+                XPosixPunct
+                XPosixSpace
+                XPosixUpper
+                XPosixWord
+                XPosixXDigit
                 _Perl_Any_Folds
                 &NonL1_Perl_Non_Final_Folds
                 &_Perl_Multi_Char_Folds
