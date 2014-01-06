@@ -1546,7 +1546,7 @@ S_is_utf8_idfirst(pTHX_ const U8 *p)
     if (*p == '_')
 	return TRUE;
     /* is_utf8_idstart would be more logical. */
-    return is_utf8_common(p, &PL_utf8_idstart, "IdStart");
+    return is_utf8_common(p, &PL_utf8_idstart, "IdStart", NULL);
 }
 
 bool
@@ -1810,13 +1810,15 @@ Perl__to_uni_fold_flags(pTHX_ UV c, U8* p, STRLEN *lenp, const U8 flags)
 
 PERL_STATIC_INLINE bool
 S_is_utf8_common(pTHX_ const U8 *const p, SV **swash,
-		 const char *const swashname)
+		 const char *const swashname, SV* const invlist)
 {
     /* returns a boolean giving whether or not the UTF8-encoded character that
      * starts at <p> is in the swash indicated by <swashname>.  <swash>
      * contains a pointer to where the swash indicated by <swashname>
      * is to be stored; which this routine will do, so that future calls will
-     * look at <*swash> and only generate a swash if it is not null
+     * look at <*swash> and only generate a swash if it is not null.  <invlist>
+     * is NULL or an inversion list that defines the swash.  If not null, it
+     * saves time during initialization of the swash.
      *
      * Note that it is assumed that the buffer length of <p> is enough to
      * contain all the bytes that comprise the character.  Thus, <*p> should
@@ -1845,7 +1847,13 @@ S_is_utf8_common(pTHX_ const U8 *const p, SV **swash,
     }
     if (!*swash) {
         U8 flags = _CORE_SWASH_INIT_ACCEPT_INVLIST;
-        *swash = _core_swash_init("utf8", swashname, &PL_sv_undef, 1, 0, NULL, &flags);
+        *swash = _core_swash_init("utf8",
+
+                                  /* Only use the name if there is no inversion
+                                   * list; otherwise will go out to disk */
+                                  (invlist) ? "" : swashname,
+
+                                  &PL_sv_undef, 1, 0, invlist, &flags);
     }
 
     return swash_fetch(*swash, p, TRUE) != 0;
@@ -1860,7 +1868,10 @@ Perl__is_utf8_FOO(pTHX_ const U8 classnum, const U8 *p)
 
     assert(classnum < _FIRST_NON_SWASH_CC);
 
-    return is_utf8_common(p, &PL_utf8_swash_ptrs[classnum], swash_property_names[classnum]);
+    return is_utf8_common(p,
+                          &PL_utf8_swash_ptrs[classnum],
+                          swash_property_names[classnum],
+                          PL_XPosix_ptrs[classnum]);
 }
 
 bool
@@ -1883,7 +1894,7 @@ Perl_is_utf8_xidfirst(pTHX_ const U8 *p) /* The naming is historical. */
     if (*p == '_')
 	return TRUE;
     /* is_utf8_idstart would be more logical. */
-    return is_utf8_common(p, &PL_utf8_xidstart, "XIdStart");
+    return is_utf8_common(p, &PL_utf8_xidstart, "XIdStart", NULL);
 }
 
 bool
@@ -1893,7 +1904,7 @@ Perl__is_utf8_perl_idstart(pTHX_ const U8 *p)
 
     PERL_ARGS_ASSERT__IS_UTF8_PERL_IDSTART;
 
-    return is_utf8_common(p, &PL_utf8_perl_idstart, "_Perl_IDStart");
+    return is_utf8_common(p, &PL_utf8_perl_idstart, "_Perl_IDStart", NULL);
 }
 
 bool
@@ -1903,7 +1914,7 @@ Perl__is_utf8_perl_idcont(pTHX_ const U8 *p)
 
     PERL_ARGS_ASSERT__IS_UTF8_PERL_IDCONT;
 
-    return is_utf8_common(p, &PL_utf8_perl_idcont, "_Perl_IDCont");
+    return is_utf8_common(p, &PL_utf8_perl_idcont, "_Perl_IDCont", NULL);
 }
 
 
@@ -1914,7 +1925,7 @@ Perl_is_utf8_idcont(pTHX_ const U8 *p)
 
     PERL_ARGS_ASSERT_IS_UTF8_IDCONT;
 
-    return is_utf8_common(p, &PL_utf8_idcont, "IdContinue");
+    return is_utf8_common(p, &PL_utf8_idcont, "IdContinue", NULL);
 }
 
 bool
@@ -1924,7 +1935,7 @@ Perl_is_utf8_xidcont(pTHX_ const U8 *p)
 
     PERL_ARGS_ASSERT_IS_UTF8_XIDCONT;
 
-    return is_utf8_common(p, &PL_utf8_idcont, "XIdContinue");
+    return is_utf8_common(p, &PL_utf8_idcont, "XIdContinue", NULL);
 }
 
 bool
@@ -1934,7 +1945,7 @@ Perl__is_utf8_mark(pTHX_ const U8 *p)
 
     PERL_ARGS_ASSERT__IS_UTF8_MARK;
 
-    return is_utf8_common(p, &PL_utf8_mark, "IsM");
+    return is_utf8_common(p, &PL_utf8_mark, "IsM", NULL);
 }
 
 /*
