@@ -144,7 +144,6 @@ my @testcases =
         },
         {
             args => [ "-links", "2" ],
-            expect => [ "abc", "link", "somedir" ],
         },
         {
             name => "[perl #113054] mapping of ?",
