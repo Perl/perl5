@@ -793,7 +793,7 @@
 #define warn_nocontext		Perl_warn_nocontext
 #define warner_nocontext	Perl_warner_nocontext
 #endif
-#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_PERL_C)
+#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_PERL_C) || defined(PERL_IN_UTF8_C)
 #define _new_invlist_C_array(a)	Perl__new_invlist_C_array(aTHX_ a)
 #endif
 #if defined(PERL_MAD)

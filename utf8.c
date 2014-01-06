@@ -32,6 +32,7 @@
 #define PERL_IN_UTF8_C
 #include "perl.h"
 #include "inline_invlist.c"
+#include "charclass_invlists.h"
 
 static const char unees[] =
     "Malformed UTF-8 character (unexpected end of string)";
@@ -1901,20 +1902,28 @@ bool
 Perl__is_utf8_perl_idstart(pTHX_ const U8 *p)
 {
     dVAR;
+    SV* invlist = NULL;
 
     PERL_ARGS_ASSERT__IS_UTF8_PERL_IDSTART;
 
-    return is_utf8_common(p, &PL_utf8_perl_idstart, "_Perl_IDStart", NULL);
+    if (! PL_utf8_perl_idstart) {
+        invlist = _new_invlist_C_array(_Perl_IDStart_invlist);
+    }
+    return is_utf8_common(p, &PL_utf8_perl_idstart, "", invlist);
 }
 
 bool
 Perl__is_utf8_perl_idcont(pTHX_ const U8 *p)
 {
     dVAR;
+    SV* invlist = NULL;
 
     PERL_ARGS_ASSERT__IS_UTF8_PERL_IDCONT;
 
-    return is_utf8_common(p, &PL_utf8_perl_idcont, "_Perl_IDCont", NULL);
+    if (! PL_utf8_perl_idcont) {
+        invlist = _new_invlist_C_array(_Perl_IDCont_invlist);
+    }
+    return is_utf8_common(p, &PL_utf8_perl_idcont, "", invlist);
 }
 
 

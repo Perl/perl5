@@ -177,6 +177,8 @@ for my $prop (qw(
                 &NonL1_Perl_Non_Final_Folds
                 &_Perl_Multi_Char_Folds
                 &UpperLatin1
+                _Perl_IDStart
+                _Perl_IDCont
     )
 ) {
 

@@ -6950,7 +6950,7 @@ PERL_CALLCONV void	Perl__invlist_dump(pTHX_ PerlIO *file, I32 level, const char*
 	assert(file); assert(indent); assert(invlist)
 
 #endif
-#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_PERL_C)
+#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_PERL_C) || defined(PERL_IN_UTF8_C)
 PERL_CALLCONV SV*	Perl__new_invlist_C_array(pTHX_ const UV* const list)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
