@@ -13394,13 +13394,18 @@ parseit:
                 && classnum != _CC_BLANK
 #endif
             ) {
+
+                /* See if it already matches the complement of this POSIX
+                 * class */
                 if ((ANYOF_FLAGS(ret) & ANYOF_POSIXL)
                     && ANYOF_POSIXL_TEST(ret, namedclass + ((namedclass % 2)
                                                             ? -1
                                                             : 1)))
                 {
                     posixl_matches_all = TRUE;
-                    break;
+                    break;  /* No need to continue.  Since it matches both
+                               e.g., \w and \W, it matches everything, and the
+                               bracketed class can be optimized into qr/./s */
                 }
                 ANYOF_POSIXL_SET(ret, namedclass);
             }
