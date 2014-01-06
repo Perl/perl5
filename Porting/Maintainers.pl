@@ -1259,22 +1259,21 @@ use File::Glob qw(:case);
     },
 
     'version' => {
-        'DISTRIBUTION' => 'JPEACOCK/version-0.9904.tar.gz',
+        'DISTRIBUTION' => 'JPEACOCK/version-0.9906.tar.gz',
         'FILES'        => q[cpan/version],
         'EXCLUDED' => [
             qr{^vutil/lib/},
             'vutil/ppport.h',
             'vutil/vxs.xs',
-            'lib/version/typemap',
             't/survey_locales',
             'vperl/vpp.pm',
         ],
 
-        # Waiting to be merged upstream: see CPAN RT#87513
+        # When adding the CPAN-distributed files for version.pm, it is necessary
+        # to delete an entire block out of lib/version.pm, since that code is
+        # only necessary with the CPAN release.
         'CUSTOMIZED'   => [
             qw( lib/version.pm
-                t/07locale.t
-                t/08_corelist.t
                 ),
         ],
 
