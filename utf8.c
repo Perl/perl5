@@ -2518,7 +2518,9 @@ Perl__core_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 m
      * Thus there are three possible inputs to find the swash: <name>,
      * <listsv>, and <invlist>.  At least one must be specified.  The result
      * will be the union of the specified ones, although <listsv>'s various
-     * actions can intersect, etc. what <name> gives.
+     * actions can intersect, etc. what <name> gives.  To avoid going out to
+     * disk at all, <invlist> should specify completely what the swash should
+     * have, and <listsv> should be &PL_sv_undef and <name> should be "".
      *
      * <invlist> is only valid for binary properties */
 
