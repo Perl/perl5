@@ -4150,7 +4150,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                      * range can participate */
                     if (OP(scan) == EXACTFA) {
                         _invlist_union_complement_2nd(EXACTF_invlist,
-                                                      PL_Posix_ptrs[_CC_ASCII],
+                                                      PL_XPosix_ptrs[_CC_ASCII],
                                                       &EXACTF_invlist);
                     }
                     else {
@@ -4706,7 +4706,14 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
                     /* FALL THROUGH */
 		case POSIXA:
                     classnum = FLAGS(scan);
-                    my_invlist = PL_Posix_ptrs[classnum];
+                    if (classnum == _CC_ASCII) {
+                        my_invlist = PL_XPosix_ptrs[_CC_ASCII];
+                    }
+                    else {
+                        _invlist_intersection(PL_XPosix_ptrs[classnum],
+                                              PL_XPosix_ptrs[_CC_ASCII],
+                                              &my_invlist);
+                    }
                     goto join_posix;
 
 		case NPOSIXD:
@@ -4723,7 +4730,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
                      * unknowable until match time */
                     if (PL_regkind[OP(scan)] == NPOSIXD) {
                         _invlist_union_complement_2nd(my_invlist,
-                                        PL_Posix_ptrs[_CC_ASCII], &my_invlist);
+                                        PL_XPosix_ptrs[_CC_ASCII], &my_invlist);
                     }
 
                   join_posix:
@@ -13671,7 +13678,10 @@ parseit:
             {
                 _invlist_intersection(this_range, PL_ASCII,
                                       &this_range);
-                _invlist_intersection(this_range, PL_Posix_ptrs[_CC_ALPHA],
+
+                /* Since this above only contains ascii, the intersection of it
+                 * with anything will still yield only ascii */
+                _invlist_intersection(this_range, PL_XPosix_ptrs[_CC_ALPHA],
                                       &this_range);
             }
             _invlist_union(cp_foldable_list, this_range, &cp_foldable_list);
