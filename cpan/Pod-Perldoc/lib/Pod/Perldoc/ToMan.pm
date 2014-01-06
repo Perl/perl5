@@ -5,7 +5,7 @@ use warnings;
 use parent qw(Pod::Perldoc::BaseTo);
 
 use vars qw($VERSION);
-$VERSION = '3.20';
+$VERSION = '3.21';
 
 use File::Spec::Functions qw(catfile);
 use Pod::Man 2.18;
@@ -63,7 +63,7 @@ sub init {
 sub _roffer_candidates {
 	my( $self ) = @_;
 
-	if( $self->is_openbsd ) { qw( mandoc groff nroff ) }
+	if( $self->is_openbsd || $self->is_bitrig ) { qw( mandoc groff nroff ) }
 	else                    { qw( groff nroff mandoc ) }
 	}
 
@@ -314,7 +314,7 @@ sub _filter_through_nroff {
         # Eliminate whitespace 
         $switches =~ s/\s//g;
 
-        # Then seperate the switches with a zero-width positive 
+        # Then separate the switches with a zero-width positive 
         # lookahead on the dash.
         #
         # See:

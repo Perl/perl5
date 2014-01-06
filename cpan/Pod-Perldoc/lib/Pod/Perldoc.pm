@@ -12,7 +12,7 @@ use File::Spec::Functions qw(catfile catdir splitdir);
 use vars qw($VERSION @Pagers $Bindir $Pod2man
   $Temp_Files_Created $Temp_File_Lifetime
 );
-$VERSION = '3.20';
+$VERSION = '3.21';
 
 #..........................................................................
 
@@ -90,12 +90,13 @@ $Pod2man = "pod2man" . ( $Config{'versiononly'} ? $Config{'version'} : '' );
 #
 # Option accessors...
 
-foreach my $subname (map "opt_$_", split '', q{mhlDriFfXqnTdULv}) {
+foreach my $subname (map "opt_$_", split '', q{mhlDriFfXqnTdULva}) {
   no strict 'refs';
   *$subname = do{ use strict 'refs';  sub () { shift->_elem($subname, @_) } };
 }
 
 # And these are so that GetOptsOO knows they take options:
+sub opt_a_with { shift->_elem('opt_a', @_) }
 sub opt_f_with { shift->_elem('opt_f', @_) }
 sub opt_q_with { shift->_elem('opt_q', @_) }
 sub opt_d_with { shift->_elem('opt_d', @_) }
@@ -293,6 +294,7 @@ Options:
     -X   Use index if present (looks for pod.idx at $Config{archlib})
     -q   Search the text of questions (not answers) in perlfaq[1-9]
     -f   Search Perl built-in functions
+    -a   Search Perl API
     -v   Search predefined Perl variables
 
 PageName|ModuleName|ProgramName|URL...
@@ -399,6 +401,7 @@ Examples:
     $program_name -f PerlFunc
     $program_name -q FAQKeywords
     $program_name -v PerlVar
+    $program_name -a PerlAPI
 
 The -h option prints more help.  Also try "$program_name perldoc" to get
 acquainted with the system.                        [Perldoc v$VERSION]
@@ -441,6 +444,7 @@ sub init {
   $self->{'pagers' } = [@Pagers] unless exists $self->{'pagers'};
   $self->{'bindir' } = $Bindir   unless exists $self->{'bindir'};
   $self->{'pod2man'} = $Pod2man  unless exists $self->{'pod2man'};
+  $self->{'search_path'} = [ ]   unless exists $self->{'search_path'};
 
   push @{ $self->{'formatter_switches'} = [] }, (
    # Yeah, we could use a hashref, but maybe there's some class where options
@@ -519,6 +523,7 @@ sub process {
     if(    $self->opt_f) { @pages = qw(perlfunc perlop)        }
     elsif( $self->opt_q) { @pages = ("perlfaq1" .. "perlfaq9") }
     elsif( $self->opt_v) { @pages = ("perlvar")                }
+    elsif( $self->opt_a) { @pages = ("perlapi")                }
     else                 { @pages = @{$self->{'args'}};
                            # @pages = __FILE__
                            #  if @pages == 1 and $pages[0] eq 'perldoc';
@@ -529,7 +534,7 @@ sub process {
     $self->find_good_formatter_class();
     $self->formatter_sanity_check();
 
-    $self->maybe_diddle_INC();
+    $self->maybe_extend_searchpath();
       # for when we're apparently in a module or extension directory
 
     my @found = $self->grand_search_init(\@pages);
@@ -596,7 +601,7 @@ sub find_good_formatter_class {
       } else {
         $^W = 0;
         # The average user just has no reason to be seeing
-        #  $^W-suppressible warnings from the the require!
+        #  $^W-suppressible warnings from the require!
       }
 
       eval "require $c";
@@ -795,8 +800,12 @@ sub options_sanity {
     # Any sanity-checking need doing here?
 
     # But does not make sense to set either -f or -q in $ENV{"PERLDOC"}
-    if( $self->opt_f or $self->opt_q ) {
-    $self->usage("Only one of -f -or -q") if $self->opt_f and $self->opt_q;
+    if( $self->opt_f or $self->opt_q or $self->opt_a) {
+    my $count;
+    $count++ if $self->opt_f;
+    $count++ if $self->opt_q;
+    $count++ if $self->opt_a;
+    $self->usage("Only one of -f or -q or -a") if $count > 1;
     $self->warn(
         "Perldoc is meant for reading one file at a time.\n",
         "So these parameters are being ignored: ",
@@ -858,7 +867,7 @@ sub grand_search_init {
 
         # We must look both in @INC for library modules and in $bindir
         # for executables, like h2xs or perldoc itself.
-        push @searchdirs, ($self->{'bindir'}, @INC);
+        push @searchdirs, ($self->{'bindir'}, @{$self->{search_path}}, @INC);
         unless ($self->opt_m) {
             if ($self->is_vms) {
                 my($i,$trn);
@@ -916,13 +925,15 @@ sub maybe_generate_dynamic_pod {
     my($self, $found_things) = @_;
     my @dynamic_pod;
 
+    $self->search_perlapi($found_things, \@dynamic_pod)   if  $self->opt_a;
+
     $self->search_perlfunc($found_things, \@dynamic_pod)  if  $self->opt_f;
 
     $self->search_perlvar($found_things, \@dynamic_pod)   if  $self->opt_v;
 
     $self->search_perlfaqs($found_things, \@dynamic_pod)  if  $self->opt_q;
 
-    if( ! $self->opt_f and ! $self->opt_q and ! $self->opt_v ) {
+    if( ! $self->opt_f and ! $self->opt_q and ! $self->opt_v and ! $self->opt_a) {
         DEBUG > 4 and print "That's a non-dynamic pod search.\n";
     } elsif ( @dynamic_pod ) {
         $self->aside("Hm, I found some Pod from that search!\n");
@@ -935,7 +946,7 @@ sub maybe_generate_dynamic_pod {
         push @{ $self->{'temp_file_list'} }, $buffer;
          # I.e., it MIGHT be deleted at the end.
 
-        my $in_list = !$self->not_dynamic && $self->opt_f || $self->opt_v;
+        my $in_list = !$self->not_dynamic && $self->opt_f || $self->opt_v || $self->opt_a;
 
         print $buffd "=over 8\n\n" if $in_list;
         print $buffd @dynamic_pod  or $self->die( "Can't print $buffer: $!" );
@@ -1140,6 +1151,83 @@ sub search_perlop {
   close PERLOP;
 
   return;
+}
+
+#..........................................................................
+
+sub search_perlapi {
+    my($self, $found_things, $pod) = @_;
+
+    DEBUG > 2 and print "Search: @$found_things\n";
+
+    my $perlapi = shift @$found_things;
+    open(PAPI, "<", $perlapi)               # "Funk is its own reward"
+        or $self->die("Can't open $perlapi: $!");
+
+    my $search_re = quotemeta($self->opt_a);
+
+    DEBUG > 2 and
+     print "Going to perlapi-scan for $search_re in $perlapi\n";
+
+    # Check available translator or backup to default (english)
+    if ( $self->opt_L && defined $self->{'translators'}->[0] ) {
+        my $tr = $self->{'translators'}->[0];
+        if ( $] < 5.008 ) {
+            $self->aside("Your old perl doesn't really have proper unicode support.");
+        }
+        else {
+            binmode(PAPI, ":utf8");
+        }
+    }
+
+    local $_;
+
+    # Look for our function
+    my $found = 0;
+    my $inlist = 0;
+
+    my @related;
+    my $related_re;
+    while (<PAPI>) {  # "The Mothership Connection is here!"
+        if ( m/^=item\s+$search_re\b/ )  {
+            $found = 1;
+        }
+        elsif (@related > 1 and /^=item/) {
+            $related_re ||= join "|", @related;
+            if (m/^=item\s+(?:$related_re)\b/) {
+                $found = 1;
+            }
+            else {
+                last;
+            }
+        }
+        elsif (/^=item/) {
+            last if $found > 1 and not $inlist;
+        }
+        elsif ($found and /^X<[^>]+>/) {
+            push @related, m/X<([^>]+)>/g;
+        }
+        next unless $found;
+        if (/^=over/) {
+            ++$inlist;
+        }
+        elsif (/^=back/) {
+            last if $found > 1 and not $inlist;
+            --$inlist;
+        }
+        push @$pod, $_;
+        ++$found if /^\w/;        # found descriptive text
+    }
+
+    if (!@$pod) {
+        CORE::die( sprintf
+          "No documentation for perl api function '%s' found\n",
+          $self->opt_a )
+        ;
+    }
+    close PAPI                or $self->die( "Can't open $perlapi: $!" );
+
+    return;
 }
 
 #..........................................................................
@@ -1648,19 +1736,18 @@ sub containspod {
 
 #..........................................................................
 
-sub maybe_diddle_INC {
+sub maybe_extend_searchpath {
   my $self = shift;
 
   # Does this look like a module or extension directory?
 
   if (-f "Makefile.PL" || -f "Build.PL") {
 
-    # Add "." and "lib" to @INC (if they exist)
-    eval q{ use lib qw(. lib); 1; } or $self->die;
+    push @{$self->{search_path} }, '.','lib';
 
     # don't add if superuser
     if ($< && $> && -d "blib") {   # don't be looking too hard now!
-      eval q{ use blib; 1 };
+      push @{ $self->{search_path} }, 'blib';
       $self->warn( $@ ) if $@ && $self->opt_D;
     }
   }

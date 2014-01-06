@@ -28,6 +28,8 @@ Examples:
 
     perldoc -v PerlVariable
 
+    perldoc -a PerlAPI
+
 See below for more description of the switches.
 
 =head1 DESCRIPTION
@@ -100,6 +102,14 @@ Example:
 
      perldoc -q shuffle
 
+=item B<-a> I<perlapifunc>
+
+The B<-a> option followed by the name of a perl api function will
+extract the documentation of this function from L<perlapi>.
+
+Example:
+
+     perldoc -a newHV
 
 =item B<-v> I<perlvar>
 
