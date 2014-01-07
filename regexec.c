@@ -1377,7 +1377,7 @@ if ((reginfo->intuit || regtry(reginfo, &s))) \
 	tmp = (s != reginfo->strbeg) ? UCHARAT(s - 1) : '\n';                  \
 	tmp = TEST_NON_UTF8(tmp);                                              \
 	REXEC_FBC_UTF8_SCAN(                                                   \
-	    if (tmp == ! TEST_NON_UTF8((U8) *s)) { \
+	    if (tmp == ! TEST_NON_UTF8((U8) *s)) {                             \
 		tmp = !tmp;                                                    \
 		IF_SUCCESS;                                                    \
 	    }                                                                  \
