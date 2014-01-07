@@ -105,6 +105,7 @@ lib/Cross.pm
 lib/ExtUtils/MANIFEST.SKIP
 lib/ExtUtils/xsubpp
 lib/auto/
+lib/perldoc.pod
 lib/buildcustomize.pl
 lib/unicore/CombiningClass.pl
 lib/unicore/Decomposition.pl
