@@ -398,7 +398,12 @@ There should be no test failures.
 
 If you build with Visual C++ 2013 then three tests currently may fail with
 Daylight Saving Time related problems: F<t/io/fs.t>,
-F<cpan/HTTP-Tiny/t/110_mirror.t> and F<lib/File.Copy.t>.
+F<cpan/HTTP-Tiny/t/110_mirror.t> and F<lib/File.Copy.t>. The failures are
+caused by bugs in the CRT in VC++ 2013 which will be fixed in future releases
+of VC++, as explained by Microsoft here:
+L<https://connect.microsoft.com/VisualStudio/feedback/details/811534/utime-sometimes-fails-to-set-the-correct-file-times-in-visual-c-2013>. In the meantime,
+if you need fixed C<stat> and C<utime> functions then have a look at the
+CPAN distribution Win32::UTCFileTime.
 
 Some test failures may occur if you use a command shell other than the
 native "cmd.exe", or if you are building from a path that contains
