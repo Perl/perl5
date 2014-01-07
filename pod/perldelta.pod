@@ -31,7 +31,7 @@ C<B::SPECIAL> object in this case.  [perl #119413]
 
 L<B::Concise> has been upgraded from version 0.95 to 0.95_01.
 
-This fixes a bug in dumping unexpected SEPCIALs.
+This fixes a bug in dumping unexpected SPECIALs.
 
 =item *
 
