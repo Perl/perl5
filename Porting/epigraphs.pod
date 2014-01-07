@@ -239,6 +239,19 @@ L<Announced on 2013-05-20 by Ricardo Signes|http://www.nntp.perl.org/group/perl.
   …that I can't fix…
   …with my hands…
 
+=head2 v5.18.2 - Miss Manners
+
+L<Announced on 2014-01-06 by Ricardo Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2014/01/msg211224.html>
+
+One of the major mistakes people make is that they think manners are
+only the expression of happy ideas. There's a whole range of behavior
+that can be expressed in a mannerly way. That's what civilization is all
+about – doing it in a mannerly and not an antagonistic way. One of the
+places we went wrong was the naturalistic Rousseauean movement of the
+Sixties in which people said, "Why can't you just say what's on your
+mind?" In civilization there have to be some restraints. If we followed
+every impulse, we'd be killing one another.
+
 =head2 v5.18.1 - Chuck Moore
 
 L<Announced on 2013-08-12 by Ricardo Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2013/08/msg205897.html>
