@@ -281,6 +281,13 @@ is($deparse->coderef2text(sub{ use utf8; /€/; }),
 done_testing($tests);
 
 __DATA__
+# TODO [perl #120950] This succeeds when run a 2nd time
+# y/uni/code/
+tr/\x{345}/\x{370}/;
+####
+# y/uni/code/  [perl #120950] This 2nd instance succeeds
+tr/\x{345}/\x{370}/;
+####
 # A constant
 1;
 ####
@@ -964,9 +971,6 @@ foreach $' (1, 2) {
 ####
 # y///r
 tr/a/b/r;
-####
-# y/uni/code/
-tr/\x{345}/\x{370}/;
 ####
 # [perl #90898]
 <a,>;
