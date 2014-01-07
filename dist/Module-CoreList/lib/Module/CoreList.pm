@@ -242,6 +242,7 @@ sub changes_between {
     5.019005 => '2013-10-20',
     5.019006 => '2013-11-20',
     5.019007 => '2013-12-20',
+    5.018002 => '2014-01-06',
     5.019008 => '????-??-??',
   );
 
@@ -8047,6 +8048,18 @@ for my $version ( sort { $a <=> $b } keys %released ) {
            'VMS::Filespec'         => 1,
         }
     },
+    5.018002 => {
+        delta_from => 5.018001,
+        changed => {
+            'B'                     => '1.42_02',
+            'B::Concise'            => '0.95_01',
+            'Config'                => '5.018002',
+            'File::Glob'            => '1.20_01',
+            'Module::CoreList'      => '3.03',
+            'Module::CoreList::TieHashDelta'=> '3.03',
+            'Module::CoreList::Utils'=> '3.03',
+        },
+    },
     5.019000 => {
         delta_from => 5.018000,
         changed => {
@@ -9472,6 +9485,13 @@ for my $version (sort { $a <=> $b } keys %delta) {
     5.018    => { delta_from => 5.017012 },
     5.018001 => {
         delta_from => 5.018,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.018002 => {
+        delta_from => 5.018001,
         changed => {
         },
         removed => {

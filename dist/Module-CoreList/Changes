@@ -1,10 +1,10 @@
 3.04
   - Prepared for v5.19.8
 
-3.03
-  - Reserved for v5.18.2
+3.03 Mon Jan  6 2014
+  - Updated for v5.18.2
 
-3.02
+3.02 Fri Dec 20 2013
   - Prepared for v5.19.7
   - Added CGI et al deprecation status
   - Finalised for v5.19.7
