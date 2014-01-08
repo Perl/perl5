@@ -105,8 +105,8 @@ foreach my $charset (@charsets) {
                     # We are using the C locale, which is essentially ASCII,
                     # but under utf8, the above-latin1 chars are treated as
                     # Unicode)
-                    $reason = "\"$char\" is not a $class in this locale under /l";
-                    $neg_reason = "\"$char\" is a $complement in this locale under /l";
+                    $reason = "\"$char\" is not a $class in the C locale under /l";
+                    $neg_reason = "\"$char\" is a $complement in the C locale under /l";
                     $match = 0;
                 }
                 elsif ($upgrade) {
