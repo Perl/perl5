@@ -812,9 +812,26 @@ The POSIX class matches the same as its Full-range counterpart.
 
 =item if locale rules are in effect ...
 
-The POSIX class matches according to the locale, except that
-C<word> uses the platform's native underscore character, no matter what
+The POSIX class matches according to the locale, except:
+
+=over
+
+=item C<word>
+
+also includes the platform's native underscore character, no matter what
 the locale is.
+
+=item C<ascii>
+
+on platforms that don't have the POSIX C<ascii> extension, this matches
+just the platform's native ASCII-range characters.
+
+=item C<blank>
+
+on platforms that don't have the POSIX C<blank> extension, this matches
+just the platform's native tab and space characters.
+
+=back
 
 =item if Unicode rules are in effect ...
 
