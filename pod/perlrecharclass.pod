@@ -29,7 +29,7 @@ the most well-known character class. By default, a dot matches any
 character, except for the newline. That default can be changed to
 add matching the newline by using the I<single line> modifier: either
 for the entire regular expression with the C</s> modifier, or
-locally with C<(?s)>.  (The C<\N> backslash sequence, described
+locally with C<(?s)>.  (The C<L</\N>> backslash sequence, described
 below, matches any character except newline without regard to the
 I<single line> modifier.)
 
@@ -93,10 +93,12 @@ If the C</a> regular expression modifier is in effect, it matches [0-9].
 Otherwise, it
 matches anything that is matched by C<\p{Digit}>, which includes [0-9].
 (An unlikely possible exception is that under locale matching rules, the
-current locale might not have [0-9] matched by C<\d>, and/or might match
-other characters whose code point is less than 256.  Such a locale
-definition would be in violation of the C language standard, but Perl
-doesn't currently assume anything in regard to this.)
+current locale might not have C<[0-9]> matched by C<\d>, and/or might match
+other characters whose code point is less than 256.  The only such locale
+definitions that are legal would be to match C<[0-9]> plus another set of
+10 consecutive digit characters;  anything else would be in violation of
+the C language standard, but Perl doesn't currently assume anything in
+regard to this.)
 
 What this means is that unless the C</a> modifier is in effect C<\d> not
 only matches the digits '0' - '9', but also Arabic, Devanagari, and
@@ -647,7 +649,7 @@ X<character class> X<\p> X<\p{}>
 X<alpha> X<alnum> X<ascii> X<blank> X<cntrl> X<digit> X<graph>
 X<lower> X<print> X<punct> X<space> X<upper> X<word> X<xdigit>
 
-POSIX character classes have the form C<[:class:]>, where I<class> is
+POSIX character classes have the form C<[:class:]>, where I<class> is the
 name, and the C<[:> and C<:]> delimiters. POSIX character classes only appear
 I<inside> bracketed character classes, and are a convenient and descriptive
 way of listing a group of characters.
@@ -662,6 +664,7 @@ Be careful about the syntax,
 
 The latter pattern would be a character class consisting of a colon,
 and the letters C<a>, C<l>, C<p> and C<h>.
+
 POSIX character classes can be part of a larger bracketed character class.
 For example,
 
@@ -779,8 +782,7 @@ Same for the two ASCII-only range forms.
 There are various other synonyms that can be used besides the names
 listed in the table.  For example, C<\p{PosixAlpha}> can be written as
 C<\p{Alpha}>.  All are listed in
-L<perluniprops/Properties accessible through \p{} and \P{}>,
-plus all characters matched by each ASCII-range property.
+L<perluniprops/Properties accessible through \p{} and \P{}>.
 
 Both the C<\p> counterparts always assume Unicode rules are in effect.
 On ASCII platforms, this means they assume that the code points from 128
@@ -904,7 +906,7 @@ We can extend the example above:
 This matches digits that are in either the Thai or Laotian scripts.
 
 Notice the white space in these examples.  This construct always has
-the C<E<sol>x> modifier turned on.
+the C<E<sol>x> modifier turned on within it.
 
 The available binary operators are:
 
