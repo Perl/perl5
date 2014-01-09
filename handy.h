@@ -1242,12 +1242,24 @@ EXTCONST U32 PL_charclass[];
 #define toUPPER_LATIN1_MOD(c) ((! FITS_IN_8_BITS(c))                       \
                                ? (c)                                       \
                                : PL_mod_latin1_uc[ (U8) (c) ])
+
+/* Use the libc versions for these if available. */
+#if defined(HAS_ISASCII) && ! defined(USE_NEXT_CTYPE)
+#   define isASCII_LC(c) (FITS_IN_8_BITS(c) && isascii( (U8) (c)))
+#else
+#   define isASCII_LC(c) isASCII(c)
+#endif
+
+#if defined(HAS_ISBLANK) && ! defined(USE_NEXT_CTYPE)
+#   define isBLANK_LC(c) _generic_LC(c, _CC_BLANK, isblank)
+#else
+#   define isBLANK_LC(c) isBLANK(c)
+#endif
+
 #ifdef USE_NEXT_CTYPE   /* NeXT computers */
 
 #  define isALPHANUMERIC_LC(c)	NXIsAlNum((unsigned int)(c))
 #  define isALPHA_LC(c)		NXIsAlpha((unsigned int)(c))
-#  define isASCII_LC(c)		isASCII((unsigned int)(c))
-#  define isBLANK_LC(c)		isBLANK((unsigned int)(c))
 #  define isCNTRL_LC(c)		NXIsCntrl((unsigned int)(c))
 #  define isDIGIT_LC(c)		NXIsDigit((unsigned int)(c))
 #  define isGRAPH_LC(c)		NXIsGraph((unsigned int)(c))
@@ -1269,16 +1281,6 @@ EXTCONST U32 PL_charclass[];
 #    define isALPHA_LC(c)   (FITS_IN_8_BITS(c) && isalpha((unsigned char)(c)))
 #    define isALPHANUMERIC_LC(c)   (FITS_IN_8_BITS(c)                          \
                                                && isalnum((unsigned char)(c)))
-#    ifdef HAS_ISASCII
-#	define isASCII_LC(c) (FITS_IN_8_BITS(c) && isascii((unsigned char)(c)))
-#    else
-#	define isASCII_LC(c) (FITS_IN_8_BITS(c) && isASCII((unsigned char)(c)))
-#    endif
-#    ifdef HAS_ISBLANK
-#	define isBLANK_LC(c) (FITS_IN_8_BITS(c) && isblank((unsigned char)(c)))
-#    else
-#	define isBLANK_LC(c) (FITS_IN_8_BITS(c) && isBLANK((unsigned char)(c)))
-#    endif
 #    define isCNTRL_LC(c)    (FITS_IN_8_BITS(c) && iscntrl((unsigned char)(c)))
 #    define isDIGIT_LC(c)    (FITS_IN_8_BITS(c) && isdigit((unsigned char)(c)))
 #    define isGRAPH_LC(c)    (FITS_IN_8_BITS(c) && isgraph((unsigned char)(c)))
@@ -1299,12 +1301,6 @@ EXTCONST U32 PL_charclass[];
 
 #    define isALPHA_LC(c)	(isascii(c) && isalpha(c))
 #    define isALPHANUMERIC_LC(c) (isascii(c) && isalnum(c))
-#    define isASCII_LC(c)	isascii(c)
-#    ifdef HAS_ISBLANK
-#	define isBLANK_LC(c)	(isascii(c) && isblank(c))
-#    else
-#	define isBLANK_LC(c)	isBLANK_A(c)
-#    endif
 #    define isCNTRL_LC(c)	(isascii(c) && iscntrl(c))
 #    define isDIGIT_LC(c)	(isascii(c) && isdigit(c))
 #    define isGRAPH_LC(c)	(isascii(c) && isgraph(c))
