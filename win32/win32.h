@@ -251,6 +251,11 @@ typedef unsigned short	mode_t;
 #define NAN_COMPARE_BROKEN 1
 #endif
 
+/* on VC2003, msvcrt.lib is missing these symbols */
+#if _MSC_VER >= 1300 && _MSC_VER < 1400
+#  pragma intrinsic(_rotl64,_rotr64)
+#endif
+
 #endif /* _MSC_VER */
 
 #ifdef __MINGW32__		/* Minimal Gnu-Win32 */
