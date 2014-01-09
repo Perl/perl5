@@ -141,11 +141,11 @@ static const char* const non_utf8_target_but_utf8_required
     SET_nextchr
 
 
-#define LOAD_UTF8_CHARCLASS(swash_ptr, property_name) STMT_START {            \
+#define LOAD_UTF8_CHARCLASS(swash_ptr, property_name, invlist) STMT_START {   \
         if (!swash_ptr) {                                                     \
             U8 flags = _CORE_SWASH_INIT_ACCEPT_INVLIST;                       \
             swash_ptr = _core_swash_init("utf8", property_name, &PL_sv_undef, \
-                                         1, 0, NULL, &flags);                 \
+                                         1, 0, invlist, &flags);              \
             assert(swash_ptr);                                                \
         }                                                                     \
     } STMT_END
@@ -154,28 +154,33 @@ static const char* const non_utf8_target_but_utf8_required
 #ifdef DEBUGGING
 #   define LOAD_UTF8_CHARCLASS_DEBUG_TEST(swash_ptr,                          \
                                           property_name,                      \
+                                          invlist,                            \
                                           utf8_char_in_property)              \
-        LOAD_UTF8_CHARCLASS(swash_ptr, property_name);                        \
+        LOAD_UTF8_CHARCLASS(swash_ptr, property_name, invlist);               \
         assert(swash_fetch(swash_ptr, (U8 *) utf8_char_in_property, TRUE));
 #else
 #   define LOAD_UTF8_CHARCLASS_DEBUG_TEST(swash_ptr,                          \
                                           property_name,                      \
+                                          invlist,                            \
                                           utf8_char_in_property)              \
-        LOAD_UTF8_CHARCLASS(swash_ptr, property_name)
+        LOAD_UTF8_CHARCLASS(swash_ptr, property_name, invlist)
 #endif
 
 #define LOAD_UTF8_CHARCLASS_ALNUM() LOAD_UTF8_CHARCLASS_DEBUG_TEST(           \
                                         PL_utf8_swash_ptrs[_CC_WORDCHAR],     \
-                                        swash_property_names[_CC_WORDCHAR],   \
+                                        "",                                   \
+                                        PL_XPosix_ptrs[_CC_WORDCHAR],         \
                                         LATIN_CAPITAL_LETTER_SHARP_S_UTF8);
 
 #define LOAD_UTF8_CHARCLASS_GCB()  /* Grapheme cluster boundaries */          \
     STMT_START {                                                              \
 	LOAD_UTF8_CHARCLASS_DEBUG_TEST(PL_utf8_X_regular_begin,               \
                                        "_X_regular_begin",                    \
+                                       NULL,                                  \
                                        LATIN_CAPITAL_LETTER_SHARP_S_UTF8);    \
 	LOAD_UTF8_CHARCLASS_DEBUG_TEST(PL_utf8_X_extend,                      \
                                        "_X_extend",                           \
+                                       NULL,                                  \
                                        COMBINING_GRAVE_ACCENT_UTF8);          \
     } STMT_END
 
@@ -494,8 +499,11 @@ S_isFOO_utf8_lc(pTHX_ const U8 classnum, const U8* character)
         /* Initialize the swash unless done already */
         if (! PL_utf8_swash_ptrs[classnum]) {
             U8 flags = _CORE_SWASH_INIT_ACCEPT_INVLIST;
-            PL_utf8_swash_ptrs[classnum] = _core_swash_init("utf8",
-                swash_property_names[classnum], &PL_sv_undef, 1, 0, NULL, &flags);
+            PL_utf8_swash_ptrs[classnum] =
+                    _core_swash_init("utf8",
+                                     "",
+                                     &PL_sv_undef, 1, 0,
+                                     PL_XPosix_ptrs[classnum], &flags);
         }
 
         return cBOOL(swash_fetch(PL_utf8_swash_ptrs[classnum], (U8 *)
@@ -1826,8 +1834,10 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         if (! PL_utf8_swash_ptrs[classnum]) {
             U8 flags = _CORE_SWASH_INIT_ACCEPT_INVLIST;
             PL_utf8_swash_ptrs[classnum] =
-                    _core_swash_init("utf8", swash_property_names[classnum],
-                                     &PL_sv_undef, 1, 0, NULL, &flags);
+                    _core_swash_init("utf8",
+                                     "",
+                                     &PL_sv_undef, 1, 0,
+                                     PL_XPosix_ptrs[classnum], &flags);
         }
 
         /* This is a copy of the loop above for swash classes, though using the
@@ -4526,8 +4536,9 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                         U8 flags = _CORE_SWASH_INIT_ACCEPT_INVLIST;
                         PL_utf8_swash_ptrs[classnum]
                                 = _core_swash_init("utf8",
-                                        swash_property_names[classnum],
-                                        &PL_sv_undef, 1, 0, NULL, &flags);
+                                        "",
+                                        &PL_sv_undef, 1, 0,
+                                        PL_XPosix_ptrs[classnum], &flags);
                     }
                     if (! (to_complement
                            ^ cBOOL(swash_fetch(PL_utf8_swash_ptrs[classnum],
@@ -7206,8 +7217,10 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
         if (! PL_utf8_swash_ptrs[classnum]) {
             U8 flags = _CORE_SWASH_INIT_ACCEPT_INVLIST;
             PL_utf8_swash_ptrs[classnum] = _core_swash_init(
-                                        "utf8", swash_property_names[classnum],
-                                        &PL_sv_undef, 1, 0, NULL, &flags);
+                                        "utf8",
+                                        "",
+                                        &PL_sv_undef, 1, 0,
+                                        PL_XPosix_ptrs[classnum], &flags);
         }
 
         while (hardcount < max && scan < loceol

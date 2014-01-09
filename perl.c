@@ -33,6 +33,7 @@
 #include "perl.h"
 #include "patchlevel.h"			/* for local_patches */
 #include "XSUB.h"
+#include "charclass_invlists.h"
 
 #ifdef NETWARE
 #include "nwutil.h"	
@@ -378,6 +379,24 @@ perl_construct(pTHXx)
     PL_registered_mros = newHV();
     /* Start with 1 bucket, for DFS.  It's unlikely we'll need more.  */
     HvMAX(PL_registered_mros) = 0;
+
+    PL_XPosix_ptrs[_CC_ASCII] = _new_invlist_C_array(ASCII_invlist);
+    PL_XPosix_ptrs[_CC_ALPHANUMERIC] = _new_invlist_C_array(XPosixAlnum_invlist);
+    PL_XPosix_ptrs[_CC_ALPHA] = _new_invlist_C_array(XPosixAlpha_invlist);
+    PL_XPosix_ptrs[_CC_BLANK] = _new_invlist_C_array(XPosixBlank_invlist);
+    PL_XPosix_ptrs[_CC_CASED] =  _new_invlist_C_array(Cased_invlist);
+    PL_XPosix_ptrs[_CC_CNTRL] = _new_invlist_C_array(XPosixCntrl_invlist);
+    PL_XPosix_ptrs[_CC_DIGIT] = _new_invlist_C_array(XPosixDigit_invlist);
+    PL_XPosix_ptrs[_CC_GRAPH] = _new_invlist_C_array(XPosixGraph_invlist);
+    PL_XPosix_ptrs[_CC_LOWER] = _new_invlist_C_array(XPosixLower_invlist);
+    PL_XPosix_ptrs[_CC_PRINT] = _new_invlist_C_array(XPosixPrint_invlist);
+    PL_XPosix_ptrs[_CC_PUNCT] = _new_invlist_C_array(XPosixPunct_invlist);
+    PL_XPosix_ptrs[_CC_SPACE] = _new_invlist_C_array(XPerlSpace_invlist);
+    PL_XPosix_ptrs[_CC_PSXSPC] = _new_invlist_C_array(XPosixSpace_invlist);
+    PL_XPosix_ptrs[_CC_UPPER] = _new_invlist_C_array(XPosixUpper_invlist);
+    PL_XPosix_ptrs[_CC_VERTSPACE] = _new_invlist_C_array(VertSpace_invlist);
+    PL_XPosix_ptrs[_CC_WORDCHAR] = _new_invlist_C_array(XPosixWord_invlist);
+    PL_XPosix_ptrs[_CC_XDIGIT] = _new_invlist_C_array(XPosixXDigit_invlist);
 
     ENTER;
 }
@@ -1032,12 +1051,6 @@ perl_destruct(pTHXx)
     PL_NonL1NonFinalFold = NULL;
     PL_UpperLatin1       = NULL;
     for (i = 0; i < POSIX_CC_COUNT; i++) {
-        SvREFCNT_dec(PL_Posix_ptrs[i]);
-        PL_Posix_ptrs[i] = NULL;
-
-        SvREFCNT_dec(PL_L1Posix_ptrs[i]);
-        PL_L1Posix_ptrs[i] = NULL;
-
         SvREFCNT_dec(PL_XPosix_ptrs[i]);
         PL_XPosix_ptrs[i] = NULL;
     }

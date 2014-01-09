@@ -793,6 +793,9 @@
 #define warn_nocontext		Perl_warn_nocontext
 #define warner_nocontext	Perl_warner_nocontext
 #endif
+#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_PERL_C) || defined(PERL_IN_UTF8_C)
+#define _new_invlist_C_array(a)	Perl__new_invlist_C_array(aTHX_ a)
+#endif
 #if defined(PERL_MAD)
 #define newFORM(a,b,c)		Perl_newFORM(aTHX_ a,b,c)
 #endif
@@ -897,7 +900,6 @@
 #  if defined(PERL_IN_REGCOMP_C)
 #define _append_range_to_invlist(a,b,c)	S__append_range_to_invlist(aTHX_ a,b,c)
 #define _invlist_array_init(a,b)	S__invlist_array_init(aTHX_ a,b)
-#define _new_invlist_C_array(a)	S__new_invlist_C_array(aTHX_ a)
 #define add_cp_to_invlist(a,b)	S_add_cp_to_invlist(aTHX_ a,b)
 #define add_data		S_add_data
 #define alloc_maybe_populate_EXACT(a,b,c,d,e)	S_alloc_maybe_populate_EXACT(aTHX_ a,b,c,d,e)
@@ -1675,7 +1677,7 @@
 #  if defined(PERL_IN_UTF8_C)
 #define check_locale_boundary_crossing(a,b,c,d)	S_check_locale_boundary_crossing(aTHX_ a,b,c,d)
 #define is_utf8_char_slow	S_is_utf8_char_slow
-#define is_utf8_common(a,b,c)	S_is_utf8_common(aTHX_ a,b,c)
+#define is_utf8_common(a,b,c,d)	S_is_utf8_common(aTHX_ a,b,c,d)
 #define swatch_get(a,b,c)	S_swatch_get(aTHX_ a,b,c)
 #define to_lower_latin1(a,b,c)	S_to_lower_latin1(aTHX_ a,b,c)
 #  endif

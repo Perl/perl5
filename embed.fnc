@@ -1098,8 +1098,8 @@ Ap	|void	|regdump	|NN const regexp* r
 Ap	|SV*	|regclass_swash	|NULLOK const regexp *prog \
 				|NN const struct regnode *node|bool doinit \
 				|NULLOK SV **listsvp|NULLOK SV **altsvp
-#ifdef PERL_IN_REGCOMP_C
-EMsR	|SV*	|_new_invlist_C_array|NN const UV* const list
+#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_PERL_C) || defined(PERL_IN_UTF8_C)
+AMpR	|SV*	|_new_invlist_C_array|NN const UV* const list
 : Not used currently: EXMs	|bool	|_invlistEQ	|NN SV* const a|NN SV* const b|const bool complement_b
 #endif
 Ap	|I32	|pregexec	|NN REGEXP * const prog|NN char* stringarg \
@@ -2357,7 +2357,7 @@ sn	|NV|mulexp10	|NV value|I32 exponent
 #if defined(PERL_IN_UTF8_C)
 iRn	|STRLEN	|is_utf8_char_slow|NN const U8 *s|const STRLEN len
 sRM	|UV	|check_locale_boundary_crossing|NN const U8* const p|const UV result|NN U8* const ustrp|NN STRLEN *lenp
-iR	|bool	|is_utf8_common	|NN const U8 *const p|NN SV **swash|NN const char * const swashname
+iR	|bool	|is_utf8_common	|NN const U8 *const p|NN SV **swash|NN const char * const swashname|NULLOK SV* const invlist
 sR	|SV*	|swatch_get	|NN SV* swash|UV start|UV span
 #endif
 

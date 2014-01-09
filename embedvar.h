@@ -53,7 +53,6 @@
 #define PL_Dir			(vTHX->IDir)
 #define PL_Env			(vTHX->IEnv)
 #define PL_HasMultiCharFold	(vTHX->IHasMultiCharFold)
-#define PL_L1Posix_ptrs		(vTHX->IL1Posix_ptrs)
 #define PL_LIO			(vTHX->ILIO)
 #define PL_Latin1		(vTHX->ILatin1)
 #define PL_Mem			(vTHX->IMem)
