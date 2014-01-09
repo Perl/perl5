@@ -9194,8 +9194,6 @@ This method keyword is documented in L<perlobj/"Destructors">.
 
 =item gt
 
-=item if
-
 =item le
 
 =item lt
@@ -9237,6 +9235,8 @@ This keyword is documented in L<perlsub/"Autoloading">.
 =item for
 
 =item foreach
+
+=item if
 
 =item unless
 
