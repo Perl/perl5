@@ -8,6 +8,9 @@
  *
  */
 
+/* IMPORTANT NOTE: Everything whose name begins with an underscore is for
+ * internal core Perl use only. */
+
 #ifndef HANDY_H /* Guard against nested #inclusion */
 #define HANDY_H
 
@@ -270,10 +273,10 @@ typedef U64TYPE U64;
 
 #define Ctl(ch) ((ch) & 037)
 
-/* This is a helper macro to avoid preprocessor issues, expanding to an
- * assert followed by a comma under DEBUGGING (hence the comma operator).  If
- * we didn't do this, we would get a comma with nothing before it when not
- * DEBUGGING */
+/* This is a helper macro to avoid preprocessor issues, replaced by nothing
+ * unless under DEBUGGING, where it expands to an assert of its argument,
+ * followed by a comma (hence the comma operator).  If we just used a straight
+ * assert(), we would get a comma with nothing before it when not DEBUGGING */
 #ifdef DEBUGGING
 #   define __ASSERT_(statement)  assert(statement),
 #else
@@ -507,7 +510,7 @@ onto the platform.  That is, the code points that are ASCII are unaffected,
 since ASCII is a subset of Latin-1.  But the non-ASCII code points are treated
 as if they are Latin-1 characters.  For example, C<isWORDCHAR_L1()> will return
 true when called with the code point 0xDF, which is a word character in both
-ASCII and EBCDIC (though it represent different characters in each).
+ASCII and EBCDIC (though it represents different characters in each).
 
 Variant C<isFOO_uni> is like the C<isFOO_L1> variant, but accepts any UV code
 point as input.  If the code point is larger than 255, Unicode rules are used
@@ -1012,6 +1015,9 @@ EXTCONST U32 PL_charclass[];
 
     /* The 1U keeps Solaris from griping when shifting sets the uppermost bit */
 #   define _CC_mask(classnum) (1U << (classnum))
+
+    /* For internal core Perl use only: the base macro for defining macros like
+     * isALPHA */
 #   define _generic_isCC(c, classnum) cBOOL(FITS_IN_8_BITS(c) \
                 && (PL_charclass[(U8) (c)] & _CC_mask(classnum)))
 
@@ -1019,8 +1025,9 @@ EXTCONST U32 PL_charclass[];
      * ASCII. */
 #   define _CC_mask_A(classnum) (_CC_mask(classnum) | _CC_mask(_CC_ASCII))
 
-    /* The _A version makes sure that both the desired bit and the ASCII bit
-     * are present */
+    /* For internal core Perl use only: the base macro for defining macros like
+     * isALPHA_A.  The foo_A version makes sure that both the desired bit and
+     * the ASCII bit are present */
 #   define _generic_isCC_A(c, classnum) (FITS_IN_8_BITS(c)  \
         && ((PL_charclass[(U8) (c)] & _CC_mask_A(classnum)) \
                                 == _CC_mask_A(classnum)))
@@ -1223,20 +1230,19 @@ EXTCONST U32 PL_charclass[];
 #define toFOLD_A(c)  toFOLD(c)
 #define toTITLE_A(c) toTITLE(c)
 
-/* Use table lookup for speed; return error character for input
- * out-of-range */
+/* Use table lookup for speed; returns the input itself if is out-of-range */
 #define toLOWER_LATIN1(c)    ((! FITS_IN_8_BITS(c))                        \
                              ? (c)                                         \
                              : PL_latin1_lc[ (U8) (c) ])
 #define toLOWER_L1(c)    toLOWER_LATIN1(c)  /* Synonym for consistency */
 
 /* Modified uc.  Is correct uc except for three non-ascii chars which are
- * all mapped to one of them, and these need special handling; error
- * character for input out-of-range */
+ * all mapped to one of them, and these need special handling; returns the
+ * input itself if is out-of-range */
 #define toUPPER_LATIN1_MOD(c) ((! FITS_IN_8_BITS(c))                       \
                                ? (c)                                       \
                                : PL_mod_latin1_uc[ (U8) (c) ])
-#ifdef USE_NEXT_CTYPE
+#ifdef USE_NEXT_CTYPE   /* NeXT computers */
 
 #  define isALPHANUMERIC_LC(c)	NXIsAlNum((unsigned int)(c))
 #  define isALPHA_LC(c)		NXIsAlpha((unsigned int)(c))
@@ -1259,9 +1265,7 @@ EXTCONST U32 PL_charclass[];
 #else /* !USE_NEXT_CTYPE */
 
 #  if defined(CTYPE256) || (!defined(isascii) && !defined(HAS_ISASCII))
-
-/* Use foo_LC_uvchr() instead  of these for beyond the Latin1 range */
-
+    /* For most other platforms */
 #    define isALPHA_LC(c)   (FITS_IN_8_BITS(c) && isalpha((unsigned char)(c)))
 #    define isALPHANUMERIC_LC(c)   (FITS_IN_8_BITS(c)                          \
                                                && isalnum((unsigned char)(c)))
@@ -1291,7 +1295,7 @@ EXTCONST U32 PL_charclass[];
 #    define toLOWER_LC(c) (FITS_IN_8_BITS(c) ? (UV)tolower((unsigned char)(c)) : (c))
 #    define toUPPER_LC(c) (FITS_IN_8_BITS(c) ? (UV)toupper((unsigned char)(c)) : (c))
 
-#  else
+#  else  /* The final fallback position */
 
 #    define isALPHA_LC(c)	(isascii(c) && isalpha(c))
 #    define isALPHANUMERIC_LC(c) (isascii(c) && isalnum(c))
@@ -1312,6 +1316,7 @@ EXTCONST U32 PL_charclass[];
 #    define isUPPER_LC(c)	(isascii(c) && isupper(c))
 #    define isWORDCHAR_LC(c)	(isascii(c) && (isalnum(c) || (c) == '_'))
 #    define isXDIGIT_LC(c)      (isascii(c) && isxdigit(c))
+
 #    define toLOWER_LC(c)	(isascii(c) ? tolower(c) : (c))
 #    define toUPPER_LC(c)	(isascii(c) ? toupper(c) : (c))
 
@@ -1324,11 +1329,18 @@ EXTCONST U32 PL_charclass[];
 #define isIDCONT_LC(c)	        isWORDCHAR_LC(c)
 #define isPSXSPC_LC(c)		isSPACE_LC(c)
 
-/* For internal core Perl use only.  If the input is Latin1, use the Latin1
- * macro; otherwise use the function 'above_latin1'.  Won't compile if 'c' isn't unsigned, as
- * won't match above_latin1 prototype. The macros do bounds checking, so have
- * duplicate checks here, so could create versions of the macros that don't,
- * but experiments show that gcc optimizes them out anyway. */
+/* For internal core Perl use only: the base macros for defining macros like
+ * isALPHA_uni.  'c' is the code point to check.  'classnum' is the POSIX class
+ * number defined earlier in this file.  _generic_uni() is used for POSIX
+ * classes where there is a macro or function 'above_latin1' that takes the
+ * single argument 'c' and returns the desired value.  These exist for those
+ * classes which have simple definitions, avoiding the overhead of a hash
+ * lookup or inversion list binary search.  _generic_swash_uni() can be used
+ * for classes where that overhead is faster than a direct lookup.
+ * _generic_uni() won't compile if 'c' isn't unsigned, as it won't match the
+ * 'above_latin1' prototype. _generic_isCC() macro does bounds checking, so
+ * have duplicate checks here, so could create versions of the macros that
+ * don't, but experiments show that gcc optimizes them out anyway. */
 
 /* Note that all ignore 'use bytes' */
 #define _generic_uni(classnum, above_latin1, c) ((c) < 256                    \
@@ -1364,6 +1376,11 @@ EXTCONST U32 PL_charclass[];
 #define toTITLE_uni(c,s,l)	to_uni_title(c,s,l)
 #define toUPPER_uni(c,s,l)	to_uni_upper(c,s,l)
 
+/* For internal core Perl use only: the base macros for defining macros like
+ * isALPHA_LC_uvchr.  These are like isALPHA_LC, but the input can be any code
+ * point, not just 0-255.  Like _generic_uni, there are two versions, one for
+ * simple class definitions; the other for more complex.  These are like
+ * _generic_uni, so see it for more info. */
 #define _generic_LC_uvchr(latin1, above_latin1, c)                            \
                                     (c < 256 ? latin1(c) : above_latin1(c))
 #define _generic_LC_swash_uvchr(latin1, classnum, c)                          \
@@ -1395,15 +1412,13 @@ EXTCONST U32 PL_charclass[];
 
 #define isBLANK_LC_uni(c)	isBLANK_LC_uvchr(UNI_TO_NATIVE(c))
 
-/* Everything whose name begins with an underscore is for internal core Perl
- * use only. */
-
-/* If the input is in the Latin1 range, use
- * the Latin1 macro 'classnum' on 'p' which is a pointer to a UTF-8 string.
- * Otherwise use the value given by the 'utf8' parameter.  This relies on the
- * fact that ASCII characters have the same representation whether utf8 or not.
- * Note that it assumes that the utf8 has been validated, and ignores 'use
- * bytes' */
+/* For internal core Perl use only: the base macros for defining macros like
+ * isALPHA_utf8.  These are like the earlier defined macros, but take an input
+ * UTF-8 encoded string 'p'. If the input is in the Latin1 range, use
+ * the Latin1 macro 'classnum' on 'p'.  Otherwise use the value given by the
+ * 'utf8' parameter.  This relies on the fact that ASCII characters have the
+ * same representation whether utf8 or not.  Note that it assumes that the utf8
+ * has been validated, and ignores 'use bytes' */
 #define _generic_utf8(classnum, p, utf8) (UTF8_IS_INVARIANT(*(p))              \
                                          ? _generic_isCC(*(p), classnum)       \
                                          : (UTF8_IS_DOWNGRADEABLE_START(*(p))) \
@@ -1416,7 +1431,7 @@ EXTCONST U32 PL_charclass[];
  * can be a macro */
 #define _generic_func_utf8(classnum, above_latin1, p)  \
                                     _generic_utf8(classnum, p, above_latin1(p))
-/* Like the above, but passes classnum to _isFOO_utf8(), instead of having a
+/* Like the above, but passes classnum to _isFOO_utf8(), instead of having an
  * 'above_latin1' parameter */
 #define _generic_swash_utf8(classnum, p)  \
                       _generic_utf8(classnum, p, _is_utf8_FOO(classnum, p))
@@ -1480,11 +1495,10 @@ EXTCONST U32 PL_charclass[];
 #define toTITLE_utf8(p,s,l)	to_utf8_title(p,s,l)
 #define toUPPER_utf8(p,s,l)	to_utf8_upper(p,s,l)
 
-/* For internal core Perl use only.  If the input is in the Latin1 range, use
- * the macro 'macro' on 'p' which is a pointer to a UTF-8 string.  Otherwise
- * use the value given by the 'utf8' parameter.  This relies on the fact that
- * ASCII characters have the same representation whether utf8 or not.  Note
- * that it assumes that the utf8 has been validated, and ignores 'use bytes' */
+/* For internal core Perl use only: the base macros for defining macros like
+ * isALPHA_LC_utf8.  These are like _generic_utf8, but if the first code point
+ * in 'p' is within the 0-255 range, it uses locale rules from the passed-in
+ * 'macro' parameter */
 #define _generic_LC_utf8(macro, p, utf8)                                    \
                          (UTF8_IS_INVARIANT(*(p))                           \
                          ? macro(*(p))                                      \
@@ -1495,7 +1509,7 @@ EXTCONST U32 PL_charclass[];
 #define _generic_LC_swash_utf8(macro, classnum, p)                         \
                     _generic_LC_utf8(macro, p, _is_utf8_FOO(classnum, p))
 #define _generic_LC_func_utf8(macro, above_latin1, p)                         \
-                    _generic_LC_utf8(macro, p, above_latin1(p))
+                              _generic_LC_utf8(macro, p, above_latin1(p))
 
 #define isALPHANUMERIC_LC_utf8(p)  _generic_LC_swash_utf8(isALPHANUMERIC_LC,  \
                                                       _CC_ALPHANUMERIC, p)
