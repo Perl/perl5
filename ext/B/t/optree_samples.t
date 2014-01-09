@@ -14,7 +14,7 @@ BEGIN {
 }
 use OptreeCheck;
 use Config;
-plan tests	=> 43;
+plan tests	=> 46;
 
 pass("GENERAL OPTREE EXAMPLES");
 
@@ -705,6 +705,25 @@ EOT_EOT
 # 7  <;> nextstate(main 3 (eval 3):1) v
 # 8  <$> const(IV 1) s
 # 9  <1> leavesub[1 ref] K/REFC,1
+EONT_EONT
+
+pass("rpeep - my $a; my @b; my %c; print 'f'");
+
+checkOptree ( name	=> 'my $a; my @b; my %c; return 1',
+	      code	=> 'my $a; my @b; my %c; return 1',
+	      bcopts	=> '-exec',
+	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
+# 1  <;> nextstate(main 991 (eval 17):1) v
+# 2  <0> padrange[$a:991,994; @b:992,994; %c:993,994] vM/LVINTRO,3
+# 3  <;> nextstate(main 994 (eval 17):1) v:{
+# 4  <$> const[IV 1] s
+# 5  <1> leavesub[1 ref] K/REFC,1
+EOT_EOT
+# 1  <;> nextstate(main 991 (eval 17):1) v
+# 2  <0> padrange[$a:991,994; @b:992,994; %c:993,994] vM/LVINTRO,3
+# 3  <;> nextstate(main 994 (eval 17):1) v:{
+# 4  <$> const(IV 1) s
+# 5  <1> leavesub[1 ref] K/REFC,1
 EONT_EONT
 
 __END__

@@ -11200,6 +11200,71 @@ Perl_rpeep(pTHX_ OP *o)
 		}
 	    }
 
+	    /* Optimise 'my $x; my $y;' into 'my ($x, $y);'
+             *
+	     * This latter form is then suitable for conversion into padrange
+	     * later on. Convert:
+	     *
+	     *   nextstate1 -> padop1 -> nextstate2 -> padop2 -> nextstate3
+	     *
+	     * into:
+	     *
+	     *   nextstate1 ->     listop     -> nextstate3
+	     *                 /            \
+	     *         pushmark -> padop1 -> padop2
+	     */
+	    if (o->op_next && (
+		    o->op_next->op_type == OP_PADSV
+		 || o->op_next->op_type == OP_PADAV
+		 || o->op_next->op_type == OP_PADHV
+		)
+		&& !(o->op_next->op_private & ~OPpLVAL_INTRO)
+		&& o->op_next->op_next && o->op_next->op_next->op_type == OP_NEXTSTATE
+		&& o->op_next->op_next->op_next && (
+		    o->op_next->op_next->op_next->op_type == OP_PADSV
+		 || o->op_next->op_next->op_next->op_type == OP_PADAV
+		 || o->op_next->op_next->op_next->op_type == OP_PADHV
+		)
+		&& !(o->op_next->op_next->op_next->op_private & ~OPpLVAL_INTRO)
+		&& o->op_next->op_next->op_next->op_next && o->op_next->op_next->op_next->op_next->op_type == OP_NEXTSTATE
+		&& (!CopLABEL((COP*)o)) /* Don't mess with labels */
+		&& (!CopLABEL((COP*)o->op_next->op_next)) /* ... */
+	    ) {
+		OP *first;
+		OP *last;
+		OP *newop;
+
+		first = o->op_next;
+		last = o->op_next->op_next->op_next;
+
+		newop = newLISTOP(OP_LIST, 0, first, last);
+		newop->op_flags |= OPf_PARENS;
+		newop->op_flags = (newop->op_flags & ~OPf_WANT) | OPf_WANT_VOID;
+
+		/* Kill nextstate2 between padop1/padop2 */
+		op_free(first->op_next);
+
+		first->op_next = last;                /* padop2 */
+		first->op_sibling = last;             /* ... */
+		o->op_next = cUNOPx(newop)->op_first; /* pushmark */
+		o->op_next->op_next = first;          /* padop1 */
+		o->op_next->op_sibling = first;       /* ... */
+		newop->op_next = last->op_next;       /* nextstate3 */
+		newop->op_sibling = last->op_sibling;
+		last->op_next = newop;                /* listop */
+		last->op_sibling = NULL;
+		o->op_sibling = newop;                /* ... */
+
+		newop->op_flags = (newop->op_flags & ~OPf_WANT) | OPf_WANT_VOID;
+
+		/* Ensure pushmark has this flag if padops do */
+		if (first->op_flags & OPf_MOD && last->op_flags & OPf_MOD) {
+		    o->op_next->op_flags |= OPf_MOD;
+		}
+
+		break;
+	    }
+
 	    /* Two NEXTSTATEs in a row serve no purpose. Except if they happen
 	       to carry two labels. For now, take the easier option, and skip
 	       this optimisation if the first NEXTSTATE has a label.  */
