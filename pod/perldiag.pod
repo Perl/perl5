@@ -3686,11 +3686,11 @@ C<no warnings 'non_unicode';>.
 =item Operation "%s" returns its argument for UTF-16 surrogate U+%X
 
 (S surrogate) You performed an operation requiring Unicode
-semantics on a Unicode surrogate.  Unicode frowns upon the use of
-surrogates for anything but storing strings in UTF-16, but semantics
-are (reluctantly) defined for the surrogates, and they are to do
-nothing for this operation.  Because the use of surrogates can be
-dangerous, Perl warns.
+semantics on a Unicode surrogate.  Unicode frowns upon the use
+of surrogates for anything but storing strings in UTF-16, but
+semantics are (reluctantly) defined for the surrogates, and
+they are to do nothing for this operation.  Because the use of
+surrogates can be dangerous, Perl warns.
 
 If the operation shown is "ToFold", it means that case-insensitive
 matching in a regular expression was done on the code point.
