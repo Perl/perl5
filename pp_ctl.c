@@ -3815,17 +3815,17 @@ PP(pp_require)
 	    for (i = 0; i <= AvFILL(ar); i++) {
 		SV * const dirsv = *av_fetch(ar, i, TRUE);
 
-		if (SvTIED_mg((const SV *)ar, PERL_MAGIC_tied))
-		    mg_get(dirsv);
+		SvGETMAGIC(dirsv);
 		if (SvROK(dirsv)) {
 		    int count;
 		    SV **svp;
 		    SV *loader = dirsv;
 
 		    if (SvTYPE(SvRV(loader)) == SVt_PVAV
-			&& !sv_isobject(loader))
+			&& !SvOBJECT(SvRV(loader)))
 		    {
 			loader = *av_fetch(MUTABLE_AV(SvRV(loader)), 0, TRUE);
+			SvGETMAGIC(loader);
 		    }
 
 		    Perl_sv_setpvf(aTHX_ namesv, "/loader/0x%"UVxf"/%s",
@@ -3846,6 +3846,11 @@ PP(pp_require)
 		    PUSHs(dirsv);
 		    PUSHs(nsv);
 		    PUTBACK;
+		    if (SvGMAGICAL(loader)) {
+			SV *l = sv_newmortal();
+			sv_setsv_nomg(l, loader);
+			loader = l;
+		    }
 		    if (sv_isobject(loader))
 			count = call_method("INC", G_ARRAY);
 		    else
@@ -3946,7 +3951,7 @@ PP(pp_require)
 		    STRLEN dirlen;
 
 		    if (SvOK(dirsv)) {
-			dir = SvPV_const(dirsv, dirlen);
+			dir = SvPV_nomg_const(dirsv, dirlen);
 		    } else {
 			dir = "";
 			dirlen = 0;
