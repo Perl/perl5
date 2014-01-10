@@ -7468,7 +7468,7 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
                     match = TRUE;
                 }
             }
-	    else if (ANYOF_POSIXL_TEST_ANY_SET(n)) {
+	    if (! match && ANYOF_POSIXL_TEST_ANY_SET(n)) {
 
                 /* The data structure is arranged so bits 0, 2, 4, ... are set
                  * if the class includes the Posix character class given by
