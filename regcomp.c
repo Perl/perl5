@@ -7634,7 +7634,6 @@ Perl__new_invlist(pTHX_ IV initial_size)
 
     return new_list;
 }
-#endif
 
 SV*
 Perl__new_invlist_C_array(pTHX_ const UV* const list)
@@ -7689,6 +7688,7 @@ Perl__new_invlist_C_array(pTHX_ const UV* const list)
 
     return invlist;
 }
+#endif /* ifndef PERL_IN_XSUB_RE */
 
 STATIC void
 S_invlist_extend(pTHX_ SV* const invlist, const UV new_max)
