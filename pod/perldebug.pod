@@ -68,9 +68,9 @@ On the given program identified by C<program_name>.
 
 Interactively supply an arbitrary C<expression> using C<-e>.
 
-=item perl -d:Ptkdb program_name
+=item perl -d:ptkdb program_name
 
-Debug a given program via the C<Devel::Ptkdb> GUI.
+Debug a given program via the C<Devel::ptkdb> GUI.
 
 =item perl -dt threaded_program_name
 
