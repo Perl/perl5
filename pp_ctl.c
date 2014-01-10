@@ -3671,9 +3671,7 @@ PP(pp_require)
     STRLEN unixlen;
 #ifdef VMS
     int vms_unixname = 0;
-    char *unixnamebuf;
     char *unixdir;
-    char *unixdirbuf;
 #endif
     const char *tryname = NULL;
     SV *namesv = NULL;
@@ -3768,8 +3766,9 @@ PP(pp_require)
      * name can be translated to UNIX.
      */
     
-    if ((unixnamebuf = SvPVX(sv_2mortal(newSVpv("", VMS_MAXRSS-1))))
-        && (unixname = tounixspec(name, unixnamebuf)) != NULL) {
+    if ((unixname =
+	  tounixspec(name, SvPVX(sv_2mortal(newSVpv("", VMS_MAXRSS-1)))))
+	 != NULL) {
 	unixlen = strlen(unixname);
 	vms_unixname = 1;
     }
@@ -3960,8 +3959,9 @@ PP(pp_require)
 		    if (!IS_SAFE_SYSCALL(dir, dirlen, "@INC entry", "require"))
 			continue;
 #ifdef VMS
-		    if (((unixdirbuf = SvPVX(sv_2mortal(newSVpv("", VMS_MAXRSS-1)))) == NULL)
-			|| ((unixdir = tounixpath(dir, unixdirbuf)) == NULL))
+		    if ((unixdir =
+			  tounixpath(dir, SvPVX(sv_2mortal(newSVpv("", VMS_MAXRSS-1)))))
+			 == NULL)
 			continue;
 		    sv_setpv(namesv, unixdir);
 		    sv_catpv(namesv, unixname);
