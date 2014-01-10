@@ -1946,8 +1946,7 @@ queue of such routines has been prematurely ended.
 
 =item False [] range "%s" in regex; marked by S<<-- HERE> in m/%s/
 
-(W regexp) (fatal within S<C<(?[   ])>>)
-A character class range must start and end at a literal
+(W regexp)(F) A character class range must start and end at a literal
 character, not another character class like C<\d> or C<[:alpha:]>.  The "-"
 in your false range is interpreted as a literal "-".  In a C<(?[...])>
 construct, this is an error, rather than a warning.  Consider quoting
@@ -2513,11 +2512,11 @@ L<perlfunc/sprintf>.
 =item Invalid escape in the specified encoding in regex; marked by
 S<<-- HERE> in m/%s/
 
-(W regexp) (fatal within S<C<(?[   ])>>)
-The numeric escape (for example C<\xHH>) of value < 256
+(W regexp)(F) The numeric escape (for example C<\xHH>) of value < 256
 didn't correspond to a single character through the conversion
 from the encoding specified by the encoding pragma.
-The escape was replaced with REPLACEMENT CHARACTER (U+FFFD) instead.
+The escape was replaced with REPLACEMENT CHARACTER (U+FFFD)
+instead, except within S<C<(?[   ])>>, where it is a fatal error.
 The S<<-- HERE> shows whereabouts in the regular expression the
 escape was discovered.
 
