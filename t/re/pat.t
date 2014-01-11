@@ -1515,11 +1515,14 @@ EOP
                             qr/\s?c/a
                             qr/[[:alpha:]]?c/u
     )) {
+      SKIP: {
+        skip "no re-debug under miniperl" if is_miniperl;
         my $prog = <<"EOP";
 use re qw(Debug COMPILE);
 $re;
 EOP
         fresh_perl_like($prog, qr/synthetic stclass/, "stderr", "$re generates a synthetic start class");
+      }
     }
 
 
