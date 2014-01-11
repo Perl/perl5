@@ -3545,22 +3545,38 @@ EOM
                 nto*|*-nto-*)
                     # Will load qnx.sh, which should change osname to nto
                     osname=qnx
+                    osvers=''
                     ;;
                 *linux-android*)
                     # Catch arm-linux-androideabi, mipsel-linux-android,
                     # and i686-linux-android
                     osname=linux-android
+                    osvers=''
                     ;;
                 *linux*)
                     # Something like arm-linux-gnueabihf is really just
                     # plain linux.
                     osname=linux
+                    osvers=''
+                    ;;
+                *solaris*|*sunos*)
+                    osname=solaris
+                    # XXX perhaps we should just assume
+                    # osvers to be 2, or maybe take the value
+                    # from targetarch. Using $run before the
+                    # hints are run is somewhat icky.
+                    set X `$run $uname -a 2>/dev/null`
+                    shift
+                    case "$3" in
+                        5*) osvers=`echo $3 | $sed 's/^5/2/g'` ;;
+                        *)  osvers="$3" ;;
+                    esac
                     ;;
                 *)
                     osname=`echo $targetarch|sed 's,^[^-]*-,,'`
+                    osvers=''
                 ;;
             esac
-            osvers=''
             ;;
         esac
 
