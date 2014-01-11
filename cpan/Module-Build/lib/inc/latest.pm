@@ -4,7 +4,7 @@ use if $] >= 5.019, 'deprecate';
 
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.4203';
+$VERSION = '0.4204';
 $VERSION = eval $VERSION;
 
 use Carp;

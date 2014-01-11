@@ -6,7 +6,7 @@ use strict;
 use vars qw($VERSION);
 use warnings;
 
-$VERSION = '0.4203';
+$VERSION = '0.4204';
 $VERSION = eval $VERSION;
 BEGIN { require 5.006001 }
 
@@ -2578,8 +2578,8 @@ sub ACTION_help {
 
   print <<EOF;
 
- Usage: $0 <action> arg1=value arg2=value ...
- Example: $0 test verbose=1
+ Usage: $0 <action> --arg1=value --arg2=value ...
+ Example: $0 test --verbose=1
 
  Actions defined:
 EOF
@@ -4606,7 +4606,7 @@ my %prereq_map = (
   test_requires => [ qw/test requires/ ],
   test_recommends => [ qw/test recommends/ ],
   recommends => [ qw/runtime recommends/ ],
-  conflicts => [ qw/build conflicts/ ],
+  conflicts => [ qw/runtime conflicts/ ],
 );
 
 sub _normalize_prereqs {
@@ -4694,7 +4694,8 @@ sub _upconvert_metapiece {
       $ret{$key} = $converter->($input->{$key});
     }
     else {
-      warn "Unknown key $key\n" unless $key =~ / \A x_ /xi;
+      my $out_key = $key =~ / \A x_ /xi ? $key : "x_$key";
+      $ret{$out_key} = $input->{$key};
     }
   }
   return \%ret;
@@ -5510,16 +5511,18 @@ sub _infer_xs_spec {
   $spec{archdir} = File::Spec->catdir($self->blib, 'arch', 'auto',
                                       @d, $file_base);
 
-  $spec{bs_file} = File::Spec->catfile($spec{archdir}, "${file_base}.bs");
-
-  $spec{lib_file} = File::Spec->catfile($spec{archdir},
-                                        "${file_base}.".$cf->get('dlext'));
-
   $spec{c_file} = File::Spec->catfile( $spec{src_dir},
                                        "${file_base}.c" );
 
   $spec{obj_file} = File::Spec->catfile( $spec{src_dir},
                                          "${file_base}".$cf->get('obj_ext') );
+
+  require DynaLoader;
+  my $modfname = defined &DynaLoader::mod2fname ? DynaLoader::mod2fname([@d, $file_base]) : $file_base;
+
+  $spec{bs_file} = File::Spec->catfile($spec{archdir}, "$modfname.bs");
+
+  $spec{lib_file} = File::Spec->catfile($spec{archdir}, "$modfname.".$cf->get('dlext'));
 
   return \%spec;
 }
