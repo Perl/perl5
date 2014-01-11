@@ -5467,7 +5467,7 @@ $cat >findhdr <<EOF
 $startsh
 wanted=\$1
 name=''
-for usrincdir in $usrinc
+for usrincdir in $incpth
 do
 	if test -f \$usrincdir/\$wanted; then
 		echo "\$usrincdir/\$wanted"
