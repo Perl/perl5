@@ -18771,10 +18771,10 @@ esac
 
 : check for ordering of bytes in a UV
 echo " "
-case "$usecrosscompile$multiarch" in
+case "$multiarch" in
 *$define*)
 	$cat <<EOM
-You seem to be either cross-compiling or doing a multiarchitecture build,
+You seem to be doing a multiarchitecture build,
 skipping the byteorder check.
 
 EOM
