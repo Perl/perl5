@@ -1348,7 +1348,7 @@ S_doform(pTHX_ CV *cv, GV *gv, OP *retop)
 
     PERL_ARGS_ASSERT_DOFORM;
 
-    if (cv && CvCLONE(cv))
+    if (CvCLONE(cv))
 	cv = MUTABLE_CV(sv_2mortal(MUTABLE_SV(cv_clone(cv))));
 
     ENTER;
