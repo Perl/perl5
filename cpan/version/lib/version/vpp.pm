@@ -117,13 +117,12 @@ sub currstr {
 
 package version::vpp;
 
-use 5.005_04;
+use 5.006002;
 use strict;
 
-use POSIX qw/locale_h/;
-use locale;
+use Config;
 use vars qw($VERSION $CLASS @ISA $LAX $STRICT);
-$VERSION = 0.9906;
+$VERSION = 0.9907;
 $CLASS = 'version::vpp';
 
 require version::regex;
@@ -479,7 +478,7 @@ sub scan_version {
     if ($errstr) {
 	# 'undef' is a special case and not an error
 	if ( $s ne 'undef') {
-	    use Carp;
+	    require Carp;
 	    Carp::croak($errstr);
 	}
     }
@@ -654,13 +653,17 @@ sub new
 	    return $self;
 	}
 
-	my $currlocale = setlocale(LC_ALL);
+	if ($Config{d_setlocale}) {
+	    use POSIX qw/locale_h/;
+	    use if $Config{d_setlocale}, 'locale';
+	    my $currlocale = setlocale(LC_ALL);
 
-	# if the current locale uses commas for decimal points, we
-	# just replace commas with decimal places, rather than changing
-	# locales
-	if ( localeconv()->{decimal_point} eq ',' ) {
-	    $value =~ tr/,/./;
+	    # if the current locale uses commas for decimal points, we
+	    # just replace commas with decimal places, rather than changing
+	    # locales
+	    if ( localeconv()->{decimal_point} eq ',' ) {
+		$value =~ tr/,/./;
+	    }
 	}
 
 	if ( not defined $value or $value =~ /^undef$/ ) {
