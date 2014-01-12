@@ -96,6 +96,15 @@ S_maybe_protect_ro(pTHX_ struct perl_memory_debug_header *header)
 # define maybe_protect_ro(foo) NOOP
 #endif
 
+#if defined(PERL_TRACK_MEMPOOL) || defined(PERL_DEBUG_READONLY_COW)
+ /* Use memory_debug_header */
+# define USE_MDH
+# if (defined(PERL_POISON) && defined(PERL_TRACK_MEMPOOL)) \
+   || defined(PERL_DEBUG_READONLY_COW)
+#  define MDH_HAS_SIZE
+# endif
+#endif
+
 /* paranoid version of system's malloc() */
 
 Malloc_t
@@ -122,7 +131,7 @@ Perl_safesysmalloc(MEM_SIZE size)
 #endif
     PERL_ALLOC_CHECK(ptr);
     if (ptr != NULL) {
-#if defined(PERL_TRACK_MEMPOOL) || defined(PERL_DEBUG_READONLY_COW)
+#ifdef USE_MDH
 	struct perl_memory_debug_header *const header
 	    = (struct perl_memory_debug_header *)ptr;
 #endif
@@ -144,8 +153,7 @@ Perl_safesysmalloc(MEM_SIZE size)
 	header->readonly = 0;
 #  endif
 #endif
-#if (defined(PERL_POISON) && defined(PERL_TRACK_MEMPOOL)) \
-  || defined(PERL_DEBUG_READONLY_COW)
+#ifdef MDH_HAS_SIZE
 	header->size = size;
 #endif
         ptr = (Malloc_t)((char*)ptr+sTHX);
@@ -190,7 +198,7 @@ Perl_safesysrealloc(Malloc_t where,MEM_SIZE size)
 
     if (!where)
 	return safesysmalloc(size);
-#if defined(PERL_TRACK_MEMPOOL) || defined(PERL_DEBUG_READONLY_COW)
+#ifdef USE_MDH
     where = (Malloc_t)((char*)where-sTHX);
     size += sTHX;
     {
@@ -212,7 +220,7 @@ Perl_safesysrealloc(Malloc_t where,MEM_SIZE size)
 	}
 #  endif
 # endif
-# if defined(PERL_POISON) || defined(PERL_DEBUG_READONLY_COW)
+# ifdef MDH_HAS_SIZE
 	header->size = size;
 # endif
     }
@@ -298,14 +306,13 @@ Perl_safesysfree(Malloc_t where)
 #endif
     DEBUG_m( PerlIO_printf(Perl_debug_log, "0x%"UVxf": (%05ld) free\n",PTR2UV(where),(long)PL_an++));
     if (where) {
-#if defined(PERL_TRACK_MEMPOOL) || defined(PERL_DEBUG_READONLY_COW)
+#ifdef USE_MDH
         where = (Malloc_t)((char*)where-sTHX);
 	{
 	    struct perl_memory_debug_header *const header
 		= (struct perl_memory_debug_header *)where;
 
-# if (defined(PERL_POISON) && defined(PERL_TRACK_MEMPOOL)) \
-   || defined(PERL_DEBUG_READONLY_COW)
+# ifdef MDH_HAS_SIZE
 	    const MEM_SIZE size = header->size;
 # endif
 # ifdef PERL_TRACK_MEMPOOL
@@ -361,21 +368,19 @@ Perl_safesyscalloc(MEM_SIZE count, MEM_SIZE size)
     dTHX;
 #endif
     Malloc_t ptr;
-#if defined(PERL_TRACK_MEMPOOL) || defined(DEBUGGING) \
- || defined(PERL_DEBUG_READONLY_COW)
+#if defined(USE_MDH) || defined(DEBUGGING)
     MEM_SIZE total_size = 0;
 #endif
 
     /* Even though calloc() for zero bytes is strange, be robust. */
     if (size && (count <= MEM_SIZE_MAX / size)) {
-#if defined(PERL_TRACK_MEMPOOL) || defined(DEBUGGING) \
- || defined(PERL_DEBUG_READONLY_COW)
+#if defined(USE_MDH) || defined(DEBUGGING)
 	total_size = size * count;
 #endif
     }
     else
 	croak_memory_wrap();
-#if defined(PERL_TRACK_MEMPOOL) || defined(PERL_DEBUG_READONLY_COW)
+#ifdef USE_MDH
     if (sTHX <= MEM_SIZE_MAX - (MEM_SIZE)total_size)
 	total_size += sTHX;
     else
@@ -408,7 +413,7 @@ Perl_safesyscalloc(MEM_SIZE count, MEM_SIZE size)
     PERL_ALLOC_CHECK(ptr);
     DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%"UVxf": (%05ld) calloc %ld x %ld bytes\n",PTR2UV(ptr),(long)PL_an++,(long)count,(long)total_size));
     if (ptr != NULL) {
-#if defined(PERL_TRACK_MEMPOOL) || defined(PERL_DEBUG_READONLY_COW)
+#ifdef USE_MDH
 	{
 	    struct perl_memory_debug_header *const header
 		= (struct perl_memory_debug_header *)ptr;
@@ -429,8 +434,7 @@ Perl_safesyscalloc(MEM_SIZE count, MEM_SIZE size)
 	    header->readonly = 0;
 #    endif
 #  endif
-#  if (defined(PERL_POISON) && defined(PERL_TRACK_MEMPOOL)) \
-    || defined(PERL_DEBUG_READONLY_COW)
+#  ifdef MDH_HAS_SIZE
 	    header->size = total_size;
 #  endif
 	    ptr = (Malloc_t)((char*)ptr+sTHX);
