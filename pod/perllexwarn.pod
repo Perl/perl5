@@ -388,7 +388,7 @@ When run it produces this output
     Useless use of length in void context at fatal line 7.  
 
 The scope where C<length> is used has escalated the C<void> warnings
-category into a fatal error, so the program terminates immediately it
+category into a fatal error, so the program terminates immediately when it
 encounters the warning.
 
 To explicitly turn off a "FATAL" warning you just disable the warning
