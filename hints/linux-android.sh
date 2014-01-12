@@ -244,3 +244,5 @@ fi # Cross-compiling with adb
 if $test "X$hostosname" = "Xdarwin"; then
   firstmakefile=GNUmakefile;
 fi
+
+osvers="`$run getprop ro.build.version.release`"
