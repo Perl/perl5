@@ -10620,7 +10620,7 @@ Perl_ck_entersub_args_core(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 	                           )
 	                        );
 	}
-	assert(0);
+	NOT_REACHED;
     }
     else {
 	OP *prev, *cvop;
