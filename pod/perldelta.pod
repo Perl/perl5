@@ -157,6 +157,12 @@ The libnet module collection has been upgraded from version 1.23 to 1.24.
 
 The handling of CRLF characters in L<Net::FTP> has been fixed.
 
+=item *
+
+L<perl5db.pl> has been upgraded from version 1.42 to 1.43
+
+Fix a crash in tab completion, where available. [perl #120827]
+
 =back
 
 =head2 Removed Modules and Pragmata
