@@ -72,7 +72,7 @@ sub _out_contents
     rc(
         <<'EOF',
 
-&parse_options("NonStop=0 ReadLine=0 TTY=db.out LineInfo=db.out");
+&parse_options("NonStop=0 ReadLine=0 TTY=db.out");
 
 sub afterinit {
     push(@DB::typeahead,
@@ -267,7 +267,7 @@ sub _quote
 sub _run {
     my $self = shift;
 
-    my $rc = qq{&parse_options("NonStop=0 TTY=db.out LineInfo=db.out");\n};
+    my $rc = qq{&parse_options("NonStop=0 TTY=db.out");\n};
 
     $rc .= join('',
         map { "$_\n"}
@@ -1235,6 +1235,7 @@ DebugWrap->new({
     $wrapper->contents_like(
         qr/
             $line_out
+            auto\(-\d+\)\s+DB<\d+>\s+\.\n
             $line_out
         /msx,
         'Test the "." command',
@@ -2380,6 +2381,10 @@ DebugWrap->new({
     $wrapper->contents_like(qr/
         ^main::\([^:]+:28\):\n
         28:\s+myfunc\(\);\n
+        auto\(-\d+\)\s+DB<1>\s+t\n
+        Trace\ =\ on\n
+        auto\(-\d+\)\s+DB<1>\s+b\ 18\n
+        auto\(-\d+\)\s+DB<2>\s+c\n
         main::myfunc\([^:]+:25\):\n
         25:\s+bar\(\);\n
         /msx,
@@ -2407,10 +2412,14 @@ DebugWrap->new({
     $wrapper->contents_like(qr/
         ^main::\([^:]+:28\):\n
         28:\s+myfunc\(\);\n
+        auto\(-\d+\)\s+DB<1>\s+o\ AutoTrace\n
+        \s+AutoTrace\s+=\s+'1'\n
+        auto\(-\d+\)\s+DB<2>\s+b\ 18\n
+        auto\(-\d+\)\s+DB<3>\s+c\n
         main::myfunc\([^:]+:25\):\n
         25:\s+bar\(\);\n
         /msx,
-        'Test the t command with function calls.',
+        'Test the o AutoTrace command with function calls.',
     );
 }
 
