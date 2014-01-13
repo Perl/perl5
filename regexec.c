@@ -7454,7 +7454,7 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
     if (c < 256) {
 	if (ANYOF_BITMAP_TEST(n, c))
 	    match = TRUE;
-	else if (flags & ANYOF_NON_UTF8_LATIN1_ALL
+	else if (flags & ANYOF_NON_UTF8_NON_ASCII_ALL
 		&& ! utf8_target
 		&& ! isASCII(c))
 	{

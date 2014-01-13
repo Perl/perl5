@@ -377,7 +377,7 @@ struct regnode_ssc {
 
 /* Match all Latin1 characters that aren't ASCII when the target string is not
  * in utf8. */
-#define ANYOF_NON_UTF8_LATIN1_ALL 0x80
+#define ANYOF_NON_UTF8_NON_ASCII_ALL 0x80
 
 #define ANYOF_FLAGS_ALL		(0xff)
 
