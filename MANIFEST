@@ -4909,6 +4909,7 @@ t/io/read.t			See if read works
 t/io/say.t			See if say works
 t/io/sem.t			See if SysV semaphores work
 t/io/shm.t			See if SysV shared memory works
+t/io/socket.t			See if socket functions work
 t/io/tell.t			See if file seeking works
 t/io/through.t			See if pipe passes data intact
 t/io/utf8.t			See if file seeking works

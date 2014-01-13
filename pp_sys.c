@@ -1711,6 +1711,14 @@ PP(pp_sysread)
 	if (!(IoFLAGS(io) & IOf_UNTAINT))
 	    SvTAINTED_on(bufsv);
 	SP = ORIGMARK;
+#if defined(__CYGWIN__)
+        /* recvfrom() on cygwin doesn't set bufsize at all for
+           connected sockets, leaving us with trash in the returned
+           name, so use the same test as the Win32 code to check if it
+           wasn't set, and set it [perl #118843] */
+        if (bufsize == sizeof namebuf)
+            bufsize = 0;
+#endif
 	sv_setpvn(TARG, namebuf, bufsize);
 	PUSHs(TARG);
 	RETURN;
