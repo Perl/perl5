@@ -12,7 +12,7 @@ use IO::Socket;
 use Carp;
 
 @ISA = qw(IO::Socket);
-$VERSION = "1.25_01";
+$VERSION = "1.26";
 $VERSION = eval $VERSION;
 
 IO::Socket::UNIX->register_domain( AF_UNIX );
@@ -73,6 +73,28 @@ IO::Socket::UNIX - Object interface for AF_UNIX domain sockets
 =head1 SYNOPSIS
 
     use IO::Socket::UNIX;
+
+    my $SOCK_PATH = "$ENV{HOME}/unix-domain-socket-test.sock";
+
+    # Server:
+    my $server = IO::Socket::UNIX->new(
+        Type => SOCK_STREAM(),
+        Local => $SOCK_PATH,
+        Listen => 1,
+    );
+
+    my $count = 1;
+    while (my $conn = $server->accept()) {
+        $conn->print("Hello " . ($count++) . "\n");
+    }
+
+    # Client:
+    my $client = IO::Socket::UNIX->new(
+        Type => SOCK_STREAM(),
+        Peer => $SOCK_PATH,
+    );
+
+    # Now read and write from $client
 
 =head1 DESCRIPTION
 
