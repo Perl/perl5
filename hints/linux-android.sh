@@ -249,3 +249,16 @@ if $test "X$hostosname" = "Xdarwin"; then
 fi
 
 osvers="`$run getprop ro.build.version.release`"
+
+# We want osname to be linux-android during Configure,
+# but plain 'android' afterwards.
+case "$src" in
+    /*) pwd="$src";;
+    *)  pwd=`test -f ../Configure && cd ..; pwd`
+        ;;
+esac
+
+$cat <<EOO >> $pwd/config.arch
+
+osname='android'
+EOO
