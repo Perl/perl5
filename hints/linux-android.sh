@@ -20,6 +20,12 @@ d_libname_unique='define'
 
 # On Android the shell is /system/bin/sh:
 targetsh='/system/bin/sh'
+case "$usecrosscompile" in
+define) ;;
+   # If we aren't cross-compiling, then sh should also point
+   # to /system/bin/sh.
+*) sh=$targetsh ;;
+esac
 
 # Make sure that we look for libm
 libswanted="$libswanted m"
@@ -244,9 +250,13 @@ $chmod a+rx $from
 
 fi # Cross-compiling with adb
 
+case "$usecrosscompile" in
+define)
 if $test "X$hostosname" = "Xdarwin"; then
   firstmakefile=GNUmakefile;
 fi
+;;
+esac
 
 osvers="`$run getprop ro.build.version.release`"
 
