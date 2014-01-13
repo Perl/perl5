@@ -1960,20 +1960,23 @@ if test "X$sysroot" != X; then
   case "$cc" in
     *gcc*|*g++*)
         echo "Using $sysroot to find your headers and libraries, adding to ccflags"
+        # _sysroot is used in places where we need --sysroot=foo
+        # but using the rest of the flags could cause issues.
+        _sysroot="--sysroot=$sysroot";
         case "$ccflags" in
             *sysroot*) ;;
             'undef'|*)
-                ccflags="$ccflags --sysroot=$sysroot"
+                ccflags="$ccflags $_sysroot"
         esac
         case "$ldflags" in
             *sysroot*) ;;
             'undef'|*)
-                ldflags="$ldflags --sysroot=$sysroot"
+                ldflags="$ldflags $_sysroot"
         esac
         case "$cppflags" in
             *sysroot*) ;;
             'undef'|*)
-                cppflags="$cppflags --sysroot=$sysroot"
+                cppflags="$cppflags $_sysroot"
         esac
         # lddlflags updated below in lddlflags section;
         # same with cccdlflags
@@ -5152,7 +5155,7 @@ checkccflag='check=$1; flag=$2; callback=$3;
 echo " ";
 echo "Checking if your compiler accepts $flag" 2>&1;
 echo "int main(void) { return 0; }" > gcctest.c;
-if $cc -O2 $flag -o gcctest gcctest.c 2>gcctest.out && ./gcctest; then
+if $cc $_sysroot -O2 $flag -o gcctest gcctest.c 2>gcctest.out && $run ./gcctest; then
     echo "Yes, it does." 2>&1;
     if $test -s gcctest.out ; then
         echo "But your platform does not like it:";
