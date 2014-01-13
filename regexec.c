@@ -1497,7 +1497,6 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
     /* We know what class it must start with. */
     switch (OP(c)) {
     case ANYOF:
-    case ANYOF_SYNTHETIC:
         if (utf8_target) {
             REXEC_FBC_UTF8_CLASS_SCAN(
                       reginclass(prog, c, (U8*)s, (U8*) strend, utf8_target));
@@ -7536,7 +7535,7 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
 		     || (utf8_target
 		         && (c >=256
 			     || (! (flags & ANYOF_LOCALE))
-			     || OP(n) == ANYOF_SYNTHETIC))))
+			     || is_ANYOF_SYNTHETIC(n)))))
 	{
 	    SV * const sw = core_regclass_swash(prog, n, TRUE, 0);
 	    if (sw) {

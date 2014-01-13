@@ -863,7 +863,7 @@ S_ssc_anything(pTHX_ regnode_ssc *ssc)
 
     PERL_ARGS_ASSERT_SSC_ANYTHING;
 
-    assert(OP(ssc) == ANYOF_SYNTHETIC);
+    assert(is_ANYOF_SYNTHETIC(ssc));
 
     ssc->invlist = sv_2mortal(_new_invlist(2)); /* mortalize so won't leak */
     _append_range_to_invlist(ssc->invlist, 0, UV_MAX);
@@ -883,7 +883,7 @@ S_ssc_is_anything(pTHX_ const regnode_ssc *ssc)
 
     PERL_ARGS_ASSERT_SSC_IS_ANYTHING;
 
-    assert(OP(ssc) == ANYOF_SYNTHETIC);
+    assert(is_ANYOF_SYNTHETIC(ssc));
 
     if (! (ANYOF_FLAGS(ssc) & ANYOF_EMPTY_STRING)) {
         return FALSE;
@@ -923,7 +923,7 @@ S_ssc_init(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc)
     PERL_ARGS_ASSERT_SSC_INIT;
 
     Zero(ssc, 1, regnode_ssc);
-    OP(ssc) = ANYOF_SYNTHETIC;
+    set_ANYOF_SYNTHETIC(ssc);
     ARG_SET(ssc, ANYOF_NONBITMAP_EMPTY);
     ssc_anything(ssc);
 
@@ -959,7 +959,7 @@ S_ssc_is_cp_posixl_init(pTHX_ const RExC_state_t *pRExC_state,
 
     PERL_ARGS_ASSERT_SSC_IS_CP_POSIXL_INIT;
 
-    assert(OP(ssc) == ANYOF_SYNTHETIC);
+    assert(is_ANYOF_SYNTHETIC(ssc));
 
     invlist_iterinit(ssc->invlist);
     ret = invlist_iternext(ssc->invlist, &start, &end)
@@ -1105,11 +1105,11 @@ S_ssc_and(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
 
     PERL_ARGS_ASSERT_SSC_AND;
 
-    assert(OP(ssc) == ANYOF_SYNTHETIC);
+    assert(is_ANYOF_SYNTHETIC(ssc));
 
     /* 'and_with' is used as-is if it too is an SSC; otherwise have to extract
      * the code point inversion list and just the relevant flags */
-    if (OP(and_with) == ANYOF_SYNTHETIC) {
+    if (is_ANYOF_SYNTHETIC(and_with)) {
         anded_cp_list = and_with->invlist;
         anded_flags = ANYOF_FLAGS(and_with);
 
@@ -1172,7 +1172,7 @@ S_ssc_and(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
      * */
 
     if ((ANYOF_FLAGS(and_with) & ANYOF_INVERT)
-        && OP(and_with) != ANYOF_SYNTHETIC)
+        && ! is_ANYOF_SYNTHETIC(and_with))
     {
         unsigned int i;
 
@@ -1230,13 +1230,13 @@ S_ssc_and(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
         } /* else ssc already has no posixes */
     } /* else: Not inverted.  This routine is a no-op if 'and_with' is an SSC
          in its initial state */
-    else if (OP(and_with) != ANYOF_SYNTHETIC
+    else if (! is_ANYOF_SYNTHETIC(and_with)
              || ! ssc_is_cp_posixl_init(pRExC_state, and_with))
     {
         /* But if 'ssc' is in its initial state, the result is just 'and_with';
          * copy it over 'ssc' */
         if (ssc_is_cp_posixl_init(pRExC_state, ssc)) {
-            if (OP(and_with) == ANYOF_SYNTHETIC) {
+            if (is_ANYOF_SYNTHETIC(and_with)) {
                 StructCopy(and_with, ssc, regnode_ssc);
             }
             else {
@@ -1273,11 +1273,11 @@ S_ssc_or(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
 
     PERL_ARGS_ASSERT_SSC_OR;
 
-    assert(OP(ssc) == ANYOF_SYNTHETIC);
+    assert(is_ANYOF_SYNTHETIC(ssc));
 
     /* 'or_with' is used as-is if it too is an SSC; otherwise have to extract
      * the code point inversion list and just the relevant flags */
-    if (OP(or_with) == ANYOF_SYNTHETIC) {
+    if (is_ANYOF_SYNTHETIC(or_with)) {
         ored_cp_list = or_with->invlist;
         ored_flags = ANYOF_FLAGS(or_with);
     }
@@ -1308,7 +1308,7 @@ S_ssc_or(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
      * */
 
     if ((ANYOF_FLAGS(or_with) & ANYOF_INVERT)
-        && OP(or_with) != ANYOF_SYNTHETIC)
+        && ! is_ANYOF_SYNTHETIC(or_with))
     {
         /* We ignore P2, leaving P1 going forward */
     }
@@ -1341,7 +1341,7 @@ S_ssc_union(pTHX_ regnode_ssc *ssc, SV* const invlist, const bool invert2nd)
 {
     PERL_ARGS_ASSERT_SSC_UNION;
 
-    assert(OP(ssc) == ANYOF_SYNTHETIC);
+    assert(is_ANYOF_SYNTHETIC(ssc));
 
     _invlist_union_maybe_complement_2nd(ssc->invlist,
                                         invlist,
@@ -1356,7 +1356,7 @@ S_ssc_intersection(pTHX_ regnode_ssc *ssc,
 {
     PERL_ARGS_ASSERT_SSC_INTERSECTION;
 
-    assert(OP(ssc) == ANYOF_SYNTHETIC);
+    assert(is_ANYOF_SYNTHETIC(ssc));
 
     _invlist_intersection_maybe_complement_2nd(ssc->invlist,
                                                invlist,
@@ -1369,7 +1369,7 @@ S_ssc_add_range(pTHX_ regnode_ssc *ssc, const UV start, const UV end)
 {
     PERL_ARGS_ASSERT_SSC_ADD_RANGE;
 
-    assert(OP(ssc) == ANYOF_SYNTHETIC);
+    assert(is_ANYOF_SYNTHETIC(ssc));
 
     ssc->invlist = _add_range_to_invlist(ssc->invlist, start, end);
 }
@@ -1383,7 +1383,7 @@ S_ssc_cp_and(pTHX_ regnode_ssc *ssc, const UV cp)
 
     PERL_ARGS_ASSERT_SSC_CP_AND;
 
-    assert(OP(ssc) == ANYOF_SYNTHETIC);
+    assert(is_ANYOF_SYNTHETIC(ssc));
 
     cp_list = add_cp_to_invlist(cp_list, cp);
     ssc_intersection(ssc, cp_list,
@@ -1399,7 +1399,7 @@ S_ssc_clear_locale(pTHX_ regnode_ssc *ssc)
 
     PERL_ARGS_ASSERT_SSC_CLEAR_LOCALE;
 
-    assert(OP(ssc) == ANYOF_SYNTHETIC);
+    assert(is_ANYOF_SYNTHETIC(ssc));
 
     ANYOF_POSIXL_ZERO(ssc);
     ANYOF_FLAGS(ssc) &= ~ANYOF_LOCALE_FLAGS;
@@ -1416,7 +1416,7 @@ S_ssc_finalize(pTHX_ RExC_state_t *pRExC_state, regnode_ssc *ssc)
 
     PERL_ARGS_ASSERT_SSC_FINALIZE;
 
-    assert(OP(ssc) == ANYOF_SYNTHETIC);
+    assert(is_ANYOF_SYNTHETIC(ssc));
 
     /* The code in this file assumes that all but these flags aren't relevant
      * to the SSC, except ANYOF_EMPTY_STRING, which should be cleared by the

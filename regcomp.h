@@ -204,6 +204,19 @@ struct regnode_ssc {
     SV* invlist;                        /* list of code points matched */
 };
 
+/*  We take advantage of 'next_off' not otherwise being used in the SSC by
+ *  actually using it: by setting it to 1.  This allows us to test and
+ *  distinguish between an SSC and other ANYOF node types, as 'next_off' cannot
+ *  otherwise be 1, because it is the offset to the next regnode expressed in
+ *  units of regnodes.  Since an ANYOF node contains extra fields, it adds up
+ *  to 12 regnode units on 32-bit systems, (hence the minimum this can be (if
+ *  not 0) is 11 there.  Even if things get tightly packed on a 64-bit system,
+ *  it still would be more than 1. */
+#define set_ANYOF_SYNTHETIC(n) STMT_START{ OP(n) = ANYOF;              \
+                                           NEXT_OFF(n) = 1;            \
+                               } STMT_END
+#define is_ANYOF_SYNTHETIC(n) (OP(n) == ANYOF && NEXT_OFF(n) == 1)
+
 /* XXX fix this description.
    Impose a limit of REG_INFTY on various pattern matching operations
    to limit stack growth and to avoid "infinite" recursions.
@@ -322,10 +335,9 @@ struct regnode_ssc {
  * performance penalty.  Better would be to split it off into a separate node,
  * which actually would improve performance a bit by allowing regexec.c to test
  * for a UTF-8 character being above 255 without having to call a function nor
- * calculate its code point value.  However, this solution might need to have a
- * second node type, ANYOF_SYNTHETIC_ABOVE_LATIN1_ALL.  Several flags are not
- * used in synthetic start class (SSC) nodes, so could be shared should new
- * flags be needed for SSCs. */
+ * calculate its code point value.  Several flags are not used in synthetic
+ * start class (SSC) nodes, so could be shared should new flags be needed for
+ * SSCs. */
 
 /* regexec.c is expecting this to be in the low bit */
 #define ANYOF_INVERT		 0x01
