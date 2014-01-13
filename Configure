@@ -3391,6 +3391,7 @@ EOM
 			case "$3" in
 			*)	osvers="$3" ;;
 			esac
+			$test -f /system/lib/libandroid.so && osname=linux-android
 			;;
 		MiNT)	osname=mint
 			;;
