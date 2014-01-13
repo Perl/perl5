@@ -1335,6 +1335,7 @@ PP(pp_getc)
 	}
 	SvUTF8_on(TARG);
     }
+    else SvUTF8_off(TARG);
     PUSHTARG;
     RETURN;
 }
