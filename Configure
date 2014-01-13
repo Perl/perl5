@@ -5977,7 +5977,7 @@ int main (void)
 EOCP
 	set try
 	if eval $compile_ok; then
-	    libcquad=`./try`
+	    libcquad=`$run ./try`
 	    echo "Your C library's 64-bit functions are $libcquad."
 	else
 	    echo "(I can't seem to compile the test program.)"
@@ -22067,7 +22067,7 @@ echo " "
 case "$val3" in
 "$define") echo "You have POSIX termios.h... good!" >&4;;
 *) if ./Cppsym pyr; then
-		case "`/bin/universe`" in
+		case "`$run /bin/universe`" in
 		ucb) if $test `./findhdr sgtty.h`; then
 				val2="$define"
 				echo "<sgtty.h> found." >&4
