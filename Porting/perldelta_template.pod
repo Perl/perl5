@@ -68,6 +68,8 @@ not usually on concerns over their design.
 
 =over
 
+=item XXX
+
 XXX Note that deprecated modules should be listed here even if they are listed
 as an updated module in the L</Modules and Pragmata> section.
 
