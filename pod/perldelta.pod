@@ -117,7 +117,9 @@ XXX
 
 =item *
 
-L<XXX> has been upgraded from version A.xx to B.yy.
+L<perl5db.pl> has been upgraded from version 1.39_10 to 1.39_11.
+
+Fix a crash in tab completion, where available. [perl #120827]
 
 =back
 
