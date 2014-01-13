@@ -21,6 +21,9 @@ d_libname_unique='define'
 # On Android the shell is /system/bin/sh:
 targetsh='/system/bin/sh'
 
+# Make sure that we look for libm
+libswanted="$libswanted m"
+
 # Down with locales!
 # https://github.com/android/platform_bionic/blob/master/libc/CAVEATS
 d_locconv='undef'
