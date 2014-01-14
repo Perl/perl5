@@ -82,7 +82,7 @@ $| = 1 if $list_all_tests;
 # output into subtests
 my $okays;          # Number of ok's in current subtest
 my $this_iteration; # Number of possible tests in current subtest
-my $count=0;        # Number of subtests = number of total tests
+my $count = 0;      # Number of subtests = number of total tests
 
 sub run_test($$$) {
     my ($test, $todo, $debug) = @_;

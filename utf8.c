@@ -2386,8 +2386,8 @@ Perl__to_utf8_fold_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, U8 flags, b
 
 	if (flags & FOLD_FLAGS_LOCALE) {
 
-            /* Special case these characters, as what normally gets returned
-             * under locale doesn't work */
+            /* Special case these two characters, as what normally gets
+             * returned under locale doesn't work */
             if (UTF8SKIP(p) == sizeof(LATIN_CAPITAL_LETTER_SHARP_S_UTF8) - 1
                 && memEQ((char *) p, LATIN_CAPITAL_LETTER_SHARP_S_UTF8,
                           sizeof(LATIN_CAPITAL_LETTER_SHARP_S_UTF8) - 1))
@@ -2722,7 +2722,7 @@ Perl__core_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 m
 
         /* Here, we have computed the union of all the passed-in data.  It may
          * be that there was an inversion list in the swash which didn't get
-         * touched; otherwise save the one computed one */
+         * touched; otherwise save the computed one */
 	if (! invlist_in_swash_is_valid
             && (int) _invlist_len(swash_invlist) > invlist_swash_boundary)
         {
@@ -3390,6 +3390,9 @@ Perl__swash_inversion_hash(pTHX_ SV* const swash)
     * have two elements, the utf8 for itself, and for 004C.  For 006B, there
     * would be three elements in its array, the utf8 for 006B, 004B and 212A.
     *
+    * Note that there are no elements in the hash for 004B, 004C, 212A.  The
+    * keys are only code points that are folded-to, so it isn't a full closure.
+    *
     * Essentially, for any code point, it gives all the code points that map to
     * it, or the list of 'froms' for that point.
     *
@@ -3530,7 +3533,7 @@ Perl__swash_inversion_hash(pTHX_ SV* const swash)
 			Perl_croak(aTHX_ "panic: hv_store() unexpectedly failed");
 		    }
 
-		    /* For debugging: UV u = valid_utf8_to_uvchr((U8*) SvPVX(*entryp), 0);*/
+		    /* For DEBUG_U: UV u = valid_utf8_to_uvchr((U8*) SvPVX(*entryp), 0);*/
 		    for (j = 0; j <= av_len(from_list); j++) {
 			entryp = av_fetch(from_list, j, FALSE);
 			if (entryp == NULL) {

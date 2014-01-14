@@ -2160,7 +2160,7 @@ Es	|CHECKPOINT|regcppush	|NN const regexp *rex|I32 parenfloor\
 Es	|void	|regcppop	|NN regexp *rex\
 				|NN U32 *maxopenparen_p
 ERsn	|U8*	|reghop3	|NN U8 *s|SSize_t off|NN const U8 *lim
-ERsM	|SV*	|core_regclass_swash|NULLOK const regexp *prog \
+ERsM	|SV*	|core_regclass_swash|NULLOK const regexp *prog             \
 				|NN const struct regnode *node|bool doinit \
 				|NULLOK SV **listsvp
 #ifdef XXX_dmq

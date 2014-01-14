@@ -4744,7 +4744,10 @@ typedef enum {
 
 /* Hints are now stored in a dedicated U32, so the bottom 8 bits are no longer
    special and there is no need for HINT_PRIVATE_MASK for COPs
-   However, bitops store HINT_INTEGER in their op_private.  */
+   However, bitops store HINT_INTEGER in their op_private.
+
+    NOTE: The typical module using these has the bit value hard-coded, so don't
+    blindly change the values of these */
 #define HINT_INTEGER		0x00000001 /* integer pragma */
 #define HINT_STRICT_REFS	0x00000002 /* strict pragma */
 #define HINT_LOCALE		0x00000004 /* locale pragma */

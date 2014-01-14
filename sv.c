@@ -11458,6 +11458,8 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	    eptr = PL_efloatbuf;
 
 #ifdef USE_LOCALE_NUMERIC
+            /* If the decimal point character in the string is UTF-8, make the
+             * output utf8 */
             if (PL_numeric_radix_sv && SvUTF8(PL_numeric_radix_sv)
                 && instr(eptr, SvPVX_const(PL_numeric_radix_sv)))
             {
