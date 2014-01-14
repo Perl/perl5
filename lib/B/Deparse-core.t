@@ -40,6 +40,7 @@ plan tests => 2071;
 
 use feature (sprintf(":%vd", $^V)); # to avoid relying on the feature
                                     # logic to add CORE::
+no warnings 'experimental::autoderef';
 use B::Deparse;
 my $deparse = new B::Deparse;
 
@@ -92,6 +93,7 @@ sub testit {
 
 	unless ($got_text =~ /^{
     package test;
+    BEGIN {\${\^WARNING_BITS} = "[^"]*"}
     use strict 'refs', 'subs';
     use feature [^\n]+
     \Q$vars\E\(\) = (.*)

@@ -10,6 +10,7 @@
 use autodie;
 use strict;
 use warnings;
+no  warnings 'experimental::autoderef';
 use File::Find;
 use ExtUtils::MM_Unix;
 use version;

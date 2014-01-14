@@ -99,6 +99,8 @@ my $tree = {
                                     [ 5.017, DEFAULT_ON ],
                                 'experimental::postderef' =>
                                     [ 5.019, DEFAULT_ON ],
+                                'experimental::autoderef' =>
+                                    [ 5.019, DEFAULT_ON ],
                         }],
 
        	 #'default'	=> [ 5.008, DEFAULT_ON ],
@@ -476,7 +478,7 @@ close_and_rename($lexwarn);
 __END__
 package warnings;
 
-our $VERSION = '1.20';
+our $VERSION = '1.21';
 
 # Verify that we're called correctly so that warnings will work.
 # see also strict.pm.
