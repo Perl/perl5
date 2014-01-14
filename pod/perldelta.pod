@@ -241,7 +241,24 @@ XXX L<message|perldiag/"message">
 
 =item *
 
-XXX L<message|perldiag/"message">
+%s on a reference is now experimental
+
+The "auto-deref" feature is now experimental.
+
+Starting in v5.14.0, it was possible to use push, pop, keys, and other
+built-in functions not only on aggregate types, but on references to
+them.  The feature was not deployed to its original intended
+specification, and now may become redundant to postfix dereferencing.
+It has always been categorized as an experimental feature, and in
+v5.20.0 is carries a warning as such.
+
+Warnings will now be issued at compile time when these operations are
+detected.
+
+  no if $] >= 5.01908, warnings => "experimental::autoderef";
+
+Consider, though, replacing the use of these features, as they may
+change behavior again before becoming stable.
 
 =item *
 
