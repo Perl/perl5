@@ -14405,6 +14405,15 @@ parseit:
      * shouldn't.  Therefore we can't invert folded locale now, as it won't be
      * folded until runtime */
 
+    /* If we didn't do folding, it's because some information isn't available
+     * until runtime; set the run-time fold flag for these.  (We don't have to
+     * worry about properties folding, as that is taken care of by the swash
+     * fetching) */
+    if (FOLD && LOC)
+    {
+       ANYOF_FLAGS(ret) |= ANYOF_LOC_FOLD;
+    }
+
     /* Optimize inverted simple patterns (e.g. [^a-z]) when everything is known
      * at compile time.  Besides not inverting folded locale now, we can't
      * invert if there are things such as \w, which aren't known until runtime
@@ -14438,15 +14447,6 @@ parseit:
             RExC_emit = orig_emit;
         }
         return orig_emit;
-    }
-
-    /* If we didn't do folding, it's because some information isn't available
-     * until runtime; set the run-time fold flag for these.  (We don't have to
-     * worry about properties folding, as that is taken care of by the swash
-     * fetching) */
-    if (FOLD && LOC)
-    {
-       ANYOF_FLAGS(ret) |= ANYOF_LOC_FOLD;
     }
 
     /* Some character classes are equivalent to other nodes.  Such nodes take
