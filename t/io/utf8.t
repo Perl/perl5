@@ -392,7 +392,7 @@ is($failed, undef);
 # return values
 SKIP: {
     skip "no PerlIO::scalar on miniperl", 2, if is_miniperl();
-    open my $fh, "<",      \($buf = chr 255);
+    open my $fh, "<:raw",  \($buf = chr 255);
     open my $uh, "<:utf8", \($uuf = "\xc4\x80");
     for([$uh,chr 256], [$fh,chr 255]) {
 	is getc $$_[0], $$_[1],
