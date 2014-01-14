@@ -14419,7 +14419,7 @@ parseit:
      * invert if there are things such as \w, which aren't known until runtime
      * */
     if (invert
-        && ! (LOC && (FOLD || (ANYOF_FLAGS(ret) & ANYOF_POSIXL)))
+        && ! (ANYOF_FLAGS(ret) & (ANYOF_LOC_FOLD|ANYOF_POSIXL))
 	&& ! depends_list
 	&& ! HAS_NONLOCALE_RUNTIME_PROPERTY_DEFINITION)
     {
