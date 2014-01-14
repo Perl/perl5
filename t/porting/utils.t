@@ -85,7 +85,7 @@ foreach my $victim (@victims) {
         skip ("$victim uses $excuses{$victim}, so can't test with just core modules")
             if $excuses{$victim};
 
-        my $got = runperl(switches => ['-c'], progfile => $victim, stderr => 1);
+        my $got = runperl(switches => ['-c'], progfile => $victim, stderr => 1, nolib => 1);
         is($got, "$victim syntax OK\n", "$victim compiles");
     }
 }
