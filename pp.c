@@ -3504,11 +3504,11 @@ PP(pp_ucfirst)
         ulen = UTF8SKIP(s);
         if (op_type == OP_UCFIRST) {
 	    _to_utf8_title_flags(s, tmpbuf, &tculen,
-				 cBOOL(IN_LOCALE_RUNTIME), &tainted);
+				 IN_LOCALE_RUNTIME, &tainted);
 	}
         else {
 	    _to_utf8_lower_flags(s, tmpbuf, &tculen,
-				 cBOOL(IN_LOCALE_RUNTIME), &tainted);
+				 IN_LOCALE_RUNTIME, &tainted);
 	}
 
         /* we can't do in-place if the length changes.  */
@@ -3771,7 +3771,7 @@ PP(pp_uc)
 
             u = UTF8SKIP(s);
             uv = _to_utf8_upper_flags(s, tmpbuf, &ulen,
-				      cBOOL(IN_LOCALE_RUNTIME), &tainted);
+				      IN_LOCALE_RUNTIME, &tainted);
 #define GREEK_CAPITAL_LETTER_IOTA 0x0399
 #define COMBINING_GREEK_YPOGEGRAMMENI 0x0345
             if (uv == GREEK_CAPITAL_LETTER_IOTA
@@ -3977,7 +3977,7 @@ PP(pp_lc)
 	    STRLEN ulen;
 
 	    _to_utf8_lower_flags(s, tmpbuf, &ulen,
-				 cBOOL(IN_LOCALE_RUNTIME), &tainted);
+				 IN_LOCALE_RUNTIME, &tainted);
 
 	    /* Here is where we would do context-sensitive actions.  See the
 	     * commit message for 86510fb15 for why there isn't any */

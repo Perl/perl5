@@ -5239,17 +5239,17 @@ typedef struct am_table_short AMTS;
 
 #ifdef USE_LOCALE_NUMERIC
 
-/* Returns non-zero If the plain locale pragma without a parameter is in effect
+/* Returns TRUE if the plain locale pragma without a parameter is in effect
  */
-#define IN_LOCALE_RUNTIME	(CopHINTS_get(PL_curcop) & HINT_LOCALE)
+#define IN_LOCALE_RUNTIME	cBOOL(CopHINTS_get(PL_curcop) & HINT_LOCALE)
 
-/* Returns non-zero If either form of the locale pragma is in effect */
+/* Returns TRUE if either form of the locale pragma is in effect */
 #define IN_SOME_LOCALE_FORM_RUNTIME   \
-		(CopHINTS_get(PL_curcop) & (HINT_LOCALE|HINT_LOCALE_NOT_CHARS))
+           cBOOL(CopHINTS_get(PL_curcop) & (HINT_LOCALE|HINT_LOCALE_NOT_CHARS))
 
-#define IN_LOCALE_COMPILETIME	(PL_hints & HINT_LOCALE)
+#define IN_LOCALE_COMPILETIME	cBOOL(PL_hints & HINT_LOCALE)
 #define IN_SOME_LOCALE_FORM_COMPILETIME \
-			    (PL_hints & (HINT_LOCALE|HINT_LOCALE_NOT_CHARS))
+                          cBOOL(PL_hints & (HINT_LOCALE|HINT_LOCALE_NOT_CHARS))
 
 #define IN_LOCALE \
 	(IN_PERL_COMPILETIME ? IN_LOCALE_COMPILETIME : IN_LOCALE_RUNTIME)
