@@ -7706,7 +7706,6 @@ Perl_yylex(pTHX)
 			ENTER;
 			SAVETMPS;
 			PUSHMARK(sp);
-			EXTEND(SP, 1);
 			XPUSHs(PL_encoding);
 			PUTBACK;
 			call_method("name", G_SCALAR);
