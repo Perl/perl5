@@ -15295,13 +15295,6 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
             bool byte_output = FALSE;   /* If something in the bitmap has been
                                            output */
 
-            if (flags & ANYOF_NONBITMAP_NON_UTF8) {
-                sv_catpvs(sv, "{outside bitmap}");
-            }
-            else {
-                sv_catpvs(sv, "{utf8}");
-            }
-
             /* Get the stuff that wasn't in the bitmap */
 	    (void) regclass_swash(prog, o, FALSE, &lv, NULL);
 	    if (lv && lv != &PL_sv_undef) {
@@ -15313,6 +15306,13 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
 
                 if (*s == '\n') {
                     const char * const t = ++s;
+
+                    if (flags & ANYOF_NONBITMAP_NON_UTF8) {
+                        sv_catpvs(sv, "{outside bitmap}");
+                    }
+                    else {
+                        sv_catpvs(sv, "{utf8}");
+                    }
 
                     if (byte_output) {
                         sv_catpvs(sv, " ");
