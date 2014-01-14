@@ -229,7 +229,7 @@ will be lost.
          |
          +- experimental --+
          |                 |
-         |                 +- experimental::aggref
+         |                 +- experimental::autoderef
          |                 |
          |                 +- experimental::lexical_subs
          |                 |

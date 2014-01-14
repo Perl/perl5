@@ -40,7 +40,7 @@ plan tests => 2071;
 
 use feature (sprintf(":%vd", $^V)); # to avoid relying on the feature
                                     # logic to add CORE::
-no warnings 'experimental::aggref';
+no warnings 'experimental::autoderef';
 use B::Deparse;
 my $deparse = new B::Deparse;
 

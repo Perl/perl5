@@ -41,7 +41,7 @@ is( join(':',@x), '1:2:3:1:2:3:4:3', 'push intuiting @ on array');
 }
 is( join(':',@x), '1:2:3:1:2:3:4', 'pop intuiting @ on array');
 
-no warnings 'experimental::aggref';
+no warnings 'experimental::autoderef';
 
 # test for push/pop on arrayref
 push(\@x,5);

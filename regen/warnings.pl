@@ -99,7 +99,7 @@ my $tree = {
                                     [ 5.017, DEFAULT_ON ],
                                 'experimental::postderef' =>
                                     [ 5.019, DEFAULT_ON ],
-                                'experimental::aggref' =>
+                                'experimental::autoderef' =>
                                     [ 5.019, DEFAULT_ON ],
                         }],
 

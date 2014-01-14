@@ -976,7 +976,7 @@ tr/a/b/r;
 <a,>;
 ####
 # [perl #91008]
-# CONTEXT no warnings 'experimental::aggref';
+# CONTEXT no warnings 'experimental::autoderef';
 each $@;
 keys $~;
 values $!;

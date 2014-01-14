@@ -9109,7 +9109,7 @@ Perl_ck_fun(pTHX_ OP *o)
 		    scalar(kid);
 		    /* diag_listed_as: push on reference is experimental */
 		    Perl_ck_warner_d(aTHX_
-				     packWARN(WARN_EXPERIMENTAL__AGGREF),
+				     packWARN(WARN_EXPERIMENTAL__AUTODEREF),
 				    "%s on reference is experimental",
 				     PL_op_desc[type]);
 		}
@@ -10953,7 +10953,7 @@ Perl_ck_each(pTHX_ OP *o)
     /* if treating as a reference, defer additional checks to runtime */
     if (o->op_type == ref_type) {
 	/* diag_listed_as: keys on reference is experimental */
-	Perl_ck_warner_d(aTHX_ packWARN(WARN_EXPERIMENTAL__AGGREF),
+	Perl_ck_warner_d(aTHX_ packWARN(WARN_EXPERIMENTAL__AUTODEREF),
 			      "%s is experimental", PL_op_desc[ref_type]);
 	return o;
     }

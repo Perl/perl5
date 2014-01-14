@@ -97,7 +97,7 @@
 
 /* Warnings Categories added in Perl 5.019 */
 
-#define WARN_EXPERIMENTAL__AGGREF 56
+#define WARN_EXPERIMENTAL__AUTODEREF 56
 #define WARN_EXPERIMENTAL__POSTDEREF 57
 #define WARN_SYSCALLS		 58
 

@@ -2035,7 +2035,7 @@ foreach $test_num ($first_locales_test_number..$final_locales_test_number) {
 	    print "# not in Perl itself.\n";
 	}
         if ($Okay{$test_num} && grep { $_ == $test_num } @problematical_tests) {
-            no warnings 'experimental::aggref';
+            no warnings 'experimental::autoderef';
             # Round to nearest .1%
             my $percent_fail = (int(.5 + (1000 * scalar(keys $Problem{$test_num})
                                           / scalar(@Locale))))

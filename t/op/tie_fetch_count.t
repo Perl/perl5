@@ -170,13 +170,13 @@ $dummy  = $$var1        ; check_count '${}';
 tie my $var2 => 'main', [];
 $dummy  = @$var2        ; check_count '@{}';
 {
-    no warnings 'experimental::aggref';
+    no warnings 'experimental::autoderef';
     $dummy  = shift $var2   ; check_count 'shift arrayref';
 }
 tie my $var3 => 'main', {};
 $dummy  = %$var3        ; check_count '%{}';
 {
-    no warnings 'experimental::aggref';
+    no warnings 'experimental::autoderef';
     $dummy  = keys $var3    ; check_count 'keys hashref';
 }
 {
