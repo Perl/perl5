@@ -411,9 +411,13 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
+=item Cygwin
 
-XXX
+recv() on a connected handle would populate the returned sender
+address with whatever happened to be in the working buffer.  recv()
+now uses a workaround similar to the Win32 recv() wrapper and returns
+an empty string when recvfrom(2) doesn't modify the supplied address
+length. [perl #118843]
 
 =back
 
