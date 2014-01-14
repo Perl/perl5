@@ -435,7 +435,7 @@ SKIP: {
     utf8::decode($k1);
     utf8::decode($k2);
     my $h = { $k1 => 1, $k2 => 2 };
-    is join('', keys $h), $k2, 'utf8::decode respects copy-on-write';
+    is join('', keys %$h), $k2, 'utf8::decode respects copy-on-write';
 }
 
 {
