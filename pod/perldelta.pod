@@ -295,6 +295,16 @@ named something "unique" -- for example, Hash/Util/Util.so becomes
 Hash/Util/PL_Hash__Util.so.  This behavior is similar to what currently
 happens on VMS, and serves as groundwork for the Android port.
 
+=item *
+
+C<sysroot> option to indicate the logical root directory under gcc and clang.
+
+When building with this option set, both Configure and the compilers search
+for all headers and libraries under this new sysroot, instead of /.
+
+This is a huge time saver if cross-compiling, but can also help
+on native builds if your toolchain's files have non-standard locations.
+
 =back
 
 =head1 Testing
