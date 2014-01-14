@@ -159,6 +159,13 @@ The handling of CRLF characters in L<Net::FTP> has been fixed.
 
 =item *
 
+L<IO::Socket::UNIX> has been upgraded from version 1.25 to 1.26.
+
+Removed a warning about an ancient behaviour change and filled out the
+SYNOPSIS. [perl #120981]
+
+=item *
+
 L<perl5db.pl> has been upgraded from version 1.42 to 1.43
 
 Fix a crash in tab completion, where available. [perl #120827]
