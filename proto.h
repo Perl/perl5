@@ -6843,7 +6843,7 @@ STATIC void	S_regtail(pTHX_ RExC_state_t *pRExC_state, regnode *p, const regnode
 #define PERL_ARGS_ASSERT_REGTAIL	\
 	assert(pRExC_state); assert(p); assert(val)
 
-STATIC STRLEN	S_reguni(pTHX_ const RExC_state_t *pRExC_state, UV uv, char *s)
+PERL_STATIC_INLINE STRLEN	S_reguni(pTHX_ const RExC_state_t *pRExC_state, UV uv, char *s)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_3);
 #define PERL_ARGS_ASSERT_REGUNI	\

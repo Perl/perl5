@@ -14677,7 +14677,7 @@ S_reganode(pTHX_ RExC_state_t *pRExC_state, U8 op, U32 arg)
 /*
 - reguni - emit (if appropriate) a Unicode character
 */
-STATIC STRLEN
+PERL_STATIC_INLINE STRLEN
 S_reguni(pTHX_ const RExC_state_t *pRExC_state, UV uv, char* s)
 {
     dVAR;
