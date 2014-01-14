@@ -71,7 +71,8 @@ SKIP: {
 
     my $result = runperl('progfile' => 'Porting/manisort',
                          'args'     => [ '-c', $manifest ],
-                         'stderr'   => 1);
+                         'stderr'   => 1,
+                         'nolib'    => 1 );
 
     like($result, qr/is sorted properly/, 'MANIFEST sorted properly');
 }
