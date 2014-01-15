@@ -280,6 +280,7 @@ else
     ldflags="$ldflags -lc -lm -lsocket"
     lddlflags="$lddlflags -lc -lm -lsocket "    
     libpth="$libpth /proc/boot"
+    targetenv="export LC_ALL=C; $targetenv"
     ;;
   *)
     # Somewhere in the build, something tries to throw a gcc
