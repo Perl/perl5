@@ -146,6 +146,13 @@ XXX
 
 =item *
 
+L<base> has been upgraded from version 2.20 to 2.21.
+
+The stricter load failure tests added in 2.20 now allow for
+C<${^LAST_FH}> being set.
+
+=item *
+
 L<Encode> has been upgraded from version 2.56 to 2.57.
 
 UTF-8 is no longer used in the C source (which some compilers didn't like), and
