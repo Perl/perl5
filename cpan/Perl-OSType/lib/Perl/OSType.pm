@@ -3,7 +3,7 @@ use warnings;
 
 package Perl::OSType;
 # ABSTRACT: Map Perl operating system names to generic types
-our $VERSION = '1.006'; # VERSION
+our $VERSION = '1.007'; # VERSION
 
 require Exporter;
 our @ISA = qw(Exporter);
@@ -50,6 +50,7 @@ my %OSTYPES = qw(
   gnukfreebsd Unix
   nto         Unix
   qnx         Unix
+  android     Unix
 
   dos         Windows
   MSWin32     Windows
@@ -84,7 +85,7 @@ sub is_os_type {
 
 =pod
 
-=encoding utf-8
+=encoding UTF-8
 
 =head1 NAME
 
@@ -92,7 +93,7 @@ Perl::OSType - Map Perl operating system names to generic types
 
 =head1 VERSION
 
-version 1.006
+version 1.007
 
 =head1 SYNOPSIS
 
@@ -185,11 +186,15 @@ Owain G. Ainsworth <oga@nicotinebsd.org>
 
 Paul Green <Paul.Green@stratus.com>
 
+=item *
+
+Piotr Roszatycki <piotr.roszatycki@gmail.com>
+
 =back
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is copyright (c) 2013 by David Golden.
+This software is copyright (c) 2014 by David Golden.
 
 This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
