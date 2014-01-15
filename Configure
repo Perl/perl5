@@ -4775,6 +4775,11 @@ y)	fn=d/
 	;;
 esac
 
+: Default value for incpth is just usrinc
+case "$incpth" in
+'') incpth="$usrinc";;
+esac
+
 : Set private lib path
 case "$plibpth" in
 '') if ./mips; then
