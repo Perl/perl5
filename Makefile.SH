@@ -1484,7 +1484,7 @@ test check: test_prep
 *) $spitshell >>$Makefile <<!GROK!THIS!
 
 test check: test_prep
-	$run -cwd $targetdir/t -env LD_LIBRARY_PATH=$targetdir:$targetdir/lib:$targetdir/lib/auto ./TEST
+	$run -cwd $targetdir/t -env "$targetenv LD_LIBRARY_PATH=$targetdir:$targetdir/lib:$targetdir/lib/auto:\$\$LD_LIBRARY_PATH" ./TEST
 
 !GROK!THIS!
 ;;
