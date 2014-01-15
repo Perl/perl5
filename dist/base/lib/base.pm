@@ -2,7 +2,7 @@ package base;
 
 use strict 'vars';
 use vars qw($VERSION);
-$VERSION = '2.20';
+$VERSION = '2.21';
 $VERSION = eval $VERSION;
 
 # constant.pm is slow
@@ -107,8 +107,8 @@ sub import {
                 # probably be using parent.pm, which doesn't try to
                 # guess whether require is needed or failed,
                 # see [perl #118561]
-                die if $@ && $@ !~ /^Can't locate \Q$fn\E .*? at \Q$file\E line \Q$line\E\.\n\z/s
-                          || $@ =~ /Compilation failed in require at \Q$file\E line \Q$line\E\.\n\z/;
+                die if $@ && $@ !~ /^Can't locate \Q$fn\E .*? at \Q$file\E line \Q$line\E(?:, <[^>]*> (?:line|chunk) [0-9]+)?\.\n\z/s
+                          || $@ =~ /Compilation failed in require at \Q$file\E line \Q$line\E(?:, <[^>]*> (?:line|chunk) [0-9]+)?\.\n\z/;
                 unless (%{"$base\::"}) {
                     require Carp;
                     local $" = " ";
