@@ -11359,7 +11359,7 @@ Perl_rpeep(pTHX_ OP *o)
                 )
                     break;
 
-                /* let $a[N] potentially be optimised into ALEMFAST_LEX
+                /* let $a[N] potentially be optimised into AELEMFAST_LEX
                  * instead */
                 if (   p->op_type == OP_PADAV
                     && p->op_next
