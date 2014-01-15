@@ -987,7 +987,7 @@
  *	so the default case (for NeXT) is big endian to catch them.
  *	This might matter for NeXT 3.0.
  */
-#if defined(USE_CROSS_COMPILE) || defined(MULTIARCH)
+#if defined(MULTIARCH)
 #  ifdef __LITTLE_ENDIAN__
 #    if LONGSIZE == 4
 #      define BYTEORDER 0x1234
@@ -4718,6 +4718,6 @@
 #endif
 
 /* Generated from:
- * 01c6afba563531a39cba7bc09849f8ec6fbe74fe96e3bd2c16e543ec67e2de16 config_h.SH
+ * 4ce7b989417303946dd7101ed52557e157c57900e9dbff6b5799a7b6af48dbd3 config_h.SH
  * 71b0dcf437b30c409fc23b5c4c6ec2c988fc419295a650fe80f93a6d5fb0ff94 uconfig.sh
  * ex: set ro: */
