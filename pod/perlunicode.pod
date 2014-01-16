@@ -1067,10 +1067,11 @@ character.
 
 =item [8]
 
-Should do C<^> and C<$> also on C<U+000B> (C<\v> in C), C<FF> (C<\f>), C<CR> (C<\r>), C<CRLF>
-(C<\r\n>), C<NEL> (C<U+0085>), C<LS> (C<U+2028>), and C<PS> (C<U+2029>); should also affect
-C<E<lt>E<gt>>, C<$.>, and script line numbers; should not split lines within C<CRLF>
-(i.e. there is no empty line between C<\r> and C<\n>).  For C<CRLF>, try the
+Should do C<^> and C<$> also on C<U+000B> (C<\v> in C), C<FF> (C<\f>),
+C<CR> (C<\r>), C<CRLF> (C<\r\n>), C<NEL> (C<U+0085>), C<LS> (C<U+2028>),
+and C<PS> (C<U+2029>); should also affect C<E<lt>E<gt>>, C<$.>, and
+script line numbers; should not split lines within C<CRLF> (i.e. there
+is no empty line between C<\r> and C<\n>).  For C<CRLF>, try the
 C<:crlf> layer (see L<PerlIO>).
 
 =item [9]
