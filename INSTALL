@@ -1090,6 +1090,17 @@ system.
 
 =back
 
+=head2 Specifying a logical root directory
+
+If you are cross-compiling, or are using a compiler which has it's own
+headers and libraries in a nonstandard location, and your compiler
+understands the C<--sysroot> option, you can use the C<-Dsysroot> option to
+specify the logical root directory under which all libraries and headers
+are searched for. This patch adjusts Configure to search under $sysroot, instead of /.
+    
+--sysroot is added to ccflags and friends so that make in
+ExtUtils::MakeMaker, and other extensions, will use it.
+
 =head2 Overriding an old config.sh
 
 If you want to use an old config.sh produced by a previous run of
