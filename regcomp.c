@@ -4601,7 +4601,6 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
 	    if (flags & SCF_DO_STCLASS) {
                 bool invert = 0;
                 SV* my_invlist = sv_2mortal(_new_invlist(0));
-                U8 classnum;
                 U8 namedclass;
 
                 /* See commit msg 749e076fceedeb708a624933726e7989f2302f6a */
@@ -4658,8 +4657,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
                     /* FALL THROUGH */
 
 		case POSIXL:
-                    classnum = FLAGS(scan);
-                    namedclass = classnum_to_namedclass(classnum) + invert;
+                    namedclass = classnum_to_namedclass(FLAGS(scan)) + invert;
                     if (flags & SCF_DO_STCLASS_AND) {
                         bool was_there = cBOOL(
                                           ANYOF_POSIXL_TEST(data->start_class,
@@ -4705,12 +4703,11 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
                     invert = 1;
                     /* FALL THROUGH */
 		case POSIXA:
-                    classnum = FLAGS(scan);
-                    if (classnum == _CC_ASCII) {
+                    if (FLAGS(scan) == _CC_ASCII) {
                         my_invlist = PL_XPosix_ptrs[_CC_ASCII];
                     }
                     else {
-                        _invlist_intersection(PL_XPosix_ptrs[classnum],
+                        _invlist_intersection(PL_XPosix_ptrs[FLAGS(scan)],
                                               PL_XPosix_ptrs[_CC_ASCII],
                                               &my_invlist);
                     }
@@ -4722,8 +4719,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
                     /* FALL THROUGH */
 		case POSIXD:
 		case POSIXU:
-                    classnum = FLAGS(scan);
-                    my_invlist = invlist_clone(PL_XPosix_ptrs[classnum]);
+                    my_invlist = invlist_clone(PL_XPosix_ptrs[FLAGS(scan)]);
 
                     /* NPOSIXD matches all upper Latin1 code points unless the
                      * target string being matched is UTF-8, which is
