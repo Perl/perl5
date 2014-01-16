@@ -658,6 +658,19 @@ Perl_re_intuit_start(pTHX_
     DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
                 "Intuit: trying to determine minimum start position...\n"));
 
+    /* for now, assume that all substr offsets are positive. If at some point
+     * in the future someone wants to do clever things with look-behind and
+     * -ve offsets, they'll need to fix up any code in this function
+     * which uses these offsets. See the thread beginning
+     * <20140113145929.GF27210@iabyn.com>
+     */
+    assert(prog->substrs->data[0].min_offset >= 0);
+    assert(prog->substrs->data[0].max_offset >= 0);
+    assert(prog->substrs->data[1].min_offset >= 0);
+    assert(prog->substrs->data[1].max_offset >= 0);
+    assert(prog->substrs->data[2].min_offset >= 0);
+    assert(prog->substrs->data[2].max_offset >= 0);
+
     /* CHR_DIST() would be more correct here but it makes things slow. */
     if (prog->minlen > strend - strpos) {
 	DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
@@ -797,11 +810,6 @@ Perl_re_intuit_start(pTHX_
         U8* start_point;
         U8* end_point;
 
-        if (srch_start_shift < 0 && strbeg - s > srch_start_shift) {
-	    srch_end_shift -= ((strbeg - s) - srch_start_shift); 
-	    srch_start_shift = strbeg - s;
-	}
-
         DEBUG_OPTIMISE_MORE_r({
             PerlIO_printf(Perl_debug_log,
                 "  At restart: s=%"IVdf" Check offset min: %"IVdf
@@ -819,7 +827,7 @@ Perl_re_intuit_start(pTHX_
             start_point= (U8*)(s + srch_start_shift);
             end_point= (U8*)(strend - srch_end_shift);
         } else {
-	    start_point= HOP3(s, srch_start_shift, srch_start_shift < 0 ? strbeg : strend);
+	    start_point= HOP3(s, srch_start_shift, strend);
             end_point= HOP3(strend, -srch_end_shift, strbeg);
 	}
 
@@ -829,7 +837,6 @@ Perl_re_intuit_start(pTHX_
         {
             U8 *p = (U8*)s;
 
-            assert(prog->check_offset_max >= 0);
             if (srch_start_shift > 0)
                 p = start_point; /* don't HOP over chars already HOPed */
             if (p < end_point)
@@ -1071,7 +1078,7 @@ Perl_re_intuit_start(pTHX_
     }
 
     
-    t= (char*)HOP3( s, -prog->check_offset_max, (prog->check_offset_max<0) ? strend : strpos);
+    t= (char*)HOP3( s, -prog->check_offset_max, strpos);
         
     DEBUG_OPTIMISE_MORE_r(
         PerlIO_printf(Perl_debug_log, 
@@ -1088,7 +1095,7 @@ Perl_re_intuit_start(pTHX_
 
     if (s - strpos > prog->check_offset_max  /* signed-corrected t > strpos */
         && (!utf8_target
-	    || ((t = (char*)reghopmaybe3((U8*)s, -prog->check_offset_max, (U8*) ((prog->check_offset_max<0) ? strend : strpos)))
+	    || ((t = (char*)reghopmaybe3((U8*)s, -prog->check_offset_max, (U8*) strpos))
 		 && t > strpos))) 
     {
 	/* Fixed substring is found far enough so that the match
