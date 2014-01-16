@@ -805,8 +805,6 @@ Perl_re_intuit_start(pTHX_
        the "check" substring in the region corrected by start/end_shift. */
     
     {
-        SSize_t srch_start_shift = start_shift;
-        SSize_t srch_end_shift = end_shift;
         U8* start_point;
         U8* end_point;
 
@@ -817,18 +815,17 @@ Perl_re_intuit_start(pTHX_
                 " Real End Shift: %"IVdf"\n",
                 (IV)(s - i_strpos),
                 (IV)prog->check_offset_min,
-                (IV)srch_start_shift,
-                (IV)srch_end_shift,
+                (IV)start_shift,
+                (IV)end_shift,
                 (IV)prog->check_end_shift);
         });
         
         if (prog->intflags & PREGf_CANY_SEEN) {
-
-            start_point= (U8*)(s + srch_start_shift);
-            end_point= (U8*)(strend - srch_end_shift);
+            start_point= (U8*)(s + start_shift);
+            end_point= (U8*)(strend - end_shift);
         } else {
-	    start_point= HOP3(s, srch_start_shift, strend);
-            end_point= HOP3(strend, -srch_end_shift, strbeg);
+	    start_point= HOP3(s, start_shift, strend);
+            end_point= HOP3(strend, -end_shift, strbeg);
 	}
 
         if (!ml_anch
@@ -837,12 +834,12 @@ Perl_re_intuit_start(pTHX_
         {
             U8 *p = (U8*)s;
 
-            if (srch_start_shift > 0)
+            if (start_shift > 0)
                 p = start_point; /* don't HOP over chars already HOPed */
             if (p < end_point)
                 p = HOP3(p,
                         (prog->check_offset_max
-                         - (srch_end_shift > 0 ? srch_start_shift : 0)
+                         - (end_shift > 0 ? start_shift : 0)
                          + CHR_SVLEN(check) - (SvTAIL(check) != 0)),
                         end_point);
             if (p < end_point)
