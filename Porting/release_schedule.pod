@@ -65,10 +65,25 @@ you should reset the version numbers to the next blead series.
   2013-10-20  5.19.5          Steve Hay
   2013-11-20  5.19.6          Chris Williams
   2013-12-20  5.19.7          Abigail
-  2014-01-20  5.19.8          ?
-  2014-02-20  5.19.9          ?
-  2014-03-20  5.19.10         ?
-  2014-04-20  5.20.0-RC1      Ricardo Signes
+  2014-01-20  5.19.8          Ricardo Signes
+  2014-02-20  5.19.9          Tony Cook
+  2014-03-20  5.19.10         Aaron Crane
+  2014-04-20  5.19.11         Steve Hay
+
+=head Perl 5.20
+
+  2014-05-20  5.20.0          Ricardo Signes
+  2014-06-20  5.20.1          Matthew Horsfall
+  2014-07-20  5.20.2          Abigail
+  2014-08-20  5.20.3          ?
+  2014-09-20  5.20.4          ?
+  2014-10-20  5.20.5          ?
+  2014-11-20  5.20.6          ?
+  2014-12-20  5.20.7          ?
+  2015-01-20  5.20.8          ?
+  2015-02-20  5.20.9          ?
+  2015-03-20  5.20.10         ?
+  2015-04-20  5.20.11         ?
 
 =head1 VICTIMS
 
