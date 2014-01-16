@@ -2735,6 +2735,8 @@ Perl__core_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 m
 	    else SvREFCNT_inc_simple_void_NN(swash_invlist);
 	}
 
+        SvREADONLY_on(swash_invlist);
+
         /* Use the inversion list stand-alone if small enough */
         if ((int) _invlist_len(swash_invlist) <= invlist_swash_boundary) {
 	    SvREFCNT_dec(retval);
@@ -3840,6 +3842,7 @@ Perl__swash_to_invlist(pTHX_ SV* const swash)
 	sv_free(other); /* through with it! */
     }
 
+    SvREADONLY_on(invlist);
     return invlist;
 }
 

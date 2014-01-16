@@ -7686,6 +7686,8 @@ Perl__new_invlist_C_array(pTHX_ const UV* const list)
     /* Initialize the iteration pointer. */
     invlist_iterfinish(invlist);
 
+    SvREADONLY_on(invlist);
+
     return invlist;
 }
 #endif /* ifndef PERL_IN_XSUB_RE */
