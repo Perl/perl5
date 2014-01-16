@@ -20,7 +20,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 714;  # Update this when adding/deleting tests.
+plan tests => 715;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1525,6 +1525,9 @@ EOP
 
         $s=~ /^a{1,2}x/ for  1..10_000;
         pass("RT#120692 a{1,2} mustn't run slowly");
+
+        $s=~ /ab.{1,2}x/;
+        pass("RT#120692 ab.{1,2} mustn't run slowly");
     }
 
     # These are based on looking at the code in regcomp.c

@@ -129,6 +129,12 @@ static const char* const non_utf8_target_but_utf8_required
 #define HOP3(pos,off,lim) (reginfo->is_utf8_target  ? reghop3((U8*)(pos), off, (U8*)(lim)) : (U8*)(pos + off))
 #define HOP3c(pos,off,lim) ((char*)HOP3(pos,off,lim))
 
+/* like HOP3, but limits the result to <= lim even for the non-utf8 case.
+ * off must be >=0; args should be vars rather than expressions */
+#define HOP3lim(pos,off,lim) (reginfo->is_utf8_target \
+    ? reghop3((U8*)(pos), off, (U8*)(lim)) \
+    : (U8*)((pos + off) > lim ? lim : (pos + off)))
+
 
 #define NEXTCHR_EOS -10 /* nextchr has fallen off the end */
 #define NEXTCHR_IS_EOS (nextchr < 0)
@@ -1004,10 +1010,16 @@ Perl_re_intuit_start(pTHX_
              * <= float_max_offset chars from the regex origin (t).
              * If this value is less than last1, use it instead.
              */
+            assert(t <= last1);
             last = 
-                CHR_DIST((U8*)last1, (U8*)t) > prog->float_max_offset
-                    ? HOP3c(t, prog->float_max_offset, strend)
-                    : last1;
+                /* this condition handles the offset==infinity case, and
+                 * is a short-cut otherwise. Although it's comparing a
+                 * byte offset to a char length, it does so in a safe way,
+                 * meaning it errs towards doing the accurate HOP3 rather
+                 * than just using last1 */
+                (last1 - t) < prog->float_max_offset
+                    ? last1
+                    : (char*)HOP3lim(t, prog->float_max_offset, last1);
 
 	    s = HOP3c(t, prog->float_min_offset, strend);
 	    if (s < other_last)
