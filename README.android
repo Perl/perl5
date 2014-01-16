@@ -18,7 +18,7 @@ perl native using one of the toolchains available on the Play Store.
 This document describes how to set up your host environment when
 attempting to build Perl for Android.
 
-=head1 Cross-Compiling
+=head1 Cross-compilation
 
 These instructions assume an Unixish build environment on your host system;
 they've been tested on Linux and OS X, and may work on Cygwin and MSYS.
