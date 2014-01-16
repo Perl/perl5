@@ -2884,10 +2884,15 @@ $define|true|[yY]*)
       test -d $src/host || mkdir $src/host
       cd $src/host && rm -rf ./*
       $src/Configure -des -Dusedevel -Dmksymlinks
-      make miniperl
-      make generate_uudmap
+      $make miniperl
+      case "$hostgenerate" in
+      '') $make generate_uudmap
+          hostgenerate=$src/host/generate_uudmap      
+          ;;
+       "$undef") hostgenerate=''
+          ;;
+      esac
       hostperl=$src/host/miniperl
-      hostgenerate=$src/host/generate_uudmap
       cd $before_host
     fi
     hostosname=`$hostperl -le 'print $^O'`

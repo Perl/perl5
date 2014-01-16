@@ -668,27 +668,44 @@ globals$(OBJ_EXT): $(generated_headers)
 
 uudmap.h mg_data.h: bitcount.h
 
-bitcount.h: generate_uudmap$(HOST_EXE_EXT)
-	./generate_uudmap$(HOST_EXE_EXT) $(generated_headers)
-
 generate_uudmap$(OBJ_EXT): mg_raw.h
 
 !NO!SUBS!
 
-if test "X$hostgenerate" != X; then
-	$spitshell >>$Makefile <<'!NO!SUBS!'
+# If hostgerenate isn't defined, then we have to build
+# generate_uudmap and run it. This can potentially mean running
+# it on the target system if we're cross-compiling.
+# If it is defined, then we just run it locally.
+case "$hostgenerate" in
+'')
+$spitshell >>$Makefile <<!GROK!THIS!
+bitcount.h: generate_uudmap\$(HOST_EXE_EXT)
+	$run ./generate_uudmap\$(HOST_EXE_EXT) \$(generated_headers)
+	-@for f in \$(generated_headers); do \\
+	    $from \$\$f; \\
+	done
+
+!GROK!THIS!
+
+$spitshell >>$Makefile <<'!NO!SUBS!'
+generate_uudmap$(HOST_EXE_EXT): generate_uudmap$(OBJ_EXT)
+	$(CC) -o generate_uudmap$(EXE_EXT) $(LDFLAGS) generate_uudmap$(OBJ_EXT) $(libs)
+
+!NO!SUBS!
+;;
+*)
+$spitshell >>$Makefile <<'!NO!SUBS!'
+bitcount.h: generate_uudmap$(HOST_EXE_EXT)
+	./generate_uudmap$(HOST_EXE_EXT) $(generated_headers)
+
 generate_uudmap$(HOST_EXE_EXT): generate_uudmap$(OBJ_EXT)
 	-@rm generate_uudmap$(HOST_EXE_EXT)
 	$(LNS) $(HOST_GENERATE) generate_uudmap$(HOST_EXE_EXT)
 
 !NO!SUBS!
-else
-	$spitshell >>$Makefile <<'!NO!SUBS!'
-generate_uudmap$(HOST_EXE_EXT): generate_uudmap$(OBJ_EXT)
-	$(CC) -o generate_uudmap$(EXE_EXT) $(LDFLAGS) generate_uudmap$(OBJ_EXT) $(libs)
+;;
+esac
 
-!NO!SUBS!
-fi
 
 $spitshell >>$Makefile <<'!NO!SUBS!'
 perlmain.c: $(MINIPERL_EXE) ext/ExtUtils-Miniperl/pm_to_blib
