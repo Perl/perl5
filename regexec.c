@@ -974,11 +974,41 @@ Perl_re_intuit_start(pTHX_
 	    char * const saved_s = s;
 	    SV* must;
 
+            /* we've just matched a fixed substr, which is start_shift chars
+             * into the regex; so calculate t, the current origin of the
+             * regex */
+
 	    t = HOP3c(s, -start_shift, strbeg);
-	    last1 = last =
+
+            /* last1 is the absolute highest point that the floating substr
+             * could start in the string, ignoring any constraints from the
+             * earlier fixed match.
+             * strend -prog->minlen (in chars) is the absolute maximum
+             * position within the string that the origin of the regex
+             * could appear. The highest start point for the floating
+             * substr is float_min_offset up from the start of the regex.
+             * (You might think it aught to be float_max_offset, but if
+             * the float matches later, it implies that the regex matched more
+             * chars, so length($&) is now > minlen, and the increase in
+             * float offset is cancelled out by the shift down of the
+             * regex origin.)
+             * Note that -minlen+float_min_offset is equivalent (AFAIKT)
+             * to CHR_SVLEN(must) - !!SvTAIL(must) + prog->float_end_shift
+             */
+	    last1 =
 		HOP3c(strend, -prog->minlen + prog->float_min_offset, strbeg);
-	    if (CHR_DIST((U8*)last, (U8*)t) > prog->float_max_offset)
-		last = HOP3c(t, prog->float_max_offset, strend);
+
+            /* last is the highest point that the floating substr could
+             * start, *given* any constraints from the earlier fixed
+             * match. This constraint is that the floating string starts
+             * <= float_max_offset chars from the regex origin (t).
+             * If this value is less than last1, use it instead.
+             */
+            last = 
+                CHR_DIST((U8*)last1, (U8*)t) > prog->float_max_offset
+                    ? HOP3c(t, prog->float_max_offset, strend)
+                    : last1;
+
 	    s = HOP3c(t, prog->float_min_offset, strend);
 	    if (s < other_last)
 		s = other_last;
