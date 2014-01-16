@@ -1776,19 +1776,20 @@ to avoid the BIND.
 =head2 Cross-compilation
 
 Perl can be cross-compiled.  It is just not trivial, cross-compilation
-rarely is.  Perl is routinely cross-compiled for many platforms (as of
-June 2005 at least PocketPC aka WinCE, Open Zaurus, Symbian, and
-the IBM OS/400).  These platforms are known as the B<target> platforms,
-while the systems where the compilation takes place are the B<host>
-platforms.
+rarely is.  Perl is routinely cross-compiled for several platforms: as of
+January 2013, these include Android, Blackberry 10, PocketPC aka
+WinCE, ARM Linux, and Solaris.  Previous versions of
+Perl also provided support for Open Zaurus, Symbian, and
+the IBM OS/400, but it's unknown if those ports still function.
+These platforms are known as the B<target> platforms, while the systems where the compilation takes place are the B<host> platforms.
 
 What makes the situation difficult is that first of all,
 cross-compilation environments vary significantly in how they are set
 up and used, and secondly because the primary way of configuring Perl
 (using the rather large Unix-tool-dependent Configure script) is not
 awfully well suited for cross-compilation.  However, starting from
-version 5.8.0, the Configure script also knows one way of supporting
-cross-compilation support, so please keep reading.
+version 5.18.0, the Configure script also knows two ways of supporting
+cross-compilation, so please keep reading.
 
 See the following files for more information about compiling Perl for
 the particular platforms:
@@ -1799,17 +1800,21 @@ the particular platforms:
 
 README.ce
 
-=item Open Zaurus
+=item Android
 
-Cross/README
+L<README.android/Cross-compilation>
 
-=item Symbian
+=item Blackberry
 
-README.symbian
+L<README.qnx/Cross-compilation>
 
-=item OS/400
+=item Solaris
 
-README.os400
+L<README.solaris/CROSS-COMPILATION>
+
+=item Linux
+
+This document; See below.
 
 =back
 
@@ -1824,28 +1829,25 @@ For some cross-compilation environments the Configure option
 C<-Dinstallprefix=...> might be handy, see L<Changing the installation
 directory>.
 
-About the cross-compilation support of Configure: what is known to
-work is running Configure in a cross-compilation environment and
-building the miniperl executable.  What is known not to work is
-building the perl executable because that would require building
-extensions: Dynaloader statically and File::Glob dynamically, for
-extensions one needs MakeMaker and MakeMaker is not yet
-cross-compilation aware, and neither is the main Makefile.
+About the cross-compilation support of Configure: There's two forms.
+The more common one requires some way of transferring and running executables
+in the target system, such as an ssh connection; this is the
+C<./Configure -Dusecrosscompile -Dtargethost=...> route.  The second method
+doesn't need access to the target system, but requires you to provide 
+a config.sh, and and a canned Makefile; the rest of this section describes
+the former.
 
-The cross-compilation setup of Configure has successfully been used in
-at least two Linux cross-compilation environments.  The setups were
-both such that the host system was Intel Linux with a gcc built for
-cross-compiling into ARM Linux, and there was a SSH connection to the
-target system.
+This cross-compilation setup of Configure has successfully been used in
+a wide variety of setups, such as a 64-bit OS X host for an Android ARM target, or
+an amd64 Linux host targeting x86 Solaris, or even Windows.
 
 To run Configure in cross-compilation mode the basic switch that
-has to be used is C<-Dusecrosscompile>.
+has to be used is C<-Dusecrosscompile>:
 
    sh ./Configure -des -Dusecrosscompile -D...
 
 This will make the cpp symbol USE_CROSS_COMPILE and the %Config
-symbol C<usecrosscompile> available, and C<xconfig.h> will be used
-for cross-compilation.
+symbol C<usecrosscompile> available.
 
 During the Configure and build, certain helper scripts will be created
 into the Cross/ subdirectory.  The scripts are used to execute a
@@ -1868,27 +1870,48 @@ You can also specify a username to use for ssh/rsh logins
 
     -Dtargetuser=luser
 
-but in case you don't, "root" will be used.
+but in case you don't, "root" will be used.  Similarly, you can specify
+a non-standard (i.e. not 22) port for the connection, if applicable, through
 
-Because this is a cross-compilation effort, you will also need to specify
-which target environment and which compilation environment to use.
-This includes the compiler, the header files, and the libraries.
-In the below we use the usual settings for the iPAQ cross-compilation
-environment:
+    -Dtargetport=2222
+
+If the name of C<cc> has the usual GNU C semantics for cross
+compilers, that is, CPU-OS-gcc, the target architecture (C<targetarch>),
+plus names of the C<ar>, C<nm>, and C<ranlib> will also be automatically
+chosen to be CPU-OS-ar and so on.
+(The C<ld> requires more thought and will be chosen later by Configure
+as appropriate).  This will also aid in guessing the proper
+operating system name for the target, which has other repercussions, like
+better defaults and possibly critical fixes for the platform.  If Configure
+isn't guessing the OS name properly, you may need to either add a hint file
+redirecting Configure's guess, or modify Configure to make the correct choice.
+
+If your compiler doesn't follow that convention, you will also need to
+specify which target environment to use, as well as C<ar> and friends:
 
     -Dtargetarch=arm-linux
-    -Dcc=arm-linux-gcc
+    -Dcc=mycrossgcc
+    -Dar=...
+
+Additionally, a cross-compilation toolchain will usually install it's own
+logical system root somewhere -- that is, it'll create a directory somewhere
+which includes subdirectories like 'include' or 'lib'.  For example, you
+may end up with C</skiff/local/arm-linux>, where 
+C</skiff/local/arm-linux/bin> holds the binaries for cross-compilation,
+C</skiff/local/arm-linux/include> has the headers, and 
+C</skiff/local/arm-linux/lib> has the library files.
+If this is the case, and you are using a compiler that understands
+C<--sysroot>, like gcc or clang, you'll want to specify the
+C<-Dsysroot> option for Configure:
+
+    -Dsysroot=/skiff/local/arm-linux
+
+However, if your don't have a suitable directory to pass to C<-Dsysroot>,
+you will also need to specify which target environment to use:
+
     -Dusrinc=/skiff/local/arm-linux/include
     -Dincpth=/skiff/local/arm-linux/include
     -Dlibpth=/skiff/local/arm-linux/lib
-
-If the name of the C<cc> has the usual GNU C semantics for cross
-compilers, that is, CPU-OS-gcc, the names of the C<ar>, C<nm>, and
-C<ranlib> will also be automatically chosen to be CPU-OS-ar and so on.
-(The C<ld> requires more thought and will be chosen later by Configure
-as appropriate.)  Also, in this case the incpth, libpth, and usrinc
-will be guessed by Configure (unless explicitly set to something else,
-in which case Configure's guesses with be appended).
 
 In addition to the default execution/transfer methods you can also
 choose B<rsh> for execution, and B<rcp> or B<cp> for transfer,
@@ -1900,13 +1923,11 @@ Putting it all together:
 
     sh ./Configure -des -Dusecrosscompile \
         -Dtargethost=so.me.ho.st \
-	-Dtargetdir=/tar/get/dir \
+        -Dtargetdir=/tar/get/dir \
         -Dtargetuser=root \
         -Dtargetarch=arm-linux \
         -Dcc=arm-linux-gcc \
-        -Dusrinc=/skiff/local/arm-linux/include \
-        -Dincpth=/skiff/local/arm-linux/include \
-        -Dlibpth=/skiff/local/arm-linux/lib \
+        -Dsysroot=/skiff/local/arm-linux \
         -D...
 
 or if you are happy with the defaults:
@@ -1922,9 +1943,32 @@ F</usr/local/arm/2.95.5>:
     sh ./Configure -des -Dusecrosscompile \
         -Dtargethost=so.me.ho.st \
         -Dcc=/usr/local/arm/2.95.5/bin/arm-linux-gcc \
-        -Dincpth=/usr/local/arm/2.95.5/include \
-        -Dusrinc=/usr/local/arm/2.95.5/include \
-        -Dlibpth=/usr/local/arm/2.95.5/lib
+        -Dsysroot=/usr/local/arm/2.95.5
+
+There is also a C<targetenv> option for Configure which can be used
+to modify the environment of the target just before testing begins
+during 'make test'.  For example, if the target system has a nonstandard /tmp location, you could do this:
+
+    -Dtargetenv="export TMPDIR=/other/tmp;"
+
+If you are planning on cross-compiling to several platforms, or some other
+thing that would involve running Configure several times, there are two
+options that can be used to speed things up considerably.
+As a bit of background, when you
+call Configure with C<-Dusecrosscompile>, it begins by actually partially
+building a miniperl on the host machine, as well as the generate_uudmap
+binary, and we end up using that during the build.
+So instead of building that new perl every single time, you can build it just
+once in a separate directory, and then pass the resulting binaries to
+Configure like this:
+
+    -Dhostperl=/path/to/second/build/dir/miniperl
+    -Dhostgenerate=/path/to/second/build/dir/generate_uudmap
+
+Much less commonly, if you are cross-compiling from an ASCII host to an
+EBCDIC target, or vise versa, you'll have to pass C<-Uhostgenerate> to
+Configure, to signify that you want to build a generate_uudmap binary
+that, during make, will be run on the target system.
 
 =head1 make test
 
