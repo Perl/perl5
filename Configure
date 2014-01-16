@@ -2904,7 +2904,7 @@ $define|true|[yY]*)
     hostosname=`$hostperl -le 'print $^O'`
     ;;
 *)
-    usecrosscompile='undef'
+    usecrosscompile="$undef"
     ;;
 esac
 
@@ -3115,7 +3115,7 @@ EOF
 *)	run=''
 	to=:
 	from=:
-	usecrosscompile='undef'
+	usecrosscompile="$undef"
 	targetarch=''
 	;;
 esac
