@@ -2140,6 +2140,14 @@ Caveats:
 
 =item AIX
 
+=item FreeMINT
+
+Perl now builds with FreeMiNT/Atari. It fails a few tests, that needs
+some investigation.
+
+The FreeMiNT port uses GNU dld for loadable module capabilities. So
+ensure you have that library installed when building perl.
+
 =back
 
 =head1 EOL Platforms 
