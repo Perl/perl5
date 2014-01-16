@@ -814,7 +814,7 @@ use File::Glob qw(:case);
     },
 
     'Module::Load::Conditional' => {
-        'DISTRIBUTION' => 'BINGOS/Module-Load-Conditional-0.58.tar.gz',
+        'DISTRIBUTION' => 'BINGOS/Module-Load-Conditional-0.60.tar.gz',
         'FILES'        => q[cpan/Module-Load-Conditional],
     },
 

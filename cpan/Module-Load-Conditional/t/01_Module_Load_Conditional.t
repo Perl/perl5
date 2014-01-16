@@ -234,6 +234,34 @@ use_ok( 'Module::Load::Conditional' );
     );
 }
 
+# test for autoload
+
+# autoload
+{
+    my $use_list = { 'AutoLoad' => 0 };
+    my $bool = can_load( modules => $use_list, autoload => 1 );
+    ok( $bool, q[autoloaded] );
+
+    eval { func1(); };
+    is( $@, '', q[exported function] );
+
+    eval { func2(); };
+    ok( $@, q[not exported function] );
+}
+
+# not autoload
+{
+    my $use_list = { 'NotAutoLoad' => 0 };
+    my $bool = can_load( modules => $use_list );
+    ok( $bool, q[not autoloaded] );
+
+    eval { func3(); };
+    ok( $@, q[not exported function - func3] );
+
+    eval { func4(); };
+    ok( $@, q[not exported function - func4] );
+}
+
 
 ### test 'requires' ###
 SKIP:{
