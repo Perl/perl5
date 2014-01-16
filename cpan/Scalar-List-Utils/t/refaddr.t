@@ -73,7 +73,7 @@ package FooBar;
 
 use overload  '0+' => sub { 10 },
 		'+' => sub { 10 + $_[1] },
-		'"' => sub { "10" };
+		'""' => sub { "10" };
 
 package MyTie;
 

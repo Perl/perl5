@@ -2,7 +2,7 @@ package List::Util::XS;
 use strict;
 use List::Util;
 
-our $VERSION = "1.35";       # FIXUP
+our $VERSION = "1.36";       # FIXUP
 $VERSION = eval $VERSION;    # FIXUP
 
 1;

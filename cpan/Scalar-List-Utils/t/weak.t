@@ -17,192 +17,163 @@ BEGIN {
 use Scalar::Util ();
 use Test::More  ((grep { /weaken/ } @Scalar::Util::EXPORT_FAIL) and !$ENV{PERL_CORE})
 			? (skip_all => 'weaken requires XS version')
-			: (tests => 22);
+			: (tests => 27);
 
-if (0) {
-  require Devel::Peek;
-  Devel::Peek->import('Dump');
-}
-else {
-  *Dump = sub {};
-}
+Scalar::Util->import(qw(weaken unweaken isweak));
 
-Scalar::Util->import(qw(weaken isweak));
-
-if(1) {
-
-my ($y,$z);
-
-#
-# Case 1: two references, one is weakened, the other is then undef'ed.
-#
-
+# two references, one is weakened, the other is then undef'ed.
 {
-	my $x = "foo";
-	$y = \$x;
-	$z = \$x;
+  my ($y,$z);
+
+  {
+    my $x = "foo";
+    $y = \$x;
+    $z = \$x;
+  }
+
+  ok(ref($y) and ref($z));
+
+  weaken($y);
+  ok(ref($y) and ref($z));
+
+  undef($z);
+  ok(not(defined($y) and defined($z)));
+
+  undef($y);
+  ok(not(defined($y) and defined($z)));
 }
-print "# START\n";
-Dump($y); Dump($z);
 
-ok( ref($y) and ref($z));
-
-print "# WEAK:\n";
-weaken($y);
-Dump($y); Dump($z);
-
-ok( ref($y) and ref($z));
-
-print "# UNDZ:\n";
-undef($z);
-Dump($y); Dump($z);
-
-ok( not (defined($y) and defined($z)) );
-
-print "# UNDY:\n";
-undef($y);
-Dump($y); Dump($z);
-
-ok( not (defined($y) and defined($z)) );
-
-print "# FIN:\n";
-Dump($y); Dump($z);
-
-
-# 
-# Case 2: one reference, which is weakened
-#
-
-print "# CASE 2:\n";
-
+# one reference, which is weakened
 {
-	my $x = "foo";
-	$y = \$x;
+  my $y;
+
+  {
+    my $x = "foo";
+    $y = \$x;
+  }
+
+  ok(ref($y));
+
+  weaken($y);
+  ok(not defined $y);
 }
 
-ok( ref($y) );
-print "# BW: \n";
-Dump($y);
-weaken($y);
-print "# AW: \n";
-Dump($y);
-ok( not defined $y  );
+my $flag;
 
-print "# EXITBLOCK\n";
-}
-
-# 
-# Case 3: a circular structure
-#
-
-my $flag = 0;
+# a circular structure
 {
-	my $y = bless {}, 'Dest';
-	Dump($y);
-	print "# 1: $y\n";
-	$y->{Self} = $y;
-	Dump($y);
-	print "# 2: $y\n";
-	$y->{Flag} = \$flag;
-	print "# 3: $y\n";
-	weaken($y->{Self});
-	print "# WKED\n";
-	ok( ref($y) );
-	print "# VALS: HASH ",$y,"   SELF ",\$y->{Self},"  Y ",\$y, 
-		"    FLAG: ",\$y->{Flag},"\n";
-	print "# VPRINT\n";
+  $flag = 0;
+
+  {
+    my $y = bless {}, 'Dest';
+    $y->{Self} = $y;
+    $y->{Flag} = \$flag;
+
+    weaken($y->{Self});
+    ok( ref($y) );
+  }
+
+  ok( $flag == 1 );
+  undef $flag;
 }
-print "# OUT $flag\n";
-ok( $flag == 1 );
 
-print "# AFTER\n";
-
-undef $flag;
-
-print "# FLAGU\n";
-
-#
-# Case 4: a more complicated circular structure
-#
-
-$flag = 0;
+# a more complicated circular structure
 {
-	my $y = bless {}, 'Dest';
-	my $x = bless {}, 'Dest';
-	$x->{Ref} = $y;
-	$y->{Ref} = $x;
-	$x->{Flag} = \$flag;
-	$y->{Flag} = \$flag;
-	weaken($x->{Ref});
+  $flag = 0;
+
+  {
+    my $y = bless {}, 'Dest';
+    my $x = bless {}, 'Dest';
+    $x->{Ref} = $y;
+    $y->{Ref} = $x;
+    $x->{Flag} = \$flag;
+    $y->{Flag} = \$flag;
+
+    weaken($x->{Ref});
+  }
+  ok( $flag == 2 );
 }
-ok( $flag == 2 );
 
-#
-# Case 5: deleting a weakref before the other one
-#
-
-my ($y,$z);
+# deleting a weakref before the other one
 {
-	my $x = "foo";
-	$y = \$x;
-	$z = \$x;
+  my ($y,$z);
+  {
+    my $x = "foo";
+    $y = \$x;
+    $z = \$x;
+  }
+
+  weaken($y);
+  undef($y);
+
+  ok(not defined $y);
+  ok(ref($z) );
 }
 
-print "# CASE5\n";
-Dump($y);
+# isweakref
+{
+  $a = 5;
+  ok(!isweak($a));
+  $b = \$a;
+  ok(!isweak($b));
+  weaken($b);
+  ok(isweak($b));
+  $b = \$a;
+  ok(!isweak($b));
 
-weaken($y);
-Dump($y);
-undef($y);
+  my $x = {};
+  weaken($x->{Y} = \$a);
+  ok(isweak($x->{Y}));
+  ok(!isweak($x->{Z}));
+}
 
-ok( not defined $y);
-ok( ref($z) );
+# unweaken
+{
+  my ($y,$z);
+  {
+    my $x = "foo";
+    $y = \$x;
+    $z = \$x;
+  }
 
+  weaken($y);
 
-#
-# Case 6: test isweakref
-#
+  ok(isweak($y), '$y is weak after weaken()');
+  is($$y, "foo", '$y points at \"foo" after weaken()');
 
-$a = 5;
-ok(!isweak($a));
-$b = \$a;
-ok(!isweak($b));
-weaken($b);
-ok(isweak($b));
-$b = \$a;
-ok(!isweak($b));
+  unweaken($y);
 
-my $x = {};
-weaken($x->{Y} = \$a);
-ok(isweak($x->{Y}));
-ok(!isweak($x->{Z}));
+  ok(!isweak($y), '$y is not weak after unweaken()');
+  is($$y, "foo", '$y points at \"foo" after unweaken()');
 
-#
-# Case 7: test weaken on a read only ref
-#
+  undef $z;
+  ok(defined $y, '$y still defined after undef $z');
+}
 
+# test weaken on a read only ref
 SKIP: {
-    # Doesn't work for older perls, see bug [perl #24506]
-    skip("Test does not work with perl < 5.8.3", 5) if $] < 5.008003;
+  # Doesn't work for older perls, see bug [perl #24506]
+  skip("Test does not work with perl < 5.8.3", 5) if $] < 5.008003;
 
-    # in a MAD build, constants have refcnt 2, not 1
-    skip("Test does not work with MAD", 5) if exists $Config{mad};
+  # in a MAD build, constants have refcnt 2, not 1
+  skip("Test does not work with MAD", 5) if exists $Config{mad};
 
-    $a = eval '\"hello"';
-    ok(ref($a)) or print "# didn't get a ref from eval\n";
-    $b = $a;
-    eval{weaken($b)};
-    # we didn't die
-    ok($@ eq "") or print "# died with $@\n";
-    ok(isweak($b));
-    ok($$b eq "hello") or print "# b is '$$b'\n";
-    $a="";
-    ok(not $b) or print "# b didn't go away\n";
+  $a = eval '\"hello"';
+  ok(ref($a)) or print "# didn't get a ref from eval\n";
+
+  $b = $a;
+  eval { weaken($b) };
+  # we didn't die
+  is($@, "");
+  ok(isweak($b));
+  is($$b, "hello");
+
+  $a="";
+  ok(not $b) or diag("b did not go away");
 }
 
 package Dest;
 
 sub DESTROY {
-	print "# INCFLAG\n";
-	${$_[0]{Flag}} ++;
+  ${$_[0]{Flag}} ++;
 }

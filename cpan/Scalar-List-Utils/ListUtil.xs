@@ -62,6 +62,22 @@ my_sv_copypv(pTHX_ SV *const dsv, SV *const ssv)
 #  define PERL_HAS_BAD_MULTICALL_REFCOUNT
 #endif
 
+#if PERL_VERSION < 14
+#  define croak_no_modify() croak("%s", PL_no_modify)
+#endif
+
+#if PERL_VERSION < 12
+static void Perl_ck_warner(pTHX_ U32 err, const char* pat, ...)
+{
+    if (Perl_ckwarn(aTHX_ err)) {
+        va_list args;
+        va_start(args, pat);
+        vwarner(err, pat, &args);
+        va_end(args);
+    }
+}
+#endif
+
 MODULE=List::Util       PACKAGE=List::Util
 
 void
@@ -917,6 +933,42 @@ PROTOTYPE: $
 CODE:
 #ifdef SvWEAKREF
     sv_rvweaken(sv);
+#else
+    croak("weak references are not implemented in this release of perl");
+#endif
+
+void
+unweaken(sv)
+    SV *sv
+PROTOTYPE: $
+INIT:
+    SV *tsv;
+CODE:
+#ifdef SvWEAKREF
+    /* This code stolen from core's sv_rvweaken() and modified */
+    if (!SvOK(sv))
+        return;
+    if (!SvROK(sv))
+        croak("Can't unweaken a nonreference");
+    else if (!SvWEAKREF(sv)) {
+        Perl_ck_warner(aTHX_ packWARN(WARN_MISC), "Reference is not weak");
+        return;
+    }
+    else if (SvREADONLY(sv)) croak_no_modify();
+
+    tsv = SvRV(sv);
+#if PERL_VERSION >= 14
+    SvWEAKREF_off(sv); SvROK_on(sv);
+    SvREFCNT_inc_NN(tsv);
+    Perl_sv_del_backref(aTHX_ tsv, sv);
+#else
+    /* Lacking sv_del_backref() the best we can do is clear the old (weak) ref
+     * then set a new strong one
+     */
+    sv_clear(sv);
+    SvRV_set(sv, SvREFCNT_inc_NN(tsv));
+    SvROK_on(sv);
+#endif
 #else
     croak("weak references are not implemented in this release of perl");
 #endif
