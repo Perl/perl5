@@ -653,19 +653,6 @@ sub new
 	    return $self;
 	}
 
-	if ($Config{d_setlocale}) {
-	    use POSIX qw/locale_h/;
-	    use if $Config{d_setlocale}, 'locale';
-	    my $currlocale = setlocale(LC_ALL);
-
-	    # if the current locale uses commas for decimal points, we
-	    # just replace commas with decimal places, rather than changing
-	    # locales
-	    if ( localeconv()->{decimal_point} eq ',' ) {
-		$value =~ tr/,/./;
-	    }
-	}
-
 	if ( not defined $value or $value =~ /^undef$/ ) {
 	    # RT #19517 - special case for undef comparison
 	    # or someone forgot to pass a value
@@ -685,6 +672,19 @@ sub new
 	}
 
 	$value = _un_vstring($value);
+
+	if ($Config{d_setlocale}) {
+	    use POSIX qw/locale_h/;
+	    use if $Config{d_setlocale}, 'locale';
+	    my $currlocale = setlocale(LC_ALL);
+
+	    # if the current locale uses commas for decimal points, we
+	    # just replace commas with decimal places, rather than changing
+	    # locales
+	    if ( localeconv()->{decimal_point} eq ',' ) {
+		$value =~ tr/,/./;
+	    }
+	}
 
 	# exponential notation
 	if ( $value =~ /\d+.?\d*e[-+]?\d+/ ) {
