@@ -16183,6 +16183,48 @@ S_put_byte(pTHX_ SV *sv, int c)
     }
 }
 
+STATIC void
+S_put_range(pTHX_ SV *sv, UV start, UV end)
+{
+
+    /* Appends to 'sv' a displayable version of the range of code points from
+     * 'start' to 'end' */
+
+    assert(start <= end);
+
+    PERL_ARGS_ASSERT_PUT_RANGE;
+
+    if (end - start < 3) {  /* Individual chars in short ranges */
+        for (; start <= end; start++)
+            put_byte(sv, start);
+    }
+    else if (   end > 255
+             || ! isALPHANUMERIC(start)
+             || ! isALPHANUMERIC(end)
+             || isDIGIT(start) != isDIGIT(end)
+             || isUPPER(start) != isUPPER(end)
+             || isLOWER(start) != isLOWER(end)
+
+                /* This final test should get optimized out except on EBCDIC
+                 * platforms, where it causes ranges that cross discontinuities
+                 * like i/j to be shown as hex instead of the misleading,
+                 * e.g. H-K (since that range includes more than H, I, J, K).
+                 * */
+             || (end - start) != NATIVE_TO_ASCII(end) - NATIVE_TO_ASCII(start))
+    {
+        Perl_sv_catpvf(aTHX_ sv, "\\x{%02" UVXf "}-\\x{%02" UVXf "}",
+                       start,
+                       (end < 256) ? end : 255);
+    }
+    else { /* Here, the ends of the range are both digits, or both uppercase,
+              or both lowercase; and there's no discontinuity in the range
+              (which could happen on EBCDIC platforms) */
+        put_byte(sv, start);
+        sv_catpvs(sv, "-");
+        put_byte(sv, end);
+    }
+}
+
 STATIC bool
 S_put_latin1_charclass_innards(pTHX_ SV *sv, char *bitmap)
 {
@@ -16191,50 +16233,27 @@ S_put_latin1_charclass_innards(pTHX_ SV *sv, char *bitmap)
      * output anything */
 
     int i;
-    int rangestart = -1;
     bool has_output_anything = FALSE;
 
     PERL_ARGS_ASSERT_PUT_LATIN1_CHARCLASS_INNARDS;
 
-    for (i = 0; i <= 256; i++) {
+    for (i = 0; i < 256; i++) {
         if (i < 256 && BITMAP_TEST((U8 *) bitmap,i)) {
-            if (rangestart == -1)
-                rangestart = i;
-        } else if (rangestart != -1) {
-            int j = i - 1;
-            if (i <= rangestart + 3) {  /* Individual chars in short ranges */
-                for (; rangestart < i; rangestart++)
-                    put_byte(sv, rangestart);
-            }
-            else if (   j > 255
-                     || ! isALPHANUMERIC(rangestart)
-                     || ! isALPHANUMERIC(j)
-                     || isDIGIT(rangestart) != isDIGIT(j)
-                     || isUPPER(rangestart) != isUPPER(j)
-                     || isLOWER(rangestart) != isLOWER(j)
 
-                        /* This final test should get optimized out except
-                         * on EBCDIC platforms, where it causes ranges that
-                         * cross discontinuities like i/j to be shown as hex
-                         * instead of the misleading, e.g. H-K (since that
-                         * range includes more than H, I, J, K). */
-                     || (j - rangestart)
-                         != NATIVE_TO_ASCII(j) - NATIVE_TO_ASCII(rangestart))
-            {
-                Perl_sv_catpvf(aTHX_ sv, "\\x{%02x}-\\x{%02x}",
-                               rangestart,
-                               (j < 256) ? j : 255);
+            /* The character at index i should be output.  Find the next
+             * character that should NOT be output */
+            int j;
+            for (j = i + 1; j <= 256; j++) {
+                if (! BITMAP_TEST((U8 *) bitmap, j)) {
+                    break;
+                }
             }
-            else { /* Here, the ends of the range are both digits, or both
-                      uppercase, or both lowercase; and there's no
-                      discontinuity in the range (which could happen on EBCDIC
-                      platforms) */
-                put_byte(sv, rangestart);
-                sv_catpvs(sv, "-");
-                put_byte(sv, j);
-            }
-            rangestart = -1;
+
+            /* Everything between them is a single range that should be output
+             * */
+            put_range(sv, i, j - 1);
             has_output_anything = TRUE;
+            i = j;
         }
     }
 

@@ -5305,6 +5305,11 @@ STATIC bool	S_put_latin1_charclass_innards(pTHX_ SV* sv, char* bitmap)
 #define PERL_ARGS_ASSERT_PUT_LATIN1_CHARCLASS_INNARDS	\
 	assert(sv); assert(bitmap)
 
+STATIC void	S_put_range(pTHX_ SV* sv, UV start, UV end)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_PUT_RANGE	\
+	assert(sv)
+
 STATIC void	S_regdump_extflags(pTHX_ const char *lead, const U32 flags);
 STATIC void	S_regdump_intflags(pTHX_ const char *lead, const U32 flags);
 STATIC U8	S_regtail_study(pTHX_ RExC_state_t *pRExC_state, regnode *p, const regnode *val, U32 depth)
