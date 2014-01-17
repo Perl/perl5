@@ -4033,6 +4033,48 @@ S_glob_assign_ref(pTHX_ SV *const dstr, SV *const sstr)
 # define GE_COWBUF_THRESHOLD(len)	1
 #endif
 
+#ifdef PERL_DEBUG_READONLY_COW
+# include <sys/mman.h>
+
+# ifndef sTHX
+#  define sTHX 0
+# endif
+
+void
+Perl_sv_buf_to_ro(pTHX_ SV *sv)
+{
+    struct perl_memory_debug_header * const header =
+	(struct perl_memory_debug_header *)(SvPVX(sv)-sTHX);
+    const MEM_SIZE len = header->size;
+    PERL_ARGS_ASSERT_SV_BUF_TO_RO;
+# ifdef PERL_TRACK_MEMPOOL
+    if (!header->readonly) header->readonly = 1;
+# endif
+    if (mprotect(header, len, PROT_READ))
+	Perl_warn(aTHX_ "mprotect RW for COW string %p %lu failed with %d",
+			 header, len, errno);
+}
+
+void
+Perl_sv_buf_to_rw(pTHX_ SV *sv)
+{
+    struct perl_memory_debug_header * const header =
+	(struct perl_memory_debug_header *)(SvPVX(sv)-sTHX);
+    const MEM_SIZE len = header->size;
+    PERL_ARGS_ASSERT_SV_BUF_TO_RW;
+    if (mprotect(header, len, PROT_READ|PROT_WRITE))
+	Perl_warn(aTHX_ "mprotect for COW string %p %lu failed with %d",
+			 header, len, errno);
+# ifdef PERL_TRACK_MEMPOOL
+    header->readonly = 0;
+# endif
+}
+
+#else
+# define sv_buf_to_ro(sv)	NOOP
+# define sv_buf_to_rw(sv)	NOOP
+#endif
+
 void
 Perl_sv_setsv_flags(pTHX_ SV *dstr, SV* sstr, const I32 flags)
 {
@@ -4435,9 +4477,13 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, SV* sstr, const I32 flags)
                     SV_COW_NEXT_SV_SET(dstr, SV_COW_NEXT_SV(sstr));
                     SV_COW_NEXT_SV_SET(sstr, dstr);
 # else
+		    if (sflags & SVf_IsCOW) {
+			sv_buf_to_rw(sstr);
+		    }
 		    CowREFCNT(sstr)++;
 # endif
                     SvPV_set(dstr, SvPVX_mutable(sstr));
+                    sv_buf_to_ro(sstr);
             } else
 #endif
             {
@@ -4531,6 +4577,9 @@ Perl_sv_setsv_cow(pTHX_ SV *dstr, SV *sstr)
     STRLEN cur = SvCUR(sstr);
     STRLEN len = SvLEN(sstr);
     char *new_pv;
+#if defined(PERL_DEBUG_READONLY_COW) && defined(PERL_NEW_COPY_ON_WRITE)
+    const bool already = cBOOL(SvIsCOW(sstr));
+#endif
 
     PERL_ARGS_ASSERT_SV_SETSV_COW;
 
@@ -4591,9 +4640,13 @@ Perl_sv_setsv_cow(pTHX_ SV *dstr, SV *sstr)
 # ifdef PERL_OLD_COPY_ON_WRITE
     SV_COW_NEXT_SV_SET(sstr, dstr);
 # else
+#  ifdef PERL_DEBUG_READONLY_COW
+    if (already) sv_buf_to_rw(sstr);
+#  endif
     CowREFCNT(sstr)++;	
 # endif
     new_pv = SvPVX_mutable(sstr);
+    sv_buf_to_ro(sstr);
 
   common_exit:
     SvPV_set(dstr, new_pv);
@@ -4868,6 +4921,7 @@ S_sv_release_COW(pTHX_ SV *sv, const char *pvx, SV *after)
                in the loop.)
                Hence other SV is no longer copy on write either.  */
             SvIsCOW_off(after);
+            sv_buf_to_rw(after);
         } else {
             /* We need to follow the pointers around the loop.  */
             SV *next;
@@ -4901,6 +4955,10 @@ the C<flags> parameter gets passed to C<sv_unref_flags()>
 when unreffing.  C<sv_force_normal> calls this function
 with flags set to 0.
 
+This function is expected to be used to signal to perl that this SV is
+about to be written to, and any extra book-keeping needs to be taken care
+of.  Hence, it croaks on read-only values.
+
 =cut
 */
 
@@ -4932,7 +4990,7 @@ S_sv_uncow(pTHX_ SV * const sv, const U32 flags)
 # ifdef PERL_NEW_COPY_ON_WRITE
 	if (len && CowREFCNT(sv) == 0)
 	    /* We own the buffer ourselves. */
-	    NOOP;
+	    sv_buf_to_rw(sv);
 	else
 # endif
 	{
@@ -4940,7 +4998,11 @@ S_sv_uncow(pTHX_ SV * const sv, const U32 flags)
             /* This SV doesn't own the buffer, so need to Newx() a new one:  */
 # ifdef PERL_NEW_COPY_ON_WRITE
 	    /* Must do this first, since the macro uses SvPVX. */
-	    if (len) CowREFCNT(sv)--;
+	    if (len) {
+		sv_buf_to_rw(sv);
+		CowREFCNT(sv)--;
+		sv_buf_to_ro(sv);
+	    }
 # endif
             SvPV_set(sv, NULL);
             SvLEN_set(sv, 0);
@@ -6421,7 +6483,9 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
 			sv_release_COW(sv, SvPVX_const(sv), SV_COW_NEXT_SV(sv));
 # else
 			if (CowREFCNT(sv)) {
+			    sv_buf_to_rw(sv);
 			    CowREFCNT(sv)--;
+			    sv_buf_to_ro(sv);
 			    SvLEN_set(sv, 0);
 			}
 # endif

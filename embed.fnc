@@ -1315,6 +1315,10 @@ sd	|void	|sv_add_arena	|NN char *const ptr|const U32 size \
 #endif
 Apd	|int	|sv_backoff	|NN SV *const sv
 Apd	|SV*	|sv_bless	|NN SV *const sv|NN HV *const stash
+#if defined(PERL_DEBUG_READONLY_COW)
+p	|void	|sv_buf_to_ro	|NN SV *sv
+p	|void	|sv_buf_to_rw	|NN SV *sv
+#endif
 Afpd	|void	|sv_catpvf	|NN SV *const sv|NN const char *const pat|...
 Apd	|void	|sv_vcatpvf	|NN SV *const sv|NN const char *const pat \
 				|NULLOK va_list *const args

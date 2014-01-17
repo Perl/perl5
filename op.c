@@ -10857,6 +10857,9 @@ Perl_ck_svconst(pTHX_ OP *o)
     if (!SvREADONLY(sv) && !SvIsCOW(sv) && SvCANCOW(sv)) {
 	SvIsCOW_on(sv);
 	CowREFCNT(sv) = 0;
+# ifdef PERL_DEBUG_READONLY_COW
+	sv_buf_to_ro(sv);
+# endif
     }
 #endif
     SvREADONLY_on(sv);

@@ -2138,7 +2138,7 @@ See also C<PL_sv_yes> and C<PL_sv_no>.
 	 == (SVt_PVLV|SVf_FAKE))
 
 
-#ifdef PERL_NEW_COPY_ON_WRITE
+#ifdef PERL_ANY_COW
 # define SvGROW(sv,len) \
 	(SvIsCOW(sv) || SvLEN(sv) < (len) ? sv_grow(sv,len) : SvPVX(sv))
 #else
