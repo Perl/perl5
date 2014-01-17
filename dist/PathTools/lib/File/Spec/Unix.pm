@@ -3,7 +3,7 @@ package File::Spec::Unix;
 use strict;
 use vars qw($VERSION);
 
-$VERSION = '3.45';
+$VERSION = '3.45_01';
 my $xs_version = $VERSION;
 $VERSION =~ tr/_//;
 
@@ -176,16 +176,15 @@ sub _cached_tmpdir {
 sub _tmpdir {
     my $self = shift;
     my @dirlist = @_;
-    {
-	no strict 'refs';
-	if (${"\cTAINT"}) { # Check for taint mode on perl >= 5.8.0
-            require Scalar::Util;
-	    @dirlist = grep { ! Scalar::Util::tainted($_) } @dirlist;
-	}
-	elsif ($] < 5.007) { # No ${^TAINT} before 5.8
-	    @dirlist = grep { eval { eval('1'.substr $_,0,0) } } @dirlist;
-	}
+    my $taint = do { no strict 'refs'; ${"\cTAINT"} };
+    if ($taint) { # Check for taint mode on perl >= 5.8.0
+	require Scalar::Util;
+	@dirlist = grep { ! Scalar::Util::tainted($_) } @dirlist;
     }
+    elsif ($] < 5.007) { # No ${^TAINT} before 5.8
+	@dirlist = grep { eval { eval('1'.substr $_,0,0) } } @dirlist;
+    }
+    
     foreach (@dirlist) {
 	next unless defined && -d && -w _;
 	$tmpdir = $_;
@@ -193,6 +192,16 @@ sub _tmpdir {
     }
     $tmpdir = $self->curdir unless defined $tmpdir;
     $tmpdir = defined $tmpdir && $self->canonpath($tmpdir);
+    if ( $tmpdir eq '.' ) {
+        # See [perl #120593] for the full details
+        # If possible, return a full path, rather than '.', but
+        # we have to avoid returning a tainted value, so we jump
+        # through some hoops.
+        ($tmpdir) = grep {
+            $taint     ? ! Scalar::Util::tainted($_) :
+            $] < 5.007 ? eval { eval('1'.substr $_,0,0) } : 1
+        } $self->rel2abs($tmpdir), $tmpdir;
+    }
     return $tmpdir;
 }
 

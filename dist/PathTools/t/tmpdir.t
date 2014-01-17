@@ -1,5 +1,5 @@
 use strict;
-use Test::More tests => 7;
+use Test::More tests => 8;
 
 # Grab all of the plain routines from File::Spec
 use File::Spec;
@@ -46,3 +46,8 @@ for ('File::Spec', "File::Spec::Win32") {
     isn't $tmpdir2, $tmpdir1, "$_->tmpdir works with changing env";
   }
 }
+
+ok(
+    File::Spec->file_name_is_absolute(File::Spec->tmpdir()),
+    "tmpdir() always returns an absolute path"
+);
