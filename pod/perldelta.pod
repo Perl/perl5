@@ -475,7 +475,9 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+In v5.19.6, C<do CORE()> was inadvertently changed from being interpreted
+as do-file (i.e., C<do +CORE()>) to do-sub (i.e., C<&CORE()>).  It has now
+been changed back.
 
 =back
 
