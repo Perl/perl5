@@ -35,6 +35,7 @@ bug*.pl
 
 # generated for configuration overrides, eg Solaris
 /config.over
+/config.arch
 
 # alternative names on OS X
 /GNUmakefile
