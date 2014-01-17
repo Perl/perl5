@@ -4034,7 +4034,7 @@ struct perl_memory_debug_header {
 
 #endif
 
-#if defined (PERL_IMPLICIT_CONTEXT) || defined (PERL_DEBUG_READONLY_COW)
+#if defined (PERL_TRACK_MEMPOOL) || defined (PERL_DEBUG_READONLY_COW)
 
 #  define sTHX	(sizeof(struct perl_memory_debug_header) + \
 	(MEM_ALIGNBYTES - sizeof(struct perl_memory_debug_header) \
