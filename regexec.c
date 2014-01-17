@@ -639,7 +639,7 @@ Perl_re_intuit_start(pTHX_
     char *t;
     const bool utf8_target = (sv && SvUTF8(sv)) ? 1 : 0; /* if no sv we have to assume bytes */
     bool ml_anch = 0;
-    char *other_last = NULL;	/* other substr checked before this */
+    char *other_last = NULL;	/* other substr already checked this high */
     char *check_at = NULL;		/* check substr found at this pos */
     char *checked_upto = NULL;          /* how far into the string we have already checked using find_byclass*/
     const I32 multiline = prog->extflags & RXf_PMf_MULTILINE;
@@ -1025,19 +1025,20 @@ Perl_re_intuit_start(pTHX_
                     ? last1
                     : (char*)HOP3lim(t, prog->float_max_offset, last1);
 
+            /* set s to the minimum position the float string can start */
 	    s = HOP3c(t, prog->float_min_offset, strend);
-	    if (s < other_last)
+	    if (s < other_last) /* skip previous failures */
 		s = other_last;
- /* XXXX It is not documented what units *_offsets are in.  Assume bytes.  */
+
 	    must = utf8_target ? prog->float_utf8 : prog->float_substr;
-	    /* fbm_instr() takes into account exact value of end-of-str
-	       if the check is SvTAIL(ed).  Since false positives are OK,
-	       and end-of-str is not later than strend we are OK. */
 	    if (must == &PL_sv_undef) {
 		s = (char*)NULL;
 		DEBUG_r(must = prog->float_utf8);	/* for debug message */
 	    }
 	    else
+                /* fbm_instr() takes into account exact value of end-of-str
+                   if the check is SvTAIL(ed).  Since false positives are OK,
+                   and end-of-str is not later than strend we are OK. */
 		s = fbm_instr((unsigned char*)s,
 			      (unsigned char*)last + SvCUR(must)
 				  - (SvTAIL(must)!=0),
@@ -1049,16 +1050,23 @@ Perl_re_intuit_start(pTHX_
 		    (s ? "Found" : "Contradicts"),
 		    quoted, RE_SV_TAIL(must));
             });
+
 	    if (!s) {
-		if (last1 == last) {
+                /* last1 is max possible float location. If we didn't
+                 * find it before there, we never will */
+		if (last == last1) {
 		    DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
 					    ", giving up...\n"));
 		    goto fail_finish;
 		}
+
+                /* try to find the anchored substr again at a higher
+                 * position. Maybe next time we'll find a float in range
+                 * too */
 		DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
 		    ", trying anchored starting at offset %ld...\n",
 		    (long)(saved_s + 1 - i_strpos)));
-		other_last = last;
+		other_last = last; /* highest failure */
 		s = HOP3c(t, 1, strend);
 		goto restart;
 	    }
@@ -1066,6 +1074,9 @@ Perl_re_intuit_start(pTHX_
 		DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, " at offset %ld...\n",
 		      (long)(s - i_strpos)));
 		other_last = s; /* Fix this later. --Hugo */
+                /* XXX the commit that introduced the "Fix this" comment
+                 * above, changed the other_last assignment from s+1 to s.
+                 * I've no idea what's right. DAPM */
 		s = saved_s;
 		if (t == strpos)
 		    goto try_at_start;
