@@ -5507,11 +5507,13 @@ PERL_CALLCONV void	Perl_sv_buf_to_ro(pTHX_ SV *sv)
 #define PERL_ARGS_ASSERT_SV_BUF_TO_RO	\
 	assert(sv)
 
-PERL_CALLCONV void	Perl_sv_buf_to_rw(pTHX_ SV *sv)
+#  if defined(PERL_IN_SV_C)
+STATIC void	S_sv_buf_to_rw(pTHX_ SV *sv)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_SV_BUF_TO_RW	\
 	assert(sv)
 
+#  endif
 #endif
 #if defined(PERL_DEBUG_READONLY_OPS)
 PERL_CALLCONV PADOFFSET	Perl_op_refcnt_dec(pTHX_ OP *o)

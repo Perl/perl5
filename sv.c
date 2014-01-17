@@ -4055,8 +4055,8 @@ Perl_sv_buf_to_ro(pTHX_ SV *sv)
 			 header, len, errno);
 }
 
-void
-Perl_sv_buf_to_rw(pTHX_ SV *sv)
+static void
+S_sv_buf_to_rw(pTHX_ SV *sv)
 {
     struct perl_memory_debug_header * const header =
 	(struct perl_memory_debug_header *)(SvPVX(sv)-sTHX);
