@@ -913,6 +913,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #define	PERL_TARGETARCH	"$targetarch"	/**/
 #endif
 
+/* USE_SHELL_ALWAYS:
+ * This symbol, if defined, indicates that only shell commands should be used
+ * when using system() or backticks.
+ */
+#$d_useshellcmds USE_SHELL_ALWAYS    /**/
+
 /* MULTIARCH:
  *	This symbol, if defined, signifies that the build
  *	process will produce some binary files that are going to be
