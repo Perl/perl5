@@ -1041,13 +1041,13 @@ sub _calc_trace_wrapper
 DebugWrap->new({
     cmds =>
     [
-        'n', 'print "<$x>"',
-        'n', 'print "<$x>"',
+        'n', 'print "<$x>\n"',
+        'n', 'print "<$x>\n"',
         'q',
     ],
     prog => '../lib/perl5db/t/lsub-n',
 })->output_like(
-    qr/<1><11>/,
+    qr/<1>\n<11>\n/,
     'n steps over lvalue subs',
 );
 
