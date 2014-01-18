@@ -496,6 +496,12 @@ handled correctly.  Formerly, whether a sub returned by such a tied element
 would be treated as a sub depended on whether a FETCH had occurred
 previously.
 
+=item *
+
+C<getc> on a byte-sized handle after the same C<getc> operator had been
+used on a utf8 handle used to treat the bytes as utf8, resulting in erratic
+behavior (e.g., malformed UTF-8 warnings).
+
 =back
 
 =head1 Known Problems
