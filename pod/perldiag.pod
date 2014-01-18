@@ -1763,9 +1763,9 @@ type in a pack template.  See L<perlfunc/pack>.
 
 =item each on reference is experimental
 
-(S experimental::autoderef) C<each> with a scalar argument is experimental and
-may change or be removed in a future Perl version.  If you want to take
-the risk of using this feature, simply disable this warning:
+(S experimental::autoderef) C<each> with a scalar argument is experimental
+and may change or be removed in a future Perl version.  If you want to
+take the risk of using this feature, simply disable this warning:
 
     no warnings "experimental::autoderef";
 
@@ -2703,9 +2703,9 @@ line.  See L<perlrun> for more details.
 
 =item keys on reference is experimental
 
-(S experimental::autoderef) C<keys> with a scalar argument is experimental and
-may change or be removed in a future Perl version.  If you want to take
-the risk of using this feature, simply disable this warning:
+(S experimental::autoderef) C<keys> with a scalar argument is experimental
+and may change or be removed in a future Perl version.  If you want to
+take the risk of using this feature, simply disable this warning:
 
     no warnings "experimental::autoderef";
 
@@ -4213,9 +4213,9 @@ fine from VMS' perspective, it's probably not what you intended.
 
 =item pop on reference is experimental
 
-(S experimental::autoderef) C<pop> with a scalar argument is experimental and
-may change or be removed in a future Perl version.  If you want to take
-the risk of using this feature, simply disable this warning:
+(S experimental::autoderef) C<pop> with a scalar argument is experimental
+and may change or be removed in a future Perl version.  If you want to
+take the risk of using this feature, simply disable this warning:
 
     no warnings "experimental::autoderef";
 
@@ -4479,9 +4479,9 @@ change when upper cased.
 
 =item push on reference is experimental
 
-(S experimental::autoderef) C<push> with a scalar argument is experimental and
-may change or be removed in a future Perl version.  If you want to take
-the risk of using this feature, simply disable this warning:
+(S experimental::autoderef) C<push> with a scalar argument is experimental
+and may change or be removed in a future Perl version.  If you want to
+take the risk of using this feature, simply disable this warning:
 
     no warnings "experimental::autoderef";
 
@@ -5035,9 +5035,10 @@ See L<perlfunc/splice>.
 
 =item splice on reference is experimental
 
-(S experimental::autoderef) C<splice> with a scalar argument is experimental
-and may change or be removed in a future Perl version.  If you want to
-take the risk of using this feature, simply disable this warning:
+(S experimental::autoderef) C<splice> with a scalar argument
+is experimental and may change or be removed in a future
+Perl version.  If you want to take the risk of using this
+feature, simply disable this warning:
 
     no warnings "experimental::autoderef";
 
@@ -5860,9 +5861,10 @@ bad switch on your behalf.)
 
 =item unshift on reference is experimental
 
-(S experimental::autoderef) C<unshift> with a scalar argument is experimental
-and may change or be removed in a future Perl version.  If you want to
-take the risk of using this feature, simply disable this warning:
+(S experimental::autoderef) C<unshift> with a scalar argument
+is experimental and may change or be removed in a future
+Perl version.  If you want to take the risk of using this
+feature, simply disable this warning:
 
     no warnings "experimental::autoderef";
 
@@ -6413,9 +6415,10 @@ longer than 1024 characters.  The return value has been truncated to
 
 =item values on reference is experimental
 
-(S experimental::autoderef) C<values> with a scalar argument is experimental
-and may change or be removed in a future Perl version.  If you want to
-take the risk of using this feature, simply disable this warning:
+(S experimental::autoderef) C<values> with a scalar argument
+is experimental and may change or be removed in a future
+Perl version.  If you want to take the risk of using this
+feature, simply disable this warning:
 
     no warnings "experimental::autoderef";
 
