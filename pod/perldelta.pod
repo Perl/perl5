@@ -487,7 +487,7 @@ been changed back.
 =item *
 
 v5.19.7 inadvertently caused freed scalars to be passed to subroutines in
-@INC it contained multiple subs.  This has been fixed. [perl #120657]
+@INC if it contained multiple subs.  This has been fixed. [perl #120657]
 
 =item *
 
