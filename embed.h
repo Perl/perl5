@@ -1004,6 +1004,7 @@
 #define regcppop(a,b)		S_regcppop(aTHX_ a,b)
 #define regcppush(a,b,c)	S_regcppush(aTHX_ a,b,c)
 #define reghop3			S_reghop3
+#define reghop4			S_reghop4
 #define reghopmaybe3		S_reghopmaybe3
 #define reginclass(a,b,c,d,e)	S_reginclass(aTHX_ a,b,c,d,e)
 #define regmatch(a,b,c)		S_regmatch(aTHX_ a,b,c)
@@ -1011,9 +1012,6 @@
 #define regtry(a,b)		S_regtry(aTHX_ a,b)
 #define to_byte_substr(a)	S_to_byte_substr(aTHX_ a)
 #define to_utf8_substr(a)	S_to_utf8_substr(aTHX_ a)
-#    if defined(XXX_dmq)
-#define reghop4			S_reghop4
-#    endif
 #  endif
 #  if defined(PERL_IN_UTF8_C) || defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C)
 #define _to_fold_latin1(a,b,c,d)	Perl__to_fold_latin1(aTHX_ a,b,c,d)

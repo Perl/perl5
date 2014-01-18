@@ -135,6 +135,10 @@ static const char* const non_utf8_target_but_utf8_required
     ? reghop3((U8*)(pos), off, (U8*)(lim)) \
     : (U8*)((pos + off) > lim ? lim : (pos + off)))
 
+#define HOP4(pos,off,llim, rlim) (reginfo->is_utf8_target \
+    ? reghop4((U8*)(pos), off, (U8*)(llim), (U8*)(rlim)) \
+    : (U8*)(pos + off))
+#define HOP4c(pos,off,llim, rlim) ((char*)HOP4(pos,off,llim, rlim))
 
 #define NEXTCHR_EOS -10 /* nextchr has fallen off the end */
 #define NEXTCHR_IS_EOS (nextchr < 0)
@@ -906,10 +910,23 @@ Perl_re_intuit_start(pTHX_
 	if (check == (utf8_target ? prog->float_utf8 : prog->float_substr)) {
 	  do_other_anchored:
 	    {
-		char * const last = HOP3c(s, -start_shift, strbeg);
+		char * last;
 		char *last1, *last2;
 		char * const saved_s = s;
 		SV* must;
+
+                /* we've previously found a floating substr starting at s.
+                 * This means that the regex origin must lie somewhere
+                 * between min: HOP3(s, -check_offset_max)
+                 * between max: HOP3(s, -check_offset_min)
+                 * (except that min will be >= strpos)
+                 * So the fixed  substr must lie somewhere between
+                 *  HOP3(min, anchored_offset)
+                 *  HOP3(max, anchored_offset) + SvCUR(substr)
+                 */
+                assert(strpos + start_shift <= s);
+                last = HOP4c(s, prog->anchored_offset-start_shift,
+                            strbeg, strend);
 
 		t = s - prog->check_offset_max;
 		if (s - strpos > prog->check_offset_max  /* signed-corrected t > strpos */
@@ -922,14 +939,12 @@ Perl_re_intuit_start(pTHX_
 		t = HOP3c(t, prog->anchored_offset, strend);
 		if (t < other_last)	/* These positions already checked */
 		    t = other_last;
-		last2 = last1 = HOP3c(strend, -prog->minlen, strbeg);
+
+                assert(prog->minlen > prog->anchored_offset);
+		last2 = last1 = HOP3c(strend,
+                                prog->anchored_offset-prog->minlen, strbeg);
 		if (last < last1)
 		    last1 = last;
-                /* XXXX It is not documented what units *_offsets are in.  
-                   We assume bytes, but this is clearly wrong. 
-                   Meaning this code needs to be carefully reviewed for errors.
-                   dmq.
-                  */
  
 		/* On end-of-str: see comment below. */
 		must = utf8_target ? prog->anchored_utf8 : prog->anchored_substr;
@@ -940,8 +955,7 @@ Perl_re_intuit_start(pTHX_
 		else
 		    s = fbm_instr(
 			(unsigned char*)t,
-			HOP3(HOP3(last1, prog->anchored_offset, strend)
-				+ SvCUR(must), -(SvTAIL(must)!=0), strbeg),
+			HOP3(last1 + SvCUR(must), -(SvTAIL(must)!=0), strbeg),
 			must,
 			multiline ? FBMrf_MULTILINE : 0
 		    );
@@ -963,8 +977,8 @@ Perl_re_intuit_start(pTHX_
 		    DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
 			", trying floating at offset %ld...\n",
 			(long)(HOP3c(saved_s, 1, strend) - i_strpos)));
-		    other_last = HOP3c(last1, prog->anchored_offset+1, strend);
-		    s = HOP3c(last, 1, strend);
+		    other_last = HOP3c(last1, 1, strend);
+		    s = HOP4c(last, 1 - prog->anchored_offset, strbeg, strend);
 		    goto restart;
 		}
 		else {
@@ -7797,11 +7811,6 @@ S_reghop3(U8 *s, SSize_t off, const U8* lim)
     return s;
 }
 
-#ifdef XXX_dmq
-/* there are a bunch of places where we use two reghop3's that should
-   be replaced with this routine. but since thats not done yet 
-   we ifdef it out - dmq
-*/
 STATIC U8 *
 S_reghop4(U8 *s, SSize_t off, const U8* llim, const U8* rlim)
 {
@@ -7827,7 +7836,6 @@ S_reghop4(U8 *s, SSize_t off, const U8* llim, const U8* rlim)
     }
     return s;
 }
-#endif
 
 STATIC U8 *
 S_reghopmaybe3(U8* s, SSize_t off, const U8* lim)

@@ -7175,6 +7175,14 @@ STATIC U8*	S_reghop3(U8 *s, SSize_t off, const U8 *lim)
 #define PERL_ARGS_ASSERT_REGHOP3	\
 	assert(s); assert(lim)
 
+STATIC U8*	S_reghop4(U8 *s, SSize_t off, const U8 *llim, const U8 *rlim)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(1)
+			__attribute__nonnull__(3)
+			__attribute__nonnull__(4);
+#define PERL_ARGS_ASSERT_REGHOP4	\
+	assert(s); assert(llim); assert(rlim)
+
 STATIC U8*	S_reghopmaybe3(U8 *s, SSize_t off, const U8 *lim)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(1)
@@ -7224,16 +7232,6 @@ STATIC void	S_to_utf8_substr(pTHX_ regexp * prog)
 #define PERL_ARGS_ASSERT_TO_UTF8_SUBSTR	\
 	assert(prog)
 
-#  if defined(XXX_dmq)
-STATIC U8*	S_reghop4(U8 *s, SSize_t off, const U8 *llim, const U8 *rlim)
-			__attribute__warn_unused_result__
-			__attribute__nonnull__(1)
-			__attribute__nonnull__(3)
-			__attribute__nonnull__(4);
-#define PERL_ARGS_ASSERT_REGHOP4	\
-	assert(s); assert(llim); assert(rlim)
-
-#  endif
 #endif
 #if defined(PERL_IN_SCOPE_C)
 STATIC void	S_save_pushptri32ptr(pTHX_ void *const ptr1, const I32 i, void *const ptr2, const int type);
