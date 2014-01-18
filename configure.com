@@ -6330,6 +6330,7 @@ $ WC "d_union_semun='undef'"
 $ WC "d_unlink_all_versions='" + d_unlink_all_versions + "'"	! VMS-specific
 $ WC "d_unordered='undef'"
 $ WC "d_unsetenv='" + d_unsetenv + "'"
+$ WC "d_useshellcmds='undef'"
 $ WC "d_clearenv='" + d_clearenv + "'"
 $ WC "d_usleep='" + d_usleep + "'"
 $ WC "d_usleepproto='" + d_usleep + "'"
