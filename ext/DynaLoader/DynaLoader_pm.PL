@@ -85,7 +85,7 @@ package DynaLoader;
 # Tim.Bunce@ig.co.uk, August 1994
 
 BEGIN {
-    $VERSION = '1.23';
+    $VERSION = '1.24';
 }
 
 use Config;
@@ -236,10 +236,10 @@ EOT
 }
 
 if ( $Config::Config{d_libname_unique} ) {
-    print OUT <<'EOT';
+    printf OUT <<'EOT', length($Config::Config{dlext}) + 1;
 sub mod2fname {
     my $parts = shift;
-    my $so_len = length($Config::Config{dlext})+1;
+    my $so_len = %d;
     my $name_max = 255; # No easy way to get this here
     
     my $libname = "PL_" .  join("__", @$parts);
