@@ -86,7 +86,7 @@ is( j(@a), j(1,2,2), 'duplicate middle element on the end');
 ok( ! Foo->isa('Bar'), 'Foo is not a Bar');
 
 splice @Foo::ISA, 0, 0, 'Bar';
-ok( !oo->isa('Bar'), 'splice @ISA and make Foo a Bar');
+ok( Foo->isa('Bar'), 'splice @ISA and make Foo a Bar');
 
 # Test undef first arg
 eval { no warnings 'experimental';splice( $new_arrayref, 0, 0, 1, 2, 3 ) };
