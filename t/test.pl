@@ -733,7 +733,7 @@ sub runperl {
     } else {
 	$result = `$runperl`;
     }
-    $result =~ s/\n\n/\n/ if $is_vms; # XXX pipes sometimes double these
+    $result =~ s/\n\n/\n/g if $is_vms; # XXX pipes sometimes double these
     return $result;
 }
 
