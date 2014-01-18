@@ -489,6 +489,13 @@ been changed back.
 v5.19.7 inadvertently caused freed scalars to be passed to subroutines in
 @INC it contained multiple subs.  This has been fixed. [perl #120657]
 
+=item *
+
+Individually-tied elements of @INC (as in C<tie $INC[0]...>) are now
+handled correctly.  Formerly, whether a sub returned by such a tied element
+would be treated as a sub depended on whether a FETCH had occurred
+previously.
+
 =back
 
 =head1 Known Problems
