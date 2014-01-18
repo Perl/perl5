@@ -299,13 +299,18 @@ Most of these are built within the directories F<utils> and F<x2p>.
 entries for each change
 Use L<XXX> with program names to get proper documentation linking. ]
 
-=head3 L<XXX>
+=head3 L<perlbug>
 
 =over 4
 
 =item *
 
-XXX
+F<perlbug> now has a C<-p> option for attaching patches with a bug report.
+
+=item *
+
+F<perlbug> now does input in the encoding of the current locale and
+output raw.
 
 =back
 
