@@ -318,6 +318,15 @@ source tree.
 
 XXX
 
+=item *
+
+By default, Perl will only create a shell subprocess for system(), backticks
+etc, if you use shell metacharacters in your shell command. Some operating
+systems (e.g. Android) do not install the separate echo or pwd binaries,
+which breaks the assumptions of not only the core tests, but also large
+parts of CPAN; In these cases, we can force perl to always spawn a
+shell by building it with the -Duseshellcmds.
+
 =back
 
 =head2 Discontinued Platforms
