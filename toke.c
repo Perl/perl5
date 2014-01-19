@@ -11221,6 +11221,16 @@ S_scan_formline(pTHX_ char *s)
     if (SvCUR(stuff)) {
 	PL_expect = XSTATE;
 	if (needargs) {
+	    const char *s2 = s;
+	    while (*s2 == '\r' || *s2 == ' ' || *s2 == '\t' || *s2 == '\f'
+		|| *s2 == 013)
+		s2++;
+	    if (*s2 == '{') {
+		start_force(PL_curforce);
+		PL_expect = XTERMBLOCK;
+		NEXTVAL_NEXTTOKE.ival = 0;
+		force_next(DO);
+	    }
 	    start_force(PL_curforce);
 	    NEXTVAL_NEXTTOKE.ival = 0;
 	    force_next(FORMLBRACK);

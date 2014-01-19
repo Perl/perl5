@@ -64,7 +64,7 @@ my $bas_tests = 21;
 my $bug_tests = 8 + 3 * 3 * 5 * 2 * 3 + 2 + 66 + 4 + 2 + 3 + 96 + 11;
 
 # number of tests in section 4
-my $hmb_tests = 35;
+my $hmb_tests = 37;
 
 my $tests = $bas_tests + $num_tests + $bug_tests + $hmb_tests;
 
@@ -1090,6 +1090,25 @@ ${{qw[ Sun 0 Mon 1 Tue 2 Wed 3 Thu 4 Fri 5 Sat 6 ]}}{"Wed"}
 write HASH;
 close HASH or die "Could not close: $!";
 is cat('Op_write.tmp'), "3\n", 'anonymous hashes';
+
+open(HASH2, '>Op_write.tmp') || die "Can't create Op_write.tmp";
+format HASH2 =
+@<<<
++{foo=>"bar"}
+.
+write HASH2;
+close HASH2 or die "Could not close: $!";
+is cat('Op_write.tmp'), "HASH\n", '+{...} is interpreted as anon hash';
+
+# Anonymous hashes
+open(BLOCK, '>Op_write.tmp') || die "Can't create Op_write.tmp";
+format BLOCK =
+@<<< @<<<
+{foo=>"bar"} # this is a block, not a hash!
+.
+write BLOCK;
+close BLOCK or die "Could not close: $!";
+is cat('Op_write.tmp'), "foo  bar\n", 'initial { is always BLOCK';
 
 # pragmata inside argument line
 open(STRICT, '>Op_write.tmp') || die "Can't create Op_write.tmp";
