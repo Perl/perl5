@@ -8,19 +8,23 @@ perlandroid - Perl under Android
 
 =head1 SYNOPSIS
 
-These are instructions for cross-compiling Perl for Android 2.0 and later.
-
-As of the writing of this document, Google only provides NDKs for
-a 64-bit versions of Linux and OS X, and we assume that you will be
-using those as the host OS; Google also provides an NDK for Windows,
-but the instructions below will not work there, although using
-Windows to cross-compile to Android should be possible through
-different means.
+The first portions of this documents contains instructions
+to cross-compile Perl for Android 2.0 and later, using the
+binaries provided by Google.  The latter portion describes how to build
+perl native using one of the toolchains available on the Play Store.
 
 =head1 DESCRIPTION
 
 This document describes how to set up your host environment when
-attempting to cross-compile Perl for Android.
+attempting to build Perl for Android.
+
+=head1 Cross-Compiling Perl
+
+These instructions assume an Unixish build environment on your host system;
+they've been tested on Linux and OS X, and may work on Cygwin and MSYS.
+While Google also provides an NDK for Windows, these steps won't work
+native there, although it may be possible to cross-compile through different
+means.
 
 =head2 Get the Android Native Development Kit (NDK)
 
@@ -55,9 +59,13 @@ This creates a working sysroot that we can feed to Configure later.
 =head2 adb or ssh?
 
 adb is the Android Debug Bridge.  For our purposes, it's basically a way
-of establishing an ssh connection to an Android device using USB.
+of establishing an ssh connection to an Android device without having to
+install anything on the device itself, as long as the device is either on
+the same local network as the host, or it is connected to the host through
+USB.
 Perl can be cross-compiled using either adb or a normal ssh connection;
 in general, if you can connect your device to the host using a USB port,
+or if you don't feel like installing an sshd app on your device,
 you may want to use adb, although you may be forced to switch to ssh if
 your device is not rooted and you're unlucky -- more on that later.
 Alternatively, if you're cross-compiling for an emulator, you'll have to
@@ -158,6 +166,25 @@ to i686-linux-android-gcc.
 On some older low-end devices -- think early 2.2 era -- some tests,
 particularly t/re/uniprops, may crash the phone, causing it to turn
 itself off once, and then back on again.
+
+=head1 Native Builds
+
+While Google doesn't provide a native toolchain for Android,
+you can still get one from the Play Store; for example, there's the CCTools
+app which you can get for free.
+Keep in mind that you want a full
+toolchain; some apps tend to default to installing only a barebones
+version without some important utilities, like ar or nm.
+
+Once you have the toolchain set up properly, the only
+remaining hurdle is actually locating where in the device it was installed
+in.  For example, CCTools installs its toolchain in 
+/data/data/com.pdaxrom.cctools/root/cctools.  With the path in hand,
+compiling perl is little more than:
+
+    export SYSROOT=<location of the native toolchain>
+    export LD_LIBRARY_PATH="$SYSROOT/lib:`pwd`:`pwd`/lib:`pwd`/lib/auto:$LD_LIBRARY_PATH"
+    sh Configure -des -Dsysroot=$SYSROOT -Alibpth="/system/lib /vendor/lib"
 
 =back
 
