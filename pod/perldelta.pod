@@ -136,7 +136,7 @@ dual-life modules would have a F<Changes> file that could be cribbed.
 
 =item *
 
-XXX
+L<IO::Socket::IP> has been (tentatively) added to core at version 0.26.
 
 =back
 
