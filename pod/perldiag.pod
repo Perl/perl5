@@ -2995,6 +2995,13 @@ arguments than were supplied, but might be used in the future for
 other cases where we can statically determine that arguments to
 functions are missing, e.g. for the L<perlfunc/pack> function.
 
+=item Redundant argument in %s
+
+(W redundant) You called a function with more arguments than other
+arguments you supplied indicated would be needed. Currently only
+emitted when a printf-type format required fewer arguments than were
+supplied, but might be used in the future for e.g. L<perlfunc/pack>.
+
 =item Missing argument to -%c
 
 (F) The argument to the indicated command line switch must follow

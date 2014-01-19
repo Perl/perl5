@@ -10639,6 +10639,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
     char ebuf[IV_DIG * 4 + NV_DIG + 32];
     /* large enough for "%#.#f" --chip */
     /* what about long double NVs? --jhi */
+    bool no_redundant_warning = FALSE; /* did we use any explicit format parameter index? */
 
     DECLARATION_FOR_STORE_LC_NUMERIC_SET_TO_NEEDED;
 
@@ -10652,9 +10653,17 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
     (void)SvPV_force_nomg(sv, origlen);
 
     /* special-case "", "%s", and "%-p" (SVf - see below) */
-    if (patlen == 0)
+    if (patlen == 0) {
+	if (svmax && ckWARN(WARN_REDUNDANT))
+	    Perl_warner(aTHX_ packWARN(WARN_REDUNDANT), "Redundant argument in %s",
+			PL_op ? OP_DESC(PL_op) : "sv_vcatpvfn()");
 	return;
+    }
     if (patlen == 2 && pat[0] == '%' && pat[1] == 's') {
+	if (svmax > 1 && ckWARN(WARN_REDUNDANT))
+	    Perl_warner(aTHX_ packWARN(WARN_REDUNDANT), "Redundant argument in %s",
+			PL_op ? OP_DESC(PL_op) : "sv_vcatpvfn()");
+
 	if (args) {
 	    const char * const s = va_arg(*args, char*);
 	    sv_catpv_nomg(sv, s ? s : nullstr);
@@ -10670,6 +10679,9 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
     }
     if (args && patlen == 3 && pat[0] == '%' &&
 		pat[1] == '-' && pat[2] == 'p') {
+	if (svmax > 1 && ckWARN(WARN_REDUNDANT))
+	    Perl_warner(aTHX_ packWARN(WARN_REDUNDANT), "Redundant argument in %s",
+			PL_op ? OP_DESC(PL_op) : "sv_vcatpvfn()");
 	argsv = MUTABLE_SV(va_arg(*args, void*));
 	sv_catsv_nomg(sv, argsv);
 	return;
@@ -10685,6 +10697,10 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	pp = pat + 2;
 	while (*pp >= '0' && *pp <= '9')
 	    digits = 10 * digits + (*pp++ - '0');
+
+	/* XXX: Why do this `svix < svmax` test? Couldn't we just
+	   format the first argument and WARN_REDUNDANT if svmax > 1?
+	   Munged by Nicholas Clark in v5.13.0-209-g95ea86d */
 	if (pp - pat == (int)patlen - 1 && svix < svmax) {
 	    const NV nv = SvNV(*svargs);
 	    if (*pp == 'g') {
@@ -10865,6 +10881,11 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	    if (*q == '$') {
 		++q;
 		efix = width;
+		if (!no_redundant_warning)
+		    /* I've forgotten if it's a better
+		       micro-optimization to always set this or to
+		       only set it if it's unset */
+		    no_redundant_warning = TRUE;
 	    } else {
 		goto gotwidth;
 	    }
@@ -11789,6 +11810,15 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	    goto vector;
 	}
     }
+
+    /* Now that we've consumed all our printf format arguments (svix)
+     * do we have things left on the stack that we didn't use?
+     */
+    if (!no_redundant_warning && svmax >= svix + 1 && ckWARN(WARN_REDUNDANT)) {
+	Perl_warner(aTHX_ packWARN(WARN_REDUNDANT), "Redundant argument in %s",
+		PL_op ? OP_DESC(PL_op) : "sv_vcatpvfn()");
+    }
+
     SvTAINT(sv);
 
     RESTORE_LC_NUMERIC();   /* Done outside loop, so don't have to save/restore

@@ -8,7 +8,7 @@ BEGIN {
     require './test.pl';
 }   
 
-plan tests => 1370;
+plan tests => 1406;
 
 use strict;
 use Config;
@@ -75,6 +75,142 @@ for (int(~0/2+1), ~0, "9999999999999999999") {
     is($result, "abcd", "only four valid values in $fmt");
     is($warn, 36, "expected warnings");
     is($bad,   0, "unexpected warnings");
+}
+
+# Tests for "missing argument" and "redundant argument" warnings
+{
+    my ($warn_missing, $warn_redundant, $warn_bad) = (0,0,0);
+    local $SIG{__WARN__} = sub {
+	if ($_[0] =~ /missing argument/i) {
+	    $warn_missing++
+	}
+	elsif ($_[0] =~ /redundant argument/i) {
+	    $warn_redundant++
+	}
+	else {
+	    $warn_bad++
+	}
+    };
+
+    my @tests = (
+	# The "", "%s", and "%-p" formats have special-case handling
+	# in sv.c
+	{
+	    fmt	 => "",
+	    args => [ qw( x ) ],
+	    res	 => "",
+	    m	 => 0,
+	    r	 => 1,
+	},
+	{
+	    fmt	 => "%s",
+	    args => [ qw( x y ) ],
+	    res	 => "x",
+	    m	 => 0,
+	    r	 => 1,
+	},
+	{
+	    fmt	 => "%-p",
+	    args => [ qw( x y ) ],
+	    res	 => qr/^[0-9a-f]+$/as,
+	    m	 => 0,
+	    r	 => 1,
+	},
+	# Other non-specialcased patterns
+	{
+	    fmt	 => "%s : %s",
+	    args => [ qw( a b c ) ],
+	    res	 => "a : b",
+	    m	 => 0,
+	    r	 => 1,
+	},
+	{
+	    fmt	 => "%s : %s : %s",
+	    args => [ qw( a b c d e ) ],
+	    res	 => "a : b : c",
+	    m	 => 0,
+	    # Note how we'll only warn about redundant arguments once,
+	    # even though both "d" and "e" are redundant...
+	    r	 => 1,
+	},
+	{
+	    fmt	 => "%s : %s : %s",
+	    args => [ ],
+	    res	 => " :  : ",
+	    # ...But when arguments are missing we'll warn about every
+	    # missing argument. This difference between the two
+	    # warnings is a feature.
+	    m	 => 3,
+	    r	 => 0,
+	},
+
+	# Tests for format parameter indexes.
+	#
+	# Deciding what to do about these is a bit tricky, and so is
+	# "correctly" warning about missing arguments on them.
+	#
+	# Should we warn if you supply 4 arguments but only use
+	# argument 1,3 & 4? Or only if you supply 5 arguments and your
+	# highest used argument is 4?
+	#
+	# For some uses of this printf feature (e.g. i18n systems)
+	# it's a always a logic error to not print out every provided
+	# argument, but for some other uses skipping some might be a
+	# feature (although you could argue that then printf should be
+	# called as e.g:
+	#
+	#     printf q[%1$s %3$s], x(), undef, z();
+	#
+	# Instead of:
+	#
+	#    printf q[%1$s %3$s], x(), y(), z();
+	#
+	# Since calling the (possibly expensive) y() function is
+	# completely redundant there.
+	#
+	# We deal with all these potential problems by not even
+	# trying. If the pattern contains any format parameter indexes
+	# whatsoever we'll never warn about redundant arguments.
+	{
+	    fmt	 => '%1$s : %2$s',
+	    args => [ qw( x y z ) ],
+	    res	 => "x : y",
+	    m	 => 0,
+	    r	 => 0,
+	},
+	{
+	    fmt	 => '%2$s : %4$s : %5$s',
+	    args => [ qw( a b c d )],
+	    res	 => "b : d : ",
+	    m	 => 1,
+	    r	 => 0,
+	},
+	{
+	    fmt	 => '%s : %1$s : %s',
+	    args => [ qw( x y z ) ],
+	    res	 => "x : x : y",
+	    m	 => 0,
+	    r	 => 0,
+	},
+
+    );
+
+    for my $i (0..$#tests) {
+	my $test = $tests[$i];
+	my $result = sprintf $test->{fmt}, @{$test->{args}};
+
+	my $prefix = "For format '$test->{fmt}' and arguments/result '@{$test->{args}}'/'$result'";
+	if (ref $test->{res} eq 'Regexp') {
+	    like($result, $test->{res}, "$prefix got the right result");
+	} else {
+	    is($result, $test->{res}, "$prefix got the right result");
+	}
+	is($warn_missing, $test->{m}, "$prefix got '$test->{m}' 'missing argument' warnings");
+	is($warn_redundant, $test->{r}, "$prefix got '$test->{r}' 'redundant argument' warnings");
+	is($warn_bad, 0, "$prefix No unknown warnings");
+
+	($warn_missing, $warn_redundant, $warn_bad) = (0,0,0);
+    }
 }
 
 {
