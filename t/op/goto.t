@@ -10,7 +10,7 @@ BEGIN {
 
 use warnings;
 use strict;
-plan tests => 89;
+plan tests => 91;
 our $TODO;
 
 my $deprecated = 0;
@@ -480,6 +480,23 @@ is "@__", chr 256, 'goto &xsub with replaced *_{ARRAY}';
 # And goto &foo should leave reified @_ alone
 sub { *__ = \@_;  goto &null } -> ("rough and tubbery");
 is ${*__}[0], 'rough and tubbery', 'goto &foo leaves reified @_ alone';
+
+
+# goto &perlsub when @_ itself does not exist [perl #119949]
+# This was only crashing when the replaced sub call had an argument list.
+# (I.e., &{ sub { goto ... } } did not crash.)
+sub {
+    undef *_;
+    goto sub {
+	is *_{ARRAY}, undef, 'goto &perlsub when @_ does not exist';
+    }
+}->();
+sub {
+    local *_;
+    goto sub {
+	is *_{ARRAY}, undef, 'goto &sub when @_ does not exist (local *_)';
+    }
+}->();
 
 
 # [perl #36521] goto &foo in warn handler could defeat recursion avoider

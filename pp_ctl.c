@@ -2956,8 +2956,10 @@ PP(pp_goto)
 		       to freed memory as the result of undef *_.  So put
 		       it in the callee’s pad, donating our refer-
 		       ence count. */
-		    SvREFCNT_dec(PAD_SVl(0));
-		    PAD_SVl(0) = (SV *)(cx->blk_sub.argarray = arg);
+		    if (arg) {
+			SvREFCNT_dec(PAD_SVl(0));
+			PAD_SVl(0) = (SV *)(cx->blk_sub.argarray = arg);
+		    }
 
 		    /* GvAV(PL_defgv) might have been modified on scope
 		       exit, so restore it. */
