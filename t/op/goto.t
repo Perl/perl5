@@ -10,7 +10,7 @@ BEGIN {
 
 use warnings;
 use strict;
-plan tests => 92;
+plan tests => 94;
 our $TODO;
 
 my $deprecated = 0;
@@ -497,6 +497,23 @@ eval { & { sub { goto &utf8::encode } } };
 # The main thing we are testing is that it did not crash.  But make sure 
 # *_{ARRAY} was untouched, too.
 is *_{ARRAY}, undef, 'goto &xsub when @_ does not exist';
+
+# goto &perlsub when @_ itself does not exist [perl #119949]
+# This was only crashing when the replaced sub call had an argument list.
+# (I.e., &{ sub { goto ... } } did not crash.)
+sub {
+    undef *_;
+    goto sub {
+	is *_{ARRAY}, undef, 'goto &perlsub when @_ does not exist';
+    }
+}->();
+sub {
+    local *_;
+    goto sub {
+	is *_{ARRAY}, undef, 'goto &sub when @_ does not exist (local *_)';
+    }
+}->();
+
 
 # [perl #36521] goto &foo in warn handler could defeat recursion avoider
 
