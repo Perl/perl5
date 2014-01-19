@@ -4242,7 +4242,7 @@ Perl_newBINOP(pTHX_ I32 type, I32 flags, OP *first, OP *last)
     dVAR;
     BINOP *binop;
 
-    assert((PL_opargs[type] & OA_CLASS_MASK) == OA_BINOP
+    ASSUME((PL_opargs[type] & OA_CLASS_MASK) == OA_BINOP
 	|| type == OP_SASSIGN || type == OP_NULL );
 
     NewOp(1101, binop, 1, BINOP);
