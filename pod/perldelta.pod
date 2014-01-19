@@ -502,6 +502,15 @@ C<getc> on a byte-sized handle after the same C<getc> operator had been
 used on a utf8 handle used to treat the bytes as utf8, resulting in erratic
 behavior (e.g., malformed UTF-8 warnings).
 
+=item *
+
+An initial C<{> at the beginning of a format argument line was always
+interpreted as the beginning of a block prior to v5.18.  In Perl v5.18, it
+started being treated as an ambiguous token.  The parser would guess
+whether it was supposed to be an anonymous hash constructor or a block
+based on the contents.  Now the previous behavious has been restored.
+[perl #119973]
+
 =back
 
 =head1 Known Problems
