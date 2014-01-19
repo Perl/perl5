@@ -511,6 +511,11 @@ whether it was supposed to be an anonymous hash constructor or a block
 based on the contents.  Now the previous behavious has been restored.
 [perl #119973]
 
+=item *
+
+In Perl v5.18 C<undef *_; goto &sub> and C<local *_; goto &sub> started
+crashing.  This has been fixed. [perl #119949]
+
 =back
 
 =head1 Known Problems
