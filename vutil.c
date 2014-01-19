@@ -553,6 +553,7 @@ Perl_upg_version(pTHX_ SV *ver, bool qv)
     const MAGIC *mg;
 #endif
 
+    ENTER;
     PERL_ARGS_ASSERT_UPG_VERSION;
 
     if ( SvNOK(ver) && !( SvPOK(ver) && SvCUR(ver) == 3 ) )
@@ -655,6 +656,7 @@ Perl_upg_version(pTHX_ SV *ver, bool qv)
 	Perl_ck_warner(aTHX_ packWARN(WARN_MISC), 
 		       "Version string '%s' contains invalid data; "
 		       "ignoring: '%s'", version, s);
+    LEAVE;
     return ver;
 }
 
