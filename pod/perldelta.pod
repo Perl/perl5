@@ -217,7 +217,8 @@ section.
 
 =item *
 
-XXX Description of the change here
+L<perlunicode> has been updated to reflect C<Bidi_Class> changes in Unicode
+6.3.
 
 =back
 
