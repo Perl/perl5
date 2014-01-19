@@ -102,6 +102,15 @@ L<IO::Socket::IP> has been (tentatively) added to core at version 0.26.
 
 =item *
 
+L<perl5db.pl> has been upgraded from version 1.42 to 1.43
+
+Fix a crash in tab completion, where available. [perl #120827]
+
+The debugger tests no longer open two handles to the same output file,
+making them more robust. [perl #118817]
+
+=item *
+
 L<base> has been upgraded from version 2.20 to 2.21.
 
 The stricter load failure tests added in 2.20 now allow for
@@ -109,16 +118,44 @@ C<${^LAST_FH}> being set.
 
 =item *
 
-L<Encode> has been upgraded from version 2.56 to 2.57.
+L<constant> has been upgraded from version 1.30 to 1.31.
+
+=item *
+
+L<DynaLoader> has been upgraded from version 1.22 to 1.24.
+
+=item *
+
+L<Encode> has been upgraded from version 2.55 to 2.57.
 
 UTF-8 is no longer used in the C source (which some compilers didn't like), and
 some POD errors have been fixed in the documentation.
 
 =item *
 
-The libnet module collection has been upgraded from version 1.23 to 1.24.
+L<Errno> has been upgraded from version 1.20_01 to 1.20_02.
 
-The handling of CRLF characters in L<Net::FTP> has been fixed.
+=item *
+
+L<ExtUtils::CBuilder> has been upgraded from version 0.280212 to 0.280213.
+
+=item *
+
+L<ExtUtils::MakeMaker> has been upgraded from version 6.84 to 6.86.
+
+=item *
+
+L<File::Copy> has been upgraded from version 2.28 to 2.29.
+
+=item *
+
+L<Hash::Util::FieldHash> has been upgraded from version 1.13 to 1.14.
+
+=item *
+
+L<inc::latest> has been upgraded from version 0.4203 to 0.4204.
+NOTE: L<inc::latest> is deprecated and may be removed from a future version of
+Perl.
 
 =item *
 
@@ -129,12 +166,75 @@ SYNOPSIS. [perl #120981]
 
 =item *
 
-L<perl5db.pl> has been upgraded from version 1.42 to 1.43
+The libnet module collection has been upgraded from version 1.23 to 1.24.
 
-Fix a crash in tab completion, where available. [perl #120827]
+The handling of CRLF characters in L<Net::FTP> has been fixed.
 
-The debugger tests no longer open two handles to the same output file,
-making them more robust. [perl #118817]
+=item *
+
+L<List::Util> has been upgraded from version 1.35 to 1.36.
+
+=item *
+
+L<Module::Build> has been upgraded from version 0.4203 to 0.4204.
+NOTE: L<Module::Build> is deprecated and may be removed from a future version
+of Perl.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 3.02 to 3.04.
+
+=item *
+
+L<Module::Load> has been upgraded from version 0.24 to 0.28.
+
+=item *
+
+L<Module::Load::Conditional> has been upgraded from version 0.58 to 0.60.
+
+=item *
+
+L<Perl::OSType> has been upgraded from version 1.006 to 1.007.
+
+=item *
+
+L<PerlIO::encoding> has been upgraded from version 0.17 to 0.18.
+
+=item *
+
+L<Pod::Perldoc> has been upgraded from version 3.20 to 3.21.
+
+=item *
+
+L<POSIX> has been upgraded from version 1.37 to 1.38_01.
+
+=item *
+
+L<Scalar::Util> has been upgraded from version 1.35 to 1.36.
+
+=item *
+
+L<threads::shared> has been upgraded from version 1.45 to 1.46.
+
+=item *
+
+L<Time::Piece> has been upgraded from version 1.24 to 1.27.
+
+=item *
+
+L<Unicode::UCD> has been upgraded from version 0.55 to 0.57.
+
+=item *
+
+L<version> has been upgraded from version 0.9904 to 0.9907.
+
+=item *
+
+L<warnings> has been upgraded from version 1.20 to 1.21.
+
+=item *
+
+L<XSLoader> has been upgraded from version 0.16 to 0.17.
 
 =back
 
