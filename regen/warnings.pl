@@ -104,6 +104,8 @@ my $tree = {
                                     [ 5.021, DEFAULT_ON ],
                         }],
 
+       	'missing'	=> [ 5.021, DEFAULT_OFF],
+
        	 #'default'	=> [ 5.008, DEFAULT_ON ],
   	}],
 } ;
@@ -472,7 +474,7 @@ read_only_bottom_close_and_rename($pm);
 __END__
 package warnings;
 
-our $VERSION = '1.24';
+our $VERSION = '1.25';
 
 # Verify that we're called correctly so that warnings will work.
 # see also strict.pm.
@@ -742,6 +744,10 @@ L<perldiag>.
 Note: Before Perl 5.8.0, the lexical warnings category "deprecated" was a
 sub-category of the "syntax" category.  It is now a top-level category
 in its own right.
+
+Note: Before 5.21.0, the "missing" lexical warnings category was
+internally defined to be the same as the "uninitialized" category. It
+is now a top-level category in its own right.
 
 =head2 Fatal Warnings
 X<warning, fatal>

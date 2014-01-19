@@ -2987,8 +2987,13 @@ separate two digits.
 
 =item Missing argument in %s
 
-(W uninitialized) A printf-type format required more arguments than were
-supplied.
+(W missing) You called a function with fewer arguments than other
+arguments you supplied indicated would be needed.
+
+Currently only emitted when a printf-type format required more
+arguments than were supplied, but might be used in the future for
+other cases where we can statically determine that arguments to
+functions are missing, e.g. for the L<perlfunc/pack> function.
 
 =item Missing argument to -%c
 

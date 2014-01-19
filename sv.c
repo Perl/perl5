@@ -10522,7 +10522,6 @@ Perl_sv_vsetpvfn(pTHX_ SV *const sv, const char *const pat, const STRLEN patlen,
  * Warn of missing argument to sprintf, and then return a defined value
  * to avoid inappropriate "use of uninit" warnings [perl #71000].
  */
-#define WARN_MISSING WARN_UNINITIALIZED /* Not sure we want a new category */
 STATIC SV*
 S_vcatpvfn_missing_argument(pTHX) {
     if (ckWARN(WARN_MISSING)) {
