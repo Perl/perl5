@@ -312,6 +312,11 @@ Copy the values used to perturb hash iteration when cloning an
 interpreter.  This was fairly harmless but caused C<valgrind> to
 complain. [perl #121336]
 
+=item *
+
+In Perl v5.18 C<undef *_; goto &sub> and C<local *_; goto &sub> started
+crashing.  This has been fixed. [perl #119949]
+
 =back
 
 =head1 Known Problems
