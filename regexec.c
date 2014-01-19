@@ -2822,7 +2822,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
 	dontbother = 0;
 	strend = HOPc(strend, -dontbother);
 	while ( (s <= last) &&
-		(s = fbm_instr((unsigned char*)HOP3(s, back_min, (back_min<0 ? strbeg : strend)),
+		(s = fbm_instr((unsigned char*)HOP4c(s, back_min, strbeg,  strend),
 				  (unsigned char*)strend, must,
 				  multiline ? FBMrf_MULTILINE : 0)) ) {
 	    DEBUG_EXECUTE_r( did_match = 1 );
