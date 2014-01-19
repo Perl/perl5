@@ -644,7 +644,9 @@ Unexpected program mode %d when morphing back from PM
 Unrecognized character %s; marked by <-- HERE after %s<-- HERE near column %d
 Unstable directory path, current directory changed unexpectedly
 Unterminated compressed integer in unpack
+Usage: %s(%s)
 Usage: %s::%s(%s)
+Usage: CODE(0x%x)(%s)
 Usage: File::Copy::rmscopy(from,to[,date_flag])
 Usage: VMS::Filespec::candelete(spec)
 Usage: VMS::Filespec::fileify(spec)
