@@ -3,6 +3,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';    # for fresh_perl_is() etc
+    require './loc_tools.pl'; # to find locales
 }
 
 use strict;
@@ -26,14 +27,7 @@ $have_setlocale = 0 if $@;
 # and mingw32 uses said silly CRT
 $have_setlocale = 0 if (($^O eq 'MSWin32' || $^O eq 'NetWare') && $Config{cc} =~ /^(cl|gcc)/i);
 skip_all("no setlocale available") unless $have_setlocale;
-my @locales;
-if (-x "/usr/bin/locale" && open(LOCALES, "/usr/bin/locale -a 2>/dev/null|")) {
-    while(<LOCALES>) {
-        chomp;
-        push(@locales, $_);
-    }
-    close(LOCALES);
-}
+my @locales = find_locales();
 skip_all("no locales available") unless @locales;
 
 plan tests => &last;
