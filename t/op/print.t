@@ -6,9 +6,9 @@ BEGIN {
 
 plan(3);
 
-fresh_perl_is('$_ = qq{OK\n}; print;', "OK\n",
+fresh_perl_is('$_ = qq{OK\n}; print;', "OK\n", {},
               'print without arguments outputs $_');
-fresh_perl_is('$_ = qq{OK\n}; print STDOUT;', "OK\n",
+fresh_perl_is('$_ = qq{OK\n}; print STDOUT;', "OK\n", {},
               'print with only a filehandle outputs $_');
 SKIP: {
     skip_if_miniperl('no dynamic loading of PerlIO::scalar in miniperl');
