@@ -832,22 +832,17 @@ Perl_re_intuit_start(pTHX_
             end_point= HOP3(strend, -end_shift, strbeg);
 	}
 
+        /* if the regex is absolutely anchored to the start of the string,
+         * then check_offset_max represents an upper bound on the string
+         * where the substr could start */
         if (!ml_anch
             && prog->intflags & PREGf_ANCH
-            && prog->check_offset_max != SSize_t_MAX)
+            && prog->check_offset_max != SSize_t_MAX
+            && start_shift < prog->check_offset_max)
         {
-            U8 *p = (U8*)s;
-
-            if (start_shift > 0)
-                p = start_point; /* don't HOP over chars already HOPed */
-            if (p < end_point)
-                p = HOP3(p,
-                        (prog->check_offset_max
-                         - (start_shift > 0 ? start_shift : 0)
-                         + CHR_SVLEN(check) - (SvTAIL(check) != 0)),
-                        end_point);
-            if (p < end_point)
-                end_point = p;
+            SSize_t off = prog->check_offset_max - start_shift
+                        + CHR_SVLEN(check) - !!SvTAIL(check);
+            end_point = HOP3lim(start_point, off, end_point);
         }
 
 	DEBUG_OPTIMISE_MORE_r({
