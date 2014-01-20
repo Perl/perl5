@@ -100,9 +100,9 @@ is( $mm->{INST_BIN},     File::Spec->catdir($Curdir, 'blib', 'bin'),
 is( keys %{$mm->{CHILDREN}}, 1 );
 my($child_pack) = keys %{$mm->{CHILDREN}};
 my $c_mm = $mm->{CHILDREN}{$child_pack};
-is( $c_mm->{INST_ARCHLIB},
-    $c_mm->{PERL_CORE} ? $c_mm->{PERL_ARCHLIB}
-                       : File::Spec->catdir($Updir, 'blib', 'arch'),
+is( Cwd::realpath($c_mm->{INST_ARCHLIB}),
+    Cwd::realpath($c_mm->{PERL_CORE} ? $c_mm->{PERL_ARCHLIB}
+                       : File::Spec->catdir($Updir, 'blib', 'arch')),
                                      'CHILD INST_ARCHLIB');
 is( $c_mm->{INST_BIN},     File::Spec->catdir($Updir, 'blib', 'bin'),
                                      'CHILD INST_BIN' );

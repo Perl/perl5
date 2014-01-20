@@ -1702,6 +1702,17 @@ EOP
 	}
     }
 
+    if ($Is{Android}) {
+    	# Android fun times!
+    	# ../../perl -I../../lib -MFile::Glob -e1 works
+    	# ../../../perl -I../../../lib -MFile::Glob -e1 fails to find
+    	# the .so for File::Glob.
+    	# This always affects core perl, but may also affect an installed
+    	# perl built with -Duserelocatableinc.
+    	$self->{PERL_LIB} = File::Spec->rel2abs($self->{PERL_LIB});
+    	$self->{PERL_ARCHLIB} = File::Spec->rel2abs($self->{PERL_ARCHLIB});
+    }
+
     # We get SITELIBEXP and SITEARCHEXP directly via
     # Get_from_Config. When we are running standard modules, these
     # won't matter, we will set INSTALLDIRS to "perl". Otherwise we
