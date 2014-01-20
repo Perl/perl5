@@ -1246,7 +1246,7 @@ use utf8;;
 "abc" =~ qr/(?<$char>abc)/;
 EOP
             utf8::encode($prog);
-            fresh_perl_like($prog, qr!Group name must start with a non-digit word character!, "",
+            fresh_perl_like($prog, qr!Group name must start with a non-digit word character!, {},
                         sprintf("'U+%04X not legal IDFirst'", ord($char)));
         }
     }
@@ -1521,7 +1521,7 @@ EOP
 use re qw(Debug COMPILE);
 $re;
 EOP
-        fresh_perl_like($prog, qr/synthetic stclass/, "stderr", "$re generates a synthetic start class");
+        fresh_perl_like($prog, qr/synthetic stclass/, { stderr=>1 }, "$re generates a synthetic start class");
       }
     }
 

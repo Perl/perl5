@@ -61,7 +61,7 @@ package main;
     fresh_perl_is(
 		  'package A::B; sub a { // }; %A::=""',
 		  '',
-		  '',
+		  {},
 		  );
     # Variant of the above which creates an object that persists until global
     # destruction, and triggers an assertion failure prior to change
@@ -69,7 +69,7 @@ package main;
     fresh_perl_is(
 		  'use Exporter; package A; sub a { // }; delete $::{$_} for keys %::',
 		  '',
-		  '',
+		  {},
 		  );
 }
 

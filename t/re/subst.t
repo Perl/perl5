@@ -668,11 +668,11 @@ is($name, "cis", q[#22351 bug with 'e' substitution modifier]);
     }
 }
 
-fresh_perl_is( '$_=q(foo);s/(.)\G//g;print' => 'foo',
+fresh_perl_is( '$_=q(foo);s/(.)\G//g;print' => 'foo', {},
                 '[perl #69056] positive GPOS regex segfault' );
-fresh_perl_is( '$_="abcdef"; s/bc|(.)\G(.)/$1 ? "[$1-$2]" : "XX"/ge; print' => 'aXXdef',
+fresh_perl_is( '$_="abcdef"; s/bc|(.)\G(.)/$1 ? "[$1-$2]" : "XX"/ge; print' => 'aXXdef', {},
                 'positive GPOS regex substitution failure (#69056, #114884)' );
-fresh_perl_is( '$_="abcdefg123456"; s/(?<=...\G)?(\d)/($1)/; print' => 'abcdefg(1)23456',
+fresh_perl_is( '$_="abcdefg123456"; s/(?<=...\G)?(\d)/($1)/; print' => 'abcdefg(1)23456', {},
                 'positive GPOS lookbehind regex substitution failure #114884' );
 
 # s/..\G//g should stop after the first iteration, rather than working its

@@ -799,7 +799,7 @@ is $wheel, 8, 'tied pad var explicitly returned in list ref context';
 }
 
 SKIP: { skip 'no attributes.pm', 1 unless eval 'require attributes';
-fresh_perl_is(<<'----', <<'====', "lvalue can not be set after definition. [perl #68758]");
+fresh_perl_is(<<'----', <<'====', {}, "lvalue can not be set after definition. [perl #68758]");
 use warnings;
 our $x;
 sub foo { $x }

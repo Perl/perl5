@@ -1125,7 +1125,7 @@ SKIP: {
 	unless $Config{extensions} =~ / Encode /;
 
     # Test case cut down by jhi
-    fresh_perl_like(<<'EOP', qr!Malformed UTF-8 character \(unexpected end of string\) in substitution \(s///\) at!, 'Segfault using HTML::Entities');
+    fresh_perl_like(<<'EOP', qr!Malformed UTF-8 character \(unexpected end of string\) in substitution \(s///\) at!, {}, 'Segfault using HTML::Entities');
 use Encode;
 my $t = ord('A') == 193 ? "\xEA" : "\xE9";
 Encode::_utf8_on($t);

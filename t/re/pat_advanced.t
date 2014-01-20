@@ -2250,7 +2250,7 @@ EOP
     {
         fresh_perl_is('print eval "\"\x{101}\" =~ /[[:lower:]]/", "\n"; print eval "\"\x{100}\" =~ /[[:lower:]]/i", "\n";',
                       "1\n1",   # Both re's should match
-                      "",
+                      {},
                       "get [:lower:] swash in first eval; test under /i in second");
     }
 
@@ -2387,7 +2387,7 @@ EOP
   # http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2013-06/msg01290.html
         fresh_perl_like('use warnings; "abc" =~ qr{(?&foo){0}abc(?<foo>)}',
                         'Quantifier unexpected on zero-length expression',
-                        "",
+                        {},
                         'No segfault on qr{(?&foo){0}abc(?<foo>)}');
     }
 
