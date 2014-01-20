@@ -2109,6 +2109,14 @@ were compiled.
 
 Save source code lines into C<@{"_<$filename"}>.
 
+=item 0x800
+
+When saving source, include evals that generate no subroutines.
+
+=item 0x1000
+
+When saving source, include source that did not compile.
+
 =back
 
 Some bits may be relevant at compile-time only, some at
