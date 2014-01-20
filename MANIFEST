@@ -5036,6 +5036,7 @@ t/lib/warnings/toke		Tests for toke.c for warnings.t
 t/lib/warnings/universal	Tests for universal.c for warnings.t
 t/lib/warnings/utf8		Tests for utf8.c for warnings.t
 t/lib/warnings/util		Tests for util.c for warnings.t
+t/loc_tools.pl			Common functions for finding platform's locales
 t/mro/basic_01_c3.t		mro tests
 t/mro/basic_01_c3_utf8.t	utf8 mro tests
 t/mro/basic_01_dfs.t		mro tests

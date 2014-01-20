@@ -19,6 +19,7 @@ BEGIN {
 	print "1..0\n";
 	exit;
     }
+    require './loc_tools.pl';
     $| = 1;
 }
 
@@ -479,209 +480,16 @@ my $final_without_setlocale = $test_num;
 
 debug "# Scanning for locales...\n";
 
-# Note that it's okay that some languages have their native names
-# capitalized here even though that's not "right".  They are lowercased
-# anyway later during the scanning process (and besides, some clueless
-# vendor might have them capitalized erroneously anyway).
-
-my $locales = <<EOF;
-Afrikaans:af:za:1 15
-Arabic:ar:dz eg sa:6 arabic8
-Brezhoneg Breton:br:fr:1 15
-Bulgarski Bulgarian:bg:bg:5
-Chinese:zh:cn tw:cn.EUC eucCN eucTW euc.CN euc.TW Big5 GB2312 tw.EUC
-Hrvatski Croatian:hr:hr:2
-Cymraeg Welsh:cy:cy:1 14 15
-Czech:cs:cz:2
-Dansk Danish:da:dk:1 15
-Nederlands Dutch:nl:be nl:1 15
-English American British:en:au ca gb ie nz us uk zw:1 15 cp850
-Esperanto:eo:eo:3
-Eesti Estonian:et:ee:4 6 13
-Suomi Finnish:fi:fi:1 15
-Flamish::fl:1 15
-Deutsch German:de:at be ch de lu:1 15
-Euskaraz Basque:eu:es fr:1 15
-Galego Galician:gl:es:1 15
-Ellada Greek:el:gr:7 g8
-Frysk:fy:nl:1 15
-Greenlandic:kl:gl:4 6
-Hebrew:iw:il:8 hebrew8
-Hungarian:hu:hu:2
-Indonesian:id:id:1 15
-Gaeilge Irish:ga:IE:1 14 15
-Italiano Italian:it:ch it:1 15
-Nihongo Japanese:ja:jp:euc eucJP jp.EUC sjis
-Korean:ko:kr:
-Latine Latin:la:va:1 15
-Latvian:lv:lv:4 6 13
-Lithuanian:lt:lt:4 6 13
-Macedonian:mk:mk:1 15
-Maltese:mt:mt:3
-Moldovan:mo:mo:2
-Norsk Norwegian:no no\@nynorsk nb nn:no:1 15
-Occitan:oc:es:1 15
-Polski Polish:pl:pl:2
-Rumanian:ro:ro:2
-Russki Russian:ru:ru su ua:5 koi8 koi8r KOI8-R koi8u cp1251 cp866
-Serbski Serbian:sr:yu:5
-Slovak:sk:sk:2
-Slovene Slovenian:sl:si:2
-Sqhip Albanian:sq:sq:1 15
-Svenska Swedish:sv:fi se:1 15
-Thai:th:th:11 tis620
-Turkish:tr:tr:9 turkish8
-Yiddish:yi::1 15
-EOF
-
-sub in_utf8 () { $^H & 0x08 || (${^OPEN} || "") =~ /:utf8/ }
-
-if (in_utf8) {
-    require "lib/locale/utf8";
-} else {
-    require "lib/locale/latin1";
-}
-
-my @Locale;
-my $Locale;
-my %posixes;
-
-sub trylocale {
-    my $locale = shift;
-    return if grep { $locale eq $_ } @Locale;
-    return unless setlocale(&POSIX::LC_ALL, $locale);
-    my $badutf8;
-    {
-        local $SIG{__WARN__} = sub {
-            $badutf8 = $_[0] =~ /Malformed UTF-8/;
-        };
-        $Locale =~ /UTF-?8/i;
-    }
-
-    if ($badutf8) {
-        ok(0, "Locale name contains malformed utf8");
-        return;
-    }
-    push @Locale, $locale;
-}
-
-sub decode_encodings {
-    my @enc;
-
-    foreach (split(/ /, shift)) {
-	if (/^(\d+)$/) {
-	    push @enc, "ISO8859-$1";
-	    push @enc, "iso8859$1";	# HP
-	    if ($1 eq '1') {
-		 push @enc, "roman8";	# HP
-	    }
-	} else {
-	    push @enc, $_;
-   	    push @enc, "$_.UTF-8";
-	}
-    }
-    if ($^O eq 'os390') {
-	push @enc, qw(IBM-037 IBM-819 IBM-1047);
-    }
-
-    return @enc;
-}
-
-trylocale("C");
-trylocale("POSIX");
-foreach (0..15) {
-    trylocale("ISO8859-$_");
-    trylocale("iso8859$_");
-    trylocale("iso8859-$_");
-    trylocale("iso_8859_$_");
-    trylocale("isolatin$_");
-    trylocale("isolatin-$_");
-    trylocale("iso_latin_$_");
-}
-
-# Sanitize the environment so that we can run the external 'locale'
-# program without the taint mode getting grumpy.
-
-# $ENV{PATH} is special in VMS.
-delete $ENV{PATH} if $^O ne 'VMS' or $Config{d_setenv};
-
-# Other subversive stuff.
-delete @ENV{qw(IFS CDPATH ENV BASH_ENV)};
-
-if (-x "/usr/bin/locale" && open(LOCALES, "/usr/bin/locale -a 2>/dev/null|")) {
-    while (<LOCALES>) {
-	# It seems that /usr/bin/locale steadfastly outputs 8 bit data, which
-	# ain't great when we're running this testPERL_UNICODE= so that utf8
-	# locales will cause all IO hadles to default to (assume) utf8
-	next unless utf8::valid($_);
-        chomp;
-	trylocale($_);
-    }
-    close(LOCALES);
-} elsif ($^O eq 'VMS' && defined($ENV{'SYS$I18N_LOCALE'}) && -d 'SYS$I18N_LOCALE') {
-# The SYS$I18N_LOCALE logical name search list was not present on
-# VAX VMS V5.5-12, but was on AXP && VAX VMS V6.2 as well as later versions.
-    opendir(LOCALES, "SYS\$I18N_LOCALE:");
-    while ($_ = readdir(LOCALES)) {
-        chomp;
-        trylocale($_);
-    }
-    close(LOCALES);
-} elsif (($^O eq 'openbsd' || $^O eq 'bitrig' ) && -e '/usr/share/locale') {
-
-   # OpenBSD doesn't have a locale executable, so reading /usr/share/locale
-   # is much easier and faster than the last resort method.
-
-    opendir(LOCALES, '/usr/share/locale');
-    while ($_ = readdir(LOCALES)) {
-        chomp;
-        trylocale($_);
-    }
-    close(LOCALES);
-} else {
-
-    # This is going to be slow.
-
-    foreach my $locale (split(/\n/, $locales)) {
-	my ($locale_name, $language_codes, $country_codes, $encodings) =
-	    split(/:/, $locale);
-	my @enc = decode_encodings($encodings);
-	foreach my $loc (split(/ /, $locale_name)) {
-	    trylocale($loc);
-	    foreach my $enc (@enc) {
-		trylocale("$loc.$enc");
-	    }
-	    $loc = lc $loc;
-	    foreach my $enc (@enc) {
-		trylocale("$loc.$enc");
-	    }
-	}
-	foreach my $lang (split(/ /, $language_codes)) {
-	    trylocale($lang);
-	    foreach my $country (split(/ /, $country_codes)) {
-		my $lc = "${lang}_${country}";
-		trylocale($lc);
-		foreach my $enc (@enc) {
-		    trylocale("$lc.$enc");
-		}
-		my $lC = "${lang}_\U${country}";
-		trylocale($lC);
-		foreach my $enc (@enc) {
-		    trylocale("$lC.$enc");
-		}
-	    }
-	}
-    }
-}
-
 setlocale(&POSIX::LC_ALL, "C");
 
-@Locale = sort @Locale;
+my @Locale = find_locales();
 
 debug "# Locales =\n";
 for ( @Locale ) {
     debug "# $_\n";
 }
+
+my %posixes;
 
 my %Problem;
 my %Okay;
@@ -799,7 +607,7 @@ my $not_necessarily_a_problem_test_number;
 my $first_casing_test_number;
 my %setlocale_failed;   # List of locales that setlocale() didn't work on
 
-foreach $Locale (@Locale) {
+foreach my $Locale (@Locale) {
     $locales_test_number = $first_locales_test_number - 1;
     debug "#\n";
     debug "# Locale = $Locale\n";
