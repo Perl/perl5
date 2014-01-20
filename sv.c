@@ -4036,15 +4036,15 @@ S_glob_assign_ref(pTHX_ SV *const dstr, SV *const sstr)
 #ifdef PERL_DEBUG_READONLY_COW
 # include <sys/mman.h>
 
-# ifndef sTHX
-#  define sTHX 0
+# ifndef PERL_MEMORY_DEBUG_HEADER_SIZE
+#  define PERL_MEMORY_DEBUG_HEADER_SIZE 0
 # endif
 
 void
 Perl_sv_buf_to_ro(pTHX_ SV *sv)
 {
     struct perl_memory_debug_header * const header =
-	(struct perl_memory_debug_header *)(SvPVX(sv)-sTHX);
+	(struct perl_memory_debug_header *)(SvPVX(sv)-PERL_MEMORY_DEBUG_HEADER_SIZE);
     const MEM_SIZE len = header->size;
     PERL_ARGS_ASSERT_SV_BUF_TO_RO;
 # ifdef PERL_TRACK_MEMPOOL
@@ -4059,7 +4059,7 @@ static void
 S_sv_buf_to_rw(pTHX_ SV *sv)
 {
     struct perl_memory_debug_header * const header =
-	(struct perl_memory_debug_header *)(SvPVX(sv)-sTHX);
+	(struct perl_memory_debug_header *)(SvPVX(sv)-PERL_MEMORY_DEBUG_HEADER_SIZE);
     const MEM_SIZE len = header->size;
     PERL_ARGS_ASSERT_SV_BUF_TO_RW;
     if (mprotect(header, len, PROT_READ|PROT_WRITE))

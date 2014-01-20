@@ -369,7 +369,7 @@
 #endif
 
 #ifndef pTHX
-/* Don't bother defining tTHX and sTHX; using them outside
+/* Don't bother defining tTHX ; using it outside
  * code guarded by PERL_IMPLICIT_CONTEXT is an error.
  */
 #  define pTHX		void
@@ -4036,12 +4036,13 @@ struct perl_memory_debug_header {
 
 #if defined (PERL_TRACK_MEMPOOL) || defined (PERL_DEBUG_READONLY_COW)
 
-#  define sTHX	(sizeof(struct perl_memory_debug_header) + \
+#  define PERL_MEMORY_DEBUG_HEADER_SIZE \
+        (sizeof(struct perl_memory_debug_header) + \
 	(MEM_ALIGNBYTES - sizeof(struct perl_memory_debug_header) \
 	 %MEM_ALIGNBYTES) % MEM_ALIGNBYTES)
 
 #else
-#  define sTHX	0
+#  define PERL_MEMORY_DEBUG_HEADER_SIZE	0
 #endif
 
 #ifdef PERL_TRACK_MEMPOOL
@@ -4074,7 +4075,7 @@ struct perl_memory_debug_header {
 #  if defined(HAS_MALLOC_SIZE) && !defined(PERL_DEBUG_READONLY_COW)
 #    ifdef PERL_TRACK_MEMPOOL
 #	define Perl_safesysmalloc_size(where)			\
-	    (malloc_size(((char *)(where)) - sTHX) - sTHX)
+	    (malloc_size(((char *)(where)) - PERL_MEMORY_DEBUG_HEADER_SIZE) - PERL_MEMORY_DEBUG_HEADER_SIZE)
 #    else
 #	define Perl_safesysmalloc_size(where) malloc_size(where)
 #    endif
@@ -4082,7 +4083,7 @@ struct perl_memory_debug_header {
 #  ifdef HAS_MALLOC_GOOD_SIZE
 #    ifdef PERL_TRACK_MEMPOOL
 #	define Perl_malloc_good_size(how_much)			\
-	    (malloc_good_size((how_much) + sTHX) - sTHX)
+	    (malloc_good_size((how_much) + PERL_MEMORY_DEBUG_HEADER_SIZE) - PERL_MEMORY_DEBUG_HEADER_SIZE)
 #    else
 #	define Perl_malloc_good_size(how_much) malloc_good_size(how_much)
 #    endif
