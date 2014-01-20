@@ -843,7 +843,7 @@ Perl_re_intuit_start(pTHX_
             if (p < end_point)
                 p = HOP3(p,
                         (prog->check_offset_max
-                         - (end_shift > 0 ? start_shift : 0)
+                         - (start_shift > 0 ? start_shift : 0)
                          + CHR_SVLEN(check) - (SvTAIL(check) != 0)),
                         end_point);
             if (p < end_point)
