@@ -179,6 +179,7 @@ aux a2p c2ph h2ph h2xs perlbug pl2pm pod2html pod2man s2p splain xsubpp
 
     perlhist		Perl history records
     perldelta		Perl changes since previous version
+    perl5198delta	Perl changes in version 5.19.8
     perl5197delta	Perl changes in version 5.19.7
     perl5196delta	Perl changes in version 5.19.6
     perl5195delta	Perl changes in version 5.19.5
