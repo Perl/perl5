@@ -534,12 +534,6 @@ Turkish:tr:tr:9 turkish8
 Yiddish:yi::1 15
 EOF
 
-if ($^O eq 'os390') {
-    # These cause heartburn.  Broken locales?
-    $locales =~ s/Svenska Swedish:sv:fi se:1 15\n//;
-    $locales =~ s/Thai:th:th:11 tis620\n//;
-}
-
 sub in_utf8 () { $^H & 0x08 || (${^OPEN} || "") =~ /:utf8/ }
 
 if (in_utf8) {
@@ -681,19 +675,6 @@ if (-x "/usr/bin/locale" && open(LOCALES, "/usr/bin/locale -a 2>/dev/null|")) {
 }
 
 setlocale(&POSIX::LC_ALL, "C");
-
-if ($^O eq 'darwin') {
-    # Darwin 8/Mac OS X 10.4 and 10.5 have bad Basque locales: perl bug #35895,
-    # Apple bug ID# 4139653. It also has a problem in Byelorussian.
-    (my $v) = $Config{osvers} =~ /^(\d+)/;
-    if ($v >= 8 and $v < 10) {
-	debug "# Skipping eu_ES, be_BY locales -- buggy in Darwin\n";
-	@Locale = grep ! m/^(eu_ES(?:\..*)?|be_BY\.CP1131)$/, @Locale;
-    } elsif ($v < 12) {
-	debug "# Skipping be_BY locales -- buggy in Darwin\n";
-	@Locale = grep ! m/^be_BY\.CP1131$/, @Locale;
-    }
-}
 
 @Locale = sort @Locale;
 
