@@ -53,6 +53,28 @@ sub _decode_encodings {
 sub find_locales {  # Returns an array of all the locales we found on the
                     # system
 
+
+    my $have_setlocale = 0;
+    eval {
+        require POSIX;
+        import POSIX ':locale_h';
+        $have_setlocale++;
+    };
+
+    # Visual C's CRT goes silly on strings of the form "en_US.ISO8859-1"
+    # and mingw32 uses said silly CRT
+    # This doesn't seem to be an issue any more, at least on Windows XP,
+    # so re-enable the tests for Windows XP onwards.
+    my $winxp = ($^O eq 'MSWin32' && defined &Win32::GetOSVersion &&
+                    join('.', (Win32::GetOSVersion())[1..2]) >= 5.1);
+    $have_setlocale = 0 if ((($^O eq 'MSWin32' && !$winxp) || $^O eq 'NetWare') &&
+                    $Config{cc} =~ /^(cl|gcc|g\+\+|ici)/i);
+
+    # UWIN seems to loop after taint tests, just skip for now
+    $have_setlocale = 0 if ($^O =~ /^uwin/);
+
+    return unless $have_setlocale;
+
     _trylocale("C", \@Locale);
     _trylocale("POSIX", \@Locale);
     foreach (0..15) {
