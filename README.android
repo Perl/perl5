@@ -26,6 +26,12 @@ While Google also provides an NDK for Windows, these steps won't work
 native there, although it may be possible to cross-compile through different
 means.
 
+If your host system's architecture is 32 bits, remember to change the
+C<x86_64>'s below to C<x86>'s.  On a similar vein, the examples below
+use the 4.8 toolchain; if you want to use something older or newer (for
+example, the 4.4.3 toolchain included in the 8th revision of the NDK), just
+change those to the relevant version.
+
 =head2 Get the Android Native Development Kit (NDK)
 
 You can download the NDK from L<https://developer.android.com/tools/sdk/ndk/index.html>.
@@ -39,7 +45,7 @@ As of 2014, most Android devices run on ARM, so that is generally a safe bet.
 
 With those two in hand, you should add
 
-$ANDROID_NDK/toolchains/$TARGETARCH-4.4.3/prebuilt/`uname | tr '[A-Z]' '[a-z]'`-x86_64/bin
+$ANDROID_NDK/toolchains/$TARGETARCH-4.8/prebuilt/`uname | tr '[A-Z]' '[a-z]'`-x86_64/bin
 
 to your PATH, where $ANDROID_NDK is the location where you unpacked the
 NDK, and $TARGETARCH is your target's architecture.
@@ -54,7 +60,7 @@ This creates a working sysroot that we can feed to Configure later.
             --platform=android-9 \
             --install-dir=$ANDROID_TOOLCHAIN \
             --system=`uname | tr '[A-Z]' '[a-z]'`-x86_64 \
-            --toolchain=$TARGETARCH-4.4.3
+            --toolchain=$TARGETARCH-4.8
 
 =head2 adb or ssh?
 
