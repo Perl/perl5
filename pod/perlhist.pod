@@ -523,6 +523,7 @@ the strings?).
  Steve     5.19.5       2013-Oct-20
  BinGOs    5.19.6       2013-Nov-20
  Abigail   5.19.7       2013-Dec-20
+ Ricardo   5.19.8       2014-Jan-20
 
 =head2 SELECTED RELEASE SIZES
 

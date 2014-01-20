@@ -440,9 +440,32 @@ crashing.  This has been fixed. [perl #119949]
 
 =head1 Acknowledgements
 
-XXX Generate this with:
+Perl 5.19.8 represents approximately 4 weeks of development since Perl 5.19.7
+and contains approximately 38,000 lines of changes across 420 files from 26
+authors.
 
-  perl Porting/acknowledgements.pl v5.19.7..HEAD
+Perl continues to flourish into its third decade thanks to a vibrant community
+of users and developers. The following people are known to have contributed the
+improvements that became Perl 5.19.8:
+
+Abigail, Alan Hourihane, Brian Fraser, Brian Gottreu, Chris 'BinGOs' Williams,
+Christian Millour, Craig A. Berry, Dagfinn Ilmari Mannsåker, Daniel Dragan,
+David Mitchell, Dominic Hargreaves, Father Chrysostomos, H.Merijn Brand, James
+E Keenan, Jess Robinson, John Peacock, Karl Williamson, Martin McGrath, Matthew
+Horsfall, Nicholas Clark, Ricardo Signes, Shlomi Fish, Steve Hay, Tobias Leich,
+Tony Cook, Ævar Arnfjörð Bjarmason.
+
+The list above is almost certainly incomplete as it is automatically generated
+from version control history. In particular, it does not include the names of
+the (very much appreciated) contributors who reported issues to the Perl bug
+tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please see
+the F<AUTHORS> file in the Perl source distribution.
 
 =head1 Reporting Bugs
 
