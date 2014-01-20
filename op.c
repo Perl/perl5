@@ -11914,7 +11914,7 @@ Perl_peep(pTHX_ OP *o)
 Return the XOP structure for a given custom op.  This macro should be
 considered internal to OP_NAME and the other access macros: use them instead.
 This macro does call a function.  Prior
-to 5.19.8, this was implemented as a
+to 5.19.9, this was implemented as a
 function.
 
 =cut
