@@ -2323,9 +2323,13 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
     case OP_COREARGS:
 	return o;
 
-    case OP_AND:
     case OP_OR:
+	if (cLOGOPo->op_first->op_type == OP_AELEM
+	 || cLOGOPo->op_first->op_type == OP_HELEM)
+	    goto rhs;
+    case OP_AND:
 	op_lvalue(cLOGOPo->op_first,		 type);
+      rhs:
 	op_lvalue(cLOGOPo->op_first->op_sibling, type);
 	goto nomod;
     }
