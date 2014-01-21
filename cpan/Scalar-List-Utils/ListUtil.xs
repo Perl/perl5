@@ -965,7 +965,7 @@ CODE:
     /* Lacking sv_del_backref() the best we can do is clear the old (weak) ref
      * then set a new strong one
      */
-    sv_clear(sv);
+    sv_setsv(sv, &PL_sv_undef);
     SvRV_set(sv, SvREFCNT_inc_NN(tsv));
     SvROK_on(sv);
 #endif
