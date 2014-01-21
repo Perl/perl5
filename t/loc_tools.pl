@@ -40,12 +40,16 @@ sub _decode_encodings {
 	    }
 	    push @enc, $_;
             push @enc, "$_.UTF-8";
+            push @enc, "$_.65001"; # Windows UTF-8
+            push @enc, "$_.ACP"; # Windows ANSI code page
+            push @enc, "$_.OCP"; # Windows OEM code page
 	}
     }
     if ($^O eq 'os390') {
 	push @enc, qw(IBM-037 IBM-819 IBM-1047);
     }
     push @enc, "UTF-8";
+    push @enc, "65001"; # Windows UTF-8
 
     return @enc;
 }
