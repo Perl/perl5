@@ -1,5 +1,12 @@
 Revision history for IO-Socket-IP
 
+0.27    2014/01/20 18:08:31
+        [BUGFIXES]
+         * Apply a short timeout to unit tests that probe for internet
+           connectivity, in case of bad firewalls, etc... (Perl RT121037)
+         * Defend against machines with IN6ADDR_LOOPBACK not being "::1" in
+           unit tests, similar to the INADDR_LOOPBACK case (RT92295)
+
 0.26    2014/01/16 12:20:02
         [CHANGES]
          * Set $VERSION in BEGIN block before 'use base' so that

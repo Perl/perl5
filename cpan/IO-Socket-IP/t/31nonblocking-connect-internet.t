@@ -20,6 +20,7 @@ SKIP: {
       PeerHost => $test_host,
       PeerPort => $test_good_port,
       Type     => SOCK_STREAM,
+      Timeout  => 3,
    ) or skip "Can't connect to $test_host:$test_good_port", 5;
 
    my $socket = IO::Socket::IP->new(
@@ -57,6 +58,7 @@ SKIP: {
       PeerHost => $test_host,
       PeerPort => $test_bad_port,
       Type     => SOCK_STREAM,
+      Timeout  => 3,
    ) and skip "Connecting to $test_host:$test_bad_port succeeds", 4;
    $! == ECONNREFUSED or skip "Connecting to $test_host:$test_bad_port doesn't give ECONNREFUSED", 4;
 

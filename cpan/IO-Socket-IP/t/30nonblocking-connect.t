@@ -8,13 +8,15 @@ use Test::More;
 use IO::Socket::IP;
 
 use IO::Socket::INET;
+use Socket qw( inet_aton inet_ntoa pack_sockaddr_in unpack_sockaddr_in );
 use Errno qw( EINPROGRESS EWOULDBLOCK );
 
 # Some odd locations like BSD jails might not like INADDR_LOOPBACK. We'll
 # establish a baseline first to test against
 my $INADDR_LOOPBACK = do {
-   my $localsock = IO::Socket::INET->new( LocalAddr => "localhost", Listen => 1 );
-   $localsock->sockaddr;
+   socket my $sockh, PF_INET, SOCK_STREAM, 0 or die "Cannot socket(PF_INET) - $!";
+   bind $sockh, pack_sockaddr_in( 0, inet_aton( "127.0.0.1" ) ) or die "Cannot bind() - $!";
+   ( unpack_sockaddr_in( getsockname $sockh ) )[1];
 };
 my $INADDR_LOOPBACK_HOST = inet_ntoa( $INADDR_LOOPBACK );
 if( $INADDR_LOOPBACK ne INADDR_LOOPBACK ) {

@@ -6,13 +6,23 @@ use warnings;
 use Test::More;
 
 use IO::Socket::IP;
-use Socket;
+use Socket qw( inet_pton inet_ntop pack_sockaddr_in6 unpack_sockaddr_in6 IN6ADDR_LOOPBACK );
 
-my $AF_INET6 = eval { require Socket and Socket::AF_INET6() } or
+my $AF_INET6 = eval { Socket::AF_INET6() } or
    plan skip_all => "No AF_INET6";
 
-eval { IO::Socket::IP->new( LocalHost => "::1" ) } or
-   plan skip_all => "Unable to bind to ::1";
+# Some odd locations like BSD jails might not like IN6ADDR_LOOPBACK. We'll
+# establish a baseline first to test against
+my $IN6ADDR_LOOPBACK = eval {
+   socket my $sockh, Socket::PF_INET6(), SOCK_STREAM, 0 or die "Cannot socket(PF_INET6) - $!";
+   bind $sockh, pack_sockaddr_in6( 0, inet_pton( $AF_INET6, "::1" ) ) or die "Cannot bind() - $!";
+   ( unpack_sockaddr_in6( getsockname $sockh ) )[1];
+} or plan skip_all => "Unable to bind to ::1 - $@";
+my $IN6ADDR_LOOPBACK_HOST = inet_ntop( $AF_INET6, $IN6ADDR_LOOPBACK );
+if( $IN6ADDR_LOOPBACK ne IN6ADDR_LOOPBACK ) {
+   diag( "Testing with IN6ADDR_LOOPBACK=$IN6ADDR_LOOPBACK_HOST; this may be because of odd networking" );
+}
+my $IN6ADDR_LOOPBACK_HEX = unpack "H*", $IN6ADDR_LOOPBACK;
 
 # Unpack just ip6_addr and port because other fields might not match end to end
 sub unpack_sockaddr_in6_addrport { 
@@ -32,8 +42,8 @@ foreach my $socktype (qw( SOCK_STREAM SOCK_DGRAM )) {
    is( $testserver->sockdomain, $AF_INET6,         "\$testserver->sockdomain for $socktype" );
    is( $testserver->socktype,   Socket->$socktype, "\$testserver->socktype for $socktype" );
 
-   is( $testserver->sockhost, "::1",       "\$testserver->sockhost for $socktype" );
-   like( $testserver->sockport, qr/^\d+$/, "\$testserver->sockport for $socktype" );
+   is( $testserver->sockhost, $IN6ADDR_LOOPBACK_HOST, "\$testserver->sockhost for $socktype" );
+   like( $testserver->sockport, qr/^\d+$/,            "\$testserver->sockport for $socktype" );
 
    my $socket = IO::Socket->new;
    $socket->socket( $AF_INET6, Socket->$socktype, 0 )
@@ -69,10 +79,10 @@ foreach my $socktype (qw( SOCK_STREAM SOCK_DGRAM )) {
    is( $testclient->peerport, $sockport, "\$testclient->peerport for $socktype" );
 
    # Unpack just so it pretty prints without wrecking the terminal if it fails
-   is( unpack("H*", $testclient->peeraddr), "0000"x7 . "0001", "\$testclient->peeraddr for $socktype" );
+   is( unpack("H*", $testclient->peeraddr), $IN6ADDR_LOOPBACK_HEX, "\$testclient->peeraddr for $socktype" );
    if( $socktype eq "SOCK_STREAM" ) {
       # Some OSes don't update sockaddr with a local bind() on SOCK_DGRAM sockets
-      is( unpack("H*", $testclient->sockaddr), "0000"x7 . "0001", "\$testclient->sockaddr for $socktype" );
+      is( unpack("H*", $testclient->sockaddr), $IN6ADDR_LOOPBACK_HEX, "\$testclient->sockaddr for $socktype" );
    }
 }
 
