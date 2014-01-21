@@ -14,6 +14,14 @@ chdir('t') if -d 't';
 
 use Carp; $SIG{__WARN__} = \&Carp::cluck;
 
+# Some trickery for Android. If we leave @INC as-is, it'll have '.' in it.
+# Later on, the 'require XSTest' end up in DynaLoader looking for
+# ./PL_XSTest.so, but unless our current directory happens to be in
+# LD_LIBRARY_PATH, Android's linker will never find the file, and the test
+# will fail.  Instead, if we have all absolute paths, it'll just work.
+@INC = map { File::Spec->rel2abs($_) } @INC
+    if $^O =~ /android/;
+
 #########################
 
 { # first block: try without linenumbers
