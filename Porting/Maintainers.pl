@@ -804,7 +804,7 @@ use File::Glob qw(:case);
     },
 
     'Module::CoreList' => {
-        'DISTRIBUTION' => 'BINGOS/Module-CoreList-3.03.tar.gz',
+        'DISTRIBUTION' => 'BINGOS/Module-CoreList-3.04.tar.gz',
         'FILES'        => q[dist/Module-CoreList],
     },
 
@@ -1262,7 +1262,7 @@ use File::Glob qw(:case);
     },
 
     'version' => {
-        'DISTRIBUTION' => 'JPEACOCK/version-0.9906.tar.gz',
+        'DISTRIBUTION' => 'JPEACOCK/version-0.9907.tar.gz',
         'FILES'        => q[cpan/version],
         'FILES'        => q[cpan/version vutil.c vutil.h vxs.inc],
         'EXCLUDED' => [
