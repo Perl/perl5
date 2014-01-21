@@ -201,6 +201,11 @@ specified by its prototype.
 
 =item *
 
+L<IO::Socket::IP>, tentatively introduced in L<Perl 5.19.8|perl5198delta>,
+has been upgraded from 0.26 to 0.27.
+
+=item *
+
 The libnet module collection has been upgraded from version 1.24 to 1.25.
 
 The creation of L<Net::FTP> dataconnections now honour the requested timeout,
