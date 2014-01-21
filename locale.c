@@ -771,22 +771,22 @@ S_is_cur_LC_category_utf8(pTHX_ int category)
 #else
 #   if defined(HAS_NL_LANGINFO) && defined(CODESET)
         {
-        char *codeset = savepv(nl_langinfo(CODESET));
-        if (codeset) {
+            char *codeset = savepv(nl_langinfo(CODESET));
+            if (codeset) {
 
-            /* If we switched LC_CTYPE, switch back */
-            if (save_ctype_locale) {
-                setlocale(LC_CTYPE, save_ctype_locale);
-                Safefree(save_ctype_locale);
+                /* If we switched LC_CTYPE, switch back */
+                if (save_ctype_locale) {
+                    setlocale(LC_CTYPE, save_ctype_locale);
+                    Safefree(save_ctype_locale);
+                }
+
+                is_utf8 = foldEQ(codeset, STR_WITH_LEN("UTF-8"))
+                        || foldEQ(codeset, STR_WITH_LEN("UTF8"));
+
+                Safefree(codeset);
+                Safefree(save_input_locale);
+                return is_utf8;
             }
-
-            is_utf8 = foldEQ(codeset, STR_WITH_LEN("UTF-8"))
-                      || foldEQ(codeset, STR_WITH_LEN("UTF8"));
-
-            Safefree(codeset);
-            Safefree(save_input_locale);
-            return is_utf8;
-        }
         }
 
 #   endif
