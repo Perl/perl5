@@ -13,7 +13,7 @@ $VERSION = '0.280212';
 sub link {
   my ($self, %args) = @_;
 
-  if ($self->{config}{useshrplib}) {
+  if ($self->{config}{useshrplib} eq 'true') {
     $args{extra_linker_flags} = [
       $self->split_like_shell($args{extra_linker_flags}),
       '-L' . $self->perl_inc(),
