@@ -20,6 +20,10 @@ chdir 't' if -d 't';
 
 use Carp; $SIG{__WARN__} = \&Carp::cluck;
 
+# See the comments about this in 001-basics.t
+@INC = map { File::Spec->rel2abs($_) } @INC
+    if $^O =~ /android/;
+
 #########################
 
 $source_file = 'XSMore.c';
