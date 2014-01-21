@@ -18,7 +18,7 @@ perl native using one of the toolchains available on the Play Store.
 This document describes how to set up your host environment when
 attempting to build Perl for Android.
 
-=head1 Cross-Compiling Perl
+=head1 Cross-Compiling
 
 These instructions assume an Unixish build environment on your host system;
 they've been tested on Linux and OS X, and may work on Cygwin and MSYS.
@@ -173,6 +173,8 @@ On some older low-end devices -- think early 2.2 era -- some tests,
 particularly t/re/uniprops, may crash the phone, causing it to turn
 itself off once, and then back on again.
 
+=back
+
 =head1 Native Builds
 
 While Google doesn't provide a native toolchain for Android,
@@ -191,8 +193,6 @@ compiling perl is little more than:
     export SYSROOT=<location of the native toolchain>
     export LD_LIBRARY_PATH="$SYSROOT/lib:`pwd`:`pwd`/lib:`pwd`/lib/auto:$LD_LIBRARY_PATH"
     sh Configure -des -Dsysroot=$SYSROOT -Alibpth="/system/lib /vendor/lib"
-
-=back
 
 =head1 AUTHOR
 
