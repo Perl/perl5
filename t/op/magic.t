@@ -123,7 +123,7 @@ SKIP: {
     sub FETCH { $next_test + pop }
     tie my @tn, __PACKAGE__;
 
-    open( CMDPIPE, "| $PERL");
+    open( CMDPIPE, "|-", $PERL);
 
     print CMDPIPE "\$t1 = $tn[1]; \$t2 = $tn[2];\n", <<'END';
 
@@ -146,7 +146,7 @@ END
 
     close CMDPIPE;
 
-    open( CMDPIPE, "| $PERL");
+    open( CMDPIPE, "|-", $PERL);
     print CMDPIPE "\$t3 = $tn[3];\n", <<'END';
 
     { package X;
@@ -176,7 +176,7 @@ END
     my $todo = ($^O eq 'os2' ? ' # TODO: EMX v0.9d_fix4 bug: wrong nibble? ' : '');
     print $? & 0xFF ? "ok $tn[4]$todo\n" : "not ok $tn[4]$todo\n";
 
-    open(CMDPIPE, "| $PERL");
+    open(CMDPIPE, "|-", $PERL);
     print CMDPIPE <<'END';
 
     sub PVBM () { 'foo' }
