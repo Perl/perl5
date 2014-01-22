@@ -182,7 +182,8 @@ hasn't yet been called in the course of the program's execution, the
 current locale is that which was determined by the L</"ENVIRONMENT"> in
 effect at the start of the program, except that
 C<L<LC_NUMERIC|/Category LC_NUMERIC: Numeric Formatting>> is always
-initialized to the C locale (mentioned under L<Finding locales>).
+initialized to the C locale (the C locale is mentioned under L<Finding
+locales>).
 If there is no valid environment, the current locale is whatever the
 system default has been set to.  It is likely, but not necessarily, the
 "C" locale.
