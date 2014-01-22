@@ -353,16 +353,27 @@ esac
 # version of -lgdbm which is a bad idea. So if we have 'nm'
 # make sure it can read the file
 # NI-S 2003/08/07
-if [ -r /usr/lib/libndbm.so  -a  -x /usr/bin/nm ] ; then
-   if /usr/bin/nm /usr/lib/libndbm.so >/dev/null 2>&1 ; then
-    echo 'Your shared -lndbm seems to be a real library.'
-   else
-    echo 'Your shared -lndbm is not a real library.'
-    set `echo X "$libswanted "| sed -e 's/ ndbm / /'`
-    shift
-    libswanted="$*"
-   fi
-fi
+case "$nm" in
+    '') ;;
+    *)
+    for p in $plibpth
+    do
+        if $test -r $p/libndbm.so; then
+            if $nm $p/libndbm.so >/dev/null 2>&1 ; then
+                echo 'Your shared -lndbm seems to be a real library.'
+                _libndbm_real=1
+                break
+            fi
+        fi
+    done
+    if $test "X$_libndbm_real" = X; then
+        echo 'Your shared -lndbm is not a real library.'
+        set `echo X "$libswanted "| sed -e 's/ ndbm / /'`
+        shift
+        libswanted="$*"
+    fi
+    ;;
+esac
 
 # Linux on Synology.
 if [ -f /etc/synoinfo.conf -a -d /usr/syno ]; then
