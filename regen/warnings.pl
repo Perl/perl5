@@ -478,7 +478,7 @@ close_and_rename($lexwarn);
 __END__
 package warnings;
 
-our $VERSION = '1.21';
+our $VERSION = '1.22';
 
 # Verify that we're called correctly so that warnings will work.
 # see also strict.pm.
@@ -693,6 +693,9 @@ sub import
         $mask |= $Bits{'all'} ;
         $mask |= $DeadBits{'all'} if vec($mask, $Offsets{'all'}+1, 1);
     }
+
+    # append 'all' when implied (after a lone "FATAL" or "NONFATAL")
+    push @_, 'all' if @_==1 && ( $_[0] eq 'FATAL' || $_[0] eq 'NONFATAL' );
     
     # Empty @_ is equivalent to @_ = 'all' ;
     ${^WARNING_BITS} = @_ ? _bits($mask, @_) : $mask | $Bits{all} ;
@@ -710,7 +713,8 @@ sub unimport
         $mask |= $DeadBits{'all'} if vec($mask, $Offsets{'all'}+1, 1);
     }
 
-    push @_, 'all' unless @_;
+    # append 'all' when implied (empty import list or after a lone "FATAL")
+    push @_, 'all' if !@_ || @_==1 && $_[0] eq 'FATAL';
 
     foreach my $word ( @_ ) {
 	if ($word eq 'FATAL') {
