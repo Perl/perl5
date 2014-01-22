@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib';
     require './test.pl';
 }
-plan 90;
+plan 116;
 
 eval "#line 8 foo\nsub foo (\$) (\$a) { }";
 is $@, "Experimental subroutine signatures not enabled at foo line 8.\n",
@@ -129,9 +129,48 @@ is $a, 123;
 
 sub nnn ($a, undef, $b) { "$a/$b" }
 is nnn(111,222,333,444), "111/333";
+is $a, 123;
 
 sub ooo ($a, undef, ${b},) { "$a/$b" }
 is ooo(111,222,333,444), "111/333";
+is $a, 123;
 
 is eval('sub ppp ($a) { $a } ppp(456)'), 456;
 is eval('sub qqq (${"a"}) { $a } 1'), undef;
+is $a, 123;
+
+sub rrr ($abc, $def ,
+# comment )))
+$ghi, $jkl) { "$abc,$def,$ghi,$jkl" }
+is rrr(11,22,33,44,55), "11,22,33,44";
+is $a, 123;
+
+sub sss ($a, $b) { "@{[$a//9]},@{[$b//9]},[@{[join(q(,),@_)]}]" }
+is sss(), "9,9,[]";
+is sss(11), "11,9,[11]";
+is sss(11,22), "11,22,[11,22]";
+is sss(11,22,33), "11,22,[11,22,33]";
+is sss(11,22,33,44), "11,22,[11,22,33,44]";
+is $a, 123;
+
+sub ttt ($a, @b) { "@{[$a//9]},[@{[join(q(,),@b)]}]" }
+is ttt(), "9,[]";
+is ttt(11), "11,[]";
+is ttt(11,22), "11,[22]";
+is ttt(11,22,33), "11,[22,33]";
+is $a, 123;
+
+our $c = "ccc";
+sub uuu ($a, @b, $c) { "@{[$a//9]},[@{[join(q(,),@b)]}],@{[$c//9]}" }
+is uuu(), "9,[],9";
+is uuu(11), "11,[],9";
+is uuu(11,22), "11,[22],9";
+is uuu(11,22,33), "11,[22,33],9";
+is $a, 123;
+
+my $vvv = sub ($a) { $a || "z" };
+is prototype($vvv), undef;
+is $vvv->(), "z";
+is $vvv->(456), 456;
+is $vvv->(456, 789), 456;
+is $a, 123;
