@@ -16,10 +16,11 @@ watchdog(10, $^O eq 'MSWin32' ? "alarm" : '');
 use Config;
 $| = 1;
 $SIG{PIPE} = 'IGNORE';
+# work around a shell set to ignore HUP
+$SIG{HUP} = 'DEFAULT';
 $SIG{HUP} = 'IGNORE' if $^O eq 'interix';
 
 my $perl = which_perl();
-$perl .= qq[ "-I../lib"];
 
 my $killsig = 'HUP';
 $killsig = 1 unless $Config{sig_name} =~ /\bHUP\b/;
@@ -34,7 +35,7 @@ SKIP:
     # close on the original of a popen handle dupped to a standard handle
     # would wait4pid(0, ...)
     open my $savein, "<&", \*STDIN;
-    my $pid = open my $fh1, qq/$perl -e "sleep 50" |/;
+    my $pid = open my $fh1, "-|", $perl, "-e", "sleep 50";
     ok($pid, "open a pipe");
     # at this point PL_fdpids[fileno($fh1)] is the pid of the new process
     ok(open(STDIN, "<&=", $fh1), "dup the pipe");
