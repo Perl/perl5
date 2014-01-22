@@ -7487,6 +7487,11 @@ STATIC int	S_intuit_more(pTHX_ char *s)
 #define PERL_ARGS_ASSERT_INTUIT_MORE	\
 	assert(s)
 
+STATIC bool	S_looks_like_prototype(pTHX_ const char *s)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_LOOKS_LIKE_PROTOTYPE	\
+	assert(s)
+
 STATIC I32	S_lop(pTHX_ I32 f, int x, char *s)
 			__attribute__nonnull__(pTHX_3);
 #define PERL_ARGS_ASSERT_LOP	\

@@ -1645,6 +1645,7 @@
 #define incline(a)		S_incline(aTHX_ a)
 #define intuit_method(a,b,c)	S_intuit_method(aTHX_ a,b,c)
 #define intuit_more(a)		S_intuit_more(aTHX_ a)
+#define looks_like_prototype(a)	S_looks_like_prototype(aTHX_ a)
 #define lop(a,b,c)		S_lop(aTHX_ a,b,c)
 #define missingterm(a)		S_missingterm(aTHX_ a)
 #define no_op(a,b)		S_no_op(aTHX_ a,b)

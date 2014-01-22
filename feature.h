@@ -27,7 +27,7 @@
 	   & HINT_LOCALIZE_HH)						  \
 	    ? Perl_feature_is_enabled(aTHX_ STR_WITH_LEN(name)) : FALSE)
 /* The longest string we pass in.  */
-#define MAX_FEATURE_LEN (sizeof("postderef_qq")-1)
+#define MAX_FEATURE_LEN (sizeof("simple_signatures")-1)
 
 #define FEATURE_FC_IS_ENABLED \
     ( \
@@ -112,6 +112,12 @@
 	 CURRENT_FEATURE_BUNDLE <= FEATURE_BUNDLE_515) \
      || (CURRENT_FEATURE_BUNDLE == FEATURE_BUNDLE_CUSTOM && \
 	 FEATURE_IS_ENABLED("unicode")) \
+    )
+
+#define FEATURE_SIMPLE_SIGNATURES_IS_ENABLED \
+    ( \
+	CURRENT_FEATURE_BUNDLE == FEATURE_BUNDLE_CUSTOM && \
+	 FEATURE_IS_ENABLED("simple_signatures") \
     )
 
 

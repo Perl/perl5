@@ -2054,6 +2054,27 @@ S_lop(pTHX_ I32 f, int x, char *s)
     }
 }
 
+/*
+ * S_looks_like_prototype: check whether something starting with '('
+ * in a subroutine declaration is to be treated as a prototype (rather
+ * than a signature)
+ */
+static bool
+S_looks_like_prototype(pTHX_ const char *s)
+{
+    char c;
+    PERL_ARGS_ASSERT_LOOKS_LIKE_PROTOTYPE;
+    if (!FEATURE_SIMPLE_SIGNATURES_IS_ENABLED)
+	return TRUE;
+    while ((c = *++s) != ')') {
+	if (c == '\\' && s[1] == ')')
+	    return FALSE;
+	if (!strchr("!\"#$%&'*+,-./:;<=>?@[\\]^_`{|}~", c))
+	    return FALSE;
+    }
+    return TRUE;
+}
+
 #ifdef PERL_MAD
  /*
  * S_start_force
@@ -6010,14 +6031,14 @@ Perl_yylex(pTHX)
 		/* XXX losing whitespace on sequential attributes here */
 	    }
 	    {
-		const char tmp
-		    = (PL_expect == XOPERATOR ? '=' : '{'); /*'}(' for vi */
-		if (*s != ';' && *s != '}' && *s != tmp
-		    && (tmp != '=' || *s != ')')) {
+		if (*s != ';' && *s != '}' &&
+		    !(PL_expect == XOPERATOR
+			? (*s == '=' ||  *s == ')')
+			: (*s == '{' ||  *s == '('))) {
 		    const char q = ((*s == '\'') ? '"' : '\'');
 		    /* If here for an expression, and parsed no attrs, back
 		       off. */
-		    if (tmp == '=' && !attrs) {
+		    if (PL_expect == XOPERATOR && !attrs) {
 			s = PL_bufptr;
 			break;
 		    }
@@ -8777,7 +8798,7 @@ Perl_yylex(pTHX)
 		}
 
 		/* Look for a prototype */
-		if (*s == '(') {
+		if (*s == '(' && looks_like_prototype(s)) {
 		    s = scan_str(s,!!PL_madskills,FALSE,FALSE,FALSE,NULL);
 		    COPLINE_SET_FROM_MULTI_END;
 		    if (!s)
@@ -8806,7 +8827,7 @@ Perl_yylex(pTHX)
 
 		if (*s == ':' && s[1] != ':')
 		    PL_expect = attrful;
-		else if (*s != '{' && key == KEY_sub) {
+		else if ((*s != '{' && *s != '(') && key == KEY_sub) {
 		    if (!have_name)
 			Perl_croak(aTHX_ "Illegal declaration of anonymous subroutine");
 		    else if (*s != ';' && *s != '}')

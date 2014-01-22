@@ -13,18 +13,18 @@ X<subroutine, declaration> X<sub>
     sub NAME : ATTRS;		  #  with attributes
     sub NAME(PROTO) : ATTRS;	  #  with attributes and prototypes
 
-    sub NAME BLOCK		  # A declaration and a definition.
-    sub NAME(PROTO) BLOCK	  #  ditto, but with prototypes
-    sub NAME : ATTRS BLOCK	  #  with attributes
-    sub NAME(PROTO) : ATTRS BLOCK #  with prototypes and attributes
+    sub NAME BODY 		  # A declaration and a definition.
+    sub NAME(PROTO) BODY 	  #  ditto, but with prototypes
+    sub NAME : ATTRS BODY 	  #  with attributes
+    sub NAME(PROTO) : ATTRS BODY  #  with prototypes and attributes
 
 To define an anonymous subroutine at runtime:
 X<subroutine, anonymous>
 
-    $subref = sub BLOCK;		 # no proto
-    $subref = sub (PROTO) BLOCK;	 # with proto
-    $subref = sub : ATTRS BLOCK;	 # with attributes
-    $subref = sub (PROTO) : ATTRS BLOCK; # with proto and attributes
+    $subref = sub BODY;                  # no proto
+    $subref = sub (PROTO) BODY;          # with proto
+    $subref = sub : ATTRS BODY;          # with attributes
+    $subref = sub (PROTO) : ATTRS BODY;  # with proto and attributes
 
 To import subroutines:
 X<import>
@@ -59,7 +59,9 @@ function without an explicit return statement is called a subroutine, but
 there's really no difference from Perl's perspective.)
 X<subroutine, parameter> X<parameter>
 
-Any arguments passed in show up in the array C<@_>.  Therefore, if
+Any arguments passed in show up in the array C<@_>.
+(They may also show up in lexical variables introduced by a signature;
+see L</Signatures> below.)  Therefore, if
 you called a function with two arguments, those would be stored in
 C<$_[0]> and C<$_[1]>.  The array C<@_> is a local array, but its
 elements are aliases for the actual scalar parameters.  In particular,
@@ -88,6 +90,7 @@ like a C<foreach> or a C<while>, the returned value is unspecified. The
 empty sub returns the empty list.
 X<subroutine, return value> X<return value> X<return>
 
+Aside from an experimental facility (see L</Signatures> below),
 Perl does not have named formal parameters.  In practice all you
 do is assign to a C<my()> list of these.  Variables that aren't
 declared to be private are global variables.  For gory details
@@ -295,6 +298,100 @@ The C<BEGIN>, C<UNITCHECK>, C<CHECK>, C<INIT> and C<END> subroutines
 are not so much subroutines as named special code blocks, of which you
 can have more than one in a package, and which you can B<not> call
 explicitly.  See L<perlmod/"BEGIN, UNITCHECK, CHECK, INIT and END">
+
+=head2 Signatures
+
+B<WARNING>: Subroutine signatures are experimental.  The feature may be
+modified or removed in future versions of Perl.  It is almost certain
+that future versions of Perl will have more complex signature facilities.
+
+Perl has an experimental facility to allow a subroutine's formal
+parameters to be introduced by special syntax, separate from the
+procedural code of the subroutine body.  The formal parameter list
+is known as a I<signature>.  The facility must be enabled first by a
+pragmatic declaration, C<use feature 'simple_signatures'>, and it will
+produce a warning unless the "experimental::simple_signatures" warnings
+category is disabled.
+
+The signature is part of a subroutine's body.  Normally the body of a
+subroutine is simply a braced block of code.  When using a signature, the
+signature is a parenthesised list of variable names that goes immediately
+before the braced block.  The variables named by the signature are
+declared as lexical variables (as if by C<my>).  When the subroutine is
+called, the argument list is assigned to the list of lexical variables,
+so that the variables get copies of the argument values.  For example,
+
+    sub foo ($left, $right) {
+	return $left + $right;
+    }
+
+is equivalent to
+
+    sub foo {
+	my ($left, $right) = @_;
+	return $left + $right;
+    }
+
+The equivalence is quite precise.  The same kinds of things can appear
+in the signature both ways, and the assignment of the argument list
+has the same semantics.  An argument can be ignored by putting C<undef>
+in the signature in place of a parameter name:
+
+    sub foo ($first, undef, $third) {
+	return "first=$first, third=$third";
+    }
+
+The signature does not perform any checking of the number of arguments
+supplied to the subroutine.  If fewer arguments were supplied than the
+number of formal parameters, the unsatisfied parameters will be undefined
+if scalar, or empty if array or hash.  If more arguments were supplied
+than can fit into the formal parameters, the excess arguments are ignored.
+
+An array or hash parameter slurps up all the remaining arguments.
+Any parameters listed later in the signature won't have any arguments
+available to them, and so will end up undefined or empty.
+
+The arguments are still available in the special array variable C<@_>, in
+addition to the lexical variables of the signature.  There is a difference
+between the two ways of accessing the arguments: C<@_> I<aliases> the
+arguments, but the signature variables get I<copies> of the arguments.
+So writing to a signature variable only changes that variable, and has
+no effect on the caller's variables, but writing to an element of C<@_>
+modifies whatever the caller used to supply that argument.
+
+There is a syntactic ambiguity between signatures and prototypes (see
+L</Prototypes>), because both start with an opening parenthesis and
+both can appear in some of the same places, such as just after the name
+in a subroutine declaration.  For historical reasons, when signatures
+are not enabled, any opening parenthesis in such a context will trigger
+very forgiving prototype parsing.  Most signatures will be interpreted
+as prototypes in those circumstances, but won't be valid prototypes.
+(A valid prototype cannot contain any alphabetic character.)  This will
+lead to somewhat confusing error messages.
+
+When signatures are enabled, the prototype syntax becomes much more
+restricted: only a parenthesised group of ASCII punctuation characters
+will be treated as a prototype.  In particular, any alphabetic or
+space character will prevent the group being treated as a prototype.
+It will then be parsed as a signature instead.  Beware that a completely
+empty group, C<()>, is a prototype, even though it would also be valid
+signature syntax.  To write an empty signature, put a space between the
+parentheses.  This is a bit pointless, because the empty signature has
+no effect.  It is also possible to construct a non-empty signature such
+as C<($__)> that looks like it could be a prototype and will be treated
+as one; again, adding a space will force interpretation as a signature.
+
+It is entirely possible for a subroutine to have both a prototype and
+a signature.  They do different jobs: the prototype affects compilation
+of calls to the subroutine, and the signature puts argument values into
+lexical variables at runtime.  You can therefore write
+
+    sub foo ($$) ($left, $right) {
+	return $left + $right;
+    }
+
+The prototype must come before the signature.  Attributes, if present,
+must also come before the signature (and after the prototype).
 
 =head2 Private Variables via my()
 X<my> X<variable, lexical> X<lexical> X<lexical variable> X<scope, lexical>

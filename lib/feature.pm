@@ -5,28 +5,29 @@
 
 package feature;
 
-our $VERSION = '1.34';
+our $VERSION = '1.35';
 
 our %feature = (
-    fc              => 'feature_fc',
-    say             => 'feature_say',
-    state           => 'feature_state',
-    switch          => 'feature_switch',
-    evalbytes       => 'feature_evalbytes',
-    postderef       => 'feature_postderef',
-    array_base      => 'feature_arybase',
-    current_sub     => 'feature___SUB__',
-    lexical_subs    => 'feature_lexsubs',
-    postderef_qq    => 'feature_postderef_qq',
-    unicode_eval    => 'feature_unieval',
-    unicode_strings => 'feature_unicode',
+    fc                => 'feature_fc',
+    say               => 'feature_say',
+    state             => 'feature_state',
+    switch            => 'feature_switch',
+    evalbytes         => 'feature_evalbytes',
+    postderef         => 'feature_postderef',
+    array_base        => 'feature_arybase',
+    current_sub       => 'feature___SUB__',
+    lexical_subs      => 'feature_lexsubs',
+    postderef_qq      => 'feature_postderef_qq',
+    unicode_eval      => 'feature_unieval',
+    unicode_strings   => 'feature_unicode',
+    simple_signatures => 'feature_simple_signatures',
 );
 
 our %feature_bundle = (
     "5.10"    => [qw(array_base say state switch)],
     "5.11"    => [qw(array_base say state switch unicode_strings)],
     "5.15"    => [qw(current_sub evalbytes fc say state switch unicode_eval unicode_strings)],
-    "all"     => [qw(array_base current_sub evalbytes fc lexical_subs postderef postderef_qq say state switch unicode_eval unicode_strings)],
+    "all"     => [qw(array_base current_sub evalbytes fc lexical_subs postderef postderef_qq say simple_signatures state switch unicode_eval unicode_strings)],
     "default" => [qw(array_base)],
 );
 
@@ -244,6 +245,26 @@ This enables declaration of subroutines via C<my sub foo>, C<state sub foo>
 and C<our sub foo> syntax.  See L<perlsub/Lexical Subroutines> for details.
 
 This feature is available from Perl 5.18 onwards.
+
+=head2 The 'simple_signatures' feature
+
+B<WARNING>: This feature is still experimental and the implementation may
+change in future versions of Perl.  For this reason, Perl will
+warn when you use the feature, unless you have explicitly disabled the
+warning:
+
+    no warnings "experimental::simple_signatures";
+
+This enables unpacking of subroutine arguments into lexical variables
+by syntax such as
+
+    sub foo ($left, $right) {
+	return $left + $right;
+    }
+
+See L<perlsub/Signatures> for details.
+
+This feature is available from Perl 5.20 onwards.
 
 =head1 FEATURE BUNDLES
 

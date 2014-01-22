@@ -1934,6 +1934,14 @@ L<perlrecharclass/Extended Bracketed Character Classes>.
     use feature 'lexical_subs';
     my sub foo { ... }
 
+=item Experimental subroutine signatures not enabled
+
+(F) To use subroutine signatures, you must first enable them:
+
+    no warnings "experimental::simple_signatures";
+    use feature "simple_signatures";
+    sub foo ($left, $right) { ... }
+
 =item Explicit blessing to '' (assuming package main)
 
 (W misc) You are blessing a reference to a zero length string.  This has
@@ -2230,6 +2238,9 @@ to your Perl administrator.
 
 (W illegalproto) An illegal character was found in a prototype declaration.
 Legal characters in prototypes are $, @, %, *, ;, [, ], &, \, and +.
+Perhaps you were trying to write a subroutine signature but didn't enable
+that feature first (C<use feature 'simple_signatures'>), so your signature
+was instead interpreted as a bad prototype.
 
 =item Illegal declaration of anonymous subroutine
 
@@ -2864,6 +2875,9 @@ appear if components are not found, or are too long.  See
 syntax of function prototypes is given a brief compile-time check for
 obvious errors like invalid characters.  A more rigorous check is run
 when the function is called.
+Perhaps the function's author was trying to write a subroutine signature
+but didn't enable that feature first (C<use feature 'simple_signatures'>),
+so the signature was instead interpreted as a bad prototype.
 
 =item Malformed UTF-8 character (%s)
 
@@ -5341,6 +5355,18 @@ change in a future Perl version, you can do this to silence the
 warning:
 
     no warnings "experimental::regex_sets";
+
+=item The simple_signatures feature is experimental
+
+(S experimental::simple_signatures) This warning is emitted if you unwrap
+a subroutine's arguments using a signature.  Simply suppress the warning
+if you want to use the feature, but know that in doing so you are taking
+the risk of using an experimental feature which may change or be removed
+in a future Perl version:
+
+    no warnings "experimental::simple_signatures";
+    use feature "simple_signatures";
+    sub foo ($left, $right) { ... }
 
 =item The stat preceding %s wasn't an lstat
 
