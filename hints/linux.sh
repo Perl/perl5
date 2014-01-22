@@ -87,6 +87,9 @@ case "$usemymalloc" in
 '') usemymalloc='n' ;;
 esac
 
+uname_minus_m="`$run uname -m 2>/dev/null`"
+uname_minus_m="${uname_minus_m:-"$targetarch"}"
+
 # Check if we're about to use Intel's ICC compiler
 case "`${cc:-cc} -V 2>&1`" in
 *"Intel(R) C++ Compiler"*|*"Intel(R) C Compiler"*)
@@ -100,7 +103,7 @@ case "`${cc:-cc} -V 2>&1`" in
     # The -no-gcc flag is needed otherwise, icc pretends (poorly) to be gcc
     ccflags="-we147 -mp -no-gcc $ccflags"
     # Prevent relocation errors on 64bits arch
-    case "`uname -m`" in
+    case "$uname_minus_m" in
 	*ia64*|*x86_64*)
 	    cccdlflags='-fPIC'
 	;;
@@ -134,7 +137,7 @@ case "$optimize" in
 # use -O2 by default ; -O3 doesn't seem to bring significant benefits with gcc
 '')
     optimize='-O2'
-    case "`uname -m`" in
+    case "$uname_minus_m" in
         ppc*)
             # on ppc, it seems that gcc (at least gcc 3.3.2) isn't happy
             # with -O2 ; so downgrade to -O1.
@@ -335,7 +338,7 @@ fi
 #'osfmach3ppc') ccdlflags='-Wl,-E' ;;
 #esac
 
-case "`uname -m`" in
+case "$uname_minus_m" in
 sparc*)
 	case "$cccdlflags" in
 	*-fpic*) cccdlflags="`echo $cccdlflags|sed 's/-fpic/-fPIC/'`" ;;
