@@ -135,6 +135,8 @@ EOCBU
 
 if $test "X$targetrun" = "Xadb"; then
 
+$rm $run $to $from $targetmkdir
+
 case "$src" in
     /*) run=$src/Cross/run
             targetmkdir=$src/Cross/mkdir
