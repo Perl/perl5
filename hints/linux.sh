@@ -177,7 +177,7 @@ else
 fi
 
 case "$plibpth" in
-'') plibpth=`LANG=C LC_ALL=C $gcc -print-search-dirs | grep libraries |
+'') plibpth=`LANG=C LC_ALL=C $gcc $ccflags $ldflags -print-search-dirs | grep libraries |
 	cut -f2- -d= | tr ':' $trnl | grep -v 'gcc' | sed -e 's:/$::'`
     set X $plibpth # Collapse all entries on one line
     shift
@@ -205,7 +205,7 @@ main() {
 	exit(0); /* succeed (yes, it's ELF) */
 }
 EOM
-if ${cc:-gcc} try.c >/dev/null 2>&1 && $run ./a.out; then
+if ${cc:-gcc} $ccflags $ldflags try.c >/dev/null 2>&1 && $run ./a.out; then
     cat <<'EOM' >&4
 
 You appear to have ELF support.  I'll try to use it for dynamic loading.
