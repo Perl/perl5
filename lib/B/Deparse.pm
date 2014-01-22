@@ -20,7 +20,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
          CVf_METHOD CVf_LVALUE
 	 PMf_KEEP PMf_GLOBAL PMf_CONTINUE PMf_EVAL PMf_ONCE
 	 PMf_MULTILINE PMf_SINGLELINE PMf_FOLD PMf_EXTENDED);
-$VERSION = '1.24';
+$VERSION = '1.25';
 use strict;
 use vars qw/$AUTOLOAD/;
 use warnings ();
@@ -1012,6 +1012,7 @@ Carp::confess("SPECIAL in deparse_sub") if $cv->isa("B::SPECIAL");
     my $body;
     my $root = $cv->ROOT;
     local $B::overlay = {};
+    my $signature = "";
     if (not null $root) {
 	$self->pessimise($root, $cv->START);
 	my $lineseq = $root->first;
@@ -1019,6 +1020,42 @@ Carp::confess("SPECIAL in deparse_sub") if $cv->isa("B::SPECIAL");
 	    my @ops;
 	    for(my$o=$lineseq->first; $$o; $o=$o->sibling) {
 		push @ops, $o;
+	    }
+	    my($xop, @yop);
+	    if($self->{expand} < 2 && @ops >= 2 && is_state($ops[0]) &&
+		    $self->{hinthash}->{feature_simple_signatures} &&
+		    (@ops == 2 || is_state($ops[2])) &&
+		    $ops[1]->name eq "aassign" &&
+		    ($ops[1]->flags & OPf_STACKED) &&
+		    ($xop = $ops[1]->first)->name =~ /\A(?:list|null)\z/ &&
+		    ($xop = $xop->first)->name eq "pushmark" &&
+		    !null($xop = $xop->sibling) && null($xop->sibling) &&
+		    $xop->name eq "rv2av" &&
+		    ($xop = $xop->first)->name eq "gv" &&
+		    $self->gv_name($self->gv_or_padgv($xop)) eq "_" &&
+		    ($xop = $ops[1]->last)->name =~ /\A(?:list|null)\z/ &&
+		    ($xop = $xop->first)->name eq "pushmark" &&
+		    do {
+			while(!null($xop = $xop->sibling)) {
+			    push @yop, $xop;
+			}
+			@yop != 0;
+		    } &&
+		    !(grep { !(
+			$_->name eq "undef" ||
+			($_->name =~ /\Apad[sah]v\z/ &&
+			    ($_->private & (OPpLVAL_INTRO|OPpOUR_INTRO|
+					    OPpPAD_STATE)) ==
+				OPpLVAL_INTRO)
+		    ) } @yop)) {
+		$self->{avoid_local}{$$_}++ foreach @yop;
+		$signature = "(" .
+		    join(", ", map { $self->deparse($_, 6) } @yop) . ") ";
+		delete $self->{avoid_local}{$$_} foreach @yop;
+		if($signature =~ /\A\([!"#\$\%&'*+,\-.\/:;<=>?\@\[\\\]^_`{|}~]*\) \z/) {
+		    $signature =~ s/\A\(/( /;
+		}
+		splice @ops, 0, 2, ();
 	    }
 	    $body = $self->lineseq(undef, 0, @ops).";";
 	    my $scope_en = $self->find_scope_en($lineseq);
@@ -1040,7 +1077,7 @@ Carp::confess("SPECIAL in deparse_sub") if $cv->isa("B::SPECIAL");
 	    return "$proto;\n";
 	}
     }
-    return $proto ."{\n\t$body\n\b}" ."\n";
+    return "$proto${signature}{\n\t$body\n\b}\n";
 }
 
 sub deparse_format {

@@ -1428,3 +1428,27 @@ print f();
 ####
 # Elements of %# should not be confused with $#{ array }
 () = ${#}{'foo'};
+####
+# simple signatures
+no warnings;
+use feature 'simple_signatures';
+my $aaa = sub ($abc, $def) {
+    print $abc + $def;
+} ;
+my $bbb = sub ( $__) {
+    print $__;
+} ;
+my $ccc = sub ($abc, undef, @def) {
+    print $abc + @def;
+} ;
+my $ddd = sub {
+    () = @_;
+    print 444;
+} ;
+my $eee = sub {
+    (my $abc, our $def) = @_;
+    print 555;
+} ;
+my $fff = sub ($abc, undef, %def) {
+    print $abc + %def;
+} ;
