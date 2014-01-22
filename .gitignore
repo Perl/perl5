@@ -52,6 +52,9 @@ perldtrace.h
 *.old
 *.xsc
 
+# general build products (darwin)
+*.dylib
+
 # general build products (Win32)
 *.def
 *.dll
