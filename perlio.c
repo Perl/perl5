@@ -4967,6 +4967,7 @@ PerlIO_tmpfile(void)
 	 fd = mkstemp(SvPVX(sv));
      }
      if (fd < 0) {
+	 SvREFCNT_dec(sv);
 	 sv = NULL;
 	 /* else we try /tmp */
 	 fd = mkstemp(tempname);
