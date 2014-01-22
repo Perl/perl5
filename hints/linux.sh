@@ -60,17 +60,6 @@ libswanted="$*"
 # Debian 4.0 puts ndbm in the -lgdbm_compat library.
 libswanted="$libswanted gdbm_compat"
 
-# If you have glibc, then report the version for ./myconfig bug reporting.
-# (Configure doesn't need to know the specific version since it just uses
-# gcc to load the library for all tests.)
-# We don't use __GLIBC__ and  __GLIBC_MINOR__ because they
-# are insufficiently precise to distinguish things like
-# libc-2.0.6 and libc-2.0.7.
-if test -L /lib/libc.so.6; then
-    libc=`ls -l /lib/libc.so.6 | awk '{print $NF}'`
-    libc=/lib/$libc
-fi
-
 # Configure may fail to find lstat() since it's a static/inline
 # function in <sys/stat.h>.
 d_lstat=define
@@ -182,6 +171,32 @@ case "$plibpth" in
     set X $plibpth # Collapse all entries on one line
     shift
     plibpth="$*"
+    ;;
+esac
+
+case "$libc" in
+'')
+# If you have glibc, then report the version for ./myconfig bug reporting.
+# (Configure doesn't need to know the specific version since it just uses
+# gcc to load the library for all tests.)
+# We don't use __GLIBC__ and  __GLIBC_MINOR__ because they
+# are insufficiently precise to distinguish things like
+# libc-2.0.6 and libc-2.0.7.
+    for p in $plibpth
+    do
+        for trylib in libc.so.6 libc.so
+        do
+            if $test -e $p/$trylib; then
+                libc=`ls -l $p/$trylib | awk '{print $NF}'`
+                if $test "X$libc" != X; then
+                    break
+                fi
+            fi
+        done
+        if $test "X$libc" != X; then
+            break
+        fi
+    done
     ;;
 esac
 
