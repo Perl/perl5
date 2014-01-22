@@ -39,7 +39,7 @@ i_libutil='undef'
 # SuSE Linux can be used as cross-compilation host for Cray XT4 Catamount/Qk.
 if test -d /opt/xt-pe
 then
-  case "`cc -V 2>&1`" in
+  case "`${cc:-cc} -V 2>&1`" in
   *catamount*) . hints/catamount.sh; return ;;
   esac
 fi
@@ -268,7 +268,7 @@ fi
 
 rm -f try.c a.out
 
-if /bin/sh -c exit; then
+if ${sh:-/bin/sh} -c exit; then
   echo ''
   echo 'You appear to have a working bash.  Good.'
 else
@@ -464,7 +464,7 @@ then
        DBLIB="$DBDIR/libdb.so"
        if [ -f $DBLIB ]
        then
-         if nm -u $DBLIB | grep pthread >/dev/null
+         if ${nm:-nm} -u $DBLIB | grep pthread >/dev/null
          then
            if ldd $DBLIB | grep pthread >/dev/null
            then
