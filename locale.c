@@ -249,7 +249,7 @@ Perl_new_ctype(pTHX_ const char *newctype)
 	else if (isLOWER_LC((U8) i))
 	    PL_fold_locale[i] = toUPPER_LC((U8) i);
 	else
-	    PL_fold_locale[i] = i;
+	    PL_fold_locale[i] = (U8) i;
     }
 
 #endif /* USE_LOCALE_CTYPE */
