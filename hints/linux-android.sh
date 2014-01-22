@@ -256,6 +256,9 @@ if $test "X$hostosname" = "Xdarwin"; then
   firstmakefile=GNUmakefile;
 fi
 ;;
+*)
+ldflags="$ldflags -L/system/lib"
+;;
 esac
 
 osvers="`$run getprop ro.build.version.release`"
