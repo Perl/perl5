@@ -1335,6 +1335,12 @@ d_libm_lib_version (d_libm_lib_version.U):
 	which indicates to the C program that math.h defines _LIB_VERSION
 	being available in libm
 
+d_libname_unique (so.U):
+	This variable is defined if the target system insists on unique
+	basenames for shared library files. This is currently true on Android,
+	false everywhere else we know of.
+	Defaults to 'undef'.
+
 d_link (d_link.U):
 	This variable conditionally defines HAS_LINK if link() is
 	available to create hard links.
@@ -3395,6 +3401,11 @@ incpath (usrinc.U):
 	right one, as in "$incpath/usr/include" or "$incpath/usr/lib".
 	Value can be "" or "/bsd43" on mips.
 
+incpth (libpth.U):
+	This variable must precede the normal include path to get the
+	right one, as in "$incpath/usr/include" or "$incpath/usr/lib".
+	Value can be "" or "/bsd43" on mips.
+
 inews (Loc.U):
 	This variable is defined but not used by Configure.
 	The value is the empty string and is not useful.
@@ -4865,6 +4876,12 @@ sysman (sysman.U):
 	pages. Rather it is the place where Configure may look to find manual
 	for unix commands (section 1 of the manual usually). See mansrc.
 
+sysroot (Sysroot.U):
+	This variable is empty unless supplied by the Configure user.
+	It can contain a path to an alternative root directory, under which
+	headers and libraries for the compilation target can be found. This
+	is generally used when cross-compiling using a gcc-like compiler.
+
 tail (Loc.U):
 	This variable is defined but not used by Configure.
 	The value is the empty string and is not useful.
@@ -4876,6 +4893,24 @@ tar (Loc.U):
 targetarch (Cross.U):
 	If cross-compiling, this variable contains the target architecture.
 	If not, this will be empty.
+
+targetdir (Cross.U):
+	This variable contains a path that will be created on the target
+	host using targetmkdir, and then used to copy the cross-compiled
+	executables to. Defaults to '/tmp' if not set.
+
+targethost (Cross.U):
+	This variable contains the name of a separate host machine that
+	can be used to run compiled test programs and perl tests on.
+	Set to empty string if not in use.
+
+targetmkdir (Cross.U):
+	This variable contains the command used by Configure to create a
+	new directory on the target host.
+
+targetport (Cross.U):
+	This variable contains the number of a network port to be used to
+	connect to the host in targethost, if unset defaults to 22 for ssh.
 
 tbl (Loc.U):
 	This variable is defined but not used by Configure.
