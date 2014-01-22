@@ -1,6 +1,6 @@
 package locale;
 
-our $VERSION = '1.02';
+our $VERSION = '1.03';
 use Config;
 
 $Carp::Internal{ (__PACKAGE__) } = 1;
@@ -47,13 +47,8 @@ Unicode and locales, including UTF-8 locales.
 See L<perllocale> for more detailed information on how Perl supports
 locales.
 
-=head1 NOTE
-
-If your system does not support locales, then loading this module will
-cause the program to die with a message:
-
-    "Your vendor does not support locales, you cannot use the locale
-    module."
+On systems that don't have locales, this pragma will cause your operations
+to behave as if in the "C" locale; attempts to change the locale will fail.
 
 =cut
 
@@ -69,11 +64,6 @@ $locale::not_chars_hint_bits = 0x10;
 
 sub import {
     shift;  # should be 'locale'; not checked
-
-    if(!$Config{d_setlocale}) {
-        ## No locale support found on this Perl, giving up:
-        die('Your vendor does not support locales, you cannot use the locale module.');
-    }
 
     my $found_not_chars = 0;
     while (defined (my $arg = shift)) {

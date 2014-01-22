@@ -25,7 +25,13 @@ XXX New core language features go here.  Summarize user-visible core language
 enhancements.  Particularly prominent performance optimisations could go
 here, but most should go in the L</Performance Enhancements> section.
 
-[ List each enhancement as a =head2 entry ]
+=head2 C<S<use locale>> now compiles on systems without locale ability
+
+Previously doing this caused the program to not compile.  Within its
+scope the program behaves as if in the "C" locale.  Thus programs
+written for platforms that support locales can run on locale-less
+platforms without change.  Attempts to change the locale away from the
+"C" locale will, of course, fail.
 
 =head1 Security
 
