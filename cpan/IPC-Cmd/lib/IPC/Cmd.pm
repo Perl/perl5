@@ -18,7 +18,7 @@ BEGIN {
                         $HAVE_MONOTONIC
                     ];
 
-    $VERSION        = '0.90';
+    $VERSION        = '0.92';
     $VERBOSE        = 0;
     $DEBUG          = 0;
     $WARN           = 1;
@@ -506,173 +506,174 @@ sub kill_gently {
 }
 
 sub open3_run {
-  my ($cmd, $opts) = @_;
+    my ($cmd, $opts) = @_;
 
-  $opts = {} unless $opts;
+    $opts = {} unless $opts;
 
-  my $child_in = FileHandle->new;
-  my $child_out = FileHandle->new;
-  my $child_err = FileHandle->new;
-  $child_out->autoflush(1);
-  $child_err->autoflush(1);
+    my $child_in = FileHandle->new;
+    my $child_out = FileHandle->new;
+    my $child_err = FileHandle->new;
+    $child_out->autoflush(1);
+    $child_err->autoflush(1);
 
-  my $pid = open3($child_in, $child_out, $child_err, $cmd);
+    my $pid = open3($child_in, $child_out, $child_err, $cmd);
 
-  # push my child's pid to our parent
-  # so in case i am killed parent
-  # could stop my child (search for
-  # child_child_pid in parent code)
-  if ($opts->{'parent_info'}) {
-    my $ps = $opts->{'parent_info'};
-    print $ps "spawned $pid\n";
-  }
-
-  if ($child_in && $child_out->opened && $opts->{'child_stdin'}) {
-
-    # If the child process dies for any reason,
-    # the next write to CHLD_IN is likely to generate
-    # a SIGPIPE in the parent, which is fatal by default.
-    # So you may wish to handle this signal.
-    #
-    # from http://perldoc.perl.org/IPC/Open3.html,
-    # absolutely needed to catch piped commands errors.
-    #
-    local $SIG{'PIPE'} = sub { 1; };
-
-    print $child_in $opts->{'child_stdin'};
-  }
-  close($child_in);
-
-  my $child_output = {
-    'out' => $child_out->fileno,
-    'err' => $child_err->fileno,
-    $child_out->fileno => {
-      'parent_socket' => $opts->{'parent_stdout'},
-      'scalar_buffer' => "",
-      'child_handle' => $child_out,
-      'block_size' => ($child_out->stat)[11] || 1024,
-      },
-    $child_err->fileno => {
-      'parent_socket' => $opts->{'parent_stderr'},
-      'scalar_buffer' => "",
-      'child_handle' => $child_err,
-      'block_size' => ($child_err->stat)[11] || 1024,
-      },
-    };
-
-  my $select = IO::Select->new();
-  $select->add($child_out, $child_err);
-
-  # pass any signal to the child
-  # effectively creating process
-  # strongly attached to the child:
-  # it will terminate only after child
-  # has terminated (except for SIGKILL,
-  # which is specially handled)
-  foreach my $s (keys %SIG) {
-    my $sig_handler;
-    $sig_handler = sub {
-      kill("$s", $pid);
-      $SIG{$s} = $sig_handler;
-    };
-    $SIG{$s} = $sig_handler;
-  }
-
-  my $child_finished = 0;
-
-  my $got_sig_child = 0;
-  $SIG{'CHLD'} = sub { $got_sig_child = time(); };
-
-  while(!$child_finished && ($child_out->opened || $child_err->opened)) {
-
-    # parent was killed otherwise we would have got
-    # the same signal as parent and process it same way
-    if (getppid() eq "1") {
-
-      # end my process group with all the children
-      # (i am the process group leader, so my pid
-      # equals to the process group id)
-      #
-      # same thing which is done
-      # with $opts->{'clean_up_children'}
-      # in run_forked
-      #
-      kill(-9, $$);
-
-      POSIX::_exit 1;
+    # push my child's pid to our parent
+    # so in case i am killed parent
+    # could stop my child (search for
+    # child_child_pid in parent code)
+    if ($opts->{'parent_info'}) {
+      my $ps = $opts->{'parent_info'};
+      print $ps "spawned $pid\n";
     }
 
-    if ($got_sig_child) {
-      if (time() - $got_sig_child > 1) {
-        # select->can_read doesn't return 0 after SIG_CHLD
+    if ($child_in && $child_out->opened && $opts->{'child_stdin'}) {
+        # If the child process dies for any reason,
+        # the next write to CHLD_IN is likely to generate
+        # a SIGPIPE in the parent, which is fatal by default.
+        # So you may wish to handle this signal.
         #
-        # "On POSIX-compliant platforms, SIGCHLD is the signal
-        # sent to a process when a child process terminates."
-        # http://en.wikipedia.org/wiki/SIGCHLD
+        # from http://perldoc.perl.org/IPC/Open3.html,
+        # absolutely needed to catch piped commands errors.
         #
-        # nevertheless kill KILL wouldn't break anything here
-        #
-        kill (9, $pid);
-        $child_finished = 1;
-      }
+        local $SIG{'PIPE'} = sub { 1; };
+
+        print $child_in $opts->{'child_stdin'};
+    }
+    close($child_in);
+
+    my $child_output = {
+        'out' => $child_out->fileno,
+        'err' => $child_err->fileno,
+        $child_out->fileno => {
+            'parent_socket' => $opts->{'parent_stdout'},
+            'scalar_buffer' => "",
+            'child_handle' => $child_out,
+            'block_size' => ($child_out->stat)[11] || 1024,
+          },
+        $child_err->fileno => {
+            'parent_socket' => $opts->{'parent_stderr'},
+            'scalar_buffer' => "",
+            'child_handle' => $child_err,
+            'block_size' => ($child_err->stat)[11] || 1024,
+          },
+        };
+
+    my $select = IO::Select->new();
+    $select->add($child_out, $child_err);
+
+    # pass any signal to the child
+    # effectively creating process
+    # strongly attached to the child:
+    # it will terminate only after child
+    # has terminated (except for SIGKILL,
+    # which is specially handled)
+    foreach my $s (keys %SIG) {
+        my $sig_handler;
+        $sig_handler = sub {
+            kill("$s", $pid);
+            $SIG{$s} = $sig_handler;
+        };
+        $SIG{$s} = $sig_handler;
     }
 
-    Time::HiRes::usleep(1);
+    my $child_finished = 0;
 
-    foreach my $fd ($select->can_read(1/100)) {
-      my $str = $child_output->{$fd->fileno};
-      Carp::confess("child stream not found: $fd") unless $str;
+    my $real_exit;
+    my $exit_value;
 
-      my $data;
-      my $count = $fd->sysread($data, $str->{'block_size'});
+    while(!$child_finished) {
 
-      if ($count) {
-        if ($str->{'parent_socket'}) {
-          my $ph = $str->{'parent_socket'};
-          print $ph $data;
+        # parent was killed otherwise we would have got
+        # the same signal as parent and process it same way
+        if (getppid() eq "1") {
+
+          # end my process group with all the children
+          # (i am the process group leader, so my pid
+          # equals to the process group id)
+          #
+          # same thing which is done
+          # with $opts->{'clean_up_children'}
+          # in run_forked
+          #
+          kill(-9, $$);
+
+          POSIX::_exit 1;
         }
-        else {
-          $str->{'scalar_buffer'} .= $data;
+
+        my $waitpid = waitpid($pid, POSIX::WNOHANG);
+
+        # child finished, catch it's exit status
+        if ($waitpid ne 0 && $waitpid ne -1) {
+          $real_exit = $?;
+          $exit_value = $? >> 8;
         }
-      }
-      elsif ($count eq 0) {
-        $select->remove($fd);
-        $fd->close();
-      }
-      else {
-        Carp::confess("error during sysread: " . $!);
-      }
+
+        if ($waitpid eq -1) {
+          $child_finished = 1;
+        }
+
+
+        my $ready_fds = [];
+        push @{$ready_fds}, $select->can_read(1/100);
+
+        READY_FDS: while (scalar(@{$ready_fds})) {
+            my $fd = shift @{$ready_fds};
+            $ready_fds = [grep {$_ ne $fd} @{$ready_fds}];
+
+            my $str = $child_output->{$fd->fileno};
+            Carp::confess("child stream not found: $fd") unless $str;
+
+            my $data;
+            my $count = $fd->sysread($data, $str->{'block_size'});
+
+            if ($count) {
+                if ($str->{'parent_socket'}) {
+                    my $ph = $str->{'parent_socket'};
+                    print $ph $data;
+                }
+                else {
+                    $str->{'scalar_buffer'} .= $data;
+                }
+            }
+            elsif ($count eq 0) {
+                $select->remove($fd);
+                $fd->close();
+            }
+            else {
+                Carp::confess("error during sysread: " . $!);
+            }
+
+            push @{$ready_fds}, $select->can_read(1/100) if $child_finished;
+        }
+
+        Time::HiRes::usleep(1);
     }
-  }
 
-  my $waitpid_ret = waitpid($pid, 0);
-  my $real_exit = $?;
-  my $exit_value  = $real_exit >> 8;
+    # since we've successfully reaped the child,
+    # let our parent know about this.
+    #
+    if ($opts->{'parent_info'}) {
+        my $ps = $opts->{'parent_info'};
 
-  # since we've successfully reaped the child,
-  # let our parent know about this.
-  #
-  if ($opts->{'parent_info'}) {
-    my $ps = $opts->{'parent_info'};
+        # child was killed, inform parent
+        if ($real_exit & 127) {
+          print $ps "$pid killed with " . ($real_exit & 127) . "\n";
+        }
 
-    # child was killed, inform parent
-    if ($real_exit & 127) {
-      print $ps "$pid killed with " . ($real_exit & 127) . "\n";
+        print $ps "reaped $pid\n";
     }
 
-    print $ps "reaped $pid\n";
-  }
-
-  if ($opts->{'parent_stdout'} || $opts->{'parent_stderr'}) {
-    return $exit_value;
-  }
-  else {
-    return {
-      'stdout' => $child_output->{$child_output->{'out'}}->{'scalar_buffer'},
-      'stderr' => $child_output->{$child_output->{'err'}}->{'scalar_buffer'},
-      'exit_code' => $exit_value,
-      };
-  }
+    if ($opts->{'parent_stdout'} || $opts->{'parent_stderr'}) {
+        return $exit_value;
+    }
+    else {
+        return {
+            'stdout' => $child_output->{$child_output->{'out'}}->{'scalar_buffer'},
+            'stderr' => $child_output->{$child_output->{'err'}}->{'scalar_buffer'},
+            'exit_code' => $exit_value,
+            };
+    }
 }
 
 =head2 $hashref = run_forked( COMMAND, { child_stdin => SCALAR, timeout => DIGIT, stdout_handler => CODEREF, stderr_handler => CODEREF} );

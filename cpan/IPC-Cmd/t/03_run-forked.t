@@ -7,6 +7,7 @@ use warnings;
 use lib qw[../lib];
 use Test::More 'no_plan';
 use Data::Dumper;
+use File::Temp qw(tempfile);
 
 use_ok("IPC::Cmd", "run_forked");
 
@@ -72,10 +73,8 @@ ok($r->{'stderr'} eq '', "discard_output stderr");
 ok($r->{'merged'} eq '', "discard_output merged");
 ok($r->{'err_msg'} eq '', "discard_output err_msg");
 
-my $filename = "/tmp/03_run_forked.t.$$";
+my ($fh, $filename) = tempfile();
 my $one_line = "in Montenegro with Katyusha\n";
-my $fh;
-open($fh, ">$filename");
 for (my $i = 0; $i < 10240; $i++) {
   print $fh $one_line;
 }
