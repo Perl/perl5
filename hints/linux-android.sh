@@ -277,3 +277,6 @@ $cat <<EOO >> $pwd/config.arch
 
 osname='android'
 EOO
+
+# Android is a linux variant, so run those hints.
+. ./hints/linux.sh
