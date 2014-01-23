@@ -257,6 +257,16 @@ define)
 if $test "X$hostosname" = "Xdarwin"; then
   firstmakefile=GNUmakefile;
 fi
+
+# When cross-compiling, full_csh and d_csh will get the
+# host's values, which is all sorts of wrong.  So unless
+# full_csh has been set on the command line, set d_csh to
+# undef.
+case "$full_csh" in
+'') d_csh="$undef"
+;;
+esac
+
 ;;
 *)
 ldflags="$ldflags -L/system/lib"
