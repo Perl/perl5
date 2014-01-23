@@ -263,6 +263,15 @@ C<targethost>.
 The incompatible changes include no longer using xconfig.h, xlib, or
 Cross.pm, so canned config files and Makefiles will have to be updated.
 
+=item *
+
+Related to the above, there is now a way of specifying the location of sh
+(or equivalent) on the target system: C<targetsh>.
+
+For example, Android has its sh in /system/bin/sh, so if cross-compiling
+from a more normal Unixy system with sh in /bin/sh, "targetsh" would end
+up as /system/bin/sh, and "sh" as /bin/sh.
+
 =back
 
 =head1 Testing
