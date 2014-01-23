@@ -4930,6 +4930,11 @@ targetport (Cross.U):
 	This variable contains the number of a network port to be used to
 	connect to the host in targethost, if unset defaults to 22 for ssh.
 
+targetsh (Cross.U):
+	If cross-compiling, this variable contains the location of sh on the
+	target system.
+	If not, this will be the same as $sh.
+
 tbl (Loc.U):
 	This variable is defined but not used by Configure.
 	The value is the empty string and is not useful.
