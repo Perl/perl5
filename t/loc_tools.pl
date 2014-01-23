@@ -1,11 +1,12 @@
 # Common tools for test files files to find the locales which exist on the
-# system.
+# system.  Caller should have defined ok() for the unlikely event that setup
+# here fails, and should have verified that this isn't miniperl before calling
+# the functions.
 
 # Note that it's okay that some languages have their native names
 # capitalized here even though that's not "right".  They are lowercased
 # anyway later during the scanning process (and besides, some clueless
 # vendor might have them capitalized erroneously anyway).
-
 
 sub _trylocale {    # Adds the locale given by the first parameter to the list
                     # given by the 2nd iff the platform supports the locale,
@@ -57,13 +58,8 @@ sub _decode_encodings {
 sub find_locales {  # Returns an array of all the locales we found on the
                     # system
 
-
-    my $have_setlocale = 0;
-    eval {
-        require POSIX;
-        import POSIX ':locale_h';
-        $have_setlocale++;
-    };
+    use Config;;
+    my $have_setlocale = $Config{d_setlocale};
 
     # Visual C's CRT goes silly on strings of the form "en_US.ISO8859-1"
     # and mingw32 uses said silly CRT
@@ -78,6 +74,10 @@ sub find_locales {  # Returns an array of all the locales we found on the
     $have_setlocale = 0 if ($^O =~ /^uwin/);
 
     return unless $have_setlocale;
+
+    # Done this way in case this is 'required' in the caller before seeing if
+    # this is miniperl.
+    require POSIX; import POSIX 'locale_h';
 
     _trylocale("C", \@Locale);
     _trylocale("POSIX", \@Locale);
