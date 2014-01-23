@@ -1323,10 +1323,10 @@ EXTCONST U32 PL_charclass[];
 
 #else /* !USE_NEXT_CTYPE */
 
+#  define _LC_CAST U8
+
 #  if defined(CTYPE256) || (!defined(isascii) && !defined(HAS_ISASCII))
     /* For most other platforms */
-
-#    define _LC_CAST U8
 
 #    define isALPHA_LC(c)   _generic_LC(c, _CC_ALPHA, isalpha)
 #    define isALPHANUMERIC_LC(c)  _generic_LC(c, _CC_ALPHANUMERIC, isalnum)
