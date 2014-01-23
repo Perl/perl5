@@ -26,7 +26,7 @@ my $perl = defined $Config{usedl} ? '../miniperl' : '../perl';
 print $fh <<"EOT";
 PERL = $perl
 REALPERL = ../perl
-RUN = $Config{run}  # Used mainly cross-compilation setups.
+RUN =  # Used mainly cross-compilation setups.
 
 EOT
 

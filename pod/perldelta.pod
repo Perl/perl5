@@ -243,7 +243,25 @@ L</Platform Support> section, instead.
 
 =item *
 
-XXX
+The cross-compilation model has been renovated.
+There's several new options, and some backwards-incompatible changes:
+
+We now build binaries for miniperl and generate_uudmap to be used on the host, rather than running
+every miniperl call on the target; this means that, short of 'make test',
+we no longer need access to the target system once Configure is done.
+You can provide already-built binaries through the C<hostperl> and
+C<hostgenerate> options to Configure.
+
+Additionally, if targeting an EBCDIC platform from an ASCII host,
+or viceversa, you'll need to run Configure with C<-Uhostgenerate>, to
+indicate that generate_uudmap should be run on the target.
+
+Finally, there's also a way of having Configure end early, right after
+building the host binaries, by cross-compiling without specifying a
+C<targethost>.
+
+The incompatible changes include no longer using xconfig.h, xlib, or
+Cross.pm, so canned config files and Makefiles will have to be updated.
 
 =back
 

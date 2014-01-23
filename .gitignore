@@ -11,6 +11,17 @@ bug*.pl
 
 # Exists during ./Configure
 /UU
+/host
+
+# Tools for cross-compile remote testing:
+/Cross/from-adb-pull
+/Cross/from-scp
+/Cross/mkdir
+/Cross/run-adb-shell
+/Cross/run-ssh
+/Cross/to-adb-push
+/Cross/to-scp
+
 
 # files produced by './configure.gnu' on a Linux machine
 /Makefile

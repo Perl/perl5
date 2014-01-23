@@ -69,7 +69,7 @@ OPTIMIZE = $optimize
 
 .SUFFIXES: .c \$(OBJ_EXT)
 
-RUN = $run
+RUN =
 PERL = $perl
 
 !GROK!THIS!

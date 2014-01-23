@@ -1,13 +1,20 @@
 #!./miniperl -w
 
 use strict;
-if (@ARGV) {
+
+my $osname = $^O;
+my $file = 'lib/buildcustomize.pl';
+
+if ( @ARGV % 2 ) {
     my $dir = shift;
     chdir $dir or die "Can't chdir '$dir': $!";
     unshift @INC, 'lib';
 }
 
-my $file = 'lib/buildcustomize.pl';
+if ( @ARGV ) {
+    # Used during cross-compilation.
+    $osname = $ARGV[1];
+}
 
 # To clarify, this isn't the entire suite of modules considered "toolchain"
 # It's not even all modules needed to build ext/
@@ -68,6 +75,7 @@ print $fh <<"EOT" or $error = "Can't print to $file: $!";
 # Replace the first entry of \@INC ("lib") with the list of
 # directories we need.
 splice(\@INC, 0, 1, $inc);
+\$^O = '$osname';
 EOT
 
 if ($error) {

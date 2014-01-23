@@ -214,6 +214,9 @@ targetmkdir=''
 targetport=''
 to=''
 usecrosscompile=''
+hostperl=''
+hostgenerate=''
+hostosname=''
 extern_C=''
 mistrustnm=''
 usedevel=''
@@ -2871,6 +2874,55 @@ $define|true|[yY]*)
 	case "$croak" in
 	y) echo "Cannot continue, aborting." >&4; exit 1 ;;
 	esac
+    : compile a host miniperl and generate_uudmap, unless we got passed them
+    if $test "X$hostperl" = X; then
+      echo "Building host miniperl and generate_uudmap binaries" >&4
+      before_host=`pwd`
+      cd ..
+      cd $src
+      src=`pwd`
+      test -d $src/host || mkdir $src/host
+      cd $src/host && rm -rf ./*
+      $src/Configure -des -Dusedevel -Dmksymlinks
+      $make miniperl
+      case "$hostgenerate" in
+      '') $make generate_uudmap
+          hostgenerate=$src/host/generate_uudmap      
+          ;;
+       "$undef") hostgenerate=''
+          ;;
+      esac
+      hostperl=$src/host/miniperl
+      cd $before_host
+    fi
+    hostosname=`$hostperl -le 'print $^O'`
+    ;;
+*)
+    usecrosscompile='undef'
+    ;;
+esac
+
+: Define -Dtargethost=somecomputer to run compiled tests on another machine
+case "$targethost" in
+    '') echo "Checking for cross-compile" >&4
+    case "$usecrosscompile$multiarch" in
+       *$define*) echo "Skipping the try tests in the rest of Configure as no targethost was defined when cross-compiling" >&4
+         if [ -f Makefile ]; then
+           echo " "
+           echo "Now you must ensure config.sh, config.h and the generated headers exist and run a $make."
+         else
+           echo "Configure done."
+         fi
+       exit 0
+       ;;
+     *) echo "No targethost for running compiler tests against defined, running locally" >&4
+        run=''
+        to=:
+        from=:
+        ;;
+    esac
+    ;;
+    *) echo "Using targethost $targethost." >&4
 	case "$src" in
 	/*) run=$src/Cross/run
 	    targetmkdir=$src/Cross/mkdir
@@ -2919,10 +2971,18 @@ $define|true|[yY]*)
 	ssh|rsh)
 	    cat >$run <<EOF
 #!/bin/sh
+env=''
 case "\$1" in
 -cwd)
   shift
   cwd=\$1
+  shift
+  ;;
+esac
+case "\$1" in
+-env)
+  shift
+  env=\$1
   shift
   ;;
 esac
@@ -2932,7 +2992,7 @@ esac
 exe=\$1
 shift
 $to \$exe
-$targetrun -p $targetport -l $targetuser $targethost "cd \$cwd && ./\$exe \$@"
+$targetrun -p $targetport -l $targetuser $targethost "cd \$cwd && \$env \$exe \$@"
 EOF
 	    ;;
 	*)  echo "Unknown targetrun '$targetrun'" >&4
@@ -2960,11 +3020,11 @@ do
   case "\$f" in
   /*)
     $targetmkdir \`dirname \$f\`
-    $targetto -P $targetport $q \$f $targetuser@$targethost:\$f            || exit 1
+    $targetto -P $targetport -r $q \$f $targetuser@$targethost:\$f            || exit 1
     ;;
   *)
     $targetmkdir $targetdir/\`dirname \$f\`
-    $targetto -P $targetport $q \$f $targetuser@$targethost:$targetdir/\$f || exit 1
+    $targetto -P $targetport -r $q \$f $targetuser@$targethost:$targetdir/\$f  2>/dev/null || exit 1
     ;;
   esac
 done
@@ -23380,6 +23440,9 @@ html1dir='$html1dir'
 html1direxp='$html1direxp'
 html3dir='$html3dir'
 html3direxp='$html3direxp'
+hostgenerate='$hostgenerate'
+hostperl='$hostperl'
+hostosname='$hostosname'
 i16size='$i16size'
 i16type='$i16type'
 i32size='$i32size'

@@ -2945,6 +2945,24 @@ hint (Oldconfig.U):
 	Gives the type of hints used for previous answers. May be one of
 	"default", "recommended" or "previous".
 
+hostperl (Cross.U)
+	This variable contains the path to a miniperl binary that can be
+	run on the host OS when cross-compiling.  Useful and available only
+	during Perl build.
+	Empty string '' if not cross-compiling.
+
+hostgenerate (Cross.U)
+	This variable contains the path to a generate_uudmap binary that
+	can be run on the host OS when cross-compiling.  Useful and
+	available only during Perl build.
+	Empty string '' if not cross-compiling.
+
+hostosname (Cross.U)
+	This variable contains the original value of '$^O' for hostperl
+	when cross-compiling.  This is useful to pick the proper tools
+	when running build code in the host.
+	Empty string '' if not cross-compiling.
+
 hostcat (nis.U):
 	This variable contains a command that produces the text of the
 	/etc/hosts file.  This is normally "cat /etc/hosts", but can be
