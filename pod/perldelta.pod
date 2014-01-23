@@ -27,6 +27,16 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 PERL_DEBUG_READONLY_COW
+
+On some operating systems Perl can be compiled in such a way that any
+attempt to modify string buffers shared by multiple SVs will crash.  This
+way XS authors can test that their modules handle copy-on-write scalars
+correctly.  See L<perlguts/"Copy on Write"> for detail.
+
+This feature was actually added in 5.19.8, but was unintentionally omitted
+from its delta document.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
@@ -152,13 +162,15 @@ XXX Changes which significantly change existing files in F<pod/> go here.
 However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
 section.
 
-=head3 L<XXX>
+=head3 L<perlguts>
 
 =over 4
 
 =item *
 
-XXX Description of the change here
+New sections on L<Read-Only Values|perlguts/"Read-Only Values"> and
+L<Copy on Write|perlguts/"Copy on Write"> have been added.  They were
+actually added in 5.19.8 but accidentally omitted from its delta document.
 
 =back
 
