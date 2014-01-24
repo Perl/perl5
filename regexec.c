@@ -639,6 +639,8 @@ Perl_re_intuit_start(pTHX_
     /* Should be nonnegative! */
     SSize_t end_shift   = 0;
     char *s;
+    /* current lowest pos in string where the regex can start matching */
+    char *rx_origin = strpos;
     SV *check;
     char *t;
     const bool utf8_target = (sv && SvUTF8(sv)) ? 1 : 0; /* if no sv we have to assume bytes */
@@ -794,7 +796,7 @@ Perl_re_intuit_start(pTHX_
 	    }
 	}
     }
-    s = strpos;
+
     start_shift = prog->check_offset_min;  /* okay to underestimate on CC */
     end_shift = prog->check_end_shift;
 
@@ -805,8 +807,10 @@ Perl_re_intuit_start(pTHX_
 #endif
 
   restart:
-    /* Find a possible match in the region s..strend by looking for
-       the "check" substring in the region corrected by start/end_shift. */
+    /* Find a candidate regex origin in the region rx_origin..strend
+     * by looking for the "check" substring in that region, corrected by
+     * start/end_shift.
+     */
     
     {
         U8* start_point;
@@ -817,7 +821,7 @@ Perl_re_intuit_start(pTHX_
                 "  At restart: s=%"IVdf" Check offset min: %"IVdf
                 " Start shift: %"IVdf" End shift %"IVdf
                 " Real End Shift: %"IVdf"\n",
-                (IV)(s - i_strpos),
+                (IV)(rx_origin - i_strpos),
                 (IV)prog->check_offset_min,
                 (IV)start_shift,
                 (IV)end_shift,
@@ -825,10 +829,10 @@ Perl_re_intuit_start(pTHX_
         });
         
         if (prog->intflags & PREGf_CANY_SEEN) {
-            start_point= (U8*)(s + start_shift);
+            start_point= (U8*)(rx_origin + start_shift);
             end_point= (U8*)(strend - end_shift);
         } else {
-	    start_point= HOP3(s, start_shift, strend);
+	    start_point= HOP3(rx_origin, start_shift, strend);
             end_point= HOP3(strend, -end_shift, strbeg);
 	}
 
@@ -970,7 +974,7 @@ Perl_re_intuit_start(pTHX_
 			", trying floating at offset %ld...\n",
 			(long)(HOP3c(saved_s, 1, strend) - i_strpos)));
 		    other_last = HOP3c(last1, 1, strend);
-		    s = HOP4c(last, 1 - prog->anchored_offset, strbeg, strend);
+		    rx_origin = HOP4c(last, 1 - prog->anchored_offset, strbeg, strend);
 		    goto restart;
 		}
 		else {
@@ -1069,7 +1073,7 @@ Perl_re_intuit_start(pTHX_
 		    ", trying anchored starting at offset %ld...\n",
 		    (long)(saved_s + 1 - i_strpos)));
 		other_last = last; /* highest failure */
-		s = HOP3c(t, 1, strend);
+		rx_origin = HOP3c(t, 1, strend);
 		goto restart;
 	    }
 	    else {
@@ -1148,7 +1152,7 @@ Perl_re_intuit_start(pTHX_
 		       than for "\n", so one should lower the limit for t? */
 		    DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "  Found /%s^%s/m, restarting lookup for check-string at offset %ld...\n",
 			PL_colors[0], PL_colors[1], (long)(t + 1 - i_strpos)));
-		    other_last = strpos = s = t + 1;
+		    other_last = strpos = rx_origin = t + 1;
 		    goto restart;
 		}
 		t++;
@@ -1296,9 +1300,10 @@ Perl_re_intuit_start(pTHX_
 		    }
 		    if (!check)
 			goto giveup;
+                    rx_origin = s;
 		    DEBUG_EXECUTE_r( PerlIO_printf(Perl_debug_log,
 				"  Looking for %s substr starting at offset %ld...\n",
-				 what, (long)(s + start_shift - i_strpos)) );
+				 what, (long)(rx_origin + start_shift - i_strpos)) );
 		    goto restart;
 		}
 		/* Have both, check_string is floating */
