@@ -11,12 +11,13 @@ locale - Perl pragma to use or avoid POSIX locales for built-in operations
 
 =head1 SYNOPSIS
 
-    @x = sort @y;	# Unicode sorting order
+    @x = sort @y;      # Native-platform/Unicode code point sort order
     {
         use locale;
-        @x = sort @y;   # Locale-defined sorting order
+        @x = sort @y;  # Locale-defined sort order
     }
-    @x = sort @y;	# Unicode sorting order again
+    @x = sort @y;      # Native-platform/Unicode code point sort order
+                       # again
 
 =head1 DESCRIPTION
 
@@ -37,8 +38,8 @@ Unicode and locales, including UTF-8 locales.
     use locale ':not_characters';
     use open ":locale";           # Convert I/O to/from Unicode
     use POSIX qw(locale_h);       # Import the LC_ALL constant
-    setlocale(LC_ALL, "");        # Required for the next statement
-                                  # to take effect
+    setlocale(LC_ALL, "");        # Generally required for the next
+                                  # statement to take effect
     printf "%.2f\n", 12345.67'    # Locale-defined formatting
     @x = sort @y;                 # Unicode-defined sorting order.
                                   # (Note that you will get better
