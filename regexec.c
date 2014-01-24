@@ -943,17 +943,13 @@ Perl_re_intuit_start(pTHX_
  
 		/* On end-of-str: see comment below. */
 		must = utf8_target ? prog->anchored_utf8 : prog->anchored_substr;
-		if (must == &PL_sv_undef) {
-		    s = (char*)NULL;
-		    DEBUG_r(must = prog->anchored_utf8);	/* for debug */
-		}
-		else
-		    s = fbm_instr(
-			(unsigned char*)t,
-			HOP3(last1 + SvCUR(must), -(SvTAIL(must)!=0), strbeg),
-			must,
-			multiline ? FBMrf_MULTILINE : 0
-		    );
+                assert(SvPOK(must));
+                s = fbm_instr(
+                    (unsigned char*)t,
+                    HOP3(last1 + SvCUR(must), -(SvTAIL(must)!=0), strbeg),
+                    must,
+                    multiline ? FBMrf_MULTILINE : 0
+                );
                 DEBUG_EXECUTE_r({
                     RE_PV_QUOTED_DECL(quoted, utf8_target, PERL_DEBUG_PAD_ZERO(0),
                         SvPVX_const(must), RE_SV_DUMPLEN(must), 30);
@@ -1040,18 +1036,14 @@ Perl_re_intuit_start(pTHX_
 		s = other_last;
 
 	    must = utf8_target ? prog->float_utf8 : prog->float_substr;
-	    if (must == &PL_sv_undef) {
-		s = (char*)NULL;
-		DEBUG_r(must = prog->float_utf8);	/* for debug message */
-	    }
-	    else
-                /* fbm_instr() takes into account exact value of end-of-str
-                   if the check is SvTAIL(ed).  Since false positives are OK,
-                   and end-of-str is not later than strend we are OK. */
-		s = fbm_instr((unsigned char*)s,
-			      (unsigned char*)last + SvCUR(must)
-				  - (SvTAIL(must)!=0),
-			      must, multiline ? FBMrf_MULTILINE : 0);
+            assert(SvPOK(must));
+            /* fbm_instr() takes into account exact value of end-of-str
+               if the check is SvTAIL(ed).  Since false positives are OK,
+               and end-of-str is not later than strend we are OK. */
+            s = fbm_instr((unsigned char*)s,
+                          (unsigned char*)last + SvCUR(must)
+                              - (SvTAIL(must)!=0),
+                          must, multiline ? FBMrf_MULTILINE : 0);
 	    DEBUG_EXECUTE_r({
 	        RE_PV_QUOTED_DECL(quoted, utf8_target, PERL_DEBUG_PAD_ZERO(0),
 	            SvPVX_const(must), RE_SV_DUMPLEN(must), 30);
