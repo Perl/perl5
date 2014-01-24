@@ -3445,12 +3445,8 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
         }
     }
     else /* an EXACTFish node */
-         if ((is_utf8_pat
-                    && is_MULTI_CHAR_FOLD_utf8_safe(pat,
-                                                    pat + STR_LEN(text_node)))
-             || (!is_utf8_pat
-                    && is_MULTI_CHAR_FOLD_latin1_safe(pat,
-                                                    pat + STR_LEN(text_node))))
+        if ((is_utf8_pat && is_MULTI_CHAR_FOLD_utf8(pat))
+             || (!is_utf8_pat && is_MULTI_CHAR_FOLD_latin1(pat)))
     {
         /* Multi-character folds require more context to sort out.  Also
          * PL_utf8_foldclosures used below doesn't handle them, so have to be
