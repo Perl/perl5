@@ -10785,8 +10785,10 @@ S_alloc_maybe_populate_EXACT(pTHX_ RExC_state_t *pRExC_state,
      * If <len> is zero, the function assumes that the node is to contain only
      * the single character given by <code_point> and calculates what <len>
      * should be.  In pass 1, it sizes the node appropriately.  In pass 2, it
-     * additionally will populate the node's STRING with <code_point>, if <len>
-     * is 0.  In both cases <*flagp> is appropriately set
+     * additionally will populate the node's STRING with <code_point> or its
+     * fold if folding.
+     *
+     * In both cases <*flagp> is appropriately set
      *
      * It knows that under FOLD, the Latin Sharp S and UTF characters above
      * 255, must be folded (the former only when the rules indicate it can
