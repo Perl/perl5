@@ -10813,19 +10813,20 @@ S_alloc_maybe_populate_EXACT(pTHX_ RExC_state_t *pRExC_state,
                 uvchr_to_utf8( character, code_point);
                 len = UTF8SKIP(character);
             }
-        }
-        else if (! FOLD
-                 || code_point != LATIN_SMALL_LETTER_SHARP_S
-                 || ASCII_FOLD_RESTRICTED
-                 || ! AT_LEAST_UNI_SEMANTICS)
+        } /* Else pattern isn't UTF8.  We only fold the sharp s, when
+             appropriate */
+        else if (UNLIKELY(code_point == LATIN_SMALL_LETTER_SHARP_S)
+                 && FOLD
+                 && AT_LEAST_UNI_SEMANTICS
+                 && ! ASCII_FOLD_RESTRICTED)
         {
-            *character = (U8) code_point;
-            len = 1;
-        }
-        else {
             *character = 's';
             *(character + 1) = 's';
             len = 2;
+        }
+        else {
+            *character = (U8) code_point;
+            len = 1;
         }
     }
 
