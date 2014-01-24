@@ -125,6 +125,12 @@ XXX
 
 =item *
 
+L<List::Util> has been upgraded from version 1.37 to 1.38.
+
+A backwards-compatibility issue with older perls has been fixed.  [cpan #92363]
+
+=item *
+
 L<warnings> has been upgraded from version 1.21 to 1.22.
 
 C<< use warnings "FATAL"; >> now implies C<< "all" >>, and similarly

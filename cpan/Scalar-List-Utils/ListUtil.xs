@@ -66,18 +66,6 @@ my_sv_copypv(pTHX_ SV *const dsv, SV *const ssv)
 #  define croak_no_modify() croak("%s", PL_no_modify)
 #endif
 
-#if PERL_VERSION < 12
-static void Perl_ck_warner(pTHX_ U32 err, const char* pat, ...)
-{
-    if (Perl_ckwarn(aTHX_ err)) {
-        va_list args;
-        va_start(args, pat);
-        vwarner(err, pat, &args);
-        va_end(args);
-    }
-}
-#endif
-
 MODULE=List::Util       PACKAGE=List::Util
 
 void
@@ -951,7 +939,8 @@ CODE:
     if (!SvROK(sv))
         croak("Can't unweaken a nonreference");
     else if (!SvWEAKREF(sv)) {
-        Perl_ck_warner(aTHX_ packWARN(WARN_MISC), "Reference is not weak");
+        if(ckWARN(WARN_MISC))
+            warn("Reference is not weak");
         return;
     }
     else if (SvREADONLY(sv)) croak_no_modify();

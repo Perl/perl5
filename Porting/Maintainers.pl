@@ -976,7 +976,7 @@ use File::Glob qw(:case);
     },
 
     'Scalar-List-Utils' => {
-        'DISTRIBUTION' => 'PEVANS/Scalar-List-Utils-1.37.tar.gz',
+        'DISTRIBUTION' => 'PEVANS/Scalar-List-Utils-1.38.tar.gz',
         'FILES'    => q[cpan/Scalar-List-Utils],
     },
 
