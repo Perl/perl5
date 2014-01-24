@@ -13849,11 +13849,25 @@ sub compile_perl() {
     my $any_folds = $perl->add_match_table("_Perl_Any_Folds",
                     Description => "Code points that particpate in some fold",
                     );
-    #
+
+    my $folds_to_multi_char = $perl->add_match_table(
+         "_Perl_Folds_To_Multi_Char",
+         Description =>
+              "Code points whose fold is a string of more than one character",
+    );
+
     foreach my $range (property_ref('Case_Folding')->ranges) {
-        $any_folds->add_range($range->start, $range->end);
-        foreach my $hex_code_point (split " ", $range->value) {
-            my $code_point = hex $hex_code_point;
+        my $start = $range->start;
+        my $end = $range->end;
+        $any_folds->add_range($start, $end);
+
+        my @hex_code_points = split " ", $range->value;
+        if (@hex_code_points > 1) {
+            $folds_to_multi_char->add_range($start, $end);
+        }
+
+        foreach my $i (0 .. @hex_code_points - 1) {
+            my $code_point = hex $hex_code_points[$i];
             $any_folds->add_range($code_point, $code_point);
         }
     }

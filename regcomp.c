@@ -6080,9 +6080,8 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 	PL_Latin1 = _new_invlist_C_array(Latin1_invlist);
 	PL_UpperLatin1 = _new_invlist_C_array(UpperLatin1_invlist);
         PL_utf8_foldable = _new_invlist_C_array(_Perl_Any_Folds_invlist);
-
         PL_HasMultiCharFold =
-                        _new_invlist_C_array(_Perl_Multi_Char_Folds_invlist);
+                       _new_invlist_C_array(_Perl_Folds_To_Multi_Char_invlist);
     }
 #endif
 

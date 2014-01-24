@@ -111,11 +111,6 @@ for my $i (0 .. @$folds_ref - 1) {
     }
 }
 
-sub _Perl_Multi_Char_Folds {
-    @has_multi_char_fold = sort { $a <=> $b } @has_multi_char_fold;
-    return mk_invlist_from_cp_list(\@has_multi_char_fold);
-}
-
 sub _Perl_Non_Final_Folds {
     @is_non_final_fold = sort { $a <=> $b } @is_non_final_fold;
     return mk_invlist_from_cp_list(\@is_non_final_fold);
@@ -175,7 +170,7 @@ for my $prop (qw(
                 XPosixXDigit
                 _Perl_Any_Folds
                 &NonL1_Perl_Non_Final_Folds
-                &_Perl_Multi_Char_Folds
+                _Perl_Folds_To_Multi_Char
                 &UpperLatin1
                 _Perl_IDStart
                 _Perl_IDCont

@@ -9171,7 +9171,7 @@ static const UV NonL1_Perl_Non_Final_Folds_invlist[] = {
 
 #ifndef PERL_IN_XSUB_RE
 
-static const UV _Perl_Multi_Char_Folds_invlist[] = {
+static const UV _Perl_Folds_To_Multi_Char_invlist[] = {
 	59,	/* Number of elements */
 	148565664, /* Version and data structure type */
 	1,	/* 0 if the list starts at 0;
