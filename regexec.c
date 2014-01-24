@@ -931,9 +931,10 @@ Perl_re_intuit_start(pTHX_
 		    NOOP;
 		else
 		    t = strpos;
-		t = HOP3c(t, prog->anchored_offset, strend);
-		if (t < other_last)	/* These positions already checked */
-		    t = other_last;
+
+		s = HOP3c(t, prog->anchored_offset, strend);
+		if (s < other_last)	/* These positions already checked */
+		    s = other_last;
 
                 assert(prog->minlen > prog->anchored_offset);
 		last2 = last1 = HOP3c(strend,
@@ -945,7 +946,7 @@ Perl_re_intuit_start(pTHX_
 		must = utf8_target ? prog->anchored_utf8 : prog->anchored_substr;
                 assert(SvPOK(must));
                 s = fbm_instr(
-                    (unsigned char*)t,
+                    (unsigned char*)s,
                     HOP3(last1 + SvCUR(must), -(SvTAIL(must)!=0), strbeg),
                     must,
                     multiline ? FBMrf_MULTILINE : 0
