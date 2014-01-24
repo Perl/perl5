@@ -191,6 +191,33 @@ sub find_locales {  # Returns an array of all the locales we found on the
 
 }
 
+sub is_locale_utf8 ($) { # Return a boolean as to if core Perl thinks the input
+                        # is a UTF-8 locale
+    my $locale = shift;
+
+    # The locale name doesn't necessarily have to have "utf8" in it to be a
+    # UTF-8 locale, but it works, mostly.
+    return $locale =~ /UTF-?8/i;
+}
+
+sub find_utf8_locale (;$) { # Return the name of locale that core Perl thinks
+                            # is a UTF-8 locale.  Optional second parameter is
+                            # a reference to a list of locales to try; if
+                            # omitted, this tries all locales it can find on
+                            # the platform
+    my $locales_ref = shift;
+    if (! defined $locales_ref) {
+        my @locales = find_locales();
+        $locales_ref = \@locales;
+    }
+
+    foreach my $locale (@$locales_ref) {
+        return $locale if is_locale_utf8($locale);
+    }
+
+    return;
+}
+
 1
 
 # Format of data is: locale_name, language_codes, country_codes, encodings
