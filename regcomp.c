@@ -10801,7 +10801,20 @@ S_alloc_maybe_populate_EXACT(pTHX_ RExC_state_t *pRExC_state,
 
     if (! len_passed_in) {
         if (UTF) {
-            if (FOLD && (! LOC || code_point > 255)) {
+            if (UNI_IS_INVARIANT(code_point)) {
+                if (LOC || ! FOLD) {    /* /l defers folding until runtime */
+                    *character = (U8) code_point;
+                }
+                else { /* Here is /i and not /l (toFOLD() is defined on just
+                          ASCII, which isn't the same thing as INVARIANT on
+                          EBCDIC, but it works there, as the extra invariants
+                          fold to themselves) */
+                    *character = toFOLD((U8) code_point);
+                }
+                len = 1;
+            }
+            else if (FOLD && (! LOC || code_point > 255)) {
+                /* Folding, and ok to do so now */
                 _to_uni_fold_flags(code_point,
                                    character,
                                    &len,
@@ -10810,6 +10823,13 @@ S_alloc_maybe_populate_EXACT(pTHX_ RExC_state_t *pRExC_state,
                                                      : (ASCII_FOLD_RESTRICTED)
                                                        ? FOLD_FLAGS_NOMIX_ASCII
                                                        : 0));
+            }
+            else if (code_point <= MAX_UTF8_TWO_BYTE) {
+
+                /* Not folding this cp, and can output it directly */
+                *character = UTF8_TWO_BYTE_HI(code_point);
+                *(character + 1) = UTF8_TWO_BYTE_LO(code_point);
+                len = 2;
             }
             else {
                 uvchr_to_utf8( character, code_point);
