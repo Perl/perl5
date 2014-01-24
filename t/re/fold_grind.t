@@ -413,7 +413,7 @@ sub pairs (@) {
 
 my @charsets = qw(d u a aa);
 if($Config{d_setlocale}) {
-    my $current_locale = POSIX::setlocale( &POSIX::LC_ALL, "C") // "";
+    my $current_locale = POSIX::setlocale( &POSIX::LC_CTYPE, "C") // "";
     if ($current_locale eq 'C') {
         require locale; import locale;
 
