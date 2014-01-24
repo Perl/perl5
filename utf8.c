@@ -4061,7 +4061,7 @@ L<http://www.unicode.org/unicode/reports/tr21/> (Case Mappings).
  *  0 for as-documented above
  *  FOLDEQ_UTF8_NOMIX_ASCII meaning that if a non-ASCII character folds to an
 			    ASCII one, to not match
- *  FOLDEQ_UTF8_LOCALE	    meaning that locale rules are to be used for code
+ *  FOLDEQ__LOCALE         meaning that locale rules are to be used for code
  *			    points below 256; unicode rules for above 255; and
  *			    folds that cross those boundaries are disallowed,
  *			    like the NOMIX_ASCII option
@@ -4087,7 +4087,7 @@ Perl_foldEQ_utf8_flags(pTHX_ const char *s1, char **pe1, UV l1, bool u1, const c
 
     PERL_ARGS_ASSERT_FOLDEQ_UTF8_FLAGS;
 
-    assert( ! ((flags & (FOLDEQ_UTF8_NOMIX_ASCII | FOLDEQ_UTF8_LOCALE))
+    assert( ! ((flags & (FOLDEQ_UTF8_NOMIX_ASCII | FOLDEQ_LOCALE))
            && (flags & (FOLDEQ_S1_ALREADY_FOLDED | FOLDEQ_S2_ALREADY_FOLDED))));
     /* The algorithm is to trial the folds without regard to the flags on
      * the first line of the above assert(), and then see if the result
@@ -4160,7 +4160,7 @@ Perl_foldEQ_utf8_flags(pTHX_ const char *s1, char **pe1, UV l1, bool u1, const c
 		/* If in locale matching, we use two sets of rules, depending
 		 * on if the code point is above or below 255.  Here, we test
 		 * for and handle locale rules */
-		if ((flags & FOLDEQ_UTF8_LOCALE)
+		if ((flags & FOLDEQ_LOCALE)
 		    && (! u1 || ! UTF8_IS_ABOVE_LATIN1(*p1)))
 		{
 		    /* There is no mixing of code points above and below 255. */
@@ -4205,7 +4205,7 @@ Perl_foldEQ_utf8_flags(pTHX_ const char *s1, char **pe1, UV l1, bool u1, const c
 		n2 = UTF8SKIP(f2);
 	    }
 	    else {
-		if ((flags & FOLDEQ_UTF8_LOCALE)
+		if ((flags & FOLDEQ_LOCALE)
 		    && (! u2 || ! UTF8_IS_ABOVE_LATIN1(*p2)))
 		{
 		    /* Here, the next char in s2 is < 256.  We've already

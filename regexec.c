@@ -1538,7 +1538,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 
     case EXACTFL:
         if (is_utf8_pat || utf8_target) {
-            utf8_fold_flags = FOLDEQ_UTF8_LOCALE;
+            utf8_fold_flags = FOLDEQ_LOCALE;
             goto do_exactf_utf8;
         }
         fold_array = PL_fold_locale;
@@ -4244,7 +4244,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             RX_MATCH_TAINTED_on(reginfo->prog);
             folder = foldEQ_locale;
             fold_array = PL_fold_locale;
-	    fold_utf8_flags = FOLDEQ_UTF8_LOCALE;
+	    fold_utf8_flags = FOLDEQ_LOCALE;
 	    goto do_exactf;
 
 	case EXACTFU_SS:         /*  /\x{df}/iu   */
@@ -4799,7 +4799,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    folder = foldEQ_locale;
 	    fold_array = PL_fold_locale;
 	    type = REFFL;
-	    utf8_fold_flags = FOLDEQ_UTF8_LOCALE;
+	    utf8_fold_flags = FOLDEQ_LOCALE;
 	    goto do_nref;
 
 	case NREFFA:  /*  /\g{name}/iaa  */
@@ -4843,7 +4843,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             RX_MATCH_TAINTED_on(reginfo->prog);
 	    folder = foldEQ_locale;
 	    fold_array = PL_fold_locale;
-	    utf8_fold_flags = FOLDEQ_UTF8_LOCALE;
+	    utf8_fold_flags = FOLDEQ_LOCALE;
 	    goto do_ref;
 
 	case REFFA:  /*  /\1/iaa  */
@@ -6947,7 +6947,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
 
     case EXACTFL:
         RXp_MATCH_TAINTED_on(prog);
-	utf8_flags = FOLDEQ_UTF8_LOCALE;
+	utf8_flags = FOLDEQ_LOCALE;
 	goto do_exactf;
 
     case EXACTF:   /* This node only generated for non-utf8 patterns */
