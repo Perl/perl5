@@ -5253,7 +5253,14 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    SET_reg_curpm(rex_sv);
 	    rex = ReANY(rex_sv);
 	    rexi = RXi_GET(rex);
-	    regcpblow(ST.cp);
+            {
+                /* preserve $^R across LEAVE's. See Bug 121070. */
+                SV *save_sv= GvSV(PL_replgv);
+                SvREFCNT_inc(save_sv);
+                regcpblow(ST.cp); /* LEAVE in disguise */
+                sv_setsv(GvSV(PL_replgv), save_sv);
+                SvREFCNT_dec(save_sv);
+            }
 	    cur_eval = ST.prev_eval;
 	    cur_curlyx = ST.prev_curlyx;
 
@@ -6702,6 +6709,10 @@ yes:
 	 * When popping the save stack, all these locals would be undone;
 	 * bypass this by setting the outermost saved $^R to the latest
 	 * value */
+        /* I dont know if this is needed or works properly now.
+         * see code related to PL_replgv elsewhere in this file.
+         * Yves
+         */
 	if (oreplsv != GvSV(PL_replgv))
 	    sv_setsv(oreplsv, GvSV(PL_replgv));
     }

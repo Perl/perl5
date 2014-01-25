@@ -22,7 +22,7 @@ BEGIN {
 }
 
 
-plan tests => 525;  # Update this when adding/deleting tests.
+plan tests => 527;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -340,8 +340,15 @@ sub run_tests {
             is("@ctl_n", "1 2 undef", 'Bug 56194');
             is("@plus", "1 2 undef", 'Bug 56194');
             is($str,
-               "\$1 = undef, \$2 = undef, \$3 = undef, \$4 = undef, \$5 = undef, \$^R = undef",
-               'Bug 56194');
+               "\$1 = undef, \$2 = undef, \$3 = undef, \$4 = undef, \$5 = undef, \$^R = 3",
+               'Bug 56194 ($^R tweaked by 121070)');
+       }
+       {
+            undef $^R;
+            "abcd"=~/(?<Char>.)(?&Char)(?{ 42 })/;
+            is("$^R", 42, 'Bug 121070 - use of (?&Char) should not clobber $^R');
+            "abcd"=~/(?<Char>.)(?&Char)(?{ 42 })(?{ 43 })/;
+            is("$^R", 43, 'related to 121070 - use of (?&Char) should not clobber $^R');
        }
     }
 
