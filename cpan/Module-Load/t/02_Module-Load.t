@@ -2,6 +2,7 @@
 
 use Test::More;
 use strict;
+use warnings;
 
 #
 # Module::Load; test new features:
@@ -20,6 +21,7 @@ my ($afx, $cnt, $r, $tcode) = ('TestXYZ_', 0);
 sub _reset{
     undef %{Data::Dumper::};
     undef %{XYZ::Module::};
+    no warnings q[uninitialized];
     eval "undef %{$afx$cnt::}";
     delete $INC{'Data/Dumper.pm'};
 }
@@ -237,6 +239,8 @@ subtest 'load_remote' => sub{
 	    load_remote("XYZ::Module","______","Data::Dumper");
 	    XYZ::Module::Dumper($WORLD);');
     cant_locate();
+
+    done_testing();
 };
 
 subtest 'autoload_remote' => sub{
