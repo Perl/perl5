@@ -1456,6 +1456,8 @@ test_prep test-prep: test_prep_pre \$(MINIPERL_EXE) \$(unidatafiles) \$(PERL_EXE
 	$to *.h
 # --- For t/x2p/s2p.t
 	$to x2p
+# --- For t/TEST
+	$to config.sh
 # --- For lib/diagnostics.t with -Duseshrplib
 	$to \$(PERL_EXE)
 	cd t && (rm -f \$(PERL_EXE); \$(LNS) ../\$(PERL_EXE) \$(PERL_EXE)) && cd ..
