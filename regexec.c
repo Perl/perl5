@@ -927,16 +927,17 @@ Perl_re_intuit_start(pTHX_
                 last = HOP4c(s, prog->anchored_offset-start_shift,
                             strbeg, strend);
 
-		t = s - prog->check_offset_max;
-		if (s - strpos > prog->check_offset_max  /* signed-corrected t > strpos */
+		rx_origin = s - prog->check_offset_max;
+                /* signed-corrected rx_origin > strpos */
+		if (s - strpos > prog->check_offset_max
 		    && (!utf8_target
-			|| ((t = (char*)reghopmaybe3((U8*)s, -(prog->check_offset_max), (U8*)strpos))
-			    && t > strpos)))
+			|| ((rx_origin = (char*)reghopmaybe3((U8*)s, -(prog->check_offset_max), (U8*)strpos))
+			    && rx_origin > strpos)))
 		    NOOP;
 		else
-		    t = strpos;
+		    rx_origin = strpos;
 
-		s = HOP3c(t, prog->anchored_offset, strend);
+		s = HOP3c(rx_origin, prog->anchored_offset, strend);
 		if (s < other_last)	/* These positions already checked */
 		    s = other_last;
 
@@ -980,10 +981,10 @@ Perl_re_intuit_start(pTHX_
 		else {
 		    DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, " at offset %ld...\n",
 			  (long)(s - i_strpos)));
-		    t = HOP3c(s, -prog->anchored_offset, strbeg);
+		    rx_origin = HOP3c(s, -prog->anchored_offset, strbeg);
 		    other_last = HOP3c(s, 1, strend);
 		    s = saved_s;
-		    if (t == strpos)
+		    if (rx_origin == strpos)
 			goto try_at_start;
 		    goto try_at_offset;
 		}
@@ -995,10 +996,10 @@ Perl_re_intuit_start(pTHX_
 	    SV* must;
 
             /* we've just matched a fixed substr, which is start_shift chars
-             * into the regex; so calculate t, the current origin of the
-             * regex */
+             * into the regex; so calculate rx_origin, the current origin
+             * of the regex */
 
-	    t = HOP3c(s, -start_shift, strbeg);
+	    rx_origin = HOP3c(s, -start_shift, strbeg);
 
             /* last1 is the absolute highest point that the floating substr
              * could start in the string, ignoring any constraints from the
@@ -1021,22 +1022,22 @@ Perl_re_intuit_start(pTHX_
             /* last is the highest point that the floating substr could
              * start, *given* any constraints from the earlier fixed
              * match. This constraint is that the floating string starts
-             * <= float_max_offset chars from the regex origin (t).
+             * <= float_max_offset chars from the regex origin (rx_origin).
              * If this value is less than last1, use it instead.
              */
-            assert(t <= last1);
+            assert(rx_origin <= last1);
             last = 
                 /* this condition handles the offset==infinity case, and
                  * is a short-cut otherwise. Although it's comparing a
                  * byte offset to a char length, it does so in a safe way,
                  * meaning it errs towards doing the accurate HOP3 rather
                  * than just using last1 */
-                (last1 - t) < prog->float_max_offset
+                (last1 - rx_origin) < prog->float_max_offset
                     ? last1
-                    : (char*)HOP3lim(t, prog->float_max_offset, last1);
+                    : (char*)HOP3lim(rx_origin, prog->float_max_offset, last1);
 
             /* set s to the minimum position the float string can start */
-	    s = HOP3c(t, prog->float_min_offset, strend);
+	    s = HOP3c(rx_origin, prog->float_min_offset, strend);
 	    if (s < other_last) /* skip previous failures */
 		s = other_last;
 
@@ -1073,7 +1074,7 @@ Perl_re_intuit_start(pTHX_
 		    ", trying anchored starting at offset %ld...\n",
 		    (long)(saved_s + 1 - i_strpos)));
 		other_last = last; /* highest failure */
-		rx_origin = HOP3c(t, 1, strend);
+		rx_origin = HOP3c(rx_origin, 1, strend);
 		goto restart;
 	    }
 	    else {
@@ -1084,7 +1085,7 @@ Perl_re_intuit_start(pTHX_
                  * above, changed the other_last assignment from s+1 to s.
                  * I've no idea what's right. DAPM */
 		s = saved_s;
-		if (t == strpos)
+		if (rx_origin == strpos)
 		    goto try_at_start;
 		goto try_at_offset;
 	    }
@@ -1092,31 +1093,34 @@ Perl_re_intuit_start(pTHX_
     }
 
     
-    t= (char*)HOP3( s, -prog->check_offset_max, strpos);
+    rx_origin = (char*)HOP3( s, -prog->check_offset_max, strpos);
         
     DEBUG_OPTIMISE_MORE_r(
         PerlIO_printf(Perl_debug_log, 
             "  Check-only match: offset min:%"IVdf" max:%"IVdf
-            " s:%"IVdf" t:%"IVdf" t-s:%"IVdf" strend-strpos:%"IVdf"\n",
+            " s:%"IVdf" rx_origin:%"IVdf" rx_origin-s:%"IVdf
+            " strend-strpos:%"IVdf"\n",
             (IV)prog->check_offset_min,
             (IV)prog->check_offset_max,
             (IV)(s-strpos),
-            (IV)(t-strpos),
-            (IV)(t-s),
+            (IV)(rx_origin-strpos),
+            (IV)(rx_origin-s),
             (IV)(strend-strpos)
         )
     );
 
-    if (s - strpos > prog->check_offset_max  /* signed-corrected t > strpos */
+    /* signed-corrected rx_origin > strpos */
+    if (s - strpos > prog->check_offset_max
         && (!utf8_target
-	    || ((t = (char*)reghopmaybe3((U8*)s, -prog->check_offset_max, (U8*) strpos))
-		 && t > strpos))) 
+	    || ((rx_origin = (char*)reghopmaybe3((U8*)s,
+                                    -prog->check_offset_max, (U8*) strpos))
+		 && rx_origin > strpos)))
     {
 	/* Fixed substring is found far enough so that the match
 	   cannot start at strpos. */
       try_at_offset:
         DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "  try at offset...\n"));
-	if (ml_anch && t[-1] != '\n') {
+	if (ml_anch && rx_origin[-1] != '\n') {
 	    /* Eventually fbm_*() should handle this, but often
 	       anchored_offset is not 0, so this check will not be wasted. */
 	    /* XXXX In the code below we prefer to look for "^" even in
@@ -1124,6 +1128,7 @@ Perl_re_intuit_start(pTHX_
 	       beyond the found float position.  These pessimizations
 	       are historical artefacts only.  */
 	  find_anchor:
+            t = rx_origin;
 	    while (t < strend - prog->minlen) {
 		if (*t == '\n') {
 		    if (t < check_at - prog->check_offset_min) {
@@ -1165,7 +1170,7 @@ Perl_re_intuit_start(pTHX_
 	    DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "  Starting position does not contradict /%s^%s/m...\n",
 			PL_colors[0], PL_colors[1]));
 	}
-	s = t;
+	s = rx_origin;
       set_useful:
 	++BmUSEFUL(utf8_target ? prog->check_utf8 : prog->check_substr);	/* hooray/5 */
     }
@@ -1182,7 +1187,7 @@ Perl_re_intuit_start(pTHX_
 	    /* May be due to an implicit anchor of m{.*foo}  */
 	    && !(prog->intflags & PREGf_IMPLICIT))
 	{
-	    t = strpos;
+	    rx_origin = strpos;
 	    goto find_anchor;
 	}
 	DEBUG_EXECUTE_r( if (ml_anch)
@@ -1321,12 +1326,13 @@ Perl_re_intuit_start(pTHX_
 	    /* Another way we could have checked stclass at the
                current position only: */
 	    if (ml_anch) {
-		s = t = t + 1;
+		s = rx_origin = t + 1;
 		if (!check)
 		    goto giveup;
 		DEBUG_EXECUTE_r( PerlIO_printf(Perl_debug_log,
 			  "  Looking for /%s^%s/m starting at offset %ld...\n",
-			  PL_colors[0], PL_colors[1], (long)(t - i_strpos)) );
+			  PL_colors[0], PL_colors[1],
+                          (long)(rx_origin - i_strpos)) );
 		goto try_at_offset;
 	    }
 	    if (!(utf8_target ? prog->float_utf8 : prog->float_substr))	/* Could have been deleted */
