@@ -74,7 +74,7 @@ in general, if you can connect your device to the host using a USB port,
 or if you don't feel like installing an sshd app on your device,
 you may want to use adb, although you may be forced to switch to ssh if
 your device is not rooted and you're unlucky -- more on that later.
-Alternatively, if you're cross-compiling for an emulator, you'll have to
+Alternatively, if you're cross-compiling to an emulator, you'll have to
 use adb.
 
 =head3 adb
@@ -117,7 +117,7 @@ device.  Either try rooting it, or go for the ssh route.
 
 To use ssh, you'll need to install and run a sshd app and set it up
 properly.  There are several paid and free apps that do this rather
-easily, so you should be able to spot one easily.
+easily, so you should be able to spot one on the store.
 Remember that Perl requires a passwordless connection, so set up a 
 public key.
 
