@@ -281,8 +281,8 @@ SKIP:{
     local $Module::Load::Conditional::CHECK_INC_HASH = 1;
 
     {   package A::B::C::D;
-        $A::B::C::D::VERSION = $$;
-        $INC{'A/B/C/D.pm'}   = $$.$$;
+        $A::B::C::D::VERSION = "$$";
+        $INC{'A/B/C/D.pm'}   = "$$"."$$";
 
         ### XXX this is no longer needed with M::Load 0.11_01
         #$INC{'[.A.B.C]D.pm'} = $$.$$ if $^O eq 'VMS';
@@ -291,8 +291,8 @@ SKIP:{
     my $href = check_install( module => 'A::B::C::D', version => 0 );
 
     ok( $href,                  'Found package in %INC' );
-    is( $href->{'file'}, $$.$$, '   Found correct file' );
-    is( $href->{'version'}, $$, '   Found correct version' );
+    is( $href->{'file'}, "$$"."$$", '   Found correct file' );
+    is( $href->{'version'}, "$$", '   Found correct version' );
     ok( $href->{'uptodate'},    '   Marked as uptodate' );
     ok( can_load( modules => { 'A::B::C::D' => 0 } ),
                                 '   can_load successful' );
