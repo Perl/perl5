@@ -19,10 +19,10 @@ use Locale::Maketext::Simple    Style => 'gettext';
 
 use vars    qw[ $VERBOSE $PREFER_BIN $FROM_EMAIL $USER_AGENT
                 $BLACKLIST $METHOD_FAIL $VERSION $METHODS
-                $FTP_PASSIVE $TIMEOUT $DEBUG $WARN
+                $FTP_PASSIVE $TIMEOUT $DEBUG $WARN $FORCEIPV4
             ];
 
-$VERSION        = '0.46';
+$VERSION        = '0.48';
 $VERSION        = eval $VERSION;    # avoid warnings with development releases
 $PREFER_BIN     = 0;                # XXX TODO implement
 $FROM_EMAIL     = 'File-Fetch@example.com';
@@ -34,6 +34,7 @@ $FTP_PASSIVE    = 1;
 $TIMEOUT        = 0;
 $DEBUG          = 0;
 $WARN           = 1;
+$FORCEIPV4      = 0;
 
 ### methods available to fetch the file depending on the scheme
 $METHODS = {
@@ -1195,6 +1196,8 @@ sub _curl_fetch {
 
     ### these long opts are self explanatory - I like that -jmb
     my $cmd = [ $curl, '-q' ];
+
+    push(@$cmd, '-4') if $^O eq 'netbsd' && $FORCEIPV4; # only seen this on NetBSD so far
 
     push(@$cmd, '--connect-timeout', $TIMEOUT) if $TIMEOUT;
 
