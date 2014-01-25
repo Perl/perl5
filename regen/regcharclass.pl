@@ -1090,10 +1090,18 @@ sub _combine {
     return if !@cond;
     my $item= shift @cond;
     my ( $cstr, $gtv );
-    if ( ref $item ) {
-        $cstr=
+    if ( ref $item ) {  # @item should be a 2-element array giving range start
+                        # and end
+        if ($item->[0] == 0) {  # UV's are never negative, so skip "0 <= "
+                                # test which could generate a compiler warning
+                                # that test is always true
+            $cstr= sprintf( "$test <= $self->{val_fmt}", $item->[1] );
+        }
+        else {
+            $cstr=
           sprintf( "( $self->{val_fmt} <= $test && $test <= $self->{val_fmt} )",
-            @$item );
+                   @$item );
+        }
         $gtv= sprintf "$self->{val_fmt}", $item->[1];
     } else {
         $cstr= sprintf( "$self->{val_fmt} == $test", $item );
