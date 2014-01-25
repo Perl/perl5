@@ -9977,7 +9977,8 @@ Perl_opendir(pTHX_ const char *name)
     /* Check access before stat; otherwise stat does not
      * accurately report whether it's a directory.
      */
-    if (!cando_by_name_int(S_IRUSR,0,dir,PERL_RMSEXPAND_M_VMS_IN)) {
+    if (!strstr(dir, "::") /* sys$check_access doesn't do remotes */
+        && !cando_by_name_int(S_IRUSR,0,dir,PERL_RMSEXPAND_M_VMS_IN)) {
       /* cando_by_name has already set errno */
       Safefree(dir);
       return NULL;
