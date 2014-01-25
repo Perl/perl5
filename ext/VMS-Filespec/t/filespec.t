@@ -138,6 +138,8 @@ __down_:[__the_.__garden_]__path_.     fileify ^ __down_:[__the_.__garden_]__pat
 __down_:[__the_]__garden_.__path_      fileify ^ __down_:[__the_]__garden_^.__path_.dir;1 #undef
 /__down_/__the_/__garden_/__path_.     fileify ^ /__down_/__the_/__garden_/__path_..dir;1 # N.B. trailing . ==> null type
 /__down_/__the_/__garden_.__path_      fileify ^ /__down_/__the_/__garden_.__path_.dir;1
+__down_::__the_:[__garden_.__path_]    fileify __down_::__the_:[__garden_]__path_.dir;1 ^
+__down_::__the_:[__garden_]            fileify __down_::__the_:[000000]__garden_.dir;1 ^
 
 # and pathifying them
 __down_:[__the_.__garden_]__path_.dir;1        pathify __down_:[__the_.__garden_.__path_] ^

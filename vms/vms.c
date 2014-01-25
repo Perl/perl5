@@ -5983,6 +5983,9 @@ int_fileify_dirspec(const char *dir, char *buf, int *utf8_fl)
     vmsdir = (char *)PerlMem_malloc(VMS_MAXRSS + 1);
     if (vmsdir == NULL) _ckvmssts_noperl(SS$_INSFMEM);
     cp1 = strpbrk(trndir,"]:>");
+    if (cp1 && *(cp1+1) == ':')   /* DECNet node spec with :: */
+        cp1 = strpbrk(cp1+2,"]:>");
+
     if (hasfilename || !cp1) { /* filename present or not VMS */
 
       if (trndir[0] == '.') {
@@ -6188,7 +6191,10 @@ int_fileify_dirspec(const char *dir, char *buf, int *utf8_fl)
           rms_set_nam_fnb(dirnam, (NAM$M_EXP_TYPE | NAM$M_EXP_VER));
         }
         else { /* No; just work with potential name */
-          if (dirfab.fab$l_sts == RMS$_FNF) dirnam = savnam;
+          if (dirfab.fab$l_sts    == RMS$_FNF
+              || dirfab.fab$l_sts == RMS$_DNF
+              || dirfab.fab$l_sts == RMS$_FND)
+                dirnam = savnam;
           else { 
 	    int fab_sts;
 	    fab_sts = dirfab.fab$l_sts;
@@ -6364,12 +6370,12 @@ int_fileify_dirspec(const char *dir, char *buf, int *utf8_fl)
           }
         }
         else {  /* This is a top-level dir.  Add the MFD to the path. */
-          cp1 = my_esa;
-          cp2 = buf;
-          while ((*cp1 != ':')  && (*cp1 != '\0')) *(cp2++) = *(cp1++);
-          strcpy(cp2,":[000000]");
-          cp1 += 2;
-          strcpy(cp2+9,cp1);
+          cp1 = strrchr(my_esa, ':');
+          assert(cp1);
+          memmove(buf, my_esa, cp1 - my_esa + 1);
+          memmove(buf + (cp1 - my_esa) + 1, "[000000]", 8);
+          memmove(buf + (cp1 - my_esa) + 9, cp1 + 2, retlen - (cp1 - my_esa + 2));
+          buf[retlen + 7] = '\0';  /* We've inserted '000000]' */
         }
       }
       sts = rms_free_search_context(&dirfab);
