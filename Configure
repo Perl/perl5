@@ -19712,7 +19712,8 @@ EOCP
 		    # Copy the .c file to the remote host ($to is an ssh-alike if targethost is set)
 		    if $test "X$targethost" != X; then
 			$to tryp.c
-			$run ./tryp \< tryp.c 2>/dev/null > tryp.out
+			$to tryp
+			$run "cat tryp.c | ./tryp" 2>/dev/null > tryp.out
 		    else
 			$cat tryp.c | $run ./tryp 2>/dev/null > tryp.out
 		    fi
@@ -19781,7 +19782,8 @@ EOCP
 	    $rm -f tryp.out
 	    if $test "X$targethost" != X; then
 		$to tryp.c
-		$run ./tryp \< tryp.c 2>/dev/null > tryp.out
+                $to tryp
+                $run "cat tryp.c | ./tryp" 2>/dev/null > tryp.out
 	    else
 		$cat tryp.c | $run ./tryp 2>/dev/null > tryp.out
 	    fi
