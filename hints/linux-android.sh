@@ -191,24 +191,21 @@ $to \$exe > /dev/null 2>&1
 # sometimes there is no $?, I dunno why? we then get Cross/run-adb-shell: line 39: exit: XX: numeric argument required
 adb -s $targethost shell "sh -c '(cd \$cwd && \$env ; \$exe \$args > $targetdir/output.stdout 2>$targetdir/output.stderr) ; \$doexit '" > /dev/null
 
+rm output.stdout output.stderr output.status 2>/dev/null
+
 $from output.stdout
 $from output.stderr
 $from output.status
 
-result=\`$cat output.stdout\`
-result_err=\`$cat output.stderr\`
-result_status=\`$cat output.status\`
-rm output.stdout output.stderr output.status
-
 # We get back Ok\r\n on android for some reason, grrr:
-result=\`echo "\$result" | $tr -d '\r'\`
-result_err=\`echo "\$result_err" | $tr -d '\r'\`
-result_status=\`echo \$result_status | $tr -d '\r'\`
-
-echo "\$result"
-if test "X\$result_err" != X; then
-  echo "\$result_err" >&2
+$cat output.stdout | $tr -d '\r'
+if test -s output.stderr; then
+    $cat output.stderr | $tr -d '\r' >&2
 fi
+
+result_status=\`$cat output.status | $tr -d '\r'\`
+
+rm output.stdout output.stderr output.status
 
 # Also, adb doesn't exit with the commands exit code, like ssh does, double-grr
 exit \$result_status
