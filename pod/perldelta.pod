@@ -320,9 +320,11 @@ source tree.
 
 =over 4
 
-=item XXX-some-platform
+=item Android
 
-XXX
+Perl can now be built for Android, either natively or through
+cross-compilation, for all three currently available architectures (ARM,
+MIPS, and x86), on a wide range of versions.
 
 =back
 

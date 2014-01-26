@@ -2158,6 +2158,8 @@ Caveats:
 
 =item AIX
 
+=item Android
+
 =item FreeMINT
 
 Perl now builds with FreeMiNT/Atari. It fails a few tests, that needs
