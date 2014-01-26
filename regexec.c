@@ -644,6 +644,7 @@ Perl_re_intuit_start(pTHX_
     SV *check;
     char *t;
     const bool utf8_target = (sv && SvUTF8(sv)) ? 1 : 0; /* if no sv we have to assume bytes */
+    U8   other_ix = 1 - prog->substrs->check_ix;
     bool ml_anch = 0;
     char *other_last = NULL;	/* other substr already checked this high */
     char *check_at = NULL;		/* check substr found at this pos */
@@ -899,14 +900,15 @@ Perl_re_intuit_start(pTHX_
        Probably it is right to do no SCREAM here...
      */
 
-    if (utf8_target ? (prog->float_utf8 && prog->anchored_utf8)
-                : (prog->float_substr && prog->anchored_substr)) 
+    if (utf8_target ? prog->substrs->data[other_ix].utf8_substr
+                    : prog->substrs->data[other_ix].substr)
     {
 	/* Take into account the "other" substring. */
 	/* XXXX May be hopelessly wrong for UTF... */
 	if (!other_last)
 	    other_last = strpos;
-	if (check == (utf8_target ? prog->float_utf8 : prog->float_substr)) {
+
+	if (prog->substrs->check_ix) {
 	  do_other_anchored:
 	    {
 		char * last;

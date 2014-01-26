@@ -43,6 +43,7 @@ struct reg_substr_datum {
     SSize_t end_shift;  /* how many fixed chars must end the string */
 };
 struct reg_substr_data {
+    U8      check_ix;   /* index into data[] of check substr */
     struct reg_substr_datum data[3];	/* Actual array */
 };
 
