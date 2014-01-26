@@ -82,8 +82,12 @@ sub env_is {
         $eqv = "\n" if length($eqv) == 2 and $eqv eq "\000\n";
         is $eqv, "$val\n", $desc;
     } else {
-        chomp (my @env = grep { s/^$key=// } `env`);
-        is "@env", $val, $desc;
+        my @env = `env`;
+        SKIP: {
+            skip("env doesn't work on this android", 1) if !@env && $^O =~ /android/;
+            chomp (my @env = grep { s/^$key=// } @env);
+            is "@env", $val, $desc;
+        }
     }
 }
 
@@ -174,6 +178,7 @@ END
     close CMDPIPE;
     $? >>= 8 if $^O eq 'VMS'; # POSIX status hiding in 2nd byte
     my $todo = ($^O eq 'os2' ? ' # TODO: EMX v0.9d_fix4 bug: wrong nibble? ' : '');
+    $todo = ($Config{usecrosscompile} ? '# TODO: Not sure whats going on here when cross-compiling' : '');
     print $? & 0xFF ? "ok $tn[4]$todo\n" : "not ok $tn[4]$todo\n";
 
     open(CMDPIPE, "|-", $PERL);
@@ -276,6 +281,9 @@ $$ = $pid; # Tests below use $$
       || $Config{usensgetexecutablepath};
     if ($^O eq 'qnx') {
 	chomp($wd = `/usr/bin/fullpath -t`);
+    }
+    elsif($^O =~ /android/) {
+        chomp($wd = `sh -c 'pwd'`);
     }
     elsif($Is_Cygwin || $is_abs) {
        # Cygwin turns the symlink into the real file

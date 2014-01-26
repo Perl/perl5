@@ -99,8 +99,15 @@ like $@, qr/^The stat preceding -l _ wasn't an lstat at /,
 SKIP: {
  use Perl::OSType 'os_type';
  if (os_type ne 'Unix') { skip "Not Unix", 3 }
- chomp(my $ln = `which ln`);
- if ( ! -e $ln ) { skip "No ln"   , 3 }
+ if ( $^O =~ /android/ ) {
+     # Even the most basic toolbox in android provides ln,
+     # but not which.
+     $ln = "ln";
+ }
+ else {
+     chomp(my $ln = `which ln`);
+     if ( ! -e $ln ) { skip "No ln"   , 3 }
+ }
  lstat $ro_empty_file;
  `ln -s $ro_empty_file 1`;
  isnt(-l -e _, 1, 'stacked -l uses previous stat, not previous retval');

@@ -945,8 +945,10 @@ Perl_reentrant_retry(const char *f, ...)
 		    uid = va_arg(ap, Uid_t);
 #endif
 		    retptr = getpwuid(uid); break;
+#if defined(HAS_GETPWENT) || defined(HAS_GETPWENT_R)
 	        case OP_GPWENT:
 		    retptr = getpwent(); break;
+#endif
 	        default:
 		    SETERRNO(ERANGE, LIB_INVARG);
 		    break;

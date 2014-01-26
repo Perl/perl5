@@ -12,7 +12,7 @@ use Config;
 plan tests => 29;
 $| = 1;
 
-watchdog(15);
+watchdog(25);
 
 $SIG{ALRM} = sub {
     die "Alarm!\n";
@@ -97,7 +97,9 @@ TODO:
 	# of a reliable way to probe for this, so for now, just skip the
 	# tests on production releases
 	skip("some OSes hang here", 3) if (int($]*1000) & 1) == 0;
-
+    
+  SKIP: {
+	skip("Issues on Android", 3) if $^O =~ /android/;
 	my $action = POSIX::SigAction->new(sub { $gotit--, die }, POSIX::SigSet->new, 0);
 	POSIX::sigaction(&POSIX::SIGALRM, $action);
 	eval {
@@ -109,6 +111,7 @@ TODO:
 	} for 1..2;
 	is $gotit, 0, 'Received both signals';
     }
+}
 }
 
 SKIP: {

@@ -15,7 +15,7 @@ use Exporter;
 use Errno;
 
 @ISA = qw(IO::Socket);
-$VERSION = "1.34";
+$VERSION = "1.35";
 
 my $EINVAL = exists(&Errno::EINVAL) ? Errno::EINVAL() : 1;
 
@@ -50,7 +50,7 @@ sub _get_proto_number {
     return undef unless defined $name;
     return $proto_number{$name} if exists $proto_number{$name};
 
-    my @proto = getprotobyname($name);
+    my @proto = eval { getprotobyname($name) };
     return undef unless @proto;
     _cache_proto(@proto);
 
@@ -62,7 +62,7 @@ sub _get_proto_name {
     return undef unless defined $num;
     return $proto_name{$num} if exists $proto_name{$num};
 
-    my @proto = getprotobynumber($num);
+    my @proto = eval { getprotobynumber($num) };
     return undef unless @proto;
     _cache_proto(@proto);
 

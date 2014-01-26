@@ -171,7 +171,7 @@ use strict;
 use Exporter;
 use vars qw(@ISA @EXPORT @EXPORT_OK $VERSION);
 
-$VERSION = '3.45_01';
+$VERSION = '3.46';
 my $xs_version = $VERSION;
 $VERSION =~ tr/_//;
 
@@ -343,6 +343,23 @@ foreach my $try ('/bin/pwd',
         last;
     }
 }
+
+# Android has a built-in pwd. Using $pwd_cmd will DTRT if
+# this perl was compiled with -Dd_useshellcmds, which is the
+# default for Android, but the block below is needed for the
+# miniperl running on the host when cross-compiling, and
+# potentially for native builds with -Ud_useshellcmds.
+if ($^O =~ /android/) {
+    # If targetsh is executable, then we're either a full
+    # perl, or a miniperl for a native build.
+    if (-x $Config::Config{targetsh}) {
+        $pwd_cmd = "$Config::Config{targetsh} -c pwd"
+    }
+    else {
+        $pwd_cmd = "$Config::Config{sh} -c pwd"
+    }
+}
+
 my $found_pwd_cmd = defined($pwd_cmd);
 unless ($pwd_cmd) {
     # Isn't this wrong?  _backtick_pwd() will fail if someone has
