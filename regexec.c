@@ -881,16 +881,22 @@ Perl_re_intuit_start(pTHX_
     /* Finish the diagnostic message */
     DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "%ld...\n", (long)(s - i_strpos)) );
 
+    /* set rx_origin to the minimum position where the regex could start
+     * matching, given the constraint of the just-matched check substring
+     */
+
+    rx_origin = (s - strpos <= prog->check_offset_max)
+        ? strpos
+        : HOP3c(s, -prog->check_offset_max, strpos);
+
+
     /* XXX dmq: first branch is for positive lookbehind...
        Our check string is offset from the beginning of the pattern.
        So we need to do any stclass tests offset forward from that 
        point. I think. :-(
      */
     
-        
-    
     check_at=s;
-     
 
     /* Got a candidate.  Check MBOL anchoring, and the *other* substr.
        Start with the other substr.
@@ -918,8 +924,8 @@ Perl_re_intuit_start(pTHX_
 
                 /* we've previously found a floating substr starting at s.
                  * This means that the regex origin must lie somewhere
-                 * between min: HOP3(s, -check_offset_max)
-                 * between max: HOP3(s, -check_offset_min)
+                 * between min (rx_origin): HOP3(s, -check_offset_max)
+                 * and max:                 HOP3(s, -check_offset_min)
                  * (except that min will be >= strpos)
                  * So the fixed  substr must lie somewhere between
                  *  HOP3(min, anchored_offset)
@@ -928,16 +934,6 @@ Perl_re_intuit_start(pTHX_
                 assert(strpos + start_shift <= s);
                 last = HOP4c(s, prog->anchored_offset-start_shift,
                             strbeg, strend);
-
-		rx_origin = s - prog->check_offset_max;
-                /* signed-corrected rx_origin > strpos */
-		if (s - strpos > prog->check_offset_max
-		    && (!utf8_target
-			|| ((rx_origin = (char*)reghopmaybe3((U8*)s, -(prog->check_offset_max), (U8*)strpos))
-			    && rx_origin > strpos)))
-		    NOOP;
-		else
-		    rx_origin = strpos;
 
 		s = HOP3c(rx_origin, prog->anchored_offset, strend);
 		if (s < other_last)	/* These positions already checked */
@@ -996,12 +992,6 @@ Perl_re_intuit_start(pTHX_
 	    char *last, *last1;
 	    char * const saved_s = s;
 	    SV* must;
-
-            /* we've just matched a fixed substr, which is start_shift chars
-             * into the regex; so calculate rx_origin, the current origin
-             * of the regex */
-
-	    rx_origin = HOP3c(s, -start_shift, strbeg);
 
             /* last1 is the absolute highest point that the floating substr
              * could start in the string, ignoring any constraints from the
@@ -1095,8 +1085,6 @@ Perl_re_intuit_start(pTHX_
     }
 
     
-    rx_origin = (char*)HOP3( s, -prog->check_offset_max, strpos);
-        
     DEBUG_OPTIMISE_MORE_r(
         PerlIO_printf(Perl_debug_log, 
             "  Check-only match: offset min:%"IVdf" max:%"IVdf
@@ -1142,7 +1130,7 @@ Perl_re_intuit_start(pTHX_
 			       Thus we can arrive here only if check substr
 			       is float.  Redo checking for "other"=="fixed".
 			     */
-			    strpos = t + 1;			
+			    rx_origin = strpos = t + 1;
 			    DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "  Found /%s^%s/m at offset %ld, rescanning for anchored from offset %ld...\n",
 				PL_colors[0], PL_colors[1], (long)(strpos - i_strpos), (long)(strpos - i_strpos + prog->anchored_offset)));
 			    goto do_other_anchored;
