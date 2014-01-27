@@ -1268,7 +1268,7 @@ STMT_START {                               \
             uscan += len;                                                           \
             len=0;                                                                  \
         } else {                                                                    \
-            uvc = _to_utf8_fold_flags( (const U8*) uc, foldbuf, &foldlen, flags, NULL);                \
+            uvc = _to_utf8_fold_flags( (const U8*) uc, foldbuf, &foldlen, flags);   \
             len = UTF8SKIP(uc);                                                     \
             skiplen = UNISKIP( uvc );                                               \
             foldlen -= skiplen;                                                     \

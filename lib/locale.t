@@ -1873,17 +1873,19 @@ setlocale(&POSIX::LC_ALL, "C");
         my $above_latin1_case_change_delta; # Same for the specific ords > 255
                                             # that we use
 
-        # We test an ASCII character, which should change case and be tainted;
+        # We test an ASCII character, which should change case;
         # a Latin1 character, which shouldn't change case under this C locale,
-        #   and is tainted.
         # an above-Latin1 character that when the case is changed would cross
-        #   the 255/256 boundary, so doesn't change case and isn't tainted
-        # (the \x{149} is one of these, but changes into 2 characters, the
+        #   the 255/256 boundary, so doesn't change case
+        #   (the \x{149} is one of these, but changes into 2 characters, the
         #   first one of which doesn't cross the boundary.
         # the final one in each list is an above-Latin1 character whose case
-        #   does change, and shouldn't be tainted.  The code below uses its
-        #   position in its list as a marker to indicate that it, unlike the
-        #   other code points above ASCII, has a successful case change
+        #   does change.  The code below uses its position in its list as a
+        #   marker to indicate that it, unlike the other code points above
+        #   ASCII, has a successful case change
+        #
+        # All casing operations under locale (but not :not_characters) should
+        # taint
         if ($function =~ /^u/) {
             @list = ("", "a", "\xe0", "\xff", "\x{fb00}", "\x{149}", "\x{101}");
             $ascii_case_change_delta = -32;
@@ -1957,9 +1959,9 @@ setlocale(&POSIX::LC_ALL, "C");
                             : "; not encoded in utf8)")
                         . " should be \"$should_be\", got \"$changed\"");
 
-                    # Tainting shouldn't happen for utf8 locales, empty
-                    # strings, or those characters above 255.
-                    (! $is_utf8_locale && length($char) > 0 && ord($char) < 256)
+                    # Tainting shouldn't happen for use locale :not_character
+                    # (a utf8 locale)
+                    (! $is_utf8_locale)
                     ? check_taint($changed)
                     : check_taint_not($changed);
 

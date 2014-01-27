@@ -1805,7 +1805,7 @@ Perl__to_uni_fold_flags(pTHX_ UV c, U8* p, STRLEN *lenp, const U8 flags)
 	       the special flags. */
 	U8 utf8_c[UTF8_MAXBYTES + 1];
 	uvchr_to_utf8(utf8_c, c);
-	return _to_utf8_fold_flags(utf8_c, p, lenp, flags, NULL);
+	return _to_utf8_fold_flags(utf8_c, p, lenp, flags);
     }
 }
 
@@ -2138,12 +2138,10 @@ Instead use L</toUPPER_utf8>.
 =cut */
 
 /* Not currently externally documented, and subject to change:
- * <flags> is set iff locale semantics are to be used for code points < 256
- * <tainted_ptr> if non-null, *tainted_ptr will be set TRUE iff locale rules
- *		 were used in the calculation; otherwise unchanged. */
+ * <flags> is set iff locale semantics are to be used for code points < 256 */
 
 UV
-Perl__to_utf8_upper_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, const bool flags, bool* tainted_ptr)
+Perl__to_utf8_upper_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, const bool flags)
 {
     dVAR;
 
@@ -2188,10 +2186,6 @@ Perl__to_utf8_upper_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, const bool
 	*(ustrp + 1) = UTF8_EIGHT_BIT_LO((U8) result);
 	*lenp = 2;
     }
-
-    if (tainted_ptr) {
-	*tainted_ptr = TRUE;
-    }
     return result;
 }
 
@@ -2206,11 +2200,10 @@ Instead use L</toTITLE_utf8>.
  * <flags> is set iff locale semantics are to be used for code points < 256
  *	   Since titlecase is not defined in POSIX, uppercase is used instead
  *	   for these/
- * <tainted_ptr> if non-null, *tainted_ptr will be set TRUE iff locale rules
- *		 were used in the calculation; otherwise unchanged. */
+ */
 
 UV
-Perl__to_utf8_title_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, const bool flags, bool* tainted_ptr)
+Perl__to_utf8_title_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, const bool flags)
 {
     dVAR;
 
@@ -2256,9 +2249,6 @@ Perl__to_utf8_title_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, const bool
 	*lenp = 2;
     }
 
-    if (tainted_ptr) {
-	*tainted_ptr = TRUE;
-    }
     return result;
 }
 
@@ -2270,12 +2260,10 @@ Instead use L</toLOWER_utf8>.
 =cut */
 
 /* Not currently externally documented, and subject to change:
- * <flags> is set iff locale semantics are to be used for code points < 256
- * <tainted_ptr> if non-null, *tainted_ptr will be set TRUE iff locale rules
- *		 were used in the calculation; otherwise unchanged. */
+ * <flags> is set iff locale semantics are to be used for code points < 256 */
 
 UV
-Perl__to_utf8_lower_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, const bool flags, bool* tainted_ptr)
+Perl__to_utf8_lower_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, const bool flags)
 {
     UV result;
 
@@ -2322,9 +2310,6 @@ Perl__to_utf8_lower_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, const bool
 	*lenp = 2;
     }
 
-    if (tainted_ptr) {
-	*tainted_ptr = TRUE;
-    }
     return result;
 }
 
@@ -2344,11 +2329,10 @@ Instead use L</toFOLD_utf8>.
  *			      otherwise simple folds
  *      bit FOLD_FLAGS_NOMIX_ASCII is set iff folds of non-ASCII to ASCII are
  *			      prohibited
- * <tainted_ptr> if non-null, *tainted_ptr will be set TRUE iff locale rules
- *		 were used in the calculation; otherwise unchanged. */
+ */
 
 UV
-Perl__to_utf8_fold_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, U8 flags, bool* tainted_ptr)
+Perl__to_utf8_fold_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, U8 flags)
 {
     dVAR;
 
@@ -2453,9 +2437,6 @@ Perl__to_utf8_fold_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, U8 flags, b
 	*lenp = 2;
     }
 
-    if (tainted_ptr) {
-	*tainted_ptr = TRUE;
-    }
     return result;
 
   return_long_s:

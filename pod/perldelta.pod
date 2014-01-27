@@ -43,13 +43,16 @@ L</Selected Bug Fixes> section.
 
 =head1 Incompatible Changes
 
-XXX For a release on a stable branch, this section aspires to be:
+=head2 Tainting happens under more circumstances; now conforms to documentation
 
-    There are no changes intentionally incompatible with 5.XXX.XXX
-    If any exist, they are bugs, and we request that you submit a
-    report.  See L</Reporting Bugs> below.
-
-[ List each incompatible change as a =head2 entry ]
+When changing the case of a string (C<lc>, C<"\U">, I<etc>.), within the
+scope of C<use locale>, the result is now tainted no matter what the
+contents of the string were, as the documentation (L<perlsec>,
+L<perllocale/SECURITY>) indicates it should.   Previously, if the string
+contained no characters whose case change could be affected by the
+locale, the result would not be tainted.  For example, the result of
+C<uc()> on an empty string or one containing only above-Latin1 code
+points is now tainted.  This leads to more consistent tainting results.
 
 =head1 Deprecations
 
