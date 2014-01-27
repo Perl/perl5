@@ -3,7 +3,7 @@ Locale::Codes::Script_Codes;
 
 # This file was automatically generated.  Any changes to this file will
 # be lost the next time 'get_codes' is run.
-#    Generated on: Fri Nov 22 15:24:35 EST 2013
+#    Generated on: Thu Jan 23 14:27:55 EST 2014
 
 use strict;
 require 5.006;
@@ -11,7 +11,7 @@ use warnings;
 use utf8;
 
 our($VERSION);
-$VERSION='3.28';
+$VERSION='3.29';
 
 $Locale::Codes::Data{'script'}{'id'} = '0166';
 
@@ -24,6 +24,8 @@ $Locale::Codes::Data{'script'}{'id2names'} = {
       ],
    q(0003) => [
       q(Ahom, Tai Ahom),
+      q(Ahom),
+      q(Tai Ahom),
       ],
    q(0004) => [
       q(Arabic),
@@ -309,7 +311,6 @@ $Locale::Codes::Data{'script'}{'id2names'} = {
       ],
    q(0088) => [
       q(Mende Kikakui),
-      q(Mende),
       ],
    q(0089) => [
       q(Meroitic Cursive),
@@ -323,6 +324,8 @@ $Locale::Codes::Data{'script'}{'id2names'} = {
    q(0092) => [
       q(Modi, Modi),
       q( Multani),
+      q(Modi),
+      q(Multani),
       ],
    q(0093) => [
       q(Moon (Moon code, Moon script, Moon type)),
@@ -468,6 +471,8 @@ $Locale::Codes::Data{'script'}{'id2names'} = {
       ],
    q(0130) => [
       q(Siddham, Siddham, Siddhamatrka),
+      q(Siddham),
+      q(Siddhamatrka),
       ],
    q(0131) => [
       q(Khudawadi, Sindhi),
@@ -600,6 +605,10 @@ $Locale::Codes::Data{'script'}{'alias2id'} = {
    q(afaka) => [
       q(0001),
       q(0),
+      ],
+   q(ahom) => [
+      q(0003),
+      q(1),
       ],
    q(ahom, tai ahom) => [
       q(0003),
@@ -1101,10 +1110,6 @@ $Locale::Codes::Data{'script'}{'alias2id'} = {
       q(0096),
       q(2),
       ],
-   q(mende) => [
-      q(0088),
-      q(1),
-      ],
    q(mende kikakui) => [
       q(0088),
       q(0),
@@ -1124,6 +1129,10 @@ $Locale::Codes::Data{'script'}{'alias2id'} = {
    q(miao (pollard)) => [
       q(0116),
       q(0),
+      ],
+   q(modi) => [
+      q(0092),
+      q(2),
       ],
    q(modi, modi) => [
       q(0092),
@@ -1168,6 +1177,10 @@ $Locale::Codes::Data{'script'}{'alias2id'} = {
    q(mru) => [
       q(0095),
       q(2),
+      ],
+   q(multani) => [
+      q(0092),
+      q(3),
       ],
    q(myanmar) => [
       q(0097),
@@ -1381,9 +1394,17 @@ $Locale::Codes::Data{'script'}{'alias2id'} = {
       q(0128),
       q(2),
       ],
+   q(siddham) => [
+      q(0130),
+      q(1),
+      ],
    q(siddham, siddham, siddhamatrka) => [
       q(0130),
       q(0),
+      ],
+   q(siddhamatrka) => [
+      q(0130),
+      q(2),
       ],
    q(signwriting) => [
       q(0127),
@@ -1444,6 +1465,10 @@ $Locale::Codes::Data{'script'}{'alias2id'} = {
    q(tagbanwa) => [
       q(0140),
       q(0),
+      ],
+   q(tai ahom) => [
+      q(0003),
+      q(2),
       ],
    q(tai le) => [
       q(0142),
@@ -1563,7 +1588,7 @@ $Locale::Codes::Data{'script'}{'code2id'} = {
          ],
       q(Ahom) => [
          q(0003),
-         q(0),
+         q(1),
          ],
       q(Arab) => [
          q(0004),
@@ -1903,7 +1928,7 @@ $Locale::Codes::Data{'script'}{'code2id'} = {
          ],
       q(Mend) => [
          q(0088),
-         q(1),
+         q(0),
          ],
       q(Merc) => [
          q(0089),
@@ -1919,7 +1944,7 @@ $Locale::Codes::Data{'script'}{'code2id'} = {
          ],
       q(Modi) => [
          q(0092),
-         q(0),
+         q(2),
          ],
       q(Mong) => [
          q(0094),
@@ -1939,7 +1964,7 @@ $Locale::Codes::Data{'script'}{'code2id'} = {
          ],
       q(Mult) => [
          q(0092),
-         q(1),
+         q(3),
          ],
       q(Mymr) => [
          q(0097),
@@ -2075,7 +2100,7 @@ $Locale::Codes::Data{'script'}{'code2id'} = {
          ],
       q(Sidd) => [
          q(0130),
-         q(0),
+         q(1),
          ],
       q(Sind) => [
          q(0131),

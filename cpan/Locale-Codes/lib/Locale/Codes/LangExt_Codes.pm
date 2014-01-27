@@ -3,7 +3,7 @@ Locale::Codes::LangExt_Codes;
 
 # This file was automatically generated.  Any changes to this file will
 # be lost the next time 'get_codes' is run.
-#    Generated on: Fri Nov 22 15:25:03 EST 2013
+#    Generated on: Thu Jan 23 14:29:32 EST 2014
 
 use strict;
 require 5.006;
@@ -11,7 +11,7 @@ use warnings;
 use utf8;
 
 our($VERSION);
-$VERSION='3.28';
+$VERSION='3.29';
 
 $Locale::Codes::Data{'langext'}{'id'} = '0228';
 

@@ -22,13 +22,31 @@ September, December). I will also check on request, so if a code
 changes that you use, feel free to contact me.  Any time there are new
 codes, I will add them to the module and release a new version.
 
-=head1 VERSION 3.32  (planned 2014-12-01; sbeck)
+=head1 VERSION 3.33  (planned 2014-12-01; sbeck)
 
-=head1 VERSION 3.31  (planned 2014-09-01; sbeck)
+=head1 VERSION 3.32  (planned 2014-09-01; sbeck)
 
-=head1 VERSION 3.30  (planned 2014-06-01; sbeck)
+=head1 VERSION 3.31  (planned 2014-06-01; sbeck)
 
-=head1 VERSION 3.29  (planned 2014-03-01; sbeck)
+=head1 VERSION 3.30  (planned 2014-03-01; sbeck)
+
+=head1 VERSION 3.29  (2014-01-27; sbeck)
+
+=over 4
+
+=item B<ISO 3166 country codes improved>
+
+ISO 3166 is now browsable online (previously, only the alpha-2 codes were)
+and it contains more accurate information than the previous sources, so
+I've switched to using the full standard.  In response to RT 92303 which
+reported some codes being 'retired' that should not have been.
+
+=item B<Bug fixes>
+
+Fixed the pod test files so that pod tests won't get run at install
+time.  In response to RT 91167.
+
+=back
 
 =head1 VERSION 3.28  (2013-12-02; sbeck)
 
@@ -663,7 +681,7 @@ Currently maintained by Sullivan Beck (sbeck@cpan.org).
 =head1 COPYRIGHT
 
    Copyright (c) 2001-2010 Neil Bowers
-   Copyright (c) 2010-2013 Sullivan Beck
+   Copyright (c) 2010-2014 Sullivan Beck
 
 This module is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.

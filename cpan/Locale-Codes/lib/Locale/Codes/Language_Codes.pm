@@ -3,7 +3,7 @@ Locale::Codes::Language_Codes;
 
 # This file was automatically generated.  Any changes to this file will
 # be lost the next time 'get_codes' is run.
-#    Generated on: Fri Nov 22 15:03:35 EST 2013
+#    Generated on: Thu Jan 23 13:07:29 EST 2014
 
 use strict;
 require 5.006;
@@ -11,7 +11,7 @@ use warnings;
 use utf8;
 
 our($VERSION);
-$VERSION='3.28';
+$VERSION='3.29';
 
 $Locale::Codes::Data{'language'}{'id'} = '7985';
 
@@ -551,8 +551,8 @@ $Locale::Codes::Data{'language'}{'id2names'} = {
       ],
    q(0164) => [
       q(Greek, Modern (1453-)),
-      q(Modern Greek (1453-)),
       q(Greek),
+      q(Modern Greek (1453-)),
       ],
    q(0165) => [
       q(Guarani),
@@ -33541,7 +33541,7 @@ $Locale::Codes::Data{'language'}{'alias2id'} = {
       ],
    q(greek) => [
       q(0164),
-      q(2),
+      q(1),
       ],
    q(greek languages) => [
       q(0508),
@@ -43117,7 +43117,7 @@ $Locale::Codes::Data{'language'}{'alias2id'} = {
       ],
    q(modern greek (1453-)) => [
       q(0164),
-      q(1),
+      q(2),
       ],
    q(modole) => [
       q(4502),
@@ -57597,7 +57597,7 @@ $Locale::Codes::Data{'language'}{'code2id'} = {
          ],
       q(el) => [
          q(0164),
-         q(1),
+         q(2),
          ],
       q(en) => [
          q(0123),
