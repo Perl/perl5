@@ -1258,7 +1258,7 @@ STMT_START {                               \
     STRLEN skiplen;                                                                 \
     U8 flags = FOLD_FLAGS_FULL; \
     switch (trie_type) {                                                            \
-    case trie_utf8_exactfa_fold:                                                            \
+    case trie_utf8_exactfa_fold:                                                    \
         flags |= FOLD_FLAGS_NOMIX_ASCII; \
         /* FALL THROUGH */ \
     case trie_utf8_fold:                                                            \
@@ -1286,7 +1286,7 @@ STMT_START {                               \
             len=0;                                                                  \
         } else {                                                                    \
             len = 1;                                                                \
-            uvc = _to_fold_latin1( (U8) *uc, foldbuf, &foldlen, flags);   \
+            uvc = _to_fold_latin1( (U8) *uc, foldbuf, &foldlen, flags);             \
             skiplen = UNISKIP( uvc );                                               \
             foldlen -= skiplen;                                                     \
             uscan = foldbuf + skiplen;                                              \
@@ -1537,7 +1537,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         goto do_exactf_non_utf8;
 
     case EXACTFL:
-        if (is_utf8_pat || utf8_target) {
+        if (is_utf8_pat || utf8_target || IN_UTF8_CTYPE_LOCALE) {
             utf8_fold_flags = FOLDEQ_LOCALE;
             goto do_exactf_utf8;
         }
@@ -3425,6 +3425,7 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
     dVAR;
 
     U8 *pat = (U8*)STRING(text_node);
+    U8 folded[UTF8_MAX_FOLD_CHAR_EXPAND * UTF8_MAXBYTES_CASE + 1];
 
     if (OP(text_node) == EXACT) {
 
@@ -3444,7 +3445,56 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
             c2 = c1 = valid_utf8_to_uvchr(pat, NULL);
         }
     }
-    else /* an EXACTFish node */
+    else { /* an EXACTFish node */
+        U8 *pat_end = pat + STR_LEN(text_node);
+
+        /* An EXACTFL node has at least some characters unfolded, because what
+         * they match is not known until now.  So, now is the time to fold
+         * the first few of them, as many as are needed to determine 'c1' and
+         * 'c2' later in the routine.  If the pattern isn't UTF-8, we only need
+         * to fold if in a UTF-8 locale, and then only the Sharp S; everything
+         * else is 1-1 and isn't assumed to be folded.  In a UTF-8 pattern, we
+         * need to fold as many characters as a single character can fold to,
+         * so that later we can check if the first ones are such a multi-char
+         * fold.  But, in such a pattern only locale-problematic characters
+         * aren't folded, so we can skip this completely if the first character
+         * in the node isn't one of the tricky ones */
+        if (OP(text_node) == EXACTFL) {
+
+            if (! is_utf8_pat) {
+                if (IN_UTF8_CTYPE_LOCALE && *pat == LATIN_SMALL_LETTER_SHARP_S)
+                {
+                    folded[0] = folded[1] = 's';
+                    pat = folded;
+                    pat_end = folded + 2;
+                }
+            }
+            else if (is_PROBLEMATIC_LOCALE_FOLDEDS_START_utf8(pat)) {
+                U8 *s = pat;
+                U8 *d = folded;
+                int i;
+
+                for (i = 0; i < UTF8_MAX_FOLD_CHAR_EXPAND && s < pat_end; i++) {
+                    if (isASCII(*s)) {
+                        *(d++) = (U8) toFOLD_LC(*s);
+                        s++;
+                    }
+                    else {
+                        STRLEN len;
+                        _to_utf8_fold_flags(s,
+                                            d,
+                                            &len,
+                                            FOLD_FLAGS_FULL | FOLD_FLAGS_LOCALE);
+                        d += len;
+                        s += UTF8SKIP(s);
+                    }
+                }
+
+                pat = folded;
+                pat_end = d;
+            }
+        }
+
         if ((is_utf8_pat && is_MULTI_CHAR_FOLD_utf8(pat))
              || (!is_utf8_pat && is_MULTI_CHAR_FOLD_latin1(pat)))
     {
@@ -3506,13 +3556,13 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
                     c2 = SvUV(*c_p);
 
                     /* Folds that cross the 255/256 boundary are forbidden if
-                     * EXACTFL, or EXACTFA and one is ASCIII.  Since the
-                     * pattern character is above 256, and its only other match
-                     * is below 256, the only legal match will be to itself.
-                     * We have thrown away the original, so have to compute
-                     * which is the one above 255 */
+                     * EXACTFL (and isnt a UTF8 locale), or EXACTFA and one is
+                     * ASCIII.  Since the pattern character is above 256, and
+                     * its only other match is below 256, the only legal match
+                     * will be to itself.  We have thrown away the original, so
+                     * have to compute which is the one above 255 */
                     if ((c1 < 256) != (c2 < 256)) {
-                        if (OP(text_node) == EXACTFL
+                        if ((OP(text_node) == EXACTFL && ! IN_UTF8_CTYPE_LOCALE)
                             || ((OP(text_node) == EXACTFA
                                  || OP(text_node) == EXACTFA_NO_TRIE)
                                 && (isASCII(c1) || isASCII(c2))))
@@ -3531,7 +3581,7 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
         else /* Here, c1 is < 255 */
              if (utf8_target
                  && HAS_NONLATIN1_FOLD_CLOSURE(c1)
-                 && OP(text_node) != EXACTFL
+                 && ( ! (OP(text_node) == EXACTFL && ! IN_UTF8_CTYPE_LOCALE))
                  && ((OP(text_node) != EXACTFA
                       && OP(text_node) != EXACTFA_NO_TRIE)
                      || ! isASCII(c1)))
@@ -3580,6 +3630,7 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
                     assert(0); /* NOTREACHED */
             }
         }
+    }
     }
 
     /* Here have figured things out.  Set up the returns */
@@ -4275,7 +4326,11 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    s = STRING(scan);
 	    ln = STR_LEN(scan);
 
-	    if (utf8_target || is_utf8_pat || state_num == EXACTFU_SS) {
+	    if (utf8_target
+                || is_utf8_pat
+                || state_num == EXACTFU_SS
+                || (state_num == EXACTFL && IN_UTF8_CTYPE_LOCALE))
+            {
 	      /* Either target or the pattern are utf8, or has the issue where
 	       * the fold lengths may differ. */
 		const char * const l = locinput;
@@ -4883,8 +4938,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
 	    s = reginfo->strbeg + ln;
 	    if (type != REF	/* REF can do byte comparison */
-		&& (utf8_target || type == REFFU))
-	    { /* XXX handle REFFL better */
+		&& (utf8_target || type == REFFU || type == REFFL))
+	    {
 		char * limit = reginfo->strend;
 
 		/* This call case insensitively compares the entire buffer
@@ -7522,6 +7577,16 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
                 }
 	    }
 	}
+    }
+
+    /* For /li matching and the current locale is a UTF-8 one, look at the
+     * special list, valid for just these circumstances. */
+    if (! match
+        && (flags & ANYOF_LOC_FOLD)
+        && IN_UTF8_CTYPE_LOCALE
+        && ANYOF_UTF8_LOCALE_INVLIST(n))
+    {
+        match = _invlist_contains_cp(ANYOF_UTF8_LOCALE_INVLIST(n), c);
     }
 
     /* If the bitmap didn't (or couldn't) match, and something outside the

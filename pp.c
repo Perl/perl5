@@ -3528,17 +3528,27 @@ PP(pp_ucfirst)
 	}
 	/* is ucfirst() */
 	else if (IN_LOCALE_RUNTIME) {
-	    *tmpbuf = toUPPER_LC(*s);	/* This would be a bug if any locales
-					 * have upper and title case different
-					 */
+            if (IN_UTF8_CTYPE_LOCALE) {
+                goto do_uni_rules;
+            }
+
+            *tmpbuf = (U8) toUPPER_LC(*s); /* This would be a bug if any
+                                              locales have upper and title case
+                                              different */
 	}
 	else if (! IN_UNI_8_BIT) {
 	    *tmpbuf = toUPPER(*s);	/* Returns caseless for non-ascii, or
 					 * on EBCDIC machines whatever the
 					 * native function does */
 	}
-	else { /* is ucfirst non-UTF-8, not in locale, and cased latin1 */
-	    UV title_ord = _to_upper_title_latin1(*s, tmpbuf, &tculen, 's');
+        else {
+            /* Here, is ucfirst non-UTF-8, not in locale (unless that locale is
+             * UTF-8, which we treat as not in locale), and cased latin1 */
+	    UV title_ord;
+
+      do_uni_rules:
+
+	    title_ord = _to_upper_title_latin1(*s, tmpbuf, &tculen, 's');
 	    if (tculen > 1) {
 		assert(tculen == 2);
 
@@ -3700,15 +3710,20 @@ PP(pp_uc)
 	(SvTEMP(source) && !SvSMAGICAL(source) && SvREFCNT(source) == 1))
 	&& !SvREADONLY(source) && SvPOK(source)
 	&& !DO_UTF8(source)
-	&& (IN_LOCALE_RUNTIME || ! IN_UNI_8_BIT)) {
+	&& ((IN_LOCALE_RUNTIME)
+            ? ! IN_UTF8_CTYPE_LOCALE
+            : ! IN_UNI_8_BIT))
+    {
 
-	/* We can convert in place.  The reason we can't if in UNI_8_BIT is to
-	 * make the loop tight, so we overwrite the source with the dest before
-	 * looking at it, and we need to look at the original source
-	 * afterwards.  There would also need to be code added to handle
-	 * switching to not in-place in midstream if we run into characters
-	 * that change the length.
-	 */
+        /* We can convert in place.  The reason we can't if in UNI_8_BIT is to
+         * make the loop tight, so we overwrite the source with the dest before
+         * looking at it, and we need to look at the original source
+         * afterwards.  There would also need to be code added to handle
+         * switching to not in-place in midstream if we run into characters
+         * that change the length.  Since being in locale overrides UNI_8_BIT,
+         * that latter becomes irrelevant in the above test; instead for
+         * locale, the size can't normally change, except if the locale is a
+         * UTF-8 one */
 	dest = source;
 	s = d = (U8*)SvPV_force_nomg(source, len);
 	min = len + 1;
@@ -3806,8 +3821,11 @@ PP(pp_uc)
 	     * latin1 as having case; otherwise the latin1 casing.  Do the
 	     * whole thing in a tight loop, for speed, */
 	    if (IN_LOCALE_RUNTIME) {
+                if (IN_UTF8_CTYPE_LOCALE) {
+                    goto do_uni_rules;
+                }
 		for (; s < send; d++, s++)
-		    *d = toUPPER_LC(*s);
+                    *d = (U8) toUPPER_LC(*s);
 	    }
 	    else if (! IN_UNI_8_BIT) {
 		for (; s < send; d++, s++) {
@@ -3815,6 +3833,7 @@ PP(pp_uc)
 		}
 	    }
 	    else {
+          do_uni_rules:
 		for (; s < send; d++, s++) {
 		    *d = toUPPER_LATIN1_MOD(*s);
 		    if (LIKELY(*d != LATIN_SMALL_LETTER_Y_WITH_DIAERESIS)) {
@@ -4169,6 +4188,9 @@ PP(pp_fc)
     } /* Unflagged string */
     else if (len) {
         if ( IN_LOCALE_RUNTIME ) { /* Under locale */
+            if (IN_UTF8_CTYPE_LOCALE) {
+                goto do_uni_folding;
+            }
             for (; s < send; d++, s++)
                 *d = toFOLD_LC(*s);
         }
@@ -4177,6 +4199,7 @@ PP(pp_fc)
                 *d = toFOLD(*s);
         }
         else {
+      do_uni_folding:
             /* For ASCII and the Latin-1 range, there's only two troublesome
              * folds, \x{DF} (\N{LATIN SMALL LETTER SHARP S}), which under full
              * casefolding becomes 'ss'; and \x{B5} (\N{MICRO SIGN}), which

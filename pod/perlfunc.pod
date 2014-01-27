@@ -3338,10 +3338,13 @@ Respects current LC_CTYPE locale for code points < 256; and uses Unicode
 semantics for the remaining code points (this last can only happen if
 the UTF8 flag is also set).  See L<perllocale>.
 
-A deficiency in this is that case changes that cross the 255/256
+Starting in v5.20, Perl wil use full Unicode rules if the locale is
+UTF-8.  Otherwise, there is a deficiency in this scheme, which is that
+case changes that cross the 255/256
 boundary are not well-defined.  For example, the lower case of LATIN CAPITAL
 LETTER SHARP S (U+1E9E) in Unicode semantics is U+00DF (on ASCII
-platforms).   But under C<use locale>, the lower case of U+1E9E is
+platforms).   But under C<use locale> (prior to v5.20 or not a UTF-8
+locale), the lower case of U+1E9E is
 itself, because 0xDF may not be LATIN SMALL LETTER SHARP S in the
 current locale, and Perl has no way of knowing if that character even
 exists in the locale, much less what code point it is.  Perl returns

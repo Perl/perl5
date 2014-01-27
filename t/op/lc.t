@@ -5,12 +5,14 @@
 BEGIN {
     chdir 't';
     @INC = '../lib';
+    require Config; import Config;
     require './test.pl';
+    require './loc_tools.pl';   # Contains find_utf8_locale()
 }
 
 use feature qw( fc );
 
-plan tests => 134;
+plan tests => 134 + 4 * 256;
 
 is(lc(undef),	   "", "lc(undef) is ''");
 is(lcfirst(undef), "", "lcfirst(undef) is ''");
@@ -313,3 +315,38 @@ $h{k} = bless[], "\x{130}bcde"; # U+0130 grows with lc()
    # using delete marks it as TEMP, so uc-in-place is permitted
 like lc delete $h{k}, qr "^i\x{307}bcde=array\(.*\)",
     'lc(TEMP ref) does not produce a corrupt string';
+
+
+my $utf8_locale = find_utf8_locale();
+
+SKIP: {
+    skip 'Can\'t find a UTF-8 locale', 4*256 unless defined $utf8_locale;
+
+    use feature qw( unicode_strings );
+
+    no locale;
+
+    my @unicode_lc;
+    my @unicode_uc;
+    my @unicode_lcfirst;
+    my @unicode_ucfirst;
+
+    # Get all the values outside of 'locale'
+    for my $i (0 .. 255) {
+        push @unicode_lc, lc(chr $i);
+        push @unicode_uc, uc(chr $i);
+        push @unicode_lcfirst, lcfirst(chr $i);
+        push @unicode_ucfirst, ucfirst(chr $i);
+    }
+
+    use if $Config{d_setlocale}, qw(POSIX locale_h);
+    use locale;
+    setlocale(LC_CTYPE, $utf8_locale);
+
+    for my $i (0 .. 255) {
+        is(lc(chr $i), $unicode_lc[$i], "In a UTF-8 locale, lc(chr $i) is the same as official Unicode");
+        is(uc(chr $i), $unicode_uc[$i], "In a UTF-8 locale, uc(chr $i) is the same as official Unicode");
+        is(lcfirst(chr $i), $unicode_lcfirst[$i], "In a UTF-8 locale, lcfirst(chr $i) is the same as official Unicode");
+        is(ucfirst(chr $i), $unicode_ucfirst[$i], "In a UTF-8 locale, ucfirst(chr $i) is the same as official Unicode");
+    }
+}

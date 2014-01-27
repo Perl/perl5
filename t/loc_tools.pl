@@ -195,9 +195,39 @@ sub is_locale_utf8 ($) { # Return a boolean as to if core Perl thinks the input
                         # is a UTF-8 locale
     my $locale = shift;
 
-    # The locale name doesn't necessarily have to have "utf8" in it to be a
-    # UTF-8 locale, but it works, mostly.
-    return $locale =~ /UTF-?8/i;
+    use locale;
+
+    my $save_locale = setlocale(&POSIX::LC_CTYPE());
+    if (! $save_locale) {
+        ok(0, "Verify could save previous locale");
+        return 0;
+    }
+
+    if (! setlocale(&POSIX::LC_CTYPE(), $locale)) {
+        ok(0, "Verify could setlocale to $locale");
+        return 0;
+    }
+
+    my $ret = 0;
+
+    # Use an op that gives different results for UTF-8 than any other locale.
+    # If a platform has UTF-8 locales, there should be at least one locale on
+    # most platforms with UTF-8 in its name, so if there is a bug in the op
+    # giving a false negative, we should get a failure for those locales as we
+    # go through testing all the locales on the platform.
+    if (CORE::fc(chr utf8::unicode_to_native(0xdf)) ne "ss") {
+        if ($locale =~ /UTF-?8/i) {
+            ok (0, "Verify $locale with UTF-8 in name is a UTF-8 locale");
+        }
+    }
+    else {
+        $ret = 1;
+    }
+
+    die "Couldn't restore locale '$save_locale'"
+        unless setlocale(&POSIX::LC_CTYPE(), $save_locale);
+
+    return $ret;
 }
 
 sub find_utf8_locale (;$) { # Return the name of locale that core Perl thinks

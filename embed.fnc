@@ -650,7 +650,7 @@ p	|UV	|_to_upper_title_latin1|const U8 c|NN U8 *p|NN STRLEN *lenp|const char S_o
 #endif
 AMp	|UV	|to_uni_lower	|UV c|NN U8 *p|NN STRLEN *lenp
 AMmp	|UV	|to_uni_fold	|UV c|NN U8 *p|NN STRLEN *lenp
-AMp	|UV	|_to_uni_fold_flags|UV c|NN U8 *p|NN STRLEN *lenp|const U8 flags
+AMp	|UV	|_to_uni_fold_flags|UV c|NN U8 *p|NN STRLEN *lenp|U8 flags
 ADMpPR	|bool	|is_uni_alnum_lc|UV c
 ADMpPR	|bool	|is_uni_alnumc_lc|UV c
 ADMpPR	|bool	|is_uni_idfirst_lc|UV c
@@ -1513,13 +1513,13 @@ Apd	|UV	|to_utf8_case	|NN const U8 *p|NN U8* ustrp|NULLOK STRLEN *lenp \
 				|NN SV **swashp|NN const char *normal|NULLOK const char *special
 Abmd	|UV	|to_utf8_lower	|NN const U8 *p|NN U8* ustrp|NULLOK STRLEN *lenp
 AMp	|UV	|_to_utf8_lower_flags	|NN const U8 *p|NN U8* ustrp  \
-				|NULLOK STRLEN *lenp|const bool flags
+				|NULLOK STRLEN *lenp|bool flags
 Abmd	|UV	|to_utf8_upper	|NN const U8 *p|NN U8* ustrp|NULLOK STRLEN *lenp
 AMp	|UV	|_to_utf8_upper_flags	|NN const U8 *p|NN U8* ustrp   \
-				|NULLOK STRLEN *lenp|const bool flags
+				|NULLOK STRLEN *lenp|bool flags
 Abmd	|UV	|to_utf8_title	|NN const U8 *p|NN U8* ustrp|NULLOK STRLEN *lenp
 AMp	|UV	|_to_utf8_title_flags	|NN const U8 *p|NN U8* ustrp   \
-				|NULLOK STRLEN *lenp|const bool flags
+				|NULLOK STRLEN *lenp|bool flags
 Abmd	|UV	|to_utf8_fold	|NN const U8 *p|NN U8* ustrp|NULLOK STRLEN *lenp
 AMp	|UV	|_to_utf8_fold_flags|NN const U8 *p|NN U8* ustrp       \
 				|NULLOK STRLEN *lenp|U8 flags
@@ -2089,7 +2089,7 @@ Es	|void	|ssc_or		|NN const RExC_state_t *pRExC_state \
 				|NN const regnode_ssc *or_with
 Es	|SV*	|get_ANYOF_cp_list_for_ssc                                 \
 				|NN const RExC_state_t *pRExC_state \
-				|NN const regnode_charclass_posixl* const node
+				|NN const regnode_charclass_posixl_fold* const node
 Ei	|void	|ssc_intersection|NN regnode_ssc *ssc \
 				|NN SV* const invlist|const bool invert_2nd
 Ei	|void	|ssc_union	|NN regnode_ssc *ssc \

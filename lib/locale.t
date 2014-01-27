@@ -602,10 +602,10 @@ foreach my $Locale (@Locale) {
 	next;
     }
 
-    # We test UTF-8 locales only under ':not_characters'; otherwise they have
-    # documented deficiencies.  Non- UTF-8 locales are tested only under plain
-    # 'use locale', as otherwise we would have to convert everything in them
-    # to Unicode.
+    # We test UTF-8 locales only under ':not_characters';  It is easier to
+    # test them in other test files than here.  Non- UTF-8 locales are tested
+    # only under plain 'use locale', as otherwise we would have to convert
+    # everything in them to Unicode.
 
     my %UPPER = ();     # All alpha X for which uc(X) == X and lc(X) != X
     my %lower = ();     # All alpha X for which lc(X) == X and uc(X) != X

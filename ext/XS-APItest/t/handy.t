@@ -1,5 +1,9 @@
 #!perl -w
 
+BEGIN {
+    require 'loc_tools.pl';   # Contains find_utf8_locale()
+}
+
 use strict;
 use Test::More;
 use Config;
@@ -13,6 +17,7 @@ sub truth($) {  # Converts values so is() works
 }
 
 my $locale;
+my $utf8_locale;
 if($Config{d_setlocale}) {
     require POSIX;
     $locale = POSIX::setlocale( &POSIX::LC_ALL, "C");
@@ -31,6 +36,8 @@ if($Config{d_setlocale}) {
                 last;
             }
         }
+
+        $utf8_locale = find_utf8_locale();
     }
 }
 
@@ -149,13 +156,30 @@ foreach my $name (sort keys %properties) {
             if (defined $locale) {
                 require locale; import locale;
 
+                POSIX::setlocale( &POSIX::LC_ALL, "C");
                 $ret = truth eval "test_is${function}_LC($i)";
                 if ($@) {
                     fail($@);
                 }
                 else {
                     my $truth = truth($matches && $i < 128);
-                    is ($ret, $truth, "is${function}_LC( $display_name ) == $truth");
+                    is ($ret, $truth, "is${function}_LC( $display_name ) == $truth (C locale)");
+                }
+            }
+
+            if (defined $utf8_locale) {
+                use locale;
+
+                POSIX::setlocale( &POSIX::LC_ALL, $utf8_locale);
+                $ret = truth eval "test_is${function}_LC($i)";
+                if ($@) {
+                    fail($@);
+                }
+                else {
+
+                    # UTF-8 locale works on full range 0-255
+                    my $truth = truth($matches && $i < 256);
+                    is ($ret, $truth, "is${function}_LC( $display_name ) == $truth ($utf8_locale)");
                 }
             }
         }
@@ -171,13 +195,28 @@ foreach my $name (sort keys %properties) {
         if (defined $locale && $name ne 'vertws') {
             require locale; import locale;
 
+            POSIX::setlocale( &POSIX::LC_ALL, "C");
             $ret = truth eval "test_is${function}_LC_uvchr('$i')";
             if ($@) {
                 fail($@);
             }
             else {
                 my $truth = truth($matches && ($i < 128 || $i > 255));
-                is ($ret, $truth, "is${function}_LC_uvchr( $display_name ) == $truth");
+                is ($ret, $truth, "is${function}_LC_uvchr( $display_name ) == $truth (C locale)");
+            }
+        }
+
+        if (defined $utf8_locale && $name ne 'vertws') {
+            use locale;
+
+            POSIX::setlocale( &POSIX::LC_ALL, $utf8_locale);
+            $ret = truth eval "test_is${function}_LC_uvchr('$i')";
+            if ($@) {
+                fail($@);
+            }
+            else {
+                my $truth = truth($matches);
+                is ($ret, $truth, "is${function}_LC_uvchr( $display_name ) == $truth ($utf8_locale)");
             }
         }
 
@@ -195,13 +234,28 @@ foreach my $name (sort keys %properties) {
         if ($name ne 'vertws' && defined $locale) {
             require locale; import locale;
 
+            POSIX::setlocale( &POSIX::LC_ALL, "C");
             $ret = truth eval "test_is${function}_LC_utf8('$char')";
             if ($@) {
                 fail($@);
             }
             else {
                 my $truth = truth($matches && ($i < 128 || $i > 255));
-                is ($ret, $truth, "is${function}_LC_utf8( $display_name ) == $truth");
+                is ($ret, $truth, "is${function}_LC_utf8( $display_name ) == $truth (C locale)");
+            }
+        }
+
+        if ($name ne 'vertws' && defined $utf8_locale) {
+            use locale;
+
+            POSIX::setlocale( &POSIX::LC_ALL, $utf8_locale);
+            $ret = truth eval "test_is${function}_LC_utf8('$char')";
+            if ($@) {
+                fail($@);
+            }
+            else {
+                my $truth = truth($matches);
+                is ($ret, $truth, "is${function}_LC_utf8( $display_name ) == $truth ($utf8_locale)");
             }
         }
     }
@@ -292,10 +346,11 @@ foreach my $name (sort keys %to_properties) {
             }
         }
 
-        if ($name ne 'TITLE' && defined $locale) {
+        if ($name ne 'TITLE') { # Test _LC;  titlecase is not defined in locales.
+            if (defined $locale) {
             require locale; import locale;
 
-            # Test _LC;  titlecase is not defined in locales.
+                POSIX::setlocale( &POSIX::LC_ALL, "C");
             $ret = eval "test_to${function}_LC($j)";
             if ($@) {
                 fail($@);
@@ -304,7 +359,32 @@ foreach my $name (sort keys %to_properties) {
                 my $should_be = ($i < 128 && $map_ref->[$index] != $missing)
                                 ? $map_ref->[$index] + $j - $list_ref->[$index]
                                 : $j;
-                is ($ret, $should_be, sprintf("to${function}_LC( $display_name ) == 0x%02X", $should_be));
+                is ($ret, $should_be, sprintf("to${function}_LC( $display_name ) == 0x%02X (C locale)", $should_be));
+            }
+            }
+
+            if (defined $utf8_locale) {
+                use locale;
+
+                SKIP: {
+                    skip "to${property}_LC does not work for LATIN SMALL LETTER SHARP S", 1
+                        if $j == 0xDF && ($name eq 'FOLD' || $name eq 'UPPER');
+
+                    POSIX::setlocale( &POSIX::LC_ALL, $utf8_locale);
+                    $ret = eval "test_to${function}_LC($j)";
+                    if ($@) {
+                        fail($@);
+                    }
+                    else {
+                        my $should_be = ($i < 256
+                                         && ! ref $map_ref->[$index]
+                                         && $map_ref->[$index] != $missing
+                                        )
+                                        ? $map_ref->[$index] + $j - $list_ref->[$index]
+                                        : $j;
+                        is ($ret, $should_be, sprintf("to${function}_LC( $display_name ) == 0x%02X ($utf8_locale)", $should_be));
+                    }
+                }
             }
         }
 

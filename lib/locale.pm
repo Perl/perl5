@@ -27,24 +27,6 @@ expressions, LC_COLLATE for string comparison, and LC_NUMERIC for number
 formatting).  Each "use locale" or "no locale"
 affects statements to the end of the enclosing BLOCK.
 
-Starting in Perl 5.16, a hybrid mode for this pragma is available,
-
-    use locale ':not_characters';
-
-which enables only the portions of locales that don't affect the character
-set (that is, all except LC_COLLATE and LC_CTYPE).  This is useful when mixing
-Unicode and locales, including UTF-8 locales.
-
-    use locale ':not_characters';
-    use open ":locale";           # Convert I/O to/from Unicode
-    use POSIX qw(locale_h);       # Import the LC_ALL constant
-    setlocale(LC_ALL, "");        # Generally required for the next
-                                  # statement to take effect
-    printf "%.2f\n", 12345.67'    # Locale-defined formatting
-    @x = sort @y;                 # Unicode-defined sorting order.
-                                  # (Note that you will get better
-                                  # results using Unicode::Collate.)
-
 See L<perllocale> for more detailed information on how Perl supports
 locales.
 

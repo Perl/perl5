@@ -802,11 +802,15 @@ L<http://www.cl.cam.ac.uk/~mgk25/unicode.html>
 
 How Does Unicode Work With Traditional Locales?
 
-Starting in Perl 5.16, you can specify
+If your locale is a UTF-8 locale, starting in Perl v5.20, Perl works
+well for all categories except C<LC_COLLATE> dealing with sorting and
+the C<cmp> operator.
+
+For other locales, starting in Perl 5.16, you can specify
 
     use locale ':not_characters';
 
-to get Perl to work well with traditional locales.  The catch is that you
+to get Perl to work well with them.  The catch is that you
 have to translate from the locale character set to/from Unicode
 yourself.  See L</Unicode IE<sol>O> above for how to
 

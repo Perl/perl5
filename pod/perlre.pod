@@ -254,15 +254,22 @@ the same as the compilation-time locale, and can differ from one match
 to another if there is an intervening call of the
 L<setlocale() function|perllocale/The setlocale function>.
 
-Perl only supports single-byte locales.  This means that code points
-above 255 are treated as Unicode no matter what locale is in effect.
+The only non-single-byte locale Perl supports is (starting in v5.20)
+UTF-8.  This means that code points above 255 are treated as Unicode no
+matter what locale is in effect (since UTF-8 implies Unicode).
+
 Under Unicode rules, there are a few case-insensitive matches that cross
-the 255/256 boundary.  These are disallowed under C</l>.  For example,
-0xFF (on ASCII platforms) does not caselessly match the character at
-0x178, C<LATIN CAPITAL LETTER Y WITH DIAERESIS>, because 0xFF may not be
-C<LATIN SMALL LETTER Y WITH DIAERESIS> in the current locale, and Perl
-has no way of knowing if that character even exists in the locale, much
-less what code point it is.
+the 255/256 boundary.  Except for UTF-8 locales in Perls v5.20 and
+later, these are disallowed under C</l>.  For example, 0xFF (on ASCII
+platforms) does not caselessly match the character at 0x178, C<LATIN
+CAPITAL LETTER Y WITH DIAERESIS>, because 0xFF may not be C<LATIN SMALL
+LETTER Y WITH DIAERESIS> in the current locale, and Perl has no way of
+knowing if that character even exists in the locale, much less what code
+point it is.
+
+In a UTF-8 locale in v5.20 and later, the only visible difference
+between locale and non-locale in regular expressions should be tainting
+(see L<perlsec>).
 
 This modifier may be specified to be the default by C<use locale>, but
 see L</Which character set modifier is in effect?>.

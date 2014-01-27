@@ -75,7 +75,7 @@ PERL_CALLCONV bool	Perl__is_utf8_perl_idstart(pTHX_ const U8 *p)
 #define PERL_ARGS_ASSERT__IS_UTF8_PERL_IDSTART	\
 	assert(p)
 
-PERL_CALLCONV UV	Perl__to_uni_fold_flags(pTHX_ UV c, U8 *p, STRLEN *lenp, const U8 flags)
+PERL_CALLCONV UV	Perl__to_uni_fold_flags(pTHX_ UV c, U8 *p, STRLEN *lenp, U8 flags)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3);
 #define PERL_ARGS_ASSERT__TO_UNI_FOLD_FLAGS	\
@@ -87,19 +87,19 @@ PERL_CALLCONV UV	Perl__to_utf8_fold_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *
 #define PERL_ARGS_ASSERT__TO_UTF8_FOLD_FLAGS	\
 	assert(p); assert(ustrp)
 
-PERL_CALLCONV UV	Perl__to_utf8_lower_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, const bool flags)
+PERL_CALLCONV UV	Perl__to_utf8_lower_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, bool flags)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT__TO_UTF8_LOWER_FLAGS	\
 	assert(p); assert(ustrp)
 
-PERL_CALLCONV UV	Perl__to_utf8_title_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, const bool flags)
+PERL_CALLCONV UV	Perl__to_utf8_title_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, bool flags)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT__TO_UTF8_TITLE_FLAGS	\
 	assert(p); assert(ustrp)
 
-PERL_CALLCONV UV	Perl__to_utf8_upper_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, const bool flags)
+PERL_CALLCONV UV	Perl__to_utf8_upper_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, bool flags)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT__TO_UTF8_UPPER_FLAGS	\
@@ -6616,7 +6616,7 @@ STATIC bool	S_could_it_be_a_POSIX_class(pTHX_ RExC_state_t *pRExC_state)
 #define PERL_ARGS_ASSERT_COULD_IT_BE_A_POSIX_CLASS	\
 	assert(pRExC_state)
 
-STATIC SV*	S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state, const regnode_charclass_posixl* const node)
+STATIC SV*	S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state, const regnode_charclass_posixl_fold* const node)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_GET_ANYOF_CP_LIST_FOR_SSC	\

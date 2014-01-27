@@ -1524,6 +1524,14 @@ FOLDS_TO_MULTI: characters that fold to multi-char strings
 => UTF8 :fast
 \p{_Perl_Folds_To_Multi_Char}
 
+PROBLEMATIC_LOCALE_FOLD : characters whose fold is problematic under locale
+=> UTF8 cp :fast
+\p{_Perl_Problematic_Locale_Folds}
+
+PROBLEMATIC_LOCALE_FOLDEDS_START : The first folded character of folds which are problematic under locale
+=> UTF8 cp :fast
+\p{_Perl_Problematic_Locale_Foldeds_Start}
+
 PATWS: pattern white space
 => generic generic_non_low cp : fast safe
 \p{PatWS}

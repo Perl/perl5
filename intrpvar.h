@@ -230,6 +230,7 @@ PERLVARI(I, dumpindent,	U16,	4)	/* number of blanks per dump
 PERLVAR(I, exit_flags,	U8)		/* was exit() unexpected, etc. */
 
 PERLVAR(I, utf8locale,	bool)		/* utf8 locale detected */
+PERLVAR(I, in_utf8_CTYPE_locale, bool)
 
 PERLVARA(I, colors,6,	char *)		/* values from PERL_RE_COLORS env var */
 

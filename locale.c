@@ -243,13 +243,23 @@ Perl_new_ctype(pTHX_ const char *newctype)
 
     PERL_ARGS_ASSERT_NEW_CTYPE;
 
+    PL_in_utf8_CTYPE_locale = is_cur_LC_category_utf8(LC_CTYPE);
+
+    /* A UTF-8 locale gets standard rules.  But note that code still has to
+     * handle this specially because of the three problematic code points */
+    if (PL_in_utf8_CTYPE_locale) {
+        Copy(PL_fold_latin1, PL_fold_locale, 256, U8);
+    }
+    else {
+
     for (i = 0; i < 256; i++) {
 	if (isUPPER_LC((U8) i))
-	    PL_fold_locale[i] = toLOWER_LC((U8) i);
+	    PL_fold_locale[i] = (U8) toLOWER_LC((U8) i);
 	else if (isLOWER_LC((U8) i))
-	    PL_fold_locale[i] = toUPPER_LC((U8) i);
+	    PL_fold_locale[i] = (U8) toUPPER_LC((U8) i);
 	else
 	    PL_fold_locale[i] = (U8) i;
+    }
     }
 
 #endif /* USE_LOCALE_CTYPE */

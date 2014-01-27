@@ -729,6 +729,83 @@
 : ( ( ( 0xEF == NATIVE_TO_LATIN1(((U8*)s)[0]) ) && ( 0xAC == NATIVE_TO_LATIN1(((U8*)s)[1]) ) ) && ( ( NATIVE_TO_LATIN1(((U8*)s)[2]) <= 0x86 ) || ( 0x93 <= NATIVE_TO_LATIN1(((U8*)s)[2]) && NATIVE_TO_LATIN1(((U8*)s)[2]) <= 0x97 ) ) ) ? 3 : 0 )
 
 /*
+	PROBLEMATIC_LOCALE_FOLD: characters whose fold is problematic under locale
+
+	\p{_Perl_Problematic_Locale_Folds}
+*/
+/*** GENERATED CODE ***/
+#define is_PROBLEMATIC_LOCALE_FOLD_utf8(s)                                  \
+( ( ( NATIVE_TO_LATIN1(((U8*)s)[0]) & 0x80 ) == 0x00 ) ? 1                  \
+: ( ( NATIVE_TO_LATIN1(((U8*)s)[0]) & 0xFE ) == 0xC2 ) ?                    \
+    2                                                                       \
+: ( 0xC4 == NATIVE_TO_LATIN1(((U8*)s)[0]) || 0xC7 == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ?\
+    ( ( 0xB0 == NATIVE_TO_LATIN1(((U8*)s)[1]) ) ? 2 : 0 )                   \
+: ( 0xC5 == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ?                               \
+    ( ( 0x89 == NATIVE_TO_LATIN1(((U8*)s)[1]) || 0xB8 == NATIVE_TO_LATIN1(((U8*)s)[1]) || 0xBF == NATIVE_TO_LATIN1(((U8*)s)[1]) ) ? 2 : 0 )\
+: ( 0xCE == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ?                               \
+    ( ( ( NATIVE_TO_LATIN1(((U8*)s)[1]) & 0xDF ) == 0x9C ) ? 2 : 0 )        \
+: ( 0xE1 == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ?                               \
+    ( ( ( 0xBA == NATIVE_TO_LATIN1(((U8*)s)[1]) ) && ( ( 0x96 <= NATIVE_TO_LATIN1(((U8*)s)[2]) && NATIVE_TO_LATIN1(((U8*)s)[2]) <= 0x9A ) || 0x9E == NATIVE_TO_LATIN1(((U8*)s)[2]) ) ) ? 3 : 0 )\
+: ( 0xE2 == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ?                               \
+    ( ( ( 0x84 == NATIVE_TO_LATIN1(((U8*)s)[1]) ) && ( ( NATIVE_TO_LATIN1(((U8*)s)[2]) & 0xFE ) == 0xAA ) ) ? 3 : 0 )\
+: ( ( ( 0xEF == NATIVE_TO_LATIN1(((U8*)s)[0]) ) && ( 0xAC == NATIVE_TO_LATIN1(((U8*)s)[1]) ) ) && ( NATIVE_TO_LATIN1(((U8*)s)[2]) <= 0x86 ) ) ? 3 : 0 )
+
+/*** GENERATED CODE ***/
+#define is_PROBLEMATIC_LOCALE_FOLD_cp(cp)                                   \
+( NATIVE_TO_UNI(cp) <= 0xFF || ( 0xFF < NATIVE_TO_UNI(cp) &&                \
+( 0x130 == NATIVE_TO_UNI(cp) || ( 0x130 < NATIVE_TO_UNI(cp) &&              \
+( 0x149 == NATIVE_TO_UNI(cp) || ( 0x149 < NATIVE_TO_UNI(cp) &&              \
+( 0x178 == NATIVE_TO_UNI(cp) || ( 0x178 < NATIVE_TO_UNI(cp) &&              \
+( 0x17F == NATIVE_TO_UNI(cp) || ( 0x17F < NATIVE_TO_UNI(cp) &&              \
+( 0x1F0 == NATIVE_TO_UNI(cp) || ( 0x1F0 < NATIVE_TO_UNI(cp) &&              \
+( 0x39C == NATIVE_TO_UNI(cp) || ( 0x39C < NATIVE_TO_UNI(cp) &&              \
+( 0x3BC == NATIVE_TO_UNI(cp) || ( 0x3BC < NATIVE_TO_UNI(cp) &&              \
+( ( 0x1E96 <= NATIVE_TO_UNI(cp) && NATIVE_TO_UNI(cp) <= 0x1E9A ) || ( 0x1E9A < NATIVE_TO_UNI(cp) &&\
+( 0x1E9E == NATIVE_TO_UNI(cp) || ( 0x1E9E < NATIVE_TO_UNI(cp) &&            \
+( 0x212A == NATIVE_TO_UNI(cp) || ( 0x212A < NATIVE_TO_UNI(cp) &&            \
+( 0x212B == NATIVE_TO_UNI(cp) || ( 0xFB00 <= NATIVE_TO_UNI(cp) && NATIVE_TO_UNI(cp) <= 0xFB06 ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) )
+
+/*
+	PROBLEMATIC_LOCALE_FOLDEDS_START: The first folded character of folds which are problematic under locale
+
+	\p{_Perl_Problematic_Locale_Foldeds_Start}
+*/
+/*** GENERATED CODE ***/
+#define is_PROBLEMATIC_LOCALE_FOLDEDS_START_utf8(s)                         \
+( ( ( NATIVE_TO_LATIN1(((U8*)s)[0]) & 0x80 ) == 0x00 ) ? 1                  \
+: ( ( NATIVE_TO_LATIN1(((U8*)s)[0]) & 0xFE ) == 0xC2 ) ?                    \
+    2                                                                       \
+: ( 0xC4 == NATIVE_TO_LATIN1(((U8*)s)[0]) || 0xC7 == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ?\
+    ( ( 0xB0 == NATIVE_TO_LATIN1(((U8*)s)[1]) ) ? 2 : 0 )                   \
+: ( 0xC5 == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ?                               \
+    ( ( 0x89 == NATIVE_TO_LATIN1(((U8*)s)[1]) || 0xB8 == NATIVE_TO_LATIN1(((U8*)s)[1]) || 0xBF == NATIVE_TO_LATIN1(((U8*)s)[1]) ) ? 2 : 0 )\
+: ( 0xCA == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ?                               \
+    ( ( 0xBC == NATIVE_TO_LATIN1(((U8*)s)[1]) ) ? 2 : 0 )                   \
+: ( 0xCE == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ?                               \
+    ( ( ( NATIVE_TO_LATIN1(((U8*)s)[1]) & 0xDF ) == 0x9C ) ? 2 : 0 )        \
+: ( 0xE1 == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ?                               \
+    ( ( ( 0xBA == NATIVE_TO_LATIN1(((U8*)s)[1]) ) && ( ( 0x96 <= NATIVE_TO_LATIN1(((U8*)s)[2]) && NATIVE_TO_LATIN1(((U8*)s)[2]) <= 0x9A ) || 0x9E == NATIVE_TO_LATIN1(((U8*)s)[2]) ) ) ? 3 : 0 )\
+: ( 0xE2 == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ?                               \
+    ( ( ( 0x84 == NATIVE_TO_LATIN1(((U8*)s)[1]) ) && ( ( NATIVE_TO_LATIN1(((U8*)s)[2]) & 0xFE ) == 0xAA ) ) ? 3 : 0 )\
+: ( ( ( 0xEF == NATIVE_TO_LATIN1(((U8*)s)[0]) ) && ( 0xAC == NATIVE_TO_LATIN1(((U8*)s)[1]) ) ) && ( NATIVE_TO_LATIN1(((U8*)s)[2]) <= 0x86 ) ) ? 3 : 0 )
+
+/*** GENERATED CODE ***/
+#define is_PROBLEMATIC_LOCALE_FOLDEDS_START_cp(cp)                          \
+( NATIVE_TO_UNI(cp) <= 0xFF || ( 0xFF < NATIVE_TO_UNI(cp) &&                \
+( 0x130 == NATIVE_TO_UNI(cp) || ( 0x130 < NATIVE_TO_UNI(cp) &&              \
+( 0x149 == NATIVE_TO_UNI(cp) || ( 0x149 < NATIVE_TO_UNI(cp) &&              \
+( 0x178 == NATIVE_TO_UNI(cp) || ( 0x178 < NATIVE_TO_UNI(cp) &&              \
+( 0x17F == NATIVE_TO_UNI(cp) || ( 0x17F < NATIVE_TO_UNI(cp) &&              \
+( 0x1F0 == NATIVE_TO_UNI(cp) || ( 0x1F0 < NATIVE_TO_UNI(cp) &&              \
+( 0x2BC == NATIVE_TO_UNI(cp) || ( 0x2BC < NATIVE_TO_UNI(cp) &&              \
+( 0x39C == NATIVE_TO_UNI(cp) || ( 0x39C < NATIVE_TO_UNI(cp) &&              \
+( 0x3BC == NATIVE_TO_UNI(cp) || ( 0x3BC < NATIVE_TO_UNI(cp) &&              \
+( ( 0x1E96 <= NATIVE_TO_UNI(cp) && NATIVE_TO_UNI(cp) <= 0x1E9A ) || ( 0x1E9A < NATIVE_TO_UNI(cp) &&\
+( 0x1E9E == NATIVE_TO_UNI(cp) || ( 0x1E9E < NATIVE_TO_UNI(cp) &&            \
+( 0x212A == NATIVE_TO_UNI(cp) || ( 0x212A < NATIVE_TO_UNI(cp) &&            \
+( 0x212B == NATIVE_TO_UNI(cp) || ( 0xFB00 <= NATIVE_TO_UNI(cp) && NATIVE_TO_UNI(cp) <= 0xFB06 ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) ) )
+
+/*
 	PATWS: pattern white space
 
 	\p{PatWS}

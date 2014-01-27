@@ -523,12 +523,13 @@ Variant C<isFOO_utf8> is like C<isFOO_uni>, but the input is a pointer to a
 classification of just the first (possibly multi-byte) character in the string
 is tested.
 
-Variant C<isFOO_LC> is like the C<isFOO_A> and C<isFOO_L1> variants, but uses
-the C library function that gives the named classification instead of
-hard-coded rules.  For example, C<isDIGIT_LC()> returns the result of calling
-C<isdigit()>.  This means that the result is based on the current locale, which
-is what C<LC> in the name stands for.  FALSE is always returned if the input
-won't fit into an octet.
+Variant C<isFOO_LC> is like the C<isFOO_A> and C<isFOO_L1> variants, but the
+result is based on the current locale, which is what C<LC> in the name stands
+for.  If Perl can determine that the current locale is a UTF-8 locale, it uses
+the published Unicode rules; otherwise, it uses the C library function that
+gives the named classification.  For example, C<isDIGIT_LC()> when not in a
+UTF-8 locale returns the result of calling C<isdigit()>.  FALSE is always
+returned if the input won't fit into an octet.
 
 Variant C<isFOO_LC_uvchr> is like C<isFOO_LC>, but is defined on any UV.  It
 returns the same as C<isFOO_LC> for input code points less than 256, and
@@ -1241,18 +1242,24 @@ EXTCONST U32 PL_charclass[];
 #define toUPPER_LATIN1_MOD(c) ((! FITS_IN_8_BITS(c))                       \
                                ? (c)                                       \
                                : PL_mod_latin1_uc[ (U8) (c) ])
+#define IN_UTF8_CTYPE_LOCALE PL_in_utf8_CTYPE_locale
 
 /* Use foo_LC_uvchr() instead  of these for beyond the Latin1 range */
 
 /* For internal core Perl use only: the base macro for defining macros like
  * isALPHA_LC, which uses the current LC_CTYPE locale.  'c' is the code point
- * (0-255) to check.  'utf8_locale_classnum' is currently unused.  The code to
- * actually do the test this is passed in 'non_utf8'.  If 'c' is above 255, 0
- * is returned.  For accessing the full range of possible code points under
- * locale rules, use the macros based on _generic_LC_uvchr instead of this. */
+ * (0-255) to check.  In a UTF-8 locale, the result is the same as calling
+ * isFOO_L1(); the 'utf8_locale_classnum' parameter is something like
+ * _CC_UPPER, which gives the class number for doing this.  For non-UTF-8
+ * locales, the code to actually do the test this is passed in 'non_utf8'.  If
+ * 'c' is above 255, 0 is returned.  For accessing the full range of possible
+ * code points under locale rules, use the macros based on _generic_LC_uvchr
+ * instead of this. */
 #define _generic_LC_base(c, utf8_locale_classnum, non_utf8)                    \
            (! FITS_IN_8_BITS(c)                                                \
            ? 0                                                                 \
+           : IN_UTF8_CTYPE_LOCALE                                              \
+             ? cBOOL(PL_charclass[(U8) (c)] & _CC_mask(utf8_locale_classnum))  \
              : cBOOL(non_utf8))
 
 /* For internal core Perl use only: a helper macro for defining macros like
@@ -1275,15 +1282,41 @@ EXTCONST U32 PL_charclass[];
  * helper macros */
 #define _generic_toLOWER_LC(c, function, cast)  (! FITS_IN_8_BITS(c)           \
                                                 ? (c)                          \
+                                                : (IN_UTF8_CTYPE_LOCALE)       \
+                                                  ? PL_latin1_lc[ (U8) (c) ]   \
                                                 : function((cast)(c)))
 
+/* Note that the result can be larger than a byte in a UTF-8 locale.  It
+ * returns a single value, so can't adequately return the upper case of LATIN
+ * SMALL LETTER SHARP S in a UTF-8 locale (which should be a string of two
+ * values "SS");  instead it asserts against that under DEBUGGING, and
+ * otherwise returns its input */
 #define _generic_toUPPER_LC(c, function, cast)                                 \
                     (! FITS_IN_8_BITS(c)                                       \
                     ? (c)                                                      \
-                      : function((cast)(c)))
+                    : ((! IN_UTF8_CTYPE_LOCALE)                                \
+                      ? function((cast)(c))                                    \
+                      : ((((U8)(c)) == MICRO_SIGN)                             \
+                        ? GREEK_CAPITAL_LETTER_MU                              \
+                        : ((((U8)(c)) == LATIN_SMALL_LETTER_Y_WITH_DIAERESIS)  \
+                          ? LATIN_CAPITAL_LETTER_Y_WITH_DIAERESIS              \
+                          : ((((U8)(c)) == LATIN_SMALL_LETTER_SHARP_S)         \
+                            ? (__ASSERT_(0) (c))                               \
+                            : PL_mod_latin1_uc[ (U8) (c) ])))))
 
+/* Note that the result can be larger than a byte in a UTF-8 locale.  It
+ * returns a single value, so can't adequately return the fold case of LATIN
+ * SMALL LETTER SHARP S in a UTF-8 locale (which should be a string of two
+ * values "ss"); instead it asserts against that under DEBUGGING, and
+ * otherwise returns its input */
 #define _generic_toFOLD_LC(c, function, cast)                                  \
-                      _generic_toLOWER_LC(c, function, cast)
+                    (LIKELY((c) != MICRO_SIGN)                                 \
+                    ? (__ASSERT_(! IN_UTF8_CTYPE_LOCALE                        \
+                                 || (c) != LATIN_SMALL_LETTER_SHARP_S)         \
+                       _generic_toLOWER_LC(c, function, cast))                 \
+                    : (IN_UTF8_CTYPE_LOCALE)                                   \
+                      ? GREEK_SMALL_LETTER_MU                                  \
+                      : (c))
 
 /* Use the libc versions for these if available. */
 #if defined(HAS_ISASCII) && ! defined(USE_NEXT_CTYPE)

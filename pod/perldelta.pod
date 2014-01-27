@@ -25,6 +25,16 @@ XXX New core language features go here.  Summarize user-visible core language
 enhancements.  Particularly prominent performance optimisations could go
 here, but most should go in the L</Performance Enhancements> section.
 
+=head2 UTF-8 locales now supported better under C<S<use locale>>
+
+A UTF-8 locale is one in which the character set is Unicode and the
+encoding is UTF-8.  Now, the POSIX C<LC_CTYPE> category operations under
+such a locale (within the scope of C<S<use locale>>), which include case
+changing (like C<lc()>, C<"\U">), and character classification (C<\w>,
+C<\D>, C<qr/[[:punct:]]/> work just as if not under locale, except taint
+rules are followed.  Prior to this, Perl only handled single-byte
+locales.  This resolves [perl #56820].
+
 =head2 C<S<use locale>> now compiles on systems without locale ability
 
 Previously doing this caused the program to not compile.  Within its

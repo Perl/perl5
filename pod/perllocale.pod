@@ -27,20 +27,22 @@ is controlled per application by using one pragma, one function call,
 and several environment variables.
 
 Unfortunately, there are quite a few deficiencies with the design (and
-often, the implementations) of locales, and their use for character sets
-has mostly been supplanted by Unicode (see L<perlunitut> for an
-introduction to that, and keep on reading here for how Unicode interacts
-with locales in Perl).
+often, the implementations) of locales.  Unicode was invented (see
+L<perlunitut> for an introduction to that) in part to address these
+design deficiencies, and nowadays, there is a series of "UTF-8
+locales", based on Unicode.  These are locales whose character set is
+Unicode, encoded in UTF-8.  Starting in v5.20, Perl fully supports
+UTF-8 locales, except for sorting and string comparisions.  (Use
+L<Unicode::Collate> for these.)  Perl continues to support the old
+non UTF-8 locales as well.
 
-Perl continues to support the old locale system, and starting in v5.16,
-provides a hybrid way to use the Unicode character set, along with the
-other portions of locales that may not be so problematic.
 (Unicode is also creating C<CLDR>, the "Common Locale Data Repository",
 L<http://cldr.unicode.org/> which includes more types of information than
 are available in the POSIX locale system.  At the time of this writing,
 there was no CPAN module that provides access to this XML-encoded data.
 However, many of its locales have the POSIX-only data extracted, and are
-available at L<http://unicode.org/Public/cldr/latest/>.)
+available as UTF-8 locales at
+L<http://unicode.org/Public/cldr/latest/>.)
 
 =head1 WHAT IS A LOCALE
 
@@ -166,7 +168,8 @@ Starting in v5.16, there is an optional parameter to this pragma:
 
     use locale ':not_characters';
 
-This parameter allows better mixing of locales and Unicode, and is
+This parameter allows better mixing of locales and Unicode (less useful
+in v5.20 and later), and is
 described fully in L</Unicode and UTF-8>, but briefly, it tells Perl to
 not use the character portions of the locale definition, that is
 the C<LC_CTYPE> and C<LC_COLLATE> categories.  Instead it will use the
@@ -738,6 +741,11 @@ C<$equal_in_locale> will be true if the collation locale specifies a
 dictionary-like ordering that ignores space characters completely and
 which folds case.
 
+Perl only supports single-byte locales for C<LC_COLLATE>.  This means
+that a UTF-8 locale likely will just give you machine-native ordering.
+Use L<Unicode::Collate> for the full implementation of the Unicode
+Collation Algorithm.
+
 If you have a single string that you want to check for "equality in
 locale" against several others, you might think you could gain a little
 efficiency by using C<POSIX::strxfrm()> in conjunction with C<eq>:
@@ -800,6 +808,21 @@ you may find--possibly to your surprise--that "|" moves from the
 C<POSIX::ispunct()> class to C<POSIX::isalpha()>.
 Unfortunately, this creates big problems for regular expressions. "|" still
 means alternation even though it matches C<\w>.
+
+Starting in v5.20, Perl supports UTF-8 locales for C<LC_CTYPE>, but
+otherwise Perl only supports single-byte locales, such as the ISO 8859
+series.  This means that wide character locales, for example for Asian
+languages, are not supported.  The UTF-8 locale support is actually a
+superset of POSIX locales, because it is really full Unicode behavior
+as if no locale were in effect at all (except for tainting; see
+L</SECURITY>).  POSIX locales, even UTF-8 ones,
+are lacking certain concepts in Unicode, such as the idea that changing
+the case of a character could expand to be more than one character.
+Perl in a UTF-8 locale, will give you that expansion.  Prior to v5.20,
+Perl treated a UTF-8 locale on some platforms like an ISO 8859-1 one,
+with some restrictions, and on other platforms more like the "C" locale.
+For releases v5.16 and v5.18, C<S<use locale 'not_characters>> could be
+used as a workaround for this (see L</Unicode and UTF-8>).
 
 Note that there are quite a few things that are unaffected by the
 current locale.  All the escape sequences for particular characters,
@@ -1277,9 +1300,11 @@ into bankers, bikers, gamers, and so on.
 =head1 Unicode and UTF-8
 
 The support of Unicode is new starting from Perl version v5.6, and more fully
-implemented in versions v5.8 and later.  See L<perluniintro>.  It is
-strongly recommended that when combining Unicode and locale (starting in
-v5.16), you use
+implemented in versions v5.8 and later.  See L<perluniintro>.
+
+Starting in Perl v5.20, UTF-8 locales are supported in Perl, except for
+C<LC_COLLATE> (use L<Unicode::Collate> instead).  If you have Perl v5.16
+or v5.18 and can't upgrade, you can use
 
     use locale ':not_characters';
 
@@ -1299,26 +1324,38 @@ into the locale.  (See L<open>).  On a per-filehandle basis, you can
 instead use the L<PerlIO::locale> module, or the L<Encode::Locale>
 module, both available from CPAN.  The latter module also has methods to
 ease the handling of C<ARGV> and environment variables, and can be used
-on individual strings.  Also, if you know that all your locales will be
+on individual strings.  If you know that all your locales will be
 UTF-8, as many are these days, you can use the L<B<-C>|perlrun/-C>
 command line switch.
 
 This form of the pragma allows essentially seamless handling of locales
-with Unicode.  The collation order will be Unicode's.  It is strongly
+with Unicode.  The collation order will be by Unicode code point order.
+It is strongly
 recommended that when you need to order and sort strings that you use
 the standard module L<Unicode::Collate> which gives much better results
 in many instances than you can get with the old-style locale handling.
 
-For pre-v5.16 Perls, or if you use the locale pragma without the
-C<:not_characters> parameter, Perl tries to work with both Unicode and
-locales--but there are problems.
+All the modules and switches just described can be used in v5.20 with
+just plain C<use locale>, and, should the input locales not be UTF-8,
+you'll get the less than ideal behavior, described below, that you get
+with pre-v5.16 Perls, or when you use the locale pragma without the
+C<:not_characters> parameter in v5.16 and v5.18.  If you are using
+exclusively UTF-8 locales in v5.20 and higher, the rest of this section
+does not apply to you.
 
-Perl does not handle multi-byte locales in this case, such as have been
-used for various
-Asian languages, such as Big5 or Shift JIS.  However, the increasingly
-common multi-byte UTF-8 locales, if properly implemented, may work
-reasonably well (depending on your C library implementation) in this
-form of the locale pragma, simply because both
+There are two cases, multi-byte and single-byte locales.  First
+multi-byte:
+
+The only multi-byte (or wide character) locale that Perl is ever likely
+to support is UTF-8.  This is due to the difficulty of implementation,
+the fact that high quality UTF-8 locales are now published for every
+area of the world (L<http://unicode.org/Public/cldr/latest/>), and that
+failing all that you can use the L<Encode> module to translate to/from
+your locale.  So, you'll have to do one of those things if you're using
+one of these locales, such as Big5 or Shift JIS.  For UTF-8 locales, in
+Perls (pre v5.20) that don't have full UTF-8 locale support, they may
+work reasonably well (depending on your C library implementation)
+simply because both
 they and Perl store characters that take up multiple bytes the same way.
 However, some, if not most, C library implementations may not process
 the characters in the upper half of the Latin-1 range (128 - 255)
@@ -1326,7 +1363,10 @@ properly under LC_CTYPE.  To see if a character is a particular type
 under a locale, Perl uses the functions like C<isalnum()>.  Your C
 library may not work for UTF-8 locales with those functions, instead
 only working under the newer wide library functions like C<iswalnum()>.
+However, they are treated like single-byte locales, and will have the
+restrictions described below.
 
+For single-byte locales,
 Perl generally takes the tack to use locale rules on code points that can fit
 in a single byte, and Unicode rules for those that can't (though this
 isn't uniformly applied, see the note at the end of this section).  This
@@ -1341,7 +1381,8 @@ for Unicode only, such as C<\p{Alpha}>.  They assume that 0xD7 always has its
 Unicode meaning (or the equivalent on EBCDIC platforms).  Since Latin1 is a
 subset of Unicode and 0xD7 is the multiplication sign in both Latin1 and
 Unicode, C<\p{Alpha}> will never match it, regardless of locale.  A similar
-issue occurs with C<\N{...}>.  It is therefore a bad idea to use C<\p{}> or
+issue occurs with C<\N{...}>.  Prior to v5.20, It is therefore a bad
+idea to use C<\p{}> or
 C<\N{}> under plain C<use locale>--I<unless> you can guarantee that the
 locale will be a ISO8859-1.  Use POSIX character classes instead.
 

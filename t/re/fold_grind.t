@@ -8,6 +8,7 @@ BEGIN {
     require './test.pl';
     require Config; import Config;
     skip_all_if_miniperl("no dynamic loading on miniperl, no Encode nor POSIX");
+    require './loc_tools.pl';
 }
 
 use charnames ":full";
@@ -84,16 +85,21 @@ my $okays;          # Number of ok's in current subtest
 my $this_iteration; # Number of possible tests in current subtest
 my $count = 0;      # Number of subtests = number of total tests
 
-sub run_test($$$) {
-    my ($test, $todo, $debug) = @_;
+sub run_test($$$$) {
+    my ($test, $todo, $do_we_output_locale_name, $debug) = @_;
 
     $debug = "" unless $DEBUG;
     my $res = eval $test;
 
+    if ($do_we_output_locale_name) {
+        $do_we_output_locale_name = 'setlocale(LC_CTYPE, "'
+                         .  POSIX::setlocale(&POSIX::LC_CTYPE)
+                         . '"); ';
+    }
     if (!$res || $list_all_tests) {
       # Failed or debug; output the result
       $count++;
-      ok($res, "$test; $debug");
+      ok($res, "$do_we_output_locale_name$test; $debug");
     } else {
       # Just count the test as passed
       $okays++;
@@ -411,6 +417,8 @@ sub pairs (@) {
     map { prefix $_[$_], @_[0..$_-1, $_+1..$#_] } 0..$#_
 }
 
+my $utf8_locale;
+
 my @charsets = qw(d u a aa);
 if($Config{d_setlocale}) {
     my $current_locale = POSIX::setlocale( &POSIX::LC_CTYPE, "C") // "";
@@ -423,10 +431,16 @@ if($Config{d_setlocale}) {
         # skip the locale tests in that situation.
         for my $i (128 .. 255) {
             my $char = chr($i);
-            goto untestable_locale if uc($char) ne $char || lc($char) ne $char;
+            goto skip_C_locale_tests if uc($char) ne $char || lc($char) ne $char;
         }
         push @charsets, 'l';
-      untestable_locale:
+
+      skip_C_locale_tests:
+
+        # Look for utf8 locale.  We use the pseudo-modifier 'L' to indicate
+        # that we really want /l, but change to a UTF-8 locale.
+        $utf8_locale = find_utf8_locale();
+        push @charsets, 'L' if defined $utf8_locale;
     }
 }
 
@@ -495,6 +509,15 @@ foreach my $test (sort { numerically } keys %tests) {
 
     # Now grind out tests, using various combinations.
     foreach my $charset (@charsets) {
+      my $charset_mod = lc $charset;
+      my $current_locale = "";
+      if ($charset_mod eq 'l') {
+        $current_locale = POSIX::setlocale(&POSIX::LC_CTYPE,
+                          ($charset eq 'L')
+                           ? $utf8_locale
+                           : 'C');
+        $current_locale = 'C locale' if $current_locale eq 'C';
+      }
       $okays = 0;
       $this_iteration = 0;
 
@@ -664,7 +687,7 @@ foreach my $test (sort { numerically } keys %tests) {
           next if $pattern_above_latin1 && ! $utf8_pattern;
 
           # Our testing of 'l' uses the POSIX locale, which is ASCII-only
-          my $uni_semantics = $charset ne 'l' && ($utf8_target || $charset eq 'u' || ($charset eq 'd' && $utf8_pattern) || $charset =~ /a/);
+          my $uni_semantics = $charset ne 'l' && ($utf8_target || $charset eq 'u' || $charset eq 'L' || ($charset eq 'd' && $utf8_pattern) || $charset =~ /a/);
           my $upgrade_pattern = "";
           $upgrade_pattern = ' utf8::upgrade($p);' if ! $pattern_above_latin1 && $utf8_pattern;
 
@@ -682,18 +705,18 @@ foreach my $test (sort { numerically } keys %tests) {
           $op = '!~' if $should_fail;
 
           my $todo = 0;  # No longer any todo's
-          my $eval = "my \$c = \"$lhs$rhs\"; my \$p = qr/(?$charset:^($rhs)\\1\$)/i;$upgrade_target$upgrade_pattern \$c $op \$p";
-          run_test($eval, $todo, "");
+          my $eval = "my \$c = \"$lhs$rhs\"; my \$p = qr/(?$charset_mod:^($rhs)\\1\$)/i;$upgrade_target$upgrade_pattern \$c $op \$p";
+          run_test($eval, $todo, ($charset_mod eq 'l'), "");
 
-          $eval = "my \$c = \"$lhs$rhs\"; my \$p = qr/(?$charset:^(?<grind>$rhs)\\k<grind>\$)/i;$upgrade_target$upgrade_pattern \$c $op \$p";
-          run_test($eval, $todo, "");
+          $eval = "my \$c = \"$lhs$rhs\"; my \$p = qr/(?$charset_mod:^(?<grind>$rhs)\\k<grind>\$)/i;$upgrade_target$upgrade_pattern \$c $op \$p";
+          run_test($eval, $todo, ($charset_mod eq 'l'), "");
 
           if ($lhs ne $rhs) {
-            $eval = "my \$c = \"$rhs$lhs\"; my \$p = qr/(?$charset:^($rhs)\\1\$)/i;$upgrade_target$upgrade_pattern \$c $op \$p";
-            run_test($eval, "", "");
+            $eval = "my \$c = \"$rhs$lhs\"; my \$p = qr/(?$charset_mod:^($rhs)\\1\$)/i;$upgrade_target$upgrade_pattern \$c $op \$p";
+            run_test($eval, "", ($charset_mod eq 'l'), "");
 
-            $eval = "my \$c = \"$rhs$lhs\"; my \$p = qr/(?$charset:^(?<grind>$rhs)\\k<grind>\$)/i;$upgrade_target$upgrade_pattern \$c $op \$p";
-            run_test($eval, "", "");
+            $eval = "my \$c = \"$rhs$lhs\"; my \$p = qr/(?$charset_mod:^(?<grind>$rhs)\\k<grind>\$)/i;$upgrade_target$upgrade_pattern \$c $op \$p";
+            run_test($eval, "", ($charset_mod eq 'l'), "");
           }
 
           # See if works on what could be a simple trie.
@@ -706,8 +729,8 @@ foreach my $test (sort { numerically } keys %tests) {
             use bytes;
             $alternate = 'q' x length $evaled;
           }
-          $eval = "my \$c = \"$lhs\"; my \$p = qr/$rhs|$alternate/i$charset;$upgrade_target$upgrade_pattern \$c $op \$p";
-          run_test($eval, "", "");
+          $eval = "my \$c = \"$lhs\"; my \$p = qr/$rhs|$alternate/i$charset_mod;$upgrade_target$upgrade_pattern \$c $op \$p";
+          run_test($eval, "", ($charset_mod eq 'l'), "");
 
           # Check that works when the folded character follows something that
           # is quantified.  This test knows the regex code internals to the
@@ -722,12 +745,12 @@ foreach my $test (sort { numerically } keys %tests) {
           # quick, and this insulates these tests from changes in the
           # implementation.)
           for my $quantifier ('?', '??', '*', '*?', '+', '+?', '{1,2}', '{1,2}?') {
-            $eval = "my \$c = \"_$lhs\"; my \$p = qr/(?$charset:.$quantifier$rhs)/i;$upgrade_target$upgrade_pattern \$c $op \$p";
-            run_test($eval, "", "");
-            $eval = "my \$c = \"__$lhs\"; my \$p = qr/(?$charset:(?:..)$quantifier$rhs)/i;$upgrade_target$upgrade_pattern \$c $op \$p";
-            run_test($eval, "", "");
-            $eval = "my \$c = \"__$lhs\"; my \$p = qr/(?$charset:(?:.|\\R)$quantifier$rhs)/i;$upgrade_target$upgrade_pattern \$c $op \$p";
-            run_test($eval, "", "");
+            $eval = "my \$c = \"_$lhs\"; my \$p = qr/(?$charset_mod:.$quantifier$rhs)/i;$upgrade_target$upgrade_pattern \$c $op \$p";
+            run_test($eval, "", ($charset_mod eq 'l'), "");
+            $eval = "my \$c = \"__$lhs\"; my \$p = qr/(?$charset_mod:(?:..)$quantifier$rhs)/i;$upgrade_target$upgrade_pattern \$c $op \$p";
+            run_test($eval, "", ($charset_mod eq 'l'), "");
+            $eval = "my \$c = \"__$lhs\"; my \$p = qr/(?$charset_mod:(?:.|\\R)$quantifier$rhs)/i;$upgrade_target$upgrade_pattern \$c $op \$p";
+            run_test($eval, "", ($charset_mod eq 'l'), "");
           }
 
           foreach my $bracketed (0, 1) {   # Put rhs in [...], or not
@@ -804,7 +827,7 @@ foreach my $test (sort { numerically } keys %tests) {
                             my $must_match = ! $can_match_null || $both_sides;
                             # for performance, but doing this missed many failures
                             #next unless $must_match;
-                            my $quantified = "(?$charset:$l_anchor$prepend$interior${quantifier}$append$r_anchor)";
+                            my $quantified = "(?$charset_mod:$l_anchor$prepend$interior${quantifier}$append$r_anchor)";
                             my $op;
                             if ($must_match && $should_fail)  {
                                 $op = 0;
@@ -854,7 +877,13 @@ foreach my $test (sort { numerically } keys %tests) {
                             }
 
 
-                            my $desc = "my \$c = \"$prepend$lhs$append\"; "
+                            my $desc = "";
+                            if ($charset_mod eq 'l') {
+                                $desc .= 'setlocale(LC_CTYPE, "'
+                                        . POSIX::setlocale(&POSIX::LC_CTYPE)
+                                        . '"); '
+                            }
+                            $desc .= "my \$c = \"$prepend$lhs$append\"; "
                                     . "my \$p = qr/$quantified/i;"
                                     . "$upgrade_target$upgrade_pattern "
                                     . "\$c " . ($op ? "=~" : "!~") . " \$p; ";
@@ -903,8 +932,9 @@ foreach my $test (sort { numerically } keys %tests) {
       unless($list_all_tests) {
         $count++;
         is $okays, $this_iteration, "$okays subtests ok for"
-          . " /$charset,"
-          . ' target="' . join("", @x_target) . '",'
+          . " /$charset_mod"
+          . (($charset_mod eq 'l') ? " ($current_locale)" : "")
+          . ', target="' . join("", @x_target) . '",'
           . ' pat="' . join("", @x_pattern) . '"';
       }
     }

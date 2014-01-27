@@ -13849,6 +13849,50 @@ sub compile_perl() {
     my $any_folds = $perl->add_match_table("_Perl_Any_Folds",
                     Description => "Code points that particpate in some fold",
                     );
+    my $loc_problem_folds = $perl->add_match_table(
+               "_Perl_Problematic_Locale_Folds",
+               Description =>
+                   "Code points that are in some way problematic under locale",
+    );
+
+    # This allows regexec.c to skip some work when appropriate.  Some of the
+    # entries in _Perl_Problematic_Locale_Folds are multi-character folds,
+    my $loc_problem_folds_start = $perl->add_match_table(
+               "_Perl_Problematic_Locale_Foldeds_Start",
+               Description =>
+                   "The first character of every sequence in _Perl_Problematic_Locale_Folds",
+    );
+
+    my $cf = property_ref('Case_Folding');
+
+    # Every character 0-255 is problematic because what each folds to depends
+    # on the current locale
+    $loc_problem_folds->add_range(0, 255);
+    $loc_problem_folds_start += $loc_problem_folds;
+
+    # Also problematic are anything these fold to outside the range.  Likely
+    # forever the only thing folded to by these outside the 0-255 range is the
+    # GREEK SMALL MU (from the MICRO SIGN), but it's easy to make the code
+    # completely general, which should catch any unexpected changes or errors.
+    # We look at each code point 0-255, and add its fold (including each part
+    # of a multi-char fold) to the list.  See the commit message for these
+    # changes for a more complete description of the MU issue.
+    foreach my $range ($loc_problem_folds->ranges) {
+        foreach my $code_point($range->start .. $range->end) {
+            my $fold_range = $cf->containing_range($code_point);
+            next unless defined $fold_range;
+
+            my @hex_folds = split " ", $fold_range->value;
+            my $start_cp = hex $hex_folds[0];
+            foreach my $i (0 .. @hex_folds - 1) {
+                my $cp = hex $hex_folds[$i];
+                next unless $cp > 255;    # Already have the < 256 ones
+
+                $loc_problem_folds->add_range($cp, $cp);
+                $loc_problem_folds_start->add_range($start_cp, $start_cp);
+            }
+        }
+    }
 
     my $folds_to_multi_char = $perl->add_match_table(
          "_Perl_Folds_To_Multi_Char",
@@ -13856,19 +13900,38 @@ sub compile_perl() {
               "Code points whose fold is a string of more than one character",
     );
 
-    foreach my $range (property_ref('Case_Folding')->ranges) {
+    # Look through all the known folds to populate these tables.
+    foreach my $range ($cf->ranges) {
         my $start = $range->start;
         my $end = $range->end;
         $any_folds->add_range($start, $end);
 
-        my @hex_code_points = split " ", $range->value;
-        if (@hex_code_points > 1) {
+        my @hex_folds = split " ", $range->value;
+        if (@hex_folds > 1) {   # Is multi-char fold
             $folds_to_multi_char->add_range($start, $end);
         }
 
-        foreach my $i (0 .. @hex_code_points - 1) {
-            my $code_point = hex $hex_code_points[$i];
-            $any_folds->add_range($code_point, $code_point);
+        my $found_locale_problematic = 0;
+
+        # Look at each of the folded-to characters...
+        foreach my $i (0 .. @hex_folds - 1) {
+            my $cp = hex $hex_folds[$i];
+            $any_folds->add_range($cp, $cp);
+
+            # The fold is problematic if any of the folded-to characters is
+            # already considered problematic.
+            if ($loc_problem_folds->contains($cp)) {
+                $loc_problem_folds->add_range($start, $end);
+                $found_locale_problematic = 1;
+            }
+        }
+
+        # If this is a problematic fold, add to the start chars the
+        # folding-from characters and first folded-to character.
+        if ($found_locale_problematic) {
+            $loc_problem_folds_start->add_range($start, $end);
+            my $cp = hex $hex_folds[0];
+            $loc_problem_folds_start->add_range($cp, $cp);
         }
     }
 
