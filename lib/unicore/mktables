@@ -13875,8 +13875,9 @@ sub compile_perl() {
     # GREEK SMALL MU (from the MICRO SIGN), but it's easy to make the code
     # completely general, which should catch any unexpected changes or errors.
     # We look at each code point 0-255, and add its fold (including each part
-    # of a multi-char fold) to the list.  See the commit message for these
-    # changes for a more complete description of the MU issue.
+    # of a multi-char fold) to the list.  See commit message
+    # 31f05a37c4e9c37a7263491f2fc0237d836e1a80 for a more complete description
+    # of the MU issue.
     foreach my $range ($loc_problem_folds->ranges) {
         foreach my $code_point($range->start .. $range->end) {
             my $fold_range = $cf->containing_range($code_point);
