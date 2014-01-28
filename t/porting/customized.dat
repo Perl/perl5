@@ -1,6 +1,8 @@
 Config::Perl::V cpan/Config-Perl-V/t/20_plv510.t 7263a40dcbaf1ee447f0209d3bbc029cc747c959
 Config::Perl::V cpan/Config-Perl-V/t/21_plv518.t ec23f4e34fb2f84f63f5588ad4a577530dbef5d2
 Digest::MD5 cpan/Digest-MD5/t/files.t bdbe05b705d9da305fedce7a9f4b6ba63250c7cf
+ExtUtils::MakeMaker cpan/ExtUtils-MakeMaker/lib/ExtUtils/MM_Any.pm 1fe5d3a6f9e8fe93d3db12a8f621fbd97641e9a6
+ExtUtils::MakeMaker cpan/ExtUtils-MakeMaker/lib/ExtUtils/MM_Unix.pm 5299ef72215cf4f911fc0e3a1205de40c348db6a
 Module::Build cpan/Module-Build/lib/Module/Build/ConfigData.pm c12eec359dba0cf6118f958fb98ddebdaa3787b9
 PerlIO::via::QuotedPrint cpan/PerlIO-via-QuotedPrint/t/QuotedPrint.t ca39f0146e89de02c746e199c45dcb3e5edad691
 Text::Balanced cpan/Text-Balanced/t/01_compile.t 1598cf491a48fa546260a2ec41142abe84da533d

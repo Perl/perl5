@@ -486,6 +486,8 @@ use File::Glob qw(:case);
             'PATCHING',
             'README.packaging',
         ],
+        # Waiting to be merged upstream: see CPAN RT#92535
+        'CUSTOMIZED'   => ['lib/ExtUtils/MM_Any.pm', 'lib/ExtUtils/MM_Unix.pm'],
     },
 
     'ExtUtils::Manifest' => {
