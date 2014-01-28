@@ -768,8 +768,8 @@ static const scan_data_t zero_scan_data =
             if (RExC_seen & REG_SEEN_RUN_ON_COMMENT)                        \
                 PerlIO_printf(Perl_debug_log,"REG_SEEN_RUN_ON_COMMENT ");   \
                                                                             \
-            if (RExC_seen & REG_SEEN_EXACTF_SHARP_S)                        \
-                PerlIO_printf(Perl_debug_log,"REG_SEEN_EXACTF_SHARP_S ");   \
+            if (RExC_seen & REG_SEEN_UNFOLDED_MULTI)                        \
+                PerlIO_printf(Perl_debug_log,"REG_SEEN_UNFOLDED_MULTI ");   \
                                                                             \
             if (RExC_seen & REG_SEEN_GOSTART)                               \
                 PerlIO_printf(Perl_debug_log,"REG_SEEN_GOSTART ");          \
@@ -3102,7 +3102,7 @@ S_make_trie_failtable(pTHX_ RExC_state_t *pRExC_state, regnode *source,  regnode
  * fold.  *min_subtract is set to the total delta number of characters of the
  * input nodes.
  *
- * And *has_exactf_sharp_s is set to indicate whether or not the node contains
+ * And *unfolded_multi_char is set to indicate whether or not the node contains
  * an unfolded multi-char fold.  This happens when whether the fold is valid or
  * not won't be known until runtime; namely for EXACTF nodes that contain LATIN
  * SMALL LETTER SHARP S, as only if the target string being matched against
@@ -3206,13 +3206,13 @@ S_make_trie_failtable(pTHX_ RExC_state_t *pRExC_state, regnode *source,  regnode
  *      using /iaa matching will be doing so almost entirely with ASCII
  *      strings, so this should rarely be encountered in practice */
 
-#define JOIN_EXACT(scan,min_subtract,has_exactf_sharp_s, flags) \
+#define JOIN_EXACT(scan,min_subtract,unfolded_multi_char, flags) \
     if (PL_regkind[OP(scan)] == EXACT) \
-        join_exact(pRExC_state,(scan),(min_subtract),has_exactf_sharp_s, (flags),NULL,depth+1)
+        join_exact(pRExC_state,(scan),(min_subtract),unfolded_multi_char, (flags),NULL,depth+1)
 
 STATIC U32
 S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
-                   UV *min_subtract, bool *has_exactf_sharp_s,
+                   UV *min_subtract, bool *unfolded_multi_char,
                    U32 flags,regnode *val, U32 depth)
 {
     /* Merge several consecutive EXACTish nodes into one. */
@@ -3297,7 +3297,7 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
     }
 
     *min_subtract = 0;
-    *has_exactf_sharp_s = FALSE;
+    *unfolded_multi_char = FALSE;
 
     /* Here, all the adjacent mergeable EXACTish nodes have been merged.  We
      * can now analyze for sequences of problematic code points.  (Prior to
@@ -3347,7 +3347,7 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
                         d += s_len;
                     }
                     else if (is_FOLDS_TO_MULTI_utf8(s)) {
-                        *has_exactf_sharp_s = TRUE;
+                        *unfolded_multi_char = TRUE;
                         Copy(s, d, s_len, U8);
                         d += s_len;
                     }
@@ -3448,7 +3448,7 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
 	    while (s < s_end) {
                 if (*s == LATIN_SMALL_LETTER_SHARP_S) {
                     OP(scan) = EXACTFA_NO_TRIE;
-                    *has_exactf_sharp_s = TRUE;
+                    *unfolded_multi_char = TRUE;
                     break;
                 }
                 s++;
@@ -3473,7 +3473,7 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
                     if (*s == LATIN_SMALL_LETTER_SHARP_S
                         && (OP(scan) == EXACTF || OP(scan) == EXACTFL))
                     {
-                        *has_exactf_sharp_s = TRUE;
+                        *unfolded_multi_char = TRUE;
                     }
                     s++;
                     continue;
@@ -3591,7 +3591,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
         UV min_subtract = 0;    /* How mmany chars to subtract from the minimum
                                    node length to get a real minimum (because
                                    the folded version may be shorter) */
-	bool has_exactf_sharp_s = FALSE;
+	bool unfolded_multi_char = FALSE;
 	/* Peephole optimizer: */
         DEBUG_OPTIMISE_MORE_r(
         {
@@ -3623,7 +3623,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
         /* Its not clear to khw or hv why this is done here, and not in the
          * clauses that deal with EXACT nodes.  khw's guess is that it's
          * because of a previous design */
-        JOIN_EXACT(scan,&min_subtract, &has_exactf_sharp_s, 0);
+        JOIN_EXACT(scan,&min_subtract, &unfolded_multi_char, 0);
 
 	/* Follow the next-chain of the current node and optimize
 	   away all the NOTHINGs from it.  */
@@ -4244,8 +4244,8 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		uc = utf8_to_uvchr_buf(s, s + l, NULL);
 		l = utf8_length(s, s + l);
 	    }
-	    if (has_exactf_sharp_s) {
-		RExC_seen |= REG_SEEN_EXACTF_SHARP_S;
+	    if (unfolded_multi_char) {
+		RExC_seen |= REG_SEEN_UNFOLDED_MULTI;
 	    }
 	    min += l - min_subtract;
             assert (min >= 0);
@@ -4550,7 +4550,10 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		      && !(data->flags & SF_HAS_EVAL)
 		      && !deltanext	/* atom is fixed width */
 		      && minnext != 0	/* CURLYM can't handle zero width */
-                      && ! (RExC_seen & REG_SEEN_EXACTF_SHARP_S) /* Nor \xDF */
+
+                         /* Nor characters whose fold at run-time may be
+                          * multi-character */
+                      && ! (RExC_seen & REG_SEEN_UNFOLDED_MULTI)
 		) {
 		    /* XXXX How to optimize if data == 0? */
 		    /* Optimize to a simpler form.  */
@@ -6046,8 +6049,8 @@ S_setup_longest(pTHX_ RExC_state_t *pRExC_state, SV* sv_longest,
            || (eol /* Can't have SEOL and MULTI */
                && (! meol || (RExC_flags & RXf_PMf_MULTILINE)))
           )
-            /* See comments for join_exact for why REG_SEEN_EXACTF_SHARP_S */
-        || (RExC_seen & REG_SEEN_EXACTF_SHARP_S))
+            /* See comments for join_exact for why REG_SEEN_UNFOLDED_MULTI */
+        || (RExC_seen & REG_SEEN_UNFOLDED_MULTI))
     {
         return FALSE;
     }
@@ -15198,9 +15201,9 @@ S_regtail_study(pTHX_ RExC_state_t *pRExC_state, regnode *p,
         regnode * const temp = regnext(scan);
 #ifdef EXPERIMENTAL_INPLACESCAN
         if (PL_regkind[OP(scan)] == EXACT) {
-	    bool has_exactf_sharp_s;	/* Unexamined in this routine */
+	    bool unfolded_multi_char;	/* Unexamined in this routine */
             if (join_exact(pRExC_state, scan, &min,
-                           &has_exactf_sharp_s, 1, val, depth+1))
+                           &unfolded_multi_char, 1, val, depth+1))
                 return EXACT;
 	}
 #endif
