@@ -1428,3 +1428,12 @@ print f();
 ####
 # Elements of %# should not be confused with $#{ array }
 () = ${#}{'foo'};
+####
+# [perl #121050] Prototypes with whitespace
+sub _121050(\$ \$) { }
+_121050($a,$b);
+sub _121050empty( ) {}
+() = _121050empty() + 1;
+>>>>
+_121050 $a, $b;
+() = _121050empty + 1;

@@ -3698,8 +3698,9 @@ sub check_proto {
     my @reals;
     # An unbackslashed @ or % gobbles up the rest of the args
     1 while $proto =~ s/(?<!\\)([@%])[^\]]+$/$1/;
+    $proto =~ s/^\s*//;
     while ($proto) {
-	$proto =~ s/^(\\?[\$\@&%*_]|\\\[[\$\@&%*]+\]|;)//;
+	$proto =~ s/^(\\?[\$\@&%*_]|\\\[[\$\@&%*]+\]|;)\s*//;
 	my $chr = $1;
 	if ($chr eq "") {
 	    return "&" if @args;
@@ -3856,7 +3857,7 @@ sub pp_entersub {
 	my $dproto = defined($proto) ? $proto : "undefined";
         if (!$declared) {
 	    return "$kid(" . $args . ")";
-	} elsif ($dproto eq "") {
+	} elsif ($dproto =~ /^\s*\z/) {
 	    return $kid;
 	} elsif ($dproto eq "\$" and is_scalar($exprs[0])) {
 	    # is_scalar is an excessively conservative test here:
