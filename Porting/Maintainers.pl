@@ -1267,7 +1267,6 @@ use File::Glob qw(:case);
 
     'version' => {
         'DISTRIBUTION' => 'JPEACOCK/version-0.9907.tar.gz',
-        'FILES'        => q[cpan/version],
         'FILES'        => q[cpan/version vutil.c vutil.h vxs.inc],
         'EXCLUDED' => [
             qr{^vutil/lib/},
@@ -1282,6 +1281,8 @@ use File::Glob qw(:case);
         'CUSTOMIZED'   => [
             qw( lib/version.pm
                 ),
+            # Waiting to be merged upstream: see CPAN RT#92536
+            't/07locale.t', 'lib/version/vpp.pm', 'vutil.c'
         ],
 
         'MAP' => {
