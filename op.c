@@ -2275,7 +2275,7 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
     case OP_AELEM:
     case OP_HELEM:
 	ref(cBINOPo->op_first, o->op_type);
-	if (type == OP_ENTERSUB &&
+	if ((type == OP_ENTERSUB || type == OP_GREPSTART) &&
 	     !(o->op_private & (OPpLVAL_INTRO | OPpDEREF)))
 	    o->op_private |= OPpLVAL_DEFER;
 	if (type == OP_LEAVESUBLV)

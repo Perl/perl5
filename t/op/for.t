@@ -4,7 +4,7 @@ BEGIN {
     require "test.pl";
 }
 
-plan(106);
+plan(108);
 
 # A lot of tests to check that reversed for works.
 
@@ -554,13 +554,17 @@ TODO: {
      }
 }
 
-TODO: {
-    local $TODO = "RT #2166: foreach spuriously autovivifies";
+{
     my %h;
     foreach (@h{a, b}) {}
-    if(keys(%h)) {
-        todo_skip("RT #2166: foreach spuriously autovivifies");
-    }
+    is scalar keys(%h), 0, "RT #2166: foreach does not autovivify helems";
+    undef %h;
+    my $foo;
+    foreach $foo (@h{a, b}) {}
+    ok !scalar keys(%h), 'RT #2166: foreach $var does not autovivify helems';
+    undef %h;
+    foreach my $bar (@h{a, b}) {}
+    ok !scalar keys(%h), 'RT #2166: foreach my $var does not autovivify helems';
 }
 
 sub {

@@ -25,7 +25,7 @@ sub FETCH {
 package main;
 require './test.pl';
 
-plan( tests => 13 );
+plan( tests => 14 );
 
 
 my ($a, $b, $c);
@@ -83,6 +83,9 @@ is(pos($x) || $@, 2, "|| propagates lvaluish context to its lhs");
 for ($h{k} || '') {}
 ok(!exists $h{k},
   "|| does not propagate lvaluish cx to a subscript on its lhs");
+
+for (${\''} || $h{l}) {}
+ok(!exists $h{l}, "foreach does not vivify rhs of ||");
 
 my $aa, $bb, $cc;
 $bb = 1;
