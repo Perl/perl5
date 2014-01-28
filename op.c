@@ -672,6 +672,14 @@ S_op_destroy(pTHX_ OP *o)
 
 /* Destructor */
 
+/*
+=for apidoc Am|void|op_free|OP *o
+
+Frees an op when it no longer linked in any optree.
+
+=cut
+*/
+
 void
 Perl_op_free(pTHX_ OP *o)
 {
@@ -985,6 +993,15 @@ S_find_and_forget_pmops(pTHX_ OP *o)
 	}
     }
 }
+
+/*
+=for apidoc Am|void|op_null|OP *o
+
+Neutralizes an op when it is no longer needed, but is still linked to from
+other ops.
+
+=cut
+*/
 
 void
 Perl_op_null(pTHX_ OP *o)
