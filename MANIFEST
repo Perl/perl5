@@ -46,6 +46,7 @@ cpan/autodie/lib/autodie.pm		Functions succeed or die with lexical scope
 cpan/autodie/lib/autodie/skip.pm
 cpan/autodie/lib/Fatal.pm		Make errors in functions/builtins fatal
 cpan/autodie/t/00-load.t		autodie - basic load
+cpan/autodie/t/args.t
 cpan/autodie/t/autodie_skippy.pm
 cpan/autodie/t/autodie.t		autodie - Basic functionality
 cpan/autodie/t/autodie_test_module.pm	autodie - test helper
@@ -101,6 +102,7 @@ cpan/autodie/t/no_carp.t
 cpan/autodie/t/open.t			autodie - Testing open
 cpan/autodie/t/recv.t			autodie - send/recv tests
 cpan/autodie/t/repeat.t			autodie - repeat autodie leak tests
+cpan/autodie/t/rt-74246.t
 cpan/autodie/t/scope_leak.t		autodie - file scope leak tests
 cpan/autodie/t/skip.t
 cpan/autodie/t/string-eval-basic.t	autodie - Basic string eval test

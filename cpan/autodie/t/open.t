@@ -53,12 +53,18 @@ unlike($@, qr/at \S+ line \d+\s+at \S+ line \d+/, "...but not too mentions");
 # Sniff to see if we can run 'true' on this system.  Changes we can't
 # on non-Unix systems.
 
+use Config;
+my @true = ($^O =~ /android/
+            || ($Config{usecrosscompile} && $^O eq 'nto' ))
+        ? ('sh', '-c', 'true $@', '--')
+        : 'true';
+
 eval {
     use autodie;
 
     die "Windows and VMS do not support multi-arg pipe" if $^O eq "MSWin32" or $^O eq 'VMS';
 
-    open(my $fh, '-|', "true");
+    open(my $fh, '-|', @true);
 };
 
 SKIP: {
@@ -68,10 +74,10 @@ SKIP: {
         use autodie;
 
         my $fh;
-        open $fh, "-|", "true";
-        open $fh, "-|", "true", "foo";
-        open $fh, "-|", "true", "foo", "bar";
-        open $fh, "-|", "true", "foo", "bar", "baz";
+        open $fh, "-|", @true;
+        open $fh, "-|", @true, "foo";
+        open $fh, "-|", @true, "foo", "bar";
+        open $fh, "-|", @true, "foo", "bar", "baz";
     };
 
     is $@, '', "multi arg piped open does not fail";
