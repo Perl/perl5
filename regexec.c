@@ -197,14 +197,14 @@ static const char* const non_utf8_target_but_utf8_required
  * although it may be done at run time beause of the REF possibility - more
  * investigation required. -- demerphq
 */
-#define JUMPABLE(rn) (      \
-    OP(rn) == OPEN ||       \
+#define JUMPABLE(rn) (                                                             \
+    OP(rn) == OPEN ||                                                              \
     (OP(rn) == CLOSE && (!cur_eval || cur_eval->u.eval.close_paren != ARG(rn))) || \
-    OP(rn) == EVAL ||   \
-    OP(rn) == SUSPEND || OP(rn) == IFMATCH || \
-    OP(rn) == PLUS || OP(rn) == MINMOD || \
-    OP(rn) == KEEPS || \
-    (PL_regkind[OP(rn)] == CURLY && ARG1(rn) > 0) \
+    OP(rn) == EVAL ||                                                              \
+    OP(rn) == SUSPEND || OP(rn) == IFMATCH ||                                      \
+    OP(rn) == PLUS || OP(rn) == MINMOD ||                                          \
+    OP(rn) == KEEPS ||                                                             \
+    (PL_regkind[OP(rn)] == CURLY && ARG1(rn) > 0)                                  \
 )
 #define IS_EXACT(rn) (PL_regkind[OP(rn)] == EXACT)
 
@@ -230,7 +230,7 @@ static const char* const non_utf8_target_but_utf8_required
   Search for mandatory following text node; for lookahead, the text must
   follow but for lookbehind (rn->flags != 0) we skip to the next step.
 */
-#define FIND_NEXT_IMPT(rn) STMT_START { \
+#define FIND_NEXT_IMPT(rn) STMT_START {                                   \
     while (JUMPABLE(rn)) { \
 	const OPCODE type = OP(rn); \
 	if (type == SUSPEND || PL_regkind[type] == CURLY) \
@@ -1254,13 +1254,13 @@ Perl_re_intuit_start(pTHX_
                                 : (utf8_target ? trie_utf8_fold : trie_latin_utf8_fold))
 
 #define REXEC_TRIE_READ_CHAR(trie_type, trie, widecharmap, uc, uscan, len, uvc, charid, foldlen, foldbuf, uniflags) \
-STMT_START {                               \
+STMT_START {                                                                        \
     STRLEN skiplen;                                                                 \
-    U8 flags = FOLD_FLAGS_FULL; \
+    U8 flags = FOLD_FLAGS_FULL;                                                     \
     switch (trie_type) {                                                            \
     case trie_utf8_exactfa_fold:                                                    \
-        flags |= FOLD_FLAGS_NOMIX_ASCII; \
-        /* FALL THROUGH */ \
+        flags |= FOLD_FLAGS_NOMIX_ASCII;                                            \
+        /* FALL THROUGH */                                                          \
     case trie_utf8_fold:                                                            \
         if ( foldlen>0 ) {                                                          \
             uvc = utf8n_to_uvchr( (const U8*) uscan, UTF8_MAXLEN, &len, uniflags ); \
@@ -1275,9 +1275,9 @@ STMT_START {                               \
             uscan = foldbuf + skiplen;                                              \
         }                                                                           \
         break;                                                                      \
-    case trie_latin_utf8_exactfa_fold: \
-        flags |= FOLD_FLAGS_NOMIX_ASCII; \
-        /* FALL THROUGH */ \
+    case trie_latin_utf8_exactfa_fold:                                              \
+        flags |= FOLD_FLAGS_NOMIX_ASCII;                                            \
+        /* FALL THROUGH */                                                          \
     case trie_latin_utf8_fold:                                                      \
         if ( foldlen>0 ) {                                                          \
             uvc = utf8n_to_uvchr( (const U8*) uscan, UTF8_MAXLEN, &len, uniflags ); \
@@ -1364,24 +1364,24 @@ REXEC_FBC_SCAN(                                       \
 	tmp = 1;                                      \
 )
 
-#define REXEC_FBC_TRYIT               \
+#define REXEC_FBC_TRYIT                       \
 if ((reginfo->intuit || regtry(reginfo, &s))) \
     goto got_it
 
 #define REXEC_FBC_CSCAN(CoNdUtF8,CoNd)                         \
-    if (utf8_target) {                                             \
+    if (utf8_target) {                                         \
 	REXEC_FBC_UTF8_CLASS_SCAN(CoNdUtF8);                   \
     }                                                          \
     else {                                                     \
 	REXEC_FBC_CLASS_SCAN(CoNd);                            \
     }
     
-#define DUMP_EXEC_POS(li,s,doutf8) \
+#define DUMP_EXEC_POS(li,s,doutf8)                          \
     dump_exec_pos(li,s,(reginfo->strend),(reginfo->strbeg), \
                 startpos, doutf8)
 
 
-#define UTF8_NOLOAD(TEST_NON_UTF8, IF_SUCCESS, IF_FAIL) \
+#define UTF8_NOLOAD(TEST_NON_UTF8, IF_SUCCESS, IF_FAIL)                        \
 	tmp = (s != reginfo->strbeg) ? UCHARAT(s - 1) : '\n';                  \
 	tmp = TEST_NON_UTF8(tmp);                                              \
 	REXEC_FBC_UTF8_SCAN(                                                   \
@@ -1394,7 +1394,7 @@ if ((reginfo->intuit || regtry(reginfo, &s))) \
 	    }                                                                  \
 	);                                                                     \
 
-#define UTF8_LOAD(TeSt1_UtF8, TeSt2_UtF8, IF_SUCCESS, IF_FAIL) \
+#define UTF8_LOAD(TeSt1_UtF8, TeSt2_UtF8, IF_SUCCESS, IF_FAIL)                 \
 	if (s == reginfo->strbeg) {                                            \
 	    tmp = '\n';                                                        \
 	}                                                                      \
@@ -1441,9 +1441,9 @@ if ((reginfo->intuit || regtry(reginfo, &s))) \
  * one, and compare it with the wordness of this one.  If they differ, we have
  * a boundary.  At the beginning of the string, pretend that the previous
  * character was a new-line */
-#define FBC_BOUND_COMMON(UTF8_CODE, TEST_NON_UTF8, IF_SUCCESS, IF_FAIL) \
+#define FBC_BOUND_COMMON(UTF8_CODE, TEST_NON_UTF8, IF_SUCCESS, IF_FAIL)        \
     if (utf8_target) {                                                         \
-		UTF8_CODE \
+		UTF8_CODE                                                      \
     }                                                                          \
     else {  /* Not utf8 */                                                     \
 	tmp = (s != reginfo->strbeg) ? UCHARAT(s - 1) : '\n';                  \
@@ -1458,7 +1458,7 @@ if ((reginfo->intuit || regtry(reginfo, &s))) \
 	    }                                                                  \
 	);                                                                     \
     }                                                                          \
-    if ((!prog->minlen && tmp) && (reginfo->intuit || regtry(reginfo, &s)))           \
+    if ((!prog->minlen && tmp) && (reginfo->intuit || regtry(reginfo, &s)))    \
 	goto got_it;
 
 /* We know what class REx starts with.  Try to find this position... */
@@ -2952,7 +2952,7 @@ phooey:
 
 /* Set which rex is pointed to by PL_reg_curpm, handling ref counting.
  * Do inc before dec, in case old and new rex are the same */
-#define SET_reg_curpm(Re2) \
+#define SET_reg_curpm(Re2)                          \
     if (reginfo->info_aux_eval) {                   \
 	(void)ReREFCNT_inc(Re2);		    \
 	ReREFCNT_dec(PM_GETRE(PL_reg_curpm));	    \
@@ -3217,11 +3217,11 @@ regmatch(), slabs allocated since entry are freed.
 
 #define DEBUG_STATE_pp(pp)				    \
     DEBUG_STATE_r({					    \
-	DUMP_EXEC_POS(locinput, scan, utf8_target);		    \
+	DUMP_EXEC_POS(locinput, scan, utf8_target);         \
 	PerlIO_printf(Perl_debug_log,			    \
 	    "    %*s"pp" %s%s%s%s%s\n",			    \
 	    depth*2, "",				    \
-	    PL_reg_name[st->resume_state],                     \
+	    PL_reg_name[st->resume_state],                  \
 	    ((st==yes_state||st==mark_state) ? "[" : ""),   \
 	    ((st==yes_state) ? "Y" : ""),                   \
 	    ((st==mark_state) ? "M" : ""),                  \
@@ -3497,140 +3497,143 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
 
         if ((is_utf8_pat && is_MULTI_CHAR_FOLD_utf8(pat))
              || (!is_utf8_pat && is_MULTI_CHAR_FOLD_latin1(pat)))
-    {
-        /* Multi-character folds require more context to sort out.  Also
-         * PL_utf8_foldclosures used below doesn't handle them, so have to be
-         * handled outside this routine */
-        use_chrtest_void = TRUE;
-    }
-    else { /* an EXACTFish node which doesn't begin with a multi-char fold */
-        c1 = is_utf8_pat ? valid_utf8_to_uvchr(pat, NULL) : *pat;
-        if (c1 > 256) {
-            /* Load the folds hash, if not already done */
-            SV** listp;
-            if (! PL_utf8_foldclosures) {
-                if (! PL_utf8_tofold) {
-                    U8 dummy[UTF8_MAXBYTES_CASE+1];
+        {
+            /* Multi-character folds require more context to sort out.  Also
+             * PL_utf8_foldclosures used below doesn't handle them, so have to
+             * be handled outside this routine */
+            use_chrtest_void = TRUE;
+        }
+        else { /* an EXACTFish node which doesn't begin with a multi-char fold */
+            c1 = is_utf8_pat ? valid_utf8_to_uvchr(pat, NULL) : *pat;
+            if (c1 > 256) {
+                /* Load the folds hash, if not already done */
+                SV** listp;
+                if (! PL_utf8_foldclosures) {
+                    if (! PL_utf8_tofold) {
+                        U8 dummy[UTF8_MAXBYTES_CASE+1];
 
-                    /* Force loading this by folding an above-Latin1 char */
-                    to_utf8_fold((U8*) HYPHEN_UTF8, dummy, NULL);
-                    assert(PL_utf8_tofold); /* Verify that worked */
-                }
-                PL_utf8_foldclosures = _swash_inversion_hash(PL_utf8_tofold);
-            }
-
-            /* The fold closures data structure is a hash with the keys being
-             * the UTF-8 of every character that is folded to, like 'k', and
-             * the values each an array of all code points that fold to its
-             * key.  e.g. [ 'k', 'K', KELVIN_SIGN ].  Multi-character folds are
-             * not included */
-            if ((! (listp = hv_fetch(PL_utf8_foldclosures,
-                                     (char *) pat,
-                                     UTF8SKIP(pat),
-                                     FALSE))))
-            {
-                /* Not found in the hash, therefore there are no folds
-                 * containing it, so there is only a single character that
-                 * could match */
-                c2 = c1;
-            }
-            else {  /* Does participate in folds */
-                AV* list = (AV*) *listp;
-                if (av_len(list) != 1) {
-
-                    /* If there aren't exactly two folds to this, it is outside
-                     * the scope of this function */
-                    use_chrtest_void = TRUE;
-                }
-                else {  /* There are two.  Get them */
-                    SV** c_p = av_fetch(list, 0, FALSE);
-                    if (c_p == NULL) {
-                        Perl_croak(aTHX_ "panic: invalid PL_utf8_foldclosures structure");
+                        /* Force loading this by folding an above-Latin1 char */
+                        to_utf8_fold((U8*) HYPHEN_UTF8, dummy, NULL);
+                        assert(PL_utf8_tofold); /* Verify that worked */
                     }
-                    c1 = SvUV(*c_p);
+                    PL_utf8_foldclosures = _swash_inversion_hash(PL_utf8_tofold);
+                }
 
-                    c_p = av_fetch(list, 1, FALSE);
-                    if (c_p == NULL) {
-                        Perl_croak(aTHX_ "panic: invalid PL_utf8_foldclosures structure");
+                /* The fold closures data structure is a hash with the keys
+                 * being the UTF-8 of every character that is folded to, like
+                 * 'k', and the values each an array of all code points that
+                 * fold to its key.  e.g. [ 'k', 'K', KELVIN_SIGN ].
+                 * Multi-character folds are not included */
+                if ((! (listp = hv_fetch(PL_utf8_foldclosures,
+                                        (char *) pat,
+                                        UTF8SKIP(pat),
+                                        FALSE))))
+                {
+                    /* Not found in the hash, therefore there are no folds
+                    * containing it, so there is only a single character that
+                    * could match */
+                    c2 = c1;
+                }
+                else {  /* Does participate in folds */
+                    AV* list = (AV*) *listp;
+                    if (av_len(list) != 1) {
+
+                        /* If there aren't exactly two folds to this, it is
+                         * outside the scope of this function */
+                        use_chrtest_void = TRUE;
                     }
-                    c2 = SvUV(*c_p);
+                    else {  /* There are two.  Get them */
+                        SV** c_p = av_fetch(list, 0, FALSE);
+                        if (c_p == NULL) {
+                            Perl_croak(aTHX_ "panic: invalid PL_utf8_foldclosures structure");
+                        }
+                        c1 = SvUV(*c_p);
 
-                    /* Folds that cross the 255/256 boundary are forbidden if
-                     * EXACTFL (and isnt a UTF8 locale), or EXACTFA and one is
-                     * ASCIII.  Since the pattern character is above 256, and
-                     * its only other match is below 256, the only legal match
-                     * will be to itself.  We have thrown away the original, so
-                     * have to compute which is the one above 255 */
-                    if ((c1 < 256) != (c2 < 256)) {
-                        if ((OP(text_node) == EXACTFL && ! IN_UTF8_CTYPE_LOCALE)
-                            || ((OP(text_node) == EXACTFA
-                                 || OP(text_node) == EXACTFA_NO_TRIE)
-                                && (isASCII(c1) || isASCII(c2))))
-                        {
-                            if (c1 < 256) {
-                                c1 = c2;
-                            }
-                            else {
-                                c2 = c1;
+                        c_p = av_fetch(list, 1, FALSE);
+                        if (c_p == NULL) {
+                            Perl_croak(aTHX_ "panic: invalid PL_utf8_foldclosures structure");
+                        }
+                        c2 = SvUV(*c_p);
+
+                        /* Folds that cross the 255/256 boundary are forbidden
+                         * if EXACTFL (and isnt a UTF8 locale), or EXACTFA and
+                         * one is ASCIII.  Since the pattern character is above
+                         * 256, and its only other match is below 256, the only
+                         * legal match will be to itself.  We have thrown away
+                         * the original, so have to compute which is the one
+                         * above 255 */
+                        if ((c1 < 256) != (c2 < 256)) {
+                            if ((OP(text_node) == EXACTFL
+                                 && ! IN_UTF8_CTYPE_LOCALE)
+                                || ((OP(text_node) == EXACTFA
+                                    || OP(text_node) == EXACTFA_NO_TRIE)
+                                    && (isASCII(c1) || isASCII(c2))))
+                            {
+                                if (c1 < 256) {
+                                    c1 = c2;
+                                }
+                                else {
+                                    c2 = c1;
+                                }
                             }
                         }
                     }
                 }
             }
-        }
-        else /* Here, c1 is < 255 */
-             if (utf8_target
-                 && HAS_NONLATIN1_FOLD_CLOSURE(c1)
-                 && ( ! (OP(text_node) == EXACTFL && ! IN_UTF8_CTYPE_LOCALE))
-                 && ((OP(text_node) != EXACTFA
-                      && OP(text_node) != EXACTFA_NO_TRIE)
-                     || ! isASCII(c1)))
-        {
-            /* Here, there could be something above Latin1 in the target which
-             * folds to this character in the pattern.  All such cases except
-             * LATIN SMALL LETTER Y WITH DIAERESIS have more than two characters
-             * involved in their folds, so are outside the scope of this
-             * function */
-            if (UNLIKELY(c1 == LATIN_SMALL_LETTER_Y_WITH_DIAERESIS)) {
-                c2 = LATIN_CAPITAL_LETTER_Y_WITH_DIAERESIS;
+            else /* Here, c1 is < 255 */
+                if (utf8_target
+                    && HAS_NONLATIN1_FOLD_CLOSURE(c1)
+                    && ( ! (OP(text_node) == EXACTFL && ! IN_UTF8_CTYPE_LOCALE))
+                    && ((OP(text_node) != EXACTFA
+                        && OP(text_node) != EXACTFA_NO_TRIE)
+                        || ! isASCII(c1)))
+            {
+                /* Here, there could be something above Latin1 in the target
+                 * which folds to this character in the pattern.  All such
+                 * cases except LATIN SMALL LETTER Y WITH DIAERESIS have more
+                 * than two characters involved in their folds, so are outside
+                 * the scope of this function */
+                if (UNLIKELY(c1 == LATIN_SMALL_LETTER_Y_WITH_DIAERESIS)) {
+                    c2 = LATIN_CAPITAL_LETTER_Y_WITH_DIAERESIS;
+                }
+                else {
+                    use_chrtest_void = TRUE;
+                }
             }
-            else {
-                use_chrtest_void = TRUE;
-            }
-        }
-        else { /* Here nothing above Latin1 can fold to the pattern character */
-            switch (OP(text_node)) {
+            else { /* Here nothing above Latin1 can fold to the pattern
+                      character */
+                switch (OP(text_node)) {
 
-                case EXACTFL:   /* /l rules */
-                    c2 = PL_fold_locale[c1];
-                    break;
-
-                case EXACTF:   /* This node only generated for non-utf8
-                                  patterns */
-                    assert(! is_utf8_pat);
-                    if (! utf8_target) {    /* /d rules */
-                        c2 = PL_fold[c1];
+                    case EXACTFL:   /* /l rules */
+                        c2 = PL_fold_locale[c1];
                         break;
-                    }
-                    /* FALLTHROUGH */
-                    /* /u rules for all these.  This happens to work for
-                     * EXACTFA as nothing in Latin1 folds to ASCII */
-                case EXACTFA_NO_TRIE:   /* This node only generated for
-                                           non-utf8 patterns */
-                    assert(! is_utf8_pat);
-                    /* FALL THROUGH */
-                case EXACTFA:
-                case EXACTFU_SS:
-                case EXACTFU:
-                    c2 = PL_fold_latin1[c1];
-                    break;
 
-		default:
-                    Perl_croak(aTHX_ "panic: Unexpected op %u", OP(text_node));
-                    assert(0); /* NOTREACHED */
+                    case EXACTF:   /* This node only generated for non-utf8
+                                    patterns */
+                        assert(! is_utf8_pat);
+                        if (! utf8_target) {    /* /d rules */
+                            c2 = PL_fold[c1];
+                            break;
+                        }
+                        /* FALLTHROUGH */
+                        /* /u rules for all these.  This happens to work for
+                        * EXACTFA as nothing in Latin1 folds to ASCII */
+                    case EXACTFA_NO_TRIE:   /* This node only generated for
+                                            non-utf8 patterns */
+                        assert(! is_utf8_pat);
+                        /* FALL THROUGH */
+                    case EXACTFA:
+                    case EXACTFU_SS:
+                    case EXACTFU:
+                        c2 = PL_fold_latin1[c1];
+                        break;
+
+                    default:
+                        Perl_croak(aTHX_ "panic: Unexpected op %u", OP(text_node));
+                        assert(0); /* NOTREACHED */
+                }
             }
         }
-    }
     }
 
     /* Here have figured things out.  Set up the returns */

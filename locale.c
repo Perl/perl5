@@ -251,15 +251,14 @@ Perl_new_ctype(pTHX_ const char *newctype)
         Copy(PL_fold_latin1, PL_fold_locale, 256, U8);
     }
     else {
-
-    for (i = 0; i < 256; i++) {
-	if (isUPPER_LC((U8) i))
-	    PL_fold_locale[i] = (U8) toLOWER_LC((U8) i);
-	else if (isLOWER_LC((U8) i))
-	    PL_fold_locale[i] = (U8) toUPPER_LC((U8) i);
-	else
-	    PL_fold_locale[i] = (U8) i;
-    }
+        for (i = 0; i < 256; i++) {
+            if (isUPPER_LC((U8) i))
+                PL_fold_locale[i] = (U8) toLOWER_LC((U8) i);
+            else if (isLOWER_LC((U8) i))
+                PL_fold_locale[i] = (U8) toUPPER_LC((U8) i);
+            else
+                PL_fold_locale[i] = (U8) i;
+        }
     }
 
 #endif /* USE_LOCALE_CTYPE */

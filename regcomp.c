@@ -3260,8 +3260,9 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
             const unsigned int oldl = STR_LEN(scan);
             regnode * const nnext = regnext(n);
 
-            /* XXX I (khw) kind of doubt that this works on platforms where
-             * U8_MAX is above 255 because of lots of other assumptions */
+            /* XXX I (khw) kind of doubt that this works on platforms (should
+             * Perl ever run on one) where U8_MAX is above 255 because of lots
+             * of other assumptions */
             /* Don't join if the sum can't fit into a single node */
             if (oldl + STR_LEN(n) > U8_MAX)
                 break;
@@ -3312,7 +3313,7 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
                                        multi-char folds expand to */
 
 	/* One pass is made over the node's string looking for all the
-	 * possibilities.  to avoid some tests in the loop, there are two main
+	 * possibilities.  To avoid some tests in the loop, there are two main
 	 * cases, for UTF-8 patterns (which can't have EXACTF nodes) and
 	 * non-UTF-8 */
 	if (UTF) {
@@ -11957,24 +11958,23 @@ tryagain:
                          * cancel out the increment that follows */
                         len += foldlen - 1;
                     }
-                        /* If this node only contains non-folding code points
-                         * so far, see if this new one is also non-folding */
-                        if (maybe_exact) {
-                            if (folded != ender) {
+                    /* If this node only contains non-folding code points so
+                     * far, see if this new one is also non-folding */
+                    if (maybe_exact) {
+                        if (folded != ender) {
+                            maybe_exact = FALSE;
+                        }
+                        else {
+                            /* Here the fold is the original; we have to check
+                             * further to see if anything folds to it */
+                            if (_invlist_contains_cp(PL_utf8_foldable,
+                                                        ender))
+                            {
                                 maybe_exact = FALSE;
                             }
-                            else {
-                                /* Here the fold is the original; we have
-                                 * to check further to see if anything
-                                 * folds to it */
-                                if (_invlist_contains_cp(PL_utf8_foldable,
-                                                         ender))
-                                {
-                                    maybe_exact = FALSE;
-                                }
-                            }
                         }
-                        ender = folded;
+                    }
+                    ender = folded;
 		}
 
 		if (next_is_quantifier) {
@@ -13583,14 +13583,14 @@ parseit:
                 || (namedclass > OOB_NAMEDCLASS
                     && namedclass < ANYOF_POSIXL_MAX))
             {
-            if (! need_class) {
-                need_class = 1;
-                if (SIZE_ONLY) {
-                RExC_size += ANYOF_POSIXL_SKIP - ANYOF_SKIP;
-            }
-            else {
-                RExC_emit += ANYOF_POSIXL_SKIP - ANYOF_SKIP;
-            }
+                if (! need_class) {
+                    need_class = 1;
+                    if (SIZE_ONLY) {
+                    RExC_size += ANYOF_POSIXL_SKIP - ANYOF_SKIP;
+                }
+                else {
+                    RExC_emit += ANYOF_POSIXL_SKIP - ANYOF_SKIP;
+                }
             }
             ANYOF_POSIXL_ZERO(ret);
             ANYOF_FLAGS(ret) |= ANYOF_POSIXL;

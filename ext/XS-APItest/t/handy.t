@@ -348,19 +348,19 @@ foreach my $name (sort keys %to_properties) {
 
         if ($name ne 'TITLE') { # Test _LC;  titlecase is not defined in locales.
             if (defined $locale) {
-            require locale; import locale;
+                require locale; import locale;
 
-                POSIX::setlocale( &POSIX::LC_ALL, "C");
-            $ret = eval "test_to${function}_LC($j)";
-            if ($@) {
-                fail($@);
-            }
-            else {
-                my $should_be = ($i < 128 && $map_ref->[$index] != $missing)
+                    POSIX::setlocale( &POSIX::LC_ALL, "C");
+                $ret = eval "test_to${function}_LC($j)";
+                if ($@) {
+                    fail($@);
+                }
+                else {
+                    my $should_be = ($i < 128 && $map_ref->[$index] != $missing)
                                 ? $map_ref->[$index] + $j - $list_ref->[$index]
                                 : $j;
-                is ($ret, $should_be, sprintf("to${function}_LC( $display_name ) == 0x%02X (C locale)", $should_be));
-            }
+                    is ($ret, $should_be, sprintf("to${function}_LC( $display_name ) == 0x%02X (C locale)", $should_be));
+                }
             }
 
             if (defined $utf8_locale) {
