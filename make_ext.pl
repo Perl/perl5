@@ -148,7 +148,11 @@ if ($is_Win32) {
     }
     (my $topdir = $perl) =~ s/\\[^\\]+$//;
     # miniperl needs to find perlglob and pl2bat
-    $ENV{PATH} = "$topdir;$topdir\\win32\\bin;$ENV{PATH}";
+    # However, avoid touching PATH when cross-compiling
+    # TO Win32 if the host os isn't Windows-based, since the
+    # path separator is likely different
+    $ENV{PATH} = "$topdir;$topdir\\win32\\bin;$ENV{PATH}"
+        if !IS_CROSS || $Config{hostosname} eq 'MSWin32';
     my $pl2bat = "$topdir\\win32\\bin\\pl2bat";
     unless (-f "$pl2bat.bat") {
 	my @args = ($perl, "-I$topdir\\lib", ("$pl2bat.pl") x 2);
@@ -159,7 +163,7 @@ if ($is_Win32) {
     print "In $build";
     foreach my $dir (@dirs) {
 	chdir($dir) or die "Cannot cd to $dir: $!\n";
-	(my $ext = Cwd::getcwd()) =~ s{/}{\\}g;
+	my $ext = Cwd::getcwd();
 	FindExt::scan_ext($ext);
 	FindExt::set_static_extensions(split ' ', $Config{static_ext});
 	chdir $build
@@ -190,8 +194,10 @@ if ($is_Win32) {
 	}
     }
 
-    chdir '..'
-	or die "Couldn't chdir to build directory: $!"; # now in the Perl build
+    if ( $build =~ /win32$/ ) {
+        chdir '..'
+            or die "Couldn't chdir to build directory: $!"; # now in the Perl build
+    }
 }
 elsif ($is_VMS) {
     $perl = $^X;
