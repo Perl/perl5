@@ -2871,9 +2871,14 @@ $define|true|[yY]*)
 	'') echo "Targetarch not defined." >&4; croak=y ;;
 	*)  echo "Using targetarch $targetarch." >&4 ;;
 	esac
+	case "$targetrun" in
+	wine) targethost='127.0.0.1' ;;
+	*)
 	case "$targethost" in
 	'') echo "Targethost not defined." >&4; croak=y ;;
 	*)  echo "Using targethost $targethost." >&4
+	esac
+	;;
 	esac
 	locincpth=' '
 	loclibpth=' '
@@ -3003,6 +3008,32 @@ EOF
 	    ;;
 	adb)
 	    $touch $run
+	    ;;
+	wine)
+        to=:
+        from=:
+cat >$run <<EOF
+#!/bin/sh
+env=''
+case "\$1" in
+-cwd)
+  shift
+  shift
+  ;;
+esac
+case "\$1" in
+-env)
+  shift
+  env=\$1
+  shift
+  ;;
+esac
+\$env wine \$@ > out.tmp
+status=\$?
+$tr -d '\\r' < out.tmp
+$rm -f out.tmp
+exit \$status
+EOF
 	    ;;
 	*)  echo "Unknown targetrun '$targetrun'" >&4
 	    exit 1
