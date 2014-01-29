@@ -1310,13 +1310,11 @@ EXTCONST U32 PL_charclass[];
  * values "ss"); instead it asserts against that under DEBUGGING, and
  * otherwise returns its input */
 #define _generic_toFOLD_LC(c, function, cast)                                  \
-                    (LIKELY((c) != MICRO_SIGN)                                 \
-                    ? (__ASSERT_(! IN_UTF8_CTYPE_LOCALE                        \
-                                 || (c) != LATIN_SMALL_LETTER_SHARP_S)         \
-                       _generic_toLOWER_LC(c, function, cast))                 \
-                    : (IN_UTF8_CTYPE_LOCALE)                                   \
+                    ((UNLIKELY((c) == MICRO_SIGN) && IN_UTF8_CTYPE_LOCALE)     \
                       ? GREEK_SMALL_LETTER_MU                                  \
-                      : (c))
+                      : (__ASSERT_(! IN_UTF8_CTYPE_LOCALE                      \
+                                   || (c) != LATIN_SMALL_LETTER_SHARP_S)       \
+                         _generic_toLOWER_LC(c, function, cast)))
 
 /* Use the libc versions for these if available. */
 #if defined(HAS_ISASCII) && ! defined(USE_NEXT_CTYPE)
