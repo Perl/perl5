@@ -79,6 +79,9 @@ perldtrace.h
 *.res
 *.RES
 
+# same but when cross-compiling using mingw64
+*.d
+
 # gcov build products. see L<perlhack/"GCC gcov Profiling">
 *.gcov
 *.gcda

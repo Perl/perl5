@@ -4081,6 +4081,7 @@ hints/unisysdynix.sh		Hints for named architecture
 hints/utekv.sh			Hints for named architecture
 hints/uwin.sh			Hints for named architecture
 hints/vos.sh			Hints for named architecture
+hints/w64-mingw32.sh		Hints for named architecture
 hv.c				Hash value code
 hv_func.h			Hash value static inline function header
 hv.h				Hash value header
