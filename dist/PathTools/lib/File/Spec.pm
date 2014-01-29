@@ -16,8 +16,19 @@ my %module = (MacOS   => 'Mac',
 	      dos     => 'OS2',   # Yes, File::Spec::OS2 works on DJGPP.
 	      cygwin  => 'Cygwin');
 
+# We can get called before Config.pm exists.
+eval { require Config };
 
-my $module = $module{$^O} || 'Unix';
+# If we're cross-compiling AND running on the host, File::Spec should
+# load the module for the host OS, not the target. This allows us to
+# cross-compile from a Unix-like system to Windows.
+my $host_os = !defined &DynaLoader::boot_DynaLoader
+            ? $Config::Config{hostosname}
+            : '';
+my $module = ($host_os
+                ? $module{$host_os}
+                : $module{$^O})
+            || 'Unix';
 
 require "File/Spec/$module.pm";
 @ISA = ("File::Spec::$module");

@@ -180,6 +180,8 @@ $VERSION =~ tr/_//;
 push @EXPORT, qw(getdcwd) if $^O eq 'MSWin32';
 @EXPORT_OK = qw(chdir abs_path fast_abs_path realpath fast_realpath);
 
+eval { require Config };
+
 # sys_cwd may keep the builtin command
 
 # All the functionality of this module may provided by builtins,
@@ -328,6 +330,15 @@ my %METHOD_MAP =
 
 $METHOD_MAP{NT} = $METHOD_MAP{MSWin32};
 
+# See the explanation on File::Spec. If we're cross compiling and
+# running on the host OS, then we don't want any of the target-specific
+# functions.
+if ( $Config::Config{usecrosscompile}
+    && !defined &DynaLoader::boot_DynaLoader
+    && $Config::Config{hostosname} ne $^O) {
+    delete $METHOD_MAP{$^O};
+    delete $METHOD_MAP{NT} if $^O eq 'MSWin32';
+}
 
 # Find the pwd command in the expected locations.  We assume these
 # are safe.  This prevents _backtick_pwd() consulting $ENV{PATH}
@@ -392,7 +403,7 @@ sub _backtick_pwd {
 unless ($METHOD_MAP{$^O}{cwd} or defined &cwd) {
     # The pwd command is not available in some chroot(2)'ed environments
     my $sep = $Config::Config{path_sep} || ':';
-    my $os = $^O;  # Protect $^O from tainting
+    my $os  = $Config::Config{hostosname} || $^O;  # Protect $^O from tainting
 
 
     # Try again to find a pwd, this time searching the whole PATH.
