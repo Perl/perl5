@@ -18809,7 +18809,10 @@ if set times val -f d_times; eval $csym; $val; then
 	eval $typedef_ask
 else
 	echo 'times() NOT found, hope that will do.' >&4
-	d_times="$undef"
+	case "$d_times" in
+	define) ;;
+	*) d_times="$undef";;
+	esac
 	clocktype='int'
 fi
 
