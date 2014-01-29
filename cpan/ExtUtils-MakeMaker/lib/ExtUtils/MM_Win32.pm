@@ -31,13 +31,17 @@ our $VERSION = '6.86';
 
 $ENV{EMXSHELL} = 'sh'; # to run `commands`
 
+my $cross_compiling_from_unix = $Config{usecrosscompile}
+                                && !defined &DynaLoader::boot_DynaLoader
+                                && $Config{hostosname} !~ /win/i;
+
 my ( $BORLAND, $GCC, $DLLTOOL ) = _identify_compiler_environment( \%Config );
 
 sub _identify_compiler_environment {
 	my ( $config ) = @_;
 
 	my $BORLAND = $config->{cc} =~ /^bcc/i ? 1 : 0;
-	my $GCC     = $config->{cc} =~ /\bgcc\b/i ? 1 : 0;
+	my $GCC     = $config->{cc} =~ /\bg(?:cc\b|\+\+)/i ? 1 : 0;
 	my $DLLTOOL = $config->{dlltool} || 'dlltool';
 
 	return ( $BORLAND, $GCC, $DLLTOOL );
@@ -107,6 +111,9 @@ used by default.
 
 sub maybe_command {
     my($self,$file) = @_;
+    if ($cross_compiling_from_unix) {
+        return $file if -x $file;
+    }
     my @e = exists($ENV{'PATHEXT'})
           ? split(/;/, $ENV{PATHEXT})
 	  : qw(.com .exe .bat .cmd);
@@ -135,6 +142,10 @@ Using \ for Windows.
 sub init_DIRFILESEP {
     my($self) = shift;
 
+    if ( $cross_compiling_from_unix ) {
+        return $self->{DIRFILESEP} = '/';
+    }
+    
     # The ^ makes sure its not interpreted as an escape in nmake
     $self->{DIRFILESEP} = $self->is_make_type('nmake') ? '^\\' :
                           $self->is_make_type('dmake') ? '\\\\'
@@ -150,9 +161,11 @@ Override some of the slower, portable commands with Windows specific ones.
 sub init_tools {
     my ($self) = @_;
 
-    $self->{NOOP}     ||= 'rem';
-    $self->{DEV_NULL} ||= '> NUL';
-
+    if ( !$cross_compiling_from_unix ) {
+        $self->{NOOP}     ||= 'rem';
+        $self->{DEV_NULL} ||= '> NUL';
+    }
+    
     $self->{FIXIN}    ||= $self->{PERL_CORE} ?
       "\$(PERLRUN) $self->{PERL_SRC}/win32/bin/pl2bat.pl" :
       'pl2bat.bat';
@@ -309,15 +322,19 @@ MAKE_FRAG
     push @m,
 q{	$(AR) }.($BORLAND ? '$@ $(OBJECT:^"+")'
 			  : ($GCC ? '-ru $@ $(OBJECT)'
-			          : '-out:$@ $(OBJECT)')).q{
+			          : '-out:$@ $(OBJECT)'))
+	       .sprintf(q{
 	$(CHMOD) $(PERM_RWX) $@
-	$(NOECHO) $(ECHO) "$(EXTRALIBS)" > $(INST_ARCHAUTODIR)\extralibs.ld
-};
+	$(NOECHO) $(ECHO) "$(EXTRALIBS)" > %s
+}, File::Spec->catfile('$(INST_ARCHAUTODIR)', 'extralibs.ld'));
 
     # Old mechanism - still available:
-    push @m, <<'MAKE_FRAG' if $self->{PERL_SRC} && $self->{EXTRALIBS};
-	$(NOECHO) $(ECHO) "$(EXTRALIBS)" >> $(PERL_SRC)\ext.libs
+    if ($self->{PERL_SRC} && $self->{EXTRALIBS}) {
+        my $ext_libs = File::Spec->catfile('$(PERL_SRC)', 'ext.libs');
+        push @m, sprintf(<<'MAKE_FRAG', $ext_libs);
+	$(NOECHO) $(ECHO) "$(EXTRALIBS)" >> %s
 MAKE_FRAG
+    }
 
     join('', @m);
 }
@@ -400,7 +417,7 @@ sub extra_clean_files {
 sub init_linker {
     my $self = shift;
 
-    $self->{PERL_ARCHIVE}       = "\$(PERL_INC)\\$Config{libperl}";
+    $self->{PERL_ARCHIVE}       = File::Spec->catfile('$(PERL_INC)', $Config{libperl});
     $self->{PERL_ARCHIVE_AFTER} = '';
     $self->{EXPORT_LIST}        = '$(BASEEXT).def';
 }
@@ -465,8 +482,8 @@ sub _normalize_path_name {
     my $self = shift;
     my $file = shift;
 
-    require Win32;
-    my $short = Win32::GetShortPathName($file);
+    eval { require Win32 };
+    my $short = eval { Win32::GetShortPathName($file) };
     return defined $short ? lc $short : lc $file;
 }
 
