@@ -1,4 +1,5 @@
 use strict;
+use File::Spec;
 use ExtUtils::MakeMaker;
 
 my $is_mswin    = $^O eq 'MSWin32';
@@ -53,12 +54,11 @@ DynaLoader.xs: $(DLSRC)
 
 sub MY::static {
     my $object;
-    if ($is_mswin || $is_netware) {
-	$object = '$(PERL_SRC)\\$(OBJECT)';
-    } elsif ($is_vms) {
-	$object = '$(PERL_SRC)$(OBJECT)';
-    } else {
-	$object = '$(PERL_SRC)/$(OBJECT)';
+    if ($is_vms) {
+        $object = '$(PERL_SRC)$(OBJECT)';
+    }
+    else {
+	$object = File::Spec->catfile('$(PERL_SRC)', '$(OBJECT)');
     }
 
 
