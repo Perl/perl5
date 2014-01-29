@@ -13589,15 +13589,15 @@ parseit:
                 if (! need_class) {
                     need_class = 1;
                     if (SIZE_ONLY) {
-                    RExC_size += ANYOF_POSIXL_SKIP - ANYOF_SKIP;
+                        RExC_size += ANYOF_POSIXL_SKIP - ANYOF_SKIP;
+                    }
+                    else {
+                        RExC_emit += ANYOF_POSIXL_SKIP - ANYOF_SKIP;
+                    }
                 }
-                else {
-                    RExC_emit += ANYOF_POSIXL_SKIP - ANYOF_SKIP;
-                }
+                ANYOF_POSIXL_ZERO(ret);
+                ANYOF_FLAGS(ret) |= ANYOF_POSIXL;
             }
-            ANYOF_POSIXL_ZERO(ret);
-            ANYOF_FLAGS(ret) |= ANYOF_POSIXL;
-        }
         }
 
 	if (namedclass > OOB_NAMEDCLASS) { /* this is a named class \blah */
