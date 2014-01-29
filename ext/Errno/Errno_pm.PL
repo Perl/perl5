@@ -167,7 +167,7 @@ sub get_files {
 	close(CPPI);
 
 	# invoke CPP and read the output
-	if ($IsMSWin32 || $^O eq 'NetWare') {
+	if (($IsMSWin32 || $^O eq 'NetWare') && $Config{cpprun}) {
 	    open(CPPO,"$Config{cpprun} $Config{cppflags} errno.c |") or
 		die "Cannot run '$Config{cpprun} $Config{cppflags} errno.c'";
 	} else {
@@ -230,7 +230,7 @@ sub write_errno_pm {
 	    $cpp =~ s/sys\$input//i;
 	    open(CPPO,"$cpp  errno.c |") or
 		die "Cannot exec $Config{cppstdin}";
-	} elsif ($IsMSWin32 || $^O eq 'NetWare') {
+	} elsif (($IsMSWin32 || $^O eq 'NetWare') && $Config{cpprun}) {
 	    open(CPPO,"$Config{cpprun} $Config{cppflags} errno.c |") or
 		die "Cannot run '$Config{cpprun} $Config{cppflags} errno.c'";
 	} elsif ($IsSymbian) {
@@ -250,8 +250,9 @@ sub write_errno_pm {
 	    next unless ($name, $expr) = /"(.*?)"\s*\[\s*\[\s*(.*?)\s*\]\s*\]/;
 	    next if $name eq $expr;
 	    $expr =~ s/\(?\(\s*[a-z_]\w*\s*\)([^\)]*)\)?/$1/i; # ((type)0xcafebabe) at alia
-	    $expr =~ s/((?:0x)?[0-9a-fA-F]+)[LU]+\b/$1/g; # 2147483647L et alia
+	    $expr =~ s/((?:0x)?[0-9a-fA-F]+)[luLU]+\b/$1/g; # 2147483647L et alia
 	    next if $expr =~ m/^[a-zA-Z]+$/; # skip some Win32 functions
+            next if $expr =~ m/\bL"\\\\[a-zA-Z]+\\\\"/; # skip some Win32 functions
 	    if($expr =~ m/^0[xX]/) {
 		$err{$name} = hex $expr;
 	    }
