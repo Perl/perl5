@@ -1973,15 +1973,13 @@ with some other statement, you can use one of these styles to avoid the warning:
     exec ('foo')   or print STDERR "couldn't exec foo: $!";
     { exec ('foo') }; print STDERR "couldn't exec foo: $!";
 
-If there is more than one argument in LIST, or if LIST is an array
-with more than one value, calls execvp(3) with the arguments in LIST.
-If there is only one scalar argument or an array with one element in it,
-the argument is checked for shell metacharacters, and if there are any,
-the entire argument is passed to the system's command shell for parsing
-(this is C</bin/sh -c> on Unix platforms, but varies on other platforms).
-If there are no shell metacharacters in the argument, it is split into
-words and passed directly to C<execvp>, which is more efficient.
-Examples:
+If there is more than one argument in LIST, this calls execvp(3) with the
+arguments in LIST.  If there is only one element in LIST, the argument is
+checked for shell metacharacters, and if there are any, the entire
+argument is passed to the system's command shell for parsing (this is
+C</bin/sh -c> on Unix platforms, but varies on other platforms).  If
+there are no shell metacharacters in the argument, it is split into words
+and passed directly to C<execvp>, which is more efficient.  Examples:
 
     exec '/bin/echo', 'Your arguments are: ', @ARGV;
     exec "sort $outfile | uniq";
