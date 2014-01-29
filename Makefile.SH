@@ -450,6 +450,20 @@ sh = $SH
 shextract = $shextract
 !GROK!THIS!
 
+case "$osname" in
+MSWin32)
+$spitshell >>$Makefile <<!GROK!THIS!
+CCFLAGS		= $ccflags
+GLOBEXE		= perlglob.exe
+!GROK!THIS!
+;;
+*)
+$spitshell >>$Makefile <<'!NO!SUBS!'
+GLOBEXE		= 
+!NO!SUBS!
+;;
+esac
+
 ## In the following dollars and backticks do not need the extra backslash.
 $spitshell >>$Makefile <<'!NO!SUBS!'
 
@@ -577,6 +591,7 @@ git_version.h: lib/Config_git.pl
 
 lib/Config_git.pl: $(MINIPERL_EXE) make_patchnum.pl
 	$(MINIPERL) make_patchnum.pl
+	-@$(CPS) git_version.h lib/CORE/
 
 # make sure that we recompile perl.c if the git version changes
 perl$(OBJ_EXT): git_version.h
@@ -668,8 +683,6 @@ globals$(OBJ_EXT): $(generated_headers)
 
 uudmap.h mg_data.h: bitcount.h
 
-generate_uudmap$(OBJ_EXT): mg_raw.h
-
 !NO!SUBS!
 
 # If hostgerenate isn't defined, then we have to build
@@ -684,6 +697,7 @@ bitcount.h: generate_uudmap\$(HOST_EXE_EXT)
 	-@for f in \$(generated_headers); do \\
 	    $from \$\$f; \\
 	done
+	-@\$(CPS) *.h lib/CORE/
 
 !GROK!THIS!
 
@@ -697,6 +711,7 @@ generate_uudmap$(HOST_EXE_EXT): generate_uudmap$(OBJ_EXT)
 $spitshell >>$Makefile <<'!NO!SUBS!'
 bitcount.h: generate_uudmap$(HOST_EXE_EXT)
 	./generate_uudmap$(HOST_EXE_EXT) $(generated_headers)
+	-@$(CPS) *.h lib/CORE/
 
 generate_uudmap$(HOST_EXE_EXT): generate_uudmap$(OBJ_EXT)
 	-@rm generate_uudmap$(HOST_EXE_EXT)
@@ -718,6 +733,19 @@ ext.libs: $(static_ext)
 	-@test -f ext.libs || touch ext.libs
 
 !NO!SUBS!
+
+case "$osname" in
+MSWin32)
+$spitshell >>$Makefile <<'!NO!SUBS!'
+$(GLOBEXE) : perlglob$(OBJ_EXT)
+	$(LD) -mconsole -o $@ $(LDDLFLAGS) perlglob$(OBJ_EXT)
+	$(CPS) $(GLOBEXE) t/$(GLOBEXE)
+
+perlglob$(OBJ_EXT)  : perlglob.c
+
+!NO!SUBS!
+;;
+esac
 
 # How to build libperl.  This is still rather convoluted.
 # Load up custom Makefile.SH fragment for shared loading and executables:
@@ -796,6 +824,12 @@ $(LIBPERL_NONSHR): $(obj)
 
 !NO!SUBS!
 	;;
+MSWin32)
+	$spitshell >>$Makefile <<'!NO!SUBS!'
+LIBPERLEXPORT		= perllib$(OBJ_EXT)
+
+!NO!SUBS!
+	;;
 esac
 
 if test -s $Makefile_s ; then
@@ -832,10 +866,37 @@ $(MINIDTRACE_O): perldtrace.d $(minindt_obj) perlmini$(OBJ_EXT)
 		;;
     esac
 	$spitshell >>$Makefile <<'!NO!SUBS!'
-$(LIBPERL): $& $(obj) $(DYNALOADER) $(LIBPERLEXPORT)
+$(LIBPERL): $& $(obj) $(static_ext) $(DYNALOADER) $(LIBPERLEXPORT)
 !NO!SUBS!
 	case "$useshrplib" in
 	true)
+		case "$osname" in
+		MSWin32)
+		$spitshell >>Makefile <<'!NO!SUBS!'
+	rm -f $@
+	$(MINIPERL) -w makedef.pl PLATFORM=win32 -DPERL_DLL=$(LIBPERL) \
+		$(CCFLAGS) \
+		CCTYPE="GCC" > perldll.def
+	$(LD) -o $@ $(SHRPLDFLAGS) -Wl,--base-file -Wl,perl.base $(obj) perllib$(OBJ_EXT) $(DYNALOADER) $(static_ext) $(libs) -lstdc++
+	dlltool.exe --output-lib libperl$(LIB_EXT) \
+		--dllname $(LIBPERL) \
+		--def perldll.def \
+		--base-file perl.base \
+		--output-exp perl.exp
+	$(LD) -o $@ $(SHRPLDFLAGS) $(obj) perllib$(OBJ_EXT) $(DYNALOADER) $(static_ext) $(libs) -lstdc++ perl.exp
+	$(CPS) $(LIBPERL) lib/CORE/
+
+perllib$(OBJ_EXT): perllibst.h
+	echo @`\$(CCCMD)` $(PLDLFLAGS) -xc++ perllib.c
+	@`\$(CCCMD)` $(PLDLFLAGS) -xc++ perllib.c
+
+perllibst.h:
+	$(MINIPERL) win32/create_perllibst_h.pl
+	$(CPS) perllibst.h lib/CORE/
+
+!NO!SUBS!
+		;;
+		*)
 		$spitshell >>$Makefile <<'!NO!SUBS!'
 	rm -f $@
 	$(LD) -o $@ $(SHRPLDFLAGS) $(obj) $(DYNALOADER) $(libs)
@@ -849,6 +910,8 @@ $(LIBPERL): $& $(obj) $(DYNALOADER) $(LIBPERLEXPORT)
 !NO!SUBS!
 			;;
 		esac
+	  ;;
+	  esac
 		;;
 	*)
 		$spitshell >>$Makefile <<'!NO!SUBS!'
@@ -943,12 +1006,29 @@ lib/buildcustomize.pl: $& $(mini_obj) write_buildcustomize.pl
 		;;
 	esac
 
+	case "${osname}" in
+	MSWin32)
+	$spitshell >>$Makefile <<'!NO!SUBS!'
+
+$(PERL_EXE): $& perlmain$(OBJ_EXT) $(LIBPERL) $(static_ext) ext.libs $(PERLEXPORT) write_buildcustomize.pl
+	-@rm -f miniperl.xok
+	$(LD) -mconsole -o $@ $(CLDFLAGS) $(CCDLFLAGS) perlmain$(OBJ_EXT) $(static_ext) $(LLIBPERL) `cat ext.libs` $(libs)
+	cp $(PERL_EXE) wperl.exe
+	$(MINIPERL) win32/bin/exetype.pl wperl.exe WINDOWS
+
+!NO!SUBS!
+	;;
+	*)
 	$spitshell >>$Makefile <<'!NO!SUBS!'
 
 $(PERL_EXE): $& perlmain$(OBJ_EXT) $(LIBPERL) $(static_ext) ext.libs $(PERLEXPORT) write_buildcustomize.pl
 	-@rm -f miniperl.xok
 	$(SHRPENV) $(CC) -o perl $(CLDFLAGS) $(CCDLFLAGS) perlmain$(OBJ_EXT) $(static_ext) $(LLIBPERL) `cat ext.libs` $(libs)
 
+!NO!SUBS!
+	;;
+	esac
+	$spitshell >>$Makefile <<'!NO!SUBS!'
 # Microperl.  This is just a convenience thing if one happens to
 # build also the full Perl and therefore the real big Makefile:
 # usually one should manually explicitly issue the below command.
@@ -958,7 +1038,6 @@ microperl:
 	$(MAKE) -f Makefile.micro
 
 !NO!SUBS!
-
 fi
 
 # Some environment have no system(), which mkpport uses.
@@ -1006,7 +1085,7 @@ uni.data: $(MINIPERL_EXE) $(CONFIGPM) lib/unicore/mktables $(nonxs_ext)
 # But also this ensures that all extensions are built before we try to scan
 # them, which picks up Devel::PPPort's documentation.
 pod/perltoc.pod: $(perltoc_pod_prereqs)  $(PERL_EXE) $(ext) pod/buildtoc
-	$(RUN_PERL) -f pod/buildtoc -q
+	$(MINIPERL) -f pod/buildtoc -q
 
 pod/perlapi.pod: pod/perlintern.pod
 
@@ -1468,7 +1547,7 @@ test_prep test-prep: test_prep_pre \$(MINIPERL_EXE) \$(unidatafiles) \$(PERL_EXE
 esac
 
 $spitshell >>$Makefile <<'!NO!SUBS!'
-test_prep_reonly: $(MINIPERL_EXE) $(PERL_EXE) $(dynamic_ext_re) $(TEST_PERL_DLL)
+test_prep_reonly: $(MINIPERL_EXE) $(PERL_EXE) $(dynamic_ext_re) $(TEST_PERL_DLL) $(GLOBEXE)
 	$(MINIPERL) make_ext.pl $(dynamic_ext_re) MAKE=$(MAKE) LIBPERL_A=$(LIBPERL) LINKTYPE=dynamic
 	cd t && (rm -f $(PERL_EXE); $(LNS) ../$(PERL_EXE) $(PERL_EXE))
 !NO!SUBS!
