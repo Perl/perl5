@@ -5,7 +5,7 @@ use strict;
 
 use Config;
 
-my @statics = split /\s+/, $Config{static_ext};
+my @statics = grep $_, split /\s+/, $Config{static_ext};
 open my $fh, '>', 'perllibst.h' or die "Failed to write to perllibst.h:$!";
 
 my @statics1 = map {local $_=$_;s/\//__/g;$_} @statics;
