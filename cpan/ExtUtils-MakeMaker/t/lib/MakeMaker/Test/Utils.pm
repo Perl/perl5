@@ -119,6 +119,8 @@ sub which_perl {
     my $perl = $^X;
     $perl ||= 'perl';
 
+    return $Config{hostperl} if $Config{hostperl};
+    
     # VMS should have 'perl' aliased properly
     return $perl if $Is_VMS;
 

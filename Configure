@@ -4869,6 +4869,7 @@ $rm -f testcpp.c testcpp.out
 case "$osname" in
 vos) cppfilter="tr '\\\\>' '/' |" ;; # path component separator is >
 os2) cppfilter="sed -e 's|\\\\\\\\|/|g' |" ;; # path component separator is \
+MSWin32|mswin32) cppfilter="$sed -e 's,[a-z]:,,g' | $tr '\\\\\\\\' '/' | $tr -d '\\r' |" ;; #  
 *)   cppfilter='' ;;
 esac
 
@@ -4879,8 +4880,10 @@ esac
 case "$ccname" in
     gcc)
 	$echo 'extern int foo;' > try.c
-	set X `$cppstdin -v try.c 2>&1 | $awk '/^#include </,/^End of search /'|$cppfilter $grep '/include'`
+	eval "$cppstdin -v < try.c 2>&1 | $awk '/^#include </,/^End of search /'|$cppfilter $grep '/include'" > incpth.tmp
+	set X `cat incpth.tmp`
 	shift
+	$rm -f incpth.tmp
 	if $test $# -gt 0; then
 	    incpth="$incpth $*"
 	    incpth="`$echo $incpth|$sed 's/^ //'`"
@@ -5655,10 +5658,11 @@ vos) testaccess=-e ;;
 *)   testaccess=-r ;;
 esac
 echo '#include <stdio.h>' > foo.c
+
 $cat >fieldn <<EOF
 $startsh
 $cppstdin $cppflags $cppminus <foo.c 2>/dev/null | \
-$grep '^[ 	]*#.*stdio\.h' | \
+$cppfilter $grep '^[ 	]*#.*stdio\.h' | \
 while read cline; do
 	pos=1
 	set \$cline
@@ -7732,6 +7736,19 @@ unknown)
 	done
 	$test -r $1 || set $sysroot/usr/ccs/lib/libc.$so
 	$test -r $1 || set $sysroot/lib/libsys_s$_a
+	case "$osname" in
+	MSWin32|mswin32) 
+	    for p in $libpth
+	    do
+	        if $test -e $p/libmsvcrt.a; then
+	            set `ls -l $p/libmsvcrt.a | awk '{print $NF}'`
+	            if $test "X$1" != X; then
+	                break
+	            fi
+	        fi
+	    done
+	    ;;
+	esac
 	;;
 *)
 	set blurfl
@@ -7816,12 +7833,14 @@ $sed 's/^/	/' libnames >&4
 echo " "
 $echo $n "This may take a while...$c" >&4
 
+# If we're cross-compiling for Win32, nm.exe will return lines with
+# \r\n, so get rid of the \r
 for file in $*; do
 	case $file in
 	*$so*) $nm $nm_so_opt $nm_opt $file 2>/dev/null;;
 	*) $nm $nm_opt $file 2>/dev/null;;
 	esac
-done >libc.tmp
+done | $tr -d '\r' >libc.tmp
 
 $echo $n ".$c"
 $grep fprintf libc.tmp > libc.ptf
@@ -7832,6 +7851,13 @@ if com="$sed -n -e 's/__IO//' -e 's/^.* $xxx  *//p'";\
 	eval $xscan;\
 	$contains '^fprintf$' libc.list >/dev/null 2>&1; then
 		eval $xrun
+# Special case to allow cross-compiling to Win32; basically the same
+# as the above, but using __imp instead of __IO. This is how functions
+# in the libmsvcrt.a provided by mingw will look like
+elif com="$sed -n -e 's/__imp//' -e 's/^.* $xxx  *//p'";\
+        eval $xscan;\
+        $contains '^fprintf$' libc.list >/dev/null 2>&1; then
+                eval $xrun
 elif com="$sed -n -e 's/^__*//' -e 's/^\([a-zA-Z_0-9$]*\).*xtern.*/\1/p'";\
 	eval $xscan;\
 	$contains '^fprintf$' libc.list >/dev/null 2>&1; then
