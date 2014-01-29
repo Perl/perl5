@@ -20,7 +20,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 710;  # Update this when adding/deleting tests.
+plan tests => 711;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1485,6 +1485,15 @@ EOP
 	*^R = *caretRglobwithnoscalar;
 	"" =~ /(?{42})/;
 	is $^R, 42, 'assigning to *^R does not result in a crash';
+	is runperl(
+	     stderr => 1,
+	     prog => 'eval q|'
+	            .' q-..- =~ /(??{undef *^R;q--})(?{42})/; '
+                    .' print qq-$^R\n-'
+	            .'|'
+	   ),
+	   "42\n",
+	   'undefining *^R within (??{}) does not result in a crash';
     }
 
     {

@@ -3749,6 +3749,9 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
     GET_RE_DEBUG_FLAGS_DECL;
 #endif
 
+    /* protect against undef(*^R) */
+    SAVEFREESV(SvREFCNT_inc_simple_NN(oreplsv));
+
     /* shut up 'may be used uninitialized' compiler warnings for dMULTICALL */
     multicall_oldcatch = 0;
     multicall_cv = NULL;
