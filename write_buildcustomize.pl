@@ -38,6 +38,7 @@ my @toolchain = qw(cpan/AutoLoader/lib
                    dist/Exporter/lib
                    ext/File-Find/lib
                    cpan/Text-Tabs/lib
+                   cpan/Text-ParseWords/lib
 		   dist/constant/lib
 		   );
 
