@@ -23,6 +23,10 @@ my $fh = open_new($target, undef, {by => $0}, 1);
 # need perl, not just miniperl.
 my $perl = defined $Config{usedl} ? '../miniperl' : '../perl';
 
+if ( $Config{hostperl} ) {
+    $perl = $Config{hostperl};
+}
+
 print $fh <<"EOT";
 PERL = $perl
 REALPERL = ../perl

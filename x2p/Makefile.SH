@@ -36,6 +36,11 @@ case "$usedl" in
     *)      perl="../perl" ;;
 esac
 
+case "$hostperl" in
+    '') ;;
+    *) perl="$hostperl" ;;
+esac
+
 cat >Makefile <<!GROK!THIS!
 # $RCSfile: Makefile.SH,v $$Revision: 4.1 $$Date: 92/08/07 18:29:07 $
 #
