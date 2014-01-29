@@ -675,7 +675,7 @@ S_op_destroy(pTHX_ OP *o)
 /*
 =for apidoc Am|void|op_free|OP *o
 
-Frees an op when it is no longer linked in any optree.
+Free an op. Only use this when an op is no longer linked to from any optree.
 
 =cut
 */
