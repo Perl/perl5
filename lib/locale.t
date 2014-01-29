@@ -612,6 +612,16 @@ foreach my $Locale (@Locale) {
     my %BoThCaSe = ();  # All alpha X for which uc(X) == lc(X) == X
 
     my $is_utf8_locale = is_locale_utf8($Locale);
+
+    debug "# is utf8 locale? = $is_utf8_locale\n";
+
+    my $radix = localeconv()->{decimal_point};
+    if ($radix !~ / ^ [[:ascii:]] + $/x) {
+        use bytes;
+        $radix = disp_chars(split "", $radix);
+    }
+    debug "# radix = $radix\n";
+
     if (! $is_utf8_locale) {
         use locale;
         @{$posixes{'word'}} = grep /\w/, map { chr } 0..255;
@@ -712,14 +722,14 @@ foreach my $Locale (@Locale) {
         }
     }
 
-    debug "# UPPER    = ", disp_chars(keys %UPPER), "\n";
-    debug "# lower    = ", disp_chars(keys %lower), "\n";
-    debug "# BoThCaSe = ", disp_chars(keys %BoThCaSe), "\n";
+    debug "# UPPER    = ", disp_chars(sort { ord $a <=> ord $b } keys %UPPER), "\n";
+    debug "# lower    = ", disp_chars(sort { ord $a <=> ord $b } keys %lower), "\n";
+    debug "# BoThCaSe = ", disp_chars(sort { ord $a <=> ord $b } keys %BoThCaSe), "\n";
     debug "# Unassigned = ", disp_chars(sort { ord $a <=> ord $b } keys %Unassigned), "\n";
 
     my @failures;
     my @fold_failures;
-    foreach my $x (sort keys %UPPER) {
+    foreach my $x (sort { ord $a <=> ord $b } keys %UPPER) {
         my $ok;
         my $fold_ok;
         if ($is_utf8_locale) {
@@ -748,7 +758,7 @@ foreach my $Locale (@Locale) {
     undef @failures;
     undef @fold_failures;
 
-    foreach my $x (sort keys %lower) {
+    foreach my $x (sort { ord $a <=> ord $b } keys %lower) {
         my $ok;
         my $fold_ok;
         if ($is_utf8_locale) {
@@ -784,7 +794,7 @@ foreach my $Locale (@Locale) {
 	}
     }
 
-    @Added_alpha = sort @Added_alpha;
+    @Added_alpha = sort { ord $a <=> ord $b } @Added_alpha;
 
     debug "# Added_alpha = ", disp_chars(@Added_alpha), "\n";
 
@@ -1645,7 +1655,7 @@ foreach my $Locale (@Locale) {
         my @f = ();
         ++$locales_test_number;
         $test_names{$locales_test_number} = 'Verify case insensitive matching works';
-        foreach my $x (sort keys %UPPER) {
+        foreach my $x (sort { ord $a <=> ord $b } keys %UPPER) {
             if (! $is_utf8_locale) {
                 my $y = lc $x;
                 next unless uc $y eq $x;
@@ -1713,7 +1723,7 @@ foreach my $Locale (@Locale) {
             }
         }
 
-	foreach my $x (sort keys %lower) {
+	foreach my $x (sort { ord $a <=> ord $b } keys %lower) {
             if (! $is_utf8_locale) {
                 my $y = uc $x;
                 next unless lc $y eq $x;
