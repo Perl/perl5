@@ -734,7 +734,7 @@ AMpd	|SV*	|parse_label	|U32 flags
 AMpd	|OP*	|parse_fullstmt	|U32 flags
 AMpd	|OP*	|parse_stmtseq	|U32 flags
 : Used in various files
-Ap	|void	|op_null	|NN OP* o
+Apd	|void	|op_null	|NN OP* o
 : FIXME. Used by Data::Alias
 EXp	|void	|op_clear	|NN OP* o
 Ap	|void	|op_refcnt_lock
@@ -1015,7 +1015,7 @@ Apd	|int	|vcmp		|NN SV *lhv|NN SV *rhv
 p	|PerlIO*|nextargv	|NN GV* gv
 AnpP	|char*	|ninstr		|NN const char* big|NN const char* bigend \
 				|NN const char* little|NN const char* lend
-Ap	|void	|op_free	|NULLOK OP* arg
+Apd	|void	|op_free	|NULLOK OP* arg
 Mp	|OP*	|op_unscope	|NULLOK OP* o
 #ifdef PERL_CORE
 p	|void	|opslab_free	|NN OPSLAB *slab
