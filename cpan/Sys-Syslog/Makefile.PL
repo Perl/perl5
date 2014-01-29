@@ -1,5 +1,6 @@
 use 5.005;
 use strict;
+use Config;
 use ExtUtils::MakeMaker;
 use File::Copy;
 use File::Spec;
@@ -33,7 +34,7 @@ if ($^O =~ /Win32/) {
     $virtual_path{'win32/Win32.pm'   } = '$(INST_LIBDIR)/Syslog/Win32.pm';
     $virtual_path{'win32/PerlLog.dll'} = '$(INST_ARCHAUTODIR)/PerlLog.dll';
 
-    push @extra_params, CCFLAGS => "-Ifallback";
+    push @extra_params, CCFLAGS => "$Config{ccflags} -Ifallback";
 
     # recreate the DLL from its uuencoded form if it's not here
     if (! -f File::Spec->catfile("win32", "$name.dll")) {
