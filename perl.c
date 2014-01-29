@@ -3912,7 +3912,7 @@ Perl_doing_taint(int argc, char *argv[], char *envp[])
     Uid_t euid = PerlProc_geteuid();
     Gid_t gid  = PerlProc_getgid();
     Gid_t egid = PerlProc_getegid();
-    (void)envp;
+    PERL_UNUSED_ARG(envp);
 
 #ifdef VMS
     uid  |=  gid << 16;
@@ -3920,6 +3920,8 @@ Perl_doing_taint(int argc, char *argv[], char *envp[])
 #endif
     if (uid && (euid != uid || egid != gid))
 	return 1;
+#else
+    PERL_UNUSED_ARG(envp);
 #endif /* !PERL_IMPLICIT_SYS */
     /* This is a really primitive check; environment gets ignored only
      * if -T are the first chars together; otherwise one gets
