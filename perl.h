@@ -288,7 +288,7 @@
  *
  */
 
-#if defined(__SYMBIAN32__) && defined(__GNUC__)
+#if (defined(__SYMBIAN32__) || defined(__MINGW64__)) && defined(__GNUC__)
 #  ifdef __cplusplus
 #    define PERL_UNUSED_DECL
 #  else
