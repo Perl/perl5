@@ -1,5 +1,6 @@
 use ExtUtils::MakeMaker;
 use Config;
+use File::Spec;
 
 # The existence of the ./sdbm/Makefile.PL file causes MakeMaker
 # to automatically include Makefile code for the targets
@@ -9,7 +10,9 @@ use Config;
 # Work around: Darwin ppc64 bug ignores archive contents when building bundles
 
 $define = ($^O eq 'MSWin32') ? '-DMSDOS' : '';
-if ($^O eq 'MSWin32') { $myextlib = 'sdbm\\libsdbm$(LIB_EXT)'; }
+if ($^O eq 'MSWin32') {
+    $myextlib = File::Spec->catfile('sdbm', 'libsdbm$(LIB_EXT)');
+}
 elsif ($^O eq 'darwin' && $Config{'ldflags'} =~/-arch ppc64/) {
                         $myextlib = '-all_load sdbm/libsdbm$(LIB_EXT)'; }
 else                  { $myextlib = 'sdbm/libsdbm$(LIB_EXT)';  }
