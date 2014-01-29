@@ -120,6 +120,7 @@ for file in `$cat .clist`; do
     cygwin)   uwinfix="-e s,\\\\\\\\,/,g" ;;
     posix-bc) uwinfix="-e s/\\*POSIX(\\(.*\\))/\\1/" ;;
     vos)      uwinfix="-e s/\#/\\\#/" ;;
+    MSWin32)  uwinfix="-e s,[a-z]:,,g -e s,\\\\\\\\,/,g" ;;
     *)        uwinfix="" ;;
     esac
     case "$file" in
