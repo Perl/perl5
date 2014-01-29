@@ -13581,6 +13581,11 @@ parseit:
                 else {
                     RExC_emit += ANYOF_POSIXL_FOLD_SKIP - ANYOF_SKIP;
                 }
+
+                /* We need to initialize this here because this node type has
+                 * this field, and will skip getting initialized when we get to
+                 * a posix class since are doing it here */
+                ANYOF_POSIXL_ZERO(ret);
             }
             if (ANYOF_LOCALE == ANYOF_POSIXL
                 || (namedclass > OOB_NAMEDCLASS
@@ -13594,8 +13599,8 @@ parseit:
                     else {
                         RExC_emit += ANYOF_POSIXL_SKIP - ANYOF_SKIP;
                     }
+                    ANYOF_POSIXL_ZERO(ret);
                 }
-                ANYOF_POSIXL_ZERO(ret);
                 ANYOF_FLAGS(ret) |= ANYOF_POSIXL;
             }
         }
