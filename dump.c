@@ -1555,8 +1555,6 @@ const struct flag_to_name regexp_extflags_names[] = {
     {RXf_ANCH_MBOL,       "ANCH_MBOL,"},
     {RXf_ANCH_SBOL,       "ANCH_SBOL,"},
     {RXf_ANCH_GPOS,       "ANCH_GPOS,"},
-    {RXf_GPOS_SEEN,       "GPOS_SEEN,"},
-    {RXf_GPOS_FLOAT,      "GPOS_FLOAT,"},
     {RXf_NO_INPLACE_SUBST, "NO_INPLACE_SUBST,"},
     {RXf_EVAL_SEEN,       "EVAL_SEEN,"},
     {RXf_CHECK_ALL,       "CHECK_ALL,"},
@@ -1586,6 +1584,8 @@ const struct flag_to_name regexp_core_intflags_names[] = {
     {PREGf_USE_RE_EVAL,     "USE_RE_EVAL,"},
     {PREGf_NOSCAN,          "NOSCAN,"},
     {PREGf_CANY_SEEN,       "CANY_SEEN,"},
+    {PREGf_GPOS_SEEN,       "GPOS_SEEN,"},
+    {PREGf_GPOS_FLOAT,      "GPOS_FLOAT,"},
 };
 
 void

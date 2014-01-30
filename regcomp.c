@@ -5180,7 +5180,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
 		flags &= ~SCF_DO_STCLASS;
 	}
 	else if (OP(scan) == GPOS) {
-	    if (!(RExC_rx->extflags & RXf_GPOS_FLOAT) &&
+            if (!(RExC_rx->intflags & PREGf_GPOS_FLOAT) &&
 	        !(delta || is_inf || (data && data->pos_delta)))
 	    {
 	        if (!(RExC_rx->extflags & RXf_ANCH) && (flags & SCF_DO_SUBSTR))
@@ -5188,7 +5188,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
 	        if (RExC_rx->gofs < (STRLEN)min)
 		    RExC_rx->gofs = min;
             } else {
-                RExC_rx->extflags |= RXf_GPOS_FLOAT;
+                RExC_rx->intflags |= PREGf_GPOS_FLOAT;
                 RExC_rx->gofs = 0;
             }
 	}
@@ -7016,7 +7016,7 @@ reStudy:
         r->minlen = minlen;
 
     if (RExC_seen & REG_SEEN_GPOS)
-	r->extflags |= RXf_GPOS_SEEN;
+        r->intflags |= PREGf_GPOS_SEEN;
     if (RExC_seen & REG_SEEN_LOOKBEHIND)
         r->extflags |= RXf_NO_INPLACE_SUBST; /* inplace might break the
                                                 lookbehind */
@@ -15414,7 +15414,7 @@ Perl_regdump(pTHX_ const regexp *r)
 	    PerlIO_printf(Perl_debug_log, "(GPOS)");
 	PerlIO_putc(Perl_debug_log, ' ');
     }
-    if (r->extflags & RXf_GPOS_SEEN)
+    if (r->intflags & PREGf_GPOS_SEEN)
 	PerlIO_printf(Perl_debug_log, "GPOS:%"UVuf" ", (UV)r->gofs);
     if (r->intflags & PREGf_SKIP)
 	PerlIO_printf(Perl_debug_log, "plus ");

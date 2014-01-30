@@ -2278,7 +2278,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
 
     startpos = stringarg;
 
-    if (prog->extflags & RXf_GPOS_SEEN) {
+    if (prog->intflags & PREGf_GPOS_SEEN) {
         MAGIC *mg;
 
         /* set reginfo->ganch, the position where \G can match */
@@ -2320,7 +2320,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
             else
                 startpos -= prog->gofs;
         }
-        else if (prog->extflags & RXf_GPOS_FLOAT)
+        else if (prog->intflags & PREGf_GPOS_FLOAT)
             startpos = strbeg;
     }
 
@@ -2360,7 +2360,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
                     && (s < stringarg))
             {
                 /* this should only be possible under \G */
-                assert(prog->extflags & RXf_GPOS_SEEN);
+                assert(prog->intflags & PREGf_GPOS_SEEN);
                 DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
                     "matched, but failing for REXEC_FAIL_ON_UNDERFLOW\n"));
                 goto phooey;
@@ -2573,8 +2573,11 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
 	    } /* end search for newline */
 	} /* end anchored/multiline check string search */
 	goto phooey;
-    } else if (RXf_GPOS_CHECK == (prog->extflags & RXf_GPOS_CHECK)) 
+    } else if ((prog->intflags & PREGf_GPOS_SEEN) && (prog->extflags & RXf_ANCH_GPOS))
     {
+        /* XXX: Why do we check both PREGf_GPOS_SEEN && RXf_ANCH_GPOS the
+         * latter can't be true unless the former is too as far as I know.
+         * Needs further investigation - Yves */
         /* For anchored \G, the only position it can match from is
          * (ganch-gofs); we already set startpos to this above; if intuit
          * moved us on from there, we can't possibly succeed */
@@ -2890,7 +2893,7 @@ got_it:
             && (prog->offs[0].start < stringarg - strbeg))
     {
         /* this should only be possible under \G */
-        assert(prog->extflags & RXf_GPOS_SEEN);
+        assert(prog->intflags & PREGf_GPOS_SEEN);
         DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
             "matched, but failing for REXEC_FAIL_ON_UNDERFLOW\n"));
         goto phooey;
