@@ -1268,6 +1268,7 @@ do_test('UTF-8 in a regular expression',
   my $base_count = Devel::Peek::SvREFCNT(%hash);
   my $ref = \%hash;
   is(Devel::Peek::SvREFCNT(%hash), $base_count + 1, "SvREFCNT on non-scalar");
+  ok(!eval { &Devel::Peek::SvREFCNT(1) }, "requires prototype");
 }
 {
 # utf8 tests
