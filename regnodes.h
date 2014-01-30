@@ -650,16 +650,16 @@ EXTCONST char * const PL_reg_extflags_name[] = {
 	"CHARSET1",         /* 0x00000040 : "CHARSET" - 0x000000e0 */
 	"CHARSET2",         /* 0x00000080 : "CHARSET" - 0x000000e0 */
 	"SPLIT",            /* 0x00000100 */
-	"ANCH_BOL",         /* 0x00000200 */
-	"ANCH_MBOL",        /* 0x00000400 */
-	"ANCH_SBOL",        /* 0x00000800 */
-	"ANCH_GPOS",        /* 0x00001000 */
-	"UNUSED1",          /* 0x00002000 */
-	"UNUSED2",          /* 0x00004000 */
+	"IS_ANCHORED",      /* 0x00000200 */
+	"UNUSED1",          /* 0x00000400 */
+	"UNUSED2",          /* 0x00000800 */
+	"UNUSED3",          /* 0x00001000 */
+	"UNUSED4",          /* 0x00002000 */
+	"UNUSED5",          /* 0x00004000 */
 	"NO_INPLACE_SUBST", /* 0x00008000 */
 	"EVAL_SEEN",        /* 0x00010000 */
-	"UNUSED3",          /* 0x00020000 */
-	"UNUSED4",          /* 0x00040000 */
+	"UNUSED8",          /* 0x00020000 */
+	"UNUSED9",          /* 0x00040000 */
 	"CHECK_ALL",        /* 0x00080000 */
 	"MATCH_UTF8",       /* 0x00100000 */
 	"USE_INTUIT_NOML",  /* 0x00200000 */
@@ -692,6 +692,10 @@ EXTCONST char * const PL_reg_intflags_name[] = {
 	"CANY_SEEN",                  /* 0x00000080 - PREGf_CANY_SEEN */
 	"GPOS_SEEN",                  /* 0x00000100 - PREGf_GPOS_SEEN */
 	"GPOS_FLOAT",                 /* 0x00000200 - PREGf_GPOS_FLOAT */
+	"ANCH_BOL",                   /* 0x00000400 - PREGf_ANCH_BOL */
+	"ANCH_MBOL",                  /* 0x00000800 - PREGf_ANCH_MBOL */
+	"ANCH_SBOL",                  /* 0x00001000 - PREGf_ANCH_SBOL */
+	"ANCH_GPOS",                  /* 0x00002000 - PREGf_ANCH_GPOS */
 };
 #endif /* DOINIT */
 

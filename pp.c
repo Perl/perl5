@@ -5644,7 +5644,7 @@ PP(pp_split)
     else if (do_utf8 == (RX_UTF8(rx) != 0) &&
 	     (RX_EXTFLAGS(rx) & RXf_USE_INTUIT) && !RX_NPARENS(rx)
 	     && (RX_EXTFLAGS(rx) & RXf_CHECK_ALL)
-	     && !(RX_EXTFLAGS(rx) & RXf_ANCH)) {
+             && !(RX_EXTFLAGS(rx) & RXf_IS_ANCHORED)) {
 	const int tail = (RX_EXTFLAGS(rx) & RXf_INTUIT_TAIL);
 	SV * const csv = CALLREG_INTUIT_STRING(rx);
 

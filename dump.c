@@ -1551,10 +1551,7 @@ const struct flag_to_name regexp_extflags_names[] = {
     {RXf_PMf_FOLD,        "PMf_FOLD,"},
     {RXf_PMf_EXTENDED,    "PMf_EXTENDED,"},
     {RXf_PMf_KEEPCOPY,    "PMf_KEEPCOPY,"},
-    {RXf_ANCH_BOL,        "ANCH_BOL,"},
-    {RXf_ANCH_MBOL,       "ANCH_MBOL,"},
-    {RXf_ANCH_SBOL,       "ANCH_SBOL,"},
-    {RXf_ANCH_GPOS,       "ANCH_GPOS,"},
+    {RXf_IS_ANCHORED,     "IS_ANCHORED,"},
     {RXf_NO_INPLACE_SUBST, "NO_INPLACE_SUBST,"},
     {RXf_EVAL_SEEN,       "EVAL_SEEN,"},
     {RXf_CHECK_ALL,       "CHECK_ALL,"},
@@ -1586,6 +1583,10 @@ const struct flag_to_name regexp_core_intflags_names[] = {
     {PREGf_CANY_SEEN,       "CANY_SEEN,"},
     {PREGf_GPOS_SEEN,       "GPOS_SEEN,"},
     {PREGf_GPOS_FLOAT,      "GPOS_FLOAT,"},
+    {PREGf_ANCH_BOL,        "ANCH_BOL,"},
+    {PREGf_ANCH_MBOL,       "ANCH_MBOL,"},
+    {PREGf_ANCH_SBOL,       "ANCH_SBOL,"},
+    {PREGf_ANCH_GPOS,       "ANCH_GPOS,"},
 };
 
 void

@@ -677,15 +677,15 @@ Perl_re_intuit_start(pTHX_
         }
 	check = prog->check_substr;
     }
-    if (prog->extflags & RXf_ANCH) { /* Match at \G, beg-of-str or after \n */
-	ml_anch = !( (prog->extflags & RXf_ANCH_SINGLE)
-		     || ( (prog->extflags & RXf_ANCH_BOL)
+    if (prog->intflags & PREGf_ANCH) { /* Match at \G, beg-of-str or after \n */
+        ml_anch = !( (prog->intflags & PREGf_ANCH_SINGLE)
+                     || ( (prog->intflags & PREGf_ANCH_BOL)
 			  && !multiline ) );	/* Check after \n? */
 
 	if (!ml_anch) {
           /* we are only allowed to match at BOS or \G */
 
-	  if (prog->extflags & RXf_ANCH_GPOS) {
+          if (prog->intflags & PREGf_ANCH_GPOS) {
             /* in this case, we hope(!) that the caller has already
              * set strpos to pos()-gofs, and will already have checked
              * that this anchor position is legal
@@ -1101,8 +1101,12 @@ Perl_re_intuit_start(pTHX_
 	    s = strpos;
 	    /* XXXX If the check string was an implicit check MBOL, then we need to unset the relevant flag
 		    see http://bugs.activestate.com/show_bug.cgi?id=87173 */
-	    if (prog->intflags & PREGf_IMPLICIT)
-		prog->extflags &= ~RXf_ANCH_MBOL;
+            if (prog->intflags & PREGf_IMPLICIT) {
+                prog->intflags &= ~PREGf_ANCH_MBOL;
+                /* maybe we have no anchors left after this... */
+                if (!(prog->intflags & PREGf_ANCH))
+                    prog->extflags &= ~RXf_IS_ANCHORED;
+            }
 	    /* XXXX This is a remnant of the old implementation.  It
 	            looks wasteful, since now INTUIT can use many
 	            other heuristics. */
@@ -1162,7 +1166,7 @@ Perl_re_intuit_start(pTHX_
 	    }
 	    DEBUG_EXECUTE_r( PerlIO_printf(Perl_debug_log,
 				   "This position contradicts STCLASS...\n") );
-	    if ((prog->extflags & RXf_ANCH) && !ml_anch)
+            if ((prog->intflags & PREGf_ANCH) && !ml_anch)
 		goto fail;
 	    checked_upto = HOPBACKc(endpos, start_shift);
 	    DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "start_shift: %"IVdf" check_at: %"IVdf" endpos: %"IVdf" checked_upto: %"IVdf"\n",
@@ -2304,7 +2308,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
          * to the start of the string, e.g. /w+\G/
          */
 
-        if (prog->extflags & RXf_ANCH_GPOS) {
+        if (prog->intflags & PREGf_ANCH_GPOS) {
             startpos  = reginfo->ganch - prog->gofs;
             if (startpos <
                 ((flags & REXEC_FAIL_ON_UNDERFLOW) ? stringarg : strbeg))
@@ -2495,11 +2499,10 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
 
     /* Simplest case:  anchored match need be tried only once. */
     /*  [unless only anchor is BOL and multiline is set] */
-    if (prog->extflags & (RXf_ANCH & ~RXf_ANCH_GPOS)) {
+    if (prog->intflags & (PREGf_ANCH & ~PREGf_ANCH_GPOS)) {
 	if (s == startpos && regtry(reginfo, &s))
 	    goto got_it;
-	else if (multiline || (prog->intflags & PREGf_IMPLICIT)
-		 || (prog->extflags & RXf_ANCH_MBOL)) /* XXXX SBOL? */
+        else if (multiline || (prog->intflags & (PREGf_IMPLICIT | PREGf_ANCH_MBOL))) /* XXXX SBOL? */
 	{
 	    char *end;
 
@@ -2573,9 +2576,9 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
 	    } /* end search for newline */
 	} /* end anchored/multiline check string search */
 	goto phooey;
-    } else if ((prog->intflags & PREGf_GPOS_SEEN) && (prog->extflags & RXf_ANCH_GPOS))
+    } else if ((prog->intflags & (PREGf_GPOS_SEEN | PREGf_ANCH_GPOS)) == (PREGf_GPOS_SEEN | PREGf_ANCH_GPOS))
     {
-        /* XXX: Why do we check both PREGf_GPOS_SEEN && RXf_ANCH_GPOS the
+        /* XXX: Why do we check both PREGf_GPOS_SEEN && PREGf_ANCH_GPOS the
          * latter can't be true unless the former is too as far as I know.
          * Needs further investigation - Yves */
         /* For anchored \G, the only position it can match from is

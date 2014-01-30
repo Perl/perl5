@@ -5183,8 +5183,8 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
             if (!(RExC_rx->intflags & PREGf_GPOS_FLOAT) &&
 	        !(delta || is_inf || (data && data->pos_delta)))
 	    {
-	        if (!(RExC_rx->extflags & RXf_ANCH) && (flags & SCF_DO_SUBSTR))
-		    RExC_rx->extflags |= RXf_ANCH_GPOS;
+                if (!(RExC_rx->intflags & PREGf_ANCH) && (flags & SCF_DO_SUBSTR))
+                    RExC_rx->intflags |= PREGf_ANCH_GPOS;
 	        if (RExC_rx->gofs < (STRLEN)min)
 		    RExC_rx->gofs = min;
             } else {
@@ -6752,31 +6752,30 @@ reStudy:
 		 PL_regkind[OP(first)] == NBOUND)
 	    ri->regstclass = first;
 	else if (PL_regkind[OP(first)] == BOL) {
-	    r->extflags |= (OP(first) == MBOL
-			   ? RXf_ANCH_MBOL
+            r->intflags |= (OP(first) == MBOL
+                           ? PREGf_ANCH_MBOL
 			   : (OP(first) == SBOL
-			      ? RXf_ANCH_SBOL
-			      : RXf_ANCH_BOL));
+                              ? PREGf_ANCH_SBOL
+                              : PREGf_ANCH_BOL));
 	    first = NEXTOPER(first);
 	    goto again;
 	}
 	else if (OP(first) == GPOS) {
-	    r->extflags |= RXf_ANCH_GPOS;
+            r->intflags |= PREGf_ANCH_GPOS;
 	    first = NEXTOPER(first);
 	    goto again;
 	}
 	else if ((!sawopen || !RExC_sawback) &&
 	    (OP(first) == STAR &&
 	    PL_regkind[OP(NEXTOPER(first))] == REG_ANY) &&
-	    !(r->extflags & RXf_ANCH) && !pRExC_state->num_code_blocks)
+            !(r->intflags & PREGf_ANCH) && !pRExC_state->num_code_blocks)
 	{
 	    /* turn .* into ^.* with an implied $*=1 */
 	    const int type =
 		(OP(NEXTOPER(first)) == REG_ANY)
-		    ? RXf_ANCH_MBOL
-		    : RXf_ANCH_SBOL;
-	    r->extflags |= type;
-	    r->intflags |= PREGf_IMPLICIT;
+                    ? PREGf_ANCH_MBOL
+                    : PREGf_ANCH_SBOL;
+            r->intflags |= (type | PREGf_IMPLICIT);
 	    first = NEXTOPER(first);
 	    goto again;
 	}
@@ -6846,7 +6845,7 @@ reStudy:
 	     && data.last_start_min == 0 && data.last_end > 0
 	     && !RExC_seen_zerolen
 	     && !(RExC_seen & REG_SEEN_VERBARG)
-	     && !((RExC_seen & REG_SEEN_GPOS) || (r->extflags & RXf_ANCH_GPOS)))
+             && !((RExC_seen & REG_SEEN_GPOS) || (r->intflags & PREGf_ANCH_GPOS)))
 	    r->extflags |= RXf_CHECK_ALL;
 	scan_commit(pRExC_state, &data,&minlen,0);
 
@@ -6935,7 +6934,7 @@ reStudy:
 	    r->check_substr = r->anchored_substr;
 	    r->check_utf8 = r->anchored_utf8;
 	    r->check_offset_min = r->check_offset_max = r->anchored_offset;
-	    if (r->extflags & RXf_ANCH_SINGLE)
+            if (r->intflags & PREGf_ANCH_SINGLE)
                 r->intflags |= PREGf_NOSCAN;
 	}
 	else {
@@ -7037,6 +7036,11 @@ reStudy:
         RXp_PAREN_NAMES(r) = MUTABLE_HV(SvREFCNT_inc(RExC_paren_names));
     else
         RXp_PAREN_NAMES(r) = NULL;
+
+    /* If we have seen an anchor in our pattern then we set the extflag RXf_IS_ANCHORED
+     * so it can be used in pp.c */
+    if (r->intflags & PREGf_ANCH)
+        r->extflags |= RXf_IS_ANCHORED;
 
     {
         regnode *first = ri->program + 1;
@@ -15402,15 +15406,15 @@ Perl_regdump(pTHX_ const regexp *r)
 	regprop(r, sv, ri->regstclass);
 	PerlIO_printf(Perl_debug_log, "stclass %s ", SvPVX_const(sv));
     }
-    if (r->extflags & RXf_ANCH) {
+    if (r->intflags & PREGf_ANCH) {
 	PerlIO_printf(Perl_debug_log, "anchored");
-	if (r->extflags & RXf_ANCH_BOL)
+        if (r->intflags & PREGf_ANCH_BOL)
 	    PerlIO_printf(Perl_debug_log, "(BOL)");
-	if (r->extflags & RXf_ANCH_MBOL)
+        if (r->intflags & PREGf_ANCH_MBOL)
 	    PerlIO_printf(Perl_debug_log, "(MBOL)");
-	if (r->extflags & RXf_ANCH_SBOL)
+        if (r->intflags & PREGf_ANCH_SBOL)
 	    PerlIO_printf(Perl_debug_log, "(SBOL)");
-	if (r->extflags & RXf_ANCH_GPOS)
+        if (r->intflags & PREGf_ANCH_GPOS)
 	    PerlIO_printf(Perl_debug_log, "(GPOS)");
 	PerlIO_putc(Perl_debug_log, ' ');
     }

@@ -384,16 +384,13 @@ get_regex_charset_name(const U32 flags, STRLEN* const lenp)
     }
 }
 
-/* Anchor and GPOS related stuff */
-#define RXf_ANCH_BOL    	(1<<(RXf_BASE_SHIFT+0))
-#define RXf_ANCH_MBOL   	(1<<(RXf_BASE_SHIFT+1))
-#define RXf_ANCH_SBOL   	(1<<(RXf_BASE_SHIFT+2))
-#define RXf_ANCH_GPOS   	(1<<(RXf_BASE_SHIFT+3))
+/* Do we have some sort of anchor? */
+#define RXf_IS_ANCHORED         (1<<(RXf_BASE_SHIFT+0))
+#define RXf_UNUSED1             (1<<(RXf_BASE_SHIFT+1))
+#define RXf_UNUSED2             (1<<(RXf_BASE_SHIFT+2))
+#define RXf_UNUSED3             (1<<(RXf_BASE_SHIFT+3))
 #define RXf_UNUSED4             (1<<(RXf_BASE_SHIFT+4))
 #define RXf_UNUSED5             (1<<(RXf_BASE_SHIFT+5))
-/* two bits here */
-#define RXf_ANCH        	(RXf_ANCH_BOL|RXf_ANCH_MBOL|RXf_ANCH_GPOS|RXf_ANCH_SBOL)
-#define RXf_ANCH_SINGLE         (RXf_ANCH_SBOL|RXf_ANCH_GPOS)
 
 /* What we have seen */
 #define RXf_NO_INPLACE_SUBST    (1<<(RXf_BASE_SHIFT+6))
