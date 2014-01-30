@@ -1063,7 +1063,7 @@ S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state,
 
     /* If this can match all upper Latin1 code points, have to add them
      * as well */
-    if (OP(node) == ANYOF_NON_UTF8_NON_ASCII_ALL) {
+    if (ANYOF_FLAGS(node) & ANYOF_NON_UTF8_NON_ASCII_ALL) {
         _invlist_union(invlist, PL_UpperLatin1, &invlist);
     }
 
