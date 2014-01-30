@@ -874,7 +874,7 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
 
     /* We could be called without perl.h, in which case NATIVE_TO_ASCII() is
      * likely not defined, and so we use the native function */
-#   define isASCII(c)    isascii(c)
+#   define isASCII(c)    cBOOL(isascii(c))
 #else
 #   define isASCII(c)    ((WIDEST_UTYPE)(c) < 128)
 #endif
