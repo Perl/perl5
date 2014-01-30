@@ -646,7 +646,7 @@ Perl_re_intuit_start(pTHX_
     const bool utf8_target = (sv && SvUTF8(sv)) ? 1 : 0; /* if no sv we have to assume bytes */
     U8   other_ix = 1 - prog->substrs->check_ix;
     bool ml_anch = 0;
-    char *other_last = NULL;	/* other substr already checked this high */
+    char *other_last = NULL; /* latest pos 'other' substr already checked to */
     char *check_at = NULL;		/* check substr found at this pos */
     char *checked_upto = NULL;          /* how far into the string we have already checked using find_byclass*/
     const I32 multiline = prog->extflags & RXf_PMf_MULTILINE;
@@ -821,7 +821,7 @@ Perl_re_intuit_start(pTHX_
             PerlIO_printf(Perl_debug_log,
                 "  At restart: s=%"IVdf" Check offset min: %"IVdf
                 " Start shift: %"IVdf" End shift %"IVdf
-                " Real End Shift: %"IVdf"\n",
+                " Real end Shift: %"IVdf"\n",
                 (IV)(rx_origin - i_strpos),
                 (IV)prog->check_offset_min,
                 (IV)start_shift,
@@ -993,25 +993,46 @@ Perl_re_intuit_start(pTHX_
 	    char * const saved_s = s;
 	    SV* must;
 
-            /* last1 is the absolute highest point that the floating substr
-             * could start in the string, ignoring any constraints from the
-             * earlier fixed match.
-             * strend -prog->minlen (in chars) is the absolute maximum
-             * position within the string that the origin of the regex
-             * could appear. The highest start point for the floating
-             * substr is float_min_offset up from the start of the regex.
-             * (You might think it aught to be float_max_offset, but if
-             * the float matches later, it implies that the regex matched more
-             * chars, so length($&) is now > minlen, and the increase in
-             * float offset is cancelled out by the shift down of the
-             * regex origin.)
-             * Note that -minlen+float_min_offset is equivalent (AFAIKT)
+            /* Calculate last1, the absolute latest point where the
+             * floating substr could start in the string, ignoring any
+             * constraints from the earlier fixed match. It is calculated
+             * as follows:
+             *
+             * strend - prog->minlen (in chars) is the absolute latest
+             * position within the string where the origin of the regex
+             * could appear. The latest start point for the floating
+             * substr is float_min_offset(*) on from the start of the
+             * regex.  last1 simply combines thee two offsets.
+             *
+             * (*) You might think the latest start point should be
+             * float_max_offset from the regex origin, and technically
+             * you'd be correct. However, consider
+             *    /a\d{2,4}bcd\w/
+             * Here, float min, max are 3,5 and minlen is 7.
+             * This can match either
+             *    /a\d\dbcd\w/
+             *    /a\d\d\dbcd\w/
+             *    /a\d\d\d\dbcd\w/
+             * In the first case, the regex matches minlen chars; in the
+             * second, minlen+1, in the third, minlen+2.
+             * In the first case, the floating offset is 3 (which equals
+             * float_min), in the second, 4, and in the third, 5 (which
+             * equals float_max). In all cases, the floating string bcd
+             * can never start more than 4 chars from the end of the
+             * string, which equals minlen - float_min. As the substring
+             * starts to match more than float_min from the start of the
+             * regex, it makes the regex match more than minlen chars,
+             * and the two cancel each other out. So we can always use
+             * float_min - minlen, rather than float_max - minlen for the
+             * latest position in the string.
+             *
+             * Note that -minlen + float_min_offset is equivalent (AFAIKT)
              * to CHR_SVLEN(must) - !!SvTAIL(must) + prog->float_end_shift
              */
 	    last1 =
 		HOP3c(strend, -prog->minlen + prog->float_min_offset, strbeg);
 
-            /* last is the highest point that the floating substr could
+            /* last is the latest point where the floating substr could
              * start, *given* any constraints from the earlier fixed
              * match. This constraint is that the floating string starts
              * <= float_max_offset chars from the regex origin (rx_origin).
@@ -1022,13 +1043,16 @@ Perl_re_intuit_start(pTHX_
                 /* this condition handles the offset==infinity case, and
                  * is a short-cut otherwise. Although it's comparing a
                  * byte offset to a char length, it does so in a safe way,
-                 * meaning it errs towards doing the accurate HOP3 rather
-                 * than just using last1 */
+                 * since 1 char always occupies 1 or more bytes,
+                 * so if a string range is  (last1 - rx_origin) bytes,
+                 * it will be less than or equal to  (last1 - rx_origin)
+                 * chars; meaning it errs towards doing the accurate HOP3
+                 * rather than just using last1 as a short-cut */
                 (last1 - rx_origin) < prog->float_max_offset
                     ? last1
                     : (char*)HOP3lim(rx_origin, prog->float_max_offset, last1);
 
-            /* set s to the minimum position the float string can start */
+            /* set s to the earliest position the float string can start */
 	    s = HOP3c(rx_origin, prog->float_min_offset, strend);
 	    if (s < other_last) /* skip previous failures */
 		s = other_last;
@@ -1051,7 +1075,7 @@ Perl_re_intuit_start(pTHX_
             });
 
 	    if (!s) {
-                /* last1 is max possible float location. If we didn't
+                /* last1 is latest possible float location. If we didn't
                  * find it before there, we never will */
 		if (last == last1) {
 		    DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
@@ -1059,7 +1083,7 @@ Perl_re_intuit_start(pTHX_
 		    goto fail_finish;
 		}
 
-                /* try to find the anchored substr again at a higher
+                /* try to find the anchored substr again at a later
                  * position. Maybe next time we'll find a float in range
                  * too */
 		DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
