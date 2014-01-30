@@ -6936,7 +6936,7 @@ reStudy:
 	    r->check_utf8 = r->anchored_utf8;
 	    r->check_offset_min = r->check_offset_max = r->anchored_offset;
 	    if (r->extflags & RXf_ANCH_SINGLE)
-		r->extflags |= RXf_NOSCAN;
+                r->intflags |= PREGf_NOSCAN;
 	}
 	else {
 	    r->check_end_shift = r->float_end_shift;
@@ -15391,7 +15391,7 @@ Perl_regdump(pTHX_ const regexp *r)
 		      (r->check_substr == r->float_substr
 		       && r->check_utf8 == r->float_utf8
 		       ? "(checking floating" : "(checking anchored"));
-    if (r->extflags & RXf_NOSCAN)
+    if (r->intflags & PREGf_NOSCAN)
 	PerlIO_printf(Perl_debug_log, " noscan");
     if (r->extflags & RXf_CHECK_ALL)
 	PerlIO_printf(Perl_debug_log, " isall");

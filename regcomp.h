@@ -125,12 +125,17 @@
  *
  * See regexp.h for flags used externally to the regexp engine
  */
+#define RXp_INTFLAGS(rx)        ((rx)->intflags)
+#define RX_INTFLAGS(prog)        RXp_INTFLAGS(ReANY(prog))
+
 #define PREGf_SKIP		0x00000001
 #define PREGf_IMPLICIT		0x00000002 /* Converted .* to ^.* */
 #define PREGf_NAUGHTY		0x00000004 /* how exponential is this pattern? */
 #define PREGf_VERBARG_SEEN	0x00000008
 #define PREGf_CUTGROUP_SEEN	0x00000010
 #define PREGf_USE_RE_EVAL	0x00000020 /* compiled with "use re 'eval'" */
+/* these used to be extflags, but are now intflags */
+#define PREGf_NOSCAN            0x00000040
 
 
 /* this is where the old regcomp.h started */

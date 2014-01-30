@@ -402,7 +402,7 @@ get_regex_charset_name(const U32 flags, STRLEN* const lenp)
 #define RXf_CANY_SEEN   	(1<<(RXf_BASE_SHIFT+8))
 
 /* Special */
-#define RXf_NOSCAN      	(1<<(RXf_BASE_SHIFT+9))
+#define RXf_UNUSED1              (1<<(RXf_BASE_SHIFT+9))
 #define RXf_CHECK_ALL   	(1<<(RXf_BASE_SHIFT+10))
 
 /* UTF8 related */
