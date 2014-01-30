@@ -3,10 +3,10 @@
  *
  * Ref: NIST FIPS PUB 180-2 Secure Hash Standard
  *
- * Copyright (C) 2003-2013 Mark Shelor, All Rights Reserved
+ * Copyright (C) 2003-2014 Mark Shelor, All Rights Reserved
  *
- * Version: 5.85
- * Wed Jun 26 04:05:26 MST 2013
+ * Version: 5.86
+ * Thu Jan 30 08:24:28 MST 2014
  *
  */
 
@@ -423,22 +423,31 @@ static UCHR *shadigest(SHA *s)
 	return(s->digest);
 }
 
+/* xmap: translation map for hexadecimal encoding */
+static char xmap[] =
+	"0123456789abcdef";
+
 /* shahex: returns pointer to current digest (hexadecimal) */
 static char *shahex(SHA *s)
 {
 	int i;
+	char *h;
+	UCHR *d;
 
 	digcpy(s);
 	s->hex[0] = '\0';
 	if (HEXLEN((size_t) s->digestlen) >= sizeof(s->hex))
 		return(s->hex);
-	for (i = 0; i < s->digestlen; i++)
-		sprintf(s->hex+i*2, "%02x", s->digest[i]);
+	for (i = 0, h = s->hex, d = s->digest; i < s->digestlen; i++) {
+		*h++ = xmap[(*d >> 4) & 0x0f];
+		*h++ = xmap[(*d++   ) & 0x0f];
+	}
+	*h = '\0';
 	return(s->hex);
 }
 
-/* map: translation map for Base 64 encoding */
-static char map[] =
+/* bmap: translation map for Base 64 encoding */
+static char bmap[] =
 	"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 /* encbase64: encodes input (0 to 3 bytes) into Base 64 */
@@ -450,10 +459,10 @@ static void encbase64(UCHR *in, int n, char *out)
 	if (n < 1 || n > 3)
 		return;
 	memcpy(byte, in, n);
-	out[0] = map[byte[0] >> 2];
-	out[1] = map[((byte[0] & 0x03) << 4) | (byte[1] >> 4)];
-	out[2] = map[((byte[1] & 0x0f) << 2) | (byte[2] >> 6)];
-	out[3] = map[byte[2] & 0x3f];
+	out[0] = bmap[byte[0] >> 2];
+	out[1] = bmap[((byte[0] & 0x03) << 4) | (byte[1] >> 4)];
+	out[2] = bmap[((byte[1] & 0x0f) << 2) | (byte[2] >> 6)];
+	out[3] = bmap[byte[2] & 0x3f];
 	out[n+1] = '\0';
 }
 
