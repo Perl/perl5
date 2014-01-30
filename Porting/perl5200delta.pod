@@ -386,10 +386,6 @@ L<LaTeX::Encode> version 0.08
 
 L<Mail::SpamAssassin> version 3.3.2
 
-=item
-
-L<Tk> version 804.031
-
 =back
 
 =back
