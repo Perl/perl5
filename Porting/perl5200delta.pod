@@ -388,10 +388,6 @@ L<Mail::SpamAssassin> version 3.3.2
 
 =item
 
-L<Mouse> version 1.11
-
-=item
-
 L<Tk> version 804.031
 
 =back
