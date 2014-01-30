@@ -166,6 +166,13 @@ XXX
 
 =item *
 
+L<Devel::Peek> has been upgraded from version 1.15 to 1.16.
+
+Devel::Peek::SvREFCNT() now ensures it has been passed a reference, as
+specified by its prototype.
+
+=item *
+
 L<List::Util> has been upgraded from version 1.37 to 1.38.
 
 A backwards-compatibility issue with older perls has been fixed.  [cpan #92363]
