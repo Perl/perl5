@@ -166,6 +166,13 @@ XXX
 
 =item *
 
+L<B::Deparse> has been upgraded from version 1.24 to 1.25.
+
+It now knows how to handle whitespace it prototypes.  Previously, it could
+loop infinitely.  [perl #121050]
+
+=item *
+
 L<Devel::Peek> has been upgraded from version 1.15 to 1.16.
 
 Devel::Peek::SvREFCNT() now ensures it has been passed a reference, as
