@@ -4192,7 +4192,7 @@ PP(pp_fc)
                 goto do_uni_folding;
             }
             for (; s < send; d++, s++)
-                *d = toFOLD_LC(*s);
+                *d = (U8) toFOLD_LC(*s);
         }
         else if ( !IN_UNI_8_BIT ) { /* Under nothing, or bytes */
             for (; s < send; d++, s++)
