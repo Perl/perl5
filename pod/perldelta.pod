@@ -118,7 +118,25 @@ There may well be none in a stable release.
 
 =item *
 
-XXX
+Code like:
+
+  my $x; # or @x, %x
+  my $y;
+
+is now optimized to:
+
+  my ($x, $y);
+
+In combination with the padrange optimization, this means longer
+uninitialized my variable statements are also optimized, so:
+
+  my $x; my @y; my %z;
+
+becomes:
+
+  my ($x, @y, %z);
+
+[perl #121077]
 
 =back
 
