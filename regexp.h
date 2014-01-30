@@ -399,10 +399,10 @@ get_regex_charset_name(const U32 flags, STRLEN* const lenp)
 /* What we have seen */
 #define RXf_NO_INPLACE_SUBST    (1<<(RXf_BASE_SHIFT+6))
 #define RXf_EVAL_SEEN   	(1<<(RXf_BASE_SHIFT+7))
-#define RXf_CANY_SEEN   	(1<<(RXf_BASE_SHIFT+8))
+#define RXf_UNUSED1                   (1<<(RXf_BASE_SHIFT+8))
 
 /* Special */
-#define RXf_UNUSED1              (1<<(RXf_BASE_SHIFT+9))
+#define RXf_UNUSED2             (1<<(RXf_BASE_SHIFT+9))
 #define RXf_CHECK_ALL   	(1<<(RXf_BASE_SHIFT+10))
 
 /* UTF8 related */

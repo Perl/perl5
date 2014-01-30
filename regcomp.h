@@ -136,6 +136,7 @@
 #define PREGf_USE_RE_EVAL	0x00000020 /* compiled with "use re 'eval'" */
 /* these used to be extflags, but are now intflags */
 #define PREGf_NOSCAN            0x00000040
+#define PREGf_CANY_SEEN           0x00000080
 
 
 /* this is where the old regcomp.h started */

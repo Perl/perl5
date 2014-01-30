@@ -699,7 +699,7 @@ Perl_re_intuit_start(pTHX_
 	      goto fail;
 	  }
 	  if (prog->check_offset_min == prog->check_offset_max
-              && !(prog->extflags & RXf_CANY_SEEN)
+              && !(prog->intflags & PREGf_CANY_SEEN)
               && ! multiline)   /* /m can cause \n's to match that aren't
                                    accounted for in the string max length.
                                    See [perl #115242] */
@@ -785,7 +785,7 @@ Perl_re_intuit_start(pTHX_
             (IV)prog->check_end_shift);
     });       
         
-        if (prog->extflags & RXf_CANY_SEEN) {
+        if (prog->intflags & PREGf_CANY_SEEN) {
             start_point= (U8*)(s + srch_start_shift);
             end_point= (U8*)(strend - srch_end_shift);
         } else {

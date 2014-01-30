@@ -7023,7 +7023,7 @@ reStudy:
     if (pRExC_state->num_code_blocks)
 	r->extflags |= RXf_EVAL_SEEN;
     if (RExC_seen & REG_SEEN_CANY)
-	r->extflags |= RXf_CANY_SEEN;
+        r->intflags |= PREGf_CANY_SEEN;
     if (RExC_seen & REG_SEEN_VERBARG)
     {
 	r->intflags |= PREGf_VERBARG_SEEN;
@@ -7409,7 +7409,7 @@ Perl_reg_numbered_buff_fetch(pTHX_ REGEXP * const r, const I32 paren,
         sv_setpvn(sv, s, i);
         TAINT_set(oldtainted);
 #endif
-        if ( (rx->extflags & RXf_CANY_SEEN)
+        if ( (rx->intflags & PREGf_CANY_SEEN)
             ? (RXp_MATCH_UTF8(rx)
                         && (!i || is_utf8_string((U8*)s, i)))
             : (RXp_MATCH_UTF8(rx)) )
