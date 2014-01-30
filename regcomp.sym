@@ -55,6 +55,7 @@ REG_ANY     REG_ANY,    no 0 S    ; Match any one character (except newline).
 SANY        REG_ANY,    no 0 S    ; Match any one character.
 CANY        REG_ANY,    no 0 S    ; Match any one byte.
 ANYOF       ANYOF,      sv 0 S    ; Match character in (or not in) this class, single char match only
+ANYOF_NON_UTF8_NON_ASCII_ALL ANYOF, sv 0 S ; like ANYOF, also matches any U+80 - U+FF when not in UTF-8
 
 # Order of the below is important.  See ordering comment above.
 POSIXD      POSIXD,     none 0 S   ; Some [[:class:]] under /d; the FLAGS field gives which one

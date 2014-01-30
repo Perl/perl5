@@ -1068,7 +1068,7 @@ S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state,
 
     /* If this can match all upper Latin1 code points, have to add them
      * as well */
-    if (ANYOF_FLAGS(node) & ANYOF_NON_UTF8_NON_ASCII_ALL) {
+    if (OP(node) == ANYOF_NON_UTF8_NON_ASCII_ALL) {
         _invlist_union(invlist, PL_UpperLatin1, &invlist);
     }
 
@@ -4840,6 +4840,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
 		    }
 		    break;
 
+                case ANYOF_NON_UTF8_NON_ASCII_ALL:
                 case ANYOF:
 		    if (flags & SCF_DO_STCLASS_AND)
 			ssc_and(pRExC_state, data->start_class,
@@ -14471,7 +14472,7 @@ parseit:
             if (DEPENDS_SEMANTICS) {
                 /* Under /d, everything in the upper half of the Latin1 range
                  * matches these complements */
-                ANYOF_FLAGS(ret) |= ANYOF_NON_UTF8_NON_ASCII_ALL;
+                OP(ret) = ANYOF_NON_UTF8_NON_ASCII_ALL;
             }
             else if (AT_LEAST_ASCII_RESTRICTED) {
                 /* Under /a and /aa, everything above ASCII matches these
@@ -15657,7 +15658,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
                     sv_catpvs(sv, "^");
             }
 
-            if (flags & ANYOF_NON_UTF8_NON_ASCII_ALL) {
+            if (OP(o) == ANYOF_NON_UTF8_NON_ASCII_ALL) {
                 sv_catpvs(sv, "{non-utf8-latin1-all}");
             }
 

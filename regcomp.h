@@ -358,17 +358,15 @@ struct regnode_ssc {
  * ANYOF_NONBITMAP_NON_UTF8 bit is also set. */
 #define ANYOF_NONBITMAP(node)	(ARG(node) != ANYOF_NONBITMAP_EMPTY)
 
-/* Flags for node->flags of ANYOF.  These are in short supply, with none
- * currently available.  If more are needed, the ANYOF_LOCALE and
- * ANYOF_POSIXL bits could be shared, making a space penalty for all locale
- * nodes.  Also, the ABOVE_LATIN1_ALL bit could be freed up by resorting to
- * creating a swash containing everything above 255.  This introduces a
- * performance penalty.  Better would be to split it off into a separate node,
- * which actually would improve performance a bit by allowing regexec.c to test
- * for a UTF-8 character being above 255 without having to call a function nor
- * calculate its code point value.  Several flags are not used in synthetic
- * start class (SSC) nodes, so could be shared should new flags be needed for
- * SSCs. */
+/* Flags for node->flags of ANYOF.  These are in short supply, with one
+ * currently available.  If more are needed, the ABOVE_LATIN1_ALL bit could be
+ * freed up by resorting to creating a swash containing everything above 255.
+ * This introduces a performance penalty.  An option that wouldn't slow things
+ * down would be to split one of the LOC flags out into a separate node, like
+ * what has been done with ANYOF_NON_UTF8_NON_ASCII_ALL.  One of these is only
+ * for /l nodes; the other only for /d, so there are no combinatorial issues.
+ * Several flags are not used in synthetic start class (SSC) nodes, so could be
+ * shared should new flags be needed for SSCs, like ANYOF_EMPTY_STRING now. */
 
 /* regexec.c is expecting this to be in the low bit */
 #define ANYOF_INVERT		 0x01
@@ -406,11 +404,7 @@ struct regnode_ssc {
 #define ANYOF_ABOVE_LATIN1_ALL	 0x40
 #define ANYOF_UNICODE_ALL	 ANYOF_ABOVE_LATIN1_ALL
 
-/* Match all Latin1 characters that aren't ASCII when the target string is not
- * in utf8. */
-#define ANYOF_NON_UTF8_NON_ASCII_ALL 0x80
-
-#define ANYOF_FLAGS_ALL		(0xff)
+#define ANYOF_FLAGS_ALL		(0x7F)
 
 #define ANYOF_LOCALE_FLAGS (ANYOF_LOCALE                        \
                            |ANYOF_LOC_FOLD                      \
