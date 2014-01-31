@@ -18,7 +18,7 @@ our @Overridable;
 my @Prepend_parent;
 my %Recognized_Att_Keys;
 
-our $VERSION = '6.86';
+our $VERSION = '6.88';
 $VERSION = eval $VERSION;  ## no critic [BuiltinFunctions::ProhibitStringyEval]
 
 # Emulate something resembling CVS $Revision$
@@ -2083,10 +2083,10 @@ MakeMaker will turn it into an array with one element.
 
 Available in version 6.31 and above.
 
-The licensing terms of your distribution.  Generally it's "perl" for the
+The licensing terms of your distribution.  Generally it's "perl_5" for the
 same license as Perl itself.
 
-See L<Module::Build::API> for the list of options.
+See L<CPAN::Meta::Spec> for the list of options.
 
 Defaults to "unknown".
 
@@ -2609,6 +2609,8 @@ speedup. It may seriously damage the resulting Makefile. Only use it
 if you really need it.
 
 =item TEST_REQUIRES
+
+Available in version 6.64 and above.
 
 A hash of modules that are needed to test your module but not run or
 build it.

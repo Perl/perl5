@@ -100,9 +100,13 @@ is( $mm->{INST_BIN},     File::Spec->catdir($Curdir, 'blib', 'bin'),
 is( keys %{$mm->{CHILDREN}}, 1 );
 my($child_pack) = keys %{$mm->{CHILDREN}};
 my $c_mm = $mm->{CHILDREN}{$child_pack};
-is( $c_mm->{INST_ARCHLIB},
-    $c_mm->{PERL_CORE} ? $c_mm->{PERL_ARCHLIB}
-                       : File::Spec->catdir($Updir, 'blib', 'arch'),
+# Android passes ARCHLIB through ->rel2abs, so in case the same
+# path is presented in two different ways, we need to
+# pass it through Cwd::realpath.
+my $normalize = $^O =~ /android/ ? \&Cwd::realpath : sub {shift};
+is( $normalize->($c_mm->{INST_ARCHLIB}),
+    $normalize->($c_mm->{PERL_CORE} ? $c_mm->{PERL_ARCHLIB}
+                       : File::Spec->catdir($Updir, 'blib', 'arch')),
                                      'CHILD INST_ARCHLIB');
 is( $c_mm->{INST_BIN},     File::Spec->catdir($Updir, 'blib', 'bin'),
                                      'CHILD INST_BIN' );

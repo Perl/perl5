@@ -1,7 +1,7 @@
 package ExtUtils::MM_Any;
 
 use strict;
-our $VERSION = '6.86';
+our $VERSION = '6.88';
 
 use Carp;
 use File::Spec;
@@ -643,7 +643,7 @@ sub dir_target {
 
     my $make = '';
     foreach my $dir (@dirs) {
-        $make .= sprintf <<'MAKE', ($dir) x 7;
+        $make .= sprintf <<'MAKE', ($dir) x 4;
 %s$(DFSEP).exists :: Makefile.PL
 	$(NOECHO) $(MKPATH) %s
 	$(NOECHO) $(CHMOD) $(PERM_DIR) %s

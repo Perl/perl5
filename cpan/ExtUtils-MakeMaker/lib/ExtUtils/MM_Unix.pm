@@ -15,7 +15,7 @@ use ExtUtils::MakeMaker qw($Verbose neatvalue);
 
 # If we make $VERSION an our variable parse_version() breaks
 use vars qw($VERSION);
-$VERSION = '6.86';
+$VERSION = '6.88';
 $VERSION = eval $VERSION;  ## no critic [BuiltinFunctions::ProhibitStringyEval]
 
 require ExtUtils::MM_Any;
@@ -37,6 +37,7 @@ BEGIN {
     $Is{BSD}     = ($^O =~ /^(?:free|net|open)bsd$/ or
                    grep( $^O eq $_, qw(bsdos interix dragonfly) )
                   );
+    $Is{Android} = $^O =~ /android/;
 }
 
 BEGIN {
@@ -866,7 +867,7 @@ BOOTSTRAP =
 
     my $target = $Is{VMS} ? '$(MMS$TARGET)' : '$@';
 
-    return sprintf <<'MAKE_FRAG', ($target) x 5;
+    return sprintf <<'MAKE_FRAG', ($target) x 2;
 BOOTSTRAP = $(BASEEXT).bs
 
 # As Mkbootstrap might not write a file (if none is required)
@@ -933,7 +934,7 @@ $(INST_DYNAMIC): $(OBJECT) $(MYEXTLIB) $(INST_ARCHAUTODIR)$(DFSEP).exists $(EXPO
 
     my $libs = '$(LDLOADLIBS)';
 
-    if (($Is{NetBSD} || $Is{Interix}) && $Config{'useshrplib'} eq 'true') {
+    if (($Is{NetBSD} || $Is{Interix} || $Is{Android}) && $Config{'useshrplib'} eq 'true') {
 	# Use nothing on static perl platforms, and to the flags needed
 	# to link against the shared libperl library on shared perl
 	# platforms.  We peek at lddlflags to see if we need -Wl,-R
@@ -942,6 +943,10 @@ $(INST_DYNAMIC): $(OBJECT) $(MYEXTLIB) $(INST_ARCHAUTODIR)$(DFSEP).exists $(EXPO
             $libs .= ' -L$(PERL_INC) -Wl,-R$(INSTALLARCHLIB)/CORE -Wl,-R$(PERL_ARCHLIB)/CORE -lperl';
         } elsif ($Config{'lddlflags'} =~ /-R/) {
             $libs .= ' -L$(PERL_INC) -R$(INSTALLARCHLIB)/CORE -R$(PERL_ARCHLIB)/CORE -lperl';
+        } elsif ( $Is{Android} ) {
+            # The Android linker will not recognize symbols from
+            # libperl unless the module explicitly depends on it.
+            $libs .= ' -L$(PERL_INC) -lperl';
         }
     }
 
@@ -1695,6 +1700,17 @@ EOP
 	      }
 	    }
 	}
+    }
+
+    if ($Is{Android}) {
+    	# Android fun times!
+    	# ../../perl -I../../lib -MFile::Glob -e1 works
+    	# ../../../perl -I../../../lib -MFile::Glob -e1 fails to find
+    	# the .so for File::Glob.
+    	# This always affects core perl, but may also affect an installed
+    	# perl built with -Duserelocatableinc.
+    	$self->{PERL_LIB} = File::Spec->rel2abs($self->{PERL_LIB});
+    	$self->{PERL_ARCHLIB} = File::Spec->rel2abs($self->{PERL_ARCHLIB});
     }
 
     # We get SITELIBEXP and SITEARCHEXP directly via
