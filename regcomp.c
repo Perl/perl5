@@ -741,38 +741,38 @@ static const scan_data_t zero_scan_data =
         DEBUG_OPTIMISE_MORE_r({                                             \
             PerlIO_printf(Perl_debug_log,"RExC_seen: ");                    \
                                                                             \
-            if (RExC_seen & REG_SEEN_ZERO_LEN)                              \
-                PerlIO_printf(Perl_debug_log,"REG_SEEN_ZERO_LEN ");         \
+            if (RExC_seen & REG_ZERO_LEN_SEEN)                              \
+                PerlIO_printf(Perl_debug_log,"REG_ZERO_LEN_SEEN ");         \
                                                                             \
-            if (RExC_seen & REG_SEEN_LOOKBEHIND)                            \
-                PerlIO_printf(Perl_debug_log,"REG_SEEN_LOOKBEHIND ");       \
+            if (RExC_seen & REG_LOOKBEHIND_SEEN)                            \
+                PerlIO_printf(Perl_debug_log,"REG_LOOKBEHIND_SEEN ");       \
                                                                             \
-            if (RExC_seen & REG_SEEN_GPOS)                                  \
-                PerlIO_printf(Perl_debug_log,"REG_SEEN_GPOS ");             \
+            if (RExC_seen & REG_GPOS_SEEN)                                  \
+                PerlIO_printf(Perl_debug_log,"REG_GPOS_SEEN ");             \
                                                                             \
-            if (RExC_seen & REG_SEEN_CANY)                                  \
-                PerlIO_printf(Perl_debug_log,"REG_SEEN_CANY ");             \
+            if (RExC_seen & REG_CANY_SEEN)                                  \
+                PerlIO_printf(Perl_debug_log,"REG_CANY_SEEN ");             \
                                                                             \
-            if (RExC_seen & REG_SEEN_RECURSE)                               \
-                PerlIO_printf(Perl_debug_log,"REG_SEEN_RECURSE ");          \
+            if (RExC_seen & REG_RECURSE_SEEN)                               \
+                PerlIO_printf(Perl_debug_log,"REG_RECURSE_SEEN ");          \
                                                                             \
-            if (RExC_seen & REG_TOP_LEVEL_BRANCHES)                         \
-                PerlIO_printf(Perl_debug_log,"REG_TOP_LEVEL_BRANCHES ");    \
+            if (RExC_seen & REG_TOP_LEVEL_BRANCHES_SEEN)                         \
+                PerlIO_printf(Perl_debug_log,"REG_TOP_LEVEL_BRANCHES_SEEN ");    \
                                                                             \
-            if (RExC_seen & REG_SEEN_VERBARG)                               \
-                PerlIO_printf(Perl_debug_log,"REG_SEEN_VERBARG ");          \
+            if (RExC_seen & REG_VERBARG_SEEN)                               \
+                PerlIO_printf(Perl_debug_log,"REG_VERBARG_SEEN ");          \
                                                                             \
-            if (RExC_seen & REG_SEEN_CUTGROUP)                              \
-                PerlIO_printf(Perl_debug_log,"REG_SEEN_CUTGROUP ");         \
+            if (RExC_seen & REG_CUTGROUP_SEEN)                              \
+                PerlIO_printf(Perl_debug_log,"REG_CUTGROUP_SEEN ");         \
                                                                             \
-            if (RExC_seen & REG_SEEN_RUN_ON_COMMENT)                        \
-                PerlIO_printf(Perl_debug_log,"REG_SEEN_RUN_ON_COMMENT ");   \
+            if (RExC_seen & REG_RUN_ON_COMMENT_SEEN)                        \
+                PerlIO_printf(Perl_debug_log,"REG_RUN_ON_COMMENT_SEEN ");   \
                                                                             \
-            if (RExC_seen & REG_SEEN_UNFOLDED_MULTI)                        \
-                PerlIO_printf(Perl_debug_log,"REG_SEEN_UNFOLDED_MULTI ");   \
+            if (RExC_seen & REG_UNFOLDED_MULTI_SEEN)                        \
+                PerlIO_printf(Perl_debug_log,"REG_UNFOLDED_MULTI_SEEN ");   \
                                                                             \
-            if (RExC_seen & REG_SEEN_GOSTART)                               \
-                PerlIO_printf(Perl_debug_log,"REG_SEEN_GOSTART ");          \
+            if (RExC_seen & REG_GOSTART_SEEN)                               \
+                PerlIO_printf(Perl_debug_log,"REG_GOSTART_SEEN ");          \
                                                                             \
             PerlIO_printf(Perl_debug_log,"\n");                             \
         });
@@ -3072,7 +3072,7 @@ S_make_trie_failtable(pTHX_ RExC_state_t *pRExC_state, regnode *source,  regnode
         PerlIO_printf(Perl_debug_log, "\n");
     });
     Safefree(q);
-    /*RExC_seen |= REG_SEEN_TRIEDFA;*/
+    /*RExC_seen |= REG_TRIEDFA_SEEN;*/
 }
 
 
@@ -4061,7 +4061,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                                     if ( startbranch == first
                                          && scan == tail )
                                     {
-                                        RExC_seen &=~REG_TOP_LEVEL_BRANCHES;
+                                        RExC_seen &=~REG_TOP_LEVEL_BRANCHES_SEEN;
                                     }
                                 }
 #endif
@@ -4245,7 +4245,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		l = utf8_length(s, s + l);
 	    }
 	    if (unfolded_multi_char) {
-		RExC_seen |= REG_SEEN_UNFOLDED_MULTI;
+                RExC_seen |= REG_UNFOLDED_MULTI_SEEN;
 	    }
 	    min += l - min_subtract;
             assert (min >= 0);
@@ -4553,7 +4553,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 
                          /* Nor characters whose fold at run-time may be
                           * multi-character */
-                      && ! (RExC_seen & REG_SEEN_UNFOLDED_MULTI)
+                      && ! (RExC_seen & REG_UNFOLDED_MULTI_SEEN)
 		) {
 		    /* XXXX How to optimize if data == 0? */
 		    /* Optimize to a simpler form.  */
@@ -6049,8 +6049,8 @@ S_setup_longest(pTHX_ RExC_state_t *pRExC_state, SV* sv_longest,
            || (eol /* Can't have SEOL and MULTI */
                && (! meol || (RExC_flags & RXf_PMf_MULTILINE)))
           )
-            /* See comments for join_exact for why REG_SEEN_UNFOLDED_MULTI */
-        || (RExC_seen & REG_SEEN_UNFOLDED_MULTI))
+            /* See comments for join_exact for why REG_UNFOLDED_MULTI_SEEN */
+        || (RExC_seen & REG_UNFOLDED_MULTI_SEEN))
     {
         return FALSE;
     }
@@ -6508,8 +6508,8 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
         bool has_default =
                     (((r->extflags & RXf_PMf_STD_PMMOD) != RXf_PMf_STD_PMMOD)
                     || ! has_charset);
-	bool has_runon = ((RExC_seen & REG_SEEN_RUN_ON_COMMENT)
-                                                   == REG_SEEN_RUN_ON_COMMENT);
+        bool has_runon = ((RExC_seen & REG_RUN_ON_COMMENT_SEEN)
+                                                   == REG_RUN_ON_COMMENT_SEEN);
 	U16 reganch = (U16)((r->extflags & RXf_PMf_STD_PMMOD)
 			    >> RXf_PMf_STD_PMMOD_SHIFT);
 	const char *fptr = STD_PAT_MODS;        /*"msix"*/
@@ -6573,13 +6573,13 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 
     /* setup various meta data about recursion, this all requires
      * RExC_npar to be correctly set, and a bit later on we clear it */
-    if (RExC_seen & REG_SEEN_RECURSE) {
+    if (RExC_seen & REG_RECURSE_SEEN) {
         Newxz(RExC_open_parens, RExC_npar,regnode *);
         SAVEFREEPV(RExC_open_parens);
         Newxz(RExC_close_parens,RExC_npar,regnode *);
         SAVEFREEPV(RExC_close_parens);
     }
-    if (RExC_seen & (REG_SEEN_RECURSE | REG_SEEN_GOSTART)) {
+    if (RExC_seen & (REG_RECURSE_SEEN | REG_GOSTART_SEEN)) {
         /* Note, RExC_npar is 1 + the number of parens in a pattern.
          * So its 1 if there are no parens. */
         RExC_study_chunk_recursed_bytes= (RExC_npar >> 3) +
@@ -6643,10 +6643,10 @@ reStudy:
         DEBUG_OPTIMISE_r(PerlIO_printf(Perl_debug_log,"Restudying\n"));
 
         RExC_state = copyRExC_state;
-        if (seen & REG_TOP_LEVEL_BRANCHES)
-            RExC_seen |= REG_TOP_LEVEL_BRANCHES;
+        if (seen & REG_TOP_LEVEL_BRANCHES_SEEN)
+            RExC_seen |= REG_TOP_LEVEL_BRANCHES_SEEN;
         else
-            RExC_seen &= ~REG_TOP_LEVEL_BRANCHES;
+            RExC_seen &= ~REG_TOP_LEVEL_BRANCHES_SEEN;
 	StructCopy(&zero_scan_data, &data, scan_data_t);
     }
 #else
@@ -6666,7 +6666,7 @@ reStudy:
 
     /* testing for BRANCH here tells us whether there is "must appear"
        data in the pattern. If there is then we can use it for optimisations */
-    if (!(RExC_seen & REG_TOP_LEVEL_BRANCHES)) { /*  Only one top-level choice.
+    if (!(RExC_seen & REG_TOP_LEVEL_BRANCHES_SEEN)) { /*  Only one top-level choice.
                                                   */
 	SSize_t fake;
 	STRLEN longest_float_length, longest_fixed_length;
@@ -6844,8 +6844,8 @@ reStudy:
 	if ( RExC_npar == 1 && data.longest == &(data.longest_fixed)
 	     && data.last_start_min == 0 && data.last_end > 0
 	     && !RExC_seen_zerolen
-	     && !(RExC_seen & REG_SEEN_VERBARG)
-             && !((RExC_seen & REG_SEEN_GPOS) || (r->intflags & PREGf_ANCH_GPOS)))
+             && !(RExC_seen & REG_VERBARG_SEEN)
+             && !((RExC_seen & REG_GPOS_SEEN) || (r->intflags & PREGf_ANCH_GPOS)))
 	    r->extflags |= RXf_CHECK_ALL;
 	scan_commit(pRExC_state, &data,&minlen,0);
 
@@ -7014,21 +7014,21 @@ reStudy:
     if (r->minlen < minlen)
         r->minlen = minlen;
 
-    if (RExC_seen & REG_SEEN_GPOS)
+    if (RExC_seen & REG_GPOS_SEEN)
         r->intflags |= PREGf_GPOS_SEEN;
-    if (RExC_seen & REG_SEEN_LOOKBEHIND)
+    if (RExC_seen & REG_LOOKBEHIND_SEEN)
         r->extflags |= RXf_NO_INPLACE_SUBST; /* inplace might break the
                                                 lookbehind */
     if (pRExC_state->num_code_blocks)
 	r->extflags |= RXf_EVAL_SEEN;
-    if (RExC_seen & REG_SEEN_CANY)
+    if (RExC_seen & REG_CANY_SEEN)
         r->intflags |= PREGf_CANY_SEEN;
-    if (RExC_seen & REG_SEEN_VERBARG)
+    if (RExC_seen & REG_VERBARG_SEEN)
     {
 	r->intflags |= PREGf_VERBARG_SEEN;
         r->extflags |= RXf_NO_INPLACE_SUBST; /* don't understand this! Yves */
     }
-    if (RExC_seen & REG_SEEN_CUTGROUP)
+    if (RExC_seen & REG_CUTGROUP_SEEN)
 	r->intflags |= PREGf_CUTGROUP_SEEN;
     if (pm_flags & PMf_USE_RE_EVAL)
 	r->intflags |= PREGf_USE_RE_EVAL;
@@ -9424,7 +9424,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                 /* [19:06] <TimToady> :: is then */
                 if ( memEQs(start_verb,verb_len,"THEN") ) {
                     op = CUTGROUP;
-                    RExC_seen |= REG_SEEN_CUTGROUP;
+                    RExC_seen |= REG_CUTGROUP_SEEN;
                 }
                 break;
 	    }
@@ -9457,7 +9457,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                     }
 	        }
 	        if (!internal_argval)
-	            RExC_seen |= REG_SEEN_VERBARG;
+                    RExC_seen |= REG_VERBARG_SEEN;
 	    } else if ( start_arg ) {
 	        vFAIL3("Verb pattern '%.*s' may not have an argument",
 	                verb_len, start_verb);
@@ -9610,7 +9610,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 		    paren = 1;
 		    goto capturing_parens;
 		}
-                RExC_seen |= REG_SEEN_LOOKBEHIND;
+                RExC_seen |= REG_LOOKBEHIND_SEEN;
 		RExC_in_lookbehind++;
 		RExC_parse++;
 	    case '=':           /* (?=...) */
@@ -9654,7 +9654,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 		if (*RExC_parse != ')')
 		    FAIL("Sequence (?R) not terminated");
 		ret = reg_node(pRExC_state, GOSTART);
-                    RExC_seen |= REG_SEEN_GOSTART;
+                    RExC_seen |= REG_GOSTART_SEEN;
 		*flagp |= POSTPONED;
 		nextchar(pRExC_state);
 		return ret;
@@ -9735,7 +9735,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 		} else {
 		    RExC_size++;
     		}
-    		RExC_seen |= REG_SEEN_RECURSE;
+                    RExC_seen |= REG_RECURSE_SEEN;
                 Set_Node_Length(ret, 1 + regarglen[OP(ret)]); /* MJD */
 		Set_Node_Offset(ret, parse_start); /* MJD */
 
@@ -9995,7 +9995,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 	    if (!SIZE_ONLY ){
 	        if (!RExC_nestroot)
 	            RExC_nestroot = parno;
-	        if (RExC_seen & REG_SEEN_RECURSE
+                if (RExC_seen & REG_RECURSE_SEEN
 	            && !RExC_open_parens[parno-1])
 	        {
 		    DEBUG_OPTIMISE_MORE_r(PerlIO_printf(Perl_debug_log,
@@ -10086,7 +10086,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 	    break;
 	case 1: case 2:
 	    ender = reganode(pRExC_state, CLOSE, parno);
-	    if (!SIZE_ONLY && RExC_seen & REG_SEEN_RECURSE) {
+            if (!SIZE_ONLY && RExC_seen & REG_RECURSE_SEEN) {
 		DEBUG_OPTIMISE_MORE_r(PerlIO_printf(Perl_debug_log,
 			"Setting close paren #%"IVdf" to %d\n",
 			(IV)parno, REG_NODE_NUM(ender)));
@@ -10133,7 +10133,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 	if (have_branch && !SIZE_ONLY) {
             char is_nothing= 1;
 	    if (depth==1)
-	        RExC_seen |= REG_TOP_LEVEL_BRANCHES;
+                RExC_seen |= REG_TOP_LEVEL_BRANCHES_SEEN;
 
 	    /* Hook the tails of the branches to the closing node. */
 	    for (br = ret; br; br = regnext(br)) {
@@ -11194,7 +11194,7 @@ tryagain:
 	    goto finish_meta_pat;
 	case 'G':
 	    ret = reg_node(pRExC_state, GPOS);
-	    RExC_seen |= REG_SEEN_GPOS;
+            RExC_seen |= REG_GPOS_SEEN;
 	    *flagp |= SIMPLE;
 	    goto finish_meta_pat;
 	case 'K':
@@ -11205,7 +11205,7 @@ tryagain:
 	     * be necessary here to avoid cases of memory corruption, as
 	     * with: C<$_="x" x 80; s/x\K/y/> -- rgs
 	     */
-	    RExC_seen |= REG_SEEN_LOOKBEHIND;
+            RExC_seen |= REG_LOOKBEHIND_SEEN;
 	    goto finish_meta_pat;
 	case 'Z':
 	    ret = reg_node(pRExC_state, SEOL);
@@ -11219,7 +11219,7 @@ tryagain:
 	    goto finish_meta_pat;
 	case 'C':
 	    ret = reg_node(pRExC_state, CANY);
-	    RExC_seen |= REG_SEEN_CANY;
+            RExC_seen |= REG_CANY_SEEN;
 	    *flagp |= HASWIDTH|SIMPLE;
 	    goto finish_meta_pat;
 	case 'X':
@@ -11236,7 +11236,7 @@ tryagain:
 
 	case 'b':
 	    RExC_seen_zerolen++;
-	    RExC_seen |= REG_SEEN_LOOKBEHIND;
+            RExC_seen |= REG_LOOKBEHIND_SEEN;
 	    op = BOUND + get_regex_charset(RExC_flags);
             if (op > BOUNDA) {  /* /aa is same as /a */
                 op = BOUNDA;
@@ -11250,7 +11250,7 @@ tryagain:
 	    goto finish_meta_pat;
 	case 'B':
 	    RExC_seen_zerolen++;
-	    RExC_seen |= REG_SEEN_LOOKBEHIND;
+            RExC_seen |= REG_LOOKBEHIND_SEEN;
 	    op = NBOUND + get_regex_charset(RExC_flags);
             if (op > NBOUNDA) { /* /aa is same as /a */
                 op = NBOUNDA;
@@ -12220,7 +12220,7 @@ S_regwhite( RExC_state_t *pRExC_state, char *p )
 		}
 	    } while (p < e);
 	    if (!ended)
-	        RExC_seen |= REG_SEEN_RUN_ON_COMMENT;
+                RExC_seen |= REG_RUN_ON_COMMENT_SEEN;
 	}
 	else
 	    break;
@@ -12234,7 +12234,7 @@ S_regpatws( RExC_state_t *pRExC_state, char *p , const bool recognize_comment )
     /* Returns the next non-pattern-white space, non-comment character (the
      * latter only if 'recognize_comment is true) in the string p, which is
      * ended by RExC_end.  If there is no line break ending a comment,
-     * RExC_seen has added the REG_SEEN_RUN_ON_COMMENT flag; */
+     * RExC_seen has added the REG_RUN_ON_COMMENT_SEEN flag; */
     const char *e = RExC_end;
 
     PERL_ARGS_ASSERT_REGPATWS;
@@ -12254,7 +12254,7 @@ S_regpatws( RExC_state_t *pRExC_state, char *p , const bool recognize_comment )
 		}
 	    } while (p < e);
 	    if (!ended)
-	        RExC_seen |= REG_SEEN_RUN_ON_COMMENT;
+                RExC_seen |= REG_RUN_ON_COMMENT_SEEN;
 	}
 	else
 	    break;
@@ -14839,7 +14839,7 @@ S_set_ANYOF_arg(pTHX_ RExC_state_t* const pRExC_state,
 
    Absorbs an /x style # comments from the input stream.
    Returns true if there is more text remaining in the stream.
-   Will set the REG_SEEN_RUN_ON_COMMENT flag if the comment
+   Will set the REG_RUN_ON_COMMENT_SEEN flag if the comment
    terminates the pattern without including a newline.
 
    Note its the callers responsibility to ensure that we are
@@ -14862,7 +14862,7 @@ S_reg_skipcomment(pTHX_ RExC_state_t *pRExC_state)
     if (!ended) {
         /* we ran off the end of the pattern without ending
            the comment, so we have to add an \n when wrapping */
-        RExC_seen |= REG_SEEN_RUN_ON_COMMENT;
+        RExC_seen |= REG_RUN_ON_COMMENT_SEEN;
         return 0;
     } else
         return 1;

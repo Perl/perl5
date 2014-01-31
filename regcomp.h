@@ -570,19 +570,18 @@ struct regnode_ssc {
 
 #define EXTRA_SIZE(guy) ((sizeof(guy)-1)/sizeof(struct regnode))
 
-#define REG_SEEN_ZERO_LEN	0x00000001
-#define REG_SEEN_LOOKBEHIND	0x00000002
-#define REG_SEEN_GPOS		0x00000004
+#define REG_ZERO_LEN_SEEN                   0x00000001
+#define REG_LOOKBEHIND_SEEN                 0x00000002
+#define REG_GPOS_SEEN                       0x00000004
 /* spare */
-#define REG_SEEN_CANY		0x00000010
-#define REG_SEEN_SANY		REG_SEEN_CANY /* src bckwrd cmpt */
-#define REG_SEEN_RECURSE        0x00000020
-#define REG_TOP_LEVEL_BRANCHES  0x00000040
-#define REG_SEEN_VERBARG        0x00000080
-#define REG_SEEN_CUTGROUP       0x00000100
-#define REG_SEEN_RUN_ON_COMMENT 0x00000200
-#define REG_SEEN_UNFOLDED_MULTI 0x00000400
-#define REG_SEEN_GOSTART        0x00000800
+#define REG_CANY_SEEN                       0x00000010
+#define REG_RECURSE_SEEN                    0x00000020
+#define REG_TOP_LEVEL_BRANCHES_SEEN         0x00000040
+#define REG_VERBARG_SEEN                    0x00000080
+#define REG_CUTGROUP_SEEN                   0x00000100
+#define REG_RUN_ON_COMMENT_SEEN             0x00000200
+#define REG_UNFOLDED_MULTI_SEEN             0x00000400
+#define REG_GOSTART_SEEN                    0x00000800
 
 START_EXTERN_C
 
