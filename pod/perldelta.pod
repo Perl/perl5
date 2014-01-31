@@ -422,9 +422,39 @@ well.
 
 =over 4
 
-=item *
+=item Regexp Engine Changes That Affect The Pluggable Regex Engine Interface
 
-XXX
+Many flags that used to be exposed via regexp.h and used to populate the
+extflags member of struct regexp have been removed. These fields were
+technically private to Perl's own regexp engine and should not have been
+exposed there in the first place.
+
+The affected flags are:
+
+    RXf_NOSCAN
+    RXf_CANY_SEEN
+    RXf_GPOS_SEEN
+    RXf_GPOS_FLOAT
+    RXf_ANCH_BOL
+    RXf_ANCH_MBOL
+    RXf_ANCH_SBOL
+    RXf_ANCH_GPOS
+
+As well as the follow flag masks:
+
+    RXf_ANCH_SINGLE
+    RXf_ANCH
+
+All have been renamed to PREGf_ equivalents and moved to regcomp.h.
+
+The behavior previously achieved by setting one or more of the RXf_ANCH_
+flags (via the RXf_ANCH mask) have now been replaced by a *single* flag bit
+in extflags:
+
+    RXf_IS_ANCHORED
+
+pluggable regex engines which previously used to set these flags should
+now set this flag ALONE.
 
 =back
 
