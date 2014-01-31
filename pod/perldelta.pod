@@ -459,6 +459,21 @@ XXX
 
 =back
 
+=head1 Errata From Previous Releases
+
+=over 4
+
+=item perl5180delta.pod
+
+This pod file contains a statement saying that C<RXf_SPLIT> (and its alias
+C<RXf_PMf_SPLIT>) and C<RXf_SKIPWHITE> were no longer used and #defined
+to 0. This was the case for a short period, but the change was reverted
+before Perl 5.18 was released. As such it was not true in Perl 5.18.x,
+and is also not true now. Both flags continue to be used. The incorrect
+entry has been removed from C<perl5180delta.pod> in this release.
+
+=back
+
 =head1 Obituary
 
 XXX If any significant core contributor has died, we've added a short obituary

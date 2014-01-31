@@ -2351,11 +2351,6 @@ called from XS modules [perl #79824].
 
 =item *
 
-C<RXf_SPLIT> and C<RXf_SKIPWHITE> are no longer used.  They are now
-#defined as 0.
-
-=item *
-
 The new C<RXf_MODIFIES_VARS> flag can be set by custom regular expression
 engines to indicate that the execution of the regular expression may cause
 variables to be modified.  This lets C<s///> know to skip certain
