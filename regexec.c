@@ -917,8 +917,7 @@ Perl_re_intuit_start(pTHX_
 	if (prog->substrs->check_ix) {
 	  do_other_anchored:
 	    {
-		char * last;
-		char *last1, *last2;
+		char *last, *last1;
 		char * const saved_s = s;
 		SV* must;
 
@@ -940,18 +939,15 @@ Perl_re_intuit_start(pTHX_
 		    s = other_last;
 
                 assert(prog->minlen > prog->anchored_offset);
-		last2 = last1 = HOP3c(strend,
+		last1 = HOP3c(strend,
                                 prog->anchored_offset-prog->minlen, strbeg);
-		assert (last <= last2);
-		if (last < last1)
-		    last1 = last;
  
 		/* On end-of-str: see comment below. */
 		must = utf8_target ? prog->anchored_utf8 : prog->anchored_substr;
                 assert(SvPOK(must));
                 s = fbm_instr(
                     (unsigned char*)s,
-                    HOP3(last1 + SvCUR(must), -(SvTAIL(must)!=0), strbeg),
+                    HOP3(last + SvCUR(must), -(SvTAIL(must)!=0), strbeg),
                     must,
                     multiline ? FBMrf_MULTILINE : 0
                 );
@@ -965,7 +961,7 @@ Perl_re_intuit_start(pTHX_
 		
 			    
 		if (!s) {
-		    if (last1 >= last2) {
+		    if (last >= last1) {
 			DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
 						", giving up...\n"));
 			goto fail_finish;
@@ -973,7 +969,7 @@ Perl_re_intuit_start(pTHX_
 		    DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
 			", trying floating at offset %ld...\n",
 			(long)(HOP3c(saved_s, 1, strend) - i_strpos)));
-		    other_last = HOP3c(last1, 1, strend);
+		    other_last = HOP3c(last, 1, strend);
 		    rx_origin = HOP4c(last, 1 - prog->anchored_offset, strbeg, strend);
 		    goto restart;
 		}
