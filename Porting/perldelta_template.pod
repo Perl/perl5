@@ -358,6 +358,17 @@ XXX
 
 =back
 
+=head1 Errata From Previous Releases
+
+=over 4
+
+=item *
+
+XXX Add anything here that we forgot to add, or were mistaken about, in
+the perldelta of a previous release.
+
+=back
+
 =head1 Obituary
 
 XXX If any significant core contributor has died, we've added a short obituary
