@@ -6845,8 +6845,10 @@ reStudy:
 	     && data.last_start_min == 0 && data.last_end > 0
 	     && !RExC_seen_zerolen
              && !(RExC_seen & REG_VERBARG_SEEN)
-             && !((RExC_seen & REG_GPOS_SEEN) || (r->intflags & PREGf_ANCH_GPOS)))
+             && !(RExC_seen & REG_GPOS_SEEN)
+        ){
 	    r->extflags |= RXf_CHECK_ALL;
+        }
 	scan_commit(pRExC_state, &data,&minlen,0);
 
 	longest_float_length = CHR_SVLEN(data.longest_float);
