@@ -2576,11 +2576,10 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
 	    } /* end search for newline */
 	} /* end anchored/multiline check string search */
 	goto phooey;
-    } else if ((prog->intflags & (PREGf_GPOS_SEEN | PREGf_ANCH_GPOS)) == (PREGf_GPOS_SEEN | PREGf_ANCH_GPOS))
+    } else if (prog->intflags & PREGf_ANCH_GPOS)
     {
-        /* XXX: Why do we check both PREGf_GPOS_SEEN && PREGf_ANCH_GPOS the
-         * latter can't be true unless the former is too as far as I know.
-         * Needs further investigation - Yves */
+        /* PREGf_ANCH_GPOS should never be true if PREGf_GPOS_SEEN is not true */
+        assert(prog->intflags & PREGf_GPOS_SEEN);
         /* For anchored \G, the only position it can match from is
          * (ganch-gofs); we already set startpos to this above; if intuit
          * moved us on from there, we can't possibly succeed */
