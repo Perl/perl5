@@ -14,7 +14,7 @@ require 't/test.pl';
 
 open(my $fh, '<', 'Porting/README.pod') or die("Can't open Porting/README.pod: $!");
 
-my @porting_files = glob("Porting/*");
+my @porting_files = grep { !/~\z/ } glob("Porting/*");
 # It seems that dying here is nicer than having several dozen failing tests
 # later.  But that assumes one will see the message from die.
 die "Can't get contents of Porting/ directory.\n" unless @porting_files > 1;
