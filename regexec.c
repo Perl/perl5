@@ -942,6 +942,7 @@ Perl_re_intuit_start(pTHX_
                 assert(prog->minlen > prog->anchored_offset);
 		last2 = last1 = HOP3c(strend,
                                 prog->anchored_offset-prog->minlen, strbeg);
+		assert (last <= last2);
 		if (last < last1)
 		    last1 = last;
  
