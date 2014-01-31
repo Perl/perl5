@@ -974,6 +974,7 @@ if ($Opts{glossary}) {
 my %seen = ();
 my $text = 0;
 $/ = '';
+my $errors= 0;
 
 sub process {
   if (s/\A(\w*)\s+\(([\w.]+)\):\s*\n(\t?)/=item C<$1>\n\nFrom F<$2>:\n\n/m) {
@@ -998,7 +999,9 @@ EOF
   }
   elsif (!$text || !/\A\t/) {
     warn "Expected a Configure variable header",
-      ($text ? " or another paragraph of description" : () );
+      ($text ? " or another paragraph of description" : () ),
+      ", instead we got:\n$_";
+    $errors++;
   }
   s/n't/n\00t/g;		# leave can't, won't etc untouched
   s/^\t\s+(.*)/\n$1/gm;		# Indented lines ===> new paragraph
@@ -1034,6 +1037,13 @@ if ($Opts{glossary}) {
   while (<GLOS>) {
     process;
     print CONFIG_POD;
+  }
+  if ($errors) {
+    die "Errors encountered while processing $Glossary. ",
+        "Header lines are expected to be of the form:\n",
+        "NAME (CLASS):\n",
+        "Maybe there is a malformed header?\n",
+    ;
   }
 }
 
