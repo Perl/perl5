@@ -386,6 +386,11 @@ L<LaTeX::Encode> version 0.08
 
 L<Mail::SpamAssassin> version 3.3.2
 
+=item *
+
+L<RDF::Trine>.  The test failures are actually due to a bug in
+L<XML::LibXML> version 2.0108.  A patch to XML::LibXML has been submitted.
+
 =back
 
 =back
