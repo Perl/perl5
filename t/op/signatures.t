@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib';
     require './test.pl';
 }
-plan 768;
+plan 880;
 
 eval "#line 8 foo\nsub t004 :method (\$a) { }";
 is $@, "Experimental subroutine signatures not enabled at foo line 8\.\n",
@@ -269,6 +269,129 @@ is eval("t036(456, 789)"), undef;
 like $@, qr/\AToo many arguments for subroutine at/;
 is $a, 123;
 
+sub t120 ($a = $_) { $a // "z" }
+is prototype(\&t120), undef;
+$_ = "___";
+is eval("t120()"), "___";
+$_ = "___";
+is eval("t120(undef)"), "z";
+$_ = "___";
+is eval("t120(0)"), 0;
+$_ = "___";
+is eval("t120(456)"), 456;
+$_ = "___";
+is eval("t120(456, 789)"), undef;
+like $@, qr/\AToo many arguments for subroutine at/;
+is $a, 123;
+
+sub t121 ($a = caller) { $a // "z" }
+is prototype(\&t121), undef;
+is eval("t121()"), "main";
+is eval("t121(undef)"), "z";
+is eval("t121(0)"), 0;
+is eval("t121(456)"), 456;
+is eval("t121(456, 789)"), undef;
+like $@, qr/\AToo many arguments for subroutine at/;
+is eval("package T121::Z; ::t121()"), "T121::Z";
+is eval("package T121::Z; ::t121(undef)"), "z";
+is eval("package T121::Z; ::t121(0)"), 0;
+is eval("package T121::Z; ::t121(456)"), 456;
+is eval("package T121::Z; ::t121(456, 789)"), undef;
+like $@, qr/\AToo many arguments for subroutine at/;
+is $a, 123;
+
+sub t129 ($a = return 222) { $a."x" }
+is prototype(\&t129), undef;
+is eval("t129()"), "222";
+is eval("t129(0)"), "0x";
+is eval("t129(456)"), "456x";
+is eval("t129(456, 789)"), undef;
+like $@, qr/\AToo many arguments for subroutine at/;
+is $a, 123;
+
+use feature "current_sub";
+sub t122 ($c = 5, $r = $c > 0 ? __SUB__->($c - 1) : "") { $c.$r }
+is prototype(\&t122), undef;
+is eval("t122()"), "543210";
+is eval("t122(0)"), "0";
+is eval("t122(1)"), "10";
+is eval("t122(5)"), "543210";
+is eval("t122(5, 789)"), "5789";
+is eval("t122(5, 789, 987)"), undef;
+like $@, qr/\AToo many arguments for subroutine at/;
+is $a, 123;
+
+sub t123 ($list = wantarray) { $list ? "list" : "scalar" }
+is prototype(\&t123), undef;
+is eval("scalar(t123())"), "scalar";
+is eval("(t123())[0]"), "list";
+is eval("scalar(t123(0))"), "scalar";
+is eval("(t123(0))[0]"), "scalar";
+is eval("scalar(t123(1))"), "list";
+is eval("(t123(1))[0]"), "list";
+is eval("t123(456, 789)"), undef;
+like $@, qr/\AToo many arguments for subroutine at/;
+is $a, 123;
+
+sub t124 ($b = (local $a = $a + 1)) { "$a/$b" }
+is prototype(\&t124), undef;
+is eval("t124()"), "124/124";
+is $a, 123;
+is eval("t124(456)"), "123/456";
+is $a, 123;
+is eval("t124(456, 789)"), undef;
+like $@, qr/\AToo many arguments for subroutine at/;
+is $a, 123;
+
+sub t125 ($c = (our $t125_counter)++) { $c }
+is prototype(\&t125), undef;
+is eval("t125()"), 0;
+is eval("t125()"), 1;
+is eval("t125()"), 2;
+is eval("t125(456)"), 456;
+is eval("t125(789)"), 789;
+is eval("t125()"), 3;
+is eval("t125()"), 4;
+is eval("t125(456, 789)"), undef;
+like $@, qr/\AToo many arguments for subroutine at/;
+is $a, 123;
+
+use feature "state";
+sub t126 ($c = (state $s = $z++)) { $c }
+is prototype(\&t126), undef;
+$z = 222;
+is eval("t126(456)"), 456;
+is $z, 222;
+is eval("t126()"), 222;
+is $z, 223;
+is eval("t126(456)"), 456;
+is $z, 223;
+is eval("t126()"), 222;
+is $z, 223;
+is eval("t126(456, 789)"), undef;
+like $@, qr/\AToo many arguments for subroutine at/;
+is $z, 223;
+is $a, 123;
+
+sub t127 ($c = do { state $s = $z++; $s++ }) { $c }
+is prototype(\&t127), undef;
+$z = 222;
+is eval("t127(456)"), 456;
+is $z, 222;
+is eval("t127()"), 222;
+is $z, 223;
+is eval("t127()"), 223;
+is eval("t127()"), 224;
+is $z, 223;
+is eval("t127(456)"), 456;
+is eval("t127(789)"), 789;
+is eval("t127()"), 225;
+is eval("t127()"), 226;
+is eval("t127(456, 789)"), undef;
+like $@, qr/\AToo many arguments for subroutine at/;
+is $z, 223;
+is $a, 123;
+
 sub t037 ($a = 222, $b = $a."x") { "$a/$b" }
 is prototype(\&t037), undef;
 is eval("t037()"), "222/222x";
@@ -276,6 +399,27 @@ is eval("t037(0)"), "0/0x";
 is eval("t037(456)"), "456/456x";
 is eval("t037(456, 789)"), "456/789";
 is eval("t037(456, 789, 987)"), undef;
+like $@, qr/\AToo many arguments for subroutine at/;
+is $a, 123;
+
+sub t128 ($a = 222, $b = ($a = 333)) { "$a/$b" }
+is prototype(\&t128), undef;
+is eval("t128()"), "333/333";
+is eval("t128(0)"), "333/333";
+is eval("t128(456)"), "333/333";
+is eval("t128(456, 789)"), "456/789";
+is eval("t128(456, 789, 987)"), undef;
+like $@, qr/\AToo many arguments for subroutine at/;
+is $a, 123;
+
+sub t130 { join(",", @_).";".scalar(@_) }
+sub t131 ($a = 222, $b = goto &t130) { "$a/$b" }
+is prototype(\&t131), undef;
+is eval("t131()"), ";0";
+is eval("t131(0)"), "0;1";
+is eval("t131(456)"), "456;1";
+is eval("t131(456, 789)"), "456/789";
+is eval("t131(456, 789, 987)"), undef;
 like $@, qr/\AToo many arguments for subroutine at/;
 is $a, 123;
 
