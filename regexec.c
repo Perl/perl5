@@ -1086,17 +1086,23 @@ Perl_re_intuit_start(pTHX_
 		DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
 		    ", trying anchored starting at offset %ld...\n",
 		    (long)(saved_s + 1 - i_strpos)));
-		other_last = last; /* highest failure */
+		other_last = HOP3c(last, 1, strend); /* highest failure */
 		rx_origin = HOP3c(rx_origin, 1, strend);
 		goto restart;
 	    }
 	    else {
 		DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, " at offset %ld...\n",
 		      (long)(s - i_strpos)));
-		other_last = s; /* Fix this later. --Hugo */
-                /* XXX the commit that introduced the "Fix this" comment
-                 * above, changed the other_last assignment from s+1 to s.
-                 * I've no idea what's right. DAPM */
+
+                /* other_last is set to s, not s+1, since its possible for
+                 * a floating substr to fail first time, then succeed
+                 * second time at the same floating position; e.g.:
+                 *     "-AB--AABZ" =~ /\wAB\d*Z/
+                 * The first time round, anchored and float match at
+                 * "-(AB)--AAB(Z)" then fail on the initial \w character
+                 * class. Second time round, they match at "-AB--A(AB)(Z)".
+                 */
+		other_last = s;
 		s = saved_s;
 		if (rx_origin == strpos)
 		    goto try_at_start;
