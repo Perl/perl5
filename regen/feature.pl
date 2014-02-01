@@ -34,6 +34,7 @@ my %feature = (
     unicode_eval    => 'unieval',
     unicode_strings => 'unicode',
     fc              => 'fc',
+    signatures      => 'signatures',
 );
 
 # NOTE: If a feature is ever enabled in a non-contiguous range of Perl
@@ -360,7 +361,7 @@ read_only_bottom_close_and_rename($h);
 __END__
 package feature;
 
-our $VERSION = '1.34';
+our $VERSION = '1.35';
 
 FEATURES
 
@@ -559,6 +560,26 @@ This enables declaration of subroutines via C<my sub foo>, C<state sub foo>
 and C<our sub foo> syntax.  See L<perlsub/Lexical Subroutines> for details.
 
 This feature is available from Perl 5.18 onwards.
+
+=head2 The 'signatures' feature
+
+B<WARNING>: This feature is still experimental and the implementation may
+change in future versions of Perl.  For this reason, Perl will
+warn when you use the feature, unless you have explicitly disabled the
+warning:
+
+    no warnings "experimental::signatures";
+
+This enables unpacking of subroutine arguments into lexical variables
+by syntax such as
+
+    sub foo ($left, $right) {
+	return $left + $right;
+    }
+
+See L<perlsub/Signatures> for details.
+
+This feature is available from Perl 5.20 onwards.
 
 =head1 FEATURE BUNDLES
 

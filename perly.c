@@ -28,6 +28,7 @@
 #include "EXTERN.h"
 #define PERL_IN_PERLY_C
 #include "perl.h"
+#include "feature.h"
 
 typedef unsigned char yytype_uint8;
 typedef signed char yytype_int8;

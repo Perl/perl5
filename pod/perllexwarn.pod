@@ -239,6 +239,8 @@ will be lost.
          |                 |
          |                 +- experimental::regex_sets
          |                 |
+         |                 +- experimental::signatures
+         |                 |
          |                 +- experimental::smartmatch
          |
          +- glob

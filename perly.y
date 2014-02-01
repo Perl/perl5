@@ -97,9 +97,9 @@
 %type <opval> sliceme kvslice gelem
 %type <opval> listexpr nexpr texpr iexpr mexpr mnexpr miexpr
 %type <opval> optlistexpr optexpr indirob listop method
-%type <opval> formname subname proto subbody cont my_scalar formblock
+%type <opval> formname subname proto optsubbody cont my_scalar formblock
 %type <opval> subattrlist myattrlist myattrterm myterm
-%type <opval> termbinop termunop anonymous termdo
+%type <opval> realsubbody subsignature termbinop termunop anonymous termdo
 %type <opval> formstmtseq formline formarg
 
 %nonassoc <i_tkval> PREC_LOW
@@ -339,7 +339,7 @@ barestmt:	PLUGSTMT
 			  PL_parser->in_my = 0;
 			  PL_parser->in_my_stash = NULL;
 			}
-		proto subattrlist subbody
+		proto subattrlist optsubbody
 			{
 			  SvREFCNT_inc_simple_void(PL_compcv);
 #ifdef MAD
@@ -728,8 +728,40 @@ myattrlist:	COLONATTR THING
 			}
 	;
 
-/* Subroutine body - either null or a block */
-subbody	:	block	{ $$ = $1; }
+/* Optional subroutine signature */
+subsignature:	/* NULL */ { $$ = (OP*)NULL; }
+	|	'('
+			{
+			  if (!FEATURE_SIGNATURES_IS_ENABLED)
+			    Perl_croak(aTHX_ "Experimental "
+				"subroutine signatures not enabled");
+			  Perl_ck_warner_d(aTHX_
+				packWARN(WARN_EXPERIMENTAL__SIGNATURES),
+				"The signatures feature is experimental");
+			  $<opval>$ = parse_subsignature();
+			}
+		')'
+			{
+			  $$ = op_append_list(OP_LINESEQ, $<opval>2,
+				newSTATEOP(0, NULL, sawparens(newNULLLIST())));
+			  PL_parser->expect = XBLOCK;
+			}
+	;
+
+/* Subroutine body - block with optional signature */
+realsubbody:	remember subsignature '{' stmtseq '}'
+			{
+			  if (PL_parser->copline > (line_t)IVAL($3))
+			      PL_parser->copline = (line_t)IVAL($3);
+			  $$ = block_end($1,
+				op_append_list(OP_LINESEQ, $2, $4));
+			  TOKEN_GETMAD($3,$$,'{');
+			  TOKEN_GETMAD($5,$$,'}');
+			}
+	;
+
+/* Optional subroutine body, for named subroutine declaration */
+optsubbody:	realsubbody { $$ = $1; }
 	|	';'	{ $$ = IF_MAD(
 				    newOP(OP_NULL,0),
 				    (OP*)NULL
@@ -1101,7 +1133,7 @@ anonymous:	'[' expr ']'
 			  TOKEN_GETMAD($2,$$,';');
 			  TOKEN_GETMAD($3,$$,'}');
 			}
-	|	ANONSUB startanonsub proto subattrlist block	%prec '('
+	|	ANONSUB startanonsub proto subattrlist realsubbody	%prec '('
 			{ SvREFCNT_inc_simple_void(PL_compcv);
 			  $$ = newANONATTRSUB($2, $3, $4, $5);
 			  TOKEN_GETMAD($1,$$,'o');
