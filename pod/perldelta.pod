@@ -118,7 +118,25 @@ There may well be none in a stable release.
 
 =item *
 
-XXX
+Code like:
+
+  my $x; # or @x, %x
+  my $y;
+
+is now optimized to:
+
+  my ($x, $y);
+
+In combination with the padrange optimization, this means longer
+uninitialized my variable statements are also optimized, so:
+
+  my $x; my @y; my %z;
+
+becomes:
+
+  my ($x, @y, %z);
+
+[perl #121077]
 
 =back
 
@@ -145,6 +163,20 @@ XXX
 =head2 Updated Modules and Pragmata
 
 =over 4
+
+=item *
+
+L<B::Deparse> has been upgraded from version 1.24 to 1.25.
+
+It now knows how to handle whitespace it prototypes.  Previously, it could
+loop infinitely.  [perl #121050]
+
+=item *
+
+L<Devel::Peek> has been upgraded from version 1.15 to 1.16.
+
+Devel::Peek::SvREFCNT() now ensures it has been passed a reference, as
+specified by its prototype.
 
 =item *
 
@@ -390,9 +422,39 @@ well.
 
 =over 4
 
-=item *
+=item Regexp Engine Changes That Affect The Pluggable Regex Engine Interface
 
-XXX
+Many flags that used to be exposed via regexp.h and used to populate the
+extflags member of struct regexp have been removed. These fields were
+technically private to Perl's own regexp engine and should not have been
+exposed there in the first place.
+
+The affected flags are:
+
+    RXf_NOSCAN
+    RXf_CANY_SEEN
+    RXf_GPOS_SEEN
+    RXf_GPOS_FLOAT
+    RXf_ANCH_BOL
+    RXf_ANCH_MBOL
+    RXf_ANCH_SBOL
+    RXf_ANCH_GPOS
+
+As well as the follow flag masks:
+
+    RXf_ANCH_SINGLE
+    RXf_ANCH
+
+All have been renamed to PREGf_ equivalents and moved to regcomp.h.
+
+The behavior previously achieved by setting one or more of the RXf_ANCH_
+flags (via the RXf_ANCH mask) have now been replaced by a *single* flag bit
+in extflags:
+
+    RXf_IS_ANCHORED
+
+pluggable regex engines which previously used to set these flags should
+now set this flag ALONE.
 
 =back
 
@@ -424,6 +486,21 @@ platform specific bugs also go here.
 =item *
 
 XXX
+
+=back
+
+=head1 Errata From Previous Releases
+
+=over 4
+
+=item perl5180delta.pod
+
+This pod file contains a statement saying that C<RXf_SPLIT> (and its alias
+C<RXf_PMf_SPLIT>) and C<RXf_SKIPWHITE> were no longer used and #defined
+to 0. This was the case for a short period, but the change was reverted
+before Perl 5.18 was released. As such it was not true in Perl 5.18.x,
+and is also not true now. Both flags continue to be used. The incorrect
+entry has been removed from C<perl5180delta.pod> in this release.
 
 =back
 

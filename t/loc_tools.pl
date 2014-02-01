@@ -95,10 +95,10 @@ sub find_locales {  # Returns an array of all the locales we found on the
     # program without the taint mode getting grumpy.
 
     # $ENV{PATH} is special in VMS.
-    delete $ENV{PATH} if $^O ne 'VMS' or $Config{d_setenv};
+    delete local $ENV{PATH} if $^O ne 'VMS' or $Config{d_setenv};
 
     # Other subversive stuff.
-    delete @ENV{qw(IFS CDPATH ENV BASH_ENV)};
+    delete local @ENV{qw(IFS CDPATH ENV BASH_ENV)};
 
     if (-x "/usr/bin/locale"
         && open(LOCALES, "/usr/bin/locale -a 2>/dev/null|"))

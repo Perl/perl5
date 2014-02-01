@@ -677,15 +677,15 @@ Perl_re_intuit_start(pTHX_
         }
 	check = prog->check_substr;
     }
-    if (prog->extflags & RXf_ANCH) { /* Match at \G, beg-of-str or after \n */
-	ml_anch = !( (prog->extflags & RXf_ANCH_SINGLE)
-		     || ( (prog->extflags & RXf_ANCH_BOL)
+    if (prog->intflags & PREGf_ANCH) { /* Match at \G, beg-of-str or after \n */
+        ml_anch = !( (prog->intflags & PREGf_ANCH_SINGLE)
+                     || ( (prog->intflags & PREGf_ANCH_BOL)
 			  && !multiline ) );	/* Check after \n? */
 
 	if (!ml_anch) {
           /* we are only allowed to match at BOS or \G */
 
-	  if (prog->extflags & RXf_ANCH_GPOS) {
+          if (prog->intflags & PREGf_ANCH_GPOS) {
             /* in this case, we hope(!) that the caller has already
              * set strpos to pos()-gofs, and will already have checked
              * that this anchor position is legal
@@ -699,7 +699,7 @@ Perl_re_intuit_start(pTHX_
 	      goto fail;
 	  }
 	  if (prog->check_offset_min == prog->check_offset_max
-              && !(prog->extflags & RXf_CANY_SEEN)
+              && !(prog->intflags & PREGf_CANY_SEEN)
               && ! multiline)   /* /m can cause \n's to match that aren't
                                    accounted for in the string max length.
                                    See [perl #115242] */
@@ -785,7 +785,7 @@ Perl_re_intuit_start(pTHX_
             (IV)prog->check_end_shift);
     });       
         
-        if (prog->extflags & RXf_CANY_SEEN) {
+        if (prog->intflags & PREGf_CANY_SEEN) {
             start_point= (U8*)(s + srch_start_shift);
             end_point= (U8*)(strend - srch_end_shift);
         } else {
@@ -1101,8 +1101,12 @@ Perl_re_intuit_start(pTHX_
 	    s = strpos;
 	    /* XXXX If the check string was an implicit check MBOL, then we need to unset the relevant flag
 		    see http://bugs.activestate.com/show_bug.cgi?id=87173 */
-	    if (prog->intflags & PREGf_IMPLICIT)
-		prog->extflags &= ~RXf_ANCH_MBOL;
+            if (prog->intflags & PREGf_IMPLICIT) {
+                prog->intflags &= ~PREGf_ANCH_MBOL;
+                /* maybe we have no anchors left after this... */
+                if (!(prog->intflags & PREGf_ANCH))
+                    prog->extflags &= ~RXf_IS_ANCHORED;
+            }
 	    /* XXXX This is a remnant of the old implementation.  It
 	            looks wasteful, since now INTUIT can use many
 	            other heuristics. */
@@ -1162,7 +1166,7 @@ Perl_re_intuit_start(pTHX_
 	    }
 	    DEBUG_EXECUTE_r( PerlIO_printf(Perl_debug_log,
 				   "This position contradicts STCLASS...\n") );
-	    if ((prog->extflags & RXf_ANCH) && !ml_anch)
+            if ((prog->intflags & PREGf_ANCH) && !ml_anch)
 		goto fail;
 	    checked_upto = HOPBACKc(endpos, start_shift);
 	    DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "start_shift: %"IVdf" check_at: %"IVdf" endpos: %"IVdf" checked_upto: %"IVdf"\n",
@@ -2278,7 +2282,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
 
     startpos = stringarg;
 
-    if (prog->extflags & RXf_GPOS_SEEN) {
+    if (prog->intflags & PREGf_GPOS_SEEN) {
         MAGIC *mg;
 
         /* set reginfo->ganch, the position where \G can match */
@@ -2304,7 +2308,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
          * to the start of the string, e.g. /w+\G/
          */
 
-        if (prog->extflags & RXf_ANCH_GPOS) {
+        if (prog->intflags & PREGf_ANCH_GPOS) {
             startpos  = reginfo->ganch - prog->gofs;
             if (startpos <
                 ((flags & REXEC_FAIL_ON_UNDERFLOW) ? stringarg : strbeg))
@@ -2320,7 +2324,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
             else
                 startpos -= prog->gofs;
         }
-        else if (prog->extflags & RXf_GPOS_FLOAT)
+        else if (prog->intflags & PREGf_GPOS_FLOAT)
             startpos = strbeg;
     }
 
@@ -2360,7 +2364,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
                     && (s < stringarg))
             {
                 /* this should only be possible under \G */
-                assert(prog->extflags & RXf_GPOS_SEEN);
+                assert(prog->intflags & PREGf_GPOS_SEEN);
                 DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
                     "matched, but failing for REXEC_FAIL_ON_UNDERFLOW\n"));
                 goto phooey;
@@ -2495,11 +2499,10 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
 
     /* Simplest case:  anchored match need be tried only once. */
     /*  [unless only anchor is BOL and multiline is set] */
-    if (prog->extflags & (RXf_ANCH & ~RXf_ANCH_GPOS)) {
+    if (prog->intflags & (PREGf_ANCH & ~PREGf_ANCH_GPOS)) {
 	if (s == startpos && regtry(reginfo, &s))
 	    goto got_it;
-	else if (multiline || (prog->intflags & PREGf_IMPLICIT)
-		 || (prog->extflags & RXf_ANCH_MBOL)) /* XXXX SBOL? */
+        else if (multiline || (prog->intflags & (PREGf_IMPLICIT | PREGf_ANCH_MBOL))) /* XXXX SBOL? */
 	{
 	    char *end;
 
@@ -2573,8 +2576,10 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
 	    } /* end search for newline */
 	} /* end anchored/multiline check string search */
 	goto phooey;
-    } else if (RXf_GPOS_CHECK == (prog->extflags & RXf_GPOS_CHECK)) 
+    } else if (prog->intflags & PREGf_ANCH_GPOS)
     {
+        /* PREGf_ANCH_GPOS should never be true if PREGf_GPOS_SEEN is not true */
+        assert(prog->intflags & PREGf_GPOS_SEEN);
         /* For anchored \G, the only position it can match from is
          * (ganch-gofs); we already set startpos to this above; if intuit
          * moved us on from there, we can't possibly succeed */
@@ -2890,7 +2895,7 @@ got_it:
             && (prog->offs[0].start < stringarg - strbeg))
     {
         /* this should only be possible under \G */
-        assert(prog->extflags & RXf_GPOS_SEEN);
+        assert(prog->intflags & PREGf_GPOS_SEEN);
         DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
             "matched, but failing for REXEC_FAIL_ON_UNDERFLOW\n"));
         goto phooey;

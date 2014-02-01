@@ -492,6 +492,9 @@ SvREFCNT(sv)
 SV *	sv
 PROTOTYPE: \[$@%&*]
 CODE:
+    SvGETMAGIC(sv);
+    if (!SvROK(sv))
+        croak_xs_usage(cv, "SCALAR");
     RETVAL = SvREFCNT(SvRV(sv)) - 1; /* -1 because our ref doesn't count */
 OUTPUT:
     RETVAL

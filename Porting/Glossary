@@ -2945,19 +2945,19 @@ hint (Oldconfig.U):
 	Gives the type of hints used for previous answers. May be one of
 	"default", "recommended" or "previous".
 
-hostperl (Cross.U)
+hostperl (Cross.U):
 	This variable contains the path to a miniperl binary that can be
 	run on the host OS when cross-compiling.  Useful and available only
 	during Perl build.
 	Empty string '' if not cross-compiling.
 
-hostgenerate (Cross.U)
+hostgenerate (Cross.U):
 	This variable contains the path to a generate_uudmap binary that
 	can be run on the host OS when cross-compiling.  Useful and
 	available only during Perl build.
 	Empty string '' if not cross-compiling.
 
-hostosname (Cross.U)
+hostosname (Cross.U):
 	This variable contains the original value of '$^O' for hostperl
 	when cross-compiling.  This is useful to pick the proper tools
 	when running build code in the host.
@@ -4913,9 +4913,17 @@ targetarch (Cross.U):
 	If not, this will be empty.
 
 targetdir (Cross.U):
-	This variable contains a path that will be created on the target
-	host using targetmkdir, and then used to copy the cross-compiled
-	executables to. Defaults to '/tmp' if not set.
+        This variable contains a path that will be created on the target
+        host using targetmkdir, and then used to copy the cross-compiled
+        executables to. Defaults to '/tmp' if not set.
+
+targetenv (Cross.U):
+        If cross-compiling, this variable can be used to modify the
+        environment on the target system.
+        However, how and where it's used, and even if it's used at all, is
+        entirely dependent on both the transport mechanism (targetrun) and
+        what the target system is.  Unless the relevant documentation says
+        otherwise, it is genereally not useful.
 
 targethost (Cross.U):
 	This variable contains the name of a separate host machine that

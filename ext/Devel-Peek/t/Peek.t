@@ -362,6 +362,7 @@ do_test('reference to named subroutine without prototype',
     OUTSIDE = $ADDR \\(MAIN\\)');
 
 if ($] >= 5.011) {
+# note the conditionals on ENGINE and INTFLAGS were introduced in 5.19.9
 do_test('reference to regexp',
         qr(tic),
 'SV = $RV\\($ADDR\\) at $ADDR
@@ -380,7 +381,8 @@ do_test('reference to regexp',
 '
     COMPFLAGS = 0x0 \(\)
     EXTFLAGS = 0x680000 \(CHECK_ALL,USE_INTUIT_NOML,USE_INTUIT_ML\)
-    INTFLAGS = 0x0
+(?:    ENGINE = $ADDR \(STANDARD\)
+)?    INTFLAGS = 0x0(?: \(\))?
     NPARENS = 0
     LASTPAREN = 0
     LASTCLOSEPAREN = 0
@@ -392,8 +394,8 @@ do_test('reference to regexp',
     SUBOFFSET = 0
     SUBCOFFSET = 0
     SUBBEG = 0x0
-    ENGINE = $ADDR
-    MOTHER_RE = $ADDR'
+(?:    ENGINE = $ADDR
+)?    MOTHER_RE = $ADDR'
 . ($] < 5.019003 ? '' : '
     SV = REGEXP\($ADDR\) at $ADDR
       REFCNT = 2
@@ -402,7 +404,8 @@ do_test('reference to regexp',
       CUR = 8
       COMPFLAGS = 0x0 \(\)
       EXTFLAGS = 0x680000 \(CHECK_ALL,USE_INTUIT_NOML,USE_INTUIT_ML\)
-      INTFLAGS = 0x0
+(?:      ENGINE = $ADDR \(STANDARD\)
+)?      INTFLAGS = 0x0(?: \(\))?
       NPARENS = 0
       LASTPAREN = 0
       LASTCLOSEPAREN = 0
@@ -414,8 +417,8 @@ do_test('reference to regexp',
       SUBOFFSET = 0
       SUBCOFFSET = 0
       SUBBEG = 0x0
-      ENGINE = $ADDR
-      MOTHER_RE = 0x0
+(?:    ENGINE = $ADDR
+)?      MOTHER_RE = 0x0
       PAREN_NAMES = 0x0
       SUBSTRS = $ADDR
       PPRIVATE = $ADDR
@@ -1198,7 +1201,7 @@ unless ($Config{useithreads}) {
     pass "no crash with DeadCode";
     close OUT;
 }
-
+# note the conditionals on ENGINE and INTFLAGS were introduced in 5.19.9
 do_test('UTF-8 in a regular expression',
         qr/\x{100}/,
 'SV = IV\($ADDR\) at $ADDR
@@ -1213,7 +1216,8 @@ do_test('UTF-8 in a regular expression',
     STASH = $ADDR	"Regexp"
     COMPFLAGS = 0x0 \(\)
     EXTFLAGS = 0x680040 \(CHECK_ALL,USE_INTUIT_NOML,USE_INTUIT_ML\)
-    INTFLAGS = 0x0
+(?:    ENGINE = $ADDR \(STANDARD\)
+)?    INTFLAGS = 0x0(?: \(\))?
     NPARENS = 0
     LASTPAREN = 0
     LASTCLOSEPAREN = 0
@@ -1225,8 +1229,8 @@ do_test('UTF-8 in a regular expression',
     SUBOFFSET = 0
     SUBCOFFSET = 0
     SUBBEG = 0x0
-    ENGINE = $ADDR
-    MOTHER_RE = $ADDR'
+(?:    ENGINE = $ADDR
+)?    MOTHER_RE = $ADDR'
 . ($] < 5.019003 ? '' : '
     SV = REGEXP\($ADDR\) at $ADDR
       REFCNT = 2
@@ -1235,7 +1239,8 @@ do_test('UTF-8 in a regular expression',
       CUR = 13
       COMPFLAGS = 0x0 \(\)
       EXTFLAGS = 0x680040 \(CHECK_ALL,USE_INTUIT_NOML,USE_INTUIT_ML\)
-      INTFLAGS = 0x0
+(?:      ENGINE = $ADDR \(STANDARD\)
+)?      INTFLAGS = 0x0(?: \(\))?
       NPARENS = 0
       LASTPAREN = 0
       LASTCLOSEPAREN = 0
@@ -1247,8 +1252,8 @@ do_test('UTF-8 in a regular expression',
       SUBOFFSET = 0
       SUBCOFFSET = 0
       SUBBEG = 0x0
-      ENGINE = $ADDR
-      MOTHER_RE = 0x0
+(?:    ENGINE = $ADDR
+)?      MOTHER_RE = 0x0
       PAREN_NAMES = 0x0
       SUBSTRS = $ADDR
       PPRIVATE = $ADDR
@@ -1268,6 +1273,7 @@ do_test('UTF-8 in a regular expression',
   my $base_count = Devel::Peek::SvREFCNT(%hash);
   my $ref = \%hash;
   is(Devel::Peek::SvREFCNT(%hash), $base_count + 1, "SvREFCNT on non-scalar");
+  ok(!eval { &Devel::Peek::SvREFCNT(1) }, "requires prototype");
 }
 {
 # utf8 tests

@@ -267,7 +267,19 @@ EOF
             1, {}, "/il matching of [bracketed] doesn't skip POSIX class if fails individ char");
     }
 
+    {
+        fresh_perl_is(<<"EOF",
+                use locale;
+                use POSIX;
+                POSIX::setlocale(POSIX::LC_CTYPE(),"C");
+                print "0" =~ /[\\d[:punct:]]/l || 0;
+                print "\\n";
+EOF
+            1, {}, "/l matching of [bracketed] doesn't skip non-first POSIX class");
+
+    }
+
 
 } # SKIP
 
-sub last { 16 }
+sub last { 17 }

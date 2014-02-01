@@ -709,9 +709,10 @@ S_is_cur_LC_category_utf8(pTHX_ int category)
         return FALSE;
     }
 
-#if defined(USE_LOCALE_CTYPE) && (defined(MB_CUR_MAX) || defined(HAS_NL_LANGINFO) && defined(CODESET))
+#if defined(USE_LOCALE_CTYPE)    \
+    && (defined(MB_CUR_MAX) || (defined(HAS_NL_LANGINFO) && defined(CODESET)))
 
-    { /* Next try MB_CUR_MAX or nl_langinfo if available */
+    { /* Next try nl_langinfo or MB_CUR_MAX if available */
 
         char *save_ctype_locale = NULL;
         bool is_utf8;
@@ -739,49 +740,13 @@ S_is_cur_LC_category_utf8(pTHX_ int category)
         }
 
         /* Here the current LC_CTYPE is set to the locale of the category whose
-         * information is desired.  This means that MB_CUR_MAX and
-         * nl_langinfo() should give the correct results */
+         * information is desired.  This means that nl_langinfo() and MB_CUR_MAX
+         * should give the correct results */
 
-#   ifdef MB_CUR_MAX
-
-        /* If we switched LC_CTYPE, switch back */
-        if (save_ctype_locale) {
-            setlocale(LC_CTYPE, save_ctype_locale);
-            Safefree(save_ctype_locale);
-        }
-
-        /* Standard UTF-8 needs at least 4 bytes to represent the maximum
-         * Unicode code point.  Since UTF-8 is the only non-single byte
-         * encoding we handle, we just say any such encoding is UTF-8, and if
-         * turns out to be wrong, other things will fail */
-        is_utf8 = MB_CUR_MAX >= 4;
-
-        Safefree(save_input_locale);
-
-#       ifdef HAS_MBTOWC
-
-        /* ... But, most system that have MB_CUR_MAX will also have mbtowc(),
-         * since they are both in the C99 standard.  We can feed a known byte
-         * string to the latter function, and check that it gives the expected
-         * result */
-        if (is_utf8) {
-            wchar_t wc;
-            if (mbtowc(&wc, HYPHEN_UTF8, strlen(HYPHEN_UTF8))
-                                                        != strlen(HYPHEN_UTF8)
-                || wc != (wchar_t) 0x2010)
-            {
-                is_utf8 = FALSE;
-            }
-        }
-
-#       endif
-
-        return is_utf8;
-#else
 #   if defined(HAS_NL_LANGINFO) && defined(CODESET)
         {
             char *codeset = savepv(nl_langinfo(CODESET));
-            if (codeset) {
+            if (codeset && strNE(codeset, "")) {
 
                 /* If we switched LC_CTYPE, switch back */
                 if (save_ctype_locale) {
@@ -799,6 +764,44 @@ S_is_cur_LC_category_utf8(pTHX_ int category)
         }
 
 #   endif
+#   ifdef MB_CUR_MAX
+
+        /* Here, either we don't have nl_langinfo, or it didn't return a
+         * codeset.  Try MB_CUR_MAX */
+
+        /* Standard UTF-8 needs at least 4 bytes to represent the maximum
+         * Unicode code point.  Since UTF-8 is the only non-single byte
+         * encoding we handle, we just say any such encoding is UTF-8, and if
+         * turns out to be wrong, other things will fail */
+        is_utf8 = MB_CUR_MAX >= 4;
+
+        Safefree(save_input_locale);
+
+#       ifdef HAS_MBTOWC
+
+        /* ... But, most system that have MB_CUR_MAX will also have mbtowc(),
+         * since they are both in the C99 standard.  We can feed a known byte
+         * string to the latter function, and check that it gives the expected
+         * result */
+        if (is_utf8) {
+            wchar_t wc;
+            (void) mbtowc(&wc, NULL, 0);    /* Reset any shift state */
+            if (mbtowc(&wc, HYPHEN_UTF8, strlen(HYPHEN_UTF8))
+                                                        != strlen(HYPHEN_UTF8)
+                || wc != (wchar_t) 0x2010)
+            {
+                is_utf8 = FALSE;
+            }
+        }
+#       endif
+
+        /* If we switched LC_CTYPE, switch back */
+        if (save_ctype_locale) {
+            setlocale(LC_CTYPE, save_ctype_locale);
+            Safefree(save_ctype_locale);
+        }
+
+        return is_utf8;
 #   endif
     }
 

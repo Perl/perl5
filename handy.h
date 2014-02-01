@@ -874,7 +874,7 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
 
     /* We could be called without perl.h, in which case NATIVE_TO_ASCII() is
      * likely not defined, and so we use the native function */
-#   define isASCII(c)    isascii(c)
+#   define isASCII(c)    cBOOL(isascii(c))
 #else
 #   define isASCII(c)    ((WIDEST_UTYPE)(c) < 128)
 #endif
@@ -1310,13 +1310,11 @@ EXTCONST U32 PL_charclass[];
  * values "ss"); instead it asserts against that under DEBUGGING, and
  * otherwise returns its input */
 #define _generic_toFOLD_LC(c, function, cast)                                  \
-                    (LIKELY((c) != MICRO_SIGN)                                 \
-                    ? (__ASSERT_(! IN_UTF8_CTYPE_LOCALE                        \
-                                 || (c) != LATIN_SMALL_LETTER_SHARP_S)         \
-                       _generic_toLOWER_LC(c, function, cast))                 \
-                    : (IN_UTF8_CTYPE_LOCALE)                                   \
+                    ((UNLIKELY((c) == MICRO_SIGN) && IN_UTF8_CTYPE_LOCALE)     \
                       ? GREEK_SMALL_LETTER_MU                                  \
-                      : (c))
+                      : (__ASSERT_(! IN_UTF8_CTYPE_LOCALE                      \
+                                   || (c) != LATIN_SMALL_LETTER_SHARP_S)       \
+                         _generic_toLOWER_LC(c, function, cast)))
 
 /* Use the libc versions for these if available. */
 #if defined(HAS_ISASCII) && ! defined(USE_NEXT_CTYPE)

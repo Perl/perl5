@@ -102,7 +102,8 @@ for my $spec (@test_files) {
 }
 
 # do we have a vaguely sane find(1)?
-my @files = sort `find '$tmpdir' -name 'abc' -o -name 'acc'`;
+# BusyBox find is non-POSIX - it doesn't have -links
+my @files = sort `find '$tmpdir' '(' -name 'abc' -o -name 'acc' ')' -a -links +0`;
 @files == 2 && $files[0] =~ /\babc\n\z/ && $files[1] =~ /\bacc\n\z/
     or skip_all("doesn't appear to be a sane find(1)");
 

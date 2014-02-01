@@ -2,10 +2,10 @@
 
 	## shasum: filter for computing SHA digests (ref. sha1sum/md5sum)
 	##
-	## Copyright (C) 2003-2013 Mark Shelor, All Rights Reserved
+	## Copyright (C) 2003-2014 Mark Shelor, All Rights Reserved
 	##
-	## Version: 5.85
-	## Wed Jun 26 04:05:26 MST 2013
+	## Version: 5.86
+	## Thu Jan 30 08:24:28 MST 2014
 
 	## shasum SYNOPSIS adapted from GNU Coreutils sha1sum.
 	## Add an "-a" option for algorithm selection, a "-p"
@@ -82,7 +82,7 @@ the 7-bit message I<0001100>:
 
 =head1 AUTHOR
 
-Copyright (c) 2003-2013 Mark Shelor <mshelor@cpan.org>.
+Copyright (c) 2003-2014 Mark Shelor <mshelor@cpan.org>.
 
 =head1 SEE ALSO
 
@@ -97,7 +97,7 @@ use strict;
 use Fcntl;
 use Getopt::Long;
 
-my $VERSION = "5.85";
+my $VERSION = "5.86";
 
 
 	## Try to use Digest::SHA.  If not installed, use the slower

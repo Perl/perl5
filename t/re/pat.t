@@ -20,7 +20,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 711;  # Update this when adding/deleting tests.
+plan tests => 712;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1533,6 +1533,11 @@ EOP
         fresh_perl_like($prog, qr/synthetic stclass/, { stderr=>1 }, "$re generates a synthetic start class");
       }
     }
+
+    {
+        like "\x{AA}", qr/a?[\W_]/d, "\\W with /d synthetic start class works";
+    }
+
 
 
 } # End of sub run_tests
