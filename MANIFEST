@@ -194,6 +194,7 @@ cpan/Compress-Raw-Bzip2/private/MakeUtil.pm
 cpan/Compress-Raw-Bzip2/t/000prereq.t
 cpan/Compress-Raw-Bzip2/t/01bzip2.t
 cpan/Compress-Raw-Bzip2/t/09limitoutput.t
+cpan/Compress-Raw-Bzip2/t/19nonpv.t
 cpan/Compress-Raw-Bzip2/t/99pod.t
 cpan/Compress-Raw-Bzip2/t/compress/CompTestUtils.pm
 cpan/Compress-Raw-Bzip2/typemap
