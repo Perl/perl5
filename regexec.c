@@ -920,6 +920,7 @@ Perl_re_intuit_start(pTHX_
 		char *last, *last1;
 		char * const saved_s = s;
 		SV* must;
+                struct reg_substr_datum *other = &prog->substrs->data[other_ix];
 
                 /* we've previously found a floating substr starting at s.
                  * This means that the regex origin must lie somewhere
@@ -931,19 +932,19 @@ Perl_re_intuit_start(pTHX_
                  *  HOP3(max, anchored_offset) + SvCUR(substr)
                  */
                 assert(strpos + start_shift <= s);
-                last = HOP4c(s, prog->anchored_offset-start_shift,
+                last = HOP4c(s, other->min_offset - start_shift,
                             strbeg, strend);
 
-		s = HOP3c(rx_origin, prog->anchored_offset, strend);
+		s = HOP3c(rx_origin, other->min_offset, strend);
 		if (s < other_last)	/* These positions already checked */
 		    s = other_last;
 
-                assert(prog->minlen > prog->anchored_offset);
+                assert(prog->minlen > other->min_offset);
 		last1 = HOP3c(strend,
-                                prog->anchored_offset-prog->minlen, strbeg);
+                                other->min_offset - prog->minlen, strbeg);
  
 		/* On end-of-str: see comment below. */
-		must = utf8_target ? prog->anchored_utf8 : prog->anchored_substr;
+		must = utf8_target ? other->utf8_substr : other->substr;
                 assert(SvPOK(must));
                 s = fbm_instr(
                     (unsigned char*)s,
@@ -970,13 +971,13 @@ Perl_re_intuit_start(pTHX_
 			", trying floating at offset %ld...\n",
 			(long)(HOP3c(saved_s, 1, strend) - i_strpos)));
 		    other_last = HOP3c(last, 1, strend);
-		    rx_origin = HOP4c(last, 1 - prog->anchored_offset, strbeg, strend);
+		    rx_origin = HOP4c(last, 1 - other->min_offset, strbeg, strend);
 		    goto restart;
 		}
 		else {
 		    DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, " at offset %ld...\n",
 			  (long)(s - i_strpos)));
-		    rx_origin = HOP3c(s, -prog->anchored_offset, strbeg);
+		    rx_origin = HOP3c(s, -other->min_offset, strbeg);
 		    other_last = HOP3c(s, 1, strend);
 		    s = saved_s;
 		    if (rx_origin == strpos)
@@ -989,6 +990,7 @@ Perl_re_intuit_start(pTHX_
 	    char *last, *last1;
 	    char * const saved_s = s;
 	    SV* must;
+            struct reg_substr_datum *other = &prog->substrs->data[other_ix];
 
             /* Calculate last1, the absolute latest point where the
              * floating substr could start in the string, ignoring any
@@ -1027,7 +1029,7 @@ Perl_re_intuit_start(pTHX_
              * to CHR_SVLEN(must) - !!SvTAIL(must) + prog->float_end_shift
              */
 	    last1 =
-		HOP3c(strend, -prog->minlen + prog->float_min_offset, strbeg);
+		HOP3c(strend, other->min_offset - prog->minlen, strbeg);
 
             /* last is the latest point where the floating substr could
              * start, *given* any constraints from the earlier fixed
@@ -1045,16 +1047,16 @@ Perl_re_intuit_start(pTHX_
                  * it will be less than or equal to  (last1 - rx_origin)
                  * chars; meaning it errs towards doing the accurate HOP3
                  * rather than just using last1 as a short-cut */
-                (last1 - rx_origin) < prog->float_max_offset
+                (last1 - rx_origin) < other->max_offset
                     ? last1
-                    : (char*)HOP3lim(rx_origin, prog->float_max_offset, last1);
+                    : (char*)HOP3lim(rx_origin, other->max_offset, last1);
 
             /* set s to the earliest position the float string can start */
-	    s = HOP3c(rx_origin, prog->float_min_offset, strend);
+	    s = HOP3c(rx_origin, other->min_offset, strend);
 	    if (s < other_last) /* skip previous failures */
 		s = other_last;
 
-	    must = utf8_target ? prog->float_utf8 : prog->float_substr;
+            must = utf8_target ? other->utf8_substr : other->substr;
             assert(SvPOK(must));
             /* fbm_instr() takes into account exact value of end-of-str
                if the check is SvTAIL(ed).  Since false positives are OK,
