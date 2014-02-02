@@ -8,16 +8,16 @@ use bytes;
 
 require Exporter ;
 
-use IO::Compress::RawDeflate 2.063 ();
-use IO::Compress::Adapter::Deflate 2.063 ;
+use IO::Compress::RawDeflate 2.064 ();
+use IO::Compress::Adapter::Deflate 2.064 ;
 
-use IO::Compress::Zlib::Constants 2.063 ;
-use IO::Compress::Base::Common  2.063 qw();
+use IO::Compress::Zlib::Constants 2.064 ;
+use IO::Compress::Base::Common  2.064 qw();
 
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, %DEFLATE_CONSTANTS, $DeflateError);
 
-$VERSION = '2.063';
+$VERSION = '2.064';
 $DeflateError = '';
 
 @ISA    = qw(Exporter IO::Compress::RawDeflate);
@@ -932,7 +932,7 @@ See the Changes file.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2005-2013 Paul Marquess. All rights reserved.
+Copyright (c) 2005-2014 Paul Marquess. All rights reserved.
 
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.

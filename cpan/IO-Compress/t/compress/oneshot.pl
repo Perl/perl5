@@ -16,7 +16,7 @@ BEGIN {
     $extra = 1
         if eval { require Test::NoWarnings ;  import Test::NoWarnings; 1 };
 
-    plan tests => 989 + $extra ;
+    plan tests => 995 + $extra ;
 
     use_ok('IO::Uncompress::AnyUncompress', qw(anyuncompress $AnyUncompressError)) ;
 
@@ -304,6 +304,7 @@ sub run
                     is $keep, $buffer, "  Input buffer not changed" ;
                     my $got = anyUncompress(\$output, $already);
                     $got = undef if ! defined $buffer && $got eq '' ;
+                    ok ! $$Error, "  no error [$$Error]" ;
                     is $got, $buffer, "  Uncompressed matches original";
 
                 }

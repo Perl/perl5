@@ -9,14 +9,14 @@ use warnings;
 #use bytes;
 
 use IO::File;
-use IO::Uncompress::RawInflate  2.063 ;
-use IO::Compress::Base::Common  2.063 qw(:Status );
-use IO::Uncompress::Adapter::Inflate  2.063 ;
-use IO::Uncompress::Adapter::Identity 2.063 ;
-use IO::Compress::Zlib::Extra 2.063 ;
-use IO::Compress::Zip::Constants 2.063 ;
+use IO::Uncompress::RawInflate  2.064 ;
+use IO::Compress::Base::Common  2.064 qw(:Status );
+use IO::Uncompress::Adapter::Inflate  2.064 ;
+use IO::Uncompress::Adapter::Identity 2.064 ;
+use IO::Compress::Zlib::Extra 2.064 ;
+use IO::Compress::Zip::Constants 2.064 ;
 
-use Compress::Raw::Zlib  2.063 () ;
+use Compress::Raw::Zlib  2.064 () ;
 
 BEGIN
 {
@@ -31,7 +31,7 @@ require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $UnzipError, %headerLookup);
 
-$VERSION = '2.063';
+$VERSION = '2.064';
 $UnzipError = '';
 
 @ISA    = qw(Exporter IO::Uncompress::RawInflate);
@@ -1861,7 +1861,7 @@ See the Changes file.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2005-2013 Paul Marquess. All rights reserved.
+Copyright (c) 2005-2014 Paul Marquess. All rights reserved.
 
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
