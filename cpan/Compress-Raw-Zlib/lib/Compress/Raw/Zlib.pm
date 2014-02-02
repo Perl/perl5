@@ -8,9 +8,9 @@ use Carp ;
 use strict ;
 use warnings ;
 use bytes ;
-our ($VERSION, $XS_VERSION, @ISA, @EXPORT, %EXPORT_TAGS, @EXPORT_OK, $AUTOLOAD, %DEFLATE_CONSTANTS, @DEFLATE_CONSTANTS );
+our ($VERSION, $XS_VERSION, @ISA, @EXPORT, %EXPORT_TAGS, @EXPORT_OK, $AUTOLOAD, %DEFLATE_CONSTANTS, @DEFLATE_CONSTANTS);
 
-$VERSION = '2.063';
+$VERSION = '2.064';
 $XS_VERSION = $VERSION; 
 $VERSION = eval $VERSION;
 
@@ -635,8 +635,8 @@ Compress::Raw::Zlib - Low-Level Interface to zlib compression library
     $crc = adler32($buffer [,$crc]) ;
     $crc = crc32($buffer [,$crc]) ;
 
-    $crc = adler32_combine($crc1, $crc2, $len2)l
-    $crc = crc32_combine($adler1, $adler2, $len2)
+    $crc = crc32_combine($crc1, $crc2, $len2);
+    $adler = adler32_combine($adler1, $adler2, $len2);
 
     my $version = Compress::Raw::Zlib::zlib_version();
     my $flags = Compress::Raw::Zlib::zlibCompileFlags();
@@ -1290,10 +1290,11 @@ If the $crc parameters is C<undef>, the crc value will be reset.
 If you have built this module with zlib 1.2.3 or better, two more
 CRC-related functions are available.
 
-    $crc = adler32_combine($crc1, $crc2, $len2)l
-    $crc = crc32_combine($adler1, $adler2, $len2)
+    $crc = crc32_combine($crc1, $crc2, $len2);
+    $adler = adler32_combine($adler1, $adler2, $len2);
 
 These functions allow checksums to be merged.
+Refer to the I<zlib> documentation for more details.
 
 =head1 Misc
 
@@ -1589,7 +1590,7 @@ See the Changes file.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2005-2013 Paul Marquess. All rights reserved.
+Copyright (c) 2005-2014 Paul Marquess. All rights reserved.
 
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
