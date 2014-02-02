@@ -1092,13 +1092,7 @@ Perl_re_intuit_start(pTHX_
         )
     );
 
-    /* signed-corrected rx_origin > strpos */
-    if (s - strpos > prog->check_offset_max
-        && (!utf8_target
-	    || ((rx_origin = (char*)reghopmaybe3((U8*)s,
-                                    -prog->check_offset_max, (U8*) strpos))
-		 && rx_origin > strpos)))
-    {
+    if (rx_origin != strpos) {
 	/* Fixed substring is found far enough so that the match
 	   cannot start at strpos. */
       try_at_offset:
