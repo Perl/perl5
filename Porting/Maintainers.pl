@@ -230,6 +230,8 @@ use File::Glob qw(:case);
                 t/99pod.t
                 ),
         ],
+        # Waiting to be merged upstream; see CPAN RT#92657
+        'CUSTOMIZED'  => ['Zlib.xs'],
     },
 
     'Config::Perl::V' => {
