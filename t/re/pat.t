@@ -20,7 +20,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 712;  # Update this when adding/deleting tests.
+plan tests => 713;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1538,6 +1538,10 @@ EOP
         like "\x{AA}", qr/a?[\W_]/d, "\\W with /d synthetic start class works";
     }
 
+    {
+        use utf8;
+        unlike("\xe0", qr/\W/, "'use utf8' implies /u");
+    }
 
 
 } # End of sub run_tests
