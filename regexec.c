@@ -845,9 +845,11 @@ Perl_re_intuit_start(pTHX_
             && prog->check_offset_max != SSize_t_MAX
             && start_shift < prog->check_offset_max)
         {
-            SSize_t off = prog->check_offset_max - start_shift
-                        + CHR_SVLEN(check) - !!SvTAIL(check);
-            end_point = HOP3lim(start_point, off, end_point);
+            SSize_t len = SvCUR(check) - !!SvTAIL(check);
+            end_point = HOP3lim(start_point,
+                            prog->check_offset_max - start_shift,
+                            end_point -len)
+                        + len;
         }
 
 	DEBUG_OPTIMISE_MORE_r({
@@ -948,7 +950,7 @@ Perl_re_intuit_start(pTHX_
             assert(SvPOK(must));
             s = fbm_instr(
                 (unsigned char*)s,
-                HOP3(last + SvCUR(must), -(SvTAIL(must)!=0), strbeg),
+                (unsigned char*)last + SvCUR(must) - (SvTAIL(must)!=0),
                 must,
                 multiline ? FBMrf_MULTILINE : 0
             );
