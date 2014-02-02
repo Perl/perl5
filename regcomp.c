@@ -159,6 +159,7 @@ struct RExC_state_t {
 					    within pattern */
     int		num_code_blocks;	/* size of code_blocks[] */
     int		code_index;		/* next code_blocks[] slot */
+    SSize_t     maxlen;                        /* mininum possible number of chars in string to match */
 #if ADD_TO_REGEXEC
     char 	*starttry;		/* -Dr: where regtry was called. */
 #define RExC_starttry	(pRExC_state->starttry)
@@ -196,6 +197,7 @@ struct RExC_state_t {
 #define RExC_sawback	(pRExC_state->sawback)
 #define RExC_seen	(pRExC_state->seen)
 #define RExC_size	(pRExC_state->size)
+#define RExC_maxlen        (pRExC_state->maxlen)
 #define RExC_npar	(pRExC_state->npar)
 #define RExC_nestroot   (pRExC_state->nestroot)
 #define RExC_extralen	(pRExC_state->extralen)
@@ -773,6 +775,9 @@ static const scan_data_t zero_scan_data =
                                                                             \
             if (RExC_seen & REG_GOSTART_SEEN)                               \
                 PerlIO_printf(Perl_debug_log,"REG_GOSTART_SEEN ");          \
+                                                                            \
+            if (RExC_seen & REG_UNBOUNDED_QUANTIFIER_SEEN)                               \
+                PerlIO_printf(Perl_debug_log,"REG_UNBOUNDED_QUANTIFIER_SEEN ");          \
                                                                             \
             PerlIO_printf(Perl_debug_log,"\n");                             \
         });
@@ -3671,7 +3676,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                     SCAN_COMMIT(pRExC_state, data, minlenp); /* Cannot merge
                                                                 strings after
                                                             this. */
-            if (flags & SCF_DO_STCLASS)
+                if (flags & SCF_DO_STCLASS)
 		    ssc_init_zero(pRExC_state, &accum);
 
 		while (OP(scan) == code) {
@@ -4494,12 +4499,12 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		is_inf_internal |= deltanext == SSize_t_MAX
                          || (maxcount == REG_INFTY && minnext + deltanext > 0);
 		is_inf |= is_inf_internal;
-		if (is_inf)
+                if (is_inf) {
 		    delta = SSize_t_MAX;
-		else
+                } else {
 		    delta += (minnext + deltanext) * maxcount
                              - minnext * mincount;
-
+                }
 		/* Try powerful optimization CURLYX => CURLYN. */
 		if (  OP(oscan) == CURLYX && data
 		      && data->flags & SF_IN_PAR
@@ -5366,6 +5371,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
 
     *scanp = scan;
     *deltap = is_inf_internal ? SSize_t_MAX : delta;
+
     if (flags & SCF_DO_SUBSTR && is_inf)
 	data->pos_delta = SSize_t_MAX - data->pos_min;
     if (is_par > (I32)U8_MAX)
@@ -5385,7 +5391,16 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
 
     DEBUG_STUDYDATA("post-fin:",data,depth);
 
-    return min < stopmin ? min : stopmin;
+    {
+        SSize_t final_minlen= min < stopmin ? min : stopmin;
+
+        if (RExC_maxlen < final_minlen + delta) {
+            RExC_maxlen = final_minlen + delta;
+        }
+
+        return final_minlen;
+    }
+    /* not-reached */
 }
 
 STATIC U32
@@ -6376,6 +6391,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     RExC_sawback = 0;
 
     RExC_seen = 0;
+    RExC_maxlen = 0;
     RExC_in_lookbehind = 0;
     RExC_seen_zerolen = *exp == '^' ? -1 : 0;
     RExC_extralen = 0;
@@ -7017,12 +7033,14 @@ reStudy:
     /* Guard against an embedded (?=) or (?<=) with a longer minlen than
        the "real" pattern. */
     DEBUG_OPTIMISE_r({
-	PerlIO_printf(Perl_debug_log,"minlen: %"IVdf" r->minlen:%"IVdf"\n",
-		      (IV)minlen, (IV)r->minlen);
+        PerlIO_printf(Perl_debug_log,"minlen: %"IVdf" r->minlen:%"IVdf" maxlen:%ld\n",
+                      (IV)minlen, (IV)r->minlen, RExC_maxlen);
     });
     r->minlenret = minlen;
     if (r->minlen < minlen)
         r->minlen = minlen;
+
+
 
     if (RExC_seen & REG_GPOS_SEEN)
         r->intflags |= PREGf_GPOS_SEEN;
@@ -7046,6 +7064,9 @@ reStudy:
         RXp_PAREN_NAMES(r) = MUTABLE_HV(SvREFCNT_inc(RExC_paren_names));
     else
         RXp_PAREN_NAMES(r) = NULL;
+
+    if (RExC_seen & REG_UNBOUNDED_QUANTIFIER_SEEN)
+        r->extflags |= RXf_UNBOUNDED_QUANTIFIER_SEEN;
 
     /* If we have seen an anchor in our pattern then we set the extflag RXf_IS_ANCHORED
      * so it can be used in pp.c */
@@ -10466,6 +10487,8 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 		ARG1_SET(ret, (U16)min);
 		ARG2_SET(ret, (U16)max);
 	    }
+            if (max == REG_INFTY)
+                RExC_seen |= REG_UNBOUNDED_QUANTIFIER_SEEN;
 
 	    goto nest_check;
 	}
@@ -10503,6 +10526,7 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 	reginsert(pRExC_state, STAR, ret, depth+1);
 	ret->flags = 0;
 	RExC_naughty += 4;
+        RExC_seen |= REG_UNBOUNDED_QUANTIFIER_SEEN;
     }
     else if (op == '*') {
 	min = 0;
@@ -10512,6 +10536,7 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 	reginsert(pRExC_state, PLUS, ret, depth+1);
 	ret->flags = 0;
 	RExC_naughty += 3;
+        RExC_seen |= REG_UNBOUNDED_QUANTIFIER_SEEN;
     }
     else if (op == '+') {
 	min = 1;

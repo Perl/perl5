@@ -128,6 +128,7 @@ struct reg_code_block {
 	SSize_t suboffset; /* byte offset of subbeg from logical start of str */ \
 	SSize_t subcoffset; /* suboffset equiv, but in chars (for @-/@+) */ \
 	/* Information about the match that isn't often used */		\
+        SSize_t maxlen;        /* mininum possible number of chars in string to match */\
 	/* offset from wrapped to the start of precomp */		\
 	PERL_BITFIELD32 pre_prefix:4;					\
         /* original flags used to compile the pattern, may differ */    \
@@ -398,7 +399,7 @@ get_regex_charset_name(const U32 flags, STRLEN* const lenp)
 #define RXf_UNUSED8             (1<<(RXf_BASE_SHIFT+8))
 
 /* Special */
-#define RXf_UNUSED9             (1<<(RXf_BASE_SHIFT+9))
+#define RXf_UNBOUNDED_QUANTIFIER_SEEN   (1<<(RXf_BASE_SHIFT+9))
 #define RXf_CHECK_ALL   	(1<<(RXf_BASE_SHIFT+10))
 
 /* UTF8 related */

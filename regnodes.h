@@ -659,7 +659,7 @@ EXTCONST char * const PL_reg_extflags_name[] = {
 	"NO_INPLACE_SUBST", /* 0x00008000 */
 	"EVAL_SEEN",        /* 0x00010000 */
 	"UNUSED8",          /* 0x00020000 */
-	"UNUSED9",          /* 0x00040000 */
+	"UNBOUNDED_QUANTIFIER_SEEN",/* 0x00040000 */
 	"CHECK_ALL",        /* 0x00080000 */
 	"MATCH_UTF8",       /* 0x00100000 */
 	"USE_INTUIT_NOML",  /* 0x00200000 */
