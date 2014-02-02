@@ -930,6 +930,11 @@ Perl_re_intuit_start(pTHX_
              *  HOP3(min, anchored_offset)
              *  HOP3(max, anchored_offset) + SvCUR(substr)
              */
+
+            assert(prog->minlen > other->min_offset);
+            last1 = HOP3c(strend,
+                            other->min_offset - prog->minlen, strbeg);
+
             assert(strpos + start_shift <= s);
             last = HOP4c(s, other->min_offset - start_shift,
                         strbeg, strend);
@@ -937,10 +942,6 @@ Perl_re_intuit_start(pTHX_
             s = HOP3c(rx_origin, other->min_offset, strend);
             if (s < other_last)	/* These positions already checked */
                 s = other_last;
-
-            assert(prog->minlen > other->min_offset);
-            last1 = HOP3c(strend,
-                            other->min_offset - prog->minlen, strbeg);
 
             /* On end-of-str: see comment below. */
             must = utf8_target ? other->utf8_substr : other->substr;
