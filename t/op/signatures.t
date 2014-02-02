@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib';
     require './test.pl';
 }
-plan 880;
+plan 912;
 
 eval "#line 8 foo\nsub t004 :method (\$a) { }";
 is $@, "Experimental subroutine signatures not enabled at foo line 8\.\n",
@@ -583,6 +583,12 @@ is eval("t034(456, 789, 987, 654, 321)"), "456/789/987/654/321;5";
 is eval("t034(456, 789, 987, 654, 321, 111)"), "456/789/987/654/321/111;6";
 is $a, 123;
 
+eval "#line 8 foo\nsub t136 (\@abc = 222) { }";
+like $@, qr/\AParse error at foo line 8\.\n/;
+
+eval "#line 8 foo\nsub t137 (\@abc =) { }";
+like $@, qr/\AParse error at foo line 8\.\n/;
+
 sub t035 (@) { $a }
 is prototype(\&t035), undef;
 is eval("t035()"), 123;
@@ -594,6 +600,12 @@ is eval("t035(456, 789, 987, 654)"), 123;
 is eval("t035(456, 789, 987, 654, 321)"), 123;
 is eval("t035(456, 789, 987, 654, 321, 111)"), 123;
 is $a, 123;
+
+eval "#line 8 foo\nsub t138 (\@ = 222) { }";
+like $@, qr/\AParse error at foo line 8\.\n/;
+
+eval "#line 8 foo\nsub t139 (\@ =) { }";
+like $@, qr/\AParse error at foo line 8\.\n/;
 
 sub t039 (%abc) { join("/", map { $_."=".$abc{$_} } sort keys %abc) }
 is prototype(\&t039), undef;
@@ -611,6 +623,12 @@ like $@, qr#\AOdd name/value argument for subroutine at#;
 is eval("t039(456, 789, 987, 654, 321, 111)"), "321=111/456=789/987=654";
 is $a, 123;
 
+eval "#line 8 foo\nsub t140 (\%abc = 222) { }";
+like $@, qr/\AParse error at foo line 8\.\n/;
+
+eval "#line 8 foo\nsub t141 (\%abc =) { }";
+like $@, qr/\AParse error at foo line 8\.\n/;
+
 sub t040 (%) { $a }
 is prototype(\&t040), undef;
 is eval("t040()"), 123;
@@ -626,6 +644,12 @@ is eval("t040(456, 789, 987, 654, 321)"), undef;
 like $@, qr#\AOdd name/value argument for subroutine at#;
 is eval("t040(456, 789, 987, 654, 321, 111)"), 123;
 is $a, 123;
+
+eval "#line 8 foo\nsub t142 (\% = 222) { }";
+like $@, qr/\AParse error at foo line 8\.\n/;
+
+eval "#line 8 foo\nsub t143 (\% =) { }";
+like $@, qr/\AParse error at foo line 8\.\n/;
 
 sub t041 ($a, @b) { $a.";".join("/", @b) }
 is prototype(\&t041), undef;
@@ -1129,6 +1153,52 @@ is prototype(\&t033), undef;
 is eval("t033()"), "azy";
 is eval("t033(sub { \"x\".\$_[0].\"x\" })"), "xaxy";
 is eval("t033(sub { \"x\".\$_[0].\"x\" }, 789)"), undef;
+like $@, qr/\AToo many arguments for subroutine at/;
+is $a, 123;
+
+sub t133 ($a = sub ($a = 222) { $a."z" }) { $a->()."/".$a->("a") }
+is prototype(\&t133), undef;
+is eval("t133()"), "222z/az";
+is eval("t133(sub { \"x\".(\$_[0] // \"u\").\"x\" })"), "xux/xax";
+is eval("t133(sub { \"x\".(\$_[0] // \"u\").\"x\" }, 789)"), undef;
+like $@, qr/\AToo many arguments for subroutine at/;
+is $a, 123;
+
+sub t134 ($a = sub ($a, $t = sub { $_[0]."p" }) { $t->($a)."z" }) {
+    $a->("a")."/".$a->("b", sub { $_[0]."q" } )
+}
+is prototype(\&t134), undef;
+is eval("t134()"), "apz/bqz";
+is eval("t134(sub { \"x\".(\$_[1] // sub{\$_[0]})->(\$_[0]).\"x\" })"),
+    "xax/xbqx";
+is eval("t134(sub { \"x\".(\$_[1] // sub{\$_[0]})->(\$_[0]).\"x\" }, 789)"),
+    undef;
+like $@, qr/\AToo many arguments for subroutine at/;
+is $a, 123;
+
+sub t135 ($a = sub ($a, $t = sub ($p) { $p."p" }) { $t->($a)."z" }) {
+    $a->("a")."/".$a->("b", sub { $_[0]."q" } )
+}
+is prototype(\&t135), undef;
+is eval("t135()"), "apz/bqz";
+is eval("t135(sub { \"x\".(\$_[1] // sub{\$_[0]})->(\$_[0]).\"x\" })"),
+    "xax/xbqx";
+is eval("t135(sub { \"x\".(\$_[1] // sub{\$_[0]})->(\$_[0]).\"x\" }, 789)"),
+    undef;
+like $@, qr/\AToo many arguments for subroutine at/;
+is $a, 123;
+
+sub t132 (
+    $a = sub ($a, $t = sub ($p = 222) { $p."p" }) { $t->($a)."z".$t->() },
+) {
+    $a->("a")."/".$a->("b", sub { ($_[0] // "u")."q" } )
+}
+is prototype(\&t132), undef;
+is eval("t132()"), "apz222p/bqzuq";
+is eval("t132(sub { \"x\".(\$_[1] // sub{\$_[0]})->(\$_[0]).\"x\" })"),
+    "xax/xbqx";
+is eval("t132(sub { \"x\".(\$_[1] // sub{\$_[0]})->(\$_[0]).\"x\" }, 789)"),
+    undef;
 like $@, qr/\AToo many arguments for subroutine at/;
 is $a, 123;
 
