@@ -914,9 +914,8 @@ Perl_re_intuit_start(pTHX_
 	if (!other_last)
 	    other_last = strpos;
 
+      do_other_substr:
 	if (prog->substrs->check_ix) {
-	  do_other_anchored:
-	    {
 		char *last, *last1;
 		char * const saved_s = s;
 		SV* must;
@@ -984,7 +983,6 @@ Perl_re_intuit_start(pTHX_
 			goto try_at_start;
 		    goto try_at_offset;
 		}
-	    }
 	}
 	else {		/* Take into account the floating substring. */
 	    char *last, *last1;
@@ -1162,7 +1160,8 @@ Perl_re_intuit_start(pTHX_
 			    rx_origin = strpos = t + 1;
 			    DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "  Found /%s^%s/m at offset %ld, rescanning for anchored from offset %ld...\n",
 				PL_colors[0], PL_colors[1], (long)(strpos - i_strpos), (long)(strpos - i_strpos + prog->anchored_offset)));
-			    goto do_other_anchored;
+                            assert(prog->substrs->check_ix); /* other is float */
+			    goto do_other_substr;
 			}
 			/* We don't contradict the found floating substring. */
 			/* XXXX Why not check for STCLASS? */
@@ -1340,7 +1339,8 @@ Perl_re_intuit_start(pTHX_
 		DEBUG_EXECUTE_r( PerlIO_printf(Perl_debug_log,
 			  "  Looking for anchored substr starting at offset %ld...\n",
 			  (long)(other_last - i_strpos)) );
-		goto do_other_anchored;
+                assert(prog->substrs->check_ix); /* other is float */
+		goto do_other_substr;
 	    }
 	    /* Another way we could have checked stclass at the
                current position only: */
