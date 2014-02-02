@@ -1070,32 +1070,29 @@ Perl_re_intuit_start(pTHX_
                     other_last = HOP3c(s, 1, strend);
                 }
                 s = saved_s;
-                if (rx_origin == strpos)
-                    goto try_at_start;
-                goto try_at_offset;
             }
 	}
     }
+    else {
+        DEBUG_OPTIMISE_MORE_r(
+            PerlIO_printf(Perl_debug_log,
+                "  Check-only match: offset min:%"IVdf" max:%"IVdf
+                " s:%"IVdf" rx_origin:%"IVdf" rx_origin-s:%"IVdf
+                " strend-strpos:%"IVdf"\n",
+                (IV)prog->check_offset_min,
+                (IV)prog->check_offset_max,
+                (IV)(s-strpos),
+                (IV)(rx_origin-strpos),
+                (IV)(rx_origin-s),
+                (IV)(strend-strpos)
+            )
+        );
+    }
 
-    
-    DEBUG_OPTIMISE_MORE_r(
-        PerlIO_printf(Perl_debug_log, 
-            "  Check-only match: offset min:%"IVdf" max:%"IVdf
-            " s:%"IVdf" rx_origin:%"IVdf" rx_origin-s:%"IVdf
-            " strend-strpos:%"IVdf"\n",
-            (IV)prog->check_offset_min,
-            (IV)prog->check_offset_max,
-            (IV)(s-strpos),
-            (IV)(rx_origin-strpos),
-            (IV)(rx_origin-s),
-            (IV)(strend-strpos)
-        )
-    );
-
+  postprocess_substr_matches:
     if (rx_origin != strpos) {
 	/* Fixed substring is found far enough so that the match
 	   cannot start at strpos. */
-      try_at_offset:
         DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "  try at offset...\n"));
 	if (ml_anch && rx_origin[-1] != '\n') {
 	    /* Eventually fbm_*() should handle this, but often
@@ -1157,7 +1154,6 @@ Perl_re_intuit_start(pTHX_
 	   - no optimization of calling REx engine can be performed,
 	   unless it was an MBOL and we are not after MBOL,
 	   or a future STCLASS check will fail this. */
-      try_at_start:
         DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "  try at start...\n"));
 	/* Even in this situation we may use MBOL flag if strpos is offset
 	   wrt the start of the string. */
@@ -1312,7 +1308,10 @@ Perl_re_intuit_start(pTHX_
 			  "  Looking for /%s^%s/m starting at offset %ld...\n",
 			  PL_colors[0], PL_colors[1],
                           (long)(rx_origin - i_strpos)) );
-		goto try_at_offset;
+                /* XXX DAPM I don't yet know why this is true, but the code
+                 * assumed it when it used to do goto try_at_offset */
+                assert(rx_origin != strpos);
+		goto postprocess_substr_matches;
 	    }
 	    if (!(utf8_target ? prog->float_utf8 : prog->float_substr))	/* Could have been deleted */
 		goto fail;
