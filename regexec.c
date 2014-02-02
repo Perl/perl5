@@ -916,73 +916,73 @@ Perl_re_intuit_start(pTHX_
 
       do_other_substr:
 	if (prog->substrs->check_ix) {
-		char *last, *last1;
-		char * const saved_s = s;
-		SV* must;
-                struct reg_substr_datum *other = &prog->substrs->data[other_ix];
+            char *last, *last1;
+            char * const saved_s = s;
+            SV* must;
+            struct reg_substr_datum *other = &prog->substrs->data[other_ix];
 
-                /* we've previously found a floating substr starting at s.
-                 * This means that the regex origin must lie somewhere
-                 * between min (rx_origin): HOP3(s, -check_offset_max)
-                 * and max:                 HOP3(s, -check_offset_min)
-                 * (except that min will be >= strpos)
-                 * So the fixed  substr must lie somewhere between
-                 *  HOP3(min, anchored_offset)
-                 *  HOP3(max, anchored_offset) + SvCUR(substr)
-                 */
-                assert(strpos + start_shift <= s);
-                last = HOP4c(s, other->min_offset - start_shift,
-                            strbeg, strend);
+            /* we've previously found a floating substr starting at s.
+             * This means that the regex origin must lie somewhere
+             * between min (rx_origin): HOP3(s, -check_offset_max)
+             * and max:                 HOP3(s, -check_offset_min)
+             * (except that min will be >= strpos)
+             * So the fixed  substr must lie somewhere between
+             *  HOP3(min, anchored_offset)
+             *  HOP3(max, anchored_offset) + SvCUR(substr)
+             */
+            assert(strpos + start_shift <= s);
+            last = HOP4c(s, other->min_offset - start_shift,
+                        strbeg, strend);
 
-		s = HOP3c(rx_origin, other->min_offset, strend);
-		if (s < other_last)	/* These positions already checked */
-		    s = other_last;
+            s = HOP3c(rx_origin, other->min_offset, strend);
+            if (s < other_last)	/* These positions already checked */
+                s = other_last;
 
-                assert(prog->minlen > other->min_offset);
-		last1 = HOP3c(strend,
-                                other->min_offset - prog->minlen, strbeg);
- 
-		/* On end-of-str: see comment below. */
-		must = utf8_target ? other->utf8_substr : other->substr;
-                assert(SvPOK(must));
-                s = fbm_instr(
-                    (unsigned char*)s,
-                    HOP3(last + SvCUR(must), -(SvTAIL(must)!=0), strbeg),
-                    must,
-                    multiline ? FBMrf_MULTILINE : 0
-                );
-                DEBUG_EXECUTE_r({
-                    RE_PV_QUOTED_DECL(quoted, utf8_target, PERL_DEBUG_PAD_ZERO(0),
-                        SvPVX_const(must), RE_SV_DUMPLEN(must), 30);
-                    PerlIO_printf(Perl_debug_log, "  %s anchored substr %s%s",
-			(s ? "Found" : "Contradicts"),
-                        quoted, RE_SV_TAIL(must));
-                });		    
-		
-			    
-		if (!s) {
-		    if (last >= last1) {
-			DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
-						", giving up...\n"));
-			goto fail_finish;
-		    }
-		    DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
-			", trying floating at offset %ld...\n",
-			(long)(HOP3c(saved_s, 1, strend) - i_strpos)));
-		    other_last = HOP3c(last, 1, strend);
-		    rx_origin = HOP4c(last, 1 - other->min_offset, strbeg, strend);
-		    goto restart;
-		}
-		else {
-		    DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, " at offset %ld...\n",
-			  (long)(s - i_strpos)));
-		    rx_origin = HOP3c(s, -other->min_offset, strbeg);
-		    other_last = HOP3c(s, 1, strend);
-		    s = saved_s;
-		    if (rx_origin == strpos)
-			goto try_at_start;
-		    goto try_at_offset;
-		}
+            assert(prog->minlen > other->min_offset);
+            last1 = HOP3c(strend,
+                            other->min_offset - prog->minlen, strbeg);
+
+            /* On end-of-str: see comment below. */
+            must = utf8_target ? other->utf8_substr : other->substr;
+            assert(SvPOK(must));
+            s = fbm_instr(
+                (unsigned char*)s,
+                HOP3(last + SvCUR(must), -(SvTAIL(must)!=0), strbeg),
+                must,
+                multiline ? FBMrf_MULTILINE : 0
+            );
+            DEBUG_EXECUTE_r({
+                RE_PV_QUOTED_DECL(quoted, utf8_target, PERL_DEBUG_PAD_ZERO(0),
+                    SvPVX_const(must), RE_SV_DUMPLEN(must), 30);
+                PerlIO_printf(Perl_debug_log, "  %s anchored substr %s%s",
+                    (s ? "Found" : "Contradicts"),
+                    quoted, RE_SV_TAIL(must));
+            });
+
+
+            if (!s) {
+                if (last >= last1) {
+                    DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
+                                            ", giving up...\n"));
+                    goto fail_finish;
+                }
+                DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
+                    ", trying floating at offset %ld...\n",
+                    (long)(HOP3c(saved_s, 1, strend) - i_strpos)));
+                other_last = HOP3c(last, 1, strend);
+                rx_origin = HOP4c(last, 1 - other->min_offset, strbeg, strend);
+                goto restart;
+            }
+            else {
+                DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, " at offset %ld...\n",
+                      (long)(s - i_strpos)));
+                rx_origin = HOP3c(s, -other->min_offset, strbeg);
+                other_last = HOP3c(s, 1, strend);
+                s = saved_s;
+                if (rx_origin == strpos)
+                    goto try_at_start;
+                goto try_at_offset;
+            }
 	}
 	else {		/* Take into account the floating substring. */
 	    char *last, *last1;
