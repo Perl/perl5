@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib';
     require './test.pl';
 }
-plan 1131;
+plan 1143;
 
 eval "#line 8 foo\nsub t004 :method (\$a) { }";
 is $@, "Experimental subroutine signatures not enabled at foo line 8\.\n",
@@ -794,6 +794,17 @@ is eval("t038(456, 789, 987)"), undef;
 like $@, qr/\AToo many arguments for subroutine at/;
 is $a, 123;
 
+sub t176 ($a = 222, ?$b, $c = $a."x".$b) { "$a/$b/$c" }
+is prototype(\&t176), undef;
+is eval("t176()"), "222//222x";
+is eval("t176(0)"), "0/1/0x1";
+is eval("t176(222)"), "222/1/222x1";
+is eval("t176(456)"), "456/1/456x1";
+is eval("t176(456, 789)"), "456/1/789";
+is eval("t176(456, 789, 987)"), undef;
+like $@, qr/\AToo many arguments for subroutine at/;
+is $a, 123;
+
 eval "#line 8 foo\nsub t030 (\$a = 222, \$b) { }";
 is $@, "Mandatory parameter follows optional parameter at foo line 8\.\n";
 
@@ -1304,13 +1315,19 @@ sub t085
     333
     ,
     ,
+    ?
+    $
+    c
+    ,
+    ,
     )
-    { $a.$b }
+    { "$a/$b/$c" }
 is prototype(\&t085), undef;
 is eval("t085()"), undef;
 like $@, qr/\AToo few arguments for subroutine at/;
-is eval("t085(456)"), "456333";
-is eval("t085(456, 789)"), "456789";
+is eval("t085(456)"), "456/333/";
+is eval("t085(456, 333)"), "456/333/1";
+is eval("t085(456, 789)"), "456/789/1";
 is eval("t085(456, 789, 987)"), undef;
 like $@, qr/\AToo many arguments for subroutine at/;
 is eval("t085(456, 789, 987, 654)"), undef;
@@ -1329,13 +1346,19 @@ sub t086
     333 #foo)))
     , #foo)))
     , #foo)))
+    ? #foo)))
+    $ #foo)))
+    c #foo)))
+    , #foo)))
+    , #foo)))
     ) #foo)))
-    { $a.$b }
+    { "$a/$b/$c" }
 is prototype(\&t086), undef;
 is eval("t086()"), undef;
 like $@, qr/\AToo few arguments for subroutine at/;
-is eval("t086(456)"), "456333";
-is eval("t086(456, 789)"), "456789";
+is eval("t086(456)"), "456/333/";
+is eval("t086(456, 333)"), "456/333/1";
+is eval("t086(456, 789)"), "456/789/1";
 is eval("t086(456, 789, 987)"), undef;
 like $@, qr/\AToo many arguments for subroutine at/;
 is eval("t086(456, 789, 987, 654)"), undef;
@@ -1354,13 +1377,19 @@ sub t087
     333#foo)))
     ,#foo)))
     ,#foo)))
+    ?#foo)))
+    $ #foo)))
+    c#foo)))
+    ,#foo)))
+    ,#foo)))
     )#foo)))
-    { $a.$b }
+    { "$a/$b/$c" }
 is prototype(\&t087), undef;
 is eval("t087()"), undef;
 like $@, qr/\AToo few arguments for subroutine at/;
-is eval("t087(456)"), "456333";
-is eval("t087(456, 789)"), "456789";
+is eval("t087(456)"), "456/333/";
+is eval("t087(456, 333)"), "456/333/1";
+is eval("t087(456, 789)"), "456/789/1";
 is eval("t087(456, 789, 987)"), undef;
 like $@, qr/\AToo many arguments for subroutine at/;
 is eval("t087(456, 789, 987, 654)"), undef;
