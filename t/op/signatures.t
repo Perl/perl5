@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib';
     require './test.pl';
 }
-plan 912;
+plan 1131;
 
 eval "#line 8 foo\nsub t004 :method (\$a) { }";
 is $@, "Experimental subroutine signatures not enabled at foo line 8\.\n",
@@ -493,6 +493,223 @@ is eval("t119(456, 789, 987, 654)"), undef;
 like $@, qr/\AToo many arguments for subroutine at/;
 is $a, 123;
 
+sub t144 ($a = 222, ?$b) { ($a // "u")."/".($b // "u") }
+is prototype(\&t144), undef;
+is eval("t144()"), "222/";
+is eval("t144(undef)"), "u/1";
+is eval("t144(0)"), "0/1";
+is eval("t144(222)"), "222/1";
+is eval("t144(456)"), "456/1";
+is eval("t144(456, 789)"), undef;
+like $@, qr/\AToo many arguments for subroutine at/;
+is eval("t144(456, 789, 987)"), undef;
+like $@, qr/\AToo many arguments for subroutine at/;
+is eval("t144(456, 789, 987, 654)"), undef;
+like $@, qr/\AToo many arguments for subroutine at/;
+is $a, 123;
+
+sub t145 ($a = undef, ?$b) { ($a // "u")."/".($b // "u") }
+is prototype(\&t145), undef;
+is eval("t145()"), "u/";
+is eval("t145(undef)"), "u/1";
+is eval("t145(0)"), "0/1";
+is eval("t145(222)"), "222/1";
+is eval("t145(456)"), "456/1";
+is eval("t145(456, 789)"), undef;
+like $@, qr/\AToo many arguments for subroutine at/;
+is eval("t145(456, 789, 987)"), undef;
+like $@, qr/\AToo many arguments for subroutine at/;
+is eval("t145(456, 789, 987, 654)"), undef;
+like $@, qr/\AToo many arguments for subroutine at/;
+is $a, 123;
+
+sub t146 ($ = 222, ?$b) { ($b // "u") }
+is prototype(\&t146), undef;
+is eval("t146()"), "";
+is eval("t146(undef)"), "1";
+is eval("t146(0)"), "1";
+is eval("t146(222)"), "1";
+is eval("t146(456)"), "1";
+is eval("t146(456, 789)"), undef;
+like $@, qr/\AToo many arguments for subroutine at/;
+is eval("t146(456, 789, 987)"), undef;
+like $@, qr/\AToo many arguments for subroutine at/;
+is eval("t146(456, 789, 987, 654)"), undef;
+like $@, qr/\AToo many arguments for subroutine at/;
+is $a, 123;
+
+sub t147 ($ = undef, ?$b) { ($b // "u") }
+is prototype(\&t147), undef;
+is eval("t147()"), "";
+is eval("t147(undef)"), "1";
+is eval("t147(0)"), "1";
+is eval("t147(222)"), "1";
+is eval("t147(456)"), "1";
+is eval("t147(456, 789)"), undef;
+like $@, qr/\AToo many arguments for subroutine at/;
+is eval("t147(456, 789, 987)"), undef;
+like $@, qr/\AToo many arguments for subroutine at/;
+is eval("t147(456, 789, 987, 654)"), undef;
+like $@, qr/\AToo many arguments for subroutine at/;
+is $a, 123;
+
+sub t148 ($ =, ?$b) { ($b // "u") }
+is prototype(\&t148), undef;
+is eval("t148()"), "";
+is eval("t148(undef)"), "1";
+is eval("t148(0)"), "1";
+is eval("t148(222)"), "1";
+is eval("t148(456)"), "1";
+is eval("t148(456, 789)"), undef;
+like $@, qr/\AToo many arguments for subroutine at/;
+is eval("t148(456, 789, 987)"), undef;
+like $@, qr/\AToo many arguments for subroutine at/;
+is eval("t148(456, 789, 987, 654)"), undef;
+like $@, qr/\AToo many arguments for subroutine at/;
+is $a, 123;
+
+sub t149 ($a = 222, ?$b, $c = 333, ?$d) {
+    join("/", map { $_ // "u" } $a, $b, $c, $d)
+}
+is prototype(\&t149), undef;
+is eval("t149()"), "222//333/";
+is eval("t149(undef)"), "u/1/333/";
+is eval("t149(0)"), "0/1/333/";
+is eval("t149(222)"), "222/1/333/";
+is eval("t149(456)"), "456/1/333/";
+is eval("t149(456, undef)"), "456/1/u/1";
+is eval("t149(456, 0)"), "456/1/0/1";
+is eval("t149(456, 333)"), "456/1/333/1";
+is eval("t149(456, 789)"), "456/1/789/1";
+is eval("t149(456, 789, 987)"), undef;
+like $@, qr/\AToo many arguments for subroutine at/;
+is eval("t149(456, 789, 987, 654)"), undef;
+like $@, qr/\AToo many arguments for subroutine at/;
+is $a, 123;
+
+sub t150 ($a = 222, ?$b, ?$c, $d = 333, ?$e, ?$f) {
+    join("/", map { $_ // "u" } $a, $b, $c, $d, $e, $f)
+}
+is prototype(\&t150), undef;
+is eval("t150()"), "222///333//";
+is eval("t150(undef)"), "u/1/1/333//";
+is eval("t150(0)"), "0/1/1/333//";
+is eval("t150(222)"), "222/1/1/333//";
+is eval("t150(456)"), "456/1/1/333//";
+is eval("t150(456, undef)"), "456/1/1/u/1/1";
+is eval("t150(456, 0)"), "456/1/1/0/1/1";
+is eval("t150(456, 333)"), "456/1/1/333/1/1";
+is eval("t150(456, 789)"), "456/1/1/789/1/1";
+is eval("t150(456, 789, 987)"), undef;
+like $@, qr/\AToo many arguments for subroutine at/;
+is eval("t150(456, 789, 987, 654)"), undef;
+like $@, qr/\AToo many arguments for subroutine at/;
+is $a, 123;
+
+sub t151 ($a = 222, ?$b, $c = 333) { join("/", map { $_ // "u" } $a, $b, $c) }
+is prototype(\&t151), undef;
+is eval("t151()"), "222//333";
+is eval("t151(undef)"), "u/1/333";
+is eval("t151(0)"), "0/1/333";
+is eval("t151(222)"), "222/1/333";
+is eval("t151(456)"), "456/1/333";
+is eval("t151(456, undef)"), "456/1/u";
+is eval("t151(456, 0)"), "456/1/0";
+is eval("t151(456, 333)"), "456/1/333";
+is eval("t151(456, 789)"), "456/1/789";
+is eval("t151(456, 789, 987)"), undef;
+like $@, qr/\AToo many arguments for subroutine at/;
+is eval("t151(456, 789, 987, 654)"), undef;
+like $@, qr/\AToo many arguments for subroutine at/;
+is $a, 123;
+
+sub t152 ($a = 222, ?$b, ?$c, $d = 333) {
+    join("/", map { $_ // "u" } $a, $b, $c, $d)
+}
+is prototype(\&t152), undef;
+is eval("t152()"), "222///333";
+is eval("t152(undef)"), "u/1/1/333";
+is eval("t152(0)"), "0/1/1/333";
+is eval("t152(222)"), "222/1/1/333";
+is eval("t152(456)"), "456/1/1/333";
+is eval("t152(456, undef)"), "456/1/1/u";
+is eval("t152(456, 0)"), "456/1/1/0";
+is eval("t152(456, 333)"), "456/1/1/333";
+is eval("t152(456, 789)"), "456/1/1/789";
+is eval("t152(456, 789, 987)"), undef;
+like $@, qr/\AToo many arguments for subroutine at/;
+is eval("t152(456, 789, 987, 654)"), undef;
+like $@, qr/\AToo many arguments for subroutine at/;
+is $a, 123;
+
+sub t153 ($a = 222, $b = 333, ?$c) { join("/", map { $_ // "u" } $a, $b, $c) }
+is prototype(\&t153), undef;
+is eval("t153()"), "222/333/";
+is eval("t153(undef)"), "u/333/";
+is eval("t153(0)"), "0/333/";
+is eval("t153(222)"), "222/333/";
+is eval("t153(456)"), "456/333/";
+is eval("t153(456, undef)"), "456/u/1";
+is eval("t153(456, 0)"), "456/0/1";
+is eval("t153(456, 333)"), "456/333/1";
+is eval("t153(456, 789)"), "456/789/1";
+is eval("t153(456, 789, 987)"), undef;
+like $@, qr/\AToo many arguments for subroutine at/;
+is eval("t153(456, 789, 987, 654)"), undef;
+like $@, qr/\AToo many arguments for subroutine at/;
+is $a, 123;
+
+sub t154 ($a = 222, $b = 333, ?$c, ?$d) {
+    join("/", map { $_ // "u" } $a, $b, $c, $d)
+}
+is prototype(\&t154), undef;
+is eval("t154()"), "222/333//";
+is eval("t154(undef)"), "u/333//";
+is eval("t154(0)"), "0/333//";
+is eval("t154(222)"), "222/333//";
+is eval("t154(456)"), "456/333//";
+is eval("t154(456, undef)"), "456/u/1/1";
+is eval("t154(456, 0)"), "456/0/1/1";
+is eval("t154(456, 333)"), "456/333/1/1";
+is eval("t154(456, 789)"), "456/789/1/1";
+is eval("t154(456, 789, 987)"), undef;
+like $@, qr/\AToo many arguments for subroutine at/;
+is eval("t154(456, 789, 987, 654)"), undef;
+like $@, qr/\AToo many arguments for subroutine at/;
+is $a, 123;
+
+eval "#line 8 foo\nsub t167 (\$a = 222, ?\$b = 333) { }";
+like $@, qr/\AParse error at foo line 8\.\n/;
+
+eval "#line 8 foo\nsub t168 (\$a = 222, ?\$b =) { }";
+like $@, qr/\AParse error at foo line 8\.\n/;
+
+eval "#line 8 foo\nsub t164 (\$a = 222, ?\$) { }";
+like $@, qr/\AParse error at foo line 8\.\n/;
+
+eval "#line 8 foo\nsub t165 (\$a = 222, ?\@b) { }";
+like $@, qr/\AParse error at foo line 8\.\n/;
+
+eval "#line 8 foo\nsub t166 (\$a = 222, ?\%b) { }";
+like $@, qr/\AParse error at foo line 8\.\n/;
+
+eval "#line 8 foo\nsub t156 (?\$) { }";
+like $@, qr/\AParse error at foo line 8\.\n/;
+
+eval "#line 8 foo\nsub t157 (?\@a) { }";
+like $@, qr/\AParse error at foo line 8\.\n/;
+
+eval "#line 8 foo\nsub t158 (?\%a) { }";
+like $@, qr/\AParse error at foo line 8\.\n/;
+
+eval "#line 8 foo\nsub t159 (?\$a) { }";
+is $@, "Optional parameter predicate doesn't follow optional parameter".
+	" at foo line 8\.\n";
+
+eval "#line 8 foo\nsub t161 (?\$a, \$b = 222) { }";
+is $@, "Optional parameter predicate doesn't follow optional parameter".
+	" at foo line 8\.\n";
+
 sub t028 ($a, $b = 333) { "$a/$b" }
 is prototype(\&t028), undef;
 is eval("t028()"), undef;
@@ -537,6 +754,18 @@ is eval("t047(456, 789, 987)"), undef;
 like $@, qr/\AToo many arguments for subroutine at/;
 is $a, 123;
 
+sub t155 ($a, $b = 333, ?$c) { "$a/$b/$c" }
+is prototype(\&t155), undef;
+is eval("t155()"), undef;
+like $@, qr/\AToo few arguments for subroutine at/;
+is eval("t155(0)"), "0/333/";
+is eval("t155(456)"), "456/333/";
+is eval("t155(456, 333)"), "456/333/1";
+is eval("t155(456, 789)"), "456/789/1";
+is eval("t155(456, 789, 987)"), undef;
+like $@, qr/\AToo many arguments for subroutine at/;
+is $a, 123;
+
 sub t029 ($a, $b, $c = 222, $d = 333) { "$a/$b/$c/$d" }
 is prototype(\&t029), undef;
 is eval("t029()"), undef;
@@ -570,6 +799,18 @@ is $@, "Mandatory parameter follows optional parameter at foo line 8\.\n";
 
 eval "#line 8 foo\nsub t031 (\$a = 222, \$b = 333, \$c, \$d) { }";
 is $@, "Mandatory parameter follows optional parameter at foo line 8\.\n";
+
+eval "#line 8 foo\nsub t160 (?\$a, \$b) { }";
+is $@, "Optional parameter predicate doesn't follow optional parameter".
+	" at foo line 8\.\n";
+
+eval "#line 8 foo\nsub t162 (\$a, ?\$b) { }";
+is $@, "Optional parameter predicate doesn't follow optional parameter".
+	" at foo line 8\.\n";
+
+eval "#line 8 foo\nsub t163 (\$a, ?\$b, \$c = 222) { }";
+is $@, "Optional parameter predicate doesn't follow optional parameter".
+	" at foo line 8\.\n";
 
 sub t034 (@abc) { join("/", @abc).";".scalar(@abc) }
 is prototype(\&t034), undef;
@@ -789,6 +1030,19 @@ is eval("t048(456, 789, 987, 654, 321)"), "456;789/987/654/321;4";
 is eval("t048(456, 789, 987, 654, 321, 111)"), "456;789/987/654/321/111;5";
 is $a, 123;
 
+sub t174 ($a = 222, ?$b, @c) { "$a;$b;".join("/", @c).";".scalar(@c) }
+is prototype(\&t174), undef;
+is eval("t174()"), "222;;;0";
+is eval("t174(0)"), "0;1;;0";
+is eval("t174(222)"), "222;1;;0";
+is eval("t174(456)"), "456;1;;0";
+is eval("t174(456, 789)"), "456;1;789;1";
+is eval("t174(456, 789, 987)"), "456;1;789/987;2";
+is eval("t174(456, 789, 987, 654)"), "456;1;789/987/654;3";
+is eval("t174(456, 789, 987, 654, 321)"), "456;1;789/987/654/321;4";
+is eval("t174(456, 789, 987, 654, 321, 111)"), "456;1;789/987/654/321/111;5";
+is $a, 123;
+
 sub t054 ($a = 222, $b = 333, @c) { "$a;$b;".join("/", @c).";".scalar(@c) }
 is prototype(\&t054), undef;
 is eval("t054()"), "222;333;;0";
@@ -827,6 +1081,26 @@ is eval("t050(222, 456, 789, 987, 654, 321)"), undef;
 like $@, qr#\AOdd name/value argument for subroutine at#;
 is eval("t050(222, 456, 789, 987, 654, 321, 111)"),
     "222;321=111/456=789/987=654";
+is $a, 123;
+
+sub t175 ($a = 211, ?$b, %c) {
+    "$a;$b;".join("/", map { $_."=".$c{$_} } sort keys %c)
+}
+is prototype(\&t175), undef;
+is eval("t175()"), "211;;";
+is eval("t175(211)"), "211;1;";
+is eval("t175(222)"), "222;1;";
+is eval("t175(222, 456)"), undef;
+like $@, qr#\AOdd name/value argument for subroutine at#;
+is eval("t175(211, 456, 789)"), "211;1;456=789";
+is eval("t175(222, 456, 789)"), "222;1;456=789";
+is eval("t175(222, 456, 789, 987)"), undef;
+like $@, qr#\AOdd name/value argument for subroutine at#;
+is eval("t175(222, 456, 789, 987, 654)"), "222;1;456=789/987=654";
+is eval("t175(222, 456, 789, 987, 654, 321)"), undef;
+like $@, qr#\AOdd name/value argument for subroutine at#;
+is eval("t175(222, 456, 789, 987, 654, 321, 111)"),
+    "222;1;321=111/456=789/987=654";
 is $a, 123;
 
 sub t056 ($a = 211, $b = 311, %c) {
@@ -879,6 +1153,19 @@ is eval("t058(456, 789, 987)"), "456;789;987;1";
 is eval("t058(456, 789, 987, 654)"), "456;789;987/654;2";
 is eval("t058(456, 789, 987, 654, 321)"), "456;789;987/654/321;3";
 is eval("t058(456, 789, 987, 654, 321, 111)"), "456;789;987/654/321/111;4";
+is $a, 123;
+
+sub t169 ($a, $b = 333, ?$c, @d) { "$a;$b;$c;".join("/", @d).";".scalar(@d) }
+is prototype(\&t169), undef;
+is eval("t169()"), undef;
+like $@, qr/\AToo few arguments for subroutine at/;
+is eval("t169(456)"), "456;333;;;0";
+is eval("t169(456, 333)"), "456;333;1;;0";
+is eval("t169(456, 789)"), "456;789;1;;0";
+is eval("t169(456, 789, 987)"), "456;789;1;987;1";
+is eval("t169(456, 789, 987, 654)"), "456;789;1;987/654;2";
+is eval("t169(456, 789, 987, 654, 321)"), "456;789;1;987/654/321;3";
+is eval("t169(456, 789, 987, 654, 321, 111)"), "456;789;1;987/654/321/111;4";
 is $a, 123;
 
 eval "#line 8 foo\nsub t059 (\@a, \$b) { }";
@@ -943,6 +1230,22 @@ is $@, "Slurpy parameter not last at foo line 8\.\n";
 
 eval "#line 8 foo\nsub t079 (\$a, \@b, \$c, \$d) { }";
 is $@, "Slurpy parameter not last at foo line 8\.\n";
+
+eval "#line 8 foo\nsub t170 (\@a, ?\$b) { }";
+is $@, "Optional parameter predicate doesn't follow optional parameter".
+	" at foo line 8\.\n";
+
+eval "#line 8 foo\nsub t171 (\@, ?\$b) { }";
+is $@, "Optional parameter predicate doesn't follow optional parameter".
+	" at foo line 8\.\n";
+
+eval "#line 8 foo\nsub t172 (\%a, ?\$b) { }";
+is $@, "Optional parameter predicate doesn't follow optional parameter".
+	" at foo line 8\.\n";
+
+eval "#line 8 foo\nsub t173 (\%, ?\$b) { }";
+is $@, "Optional parameter predicate doesn't follow optional parameter".
+	" at foo line 8\.\n";
 
 sub t080 ($a,,, $b) { $a.$b }
 is prototype(\&t080), undef;

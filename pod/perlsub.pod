@@ -402,6 +402,26 @@ is not important, it may be omitted just as the parameter's name was:
 	print $thing;
     }
 
+If it is necessary to know whether an optional parameter was actually
+supplied, i.e., if the behaviour for not supplying the parameter isn't
+simply to use a default value, then a parameter predicate can be used to
+detect it.  A parameter predicate is specified as another named scalar
+variable, preceded by "?", in a list item immediately following the
+optional parameter in question.  The predicate variable is filled with
+a truth value indicating whether the optional parameter was supplied by
+the caller.  For example,
+
+    my $stored_value;
+    sub foo ($new_value = undef, ?$supplied) {
+	$stored_value = $new_value if $supplied;
+	return $stored_value;
+    }
+
+If there are multiple optional parameters, each can have its own parameter
+predicate.  A parameter predicate can be applied to a nameless optional
+parameter just as to a named one.  A parameter predicate cannot itself
+be nameless.
+
 Optional positional parameters must come after all mandatory positional
 parameters.  (If there are no mandatory positional parameters then an
 optional positional parameters can be the first thing in the signature.)

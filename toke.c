@@ -12495,6 +12495,25 @@ Perl_parse_subsignature(pTHX)
 				newSTATEOP(0, NULL, expr));
 		max_arity = ++pos;
 	    } break;
+	    case '?': {
+		OP *var;
+		lex_token_boundary();
+		lex_read_unichar(0);
+		lex_read_space(0);
+		if (lex_peek_unichar(0) != '$') goto parse_error;
+		var = parse_opt_lexvar();
+		if (!var) goto parse_error;
+		if (prev_type != 1)
+		    qerror(Perl_mess(aTHX_ "Optional parameter predicate "
+			    "doesn't follow optional parameter"));
+		initops = op_append_list(OP_LINESEQ, initops,
+			    newSTATEOP(0, NULL,
+				newASSIGNOP(OPf_STACKED, var, 0,
+				    newBINOP(OP_GE, 0,
+					scalar(newUNOP(OP_RV2AV, 0,
+						newGVOP(OP_GV, 0, PL_defgv))),
+					newSVOP(OP_CONST, 0, newSViv(pos))))));
+	    } break;
 	    case '@':
 	    case '%': {
 		OP *var;
