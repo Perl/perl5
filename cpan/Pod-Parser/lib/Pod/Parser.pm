@@ -12,7 +12,7 @@ use strict;
 
 ## These "variables" are used as local "glob aliases" for performance
 use vars qw($VERSION @ISA %myData %myOpts @input_stack);
-$VERSION = '1.61';  ## Current version of this package
+$VERSION = '1.62';  ## Current version of this package
 require  5.005;    ## requires this Perl version or later
 
 #############################################################################
@@ -81,6 +81,10 @@ Nothing.
 
 =head1 DESCRIPTION
 
+B<NOTE: This module is considered legacy; modern Perl releases (5.18 and
+higher) are going to remove Pod-Parser from core and use L<Pod-Simple>
+for all things POD.>
+
 B<Pod::Parser> is a base class for creating POD filters and translators.
 It handles most of the effort involved with parsing the POD sections
 from an input stream, leaving subclasses free to be concerned only with
@@ -89,10 +93,6 @@ performing the actual translation of text.
 B<Pod::Parser> parses PODs, and makes method calls to handle the various
 components of the POD. Subclasses of B<Pod::Parser> override these methods
 to translate the POD into whatever output format they desire.
-
-Note: This module is considered as legacy; modern Perl releases (5.18 and
-higher) are going to remove Pod::Parser from core and use L<Pod::Simple>
-for all things POD.
 
 =head1 QUICK OVERVIEW
 
@@ -1146,7 +1146,7 @@ closes the input and output files.
 
 =back
 
-If the special input filename "-" or "<&STDIN" is given then the STDIN
+If the special input filename "", "-" or "<&STDIN" is given then the STDIN
 filehandle is used for input (and no open or close is performed). If no
 input filename is specified then "-" is implied. Filehandle references,
 or objects that support the regular IO operations (like C<E<lt>$fhE<gt>>

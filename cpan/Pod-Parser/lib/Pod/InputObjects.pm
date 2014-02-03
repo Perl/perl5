@@ -12,7 +12,7 @@ package Pod::InputObjects;
 use strict;
 
 use vars qw($VERSION);
-$VERSION = '1.61';  ## Current version of this package
+$VERSION = '1.62';  ## Current version of this package
 require  5.005;    ## requires this Perl version or later
 
 #############################################################################
@@ -34,6 +34,10 @@ perl5.004, Carp
 Nothing.
 
 =head1 DESCRIPTION
+
+B<NOTE: This module is considered legacy; modern Perl releases (5.18 and
+higher) are going to remove Pod-Parser from core and use L<Pod-Simple>
+for all things POD.>
 
 This module defines some basic input objects used by B<Pod::Parser> when
 reading and parsing POD text from an input source. The following objects
