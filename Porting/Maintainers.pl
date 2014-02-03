@@ -220,7 +220,7 @@ use File::Glob qw(:case);
     },
 
     'Compress::Raw::Zlib' => {
-        'DISTRIBUTION' => 'PMQS/Compress-Raw-Zlib-2.064.tar.gz',
+        'DISTRIBUTION' => 'PMQS/Compress-Raw-Zlib-2.065.tar.gz',
 
         'FILES'    => q[cpan/Compress-Raw-Zlib],
         'EXCLUDED' => [
@@ -230,8 +230,6 @@ use File::Glob qw(:case);
                 t/99pod.t
                 ),
         ],
-        # Waiting to be merged upstream; see CPAN RT#92657
-        'CUSTOMIZED'  => ['Zlib.xs'],
     },
 
     'Config::Perl::V' => {
