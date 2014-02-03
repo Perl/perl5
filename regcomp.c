@@ -4912,10 +4912,12 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
 
                     /* NPOSIXD matches all upper Latin1 code points unless the
                      * target string being matched is UTF-8, which is
-                     * unknowable until match time */
-                    if (PL_regkind[OP(scan)] == NPOSIXD) {
-                        _invlist_union_complement_2nd(my_invlist,
-                                        PL_XPosix_ptrs[_CC_ASCII], &my_invlist);
+                     * unknowable until match time.  Since we are going to
+                     * invert, we want to get rid of all of them so that the
+                     * inversion will match all */
+                    if (OP(scan) == NPOSIXD) {
+                        _invlist_subtract(my_invlist, PL_UpperLatin1,
+                                          &my_invlist);
                     }
 
                   join_posix:

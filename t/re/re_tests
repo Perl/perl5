@@ -1843,5 +1843,10 @@ A+(*PRUNE)BC(?{})	AAABC	y	$&	AAABC
 
 # RT #120600: Variable length lookbehind is not variable
 (?<W>a)(?<BB>(?=(?&W))(?<=(?&W)))(?&BB)	aa	y	$&	a	# test repeated recursive patterns
+
+# This group is from RT #121144
+/^\S+=/d	\x{3a3}=\x{3a0}	y	$&	\x{3a3}=
+/^\S+=/u	\x{3a3}=\x{3a0}	y	$&	\x{3a3}=
+
 # Keep these lines at the end of the file
 # vim: softtabstop=0 noexpandtab
