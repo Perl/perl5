@@ -5,7 +5,7 @@ use File::Spec;
 use ExtUtils::CBuilder::Platform::Unix;
 
 use vars qw($VERSION @ISA);
-$VERSION = '0.280214';
+$VERSION = '0.280215';
 @ISA = qw(ExtUtils::CBuilder::Platform::Unix);
 
 # The Android linker will not recognize symbols from
@@ -21,7 +21,17 @@ sub link {
     ];
   }
 
-  return $self->SUPER::link(%args);
+  # Several modules on CPAN rather rightfully expect being
+  # able to pass $so_file to DynaLoader::dl_load_file and
+  # have it Just Work.  However, $so_file will more likely
+  # than not be a relative path, and unless the module 
+  # author subclasses MakeMaker/Module::Build to modify
+  # LD_LIBRARY_PATH, which would be insane, Android's linker
+  # won't find the .so
+  # So we make this all work by returning an absolute path.
+  my($so_file, @so_tmps) = $self->SUPER::link(%args);
+  $so_file = File::Spec->rel2abs($so_file);
+  return ($so_file, @so_tmps);
 }
 
 1;
