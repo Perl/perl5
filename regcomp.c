@@ -13682,9 +13682,6 @@ parseit:
 #ifndef HAS_ISASCII
                 && classnum != _CC_ASCII
 #endif
-#ifndef HAS_ISBLANK
-                && classnum != _CC_BLANK
-#endif
             ) {
 
                 /* See if it already matches the complement of this POSIX
@@ -13768,16 +13765,6 @@ parseit:
                                        ? &posixes
                                        : &nposixes;
                     SV** source_ptr = &PL_XPosix_ptrs[classnum];
-#ifndef HAS_ISBLANK
-                    /* If the platform doesn't have isblank(), we handle locale
-                     * with the hardcoded ASII values. */
-                    if (LOC && classnum == _CC_BLANK) {
-                        _invlist_subtract(*source_ptr,
-                                          PL_UpperLatin1,
-                                          source_ptr);
-                    }
-#endif
-
                     _invlist_union_maybe_complement_2nd(
                                                      *posixes_ptr,
                                                      *source_ptr,
@@ -14145,14 +14132,6 @@ parseit:
                     if (op > POSIXA) { /* /aa is same as /a */
                         op = POSIXA;
                     }
-#ifndef HAS_ISBLANK
-                    if (op == POSIXL
-                        && (namedclass == ANYOF_BLANK
-                            || namedclass == ANYOF_NBLANK))
-                    {
-                        op = POSIXA;
-                    }
-#endif
 
                 join_posix:
                     /* The odd numbered ones are the complements of the

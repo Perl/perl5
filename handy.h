@@ -1325,8 +1325,8 @@ EXTCONST U32 PL_charclass[];
 
 #if defined(HAS_ISBLANK) && ! defined(USE_NEXT_CTYPE)
 #   define isBLANK_LC(c) _generic_LC(c, _CC_BLANK, isblank)
-#else
-#   define isBLANK_LC(c) isBLANK(c)
+#else /* Unlike isASCII, varies if in a UTF-8 locale */
+#   define isBLANK_LC(c) (IN_UTF8_CTYPE_LOCALE) ? isBLANK_L1(c) : isBLANK(c)
 #endif
 
 #ifdef USE_NEXT_CTYPE   /* NeXT computers */
