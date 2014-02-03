@@ -1404,7 +1404,12 @@ not reading from a record-oriented file (or your OS doesn't have
 record-oriented files), then you'll likely get a full chunk of data
 with every read.  If a record is larger than the record size you've
 set, you'll get the record back in pieces.  Trying to set the record
-size to zero or less will cause reading in the (rest of the) whole file.
+size to zero or less is deprecated and will cause $/ to have the value
+of "undef", which will cause reading in the (rest of the) whole file.
+
+As of 5.19.9 setting C<$/> to any other form of reference will throw a
+fatal exception. This is in preparation for supporting new ways to set
+C<$/> in the future.
 
 On VMS only, record reads bypass PerlIO layers and any associated
 buffering, so you must not mix record and non-record reads on the

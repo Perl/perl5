@@ -2749,8 +2749,20 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	}
 	break;
     case '/':
-	SvREFCNT_dec(PL_rs);
-	PL_rs = newSVsv(sv);
+        if (!SvROK(sv) || ( SvTYPE(SvRV(sv)) < SVt_PVAV && SvIV(SvRV(sv)) > 0 ) ) {
+            SvREFCNT_dec(PL_rs);
+            PL_rs = newSVsv(sv);
+        } else if (SvTYPE(SvRV(sv)) >= SVt_PVAV) {
+            Perl_croak(aTHX_ "Setting $/ to a %s reference is forbidden", sv_reftype(SvRV(sv),0));
+        } else {
+            /* treat as undef */
+            Perl_ck_warner(aTHX_ packWARN(WARN_DEPRECATED),
+                "Setting $/ to a reference to %s as a form of slurp is deprecated, treating as undef",
+                SvIV(SvRV(sv)) < 0 ? "a negative integer" : "zero"
+            );
+            SvREFCNT_dec(PL_rs);
+            PL_rs= newSVsv(&PL_sv_undef);
+        }
 	break;
     case '\\':
 	SvREFCNT_dec(PL_ors_sv);

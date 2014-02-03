@@ -76,7 +76,23 @@ points is now tainted.  This leads to more consistent tainting results.
 
 =head1 Deprecations
 
-XXX Any deprecated features, syntax, modules etc. should be listed here.
+=over 4
+
+=item *
+
+Setting C<$/> to a reference to zero or a reference to a negative integer is
+now deprecated, and will behave B<exactly> as though it was set to C<undef>.
+If you want slurp behavior set C<$/> to C<undef> explicitly.
+
+=item *
+
+Setting C<$/> to a reference to a non integer is now forbidden and will
+throw an error. Perl has never documented what would happen in this
+context and while it used to behave the same as setting C<$/> to
+the address of the references in future it may behave differently, so we
+have forbidden this usage.
+
+=back
 
 =head2 Module removals
 
@@ -254,6 +270,10 @@ and New Warnings
 
 =item *
 
+Added L<<Setting $E<0x2f> to a %s reference is forbidden|perldiag/"Setting $E<0x2f> to a %s reference is forbidden">>
+
+=item *
+
 XXX L<message|perldiag/"message">
 
 =back
@@ -261,6 +281,10 @@ XXX L<message|perldiag/"message">
 =head3 New Warnings
 
 =over 4
+
+=item *
+
+Added L<<Setting $E<0x2f> to a reference to %s as a form of slurp is deprecated, treating as undef|perldiag/"Setting $E<0x2f> to a reference to %s as a form of slurp is deprecated, treating as undef">>
 
 =item *
 
