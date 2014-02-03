@@ -3,7 +3,7 @@ use strict;
 use vars qw/$VERSION %released %version %families %upstream
 	    %bug_tracker %deprecated %delta/;
 use Module::CoreList::TieHashDelta;
-$VERSION = '3.04';
+$VERSION = '3.05';
 
 my $dumpinc = 0;
 sub import {
@@ -244,6 +244,7 @@ sub changes_between {
     5.019007 => '2013-12-20',
     5.018002 => '2014-01-06',
     5.019008 => '2014-01-20',
+    5.019009 => '????-??-??',
   );
 
 for my $version ( sort { $a <=> $b } keys %released ) {
@@ -9380,6 +9381,17 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         removed => {
         }
     },
+    5.019009 => {
+        delta_from => 5.019008,
+        changed => {
+            'Config'                => '5.019009',
+            'Module::CoreList'      => '3.05',
+            'Module::CoreList::TieHashDelta'=> '3.05',
+            'Module::CoreList::Utils'=> '3.05',
+        },
+        removed => {
+        }
+    },
 );
 
 sub is_core
@@ -9748,6 +9760,13 @@ for my $version (sort { $a <=> $b } keys %delta) {
     },
     5.019008 => {
         delta_from => 5.019007,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.019009 => {
+        delta_from => 5.019008,
         changed => {
         },
         removed => {
@@ -10167,6 +10186,9 @@ for my $version (sort { $a <=> $b } keys %deprecated) {
     'inc::latest'           => 'cpan',
     'parent'                => 'cpan',
     'perlfaq'               => 'cpan',
+    'version'               => 'cpan',
+    'version::regex'        => 'cpan',
+    'version::vpp'          => 'cpan',
 );
 
 %bug_tracker = (
@@ -10571,6 +10593,9 @@ for my $version (sort { $a <=> $b } keys %deprecated) {
     'inc::latest'           => undef,
     'parent'                => undef,
     'perlfaq'               => 'https://github.com/perl-doc-cats/perlfaq/issues',
+    'version'               => undef,
+    'version::regex'        => undef,
+    'version::vpp'          => undef,
 );
 
 # Create aliases with trailing zeros for $] use
