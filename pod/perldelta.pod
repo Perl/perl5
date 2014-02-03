@@ -469,7 +469,12 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+Backticks (C< `` > or C< qx// >) combined with multiple threads on
+Win32 could result in output sent to stdout on one thread being
+captured by backticks of an external command in another thread.
+
+This could occur for pseudo-forked processes too, as Win32's
+psuedo-fork is implemented in terms of threads. [perl #77672]
 
 =back
 
