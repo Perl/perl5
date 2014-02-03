@@ -4913,17 +4913,17 @@ targetarch (Cross.U):
 	If not, this will be empty.
 
 targetdir (Cross.U):
-        This variable contains a path that will be created on the target
-        host using targetmkdir, and then used to copy the cross-compiled
-        executables to. Defaults to '/tmp' if not set.
+	This variable contains a path that will be created on the target
+	host using targetmkdir, and then used to copy the cross-compiled
+	executables to. Defaults to '/tmp' if not set.
 
 targetenv (Cross.U):
-        If cross-compiling, this variable can be used to modify the
-        environment on the target system.
-        However, how and where it's used, and even if it's used at all, is
-        entirely dependent on both the transport mechanism (targetrun) and
-        what the target system is.  Unless the relevant documentation says
-        otherwise, it is genereally not useful.
+	If cross-compiling, this variable can be used to modify the
+	environment on the target system.
+	However, how and where it's used, and even if it's used at all, is
+	entirely dependent on both the transport mechanism (targetrun) and
+	what the target system is.  Unless the relevant documentation says
+	otherwise, it is genereally not useful.
 
 targethost (Cross.U):
 	This variable contains the name of a separate host machine that
