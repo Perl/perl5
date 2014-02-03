@@ -40,6 +40,8 @@ if($Config{d_setlocale}) {
         $utf8_locale = find_utf8_locale();
     }
 }
+my $has_isblank = $Config{d_isblank};  # has C99, locale-specific blank checking
+
 
 my %properties = (
                    # name => Lookup-property name
@@ -177,9 +179,13 @@ foreach my $name (sort keys %properties) {
                 }
                 else {
 
+                  TODO: {
                     # UTF-8 locale works on full range 0-255
+                    local $TODO = 'locale-specific isblank not available'
+                        unless $has_isblank || $function ne 'BLANK' || $char_name ne 'NO-BREAK SPACE';
                     my $truth = truth($matches && $i < 256);
                     is ($ret, $truth, "is${function}_LC( $display_name ) == $truth ($utf8_locale)");
+                  }
                 }
             }
         }
@@ -215,8 +221,12 @@ foreach my $name (sort keys %properties) {
                 fail($@);
             }
             else {
+              TODO: {
+                local $TODO = 'locale-specific isblank not available'
+                    unless $has_isblank || $function ne 'BLANK' || $char_name ne 'NO-BREAK SPACE';
                 my $truth = truth($matches);
                 is ($ret, $truth, "is${function}_LC_uvchr( $display_name ) == $truth ($utf8_locale)");
+              }
             }
         }
 
@@ -254,8 +264,12 @@ foreach my $name (sort keys %properties) {
                 fail($@);
             }
             else {
+              TODO: {
+                local $TODO = 'locale-specific isblank not available'
+                    unless $has_isblank || $function ne 'BLANK' || $char_name ne 'NO-BREAK SPACE';
                 my $truth = truth($matches);
                 is ($ret, $truth, "is${function}_LC_utf8( $display_name ) == $truth ($utf8_locale)");
+              }
             }
         }
     }
