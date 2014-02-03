@@ -11568,6 +11568,7 @@ Perl_rpeep(pTHX_ OP *o)
                                || p->op_type == OP_PADHV)
                             && (p->op_flags & OPf_WANT) == OPf_WANT_VOID
                             && (p->op_private & OPpLVAL_INTRO) == intro
+                            && !(p->op_private & ~OPpLVAL_INTRO)
                             && p->op_next
                             && (   p->op_next->op_type == OP_NEXTSTATE
                                 || p->op_next->op_type == OP_DBSTATE)
