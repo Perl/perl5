@@ -122,7 +122,7 @@ use strict;
 
 use Config;
 use vars qw($VERSION $CLASS @ISA $LAX $STRICT);
-$VERSION = 0.9907;
+$VERSION = 0.9908;
 $CLASS = 'version::vpp';
 
 require version::regex;
@@ -634,78 +634,78 @@ sub scan_version {
     return $s;
 }
 
-sub new
-{
-	my ($class, $value) = @_;
-	unless (defined $class) {
-	    require Carp;
-	    Carp::croak('Usage: version::new(class, version)');
-	}
-	my $self = bless ({}, ref ($class) || $class);
-	my $qv = FALSE;
+sub new {
+    my $class = shift;
+    unless (defined $class or $#_ > 1) {
+	require Carp;
+	Carp::croak('Usage: version::new(class, version)');
+    }
 
-	if ( ref($value) && eval('$value->isa("version")') ) {
-	    # Can copy the elements directly
-	    $self->{version} = [ @{$value->{version} } ];
-	    $self->{qv} = 1 if $value->{qv};
-	    $self->{alpha} = 1 if $value->{alpha};
-	    $self->{original} = ''.$value->{original};
-	    return $self;
-	}
+    my $self = bless ({}, ref ($class) || $class);
+    my $qv = FALSE;
 
-	if ( not defined $value or $value =~ /^undef$/ ) {
-	    # RT #19517 - special case for undef comparison
-	    # or someone forgot to pass a value
-	    push @{$self->{version}}, 0;
-	    $self->{original} = "0";
-	    return ($self);
-	}
+    if ( $#_ == 1 ) { # must be CVS-style
+	$qv = TRUE;
+    }
+    my $value = pop; # always going to be the last element
 
-	if ( $#_ == 2 ) { # must be CVS-style
-	    $value = $_[2];
-	    $qv = TRUE;
-	}
+    if ( ref($value) && eval('$value->isa("version")') ) {
+	# Can copy the elements directly
+	$self->{version} = [ @{$value->{version} } ];
+	$self->{qv} = 1 if $value->{qv};
+	$self->{alpha} = 1 if $value->{alpha};
+	$self->{original} = ''.$value->{original};
+	return $self;
+    }
 
-	if (ref($value) =~ m/ARRAY|HASH/) {
-	    require Carp;
-	    Carp::croak("Invalid version format (non-numeric data)");
-	}
-
-	$value = _un_vstring($value);
-
-	if ($Config{d_setlocale}) {
-	    use POSIX qw/locale_h/;
-	    use if $Config{d_setlocale}, 'locale';
-	    my $currlocale = setlocale(LC_ALL);
-
-	    # if the current locale uses commas for decimal points, we
-	    # just replace commas with decimal places, rather than changing
-	    # locales
-	    if ( localeconv()->{decimal_point} eq ',' ) {
-		$value =~ tr/,/./;
-	    }
-	}
-
-	# exponential notation
-	if ( $value =~ /\d+.?\d*e[-+]?\d+/ ) {
-	    $value = sprintf("%.9f",$value);
-	    $value =~ s/(0+)$//; # trim trailing zeros
-	}
-
-	my $s = scan_version($value, \$self, $qv);
-
-	if ($s) { # must be something left over
-	    warn("Version string '%s' contains invalid data; "
-                       ."ignoring: '%s'", $value, $s);
-	}
-
+    if ( not defined $value or $value =~ /^undef$/ ) {
+	# RT #19517 - special case for undef comparison
+	# or someone forgot to pass a value
+	push @{$self->{version}}, 0;
+	$self->{original} = "0";
 	return ($self);
+    }
+
+
+    if (ref($value) =~ m/ARRAY|HASH/) {
+	require Carp;
+	Carp::croak("Invalid version format (non-numeric data)");
+    }
+
+    $value = _un_vstring($value);
+
+    if ($Config{d_setlocale}) {
+	use POSIX qw/locale_h/;
+	use if $Config{d_setlocale}, 'locale';
+	my $currlocale = setlocale(LC_ALL);
+
+	# if the current locale uses commas for decimal points, we
+	# just replace commas with decimal places, rather than changing
+	# locales
+	if ( localeconv()->{decimal_point} eq ',' ) {
+	    $value =~ tr/,/./;
+	}
+    }
+
+    # exponential notation
+    if ( $value =~ /\d+.?\d*e[-+]?\d+/ ) {
+	$value = sprintf("%.9f",$value);
+	$value =~ s/(0+)$//; # trim trailing zeros
+    }
+
+    my $s = scan_version($value, \$self, $qv);
+
+    if ($s) { # must be something left over
+	warn("Version string '%s' contains invalid data; "
+		   ."ignoring: '%s'", $value, $s);
+    }
+
+    return ($self);
 }
 
 *parse = \&new;
 
-sub numify
-{
+sub numify {
     my ($self) = @_;
     unless (_verify($self)) {
 	require Carp;
@@ -745,8 +745,7 @@ sub numify
     return $string;
 }
 
-sub normal
-{
+sub normal {
     my ($self) = @_;
     unless (_verify($self)) {
 	require Carp;
@@ -781,8 +780,7 @@ sub normal
     return $string;
 }
 
-sub stringify
-{
+sub stringify {
     my ($self) = @_;
     unless (_verify($self)) {
 	require Carp;
@@ -795,8 +793,7 @@ sub stringify
 	    : $self->numify;
 }
 
-sub vcmp
-{
+sub vcmp {
     require UNIVERSAL;
     my ($left,$right,$swap) = @_;
     my $class = ref($left);
