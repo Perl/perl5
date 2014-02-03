@@ -132,6 +132,10 @@ static long	tokenize(const char *str, char **dest, char ***destv);
 static void	get_shell(void);
 static char*	find_next_space(const char *s);
 static int	do_spawn2(pTHX_ const char *cmd, int exectype);
+static int	do_spawn2_handles(pTHX_ const char *cmd, int exectype,
+                        const int *handles);
+static int	do_spawnvp_handles(int mode, const char *cmdname,
+                        const char * const *argv, const int *handles);
 static long	find_pid(pTHX_ int pid);
 static void	remove_dead_process(long child);
 static int	terminate_process(DWORD pid, HANDLE process_handle, int sig);
@@ -695,7 +699,12 @@ find_next_space(const char *s)
 }
 
 static int
-do_spawn2(pTHX_ const char *cmd, int exectype)
+do_spawn2(pTHX_ const char *cmd, int exectype) {
+    return do_spawn2_handles(aTHX_ cmd, exectype, NULL);
+}
+
+static int
+do_spawn2_handles(pTHX_ const char *cmd, int exectype, const int *handles)
 {
     char **a;
     char *s;
@@ -728,8 +737,8 @@ do_spawn2(pTHX_ const char *cmd, int exectype)
 				       (const char* const*)argv);
 		break;
 	    case EXECF_SPAWN_NOWAIT:
-		status = win32_spawnvp(P_NOWAIT, argv[0],
-				       (const char* const*)argv);
+		status = do_spawnvp_handles(P_NOWAIT, argv[0],
+					    (const char* const*)argv, handles);
 		break;
 	    case EXECF_EXEC:
 		status = win32_execvp(argv[0], (const char* const*)argv);
@@ -756,8 +765,8 @@ do_spawn2(pTHX_ const char *cmd, int exectype)
 				   (const char* const*)argv);
 	    break;
 	case EXECF_SPAWN_NOWAIT:
-	    status = win32_spawnvp(P_NOWAIT, argv[0],
-				   (const char* const*)argv);
+	    status = do_spawnvp_handles(P_NOWAIT, argv[0],
+					(const char* const*)argv, handles);
 	    break;
 	case EXECF_EXEC:
 	    status = win32_execvp(argv[0], (const char* const*)argv);
@@ -2953,6 +2962,7 @@ win32_popen(const char *command, const char *mode)
     return _popen(command, mode);
 #else
     int p[2];
+    int handles[3];
     int parent, child;
     int stdfd, oldfd;
     int ourmode;
@@ -2991,47 +3001,32 @@ win32_popen(const char *command, const char *mode)
     if (win32_pipe(p, 512, ourmode) == -1)
         return NULL;
 
-    /* save the old std handle (this needs to happen before the
-     * dup2(), since that might call SetStdHandle() too) */
-    OP_REFCNT_LOCK;
-    lock_held = 1;
-    old_h = GetStdHandle(nhandle);
+    /* Previously this code redirected stdin/out temporarily so the
+       child process inherited those handles, this caused race
+       conditions when another thread was writing/reading those
+       handles.
 
-    /* save current stdfd */
-    if ((oldfd = win32_dup(stdfd)) == -1)
+       To avoid that we just feed the handles to CreateProcess() so
+       the handles are redirected only in the child.
+     */
+    handles[child] = p[child];
+    handles[parent] = -1;
+    handles[2] = -1;
+
+    /* CreateProcess() requires inheritable handles */
+    if (!SetHandleInformation(_get_osfhandle(p[child]), HANDLE_FLAG_INHERIT,
+			      HANDLE_FLAG_INHERIT)) {
         goto cleanup;
-
-    /* make stdfd go to child end of pipe (implicitly closes stdfd) */
-    /* stdfd will be inherited by the child */
-    if (win32_dup2(p[child], stdfd) == -1)
-        goto cleanup;
-
-    /* close the child end in parent */
-    win32_close(p[child]);
-
-    /* set the new std handle (in case dup2() above didn't) */
-    SetStdHandle(nhandle, (HANDLE)_get_osfhandle(stdfd));
+    }
 
     /* start the child */
     {
 	dTHX;
-	if ((childpid = do_spawn_nowait((char*)command)) == -1)
+
+	if ((childpid = do_spawn2_handles(aTHX_ command, EXECF_SPAWN_NOWAIT, handles)) == -1)
 	    goto cleanup;
 
-	/* revert stdfd to whatever it was before */
-	if (win32_dup2(oldfd, stdfd) == -1)
-	    goto cleanup;
-
-	/* close saved handle */
-	win32_close(oldfd);
-
-	/* restore the old std handle (this needs to happen after the
-	 * dup2(), since that might call SetStdHandle() too */
-	if (lock_held) {
-	    SetStdHandle(nhandle, old_h);
-	    OP_REFCNT_UNLOCK;
-	    lock_held = 0;
-	}
+	win32_close(p[child]);
 
 	sv_setiv(*av_fetch(w32_fdpid, p[parent], TRUE), childpid);
 
@@ -3046,15 +3041,7 @@ cleanup:
     /* we don't need to check for errors here */
     win32_close(p[0]);
     win32_close(p[1]);
-    if (oldfd != -1) {
-        win32_dup2(oldfd, stdfd);
-        win32_close(oldfd);
-    }
-    if (lock_held) {
-	SetStdHandle(nhandle, old_h);
-	OP_REFCNT_UNLOCK;
-	lock_held = 0;
-    }
+
     return (NULL);
 
 #endif /* USE_RTL_POPEN */
@@ -3708,6 +3695,13 @@ win32_spawnvp(int mode, const char *cmdname, const char *const *argv)
 #ifdef USE_RTL_SPAWNVP
     return spawnvp(mode, cmdname, (char * const *)argv);
 #else
+    return do_spawnvp_handles(mode, cmdname, argv, NULL);
+#endif
+}
+
+static int
+do_spawnvp_handles(int mode, const char *cmdname, const char *const *argv,
+                const int *handles) {
     dTHXa(NULL);
     int ret;
     void* env;
@@ -3765,6 +3759,7 @@ win32_spawnvp(int mode, const char *cmdname, const char *const *argv)
 	ret = -1;
 	goto RETVAL;
     }
+
     memset(&StartupInfo,0,sizeof(StartupInfo));
     StartupInfo.cb = sizeof(StartupInfo);
     memset(&tbl,0,sizeof(tbl));
@@ -3778,9 +3773,12 @@ win32_spawnvp(int mode, const char *cmdname, const char *const *argv)
     StartupInfo.dwYCountChars	= tbl.dwYCountChars;
     StartupInfo.dwFillAttribute	= tbl.dwFillAttribute;
     StartupInfo.wShowWindow	= tbl.wShowWindow;
-    StartupInfo.hStdInput	= tbl.childStdIn;
-    StartupInfo.hStdOutput	= tbl.childStdOut;
-    StartupInfo.hStdError	= tbl.childStdErr;
+    StartupInfo.hStdInput	= handles && handles[0] != -1 ?
+            (HANDLE)_get_osfhandle(handles[0]) : tbl.childStdIn;
+    StartupInfo.hStdOutput	= handles && handles[1] != -1 ?
+            (HANDLE)_get_osfhandle(handles[1]) : tbl.childStdOut;
+    StartupInfo.hStdError	= handles && handles[2] != -1 ?
+	    (HANDLE)_get_osfhandle(handles[2]) : tbl.childStdErr;
     if (StartupInfo.hStdInput == INVALID_HANDLE_VALUE &&
 	StartupInfo.hStdOutput == INVALID_HANDLE_VALUE &&
 	StartupInfo.hStdError == INVALID_HANDLE_VALUE)
@@ -3860,7 +3858,6 @@ RETVAL:
     if (cname != cmdname)
 	Safefree(cname);
     return ret;
-#endif
 }
 
 DllExport int

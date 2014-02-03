@@ -5472,6 +5472,7 @@ t/uni/upper.t			See if Unicode casing works
 t/uni/variables.t		See that the rules for variable names work
 t/uni/write.t			See if Unicode formats work
 t/win32/fs.t			Test Win32 link for compatibility
+t/win32/popen.t			Test for stdout races in backticks, etc
 t/win32/runenv.t		Test if Win* perl honors its env variables
 t/win32/signal.t		Test Win32 signal emulation
 t/win32/system.t		See if system works in Win*
