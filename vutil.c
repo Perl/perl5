@@ -525,7 +525,8 @@ Perl_new_version(pTHX_ SV *ver)
 	}
     }
 #endif
-    return UPG_VERSION(rv, FALSE);
+    sv_2mortal(rv); /* in case upg_version croaks before it returns */
+    return SvREFCNT_inc_NN(UPG_VERSION(rv, FALSE));
 }
 
 /*
@@ -558,7 +559,25 @@ Perl_upg_version(pTHX_ SV *ver, bool qv)
 #endif
     PERL_ARGS_ASSERT_UPG_VERSION;
 
-    if ( SvNOK(ver) && !( SvPOK(ver) && SvCUR(ver) == 3 ) )
+    if ( (SvUOK(ver) && SvUVX(ver) > VERSION_MAX)
+	   || (SvIOK(ver) && SvIVX(ver) > VERSION_MAX) ) {
+	/* out of bounds [unsigned] integer */
+	STRLEN len;
+	char tbuf[64];
+	len = my_snprintf(tbuf, sizeof(tbuf), "%d", VERSION_MAX);
+	version = savepvn(tbuf, len);
+	SAVEFREEPV(version);
+	Perl_ck_warner(aTHX_ packWARN(WARN_OVERFLOW),
+		       "Integer overflow in version %d",VERSION_MAX);
+    }
+    else if ( SvUOK(ver) || SvIOK(ver))
+VER_IV:
+    {
+	version = savesvpv(ver);
+	SAVEFREEPV(version);
+    }
+    else if (SvNOK(ver) && !( SvPOK(ver) && SvCUR(ver) == 3 ) )
+VER_NV:
     {
 	STRLEN len;
 
@@ -590,22 +609,8 @@ Perl_upg_version(pTHX_ SV *ver, bool qv)
 	qv = TRUE;
     }
 #endif
-    else if ( (SvUOK(ver) && SvUVX(ver) > VERSION_MAX)
-	   || (SvIOK(ver) && SvIVX(ver) > VERSION_MAX) ) {
-	/* out of bounds [unsigned] integer */
-	STRLEN len;
-	char tbuf[64];
-	len = my_snprintf(tbuf, sizeof(tbuf), "%d", VERSION_MAX);
-	version = savepvn(tbuf, len);
-	SAVEFREEPV(version);
-	Perl_ck_warner(aTHX_ packWARN(WARN_OVERFLOW),
-		       "Integer overflow in version %d",VERSION_MAX);
-    }
-    else if ( SvUOK(ver) || SvIOK(ver) ) {
-	version = savesvpv(ver);
-	SAVEFREEPV(version);
-    }
-    else if ( SvPOK(ver) )/* must be a string or something like a string */
+    else if ( SvPOK(ver))/* must be a string or something like a string */
+VER_PV:
     {
 	STRLEN len;
 	version = savepvn(SvPV(ver,len), SvCUR(ver));
@@ -647,6 +652,17 @@ Perl_upg_version(pTHX_ SV *ver, bool qv)
 #  endif
 #endif
     }
+#if PERL_VERSION_LT(5,17,2)
+    else if (SvIOKp(ver)) {
+	goto VER_IV;
+    }
+    else if (SvNOKp(ver)) {
+	goto VER_NV;
+    }
+    else if (SvPOKp(ver)) {
+	goto VER_PV;
+    }
+#endif
     else
     {
 	/* no idea what this is */
@@ -662,6 +678,7 @@ Perl_upg_version(pTHX_ SV *ver, bool qv)
 #if PERL_VERSION_LT(5,19,8) && defined(USE_ITHREADS)
     LEAVE;
 #endif
+
     return ver;
 }
 

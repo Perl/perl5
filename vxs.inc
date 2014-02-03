@@ -14,6 +14,20 @@
 #endif
 #define VXS(name) XS(VXSp(name))
 
+/* uses PUSHs, so SP must be at start, PUSHs sv on Perl stack, then returns from
+   xsub; this is a little more machine code/tailcall friendly than mPUSHs(foo);
+   PUTBACK; return; */
+
+#define VXS_RETURN_M_SV(sv) \
+    STMT_START {							\
+	SV * sv_vtc = sv;						\
+	PUSHs(sv_vtc);							\
+	PUTBACK;							\
+	sv_2mortal(sv_vtc);						\
+	return;								\
+    } STMT_END
+
+
 #ifdef VXS_XSUB_DETAILS
 #  ifdef PERL_CORE
     {"UNIVERSAL::VERSION", VXSp(universal_version), VXSXSDP(NULL)},
@@ -173,7 +187,7 @@ VXS(version_new)
 {
     dVAR;
     dXSARGS;
-    SV *vs = items ? ST(1) : &PL_sv_undef;
+    SV *vs;
     SV *rv;
     const char * classname = "";
     STRLEN len;
@@ -183,18 +197,8 @@ VXS(version_new)
 
     SP -= items;
 
-    if (items > 3 || items == 0)
-        Perl_croak(aTHX_ "Usage: version::new(class, version)");
-
-    /* Just in case this is something like a tied hash */
-    SvGETMAGIC(vs);
-
-    if ( items == 1 || ! SvOK(vs) ) { /* no param or explicit undef */
-        /* create empty object */
-        vs = sv_newmortal();
-        sv_setpvs(vs,"undef");
-    }
-    else if (items == 3 ) {
+    switch((U32)items) {
+    case 3: {
         SV * svarg2;
         vs = sv_newmortal();
         svarg2 = ST(2);
@@ -203,7 +207,27 @@ VXS(version_new)
 #else
         Perl_sv_setpvf(aTHX_ vs,"v%s",SvPV_nolen_const(svarg2));
 #endif
+        break;
     }
+    case 2:
+        vs = ST(1);
+    /* Just in case this is something like a tied hash */
+        SvGETMAGIC(vs);
+        if(SvOK(vs))
+            break;
+        /* drop through */
+    case 1:
+        /* no param or explicit undef */
+        /* create empty object */
+        vs = sv_newmortal();
+        sv_setpvs(vs,"undef");
+        break;
+    default:
+    case 0:
+        Perl_croak_nocontext("Usage: version::new(class, version)");
+        break;
+    }
+
     svarg0 = ST(0);
     if ( sv_isobject(svarg0) ) {
 	/* get the class if called as an object method */
@@ -215,7 +239,7 @@ VXS(version_new)
 #endif
     }
     else {
-	classname = SvPV(svarg0, len);
+	classname = SvPV_nomg(svarg0, len);
 	flags     = SvUTF8(svarg0);
     }
 
@@ -228,9 +252,7 @@ VXS(version_new)
         sv_bless(rv, gv_stashpvn(classname, len, GV_ADD | flags));
 #endif
 
-    mPUSHs(rv);
-    PUTBACK;
-    return;
+    VXS_RETURN_M_SV(rv);
 }
 
 #define VTYPECHECK(var, val, varname) \
@@ -240,7 +262,7 @@ VXS(version_new)
 	    (var) = SvRV(sv_vtc);						\
 	}								\
 	else								\
-	    Perl_croak(aTHX_ varname " is not of type version");	\
+	    Perl_croak_nocontext(varname " is not of type version");	\
     } STMT_END
 
 VXS(version_stringify)
@@ -254,10 +276,7 @@ VXS(version_stringify)
 	  SV *	lobj;
 	  VTYPECHECK(lobj, ST(0), "lobj");
 
-	  mPUSHs(VSTRINGIFY(lobj));
-
-	  PUTBACK;
-	  return;
+	  VXS_RETURN_M_SV(VSTRINGIFY(lobj));
      }
 }
 
@@ -271,9 +290,7 @@ VXS(version_numify)
      {
 	  SV *	lobj;
 	  VTYPECHECK(lobj, ST(0), "lobj");
-	  mPUSHs(VNUMIFY(lobj));
-	  PUTBACK;
-	  return;
+	  VXS_RETURN_M_SV(VNUMIFY(lobj));
      }
 }
 
@@ -288,10 +305,7 @@ VXS(version_normal)
 	  SV *	ver;
 	  VTYPECHECK(ver, ST(0), "ver");
 
-	  mPUSHs(VNORMAL(ver));
-
-	  PUTBACK;
-	  return;
+	  VXS_RETURN_M_SV(VNORMAL(ver));
      }
 }
 
@@ -326,11 +340,8 @@ VXS(version_vcmp)
 		    rs = newSViv(VCMP(lobj,rvs));
 	       }
 
-	       mPUSHs(rs);
+	       VXS_RETURN_M_SV(rs);
 	  }
-
-	  PUTBACK;
-	  return;
      }
 }
 
@@ -351,9 +362,7 @@ VXS(version_boolean)
 				    ))
 			 )
 		   );
-	mPUSHs(rs);
-	PUTBACK;
-	return;
+	VXS_RETURN_M_SV(rs);
     }
 }
 
