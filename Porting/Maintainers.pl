@@ -687,6 +687,7 @@ use File::Glob qw(:case);
         'FILES'        => q[cpan/Locale-Codes],
         'EXCLUDED'     => [
             qw( README.first
+                t/pod_coverage.ign
                 t/pod_coverage.t
                 t/pod.t),
             qr{^t/runtests},
