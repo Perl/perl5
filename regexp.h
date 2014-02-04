@@ -435,7 +435,7 @@ get_regex_charset_name(const U32 flags, STRLEN* const lenp)
  *
  */
 
-#if NO_TAINT_SUPPORT
+#ifdef NO_TAINT_SUPPORT
 #   define RX_ISTAINTED(prog)    0
 #   define RX_TAINT_on(prog)     NOOP
 #   define RXp_MATCH_TAINTED(prog) 0

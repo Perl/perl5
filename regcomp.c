@@ -160,7 +160,7 @@ struct RExC_state_t {
     int		num_code_blocks;	/* size of code_blocks[] */
     int		code_index;		/* next code_blocks[] slot */
     SSize_t     maxlen;                        /* mininum possible number of chars in string to match */
-#if ADD_TO_REGEXEC
+#ifdef ADD_TO_REGEXEC
     char 	*starttry;		/* -Dr: where regtry was called. */
 #define RExC_starttry	(pRExC_state->starttry)
 #endif
@@ -7432,7 +7432,7 @@ Perl_reg_numbered_buff_fetch(pTHX_ REGEXP * const r, const I32 paren,
     assert(s >= rx->subbeg);
     assert((STRLEN)rx->sublen >= (STRLEN)((s - rx->subbeg) + i) );
     if (i >= 0) {
-#if NO_TAINT_SUPPORT
+#ifdef NO_TAINT_SUPPORT
         sv_setpvn(sv, s, i);
 #else
         const int oldtainted = TAINT_get;

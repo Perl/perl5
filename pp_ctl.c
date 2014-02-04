@@ -153,7 +153,7 @@ PP(pp_regcomp)
 	       modified by get-magic), to avoid incorrectly setting the
 	       RXf_TAINTED flag with RX_TAINT_on further down. */
 	    TAINT_set(was_tainted);
-#if NO_TAINT_SUPPORT
+#ifdef NO_TAINT_SUPPORT
             PERL_UNUSED_VAR(was_tainted);
 #endif
 	}

@@ -1857,9 +1857,9 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 	    break;
 
 	case 't':
-#if SILENT_NO_TAINT_SUPPORT
+#if defined(SILENT_NO_TAINT_SUPPORT)
             /* silently ignore */
-#elif NO_TAINT_SUPPORT
+#elif defined(NO_TAINT_SUPPORT)
             Perl_croak_nocontext("This perl was compiled without taint support. "
                        "Cowardly refusing to run with -t or -T flags");
 #else
@@ -1872,9 +1872,9 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 	    s++;
 	    goto reswitch;
 	case 'T':
-#if SILENT_NO_TAINT_SUPPORT
+#if defined(SILENT_NO_TAINT_SUPPORT)
             /* silently ignore */
-#elif NO_TAINT_SUPPORT
+#elif defined(NO_TAINT_SUPPORT)
             Perl_croak_nocontext("This perl was compiled without taint support. "
                        "Cowardly refusing to run with -t or -T flags");
 #else
@@ -1989,9 +1989,9 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 	while (isSPACE(*s))
 	    s++;
 	if (*s == '-' && *(s+1) == 'T') {
-#if SILENT_NO_TAINT_SUPPORT
+#if defined(SILENT_NO_TAINT_SUPPORT)
             /* silently ignore */
-#elif NO_TAINT_SUPPORT
+#elif defined(NO_TAINT_SUPPORT)
             Perl_croak_nocontext("This perl was compiled without taint support. "
                        "Cowardly refusing to run with -t or -T flags");
 #else
@@ -2028,9 +2028,9 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 		    }
 		}
 		if (*d == 't') {
-#if SILENT_NO_TAINT_SUPPORT
+#if defined(SILENT_NO_TAINT_SUPPORT)
             /* silently ignore */
-#elif NO_TAINT_SUPPORT
+#elif defined(NO_TAINT_SUPPORT)
                     Perl_croak_nocontext("This perl was compiled without taint support. "
                                "Cowardly refusing to run with -t or -T flags");
 #else
@@ -3377,9 +3377,9 @@ Perl_moreswitches(pTHX_ const char *s)
 	return s;
     case 't':
     case 'T':
-#if SILENT_NO_TAINT_SUPPORT
+#if defined(SILENT_NO_TAINT_SUPPORT)
             /* silently ignore */
-#elif NO_TAINT_SUPPORT
+#elif defined(NO_TAINT_SUPPORT)
         Perl_croak_nocontext("This perl was compiled without taint support. "
                    "Cowardly refusing to run with -t or -T flags");
 #else
@@ -3872,7 +3872,7 @@ S_init_ids(pTHX)
 {
     /* no need to do anything here any more if we don't
      * do tainting. */
-#if !NO_TAINT_SUPPORT
+#ifndef NO_TAINT_SUPPORT
     dVAR;
     const Uid_t my_uid = PerlProc_getuid();
     const Uid_t my_euid = PerlProc_geteuid();

@@ -538,7 +538,7 @@
  * DANGER! Using NO_TAINT_SUPPORT or SILENT_NO_TAINT_SUPPORT
  *         voids your nonexistent warranty!
  */
-#if SILENT_NO_TAINT_SUPPORT && !defined(NO_TAINT_SUPPORT)
+#if defined(SILENT_NO_TAINT_SUPPORT) && !defined(NO_TAINT_SUPPORT)
 #  define NO_TAINT_SUPPORT 1
 #endif
 
@@ -546,7 +546,7 @@
  * operations into no-ops for a very modest speed-up. Enable only if you
  * know what you're doing: tests and CPAN modules' tests are bound to fail.
  */
-#if NO_TAINT_SUPPORT
+#ifdef NO_TAINT_SUPPORT
 #   define TAINT		NOOP
 #   define TAINT_NOT		NOOP
 #   define TAINT_IF(c)		NOOP
