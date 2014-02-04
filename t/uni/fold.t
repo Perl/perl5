@@ -9,7 +9,7 @@ BEGIN {
     @INC = '../lib';
     require Config; import Config;
     require './test.pl';
-    require './loc_tools.pl';   # Contains find_utf8_locale()
+    require './loc_tools.pl';   # Contains find_utf8_ctype_locale()
 }
 
 use feature 'unicode_strings';
@@ -448,7 +448,7 @@ foreach my $test_ref (@CF) {
     }
 }
 
-my $utf8_locale = find_utf8_locale();
+my $utf8_locale = find_utf8_ctype_locale();
 
 {
     use feature qw( fc );

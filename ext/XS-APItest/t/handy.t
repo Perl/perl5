@@ -1,7 +1,7 @@
 #!perl -w
 
 BEGIN {
-    require 'loc_tools.pl';   # Contains find_utf8_locale()
+    require 'loc_tools.pl';   # Contains find_utf8_ctype_locale()
 }
 
 use strict;
@@ -37,7 +37,7 @@ if($Config{d_setlocale}) {
             }
         }
 
-        $utf8_locale = find_utf8_locale();
+        $utf8_locale = find_utf8_ctype_locale();
     }
 }
 

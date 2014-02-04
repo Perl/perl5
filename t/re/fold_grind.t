@@ -439,7 +439,7 @@ if($Config{d_setlocale}) {
 
         # Look for utf8 locale.  We use the pseudo-modifier 'L' to indicate
         # that we really want /l, but change to a UTF-8 locale.
-        $utf8_locale = find_utf8_locale();
+        $utf8_locale = find_utf8_ctype_locale();
         push @charsets, 'L' if defined $utf8_locale;
     }
 }

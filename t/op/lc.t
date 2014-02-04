@@ -7,7 +7,7 @@ BEGIN {
     @INC = '../lib';
     require Config; import Config;
     require './test.pl';
-    require './loc_tools.pl';   # Contains find_utf8_locale()
+    require './loc_tools.pl';   # Contains find_utf8_ctype_locale()
 }
 
 use feature qw( fc );
@@ -317,7 +317,7 @@ like lc delete $h{k}, qr "^i\x{307}bcde=array\(.*\)",
     'lc(TEMP ref) does not produce a corrupt string';
 
 
-my $utf8_locale = find_utf8_locale();
+my $utf8_locale = find_utf8_ctype_locale();
 
 SKIP: {
     skip 'Can\'t find a UTF-8 locale', 4*256 unless defined $utf8_locale;

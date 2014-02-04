@@ -456,7 +456,9 @@ my $final_without_setlocale = $test_num;
 
 debug "# Scanning for locales...\n";
 
-my @Locale = find_locales();
+require POSIX; import POSIX ':locale_h';
+
+my @Locale = find_locales([ &POSIX::LC_CTYPE, &POSIX::LC_ALL ]);
 
 debug "# Locales =\n";
 for ( @Locale ) {
@@ -468,9 +470,6 @@ unless (@Locale) {
     exit;
 }
 
-# We shouldn't get this far unless we know this will succeed
-require POSIX;
-import POSIX ':locale_h';
 
 setlocale(&POSIX::LC_ALL, "C");
 

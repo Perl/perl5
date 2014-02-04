@@ -60,7 +60,7 @@ if (! is_miniperl() && $Config{d_setlocale}) {
     skip_adding_C_locale:
 
         # Use a pseudo-modifier 'L' to indicate to use /l with a UTF-8 locale
-        $utf8_locale = find_utf8_locale();
+        $utf8_locale = find_utf8_ctype_locale();
         push @charsets, 'L' if defined $utf8_locale;
     }
 }
