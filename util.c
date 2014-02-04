@@ -1697,7 +1697,7 @@ paths reduces CPU cache pressure.
 */
 
 void
-Perl_croak_no_modify()
+Perl_croak_no_modify(void)
 {
     Perl_croak_nocontext( "%s", PL_no_modify);
 }
@@ -1706,7 +1706,7 @@ Perl_croak_no_modify()
    This is typically called when malloc returns NULL.
 */
 void
-Perl_croak_no_mem()
+Perl_croak_no_mem(void)
 {
     dTHX;
     int rc;
