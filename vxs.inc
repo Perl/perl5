@@ -12,7 +12,7 @@
 /* proto member is unused in version, it is used in CORE by non version xsubs */
 #  define VXSXSDP(x)
 #endif
-#define VXS(name) XS(VXSp(name))
+#define VXS(name) XS(VXSp(name)); XS(VXSp(name))
 
 /* uses PUSHs, so SP must be at start, PUSHs sv on Perl stack, then returns from
    xsub; this is a little more machine code/tailcall friendly than mPUSHs(foo);

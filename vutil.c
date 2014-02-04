@@ -28,7 +28,7 @@ some time when tokenizing.
 =cut
 */
 const char *
-#if VUTIL_REPLACE_CORE
+#ifdef VUTIL_REPLACE_CORE
 Perl_prescan_version2(pTHX_ const char *s, bool strict,
 #else
 Perl_prescan_version(pTHX_ const char *s, bool strict,
@@ -259,7 +259,7 @@ it doesn't.
 */
 
 const char *
-#if VUTIL_REPLACE_CORE
+#ifdef VUTIL_REPLACE_CORE
 Perl_scan_version2(pTHX_ const char *s, SV *rv, bool qv)
 #else
 Perl_scan_version(pTHX_ const char *s, SV *rv, bool qv)
@@ -453,7 +453,7 @@ want to upgrade the SV.
 */
 
 SV *
-#if VUTIL_REPLACE_CORE
+#ifdef VUTIL_REPLACE_CORE
 Perl_new_version2(pTHX_ SV *ver)
 #else
 Perl_new_version(pTHX_ SV *ver)
@@ -543,7 +543,7 @@ to force this SV to be interpreted as an "extended" version.
 */
 
 SV *
-#if VUTIL_REPLACE_CORE
+#ifdef VUTIL_REPLACE_CORE
 Perl_upg_version2(pTHX_ SV *ver, bool qv)
 #else
 Perl_upg_version(pTHX_ SV *ver, bool qv)
@@ -571,13 +571,17 @@ Perl_upg_version(pTHX_ SV *ver, bool qv)
 		       "Integer overflow in version %d",VERSION_MAX);
     }
     else if ( SvUOK(ver) || SvIOK(ver))
+#if PERL_VERSION_LT(5,17,2)
 VER_IV:
+#endif
     {
 	version = savesvpv(ver);
 	SAVEFREEPV(version);
     }
     else if (SvNOK(ver) && !( SvPOK(ver) && SvCUR(ver) == 3 ) )
+#if PERL_VERSION_LT(5,17,2)
 VER_NV:
+#endif
     {
 	STRLEN len;
 
@@ -610,7 +614,9 @@ VER_NV:
     }
 #endif
     else if ( SvPOK(ver))/* must be a string or something like a string */
+#if PERL_VERSION_LT(5,17,2)
 VER_PV:
+#endif
     {
 	STRLEN len;
 	version = savepvn(SvPV(ver,len), SvCUR(ver));
@@ -709,7 +715,7 @@ confused by derived classes which may contain additional hash entries):
 */
 
 SV *
-#if VUTIL_REPLACE_CORE
+#ifdef VUTIL_REPLACE_CORE
 Perl_vverify2(pTHX_ SV *vs)
 #else
 Perl_vverify(pTHX_ SV *vs)
@@ -750,7 +756,7 @@ The SV returned has a refcount of 1.
 */
 
 SV *
-#if VUTIL_REPLACE_CORE
+#ifdef VUTIL_REPLACE_CORE
 Perl_vnumify2(pTHX_ SV *vs)
 #else
 Perl_vnumify(pTHX_ SV *vs)
@@ -844,7 +850,7 @@ The SV returned has a refcount of 1.
 */
 
 SV *
-#if VUTIL_REPLACE_CORE
+#ifdef VUTIL_REPLACE_CORE
 Perl_vnormal2(pTHX_ SV *vs)
 #else
 Perl_vnormal(pTHX_ SV *vs)
@@ -914,7 +920,7 @@ The SV returned has a refcount of 1.
 */
 
 SV *
-#if VUTIL_REPLACE_CORE
+#ifdef VUTIL_REPLACE_CORE
 Perl_vstringify2(pTHX_ SV *vs)
 #else
 Perl_vstringify(pTHX_ SV *vs)
@@ -955,7 +961,7 @@ converted into version objects.
 */
 
 int
-#if VUTIL_REPLACE_CORE
+#ifdef VUTIL_REPLACE_CORE
 Perl_vcmp2(pTHX_ SV *lhv, SV *rhv)
 #else
 Perl_vcmp(pTHX_ SV *lhv, SV *rhv)
