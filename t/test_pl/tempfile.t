@@ -55,7 +55,10 @@ is( tempfile(), "${prefix}C");
     }
 }
 
-skip_files(20,'Y','Z');
+ok( register_tempfile("${prefix}F"), 'registered the next file with register_tempfile' );
+is( tempfile(), "${prefix}G", 'tempfile() properly skips files added with register_tempfile()' );
+
+skip_files(18,'Y','Z');
 
 is( tempfile(), "${prefix}Z", 'Last single letter filename');
 is( tempfile(), "${prefix}AA", 'First double letter filename');
