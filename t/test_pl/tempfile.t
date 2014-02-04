@@ -75,4 +75,19 @@ ok( !eval{tempfile()}, 'Should bail after Last available filename' );
 my $err = "$@";
 like( $err, qr{^Can't find temporary file name starting}, 'check error string' );
 
+{
+    my $returned = runperl( progs => [
+        'require q[./test.pl];',
+        'my $t = tempfile();',
+        'print qq[$t|];',
+        'print open(FH,q[>],$t) ? qq[ok|] : qq[not ok|] ;',
+        'print -e $t ? qq[ok|] : qq[not ok|];',
+    ] );
+    my($filename,$opened,$existed) = split /\|/, $returned;
+
+    is( $opened, 'ok', "$filename created" );
+    is( $existed, 'ok', "$filename did exist" );
+    ok( !-e $filename, "$filename doesn't exist now" );
+}
+
 done_testing();
