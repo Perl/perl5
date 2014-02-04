@@ -1187,7 +1187,7 @@ use File::Glob qw(:case);
     },
 
     'threads' => {
-        'DISTRIBUTION' => 'JDHEDDEN/threads-1.89.tar.gz',
+        'DISTRIBUTION' => 'JDHEDDEN/threads-1.92.tar.gz',
         'FILES'        => q[dist/threads],
         'EXCLUDED'     => [
             qr{^examples/},
