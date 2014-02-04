@@ -513,6 +513,12 @@ captured by backticks of an external command in another thread.
 This could occur for pseudo-forked processes too, as Win32's
 psuedo-fork is implemented in terms of threads. [perl #77672]
 
+=item *
+
+C<< open $fh, ">+", undef >> no longer leaks memory when TMPDIR is set
+but points to a directory a temporary file cannot be created in. [perl
+#120951]
+
 =back
 
 =head1 Known Problems
