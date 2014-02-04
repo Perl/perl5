@@ -9571,6 +9571,14 @@ Perl_sv_reftype(pTHX_ const SV *const sv, const int ob)
 	return SvPV_nolen_const(sv_ref(NULL, sv, ob));
     }
     else {
+        /* WARNING - There is code, for instance in mg.c, that assumes that
+         * the only reason that sv_reftype(sv,0) would return a string starting
+         * with 'L' or 'S' is that it is a LVALUE or a SCALAR.
+         * Yes this a dodgy way to do type checking, but it saves practically reimplementing
+         * this routine inside other subs, and it saves time.
+         * Do not change this assumption without searching for "dodgy type check" in
+         * the code.
+         * - Yves */
 	switch (SvTYPE(sv)) {
 	case SVt_NULL:
 	case SVt_IV:
