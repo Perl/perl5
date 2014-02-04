@@ -11031,9 +11031,6 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	    /*FALLTHROUGH*/
 	case 'd':
 	case 'i':
-#if vdNUMBER
-	format_vd:
-#endif
 	    if (vectorize) {
 		STRLEN ulen;
 		if (!veclen)
