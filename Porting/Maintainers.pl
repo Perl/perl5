@@ -1281,6 +1281,11 @@ use File::Glob qw(:case);
         'CUSTOMIZED'   => [
             qw( lib/version.pm
                 ),
+
+            # Merged upstream, waiting for new CPAN release: see CPAN RT#92721
+            qw( vutil.c
+                vxs.inc
+                ),
         ],
 
         'MAP' => {
