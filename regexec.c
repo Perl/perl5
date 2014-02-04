@@ -1159,7 +1159,6 @@ Perl_re_intuit_start(pTHX_
 	    /* May be due to an implicit anchor of m{.*foo}  */
 	    && !(prog->intflags & PREGf_IMPLICIT))
 	{
-	    rx_origin = strpos;
 	    goto find_anchor;
 	}
 	DEBUG_EXECUTE_r( if (ml_anch)
