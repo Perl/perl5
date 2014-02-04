@@ -117,6 +117,12 @@ Perl_set_numeric_radix(pTHX)
     }
     else
 	PL_numeric_radix_sv = NULL;
+
+    DEBUG_L(PerlIO_printf(Perl_debug_log, "Locale radix is %s\n",
+                                          (PL_numeric_radix_sv)
+                                          ? lc->decimal_point
+                                          : "NULL"));
+
 # endif /* HAS_LOCALECONV */
 #endif /* USE_LOCALE_NUMERIC */
 }
@@ -195,6 +201,8 @@ Perl_set_numeric_standard(pTHX)
 	PL_numeric_local = FALSE;
 	set_numeric_radix();
     }
+    DEBUG_L(PerlIO_printf(Perl_debug_log,
+                          "Underlying LC_NUMERIC locale now is C\n"));
 
 #endif /* USE_LOCALE_NUMERIC */
 }
@@ -215,6 +223,9 @@ Perl_set_numeric_local(pTHX)
 	PL_numeric_local = TRUE;
 	set_numeric_radix();
     }
+    DEBUG_L(PerlIO_printf(Perl_debug_log,
+                          "Underlying LC_NUMERIC locale now is %s\n",
+                          PL_numeric_name));
 
 #endif /* USE_LOCALE_NUMERIC */
 }
@@ -699,12 +710,18 @@ S_is_cur_LC_category_utf8(pTHX_ int category)
     /* First dispose of the trivial cases */
     save_input_locale = setlocale(category, NULL);
     if (! save_input_locale) {
+        DEBUG_L(PerlIO_printf(Perl_debug_log,
+                              "Could not find current locale for category %d\n",
+                              category));
         return FALSE;   /* XXX maybe should croak */
     }
     save_input_locale = stdize_locale(savepv(save_input_locale));
     if ((*save_input_locale == 'C' && save_input_locale[1] == '\0')
         || strEQ(save_input_locale, "POSIX"))
     {
+        DEBUG_L(PerlIO_printf(Perl_debug_log,
+                              "Current locale for category %d is %s\n",
+                              category, save_input_locale));
         Safefree(save_input_locale);
         return FALSE;
     }
@@ -722,6 +739,8 @@ S_is_cur_LC_category_utf8(pTHX_ int category)
             /* Get the current LC_CTYPE locale */
             save_ctype_locale = stdize_locale(savepv(setlocale(LC_CTYPE, NULL)));
             if (! save_ctype_locale) {
+                DEBUG_L(PerlIO_printf(Perl_debug_log,
+                               "Could not find current locale for LC_CTYPE\n"));
                 goto cant_use_nllanginfo;
             }
 
@@ -734,10 +753,16 @@ S_is_cur_LC_category_utf8(pTHX_ int category)
                 save_ctype_locale = NULL;
             }
             else if (! setlocale(LC_CTYPE, save_input_locale)) {
+                DEBUG_L(PerlIO_printf(Perl_debug_log,
+                                    "Could not change LC_CTYPE locale to %s\n",
+                                    save_input_locale));
                 Safefree(save_ctype_locale);
                 goto cant_use_nllanginfo;
             }
         }
+
+        DEBUG_L(PerlIO_printf(Perl_debug_log, "Current LC_CTYPE locale=%s\n",
+                                              save_input_locale));
 
         /* Here the current LC_CTYPE is set to the locale of the category whose
          * information is desired.  This means that nl_langinfo() and MB_CUR_MAX
@@ -757,6 +782,9 @@ S_is_cur_LC_category_utf8(pTHX_ int category)
                 is_utf8 = foldEQ(codeset, STR_WITH_LEN("UTF-8"))
                         || foldEQ(codeset, STR_WITH_LEN("UTF8"));
 
+                DEBUG_L(PerlIO_printf(Perl_debug_log,
+                       "\tnllanginfo returned CODESET '%s'; ?UTF8 locale=%d\n",
+                                                     codeset,         is_utf8));
                 Safefree(codeset);
                 Safefree(save_input_locale);
                 return is_utf8;
@@ -775,6 +803,10 @@ S_is_cur_LC_category_utf8(pTHX_ int category)
          * turns out to be wrong, other things will fail */
         is_utf8 = MB_CUR_MAX >= 4;
 
+        DEBUG_L(PerlIO_printf(Perl_debug_log,
+                              "\tMB_CUR_MAX=%d; ?UTF8 locale=%d\n",
+                                   (int) MB_CUR_MAX,      is_utf8));
+
         Safefree(save_input_locale);
 
 #       ifdef HAS_MBTOWC
@@ -786,11 +818,16 @@ S_is_cur_LC_category_utf8(pTHX_ int category)
         if (is_utf8) {
             wchar_t wc;
             (void) mbtowc(&wc, NULL, 0);    /* Reset any shift state */
+            errno = 0;
             if (mbtowc(&wc, HYPHEN_UTF8, strlen(HYPHEN_UTF8))
                                                         != strlen(HYPHEN_UTF8)
                 || wc != (wchar_t) 0x2010)
             {
                 is_utf8 = FALSE;
+                DEBUG_L(PerlIO_printf(Perl_debug_log, "\thyphen=U+%x\n", wc));
+                DEBUG_L(PerlIO_printf(Perl_debug_log,
+                        "\treturn from mbtowc=%d; errno=%d; ?UTF8 locale=0\n",
+                        mbtowc(&wc, HYPHEN_UTF8, strlen(HYPHEN_UTF8)), errno));
             }
         }
 #       endif
@@ -834,9 +871,15 @@ S_is_cur_LC_category_utf8(pTHX_ int category)
             }
             if (*(name) == '8') {
                 Safefree(save_input_locale);
+                DEBUG_L(PerlIO_printf(Perl_debug_log,
+                                      "Locale %s ends with UTF-8 in name\n",
+                                      save_input_locale));
                 return TRUE;
             }
         }
+        DEBUG_L(PerlIO_printf(Perl_debug_log,
+                              "Locale %s doesn't end with UTF-8 in name\n",
+                                save_input_locale));
     }
 
 #ifdef WIN32
@@ -849,6 +892,9 @@ S_is_cur_LC_category_utf8(pTHX_ int category)
         && *(save_input_locale + final_pos - 4) == '6')
     {
         Safefree(save_input_locale);
+        DEBUG_L(PerlIO_printf(Perl_debug_log,
+                        "Locale %s ends with 10056 in name, is UTF-8 locale\n",
+                        save_input_locale));
         return TRUE;
     }
 #endif
@@ -856,6 +902,9 @@ S_is_cur_LC_category_utf8(pTHX_ int category)
     /* Other common encodings are the ISO 8859 series, which aren't UTF-8 */
     if (instr(save_input_locale, "8859")) {
         Safefree(save_input_locale);
+        DEBUG_L(PerlIO_printf(Perl_debug_log,
+                             "Locale %s has 8859 in name, not UTF-8 locale\n",
+                             save_input_locale));
         return FALSE;
     }
 
@@ -884,11 +933,16 @@ S_is_cur_LC_category_utf8(pTHX_ int category)
             save_monetary_locale = stdize_locale(savepv(setlocale(LC_MONETARY,
                                                                   NULL)));
             if (! save_monetary_locale) {
+                DEBUG_L(PerlIO_printf(Perl_debug_log,
+                            "Could not find current locale for LC_MONETARY\n"));
                 goto cant_use_monetary;
             }
 
             if (strNE(save_monetary_locale, save_input_locale)) {
                 if (! setlocale(LC_MONETARY, save_input_locale)) {
+                    DEBUG_L(PerlIO_printf(Perl_debug_log,
+                                "Could not change LC_MONETARY locale to %s\n",
+                                                            save_input_locale));
                     Safefree(save_monetary_locale);
                     goto cant_use_monetary;
                 }
@@ -900,9 +954,13 @@ S_is_cur_LC_category_utf8(pTHX_ int category)
 
         if (lc && lc->currency_symbol) {
             if (! is_utf8_string((U8 *) lc->currency_symbol, 0)) {
+                DEBUG_L(PerlIO_printf(Perl_debug_log,
+                            "Currency symbol for %s is not legal UTF-8\n",
+                                        save_input_locale));
                 illegal_utf8 = TRUE;
             }
             else if (is_ascii_string((U8 *) lc->currency_symbol, 0)) {
+                DEBUG_L(PerlIO_printf(Perl_debug_log, "Currency symbol for %s contains only ASCII; can't use for determining if UTF-8 locale\n", save_input_locale));
                 only_ascii = TRUE;
             }
         }
@@ -920,6 +978,9 @@ S_is_cur_LC_category_utf8(pTHX_ int category)
          * UTF-8.  (We can't really tell if the locale is UTF-8 or not if the
          * symbol is just a '$', so we err on the side of it not being UTF-8)
          * */
+        DEBUG_L(PerlIO_printf(Perl_debug_log, "\tis_utf8=%d\n", (illegal_utf8)
+                                                               ? FALSE
+                                                               : ! only_ascii));
         return (illegal_utf8)
                 ? FALSE
                 : ! only_ascii;
@@ -1006,6 +1067,9 @@ S_is_cur_LC_category_utf8(pTHX_ int category)
 
 #endif
 
+    DEBUG_L(PerlIO_printf(Perl_debug_log,
+                          "Assuming locale %s is not a UTF-8 locale\n",
+                                    save_input_locale));
     Safefree(save_input_locale);
     return FALSE;
 }

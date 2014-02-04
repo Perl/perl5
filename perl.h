@@ -3560,7 +3560,8 @@ Gid_t getegid (void);
 #define DEBUG_q_FLAG		0x00800000 /*8388608 */
 #define DEBUG_M_FLAG		0x01000000 /*16777216*/
 #define DEBUG_B_FLAG		0x02000000 /*33554432*/
-#define DEBUG_MASK		0x03FFEFFF /* mask of all the standard flags */
+#define DEBUG_L_FLAG		0x04000000 /*67108864*/
+#define DEBUG_MASK		0x07FFEFFF /* mask of all the standard flags */
 
 #define DEBUG_DB_RECURSE_FLAG	0x40000000
 #define DEBUG_TOP_FLAG		0x80000000 /* XXX what's this for ??? Signal
@@ -3592,6 +3593,7 @@ Gid_t getegid (void);
 #  define DEBUG_q_TEST_ (PL_debug & DEBUG_q_FLAG)
 #  define DEBUG_M_TEST_ (PL_debug & DEBUG_M_FLAG)
 #  define DEBUG_B_TEST_ (PL_debug & DEBUG_B_FLAG)
+#  define DEBUG_L_TEST_ (PL_debug & DEBUG_L_FLAG)
 #  define DEBUG_Xv_TEST_ (DEBUG_X_TEST_ && DEBUG_v_TEST_)
 #  define DEBUG_Uv_TEST_ (DEBUG_U_TEST_ && DEBUG_v_TEST_)
 #  define DEBUG_Pv_TEST_ (DEBUG_P_TEST_ && DEBUG_v_TEST_)
@@ -3624,6 +3626,7 @@ Gid_t getegid (void);
 #  define DEBUG_q_TEST DEBUG_q_TEST_
 #  define DEBUG_M_TEST DEBUG_M_TEST_
 #  define DEBUG_B_TEST DEBUG_B_TEST_
+#  define DEBUG_L_TEST DEBUG_L_TEST_
 #  define DEBUG_Xv_TEST DEBUG_Xv_TEST_
 #  define DEBUG_Uv_TEST DEBUG_Uv_TEST_
 #  define DEBUG_Pv_TEST DEBUG_Pv_TEST_
@@ -3675,6 +3678,7 @@ Gid_t getegid (void);
 #  define DEBUG_q(a) DEBUG__(DEBUG_q_TEST, a)
 #  define DEBUG_M(a) DEBUG__(DEBUG_M_TEST, a)
 #  define DEBUG_B(a) DEBUG__(DEBUG_B_TEST, a)
+#  define DEBUG_L(a) DEBUG__(DEBUG_L_TEST, a)
 
 #else /* DEBUGGING */
 
@@ -3704,6 +3708,7 @@ Gid_t getegid (void);
 #  define DEBUG_q_TEST (0)
 #  define DEBUG_M_TEST (0)
 #  define DEBUG_B_TEST (0)
+#  define DEBUG_L_TEST (0)
 #  define DEBUG_Xv_TEST (0)
 #  define DEBUG_Uv_TEST (0)
 #  define DEBUG_Pv_TEST (0)
@@ -3735,6 +3740,7 @@ Gid_t getegid (void);
 #  define DEBUG_q(a)
 #  define DEBUG_M(a)
 #  define DEBUG_B(a)
+#  define DEBUG_L(a)
 #  define DEBUG_Xv(a)
 #  define DEBUG_Uv(a)
 #  define DEBUG_Pv(a)

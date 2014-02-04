@@ -53,6 +53,11 @@ correctly.  See L<perlguts/"Copy on Write"> for detail.
 This feature was actually added in 5.19.8, but was unintentionally omitted
 from its delta document.
 
+=head2 C<-DL> runtime option now added for tracing locale setting
+
+This is designed for Perl core developers to aid in field debugging bugs
+regarding locales.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
