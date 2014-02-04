@@ -818,7 +818,7 @@ Perl_re_intuit_start(pTHX_
 
         DEBUG_OPTIMISE_MORE_r({
             PerlIO_printf(Perl_debug_log,
-                "  At restart: s=%"IVdf" Check offset min: %"IVdf
+                "  At restart: rx_origin=%"IVdf" Check offset min: %"IVdf
                 " Start shift: %"IVdf" End shift %"IVdf
                 " Real end Shift: %"IVdf"\n",
                 (IV)(rx_origin - i_strpos),
@@ -858,7 +858,7 @@ Perl_re_intuit_start(pTHX_
                 start_point);
         });
 
-	s = fbm_instr( start_point, end_point,
+	check_at = fbm_instr( start_point, end_point,
 		      check, multiline ? FBMrf_MULTILINE : 0);
     }
 
@@ -869,26 +869,26 @@ Perl_re_intuit_start(pTHX_
         RE_PV_QUOTED_DECL(quoted, utf8_target, PERL_DEBUG_PAD_ZERO(0),
             SvPVX_const(check), RE_SV_DUMPLEN(check), 30);
         PerlIO_printf(Perl_debug_log, "  %s %s substr %s%s%s",
-			  (s ? "Found" : "Did not find"),
+			  (check_at ? "Found" : "Did not find"),
 	    (check == (utf8_target ? prog->anchored_utf8 : prog->anchored_substr)
 	        ? "anchored" : "floating"),
 	    quoted,
 	    RE_SV_TAIL(check),
-	    (s ? " at offset " : "...\n") ); 
+	    (check_at ? " at offset " : "...\n") );
     });
 
-    if (!s)
+    if (!check_at)
 	goto fail_finish;
     /* Finish the diagnostic message */
-    DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "%ld...\n", (long)(s - i_strpos)) );
+    DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "%ld...\n", (long)(check_at - i_strpos)) );
 
     /* set rx_origin to the minimum position where the regex could start
      * matching, given the constraint of the just-matched check substring
      */
 
-    rx_origin = (s - strpos <= prog->check_offset_max)
+    rx_origin = (check_at - strpos <= prog->check_offset_max)
         ? strpos
-        : HOP3c(s, -prog->check_offset_max, strpos);
+        : HOP3c(check_at, -prog->check_offset_max, strpos);
 
 
     /* XXX dmq: first branch is for positive lookbehind...
@@ -897,8 +897,6 @@ Perl_re_intuit_start(pTHX_
        point. I think. :-(
      */
     
-    check_at=s;
-
     /* Got a candidate.  Check MBOL anchoring, and the *other* substr.
        Start with the other substr.
        XXXX no SCREAM optimization yet - and a very coarse implementation
