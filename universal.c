@@ -328,6 +328,7 @@ Perl_croak_xs_usage(const CV *const cv, const char *const params)
     }
 }
 
+XS(XS_UNIVERSAL_isa); /* prototype to pass -Wmissing-prototypes */
 XS(XS_UNIVERSAL_isa)
 {
     dVAR;
@@ -348,6 +349,7 @@ XS(XS_UNIVERSAL_isa)
     }
 }
 
+XS(XS_UNIVERSAL_can); /* prototype to pass -Wmissing-prototypes */
 XS(XS_UNIVERSAL_can)
 {
     dVAR;
@@ -399,6 +401,7 @@ XS(XS_UNIVERSAL_can)
     XSRETURN(1);
 }
 
+XS(XS_UNIVERSAL_DOES); /* prototype to pass -Wmissing-prototypes */
 XS(XS_UNIVERSAL_DOES)
 {
     dVAR;
@@ -416,6 +419,7 @@ XS(XS_UNIVERSAL_DOES)
     }
 }
 
+XS(XS_utf8_is_utf8); /* prototype to pass -Wmissing-prototypes */
 XS(XS_utf8_is_utf8)
 {
      dVAR;
@@ -433,6 +437,7 @@ XS(XS_utf8_is_utf8)
      XSRETURN_EMPTY;
 }
 
+XS(XS_utf8_valid); /* prototype to pass -Wmissing-prototypes */
 XS(XS_utf8_valid)
 {
      dVAR;
@@ -451,6 +456,7 @@ XS(XS_utf8_valid)
      XSRETURN_EMPTY;
 }
 
+XS(XS_utf8_encode); /* prototype to pass -Wmissing-prototypes */
 XS(XS_utf8_encode)
 {
     dVAR;
@@ -462,6 +468,7 @@ XS(XS_utf8_encode)
     XSRETURN_EMPTY;
 }
 
+XS(XS_utf8_decode); /* prototype to pass -Wmissing-prototypes */
 XS(XS_utf8_decode)
 {
     dVAR;
@@ -479,6 +486,7 @@ XS(XS_utf8_decode)
     XSRETURN(1);
 }
 
+XS(XS_utf8_upgrade); /* prototype to pass -Wmissing-prototypes */
 XS(XS_utf8_upgrade)
 {
     dVAR;
@@ -496,6 +504,7 @@ XS(XS_utf8_upgrade)
     XSRETURN(1);
 }
 
+XS(XS_utf8_downgrade); /* prototype to pass -Wmissing-prototypes */
 XS(XS_utf8_downgrade)
 {
     dVAR;
@@ -512,6 +521,7 @@ XS(XS_utf8_downgrade)
     XSRETURN(1);
 }
 
+XS(XS_utf8_native_to_unicode); /* prototype to pass -Wmissing-prototypes */
 XS(XS_utf8_native_to_unicode)
 {
  dVAR;
@@ -525,6 +535,7 @@ XS(XS_utf8_native_to_unicode)
  XSRETURN(1);
 }
 
+XS(XS_utf8_unicode_to_native); /* prototype to pass -Wmissing-prototypes */
 XS(XS_utf8_unicode_to_native)
 {
  dVAR;
@@ -538,6 +549,7 @@ XS(XS_utf8_unicode_to_native)
  XSRETURN(1);
 }
 
+XS(XS_Internals_SvREADONLY); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Internals_SvREADONLY)	/* This is dangerous stuff. */
 {
     dVAR;
@@ -575,6 +587,7 @@ XS(XS_Internals_SvREADONLY)	/* This is dangerous stuff. */
     XSRETURN_UNDEF; /* Can't happen. */
 }
 
+XS(XS_constant__make_const); /* prototype to pass -Wmissing-prototypes */
 XS(XS_constant__make_const)	/* This is dangerous stuff. */
 {
     dVAR;
@@ -605,6 +618,7 @@ XS(XS_constant__make_const)	/* This is dangerous stuff. */
     XSRETURN(0);
 }
 
+XS(XS_Internals_SvREFCNT); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Internals_SvREFCNT)	/* This is dangerous stuff. */
 {
     dVAR;
@@ -630,6 +644,7 @@ XS(XS_Internals_SvREFCNT)	/* This is dangerous stuff. */
 
 }
 
+XS(XS_Internals_hv_clear_placehold); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Internals_hv_clear_placehold)
 {
     dVAR;
@@ -644,6 +659,7 @@ XS(XS_Internals_hv_clear_placehold)
     }
 }
 
+XS(XS_PerlIO_get_layers); /* prototype to pass -Wmissing-prototypes */
 XS(XS_PerlIO_get_layers)
 {
     dVAR;
@@ -770,6 +786,7 @@ XS(XS_PerlIO_get_layers)
 }
 
 
+XS(XS_re_is_regexp); /* prototype to pass -Wmissing-prototypes */
 XS(XS_re_is_regexp)
 {
     dVAR; 
@@ -786,6 +803,7 @@ XS(XS_re_is_regexp)
     }
 }
 
+XS(XS_re_regnames_count); /* prototype to pass -Wmissing-prototypes */
 XS(XS_re_regnames_count)
 {
     REGEXP *rx = PL_curpm ? PM_GETRE(PL_curpm) : NULL;
@@ -809,6 +827,7 @@ XS(XS_re_regnames_count)
     XSRETURN(1);
 }
 
+XS(XS_re_regname); /* prototype to pass -Wmissing-prototypes */
 XS(XS_re_regname)
 {
     dVAR;
@@ -841,6 +860,7 @@ XS(XS_re_regname)
 }
 
 
+XS(XS_re_regnames); /* prototype to pass -Wmissing-prototypes */
 XS(XS_re_regnames)
 {
     dVAR;
@@ -896,6 +916,7 @@ XS(XS_re_regnames)
     return;
 }
 
+XS(XS_re_regexp_pattern); /* prototype to pass -Wmissing-prototypes */
 XS(XS_re_regexp_pattern)
 {
     dVAR;

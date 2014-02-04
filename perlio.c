@@ -310,6 +310,7 @@ PerlIO_openn(pTHX_ const char *layers, const char *mode, int fd,
     return NULL;
 }
 
+XS(XS_PerlIO__Layer__find); /* prototype to pass -Wmissing-prototypes */
 XS(XS_PerlIO__Layer__find)
 {
     dXSARGS;
@@ -818,6 +819,7 @@ MGVTBL perlio_vtab = {
     perlio_mg_free
 };
 
+XS(XS_io_MODIFY_SCALAR_ATTRIBUTES); /* prototype to pass -Wmissing-prototypes */
 XS(XS_io_MODIFY_SCALAR_ATTRIBUTES)
 {
     dXSARGS;
@@ -858,6 +860,7 @@ PerlIO_tab_sv(pTHX_ PerlIO_funcs *tab)
     return sv;
 }
 
+XS(XS_PerlIO__Layer__NoWarnings); /* prototype to pass -Wmissing-prototypes */
 XS(XS_PerlIO__Layer__NoWarnings)
 {
     /* This is used as a %SIG{__WARN__} handler to suppress warnings
@@ -871,6 +874,7 @@ XS(XS_PerlIO__Layer__NoWarnings)
     XSRETURN(0);
 }
 
+XS(XS_PerlIO__Layer__find); /* prototype to pass -Wmissing-prototypes */
 XS(XS_PerlIO__Layer__find)
 {
     dVAR;
