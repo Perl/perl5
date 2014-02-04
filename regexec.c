@@ -1086,20 +1086,25 @@ Perl_re_intuit_start(pTHX_
     }
 
   postprocess_substr_matches:
-    if (rx_origin != strpos) {
-	/* Fixed substring is found far enough so that the match
-	   cannot start at strpos. */
-        char *t;
 
-        DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "  try at offset...\n"));
-	if (ml_anch && rx_origin[-1] != '\n') {
+    /* handle the extra constraint of /^/m  */
+
+    if (   ((rx_origin != strpos) && (ml_anch && rx_origin[-1] != '\n'))
+        || ((rx_origin == strpos) &&
+                (ml_anch && (strpos != strbeg) && strpos[-1] != '\n'
+                    /* May be due to an implicit anchor of m{.*foo}  */
+	    && !(prog->intflags & PREGf_IMPLICIT))))
+    {
+            char *t;
+
 	    /* Eventually fbm_*() should handle this, but often
 	       anchored_offset is not 0, so this check will not be wasted. */
 	    /* XXXX In the code below we prefer to look for "^" even in
 	       presence of anchored substrings.  And we search even
 	       beyond the found float position.  These pessimizations
 	       are historical artefacts only.  */
-	  find_anchor:
+	    DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
+                            "  looking for /^/m anchor"));
             t = rx_origin;
 	    while (t < strend - prog->minlen) {
 		if (*t == '\n') {
@@ -1123,7 +1128,7 @@ Perl_re_intuit_start(pTHX_
 			s = t + 1;
 			DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "  Found /%s^%s/m at offset %ld...\n",
 			    PL_colors[0], PL_colors[1], (long)(s - i_strpos)));
-			goto set_useful;
+			break; /* success: found anchor */
 		    }
 		    /* Position contradicts check-string */
 		    /* XXXX probably better to look for check-string
@@ -1135,16 +1140,26 @@ Perl_re_intuit_start(pTHX_
 		}
 		t++;
 	    }
-	    DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "  Did not find /%s^%s/m...\n",
+	    if (t >= strend - prog->minlen) {
+                DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "  Did not find /%s^%s/m...\n",
 			PL_colors[0], PL_colors[1]));
-	    goto fail_finish;
-	}
-	else {
-	    DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "  Starting position does not contradict /%s^%s/m...\n",
-			PL_colors[0], PL_colors[1]));
-	}
+                goto fail_finish;
+            }
+    }
+    else {
+        DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "  Starting position does not contradict /%s^%s/m...\n",
+                    PL_colors[0], PL_colors[1]));
+    }
+
+
+    /* Decide whether using the substrings helped */
+
+    if (rx_origin != strpos) {
+	/* Fixed substring is found far enough so that the match
+	   cannot start at strpos. */
+
+        DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "  try at offset...\n"));
 	s = rx_origin;
-      set_useful:
 	++BmUSEFUL(utf8_target ? prog->check_utf8 : prog->check_substr);	/* hooray/5 */
     }
     else {
@@ -1152,19 +1167,6 @@ Perl_re_intuit_start(pTHX_
 	   - no optimization of calling REx engine can be performed,
 	   unless it was an MBOL and we are not after MBOL,
 	   or a future STCLASS check will fail this. */
-        DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "  try at start...\n"));
-	/* Even in this situation we may use MBOL flag if strpos is offset
-	   wrt the start of the string. */
-	if (ml_anch && (strpos != strbeg) && strpos[-1] != '\n'
-	    /* May be due to an implicit anchor of m{.*foo}  */
-	    && !(prog->intflags & PREGf_IMPLICIT))
-	{
-	    goto find_anchor;
-	}
-	DEBUG_EXECUTE_r( if (ml_anch)
-	    PerlIO_printf(Perl_debug_log, "  Position at offset %ld does not contradict /%s^%s/m...\n",
-			  (long)(strpos - i_strpos), PL_colors[0], PL_colors[1]);
-	);
       success_at_start:
 	if (!(prog->intflags & PREGf_NAUGHTY)	/* XXXX If strpos moved? */
 	    && (utf8_target ? (
