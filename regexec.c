@@ -642,7 +642,6 @@ Perl_re_intuit_start(pTHX_
     /* current lowest pos in string where the regex can start matching */
     char *rx_origin = strpos;
     SV *check;
-    char *t;
     const bool utf8_target = (sv && SvUTF8(sv)) ? 1 : 0; /* if no sv we have to assume bytes */
     U8   other_ix = 1 - prog->substrs->check_ix;
     bool ml_anch = 0;
@@ -1093,6 +1092,8 @@ Perl_re_intuit_start(pTHX_
     if (rx_origin != strpos) {
 	/* Fixed substring is found far enough so that the match
 	   cannot start at strpos. */
+        char *t;
+
         DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "  try at offset...\n"));
 	if (ml_anch && rx_origin[-1] != '\n') {
 	    /* Eventually fbm_*() should handle this, but often
@@ -1221,6 +1222,8 @@ Perl_re_intuit_start(pTHX_
 	/* If regstclass takes bytelength more than 1: If charlength==1, OK.
 	   This leaves EXACTF-ish only, which are dealt with in find_byclass().  */
         const U8* const str = (U8*)STRING(progi->regstclass);
+        char *t;
+
         /* XXX this value could be pre-computed */
         const int cl_l = (PL_regkind[OP(progi->regstclass)] == EXACT
 		    ?  (reginfo->is_utf8_pat
