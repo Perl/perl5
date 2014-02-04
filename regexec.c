@@ -916,6 +916,7 @@ Perl_re_intuit_start(pTHX_
       do_other_substr:
 	{
             char *last, *last1;
+            char *s;
             SV* must;
             struct reg_substr_datum *other = &prog->substrs->data[other_ix];
 
@@ -1288,7 +1289,6 @@ Perl_re_intuit_start(pTHX_
 		if (t + start_shift >= check_at) /* Contradicts floating=check */
 		    goto retry_floating_check;
 		/* Recheck anchored substring, but not floating... */
-		s = check_at;
 		if (!check)
 		    goto giveup;
 		DEBUG_EXECUTE_r( PerlIO_printf(Perl_debug_log,
