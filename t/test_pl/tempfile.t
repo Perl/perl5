@@ -44,7 +44,18 @@ note("skipping the first filename because it is taken for use by _fresh_perl()")
 is( tempfile(), "${prefix}B");
 is( tempfile(), "${prefix}C");
 
-skip_files(22,'Y','Z');
+{
+    ok( open( my $fh, '>', "${prefix}D" ), 'created file with the next filename' );
+    is( tempfile(), "${prefix}E", 'properly skips files that already exist');
+
+    if( close($fh) ){
+        unlink_all("${prefix}D");
+    }else{
+        tempfile(); # allow the rest of the tests to work correctly
+    }
+}
+
+skip_files(20,'Y','Z');
 
 is( tempfile(), "${prefix}Z", 'Last single letter filename');
 is( tempfile(), "${prefix}AA", 'First double letter filename');
