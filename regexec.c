@@ -918,15 +918,14 @@ Perl_re_intuit_start(pTHX_
       do_other_substr:
 	{
             char *last, *last1;
-            char * const saved_s = s;
             SV* must;
             struct reg_substr_datum *other = &prog->substrs->data[other_ix];
 
             /* if "other" is anchored:
-             * we've previously found a floating substr starting at s.
+             * we've previously found a floating substr starting at check_at.
              * This means that the regex origin must lie somewhere
-             * between min (rx_origin): HOP3(s, -check_offset_max)
-             * and max:                 HOP3(s, -check_offset_min)
+             * between min (rx_origin): HOP3(check_at, -check_offset_max)
+             * and max:                 HOP3(check_at, -check_offset_min)
              * (except that min will be >= strpos)
              * So the fixed  substr must lie somewhere between
              *  HOP3(min, anchored_offset)
@@ -999,8 +998,8 @@ Perl_re_intuit_start(pTHX_
                         : (char*)HOP3lim(rx_origin, other->max_offset, last1);
             }
             else {
-                assert(strpos + start_shift <= s);
-                last = HOP4c(s, other->min_offset - start_shift,
+                assert(strpos + start_shift <= check_at);
+                last = HOP4c(check_at, other->min_offset - start_shift,
                             strbeg, strend);
             }
 
@@ -1041,7 +1040,7 @@ Perl_re_intuit_start(pTHX_
                 DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
                     ", trying %s at offset %ld...\n",
                     (other_ix ? "floating" : "anchored"),
-                    (long)(HOP3c(saved_s, 1, strend) - i_strpos)));
+                    (long)(HOP3c(check_at, 1, strend) - i_strpos)));
 
                 other_last = HOP3c(last, 1, strend) /* highest failure */;
                 rx_origin = other_ix
@@ -1068,7 +1067,6 @@ Perl_re_intuit_start(pTHX_
                     rx_origin = HOP3c(s, -other->min_offset, strbeg);
                     other_last = HOP3c(s, 1, strend);
                 }
-                s = saved_s;
             }
 	}
     }
@@ -1076,13 +1074,13 @@ Perl_re_intuit_start(pTHX_
         DEBUG_OPTIMISE_MORE_r(
             PerlIO_printf(Perl_debug_log,
                 "  Check-only match: offset min:%"IVdf" max:%"IVdf
-                " s:%"IVdf" rx_origin:%"IVdf" rx_origin-s:%"IVdf
+                " check_at:%"IVdf" rx_origin:%"IVdf" rx_origin-check_at:%"IVdf
                 " strend-strpos:%"IVdf"\n",
                 (IV)prog->check_offset_min,
                 (IV)prog->check_offset_max,
-                (IV)(s-strpos),
+                (IV)(check_at-strpos),
                 (IV)(rx_origin-strpos),
-                (IV)(rx_origin-s),
+                (IV)(rx_origin-check_at),
                 (IV)(strend-strpos)
             )
         );
