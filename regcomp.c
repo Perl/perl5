@@ -6305,10 +6305,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 
     /* ignore the utf8ness if the pattern is 0 length */
     RExC_utf8 = RExC_orig_utf8 = (plen == 0 || IN_BYTES) ? 0 : SvUTF8(pat);
-
-    /* 'use utf8' in the program indicates Unicode rules are wanted */
-    RExC_uni_semantics = (PL_hints & HINT_UTF8);
-
+    RExC_uni_semantics = 0;
     RExC_contains_locale = 0;
     RExC_contains_i = 0;
     pRExC_state->runtime_code_qr = NULL;
@@ -6359,13 +6356,10 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     if (initial_charset == REGEX_LOCALE_CHARSET) {
 	RExC_contains_locale = 1;
     }
-    else if ((RExC_utf8 || RExC_uni_semantics)
-              && initial_charset == REGEX_DEPENDS_CHARSET)
-    {
+    else if (RExC_utf8 && initial_charset == REGEX_DEPENDS_CHARSET) {
 
-        /* Set to use unicode semantics if has the 'depends' charset specified,
-         * and either the pattern is in utf8 (as it means unicode when utf8),
-         * or we already know we want unicode rules  */
+	/* Set to use unicode semantics if the pattern is in utf8 and has the
+	 * 'depends' charset specified, as it means unicode when utf8  */
 	set_regex_charset(&rx_flags, REGEX_UNICODE_CHARSET);
     }
 
