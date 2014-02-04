@@ -5394,10 +5394,9 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
     {
         SSize_t final_minlen= min < stopmin ? min : stopmin;
 
-        if (RExC_maxlen < final_minlen + delta) {
+        if (!(RExC_seen & REG_UNBOUNDED_QUANTIFIER_SEEN) && (RExC_maxlen < final_minlen + delta)) {
             RExC_maxlen = final_minlen + delta;
         }
-
         return final_minlen;
     }
     /* not-reached */
@@ -7030,6 +7029,14 @@ reStudy:
 	}
     }
 
+    if (RExC_seen & REG_UNBOUNDED_QUANTIFIER_SEEN) {
+        r->extflags |= RXf_UNBOUNDED_QUANTIFIER_SEEN;
+        r->maxlen = REG_INFTY;
+    }
+    else {
+        r->maxlen = RExC_maxlen;
+    }
+
     /* Guard against an embedded (?=) or (?<=) with a longer minlen than
        the "real" pattern. */
     DEBUG_OPTIMISE_r({
@@ -7039,8 +7046,6 @@ reStudy:
     r->minlenret = minlen;
     if (r->minlen < minlen)
         r->minlen = minlen;
-
-
 
     if (RExC_seen & REG_GPOS_SEEN)
         r->intflags |= PREGf_GPOS_SEEN;
@@ -7064,9 +7069,6 @@ reStudy:
         RXp_PAREN_NAMES(r) = MUTABLE_HV(SvREFCNT_inc(RExC_paren_names));
     else
         RXp_PAREN_NAMES(r) = NULL;
-
-    if (RExC_seen & REG_UNBOUNDED_QUANTIFIER_SEEN)
-        r->extflags |= RXf_UNBOUNDED_QUANTIFIER_SEEN;
 
     /* If we have seen an anchor in our pattern then we set the extflag RXf_IS_ANCHORED
      * so it can be used in pp.c */
