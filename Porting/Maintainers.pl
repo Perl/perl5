@@ -1268,6 +1268,7 @@ use File::Glob qw(:case);
         'FILES'        => q[cpan/version vutil.c vutil.h vxs.inc],
         'EXCLUDED' => [
             qr{^vutil/lib/},
+            'vutil/Makefile.PL',
             'vutil/ppport.h',
             'vutil/vxs.xs',
             't/survey_locales',
