@@ -762,6 +762,7 @@ Perl_re_intuit_start(pTHX_
             {
 	        /* Substring at constant offset from beg-of-str... */
 	        SSize_t slen = SvCUR(check);
+                char *s;
 
 	        s = HOP3c(strpos, prog->check_offset_min, strend);
 	    
