@@ -1089,11 +1089,9 @@ Perl_re_intuit_start(pTHX_
 
     /* handle the extra constraint of /^/m  */
 
-    if (   ((rx_origin != strpos) && (ml_anch && rx_origin[-1] != '\n'))
-        || ((rx_origin == strpos) &&
-                (ml_anch && (strpos != strbeg) && strpos[-1] != '\n'
-                    /* May be due to an implicit anchor of m{.*foo}  */
-	    && !(prog->intflags & PREGf_IMPLICIT))))
+    if (ml_anch && rx_origin != strbeg && rx_origin[-1] != '\n'
+        /* May be due to an implicit anchor of m{.*foo}  */
+        && !(prog->intflags & PREGf_IMPLICIT))
     {
         char *t;
 
