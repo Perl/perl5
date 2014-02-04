@@ -22,16 +22,20 @@ sub skip_files{
         }
     }
 
+    local $main::Level = $main::Level + 1;
+
     my $common_mess = "skip $skip filenames to $to so that the next one will end with $next";
     if( $last == $skip ){
         if( $check eq $cmp ){
             pass( $common_mess );
         }else{
             my($alpha) = $check =~ /\Atmp\d+([A-Z][A-Z]?)\Z/;
-            fail( $common_mess, "only skipped to $alpha" )
+            fail( $common_mess );
+            diag( "only skipped to $alpha" );
         }
     }else{
-        fail( $common_mess, "only skipped $last files" );
+        fail( $common_mess );
+        diag( "only skipped $last out of $skip files" );
     }
 }
 
