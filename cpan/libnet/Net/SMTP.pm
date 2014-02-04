@@ -16,7 +16,7 @@ use IO::Socket;
 use Net::Cmd;
 use Net::Config;
 
-$VERSION = "2.32";
+$VERSION = "2.33";
 
 @ISA = qw(Net::Cmd IO::Socket::INET);
 
@@ -670,6 +670,10 @@ value, with I<true> meaning that the operation was a success. When a method
 states that it returns a value, failure will be returned as I<undef> or an
 empty list.
 
+C<Net::SMTP> inherits from C<Net::Cmd> so methods defined in C<Net::Cmd> may
+be used to send commands to the remote SMTP server in addition to the methods
+documented here.
+
 =over 4
 
 =item banner ()
@@ -835,10 +839,6 @@ Verify that C<ADDRESS> is a legitimate mailing address.
 
 Most sites usually disable this feature in their SMTP service configuration.
 Use "Debug => 1" option under new() to see if disabled.
-
-=item message ()
-
-Returns the text message returned from the last command. (Net::Cmd method)
 
 =item help ( [ $subject ] )
 

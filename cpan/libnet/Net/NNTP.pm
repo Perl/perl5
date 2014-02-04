@@ -14,7 +14,7 @@ use Carp;
 use Time::Local;
 use Net::Config;
 
-$VERSION = "2.25";
+$VERSION = "2.26";
 @ISA     = qw(Net::Cmd IO::Socket::INET);
 
 
@@ -715,7 +715,9 @@ Net::NNTP - NNTP Client class
 =head1 DESCRIPTION
 
 C<Net::NNTP> is a class implementing a simple NNTP client in Perl as described
-in RFC977. C<Net::NNTP> inherits its communication methods from C<Net::Cmd>
+in RFC977.
+
+The Net::NNTP class is a subclass of Net::Cmd and IO::Socket::INET.
 
 =head1 CONSTRUCTOR
 
@@ -763,6 +765,10 @@ Unless otherwise stated all methods return either a I<true> or I<false>
 value, with I<true> meaning that the operation was a success. When a method
 states that it returns a value, failure will be returned as I<undef> or an
 empty list.
+
+C<Net::NNTP> inherits from C<Net::Cmd> so methods defined in C<Net::Cmd> may
+be used to send commands to the remote NNTP server in addition to the methods
+documented here.
 
 =over 4
 

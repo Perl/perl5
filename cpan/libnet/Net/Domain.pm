@@ -16,7 +16,7 @@ use Net::Config;
 @ISA       = qw(Exporter);
 @EXPORT_OK = qw(hostname hostdomain hostfqdn domainname);
 
-$VERSION = "2.22";
+$VERSION = "2.23";
 
 my ($host, $domain, $fqdn) = (undef, undef, undef);
 
@@ -169,7 +169,7 @@ sub _hostdomain {
     }
 
     chop($dom = `domainname 2>/dev/null`)
-      unless (defined $dom || $^O =~ /^(?:cygwin|MSWin32)/);
+      unless (defined $dom || $^O =~ /^(?:cygwin|MSWin32|android)/);
 
     if (defined $dom) {
       my @h = ();

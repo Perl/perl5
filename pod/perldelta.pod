@@ -201,6 +201,14 @@ specified by its prototype.
 
 =item *
 
+The libnet module collection has been upgraded from version 1.24 to 1.25.
+
+The creation of L<Net::FTP> dataconnections now honour the requested timeout,
+errors from C<Net::Cmd::response()> are now handled in C<Net::FTP::pasv_wait()>
+and a warning from C<Net::Domain::domainname()> on Android is now stopped.
+
+=item *
+
 L<List::Util> has been upgraded from version 1.37 to 1.38.
 
 A backwards-compatibility issue with older perls has been fixed.  [cpan #92363]

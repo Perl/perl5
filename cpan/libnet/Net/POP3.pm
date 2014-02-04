@@ -13,7 +13,7 @@ use Net::Cmd;
 use Carp;
 use Net::Config;
 
-$VERSION = "2.30";
+$VERSION = "2.31";
 
 @ISA = qw(Net::Cmd IO::Socket::INET);
 
@@ -557,6 +557,8 @@ A new Net::POP3 object must be created with the I<new> method. Once
 this has been done, all POP3 commands are accessed via method calls
 on the object.
 
+The Net::POP3 class is a subclass of Net::Cmd and IO::Socket::INET.
+
 =head1 CONSTRUCTOR
 
 =over 4
@@ -595,6 +597,10 @@ Unless otherwise stated all methods return either a I<true> or I<false>
 value, with I<true> meaning that the operation was a success. When a method
 states that it returns a value, failure will be returned as I<undef> or an
 empty list.
+
+C<Net::POP3> inherits from C<Net::Cmd> so methods defined in C<Net::Cmd> may
+be used to send commands to the remote POP3 server in addition to the methods
+documented here.
 
 =over 4
 
