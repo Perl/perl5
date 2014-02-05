@@ -70,18 +70,18 @@ S_grok_bslash_c(pTHX_ const char source, const bool output_warning)
     if (output_warning && ! isCNTRL_L1(result)) {
         /* We use isCNTRL_L1 above and not simply isCNTRL, because on EBCDIC
          * machines, things like \cT map into a C1 control. */
-	    U8 clearer[3];
-	    U8 i = 0;
-	    if (! isWORDCHAR(result)) {
-		clearer[i++] = '\\';
-	    }
-	    clearer[i++] = result;
-	    clearer[i++] = '\0';
+        U8 clearer[3];
+        U8 i = 0;
+        if (! isWORDCHAR(result)) {
+            clearer[i++] = '\\';
+        }
+        clearer[i++] = result;
+        clearer[i++] = '\0';
 
-	    Perl_ck_warner(aTHX_ packWARN(WARN_SYNTAX),
-			    "\"\\c%c\" is more clearly written simply as \"%s\"",
-			    source,
-			    clearer);
+        Perl_ck_warner(aTHX_ packWARN(WARN_SYNTAX),
+                        "\"\\c%c\" is more clearly written simply as \"%s\"",
+                        source,
+                        clearer);
     }
 
     return result;
