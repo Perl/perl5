@@ -3545,8 +3545,6 @@ typedef struct scan_frame {
 } scan_frame;
 
 
-#define SCAN_COMMIT(s, data, m) scan_commit(s, data, m, is_inf)
-
 STATIC SSize_t
 S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                         SSize_t *minlenp, SSize_t *deltap,
@@ -3672,10 +3670,11 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		regnode_ssc accum;
 		regnode * const startbranch=scan;
 
-		if (flags & SCF_DO_SUBSTR)
-                    SCAN_COMMIT(pRExC_state, data, minlenp); /* Cannot merge
-                                                                strings after
-                                                            this. */
+                if (flags & SCF_DO_SUBSTR) {
+                    /* Cannot merge strings after this. */
+                    scan_commit(pRExC_state, data, minlenp, is_inf);
+                }
+
                 if (flags & SCF_DO_STCLASS)
 		    ssc_init_zero(pRExC_state, &accum);
 
@@ -4145,7 +4144,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                     /* some form of infinite recursion, assume infinite length
                      * */
                     if (flags & SCF_DO_SUBSTR) {
-                        SCAN_COMMIT(pRExC_state,data,minlenp);
+                        scan_commit(pRExC_state, data, minlenp, is_inf);
                         data->longest = &(data->longest_float);
                     }
                     is_inf = is_inf_internal = 1;
@@ -4242,7 +4241,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 	    /* Search for fixed substrings supports EXACT only. */
 	    if (flags & SCF_DO_SUBSTR) {
 		assert(data);
-		SCAN_COMMIT(pRExC_state, data, minlenp);
+                scan_commit(pRExC_state, data, minlenp, is_inf);
 	    }
 	    if (UTF) {
 		const U8 * const s = (U8 *)STRING(scan);
@@ -4392,7 +4391,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		is_inf = is_inf_internal = 1;
 		scan = regnext(scan);
 		if (flags & SCF_DO_SUBSTR) {
-                    SCAN_COMMIT(pRExC_state, data, minlenp);
+                    scan_commit(pRExC_state, data, minlenp, is_inf);
                     /* Cannot extend fixed substrings */
 		    data->longest = &(data->longest_float);
 		}
@@ -4416,7 +4415,8 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		next_is_eval = (OP(scan) == EVAL);
 	      do_curly:
 		if (flags & SCF_DO_SUBSTR) {
-		    if (mincount == 0) SCAN_COMMIT(pRExC_state,data,minlenp);
+                    if (mincount == 0)
+                        scan_commit(pRExC_state, data, minlenp, is_inf);
                     /* Cannot extend fixed substrings */
 		    pos_before = data->pos_min;
 		}
@@ -4696,7 +4696,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
 		    if (mincount != maxcount) {
 			 /* Cannot extend fixed substrings found inside
 			    the group.  */
-			SCAN_COMMIT(pRExC_state,data,minlenp);
+                        scan_commit(pRExC_state, data, minlenp, is_inf);
 			if (mincount && last_str) {
 			    SV * const sv = data->last_found;
 			    MAGIC * const mg = SvUTF8(sv) && SvMAGICAL(sv) ?
@@ -4735,8 +4735,8 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
             case REF:
             case CLUMP:
 		if (flags & SCF_DO_SUBSTR) {
-                    SCAN_COMMIT(pRExC_state,data,minlenp); /* Cannot expect
-                                                              anything... */
+                    /* Cannot expect anything... */
+                    scan_commit(pRExC_state, data, minlenp, is_inf);
 		    data->longest = &(data->longest_float);
 		}
 		is_inf = is_inf_internal = 1;
@@ -4777,8 +4777,8 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
 	    min++;
 	    delta++;    /* Because of the 2 char string cr-lf */
             if (flags & SCF_DO_SUBSTR) {
-                SCAN_COMMIT(pRExC_state,data,minlenp);	/* Cannot expect
-                                                           anything... */
+                /* Cannot expect anything... */
+                scan_commit(pRExC_state, data, minlenp, is_inf);
     	        data->pos_min += 1;
 	        data->pos_delta += 1;
 		data->longest = &(data->longest_float);
@@ -4787,7 +4787,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
 	else if (REGNODE_SIMPLE(OP(scan))) {
 
 	    if (flags & SCF_DO_SUBSTR) {
-		SCAN_COMMIT(pRExC_state,data,minlenp);
+                scan_commit(pRExC_state, data, minlenp, is_inf);
 		data->pos_min++;
 	    }
 	    min++;
@@ -4945,7 +4945,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
 	    data->flags |= (OP(scan) == MEOL
 			    ? SF_BEFORE_MEOL
 			    : SF_BEFORE_SEOL);
-	    SCAN_COMMIT(pRExC_state, data, minlenp);
+            scan_commit(pRExC_state, data, minlenp, is_inf);
 
 	}
 	else if (  PL_regkind[OP(scan)] == BRANCHJ
@@ -5072,7 +5072,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
                     if ((flags & SCF_DO_SUBSTR) && data->last_found) {
                         f |= SCF_DO_SUBSTR;
                         if (scan->flags)
-                            SCAN_COMMIT(pRExC_state, &data_fake,minlenp);
+                            scan_commit(pRExC_state, &data_fake, minlenp, is_inf);
                         data_fake.last_found=newSVsv(data->last_found);
                     }
                 }
@@ -5122,7 +5122,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
                     if ((flags & SCF_DO_SUBSTR) && data_fake.last_found) {
                         if (RExC_rx->minlen<*minnextp)
                             RExC_rx->minlen=*minnextp;
-                        SCAN_COMMIT(pRExC_state, &data_fake, minnextp);
+                        scan_commit(pRExC_state, &data_fake, minnextp, is_inf);
                         SvREFCNT_dec_NN(data_fake.last_found);
 
                         if ( data_fake.minlen_fixed != minlenp )
@@ -5166,7 +5166,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
 	}
 	else if ( PL_regkind[OP(scan)] == ENDLIKE ) {
 	    if (flags & SCF_DO_SUBSTR) {
-		SCAN_COMMIT(pRExC_state,data,minlenp);
+                scan_commit(pRExC_state, data, minlenp, is_inf);
 		flags &= ~SCF_DO_SUBSTR;
 	    }
 	    if (data && OP(scan)==ACCEPT) {
@@ -5178,7 +5178,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
 	else if (OP(scan) == LOGICAL && scan->flags == 2) /* Embedded follows */
 	{
 		if (flags & SCF_DO_SUBSTR) {
-		    SCAN_COMMIT(pRExC_state,data,minlenp);
+                    scan_commit(pRExC_state, data, minlenp, is_inf);
 		    data->longest = &(data->longest_float);
 		}
 		is_inf = is_inf_internal = 1;
@@ -5211,9 +5211,10 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
             SSize_t max1 = 0, min1 = SSize_t_MAX;
             regnode_ssc accum;
 
-            if (flags & SCF_DO_SUBSTR) /* XXXX Add !SUSPEND? */
-                SCAN_COMMIT(pRExC_state, data,minlenp); /* Cannot merge strings
-                                                           after this. */
+            if (flags & SCF_DO_SUBSTR) { /* XXXX Add !SUSPEND? */
+                /* Cannot merge strings after this. */
+                scan_commit(pRExC_state, data, minlenp, is_inf);
+            }
             if (flags & SCF_DO_STCLASS)
                 ssc_init_zero(pRExC_state, &accum);
 
@@ -5327,8 +5328,8 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
 	    delta += (trie->maxlen - trie->minlen);
 	    flags &= ~SCF_DO_STCLASS; /* xxx */
             if (flags & SCF_DO_SUBSTR) {
-                SCAN_COMMIT(pRExC_state,data,minlenp);	/* Cannot expect
-                                                           anything... */
+                /* Cannot expect anything... */
+                scan_commit(pRExC_state, data, minlenp, is_inf);
     	        data->pos_min += trie->minlen;
     	        data->pos_delta += (trie->maxlen - trie->minlen);
 		if (trie->maxlen != trie->minlen)
