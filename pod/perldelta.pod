@@ -220,6 +220,12 @@ A backwards-compatibility issue with older perls has been fixed.  [cpan #92363]
 
 =item *
 
+L<threads> has been upgraded from version 1.91 to 1.92.
+
+Synchronization with CPAN release.
+
+=item *
+
 L<warnings> has been upgraded from version 1.21 to 1.22.
 
 C<< use warnings "FATAL"; >> now implies C<< "all" >>, and similarly
