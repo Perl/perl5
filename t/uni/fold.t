@@ -421,7 +421,7 @@ foreach my $test_ref (@CF) {
 {
     use feature qw( fc unicode_strings );
     use if $Config{d_setlocale}, qw(POSIX locale_h);
-    setlocale(LC_ALL, "C") if $Config{d_setlocale};
+    setlocale(&POSIX::LC_ALL, "C") if $Config{d_setlocale};
 
     # This tests both code paths in pp_fc
 
