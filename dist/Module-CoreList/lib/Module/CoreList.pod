@@ -83,7 +83,7 @@ Returns true if MODULE was bundled with the specified version of Perl.
 You can optionally specify a minimum version of the module,
 and can also specify a version of Perl.
 If a version of Perl isn't specified,
-C<is_core()> will use the version of Perl that is running (ie C<$^V>).
+C<is_core()> will use the numeric version of Perl that is running (ie C<$]>).
 
 If you want to specify the version of Perl, but don't care about
 the version of the module, pass C<undef> for the module version:

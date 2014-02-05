@@ -3,7 +3,7 @@ use strict;
 use vars qw/$VERSION %released %version %families %upstream
 	    %bug_tracker %deprecated %delta/;
 use Module::CoreList::TieHashDelta;
-$VERSION = '3.05';
+$VERSION = '3.06';
 
 my $dumpinc = 0;
 sub import {
@@ -9401,7 +9401,7 @@ sub is_core
     my ($module_version, $perl_version);
 
     $module_version = shift if @_ > 0;
-    $perl_version   = @_ > 0 ? shift : $^V;
+    $perl_version   = @_ > 0 ? shift : $];
 
     my $first_release = first_release($module);
 
