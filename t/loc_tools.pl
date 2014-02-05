@@ -249,6 +249,7 @@ sub find_utf8_ctype_locale (;$) { # Return the name of locale that core Perl
                                   # tries all locales it can find on the
                                   # platform
     my $locales_ref = shift;
+    return if !defined &POSIX::LC_CTYPE;
     if (! defined $locales_ref) {
         my @locales = find_locales(&POSIX::LC_CTYPE());
         $locales_ref = \@locales;

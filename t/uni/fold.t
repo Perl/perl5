@@ -456,7 +456,7 @@ my $utf8_locale = find_utf8_ctype_locale();
     is(fc("\x{1E9E}"), fc("\x{17F}\x{17F}"), 'fc("\x{1E9E}") eq fc("\x{17F}\x{17F}")');
     SKIP: {
         skip 'Can\'t find a UTF-8 locale', 1 unless defined $utf8_locale;
-        setlocale(LC_CTYPE, $utf8_locale);
+        setlocale(&LC_CTYPE, $utf8_locale);
         is(fc("\x{1E9E}"), "ss", 'fc("\x{1E9E}") eq "ss" in a UTF-8 locale)');
     }
 }
@@ -474,7 +474,7 @@ SKIP: {
     }
 
     # These should match the UTF-8 locale values
-    setlocale(LC_CTYPE, $utf8_locale);
+    setlocale(&LC_CTYPE, $utf8_locale);
     use locale;
     for (0..0xff) {
         is(fc(chr), $unicode_fc[$_], "In a UTF-8 locale, fc(chr $_) is the same as official Unicode");
