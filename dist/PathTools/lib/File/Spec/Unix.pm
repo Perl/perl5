@@ -3,7 +3,7 @@ package File::Spec::Unix;
 use strict;
 use vars qw($VERSION);
 
-$VERSION = '3.46';
+$VERSION = '3.47';
 my $xs_version = $VERSION;
 $VERSION =~ tr/_//;
 
@@ -192,11 +192,10 @@ sub _tmpdir {
     }
     $tmpdir = $self->curdir unless defined $tmpdir;
     $tmpdir = defined $tmpdir && $self->canonpath($tmpdir);
-    if ( $tmpdir eq '.' ) {
+    if ( !$self->file_name_is_absolute($tmpdir) ) {
         # See [perl #120593] for the full details
-        # If possible, return a full path, rather than '.', but
-        # we have to avoid returning a tainted value, so we jump
-        # through some hoops.
+        # If possible, return a full path, rather than '.' or 'lib', but
+        # jump through some hoops to avoid returning a tainted value.
         ($tmpdir) = grep {
             $taint     ? ! Scalar::Util::tainted($_) :
             $] < 5.007 ? eval { eval('1'.substr $_,0,0) } : 1
