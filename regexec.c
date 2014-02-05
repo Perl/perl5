@@ -883,12 +883,12 @@ Perl_re_intuit_start(pTHX_
     DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "%ld...\n", (long)(check_at - i_strpos)) );
 
     /* set rx_origin to the minimum position where the regex could start
-     * matching, given the constraint of the just-matched check substring
+     * matching, given the constraint of the just-matched check substring.
+     * But don't set it lower than previously.
      */
 
-    rx_origin = (check_at - strpos <= prog->check_offset_max)
-        ? strpos
-        : HOP3c(check_at, -prog->check_offset_max, strpos);
+    if (check_at - rx_origin > prog->check_offset_max)
+        rx_origin = HOP3c(check_at, -prog->check_offset_max, rx_origin);
 
 
     /* XXX dmq: first branch is for positive lookbehind...
