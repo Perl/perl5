@@ -1124,9 +1124,9 @@ Perl_re_intuit_start(pTHX_
                     }
                     /* We don't contradict the found floating substring. */
                     /* XXXX Why not check for STCLASS? */
-                    s = t + 1;
+                    rx_origin = t + 1;
                     DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "  Found /%s^%s/m at offset %ld...\n",
-                        PL_colors[0], PL_colors[1], (long)(s - i_strpos)));
+                        PL_colors[0], PL_colors[1], (long)(rx_origin - i_strpos)));
                     break; /* success: found anchor */
                 }
                 /* Position contradicts check-string */
@@ -1158,7 +1158,6 @@ Perl_re_intuit_start(pTHX_
 	   cannot start at strpos. */
 
         DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "  try at offset...\n"));
-	s = rx_origin;
 	++BmUSEFUL(utf8_target ? prog->check_utf8 : prog->check_substr);	/* hooray/5 */
     }
     else {
@@ -1186,7 +1185,6 @@ Perl_re_intuit_start(pTHX_
 	    prog->check_substr = prog->check_utf8 = NULL;	/* disable */
 	    prog->float_substr = prog->float_utf8 = NULL;	/* clear */
 	    check = NULL;			/* abort */
-	    s = strpos;
 	    /* XXXX If the check string was an implicit check MBOL, then we need to unset the relevant flag
 		    see http://bugs.activestate.com/show_bug.cgi?id=87173 */
             if (prog->intflags & PREGf_IMPLICIT) {
@@ -1201,8 +1199,6 @@ Perl_re_intuit_start(pTHX_
 	    prog->extflags &= ~RXf_USE_INTUIT;
 	    /* XXXX What other flags might need to be cleared in this branch? */
 	}
-	else
-	    s = strpos;
     }
 
     /* Last resort... */
@@ -1212,8 +1208,8 @@ Perl_re_intuit_start(pTHX_
     if (progi->regstclass && PL_regkind[OP(progi->regstclass)]!=TRIE) {
 	/* minlen == 0 is possible if regstclass is \b or \B,
 	   and the fixed substr is ''$.
-	   Since minlen is already taken into account, s+1 is before strend;
-	   accidentally, minlen >= 1 guaranties no false positives at s + 1
+	   Since minlen is already taken into account, rx_origin+1 is before strend;
+	   accidentally, minlen >= 1 guaranties no false positives at rx_origin + 1
 	   even for \b or \B.  But (minlen? 1 : 0) below assumes that
 	   regstclass does not come from lookahead...  */
 	/* If regstclass takes bytelength more than 1: If charlength==1, OK.
@@ -1228,6 +1224,7 @@ Perl_re_intuit_start(pTHX_
                         : STR_LEN(progi->regstclass))
 		    : 1);
 	char * endpos;
+        s = rx_origin;
 	if (prog->anchored_substr || prog->anchored_utf8 || ml_anch)
             endpos= HOP3c(s, (prog->minlen ? cl_l : 0), strend);
         else if (prog->float_substr || prog->float_utf8)
@@ -1277,9 +1274,9 @@ Perl_re_intuit_start(pTHX_
 					       "  Could not match STCLASS...\n") );
 			goto fail;
 		    }
+                    rx_origin = s;
 		    if (!check)
 			goto giveup;
-                    rx_origin = s;
 		    DEBUG_EXECUTE_r( PerlIO_printf(Perl_debug_log,
 				"  Looking for %s substr starting at offset %ld...\n",
 				 what, (long)(rx_origin + start_shift - i_strpos)) );
@@ -1289,8 +1286,10 @@ Perl_re_intuit_start(pTHX_
 		if (t + start_shift >= check_at) /* Contradicts floating=check */
 		    goto retry_floating_check;
 		/* Recheck anchored substring, but not floating... */
-		if (!check)
+		if (!check) {
+                    rx_origin = NULL;
 		    goto giveup;
+                }
 		DEBUG_EXECUTE_r( PerlIO_printf(Perl_debug_log,
 			  "  Looking for anchored substr starting at offset %ld...\n",
 			  (long)(other_last - i_strpos)) );
@@ -1335,8 +1334,8 @@ Perl_re_intuit_start(pTHX_
   giveup:
     DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "Intuit: %s%s:%s match at offset %ld\n",
 			  PL_colors[4], (check ? "Successfully guessed" : "Giving up"),
-			  PL_colors[5], (long)(s - i_strpos)) );
-    return s;
+			  PL_colors[5], (long)(rx_origin - i_strpos)) );
+    return rx_origin;
 
   fail_finish:				/* Substring not found */
     if (prog->check_substr || prog->check_utf8)		/* could be removed already */
