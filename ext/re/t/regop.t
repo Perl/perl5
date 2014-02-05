@@ -55,7 +55,7 @@ foreach my $testout ( @tests ) {
 # that the tests for this result set are finished.
 # If you add a test make sure you update $NUM_SECTS
 # the commented output is just for legacy/debugging purposes
-BEGIN{ $NUM_SECTS= 6 }
+BEGIN{ $NUM_SECTS= 7 }
 
 __END__
 #Compiling REx "X(A|[B]Q||C|D)Y"
@@ -259,3 +259,26 @@ Offsets: [3]
 1:1[3] 3:4[0]
 %MATCHED%        
 Freeing REx: "[q]"
+---
+#Compiling REx "^(\S{1,9}):\s*(\d+)$"
+#synthetic stclass "ANYOF[\x{00}-\x{08}\x{0E}-\x{1F}\x{21}-\x{FF}][{utf8}0100-167F 1681-1FFF 200B-2027 202A-202E 2030-205E 2060-2FFF 3001-INFINITY]".
+#Final program:
+#   1: BOL (2)
+#   2: OPEN1 (4)
+#   4:   CURLY {1,9} (7)
+#   6:     NPOSIXD[\s] (0)
+#   7: CLOSE1 (9)
+#   9: EXACT <:> (11)
+#  11: STAR (13)
+#  12:   POSIXD[\s] (0)
+#  13: OPEN2 (15)
+#  15:   PLUS (17)
+#  16:     POSIXD[\d] (0)
+#  17: CLOSE2 (19)
+#  19: EOL (20)
+#  20: END (0)
+#floating ":" at 1..9 (checking floating) stclass ANYOF[\x{00}-\x{08}\x{0E}-\x{1F}\x{21}-\x{FF}][{utf8}0100-167F 1681-1FFF 200B-2027 202A-202E 2030-205E 2060-2FFF 3001-INFINITY] anchored(BOL) minlen 3
+#Freeing REx: "^(\S{1,9}):\s*(\d+)$"
+floating ":" at 1..9 (checking floating) stclass ANYOF[\x{00}-\x{08}\x{0E}-\x{1F}\x{21}-\x{FF}][{utf8}0100-167F 1681-1FFF 200B-2027 202A-202E 2030-205E 2060-2FFF 3001-INFINITY] anchored(BOL) minlen 3
+%MATCHED%
+synthetic stclass

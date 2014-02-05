@@ -4388,13 +4388,13 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    scan = NEXTOPER(scan);
 		    goto do_curly;
 		}
-		is_inf = is_inf_internal = 1;
-		scan = regnext(scan);
 		if (flags & SCF_DO_SUBSTR) {
                     scan_commit(pRExC_state, data, minlenp, is_inf);
                     /* Cannot extend fixed substrings */
 		    data->longest = &(data->longest_float);
 		}
+                is_inf = is_inf_internal = 1;
+                scan = regnext(scan);
 		goto optimize_curly_tail;
 	    case CURLY:
 	        if (stopparen>0 && (OP(scan)==CURLYN || OP(scan)==CURLYM)
