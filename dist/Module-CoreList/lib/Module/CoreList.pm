@@ -3,6 +3,7 @@ use strict;
 use vars qw/$VERSION %released %version %families %upstream
 	    %bug_tracker %deprecated %delta/;
 use Module::CoreList::TieHashDelta;
+use version;
 $VERSION = '3.06';
 
 my $dumpinc = 0;
@@ -9433,7 +9434,7 @@ sub is_core
             last RELEASE if $prn > $perl_version;
             next unless defined(my $next_module_version
                                    = $delta{$prn}->{changed}->{$module});
-            return 1 if $next_module_version >= $module_version;
+            return 1 if version->parse($next_module_version) >= version->parse($module_version);
         }
         return 0;
     }
