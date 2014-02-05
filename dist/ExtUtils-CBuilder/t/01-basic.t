@@ -50,6 +50,7 @@ ok 1;
 my ($lib, @temps) = $b->link(objects => $object_file,
                              module_name => 'basict');
 $lib =~ tr/"'//d;
+$_ = File::Spec->rel2abs($_) for $lib_file, $lib;
 is $lib_file, $lib;
 
 for ($source_file, $object_file, $lib_file) {

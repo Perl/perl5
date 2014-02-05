@@ -5,7 +5,7 @@ use File::Spec;
 use ExtUtils::CBuilder::Platform::Unix;
 
 use vars qw($VERSION @ISA);
-$VERSION = '0.280215';
+$VERSION = '0.280216';
 @ISA = qw(ExtUtils::CBuilder::Platform::Unix);
 
 # The Android linker will not recognize symbols from
@@ -31,7 +31,7 @@ sub link {
   # So we make this all work by returning an absolute path.
   my($so_file, @so_tmps) = $self->SUPER::link(%args);
   $so_file = File::Spec->rel2abs($so_file);
-  return ($so_file, @so_tmps);
+  return wantarray ? ($so_file, @so_tmps) : $so_file;
 }
 
 1;
