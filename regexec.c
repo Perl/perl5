@@ -909,7 +909,6 @@ Perl_re_intuit_start(pTHX_
                     : prog->substrs->data[other_ix].substr)
     {
 	/* Take into account the "other" substring. */
-	/* XXXX May be hopelessly wrong for UTF... */
 	if (!other_last)
 	    other_last = strpos;
 
