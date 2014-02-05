@@ -638,7 +638,6 @@ Perl_re_intuit_start(pTHX_
     SSize_t start_shift = 0;
     /* Should be nonnegative! */
     SSize_t end_shift   = 0;
-    char *s;
     /* current lowest pos in string where the regex can start matching */
     char *rx_origin = strpos;
     SV *check;
@@ -1224,7 +1223,7 @@ Perl_re_intuit_start(pTHX_
                         : STR_LEN(progi->regstclass))
 		    : 1);
 	char * endpos;
-        s = rx_origin;
+        char *s = rx_origin;
 	if (prog->anchored_substr || prog->anchored_utf8 || ml_anch)
             endpos= HOP3c(s, (prog->minlen ? cl_l : 0), strend);
         else if (prog->float_substr || prog->float_utf8)
