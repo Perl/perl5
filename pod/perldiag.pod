@@ -1387,14 +1387,6 @@ uses the character values modulus 256 instead, as if you had provided:
 
    unpack("s", "\x{f3}b")
 
-=item "\c{" is deprecated and is more clearly written as ";"
-
-(D deprecated, syntax) The C<\cI<X>> construct is intended to be a way
-to specify non-printable characters.  You used it with a "{" which
-evaluates to ";", which is printable.  It is planned to remove the
-ability to specify a semi-colon this way in Perl 5.20.  Just use a
-semi-colon or a backslash-semi-colon without the "\c".
-
 =item "\c%c" is more clearly written simply as "%s"
 
 (W syntax) The C<\cI<X>> construct is intended to be a way to specify
@@ -6169,6 +6161,13 @@ you can write it as C<push(@tied_array,())> to avoid this warning.
 
 (F) The "use" keyword is recognized and executed at compile time, and
 returns no useful value.  See L<perlmod>.
+
+=item Use "%c" instead of "\c{"
+
+(F) The C<\cI<X>> construct is intended to be a way to specify
+non-printable characters.  You used it with a C<"{"> which evaluates to
+C<";">, which is printable.  On ASCII platforms, just use a semi-colon
+or a backslash-semi-colon without the C<"\c">.
 
 =item Use of assignment to $[ is deprecated
 

@@ -1361,19 +1361,21 @@ no
 ########
 # toke.c
 use warnings;
-my $a = "\c{ack}";
 $a = "\c,";
 $a = "\c`";
 no warnings 'syntax';
-$a = "\c{ack}";
 $a = "\c,";
 $a = "\c`";
-no warnings 'deprecated';
 EXPECT
-"\c{" is deprecated and is more clearly written as ";" at - line 3.
-"\c," is more clearly written simply as "l" at - line 4.
-"\c`" is more clearly written simply as "\ " at - line 5.
-"\c{" is deprecated and is more clearly written as ";" at - line 7.
+"\c," is more clearly written simply as "l" at - line 3.
+"\c`" is more clearly written simply as "\ " at - line 4.
+########
+# toke.c
+use warnings;
+my $a = "\c{ack}";
+EXPECT
+OPTION fatal
+Use ";" instead of "\c{" at - line 3.
 ########
 # toke.c
 use warnings 'syntax' ;

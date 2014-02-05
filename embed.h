@@ -980,7 +980,7 @@
 #  endif
 #  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_TOKE_C)
 #define form_short_octal_warning(a,b)	S_form_short_octal_warning(aTHX_ a,b)
-#define grok_bslash_c(a,b,c)	S_grok_bslash_c(aTHX_ a,b,c)
+#define grok_bslash_c(a,b)	S_grok_bslash_c(aTHX_ a,b)
 #define grok_bslash_o(a,b,c,d,e,f,g)	S_grok_bslash_o(aTHX_ a,b,c,d,e,f,g)
 #define grok_bslash_x(a,b,c,d,e,f,g)	S_grok_bslash_x(aTHX_ a,b,c,d,e,f,g)
 #define regcurly(a,b)		S_regcurly(aTHX_ a,b)

@@ -7038,7 +7038,7 @@ STATIC char*	S_form_short_octal_warning(pTHX_ const char * const s, const STRLEN
 #define PERL_ARGS_ASSERT_FORM_SHORT_OCTAL_WARNING	\
 	assert(s)
 
-STATIC char	S_grok_bslash_c(pTHX_ const char source, const bool utf8, const bool output_warning)
+STATIC char	S_grok_bslash_c(pTHX_ const char source, const bool output_warning)
 			__attribute__warn_unused_result__;
 
 STATIC bool	S_grok_bslash_o(pTHX_ char** s, UV* uv, const char** error_msg, const bool output_warning, const bool strict, const bool silence_non_portable, const bool utf8)
