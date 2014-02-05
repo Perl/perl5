@@ -7790,6 +7790,8 @@ Perl_sv_cmp_locale_flags(pTHX_ SV *const sv1, SV *const sv2,
   raw_compare:
     /*FALLTHROUGH*/
 
+#else
+    PERL_UNUSED_ARG(flags);
 #endif /* USE_LOCALE_COLLATE */
 
     return sv_cmp(sv1, sv2);
