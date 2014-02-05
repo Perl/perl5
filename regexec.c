@@ -1041,9 +1041,10 @@ Perl_re_intuit_start(pTHX_
                     (long)(HOP3c(check_at, 1, strend) - i_strpos)));
 
                 other_last = HOP3c(last, 1, strend) /* highest failure */;
-                rx_origin = other_ix
-                    ? HOP3c(rx_origin, 1, strend)
-                    : HOP4c(last, 1 - other->min_offset, strbeg, strend);
+                rx_origin =
+                    other_ix
+                        ? HOP3c(rx_origin, 1, strend)
+                        : HOP4c(last, 1 - other->min_offset, strbeg, strend);
                 goto restart;
             }
             else {
