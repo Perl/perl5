@@ -200,18 +200,6 @@ EOF
          "No compile error on v-strings when setting the locale to non-dot radix at compile time when default environment has non-dot radix");
     }
 
-    for ($different) {
-	local $ENV{LC_NUMERIC} = $_;
-	local $ENV{LC_ALL}; # so it never overrides LC_NUMERIC
-	fresh_perl_is(<<"EOF",
-	    use POSIX qw(locale_h);
-
-            BEGIN { print setlocale(LC_NUMERIC), "\n"; };
-EOF
-	 $_, { },
-         "Passed in LC_NUMERIC is valid at compilation time");
-    }
-
     unless ($comma) {
         skip("no locale available where LC_NUMERIC is a comma", 2);
     }
@@ -282,4 +270,4 @@ EOF
 
 } # SKIP
 
-sub last { 17 }
+sub last { 16 }
