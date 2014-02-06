@@ -223,6 +223,7 @@ my @death =
  "m/(?('/" => "Sequence (?('... not terminated {#} m/(?('{#}/",
  'm/\g{/'  => 'Sequence \g{... not terminated {#} m/\g{{#}/',
  'm/\k</'  => 'Sequence \k<... not terminated {#} m/\k<{#}/',
+ 'm/\cß/' => "Character following \"\\c\" must be printable ASCII",
 );
 
 my @death_utf8 = mark_as_utf8(
@@ -302,7 +303,8 @@ my @death_utf8 = mark_as_utf8(
  '/(?[ \p{ ネ = bar } ])/' => 'Property \'ネ = bar\' is unknown {#} m/(?[ \p{ ネ = bar }{#} ])/',
  '/ネ(?[ \t ]/' => 'Syntax error in (?[...]) in regex m/ネ(?[ \t ]/',
  '/(?[ \t + \e # ネ This was supposed to be a comment ])/' => 'Syntax error in (?[...]) in regex m/(?[ \t + \e # ネ This was supposed to be a comment ])/',
- 'm/(*ネ)ネ/' => q<Unknown verb pattern 'ネ' {#} m/(*ネ){#}ネ/>
+ 'm/(*ネ)ネ/' => q<Unknown verb pattern 'ネ' {#} m/(*ネ){#}ネ/>,
+ '/\cネ/' => "Character following \"\\c\" must be printable ASCII",
 );
 push @death, @death_utf8;
 

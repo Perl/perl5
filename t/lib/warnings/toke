@@ -1378,6 +1378,12 @@ OPTION fatal
 Use ";" instead of "\c{" at - line 3.
 ########
 # toke.c
+my $a = "\câ";
+EXPECT
+OPTION fatal
+Character following "\c" must be printable ASCII at - line 2.
+########
+# toke.c
 use warnings 'syntax' ;
 my $a = qr/foo/du;
 $a = qr/foo/lai;
