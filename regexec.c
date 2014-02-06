@@ -909,12 +909,13 @@ Perl_re_intuit_start(pTHX_
                     : prog->substrs->data[other_ix].substr)
     {
 	/* Take into account the "other" substring. */
-      do_other_substr:
-	{
             char *last, *last1;
             char *s;
             SV* must;
-            struct reg_substr_datum *other = &prog->substrs->data[other_ix];
+            struct reg_substr_datum *other;
+
+          do_other_substr:
+            other = &prog->substrs->data[other_ix];
 
             /* if "other" is anchored:
              * we've previously found a floating substr starting at check_at.
@@ -1064,7 +1065,6 @@ Perl_re_intuit_start(pTHX_
                     other_last = HOP3c(s, 1, strend);
                 }
             }
-	}
     }
     else {
         DEBUG_OPTIMISE_MORE_r(
