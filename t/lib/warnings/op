@@ -1904,3 +1904,20 @@ sub dont_warn_44 { redo ($a or $b) while(1);  }
 sub dont_warn_45 { redo ($a and $b) while(1); }
 sub dont_warn_46 { redo ($a xor $b) while(1); }
 EXPECT
+########
+use feature "signatures";
+sub aaa { 2 }
+sub bbb ($a) { 4 }
+$aaa = sub { 2 };
+$bbb = sub ($a) { 4 };
+EXPECT
+The signatures feature is experimental at - line 3.
+The signatures feature is experimental at - line 5.
+########
+no warnings "experimental::signatures";
+use feature "signatures";
+sub aaa { 2 }
+sub bbb ($a) { 4 }
+$aaa = sub { 2 };
+$bbb = sub ($a) { 4 };
+EXPECT

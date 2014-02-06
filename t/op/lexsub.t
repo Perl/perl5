@@ -307,7 +307,7 @@ sub make_anon_with_state_sub{
   r(1);
 }
 like runperl(
-      switches => [ '-Mfeature=:all' ],
+      switches => [ '-Mfeature=lexical_subs,state' ],
       prog     => 'state sub a { foo ref } a()',
       stderr   => 1
      ),
@@ -600,7 +600,7 @@ not_lexical11();
   is $w, undef, 'no double free from constant my subs';
 }
 like runperl(
-      switches => [ '-Mfeature=:all' ],
+      switches => [ '-Mfeature=lexical_subs,state' ],
       prog     => 'my sub a { foo ref } a()',
       stderr   => 1
      ),
@@ -676,7 +676,7 @@ eval 'sub not_lexical7 { my @x }';
 }
 
 like runperl(
-      switches => [ '-Mfeature=:all', '-Mwarnings=FATAL,all', '-M-warnings=experimental::lexical_subs' ],
+      switches => [ '-Mfeature=lexical_subs,state', '-Mwarnings=FATAL,all', '-M-warnings=experimental::lexical_subs' ],
       prog     => 'my sub foo; sub foo { foo } foo',
       stderr   => 1
      ),
@@ -684,7 +684,7 @@ like runperl(
     'deep recursion warnings for lexical subs do not crash';
 
 like runperl(
-      switches => [ '-Mfeature=:all', '-Mwarnings=FATAL,all', '-M-warnings=experimental::lexical_subs' ],
+      switches => [ '-Mfeature=lexical_subs,state', '-Mwarnings=FATAL,all', '-M-warnings=experimental::lexical_subs' ],
       prog     => 'my sub foo() { 42 } undef &foo',
       stderr   => 1
      ),

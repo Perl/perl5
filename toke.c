@@ -6010,14 +6010,14 @@ Perl_yylex(pTHX)
 		/* XXX losing whitespace on sequential attributes here */
 	    }
 	    {
-		const char tmp
-		    = (PL_expect == XOPERATOR ? '=' : '{'); /*'}(' for vi */
-		if (*s != ';' && *s != '}' && *s != tmp
-		    && (tmp != '=' || *s != ')')) {
+		if (*s != ';' && *s != '}' &&
+		    !(PL_expect == XOPERATOR
+			? (*s == '=' ||  *s == ')')
+			: (*s == '{' ||  *s == '('))) {
 		    const char q = ((*s == '\'') ? '"' : '\'');
 		    /* If here for an expression, and parsed no attrs, back
 		       off. */
-		    if (tmp == '=' && !attrs) {
+		    if (PL_expect == XOPERATOR && !attrs) {
 			s = PL_bufptr;
 			break;
 		    }
@@ -8777,7 +8777,7 @@ Perl_yylex(pTHX)
 		}
 
 		/* Look for a prototype */
-		if (*s == '(') {
+		if (*s == '(' && !FEATURE_SIGNATURES_IS_ENABLED) {
 		    s = scan_str(s,!!PL_madskills,FALSE,FALSE,FALSE,NULL);
 		    COPLINE_SET_FROM_MULTI_END;
 		    if (!s)
@@ -8806,7 +8806,7 @@ Perl_yylex(pTHX)
 
 		if (*s == ':' && s[1] != ':')
 		    PL_expect = attrful;
-		else if (*s != '{' && key == KEY_sub) {
+		else if ((*s != '{' && *s != '(') && key == KEY_sub) {
 		    if (!have_name)
 			Perl_croak(aTHX_ "Illegal declaration of anonymous subroutine");
 		    else if (*s != ';' && *s != '}')
@@ -12392,6 +12392,206 @@ Perl_parse_stmtseq(pTHX_ U32 flags)
     if (c != -1 && c != /*{*/'}')
 	qerror(Perl_mess(aTHX_ "Parse error"));
     return stmtseqop;
+}
+
+#define lex_token_boundary() S_lex_token_boundary(aTHX)
+static void
+S_lex_token_boundary(pTHX)
+{
+    PL_oldoldbufptr = PL_oldbufptr;
+    PL_oldbufptr = PL_bufptr;
+}
+
+#define parse_opt_lexvar() S_parse_opt_lexvar(aTHX)
+static OP *
+S_parse_opt_lexvar(pTHX)
+{
+    I32 sigil, c;
+    char *s, *d;
+    OP *var;
+    lex_token_boundary();
+    sigil = lex_read_unichar(0);
+    if (lex_peek_unichar(0) == '#') {
+	qerror(Perl_mess(aTHX_ "Parse error"));
+	return NULL;
+    }
+    lex_read_space(0);
+    c = lex_peek_unichar(0);
+    if (c == -1 || !(UTF ? isIDFIRST_uni(c) : isIDFIRST_A(c)))
+	return NULL;
+    s = PL_bufptr;
+    d = PL_tokenbuf + 1;
+    PL_tokenbuf[0] = sigil;
+    parse_ident(&s, &d, PL_tokenbuf + sizeof(PL_tokenbuf) - 1, 0, cBOOL(UTF));
+    PL_bufptr = s;
+    if (d == PL_tokenbuf+1)
+	return NULL;
+    *d = 0;
+    var = newOP(sigil == '$' ? OP_PADSV : sigil == '@' ? OP_PADAV : OP_PADHV,
+		OPf_MOD | (OPpLVAL_INTRO<<8));
+    var->op_targ = allocmy(PL_tokenbuf, d - PL_tokenbuf, UTF ? SVf_UTF8 : 0);
+    return var;
+}
+
+OP *
+Perl_parse_subsignature(pTHX)
+{
+    I32 c;
+    int prev_type = 0, pos = 0, min_arity = 0, max_arity = 0;
+    OP *initops = NULL;
+    lex_read_space(0);
+    c = lex_peek_unichar(0);
+    while (c != /*(*/')') {
+	switch (c) {
+	    case '$': {
+		OP *var, *expr;
+		if (prev_type == 2)
+		    qerror(Perl_mess(aTHX_ "Slurpy parameter not last"));
+		var = parse_opt_lexvar();
+		expr = var ?
+		    newBINOP(OP_AELEM, 0,
+			ref(newUNOP(OP_RV2AV, 0, newGVOP(OP_GV, 0, PL_defgv)),
+			    OP_RV2AV),
+			newSVOP(OP_CONST, 0, newSViv(pos))) :
+		    NULL;
+		lex_read_space(0);
+		c = lex_peek_unichar(0);
+		if (c == '=') {
+		    lex_token_boundary();
+		    lex_read_unichar(0);
+		    lex_read_space(0);
+		    c = lex_peek_unichar(0);
+		    if (c == ',' || c == /*(*/')') {
+			if (var)
+			    qerror(Perl_mess(aTHX_ "Optional parameter "
+				    "lacks default expression"));
+		    } else {
+			OP *defexpr = parse_termexpr(0);
+			if (defexpr->op_type == OP_UNDEF &&
+				!(defexpr->op_flags & OPf_KIDS)) {
+			    op_free(defexpr);
+			} else {
+			    OP *ifop = 
+				newBINOP(OP_GE, 0,
+				    scalar(newUNOP(OP_RV2AV, 0,
+					    newGVOP(OP_GV, 0, PL_defgv))),
+				    newSVOP(OP_CONST, 0, newSViv(pos+1)));
+			    expr = var ?
+				newCONDOP(0, ifop, expr, defexpr) :
+				newLOGOP(OP_OR, 0, ifop, defexpr);
+			}
+		    }
+		    prev_type = 1;
+		} else {
+		    if (prev_type == 1)
+			qerror(Perl_mess(aTHX_ "Mandatory parameter "
+				"follows optional parameter"));
+		    prev_type = 0;
+		    min_arity = pos + 1;
+		}
+		if (var) expr = newASSIGNOP(OPf_STACKED, var, 0, expr);
+		if (expr)
+		    initops = op_append_list(OP_LINESEQ, initops,
+				newSTATEOP(0, NULL, expr));
+		max_arity = ++pos;
+	    } break;
+	    case '@':
+	    case '%': {
+		OP *var;
+		if (prev_type == 2)
+		    qerror(Perl_mess(aTHX_ "Slurpy parameter not last"));
+		var = parse_opt_lexvar();
+		if (c == '%') {
+		    OP *chkop = newLOGOP((pos & 1) ? OP_OR : OP_AND, 0,
+			    newBINOP(OP_BIT_AND, 0,
+				scalar(newUNOP(OP_RV2AV, 0,
+				    newGVOP(OP_GV, 0, PL_defgv))),
+				newSVOP(OP_CONST, 0, newSViv(1))),
+			    newLISTOP(OP_DIE, 0, newOP(OP_PUSHMARK, 0),
+				newSVOP(OP_CONST, 0,
+				    newSVpvs("Odd name/value argument "
+					"for subroutine"))));
+		    if (pos != min_arity)
+			chkop = newLOGOP(OP_AND, 0,
+				    newBINOP(OP_GT, 0,
+					scalar(newUNOP(OP_RV2AV, 0,
+					    newGVOP(OP_GV, 0, PL_defgv))),
+					newSVOP(OP_CONST, 0, newSViv(pos))),
+				    chkop);
+		    initops = op_append_list(OP_LINESEQ,
+				newSTATEOP(0, NULL, chkop),
+				initops);
+		}
+		if (var) {
+		    OP *slice = pos ?
+			op_prepend_elem(OP_ASLICE,
+			    newOP(OP_PUSHMARK, 0),
+			    newLISTOP(OP_ASLICE, 0,
+				list(newRANGE(0,
+				    newSVOP(OP_CONST, 0, newSViv(pos)),
+				    newUNOP(OP_AV2ARYLEN, 0,
+					ref(newUNOP(OP_RV2AV, 0,
+						newGVOP(OP_GV, 0, PL_defgv)),
+					    OP_AV2ARYLEN)))),
+				ref(newUNOP(OP_RV2AV, 0,
+					newGVOP(OP_GV, 0, PL_defgv)),
+				    OP_ASLICE))) :
+			newUNOP(OP_RV2AV, 0, newGVOP(OP_GV, 0, PL_defgv));
+		    initops = op_append_list(OP_LINESEQ, initops,
+			newSTATEOP(0, NULL,
+			    newASSIGNOP(OPf_STACKED, var, 0, slice)));
+		}
+		prev_type = 2;
+		max_arity = -1;
+	    } break;
+	    default:
+		parse_error:
+		qerror(Perl_mess(aTHX_ "Parse error"));
+		return NULL;
+	}
+	lex_read_space(0);
+	c = lex_peek_unichar(0);
+	switch (c) {
+	    case /*(*/')': break;
+	    case ',':
+		do {
+		    lex_token_boundary();
+		    lex_read_unichar(0);
+		    lex_read_space(0);
+		    c = lex_peek_unichar(0);
+		} while (c == ',');
+		break;
+	    default:
+		goto parse_error;
+	}
+    }
+    if (min_arity != 0) {
+	initops = op_append_list(OP_LINESEQ,
+	    newSTATEOP(0, NULL,
+		newLOGOP(OP_OR, 0,
+		    newBINOP(OP_GE, 0,
+			scalar(newUNOP(OP_RV2AV, 0,
+			    newGVOP(OP_GV, 0, PL_defgv))),
+			newSVOP(OP_CONST, 0, newSViv(min_arity))),
+		    newLISTOP(OP_DIE, 0, newOP(OP_PUSHMARK, 0),
+			newSVOP(OP_CONST, 0,
+			    newSVpvs("Too few arguments for subroutine"))))),
+	    initops);
+    }
+    if (max_arity != -1) {
+	initops = op_append_list(OP_LINESEQ,
+	    newSTATEOP(0, NULL,
+		newLOGOP(OP_OR, 0,
+		    newBINOP(OP_LE, 0,
+			scalar(newUNOP(OP_RV2AV, 0,
+			    newGVOP(OP_GV, 0, PL_defgv))),
+			newSVOP(OP_CONST, 0, newSViv(max_arity))),
+		    newLISTOP(OP_DIE, 0, newOP(OP_PUSHMARK, 0),
+			newSVOP(OP_CONST, 0,
+			    newSVpvs("Too many arguments for subroutine"))))),
+	    initops);
+    }
+    return initops;
 }
 
 /*

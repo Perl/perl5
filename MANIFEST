@@ -5266,6 +5266,7 @@ t/op/runlevel.t			See if die() works from perl_call_*()
 t/op/select.t			See if 0- and 1-argument select works
 t/op/setpgrpstack.t		See if setpgrp works
 t/op/sigdispatch.t		See if signals are always dispatched
+t/op/signatures.t		See if sub signatures work
 t/op/sigsystem.t		See if system and SIGCHLD handlers play together nicely
 t/op/sleep.t			See if sleep works
 t/op/smartkve.t			See if smart deref for keys/values/each works

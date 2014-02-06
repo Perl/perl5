@@ -1926,6 +1926,14 @@ L<perlrecharclass/Extended Bracketed Character Classes>.
     use feature 'lexical_subs';
     my sub foo { ... }
 
+=item Experimental subroutine signatures not enabled
+
+(F) To use subroutine signatures, you must first enable them:
+
+    no warnings "experimental:signatures";
+    use feature "signatures";
+    sub foo ($left, $right) { ... }
+
 =item Explicit blessing to '' (assuming package main)
 
 (W misc) You are blessing a reference to a zero length string.  This has
@@ -2222,6 +2230,9 @@ to your Perl administrator.
 
 (W illegalproto) An illegal character was found in a prototype declaration.
 Legal characters in prototypes are $, @, %, *, ;, [, ], &, \, and +.
+Perhaps you were trying to write a subroutine signature but didn't enable
+that feature first (C<use feature 'signatures'>), so your signature was
+instead interpreted as a bad prototype.
 
 =item Illegal declaration of anonymous subroutine
 
@@ -2856,6 +2867,9 @@ appear if components are not found, or are too long.  See
 syntax of function prototypes is given a brief compile-time check for
 obvious errors like invalid characters.  A more rigorous check is run
 when the function is called.
+Perhaps the function's author was trying to write a subroutine signature
+but didn't enable that feature first (C<use feature 'signatures'>),
+so the signature was instead interpreted as a bad prototype.
 
 =item Malformed UTF-8 character (%s)
 
@@ -2904,6 +2918,15 @@ rules and perl was unable to guess how to make more progress.
 
 (F) Perl thought it was reading UTF-16 encoded character data but while
 doing it Perl met a malformed Unicode surrogate.
+
+=item Mandatory parameter follows optional parameter
+
+(F) In a subroutine signature, you wrote something like "$a = undef,
+$b", making an earlier parameter optional and a later one mandatory.
+Parameters are filled from left to right, so it's impossible for the
+caller to omit an earlier one and pass a later one.  If you want to act
+as if the parameters are filled from right to left, declare the rightmost
+optional and then shuffle the parameters around in the subroutine's body.
 
 =item Matched non-Unicode code point 0x%X against Unicode property; may
 not be portable
@@ -3619,6 +3642,15 @@ the braces.
 (4294967295) and therefore non-portable between systems.  See
 L<perlport> for more on portability concerns.
 
+=item Odd name/value argument for subroutine
+
+(F) A subroutine using a slurpy hash parameter in its signature
+received an odd number of arguments to populate the hash.  It requires
+the arguments to be paired, with the same number of keys as values.
+The caller of the subroutine is presumably at fault.  Inconveniently,
+this error will be reported at the location of the subroutine, not that
+of the caller.
+
 =item Odd number of arguments for overload::constant
 
 (W overload) The call to overload::constant contained an odd number of
@@ -3728,6 +3760,13 @@ was expecting an operator.  The parser has assumed you really meant to
 use an operator, but this is highly likely to be incorrect.  For
 example, if you say "*foo *foo" it will be interpreted as if you said
 "*foo * 'foo'".
+
+=item Optional parameter lacks default expression
+
+(F) In a subroutine signature, you wrote something like "$a =", making a
+named optional parameter without a default value.  A nameless optional
+parameter is permitted to have no default value, but a named one must
+have a specific default.  You probably want "$a = undef".
 
 =item "our" variable %s redeclared
 
@@ -5009,6 +5048,12 @@ a compilation error, but could not be found, so it was leaked instead.
 it can reliably handle and C<sleep> probably slept for less time than
 requested.
 
+=item Slurpy parameter not last
+
+(F) In a subroutine signature, you put something after a slurpy (array or
+hash) parameter.  The slurpy parameter takes all the available arguments,
+so there can't be any left to fill later parameters.
+
 =item Smart matching a non-overloaded object breaks encapsulation
 
 (F) You should not use the C<~~> operator on an object that does not
@@ -5358,6 +5403,18 @@ warning:
 
     no warnings "experimental::regex_sets";
 
+=item The signatures feature is experimental
+
+(S experimental::signatures) This warning is emitted if you unwrap a
+subroutine's arguments using a signature.  Simply suppress the warning
+if you want to use the feature, but know that in doing so you are taking
+the risk of using an experimental feature which may change or be removed
+in a future Perl version:
+
+    no warnings "experimental::signatures";
+    use feature "signatures";
+    sub foo ($left, $right) { ... }
+
 =item The stat preceding %s wasn't an lstat
 
 (F) It makes no sense to test the current stat buffer for symbolic
@@ -5426,6 +5483,13 @@ See L<perlunicode/"User-Defined Character Properties">.
 (F) There has to be at least one argument to syscall() to specify the
 system call to call, silly dilly.
 
+=item Too few arguments for subroutine
+
+(F) A subroutine using a signature received fewer arguments than required
+by the signature.  The caller of the subroutine is presumably at fault.
+Inconveniently, this error will be reported at the location of the
+subroutine, not that of the caller.
+
 =item Too late for "-%s" option
 
 (X) The #! line (or local equivalent) in a Perl script contains the
@@ -5455,6 +5519,13 @@ BEGIN block.
 =item Too many arguments for %s
 
 (F) The function requires fewer arguments than you specified.
+
+=item Too many arguments for subroutine
+
+(F) A subroutine using a signature received more arguments than required
+by the signature.  The caller of the subroutine is presumably at fault.
+Inconveniently, this error will be reported at the location of the
+subroutine, not that of the caller.
 
 =item Too many )'s
 

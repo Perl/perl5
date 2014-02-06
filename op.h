@@ -695,7 +695,7 @@ struct loop {
 #define PERL_LOADMOD_NOIMPORT		0x2	/* use Module () */
 #define PERL_LOADMOD_IMPORT_OPS		0x4	/* use Module (...) */
 
-#if defined(PERL_IN_PERLY_C) || defined(PERL_IN_OP_C)
+#if defined(PERL_IN_PERLY_C) || defined(PERL_IN_OP_C) || defined(PERL_IN_TOKE_C)
 #define ref(o, type) doref(o, type, TRUE)
 #endif
 
