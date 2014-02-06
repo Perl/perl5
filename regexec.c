@@ -651,9 +651,6 @@ Perl_re_intuit_start(pTHX_
     RXi_GET_DECL(prog,progi);
     regmatch_info reginfo_buf;  /* create some info to pass to find_byclass */
     regmatch_info *const reginfo = &reginfo_buf;
-#ifdef DEBUGGING
-    const char * const i_strpos = strpos;
-#endif
     GET_RE_DEBUG_FLAGS_DECL;
 
     PERL_ARGS_ASSERT_RE_INTUIT_START;
@@ -821,7 +818,7 @@ Perl_re_intuit_start(pTHX_
                 "  At restart: rx_origin=%"IVdf" Check offset min: %"IVdf
                 " Start shift: %"IVdf" End shift %"IVdf
                 " Real end Shift: %"IVdf"\n",
-                (IV)(rx_origin - i_strpos),
+                (IV)(rx_origin - strpos),
                 (IV)prog->check_offset_min,
                 (IV)start_shift,
                 (IV)end_shift,
@@ -880,7 +877,7 @@ Perl_re_intuit_start(pTHX_
     if (!check_at)
 	goto fail_finish;
     /* Finish the diagnostic message */
-    DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "%ld...\n", (long)(check_at - i_strpos)) );
+    DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "%ld...\n", (long)(check_at - strpos)) );
 
     /* set rx_origin to the minimum position where the regex could start
      * matching, given the constraint of the just-matched check substring.
@@ -1036,7 +1033,7 @@ Perl_re_intuit_start(pTHX_
             DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
                 ", trying %s at offset %ld...\n",
                 (other_ix ? "floating" : "anchored"),
-                (long)(HOP3c(check_at, 1, strend) - i_strpos)));
+                (long)(HOP3c(check_at, 1, strend) - strpos)));
 
             other_last = HOP3c(last, 1, strend) /* highest failure */;
             rx_origin =
@@ -1047,7 +1044,7 @@ Perl_re_intuit_start(pTHX_
         }
         else {
             DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, " at offset %ld...\n",
-                  (long)(s - i_strpos)));
+                  (long)(s - strpos)));
 
             if (other_ix) {
                 /* other_last is set to s, not s+1, since its possible for
@@ -1114,7 +1111,7 @@ Perl_re_intuit_start(pTHX_
                          */
                         rx_origin = t + 1;
                         DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "  Found /%s^%s/m at offset %ld, rescanning for anchored from offset %ld...\n",
-                            PL_colors[0], PL_colors[1], (long)(rx_origin - i_strpos), (long)(rx_origin - i_strpos + prog->anchored_offset)));
+                            PL_colors[0], PL_colors[1], (long)(rx_origin - strpos), (long)(rx_origin - strpos + prog->anchored_offset)));
                         assert(prog->substrs->check_ix); /* other is float */
                         goto do_other_substr;
                     }
@@ -1122,14 +1119,14 @@ Perl_re_intuit_start(pTHX_
                     /* XXXX Why not check for STCLASS? */
                     rx_origin = t + 1;
                     DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "  Found /%s^%s/m at offset %ld...\n",
-                        PL_colors[0], PL_colors[1], (long)(rx_origin - i_strpos)));
+                        PL_colors[0], PL_colors[1], (long)(rx_origin - strpos)));
                     break; /* success: found anchor */
                 }
                 /* Position contradicts check-string */
                 /* XXXX probably better to look for check-string
                    than for "\n", so one should lower the limit for t? */
                 DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "  Found /%s^%s/m, restarting lookup for check-string at offset %ld...\n",
-                    PL_colors[0], PL_colors[1], (long)(t + 1 - i_strpos)));
+                    PL_colors[0], PL_colors[1], (long)(t + 1 - strpos)));
                 other_last = rx_origin = t + 1;
                 goto restart;
             }
@@ -1275,7 +1272,7 @@ Perl_re_intuit_start(pTHX_
 			goto giveup;
 		    DEBUG_EXECUTE_r( PerlIO_printf(Perl_debug_log,
 				"  Looking for %s substr starting at offset %ld...\n",
-				 what, (long)(rx_origin + start_shift - i_strpos)) );
+				 what, (long)(rx_origin + start_shift - strpos)) );
 		    goto restart;
 		}
 		/* Have both, check_string is floating */
@@ -1288,7 +1285,7 @@ Perl_re_intuit_start(pTHX_
                 }
 		DEBUG_EXECUTE_r( PerlIO_printf(Perl_debug_log,
 			  "  Looking for anchored substr starting at offset %ld...\n",
-			  (long)(other_last - i_strpos)) );
+			  (long)(other_last - strpos)) );
                 assert(prog->substrs->check_ix); /* other is float */
 		goto do_other_substr;
 	    }
@@ -1301,7 +1298,7 @@ Perl_re_intuit_start(pTHX_
 		DEBUG_EXECUTE_r( PerlIO_printf(Perl_debug_log,
 			  "  Looking for /%s^%s/m starting at offset %ld...\n",
 			  PL_colors[0], PL_colors[1],
-                          (long)(rx_origin - i_strpos)) );
+                          (long)(rx_origin - strpos)) );
                 /* XXX DAPM I don't yet know why this is true, but the code
                  * assumed it when it used to do goto try_at_offset */
                 assert(rx_origin != strpos);
@@ -1318,7 +1315,7 @@ Perl_re_intuit_start(pTHX_
 	if (t != s) {
             DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
 			"  By STCLASS: moving %ld --> %ld\n",
-                                  (long)(t - i_strpos), (long)(s - i_strpos))
+                                  (long)(t - strpos), (long)(s - strpos))
                    );
         }
         else {
@@ -1330,7 +1327,7 @@ Perl_re_intuit_start(pTHX_
   giveup:
     DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "Intuit: %s%s:%s match at offset %ld\n",
 			  PL_colors[4], (check ? "Successfully guessed" : "Giving up"),
-			  PL_colors[5], (long)(rx_origin - i_strpos)) );
+			  PL_colors[5], (long)(rx_origin - strpos)) );
     return rx_origin;
 
   fail_finish:				/* Substring not found */
