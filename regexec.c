@@ -909,162 +909,162 @@ Perl_re_intuit_start(pTHX_
                     : prog->substrs->data[other_ix].substr)
     {
 	/* Take into account the "other" substring. */
-            char *last, *last1;
-            char *s;
-            SV* must;
-            struct reg_substr_datum *other;
+        char *last, *last1;
+        char *s;
+        SV* must;
+        struct reg_substr_datum *other;
 
-          do_other_substr:
-            other = &prog->substrs->data[other_ix];
+      do_other_substr:
+        other = &prog->substrs->data[other_ix];
 
-            /* if "other" is anchored:
-             * we've previously found a floating substr starting at check_at.
-             * This means that the regex origin must lie somewhere
-             * between min (rx_origin): HOP3(check_at, -check_offset_max)
-             * and max:                 HOP3(check_at, -check_offset_min)
-             * (except that min will be >= strpos)
-             * So the fixed  substr must lie somewhere between
-             *  HOP3(min, anchored_offset)
-             *  HOP3(max, anchored_offset) + SvCUR(substr)
+        /* if "other" is anchored:
+         * we've previously found a floating substr starting at check_at.
+         * This means that the regex origin must lie somewhere
+         * between min (rx_origin): HOP3(check_at, -check_offset_max)
+         * and max:                 HOP3(check_at, -check_offset_min)
+         * (except that min will be >= strpos)
+         * So the fixed  substr must lie somewhere between
+         *  HOP3(min, anchored_offset)
+         *  HOP3(max, anchored_offset) + SvCUR(substr)
+         */
+
+        /* if "other" is floating
+         * Calculate last1, the absolute latest point where the
+         * floating substr could start in the string, ignoring any
+         * constraints from the earlier fixed match. It is calculated
+         * as follows:
+         *
+         * strend - prog->minlen (in chars) is the absolute latest
+         * position within the string where the origin of the regex
+         * could appear. The latest start point for the floating
+         * substr is float_min_offset(*) on from the start of the
+         * regex.  last1 simply combines thee two offsets.
+         *
+         * (*) You might think the latest start point should be
+         * float_max_offset from the regex origin, and technically
+         * you'd be correct. However, consider
+         *    /a\d{2,4}bcd\w/
+         * Here, float min, max are 3,5 and minlen is 7.
+         * This can match either
+         *    /a\d\dbcd\w/
+         *    /a\d\d\dbcd\w/
+         *    /a\d\d\d\dbcd\w/
+         * In the first case, the regex matches minlen chars; in the
+         * second, minlen+1, in the third, minlen+2.
+         * In the first case, the floating offset is 3 (which equals
+         * float_min), in the second, 4, and in the third, 5 (which
+         * equals float_max). In all cases, the floating string bcd
+         * can never start more than 4 chars from the end of the
+         * string, which equals minlen - float_min. As the substring
+         * starts to match more than float_min from the start of the
+         * regex, it makes the regex match more than minlen chars,
+         * and the two cancel each other out. So we can always use
+         * float_min - minlen, rather than float_max - minlen for the
+         * latest position in the string.
+         *
+         * Note that -minlen + float_min_offset is equivalent (AFAIKT)
+         * to CHR_SVLEN(must) - !!SvTAIL(must) + prog->float_end_shift
+         */
+
+        if (!other_ix)
+            assert(prog->minlen > other->min_offset);
+
+        last1 = HOP3c(strend,
+                        other->min_offset - prog->minlen, strbeg);
+
+        if (other_ix) {
+            /* last is the latest point where the floating substr could
+             * start, *given* any constraints from the earlier fixed
+             * match. This constraint is that the floating string starts
+             * <= float_max_offset chars from the regex origin (rx_origin).
+             * If this value is less than last1, use it instead.
              */
+            assert(rx_origin <= last1);
+            last =
+                /* this condition handles the offset==infinity case, and
+                 * is a short-cut otherwise. Although it's comparing a
+                 * byte offset to a char length, it does so in a safe way,
+                 * since 1 char always occupies 1 or more bytes,
+                 * so if a string range is  (last1 - rx_origin) bytes,
+                 * it will be less than or equal to  (last1 - rx_origin)
+                 * chars; meaning it errs towards doing the accurate HOP3
+                 * rather than just using last1 as a short-cut */
+                (last1 - rx_origin) < other->max_offset
+                    ? last1
+                    : (char*)HOP3lim(rx_origin, other->max_offset, last1);
+        }
+        else {
+            assert(strpos + start_shift <= check_at);
+            last = HOP4c(check_at, other->min_offset - start_shift,
+                        strbeg, strend);
+        }
 
-            /* if "other" is floating
-             * Calculate last1, the absolute latest point where the
-             * floating substr could start in the string, ignoring any
-             * constraints from the earlier fixed match. It is calculated
-             * as follows:
-             *
-             * strend - prog->minlen (in chars) is the absolute latest
-             * position within the string where the origin of the regex
-             * could appear. The latest start point for the floating
-             * substr is float_min_offset(*) on from the start of the
-             * regex.  last1 simply combines thee two offsets.
-             *
-             * (*) You might think the latest start point should be
-             * float_max_offset from the regex origin, and technically
-             * you'd be correct. However, consider
-             *    /a\d{2,4}bcd\w/
-             * Here, float min, max are 3,5 and minlen is 7.
-             * This can match either
-             *    /a\d\dbcd\w/
-             *    /a\d\d\dbcd\w/
-             *    /a\d\d\d\dbcd\w/
-             * In the first case, the regex matches minlen chars; in the
-             * second, minlen+1, in the third, minlen+2.
-             * In the first case, the floating offset is 3 (which equals
-             * float_min), in the second, 4, and in the third, 5 (which
-             * equals float_max). In all cases, the floating string bcd
-             * can never start more than 4 chars from the end of the
-             * string, which equals minlen - float_min. As the substring
-             * starts to match more than float_min from the start of the
-             * regex, it makes the regex match more than minlen chars,
-             * and the two cancel each other out. So we can always use
-             * float_min - minlen, rather than float_max - minlen for the
-             * latest position in the string.
-             *
-             * Note that -minlen + float_min_offset is equivalent (AFAIKT)
-             * to CHR_SVLEN(must) - !!SvTAIL(must) + prog->float_end_shift
-             */
+        s = HOP3c(rx_origin, other->min_offset, strend);
+        if (s < other_last)	/* These positions already checked */
+            s = other_last;
 
-            if (!other_ix)
-                assert(prog->minlen > other->min_offset);
+        must = utf8_target ? other->utf8_substr : other->substr;
+        assert(SvPOK(must));
+        s = fbm_instr(
+            (unsigned char*)s,
+            (unsigned char*)last + SvCUR(must) - (SvTAIL(must)!=0),
+            must,
+            multiline ? FBMrf_MULTILINE : 0
+        );
+        DEBUG_EXECUTE_r({
+            RE_PV_QUOTED_DECL(quoted, utf8_target, PERL_DEBUG_PAD_ZERO(0),
+                SvPVX_const(must), RE_SV_DUMPLEN(must), 30);
+            PerlIO_printf(Perl_debug_log, "  %s %s substr %s%s",
+                s ? "Found" : "Contradicts",
+                other_ix ? "floating" : "anchored",
+                quoted, RE_SV_TAIL(must));
+        });
 
-            last1 = HOP3c(strend,
-                            other->min_offset - prog->minlen, strbeg);
+
+        if (!s) {
+            /* last1 is latest possible substr location. If we didn't
+             * find it before there, we never will */
+            if (last >= last1) {
+                DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
+                                        ", giving up...\n"));
+                goto fail_finish;
+            }
+
+            /* try to find the check substr again at a later
+             * position. Maybe next time we'll find the "other" substr
+             * in range too */
+            DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
+                ", trying %s at offset %ld...\n",
+                (other_ix ? "floating" : "anchored"),
+                (long)(HOP3c(check_at, 1, strend) - i_strpos)));
+
+            other_last = HOP3c(last, 1, strend) /* highest failure */;
+            rx_origin =
+                other_ix
+                    ? HOP3c(rx_origin, 1, strend)
+                    : HOP4c(last, 1 - other->min_offset, strbeg, strend);
+            goto restart;
+        }
+        else {
+            DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, " at offset %ld...\n",
+                  (long)(s - i_strpos)));
 
             if (other_ix) {
-                /* last is the latest point where the floating substr could
-                 * start, *given* any constraints from the earlier fixed
-                 * match. This constraint is that the floating string starts
-                 * <= float_max_offset chars from the regex origin (rx_origin).
-                 * If this value is less than last1, use it instead.
+                /* other_last is set to s, not s+1, since its possible for
+                 * a floating substr to fail first time, then succeed
+                 * second time at the same floating position; e.g.:
+                 *     "-AB--AABZ" =~ /\wAB\d*Z/
+                 * The first time round, anchored and float match at
+                 * "-(AB)--AAB(Z)" then fail on the initial \w character
+                 * class. Second time round, they match at "-AB--A(AB)(Z)".
                  */
-                assert(rx_origin <= last1);
-                last =
-                    /* this condition handles the offset==infinity case, and
-                     * is a short-cut otherwise. Although it's comparing a
-                     * byte offset to a char length, it does so in a safe way,
-                     * since 1 char always occupies 1 or more bytes,
-                     * so if a string range is  (last1 - rx_origin) bytes,
-                     * it will be less than or equal to  (last1 - rx_origin)
-                     * chars; meaning it errs towards doing the accurate HOP3
-                     * rather than just using last1 as a short-cut */
-                    (last1 - rx_origin) < other->max_offset
-                        ? last1
-                        : (char*)HOP3lim(rx_origin, other->max_offset, last1);
+                other_last = s;
             }
             else {
-                assert(strpos + start_shift <= check_at);
-                last = HOP4c(check_at, other->min_offset - start_shift,
-                            strbeg, strend);
+                rx_origin = HOP3c(s, -other->min_offset, strbeg);
+                other_last = HOP3c(s, 1, strend);
             }
-
-            s = HOP3c(rx_origin, other->min_offset, strend);
-            if (s < other_last)	/* These positions already checked */
-                s = other_last;
-
-            must = utf8_target ? other->utf8_substr : other->substr;
-            assert(SvPOK(must));
-            s = fbm_instr(
-                (unsigned char*)s,
-                (unsigned char*)last + SvCUR(must) - (SvTAIL(must)!=0),
-                must,
-                multiline ? FBMrf_MULTILINE : 0
-            );
-            DEBUG_EXECUTE_r({
-                RE_PV_QUOTED_DECL(quoted, utf8_target, PERL_DEBUG_PAD_ZERO(0),
-                    SvPVX_const(must), RE_SV_DUMPLEN(must), 30);
-                PerlIO_printf(Perl_debug_log, "  %s %s substr %s%s",
-                    s ? "Found" : "Contradicts",
-                    other_ix ? "floating" : "anchored",
-                    quoted, RE_SV_TAIL(must));
-            });
-
-
-            if (!s) {
-                /* last1 is latest possible substr location. If we didn't
-                 * find it before there, we never will */
-                if (last >= last1) {
-                    DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
-                                            ", giving up...\n"));
-                    goto fail_finish;
-                }
-
-                /* try to find the check substr again at a later
-                 * position. Maybe next time we'll find the "other" substr
-                 * in range too */
-                DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
-                    ", trying %s at offset %ld...\n",
-                    (other_ix ? "floating" : "anchored"),
-                    (long)(HOP3c(check_at, 1, strend) - i_strpos)));
-
-                other_last = HOP3c(last, 1, strend) /* highest failure */;
-                rx_origin =
-                    other_ix
-                        ? HOP3c(rx_origin, 1, strend)
-                        : HOP4c(last, 1 - other->min_offset, strbeg, strend);
-                goto restart;
-            }
-            else {
-                DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, " at offset %ld...\n",
-                      (long)(s - i_strpos)));
-
-                if (other_ix) {
-                    /* other_last is set to s, not s+1, since its possible for
-                     * a floating substr to fail first time, then succeed
-                     * second time at the same floating position; e.g.:
-                     *     "-AB--AABZ" =~ /\wAB\d*Z/
-                     * The first time round, anchored and float match at
-                     * "-(AB)--AAB(Z)" then fail on the initial \w character
-                     * class. Second time round, they match at "-AB--A(AB)(Z)".
-                     */
-                    other_last = s;
-                }
-                else {
-                    rx_origin = HOP3c(s, -other->min_offset, strbeg);
-                    other_last = HOP3c(s, 1, strend);
-                }
-            }
+        }
     }
     else {
         DEBUG_OPTIMISE_MORE_r(
