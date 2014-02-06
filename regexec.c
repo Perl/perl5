@@ -644,7 +644,7 @@ Perl_re_intuit_start(pTHX_
     const bool utf8_target = (sv && SvUTF8(sv)) ? 1 : 0; /* if no sv we have to assume bytes */
     U8   other_ix = 1 - prog->substrs->check_ix;
     bool ml_anch = 0;
-    char *other_last = NULL; /* latest pos 'other' substr already checked to */
+    char *other_last = strpos;/* latest pos 'other' substr already checked to */
     char *check_at = NULL;		/* check substr found at this pos */
     char *checked_upto = NULL;          /* how far into the string we have already checked using find_byclass*/
     const I32 multiline = prog->extflags & RXf_PMf_MULTILINE;
@@ -909,9 +909,6 @@ Perl_re_intuit_start(pTHX_
                     : prog->substrs->data[other_ix].substr)
     {
 	/* Take into account the "other" substring. */
-	if (!other_last)
-	    other_last = strpos;
-
       do_other_substr:
 	{
             char *last, *last1;
