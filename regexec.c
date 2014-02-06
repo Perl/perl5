@@ -1112,9 +1112,9 @@ Perl_re_intuit_start(pTHX_
                            Thus we can arrive here only if check substr
                            is float.  Redo checking for "other"=="fixed".
                          */
-                        rx_origin = strpos = t + 1;
+                        rx_origin = t + 1;
                         DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "  Found /%s^%s/m at offset %ld, rescanning for anchored from offset %ld...\n",
-                            PL_colors[0], PL_colors[1], (long)(strpos - i_strpos), (long)(strpos - i_strpos + prog->anchored_offset)));
+                            PL_colors[0], PL_colors[1], (long)(rx_origin - i_strpos), (long)(rx_origin - i_strpos + prog->anchored_offset)));
                         assert(prog->substrs->check_ix); /* other is float */
                         goto do_other_substr;
                     }
@@ -1130,7 +1130,7 @@ Perl_re_intuit_start(pTHX_
                    than for "\n", so one should lower the limit for t? */
                 DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "  Found /%s^%s/m, restarting lookup for check-string at offset %ld...\n",
                     PL_colors[0], PL_colors[1], (long)(t + 1 - i_strpos)));
-                other_last = strpos = rx_origin = t + 1;
+                other_last = rx_origin = t + 1;
                 goto restart;
             }
             t++;
