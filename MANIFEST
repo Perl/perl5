@@ -3589,6 +3589,7 @@ ext/DynaLoader/dl_vms.xs	VMS implementation
 ext/DynaLoader/dl_win32.xs	Win32 implementation
 ext/DynaLoader/DynaLoader_pm.PL	Dynamic Loader perl module
 ext/DynaLoader/hints/aix.pl	Hint for DynaLoader for named architecture
+ext/DynaLoader/hints/android.pl	Hint for DynaLoader for named architecture
 ext/DynaLoader/hints/gnukfreebsd.pl	Hint for DynaLoader for named architecture
 ext/DynaLoader/hints/gnuknetbsd.pl	Hint for DynaLoader for named architecture
 ext/DynaLoader/hints/linux.pl	Hint for DynaLoader for named architecture
