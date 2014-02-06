@@ -3546,7 +3546,7 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
     dVAR;
 
     U8 *pat = (U8*)STRING(text_node);
-    U8 folded[UTF8_MAX_FOLD_CHAR_EXPAND * UTF8_MAXBYTES_CASE + 1];
+    U8 folded[UTF8_MAX_FOLD_CHAR_EXPAND * UTF8_MAXBYTES_CASE + 1] = { '\0' };
 
     if (OP(text_node) == EXACT) {
 
