@@ -6162,12 +6162,10 @@ you can write it as C<push(@tied_array,())> to avoid this warning.
 (F) The "use" keyword is recognized and executed at compile time, and
 returns no useful value.  See L<perlmod>.
 
-=item Use "%c" instead of "\c{"
+=item Use "%s" instead of "%s"
 
-(F) The C<\cI<X>> construct is intended to be a way to specify
-non-printable characters.  You used it with a C<"{"> which evaluates to
-C<";">, which is printable.  On ASCII platforms, just use a semi-colon
-or a backslash-semi-colon without the C<"\c">.
+(F) The second listed construct is no longer legal.  Use the first one
+instead.
 
 =item Use of assignment to $[ is deprecated
 

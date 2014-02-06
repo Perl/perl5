@@ -11277,7 +11277,8 @@ tryagain:
 	    FLAGS(ret) = get_regex_charset(RExC_flags);
 	    *flagp |= SIMPLE;
 	    if (! SIZE_ONLY && (U8) *(RExC_parse + 1) == '{') {
-		ckWARNdep(RExC_parse, "\"\\b{\" is deprecated; use \"\\b\\{\" or \"\\b[{]\" instead");
+                /* diag_listed_as: Use "%s" instead of "%s" */
+	        vFAIL("Use \"\\b\\{\" instead of \"\\b{\"");
 	    }
 	    goto finish_meta_pat;
 	case 'B':
@@ -11291,7 +11292,8 @@ tryagain:
 	    FLAGS(ret) = get_regex_charset(RExC_flags);
 	    *flagp |= SIMPLE;
 	    if (! SIZE_ONLY && (U8) *(RExC_parse + 1) == '{') {
-		ckWARNdep(RExC_parse, "\"\\B{\" is deprecated; use \"\\B\\{\" or \"\\B[{]\" instead");
+                /* diag_listed_as: Use "%s" instead of "%s" */
+	        vFAIL("Use \"\\B\\{\" instead of \"\\B{\"");
 	    }
 	    goto finish_meta_pat;
 

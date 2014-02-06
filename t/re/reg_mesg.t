@@ -119,6 +119,8 @@ my @death =
 '/(?lil:foo)/' => 'Regexp modifier "l" may not appear twice {#} m/(?lil{#}:foo)/',
 '/(?aaia:foo)/' => 'Regexp modifier "a" may appear a maximum of twice {#} m/(?aaia{#}:foo)/',
 '/(?i-l:foo)/' => 'Regexp modifier "l" may not appear after the "-" {#} m/(?i-l{#}:foo)/',
+'/a\b{cde/' => 'Use "\b\{" instead of "\b{" {#} m/a\{#}b{cde/',
+'/a\B{cde/' => 'Use "\B\{" instead of "\B{" {#} m/a\{#}B{cde/',
 
  '/((x)/' => 'Unmatched ( {#} m/({#}(x)/',
 
@@ -412,8 +414,6 @@ my @experimental_regex_sets = (
 );
 
 my @deprecated = (
-    '/a\b{cde/' => '"\b{" is deprecated; use "\b\{" or "\b[{]" instead {#} m/a\{#}b{cde/',
-    '/a\B{cde/' => '"\B{" is deprecated; use "\B\{" or "\B[{]" instead {#} m/a\{#}B{cde/',
     "/(?x)latin1\\\x{85}\x{85}\\\x{85}/" => 'Escape literal pattern white space under /x {#} ' . "m/(?x)latin1\\\x{85}\x{85}{#}\\\x{85}/",
     'use utf8; /(?x)utf8\\/' => 'Escape literal pattern white space under /x {#} ' . "m/(?x)utf8\\\N{NEXT LINE}\N{NEXT LINE}{#}\\\N{NEXT LINE}/",
     '/((?# This is a comment in the middle of a token)?:foo)/' => 'In \'(?...)\', splitting the initial \'(?\' is deprecated {#} m/((?# This is a comment in the middle of a token)?{#}:foo)/',

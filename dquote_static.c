@@ -63,6 +63,8 @@ S_grok_bslash_c(pTHX_ const char source, const bool output_warning)
     }
     else if (source == '{') {
         assert(isPRINT_A(toCTRL('{')));
+
+        /* diag_listed_as: Use "%s" instead of "%s" */
         Perl_croak(aTHX_ "Use \"%c\" instead of \"\\c{\"", toCTRL('{'));
     }
 
