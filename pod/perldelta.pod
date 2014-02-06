@@ -189,7 +189,7 @@ XXX
 
 L<B::Deparse> has been upgraded from version 1.24 to 1.25.
 
-It now knows how to handle whitespace it prototypes.  Previously, it could
+It now knows how to handle whitespace in prototypes.  Previously, it could
 loop infinitely.  [perl #121050]
 
 =item *
