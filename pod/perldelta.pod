@@ -58,6 +58,19 @@ from its delta document.
 This is designed for Perl core developers to aid in field debugging bugs
 regarding locales.
 
+=head2 Subroutine signatures
+
+Declarative syntax to unwrap argument list into lexical variables.
+C<sub foo ($a,$b) {...}> checks the number of arguments and puts the
+arguments into lexical variables.  Signatures are not equivalent to
+the existing idiom of C<sub foo { my($a,$b) = @_; ... }>.  Signatures
+are only available by enabling a non-default feature, and generate
+warnings about being experimental.  The syntactic clash with
+prototypes is managed by disabling the short prototype syntax when
+signatures are enabled.
+
+See L<perlsub/Signatures> for details.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
@@ -78,6 +91,16 @@ contained no characters whose case change could be affected by the
 locale, the result would not be tainted.  For example, the result of
 C<uc()> on an empty string or one containing only above-Latin1 code
 points is now tainted.  This leads to more consistent tainting results.
+
+=head2 Quote-like escape changes
+
+The character after C<\c> in a double-quoted string ("..." or qq(...))
+or regular expression must now be a printable character and may not be
+C<{>.
+
+A literal C<{> after C<\B> or C<\b> is now fatal.
+
+These were deprecated in perl v5.14.
 
 =head1 Deprecations
 
@@ -187,10 +210,36 @@ XXX
 
 =item *
 
+L<autodie> has been upgraded from version 2.22 to 2.23.
+
+C<autodie> no longer weakens strict by allowing undeclared variables
+with the same name as built-ins.  [cpan #74246]
+
+C<use autodie qw( foo ! foo);> now correctly insists that we have
+hints for foo.
+
+=item *
+
 L<B::Deparse> has been upgraded from version 1.24 to 1.25.
 
 It now knows how to handle whitespace in prototypes.  Previously, it could
 loop infinitely.  [perl #121050]
+
+=item *
+
+L<Compress::Raw::Bzip2> has been upgraded from version 2.063 to 2.064.
+
+Handle non-PVs better.  [cpan #91558]
+
+=item *
+
+L<Compress::Raw::Zlib> has been upgraded from version 2.063 to 2.065.
+
+Handle non-PVs better.  [cpan #91558]
+
+Z_OK instead of Z_BUF_ERROR.  [cpan #92521]
+
+Resolve a C++ build failure in core.  [cpan #92657]
 
 =item *
 
@@ -201,8 +250,37 @@ specified by its prototype.
 
 =item *
 
+L<Digest::SHA> has been upgraded from version 5.85 to 5.86.
+
+Improved the performance of hexadecimal output functions.
+
+=item *
+
+L<ExtUtils::MakeMaker> has been upgraded from version 6.86 to 6.88.
+
+Improved support for Android and other minor changes.
+
+=item *
+
+L<File::Fetch> has been upgraded from version 0.46 to 0.48.
+
+Force curl to be IPv4 only during testing on NetBSD.
+
+=item *
+
+The IO-Compress module collection has been upgraded from version 2.063
+to 2.064.
+
+Android support.
+
+=item *
+
 L<IO::Socket::IP>, tentatively introduced in L<Perl 5.19.8|perl5198delta>,
 has been upgraded from 0.26 to 0.27.
+
+=item *
+
+L<IPC::Cmd> has been upgraded from version 0.90 to 0.92.
 
 =item *
 
@@ -220,9 +298,41 @@ A backwards-compatibility issue with older perls has been fixed.  [cpan #92363]
 
 =item *
 
+L<Locale::Codes> has been upgraded from version 3.28 to 3.29.
+
+=item *
+
+L<Module::Load> has been upgraded from version 0.28 to 0.30.
+
+Prevent uninitialized warnings during testing.
+
+=item *
+
+L<Module::Load::Conditional> has been upgraded from version 0.60 to 0.62.
+
+=item *
+
+The PathTools module collection has been upgraded from version 3.45 to
+3.46.
+
+Improved support for Android.
+
+C<< File::Spec::Unix->tmpdir >> now consistently returns an absolute
+path, unless in taint mode.  [perl #120593]
+
+=item *
+
+L<Pod::Parser> has been upgraded from version 1.61 to 1.62.
+
+=item *
+
 L<threads> has been upgraded from version 1.91 to 1.92.
 
 Synchronization with CPAN release.
+
+=item *
+
+L<version> has been upgraded from version 0.9907 to 0.9908.
 
 =item *
 
@@ -261,6 +371,17 @@ XXX Description of the purpose of the new file here
 XXX Changes which significantly change existing files in F<pod/> go here.
 However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
 section.
+
+=head3 L<perlfunc>
+
+=over 4
+
+=item *
+
+L<perlfunc/exec>'s handling of arguments is now more clearly
+documented.
+
+=back
 
 =head3 L<perlguts>
 
@@ -454,9 +575,9 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
+=item VMS
 
-XXX
+Skip access checks on remotes in opendir().  [perl #121002]
 
 =back
 
@@ -522,13 +643,23 @@ Win32 could result in output sent to stdout on one thread being
 captured by backticks of an external command in another thread.
 
 This could occur for pseudo-forked processes too, as Win32's
-psuedo-fork is implemented in terms of threads. [perl #77672]
+psuedo-fork is implemented in terms of threads.  [perl #77672]
 
 =item *
 
 C<< open $fh, ">+", undef >> no longer leaks memory when TMPDIR is set
-but points to a directory a temporary file cannot be created in. [perl
+but points to a directory a temporary file cannot be created in.  [perl
 #120951]
+
+=item *
+
+C<$^R> is wasn't available outside of the regular expression that
+initialized it.  [perl #121070]
+
+=item *
+
+Fixed a regular expression bug introduced in 5.19.5 where \S, \W etc
+could fail for above ASCII.  [perl #121144]
 
 =back
 
