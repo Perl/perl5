@@ -192,7 +192,7 @@ struct regnode_charclass {
     U8	flags;
     U8  type;
     U16 next_off;
-    U32 arg1;				/* used as ptr in S_regclass */
+    U32 arg1;
     char bitmap[ANYOF_BITMAP_SIZE];	/* only compile-time */
 };
 
@@ -201,7 +201,7 @@ struct regnode_charclass_class {
     U8	flags;				/* ANYOF_POSIXL bit must go here */
     U8  type;
     U16 next_off;
-    U32 arg1;					/* used as ptr in S_regclass */
+    U32 arg1;
     char bitmap[ANYOF_BITMAP_SIZE];		/* both compile-time */
     U32 classflags;	                        /* and run-time */
 };
@@ -212,7 +212,7 @@ struct regnode_charclass_posixl_fold {
     U8	flags;				/* ANYOF_POSIXL bit must go here */
     U8  type;
     U16 next_off;
-    U32 arg1;				/* used as ptr in S_regclass */
+    U32 arg1;
     char bitmap[ANYOF_BITMAP_SIZE];	/* both compile-time */
     U32 classflags;	                /* and run-time */
     SV* utf8_locale_list;               /* list of code points matched by folds
@@ -227,7 +227,7 @@ struct regnode_ssc {
     U8	flags;				/* ANYOF_POSIXL bit must go here */
     U8  type;
     U16 next_off;
-    U32 arg1;				/* used as ptr in S_regclass */
+    U32 arg1;
     char bitmap[ANYOF_BITMAP_SIZE];	/* both compile-time */
     U32 classflags;	                /* and run-time */
     SV* utf8_locale_list;               /* list of code points matched by folds
