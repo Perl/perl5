@@ -1097,46 +1097,59 @@ Perl_re_intuit_start(pTHX_
            are historical artefacts only.  */
         DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
                         "  looking for /^/m anchor"));
-        t = rx_origin;
-        while (t < strend - prog->minlen) {
-            if (*t == '\n') {
-                if (t < check_at - prog->check_offset_min) {
-                    if (utf8_target ? prog->anchored_utf8 : prog->anchored_substr) {
-                        /* Since we moved from the found position,
-                           we definitely contradict the found anchored
-                           substr.  Due to the above check we do not
-                           contradict "check" substr.
-                           Thus we can arrive here only if check substr
-                           is float.  Redo checking for "other"=="fixed".
-                         */
-                        rx_origin = t + 1;
-                        DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "  Found /%s^%s/m at offset %ld, rescanning for anchored from offset %ld...\n",
-                            PL_colors[0], PL_colors[1], (long)(rx_origin - strpos), (long)(rx_origin - strpos + prog->anchored_offset)));
-                        assert(prog->substrs->check_ix); /* other is float */
-                        goto do_other_substr;
-                    }
-                    /* We don't contradict the found floating substring. */
-                    /* XXXX Why not check for STCLASS? */
-                    rx_origin = t + 1;
-                    DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "  Found /%s^%s/m at offset %ld...\n",
-                        PL_colors[0], PL_colors[1], (long)(rx_origin - strpos)));
-                    break; /* success: found anchor */
-                }
-                /* Position contradicts check-string */
-                /* XXXX probably better to look for check-string
-                   than for "\n", so one should lower the limit for t? */
-                DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "  Found /%s^%s/m, restarting lookup for check-string at offset %ld...\n",
-                    PL_colors[0], PL_colors[1], (long)(t + 1 - strpos)));
-                other_last = rx_origin = t + 1;
-                goto restart;
-            }
-            t++;
-        }
-        if (t >= strend - prog->minlen) {
-            DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "  Did not find /%s^%s/m...\n",
-                    PL_colors[0], PL_colors[1]));
+
+        /* we have failed the constraint of a \n before rx_origin.
+         * Find the next \n, if any ... */
+
+        t = (char *)memchr(rx_origin, '\n',
+                        (strend - prog->minlen) - rx_origin);
+        if (!t) {
+            DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
+                            "  Did not find /%s^%s/m...\n",
+                            PL_colors[0], PL_colors[1]));
             goto fail_finish;
         }
+
+        rx_origin = t + 1; /* earliest possible origin is after the \n */
+
+        if (t >= check_at - prog->check_offset_min) {
+            /* Position contradicts check-string; either because
+             * check was anchored (and thus has no wiggle room),
+             * or check was float and t is above the float range */
+
+            /* XXXX probably better to look for check-string
+               than for "\n", so one should lower the limit for t? */
+            DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
+                "  Found /%s^%s/m, restarting lookup for check-string at offset %ld...\n",
+                PL_colors[0], PL_colors[1], (long)(t + 1 - strpos)));
+            other_last = rx_origin;
+            goto restart;
+        }
+
+        /* if we get here, the check substr must have been float,
+         * is in range, and we may or may not have have an anchored
+         * "other" substr which still contradicts */
+        assert(prog->substrs->check_ix); /* check is float */
+
+        if (utf8_target ? prog->anchored_utf8 : prog->anchored_substr) {
+            /* whoops, the anchored "other" substr exists, so we still
+             * contradict. On the other hand, the float "check" substr
+             * didn't contradict, so just retry the anchored "other"
+             * substr */
+            DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
+                "  Found /%s^%s/m at offset %ld, rescanning for anchored from offset %ld...\n",
+                PL_colors[0], PL_colors[1],
+                (long)(rx_origin - strpos),
+                (long)(rx_origin - strpos + prog->anchored_offset)));
+            goto do_other_substr;
+        }
+
+        /* success: we don't contradict the found floating substring
+         * (and there's no anchored substr). */
+        /* XXXX Why not check for STCLASS? */
+        DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
+            "  Found /%s^%s/m at offset %ld...\n",
+            PL_colors[0], PL_colors[1], (long)(rx_origin - strpos)));
     }
     else {
         DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "  Starting position does not contradict /%s^%s/m...\n",
