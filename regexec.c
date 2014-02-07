@@ -963,9 +963,7 @@ Perl_re_intuit_start(pTHX_
          * to CHR_SVLEN(must) - !!SvTAIL(must) + prog->float_end_shift
          */
 
-        if (!other_ix)
-            assert(prog->minlen > other->min_offset);
-
+        assert(prog->minlen >= other->min_offset);
         last1 = HOP3c(strend,
                         other->min_offset - prog->minlen, strbeg);
 
