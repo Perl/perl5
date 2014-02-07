@@ -10774,8 +10774,11 @@ subroutine call, not marked with C<&>, where the callee can be identified
 at compile time as I<cv>.
 
 The C-level function pointer is supplied in I<ckfun>, and an SV argument
-for it is supplied in I<ckobj>.  The function is intended to be called
-in this manner:
+for it is supplied in I<ckobj>.  The function should be defined like this:
+
+    STATIC OP * ckfun(pTHX_ OP *op, GV *namegv, SV *ckobj)
+
+It is intended to be called in this manner:
 
     entersubop = ckfun(aTHX_ entersubop, namegv, ckobj);
 
@@ -12383,6 +12386,18 @@ check chain, and I<old_checker_p> points to the storage location where a
 pointer to the next function in the chain will be stored.  The value of
 I<new_pointer> is written into the L</PL_check> array, while the value
 previously stored there is written to I<*old_checker_p>.
+
+The function should be defined like this:
+
+    static OP *new_checker(pTHX_ OP *op) { ... }
+
+It is intended to be called in this manner:
+
+    new_checker(aTHX_ op)
+
+I<old_checker_p> should be defined like this:
+
+    static Perl_check_t old_checker_p;
 
 L</PL_check> is global to an entire process, and a module wishing to
 hook op checking may find itself invoked more than once per process,
