@@ -1112,9 +1112,12 @@ Perl_re_intuit_start(pTHX_
             goto fail_finish;
         }
 
+        /* since *t == '\n', it's safe to do +1 here rather than HOP(t,1) */
         rx_origin = t + 1; /* earliest possible origin is after the \n */
 
-        if (t >= check_at - prog->check_offset_min) {
+        if (prog->substrs->check_ix == 0  /* check is anchored */
+            || t >= HOP3c(check_at,  - prog->check_offset_min, strpos))
+        {
             /* Position contradicts check-string; either because
              * check was anchored (and thus has no wiggle room),
              * or check was float and t is above the float range */
