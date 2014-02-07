@@ -1085,8 +1085,6 @@ Perl_re_intuit_start(pTHX_
         /* May be due to an implicit anchor of m{.*foo}  */
         && !(prog->intflags & PREGf_IMPLICIT))
     {
-        char *t;
-
         DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
                         "  looking for /^/m anchor"));
 
@@ -1103,27 +1101,29 @@ Perl_re_intuit_start(pTHX_
          * first
          */
 
-        t = (char *)memchr(rx_origin, '\n',
+        rx_origin = (char *)memchr(rx_origin, '\n',
                         HOP3c(strend, - prog->minlen, strpos) - rx_origin);
-        if (!t) {
+        if (!rx_origin) {
             DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
                             "  Did not find /%s^%s/m...\n",
                             PL_colors[0], PL_colors[1]));
             goto fail_finish;
         }
 
-        /* since *t == '\n', it's safe to do +1 here rather than HOP(t,1) */
-        rx_origin = t + 1; /* earliest possible origin is after the \n */
+        /* earliest possible origin is 1 char after the \n.
+         * (since *rx_origin == '\n', it's safe to ++ here rather than
+         * HOP(rx_origin, 1)) */
+        rx_origin++;
 
         if (prog->substrs->check_ix == 0  /* check is anchored */
-            || t >= HOP3c(check_at,  - prog->check_offset_min, strpos))
+            || rx_origin >= HOP3c(check_at,  - prog->check_offset_min, strpos))
         {
             /* Position contradicts check-string; either because
              * check was anchored (and thus has no wiggle room),
-             * or check was float and t is above the float range */
+             * or check was float and rx_origin is above the float range */
             DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
                 "  Found /%s^%s/m, restarting lookup for check-string at offset %ld...\n",
-                PL_colors[0], PL_colors[1], (long)(t + 1 - strpos)));
+                PL_colors[0], PL_colors[1], (long)(rx_origin - strpos)));
             goto restart;
         }
 
