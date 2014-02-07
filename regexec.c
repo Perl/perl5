@@ -1121,8 +1121,6 @@ Perl_re_intuit_start(pTHX_
             DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
                 "  Found /%s^%s/m, restarting lookup for check-string at offset %ld...\n",
                 PL_colors[0], PL_colors[1], (long)(t + 1 - strpos)));
-            if (other_last < rx_origin)
-                other_last = rx_origin;
             goto restart;
         }
 
