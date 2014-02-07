@@ -20,7 +20,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 716;  # Update this when adding/deleting tests.
+plan tests => 717;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1533,6 +1533,10 @@ EOP
         $s .= "1a1bc";
         utf8::upgrade($s);
         ok($s =~ /\da\d{0,30000}bc/, "\\d{30000}");
+
+        $s = "-ab\n" x 250_000;
+        $s .= "abx";
+        ok($s =~ /^ab.*x/m, "distant float with /m");
 
     }
 
