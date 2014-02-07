@@ -1104,7 +1104,7 @@ Perl_re_intuit_start(pTHX_
          */
 
         t = (char *)memchr(rx_origin, '\n',
-                        (strend - prog->minlen) - rx_origin);
+                        HOP3c(strend, - prog->minlen, strpos) - rx_origin);
         if (!t) {
             DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
                             "  Did not find /%s^%s/m...\n",
