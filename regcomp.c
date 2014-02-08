@@ -4630,6 +4630,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    pars++;
 		if (flags & SCF_DO_SUBSTR) {
 		    SV *last_str = NULL;
+                    STRLEN last_chrs = 0;
 		    int counted = mincount != 0;
 
                     if (data->last_end > 0 && mincount != 0) { /* Ends with a
@@ -4645,9 +4646,12 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 			l -= old;
 			/* Get the added string: */
 			last_str = newSVpvn_utf8(s  + old, l, UTF);
+                        last_chrs = UTF ? utf8_length((U8*)(s + old),
+                                            (U8*)(s + old + l)) : l;
 			if (deltanext == 0 && pos_before == b) {
 			    /* What was added is a constant string */
 			    if (mincount > 1) {
+
 				SvGROW(last_str, (mincount * l) + 1);
 				repeatcpy(SvPVX(last_str) + l,
 					  SvPVX_const(last_str), l,
@@ -4663,8 +4667,9 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 					SvUTF8(sv) && SvMAGICAL(sv) ?
 					mg_find(sv, PERL_MAGIC_utf8) : NULL;
 				    if (mg && mg->mg_len >= 0)
-					mg->mg_len += CHR_SVLEN(last_str) - l;
+					mg->mg_len += last_chrs * (mincount-1);
 				}
+                                last_chrs *= mincount;
 				data->last_end += l * (mincount - 1);
 			    }
 			} else {
@@ -4706,12 +4711,10 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
 				mg->mg_len = -1;
 			    sv_setsv(sv, last_str);
 			    data->last_end = data->pos_min;
-			    data->last_start_min =
-				data->pos_min - CHR_SVLEN(last_str);
+			    data->last_start_min = data->pos_min - last_chrs;
 			    data->last_start_max = is_inf
 				? SSize_t_MAX
-				: data->pos_min + data->pos_delta
-				- CHR_SVLEN(last_str);
+				: data->pos_min + data->pos_delta - last_chrs;
 			}
 			data->longest = &(data->longest_float);
 		    }
@@ -6950,14 +6953,16 @@ reStudy:
         /* A temporary algorithm prefers floated substr to fixed one to dig
          * more info. */
 	if (longest_fixed_length > longest_float_length) {
+	    r->substrs->check_ix = 0;
 	    r->check_end_shift = r->anchored_end_shift;
 	    r->check_substr = r->anchored_substr;
 	    r->check_utf8 = r->anchored_utf8;
 	    r->check_offset_min = r->check_offset_max = r->anchored_offset;
-            if (r->intflags & PREGf_ANCH_SINGLE)
+            if (r->intflags & (PREGf_ANCH_SBOL|PREGf_ANCH_GPOS))
                 r->intflags |= PREGf_NOSCAN;
 	}
 	else {
+	    r->substrs->check_ix = 1;
 	    r->check_end_shift = r->float_end_shift;
 	    r->check_substr = r->float_substr;
 	    r->check_utf8 = r->float_utf8;
@@ -6969,6 +6974,8 @@ reStudy:
 	    if (SvTAIL(r->check_substr ? r->check_substr : r->check_utf8))
 		r->extflags |= RXf_INTUIT_TAIL;
 	}
+        r->substrs->data[0].max_offset = r->substrs->data[0].min_offset;
+
 	/* XXX Unneeded? dmq (shouldn't as this is handled elsewhere)
 	if ( (STRLEN)minlen < longest_float_length )
             minlen= longest_float_length;

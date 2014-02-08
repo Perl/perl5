@@ -98,7 +98,7 @@ matched empty string
 Match successful!
 Found floating substr "Y" at offset 1...
 Found anchored substr "X" at offset 0...
-Guessed: match at offset 0
+Successfully guessed: match at offset 0
 checking floating
 minlen 2
 S:1/6   
@@ -121,7 +121,7 @@ foobar
 checking anchored isall
 minlen 6
 anchored "foobar" at 0
-Guessed: match at offset 0
+Successfully guessed: match at offset 0
 Compiling REx "[f][o][o][b][a][r]"
 Freeing REx: "[f][o][o][b][a][r]"
 %MATCHED%
