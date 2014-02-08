@@ -4738,8 +4738,8 @@ always come last, to avoid ambiguity with subsequent unary operators.
 
 =item rewinddir() attempted on invalid dirhandle %s
 
-(W io) The dirhandle you tried to do a rewinddir() on is either closed or not
-really a dirhandle.  Check your control flow.
+(W io) The dirhandle you tried to do a rewinddir() on is either closed
+or not really a dirhandle.  Check your control flow.
 
 =item Scalars leaked: %d
 
@@ -5901,8 +5901,9 @@ subroutine.
 %d
 
 (F) The Perl parser has no idea what to do with the specified character
-in your Perl script (or eval) near the specified column.  Perhaps you tried 
-to run a compressed script, a binary program, or a directory as a Perl program.
+in your Perl script (or eval) near the specified column.  Perhaps you
+tried  to run a compressed script, a binary program, or a directory as
+a Perl program.
 
 =item Unrecognized escape \%c in character class in regex; marked by
 S<<-- HERE> in m/%s/
@@ -6246,7 +6247,8 @@ is deprecated.  See L<perlvar/"$[">.
 =item Use of bare << to mean <<"" is deprecated
 
 (D deprecated) You are now encouraged to use the explicitly quoted
-form if you wish to use an empty line as the terminator of the here-document.
+form if you wish to use an empty line as the terminator of the
+here-document.
 
 =item Use of chdir('') or chdir(undef) as chdir() deprecated
 
@@ -6541,8 +6543,8 @@ gone out of scope, for example,
     }
     f()->();
 
-Here, when the '$a' in the eval is being compiled, f() is not currently being
-executed, so its $a is not available for capture.
+Here, when the '$a' in the eval is being compiled, f() is not currently
+being executed, so its $a is not available for capture.
 
 =item Variable "%s" is not imported%s
 
