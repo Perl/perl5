@@ -653,7 +653,7 @@ but points to a directory a temporary file cannot be created in.  [perl
 
 =item *
 
-C<$^R> is wasn't available outside of the regular expression that
+C<$^R> wasn't available outside of the regular expression that
 initialized it.  [perl #121070]
 
 =item *
