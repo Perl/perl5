@@ -978,7 +978,7 @@ Perl_re_intuit_start(pTHX_
         last1 = HOP3c(strend,
                         other->min_offset - prog->minlen, strbeg);
 
-        if (other_ix) {
+        if (other_ix) {/* i.e. if (other-is-float) */
             /* last is the latest point where the floating substr could
              * start, *given* any constraints from the earlier fixed
              * match. This constraint is that the floating string starts
@@ -1046,7 +1046,7 @@ Perl_re_intuit_start(pTHX_
 
             other_last = HOP3c(last, 1, strend) /* highest failure */;
             rx_origin =
-                other_ix
+                other_ix /* i.e. if other-is-float */
                     ? HOP3c(rx_origin, 1, strend)
                     : HOP4c(last, 1 - other->min_offset, strbeg, strend);
             goto restart;
@@ -1055,7 +1055,7 @@ Perl_re_intuit_start(pTHX_
             DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, " at offset %ld...\n",
                   (long)(s - strpos)));
 
-            if (other_ix) {
+            if (other_ix) { /* if (other-is-float) */
                 /* other_last is set to s, not s+1, since its possible for
                  * a floating substr to fail first time, then succeed
                  * second time at the same floating position; e.g.:
