@@ -1652,7 +1652,7 @@ becomes
 
     { my $x; sub f { return $x++ } }
 
-Beginning with perl 5.9.4, you can also use C<state> variables to have
+Beginning with perl 5.10.0, you can also use C<state> variables to have
 lexicals that are initialized only once (see L<feature>):
 
     sub f { state $x; return $x++ }
@@ -2664,7 +2664,7 @@ neither as a system call nor an ioctl call (SIOCATMARK).
 =item $* is no longer supported
 
 (D deprecated, syntax) The special variable C<$*>, deprecated in older
-perls, has been removed as of 5.9.0 and is no longer supported.  In
+perls, has been removed as of 5.10.0 and is no longer supported.  In
 previous versions of perl the use of C<$*> enabled or disabled multi-line
 matching within a string.
 
@@ -2676,7 +2676,7 @@ then all regular expressions behaved as if they were written using C</m>.)
 =item $# is no longer supported
 
 (D deprecated, syntax) The special variable C<$#>, deprecated in older
-perls, has been removed as of 5.9.3 and is no longer supported.  You
+perls, has been removed as of 5.10.0 and is no longer supported.  You
 should use the printf/sprintf functions instead.
 
 =item '%s' is not a code reference
@@ -4785,10 +4785,10 @@ L<perlref>.
 construct.  Remember that bracketing delimiters count nesting level.
 Missing the leading C<$> from a variable C<$m> may cause this error.
 
-Note that since Perl 5.9.0 a // can also be the I<defined-or>
+Note that since Perl 5.10.0 a // can also be the I<defined-or>
 construct, not just the empty search pattern.  Therefore code written
-in Perl 5.9.0 or later that uses the // as the I<defined-or> can be
-misparsed by pre-5.9.0 Perls as a non-terminated search pattern.
+in Perl 5.10.0 or later that uses the // as the I<defined-or> can be
+misparsed by pre-5.10.0 Perls as a non-terminated search pattern.
 
 =item Search pattern not terminated or ternary operator parsed as search pattern
 
@@ -4977,7 +4977,7 @@ L<perlfunc/setsockopt>.
 (F) You tried to assign a reference to a non integer to C<$/>.  In older
 Perls this would have behaved similarly to setting it to a reference to
 a positive integer, where the integer was the address of the reference.
-As of Perl 5.19.9 this is a fatal error, to allow future versions of Perl
+As of Perl 5.20.0 this is a fatal error, to allow future versions of Perl
 to use non-integer refs for more interesting purposes.
 
 =item Setting $/ to a reference to %s as a form of slurp is deprecated, treating as undef
@@ -4988,7 +4988,7 @@ to work the same as setting it to C<undef> but was in fact internally
 different, less efficient and with very bad luck could have resulted in
 your file being split by a stringified form of the reference.
 
-In Perl 5.19.9 this was changed so that it would be B<exactly> the same as
+In Perl 5.20.0 this was changed so that it would be B<exactly> the same as
 setting C<$/> to undef, with the exception that this warning would be
 thrown.
 
