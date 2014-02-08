@@ -607,7 +607,6 @@ $priv{$_}{64} = "RTIME" for qw(match subst substcont qr);
   for qw(trans transr);
 $priv{repeat}{64} = "DOLIST";
 $priv{leaveloop}{64} = "CONT";
-$priv{$_}{4} = "DREFed" for qw(rv2sv rv2av rv2hv);
 @{$priv{$_}}{32,64,96} = qw(DREFAV DREFHV DREFSV)
   for qw(rv2gv rv2sv padsv aelem helem);
 $priv{$_}{16} = "STATE" for qw(padav padhv padsv);
