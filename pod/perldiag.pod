@@ -4974,16 +4974,16 @@ L<perlfunc/setsockopt>.
 
 =item Setting $/ to a %s reference is forbidden
 
-(F) You tried to assign a reference to a non integer to C<$/>. In older
-Perls this would have behaved similarly to setting it to a reference
-to a positive integer, where the integer was the address of the reference.
+(F) You tried to assign a reference to a non integer to C<$/>.  In older
+Perls this would have behaved similarly to setting it to a reference to
+a positive integer, where the integer was the address of the reference.
 As of Perl 5.19.9 this is a fatal error, to allow future versions of Perl
-to use non integer refs for more interesting purposes.
+to use non-integer refs for more interesting purposes.
 
 =item Setting $/ to a reference to %s as a form of slurp is deprecated, treating as undef
 
 (W deprecated) You assigned a reference to a scalar to C<$/> where the
-referenced item is not a positive integer. In older perls this B<appeared>
+referenced item is not a positive integer.  In older perls this B<appeared>
 to work the same as setting it to C<undef> but was in fact internally
 different, less efficient and with very bad luck could have resulted in
 your file being split by a stringified form of the reference.
@@ -4992,9 +4992,9 @@ In Perl 5.19.9 this was changed so that it would be B<exactly> the same as
 setting C<$/> to undef, with the exception that this warning would be
 thrown.
 
-You are recommended to change your code to set C<$/> to C<undef>
-explicitly if you wish to slurp the file. In future versions of Perl
-assigning a reference to will throw a fatal error.
+You are recommended to change your code to set C<$/> to C<undef> explicitly
+if you wish to slurp the file. In future versions of Perl assigning
+a reference to will throw a fatal error.
 
 =item shift on reference is experimental
 
