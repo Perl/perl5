@@ -1918,14 +1918,6 @@ interpolated.  If you see this error message, then you probably
 have some other C<(?...)> construct inside your character class.  See
 L<perlrecharclass/Extended Bracketed Character Classes>.
 
-=item Experimental "%s" subs not enabled
-
-(F) To use lexical subs, you must first enable them:
-
-    no warnings 'experimental::lexical_subs';
-    use feature 'lexical_subs';
-    my sub foo { ... }
-
 =item Experimental subroutine signatures not enabled
 
 (F) To use subroutine signatures, you must first enable them:
@@ -1933,6 +1925,14 @@ L<perlrecharclass/Extended Bracketed Character Classes>.
     no warnings "experimental:signatures";
     use feature "signatures";
     sub foo ($left, $right) { ... }
+
+=item Experimental "%s" subs not enabled
+
+(F) To use lexical subs, you must first enable them:
+
+    no warnings 'experimental::lexical_subs';
+    use feature 'lexical_subs';
+    my sub foo { ... }
 
 =item Explicit blessing to '' (assuming package main)
 
@@ -4936,30 +4936,6 @@ less.  Please see the following for more information:
 
 You should also look at L<perlfaq9>.
 
-=item Setting $/ to a reference to %s as a form of slurp is deprecated, treating as undef
-
-(W deprecated) You assigned a reference to a scalar to C<$/> where the
-referenced item is not a positive integer. In older perls this B<appeared>
-to work the same as setting it to C<undef> but was in fact internally
-different, less efficient and with very bad luck could have resulted in
-your file being split by a stringified form of the reference.
-
-In Perl 5.19.9 this was changed so that it would be B<exactly> the same as
-setting C<$/> to undef, with the exception that this warning would be
-thrown.
-
-You are recommended to change your code to set C<$/> to C<undef>
-explicitly if you wish to slurp the file. In future versions of Perl
-assigning a reference to will throw a fatal error.
-
-=item Setting $/ to a %s reference is forbidden
-
-(F) You tried to assign a reference to a non integer to C<$/>. In older
-Perls this would have behaved similarly to setting it to a reference
-to a positive integer, where the integer was the address of the reference.
-As of Perl 5.19.9 this is a fatal error, to allow future versions of Perl
-to use non integer refs for more interesting purposes.
-
 =item setegid() not implemented
 
 (F) You tried to assign to C<$)>, and your operating system doesn't
@@ -4995,6 +4971,30 @@ didn't think so.
 (W closed) You tried to set a socket option on a closed socket.  Did you
 forget to check the return value of your socket() call?  See
 L<perlfunc/setsockopt>.
+
+=item Setting $/ to a %s reference is forbidden
+
+(F) You tried to assign a reference to a non integer to C<$/>. In older
+Perls this would have behaved similarly to setting it to a reference
+to a positive integer, where the integer was the address of the reference.
+As of Perl 5.19.9 this is a fatal error, to allow future versions of Perl
+to use non integer refs for more interesting purposes.
+
+=item Setting $/ to a reference to %s as a form of slurp is deprecated, treating as undef
+
+(W deprecated) You assigned a reference to a scalar to C<$/> where the
+referenced item is not a positive integer. In older perls this B<appeared>
+to work the same as setting it to C<undef> but was in fact internally
+different, less efficient and with very bad luck could have resulted in
+your file being split by a stringified form of the reference.
+
+In Perl 5.19.9 this was changed so that it would be B<exactly> the same as
+setting C<$/> to undef, with the exception that this warning would be
+thrown.
+
+You are recommended to change your code to set C<$/> to C<undef>
+explicitly if you wish to slurp the file. In future versions of Perl
+assigning a reference to will throw a fatal error.
 
 =item shift on reference is experimental
 
@@ -6073,6 +6073,11 @@ See L<Win32> for more information.
 You probably meant to use C<$]> instead.  C<$[> is the base for indexing
 arrays.  C<$]> is the Perl version number in decimal.
 
+=item Use "%s" instead of "%s"
+
+(F) The second listed construct is no longer legal.  Use the first one
+instead.
+
 =item Useless assignment to a temporary
 
 (W misc) You assigned to an lvalue subroutine, but what
@@ -6232,11 +6237,6 @@ you can write it as C<push(@tied_array,())> to avoid this warning.
 
 (F) The "use" keyword is recognized and executed at compile time, and
 returns no useful value.  See L<perlmod>.
-
-=item Use "%s" instead of "%s"
-
-(F) The second listed construct is no longer legal.  Use the first one
-instead.
 
 =item Use of assignment to $[ is deprecated
 
