@@ -673,6 +673,17 @@ Perl_re_intuit_start(pTHX_
     assert(prog->substrs->data[2].min_offset >= 0);
     assert(prog->substrs->data[2].max_offset >= 0);
 
+    /* for now, assume that if both present, that the floating substring
+     * follows the anchored substring, and that they don't overlap.
+     * If you break this assumption (e.g. doing better optimisations
+     * with lookahead/behind), then you'll need to audit the code in this
+     * function carefully first
+     */
+    assert(
+            ! (  (prog->anchored_utf8 || prog->anchored_substr)
+              && (prog->float_utf8    || prog->float_substr))
+           || (prog->float_min_offset >= prog->anchored_offset));
+
     /* CHR_DIST() would be more correct here but it makes things slow. */
     if (prog->minlen > strend - strpos) {
 	DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
