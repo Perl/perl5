@@ -643,7 +643,7 @@ Win32 could result in output sent to stdout on one thread being
 captured by backticks of an external command in another thread.
 
 This could occur for pseudo-forked processes too, as Win32's
-psuedo-fork is implemented in terms of threads.  [perl #77672]
+pseudo-fork is implemented in terms of threads.  [perl #77672]
 
 =item *
 
