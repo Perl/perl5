@@ -194,6 +194,7 @@ our $TRACEONLY = 0;
 our $WARNTRACE = 0;
 
 use Config;
+use Text::Tabs 'expand';
 my $privlib = $Config{privlibexp};
 if ($^O eq 'VMS') {
     require VMS::Filespec;
@@ -366,6 +367,7 @@ my %msg;
 		{
 		    next;
 		}
+		$_ = expand $_;
 		s/^/    /gm;
 		$msg{$header} .= $_;
 		for my $h(@headers) { $msg{$h} .= $_ }
