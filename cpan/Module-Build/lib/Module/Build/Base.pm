@@ -6,7 +6,7 @@ use strict;
 use vars qw($VERSION);
 use warnings;
 
-$VERSION = '0.4204';
+$VERSION = '0.4205';
 $VERSION = eval $VERSION;
 BEGIN { require 5.006001 }
 
@@ -4388,8 +4388,8 @@ BEGIN { *scripts = \&script_files; }
     perl         => 'Perl_5',
     apache       => 'Apache_2_0',
     apache_1_1   => 'Apache_1_1',
-    artistic     => 'Artistic_1_0',
-    artistic_2   => 'Artistic_2_0',
+    artistic     => 'Artistic_1',
+    artistic_2   => 'Artistic_2',
     lgpl         => 'LGPL_2_1',
     lgpl2        => 'LGPL_2_1',
     lgpl3        => 'LGPL_3_0',
@@ -4435,21 +4435,30 @@ BEGIN { *scripts = \&script_files; }
   }
 }
 
+sub _software_license_class {
+  my ($self, $license) = @_;
+  if ($self->valid_licenses->{$license} && eval { require Software::LicenseUtils; Software::LicenseUtils->VERSION(0.103009) }) {
+    my ($class) = Software::LicenseUtils->guess_license_from_meta_key($license, 1);
+	eval "require $class";
+	#die $class;
+	return $class;
+  }
+  LICENSE: for my $l ( $self->valid_licenses->{ $license }, $license ) {
+    next unless defined $l;
+    my $trial = "Software::License::" . $l;
+    if ( eval "require Software::License; Software::License->VERSION(0.014); require $trial; 1" ) {
+      return $trial;
+    }
+  }
+  return;
+}
+
 # use mapping or license name directly
 sub _software_license_object {
   my ($self) = @_;
   return unless defined( my $license = $self->license );
 
-  my $class;
-  LICENSE: for my $l ( $self->valid_licenses->{ $license }, $license ) {
-    next unless defined $l;
-    my $trial = "Software::License::" . $l;
-    if ( eval "require Software::License; Software::License->VERSION(0.014); require $trial; 1" ) {
-      $class = $trial;
-      last LICENSE;
-    }
-  }
-  return unless defined $class;
+  my $class = $self->_software_license_class($license) or return;
 
   # Software::License requires a 'holder' argument
   my $author = join( " & ", @{ $self->dist_author }) || 'unknown';
@@ -5339,7 +5348,7 @@ sub have_c_compiler {
   return $p->{_have_c_compiler} if defined $p->{_have_c_compiler};
 
   $self->log_verbose("Checking if compiler tools configured... ");
-  my $b = eval { $self->cbuilder };
+  my $b = $self->cbuilder;
   my $have = $b && eval { $b->have_compiler };
   $self->log_verbose($have ? "ok.\n" : "failed.\n");
   return $p->{_have_c_compiler} = $have;

@@ -197,7 +197,15 @@ sub find_in_path {
 }
 
 sub check_compiler {
-  return (1,1) if $ENV{PERL_CORE};
+  if ($ENV{PERL_CORE}) {
+    require IPC::Cmd;
+    if ( $Config{usecrosscompile} && !IPC::Cmd::can_run($Config{cc}) ) {
+      return;
+    }
+    else {
+      return(1,1);
+    }
+  }
 
   local $SIG{__WARN__} = sub {};
 
