@@ -1,11 +1,23 @@
-
-require 5;
-#                        The documentation is at the end.
-# Time-stamp: "2004-05-07 15:31:25 ADT"
 package Pod::Escapes;
+use strict;
+use warnings;
+use 5.006;
+
+use vars qw(
+  %Code2USASCII
+  %Name2character
+  %Name2character_number
+  %Latin1Code_to_fallback
+  %Latin1Char_to_fallback
+  $FAR_CHAR
+  $FAR_CHAR_NUMBER
+  $NOT_ASCII
+  @ISA $VERSION @EXPORT_OK %EXPORT_TAGS
+);
+
 require Exporter;
 @ISA = ('Exporter');
-$VERSION = '1.04';
+$VERSION = '1.05';
 @EXPORT_OK = qw(
   %Code2USASCII
   %Name2character
@@ -18,18 +30,6 @@ $VERSION = '1.04';
 %EXPORT_TAGS = ('ALL' => \@EXPORT_OK);
 
 #==========================================================================
-
-use strict;
-use vars qw(
-  %Code2USASCII
-  %Name2character
-  %Name2character_number
-  %Latin1Code_to_fallback
-  %Latin1Char_to_fallback
-  $FAR_CHAR
-  $FAR_CHAR_NUMBER
-  $NOT_ASCII
-);
 
 $FAR_CHAR = "?" unless defined $FAR_CHAR;
 $FAR_CHAR_NUMBER = ord($FAR_CHAR) unless defined $FAR_CHAR_NUMBER;
@@ -529,7 +529,7 @@ __END__
 
 =head1 NAME
 
-Pod::Escapes -- for resolving Pod EE<lt>...E<gt> sequences
+Pod::Escapes - for resolving Pod EE<lt>...E<gt> sequences
 
 =head1 SYNOPSIS
 
@@ -567,7 +567,7 @@ C<e2char('0x2F')>, and C<e2char('057')> all return "/",
 because C<EE<lt>solE<gt>>, C<EE<lt>47E<gt>>, C<EE<lt>0x2fE<gt>>,
 and C<EE<lt>057E<gt>>, all mean "/".  If
 the name has no known value (as with a name of "qacute") or is
-syntactally invalid (as with a name of "1/4"), this returns undef.
+syntactically invalid (as with a name of "1/4"), this returns undef.
 
 =item e2charnum($e_content)
 
@@ -579,7 +579,7 @@ C<e2char('0x2F')>, and C<e2char('057')> all return 47,
 because C<EE<lt>solE<gt>>, C<EE<lt>47E<gt>>, C<EE<lt>0x2fE<gt>>,
 and C<EE<lt>057E<gt>>, all mean "/", whose Unicode number is 47.  If
 the name has no known value (as with a name of "qacute") or is
-syntactally invalid (as with a name of "1/4"), this returns undef.
+syntactically invalid (as with a name of "1/4"), this returns undef.
 
 =item $Name2character{I<name>}
 
@@ -647,6 +647,10 @@ L<perlpodspec|perlpodspec>
 
 L<Text::Unidecode|Text::Unidecode>
 
+=head1 REPOSITORY
+
+L<https://github.com/neilbowers/Pod-Escapes>
+
 =head1 COPYRIGHT AND DISCLAIMERS
 
 Copyright (c) 2001-2004 Sean M. Burke.  All rights reserved.
@@ -671,12 +675,13 @@ Currently (October 2001), that's these three:
 
 Sean M. Burke C<sburke@cpan.org>
 
+Now being maintained by Neil Bowers E<lt>neilb@cpan.orgE<gt>
+
 =cut
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # What I used for reading the XHTML .ent files:
 
-use strict;
 my(@norms, @good, @bad);
 my $dir = 'c:/sgml/docbook/';
 my %escapes;
