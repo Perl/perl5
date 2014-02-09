@@ -2057,6 +2057,21 @@ such as C<$$x = 5> which might have to vivify a reference in C<$x>.
 =cut
 */
 
+static bool
+S_vivifies(const OPCODE type)
+{
+    switch(type) {
+    case OP_RV2AV:     case   OP_ASLICE:
+    case OP_RV2HV:     case OP_KVASLICE:
+    case OP_RV2SV:     case   OP_HSLICE:
+    case OP_AELEMFAST: case OP_KVHSLICE:
+    case OP_HELEM:
+    case OP_AELEM:
+	return 1;
+    }
+    return 0;
+}
+
 OP *
 Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 {
@@ -2343,8 +2358,12 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 
     case OP_AND:
     case OP_OR:
-	op_lvalue(cLOGOPo->op_first,		 type);
-	op_lvalue(cLOGOPo->op_first->op_sibling, type);
+	if (type == OP_LEAVESUBLV
+	 || !S_vivifies(cLOGOPo->op_first->op_type))
+	    op_lvalue(cLOGOPo->op_first, type);
+	if (type == OP_LEAVESUBLV
+	 || !S_vivifies(cLOGOPo->op_first->op_sibling->op_type))
+	    op_lvalue(cLOGOPo->op_first->op_sibling, type);
 	goto nomod;
     }
 
