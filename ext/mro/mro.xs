@@ -45,8 +45,9 @@ S_mro_get_linear_isa_c3(pTHX_ HV* stash, U32 level)
       Perl_croak(aTHX_ "Can't linearize anonymous symbol table");
 
     if (level > 100)
-        Perl_croak(aTHX_ "Recursive inheritance detected in package '%"SVf"'",
-		   SVfARG(sv_2mortal(newSVhek(stashhek))));
+        Perl_croak(aTHX_ "Recursive inheritance detected in package '%"HEKf
+                         "'",
+                          HEKfARG(stashhek));
 
     meta = HvMROMETA(stash);
 
@@ -255,9 +256,9 @@ S_mro_get_linear_isa_c3(pTHX_ HV* stash, U32 level)
                 I32 i;
 
                 errmsg = newSVpvf(
-                            "Inconsistent hierarchy during C3 merge of class '%"SVf"':\n\t"
+                           "Inconsistent hierarchy during C3 merge of class '%"HEKf"':\n\t"
                             "current merge results [\n",
-                                            SVfARG(sv_2mortal(newSVhek(stashhek))));
+                            HEKfARG(stashhek));
                 for (i = 0; i <= av_len(retval); i++) {
                     SV **elem = av_fetch(retval, i, 0);
                     sv_catpvf(errmsg, "\t\t%"SVf",\n", SVfARG(*elem));
@@ -588,10 +589,11 @@ mro__nextcan(...)
 	    SV* const val = HeVAL(cache_entry);
 	    if(val == &PL_sv_undef) {
 		if(throw_nomethod)
-		    Perl_croak(aTHX_ "No next::method '%"SVf"' found for %"SVf,
+		    Perl_croak(aTHX_
+                       "No next::method '%"SVf"' found for %"HEKf,
                         SVfARG(newSVpvn_flags(subname, subname_len,
                                 SVs_TEMP | ( subname_utf8 ? SVf_UTF8 : 0 ) )),
-                        SVfARG(sv_2mortal(newSVhek( HvNAME_HEK(selfstash) ))));
+                        HEKfARG( HvNAME_HEK(selfstash) ));
                 XSRETURN_EMPTY;
 	    }
 	    mXPUSHs(newRV_inc(val));
@@ -635,9 +637,10 @@ mro__nextcan(...)
 
             if (!curstash) {
                 if (ckWARN(WARN_SYNTAX))
-                    Perl_warner(aTHX_ packWARN(WARN_SYNTAX), "Can't locate package %"SVf" for @%"SVf"::ISA",
+                    Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
+                       "Can't locate package %"SVf" for @%"HEKf"::ISA",
                         (void*)linear_sv,
-                        SVfARG(sv_2mortal(newSVhek( HvNAME_HEK(selfstash) ))));
+                        HEKfARG( HvNAME_HEK(selfstash) ));
                 continue;
             }
 
@@ -668,10 +671,10 @@ mro__nextcan(...)
 
     (void)hv_store_ent(nmcache, sv, &PL_sv_undef, 0);
     if(throw_nomethod)
-        Perl_croak(aTHX_ "No next::method '%"SVf"' found for %"SVf,
+        Perl_croak(aTHX_ "No next::method '%"SVf"' found for %"HEKf,
                          SVfARG(newSVpvn_flags(subname, subname_len,
                                 SVs_TEMP | ( subname_utf8 ? SVf_UTF8 : 0 ) )),
-                        SVfARG(sv_2mortal(newSVhek( HvNAME_HEK(selfstash) ))));
+                        HEKfARG( HvNAME_HEK(selfstash) ));
     XSRETURN_EMPTY;
 
 BOOT:
