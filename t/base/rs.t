@@ -250,7 +250,9 @@ sub test_bad_setting {
   } else {
     my $msg= $@ || "Zombie Error";
     print "ok ",$test_count++," # \$/ = []; should die\n";
-    if ($msg!~m!Setting \$\/ to a ARRAY reference is forbidden!) {print "not ";}
+    if ($msg!~m!Setting \$\/ to an ARRAY reference is forbidden!) {
+      print "not ";
+    }
     print "ok ",$test_count++," # \$/ = []; produced expected error message\n";
   }
   if (eval {$/ = {}; 1}) {
