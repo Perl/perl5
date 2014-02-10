@@ -1266,9 +1266,6 @@ Perl_re_intuit_start(pTHX_
 	if (s) {
 	    checked_upto = s;
 	} else {
-#ifdef DEBUGGING
-	    const char *what = NULL;
-#endif
 	    if (endpos == strend) {
 		DEBUG_EXECUTE_r( PerlIO_printf(Perl_debug_log,
 				"  Could not match STCLASS...\n") );
@@ -1284,7 +1281,6 @@ Perl_re_intuit_start(pTHX_
 	    /* Contradict one of substrings */
 	    if (prog->anchored_substr || prog->anchored_utf8) {
 		if (prog->substrs->check_ix == 0) { /* check is anchored */
-		    DEBUG_EXECUTE_r( what = "anchored" );
 		  hop_and_restart:
 		    rx_origin = HOP3c(rx_origin, 1, strend);
 		    if (rx_origin + start_shift + end_shift > strend) {
@@ -1294,8 +1290,9 @@ Perl_re_intuit_start(pTHX_
 			goto fail;
 		    }
 		    DEBUG_EXECUTE_r( PerlIO_printf(Perl_debug_log,
-				"  Looking for %s substr starting at offset %ld...\n",
-				 what, (long)(rx_origin + start_shift - strpos)) );
+                        "  Looking for %s substr starting at offset %ld...\n",
+                        (prog->substrs->check_ix ? "floating" : "anchored"),
+                        (long)(rx_origin + start_shift - strpos)) );
 		    goto restart;
 		}
 		/* Have both, check_string is floating */
@@ -1332,7 +1329,6 @@ Perl_re_intuit_start(pTHX_
 	    /* Check is floating substring. */
 	  retry_floating_check:
 	    rx_origin = check_at - start_shift;
-	    DEBUG_EXECUTE_r( what = "floating" );
 	    goto hop_and_restart;
 	}
 	if (rx_origin != s) {
