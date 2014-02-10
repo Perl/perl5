@@ -1245,24 +1245,24 @@ Perl_re_intuit_start(pTHX_
                         : STR_LEN(progi->regstclass))
 		    : 1);
 	char * endpos;
-        char *s = rx_origin;
+        char *s;
 	if (prog->anchored_substr || prog->anchored_utf8 || ml_anch)
-            endpos= HOP3c(s, (prog->minlen ? cl_l : 0), strend);
+            endpos= HOP3c(rx_origin, (prog->minlen ? cl_l : 0), strend);
         else if (prog->float_substr || prog->float_utf8)
 	    endpos= HOP3c(HOP3c(check_at, -start_shift, strbeg), cl_l, strend);
         else 
             endpos= strend;
 		    
-        if (checked_upto < s)
-           checked_upto = s;
+        if (checked_upto < rx_origin)
+           checked_upto = rx_origin;
         DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
             "  looking for class: start_shift: %"IVdf" check_at: %"IVdf
-            " s: %"IVdf" endpos: %"IVdf" checked_upto: %"IVdf"\n",
+            " rx_origin: %"IVdf" endpos: %"IVdf" checked_upto: %"IVdf"\n",
               (IV)start_shift, (IV)(check_at - strbeg),
-              (IV)(s - strbeg), (IV)(endpos - strbeg),
+              (IV)(rx_origin - strbeg), (IV)(endpos - strbeg),
               (IV)(checked_upto- strbeg)));
 
-	t = s;
+	t = rx_origin;
         s = find_byclass(prog, progi->regstclass, checked_upto, endpos,
                             reginfo);
 	if (s) {
