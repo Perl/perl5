@@ -1285,7 +1285,7 @@ Perl_re_intuit_start(pTHX_
                                       (IV)start_shift, (IV)(check_at - strbeg), (IV)(endpos - strbeg), (IV)(checked_upto- strbeg)));
 	    /* Contradict one of substrings */
 	    if (prog->anchored_substr || prog->anchored_utf8) {
-		if ((utf8_target ? prog->anchored_utf8 : prog->anchored_substr) == check) {
+		if (prog->substrs->check_ix == 0) { /* check is anchored */
 		    DEBUG_EXECUTE_r( what = "anchored" );
 		  hop_and_restart:
 		    s = HOP3c(t, 1, strend);
