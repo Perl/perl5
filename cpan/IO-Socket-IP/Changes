@@ -1,5 +1,15 @@
 Revision history for IO-Socket-IP
 
+0.28    2014/02/10 16:17:59
+        [CHANGES]
+         * Renamed internal _configure method to _io_socket_ip__configure to
+           avoid clashes with modules that try to subclass IO::Socket::INET
+
+        [BUGFIXES]
+         * Disable AI_ADDRCONFIG during one-sided 'v6 tests as sometimes it
+           would otherwise fail
+         * Skip the SO_BROADCAST test on OSes that fail with EACCES (RT92502)
+
 0.27    2014/01/20 18:08:31
         [BUGFIXES]
          * Apply a short timeout to unit tests that probe for internet

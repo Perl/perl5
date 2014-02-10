@@ -49,6 +49,7 @@ foreach my $socktype (qw( SOCK_STREAM SOCK_DGRAM )) {
       PeerHost    => "::1",
       PeerService => $testport,
       Type        => Socket->$socktype,
+      GetAddrInfoFlags => 0, # disable AI_ADDRCONFIG
    );
 
    ok( defined $socket, "IO::Socket::IP->new constructs a $socktype socket" ) or

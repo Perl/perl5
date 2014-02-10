@@ -7,7 +7,7 @@ package IO::Socket::IP;
 # $VERSION needs to be set before  use base 'IO::Socket'
 #  - https://rt.cpan.org/Ticket/Display.html?id=92107
 BEGIN {
-   $VERSION = '0.27';
+   $VERSION = '0.28';
 }
 
 use strict;
@@ -364,10 +364,11 @@ sub configure
       }
    }
 
-   $self->_configure( $arg );
+   $self->_io_socket_ip__configure( $arg );
 }
 
-sub _configure
+# Avoid simply calling it _configure, as some subclasses of IO::Socket::INET on CPAN already take that
+sub _io_socket_ip__configure
 {
    my $self = shift;
    my ( $arg ) = @_;

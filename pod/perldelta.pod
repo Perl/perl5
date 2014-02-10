@@ -276,7 +276,7 @@ Android support.
 =item *
 
 L<IO::Socket::IP>, tentatively introduced in L<Perl 5.19.8|perl5198delta>,
-has been upgraded from 0.26 to 0.27.
+has been upgraded from 0.26 to 0.28.
 
 =item *
 

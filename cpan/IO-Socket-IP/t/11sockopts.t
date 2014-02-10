@@ -7,6 +7,7 @@ use Test::More;
 
 use IO::Socket::IP;
 
+use Errno qw( EACCES );
 use Socket qw( SOL_SOCKET SO_REUSEADDR SO_REUSEPORT SO_BROADCAST );
 
 TODO: {
@@ -43,12 +44,16 @@ SKIP: {
    ok( $sock->getsockopt( SOL_SOCKET, SO_REUSEPORT ), 'SO_REUSEPORT set' );
 }
 
-{
+SKIP: {
+   # Some OSes need special privileges to set SO_BROADCAST
+   $! = 0;
    my $sock = IO::Socket::IP->new(
       LocalHost => "127.0.0.1",
       Type      => SOCK_DGRAM,
       Broadcast => 1,
-   ) or die "Cannot socket() - $@";
+   );
+   skip "Privileges required to set broadcast on datagram socket", 1 if !$sock and $! == EACCES;
+   die "Cannot socket() - $@" unless $sock;
 
    ok( $sock->getsockopt( SOL_SOCKET, SO_BROADCAST ), 'SO_BROADCAST set' );
 }

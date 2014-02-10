@@ -34,6 +34,7 @@ foreach my $socktype (qw( SOCK_STREAM SOCK_DGRAM )) {
       ( $socktype eq "SOCK_STREAM" ? ( Listen => 1 ) : () ),
       LocalHost => "::1",
       Type      => Socket->$socktype,
+      GetAddrInfoFlags => 0, # disable AI_ADDRCONFIG
    );
 
    ok( defined $testserver, "IO::Socket::IP->new constructs a $socktype socket" ) or
