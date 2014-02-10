@@ -278,16 +278,18 @@ PP(pp_concat)
 	else
 	    SvUTF8_off(TARG);
     }
-    else { /* $l .= $r */
-	if (!SvOK(TARG)) {
+    else { /* $l .= $r   and   left == TARG */
+	if (!SvOK(left)) {
 	    if (left == right && ckWARN(WARN_UNINITIALIZED)) /* $l .= $l */
 		report_uninit(right);
 	    sv_setpvs(left, "");
 	}
-	SvPV_force_nomg_nolen(left);
+        else {
+            SvPV_force_nomg_nolen(left);
+        }
 	lbyte = !DO_UTF8(left);
 	if (IN_BYTES)
-	    SvUTF8_off(TARG);
+	    SvUTF8_off(left);
     }
 
     if (!rcopied) {
