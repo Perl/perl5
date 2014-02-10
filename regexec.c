@@ -1288,14 +1288,13 @@ Perl_re_intuit_start(pTHX_
 		if (prog->substrs->check_ix == 0) { /* check is anchored */
 		    DEBUG_EXECUTE_r( what = "anchored" );
 		  hop_and_restart:
-		    s = HOP3c(t, 1, strend);
-		    if (s + start_shift + end_shift > strend) {
+		    rx_origin = HOP3c(t, 1, strend);
+		    if (rx_origin + start_shift + end_shift > strend) {
 			/* XXXX Should be taken into account earlier? */
 			DEBUG_EXECUTE_r( PerlIO_printf(Perl_debug_log,
 					       "  Could not match STCLASS...\n") );
 			goto fail;
 		    }
-                    rx_origin = s;
 		    DEBUG_EXECUTE_r( PerlIO_printf(Perl_debug_log,
 				"  Looking for %s substr starting at offset %ld...\n",
 				 what, (long)(rx_origin + start_shift - strpos)) );
@@ -1318,7 +1317,7 @@ Perl_re_intuit_start(pTHX_
 	    /* Another way we could have checked stclass at the
                current position only: */
 	    if (ml_anch) {
-		s = rx_origin = t + 1;
+		rx_origin = t + 1;
 		if (!check)
 		    goto giveup;
 		DEBUG_EXECUTE_r( PerlIO_printf(Perl_debug_log,
