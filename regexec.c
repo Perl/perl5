@@ -1296,8 +1296,6 @@ Perl_re_intuit_start(pTHX_
 			goto fail;
 		    }
                     rx_origin = s;
-		    if (!check)
-			goto giveup;
 		    DEBUG_EXECUTE_r( PerlIO_printf(Perl_debug_log,
 				"  Looking for %s substr starting at offset %ld...\n",
 				 what, (long)(rx_origin + start_shift - strpos)) );
