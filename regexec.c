@@ -1236,7 +1236,6 @@ Perl_re_intuit_start(pTHX_
 	/* If regstclass takes bytelength more than 1: If charlength==1, OK.
 	   This leaves EXACTF-ish only, which are dealt with in find_byclass().  */
         const U8* const str = (U8*)STRING(progi->regstclass);
-        char *t;
 
         /* XXX this value could be pre-computed */
         const int cl_l = (PL_regkind[OP(progi->regstclass)] == EXACT
@@ -1262,7 +1261,6 @@ Perl_re_intuit_start(pTHX_
               (IV)(rx_origin - strbeg), (IV)(endpos - strbeg),
               (IV)(checked_upto- strbeg)));
 
-	t = rx_origin;
         s = find_byclass(prog, progi->regstclass, checked_upto, endpos,
                             reginfo);
 	if (s) {
@@ -1288,7 +1286,7 @@ Perl_re_intuit_start(pTHX_
 		if (prog->substrs->check_ix == 0) { /* check is anchored */
 		    DEBUG_EXECUTE_r( what = "anchored" );
 		  hop_and_restart:
-		    rx_origin = HOP3c(t, 1, strend);
+		    rx_origin = HOP3c(rx_origin, 1, strend);
 		    if (rx_origin + start_shift + end_shift > strend) {
 			/* XXXX Should be taken into account earlier? */
 			DEBUG_EXECUTE_r( PerlIO_printf(Perl_debug_log,
@@ -1301,7 +1299,7 @@ Perl_re_intuit_start(pTHX_
 		    goto restart;
 		}
 		/* Have both, check_string is floating */
-		if (t + start_shift >= check_at) /* Contradicts floating=check */
+		if (rx_origin + start_shift >= check_at) /* Contradicts floating=check */
 		    goto retry_floating_check;
 		/* Recheck anchored substring, but not floating... */
 		if (!check) {
@@ -1317,7 +1315,7 @@ Perl_re_intuit_start(pTHX_
 	    /* Another way we could have checked stclass at the
                current position only: */
 	    if (ml_anch) {
-		rx_origin = t + 1;
+		rx_origin++;
 		if (!check)
 		    goto giveup;
 		DEBUG_EXECUTE_r( PerlIO_printf(Perl_debug_log,
@@ -1333,14 +1331,14 @@ Perl_re_intuit_start(pTHX_
 		goto fail;
 	    /* Check is floating substring. */
 	  retry_floating_check:
-	    t = check_at - start_shift;
+	    rx_origin = check_at - start_shift;
 	    DEBUG_EXECUTE_r( what = "floating" );
 	    goto hop_and_restart;
 	}
-	if (t != s) {
+	if (rx_origin != s) {
             DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
 			"  By STCLASS: moving %ld --> %ld\n",
-                                  (long)(t - strpos), (long)(s - strpos))
+                                  (long)(rx_origin - strpos), (long)(s - strpos))
                    );
         }
         else {
