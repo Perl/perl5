@@ -125,7 +125,7 @@ sub _round {
 # version
 sub changes_files {
     my $output = qx(git diff --shortstat $since_until);
-    my @filenames = qx(git diff --numstat $since_until | perl -anle 'next if m{^dist/Module-CoreList} or not /\\.(?:pm|c|h|t)\\z/; print \$F[2]');
+    my @filenames = qx(git diff --numstat $since_until | $^X -anle 'next if m{^dist/Module-CoreList} or not /\\.(?:pm|c|h|t)\\z/; print \$F[2]');
     chomp @filenames;
     my $output_code_changed = qx# git diff --shortstat $since_until -- @filenames #;
 
