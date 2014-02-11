@@ -1505,10 +1505,11 @@ DebugWrap->new({
         }
     );
 
+    my $nl = $^O eq 'VMS' ? "" : "\\\n";
     $wrapper->output_like(qr#
-        \nVar<Q>=1\n
-        \nVar<Q>=2\n
-        \nVar<Q>=3\n
+        \nVar<Q>=1$nl
+        \nVar<Q>=2$nl
+        \nVar<Q>=3
         #msx,
         "a command is working",
     );
@@ -2278,7 +2279,7 @@ DebugWrap->new({
     );
 
     $wrapper->output_like(qr#
-        ^This\ program\ dies\.\ at\ \S+\ line\ 18\.\n
+        ^This\ program\ dies\.\ at\ \S+\ line\ 18\N*\.\n
         .*?
         ^\s+main::baz\(\)\ called\ at\ \S+\ line\ 13\n
         \s+main::bar\(\)\ called\ at\ \S+\ line\ 7\n
@@ -2303,7 +2304,7 @@ DebugWrap->new({
     );
 
     $wrapper->contents_like(qr#
-        ^This\ is\ not\ a\ warning\.\ at\ \S+\ line\ 18\.\n
+        ^This\ is\ not\ a\ warning\.\ at\ \S+\ line\ 18\N*\.\n
         .*?
         ^\s+main::baz\(\)\ called\ at\ \S+\ line\ 13\n
         \s+main::bar\(\)\ called\ at\ \S+\ line\ 25\n
