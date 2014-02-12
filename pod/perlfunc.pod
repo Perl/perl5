@@ -3696,7 +3696,7 @@ this right, so Perl automatically removes all trailing slashes to keep
 everyone happy.
 
 To recursively create a directory structure, look at
-the C<mkpath> function of the L<File::Path> module.
+the C<make_path> function of the L<File::Path> module.
 
 =item msgctl ID,CMD,ARG
 X<msgctl>

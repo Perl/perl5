@@ -624,6 +624,8 @@ gnat\100frii.com                        gnat\100prometheus.frii.com
 gp\100familiehaase.de                   gerrit\100familiehaase.de
 grazz\100pobox.com                      grazz\100nyc.rr.com
 gward\100ase.com                        greg\100bic.mni.mcgill.ca
+haggai\100cpan.org                      alanhaggai\100alanhaggai.org
++                                       alanhaggai\100gmail.com
 hansmu\100xs4all.nl                     hansm\100icgroup.nl
 +                                       hansm\100icgned.nl
 +                                       hans\100icgned.nl
