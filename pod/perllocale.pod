@@ -806,7 +806,7 @@ interpolation with C<\F>, C<\l>, C<\L>, C<\u>, or C<\U> in double-quoted
 strings and C<s///> substitutions; and case-independent regular expression
 pattern matching using the C<i> modifier.
 
-Finally, C<LC_CTYPE> affects the POSIX character-class test
+Finally, C<LC_CTYPE> affects the (deprecated) POSIX character-class test
 functions--C<POSIX::isalpha()>, C<POSIX::islower()>, and so on.  For
 example, if you move from the "C" locale to a 7-bit Scandinavian one,
 you may find--possibly to your surprise--that "|" moves from the

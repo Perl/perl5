@@ -553,6 +553,8 @@ static XSPROTO(is_common); /* prototype to pass -Wmissing-prototypes */
 static XSPROTO(is_common)
 {
     dXSARGS;
+    static PTR_TBL_t * is_common_ptr_table;
+
     if (items != 1)
        croak_xs_usage(cv,  "charstring");
 
@@ -563,6 +565,23 @@ static XSPROTO(is_common)
 	unsigned char *s = (unsigned char *) SvPV(ST(0), len);
 	unsigned char *e = s + len;
 	isfunc_t isfunc = (isfunc_t) XSANY.any_dptr;
+
+        if (ckWARN_d(WARN_DEPRECATED)) {
+
+            /* Warn exactly once for each lexical place this function is
+             * called.  See thread at
+             * http://markmail.org/thread/jhqcag5njmx7jpyu */
+
+	    if (! is_common_ptr_table) {
+               is_common_ptr_table = ptr_table_new();
+            }
+	    if (! ptr_table_fetch(is_common_ptr_table, PL_op)) {
+                Perl_warner(aTHX_ packWARN(WARN_DEPRECATED),
+                            "Calling POSIX::%"HEKf"() is deprecated",
+                            HEKfARG(GvNAME_HEK(CvGV(cv))));
+                ptr_table_store(is_common_ptr_table, PL_op, (void *) 1);
+            }
+        }
 
 	for (RETVAL = 1; RETVAL && s < e; s++)
 	    if (!isfunc(*s))

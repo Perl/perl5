@@ -131,6 +131,18 @@ context and while it used to behave the same as setting C<$/> to
 the address of the references in future it may behave differently, so we
 have forbidden this usage.
 
+=item *
+
+Use of any of these functions in the C<POSIX> module is now deprecated:
+C<isalnum>, C<isalpha>, C<iscntrl>, C<isdigit>, C<isgraph>, C<islower>,
+C<isprint>, C<ispunct>, C<isspace>, C<isupper>, and C<isxdigit>.  The
+functions are buggy and don't work on UTF-8 encoded strings.  See their
+entries in L<POSIX> for more information.
+
+A warning is raised on the first call to any of them from each place in
+the code that they are called.  (Hence a repeated statement in a loop
+will raise just the one warning.)
+
 =back
 
 =head2 Module removals

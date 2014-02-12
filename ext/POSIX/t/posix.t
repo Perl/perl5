@@ -290,6 +290,8 @@ is ($result, undef, "fgets should fail");
 like ($@, qr/^Use method IO::Handle::gets\(\) instead/,
       "check its redef message");
 
+{
+no warnings 'deprecated';
 # Simplistic tests for the isXXX() functions (bug #16799)
 ok( POSIX::isalnum('1'),  'isalnum' );
 ok(!POSIX::isalnum('*'),  'isalnum' );
@@ -320,6 +322,7 @@ ok( POSIX::isalnum(undef),'isalnum undef' );
 # those functions should stringify their arguments
 ok(!POSIX::isalpha([]),   'isalpha []' );
 ok( POSIX::isprint([]),   'isprint []' );
+}
 
 eval { use strict; POSIX->import("S_ISBLK"); my $x = S_ISBLK };
 unlike( $@, qr/Can't use string .* as a symbol ref/, "Can import autoloaded constants" );
