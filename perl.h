@@ -3330,6 +3330,8 @@ typedef struct magic_state MGS;	/* struct magic_state defined in mg.c */
  * before their definitions in regcomp.h. */
 
 struct scan_data_t;
+typedef struct regnode_charclass regnode_charclass;
+
 struct regnode_charclass_class;
 
 /* A hopefully less confusing name.  The sub-classes are all Posix classes only

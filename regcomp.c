@@ -1128,7 +1128,7 @@ S_ssc_flags_and(regnode_ssc *ssc, const U8 and_with)
 
 STATIC void
 S_ssc_and(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
-                const regnode_ssc *and_with)
+                const regnode_charclass *and_with)
 {
     /* Accumulate into SSC 'ssc' its 'AND' with 'and_with', which is either
      * another SSC or a regular ANYOF class.  Can create false positives. */
@@ -1143,7 +1143,7 @@ S_ssc_and(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
     /* 'and_with' is used as-is if it too is an SSC; otherwise have to extract
      * the code point inversion list and just the relevant flags */
     if (is_ANYOF_SYNTHETIC(and_with)) {
-        anded_cp_list = and_with->invlist;
+        anded_cp_list = ((regnode_ssc *)and_with)->invlist;
         anded_flags = ANYOF_FLAGS(and_with);
 
         /* XXX This is a kludge around what appears to be deficiencies in the
@@ -1161,7 +1161,7 @@ S_ssc_and(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
          * creates bugs, the consequences are only that a warning isn't raised
          * that should be; while the consequences for having /l bugs is
          * incorrect matches */
-        if (ssc_is_anything(and_with)) {
+        if (ssc_is_anything((regnode_ssc *)and_with)) {
             anded_flags |= ANYOF_WARN_SUPER;
         }
     }
@@ -1250,10 +1250,10 @@ S_ssc_and(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
             ANYOF_POSIXL_ZERO(&temp);
             for (i = 0; i < ANYOF_MAX; i++) {
                 assert(i % 2 != 0
-                       || ! ANYOF_POSIXL_TEST(and_with, i)
-                       || ! ANYOF_POSIXL_TEST(and_with, i + 1));
+                       || ! ANYOF_POSIXL_TEST((regnode_charclass_posixl*) and_with, i)
+                       || ! ANYOF_POSIXL_TEST((regnode_charclass_posixl*) and_with, i + 1));
 
-                if (ANYOF_POSIXL_TEST(and_with, i)) {
+                if (ANYOF_POSIXL_TEST((regnode_charclass_posixl*) and_with, i)) {
                     ANYOF_POSIXL_SET(&temp, i + add);
                 }
                 add = 0 - add; /* 1 goes to -1; -1 goes to 1 */
@@ -1264,7 +1264,7 @@ S_ssc_and(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
     } /* else: Not inverted.  This routine is a no-op if 'and_with' is an SSC
          in its initial state */
     else if (! is_ANYOF_SYNTHETIC(and_with)
-             || ! ssc_is_cp_posixl_init(pRExC_state, and_with))
+             || ! ssc_is_cp_posixl_init(pRExC_state, (regnode_ssc *)and_with))
     {
         /* But if 'ssc' is in its initial state, the result is just 'and_with';
          * copy it over 'ssc' */
@@ -1276,7 +1276,7 @@ S_ssc_and(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
                 ssc->invlist = anded_cp_list;
                 ANYOF_POSIXL_ZERO(ssc);
                 if (ANYOF_FLAGS(and_with) & ANYOF_POSIXL) {
-                    ANYOF_POSIXL_OR(and_with, ssc);
+                    ANYOF_POSIXL_OR((regnode_charclass_posixl*) and_with, ssc);
                 }
             }
         }
@@ -1284,7 +1284,7 @@ S_ssc_and(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
                     || (ANYOF_FLAGS(and_with) & ANYOF_POSIXL))
         {
             /* One or the other of P1, P2 is non-empty. */
-            ANYOF_POSIXL_AND(and_with, ssc);
+            ANYOF_POSIXL_AND((regnode_charclass_posixl*) and_with, ssc);
             ssc_union(ssc, anded_cp_list, FALSE);
         }
         else { /* P1 = P2 = empty */
@@ -1295,7 +1295,7 @@ S_ssc_and(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
 
 STATIC void
 S_ssc_or(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
-               const regnode_ssc *or_with)
+               const regnode_charclass *or_with)
 {
     /* Accumulate into SSC 'ssc' its 'OR' with 'or_with', which is either
      * another SSC or a regular ANYOF class.  Can create false positives if
@@ -1311,7 +1311,7 @@ S_ssc_or(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
     /* 'or_with' is used as-is if it too is an SSC; otherwise have to extract
      * the code point inversion list and just the relevant flags */
     if (is_ANYOF_SYNTHETIC(or_with)) {
-        ored_cp_list = or_with->invlist;
+        ored_cp_list = ((regnode_ssc*) or_with)->invlist;
         ored_flags = ANYOF_FLAGS(or_with);
     }
     else {
@@ -1346,7 +1346,7 @@ S_ssc_or(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
         /* We ignore P2, leaving P1 going forward */
     }
     else {  /* Not inverted */
-        ANYOF_POSIXL_OR(or_with, ssc);
+        ANYOF_POSIXL_OR((regnode_charclass_posixl*)or_with, ssc);
         if (ANYOF_POSIXL_TEST_ANY_SET(ssc)) {
             unsigned int i;
             for (i = 0; i < ANYOF_MAX; i += 2) {
@@ -3732,7 +3732,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 			data->whilem_c = data_fake.whilem_c;
 		    }
 		    if (flags & SCF_DO_STCLASS)
-			ssc_or(pRExC_state, &accum, &this_class);
+			ssc_or(pRExC_state, &accum, (regnode_charclass*)&this_class);
 		}
 		if (code == IFTHEN && num < 2) /* Empty ELSE branch */
 		    min1 = 0;
@@ -3752,15 +3752,15 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		else
 		    delta += max1 - min1;
 		if (flags & SCF_DO_STCLASS_OR) {
-		    ssc_or(pRExC_state, data->start_class, &accum);
+		    ssc_or(pRExC_state, data->start_class, (regnode_charclass*) &accum);
 		    if (min1) {
-			ssc_and(pRExC_state, data->start_class, and_withp);
+			ssc_and(pRExC_state, data->start_class, (regnode_charclass *) and_withp);
 			flags &= ~SCF_DO_STCLASS;
 		    }
 		}
 		else if (flags & SCF_DO_STCLASS_AND) {
 		    if (min1) {
-			ssc_and(pRExC_state, data->start_class, &accum);
+			ssc_and(pRExC_state, data->start_class, (regnode_charclass *) &accum);
 			flags &= ~SCF_DO_STCLASS;
 		    }
 		    else {
@@ -4225,7 +4225,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 	    }
 	    else if (flags & SCF_DO_STCLASS_OR) {
                 ssc_add_cp(data->start_class, uc);
-		ssc_and(pRExC_state, data->start_class, and_withp);
+		ssc_and(pRExC_state, data->start_class, (regnode_charclass *) and_withp);
 
                 /* See commit msg 749e076fceedeb708a624933726e7989f2302f6a */
                 ANYOF_FLAGS(data->start_class) &= ~ANYOF_EMPTY_STRING;
@@ -4345,7 +4345,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 	    }
 	    else if (flags & SCF_DO_STCLASS_OR) {
                 ssc_union(data->start_class, EXACTF_invlist, FALSE);
-		ssc_and(pRExC_state, data->start_class, and_withp);
+		ssc_and(pRExC_state, data->start_class, (regnode_charclass *) and_withp);
 
                 /* See commit msg 749e076fceedeb708a624933726e7989f2302f6a */
                 ANYOF_FLAGS(data->start_class) &= ~ANYOF_EMPTY_STRING;
@@ -4457,7 +4457,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    data->start_class = oclass;
 		if (mincount == 0 || minnext == 0) {
 		    if (flags & SCF_DO_STCLASS_OR) {
-			ssc_or(pRExC_state, data->start_class, &this_class);
+			ssc_or(pRExC_state, data->start_class, (regnode_charclass *) &this_class);
 		    }
 		    else if (flags & SCF_DO_STCLASS_AND) {
 			/* Switch to OR mode: cache the old value of
@@ -4471,11 +4471,11 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    }
 		} else {		/* Non-zero len */
 		    if (flags & SCF_DO_STCLASS_OR) {
-			ssc_or(pRExC_state, data->start_class, &this_class);
-			ssc_and(pRExC_state, data->start_class, and_withp);
+			ssc_or(pRExC_state, data->start_class, (regnode_charclass *) &this_class);
+			ssc_and(pRExC_state, data->start_class, (regnode_charclass *) and_withp);
 		    }
 		    else if (flags & SCF_DO_STCLASS_AND)
-			ssc_and(pRExC_state, data->start_class, &this_class);
+			ssc_and(pRExC_state, data->start_class, (regnode_charclass *) &this_class);
 		    flags &= ~SCF_DO_STCLASS;
 		}
 		if (!scan) 		/* It was not CURLYX, but CURLY. */
@@ -4769,7 +4769,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
                     ssc_union(data->start_class,
                               PL_XPosix_ptrs[_CC_VERTSPACE],
                               FALSE);
-		    ssc_and(pRExC_state, data->start_class, and_withp);
+		    ssc_and(pRExC_state, data->start_class, (regnode_charclass *) and_withp);
 
                     /* See commit msg for
                      * 749e076fceedeb708a624933726e7989f2302f6a */
@@ -4843,10 +4843,10 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
                 case ANYOF:
 		    if (flags & SCF_DO_STCLASS_AND)
 			ssc_and(pRExC_state, data->start_class,
-                                (regnode_ssc*) scan);
+                                (regnode_charclass *) scan);
 		    else
 			ssc_or(pRExC_state, data->start_class,
-                                                          (regnode_ssc*)scan);
+                                                          (regnode_charclass *) scan);
 		    break;
 
 		case NPOSIXL:
@@ -4940,7 +4940,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
                     }
 		}
 		if (flags & SCF_DO_STCLASS_OR)
-		    ssc_and(pRExC_state, data->start_class, and_withp);
+		    ssc_and(pRExC_state, data->start_class, (regnode_charclass *) and_withp);
 		flags &= ~SCF_DO_STCLASS;
 	    }
 	}
@@ -5043,7 +5043,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
 			ssc_init(pRExC_state, data->start_class);
 		    }  else {
 			/* AND before and after: combine and continue */
-			ssc_and(pRExC_state, data->start_class, &intrnl);
+			ssc_and(pRExC_state, data->start_class, (regnode_charclass *) &intrnl);
 		    }
                 }
 	    }
@@ -5114,7 +5114,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
                 *minnextp += min;
 
                 if (f & SCF_DO_STCLASS_AND) {
-                    ssc_and(pRExC_state, data->start_class, &intrnl);
+                    ssc_and(pRExC_state, data->start_class, (regnode_charclass *) &intrnl);
                 }
                 if (data) {
                     if (data_fake.flags & (SF_HAS_PAR|SF_IN_PAR))
@@ -5286,7 +5286,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
                         data->whilem_c = data_fake.whilem_c;
                     }
                     if (flags & SCF_DO_STCLASS)
-                        ssc_or(pRExC_state, &accum, &this_class);
+                        ssc_or(pRExC_state, &accum, (regnode_charclass *) &this_class);
                 }
             }
             if (flags & SCF_DO_SUBSTR) {
@@ -5298,15 +5298,15 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
             min += min1;
             delta += max1 - min1;
             if (flags & SCF_DO_STCLASS_OR) {
-                ssc_or(pRExC_state, data->start_class, &accum);
+                ssc_or(pRExC_state, data->start_class, (regnode_charclass *) &accum);
                 if (min1) {
-                    ssc_and(pRExC_state, data->start_class, and_withp);
+                    ssc_and(pRExC_state, data->start_class, (regnode_charclass *) and_withp);
                     flags &= ~SCF_DO_STCLASS;
                 }
             }
             else if (flags & SCF_DO_STCLASS_AND) {
                 if (min1) {
-                    ssc_and(pRExC_state, data->start_class, &accum);
+                    ssc_and(pRExC_state, data->start_class, (regnode_charclass *) &accum);
                     flags &= ~SCF_DO_STCLASS;
                 }
                 else {
@@ -5389,7 +5389,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
 	data->flags &= ~SF_IN_PAR;
     }
     if (flags & SCF_DO_STCLASS_OR)
-	ssc_and(pRExC_state, data->start_class, and_withp);
+	ssc_and(pRExC_state, data->start_class, (regnode_charclass *) and_withp);
     if (flags & SCF_TRIE_RESTUDY)
         data->flags |= 	SCF_TRIE_RESTUDY;
 

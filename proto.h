@@ -6887,7 +6887,7 @@ PERL_STATIC_INLINE void	S_ssc_add_range(pTHX_ regnode_ssc *ssc, UV const start, 
 #define PERL_ARGS_ASSERT_SSC_ADD_RANGE	\
 	assert(ssc)
 
-STATIC void	S_ssc_and(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc, const regnode_ssc *and_with)
+STATIC void	S_ssc_and(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc, const regnode_charclass *and_with)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3);
@@ -6945,7 +6945,7 @@ STATIC int	S_ssc_is_cp_posixl_init(pTHX_ const RExC_state_t *pRExC_state, const 
 #define PERL_ARGS_ASSERT_SSC_IS_CP_POSIXL_INIT	\
 	assert(pRExC_state); assert(ssc)
 
-STATIC void	S_ssc_or(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc, const regnode_ssc *or_with)
+STATIC void	S_ssc_or(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc, const regnode_charclass *or_with)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3);

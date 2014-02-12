@@ -2088,11 +2088,11 @@ EsR	|int	|ssc_is_cp_posixl_init|NN const RExC_state_t *pRExC_state \
 				|NN const regnode_ssc *ssc
 Es	|void	|ssc_and	|NN const RExC_state_t *pRExC_state \
 				|NN regnode_ssc *ssc                \
-				|NN const regnode_ssc *and_with
+				|NN const regnode_charclass *and_with
 Esn	|void	|ssc_flags_and	|NN regnode_ssc *ssc|const U8 and_with
 Es	|void	|ssc_or		|NN const RExC_state_t *pRExC_state \
 				|NN regnode_ssc *ssc \
-				|NN const regnode_ssc *or_with
+				|NN const regnode_charclass *or_with
 Es	|SV*	|get_ANYOF_cp_list_for_ssc                                 \
 				|NN const RExC_state_t *pRExC_state \
 				|NN const regnode_charclass_posixl_fold* const node
