@@ -21,7 +21,7 @@ use Carp 'croak';
 
 # The revision is no longer being updated since moving to git.
 $CGI::revision = '$Id: CGI.pm,v 1.266 2009/07/30 16:32:34 lstein Exp $';
-$CGI::VERSION='3.64';
+$CGI::VERSION='3.65';
 
 # HARD-CODED LOCATION FOR FILE UPLOAD TEMPORARY FILES.
 # UNCOMMENT THIS ONLY IF YOU KNOW WHAT YOU'RE DOING.
