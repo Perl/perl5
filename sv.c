@@ -12094,7 +12094,9 @@ Perl_ptr_table_fetch(pTHX_ PTR_TBL_t *const tbl, const void *const sv)
     return tblent ? tblent->newval : NULL;
 }
 
-/* add a new entry to a pointer-mapping table */
+/* add a new entry to a pointer-mapping table 'tbl'.  In hash terms, 'oldsv' is
+ * the key; 'newsv' is the value.  The names "old" and "new" are specific to
+ * the core's typical use of ptr_tables in thread cloning. */
 
 void
 Perl_ptr_table_store(pTHX_ PTR_TBL_t *const tbl, const void *const oldsv, void *const newsv)
