@@ -561,6 +561,8 @@ static XSPROTO(is_common)
     {
 	dXSTARG;
 	STRLEN	len;
+        /*int	RETVAL = 0;   YYY means uncomment this to return false on an
+                            * empty string input */
 	int	RETVAL;
 	unsigned char *s = (unsigned char *) SvPV(ST(0), len);
 	unsigned char *e = s + len;
@@ -583,9 +585,11 @@ static XSPROTO(is_common)
             }
         }
 
+        /*if (e > s) { YYY */
 	for (RETVAL = 1; RETVAL && s < e; s++)
 	    if (!isfunc(*s))
 		RETVAL = 0;
+        /*} YYY */
 	XSprePUSH;
 	PUSHi((IV)RETVAL);
     }
