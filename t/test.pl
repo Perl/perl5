@@ -869,6 +869,28 @@ sub tempfile {
     die "Can't find temporary file name starting \"tmp$$\"";
 }
 
+# register_tempfile - Adds a list of files to be removed at the end of the current test file
+# Arguments :
+#   a list of files to be removed later
+
+# returns a count of how many file names were actually added
+
+# Reuses %tmpfiles so that tempfile() will also skip any files added here
+# even if the file doesn't exist yet.
+
+sub register_tempfile {
+    my $count = 0;
+    for( @_ ){
+	if( $tmpfiles{$_} ){
+	    _print_stderr "# Temporary file '$_' already added\n";
+	}else{
+	    $tmpfiles{$_} = 1;
+	    $count = $count + 1;
+	}
+    }
+    return $count;
+}
+
 # This is the temporary file for _fresh_perl
 my $tmpfile = tempfile();
 
