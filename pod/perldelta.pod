@@ -415,7 +415,7 @@ and New Warnings
 
 =item *
 
-Added L<<Setting $E<0x2f> to a %s reference is forbidden|perldiag/"Setting $E<0x2f> to a %s reference is forbidden">>
+Added L<Setting $E<sol> to a %s reference is forbidden|perldiag/"Setting $E<sol> to a %s reference is forbidden">
 
 =item *
 
@@ -429,7 +429,7 @@ XXX L<message|perldiag/"message">
 
 =item *
 
-Added L<<Setting $E<0x2f> to a reference to %s as a form of slurp is deprecated, treating as undef|perldiag/"Setting $E<0x2f> to a reference to %s as a form of slurp is deprecated, treating as undef">>
+Added L<Setting $E<sol> to a reference to %s as a form of slurp is deprecated, treating as undef|perldiag/"Setting $E<sol> to a reference to %s as a form of slurp is deprecated, treating as undef">
 
 =item *
 
