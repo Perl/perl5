@@ -2014,7 +2014,7 @@ after modifying a scalar, in case it is a magical variable like C<$|>
 or a tied variable (it calls C<STORE>).  This macro evaluates its
 argument more than once.
 
-=for apidoc Am|void|SvSetSV|SV* dsb|SV* ssv
+=for apidoc Am|void|SvSetSV|SV* dsv|SV* ssv
 Calls C<sv_setsv> if dsv is not the same as ssv.  May evaluate arguments
 more than once.
 
@@ -2022,7 +2022,7 @@ more than once.
 Calls a non-destructive version of C<sv_setsv> if dsv is not the same as
 ssv.  May evaluate arguments more than once.
 
-=for apidoc Am|void|SvSetMagicSV|SV* dsb|SV* ssv
+=for apidoc Am|void|SvSetMagicSV|SV* dsv|SV* ssv
 Like C<SvSetSV>, but does any set magic required afterwards.
 
 =for apidoc Am|void|SvSetMagicSV_nosteal|SV* dsv|SV* ssv
