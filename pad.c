@@ -607,6 +607,7 @@ Perl_pad_add_name_pvn(pTHX_ const char *namepv, STRLEN namelen,
 {
     dVAR;
     PADOFFSET offset;
+    const char *orig_namepv = namepv;
     SV *namesv;
     bool is_utf8;
 
@@ -663,6 +664,10 @@ Perl_pad_add_name_pvn(pTHX_ const char *namepv, STRLEN namelen,
 			   "Pad addname: %ld \"%s\" new lex=0x%"UVxf"\n",
 			   (long)offset, SvPVX(namesv),
 			   PTR2UV(PL_curpad[offset])));
+
+    if ( namepv != orig_namepv ) {
+        Safefree(namepv);
+    }
 
     return offset;
 }
@@ -960,6 +965,7 @@ Perl_pad_findmy_pvn(pTHX_ const char *namepv, STRLEN namelen, U32 flags)
     I32 offset;
     const AV *nameav;
     SV **name_svp;
+    const char *orig_namepv = namepv;
 
     PERL_ARGS_ASSERT_PAD_FINDMY_PVN;
 
@@ -981,8 +987,13 @@ Perl_pad_findmy_pvn(pTHX_ const char *namepv, STRLEN namelen, U32 flags)
 
     offset = pad_findlex(namepv, namelen, flags,
                 PL_compcv, PL_cop_seqmax, 1, NULL, &out_sv, &out_flags);
-    if ((PADOFFSET)offset != NOT_IN_PAD) 
+    if ((PADOFFSET)offset != NOT_IN_PAD) { 
+        if ( namepv != orig_namepv ) {
+            Safefree(namepv);
+        }
+
 	return offset;
+    }
 
     /* look for an our that's being introduced; this allows
      *    our $foo = 0 unless defined $foo;
@@ -998,8 +1009,15 @@ Perl_pad_findmy_pvn(pTHX_ const char *namepv, STRLEN namelen, U32 flags)
             && sv_eq_pvn_flags(aTHX_ namesv, namepv, namelen,
                                 flags & padadd_UTF8_NAME ? SVf_UTF8 : 0 )
 	    && COP_SEQ_RANGE_LOW(namesv) == PERL_PADSEQ_INTRO
-	)
+	) {
+	    if ( namepv != orig_namepv ) {
+	        Safefree(namepv);
+	    }
 	    return offset;
+	}
+    }
+    if ( namepv != orig_namepv ) {
+        Safefree(namepv);
     }
     return NOT_IN_PAD;
 }
