@@ -17,7 +17,7 @@ use vars qw(
 
 require Exporter;
 @ISA = ('Exporter');
-$VERSION = '1.05';
+$VERSION = '1.06';
 @EXPORT_OK = qw(
   %Code2USASCII
   %Name2character
@@ -90,7 +90,7 @@ sub e2charnum {
     $in = hex $1;
   } # else it's decimal, or named
 
-  if($in =~ m/^\d+$/s) {
+  if($in =~ m/^[0-9]+$/s) {
     return 0 + $in;
   } else {
     return $Name2character_number{$in}; # returns undef if unknown
@@ -641,11 +641,17 @@ C<chr($Name2character_number{$name})>.
 
 =head1 SEE ALSO
 
-L<perlpod|perlpod>
+L<Pod::Browser> - a pod web server based on L<Catalyst>.
 
-L<perlpodspec|perlpodspec>
+L<Pod::Checker> - check pod documents for syntax errors.
 
-L<Text::Unidecode|Text::Unidecode>
+L<Pod::Coverage> - check if the documentation for a module is comprehensive.
+
+L<perlpod> - description of pod format (for people documenting with pod).
+
+L<perlpodspec> - specification of pod format (for people processing it).
+
+L<Text::Unidecode> - ASCII transliteration of Unicode text.
 
 =head1 REPOSITORY
 
