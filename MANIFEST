@@ -352,33 +352,53 @@ cpan/CPAN-Meta/t/save-load.t
 cpan/CPAN-Meta/t/strings.t
 cpan/CPAN-Meta/t/validator.t
 cpan/CPAN-Meta-YAML/lib/CPAN/Meta/YAML.pm		CPAN-Meta-YAML files
+cpan/CPAN-Meta-YAML/t/01_api.t
 cpan/CPAN-Meta-YAML/t/01_compile.t		CPAN-Meta-YAML files
-cpan/CPAN-Meta-YAML/t/02_basic.t		CPAN-Meta-YAML files
-cpan/CPAN-Meta-YAML/t/03_regression.t		CPAN-Meta-YAML files
-cpan/CPAN-Meta-YAML/t/05_export.t		CPAN-Meta-YAML files
-cpan/CPAN-Meta-YAML/t/11_meta_yml.t		CPAN-Meta-YAML files
-cpan/CPAN-Meta-YAML/t/12_plagger.t		CPAN-Meta-YAML files
-cpan/CPAN-Meta-YAML/t/13_perl_smith.t		CPAN-Meta-YAML files
-cpan/CPAN-Meta-YAML/t/14_yaml_org.t		CPAN-Meta-YAML files
-cpan/CPAN-Meta-YAML/t/15_multibyte.t		CPAN-Meta-YAML files
-cpan/CPAN-Meta-YAML/t/16_nullrefs.t		CPAN-Meta-YAML files
-cpan/CPAN-Meta-YAML/t/17_toolbar.t		CPAN-Meta-YAML files
-cpan/CPAN-Meta-YAML/t/18_tap.t		CPAN-Meta-YAML files
-cpan/CPAN-Meta-YAML/t/19_errors.t		CPAN-Meta-YAML files
+cpan/CPAN-Meta-YAML/t/10_read.t
+cpan/CPAN-Meta-YAML/t/11_read_string.t
+cpan/CPAN-Meta-YAML/t/12_write.t
+cpan/CPAN-Meta-YAML/t/13_write_string.t
 cpan/CPAN-Meta-YAML/t/20_subclass.t		CPAN-Meta-YAML files
-cpan/CPAN-Meta-YAML/t/21_bom.t		CPAN-Meta-YAML files
-cpan/CPAN-Meta-YAML/t/22_comments.t		CPAN-Meta-YAML files
-cpan/CPAN-Meta-YAML/t/data/HTML-WebDAO.yml		CPAN-Meta-YAML files
+cpan/CPAN-Meta-YAML/t/21_yamlpm_compat.t
+cpan/CPAN-Meta-YAML/t/30_yaml_spec_tml.t
+cpan/CPAN-Meta-YAML/t/31_local_tml.t
+cpan/CPAN-Meta-YAML/t/32_world_tml.t
+cpan/CPAN-Meta-YAML/t/data/ascii.yml
+cpan/CPAN-Meta-YAML/t/data/latin1.yml
 cpan/CPAN-Meta-YAML/t/data/multibyte.yml		CPAN-Meta-YAML files
-cpan/CPAN-Meta-YAML/t/data/one.yml		CPAN-Meta-YAML files
-cpan/CPAN-Meta-YAML/t/data/sample.yml		CPAN-Meta-YAML files
-cpan/CPAN-Meta-YAML/t/data/Spreadsheet-Read.yml		CPAN-Meta-YAML files
-cpan/CPAN-Meta-YAML/t/data/Template-Provider-Unicode-Japanese.yml		CPAN-Meta-YAML files
-cpan/CPAN-Meta-YAML/t/data/toolbar.yml		CPAN-Meta-YAML files
-cpan/CPAN-Meta-YAML/t/data/two.yml		CPAN-Meta-YAML files
 cpan/CPAN-Meta-YAML/t/data/utf_16_le_bom.yml		CPAN-Meta-YAML files
-cpan/CPAN-Meta-YAML/t/data/vanilla.yml		CPAN-Meta-YAML files
-cpan/CPAN-Meta-YAML/t/lib/Test.pm		CPAN-Meta-YAML files
+cpan/CPAN-Meta-YAML/t/data/utf_8_bom.yml
+cpan/CPAN-Meta-YAML/t/lib/TestBridge.pm
+cpan/CPAN-Meta-YAML/t/lib/TestML/Tiny.pm
+cpan/CPAN-Meta-YAML/t/lib/TestUtils.pm
+cpan/CPAN-Meta-YAML/t/README.md
+cpan/CPAN-Meta-YAML/t/tml
+cpan/CPAN-Meta-YAML/t/tml-local/dump-error/circular.tml
+cpan/CPAN-Meta-YAML/t/tml-local/load-error/document.tml
+cpan/CPAN-Meta-YAML/t/tml-local/load-error/scalar.tml
+cpan/CPAN-Meta-YAML/t/tml-local/load-error/tag.tml
+cpan/CPAN-Meta-YAML/t/tml-local/perl-to-yaml/quoting.tml
+cpan/CPAN-Meta-YAML/t/tml-local/yaml-roundtrip/collection.tml
+cpan/CPAN-Meta-YAML/t/tml-local/yaml-roundtrip/comment.tml
+cpan/CPAN-Meta-YAML/t/tml-local/yaml-roundtrip/document.tml
+cpan/CPAN-Meta-YAML/t/tml-local/yaml-roundtrip/mapping.tml
+cpan/CPAN-Meta-YAML/t/tml-local/yaml-roundtrip/quoting.tml
+cpan/CPAN-Meta-YAML/t/tml-local/yaml-roundtrip/scalar.tml
+cpan/CPAN-Meta-YAML/t/tml-local/yaml-roundtrip/sequence.tml
+cpan/CPAN-Meta-YAML/t/tml-spec/basic-data.tml
+cpan/CPAN-Meta-YAML/t/tml-spec/unicode.tml
+cpan/CPAN-Meta-YAML/t/tml-world/Acme-Time-Baby.tml
+cpan/CPAN-Meta-YAML/t/tml-world/Data-Swap.tml
+cpan/CPAN-Meta-YAML/t/tml-world/Games-Nintendo-Wii-Mii.tml
+cpan/CPAN-Meta-YAML/t/tml-world/HTML-WebDAO.tml
+cpan/CPAN-Meta-YAML/t/tml-world/ITS-SIN-FIDS-Content-XML.tml
+cpan/CPAN-Meta-YAML/t/tml-world/Plagger.tml
+cpan/CPAN-Meta-YAML/t/tml-world/Spreadsheet-Read.tml
+cpan/CPAN-Meta-YAML/t/tml-world/Template-Provider-Unicode-Japanese.tml
+cpan/CPAN-Meta-YAML/t/tml-world/toolbar.tml
+cpan/CPAN-Meta-YAML/t/tml-world/Vanilla-Perl.tml
+cpan/CPAN-Meta-YAML/t/tml-world/yaml_org.tml
+cpan/CPAN-Meta-YAML/t/tml-world/YAML-Tiny-META.tml
 cpan/CPAN/PAUSE2003.pub		CPAN public key
 cpan/CPAN/PAUSE2005.pub		CPAN public key
 cpan/CPAN/PAUSE2007.pub		CPAN public key
