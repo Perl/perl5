@@ -1096,6 +1096,8 @@ Perl_re_intuit_start(pTHX_
         /* May be due to an implicit anchor of m{.*foo}  */
         && !(prog->intflags & PREGf_IMPLICIT))
     {
+        char *s;
+
         DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
                         "  looking for /^/m anchor"));
 
@@ -1112,9 +1114,10 @@ Perl_re_intuit_start(pTHX_
          * first
          */
 
-        rx_origin = (char *)memchr(rx_origin, '\n',
-                        HOP3c(strend, - prog->minlen, strpos) - rx_origin);
-        if (!rx_origin) {
+        s = HOP3c(strend, - prog->minlen, strpos);
+        if (s <= rx_origin ||
+            ! ( rx_origin = (char *)memchr(rx_origin, '\n', s - rx_origin)))
+        {
             DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
                             "  Did not find /%s^%s/m...\n",
                             PL_colors[0], PL_colors[1]));
