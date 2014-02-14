@@ -2,9 +2,9 @@ use strict;
 use warnings;
 use Encode ();
 
-use Test::More tests => 77;
+use Test::More tests => 78;
 
-use XS::APItest qw( fetch_pad_names pad_scalar );
+use XS::APItest qw( fetch_pad_names pad_scalar pad_findmy_pvn);
 
 local $SIG{__WARN__} = sub { warn $_[0] unless $_[0] =~ /Wide character in print at/ };
 
@@ -319,4 +319,23 @@ sub general_tests {
         }
     }
 
+}
+
+BEGIN{
+# test for [perl #121200] memory leak when including a file with "use utf8"
+require IPC::Cmd;
+require File::Spec;
+SKIP: {
+    my $null = File::Spec->devnull;
+    my $ps = IPC::Cmd::can_run("ps") && qx[ps -p $$ -o rss= 2>$null]+0
+                ? sub { qx[ps -p $$ -o rss= 2>/dev/null]+0 }
+                : undef;
+    skip("Can't run 'ps' here, skipping", 1) unless $ps;
+    sleep 1;
+    my $before = $ps->();
+    pad_findmy_pvn("\N{U+78}") for 0..1e5;
+    my $after  = $ps->();
+    my $diff   = $after - $before;
+    cmp_ok($diff, "<", 54, "no memory leak from pad_add_name_pvn");
+}
 }

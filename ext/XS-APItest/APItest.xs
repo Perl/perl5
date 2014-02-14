@@ -3420,6 +3420,17 @@ CV* cv
  OUTPUT:
   RETVAL
 
+void
+pad_findmy_pvn(SV *a1)
+CODE:
+    char *namepv;
+    STRLEN namelen;
+    SV *namesv = sv_2mortal(newSVpvs("$"));
+    PADOFFSET padoff = NOT_IN_PAD;
+    sv_catsv(namesv, a1);
+    namepv = SvPV(namesv, namelen);
+    padoff = pad_findmy_pvn(namepv, namelen, SvUTF8(namesv));
+
 STRLEN
 underscore_length()
 PROTOTYPE:
