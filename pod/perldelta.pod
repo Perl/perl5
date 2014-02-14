@@ -220,10 +220,20 @@ hints for foo.
 
 =item *
 
+L<B::Concise> has been upgraded from version 0.991 to 0.992.
+
+Remove the obsolete C<DEREFed> flag.
+
+=item *
+
 L<B::Deparse> has been upgraded from version 1.24 to 1.25.
 
 It now knows how to handle whitespace in prototypes.  Previously, it could
 loop infinitely.  [perl #121050]
+
+=item *
+
+L<CGI> has been upgraded from version 3.64 to 3.65.
 
 =item *
 
@@ -302,6 +312,18 @@ L<Locale::Codes> has been upgraded from version 3.28 to 3.29.
 
 =item *
 
+L<Module::Build> has been upgraded from version 0.4204 to 0.4205.
+
+Fix license code regression for artistic license.
+
+Don't swallow ExtUtils::CBuilder loading errors.
+
+Handle testing on cross-compile builds.
+
+Protect against platforms without getpw{nam,uid}.
+
+=item *
+
 L<Module::Load> has been upgraded from version 0.28 to 0.30.
 
 Prevent uninitialized warnings during testing.
@@ -312,6 +334,12 @@ L<Module::Load::Conditional> has been upgraded from version 0.60 to 0.62.
 
 =item *
 
+L<mro> has been upgraded from version 1.14 to 1.15.
+
+Use HEKfARG() instead of creating and throwing away SVs.
+
+=item *
+
 The PathTools module collection has been upgraded from version 3.45 to
 3.46.
 
@@ -319,6 +347,12 @@ Improved support for Android.
 
 C<< File::Spec::Unix->tmpdir >> now consistently returns an absolute
 path, unless in taint mode.  [perl #120593]
+
+=item *
+
+L<Pod::Escapes> has been upgraded from version 1.04 to 1.05.
+
+Now strict and warning clean.  Several minor documentation updates.
 
 =item *
 
@@ -660,6 +694,37 @@ initialized it.  [perl #121070]
 
 Fixed a regular expression bug introduced in 5.19.5 where \S, \W etc
 could fail for above ASCII.  [perl #121144]
+
+=item *
+
+A large set of fixes and refactoring for re_intuit_start() was merged,
+the highlights are:
+
+=over
+
+=item *
+
+Fixed a panic when compiling the regular expression
+C</\x{100}[xy]\x{100}{2}/>.
+
+=item *
+
+Fixed a performance regression when performing a global pattern match
+against a UTF-8 string.  [perl #120692]
+
+=item *
+
+Fixed another performance issue where matching a regular expression
+like C</ab.{1,2}x/> against a long UTF-8 string would unnecessarily
+calculate byte offsets for a large portion of the string. [perl
+#120692]
+
+=back
+
+=item *
+
+C< for ( $h{k} || '' ) > no longer auto-vivifies C<$h{k}>.  [perl
+#120374]
 
 =back
 
