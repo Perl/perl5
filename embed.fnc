@@ -1069,6 +1069,11 @@ ApdO	|AV*	|get_av		|NN const char *name|I32 flags
 ApdO	|HV*	|get_hv		|NN const char *name|I32 flags
 ApdO	|CV*	|get_cv		|NN const char* name|I32 flags
 Apd	|CV*	|get_cvn_flags	|NN const char* name|STRLEN len|I32 flags
+#ifdef WIN32
+ApPM	|char*	|my_setlocale	|int category|NULLOK const char* locale
+#else
+AmPM	|char*	|my_setlocale	|int category|NULLOK const char* locale
+#endif
 ApOM	|int	|init_i18nl10n	|int printwarn
 ApOM	|int	|init_i18nl14n	|int printwarn
 ApOM	|void	|new_collate	|NULLOK const char* newcoll

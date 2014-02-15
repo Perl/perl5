@@ -1115,7 +1115,8 @@ and you should investigate what the problem is.
 
 The following environment variables are not specific to Perl: They are
 part of the standardized (ISO C, XPG4, POSIX 1.c) C<setlocale()> method
-for controlling an application's opinion on data.
+for controlling an application's opinion on data.  Windows is non-POSIX,
+but Perl arranges for the following to work as described anyway.
 
 =over 12
 

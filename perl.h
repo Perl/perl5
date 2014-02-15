@@ -702,6 +702,9 @@
 #   if !defined(NO_LOCALE_MONETARY) && defined(LC_MONETARY)
 #	define USE_LOCALE_MONETARY
 #   endif
+#   ifndef WIN32    /* No wrapper except on Windows */
+#       define my_setlocale(a,b) setlocale(a,b)
+#   endif
 #endif /* !NO_LOCALE && HAS_SETLOCALE */
 
 #include <setjmp.h>

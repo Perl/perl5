@@ -951,7 +951,11 @@ setlocale(category, locale = 0)
     PREINIT:
 	char *		retval;
     CODE:
+#ifdef WIN32    /* Use wrapper on Windows */
+	retval = Perl_my_setlocale(aTHX_ category, locale);
+#else
 	retval = setlocale(category, locale);
+#endif
 	if (! retval) {
             XSRETURN_UNDEF;
         }

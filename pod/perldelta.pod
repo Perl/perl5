@@ -726,6 +726,12 @@ calculate byte offsets for a large portion of the string. [perl
 C< for ( $h{k} || '' ) > no longer auto-vivifies C<$h{k}>.  [perl
 #120374]
 
+=item *
+
+On Windows machines, Perl now emulates the POSIX use of the environment
+for locale initialization.  Previously, the environment was ignored.
+See L<perllocale/ENVIRONMENT>.
+
 =back
 
 =head1 Known Problems

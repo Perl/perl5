@@ -331,6 +331,85 @@ Perl_new_collate(pTHX_ const char *newcoll)
 #endif /* USE_LOCALE_COLLATE */
 }
 
+#ifdef WIN32
+
+char *
+Perl_my_setlocale(pTHX_ int category, const char* locale)
+{
+    /* This, for Windows, emulates POSIX setlocale() behavior.  There is no
+     * difference unless the input locale is "", which means on Windows to get
+     * the machine default, which is set via the computer's "Regional and
+     * Language Options" (or its current equivalent).  In POSIX, it instead
+     * means to find the locale from the user's environment.  This routine
+     * looks in the environment, and, if anything is found, uses that instead
+     * of going to the machine default.  If there is no environment override,
+     * the machine default is used, as normal, by calling the real setlocale()
+     * with "".  The POSIX behavior is to use the LC_ALL variable if set;
+     * otherwise to use the particular category's variable if set; otherwise to
+     * use the LANG variable. */
+
+    if (locale && strEQ(locale, "")) {
+#   ifdef LC_ALL
+        locale = PerlEnv_getenv("LC_ALL");
+        if (! locale) {
+#endif
+            switch (category) {
+#   ifdef LC_ALL
+                case LC_ALL:
+                    break;  /* We already know its variable isn't set */
+#   endif
+#   ifdef USE_LOCALE_TIME
+                case LC_TIME:
+                    locale = PerlEnv_getenv("LC_TIME");
+                    break;
+#   endif
+#   ifdef USE_LOCALE_CTYPE
+                case LC_CTYPE:
+                    locale = PerlEnv_getenv("LC_CTYPE");
+                    break;
+#   endif
+#   ifdef USE_LOCALE_COLLATE
+                case LC_COLLATE:
+                    locale = PerlEnv_getenv("LC_COLLATE");
+                    break;
+#   endif
+#   ifdef USE_LOCALE_MONETARY
+                case LC_MONETARY:
+                    locale = PerlEnv_getenv("LC_MONETARY");
+                    break;
+#   endif
+#   ifdef USE_LOCALE_NUMERIC
+                case LC_NUMERIC:
+                    locale = PerlEnv_getenv("LC_NUMERIC");
+                    break;
+#   endif
+#   ifdef USE_LOCALE_MESSAGES
+                case LC_MESSAGES:
+                    locale = PerlEnv_getenv("LC_MESSAGES");
+                    break;
+#   endif
+                default:
+                    /* This is a category, like PAPER_SIZE that we don't
+                     * know about; and so can't provide a wrapper. */
+                    break;
+            }
+            if (! locale) {
+                locale = PerlEnv_getenv("LANG");
+                if (! locale) {
+                    locale = "";
+                }
+            }
+#   ifdef LC_ALL
+        }
+#   endif
+    }
+
+    return setlocale(category, locale);
+}
+
+#endif
+
+
 /*
  * Initialize locale awareness.
  */
@@ -378,7 +457,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 
 #   ifdef LC_ALL
     if (lang) {
-	if (setlocale(LC_ALL, setlocale_init))
+	if (my_setlocale(LC_ALL, setlocale_init))
 	    done = TRUE;
 	else
 	    setlocale_failure = TRUE;
@@ -387,7 +466,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 #       ifdef USE_LOCALE_CTYPE
 	Safefree(curctype);
 	if (! (curctype =
-	       setlocale(LC_CTYPE,
+	       my_setlocale(LC_CTYPE,
 			 (!done && (lang || PerlEnv_getenv("LC_CTYPE")))
 				    ? setlocale_init : NULL)))
 	    setlocale_failure = TRUE;
@@ -397,7 +476,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 #       ifdef USE_LOCALE_COLLATE
 	Safefree(curcoll);
 	if (! (curcoll =
-	       setlocale(LC_COLLATE,
+	       my_setlocale(LC_COLLATE,
 			 (!done && (lang || PerlEnv_getenv("LC_COLLATE")))
 				   ? setlocale_init : NULL)))
 	    setlocale_failure = TRUE;
@@ -407,7 +486,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 #       ifdef USE_LOCALE_NUMERIC
 	Safefree(curnum);
 	if (! (curnum =
-	       setlocale(LC_NUMERIC,
+	       my_setlocale(LC_NUMERIC,
 			 (!done && (lang || PerlEnv_getenv("LC_NUMERIC")))
 				  ? setlocale_init : NULL)))
 	    setlocale_failure = TRUE;
@@ -421,28 +500,28 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 #endif /* !LOCALE_ENVIRON_REQUIRED */
 
 #ifdef LC_ALL
-    if (! setlocale(LC_ALL, setlocale_init))
+    if (! my_setlocale(LC_ALL, setlocale_init))
 	setlocale_failure = TRUE;
 #endif /* LC_ALL */
 
     if (!setlocale_failure) {
 #ifdef USE_LOCALE_CTYPE
 	Safefree(curctype);
-	if (! (curctype = setlocale(LC_CTYPE, setlocale_init)))
+	if (! (curctype = my_setlocale(LC_CTYPE, setlocale_init)))
 	    setlocale_failure = TRUE;
 	else
 	    curctype = savepv(curctype);
 #endif /* USE_LOCALE_CTYPE */
 #ifdef USE_LOCALE_COLLATE
 	Safefree(curcoll);
-	if (! (curcoll = setlocale(LC_COLLATE, setlocale_init)))
+	if (! (curcoll = my_setlocale(LC_COLLATE, setlocale_init)))
 	    setlocale_failure = TRUE;
 	else
 	    curcoll = savepv(curcoll);
 #endif /* USE_LOCALE_COLLATE */
 #ifdef USE_LOCALE_NUMERIC
 	Safefree(curnum);
-	if (! (curnum = setlocale(LC_NUMERIC, setlocale_init)))
+	if (! (curnum = my_setlocale(LC_NUMERIC, setlocale_init)))
 	    setlocale_failure = TRUE;
 	else
 	    curnum = savepv(curnum);
