@@ -12,7 +12,7 @@ BEGIN {
 
 use warnings;
 
-plan( tests => 259 );
+plan( tests => 271 );
 
 # type coercion on assignment
 $foo = 'foo';
@@ -960,6 +960,63 @@ sub Undefiner::DESTROY {
     undef *undefine_me_if_you_dare;
     is $w, undef,
       'undeffing a gv in DESTROY triggered by undeffing the same gv'
+}
+
+# [perl #121242]
+# More gp_free madness.  gp_free could call a destructor that frees the gv
+# whose gp is being freed.
+sub Fred::AUTOLOAD { $Fred::AUTOLOAD }
+undef *{"Fred::AUTOLOAD"};
+pass 'no crash from gp_free triggering gv_try_downgrade';
+sub _121242::DESTROY { delete $_121242::{$_[0][0]} };
+${"_121242::foo"} = bless ["foo"], _121242::;
+undef *{"_121242::foo"};
+pass 'no crash from pp_undef/gp_free freeing the gv';
+${"_121242::bar"} = bless ["bar"], _121242::;
+*{"_121242::bar"} = "bar";
+pass 'no crash from sv_setsv/gp_free freeing the gv';
+${"_121242::baz"} = bless ["baz"], _121242::;
+*{"_121242::baz"} = *foo;
+pass 'no crash from glob_assign_glob/gp_free freeing the gv';
+{
+    my $foo;
+    undef *_121242::DESTROY;
+    *_121242::DESTROY = sub { undef $foo };
+    my $set_up_foo = sub {
+        # Make $$foo into a fake glob whose array slot holds a blessed
+        # array that undefines $foo, freeing the fake glob.
+        $foo = undef;
+        $$foo = do {local *bar};
+        *$$foo = bless [], _121242::;
+    };
+    &$set_up_foo;
+    $$foo = 3;
+    pass 'no crash from sv_setsv/sv_unglob/gp_free freeing the gv';
+    &$set_up_foo;
+    utf8::encode $$foo;
+    pass 'no crash from sv_utf8_encode/sv_unglob/gp_free freeing the gv';
+    &$set_up_foo;
+    open BAR, "TEST";
+    $$foo .= <BAR>;
+    pass 'no crash from do_readline/sv_unglob/gp_free freeing the gv';
+    close BAR;
+    &$set_up_foo;
+    $$foo .= 3;
+    pass 'no crash from pp_concat/sv_unglob/gp_free freeing the gv';
+    &$set_up_foo;
+    no warnings;
+    $$foo++;
+    pass 'no crash from sv_inc/sv_unglob/gp_free freeing the gv';
+    &$set_up_foo;
+    $$foo--;
+    pass 'no crash from sv_dec/sv_unglob/gp_free freeing the gv';
+    &$set_up_foo;
+    undef $$foo;
+    pass 'no crash from pp_undef/sv_unglob/gp_free freeing the gv';
+    $foo = undef;
+    $$foo = 3;
+    $$foo =~ s/3/$$foo = do {local *bar}; *$$foo = bless [],_121242::; 4/e;
+    pass 'no crash from pp_substcont/sv_unglob/gp_free freeing the gv';
 }
 
 # *{undef}

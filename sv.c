@@ -3773,6 +3773,8 @@ S_glob_assign_glob(pTHX_ SV *const dstr, SV *const sstr, const int dtype)
                     );
             }
         }
+
+        SvREFCNT_inc_simple_void_NN(sv_2mortal(dstr));
     }
 
     gp_free(MUTABLE_GV(dstr));
@@ -4312,8 +4314,10 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, SV* sstr, const I32 flags)
 		    reset_isa = TRUE;
 		}
 
-		if (GvGP(dstr))
+		if (GvGP(dstr)) {
+		    SvREFCNT_inc_simple_void_NN(sv_2mortal(dstr));
 		    gp_free(MUTABLE_GV(dstr));
+		}
 		GvGP_set(dstr, gp_ref(GvGP(gv)));
 
 		if (reset_isa) {
@@ -9940,6 +9944,7 @@ S_sv_unglob(pTHX_ SV *const sv, U32 flags)
     if (!(flags & SV_COW_DROP_PV))
 	gv_efullname3(temp, MUTABLE_GV(sv), "*");
 
+    SvREFCNT_inc_simple_void_NN(sv_2mortal(sv));
     if (GvGP(sv)) {
         if(GvCVu((const GV *)sv) && (stash = GvSTASH(MUTABLE_GV(sv)))
 	   && HvNAME_get(stash))

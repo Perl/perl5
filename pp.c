@@ -1024,6 +1024,7 @@ PP(pp_undef)
                 else stash = NULL;
             }
 
+	    SvREFCNT_inc_simple_void_NN(sv_2mortal(sv));
 	    gp_free(MUTABLE_GV(sv));
 	    Newxz(gp, 1, GP);
 	    GvGP_set(sv, gp_ref(gp));
