@@ -119,6 +119,7 @@ struct xpvhv_aux {
                                    used to detect each() after insert for warnings */
 #endif
     U32         xhv_fill_lazy;
+    U32         xhv_aux_flags;      /* assorted extra flags */
 };
 
 /* hash structure: */

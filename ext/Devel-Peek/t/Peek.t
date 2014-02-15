@@ -821,6 +821,7 @@ do_test('ENAME on a stash',
     FLAGS = \\(OOK,SHAREKEYS\\)
     IV = 1					# $] < 5.009
     NV = $FLOAT					# $] < 5.009
+    AUX_FLAGS = 0                               # $] > 5.019008
     ARRAY = $ADDR
     KEYS = 0
     FILL = 0 \(cached = 0\)
@@ -845,6 +846,7 @@ do_test('ENAMEs on a stash',
     FLAGS = \\(OOK,SHAREKEYS\\)
     IV = 1					# $] < 5.009
     NV = $FLOAT					# $] < 5.009
+    AUX_FLAGS = 0                               # $] > 5.019008
     ARRAY = $ADDR
     KEYS = 0
     FILL = 0 \(cached = 0\)
@@ -871,6 +873,7 @@ do_test('ENAMEs on a stash with no NAME',
     FLAGS = \\(OOK,OVERLOAD,SHAREKEYS\\)	# $] >=5.017
     IV = 1					# $] < 5.009
     NV = $FLOAT					# $] < 5.009
+    AUX_FLAGS = 0                               # $] > 5.019008
     ARRAY = $ADDR
     KEYS = 0
     FILL = 0 \(cached = 0\)
@@ -923,6 +926,7 @@ do_test('small hash after keys',
     FLAGS = \\(PADMY,OOK,SHAREKEYS\\)
     IV = 1					# $] < 5.009
     NV = $FLOAT					# $] < 5.009
+    AUX_FLAGS = 0                               # $] > 5.019008
     ARRAY = $ADDR  \\(0:[67],.*\\)
     hash quality = [0-9.]+%
     KEYS = 2
@@ -954,6 +958,7 @@ do_test('small hash after keys and scalar',
     FLAGS = \\(PADMY,OOK,SHAREKEYS\\)
     IV = 1					# $] < 5.009
     NV = $FLOAT					# $] < 5.009
+    AUX_FLAGS = 0                               # $] > 5.019008
     ARRAY = $ADDR  \\(0:[67],.*\\)
     hash quality = [0-9.]+%
     KEYS = 2
@@ -986,6 +991,7 @@ do_test('large hash',
     FLAGS = \\(PADMY,OOK,SHAREKEYS\\)
     IV = 1					# $] < 5.009
     NV = $FLOAT					# $] < 5.009
+    AUX_FLAGS = 0                               # $] > 5.019008
     ARRAY = $ADDR  \\(0:\d+,.*\\)
     hash quality = \d+\\.\d+%
     KEYS = 1000

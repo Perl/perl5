@@ -1883,6 +1883,11 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	}
 	break;
     case SVt_PVHV:
+        if (SvOOK(sv)) {
+            struct xpvhv_aux *const aux = HvAUX(sv);
+            Perl_dump_indent(aTHX_ level, file, "  AUX_FLAGS = %"UVuf"\n",
+                             (UV)aux->xhv_aux_flags);
+        }
 	Perl_dump_indent(aTHX_ level, file, "  ARRAY = 0x%"UVxf, PTR2UV(HvARRAY(sv)));
 	if (HvARRAY(sv) && HvUSEDKEYS(sv)) {
 	    /* Show distribution of HEs in the ARRAY */

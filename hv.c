@@ -1979,6 +1979,7 @@ S_hv_auxinit(pTHX_ HV *hv) {
     iter->xhv_name_count = 0;
     iter->xhv_backreferences = 0;
     iter->xhv_mro_meta = NULL;
+    iter->xhv_aux_flags = 0;
     return iter;
 }
 
