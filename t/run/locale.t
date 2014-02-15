@@ -282,6 +282,7 @@ EOF
             "1.5", {}, "POSIX::strtod() uses underlying locale");
         }
     }
+} # SKIP
 
     {
         fresh_perl_is(<<"EOF",
@@ -305,8 +306,5 @@ EOF
             1, {}, "/l matching of [bracketed] doesn't skip non-first POSIX class");
 
     }
-
-
-} # SKIP
 
 sub last { 18 }
