@@ -2258,23 +2258,30 @@ Perl_gv_check(pTHX_ HV *stash)
 {
     dVAR;
     I32 i;
+    struct xpvhv_aux *aux;
 
     PERL_ARGS_ASSERT_GV_CHECK;
 
     if (!HvARRAY(stash))
 	return;
+
+    assert(SvOOK(stash));
+    aux = HvAUX(stash);
+
     for (i = 0; i <= (I32) HvMAX(stash); i++) {
         const HE *entry;
-	/* SvIsCOW is unused on HVs, so we can use it to mark stashes we
-	   are currently searching through recursively.  */
-	SvIsCOW_on(stash);
+        /* mark stash is being scanned, to avoid recursing */
+        aux->xhv_aux_flags |= HvAUXf_SCAN_STASH;
 	for (entry = HvARRAY(stash)[i]; entry; entry = HeNEXT(entry)) {
             GV *gv;
             HV *hv;
 	    if (HeKEY(entry)[HeKLEN(entry)-1] == ':' &&
 		(gv = MUTABLE_GV(HeVAL(entry))) && isGV(gv) && (hv = GvHV(gv)))
 	    {
-		if (hv != PL_defstash && hv != stash && !SvIsCOW(hv))
+		if (hv != PL_defstash && hv != stash
+                    && !(SvOOK(hv)
+                        && (HvAUX(hv)->xhv_aux_flags & HvAUXf_SCAN_STASH))
+                )
 		     gv_check(hv);              /* nested package */
 	    }
             else if ( *HeKEY(entry) != '_'
@@ -2298,7 +2305,7 @@ Perl_gv_check(pTHX_ HV *stash)
                             HEKfARG(GvNAME_HEK(gv)));
 	    }
 	}
-	SvIsCOW_off(stash);
+        aux->xhv_aux_flags &= ~HvAUXf_SCAN_STASH;
     }
 }
 

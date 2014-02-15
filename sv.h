@@ -364,7 +364,6 @@ perform the upgrade if necessary.  See C<svtype>.
 #define SVpad_NAMELIST	SVp_SCREAM  /* AV is a padnamelist */
 #define SVf_IsCOW	0x00010000  /* copy on write (shared hash key if
 				       SvLEN == 0) */
-				    /* Also used on HVs in gv.c:gv_check */
 #define SVs_PADTMP	0x00020000  /* in use as tmp; only if ! SVs_PADMY */
 #define SVs_PADSTALE	0x00020000  /* lexical has gone out of scope;
 					only valid for SVs_PADMY */

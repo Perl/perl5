@@ -122,6 +122,8 @@ struct xpvhv_aux {
     U32         xhv_aux_flags;      /* assorted extra flags */
 };
 
+#define HvAUXf_SCAN_STASH   0x1   /* stash is being scanned by gv_check */
+
 /* hash structure: */
 /* This structure must match the beginning of struct xpvmg in sv.h. */
 struct xpvhv {
