@@ -10907,7 +10907,8 @@ S_compute_EXACTish(pTHX_ RExC_state_t *pRExC_state)
 
 PERL_STATIC_INLINE void
 S_alloc_maybe_populate_EXACT(pTHX_ RExC_state_t *pRExC_state,
-                         regnode *node, I32* flagp, STRLEN len, UV code_point)
+                         regnode *node, I32* flagp, STRLEN len, UV code_point,
+                         const bool downgradable)
 {
     /* This knows the details about sizing an EXACTish node, setting flags for
      * it (by setting <*flagp>, and potentially populating it with a single
@@ -10929,7 +10930,12 @@ S_alloc_maybe_populate_EXACT(pTHX_ RExC_state_t *pRExC_state,
      *
      * It knows that under FOLD, the Latin Sharp S and UTF characters above
      * 255, must be folded (the former only when the rules indicate it can
-     * match 'ss') */
+     * match 'ss')
+     *
+     * When it does the populating, it looks at the flag 'downgradable'.  If
+     * true with a node that folds, it checks if the single code point
+     * participates in a fold, and if not downgrades the node to an EXACT.
+     * This helps the optimizer */
 
     bool len_passed_in = cBOOL(len != 0);
     U8 character[UTF8_MAXBYTES_CASE+1];
@@ -10947,18 +10953,31 @@ S_alloc_maybe_populate_EXACT(pTHX_ RExC_state_t *pRExC_state,
                           EBCDIC, but it works there, as the extra invariants
                           fold to themselves) */
                     *character = toFOLD((U8) code_point);
+                    if (downgradable
+                        && *character == code_point
+                        && ! HAS_NONLATIN1_FOLD_CLOSURE(code_point))
+                    {
+                        OP(node) = EXACT;
+                    }
                 }
                 len = 1;
             }
             else if (FOLD && (! LOC
                               || ! is_PROBLEMATIC_LOCALE_FOLD_cp(code_point)))
             {   /* Folding, and ok to do so now */
-                _to_uni_fold_flags(code_point,
+                UV folded = _to_uni_fold_flags(
+                                   code_point,
                                    character,
                                    &len,
                                    FOLD_FLAGS_FULL | ((ASCII_FOLD_RESTRICTED)
                                                       ? FOLD_FLAGS_NOMIX_ASCII
                                                       : 0));
+                if (downgradable
+                    && folded == code_point
+                    && ! _invlist_contains_cp(PL_utf8_foldable, code_point))
+                {
+                    OP(node) = EXACT;
+                }
             }
             else if (code_point <= MAX_UTF8_TWO_BYTE) {
 
@@ -10971,19 +10990,36 @@ S_alloc_maybe_populate_EXACT(pTHX_ RExC_state_t *pRExC_state,
                 uvchr_to_utf8( character, code_point);
                 len = UTF8SKIP(character);
             }
-        } /* Else pattern isn't UTF8.  We only fold the sharp s, when
-             appropriate */
-        else if (UNLIKELY(code_point == LATIN_SMALL_LETTER_SHARP_S)
-                 && FOLD
-                 && AT_LEAST_UNI_SEMANTICS
-                 && ! ASCII_FOLD_RESTRICTED)
-        {
+        } /* Else pattern isn't UTF8.  */
+        else if (! FOLD) {
+            *character = (U8) code_point;
+            len = 1;
+        } /* Else is folded non-UTF8 */
+        else if (LIKELY(code_point != LATIN_SMALL_LETTER_SHARP_S)) {
+
+            /* We don't fold any non-UTF8 except possibly the Sharp s  (see
+             * comments at join_exact()); */
+            *character = (U8) code_point;
+            len = 1;
+
+            /* Can turn into an EXACT node if we know the fold at compile time,
+             * and it folds to itself and doesn't particpate in other folds */
+            if (downgradable
+                && ! LOC
+                && PL_fold_latin1[code_point] == code_point
+                && (! HAS_NONLATIN1_FOLD_CLOSURE(code_point)
+                    || (isASCII(code_point) && ASCII_FOLD_RESTRICTED)))
+            {
+                OP(node) = EXACT;
+            }
+        } /* else is Sharp s.  May need to fold it */
+        else if (AT_LEAST_UNI_SEMANTICS && ! ASCII_FOLD_RESTRICTED) {
             *character = 's';
             *(character + 1) = 's';
             len = 2;
         }
         else {
-            *character = (U8) code_point;
+            *character = LATIN_SMALL_LETTER_SHARP_S;
             len = 1;
         }
     }
@@ -12222,7 +12258,12 @@ tryagain:
                         OP(ret) = EXACTFU;
                     }
                 }
-                alloc_maybe_populate_EXACT(pRExC_state, ret, flagp, len, ender);
+                alloc_maybe_populate_EXACT(pRExC_state, ret, flagp, len, ender,
+                                           FALSE /* Don't look to see if could
+                                                    be turned into an EXACT
+                                                    node, as we have already
+                                                    computed that */
+                                          );
             }
 
 	    RExC_parse = p - 1;
@@ -14214,7 +14255,9 @@ parseit:
                 *flagp |= HASWIDTH|SIMPLE;
             }
             else if (PL_regkind[op] == EXACT) {
-                alloc_maybe_populate_EXACT(pRExC_state, ret, flagp, 0, value);
+                alloc_maybe_populate_EXACT(pRExC_state, ret, flagp, 0, value,
+                                           TRUE /* downgradable to EXACT */
+                                           );
             }
 
             RExC_parse = (char *) cur_parse;
@@ -14743,7 +14786,9 @@ parseit:
             RExC_parse = (char *)cur_parse;
 
             if (PL_regkind[op] == EXACT) {
-                alloc_maybe_populate_EXACT(pRExC_state, ret, flagp, 0, value);
+                alloc_maybe_populate_EXACT(pRExC_state, ret, flagp, 0, value,
+                                           TRUE /* downgradable to EXACT */
+                                          );
             }
 
             SvREFCNT_dec_NN(cp_list);

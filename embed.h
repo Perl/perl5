@@ -906,7 +906,7 @@
 #define _invlist_array_init(a,b)	S__invlist_array_init(aTHX_ a,b)
 #define add_cp_to_invlist(a,b)	S_add_cp_to_invlist(aTHX_ a,b)
 #define add_data		S_add_data
-#define alloc_maybe_populate_EXACT(a,b,c,d,e)	S_alloc_maybe_populate_EXACT(aTHX_ a,b,c,d,e)
+#define alloc_maybe_populate_EXACT(a,b,c,d,e,f)	S_alloc_maybe_populate_EXACT(aTHX_ a,b,c,d,e,f)
 #define compute_EXACTish(a)	S_compute_EXACTish(aTHX_ a)
 #define could_it_be_a_POSIX_class(a)	S_could_it_be_a_POSIX_class(aTHX_ a)
 #define get_ANYOF_cp_list_for_ssc(a,b)	S_get_ANYOF_cp_list_for_ssc(aTHX_ a,b)
