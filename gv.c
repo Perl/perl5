@@ -2493,6 +2493,9 @@ Perl_Gv_AMupdate(pTHX_ HV *stash, bool destructing)
   {
     int filled = 0;
     int i;
+    struct xpvhv_aux *aux;
+    bool deref_seen = 0;
+
 
     /* Work with "fallback" key, which we assume to be first in PL_AMG_names */
 
@@ -2522,6 +2525,11 @@ Perl_Gv_AMupdate(pTHX_ HV *stash, bool destructing)
     else {
         filled = 1;
     }
+
+    assert(SvOOK(stash));
+    aux = HvAUX(stash);
+    /* initially assume the worst */
+    aux->xhv_aux_flags &= ~HvAUXf_NO_DEREF;
 
     for (i = 1; i < NofAMmeth; i++) {
 	const char * const cooky = PL_AMG_names[i];
@@ -2589,7 +2597,24 @@ Perl_Gv_AMupdate(pTHX_ HV *stash, bool destructing)
 	    filled = 1;
 	}
 	amt.table[i]=MUTABLE_CV(SvREFCNT_inc_simple(cv));
+
+        if (gv) {
+            switch (i) {
+            case to_sv_amg:
+            case to_av_amg:
+            case to_hv_amg:
+            case to_gv_amg:
+            case to_cv_amg:
+            case nomethod_amg:
+                deref_seen = 1;
+                break;
+            }
+        }
     }
+    if (!deref_seen)
+        /* none of @{} etc overloaded; we can do $obj->[N] quicker */
+        aux->xhv_aux_flags |= HvAUXf_NO_DEREF;
+
     if (filled) {
       AMT_AMAGIC_on(&amt);
       sv_magic(MUTABLE_SV(stash), 0, PERL_MAGIC_overload_table,
@@ -2759,11 +2784,19 @@ Perl_try_amagic_bin(pTHX_ int method, int flags) {
 SV *
 Perl_amagic_deref_call(pTHX_ SV *ref, int method) {
     SV *tmpsv = NULL;
+    HV *stash;
 
     PERL_ARGS_ASSERT_AMAGIC_DEREF_CALL;
 
-    while (SvAMAGIC(ref) && 
-	   (tmpsv = amagic_call(ref, &PL_sv_undef, method,
+    if (!SvAMAGIC(ref))
+        return ref;
+    /* return quickly if none of the deref ops are overloaded */
+    stash = SvSTASH(SvRV(ref));
+    assert(SvOOK(stash));
+    if (HvAUX(stash)->xhv_aux_flags & HvAUXf_NO_DEREF)
+        return ref;
+
+    while ((tmpsv = amagic_call(ref, &PL_sv_undef, method,
 				AMGf_noright | AMGf_unary))) { 
 	if (!SvROK(tmpsv))
 	    Perl_croak(aTHX_ "Overloaded dereference did not return a reference");
@@ -2772,6 +2805,8 @@ Perl_amagic_deref_call(pTHX_ SV *ref, int method) {
 	    return tmpsv;
 	}
 	ref = tmpsv;
+        if (!SvAMAGIC(ref))
+            break;
     }
     return tmpsv ? tmpsv : ref;
 }

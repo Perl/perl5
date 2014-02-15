@@ -545,6 +545,8 @@ Perl_mro_isa_changed_in(pTHX_ HV* stash)
 
     /* Changes to @ISA might turn overloading on */
     HvAMAGIC_on(stash);
+    /* pessimise derefs for now. Will get recalculated by Gv_AMupdate() */
+    HvAUX(stash)->xhv_aux_flags &= ~HvAUXf_NO_DEREF;
 
     /* DESTROY can be cached in SvSTASH. */
     if (!SvOBJECT(stash)) SvSTASH(stash) = NULL;
@@ -1359,6 +1361,8 @@ Perl_mro_method_changed_in(pTHX_ HV *stash)
     /* The method change may be due to *{$package . "::()"} = \&nil; in
        overload.pm. */
     HvAMAGIC_on(stash);
+    /* pessimise derefs for now. Will get recalculated by Gv_AMupdate() */
+    HvAUX(stash)->xhv_aux_flags &= ~HvAUXf_NO_DEREF;
 }
 
 void
