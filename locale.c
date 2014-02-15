@@ -524,6 +524,14 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 	    setlocale_failure = TRUE;
         }
 #       endif /* USE_LOCALE_MESSAGES */
+#       ifdef USE_LOCALE_MONETARY
+	if (! my_setlocale(LC_MONETARY,
+			 (!done && (lang || PerlEnv_getenv("LC_MONETARY")))
+				  ? setlocale_init : NULL))
+        {
+	    setlocale_failure = TRUE;
+        }
+#       endif /* USE_LOCALE_MONETARY */
     }
 
 #   endif /* LC_ALL */
@@ -600,6 +608,11 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
             if (! (my_setlocale(LC_MESSAGES, trial_locale)))
                 setlocale_failure = TRUE;
 #endif /* USE_LOCALE_MESSAGES */
+#ifdef USE_LOCALE_MONETARY
+            if (! (my_setlocale(LC_MONETARY, trial_locale)))
+                setlocale_failure = TRUE;
+#endif /* USE_LOCALE_MONETARY */
+
             if (! setlocale_failure) {  /* Success */
                 break;
             }
