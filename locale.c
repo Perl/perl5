@@ -444,15 +444,29 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 #endif /* USE_LOCALE_NUMERIC */
 #ifdef __GLIBC__
     char * const language   = PerlEnv_getenv("LANGUAGE");
+#else
+    const char * const language   = NULL;
 #endif
+
     /* NULL uses the existing already set up locale */
     const char * const setlocale_init = (PerlEnv_getenv("PERL_SKIP_LOCALE_INIT"))
                                         ? NULL
                                         : "";
+    const char* trial_locales[5] = { setlocale_init }; /* 5 = 1 each for "",
+                                                          LC_ALL, LANG, "", C
+                                                        */
+    unsigned int trial_locales_count = 1;
     char * const lc_all     = PerlEnv_getenv("LC_ALL");
     char * const lang       = PerlEnv_getenv("LANG");
     bool setlocale_failure = FALSE;
+    unsigned int i;
+    char *p;
+    const bool locwarn = (printwarn > 1 ||
+                    (printwarn &&
+                     (!(p = PerlEnv_getenv("PERL_BADLANG")) || atoi(p))));
     bool done = FALSE;
+    const char *description;
+    const char *system_default_locale = NULL;
 
 
 #ifndef LOCALE_ENVIRON_REQUIRED
@@ -508,42 +522,85 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 
 #endif /* !LOCALE_ENVIRON_REQUIRED */
 
+    /* We try each locale in the list until we get one that works, or exhaust
+     * the list */
+    for (i= 0; i < trial_locales_count; i++) {
+        const char * trial_locale = trial_locales[i];
+
+        if (i > 0) {
+
+            /* XXX This is to preserve old behavior for LOCALE_ENVIRON_REQUIRED
+             * when i==0, but I (khw) don't think that behavior makes much
+             * sense */
+            setlocale_failure = FALSE;
+
+#ifdef WIN32
+
+            /* On Windows machines, an entry of "" after the 0th means to use
+             * the system default locale, which we now proceed to get. */
+            if (strEQ(trial_locale, "")) {
+                unsigned int j;
+
+                /* Note that this may change the locale, but we are going to do
+                 * that anyway just below */
+                system_default_locale = setlocale(LC_ALL, "");
+
+                /* Skip if invalid or it's already on the list of locales to
+                 * try */
+                if (! system_default_locale) {
+                    goto next_iteration;
+                }
+                for (j = 0; j < trial_locales_count; j++) {
+                    if (strEQ(system_default_locale, trial_locales[j])) {
+                        goto next_iteration;
+                    }
+                }
+
+                trial_locale = system_default_locale;
+            }
+#endif
+        }
+
 #ifdef LC_ALL
-    if (! my_setlocale(LC_ALL, setlocale_init))
+    if (! my_setlocale(LC_ALL, trial_locale))
 	setlocale_failure = TRUE;
 #endif /* LC_ALL */
 
     if (!setlocale_failure) {
 #ifdef USE_LOCALE_CTYPE
 	Safefree(curctype);
-	if (! (curctype = my_setlocale(LC_CTYPE, setlocale_init)))
+	if (! (curctype = my_setlocale(LC_CTYPE, trial_locale)))
 	    setlocale_failure = TRUE;
 	else
 	    curctype = savepv(curctype);
 #endif /* USE_LOCALE_CTYPE */
 #ifdef USE_LOCALE_COLLATE
 	Safefree(curcoll);
-	if (! (curcoll = my_setlocale(LC_COLLATE, setlocale_init)))
+	if (! (curcoll = my_setlocale(LC_COLLATE, trial_locale)))
 	    setlocale_failure = TRUE;
 	else
 	    curcoll = savepv(curcoll);
 #endif /* USE_LOCALE_COLLATE */
 #ifdef USE_LOCALE_NUMERIC
 	Safefree(curnum);
-	if (! (curnum = my_setlocale(LC_NUMERIC, setlocale_init)))
+	if (! (curnum = my_setlocale(LC_NUMERIC, trial_locale)))
 	    setlocale_failure = TRUE;
 	else
 	    curnum = savepv(curnum);
 #endif /* USE_LOCALE_NUMERIC */
+
+        if (! setlocale_failure) {  /* Success */
+            break;
+        }
     }
 
-    if (setlocale_failure) {
-	char *p;
-	const bool locwarn = (printwarn > 1 ||
-			(printwarn &&
-			 (!(p = PerlEnv_getenv("PERL_BADLANG")) || atoi(p))));
+            /* Here, something failed; will need to try a fallback. */
+            ok = 0;
 
-	if (locwarn) {
+            if (i == 0) {
+                unsigned int j;
+
+            if (locwarn) { /* Output failure info only on the first one */
 #ifdef LC_ALL
 
 	    PerlIO_printf(Perl_error_log,
@@ -612,43 +669,77 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 			  "    are supported and installed on your system.\n");
 	}
 
-#ifdef LC_ALL
+            /* Calculate what fallback locales to try.  We have avoided this
+             * until we have to, becuase failure is quite unlikely.  This will
+             * usually change the upper bound of the loop we are in.
+             *
+             * Since the system's default way of setting the locale has not
+             * found one that works, We use Perl's defined ordering: LC_ALL,
+             * LANG, and the C locale.  We don't try the same locale twice, so
+             * don't add to the list if already there.  (On POSIX systems, the
+             * LC_ALL element will likely be a repeat of the 0th element "",
+             * but there's no harm done by doing it explicitly */
+            if (lc_all) {
+                for (j = 0; j < trial_locales_count; j++) {
+                    if (strEQ(lc_all, trial_locales[j])) {
+                        goto done_lc_all;
+                    }
+                }
+                trial_locales[trial_locales_count++] = lc_all;
+            }
+          done_lc_all:
 
-	if (setlocale(LC_ALL, "C")) {
-	    if (locwarn)
-		PerlIO_printf(Perl_error_log,
-      "perl: warning: Falling back to the standard locale (\"C\").\n");
-	    ok = 0;
-	}
-	else {
-	    if (locwarn)
-		PerlIO_printf(Perl_error_log,
-      "perl: warning: Failed to fall back to the standard locale (\"C\").\n");
-	    ok = -1;
-	}
+            if (lang) {
+                for (j = 0; j < trial_locales_count; j++) {
+                    if (strEQ(lang, trial_locales[j])) {
+                        goto done_lang;
+                    }
+                }
+                trial_locales[trial_locales_count++] = lang;
+            }
+          done_lang:
 
-#else /* ! LC_ALL */
+#if defined(WIN32) && defined(LC_ALL)
+            /* For Windows, we also try the system default locale before "C".
+             * (If there exists a Windows without LC_ALL we skip this because
+             * it gets too complicated.  For those, the "C" is the next
+             * fallback possibility).  The "" is the same as the 0th element of
+             * the array, but the code at the loop above knows to treat it
+             * differently when not the 0th */
+            trial_locales[trial_locales_count++] = "";
+#endif
 
-	if (0
-#ifdef USE_LOCALE_CTYPE
-	    || !(curctype || setlocale(LC_CTYPE, "C"))
-#endif /* USE_LOCALE_CTYPE */
-#ifdef USE_LOCALE_COLLATE
-	    || !(curcoll || setlocale(LC_COLLATE, "C"))
-#endif /* USE_LOCALE_COLLATE */
-#ifdef USE_LOCALE_NUMERIC
-	    || !(curnum || setlocale(LC_NUMERIC, "C"))
-#endif /* USE_LOCALE_NUMERIC */
-	    )
-	{
-	    if (locwarn)
-		PerlIO_printf(Perl_error_log,
-      "perl: warning: Cannot fall back to the standard locale (\"C\").\n");
-	    ok = -1;
-	}
+            for (j = 0; j < trial_locales_count; j++) {
+                if (strEQ("C", trial_locales[j])) {
+                    goto done_C;
+                }
+            }
+            trial_locales[trial_locales_count++] = "C";
 
-#endif /* ! LC_ALL */
+          done_C: ;
+        }   /* end of first time through the loop */
 
+#ifdef WIN32
+      next_iteration: ;
+#endif
+
+    }   /* end of looping through the trial locales */
+
+    if (ok < 1) {   /* If we tried to fallback */
+        const char* msg;
+        if (! setlocale_failure) {  /* fallback succeeded */
+           msg = "Falling back to";
+        }
+        else {  /* fallback failed */
+
+            /* We dropped off the end of the loop, so have to decrement i to
+             * get back to the value the last time through */
+            i--;
+
+            ok = -1;
+            msg = "Failed to fall back to";
+
+            /* To continue, we should use whatever values we've got */
 #ifdef USE_LOCALE_CTYPE
 	Safefree(curctype);
 	curctype = savepv(setlocale(LC_CTYPE, NULL));
@@ -661,8 +752,35 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 	Safefree(curnum);
 	curnum = savepv(setlocale(LC_NUMERIC, NULL));
 #endif /* USE_LOCALE_NUMERIC */
-    }
-    else {
+        }
+
+        if (locwarn) {
+            const char * description;
+            const char * name = "";
+            if (strEQ(trial_locales[i], "C")) {
+                description = "the standard locale";
+                name = "C";
+            }
+            else if (strEQ(trial_locales[i], "")) {
+                description = "the system default locale";
+                if (system_default_locale) {
+                    name = system_default_locale;
+                }
+            }
+            else {
+                description = "a fallback locale";
+                name = trial_locales[i];
+            }
+            if (name && strNE(name, "")) {
+                PerlIO_printf(Perl_error_log,
+                    "perl: warning: %s %s (\"%s\").\n", msg, description, name);
+            }
+            else {
+                PerlIO_printf(Perl_error_log,
+                                   "perl: warning: %s %s.\n", msg, description);
+            }
+        }
+    } /* End of tried to fallback */
 
 #ifdef USE_LOCALE_CTYPE
     new_ctype(curctype);
@@ -675,8 +793,6 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 #ifdef USE_LOCALE_NUMERIC
     new_numeric(curnum);
 #endif /* USE_LOCALE_NUMERIC */
-
-    }
 
 #if defined(USE_PERLIO) && defined(USE_LOCALE_CTYPE)
     {

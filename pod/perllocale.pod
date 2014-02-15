@@ -188,8 +188,10 @@ C<L<LC_NUMERIC|/Category LC_NUMERIC: Numeric Formatting>> is always
 initialized to the C locale (the C locale is mentioned under L<Finding
 locales>).
 If there is no valid environment, the current locale is whatever the
-system default has been set to.  It is likely, but not necessarily, the
-"C" locale.
+system default has been set to.   On POSIX systems, it is likely, but
+not necessarily, the "C" locale.  On Windows, the default is set via the
+computer's S<C<Control Panel-E<gt>Regional and Language Options>> (or its
+current equivalent).
 
 The operations that are affected by locale are:
 
@@ -361,8 +363,9 @@ C<POSIX::setlocale()> function:
         # LC_CTYPE now in locale "French, Canada, codeset ISO 8859-1"
 
         setlocale(LC_CTYPE, "");
-        # LC_CTYPE now reset to default defined by LC_ALL/LC_CTYPE/LANG
-        # environment variables.  See below for documentation.
+        # LC_CTYPE now reset to the default defined by the
+        # LC_ALL/LC_CTYPE/LANG environment variables, or to the system
+        # default.  See below for documentation.
 
         # restore the old locale
         setlocale(LC_CTYPE, $old_locale);
@@ -484,11 +487,13 @@ You may encounter the following warning message at Perl startup:
 This means that your locale settings had LC_ALL set to "En_US" and
 LANG exists but has no value.  Perl tried to believe you but could not.
 Instead, Perl gave up and fell back to the "C" locale, the default locale
-that is supposed to work no matter what.  This usually means your locale
-settings were wrong, they mention locales your system has never heard
-of, or the locale installation in your system has problems (for example,
-some system files are broken or missing).  There are quick and temporary
-fixes to these problems, as well as more thorough and lasting fixes.
+that is supposed to work no matter what.  (On Windows, it first tries
+falling back to the system default locale.)  This usually means your
+locale settings were wrong, they mention locales your system has never
+heard of, or the locale installation in your system has problems (for
+example, some system files are broken or missing).  There are quick and
+temporary fixes to these problems, as well as more thorough and lasting
+fixes.
 
 =head2 Testing for broken locales
 
@@ -1117,6 +1122,12 @@ The following environment variables are not specific to Perl: They are
 part of the standardized (ISO C, XPG4, POSIX 1.c) C<setlocale()> method
 for controlling an application's opinion on data.  Windows is non-POSIX,
 but Perl arranges for the following to work as described anyway.
+If the locale given by an environment variable is not valid, Perl tries
+the next lower one in priority.  If none are valid, on Windows, the
+system default locale is then tried.  If all else fails, the C<"C">
+locale is used.  If even that doesn't work, something is badly broken,
+but Perl tries to forge ahead with whatever the locale settinga might
+be.
 
 =over 12
 

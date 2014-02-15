@@ -186,6 +186,45 @@ EOF
     }
 
     for ($different) {
+        local $ENV{LC_ALL} = "invalid";
+	local $ENV{LC_NUMERIC} = "invalid";
+        local $ENV{LANG} = $_;
+
+        # Can't turn off the warnings, so send them to /dev/null
+        fresh_perl_is(<<'EOF', "$difference", { stderr => "devnull" },
+        use locale;
+            use POSIX qw(locale_h);
+            setlocale(LC_NUMERIC, "");
+            my $in = 4.2;
+            printf("%g", $in);
+EOF
+        "LANG is used if LC_ALL, LC_NUMERIC are invalid");
+    }
+
+    SKIP: {
+        if ($^O eq 'MSWin32') {
+            skip("Win32 uses system default locale in preference to \"C\"", 1);
+        }
+        else {
+            for ($different) {
+                local $ENV{LC_ALL} = "invalid";
+                local $ENV{LC_NUMERIC} = "invalid";
+                local $ENV{LANG} = "invalid";
+
+                # Can't turn off the warnings, so send them to /dev/null
+                fresh_perl_is(<<'EOF', 4.2, { stderr => "devnull" },
+                use locale;
+                    use POSIX qw(locale_h);
+                    setlocale(LC_NUMERIC, "");
+                    my $in = 4.2;
+                    printf("%g", $in);
+EOF
+                'C locale is used if LC_ALL, LC_NUMERIC, LANG are invalid');
+            }
+        }
+    }
+
+    for ($different) {
 	local $ENV{LC_NUMERIC} = $_;
 	local $ENV{LC_ALL}; # so it never overrides LC_NUMERIC
 	fresh_perl_is(<<"EOF",
@@ -201,7 +240,7 @@ EOF
     }
 
     unless ($comma) {
-        skip("no locale available where LC_NUMERIC is a comma", 2);
+        skip("no locale available where LC_NUMERIC is a comma", 3);
     }
     else {
 
@@ -270,4 +309,4 @@ EOF
 
 } # SKIP
 
-sub last { 16 }
+sub last { 18 }

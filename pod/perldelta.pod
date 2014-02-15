@@ -71,6 +71,17 @@ signatures are enabled.
 
 See L<perlsub/Signatures> for details.
 
+=head2 More locale initialization fallback options
+
+If there was an error with locales during Perl start-up, it immediately
+gave up and tried to use the C<"C"> locale.  Now it first tries using
+other locales given by the environment variables, as detailed in
+L<perllocale/ENVIRONMENT>.  For example, if C<LC_ALL> and C<LANG> are
+both set, and using the C<LC_ALL> locale fails, Perl will now try the
+C<LANG> locale, and only if that fails, will it fall back to C<"C">.  On
+Windows machines, Perl will try, ahead of using C<"C">, the system
+default locale if all the locales given by environment variables fail.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
