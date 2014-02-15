@@ -516,6 +516,14 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 	else
 	    curnum = savepv(curnum);
 #       endif /* USE_LOCALE_NUMERIC */
+#       ifdef USE_LOCALE_MESSAGES
+	if (! my_setlocale(LC_MESSAGES,
+			 (!done && (lang || PerlEnv_getenv("LC_MESSAGES")))
+				  ? setlocale_init : NULL))
+        {
+	    setlocale_failure = TRUE;
+        }
+#       endif /* USE_LOCALE_MESSAGES */
     }
 
 #   endif /* LC_ALL */
@@ -588,6 +596,10 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
             else
                 curnum = savepv(curnum);
 #endif /* USE_LOCALE_NUMERIC */
+#ifdef USE_LOCALE_MESSAGES
+            if (! (my_setlocale(LC_MESSAGES, trial_locale)))
+                setlocale_failure = TRUE;
+#endif /* USE_LOCALE_MESSAGES */
             if (! setlocale_failure) {  /* Success */
                 break;
             }
@@ -621,7 +633,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
                 if (! curnum)
                     PerlIO_printf(Perl_error_log, "LC_NUMERIC ");
 #endif /* USE_LOCALE_NUMERIC */
-                PerlIO_printf(Perl_error_log, "\n");
+                PerlIO_printf(Perl_error_log, "and possibly others\n");
 
 #endif /* LC_ALL */
 
