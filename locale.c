@@ -416,12 +416,19 @@ Perl_my_setlocale(pTHX_ int category, const char* locale)
 int
 Perl_init_i18nl10n(pTHX_ int printwarn)
 {
-    int ok = 1;
-    /* returns
+    /* printwarn is
+     *
+     *    0 if not to output warning when setup locale is bad
+     *    1 if to output warning based on value of PERL_BADLANG
+     *    >1 if to output regardless of PERL_BADLANG
+     *
+     * returns
      *    1 = set ok or not applicable,
-     *    0 = fallback to C locale,
-     *   -1 = fallback to C locale failed
+     *    0 = fallback to a locale of lower priority
+     *   -1 = fallback to all locales failed, not even to the C locale
      */
+
+    int ok = 1;
 
 #if defined(USE_LOCALE)
     dVAR;
@@ -445,15 +452,17 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
     char * const lc_all     = PerlEnv_getenv("LC_ALL");
     char * const lang       = PerlEnv_getenv("LANG");
     bool setlocale_failure = FALSE;
+    bool done = FALSE;
 
-#ifdef LOCALE_ENVIRON_REQUIRED
+
+#ifndef LOCALE_ENVIRON_REQUIRED
+    PERL_UNUSED_VAR(done);
+#else
 
     /*
      * Ultrix setlocale(..., "") fails if there are no environment
      * variables from which to get a locale name.
      */
-
-    bool done = FALSE;
 
 #   ifdef LC_ALL
     if (lang) {
