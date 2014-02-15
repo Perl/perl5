@@ -681,7 +681,7 @@ sub _create_runperl { # Create the string to qx in runperl().
     if (defined $args{args}) {
 	$runperl = _quote_args($runperl, $args{args});
     }
-    if ($args{stderr} eq 'devnull') {
+    if (exists $args{stderr} && $args{stderr} eq 'devnull') {
         $runperl = $runperl . ($is_mswin ? ' 2>nul' : ' 2>/dev/null');
     }
     elsif ($args{stderr}) {
