@@ -562,112 +562,111 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
         }
 
 #ifdef LC_ALL
-    if (! my_setlocale(LC_ALL, trial_locale))
-	setlocale_failure = TRUE;
+        if (! my_setlocale(LC_ALL, trial_locale))
+            setlocale_failure = TRUE;
 #endif /* LC_ALL */
 
-    if (!setlocale_failure) {
+        if (!setlocale_failure) {
 #ifdef USE_LOCALE_CTYPE
-	Safefree(curctype);
-	if (! (curctype = my_setlocale(LC_CTYPE, trial_locale)))
-	    setlocale_failure = TRUE;
-	else
-	    curctype = savepv(curctype);
+            Safefree(curctype);
+            if (! (curctype = my_setlocale(LC_CTYPE, trial_locale)))
+                setlocale_failure = TRUE;
+            else
+                curctype = savepv(curctype);
 #endif /* USE_LOCALE_CTYPE */
 #ifdef USE_LOCALE_COLLATE
-	Safefree(curcoll);
-	if (! (curcoll = my_setlocale(LC_COLLATE, trial_locale)))
-	    setlocale_failure = TRUE;
-	else
-	    curcoll = savepv(curcoll);
+            Safefree(curcoll);
+            if (! (curcoll = my_setlocale(LC_COLLATE, trial_locale)))
+                setlocale_failure = TRUE;
+            else
+                curcoll = savepv(curcoll);
 #endif /* USE_LOCALE_COLLATE */
 #ifdef USE_LOCALE_NUMERIC
-	Safefree(curnum);
-	if (! (curnum = my_setlocale(LC_NUMERIC, trial_locale)))
-	    setlocale_failure = TRUE;
-	else
-	    curnum = savepv(curnum);
+            Safefree(curnum);
+            if (! (curnum = my_setlocale(LC_NUMERIC, trial_locale)))
+                setlocale_failure = TRUE;
+            else
+                curnum = savepv(curnum);
 #endif /* USE_LOCALE_NUMERIC */
-
-        if (! setlocale_failure) {  /* Success */
-            break;
+            if (! setlocale_failure) {  /* Success */
+                break;
+            }
         }
-    }
 
-            /* Here, something failed; will need to try a fallback. */
-            ok = 0;
+        /* Here, something failed; will need to try a fallback. */
+        ok = 0;
 
-            if (i == 0) {
-                unsigned int j;
+        if (i == 0) {
+            unsigned int j;
 
             if (locwarn) { /* Output failure info only on the first one */
 #ifdef LC_ALL
 
-	    PerlIO_printf(Perl_error_log,
-	       "perl: warning: Setting locale failed.\n");
+                PerlIO_printf(Perl_error_log,
+                "perl: warning: Setting locale failed.\n");
 
 #else /* !LC_ALL */
 
-	    PerlIO_printf(Perl_error_log,
-	       "perl: warning: Setting locale failed for the categories:\n\t");
+                PerlIO_printf(Perl_error_log,
+                "perl: warning: Setting locale failed for the categories:\n\t");
 #ifdef USE_LOCALE_CTYPE
-	    if (! curctype)
-		PerlIO_printf(Perl_error_log, "LC_CTYPE ");
+                if (! curctype)
+                    PerlIO_printf(Perl_error_log, "LC_CTYPE ");
 #endif /* USE_LOCALE_CTYPE */
 #ifdef USE_LOCALE_COLLATE
-	    if (! curcoll)
-		PerlIO_printf(Perl_error_log, "LC_COLLATE ");
+                if (! curcoll)
+                    PerlIO_printf(Perl_error_log, "LC_COLLATE ");
 #endif /* USE_LOCALE_COLLATE */
 #ifdef USE_LOCALE_NUMERIC
-	    if (! curnum)
-		PerlIO_printf(Perl_error_log, "LC_NUMERIC ");
+                if (! curnum)
+                    PerlIO_printf(Perl_error_log, "LC_NUMERIC ");
 #endif /* USE_LOCALE_NUMERIC */
-	    PerlIO_printf(Perl_error_log, "\n");
+                PerlIO_printf(Perl_error_log, "\n");
 
 #endif /* LC_ALL */
 
-	    PerlIO_printf(Perl_error_log,
-		"perl: warning: Please check that your locale settings:\n");
+                PerlIO_printf(Perl_error_log,
+                    "perl: warning: Please check that your locale settings:\n");
 
 #ifdef __GLIBC__
-	    PerlIO_printf(Perl_error_log,
-			  "\tLANGUAGE = %c%s%c,\n",
-			  language ? '"' : '(',
-			  language ? language : "unset",
-			  language ? '"' : ')');
+                PerlIO_printf(Perl_error_log,
+                            "\tLANGUAGE = %c%s%c,\n",
+                            language ? '"' : '(',
+                            language ? language : "unset",
+                            language ? '"' : ')');
 #endif
 
-	    PerlIO_printf(Perl_error_log,
-			  "\tLC_ALL = %c%s%c,\n",
-			  lc_all ? '"' : '(',
-			  lc_all ? lc_all : "unset",
-			  lc_all ? '"' : ')');
+                PerlIO_printf(Perl_error_log,
+                            "\tLC_ALL = %c%s%c,\n",
+                            lc_all ? '"' : '(',
+                            lc_all ? lc_all : "unset",
+                            lc_all ? '"' : ')');
 
 #if defined(USE_ENVIRON_ARRAY)
-	    {
-	      char **e;
-	      for (e = environ; *e; e++) {
-		  if (strnEQ(*e, "LC_", 3)
-			&& strnNE(*e, "LC_ALL=", 7)
-			&& (p = strchr(*e, '=')))
-		      PerlIO_printf(Perl_error_log, "\t%.*s = \"%s\",\n",
-				    (int)(p - *e), *e, p + 1);
-	      }
-	    }
+                {
+                char **e;
+                for (e = environ; *e; e++) {
+                    if (strnEQ(*e, "LC_", 3)
+                            && strnNE(*e, "LC_ALL=", 7)
+                            && (p = strchr(*e, '=')))
+                        PerlIO_printf(Perl_error_log, "\t%.*s = \"%s\",\n",
+                                        (int)(p - *e), *e, p + 1);
+                }
+                }
 #else
-	    PerlIO_printf(Perl_error_log,
-			  "\t(possibly more locale environment variables)\n");
+                PerlIO_printf(Perl_error_log,
+                            "\t(possibly more locale environment variables)\n");
 #endif
 
-	    PerlIO_printf(Perl_error_log,
-			  "\tLANG = %c%s%c\n",
-			  lang ? '"' : '(',
-			  lang ? lang : "unset",
-			  lang ? '"' : ')');
+                PerlIO_printf(Perl_error_log,
+                            "\tLANG = %c%s%c\n",
+                            lang ? '"' : '(',
+                            lang ? lang : "unset",
+                            lang ? '"' : ')');
 
-	    PerlIO_printf(Perl_error_log,
-			  "    are supported and installed on your system.\n");
-	}
+                PerlIO_printf(Perl_error_log,
+                            "    are supported and installed on your system.\n");
+            }
 
             /* Calculate what fallback locales to try.  We have avoided this
              * until we have to, becuase failure is quite unlikely.  This will
@@ -741,16 +740,16 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 
             /* To continue, we should use whatever values we've got */
 #ifdef USE_LOCALE_CTYPE
-	Safefree(curctype);
-	curctype = savepv(setlocale(LC_CTYPE, NULL));
+            Safefree(curctype);
+            curctype = savepv(setlocale(LC_CTYPE, NULL));
 #endif /* USE_LOCALE_CTYPE */
 #ifdef USE_LOCALE_COLLATE
-	Safefree(curcoll);
-	curcoll = savepv(setlocale(LC_COLLATE, NULL));
+            Safefree(curcoll);
+            curcoll = savepv(setlocale(LC_COLLATE, NULL));
 #endif /* USE_LOCALE_COLLATE */
 #ifdef USE_LOCALE_NUMERIC
-	Safefree(curnum);
-	curnum = savepv(setlocale(LC_NUMERIC, NULL));
+            Safefree(curnum);
+            curnum = savepv(setlocale(LC_NUMERIC, NULL));
 #endif /* USE_LOCALE_NUMERIC */
         }
 
@@ -795,15 +794,13 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 #endif /* USE_LOCALE_NUMERIC */
 
 #if defined(USE_PERLIO) && defined(USE_LOCALE_CTYPE)
-    {
-      /* Set PL_utf8locale to TRUE if using PerlIO _and_
-         the current LC_CTYPE locale is UTF-8.
-	 If PL_utf8locale and PL_unicode (set by -C or by $ENV{PERL_UNICODE})
-         are true, perl.c:S_parse_body() will turn on the PerlIO :utf8 layer
-	 on STDIN, STDOUT, STDERR, _and_ the default open discipline.
-      */
-        PL_utf8locale = is_cur_LC_category_utf8(LC_CTYPE);
-    }
+    /* Set PL_utf8locale to TRUE if using PerlIO _and_ the current LC_CTYPE
+     * locale is UTF-8.  If PL_utf8locale and PL_unicode (set by -C or by
+     * $ENV{PERL_UNICODE}) are true, perl.c:S_parse_body() will turn on the
+     * PerlIO :utf8 layer on STDIN, STDOUT, STDERR, _and_ the default open
+     * discipline.  */
+    PL_utf8locale = is_cur_LC_category_utf8(LC_CTYPE);
+
     /* Set PL_unicode to $ENV{PERL_UNICODE} if using PerlIO.
        This is an alternative to using the -C command line switch
        (the -C if present will override this). */
@@ -829,6 +826,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 
     return ok;
 }
+
 
 #ifdef USE_LOCALE_COLLATE
 
