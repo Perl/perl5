@@ -2253,6 +2253,11 @@ Perl_gv_efullname4(pTHX_ SV *sv, const GV *gv, const char *prefix, bool keepmain
     gv_fullname4(sv, egv ? egv : gv, prefix, keepmain);
 }
 
+
+/* recursively scan a stash and any nested stashes looking for entries
+ * that need the "only used once" warning raised
+ */
+
 void
 Perl_gv_check(pTHX_ HV *stash)
 {
