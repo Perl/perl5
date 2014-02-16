@@ -3327,8 +3327,8 @@ What gets returned depends on several factors:
 
 =item If C<use bytes> is in effect:
 
-The results follow ASCII semantics.  Only characters C<A-Z> change, to C<a-z>
-respectively.
+The results follow ASCII semantics.  Only the characters C<A-Z> change,
+to C<a-z> respectively.
 
 =item Otherwise, if C<use locale> (but not C<use locale ':not_characters'>) is in effect:
 
