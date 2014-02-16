@@ -1,27 +1,14 @@
+use 5.008001;
 use strict;
 package Parse::CPAN::Meta;
 # ABSTRACT: Parse META.yml and META.json CPAN metadata files
-our $VERSION = '1.4409'; # VERSION
+our $VERSION = '1.4410'; # VERSION
 
+use Exporter;
 use Carp 'croak';
 
-# UTF Support?
-sub HAVE_UTF8 () { $] >= 5.007003 }
-sub IO_LAYER () { $] >= 5.008001 ? ":utf8" : "" }  
-
-BEGIN {
-	if ( HAVE_UTF8 ) {
-		# The string eval helps hide this from Test::MinimumVersion
-		eval "require utf8;";
-		die "Failed to load UTF-8 support" if $@;
-	}
-
-	# Class structure
-	require 5.004;
-	require Exporter;
-	@Parse::CPAN::Meta::ISA       = qw{ Exporter      };
-	@Parse::CPAN::Meta::EXPORT_OK = qw{ Load LoadFile };
-}
+our @ISA = qw/Exporter/;
+our @EXPORT_OK = qw/Load LoadFile/;
 
 sub load_file {
   my ($class, $filename) = @_;
@@ -41,22 +28,21 @@ sub load_yaml_string {
   my ($class, $string) = @_;
   my $backend = $class->yaml_backend();
   my $data = eval { no strict 'refs'; &{"$backend\::Load"}($string) };
-  if ( $@ ) { 
-    croak $backend->can('errstr') ? $backend->errstr : $@
-  }
+  croak $@ if $@;
   return $data || {}; # in case document was valid but empty
 }
 
 sub load_json_string {
   my ($class, $string) = @_;
-  return $class->json_backend()->new->decode($string);
+  my $data = eval { $class->json_backend()->new->decode($string) };
+  croak $@ if $@;
+  return $data || {};
 }
 
 sub yaml_backend {
-  local $Module::Load::Conditional::CHECK_INC_HASH = 1;
   if (! defined $ENV{PERL_YAML_BACKEND} ) {
-    _can_load( 'CPAN::Meta::YAML', 0.002 )
-      or croak "CPAN::Meta::YAML 0.002 is not available\n";
+    _can_load( 'CPAN::Meta::YAML', 0.011 )
+      or croak "CPAN::Meta::YAML 0.011 is not available\n";
     return "CPAN::Meta::YAML";
   }
   else {
@@ -70,7 +56,6 @@ sub yaml_backend {
 }
 
 sub json_backend {
-  local $Module::Load::Conditional::CHECK_INC_HASH = 1;
   if (! $ENV{PERL_JSON_BACKEND} or $ENV{PERL_JSON_BACKEND} eq 'JSON::PP') {
     _can_load( 'JSON::PP' => 2.27103 )
       or croak "JSON::PP 2.27103 is not available\n";
@@ -85,7 +70,7 @@ sub json_backend {
 }
 
 sub _slurp {
-  open my $fh, "<" . IO_LAYER, "$_[0]"
+  open my $fh, "<:utf8", "$_[0]" ## no critic
     or die "can't open $_[0] for reading: $!";
   return do { local $/; <$fh> };
 }
@@ -109,16 +94,16 @@ sub _can_load {
 # Create an object from a file
 sub LoadFile ($) {
   require CPAN::Meta::YAML;
-  my $object = CPAN::Meta::YAML::LoadFile(shift)
-    or die CPAN::Meta::YAML->errstr;
+  my $object = eval { CPAN::Meta::YAML::LoadFile(shift) };
+  croak $@ if $@;
   return $object;
 }
 
 # Parse a document from a string.
 sub Load ($) {
   require CPAN::Meta::YAML;
-  my $object = CPAN::Meta::YAML::Load(shift)
-    or die CPAN::Meta::YAML->errstr;
+  my $object = eval { CPAN::Meta::YAML::Load(shift) };
+  croak $@ if $@;
   return $object;
 }
 
@@ -128,7 +113,7 @@ __END__
 
 =pod
 
-=encoding utf-8
+=encoding UTF-8
 
 =head1 NAME
 
@@ -136,7 +121,7 @@ Parse::CPAN::Meta - Parse META.yml and META.json CPAN metadata files
 
 =head1 VERSION
 
-version 1.4409
+version 1.4410
 
 =head1 SYNOPSIS
 
@@ -180,7 +165,12 @@ All error reporting is done with exceptions (die'ing).
 Note that META files are expected to be in UTF-8 encoding, only.  When
 converted string data, it must first be decoded from UTF-8.
 
-=for Pod::Coverage HAVE_UTF8 IO_LAYER
+=begin Pod::Coverage
+
+
+
+
+=end Pod::Coverage
 
 =head1 METHODS
 
@@ -191,8 +181,8 @@ converted string data, it must first be decoded from UTF-8.
   my $metadata_structure = Parse::CPAN::Meta->load_file('META.yml');
 
 This method will read the named file and deserialize it to a data structure,
-determining whether it should be JSON or YAML based on the filename.  On
-Perl 5.8.1 or later, the file will be read using the ":utf8" IO layer.
+determining whether it should be JSON or YAML based on the filename.
+The file will be read using the ":utf8" IO layer.
 
 =head2 load_yaml_string
 
@@ -229,8 +219,8 @@ the L<JSON> module.  See L</ENVIRONMENT> for details.
 
 =head1 FUNCTIONS
 
-For maintenance clarity, no functions are exported.  These functions are
-available for backwards compatibility only and are best avoided in favor of
+For maintenance clarity, no functions are exported by default.  These functions
+are available for backwards compatibility only and are best avoided in favor of
 C<load_file>.
 
 =head2 Load
@@ -321,7 +311,7 @@ Steffen Mueller <smueller@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is copyright (c) 2013 by Adam Kennedy and Contributors.
+This software is copyright (c) 2014 by Adam Kennedy and Contributors.
 
 This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
