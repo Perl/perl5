@@ -79,6 +79,21 @@ instead of saying "C<make test>", you should say "C<make test_static>".
 On systems that cannot build dynamically-loadable libraries at all, simply
 saying "C<make test>" is sufficient.
 
+=head2 Threads and PERL_NO_GET_CONTEXT
+
+For threaded builds, perl requires the context pointer for the current
+thread, without C<PERL_NO_GET_CONTEXT>, perl will call a function to
+retrieve the context.
+
+For improved performance, include:
+
+  #define PERL_NO_GET_CONTEXT
+
+as shown below.
+
+For more details, see L<perlguts|perlguts/How multiple interpreters
+and concurrency are supported>.
+
 =head1 TUTORIAL
 
 Now let's go on with the show!
@@ -146,6 +161,7 @@ the extension.
 
 Finally, the Mytest.xs file should look something like this:
 
+    #define PERL_NO_GET_CONTEXT
     #include "EXTERN.h"
     #include "perl.h"
     #include "XSUB.h"
@@ -1227,6 +1243,7 @@ Suppose that for some strange reason we need a wrapper around the
 standard C library function C<fputs()>. This is all we need:
 
 	#define PERLIO_NOT_STDIO 0
+	#define PERL_NO_GET_CONTEXT
 	#include "EXTERN.h"
 	#include "perl.h"
 	#include "XSUB.h"

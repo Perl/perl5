@@ -110,8 +110,12 @@ This XSUB will be invoked from Perl with the usage shown
 above.  Note that the first three #include statements, for
 C<EXTERN.h>, C<perl.h>, and C<XSUB.h>, will always be present at the
 beginning of an XS file.  This approach and others will be
-expanded later in this document.
+expanded later in this document.  A #define for C<PERL_NO_GET_CONTEXT>
+should be present to fetch the interpreter context more efficiently,
+see L<perlguts|perlguts/How multiple interpreters and concurrency are
+supported> for details.
 
+     #define PERL_NO_GET_CONTEXT
      #include "EXTERN.h"
      #include "perl.h"
      #include "XSUB.h"
@@ -1870,6 +1874,7 @@ the C<-g> (C<--global>) option with h2xs (see L<h2xs>).
 
 Below is an example module that makes use of the macros.
 
+    #define PERL_NO_GET_CONTEXT
     #include "EXTERN.h"
     #include "perl.h"
     #include "XSUB.h"
@@ -2050,6 +2055,7 @@ or even crashes become more likely), nor is it very portable.
 
 File C<RPC.xs>: Interface to some ONC+ RPC bind library functions.
 
+     #define PERL_NO_GET_CONTEXT
      #include "EXTERN.h"
      #include "perl.h"
      #include "XSUB.h"
