@@ -361,10 +361,22 @@ struct regnode_ssc {
 /* Flags for node->flags of ANYOF.  These are in short supply, with one
  * currently available.  If more are needed, the ABOVE_LATIN1_ALL bit could be
  * freed up by resorting to creating a swash containing everything above 255.
- * This introduces a performance penalty.  An option that wouldn't slow things
- * down would be to split one of the LOC flags out into a separate node, like
- * what has been done with ANYOF_NON_UTF8_NON_ASCII_ALL.  One of these is only
- * for /l nodes; the other only for /d, so there are no combinatorial issues.
+ * This introduces a performance penalty.
+ * shared should new flags be needed for SSCs, like ANYOF_EMPTY_STRING now. */
+
+/* Flags for node->flags of ANYOF.  These are in short supply, with none
+ * currently available.  The easiest solution for one more flag is to eliminate
+ * the ANYOF_LOCALE flag, because it doesn't add any extra information beyond
+ * the other two LOC flags.  Also, the ABOVE_LATIN1_ALL bit could be freed up
+ * by resorting to creating a swash containing everything above 255.  This
+ * introduces a performance penalty.  An option that wouldn't slow things down
+ * would be to split one of the two remaining LOC flags out into a separate
+ * node, like what was done with ANYOF_NON_UTF8_NON_ASCII_ALL in commit
+ * 34fdef848b1687b91892ba55e9e0c3430e0770f6 (but which was reverted because it
+ * wasn't the best option available at the time), and using a LOC flag is
+ * probably better than that commit anyway.  But it could be reinstated if we
+ * need a bit.  The LOC flags are only for /l nodes; the reverted commit was
+ * only for /d, so there are no combinatorial issues.
  * Several flags are not used in synthetic start class (SSC) nodes, so could be
  * shared should new flags be needed for SSCs, like ANYOF_EMPTY_STRING now. */
 
@@ -404,7 +416,11 @@ struct regnode_ssc {
 #define ANYOF_ABOVE_LATIN1_ALL	 0x40
 #define ANYOF_UNICODE_ALL	 ANYOF_ABOVE_LATIN1_ALL
 
-#define ANYOF_FLAGS_ALL		(0x7F)
+/* Match all Latin1 characters that aren't ASCII when the target string is not
+ * in utf8. */
+#define ANYOF_NON_UTF8_NON_ASCII_ALL 0x80
+
+#define ANYOF_FLAGS_ALL		(0xff)
 
 #define ANYOF_LOCALE_FLAGS (ANYOF_LOCALE                        \
                            |ANYOF_LOC_FOLD                      \

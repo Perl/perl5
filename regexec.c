@@ -1619,14 +1619,6 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 
     /* We know what class it must start with. */
     switch (OP(c)) {
-    case ANYOF_NON_UTF8_NON_ASCII_ALL:
-        if (! utf8_target && ! ANYOF_FLAGS(c)) {
-            REXEC_FBC_CLASS_SCAN(! isASCII((U8) *s)
-                                 || REGINCLASS(prog, c, (U8*)s));
-            break;
-        }
-
-	/* FALL THROUGH */
     case ANYOF:
         if (utf8_target) {
             REXEC_FBC_UTF8_CLASS_SCAN(
@@ -4584,17 +4576,6 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		    sayNO;
 	    break;
 
-        case ANYOF_NON_UTF8_NON_ASCII_ALL:
-            if (! NEXTCHR_IS_EOS && ! utf8_target && ! ANYOF_FLAGS(scan)) {
-		if ((isASCII((U8)(*locinput))
-                    && ! REGINCLASS(rex, scan, (U8*)locinput)))
-                {
-		    sayNO;
-                }
-		locinput++;
-                break;
-            }
-            /* FALLTHROUGH */
 	case ANYOF:  /*  /[abc]/       */
             if (NEXTCHR_IS_EOS)
                 sayNO;
@@ -7222,17 +7203,6 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
 	}
 	break;
     }
-    case ANYOF_NON_UTF8_NON_ASCII_ALL:
-        if (! utf8_target && ! ANYOF_FLAGS(p)) {
-	    while (scan < loceol
-                   && (! isASCII((U8) *scan)
-                       || REGINCLASS(prog, p, (U8*)scan)))
-            {
-		scan++;
-            }
-            break;
-        }
-        /* FALLTHROUGH */
     case ANYOF:
 	if (utf8_target) {
 	    while (hardcount < max
@@ -7676,7 +7646,7 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
     if (c < 256) {
 	if (ANYOF_BITMAP_TEST(n, c))
 	    match = TRUE;
-	else if (OP(n) == ANYOF_NON_UTF8_NON_ASCII_ALL
+	else if (flags & ANYOF_NON_UTF8_NON_ASCII_ALL
 		&& ! utf8_target
 		&& ! isASCII(c))
 	{
