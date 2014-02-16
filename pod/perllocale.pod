@@ -61,14 +61,14 @@ for example the character used as the decimal point.
 =item Category LC_MONETARY: Formatting of monetary amounts
 
 =for comment
-The nbsp below makes this look better
+The nbsp below makes this look better (though not great)
 
 E<160>
 
 =item Category LC_TIME: Date/Time formatting
 
 =for comment
-The nbsp below makes this look better
+The nbsp below makes this look better (though not great)
 
 E<160>
 
@@ -183,10 +183,7 @@ The current locale is set at execution time by
 L<setlocale()|/The setlocale function> described below.  If that function
 hasn't yet been called in the course of the program's execution, the
 current locale is that which was determined by the L</"ENVIRONMENT"> in
-effect at the start of the program, except that
-C<L<LC_NUMERIC|/Category LC_NUMERIC: Numeric Formatting>> is always
-initialized to the C locale (the C locale is mentioned under L<Finding
-locales>).
+effect at the start of the program.
 If there is no valid environment, the current locale is whatever the
 system default has been set to.   On POSIX systems, it is likely, but
 not necessarily, the "C" locale.  On Windows, the default is set via the
@@ -241,7 +238,12 @@ L<perlapi/my_vsnprintf>.
 
 =back
 
-=item Lingering effects of C<S<use locale>>
+=for comment
+The nbsp below makes this look better (though not great)
+
+E<160>
+
+=item B<Lingering effects of C<S<use locale>>>
 
 Certain Perl operations that are set-up within the scope of a
 C<use locale> variant retain that effect even outside the scope.
@@ -266,6 +268,11 @@ was done within the scope of C<use locale> that determines the match
 behavior, not if the matches are done within such a scope or not.
 
 =back
+
+=for comment
+The nbsp below makes this look better (though not great)
+
+E<160>
 
 =item B<Under C<"use locale ':not_characters';">>
 
@@ -293,7 +300,7 @@ C<sprintf()>.
 =back
 
 =for comment
-The nbsp below makes this look better
+The nbsp below makes this look better (though not great)
 
 E<160>
 
@@ -350,7 +357,7 @@ C<POSIX::setlocale()> function:
         #                    LC_CTYPE -- explained below
         # (Showing the testing for success/failure of operations is
         # omitted in these examples to avoid distracting from the main
-        # point
+        # point)
 
         use POSIX qw(locale_h);
         use locale;
@@ -791,13 +798,17 @@ always obey the current C<LC_COLLATE> locale.
 In the scope of S<C<use locale>> (but not a
 C<use locale ':not_characters'>), Perl obeys the C<LC_CTYPE> locale
 setting.  This controls the application's notion of which characters are
-alphabetic.  This affects Perl's C<\w> regular expression metanotation,
+alphabetic, numeric, punctuation, I<etc>.  This affects Perl's C<\w>
+regular expression metanotation,
 which stands for alphanumeric characters--that is, alphabetic,
-numeric, and including other special characters such as the underscore or
-hyphen.  (Consult L<perlre> for more information about
+numeric, and the platform's native underscore.
+(Consult L<perlre> for more information about
 regular expressions.)  Thanks to C<LC_CTYPE>, depending on your locale
 setting, characters like "E<aelig>", "E<eth>", "E<szlig>", and
 "E<oslash>" may be understood as C<\w> characters.
+It also affects things like C<\s>, C<\D>, and the POSIX character
+classes, like C<[[:graph:]]>.  (See L<perlrecharclass> for more
+information on all these.)
 
 The C<LC_CTYPE> locale also provides the map used in transliterating
 characters between lower and uppercase.  This affects the case-mapping
