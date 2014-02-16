@@ -9,7 +9,7 @@ BEGIN { require "./test.pl"; }
 
 # This test depends on t/lib/Devel/switchd*.pm.
 
-plan(tests => 17);
+plan(tests => 18);
 
 my $r;
 
@@ -252,4 +252,26 @@ is(
   ),
   "ok\n",
   "setting breakpoints without *DB::dbline aliased"
+);
+
+# [perl #121255]
+# Check that utf8 caches are flushed when $DB::sub is set
+is(
+  runperl(
+   switches => [ '-Ilib', '-d:switchd_empty' ],
+   progs => [ split "\n",
+    'sub DB::sub{length($DB::sub); goto &$DB::sub}
+     ${^UTF8CACHE}=-1;
+     print
+       eval qq|sub oo\x{25f} { 42 }
+               sub ooooo\x{25f} { oo\x{25f}() }
+               ooooo\x{25f}()| 
+        || $@,
+       qq|\n|;
+    '
+   ],
+   stderr => 1
+  ),
+  "42\n",
+  'UTF8 length caches on $DB::sub are flushed'
 );

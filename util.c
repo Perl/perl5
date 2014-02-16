@@ -5334,6 +5334,7 @@ Perl_get_db_sub(pTHX_ SV **svp, CV *cv)
 	(void)SvIOK_on(dbsv);
 	SvIV_set(dbsv, PTR2IV(cv));	/* Do it the quickest way  */
     }
+    SvSETMAGIC(dbsv);
     TAINT_IF(save_taint);
 #ifdef NO_TAINT_SUPPORT
     PERL_UNUSED_VAR(save_taint);
