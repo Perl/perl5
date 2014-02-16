@@ -235,6 +235,12 @@ if ($ARGS{PLATFORM} ne 'vms') {
     }
 }
 
+if ($ARGS{PLATFORM} ne 'win32') {
+    ++$skip{$_} foreach qw(
+		    Perl_my_setlocale
+			 );
+}
+
 unless ($define{UNLINK_ALL_VERSIONS}) {
     ++$skip{Perl_unlnk};
 }
