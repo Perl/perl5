@@ -550,11 +550,6 @@ which was too long, so it was truncated to the string shown.
 (F) A subroutine invoked from an external package via call_sv()
 exited by calling exit.
 
-=item Calling POSIX::%s() is deprecated
-
-(D deprecated) You called a function whose use is deprecated.  See
-the function's name in L<POSIX> for details.
-
 =item %s() called too early to check prototype
 
 (W prototype) You've called a function that has a prototype before the
@@ -565,6 +560,11 @@ subroutine definition ahead of the call to get proper prototype
 checking.  Alternatively, if you are certain that you're calling the
 function correctly, you may put an ampersand before the name to avoid
 the warning.  See L<perlsub>.
+
+=item Calling POSIX::%s() is deprecated
+
+(D deprecated) You called a function whose use is deprecated.  See
+the function's name in L<POSIX> for details.
 
 =item Cannot compress integer in pack
 
