@@ -1703,6 +1703,7 @@ Like sv_utf8_upgrade, but doesn't do magic on C<sv>.
     (SvPOK_nog(sv) \
      ? SvPVX(sv) : sv_2pv_flags(sv, 0, SV_GMAGIC))
 
+/* "_nomg" in these defines means no mg_get() */
 #define SvPV_nomg_nolen(sv) \
     (SvPOK_nog(sv) \
      ? SvPVX(sv) : sv_2pv_flags(sv, 0, 0))
