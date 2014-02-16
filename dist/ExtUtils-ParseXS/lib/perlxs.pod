@@ -109,9 +109,11 @@ C and Perl and so preserves the interface even from Perl.
 This XSUB will be invoked from Perl with the usage shown
 above.  Note that the first three #include statements, for
 C<EXTERN.h>, C<perl.h>, and C<XSUB.h>, will always be present at the
-beginning of an XS file.  PERL_NO_GET_CONTEXT should be present to use
-the modern Perl C API.  This approach and others will be expanded later
-in this document.
+beginning of an XS file.  This approach and others will be
+expanded later in this document.  A #define for C<PERL_NO_GET_CONTEXT>
+should be present to fetch the interpreter context more efficiently,
+see L<perlguts|perlguts/How multiple interpreters and concurrency are
+supported> for details.
 
      #define PERL_NO_GET_CONTEXT
      #include "EXTERN.h"
