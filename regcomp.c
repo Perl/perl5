@@ -1452,13 +1452,11 @@ S_ssc_finalize(pTHX_ RExC_state_t *pRExC_state, regnode_ssc *ssc)
 
     set_ANYOF_arg(pRExC_state, (regnode *) ssc, invlist, NULL, NULL, FALSE);
 
-    /* The code points that could match under /li are already incorporated into
-     * the inversion list and bit map */
-    ANYOF_FLAGS(ssc) &= ~ANYOF_LOC_FOLD;
-
     if (ANYOF_POSIXL_SSC_TEST_ANY_SET(ssc)) {
-        ANYOF_FLAGS(ssc) |= ANYOF_LOCALE|ANYOF_POSIXL;
+        ANYOF_FLAGS(ssc) |= ANYOF_POSIXL;
     }
+
+    assert(! (ANYOF_FLAGS(ssc) & ANYOF_LOCALE_FLAGS) || RExC_contains_locale);
 }
 
 #define TRIE_LIST_ITEM(state,idx) (trie->states[state].trans.list)[ idx ]
@@ -4259,12 +4257,6 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		}
 	    }
             if (OP(scan) == EXACTFL) {
-                if (flags & SCF_DO_STCLASS_AND) {
-                    ssc_flags_and(data->start_class, ANYOF_LOCALE);
-                }
-                else if (flags & SCF_DO_STCLASS_OR) {
-                    ANYOF_FLAGS(data->start_class) |= ANYOF_LOCALE;
-                }
 
                 /* We don't know what the folds are; it could be anything. XXX
                  * Actually, we only support UTF-8 encoding for code points
@@ -13227,9 +13219,6 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
         ANYOF_FLAGS(ret) = 0;
 
  	RExC_emit += ANYOF_SKIP;
-	if (LOC) {
-	    ANYOF_FLAGS(ret) |= ANYOF_LOCALE;
-	}
 	listsv = newSVpvs_flags("# comment\n", SVs_TEMP);
 	initial_listsv_len = SvCUR(listsv);
         SvTEMP_off(listsv); /* Grr, TEMPs and mortals are conflated.  */
@@ -13641,8 +13630,7 @@ parseit:
         /* What matches in a locale is not known until runtime.  This includes
          * what the Posix classes (like \w, [:space:]) match.  Room must be
          * reserved (one time per outer bracketed class) to store such classes,
-         * either if Perl is compiled so that locale nodes always should have
-         * this space, or if there is such posix class info to be stored.  The
+         * if there is such posix class info to be stored.  The
          * space will contain a bit for each named class that is to be matched
          * against.  This isn't needed for \p{} and pseudo-classes, as they are
          * not affected by locale, and hence are dealt with separately */
@@ -13661,10 +13649,7 @@ parseit:
                  * a posix class since are doing it here */
                 ANYOF_POSIXL_ZERO(ret);
             }
-            if (ANYOF_LOCALE == ANYOF_POSIXL
-                || (namedclass > OOB_NAMEDCLASS
-                    && namedclass < ANYOF_POSIXL_MAX))
-            {
+            if (namedclass > OOB_NAMEDCLASS && namedclass < ANYOF_POSIXL_MAX) {
                 if (! need_class) {
                     need_class = 1;
                     if (SIZE_ONLY) {
@@ -14627,7 +14612,7 @@ parseit:
      * invert if there are things such as \w, which aren't known until runtime
      * */
     if (invert
-        && ! (ANYOF_FLAGS(ret) & (ANYOF_LOC_FOLD|ANYOF_POSIXL))
+        && ! (ANYOF_FLAGS(ret) & (ANYOF_LOCALE_FLAGS))
 	&& ! depends_list
 	&& ! HAS_NONLOCALE_RUNTIME_PROPERTY_DEFINITION)
     {
@@ -14675,7 +14660,7 @@ parseit:
     if (cp_list
         && ! invert
         && ! depends_list
-        && ! (ANYOF_FLAGS(ret) & (ANYOF_LOC_FOLD|ANYOF_POSIXL))
+        && ! (ANYOF_FLAGS(ret) & (ANYOF_LOCALE_FLAGS))
         && ! HAS_NONLOCALE_RUNTIME_PROPERTY_DEFINITION
 
            /* We don't optimize if we are supposed to make sure all non-Unicode
@@ -15657,7 +15642,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
 	int do_sep = 0;
 
 
-	if (flags & ANYOF_LOCALE)
+	if (flags & ANYOF_LOCALE_FLAGS)
 	    sv_catpvs(sv, "{loc}");
 	if (flags & ANYOF_LOC_FOLD)
 	    sv_catpvs(sv, "{i}");

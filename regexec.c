@@ -7652,7 +7652,7 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
 	{
 	    match = TRUE;
 	}
-	else if (flags & ANYOF_LOCALE) {
+	else if (flags & ANYOF_LOCALE_FLAGS) {
 	    if (flags & ANYOF_LOC_FOLD) {
                 RXp_MATCH_TAINTED_on(prog);
 		 if (ANYOF_BITMAP_TEST(n, PL_fold_locale[c])) {
@@ -7736,7 +7736,7 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
 		 && ((flags & ANYOF_NONBITMAP_NON_UTF8)
 		     || (utf8_target
 		         && (c >=256
-			     || (! (flags & ANYOF_LOCALE))
+			     || (! (flags & ANYOF_LOCALE_FLAGS))
 			     || is_ANYOF_SYNTHETIC(n)))))
 	{
 	    SV * const sw = core_regclass_swash(prog, n, TRUE, 0);
