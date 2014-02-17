@@ -1278,60 +1278,65 @@ Perl_re_intuit_start(pTHX_
 	    checked_upto = HOPBACKc(endpos, start_shift);
 	    DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "  start_shift: %"IVdf" check_at: %"IVdf" endpos: %"IVdf" checked_upto: %"IVdf"\n",
                                       (IV)start_shift, (IV)(check_at - strbeg), (IV)(endpos - strbeg), (IV)(checked_upto- strbeg)));
-	    /* Contradict one of substrings */
-	    if (prog->anchored_substr || prog->anchored_utf8) {
-		if (prog->substrs->check_ix == 1) { /* check is float */
-                    /* Have both, check_string is floating */
-                    assert(rx_origin + start_shift <= check_at);
-                    if (rx_origin + start_shift != check_at) {
-                        /* not at latest position float substr could match:
-                         * Recheck anchored substring, but not floating... */
-                        if (!check) {
-                            rx_origin = NULL;
-                            goto giveup;
-                        }
-                        DEBUG_EXECUTE_r( PerlIO_printf(Perl_debug_log,
-                                  "  Looking for anchored substr starting at offset %ld...\n",
-                                  (long)(other_last - strpos)) );
-                        goto do_other_substr;
-                    }
-                }
 
-              hop_and_restart:
-                rx_origin = HOP3c(rx_origin, 1, strend);
-                if (rx_origin + start_shift + end_shift > strend) {
-                    /* XXXX Should be taken into account earlier? */
+	    /* Contradict one of substrings */
+	    if (!(prog->anchored_substr || prog->anchored_utf8)) {
+                /* float-only */
+
+                /* Another way we could have checked stclass at the
+                   current position only: */
+                if (ml_anch) {
+                    rx_origin++;
+                    if (!check)
+                        goto giveup;
                     DEBUG_EXECUTE_r( PerlIO_printf(Perl_debug_log,
-                                           "  Could not match STCLASS...\n") );
-                    goto fail;
+                              "  Looking for /%s^%s/m starting at offset %ld...\n",
+                              PL_colors[0], PL_colors[1],
+                              (long)(rx_origin - strpos)) );
+                    /* XXX DAPM I don't yet know why this is true, but the code
+                     * assumed it when it used to do goto try_at_offset */
+                    assert(rx_origin != strpos);
+                    goto postprocess_substr_matches;
                 }
+                if (!(utf8_target ? prog->float_utf8 : prog->float_substr))	/* Could have been deleted */
+                    goto fail;
+                /* Check is floating substring. */
+                rx_origin = check_at - start_shift;
+                goto hop_and_restart;
+            }
+
+            if (prog->substrs->check_ix == 1) { /* check is float */
+                /* Have both, check_string is floating */
+                assert(rx_origin + start_shift <= check_at);
+                if (rx_origin + start_shift != check_at) {
+                    /* not at latest position float substr could match:
+                     * Recheck anchored substring, but not floating... */
+                    if (!check) {
+                        rx_origin = NULL;
+                        goto giveup;
+                    }
+                    DEBUG_EXECUTE_r( PerlIO_printf(Perl_debug_log,
+                              "  Looking for anchored substr starting at offset %ld...\n",
+                              (long)(other_last - strpos)) );
+                    goto do_other_substr;
+                }
+            }
+
+          hop_and_restart:
+            rx_origin = HOP3c(rx_origin, 1, strend);
+            if (rx_origin + start_shift + end_shift > strend) {
+                /* XXXX Should be taken into account earlier? */
                 DEBUG_EXECUTE_r( PerlIO_printf(Perl_debug_log,
-                    "  Looking for %s substr starting at offset %ld...\n",
-                    (prog->substrs->check_ix ? "floating" : "anchored"),
-                    (long)(rx_origin + start_shift - strpos)) );
-                goto restart;
-	    }
-	    /* Another way we could have checked stclass at the
-               current position only: */
-	    if (ml_anch) {
-		rx_origin++;
-		if (!check)
-		    goto giveup;
-		DEBUG_EXECUTE_r( PerlIO_printf(Perl_debug_log,
-			  "  Looking for /%s^%s/m starting at offset %ld...\n",
-			  PL_colors[0], PL_colors[1],
-                          (long)(rx_origin - strpos)) );
-                /* XXX DAPM I don't yet know why this is true, but the code
-                 * assumed it when it used to do goto try_at_offset */
-                assert(rx_origin != strpos);
-		goto postprocess_substr_matches;
-	    }
-	    if (!(utf8_target ? prog->float_utf8 : prog->float_substr))	/* Could have been deleted */
-		goto fail;
-	    /* Check is floating substring. */
-	    rx_origin = check_at - start_shift;
-	    goto hop_and_restart;
+                                       "  Could not match STCLASS...\n") );
+                goto fail;
+            }
+            DEBUG_EXECUTE_r( PerlIO_printf(Perl_debug_log,
+                "  Looking for %s substr starting at offset %ld...\n",
+                (prog->substrs->check_ix ? "floating" : "anchored"),
+                (long)(rx_origin + start_shift - strpos)) );
+            goto restart;
 	}
+
 	if (rx_origin != s) {
             DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
 			"  By STCLASS: moving %ld --> %ld\n",
