@@ -7563,7 +7563,8 @@ S_core_regclass_swash(pTHX_ const regexp *prog, const regnode* node, bool doinit
 	    if (ary[1] && SvROK(ary[1])) {
 		sw = ary[1];
 	    }
-	    else if (si && doinit) {
+	    else if (doinit && ((si && si != &PL_sv_undef)
+                                 || (invlist && invlist != &PL_sv_undef))) {
 
 		sw = _core_swash_init("utf8", /* the utf8 package */
 				      "", /* nameless */
