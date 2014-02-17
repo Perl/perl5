@@ -5,7 +5,6 @@ use warnings;
 
 use File::Basename;
 use Test::More 0.96;
-use t::SimpleCookieJar;
 use t::Util qw[tmpfile rewind slurp monkey_patch dir_list parse_case
   hashify connect_args clear_socket_source set_socket_source sort_headers
   $CRLF $LF];
@@ -62,7 +61,7 @@ SKIP: for my $class ( qw/t::SimpleCookieJar HTTP::CookieJar/ ) {
                 my $res_fh = tmpfile($give_res);
                 my $req_fh = tmpfile();
 
-                $http = HTTP::Tiny->new(%new_args) if !defined $http;
+                $http = HTTP::Tiny->new(keep_alive => 0, %new_args) if !defined $http;
                 clear_socket_source();
                 set_socket_source($req_fh, $res_fh);
 

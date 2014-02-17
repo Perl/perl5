@@ -1133,6 +1133,8 @@ cpan/HTTP-Tiny/t/141_no_proxy.t
 cpan/HTTP-Tiny/t/150_post_form.t
 cpan/HTTP-Tiny/t/160_cookies.t
 cpan/HTTP-Tiny/t/161_basic_auth.t
+cpan/HTTP-Tiny/t/162_proxy_auth.t
+cpan/HTTP-Tiny/t/170_keepalive.t
 cpan/HTTP-Tiny/t/BrokenCookieJar.pm
 cpan/HTTP-Tiny/t/cases/auth-01.txt
 cpan/HTTP-Tiny/t/cases/auth-02.txt
@@ -1174,12 +1176,18 @@ cpan/HTTP-Tiny/t/cases/get-19.txt
 cpan/HTTP-Tiny/t/cases/get-20.txt
 cpan/HTTP-Tiny/t/cases/get-21.txt
 cpan/HTTP-Tiny/t/cases/head-01.txt
+cpan/HTTP-Tiny/t/cases/keepalive-01.txt
+cpan/HTTP-Tiny/t/cases/keepalive-02.txt
+cpan/HTTP-Tiny/t/cases/keepalive-03.txt
+cpan/HTTP-Tiny/t/cases/keepalive-04.txt
+cpan/HTTP-Tiny/t/cases/keepalive-05.txt
 cpan/HTTP-Tiny/t/cases/mirror-01.txt
 cpan/HTTP-Tiny/t/cases/mirror-02.txt
 cpan/HTTP-Tiny/t/cases/mirror-03.txt
 cpan/HTTP-Tiny/t/cases/mirror-04.txt
 cpan/HTTP-Tiny/t/cases/mirror-05.txt
 cpan/HTTP-Tiny/t/cases/post-01.txt
+cpan/HTTP-Tiny/t/cases/proxy-auth-01.txt
 cpan/HTTP-Tiny/t/cases/put-01.txt
 cpan/HTTP-Tiny/t/cases/put-02.txt
 cpan/HTTP-Tiny/t/cases/put-03.txt
