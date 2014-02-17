@@ -1280,36 +1280,37 @@ Perl_re_intuit_start(pTHX_
                                       (IV)start_shift, (IV)(check_at - strbeg), (IV)(endpos - strbeg), (IV)(checked_upto- strbeg)));
 	    /* Contradict one of substrings */
 	    if (prog->anchored_substr || prog->anchored_utf8) {
-		if (prog->substrs->check_ix == 0) { /* check is anchored */
-		  hop_and_restart:
-		    rx_origin = HOP3c(rx_origin, 1, strend);
-		    if (rx_origin + start_shift + end_shift > strend) {
-			/* XXXX Should be taken into account earlier? */
-			DEBUG_EXECUTE_r( PerlIO_printf(Perl_debug_log,
-					       "  Could not match STCLASS...\n") );
-			goto fail;
-		    }
-		    DEBUG_EXECUTE_r( PerlIO_printf(Perl_debug_log,
-                        "  Looking for %s substr starting at offset %ld...\n",
-                        (prog->substrs->check_ix ? "floating" : "anchored"),
-                        (long)(rx_origin + start_shift - strpos)) );
-		    goto restart;
+		if (prog->substrs->check_ix == 1) { /* check is float */
+                    /* Have both, check_string is floating */
+                    assert(rx_origin + start_shift <= check_at);
+                    if (rx_origin + start_shift == check_at)
+                        /* already at latest position float substr could match */
+                        goto hop_and_restart;
+                    /* Recheck anchored substring, but not floating... */
+                    if (!check) {
+                        rx_origin = NULL;
+                        goto giveup;
+                    }
+                    DEBUG_EXECUTE_r( PerlIO_printf(Perl_debug_log,
+                              "  Looking for anchored substr starting at offset %ld...\n",
+                              (long)(other_last - strpos)) );
+                    assert(prog->substrs->check_ix); /* other is float */
+                    goto do_other_substr;
 		}
-		/* Have both, check_string is floating */
-		assert(rx_origin + start_shift <= check_at);
-		if (rx_origin + start_shift == check_at)
-                    /* already at latest position float substr could match */
-		    goto hop_and_restart;
-		/* Recheck anchored substring, but not floating... */
-		if (!check) {
-                    rx_origin = NULL;
-		    goto giveup;
+
+              hop_and_restart:
+                rx_origin = HOP3c(rx_origin, 1, strend);
+                if (rx_origin + start_shift + end_shift > strend) {
+                    /* XXXX Should be taken into account earlier? */
+                    DEBUG_EXECUTE_r( PerlIO_printf(Perl_debug_log,
+                                           "  Could not match STCLASS...\n") );
+                    goto fail;
                 }
-		DEBUG_EXECUTE_r( PerlIO_printf(Perl_debug_log,
-			  "  Looking for anchored substr starting at offset %ld...\n",
-			  (long)(other_last - strpos)) );
-                assert(prog->substrs->check_ix); /* other is float */
-		goto do_other_substr;
+                DEBUG_EXECUTE_r( PerlIO_printf(Perl_debug_log,
+                    "  Looking for %s substr starting at offset %ld...\n",
+                    (prog->substrs->check_ix ? "floating" : "anchored"),
+                    (long)(rx_origin + start_shift - strpos)) );
+                goto restart;
 	    }
 	    /* Another way we could have checked stclass at the
                current position only: */
