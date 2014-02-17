@@ -357,13 +357,6 @@ struct regnode_ssc {
  * it, but a non-UTF8-encoded string will be tried only if the
  * ANYOF_NONBITMAP_NON_UTF8 bit is also set. */
 #define ANYOF_NONBITMAP(node)	(ARG(node) != ANYOF_NONBITMAP_EMPTY)
-
-/* Flags for node->flags of ANYOF.  These are in short supply, with one
- * currently available.  If more are needed, the ABOVE_LATIN1_ALL bit could be
- * freed up by resorting to creating a swash containing everything above 255.
- * This introduces a performance penalty.
- * shared should new flags be needed for SSCs, like ANYOF_EMPTY_STRING now. */
-
 /* Flags for node->flags of ANYOF.  These are in short supply, with one
  * currently available.  The ABOVE_LATIN1_ALL bit could be freed up
  * by resorting to creating a swash containing everything above 255.  This
