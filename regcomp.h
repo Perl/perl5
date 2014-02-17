@@ -538,9 +538,18 @@ struct regnode_ssc {
 	 && (((regnode_charclass_posixl*)(p))->classflags))
 #define ANYOF_CLASS_TEST_ANY_SET(p) ANYOF_POSIXL_TEST_ANY_SET(p)
 
-#define ANYOF_POSIXL_TEST_ALL_SET(p)                               \
-        ((ANYOF_FLAGS(p) & ANYOF_POSIXL)                           \
-         && ((regnode_charclass_posixl*) (p))->classflags == ((1U << ((ANYOF_POSIXL_MAX) - 1))) - 1)
+/* Since an SSC always has this field, we don't have to test for that; nor do
+ * we want to because the bit isn't set for SSC during its construction */
+#define ANYOF_POSIXL_SSC_TEST_ANY_SET(p)                               \
+                            cBOOL(((regnode_ssc*)(p))->classflags)
+#define ANYOF_POSIXL_SSC_TEST_ALL_SET(p) /* Are all bits set? */       \
+        (((regnode_ssc*) (p))->classflags                              \
+                        == ((1U << ((ANYOF_POSIXL_MAX) - 1))) - 1)
+
+#define ANYOF_POSIXL_TEST_ALL_SET(p)                                   \
+        ((ANYOF_FLAGS(p) & ANYOF_POSIXL)                               \
+         && ((regnode_charclass_posixl*) (p))->classflags              \
+                        == ((1U << ((ANYOF_POSIXL_MAX) - 1))) - 1)
 
 #define ANYOF_POSIXL_OR(source, dest) STMT_START { (dest)->classflags |= (source)->classflags ; } STMT_END
 #define ANYOF_CLASS_OR(source, dest) ANYOF_POSIXL_OR((source), (dest))

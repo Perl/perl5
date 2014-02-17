@@ -924,7 +924,7 @@ S_ssc_is_anything(pTHX_ const regnode_ssc *ssc)
     }
 
     /* If e.g., both \w and \W are set, matches everything */
-    if (ANYOF_FLAGS(ssc) & ANYOF_POSIXL) {
+    if (ANYOF_POSIXL_SSC_TEST_ANY_SET(ssc)) {
         int i;
         for (i = 0; i < ANYOF_POSIXL_MAX; i += 2) {
             if (ANYOF_POSIXL_TEST(ssc, i) && ANYOF_POSIXL_TEST(ssc, i+1)) {
@@ -958,7 +958,6 @@ S_ssc_init(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc)
      * necessary. */
     if (RExC_contains_locale) {
 	ANYOF_POSIXL_SETALL(ssc);
-	ANYOF_FLAGS(ssc) |= ANYOF_LOCALE|ANYOF_POSIXL;
     }
     else {
 	ANYOF_POSIXL_ZERO(ssc);
@@ -991,11 +990,7 @@ S_ssc_is_cp_posixl_init(pTHX_ const RExC_state_t *pRExC_state,
         return FALSE;
     }
 
-    if (RExC_contains_locale
-        && ! ((ANYOF_FLAGS(ssc) & ANYOF_LOCALE)
-               || ! (ANYOF_FLAGS(ssc) & ANYOF_POSIXL)
-               || ! ANYOF_POSIXL_TEST_ALL_SET(ssc)))
-    {
+    if (RExC_contains_locale && ! ANYOF_POSIXL_SSC_TEST_ALL_SET(ssc)) {
         return FALSE;
     }
 
@@ -1219,7 +1214,7 @@ S_ssc_and(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
         if (! (ANYOF_FLAGS(and_with) & ANYOF_POSIXL)) {
             ANYOF_POSIXL_ZERO(ssc);
         }
-        else if (ANYOF_POSIXL_TEST_ANY_SET(ssc)) {
+        else if (ANYOF_POSIXL_SSC_TEST_ANY_SET(ssc)) {
 
             /* Note that the Posix class component P from 'and_with' actually
              * looks like:
@@ -1280,8 +1275,8 @@ S_ssc_and(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
                 }
             }
         }
-        else if ((ANYOF_FLAGS(ssc) & ANYOF_POSIXL)
-                    || (ANYOF_FLAGS(and_with) & ANYOF_POSIXL))
+        else if (ANYOF_POSIXL_SSC_TEST_ANY_SET(ssc)
+                 || (ANYOF_FLAGS(and_with) & ANYOF_POSIXL))
         {
             /* One or the other of P1, P2 is non-empty. */
             ANYOF_POSIXL_AND((regnode_charclass_posixl*) and_with, ssc);
@@ -1347,7 +1342,7 @@ S_ssc_or(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
     }
     else {  /* Not inverted */
         ANYOF_POSIXL_OR((regnode_charclass_posixl*)or_with, ssc);
-        if (ANYOF_POSIXL_TEST_ANY_SET(ssc)) {
+        if (ANYOF_POSIXL_SSC_TEST_ANY_SET(ssc)) {
             unsigned int i;
             for (i = 0; i < ANYOF_MAX; i += 2) {
                 if (ANYOF_POSIXL_TEST(ssc, i) && ANYOF_POSIXL_TEST(ssc, i + 1))
@@ -1355,9 +1350,6 @@ S_ssc_or(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
                     ssc_match_all_cp(ssc);
                     ANYOF_POSIXL_CLEAR(ssc, i);
                     ANYOF_POSIXL_CLEAR(ssc, i+1);
-                    if (! ANYOF_POSIXL_TEST_ANY_SET(ssc)) {
-                        ANYOF_FLAGS(ssc) &= ~ANYOF_POSIXL;
-                    }
                 }
             }
         }
@@ -1464,7 +1456,9 @@ S_ssc_finalize(pTHX_ RExC_state_t *pRExC_state, regnode_ssc *ssc)
      * the inversion list and bit map */
     ANYOF_FLAGS(ssc) &= ~ANYOF_LOC_FOLD;
 
-    assert(! (ANYOF_FLAGS(ssc) & ANYOF_LOCALE) || RExC_contains_locale);
+    if (ANYOF_POSIXL_SSC_TEST_ANY_SET(ssc)) {
+        ANYOF_FLAGS(ssc) |= ANYOF_LOCALE|ANYOF_POSIXL;
+    }
 }
 
 #define TRIE_LIST_ITEM(state,idx) (trie->states[state].trans.list)[ idx ]
@@ -4881,16 +4875,10 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
                             ssc_match_all_cp(data->start_class);
                             ANYOF_POSIXL_CLEAR(data->start_class, namedclass);
                             ANYOF_POSIXL_CLEAR(data->start_class, complement);
-                            if (! ANYOF_POSIXL_TEST_ANY_SET(data->start_class))
-                            {
-                                ANYOF_FLAGS(data->start_class) &= ~ANYOF_POSIXL;
-                            }
                         }
                         else {  /* The usual case; just add this class to the
                                    existing set */
                             ANYOF_POSIXL_SET(data->start_class, namedclass);
-                            ANYOF_FLAGS(data->start_class)
-                                                |= ANYOF_LOCALE|ANYOF_POSIXL;
                         }
                     }
                     break;
