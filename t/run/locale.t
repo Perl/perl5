@@ -37,8 +37,9 @@ EOF
     "", {}, "no locales where LC_NUMERIC breaks");
 
 {
-    local $ENV{LC_NUMERIC};
+    local $ENV{LC_NUMERIC}; # So not taken as a default
     local $ENV{LC_ALL}; # so it never overrides LC_NUMERIC
+    local $ENV{LANG};   # So not taken as a default
     fresh_perl_is("for (qw(@locales)) {\n" . <<'EOF',
         use POSIX qw(locale_h);
         use locale;
