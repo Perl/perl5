@@ -347,17 +347,7 @@ struct regnode_ssc {
  * reach this high). */
 #define ANYOF_NONBITMAP_EMPTY	((U32) -1)
 
-/* The information used to be stored as as combination of the ANYOF_UTF8 and
- * ANYOF_NONBITMAP_NON_UTF8 bits in the flags field, but was moved out of there
- * to free up a bit for other uses.  This tries to hide the change from
- * existing code as much as possible.  Now, the data structure that goes in ARG
- * is not allocated unless it is needed, and that is what is used to determine
- * if there is something outside the bitmap.  The code now assumes that if
- * that structure exists, that any UTF-8 encoded string should be tried against
- * it, but a non-UTF8-encoded string will be tried only if the
- * ANYOF_NONBITMAP_NON_UTF8 bit is also set. */
-#define ANYOF_NONBITMAP(node)	(ARG(node) != ANYOF_NONBITMAP_EMPTY)
-/* Flags for node->flags of ANYOF.  These are in short supply, with one
+/* Flags for node->flags of ANYOF.  These are in short supply, with none
  * currently available.  The ABOVE_LATIN1_ALL bit could be freed up
  * by resorting to creating a swash containing everything above 255.  This
  * introduces a performance penalty.  An option that wouldn't slow things down
@@ -380,7 +370,9 @@ struct regnode_ssc {
  * regex compilation. */
 #define ANYOF_EMPTY_STRING       ANYOF_INVERT
 
-/* spare                        0x02 */
+/* Are there things that will match only if the target string is encoded in
+ * UTF-8?  (This is not set if ANYOF_AOVE_LATIN1_ALL is set) */
+#define ANYOF_UTF8               0x02
 
 /* The fold is calculated and stored in the bitmap where possible at compile
  * time.  However under locale, the actual folding varies depending on
@@ -411,14 +403,14 @@ struct regnode_ssc {
  * in utf8. */
 #define ANYOF_NON_UTF8_NON_ASCII_ALL 0x80
 
-#define ANYOF_FLAGS_ALL		(0xf5)
+#define ANYOF_FLAGS_ALL		(0xff)
 
 #define ANYOF_LOCALE_FLAGS (ANYOF_LOC_FOLD | ANYOF_POSIXL)
 
 /* These are the flags that apply to both regular ANYOF nodes and synthetic
  * start class nodes during construction of the SSC.  During finalization of
  * the SSC, other of the flags could be added to it */
-#define ANYOF_COMMON_FLAGS    (ANYOF_WARN_SUPER)
+#define ANYOF_COMMON_FLAGS    (ANYOF_WARN_SUPER|ANYOF_UTF8)
 
 /* Character classes for node->classflags of ANYOF */
 /* Should be synchronized with a table in regprop() */

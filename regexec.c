@@ -7532,7 +7532,7 @@ S_core_regclass_swash(pTHX_ const regexp *prog, const regnode* node, bool doinit
 
     PERL_ARGS_ASSERT_CORE_REGCLASS_SWASH;
 
-    assert(ANYOF_NONBITMAP(node));
+    assert(ANYOF_FLAGS(node) & (ANYOF_UTF8|ANYOF_NONBITMAP_NON_UTF8));
 
     if (data && data->count) {
 	const U32 n = ARG(node);
@@ -7720,25 +7720,14 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
     }
 
     /* If the bitmap didn't (or couldn't) match, and something outside the
-     * bitmap could match, try that.  Locale nodes specify completely the
-     * behavior of code points in the bit map (otherwise, a utf8 target would
-     * cause them to be treated as Unicode and not locale), except in
-     * the very unlikely event when this node is a synthetic start class, which
-     * could be a combination of locale and non-locale nodes.  So allow locale
-     * to match for the synthetic start class, which will give a false
-     * positive that will be resolved when the match is done again as not part
-     * of the synthetic start class */
+     * bitmap could match, try that. */
     if (!match) {
 	if (c >= 256 && (flags & ANYOF_ABOVE_LATIN1_ALL)) {
 	    match = TRUE;	/* Everything above 255 matches */
 	}
-	else if (ANYOF_NONBITMAP(n)
-		 && ((flags & ANYOF_NONBITMAP_NON_UTF8)
-		     || (utf8_target
-		         && (c >=256
-			     || (! (flags & ANYOF_LOCALE_FLAGS))
-			     || is_ANYOF_SYNTHETIC(n)))))
-	{
+	else if ((flags & ANYOF_NONBITMAP_NON_UTF8)
+		  || (utf8_target && (flags & ANYOF_UTF8)))
+        {
 	    SV * const sw = core_regclass_swash(prog, n, TRUE, 0);
 	    if (sw) {
 		U8 * utf8_p;

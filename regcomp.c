@@ -12351,6 +12351,9 @@ S_populate_ANYOF_from_invlist(pTHX_ regnode *node, SV** invlist_ptr)
             if (end == UV_MAX && start <= 256) {
                 ANYOF_FLAGS(node) |= ANYOF_ABOVE_LATIN1_ALL;
             }
+            else if (end >= 256) {
+                ANYOF_FLAGS(node) |= ANYOF_UTF8;
+            }
 
 	    /* Quit if are above what we should change */
 	    if (start > 255) {
@@ -14792,6 +14795,7 @@ parseit:
 	else {
 	    cp_list = depends_list;
 	}
+        ANYOF_FLAGS(ret) |= ANYOF_UTF8;
     }
 
     /* If there is a swash and more than one element, we can't use the swash in
@@ -14845,11 +14849,14 @@ S_set_ANYOF_arg(pTHX_ RExC_state_t* const pRExC_state,
     PERL_ARGS_ASSERT_SET_ANYOF_ARG;
 
     if (! cp_list && ! runtime_defns) {
+        assert(! (ANYOF_FLAGS(node) & (ANYOF_UTF8|ANYOF_NONBITMAP_NON_UTF8)));
 	ARG_SET(node, ANYOF_NONBITMAP_EMPTY);
     }
     else {
 	AV * const av = newAV();
 	SV *rv;
+
+        assert(ANYOF_FLAGS(node) & (ANYOF_UTF8|ANYOF_NONBITMAP_NON_UTF8));
 
 	av_store(av, 0, (runtime_defns)
 			? SvREFCNT_inc(runtime_defns) : &PL_sv_undef);
@@ -15665,8 +15672,8 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
             }
         }
 
-	if ((flags & ANYOF_ABOVE_LATIN1_ALL)
-            || ANYOF_UTF8_LOCALE_INVLIST(o) || ANYOF_NONBITMAP(o))
+	if ((flags & (ANYOF_ABOVE_LATIN1_ALL|ANYOF_UTF8|ANYOF_NONBITMAP_NON_UTF8))
+            || ANYOF_UTF8_LOCALE_INVLIST(o))
         {
             if (do_sep) {
                 Perl_sv_catpvf(aTHX_ sv,"%s][%s",PL_colors[1],PL_colors[0]);
@@ -15682,7 +15689,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
             /* output information about the unicode matching */
             if (flags & ANYOF_ABOVE_LATIN1_ALL)
                 sv_catpvs(sv, "{unicode_all}");
-            else if (ANYOF_NONBITMAP(o)) {
+            else if (FLAGS(o) & (ANYOF_UTF8|ANYOF_NONBITMAP_NON_UTF8)) {
                 SV *lv; /* Set if there is something outside the bit map. */
                 bool byte_output = FALSE;   /* If something in the bitmap has
                                                been output */
