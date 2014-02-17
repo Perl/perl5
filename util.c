@@ -5272,9 +5272,8 @@ S_gv_has_usable_name(pTHX_ GV *gv)
     GV **gvp;
     return GvSTASH(gv)
 	&& HvENAME(GvSTASH(gv))
-	&& (gvp = (GV **)hv_fetch(
-			GvSTASH(gv), GvNAME(gv),
-			GvNAMEUTF8(gv) ? -GvNAMELEN(gv) : GvNAMELEN(gv), 0
+	&& (gvp = (GV **)hv_fetchhek(
+			GvSTASH(gv), GvNAME_HEK(gv), 0
 	   ))
 	&& *gvp == gv;
 }
