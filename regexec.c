@@ -1280,25 +1280,25 @@ Perl_re_intuit_start(pTHX_
                                       (IV)start_shift, (IV)(check_at - strbeg), (IV)(endpos - strbeg), (IV)(checked_upto- strbeg)));
 
 	    /* Contradict one of substrings */
-	    if ((prog->anchored_substr || prog->anchored_utf8)
-                && prog->substrs->check_ix == 1) { /* check is float */
-                /* Have both, check_string is floating */
-                assert(rx_origin + start_shift <= check_at);
-                if (rx_origin + start_shift != check_at) {
-                    /* not at latest position float substr could match:
-                     * Recheck anchored substring, but not floating... */
-                    if (!check) {
-                        rx_origin = NULL;
-                        goto giveup;
+	    if (prog->anchored_substr || prog->anchored_utf8) {
+                if (prog->substrs->check_ix == 1) { /* check is float */
+                    /* Have both, check_string is floating */
+                    assert(rx_origin + start_shift <= check_at);
+                    if (rx_origin + start_shift != check_at) {
+                        /* not at latest position float substr could match:
+                         * Recheck anchored substring, but not floating... */
+                        if (!check) {
+                            rx_origin = NULL;
+                            goto giveup;
+                        }
+                        DEBUG_EXECUTE_r( PerlIO_printf(Perl_debug_log,
+                                  "  Looking for anchored substr starting at offset %ld...\n",
+                                  (long)(other_last - strpos)) );
+                        goto do_other_substr;
                     }
-                    DEBUG_EXECUTE_r( PerlIO_printf(Perl_debug_log,
-                              "  Looking for anchored substr starting at offset %ld...\n",
-                              (long)(other_last - strpos)) );
-                    goto do_other_substr;
                 }
             }
-
-	    if (!(prog->anchored_substr || prog->anchored_utf8)) {
+	    else {
                 /* float-only */
 
                 /* Another way we could have checked stclass at the
