@@ -1283,20 +1283,20 @@ Perl_re_intuit_start(pTHX_
 		if (prog->substrs->check_ix == 1) { /* check is float */
                     /* Have both, check_string is floating */
                     assert(rx_origin + start_shift <= check_at);
-                    if (rx_origin + start_shift == check_at)
-                        /* already at latest position float substr could match */
-                        goto hop_and_restart;
-                    /* Recheck anchored substring, but not floating... */
-                    if (!check) {
-                        rx_origin = NULL;
-                        goto giveup;
+                    if (rx_origin + start_shift != check_at) {
+                        /* not at latest position float substr could match:
+                         * Recheck anchored substring, but not floating... */
+                        if (!check) {
+                            rx_origin = NULL;
+                            goto giveup;
+                        }
+                        DEBUG_EXECUTE_r( PerlIO_printf(Perl_debug_log,
+                                  "  Looking for anchored substr starting at offset %ld...\n",
+                                  (long)(other_last - strpos)) );
+                        assert(prog->substrs->check_ix); /* other is float */
+                        goto do_other_substr;
                     }
-                    DEBUG_EXECUTE_r( PerlIO_printf(Perl_debug_log,
-                              "  Looking for anchored substr starting at offset %ld...\n",
-                              (long)(other_last - strpos)) );
-                    assert(prog->substrs->check_ix); /* other is float */
-                    goto do_other_substr;
-		}
+                }
 
               hop_and_restart:
                 rx_origin = HOP3c(rx_origin, 1, strend);
