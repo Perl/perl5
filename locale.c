@@ -444,8 +444,6 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 #endif /* USE_LOCALE_NUMERIC */
 #ifdef __GLIBC__
     char * const language   = PerlEnv_getenv("LANGUAGE");
-#else
-    const char * const language   = NULL;
 #endif
 
     /* NULL uses the existing already set up locale */
@@ -465,7 +463,6 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
                     (printwarn &&
                      (!(p = PerlEnv_getenv("PERL_BADLANG")) || atoi(p))));
     bool done = FALSE;
-    const char *description;
     const char *system_default_locale = NULL;
 
 
