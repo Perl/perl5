@@ -1852,7 +1852,7 @@ foreach $test_num ($first_locales_test_number..$final_locales_test_number) {
 
 $test_num = $final_locales_test_number;
 
-unless ( $^O eq 'dragonfly' ) {
+unless ( $^O =~ m!^(dragonfly|openbsd|bitrig|mirbsd)$! ) {
     # perl #115808
     use warnings;
     my $warned = 0;
