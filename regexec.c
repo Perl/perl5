@@ -1296,8 +1296,10 @@ Perl_re_intuit_start(pTHX_
 		    goto restart;
 		}
 		/* Have both, check_string is floating */
-		if (rx_origin + start_shift >= check_at) /* Contradicts floating=check */
-		    goto retry_floating_check;
+		assert(rx_origin + start_shift <= check_at);
+		if (rx_origin + start_shift == check_at)
+                    /* already at latest position float substr could match */
+		    goto hop_and_restart;
 		/* Recheck anchored substring, but not floating... */
 		if (!check) {
                     rx_origin = NULL;
@@ -1327,7 +1329,6 @@ Perl_re_intuit_start(pTHX_
 	    if (!(utf8_target ? prog->float_utf8 : prog->float_substr))	/* Could have been deleted */
 		goto fail;
 	    /* Check is floating substring. */
-	  retry_floating_check:
 	    rx_origin = check_at - start_shift;
 	    goto hop_and_restart;
 	}
