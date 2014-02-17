@@ -1293,7 +1293,6 @@ Perl_re_intuit_start(pTHX_
                         DEBUG_EXECUTE_r( PerlIO_printf(Perl_debug_log,
                                   "  Looking for anchored substr starting at offset %ld...\n",
                                   (long)(other_last - strpos)) );
-                        assert(prog->substrs->check_ix); /* other is float */
                         goto do_other_substr;
                     }
                 }
