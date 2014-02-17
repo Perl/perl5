@@ -76,8 +76,8 @@ for ("C", @locales) { # prefer C for the base if available
 setlocale(LC_NUMERIC, $original_locale);
 
 SKIP: {
-    skip("no locale available where LC_NUMERIC makes a difference", &last - 2)
-	if !$different;
+    skip("no locale available where LC_NUMERIC makes a difference", &last - 4 )
+	if !$different;     # -4 is 2 tests before this block; 2 after
     note("using the '$different' locale for LC_NUMERIC tests");
     for ($different) {
 	local $ENV{LC_NUMERIC} = $_;
