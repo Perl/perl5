@@ -8066,7 +8066,13 @@ Perl_sv_gets(pTHX_ SV *const sv, PerlIO *const fp, I32 append)
 	if (!PerlLIO_fstat(PerlIO_fileno(fp), &st) && S_ISREG(st.st_mode))  {
 	    const Off_t offset = PerlIO_tell(fp);
 	    if (offset != (Off_t) -1 && st.st_size + append > offset) {
-	     	(void) SvGROW(sv, (STRLEN)((st.st_size - offset) + append + 1));
+		(void) SvGROW(sv, (STRLEN)((st.st_size - offset) + append + 1
+#ifdef PERL_NEW_COPY_ON_WRITE
+			/* Add an extra byte for the sake of copy-on-
+			   write's buffer reference count. */
+				    + 1
+#endif
+		));
 	    }
 	}
 	rsptr = NULL;
