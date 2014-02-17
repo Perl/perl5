@@ -578,8 +578,19 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
         }
 
 #ifdef LC_ALL
-        if (! my_setlocale(LC_ALL, trial_locale))
+        if (! my_setlocale(LC_ALL, trial_locale)) {
             setlocale_failure = TRUE;
+        }
+        else {
+            /* Since LC_ALL succeeded, it should have changed all the other
+             * categories it can to its value; so we massage things so that the
+             * setlocales below just return their category's current values.
+             * This adequately handles the case in NetBSD where LC_COLLATE may
+             * not be defined for a locale, and setting it individually will
+             * fail, whereas setting LC_ALL suceeds, leaving LC_COLLATE set to
+             * the POSIX locale. */
+            trial_locale = NULL;
+        }
 #endif /* LC_ALL */
 
         if (!setlocale_failure) {
