@@ -96,8 +96,6 @@ sub import {
             {
                 local $SIG{__DIE__};
                 my $fn = _module_to_filename($base);
-                my $file = __FILE__;
-                my $line = __LINE__ + 1;
                 eval { require $fn };
                 # Only ignore "Can't locate" errors from our eval require.
                 # Other fatal errors (syntax etc) must be reported.
@@ -107,8 +105,8 @@ sub import {
                 # probably be using parent.pm, which doesn't try to
                 # guess whether require is needed or failed,
                 # see [perl #118561]
-                die if $@ && $@ !~ /^Can't locate \Q$fn\E .*? at \Q$file\E line \Q$line\E(?:, <[^>]*> (?:line|chunk) [0-9]+)?\.\n\z/s
-                          || $@ =~ /Compilation failed in require at \Q$file\E line \Q$line\E(?:, <[^>]*> (?:line|chunk) [0-9]+)?\.\n\z/;
+                die if $@ && $@ !~ /^Can't locate \Q$fn\E .*? at .* line [0-9]+(?:, <[^>]*> (?:line|chunk) [0-9]+)?\.\n\z/s
+                          || $@ =~ /Compilation failed in require at .* line [0-9]+(?:, <[^>]*> (?:line|chunk) [0-9]+)?\.\n\z/;
                 unless (%{"$base\::"}) {
                     require Carp;
                     local $" = " ";

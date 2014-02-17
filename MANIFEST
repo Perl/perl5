@@ -2903,6 +2903,7 @@ dist/base/t/base-open-chunk.t	See if base works
 dist/base/t/base-open-line.t	See if base works
 dist/base/t/base.t		See if base works
 dist/base/t/compile-time.t	See if base works
+dist/base/t/core-global.t	See if base works around CORE::GLOBAL::require
 dist/base/t/fields-5_6_0.t	See if fields work
 dist/base/t/fields-5_8_0.t	See if fields work
 dist/base/t/fields-base.t	See if fields work
