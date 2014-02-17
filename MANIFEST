@@ -1731,6 +1731,7 @@ cpan/Parse-CPAN-Meta/t/02_api.t
 cpan/Parse-CPAN-Meta/t/03_functions.t
 cpan/Parse-CPAN-Meta/t/04_export.t
 cpan/Parse-CPAN-Meta/t/05_errors.t
+cpan/Parse-CPAN-Meta/t/data/BadMETA.yml
 cpan/Parse-CPAN-Meta/t/data/META-VR.json
 cpan/Parse-CPAN-Meta/t/data/META-VR.yml
 cpan/Parse-CPAN-Meta/t/lib/Parse/CPAN/Meta/Test.pm

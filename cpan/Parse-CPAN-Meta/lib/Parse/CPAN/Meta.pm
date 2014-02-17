@@ -2,7 +2,7 @@ use 5.008001;
 use strict;
 package Parse::CPAN::Meta;
 # ABSTRACT: Parse META.yml and META.json CPAN metadata files
-our $VERSION = '1.4410'; # VERSION
+our $VERSION = '1.4412'; # VERSION
 
 use Exporter;
 use Carp 'croak';
@@ -70,7 +70,10 @@ sub json_backend {
 }
 
 sub _slurp {
-  open my $fh, "<:utf8", "$_[0]" ## no critic
+  require Encode;
+  require PerlIO::encoding;
+  local $PerlIO::encoding::fallback = Encode::PERLQQ()|Encode::STOP_AT_PARTIAL();
+  open my $fh, "<:encoding(UTF-8)", "$_[0]" ## no critic
     or die "can't open $_[0] for reading: $!";
   return do { local $/; <$fh> };
 }
@@ -93,10 +96,7 @@ sub _can_load {
 # Kept for backwards compatibility only
 # Create an object from a file
 sub LoadFile ($) {
-  require CPAN::Meta::YAML;
-  my $object = eval { CPAN::Meta::YAML::LoadFile(shift) };
-  croak $@ if $@;
-  return $object;
+  return Load(_slurp(shift));
 }
 
 # Parse a document from a string.
@@ -121,7 +121,7 @@ Parse::CPAN::Meta - Parse META.yml and META.json CPAN metadata files
 
 =head1 VERSION
 
-version 1.4410
+version 1.4412
 
 =head1 SYNOPSIS
 

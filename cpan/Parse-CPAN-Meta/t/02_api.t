@@ -5,22 +5,13 @@ delete $ENV{PERL_JSON_BACKEND};
 
 # Testing of a known-bad file from an editor
 
-BEGIN {
-	if( $ENV{PERL_CORE} ) {
-		chdir 't';
-		@INC = ('../lib', 'lib');
-	}
-	else {
-		unshift @INC, 't/lib/';
-	}
-}
-
 use strict;
 BEGIN {
 	$|  = 1;
 	$^W = 1;
 }
 
+use lib 't/lib';
 use File::Spec::Functions ':ALL';
 use Parse::CPAN::Meta;
 use Parse::CPAN::Meta::Test;
@@ -77,6 +68,14 @@ my $meta_yaml = catfile( test_data_directory(), 'META-VR.yml' );
   my $from_yaml = Parse::CPAN::Meta->load_yaml_string( $yaml );
   is_deeply($from_yaml, $want, "load from YAML str results in expected data");
 }
+
+{
+  local $ENV{PERL_YAML_BACKEND}; # ensure we get CPAN::META::YAML
+
+  my @yaml   = Parse::CPAN::Meta::LoadFile( 't/data/BadMETA.yml' );
+  is($yaml[0]{author}[0], 'Olivier Mengu\xE9', "Bad UTF-8 is replaced");
+}
+
 
 SKIP: {
   skip "YAML module not installed", 2
