@@ -364,19 +364,18 @@ struct regnode_ssc {
  * This introduces a performance penalty.
  * shared should new flags be needed for SSCs, like ANYOF_EMPTY_STRING now. */
 
-/* Flags for node->flags of ANYOF.  These are in short supply, with none
- * currently available.  The easiest solution for one more flag is to eliminate
- * the ANYOF_LOCALE flag, because it doesn't add any extra information beyond
- * the other two LOC flags.  Also, the ABOVE_LATIN1_ALL bit could be freed up
+/* Flags for node->flags of ANYOF.  These are in short supply, with one
+ * currently available.  The ABOVE_LATIN1_ALL bit could be freed up
  * by resorting to creating a swash containing everything above 255.  This
  * introduces a performance penalty.  An option that wouldn't slow things down
- * would be to split one of the two remaining LOC flags out into a separate
+ * would be to split one of the two LOC flags out into a separate
  * node, like what was done with ANYOF_NON_UTF8_NON_ASCII_ALL in commit
  * 34fdef848b1687b91892ba55e9e0c3430e0770f6 (but which was reverted because it
  * wasn't the best option available at the time), and using a LOC flag is
  * probably better than that commit anyway.  But it could be reinstated if we
  * need a bit.  The LOC flags are only for /l nodes; the reverted commit was
- * only for /d, so there are no combinatorial issues.
+ * only for /d, so there are no combinatorial issues.  The LOC flag to use is
+ * probably the POSIXL one.
  * Several flags are not used in synthetic start class (SSC) nodes, so could be
  * shared should new flags be needed for SSCs, like ANYOF_EMPTY_STRING now. */
 
@@ -388,7 +387,7 @@ struct regnode_ssc {
  * regex compilation. */
 #define ANYOF_EMPTY_STRING       ANYOF_INVERT
 
-#define ANYOF_LOCALE		 0x02	    /* /l modifier */
+/* spare                        0x02 */
 
 /* The fold is calculated and stored in the bitmap where possible at compile
  * time.  However under locale, the actual folding varies depending on
@@ -399,8 +398,7 @@ struct regnode_ssc {
 /* Set if this is a regnode_charclass_posixl vs a regnode_charclass.  This
  * is used for runtime \d, \w, [:posix:], ..., which are used only in locale
  * and the optimizer's synthetic start class.  Non-locale \d, etc are resolved
- * at compile-time.  Could be shared with ANYOF_LOCALE, forcing all locale
- * nodes to be large */
+ * at compile-time */
 #define ANYOF_POSIXL	         0x08
 #define ANYOF_CLASS	         ANYOF_POSIXL
 #define ANYOF_LARGE              ANYOF_POSIXL
@@ -420,7 +418,7 @@ struct regnode_ssc {
  * in utf8. */
 #define ANYOF_NON_UTF8_NON_ASCII_ALL 0x80
 
-#define ANYOF_FLAGS_ALL		(0xff)
+#define ANYOF_FLAGS_ALL		(0xf5)
 
 #define ANYOF_LOCALE_FLAGS (ANYOF_LOC_FOLD | ANYOF_POSIXL)
 
