@@ -2,6 +2,7 @@
  * Cygwin extras
  */
 
+#define PERLIO_NOT_STDIO 0
 #include "EXTERN.h"
 #include "perl.h"
 #undef USE_DYNAMIC_LOADING
