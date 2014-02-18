@@ -1778,13 +1778,11 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         break;
     }
     case BOUNDL:
-        RXp_MATCH_TAINTED_on(prog);
         FBC_BOUND(isWORDCHAR_LC,
                   isWORDCHAR_LC_uvchr(tmp),
                   isWORDCHAR_LC_utf8((U8*)s));
         break;
     case NBOUNDL:
-        RXp_MATCH_TAINTED_on(prog);
         FBC_NBOUND(isWORDCHAR_LC,
                    isWORDCHAR_LC_uvchr(tmp),
                    isWORDCHAR_LC_utf8((U8*)s));
@@ -1833,7 +1831,6 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         /* FALLTHROUGH */
 
     case POSIXL:
-        RXp_MATCH_TAINTED_on(prog);
         REXEC_FBC_CSCAN(to_complement ^ cBOOL(isFOO_utf8_lc(FLAGS(c), (U8 *) s)),
                         to_complement ^ cBOOL(isFOO_lc(FLAGS(c), *s)));
         break;
@@ -2518,8 +2515,6 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
     if (UCHARAT(progi->program) != REG_MAGIC) {
 	Perl_croak(aTHX_ "corrupted regexp program");
     }
-
-    RX_MATCH_TAINTED_off(rx);
 
     reginfo->prog = rx;	 /* Yes, sorry that this is confusing.  */
     reginfo->intuit = 0;
@@ -4422,7 +4417,6 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    const char * s;
 	    U32 fold_utf8_flags;
 
-            RX_MATCH_TAINTED_on(reginfo->prog);
             folder = foldEQ_locale;
             fold_array = PL_fold_locale;
 	    fold_utf8_flags = FOLDEQ_LOCALE;
@@ -4495,8 +4489,6 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	 * have to set the FLAGS fields of these */
 	case BOUNDL:  /*  /\b/l  */
 	case NBOUNDL: /*  /\B/l  */
-            RX_MATCH_TAINTED_on(reginfo->prog);
-	    /* FALL THROUGH */
 	case BOUND:   /*  /\b/   */
 	case BOUNDU:  /*  /\b/u  */
 	case BOUNDA:  /*  /\b/a  */
@@ -4602,10 +4594,6 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
         case POSIXL:    /* \w or [:punct:] etc. under /l */
             if (NEXTCHR_IS_EOS)
                 sayNO;
-
-            /* The locale hasn't influenced the outcome before this, so defer
-             * tainting until now */
-            RX_MATCH_TAINTED_on(reginfo->prog);
 
             /* Use isFOO_lc() for characters within Latin1.  (Note that
              * UTF8_IS_INVARIANT works even on non-UTF-8 strings, or else
@@ -4980,7 +4968,6 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    const U8 *fold_array;
 	    UV utf8_fold_flags;
 
-            RX_MATCH_TAINTED_on(reginfo->prog);
 	    folder = foldEQ_locale;
 	    fold_array = PL_fold_locale;
 	    type = REFFL;
@@ -5025,7 +5012,6 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    goto do_nref_ref_common;
 
 	case REFFL:  /*  /\1/il  */
-            RX_MATCH_TAINTED_on(reginfo->prog);
 	    folder = foldEQ_locale;
 	    fold_array = PL_fold_locale;
 	    utf8_fold_flags = FOLDEQ_LOCALE;
@@ -7131,7 +7117,6 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
 	goto do_exactf;
 
     case EXACTFL:
-        RXp_MATCH_TAINTED_on(prog);
 	utf8_flags = FOLDEQ_LOCALE;
 	goto do_exactf;
 
@@ -7225,7 +7210,6 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
         /* FALLTHROUGH */
 
     case POSIXL:
-        RXp_MATCH_TAINTED_on(prog);
 	if (! utf8_target) {
 	    while (scan < loceol && to_complement ^ cBOOL(isFOO_lc(FLAGS(p),
                                                                    *scan)))
@@ -7673,7 +7657,6 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
 	}
 	else if (flags & ANYOF_LOCALE_FLAGS) {
 	    if (flags & ANYOF_LOC_FOLD) {
-                RXp_MATCH_TAINTED_on(prog);
 		 if (ANYOF_BITMAP_TEST(n, PL_fold_locale[c])) {
                     match = TRUE;
                 }
@@ -7713,7 +7696,6 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
                 int count = 0;
                 int to_complement = 0;
 
-                RXp_MATCH_TAINTED_on(prog);
                 while (count < ANYOF_MAX) {
                     if (ANYOF_POSIXL_TEST(n, count)
                         && to_complement ^ cBOOL(isFOO_lc(count/2, (U8) c)))

@@ -186,6 +186,83 @@ check_taint      $+, "\t\$+";
 check_taint      $1, "\t\$1";
 check_taint_not  $2, "\t\$2";
 
+/(.)/;	# untaint $&, $`, $', $+, $1.
+check_taint_not  $&, "\t/(.)/ \$&";
+
+"a" =~ /(a)|(\w)/;	# taint $&, $`, $', $+, $1.
+check_taint      $&, "\t/(a)|(\\w)/ \$&";
+check_taint      $`, "\t\$`";
+check_taint      $', "\t\$'";
+check_taint      $+, "\t\$+";
+check_taint      $1, "\t\$1";
+ok($1 eq 'a', ("\t" x 4) . "\$1 is 'a'");
+ok(! defined $2, ("\t" x 4) . "\$2 is undefined");
+check_taint_not  $2, "\t\$2";
+check_taint_not  $3, "\t\$3";
+
+/(.)/;	# untaint $&, $`, $', $+, $1.
+check_taint_not  $&, "\t/(.)/ \$&";
+
+"\N{CYRILLIC SMALL LETTER A}" =~ /(\N{CYRILLIC CAPITAL LETTER A})/i;	# no tainting because no locale dependence
+check_taint_not      $&, "\t/(\\N{CYRILLIC CAPITAL LETTER A})/i \$&";
+check_taint_not      $`, "\t\$`";
+check_taint_not      $', "\t\$'";
+check_taint_not      $+, "\t\$+";
+check_taint_not      $1, "\t\$1";
+ok($1 eq "\N{CYRILLIC SMALL LETTER A}", ("\t" x 4) . "\$1 is 'small cyrillic a'");
+check_taint_not      $2, "\t\$2";
+
+/(.)/;	# untaint $&, $`, $', $+, $1.
+check_taint_not  $&, "\t/./ \$&";
+
+"k" =~ /(\N{KELVIN SIGN})/i;	# taints because depends on locale
+check_taint      $&, "\t/(\\N{KELVIN SIGN})/i \$&";
+check_taint      $`, "\t\$`";
+check_taint      $', "\t\$'";
+check_taint      $+, "\t\$+";
+check_taint      $1, "\t\$1";
+ok($1 eq 'k', ("\t" x 4) . "\$1 is 'k'");
+check_taint_not      $2, "\t\$2";
+
+/(.)/;	# untaint $&, $`, $', $+, $1.
+check_taint_not  $&, "\t/(.)/ \$&";
+
+"a:" =~ /(.)\b(.)/;	# taint $&, $`, $', $+, $1.
+check_taint      $&, "\t/(.)\\b(.)/ \$&";
+check_taint      $`, "\t\$`";
+check_taint      $', "\t\$'";
+check_taint      $+, "\t\$+";
+check_taint      $1, "\t\$1";
+check_taint      $2, "\t\$2";
+check_taint_not  $3, "\t\$3";
+
+/(.)/;	# untaint $&, $`, $', $+, $1.
+check_taint_not  $&, "\t/./ \$&";
+
+"aa" =~ /(.)\B(.)/;	# taint $&, $`, $', $+, $1.
+check_taint      $&, "\t/(.)\\B(.)/ \$&";
+check_taint      $`, "\t\$`";
+check_taint      $', "\t\$'";
+check_taint      $+, "\t\$+";
+check_taint      $1, "\t\$1";
+check_taint      $2, "\t\$2";
+check_taint_not  $3, "\t\$3";
+
+/(.)/;	# untaint $&, $`, $', $+, $1.
+check_taint_not  $&, "\t/./ \$&";
+
+"aaa" =~ /(.).(\1)/i;	# notaint because not locale dependent
+check_taint_not      $&, "\t/(.).(\\1)/ \$&";
+check_taint_not      $`, "\t\$`";
+check_taint_not      $', "\t\$'";
+check_taint_not      $+, "\t\$+";
+check_taint_not      $1, "\t\$1";
+check_taint_not      $2, "\t\$2";
+check_taint_not  $3, "\t\$3";
+
+/(.)/;	# untaint $&, $`, $', $+, $1.
+check_taint_not  $&, "\t/./ \$&";
+
 $_ = $a;	# untaint $_
 
 check_taint_not  $_, "\t\$_";

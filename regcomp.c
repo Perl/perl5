@@ -6330,10 +6330,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     if (rx_flags & PMf_FOLD) {
         RExC_contains_i = 1;
     }
-    if (initial_charset == REGEX_LOCALE_CHARSET) {
-	RExC_contains_locale = 1;
-    }
-    else if (RExC_utf8 && initial_charset == REGEX_DEPENDS_CHARSET) {
+    if (RExC_utf8 && initial_charset == REGEX_DEPENDS_CHARSET) {
 
 	/* Set to use unicode semantics if the pattern is in utf8 and has the
 	 * 'depends' charset specified, as it means unicode when utf8  */
@@ -7072,6 +7069,11 @@ reStudy:
             r->extflags |= (RXf_SKIPWHITE|RXf_WHITE);
 
     }
+
+    if (RExC_contains_locale) {
+        RXp_EXTFLAGS(r) |= RXf_TAINTED_SEEN;
+    }
+
 #ifdef DEBUGGING
     if (RExC_paren_names) {
         ri->name_list_idx = add_data( pRExC_state, STR_WITH_LEN("a"));
@@ -9159,7 +9161,6 @@ S_parse_lparen_question_flags(pTHX_ RExC_state_t *pRExC_state)
                 }
                 cs = REGEX_LOCALE_CHARSET;
                 has_charset_modifier = LOCALE_PAT_MOD;
-                RExC_contains_locale = 1;
                 break;
             case UNICODE_PAT_MOD:
                 if (has_charset_modifier) {
@@ -11018,6 +11019,10 @@ S_alloc_maybe_populate_EXACT(pTHX_ RExC_state_t *pRExC_state,
     {
         *flagp |= SIMPLE;
     }
+
+    if (OP(node) == EXACTFL) {
+        RExC_contains_locale = 1;
+    }
 }
 
 
@@ -11289,6 +11294,9 @@ tryagain:
             if (op > BOUNDA) {  /* /aa is same as /a */
                 op = BOUNDA;
             }
+            else if (op == BOUNDL) {
+                RExC_contains_locale = 1;
+            }
 	    ret = reg_node(pRExC_state, op);
 	    FLAGS(ret) = get_regex_charset(RExC_flags);
 	    *flagp |= SIMPLE;
@@ -11303,6 +11311,9 @@ tryagain:
 	    op = NBOUND + get_regex_charset(RExC_flags);
             if (op > NBOUNDA) { /* /aa is same as /a */
                 op = NBOUNDA;
+            }
+            else if (op == NBOUNDL) {
+                RExC_contains_locale = 1;
             }
 	    ret = reg_node(pRExC_state, op);
 	    FLAGS(ret) = get_regex_charset(RExC_flags);
@@ -11352,6 +11363,9 @@ tryagain:
 	    op = POSIXD + get_regex_charset(RExC_flags);
             if (op > POSIXA) {  /* /aa is same as /a */
                 op = POSIXA;
+            }
+            else if (op == POSIXL) {
+                RExC_contains_locale = 1;
             }
 
         join_posix_op_known:
@@ -14194,6 +14208,9 @@ parseit:
             else {
                 RExC_emit = (regnode *)orig_emit;
                 if (PL_regkind[op] == POSIXD) {
+                    if (op == POSIXL) {
+                        RExC_contains_locale = 1;
+                    }
                     if (invert) {
                         op += NPOSIXD - POSIXD;
                     }
@@ -14789,6 +14806,11 @@ parseit:
                   swash, has_user_defined_property);
 
     *flagp |= HASWIDTH|SIMPLE;
+
+    if (ANYOF_FLAGS(ret) & ANYOF_LOCALE_FLAGS) {
+        RExC_contains_locale = 1;
+    }
+
     return ret;
 }
 

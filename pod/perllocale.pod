@@ -1011,16 +1011,23 @@ Scalar true/false result never tainted.
 All subpatterns, either delivered as a list-context result or as C<$1>
 I<etc>., are tainted if C<use locale> (but not
 S<C<use locale ':not_characters'>>) is in effect, and the subpattern
-regular expression is matched case-insensitively (C</i>) or contains a
-locale-dependent construct.  These constructs include C<\w>
-(to match an alphanumeric character), C<\W> (non-alphanumeric
-character), C<\s> (whitespace character), C<\S> (non whitespace
-character), and the POSIX character classes, such as C<[:alpha:]> (see
-L<perlrecharclass/POSIX Character Classes>).
+regular expression contains a locale-dependent construct.  These
+constructs include C<\w> (to match an alphanumeric character), C<\W>
+(non-alphanumeric character), C<\b> and C<\B> (word-boundary and
+non-boundardy, which depend on what C<\w> and C<\W> match), C<\s>
+(whitespace character), C<\S> (non whitespace character), C<\d> and
+C<\D> (digits and non-digits), and the POSIX character classes, such as
+C<[:alpha:]> (see L<perlrecharclass/POSIX Character Classes>).
+
+Tainting is also likely if the pattern is to be matched
+case-insensitively (via C</i>).  The exception is if all the code points
+to be matched this way are above 255 and do not have folds under Unicode
+rules to below 256.  Tainting is not done for these because Perl
+only uses Unicode rules for such code points, and those rules are the
+same no matter what the current locale.
+
 The matched-pattern variables, C<$&>, C<$`> (pre-match), C<$'>
 (post-match), and C<$+> (last match) also are tainted.
-(Note that currently there are some bugs where not everything that
-should be tainted gets tainted in all circumstances.)
 
 =item  *
 

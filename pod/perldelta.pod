@@ -94,14 +94,27 @@ L</Selected Bug Fixes> section.
 
 =head2 Tainting happens under more circumstances; now conforms to documentation
 
-When changing the case of a string (C<lc>, C<"\U">, I<etc>.), within the
-scope of C<use locale>, the result is now tainted no matter what the
+This affects regular expression matching and changing the case of a
+string (C<lc>, C<"\U">, I<etc>.) within the scope of C<use locale>.
+The result is now tainted based on the operation, no matter what the
 contents of the string were, as the documentation (L<perlsec>,
-L<perllocale/SECURITY>) indicates it should.   Previously, if the string
-contained no characters whose case change could be affected by the
-locale, the result would not be tainted.  For example, the result of
-C<uc()> on an empty string or one containing only above-Latin1 code
-points is now tainted.  This leads to more consistent tainting results.
+L<perllocale/SECURITY>) indicates it should.  Previously, for the case
+change operation, if the string contained no characters whose case
+change could be affected by the locale, the result would not be tainted.
+For example, the result of C<uc()> on an empty string or one containing
+only above-Latin1 code points is now tainted, and wasn't before.  This
+leads to more consistent tainting results.  Regular expression patterns
+taint their non-binary results (like C<$&>, C<$2>) if and only if the
+pattern contains elements whose matching depends on the current
+(potentially tainted) locale.  Like the case changing functions, the
+actual contents of the string being matched now do not matter, whereas
+formerly it did.  For example, if the pattern contains a C<\w>, the
+results will be tainted even if the match did not have to use that
+portion of the pattern to succeed or fail, because what a C<\w> matches
+depends on locale.  However, for example, a C<.> in a pattern will not
+enable tainting, because the dot matches any single character, and what
+the current locale is doesn't change in any way what matches and what
+doesn't.
 
 =head2 Quote-like escape changes
 
