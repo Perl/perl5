@@ -185,7 +185,7 @@ struct regnode_2 {
 };
 
 
-#define ANYOF_BITMAP_SIZE	32	/* 256 b/(8 b/B) */
+#define ANYOF_BITMAP_SIZE	(256 / 8)   /* 8 bits/Byte */
 
 /* also used by trie */
 struct regnode_charclass {
