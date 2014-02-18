@@ -110,7 +110,7 @@ check_taint_not   $&, "not tainted outside 'use locale'";
 
 use locale;	# engage locale and therefore locale taint.
 
-check_taint_not   $a;
+check_taint_not   $a, "\t\$a";
 
 check_taint       uc($a);
 check_taint       "\U$a";
@@ -133,150 +133,150 @@ $_ = $a;	# untaint $_
 
 $_ = uc($a);	# taint $_
 
-check_taint      $_;
+check_taint      $_, "\t\$_";
 
 /(\w)/;	# taint $&, $`, $', $+, $1.
-check_taint      $&;
-check_taint      $`;
-check_taint      $';
-check_taint      $+;
-check_taint      $1;
-check_taint_not  $2;
+check_taint      $&, "\t/(\\w)/ \$&";
+check_taint      $`, "\t\$`";
+check_taint      $', "\t\$'";
+check_taint      $+, "\t\$+";
+check_taint      $1, "\t\$1";
+check_taint_not  $2, "\t\$2";
 
 /(.)/;	# untaint $&, $`, $', $+, $1.
-check_taint_not  $&;
-check_taint_not  $`;
-check_taint_not  $';
-check_taint_not  $+;
-check_taint_not  $1;
-check_taint_not  $2;
+check_taint_not  $&, "\t/(.)/ \$&";
+check_taint_not  $`, "\t\$`";
+check_taint_not  $', "\t\$'";
+check_taint_not  $+, "\t\$+";
+check_taint_not  $1, "\t\$1";
+check_taint_not  $2, "\t\$2";
 
 /(\W)/;	# taint $&, $`, $', $+, $1.
-check_taint      $&;
-check_taint      $`;
-check_taint      $';
-check_taint      $+;
-check_taint      $1;
-check_taint_not  $2;
+check_taint      $&, "\t/(\\W)/ \$&";
+check_taint      $`, "\t\$`";
+check_taint      $', "\t\$'";
+check_taint      $+, "\t\$+";
+check_taint      $1, "\t\$1";
+check_taint_not  $2, "\t\$2";
 
 /(.)/;	# untaint $&, $`, $', $+, $1.
-check_taint_not  $&, '/(.)/';
-check_taint_not  $`;
-check_taint_not  $';
-check_taint_not  $+;
-check_taint_not  $1;
-check_taint_not  $2;
+check_taint_not  $&, "\t/(.)/ \$&";
+check_taint_not  $`, "\t\$`";
+check_taint_not  $', "\t\$'";
+check_taint_not  $+, "\t\$+";
+check_taint_not  $1, "\t\$1";
+check_taint_not  $2, "\t\$2";
 
 /(\s)/;	# taint $&, $`, $', $+, $1.
-check_taint      $&;
-check_taint      $`;
-check_taint      $';
-check_taint      $+;
-check_taint      $1;
-check_taint_not  $2;
+check_taint      $&, "\t/(\\s)/ \$&";
+check_taint      $`, "\t\$`";
+check_taint      $', "\t\$'";
+check_taint      $+, "\t\$+";
+check_taint      $1, "\t\$1";
+check_taint_not  $2, "\t\$2";
 
 /(.)/;	# untaint $&, $`, $', $+, $1.
-check_taint_not  $&, '/(.)/';
+check_taint_not  $&, "\t/(.)/ \$&";
 
 /(\S)/;	# taint $&, $`, $', $+, $1.
-check_taint      $&;
-check_taint      $`;
-check_taint      $';
-check_taint      $+;
-check_taint      $1;
-check_taint_not  $2;
+check_taint      $&, "\t/(\\S)/ \$&";
+check_taint      $`, "\t\$`";
+check_taint      $', "\t\$'";
+check_taint      $+, "\t\$+";
+check_taint      $1, "\t\$1";
+check_taint_not  $2, "\t\$2";
 
 $_ = $a;	# untaint $_
 
-check_taint_not  $_;
+check_taint_not  $_, "\t\$_";
 
 /(b)/;		# this must not taint
-check_taint_not  $&;
-check_taint_not  $`;
-check_taint_not  $';
-check_taint_not  $+;
-check_taint_not  $1;
-check_taint_not  $2;
+check_taint_not  $&, "\t/(b)/ \$&";
+check_taint_not  $`, "\t\$`";
+check_taint_not  $', "\t\$'";
+check_taint_not  $+, "\t\$+";
+check_taint_not  $1, "\t\$1";
+check_taint_not  $2, "\t\$2";
 
 $_ = $a;	# untaint $_
 
-check_taint_not  $_;
+check_taint_not  $_, "\t\$_";
 
 $b = uc($a);	# taint $b
 s/(.+)/$b/;	# this must taint only the $_
 
-check_taint      $_;
-check_taint_not  $&;
-check_taint_not  $`;
-check_taint_not  $';
-check_taint_not  $+;
-check_taint_not  $1;
-check_taint_not  $2;
+check_taint      $_, "\t\$_";
+check_taint_not  $&, "\t\$&";
+check_taint_not  $`, "\t\$`";
+check_taint_not  $', "\t\$'";
+check_taint_not  $+, "\t\$+";
+check_taint_not  $1, "\t\$1";
+check_taint_not  $2, "\t\$2";
 
 $_ = $a;	# untaint $_
 
 s/(.+)/b/;	# this must not taint
-check_taint_not  $_;
-check_taint_not  $&;
-check_taint_not  $`;
-check_taint_not  $';
-check_taint_not  $+;
-check_taint_not  $1;
-check_taint_not  $2;
+check_taint_not  $_, "\t\$_";
+check_taint_not  $&, "\t\$&";
+check_taint_not  $`, "\t\$`";
+check_taint_not  $', "\t\$'";
+check_taint_not  $+, "\t\$+";
+check_taint_not  $1, "\t\$1";
+check_taint_not  $2, "\t\$2";
 
 $b = $a;	# untaint $b
 
 ($b = $a) =~ s/\w/$&/;
-check_taint      $b;	# $b should be tainted.
-check_taint_not  $a;	# $a should be not.
+check_taint      $b, "\t\$b";	# $b should be tainted.
+check_taint_not  $a, "\t\$a";	# $a should be not.
 
 $_ = $a;	# untaint $_
 
 s/(\w)/\l$1/;	# this must taint
-check_taint      $_;
-check_taint      $&;
-check_taint      $`;
-check_taint      $';
-check_taint      $+;
-check_taint      $1;
-check_taint_not  $2;
+check_taint      $_, "\t\$_";
+check_taint      $&, "\t\$&";
+check_taint      $`, "\t\$`";
+check_taint      $', "\t\$'";
+check_taint      $+, "\t\$+";
+check_taint      $1, "\t\$1";
+check_taint_not  $2, "\t\$2";
 
 $_ = $a;	# untaint $_
 
 s/(\w)/\L$1/;	# this must taint
-check_taint      $_;
-check_taint      $&;
-check_taint      $`;
-check_taint      $';
-check_taint      $+;
-check_taint      $1;
-check_taint_not  $2;
+check_taint      $_, "\t\$_";
+check_taint      $&, "\t\$&";
+check_taint      $`, "\t\$`";
+check_taint      $', "\t\$'";
+check_taint      $+, "\t\$+";
+check_taint      $1, "\t\$1";
+check_taint_not  $2, "\t\$2";
 
 $_ = $a;	# untaint $_
 
 s/(\w)/\u$1/;	# this must taint
-check_taint      $_;
-check_taint      $&;
-check_taint      $`;
-check_taint      $';
-check_taint      $+;
-check_taint      $1;
-check_taint_not  $2;
+check_taint      $_, "\t\$_";
+check_taint      $&, "\t\$&";
+check_taint      $`, "\t\$`";
+check_taint      $', "\t\$'";
+check_taint      $+, "\t\$+";
+check_taint      $1, "\t\$1";
+check_taint_not  $2, "\t\$2";
 
 $_ = $a;	# untaint $_
 
 s/(\w)/\U$1/;	# this must taint
-check_taint      $_;
-check_taint      $&;
-check_taint      $`;
-check_taint      $';
-check_taint      $+;
-check_taint      $1;
-check_taint_not  $2;
+check_taint      $_, "\t\$_";
+check_taint      $&, "\t\$&";
+check_taint      $`, "\t\$`";
+check_taint      $', "\t\$'";
+check_taint      $+, "\t\$+";
+check_taint      $1, "\t\$1";
+check_taint_not  $2, "\t\$2";
 
 # After all this tainting $a should be cool.
 
-check_taint_not  $a;
+check_taint_not  $a, "\t\$a";
 
 "a" =~ /([a-z])/;
 check_taint_not $1, '"a" =~ /([a-z])/';
