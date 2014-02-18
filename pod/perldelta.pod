@@ -283,9 +283,11 @@ specified by its prototype.
 
 =item *
 
-L<Digest::SHA> has been upgraded from version 5.85 to 5.86.
+L<Digest::SHA> has been upgraded from version 5.85 to 5.87.
 
-Improved the performance of hexadecimal output functions.
+Improved the performance of hexadecimal output functions and simplified capture
+of intermediate SHA states, which can now be done via strings (see
+C<getstate()>/C<putstate()>).
 
 =item *
 

@@ -740,7 +740,6 @@ cpan/Digest-SHA/src/sha.h		Digest::SHA extension
 cpan/Digest-SHA/t/allfcns.t		See if Digest::SHA works
 cpan/Digest-SHA/t/base64.t		See if Digest::SHA works
 cpan/Digest-SHA/t/bitbuf.t		See if Digest::SHA works
-cpan/Digest-SHA/t/dumpload.t		See if Digest::SHA works
 cpan/Digest-SHA/t/fips180-4.t		See if Digest::SHA works
 cpan/Digest-SHA/t/fips198.t		See if Digest::SHA works
 cpan/Digest-SHA/t/gglong.t		See if Digest::SHA works
@@ -756,6 +755,7 @@ cpan/Digest-SHA/t/sha224.t		See if Digest::SHA works
 cpan/Digest-SHA/t/sha256.t		See if Digest::SHA works
 cpan/Digest-SHA/t/sha384.t		See if Digest::SHA works
 cpan/Digest-SHA/t/sha512.t		See if Digest::SHA works
+cpan/Digest-SHA/t/state.t		See if Digest::SHA works
 cpan/Digest-SHA/t/unicode.t
 cpan/Digest-SHA/t/woodbury.t		See if Digest::SHA works
 cpan/Digest-SHA/typemap			Typemap for Digest::SHA

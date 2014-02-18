@@ -7,7 +7,7 @@ use vars qw($VERSION @ISA @EXPORT @EXPORT_OK);
 use Fcntl;
 use integer;
 
-$VERSION = '5.86';
+$VERSION = '5.87';
 
 require Exporter;
 require DynaLoader;
@@ -161,12 +161,94 @@ sub Addfile {
 	$self;
 }
 
+sub getstate {
+	my $self = shift;
+
+	my $alg = $self->algorithm or return;
+	my $state = $self->_getstate or return;
+	my $nD = $alg <= 256 ?  8 :  16;
+	my $nH = $alg <= 256 ? 32 :  64;
+	my $nB = $alg <= 256 ? 64 : 128;
+	my($H, $block, $blockcnt, $lenhh, $lenhl, $lenlh, $lenll) =
+		$state =~ /^(.{$nH})(.{$nB})(.{4})(.{4})(.{4})(.{4})(.{4})$/s;
+	for ($alg, $H, $block, $blockcnt, $lenhh, $lenhl, $lenlh, $lenll) {
+		return unless defined $_;
+	}
+
+	my @s = ();
+	push(@s, "alg:" . $alg);
+	push(@s, "H:" . join(":", unpack("H*", $H) =~ /.{$nD}/g));
+	push(@s, "block:" . join(":", unpack("H*", $block) =~ /.{2}/g));
+	push(@s, "blockcnt:" . unpack("N", $blockcnt));
+	push(@s, "lenhh:" . unpack("N", $lenhh));
+	push(@s, "lenhl:" . unpack("N", $lenhl));
+	push(@s, "lenlh:" . unpack("N", $lenlh));
+	push(@s, "lenll:" . unpack("N", $lenll));
+	join("\n", @s) . "\n";
+}
+
+sub putstate {
+	my $class = shift;
+	my $state = shift;
+
+	my %s = ();
+	for (split(/\n/, $state)) {
+		s/^\s+//;
+		s/\s+$//;
+		next if (/^(#|$)/);
+		my @f = split(/[:\s]+/);
+		my $tag = shift(@f);
+		$s{$tag} = join('', @f);
+	}
+
+	# H and block may contain arbitrary values, but check everything else
+	grep { $_ == $s{'alg'} } (1,224,256,384,512,512224,512256) or return;
+	length($s{'H'}) == ($s{'alg'} <= 256 ? 64 : 128) or return;
+	length($s{'block'}) == ($s{'alg'} <= 256 ? 128 : 256) or return;
+	{
+		no integer;
+		for (qw(blockcnt lenhh lenhl lenlh lenll)) {
+			0 <= $s{$_} or return;
+			$s{$_} <= 4294967295 or return;
+		}
+		$s{'blockcnt'} < ($s{'alg'} <= 256 ? 512 : 1024) or return;
+	}
+
+	my $state_packed = (
+		pack("H*", $s{'H'}) .
+		pack("H*", $s{'block'}) .
+		pack("N", $s{'blockcnt'}) .
+		pack("N", $s{'lenhh'}) .
+		pack("N", $s{'lenhl'}) .
+		pack("N", $s{'lenlh'}) .
+		pack("N", $s{'lenll'})
+	);
+
+	if (ref($class)) {	# instance method
+		if ($$class) { shaclose($$class); $$class = undef }
+		return unless $$class = shaopen($s{'alg'});
+		return $class->_putstate($state_packed);
+	}
+	else {
+		my $sha = shaopen($s{'alg'}) or return;
+		my $self = \$sha;
+		bless($self, $class);
+		return $self->_putstate($state_packed);
+	}
+}
+
 sub dump {
 	my $self = shift;
 	my $file = shift;
 
-	$file = "" unless defined $file;
-	shadump($file, $$self) || return;
+	my $state = $self->getstate or return;
+	$file = "-" if (!defined($file) || $file eq "");
+
+	local *FH;
+	open(FH, "> $file") or return;
+	print FH $state;
+	close(FH);
+
 	return($self);
 }
 
@@ -174,16 +256,14 @@ sub load {
 	my $class = shift;
 	my $file = shift;
 
-	$file = "" unless defined $file;
-	if (ref($class)) {	# instance method
-		if ($$class) { shaclose($$class); $$class = undef }
-		return unless $$class = shaload($file);
-		return($class);
-	}
-	my $state = shaload($file) || return;
-	my $self = \$state;
-	bless($self, $class);
-	return($self);
+	$file = "-" if (!defined($file) || $file eq "");
+	
+	local *FH;
+	open(FH, "< $file") or return;
+	my $str = join('', <FH>);
+	close(FH);
+
+	$class->putstate($str);
 }
 
 Digest::SHA->bootstrap($VERSION);
@@ -225,9 +305,9 @@ In programs:
 	$sha->add_bits($bits);
 	$sha->add_bits($data, $nbits);
 
-	$sha_copy = $sha->clone;	# if needed, make copy of
-	$sha->dump($file);		#	current digest state,
-	$sha->load($file);		#	or save it on disk
+	$sha_copy = $sha->clone;	# make copy of digest object
+	$state = $sha->getstate;	# save current state to string
+	$sha->putstate($state);		# restore previous $state
 
 	$digest = $sha->digest;		# compute digest
 	$digest = $sha->hexdigest;
@@ -302,16 +382,15 @@ Note that for larger bit-strings, it's more efficient to use the
 two-argument version I<add_bits($data, $nbits)>, where I<$data> is
 in the customary packed binary format used for Perl strings.
 
-The module also lets you save intermediate SHA states to disk, or
-display them on standard output.  The I<dump()> method generates
-portable, human-readable text describing the current state of
-computation.  You can subsequently retrieve the file with I<load()>
-to resume where the calculation left off.
+The module also lets you save intermediate SHA states to a string.  The
+I<getstate()> method generates portable, human-readable text describing
+the current state of computation.  You can subsequently restore that
+state with I<putstate()> to resume where the calculation left off.
 
 To see what a state description looks like, just run the following:
 
 	use Digest::SHA;
-	Digest::SHA->new->add("Shaw" x 1962)->dump;
+	print Digest::SHA->new->add("Shaw" x 1962)->getstate;
 
 As an added convenience, the Digest::SHA module offers routines to
 calculate keyed hashes using the HMAC-SHA-1/224/256/384/512
@@ -565,21 +644,30 @@ a convenient way to calculate the digest values of partial-byte data by
 using files, rather than having to write programs using the I<add_bits>
 method.
 
+=item B<getstate>
+
+Returns a string containing a portable, human-readable representation
+of the current SHA state.
+
+=item B<putstate($str)>
+
+Returns a Digest::SHA object representing the SHA state contained
+in I<$str>.  The format of I<$str> matches the format of the output
+produced by method I<getstate>.  If called as a class method, a new
+object is created; if called as an instance method, the object is reset
+to the state contained in I<$str>.
+
 =item B<dump($filename)>
 
-Provides persistent storage of intermediate SHA states by writing
-a portable, human-readable representation of the current state to
-I<$filename>.  If the argument is missing, or equal to the empty
-string, the state information will be written to STDOUT.
+Writes the output of I<getstate> to I<$filename>.  If the argument is
+missing, or equal to the empty string, the state information will be
+written to STDOUT.
 
 =item B<load($filename)>
 
-Returns a Digest::SHA object representing the intermediate SHA
-state that was previously dumped to I<$filename>.  If called as a
-class method, a new object is created; if called as an instance
-method, the object is reset to the state contained in I<$filename>.
-If the argument is missing, or equal to the empty string, the state
-information will be read from STDIN.
+Returns a Digest::SHA object that results from calling I<putstate> on
+the contents of I<$filename>.  If the argument is missing, or equal to
+the empty string, the state information will be read from STDIN.
 
 =item B<digest>
 

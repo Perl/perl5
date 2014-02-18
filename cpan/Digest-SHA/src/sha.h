@@ -5,8 +5,8 @@
  *
  * Copyright (C) 2003-2014 Mark Shelor, All Rights Reserved
  *
- * Version: 5.86
- * Thu Jan 30 08:24:28 MST 2014
+ * Version: 5.87
+ * Mon Feb 17 16:42:02 MST 2014
  *
  */
 
@@ -105,26 +105,6 @@
 #define SHA_new		New
 #define SHA_newz	Newz
 #define SHA_free	Safefree
-
-#ifdef SHA_PerlIO
-	#define SHA_FILE		PerlIO
-	#define SHA_stdin()		PerlIO_stdin()
-	#define SHA_stdout()		PerlIO_stdout()
-	#define SHA_open		PerlIO_open
-	#define SHA_close		PerlIO_close
-	#define SHA_fprintf		PerlIO_printf
-	#define SHA_feof		PerlIO_eof
-	#define SHA_getc		PerlIO_getc
-#else
-	#define SHA_FILE		FILE
-	#define SHA_stdin()		stdin
-	#define SHA_stdout()		stdout
-	#define SHA_open		fopen
-	#define SHA_close		fclose
-	#define SHA_fprintf		fprintf
-	#define SHA_feof		feof
-	#define SHA_getc		fgetc
-#endif
 
 #define SHA1		1
 #define SHA224		224

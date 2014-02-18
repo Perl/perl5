@@ -1,5 +1,4 @@
 use strict;
-use FileHandle;
 
 my $MODULE;
 
@@ -26,18 +25,12 @@ my @sharsp = (
 my $numtests = scalar @sharsp;
 print "1..$numtests\n";
 
-my @tempfiles;
-END { 1 while unlink @tempfiles }
-
-my @statefiles = ("dl001.tmp", "dl256.tmp", "dl384.tmp", "dl512.tmp");
-for (@statefiles) {
-	push @tempfiles, $_;
-	my $fh = FileHandle->new($_, "w");
-	for (1 .. 8) { my $line = <DATA>; print $fh $line }
-	$fh->close;
-}
-my $tmpfile = "dumpload.tmp";
-push @tempfiles, $tmpfile;
+my($state001, $state256, $state384, $state512) = ('', '', '', '');
+for (1 .. 8) { my $line = <DATA>; $state001 .= $line }
+for (1 .. 8) { my $line = <DATA>; $state256 .= $line }
+for (1 .. 8) { my $line = <DATA>; $state384 .= $line }
+for (1 .. 8) { my $line = <DATA>; $state512 .= $line }
+my @states = ($state001, $state256, $state384, $state512);
 
 my @alg = (1, 256, 384, 512);
 my $data = "a" x 990000;
@@ -47,7 +40,6 @@ while (@sharsp) {
 	my $skip = 0;
 	my $alg = shift @alg;
 	my $rsp = shift @sharsp;
-	my $file = shift @statefiles; push(@statefiles, $file);
 	if ($alg == 384) { $skip = sha384_hex("") ? 0 : 1 }
 	if ($alg == 512) { $skip = sha512_hex("") ? 0 : 1 }
 	if ($skip) {
@@ -56,12 +48,12 @@ while (@sharsp) {
 	}
 	my $digest;
 	my $state;
-	unless ($state = $MODULE->load($file)) {
+	unless ($state = $MODULE->putstate(shift @states)) {
 		print "not ok ", $testnum++, "\n";
 		next;
 	}
-	$state->add_bits($data, 79984)->dump($tmpfile);
-	$state->load($tmpfile)->add_bits($data, 16);
+	my $statestr = $state->add_bits($data, 79984)->getstate;
+	$state->putstate($statestr)->add_bits($data, 16);
 	$digest = $state->hexdigest;
 	print "not " unless $digest eq $rsp;
 	print "ok ", $testnum++, "\n";

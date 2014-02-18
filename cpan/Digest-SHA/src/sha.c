@@ -5,8 +5,8 @@
  *
  * Copyright (C) 2003-2014 Mark Shelor, All Rights Reserved
  *
- * Version: 5.86
- * Thu Jan 30 08:24:28 MST 2014
+ * Version: 5.87
+ * Mon Feb 17 16:42:02 MST 2014
  *
  */
 
@@ -222,18 +222,30 @@ static void sha256(SHA *s, UCHR *block)		/* SHA-224/256 transform */
 			: ((nbytes) / 3) * 4 + ((nbytes) % 3) + 1)
 
 /* w32mem: writes 32-bit word to memory in big-endian order */
-static void w32mem(UCHR *mem, W32 w32)
+static UCHR *w32mem(UCHR *mem, W32 w32)
 {
 	int i;
 
 	for (i = 0; i < 4; i++)
 		*mem++ = (UCHR) (SR32(w32, 24-i*8) & 0xff);
+	return(mem);
+}
+
+/* memw32: returns 32-bit word from memory written in big-endian order */
+static W32 memw32(UCHR *mem)
+{
+	int i;
+	W32 w = 0;
+
+	for (i = 0; i < 4; i++)
+		w = (w << 8) + *mem++;
+	return(w);
 }
 
 /* digcpy: writes current state to digest buffer */
-static void digcpy(SHA *s)
+static UCHR *digcpy(SHA *s)
 {
-	UINT i;
+	int i;
 	UCHR *d = s->digest;
 	W32 *p32 = (W32 *) s->H;
 	W64 *p64 = (W64 *) s->H;
@@ -246,6 +258,24 @@ static void digcpy(SHA *s)
 			w32mem(d, (W32) ((*p64 >> 16) >> 16));
 			w32mem(d+4, (W32) (*p64++ & SHA32_MAX));
 		}
+	return(s->digest);
+}
+
+/* statecpy: writes buffer to current state (opposite of digcpy) */
+static UCHR *statecpy(SHA *s, UCHR *buf)
+{
+	int i;
+	W32 *p32 = (W32 *) s->H;
+	W64 *p64 = (W64 *) s->H;
+
+	if (s->alg <= SHA256)
+		for (i = 0; i < 8; i++, buf += 4)
+			*p32++ = memw32(buf);
+	else
+		for (i = 0; i < 8; i++, buf += 8)
+			*p64++ = ((W64) memw32(buf) << 32) +
+					memw32(buf+4);
+	return(buf);
 }
 
 #define SHA_INIT(algo, transform) 					\
@@ -416,13 +446,6 @@ static void shafinish(SHA *s)
 	s->sha(s, s->block);
 }
 
-/* shadigest: returns pointer to current digest (binary) */
-static UCHR *shadigest(SHA *s)
-{
-	digcpy(s);
-	return(s->digest);
-}
-
 /* xmap: translation map for hexadecimal encoding */
 static char xmap[] =
 	"0123456789abcdef";
@@ -434,11 +457,11 @@ static char *shahex(SHA *s)
 	char *h;
 	UCHR *d;
 
-	digcpy(s);
+	d = digcpy(s);
 	s->hex[0] = '\0';
 	if (HEXLEN((size_t) s->digestlen) >= sizeof(s->hex))
 		return(s->hex);
-	for (i = 0, h = s->hex, d = s->digest; i < s->digestlen; i++) {
+	for (i = 0, h = s->hex; i < s->digestlen; i++) {
 		*h++ = xmap[(*d >> 4) & 0x0f];
 		*h++ = xmap[(*d++   ) & 0x0f];
 	}
@@ -473,29 +496,17 @@ static char *shabase64(SHA *s)
 	UCHR *q;
 	char out[5];
 
-	digcpy(s);
+	q = digcpy(s);
 	s->base64[0] = '\0';
 	if (B64LEN((size_t) s->digestlen) >= sizeof(s->base64))
 		return(s->base64);
-	for (n = s->digestlen, q = s->digest; n > 3; n -= 3, q += 3) {
+	for (n = s->digestlen; n > 3; n -= 3, q += 3) {
 		encbase64(q, 3, out);
 		strcat(s->base64, out);
 	}
 	encbase64(q, n, out);
 	strcat(s->base64, out);
 	return(s->base64);
-}
-
-/* shadsize: returns length of digest in bytes */
-static int shadsize(SHA *s)
-{
-	return(s->digestlen);
-}
-
-/* shaalg: returns which SHA algorithm is being used */
-static int shaalg(SHA *s)
-{
-	return(s->alg);
 }
 
 /* shadup: duplicates current digest object */
@@ -508,153 +519,6 @@ static SHA *shadup(SHA *s)
 		return(NULL);
 	memcpy(p, s, sizeof(SHA));
 	return(p);
-}
-
-/* shadump: dumps digest object to a human-readable ASCII file */
-static int shadump(char *file, SHA *s)
-{
-	int i, j;
-	SHA_FILE *f;
-	UCHR *p = shadigest(s);
-
-	if (file == NULL || strlen(file) == 0)
-		f = SHA_stdout();
-	else if ((f = SHA_open(file, "w")) == NULL)
-		return(0);
-	SHA_fprintf(f, "alg:%d\nH", s->alg);
-	for (i = 0; i < 8; i++)
-		for (j = 0; j < (s->alg <= 256 ? 4 : 8); j++)
-			SHA_fprintf(f, "%s%02x", j==0 ? ":" : "", *p++);
-	SHA_fprintf(f, "\nblock");
-	for (i = 0; i < (int) (s->blocksize >> 3); i++)
-		SHA_fprintf(f, ":%02x", s->block[i]);
-	SHA_fprintf(f, "\nblockcnt:%u\n", s->blockcnt);
-	SHA_fprintf(f, "lenhh:%lu\nlenhl:%lu\nlenlh:%lu\nlenll:%lu\n",
-		(ULNG) LO32(s->lenhh), (ULNG) LO32(s->lenhl),
-		(ULNG) LO32(s->lenlh), (ULNG) LO32(s->lenll));
-	if (f != SHA_stdout())
-		SHA_close(f);
-	return(1);
-}
-
-/* fgetstr: reads (and returns pointer to) next line of file */
-static char *fgetstr(char *line, UINT maxsize, SHA_FILE *f)
-{
-	char *p;
-
-	if (SHA_feof(f) || maxsize == 0)
-		return(NULL);
-	for (p = line; !SHA_feof(f) && maxsize > 1; maxsize--)
-		if ((*p++ = SHA_getc(f)) == '\n')
-			break;
-	*p = '\0';
-	return(line);
-}
-
-/* empty: returns true if line contains only whitespace characters */
-static int empty(char *line)
-{
-	char *p;
-
-	for (p = line; *p; p++)
-		if (!isspace(*p))
-			return(0);
-	return(1);
-}
-
-/* getval: null-terminates field value, and sets pointer to rest of line */
-static char *getval(char *line, char **pprest)
-{
-	char *p, *v;
-
-	for (v = line; *v == ':' || isspace(*v); v++)
-		;
-	for (p = v; *p; p++) {
-		if (*p == ':' || isspace(*p)) {
-			*p++ = '\0';
-			break;
-		}
-	}
-	*pprest = p;
-	return(p == v ? NULL : v);
-}
-
-/* types of values present in dump file */
-#define T_C 1			/* character */
-#define T_I 2			/* normal integer */
-#define T_L 3			/* 32-bit value */
-#define T_Q 4			/* 64-bit value */
-
-/* ldvals: checks next line in dump file against tag, and loads values */
-static int ldvals(
-	SHA_FILE *f,
-	const char *tag,
-	int type,
-	void *pval,
-	int reps,
-	int base)
-{
-	char *p, *pr, line[512];
-	UCHR *pc = (UCHR *) pval; UINT *pi = (UINT *) pval;
-	W32  *pl = (W32  *) pval; W64  *pq = (W64  *) pval;
-
-	while ((p = fgetstr(line, sizeof(line), f)) != NULL)
-		if (line[0] != '#' && !empty(line))
-			break;
-	if (p == NULL || strcmp(getval(line, &pr), tag) != 0)
-		return(0);
-	while (reps-- > 0) {
-		if ((p = getval(pr, &pr)) == NULL)
-			return(1);
-		switch (type) {
-		case T_C: *pc++ = (UCHR) strtoul(p, NULL, base); break;
-		case T_I: *pi++ = (UINT) strtoul(p, NULL, base); break;
-		case T_L: *pl++ = (W32 ) strtoul(p, NULL, base); break;
-		case T_Q: *pq++ = (W64 ) strto64(p            ); break;
-		}
-	}
-	return(1);
-}
-
-/* closeall: closes dump file and de-allocates digest object */
-static SHA *closeall(SHA_FILE *f, SHA *s)
-{
-	if (f != NULL && f != SHA_stdin())
-		SHA_close(f);
-	if (s != NULL)
-		shaclose(s);
-	return(NULL);
-}
-
-/* shaload: creates digest object corresponding to contents of dump file */
-static SHA *shaload(char *file)
-{
-	int alg;
-	SHA *s = NULL;
-	SHA_FILE *f;
-
-	if (file == NULL || strlen(file) == 0)
-		f = SHA_stdin();
-	else if ((f = SHA_open(file, "r")) == NULL)
-		return(NULL);
-	if (
-		/* avoid parens by exploiting precedence of (type)&-> */
-		!ldvals(f,"alg",T_I,(VP)&alg,1,10)			||
-		((s = shaopen(alg)) == NULL)				||
-		!ldvals(f,"H",alg<=SHA256?T_L:T_Q,(VP)s->H,8,16)	||
-		!ldvals(f,"block",T_C,(VP)s->block,s->blocksize/8,16)	||
-		!ldvals(f,"blockcnt",T_I,(VP)&s->blockcnt,1,10)		||
-		(alg <= SHA256 && s->blockcnt >= SHA1_BLOCK_BITS)	||
-		(alg >= SHA384 && s->blockcnt >= SHA384_BLOCK_BITS)	||
-		!ldvals(f,"lenhh",T_L,(VP)&s->lenhh,1,10)		||
-		!ldvals(f,"lenhl",T_L,(VP)&s->lenhl,1,10)		||
-		!ldvals(f,"lenlh",T_L,(VP)&s->lenlh,1,10)		||
-		!ldvals(f,"lenll",T_L,(VP)&s->lenll,1,10)
-	)
-		return(closeall(f, s));
-	if (f != SHA_stdin())
-		SHA_close(f);
-	return(s);
 }
 
 /* hmacopen: creates a new HMAC-SHA digest object */
@@ -686,7 +550,7 @@ static HMAC *hmacopen(int alg, UCHR *key, UINT keylen)
 		}
 		shawrite(key, keylen * 8, h->ksha);
 		shafinish(h->ksha);
-		memcpy(h->key, shadigest(h->ksha), h->ksha->digestlen);
+		memcpy(h->key, digcpy(h->ksha), h->ksha->digestlen);
 		shaclose(h->ksha);
 	}
 	for (i = 0; i < h->osha->blocksize / 8; i++)
@@ -709,15 +573,9 @@ static ULNG hmacwrite(UCHR *bitstr, ULNG bitcnt, HMAC *h)
 static void hmacfinish(HMAC *h)
 {
 	shafinish(h->isha);
-	shawrite(shadigest(h->isha), h->isha->digestlen * 8, h->osha);
+	shawrite(digcpy(h->isha), h->isha->digestlen * 8, h->osha);
 	shaclose(h->isha);
 	shafinish(h->osha);
-}
-
-/* hmacdigest: returns pointer to digest (binary) */
-static UCHR *hmacdigest(HMAC *h)
-{
-	return(shadigest(h->osha));
 }
 
 /* hmachex: returns pointer to digest (hexadecimal) */
