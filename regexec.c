@@ -7505,14 +7505,19 @@ Perl_regclass_swash(pTHX_ const regexp *prog, const regnode* node, bool doinit, 
         *altsvp = NULL;
     }
 
-    return newSVsv(core_regclass_swash(prog, node, doinit, listsvp));
+    return newSVsv(_get_regclass_nonbitmap_data(prog, node, doinit, listsvp, NULL));
 }
 #endif
 
-STATIC SV *
-S_core_regclass_swash(pTHX_ const regexp *prog, const regnode* node, bool doinit, SV** listsvp)
+SV *
+Perl__get_regclass_nonbitmap_data(pTHX_ const regexp *prog,
+                                        const regnode* node,
+                                        bool doinit,
+                                        SV** listsvp,
+                                        SV** only_utf8_locale_ptr)
 {
-    /* Returns the swash for the input 'node' in the regex 'prog'.
+    /* For internal core use only.
+     * Returns the swash for the input 'node' in the regex 'prog'.
      * If <doinit> is 'true', will attempt to create the swash if not already
      *	  done.
      * If <listsvp> is non-null, will return the printable contents of the
@@ -7530,7 +7535,7 @@ S_core_regclass_swash(pTHX_ const regexp *prog, const regnode* node, bool doinit
     RXi_GET_DECL(prog,progi);
     const struct reg_data * const data = prog ? progi->data : NULL;
 
-    PERL_ARGS_ASSERT_CORE_REGCLASS_SWASH;
+    PERL_ARGS_ASSERT__GET_REGCLASS_NONBITMAP_DATA;
 
     assert(ANYOF_FLAGS(node) & (ANYOF_UTF8|ANYOF_NONBITMAP_NON_UTF8));
 
@@ -7729,7 +7734,7 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
 	else if ((flags & ANYOF_NONBITMAP_NON_UTF8)
 		  || (utf8_target && (flags & ANYOF_UTF8)))
         {
-	    SV * const sw = core_regclass_swash(prog, n, TRUE, 0);
+	    SV * const sw = _get_regclass_nonbitmap_data(prog, n, TRUE, 0, NULL);
 	    if (sw) {
 		U8 * utf8_p;
 		if (utf8_target) {

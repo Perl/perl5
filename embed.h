@@ -796,6 +796,9 @@
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_PERL_C) || defined(PERL_IN_UTF8_C)
 #define _new_invlist_C_array(a)	Perl__new_invlist_C_array(aTHX_ a)
 #endif
+#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C)
+#define _get_regclass_nonbitmap_data(a,b,c,d,e)	Perl__get_regclass_nonbitmap_data(aTHX_ a,b,c,d,e)
+#endif
 #if defined(PERL_MAD)
 #define newFORM(a,b,c)		Perl_newFORM(aTHX_ a,b,c)
 #endif
@@ -999,7 +1002,6 @@
 #define _swash_to_invlist(a)	Perl__swash_to_invlist(aTHX_ a)
 #  endif
 #  if defined(PERL_IN_REGEXEC_C)
-#define core_regclass_swash(a,b,c,d)	S_core_regclass_swash(aTHX_ a,b,c,d)
 #define find_byclass(a,b,c,d,e)	S_find_byclass(aTHX_ a,b,c,d,e)
 #define isFOO_lc(a,b)		S_isFOO_lc(aTHX_ a,b)
 #define isFOO_utf8_lc(a,b)	S_isFOO_utf8_lc(aTHX_ a,b)

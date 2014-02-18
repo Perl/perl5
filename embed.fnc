@@ -1508,6 +1508,13 @@ EXpMR	|IV	|_invlist_search	|NN SV* const invlist|const UV cp
 EXMpR	|SV*	|_get_swash_invlist|NN SV* const swash
 EXMpR	|HV*	|_swash_inversion_hash	|NN SV* const swash
 #endif
+#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C)
+ApM	|SV*	|_get_regclass_nonbitmap_data				   \
+				|NULLOK const regexp *prog		   \
+				|NN const struct regnode *node|bool doinit \
+				|NULLOK SV **listsvp			   \
+				|NULLOK SV **lonly_utf8_locale
+#endif
 #if defined(PERL_IN_REGCOMP_C) || defined (PERL_IN_DUMP_C)
 EXMp	|void	|_invlist_dump	|NN PerlIO *file|I32 level   \
 				|NN const char* const indent \
@@ -2171,9 +2178,6 @@ Es	|CHECKPOINT|regcppush	|NN const regexp *rex|I32 parenfloor\
 Es	|void	|regcppop	|NN regexp *rex\
 				|NN U32 *maxopenparen_p
 ERsn	|U8*	|reghop3	|NN U8 *s|SSize_t off|NN const U8 *lim
-ERsM	|SV*	|core_regclass_swash|NULLOK const regexp *prog             \
-				|NN const struct regnode *node|bool doinit \
-				|NULLOK SV **listsvp
 ERsn	|U8*	|reghop4	|NN U8 *s|SSize_t off|NN const U8 *llim \
 				|NN const U8 *rlim
 ERsn	|U8*	|reghopmaybe3	|NN U8 *s|SSize_t off|NN const U8 *lim
