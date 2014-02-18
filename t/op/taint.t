@@ -1433,7 +1433,12 @@ SKIP: {
         my $sent = "foobar";
         my $rcvd;
         my $size = 2000;
-        my $id = shmget(IPC_PRIVATE, $size, S_IRWXU);
+        my $id;
+        eval {
+            local $SIG{SYS} = sub { die "SIGSYS caught\n" };
+            $id = shmget(IPC_PRIVATE, $size, S_IRWXU);
+            1;
+        } or do { chomp(my $msg = $@); skip "shmget: $msg", 1; };
 
         if (defined $id) {
             if (shmwrite($id, $sent, 0, 60)) {
@@ -1453,7 +1458,7 @@ SKIP: {
         skip "SysV shared memory operation failed", 1 unless 
           $rcvd eq $sent;
 
-        is_tainted($rcvd);
+        is_tainted($rcvd, "shmread");
     }
 
 
@@ -1462,7 +1467,12 @@ SKIP: {
         skip "msg*() not available", 1 unless $Config{d_msg};
 
 	no strict 'subs';
-	my $id = msgget(IPC_PRIVATE, IPC_CREAT | S_IRWXU);
+        my $id;
+        eval {
+            local $SIG{SYS} = sub { die "SIGSYS caught\n" };
+            $id = msgget(IPC_PRIVATE, IPC_CREAT | S_IRWXU);
+            1;
+        } or do { chomp(my $msg = $@); skip "msgget: $msg", 1; };
 
 	my $sent      = "message";
 	my $type_sent = 1234;
@@ -1488,7 +1498,7 @@ SKIP: {
             skip "SysV message queue operation failed", 1
               unless $rcvd eq $sent && $type_sent == $type_rcvd;
 
-	    is_tainted($rcvd);
+	    is_tainted($rcvd, "msgrcv");
 	}
     }
 }
