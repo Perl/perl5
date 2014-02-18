@@ -276,6 +276,10 @@ Resolve a C++ build failure in core.  [cpan #92657]
 
 =item *
 
+L<CPAN::Meta::YAML> has been upgraded from version 0.010 to 0.011.
+
+=item *
+
 L<Devel::Peek> has been upgraded from version 1.15 to 1.16.
 
 Devel::Peek::SvREFCNT() now ensures it has been passed a reference, as
@@ -300,6 +304,12 @@ Improved support for Android and other minor changes.
 L<File::Fetch> has been upgraded from version 0.46 to 0.48.
 
 Force curl to be IPv4 only during testing on NetBSD.
+
+=item *
+
+L<HTTP::Tiny> has been upgraded from version 0.039 to 0.041.
+
+Added support for keep-alive connections.
 
 =item *
 
@@ -365,6 +375,15 @@ Use HEKfARG() instead of creating and throwing away SVs.
 
 =item *
 
+L<Parse::CPAN::Meta> has been upgraded from version 1.4409 to 1.4412.
+
+Invalid UTF-8 encoding in YAML files are now replaced with "PERLQQ"
+quoting from the Encode module and without warnings.
+
+Removed legacy test modifications for testing with the perl core.
+
+=item *
+
 The PathTools module collection has been upgraded from version 3.45 to
 3.46.
 
@@ -378,6 +397,9 @@ path, unless in taint mode.  [perl #120593]
 L<Pod::Escapes> has been upgraded from version 1.04 to 1.05.
 
 Now strict and warning clean.  Several minor documentation updates.
+
+e2charnum() no longer treats non-ASCII Unicode digits as suitable for
+an escape.  [cpan #70246]
 
 =item *
 
@@ -638,6 +660,13 @@ L</Modules and Pragmata> section.
 
 Skip access checks on remotes in opendir().  [perl #121002]
 
+=item Cygwin
+
+Fixed a build error in cygwin.c on Cygwin 1.7.28.
+
+Tests now handle the errors that occur when C<cygserver> isn't
+running.
+
 =back
 
 =head1 Internal Changes
@@ -756,6 +785,19 @@ C< for ( $h{k} || '' ) > no longer auto-vivifies C<$h{k}>.  [perl
 On Windows machines, Perl now emulates the POSIX use of the environment
 for locale initialization.  Previously, the environment was ignored.
 See L<perllocale/ENVIRONMENT>.
+
+=item *
+
+Fixed a crash when destroying a self-referencing GLOB.  [perl #121242]
+
+=item *
+
+Call set-magic when setting $DB::sub.  [perl #121255]
+
+=item *
+
+Fixed an alignment error when compiling regular expressions when built
+with GCC on HP-UX 64-bit.
 
 =back
 
