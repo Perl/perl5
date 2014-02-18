@@ -3178,22 +3178,32 @@ S_scan_const(pTHX_ char *start)
 
 	/* likewise skip #-initiated comments in //x patterns */
 	else if (*s == '#' && PL_lex_inpat &&
-	  ((PMOP*)PL_lex_inpat)->op_pmflags & RXf_PMf_EXTENDED) {
-	    while (s+1 < send && *s != '\n') {
+	  ((PMOP*)PL_lex_inpat)->op_pmflags & RXf_PMf_EXTENDED)
+        {
+            if (in_charclass) {
                 /* for maint-5.18, half-fix #-in-charclass bug:
-                 *   *do* recognise codeblocks: /[#](?{})/
-                 *   *don't* recognise interpolated vars: /[#$x]/
-                 */
-                if (in_charclass && !PL_lex_casemods && s+3 < send &&
-		     s[0] == '(' &&
-		     s[1] == '?' &&
-		     (    s[2] == '{'
-		      || (s[2] == '?' && s[3] == '{')))
-                    break;
-		*d++ = NATIVE_TO_NEED(has_utf8,*s++);
+                 * strictly speaking, #-in-charclass has no special
+                 * meaning; however, for backwards compatibility,
+                 * ignore $variables etc for the rest of the charclass
+                 * scope */
+                while (in_charclass && s+1 < send && *s != '\n') {
+                    if (*s == ']') {
+                        char *s1 = s-1;
+                        int esc = 0;
+                        while (s1 >= start && *s1-- == '\\')
+                            esc = !esc;
+                        if (!esc)
+                            in_charclass = FALSE;
+                    }
+                    *d++ = *s++;
+                }
+                continue;
             }
-            if (s+ 1 < send && *s != '\n')
-                break; /* we stopped on (?{}), not EOL */
+            else {
+                /* normal /...#.../x; skipt to end of line */
+                while (s+1 < send && *s != '\n')
+                    *d++ = *s++;
+            }
 	}
 
 	/* no further processing of single-quoted regex */

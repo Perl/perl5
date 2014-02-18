@@ -20,7 +20,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 672;  # Update this when adding/deleting tests.
+plan tests => 674;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1399,6 +1399,14 @@ EOP
 	$s = 'abcd$%#&';
 	$s =~ s/[a#$b%]/X/gx;
 	is ($s, 'XXcdXXX&', 'RT #119125 with /x');
+
+	$s = 'abYcd$Y#Y&';
+	my $c = 'Y';
+	$s =~ s/[#$b]$c/X/gx;
+	is ($s, 'aXcdXX&', 'RT #119125 with /x and trailing var');
+
+        ok("a#b" =~ /a[#]
+                        b(?{})/x, 'RT #119125 with newline and codeblock');
     }
 
 } # End of sub run_tests
