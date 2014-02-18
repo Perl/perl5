@@ -1171,56 +1171,8 @@ Perl_re_intuit_start(pTHX_
             PL_colors[0], PL_colors[1]));
     }
 
+  success_at_start:
 
-    /* Decide whether using the substrings helped */
-
-    if (rx_origin != strpos) {
-	/* Fixed substring is found far enough so that the match
-	   cannot start at strpos. */
-
-        DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "  try at offset...\n"));
-	++BmUSEFUL(utf8_target ? prog->check_utf8 : prog->check_substr);	/* hooray/5 */
-    }
-    else {
-	/* The found string does not prohibit matching at strpos,
-	   - no optimization of calling REx engine can be performed,
-	   unless it was an MBOL and we are not after MBOL,
-	   or a future STCLASS check will fail this. */
-      success_at_start:
-	if (!(prog->intflags & PREGf_NAUGHTY)	/* XXXX If strpos moved? */
-	    && (utf8_target ? (
-		prog->check_utf8		/* Could be deleted already */
-		&& --BmUSEFUL(prog->check_utf8) < 0
-		&& (prog->check_utf8 == prog->float_utf8)
-	    ) : (
-		prog->check_substr		/* Could be deleted already */
-		&& --BmUSEFUL(prog->check_substr) < 0
-		&& (prog->check_substr == prog->float_substr)
-	    )))
-	{
-	    /* If flags & SOMETHING - do not do it many times on the same match */
-	    DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "  ... Disabling check substring...\n"));
-	    /* XXX Does the destruction order has to change with utf8_target? */
-	    SvREFCNT_dec(utf8_target ? prog->check_utf8 : prog->check_substr);
-	    SvREFCNT_dec(utf8_target ? prog->check_substr : prog->check_utf8);
-	    prog->check_substr = prog->check_utf8 = NULL;	/* disable */
-	    prog->float_substr = prog->float_utf8 = NULL;	/* clear */
-	    check = NULL;			/* abort */
-	    /* XXXX If the check string was an implicit check MBOL, then we need to unset the relevant flag
-		    see http://bugs.activestate.com/show_bug.cgi?id=87173 */
-            if (prog->intflags & PREGf_IMPLICIT) {
-                prog->intflags &= ~PREGf_ANCH_MBOL;
-                /* maybe we have no anchors left after this... */
-                if (!(prog->intflags & PREGf_ANCH))
-                    prog->extflags &= ~RXf_IS_ANCHORED;
-            }
-	    /* XXXX This is a remnant of the old implementation.  It
-	            looks wasteful, since now INTUIT can use many
-	            other heuristics. */
-	    prog->extflags &= ~RXf_USE_INTUIT;
-	    /* XXXX What other flags might need to be cleared in this branch? */
-	}
-    }
 
     /* Last resort... */
     /* XXXX BmUSEFUL already changed, maybe multiple change is meaningful... */
@@ -1287,10 +1239,6 @@ Perl_re_intuit_start(pTHX_
                     if (rx_origin + start_shift != check_at) {
                         /* not at latest position float substr could match:
                          * Recheck anchored substring, but not floating... */
-                        if (!check) {
-                            rx_origin = NULL;
-                            goto giveup;
-                        }
                         DEBUG_EXECUTE_r( PerlIO_printf(Perl_debug_log,
                                   "  Looking for anchored substr starting at offset %ld...\n",
                                   (long)(other_last - strpos)) );
@@ -1305,8 +1253,6 @@ Perl_re_intuit_start(pTHX_
                    current position only: */
                 if (ml_anch) {
                     rx_origin++;
-                    if (!check)
-                        goto giveup;
                     DEBUG_EXECUTE_r( PerlIO_printf(Perl_debug_log,
                               "  Looking for /%s^%s/m starting at offset %ld...\n",
                               PL_colors[0], PL_colors[1],
@@ -1348,10 +1294,60 @@ Perl_re_intuit_start(pTHX_
                    );
         }
     }
-  giveup:
-    DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "Intuit: %s%s:%s match at offset %ld\n",
-			  PL_colors[4], (check ? "Successfully guessed" : "Giving up"),
-			  PL_colors[5], (long)(rx_origin - strpos)) );
+
+    /* Decide whether using the substrings helped */
+
+    if (rx_origin != strpos) {
+	/* Fixed substring is found far enough so that the match
+	   cannot start at strpos. */
+
+        DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "  try at offset...\n"));
+	++BmUSEFUL(utf8_target ? prog->check_utf8 : prog->check_substr);	/* hooray/5 */
+    }
+    else {
+	/* The found string does not prohibit matching at strpos,
+	   - no optimization of calling REx engine can be performed,
+	   unless it was an MBOL and we are not after MBOL,
+	   or a future STCLASS check will fail this. */
+	if (!(prog->intflags & PREGf_NAUGHTY)	/* XXXX If strpos moved? */
+	    && (utf8_target ? (
+		prog->check_utf8		/* Could be deleted already */
+		&& --BmUSEFUL(prog->check_utf8) < 0
+		&& (prog->check_utf8 == prog->float_utf8)
+	    ) : (
+		prog->check_substr		/* Could be deleted already */
+		&& --BmUSEFUL(prog->check_substr) < 0
+		&& (prog->check_substr == prog->float_substr)
+	    )))
+	{
+	    /* If flags & SOMETHING - do not do it many times on the same match */
+	    DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "  ... Disabling check substring...\n"));
+	    /* XXX Does the destruction order has to change with utf8_target? */
+	    SvREFCNT_dec(utf8_target ? prog->check_utf8 : prog->check_substr);
+	    SvREFCNT_dec(utf8_target ? prog->check_substr : prog->check_utf8);
+	    prog->check_substr = prog->check_utf8 = NULL;	/* disable */
+	    prog->float_substr = prog->float_utf8 = NULL;	/* clear */
+	    check = NULL;			/* abort */
+	    /* XXXX If the check string was an implicit check MBOL, then we need to unset the relevant flag
+		    see http://bugs.activestate.com/show_bug.cgi?id=87173 */
+            if (prog->intflags & PREGf_IMPLICIT) {
+                prog->intflags &= ~PREGf_ANCH_MBOL;
+                /* maybe we have no anchors left after this... */
+                if (!(prog->intflags & PREGf_ANCH))
+                    prog->extflags &= ~RXf_IS_ANCHORED;
+            }
+	    /* XXXX This is a remnant of the old implementation.  It
+	            looks wasteful, since now INTUIT can use many
+	            other heuristics. */
+	    prog->extflags &= ~RXf_USE_INTUIT;
+	    /* XXXX What other flags might need to be cleared in this branch? */
+	}
+    }
+
+    DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
+            "Intuit: %sSuccessfully guessed:%s match at offset %ld\n",
+             PL_colors[4], PL_colors[5], (long)(rx_origin - strpos)) );
+
     return rx_origin;
 
   fail_finish:				/* Substring not found */
