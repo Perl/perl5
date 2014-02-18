@@ -2108,6 +2108,25 @@ at L<http://www.cpan.org/src>
 
 =item Cygwin
 
+Some tests are known to fail:
+
+=over
+
+=item *
+
+F<ext/XS-APItes/t/call_checker.t> - see
+L<https://rt.perl.org/Ticket/Display.html?id=78502>
+
+=item *
+
+F<dist/I18N-Collate/t/I18N-Collate.t>
+
+=item *
+
+F<ext/Win32CORE/t/win32core.t> - may fail on recent cygwin installs.
+
+=back
+
 =item Solaris (x86, SPARC)
 
 =item OpenVMS
