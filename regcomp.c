@@ -15763,26 +15763,26 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
                     SvREFCNT_dec_NN(lv);
                 }
 
-            if ((flags & ANYOF_LOC_FOLD)
-                 && only_utf8_locale
-                 && only_utf8_locale != &PL_sv_undef)
-            {
-                UV start, end;
-                int max_entries = 256;
+                if ((flags & ANYOF_LOC_FOLD)
+                     && only_utf8_locale
+                     && only_utf8_locale != &PL_sv_undef)
+                {
+                    UV start, end;
+                    int max_entries = 256;
 
-                sv_catpvs(sv, "{utf8 locale}");
-                invlist_iterinit(only_utf8_locale);
-                while (invlist_iternext(only_utf8_locale,
-                                        &start, &end)) {
-                    put_range(sv, start, end);
-                    max_entries --;
-                    if (max_entries < 0) {
-                        sv_catpvs(sv, "...");
-                        break;
+                    sv_catpvs(sv, "{utf8 locale}");
+                    invlist_iterinit(only_utf8_locale);
+                    while (invlist_iternext(only_utf8_locale,
+                                            &start, &end)) {
+                        put_range(sv, start, end);
+                        max_entries --;
+                        if (max_entries < 0) {
+                            sv_catpvs(sv, "...");
+                            break;
+                        }
                     }
+                    invlist_iterfinish(only_utf8_locale);
                 }
-                invlist_iterfinish(only_utf8_locale);
-            }
             }
 	}
 

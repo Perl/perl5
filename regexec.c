@@ -7565,15 +7565,15 @@ Perl__get_regclass_nonbitmap_data(pTHX_ const regexp *prog,
                     *only_utf8_locale_ptr = NULL;
                 }
 
-	    if (av_len(av) >= 3) {
-		invlist = ary[3];
-		if (SvUV(ary[4])) {
-                    swash_init_flags |= _CORE_SWASH_INIT_USER_DEFINED_PROPERTY;
+                if (av_len(av) >= 3) {
+                    invlist = ary[3];
+                    if (SvUV(ary[4])) {
+                        swash_init_flags |= _CORE_SWASH_INIT_USER_DEFINED_PROPERTY;
+                    }
                 }
-	    }
-	    else {
-		invlist = NULL;
-	    }
+                else {
+                    invlist = NULL;
+                }
 	    }
 
 	    /* Element [1] is reserved for the set-up swash.  If already there,
