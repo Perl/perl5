@@ -450,10 +450,8 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
     const char * const setlocale_init = (PerlEnv_getenv("PERL_SKIP_LOCALE_INIT"))
                                         ? NULL
                                         : "";
-    const char* trial_locales[5] = { setlocale_init }; /* 5 = 1 each for "",
-                                                          LC_ALL, LANG, "", C
-                                                        */
-    unsigned int trial_locales_count = 1;
+    const char* trial_locales[5];   /* 5 = 1 each for "", LC_ALL, LANG, "", C */
+    unsigned int trial_locales_count;
     char * const lc_all     = PerlEnv_getenv("LC_ALL");
     char * const lang       = PerlEnv_getenv("LANG");
     bool setlocale_failure = FALSE;
@@ -537,6 +535,8 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 
     /* We try each locale in the list until we get one that works, or exhaust
      * the list */
+    trial_locales[0] = setlocale_init;
+    trial_locales_count = 1;
     for (i= 0; i < trial_locales_count; i++) {
         const char * trial_locale = trial_locales[i];
 
