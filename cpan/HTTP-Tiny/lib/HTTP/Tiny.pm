@@ -3,7 +3,7 @@ package HTTP::Tiny;
 use strict;
 use warnings;
 # ABSTRACT: A small, simple, correct HTTP/1.1 client
-our $VERSION = '0.041'; # VERSION
+our $VERSION = '0.042'; # VERSION
 
 use Carp ();
 
@@ -415,9 +415,6 @@ sub request {
 # array reference, the key will be repeated with each of the values of the array
 # reference.  If data is provided as a hash reference, the key/value pairs in the
 # resulting string will be sorted by key and value for consistent ordering.
-#
-# To preserve the order (r
-#
 #
 # =cut
 
@@ -843,6 +840,14 @@ use warnings;
 use Errno      qw[EINTR EPIPE];
 use IO::Socket qw[SOCK_STREAM];
 
+# PERL_HTTP_TINY_IPV4_ONLY is a private environment variable to force old
+# behavior if someone is unable to boostrap CPAN from a new perl install; it is
+# not intended for general, per-client use and may be removed in the future
+my $SOCKET_CLASS =
+    $ENV{PERL_HTTP_TINY_IPV4_ONLY} ? 'IO::Socket::INET' :
+    eval { require IO::Socket::IP; IO::Socket::IP->VERSION(0.25) } ? 'IO::Socket::IP' :
+    'IO::Socket::INET';
+
 sub BUFSIZE () { 32768 } ## no critic
 
 my $Printable = sub {
@@ -879,7 +884,7 @@ sub connect {
     elsif ( $scheme ne 'http' ) {
       die(qq/Unsupported URL scheme '$scheme'\n/);
     }
-    $self->{fh} = 'IO::Socket::INET'->new(
+    $self->{fh} = $SOCKET_CLASS->new(
         PeerHost  => $host,
         PeerPort  => $port,
         $self->{local_address} ?
@@ -1419,7 +1424,7 @@ HTTP::Tiny - A small, simple, correct HTTP/1.1 client
 
 =head1 VERSION
 
-version 0.041
+version 0.042
 
 =head1 SYNOPSIS
 
@@ -1441,11 +1446,16 @@ version 0.041
 
 =head1 DESCRIPTION
 
-This is a very simple HTTP/1.1 client, designed for doing simple GET
+This is a very simple HTTP/1.1 client, designed for doing simple
 requests without the overhead of a large framework like L<LWP::UserAgent>.
 
 It is more correct and more complete than L<HTTP::Lite>.  It supports
 proxies and redirection.  It also correctly resumes after EINTR.
+
+If L<IO::Socket::IP> 0.25 or later is installed, HTTP::Tiny will use it instead
+of L<IO::Socket::INET> for transparent support for both IPv4 and IPv6.
+
+Cookie support requires L<HTTP::CookieJar> or an equivalent class.
 
 =head1 METHODS
 
@@ -1742,8 +1752,6 @@ array reference, the key will be repeated with each of the values of the array
 reference.  If data is provided as a hash reference, the key/value pairs in the
 resulting string will be sorted by key and value for consistent ordering.
 
-To preserve the order (r
-
 =for Pod::Coverage SSL_options
 agent
 cookie_jar
@@ -1913,10 +1921,6 @@ mandated by the specification.  There is no automatic support for status 305
 
 =item *
 
-Cookie support requires L<HTTP::CookieJar> or an equivalent class.
-
-=item *
-
 There is no provision for delaying a request body using an C<Expect> header.
 Unexpected C<1XX> responses are silently ignored as per the specification.
 
@@ -1928,15 +1932,11 @@ Only 'chunked' C<Transfer-Encoding> is supported.
 
 There is no support for a Request-URI of '*' for the 'OPTIONS' request.
 
-=item *
-
-There is no support for IPv6 of any kind.
-
 =back
 
-Despite the limitations listed above, HTTP::Tiny is considered nearly
-feature-complete.  If there are enhancements unrelated to the underlying
-transport, please consider them for L<HTTP::Tiny::UA> instead.
+Despite the limitations listed above, HTTP::Tiny is considered
+feature-complete.  New feature requests should be directed to
+L<HTTP::Tiny::UA>.
 
 =head1 SEE ALSO
 
@@ -1944,7 +1944,7 @@ transport, please consider them for L<HTTP::Tiny::UA> instead.
 
 =item *
 
-L<HTTP::Tiny::UA> — Higher level UA features for HTTP::Tiny
+L<HTTP::Tiny::UA> - Higher level UA features for HTTP::Tiny
 
 =item *
 
@@ -1953,6 +1953,10 @@ L<HTTP::Thin> - HTTP::Tiny wrapper with L<HTTP::Request>/L<HTTP::Response> compa
 =item *
 
 L<HTTP::Tiny::Mech> - Wrap L<WWW::Mechanize> instance in HTTP::Tiny compatible interface
+
+=item *
+
+L<IO::Socket::IP> - Required for IPv6 support
 
 =item *
 
