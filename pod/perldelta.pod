@@ -375,7 +375,7 @@ Use HEKfARG() instead of creating and throwing away SVs.
 
 =item *
 
-L<Parse::CPAN::Meta> has been upgraded from version 1.4409 to 1.4412.
+L<Parse::CPAN::Meta> has been upgraded from version 1.4409 to 1.4413.
 
 Invalid UTF-8 encoding in YAML files are now replaced with "PERLQQ"
 quoting from the Encode module and without warnings.

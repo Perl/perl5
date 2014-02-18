@@ -2,7 +2,7 @@ use 5.008001;
 use strict;
 package Parse::CPAN::Meta;
 # ABSTRACT: Parse META.yml and META.json CPAN metadata files
-our $VERSION = '1.4412'; # VERSION
+our $VERSION = '1.4413'; # VERSION
 
 use Exporter;
 use Carp 'croak';
@@ -71,11 +71,11 @@ sub json_backend {
 
 sub _slurp {
   require Encode;
-  require PerlIO::encoding;
-  local $PerlIO::encoding::fallback = Encode::PERLQQ()|Encode::STOP_AT_PARTIAL();
-  open my $fh, "<:encoding(UTF-8)", "$_[0]" ## no critic
+  open my $fh, "<:raw", "$_[0]" ## no critic
     or die "can't open $_[0] for reading: $!";
-  return do { local $/; <$fh> };
+  my $content = do { local $/; <$fh> };
+  $content = Encode::decode('UTF-8', $content, Encode::PERLQQ());
+  return $content;
 }
   
 sub _can_load {
@@ -121,7 +121,7 @@ Parse::CPAN::Meta - Parse META.yml and META.json CPAN metadata files
 
 =head1 VERSION
 
-version 1.4412
+version 1.4413
 
 =head1 SYNOPSIS
 
@@ -290,6 +290,10 @@ David Golden <dagolden@cpan.org>
 =head1 CONTRIBUTORS
 
 =over 4
+
+=item *
+
+Graham Knop <haarg@haarg.org>
 
 =item *
 
