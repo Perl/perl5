@@ -13644,29 +13644,6 @@ parseit:
 
         /* Here, we have the current token in 'value' */
 
-        /* What matches in a locale is not known until runtime.  This includes
-         * what the Posix classes (like \w, [:space:]) match.  Room must be
-         * reserved (one time per outer bracketed class) to store such classes,
-         * if there is such posix class info to be stored.  The
-         * space will contain a bit for each named class that is to be matched
-         * against.  This isn't needed for \p{} and pseudo-classes, as they are
-         * not affected by locale, and hence are dealt with separately */
-        if (LOC) {
-            if (namedclass > OOB_NAMEDCLASS && namedclass < ANYOF_POSIXL_MAX) {
-                if (! need_class) {
-                    need_class = 1;
-                    if (SIZE_ONLY) {
-                        RExC_size += ANYOF_POSIXL_SKIP - ANYOF_SKIP;
-                    }
-                    else {
-                        RExC_emit += ANYOF_POSIXL_SKIP - ANYOF_SKIP;
-                    }
-                    ANYOF_POSIXL_ZERO(ret);
-                }
-                ANYOF_FLAGS(ret) |= ANYOF_POSIXL;
-            }
-        }
-
 	if (namedclass > OOB_NAMEDCLASS) { /* this is a named class \blah */
             U8 classnum;
 
@@ -13706,6 +13683,24 @@ parseit:
                 && classnum != _CC_ASCII
 #endif
             ) {
+                /* What the Posix classes (like \w, [:space:]) match in locale
+                 * isn't knowable under locale until actual match time.  Room
+                 * must be reserved (one time per outer bracketed class) to
+                 * store such classes.  The space will contain a bit for each
+                 * named class that is to be matched against.  This isn't
+                 * needed for \p{} and pseudo-classes, as they are not affected
+                 * by locale, and hence are dealt with separately */
+                if (! need_class) {
+                    need_class = 1;
+                    if (SIZE_ONLY) {
+                        RExC_size += ANYOF_POSIXL_SKIP - ANYOF_SKIP;
+                    }
+                    else {
+                        RExC_emit += ANYOF_POSIXL_SKIP - ANYOF_SKIP;
+                    }
+                    ANYOF_FLAGS(ret) |= ANYOF_POSIXL;
+                    ANYOF_POSIXL_ZERO(ret);
+                }
 
                 /* See if it already matches the complement of this POSIX
                  * class */
