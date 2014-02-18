@@ -159,6 +159,14 @@ check_taint      $+;
 check_taint      $1;
 check_taint_not  $2;
 
+/(.)/;	# untaint $&, $`, $', $+, $1.
+check_taint_not  $&, '/(.)/';
+check_taint_not  $`;
+check_taint_not  $';
+check_taint_not  $+;
+check_taint_not  $1;
+check_taint_not  $2;
+
 /(\s)/;	# taint $&, $`, $', $+, $1.
 check_taint      $&;
 check_taint      $`;
@@ -166,6 +174,9 @@ check_taint      $';
 check_taint      $+;
 check_taint      $1;
 check_taint_not  $2;
+
+/(.)/;	# untaint $&, $`, $', $+, $1.
+check_taint_not  $&, '/(.)/';
 
 /(\S)/;	# taint $&, $`, $', $+, $1.
 check_taint      $&;
