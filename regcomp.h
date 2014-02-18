@@ -187,6 +187,17 @@ struct regnode_2 {
 
 #define ANYOF_BITMAP_SIZE	(256 / 8)   /* 8 bits/Byte */
 
+/* Note that these form structs which are supersets of the next smaller one, by
+ * appending fields.  Alignment problems can occur if one of those optional
+ * fields requires stricter alignment than the base struct.  And formal
+ * parameters that can really be two or more of the structs should be
+ * declared as the smallest one it could be.  See commit message for
+ * 7dcac5f6a5195002b55c935ee1d67f67e1df280b.  Regnode allocation is done
+ * without regard to alignment, and changing it to would also require changing
+ * the code that inserts and deletes regnodes.  The basic single-argument
+ * regnode has a U32, which is what reganode() allocates as a unit.  Therefore
+ * no field can require stricter alignment than U32. */
+
 /* also used by trie */
 struct regnode_charclass {
     U8	flags;
@@ -206,23 +217,14 @@ struct regnode_charclass_class {
     U32 classflags;	                        /* and run-time */
 };
 
-/* like above, but also has folds that are used only if the runtime locale is
- * UTF-8. */
-struct regnode_charclass_posixl_fold {
-    U8	flags;				/* ANYOF_POSIXL bit must go here */
-    U8  type;
-    U16 next_off;
-    U32 arg1;
-    char bitmap[ANYOF_BITMAP_SIZE];	/* both compile-time */
-    U32 classflags;	                /* and run-time */
-    SV* utf8_locale_list;               /* list of code points matched by folds
-                                           in a UTF-8 locale */
-};
-
 /* A synthetic start class; is a regnode_charclass_posixl_fold, plus an extra
  * SV*, used only during its construction and which is not used by regexec.c.
  * Note that the 'next_off' field is unused, as the SSC stands alone, so there
- * is never a next node. */
+ * is never a next node.  Also, there is no alignment issue, becase these are
+ * declared or allocated as a complete unit so the compiler takes care of
+ * alignment.  This is unlike ithe other regnodes which are allocated in terms
+ * of multiples of a single-argument regnode.  Because there is no alignment
+ * issue, these can have a pointer field */
 struct regnode_ssc {
     U8	flags;				/* ANYOF_POSIXL bit must go here */
     U8  type;
@@ -230,8 +232,6 @@ struct regnode_ssc {
     U32 arg1;
     char bitmap[ANYOF_BITMAP_SIZE];	/* both compile-time */
     U32 classflags;	                /* and run-time */
-    SV* utf8_locale_list;               /* list of code points matched by folds
-                                           in a UTF-8 locale */
     SV* invlist;                        /* list of code points matched */
 };
 
@@ -492,7 +492,6 @@ struct regnode_ssc {
 #define ANYOF_SIZE		(sizeof(struct regnode_charclass))
 #define ANYOF_POSIXL_SIZE	(sizeof(regnode_charclass_posixl))
 #define ANYOF_CLASS_SIZE	ANYOF_POSIXL_SIZE
-#define ANYOF_POSIXL_FOLD_SIZE  (sizeof(regnode_charclass_posixl_fold))
 
 #define ANYOF_FLAGS(p)		((p)->flags)
 
@@ -554,10 +553,7 @@ struct regnode_ssc {
 
 #define ANYOF_SKIP		((ANYOF_SIZE - 1)/sizeof(regnode))
 #define ANYOF_POSIXL_SKIP	((ANYOF_POSIXL_SIZE - 1)/sizeof(regnode))
-#define ANYOF_POSIXL_FOLD_SKIP  ((ANYOF_POSIXL_FOLD_SIZE - 1)/sizeof(regnode))
 #define ANYOF_CLASS_SKIP	ANYOF_POSIXL_SKIP
-
-#define ANYOF_UTF8_LOCALE_INVLIST(node) (((regnode_charclass_posixl_fold*) (node))->utf8_locale_list)
 
 /*
  * Utility definitions.

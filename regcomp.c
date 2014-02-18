@@ -999,7 +999,7 @@ S_ssc_is_cp_posixl_init(pTHX_ const RExC_state_t *pRExC_state,
 
 STATIC SV*
 S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state,
-                               const regnode_charclass_posixl_fold* const node)
+                               const regnode_charclass_posixl* const node)
 {
     /* Returns a mortal inversion list defining which code points are matched
      * by 'node', which is of type ANYOF.  Handles complementing the result if
@@ -1008,6 +1008,7 @@ S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state,
      * possibility. */
 
     SV* invlist = sv_2mortal(_new_invlist(0));
+    SV* only_utf8_locale_invlist = NULL;
     unsigned int i;
     const U32 n = ARG(node);
     bool new_node_has_latin1 = FALSE;
@@ -1030,11 +1031,18 @@ S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state,
              * known until runtime -- we have to assume it could be anything */
             return _add_range_to_invlist(invlist, 0, UV_MAX);
         }
-        else {
+        else if (ary[3] && ary[3] != &PL_sv_undef) {
 
             /* Here no compile-time swash, and no run-time only data.  Use the
              * node's inversion list */
-            invlist = sv_2mortal(invlist_clone(ary[2]));
+            invlist = sv_2mortal(invlist_clone(ary[3]));
+        }
+
+        /* Get the code points valid only under UTF-8 locales */
+        if ((ANYOF_FLAGS(node) & ANYOF_LOC_FOLD)
+            && ary[2] && ary[2] != &PL_sv_undef)
+        {
+            only_utf8_locale_invlist = ary[2];
         }
     }
 
@@ -1082,11 +1090,12 @@ S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state,
         _invlist_union(invlist, PL_Latin1, &invlist);
     }
 
-    /* Similarly add the UTF-8 locale possible matches */
-    if (ANYOF_FLAGS(node) & ANYOF_LOC_FOLD && ANYOF_UTF8_LOCALE_INVLIST(node))
-    {
+    /* Similarly add the UTF-8 locale possible matches.  These have to be
+     * deferred until after the non-UTF-8 locale ones are taken care of just
+     * above, or it leads to wrong results under ANYOF_INVERT */
+    if (only_utf8_locale_invlist) {
         _invlist_union_maybe_complement_2nd(invlist,
-                                            ANYOF_UTF8_LOCALE_INVLIST(node),
+                                            only_utf8_locale_invlist,
                                             ANYOF_FLAGS(node) & ANYOF_INVERT,
                                             &invlist);
     }
@@ -1162,7 +1171,7 @@ S_ssc_and(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
     }
     else {
         anded_cp_list = get_ANYOF_cp_list_for_ssc(pRExC_state,
-                                     (regnode_charclass_posixl_fold*) and_with);
+                                     (regnode_charclass_posixl*) and_with);
         anded_flags = ANYOF_FLAGS(and_with) & ANYOF_COMMON_FLAGS;
     }
 
@@ -1239,7 +1248,7 @@ S_ssc_and(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
              * standard, in particular almost everything by Microsoft.
              * The loop below just changes e.g., \w into \W and vice versa */
 
-            regnode_charclass_posixl_fold temp;
+            regnode_charclass_posixl temp;
             int add = 1;    /* To calculate the index of the complement */
 
             ANYOF_POSIXL_ZERO(&temp);
@@ -1311,7 +1320,7 @@ S_ssc_or(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
     }
     else {
         ored_cp_list = get_ANYOF_cp_list_for_ssc(pRExC_state,
-                                     (regnode_charclass_posixl_fold*) or_with);
+                                     (regnode_charclass_posixl*) or_with);
         ored_flags = ANYOF_FLAGS(or_with) & ANYOF_COMMON_FLAGS;
     }
 
@@ -1450,7 +1459,8 @@ S_ssc_finalize(pTHX_ RExC_state_t *pRExC_state, regnode_ssc *ssc)
 
     populate_ANYOF_from_invlist( (regnode *) ssc, &invlist);
 
-    set_ANYOF_arg(pRExC_state, (regnode *) ssc, invlist, NULL, NULL, FALSE);
+    set_ANYOF_arg(pRExC_state, (regnode *) ssc, invlist,
+                                NULL, NULL, NULL, FALSE);
 
     if (ANYOF_POSIXL_SSC_TEST_ANY_SET(ssc)) {
         ANYOF_FLAGS(ssc) |= ANYOF_POSIXL;
@@ -13188,6 +13198,10 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
      * that fold to/from them under /i */
     SV* cp_foldable_list = NULL;
 
+    /* Like cp_list, but code points on this list are valid only when the
+     * runtime locale is UTF-8 */
+    SV* only_utf8_locale_list = NULL;
+
 #ifdef EBCDIC
     /* In a range, counts how many 0-2 of the ends of it came from literals,
      * not escapes.  Thus we can tell if 'A' was input vs \x{C1} */
@@ -13638,20 +13652,6 @@ parseit:
          * against.  This isn't needed for \p{} and pseudo-classes, as they are
          * not affected by locale, and hence are dealt with separately */
         if (LOC) {
-            if (FOLD && ! need_class) {
-                need_class = 1;
-                if (SIZE_ONLY) {
-                    RExC_size += ANYOF_POSIXL_FOLD_SKIP - ANYOF_SKIP;
-                }
-                else {
-                    RExC_emit += ANYOF_POSIXL_FOLD_SKIP - ANYOF_SKIP;
-                }
-
-                /* We need to initialize this here because this node type has
-                 * this field, and will skip getting initialized when we get to
-                 * a posix class since are doing it here */
-                ANYOF_POSIXL_ZERO(ret);
-            }
             if (namedclass > OOB_NAMEDCLASS && namedclass < ANYOF_POSIXL_MAX) {
                 if (! need_class) {
                     need_class = 1;
@@ -14264,8 +14264,7 @@ parseit:
              * runtime only when the locale indicates Unicode rules.  For
              * non-locale, we just use to the general list */
             if (LOC) {
-                use_list = &ANYOF_UTF8_LOCALE_INVLIST(ret);
-                *use_list = NULL;
+                use_list = &only_utf8_locale_list;
             }
             else {
                 use_list = &cp_list;
@@ -14596,7 +14595,7 @@ parseit:
      * fetching).  We know to set the flag if we have a non-NULL list for UTF-8
      * locales, or the class matches at least one 0-255 range code point */
     if (LOC && FOLD) {
-        if (ANYOF_UTF8_LOCALE_INVLIST(ret)) {
+        if (only_utf8_locale_list) {
             ANYOF_FLAGS(ret) |= ANYOF_LOC_FOLD;
         }
         else if (cp_list) { /* Look to see if there a 0-255 code point is in
@@ -14808,6 +14807,7 @@ parseit:
     set_ANYOF_arg(pRExC_state, ret, cp_list,
                   (HAS_NONLOCALE_RUNTIME_PROPERTY_DEFINITION)
                    ? listsv : NULL,
+                  only_utf8_locale_list,
                   swash, has_user_defined_property);
 
     *flagp |= HASWIDTH|SIMPLE;
@@ -14821,6 +14821,7 @@ S_set_ANYOF_arg(pTHX_ RExC_state_t* const pRExC_state,
                 regnode* const node,
                 SV* const cp_list,
                 SV* const runtime_defns,
+                SV* const only_utf8_locale_list,
                 SV* const swash,
                 const bool has_user_defined_property)
 {
@@ -14838,25 +14839,29 @@ S_set_ANYOF_arg(pTHX_ RExC_state_t* const pRExC_state,
      *  av[1] if &PL_sv_undef, is a placeholder to later contain the swash
      *        computed from av[0].  But if no further computation need be done,
      *        the swash is stored here now (and av[0] is &PL_sv_undef).
-     *  av[2] stores the cp_list inversion list for use in addition or instead
+     *  av[2] stores the inversion list of code points that match only if the
+     *        current locale is UTF-8
+     *  av[3] stores the cp_list inversion list for use in addition or instead
      *        of av[0]; used only if cp_list exists and av[1] is &PL_sv_undef.
      *        (Otherwise everything needed is already in av[0] and av[1])
-     *  av[3] is set if any component of the class is from a user-defined
-     *        property; used only if av[2] exists */
+     *  av[4] is set if any component of the class is from a user-defined
+     *        property; used only if av[3] exists */
 
     UV n;
 
     PERL_ARGS_ASSERT_SET_ANYOF_ARG;
 
-    if (! cp_list && ! runtime_defns) {
-        assert(! (ANYOF_FLAGS(node) & (ANYOF_UTF8|ANYOF_NONBITMAP_NON_UTF8)));
+    if (! cp_list && ! runtime_defns && ! only_utf8_locale_list) {
+        assert(! (ANYOF_FLAGS(node)
+                    & (ANYOF_UTF8|ANYOF_NONBITMAP_NON_UTF8)));
 	ARG_SET(node, ANYOF_NONBITMAP_EMPTY);
     }
     else {
 	AV * const av = newAV();
 	SV *rv;
 
-        assert(ANYOF_FLAGS(node) & (ANYOF_UTF8|ANYOF_NONBITMAP_NON_UTF8));
+        assert(ANYOF_FLAGS(node)
+                    & (ANYOF_UTF8|ANYOF_NONBITMAP_NON_UTF8|ANYOF_LOC_FOLD));
 
 	av_store(av, 0, (runtime_defns)
 			? SvREFCNT_inc(runtime_defns) : &PL_sv_undef);
@@ -14867,10 +14872,17 @@ S_set_ANYOF_arg(pTHX_ RExC_state_t* const pRExC_state,
 	else {
 	    av_store(av, 1, &PL_sv_undef);
 	    if (cp_list) {
-		av_store(av, 2, cp_list);
-		av_store(av, 3, newSVuv(has_user_defined_property));
+		av_store(av, 3, cp_list);
+		av_store(av, 4, newSVuv(has_user_defined_property));
 	    }
 	}
+
+        if (only_utf8_locale_list) {
+	    av_store(av, 2, only_utf8_locale_list);
+        }
+        else {
+	    av_store(av, 2, &PL_sv_undef);
+        }
 
 	rv = newRV_noinc(MUTABLE_SV(av));
 	n = add_data(pRExC_state, STR_WITH_LEN("s"));
@@ -15672,8 +15684,10 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
             }
         }
 
-	if ((flags & (ANYOF_ABOVE_LATIN1_ALL|ANYOF_UTF8|ANYOF_NONBITMAP_NON_UTF8))
-            || ANYOF_UTF8_LOCALE_INVLIST(o))
+	if ((flags & (ANYOF_ABOVE_LATIN1_ALL
+                      |ANYOF_UTF8
+                      |ANYOF_NONBITMAP_NON_UTF8
+                      |ANYOF_LOC_FOLD)))
         {
             if (do_sep) {
                 Perl_sv_catpvf(aTHX_ sv,"%s][%s",PL_colors[1],PL_colors[0]);
@@ -15689,13 +15703,15 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
             /* output information about the unicode matching */
             if (flags & ANYOF_ABOVE_LATIN1_ALL)
                 sv_catpvs(sv, "{unicode_all}");
-            else if (FLAGS(o) & (ANYOF_UTF8|ANYOF_NONBITMAP_NON_UTF8)) {
+            else if (ARG(o) != ANYOF_NONBITMAP_EMPTY) {
                 SV *lv; /* Set if there is something outside the bit map. */
                 bool byte_output = FALSE;   /* If something in the bitmap has
                                                been output */
+                SV *only_utf8_locale;
 
                 /* Get the stuff that wasn't in the bitmap */
-                (void) regclass_swash(prog, o, FALSE, &lv, NULL);
+                (void) _get_regclass_nonbitmap_data(prog, o, FALSE,
+                                                    &lv, &only_utf8_locale);
                 if (lv && lv != &PL_sv_undef) {
                     char *s = savesvpv(lv);
                     char * const origs = s;
@@ -15746,16 +15762,17 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
                     Safefree(origs);
                     SvREFCNT_dec_NN(lv);
                 }
-            }
 
-            /* Output any UTF-8 locale code points */
-            if (flags & ANYOF_LOC_FOLD && ANYOF_UTF8_LOCALE_INVLIST(o)) {
+            if ((flags & ANYOF_LOC_FOLD)
+                 && only_utf8_locale
+                 && only_utf8_locale != &PL_sv_undef)
+            {
                 UV start, end;
                 int max_entries = 256;
 
                 sv_catpvs(sv, "{utf8 locale}");
-                invlist_iterinit(ANYOF_UTF8_LOCALE_INVLIST(o));
-                while (invlist_iternext(ANYOF_UTF8_LOCALE_INVLIST(o),
+                invlist_iterinit(only_utf8_locale);
+                while (invlist_iternext(only_utf8_locale,
                                         &start, &end)) {
                     put_range(sv, start, end);
                     max_entries --;
@@ -15764,7 +15781,8 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
                         break;
                     }
                 }
-                invlist_iterfinish(ANYOF_UTF8_LOCALE_INVLIST(o));
+                invlist_iterfinish(only_utf8_locale);
+            }
             }
 	}
 
@@ -16629,11 +16647,9 @@ S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
 	}
 	else if (PL_regkind[(U8)op] == ANYOF) {
 	    /* arglen 1 + class block */
-	    node += 1 + ((ANYOF_FLAGS(node) & ANYOF_LOC_FOLD)
-		         ? ANYOF_POSIXL_FOLD_SKIP
-                         : (ANYOF_FLAGS(node) & ANYOF_POSIXL)
-                           ? ANYOF_POSIXL_SKIP
-                           : ANYOF_SKIP);
+	    node += 1 + ((ANYOF_FLAGS(node) & ANYOF_POSIXL)
+                          ? ANYOF_POSIXL_SKIP
+                          : ANYOF_SKIP);
 	    node = NEXTOPER(node);
 	}
 	else if (PL_regkind[(U8)op] == EXACT) {

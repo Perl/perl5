@@ -2041,6 +2041,7 @@ Es	|void	 |set_ANYOF_arg	|NN RExC_state_t* const pRExC_state \
 				|NN regnode* const node                    \
 				|NULLOK SV* const cp_list                  \
 				|NULLOK SV* const runtime_defns            \
+				|NULLOK SV* const only_utf8_locale_list	   \
 				|NULLOK SV* const swash                    \
 				|const bool has_user_defined_property
 Es	|regnode*|regclass	|NN RExC_state_t *pRExC_state \
@@ -2102,7 +2103,7 @@ Es	|void	|ssc_or		|NN const RExC_state_t *pRExC_state \
 				|NN const regnode_charclass *or_with
 Es	|SV*	|get_ANYOF_cp_list_for_ssc                                 \
 				|NN const RExC_state_t *pRExC_state \
-				|NN const regnode_charclass_posixl_fold* const node
+				|NN const regnode_charclass_posixl* const node
 Ei	|void	|ssc_intersection|NN regnode_ssc *ssc \
 				|NN SV* const invlist|const bool invert_2nd
 Ei	|void	|ssc_union	|NN regnode_ssc *ssc \

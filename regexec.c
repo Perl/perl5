@@ -7537,7 +7537,8 @@ Perl__get_regclass_nonbitmap_data(pTHX_ const regexp *prog,
 
     PERL_ARGS_ASSERT__GET_REGCLASS_NONBITMAP_DATA;
 
-    assert(ANYOF_FLAGS(node) & (ANYOF_UTF8|ANYOF_NONBITMAP_NON_UTF8));
+    assert(ANYOF_FLAGS(node)
+                        & (ANYOF_UTF8|ANYOF_NONBITMAP_NON_UTF8|ANYOF_LOC_FOLD));
 
     if (data && data->count) {
 	const U32 n = ARG(node);
@@ -7550,17 +7551,29 @@ Perl__get_regclass_nonbitmap_data(pTHX_ const regexp *prog,
 	
 	    si = *ary;	/* ary[0] = the string to initialize the swash with */
 
-	    /* Elements 2 and 3 are either both present or both absent. [2] is
-	     * any inversion list generated at compile time; [3] indicates if
+	    /* Elements 3 and 4 are either both present or both absent. [3] is
+	     * any inversion list generated at compile time; [4] indicates if
 	     * that inversion list has any user-defined properties in it. */
-	    if (av_len(av) >= 2) {
-		invlist = ary[2];
-		if (SvUV(ary[3])) {
+            if (av_tindex(av) >= 2) {
+                if (only_utf8_locale_ptr
+                    && ary[2]
+                    && ary[2] != &PL_sv_undef)
+                {
+                    *only_utf8_locale_ptr = ary[2];
+                }
+                else {
+                    *only_utf8_locale_ptr = NULL;
+                }
+
+	    if (av_len(av) >= 3) {
+		invlist = ary[3];
+		if (SvUV(ary[4])) {
                     swash_init_flags |= _CORE_SWASH_INIT_USER_DEFINED_PROPERTY;
                 }
 	    }
 	    else {
 		invlist = NULL;
+	    }
 	    }
 
 	    /* Element [1] is reserved for the set-up swash.  If already there,
@@ -7715,15 +7728,6 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
 	}
     }
 
-    /* For /li matching and the current locale is a UTF-8 one, look at the
-     * special list, valid for just these circumstances. */
-    if (! match
-        && (flags & ANYOF_LOC_FOLD)
-        && IN_UTF8_CTYPE_LOCALE
-        && ANYOF_UTF8_LOCALE_INVLIST(n))
-    {
-        match = _invlist_contains_cp(ANYOF_UTF8_LOCALE_INVLIST(n), c);
-    }
 
     /* If the bitmap didn't (or couldn't) match, and something outside the
      * bitmap could match, try that. */
@@ -7732,9 +7736,14 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
 	    match = TRUE;	/* Everything above 255 matches */
 	}
 	else if ((flags & ANYOF_NONBITMAP_NON_UTF8)
-		  || (utf8_target && (flags & ANYOF_UTF8)))
+		  || (utf8_target && (flags & ANYOF_UTF8))
+                  || ((flags & ANYOF_LOC_FOLD)
+                       && IN_UTF8_CTYPE_LOCALE
+                       && ARG(n) != ANYOF_NONBITMAP_EMPTY))
         {
-	    SV * const sw = _get_regclass_nonbitmap_data(prog, n, TRUE, 0, NULL);
+            SV* only_utf8_locale = NULL;
+	    SV * const sw = _get_regclass_nonbitmap_data(prog, n, TRUE, 0,
+                                                            &only_utf8_locale);
 	    if (sw) {
 		U8 * utf8_p;
 		if (utf8_target) {
@@ -7751,6 +7760,9 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
 		/* If we allocated a string above, free it */
 		if (! utf8_target) Safefree(utf8_p);
 	    }
+            if (! match && only_utf8_locale && IN_UTF8_CTYPE_LOCALE) {
+                match = _invlist_contains_cp(only_utf8_locale, c);
+            }
 	}
 
         if (UNICODE_IS_SUPER(c)

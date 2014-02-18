@@ -3337,7 +3337,6 @@ struct regnode_charclass_class;
 /* A hopefully less confusing name.  The sub-classes are all Posix classes only
  * used under /l matching */
 typedef struct regnode_charclass_class regnode_charclass_posixl;
-typedef struct regnode_charclass_posixl_fold regnode_charclass_posixl_fold;
 
 typedef struct regnode_ssc regnode_ssc;
 typedef struct RExC_state_t RExC_state_t;
