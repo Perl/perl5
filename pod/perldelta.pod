@@ -291,7 +291,7 @@ L<Digest::SHA> has been upgraded from version 5.85 to 5.87.
 
 Improved the performance of hexadecimal output functions and simplified capture
 of intermediate SHA states, which can now be done via strings (see
-C<getstate()>/C<putstate()>).
+C<L<getstate()|Digest::SHA/getstate>>/C<L<putstate()|Digest::SHA/putstate($str)>>).
 
 =item *
 
