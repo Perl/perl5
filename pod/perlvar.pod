@@ -2253,10 +2253,10 @@ The version + patchlevel / 1000 of the Perl interpreter.  This variable
 can be used to determine whether the Perl interpreter executing a
 script is in the right range of versions:
 
-    warn "No checksumming!\n" if $] < 3.019;
+    warn "No PerlIO!\n" if $] lt '5.008';
 
 The floating point representation can sometimes lead to inaccurate
-numeric comparisons.
+numeric comparisons, so string comparisons are recommended.
 
 See also the documentation of C<use VERSION> and C<require VERSION>
 for a convenient way to fail if the running Perl interpreter is too old.
