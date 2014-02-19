@@ -295,6 +295,12 @@ C<L<getstate()|Digest::SHA/getstate>>/C<L<putstate()|Digest::SHA/putstate($str)>
 
 =item *
 
+L<English> has been upgraded from version 1.08 to 1.09.
+
+Added C<$OLD_PERL_VERSION> as an alias for C<$]>.
+
+=item *
+
 L<ExtUtils::MakeMaker> has been upgraded from version 6.86 to 6.88.
 
 Improved support for Android and other minor changes.
@@ -307,9 +313,12 @@ Force curl to be IPv4 only during testing on NetBSD.
 
 =item *
 
-L<HTTP::Tiny> has been upgraded from version 0.039 to 0.041.
+L<HTTP::Tiny> has been upgraded from version 0.039 to 0.042.
 
 Added support for keep-alive connections.
+
+If L<IO::Socket::IP> 0.25 or later is available, use that for
+transparent IPv4 or IPv6 support.
 
 =item *
 
