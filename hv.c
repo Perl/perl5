@@ -1753,10 +1753,11 @@ Perl_hv_undef_flags(pTHX_ HV *hv, U32 flags)
 {
     dVAR;
     XPVHV* xhv;
-    const bool save = !!SvREFCNT(hv);
+    bool save;
 
     if (!hv)
 	return;
+    save = !!SvREFCNT(hv);
     DEBUG_A(Perl_hv_assert(aTHX_ hv));
     xhv = (XPVHV*)SvANY(hv);
 
