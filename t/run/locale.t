@@ -177,7 +177,7 @@ EOF
 	local $ENV{LC_NUMERIC} = $_;
 	local $ENV{LC_ALL}; # so it never overrides LC_NUMERIC
 	fresh_perl_is(<<'EOF', "$difference "x4, {},
-        use locale;
+            use locale;
 	    use POSIX qw(locale_h);
 	    setlocale(LC_NUMERIC, "");
 	    my $in = 4.2;
