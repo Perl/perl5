@@ -2097,7 +2097,6 @@ EsR	|int	|ssc_is_cp_posixl_init|NN const RExC_state_t *pRExC_state \
 Es	|void	|ssc_and	|NN const RExC_state_t *pRExC_state \
 				|NN regnode_ssc *ssc                \
 				|NN const regnode_charclass *and_with
-Esn	|void	|ssc_flags_and	|NN regnode_ssc *ssc|const U8 and_with
 Es	|void	|ssc_or		|NN const RExC_state_t *pRExC_state \
 				|NN regnode_ssc *ssc \
 				|NN const regnode_charclass *or_with

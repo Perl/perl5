@@ -960,7 +960,6 @@
 #define ssc_clear_locale(a)	S_ssc_clear_locale(aTHX_ a)
 #define ssc_cp_and(a,b)		S_ssc_cp_and(aTHX_ a,b)
 #define ssc_finalize(a,b)	S_ssc_finalize(aTHX_ a,b)
-#define ssc_flags_and		S_ssc_flags_and
 #define ssc_init(a,b)		S_ssc_init(aTHX_ a,b)
 #define ssc_intersection(a,b,c)	S_ssc_intersection(aTHX_ a,b,c)
 #define ssc_is_anything(a)	S_ssc_is_anything(aTHX_ a)

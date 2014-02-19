@@ -1109,23 +1109,6 @@ S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state,
 #define ssc_add_cp(ssc, cp)   ssc_add_range((ssc), (cp), (cp))
 #define ssc_match_all_cp(ssc) ssc_add_range(ssc, 0, UV_MAX)
 
-STATIC void
-S_ssc_flags_and(regnode_ssc *ssc, const U8 and_with)
-{
-    /* Take the flags 'and_with' and accumulate them anded into the flags for
-     * the SSC 'ssc'.  The non-SSC related flags in 'and_with' are ignored.
-     * The flags 'and_with' should not come from another SSC (otherwise the
-     * EMPTY_STRING flag won't work) */
-
-    const U8 ssc_only_flags = ANYOF_FLAGS(ssc) & ~ANYOF_COMMON_FLAGS;
-
-    PERL_ARGS_ASSERT_SSC_FLAGS_AND;
-
-    /* Use just the SSC-related flags from 'and_with' */
-    ANYOF_FLAGS(ssc) &= (and_with & ANYOF_COMMON_FLAGS);
-    ANYOF_FLAGS(ssc) |= ssc_only_flags;
-}
-
 /* 'AND' a given class with another one.  Can create false positives.  'ssc'
  * should not be inverted.  'and_with->flags & ANYOF_POSIXL' should be 0 if
  * 'and_with' is a regnode_charclass instead of a regnode_ssc. */

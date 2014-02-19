@@ -6915,11 +6915,6 @@ STATIC void	S_ssc_finalize(pTHX_ RExC_state_t *pRExC_state, regnode_ssc *ssc)
 #define PERL_ARGS_ASSERT_SSC_FINALIZE	\
 	assert(pRExC_state); assert(ssc)
 
-STATIC void	S_ssc_flags_and(regnode_ssc *ssc, const U8 and_with)
-			__attribute__nonnull__(1);
-#define PERL_ARGS_ASSERT_SSC_FLAGS_AND	\
-	assert(ssc)
-
 STATIC void	S_ssc_init(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
