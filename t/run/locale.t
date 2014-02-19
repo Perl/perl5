@@ -187,6 +187,20 @@ EOF
     }
 
     for ($different) {
+	local $ENV{LC_NUMERIC} = $_;
+	local $ENV{LC_ALL}; # so it never overrides LC_NUMERIC
+	local $ENV{LANG};   # so on Windows gets sys default locale
+	fresh_perl_is(<<'EOF', "$difference "x4, {},
+            use locale;
+	    use POSIX qw(locale_h);
+	    setlocale(LC_NUMERIC, "");
+	    my $in = 4.2;
+	    printf("%g %g %s %s ", $in, 4.2, sprintf("%g", $in), sprintf("%g", 4.2));
+EOF
+	"Uses the above test to verify that on Windows the system default locale has lower priority than LC_NUMERIC");
+    }
+
+    for ($different) {
         local $ENV{LC_ALL} = "invalid";
 	local $ENV{LC_NUMERIC} = "invalid";
         local $ENV{LANG} = $_;
@@ -308,4 +322,4 @@ EOF
 
     }
 
-sub last { 18 }
+sub last { 19 }

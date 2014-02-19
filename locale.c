@@ -348,7 +348,7 @@ Perl_my_setlocale(pTHX_ int category, const char* locale)
      * otherwise to use the particular category's variable if set; otherwise to
      * use the LANG variable. */
 
-    unsigned override_LANG = 0;
+    bool override_LC_ALL = 0;
     char * result;
 
     if (locale && strEQ(locale, "")) {
@@ -359,7 +359,7 @@ Perl_my_setlocale(pTHX_ int category, const char* locale)
             switch (category) {
 #   ifdef LC_ALL
                 case LC_ALL:
-                    override_LANG++;
+                    override_LC_ALL = TRUE;
                     break;  /* We already know its variable isn't set */
 #   endif
 #   ifdef USE_LOCALE_TIME
@@ -399,10 +399,7 @@ Perl_my_setlocale(pTHX_ int category, const char* locale)
             }
             if (! locale) {
                 locale = PerlEnv_getenv("LANG");
-                if (locale) {
-                    override_LANG++;
-                }
-                else {
+                if (! locale) {
                     locale = "";
                 }
             }
@@ -413,15 +410,15 @@ Perl_my_setlocale(pTHX_ int category, const char* locale)
 
     result = setlocale(category, locale);
 
-    if (override_LANG < 2)  {
+    if (! override_LC_ALL)  {
         return result;
     }
 
     /* Here the input locale was LC_ALL, and we have set it to what is in the
-     * LANG variable.  But LANG has lower priority than the other LC_foo
-     * variables, so override it for each one that is set.  (If they are set to
-     * "", it means to use the same thing we just set LC_ALL to, so can skip)
-     * */
+     * LANG variable or the system default if there is no LANG.  But these have
+     * lower priority than the other LC_foo variables, so override it for each
+     * one that is set.  (If they are set to "", it means to use the same thing
+     * we just set LC_ALL to, so can skip) */
 #   ifdef USE_LOCALE_TIME
     result = PerlEnv_getenv("LC_TIME");
     if (result and strNE(result, "")) {
