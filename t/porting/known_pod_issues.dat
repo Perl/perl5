@@ -32,6 +32,8 @@ Class::Accessor
 Class::C3
 Class::ISA
 Class::PseudoHash
+Class::Tiny
+Class::Tiny::Antlers
 Classic::Perl
 Clone
 cpan2dist(1)
@@ -112,7 +114,6 @@ nl_langinfo(3)
 Number::Format
 Object::Accessor
 Object::InsideOut
-Object::Tiny
 open(2)
 OS2::Proc
 OS2::WinObject
