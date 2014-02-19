@@ -1,6 +1,6 @@
 package English;
 
-our $VERSION = '1.08';
+our $VERSION = '1.09';
 
 require Exporter;
 @ISA = qw(Exporter);
@@ -119,6 +119,7 @@ sub import {
 	*EGID
 	*PROGRAM_NAME
 	*PERL_VERSION
+	*OLD_PERL_VERSION
 	*ACCUMULATOR
 	*COMPILING
 	*DEBUGGING
@@ -214,6 +215,7 @@ sub import {
 # Internals.
 
 	*PERL_VERSION				= *^V	;
+	*OLD_PERL_VERSION			= *]	;
 	*ACCUMULATOR				= *^A	;
 	*COMPILING				= *^C	;
 	*DEBUGGING				= *^D	;
@@ -231,6 +233,5 @@ sub import {
 
 #	*ARRAY_BASE				= *[	;
 #	*OFMT					= *#	;
-#	*OLD_PERL_VERSION			= *]	;
 
 1;
