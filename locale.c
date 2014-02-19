@@ -348,6 +348,9 @@ Perl_my_setlocale(pTHX_ int category, const char* locale)
      * otherwise to use the particular category's variable if set; otherwise to
      * use the LANG variable. */
 
+    unsigned override_LANG = 0;
+    char * result;
+
     if (locale && strEQ(locale, "")) {
 #   ifdef LC_ALL
         locale = PerlEnv_getenv("LC_ALL");
@@ -356,6 +359,7 @@ Perl_my_setlocale(pTHX_ int category, const char* locale)
             switch (category) {
 #   ifdef LC_ALL
                 case LC_ALL:
+                    override_LANG++;
                     break;  /* We already know its variable isn't set */
 #   endif
 #   ifdef USE_LOCALE_TIME
@@ -395,7 +399,10 @@ Perl_my_setlocale(pTHX_ int category, const char* locale)
             }
             if (! locale) {
                 locale = PerlEnv_getenv("LANG");
-                if (! locale) {
+                if (locale) {
+                    override_LANG++;
+                }
+                else {
                     locale = "";
                 }
             }
@@ -404,7 +411,56 @@ Perl_my_setlocale(pTHX_ int category, const char* locale)
 #   endif
     }
 
-    return setlocale(category, locale);
+    result = setlocale(category, locale);
+
+    if (override_LANG < 2)  {
+        return result;
+    }
+
+    /* Here the input locale was LC_ALL, and we have set it to what is in the
+     * LANG variable.  But LANG has lower priority than the other LC_foo
+     * variables, so override it for each one that is set.  (If they are set to
+     * "", it means to use the same thing we just set LC_ALL to, so can skip)
+     * */
+#   ifdef USE_LOCALE_TIME
+    result = PerlEnv_getenv("LC_TIME");
+    if (result and strNE(result, "")) {
+        setlocale(LC_TIME, result);
+    }
+#   endif
+#   ifdef USE_LOCALE_CTYPE
+    result = PerlEnv_getenv("LC_CTYPE");
+    if (result and strNE(result, "")) {
+        setlocale(LC_CTYPE, result);
+    }
+#   endif
+#   ifdef USE_LOCALE_COLLATE
+    result = PerlEnv_getenv("LC_COLLATE");
+    if (result and strNE(result, "")) {
+        setlocale(LC_COLLATE, result);
+    }
+#   endif
+#   ifdef USE_LOCALE_MONETARY
+    result = PerlEnv_getenv("LC_MONETARY");
+    if (result and strNE(result, "")) {
+        setlocale(LC_MONETARY, result);
+    }
+#   endif
+#   ifdef USE_LOCALE_NUMERIC
+    result = PerlEnv_getenv("LC_NUMERIC");
+    if (result and strNE(result, "")) {
+        setlocale(LC_NUMERIC, result);
+    }
+#   endif
+#   ifdef USE_LOCALE_MESSAGES
+    result = PerlEnv_getenv("LC_MESSAGES");
+    if (result and strNE(result, "")) {
+        setlocale(LC_MESSAGES, result);
+    }
+#   endif
+
+    return setlocale(LC_ALL, NULL);
+
 }
 
 #endif
