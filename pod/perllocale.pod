@@ -1113,6 +1113,15 @@ of a match involving C<\w> while C<use locale> is in effect.
 
 =over 12
 
+=item PERL_SKIP_LOCALE_INIT
+
+This environment variable, available starting in Perl v5.20, and if it
+evaluates to a TRUE value, tells Perl to not use the rest of the
+environment variables to initialize with.  Instead, Perl uses whatever
+the current locale settings are.  This is particularly useful in
+embedded environments, see
+L<perlembed/Using embedded Perl with POSIX locales>.
+
 =item PERL_BADLANG
 
 A string that can suppress Perl's warning about failed locale settings
