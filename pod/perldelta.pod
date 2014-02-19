@@ -276,6 +276,12 @@ Resolve a C++ build failure in core.  [cpan #92657]
 
 =item *
 
+L<Config::Perl::V> has been upgraded from version 0.19 to 0.20.
+
+Synchronize with blead (bincompat options)
+
+=item *
+
 L<CPAN::Meta::YAML> has been upgraded from version 0.010 to 0.011.
 
 =item *

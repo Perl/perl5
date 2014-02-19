@@ -8,7 +8,7 @@ use warnings;
 use Config;
 use Exporter;
 use vars qw($VERSION @ISA @EXPORT_OK %EXPORT_TAGS);
-$VERSION     = "0.19";
+$VERSION     = "0.20";
 @ISA         = ("Exporter");
 @EXPORT_OK   = qw( plv2hash summary myconfig signature );
 %EXPORT_TAGS = (
@@ -22,14 +22,17 @@ $VERSION     = "0.19";
 
 # The list are as the perl binary has stored it in PL_bincompat_options
 #  search for it in
-#   perl.c line 1669 S_Internals_V ()
-#   perl.h line 4505 PL_bincompat_options
+#   perl.c line 1643 S_Internals_V ()
+#     perl -ne'(/^S_Internals_V/../^}/)&&s/^\s+"( .*)"/$1/ and print' perl.c
+#   perl.h line 4566 PL_bincompat_options
+#     perl -ne'(/^\w.*PL_bincompat/../^\w}/)&&s/^\s+"( .*)"/$1/ and print' perl.h
 my %BTD = map { $_ => 0 } qw(
 
     DEBUGGING
     NO_MATHOMS
     NO_HASH_SEED
     NO_TAINT_SUPPORT
+    PERL_BOOL_AS_CHAR
     PERL_DISABLE_PMC
     PERL_DONT_CREATE_GVSV
     PERL_EXTERNAL_GLOB
@@ -76,6 +79,7 @@ my %BTD = map { $_ => 0 } qw(
     MULTIPLICITY
     MYMALLOC
     PERLIO_LAYERS
+    PERL_DEBUG_READONLY_COW
     PERL_DEBUG_READONLY_OPS
     PERL_GLOBAL_STRUCT
     PERL_IMPLICIT_CONTEXT
@@ -518,7 +522,7 @@ H.Merijn Brand <h.m.brand@xs4all.nl>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2009-2013 H.Merijn Brand
+Copyright (C) 2009-2014 H.Merijn Brand
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
