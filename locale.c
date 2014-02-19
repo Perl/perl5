@@ -421,37 +421,37 @@ Perl_my_setlocale(pTHX_ int category, const char* locale)
      * we just set LC_ALL to, so can skip) */
 #   ifdef USE_LOCALE_TIME
     result = PerlEnv_getenv("LC_TIME");
-    if (result and strNE(result, "")) {
+    if (result && strNE(result, "")) {
         setlocale(LC_TIME, result);
     }
 #   endif
 #   ifdef USE_LOCALE_CTYPE
     result = PerlEnv_getenv("LC_CTYPE");
-    if (result and strNE(result, "")) {
+    if (result && strNE(result, "")) {
         setlocale(LC_CTYPE, result);
     }
 #   endif
 #   ifdef USE_LOCALE_COLLATE
     result = PerlEnv_getenv("LC_COLLATE");
-    if (result and strNE(result, "")) {
+    if (result && strNE(result, "")) {
         setlocale(LC_COLLATE, result);
     }
 #   endif
 #   ifdef USE_LOCALE_MONETARY
     result = PerlEnv_getenv("LC_MONETARY");
-    if (result and strNE(result, "")) {
+    if (result && strNE(result, "")) {
         setlocale(LC_MONETARY, result);
     }
 #   endif
 #   ifdef USE_LOCALE_NUMERIC
     result = PerlEnv_getenv("LC_NUMERIC");
-    if (result and strNE(result, "")) {
+    if (result && strNE(result, "")) {
         setlocale(LC_NUMERIC, result);
     }
 #   endif
 #   ifdef USE_LOCALE_MESSAGES
     result = PerlEnv_getenv("LC_MESSAGES");
-    if (result and strNE(result, "")) {
+    if (result && strNE(result, "")) {
         setlocale(LC_MESSAGES, result);
     }
 #   endif
