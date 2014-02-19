@@ -6,7 +6,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-use Test::More tests => 57;
+use Test::More tests => 58;
 
 use English qw( -no_match_vars ) ;
 use Config;
