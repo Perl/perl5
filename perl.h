@@ -4587,6 +4587,9 @@ EXTCONST char PL_bincompat_options[] =
 #  ifdef PERLIO_LAYERS
 			     " PERLIO_LAYERS"
 #  endif
+#  ifdef PERL_DEBUG_READONLY_COW
+			     " PERL_DEBUG_READONLY_COW"
+#  endif
 #  ifdef PERL_DEBUG_READONLY_OPS
 			     " PERL_DEBUG_READONLY_OPS"
 #  endif
