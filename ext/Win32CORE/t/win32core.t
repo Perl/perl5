@@ -10,7 +10,7 @@ BEGIN {
 	}
     }
 
-    plan tests => 5;
+    plan tests => 6;
 };
 use_ok( "Win32CORE" );
 
@@ -19,7 +19,9 @@ ok(!defined &Win32::ExpandEnvironmentStrings,
    "ensure other Win32::* functions aren't loaded yet");
 
 $^E = 42;
+$! = 4;
 ok(eval { Win32::GetLastError(); 1 }, 'GetLastError() works on the first call');
+my $errno = 0 + $!;
 my $sys_errno = 0 + $^E;
 SKIP: {
     $^O eq "cygwin"
@@ -28,6 +30,7 @@ SKIP: {
     # should not affect the last error being retrieved
     is($sys_errno, 42, '$^E is preserved across Win32 autoload');
 }
+is($errno, 4, '$! is preserved across Win32 autoload');
 
 # Now all Win32::* functions should be loaded
 ok(defined &Win32::ExpandEnvironmentStrings,
