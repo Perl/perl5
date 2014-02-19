@@ -183,8 +183,9 @@ But testing for taintedness gets you only so far.  Sometimes you have just
 to clear your data's taintedness.  Values may be untainted by using them
 as keys in a hash; otherwise the only way to bypass the tainting
 mechanism is by referencing subpatterns from a regular expression match.
-Perl presumes that if you reference a substring using $1, $2, etc., that
-you knew what you were doing when you wrote the pattern.  That means using
+Perl presumes that if you reference a substring using $1, $2, etc. in a
+non-tainting pattern, that
+you knew what you were doing when you wrote that pattern.  That means using
 a bit of thought--don't just blindly untaint anything, or you defeat the
 entire mechanism.  It's better to verify that the variable has only good
 characters (for certain values of "good") rather than checking whether it
