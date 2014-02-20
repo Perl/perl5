@@ -5,7 +5,7 @@
 
 package feature;
 
-our $VERSION = '1.35';
+our $VERSION = '1.36';
 
 our %feature = (
     fc              => 'feature_fc',
@@ -141,7 +141,7 @@ This feature is available starting with Perl 5.10.
 
 =head2 The 'unicode_strings' feature
 
-C<use feature 'unicode_strings'> tells the compiler to use Unicode semantics
+C<use feature 'unicode_strings'> tells the compiler to use Unicode rules
 in all string operations executed within its scope (unless they are also
 within the scope of either C<use locale> or C<use bytes>).  The same applies
 to all regular expressions compiled within the scope, even if executed outside
@@ -149,7 +149,7 @@ it.  It does not change the internal representation of strings, but only how
 they are interpreted.
 
 C<no feature 'unicode_strings'> tells the compiler to use the traditional
-Perl semantics wherein the native character set semantics is used unless it is
+Perl rules wherein the native character set rules is used unless it is
 clear to Perl that Unicode is desired.  This can lead to some surprises
 when the behavior suddenly changes.  (See
 L<perlunicode/The "Unicode Bug"> for details.)  For this reason, if you are

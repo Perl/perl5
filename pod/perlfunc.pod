@@ -3327,20 +3327,20 @@ What gets returned depends on several factors:
 
 =item If C<use bytes> is in effect:
 
-The results follow ASCII semantics.  Only the characters C<A-Z> change,
+The results follow ASCII rules.  Only the characters C<A-Z> change,
 to C<a-z> respectively.
 
 =item Otherwise, if C<use locale> (but not C<use locale ':not_characters'>) is in effect:
 
 Respects current LC_CTYPE locale for code points < 256; and uses Unicode
-semantics for the remaining code points (this last can only happen if
+rules for the remaining code points (this last can only happen if
 the UTF8 flag is also set).  See L<perllocale>.
 
 Starting in v5.20, Perl wil use full Unicode rules if the locale is
 UTF-8.  Otherwise, there is a deficiency in this scheme, which is that
 case changes that cross the 255/256
 boundary are not well-defined.  For example, the lower case of LATIN CAPITAL
-LETTER SHARP S (U+1E9E) in Unicode semantics is U+00DF (on ASCII
+LETTER SHARP S (U+1E9E) in Unicode rules is U+00DF (on ASCII
 platforms).   But under C<use locale> (prior to v5.20 or not a UTF-8
 locale), the lower case of U+1E9E is
 itself, because 0xDF may not be LATIN SMALL LETTER SHARP S in the
@@ -3351,15 +3351,15 @@ many) where the 255/256 boundary would otherwise be crossed.
 
 =item Otherwise, If EXPR has the UTF8 flag set:
 
-Unicode semantics are used for the case change.
+Unicode rules are used for the case change.
 
 =item Otherwise, if C<use feature 'unicode_strings'> or C<use locale ':not_characters'> is in effect:
 
-Unicode semantics are used for the case change.
+Unicode rules are used for the case change.
 
 =item Otherwise:
 
-ASCII semantics are used for the case change.  The lowercase of any character
+ASCII rules are used for the case change.  The lowercase of any character
 outside the ASCII range is the character itself.
 
 =back

@@ -569,19 +569,19 @@ will be lost.
  MEOL            no         Same, assuming multiline.
  SEOL            no         Same, assuming singleline.
  BOUND           no         Match "" at any word boundary using native
-                            charset semantics for non-utf8
+                            charset rules for non-utf8
  BOUNDL          no         Match "" at any locale word boundary
  BOUNDU          no         Match "" at any word boundary using Unicode
-                            semantics
+                            rules
  BOUNDA          no         Match "" at any word boundary using ASCII
-                            semantics
+                            rules
  NBOUND          no         Match "" at any word non-boundary using
-                            native charset semantics for non-utf8
+                            native charset rules for non-utf8
  NBOUNDL         no         Match "" at any locale word non-boundary
  NBOUNDU         no         Match "" at any word non-boundary using
-                            Unicode semantics
+                            Unicode rules
  NBOUNDA         no         Match "" at any word non-boundary using
-                            ASCII semantics
+                            ASCII rules
  GPOS            no         Matches where last m//g left off.
 
  # [Special] alternatives:
@@ -680,25 +680,25 @@ will be lost.
 
  REF             num 1      Match some already matched string
  REFF            num 1      Match already matched string, folded using
-                            native charset semantics for non-utf8
+                            native charset rules for non-utf8
  REFFL           num 1      Match already matched string, folded in loc.
  REFFU           num 1      Match already matched string, folded using
-                            unicode semantics for non-utf8
+                            unicode rules for non-utf8
  REFFA           num 1      Match already matched string, folded using
-                            unicode semantics for non-utf8, no mixing
-                            ASCII, non-ASCII
+                            unicode rules for non-utf8, no mixing ASCII,
+                            non-ASCII
 
  # Named references.  Code in regcomp.c assumes that these all are after
  # the numbered references
  NREF            no-sv 1    Match some already matched string
  NREFF           no-sv 1    Match already matched string, folded using
-                            native charset semantics for non-utf8
+                            native charset rules for non-utf8
  NREFFL          no-sv 1    Match already matched string, folded in loc.
  NREFFU          num 1      Match already matched string, folded using
-                            unicode semantics for non-utf8
+                            unicode rules for non-utf8
  NREFFA          num 1      Match already matched string, folded using
-                            unicode semantics for non-utf8, no mixing
-                            ASCII, non-ASCII
+                            unicode rules for non-utf8, no mixing ASCII,
+                            non-ASCII
 
  IFMATCH         off 1 2    Succeeds if the following matches.
  UNLESSM         off 1 2    Fails if the following matches.

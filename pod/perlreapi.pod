@@ -143,7 +143,7 @@ TODO: Document this
 
 =item Character set
 
-The character set semantics are determined by an enum that is contained
+The character set rules are determined by an enum that is contained
 in this field.  This is still experimental and subject to change, but
 the current interface returns the rules by use of the in-line function
 C<get_regex_charset(const U32 flags)>.  The only currently documented

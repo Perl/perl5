@@ -98,7 +98,7 @@ after the match regardless of the modifier.
 =item a, d, l and u
 X</a> X</d> X</l> X</u>
 
-These modifiers, all new in 5.14, affect which character-set semantics
+These modifiers, all new in 5.14, affect which character-set rules
 (Unicode, etc.) are used, as described below in
 L</Character set modifiers>.
 
@@ -182,7 +182,7 @@ X</x>
 =head3 Character set modifiers
 
 C</d>, C</u>, C</a>, and C</l>, available starting in 5.14, are called
-the character set modifiers; they affect the character set semantics
+the character set modifiers; they affect the character set rules
 used for the regular expression.
 
 The C</d>, C</u>, and C</l> modifiers are not likely to be of much use
@@ -410,7 +410,7 @@ between C<\w> and C<\W>, using the C</a> definitions of them (similarly
 for C<\B>).
 
 Otherwise, C</a> behaves like the C</u> modifier, in that
-case-insensitive matching uses Unicode semantics; for example, "k" will
+case-insensitive matching uses Unicode rules; for example, "k" will
 match the Unicode C<\N{KELVIN SIGN}> under C</i> matching, and code
 points in the Latin1 range, above ASCII will have Unicode rules when it
 comes to case-insensitive matching.

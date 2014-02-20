@@ -1694,7 +1694,7 @@ modifier has is not propagated, being restricted to those patterns
 explicitly using it.
 
 The last four modifiers listed above, added in Perl 5.14,
-control the character set semantics, but C</a> is the only one you are likely
+control the character set rules, but C</a> is the only one you are likely
 to want to specify explicitly; the other three are selected
 automatically by various pragmas.
 

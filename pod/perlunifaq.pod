@@ -155,7 +155,7 @@ Unicode, whether the string is encoded in UTF-8 or not, thus avoiding
 the problem.
 
 However, on earlier Perls, or if you pass strings to subroutines outside
-the feature's scope, you can force Unicode semantics by changing the
+the feature's scope, you can force Unicode rules by changing the
 encoding to UTF-8 by doing C<utf8::upgrade($string)>. This can be used
 safely on any string, as it checks and does not change strings that have
 already been upgraded.

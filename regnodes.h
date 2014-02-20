@@ -18,14 +18,14 @@
 #define	EOL                   	6	/* 0x06 Match "" at end of line. */
 #define	MEOL                  	7	/* 0x07 Same, assuming multiline. */
 #define	SEOL                  	8	/* 0x08 Same, assuming singleline. */
-#define	BOUND                 	9	/* 0x09 Match "" at any word boundary using native charset semantics for non-utf8 */
+#define	BOUND                 	9	/* 0x09 Match "" at any word boundary using native charset rules for non-utf8 */
 #define	BOUNDL                	10	/* 0x0a Match "" at any locale word boundary */
-#define	BOUNDU                	11	/* 0x0b Match "" at any word boundary using Unicode semantics */
-#define	BOUNDA                	12	/* 0x0c Match "" at any word boundary using ASCII semantics */
-#define	NBOUND                	13	/* 0x0d Match "" at any word non-boundary using native charset semantics for non-utf8 */
+#define	BOUNDU                	11	/* 0x0b Match "" at any word boundary using Unicode rules */
+#define	BOUNDA                	12	/* 0x0c Match "" at any word boundary using ASCII rules */
+#define	NBOUND                	13	/* 0x0d Match "" at any word non-boundary using native charset rules for non-utf8 */
 #define	NBOUNDL               	14	/* 0x0e Match "" at any locale word non-boundary */
-#define	NBOUNDU               	15	/* 0x0f Match "" at any word non-boundary using Unicode semantics */
-#define	NBOUNDA               	16	/* 0x10 Match "" at any word non-boundary using ASCII semantics */
+#define	NBOUNDU               	15	/* 0x0f Match "" at any word non-boundary using Unicode rules */
+#define	NBOUNDA               	16	/* 0x10 Match "" at any word non-boundary using ASCII rules */
 #define	GPOS                  	17	/* 0x11 Matches where last m//g left off. */
 #define	REG_ANY               	18	/* 0x12 Match any one character (except newline). */
 #define	SANY                  	19	/* 0x13 Match any one character. */
@@ -61,15 +61,15 @@
 #define	OPEN                  	49	/* 0x31 Mark this point in input as start of #n. */
 #define	CLOSE                 	50	/* 0x32 Analogous to OPEN. */
 #define	REF                   	51	/* 0x33 Match some already matched string */
-#define	REFF                  	52	/* 0x34 Match already matched string, folded using native charset semantics for non-utf8 */
+#define	REFF                  	52	/* 0x34 Match already matched string, folded using native charset rules for non-utf8 */
 #define	REFFL                 	53	/* 0x35 Match already matched string, folded in loc. */
-#define	REFFU                 	54	/* 0x36 Match already matched string, folded using unicode semantics for non-utf8 */
-#define	REFFA                 	55	/* 0x37 Match already matched string, folded using unicode semantics for non-utf8, no mixing ASCII, non-ASCII */
+#define	REFFU                 	54	/* 0x36 Match already matched string, folded using unicode rules for non-utf8 */
+#define	REFFA                 	55	/* 0x37 Match already matched string, folded using unicode rules for non-utf8, no mixing ASCII, non-ASCII */
 #define	NREF                  	56	/* 0x38 Match some already matched string */
-#define	NREFF                 	57	/* 0x39 Match already matched string, folded using native charset semantics for non-utf8 */
+#define	NREFF                 	57	/* 0x39 Match already matched string, folded using native charset rules for non-utf8 */
 #define	NREFFL                	58	/* 0x3a Match already matched string, folded in loc. */
-#define	NREFFU                	59	/* 0x3b Match already matched string, folded using unicode semantics for non-utf8 */
-#define	NREFFA                	60	/* 0x3c Match already matched string, folded using unicode semantics for non-utf8, no mixing ASCII, non-ASCII */
+#define	NREFFU                	59	/* 0x3b Match already matched string, folded using unicode rules for non-utf8 */
+#define	NREFFA                	60	/* 0x3c Match already matched string, folded using unicode rules for non-utf8, no mixing ASCII, non-ASCII */
 #define	IFMATCH               	61	/* 0x3d Succeeds if the following matches. */
 #define	UNLESSM               	62	/* 0x3e Fails if the following matches. */
 #define	SUSPEND               	63	/* 0x3f "Independent" sub-RE. */

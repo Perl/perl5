@@ -1,7 +1,7 @@
 package charnames;
 use strict;
 use warnings;
-our $VERSION = '1.39';
+our $VERSION = '1.40';
 use unicore::Name;    # mktables-generated algorithmically-defined names
 use _charnames ();    # The submodule for this where most of the work gets done
 
@@ -228,7 +228,7 @@ input name is that of a character that won't fit into a byte (i.e., whose
 ordinal is above 255).
 
 Otherwise, any string that includes a C<\N{I<charname>}> or
-C<S<\N{U+I<code point>}>> will automatically have Unicode semantics (see
+C<S<\N{U+I<code point>}>> will automatically have Unicode rules (see
 L<perlunicode/Byte and Character Semantics>).
 
 =head1 LOOSE MATCHES
