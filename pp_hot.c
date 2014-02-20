@@ -1553,7 +1553,7 @@ Perl_do_readline(pTHX)
 	    if (IoFLAGS(io) & IOf_ARGV) {
 		if (IoFLAGS(io) & IOf_START) {
 		    IoLINES(io) = 0;
-		    if (av_len(GvAVn(PL_last_in_gv)) < 0) {
+		    if (av_tindex(GvAVn(PL_last_in_gv)) < 0) {
 			IoFLAGS(io) &= ~IOf_START;
 			do_open(PL_last_in_gv,"-",1,FALSE,O_RDONLY,0,NULL);
 			SvTAINTED_off(GvSVn(PL_last_in_gv)); /* previous tainting irrelevant */
@@ -2852,7 +2852,7 @@ PP(pp_aelem)
 	    IV len;
 	    if (!defer)
 		DIE(aTHX_ PL_no_aelem, elem);
-	    len = av_len(av);
+	    len = av_tindex(av);
 	    mPUSHs(newSVavdefelem(av,
 	    /* Resolve a negative index now, unless it points before the
 	       beginning of the array, in which case record it for error

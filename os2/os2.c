@@ -2011,7 +2011,7 @@ mod2fname(pTHX_ SV *sv)
     if (SvTYPE(sv) != SVt_PVAV) 
       Perl_croak_nocontext("Not array reference given to mod2fname");
 
-    avlen = av_len((AV*)sv);
+    avlen = av_tindex((AV*)sv);
     if (avlen < 0) 
       Perl_croak_nocontext("Empty array reference given to mod2fname");
 

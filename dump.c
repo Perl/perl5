@@ -1871,9 +1871,9 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	if (AvREIFY(sv))	sv_catpv(d, ",REIFY");
 	Perl_dump_indent(aTHX_ level, file, "  FLAGS = (%s)\n",
 			 SvCUR(d) ? SvPVX_const(d) + 1 : "");
-	if (nest < maxnest && av_len(MUTABLE_AV(sv)) >= 0) {
+	if (nest < maxnest && av_tindex(MUTABLE_AV(sv)) >= 0) {
 	    SSize_t count;
-	    for (count = 0; count <=  av_len(MUTABLE_AV(sv)) && count < maxnest; count++) {
+	    for (count = 0; count <=  av_tindex(MUTABLE_AV(sv)) && count < maxnest; count++) {
 		SV** const elt = av_fetch(MUTABLE_AV(sv),count,0);
 
 		Perl_dump_indent(aTHX_ level + 1, file, "Elt No. %"IVdf"\n", (IV)count);

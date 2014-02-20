@@ -7301,7 +7301,7 @@ Perl_reg_named_buff_scalar(pTHX_ REGEXP * const r, const U32 flags)
         } else if (flags & RXapif_ONE) {
             ret = CALLREG_NAMED_BUFF_ALL(r, (flags | RXapif_REGNAMES));
             av = MUTABLE_AV(SvRV(ret));
-            length = av_len(av);
+            length = av_tindex(av);
 	    SvREFCNT_dec_NN(ret);
             return newSViv(length + 1);
         } else {
@@ -14021,7 +14021,7 @@ parseit:
 #endif
 
         /* Look at the longest folds first */
-        for (cp_count = av_len(multi_char_matches); cp_count > 0; cp_count--) {
+        for (cp_count = av_tindex(multi_char_matches); cp_count > 0; cp_count--) {
 
             if (av_exists(multi_char_matches, cp_count)) {
                 AV** this_array_ptr;
@@ -14430,7 +14430,7 @@ parseit:
                     {
                         AV* list = (AV*) *listp;
                         IV k;
-                        for (k = 0; k <= av_len(list); k++) {
+                        for (k = 0; k <= av_tindex(list); k++) {
                             SV** c_p = av_fetch(list, k, FALSE);
                             UV c;
                             if (c_p == NULL) {

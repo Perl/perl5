@@ -12965,7 +12965,7 @@ mod2fname(pTHX_ CV *cv)
   int max_name_len = 39;
   AV *in_array = (AV *)SvRV(ST(0));
 
-  num_entries = av_len(in_array);
+  num_entries = av_tindex(in_array);
 
   /* All the names start with PL_. */
   strcpy(ultimate_name, "PL_");

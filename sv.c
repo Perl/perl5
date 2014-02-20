@@ -13939,7 +13939,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     /* Call the ->CLONE method, if it exists, for each of the stashes
        identified by sv_dup() above.
     */
-    while(av_len(param->stashes) != -1) {
+    while(av_tindex(param->stashes) != -1) {
 	HV* const stash = MUTABLE_HV(av_shift(param->stashes));
 	GV* const cloner = gv_fetchmethod_autoload(stash, "CLONE", 0);
 	if (cloner && GvCV(cloner)) {

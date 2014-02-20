@@ -3655,7 +3655,7 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
                 }
                 else {  /* Does participate in folds */
                     AV* list = (AV*) *listp;
-                    if (av_len(list) != 1) {
+                    if (av_tindex(list) != 1) {
 
                         /* If there aren't exactly two folds to this, it is
                          * outside the scope of this function */
@@ -7549,7 +7549,7 @@ Perl__get_regclass_nonbitmap_data(pTHX_ const regexp *prog,
                     *only_utf8_locale_ptr = NULL;
                 }
 
-                if (av_len(av) >= 3) {
+                if (av_tindex(av) >= 3) {
                     invlist = ary[3];
                     if (SvUV(ary[4])) {
                         swash_init_flags |= _CORE_SWASH_INIT_USER_DEFINED_PROPERTY;
@@ -7908,7 +7908,7 @@ S_setup_eval_state(pTHX_ regmatch_info *const reginfo)
             /* this regexp is also owned by the new PL_reg_curpm, which
                will try to free it.  */
             av_push(PL_regex_padav, repointer);
-            PL_reg_curpm->op_pmoffset = av_len(PL_regex_padav);
+            PL_reg_curpm->op_pmoffset = av_tindex(PL_regex_padav);
             PL_regex_pad = AvARRAY(PL_regex_padav);
         }
 #endif

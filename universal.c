@@ -722,7 +722,7 @@ XS(XS_PerlIO_get_layers)
 	     AV* const av = PerlIO_get_layers(aTHX_ input ?
 					IoIFP(io) : IoOFP(io));
 	     SSize_t i;
-	     const SSize_t last = av_len(av);
+	     const SSize_t last = av_tindex(av);
 	     SSize_t nitem = 0;
 	     
 	     for (i = last; i >= 0; i -= 3) {
@@ -898,7 +898,7 @@ XS(XS_re_regnames)
         XSRETURN_UNDEF;
 
     av = MUTABLE_AV(SvRV(ret));
-    length = av_len(av);
+    length = av_tindex(av);
 
     EXTEND(SP, length+1); /* better extend stack just once */
     for (i = 0; i <= length; i++) {

@@ -2085,7 +2085,7 @@ PP(pp_eof)
 
     if (!MAXARG && (PL_op->op_flags & OPf_SPECIAL)) {	/* eof() */
 	if (io && !IoIFP(io)) {
-	    if ((IoFLAGS(io) & IOf_START) && av_len(GvAVn(gv)) < 0) {
+	    if ((IoFLAGS(io) & IOf_START) && av_tindex(GvAVn(gv)) < 0) {
 		IoLINES(io) = 0;
 		IoFLAGS(io) &= ~IOf_START;
 		do_open(gv, "-", 1, FALSE, O_RDONLY, 0, NULL);
