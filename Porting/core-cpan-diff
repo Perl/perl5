@@ -97,7 +97,7 @@ sub run {
     my $mirror_url = "http://www.cpan.org/";
     my $use_diff;
     my $output_file;
-    my $verbose;
+    my $verbose = 0;
     my $force;
     my $do_crosscheck;
 
@@ -112,7 +112,7 @@ sub run {
         'o|output=s'    => \$output_file,
         'r|reverse'     => \$reverse,
         'u|upstream=s@' => \@wanted_upstreams,
-        'v|verbose'     => \$verbose,
+        'v|verbose:1'   => \$verbose,
         'x|crosscheck'  => \$do_crosscheck,
     ) or usage;
 
@@ -121,8 +121,8 @@ sub run {
     usage("Cannot mix -a with module list") if $scan_all && @ARGV;
 
     if ($do_crosscheck) {
-        usage("can't use -r, -d, --diffopts, -v with --crosscheck")
-          if ( $reverse || $use_diff || $diff_opts || $verbose );
+        usage("can't use -r, -d, --diffopts with --crosscheck")
+          if ( $reverse || $use_diff || $diff_opts );
     }
     else {
         $diff_opts = '-u -b' unless defined $diff_opts;
@@ -164,11 +164,12 @@ sub run {
 
     if ($do_crosscheck) {
         do_crosscheck(
-            $outfh, $cache_dir, $mirror_url,
+            $outfh, $cache_dir, $mirror_url, $verbose,
             $force, \@modules,  \@wanted_upstreams
         );
     }
     else {
+        $verbose > 2 and $use_diff++;
         do_compare(
             \@modules,  $outfh,      $output_file,
             $cache_dir, $mirror_url, $verbose,
@@ -337,8 +338,10 @@ EOF
               file_diff( $outfh, $abs_cpan_file, $mapped_file, $reverse,
                 $diff_opts );
             if ( $different && customized( $m, $relative_mapped_file ) ) {
-                if (! $use_diff ) {
-                    print $outfh "  Customized for blead: $relative_mapped_file\n";
+		print $outfh "  Customized for blead: $relative_mapped_file\n";
+                if ( $use_diff && $verbose ) {
+                    $different =~ s{^(--- |\+\+\+ )/tmp/[^/]+/}{$1}gm;
+                    print $outfh $different;
                 }
             }
             elsif ($different) {
@@ -440,7 +443,7 @@ sub distro_base {
 
 sub do_crosscheck {
     my (
-        $outfh, $cache_dir, $mirror_url,
+        $outfh, $cache_dir, $mirror_url, $verbose,
         $force, $modules,   $wanted_upstreams,
     ) = @_;
 
@@ -492,6 +495,8 @@ sub do_crosscheck {
     for my $module (@$modules) {
         my $m = $Maintainers::Modules{$module}
           or die "ERROR: No such module in Maintainers.pl: '$module'\n";
+
+        $verbose and warn "Checking $module\n";
 
         unless ( $m->{CPAN} ) {
             print $outfh "\nWARNING: $module is not dual-life; skipping\n";
