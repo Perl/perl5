@@ -236,8 +236,6 @@ use File::Glob qw(:case);
         'DISTRIBUTION' => 'HMBRAND/Config-Perl-V-0.20.tgz',
         'FILES'        => q[cpan/Config-Perl-V],
         'EXCLUDED'     => ['examples/show-v.pl'],
-        # Waiting to be merged upstream: see CPAN RT#92534
-        'CUSTOMIZED'   => ['t/20_plv510.t', 't/21_plv518.t'],
     },
 
     'constant' => {

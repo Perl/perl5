@@ -60,6 +60,7 @@ Summary of my perl5 (revision 5 version 18 subversion 0) configuration:
     uname='linux test 3.7.10-1.4-desktop #1 smp preempt fri apr 19 12:06:34 utc 2013 (8ef74f8) i686 i686 i386 gnulinux '
     config_args='-Duse64bitint -Duselongdouble -des'
     hint=recommended, useposix=true, d_sigaction=define
+    useperlio=define, d_sfio=undef, uselargefiles=define, usesocks=undef
     useithreads=undef, usemultiplicity=undef
     use64bitint=define, use64bitall=undef, uselongdouble=define
     usemymalloc=n, bincompat5005=undef
