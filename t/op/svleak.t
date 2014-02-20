@@ -15,7 +15,7 @@ BEGIN {
 
 use Config;
 
-plan tests => 126;
+plan tests => 127;
 
 # run some code N times. If the number of SVs at the end of loop N is
 # greater than (N-1)*delta at the end of loop 1, we've got a leak
@@ -474,3 +474,7 @@ leak(2, 0, sub {
 
 
 leak(2,0,sub{eval{require untohunothu}}, 'requiring nonexistent module');
+
+# [perl #120939]
+use constant const_av_xsub_leaked => 1 .. 3;
+leak(5, 0, sub { scalar &const_av_xsub_leaked }, "const_av_sub in scalar context");

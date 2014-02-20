@@ -12478,7 +12478,7 @@ const_av_xsub(pTHX_ CV* cv)
 	Perl_croak(aTHX_ "Magical list constants are not supported");
     if (GIMME_V != G_ARRAY) {
 	EXTEND(SP, 1);
-	ST(0) = newSViv((IV)AvFILLp(av)+1);
+	ST(0) = sv_2mortal(newSViv((IV)AvFILLp(av)+1));
 	XSRETURN(1);
     }
     EXTEND(SP, AvFILLp(av)+1);
