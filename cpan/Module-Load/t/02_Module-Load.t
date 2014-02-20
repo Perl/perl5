@@ -3,6 +3,7 @@
 use Test::More;
 use strict;
 use warnings;
+use Config;
 
 #
 # Module::Load; test new features:
@@ -74,16 +75,6 @@ subtest 'load/prevcompat' => sub{
     	    Data::Dumper->Dump([$WORLD]);');
     is_peace_in_world();
 
-    _test('use Module::Load;
-	    load("Data::Dumper","Dumper","DumperX");
-    	    Data::Dumper->Dump([$WORLD]);');
-    is_peace_in_world();
-
-	_test('use Module::Load "all";
-	    load("Data::Dumper","Dumper","DumperX");
-    	    DumperX([$WORLD]);');
-    is_peace_in_world();
-
     _test('use Module::Load "all";
 		load("______");');
     cant_locate();
@@ -127,11 +118,6 @@ subtest 'autoload' => sub{
     	    Dumper($WORLD);');
     is_peace_in_world();
 
-    _test('use Module::Load;
-			Module::Load::autoload("Data::Dumper","Dumper","DumperX");
-    	    DumperX($WORLD);');
-    is_peace_in_world();
-
     _test('use Module::Load "autoload";
 			autoload("Data::Dumper");
     	    Dumper($WORLD);');
@@ -140,11 +126,6 @@ subtest 'autoload' => sub{
     _test('use Module::Load "all";
 			autoload("Data::Dumper");
     	    Dumper($WORLD);');
-    is_peace_in_world();
-
-    _test('use Module::Load "all";
-			autoload("Data::Dumper","Dumper","DumperX");
-    	    DumperX($WORLD);');
     is_peace_in_world();
 
     _test('use Module::Load "all";
@@ -220,21 +201,6 @@ subtest 'load_remote' => sub{
 	    XYZ::Module::Dumper($WORLD);');
     is_peace_in_world();
 
-    _test('use Module::Load;
-	    Module::Load::load_remote("XYZ::Module","Data::Dumper","Dumper","DumperX");
-	    XYZ::Module::Dumper($WORLD);');
-    is_peace_in_world();
-
-    _test('use Module::Load "load_remote";
-	    load_remote("XYZ::Module","Data::Dumper","Dumper","DumperX");
-	    XYZ::Module::Dumper($WORLD);');
-    is_peace_in_world();
-
-    _test('use Module::Load "all";
-	    load_remote("XYZ::Module","Data::Dumper","Dumper","DumperX");
-	    XYZ::Module::Dumper($WORLD);');
-    is_peace_in_world();
-
 	_test('use Module::Load "all";
 	    load_remote("XYZ::Module","______","Data::Dumper");
 	    XYZ::Module::Dumper($WORLD);');
@@ -261,16 +227,6 @@ subtest 'autoload_remote' => sub{
 
     _test('use Module::Load;
 	    Module::Load::autoload_remote("XYZ::Module","Data::Dumper");
-	    XYZ::Module::Dumper($WORLD);');
-    is_peace_in_world();
-
-    _test('use Module::Load;
-	    Module::Load::autoload_remote("XYZ::Module","Data::Dumper","Dumper","DumperX");
-	    XYZ::Module::DumperX($WORLD);');
-    is_peace_in_world();
-
-    _test('use Module::Load "autoload_remote";
-	    autoload_remote("XYZ::Module","Data::Dumper","Dumper","DumperX");
 	    XYZ::Module::Dumper($WORLD);');
     is_peace_in_world();
 
@@ -302,7 +258,6 @@ subtest 'complex' => sub{
 			autoload_remote("Data::Dumper");
 	    Data::Dumper->Dump([$WORLD]);');
     isnt_def_sub();
-
 
 	_test('use Module::Load "load","autoload";
 			load("Data::Dumper", "Dumper");
@@ -342,6 +297,58 @@ subtest 'complex' => sub{
 	_test('use Module::Load "all","";
 			load("Carp");');
     isnt_def_sub();
+
+    done_testing();
+};
+
+subtest 'dumpxs' => sub{
+    unless ( $Config::Config{usedl} ) {
+      plan skip_all => 'Statically linked perl';
+    }
+    _test('use Module::Load;
+	    load("Data::Dumper","Dumper","DumperX");
+    	    Data::Dumper->Dump([$WORLD]);');
+    is_peace_in_world();
+
+	_test('use Module::Load "all";
+	    load("Data::Dumper","Dumper","DumperX");
+    	    DumperX([$WORLD]);');
+    is_peace_in_world();
+
+    _test('use Module::Load;
+			Module::Load::autoload("Data::Dumper","Dumper","DumperX");
+    	    DumperX($WORLD);');
+    is_peace_in_world();
+
+    _test('use Module::Load "all";
+			autoload("Data::Dumper","Dumper","DumperX");
+    	    DumperX($WORLD);');
+    is_peace_in_world();
+
+    _test('use Module::Load;
+	    Module::Load::load_remote("XYZ::Module","Data::Dumper","Dumper","DumperX");
+	    XYZ::Module::Dumper($WORLD);');
+    is_peace_in_world();
+
+    _test('use Module::Load "load_remote";
+	    load_remote("XYZ::Module","Data::Dumper","Dumper","DumperX");
+	    XYZ::Module::Dumper($WORLD);');
+    is_peace_in_world();
+
+    _test('use Module::Load "all";
+	    load_remote("XYZ::Module","Data::Dumper","Dumper","DumperX");
+	    XYZ::Module::Dumper($WORLD);');
+    is_peace_in_world();
+
+    _test('use Module::Load;
+	    Module::Load::autoload_remote("XYZ::Module","Data::Dumper","Dumper","DumperX");
+	    XYZ::Module::DumperX($WORLD);');
+    is_peace_in_world();
+
+    _test('use Module::Load "autoload_remote";
+	    autoload_remote("XYZ::Module","Data::Dumper","Dumper","DumperX");
+	    XYZ::Module::Dumper($WORLD);');
+    is_peace_in_world();
 
     done_testing();
 };

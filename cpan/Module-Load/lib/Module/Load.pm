@@ -1,6 +1,6 @@
 package Module::Load;
 
-$VERSION = '0.30';
+$VERSION = '0.32';
 
 use strict;
 use warnings;
