@@ -215,15 +215,6 @@ check_taint_not      $2, "\t\$2";
 /(.)/;	# untaint $&, $`, $', $+, $1.
 check_taint_not  $&, "\t/./ \$&";
 
-"k" =~ /(\N{KELVIN SIGN})/i;	# taints because depends on locale
-check_taint      $&, "\t/(\\N{KELVIN SIGN})/i \$&";
-check_taint      $`, "\t\$`";
-check_taint      $', "\t\$'";
-check_taint      $+, "\t\$+";
-check_taint      $1, "\t\$1";
-ok($1 eq 'k', ("\t" x 4) . "\$1 is 'k'");
-check_taint_not      $2, "\t\$2";
-
 /(.)/;	# untaint $&, $`, $', $+, $1.
 check_taint_not  $&, "\t/(.)/ \$&";
 
