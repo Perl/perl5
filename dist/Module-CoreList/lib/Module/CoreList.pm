@@ -4,7 +4,7 @@ use vars qw/$VERSION %released %version %families %upstream
 	    %bug_tracker %deprecated %delta/;
 use Module::CoreList::TieHashDelta;
 use version;
-$VERSION = '3.06';
+$VERSION = '3.07';
 
 my $dumpinc = 0;
 sub import {
@@ -246,6 +246,7 @@ sub changes_between {
     5.018002 => '2014-01-06',
     5.019008 => '2014-01-20',
     5.019009 => '2014-02-20',
+    5.019010 => '????-??-??',
   );
 
 for my $version ( sort { $a <=> $b } keys %released ) {
@@ -9573,6 +9574,17 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         removed => {
         }
     },
+    5.019010 => {
+        delta_from => 5.019009,
+        changed => {
+            'Config'                => '5.019010',
+            'Module::CoreList'      => '3.07',
+            'Module::CoreList::TieHashDelta'=> '3.07',
+            'Module::CoreList::Utils'=> '3.07',
+        },
+        removed => {
+        }
+    },
 );
 
 sub is_core
@@ -9948,6 +9960,13 @@ for my $version (sort { $a <=> $b } keys %delta) {
     },
     5.019009 => {
         delta_from => 5.019008,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.019010 => {
+        delta_from => 5.019009,
         changed => {
         },
         removed => {
@@ -10786,6 +10805,7 @@ for my $version (sort { $a <=> $b } keys %deprecated) {
 $released{'5.000'} = $released{5};
 $version{'5.000'} = $version{5};
 
+_create_aliases(\%delta);
 _create_aliases(\%released);
 _create_aliases(\%version);
 _create_aliases(\%deprecated);
