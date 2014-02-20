@@ -17,6 +17,33 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.19.9 - R. A. MacAvoy, Tea with the Black Dragon
+
+L<Announced on 2014-02-20 by Tony Cook|http://www.nntp.perl.org/group/perl.perl5.porters/2014/02/msg213047.html>
+
+Old hands.  The smell of rain--the smell of Ch'an.  Quiet words in
+rough Cantonese.  "I am not to be your master.  Your master has to be
+stronger than you are--has to tell you you are a fool and make you
+know it.  And make you feel content in being a fool.  How could I do
+that for you?  I'm old.  You are too strong for me; you are full of
+chi."  The old man has paused then, huddled against the wind while
+clouds thickened above them.
+
+"I will tell you this, Long," he continued, "Before you find yourself
+you will lose your chi.  Also you will leave behind you all pride of
+body, pride of mind.  You will be reduced.  Like me."  The old man
+closed his eyes, and rain began to beat against his gray, crew-cut
+hair.  He pulled his coat closer.  Suddenly his eyes snapped open and
+he looked Long in the face.
+
+"You must leave China.  Go across the ocean.  There you will meet your
+master."  He set down his teacup with a palsied hand.  His voice rose,
+grew fierce.
+
+"I tell you this, most honored and impressive visitor.  You are a
+fool, yes, but you will find the very thing you seek.  You will find
+truth!"
+
 =head2 v5.19.8 - Joseph Heller, Catch-22
 
 L<Announced on 2014-01-20 by Ricardo Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2014/01/msg211729.html>
