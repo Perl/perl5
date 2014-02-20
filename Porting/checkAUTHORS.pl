@@ -792,7 +792,8 @@ Peter.Dintelmann\100Dresdner-Bank.com   peter.dintelmann\100dresdner-bank.com
 # NOTE: There is an intentional trailing space in the line above
 pfeifer\100wait.de                      pfeifer\100charly.informatik.uni-dortmund.de
 +                                       upf\100de.uu.net
-rabbit\100rabbit.us                     rabbit+bugs\100rabbit.us
+ribasushi@cpan.org			rabbit\100rabbit.us
++					rabbit+bugs\100rabbit.us
 perl\100aaroncrane.co.uk		arc\100cpan.org
 phil\100perkpartners.com                phil\100finchcomputer.com
 pimlott\100idiomtech.com                andrew\100pimlott.net
