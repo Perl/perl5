@@ -685,6 +685,16 @@ with GCC on HP-UX 64-bit.
 
 =back
 
+=head1 Known Problems
+
+=over 4
+
+=item *
+
+The F<lib/locale.t> test may fail rarely.
+
+=back
+
 =head1 Errata From Previous Releases
 
 =over 4
