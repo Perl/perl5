@@ -4993,7 +4993,7 @@ You are recommended to change your code to set C<$/> to C<undef> explicitly
 if you wish to slurp the file. In future versions of Perl assigning
 a reference to will throw a fatal error.
 
-=item Setting $/ to a %s reference is forbidden
+=item Setting $/ to %s reference is forbidden
 
 (F) You tried to assign a reference to a non integer to C<$/>.  In older
 Perls this would have behaved similarly to setting it to a reference to

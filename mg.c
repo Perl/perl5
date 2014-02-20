@@ -2769,7 +2769,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
                         );
                     }
                 } else {
-              /* diag_listed_as: Setting $/ to a %s reference is forbidden */
+              /* diag_listed_as: Setting $/ to %s reference is forbidden */
                     Perl_croak(aTHX_ "Setting $/ to a%s %s reference is forbidden",
                                       *reftype == 'A' ? "n" : "", reftype);
                 }

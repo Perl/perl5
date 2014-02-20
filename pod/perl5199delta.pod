@@ -482,7 +482,7 @@ diagnostic messages, see L<perldiag>.
 
 =item *
 
-Added L<Setting $E<sol> to a %s reference is forbidden|perldiag/"Setting $E<sol> to a %s reference is forbidden">
+Added L<Setting $E<sol> to a %s reference is forbidden|perldiag/"Setting $E<sol> to %s reference is forbidden">
 
 =back
 
