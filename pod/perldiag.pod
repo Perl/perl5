@@ -1927,7 +1927,7 @@ L<perlrecharclass/Extended Bracketed Character Classes>.
 
 (F) To use subroutine signatures, you must first enable them:
 
-    no warnings "experimental:signatures";
+    no warnings "experimental::signatures";
     use feature "signatures";
     sub foo ($left, $right) { ... }
 
