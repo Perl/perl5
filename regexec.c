@@ -7491,7 +7491,6 @@ Perl_regclass_swash(pTHX_ const regexp *prog, const regnode* node, bool doinit, 
 
     return newSVsv(_get_regclass_nonbitmap_data(prog, node, doinit, listsvp, NULL));
 }
-#endif
 
 SV *
 Perl__get_regclass_nonbitmap_data(pTHX_ const regexp *prog,
@@ -7605,6 +7604,7 @@ Perl__get_regclass_nonbitmap_data(pTHX_ const regexp *prog,
 
     return sw;
 }
+#endif /* !defined(PERL_IN_XSUB_RE) || defined(PLUGGABLE_RE_EXTENSION) */
 
 /*
  - reginclass - determine if a character falls into a character class
