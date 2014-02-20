@@ -10882,7 +10882,7 @@ S_compute_EXACTish(pTHX_ RExC_state_t *pRExC_state)
 PERL_STATIC_INLINE void
 S_alloc_maybe_populate_EXACT(pTHX_ RExC_state_t *pRExC_state,
                          regnode *node, I32* flagp, STRLEN len, UV code_point,
-                         const bool downgradable)
+                         bool downgradable)
 {
     /* This knows the details about sizing an EXACTish node, setting flags for
      * it (by setting <*flagp>, and potentially populating it with a single
@@ -10915,6 +10915,12 @@ S_alloc_maybe_populate_EXACT(pTHX_ RExC_state_t *pRExC_state,
     U8 character[UTF8_MAXBYTES_CASE+1];
 
     PERL_ARGS_ASSERT_ALLOC_MAYBE_POPULATE_EXACT;
+
+    /* Don't bother to check for downgrading in PASS1, as it doesn't make any
+     * sizing difference, and is extra work that is thrown away */
+    if (downgradable && ! PASS2) {
+        downgradable = FALSE;
+    }
 
     if (! len_passed_in) {
         if (UTF) {
@@ -11020,7 +11026,8 @@ S_alloc_maybe_populate_EXACT(pTHX_ RExC_state_t *pRExC_state,
         *flagp |= SIMPLE;
     }
 
-    if (OP(node) == EXACTFL) {
+    /* The OP may not be well defined in PASS1 */
+    if (PASS2 && OP(node) == EXACTFL) {
         RExC_contains_locale = 1;
     }
 }

@@ -2079,7 +2079,7 @@ EsRn	|char *	|regpatws	|NN RExC_state_t *pRExC_state \
 				|NN char *p|const bool recognize_comment
 Ei	|void   |alloc_maybe_populate_EXACT|NN RExC_state_t *pRExC_state \
 				|NN regnode *node|NN I32 *flagp|STRLEN len \
-				|UV code_point|const bool downgradable
+				|UV code_point|bool downgradable
 Ei	|U8   |compute_EXACTish|NN RExC_state_t *pRExC_state
 Es	|char *	|nextchar	|NN RExC_state_t *pRExC_state
 Es	|bool	|reg_skipcomment|NN RExC_state_t *pRExC_state
