@@ -1006,8 +1006,23 @@ to the registree to ensure it is accurate.  The value returned will be
 one of the OA_* constants from op.h.
 
 =for apidoc Am|bool|OP_TYPE_IS|OP *o, Optype type
-Returns true if the given OP is not NULL and if it is of the given
-type.
+Returns true if the given OP is not a NULL pointer
+and if it is of the given type.
+
+The negation of this macro, C<OP_TYPE_ISNT> is also available
+as well as C<OP_TYPE_IS_NN> and C<OP_TYPE_ISNT_NN> which elide
+the NULL pointer check.
+
+=for apidoc Am|bool|OP_TYPE_IS_OR_WAS|OP *o, Optype type
+Returns true if the given OP is not a NULL pointer and
+if it is of the given type or used to be before being
+replaced by an OP of type OP_NULL.
+
+The negation of this macro, C<OP_TYPE_ISNT_AND_WASNT>
+is also available as well as C<OP_TYPE_IS_OR_WAS_NN>
+and C<OP_TYPE_ISNT_AND_WASNT_NN> which elide
+the NULL pointer check.
+
 =cut
 */
 
@@ -1022,7 +1037,27 @@ type.
 		     : (PL_opargs[(o)->op_type] & OA_CLASS_MASK))
 
 #define OP_TYPE_IS(o, type) ((o) && (o)->op_type == (type))
+#define OP_TYPE_IS_NN(o, type) ((o)->op_type == (type))
+#define OP_TYPE_ISNT(o, type) ((o) && (o)->op_type != (type))
+#define OP_TYPE_ISNT_NN(o, type) ((o)->op_type != (type))
 
+#define OP_TYPE_IS_OR_WAS_NN(o, type) \
+    ( ((o)->op_type == OP_NULL \
+       ? (o)->op_targ \
+       : (o)->op_type) \
+      == (type) )
+
+#define OP_TYPE_IS_OR_WAS(o, type) \
+    ( (o) && OP_TYPE_IS_OR_WAS_NN(o, type) )
+
+#define OP_TYPE_ISNT_AND_WASNT_NN(o, type) \
+    ( ((o)->op_type == OP_NULL \
+       ? (o)->op_targ \
+       : (o)->op_type) \
+      != (type) )
+
+#define OP_TYPE_ISNT_AND_WASNT(o, type) \
+    ( (o) && OP_TYPE_ISNT_AND_WASNT_NN(o, type) )
 
 #define newATTRSUB(f, o, p, a, b) Perl_newATTRSUB_x(aTHX_  f, o, p, a, b, FALSE)
 #define newSUB(f, o, p, b)	newATTRSUB((f), (o), (p), NULL, (b))

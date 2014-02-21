@@ -5777,8 +5777,7 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 	o = newBINOP(OP_AASSIGN, flags, list(force_list(right)), curop);
 	o->op_private = (U8)(0 | (flags >> 8));
 
-	if ((left->op_type == OP_LIST
-	     || (left->op_type == OP_NULL && left->op_targ == OP_LIST)))
+	if (OP_TYPE_IS_OR_WAS(left, OP_LIST))
 	{
 	    OP* lop = ((LISTOP*)left)->op_first;
 	    maybe_common_vars = FALSE;
