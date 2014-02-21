@@ -1,4 +1,10 @@
-3.06
+3.08
+  - prepared for v5.19.10
+
+3.07 Fri Feb 21 2014
+ - fix for is_core tests and perls ending in 0
+
+3.06 Thu Feb 20 2014
  - updated for 5.19.9
  - fix Module::CoreList::is_core default perl version
  - fix Module::CoreList::is_core version comparision
