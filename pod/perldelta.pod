@@ -126,6 +126,13 @@ overrides. [perl #121196]
 
 =item *
 
+L<HTTP::Tiny> has been upgraded from version 0.042 to 0.043.
+
+No longer sends absolute request URI when tunneling SSL via proxy and fixes
+regression in setting host name to verify SSL.
+
+=item *
+
 L<Module::Load> has been upgraded from version 0.30 to 0.32.
 
 Fix tests to support statically built perls.

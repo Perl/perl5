@@ -3,7 +3,7 @@ package HTTP::Tiny;
 use strict;
 use warnings;
 # ABSTRACT: A small, simple, correct HTTP/1.1 client
-our $VERSION = '0.042'; # VERSION
+our $VERSION = '0.043'; # VERSION
 
 use Carp ();
 
@@ -466,6 +466,7 @@ sub _request {
     my $request = {
         method    => $method,
         scheme    => $scheme,
+        host      => $host,
         host_port => ($port == $DefaultPort{$scheme} ? $host : "$host:$port"),
         uri       => $path_query,
         headers   => {},
@@ -545,8 +546,6 @@ sub _open_handle {
 sub _proxy_connect {
     my ($self, $request, $handle) = @_;
 
-    $request->{uri} = "$request->{scheme}://$request->{host_port}$request->{uri}";
-
     my @proxy_vars;
     if ( $request->{scheme} eq 'https' ) {
         Carp::croak(qq{No https_proxy defined}) unless $self->{https_proxy};
@@ -568,8 +567,13 @@ sub _proxy_connect {
 
     $handle->connect($p_scheme, $p_host, $p_port);
 
-    $self->_create_proxy_tunnel( $request, $handle )
-        if $request->{scheme} eq 'https';
+    if ($request->{scheme} eq 'https') {
+        $self->_create_proxy_tunnel( $request, $handle );
+    }
+    else {
+        # non-tunneled proxy requires absolute URI
+        $request->{uri} = "$request->{scheme}://$request->{host_port}$request->{uri}";
+    }
 
     return $handle;
 }
@@ -1424,7 +1428,7 @@ HTTP::Tiny - A small, simple, correct HTTP/1.1 client
 
 =head1 VERSION
 
-version 0.042
+version 0.043
 
 =head1 SYNOPSIS
 
