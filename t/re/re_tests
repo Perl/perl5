@@ -1848,5 +1848,10 @@ A+(*PRUNE)BC(?{})	AAABC	y	$&	AAABC
 /^\S+=/d	\x{3a3}=\x{3a0}	y	$&	\x{3a3}=
 /^\S+=/u	\x{3a3}=\x{3a0}	y	$&	\x{3a3}=
 
+/(.)((o)\1)(?2)/	fofof	y	$2	of
+/(.)(?2)((\1)(?4)(\1))/	fffffff	y	$1	f
+/(.)(?2)((.)(?4)(\1))/	foffoff	y	$2	off
+/^(.\2?)(.)(?1)$/	abcb	y	$2	b
+/^(.\1?)(?1)$/	aba	y	$1	a
 # Keep these lines at the end of the file
 # vim: softtabstop=0 noexpandtab

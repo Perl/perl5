@@ -271,18 +271,33 @@ S_regcppush(pTHX_ const regexp *rex, I32 parenfloor, U32 maxopenparen)
 {
     dVAR;
     const int retval = PL_savestack_ix;
-    const int paren_elems_to_push =
-                (maxopenparen - parenfloor) * REGCP_PAREN_ELEMS;
-    const UV total_elems = paren_elems_to_push + REGCP_OTHER_ELEMS;
-    const UV elems_shifted = total_elems << SAVE_TIGHT_SHIFT;
     I32 p;
     GET_RE_DEBUG_FLAGS_DECL;
 
     PERL_ARGS_ASSERT_REGCPPUSH;
+    /* Note that this code makes redundant some logic below. See the
+     * "XXX: Unused" commented out code below. If this code is deemed
+     * to be correct we should audit all uses of "parenfloor" and remove
+     * similar logic elsewhere (which has comments which suggests the
+     * below logic is *correct*.
+     * Yves */
+    if (parenfloor > maxopenparen)
+        parenfloor= 0;
+    {
+    const int paren_elems_to_push =
+                (maxopenparen - parenfloor) * REGCP_PAREN_ELEMS;
+    const UV total_elems = paren_elems_to_push + REGCP_OTHER_ELEMS;
+    const UV elems_shifted = total_elems << SAVE_TIGHT_SHIFT;
 
+    /* The code below is no longer required due to the comparison above.
+     * I leave it in as a form of documentation of how we used to do
+     * things as it is not clear to me what the "right" thing to do
+     * here actually is. Yves */
+    /* XXX: Unused Code. See above. -Yves
     if (paren_elems_to_push < 0)
-	Perl_croak(aTHX_ "panic: paren_elems_to_push, %i < 0",
-		   paren_elems_to_push);
+	Perl_croak(aTHX_ "panic: paren_elems_to_push, %i < 0, maxopenparen: %i parenfloor: %i REGCP_PAREN_ELEMS: %i",
+		   paren_elems_to_push, maxopenparen, parenfloor, REGCP_PAREN_ELEMS);
+    */
 
     if ((elems_shifted >> SAVE_TIGHT_SHIFT) != total_elems)
 	Perl_croak(aTHX_ "panic: paren_elems_to_push offset %"UVuf
@@ -321,6 +336,7 @@ S_regcppush(pTHX_ const regexp *rex, I32 parenfloor, U32 maxopenparen)
     SSPUSHUV(SAVEt_REGCONTEXT | elems_shifted); /* Magic cookie. */
 
     return retval;
+    }
 }
 
 /* These are needed since we do not localize EVAL nodes: */
@@ -5269,17 +5285,17 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		startpoint = rei->program + 1;
                	ST.close_paren = 0; /* only used for GOSUB */
 
+                re->lastparen = 0;
+                re->lastcloseparen = 0;
+
         eval_recurse_doit: /* Share code with GOSUB below this line */                		
 		/* run the pattern returned from (??{...}) */
 
                 /* Save *all* the positions. */
 		ST.cp = regcppush(rex, 0, maxopenparen);
 		REGCP_SET(ST.lastcp);
+                maxopenparen = 0;
 		
-		re->lastparen = 0;
-		re->lastcloseparen = 0;
-
-		maxopenparen = 0;
 
                 /* invalidate the S-L poscache. We're now executing a
                  * different set of WHILEM ops (and their associated
