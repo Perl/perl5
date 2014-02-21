@@ -385,8 +385,9 @@ sub charinfo {
     @CATEGORIES =_read_table("To/Gc.pl") unless @CATEGORIES;
     $prop{'category'} = _search(\@CATEGORIES, 0, $#CATEGORIES, $code)
                         // $utf8::SwashInfo{'ToGc'}{'missing'};
-
-    return if $prop{'category'} eq 'Cn';    # Unassigned code points are undef
+    # Return undef if category value is 'Unassigned' or one of its synonyms 
+    return if grep { lc $_ eq 'unassigned' }
+                                    prop_value_aliases('Gc', $prop{'category'});
 
     $prop{'code'} = sprintf "%04X", $code;
     $prop{'name'} = ($char =~ /\p{Cntrl}/) ? '<control>'

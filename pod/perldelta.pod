@@ -27,6 +27,11 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 Unicode 7.0 is now supported
+
+For details on what is in this release, see
+L<http://www.unicode.org/versions/Unicode7.0.0/>.
+
 =head2 Experimental C Backtrace API
 
 Starting from Perl 5.21.1, on some platforms Perl supports retrieving

@@ -1,5 +1,5 @@
-# StandardizedVariants-6.3.0.txt
-# Date: 2012-11-14, 21:34:00 GMT [KW, LI]
+# StandardizedVariants-7.0.0.txt
+# Date: 2014-01-24, 20:00:00 GMT [KW, LI]
 #
 # Specification of the variation sequences that are defined in the
 # Unicode Standard.
@@ -7,7 +7,7 @@
 # This file is a normative contributory data file in the
 # Unicode Character Database.
 #
-# Copyright (c) 1991-2012 Unicode, Inc.
+# Copyright (c) 1991-2014 Unicode, Inc.
 # For terms of use, see http://www.unicode.org/terms_of_use.html
 #
 # Standardized variation sequences are defined in this file.
@@ -20,8 +20,8 @@
 # from what it would have had in the absence of the variation selector.
 #
 # For more information on standardized variation sequences, 
-# see Section 16.4, Variation Selectors, 
-# in The Unicode Standard, Version 6.3.
+# see Section 23.4, Variation Selectors, 
+# in The Unicode Standard, Version 7.0.
 #
 # For more information on the Ideographic Variation Database,
 # see http://www.unicode.org/ivd/
