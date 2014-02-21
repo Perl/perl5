@@ -3608,9 +3608,10 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
         DEBUG_PEEP("Peep", scan, depth);
 
 
-        /* Its not clear to khw or hv why this is done here, and not in the
-         * clauses that deal with EXACT nodes.  khw's guess is that it's
-         * because of a previous design */
+        /* The reason we do this here we need to deal with things like /(?:f)(?:o)(?:o)/
+         * which cant be dealt with by the normal EXACT parsing code, as each (?:..) is handled
+         * by a different invocation of reg() -- Yves
+         */
         JOIN_EXACT(scan,&min_subtract, &unfolded_multi_char, 0);
 
 	/* Follow the next-chain of the current node and optimize
@@ -3759,8 +3760,8 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    }
 		}
 
-                if (PERL_ENABLE_TRIE_OPTIMISATION && OP( startbranch )
-                                                                   == BRANCH )
+                if (PERL_ENABLE_TRIE_OPTIMISATION &&
+                        OP( startbranch ) == BRANCH )
                 {
 		/* demq.
 
@@ -7047,7 +7048,15 @@ reStudy:
     if (r->intflags & PREGf_ANCH)
         r->extflags |= RXf_IS_ANCHORED;
 
+
     {
+        /* this is used to identify "special" patterns that might result
+         * in Perl NOT calling the regex engine and instead doing the match "itself",
+         * particularly special cases in split//. By having the regex compiler
+         * do this pattern matching at a regop level (instead of by inspecting the pattern)
+         * we avoid weird issues with equivalent patterns resulting in different behavior,
+         * AND we allow non Perl engines to get the same optimizations by the setting the
+         * flags appropriately - Yves */
         regnode *first = ri->program + 1;
         U8 fop = OP(first);
         regnode *next = NEXTOPER(first);
