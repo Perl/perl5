@@ -119,6 +119,13 @@ XXX
 
 =item *
 
+L<base> has been upgraded from version 2.21 to 2.22.
+
+Co-exist more gracefully with C<CORE::GLOBAL::require>
+overrides. [perl #121196]
+
+=item *
+
 L<Module::Load> has been upgraded from version 0.30 to 0.32.
 
 Fix tests to support statically built perls.
