@@ -497,7 +497,9 @@ First available in Perl 5.10.1 (the 5.10.0 version behaved differently),
 binary C<~~> does a "smartmatch" between its arguments.  This is mostly
 used implicitly in the C<when> construct described in L<perlsyn>, although
 not all C<when> clauses call the smartmatch operator.  Unique among all of
-Perl's operators, the smartmatch operator can recurse.
+Perl's operators, the smartmatch operator can recurse.  The smartmatch
+operator is L<experimental|perlpolicy/experimental> and its behavior is
+subject to change.
 
 It is also unique in that all other Perl operators impose a context
 (usually string or numeric context) on their operands, autoconverting
