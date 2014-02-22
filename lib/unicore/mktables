@@ -528,6 +528,9 @@ my $unicode_reference_url = 'http://www.unicode.org/reports/tr44/';
 #   0275;LATIN SMALL LETTER BARRED O;Ll;0;L;;;;;N;;;019F;;019F
 # Without this change, there are casing problems for this character.
 #
+# Search for $string_compare_versions to see how to compare changes to
+# properties between Unicode versions
+#
 ##############################################################################
 
 my $UNDEF = ':UNDEF:';  # String to print out for undefined values in tracing
