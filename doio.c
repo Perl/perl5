@@ -1789,12 +1789,15 @@ nothing in the core.
 	    if (!(SvNIOK(*mark) || looks_like_number(*mark)))
 		Perl_croak(aTHX_ "Can't kill a non-numeric process ID");
 	    proc = SvIV_nomg(*mark);
-	    if (killgp)
-	    {
-                proc = -proc;
-	    }
 	    APPLY_TAINT_PROPER();
-	    if (PerlProc_kill(proc, val))
+#ifdef HAS_KILLPG
+            /* use killpg in preference, as the killpg() wrapper for Win32
+             * understands process groups, but the kill() wrapper doesn't */
+            if (killgp ? PerlProc_killpg(proc, val)
+                       : PerlProc_kill(proc, val))
+#else
+            if (PerlProc_kill(killgp ? -proc: proc, val))
+#endif
 		tot--;
 	}
 	PERL_ASYNC_CHECK();
