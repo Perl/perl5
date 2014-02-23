@@ -1486,14 +1486,21 @@ into perl, so changing it requires a custom build.
 =item C<(?I<PARNO>)> C<(?-I<PARNO>)> C<(?+I<PARNO>)> C<(?R)> C<(?0)>
 X<(?PARNO)> X<(?1)> X<(?R)> X<(?0)> X<(?-1)> X<(?+1)> X<(?-PARNO)> X<(?+PARNO)>
 X<regex, recursive> X<regexp, recursive> X<regular expression, recursive>
-X<regex, relative recursion>
+X<regex, relative recursion> X<GOSUB> X<GOSTART>
+
+Recursive subpattern. Treat the contents of a given capture buffer in the
+current pattern as an independent subpattern and attempt to match it at
+the current position in the string. Information about capture state from
+the caller for things like backreferences is available to the subpattern,
+but capture buffers set by the subpattern are not visible to the caller.
 
 Similar to C<(??{ code })> except that it does not involve executing any
 code or potentially compiling a returned pattern string; instead it treats
 the part of the current pattern contained within a specified capture group
-as an independent pattern that must match at the current position.
-Capture groups contained by the pattern will have the value as determined
-by the outermost recursion.
+as an independent pattern that must match at the current position. Also
+different is the treatment of capture buffers, unlike C<(??{ code })>
+recursive patterns have access to their callers match state, so one can
+use backreferences safely.
 
 I<PARNO> is a sequence of digits (not starting with 0) whose value reflects
 the paren-number of the capture group to recurse to. C<(?R)> recurses to

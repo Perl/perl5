@@ -1857,8 +1857,15 @@ A+(*PRUNE)BC(?{})	AAABC	y	$&	AAABC
 '(?-m:^abc)'m	x\nabcde	n	-	-
 
 # RT #121248 - segfault
-
 /^[+]([^(]+)$/mi	li	n	-	-
 
+# RT #121299 - Inconsistent behavior with backreferences nested inside subpattern references
+/(.)((o)\1)(?2)/	fofof	y	$2	of
+/(.)(?2)((\1)(?4)(\1))/	fffffff	y	$1	f
+/(.)(?2)((.)(?4)(\1))/	foffoff	y	$2	off
+/^(.\2?)(.)(?1)$/	abcb	y	$2	b
+/^(.\1?)(?1)$/	aba	y	$1	a
+/^ (\3(?2)\3)? ((.)) (?1) $/x	aaba	y	$2	a
+/^ (a|\3(?1)\2|(?2)) ((b|c)(?4)?) (?1) (d(?1)) $/x	abbcdcabbda	y	$2	b
 # Keep these lines at the end of the file
 # vim: softtabstop=0 noexpandtab

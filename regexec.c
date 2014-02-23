@@ -291,8 +291,8 @@ S_regcppush(pTHX_ const regexp *rex, I32 parenfloor, U32 maxopenparen)
     PERL_ARGS_ASSERT_REGCPPUSH;
 
     if (paren_elems_to_push < 0)
-	Perl_croak(aTHX_ "panic: paren_elems_to_push, %i < 0",
-		   paren_elems_to_push);
+        Perl_croak(aTHX_ "panic: paren_elems_to_push, %i < 0, maxopenparen: %i parenfloor: %i REGCP_PAREN_ELEMS: %i",
+                   paren_elems_to_push, maxopenparen, parenfloor, REGCP_PAREN_ELEMS);
 
     if ((elems_shifted >> SAVE_TIGHT_SHIFT) != total_elems)
 	Perl_croak(aTHX_ "panic: paren_elems_to_push offset %"UVuf
@@ -5129,7 +5129,14 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 startpoint = rei->program+1;
                 ST.close_paren = 0;
             }
+
+            /* Save all the positions seen so far. */
+            ST.cp = regcppush(rex, 0, maxopenparen);
+            REGCP_SET(ST.lastcp);
+
+            /* and then jump to the code we share with EVAL */
             goto eval_recurse_doit;
+
             assert(0); /* NOTREACHED */
 
         case EVAL:  /*   /(?{A})B/   /(??{A})B/  and /(?(?{A})X|Y)B/   */        
@@ -5366,6 +5373,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 re->sublen = rex->sublen;
                 re->suboffset = rex->suboffset;
                 re->subcoffset = rex->subcoffset;
+                re->lastparen = 0;
+                re->lastcloseparen = 0;
 		rei = RXi_GET(re);
                 DEBUG_EXECUTE_r(
                     debug_start_match(re_sv, utf8_target, locinput,
@@ -5373,18 +5382,16 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		);		
 		startpoint = rei->program + 1;
                	ST.close_paren = 0; /* only used for GOSUB */
+                /* Save all the seen positions so far. */
+                ST.cp = regcppush(rex, 0, maxopenparen);
+                REGCP_SET(ST.lastcp);
+                /* and set maxopenparen to 0, since we are starting a "fresh" match */
+                maxopenparen = 0;
+                /* run the pattern returned from (??{...}) */
 
-        eval_recurse_doit: /* Share code with GOSUB below this line */                		
-		/* run the pattern returned from (??{...}) */
-
-                /* Save *all* the positions. */
-		ST.cp = regcppush(rex, 0, maxopenparen);
-		REGCP_SET(ST.lastcp);
-		
-		re->lastparen = 0;
-		re->lastcloseparen = 0;
-
-		maxopenparen = 0;
+        eval_recurse_doit: /* Share code with GOSUB below this line
+                            * At this point we expect the stack context to be
+                            * set up correctly */
 
                 /* invalidate the S-L poscache. We're now executing a
                  * different set of WHILEM ops (and their associated
@@ -5396,6 +5403,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                  * pattern again */
 		reginfo->poscache_maxiter = 0;
 
+                /* the new regexp might have a different is_utf8_pat than we do */
                 is_utf8_pat = reginfo->is_utf8_pat = cBOOL(RX_UTF8(re_sv));
 
 		ST.prev_rex = rex_sv;
