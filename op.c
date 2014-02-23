@@ -11705,7 +11705,7 @@ Perl_rpeep(pTHX_ OP *o)
 		    pop->op_next->op_type == OP_AELEM &&
 		    !(pop->op_next->op_private &
 		      (OPpLVAL_INTRO|OPpLVAL_DEFER|OPpDEREF|OPpMAYBE_LVSUB)) &&
-		    (i = SvIV(((SVOP*)pop)->op_sv)) <= 255 && i >= 0)
+		    (i = SvIV(((SVOP*)pop)->op_sv)) >= -128 && i <= 127)
 		{
 		    GV *gv;
 		    if (cSVOPx(pop)->op_private & OPpCONST_STRICT)

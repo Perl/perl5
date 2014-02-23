@@ -1437,3 +1437,13 @@ sub _121050empty( ) {}
 >>>>
 _121050 $a, $b;
 () = _121050empty + 1;
+####
+# ensure aelemfast works in the range -128..127 and that there's no
+# funky edge cases
+my $x;
+no strict 'vars';
+$x = $a[-256] + $a[-255] + $a[-129] + $a[-128] + $a[-127] + $a[-1] + $a[0];
+$x = $a[1] + $a[126] + $a[127] + $a[128] + $a[255] + $a[256];
+my @b;
+$x = $b[-256] + $b[-255] + $b[-129] + $b[-128] + $b[-127] + $b[-1] + $b[0];
+$x = $b[1] + $b[126] + $b[127] + $b[128] + $b[255] + $b[256];

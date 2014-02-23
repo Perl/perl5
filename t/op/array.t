@@ -6,7 +6,7 @@ BEGIN {
     require 'test.pl';
 }
 
-plan (137);
+plan (171);
 
 #
 # @foo, @bar, and @ary are also used from tie-stdarray after tie-ing them
@@ -501,5 +501,48 @@ $_ = \$#{[]};
 $$_ = \1;
 "$$_";
 pass "no assertion failure after assigning ref to arylen when ary is gone";
+
+
+{
+    # Test aelemfast for both +ve and -ve indices, both lex and package vars.
+    # Make especially careful that we don't have any edge cases around
+    # fitting an I8 into a U8.
+    my @a = (0..299);
+    is($a[-256], 300-256, 'lex -256');
+    is($a[-255], 300-255, 'lex -255');
+    is($a[-254], 300-254, 'lex -254');
+    is($a[-129], 300-129, 'lex -129');
+    is($a[-128], 300-128, 'lex -128');
+    is($a[-127], 300-127, 'lex -127');
+    is($a[-126], 300-126, 'lex -126');
+    is($a[  -1], 300-  1, 'lex   -1');
+    is($a[   0],       0, 'lex    0');
+    is($a[   1],       1, 'lex    1');
+    is($a[ 126],     126, 'lex  126');
+    is($a[ 127],     127, 'lex  127');
+    is($a[ 128],     128, 'lex  128');
+    is($a[ 129],     129, 'lex  129');
+    is($a[ 254],     254, 'lex  254');
+    is($a[ 255],     255, 'lex  255');
+    is($a[ 256],     256, 'lex  256');
+    @aelem =(0..299);
+    is($aelem[-256], 300-256, 'pkg -256');
+    is($aelem[-255], 300-255, 'pkg -255');
+    is($aelem[-254], 300-254, 'pkg -254');
+    is($aelem[-129], 300-129, 'pkg -129');
+    is($aelem[-128], 300-128, 'pkg -128');
+    is($aelem[-127], 300-127, 'pkg -127');
+    is($aelem[-126], 300-126, 'pkg -126');
+    is($aelem[  -1], 300-  1, 'pkg   -1');
+    is($aelem[   0],       0, 'pkg    0');
+    is($aelem[   1],       1, 'pkg    1');
+    is($aelem[ 126],     126, 'pkg  126');
+    is($aelem[ 127],     127, 'pkg  127');
+    is($aelem[ 128],     128, 'pkg  128');
+    is($aelem[ 129],     129, 'pkg  129');
+    is($aelem[ 254],     254, 'pkg  254');
+    is($aelem[ 255],     255, 'pkg  255');
+    is($aelem[ 256],     256, 'pkg  256');
+}
 
 "We're included by lib/Tie/Array/std.t so we need to return something true";

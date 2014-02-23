@@ -3332,7 +3332,9 @@ sub pp_aelemfast_lex {
     my($op, $cx) = @_;
     my $name = $self->padname($op->targ);
     $name =~ s/^@/\$/;
-    return $name . "[" .  ($op->private + $self->{'arybase'}) . "]";
+    my $i = $op->private;
+    $i -= 256 if $i > 127;
+    return $name . "[" .  ($i + $self->{'arybase'}) . "]";
 }
 
 sub pp_aelemfast {
@@ -3344,7 +3346,9 @@ sub pp_aelemfast {
     my $gv = $self->gv_or_padgv($op);
     my($name,$quoted) = $self->stash_variable_name('@',$gv);
     $name = $quoted ? "$name->" : '$' . $name;
-    return $name . "[" .  ($op->private + $self->{'arybase'}) . "]";
+    my $i = $op->private;
+    $i -= 256 if $i > 127;
+    return $name . "[" .  ($i + $self->{'arybase'}) . "]";
 }
 
 sub rv2x {

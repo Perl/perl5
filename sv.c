@@ -14516,12 +14516,12 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
 	    AV *av = MUTABLE_AV(PAD_SV(obase->op_targ));
 	    if (!av || SvRMAGICAL(av))
 		break;
-	    svp = av_fetch(av, (I32)obase->op_private, FALSE);
+	    svp = av_fetch(av, (I8)obase->op_private, FALSE);
 	    if (!svp || *svp != uninit_sv)
 		break;
 	}
 	return varname(NULL, '$', obase->op_targ,
-		       NULL, (I32)obase->op_private, FUV_SUBSCRIPT_ARRAY);
+		       NULL, (I8)obase->op_private, FUV_SUBSCRIPT_ARRAY);
     case OP_AELEMFAST:
 	{
 	    gv = cGVOPx_gv(obase);
@@ -14532,12 +14532,12 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
 		AV *const av = GvAV(gv);
 		if (!av || SvRMAGICAL(av))
 		    break;
-		svp = av_fetch(av, (I32)obase->op_private, FALSE);
+		svp = av_fetch(av, (I8)obase->op_private, FALSE);
 		if (!svp || *svp != uninit_sv)
 		    break;
 	    }
 	    return varname(gv, '$', 0,
-		    NULL, (I32)obase->op_private, FUV_SUBSCRIPT_ARRAY);
+		    NULL, (I8)obase->op_private, FUV_SUBSCRIPT_ARRAY);
 	}
 	break;
 

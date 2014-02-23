@@ -727,8 +727,12 @@ PP(pp_aelemfast)
     AV * const av = PL_op->op_type == OP_AELEMFAST_LEX
 	? MUTABLE_AV(PAD_SV(PL_op->op_targ)) : GvAVn(cGVOP_gv);
     const U32 lval = PL_op->op_flags & OPf_MOD;
-    SV** const svp = av_fetch(av, PL_op->op_private, lval);
+    SV** const svp = av_fetch(av, (I8)PL_op->op_private, lval);
     SV *sv = (svp ? *svp : &PL_sv_undef);
+
+    if (UNLIKELY(!svp && lval))
+        DIE(aTHX_ PL_no_aelem, (int)(I8)PL_op->op_private);
+
     EXTEND(SP, 1);
     if (!lval && SvRMAGICAL(av) && SvGMAGICAL(sv)) /* see note in pp_helem() */
 	mg_get(sv);
