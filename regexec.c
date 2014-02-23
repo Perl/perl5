@@ -2866,7 +2866,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
 	}
 	DEBUG_EXECUTE_r({
 	    SV * const prop = sv_newmortal();
-	    regprop(prog, prop, c);
+            regprop(prog, prop, c, reginfo);
 	    {
 		RE_PV_QUOTED_DECL(quoted,utf8_target,PERL_DEBUG_PAD_ZERO(1),
 		    s,strend-s,60);
@@ -3896,7 +3896,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    SV * const prop = sv_newmortal();
 	    regnode *rnext=regnext(scan);
 	    DUMP_EXEC_POS( locinput, scan, utf8_target );
-	    regprop(rex, prop, scan);
+            regprop(rex, prop, scan, reginfo);
             
 	    PerlIO_printf(Perl_debug_log,
 		    "%3"IVdf":%*s%s(%"IVdf")\n",
@@ -7463,7 +7463,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
 	GET_RE_DEBUG_FLAGS_DECL;
 	DEBUG_EXECUTE_r({
 	    SV * const prop = sv_newmortal();
-	    regprop(prog, prop, p);
+            regprop(prog, prop, p, reginfo);
 	    PerlIO_printf(Perl_debug_log,
 			"%*s  %s can match %"IVdf" times out of %"IVdf"...\n",
 			REPORT_CODE_OFF + depth*2, "", SvPVX_const(prop),(IV)c,(IV)max);
