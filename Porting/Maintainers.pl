@@ -332,6 +332,11 @@ use File::Glob qw(:case);
             't/04_scalar.t',    # requires YAML.pm
             qr{^xt},
         ],
+        # Waiting to be merged upstream: see CPAN RT#93297
+        'CUSTOMIZED'   => [
+            qw( t/31_local_tml.t
+                ),
+        ],
     },
 
     'Data::Dumper' => {

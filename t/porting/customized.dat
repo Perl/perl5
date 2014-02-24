@@ -1,5 +1,4 @@
-Config::Perl::V cpan/Config-Perl-V/t/20_plv510.t 7263a40dcbaf1ee447f0209d3bbc029cc747c959
-Config::Perl::V cpan/Config-Perl-V/t/21_plv518.t ec23f4e34fb2f84f63f5588ad4a577530dbef5d2
+CPAN::Meta::YAML cpan/CPAN-Meta-YAML/t/31_local_tml.t cf319f3129942411237125f0d92a224184375209
 Digest::MD5 cpan/Digest-MD5/t/files.t bdbe05b705d9da305fedce7a9f4b6ba63250c7cf
 Module::Build cpan/Module-Build/lib/Module/Build/ConfigData.pm 85eb9656e68d1f256737dc52d86b5d0fed28f832
 PerlIO::via::QuotedPrint cpan/PerlIO-via-QuotedPrint/t/QuotedPrint.t ca39f0146e89de02c746e199c45dcb3e5edad691
