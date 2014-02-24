@@ -316,6 +316,9 @@ BEGIN {
 
 
 
+BEGIN { for (qw[ const stringify rv2sv list glob pushmark null]) {
+    eval "sub OP_\U$_ () { " . opnumber($_) . "}"
+}}
 
 # _pessimise_walk(): recursively walk the optree of a sub,
 # possibly undoing optimisations along the way.
@@ -345,6 +348,7 @@ sub _pessimise_walk {
 	    # the original gv[_].
 
 	    $B::overlay->{$$op} = {
+		    type => OP_PUSHMARK,
 		    name => 'pushmark',
 		    private => ($op->private & OPpLVAL_INTRO),
 		    next    => ($op->flags & OPf_SPECIAL)
@@ -3208,10 +3212,6 @@ sub pp_leavetry {
     return "eval {\n\t" . $self->pp_leave(@_) . "\n\b}";
 }
 
-BEGIN { for (qw[ const stringify rv2sv list glob ]) {
-    eval "sub OP_\U$_ () { " . opnumber($_) . "}"
-}}
-
 sub pp_null {
     my $self = shift;
     my($op, $cx) = @_;
@@ -3388,7 +3388,7 @@ sub pp_av2arylen {
 sub pp_rv2cv {
     my ($self, $op, $cx) = @_;
     if (!null($op->first) && $op->first->name eq 'null' &&
-	$op->first->targ eq OP_LIST)
+	$op->first->targ == OP_LIST)
     {
 	return $self->rv2x($op->first->first->sibling, $cx, "&")
     }
@@ -4634,7 +4634,7 @@ sub pure_string {
     }
     elsif ($type eq 'join') {
 	my $join_op = $op->first->sibling;  # Skip pushmark
-	return 0 unless $join_op->name eq 'null' && $join_op->targ eq OP_RV2SV;
+	return 0 unless $join_op->name eq 'null' && $join_op->targ == OP_RV2SV;
 
 	my $gvop = $join_op->first;
 	return 0 unless $gvop->name eq 'gvsv';
