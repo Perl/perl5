@@ -1621,12 +1621,15 @@ foreach my $Locale (@Locale) {
 
     report_result($Locale, ++$locales_test_number, $ok3);
     $test_names{$locales_test_number} = 'Verify that a different locale radix works when doing "==" with a constant';
+    $problematical_tests{$locales_test_number} = 1;
 
     report_result($Locale, ++$locales_test_number, $ok4);
     $test_names{$locales_test_number} = 'Verify that a different locale radix works when doing "==" with a scalar';
+    $problematical_tests{$locales_test_number} = 1;
 
     report_result($Locale, ++$locales_test_number, $ok5);
     $test_names{$locales_test_number} = 'Verify that a different locale radix works when doing "==" with a scalar and an intervening sprintf';
+    $problematical_tests{$locales_test_number} = 1;
 
     debug "# $first_c_test..$locales_test_number: \$c = $c, \$d = $d, Locale = $Locale\n";
 
@@ -1639,24 +1642,30 @@ foreach my $Locale (@Locale) {
 
     report_result($Locale, ++$locales_test_number, $ok8);
     $test_names{$locales_test_number} = 'Verify that "==" with a scalar and an intervening sprintf still works in inner no locale';
+    $problematical_tests{$locales_test_number} = 1;
 
     debug "# $first_e_test..$locales_test_number: \$e = $e, no locale\n";
 
     report_result($Locale, ++$locales_test_number, $ok9);
     $test_names{$locales_test_number} = 'Verify that after a no-locale block, a different locale radix still works when doing "==" with a constant';
+    $problematical_tests{$locales_test_number} = 1;
     my $first_f_test = $locales_test_number;
 
     report_result($Locale, ++$locales_test_number, $ok10);
     $test_names{$locales_test_number} = 'Verify that after a no-locale block, a different locale radix still works when doing "==" with a scalar';
+    $problematical_tests{$locales_test_number} = 1;
 
     report_result($Locale, ++$locales_test_number, $ok11);
     $test_names{$locales_test_number} = 'Verify that after a no-locale block, a different locale radix still works when doing "==" with a scalar and an intervening sprintf';
+    $problematical_tests{$locales_test_number} = 1;
 
     report_result($Locale, ++$locales_test_number, $ok12);
     $test_names{$locales_test_number} = 'Verify that after a no-locale block, a different locale radix can participate in an addition and function call as numeric';
+    $problematical_tests{$locales_test_number} = 1;
 
     report_result($Locale, ++$locales_test_number, $ok13);
     $test_names{$locales_test_number} = 'Verify that don\'t get warning under "==" even if radix is not a dot';
+    $problematical_tests{$locales_test_number} = 1;
 
     report_result($Locale, ++$locales_test_number, $ok14);
     $test_names{$locales_test_number} = 'Verify that non-ASCII UTF-8 error messages are in UTF-8';
@@ -1849,6 +1858,7 @@ foreach my $Locale (@Locale) {
         my @f = ();
         ++$locales_test_number;
         $test_names{$locales_test_number} = 'Verify atof with locale radix and negative exponent';
+        $problematical_tests{$locales_test_number} = 1;
 
         my $radix = POSIX::localeconv()->{decimal_point};
         my @nums = (
