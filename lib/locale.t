@@ -41,7 +41,7 @@ my $acceptable_fold_failure_percentage = ($^O =~ / ^ ( MSWin32 | AIX ) $ /ix)
                                          : 5;
 
 # The list of test numbers of the problematic tests.
-my @problematical_tests;
+my %problematical_tests;
 
 
 use Dumpvalue;
@@ -1342,7 +1342,7 @@ foreach my $Locale (@Locale) {
     report_multi_result($Locale, $locales_test_number, \@f);
 
     foreach ($first_casing_test_number..$locales_test_number) {
-        push @problematical_tests, $_;
+        $problematical_tests{$_} = 1;
     }
 
 
@@ -1841,7 +1841,7 @@ foreach my $Locale (@Locale) {
             }
 	}
 	report_multi_result($Locale, $locales_test_number, \@f);
-        push @problematical_tests, $locales_test_number;
+        $problematical_tests{$locales_test_number} = 1;
     }
 
     # [perl #109318]
@@ -1894,7 +1894,7 @@ foreach $test_num ($first_locales_test_number..$final_locales_test_number) {
 	    print "# It usually indicates a problem in the environment,\n";
 	    print "# not in Perl itself.\n";
 	}
-        if ($Okay{$test_num} && grep { $_ == $test_num } @problematical_tests) {
+        if ($Okay{$test_num} && grep { $_ == $test_num } keys %problematical_tests) {
             no warnings 'experimental::autoderef';
             # Round to nearest .1%
             my $percent_fail = (int(.5 + (1000 * scalar(keys $Problem{$test_num})
