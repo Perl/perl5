@@ -2,11 +2,11 @@ use 5.008001; # sane UTF-8 support
 use strict;
 use warnings;
 package CPAN::Meta::YAML;
-$CPAN::Meta::YAML::VERSION = '0.011';
+$CPAN::Meta::YAML::VERSION = '0.012';
 BEGIN {
   $CPAN::Meta::YAML::AUTHORITY = 'cpan:ADAMK';
 }
-# git description: v1.59-TRIAL-1-g33d9cd2
+# git description: v1.60-1-g1c16a0a
 ; # original $VERSION removed by Doppelgaenger
 # XXX-INGY is 5.8.1 too old/broken for utf8?
 # XXX-XDG Lancaster consensus was that it was sufficient until
@@ -881,7 +881,7 @@ CPAN::Meta::YAML - Read and write a subset of YAML for CPAN Meta files
 
 =head1 VERSION
 
-version 0.011
+version 0.012
 
 =head1 SYNOPSIS
 

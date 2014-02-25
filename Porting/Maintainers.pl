@@ -324,18 +324,13 @@ use File::Glob qw(:case);
     },
 
     'CPAN::Meta::YAML' => {
-        'DISTRIBUTION' => 'DAGOLDEN/CPAN-Meta-YAML-0.011.tar.gz',
+        'DISTRIBUTION' => 'DAGOLDEN/CPAN-Meta-YAML-0.012.tar.gz',
         'FILES'        => q[cpan/CPAN-Meta-YAML],
         'EXCLUDED'     => [
             't/00-compile.t',
             't/00-report-prereqs.t',
             't/04_scalar.t',    # requires YAML.pm
             qr{^xt},
-        ],
-        # Waiting to be merged upstream: see CPAN RT#93297
-        'CUSTOMIZED'   => [
-            qw( t/31_local_tml.t
-                ),
         ],
     },
 
