@@ -7,7 +7,7 @@ package IO::Socket::IP;
 # $VERSION needs to be set before  use base 'IO::Socket'
 #  - https://rt.cpan.org/Ticket/Display.html?id=92107
 BEGIN {
-   $VERSION = '0.28';
+   $VERSION = '0.29';
 }
 
 use strict;
@@ -34,6 +34,9 @@ use POSIX qw( dup2 );
 use Errno qw( EINVAL EINPROGRESS EISCONN );
 
 use constant HAVE_MSWIN32 => ( $^O eq "MSWin32" );
+
+# At least one OS (Android) is known not to have getprotobyname()
+use constant HAVE_GETPROTOBYNAME => defined eval { getprotobyname( "tcp" ) };
 
 my $IPv6_re = do {
    # translation of RFC 3986 3.2.2 ABNF to re
@@ -394,7 +397,9 @@ sub _io_socket_ip__configure
 
    if( defined( my $proto = $arg->{Proto} ) ) {
       unless( $proto =~ m/^\d+$/ ) {
-         my $protonum = getprotobyname( $proto );
+         my $protonum = HAVE_GETPROTOBYNAME
+            ? getprotobyname( $proto )
+            : eval { Socket->${\"IPPROTO_\U$proto"}() };
          defined $protonum or croak "Unrecognised protocol $proto";
          $proto = $protonum;
       }
@@ -518,24 +523,27 @@ sub _io_socket_ip__configure
 
    if( !@infos ) {
       # If there was a Family hint then create a plain unbound, unconnected socket
+      if( defined $hints{family} ) {
+         @infos = ( {
+            family   => $hints{family},
+            socktype => $hints{socktype},
+            protocol => $hints{protocol},
+         } );
+      }
       # If there wasn't, use getaddrinfo()'s AI_ADDRCONFIG side-effect to guess a
       # suitable family first.
-      if( !defined $hints{family} ) {
-         my ( $err, $addrinfo ) = getaddrinfo( "", "0", \%hints );
+      else {
+         ( my $err, @infos ) = getaddrinfo( "", "0", \%hints );
          if( $err ) {
             $@ = "$err";
             $! = EINVAL;
             return;
          }
 
-         $hints{family} = $addrinfo->{family};
+         # We'll take all the @infos anyway, because some OSes (HPUX) are known to
+         # ignore the AI_ADDRCONFIG hint and return AF_INET6 even if they don't
+         # support them
       }
-
-      @infos = ( {
-         family   => $hints{family},
-         socktype => $hints{socktype},
-         protocol => $hints{protocol},
-      } );
    }
 
    # In the nonblocking case, caller will be calling ->setup multiple times.

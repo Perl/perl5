@@ -1,5 +1,11 @@
 Revision history for IO-Socket-IP
 
+0.29    2014/02/24 16:06:29
+        [BUGFIXES]
+         * Workaround for OSes that disobey AI_ADDRCONFIG and yield AIs on
+           families the kernel will not support anyway (e.g. HPUX)
+         * Workaround for OSes that lack getprotobyname() (e.g. Android)
+
 0.28    2014/02/10 16:17:59
         [CHANGES]
          * Renamed internal _configure method to _io_socket_ip__configure to
