@@ -5,7 +5,7 @@ use warnings;
 use parent qw(Pod::Perldoc::BaseTo);
 
 use vars qw($VERSION);
-$VERSION = '3.21';
+$VERSION = '3.23';
 
 use File::Spec::Functions qw(catfile);
 use Pod::Man 2.18;
@@ -212,34 +212,13 @@ sub _have_groff_with_utf8 {
 sub _have_mandoc_with_utf8 {
 	my( $self ) = @_;
 
-	return 0 unless $self->_is_mandoc;
-	my $roffer = $self->__nroffer;
-
-	my $minimum_mandoc_version = '1.11';
-
-	my $version_string = `$roffer -V`;
-	my( $version ) = $version_string =~ /mandoc ((\d+)\.(\d+))/;
-	$self->debug( "Found mandoc $version\n" );
-
-	# is a string comparison good enough?
-	if( $version lt $minimum_mandoc_version ) {
-		$self->warn(
-			"You have an older mandoc." .
-			" Update to version $minimum_mandoc_version for better Unicode support.\n" .
-			"If you don't upgrade, wide characters may come out oddly.\n" .
-			"Your results still might be odd. If you have groff, that's even better.\n"
-			 );
-		}
-
-	$version ge $minimum_mandoc_version;
+       $self->_is_mandoc and not system 'mandoc -Tlocale -V > /dev/null 2>&1';
 	}
 
 sub _collect_nroff_switches {
 	my( $self ) = shift;
 
-	my @render_switches = $self->_is_mandoc ? qw(-mandoc) : qw(-man);
-
-	push @render_switches, $self->_get_device_switches;
+    my @render_switches = ('-man', $self->_get_device_switches);
 
 	# Thanks to Brendan O'Dea for contributing the following block
 	if( $self->_is_roff and -t STDOUT and my ($cols) = $self->_get_columns ) {
@@ -263,7 +242,7 @@ sub _get_device_switches {
 	   if( $self->_is_nroff  )             { qw()              }
 	elsif( $self->_have_groff_with_utf8 )  { qw(-Kutf8 -Tutf8) }
 	elsif( $self->_is_ebcdic )             { qw(-Tcp1047)      }
-	elsif( $self->_have_mandoc_with_utf8 ) { qw(-Tutf8)        }
+	elsif( $self->_have_mandoc_with_utf8 ) { qw(-Tlocale)      }
 	elsif( $self->_is_mandoc )             { qw()              }
 	else                                   { qw(-Tlatin1)      }
 	}

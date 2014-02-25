@@ -256,6 +256,11 @@ C<PERLDOC_PAGER>, C<MANPAGER>, or C<PAGER> before trying to find a pager
 on its own. (C<MANPAGER> is not used if C<perldoc> was told to display
 plain text or unformatted pod.)
 
+When using perldoc in it's C<-m> mode (display module source code),
+C<perldoc> will attempt to use the pager set in C<PERLDOC_SRC_PAGER>.
+A useful setting for this command is your favorite editor as in
+C</usr/bin/nano>. (Don't judge me.)
+
 One useful value for C<PERLDOC_PAGER> is C<less -+C -E>.
 
 Having PERLDOCDEBUG set to a positive integer will make perldoc emit
