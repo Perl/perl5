@@ -2964,11 +2964,10 @@ win32_popen(const char *command, const char *mode)
     int p[2];
     int handles[3];
     int parent, child;
-    int stdfd, oldfd;
+    int stdfd;
     int ourmode;
     int childpid;
     DWORD nhandle;
-    HANDLE old_h;
     int lock_held = 0;
 
     /* establish which ends read and write */
@@ -3014,7 +3013,7 @@ win32_popen(const char *command, const char *mode)
     handles[2] = -1;
 
     /* CreateProcess() requires inheritable handles */
-    if (!SetHandleInformation(_get_osfhandle(p[child]), HANDLE_FLAG_INHERIT,
+    if (!SetHandleInformation((HANDLE)_get_osfhandle(p[child]), HANDLE_FLAG_INHERIT,
 			      HANDLE_FLAG_INHERIT)) {
         goto cleanup;
     }

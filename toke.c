@@ -12420,7 +12420,7 @@ S_parse_opt_lexvar(pTHX)
 	return NULL;
     s = PL_bufptr;
     d = PL_tokenbuf + 1;
-    PL_tokenbuf[0] = sigil;
+    PL_tokenbuf[0] = (char)sigil;
     parse_ident(&s, &d, PL_tokenbuf + sizeof(PL_tokenbuf) - 1, 0, cBOOL(UTF));
     PL_bufptr = s;
     if (d == PL_tokenbuf+1)

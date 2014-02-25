@@ -1452,7 +1452,7 @@ S_parse_gv_stash_name(pTHX_ HV **stash, GV **gv, const char **name,
                     tmpbuf[(*len)++] = ':';
                     key = tmpbuf;
                 }
-                gvp = (GV**)hv_fetch(*stash, key, is_utf8 ? -(*len) : *len, add);
+                gvp = (GV**)hv_fetch(*stash, key, is_utf8 ? -((I32)*len) : (I32)*len, add);
                 *gv = gvp ? *gvp : NULL;
                 if (*gv && *gv != (const GV *)&PL_sv_undef) {
                     if (SvTYPE(*gv) != SVt_PVGV)
@@ -1583,7 +1583,7 @@ S_find_default_stash(pTHX_ HV **stash, const char *name, STRLEN len,
                 !(len == 1 && sv_type == SVt_PV &&
                 (*name == 'a' || *name == 'b')) )
             {
-                GV**gvp = (GV**)hv_fetch(*stash,name,is_utf8 ? -len : len,0);
+                GV**gvp = (GV**)hv_fetch(*stash,name,is_utf8 ? -(I32)len : (I32)len,0);
                 if (!gvp || *gvp == (const GV *)&PL_sv_undef ||
                     SvTYPE(*gvp) != SVt_PVGV)
                 {
@@ -2119,7 +2119,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
     }
     
     /* By this point we should have a stash and a name */
-    gvp = (GV**)hv_fetch(stash,name,is_utf8 ? -len : len,add);
+    gvp = (GV**)hv_fetch(stash,name,is_utf8 ? -(I32)len : (I32)len,add);
     if (!gvp || *gvp == (const GV *)&PL_sv_undef) {
 	if (addmg) gv = (GV *)newSV(0);
 	else return NULL;
