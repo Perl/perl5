@@ -11542,11 +11542,15 @@ tryagain:
                 }
                 else {
                     num = S_backref_value(RExC_parse);
-                    /* bare \NNN might be backref or octal */
+                    /* bare \NNN might be backref or octal - if it is larger than or equal
+                     * RExC_npar then it is assumed to be and octal escape.
+                     * Note RExC_npar is +1 from the actual number of parens*/
                     if (num == I32_MAX || (num > 9 && num >= RExC_npar
                             && *RExC_parse != '8' && *RExC_parse != '9'))
+                    {
                         /* Probably a character specified in octal, e.g. \35 */
                         goto defchar;
+                    }
                 }
 
                 /* at this point RExC_parse definitely points to a backref
@@ -11852,7 +11856,11 @@ tryagain:
                          * 118 OR as "\11" . "8" depending on whether there
                          * were 118 capture buffers defined already in the
                          * pattern.  */
-                        if ( !isDIGIT(p[1]) || S_backref_value(p) <= RExC_npar)
+
+                        /* NOTE, RExC_npar is 1 more than the actual number of
+                         * parens we have seen so far, hence the < RExC_npar below. */
+
+                        if ( !isDIGIT(p[1]) || S_backref_value(p) < RExC_npar)
                         {  /* Not to be treated as an octal constant, go
                                    find backref */
                             --p;
