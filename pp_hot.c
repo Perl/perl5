@@ -2777,12 +2777,12 @@ try_autoload:
 	CvXSUB(cv)(aTHX_ cv);
 
 	/* Enforce some sanity in scalar context. */
-	if (gimme == G_SCALAR && ++markix != PL_stack_sp - PL_stack_base ) {
-	    if (markix > PL_stack_sp - PL_stack_base)
-		*(PL_stack_base + markix) = &PL_sv_undef;
-	    else
-		*(PL_stack_base + markix) = *PL_stack_sp;
-	    PL_stack_sp = PL_stack_base + markix;
+	if (gimme == G_SCALAR) {
+            SV **svp = PL_stack_base + markix + 1;
+            if (svp != PL_stack_sp) {
+                *svp = svp > PL_stack_sp ? &PL_sv_undef : *PL_stack_sp;
+                PL_stack_sp = svp;
+            }
 	}
 	LEAVE;
 	return NORMAL;
