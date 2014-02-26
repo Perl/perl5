@@ -11155,12 +11155,14 @@ S_inplace_aassign(pTHX_ OP *o) {
 STATIC void
 S_null_listop_in_list_context(pTHX_ OP *o)
 {
+    OP *kid;
+
     PERL_ARGS_ASSERT_NULL_LISTOP_IN_LIST_CONTEXT;
 
     /* This is an OP_LIST in list context. That means we
      * can ditch the OP_LIST and the OP_PUSHMARK within. */
 
-    OP *kid = cLISTOPo->op_first;
+    kid = cLISTOPo->op_first;
     /* Find the end of the chain of OPs executed within the OP_LIST. */
     while (kid->op_next != o) {
         assert(kid);
