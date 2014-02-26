@@ -2526,60 +2526,60 @@ PP(pp_entersub)
 	DIE(aTHX_ "Not a CODE reference");
     /* This is overwhelmingly the most common case:  */
     if (!LIKELY(SvTYPE(sv) == SVt_PVGV && (cv = GvCVu((const GV *)sv)))) {
-    switch (SvTYPE(sv)) {
-    case SVt_PVGV:
-      we_have_a_glob:
-	if (!(cv = GvCVu((const GV *)sv))) {
-	    HV *stash;
-	    cv = sv_2cv(sv, &stash, &gv, 0);
-	}
-	if (!cv) {
-	    ENTER;
-	    SAVETMPS;
-	    goto try_autoload;
-	}
-	break;
-    case SVt_PVLV:
-	if(isGV_with_GP(sv)) goto we_have_a_glob;
-	/*FALLTHROUGH*/
-    default:
-	if (sv == &PL_sv_yes) {		/* unfound import, ignore */
-	    if (hasargs)
-		SP = PL_stack_base + POPMARK;
-	    else
-		(void)POPMARK;
-	    RETURN;
-	}
-	SvGETMAGIC(sv);
-	if (SvROK(sv)) {
-	    if (SvAMAGIC(sv)) {
-		sv = amagic_deref_call(sv, to_cv_amg);
-		/* Don't SPAGAIN here.  */
-	    }
-	}
-	else {
-	    const char *sym;
-	    STRLEN len;
-	    if (!SvOK(sv))
-		DIE(aTHX_ PL_no_usym, "a subroutine");
-	    sym = SvPV_nomg_const(sv, len);
-	    if (PL_op->op_private & HINT_STRICT_REFS)
-		DIE(aTHX_ "Can't use string (\"%" SVf32 "\"%s) as a subroutine ref while \"strict refs\" in use", sv, len>32 ? "..." : "");
-	    cv = get_cvn_flags(sym, len, GV_ADD|SvUTF8(sv));
-	    break;
-	}
-	cv = MUTABLE_CV(SvRV(sv));
-	if (SvTYPE(cv) == SVt_PVCV)
-	    break;
-	/* FALL THROUGH */
-    case SVt_PVHV:
-    case SVt_PVAV:
-	DIE(aTHX_ "Not a CODE reference");
-	/* This is the second most common case:  */
-    case SVt_PVCV:
-	cv = MUTABLE_CV(sv);
-	break;
-    }
+        switch (SvTYPE(sv)) {
+        case SVt_PVGV:
+          we_have_a_glob:
+            if (!(cv = GvCVu((const GV *)sv))) {
+                HV *stash;
+                cv = sv_2cv(sv, &stash, &gv, 0);
+            }
+            if (!cv) {
+                ENTER;
+                SAVETMPS;
+                goto try_autoload;
+            }
+            break;
+        case SVt_PVLV:
+            if(isGV_with_GP(sv)) goto we_have_a_glob;
+            /*FALLTHROUGH*/
+        default:
+            if (sv == &PL_sv_yes) {		/* unfound import, ignore */
+                if (hasargs)
+                    SP = PL_stack_base + POPMARK;
+                else
+                    (void)POPMARK;
+                RETURN;
+            }
+            SvGETMAGIC(sv);
+            if (SvROK(sv)) {
+                if (SvAMAGIC(sv)) {
+                    sv = amagic_deref_call(sv, to_cv_amg);
+                    /* Don't SPAGAIN here.  */
+                }
+            }
+            else {
+                const char *sym;
+                STRLEN len;
+                if (!SvOK(sv))
+                    DIE(aTHX_ PL_no_usym, "a subroutine");
+                sym = SvPV_nomg_const(sv, len);
+                if (PL_op->op_private & HINT_STRICT_REFS)
+                    DIE(aTHX_ "Can't use string (\"%" SVf32 "\"%s) as a subroutine ref while \"strict refs\" in use", sv, len>32 ? "..." : "");
+                cv = get_cvn_flags(sym, len, GV_ADD|SvUTF8(sv));
+                break;
+            }
+            cv = MUTABLE_CV(SvRV(sv));
+            if (SvTYPE(cv) == SVt_PVCV)
+                break;
+            /* FALL THROUGH */
+        case SVt_PVHV:
+        case SVt_PVAV:
+            DIE(aTHX_ "Not a CODE reference");
+            /* This is the second most common case:  */
+        case SVt_PVCV:
+            cv = MUTABLE_CV(sv);
+            break;
+        }
     }
 
     ENTER;
