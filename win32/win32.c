@@ -219,54 +219,35 @@ set_w32_module_name(void)
                                ? GetModuleHandle(NULL)
                                : w32_perldll_handle);
 
-    OSVERSIONINFO osver; /* g_osver may not yet be initialized */
-    osver.dwOSVersionInfoSize = sizeof(osver);
-    GetVersionEx(&osver);
+    WCHAR modulename[MAX_PATH];
+    WCHAR fullname[MAX_PATH];
+    char *ansi;
 
-    if (osver.dwMajorVersion > 4) {
-        WCHAR modulename[MAX_PATH];
-        WCHAR fullname[MAX_PATH];
-        char *ansi;
+    DWORD (__stdcall *pfnGetLongPathNameW)(LPCWSTR, LPWSTR, DWORD) =
+        (DWORD (__stdcall *)(LPCWSTR, LPWSTR, DWORD))
+        GetProcAddress(GetModuleHandle("kernel32.dll"), "GetLongPathNameW");
 
-        DWORD (__stdcall *pfnGetLongPathNameW)(LPCWSTR, LPWSTR, DWORD) =
-            (DWORD (__stdcall *)(LPCWSTR, LPWSTR, DWORD))
-            GetProcAddress(GetModuleHandle("kernel32.dll"), "GetLongPathNameW");
+    GetModuleFileNameW(module, modulename, sizeof(modulename)/sizeof(WCHAR));
 
-        GetModuleFileNameW(module, modulename, sizeof(modulename)/sizeof(WCHAR));
+    /* Make sure we get an absolute pathname in case the module was loaded
+     * explicitly by LoadLibrary() with a relative path. */
+    GetFullPathNameW(modulename, sizeof(fullname)/sizeof(WCHAR), fullname, NULL);
 
-        /* Make sure we get an absolute pathname in case the module was loaded
-         * explicitly by LoadLibrary() with a relative path. */
-        GetFullPathNameW(modulename, sizeof(fullname)/sizeof(WCHAR), fullname, NULL);
+    /* Make sure we start with the long path name of the module because we
+     * later scan for pathname components to match "5.xx" to locate
+     * compatible sitelib directories, and the short pathname might mangle
+     * this path segment (e.g. by removing the dot on NTFS to something
+     * like "5xx~1.yy") */
+    if (pfnGetLongPathNameW)
+        pfnGetLongPathNameW(fullname, fullname, sizeof(fullname)/sizeof(WCHAR));
 
-        /* Make sure we start with the long path name of the module because we
-         * later scan for pathname components to match "5.xx" to locate
-         * compatible sitelib directories, and the short pathname might mangle
-         * this path segment (e.g. by removing the dot on NTFS to something
-         * like "5xx~1.yy") */
-        if (pfnGetLongPathNameW)
-            pfnGetLongPathNameW(fullname, fullname, sizeof(fullname)/sizeof(WCHAR));
+    /* remove \\?\ prefix */
+    if (memcmp(fullname, L"\\\\?\\", 4*sizeof(WCHAR)) == 0)
+        memmove(fullname, fullname+4, (wcslen(fullname+4)+1)*sizeof(WCHAR));
 
-        /* remove \\?\ prefix */
-        if (memcmp(fullname, L"\\\\?\\", 4*sizeof(WCHAR)) == 0)
-            memmove(fullname, fullname+4, (wcslen(fullname+4)+1)*sizeof(WCHAR));
-
-        ansi = win32_ansipath(fullname);
-        my_strlcpy(w32_module_name, ansi, sizeof(w32_module_name));
-        win32_free(ansi);
-    }
-    else {
-        GetModuleFileName(module, w32_module_name, sizeof(w32_module_name));
-
-        /* remove \\?\ prefix */
-        if (memcmp(w32_module_name, "\\\\?\\", 4) == 0)
-            memmove(w32_module_name, w32_module_name+4, strlen(w32_module_name+4)+1);
-
-        /* try to get full path to binary (which may be mangled when perl is
-         * run from a 16-bit app) */
-        /*PerlIO_printf(Perl_debug_log, "Before %s\n", w32_module_name);*/
-        win32_longpath(w32_module_name);
-        /*PerlIO_printf(Perl_debug_log, "After  %s\n", w32_module_name);*/
-    }
+    ansi = win32_ansipath(fullname);
+    my_strlcpy(w32_module_name, ansi, sizeof(w32_module_name));
+    win32_free(ansi);
 
     /* normalize to forward slashes */
     ptr = w32_module_name;
