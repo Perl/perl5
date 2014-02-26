@@ -2647,7 +2647,6 @@ try_autoload:
     if (!(CvISXSUB(cv))) {
 	/* This path taken at least 75% of the time   */
 	dMARK;
-	SSize_t items = SP - MARK;
 	PADLIST * const padlist = CvPADLIST(cv);
         I32 depth;
 
@@ -2662,6 +2661,9 @@ try_autoload:
 	PAD_SET_CUR_NOSAVE(padlist, depth);
 	if (LIKELY(hasargs)) {
 	    AV *const av = MUTABLE_AV(PAD_SVl(0));
+            SSize_t items;
+            AV **defavp;
+
 	    if (UNLIKELY(AvREAL(av))) {
 		/* @_ is normally not REAL--this should only ever
 		 * happen when DB::sub() calls things that modify @_ */
@@ -2669,11 +2671,12 @@ try_autoload:
 		AvREAL_off(av);
 		AvREIFY_on(av);
 	    }
-	    cx->blk_sub.savearray = GvAV(PL_defgv);
-	    GvAV(PL_defgv) = MUTABLE_AV(SvREFCNT_inc_simple(av));
+	    defavp = &GvAV(PL_defgv);
+	    cx->blk_sub.savearray = *defavp;
+	    *defavp = MUTABLE_AV(SvREFCNT_inc_simple_NN(av));
 	    CX_CURPAD_SAVE(cx->blk_sub);
 	    cx->blk_sub.argarray = av;
-	    ++MARK;
+            items = SP - MARK;
 
 	    if (UNLIKELY(items - 1 > AvMAX(av))) {
                 SV **ary = AvALLOC(av);
@@ -2683,7 +2686,7 @@ try_autoload:
                 AvARRAY(av) = ary;
             }
 
-	    Copy(MARK,AvARRAY(av),items,SV*);
+	    Copy(MARK+1,AvARRAY(av),items,SV*);
 	    AvFILLp(av) = items - 1;
 	
 	    MARK = AvARRAY(av);
