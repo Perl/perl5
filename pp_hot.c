@@ -2649,17 +2649,17 @@ try_autoload:
 	dMARK;
 	SSize_t items = SP - MARK;
 	PADLIST * const padlist = CvPADLIST(cv);
+        I32 depth;
 
 	PUSHBLOCK(cx, CXt_SUB, MARK);
 	PUSHSUB(cx);
 	cx->blk_sub.retop = PL_op->op_next;
-	CvDEPTH(cv)++;
-	if (UNLIKELY(CvDEPTH(cv) >= 2)) {
+	if (UNLIKELY((depth = ++CvDEPTH(cv)) >= 2)) {
 	    PERL_STACK_OVERFLOW_CHECK();
-	    pad_push(padlist, CvDEPTH(cv));
+	    pad_push(padlist, depth);
 	}
 	SAVECOMPPAD();
-	PAD_SET_CUR_NOSAVE(padlist, CvDEPTH(cv));
+	PAD_SET_CUR_NOSAVE(padlist, depth);
 	if (LIKELY(hasargs)) {
 	    AV *const av = MUTABLE_AV(PAD_SVl(0));
 	    if (UNLIKELY(AvREAL(av))) {
@@ -2705,7 +2705,7 @@ try_autoload:
 	 * stuff so that __WARN__ handlers can safely dounwind()
 	 * if they want to
 	 */
-	if (UNLIKELY(CvDEPTH(cv) == PERL_SUB_DEPTH_WARN
+	if (UNLIKELY(depth == PERL_SUB_DEPTH_WARN
                 && ckWARN(WARN_RECURSION)
                 && !(PERLDB_SUB && cv == GvCV(PL_DBsub))))
 	    sub_crush_depth(cv);
