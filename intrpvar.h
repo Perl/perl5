@@ -76,6 +76,7 @@ PERLVAR(I, tainted,	bool)		/* using variables controlled by $< */
 PERLVAR(I, delaymagic,	U16)		/* ($<,$>) = ... */
 PERLVAR(I, localizing,	U8)		/* are we processing a local() list? */
 PERLVAR(I, in_eval,	U8)		/* trap "fatal" errors? */
+PERLVAR(I, defgv,	GV *)           /* the *_ glob */
 /*
 
 =for apidoc mn|bool|PL_dowarn
@@ -349,7 +350,6 @@ PERLVAR(I, psig_pend, int *)		/* per-signal "count" of pending */
 /* shortcuts to various I/O objects */
 PERLVAR(I, stdingv,	GV *)		/*  *STDIN      */
 PERLVAR(I, stderrgv,	GV *)		/*  *STDERR     */
-PERLVAR(I, defgv,	GV *)
 PERLVAR(I, argvgv,	GV *)		/*  *ARGV       */
 PERLVAR(I, argvoutgv,	GV *)		/*  *ARGVOUT    */
 PERLVAR(I, argvout_stack, AV *)
