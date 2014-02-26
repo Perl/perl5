@@ -1334,8 +1334,6 @@ cpan/IO-Compress/t/cz-14gzopen.t			IO::Compress
 cpan/IO-Compress/t/globmapper.t				IO::Compress
 cpan/IO-Socket-IP/Build.PL				IO::Socket::IP
 cpan/IO-Socket-IP/Changes				IO::Socket::IP
-cpan/IO-Socket-IP/examples/connect.pl			IO::Socket::IP
-cpan/IO-Socket-IP/examples/nonblocking_libasyncns.pl	IO::Socket::IP
 cpan/IO-Socket-IP/lib/IO/Socket/IP.pm			IO::Socket::IP
 cpan/IO-Socket-IP/LICENSE				IO::Socket::IP
 cpan/IO-Socket-IP/Makefile.PL				IO::Socket::IP
