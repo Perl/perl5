@@ -2522,10 +2522,11 @@ PP(pp_entersub)
     I32 gimme;
     const bool hasargs = (PL_op->op_flags & OPf_STACKED) != 0;
 
-    if (!sv)
+    if (UNLIKELY(!sv))
 	DIE(aTHX_ "Not a CODE reference");
+    /* This is overwhelmingly the most common case:  */
+    if (!LIKELY(SvTYPE(sv) == SVt_PVGV && (cv = GvCVu((const GV *)sv)))) {
     switch (SvTYPE(sv)) {
-	/* This is overwhelming the most common case:  */
     case SVt_PVGV:
       we_have_a_glob:
 	if (!(cv = GvCVu((const GV *)sv))) {
@@ -2579,13 +2580,14 @@ PP(pp_entersub)
 	cv = MUTABLE_CV(sv);
 	break;
     }
+    }
 
     ENTER;
 
   retry:
-    if (CvCLONE(cv) && ! CvCLONED(cv))
+    if (UNLIKELY(CvCLONE(cv) && ! CvCLONED(cv)))
 	DIE(aTHX_ "Closure prototype called");
-    if (!CvROOT(cv) && !CvXSUB(cv)) {
+    if (UNLIKELY(!CvROOT(cv) && !CvXSUB(cv))) {
 	GV* autogv;
 	SV* sub_name;
 
@@ -2621,8 +2623,9 @@ try_autoload:
 	goto retry;
     }
 
-    gimme = GIMME_V;
-    if ((PL_op->op_private & OPpENTERSUB_DB) && GvCV(PL_DBsub) && !CvNODEBUG(cv)) {
+    if (UNLIKELY((PL_op->op_private & OPpENTERSUB_DB) && GvCV(PL_DBsub)
+            && !CvNODEBUG(cv)))
+    {
 	 Perl_get_db_sub(aTHX_ &sv, cv);
 	 if (CvISXSUB(cv))
 	     PL_curcopdb = PL_curcop;
@@ -2639,24 +2642,27 @@ try_autoload:
 	    DIE(aTHX_ "No DB::sub routine defined");
     }
 
+    gimme = GIMME_V;
+
     if (!(CvISXSUB(cv))) {
 	/* This path taken at least 75% of the time   */
 	dMARK;
 	SSize_t items = SP - MARK;
 	PADLIST * const padlist = CvPADLIST(cv);
+
 	PUSHBLOCK(cx, CXt_SUB, MARK);
 	PUSHSUB(cx);
 	cx->blk_sub.retop = PL_op->op_next;
 	CvDEPTH(cv)++;
-	if (CvDEPTH(cv) >= 2) {
+	if (UNLIKELY(CvDEPTH(cv) >= 2)) {
 	    PERL_STACK_OVERFLOW_CHECK();
 	    pad_push(padlist, CvDEPTH(cv));
 	}
 	SAVECOMPPAD();
 	PAD_SET_CUR_NOSAVE(padlist, CvDEPTH(cv));
-	if (hasargs) {
+	if (LIKELY(hasargs)) {
 	    AV *const av = MUTABLE_AV(PAD_SVl(0));
-	    if (AvREAL(av)) {
+	    if (UNLIKELY(AvREAL(av))) {
 		/* @_ is normally not REAL--this should only ever
 		 * happen when DB::sub() calls things that modify @_ */
 		av_clear(av);
@@ -2669,7 +2675,7 @@ try_autoload:
 	    cx->blk_sub.argarray = av;
 	    ++MARK;
 
-	    if (items - 1 > AvMAX(av)) {
+	    if (UNLIKELY(items - 1 > AvMAX(av))) {
                 SV **ary = AvALLOC(av);
                 AvMAX(av) = items - 1;
                 Renew(ary, items, SV*);
@@ -2692,15 +2698,16 @@ try_autoload:
 	    }
 	}
 	SAVETMPS;
-	if ((cx->blk_u16 & OPpENTERSUB_LVAL_MASK) == OPpLVAL_INTRO &&
-	    !CvLVALUE(cv))
+	if (UNLIKELY((cx->blk_u16 & OPpENTERSUB_LVAL_MASK) == OPpLVAL_INTRO &&
+	    !CvLVALUE(cv)))
 	    DIE(aTHX_ "Can't modify non-lvalue subroutine call");
 	/* warning must come *after* we fully set up the context
 	 * stuff so that __WARN__ handlers can safely dounwind()
 	 * if they want to
 	 */
-	if (CvDEPTH(cv) == PERL_SUB_DEPTH_WARN && ckWARN(WARN_RECURSION)
-	    && !(PERLDB_SUB && cv == GvCV(PL_DBsub)))
+	if (UNLIKELY(CvDEPTH(cv) == PERL_SUB_DEPTH_WARN
+                && ckWARN(WARN_RECURSION)
+                && !(PERLDB_SUB && cv == GvCV(PL_DBsub))))
 	    sub_crush_depth(cv);
 	RETURNOP(CvSTART(cv));
     }
@@ -2710,13 +2717,13 @@ try_autoload:
 	SAVETMPS;
 	PUTBACK;
 
-	if (((PL_op->op_private
+	if (UNLIKELY(((PL_op->op_private
 	       & PUSHSUB_GET_LVALUE_MASK(Perl_is_lvalue_sub)
              ) & OPpENTERSUB_LVAL_MASK) == OPpLVAL_INTRO &&
-	    !CvLVALUE(cv))
+	    !CvLVALUE(cv)))
 	    DIE(aTHX_ "Can't modify non-lvalue subroutine call");
 
-	if (!hasargs && GvAV(PL_defgv)) {
+	if (UNLIKELY(!hasargs && GvAV(PL_defgv))) {
 	    /* Need to copy @_ to stack. Alternative may be to
 	     * switch stack to @_, and copy return values
 	     * back. This would allow popping @_ in XSUB, e.g.. XXXX */
@@ -2755,7 +2762,7 @@ try_autoload:
 	    }
 	}
 	/* We assume first XSUB in &DB::sub is the called one. */
-	if (PL_curcopdb) {
+	if (UNLIKELY(PL_curcopdb)) {
 	    SAVEVPTR(PL_curcop);
 	    PL_curcop = PL_curcopdb;
 	    PL_curcopdb = NULL;
