@@ -124,7 +124,7 @@ my @make = split ' ', $1 || $Config{make} || $ENV{MAKE};
 
 if ($target eq '') {
     die "make_ext: no make target specified (eg all or clean)\n";
-} elsif ($target !~ /(?:^all|clean)$/) {
+} elsif ($target !~ /^(?:all|clean|distclean|realclean|veryclean)$/) {
     # for the time being we are strict about what make_ext is used for
     die "$0: unknown make target '$target'\n";
 }
