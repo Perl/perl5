@@ -1238,7 +1238,12 @@ if ( !caller ) {
     }
     print $out_fh read_only_top( lang => 'C', by => $0,
 				 file => 'regcharclass.h', style => '*',
-				 copyright => [2007, 2011] );
+				 copyright => [2007, 2011],
+                                 final => <<EOF,
+WARNING: These macros are for internal Perl core use only, and may be
+changed or removed without notice.
+EOF
+    );
     print $out_fh "\n#ifndef H_REGCHARCLASS   /* Guard against nested #includes */\n#define H_REGCHARCLASS 1\n\n";
 
     my ( $op, $title, @txt, @types, %mods );
