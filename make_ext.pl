@@ -342,7 +342,7 @@ sub build_extension {
     if (!-f $makefile) {
 	NO_MAKEFILE:
 	if (!-f 'Makefile.PL') {
-            unless (just_pm_to_blib($target, $ext_dir, $mname)) {
+            unless (just_pm_to_blib($target, $ext_dir, $mname, $return_dir)) {
                 # No problems returned, so it has faked everything for us. :-)
                 chdir $return_dir || die "Cannot cd to $return_dir: $!";
                 return;
@@ -452,7 +452,7 @@ EOM
                             |Search::Dict)\z/x) {
             # An explicit list of dual-life extensions that have a Makefile.PL
             # for CPAN, but we have verified can also be built using the fakery.
-            my ($problem) = just_pm_to_blib($target, $ext_dir, $mname);
+            my ($problem) = just_pm_to_blib($target, $ext_dir, $mname, $return_dir);
             # We really need to sanity test that we can fake it.
             # Otherwise "skips" will go undetected, and the build slow down for
             # everyone, defeating the purpose.
@@ -593,7 +593,7 @@ sub _unlink {
 # savings are impressive.
 
 sub just_pm_to_blib {
-    my ($target, $ext_dir, $mname) = @_;
+    my ($target, $ext_dir, $mname, $return_dir) = @_;
     my ($has_lib, $has_top, $has_topdir);
     my ($last) = $mname =~ /([^:]+)$/;
     my ($first) = $mname =~ /^([^:]+)/;
@@ -690,6 +690,14 @@ sub just_pm_to_blib {
         print $fh "$0 has handled pm_to_blib directly\n";
         close $fh
             or die $!;
+	if ($is_Unix) {
+            # Fake the fallback cleanup
+            my $fallback
+                = join '', map {s!^\.\./\.\./!!; "rm -f $_\n"} sort values %pm;
+            foreach my $clean_target ('realclean', 'veryclean') {
+                fallback_cleanup($return_dir, $clean_target, $fallback);
+            }
+        }
     } else {
         # A clean target.
         # For now, make the targets behave the same way as ExtUtils::MakeMaker
