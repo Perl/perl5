@@ -11164,10 +11164,8 @@ S_null_listop_in_list_context(pTHX_ OP *o)
 
     kid = cLISTOPo->op_first;
     /* Find the end of the chain of OPs executed within the OP_LIST. */
-    while (kid->op_next != o) {
-        assert(kid);
+    while (kid->op_next != o)
         kid = kid->op_next;
-    }
 
     kid->op_next = o->op_next; /* patch list out of exec chain */
     op_null(cUNOPo->op_first); /* NULL the pushmark */
