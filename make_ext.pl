@@ -468,14 +468,8 @@ EOM
 	# But this always used to be a problem with the old /bin/sh version of
 	# this.
 	if ($is_Unix) {
-	    my $suffix = '.sh';
 	    foreach my $clean_target ('realclean', 'veryclean') {
-		my $file = "$return_dir/$clean_target$suffix";
-		open my $fh, '>>', $file or die "open $file: $!";
-		# Quite possible that we're being run in parallel here.
-		# Can't use Fcntl this early to get the LOCK_EX
-		flock $fh, 2 or warn "flock $file: $!";
-		print $fh <<"EOS";
+                fallback_cleanup($return_dir, $clean_target, <<"EOS");
 cd $ext_dir
 if test ! -f Makefile -a -f Makefile.old; then
     echo "Note: Using Makefile.old"
@@ -488,7 +482,6 @@ else
 fi
 cd $return_dir
 EOS
-		close $fh or die "close $file: $!";
 	    }
 	}
     }
@@ -537,4 +530,15 @@ sub _unlink {
     1 while unlink $_[0];
     my $err = $!;
     die "Can't unlink $_[0]: $err" if -f $_[0];
+}
+
+sub fallback_cleanup {
+    my ($dir, $clean_target, $contents) = @_;
+    my $file = "$dir/$clean_target.sh";
+    open my $fh, '>>', $file or die "open $file: $!";
+    # Quite possible that we're being run in parallel here.
+    # Can't use Fcntl this early to get the LOCK_EX
+    flock $fh, 2 or warn "flock $file: $!";
+    print $fh $contents or die "print $file: $!";
+    close $fh or die "close $file: $!";
 }
