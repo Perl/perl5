@@ -125,7 +125,8 @@ my @make = split ' ', $1 || $Config{make} || $ENV{MAKE};
 if ($target eq '') {
     die "make_ext: no make target specified (eg all or clean)\n";
 } elsif ($target !~ /^(?:all|clean|distclean|realclean|veryclean)$/) {
-    # for the time being we are strict about what make_ext is used for
+    # we are strict about what make_ext is used for because we emulate these
+    # targets for simple modules:
     die "$0: unknown make target '$target'\n";
 }
 
@@ -253,12 +254,12 @@ foreach my $spec (@extspec)  {
 
     print "\tMaking $mname ($target)\n";
 
-    build_extension($ext_pathname, $perl, $mname,
+    build_extension($ext_pathname, $perl, $mname, $target,
 		    [@pass_through, @{$extra_passthrough{$spec} || []}]);
 }
 
 sub build_extension {
-    my ($ext_dir, $perl, $mname, $pass_through) = @_;
+    my ($ext_dir, $perl, $mname, $target, $pass_through) = @_;
 
     unless (chdir "$ext_dir") {
 	warn "Cannot cd to $ext_dir: $!";
@@ -341,6 +342,12 @@ sub build_extension {
     if (!-f $makefile) {
 	NO_MAKEFILE:
 	if (!-f 'Makefile.PL') {
+            unless (just_pm_to_blib($target, $ext_dir)) {
+                # No problems returned, so it has faked everything for us. :-)
+                chdir $return_dir || die "Cannot cd to $return_dir: $!";
+                return;
+            }
+
 	    print "\nCreating Makefile.PL in $ext_dir for $mname\n";
 	    my ($fromname, $key, $value);
 	    if ($mname eq 'podlators') {
@@ -530,6 +537,105 @@ sub _unlink {
     1 while unlink $_[0];
     my $err = $!;
     die "Can't unlink $_[0]: $err" if -f $_[0];
+}
+
+# Figure out if this extension is simple enough that it would only use
+# ExtUtils::MakeMaker's pm_to_blib target. If we're confident that it would,
+# then do all the work ourselves (returning an empty list), else return the
+# name of a file that we identified as beyond our ability to handle.
+#
+# While this is clearly quite a bit more work than just letting
+# ExtUtils::MakeMaker do it, and effectively is some code duplication, the time
+# savings are impressive.
+
+sub just_pm_to_blib {
+    my ($target, $ext_dir) = @_;
+    my $has_lib;
+    foreach my $leaf (<*>) {
+        if (-d $leaf) {
+            next if $leaf =~ /\A(?:\.|\.\.|t|demo)\z/;
+            if ($leaf eq 'lib') {
+                ++$has_lib;
+                next;
+            }
+        }
+        return $leaf
+            unless -f _;
+        # Makefile.PL is "safe" to ignore because we will only be called for
+        # directories that hold a Makefile.PL if they are in the exception list.
+        next
+            if $leaf =~ /\A(ChangeLog
+                            |Changes
+                            |LICENSE
+                            |Makefile\.PL
+                            |MANIFEST
+                            |META\.yml
+                            |pm_to_blib
+                            |README
+                            |README\.patching
+                            |README\.release
+                            )\z/xi; # /i to deal with case munging systems.
+        return $leaf;
+    }
+    return 'no lib/'
+        unless $has_lib;
+
+    print "\nRunning pm_to_blib for $ext_dir directly\n";
+
+    # strictly ExtUtils::MakeMaker uses the pm_to_blib target to install
+    # .pm, pod and .pl files. We're just going to do it for .pm and .pod
+    # files, to avoid problems on case munging file systems. Specifically,
+    # _pm.PL which ExtUtils::MakeMaker should run munges to _PM.PL, and
+    # looks a lot like a regular foo.pl (ie FOO.PL)
+    my @pm;
+    require File::Find;
+    unless (eval {
+        File::Find::find({
+                          no_chdir => 1,
+                          wanted => sub {
+                              return if -d $_;
+                              # Bail out immediately with the problem file:
+                              die \$_
+                                  unless -f _;
+                              die \$_
+                                  unless /\A[^.]+\.(?:pm|pod)\z/i;
+                              push @pm, $_;
+                              }
+                         }, 'lib');
+        1;
+    }) {
+        # Problem files aren't really errors:
+        return ${$@}
+            if ref $@ eq 'SCALAR';
+        # But anything else is:
+        die $@;
+    }
+    # This is running under miniperl, so no autodie
+    if ($target eq 'all') {
+        require ExtUtils::Install;
+        ExtUtils::Install::pm_to_blib({map {$_ => "../../$_"} sort @pm},
+                                      '../../lib/auto');
+        open my $fh, '>', 'pm_to_blib'
+            or die $!;
+        print $fh "$0 has handled pm_to_blib directly\n";
+        close $fh
+            or die $!;
+    } else {
+        # A clean target.
+        # For now, make the targets behave the same way as ExtUtils::MakeMaker
+        # does
+        _unlink('pm_to_blib');
+        unless ($target eq 'clean') {
+            # but cheat a bit, by relying on the top level Makefile clean target
+            # to take out our directory lib/auto/...
+            # (which it has to deal with, as cpan/foo/bar creates
+            # lib/auto/foo/bar, but the EU::MM rule will only
+            # rmdir lib/auto/foo/bar, leaving lib/auto/foo
+            _unlink("../../$_")
+                foreach @pm;
+        }
+    }
+    return;
 }
 
 sub fallback_cleanup {
