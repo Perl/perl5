@@ -1916,8 +1916,10 @@ PP(pp_iter)
                 *itersvp = NULL;
                 Perl_croak(aTHX_ "Use of freed value in iteration");
             }
-            if (SvPADTMP(sv) && !IS_PADGV(sv))
+            if (SvPADTMP(sv)) {
+                assert(!IS_PADGV(sv));
                 sv = newSVsv(sv);
+            }
             else {
                 SvTEMP_off(sv);
                 SvREFCNT_inc_simple_void_NN(sv);
@@ -2432,7 +2434,8 @@ PP(pp_grepwhile)
 	SAVEVPTR(PL_curpm);
 
 	src = PL_stack_base[*PL_markstack_ptr];
-	if (SvPADTMP(src) && !IS_PADGV(src)) {
+	if (SvPADTMP(src)) {
+            assert(!IS_PADGV(src));
 	    src = PL_stack_base[*PL_markstack_ptr] = sv_mortalcopy(src);
 	    PL_tmps_floor++;
 	}
@@ -2522,70 +2525,72 @@ PP(pp_entersub)
     I32 gimme;
     const bool hasargs = (PL_op->op_flags & OPf_STACKED) != 0;
 
-    if (!sv)
+    if (UNLIKELY(!sv))
 	DIE(aTHX_ "Not a CODE reference");
-    switch (SvTYPE(sv)) {
-	/* This is overwhelming the most common case:  */
-    case SVt_PVGV:
-      we_have_a_glob:
-	if (!(cv = GvCVu((const GV *)sv))) {
-	    HV *stash;
-	    cv = sv_2cv(sv, &stash, &gv, 0);
-	}
-	if (!cv) {
-	    ENTER;
-	    SAVETMPS;
-	    goto try_autoload;
-	}
-	break;
-    case SVt_PVLV:
-	if(isGV_with_GP(sv)) goto we_have_a_glob;
-	/*FALLTHROUGH*/
-    default:
-	if (sv == &PL_sv_yes) {		/* unfound import, ignore */
-	    if (hasargs)
-		SP = PL_stack_base + POPMARK;
-	    else
-		(void)POPMARK;
-	    RETURN;
-	}
-	SvGETMAGIC(sv);
-	if (SvROK(sv)) {
-	    if (SvAMAGIC(sv)) {
-		sv = amagic_deref_call(sv, to_cv_amg);
-		/* Don't SPAGAIN here.  */
-	    }
-	}
-	else {
-	    const char *sym;
-	    STRLEN len;
-	    if (!SvOK(sv))
-		DIE(aTHX_ PL_no_usym, "a subroutine");
-	    sym = SvPV_nomg_const(sv, len);
-	    if (PL_op->op_private & HINT_STRICT_REFS)
-		DIE(aTHX_ "Can't use string (\"%" SVf32 "\"%s) as a subroutine ref while \"strict refs\" in use", sv, len>32 ? "..." : "");
-	    cv = get_cvn_flags(sym, len, GV_ADD|SvUTF8(sv));
-	    break;
-	}
-	cv = MUTABLE_CV(SvRV(sv));
-	if (SvTYPE(cv) == SVt_PVCV)
-	    break;
-	/* FALL THROUGH */
-    case SVt_PVHV:
-    case SVt_PVAV:
-	DIE(aTHX_ "Not a CODE reference");
-	/* This is the second most common case:  */
-    case SVt_PVCV:
-	cv = MUTABLE_CV(sv);
-	break;
+    /* This is overwhelmingly the most common case:  */
+    if (!LIKELY(SvTYPE(sv) == SVt_PVGV && (cv = GvCVu((const GV *)sv)))) {
+        switch (SvTYPE(sv)) {
+        case SVt_PVGV:
+          we_have_a_glob:
+            if (!(cv = GvCVu((const GV *)sv))) {
+                HV *stash;
+                cv = sv_2cv(sv, &stash, &gv, 0);
+            }
+            if (!cv) {
+                ENTER;
+                SAVETMPS;
+                goto try_autoload;
+            }
+            break;
+        case SVt_PVLV:
+            if(isGV_with_GP(sv)) goto we_have_a_glob;
+            /*FALLTHROUGH*/
+        default:
+            if (sv == &PL_sv_yes) {		/* unfound import, ignore */
+                if (hasargs)
+                    SP = PL_stack_base + POPMARK;
+                else
+                    (void)POPMARK;
+                RETURN;
+            }
+            SvGETMAGIC(sv);
+            if (SvROK(sv)) {
+                if (SvAMAGIC(sv)) {
+                    sv = amagic_deref_call(sv, to_cv_amg);
+                    /* Don't SPAGAIN here.  */
+                }
+            }
+            else {
+                const char *sym;
+                STRLEN len;
+                if (!SvOK(sv))
+                    DIE(aTHX_ PL_no_usym, "a subroutine");
+                sym = SvPV_nomg_const(sv, len);
+                if (PL_op->op_private & HINT_STRICT_REFS)
+                    DIE(aTHX_ "Can't use string (\"%" SVf32 "\"%s) as a subroutine ref while \"strict refs\" in use", sv, len>32 ? "..." : "");
+                cv = get_cvn_flags(sym, len, GV_ADD|SvUTF8(sv));
+                break;
+            }
+            cv = MUTABLE_CV(SvRV(sv));
+            if (SvTYPE(cv) == SVt_PVCV)
+                break;
+            /* FALL THROUGH */
+        case SVt_PVHV:
+        case SVt_PVAV:
+            DIE(aTHX_ "Not a CODE reference");
+            /* This is the second most common case:  */
+        case SVt_PVCV:
+            cv = MUTABLE_CV(sv);
+            break;
+        }
     }
 
     ENTER;
 
   retry:
-    if (CvCLONE(cv) && ! CvCLONED(cv))
+    if (UNLIKELY(CvCLONE(cv) && ! CvCLONED(cv)))
 	DIE(aTHX_ "Closure prototype called");
-    if (!CvROOT(cv) && !CvXSUB(cv)) {
+    if (UNLIKELY(!CvROOT(cv) && !CvXSUB(cv))) {
 	GV* autogv;
 	SV* sub_name;
 
@@ -2621,8 +2626,9 @@ try_autoload:
 	goto retry;
     }
 
-    gimme = GIMME_V;
-    if ((PL_op->op_private & OPpENTERSUB_DB) && GvCV(PL_DBsub) && !CvNODEBUG(cv)) {
+    if (UNLIKELY((PL_op->op_private & OPpENTERSUB_DB) && GvCV(PL_DBsub)
+            && !CvNODEBUG(cv)))
+    {
 	 Perl_get_db_sub(aTHX_ &sv, cv);
 	 if (CvISXSUB(cv))
 	     PL_curcopdb = PL_curcop;
@@ -2639,37 +2645,43 @@ try_autoload:
 	    DIE(aTHX_ "No DB::sub routine defined");
     }
 
+    gimme = GIMME_V;
+
     if (!(CvISXSUB(cv))) {
 	/* This path taken at least 75% of the time   */
 	dMARK;
-	SSize_t items = SP - MARK;
 	PADLIST * const padlist = CvPADLIST(cv);
+        I32 depth;
+
 	PUSHBLOCK(cx, CXt_SUB, MARK);
 	PUSHSUB(cx);
 	cx->blk_sub.retop = PL_op->op_next;
-	CvDEPTH(cv)++;
-	if (CvDEPTH(cv) >= 2) {
+	if (UNLIKELY((depth = ++CvDEPTH(cv)) >= 2)) {
 	    PERL_STACK_OVERFLOW_CHECK();
-	    pad_push(padlist, CvDEPTH(cv));
+	    pad_push(padlist, depth);
 	}
 	SAVECOMPPAD();
-	PAD_SET_CUR_NOSAVE(padlist, CvDEPTH(cv));
-	if (hasargs) {
+	PAD_SET_CUR_NOSAVE(padlist, depth);
+	if (LIKELY(hasargs)) {
 	    AV *const av = MUTABLE_AV(PAD_SVl(0));
-	    if (AvREAL(av)) {
+            SSize_t items;
+            AV **defavp;
+
+	    if (UNLIKELY(AvREAL(av))) {
 		/* @_ is normally not REAL--this should only ever
 		 * happen when DB::sub() calls things that modify @_ */
 		av_clear(av);
 		AvREAL_off(av);
 		AvREIFY_on(av);
 	    }
-	    cx->blk_sub.savearray = GvAV(PL_defgv);
-	    GvAV(PL_defgv) = MUTABLE_AV(SvREFCNT_inc_simple(av));
+	    defavp = &GvAV(PL_defgv);
+	    cx->blk_sub.savearray = *defavp;
+	    *defavp = MUTABLE_AV(SvREFCNT_inc_simple_NN(av));
 	    CX_CURPAD_SAVE(cx->blk_sub);
 	    cx->blk_sub.argarray = av;
-	    ++MARK;
+            items = SP - MARK;
 
-	    if (items - 1 > AvMAX(av)) {
+	    if (UNLIKELY(items - 1 > AvMAX(av))) {
                 SV **ary = AvALLOC(av);
                 AvMAX(av) = items - 1;
                 Renew(ary, items, SV*);
@@ -2677,30 +2689,33 @@ try_autoload:
                 AvARRAY(av) = ary;
             }
 
-	    Copy(MARK,AvARRAY(av),items,SV*);
+	    Copy(MARK+1,AvARRAY(av),items,SV*);
 	    AvFILLp(av) = items - 1;
 	
 	    MARK = AvARRAY(av);
 	    while (items--) {
 		if (*MARK)
 		{
-		    if (SvPADTMP(*MARK) && !IS_PADGV(*MARK))
+		    if (SvPADTMP(*MARK)) {
+                        assert(!IS_PADGV(*MARK));
 			*MARK = sv_mortalcopy(*MARK);
+                    }
 		    SvTEMP_off(*MARK);
 		}
 		MARK++;
 	    }
 	}
 	SAVETMPS;
-	if ((cx->blk_u16 & OPpENTERSUB_LVAL_MASK) == OPpLVAL_INTRO &&
-	    !CvLVALUE(cv))
+	if (UNLIKELY((cx->blk_u16 & OPpENTERSUB_LVAL_MASK) == OPpLVAL_INTRO &&
+	    !CvLVALUE(cv)))
 	    DIE(aTHX_ "Can't modify non-lvalue subroutine call");
 	/* warning must come *after* we fully set up the context
 	 * stuff so that __WARN__ handlers can safely dounwind()
 	 * if they want to
 	 */
-	if (CvDEPTH(cv) == PERL_SUB_DEPTH_WARN && ckWARN(WARN_RECURSION)
-	    && !(PERLDB_SUB && cv == GvCV(PL_DBsub)))
+	if (UNLIKELY(depth == PERL_SUB_DEPTH_WARN
+                && ckWARN(WARN_RECURSION)
+                && !(PERLDB_SUB && cv == GvCV(PL_DBsub))))
 	    sub_crush_depth(cv);
 	RETURNOP(CvSTART(cv));
     }
@@ -2710,13 +2725,13 @@ try_autoload:
 	SAVETMPS;
 	PUTBACK;
 
-	if (((PL_op->op_private
+	if (UNLIKELY(((PL_op->op_private
 	       & PUSHSUB_GET_LVALUE_MASK(Perl_is_lvalue_sub)
              ) & OPpENTERSUB_LVAL_MASK) == OPpLVAL_INTRO &&
-	    !CvLVALUE(cv))
+	    !CvLVALUE(cv)))
 	    DIE(aTHX_ "Can't modify non-lvalue subroutine call");
 
-	if (!hasargs && GvAV(PL_defgv)) {
+	if (UNLIKELY(!hasargs && GvAV(PL_defgv))) {
 	    /* Need to copy @_ to stack. Alternative may be to
 	     * switch stack to @_, and copy return values
 	     * back. This would allow popping @_ in XSUB, e.g.. XXXX */
@@ -2750,12 +2765,14 @@ try_autoload:
 	    SSize_t items = SP - mark;
 	    while (items--) {
 		mark++;
-		if (*mark && SvPADTMP(*mark) && !IS_PADGV(*mark))
+		if (*mark && SvPADTMP(*mark)) {
+                    assert(!IS_PADGV(*mark));
 		    *mark = sv_mortalcopy(*mark);
+                }
 	    }
 	}
 	/* We assume first XSUB in &DB::sub is the called one. */
-	if (PL_curcopdb) {
+	if (UNLIKELY(PL_curcopdb)) {
 	    SAVEVPTR(PL_curcop);
 	    PL_curcop = PL_curcopdb;
 	    PL_curcopdb = NULL;
@@ -2767,12 +2784,12 @@ try_autoload:
 	CvXSUB(cv)(aTHX_ cv);
 
 	/* Enforce some sanity in scalar context. */
-	if (gimme == G_SCALAR && ++markix != PL_stack_sp - PL_stack_base ) {
-	    if (markix > PL_stack_sp - PL_stack_base)
-		*(PL_stack_base + markix) = &PL_sv_undef;
-	    else
-		*(PL_stack_base + markix) = *PL_stack_sp;
-	    PL_stack_sp = PL_stack_base + markix;
+	if (gimme == G_SCALAR) {
+            SV **svp = PL_stack_base + markix + 1;
+            if (svp != PL_stack_sp) {
+                *svp = svp > PL_stack_sp ? &PL_sv_undef : *PL_stack_sp;
+                PL_stack_sp = svp;
+            }
 	}
 	LEAVE;
 	return NORMAL;

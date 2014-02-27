@@ -571,8 +571,10 @@ S_refto(pTHX_ SV *sv)
 	SvTEMP_off(sv);
 	SvREFCNT_inc_void_NN(sv);
     }
-    else if (SvPADTMP(sv) && !IS_PADGV(sv))
+    else if (SvPADTMP(sv)) {
+        assert(!IS_PADGV(sv));
         sv = newSVsv(sv);
+    }
     else {
 	SvTEMP_off(sv);
 	SvREFCNT_inc_void_NN(sv);
@@ -1707,10 +1709,11 @@ PP(pp_repeat)
 		    SvREADONLY_on(*SP);
 		}
 #else
-               if (*SP)
-                {
-                   if (mod && SvPADTMP(*SP) && !IS_PADGV(*SP))
+                if (*SP) {
+                   if (mod && SvPADTMP(*SP)) {
+                       assert(!IS_PADGV(*SP));
                        *SP = sv_mortalcopy(*SP);
+                   }
 		   SvTEMP_off((*SP));
 		}
 #endif
@@ -4896,8 +4899,10 @@ PP(pp_lslice)
 	    is_something_there = TRUE;
 	    if (!(*lelem = firstrelem[ix]))
 		*lelem = &PL_sv_undef;
-	    else if (mod && SvPADTMP(*lelem) && !IS_PADGV(*lelem))
+	    else if (mod && SvPADTMP(*lelem)) {
+                assert(!IS_PADGV(*lelem));
 		*lelem = firstrelem[ix] = sv_mortalcopy(*lelem);
+            }
 	}
     }
     if (is_something_there)

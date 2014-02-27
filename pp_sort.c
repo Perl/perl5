@@ -1609,8 +1609,10 @@ PP(pp_sort)
     copytmps = !sorting_av && PL_sortcop;
     for (i=max; i > 0 ; i--) {
 	if ((*p1 = *p2++)) {			/* Weed out nulls. */
-	    if (copytmps && SvPADTMP(*p1) && !IS_PADGV(*p1))
+	    if (copytmps && SvPADTMP(*p1)) {
+                assert(!IS_PADGV(*p1));
 		*p1 = sv_mortalcopy(*p1);
+            }
 	    SvTEMP_off(*p1);
 	    if (!PL_sortcop) {
 		if (priv & OPpSORT_NUMERIC) {

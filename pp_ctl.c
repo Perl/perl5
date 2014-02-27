@@ -938,7 +938,8 @@ PP(pp_grepstart)
     SAVEVPTR(PL_curpm);
 
     src = PL_stack_base[*PL_markstack_ptr];
-    if (SvPADTMP(src) && !IS_PADGV(src)) {
+    if (SvPADTMP(src)) {
+        assert(!IS_PADGV(src));
 	src = PL_stack_base[*PL_markstack_ptr] = sv_mortalcopy(src);
 	PL_tmps_floor++;
     }
@@ -1090,7 +1091,10 @@ PP(pp_mapwhile)
 
 	/* set $_ to the new source item */
 	src = PL_stack_base[PL_markstack_ptr[-1]];
-	if (SvPADTMP(src) && !IS_PADGV(src)) src = sv_mortalcopy(src);
+	if (SvPADTMP(src)) {
+            assert(!IS_PADGV(src));
+            src = sv_mortalcopy(src);
+        }
 	SvTEMP_off(src);
 	if (PL_op->op_private & OPpGREP_LEX)
 	    PAD_SVl(PL_op->op_targ) = src;
