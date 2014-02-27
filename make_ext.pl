@@ -550,15 +550,19 @@ sub _unlink {
 
 sub just_pm_to_blib {
     my ($target, $ext_dir, $mname) = @_;
-    my $has_lib;
-    my $has_top;
+    my ($has_lib, $has_top, $has_topdir);
     my ($last) = $mname =~ /([^:]+)$/;
+    my ($first) = $mname =~ /^([^:]+)/;
 
     foreach my $leaf (<*>) {
         if (-d $leaf) {
             next if $leaf =~ /\A(?:\.|\.\.|t|demo)\z/;
             if ($leaf eq 'lib') {
                 ++$has_lib;
+                next;
+            }
+            if ($leaf eq $first) {
+                ++$has_topdir;
                 next;
             }
         }
@@ -586,6 +590,8 @@ sub just_pm_to_blib {
     }
     return 'no lib/'
         unless $has_lib || $has_top;
+    die "Inconsistent module $mname has both lib/ and $first/"
+        if $has_lib && $has_topdir;
 
     print "\nRunning pm_to_blib for $ext_dir directly\n";
 
@@ -594,7 +600,7 @@ sub just_pm_to_blib {
         my $to = $mname =~ s!::!/!gr;
         $pm{"$last.pm"} = "../../lib/$to.pm";
     }
-    if ($has_lib) {
+    if ($has_lib || $has_topdir) {
         # strictly ExtUtils::MakeMaker uses the pm_to_blib target to install
         # .pm, pod and .pl files. We're just going to do it for .pm and .pod
         # files, to avoid problems on case munging file systems. Specifically,
@@ -614,7 +620,7 @@ sub just_pm_to_blib {
                                       unless /\A[^.]+\.(?:pm|pod)\z/i;
                                   push @found, $_;
                               }
-                             }, 'lib');
+                             }, $has_lib ? 'lib' : $first);
             1;
         }) {
             # Problem files aren't really errors:
@@ -623,8 +629,12 @@ sub just_pm_to_blib {
             # But anything else is:
             die $@;
         }
-        foreach (@found) {
-            $pm{$_} = "../../$_";
+        if ($has_lib) {
+            $pm{$_} = "../../$_"
+                foreach @found;
+        } else {
+            $pm{$_} = "../../lib/$_"
+                foreach @found;
         }
     }
     # This is running under miniperl, so no autodie
