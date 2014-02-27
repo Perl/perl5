@@ -1916,8 +1916,10 @@ PP(pp_iter)
                 *itersvp = NULL;
                 Perl_croak(aTHX_ "Use of freed value in iteration");
             }
-            if (SvPADTMP(sv) && !IS_PADGV(sv))
+            if (SvPADTMP(sv)) {
+                assert(!IS_PADGV(sv));
                 sv = newSVsv(sv);
+            }
             else {
                 SvTEMP_off(sv);
                 SvREFCNT_inc_simple_void_NN(sv);
@@ -2432,7 +2434,8 @@ PP(pp_grepwhile)
 	SAVEVPTR(PL_curpm);
 
 	src = PL_stack_base[*PL_markstack_ptr];
-	if (SvPADTMP(src) && !IS_PADGV(src)) {
+	if (SvPADTMP(src)) {
+            assert(!IS_PADGV(src));
 	    src = PL_stack_base[*PL_markstack_ptr] = sv_mortalcopy(src);
 	    PL_tmps_floor++;
 	}
@@ -2693,8 +2696,10 @@ try_autoload:
 	    while (items--) {
 		if (*MARK)
 		{
-		    if (SvPADTMP(*MARK) && !IS_PADGV(*MARK))
+		    if (SvPADTMP(*MARK)) {
+                        assert(!IS_PADGV(*MARK));
 			*MARK = sv_mortalcopy(*MARK);
+                    }
 		    SvTEMP_off(*MARK);
 		}
 		MARK++;
@@ -2760,8 +2765,10 @@ try_autoload:
 	    SSize_t items = SP - mark;
 	    while (items--) {
 		mark++;
-		if (*mark && SvPADTMP(*mark) && !IS_PADGV(*mark))
+		if (*mark && SvPADTMP(*mark)) {
+                    assert(!IS_PADGV(*mark));
 		    *mark = sv_mortalcopy(*mark);
+                }
 	    }
 	}
 	/* We assume first XSUB in &DB::sub is the called one. */

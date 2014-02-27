@@ -2528,13 +2528,14 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
     /* see how far we have to get to not match where we matched before */
     reginfo->till = stringarg + minend;
 
-    if (prog->extflags & RXf_EVAL_SEEN && SvPADTMP(sv) && !IS_PADGV(sv)) {
+    if (prog->extflags & RXf_EVAL_SEEN && SvPADTMP(sv)) {
         /* SAVEFREESV, not sv_mortalcopy, as this SV must last until after
            S_cleanup_regmatch_info_aux has executed (registered by
            SAVEDESTRUCTOR_X below).  S_cleanup_regmatch_info_aux modifies
            magic belonging to this SV.
            Not newSVsv, either, as it does not COW.
         */
+        assert(!IS_PADGV(sv));
         reginfo->sv = newSV(0);
         SvSetSV_nosteal(reginfo->sv, sv);
         SAVEFREESV(reginfo->sv);
