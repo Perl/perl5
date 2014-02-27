@@ -342,7 +342,7 @@ sub build_extension {
     if (!-f $makefile) {
 	NO_MAKEFILE:
 	if (!-f 'Makefile.PL') {
-            unless (just_pm_to_blib($target, $ext_dir)) {
+            unless (just_pm_to_blib($target, $ext_dir, $mname)) {
                 # No problems returned, so it has faked everything for us. :-)
                 chdir $return_dir || die "Cannot cd to $return_dir: $!";
                 return;
@@ -549,8 +549,11 @@ sub _unlink {
 # savings are impressive.
 
 sub just_pm_to_blib {
-    my ($target, $ext_dir) = @_;
+    my ($target, $ext_dir, $mname) = @_;
     my $has_lib;
+    my $has_top;
+    my ($last) = $mname =~ /([^:]+)$/;
+
     foreach my $leaf (<*>) {
         if (-d $leaf) {
             next if $leaf =~ /\A(?:\.|\.\.|t|demo)\z/;
@@ -575,46 +578,59 @@ sub just_pm_to_blib {
                             |README\.patching
                             |README\.release
                             )\z/xi; # /i to deal with case munging systems.
+        if ($leaf eq "$last.pm") {
+            ++$has_top;
+            next;
+        }
         return $leaf;
     }
     return 'no lib/'
-        unless $has_lib;
+        unless $has_lib || $has_top;
 
     print "\nRunning pm_to_blib for $ext_dir directly\n";
 
-    # strictly ExtUtils::MakeMaker uses the pm_to_blib target to install
-    # .pm, pod and .pl files. We're just going to do it for .pm and .pod
-    # files, to avoid problems on case munging file systems. Specifically,
-    # _pm.PL which ExtUtils::MakeMaker should run munges to _PM.PL, and
-    # looks a lot like a regular foo.pl (ie FOO.PL)
-    my @pm;
-    require File::Find;
-    unless (eval {
-        File::Find::find({
-                          no_chdir => 1,
-                          wanted => sub {
-                              return if -d $_;
-                              # Bail out immediately with the problem file:
-                              die \$_
-                                  unless -f _;
-                              die \$_
-                                  unless /\A[^.]+\.(?:pm|pod)\z/i;
-                              push @pm, $_;
+    my %pm;
+    if ($has_top) {
+        my $to = $mname =~ s!::!/!gr;
+        $pm{"$last.pm"} = "../../lib/$to.pm";
+    }
+    if ($has_lib) {
+        # strictly ExtUtils::MakeMaker uses the pm_to_blib target to install
+        # .pm, pod and .pl files. We're just going to do it for .pm and .pod
+        # files, to avoid problems on case munging file systems. Specifically,
+        # _pm.PL which ExtUtils::MakeMaker should run munges to _PM.PL, and
+        # looks a lot like a regular foo.pl (ie FOO.PL)
+        my @found;
+        require File::Find;
+        unless (eval {
+            File::Find::find({
+                              no_chdir => 1,
+                              wanted => sub {
+                                  return if -d $_;
+                                  # Bail out immediately with the problem file:
+                                  die \$_
+                                      unless -f _;
+                                  die \$_
+                                      unless /\A[^.]+\.(?:pm|pod)\z/i;
+                                  push @found, $_;
                               }
-                         }, 'lib');
-        1;
-    }) {
-        # Problem files aren't really errors:
-        return ${$@}
-            if ref $@ eq 'SCALAR';
-        # But anything else is:
-        die $@;
+                             }, 'lib');
+            1;
+        }) {
+            # Problem files aren't really errors:
+            return ${$@}
+                if ref $@ eq 'SCALAR';
+            # But anything else is:
+            die $@;
+        }
+        foreach (@found) {
+            $pm{$_} = "../../$_";
+        }
     }
     # This is running under miniperl, so no autodie
     if ($target eq 'all') {
         require ExtUtils::Install;
-        ExtUtils::Install::pm_to_blib({map {$_ => "../../$_"} sort @pm},
-                                      '../../lib/auto');
+        ExtUtils::Install::pm_to_blib(\%pm, '../../lib/auto');
         open my $fh, '>', 'pm_to_blib'
             or die $!;
         print $fh "$0 has handled pm_to_blib directly\n";
@@ -632,7 +648,7 @@ sub just_pm_to_blib {
             # lib/auto/foo/bar, but the EU::MM rule will only
             # rmdir lib/auto/foo/bar, leaving lib/auto/foo
             _unlink("../../$_")
-                foreach @pm;
+                foreach sort values %pm;
         }
     }
     return;
