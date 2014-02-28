@@ -281,12 +281,22 @@ sub __incrdepth {
 # returns the new root opcode of the tree.
 sub __cond_join {
     my ( $cond, $yes, $no )= @_;
+    if (ref $yes) {
     return {
         test  => $cond,
         yes   => __incrdepth( $yes ),
         no    => $no,
         depth => 0,
     };
+    }
+    else {
+        return {
+            test  => $cond,
+            yes   => $yes,
+            no    => __incrdepth($no),
+            depth => 0,
+        };
+    }
 }
 
 # Methods
@@ -614,27 +624,122 @@ sub length_optree {
     die "Can't do a length_optree on type 'cp', makes no sense."
       if $type =~ /^cp/;
 
-    my ( @size, $method );
+    my $else= ( $opt{else} ||= 0 );
 
-    if ( $type =~ /generic/ ) {
-        $method= 'generic_optree';
+    my $method = $type =~ /generic/ ? 'generic_optree' : 'optree';
+    if ($method eq 'optree' && scalar keys %{$self->{size}{$type}} == 1) {
+
+        # Here is non-generic output (meaning that we are only generating one
+        # type), and all things that match have the same number ('size') of
+        # bytes.  The length guard is simply that we have that number of
+        # bytes.
+        my @size = keys %{$self->{size}{$type}};
+        my $cond= "((e) - (s)) >= $size[0]";
+        my $optree = $self->$method(%opt);
+        $else= __cond_join( $cond, $optree, $else );
+    }
+    elsif ($self->{has_multi}) {
+        my @size;
+
+        # Here, there can be a match of a multiple character string.  We use
+        # the traditional method which is to have a branch for each possible
+        # size (longest first) and test for the legal values for that size.
         my %sizes= (
             %{ $self->{size}{low}    || {} },
             %{ $self->{size}{latin1} || {} },
             %{ $self->{size}{utf8}   || {} }
         );
-        @size= sort { $a <=> $b } keys %sizes;
-    } else {
-        $method= 'optree';
-        @size= sort { $a <=> $b } keys %{ $self->{size}{$type} };
+        if ($method eq 'generic_optree') {
+            @size= sort { $a <=> $b } keys %sizes;
+        } else {
+            @size= sort { $a <=> $b } keys %{ $self->{size}{$type} };
+        }
+        for my $size ( @size ) {
+            my $optree= $self->$method( %opt, type => $type, max_depth => $size );
+            my $cond= "((e)-(s) > " . ( $size - 1 ).")";
+            $else= __cond_join( $cond, $optree, $else );
+        }
+    }
+    else {
+        my $utf8;
+
+        # Here, has more than one possible size, and only matches a single
+        # character.  For non-utf8, the needed length is 1; for utf8, it is
+        # found by array lookup 'UTF8SKIP'.
+
+        # If want just the code points above 255, set up to look for those;
+        # otherwise assume will be looking for all non-UTF-8-invariant code
+        # poiints.
+        my $trie_type = ($type eq 'high') ? 'high' : 'utf8';
+
+        # If we do want more than the 0-255 range, find those, and if they
+        # exist...
+        if ($opt{type} !~ /latin1/i && ($utf8 = $self->make_trie($trie_type, 0))) {
+
+            # ... get them into an optree, and set them up as the 'else' clause
+            $utf8 = $self->_optree( $utf8, 'depth', $opt{ret_type}, 0, 0 );
+
+            # We could make this
+            #   UTF8_IS_START(*s) && ((e) - (s)) >= UTF8SKIP(s))";
+            # to avoid doing the UTF8SKIP and subsequent branches for invariants
+            # that don't match.  But the current macros that get generated
+            # have only a few things that can match past this, so I (khw)
+            # don't think it is worth it.  (Even better would be to use
+            # calculate_mask(keys %$utf8) instead of UTF8_IS_START, and use it
+            # if it saves a bunch.
+            my $cond = "(((e) - (s)) >= UTF8SKIP(s))";
+            $else = __cond_join($cond, $utf8, $else);
+
+            # For 'generic', we also will want the latin1 UTF-8 variants for
+            # the case where the input isn't UTF-8.
+            my $latin1;
+            if ($method eq 'generic_optree') {
+                $latin1 = $self->make_trie( 'latin1', 1);
+                $latin1= $self->_optree( $latin1, 'depth', $opt{ret_type}, 0, 0 );
+            }
+
+            # If we want the UTF-8 invariants, get those.
+            my $low;
+            if ($opt{type} !~ /non_low|high/
+                && ($low= $self->make_trie( 'low', 1)))
+            {
+                $low= $self->_optree( $low, 'depth', $opt{ret_type}, 0, 0 );
+
+                # Expand out the UTF-8 invariants as a string so that we
+                # can use them as the conditional
+                $low = $self->_cond_as_str( $low, 0, \%opt);
+
+                # If there are Latin1 variants, add a test for them.
+                if ($latin1) {
+                    $else = __cond_join("(! is_utf8 )", $latin1, $else);
+                }
+                elsif ($method eq 'generic_optree') {
+
+                    # Otherwise for 'generic' only we know that what
+                    # follows must be valid for just UTF-8 strings,
+                    $else->{test} = "( is_utf8 && $else->{test} )";
+                }
+
+                # If the invariants match, we are done; otherwise we have
+                # to go to the 'else' clause.
+                $else = __cond_join($low, 1, $else);
+            }
+            elsif ($latin1) {   # Here, didn't want or didn't have invariants,
+                                # but we do have latin variants
+                $else = __cond_join("(! is_utf8)", $latin1, $else);
+            }
+
+            # We need at least one byte available to start off the tests
+            $else = __cond_join("((e) > (s))", $else, 0);
+        }
+        else {  # Here, we don't want or there aren't any variants.  A single
+                # byte available is enough.
+            my $cond= "((e) > (s))";
+            my $optree = $self->$method(%opt);
+            $else= __cond_join( $cond, $optree, $else );
+        }
     }
 
-    my $else= ( $opt{else} ||= 0 );
-    for my $size ( @size ) {
-        my $optree= $self->$method( %opt, type => $type, max_depth => $size );
-        my $cond= "((e)-(s) > " . ( $size - 1 ).")";
-        $else= __cond_join( $cond, $optree, $else );
-    }
     return $else;
 }
 
