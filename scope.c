@@ -1039,7 +1039,7 @@ Perl_leave_scope(pTHX_ I32 base)
                 assert(SvPADMY(sv));
 
                 /* Can clear pad variable in place? */
-                if (SvREFCNT(sv) <= 1 && !SvOBJECT(sv)) {
+                if (SvREFCNT(sv) == 1 && !SvOBJECT(sv)) {
 
                     /* these flags are the union of all the relevant flags
                      * in the individual conditions within */
