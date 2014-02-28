@@ -3919,7 +3919,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
         assert(nextchr < 256 && (nextchr >= 0 || nextchr == NEXTCHR_EOS));
 
 	switch (state_num) {
-	case BOL: /*  /^../  */
+	case BOL:  /*  /^../   */
+	case SBOL: /*  /^../s  */
 	    if (locinput == reginfo->strbeg)
 		break;
 	    sayNO;
@@ -3930,11 +3931,6 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    {
 		break;
 	    }
-	    sayNO;
-
-	case SBOL: /*  /^../s  */
-	    if (locinput == reginfo->strbeg)
-		break;
 	    sayNO;
 
 	case GPOS: /*  \G  */
