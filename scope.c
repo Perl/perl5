@@ -1036,28 +1036,46 @@ Perl_leave_scope(pTHX_ I32 base)
                     (SvREFCNT(sv) <= 1 && !SvOBJECT(sv)) ? "clear" : "abandon"
                 ));
 
+                assert(SvPADMY(sv));
+
                 /* Can clear pad variable in place? */
-                if (SvREFCNT(sv) <= 1 && !SvOBJECT(sv)) {
-                    /*
-                     * if a my variable that was made readonly is going out of
-                     * scope, we want to remove the readonlyness so that it can
-                     * go out of scope quietly
-                     */
-                    if (SvPADMY(sv) && !SvFAKE(sv))
-                        SvREADONLY_off(sv);
+                if (SvREFCNT(sv) == 1 && !SvOBJECT(sv)) {
 
-                    if (SvTYPE(sv) == SVt_PVHV)
-                        Perl_hv_kill_backrefs(aTHX_ MUTABLE_HV(sv));
-                    if (SvMAGICAL(sv))
+                    /* these flags are the union of all the relevant flags
+                     * in the individual conditions within */
+                    if (UNLIKELY(SvFLAGS(sv) & (
+                            SVf_READONLY /* for SvREADONLY_off() */
+                          | (SVs_GMG|SVs_SMG|SVs_RMG) /* SvMAGICAL() */
+                          | SVf_OOK
+                          | SVf_THINKFIRST)))
                     {
-                      sv_unmagic(sv, PERL_MAGIC_backref);
-                      if (SvTYPE(sv) != SVt_PVCV)
-                        mg_free(sv);
-                    }
-                    if (SvTHINKFIRST(sv))
-                        sv_force_normal_flags(sv, SV_IMMEDIATE_UNREF
-                                                 |SV_COW_DROP_PV);
+                        /* if a my variable that was made readonly is
+                         * going out of scope, we want to remove the
+                         * readonlyness so that it can go out of scope
+                         * quietly
+                         */
+                        if (SvREADONLY(sv) && !SvFAKE(sv))
+                            SvREADONLY_off(sv);
 
+                        if (SvOOK(sv)) { /* OOK or HvAUX */
+                            if (SvTYPE(sv) == SVt_PVHV)
+                                Perl_hv_kill_backrefs(aTHX_ MUTABLE_HV(sv));
+                            else
+                                sv_backoff(sv);
+                        }
+
+                        if (SvMAGICAL(sv)) {
+                            /* note that backrefs (either in HvAUX or magic)
+                             * must be removed before other magic */
+                            sv_unmagic(sv, PERL_MAGIC_backref);
+                            if (SvTYPE(sv) != SVt_PVCV)
+                                mg_free(sv);
+                        }
+                        if (SvTHINKFIRST(sv))
+                            sv_force_normal_flags(sv, SV_IMMEDIATE_UNREF
+                                                     |SV_COW_DROP_PV);
+
+                    }
                     switch (SvTYPE(sv)) {
                     case SVt_NULL:
                         break;
@@ -1077,7 +1095,9 @@ Perl_leave_scope(pTHX_ I32 base)
                         break;
                     }
                     default:
-                        SvOK_off(sv);
+                        assert_not_ROK(sv);
+                        assert_not_glob(sv);
+                        SvFLAGS(sv) &=~ (SVf_OK|SVf_IVisUV|SVf_UTF8);
                         break;
                     }
                     SvPADSTALE_on(sv); /* mark as no longer live */
