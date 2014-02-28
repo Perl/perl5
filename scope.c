@@ -1090,7 +1090,11 @@ Perl_leave_scope(pTHX_ I32 base)
                         break;
                     }
                     default:
-                        SvOK_off(sv);
+                        assert_not_ROK(sv);
+                        assert_not_glob(sv);
+                        SvFLAGS(sv) &=~ (SVf_OK|SVf_IVisUV|SVf_UTF8);
+                        if (SvOOK(sv))
+                            sv_backoff(sv);
                         break;
                     }
                     SvPADSTALE_on(sv); /* mark as no longer live */
