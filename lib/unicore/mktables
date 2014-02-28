@@ -2502,7 +2502,12 @@ END
             }
             $handle{$addr} = $file_handle; # Cache the open file handle
 
-            if ($v_version ge v3.2.0 && lc($file) ne 'unicodedata.txt') {
+            if ($v_version ge v3.2.0
+                && lc($file) ne 'unicodedata.txt'
+
+                    # Unihan files used another format until v7
+                && ($v_version ge v7.0.0 || $file !~ /^Unihan/i))
+            {
                 $_ = <$file_handle>;
                 if ($_ !~ / - $string_version \. /x) {
                     chomp;
