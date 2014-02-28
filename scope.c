@@ -1041,16 +1041,12 @@ Perl_leave_scope(pTHX_ I32 base)
                 /* Can clear pad variable in place? */
                 if (SvREFCNT(sv) <= 1 && !SvOBJECT(sv)) {
 
-                    /* note that backrefs (either in HvAUX or magic)
-                     * must be removed before other magic */
-                    if (SvTYPE(sv) == SVt_PVHV)
-                        Perl_hv_kill_backrefs(aTHX_ MUTABLE_HV(sv));
-
                     /* these flags are the union of all the relevant flags
                      * in the individual conditions within */
                     if (UNLIKELY(SvFLAGS(sv) & (
                             SVf_READONLY /* for SvREADONLY_off() */
                           | (SVs_GMG|SVs_SMG|SVs_RMG) /* SvMAGICAL() */
+                          | SVf_OOK
                           | SVf_THINKFIRST)))
                     {
                         /* if a my variable that was made readonly is
@@ -1061,7 +1057,16 @@ Perl_leave_scope(pTHX_ I32 base)
                         if (SvREADONLY(sv) && !SvFAKE(sv))
                             SvREADONLY_off(sv);
 
+                        if (SvOOK(sv)) { /* OOK or HvAUX */
+                            if (SvTYPE(sv) == SVt_PVHV)
+                                Perl_hv_kill_backrefs(aTHX_ MUTABLE_HV(sv));
+                            else
+                                sv_backoff(sv);
+                        }
+
                         if (SvMAGICAL(sv)) {
+                            /* note that backrefs (either in HvAUX or magic)
+                             * must be removed before other magic */
                             sv_unmagic(sv, PERL_MAGIC_backref);
                             if (SvTYPE(sv) != SVt_PVCV)
                                 mg_free(sv);
@@ -1093,8 +1098,6 @@ Perl_leave_scope(pTHX_ I32 base)
                         assert_not_ROK(sv);
                         assert_not_glob(sv);
                         SvFLAGS(sv) &=~ (SVf_OK|SVf_IVisUV|SVf_UTF8);
-                        if (SvOOK(sv))
-                            sv_backoff(sv);
                         break;
                     }
                     SvPADSTALE_on(sv); /* mark as no longer live */
