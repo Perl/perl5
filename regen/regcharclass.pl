@@ -282,12 +282,12 @@ sub __incrdepth {
 sub __cond_join {
     my ( $cond, $yes, $no )= @_;
     if (ref $yes) {
-    return {
-        test  => $cond,
-        yes   => __incrdepth( $yes ),
-        no    => $no,
-        depth => 0,
-    };
+        return {
+            test  => $cond,
+            yes   => __incrdepth( $yes ),
+            no    => $no,
+            depth => 0,
+        };
     }
     else {
         return {
@@ -524,7 +524,7 @@ sub _optree {
     }
 
     # first we loop over the possible keys/conditions and find out what they
-    # look like we group conditions with the same optree together.
+    # look like; we group conditions with the same optree together.
     my %dmp_res;
     my @res_order;
     local $Data::Dumper::Sortkeys=1;
@@ -1289,7 +1289,7 @@ sub render {
 # type defaults to 'generic', and ret_type to 'len' unless type is 'cp'
 # in which case it defaults to 'cp' as well.
 #
-# it is illegal to do a type 'cp' macro on a pattern with multi-codepoint
+# It is illegal to do a type 'cp' macro on a pattern with multi-codepoint
 # sequences in it, as the generated macro will accept only a single codepoint
 # as an argument.
 #
