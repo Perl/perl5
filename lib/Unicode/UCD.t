@@ -1761,12 +1761,8 @@ foreach my $prop (sort(keys %props), sort keys %legacy_props) {
                     next PROPERTY;
                 }
             } # Otherwise, the map is to a simple scalar
-            elsif ($full_name =~    # These maps are in hex
-                    / ^ ( Simple_ )? ( Case_Folding
-                                       | ( Lower
-                                           | Title
-                                           | Upper ) case_Mapping ) $ /x)
-            {
+            elsif (defined $file_format && $file_format eq 'ax') {
+                # These maps are in hex
                 $invmap_ref->[$i] = sprintf("%X", $invmap_ref->[$i]);
             }
             elsif ($format eq 'ad' || $format eq 'ale') {
