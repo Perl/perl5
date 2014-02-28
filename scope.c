@@ -1038,6 +1038,19 @@ Perl_leave_scope(pTHX_ I32 base)
 
                 /* Can clear pad variable in place? */
                 if (SvREFCNT(sv) <= 1 && !SvOBJECT(sv)) {
+
+                    /* note that backrefs (either in HvAUX or magic)
+                     * must be removed before other magic */
+                    if (SvTYPE(sv) == SVt_PVHV)
+                        Perl_hv_kill_backrefs(aTHX_ MUTABLE_HV(sv));
+
+                    /* these flags are the union of all the relevant flags
+                     * in the individual conditions within */
+                    if (UNLIKELY(SvFLAGS(sv) & (
+                            SVf_READONLY /* for SvREADONLY_off() */
+                          | (SVs_GMG|SVs_SMG|SVs_RMG) /* SvMAGICAL() */
+                          | SVf_THINKFIRST)))
+                    {
                     /*
                      * if a my variable that was made readonly is going out of
                      * scope, we want to remove the readonlyness so that it can
@@ -1046,8 +1059,6 @@ Perl_leave_scope(pTHX_ I32 base)
                     if (SvPADMY(sv) && !SvFAKE(sv))
                         SvREADONLY_off(sv);
 
-                    if (SvTYPE(sv) == SVt_PVHV)
-                        Perl_hv_kill_backrefs(aTHX_ MUTABLE_HV(sv));
                     if (SvMAGICAL(sv))
                     {
                       sv_unmagic(sv, PERL_MAGIC_backref);
@@ -1058,6 +1069,7 @@ Perl_leave_scope(pTHX_ I32 base)
                         sv_force_normal_flags(sv, SV_IMMEDIATE_UNREF
                                                  |SV_COW_DROP_PV);
 
+                    }
                     switch (SvTYPE(sv)) {
                     case SVt_NULL:
                         break;
