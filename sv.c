@@ -12616,6 +12616,10 @@ S_sv_dup_common(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
 
 			daux->xhv_fill_lazy = saux->xhv_fill_lazy;
 			daux->xhv_aux_flags = saux->xhv_aux_flags;
+#ifdef PERL_HASH_RANDOMIZE_KEYS
+			daux->xhv_rand = saux->xhv_rand;
+			daux->xhv_last_rand = saux->xhv_last_rand;
+#endif
 			daux->xhv_riter = saux->xhv_riter;
 			daux->xhv_eiter = saux->xhv_eiter
 			    ? he_dup(saux->xhv_eiter,
