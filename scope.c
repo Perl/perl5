@@ -1051,23 +1051,22 @@ Perl_leave_scope(pTHX_ I32 base)
                           | (SVs_GMG|SVs_SMG|SVs_RMG) /* SvMAGICAL() */
                           | SVf_THINKFIRST)))
                     {
-                    /*
-                     * if a my variable that was made readonly is going out of
-                     * scope, we want to remove the readonlyness so that it can
-                     * go out of scope quietly
-                     */
-                    if (SvPADMY(sv) && !SvFAKE(sv))
-                        SvREADONLY_off(sv);
+                        /* if a my variable that was made readonly is
+                         * going out of scope, we want to remove the
+                         * readonlyness so that it can go out of scope
+                         * quietly
+                         */
+                        if (SvPADMY(sv) && !SvFAKE(sv))
+                            SvREADONLY_off(sv);
 
-                    if (SvMAGICAL(sv))
-                    {
-                      sv_unmagic(sv, PERL_MAGIC_backref);
-                      if (SvTYPE(sv) != SVt_PVCV)
-                        mg_free(sv);
-                    }
-                    if (SvTHINKFIRST(sv))
-                        sv_force_normal_flags(sv, SV_IMMEDIATE_UNREF
-                                                 |SV_COW_DROP_PV);
+                        if (SvMAGICAL(sv)) {
+                            sv_unmagic(sv, PERL_MAGIC_backref);
+                            if (SvTYPE(sv) != SVt_PVCV)
+                                mg_free(sv);
+                        }
+                        if (SvTHINKFIRST(sv))
+                            sv_force_normal_flags(sv, SV_IMMEDIATE_UNREF
+                                                     |SV_COW_DROP_PV);
 
                     }
                     switch (SvTYPE(sv)) {
