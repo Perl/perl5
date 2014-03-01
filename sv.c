@@ -13559,10 +13559,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_statbuf		= proto_perl->Istatbuf;
     PL_statcache	= proto_perl->Istatcache;
 
-#ifdef HAS_TIMES
-    PL_timesbuf		= proto_perl->Itimesbuf;
-#endif
-
 #ifndef NO_TAINT_SUPPORT
     PL_tainted		= proto_perl->Itainted;
 #else

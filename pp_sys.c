@@ -4397,20 +4397,23 @@ PP(pp_tms)
 #ifdef HAS_TIMES
     dVAR;
     dSP;
-    EXTEND(SP, 4);
-#ifndef VMS
-    (void)PerlProc_times(&PL_timesbuf);
+#ifdef VMS
+    /* time.h uses different name for struct tms, though the same data is
+       returned.
+     */
+    struct tbuffer_t timesbuf;
 #else
-    (void)PerlProc_times((tbuffer_t *)&PL_timesbuf);  /* time.h uses different name for */
-                                                   /* struct tms, though same data   */
-                                                   /* is returned.                   */
+    struct tms timesbuf;
 #endif
 
-    mPUSHn(((NV)PL_timesbuf.tms_utime)/(NV)PL_clocktick);
+    EXTEND(SP, 4);
+    (void)PerlProc_times(&timesbuf);
+
+    mPUSHn(((NV)timesbuf.tms_utime)/(NV)PL_clocktick);
     if (GIMME == G_ARRAY) {
-	mPUSHn(((NV)PL_timesbuf.tms_stime)/(NV)PL_clocktick);
-	mPUSHn(((NV)PL_timesbuf.tms_cutime)/(NV)PL_clocktick);
-	mPUSHn(((NV)PL_timesbuf.tms_cstime)/(NV)PL_clocktick);
+	mPUSHn(((NV)timesbuf.tms_stime)/(NV)PL_clocktick);
+	mPUSHn(((NV)timesbuf.tms_cutime)/(NV)PL_clocktick);
+	mPUSHn(((NV)timesbuf.tms_cstime)/(NV)PL_clocktick);
     }
     RETURN;
 #else

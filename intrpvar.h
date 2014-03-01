@@ -174,6 +174,7 @@ PERLVAR(I, statgv,	GV *)
 PERLVARI(I, statname,	SV *,	NULL)
 
 #ifdef HAS_TIMES
+/* Will be removed soon after v5.21.0. See RT #121351 */
 PERLVAR(I, timesbuf,	struct tms)
 #endif
 
