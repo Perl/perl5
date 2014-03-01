@@ -598,8 +598,12 @@ sub just_pm_to_blib {
     my ($last) = $mname =~ /([^:]+)$/;
     my ($first) = $mname =~ /^([^:]+)/;
 
+    my $pm_to_blib = $is_VMS ? 'pm_to_blib.ts' : 'pm_to_blib';
+
     foreach my $leaf (<*>) {
         if (-d $leaf) {
+            $leaf =~ s/\.DIR\z//i
+                if $is_VMS;
             next if $leaf =~ /\A(?:\.|\.\.|t|demo)\z/;
             if ($leaf eq 'lib') {
                 ++$has_lib;
@@ -612,6 +616,8 @@ sub just_pm_to_blib {
         }
         return $leaf
             unless -f _;
+        $leaf =~ s/\.\z//
+            if $is_VMS;
         # Makefile.PL is "safe" to ignore because we will only be called for
         # directories that hold a Makefile.PL if they are in the exception list.
         next
@@ -621,7 +627,7 @@ sub just_pm_to_blib {
                             |Makefile\.PL
                             |MANIFEST
                             |META\.yml
-                            |pm_to_blib
+                            |\Q$pm_to_blib\E
                             |README
                             |README\.patching
                             |README\.release
@@ -685,11 +691,11 @@ sub just_pm_to_blib {
     if ($target eq 'all') {
         require ExtUtils::Install;
         ExtUtils::Install::pm_to_blib(\%pm, '../../lib/auto');
-        open my $fh, '>', 'pm_to_blib'
-            or die $!;
+        open my $fh, '>', $pm_to_blib
+            or die "Can't open '$pm_to_blib': $!";
         print $fh "$0 has handled pm_to_blib directly\n";
         close $fh
-            or die $!;
+            or die "Can't close '$pm_to_blib': $!";
 	if ($is_Unix) {
             # Fake the fallback cleanup
             my $fallback
@@ -702,7 +708,7 @@ sub just_pm_to_blib {
         # A clean target.
         # For now, make the targets behave the same way as ExtUtils::MakeMaker
         # does
-        _unlink('pm_to_blib');
+        _unlink($pm_to_blib);
         unless ($target eq 'clean') {
             # but cheat a bit, by relying on the top level Makefile clean target
             # to take out our directory lib/auto/...
