@@ -78,7 +78,6 @@ Perl_do_openn(pTHX_ GV *gv, const char *oname, I32 len, int as_raw,
     bool was_fdopen = FALSE;
     char *type  = NULL;
     char mode[PERL_MODE_MAX];	/* file mode ("r\0", "rb\0", "ab\0" etc.) */
-    SV *namesv;
 
     PERL_ARGS_ASSERT_DO_OPENN;
 
@@ -136,6 +135,7 @@ Perl_do_openn(pTHX_ GV *gv, const char *oname, I32 len, int as_raw,
 	     ;
 	const int modifyingmode = O_WRONLY|O_RDWR|O_CREAT|appendtrunc;
 	int ismodifying;
+        SV *namesv;
 
 	if (num_svs != 0) {
 	    Perl_croak(aTHX_ "panic: sysopen with multiple args, num_svs=%ld",
@@ -172,10 +172,8 @@ Perl_do_openn(pTHX_ GV *gv, const char *oname, I32 len, int as_raw,
         IoTYPE(io) = PerlIO_intmode2str(rawmode, &mode[ix], &writing);
 
 	namesv = newSVpvn_flags(oname, len, SVs_TEMP);
-	num_svs = 1;
-	svp = &namesv;
 	type = NULL;
-	fp = PerlIO_openn(aTHX_ type, mode, -1, rawmode, rawperm, NULL, num_svs, svp);
+	fp = PerlIO_openn(aTHX_ type, mode, -1, rawmode, rawperm, NULL, 1, &namesv);
     }
     else {
 	/* Regular (non-sys) open */
@@ -410,13 +408,14 @@ Perl_do_openn(pTHX_ GV *gv, const char *oname, I32 len, int as_raw,
 		    }
 		}
 		else  {
-		    if (!num_svs) {
-			namesv = newSVpvn_flags(type, tend - type, SVs_TEMP);
-			num_svs = 1;
-			svp = &namesv;
+		    if (num_svs) {
+                        fp = PerlIO_openn(aTHX_ type,mode,-1,0,0,NULL,num_svs,svp);
+                    }
+                    else {
+                        SV *namesv = newSVpvn_flags(type, tend - type, SVs_TEMP);
 		        type = NULL;
+                        fp = PerlIO_openn(aTHX_ type,mode,-1,0,0,NULL,1,&namesv);
 		    }
-		    fp = PerlIO_openn(aTHX_ type,mode,-1,0,0,NULL,num_svs,svp);
 		}
 	    } /* !& */
 	    if (!fp && type && *type && *type != ':' && !isIDFIRST(*type))
@@ -444,13 +443,14 @@ Perl_do_openn(pTHX_ GV *gv, const char *oname, I32 len, int as_raw,
 		}
 	    }
 	    else {
-		if (!num_svs) {
-		    namesv = newSVpvn_flags(type, tend - type, SVs_TEMP);
-		    num_svs = 1;
-		    svp = &namesv;
+		if (num_svs) {
+                    fp = PerlIO_openn(aTHX_ type,mode,-1,0,0,NULL,num_svs,svp);
+                }
+                else {
+                    SV *namesv  = newSVpvn_flags(type, tend - type, SVs_TEMP);
 		    type = NULL;
+                    fp = PerlIO_openn(aTHX_ type,mode,-1,0,0,NULL,1,&namesv);
 		}
-		fp = PerlIO_openn(aTHX_ type,mode,-1,0,0,NULL,num_svs,svp);
 	    }
 	    if (!fp && type && *type && *type != ':' && !isIDFIRST(*type))
 	       goto unknown_open_mode;
@@ -523,13 +523,14 @@ Perl_do_openn(pTHX_ GV *gv, const char *oname, I32 len, int as_raw,
 		IoTYPE(io) = IoTYPE_STD;
 	    }
 	    else {
-		if (!num_svs) {
-		    namesv = newSVpvn_flags(type, tend - type, SVs_TEMP);
-		    num_svs = 1;
-		    svp = &namesv;
+		if (num_svs) {
+                    fp = PerlIO_openn(aTHX_ type,mode,-1,0,0,NULL,num_svs,svp);
+                }
+                else {
+		    SV *namesv = newSVpvn_flags(type, tend - type, SVs_TEMP);
 		    type = NULL;
+                    fp = PerlIO_openn(aTHX_ type,mode,-1,0,0,NULL,1,&namesv);
 		}
-		fp = PerlIO_openn(aTHX_ type,mode,-1,0,0,NULL,num_svs,svp);
 	    }
 	}
     }
