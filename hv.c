@@ -1938,6 +1938,23 @@ PERL_STATIC_INLINE U32 S_ptr_hash(PTRV u) {
     return (U32)u;
 }
 
+static struct xpvhv_aux*
+S_hv_auxinit_internal(struct xpvhv_aux *iter) {
+    PERL_ARGS_ASSERT_HV_AUXINIT_INTERNAL;
+    iter->xhv_riter = -1; 	/* HvRITER(hv) = -1 */
+    iter->xhv_eiter = NULL;	/* HvEITER(hv) = NULL */
+#ifdef PERL_HASH_RANDOMIZE_KEYS
+    iter->xhv_last_rand = iter->xhv_rand;
+#endif
+    iter->xhv_fill_lazy = 0;
+    iter->xhv_name_u.xhvnameu_name = 0;
+    iter->xhv_name_count = 0;
+    iter->xhv_backreferences = 0;
+    iter->xhv_mro_meta = NULL;
+    iter->xhv_aux_flags = 0;
+    return iter;
+}
+
 
 static struct xpvhv_aux*
 S_hv_auxinit(pTHX_ HV *hv) {
@@ -1971,18 +1988,7 @@ S_hv_auxinit(pTHX_ HV *hv) {
         iter = HvAUX(hv);
     }
 
-    iter->xhv_riter = -1; 	/* HvRITER(hv) = -1 */
-    iter->xhv_eiter = NULL;	/* HvEITER(hv) = NULL */
-#ifdef PERL_HASH_RANDOMIZE_KEYS
-    iter->xhv_last_rand = iter->xhv_rand;
-#endif
-    iter->xhv_fill_lazy = 0;
-    iter->xhv_name_u.xhvnameu_name = 0;
-    iter->xhv_name_count = 0;
-    iter->xhv_backreferences = 0;
-    iter->xhv_mro_meta = NULL;
-    iter->xhv_aux_flags = 0;
-    return iter;
+    return hv_auxinit_internal(iter);
 }
 
 /*

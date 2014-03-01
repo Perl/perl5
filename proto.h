@@ -5863,6 +5863,11 @@ STATIC struct xpvhv_aux*	S_hv_auxinit(pTHX_ HV *hv)
 #define PERL_ARGS_ASSERT_HV_AUXINIT	\
 	assert(hv)
 
+STATIC struct xpvhv_aux*	S_hv_auxinit_internal(struct xpvhv_aux *iter)
+			__attribute__nonnull__(1);
+#define PERL_ARGS_ASSERT_HV_AUXINIT_INTERNAL	\
+	assert(iter)
+
 STATIC SV*	S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen, int k_flags, I32 d_flags, U32 hash);
 STATIC SV*	S_hv_free_ent_ret(pTHX_ HV *hv, HE *entry)
 			__attribute__nonnull__(pTHX_1)
