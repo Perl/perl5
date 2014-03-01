@@ -76,7 +76,6 @@ Perl_do_openn(pTHX_ GV *gv, const char *oname, I32 len, int as_raw,
     int fd;
     int result;
     bool was_fdopen = FALSE;
-    bool in_raw = 0, in_crlf = 0, out_raw = 0, out_crlf = 0;
     char *type  = NULL;
     char mode[PERL_MODE_MAX];	/* file mode ("r\0", "rb\0", "ab\0" etc.) */
     SV *namesv;
@@ -85,16 +84,6 @@ Perl_do_openn(pTHX_ GV *gv, const char *oname, I32 len, int as_raw,
 
     Zero(mode,sizeof(mode),char);
     PL_forkprocess = 1;		/* assume true if no fork */
-
-    /* Collect default raw/crlf info from the op */
-    if (PL_op && PL_op->op_type == OP_OPEN) {
-	/* set up IO layers */
-	const U8 flags = PL_op->op_private;
-	in_raw = (flags & OPpOPEN_IN_RAW);
-	in_crlf = (flags & OPpOPEN_IN_CRLF);
-	out_raw = (flags & OPpOPEN_OUT_RAW);
-	out_crlf = (flags & OPpOPEN_OUT_CRLF);
-    }
 
     /* If currently open - close before we re-open */
     if (IoIFP(io)) {
@@ -194,6 +183,17 @@ Perl_do_openn(pTHX_ GV *gv, const char *oname, I32 len, int as_raw,
 	STRLEN olen = len;
 	char *tend;
 	int dodup = 0;
+        bool in_raw = 0, in_crlf = 0, out_raw = 0, out_crlf = 0;
+
+        /* Collect default raw/crlf info from the op */
+        if (PL_op && PL_op->op_type == OP_OPEN) {
+            /* set up IO layers */
+            const U8 flags = PL_op->op_private;
+            in_raw = (flags & OPpOPEN_IN_RAW);
+            in_crlf = (flags & OPpOPEN_IN_CRLF);
+            out_raw = (flags & OPpOPEN_OUT_RAW);
+            out_crlf = (flags & OPpOPEN_OUT_CRLF);
+        }
 
 	type = savepvn(oname, len);
 	tend = type+len;
