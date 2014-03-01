@@ -1095,8 +1095,11 @@ Perl_leave_scope(pTHX_ I32 base)
                         break;
                     }
                     default:
-                        assert_not_ROK(sv);
-                        assert_not_glob(sv);
+                        /* This looks odd, but these two macros are for use in
+                           expressions and finish with a trailing comma, so
+                           adding a ; after them would be wrong. */
+                        assert_not_ROK(sv)
+                        assert_not_glob(sv)
                         SvFLAGS(sv) &=~ (SVf_OK|SVf_IVisUV|SVf_UTF8);
                         break;
                     }
