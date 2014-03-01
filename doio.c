@@ -324,6 +324,7 @@ Perl_do_openn(pTHX_ GV *gv, const char *oname, I32 len, int as_raw,
 		}
 		else {
 		    PerlIO *that_fp = NULL;
+                    int wanted_fd;
 		    if (num_svs > 1) {
 			/* diag_listed_as: More than one argument to '%s' open */
 			Perl_croak(aTHX_ "More than one argument to '%c&' open",IoTYPE(io));
@@ -334,11 +335,11 @@ Perl_do_openn(pTHX_ GV *gv, const char *oname, I32 len, int as_raw,
 			     SvIOK(*svp)
 			  || (SvPOKp(*svp) && looks_like_number(*svp))
 		       )) {
-			fd = SvUV(*svp);
+                        wanted_fd = SvUV(*svp);
 			num_svs = 0;
 		    }
 		    else if (isDIGIT(*type)) {
-			fd = atoi(type);
+                        wanted_fd = atoi(type);
 		    }
 		    else {
 			const IO* thatio;
@@ -367,7 +368,7 @@ Perl_do_openn(pTHX_ GV *gv, const char *oname, I32 len, int as_raw,
 			     * filehandle?  Perhaps we should do
 			     * fsetpos(src)+fgetpos(dst)?  --nik */
 			    PerlIO_flush(that_fp);
-			    fd = PerlIO_fileno(that_fp);
+			    wanted_fd = PerlIO_fileno(that_fp);
 			    /* When dup()ing STDIN, STDOUT or STDERR
 			     * explicitly set appropriate access mode */
 			    if (that_fp == PerlIO_stdout()
@@ -381,7 +382,7 @@ Perl_do_openn(pTHX_ GV *gv, const char *oname, I32 len, int as_raw,
 				IoTYPE(io) = IoTYPE_SOCKET;
 			}
 			else
-			    fd = -1;
+			    wanted_fd = -1;
 		    }
 		    if (!num_svs)
 			type = NULL;
@@ -390,12 +391,12 @@ Perl_do_openn(pTHX_ GV *gv, const char *oname, I32 len, int as_raw,
 		    }
 		    else {
 			if (dodup)
-			    fd = PerlLIO_dup(fd);
+                            wanted_fd = PerlLIO_dup(wanted_fd);
 			else
 			    was_fdopen = TRUE;
-			if (!(fp = PerlIO_openn(aTHX_ type,mode,fd,0,0,NULL,num_svs,svp))) {
-			    if (dodup && fd >= 0)
-				PerlLIO_close(fd);
+                        if (!(fp = PerlIO_openn(aTHX_ type,mode,wanted_fd,0,0,NULL,num_svs,svp))) {
+                            if (dodup && wanted_fd >= 0)
+                                PerlLIO_close(wanted_fd);
 			}
 		    }
 		}
