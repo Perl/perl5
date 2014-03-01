@@ -54,7 +54,10 @@ require File::Spec::Functions;
 
 my $inc = join ",\n        ",
     map { "q\0$_\0" }
-    (map {File::Spec::Functions::rel2abs($_)} @toolchain, 'lib');
+    (map {File::Spec::Functions::rel2abs($_)} (
+# faster build on the non-parallel Win32 build process
+        $^O eq 'MSWin32' ? ('lib', @toolchain ) : (@toolchain, 'lib')
+    ));
 
 open my $fh, '>', $file
     or die "Can't open $file: $!";
@@ -74,6 +77,7 @@ print $fh <<"EOT" or $error = "Can't print to $file: $!";
 # We are miniperl, building extensions
 # Replace the first entry of \@INC ("lib") with the list of
 # directories we need.
+${\($^O eq 'MSWin32' ? '${^WIN32_SLOPPY_STAT} = 1;':'')}
 splice(\@INC, 0, 1, $inc);
 \$^O = '$osname';
 EOT
