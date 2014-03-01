@@ -74,7 +74,6 @@ Perl_do_openn(pTHX_ GV *gv, const char *oname, I32 len, int as_raw,
     int writing = 0;
     PerlIO *fp;
     int fd;
-    int result;
     bool was_fdopen = FALSE;
     char *type  = NULL;
     char mode[PERL_MODE_MAX];	/* file mode ("r\0", "rb\0", "ab\0" etc.) */
@@ -86,38 +85,44 @@ Perl_do_openn(pTHX_ GV *gv, const char *oname, I32 len, int as_raw,
 
     /* If currently open - close before we re-open */
     if (IoIFP(io)) {
-	fd = PerlIO_fileno(IoIFP(io));
 	if (IoTYPE(io) == IoTYPE_STD) {
 	    /* This is a clone of one of STD* handles */
-	    result = 0;
 	}
-	else if (fd >= 0 && fd <= PL_maxsysfd) {
-	    /* This is one of the original STD* handles */
-	    saveifp  = IoIFP(io);
-	    saveofp  = IoOFP(io);
-	    savetype = IoTYPE(io);
-	    savefd   = fd;
-	    result   = 0;
-	}
-	else if (IoTYPE(io) == IoTYPE_PIPE)
-	    result = PerlProc_pclose(IoIFP(io));
-	else if (IoIFP(io) != IoOFP(io)) {
-	    if (IoOFP(io)) {
-		result = PerlIO_close(IoOFP(io));
-		PerlIO_close(IoIFP(io)); /* clear stdio, fd already closed */
-	    }
-	    else
-		result = PerlIO_close(IoIFP(io));
-	}
-	else
-	    result = PerlIO_close(IoIFP(io));
-	if (result == EOF && fd > PL_maxsysfd) {
-	    /* Why is this not Perl_warn*() call ? */
-	    PerlIO_printf(Perl_error_log,
-		"Warning: unable to close filehandle %"HEKf" properly.\n",
-		 HEKfARG(GvENAME_HEK(gv))
-	    );
-	}
+	else {
+            const int old_fd = PerlIO_fileno(IoIFP(io));
+
+            if (old_fd >= 0 && old_fd <= PL_maxsysfd) {
+                /* This is one of the original STD* handles */
+                saveifp  = IoIFP(io);
+                saveofp  = IoOFP(io);
+                savetype = IoTYPE(io);
+                savefd   = old_fd;
+            }
+            else {
+                int result;
+
+                if (IoTYPE(io) == IoTYPE_PIPE)
+                    result = PerlProc_pclose(IoIFP(io));
+                else if (IoIFP(io) != IoOFP(io)) {
+                    if (IoOFP(io)) {
+                        result = PerlIO_close(IoOFP(io));
+                        PerlIO_close(IoIFP(io)); /* clear stdio, fd already closed */
+                    }
+                    else
+                        result = PerlIO_close(IoIFP(io));
+                }
+                else
+                    result = PerlIO_close(IoIFP(io));
+
+                if (result == EOF && old_fd > PL_maxsysfd) {
+                    /* Why is this not Perl_warn*() call ? */
+                    PerlIO_printf(Perl_error_log,
+                                  "Warning: unable to close filehandle %"HEKf" properly.\n",
+                                  HEKfARG(GvENAME_HEK(gv))
+                        );
+                }
+            }
+        }
 	IoOFP(io) = IoIFP(io) = NULL;
     }
 
