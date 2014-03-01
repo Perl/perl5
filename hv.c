@@ -1162,6 +1162,7 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
     return NULL;
 }
 
+
 STATIC void
 S_hsplit(pTHX_ HV *hv, STRLEN const oldsize, STRLEN newsize)
 {
@@ -1170,18 +1171,25 @@ S_hsplit(pTHX_ HV *hv, STRLEN const oldsize, STRLEN newsize)
     char *a = (char*) HvARRAY(hv);
     HE **aep;
 
-    PERL_ARGS_ASSERT_HSPLIT;
+    bool do_aux= (
+        /* already have an HvAUX(hv) so we have to move it */
+        SvOOK(hv) ||
+        /* no HvAUX() but array we are going to allocate is large enough
+         * there is no point in saving the space for the iterator, and
+         * speeds up later traversals. */
+        ( ( hv != PL_strtab ) && ( newsize >= PERL_HV_ALLOC_AUX_SIZE ) )
+    );
 
-    /*PerlIO_printf(PerlIO_stderr(), "hsplit called for %p which had %d\n",
-      (void*)hv, (int) oldsize);*/
+    PERL_ARGS_ASSERT_HSPLIT;
 
     PL_nomemok = TRUE;
     Renew(a, PERL_HV_ARRAY_ALLOC_BYTES(newsize)
-	  + (SvOOK(hv) ? sizeof(struct xpvhv_aux) : 0), char);
+          + (do_aux ? sizeof(struct xpvhv_aux) : 0), char);
+    PL_nomemok = FALSE;
     if (!a) {
-      PL_nomemok = FALSE;
       return;
     }
+
 #ifdef PERL_HASH_RANDOMIZE_KEYS
     /* the idea of this is that we create a "random" value by hashing the address of
      * the array, we then use the low bit to decide if we insert at the top, or insert
@@ -1194,29 +1202,46 @@ S_hsplit(pTHX_ HV *hv, STRLEN const oldsize, STRLEN newsize)
         PL_hash_rand_bits = ROTL_UV(PL_hash_rand_bits,1);
     }
 #endif
-
-    if (SvOOK(hv)) {
+    HvARRAY(hv) = (HE**) a;
+    HvMAX(hv) = newsize - 1;
+    /* before we zero the newly added memory, we
+     * need to deal with the aux struct that may be there
+     * or have been allocated by us*/
+    if (do_aux) {
         struct xpvhv_aux *const dest
             = (struct xpvhv_aux*) &a[newsize * sizeof(HE*)];
-        Move(&a[oldsize * sizeof(HE*)], dest, 1, struct xpvhv_aux);
-        /* we reset the iterator's xhv_rand as well, so they get a totally new ordering */
+        if (SvOOK(hv)) {
+            /* alread have an aux, copy the old one in place. */
+            Move(&a[oldsize * sizeof(HE*)], dest, 1, struct xpvhv_aux);
+            /* we reset the iterator's xhv_rand as well, so they get a totally new ordering */
 #ifdef PERL_HASH_RANDOMIZE_KEYS
-        dest->xhv_rand = (U32)PL_hash_rand_bits;
+            dest->xhv_rand = (U32)PL_hash_rand_bits;
 #endif
-        /* For now, just reset the lazy fill counter.
-           It would be possible to update the counter in the code below
-           instead.  */
-        dest->xhv_fill_lazy = 0;
+            /* For now, just reset the lazy fill counter.
+               It would be possible to update the counter in the code below
+               instead.  */
+            dest->xhv_fill_lazy = 0;
+        } else {
+            /* no existing aux structure, but we allocated space for one
+             * so intialize it properly. This unrolls hv_auxinit() a bit,
+             * since we have to do the realloc anyway. */
+            /* first we set the iterator's xhv_rand so it can be copied into lastrand below */
+#ifdef PERL_HASH_RANDOMIZE_KEYS
+            dest->xhv_rand = (U32)PL_hash_rand_bits;
+#endif
+            /* this is the "non realloc" part of the hv_auxinit() */
+            (void)hv_auxinit_internal(dest);
+            /* Turn on the OOK flag */
+            SvOOK_on(hv);
+        }
     }
-
-    PL_nomemok = FALSE;
+    /* now we can safely clear the second half */
     Zero(&a[oldsize * sizeof(HE*)], (newsize-oldsize) * sizeof(HE*), char);	/* zero 2nd half*/
-    HvMAX(hv) = --newsize;
-    HvARRAY(hv) = (HE**) a;
 
     if (!HvTOTALKEYS(hv))       /* skip rest if no entries */
         return;
 
+    newsize--;
     aep = (HE**)a;
     do {
 	HE **oentry = aep + i;

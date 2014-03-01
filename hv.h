@@ -238,6 +238,16 @@ C<SV*>.
 */
 
 #define PERL_HASH_DEFAULT_HvMAX 7
+/* HvMAX(hv)+1 is >= to this we preallocate the HvAUX() struct during hsplit()
+ * The assumption being that we are using so much space anyway we might
+ * as well allocate the extra bytes and speed up later keys()
+ * or each() operations. We don't do this to small hashes as we assume
+ * that a) it will be easy/fast to resize them to add the iterator, and b) that
+ * many of them will be objects which won't be traversed. Larger hashes however
+ * will take longer to extend, and the size of the aux struct is swamped by the
+ * overall length of the bucket array.
+ * */
+#define PERL_HV_ALLOC_AUX_SIZE (1 << 9)
 
 /* these hash entry flags ride on hent_klen (for use only in magic/tied HVs) */
 #define HEf_SVKEY	-2	/* hent_key is an SV* */
