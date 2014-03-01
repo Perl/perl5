@@ -579,11 +579,7 @@ Perl_do_openn(pTHX_ GV *gv, const char *oname, I32 len, int as_raw,
 	    IoTYPE(io) = IoTYPE_SOCKET;	/* in case a socket was passed in to us */
 #ifdef HAS_SOCKET
 	else if (
-#ifdef S_IFMT
 	    !(PL_statbuf.st_mode & S_IFMT)
-#else
-	    !PL_statbuf.st_mode
-#endif
 	    && IoTYPE(io) != IoTYPE_WRONLY  /* Dups of STD* filehandles already have */
 	    && IoTYPE(io) != IoTYPE_RDONLY  /* type so they aren't marked as sockets */
 	) {				    /* on OS's that return 0 on fstat()ed pipe */
