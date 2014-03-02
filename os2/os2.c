@@ -4257,7 +4257,7 @@ XS(XS_OS2_pipe)
 	ST(0) = sv_newmortal();
 	{
 	    GV *gv = newGVgen("OS2::pipe");
-	    if ( do_open(gv, perltype, strlen(perltype), FALSE, 0, 0, perlio) )
+	    if ( do_open6(gv, perltype, strlen(perltype), perlio, NULL, 0) )
 		sv_setsv(ST(0), sv_bless(newRV((SV*)gv), gv_stashpv("IO::Handle",1)));
 	    else
 		ST(0) = &PL_sv_undef;

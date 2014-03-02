@@ -827,13 +827,16 @@ Perl_nextargv(pTHX_ GV *gv)
 	return NULL;
     while (av_tindex(GvAV(gv)) >= 0) {
 	STRLEN oldlen;
+        bool success;
 	sv = av_shift(GvAV(gv));
 	SAVEFREESV(sv);
 	SvTAINTED_off(GvSVn(gv)); /* previous tainting irrelevant */
 	sv_setsv(GvSVn(gv),sv);
 	SvSETMAGIC(GvSV(gv));
 	PL_oldname = SvPVx(GvSV(gv), oldlen);
-	if (do_open(gv,PL_oldname,oldlen,PL_inplace!=0,O_RDONLY,0,NULL)) {
+        success = PL_inplace ? do_open_raw(gv, PL_oldname, oldlen, O_RDONLY, 0)
+            : do_open6(gv, PL_oldname, oldlen, NULL, NULL, 0);
+	if (success) {
 	    if (PL_inplace) {
 		TAINT_PROPER("inplace open");
 		if (oldlen == 1 && *PL_oldname == '-') {
@@ -900,7 +903,7 @@ Perl_nextargv(pTHX_ GV *gv)
 		    do_close(gv,FALSE);
 		    (void)PerlLIO_unlink(SvPVX_const(sv));
 		    (void)PerlLIO_rename(PL_oldname,SvPVX_const(sv));
-		    do_open(gv,(char*)SvPVX_const(sv),SvCUR(sv),TRUE,O_RDONLY,0,NULL);
+		    do_open_raw(gv, SvPVX_const(sv), SvCUR(sv), O_RDONLY, 0);
 #endif /* DOSISH */
 #else
 		    (void)UNLINK(SvPVX_const(sv));
@@ -932,14 +935,14 @@ Perl_nextargv(pTHX_ GV *gv)
 
 		sv_setpvn(sv,PL_oldname,oldlen);
 		SETERRNO(0,0);		/* in case sprintf set errno */
-		if (!Perl_do_openn(aTHX_ PL_argvoutgv, (char*)SvPVX_const(sv),
-				   SvCUR(sv), TRUE,
+		if (!Perl_do_open_raw(aTHX_ PL_argvoutgv, SvPVX_const(sv),
+                                      SvCUR(sv),
 #ifdef VMS
-				   O_WRONLY|O_CREAT|O_TRUNC,0,
+                                      O_WRONLY|O_CREAT|O_TRUNC, 0
 #else
-				   O_WRONLY|O_CREAT|OPEN_EXCL,0600,
+                                      O_WRONLY|O_CREAT|OPEN_EXCL, 0600
 #endif
-				   NULL, NULL, 0)) {
+                        )) {
 		    Perl_ck_warner_d(aTHX_ packWARN(WARN_INPLACE), "Can't do inplace edit on %s: %s",
 				     PL_oldname, Strerror(errno) );
 		    do_close(gv,FALSE);
@@ -2515,8 +2518,8 @@ Perl_vms_start_glob
 	if (home && *home) SvSETMAGIC(*home);
 	if (path && *path) SvSETMAGIC(*path);
     }
-    (void)do_open(PL_last_in_gv, (char*)SvPVX_const(tmpcmd), SvCUR(tmpcmd),
-		  FALSE, O_RDONLY, 0, NULL);
+    (void)do_open6(PL_last_in_gv, SvPVX_const(tmpcmd), SvCUR(tmpcmd),
+                   NULL, NULL, 0);
     fp = IoIFP(io);
 #endif /* !VMS */
     LEAVE;
