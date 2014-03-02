@@ -791,13 +791,6 @@ PerlIO *
 Perl_nextargv(pTHX_ GV *gv)
 {
     dVAR;
-    SV *sv;
-#ifndef FLEXFILENAMES
-    int filedev;
-    int fileino;
-#endif
-    Uid_t fileuid;
-    Gid_t filegid;
     IO * const io = GvIOp(gv);
 
     PERL_ARGS_ASSERT_NEXTARGV;
@@ -827,7 +820,7 @@ Perl_nextargv(pTHX_ GV *gv)
 	return NULL;
     while (av_tindex(GvAV(gv)) >= 0) {
 	STRLEN oldlen;
-	sv = av_shift(GvAV(gv));
+        SV *const sv = av_shift(GvAV(gv));
 	SAVEFREESV(sv);
 	SvTAINTED_off(GvSVn(gv)); /* previous tainting irrelevant */
 	sv_setsv(GvSVn(gv),sv);
@@ -844,6 +837,13 @@ Perl_nextargv(pTHX_ GV *gv)
                failure to the warning code, and then the while loop above tries
                the next entry. */
             if (do_open_raw(gv, PL_oldname, oldlen, O_RDONLY, 0)) {
+#ifndef FLEXFILENAMES
+                int filedev;
+                int fileino;
+#endif
+                Uid_t fileuid;
+                Gid_t filegid;
+
 		TAINT_PROPER("inplace open");
 		if (oldlen == 1 && *PL_oldname == '-') {
 		    setdefout(gv_fetchpvs("STDOUT", GV_ADD|GV_NOTQUAL,
