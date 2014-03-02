@@ -5712,6 +5712,16 @@ STATIC void	S_exec_failed(pTHX_ const char *cmd, int fd, int do_report)
 STATIC bool	S_ingroup(pTHX_ Gid_t testgid, bool effective)
 			__attribute__warn_unused_result__;
 
+STATIC IO *	S_openn_setup(pTHX_ GV *gv, char *mode, PerlIO **saveifp, PerlIO **saveofp, int *savefd, char *savetype)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2)
+			__attribute__nonnull__(pTHX_3)
+			__attribute__nonnull__(pTHX_4)
+			__attribute__nonnull__(pTHX_5)
+			__attribute__nonnull__(pTHX_6);
+#define PERL_ARGS_ASSERT_OPENN_SETUP	\
+	assert(gv); assert(mode); assert(saveifp); assert(saveofp); assert(savefd); assert(savetype)
+
 #endif
 #if defined(PERL_IN_DOOP_C)
 STATIC I32	S_do_trans_complex(pTHX_ SV * const sv)

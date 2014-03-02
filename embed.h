@@ -1383,6 +1383,7 @@
 #  if defined(PERL_IN_DOIO_C)
 #define exec_failed(a,b,c)	S_exec_failed(aTHX_ a,b,c)
 #define ingroup(a,b)		S_ingroup(aTHX_ a,b)
+#define openn_setup(a,b,c,d,e,f)	S_openn_setup(aTHX_ a,b,c,d,e,f)
 #  endif
 #  if defined(PERL_IN_DOOP_C)
 #define do_trans_complex(a)	S_do_trans_complex(aTHX_ a)

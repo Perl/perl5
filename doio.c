@@ -60,25 +60,19 @@
 
 #include <signal.h>
 
-bool
-Perl_do_openn(pTHX_ GV *gv, const char *oname, I32 len, int as_raw,
-	      int rawmode, int rawperm, PerlIO *supplied_fp, SV **svp,
-	      I32 num_svs)
+static IO *
+S_openn_setup(pTHX_ GV *gv, char *mode, PerlIO **saveifp, PerlIO **saveofp,
+              int *savefd,  char *savetype)
 {
     dVAR;
     IO * const io = GvIOn(gv);
-    PerlIO *saveifp = NULL;
-    PerlIO *saveofp = NULL;
-    int savefd = -1;
-    char savetype = IoTYPE_CLOSED;
-    int writing = 0;
-    PerlIO *fp;
-    int fd;
-    bool was_fdopen = FALSE;
-    char *type  = NULL;
-    char mode[PERL_MODE_MAX];	/* file mode ("r\0", "rb\0", "ab\0" etc.) */
 
-    PERL_ARGS_ASSERT_DO_OPENN;
+    PERL_ARGS_ASSERT_OPENN_SETUP;
+
+    *saveifp = NULL;
+    *saveofp = NULL;
+    *savefd = -1;
+    *savetype = IoTYPE_CLOSED;
 
     Zero(mode,sizeof(mode),char);
     PL_forkprocess = 1;		/* assume true if no fork */
@@ -93,10 +87,10 @@ Perl_do_openn(pTHX_ GV *gv, const char *oname, I32 len, int as_raw,
 
             if (old_fd >= 0 && old_fd <= PL_maxsysfd) {
                 /* This is one of the original STD* handles */
-                saveifp  = IoIFP(io);
-                saveofp  = IoOFP(io);
-                savetype = IoTYPE(io);
-                savefd   = old_fd;
+                *saveifp  = IoIFP(io);
+                *saveofp  = IoOFP(io);
+                *savetype = IoTYPE(io);
+                *savefd   = old_fd;
             }
             else {
                 int result;
@@ -125,6 +119,28 @@ Perl_do_openn(pTHX_ GV *gv, const char *oname, I32 len, int as_raw,
         }
 	IoOFP(io) = IoIFP(io) = NULL;
     }
+    return io;
+}
+
+bool
+Perl_do_openn(pTHX_ GV *gv, const char *oname, I32 len, int as_raw,
+	      int rawmode, int rawperm, PerlIO *supplied_fp, SV **svp,
+	      I32 num_svs)
+{
+    dVAR;
+    PerlIO *saveifp;
+    PerlIO *saveofp;
+    int savefd;
+    char savetype;
+    char mode[PERL_MODE_MAX];	/* file mode ("r\0", "rb\0", "ab\0" etc.) */
+    IO * const io = openn_setup(gv, mode, &saveifp, &saveofp, &savefd, &savetype);
+    int writing = 0;
+    PerlIO *fp;
+    int fd;
+    bool was_fdopen = FALSE;
+    char *type  = NULL;
+
+    PERL_ARGS_ASSERT_DO_OPENN;
 
     if (as_raw) {
         /* sysopen style args, i.e. integer mode and permissions */
