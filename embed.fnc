@@ -408,6 +408,11 @@ Ap	|bool	|do_openn	|NN GV *gv|NN const char *oname|I32 len \
 				|int as_raw|int rawmode|int rawperm \
 				|NULLOK PerlIO *supplied_fp|NULLOK SV **svp \
 				|I32 num
+Mp	|bool	|do_open_raw	|NN GV *gv|NN const char *oname|STRLEN len \
+				|int rawmode|int rawperm
+Mp	|bool	|do_open6	|NN GV *gv|NN const char *oname|STRLEN len \
+				|NULLOK PerlIO *supplied_fp|NULLOK SV **svp \
+				|U32 num
 : Used in pp_hot.c and pp_sys.c
 p	|bool	|do_print	|NULLOK SV* sv|NN PerlIO* fp
 : Used in pp_sys.c

@@ -127,6 +127,24 @@ Perl_do_openn(pTHX_ GV *gv, const char *oname, I32 len, int as_raw,
 	      int rawmode, int rawperm, PerlIO *supplied_fp, SV **svp,
 	      I32 num_svs)
 {
+    PERL_ARGS_ASSERT_DO_OPENN;
+
+    if (as_raw) {
+        /* sysopen style args, i.e. integer mode and permissions */
+
+	if (num_svs != 0) {
+	    Perl_croak(aTHX_ "panic: sysopen with multiple args, num_svs=%ld",
+		       (long) num_svs);
+	}
+        return do_open_raw(gv, oname, len, rawmode, rawperm);
+    }
+    return do_open6(gv, oname, len, supplied_fp, svp, num_svs);
+}
+
+bool
+Perl_do_open_raw(pTHX_ GV *gv, const char *oname, STRLEN len,
+                 int rawmode, int rawperm)
+{
     dVAR;
     PerlIO *saveifp;
     PerlIO *saveofp;
@@ -136,12 +154,11 @@ Perl_do_openn(pTHX_ GV *gv, const char *oname, I32 len, int as_raw,
     IO * const io = openn_setup(gv, mode, &saveifp, &saveofp, &savefd, &savetype);
     int writing = 0;
     PerlIO *fp;
-    bool was_fdopen = FALSE;
-    char *type  = NULL;
 
-    PERL_ARGS_ASSERT_DO_OPENN;
+    PERL_ARGS_ASSERT_DO_OPEN_RAW;
 
-    if (as_raw) {
+    /* For ease of blame back to 5.000, keep the existing indenting. */
+    {
         /* sysopen style args, i.e. integer mode and permissions */
 	STRLEN ix = 0;
 	const int appendtrunc =
@@ -157,10 +174,6 @@ Perl_do_openn(pTHX_ GV *gv, const char *oname, I32 len, int as_raw,
 	int ismodifying;
         SV *namesv;
 
-	if (num_svs != 0) {
-	    Perl_croak(aTHX_ "panic: sysopen with multiple args, num_svs=%ld",
-		       (long) num_svs);
-	}
 	/* It's not always
 
 	   O_RDONLY 0
@@ -192,10 +205,32 @@ Perl_do_openn(pTHX_ GV *gv, const char *oname, I32 len, int as_raw,
         IoTYPE(io) = PerlIO_intmode2str(rawmode, &mode[ix], &writing);
 
 	namesv = newSVpvn_flags(oname, len, SVs_TEMP);
-	type = NULL;
-	fp = PerlIO_openn(aTHX_ type, mode, -1, rawmode, rawperm, NULL, 1, &namesv);
+	fp = PerlIO_openn(aTHX_ NULL, mode, -1, rawmode, rawperm, NULL, 1, &namesv);
     }
-    else {
+    return openn_cleanup(gv, io, fp, mode, oname, saveifp, saveofp, savefd,
+                         savetype, writing, 0, NULL);
+}
+
+bool
+Perl_do_open6(pTHX_ GV *gv, const char *oname, STRLEN len,
+              PerlIO *supplied_fp, SV **svp, U32 num_svs)
+{
+    dVAR;
+    PerlIO *saveifp;
+    PerlIO *saveofp;
+    int savefd;
+    char savetype;
+    char mode[PERL_MODE_MAX];	/* file mode ("r\0", "rb\0", "ab\0" etc.) */
+    IO * const io = openn_setup(gv, mode, &saveifp, &saveofp, &savefd, &savetype);
+    int writing = 0;
+    PerlIO *fp;
+    bool was_fdopen = FALSE;
+    char *type  = NULL;
+
+    PERL_ARGS_ASSERT_DO_OPEN6;
+
+    /* For ease of blame back to 5.000, keep the existing indenting. */
+    {
 	/* Regular (non-sys) open */
 	char *name;
 	STRLEN olen = len;

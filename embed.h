@@ -1101,6 +1101,8 @@
 #define do_eof(a)		Perl_do_eof(aTHX_ a)
 #define do_execfree()		Perl_do_execfree(aTHX)
 #define do_ncmp(a,b)		Perl_do_ncmp(aTHX_ a,b)
+#define do_open6(a,b,c,d,e,f)	Perl_do_open6(aTHX_ a,b,c,d,e,f)
+#define do_open_raw(a,b,c,d,e)	Perl_do_open_raw(aTHX_ a,b,c,d,e)
 #define do_print(a,b)		Perl_do_print(aTHX_ a,b)
 #define do_readline()		Perl_do_readline(aTHX)
 #define do_seek(a,b,c)		Perl_do_seek(aTHX_ a,b,c)

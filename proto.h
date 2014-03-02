@@ -934,12 +934,24 @@ PERL_CALLCONV void	Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, const OP *o)
 #define PERL_ARGS_ASSERT_DO_OPEN	\
 	assert(gv); assert(name)
 
+PERL_CALLCONV bool	Perl_do_open6(pTHX_ GV *gv, const char *oname, STRLEN len, PerlIO *supplied_fp, SV **svp, U32 num)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_DO_OPEN6	\
+	assert(gv); assert(oname)
+
 PERL_CALLCONV bool	Perl_do_open9(pTHX_ GV *gv, const char *name, I32 len, int as_raw, int rawmode, int rawperm, PerlIO *supplied_fp, SV *svs, I32 num)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_8);
 #define PERL_ARGS_ASSERT_DO_OPEN9	\
 	assert(gv); assert(name); assert(svs)
+
+PERL_CALLCONV bool	Perl_do_open_raw(pTHX_ GV *gv, const char *oname, STRLEN len, int rawmode, int rawperm)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_DO_OPEN_RAW	\
+	assert(gv); assert(oname)
 
 PERL_CALLCONV bool	Perl_do_openn(pTHX_ GV *gv, const char *oname, I32 len, int as_raw, int rawmode, int rawperm, PerlIO *supplied_fp, SV **svp, I32 num)
 			__attribute__nonnull__(pTHX_1)
