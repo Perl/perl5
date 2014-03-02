@@ -15213,6 +15213,8 @@ sub make_re_pod_entries($) {
             # property always use the single form.
             if ($table_property == $perl) {
                 $entry = "\\p{$name}";
+                $entry .= " \\p$name" if length $name == 1; # Show non-braced
+                                                            # form too
                 $entry_ref = "\\p{$name}";
             }
             else {    # Compound form.
@@ -16078,6 +16080,9 @@ property that has them.  If the left column is a short name for a property,
 the right column will give its longer, more descriptive name; and if the left
 column is the longest name, the right column will show any equivalent shortest
 name, in both single and compound forms if applicable.
+
+If braces are not needed to specify a property (e.g., C<\\pL>), the left
+column contains both forms, with and without braces.
 
 The right column will also caution you if a property means something different
 than what might normally be expected.
