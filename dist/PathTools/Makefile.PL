@@ -1,6 +1,3 @@
-
-BEGIN { @INC = grep {!/blib/} @INC }
-
 require 5.005;
 use ExtUtils::MakeMaker;
 WriteMakefile
