@@ -585,88 +585,234 @@
 	&regcharclass_multi_char_folds::multi_char_folds(1)
 */
 /*** GENERATED CODE ***/
-#define is_MULTI_CHAR_FOLD_utf8_part0(s)                                    \
-( ( ( 0xCC == NATIVE_TO_LATIN1(((U8*)s)[1]) ) && ( 0xB1 == NATIVE_TO_LATIN1(((U8*)s)[2]) ) ) ? 3 : 0 )
+#define is_MULTI_CHAR_FOLD_utf8_safe_part0(s,e)                             \
+( ( 0x73 == NATIVE_TO_LATIN1(((U8*)s)[1]) || 0x74 == NATIVE_TO_LATIN1(((U8*)s)[1]) ) ? 2 : 0 )
 
 
 /*** GENERATED CODE ***/
-#define is_MULTI_CHAR_FOLD_utf8_part1(s)                                    \
-( ( 0x69 == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ?                               \
-    ( ( ( 0xCC == NATIVE_TO_LATIN1(((U8*)s)[1]) ) && ( 0x87 == NATIVE_TO_LATIN1(((U8*)s)[2]) ) ) ? 3 : 0 )\
-: ( 0x6A == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ?                               \
-    ( ( ( 0xCC == NATIVE_TO_LATIN1(((U8*)s)[1]) ) && ( 0x8C == NATIVE_TO_LATIN1(((U8*)s)[2]) ) ) ? 3 : 0 )\
-: ( 0x73 == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ?                               \
-    ( ( 0x73 == NATIVE_TO_LATIN1(((U8*)s)[1]) || 0x74 == NATIVE_TO_LATIN1(((U8*)s)[1]) ) ? 2 : 0 )\
-: ( 0x74 == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ?                               \
-    ( ( ( 0xCC == NATIVE_TO_LATIN1(((U8*)s)[1]) ) && ( 0x88 == NATIVE_TO_LATIN1(((U8*)s)[2]) ) ) ? 3 : 0 )\
-: ( 0x77 == NATIVE_TO_LATIN1(((U8*)s)[0]) || 0x79 == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ?\
-    ( ( ( 0xCC == NATIVE_TO_LATIN1(((U8*)s)[1]) ) && ( 0x8A == NATIVE_TO_LATIN1(((U8*)s)[2]) ) ) ? 3 : 0 )\
-: ( 0xC5 == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ?                               \
-    ( ( ( ( 0xBF == NATIVE_TO_LATIN1(((U8*)s)[1]) ) && ( 0xC5 == NATIVE_TO_LATIN1(((U8*)s)[2]) ) ) && ( 0xBF == NATIVE_TO_LATIN1(((U8*)s)[3]) ) ) ? 4 : 0 )\
-: ( 0xCA == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ?                               \
-    ( ( ( 0xBC == NATIVE_TO_LATIN1(((U8*)s)[1]) ) && ( 0x6E == NATIVE_TO_LATIN1(((U8*)s)[2]) ) ) ? 3 : 0 )\
-: ( 0xCE == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ?                               \
-    ( ( ( NATIVE_TO_LATIN1(((U8*)s)[1]) & 0xFD ) == 0xAC ) ?                \
-	( ( ( 0xCE == NATIVE_TO_LATIN1(((U8*)s)[2]) ) && ( 0xB9 == NATIVE_TO_LATIN1(((U8*)s)[3]) ) ) ? 4 : 0 )\
-    : ( 0xB1 == NATIVE_TO_LATIN1(((U8*)s)[1]) || 0xB7 == NATIVE_TO_LATIN1(((U8*)s)[1]) ) ?\
-	( ( 0xCD == NATIVE_TO_LATIN1(((U8*)s)[2]) ) ?                       \
-	    ( ( 0x82 == NATIVE_TO_LATIN1(((U8*)s)[3]) ) ?                   \
-		( ( ( 0xCE == NATIVE_TO_LATIN1(((U8*)s)[4]) ) && ( 0xB9 == NATIVE_TO_LATIN1(((U8*)s)[5]) ) ) ? 6 : 4 )\
-	    : 0 )                                                           \
-	: ( ( 0xCE == NATIVE_TO_LATIN1(((U8*)s)[2]) ) && ( 0xB9 == NATIVE_TO_LATIN1(((U8*)s)[3]) ) ) ? 4 : 0 )\
-    : ( 0xB9 == NATIVE_TO_LATIN1(((U8*)s)[1]) ) ?                           \
-	( ( 0xCC == NATIVE_TO_LATIN1(((U8*)s)[2]) ) ?                       \
-	    ( ( 0x88 == NATIVE_TO_LATIN1(((U8*)s)[3]) ) ?                   \
-		( ( 0xCC == NATIVE_TO_LATIN1(((U8*)s)[4]) ) ?               \
-		    ( ( NATIVE_TO_LATIN1(((U8*)s)[5]) <= 0x81 ) ? 6 : 0 )   \
-		: ( ( 0xCD == NATIVE_TO_LATIN1(((U8*)s)[4]) ) && ( 0x82 == NATIVE_TO_LATIN1(((U8*)s)[5]) ) ) ? 6 : 0 )\
-	    : 0 )                                                           \
-	: ( ( 0xCD == NATIVE_TO_LATIN1(((U8*)s)[2]) ) && ( 0x82 == NATIVE_TO_LATIN1(((U8*)s)[3]) ) ) ? 4 : 0 )\
-    : 0 )                                                                   \
-: ( 0xCF == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ?                               \
-    ( ( 0x81 == NATIVE_TO_LATIN1(((U8*)s)[1]) ) ?                           \
-	( ( ( 0xCC == NATIVE_TO_LATIN1(((U8*)s)[2]) ) && ( 0x93 == NATIVE_TO_LATIN1(((U8*)s)[3]) ) ) ? 4 : 0 )\
-    : ( 0x85 == NATIVE_TO_LATIN1(((U8*)s)[1]) ) ?                           \
-	( ( 0xCC == NATIVE_TO_LATIN1(((U8*)s)[2]) ) ?                       \
-	    ( ( 0x88 == NATIVE_TO_LATIN1(((U8*)s)[3]) ) ?                   \
-		( ( 0xCC == NATIVE_TO_LATIN1(((U8*)s)[4]) ) ?               \
-		    ( ( NATIVE_TO_LATIN1(((U8*)s)[5]) <= 0x81 ) ? 6 : 0 )   \
-		: ( ( 0xCD == NATIVE_TO_LATIN1(((U8*)s)[4]) ) && ( 0x82 == NATIVE_TO_LATIN1(((U8*)s)[5]) ) ) ? 6 : 0 )\
-	    : ( 0x93 == NATIVE_TO_LATIN1(((U8*)s)[3]) ) ?                   \
-		( ( 0xCC == NATIVE_TO_LATIN1(((U8*)s)[4]) ) ?               \
-		    ( ( NATIVE_TO_LATIN1(((U8*)s)[5]) <= 0x81 ) ? 6 : 4 )   \
-		: ( ( 0xCD == NATIVE_TO_LATIN1(((U8*)s)[4]) ) && ( 0x82 == NATIVE_TO_LATIN1(((U8*)s)[5]) ) ) ? 6 : 4 )\
-	    : 0 )                                                           \
-	: ( ( 0xCD == NATIVE_TO_LATIN1(((U8*)s)[2]) ) && ( 0x82 == NATIVE_TO_LATIN1(((U8*)s)[3]) ) ) ? 4 : 0 )\
-    : ( 0x89 == NATIVE_TO_LATIN1(((U8*)s)[1]) ) ?                           \
-	( ( 0xCD == NATIVE_TO_LATIN1(((U8*)s)[2]) ) ?                       \
-	    ( ( 0x82 == NATIVE_TO_LATIN1(((U8*)s)[3]) ) ?                   \
-		( ( ( 0xCE == NATIVE_TO_LATIN1(((U8*)s)[4]) ) && ( 0xB9 == NATIVE_TO_LATIN1(((U8*)s)[5]) ) ) ? 6 : 4 )\
-	    : 0 )                                                           \
-	: ( ( 0xCE == NATIVE_TO_LATIN1(((U8*)s)[2]) ) && ( 0xB9 == NATIVE_TO_LATIN1(((U8*)s)[3]) ) ) ? 4 : 0 )\
-    : ( ( ( 0x8E == NATIVE_TO_LATIN1(((U8*)s)[1]) ) && ( 0xCE == NATIVE_TO_LATIN1(((U8*)s)[2]) ) ) && ( 0xB9 == NATIVE_TO_LATIN1(((U8*)s)[3]) ) ) ? 4 : 0 )\
-: ( 0xD5 == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ?                               \
-    ( ( 0xA5 == NATIVE_TO_LATIN1(((U8*)s)[1]) ) ?                           \
-	( ( ( 0xD6 == NATIVE_TO_LATIN1(((U8*)s)[2]) ) && ( 0x82 == NATIVE_TO_LATIN1(((U8*)s)[3]) ) ) ? 4 : 0 )\
-    : ( 0xB4 == NATIVE_TO_LATIN1(((U8*)s)[1]) ) ?                           \
-	( ( ( 0xD5 == NATIVE_TO_LATIN1(((U8*)s)[2]) ) && ( ( ( NATIVE_TO_LATIN1(((U8*)s)[3]) & 0xF7 ) == 0xA5 ) || NATIVE_TO_LATIN1(((U8*)s)[3]) == 0xAB || NATIVE_TO_LATIN1(((U8*)s)[3]) == 0xB6 ) ) ? 4 : 0 )\
-    : ( ( ( 0xBE == NATIVE_TO_LATIN1(((U8*)s)[1]) ) && ( 0xD5 == NATIVE_TO_LATIN1(((U8*)s)[2]) ) ) && ( 0xB6 == NATIVE_TO_LATIN1(((U8*)s)[3]) ) ) ? 4 : 0 )\
-: ( 0xE1 == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ?                               \
-    ( ( 0xBC == NATIVE_TO_LATIN1(((U8*)s)[1]) ) ?                           \
-	( ( ( ( ( NATIVE_TO_LATIN1(((U8*)s)[2]) & 0xD8 ) == 0x80 ) && ( 0xCE == NATIVE_TO_LATIN1(((U8*)s)[3]) ) ) && ( 0xB9 == NATIVE_TO_LATIN1(((U8*)s)[4]) ) ) ? 5 : 0 )\
-    : ( ( ( ( 0xBD == NATIVE_TO_LATIN1(((U8*)s)[1]) ) && ( ( ( NATIVE_TO_LATIN1(((U8*)s)[2]) & 0xF8 ) == 0xA0 ) || ( ( NATIVE_TO_LATIN1(((U8*)s)[2]) & 0xFB ) == 0xB0 ) || NATIVE_TO_LATIN1(((U8*)s)[2]) == 0xBC ) ) && ( 0xCE == NATIVE_TO_LATIN1(((U8*)s)[3]) ) ) && ( 0xB9 == NATIVE_TO_LATIN1(((U8*)s)[4]) ) ) ? 5 : 0 )\
+#define is_MULTI_CHAR_FOLD_utf8_safe_part1(s,e)                             \
+( ( 0x74 == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ?                               \
+	( ( ( 0xCC == NATIVE_TO_LATIN1(((U8*)s)[1]) ) && ( 0x88 == NATIVE_TO_LATIN1(((U8*)s)[2]) ) ) ? 3 : 0 )\
+    : ( 0x77 == NATIVE_TO_LATIN1(((U8*)s)[0]) || 0x79 == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ?\
+	( ( ( 0xCC == NATIVE_TO_LATIN1(((U8*)s)[1]) ) && ( 0x8A == NATIVE_TO_LATIN1(((U8*)s)[2]) ) ) ? 3 : 0 )\
+    : ( 0xC5 == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ?                           \
+	( ( ( ( 0xBF == NATIVE_TO_LATIN1(((U8*)s)[1]) ) && ( 0xC5 == NATIVE_TO_LATIN1(((U8*)s)[2]) ) ) && ( 0xBF == NATIVE_TO_LATIN1(((U8*)s)[3]) ) ) ? 4 : 0 )\
+    : ( 0xCA == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ?                           \
+	( ( ( 0xBC == NATIVE_TO_LATIN1(((U8*)s)[1]) ) && ( 0x6E == NATIVE_TO_LATIN1(((U8*)s)[2]) ) ) ? 3 : 0 )\
+    : ( 0xCE == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ?                           \
+	( ( ( NATIVE_TO_LATIN1(((U8*)s)[1]) & 0xFD ) == 0xAC ) ?            \
+	    ( ( ( 0xCE == NATIVE_TO_LATIN1(((U8*)s)[2]) ) && ( 0xB9 == NATIVE_TO_LATIN1(((U8*)s)[3]) ) ) ? 4 : 0 )\
+	: ( 0xB1 == NATIVE_TO_LATIN1(((U8*)s)[1]) || 0xB7 == NATIVE_TO_LATIN1(((U8*)s)[1]) ) ?\
+	    ( ( 0xCD == NATIVE_TO_LATIN1(((U8*)s)[2]) ) ?                   \
+		( ( 0x82 == NATIVE_TO_LATIN1(((U8*)s)[3]) ) ?               \
+		    ( ( ( 0xCE == NATIVE_TO_LATIN1(((U8*)s)[4]) ) && ( 0xB9 == NATIVE_TO_LATIN1(((U8*)s)[5]) ) ) ? 6 : 4 )\
+		: 0 )                                                       \
+	    : ( ( 0xCE == NATIVE_TO_LATIN1(((U8*)s)[2]) ) && ( 0xB9 == NATIVE_TO_LATIN1(((U8*)s)[3]) ) ) ? 4 : 0 )\
+	: ( 0xB9 == NATIVE_TO_LATIN1(((U8*)s)[1]) ) ?                       \
+	    ( ( 0xCC == NATIVE_TO_LATIN1(((U8*)s)[2]) ) ?                   \
+		( ( 0x88 == NATIVE_TO_LATIN1(((U8*)s)[3]) ) ?               \
+		    ( ( 0xCC == NATIVE_TO_LATIN1(((U8*)s)[4]) ) ?           \
+			( ( ( NATIVE_TO_LATIN1(((U8*)s)[5]) & 0xFE ) == 0x80 ) ? 6 : 0 )\
+		    : ( ( 0xCD == NATIVE_TO_LATIN1(((U8*)s)[4]) ) && ( 0x82 == NATIVE_TO_LATIN1(((U8*)s)[5]) ) ) ? 6 : 0 )\
+		: 0 )                                                       \
+	    : ( ( 0xCD == NATIVE_TO_LATIN1(((U8*)s)[2]) ) && ( 0x82 == NATIVE_TO_LATIN1(((U8*)s)[3]) ) ) ? 4 : 0 )\
+	: 0 )                                                               \
+    : ( 0xCF == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ?                           \
+	( ( 0x81 == NATIVE_TO_LATIN1(((U8*)s)[1]) ) ?                       \
+	    ( ( ( 0xCC == NATIVE_TO_LATIN1(((U8*)s)[2]) ) && ( 0x93 == NATIVE_TO_LATIN1(((U8*)s)[3]) ) ) ? 4 : 0 )\
+	: ( 0x85 == NATIVE_TO_LATIN1(((U8*)s)[1]) ) ?                       \
+	    ( ( 0xCC == NATIVE_TO_LATIN1(((U8*)s)[2]) ) ?                   \
+		( ( 0x88 == NATIVE_TO_LATIN1(((U8*)s)[3]) ) ?               \
+		    ( ( 0xCC == NATIVE_TO_LATIN1(((U8*)s)[4]) ) ?           \
+			( ( ( NATIVE_TO_LATIN1(((U8*)s)[5]) & 0xFE ) == 0x80 ) ? 6 : 0 )\
+		    : ( ( 0xCD == NATIVE_TO_LATIN1(((U8*)s)[4]) ) && ( 0x82 == NATIVE_TO_LATIN1(((U8*)s)[5]) ) ) ? 6 : 0 )\
+		: ( 0x93 == NATIVE_TO_LATIN1(((U8*)s)[3]) ) ?               \
+		    ( ( 0xCC == NATIVE_TO_LATIN1(((U8*)s)[4]) ) ?           \
+			( ( ( NATIVE_TO_LATIN1(((U8*)s)[5]) & 0xFE ) == 0x80 ) ? 6 : 4 )\
+		    : ( ( 0xCD == NATIVE_TO_LATIN1(((U8*)s)[4]) ) && ( 0x82 == NATIVE_TO_LATIN1(((U8*)s)[5]) ) ) ? 6 : 4 )\
+		: 0 )                                                       \
+	    : ( ( 0xCD == NATIVE_TO_LATIN1(((U8*)s)[2]) ) && ( 0x82 == NATIVE_TO_LATIN1(((U8*)s)[3]) ) ) ? 4 : 0 )\
+	: ( 0x89 == NATIVE_TO_LATIN1(((U8*)s)[1]) ) ?                       \
+	    ( ( 0xCD == NATIVE_TO_LATIN1(((U8*)s)[2]) ) ?                   \
+		( ( 0x82 == NATIVE_TO_LATIN1(((U8*)s)[3]) ) ?               \
+		    ( ( ( 0xCE == NATIVE_TO_LATIN1(((U8*)s)[4]) ) && ( 0xB9 == NATIVE_TO_LATIN1(((U8*)s)[5]) ) ) ? 6 : 4 )\
+		: 0 )                                                       \
+	    : ( ( 0xCE == NATIVE_TO_LATIN1(((U8*)s)[2]) ) && ( 0xB9 == NATIVE_TO_LATIN1(((U8*)s)[3]) ) ) ? 4 : 0 )\
+	: ( ( ( 0x8E == NATIVE_TO_LATIN1(((U8*)s)[1]) ) && ( 0xCE == NATIVE_TO_LATIN1(((U8*)s)[2]) ) ) && ( 0xB9 == NATIVE_TO_LATIN1(((U8*)s)[3]) ) ) ? 4 : 0 )\
+    : ( 0xD5 == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ?                           \
+	( ( 0xA5 == NATIVE_TO_LATIN1(((U8*)s)[1]) ) ?                       \
+	    ( ( ( 0xD6 == NATIVE_TO_LATIN1(((U8*)s)[2]) ) && ( 0x82 == NATIVE_TO_LATIN1(((U8*)s)[3]) ) ) ? 4 : 0 )\
+	: ( 0xB4 == NATIVE_TO_LATIN1(((U8*)s)[1]) ) ?                       \
+	    ( ( ( 0xD5 == NATIVE_TO_LATIN1(((U8*)s)[2]) ) && ( ( ( NATIVE_TO_LATIN1(((U8*)s)[3]) & 0xF7 ) == 0xA5 ) || NATIVE_TO_LATIN1(((U8*)s)[3]) == 0xAB || NATIVE_TO_LATIN1(((U8*)s)[3]) == 0xB6 ) ) ? 4 : 0 )\
+	: ( ( ( 0xBE == NATIVE_TO_LATIN1(((U8*)s)[1]) ) && ( 0xD5 == NATIVE_TO_LATIN1(((U8*)s)[2]) ) ) && ( 0xB6 == NATIVE_TO_LATIN1(((U8*)s)[3]) ) ) ? 4 : 0 )\
+    : ( 0xE1 == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ?                           \
+	( ( 0xBC == NATIVE_TO_LATIN1(((U8*)s)[1]) ) ?                       \
+	    ( ( ( ( ( NATIVE_TO_LATIN1(((U8*)s)[2]) & 0xD8 ) == 0x80 ) && ( 0xCE == NATIVE_TO_LATIN1(((U8*)s)[3]) ) ) && ( 0xB9 == NATIVE_TO_LATIN1(((U8*)s)[4]) ) ) ? 5 : 0 )\
+	: ( ( ( ( 0xBD == NATIVE_TO_LATIN1(((U8*)s)[1]) ) && ( ( ( NATIVE_TO_LATIN1(((U8*)s)[2]) & 0xF8 ) == 0xA0 ) || ( ( NATIVE_TO_LATIN1(((U8*)s)[2]) & 0xFB ) == 0xB0 ) || NATIVE_TO_LATIN1(((U8*)s)[2]) == 0xBC ) ) && ( 0xCE == NATIVE_TO_LATIN1(((U8*)s)[3]) ) ) && ( 0xB9 == NATIVE_TO_LATIN1(((U8*)s)[4]) ) ) ? 5 : 0 )\
+    : 0 )
+
+
+/*** GENERATED CODE ***/
+#define is_MULTI_CHAR_FOLD_utf8_safe_part2(s,e)                             \
+( ( 0x61 == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ?                               \
+	( ( ( 0xCA == NATIVE_TO_LATIN1(((U8*)s)[1]) ) && ( 0xBE == NATIVE_TO_LATIN1(((U8*)s)[2]) ) ) ? 3 : 0 )\
+    : ( 0x66 == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ?                           \
+	( ( 0x66 == NATIVE_TO_LATIN1(((U8*)s)[1]) ) ?                       \
+	    ( ( 0x69 == NATIVE_TO_LATIN1(((U8*)s)[2]) || 0x6C == NATIVE_TO_LATIN1(((U8*)s)[2]) ) ? 3 : 2 )\
+	: ( 0x69 == NATIVE_TO_LATIN1(((U8*)s)[1]) || 0x6C == NATIVE_TO_LATIN1(((U8*)s)[1]) ) ? 2 : 0 )\
+    : ( 0x68 == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ?                           \
+	( ( ( 0xCC == NATIVE_TO_LATIN1(((U8*)s)[1]) ) && ( 0xB1 == NATIVE_TO_LATIN1(((U8*)s)[2]) ) ) ? 3 : 0 )\
+    : ( 0x69 == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ?                           \
+	( ( ( 0xCC == NATIVE_TO_LATIN1(((U8*)s)[1]) ) && ( 0x87 == NATIVE_TO_LATIN1(((U8*)s)[2]) ) ) ? 3 : 0 )\
+    : ( 0x6A == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ?                           \
+	( ( ( 0xCC == NATIVE_TO_LATIN1(((U8*)s)[1]) ) && ( 0x8C == NATIVE_TO_LATIN1(((U8*)s)[2]) ) ) ? 3 : 0 )\
+    : ( 0x73 == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ?                           \
+	( ( 0x73 == NATIVE_TO_LATIN1(((U8*)s)[1]) || 0x74 == NATIVE_TO_LATIN1(((U8*)s)[1]) ) ? 2 : 0 )\
+    : ( 0x74 == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ?                           \
+	( ( ( 0xCC == NATIVE_TO_LATIN1(((U8*)s)[1]) ) && ( 0x88 == NATIVE_TO_LATIN1(((U8*)s)[2]) ) ) ? 3 : 0 )\
+    : ( 0x77 == NATIVE_TO_LATIN1(((U8*)s)[0]) || 0x79 == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ?\
+	( ( ( 0xCC == NATIVE_TO_LATIN1(((U8*)s)[1]) ) && ( 0x8A == NATIVE_TO_LATIN1(((U8*)s)[2]) ) ) ? 3 : 0 )\
+    : ( 0xC5 == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ?                           \
+	( ( ( ( 0xBF == NATIVE_TO_LATIN1(((U8*)s)[1]) ) && ( 0xC5 == NATIVE_TO_LATIN1(((U8*)s)[2]) ) ) && ( 0xBF == NATIVE_TO_LATIN1(((U8*)s)[3]) ) ) ? 4 : 0 )\
+    : ( 0xCA == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ?                           \
+	( ( ( 0xBC == NATIVE_TO_LATIN1(((U8*)s)[1]) ) && ( 0x6E == NATIVE_TO_LATIN1(((U8*)s)[2]) ) ) ? 3 : 0 )\
+    : ( 0xCE == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ?                           \
+	( ( ( NATIVE_TO_LATIN1(((U8*)s)[1]) & 0xFD ) == 0xAC ) ?            \
+	    ( ( ( 0xCE == NATIVE_TO_LATIN1(((U8*)s)[2]) ) && ( 0xB9 == NATIVE_TO_LATIN1(((U8*)s)[3]) ) ) ? 4 : 0 )\
+	: ( 0xB1 == NATIVE_TO_LATIN1(((U8*)s)[1]) || 0xB7 == NATIVE_TO_LATIN1(((U8*)s)[1]) ) ?\
+	    ( ( 0xCD == NATIVE_TO_LATIN1(((U8*)s)[2]) ) ?                   \
+		( ( 0x82 == NATIVE_TO_LATIN1(((U8*)s)[3]) ) ? 4 : 0 )       \
+	    : ( ( 0xCE == NATIVE_TO_LATIN1(((U8*)s)[2]) ) && ( 0xB9 == NATIVE_TO_LATIN1(((U8*)s)[3]) ) ) ? 4 : 0 )\
+	: ( ( ( 0xB9 == NATIVE_TO_LATIN1(((U8*)s)[1]) ) && ( 0xCD == NATIVE_TO_LATIN1(((U8*)s)[2]) ) ) && ( 0x82 == NATIVE_TO_LATIN1(((U8*)s)[3]) ) ) ? 4 : 0 )\
+    : ( 0xCF == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ?                           \
+	( ( 0x81 == NATIVE_TO_LATIN1(((U8*)s)[1]) ) ?                       \
+	    ( ( ( 0xCC == NATIVE_TO_LATIN1(((U8*)s)[2]) ) && ( 0x93 == NATIVE_TO_LATIN1(((U8*)s)[3]) ) ) ? 4 : 0 )\
+	: ( 0x85 == NATIVE_TO_LATIN1(((U8*)s)[1]) ) ?                       \
+	    ( ( 0xCC == NATIVE_TO_LATIN1(((U8*)s)[2]) ) ?                   \
+		( ( 0x93 == NATIVE_TO_LATIN1(((U8*)s)[3]) ) ? 4 : 0 )       \
+	    : ( ( 0xCD == NATIVE_TO_LATIN1(((U8*)s)[2]) ) && ( 0x82 == NATIVE_TO_LATIN1(((U8*)s)[3]) ) ) ? 4 : 0 )\
+	: ( 0x89 == NATIVE_TO_LATIN1(((U8*)s)[1]) ) ?                       \
+	    ( ( 0xCD == NATIVE_TO_LATIN1(((U8*)s)[2]) ) ?                   \
+		( ( 0x82 == NATIVE_TO_LATIN1(((U8*)s)[3]) ) ? 4 : 0 )       \
+	    : ( ( 0xCE == NATIVE_TO_LATIN1(((U8*)s)[2]) ) && ( 0xB9 == NATIVE_TO_LATIN1(((U8*)s)[3]) ) ) ? 4 : 0 )\
+	: ( ( ( 0x8E == NATIVE_TO_LATIN1(((U8*)s)[1]) ) && ( 0xCE == NATIVE_TO_LATIN1(((U8*)s)[2]) ) ) && ( 0xB9 == NATIVE_TO_LATIN1(((U8*)s)[3]) ) ) ? 4 : 0 )\
+    : ( 0xD5 == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ?                           \
+	( ( 0xA5 == NATIVE_TO_LATIN1(((U8*)s)[1]) ) ?                       \
+	    ( ( ( 0xD6 == NATIVE_TO_LATIN1(((U8*)s)[2]) ) && ( 0x82 == NATIVE_TO_LATIN1(((U8*)s)[3]) ) ) ? 4 : 0 )\
+	: ( 0xB4 == NATIVE_TO_LATIN1(((U8*)s)[1]) ) ?                       \
+	    ( ( ( 0xD5 == NATIVE_TO_LATIN1(((U8*)s)[2]) ) && ( ( ( NATIVE_TO_LATIN1(((U8*)s)[3]) & 0xF7 ) == 0xA5 ) || NATIVE_TO_LATIN1(((U8*)s)[3]) == 0xAB || NATIVE_TO_LATIN1(((U8*)s)[3]) == 0xB6 ) ) ? 4 : 0 )\
+	: ( ( ( 0xBE == NATIVE_TO_LATIN1(((U8*)s)[1]) ) && ( 0xD5 == NATIVE_TO_LATIN1(((U8*)s)[2]) ) ) && ( 0xB6 == NATIVE_TO_LATIN1(((U8*)s)[3]) ) ) ? 4 : 0 )\
+    : 0 )
+
+
+/*** GENERATED CODE ***/
+#define is_MULTI_CHAR_FOLD_utf8_safe_part3(s,e)                             \
+( ((e)-(s) > 2) ?                                                           \
+    ( ( 0x61 == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ?                           \
+	( ( ( 0xCA == NATIVE_TO_LATIN1(((U8*)s)[1]) ) && ( 0xBE == NATIVE_TO_LATIN1(((U8*)s)[2]) ) ) ? 3 : 0 )\
+    : ( 0x66 == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ?                           \
+	( ( 0x66 == NATIVE_TO_LATIN1(((U8*)s)[1]) ) ?                       \
+	    ( ( 0x69 == NATIVE_TO_LATIN1(((U8*)s)[2]) || 0x6C == NATIVE_TO_LATIN1(((U8*)s)[2]) ) ? 3 : 2 )\
+	: ( 0x69 == NATIVE_TO_LATIN1(((U8*)s)[1]) || 0x6C == NATIVE_TO_LATIN1(((U8*)s)[1]) ) ? 2 : 0 )\
+    : ( 0x68 == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ?                           \
+	( ( ( 0xCC == NATIVE_TO_LATIN1(((U8*)s)[1]) ) && ( 0xB1 == NATIVE_TO_LATIN1(((U8*)s)[2]) ) ) ? 3 : 0 )\
+    : ( 0x69 == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ?                           \
+	( ( ( 0xCC == NATIVE_TO_LATIN1(((U8*)s)[1]) ) && ( 0x87 == NATIVE_TO_LATIN1(((U8*)s)[2]) ) ) ? 3 : 0 )\
+    : ( 0x6A == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ?                           \
+	( ( ( 0xCC == NATIVE_TO_LATIN1(((U8*)s)[1]) ) && ( 0x8C == NATIVE_TO_LATIN1(((U8*)s)[2]) ) ) ? 3 : 0 )\
+    : ( 0x73 == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ?                           \
+	( ( 0x73 == NATIVE_TO_LATIN1(((U8*)s)[1]) || 0x74 == NATIVE_TO_LATIN1(((U8*)s)[1]) ) ? 2 : 0 )\
+    : ( 0x74 == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ?                           \
+	( ( ( 0xCC == NATIVE_TO_LATIN1(((U8*)s)[1]) ) && ( 0x88 == NATIVE_TO_LATIN1(((U8*)s)[2]) ) ) ? 3 : 0 )\
+    : ( 0x77 == NATIVE_TO_LATIN1(((U8*)s)[0]) || 0x79 == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ?\
+	( ( ( 0xCC == NATIVE_TO_LATIN1(((U8*)s)[1]) ) && ( 0x8A == NATIVE_TO_LATIN1(((U8*)s)[2]) ) ) ? 3 : 0 )\
+    : ( ( ( 0xCA == NATIVE_TO_LATIN1(((U8*)s)[0]) ) && ( 0xBC == NATIVE_TO_LATIN1(((U8*)s)[1]) ) ) && ( 0x6E == NATIVE_TO_LATIN1(((U8*)s)[2]) ) ) ? 3 : 0 )\
+: ((e)-(s) > 1) ?                                                           \
+    ( ( 0x66 == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ?                           \
+	( ( 0x66 == NATIVE_TO_LATIN1(((U8*)s)[1]) || 0x69 == NATIVE_TO_LATIN1(((U8*)s)[1]) || 0x6C == NATIVE_TO_LATIN1(((U8*)s)[1]) ) ? 2 : 0 )\
+    : ( ( 0x73 == NATIVE_TO_LATIN1(((U8*)s)[0]) ) && ( 0x73 == NATIVE_TO_LATIN1(((U8*)s)[1]) || 0x74 == NATIVE_TO_LATIN1(((U8*)s)[1]) ) ) ? 2 : 0 )\
 : 0 )
 
 
 /*** GENERATED CODE ***/
-#define is_MULTI_CHAR_FOLD_utf8(s)                                          \
+#define is_MULTI_CHAR_FOLD_utf8_safe_part4(s,e)                             \
 ( ( 0x61 == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ?                               \
-    ( ( ( 0xCA == NATIVE_TO_LATIN1(((U8*)s)[1]) ) && ( 0xBE == NATIVE_TO_LATIN1(((U8*)s)[2]) ) ) ? 3 : 0 )\
-: ( 0x66 == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ?                               \
-    ( ( 0x66 == NATIVE_TO_LATIN1(((U8*)s)[1]) ) ?                           \
-	( ( 0x69 == NATIVE_TO_LATIN1(((U8*)s)[2]) || 0x6C == NATIVE_TO_LATIN1(((U8*)s)[2]) ) ? 3 : 2 )\
-    : ( 0x69 == NATIVE_TO_LATIN1(((U8*)s)[1]) || 0x6C == NATIVE_TO_LATIN1(((U8*)s)[1]) ) ? 2 : 0 )\
-: ( 0x68 == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ? is_MULTI_CHAR_FOLD_utf8_part0(s) : is_MULTI_CHAR_FOLD_utf8_part1(s) )
+	( ( ( 0xCA == NATIVE_TO_LATIN1(((U8*)s)[1]) ) && ( 0xBE == NATIVE_TO_LATIN1(((U8*)s)[2]) ) ) ? 3 : 0 )\
+    : ( 0x66 == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ?                           \
+	( ( 0x66 == NATIVE_TO_LATIN1(((U8*)s)[1]) ) ?                       \
+	    ( ( 0x69 == NATIVE_TO_LATIN1(((U8*)s)[2]) || 0x6C == NATIVE_TO_LATIN1(((U8*)s)[2]) ) ? 3 : 2 )\
+	: ( 0x69 == NATIVE_TO_LATIN1(((U8*)s)[1]) || 0x6C == NATIVE_TO_LATIN1(((U8*)s)[1]) ) ? 2 : 0 )\
+    : ( 0x68 == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ?                           \
+	( ( ( 0xCC == NATIVE_TO_LATIN1(((U8*)s)[1]) ) && ( 0xB1 == NATIVE_TO_LATIN1(((U8*)s)[2]) ) ) ? 3 : 0 )\
+    : ( 0x69 == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ?                           \
+	( ( ( 0xCC == NATIVE_TO_LATIN1(((U8*)s)[1]) ) && ( 0x87 == NATIVE_TO_LATIN1(((U8*)s)[2]) ) ) ? 3 : 0 )\
+    : ( 0x6A == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ?                           \
+	( ( ( 0xCC == NATIVE_TO_LATIN1(((U8*)s)[1]) ) && ( 0x8C == NATIVE_TO_LATIN1(((U8*)s)[2]) ) ) ? 3 : 0 )\
+    : ( 0x73 == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ? is_MULTI_CHAR_FOLD_utf8_safe_part0(s,e) : is_MULTI_CHAR_FOLD_utf8_safe_part1(s,e) )
+
+
+/*** GENERATED CODE ***/
+#define is_MULTI_CHAR_FOLD_utf8_safe_part5(s,e)                             \
+( ((e)-(s) > 4) ?                                                           \
+    ( ( 0x61 == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ?                           \
+	( ( ( 0xCA == NATIVE_TO_LATIN1(((U8*)s)[1]) ) && ( 0xBE == NATIVE_TO_LATIN1(((U8*)s)[2]) ) ) ? 3 : 0 )\
+    : ( 0x66 == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ?                           \
+	( ( 0x66 == NATIVE_TO_LATIN1(((U8*)s)[1]) ) ?                       \
+	    ( ( 0x69 == NATIVE_TO_LATIN1(((U8*)s)[2]) || 0x6C == NATIVE_TO_LATIN1(((U8*)s)[2]) ) ? 3 : 2 )\
+	: ( 0x69 == NATIVE_TO_LATIN1(((U8*)s)[1]) || 0x6C == NATIVE_TO_LATIN1(((U8*)s)[1]) ) ? 2 : 0 )\
+    : ( 0x68 == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ?                           \
+	( ( ( 0xCC == NATIVE_TO_LATIN1(((U8*)s)[1]) ) && ( 0xB1 == NATIVE_TO_LATIN1(((U8*)s)[2]) ) ) ? 3 : 0 )\
+    : ( 0x69 == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ?                           \
+	( ( ( 0xCC == NATIVE_TO_LATIN1(((U8*)s)[1]) ) && ( 0x87 == NATIVE_TO_LATIN1(((U8*)s)[2]) ) ) ? 3 : 0 )\
+    : ( 0x6A == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ?                           \
+	( ( ( 0xCC == NATIVE_TO_LATIN1(((U8*)s)[1]) ) && ( 0x8C == NATIVE_TO_LATIN1(((U8*)s)[2]) ) ) ? 3 : 0 )\
+    : ( 0x73 == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ?                           \
+	( ( 0x73 == NATIVE_TO_LATIN1(((U8*)s)[1]) || 0x74 == NATIVE_TO_LATIN1(((U8*)s)[1]) ) ? 2 : 0 )\
+    : ( 0x74 == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ?                           \
+	( ( ( 0xCC == NATIVE_TO_LATIN1(((U8*)s)[1]) ) && ( 0x88 == NATIVE_TO_LATIN1(((U8*)s)[2]) ) ) ? 3 : 0 )\
+    : ( 0x77 == NATIVE_TO_LATIN1(((U8*)s)[0]) || 0x79 == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ?\
+	( ( ( 0xCC == NATIVE_TO_LATIN1(((U8*)s)[1]) ) && ( 0x8A == NATIVE_TO_LATIN1(((U8*)s)[2]) ) ) ? 3 : 0 )\
+    : ( 0xC5 == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ?                           \
+	( ( ( ( 0xBF == NATIVE_TO_LATIN1(((U8*)s)[1]) ) && ( 0xC5 == NATIVE_TO_LATIN1(((U8*)s)[2]) ) ) && ( 0xBF == NATIVE_TO_LATIN1(((U8*)s)[3]) ) ) ? 4 : 0 )\
+    : ( 0xCA == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ?                           \
+	( ( ( 0xBC == NATIVE_TO_LATIN1(((U8*)s)[1]) ) && ( 0x6E == NATIVE_TO_LATIN1(((U8*)s)[2]) ) ) ? 3 : 0 )\
+    : ( 0xCE == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ?                           \
+	( ( ( NATIVE_TO_LATIN1(((U8*)s)[1]) & 0xFD ) == 0xAC ) ?            \
+	    ( ( ( 0xCE == NATIVE_TO_LATIN1(((U8*)s)[2]) ) && ( 0xB9 == NATIVE_TO_LATIN1(((U8*)s)[3]) ) ) ? 4 : 0 )\
+	: ( 0xB1 == NATIVE_TO_LATIN1(((U8*)s)[1]) || 0xB7 == NATIVE_TO_LATIN1(((U8*)s)[1]) ) ?\
+	    ( ( 0xCD == NATIVE_TO_LATIN1(((U8*)s)[2]) ) ?                   \
+		( ( 0x82 == NATIVE_TO_LATIN1(((U8*)s)[3]) ) ? 4 : 0 )       \
+	    : ( ( 0xCE == NATIVE_TO_LATIN1(((U8*)s)[2]) ) && ( 0xB9 == NATIVE_TO_LATIN1(((U8*)s)[3]) ) ) ? 4 : 0 )\
+	: ( ( ( 0xB9 == NATIVE_TO_LATIN1(((U8*)s)[1]) ) && ( 0xCD == NATIVE_TO_LATIN1(((U8*)s)[2]) ) ) && ( 0x82 == NATIVE_TO_LATIN1(((U8*)s)[3]) ) ) ? 4 : 0 )\
+    : ( 0xCF == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ?                           \
+	( ( 0x81 == NATIVE_TO_LATIN1(((U8*)s)[1]) ) ?                       \
+	    ( ( ( 0xCC == NATIVE_TO_LATIN1(((U8*)s)[2]) ) && ( 0x93 == NATIVE_TO_LATIN1(((U8*)s)[3]) ) ) ? 4 : 0 )\
+	: ( 0x85 == NATIVE_TO_LATIN1(((U8*)s)[1]) ) ?                       \
+	    ( ( 0xCC == NATIVE_TO_LATIN1(((U8*)s)[2]) ) ?                   \
+		( ( 0x93 == NATIVE_TO_LATIN1(((U8*)s)[3]) ) ? 4 : 0 )       \
+	    : ( ( 0xCD == NATIVE_TO_LATIN1(((U8*)s)[2]) ) && ( 0x82 == NATIVE_TO_LATIN1(((U8*)s)[3]) ) ) ? 4 : 0 )\
+	: ( 0x89 == NATIVE_TO_LATIN1(((U8*)s)[1]) ) ?                       \
+	    ( ( 0xCD == NATIVE_TO_LATIN1(((U8*)s)[2]) ) ?                   \
+		( ( 0x82 == NATIVE_TO_LATIN1(((U8*)s)[3]) ) ? 4 : 0 )       \
+	    : ( ( 0xCE == NATIVE_TO_LATIN1(((U8*)s)[2]) ) && ( 0xB9 == NATIVE_TO_LATIN1(((U8*)s)[3]) ) ) ? 4 : 0 )\
+	: ( ( ( 0x8E == NATIVE_TO_LATIN1(((U8*)s)[1]) ) && ( 0xCE == NATIVE_TO_LATIN1(((U8*)s)[2]) ) ) && ( 0xB9 == NATIVE_TO_LATIN1(((U8*)s)[3]) ) ) ? 4 : 0 )\
+    : ( 0xD5 == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ?                           \
+	( ( 0xA5 == NATIVE_TO_LATIN1(((U8*)s)[1]) ) ?                       \
+	    ( ( ( 0xD6 == NATIVE_TO_LATIN1(((U8*)s)[2]) ) && ( 0x82 == NATIVE_TO_LATIN1(((U8*)s)[3]) ) ) ? 4 : 0 )\
+	: ( 0xB4 == NATIVE_TO_LATIN1(((U8*)s)[1]) ) ?                       \
+	    ( ( ( 0xD5 == NATIVE_TO_LATIN1(((U8*)s)[2]) ) && ( ( ( NATIVE_TO_LATIN1(((U8*)s)[3]) & 0xF7 ) == 0xA5 ) || NATIVE_TO_LATIN1(((U8*)s)[3]) == 0xAB || NATIVE_TO_LATIN1(((U8*)s)[3]) == 0xB6 ) ) ? 4 : 0 )\
+	: ( ( ( 0xBE == NATIVE_TO_LATIN1(((U8*)s)[1]) ) && ( 0xD5 == NATIVE_TO_LATIN1(((U8*)s)[2]) ) ) && ( 0xB6 == NATIVE_TO_LATIN1(((U8*)s)[3]) ) ) ? 4 : 0 )\
+    : ( 0xE1 == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ?                           \
+	( ( 0xBC == NATIVE_TO_LATIN1(((U8*)s)[1]) ) ?                       \
+	    ( ( ( ( ( NATIVE_TO_LATIN1(((U8*)s)[2]) & 0xD8 ) == 0x80 ) && ( 0xCE == NATIVE_TO_LATIN1(((U8*)s)[3]) ) ) && ( 0xB9 == NATIVE_TO_LATIN1(((U8*)s)[4]) ) ) ? 5 : 0 )\
+	: ( ( ( ( 0xBD == NATIVE_TO_LATIN1(((U8*)s)[1]) ) && ( ( ( NATIVE_TO_LATIN1(((U8*)s)[2]) & 0xF8 ) == 0xA0 ) || ( ( NATIVE_TO_LATIN1(((U8*)s)[2]) & 0xFB ) == 0xB0 ) || NATIVE_TO_LATIN1(((U8*)s)[2]) == 0xBC ) ) && ( 0xCE == NATIVE_TO_LATIN1(((U8*)s)[3]) ) ) && ( 0xB9 == NATIVE_TO_LATIN1(((U8*)s)[4]) ) ) ? 5 : 0 )\
+    : 0 )                                                                   \
+: ((e)-(s) > 3) ? is_MULTI_CHAR_FOLD_utf8_safe_part2(s,e) : is_MULTI_CHAR_FOLD_utf8_safe_part3(s,e) )
+
+
+/*** GENERATED CODE ***/
+#define is_MULTI_CHAR_FOLD_utf8_safe(s,e)                                   \
+( ((e)-(s) > 5) ? is_MULTI_CHAR_FOLD_utf8_safe_part4(s,e) : is_MULTI_CHAR_FOLD_utf8_safe_part5(s,e) )
 
 /*
 	MULTI_CHAR_FOLD: multi-char strings that are folded to by a single character
@@ -674,12 +820,18 @@
 	&regcharclass_multi_char_folds::multi_char_folds(0)
 */
 /*** GENERATED CODE ***/
-#define is_MULTI_CHAR_FOLD_latin1(s)                                        \
-( ( ( NATIVE_TO_LATIN1(((U8*)s)[0]) & 0xDF ) == 0x46 ) ?                    \
-    ( ( ( NATIVE_TO_LATIN1(((U8*)s)[1]) & 0xDF ) == 0x46 ) ?                \
-	( ( ( ( NATIVE_TO_LATIN1(((U8*)s)[2]) & 0xDF ) == 0x49 ) || ( ( NATIVE_TO_LATIN1(((U8*)s)[2]) & 0xDF ) == 0x4C ) ) ? 3 : 2 )\
-    : ( ( ( NATIVE_TO_LATIN1(((U8*)s)[1]) & 0xDF ) == 0x49 ) || ( ( NATIVE_TO_LATIN1(((U8*)s)[1]) & 0xDF ) == 0x4C ) ) ? 2 : 0 )\
-: ( ( ( NATIVE_TO_LATIN1(((U8*)s)[0]) & 0xDF ) == 0x53 ) && ( ( ( NATIVE_TO_LATIN1(((U8*)s)[1]) & 0xDF ) == 0x53 ) || ( ( NATIVE_TO_LATIN1(((U8*)s)[1]) & 0xDF ) == 0x54 ) ) ) ? 2 : 0 )
+#define is_MULTI_CHAR_FOLD_latin1_safe(s,e)                                 \
+( ((e)-(s) > 2) ?                                                           \
+    ( ( ( NATIVE_TO_LATIN1(((U8*)s)[0]) & 0xDF ) == 0x46 ) ?                \
+	( ( ( NATIVE_TO_LATIN1(((U8*)s)[1]) & 0xDF ) == 0x46 ) ?            \
+	    ( ( ( ( NATIVE_TO_LATIN1(((U8*)s)[2]) & 0xDF ) == 0x49 ) || ( ( NATIVE_TO_LATIN1(((U8*)s)[2]) & 0xDF ) == 0x4C ) ) ? 3 : 2 )\
+	: ( ( ( NATIVE_TO_LATIN1(((U8*)s)[1]) & 0xDF ) == 0x49 ) || ( ( NATIVE_TO_LATIN1(((U8*)s)[1]) & 0xDF ) == 0x4C ) ) ? 2 : 0 )\
+    : ( ( ( NATIVE_TO_LATIN1(((U8*)s)[0]) & 0xDF ) == 0x53 ) && ( ( ( NATIVE_TO_LATIN1(((U8*)s)[1]) & 0xDF ) == 0x53 ) || ( ( NATIVE_TO_LATIN1(((U8*)s)[1]) & 0xDF ) == 0x54 ) ) ) ? 2 : 0 )\
+: ((e)-(s) > 1) ?                                                           \
+    ( ( ( NATIVE_TO_LATIN1(((U8*)s)[0]) & 0xDF ) == 0x46 ) ?                \
+	( ( ( ( NATIVE_TO_LATIN1(((U8*)s)[1]) & 0xDF ) == 0x46 ) || ( ( NATIVE_TO_LATIN1(((U8*)s)[1]) & 0xDF ) == 0x49 ) || ( ( NATIVE_TO_LATIN1(((U8*)s)[1]) & 0xDF ) == 0x4C ) ) ? 2 : 0 )\
+    : ( ( ( NATIVE_TO_LATIN1(((U8*)s)[0]) & 0xDF ) == 0x53 ) && ( ( ( NATIVE_TO_LATIN1(((U8*)s)[1]) & 0xDF ) == 0x53 ) || ( ( NATIVE_TO_LATIN1(((U8*)s)[1]) & 0xDF ) == 0x54 ) ) ) ? 2 : 0 )\
+: 0 )
 
 /*
 	FOLDS_TO_MULTI: characters that fold to multi-char strings

@@ -1618,14 +1618,14 @@ QUOTEMETA: Meta-characters that \Q should quote
 \p{_Perl_Quotemeta}
 
 MULTI_CHAR_FOLD: multi-char strings that are folded to by a single character
-=> UTF8 :fast
+=> UTF8 :safe
 do regen/regcharclass_multi_char_folds.pl
 
 # 1 => All folds
 &regcharclass_multi_char_folds::multi_char_folds(1)
 
 MULTI_CHAR_FOLD: multi-char strings that are folded to by a single character
-=> LATIN1 :fast
+=> LATIN1 : safe
 
 &regcharclass_multi_char_folds::multi_char_folds(0)
 # 0 => Latin1-only

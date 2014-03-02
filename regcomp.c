@@ -2109,7 +2109,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                         foldlen -= UTF8SKIP(uc);
                     }
                     else {
-                        foldlen = is_MULTI_CHAR_FOLD_utf8(uc);
+                        foldlen = is_MULTI_CHAR_FOLD_utf8_safe(uc, e);
                         minbytes++;
                     }
                 }
@@ -2126,7 +2126,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                         foldlen--;
                     }
                     else {
-                        foldlen = is_MULTI_CHAR_FOLD_latin1(uc);
+                        foldlen = is_MULTI_CHAR_FOLD_latin1_safe(uc, e);
                         minbytes++;
                     }
                 }
@@ -3365,7 +3365,7 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
                                      length sequence we are looking for is 2 */
 	    {
                 int count = 0;  /* How many characters in a multi-char fold */
-                int len = is_MULTI_CHAR_FOLD_utf8(s);
+                int len = is_MULTI_CHAR_FOLD_utf8_safe(s, s_end);
                 if (! len) {    /* Not a multi-char fold: get next char */
                     s += UTF8SKIP(s);
                     continue;
@@ -3458,7 +3458,7 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
                               : s_end -1;
 
 	    while (s < upper) {
-                int len = is_MULTI_CHAR_FOLD_latin1(s);
+                int len = is_MULTI_CHAR_FOLD_latin1_safe(s, s_end);
                 if (! len) {    /* Not a multi-char fold. */
                     if (*s == LATIN_SMALL_LETTER_SHARP_S
                         && (OP(scan) == EXACTF || OP(scan) == EXACTFL))
