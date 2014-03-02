@@ -136,7 +136,6 @@ Perl_do_openn(pTHX_ GV *gv, const char *oname, I32 len, int as_raw,
     IO * const io = openn_setup(gv, mode, &saveifp, &saveofp, &savefd, &savetype);
     int writing = 0;
     PerlIO *fp;
-    int fd;
     bool was_fdopen = FALSE;
     char *type  = NULL;
 
@@ -234,13 +233,16 @@ Perl_do_openn(pTHX_ GV *gv, const char *oname, I32 len, int as_raw,
 		    Perl_warner(aTHX_ packWARN(WARN_IO),
 			    "Can't open a reference");
 		SETERRNO(EINVAL, LIB_INVARG);
+                fp = NULL;
 		goto say_false;
 	    }
 #endif /* USE_STDIO */
             p = (SvOK(*svp) || SvGMAGICAL(*svp)) ? SvPV(*svp, nlen) : NULL;
 
-	    if (p && !IS_SAFE_PATHNAME(p, nlen, "open"))
+            if (p && !IS_SAFE_PATHNAME(p, nlen, "open")) {
+                fp = NULL;
                 goto say_false;
+            }
 
 	    name = p ? savepvn(p, nlen) : savepvs("");
 
@@ -279,6 +281,7 @@ Perl_do_openn(pTHX_ GV *gv, const char *oname, I32 len, int as_raw,
 		if (ckWARN(WARN_PIPE))
 		    Perl_warner(aTHX_ packWARN(WARN_PIPE), "Missing command in piped open");
 		errno = EPIPE;
+                fp = NULL;
 		goto say_false;
 	    }
 	    if (!(*name == '-' && name[1] == '\0') || num_svs)
@@ -304,6 +307,7 @@ Perl_do_openn(pTHX_ GV *gv, const char *oname, I32 len, int as_raw,
 	    if (num_svs) {
 		if (*type) {
 		    if (PerlIO_apply_layers(aTHX_ fp, mode, type) != 0) {
+                        fp = NULL;
 			goto say_false;
 		    }
 		}
@@ -371,6 +375,7 @@ Perl_do_openn(pTHX_ GV *gv, const char *oname, I32 len, int as_raw,
 #ifdef EINVAL
 			    SETERRNO(EINVAL,SS_IVCHAN);
 #endif
+                            fp = NULL;
 			    goto say_false;
 			}
 			if ((that_fp = IoIFP(thatio))) {
@@ -497,6 +502,7 @@ Perl_do_openn(pTHX_ GV *gv, const char *oname, I32 len, int as_raw,
 		if (ckWARN(WARN_PIPE))
 		    Perl_warner(aTHX_ packWARN(WARN_PIPE), "Missing command in piped open");
 		errno = EPIPE;
+                fp = NULL;
 		goto say_false;
 	    }
 	    if (!(*name == '-' && name[1] == '\0') || num_svs)
@@ -521,6 +527,7 @@ Perl_do_openn(pTHX_ GV *gv, const char *oname, I32 len, int as_raw,
 		    type++;
 		if (*type) {
 		    if (PerlIO_apply_layers(aTHX_ fp, mode, type) != 0) {
+                        fp = NULL;
 			goto say_false;
 		    }
 		}
@@ -556,6 +563,23 @@ Perl_do_openn(pTHX_ GV *gv, const char *oname, I32 len, int as_raw,
 	    }
 	}
     }
+
+  say_false:
+    return openn_cleanup(gv, io, fp, mode, oname, saveifp, saveofp, savefd,
+                         savetype, writing, was_fdopen, type);
+}
+
+/* Yes, this is ugly, but it's private, and I don't see a cleaner way to
+   simplify the two-headed public interface of do_openn. */
+static bool
+S_openn_cleanup(pTHX_ GV *gv, IO *io, PerlIO *fp, char *mode, const char *oname,
+                PerlIO *saveifp, PerlIO *saveofp, int savefd, char savetype,
+                int writing, bool was_fdopen, const char *type)
+{
+    int fd;
+
+    PERL_ARGS_ASSERT_OPENN_CLEANUP;
+
     if (!fp) {
 	if (IoTYPE(io) == IoTYPE_RDONLY && ckWARN(WARN_NEWLINE)
 	    && strchr(oname, '\n')

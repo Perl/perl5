@@ -398,6 +398,11 @@ Ap	|bool	|do_open9	|NN GV *gv|NN const char *name|I32 len|int as_raw \
 s	|IO *	|openn_setup    |NN GV *gv|NN char *mode|NN PerlIO **saveifp \
 				|NN PerlIO **saveofp|NN int *savefd \
                                 |NN char *savetype
+s	|bool	|openn_cleanup	|NN GV *gv|NN IO *io|NULLOK PerlIO *fp \
+				|NN char *mode|NN const char *oname \
+                                |NULLOK PerlIO *saveifp|NULLOK PerlIO *saveofp \
+                                |int savefd|char savetype|int writing \
+                                |bool was_fdopen|NULLOK const char *type
 #endif
 Ap	|bool	|do_openn	|NN GV *gv|NN const char *oname|I32 len \
 				|int as_raw|int rawmode|int rawperm \

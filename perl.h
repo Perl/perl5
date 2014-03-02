@@ -175,6 +175,7 @@
 #  define pTHX_7	8
 #  define pTHX_8	9
 #  define pTHX_9	10
+#  define pTHX_12	13
 #  if defined(DEBUGGING) && !defined(PERL_TRACK_MEMPOOL)
 #    define PERL_TRACK_MEMPOOL
 #  endif
@@ -384,6 +385,7 @@
 #  define pTHX_7	7
 #  define pTHX_8	8
 #  define pTHX_9	9
+#  define pTHX_12	12
 #endif
 
 #ifndef dVAR
