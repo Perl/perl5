@@ -86,53 +86,16 @@ char *tzname[] = { "" , "" };
 #endif
 
 #if defined(__VMS) && !defined(__POSIX_SOURCE)
-#  include <libdef.h>       /* LIB$_INVARG constant */
-#  include <lib$routines.h> /* prototype for lib$ediv() */
-#  include <starlet.h>      /* prototype for sys$gettim() */
-#  if DECC_VERSION < 50000000
-#    define pid_t int       /* old versions of DECC miss this in types.h */
-#  endif
+
+#  include <utsname.h>
 
 #  undef mkfifo
 #  define mkfifo(a,b) (not_here("mkfifo"),-1)
-#  define tzset() not_here("tzset")
-
-#if ((__VMS_VER >= 70000000) && (__DECC_VER >= 50200000)) || (__CRTL_VER >= 70000000)
-#    define HAS_TZNAME  /* shows up in VMS 7.0 or Dec C 5.6 */
-#    include <utsname.h>
-#  endif /* __VMS_VER >= 70000000 or Dec C 5.6 */
 
    /* The POSIX notion of ttyname() is better served by getname() under VMS */
    static char ttnambuf[64];
 #  define ttyname(fd) (isatty(fd) > 0 ? getname(fd,ttnambuf,0) : NULL)
 
-   /* The non-POSIX CRTL times() has void return type, so we just get the
-      current time directly */
-   clock_t vms_times(struct tms *bufptr) {
-	dTHX;
-	clock_t retval;
-	/* Get wall time and convert to 10 ms intervals to
-	 * produce the return value that the POSIX standard expects */
-#  if defined(__DECC) && defined (__ALPHA)
-#    include <ints.h>
-	uint64 vmstime;
-	_ckvmssts(sys$gettim(&vmstime));
-	vmstime /= 100000;
-	retval = vmstime & 0x7fffffff;
-#  else
-	/* (Older hw or ccs don't have an atomic 64-bit type, so we
-	 * juggle 32-bit ints (and a float) to produce a time_t result
-	 * with minimal loss of information.) */
-	long int vmstime[2],remainder,divisor = 100000;
-	_ckvmssts(sys$gettim((unsigned long int *)vmstime));
-	vmstime[1] &= 0x7fff;  /* prevent overflow in EDIV */
-	_ckvmssts(lib$ediv(&divisor,vmstime,(long int *)&retval,&remainder));
-#  endif
-	/* Fill in the struct tms using the CRTL routine . . .*/
-	times((tbuffer_t *)bufptr);
-	return (clock_t) retval;
-   }
-#  define times(t) vms_times(t)
 #else
 #if defined (__CYGWIN__)
 #    define tzname _tzname
