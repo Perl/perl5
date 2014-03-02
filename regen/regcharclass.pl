@@ -1293,6 +1293,11 @@ sub render {
 # sequences in it, as the generated macro will accept only a single codepoint
 # as an argument.
 #
+# It is also illegal to do a non-safe macro on a pattern with multi-codepoint
+# sequences in it, as even if it is known to be well-formed, we need to not
+# run off the end of the buffer when say the buffer ends with the first two
+# characters, but three are looked at by the macro.
+#
 # returns the macro.
 
 
@@ -1300,9 +1305,14 @@ sub make_macro {
     my $self= shift;
     my %opts= @_;
     my $type= $opts{type} || 'generic';
-    die "Can't do a 'cp' on multi-codepoint character class '$self->{op}'"
-      if $type =~ /^cp/
-      and $self->{has_multi};
+    if ($self->{has_multi}) {
+        if ($type =~ /^cp/) {
+            die "Can't do a 'cp' on multi-codepoint character class '$self->{op}'"
+        }
+        elsif (! $opts{safe}) {
+            die "'safe' is required on multi-codepoint character class '$self->{op}'"
+        }
+    }
     my $ret_type= $opts{ret_type} || ( $opts{type} =~ /^cp/ ? 'cp' : 'len' );
     my $method;
     if ( $opts{safe} ) {
