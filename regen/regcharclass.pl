@@ -1537,16 +1537,16 @@ __DATA__
 # 0x1FE3  # GREEK SMALL LETTER UPSILON WITH DIALYTIKA AND OXIA; maps same as 03B0
 
 LNBREAK: Line Break: \R
-=> generic UTF8 LATIN1 :fast safe
+=> generic UTF8 LATIN1 : safe
 "\x0D\x0A"      # CRLF - Network (Windows) line ending
 \p{VertSpace}
 
 HORIZWS: Horizontal Whitespace: \h \H
-=> generic UTF8 LATIN1 high cp cp_high :fast safe
+=> generic UTF8 LATIN1 high cp_high :fast safe
 \p{HorizSpace}
 
 VERTWS: Vertical Whitespace: \v \V
-=> generic UTF8 high LATIN1 cp cp_high :fast safe
+=> generic UTF8 high LATIN1 cp_high :fast safe
 \p{VertSpace}
 
 XDIGIT: Hexadecimal digits

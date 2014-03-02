@@ -25,17 +25,6 @@
 	\p{VertSpace}
 */
 /*** GENERATED CODE ***/
-#define is_LNBREAK(s,is_utf8)                                               \
-( ( 0x0A <= NATIVE_TO_LATIN1(((U8*)s)[0]) && NATIVE_TO_LATIN1(((U8*)s)[0]) <= 0x0C ) ? 1\
-: ( 0x0D == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ?                               \
-    ( ( 0x0A == NATIVE_TO_LATIN1(((U8*)s)[1]) ) ? 2 : 1 )                   \
-: ( is_utf8 ) ?                                                             \
-    ( ( 0xC2 == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ?                           \
-	( ( 0x85 == NATIVE_TO_LATIN1(((U8*)s)[1]) ) ? 2 : 0 )               \
-    : ( ( ( 0xE2 == NATIVE_TO_LATIN1(((U8*)s)[0]) ) && ( 0x80 == NATIVE_TO_LATIN1(((U8*)s)[1]) ) ) && ( ( NATIVE_TO_LATIN1(((U8*)s)[2]) & 0xFE ) == 0xA8 ) ) ? 3 : 0 )\
-: ( 0x85 == NATIVE_TO_LATIN1(((U8*)s)[0]) ) )
-
-/*** GENERATED CODE ***/
 #define is_LNBREAK_safe(s,e,is_utf8)                                        \
 ( ((e)-(s) > 2) ?                                                           \
     ( ( 0x0A <= NATIVE_TO_LATIN1(((U8*)s)[0]) && NATIVE_TO_LATIN1(((U8*)s)[0]) <= 0x0C ) ? 1\
@@ -61,15 +50,6 @@
 : 0 )
 
 /*** GENERATED CODE ***/
-#define is_LNBREAK_utf8(s)                                                  \
-( ( 0x0A <= NATIVE_TO_LATIN1(((U8*)s)[0]) && NATIVE_TO_LATIN1(((U8*)s)[0]) <= 0x0C ) ? 1\
-: ( 0x0D == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ?                               \
-    ( ( 0x0A == NATIVE_TO_LATIN1(((U8*)s)[1]) ) ? 2 : 1 )                   \
-: ( 0xC2 == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ?                               \
-    ( ( 0x85 == NATIVE_TO_LATIN1(((U8*)s)[1]) ) ? 2 : 0 )                   \
-: ( ( ( 0xE2 == NATIVE_TO_LATIN1(((U8*)s)[0]) ) && ( 0x80 == NATIVE_TO_LATIN1(((U8*)s)[1]) ) ) && ( ( NATIVE_TO_LATIN1(((U8*)s)[2]) & 0xFE ) == 0xA8 ) ) ? 3 : 0 )
-
-/*** GENERATED CODE ***/
 #define is_LNBREAK_utf8_safe(s,e)                                           \
 ( ((e)-(s) > 2) ?                                                           \
     ( ( 0x0A <= NATIVE_TO_LATIN1(((U8*)s)[0]) && NATIVE_TO_LATIN1(((U8*)s)[0]) <= 0x0C ) ? 1\
@@ -85,13 +65,6 @@
     : ( ( 0xC2 == NATIVE_TO_LATIN1(((U8*)s)[0]) ) && ( 0x85 == NATIVE_TO_LATIN1(((U8*)s)[1]) ) ) ? 2 : 0 )\
 : ((e)-(s) > 0) ?                                                           \
     ( 0x0A <= NATIVE_TO_LATIN1(((U8*)s)[0]) && NATIVE_TO_LATIN1(((U8*)s)[0]) <= 0x0D )\
-: 0 )
-
-/*** GENERATED CODE ***/
-#define is_LNBREAK_latin1(s)                                                \
-( ( ( 0x0A <= NATIVE_TO_LATIN1(((U8*)s)[0]) && NATIVE_TO_LATIN1(((U8*)s)[0]) <= 0x0C ) || 0x85 == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ? 1\
-: ( 0x0D == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ?                               \
-    ( ( 0x0A == NATIVE_TO_LATIN1(((U8*)s)[1]) ) ? 2 : 1 )                   \
 : 0 )
 
 /*** GENERATED CODE ***/
@@ -207,16 +180,6 @@
 : 0 )
 
 /*** GENERATED CODE ***/
-#define is_HORIZWS_cp(cp)                                                   \
-( 0x09 == NATIVE_TO_UNI(cp) || ( 0x09 < NATIVE_TO_UNI(cp) &&                \
-( 0x20 == NATIVE_TO_UNI(cp) || ( 0x20 < NATIVE_TO_UNI(cp) &&                \
-( 0xA0 == NATIVE_TO_UNI(cp) || ( 0xA0 < NATIVE_TO_UNI(cp) &&                \
-( 0x1680 == NATIVE_TO_UNI(cp) || ( 0x1680 < NATIVE_TO_UNI(cp) &&            \
-( ( 0x2000 <= NATIVE_TO_UNI(cp) && NATIVE_TO_UNI(cp) <= 0x200A ) || ( 0x200A < NATIVE_TO_UNI(cp) &&\
-( 0x202F == NATIVE_TO_UNI(cp) || ( 0x202F < NATIVE_TO_UNI(cp) &&            \
-( 0x205F == NATIVE_TO_UNI(cp) || 0x3000 == NATIVE_TO_UNI(cp) ) ) ) ) ) ) ) ) ) ) ) ) )
-
-/*** GENERATED CODE ***/
 #define is_HORIZWS_cp_high(cp)                                              \
 ( 0x1680 == NATIVE_TO_UNI(cp) || ( 0x1680 < NATIVE_TO_UNI(cp) &&            \
 ( ( 0x2000 <= NATIVE_TO_UNI(cp) && NATIVE_TO_UNI(cp) <= 0x200A ) || ( 0x200A < NATIVE_TO_UNI(cp) &&\
@@ -285,12 +248,6 @@
 ( ( ((e) - (s)) >= 1 ) ?                                                    \
     ( ( 0x0A <= NATIVE_TO_LATIN1(((U8*)s)[0]) && NATIVE_TO_LATIN1(((U8*)s)[0]) <= 0x0D ) || 0x85 == NATIVE_TO_LATIN1(((U8*)s)[0]) )\
 : 0 )
-
-/*** GENERATED CODE ***/
-#define is_VERTWS_cp(cp)                                                    \
-( ( 0x0A <= NATIVE_TO_UNI(cp) && NATIVE_TO_UNI(cp) <= 0x0D ) || ( 0x0D < NATIVE_TO_UNI(cp) &&\
-( 0x85 == NATIVE_TO_UNI(cp) || ( 0x85 < NATIVE_TO_UNI(cp) &&                \
-( 0x2028 == NATIVE_TO_UNI(cp) || 0x2029 == NATIVE_TO_UNI(cp) ) ) ) ) )
 
 /*** GENERATED CODE ***/
 #define is_VERTWS_cp_high(cp)                                               \
