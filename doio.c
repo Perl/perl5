@@ -827,17 +827,23 @@ Perl_nextargv(pTHX_ GV *gv)
 	return NULL;
     while (av_tindex(GvAV(gv)) >= 0) {
 	STRLEN oldlen;
-        bool success;
 	sv = av_shift(GvAV(gv));
 	SAVEFREESV(sv);
 	SvTAINTED_off(GvSVn(gv)); /* previous tainting irrelevant */
 	sv_setsv(GvSVn(gv),sv);
 	SvSETMAGIC(GvSV(gv));
 	PL_oldname = SvPVx(GvSV(gv), oldlen);
-        success = PL_inplace ? do_open_raw(gv, PL_oldname, oldlen, O_RDONLY, 0)
-            : do_open6(gv, PL_oldname, oldlen, NULL, NULL, 0);
-	if (success) {
-	    if (PL_inplace) {
+        if (LIKELY(!PL_inplace)) {
+            if (do_open6(gv, PL_oldname, oldlen, NULL, NULL, 0)) {
+                return IoIFP(GvIOp(gv));
+            }
+        }
+        else {
+            /* This very long block ends with return IoIFP(GvIOp(gv));
+               Both this block and the block above fall through on open
+               failure to the warning code, and then the while loop above tries
+               the next entry. */
+            if (do_open_raw(gv, PL_oldname, oldlen, O_RDONLY, 0)) {
 		TAINT_PROPER("inplace open");
 		if (oldlen == 1 && *PL_oldname == '-') {
 		    setdefout(gv_fetchpvs("STDOUT", GV_ADD|GV_NOTQUAL,
@@ -968,23 +974,22 @@ Perl_nextargv(pTHX_ GV *gv)
                     /* XXX silently ignore failures */
                     PERL_UNUSED_VAR(rc);
 		}
+                return IoIFP(GvIOp(gv));
 	    }
-	    return IoIFP(GvIOp(gv));
-	}
-	else {
-	    if (ckWARN_d(WARN_INPLACE)) {
-		const int eno = errno;
-		if (PerlLIO_stat(PL_oldname, &PL_statbuf) >= 0
-		    && !S_ISREG(PL_statbuf.st_mode))	
-		{
-		    Perl_warner(aTHX_ packWARN(WARN_INPLACE),
-				"Can't do inplace edit: %s is not a regular file",
-				PL_oldname);
-		}
-		else
-		    Perl_warner(aTHX_ packWARN(WARN_INPLACE), "Can't open %s: %s",
-				PL_oldname, Strerror(eno));
-	    }
+	} /* successful do_open_raw(), PL_inplace non-NULL */
+
+        if (ckWARN_d(WARN_INPLACE)) {
+            const int eno = errno;
+            if (PerlLIO_stat(PL_oldname, &PL_statbuf) >= 0
+                && !S_ISREG(PL_statbuf.st_mode)) {
+                Perl_warner(aTHX_ packWARN(WARN_INPLACE),
+                            "Can't do inplace edit: %s is not a regular file",
+                            PL_oldname);
+            }
+            else {
+                Perl_warner(aTHX_ packWARN(WARN_INPLACE), "Can't open %s: %s",
+                            PL_oldname, Strerror(eno));
+            }
 	}
     }
     if (io && (IoFLAGS(io) & IOf_ARGV))
