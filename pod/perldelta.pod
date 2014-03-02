@@ -256,7 +256,11 @@ L</Platform Support> section, instead.
 
 =item *
 
-XXX
+Where possible, the build now avoids recursive invocations of F<make> when
+building pure-Perl extensions, without removing any parallelism from the
+build. Currently around 80 extensions can be processed directly by the
+F<make_ext.pl> tool, meaning that 80 invocations of F<make> and 160
+invocations of F<miniperl> are no longer made.
 
 =back
 
