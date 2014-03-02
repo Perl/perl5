@@ -4397,14 +4397,7 @@ PP(pp_tms)
 #ifdef HAS_TIMES
     dVAR;
     dSP;
-#ifdef VMS
-    /* time.h uses different name for struct tms, though the same data is
-       returned.
-     */
-    struct tbuffer_t timesbuf;
-#else
     struct tms timesbuf;
-#endif
 
     EXTEND(SP, 4);
     (void)PerlProc_times(&timesbuf);
