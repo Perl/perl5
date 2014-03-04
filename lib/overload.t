@@ -48,7 +48,7 @@ package main;
 
 $| = 1;
 BEGIN { require './test.pl' }
-plan tests => 5193;
+plan tests => 5194;
 
 use Scalar::Util qw(tainted);
 
@@ -2701,6 +2701,35 @@ EOF
 	'overloaded REGEXP'
     );
 }
+
+{
+    # RT #121362
+    # splitting the stash HV while rebuilding the overload cache gave
+    # valgrind errors. This test code triggers such a split. It doesn't
+    # actually test anything; its just there for valgrind to spot
+    # problems.
+
+    package A_121362;
+
+    sub stringify { }
+    use overload '""' => 'stringify';
+
+    package B_121362;
+    our @ISA = qw(A_121362);
+
+    package main;
+
+    my $x = bless { }, 'B_121362';
+
+    for ('a'..'z') {
+        delete $B_121362::{stringify}; # delete cache entry
+        no strict 'refs';
+        *{"B_121362::$_"}  = sub { };  # increase size of %B_121362
+        my $y = $x->{value};       # trigger cache add to %B_121362
+    }
+    pass("RT 121362");
+}
+
 
 { # undefining the overload stash -- KEEP THIS TEST LAST
     package ant;

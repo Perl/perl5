@@ -2612,8 +2612,10 @@ Perl_Gv_AMupdate(pTHX_ HV *stash, bool destructing)
         }
     }
     if (!deref_seen)
-        /* none of @{} etc overloaded; we can do $obj->[N] quicker */
-        aux->xhv_aux_flags |= HvAUXf_NO_DEREF;
+        /* none of @{} etc overloaded; we can do $obj->[N] quicker.
+         * NB - aux var invalid here, HvARRAY() could have been
+         * reallocated since it was assigned to */
+        HvAUX(stash)->xhv_aux_flags |= HvAUXf_NO_DEREF;
 
     if (filled) {
       AMT_AMAGIC_on(&amt);
