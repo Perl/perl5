@@ -51,6 +51,9 @@ my $want = {
 
 my $meta_json = catfile( test_data_directory(), 'META-VR.json' );
 my $meta_yaml = catfile( test_data_directory(), 'META-VR.yml' );
+my $yaml_meta = catfile( test_data_directory(), 'yaml.meta' );
+my $json_meta = catfile( test_data_directory(), 'json.meta' );
+my $bare_yaml_meta = catfile( test_data_directory(), 'bareyaml.meta' );
 
 ### YAML tests
 {
@@ -59,6 +62,22 @@ my $meta_yaml = catfile( test_data_directory(), 'META-VR.yml' );
   is(Parse::CPAN::Meta->yaml_backend(), 'CPAN::Meta::YAML', 'yaml_backend()');
   my $from_yaml = Parse::CPAN::Meta->load_file( $meta_yaml );
   is_deeply($from_yaml, $want, "load from YAML file results in expected data");
+}
+
+{
+  local $ENV{PERL_YAML_BACKEND}; # ensure we get CPAN::META::YAML
+
+  is(Parse::CPAN::Meta->yaml_backend(), 'CPAN::Meta::YAML', 'yaml_backend()');
+  my $from_yaml = Parse::CPAN::Meta->load_file( $yaml_meta );
+  is_deeply($from_yaml, $want, "load from YAML .meta file results in expected data");
+}
+
+{
+  local $ENV{PERL_YAML_BACKEND}; # ensure we get CPAN::META::YAML
+
+  is(Parse::CPAN::Meta->yaml_backend(), 'CPAN::Meta::YAML', 'yaml_backend()');
+  my $from_yaml = Parse::CPAN::Meta->load_file( $bare_yaml_meta );
+  is_deeply($from_yaml, $want, "load from bare YAML .meta file results in expected data");
 }
 
 {
@@ -96,6 +115,15 @@ SKIP: {
   is(Parse::CPAN::Meta->json_backend(), 'JSON::PP', 'json_backend()');
   my $from_json = Parse::CPAN::Meta->load_file( $meta_json );
   is_deeply($from_json, $want, "load from JSON file results in expected data");
+}
+
+{
+  # JSON tests with JSON::PP
+  local $ENV{PERL_JSON_BACKEND}; # ensure we get JSON::PP
+
+  is(Parse::CPAN::Meta->json_backend(), 'JSON::PP', 'json_backend()');
+  my $from_json = Parse::CPAN::Meta->load_file( $json_meta );
+  is_deeply($from_json, $want, "load from JSON .meta file results in expected data");
 }
 
 {

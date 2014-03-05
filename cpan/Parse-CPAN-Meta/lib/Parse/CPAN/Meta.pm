@@ -2,7 +2,7 @@ use 5.008001;
 use strict;
 package Parse::CPAN::Meta;
 # ABSTRACT: Parse META.yml and META.json CPAN metadata files
-our $VERSION = '1.4413'; # VERSION
+our $VERSION = '1.4414'; # VERSION
 
 use Exporter;
 use Carp 'croak';
@@ -13,15 +13,30 @@ our @EXPORT_OK = qw/Load LoadFile/;
 sub load_file {
   my ($class, $filename) = @_;
 
+  my $meta = _slurp($filename);
+
   if ($filename =~ /\.ya?ml$/) {
-    return $class->load_yaml_string(_slurp($filename));
+    return $class->load_yaml_string($meta);
   }
-
-  if ($filename =~ /\.json$/) {
-    return $class->load_json_string(_slurp($filename));
+  elsif ($filename =~ /\.json$/) {
+    return $class->load_json_string($meta);
   }
+  else {
+    $class->load_string($meta); # try to detect yaml/json
+  }
+}
 
-  croak("file type cannot be determined by filename");
+sub load_string {
+  my ($class, $string) = @_;
+  if ( $string =~ /^---/ ) { # looks like YAML
+    return $class->load_yaml_string($string);
+  }
+  elsif ( $string =~ /^\s*\{/ ) { # looks like JSON
+    return $class->load_json_string($string);
+  }
+  else { # maybe doc-marker-free YAML
+    return $class->load_yaml_string($string);
+  }
 }
 
 sub load_yaml_string {
@@ -121,7 +136,7 @@ Parse::CPAN::Meta - Parse META.yml and META.json CPAN metadata files
 
 =head1 VERSION
 
-version 1.4413
+version 1.4414
 
 =head1 SYNOPSIS
 
@@ -200,6 +215,13 @@ C<load_yaml_string>.
 This method deserializes the given string of JSON and the result.  
 If the source was UTF-8 encoded, the string must be decoded before calling
 C<load_json_string>.
+
+=head2 load_string
+
+  my $metadata_structure = Parse::CPAN::Meta->load_string($some_string);
+
+If you don't know whether a string contains YAML or JSON data, this method
+will use some heuristics and guess.  If it can't tell, it assumes YAML.
 
 =head2 yaml_backend
 

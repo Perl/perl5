@@ -143,6 +143,14 @@ L<Module::Load> has been upgraded from version 0.30 to 0.32.
 
 Fix tests to support statically built perls.
 
+=item *
+
+L<Parse::CPAN::Meta> has been upgraded from version 1.4413 to 1.4414.
+
+Added C<load_string>, which uses heuristics to guess YAML/JSON content.
+C<load_file> will now attempt to detect YAML/JSON content if the suffix is not
+.json, .yml or .yaml.
+
 =back
 
 =head2 Removed Modules and Pragmata
