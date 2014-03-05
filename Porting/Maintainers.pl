@@ -688,7 +688,7 @@ use File::Glob qw(:case);
     },
 
     'Locale-Codes' => {
-        'DISTRIBUTION' => 'SBECK/Locale-Codes-3.29.tar.gz',
+        'DISTRIBUTION' => 'SBECK/Locale-Codes-3.30.tar.gz',
         'FILES'        => q[cpan/Locale-Codes],
         'EXCLUDED'     => [
             qw( README.first

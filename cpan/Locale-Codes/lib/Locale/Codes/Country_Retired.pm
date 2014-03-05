@@ -3,7 +3,7 @@ Locale::Codes::Country_Retired;
 
 # This file was automatically generated.  Any changes to this file will
 # be lost the next time 'deprecate_codes' is run.
-#    Generated on: Fri Jan 24 09:18:46 EST 2014
+#    Generated on: Tue Mar  4 13:19:40 EST 2014
 
 use strict;
 require 5.006;
@@ -11,7 +11,7 @@ use warnings;
 use utf8;
 
 our($VERSION);
-$VERSION='3.29';
+$VERSION='3.30';
 
 $Locale::Codes::Retired{'country'}{'alpha-2'}{'code'} = {
    q(an) => q(Netherlands Antilles),
@@ -300,6 +300,9 @@ $Locale::Codes::Retired{'country'}{'dom'}{'code'} = {
    q(ZA) => q(South Africa),
    q(ZM) => q(Zambia),
    q(ZW) => q(Zimbabwe),
+   q(ac) => q(Ascension Island),
+   q(eu) => q(European Union),
+   q(uk) => q(United Kingdom),
 };
 
 $Locale::Codes::Retired{'country'}{'numeric'}{'code'} = {
@@ -440,9 +443,11 @@ $Locale::Codes::Retired{'country'}{'alpha-3'}{'name'} = {
 };
 
 $Locale::Codes::Retired{'country'}{'dom'}{'name'} = {
+   q(ascension island) => [ q(ac), q(Ascension Island) ],
    q(bonaire, saint eustatius and saba) => [ q(bq), q(Bonaire, Saint Eustatius and Saba) ],
    q(bonaire, sint eustatius and saba) => [ q(BQ), q(Bonaire, Sint Eustatius and Saba) ],
    q(congo, the democratic republic of the) => [ q(cd), q(Congo, The Democratic Republic of the) ],
+   q(european union) => [ q(eu), q(European Union) ],
    q(falkland islands (malvinas)) => [ q(fk), q(Falkland Islands (Malvinas)) ],
    q(france, metropolitan) => [ q(FX), q(France, Metropolitan) ],
    q(holy see (vatican city state)) => [ q(va), q(Holy See (Vatican City State)) ],

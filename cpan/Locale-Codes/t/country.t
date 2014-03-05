@@ -111,6 +111,20 @@ gb
    ~
    NewName
 
+us
+   ~
+   United States
+
+rename_country
+us
+The United States
+   ~
+   1
+
+us
+   ~
+   The United States
+
 ###################################
 # Test add_country
 

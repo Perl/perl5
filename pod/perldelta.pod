@@ -139,6 +139,12 @@ regression in setting host name to verify SSL.
 
 =item *
 
+L<Locale::Codes> has been upgraded from version 3.29 to 3.30.
+
+Fixed a problem that was preventing rename_* functions to work.  [cpan #92680]
+
+=item *
+
 L<Module::Load> has been upgraded from version 0.30 to 0.32.
 
 Fix tests to support statically built perls.

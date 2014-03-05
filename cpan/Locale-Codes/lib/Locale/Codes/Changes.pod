@@ -28,9 +28,28 @@ codes, I will add them to the module and release a new version.
 
 =head1 VERSION 3.31  (planned 2014-06-01; sbeck)
 
-=head1 VERSION 3.30  (planned 2014-03-01; sbeck)
+=head1 VERSION 3.30  (2014-03-04; sbeck)
+
+NEW CODE(s)
+
+=over 4
+
+=item B<alias_code remove date set>
+
+The alias_code function exists for backward compatibility.  It has been
+deprecated since version 3.20 when it was replaced by rename_country_code.
+The alias_code function will be removed in the December 2014 release.
+
+=item B<Bug fixes>
+
+Fixed a problem that was preventing rename_* functions to not work.
+RT 92680.
+
+=back
 
 =head1 VERSION 3.29  (2014-01-27; sbeck)
+
+NEW CODE(s)
 
 =over 4
 

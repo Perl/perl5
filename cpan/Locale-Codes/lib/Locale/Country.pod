@@ -124,8 +124,8 @@ the following two are identical:
 
 and the latter should be used for consistency.
 
-The alias_code function is deprecated and will be removed at some point
-in the future.
+The alias_code function is deprecated and will be removed in the December
+2014 release.
 
 B<Note:> this function was previously called _alias_code, but the
 leading underscore has been dropped. The old name was supported for

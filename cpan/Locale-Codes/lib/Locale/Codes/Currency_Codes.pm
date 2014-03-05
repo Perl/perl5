@@ -2,8 +2,8 @@ package #
 Locale::Codes::Currency_Codes;
 
 # This file was automatically generated.  Any changes to this file will
-# be lost the next time 'get_codes' is run.
-#    Generated on: Thu Jan 23 14:16:40 EST 2014
+# be lost the next time 'harvest_data' is run.
+#    Generated on: Thu Feb 27 15:44:26 EST 2014
 
 use strict;
 require 5.006;
@@ -11,7 +11,7 @@ use warnings;
 use utf8;
 
 our($VERSION);
-$VERSION='3.29';
+$VERSION='3.30';
 
 $Locale::Codes::Data{'currency'}{'id'} = '0178';
 
