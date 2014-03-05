@@ -109,6 +109,24 @@ recursive, but it's recursive on basic blocks, not on tree nodes.
 #define CALL_RPEEP(o) PL_rpeepp(aTHX_ o)
 #define CALL_OPFREEHOOK(o) if (PL_opfreehook) PL_opfreehook(aTHX_ o)
 
+/* remove any leading "empty" ops from the op_next chain whose first
+ * node's address is stored in op_p. Store the updated address of the
+ * first node in op_p.
+ */
+
+STATIC void
+S_prune_chain_head(pTHX_ OP** op_p)
+{
+    while (*op_p
+        && (   (*op_p)->op_type == OP_NULL
+            || (*op_p)->op_type == OP_SCOPE
+            || (*op_p)->op_type == OP_SCALAR
+            || (*op_p)->op_type == OP_LINESEQ)
+    )
+        *op_p = (*op_p)->op_next;
+}
+
+
 /* See the explanatory comments above struct opslab in op.h. */
 
 #ifdef PERL_DEBUG_READONLY_OPS
@@ -3297,6 +3315,7 @@ Perl_newPROG(pTHX_ OP *o)
 	ENTER;
 	CALL_PEEP(PL_eval_start);
 	finalize_optree(PL_eval_root);
+        S_prune_chain_head(aTHX_ &PL_eval_start);
 	LEAVE;
 	PL_savestack_ix = i;
     }
@@ -3341,6 +3360,7 @@ Perl_newPROG(pTHX_ OP *o)
 	PL_main_root->op_next = 0;
 	CALL_PEEP(PL_main_start);
 	finalize_optree(PL_main_root);
+        S_prune_chain_head(aTHX_ &PL_main_start);
 	cv_forget_slab(PL_compcv);
 	PL_compcv = 0;
 
@@ -3647,9 +3667,11 @@ S_gen_constant_list(pTHX_ OP *o)
     if (PL_parser && PL_parser->error_count)
 	return o;		/* Don't attempt to run with errors */
 
-    PL_op = curop = LINKLIST(o);
+    curop = LINKLIST(o);
     o->op_next = 0;
     CALL_PEEP(curop);
+    S_prune_chain_head(aTHX_ &curop);
+    PL_op = curop;
     Perl_pp_pushmark(aTHX);
     CALLRUNOPS(aTHX);
     PL_op = curop;
@@ -4876,6 +4898,7 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg, I32 floor)
 	    /* have to peep the DOs individually as we've removed it from
 	     * the op_next chain */
 	    CALL_PEEP(o);
+            S_prune_chain_head(aTHX_ &(o->op_next));
 	    if (is_compiletime)
 		/* runtime finalizes as part of finalizing whole tree */
 		finalize_optree(o);
@@ -7599,6 +7622,7 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
     CvROOT(cv)->op_next = 0;
     CALL_PEEP(CvSTART(cv));
     finalize_optree(CvROOT(cv));
+    S_prune_chain_head(aTHX_ &CvSTART(cv));
 
     /* now that optimizer has done its work, adjust pad values */
 
@@ -7954,6 +7978,7 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
     CvROOT(cv)->op_next = 0;
     CALL_PEEP(CvSTART(cv));
     finalize_optree(CvROOT(cv));
+    S_prune_chain_head(aTHX_ &CvSTART(cv));
 
     /* now that optimizer has done its work, adjust pad values */
 
@@ -8351,6 +8376,7 @@ Perl_newFORM(pTHX_ I32 floor, OP *o, OP *block)
     CvROOT(cv)->op_next = 0;
     CALL_PEEP(CvSTART(cv));
     finalize_optree(CvROOT(cv));
+    S_prune_chain_head(aTHX_ &CvSTART(cv));
     cv_forget_slab(cv);
 
   finish:
@@ -11149,20 +11175,27 @@ S_inplace_aassign(pTHX_ OP *o) {
     op_null(oleft);
 }
 
+
+
+/* mechanism for deferring recursion in rpeep() */
+
 #define MAX_DEFERRED 4
 
 #define DEFER(o) \
   STMT_START { \
     if (defer_ix == (MAX_DEFERRED-1)) { \
-	CALL_RPEEP(defer_queue[defer_base]); \
+        OP **defer = defer_queue[defer_base]; \
+        CALL_RPEEP(*defer); \
+        S_prune_chain_head(aTHX_ defer); \
 	defer_base = (defer_base + 1) % MAX_DEFERRED; \
 	defer_ix--; \
     } \
-    defer_queue[(defer_base + ++defer_ix) % MAX_DEFERRED] = o; \
+    defer_queue[(defer_base + ++defer_ix) % MAX_DEFERRED] = &(o); \
   } STMT_END
 
 #define IS_AND_OP(o)   (o->op_type == OP_AND)
 #define IS_OR_OP(o)    (o->op_type == OP_OR)
+
 
 STATIC void
 S_null_listop_in_list_context(pTHX_ OP *o)
@@ -11194,7 +11227,7 @@ Perl_rpeep(pTHX_ OP *o)
     dVAR;
     OP* oldop = NULL;
     OP* oldoldop = NULL;
-    OP* defer_queue[MAX_DEFERRED]; /* small queue of deferred branches */
+    OP** defer_queue[MAX_DEFERRED]; /* small queue of deferred branches */
     int defer_base = 0;
     int defer_ix = -1;
 
@@ -11207,8 +11240,12 @@ Perl_rpeep(pTHX_ OP *o)
 	if (o && o->op_opt)
 	    o = NULL;
 	if (!o) {
-	    while (defer_ix >= 0)
-		CALL_RPEEP(defer_queue[(defer_base + defer_ix--) % MAX_DEFERRED]);
+	    while (defer_ix >= 0) {
+                OP **defer =
+                        defer_queue[(defer_base + defer_ix--) % MAX_DEFERRED];
+                CALL_RPEEP(*defer);
+                S_prune_chain_head(aTHX_ defer);
+            }
 	    break;
 	}
 
