@@ -1271,7 +1271,9 @@ S_ssc_and(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
                  || (ANYOF_FLAGS(and_with) & ANYOF_POSIXL))
         {
             /* One or the other of P1, P2 is non-empty. */
-            ANYOF_POSIXL_AND((regnode_charclass_posixl*) and_with, ssc);
+            if (ANYOF_FLAGS(and_with) & ANYOF_POSIXL) {
+                ANYOF_POSIXL_AND((regnode_charclass_posixl*) and_with, ssc);
+            }
             ssc_union(ssc, anded_cp_list, FALSE);
         }
         else { /* P1 = P2 = empty */
@@ -1331,8 +1333,8 @@ S_ssc_or(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
         && ! is_ANYOF_SYNTHETIC(or_with))
     {
         /* We ignore P2, leaving P1 going forward */
-    }
-    else {  /* Not inverted */
+    }   /* else  Not inverted */
+    else if (ANYOF_FLAGS(or_with) & ANYOF_POSIXL) {
         ANYOF_POSIXL_OR((regnode_charclass_posixl*)or_with, ssc);
         if (ANYOF_POSIXL_SSC_TEST_ANY_SET(ssc)) {
             unsigned int i;
