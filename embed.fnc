@@ -2103,7 +2103,7 @@ Es	|void	|ssc_or		|NN const RExC_state_t *pRExC_state \
 				|NN const regnode_charclass *or_with
 Es	|SV*	|get_ANYOF_cp_list_for_ssc                                 \
 				|NN const RExC_state_t *pRExC_state \
-				|NN const regnode_charclass_posixl* const node
+				|NN const regnode_charclass* const node
 Ei	|void	|ssc_intersection|NN regnode_ssc *ssc \
 				|NN SV* const invlist|const bool invert_2nd
 Ei	|void	|ssc_union	|NN regnode_ssc *ssc \

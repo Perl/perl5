@@ -999,7 +999,7 @@ S_ssc_is_cp_posixl_init(pTHX_ const RExC_state_t *pRExC_state,
 
 STATIC SV*
 S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state,
-                               const regnode_charclass_posixl* const node)
+                               const regnode_charclass* const node)
 {
     /* Returns a mortal inversion list defining which code points are matched
      * by 'node', which is of type ANYOF.  Handles complementing the result if
@@ -1153,8 +1153,7 @@ S_ssc_and(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
         }
     }
     else {
-        anded_cp_list = get_ANYOF_cp_list_for_ssc(pRExC_state,
-                                     (regnode_charclass_posixl*) and_with);
+        anded_cp_list = get_ANYOF_cp_list_for_ssc(pRExC_state, and_with);
         anded_flags = ANYOF_FLAGS(and_with) & ANYOF_COMMON_FLAGS;
     }
 
@@ -1304,8 +1303,7 @@ S_ssc_or(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
         ored_flags = ANYOF_FLAGS(or_with);
     }
     else {
-        ored_cp_list = get_ANYOF_cp_list_for_ssc(pRExC_state,
-                                     (regnode_charclass_posixl*) or_with);
+        ored_cp_list = get_ANYOF_cp_list_for_ssc(pRExC_state, or_with);
         ored_flags = ANYOF_FLAGS(or_with) & ANYOF_COMMON_FLAGS;
     }
 
