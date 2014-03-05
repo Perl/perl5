@@ -15,7 +15,7 @@ my %distmeta = (
   license  => [ 'perl_5' ],
   'meta-spec' => {
     version => '2',
-    url     => 'http://search.cpan.org/perldoc?CPAN::Meta::Spec',
+    url     => 'https://metacpan.org/pod/CPAN::Meta::Spec',
   },
   dynamic_config => 1,
   generated_by   => 'Module::Build version 0.36',

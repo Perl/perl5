@@ -126,6 +126,12 @@ overrides. [perl #121196]
 
 =item *
 
+L<CPAN::Meta> has been upgraded from version 2.133380 to 2.140630.
+
+Added a C<load_string()> method that guesses whether the string is YAML or JSON.
+
+=item *
+
 L<HTTP::Tiny> has been upgraded from version 0.042 to 0.043.
 
 No longer sends absolute request URI when tunneling SSL via proxy and fixes

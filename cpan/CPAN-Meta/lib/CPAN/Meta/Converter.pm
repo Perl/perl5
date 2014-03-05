@@ -2,8 +2,25 @@ use 5.006;
 use strict;
 use warnings;
 package CPAN::Meta::Converter;
-our $VERSION = '2.133380'; # VERSION
+our $VERSION = '2.140630'; # VERSION
 
+# =head1 SYNOPSIS
+#
+#   my $struct = decode_json_file('META.json');
+#
+#   my $cmc = CPAN::Meta::Converter->new( $struct );
+#
+#   my $new_struct = $cmc->convert( version => "2" );
+#
+# =head1 DESCRIPTION
+#
+# This module converts CPAN Meta structures from one form to another.  The
+# primary use is to convert older structures to the most modern version of
+# the specification, but other transformations may be implemented in the
+# future as needed.  (E.g. stripping all custom fields or stripping all
+# optional fields.)
+#
+# =cut
 
 use CPAN::Meta::Validator;
 use CPAN::Meta::Requirements;
@@ -28,7 +45,7 @@ sub _dclone {
 }
 
 my %known_specs = (
-    '2'   => 'http://search.cpan.org/perldoc?CPAN::Meta::Spec',
+    '2'   => 'https://metacpan.org/pod/CPAN::Meta::Spec',
     '1.4' => 'http://module-build.sourceforge.net/META-spec-v1.4.html',
     '1.3' => 'http://module-build.sourceforge.net/META-spec-v1.3.html',
     '1.2' => 'http://module-build.sourceforge.net/META-spec-v1.2.html',
@@ -1217,6 +1234,15 @@ my %cleanup = (
 # Code
 #--------------------------------------------------------------------------#
 
+# =method new
+#
+#   my $cmc = CPAN::Meta::Converter->new( $struct );
+#
+# The constructor should be passed a valid metadata structure but invalid
+# structures are accepted.  If no meta-spec version is provided, version 1.0 will
+# be assumed.
+#
+# =cut
 
 sub new {
   my ($class,$data) = @_;
@@ -1251,6 +1277,53 @@ sub _extract_spec_version {
     return "1.2"; # when meta-spec was first defined
 }
 
+# =method convert
+#
+#   my $new_struct = $cmc->convert( version => "2" );
+#
+# Returns a new hash reference with the metadata converted to a different form.
+# C<convert> will die if any conversion/standardization still results in an
+# invalid structure.
+#
+# Valid parameters include:
+#
+# =over
+#
+# =item *
+#
+# C<version> -- Indicates the desired specification version (e.g. "1.0", "1.1" ... "1.4", "2").
+# Defaults to the latest version of the CPAN Meta Spec.
+#
+# =back
+#
+# Conversion proceeds through each version in turn.  For example, a version 1.2
+# structure might be converted to 1.3 then 1.4 then finally to version 2. The
+# conversion process attempts to clean-up simple errors and standardize data.
+# For example, if C<author> is given as a scalar, it will converted to an array
+# reference containing the item. (Converting a structure to its own version will
+# also clean-up and standardize.)
+#
+# When data are cleaned and standardized, missing or invalid fields will be
+# replaced with sensible defaults when possible.  This may be lossy or imprecise.
+# For example, some badly structured META.yml files on CPAN have prerequisite
+# modules listed as both keys and values:
+#
+#   requires => { 'Foo::Bar' => 'Bam::Baz' }
+#
+# These would be split and each converted to a prerequisite with a minimum
+# version of zero.
+#
+# When some mandatory fields are missing or invalid, the conversion will attempt
+# to provide a sensible default or will fill them with a value of 'unknown'.  For
+# example a missing or unrecognized C<license> field will result in a C<license>
+# field of 'unknown'.  Fields that may get an 'unknown' include:
+#
+# =for :list
+# * abstract
+# * author
+# * license
+#
+# =cut
 
 sub convert {
   my ($self, %args) = @_;
@@ -1318,7 +1391,7 @@ CPAN::Meta::Converter - Convert CPAN distribution metadata structures
 
 =head1 VERSION
 
-version 2.133380
+version 2.140630
 
 =head1 SYNOPSIS
 

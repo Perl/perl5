@@ -7,7 +7,7 @@ use 5.006;
 use strict;
 use warnings;
 package CPAN::Meta::Spec;
-our $VERSION = '2.133380'; # VERSION
+our $VERSION = '2.140630'; # VERSION
 
 1;
 
@@ -28,7 +28,7 @@ CPAN::Meta::Spec - specification for CPAN distribution metadata
 
 =head1 VERSION
 
-version 2.133380
+version 2.140630
 
 =head1 SYNOPSIS
 
@@ -82,7 +82,7 @@ version 2.133380
     keywords => [ qw/ toolchain cpan dual-life / ],
     'meta-spec' => {
       version => '2',
-      url     => 'http://search.cpan.org/perldoc?CPAN::Meta::Spec',
+      url     => 'https://metacpan.org/pod/CPAN::Meta::Spec',
     },
     generated_by => 'Module::Build version 0.36',
   };
@@ -395,6 +395,20 @@ This is a I<URL> of the metadata specification document corresponding to
 the given version.  This is strictly for human-consumption and should
 not impact the interpretation of the document.
 
+For the version 2 spec, either of these are recommended:
+
+=over 4
+
+=item *
+
+C<https://metacpan.org/pod/CPAN::Meta::Spec>
+
+=item *
+
+C<http://search.cpan.org/perldoc?CPAN::Meta::Spec>
+
+=back
+
 =back
 
 =head3 name
@@ -408,7 +422,8 @@ Example:
 This field is the name of the distribution.  This is often created by
 taking the "main package" in the distribution and changing C<::> to
 C<->, but the name may be completely unrelated to the packages within
-the distribution.  C.f. L<http://search.cpan.org/dist/libwww-perl/>.
+the distribution.  For example, L<LWP::UserAgent> is distributed as part
+of the distribution name "libwww-perl".
 
 =head3 release_status
 
@@ -662,8 +677,8 @@ Example:
 
 This describes all packages provided by this distribution.  This
 information is used by distribution and automation mechanisms like
-PAUSE, CPAN, and search.cpan.org to build indexes saying in which
-distribution various packages can be found.
+PAUSE, CPAN, metacpan.org and search.cpan.org to build indexes saying in
+which distribution various packages can be found.
 
 The keys of C<provides> are package names that can be found within
 the distribution.  If a package name key is provided, it must
@@ -1090,21 +1105,41 @@ this presents security implications.
 
 =head1 SEE ALSO
 
+=over 4
+
+=item *
+
 CPAN, L<http://www.cpan.org/>
 
-CPAN.pm, L<http://search.cpan.org/dist/CPAN/>
-
-CPANPLUS, L<http://search.cpan.org/dist/CPANPLUS/>
-
-ExtUtils::MakeMaker, L<http://search.cpan.org/dist/ExtUtils-MakeMaker/>
-
-Module::Build, L<http://search.cpan.org/dist/Module-Build/>
-
-Module::Install, L<http://search.cpan.org/dist/Module-Install/>
+=item *
 
 JSON, L<http://json.org/>
 
+=item *
+
 YAML, L<http://www.yaml.org/>
+
+=item *
+
+L<CPAN>
+
+=item *
+
+L<CPANPLUS>
+
+=item *
+
+L<ExtUtils::MakeMaker>
+
+=item *
+
+L<Module::Build>
+
+=item *
+
+L<Module::Install>
+
+=back
 
 =head1 HISTORY
 

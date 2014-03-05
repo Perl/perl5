@@ -67,7 +67,7 @@ my $distmeta = {
   keywords => [ qw/ toolchain cpan dual-life / ],
   'meta-spec' => {
     version => '2',
-    url     => 'http://search.cpan.org/perldoc?CPAN::Meta::Spec',
+    url     => 'https://metacpan.org/pod/CPAN::Meta::Spec',
   },
   generated_by => 'Module::Build version 0.36',
 };
@@ -97,5 +97,12 @@ ok( -f $metayml, "save meta to META.yml with conversion" );
 ok( $loaded = Parse::CPAN::Meta->load_file($metayml), 'load saved file' );
 is( $loaded->{name},     'Module-Build', 'name correct');
 is( $loaded->{requires}{perl}, "5.006", 'prereq correct' );
+
+# file without suffix
+
+ok( $loaded = CPAN::Meta->load_file('t/data-test/META-2.meta'), 'load_file META-2.meta' );
+
+my $string = do { open my $fh, '<', 't/data-test/META-2.meta'; local $/; <$fh> };
+ok( $loaded = CPAN::Meta->load_string($string), 'load META-2.meta from string' );
 
 done_testing;

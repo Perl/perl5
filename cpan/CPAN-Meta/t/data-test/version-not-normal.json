@@ -2,7 +2,7 @@
    "generated_by" : "Module::Build version 0.36",
    "meta-spec" : {
       "version" : "2",
-      "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec"
+      "url" : "https://metacpan.org/pod/CPAN::Meta::Spec"
    },
    "abstract" : "stuff",
    "version" : "0.36",
