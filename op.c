@@ -11453,7 +11453,7 @@ Perl_rpeep(pTHX_ OP *o)
 	case OP_LINESEQ:
 	case OP_SCOPE:
 	nothin:
-	    if (oldop && o->op_next) {
+	    if (oldop) {
 		oldop->op_next = o->op_next;
 		o->op_opt = 0;
 		continue;
