@@ -12074,6 +12074,23 @@ Perl_rpeep(pTHX_ OP *o)
 	    if (OP_GIMME(o,0) == G_VOID) {
 		OP *right = cBINOP->op_first;
 		if (right) {
+                    /*   sassign
+                    *      RIGHT
+                    *      substr
+                    *         pushmark
+                    *         arg1
+                    *         arg2
+                    *         ...
+                    * becomes
+                    *
+                    *  ex-sassign
+                    *     substr
+                    *        pushmark
+                    *        RIGHT
+                    *        arg1
+                    *        arg2
+                    *        ...
+                    */
 		    OP *left = right->op_sibling;
 		    if (left->op_type == OP_SUBSTR
 			 && (left->op_private & 7) < 4) {
@@ -12099,8 +12116,16 @@ Perl_rpeep(pTHX_ OP *o)
 	}
 	    
 	}
-	oldoldop = oldop;
-	oldop = o;
+        /* did we just null the current op? If so, re-process it to handle
+         * eliding "empty" ops from the chain */
+        if (o->op_type == OP_NULL && oldop && oldop->op_next == o) {
+            o->op_opt = 0;
+            o = oldop;
+        }
+        else {
+            oldoldop = oldop;
+            oldop = o;
+        }
     }
     LEAVE;
 }
