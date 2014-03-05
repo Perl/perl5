@@ -11899,11 +11899,25 @@ Perl_rpeep(pTHX_ OP *o)
 	    if (o->op_flags & OPf_SPECIAL) {
                 /* first arg is a code block */
 		OP * const nullop = cLISTOP->op_first->op_sibling;
-                OP * const kid    = cUNOPx(nullop)->op_first;
+                OP * kid          = cUNOPx(nullop)->op_first;
+
                 assert(nullop->op_type == OP_NULL);
 		assert(kid->op_type == OP_SCOPE
 		 || (kid->op_type == OP_NULL && kid->op_targ == OP_LEAVE));
-                DEFER(kLISTOP->op_first);
+                /* since OP_SORT doesn't have a handy op_other-style
+                 * field that can point directly to the start of the code
+                 * block, store it in the otherwise-unused op_next field
+                 * of the top-level OP_NULL. This will be quicker at
+                 * run-time, and it will also allow us to remove leading
+                 * OP_NULLs by just messing with op_nexts without
+                 * altering the basic op_first/op_sibling layout. */
+                kid = kLISTOP->op_first;
+                assert(
+                      (kid->op_type == OP_NULL && kid->op_targ == OP_NEXTSTATE)
+                    || kid->op_type == OP_STUB
+                    || kid->op_type == OP_ENTER);
+                nullop->op_next = kLISTOP->op_next;
+                DEFER(nullop->op_next);
 	    }
 
 	    /* check that RHS of sort is a single plain array */
