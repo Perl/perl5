@@ -44,6 +44,9 @@ if (defined &Win32::IsWinNT && Win32::IsWinNT()) {
         $has_link            = 1;
         $accurate_timestamps = 1;
     }
+    else {
+        $has_link            = 0;
+    }
 }
 
 my $needs_fh_reopen =
