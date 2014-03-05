@@ -1,5 +1,12 @@
 Revision history for Perl extension ExtUtils::ParseXS.
 
+3.24 - Wed Mar  5 18:20:00 CET 2014
+  - Native Android build fixes
+  - More lenient syntax for embedded TYPEMAP blocks in XS:
+    a trailing semicolon will not be required for the block
+    terminator.
+  - Code cleanup.
+
 3.22 - Thu Aug 29 19:30:00 CET 2013
   - Fix parallel testing crashes.
   - Explicitly require new-enough Exporter.

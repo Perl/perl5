@@ -6,7 +6,7 @@ use File::Spec;
 use lib qw( lib );
 use ExtUtils::ParseXS::Constants ();
 
-our $VERSION = '3.23';
+our $VERSION = '3.24';
 
 our (@ISA, @EXPORT_OK);
 @ISA = qw(Exporter);
@@ -125,26 +125,35 @@ Array holding list of directories to be searched for F<typemap> files.
 
 =cut
 
-sub standard_typemap_locations {
-  my $include_ref = shift;
-  my @tm = qw(typemap);
+SCOPE: {
+  my @tm_template;
 
-  my $updir = File::Spec->updir();
-  foreach my $dir (
-      File::Spec->catdir(($updir) x 1),
-      File::Spec->catdir(($updir) x 2),
-      File::Spec->catdir(($updir) x 3),
-      File::Spec->catdir(($updir) x 4),
-  ) {
-    unshift @tm, File::Spec->catfile($dir, 'typemap');
-    unshift @tm, File::Spec->catfile($dir, lib => ExtUtils => 'typemap');
+  sub standard_typemap_locations {
+    my $include_ref = shift;
+
+    if (not @tm_template) {
+      @tm_template = qw(typemap);
+
+      my $updir = File::Spec->updir();
+      foreach my $dir (
+          File::Spec->catdir(($updir) x 1),
+          File::Spec->catdir(($updir) x 2),
+          File::Spec->catdir(($updir) x 3),
+          File::Spec->catdir(($updir) x 4),
+      ) {
+        unshift @tm_template, File::Spec->catfile($dir, 'typemap');
+        unshift @tm_template, File::Spec->catfile($dir, lib => ExtUtils => 'typemap');
+      }
+    }
+
+    my @tm = @tm_template;
+    foreach my $dir (@{ $include_ref}) {
+      my $file = File::Spec->catfile($dir, ExtUtils => 'typemap');
+      unshift @tm, $file if -e $file;
+    }
+    return @tm;
   }
-  foreach my $dir (@{ $include_ref}) {
-    my $file = File::Spec->catfile($dir, ExtUtils => 'typemap');
-    unshift @tm, $file if -e $file;
-  }
-  return @tm;
-}
+} # end SCOPE
 
 =head2 C<trim_whitespace()>
 
@@ -223,7 +232,7 @@ Upon failure, returns C<0>.
 =cut
 
 sub valid_proto_string {
-  my($string) = @_;
+  my ($string) = @_;
 
   if ( $string =~ /^$ExtUtils::ParseXS::Constants::PrototypeRegexp+$/ ) {
     return $string;
@@ -306,7 +315,7 @@ sub map_type {
   my ($self, $type, $varname) = @_;
 
   # C++ has :: in types too so skip this
-  $type =~ tr/:/_/ unless $self->{hiertype};
+  $type =~ tr/:/_/ unless $self->{RetainCplusplusHierarchicalTypes};
   $type =~ s/^array\(([^,]*),(.*)\).*/$1 */s;
   if ($varname) {
     if ($type =~ / \( \s* \* (?= \s* \) ) /xg) {

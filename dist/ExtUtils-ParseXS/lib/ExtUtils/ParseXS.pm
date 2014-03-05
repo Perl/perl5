@@ -11,7 +11,7 @@ use Symbol;
 
 our $VERSION;
 BEGIN {
-  $VERSION = '3.23';
+  $VERSION = '3.24';
 }
 use ExtUtils::ParseXS::Constants $VERSION;
 use ExtUtils::ParseXS::CountLines $VERSION;
@@ -79,12 +79,7 @@ sub process_file {
   # Allow for $package->process_file(%hash), $obj->process_file, and process_file()
   if (@_ % 2) {
     my $invocant = shift;
-    if (ref($invocant)) {
-      $self = $invocant;
-    }
-    else {
-      $self = $invocant->new;
-    }
+    $self = ref($invocant) ? $invocant : $invocant->new;
   }
   else {
     $self = $Singleton;
@@ -123,15 +118,15 @@ sub process_file {
   }
   @{ $self->{XSStack} } = ({type => 'none'});
   $self->{InitFileCode} = [ @ExtUtils::ParseXS::Constants::InitFileCode ];
-  $self->{Overload}     = 0;
-  $self->{errors}       = 0;
+  $self->{Overload}     = 0; # bool
+  $self->{errors}       = 0; # count
   $self->{Fallback}     = '&PL_sv_undef';
 
   # Most of the 1500 lines below uses these globals.  We'll have to
   # clean this up sometime, probably.  For now, we just pull them out
   # of %args.  -Ken
 
-  $self->{hiertype} = $args{hiertype};
+  $self->{RetainCplusplusHierarchicalTypes} = $args{hiertype};
   $self->{WantPrototypes} = $args{prototypes};
   $self->{WantVersionChk} = $args{versioncheck};
   $self->{WantLineNumbers} = $args{linenumbers};
@@ -205,7 +200,7 @@ EOM
   # is a basename'd $args{filename} due to chdir above)
   open($self->{FH}, '<', $self->{filename}) or die "cannot open $self->{filename}: $!\n";
 
-  firstmodule:
+  FIRSTMODULE:
   while (readline($self->{FH})) {
     if (/^=/) {
       my $podstartline = $.;
@@ -227,7 +222,7 @@ EOM
           print("#if 0\n  \"Skipped embedded POD.\"\n#endif\n");
           printf("#line %d \"%s\"\n", $. + 1, escape_file_for_line_directive($self->{filepathname}))
             if $self->{WantLineNumbers};
-          next firstmodule
+          next FIRSTMODULE;
         }
 
       } while (readline($self->{FH}));
@@ -297,14 +292,14 @@ EOM
       $self->{$member} = {};
     }
     $self->{proto_arg} = [];
-    $self->{processing_arg_with_types} = undef;
-    $self->{proto_in_this_xsub}        = undef;
-    $self->{scope_in_this_xsub}        = undef;
-    $self->{interface}                 = undef;
+    $self->{processing_arg_with_types} = 0; # bool
+    $self->{proto_in_this_xsub}        = 0; # counter & bool
+    $self->{scope_in_this_xsub}        = 0; # counter & bool
+    $self->{interface}                 = 0; # bool
     $self->{interface_macro}           = 'XSINTERFACE_FUNC';
     $self->{interface_macro_set}       = 'XSINTERFACE_FUNC_SET';
-    $self->{ProtoThisXSUB}             = $self->{WantPrototypes};
-    $self->{ScopeThisXSUB}             = 0;
+    $self->{ProtoThisXSUB}             = $self->{WantPrototypes}; # states 0 (none), 1 (yes), 2 (empty prototype)
+    $self->{ScopeThisXSUB}             = 0; # bool
 
     my $xsreturn = 0;
 
@@ -363,8 +358,8 @@ EOM
       last;
     }
     $self->{XSStack}->[$XSS_work_idx]{functions}{ $self->{Full_func_name} }++;
-    %{ $self->{XsubAliases} }     = ();
-    %{ $self->{XsubAliasValues} } = ();
+    delete $self->{XsubAliases};
+    delete $self->{XsubAliasValues};
     %{ $self->{Interfaces} }      = ();
     @{ $self->{Attributes} }      = ();
     $self->{DoSetMagic} = 1;
@@ -830,7 +825,7 @@ EOF
       $self->{proto} = qq{, "$self->{proto}"};
     }
 
-    if (%{ $self->{XsubAliases} }) {
+    if ($self->{XsubAliases} and keys %{ $self->{XsubAliases} }) {
       $self->{XsubAliases}->{ $self->{pname} } = 0
         unless defined $self->{XsubAliases}->{ $self->{pname} };
       foreach my $xname (sort keys %{ $self->{XsubAliases} }) {
@@ -931,7 +926,7 @@ EOF
 #
 EOF
 
-  print Q(<<"EOF") if defined $self->{xsubaliases} or defined $self->{interfaces};
+  print Q(<<"EOF") if defined $self->{XsubAliases} or defined $self->{interfaces};
 #    {
 #        CV * cv;
 #
@@ -953,7 +948,7 @@ EOF
 
   print @{ $self->{InitFileCode} };
 
-  print Q(<<"EOF") if defined $self->{xsubaliases} or defined $self->{interfaces};
+  print Q(<<"EOF") if defined $self->{XsubAliases} or defined $self->{interfaces};
 #    }
 EOF
 
@@ -1286,7 +1281,6 @@ sub get_aliases {
     Warn( $self, "Warning: Aliases '$orig_alias' and '$self->{XsubAliasValues}->{$value}' have identical values")
       if $self->{XsubAliasValues}->{$value};
 
-    $self->{xsubaliases} = 1;
     $self->{XsubAliases}->{$alias} = $value;
     $self->{XsubAliasValues}->{$value} = $orig_alias;
   }
@@ -1662,6 +1656,69 @@ sub Q {
   $text;
 }
 
+# Process "MODULE = Foo ..." lines and update global state accordingly
+sub _process_module_xs_line {
+  my ($self, $module, $pkg, $prefix) = @_;
+
+  ($self->{Module_cname} = $module) =~ s/\W/_/g;
+
+  $self->{Package} = defined($pkg) ? $pkg : '';
+  $self->{Prefix}  = quotemeta( defined($prefix) ? $prefix : '' );
+
+  ($self->{Packid} = $self->{Package}) =~ tr/:/_/;
+
+  $self->{Packprefix} = $self->{Package};
+  $self->{Packprefix} .= "::" if $self->{Packprefix} ne "";
+
+  $self->{lastline} = "";
+}
+
+# Skip any embedded POD sections
+sub _maybe_skip_pod {
+  my ($self) = @_;
+
+  while ($self->{lastline} =~ /^=/) {
+    while ($self->{lastline} = readline($self->{FH})) {
+      last if ($self->{lastline} =~ /^=cut\s*$/);
+    }
+    $self->death("Error: Unterminated pod") unless defined $self->{lastline};
+    $self->{lastline} = readline($self->{FH});
+    chomp $self->{lastline};
+    $self->{lastline} =~ s/^\s+$//;
+  }
+}
+
+# This chunk of code strips out (and parses) embedded TYPEMAP blocks
+# which support a HEREdoc-alike block syntax.
+sub _maybe_parse_typemap_block {
+  my ($self) = @_;
+
+  # This is special cased from the usual paragraph-handler logic
+  # due to the HEREdoc-ish syntax.
+  if ($self->{lastline} =~ /^TYPEMAP\s*:\s*<<\s*(?:(["'])(.+?)\1|([^\s'"]+?))\s*;?\s*$/)
+  {
+    my $end_marker = quotemeta(defined($1) ? $2 : $3);
+
+    # Scan until we find $end_marker alone on a line.
+    my @tmaplines;
+    while (1) {
+      $self->{lastline} = readline($self->{FH});
+      $self->death("Error: Unterminated TYPEMAP section") if not defined $self->{lastline};
+      last if $self->{lastline} =~ /^$end_marker\s*$/;
+      push @tmaplines, $self->{lastline};
+    }
+
+    my $tmap = ExtUtils::Typemaps->new(
+      string        => join("", @tmaplines),
+      lineno_offset => 1 + ($self->current_line_number() || 0),
+      fake_filename => $self->{filename},
+    );
+    $self->{typemap}->merge(typemap => $tmap, replace => 1);
+
+    $self->{lastline} = "";
+  }
+}
+
 # Read next xsub into @{ $self->{line} } from ($lastline, readline($self->{FH})).
 sub fetch_para {
   my $self = shift;
@@ -1671,66 +1728,38 @@ sub fetch_para {
     if !defined $self->{lastline} && $self->{XSStack}->[-1]{type} eq 'if';
   @{ $self->{line} } = ();
   @{ $self->{line_no} } = ();
-  return $self->PopFile() if !defined $self->{lastline};
+  return $self->PopFile() if not defined $self->{lastline}; # EOF
 
   if ($self->{lastline} =~
-      /^MODULE\s*=\s*([\w:]+)(?:\s+PACKAGE\s*=\s*([\w:]+))?(?:\s+PREFIX\s*=\s*(\S+))?\s*$/) {
-    my $Module = $1;
-    $self->{Package} = defined($2) ? $2 : ''; # keep -w happy
-    $self->{Prefix}  = defined($3) ? $3 : ''; # keep -w happy
-    $self->{Prefix} = quotemeta $self->{Prefix};
-    ($self->{Module_cname} = $Module) =~ s/\W/_/g;
-    ($self->{Packid} = $self->{Package}) =~ tr/:/_/;
-    $self->{Packprefix} = $self->{Package};
-    $self->{Packprefix} .= "::" if $self->{Packprefix} ne "";
-    $self->{lastline} = "";
+      /^MODULE\s*=\s*([\w:]+)(?:\s+PACKAGE\s*=\s*([\w:]+))?(?:\s+PREFIX\s*=\s*(\S+))?\s*$/)
+  {
+    $self->_process_module_xs_line($1, $2, $3);
   }
 
   for (;;) {
-    # Skip embedded PODs
-    while ($self->{lastline} =~ /^=/) {
-      while ($self->{lastline} = readline($self->{FH})) {
-        last if ($self->{lastline} =~ /^=cut\s*$/);
-      }
-      $self->death("Error: Unterminated pod") unless $self->{lastline};
-      $self->{lastline} = readline($self->{FH});
-      chomp $self->{lastline};
-      $self->{lastline} =~ s/^\s+$//;
-    }
+    $self->_maybe_skip_pod;
 
-    # This chunk of code strips out (and parses) embedded TYPEMAP blocks
-    # which support a HEREdoc-alike block syntax.
-    # This is special cased from the usual paragraph-handler logic
-    # due to the HEREdoc-ish syntax.
-    if ($self->{lastline} =~ /^TYPEMAP\s*:\s*<<\s*(?:(["'])(.+?)\1|([^\s'"]+?))\s*;?\s*$/) {
-      my $end_marker = quotemeta(defined($1) ? $2 : $3);
-      my @tmaplines;
-      while (1) {
-        $self->{lastline} = readline($self->{FH});
-        $self->death("Error: Unterminated typemap") if not defined $self->{lastline};
-        last if $self->{lastline} =~ /^$end_marker\s*$/;
-        push @tmaplines, $self->{lastline};
-      }
+    $self->_maybe_parse_typemap_block;
 
-      my $tmapcode = join "", @tmaplines;
-      my $tmap = ExtUtils::Typemaps->new(
-        string => $tmapcode,
-        lineno_offset => ($self->current_line_number()||0)+1,
-        fake_filename => $self->{filename},
-      );
-      $self->{typemap}->merge(typemap => $tmap, replace => 1);
-
-      $self->{lastline} = "";
-    }
-
-    if ($self->{lastline} !~ /^\s*#/ ||
-    # CPP directives:
-    #    ANSI:    if ifdef ifndef elif else endif define undef
-    #        line error pragma
-    #    gcc:    warning include_next
-    #   obj-c:    import
-    #   others:    ident (gcc notes that some cpps have this one)
-    $self->{lastline} =~ /^#[ \t]*(?:(?:if|ifn?def|elif|else|endif|define|undef|pragma|error|warning|line\s+\d+|ident)\b|(?:include(?:_next)?|import)\s*["<].*[>"])/) {
+    if ($self->{lastline} !~ /^\s*#/ # not a CPP directive
+        # CPP directives:
+        #    ANSI:    if ifdef ifndef elif else endif define undef
+        #        line error pragma
+        #    gcc:    warning include_next
+        #   obj-c:    import
+        #   others:    ident (gcc notes that some cpps have this one)
+        || $self->{lastline} =~ /^\#[ \t]*
+                                  (?:
+                                        (?:if|ifn?def|elif|else|endif|
+                                           define|undef|pragma|error|
+                                           warning|line\s+\d+|ident)
+                                        \b
+                                      | (?:include(?:_next)?|import)
+                                        \s* ["<] .* [>"]
+                                 )
+                                /x
+    )
+    {
       last if $self->{lastline} =~ /^\S/ && @{ $self->{line} } && $self->{line}->[-1] eq "";
       push(@{ $self->{line} }, $self->{lastline});
       push(@{ $self->{line_no} }, $self->{lastline_no});
@@ -1746,27 +1775,27 @@ sub fetch_para {
     chomp $self->{lastline};
     $self->{lastline} =~ s/^\s+$//;
   }
-  pop(@{ $self->{line} }), pop(@{ $self->{line_no} }) while @{ $self->{line} } && $self->{line}->[-1] eq "";
-  1;
+
+  # Nuke trailing "line" entries until there's one that's not empty
+  pop(@{ $self->{line} }), pop(@{ $self->{line_no} })
+    while @{ $self->{line} } && $self->{line}->[-1] eq "";
+
+  return 1;
 }
 
 sub output_init {
   my $self = shift;
   my $argsref = shift;
 
-  my ($type, $num, $var, $init, $printed_name) = (
-    $argsref->{type},
-    $argsref->{num},
-    $argsref->{var},
-    $argsref->{init},
-    $argsref->{printed_name}
-  );
+  my ($type, $num, $var, $init, $printed_name)
+    = @{$argsref}{qw(type num var init printed_name)};
+
   # local assign for efficiently passing in to eval_input_typemap_code
   local $argsref->{arg} = $num
                           ? "ST(" . ($num-1) . ")"
                           : "/* not a parameter */";
 
-  if (  $init =~ /^=/  ) {
+  if ( $init =~ /^=/ ) {
     if ($printed_name) {
       $self->eval_input_typemap_code(qq/print " $init\\n"/, $argsref);
     }
@@ -1800,21 +1829,19 @@ sub generate_init {
   my $self = shift;
   my $argsref = shift;
 
-  my ($type, $num, $var, $printed_name) = (
-    $argsref->{type},
-    $argsref->{num},
-    $argsref->{var},
-    $argsref->{printed_name},
-  );
+  my ($type, $num, $var, $printed_name)
+    = @{$argsref}{qw(type num var printed_name)};
 
-  my $arg = "ST(" . ($num - 1) . ")";
   my $argoff = $num - 1;
+  my $arg = "ST($argoff)";
 
   my $typemaps = $self->{typemap};
 
   $type = ExtUtils::Typemaps::tidy_type($type);
-  $self->report_typemap_failure($typemaps, $type), return
-    unless $typemaps->get_typemap(ctype => $type);
+  if (not $typemaps->get_typemap(ctype => $type)) {
+    $self->report_typemap_failure($typemaps, $type);
+    return;
+  }
 
   (my $ntype = $type) =~ s/\s*\*/Ptr/g;
   (my $subtype = $ntype) =~ s/(?:Array)?(?:Ptr)?$//;
@@ -1829,21 +1856,29 @@ sub generate_init {
       if defined $self->{defaults}->{$var};
     return;
   }
-  $type =~ tr/:/_/ unless $self->{hiertype};
+  $type =~ tr/:/_/ unless $self->{RetainCplusplusHierarchicalTypes};
 
   my $inputmap = $typemaps->get_inputmap(xstype => $xstype);
-  $self->blurt("Error: No INPUT definition for type '$type', typekind '" . $type->xstype . "' found"), return
-    unless defined $inputmap;
+  if (not defined $inputmap) {
+    $self->blurt("Error: No INPUT definition for type '$type', typekind '" . $type->xstype . "' found");
+    return;
+  }
 
   my $expr = $inputmap->cleaned_code;
   # Note: This gruesome bit either needs heavy rethinking or documentation. I vote for the former. --Steffen
   if ($expr =~ /DO_ARRAY_ELEM/) {
     my $subtypemap  = $typemaps->get_typemap(ctype => $subtype);
-    $self->report_typemap_failure($typemaps, $subtype), return
-      if not $subtypemap;
+    if (not $subtypemap) {
+      $self->report_typemap_failure($typemaps, $subtype);
+      return;
+    }
+
     my $subinputmap = $typemaps->get_inputmap(xstype => $subtypemap->xstype);
-    $self->blurt("Error: No INPUT definition for type '$subtype', typekind '" . $subtypemap->xstype . "' found"), return
-      unless $subinputmap;
+    if (not $subinputmap) {
+      $self->blurt("Error: No INPUT definition for type '$subtype', typekind '" . $subtypemap->xstype . "' found");
+      return;
+    }
+
     my $subexpr = $subinputmap->cleaned_code;
     $subexpr =~ s/\$type/\$subtype/g;
     $subexpr =~ s/ntype/subtype/g;
@@ -1910,13 +1945,9 @@ sub generate_init {
 sub generate_output {
   my $self = shift;
   my $argsref = shift;
-  my ($type, $num, $var, $do_setmagic, $do_push) = (
-    $argsref->{type},
-    $argsref->{num},
-    $argsref->{var},
-    $argsref->{do_setmagic},
-    $argsref->{do_push}
-  );
+  my ($type, $num, $var, $do_setmagic, $do_push)
+    = @{$argsref}{qw(type num var do_setmagic do_push)};
+
   my $arg = "ST(" . ($num - ($num != 0)) . ")";
 
   my $typemaps = $self->{typemap};
@@ -1931,11 +1962,17 @@ sub generate_output {
   }
   else {
     my $typemap = $typemaps->get_typemap(ctype => $type);
-    $self->report_typemap_failure($typemaps, $type), return
-      if not $typemap;
+    if (not $typemap) {
+      $self->report_typemap_failure($typemaps, $type);
+      return;
+    }
+
     my $outputmap = $typemaps->get_outputmap(xstype => $typemap->xstype);
-    $self->blurt("Error: No OUTPUT definition for type '$type', typekind '" . $typemap->xstype . "' found"), return
-      unless $outputmap;
+    if (not $outputmap) {
+      $self->blurt("Error: No OUTPUT definition for type '$type', typekind '" . $typemap->xstype . "' found");
+      return;
+    }
+
     (my $ntype = $type) =~ s/\s*\*/Ptr/g;
     $ntype =~ s/\(\)//g;
     (my $subtype = $ntype) =~ s/(?:Array)?(?:Ptr)?$//;
@@ -1944,11 +1981,17 @@ sub generate_output {
     my $expr = $outputmap->cleaned_code;
     if ($expr =~ /DO_ARRAY_ELEM/) {
       my $subtypemap = $typemaps->get_typemap(ctype => $subtype);
-      $self->report_typemap_failure($typemaps, $subtype), return
-        if not $subtypemap;
+      if (not $subtypemap) {
+        $self->report_typemap_failure($typemaps, $subtype);
+        return;
+      }
+
       my $suboutputmap = $typemaps->get_outputmap(xstype => $subtypemap->xstype);
-      $self->blurt("Error: No OUTPUT definition for type '$subtype', typekind '" . $subtypemap->xstype . "' found"), return
-        unless $suboutputmap;
+      if (not $suboutputmap) {
+        $self->blurt("Error: No OUTPUT definition for type '$subtype', typekind '" . $subtypemap->xstype . "' found");
+        return;
+      }
+
       my $subexpr = $suboutputmap->cleaned_code;
       $subexpr =~ s/ntype/subtype/g;
       $subexpr =~ s/\$arg/ST(ix_$var)/g;

@@ -15,7 +15,6 @@ ExtUtils::ParseXS - converts Perl XS code into C code
                       typemap => 'path/to/typemap',
                       hiertype => 1,
                       except => 1,
-                      prototypes => 1,
                       versioncheck => 1,
                       linenumbers => 1,
                       optimize => 1,
@@ -160,7 +159,7 @@ Steffen Mueller, <smueller@cpan.org>
 
 =head1 COPYRIGHT
 
-Copyright 2002-2013 by Ken Williams, David Golden and other contributors.  All
+Copyright 2002-2014 by Ken Williams, David Golden and other contributors.  All
 rights reserved.
 
 This library is free software; you can redistribute it and/or
