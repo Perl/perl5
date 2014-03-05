@@ -9962,9 +9962,12 @@ Perl_ck_sort(pTHX_ OP *o)
     if (o->op_flags & OPf_STACKED)
 	simplify_sort(o);
     firstkid = cLISTOPo->op_first->op_sibling;		/* get past pushmark */
+
     if ((stacked = o->op_flags & OPf_STACKED)) {	/* may have been cleared */
 	OP *kid = cUNOPx(firstkid)->op_first;		/* get past null */
 
+        /* if the first arg is a code block, process it and mark sort as
+         * OPf_SPECIAL */
 	if (kid->op_type == OP_SCOPE || kid->op_type == OP_LEAVE) {
 	    LINKLIST(kid);
 	    if (kid->op_type == OP_LEAVE)
@@ -9990,6 +9993,16 @@ Perl_ck_sort(pTHX_ OP *o)
 
     return o;
 }
+
+/* for sort { X } ..., where X is one of
+ *   $a <=> $b, $b <= $a, $a cmp $b, $b cmp $a
+ * elide the second child of the sort (the one containing X),
+ * and set these flags as appropriate
+	OPpSORT_NUMERIC;
+	OPpSORT_INTEGER;
+	OPpSORT_DESCEND;
+ * Also, check and warn on lexical $a, $b.
+ */
 
 STATIC void
 S_simplify_sort(pTHX_ OP *o)
@@ -11883,12 +11896,14 @@ Perl_rpeep(pTHX_ OP *o)
 	case OP_SORT: {
 	    OP *oright;
 
-	    if (o->op_flags & OPf_STACKED) {
-		OP * const kid =
-		    cUNOPx(cLISTOP->op_first->op_sibling)->op_first;
-		if (kid->op_type == OP_SCOPE
-		 || (kid->op_type == OP_NULL && kid->op_targ == OP_LEAVE))
-		    DEFER(kLISTOP->op_first);
+	    if (o->op_flags & OPf_SPECIAL) {
+                /* first arg is a code block */
+		OP * const nullop = cLISTOP->op_first->op_sibling;
+                OP * const kid    = cUNOPx(nullop)->op_first;
+                assert(nullop->op_type == OP_NULL);
+		assert(kid->op_type == OP_SCOPE
+		 || (kid->op_type == OP_NULL && kid->op_targ == OP_LEAVE));
+                DEFER(kLISTOP->op_first);
 	    }
 
 	    /* check that RHS of sort is a single plain array */
