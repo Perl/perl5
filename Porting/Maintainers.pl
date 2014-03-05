@@ -484,6 +484,8 @@ use File::Glob qw(:case);
             'PATCHING',
             'README.packaging',
         ],
+        # Needs sending upstream:
+        'CUSTOMIZED'   => ['t/metafile_data.t'],
     },
 
     'ExtUtils::Manifest' => {
@@ -806,8 +808,12 @@ use File::Glob qw(:case);
             qr{^contrib/},
             qr{^inc},
         ],
-        # Generated file, not part of the CPAN distro:
-        'CUSTOMIZED' => ['lib/Module/Build/ConfigData.pm'],
+        'CUSTOMIZED' => [
+            # Generated file, not part of the CPAN distro:
+            'lib/Module/Build/ConfigData.pm',
+            # Needs sending upstream:
+            'lib/Module/Build/Base.pm'
+        ],
         'DEPRECATED' => '5.019000',
     },
 

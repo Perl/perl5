@@ -711,7 +711,7 @@ my $new_mm = sub {
 
         generated_by => "ExtUtils::MakeMaker version 6.5707, CPAN::Meta::Converter version 2.110580",
         'meta-spec'  => {
-            url         => 'http://search.cpan.org/perldoc?CPAN::Meta::Spec',
+            url         => 'https://metacpan.org/pod/CPAN::Meta::Spec',
             version     => 2,
         },
     };
