@@ -5,7 +5,7 @@ use 5.008;
 use strict;
 use warnings;
 
-our $VERSION = '1.92';
+our $VERSION = '1.93';
 my $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -135,6 +135,16 @@ threads - Perl interpreter-based threads
 =head1 VERSION
 
 This document describes threads version 1.92
+
+=head1 WARNING
+
+The "interpreter-based threads" provided by Perl are not the fast, lightweight
+system for multitasking that one might expect or hope for.  Threads are
+implemented in a way that make them easy to misuse.  Few people know how to
+use them correctly or will be able to provide help.
+
+The use of interpreter-based threads in perl is officially
+L<discouraged|perlpolicy/discouraged>.
 
 =head1 SYNOPSIS
 
