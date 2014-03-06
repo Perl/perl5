@@ -11884,6 +11884,11 @@ Perl_rpeep(pTHX_ OP *o)
 	    DEFER(cLOOP->op_lastop);
 	    break;
 
+        case OP_ENTERTRY:
+	    assert(cLOGOPo->op_other->op_type == OP_LEAVETRY);
+	    DEFER(cLOGOPo->op_other);
+	    break;
+
 	case OP_SUBST:
 	    assert(!(cPMOP->op_pmflags & PMf_ONCE));
 	    while (cPMOP->op_pmstashstartu.op_pmreplstart &&
