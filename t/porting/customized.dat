@@ -1,6 +1,4 @@
 Digest::MD5 cpan/Digest-MD5/t/files.t bdbe05b705d9da305fedce7a9f4b6ba63250c7cf
-ExtUtils::MakeMaker cpan/ExtUtils-MakeMaker/t/metafile_data.t f7b1c333830449de89da5cb7e891778b90ea8fb0
-Module::Build cpan/Module-Build/lib/Module/Build/Base.pm 5d9444ab1b651f353430edbf549ea3ca3532c57a
 Module::Build cpan/Module-Build/lib/Module/Build/ConfigData.pm 85eb9656e68d1f256737dc52d86b5d0fed28f832
 PerlIO::via::QuotedPrint cpan/PerlIO-via-QuotedPrint/t/QuotedPrint.t ca39f0146e89de02c746e199c45dcb3e5edad691
 Text::Balanced cpan/Text-Balanced/t/01_compile.t 1598cf491a48fa546260a2ec41142abe84da533d
