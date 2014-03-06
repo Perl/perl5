@@ -2,7 +2,7 @@ use 5.006;
 use strict;
 use warnings;
 package CPAN::Meta::Validator;
-our $VERSION = '2.140630'; # VERSION
+our $VERSION = '2.140640'; # VERSION
 
 # =head1 SYNOPSIS
 #
@@ -997,7 +997,7 @@ CPAN::Meta::Validator - validate CPAN distribution metadata structures
 
 =head1 VERSION
 
-version 2.140630
+version 2.140640
 
 =head1 SYNOPSIS
 

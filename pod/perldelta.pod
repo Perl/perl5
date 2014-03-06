@@ -126,7 +126,7 @@ overrides. [perl #121196]
 
 =item *
 
-L<CPAN::Meta> has been upgraded from version 2.133380 to 2.140630.
+L<CPAN::Meta> has been upgraded from version 2.133380 to 2.140640.
 
 Added a C<load_string()> method that guesses whether the string is YAML or JSON.
 

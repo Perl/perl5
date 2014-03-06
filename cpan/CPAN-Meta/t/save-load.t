@@ -67,7 +67,7 @@ my $distmeta = {
   keywords => [ qw/ toolchain cpan dual-life / ],
   'meta-spec' => {
     version => '2',
-    url     => 'https://metacpan.org/pod/CPAN::Meta::Spec',
+    url     => 'http://search.cpan.org/perldoc?CPAN::Meta::Spec',
   },
   generated_by => 'Module::Build version 0.36',
 };

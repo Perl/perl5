@@ -2,7 +2,7 @@ use 5.006;
 use strict;
 use warnings;
 package CPAN::Meta::Converter;
-our $VERSION = '2.140630'; # VERSION
+our $VERSION = '2.140640'; # VERSION
 
 # =head1 SYNOPSIS
 #
@@ -45,7 +45,7 @@ sub _dclone {
 }
 
 my %known_specs = (
-    '2'   => 'https://metacpan.org/pod/CPAN::Meta::Spec',
+    '2'   => 'http://search.cpan.org/perldoc?CPAN::Meta::Spec',
     '1.4' => 'http://module-build.sourceforge.net/META-spec-v1.4.html',
     '1.3' => 'http://module-build.sourceforge.net/META-spec-v1.3.html',
     '1.2' => 'http://module-build.sourceforge.net/META-spec-v1.2.html',
@@ -1391,7 +1391,7 @@ CPAN::Meta::Converter - Convert CPAN distribution metadata structures
 
 =head1 VERSION
 
-version 2.140630
+version 2.140640
 
 =head1 SYNOPSIS
 
