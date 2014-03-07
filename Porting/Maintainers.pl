@@ -125,7 +125,7 @@ use File::Glob qw(:case);
     },
 
     'Attribute::Handlers' => {
-        'DISTRIBUTION' => 'SMUELLER/Attribute-Handlers-0.93.tar.gz',
+        'DISTRIBUTION' => 'SMUELLER/Attribute-Handlers-0.96.tar.gz',
         'FILES'        => q[dist/Attribute-Handlers],
     },
 

@@ -4,7 +4,7 @@ use Carp;
 use warnings;
 use strict;
 use vars qw($VERSION $AUTOLOAD);
-$VERSION = '0.95'; # remember to update version in POD!
+$VERSION = '0.96'; # remember to update version in POD!
 # $DB::single=1;
 
 my %symcache;
@@ -266,7 +266,7 @@ Attribute::Handlers - Simpler definition of attribute handlers
 
 =head1 VERSION
 
-This document describes version 0.95 of Attribute::Handlers.
+This document describes version 0.96 of Attribute::Handlers.
 
 =head1 SYNOPSIS
 
@@ -930,6 +930,6 @@ Bug reports and other feedback are most welcome.
 
 =head1 COPYRIGHT AND LICENSE
 
-         Copyright (c) 2001-2009, Damian Conway. All Rights Reserved.
+         Copyright (c) 2001-2014, Damian Conway. All Rights Reserved.
        This module is free software. It may be used, redistributed
            and/or modified under the same terms as Perl itself.
