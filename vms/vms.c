@@ -8298,6 +8298,7 @@ static char *int_tovmsspec
   int no_type_seen;
   char * v_spec, * r_spec, * d_spec, * n_spec, * e_spec, * vs_spec;
   int sts, v_len, r_len, d_len, n_len, e_len, vs_len;
+  size_t all_nums;
 
   if (vms_debug_fileify) {
       if (path == NULL)
@@ -8703,14 +8704,11 @@ static char *int_tovmsspec
 	*(cp1++) = *(cp2++);
 	break;
     case ';':
-	/* FIXME: This needs fixing as Perl is putting ".dir;" on UNIX filespecs
-	 * which is wrong.  UNIX notation should be ".dir." unless
-	 * the DECC$FILENAME_UNIX_NO_VERSION is enabled.
-	 * changing this behavior could break more things at this time.
-	 * efs character set effectively does not allow "." to be a version
-	 * delimiter as a further complication about changing this.
-	 */
-	if (decc_filename_unix_report != 0) {
+        /* If it doesn't look like the beginning of a version number,
+         * escape it.
+         */
+	all_nums = strspn(cp2+1, "0123456789");
+	if (all_nums > 5 || *(cp2 + all_nums + 1) != '\0') {
 	  *(cp1++) = '^';
 	}
 	*(cp1++) = *(cp2++);

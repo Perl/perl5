@@ -115,6 +115,8 @@ __some_/../../__where_/__over_/__the_.__rainbow_       vmsify  [.__some_.--.__wh
 .../__some_/__where_/__over_/__the_.__rainbow_ vmsify  [...__some_.__where_.__over_]__the_.__rainbow_ ^
 __some_/.../__where_/__over_/__the_.__rainbow_ vmsify  [.__some_...__where_.__over_]__the_.__rainbow_  ^
 /__some_/.../__where_/__over_/__the_.__rainbow_        vmsify  __some_:[...__where_.__over_]__the_.__rainbow_ ^
+__some_/__where_.DIR;1                         vmsify  [.__some_]__where_.DIR;1 ^
+__some_/_;_where_.DIR;1                        vmsify  [.__some_]_^;_where_.DIR;1 ^
 __some_/__where_/...   vmsify  [.__some_.__where_...] ^
 /__where_/...  vmsify  __where_:[...] ^
 .	vmsify	[]	^
