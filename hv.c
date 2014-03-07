@@ -1687,6 +1687,7 @@ Perl_hfree_next_entry(pTHX_ HV *hv, STRLEN *indexp)
                 /* warning: at this point HvARRAY may have been
                  * re-allocated, HvMAX changed etc */
             }
+            iter = HvAUX(hv); /* may have been realloced */
             iter->xhv_riter = -1; 	/* HvRITER(hv) = -1 */
             iter->xhv_eiter = NULL;	/* HvEITER(hv) = NULL */
 #ifdef PERL_HASH_RANDOMIZE_KEYS
@@ -1785,7 +1786,6 @@ Perl_hv_undef_flags(pTHX_ HV *hv, U32 flags)
     }
     hfreeentries(hv);
     if (SvOOK(hv)) {
-      struct xpvhv_aux * const aux = HvAUX(hv);
       struct mro_meta *meta;
       const char *name;
 
@@ -1802,7 +1802,7 @@ Perl_hv_undef_flags(pTHX_ HV *hv, U32 flags)
       /* If this call originated from sv_clear, then we must check for
        * effective names that need freeing, as well as the usual name. */
       name = HvNAME(hv);
-      if (flags & HV_NAME_SETALL ? !!aux->xhv_name_u.xhvnameu_name : !!name) {
+      if (flags & HV_NAME_SETALL ? !!HvAUX(hv)->xhv_name_u.xhvnameu_name : !!name) {
         if (name && PL_stashcache) {
             DEBUG_o(Perl_deb(aTHX_ "hv_undef_flags clearing PL_stashcache for name '%"
                              HEKf"'\n", HvNAME_HEK(hv)));
@@ -1810,7 +1810,7 @@ Perl_hv_undef_flags(pTHX_ HV *hv, U32 flags)
         }
 	hv_name_set(hv, NULL, 0, flags);
       }
-      if((meta = aux->xhv_mro_meta)) {
+      if((meta = HvAUX(hv)->xhv_mro_meta)) {
 	if (meta->mro_linear_all) {
 	    SvREFCNT_dec_NN(meta->mro_linear_all);
 	    /* mro_linear_current is just acting as a shortcut pointer,
@@ -1824,9 +1824,9 @@ Perl_hv_undef_flags(pTHX_ HV *hv, U32 flags)
 	SvREFCNT_dec(meta->isa);
 	SvREFCNT_dec(meta->super);
 	Safefree(meta);
-	aux->xhv_mro_meta = NULL;
+	HvAUX(hv)->xhv_mro_meta = NULL;
       }
-      if (!aux->xhv_name_u.xhvnameu_name && ! aux->xhv_backreferences)
+      if (!HvAUX(hv)->xhv_name_u.xhvnameu_name && ! HvAUX(hv)->xhv_backreferences)
 	SvFLAGS(hv) &= ~SVf_OOK;
     }
     if (!SvOOK(hv)) {
@@ -2009,12 +2009,13 @@ Perl_hv_iterinit(pTHX_ HV *hv)
 	Perl_croak(aTHX_ "Bad hash");
 
     if (SvOOK(hv)) {
-	struct xpvhv_aux * const iter = HvAUX(hv);
+	struct xpvhv_aux * iter = HvAUX(hv);
 	HE * const entry = iter->xhv_eiter; /* HvEITER(hv) */
 	if (entry && HvLAZYDEL(hv)) {	/* was deleted earlier? */
 	    HvLAZYDEL_off(hv);
 	    hv_free_ent(hv, entry);
 	}
+	iter = HvAUX(hv); /* may have been reallocated */
 	iter->xhv_riter = -1; 	/* HvRITER(hv) = -1 */
 	iter->xhv_eiter = NULL; /* HvEITER(hv) = NULL */
 #ifdef PERL_HASH_RANDOMIZE_KEYS
@@ -2146,6 +2147,7 @@ Perl_hv_name_set(pTHX_ HV *hv, const char *name, U32 len, U32 flags)
 		/* The first elem may be null. */
 		if(*name) unshare_hek_or_pvn(*name, 0, 0, 0);
 		Safefree(name);
+                iter = HvAUX(hv); /* may been realloced */
 		spot = &iter->xhv_name_u.xhvnameu_name;
 		iter->xhv_name_count = 0;
 	      }
@@ -2167,6 +2169,7 @@ Perl_hv_name_set(pTHX_ HV *hv, const char *name, U32 len, U32 flags)
 	    }
 	    else if (flags & HV_NAME_SETALL) {
 		unshare_hek_or_pvn(iter->xhv_name_u.xhvnameu_name, 0, 0, 0);
+                iter = HvAUX(hv); /* may been realloced */
 		spot = &iter->xhv_name_u.xhvnameu_name;
 	    }
 	    else {
@@ -2311,6 +2314,7 @@ Perl_hv_ename_delete(pTHX_ HV *hv, const char *name, U32 len, U32 flags)
 	        : (HEK_LEN(*victim) == (I32)len && memEQ(HEK_KEY(*victim), name, len))
 	    ) {
 		unshare_hek_or_pvn(*victim, 0, 0, 0);
+                aux = HvAUX(hv); /* may been realloced */
 		if (count < 0) ++aux->xhv_name_count;
 		else --aux->xhv_name_count;
 		if (
@@ -2463,6 +2467,7 @@ Perl_hv_iternext_flags(pTHX_ HV *hv, I32 flags)
             SvREFCNT_dec(HeVAL(entry));
             Safefree(HeKEY_hek(entry));
             del_HE(entry);
+            iter = HvAUX(hv); /* may been realloced */
             iter->xhv_eiter = NULL; /* HvEITER(hv) = NULL */
 	    HvLAZYDEL_off(hv);
             return NULL;
@@ -2509,6 +2514,7 @@ Perl_hv_iternext_flags(pTHX_ HV *hv, I32 flags)
                              pTHX__FORMAT
                              pTHX__VALUE);
         }
+        iter = HvAUX(hv); /* may been realloced */
         iter->xhv_last_rand = iter->xhv_rand;
     }
 #endif
@@ -2553,6 +2559,7 @@ Perl_hv_iternext_flags(pTHX_ HV *hv, I32 flags)
 	hv_free_ent(hv, oldentry);
     }
 
+    iter = HvAUX(hv); /* may been realloced */
     iter->xhv_eiter = entry; /* HvEITER(hv) = entry */
     return entry;
 }

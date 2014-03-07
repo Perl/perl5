@@ -2263,7 +2263,6 @@ Perl_gv_check(pTHX_ HV *stash)
 {
     dVAR;
     I32 i;
-    struct xpvhv_aux *aux;
 
     PERL_ARGS_ASSERT_GV_CHECK;
 
@@ -2271,12 +2270,11 @@ Perl_gv_check(pTHX_ HV *stash)
 	return;
 
     assert(SvOOK(stash));
-    aux = HvAUX(stash);
 
     for (i = 0; i <= (I32) HvMAX(stash); i++) {
         const HE *entry;
         /* mark stash is being scanned, to avoid recursing */
-        aux->xhv_aux_flags |= HvAUXf_SCAN_STASH;
+        HvAUX(stash)->xhv_aux_flags |= HvAUXf_SCAN_STASH;
 	for (entry = HvARRAY(stash)[i]; entry; entry = HeNEXT(entry)) {
             GV *gv;
             HV *hv;
@@ -2310,7 +2308,7 @@ Perl_gv_check(pTHX_ HV *stash)
                             HEKfARG(GvNAME_HEK(gv)));
 	    }
 	}
-        aux->xhv_aux_flags &= ~HvAUXf_SCAN_STASH;
+        HvAUX(stash)->xhv_aux_flags &= ~HvAUXf_SCAN_STASH;
     }
 }
 
@@ -2493,7 +2491,6 @@ Perl_Gv_AMupdate(pTHX_ HV *stash, bool destructing)
   {
     int filled = 0;
     int i;
-    struct xpvhv_aux *aux;
     bool deref_seen = 0;
 
 
@@ -2527,9 +2524,8 @@ Perl_Gv_AMupdate(pTHX_ HV *stash, bool destructing)
     }
 
     assert(SvOOK(stash));
-    aux = HvAUX(stash);
     /* initially assume the worst */
-    aux->xhv_aux_flags &= ~HvAUXf_NO_DEREF;
+    HvAUX(stash)->xhv_aux_flags &= ~HvAUXf_NO_DEREF;
 
     for (i = 1; i < NofAMmeth; i++) {
 	const char * const cooky = PL_AMG_names[i];
