@@ -529,7 +529,7 @@ use File::Glob qw(:case);
     },
 
     'Filter::Simple' => {
-        'DISTRIBUTION' => 'SMUELLER/Filter-Simple-0.88.tar.gz',
+        'DISTRIBUTION' => 'SMUELLER/Filter-Simple-0.91.tar.gz',
         'FILES'        => q[dist/Filter-Simple],
         'EXCLUDED'     => [
             qr{^demo/}
