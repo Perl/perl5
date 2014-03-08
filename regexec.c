@@ -635,7 +635,7 @@ Perl_re_intuit_start(pTHX_
 {
     dVAR;
     struct regexp *const prog = ReANY(rx);
-    SSize_t start_shift = 0;
+    SSize_t start_shift = prog->check_offset_min;
     /* Should be nonnegative! */
     SSize_t end_shift   = 0;
     /* current lowest pos in string where the regex can start matching */
@@ -805,7 +805,6 @@ Perl_re_intuit_start(pTHX_
 	}
     }
 
-    start_shift = prog->check_offset_min;  /* okay to underestimate on CC */
     end_shift = prog->check_end_shift;
 
 #ifdef DEBUGGING	/* 7/99: reports of failure (with the older version) */
