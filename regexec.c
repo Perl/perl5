@@ -1214,9 +1214,7 @@ Perl_re_intuit_start(pTHX_
 
         s = find_byclass(prog, progi->regstclass, checked_upto, endpos,
                             reginfo);
-	if (s) {
-	    checked_upto = s;
-	} else {
+	if (!s) {
 	    if (endpos == strend) {
 		DEBUG_EXECUTE_r( PerlIO_printf(Perl_debug_log,
 				"  Could not match STCLASS...\n") );
@@ -1280,6 +1278,8 @@ Perl_re_intuit_start(pTHX_
                 (long)(rx_origin + start_shift - strpos)) );
             goto restart;
 	}
+
+        checked_upto = s;
 
 	if (rx_origin != s) {
             DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
