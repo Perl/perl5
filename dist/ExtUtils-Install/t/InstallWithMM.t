@@ -25,7 +25,6 @@ BEGIN {
 }
 
 use MakeMaker::Test::Setup::BFD;
-use IPC::Cmd qw(can_run);
 use File::Find;
 use File::Spec;
 use File::Path;

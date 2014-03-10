@@ -4,8 +4,6 @@ use File::Spec;
 use strict;
 use Config;
 
-use IPC::Cmd qw(can_run);
-
 require Exporter;
 our @ISA = qw(Exporter);
 
@@ -412,6 +410,58 @@ sub slurp {
     close $fh;
 
     return $text;
+}
+
+=item can_run
+
+C<can_run> takes only one argument: the name of a binary you wish
+to locate. C<can_run> works much like the unix binary C<which> or the bash
+command C<type>, which scans through your path, looking for the requested
+binary.
+
+Unlike C<which> and C<type>, this function is platform independent and
+will also work on, for example, Win32.
+
+If called in a scalar context it will return the full path to the binary
+you asked for if it was found, or C<undef> if it was not.
+
+If called in a list context and the global variable C<$INSTANCES> is a true
+value, it will return a list of the full paths to instances
+of the binary where found in C<PATH>, or an empty list if it was not found.
+
+=cut
+
+sub can_run {
+    my $command = shift;
+
+    # a lot of VMS executables have a symbol defined
+    # check those first
+    if ( $^O eq 'VMS' ) {
+        require VMS::DCLsym;
+        my $syms = VMS::DCLsym->new;
+        return $command if scalar $syms->getsym( uc $command );
+    }
+
+    require File::Spec;
+    require ExtUtils::MakeMaker;
+
+    my @possibles;
+
+    if( File::Spec->file_name_is_absolute($command) ) {
+        return MM->maybe_command($command);
+
+    } else {
+        for my $dir (
+            File::Spec->path,
+            File::Spec->curdir
+        ) {
+            next if ! $dir || ! -d $dir;
+            my $abs = File::Spec->catfile( $^O eq 'MSWin32' ? Win32::GetShortPathName( $dir ) : $dir, $command);
+            push @possibles, $abs if $abs = MM->maybe_command($abs);
+        }
+    }
+    return @possibles if wantarray;
+    return shift @possibles;
 }
 
 =back
