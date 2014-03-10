@@ -646,7 +646,6 @@ Perl_re_intuit_start(pTHX_
     bool ml_anch = 0;
     char *other_last = strpos;/* latest pos 'other' substr already checked to */
     char *check_at = NULL;		/* check substr found at this pos */
-    char *checked_upto = NULL;          /* how far into the string we have already checked using find_byclass*/
     const I32 multiline = prog->extflags & RXf_PMf_MULTILINE;
     RXi_GET_DECL(prog,progi);
     regmatch_info reginfo_buf;  /* create some info to pass to find_byclass */
@@ -1203,16 +1202,13 @@ Perl_re_intuit_start(pTHX_
         else 
             endpos= strend;
 		    
-        if (checked_upto < rx_origin)
-           checked_upto = rx_origin;
         DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
             "  looking for class: start_shift: %"IVdf" check_at: %"IVdf
-            " rx_origin: %"IVdf" endpos: %"IVdf" checked_upto: %"IVdf"\n",
+            " rx_origin: %"IVdf" endpos: %"IVdf"\n",
               (IV)start_shift, (IV)(check_at - strbeg),
-              (IV)(rx_origin - strbeg), (IV)(endpos - strbeg),
-              (IV)(checked_upto- strbeg)));
+              (IV)(rx_origin - strbeg), (IV)(endpos - strbeg)));
 
-        s = find_byclass(prog, progi->regstclass, checked_upto, endpos,
+        s = find_byclass(prog, progi->regstclass, rx_origin, endpos,
                             reginfo);
 	if (!s) {
 	    if (endpos == strend) {
@@ -1224,9 +1220,6 @@ Perl_re_intuit_start(pTHX_
                                "  This position contradicts STCLASS...\n") );
             if ((prog->intflags & PREGf_ANCH) && !ml_anch)
 		goto fail;
-	    checked_upto = HOPBACKc(endpos, start_shift);
-	    DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "  start_shift: %"IVdf" check_at: %"IVdf" endpos: %"IVdf" checked_upto: %"IVdf"\n",
-                                      (IV)start_shift, (IV)(check_at - strbeg), (IV)(endpos - strbeg), (IV)(checked_upto- strbeg)));
 
 	    /* Contradict one of substrings */
 	    if (prog->anchored_substr || prog->anchored_utf8) {
@@ -1278,8 +1271,6 @@ Perl_re_intuit_start(pTHX_
                 (long)(rx_origin + start_shift - strpos)) );
             goto restart;
 	}
-
-        checked_upto = s;
 
 	if (rx_origin != s) {
             DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
