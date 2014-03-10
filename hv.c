@@ -1625,8 +1625,10 @@ S_clear_placeholders(pTHX_ HV *hv, U32 items)
 
 		if (--items == 0) {
 		    /* Finished.  */
-		    HvTOTALKEYS(hv) -= (IV)HvPLACEHOLDERS_get(hv);
-		    if (HvUSEDKEYS(hv) == 0)
+		    I32 placeholders = HvPLACEHOLDERS_get(hv);
+		    HvTOTALKEYS(hv) -= (IV)placeholders;
+		    /* HvUSEDKEYS expanded */
+		    if ((HvTOTALKEYS(hv) - placeholders) == 0)
 			HvHASKFLAGS_off(hv);
 		    HvPLACEHOLDERS_set(hv, 0);
 		    return;
