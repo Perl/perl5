@@ -1670,9 +1670,8 @@ reached the end as just described; it can be explicitly reset by calling
 C<keys> or C<values> on the hash or array.  If you add or delete a hash's
 elements while iterating over it, the effect on the iterator is
 unspecified; for example, entries may be skipped or duplicated--so don't
-do that.  Exception: In the current implementation, it is always safe to
-delete the item most recently returned by C<each()>, so the following code
-works properly:
+do that.  Exception: It is always safe to delete the item most recently
+returned by C<each()>, so the following code works properly:
 
         while (($key, $value) = each %hash) {
           print $key, "\n";
