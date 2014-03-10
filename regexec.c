@@ -674,7 +674,7 @@ Perl_re_intuit_start(pTHX_
     assert(prog->substrs->data[2].max_offset >= 0);
 
     /* for now, assume that if both present, that the floating substring
-     * follows the anchored substring, and that they don't overlap.
+     * doesn't start before the anchored substring.
      * If you break this assumption (e.g. doing better optimisations
      * with lookahead/behind), then you'll need to audit the code in this
      * function carefully first
