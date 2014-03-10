@@ -4674,28 +4674,28 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
 	    /* Check that the key-sets are identical */
 	    HE *he;
 	    HV *other_hv = MUTABLE_HV(SvRV(d));
-	    bool tied = FALSE;
-	    bool other_tied = FALSE;
+	    bool tied;
+	    bool other_tied;
 	    U32 this_key_count  = 0,
 	        other_key_count = 0;
 	    HV *hv = MUTABLE_HV(SvRV(e));
 
 	    DEBUG_M(Perl_deb(aTHX_ "    applying rule Hash-Hash\n"));
 	    /* Tied hashes don't know how many keys they have. */
-	    if (SvTIED_mg((SV*)hv, PERL_MAGIC_tied)) {
-		tied = TRUE;
+	    tied = cBOOL(SvTIED_mg((SV*)hv, PERL_MAGIC_tied));
+	    other_tied = cBOOL(SvTIED_mg((const SV *)other_hv, PERL_MAGIC_tied));
+	    if (!tied ) {
+		if(other_tied) {
+		    /* swap HV sides */
+		    HV * const temp = other_hv;
+		    other_hv = hv;
+		    hv = temp;
+		    tied = TRUE;
+		    other_tied = FALSE;
+		}
+		else if(HvUSEDKEYS((const HV *) hv) != HvUSEDKEYS(other_hv))
+		    RETPUSHNO;
 	    }
-	    else if (SvTIED_mg((const SV *)other_hv, PERL_MAGIC_tied)) {
-		HV * const temp = other_hv;
-		other_hv = hv;
-		hv = temp;
-		tied = TRUE;
-	    }
-	    if (SvTIED_mg((const SV *)other_hv, PERL_MAGIC_tied))
-		other_tied = TRUE;
-	    
-	    if (!tied && HvUSEDKEYS((const HV *) hv) != HvUSEDKEYS(other_hv))
-	    	RETPUSHNO;
 
 	    /* The hashes have the same number of keys, so it suffices
 	       to check that one is a subset of the other. */
