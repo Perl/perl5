@@ -2172,8 +2172,8 @@ S_hv_auxinit(pTHX_ HV *hv) {
 =for apidoc hv_iterinit
 
 Prepares a starting point to traverse a hash table.  Returns the number of
-keys in the hash (i.e. the same as C<HvUSEDKEYS(hv)>).  The return value is
-currently only meaningful for hashes without tie magic.
+keys in the hash, including placeholders (i.e. the same as C<HvTOTALKEYS(hv)>).
+The return value is currently only meaningful for hashes without tie magic.
 
 NOTE: Before version 5.004_65, C<hv_iterinit> used to return the number of
 hash buckets that happen to be in use.  If you still need that esoteric
