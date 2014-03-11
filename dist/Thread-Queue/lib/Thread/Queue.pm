@@ -3,7 +3,7 @@ package Thread::Queue;
 use strict;
 use warnings;
 
-our $VERSION = '3.03';
+our $VERSION = '3.04';
 $VERSION = eval $VERSION;
 
 use threads::shared 1.21;
@@ -230,7 +230,8 @@ sub _validate_index
     {
         require Carp;
         my ($method) = (caller(1))[3];
-        $method =~ s/Thread::Queue:://;
+        my $class_name = ref($self);
+        $method =~ s/$class_name:://;
         $index = 'undef' if (! defined($index));
         Carp::croak("Invalid 'index' argument ($index) to '$method' method");
     }
@@ -251,7 +252,8 @@ sub _validate_count
     {
         require Carp;
         my ($method) = (caller(1))[3];
-        $method =~ s/Thread::Queue:://;
+        my $class_name = ref($self);
+        $method =~ s/$class_name:://;
         $count = 'undef' if (! defined($count));
         Carp::croak("Invalid 'count' argument ($count) to '$method' method");
     }
@@ -270,7 +272,8 @@ sub _validate_timeout
     {
         require Carp;
         my ($method) = (caller(1))[3];
-        $method =~ s/Thread::Queue:://;
+        my $class_name = ref($self);
+        $method =~ s/$class_name:://;
         $timeout = 'undef' if (! defined($timeout));
         Carp::croak("Invalid 'timeout' argument ($timeout) to '$method' method");
     }
@@ -286,7 +289,7 @@ Thread::Queue - Thread-safe queues
 
 =head1 VERSION
 
-This document describes Thread::Queue version 3.03
+This document describes Thread::Queue version 3.04
 
 =head1 SYNOPSIS
 
