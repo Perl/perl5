@@ -2684,13 +2684,15 @@ These routines are the same as their counterparts in the
 system C library.  In list context, the return values from the
 various get routines are as follows:
 
-    ($name,$passwd,$uid,$gid,
-       $quota,$comment,$gcos,$dir,$shell,$expire) = getpw*
-    ($name,$passwd,$gid,$members) = getgr*
-    ($name,$aliases,$addrtype,$length,@addrs) = gethost*
-    ($name,$aliases,$addrtype,$net) = getnet*
-    ($name,$aliases,$proto) = getproto*
-    ($name,$aliases,$port,$proto) = getserv*
+ # 0        1          2           3         4
+ ( $name,   $passwd,   $gid,       $members  ) = getgr*
+ ( $name,   $aliases,  $addrtype,  $net      ) = getnet*
+ ( $name,   $aliases,  $port,      $proto    ) = getserv*
+ ( $name,   $aliases,  $proto                ) = getproto*
+ ( $name,   $aliases,  $addrtype,  $length,  @addrs ) = gethost*
+ ( $name,   $passwd,   $uid,       $gid,     $quota,
+ $comment,  $gcos,     $dir,       $shell,   $expire ) = getpw*
+ # 5        6          7           8         9
 
 (If the entry doesn't exist you get an empty list.)
 
