@@ -1389,12 +1389,11 @@ EOF
             my ( $type, $ret )= split /-/, $type_spec;
             $ret ||= 'len';
             foreach my $mod ( @mods ) {
-                next if $mod eq 'safe' and $type =~ /^cp/;
                 delete $mods{$mod};
                 my $macro= $obj->make_macro(
                     type     => $type,
                     ret_type => $ret,
-                    safe     => $mod eq 'safe'
+                    safe     => $mod eq 'safe' && $type !~ /^cp/,
                 );
                 print $out_fh $macro, "\n";
             }
