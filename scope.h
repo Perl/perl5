@@ -98,8 +98,8 @@
  * macros */
 #define SS_MAXPUSH 4
 
-#define SSCHECK(need) if (PL_savestack_ix + (I32)(need) + SS_MAXPUSH > PL_savestack_max) savestack_grow()
-#define SSGROW(need) if (PL_savestack_ix + (I32)(need) + SS_MAXPUSH > PL_savestack_max) savestack_grow_cnt(need + SS_MAXPUSH)
+#define SSCHECK(need) if (UNLIKELY(PL_savestack_ix + (I32)(need) + SS_MAXPUSH > PL_savestack_max)) savestack_grow()
+#define SSGROW(need) if (UNLIKELY(PL_savestack_ix + (I32)(need) + SS_MAXPUSH > PL_savestack_max)) savestack_grow_cnt(need + SS_MAXPUSH)
 #define SSPUSHINT(i) (PL_savestack[PL_savestack_ix++].any_i32 = (I32)(i))
 #define SSPUSHLONG(i) (PL_savestack[PL_savestack_ix++].any_long = (long)(i))
 #define SSPUSHBOOL(p) (PL_savestack[PL_savestack_ix++].any_bool = (p))
@@ -130,7 +130,7 @@
     ix += (need);                                               \
     PL_savestack_ix = ix;                                       \
     assert(ix <= PL_savestack_max);                             \
-    if ((ix + SS_MAXPUSH) > PL_savestack_max) savestack_grow(); \
+    if (UNLIKELY((ix + SS_MAXPUSH) > PL_savestack_max)) savestack_grow(); \
     assert(PL_savestack_ix + SS_MAXPUSH <= PL_savestack_max);
 
 #define SS_ADD_INT(i)   ((ssp++)->any_i32 = (I32)(i))

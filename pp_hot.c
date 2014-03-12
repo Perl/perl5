@@ -61,7 +61,7 @@ PP(pp_gvsv)
     dVAR;
     dSP;
     EXTEND(SP,1);
-    if (PL_op->op_private & OPpLVAL_INTRO)
+    if (UNLIKELY(PL_op->op_private & OPpLVAL_INTRO))
 	PUSHs(save_scalar(cGVOP_gv));
     else
 	PUSHs(GvSVn(cGVOP_gv));
@@ -133,9 +133,10 @@ PP(pp_sassign)
 	SV * const temp = left;
 	left = right; right = temp;
     }
-    if (TAINTING_get && TAINT_get && !SvTAINTED(right))
+    if (TAINTING_get && UNLIKELY(TAINT_get) && !SvTAINTED(right))
 	TAINT_NOT;
-    if (PL_op->op_private & OPpASSIGN_CV_TO_GV) {
+    if (UNLIKELY(PL_op->op_private & OPpASSIGN_CV_TO_GV)) {
+        /* *foo =\&bar */
 	SV * const cv = SvRV(right);
 	const U32 cv_type = SvTYPE(cv);
 	const bool is_gv = isGV_with_GP(left);
@@ -214,7 +215,7 @@ PP(pp_sassign)
 
     }
     if (
-      SvTEMP(left) && !SvSMAGICAL(left) && SvREFCNT(left) == 1 &&
+      UNLIKELY(SvTEMP(left)) && !SvSMAGICAL(left) && SvREFCNT(left) == 1 &&
       (!isGV_with_GP(left) || SvFAKE(left)) && ckWARN(WARN_MISC)
     )
 	Perl_warner(aTHX_
@@ -330,7 +331,7 @@ S_pushav(pTHX_ AV* const av)
     dSP;
     const SSize_t maxarg = AvFILL(av) + 1;
     EXTEND(SP, maxarg);
-    if (SvRMAGICAL(av)) {
+    if (UNLIKELY(SvRMAGICAL(av))) {
         PADOFFSET i;
         for (i=0; i < (PADOFFSET)maxarg; i++) {
             SV ** const svp = av_fetch(av, i, FALSE);
@@ -344,7 +345,7 @@ S_pushav(pTHX_ AV* const av)
         PADOFFSET i;
         for (i=0; i < (PADOFFSET)maxarg; i++) {
             SV * const sv = AvARRAY(av)[i];
-            SP[i+1] = sv ? sv : &PL_sv_undef;
+            SP[i+1] = LIKELY(sv) ? sv : &PL_sv_undef;
         }
     }
     SP += maxarg;
@@ -470,9 +471,9 @@ PP(pp_preinc)
     dVAR; dSP;
     const bool inc =
 	PL_op->op_type == OP_PREINC || PL_op->op_type == OP_I_PREINC;
-    if (SvTYPE(TOPs) >= SVt_PVAV || (isGV_with_GP(TOPs) && !SvFAKE(TOPs)))
+    if (UNLIKELY(SvTYPE(TOPs) >= SVt_PVAV || (isGV_with_GP(TOPs) && !SvFAKE(TOPs))))
 	Perl_croak_no_modify();
-    if (!SvREADONLY(TOPs) && !SvGMAGICAL(TOPs) && SvIOK_notUV(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs)
+    if (LIKELY(!SvREADONLY(TOPs) && !SvGMAGICAL(TOPs) && SvIOK_notUV(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs))
         && SvIVX(TOPs) != (inc ? IV_MAX : IV_MIN))
     {
 	SvIV_set(TOPs, SvIVX(TOPs) + (inc ? 1 : -1));
@@ -509,7 +510,7 @@ PP(pp_defined)
     if (is_dor) {
 	PERL_ASYNC_CHECK();
         sv = TOPs;
-        if (!sv || !SvANY(sv)) {
+        if (UNLIKELY(!sv || !SvANY(sv))) {
 	    if (op_type == OP_DOR)
 		--SP;
             RETURNOP(cLOGOP->op_other);
@@ -518,7 +519,7 @@ PP(pp_defined)
     else {
 	/* OP_DEFINED */
         sv = POPs;
-        if (!sv || !SvANY(sv))
+        if (UNLIKELY(!sv || !SvANY(sv)))
             RETPUSHNO;
     }
 
@@ -876,18 +877,18 @@ PP(pp_rv2av)
 
     SvGETMAGIC(sv);
     if (SvROK(sv)) {
-	if (SvAMAGIC(sv)) {
+	if (UNLIKELY(SvAMAGIC(sv))) {
 	    sv = amagic_deref_call(sv, is_pp_rv2av ? to_av_amg : to_hv_amg);
 	}
 	sv = SvRV(sv);
-	if (SvTYPE(sv) != type)
+	if (UNLIKELY(SvTYPE(sv) != type))
 	    /* diag_listed_as: Not an ARRAY reference */
 	    DIE(aTHX_ "Not %s reference", is_pp_rv2av ? an_array : a_hash);
-	else if (PL_op->op_flags & OPf_MOD
-		&& PL_op->op_private & OPpLVAL_INTRO)
+	else if (UNLIKELY(PL_op->op_flags & OPf_MOD
+		&& PL_op->op_private & OPpLVAL_INTRO))
 	    Perl_croak(aTHX_ "%s", PL_no_localize_ref);
     }
-    else if (SvTYPE(sv) != type) {
+    else if (UNLIKELY(SvTYPE(sv) != type)) {
 	    GV *gv;
 	
 	    if (!isGV_with_GP(sv)) {
@@ -907,7 +908,7 @@ PP(pp_rv2av)
 		SETs(sv);
 		RETURN;
     }
-    else if (PL_op->op_private & OPpMAYBE_LVSUB) {
+    else if (UNLIKELY(PL_op->op_private & OPpMAYBE_LVSUB)) {
 	      const I32 flags = is_lvalue_sub();
 	      if (flags && !(flags & OPpENTERSUB_INARGS)) {
 		if (gimme != G_ARRAY)
@@ -1026,13 +1027,13 @@ PP(pp_aassign)
     ) {
 	EXTEND_MORTAL(lastrelem - firstrelem + 1);
 	for (relem = firstrelem; relem <= lastrelem; relem++) {
-	    if ((sv = *relem)) {
+	    if (LIKELY((sv = *relem))) {
 		TAINT_NOT;	/* Each item is independent */
 
 		/* Dear TODO test in t/op/sort.t, I love you.
 		   (It's relying on a panic, not a "semi-panic" from newSVsv()
 		   and then an assertion failure below.)  */
-		if (SvIS_FREED(sv)) {
+		if (UNLIKELY(SvIS_FREED(sv))) {
 		    Perl_croak(aTHX_ "panic: attempt to copy freed scalar %p",
 			       (void*)sv);
 		}
@@ -1050,7 +1051,7 @@ PP(pp_aassign)
     ary = NULL;
     hash = NULL;
 
-    while (lelem <= lastlelem) {
+    while (LIKELY(lelem <= lastlelem)) {
 	TAINT_NOT;		/* Each item stands on its own, taintwise. */
 	sv = *lelem++;
 	switch (SvTYPE(sv)) {
@@ -1064,7 +1065,7 @@ PP(pp_aassign)
 	    i = 0;
 	    while (relem <= lastrelem) {	/* gobble up all the rest */
 		SV **didstore;
-		if (*relem)
+		if (LIKELY(*relem))
 		    SvGETMAGIC(*relem); /* before newSV, in case it dies */
 		sv = newSV(0);
 		sv_setsv_nomg(sv, *relem);
@@ -1078,7 +1079,7 @@ PP(pp_aassign)
 		}
 		TAINT_NOT;
 	    }
-	    if (PL_delaymagic & DM_ARRAY_ISA)
+	    if (UNLIKELY(PL_delaymagic & DM_ARRAY_ISA))
 		SvSETMAGIC(MUTABLE_SV(ary));
 	    LEAVE;
 	    break;
@@ -1093,7 +1094,7 @@ PP(pp_aassign)
 		magic = SvMAGICAL(hash) != 0;
 
                 odd = ((lastrelem - firsthashrelem)&1)? 0 : 1;
-                if ( odd ) {
+                if (UNLIKELY(odd)) {
                     do_oddball(lastrelem, firsthashrelem);
                     /* we have firstlelem to reuse, it's not needed anymore
 		     */
@@ -1103,7 +1104,7 @@ PP(pp_aassign)
 		ENTER;
 		SAVEFREESV(SvREFCNT_inc_simple_NN(sv));
 		hv_clear(hash);
-		while (relem < lastrelem+odd) {	/* gobble up all the rest */
+		while (LIKELY(relem < lastrelem+odd)) {	/* gobble up all the rest */
 		    HE *didstore;
                     assert(*relem);
 		    /* Copy the key if aassign is called in lvalue context,
@@ -1163,10 +1164,10 @@ PP(pp_aassign)
 		break;
 	    }
 	    if (relem <= lastrelem) {
-		if (
+		if (UNLIKELY(
 		  SvTEMP(sv) && !SvSMAGICAL(sv) && SvREFCNT(sv) == 1 &&
 		  (!isGV_with_GP(sv) || SvFAKE(sv)) && ckWARN(WARN_MISC)
-		)
+		))
 		    Perl_warner(aTHX_
 		       packWARN(WARN_MISC),
 		      "Useless assignment to a temporary"
@@ -1180,7 +1181,7 @@ PP(pp_aassign)
 	    break;
 	}
     }
-    if (PL_delaymagic & ~DM_DELAY) {
+    if (UNLIKELY(PL_delaymagic & ~DM_DELAY)) {
         int rc = 0;
 	/* Will be used to set PL_tainting below */
 	Uid_t tmp_uid  = PerlProc_getuid();
@@ -1314,7 +1315,7 @@ PP(pp_qr)
     SvROK_on(rv);
 
     cvp = &( ReANY((REGEXP *)SvRV(rv))->qr_anoncv);
-    if ((cv = *cvp) && CvCLONE(*cvp)) {
+    if (UNLIKELY((cv = *cvp) && CvCLONE(*cvp))) {
 	*cvp = cv_clone(cv);
 	SvREFCNT_dec_NN(cv);
     }
@@ -1325,7 +1326,7 @@ PP(pp_qr)
 	(void)sv_bless(rv, stash);
     }
 
-    if (RX_ISTAINTED(rx)) {
+    if (UNLIKELY(RX_ISTAINTED(rx))) {
         SvTAINTED_on(rv);
         SvTAINTED_on(SvRV(rv));
     }
@@ -1487,11 +1488,13 @@ PP(pp_match)
 	EXTEND_MORTAL(nparens + i);
 	for (i = !i; i <= nparens; i++) {
 	    PUSHs(sv_newmortal());
-	    if ((RX_OFFS(rx)[i].start != -1) && RX_OFFS(rx)[i].end != -1 ) {
+	    if (LIKELY((RX_OFFS(rx)[i].start != -1)
+                     && RX_OFFS(rx)[i].end   != -1 ))
+            {
 		const I32 len = RX_OFFS(rx)[i].end - RX_OFFS(rx)[i].start;
 		const char * const s = RX_OFFS(rx)[i].start + truebase;
-	        if (RX_OFFS(rx)[i].end < 0 || RX_OFFS(rx)[i].start < 0 ||
-		    len < 0 || len > strend - s)
+	        if (UNLIKELY(RX_OFFS(rx)[i].end < 0 || RX_OFFS(rx)[i].start < 0
+                        || len < 0 || len > strend - s))
 		    DIE(aTHX_ "panic: pp_match start/end pointers, i=%ld, "
 			"start=%ld, end=%ld, s=%p, strend=%p, len=%"UVuf,
 			(long) i, (long) RX_OFFS(rx)[i].start,
@@ -1832,11 +1835,11 @@ PP(pp_iter)
            It has SvPVX of "" and SvCUR of 0, which is what we want.  */
         STRLEN maxlen = 0;
         const char *max = SvPV_const(end, maxlen);
-        if (SvNIOK(cur) || SvCUR(cur) > maxlen)
+        if (UNLIKELY(SvNIOK(cur) || SvCUR(cur) > maxlen))
             RETPUSHNO;
 
         oldsv = *itersvp;
-        if (SvREFCNT(oldsv) == 1 && !SvMAGICAL(oldsv)) {
+        if (LIKELY(SvREFCNT(oldsv) == 1 && !SvMAGICAL(oldsv))) {
             /* safe to reuse old SV */
             sv_setsv(oldsv, cur);
         }
@@ -1858,12 +1861,12 @@ PP(pp_iter)
     case CXt_LOOP_LAZYIV: /* integer increment */
     {
         IV cur = cx->blk_loop.state_u.lazyiv.cur;
-	if (cur > cx->blk_loop.state_u.lazyiv.end)
+	if (UNLIKELY(cur > cx->blk_loop.state_u.lazyiv.end))
 	    RETPUSHNO;
 
         oldsv = *itersvp;
 	/* don't risk potential race */
-	if (SvREFCNT(oldsv) == 1 && !SvMAGICAL(oldsv)) {
+	if (LIKELY(SvREFCNT(oldsv) == 1 && !SvMAGICAL(oldsv))) {
 	    /* safe to reuse old SV */
 	    sv_setiv(oldsv, cur);
 	}
@@ -1876,7 +1879,7 @@ PP(pp_iter)
 	    SvREFCNT_dec_NN(oldsv);
 	}
 
-	if (cur == IV_MAX) {
+	if (UNLIKELY(cur == IV_MAX)) {
 	    /* Handle end of range at IV_MAX */
 	    cx->blk_loop.state_u.lazyiv.end = IV_MIN;
 	} else
@@ -1898,16 +1901,16 @@ PP(pp_iter)
         }
         if (PL_op->op_private & OPpITER_REVERSED) {
             ix = --cx->blk_loop.state_u.ary.ix;
-            if (ix <= (av_is_stack ? cx->blk_loop.resetsp : -1))
+            if (UNLIKELY(ix <= (av_is_stack ? cx->blk_loop.resetsp : -1)))
                 RETPUSHNO;
         }
         else {
             ix = ++cx->blk_loop.state_u.ary.ix;
-            if (ix > (av_is_stack ? cx->blk_oldsp : AvFILL(av)))
+            if (UNLIKELY(ix > (av_is_stack ? cx->blk_oldsp : AvFILL(av))))
                 RETPUSHNO;
         }
 
-        if (SvMAGICAL(av) || AvREIFY(av)) {
+        if (UNLIKELY(SvMAGICAL(av) || AvREIFY(av))) {
             SV * const * const svp = av_fetch(av, ix, FALSE);
             sv = svp ? *svp : NULL;
         }
@@ -1915,8 +1918,8 @@ PP(pp_iter)
             sv = AvARRAY(av)[ix];
         }
 
-        if (sv) {
-            if (SvIS_FREED(sv)) {
+        if (LIKELY(sv)) {
+            if (UNLIKELY(SvIS_FREED(sv))) {
                 *itersvp = NULL;
                 Perl_croak(aTHX_ "Use of freed value in iteration");
             }
@@ -2224,9 +2227,9 @@ PP(pp_subst)
             d = s = RX_OFFS(rx)[0].start + orig;
 	    do {
                 I32 i;
-		if (iters++ > maxiters)
+		if (UNLIKELY(iters++ > maxiters))
 		    DIE(aTHX_ "Substitution loop");
-		if (RX_MATCH_TAINTED(rx)) /* run time pattern taint, eg locale */
+		if (UNLIKELY(RX_MATCH_TAINTED(rx))) /* run time pattern taint, eg locale */
 		    rxtainted |= SUBST_TAINT_PAT;
 		m = RX_OFFS(rx)[0].start + orig;
 		if ((i = m - s)) {
@@ -2294,9 +2297,9 @@ PP(pp_subst)
 	}
 	first = TRUE;
 	do {
-	    if (iters++ > maxiters)
+	    if (UNLIKELY(iters++ > maxiters))
 		DIE(aTHX_ "Substitution loop");
-	    if (RX_MATCH_TAINTED(rx))
+	    if (UNLIKELY(RX_MATCH_TAINTED(rx)))
 		rxtainted |= SUBST_TAINT_PAT;
 	    if (RX_MATCH_COPIED(rx) && RX_SUBBEG(rx) != orig) {
 		char *old_s    = s;
@@ -2324,7 +2327,7 @@ PP(pp_subst)
 		    sv_catsv(dstr, nsv);
 		}
 		else sv_catsv(dstr, repl);
-		if (SvTAINTED(repl))
+		if (UNLIKELY(SvTAINTED(repl)))
 		    rxtainted |= SUBST_TAINT_REPL;
 	    }
 	    if (once)
@@ -2407,7 +2410,7 @@ PP(pp_grepwhile)
     LEAVE_with_name("grep_item");					/* exit inner scope */
 
     /* All done yet? */
-    if (PL_stack_base + *PL_markstack_ptr > SP) {
+    if (UNLIKELY(PL_stack_base + *PL_markstack_ptr > SP)) {
 	I32 items;
 	const I32 gimme = GIMME_V;
 
@@ -2472,7 +2475,7 @@ PP(pp_leavesub)
     TAINT_NOT;
     if (gimme == G_SCALAR) {
 	MARK = newsp + 1;
-	if (MARK <= SP) {
+	if (LIKELY(MARK <= SP)) {
 	    if (cx->blk_sub.cv && CvDEPTH(cx->blk_sub.cv) > 1) {
 		if (SvTEMP(TOPs) && SvREFCNT(TOPs) == 1
 		     && !SvMAGICAL(TOPs)) {
@@ -2835,14 +2838,14 @@ PP(pp_aelem)
     bool preeminent = TRUE;
     SV *sv;
 
-    if (SvROK(elemsv) && !SvGAMAGIC(elemsv) && ckWARN(WARN_MISC))
+    if (UNLIKELY(SvROK(elemsv) && !SvGAMAGIC(elemsv) && ckWARN(WARN_MISC)))
 	Perl_warner(aTHX_ packWARN(WARN_MISC),
 		    "Use of reference \"%"SVf"\" as array index",
 		    SVfARG(elemsv));
-    if (SvTYPE(av) != SVt_PVAV)
+    if (UNLIKELY(SvTYPE(av) != SVt_PVAV))
 	RETPUSHUNDEF;
 
-    if (localizing) {
+    if (UNLIKELY(localizing)) {
 	MAGIC *mg;
 	HV *stash;
 
@@ -2882,7 +2885,7 @@ PP(pp_aelem)
 		1));
 	    RETURN;
 	}
-	if (localizing) {
+	if (UNLIKELY(localizing)) {
 	    if (preeminent)
 		save_aelem(av, elem, svp);
 	    else
@@ -2978,7 +2981,7 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
 
     PERL_ARGS_ASSERT_METHOD_COMMON;
 
-    if (!sv)
+    if (UNLIKELY(!sv))
        undefined:
 	Perl_croak(aTHX_ "Can't call method \"%"SVf"\" on an undefined value",
 		   SVfARG(meth));

@@ -3485,11 +3485,11 @@ my_swap16(const U16 x) {
 #define U_32(n) ((n) < 0.0 ? ((n) < I32_MIN ? (UV) I32_MIN : (U32)(I32) (n)) \
                   : ((n) < U32_MAX_P1 ? (U32) (n) \
                      : ((n) > 0 ? U32_MAX : 0 /* NaN */)))
-#define I_V(n) ((n) < IV_MAX_P1 ? ((n) < IV_MIN ? IV_MIN : (IV) (n)) \
-                  : ((n) < UV_MAX_P1 ? (IV)(UV) (n) \
+#define I_V(n) (LIKELY((n) < IV_MAX_P1) ? (UNLIKELY((n) < IV_MIN) ? IV_MIN : (IV) (n)) \
+                  : (LIKELY((n) < UV_MAX_P1) ? (IV)(UV) (n) \
                      : ((n) > 0 ? (IV)UV_MAX : 0 /* NaN */)))
-#define U_V(n) ((n) < 0.0 ? ((n) < IV_MIN ? (UV) IV_MIN : (UV)(IV) (n)) \
-                  : ((n) < UV_MAX_P1 ? (UV) (n) \
+#define U_V(n) ((n) < 0.0 ? (UNLIKELY((n) < IV_MIN) ? (UV) IV_MIN : (UV)(IV) (n)) \
+                  : (LIKELY((n) < UV_MAX_P1) ? (UV) (n) \
                      : ((n) > 0 ? UV_MAX : 0 /* NaN */)))
 #endif
 
@@ -5459,7 +5459,7 @@ typedef struct am_table_short AMTS;
 
 #ifndef PERL_MICRO
 #	ifndef PERL_ASYNC_CHECK
-#		define PERL_ASYNC_CHECK() if (PL_sig_pending) PL_signalhook(aTHX)
+#		define PERL_ASYNC_CHECK() if (UNLIKELY(PL_sig_pending)) PL_signalhook(aTHX)
 #	endif
 #endif
 

@@ -1362,7 +1362,7 @@ sv_force_normal does nothing.
 		     assert(SvTYPE(sv) >= SVt_PV);			\
 		     if (SvLEN(sv)) {					\
 			 assert(!SvROK(sv));				\
-			 if(SvOOK(sv)) {				\
+			 if(UNLIKELY(SvOOK(sv))) {			\
 			     STRLEN zok; 				\
 			     SvOOK_offset(sv, zok);			\
 			     SvPV_set(sv, SvPVX_mutable(sv) - zok);	\
@@ -1480,13 +1480,13 @@ attention to precisely which outputs are influenced by which inputs.
 #else
 #   define SvTAINTED(sv)	  (SvMAGICAL(sv) && sv_tainted(sv))
 #endif
-#define SvTAINTED_on(sv)  STMT_START{ if(TAINTING_get){sv_taint(sv);}   }STMT_END
-#define SvTAINTED_off(sv) STMT_START{ if(TAINTING_get){sv_untaint(sv);} }STMT_END
+#define SvTAINTED_on(sv)  STMT_START{ if(UNLIKELY(TAINTING_get)){sv_taint(sv);}   }STMT_END
+#define SvTAINTED_off(sv) STMT_START{ if(UNLIKELY(TAINTING_get)){sv_untaint(sv);} }STMT_END
 
 #define SvTAINT(sv)			\
     STMT_START {			\
-	if (TAINTING_get) {		\
-	    if (TAINT_get)		\
+	if (UNLIKELY(TAINTING_get)) {	\
+	    if (UNLIKELY(TAINT_get))	\
 		SvTAINTED_on(sv);	\
 	}				\
     } STMT_END
@@ -1756,9 +1756,9 @@ Like sv_utf8_upgrade, but doesn't do magic on C<sv>.
 #define SvPVutf8x_force(sv, lp) sv_pvutf8n_force(sv, &lp)
 #define SvPVbytex_force(sv, lp) sv_pvbyten_force(sv, &lp)
 
-#define SvTRUE(sv)        ((sv) && (SvGMAGICAL(sv) ? sv_2bool(sv) : SvTRUE_common(sv, sv_2bool_nomg(sv))))
-#define SvTRUE_nomg(sv)   ((sv) && (                                SvTRUE_common(sv, sv_2bool_nomg(sv))))
-#define SvTRUE_NN(sv)              (SvGMAGICAL(sv) ? sv_2bool(sv) : SvTRUE_common(sv, sv_2bool_nomg(sv)))
+#define SvTRUE(sv)        (LIKELY(sv) && (UNLIKELY(SvGMAGICAL(sv)) ? sv_2bool(sv) : SvTRUE_common(sv, sv_2bool_nomg(sv))))
+#define SvTRUE_nomg(sv)   (LIKELY(sv) && (                                SvTRUE_common(sv, sv_2bool_nomg(sv))))
+#define SvTRUE_NN(sv)              (UNLIKELY(SvGMAGICAL(sv)) ? sv_2bool(sv) : SvTRUE_common(sv, sv_2bool_nomg(sv)))
 #define SvTRUE_nomg_NN(sv) (                                        SvTRUE_common(sv, sv_2bool_nomg(sv)))
 #define SvTRUE_common(sv,fallback) (			\
       !SvOK(sv)						\
@@ -2061,19 +2061,19 @@ alternative is to call C<sv_grow> if you are not sure of the type of SV.
 #define SvUNLOCK(sv) PL_unlockhook(aTHX_ sv)
 #define SvDESTROYABLE(sv) PL_destroyhook(aTHX_ sv)
 
-#define SvGETMAGIC(x) ((void)(SvGMAGICAL(x) && mg_get(x)))
-#define SvSETMAGIC(x) STMT_START { if (SvSMAGICAL(x)) mg_set(x); } STMT_END
+#define SvGETMAGIC(x) ((void)(UNLIKELY(SvGMAGICAL(x)) && mg_get(x)))
+#define SvSETMAGIC(x) STMT_START { if (UNLIKELY(SvSMAGICAL(x))) mg_set(x); } STMT_END
 
 #define SvSetSV_and(dst,src,finally) \
 	STMT_START {					\
-	    if ((dst) != (src)) {			\
+	    if (LIKELY((dst) != (src))) {		\
 		sv_setsv(dst, src);			\
 		finally;				\
 	    }						\
 	} STMT_END
 #define SvSetSV_nosteal_and(dst,src,finally) \
 	STMT_START {					\
-	    if ((dst) != (src)) {			\
+	    if (LIKELY((dst) != (src))) {			\
 		sv_setsv_flags(dst, src, SV_GMAGIC | SV_NOSTEAL | SV_DO_COW_SVSETSV);	\
 		finally;				\
 	    }						\
