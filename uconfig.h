@@ -866,18 +866,6 @@
 #define OSNAME "unknown"		/**/
 #define OSVERS "unknown"		/**/
 
-/* USE_CROSS_COMPILE:
- *	This symbol, if defined, indicates that Perl is being cross-compiled.
- */
-/* PERL_TARGETARCH:
- *	This symbol, if defined, indicates the target architecture
- *	Perl has been cross-compiled to.  Undefined if not a cross-compile.
- */
-#ifndef USE_CROSS_COMPILE
-/*#define	USE_CROSS_COMPILE	/ **/
-#define	PERL_TARGETARCH	""	/**/
-#endif
-
 /* MULTIARCH:
  *	This symbol, if defined, signifies that the build
  *	process will produce some binary files that are going to be
@@ -3324,6 +3312,18 @@
 /*#define I_TERMIOS		/ **/
 /*#define I_SGTTY		/ **/
 
+/* USE_CROSS_COMPILE:
+ *	This symbol, if defined, indicates that Perl is being cross-compiled.
+ */
+/* PERL_TARGETARCH:
+ *	This symbol, if defined, indicates the target architecture
+ *	Perl has been cross-compiled to.  Undefined if not a cross-compile.
+ */
+#ifndef USE_CROSS_COMPILE
+/*#define	USE_CROSS_COMPILE	/ **/
+#define	PERL_TARGETARCH	""	/**/
+#endif
+
 /* PERL_USE_DEVEL:
  *	This symbol, if defined, indicates that Perl was configured with
  *	-Dusedevel, to enable development features.  This should not be
@@ -4718,6 +4718,6 @@
 #endif
 
 /* Generated from:
- * cdad09dc550db3784fa27db0f3cc6e1c1644e496c430e464d143bc725c327a53 config_h.SH
+ * 986d2349e078df67f02d5b9747b7fe65abb0d2875fb52a836138919aafe08545 config_h.SH
  * ac5e1b20c67628ee909f09737452ab1878a99053c728e3e7746c23c7b8a0d037 uconfig.sh
  * ex: set ro: */

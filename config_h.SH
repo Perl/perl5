@@ -901,18 +901,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #define OSNAME "$osname"		/**/
 #define OSVERS "$osvers"		/**/
 
-/* USE_CROSS_COMPILE:
- *	This symbol, if defined, indicates that Perl is being cross-compiled.
- */
-/* PERL_TARGETARCH:
- *	This symbol, if defined, indicates the target architecture
- *	Perl has been cross-compiled to.  Undefined if not a cross-compile.
- */
-#ifndef USE_CROSS_COMPILE
-#$usecrosscompile	USE_CROSS_COMPILE	/**/
-#define	PERL_TARGETARCH	"$targetarch"	/**/
-#endif
-
 /* MULTIARCH:
  *	This symbol, if defined, signifies that the build
  *	process will produce some binary files that are going to be
@@ -3141,7 +3129,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	/bin/pdksh, /bin/ash, /bin/bash, or even something such as
  *	D:/bin/sh.exe.
  */
-#define SH_PATH "$targetsh"  /**/
+#define SH_PATH "$sh"  /**/
 
 /* SIG_NAME:
  *	This symbol contains a list of signal names in order of
@@ -3358,6 +3346,18 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #$i_termio I_TERMIO		/**/
 #$i_termios I_TERMIOS		/**/
 #$i_sgtty I_SGTTY		/**/
+
+/* USE_CROSS_COMPILE:
+ *	This symbol, if defined, indicates that Perl is being cross-compiled.
+ */
+/* PERL_TARGETARCH:
+ *	This symbol, if defined, indicates the target architecture
+ *	Perl has been cross-compiled to.  Undefined if not a cross-compile.
+ */
+#ifndef USE_CROSS_COMPILE
+#$usecrosscompile	USE_CROSS_COMPILE	/**/
+#define	PERL_TARGETARCH	"$targetarch"	/**/
+#endif
 
 /* PERL_USE_DEVEL:
  *	This symbol, if defined, indicates that Perl was configured with

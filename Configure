@@ -28,7 +28,7 @@
 # See Porting/pumpkin.pod for more information on metaconfig.
 #
 
-# Generated on Wed Jan 22 12:03:46 CET 2014 [metaconfig 3.5 PL0]
+# Generated on Wed Mar 12 10:48:15 CET 2014 [metaconfig 3.5 PL0]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -206,6 +206,9 @@ ccsymbols=''
 cppccsymbols=''
 cppsymbols=''
 from=''
+hostgenerate=''
+hostosname=''
+hostperl=''
 run=''
 targetarch=''
 targetdir=''
@@ -215,10 +218,6 @@ targetmkdir=''
 targetport=''
 to=''
 usecrosscompile=''
-hostperl=''
-hostgenerate=''
-hostosname=''
-targetsh=''
 extern_C=''
 mistrustnm=''
 usedevel=''
@@ -1168,6 +1167,7 @@ scriptdirexp=''
 selectminbits=''
 selecttype=''
 sh=''
+targetsh=''
 sig_count=''
 sig_name=''
 sig_name_init=''
@@ -2841,6 +2841,9 @@ esac
 if $test "X$targethost" = "X"; then
     targethost=""
 fi
+if $test "X$targetenv" = "X"; then
+    targetenv=""
+fi
 case "$usecrosscompile" in
 $define|true|[yY]*)
 	$echo "Cross-compiling..."
@@ -2887,13 +2890,14 @@ $define|true|[yY]*)
       cd ..
       cd $src
       src=`pwd`
-      test -d $src/host || mkdir $src/host
-      cd $src/host && rm -rf ./*
+      rm -rf $src/host
+      mkdir $src/host
+      cd $src/host
       $src/Configure -des -Dusedevel -Dmksymlinks
       $make miniperl
       case "$hostgenerate" in
       '') $make generate_uudmap
-          hostgenerate=$src/host/generate_uudmap      
+          hostgenerate=$src/host/generate_uudmap
           ;;
        "$undef") hostgenerate=''
           ;;
@@ -3029,11 +3033,11 @@ do
   case "\$f" in
   /*)
     $targetmkdir \`dirname \$f\`
-    $targetto -P $targetport -r $q \$f $targetuser@$targethost:\$f            || exit 1
+    $targetto -P $targetport -r $q \$f $targetuser@$targethost:\$f           2>/dev/null  || exit 1
     ;;
   *)
     $targetmkdir $targetdir/\`dirname \$f\`
-    $targetto -P $targetport -r $q \$f $targetuser@$targethost:$targetdir/\$f  2>/dev/null || exit 1
+    $targetto -P $targetport -r $q \$f $targetuser@$targethost:$targetdir/\$f 2>/dev/null || exit 1
     ;;
   esac
 done
@@ -3574,8 +3578,8 @@ EOM
                     esac
                     ;;
                 *)
-                    osname=`echo $targetarch|sed 's,^[^-]*-,,'`
-                    osvers=''
+		    osname=`echo $targetarch|sed 's,^[^-]*-,,'`
+		    osvers=''
                 ;;
             esac
             ;;
@@ -19731,9 +19735,9 @@ EOCP
 		    if $test "X$targethost" != X; then
 			$to tryp.c
 			$to tryp
-			$run "cat tryp.c | ./tryp" 2>/dev/null > tryp.out
+			$run "cat tryp.c | ./tryp " 2>/dev/null > tryp.out
 		    else
-			$cat tryp.c | $run ./tryp 2>/dev/null > tryp.out
+			$cat tryp.c | $run ./tryp   2>/dev/null > tryp.out
 		    fi
 		    if cmp tryp.c tryp.out >/dev/null 2>&1; then
 		       $cat >&4 <<EOM
@@ -19800,10 +19804,10 @@ EOCP
 	    $rm -f tryp.out
 	    if $test "X$targethost" != X; then
 		$to tryp.c
-                $to tryp
-                $run "cat tryp.c | ./tryp" 2>/dev/null > tryp.out
+		$to tryp
+		$run "cat tryp.c | ./tryp " 2>/dev/null > tryp.out
 	    else
-		$cat tryp.c | $run ./tryp 2>/dev/null > tryp.out
+		$cat tryp.c | $run ./tryp   2>/dev/null > tryp.out
 	    fi
 	    if cmp tryp.c tryp.out >/dev/null 2>&1; then
 	       $cat >&4 <<EOM
@@ -23482,13 +23486,13 @@ h_fcntl='$h_fcntl'
 h_sysfile='$h_sysfile'
 hint='$hint'
 hostcat='$hostcat'
+hostgenerate='$hostgenerate'
+hostosname='$hostosname'
+hostperl='$hostperl'
 html1dir='$html1dir'
 html1direxp='$html1direxp'
 html3dir='$html3dir'
 html3direxp='$html3direxp'
-hostgenerate='$hostgenerate'
-hostperl='$hostperl'
-hostosname='$hostosname'
 i16size='$i16size'
 i16type='$i16type'
 i32size='$i32size'
