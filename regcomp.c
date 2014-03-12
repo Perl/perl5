@@ -11920,7 +11920,7 @@ tryagain:
                     if (! SIZE_ONLY
                         && RExC_flags & RXf_PMf_EXTENDED
                         && ckWARN_d(WARN_DEPRECATED)
-                        && is_PATWS_non_low(p, UTF))
+                        && is_PATWS_non_low_safe(p, RExC_end, UTF))
                     {
                         vWARN_dep(p + ((UTF) ? UTF8SKIP(p) : 1),
                                 "Escape literal pattern white space under /x");

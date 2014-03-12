@@ -723,15 +723,6 @@
 	\p{PatWS}
 */
 /*** GENERATED CODE ***/
-#define is_PATWS(s,is_utf8)                                                 \
-( ( ( 0x09 <= NATIVE_TO_LATIN1(((U8*)s)[0]) && NATIVE_TO_LATIN1(((U8*)s)[0]) <= 0x0D ) || 0x20 == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ? 1\
-: ( is_utf8 ) ?                                                             \
-    ( ( 0xC2 == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ?                           \
-	( ( 0x85 == NATIVE_TO_LATIN1(((U8*)s)[1]) ) ? 2 : 0 )               \
-    : ( ( ( 0xE2 == NATIVE_TO_LATIN1(((U8*)s)[0]) ) && ( 0x80 == NATIVE_TO_LATIN1(((U8*)s)[1]) ) ) && ( ( NATIVE_TO_LATIN1(((U8*)s)[2]) & 0xFE ) == 0x8E || ( NATIVE_TO_LATIN1(((U8*)s)[2]) & 0xFE ) == 0xA8 ) ) ? 3 : 0 )\
-: ( 0x85 == NATIVE_TO_LATIN1(((U8*)s)[0]) ) )
-
-/*** GENERATED CODE ***/
 #define is_PATWS_safe(s,e,is_utf8)                                          \
 ( ((e) > (s)) ?                                                             \
     ( ( ( 0x09 <= NATIVE_TO_LATIN1(((U8*)s)[0]) && NATIVE_TO_LATIN1(((U8*)s)[0]) <= 0x0D ) || 0x20 == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ? 1\
@@ -745,14 +736,6 @@
 : 0 )
 
 /*** GENERATED CODE ***/
-#define is_PATWS_non_low(s,is_utf8)                                         \
-( ( is_utf8 ) ?                                                             \
-    ( ( 0xC2 == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ?                           \
-	( ( 0x85 == NATIVE_TO_LATIN1(((U8*)s)[1]) ) ? 2 : 0 )               \
-    : ( ( ( 0xE2 == NATIVE_TO_LATIN1(((U8*)s)[0]) ) && ( 0x80 == NATIVE_TO_LATIN1(((U8*)s)[1]) ) ) && ( ( NATIVE_TO_LATIN1(((U8*)s)[2]) & 0xFE ) == 0x8E || ( NATIVE_TO_LATIN1(((U8*)s)[2]) & 0xFE ) == 0xA8 ) ) ? 3 : 0 )\
-: ( 0x85 == NATIVE_TO_LATIN1(((U8*)s)[0]) ) )
-
-/*** GENERATED CODE ***/
 #define is_PATWS_non_low_safe(s,e,is_utf8)                                  \
 ( ((e) > (s)) ?                                                             \
     ( (! is_utf8) ?                                                         \
@@ -763,15 +746,6 @@
 	: ( ( ( 0xE2 == NATIVE_TO_LATIN1(((U8*)s)[0]) ) && ( 0x80 == NATIVE_TO_LATIN1(((U8*)s)[1]) ) ) && ( ( NATIVE_TO_LATIN1(((U8*)s)[2]) & 0xFE ) == 0x8E || ( NATIVE_TO_LATIN1(((U8*)s)[2]) & 0xFE ) == 0xA8 ) ) ? 3 : 0 )\
     : 0 )                                                                   \
 : 0 )
-
-/*** GENERATED CODE ***/
-#define is_PATWS_cp(cp)                                                     \
-( ( 0x09 <= NATIVE_TO_UNI(cp) && NATIVE_TO_UNI(cp) <= 0x0D ) || ( 0x0D < NATIVE_TO_UNI(cp) &&\
-( 0x20 == NATIVE_TO_UNI(cp) || ( 0x20 < NATIVE_TO_UNI(cp) &&                \
-( 0x85 == NATIVE_TO_UNI(cp) || ( 0x85 < NATIVE_TO_UNI(cp) &&                \
-( 0x200E == NATIVE_TO_UNI(cp) || ( 0x200E < NATIVE_TO_UNI(cp) &&            \
-( 0x200F == NATIVE_TO_UNI(cp) || ( 0x200F < NATIVE_TO_UNI(cp) &&            \
-( 0x2028 == NATIVE_TO_UNI(cp) || 0x2029 == NATIVE_TO_UNI(cp) ) ) ) ) ) ) ) ) ) ) )
 
 /*** GENERATED CODE ***/
 #define is_PATWS_cp(cp)                                                     \
