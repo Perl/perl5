@@ -1107,16 +1107,46 @@ foreach my $Locale (@Locale) {
 
     ++$locales_test_number;
     undef @f;
-    $test_names{$locales_test_number} = 'Verify that [:digit:] is a subset of [:xdigit:]';
+    my @xdigit_digits;  # :digit: & :xdigit:
+    $test_names{$locales_test_number} = 'Verify that [:xdigit:] contains one or two blocks of 10 consecutive [:digit:] chars';
     for (map { chr } 0..255) {
         if ($is_utf8_locale) {
             use locale ':not_characters';
-            push @f, $_ if /[[:digit:]]/  and ! /[[:xdigit:]]/;
+            # For utf8 locales, we actually use a stricter test: that :digit:
+            # is a subset of :xdigit:, as we know that only 0-9 should match
+            push @f, $_ if /[[:digit:]]/ and ! /[[:xdigit:]]/;
         }
         else {
-            push @f, $_ if /[[:digit:]]/  and ! /[[:xdigit:]]/;
+            push @xdigit_digits, $_ if /[[:digit:]]/ and /[[:xdigit:]]/;
         }
     }
+    if (! $is_utf8_locale) {
+
+        # For non-utf8 locales, @xdigit_digits is a list of the characters
+        # that are both :xdigit: and :digit:.  Because :digit: is stored in
+        # increasing code point order (unless the tests above failed),
+        # @xdigit_digits is as well.  There should be exactly 10 or
+        # 20 of these.
+        if (@xdigit_digits != 10 && @xdigit_digits != 20) {
+            @f = @xdigit_digits;
+        }
+        else {
+
+            # Look for contiguity in the series, adding any wrong ones to @f
+            my @temp = @xdigit_digits;
+            while (@temp > 1) {
+                push @f, $temp[1] if ($temp[0] != $temp[1] - 1)
+
+                                     # Skip this test for the 0th character of
+                                     # the second block of 10, as it won't be
+                                     # contiguous with the previous block
+                                     && (! defined $xdigit_digits[10]
+                                         || $temp[1] != $xdigit_digits[10]);
+                shift @temp;
+            }
+        }
+    }
+
     report_multi_result($Locale, $locales_test_number, \@f);
 
     ++$locales_test_number;
@@ -1138,17 +1168,22 @@ foreach my $Locale (@Locale) {
     $test_names{$locales_test_number} = 'Verify that any additional members of [:xdigit:], are in groups of 6 consecutive code points';
     my $previous_ord;
     my $count = 0;
-    for (map { chr } 0..255) {
-        next unless /[[:xdigit:]]/;
-        next if /[[:digit:]]/;
-        next if /[A-Fa-f]/;
+    for my $chr (map { chr } 0..255) {
+        next unless $chr =~ /[[:xdigit:]]/;
+        if ($is_utf8_locale) {
+            next if $chr =~ /[[:digit:]]/;
+        }
+        else {
+            next if grep { $chr eq $_ } @xdigit_digits;
+        }
+        next if $chr =~ /[A-Fa-f]/;
         if (defined $previous_ord) {
             if ($is_utf8_locale) {
                 use locale ':not_characters';
-                push @f, $_ if ord $_ != $previous_ord + 1;
+                push @f, $chr if ord $chr != $previous_ord + 1;
             }
             else {
-                push @f, $_ if ord $_ != $previous_ord + 1;
+                push @f, $chr if ord $chr != $previous_ord + 1;
             }
         }
         $count++;
@@ -1156,7 +1191,7 @@ foreach my $Locale (@Locale) {
             undef $previous_ord;
         }
         else {
-            $previous_ord = ord $_;
+            $previous_ord = ord $chr;
         }
     }
     report_multi_result($Locale, $locales_test_number, \@f);
