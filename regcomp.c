@@ -1445,6 +1445,9 @@ S_ssc_finalize(pTHX_ RExC_state_t *pRExC_state, regnode_ssc *ssc)
     set_ANYOF_arg(pRExC_state, (regnode *) ssc, invlist,
                                 NULL, NULL, NULL, FALSE);
 
+    /* Make sure is clone-safe */
+    ssc->invlist = NULL;
+
     if (ANYOF_POSIXL_SSC_TEST_ANY_SET(ssc)) {
         ANYOF_FLAGS(ssc) |= ANYOF_POSIXL;
     }

@@ -217,14 +217,15 @@ struct regnode_charclass_class {
     U32 classflags;	                        /* and run-time */
 };
 
-/* A synthetic start class; is a regnode_charclass_posixl_fold, plus an extra
- * SV*, used only during its construction and which is not used by regexec.c.
- * Note that the 'next_off' field is unused, as the SSC stands alone, so there
- * is never a next node.  Also, there is no alignment issue, becase these are
- * declared or allocated as a complete unit so the compiler takes care of
- * alignment.  This is unlike ithe other regnodes which are allocated in terms
- * of multiples of a single-argument regnode.  Because there is no alignment
- * issue, these can have a pointer field */
+/* A synthetic start class (SSC); is a regnode_charclass_posixl_fold, plus an
+ * extra SV*, used only during its construction and which is not used by
+ * regexec.c.  Note that the 'next_off' field is unused, as the SSC stands
+ * alone, so there is never a next node.  Also, there is no alignment issue,
+ * becase these are declared or allocated as a complete unit so the compiler
+ * takes care of alignment.  This is unlike the other regnodes which are
+ * allocated in terms of multiples of a single-argument regnode.  SSC nodes can
+ * have a pointer field because there is no alignment issue, and because it is
+ * set to NULL after construction, before any cloning of the pattern */
 struct regnode_ssc {
     U8	flags;				/* ANYOF_POSIXL bit must go here */
     U8  type;
@@ -232,7 +233,10 @@ struct regnode_ssc {
     U32 arg1;
     char bitmap[ANYOF_BITMAP_SIZE];	/* both compile-time */
     U32 classflags;	                /* and run-time */
-    SV* invlist;                        /* list of code points matched */
+
+    /* Auxiliary, only used during construction; NULL afterwards: list of code
+     * points matched */
+    SV* invlist;
 };
 
 /*  We take advantage of 'next_off' not otherwise being used in the SSC by
