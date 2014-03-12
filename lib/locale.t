@@ -36,9 +36,9 @@ my $debug = $ENV{PERL_DEBUG_FULL_TEST} // 0;
 # http://markmail.org/message/5jwam4xsx4amsdnv.  Also on AIX machines, many
 # locales call a no-break space a graphic.
 # (There aren't 1000 locales currently in existence, so 99.9 works)
-my $acceptable_fold_failure_percentage = ($^O =~ / ^ ( MSWin32 | AIX ) $ /ix)
-                                         ? 99.9
-                                         : 5;
+my $acceptable_failure_percentage = ($^O =~ / ^ ( MSWin32 | AIX ) $ /ix)
+                                     ? 99.9
+                                     : 5;
 
 # The list of test numbers of the problematic tests.
 my %problematical_tests;
@@ -1945,7 +1945,7 @@ foreach $test_num ($first_locales_test_number..$final_locales_test_number) {
             my $percent_fail = (int(.5 + (1000 * scalar(keys $Problem{$test_num})
                                           / scalar(@Locale))))
                                / 10;
-            if (! $debug && $percent_fail < $acceptable_fold_failure_percentage)
+            if (! $debug && $percent_fail < $acceptable_failure_percentage)
             {
                 $test_names{$test_num} .= 'TODO';
                 print "# ", 100 - $percent_fail, "% of locales pass the following test, so it is likely that the failures\n";
