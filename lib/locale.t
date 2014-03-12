@@ -2161,12 +2161,12 @@ if ($didwarn) {
         my $s = join(" ", @s);
         $s =~ s/(.{50,60}) /$1\n#\t/g;
 
-        warn
+        print
             "# The following locales\n#\n",
             "#\t", $s, "\n#\n",
 	    "# tested okay.\n#\n",
     } else {
-        warn "# None of your locales were fully okay.\n";
+        print "# None of your locales were fully okay.\n";
     }
 
     if (@F) {
@@ -2181,13 +2181,13 @@ if ($didwarn) {
             $details = "# For even more details, rerun, with environment variable PERL_DEBUG_FULL_TEST=2.\n";
         }
 
-        warn
+        print
           "# The following locales\n#\n",
           "#\t", $F, "\n#\n",
           "# had problems.\n#\n",
           $details;
     } else {
-        warn "# None of your locales were broken.\n";
+        print "# None of your locales were broken.\n";
     }
 }
 
