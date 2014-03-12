@@ -28,6 +28,7 @@ use MakeMaker::Test::Setup::BFD;
 use File::Find;
 use File::Spec;
 use File::Path;
+use File::Temp qw[tempdir];
 
 # Environment variables which interfere with our testing.
 delete @ENV{qw(PREFIX LIB MAKEFLAGS)};
@@ -39,7 +40,8 @@ delete @ENV{qw(PREFIX LIB MAKEFLAGS)};
 
     perl_lib;
 
-    chdir 't';
+    my $tmpdir = tempdir( DIR => 't', CLEANUP => 1 );
+    chdir $tmpdir;
 
     my $Touch_Time = calibrate_mtime();
 
