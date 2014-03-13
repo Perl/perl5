@@ -3,7 +3,7 @@ BEGIN {
 }
 
 use strict;
-use Test::More tests => 29;
+use Test::More tests => 31;
 
 use Data::Dumper;
 use File::Temp;
@@ -41,9 +41,12 @@ sub mymeta_ok {
 
     my $have_gen = delete $have->{generated_by};
     my $want_gen = delete $want->{generated_by};
+    my $have_url = delete $have->{'meta-spec'}->{url};
+    my $want_url = delete $want->{'meta-spec'}->{url};
 
     is_deeply $have, $want, $name;
     like $have_gen, qr{CPAN::Meta}, "CPAN::Meta mentioned in the generated_by";
+    like $have_url, qr{CPAN::Meta::Spec}, "CPAN::Meta::Spec mentioned in meta-spec URL";
 
     return;
 }
