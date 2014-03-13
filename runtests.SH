@@ -16,21 +16,26 @@ case "$0" in
 esac
 echo "Extracting runtests (with variable substitutions)"
 rm -f runtests
+
 $spitshell >runtests <<!GROK!THIS!
 $startsh -e
 # runtests.SH
 # 
+!GROK!THIS!
 
-export PATH || (echo "OOPS, this isn't sh.  Desperation time.  I will feed myself to sh."; sh \$0; kill \$\$)
+## In the following, dollars and backticks do not need the extra backslash.
+$spitshell >>runtests <<'!NO!SUBS!'
 
-case \$# in
+export PATH || (echo "OOPS, this isn't sh.  Desperation time.  I will feed myself to sh."; sh $0; kill $$)
+
+case $# in
     0)
 	echo "runtests tty_flag ..."
 	exit 1
 	;;
 esac
 
-case \$1 in
+case $1 in
     tty)
 	tty=Y
 	;;
@@ -50,12 +55,16 @@ case \$1 in
 	;;
 esac
 
-if test X"\$TESTFILE" = X; then
+if test X"$TESTFILE" = X; then
     TESTFILE=TEST
 fi
 
 cd t
 
+!NO!SUBS!
+
+## In the following, dollars and backticks do need the extra backslash.
+$spitshell >>runtests <<!GROK!THIS!
 # The second branch is for testing without a tty or controlling terminal,
 # see t/op/stat.t
 if test \$tty = Y; then
