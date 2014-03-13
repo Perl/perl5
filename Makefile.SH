@@ -1510,7 +1510,7 @@ test.valgrind check.valgrind:	test_prep
 	@grep "^usemymalloc='n'" config.sh >/dev/null || exit 1
 	@echo "And of course you have to have valgrind..."
 	$(VALGRIND) $(VG_TEST) || exit 1
-	PERL_VALGRIND=1 VALGRIND='$(VALGRIND)' $(RUN_TESTS) choose
+	PERL_VALGRIND=1 VALGRIND='$(VALGRIND)' TESTFILE=harness $(RUN_TESTS) choose
 !NO!SUBS!
 	;;
 esac

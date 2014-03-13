@@ -16,6 +16,7 @@ use Config;
 
 $::do_nothing = $::do_nothing = 1;
 require './TEST';
+our $Valgrind_Log;
 
 my $Verbose = 0;
 $Verbose++ while @ARGV && $ARGV[0] eq '-v' && shift;
@@ -224,9 +225,28 @@ my $h = TAP::Harness->new({
 	    $options = $options{$test} = _scan_test($test, $type);
 	}
 
+	(local $Valgrind_Log = "$test.valgrind-current") =~ s/^.*\///;
+
 	return [ split ' ', _cmd($options, $type) ];
     },
 });
+
+# Print valgrind output after test completes
+if ($ENV{PERL_VALGRIND}) {
+    $h->callback(
+		 after_test => sub {
+		     my ($job) = @_;
+		     my $test = $job->[0];
+		     my $vfile = "$test.valgrind-current";
+	             $vfile =~ s/^.*\///;
+
+		     open(my $voutput, '<', $vfile) or return;
+		     print "$test: Valgrind output:\n";
+		     print "$test: $_" for <$voutput>;
+		     close($voutput);
+		 }
+		 );
+}
 
 if ($state) {
     $h->callback(
