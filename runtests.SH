@@ -61,6 +61,15 @@ fi
 
 cd t
 
+# If this is run under an old shell that doesn't automatically 
+# update PWD, then we must update it.  Otherwise, t/io/fs.t gets 
+# mixed up about what directory we are in.
+case "$PWD" in
+    '')  ;; # Do nothing if it isn't set at all.
+    */t) ;; # Leave it alone if it's properly updated.
+    *) PWD=${PWD}/t; export PWD ;;  # Otherwise, fix it.
+esac
+
 !NO!SUBS!
 
 ## In the following, dollars and backticks do need the extra backslash.
