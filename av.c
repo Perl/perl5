@@ -889,23 +889,23 @@ Perl_av_delete(pTHX_ AV *av, SSize_t key, I32 flags)
 	if (!AvREAL(av) && AvREIFY(av))
 	    av_reify(av);
 	sv = AvARRAY(av)[key];
+	AvARRAY(av)[key] = NULL;
 	if (key == AvFILLp(av)) {
-	    AvARRAY(av)[key] = NULL;
 	    do {
 		AvFILLp(av)--;
 	    } while (--key >= 0 && !AvARRAY(av)[key]);
 	}
-	else
-	    AvARRAY(av)[key] = NULL;
 	if (SvSMAGICAL(av))
 	    mg_set(MUTABLE_SV(av));
     }
-    if (flags & G_DISCARD) {
-	SvREFCNT_dec(sv);
-	sv = NULL;
+    if(sv != NULL) {
+	if (flags & G_DISCARD) {
+	    SvREFCNT_dec_NN(sv);
+	    return NULL;
+	}
+	else if (AvREAL(av))
+	    sv_2mortal(sv);
     }
-    else if (AvREAL(av))
-	sv = sv_2mortal(sv);
     return sv;
 }
 
