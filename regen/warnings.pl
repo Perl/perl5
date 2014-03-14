@@ -202,7 +202,7 @@ sub mkRange
 }
 
 ###########################################################################
-sub printTree
+sub warningsTree
 {
     my $tre = shift ;
     my $prefix = shift ;
@@ -211,6 +211,8 @@ sub printTree
     my $max = (sort {$a <=> $b} map { length $_ } keys %$tre)[-1] ;
     my @keys = sort keys %$tre ;
 
+    my $rv = '';
+
     while ($k = shift @keys) {
 	$v = $tre->{$k};
 	die "Value associated with key '$k' is not an ARRAY reference"
@@ -218,12 +220,12 @@ sub printTree
 
         my $offset ;
 	if ($tre ne $tree) {
-	    print $prefix . "|\n" ;
-	    print $prefix . "+- $k" ;
+	    $rv .= $prefix . "|\n" ;
+	    $rv .= $prefix . "+- $k" ;
 	    $offset = ' ' x ($max + 4) ;
 	}
 	else {
-	    print $prefix . "$k" ;
+	    $rv .= $prefix . "$k" ;
 	    $offset = ' ' x ($max + 1) ;
 	}
 
@@ -231,13 +233,14 @@ sub printTree
 	if (ref $rest)
 	{
 	    my $bar = @keys ? "|" : " ";
-	    print " -" . "-" x ($max - length $k ) . "+\n" ;
-	    printTree ($rest, $prefix . $bar . $offset )
+	    $rv .= " -" . "-" x ($max - length $k ) . "+\n" ;
+	    $rv .= warningsTree ($rest, $prefix . $bar . $offset )
 	}
 	else
-	  { print "\n" }
+	  { $rv .= "\n" }
     }
 
+    return $rv;
 }
 
 ###########################################################################
@@ -279,7 +282,7 @@ sub mkOct
 
 if (@ARGV && $ARGV[0] eq "tree")
 {
-    printTree($tree, "    ") ;
+    print warningsTree($tree, "    ") ;
     exit ;
 }
 
@@ -472,7 +475,7 @@ select +(select($lexwarn), do {
 	last if /=for warnings.pl begin/;
     }
     print "\n";
-    printTree($tree, "    ") ;
+    print warningsTree($tree, "    ") ;
     print "\n";
     while(<$oldlexwarn>) {
 	last if /=for warnings.pl end/;
