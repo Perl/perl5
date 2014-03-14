@@ -3,13 +3,10 @@
 # Regenerate (overwriting only if changed):
 #
 #    lib/warnings.pm
-#    pod/perllexwarn.pod
 #    warnings.h
 #
 # from information hardcoded into this script (the $tree hash), plus the
-# template for warnings.pm in the DATA section.  Only part of
-# pod/perllexwarn.pod (the warnings category hierarchy) is generated,
-# the other parts remaining untouched.
+# template for warnings.pm in the DATA section.
 #
 # When changing the number of warnings, t/op/caller.t should change to
 # correspond with the value of $BYTES in lib/warnings.pm
@@ -1078,11 +1075,11 @@ Equivalent to:
 =item warnings::register_categories(@names)
 
 This registers warning categories for the given names and is primarily for
-use by the warnings::register pragma, for which see L<perllexwarn>.
+use by the warnings::register pragma.
 
 =back
 
-See L<perlmodlib/Pragmatic Modules> and L<perllexwarn>.
+See also L<perlmodlib/Pragmatic Modules> and L<perldiag>.
 
 =cut
 
