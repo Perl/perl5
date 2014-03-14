@@ -521,16 +521,16 @@ sub _loose_name ($) {
                     # may already have been read-in and cached.  The cache key
                     # is the class and file to load, and whether the results
                     # need to be inverted.
-                my $found = $Cache{$class, $file, $invert_it};
-                if ($found and ref($found) eq $class) {
-                    print STDERR __LINE__, ": Returning cached swash for '$class,$file,$invert_it' for \\p{$type}\n" if DEBUG;
-                    pop @recursed if @recursed;
-                    return $found;
-                }
+                    my $found = $Cache{$class, $file, $invert_it};
+                    if ($found and ref($found) eq $class) {
+                        print STDERR __LINE__, ": Returning cached swash for '$class,$file,$invert_it' for \\p{$type}\n" if DEBUG;
+                        pop @recursed if @recursed;
+                        return $found;
+                    }
 
-                local $@;
-                local $!;
-                $list = do $file; die $@ if $@;
+                    local $@;
+                    local $!;
+                    $list = do $file; die $@ if $@;
                 }
 
                 $list_is_from_mktables = 1;

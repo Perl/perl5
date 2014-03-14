@@ -3723,22 +3723,22 @@ Perl__swash_to_invlist(pTHX_ SV* const swash)
             invlist = _new_invlist(0);
         }
         else {
-        l = (U8 *) after_strtol;
-
-        /* Get the 0th element, which is needed to setup the inversion list */
-        element0 = (UV) Strtoul((char *)l, &after_strtol, 10);
-        l = (U8 *) after_strtol;
-        invlist = _setup_canned_invlist(elements, element0, &other_elements_ptr);
-        elements--;
-
-        /* Then just populate the rest of the input */
-        while (elements-- > 0) {
-            if (l > lend) {
-                Perl_croak(aTHX_ "panic: Expecting %"UVuf" more elements than available", elements);
-            }
-            *other_elements_ptr++ = (UV) Strtoul((char *)l, &after_strtol, 10);
             l = (U8 *) after_strtol;
-        }
+
+            /* Get the 0th element, which is needed to setup the inversion list */
+            element0 = (UV) Strtoul((char *)l, &after_strtol, 10);
+            l = (U8 *) after_strtol;
+            invlist = _setup_canned_invlist(elements, element0, &other_elements_ptr);
+            elements--;
+
+            /* Then just populate the rest of the input */
+            while (elements-- > 0) {
+                if (l > lend) {
+                    Perl_croak(aTHX_ "panic: Expecting %"UVuf" more elements than available", elements);
+                }
+                *other_elements_ptr++ = (UV) Strtoul((char *)l, &after_strtol, 10);
+                l = (U8 *) after_strtol;
+            }
         }
     }
     else {
