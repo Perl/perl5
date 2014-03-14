@@ -920,19 +920,19 @@ can disable or promote into fatal errors specific warnings using
 C<__WARN__> hooks, as described in L<perlvar> and L<perlfunc/warn>.
 See also L<perldiag> and L<perltrap>.  A fine-grained warning
 facility is also available if you want to manipulate entire classes
-of warnings; see L<warnings> or L<perllexwarn>.
+of warnings; see L<warnings>.
 
 =item B<-W>
 X<-W>
 
 Enables all warnings regardless of C<no warnings> or C<$^W>.
-See L<perllexwarn>.
+See L<warnings>.
 
 =item B<-X>
 X<-X>
 
 Disables all warnings regardless of C<use warnings> or C<$^W>.
-See L<perllexwarn>.
+See L<warnings>.
 
 =item B<-x>
 X<-x>

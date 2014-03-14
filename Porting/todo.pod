@@ -856,7 +856,7 @@ if available-- but B<only> if available, all platforms will B<not>
 have catgets().
 
 For the really pure at heart, consider extending this item to cover
-also the warning messages (see L<perllexwarn>, C<warnings.pl>).
+also the warning messages (see L<warnings>, C<regen/warnings.pl>).
 
 =head1 Tasks that need a knowledge of the interpreter
 
