@@ -3719,6 +3719,10 @@ Perl__swash_to_invlist(pTHX_ SV* const swash)
         /* The first number is a count of the rest */
         l++;
         elements = Strtoul((char *)l, &after_strtol, 10);
+        if (elements == 0) {
+            invlist = _new_invlist(0);
+        }
+        else {
         l = (U8 *) after_strtol;
 
         /* Get the 0th element, which is needed to setup the inversion list */
@@ -3734,6 +3738,7 @@ Perl__swash_to_invlist(pTHX_ SV* const swash)
             }
             *other_elements_ptr++ = (UV) Strtoul((char *)l, &after_strtol, 10);
             l = (U8 *) after_strtol;
+        }
         }
     }
     else {

@@ -14823,8 +14823,9 @@ sub register_file_for_name($$$) {
     # Join all the file path components together, using slashes.
     my $full_filename = join('/', @$directory_ref, $file);
 
-    # All go in the same subdirectory of unicore
-    if ($directory_ref->[0] ne $matches_directory) {
+    # All go in the same subdirectory of unicore, or the special
+    # pseudo-directory '#'
+    if ($directory_ref->[0] !~ / ^ $matches_directory | \# $ /x) {
         Carp::my_carp("Unexpected directory in "
                 .  join('/', @{$directory_ref}, $file));
     }
@@ -17021,8 +17022,12 @@ sub write_all_tables() {
                     push @unhandled_properties, "$table";
                 }
 
-                # An empty table is just the complement of everything.
-                $table->set_complement($All) if $table != $property;
+                # The old way of expressing an empty match list was to
+                # complement the list that matches everything.  The new way is
+                # to create an empty inversion list, but this doesn't work for
+                # annotating, so use the old way then.
+                $table->set_complement($All) if $annotate
+                                                && $table != $property;
             }
             elsif ($expected_empty) {
                 my $because = "";
@@ -17310,8 +17315,45 @@ sub write_all_tables() {
         my $filename;
         my $property = $table->property;
         my $is_property = ($table == $property);
-        if (! $is_property) {
 
+        # For very short tables, instead of writing them out to actual files,
+        # we in-line their inversion list definitions into Heavy.pl.  The
+        # definition replaces the file name, and the special pseudo-directory
+        # '#' is used to signal this.  This significantly cuts down the number
+        # of files written at little extra cost to the hashes in Heavy.pl.
+        # And it means, no run-time files to read to get the definitions.
+        # But short deprecated tables are written anyway, because e.g.,
+        # Gc=Surrogate is the same exact code points as LB=Surrogate, and only
+        # the latter generates a deprecated warning, and so we want to have a
+        # way to distinguish the two.
+        if (! $is_property
+            && $table->status ne $DEPRECATED
+            && ! $annotate  # For annotation, we want to explicitly show
+                            # everything, so keep in files
+            && $table->ranges <= 1)
+        {
+            my @ranges = $table->ranges;
+            my $count = @ranges;
+            if ($count == 0) {
+                $filename = "V0";
+            }
+            else {
+                my $end = $ranges[0]->end;
+                if ($end < $MAX_WORKING_CODEPOINT) {
+                    $count++;
+                    $end = ";" . ($end + 1);
+                }
+                else {  # Extends to infinity, hence no 'end'
+                    $end = "";
+                }
+                $filename = "V$count;" . $ranges[0]->start . $end;
+            }
+            @directory = "#";
+            register_file_for_name($table, \@directory, $filename);
+            next;
+        }
+
+        if (! $is_property) {
             # Match tables for the property go in lib/$subdirectory, which is
             # the property's name.  Don't use the standard file name for this,
             # as may get an unfamiliar alias
