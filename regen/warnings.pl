@@ -470,25 +470,6 @@ while (<DATA>) {
 
 read_only_bottom_close_and_rename($pm);
 
-my $lexwarn = open_new 'pod/perllexwarn.pod', '>';
-open my $oldlexwarn, "pod/perllexwarn.pod"
-  or die "$0 cannot open pod/perllexwarn.pod for reading: $!";
-select +(select($lexwarn), do {
-    while(<$oldlexwarn>) {
-	print;
-	last if /=for warnings.pl begin/;
-    }
-    print "\n";
-    print warningsTree($tree, "    ") ;
-    print "\n";
-    while(<$oldlexwarn>) {
-	last if /=for warnings.pl end/;
-    }
-    do { print } while <$oldlexwarn>;
-})[0];
-
-close_and_rename($lexwarn);
-
 __END__
 package warnings;
 
