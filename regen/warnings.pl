@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# 
+#
 # Regenerate (overwriting only if changed):
 #
 #    lib/warnings.pm
@@ -33,7 +33,7 @@ sub DEFAULT_OFF () { 2 }
 my $tree = {
 
 'all' => [ 5.008, {
-	'io'		=> [ 5.008, { 	
+	'io'		=> [ 5.008, {
 				'pipe' 		=> [ 5.008, DEFAULT_OFF],
        				'unopened'	=> [ 5.008, DEFAULT_OFF],
        				'closed'	=> [ 5.008, DEFAULT_OFF],
@@ -42,7 +42,7 @@ my $tree = {
        				'layer'		=> [ 5.008, DEFAULT_OFF],
 				'syscalls'      => [ 5.019, DEFAULT_OFF],
 			   }],
-     	'syntax'	=> [ 5.008, { 	
+     	'syntax'	=> [ 5.008, {
 				'ambiguous'	=> [ 5.008, DEFAULT_OFF],
 			     	'semicolon'	=> [ 5.008, DEFAULT_OFF],
 			     	'precedence'	=> [ 5.008, DEFAULT_OFF],
@@ -55,7 +55,7 @@ my $tree = {
        	 			'qw'		=> [ 5.008, DEFAULT_OFF],
                                 'illegalproto'  => [ 5.011, DEFAULT_OFF],
 			   }],
-       	'severe'	=> [ 5.008, { 	
+       	'severe'	=> [ 5.008, {
 				'inplace'	=> [ 5.008, DEFAULT_ON],
 	 			'internal'	=> [ 5.008, DEFAULT_OFF],
          			'debugging'	=> [ 5.008, DEFAULT_ON],
@@ -131,7 +131,7 @@ sub valueWalk
 
 	my ($ver, $rest) = @{ $v } ;
 	push @{ $v_list{$ver} }, $k;
-	
+
 	if (ref $rest)
 	  { valueWalk ($rest) }
 
@@ -168,7 +168,7 @@ sub walk
         push @{ $list{$k} }, $NameToValue{uc $k} ;
 	die "Value associated with key '$k' is not an ARRAY reference"
 	    if !ref $v || ref $v ne 'ARRAY' ;
-	
+
 	my ($ver, $rest) = @{ $v } ;
 	if (ref $rest)
 	  { push (@{ $list{$k} }, walk ($rest)) }
@@ -215,7 +215,7 @@ sub printTree
 	$v = $tre->{$k};
 	die "Value associated with key '$k' is not an ARRAY reference"
 	    if !ref $v || ref $v ne 'ARRAY' ;
-	
+
         my $offset ;
 	if ($tre ne $tree) {
 	    print $prefix . "|\n" ;
@@ -287,7 +287,12 @@ my ($warn, $pm) = map {
     open_new($_, '>', { by => 'regen/warnings.pl' });
 } 'warnings.h', 'lib/warnings.pm';
 
-print $warn <<'EOM';
+my ($index, $warn_size);
+
+{
+  # generate warnings.h
+
+  print $warn <<'EOM';
 
 #define Off(x)			((x) / 8)
 #define Bit(x)			(1 << ((x) % 8))
@@ -312,39 +317,38 @@ print $warn <<'EOM';
 #define PERL_WARNHOOK_FATAL	(&PL_sv_placeholder)
 EOM
 
-my $offset = 0 ;
+  my $offset = 0 ;
 
-valueWalk ($tree) ;
-my $index = orderValues();
+  valueWalk ($tree) ;
+  $index = orderValues();
 
-die <<EOM if $index > 255 ;
+  die <<EOM if $index > 255 ;
 Too many warnings categories -- max is 255
-    rewrite packWARN* & unpackWARN* macros 
+    rewrite packWARN* & unpackWARN* macros
 EOM
 
-walk ($tree) ;
+  walk ($tree) ;
 
-$index *= 2 ;
-my $warn_size = int($index / 8) + ($index % 8 != 0) ;
+  $index *= 2 ;
+  $warn_size = int($index / 8) + ($index % 8 != 0) ;
 
-my $k ;
-my $last_ver = 0;
-foreach $k (sort { $a <=> $b } keys %ValueToName) {
-    my ($name, $version) = @{ $ValueToName{$k} };
-    print $warn "\n/* Warnings Categories added in Perl $version */\n\n"
-        if $last_ver != $version ;
-    $name =~ y/:/_/;
-    print $warn tab(5, "#define WARN_$name"), " $k\n" ;
-    $last_ver = $version ;
-}
-print $warn "\n" ;
+  my $k ;
+  my $last_ver = 0;
+  foreach $k (sort { $a <=> $b } keys %ValueToName) {
+      my ($name, $version) = @{ $ValueToName{$k} };
+      print $warn "\n/* Warnings Categories added in Perl $version */\n\n"
+          if $last_ver != $version ;
+      $name =~ y/:/_/;
+      print $warn tab(5, "#define WARN_$name"), " $k\n" ;
+      $last_ver = $version ;
+  }
+  print $warn "\n" ;
 
-print $warn tab(5, '#define WARNsize'),	"$warn_size\n" ;
-#print WARN tab(5, '#define WARN_ALLstring'), '"', ('\377' x $warn_size) , "\"\n" ;
-print $warn tab(5, '#define WARN_ALLstring'), '"', ('\125' x $warn_size) , "\"\n" ;
-print $warn tab(5, '#define WARN_NONEstring'), '"', ('\0' x $warn_size) , "\"\n" ;
+  print $warn tab(5, '#define WARNsize'),	"$warn_size\n" ;
+  print $warn tab(5, '#define WARN_ALLstring'), '"', ('\125' x $warn_size) , "\"\n" ;
+  print $warn tab(5, '#define WARN_NONEstring'), '"', ('\0' x $warn_size) , "\"\n" ;
 
-print $warn <<'EOM';
+  print $warn <<'EOM';
 
 #define isLEXWARN_on 	(PL_curcop->cop_warnings != pWARN_STD)
 #define isLEXWARN_off	(PL_curcop->cop_warnings == pWARN_STD)
@@ -398,14 +402,15 @@ print $warn <<'EOM';
 /* end of file warnings.h */
 EOM
 
-read_only_bottom_close_and_rename($warn);
+  read_only_bottom_close_and_rename($warn);
+}
 
 while (<DATA>) {
     last if /^KEYWORDS$/ ;
     print $pm $_ ;
 }
 
-$last_ver = 0;
+my $last_ver = 0;
 print $pm "our %Offsets = (\n" ;
 foreach my $k (sort { $a <=> $b } keys %ValueToName) {
     my ($name, $version) = @{ $ValueToName{$k} };
@@ -423,7 +428,7 @@ foreach my $k (sort { $a <=> $b } keys %ValueToName) {
 print $pm "  );\n\n" ;
 
 print $pm "our %Bits = (\n" ;
-foreach $k (sort keys  %list) {
+foreach my $k (sort keys  %list) {
 
     my $v = $list{$k} ;
     my @list = sort { $a <=> $b } @$v ;
@@ -436,7 +441,7 @@ foreach $k (sort keys  %list) {
 print $pm "  );\n\n" ;
 
 print $pm "our %DeadBits = (\n" ;
-foreach $k (sort keys  %list) {
+foreach my $k (sort keys  %list) {
 
     my $v = $list{$k} ;
     my @list = sort { $a <=> $b } @$v ;
@@ -685,7 +690,7 @@ sub bits
     return _bits(undef, @_) ;
 }
 
-sub import 
+sub import
 {
     shift;
 
@@ -698,12 +703,12 @@ sub import
 
     # append 'all' when implied (after a lone "FATAL" or "NONFATAL")
     push @_, 'all' if @_==1 && ( $_[0] eq 'FATAL' || $_[0] eq 'NONFATAL' );
-    
+
     # Empty @_ is equivalent to @_ = 'all' ;
     ${^WARNING_BITS} = @_ ? _bits($mask, @_) : $mask | $Bits{all} ;
 }
 
-sub unimport 
+sub unimport
 {
     shift;
 
@@ -720,7 +725,7 @@ sub unimport
 
     foreach my $word ( @_ ) {
 	if ($word eq 'FATAL') {
-	    next; 
+	    next;
 	}
 	elsif ($catmask = $Bits{$word}) {
 	    $mask &= ~($catmask | $DeadBits{$word} | $All);
