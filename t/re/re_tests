@@ -1881,6 +1881,8 @@ A+(*PRUNE)BC(?{})	AAABC	y	$&	AAABC
 /(a)(b)(c)(d)(e)(f)(g)(h)(i)(j)(k)\12\13\14/	abcdefghijk\12\13\14	y	$&	abcdefghijk\12\13\14
 
 \d<(.*?)>	a<>	n	-	-
+[bcd].{2,3}aaaa	XbXaaaaa	y	-	-
+[bcd].{2,3}aaaa	Xb\x{100}aaaaa	y	-	-
 
 # Keep these lines at the end of the file
 # vim: softtabstop=0 noexpandtab

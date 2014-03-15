@@ -1195,10 +1195,15 @@ Perl_re_intuit_start(pTHX_
 		    : 1);
 	char * endpos;
         char *s;
+        /* latest pos that a matching float substr constrains rx start to */
+        char *rx_max_float = NULL;
+
 	if (prog->anchored_substr || prog->anchored_utf8 || ml_anch)
             endpos= HOP3c(rx_origin, (prog->minlen ? cl_l : 0), strend);
-        else if (prog->float_substr || prog->float_utf8)
-	    endpos= HOP3c(HOP3c(check_at, -start_shift, strbeg), cl_l, strend);
+        else if (prog->float_substr || prog->float_utf8) {
+	    rx_max_float = HOP3c(check_at, -start_shift, strbeg);
+	    endpos= HOP3c(rx_max_float, cl_l, strend);
+        }
         else 
             endpos= strend;
 		    
@@ -1255,7 +1260,7 @@ Perl_re_intuit_start(pTHX_
                 if (!(utf8_target ? prog->float_utf8 : prog->float_substr))	/* Could have been deleted */
                     goto fail;
                 /* Check is floating substring. */
-                rx_origin = check_at - start_shift;
+                rx_origin = rx_max_float;
             }
 
             rx_origin = HOP3c(rx_origin, 1, strend);
