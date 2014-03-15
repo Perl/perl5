@@ -1198,6 +1198,14 @@ Perl_re_intuit_start(pTHX_
         /* latest pos that a matching float substr constrains rx start to */
         char *rx_max_float = NULL;
 
+        /* if the current rx_origin is anchored, either by satisfying an
+         * anchored substring constraint, or a /^.../m constraint, then we
+         * can reject the current origin if the start class isn't found
+         * at the current position. If we have a float-only match, then
+         * rx_origin is constrained to a range; so look for the start class
+         * in that range. if neither, then look for the start class in the
+         * whole rest of the string */
+
 	if (prog->anchored_substr || prog->anchored_utf8 || ml_anch)
             endpos= HOP3c(rx_origin, (prog->minlen ? cl_l : 0), strend);
         else if (prog->float_substr || prog->float_utf8) {
@@ -1233,7 +1241,12 @@ Perl_re_intuit_start(pTHX_
                     assert(rx_origin + start_shift <= check_at);
                     if (rx_origin + start_shift != check_at) {
                         /* not at latest position float substr could match:
-                         * Recheck anchored substring, but not floating... */
+                         * Recheck anchored substring, but not floating.
+                         * The condition above is in bytes rather than
+                         * chars for efficiency. It's conservative, in
+                         * that it errs on the side of doing 'goto
+                         * do_other_substr', where a more accurate
+                         * char-based calculation will be done */
                         DEBUG_EXECUTE_r( PerlIO_printf(Perl_debug_log,
                                   "  Looking for anchored substr starting at offset %ld...\n",
                                   (long)(other_last - strpos)) );
@@ -1244,9 +1257,14 @@ Perl_re_intuit_start(pTHX_
 	    else {
                 /* float-only */
 
-                /* Another way we could have checked stclass at the
-                   current position only: */
                 if (ml_anch) {
+                    /* In the presence of ml_anch, we might be able to
+                     * find another \n without breaking the current float
+                     * constraint. */
+
+                    /* strictly speaking this should be HOP3c(..., 1, ...),
+                     * but since we goto a block of code that's going to
+                     * search for the next \n if any, its safe here */
                     rx_origin++;
                     DEBUG_EXECUTE_r( PerlIO_printf(Perl_debug_log,
                               "  Looking for /%s^%s/m starting at offset %ld...\n",
@@ -1254,11 +1272,17 @@ Perl_re_intuit_start(pTHX_
                               (long)(rx_origin - strpos)) );
                     goto postprocess_substr_matches;
                 }
-                if (!(utf8_target ? prog->float_utf8 : prog->float_substr))	/* Could have been deleted */
+
+                /* strictly speaking this can never be true; but might
+                 * be if we ever allow intuit without substrings */
+                if (!(utf8_target ? prog->float_utf8 : prog->float_substr))
                     goto fail;
-                /* Check is floating substring. */
+
                 rx_origin = rx_max_float;
             }
+
+            /* at this point, any matching substrings have been
+             * contradicted. Start again... */
 
             rx_origin = HOP3c(rx_origin, 1, strend);
             if (rx_origin + start_shift + end_shift > strend) {
@@ -1273,6 +1297,8 @@ Perl_re_intuit_start(pTHX_
                 (long)(rx_origin + start_shift - strpos)) );
             goto restart;
 	}
+
+        /* Success !!! */
 
 	if (rx_origin != s) {
             DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
