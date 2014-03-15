@@ -1252,9 +1252,6 @@ Perl_re_intuit_start(pTHX_
                               "  Looking for /%s^%s/m starting at offset %ld...\n",
                               PL_colors[0], PL_colors[1],
                               (long)(rx_origin - strpos)) );
-                    /* XXX DAPM I don't yet know why this is true, but the code
-                     * assumed it when it used to do goto try_at_offset */
-                    assert(rx_origin != strpos);
                     goto postprocess_substr_matches;
                 }
                 if (!(utf8_target ? prog->float_utf8 : prog->float_substr))	/* Could have been deleted */
