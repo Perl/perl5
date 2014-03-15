@@ -49,6 +49,22 @@ XXX For a release on a stable branch, this section aspires to be:
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.
 
+=head2 Discouraged features
+
+=over 4
+
+=item *
+
+The "interpreter-based threads" provided by Perl are not the fast, lightweight
+system for multitasking that one might expect or hope for.  Threads are
+implemented in a way that make them easy to misuse.  Few people know how to
+use them correctly or will be able to provide help.
+
+The use of interpreter-based threads in perl is officially
+L<discouraged|perlpolicy/discouraged>.
+
+=back
+
 =head2 Module removals
 
 XXX Remove this section if inapplicable.
@@ -89,7 +105,37 @@ There may well be none in a stable release.
 
 =item *
 
-XXX
+When doing a global regex match on a string that came from the C<readline>
+or C<E<lt>E<gt>> operator, the data is no longer copied unnecessarily.
+[perl #121259]
+
+=item *
+
+It is now faster to create certain sorts of lists, including array and hash
+slices.
+
+=item *
+
+The optimisation for arrays indexed with a small constant integer is now
+applied for integers in the range -128..127, rather than 0..255. This should
+speed up Perl code using expressions like C<$x[-1]>, at the expense of
+(presumably much rarer) code using expressions like C<$x[200]>.
+
+=item *
+
+Dereferencing (as in C<$obj-E<gt>[0]> or C<$obj-E<gt>{k}>) is now faster
+when C<$obj> is an instance of a class that has overloaded methods, but
+doesn't overload any of the dereferencing methods C<@{}>, C<%{}>, and so on.
+
+=item *
+
+A few micro-optimisations have been applied to performance-sensitive parts
+of the implementation, including subroutine invocation and scope exit.
+
+=item *
+
+Perl now does less disk I/O when dealing with Unicode properties that cover
+only a single range of consecutive code points.
 
 =back
 
@@ -240,7 +286,8 @@ XXX Changes (i.e. rewording) of diagnostic messages go here
 
 =item *
 
-XXX Describe change here
+When C<use re "debug"> executes a regex containing a backreference, the
+debugging output now shows what string is being matched.
 
 =back
 
@@ -363,7 +410,16 @@ well.
 
 =item *
 
-XXX
+The Perl core now consistently uses C<av_tindex()> ("the top index of an
+array") as a more clearly-named synonym for C<av_len()>.
+
+=item *
+
+The obscure interpreter variable C<PL_timesbuf> is expected to be removed
+early in the 5.21.x development series, so that Perl 5.22.0 will not provide
+it to XS authors.  While the variable still exists in 5.19.10 (and will
+continue to exist in 5.20.0), we hope that this advance warning of the
+deprecation will help anyone who is using that variable.
 
 =back
 
