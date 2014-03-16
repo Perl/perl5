@@ -1512,10 +1512,9 @@ PP(pp_sort)
     SAVEVPTR(PL_sortcop);
     if (flags & OPf_STACKED) {
 	if (flags & OPf_SPECIAL) {
-	    OP *kid = cLISTOP->op_first->op_sibling;	/* pass pushmark */
-	    kid = kUNOP->op_first;			/* pass rv2gv */
-	    kid = kUNOP->op_first;			/* pass leave */
-	    PL_sortcop = kid->op_next;
+	    OP *nullop = cLISTOP->op_first->op_sibling;	/* pass pushmark */
+            assert(nullop->op_type == OP_NULL);
+	    PL_sortcop = nullop->op_next;
 	}
 	else {
 	    GV *autogv = NULL;

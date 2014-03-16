@@ -109,6 +109,24 @@ recursive, but it's recursive on basic blocks, not on tree nodes.
 #define CALL_RPEEP(o) PL_rpeepp(aTHX_ o)
 #define CALL_OPFREEHOOK(o) if (PL_opfreehook) PL_opfreehook(aTHX_ o)
 
+/* remove any leading "empty" ops from the op_next chain whose first
+ * node's address is stored in op_p. Store the updated address of the
+ * first node in op_p.
+ */
+
+STATIC void
+S_prune_chain_head(pTHX_ OP** op_p)
+{
+    while (*op_p
+        && (   (*op_p)->op_type == OP_NULL
+            || (*op_p)->op_type == OP_SCOPE
+            || (*op_p)->op_type == OP_SCALAR
+            || (*op_p)->op_type == OP_LINESEQ)
+    )
+        *op_p = (*op_p)->op_next;
+}
+
+
 /* See the explanatory comments above struct opslab in op.h. */
 
 #ifdef PERL_DEBUG_READONLY_OPS
@@ -3297,6 +3315,7 @@ Perl_newPROG(pTHX_ OP *o)
 	ENTER;
 	CALL_PEEP(PL_eval_start);
 	finalize_optree(PL_eval_root);
+        S_prune_chain_head(aTHX_ &PL_eval_start);
 	LEAVE;
 	PL_savestack_ix = i;
     }
@@ -3341,6 +3360,7 @@ Perl_newPROG(pTHX_ OP *o)
 	PL_main_root->op_next = 0;
 	CALL_PEEP(PL_main_start);
 	finalize_optree(PL_main_root);
+        S_prune_chain_head(aTHX_ &PL_main_start);
 	cv_forget_slab(PL_compcv);
 	PL_compcv = 0;
 
@@ -3647,9 +3667,11 @@ S_gen_constant_list(pTHX_ OP *o)
     if (PL_parser && PL_parser->error_count)
 	return o;		/* Don't attempt to run with errors */
 
-    PL_op = curop = LINKLIST(o);
+    curop = LINKLIST(o);
     o->op_next = 0;
     CALL_PEEP(curop);
+    S_prune_chain_head(aTHX_ &curop);
+    PL_op = curop;
     Perl_pp_pushmark(aTHX);
     CALLRUNOPS(aTHX);
     PL_op = curop;
@@ -4876,6 +4898,7 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg, I32 floor)
 	    /* have to peep the DOs individually as we've removed it from
 	     * the op_next chain */
 	    CALL_PEEP(o);
+            S_prune_chain_head(aTHX_ &(o->op_next));
 	    if (is_compiletime)
 		/* runtime finalizes as part of finalizing whole tree */
 		finalize_optree(o);
@@ -7599,6 +7622,7 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
     CvROOT(cv)->op_next = 0;
     CALL_PEEP(CvSTART(cv));
     finalize_optree(CvROOT(cv));
+    S_prune_chain_head(aTHX_ &CvSTART(cv));
 
     /* now that optimizer has done its work, adjust pad values */
 
@@ -7954,6 +7978,7 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
     CvROOT(cv)->op_next = 0;
     CALL_PEEP(CvSTART(cv));
     finalize_optree(CvROOT(cv));
+    S_prune_chain_head(aTHX_ &CvSTART(cv));
 
     /* now that optimizer has done its work, adjust pad values */
 
@@ -8351,6 +8376,7 @@ Perl_newFORM(pTHX_ I32 floor, OP *o, OP *block)
     CvROOT(cv)->op_next = 0;
     CALL_PEEP(CvSTART(cv));
     finalize_optree(CvROOT(cv));
+    S_prune_chain_head(aTHX_ &CvSTART(cv));
     cv_forget_slab(cv);
 
   finish:
@@ -9962,9 +9988,12 @@ Perl_ck_sort(pTHX_ OP *o)
     if (o->op_flags & OPf_STACKED)
 	simplify_sort(o);
     firstkid = cLISTOPo->op_first->op_sibling;		/* get past pushmark */
+
     if ((stacked = o->op_flags & OPf_STACKED)) {	/* may have been cleared */
 	OP *kid = cUNOPx(firstkid)->op_first;		/* get past null */
 
+        /* if the first arg is a code block, process it and mark sort as
+         * OPf_SPECIAL */
 	if (kid->op_type == OP_SCOPE || kid->op_type == OP_LEAVE) {
 	    LINKLIST(kid);
 	    if (kid->op_type == OP_LEAVE)
@@ -9990,6 +10019,16 @@ Perl_ck_sort(pTHX_ OP *o)
 
     return o;
 }
+
+/* for sort { X } ..., where X is one of
+ *   $a <=> $b, $b <= $a, $a cmp $b, $b cmp $a
+ * elide the second child of the sort (the one containing X),
+ * and set these flags as appropriate
+	OPpSORT_NUMERIC;
+	OPpSORT_INTEGER;
+	OPpSORT_DESCEND;
+ * Also, check and warn on lexical $a, $b.
+ */
 
 STATIC void
 S_simplify_sort(pTHX_ OP *o)
@@ -11136,20 +11175,27 @@ S_inplace_aassign(pTHX_ OP *o) {
     op_null(oleft);
 }
 
+
+
+/* mechanism for deferring recursion in rpeep() */
+
 #define MAX_DEFERRED 4
 
 #define DEFER(o) \
   STMT_START { \
     if (defer_ix == (MAX_DEFERRED-1)) { \
-	CALL_RPEEP(defer_queue[defer_base]); \
+        OP **defer = defer_queue[defer_base]; \
+        CALL_RPEEP(*defer); \
+        S_prune_chain_head(aTHX_ defer); \
 	defer_base = (defer_base + 1) % MAX_DEFERRED; \
 	defer_ix--; \
     } \
-    defer_queue[(defer_base + ++defer_ix) % MAX_DEFERRED] = o; \
+    defer_queue[(defer_base + ++defer_ix) % MAX_DEFERRED] = &(o); \
   } STMT_END
 
 #define IS_AND_OP(o)   (o->op_type == OP_AND)
 #define IS_OR_OP(o)    (o->op_type == OP_OR)
+
 
 STATIC void
 S_null_listop_in_list_context(pTHX_ OP *o)
@@ -11181,7 +11227,7 @@ Perl_rpeep(pTHX_ OP *o)
     dVAR;
     OP* oldop = NULL;
     OP* oldoldop = NULL;
-    OP* defer_queue[MAX_DEFERRED]; /* small queue of deferred branches */
+    OP** defer_queue[MAX_DEFERRED]; /* small queue of deferred branches */
     int defer_base = 0;
     int defer_ix = -1;
 
@@ -11194,8 +11240,12 @@ Perl_rpeep(pTHX_ OP *o)
 	if (o && o->op_opt)
 	    o = NULL;
 	if (!o) {
-	    while (defer_ix >= 0)
-		CALL_RPEEP(defer_queue[(defer_base + defer_ix--) % MAX_DEFERRED]);
+	    while (defer_ix >= 0) {
+                OP **defer =
+                        defer_queue[(defer_base + defer_ix--) % MAX_DEFERRED];
+                CALL_RPEEP(*defer);
+                S_prune_chain_head(aTHX_ defer);
+            }
 	    break;
 	}
 
@@ -11440,7 +11490,7 @@ Perl_rpeep(pTHX_ OP *o)
 	case OP_LINESEQ:
 	case OP_SCOPE:
 	nothin:
-	    if (oldop && o->op_next) {
+	    if (oldop) {
 		oldop->op_next = o->op_next;
 		o->op_opt = 0;
 		continue;
@@ -11871,6 +11921,11 @@ Perl_rpeep(pTHX_ OP *o)
 	    DEFER(cLOOP->op_lastop);
 	    break;
 
+        case OP_ENTERTRY:
+	    assert(cLOGOPo->op_other->op_type == OP_LEAVETRY);
+	    DEFER(cLOGOPo->op_other);
+	    break;
+
 	case OP_SUBST:
 	    assert(!(cPMOP->op_pmflags & PMf_ONCE));
 	    while (cPMOP->op_pmstashstartu.op_pmreplstart &&
@@ -11883,12 +11938,28 @@ Perl_rpeep(pTHX_ OP *o)
 	case OP_SORT: {
 	    OP *oright;
 
-	    if (o->op_flags & OPf_STACKED) {
-		OP * const kid =
-		    cUNOPx(cLISTOP->op_first->op_sibling)->op_first;
-		if (kid->op_type == OP_SCOPE
-		 || (kid->op_type == OP_NULL && kid->op_targ == OP_LEAVE))
-		    DEFER(kLISTOP->op_first);
+	    if (o->op_flags & OPf_SPECIAL) {
+                /* first arg is a code block */
+		OP * const nullop = cLISTOP->op_first->op_sibling;
+                OP * kid          = cUNOPx(nullop)->op_first;
+
+                assert(nullop->op_type == OP_NULL);
+		assert(kid->op_type == OP_SCOPE
+		 || (kid->op_type == OP_NULL && kid->op_targ == OP_LEAVE));
+                /* since OP_SORT doesn't have a handy op_other-style
+                 * field that can point directly to the start of the code
+                 * block, store it in the otherwise-unused op_next field
+                 * of the top-level OP_NULL. This will be quicker at
+                 * run-time, and it will also allow us to remove leading
+                 * OP_NULLs by just messing with op_nexts without
+                 * altering the basic op_first/op_sibling layout. */
+                kid = kLISTOP->op_first;
+                assert(
+                      (kid->op_type == OP_NULL && kid->op_targ == OP_NEXTSTATE)
+                    || kid->op_type == OP_STUB
+                    || kid->op_type == OP_ENTER);
+                nullop->op_next = kLISTOP->op_next;
+                DEFER(nullop->op_next);
 	    }
 
 	    /* check that RHS of sort is a single plain array */
@@ -12040,6 +12111,23 @@ Perl_rpeep(pTHX_ OP *o)
 	    if (OP_GIMME(o,0) == G_VOID) {
 		OP *right = cBINOP->op_first;
 		if (right) {
+                    /*   sassign
+                    *      RIGHT
+                    *      substr
+                    *         pushmark
+                    *         arg1
+                    *         arg2
+                    *         ...
+                    * becomes
+                    *
+                    *  ex-sassign
+                    *     substr
+                    *        pushmark
+                    *        RIGHT
+                    *        arg1
+                    *        arg2
+                    *        ...
+                    */
 		    OP *left = right->op_sibling;
 		    if (left->op_type == OP_SUBSTR
 			 && (left->op_private & 7) < 4) {
@@ -12065,8 +12153,16 @@ Perl_rpeep(pTHX_ OP *o)
 	}
 	    
 	}
-	oldoldop = oldop;
-	oldop = o;
+        /* did we just null the current op? If so, re-process it to handle
+         * eliding "empty" ops from the chain */
+        if (o->op_type == OP_NULL && oldop && oldop->op_next == o) {
+            o->op_opt = 0;
+            o = oldop;
+        }
+        else {
+            oldoldop = oldop;
+            oldop = o;
+        }
     }
     LEAVE;
 }

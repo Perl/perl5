@@ -6579,10 +6579,9 @@ STATIC I32	S_sv_ncmp(pTHX_ SV *const a, SV *const b)
 #if defined(PERL_IN_PP_SYS_C)
 STATIC OP*	S_doform(pTHX_ CV *cv, GV *gv, OP *retop)
 			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2)
-			__attribute__nonnull__(pTHX_3);
+			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_DOFORM	\
-	assert(cv); assert(gv); assert(retop)
+	assert(cv); assert(gv)
 
 STATIC SV *	S_space_join_names_mortal(pTHX_ char *const *array)
 			__attribute__nonnull__(pTHX_1);
