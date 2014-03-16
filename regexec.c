@@ -767,7 +767,13 @@ Perl_re_intuit_start(pTHX_
 
             /* in the presence of an anchor, the anchored (relative to the
              * start of the regex) substr must also be anchored relative
-             * to strpos. So quickly reject if substr isn't found there */
+             * to strpos. So quickly reject if substr isn't found there.
+             * This works for \G too, because the caller will already have
+             * subtracted gofs from pos, and gofs is the offset from the
+             * \G to the start of the regex. For example, in /.abc\Gdef/,
+             * where substr="abcdef", pos()=3, gofs=4, offset_min=1:
+             * caller will have set strpos=pos()-4; we look for the substr
+             * at position pos()-4+1, which lines up with the "a" */
 
 	    if (prog->check_offset_min == prog->check_offset_max
                 && !(prog->intflags & PREGf_CANY_SEEN)
@@ -822,11 +828,29 @@ Perl_re_intuit_start(pTHX_
 #endif
 
   restart:
-    /* Find a candidate regex origin in the region rx_origin..strend
-     * by looking for the "check" substring in that region, corrected by
-     * start/end_shift.
-     */
     
+    /* This is the (re)entry point of the main loop in this function.
+     * The goal of this loop is to:
+     * 1) find the "check" substring in the region rx_origin..strend
+     *    (adjusted by start_shift / end_shift). If not found, reject
+     *    immediately.
+     * 2) If it exists, look for the "other" substr too if defined; for
+     *    example, if the check substr maps to the anchored substr, then
+     *    check the floating substr, and vice-versa. If not found, go
+     *    back to (1) with rx_origin suitably incremented.
+     * 3) If we find an rx_origin position that doesn't contradict
+     *    either of the substrings, then check the possible additional
+     *    constraints on rx_origin of /^.../m or a known start class.
+     *    If these fail, then depending on which constraints fail, jump
+     *    back to here, or to various other re-entry points further along
+     *    that skip some of the first steps.
+     * 4) If we pass all those tests, update the BmUSEFUL() count on the
+     *    substring. If the start position was determined to be at the
+     *    beginning of the string  - so, not rejected, but not optimised,
+     *    since we have to run regmatch from position 0 - decrement the
+     *    BmUSEFUL() count. Otherwise increment it.
+     */
+
     {
         U8* start_point;
         U8* end_point;
