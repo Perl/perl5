@@ -119,6 +119,7 @@ static const char* const non_utf8_target_but_utf8_required
 	    ? reghop3((U8*)pos, off, \
                     (U8*)(off >= 0 ? reginfo->strend : reginfo->strbeg)) \
 	    : (U8*)(pos + off))
+
 #define HOPBACKc(pos, off) \
 	(char*)(reginfo->is_utf8_target \
 	    ? reghopmaybe3((U8*)pos, -off, (U8*)(reginfo->strbeg)) \
@@ -128,6 +129,14 @@ static const char* const non_utf8_target_but_utf8_required
 
 #define HOP3(pos,off,lim) (reginfo->is_utf8_target  ? reghop3((U8*)(pos), off, (U8*)(lim)) : (U8*)(pos + off))
 #define HOP3c(pos,off,lim) ((char*)HOP3(pos,off,lim))
+
+/* lim must be +ve. Returns NULL on overshoot */
+#define HOPMAYBE3(pos,off,lim) \
+	(reginfo->is_utf8_target                        \
+	    ? reghopmaybe3((U8*)pos, off, (U8*)(lim))   \
+	    : ((U8*)pos + off <= lim)                   \
+		? (U8*)pos + off                        \
+		: NULL)
 
 /* like HOP3, but limits the result to <= lim even for the non-utf8 case.
  * off must be >=0; args should be vars rather than expressions */
@@ -837,10 +846,15 @@ Perl_re_intuit_start(pTHX_
         if (prog->intflags & PREGf_CANY_SEEN) {
             start_point= (U8*)(rx_origin + start_shift);
             end_point= (U8*)(strend - end_shift);
+            if (start_point > end_point)
+                goto fail_finish;
         } else {
-	    start_point= HOP3(rx_origin, start_shift, strend);
-            end_point= HOP3(strend, -end_shift, strbeg);
+            end_point = HOP3(strend, -end_shift, strbeg);
+	    start_point = HOPMAYBE3(rx_origin, start_shift, end_point);
+            if (!start_point)
+                goto fail_finish;
 	}
+
 
         /* if the regex is absolutely anchored to the start of the string,
          * then check_offset_max represents an upper bound on the string
@@ -1285,8 +1299,11 @@ Perl_re_intuit_start(pTHX_
              * contradicted. Start again... */
 
             rx_origin = HOP3c(rx_origin, 1, strend);
+
+            /* uses bytes rather than char calculations for efficiency.
+             * It's conservative: it errs on the side of doing 'goto restart',
+             * where there is code that does a proper char-based test */
             if (rx_origin + start_shift + end_shift > strend) {
-                /* XXXX Should be taken into account earlier? */
                 DEBUG_EXECUTE_r( PerlIO_printf(Perl_debug_log,
                                        "  Could not match STCLASS...\n") );
                 goto fail;
@@ -7836,6 +7853,9 @@ S_reghop4(U8 *s, SSize_t off, const U8* llim, const U8* rlim)
     }
     return s;
 }
+
+/* like reghop3, but returns NULL on overrun, rather than returning last
+ * char pos */
 
 STATIC U8 *
 S_reghopmaybe3(U8* s, SSize_t off, const U8* lim)
