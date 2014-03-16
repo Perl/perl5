@@ -119,6 +119,7 @@ static const char* const non_utf8_target_but_utf8_required
 	    ? reghop3((U8*)pos, off, \
                     (U8*)(off >= 0 ? reginfo->strend : reginfo->strbeg)) \
 	    : (U8*)(pos + off))
+
 #define HOPBACKc(pos, off) \
 	(char*)(reginfo->is_utf8_target \
 	    ? reghopmaybe3((U8*)pos, -off, (U8*)(reginfo->strbeg)) \
@@ -128,6 +129,14 @@ static const char* const non_utf8_target_but_utf8_required
 
 #define HOP3(pos,off,lim) (reginfo->is_utf8_target  ? reghop3((U8*)(pos), off, (U8*)(lim)) : (U8*)(pos + off))
 #define HOP3c(pos,off,lim) ((char*)HOP3(pos,off,lim))
+
+/* lim must be +ve. Returns NULL on overshoot */
+#define HOPMAYBE3(pos,off,lim) \
+	(reginfo->is_utf8_target                        \
+	    ? reghopmaybe3((U8*)pos, off, (U8*)(lim))   \
+	    : ((U8*)pos + off <= lim)                   \
+		? (U8*)pos + off                        \
+		: NULL)
 
 /* like HOP3, but limits the result to <= lim even for the non-utf8 case.
  * off must be >=0; args should be vars rather than expressions */
@@ -563,64 +572,70 @@ Perl_pregexec(pTHX_ REGEXP * const prog, char* stringarg, char *strend,
 }
 #endif
 
-/*
- * Need to implement the following flags for reg_anch:
+
+
+/* re_intuit_start():
  *
- * USE_INTUIT_NOML		- Useful to call re_intuit_start() first
- * USE_INTUIT_ML
- * INTUIT_AUTORITATIVE_NOML	- Can trust a positive answer
- * INTUIT_AUTORITATIVE_ML
- * INTUIT_ONCE_NOML		- Intuit can match in one location only.
- * INTUIT_ONCE_ML
+ * Based on some optimiser hints, try to find the earliest position in the
+ * string where the regex could match.
  *
- * Another flag for this function: SECOND_TIME (so that float substrs
- * with giant delta may be not rechecked).
- */
-
-/* If SCREAM, then SvPVX_const(sv) should be compatible with strpos and strend.
-   Otherwise, only SvCUR(sv) is used to get strbeg. */
-
-/* XXXX Some places assume that there is a fixed substring.
-	An update may be needed if optimizer marks as "INTUITable"
-	RExen without fixed substrings.  Similarly, it is assumed that
-	lengths of all the strings are no more than minlen, thus they
-	cannot come from lookahead.
-	(Or minlen should take into account lookahead.) 
-  NOTE: Some of this comment is not correct. minlen does now take account
-  of lookahead/behind. Further research is required. -- demerphq
-
-*/
-
-/* A failure to find a constant substring means that there is no need to make
-   an expensive call to REx engine, thus we celebrate a failure.  Similarly,
-   finding a substring too deep into the string means that fewer calls to
-   regtry() should be needed.
-
-   REx compiler's optimizer found 4 possible hints:
-	a) Anchored substring;
-	b) Fixed substring;
-	c) Whether we are anchored (beginning-of-line or \G);
-	d) First node (of those at offset 0) which may distinguish positions;
-   We use a)b)d) and multiline-part of c), and try to find a position in the
-   string which does not contradict any of them.
- */
-
-/* Most of decisions we do here should have been done at compile time.
-   The nodes of the REx which we used for the search should have been
-   deleted from the finite automaton. */
-
-/* args:
- * rx:     the regex to match against
- * sv:     the SV being matched: only used for utf8 flag; the string
- *         itself is accessed via the pointers below. Note that on
- *         something like an overloaded SV, SvPOK(sv) may be false
- *         and the string pointers may point to something unrelated to
- *         the SV itself.
- * strbeg: real beginning of string
- * strpos: the point in the string at which to begin matching
- * strend: pointer to the byte following the last char of the string
- * flags   currently unused; set to 0
- * data:   currently unused; set to NULL
+ *   rx:     the regex to match against
+ *   sv:     the SV being matched: only used for utf8 flag; the string
+ *           itself is accessed via the pointers below. Note that on
+ *           something like an overloaded SV, SvPOK(sv) may be false
+ *           and the string pointers may point to something unrelated to
+ *           the SV itself.
+ *   strbeg: real beginning of string
+ *   strpos: the point in the string at which to begin matching
+ *   strend: pointer to the byte following the last char of the string
+ *   flags   currently unused; set to 0
+ *   data:   currently unused; set to NULL
+ *
+ * The basic idea of re_intuit_start() is to use some known information
+ * about the pattern, namely:
+ *
+ *   a) the longest known anchored substring (i.e. one that's at a
+ *      constant offset from the beginning of the pattern; but not
+ *      necessarily at a fixed offset from the beginning of the
+ *      string);
+ *   b) the longest floating substring (i.e. one that's not at a constant
+ *      offset from the beginning of the pattern);
+ *   c) Whether the pattern is anchored to the string; either
+ *      an absolute anchor: /^../, or anchored to \n: /^.../m,
+ *      or anchored to pos(): /\G/;
+ *   d) A start class: a real or synthetic character class which
+ *      represents which characters are legal at the start of the pattern;
+ *
+ * to either quickly reject the match, or to find the earliest position
+ * within the string at which the pattern might match, thus avoiding
+ * running the full NFA engine at those earlier locations, only to
+ * eventually fail and retry further along.
+ *
+ * Returns NULL if the pattern can't match, or returns the address within
+ * the string which is the earliest place the match could occur.
+ *
+ * The longest of the anchored and floating substrings is called 'check'
+ * and is checked first. The other is called 'other' and is checked
+ * second. The 'other' substring may not be present.  For example,
+ *
+ *    /(abc|xyz)ABC\d{0,3}DEFG/
+ *
+ * will have
+ *
+ *   check substr (float)    = "DEFG", offset 6..9 chars
+ *   other substr (anchored) = "ABC",  offset 3..3 chars
+ *   stclass = [ax]
+ *
+ * Be aware that during the course of this function, sometimes 'anchored'
+ * refers to a substring being anchored relative to the start of the
+ * pattern, and sometimes to the pattern itself being anchored relative to
+ * the string. For example:
+ *
+ *   /\dabc/:   "abc" is anchored to the pattern;
+ *   /^\dabc/:  "abc" is anchored to the pattern and the string;
+ *   /\d+abc/:  "abc" is anchored to neither the pattern nor the string;
+ *   /^\d+abc/: "abc" is anchored to neither the pattern nor the string,
+ *                    but the pattern is anchored to the string.
  */
 
 char *
@@ -635,7 +650,7 @@ Perl_re_intuit_start(pTHX_
 {
     dVAR;
     struct regexp *const prog = ReANY(rx);
-    SSize_t start_shift = 0;
+    SSize_t start_shift = prog->check_offset_min;
     /* Should be nonnegative! */
     SSize_t end_shift   = 0;
     /* current lowest pos in string where the regex can start matching */
@@ -646,7 +661,6 @@ Perl_re_intuit_start(pTHX_
     bool ml_anch = 0;
     char *other_last = strpos;/* latest pos 'other' substr already checked to */
     char *check_at = NULL;		/* check substr found at this pos */
-    char *checked_upto = NULL;          /* how far into the string we have already checked using find_byclass*/
     const I32 multiline = prog->extflags & RXf_PMf_MULTILINE;
     RXi_GET_DECL(prog,progi);
     regmatch_info reginfo_buf;  /* create some info to pass to find_byclass */
@@ -674,7 +688,7 @@ Perl_re_intuit_start(pTHX_
     assert(prog->substrs->data[2].max_offset >= 0);
 
     /* for now, assume that if both present, that the floating substring
-     * follows the anchored substring, and that they don't overlap.
+     * doesn't start before the anchored substring.
      * If you break this assumption (e.g. doing better optimisations
      * with lookahead/behind), then you'll need to audit the code in this
      * function carefully first
@@ -684,7 +698,9 @@ Perl_re_intuit_start(pTHX_
               && (prog->float_utf8    || prog->float_substr))
            || (prog->float_min_offset >= prog->anchored_offset));
 
-    /* CHR_DIST() would be more correct here but it makes things slow. */
+    /* byte rather than char calculation for efficiency. It fails
+     * to quickly reject some cases that can't match, but will reject
+     * them later after doing full char arithmetic */
     if (prog->minlen > strend - strpos) {
 	DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
 			      "  String too short...\n"));
@@ -759,7 +775,13 @@ Perl_re_intuit_start(pTHX_
 
             /* in the presence of an anchor, the anchored (relative to the
              * start of the regex) substr must also be anchored relative
-             * to strpos. So quickly reject if substr isn't found there */
+             * to strpos. So quickly reject if substr isn't found there.
+             * This works for \G too, because the caller will already have
+             * subtracted gofs from pos, and gofs is the offset from the
+             * \G to the start of the regex. For example, in /.abc\Gdef/,
+             * where substr="abcdef", pos()=3, gofs=4, offset_min=1:
+             * caller will have set strpos=pos()-4; we look for the substr
+             * at position pos()-4+1, which lines up with the "a" */
 
 	    if (prog->check_offset_min == prog->check_offset_max
                 && !(prog->intflags & PREGf_CANY_SEEN)
@@ -805,7 +827,6 @@ Perl_re_intuit_start(pTHX_
 	}
     }
 
-    start_shift = prog->check_offset_min;  /* okay to underestimate on CC */
     end_shift = prog->check_end_shift;
 
 #ifdef DEBUGGING	/* 7/99: reports of failure (with the older version) */
@@ -815,11 +836,32 @@ Perl_re_intuit_start(pTHX_
 #endif
 
   restart:
-    /* Find a candidate regex origin in the region rx_origin..strend
-     * by looking for the "check" substring in that region, corrected by
-     * start/end_shift.
-     */
     
+    /* This is the (re)entry point of the main loop in this function.
+     * The goal of this loop is to:
+     * 1) find the "check" substring in the region rx_origin..strend
+     *    (adjusted by start_shift / end_shift). If not found, reject
+     *    immediately.
+     * 2) If it exists, look for the "other" substr too if defined; for
+     *    example, if the check substr maps to the anchored substr, then
+     *    check the floating substr, and vice-versa. If not found, go
+     *    back to (1) with rx_origin suitably incremented.
+     * 3) If we find an rx_origin position that doesn't contradict
+     *    either of the substrings, then check the possible additional
+     *    constraints on rx_origin of /^.../m or a known start class.
+     *    If these fail, then depending on which constraints fail, jump
+     *    back to here, or to various other re-entry points further along
+     *    that skip some of the first steps.
+     * 4) If we pass all those tests, update the BmUSEFUL() count on the
+     *    substring. If the start position was determined to be at the
+     *    beginning of the string  - so, not rejected, but not optimised,
+     *    since we have to run regmatch from position 0 - decrement the
+     *    BmUSEFUL() count. Otherwise increment it.
+     */
+
+
+    /* first, look for the 'check' substring */
+
     {
         U8* start_point;
         U8* end_point;
@@ -839,10 +881,15 @@ Perl_re_intuit_start(pTHX_
         if (prog->intflags & PREGf_CANY_SEEN) {
             start_point= (U8*)(rx_origin + start_shift);
             end_point= (U8*)(strend - end_shift);
+            if (start_point > end_point)
+                goto fail_finish;
         } else {
-	    start_point= HOP3(rx_origin, start_shift, strend);
-            end_point= HOP3(strend, -end_shift, strbeg);
+            end_point = HOP3(strend, -end_shift, strbeg);
+	    start_point = HOPMAYBE3(rx_origin, start_shift, end_point);
+            if (!start_point)
+                goto fail_finish;
 	}
+
 
         /* if the regex is absolutely anchored to the start of the string,
          * then check_offset_max represents an upper bound on the string
@@ -868,50 +915,38 @@ Perl_re_intuit_start(pTHX_
 
 	check_at = fbm_instr( start_point, end_point,
 		      check, multiline ? FBMrf_MULTILINE : 0);
+
+        /* Update the count-of-usability, remove useless subpatterns,
+            unshift s.  */
+
+        DEBUG_EXECUTE_r({
+            RE_PV_QUOTED_DECL(quoted, utf8_target, PERL_DEBUG_PAD_ZERO(0),
+                SvPVX_const(check), RE_SV_DUMPLEN(check), 30);
+            PerlIO_printf(Perl_debug_log, "  %s %s substr %s%s%s",
+                              (check_at ? "Found" : "Did not find"),
+                (check == (utf8_target ? prog->anchored_utf8 : prog->anchored_substr)
+                    ? "anchored" : "floating"),
+                quoted,
+                RE_SV_TAIL(check),
+                (check_at ? " at offset " : "...\n") );
+        });
+
+        if (!check_at)
+            goto fail_finish;
+        /* Finish the diagnostic message */
+        DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "%ld...\n", (long)(check_at - strpos)) );
+
+        /* set rx_origin to the minimum position where the regex could start
+         * matching, given the constraint of the just-matched check substring.
+         * But don't set it lower than previously.
+         */
+
+        if (check_at - rx_origin > prog->check_offset_max)
+            rx_origin = HOP3c(check_at, -prog->check_offset_max, rx_origin);
     }
 
-    /* Update the count-of-usability, remove useless subpatterns,
-	unshift s.  */
 
-    DEBUG_EXECUTE_r({
-        RE_PV_QUOTED_DECL(quoted, utf8_target, PERL_DEBUG_PAD_ZERO(0),
-            SvPVX_const(check), RE_SV_DUMPLEN(check), 30);
-        PerlIO_printf(Perl_debug_log, "  %s %s substr %s%s%s",
-			  (check_at ? "Found" : "Did not find"),
-	    (check == (utf8_target ? prog->anchored_utf8 : prog->anchored_substr)
-	        ? "anchored" : "floating"),
-	    quoted,
-	    RE_SV_TAIL(check),
-	    (check_at ? " at offset " : "...\n") );
-    });
-
-    if (!check_at)
-	goto fail_finish;
-    /* Finish the diagnostic message */
-    DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "%ld...\n", (long)(check_at - strpos)) );
-
-    /* set rx_origin to the minimum position where the regex could start
-     * matching, given the constraint of the just-matched check substring.
-     * But don't set it lower than previously.
-     */
-
-    if (check_at - rx_origin > prog->check_offset_max)
-        rx_origin = HOP3c(check_at, -prog->check_offset_max, rx_origin);
-
-
-    /* XXX dmq: first branch is for positive lookbehind...
-       Our check string is offset from the beginning of the pattern.
-       So we need to do any stclass tests offset forward from that 
-       point. I think. :-(
-     */
-    
-    /* Got a candidate.  Check MBOL anchoring, and the *other* substr.
-       Start with the other substr.
-       XXXX no SCREAM optimization yet - and a very coarse implementation
-       XXXX /ttx+/ results in anchored="ttx", floating="x".  floating will
-		*always* match.  Probably should be marked during compile...
-       Probably it is right to do no SCREAM here...
-     */
+    /* now look for the 'other' substring if defined */
 
     if (utf8_target ? prog->substrs->data[other_ix].utf8_substr
                     : prog->substrs->data[other_ix].substr)
@@ -1090,7 +1125,7 @@ Perl_re_intuit_start(pTHX_
 
   postprocess_substr_matches:
 
-    /* handle the extra constraint of /^/m  */
+    /* handle the extra constraint of /^.../m if present */
 
     if (ml_anch && rx_origin != strbeg && rx_origin[-1] != '\n'
         /* May be due to an implicit anchor of m{.*foo}  */
@@ -1171,6 +1206,160 @@ Perl_re_intuit_start(pTHX_
             PL_colors[0], PL_colors[1]));
     }
 
+  success_at_start:
+
+
+    /* if we have a starting character class, then test that extra constraint.
+     * (trie stclasses are too expensive to use here, we are better off to
+     * leave it to regmatch itself) */
+
+    if (progi->regstclass && PL_regkind[OP(progi->regstclass)]!=TRIE) {
+        const U8* const str = (U8*)STRING(progi->regstclass);
+
+        /* XXX this value could be pre-computed */
+        const int cl_l = (PL_regkind[OP(progi->regstclass)] == EXACT
+		    ?  (reginfo->is_utf8_pat
+                        ? utf8_distance(str + STR_LEN(progi->regstclass), str)
+                        : STR_LEN(progi->regstclass))
+		    : 1);
+	char * endpos;
+        char *s;
+        /* latest pos that a matching float substr constrains rx start to */
+        char *rx_max_float = NULL;
+
+        /* if the current rx_origin is anchored, either by satisfying an
+         * anchored substring constraint, or a /^.../m constraint, then we
+         * can reject the current origin if the start class isn't found
+         * at the current position. If we have a float-only match, then
+         * rx_origin is constrained to a range; so look for the start class
+         * in that range. if neither, then look for the start class in the
+         * whole rest of the string */
+
+        /* XXX DAPM it's not clear what the minlen test is for, and why
+         * it's not used in the floating case. Nothing in the test suite
+         * causes minlen == 0 here. See <20140313134639.GS12844@iabyn.com>.
+         * Here are some old comments, which may or may not be correct:
+         *
+	 *   minlen == 0 is possible if regstclass is \b or \B,
+	 *   and the fixed substr is ''$.
+         *   Since minlen is already taken into account, rx_origin+1 is
+         *   before strend; accidentally, minlen >= 1 guaranties no false
+         *   positives at rx_origin + 1 even for \b or \B.  But (minlen? 1 :
+         *   0) below assumes that regstclass does not come from lookahead...
+	 *   If regstclass takes bytelength more than 1: If charlength==1, OK.
+         *   This leaves EXACTF-ish only, which are dealt with in
+         *   find_byclass().
+         */
+
+	if (prog->anchored_substr || prog->anchored_utf8 || ml_anch)
+            endpos= HOP3c(rx_origin, (prog->minlen ? cl_l : 0), strend);
+        else if (prog->float_substr || prog->float_utf8) {
+	    rx_max_float = HOP3c(check_at, -start_shift, strbeg);
+	    endpos= HOP3c(rx_max_float, cl_l, strend);
+        }
+        else 
+            endpos= strend;
+		    
+        DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
+            "  looking for class: start_shift: %"IVdf" check_at: %"IVdf
+            " rx_origin: %"IVdf" endpos: %"IVdf"\n",
+              (IV)start_shift, (IV)(check_at - strbeg),
+              (IV)(rx_origin - strbeg), (IV)(endpos - strbeg)));
+
+        s = find_byclass(prog, progi->regstclass, rx_origin, endpos,
+                            reginfo);
+	if (!s) {
+	    if (endpos == strend) {
+		DEBUG_EXECUTE_r( PerlIO_printf(Perl_debug_log,
+				"  Could not match STCLASS...\n") );
+		goto fail;
+	    }
+	    DEBUG_EXECUTE_r( PerlIO_printf(Perl_debug_log,
+                               "  This position contradicts STCLASS...\n") );
+            if ((prog->intflags & PREGf_ANCH) && !ml_anch)
+		goto fail;
+
+	    /* Contradict one of substrings */
+	    if (prog->anchored_substr || prog->anchored_utf8) {
+                if (prog->substrs->check_ix == 1) { /* check is float */
+                    /* Have both, check_string is floating */
+                    assert(rx_origin + start_shift <= check_at);
+                    if (rx_origin + start_shift != check_at) {
+                        /* not at latest position float substr could match:
+                         * Recheck anchored substring, but not floating.
+                         * The condition above is in bytes rather than
+                         * chars for efficiency. It's conservative, in
+                         * that it errs on the side of doing 'goto
+                         * do_other_substr', where a more accurate
+                         * char-based calculation will be done */
+                        DEBUG_EXECUTE_r( PerlIO_printf(Perl_debug_log,
+                                  "  Looking for anchored substr starting at offset %ld...\n",
+                                  (long)(other_last - strpos)) );
+                        goto do_other_substr;
+                    }
+                }
+            }
+	    else {
+                /* float-only */
+
+                if (ml_anch) {
+                    /* In the presence of ml_anch, we might be able to
+                     * find another \n without breaking the current float
+                     * constraint. */
+
+                    /* strictly speaking this should be HOP3c(..., 1, ...),
+                     * but since we goto a block of code that's going to
+                     * search for the next \n if any, its safe here */
+                    rx_origin++;
+                    DEBUG_EXECUTE_r( PerlIO_printf(Perl_debug_log,
+                              "  Looking for /%s^%s/m starting at offset %ld...\n",
+                              PL_colors[0], PL_colors[1],
+                              (long)(rx_origin - strpos)) );
+                    goto postprocess_substr_matches;
+                }
+
+                /* strictly speaking this can never be true; but might
+                 * be if we ever allow intuit without substrings */
+                if (!(utf8_target ? prog->float_utf8 : prog->float_substr))
+                    goto fail;
+
+                rx_origin = rx_max_float;
+            }
+
+            /* at this point, any matching substrings have been
+             * contradicted. Start again... */
+
+            rx_origin = HOP3c(rx_origin, 1, strend);
+
+            /* uses bytes rather than char calculations for efficiency.
+             * It's conservative: it errs on the side of doing 'goto restart',
+             * where there is code that does a proper char-based test */
+            if (rx_origin + start_shift + end_shift > strend) {
+                DEBUG_EXECUTE_r( PerlIO_printf(Perl_debug_log,
+                                       "  Could not match STCLASS...\n") );
+                goto fail;
+            }
+            DEBUG_EXECUTE_r( PerlIO_printf(Perl_debug_log,
+                "  Looking for %s substr starting at offset %ld...\n",
+                (prog->substrs->check_ix ? "floating" : "anchored"),
+                (long)(rx_origin + start_shift - strpos)) );
+            goto restart;
+	}
+
+        /* Success !!! */
+
+	if (rx_origin != s) {
+            DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
+			"  By STCLASS: moving %ld --> %ld\n",
+                                  (long)(rx_origin - strpos), (long)(s - strpos))
+                   );
+        }
+        else {
+            DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
+                                  "  Does not contradict STCLASS...\n");
+                   );
+        }
+    }
 
     /* Decide whether using the substrings helped */
 
@@ -1182,12 +1371,11 @@ Perl_re_intuit_start(pTHX_
 	++BmUSEFUL(utf8_target ? prog->check_utf8 : prog->check_substr);	/* hooray/5 */
     }
     else {
-	/* The found string does not prohibit matching at strpos,
-	   - no optimization of calling REx engine can be performed,
-	   unless it was an MBOL and we are not after MBOL,
-	   or a future STCLASS check will fail this. */
-      success_at_start:
-	if (!(prog->intflags & PREGf_NAUGHTY)	/* XXXX If strpos moved? */
+        /* The found rx_origin position does not prohibit matching at
+         * strpos, so calling intuit didn't gain us anything. Decrement
+         * the BmUSEFUL() count on the check substring, and if we reach
+         * zero, free it.  */
+	if (!(prog->intflags & PREGf_NAUGHTY)
 	    && (utf8_target ? (
 		prog->check_utf8		/* Could be deleted already */
 		&& --BmUSEFUL(prog->check_utf8) < 0
@@ -1222,140 +1410,10 @@ Perl_re_intuit_start(pTHX_
 	}
     }
 
-    /* Last resort... */
-    /* XXXX BmUSEFUL already changed, maybe multiple change is meaningful... */
-    /* trie stclasses are too expensive to use here, we are better off to
-       leave it to regmatch itself */
-    if (progi->regstclass && PL_regkind[OP(progi->regstclass)]!=TRIE) {
-	/* minlen == 0 is possible if regstclass is \b or \B,
-	   and the fixed substr is ''$.
-	   Since minlen is already taken into account, rx_origin+1 is before strend;
-	   accidentally, minlen >= 1 guaranties no false positives at rx_origin + 1
-	   even for \b or \B.  But (minlen? 1 : 0) below assumes that
-	   regstclass does not come from lookahead...  */
-	/* If regstclass takes bytelength more than 1: If charlength==1, OK.
-	   This leaves EXACTF-ish only, which are dealt with in find_byclass().  */
-        const U8* const str = (U8*)STRING(progi->regstclass);
-        char *t;
+    DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
+            "Intuit: %sSuccessfully guessed:%s match at offset %ld\n",
+             PL_colors[4], PL_colors[5], (long)(rx_origin - strpos)) );
 
-        /* XXX this value could be pre-computed */
-        const int cl_l = (PL_regkind[OP(progi->regstclass)] == EXACT
-		    ?  (reginfo->is_utf8_pat
-                        ? utf8_distance(str + STR_LEN(progi->regstclass), str)
-                        : STR_LEN(progi->regstclass))
-		    : 1);
-	char * endpos;
-        char *s = rx_origin;
-	if (prog->anchored_substr || prog->anchored_utf8 || ml_anch)
-            endpos= HOP3c(s, (prog->minlen ? cl_l : 0), strend);
-        else if (prog->float_substr || prog->float_utf8)
-	    endpos= HOP3c(HOP3c(check_at, -start_shift, strbeg), cl_l, strend);
-        else 
-            endpos= strend;
-		    
-        if (checked_upto < s)
-           checked_upto = s;
-        DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
-            "  looking for class: start_shift: %"IVdf" check_at: %"IVdf
-            " s: %"IVdf" endpos: %"IVdf" checked_upto: %"IVdf"\n",
-              (IV)start_shift, (IV)(check_at - strbeg),
-              (IV)(s - strbeg), (IV)(endpos - strbeg),
-              (IV)(checked_upto- strbeg)));
-
-	t = s;
-        s = find_byclass(prog, progi->regstclass, checked_upto, endpos,
-                            reginfo);
-	if (s) {
-	    checked_upto = s;
-	} else {
-#ifdef DEBUGGING
-	    const char *what = NULL;
-#endif
-	    if (endpos == strend) {
-		DEBUG_EXECUTE_r( PerlIO_printf(Perl_debug_log,
-				"  Could not match STCLASS...\n") );
-		goto fail;
-	    }
-	    DEBUG_EXECUTE_r( PerlIO_printf(Perl_debug_log,
-                               "  This position contradicts STCLASS...\n") );
-            if ((prog->intflags & PREGf_ANCH) && !ml_anch)
-		goto fail;
-	    checked_upto = HOPBACKc(endpos, start_shift);
-	    DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "  start_shift: %"IVdf" check_at: %"IVdf" endpos: %"IVdf" checked_upto: %"IVdf"\n",
-                                      (IV)start_shift, (IV)(check_at - strbeg), (IV)(endpos - strbeg), (IV)(checked_upto- strbeg)));
-	    /* Contradict one of substrings */
-	    if (prog->anchored_substr || prog->anchored_utf8) {
-		if ((utf8_target ? prog->anchored_utf8 : prog->anchored_substr) == check) {
-		    DEBUG_EXECUTE_r( what = "anchored" );
-		  hop_and_restart:
-		    s = HOP3c(t, 1, strend);
-		    if (s + start_shift + end_shift > strend) {
-			/* XXXX Should be taken into account earlier? */
-			DEBUG_EXECUTE_r( PerlIO_printf(Perl_debug_log,
-					       "  Could not match STCLASS...\n") );
-			goto fail;
-		    }
-                    rx_origin = s;
-		    if (!check)
-			goto giveup;
-		    DEBUG_EXECUTE_r( PerlIO_printf(Perl_debug_log,
-				"  Looking for %s substr starting at offset %ld...\n",
-				 what, (long)(rx_origin + start_shift - strpos)) );
-		    goto restart;
-		}
-		/* Have both, check_string is floating */
-		if (t + start_shift >= check_at) /* Contradicts floating=check */
-		    goto retry_floating_check;
-		/* Recheck anchored substring, but not floating... */
-		if (!check) {
-                    rx_origin = NULL;
-		    goto giveup;
-                }
-		DEBUG_EXECUTE_r( PerlIO_printf(Perl_debug_log,
-			  "  Looking for anchored substr starting at offset %ld...\n",
-			  (long)(other_last - strpos)) );
-                assert(prog->substrs->check_ix); /* other is float */
-		goto do_other_substr;
-	    }
-	    /* Another way we could have checked stclass at the
-               current position only: */
-	    if (ml_anch) {
-		s = rx_origin = t + 1;
-		if (!check)
-		    goto giveup;
-		DEBUG_EXECUTE_r( PerlIO_printf(Perl_debug_log,
-			  "  Looking for /%s^%s/m starting at offset %ld...\n",
-			  PL_colors[0], PL_colors[1],
-                          (long)(rx_origin - strpos)) );
-                /* XXX DAPM I don't yet know why this is true, but the code
-                 * assumed it when it used to do goto try_at_offset */
-                assert(rx_origin != strpos);
-		goto postprocess_substr_matches;
-	    }
-	    if (!(utf8_target ? prog->float_utf8 : prog->float_substr))	/* Could have been deleted */
-		goto fail;
-	    /* Check is floating substring. */
-	  retry_floating_check:
-	    t = check_at - start_shift;
-	    DEBUG_EXECUTE_r( what = "floating" );
-	    goto hop_and_restart;
-	}
-	if (t != s) {
-            DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
-			"  By STCLASS: moving %ld --> %ld\n",
-                                  (long)(t - strpos), (long)(s - strpos))
-                   );
-        }
-        else {
-            DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
-                                  "  Does not contradict STCLASS...\n");
-                   );
-        }
-    }
-  giveup:
-    DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "Intuit: %s%s:%s match at offset %ld\n",
-			  PL_colors[4], (check ? "Successfully guessed" : "Giving up"),
-			  PL_colors[5], (long)(rx_origin - strpos)) );
     return rx_origin;
 
   fail_finish:				/* Substring not found */
@@ -1366,6 +1424,7 @@ Perl_re_intuit_start(pTHX_
 			  PL_colors[4], PL_colors[5]));
     return NULL;
 }
+
 
 #define DECL_TRIE_TYPE(scan) \
     const enum { trie_plain, trie_utf8, trie_utf8_fold, trie_latin_utf8_fold, \
@@ -7826,6 +7885,9 @@ S_reghop4(U8 *s, SSize_t off, const U8* llim, const U8* rlim)
     }
     return s;
 }
+
+/* like reghop3, but returns NULL on overrun, rather than returning last
+ * char pos */
 
 STATIC U8 *
 S_reghopmaybe3(U8* s, SSize_t off, const U8* lim)
