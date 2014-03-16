@@ -904,35 +904,35 @@ Perl_re_intuit_start(pTHX_
 
 	check_at = fbm_instr( start_point, end_point,
 		      check, multiline ? FBMrf_MULTILINE : 0);
+
+        /* Update the count-of-usability, remove useless subpatterns,
+            unshift s.  */
+
+        DEBUG_EXECUTE_r({
+            RE_PV_QUOTED_DECL(quoted, utf8_target, PERL_DEBUG_PAD_ZERO(0),
+                SvPVX_const(check), RE_SV_DUMPLEN(check), 30);
+            PerlIO_printf(Perl_debug_log, "  %s %s substr %s%s%s",
+                              (check_at ? "Found" : "Did not find"),
+                (check == (utf8_target ? prog->anchored_utf8 : prog->anchored_substr)
+                    ? "anchored" : "floating"),
+                quoted,
+                RE_SV_TAIL(check),
+                (check_at ? " at offset " : "...\n") );
+        });
+
+        if (!check_at)
+            goto fail_finish;
+        /* Finish the diagnostic message */
+        DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "%ld...\n", (long)(check_at - strpos)) );
+
+        /* set rx_origin to the minimum position where the regex could start
+         * matching, given the constraint of the just-matched check substring.
+         * But don't set it lower than previously.
+         */
+
+        if (check_at - rx_origin > prog->check_offset_max)
+            rx_origin = HOP3c(check_at, -prog->check_offset_max, rx_origin);
     }
-
-    /* Update the count-of-usability, remove useless subpatterns,
-	unshift s.  */
-
-    DEBUG_EXECUTE_r({
-        RE_PV_QUOTED_DECL(quoted, utf8_target, PERL_DEBUG_PAD_ZERO(0),
-            SvPVX_const(check), RE_SV_DUMPLEN(check), 30);
-        PerlIO_printf(Perl_debug_log, "  %s %s substr %s%s%s",
-			  (check_at ? "Found" : "Did not find"),
-	    (check == (utf8_target ? prog->anchored_utf8 : prog->anchored_substr)
-	        ? "anchored" : "floating"),
-	    quoted,
-	    RE_SV_TAIL(check),
-	    (check_at ? " at offset " : "...\n") );
-    });
-
-    if (!check_at)
-	goto fail_finish;
-    /* Finish the diagnostic message */
-    DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "%ld...\n", (long)(check_at - strpos)) );
-
-    /* set rx_origin to the minimum position where the regex could start
-     * matching, given the constraint of the just-matched check substring.
-     * But don't set it lower than previously.
-     */
-
-    if (check_at - rx_origin > prog->check_offset_max)
-        rx_origin = HOP3c(check_at, -prog->check_offset_max, rx_origin);
 
 
     /* XXX dmq: first branch is for positive lookbehind...
