@@ -1348,11 +1348,11 @@ Perl_re_intuit_start(pTHX_
 	++BmUSEFUL(utf8_target ? prog->check_utf8 : prog->check_substr);	/* hooray/5 */
     }
     else {
-	/* The found string does not prohibit matching at strpos,
-	   - no optimization of calling REx engine can be performed,
-	   unless it was an MBOL and we are not after MBOL,
-	   or a future STCLASS check will fail this. */
-	if (!(prog->intflags & PREGf_NAUGHTY)	/* XXXX If strpos moved? */
+        /* The found rx_origin position does not prohibit matching at
+         * strpos, so calling intuit didn't gain us anything. Decrement
+         * the BmUSEFUL() count on the check substring, and if we reach
+         * zero, free it.  */
+	if (!(prog->intflags & PREGf_NAUGHTY)
 	    && (utf8_target ? (
 		prog->check_utf8		/* Could be deleted already */
 		&& --BmUSEFUL(prog->check_utf8) < 0
@@ -1401,6 +1401,7 @@ Perl_re_intuit_start(pTHX_
 			  PL_colors[4], PL_colors[5]));
     return NULL;
 }
+
 
 #define DECL_TRIE_TYPE(scan) \
     const enum { trie_plain, trie_utf8, trie_utf8_fold, trie_latin_utf8_fold, \
