@@ -22,7 +22,7 @@ sub syscopy;
 sub cp;
 sub mv;
 
-$VERSION = '2.29';
+$VERSION = '2.30';
 
 require Exporter;
 @ISA = qw(Exporter);
@@ -370,6 +370,7 @@ written to. If the second argument does not exist but the parent
 directory does exist, then it will be created. Trying to copy
 a file into a non-existent directory is an error.
 Trying to copy a file on top of itself is also an error.
+C<copy> will not overwrite read-only files.
 
 If the destination (second argument) already exists and is a directory,
 and the source (first argument) is not a filehandle, then the source
