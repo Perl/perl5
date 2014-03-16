@@ -1186,19 +1186,11 @@ Perl_re_intuit_start(pTHX_
   success_at_start:
 
 
-    /* Last resort... */
-    /* XXXX BmUSEFUL already changed, maybe multiple change is meaningful... */
-    /* trie stclasses are too expensive to use here, we are better off to
-       leave it to regmatch itself */
+    /* if we have a starting character class, then test that extra constraint.
+     * (trie stclasses are too expensive to use here, we are better off to
+     * leave it to regmatch itself) */
+
     if (progi->regstclass && PL_regkind[OP(progi->regstclass)]!=TRIE) {
-	/* minlen == 0 is possible if regstclass is \b or \B,
-	   and the fixed substr is ''$.
-	   Since minlen is already taken into account, rx_origin+1 is before strend;
-	   accidentally, minlen >= 1 guaranties no false positives at rx_origin + 1
-	   even for \b or \B.  But (minlen? 1 : 0) below assumes that
-	   regstclass does not come from lookahead...  */
-	/* If regstclass takes bytelength more than 1: If charlength==1, OK.
-	   This leaves EXACTF-ish only, which are dealt with in find_byclass().  */
         const U8* const str = (U8*)STRING(progi->regstclass);
 
         /* XXX this value could be pre-computed */
@@ -1219,6 +1211,22 @@ Perl_re_intuit_start(pTHX_
          * rx_origin is constrained to a range; so look for the start class
          * in that range. if neither, then look for the start class in the
          * whole rest of the string */
+
+        /* XXX DAPM it's not clear what the minlen test is for, and why
+         * it's not used in the floating case. Nothing in the test suite
+         * causes minlen == 0 here. See <20140313134639.GS12844@iabyn.com>.
+         * Here are some old comments, which may or may not be correct:
+         *
+	 *   minlen == 0 is possible if regstclass is \b or \B,
+	 *   and the fixed substr is ''$.
+         *   Since minlen is already taken into account, rx_origin+1 is
+         *   before strend; accidentally, minlen >= 1 guaranties no false
+         *   positives at rx_origin + 1 even for \b or \B.  But (minlen? 1 :
+         *   0) below assumes that regstclass does not come from lookahead...
+	 *   If regstclass takes bytelength more than 1: If charlength==1, OK.
+         *   This leaves EXACTF-ish only, which are dealt with in
+         *   find_byclass().
+         */
 
 	if (prog->anchored_substr || prog->anchored_utf8 || ml_anch)
             endpos= HOP3c(rx_origin, (prog->minlen ? cl_l : 0), strend);
