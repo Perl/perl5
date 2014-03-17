@@ -390,11 +390,16 @@ and compilation changes or changes in portability/compatibility.  However,
 changes within modules for platforms should generally be listed in the
 L</Modules and Pragmata> section.
 
+=head3 Win32
+
 =over 4
 
-=item XXX-some-platform
+=item *
 
-XXX
+Killing a process tree with L<perlfunc/kill> and a negative signal, was broken
+starting in 5.18.0. In this bug, C<kill> always returned 0 for a negative
+signal even for valid PIDs, and no processes were terminated. This has been
+fixed [perl #121230].
 
 =back
 

@@ -1,0 +1,9 @@
+#$ARGV[0] is filename used to notify parent .t perl proc that all PIDs are
+#started in the process tree
+#number 9999/9998 is eye catching
+system(1, $^X, '-e', 'sleep 5; print qq|not ok 9999 - inner child process wasn\'t killed\n|;');
+system('echo outer child started > "'.$ARGV[0].'"');
+sleep 5;
+#execution won't be reached if test successful
+print "not ok 9998 - outer child process wasn\'t killed\n";
+unlink($ARGV[0]);

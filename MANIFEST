@@ -5240,7 +5240,8 @@ t/op/index.t			See if index works
 t/op/index_thr.t		See if index works in another thread
 t/op/int.t			See if int works
 t/op/join.t			See if join works
-t/op/kill0.t			See if kill(0, $pid) works
+t/op/kill0_child		Process tree script that is kill()ed
+t/op/kill0.t			See if kill works
 t/op/kvaslice.t			See if index/value array slices work
 t/op/kvhslice.t			See if key/value hash slices work
 t/op/lc.t			See if lc, uc, lcfirst, ucfirst, quotemeta work
