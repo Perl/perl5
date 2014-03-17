@@ -3217,9 +3217,10 @@ X<kill> X<signal>
 
 =for Pod::Functions send a signal to a process or process group
 
-Sends a signal to a list of processes.  Returns the number of
-processes successfully signaled (which is not necessarily the
-same as the number actually killed).
+Sends a signal to a list of processes.  Returns the number of arguments
+that were successfully used to signal (which is not necessarily the same
+as the number of processes actually killed, e.g. where a process group is
+killed).
 
     $cnt = kill 'HUP', $child1, $child2;
     kill 'KILL', @goners;
