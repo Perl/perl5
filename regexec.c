@@ -783,10 +783,7 @@ Perl_re_intuit_start(pTHX_
              * at position pos()-4+1, which lines up with the "a" */
 
 	    if (prog->check_offset_min == prog->check_offset_max
-                && !(prog->intflags & PREGf_CANY_SEEN)
-                && ! multiline)   /* /m can cause \n's to match that aren't
-                                     accounted for in the string max length.
-                                     See [perl #115242] */
+                && !(prog->intflags & PREGf_CANY_SEEN))
             {
 	        /* Substring at constant offset from beg-of-str... */
 	        SSize_t slen = SvCUR(check);
@@ -798,7 +795,7 @@ Perl_re_intuit_start(pTHX_
                     "  Looking for check substr at fixed offset %"IVdf"...\n",
                     (IV)prog->check_offset_min));
 
-	        if (SvTAIL(check)) {
+	        if (SvTAIL(check) && !multiline) {
                     /* In this case, the regex is anchored at the end too,
                      * so the lengths must match exactly, give or take a \n.
 		     * NB: slen >= 1 since the last char of check is \n */

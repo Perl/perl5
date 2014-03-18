@@ -20,7 +20,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 718;  # Update this when adding/deleting tests.
+plan tests => 719;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1542,6 +1542,10 @@ EOP
         $s = "abcd-xyz\n" x 500_000;
         $s =~ /$r\d{1,2}xyz/m for 1..200;
         pass("BOL within //m  mustn't run slowly");
+
+        $s = "abcdefg" x 1_000_000;
+        $s =~ /(?-m:^)abcX?fg/m for 1..100;
+        pass("BOL within //m  mustn't skip absolute anchored check");
 
     }
 
