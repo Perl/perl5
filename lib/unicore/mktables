@@ -17366,15 +17366,15 @@ sub write_all_tables() {
                 # Build up its definition range-by-range.
                 my $definition = "";
                 while (defined (my $range = shift @ranges)) {
-                my $end = $range->end;
-                if ($end < $MAX_WORKING_CODEPOINT) {
-                    $count++;
-                    $end = "\n" . ($end + 1);
-                }
-                else {  # Extends to infinity, hence no 'end'
-                    $end = "";
-                }
-                $definition .= "\n" . $range->start . $end;
+                    my $end = $range->end;
+                    if ($end < $MAX_WORKING_CODEPOINT) {
+                        $count++;
+                        $end = "\n" . ($end + 1);
+                    }
+                    else {  # Extends to infinity, hence no 'end'
+                        $end = "";
+                    }
+                    $definition .= "\n" . $range->start . $end;
                 }
                 $definition = "V$count" . $definition;
                 $filename = @inline_definitions;
