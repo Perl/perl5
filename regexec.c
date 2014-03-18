@@ -1201,8 +1201,7 @@ Perl_re_intuit_start(pTHX_
     }
     else {
         DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
-            "  Starting position does not contradict /%s^%s/m...\n",
-            PL_colors[0], PL_colors[1]));
+            "  (multiline anchor test skipped)\n"));
     }
 
   success_at_start:
