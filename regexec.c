@@ -759,13 +759,24 @@ Perl_re_intuit_start(pTHX_
             /* we are only allowed to match at BOS or \G */
 
             /* trivially reject if there's a BOS anchor and we're not at BOS.
-             * In the case of \G, we hope(!) that the caller has already
-             * set strpos to pos()-gofs, and will already have checked
-             * that this anchor position is legal. So we can skip it here.
+             *
+             * Note that we don't try to do a similar quick reject for
+             * \G, since generally the caller will have calculated strpos
+             * based on pos() and gofs, so the string is already correctly
+             * anchored by definition; and handling the exceptions would
+             * be too fiddly (e.g. REXEC_IGNOREPOS).
+             *
+             * A note about IMPLICIT: on an un-anchored pattern beginning
+             * with /.*.../, these flags will have been added by the
+             * compiler:
+             *   /.*abc/, /.*abc/m:  PREGf_IMPLICIT | PREGf_ANCH_MBOL
+             *   /.*abc/s:           PREGf_IMPLICIT | PREGf_ANCH_SBOL
+             * so just the presence of SBOL isn't enough to guarantee
+             * that we're anchored.
              */
-            if (   !(prog->intflags & PREGf_ANCH_GPOS)
-                && !(prog->intflags & PREGf_IMPLICIT) /* not a real BOL */
-		&& (strpos != strbeg))
+            if (   strpos != strbeg
+                && (prog->intflags & (PREGf_ANCH_BOL|PREGf_ANCH_SBOL))
+                && !(prog->intflags & PREGf_IMPLICIT)) /* not a real BOL */
             {
 	        DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
                                 "  Not at start...\n"));
@@ -788,6 +799,14 @@ Perl_re_intuit_start(pTHX_
 	        /* Substring at constant offset from beg-of-str... */
 	        SSize_t slen = SvCUR(check);
                 char *s;
+
+                /* we only get here if there's a fixed substring (min ==
+                 * max). But PREGf_IMPLICIT only gets set if the regex
+                 * begins with /.*.../, and in that case there can't be
+                 * a fixed substring. So assert this truth. If anyone
+                 * changes this assumption (e.g. with lookahead/behind),
+                 * complain and let them fix it */
+                assert(!(prog->intflags & PREGf_IMPLICIT));
 
 	        s = HOP3c(strpos, prog->check_offset_min, strend);
 	    
