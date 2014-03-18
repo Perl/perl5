@@ -906,19 +906,33 @@ Perl_re_intuit_start(pTHX_
 	}
 
 
-        /* if the regex is absolutely anchored to the start of the string,
-         * then check_offset_max represents an upper bound on the string
-         * where the substr could start */
+        /* If the regex is absolutely anchored to either the start of the
+         * string (BOL,SBOL) or to pos() (ANCH_GPOS), then
+         * check_offset_max represents an upper bound on the string where
+         * the substr could start. For the ANCH_GPOS case, we assume that
+         * the caller of intuit will have already set strpos to
+         * pos()-gofs, so in this case strpos + offset_max will still be
+         * an upper bound on the substr.
+         */
         if (!ml_anch
             && prog->intflags & PREGf_ANCH
-            && prog->check_offset_max != SSize_t_MAX
-            && start_shift < prog->check_offset_max)
+            && !(prog->intflags & PREGf_IMPLICIT)
+            && prog->check_offset_max != SSize_t_MAX)
         {
             SSize_t len = SvCUR(check) - !!SvTAIL(check);
-            end_point = HOP3lim(start_point,
-                            prog->check_offset_max - start_shift,
-                            end_point -len)
-                        + len;
+            const char * const anchor =
+                        (prog->intflags & PREGf_ANCH_GPOS ? strpos : strbeg);
+
+            /* do a bytes rather than chars comparison. It's conservative;
+             * so it skips doing the HOP if the result can't possibly end
+             * up earlier than the old value of end_point.
+             */
+            if ((char*)end_point - anchor > prog->check_offset_max) {
+                end_point = HOP3lim((U8*)anchor,
+                                prog->check_offset_max,
+                                end_point -len)
+                            + len;
+            }
         }
 
 	DEBUG_OPTIMISE_MORE_r({

@@ -20,7 +20,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 719;  # Update this when adding/deleting tests.
+plan tests => 721;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -755,6 +755,8 @@ sub run_tests {
 	ok($_ =~ /^abc\Gdef$/, $message);
 	pos = 3;
 	ok($_ =~ /c\Gd/, $message);
+	pos = 3;
+	ok($_ =~ /..\GX?def/, $message);
     }
 
     {
@@ -1546,6 +1548,10 @@ EOP
         $s = "abcdefg" x 1_000_000;
         $s =~ /(?-m:^)abcX?fg/m for 1..100;
         pass("BOL within //m  mustn't skip absolute anchored check");
+
+        $s = "abcdefg" x 1_000_000;
+        $s =~ /^XX\d{1,10}cde/ for 1..100;
+        pass("abs anchored float string should fail quickly");
 
     }
 
