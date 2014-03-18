@@ -17349,7 +17349,7 @@ sub write_all_tables() {
         if (! $is_property
             && ! $annotate  # For annotation, we want to explicitly show
                             # everything, so keep in files
-            && $table->ranges <= 1)
+            && $table->ranges <= 3)
         {
             my @ranges = $table->ranges;
             my $count = @ranges;

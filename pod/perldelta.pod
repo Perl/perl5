@@ -135,7 +135,7 @@ of the implementation, including subroutine invocation and scope exit.
 =item *
 
 Perl now does less disk I/O when dealing with Unicode properties that cover
-only a single range of consecutive code points.
+up to three ranges of consecutive code points.
 
 =back
 
