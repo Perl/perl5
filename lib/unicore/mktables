@@ -1365,12 +1365,18 @@ my $EXTRACTED_DIR = (-d 'extracted') ? 'extracted' : "";
 my $EXTRACTED = ($EXTRACTED_DIR) ? "$EXTRACTED_DIR/" : "";
 my $AUXILIARY = 'auxiliary';
 
-# Hashes that will eventually go into Heavy.pl for the use of utf8_heavy.pl
-# and into UCD.pl for the use of UCD.pm
+# Hashes and arrays that will eventually go into Heavy.pl for the use of
+# utf8_heavy.pl and into UCD.pl for the use of UCD.pm
 my %loose_to_file_of;       # loosely maps table names to their respective
                             # files
 my %stricter_to_file_of;    # same; but for stricter mapping.
 my %loose_property_to_file_of; # Maps a loose property name to its map file
+my @inline_definitions = "V0"; # Each element gives a definition of a unique
+                            # inversion list.  When a definition is inlined,
+                            # its value in the hash it's in (one of the two
+                            # defined just above) will include an index into
+                            # this array.  The 0th element is initialized to
+                            # the definition for a zero length invwersion list
 my %file_to_swash_name;     # Maps the file name to its corresponding key name
                             # in the hash %utf8::SwashInfo
 my %nv_floating_to_rational; # maps numeric values floating point numbers to
@@ -16306,6 +16312,9 @@ sub make_Heavy () {
     my $stricter_to_file_of = simple_dumper(\%stricter_to_file_of, ' ' x 4);
     chomp $stricter_to_file_of;
 
+    my $inline_definitions = simple_dumper(\@inline_definitions, " " x 4);
+    chomp $inline_definitions;
+
     my $loose_to_file_of = simple_dumper(\%loose_to_file_of, ' ' x 4);
     chomp $loose_to_file_of;
 
@@ -16356,6 +16365,12 @@ $loose_property_name_of
 # Maps property, table to file for those using stricter matching
 \%utf8::stricter_to_file_of = (
 $stricter_to_file_of
+);
+
+# Gives the definitions (in the form of inversion lists) for those properties
+# whose definitions aren't kept in files
+\@utf8::inline_definitions = (
+$inline_definitions
 );
 
 # Maps property, table to file for those using loose matching
@@ -17328,31 +17343,42 @@ sub write_all_tables() {
         # '#' is used to signal this.  This significantly cuts down the number
         # of files written at little extra cost to the hashes in Heavy.pl.
         # And it means, no run-time files to read to get the definitions.
-        # But short deprecated tables are written anyway, because e.g.,
-        # Gc=Surrogate is the same exact code points as LB=Surrogate, and only
-        # the latter generates a deprecated warning, and so we want to have a
-        # way to distinguish the two.
         if (! $is_property
-            && $table->status ne $DEPRECATED
             && ! $annotate  # For annotation, we want to explicitly show
                             # everything, so keep in files
             && $table->ranges <= 1)
         {
             my @ranges = $table->ranges;
             my $count = @ranges;
-            if ($count == 0) {
-                $filename = "V0";
+            if ($count == 0) {  # 0th index reserved for 0-length lists
+                $filename = 0;
             }
-            else {
-                my $end = $ranges[0]->end;
+            elsif ($table->leader != $table) {
+
+                # Here, is a table that is equivalent to another; code
+                # in register_file_for_name() causes its leader's definition
+                # to be used
+
+                next;
+            }
+            else {  # No equivalent table so far.
+
+                # Build up its definition range-by-range.
+                my $definition = "";
+                while (defined (my $range = shift @ranges)) {
+                my $end = $range->end;
                 if ($end < $MAX_WORKING_CODEPOINT) {
                     $count++;
-                    $end = ";" . ($end + 1);
+                    $end = "\n" . ($end + 1);
                 }
                 else {  # Extends to infinity, hence no 'end'
                     $end = "";
                 }
-                $filename = "V$count;" . $ranges[0]->start . $end;
+                $definition .= "\n" . $range->start . $end;
+                }
+                $definition = "V$count" . $definition;
+                $filename = @inline_definitions;
+                push @inline_definitions, $definition;
             }
             @directory = "#";
             register_file_for_name($table, \@directory, $filename);

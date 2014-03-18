@@ -514,7 +514,7 @@ sub _loose_name ($) {
                 # new-lines.  Since it is in-line there is no advantage to
                 # caching the result
                 if ($file =~ s!^#/!!) {
-                    $list = $file =~ s/;/\n/gr;
+                    $list = $utf8::inline_definitions[$file];
                 }
                 else {
                     # Here, we have an actual file to read in and load, but it

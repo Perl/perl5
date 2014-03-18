@@ -1057,9 +1057,10 @@ foreach my $set_of_tables (\%utf8::stricter_to_file_of, \%utf8::loose_to_file_of
 
         # If the file's directory is '#', it is a special case where the
         # contents are in-lined with semi-colons meaning new-lines, instead of
-        # it being an actual file to read.
+        # it being an actual file to read.  The file is an index in to the
+        # array of the definitions
         if ($file =~ s!^#/!!) {
-            $official = $file =~ s/;/\n/gr;
+            $official = $utf8::inline_definitions[$file];
         }
         else {
             $official = do "unicore/lib/$file.pl";
@@ -1493,7 +1494,7 @@ foreach my $prop (sort(keys %props), sort keys %legacy_props) {
             # special case where the contents are in-lined with semi-colons
             # meaning new-lines, instead of it being an actual file to read.
             if ($base_file =~ s!^#/!!) {
-                $official = $base_file =~ s/;/\n/gr;
+                $official = $utf8::inline_definitions[$base_file];
             }
             else {
                 $official = do "unicore/$base_file.pl";
