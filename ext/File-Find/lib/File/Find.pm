@@ -3,7 +3,7 @@ use 5.006;
 use strict;
 use warnings;
 use warnings::register;
-our $VERSION = '1.26';
+our $VERSION = '1.27';
 require Exporter;
 require Cwd;
 
@@ -299,7 +299,7 @@ situations. You can disable these warnings by putting the statement
 
     no warnings 'File::Find';
 
-in the appropriate scope. See L<perllexwarn> for more info about lexical
+in the appropriate scope. See L<warnings> for more info about lexical
 warnings.
 
 =head1 CAVEAT

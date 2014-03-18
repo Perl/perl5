@@ -6739,6 +6739,6 @@ shows whereabouts in the regular expression the problem was discovered.
 
 =head1 SEE ALSO
 
-L<warnings>, L<perllexwarn>, L<diagnostics>.
+L<warnings>, L<diagnostics>.
 
 =cut

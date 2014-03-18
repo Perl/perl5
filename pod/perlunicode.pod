@@ -1403,7 +1403,7 @@ the C<"non_unicode"> warning class has been made fatal, say by:
 
  use warnings FATAL => "non_unicode"
 
-(see L<perllexwarn>).  In this mode of operation, Perl will raise the
+(see L<warnings>).  In this mode of operation, Perl will raise the
 warning for all matches against a non-Unicode code point (not just the
 arguable ones), and it skips the optimizations that might cause the
 warning to not be output.  (It currently still won't warn if the match

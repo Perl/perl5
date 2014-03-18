@@ -5336,7 +5336,7 @@ parameter twice:
 	warnings => [FATAL => qw/void io/],
     );
 
-See L<perllexwarn> for more information about lexical warnings.
+See L<warnings> for more information about lexical warnings.
 
 =item hint_bits
 

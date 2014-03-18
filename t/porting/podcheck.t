@@ -385,6 +385,7 @@ my %excluded_files = (
                         canonicalize("Porting/perl5200delta.pod") => 1,
                         canonicalize("Porting/perldelta_template.pod") => 1,
                         canonicalize("regen/feature.pl") => 1,
+                        canonicalize("regen/warnings.pl") => 1,
                         canonicalize("autodoc.pl") => 1,
                         canonicalize("configpm") => 1,
                         canonicalize("miniperl") => 1,
