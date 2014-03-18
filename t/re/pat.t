@@ -20,7 +20,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 717;  # Update this when adding/deleting tests.
+plan tests => 718;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1537,6 +1537,11 @@ EOP
         $s = "-ab\n" x 250_000;
         $s .= "abx";
         ok($s =~ /^ab.*x/m, "distant float with /m");
+
+        my $r = qr/^abcd/;
+        $s = "abcd-xyz\n" x 500_000;
+        $s =~ /$r\d{1,2}xyz/m for 1..200;
+        pass("BOL within //m  mustn't run slowly");
 
     }
 

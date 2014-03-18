@@ -753,8 +753,7 @@ Perl_re_intuit_start(pTHX_
 
     if (prog->intflags & PREGf_ANCH) { /* Match at \G, beg-of-str or after \n */
         /* Check after \n? */
-	ml_anch = (     (prog->intflags & PREGf_ANCH_MBOL)
-		    || ((prog->intflags & PREGf_ANCH_BOL) && multiline));
+	ml_anch = (prog->intflags & PREGf_ANCH_MBOL);
 
 	if (!ml_anch) {
             /* we are only allowed to match at BOS or \G */
