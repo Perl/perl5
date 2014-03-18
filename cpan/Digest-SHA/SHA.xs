@@ -34,6 +34,8 @@ shaclose(s)
 CODE:
 	RETVAL = shaclose(s);
 	sv_setiv(SvRV(ST(0)), 0);
+OUTPUT:
+	RETVAL
 
 SHA *
 shadup(s)

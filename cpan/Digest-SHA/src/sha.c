@@ -1,12 +1,12 @@
 /*
  * sha.c: routines to compute SHA-1/224/256/384/512 digests
  *
- * Ref: NIST FIPS PUB 180-2 Secure Hash Standard
+ * Ref: NIST FIPS PUB 180-4 Secure Hash Standard
  *
  * Copyright (C) 2003-2014 Mark Shelor, All Rights Reserved
  *
- * Version: 5.87
- * Mon Feb 17 16:42:02 MST 2014
+ * Version: 5.88
+ * Mon Mar 17 08:46:10 MST 2014
  *
  */
 
@@ -93,7 +93,7 @@ static void sha1(SHA *s, UCHR *block)		/* SHA-1 transform */
 	SHA32_SCHED(W, block);
 
 /*
- * Use SHA-1 alternate method from FIPS PUB 180-2 (ref. 6.1.3)
+ * Use SHA-1 alternate method from FIPS PUB 180-4 (ref. 6.1.3)
  *
  * To improve performance, unroll the loop and consolidate assignments
  * by changing the roles of variables "a" through "e" at each step.

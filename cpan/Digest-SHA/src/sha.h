@@ -1,12 +1,12 @@
 /*
  * sha.h: header file for SHA-1/224/256/384/512 routines
  *
- * Ref: NIST FIPS PUB 180-2 Secure Hash Standard
+ * Ref: NIST FIPS PUB 180-4 Secure Hash Standard
  *
  * Copyright (C) 2003-2014 Mark Shelor, All Rights Reserved
  *
- * Version: 5.87
- * Mon Feb 17 16:42:02 MST 2014
+ * Version: 5.88
+ * Mon Mar 17 08:46:10 MST 2014
  *
  */
 
