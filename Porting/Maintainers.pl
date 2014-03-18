@@ -1166,8 +1166,12 @@ use File::Glob qw(:case);
         },
     },
 
+    # Jerry Hedden does take patches that are applied to blead first, even
+    # though that can be hard to discern from the Git history; so it's
+    # correct for this (and Thread::Semaphore, threads, and threads::shared)
+    # to be under dist/ rather than cpan/
     'Thread::Queue' => {
-        'DISTRIBUTION' => 'JDHEDDEN/Thread-Queue-3.04.tar.gz',
+        'DISTRIBUTION' => 'JDHEDDEN/Thread-Queue-3.05.tar.gz',
         'FILES'        => q[dist/Thread-Queue],
         'EXCLUDED'     => [
             qr{^examples/},
