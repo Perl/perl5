@@ -1857,7 +1857,8 @@ package main;
 { # Closure
 
     # This program uses the inside-out method for objects, as recommended in
-    # "Perl Best Practices".  This closure aids in generating those.  There
+    # "Perl Best Practices".  (This is the best solution still, since this has
+    # to run under miniperl.)  This closure aids in generating those.  There
     # are two routines.  setup_package() is called once per package to set
     # things up, and then set_access() is called for each hash representing a
     # field in the object.  These routines arrange for the object to be
@@ -16362,18 +16363,22 @@ $INTERNAL_ONLY_HEADER
 $loose_property_name_of
 );
 
-# Maps property, table to file for those using stricter matching
-\%utf8::stricter_to_file_of = (
-$stricter_to_file_of
-);
-
 # Gives the definitions (in the form of inversion lists) for those properties
 # whose definitions aren't kept in files
 \@utf8::inline_definitions = (
 $inline_definitions
 );
 
-# Maps property, table to file for those using loose matching
+# Maps property, table to file for those using stricter matching.  For paths
+# whose directory is '#', the file is in the form of a numeric index into
+# \@inline_definitions
+\%utf8::stricter_to_file_of = (
+$stricter_to_file_of
+);
+
+# Maps property, table to file for those using loose matching.  For paths
+# whose directory is '#', the file is in the form of a numeric index into
+# \@inline_definitions
 \%utf8::loose_to_file_of = (
 $loose_to_file_of
 );
