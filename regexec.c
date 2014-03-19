@@ -1409,19 +1409,10 @@ Perl_re_intuit_start(pTHX_
 	    prog->check_substr = prog->check_utf8 = NULL;	/* disable */
 	    prog->float_substr = prog->float_utf8 = NULL;	/* clear */
 	    check = NULL;			/* abort */
-	    /* XXXX If the check string was an implicit check MBOL, then we need to unset the relevant flag
-		    see http://bugs.activestate.com/show_bug.cgi?id=87173 */
-            if (prog->intflags & PREGf_IMPLICIT) {
-                prog->intflags &= ~PREGf_ANCH_MBOL;
-                /* maybe we have no anchors left after this... */
-                if (!(prog->intflags & PREGf_ANCH))
-                    prog->extflags &= ~RXf_IS_ANCHORED;
-            }
 	    /* XXXX This is a remnant of the old implementation.  It
 	            looks wasteful, since now INTUIT can use many
 	            other heuristics. */
 	    prog->extflags &= ~RXf_USE_INTUIT;
-	    /* XXXX What other flags might need to be cleared in this branch? */
 	}
     }
 
