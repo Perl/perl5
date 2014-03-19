@@ -752,7 +752,15 @@ Perl_re_intuit_start(pTHX_
     });
 
     if (prog->intflags & PREGf_ANCH) { /* Match at \G, beg-of-str or after \n */
-        /* Check after \n? */
+
+        /* ml_anch: check after \n?
+         *
+         * A note about IMPLICIT: on an un-anchored pattern beginning
+         * with /.*.../, these flags will have been added by the
+         * compiler:
+         *   /.*abc/, /.*abc/m:  PREGf_IMPLICIT | PREGf_ANCH_MBOL
+         *   /.*abc/s:           PREGf_IMPLICIT | PREGf_ANCH_SBOL
+         */
 	ml_anch =      (prog->intflags & PREGf_ANCH_MBOL)
                    && !(prog->intflags & PREGf_IMPLICIT);
 
@@ -766,14 +774,6 @@ Perl_re_intuit_start(pTHX_
              * based on pos() and gofs, so the string is already correctly
              * anchored by definition; and handling the exceptions would
              * be too fiddly (e.g. REXEC_IGNOREPOS).
-             *
-             * A note about IMPLICIT: on an un-anchored pattern beginning
-             * with /.*.../, these flags will have been added by the
-             * compiler:
-             *   /.*abc/, /.*abc/m:  PREGf_IMPLICIT | PREGf_ANCH_MBOL
-             *   /.*abc/s:           PREGf_IMPLICIT | PREGf_ANCH_SBOL
-             * so just the presence of SBOL isn't enough to guarantee
-             * that we're anchored.
              */
             if (   strpos != strbeg
                 && (prog->intflags & (PREGf_ANCH_BOL|PREGf_ANCH_SBOL)))
