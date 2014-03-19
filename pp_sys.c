@@ -638,7 +638,7 @@ PP(pp_open)
     }
 
     tmps = SvPV_const(sv, len);
-    ok = do_openn(gv, tmps, len, FALSE, O_RDONLY, 0, NULL, MARK+1, (SP-MARK));
+    ok = do_open6(gv, tmps, len, NULL, MARK+1, (SP-MARK));
     SP = ORIGMARK;
     if (ok)
 	PUSHi( (I32)PL_forkprocess );
@@ -1598,8 +1598,7 @@ PP(pp_sysopen)
 
     /* Need TIEHANDLE method ? */
     const char * const tmps = SvPV_const(sv, len);
-    /* FIXME? do_open should do const  */
-    if (do_open(gv, tmps, len, TRUE, mode, perm, NULL)) {
+    if (do_open_raw(gv, tmps, len, mode, perm)) {
 	IoLINES(GvIOp(gv)) = 0;
 	PUSHs(&PL_sv_yes);
     }
@@ -2088,7 +2087,7 @@ PP(pp_eof)
 	    if ((IoFLAGS(io) & IOf_START) && av_tindex(GvAVn(gv)) < 0) {
 		IoLINES(io) = 0;
 		IoFLAGS(io) &= ~IOf_START;
-		do_open(gv, "-", 1, FALSE, O_RDONLY, 0, NULL);
+		do_open6(gv, "-", 1, NULL, NULL, 0);
 		if (GvSV(gv))
 		    sv_setpvs(GvSV(gv), "-");
 		else

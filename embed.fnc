@@ -394,10 +394,25 @@ Apmb	|bool	|do_open	|NN GV* gv|NN const char* name|I32 len|int as_raw \
 Ap	|bool	|do_open9	|NN GV *gv|NN const char *name|I32 len|int as_raw \
 				|int rawmode|int rawperm|NULLOK PerlIO *supplied_fp \
 				|NN SV *svs|I32 num
+#if defined(PERL_IN_DOIO_C)
+s	|IO *	|openn_setup    |NN GV *gv|NN char *mode|NN PerlIO **saveifp \
+				|NN PerlIO **saveofp|NN int *savefd \
+                                |NN char *savetype
+s	|bool	|openn_cleanup	|NN GV *gv|NN IO *io|NULLOK PerlIO *fp \
+				|NN char *mode|NN const char *oname \
+                                |NULLOK PerlIO *saveifp|NULLOK PerlIO *saveofp \
+                                |int savefd|char savetype|int writing \
+                                |bool was_fdopen|NULLOK const char *type
+#endif
 Ap	|bool	|do_openn	|NN GV *gv|NN const char *oname|I32 len \
 				|int as_raw|int rawmode|int rawperm \
 				|NULLOK PerlIO *supplied_fp|NULLOK SV **svp \
 				|I32 num
+Mp	|bool	|do_open_raw	|NN GV *gv|NN const char *oname|STRLEN len \
+				|int rawmode|int rawperm
+Mp	|bool	|do_open6	|NN GV *gv|NN const char *oname|STRLEN len \
+				|NULLOK PerlIO *supplied_fp|NULLOK SV **svp \
+				|U32 num
 : Used in pp_hot.c and pp_sys.c
 p	|bool	|do_print	|NULLOK SV* sv|NN PerlIO* fp
 : Used in pp_sys.c

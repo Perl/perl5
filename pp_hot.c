@@ -1562,7 +1562,7 @@ Perl_do_readline(pTHX)
 		    IoLINES(io) = 0;
 		    if (av_tindex(GvAVn(PL_last_in_gv)) < 0) {
 			IoFLAGS(io) &= ~IOf_START;
-			do_open(PL_last_in_gv,"-",1,FALSE,O_RDONLY,0,NULL);
+			do_open6(PL_last_in_gv, "-", 1, NULL, NULL, 0);
 			SvTAINTED_off(GvSVn(PL_last_in_gv)); /* previous tainting irrelevant */
 			sv_setpvs(GvSVn(PL_last_in_gv), "-");
 			SvSETMAGIC(GvSV(PL_last_in_gv));

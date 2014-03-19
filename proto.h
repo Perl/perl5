@@ -934,12 +934,24 @@ PERL_CALLCONV void	Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, const OP *o)
 #define PERL_ARGS_ASSERT_DO_OPEN	\
 	assert(gv); assert(name)
 
+PERL_CALLCONV bool	Perl_do_open6(pTHX_ GV *gv, const char *oname, STRLEN len, PerlIO *supplied_fp, SV **svp, U32 num)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_DO_OPEN6	\
+	assert(gv); assert(oname)
+
 PERL_CALLCONV bool	Perl_do_open9(pTHX_ GV *gv, const char *name, I32 len, int as_raw, int rawmode, int rawperm, PerlIO *supplied_fp, SV *svs, I32 num)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_8);
 #define PERL_ARGS_ASSERT_DO_OPEN9	\
 	assert(gv); assert(name); assert(svs)
+
+PERL_CALLCONV bool	Perl_do_open_raw(pTHX_ GV *gv, const char *oname, STRLEN len, int rawmode, int rawperm)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_DO_OPEN_RAW	\
+	assert(gv); assert(oname)
 
 PERL_CALLCONV bool	Perl_do_openn(pTHX_ GV *gv, const char *oname, I32 len, int as_raw, int rawmode, int rawperm, PerlIO *supplied_fp, SV **svp, I32 num)
 			__attribute__nonnull__(pTHX_1)
@@ -5711,6 +5723,24 @@ STATIC void	S_exec_failed(pTHX_ const char *cmd, int fd, int do_report)
 
 STATIC bool	S_ingroup(pTHX_ Gid_t testgid, bool effective)
 			__attribute__warn_unused_result__;
+
+STATIC bool	S_openn_cleanup(pTHX_ GV *gv, IO *io, PerlIO *fp, char *mode, const char *oname, PerlIO *saveifp, PerlIO *saveofp, int savefd, char savetype, int writing, bool was_fdopen, const char *type)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2)
+			__attribute__nonnull__(pTHX_4)
+			__attribute__nonnull__(pTHX_5);
+#define PERL_ARGS_ASSERT_OPENN_CLEANUP	\
+	assert(gv); assert(io); assert(mode); assert(oname)
+
+STATIC IO *	S_openn_setup(pTHX_ GV *gv, char *mode, PerlIO **saveifp, PerlIO **saveofp, int *savefd, char *savetype)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2)
+			__attribute__nonnull__(pTHX_3)
+			__attribute__nonnull__(pTHX_4)
+			__attribute__nonnull__(pTHX_5)
+			__attribute__nonnull__(pTHX_6);
+#define PERL_ARGS_ASSERT_OPENN_SETUP	\
+	assert(gv); assert(mode); assert(saveifp); assert(saveofp); assert(savefd); assert(savetype)
 
 #endif
 #if defined(PERL_IN_DOOP_C)
