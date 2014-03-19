@@ -1279,7 +1279,7 @@ Perl_re_intuit_start(pTHX_
          *   find_byclass().
          */
 
-	if (prog->anchored_substr || prog->anchored_utf8 || ml_anch)
+	if (prog->anchored_substr || prog->anchored_utf8 || (ml_anch && !(prog->intflags & PREGf_IMPLICIT)))
             endpos= HOP3c(rx_origin, (prog->minlen ? cl_l : 0), strend);
         else if (prog->float_substr || prog->float_utf8) {
 	    rx_max_float = HOP3c(check_at, -start_shift, strbeg);
@@ -1304,7 +1304,8 @@ Perl_re_intuit_start(pTHX_
 	    }
 	    DEBUG_EXECUTE_r( PerlIO_printf(Perl_debug_log,
                                "  This position contradicts STCLASS...\n") );
-            if ((prog->intflags & PREGf_ANCH) && !ml_anch)
+            if ((prog->intflags & PREGf_ANCH) && !ml_anch
+                        && !(prog->intflags & PREGf_IMPLICIT))
 		goto fail;
 
 	    /* Contradict one of substrings */
@@ -1330,7 +1331,7 @@ Perl_re_intuit_start(pTHX_
 	    else {
                 /* float-only */
 
-                if (ml_anch) {
+                if (ml_anch && !(prog->intflags & PREGf_IMPLICIT)) {
                     /* In the presence of ml_anch, we might be able to
                      * find another \n without breaking the current float
                      * constraint. */
