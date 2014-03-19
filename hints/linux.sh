@@ -58,7 +58,11 @@ shift
 libswanted="$*"
 
 # Debian 4.0 puts ndbm in the -lgdbm_compat library.
-libswanted="$libswanted gdbm_compat"
+echo $libs
+if echo " $libswanted " | grep -q ' gdbm '; then
+    # Only add if gdbm is in libswanted.
+    libswanted="$libswanted gdbm_compat"
+fi
 
 # Configure may fail to find lstat() since it's a static/inline
 # function in <sys/stat.h>.
