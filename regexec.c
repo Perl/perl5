@@ -753,7 +753,8 @@ Perl_re_intuit_start(pTHX_
 
     if (prog->intflags & PREGf_ANCH) { /* Match at \G, beg-of-str or after \n */
         /* Check after \n? */
-	ml_anch = (prog->intflags & PREGf_ANCH_MBOL);
+	ml_anch =      (prog->intflags & PREGf_ANCH_MBOL)
+                   && !(prog->intflags & PREGf_IMPLICIT);
 
 	if (!ml_anch && !(prog->intflags & PREGf_IMPLICIT)) {
             /* we are only allowed to match at BOS or \G */
@@ -905,7 +906,6 @@ Perl_re_intuit_start(pTHX_
          */
         if (!ml_anch
             && prog->intflags & PREGf_ANCH
-            && !(prog->intflags & PREGf_IMPLICIT)
             && prog->check_offset_max != SSize_t_MAX)
         {
             SSize_t len = SvCUR(check) - !!SvTAIL(check);
@@ -1145,10 +1145,7 @@ Perl_re_intuit_start(pTHX_
 
     /* handle the extra constraint of /^.../m if present */
 
-    if (ml_anch && rx_origin != strbeg && rx_origin[-1] != '\n'
-        /* May be due to an implicit anchor of m{.*foo}  */
-        && !(prog->intflags & PREGf_IMPLICIT))
-    {
+    if (ml_anch && rx_origin != strbeg && rx_origin[-1] != '\n') {
         char *s;
 
         DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
@@ -1268,7 +1265,7 @@ Perl_re_intuit_start(pTHX_
          *   find_byclass().
          */
 
-	if (prog->anchored_substr || prog->anchored_utf8 || (ml_anch && !(prog->intflags & PREGf_IMPLICIT)))
+	if (prog->anchored_substr || prog->anchored_utf8 || ml_anch)
             endpos= HOP3c(rx_origin, (prog->minlen ? cl_l : 0), strend);
         else if (prog->float_substr || prog->float_utf8) {
 	    rx_max_float = HOP3c(check_at, -start_shift, strbeg);
@@ -1320,7 +1317,7 @@ Perl_re_intuit_start(pTHX_
 	    else {
                 /* float-only */
 
-                if (ml_anch && !(prog->intflags & PREGf_IMPLICIT)) {
+                if (ml_anch) {
                     /* In the presence of ml_anch, we might be able to
                      * find another \n without breaking the current float
                      * constraint. */
