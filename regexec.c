@@ -752,21 +752,31 @@ Perl_re_intuit_start(pTHX_
     });
 
     if (prog->intflags & PREGf_ANCH) { /* Match at \G, beg-of-str or after \n */
-        /* Check after \n? */
-	ml_anch = (     (prog->intflags & PREGf_ANCH_MBOL)
-		    || ((prog->intflags & PREGf_ANCH_BOL) && multiline));
 
-	if (!ml_anch) {
+        /* ml_anch: check after \n?
+         *
+         * A note about IMPLICIT: on an un-anchored pattern beginning
+         * with /.*.../, these flags will have been added by the
+         * compiler:
+         *   /.*abc/, /.*abc/m:  PREGf_IMPLICIT | PREGf_ANCH_MBOL
+         *   /.*abc/s:           PREGf_IMPLICIT | PREGf_ANCH_SBOL
+         */
+	ml_anch =      (prog->intflags & PREGf_ANCH_MBOL)
+                   && !(prog->intflags & PREGf_IMPLICIT);
+
+	if (!ml_anch && !(prog->intflags & PREGf_IMPLICIT)) {
             /* we are only allowed to match at BOS or \G */
 
             /* trivially reject if there's a BOS anchor and we're not at BOS.
-             * In the case of \G, we hope(!) that the caller has already
-             * set strpos to pos()-gofs, and will already have checked
-             * that this anchor position is legal. So we can skip it here.
+             *
+             * Note that we don't try to do a similar quick reject for
+             * \G, since generally the caller will have calculated strpos
+             * based on pos() and gofs, so the string is already correctly
+             * anchored by definition; and handling the exceptions would
+             * be too fiddly (e.g. REXEC_IGNOREPOS).
              */
-            if (   !(prog->intflags & PREGf_ANCH_GPOS)
-                && !(prog->intflags & PREGf_IMPLICIT) /* not a real BOL */
-		&& (strpos != strbeg))
+            if (   strpos != strbeg
+                && (prog->intflags & (PREGf_ANCH_BOL|PREGf_ANCH_SBOL)))
             {
 	        DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
                                 "  Not at start...\n"));
@@ -784,22 +794,17 @@ Perl_re_intuit_start(pTHX_
              * at position pos()-4+1, which lines up with the "a" */
 
 	    if (prog->check_offset_min == prog->check_offset_max
-                && !(prog->intflags & PREGf_CANY_SEEN)
-                && ! multiline)   /* /m can cause \n's to match that aren't
-                                     accounted for in the string max length.
-                                     See [perl #115242] */
+                && !(prog->intflags & PREGf_CANY_SEEN))
             {
 	        /* Substring at constant offset from beg-of-str... */
 	        SSize_t slen = SvCUR(check);
-                char *s;
-
-	        s = HOP3c(strpos, prog->check_offset_min, strend);
+                char *s = HOP3c(strpos, prog->check_offset_min, strend);
 	    
                 DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
                     "  Looking for check substr at fixed offset %"IVdf"...\n",
                     (IV)prog->check_offset_min));
 
-	        if (SvTAIL(check)) {
+	        if (SvTAIL(check) && !multiline) {
                     /* In this case, the regex is anchored at the end too,
                      * so the lengths must match exactly, give or take a \n.
 		     * NB: slen >= 1 since the last char of check is \n */
@@ -891,19 +896,32 @@ Perl_re_intuit_start(pTHX_
 	}
 
 
-        /* if the regex is absolutely anchored to the start of the string,
-         * then check_offset_max represents an upper bound on the string
-         * where the substr could start */
+        /* If the regex is absolutely anchored to either the start of the
+         * string (BOL,SBOL) or to pos() (ANCH_GPOS), then
+         * check_offset_max represents an upper bound on the string where
+         * the substr could start. For the ANCH_GPOS case, we assume that
+         * the caller of intuit will have already set strpos to
+         * pos()-gofs, so in this case strpos + offset_max will still be
+         * an upper bound on the substr.
+         */
         if (!ml_anch
             && prog->intflags & PREGf_ANCH
-            && prog->check_offset_max != SSize_t_MAX
-            && start_shift < prog->check_offset_max)
+            && prog->check_offset_max != SSize_t_MAX)
         {
             SSize_t len = SvCUR(check) - !!SvTAIL(check);
-            end_point = HOP3lim(start_point,
-                            prog->check_offset_max - start_shift,
-                            end_point -len)
-                        + len;
+            const char * const anchor =
+                        (prog->intflags & PREGf_ANCH_GPOS ? strpos : strbeg);
+
+            /* do a bytes rather than chars comparison. It's conservative;
+             * so it skips doing the HOP if the result can't possibly end
+             * up earlier than the old value of end_point.
+             */
+            if ((char*)end_point - anchor > prog->check_offset_max) {
+                end_point = HOP3lim((U8*)anchor,
+                                prog->check_offset_max,
+                                end_point -len)
+                            + len;
+            }
         }
 
 	DEBUG_OPTIMISE_MORE_r({
@@ -1127,10 +1145,7 @@ Perl_re_intuit_start(pTHX_
 
     /* handle the extra constraint of /^.../m if present */
 
-    if (ml_anch && rx_origin != strbeg && rx_origin[-1] != '\n'
-        /* May be due to an implicit anchor of m{.*foo}  */
-        && !(prog->intflags & PREGf_IMPLICIT))
-    {
+    if (ml_anch && rx_origin != strbeg && rx_origin[-1] != '\n') {
         char *s;
 
         DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
@@ -1202,8 +1217,7 @@ Perl_re_intuit_start(pTHX_
     }
     else {
         DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
-            "  Starting position does not contradict /%s^%s/m...\n",
-            PL_colors[0], PL_colors[1]));
+            "  (multiline anchor test skipped)\n"));
     }
 
   success_at_start:
@@ -1276,7 +1290,8 @@ Perl_re_intuit_start(pTHX_
 	    }
 	    DEBUG_EXECUTE_r( PerlIO_printf(Perl_debug_log,
                                "  This position contradicts STCLASS...\n") );
-            if ((prog->intflags & PREGf_ANCH) && !ml_anch)
+            if ((prog->intflags & PREGf_ANCH) && !ml_anch
+                        && !(prog->intflags & PREGf_IMPLICIT))
 		goto fail;
 
 	    /* Contradict one of substrings */
@@ -1394,19 +1409,10 @@ Perl_re_intuit_start(pTHX_
 	    prog->check_substr = prog->check_utf8 = NULL;	/* disable */
 	    prog->float_substr = prog->float_utf8 = NULL;	/* clear */
 	    check = NULL;			/* abort */
-	    /* XXXX If the check string was an implicit check MBOL, then we need to unset the relevant flag
-		    see http://bugs.activestate.com/show_bug.cgi?id=87173 */
-            if (prog->intflags & PREGf_IMPLICIT) {
-                prog->intflags &= ~PREGf_ANCH_MBOL;
-                /* maybe we have no anchors left after this... */
-                if (!(prog->intflags & PREGf_ANCH))
-                    prog->extflags &= ~RXf_IS_ANCHORED;
-            }
 	    /* XXXX This is a remnant of the old implementation.  It
 	            looks wasteful, since now INTUIT can use many
 	            other heuristics. */
 	    prog->extflags &= ~RXf_USE_INTUIT;
-	    /* XXXX What other flags might need to be cleared in this branch? */
 	}
     }
 
