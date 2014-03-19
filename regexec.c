@@ -755,7 +755,7 @@ Perl_re_intuit_start(pTHX_
         /* Check after \n? */
 	ml_anch = (prog->intflags & PREGf_ANCH_MBOL);
 
-	if (!ml_anch) {
+	if (!ml_anch && !(prog->intflags & PREGf_IMPLICIT)) {
             /* we are only allowed to match at BOS or \G */
 
             /* trivially reject if there's a BOS anchor and we're not at BOS.
@@ -775,8 +775,7 @@ Perl_re_intuit_start(pTHX_
              * that we're anchored.
              */
             if (   strpos != strbeg
-                && (prog->intflags & (PREGf_ANCH_BOL|PREGf_ANCH_SBOL))
-                && !(prog->intflags & PREGf_IMPLICIT)) /* not a real BOL */
+                && (prog->intflags & (PREGf_ANCH_BOL|PREGf_ANCH_SBOL)))
             {
 	        DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
                                 "  Not at start...\n"));
@@ -798,17 +797,7 @@ Perl_re_intuit_start(pTHX_
             {
 	        /* Substring at constant offset from beg-of-str... */
 	        SSize_t slen = SvCUR(check);
-                char *s;
-
-                /* we only get here if there's a fixed substring (min ==
-                 * max). But PREGf_IMPLICIT only gets set if the regex
-                 * begins with /.*.../, and in that case there can't be
-                 * a fixed substring. So assert this truth. If anyone
-                 * changes this assumption (e.g. with lookahead/behind),
-                 * complain and let them fix it */
-                assert(!(prog->intflags & PREGf_IMPLICIT));
-
-	        s = HOP3c(strpos, prog->check_offset_min, strend);
+                char *s = HOP3c(strpos, prog->check_offset_min, strend);
 	    
                 DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
                     "  Looking for check substr at fixed offset %"IVdf"...\n",
