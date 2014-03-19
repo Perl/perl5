@@ -10,7 +10,7 @@ use File::Path ();
 use File::Spec ();
 use CPAN::Mirrors ();
 use vars qw($VERSION $auto_config);
-$VERSION = "5.5304";
+$VERSION = "5.5305";
 
 =head1 NAME
 
@@ -132,6 +132,9 @@ warnings, debugging output, and the output of the modules being
 installed. Set your favorite colors after some experimenting with the
 Term::ANSIColor module.
 
+Please note that on Windows platforms colorized output also requires
+the Win32::Console::ANSI module.
+
 Do you want to turn on colored output?
 
 =item colorize_print
@@ -203,7 +206,8 @@ Preferred method for determining the current working directory?
 
 Normally, CPAN.pm continues processing the full list of targets and
 dependencies, even if one of them fails.  However, you can specify
-that CPAN should halt after the first failure.
+that CPAN should halt after the first failure.  (Note that optional
+recommended or suggested modules that fail will not cause a halt.)
 
 Do you want to halt on failure (yes/no)?
 
@@ -553,6 +557,17 @@ because of missing dependencies.  Also, tests can be run
 regardless of the history using "force".
 
 Do you want to rely on the test report history (yes/no)?
+
+=item use_prompt_default
+
+When this is true, CPAN will set PERL_MM_USE_DEFAULT to a true
+value.  This causes ExtUtils::MakeMaker (and compatible) prompts
+to use default values instead of stopping to prompt you to answer
+questions. It also sets NONINTERACTIVE_TESTING to a true value to
+signal more generally that distributions should not try to
+interact with you.
+
+Do you want to use prompt defaults (yes/no)?
 
 =item use_sqlite
 
@@ -1062,6 +1077,11 @@ sub init {
     }
 
     my_dflt_prompt(mbuild_install_arg => "", $matcher);
+
+    #
+    #== use_prompt_default
+    #
+    my_yn_prompt(use_prompt_default => 0, $matcher);
 
     #
     #= Alarm period

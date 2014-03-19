@@ -4,7 +4,7 @@ use strict;
 use vars qw($VERSION @ISA $BUGHUNTING);
 use CPAN::Debug;
 use File::Basename qw(basename);
-$VERSION = "5.5011";
+$VERSION = "5.5012";
 # module is internal to CPAN.pm
 
 @ISA = qw(CPAN::Debug); ## no critic
@@ -105,7 +105,7 @@ sub gunzip {
         return 1;
     } else {
         my $command = CPAN::HandleConfig->safe_quote($self->{UNGZIPPRG});
-        system(qq{$command -dc "$read" > "$write"})==0;
+        system(qq{$command -d -c "$read" > "$write"})==0;
     }
 }
 
@@ -190,7 +190,7 @@ sub TIEHANDLE {
         $class->debug("via Compress::Zlib");
     } else {
         my $gzip = CPAN::HandleConfig->safe_quote($self->{UNGZIPPRG});
-        my $pipe = "$gzip -dc $file |";
+        my $pipe = "$gzip -d -c $file |";
         my $fh = FileHandle->new($pipe) or $CPAN::Frontend->mydie("Could not pipe[$pipe]: $!");
         binmode $fh;
         $self->{FH} = $fh;
@@ -324,7 +324,7 @@ Can't continue cutting file '$file'.
         my $tarcommand = CPAN::HandleConfig->safe_quote($exttar);
         if ($is_compressed) {
             my $command = CPAN::HandleConfig->safe_quote($extgzip);
-            $system = qq{$command -dc }.
+            $system = qq{$command -d -c }.
                 qq{< "$file" | $tarcommand x${tar_verb}f -};
         } else {
             $system = qq{$tarcommand x${tar_verb}f "$file"};

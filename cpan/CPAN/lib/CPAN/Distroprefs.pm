@@ -6,7 +6,7 @@ use strict;
 package CPAN::Distroprefs;
 
 use vars qw($VERSION);
-$VERSION = '6';
+$VERSION = '6.0001';
 
 package CPAN::Distroprefs::Result;
 
@@ -162,7 +162,7 @@ sub _build_file_list {
     while (my $fn = readdir $dh) {
         next if $fn eq '.' || $fn eq '..';
         if (-d "$dir/$fn") {
-            next if $fn eq '.svn' || $fn eq '.git' || $fn eq '.hg' || $fn eq '_darcs';
+            next if $fn =~ /^[._]/; # prune .svn, .git, .hg, _darcs and what the user wants to hide
             push @list, _build_file_list("$dir/$fn", "$dir1$fn/", $ext_re);
         } else {
             if ($fn =~ $ext_re) {
@@ -374,7 +374,9 @@ This module encapsulates reading L<Distroprefs|CPAN> and matching them against C
 
     while (my $result = $finder->next) { ... }
 
-Build an iterator which finds distroprefs files in the given directory.
+Build an iterator which finds distroprefs files in the tree below the
+given directory. Within the tree directories matching C<m/^[._]/> are
+pruned.
 
 C<%ext_map> is a hashref whose keys are file extensions and whose values are
 modules used to load matching files:

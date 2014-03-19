@@ -6,7 +6,7 @@ use vars qw($VERSION);
 
 use if $] < 5.008 => "IO::Scalar";
 
-$VERSION = '1.61';
+$VERSION = '1.62';
 
 =head1 NAME
 
@@ -965,6 +965,7 @@ sub _dump_config # -J
 
 	my $fh = $args->[0] || \*STDOUT;
 
+	local $Data::Dumper::Sortkeys = 1;
 	my $dd = Data::Dumper->new(
 		[$CPAN::Config],
 		['$CPAN::Config']
