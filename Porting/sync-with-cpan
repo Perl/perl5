@@ -218,7 +218,7 @@ chdir "cpan";
 my  $pkg_dir      = $files[0];
     $pkg_dir      =~ s!.*/!!;
 
-my ($old_version) = $distribution =~ /-([0-9.]+)\.tar\.gz/;
+my ($old_version) = $distribution =~ /-([0-9.]+(?:-TRIAL)?)\.tar\.gz/;
 
 my  $o_module     = $module;
 if ($cpan_mod =~ /-/ && $cpan_mod !~ /::/) {
@@ -267,7 +267,7 @@ unless ($tarball) {
 }
 else {
     $new_file     = $tarball;
-    $new_version  = $version // ($new_file =~ /-([0-9._]+)\.tar\.gz/) [0];
+    $new_version  = $version // ($new_file =~ /-([0-9._]+(?:-TRIAL)?)\.tar\.gz/) [0];
 }
 
 my  $old_dir      = "$pkg_dir-$old_version";
