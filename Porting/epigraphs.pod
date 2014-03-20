@@ -17,6 +17,16 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.19.10 - Michael Chadwick, The Decipherment of Linear B
+
+The urge to discover secrets is deeply ingrained in human nature; even
+the least curious mind is roused by the promise of sharing knowledge
+withheld from others. Some are fortunate enough to find a job which
+consists in the solution of mysteries, whether it be the physicist who
+tracks down a hitherto unknown nuclear particle or the policeman who
+detects a criminal. But most of us are driven to sublimate this urge
+by the solving of artificial puzzles devised for our entertainment.
+
 =head2 v5.19.9 - R. A. MacAvoy, Tea with the Black Dragon
 
 L<Announced on 2014-02-20 by Tony Cook|http://www.nntp.perl.org/group/perl.perl5.porters/2014/02/msg213047.html>
