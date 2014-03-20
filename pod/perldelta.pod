@@ -111,6 +111,11 @@ or C<E<lt>E<gt>> operator, the data is no longer copied unnecessarily.
 
 =item *
 
+Executing a regex that contains the C<^> anchor (or its variant under the
+C</m> flag) has been made much faster in several situations.
+
+=item *
+
 It is now faster to create certain sorts of lists, including array and hash
 slices.
 
@@ -126,6 +131,29 @@ speed up Perl code using expressions like C<$x[-1]>, at the expense of
 Dereferencing (as in C<$obj-E<gt>[0]> or C<$obj-E<gt>{k}>) is now faster
 when C<$obj> is an instance of a class that has overloaded methods, but
 doesn't overload any of the dereferencing methods C<@{}>, C<%{}>, and so on.
+
+=item *
+
+The first iteration over a large hash (using C<keys> or C<each>) is now
+faster. This is achieved by preallocating the hash's internal iterator
+state, rather than lazily creating it when the hash is first iterated. (For
+small hashes, the iterator is still created only when first needed. The
+assumption is that small hashes are more likely to be used as objects, and
+therefore never allocated. For large hashes, that's less likely to be true,
+and the cost of allocating the iterator is swamped by the cost of allocating
+space for the hash itself.)
+
+=item *
+
+Perl's optimiser no longer skips optimising code that follows certain
+C<eval {}> expressions (including those with an apparent infinite loop).
+
+=item *
+
+The implementation now does a better job of avoiding meaningless work at
+runtime. Internal effect-free "null" operations (created as a side-effect of
+parsing Perl programs) are normally deleted during compilation. That
+deletion is now applied in some situations that weren't previously handled.
 
 =item *
 
@@ -234,13 +262,17 @@ XXX Changes which significantly change existing files in F<pod/> go here.
 However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
 section.
 
-=head3 L<XXX>
+=head3 L<perllexwarn> and L<warnings>
 
 =over 4
 
 =item *
 
-XXX Description of the change here
+The L<perllexwarn> documentation used to describe the hierarchy of warning
+categories understood by the L<warnings> pragma. That description has now
+been moved to the L<warnings> documentation itself, leaving L<perllexwarn>
+as a stub that points to it. This change consolidates all documentation for
+lexical warnings in a single place.
 
 =back
 
@@ -329,6 +361,11 @@ build. Currently around 80 extensions can be processed directly by the
 F<make_ext.pl> tool, meaning that 80 invocations of F<make> and 160
 invocations of F<miniperl> are no longer made.
 
+=item *
+
+The build system now works correctly when compiling under GCC or Clang with
+link-time optimization enabled (the C<-flto> option). [perl #113022]
+
 =back
 
 =head1 Testing
@@ -345,7 +382,17 @@ that they represent may be covered elsewhere.
 
 =item *
 
-XXX
+The test suite no longer fails when the user's interactive shell maintains a
+C<$PWD> environment variable, but the F</bin/sh> used for running tests
+doesn't.
+
+=item *
+
+The C<test.valgrind> make target now allows tests to be run in parallel.
+This target allows Perl's test suite to be run under Valgrind, which detects
+certain sorts of C programming errors, though at significant cost in running
+time. On suitable hardware, allowing parallel execution claws back a lot of
+that additional cost. [perl #121431]
 
 =back
 
@@ -389,6 +436,29 @@ XXX List any changes for specific platforms.  This could include configuration
 and compilation changes or changes in portability/compatibility.  However,
 changes within modules for platforms should generally be listed in the
 L</Modules and Pragmata> section.
+
+=head3 Linux
+
+=over 4
+
+=item *
+
+The hints file now looks for C<libgdbm_compat> only if C<libgdbm> itself is
+also wanted. The former is never useful without the latter, and in some
+circumstances, including it could actually prevent building.
+
+=back
+
+=head3 Mac OS
+
+=over 4
+
+=item *
+
+The build system now honours an C<ld> setting supplied by the user running
+F<Configure>.
+
+=back
 
 =head3 Win32
 
@@ -441,6 +511,12 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 Static builds, as configured with C<-Uusedl> now build
 correctly. [perl #121291]
+
+=item *
+
+Regexes with backreferences nested inside subpattern references now behave
+more consistently: match variables are dynamically scoped during the
+execution of the subpattern call. [perl #121299]
 
 =back
 
