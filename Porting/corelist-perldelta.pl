@@ -59,9 +59,7 @@ sub run {
   );
 
   # by default, compare latest two version in CoreList;
-  my @versions = sort keys %Module::CoreList::version;
-  my $old = $versions[-2];
-  my $new = $versions[-1];
+  my ($old, $new) = latest_two_perl_versions();
 
   # use the provided versions if present
   # @ARGV >=2 means [old_version] [new_version] [path/to/file]
@@ -87,6 +85,23 @@ sub run {
   }
 
   exit 0;
+}
+
+sub latest_two_perl_versions {
+
+  my @versions = sort keys %Module::CoreList::version;
+
+  my $new = pop @versions;
+
+  # If a fully-padded version number ends in a zero (as in "5.019010"), that
+  # version shows up in %Module::CoreList::version both with and without its
+  # trailing zeros. So skip all versions that are numerically equal to $new.
+  pop @versions while @versions && $versions[-1] == $new;
+
+  die "Too few distinct core versions in %Module::CoreList::version ?!\n"
+    if !@versions;
+
+  return $versions[-1], $new;
 }
 
 # Given two perl versions, it returns a list describing the core distributions that have changed.
