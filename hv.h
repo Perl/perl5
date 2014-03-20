@@ -238,7 +238,9 @@ C<SV*>.
 */
 
 #define PERL_HASH_DEFAULT_HvMAX 7
-/* HvMAX(hv)+1 is >= to this we preallocate the HvAUX() struct during hsplit()
+
+/* During hsplit(), if HvMAX(hv)+1 (the new bucket count) is >= this value,
+ * we preallocate the HvAUX() struct.
  * The assumption being that we are using so much space anyway we might
  * as well allocate the extra bytes and speed up later keys()
  * or each() operations. We don't do this to small hashes as we assume
