@@ -34,6 +34,7 @@ corelist sections of the last perldelta and the next perldelta.
 
 Currently no information about Removed Modules is displayed in any of the
 modes.
+
 =cut
 
 my %sections = (
