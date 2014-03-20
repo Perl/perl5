@@ -68,7 +68,7 @@ sub run {
     ($old, $new) = (shift @ARGV, shift @ARGV);
     die "$old is an invalid version\n" if not exists
       $Module::CoreList::version{$old};
-    die "$new is an invalid verison\n" if not exists
+    die "$new is an invalid version\n" if not exists
       $Module::CoreList::version{$new};
   }
 
