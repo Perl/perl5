@@ -525,6 +525,7 @@ the strings?).
  Abigail   5.19.7       2013-Dec-20
  Ricardo   5.19.8       2014-Jan-20
  TonyC     5.19.9       2014-Feb-20
+ Aaron     5.19.10      2014-Mar-20
 
 =head2 SELECTED RELEASE SIZES
 
