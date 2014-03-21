@@ -208,6 +208,15 @@ Synchronize POD changes from the CPAN release.
 
 L<perl5db.pl> has been upgraded from version 1.44 to 1.45.
 
+=item *
+
+A mismatch between the documentation and the code in utf8::downgrade()
+was fixed in favour of the documentation. The optional second argument
+is now correctly treated as a perl boolean (true/false semantics) and
+not as an integer.
+
+=item *
+
 fork() in the debugger under C<tmux> will now create a new window for
 the forked process. L<[perl
 #121333]|https://rt.perl.org/Ticket/Display.html?id=121333>

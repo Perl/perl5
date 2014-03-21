@@ -513,7 +513,7 @@ XS(XS_utf8_downgrade)
 	croak_xs_usage(cv, "sv, failok=0");
     else {
 	SV * const sv = ST(0);
-        const bool failok = (items < 2) ? 0 : (int)SvIV(ST(1));
+        const bool failok = (items < 2) ? 0 : SvTRUE(ST(1)) ? 1 : 0;
         const bool RETVAL = sv_utf8_downgrade(sv, failok);
 
 	ST(0) = boolSV(RETVAL);
