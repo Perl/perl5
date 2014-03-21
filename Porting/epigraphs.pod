@@ -17,7 +17,9 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
-=head2 v5.19.10 - Michael Chadwick, The Decipherment of Linear B
+=head2 v5.19.10 - John Chadwick, The Decipherment of Linear B
+
+L<Announced on 2014-03-20 by Aaron Crane|http://www.nntp.perl.org/group/perl.perl5.porters/2014/03/msg213851.html>
 
 The urge to discover secrets is deeply ingrained in human nature; even
 the least curious mind is roused by the promise of sharing knowledge
