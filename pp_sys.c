@@ -3322,9 +3322,10 @@ PP(pp_fttext)
 		i = PerlIO_getc(IoIFP(io));
 		if (i != EOF)
 		    (void)PerlIO_ungetc(IoIFP(io),i);
+                else
+                    /* null file is anything */
+                    FT_RETURNYES;
 	    }
-	    if (PerlIO_get_cnt(IoIFP(io)) <= 0)	/* null file is anything */
-		FT_RETURNYES;
 	    len = PerlIO_get_bufsiz(IoIFP(io));
 	    s = (STDCHAR *) PerlIO_get_base(IoIFP(io));
 	    /* sfio can have large buffers - limit to 512 */
