@@ -806,8 +806,10 @@ C<"IO::Handle=GLOB(0x8039e0)">, then pattern matches against that.
 =head2 Bitwise And
 X<operator, bitwise, and> X<bitwise and> X<&>
 
-Binary "&" returns its operands ANDed together bit by bit.
-(See also L<Integer Arithmetic> and L<Bitwise String Operators>.)
+Binary "&" returns its operands ANDed together bit by bit.  Although no
+warning is currently raised, the result is not well defined when this operation
+is performed on operands that aren't either numbers (see
+L<Integer Arithmetic>) or bitstrings (see L<Bitwise String Operators>).
 
 Note that "&" has lower priority than relational operators, so for example
 the parentheses are essential in a test like
@@ -819,10 +821,13 @@ X<operator, bitwise, or> X<bitwise or> X<|> X<operator, bitwise, xor>
 X<bitwise xor> X<^>
 
 Binary "|" returns its operands ORed together bit by bit.
-(See also L<Integer Arithmetic> and L<Bitwise String Operators>.)
 
 Binary "^" returns its operands XORed together bit by bit.
-(See also L<Integer Arithmetic> and L<Bitwise String Operators>.)
+
+Although no warning is currently raised, the results are not well
+defined when these operations are performed on operands that aren't either
+numbers (see L<Integer Arithmetic>) or bitstrings (see L<Bitwise String
+Operators>).
 
 Note that "|" and "^" have lower priority than relational operators, so
 for example the brackets are essential in a test like
