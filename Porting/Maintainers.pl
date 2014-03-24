@@ -193,7 +193,7 @@ use File::Glob qw(:case);
     },
 
     'Carp' => {
-        'DISTRIBUTION' => 'ZEFRAM/Carp-1.32.tar.gz',
+        'DISTRIBUTION' => 'ZEFRAM/Carp-1.33.tar.gz',
         'FILES'        => q[dist/Carp],
     },
 
@@ -812,7 +812,7 @@ use File::Glob qw(:case);
     },
 
     'Module::CoreList' => {
-        'DISTRIBUTION' => 'BINGOS/Module-CoreList-3.07.tar.gz',
+        'DISTRIBUTION' => 'BINGOS/Module-CoreList-3.09.tar.gz',
         'FILES'        => q[dist/Module-CoreList],
     },
 
