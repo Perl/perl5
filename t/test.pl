@@ -1558,8 +1558,14 @@ sub watchdog ($;$)
 
             # Add END block to parent to terminate and
             #   clean up watchdog process
-            eval "END { local \$! = 0; local \$? = 0;
-                        wait() if kill('KILL', $watchdog); };";
+            # Win32 watchdog is launched by cmd.exe shell, so use process group
+            # kill, otherwise the watchdog is never killed and harness waits
+            # every time for the timeout, #121395
+            eval( $is_mswin ?
+            "END { local \$! = 0; local \$? = 0;
+                        wait() if kill('-KILL', $watchdog); };"
+            : "END { local \$! = 0; local \$? = 0;
+                        wait() if kill('KILL', $watchdog); };");
             return;
         }
 

@@ -309,6 +309,13 @@ L</Modules and Pragmata> section.
 
 XXX
 
+=item Win32
+
+About 15 minutes of idle sleeping was removed from running C<make test> due to
+a bug in which the timeout monitor used for tests could not be cancelled once
+the test completes, and the full timeout period elapsed before running the next
+test file.
+
 =back
 
 =head1 Internal Changes
