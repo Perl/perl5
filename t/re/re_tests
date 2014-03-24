@@ -1883,6 +1883,7 @@ A+(*PRUNE)BC(?{})	AAABC	y	$&	AAABC
 \d<(.*?)>	a<>	n	-	-
 [bcd].{2,3}aaaa	XbXaaaaa	y	-	-
 [bcd].{2,3}aaaa	Xb\x{100}aaaaa	y	-	-
+'\Awibble\z'm	wibble	y	-	-
 
 # Keep these lines at the end of the file
 # vim: softtabstop=0 noexpandtab

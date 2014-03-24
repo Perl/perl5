@@ -804,12 +804,15 @@ Perl_re_intuit_start(pTHX_
                     "  Looking for check substr at fixed offset %"IVdf"...\n",
                     (IV)prog->check_offset_min));
 
-	        if (SvTAIL(check) && !multiline) {
-                    /* In this case, the regex is anchored at the end too,
-                     * so the lengths must match exactly, give or take a \n.
-		     * NB: slen >= 1 since the last char of check is \n */
-		    if (   strend - s > slen || strend - s < slen - 1
-		       || (strend - s == slen && strend[-1] != '\n'))
+	        if (SvTAIL(check)) {
+                    /* In this case, the regex is anchored at the end too.
+                     * Unless it's a multiline match, the lengths must match
+                     * exactly, give or take a \n.  NB: slen >= 1 since
+                     * the last char of check is \n */
+		    if (!multiline
+                        && (   strend - s > slen
+                            || strend - s < slen - 1
+                            || (strend - s == slen && strend[-1] != '\n')))
                     {
                         DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
                                             "  String too long...\n"));
