@@ -3,7 +3,6 @@
 BEGIN {
     unshift @INC, 't/lib';
 }
-chdir 't';
 
 use strict;
 use Config;
@@ -13,12 +12,16 @@ use Test::More
     : (tests => 9);
 
 use File::Spec;
+use File::Temp qw[tempdir];
 use MakeMaker::Test::Setup::PL_FILES;
 use MakeMaker::Test::Utils;
 
 my $perl = which_perl();
 my $make = make_run();
 perl_lib();
+
+my $tmpdir = tempdir( DIR => 't', CLEANUP => 1 );
+chdir $tmpdir;
 
 setup;
 

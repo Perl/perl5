@@ -15,7 +15,7 @@ use ExtUtils::MakeMaker qw($Verbose neatvalue);
 
 # If we make $VERSION an our variable parse_version() breaks
 use vars qw($VERSION);
-$VERSION = '6.92';
+$VERSION = '6.94';
 $VERSION = eval $VERSION;  ## no critic [BuiltinFunctions::ProhibitStringyEval]
 
 require ExtUtils::MM_Any;
@@ -1291,7 +1291,7 @@ sub init_dirscan {	# --- File and Directory Lists (.xs .pm .pod etc)
 
     foreach my $name ($self->lsdir($Curdir)){
 	next if $name =~ /\#/;
-	next if $name =~ $distprefix;
+	next if $name =~ $distprefix && -d $name;
 	$name = lc($name) if $Is{VMS};
 	next if $name eq $Curdir or $name eq $Updir or $ignore{$name};
 	next unless $self->libscan($name);
