@@ -284,15 +284,16 @@ sub _cmd {
         if ($ENV{PERL_VALGRIND}) {
             my $perl_supp = $options->{return_dir} ? "$options->{return_dir}/perl.supp" : "perl.supp";
             my $valgrind_exe = $ENV{VALGRIND} // 'valgrind';
+            my $vg_opts = $ENV{VG_OPTS}
+              // '--log-fd=3 '
+		  . "--suppressions=$perl_supp --leak-check=yes "
+		  . "--leak-resolution=high --show-reachable=yes "
+                  . "--num-callers=50 --track-origins=yes";
+            $perl = "$valgrind_exe $vg_opts $perl";
+            $redir = "3>$Valgrind_Log";
             if ($options->{run_dir}) {
                 $Valgrind_Log = "$options->{run_dir}/$Valgrind_Log";
             }
-            my $vg_opts = $ENV{VG_OPTS}
-	       //   "--log-file=$Valgrind_Log "
-		  . "--suppressions=$perl_supp --leak-check=yes "
-		  . "--leak-resolution=high --show-reachable=yes "
-		  . "--num-callers=50 --track-origins=yes";
-            $perl = "$valgrind_exe $vg_opts $perl";
         }
 
         my $args = "$options->{testswitch} $options->{switch} $options->{utf8}";
