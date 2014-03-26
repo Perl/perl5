@@ -674,7 +674,7 @@ X<\g> X<\k> X<\K> X<backreference>
                    part of a larger UTF-8 character.  Thus it breaks up
                    characters into their UTF-8 bytes, so you may end up
                    with malformed pieces of UTF-8.  Unsupported in
-                   lookbehind.
+                   lookbehind. (Deprecated.)
   \1        [5]  Backreference to a specific capture group or buffer.
                    '1' may actually be any positive integer.
   \g1       [5]  Backreference to a specific or previous group,
