@@ -69,7 +69,8 @@ as C<Not in [].>
  \b                Word/non-word boundary. (Backspace in []).
  \B                Not a word/non-word boundary.  Not in [].
  \cX               Control-X.
- \C                Single octet, even under UTF-8.  Not in []. (Deprecated)
+ \C                Single octet, even under UTF-8.  Not in [].
+                   (Deprecated)
  \d                Character class for digits.
  \D                Character class for non-digits.
  \e                Escape character.
