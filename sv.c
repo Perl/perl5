@@ -9502,7 +9502,8 @@ Perl_sv_pvn_force_flags(pTHX_ SV *const sv, STRLEN *const lp, const I32 flags)
 	if (lp)
 	    *lp = len;
 
-	if (s != SvPVX_const(sv)) {	/* Almost, but not quite, sv_setpvn() */
+        if (SvTYPE(sv) < SVt_PV ||
+            s != SvPVX_const(sv)) {	/* Almost, but not quite, sv_setpvn() */
 	    if (SvROK(sv))
 		sv_unref(sv);
 	    SvUPGRADE(sv, SVt_PV);		/* Never FALSE */
