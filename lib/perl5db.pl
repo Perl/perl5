@@ -512,12 +512,17 @@ package DB;
 
 use strict;
 
+use Cwd ();
+
+my $_initial_cwd;
+
 BEGIN {eval 'use IO::Handle'}; # Needed for flush only? breaks under miniperl
 
 BEGIN {
     require feature;
     $^V =~ /^v(\d+\.\d+)/;
     feature->import(":$1");
+    $_initial_cwd = Cwd::getcwd();
 }
 
 # Debugger for Perl 5.00x; perl5db.pl patch level:
@@ -2260,6 +2265,13 @@ sub _DB__handle_restart_and_rerun_commands {
     # R - restart execution.
     # rerun - controlled restart execution.
     if ($cmd_cmd eq 'rerun' or $cmd_params eq '') {
+
+        # Change directory to the initial current working directory on
+        # the script startup, so if the debugged program changed the
+        # directory, then we will still be able to find the path to the
+        # the program. (perl 5 RT #121509 ).
+        chdir ($_initial_cwd);
+
         my @args = ($cmd_cmd eq 'R' ? restart() : rerun($cmd_params));
 
         # Close all non-system fds for a clean restart.  A more
