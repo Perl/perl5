@@ -316,6 +316,14 @@ a bug in which the timeout monitor used for tests could not be cancelled once
 the test completes, and the full timeout period elapsed before running the next
 test file.
 
+On a Perl built without psuedo-fork (psuedo-fork builds were not affected by
+this bug), probably since prcess tree kill feature was implemented on Win32,
+killing a process tree with L<perlfunc/kill> and a negative signal, resulted
+in kill inverting the returned value.  This ment successfully killing
+1 process tree PID returned 0, and also passing 2 invalid PID, returned 2.
+This has been corrected so the documented behavior for return values for kill
+executes.  [perl #121230]
+
 =back
 
 =head1 Internal Changes

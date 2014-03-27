@@ -139,6 +139,7 @@ static int	do_spawnvp_handles(int mode, const char *cmdname,
 static long	find_pid(pTHX_ int pid);
 static void	remove_dead_process(long child);
 static int	terminate_process(DWORD pid, HANDLE process_handle, int sig);
+static int	my_killpg(int pid, int sig);
 static int	my_kill(int pid, int sig);
 static void	out_of_memory(void);
 static char*	wstr_to_str(const wchar_t* wstr);
@@ -1250,8 +1251,9 @@ terminate_process(DWORD pid, HANDLE process_handle, int sig)
     return 0;
 }
 
-int
-killpg(int pid, int sig)
+/* returns number of processes killed */
+static int
+my_killpg(int pid, int sig)
 {
     HANDLE process_handle;
     HANDLE snapshot_handle;
@@ -1271,7 +1273,7 @@ killpg(int pid, int sig)
         if (Process32First(snapshot_handle, &entry)) {
             do {
                 if (entry.th32ParentProcessID == (DWORD)pid)
-                    killed += killpg(entry.th32ProcessID, sig);
+                    killed += my_killpg(entry.th32ProcessID, sig);
                 entry.dwSize = sizeof(entry);
             }
             while (Process32Next(snapshot_handle, &entry));
@@ -1282,6 +1284,7 @@ killpg(int pid, int sig)
     return killed;
 }
 
+/* returns number of processes killed */
 static int
 my_kill(int pid, int sig)
 {
@@ -1289,7 +1292,7 @@ my_kill(int pid, int sig)
     HANDLE process_handle;
 
     if (sig < 0)
-        return killpg(pid, -sig);
+        return my_killpg(pid, -sig);
 
     process_handle = OpenProcess(PROCESS_TERMINATE, FALSE, pid);
     /* OpenProcess() returns NULL on error, *not* INVALID_HANDLE_VALUE */

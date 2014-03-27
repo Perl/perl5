@@ -448,6 +448,11 @@ END_EXTERN_C
 #  undef kill
 #endif
 #define kill			win32_kill
+#ifdef UNDER_CE
+#  undef killpg
+#endif
+#define killpg(pid, sig)	win32_kill(pid, -(sig))
+
 
 #ifdef UNDER_CE
 #  undef opendir
