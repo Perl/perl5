@@ -378,7 +378,8 @@ other named unary operator.  The operator may be any of:
 
     -f  File is a plain file.
     -d  File is a directory.
-    -l  File is a symbolic link.
+    -l  File is a symbolic link (false if symlinks aren't
+        supported by the file system).
     -p  File is a named pipe (FIFO), or Filehandle is a pipe.
     -S  File is a socket.
     -b  File is a block special file.
