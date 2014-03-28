@@ -215,17 +215,17 @@ you made a local CPAN mirror. Note that a minicpan mirror won't actually work,
 but can provide a good first pass to quickly get a list of modules which
 definitely haven't changed, to avoid having to download absolutely everything.
 
-For a BLEAD release with 'cpan' upstream, if a CPAN release appears to be ahead
-of blead, then consider updating it (or asking the relevant porter to do so).
-(However, if this is one of the last BLEAD releases before a BLEAD-FINAL
-release and hence blead is in some kind of "code freeze" state (e.g. the
-sequence might be "contentious changes freeze", then "user-visible changes
-freeze" and finally "full code freeze") then any CPAN module updates must be
-subject to the same restrictions, so it may not be possible to update all
-modules until after the BLEAD-FINAL release.) If blead contains edits to a
-'cpan' upstream module, this is naughty but sometimes unavoidable to keep blead
-tests passing. Make sure the affected file has a CUSTOMIZED entry in
-F<Porting/Maintainers.pl>.
+For a BLEAD-POINT or BLEAD-FINAL release with 'cpan' upstream, if a CPAN
+release appears to be ahead of blead, then consider updating it (or asking the
+relevant porter to do so). (However, if this is a BLEAD-FINAL release or one of
+the last BLEAD-POINT releases before it and hence blead is in some kind of
+"code freeze" state (e.g. the sequence might be "contentious changes freeze",
+then "user-visible changes freeze" and finally "full code freeze") then any
+CPAN module updates must be subject to the same restrictions, so it may not be
+possible to update all modules until after the BLEAD-FINAL release.) If blead
+contains edits to a 'cpan' upstream module, this is naughty but sometimes
+unavoidable to keep blead tests passing. Make sure the affected file has a
+CUSTOMIZED entry in F<Porting/Maintainers.pl>.
 
 If you are making a MAINT release, run C<core-cpan-diff> on both blead and
 maint, then diff the two outputs. Compare this with what you expect, and if
