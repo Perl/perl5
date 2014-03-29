@@ -49,8 +49,8 @@ XXX For a release on a stable branch, this section aspires to be:
 
 The C</\C/> regular expression character class is deprecated. From perl
 5.22 onwards it will generate a warning, and from perl 5.24 onwards it
-will in addition behave identically to C</./>. If you need to examine the
-individual bytes that make up a UTF8-encode character, then use
+be a regular expression compiler error. If you need to examine the
+individual bytes that make up a UTF8-encoded character, then use
 C<utf8::encode()> on the string (or a copy) first.
 
 =head2 Module removals
