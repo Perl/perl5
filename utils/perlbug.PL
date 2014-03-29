@@ -76,8 +76,6 @@ BEGIN {
     $::HaveTemp = ($@ eq "");
     eval { require Module::CoreList; };
     $::HaveCoreList = ($@ eq "");
-    eval { require encoding; };
-    $::Have_get_locale_encoding = ($@ eq "" && defined &encoding::_get_locale_encoding);
 };
 
 my $Version = "1.40";
@@ -98,8 +96,6 @@ my( $file, $usefile, $cc, $address, $bugaddress, $testaddress, $thanksaddress,
 my $perl_version = $^V ? sprintf("%vd", $^V) : $];
 
 my $config_tag2 = "$perl_version - $Config{cf_time}";
-
-my $input_encoding = $::Have_get_locale_encoding ? encoding::_get_locale_encoding() : '';
 
 Init();
 
@@ -616,7 +612,7 @@ EOF
     if ($body) {
 	print REP $body;
     } elsif ($usefile) {
-	open(F, "<:$input_encoding", $file)
+	open(F, '<:raw', $file)
 		or die "Unable to read report file from '$file': $!\n";
 	while (<F>) {
 	    print REP $_
@@ -1050,7 +1046,7 @@ sub _add_body_start {
     my $body_start = <<"BODY_START";
 This is a multi-part message in MIME format.
 --$mime_boundary
-Content-Type: text/plain; charset=UTF-8; format=fixed
+Content-Type: text/plain; format=fixed
 Content-Transfer-Encoding: 8bit
 
 BODY_START
