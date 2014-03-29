@@ -600,6 +600,8 @@ EOF
 
     # Generate report
     open(REP, '>:raw', $filename) or die "Unable to create report file '$filename': $!\n";
+    binmode(REP, ':raw :crlf') if $Is_MSWin32;
+
     my $reptype = !$ok ? ($thanks ? 'thank-you' : 'bug')
 	: $opt{n} ? "build failure" : "success";
 
@@ -614,6 +616,7 @@ EOF
     } elsif ($usefile) {
 	open(F, '<:raw', $file)
 		or die "Unable to read report file from '$file': $!\n";
+	binmode(F, ':raw :crlf') if $Is_MSWin32;
 	while (<F>) {
 	    print REP $_
 	}
@@ -832,6 +835,7 @@ EOF
 	    } elsif ($action =~ /^(d|l|sh)/i ) { # <D>isplay, <L>ist, <Sh>ow
 		# Display the message
 		open(REP, '<:raw', $filename) or die "Couldn't open file '$filename': $!\n";
+		binmode(REP, ':raw :crlf') if $Is_MSWin32;
 		while (<REP>) { print $_ }
 		close(REP) or die "Error closing report file '$filename': $!";
 		if ($have_attachment) {
@@ -1080,6 +1084,7 @@ sub build_complete_message {
     my $content = _build_header(%{_message_headers()}) . "\n\n";
     $content .= _add_body_start() if $have_attachment;
     open( REP, "<:raw", $filename ) or die "Couldn't open file '$filename': $!\n";
+    binmode(REP, ':raw :crlf') if $Is_MSWin32;
     while (<REP>) { $content .= $_; }
     close(REP) or die "Error closing report file '$filename': $!";
     $content .= _add_attachments() if $have_attachment;
@@ -1090,6 +1095,8 @@ sub save_message_to_disk {
     my $file = shift;
 
         open OUTFILE, '>:raw', $file or do { warn  "Couldn't open '$file': $!\n"; return undef};
+        binmode(OUTFILE, ':raw :crlf') if $Is_MSWin32;
+
         print OUTFILE build_complete_message();
         close(OUTFILE) or do { warn  "Error closing $file: $!"; return undef };
 	    print "\nMessage saved.\n";
@@ -1131,6 +1138,7 @@ sub _send_message_mailsend {
     binmode($fh, ':raw');
     print $fh _add_body_start() if $have_attachment;
     open(REP, "<:raw", $filename) or die "Couldn't open '$filename': $!\n";
+    binmode(REP, ':raw :crlf') if $Is_MSWin32;
     while (<REP>) { print $fh $_ }
     close(REP) or die "Error closing $filename: $!";
     print $fh _add_attachments() if $have_attachment;
@@ -1199,6 +1207,7 @@ sub _fingerprint_lines_in_report {
     # yes, *all* whitespace is ignored.
 
     open(REP, '<:raw', $filename) or die "Unable to open report file '$filename': $!\n";
+    binmode(REP, ':raw :crlf') if $Is_MSWin32;
     while (my $line = <REP>) {
         $line =~ s/\s+//g;
         $new_lines++ if (!$REP{$line});
