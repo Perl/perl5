@@ -1,3 +1,9 @@
+=for todo
+
+b51c3e77db (craigb) - Reduce excessive stat calls in glob on VMS
+7742aa6637 (davem)  - [perl #121484] /m causing false negative
+e141190569 (tonyc)  - [perl #121366] avoid using an invalid SvPVX() in Perl_sv_pvn_force_flags
+
 =encoding utf8
 
 =head1 NAME
@@ -116,6 +122,19 @@ XXX
 =head2 Updated Modules and Pragmata
 
 =over 4
+
+=item *
+
+L<ExtUtils::Install> has been upgraded from version 1.63 to 1.64.
+
+The MM_TEST_ROOT feature has been removed from the tests.
+
+=item *
+
+L<ExtUtils::MakeMaker> has been upgraded from version 6.92 to 6.94.
+
+A regression in MM_Unix.pm has been resolved.
+[L<#96|https://github.com/Perl-Toolchain-Gang/ExtUtils-MakeMaker/issues/96>]
 
 =item *
 
@@ -307,24 +326,23 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
-
-XXX
-
 =item Win32
 
 About 15 minutes of idle sleeping was removed from running C<make test> due to
 a bug in which the timeout monitor used for tests could not be cancelled once
 the test completes, and the full timeout period elapsed before running the next
 test file.
+[L<perl #121395|https://rt.perl.org/Public/Bug/Display.html?id=121395>]
 
+XXX: Reword this and fix spelling mistakes:
 On a Perl built without psuedo-fork (psuedo-fork builds were not affected by
 this bug), probably since prcess tree kill feature was implemented on Win32,
 killing a process tree with L<perlfunc/kill> and a negative signal, resulted
 in kill inverting the returned value.  This ment successfully killing
 1 process tree PID returned 0, and also passing 2 invalid PID, returned 2.
 This has been corrected so the documented behavior for return values for kill
-executes.  [perl #121230]
+executes.
+[L<perl #121230|https://rt.perl.org/Public/Bug/Display.html?id=121230>]
 
 =back
 
