@@ -23,7 +23,7 @@
 an SV marked as magical, it calls the 'get' or 'set' function associated
 with that SV's magic.  A get is called prior to reading an SV, in order to
 give it a chance to update its internal value (get on $. writes the line
-number of the last read filehandle into to the SV's IV slot), while
+number of the last read filehandle into the SV's IV slot), while
 set is called after an SV has been written to, in order to allow it to make
 use of its changed value (set on $/ copies the SV's new value to the
 PL_rs global variable).
