@@ -3999,6 +3999,9 @@ PP(pp_require)
 			/* Avoid '<dir>//<file>' */
 			if (!dirlen || *(tmp-1) != '/') {
 			    *tmp++ = '/';
+			} else {
+			    /* So SvCUR_set reports the correct length below */
+			    dirlen--;
 			}
 
 			/* name came from an SV, so it will have a '\0' at the
