@@ -358,7 +358,12 @@ well.
 
 =item *
 
-XXX
+C<LC_NUMERIC> is now initialized to the C locale.  This affects only
+C<XS> modules, as the Perl core usages always make sure this locale
+category is correctly set for their purposes.  C<XS> code remains
+vulnerable to other code changing this category's locale.  Further fixes
+are planned in v5.22 to reduce these long-standing vulnerabilities.
+[L<perl #121317|https://rt.perl.org/Public/Bug/Display.html?id=121317>]
 
 =back
 
