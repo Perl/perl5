@@ -202,8 +202,9 @@ Only operations originating outside Perl should be affected, as follows:
 
 =item *
 
-The variable L<$!|perlvar/$ERRNO> (and its synonyms C<$ERRNO> and
-C<$OS_ERROR>) when used as strings always are in terms of the current
+The variables L<$!|perlvar/$ERRNO> (and its synonyms C<$ERRNO> and
+C<$OS_ERROR>) and L<$^E|perlvar/$EXTENDED_OS_ERROR> (and its synonym
+C<$^E>) when used as strings always are in terms of the current
 locale.
 
 =item *
