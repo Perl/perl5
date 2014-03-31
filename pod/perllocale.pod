@@ -205,7 +205,8 @@ Only operations originating outside Perl should be affected, as follows:
 The variables L<$!|perlvar/$ERRNO> (and its synonyms C<$ERRNO> and
 C<$OS_ERROR>) and L<$^E|perlvar/$EXTENDED_OS_ERROR> (and its synonym
 C<$^E>) when used as strings always are in terms of the current
-locale.
+locale and as if within the scope of L<"use bytes"|bytes>.  This is
+likely to change in Perl v5.22.
 
 =item *
 

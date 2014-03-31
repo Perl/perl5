@@ -753,6 +753,11 @@ S_fixup_errno_string(pTHX_ SV* sv)
     if(strEQ(SvPVX(sv), "")) {
 	sv_catpv(sv, UNKNOWN_ERRNO_MSG);
     }
+#if 0
+    /* This is disabled to get v5.20 out the door.  It means that $! behaves as
+     * if in the scope of both 'use locale' and 'use bytes'.  This can cause
+     * mixed encodings and double utf8 upgrading,  See towards the end of the
+     * thread for [perl #119499] */
     else {
 
         /* In some locales the error string may come back as UTF-8, in which
@@ -773,6 +778,7 @@ S_fixup_errno_string(pTHX_ SV* sv)
             SvUTF8_on(sv);
         }
     }
+#endif
 }
 
 #ifdef VMS
