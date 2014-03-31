@@ -232,10 +232,10 @@ C<printf> functions.  These wrappers don't do anything with the locale,
 and the underlying C library function is affected by the locale in
 effect at the time of the wrapper call.
 The affected functions are
-L<perlapi/my_sprintf>,
-L<perlapi/my_snprintf>,
+L<my_sprintf|perlapi/my_sprintf>,
+L<my_snprintf|perlapi/my_snprintf>,
 and
-L<perlapi/my_vsnprintf>.
+L<my_vsnprintf|perlapi/my_vsnprintf>.
 
 =back
 
