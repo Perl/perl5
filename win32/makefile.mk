@@ -65,22 +65,23 @@ INST_TOP	*= $(INST_DRV)\perl
 #USE_SITECUST	*= define
 
 #
-# uncomment to enable multiple interpreters.  This is need for fork()
-# emulation and for thread support.
+# uncomment to enable multiple interpreters.  This is needed for fork()
+# emulation and for thread support, and is auto-enabled by USE_IMP_SYS
+# and USE_ITHREADS below.
 #
 USE_MULTI	*= define
 
 #
 # Interpreter cloning/threads; now reasonably complete.
-# This should be enabled to get the fork() emulation.  
-# This needs USE_MULTI above.
+# This should be enabled to get the fork() emulation.  This needs (and
+# will auto-enable) USE_MULTI above.
 #
 USE_ITHREADS	*= define
 
 #
 # uncomment to enable the implicit "host" layer for all system calls
-# made by perl.  This needs USE_MULTI above.  
-# This is also needed to get fork().
+# made by perl.  This is also needed to get fork().  This needs (and
+# will auto-enable) USE_MULTI above.
 #
 USE_IMP_SYS	*= define
 
