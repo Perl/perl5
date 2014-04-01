@@ -326,7 +326,7 @@ effect that changes the C<\s> matching).
 
 Prior to Perl v5.18, C<\s> did not match the vertical tab.  The change
 in v5.18 is considered an experiment, which means it could be backed out
-in v5.20 or v5.22 if experience indicates that it breaks too much
+in v5.22 if experience indicates that it breaks too much
 existing code.  If this change adversely affects you, send email to
 C<perlbug@perl.org>; if it affects you positively, email
 C<perlthanks@perl.org>.  In the meantime, C<[^\S\cK]> (obscurely)

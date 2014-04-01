@@ -634,7 +634,7 @@ Returns a boolean indicating whether the specified character is a
 whitespace character.  This is analogous
 to what C<m/\s/> matches in a regular expression.  Starting in Perl 5.18
 (experimentally), this also matches what C<m/[[:space:]]/> does.
-("Experimentally" means that this change may be backed out in 5.20 or 5.22 if
+("Experimentally" means that this change may be backed out in 5.22 if
 field experience indicates that it was unwise.)  Prior to 5.18, only the
 locale forms of this macro (the ones with C<LC> in their names) matched
 precisely what C<m/[[:space:]]/> does.  In those releases, the only difference,
@@ -648,7 +648,7 @@ C<isSPACE_LC_uvchr>, and C<isSPACE_LC_utf8>.
 (short for Posix Space)
 Starting in 5.18, this is identical (experimentally) in all its forms to the
 corresponding C<isSPACE()> macros.  ("Experimentally" means that this change
-may be backed out in 5.20 or 5.22 if field experience indicates that it
+may be backed out in 5.22 if field experience indicates that it
 was unwise.)
 The locale forms of this macro are identical to their corresponding
 C<isSPACE()> forms in all Perl releases.  In releases prior to 5.18, the

@@ -1304,15 +1304,16 @@ or if you use an explicit C<continue>.)
 with an assignment operator, which implies modifying the value itself.
 Perhaps you need to copy the value to a temporary, and repeat that.
 
-=item Character following "\c" must be ASCII
+=item Character following "\c" must be printable ASCII
 
-(F)(D deprecated, syntax) In C<\cI<X>>, I<X> must be an ASCII character.
-It is planned to make this fatal in all instances in Perl v5.20.  In
+(F)(D deprecated, syntax) In C<\cI<X>>, I<X> must be a printable
+(non-control) ASCII character.  This is fatal starting in v5.20 for
+non-ASCII characters, and it is planned to make this fatal in all
+instances in Perl v5.22.  In
 the cases where it isn't fatal, the character this evaluates to is
 derived by exclusive or'ing the code point of this character with 0x40.
 
-Note that non-alphabetic ASCII characters are discouraged here as well,
-and using non-printable ones will be deprecated starting in v5.18.
+Note that non-alphabetic ASCII characters are discouraged here as well.
 
 =item Character in 'C' format wrapped in pack
 
