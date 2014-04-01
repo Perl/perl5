@@ -241,7 +241,7 @@ table below.
 
 =item otherwise ...
 
-C<\s> matches [\t\n\f\r\cK ] and, starting, experimentally in Perl
+C<\s> matches [\t\n\f\r ] and, starting, experimentally in Perl
 v5.18, the vertical tab, C<\cK>.
 (See note C<[1]> below for a discussion of this.)
 Note that this list doesn't include the non-breaking space.
