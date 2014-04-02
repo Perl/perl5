@@ -461,6 +461,45 @@ SKIP: {
 }
 
 {
+    # What do the utf8::* functions do when given a reference? A test
+    # for a behavior change that made this start dying as of
+    # v5.15.6-407-gc710240 due to a fix for [perl #91852]:
+    #
+    #    ./miniperl -Ilib -wle 'use strict; print $]; my $s = shift; my $s_ref = \$s; utf8::decode($s_ref); print $$s_ref' hlagh
+    my %expected = (
+        'utf8::is_utf8'           => { returns => "hlagh" },
+        'utf8::valid'             => { returns => "hlagh" },
+        'utf8::encode'            => { error => qr/Can't use string .*? as a SCALAR ref/},
+        'utf8::decode'            => { error => qr/Can't use string .*? as a SCALAR ref/},
+        'utf8::upgrade'           => { error => qr/Can't use string .*? as a SCALAR ref/ },
+        'utf8::downgrade'         => { returns => "hlagh" },
+        'utf8::native_to_unicode' => { returns => "hlagh" },
+        'utf8::unicode_to_native' => { returns => "hlagh" },
+    );
+    for my $func (sort keys %expected) { # sort just so it's deterministic wrt diffing *.t output
+        my $code = sprintf q[
+            use strict;
+            my $s = "hlagh";
+            my $r = \$s;
+            %s($r);
+            $$r;
+        ], $func;
+        my $ret = eval $code or my $error = $@;
+        if (my $error_rx = $expected{$func}->{error}) {
+            if (defined $error) {
+                like $error, $error_rx, "The $func function should die with an error matching $error_rx";
+            } else {
+                fail("We were expecting an error when calling the $func function but got a value of '$ret' instead");
+            }
+        } elsif (my $returns = $expected{$func}->{returns}) {
+            is($ret, $returns, "The $func function lives and returns '$returns' as expected");
+        } else {
+            die "PANIC: Internal Error"
+        }
+    }
+}
+
+{
     my $a = "456\xb6";
     utf8::upgrade($a);
 
