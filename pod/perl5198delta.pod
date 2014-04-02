@@ -84,6 +84,27 @@ as an updated module in the L</Modules and Pragmata> section.
 
 =back
 
+=head1 Performance Enhancements
+
+=over 4
+
+=item *
+
+In certain situations, when C<return> is the last statement in a subroutine's
+main scope, it will be optimized out. This means code like:
+
+  sub baz { return $cat; }
+
+will now behave like:
+
+  sub baz { $cat; }
+
+which is notably faster.
+
+[perl #120765]
+
+=back
+
 =head1 Modules and Pragmata
 
 =head2 New Modules and Pragmata
