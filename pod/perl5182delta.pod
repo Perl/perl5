@@ -36,7 +36,7 @@ This fixes a bug in dumping unexpected SPECIALs.
 =item *
 
 L<English> has been upgraded from version 1.06 to 1.06_01.  This fixes an
-error about the performance of C<$`>, C<$&>, and c<$'>.
+error about the performance of C<$`>, C<$&>, and C<$'>.
 
 =item *
 
@@ -106,7 +106,7 @@ a padop.
 
 This affected, at least, Devel::CallParser under threaded builds.
 
-This has been fixed
+This has been fixed.
 
 =item *
 
