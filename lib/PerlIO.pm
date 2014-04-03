@@ -1,6 +1,6 @@
 package PerlIO;
 
-our $VERSION = '1.08';
+our $VERSION = '1.09';
 
 # Map layer name to package that defines it
 our %alias;
@@ -103,6 +103,9 @@ represent to be read from or written to the stream. The UTF-X encoding
 is chosen to render simple text parts (i.e.  non-accented letters,
 digits and common punctuation) human readable in the encoded file.
 
+(B<CAUTION>: This layer does not validate byte sequences.  For reading input,
+you should instead use C<:encoding(utf8)> instead of bare C<:utf8>.)
+
 Here is how to write your native data out using UTF-8 (or UTF-EBCDIC)
 and then read it back in.
 
@@ -114,9 +117,6 @@ and then read it back in.
 	$in = <F>;
 	close(F);
 
-Note that this layer does not validate byte sequences. For reading
-input, using C<:encoding(utf8)> instead of bare C<:utf8> is strongly
-recommended.
 
 =item :bytes
 
