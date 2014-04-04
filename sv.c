@@ -14968,15 +14968,14 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
 	 */
 	o2 = NULL;
 	for (kid=o; kid; kid = kid->op_sibling) {
-	    if (kid) {
-		const OPCODE type = kid->op_type;
-		if ( (type == OP_CONST && SvOK(cSVOPx_sv(kid)))
-		  || (type == OP_NULL  && ! (kid->op_flags & OPf_KIDS))
-		  || (type == OP_PUSHMARK)
-		  || (type == OP_PADRANGE)
-		)
-		continue;
-	    }
+	    const OPCODE type = kid->op_type;
+	    if ( (type == OP_CONST && SvOK(cSVOPx_sv(kid)))
+	      || (type == OP_NULL  && ! (kid->op_flags & OPf_KIDS))
+	      || (type == OP_PUSHMARK)
+	      || (type == OP_PADRANGE)
+	    )
+	    continue;
+
 	    if (o2) { /* more than one found */
 		o2 = NULL;
 		break;
