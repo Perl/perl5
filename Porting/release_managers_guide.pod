@@ -1255,6 +1255,9 @@ Copy the perldelta.pod for this release into blead; for example:
  $ cp -i ../5.10.x/pod/perldelta.pod pod/perl5101delta.pod  # for example
  $ git add pod/perl5101delta.pod
 
+Don't forget to set the NAME correctly in the new file (e.g. perl5101delta
+rather than perldelta).
+
 Edit F<pod/perl.pod> to add an entry for the file, e.g.:
 
     perl5101delta		Perl changes in version 5.10.1
