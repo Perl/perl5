@@ -1435,7 +1435,7 @@ locale will be a ISO8859-1.  Use POSIX character classes instead.
 
 Another problem with this approach is that operations that cross the
 single byte/multiple byte boundary are not well-defined, and so are
-disallowed.  (This boundary is between the codepoints at 255/256.).
+disallowed.  (This boundary is between the codepoints at 255/256.)
 For example, lower casing LATIN CAPITAL LETTER Y WITH DIAERESIS (U+0178)
 should return LATIN SMALL LETTER Y WITH DIAERESIS (U+00FF).  But in the
 Greek locale, for example, there is no character at 0xFF, and Perl

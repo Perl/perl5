@@ -3259,8 +3259,8 @@ A warning may be produced in a future version.
 
 See L<perlipc/"Signals"> for more details.
 
-On some platforms such as Windows where the fork() system call is not available.
-Perl can be built to emulate fork() at the interpreter level.
+On some platforms such as Windows where the fork() system call is not
+available, Perl can be built to emulate fork() at the interpreter level.
 This emulation has limitations related to kill that have to be considered,
 for code running on Windows and in code intended to be portable.
 

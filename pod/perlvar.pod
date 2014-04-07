@@ -922,7 +922,7 @@ to return a defined value when the pattern was compiled or executed with
 the C</p> modifier.  In Perl v5.20, the C</p> modifier does nothing, so
 C<${^PREMATCH}> does the same thing as C<$PREMATCH>.
 
-This variable was added in Perl v5.10.0
+This variable was added in Perl v5.10.0.
 
 This variable is read-only and dynamically-scoped.
 

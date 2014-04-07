@@ -1275,7 +1275,7 @@ randomized to protect against local and remote attacks against Perl
 code. By manually setting a seed, this protection may be partially or
 completely lost.
 
-See L<perlsec/"Algorithmic Complexity Attacks"> and L</PERL_PERTURB_KEYS>
+See L<perlsec/"Algorithmic Complexity Attacks">, L</PERL_PERTURB_KEYS>, and
 L</PERL_HASH_SEED_DEBUG> for more information.
 
 =item PERL_PERTURB_KEYS
