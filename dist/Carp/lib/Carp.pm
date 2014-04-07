@@ -87,7 +87,7 @@ BEGIN {
     }
 }
 
-our $VERSION = '1.33';
+our $VERSION = '1.3301';
 
 our $MaxEvalLen = 0;
 our $Verbose    = 0;

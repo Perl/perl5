@@ -193,7 +193,7 @@ use File::Glob qw(:case);
     },
 
     'Carp' => {
-        'DISTRIBUTION' => 'ZEFRAM/Carp-1.33.tar.gz',
+        'DISTRIBUTION' => 'ZEFRAM/Carp-1.3301.tar.gz',
         'FILES'        => q[dist/Carp],
     },
 
