@@ -2419,6 +2419,9 @@ sub _DB__at_end_of_every_command {
             open( OUT, ">&SAVEOUT" ) || _db_warn("Can't restore DB::OUT");
         }
 
+        # Let Readline know about the new filehandles.
+        reset_IN_OUT( \*IN, \*OUT );
+
         # Close filehandle pager was using, restore the normal one
         # if necessary,
         close(SAVEOUT);
