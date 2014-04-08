@@ -3534,13 +3534,17 @@ static int sv_type(pTHX_ SV *sv)
 		return SvROK(sv) ? svis_REF : svis_SCALAR;
 	case SVt_PVMG:
 	case SVt_PVLV:		/* Workaround for perl5.004_04 "LVALUE" bug */
-		if (SvRMAGICAL(sv) && (mg_find(sv, 'p')))
+		if ((SvFLAGS(sv) & (SVs_GMG|SVs_SMG|SVs_RMG)) ==
+					(SVs_GMG|SVs_SMG|SVs_RMG) &&
+				(mg_find(sv, 'p')))
 			return svis_TIED_ITEM;
 		/* FALL THROUGH */
 #if PERL_VERSION < 9
 	case SVt_PVBM:
 #endif
-		if (SvRMAGICAL(sv) && (mg_find(sv, 'q')))
+		if ((SvFLAGS(sv) & (SVs_GMG|SVs_SMG|SVs_RMG)) ==
+					(SVs_GMG|SVs_SMG|SVs_RMG) &&
+				(mg_find(sv, 'q')))
 			return svis_TIED;
 		return SvROK(sv) ? svis_REF : svis_SCALAR;
 	case SVt_PVAV:
@@ -6498,7 +6502,9 @@ static SV *dclone(pTHX_ SV *sv)
 #if PERL_VERSION < 8
 	     || SvTYPE(sv) == SVt_PVMG
 #endif
-	     ) && SvRMAGICAL(sv) && mg_find(sv, 'p')) {
+	     ) && (SvFLAGS(sv) & (SVs_GMG|SVs_SMG|SVs_RMG)) ==
+					(SVs_GMG|SVs_SMG|SVs_RMG) &&
+	     mg_find(sv, 'p')) {
 		mg_get(sv);
 	}
 
