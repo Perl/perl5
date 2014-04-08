@@ -4632,11 +4632,15 @@ Perl_init_global_struct(pTHX)
 void
 Perl_free_global_struct(pTHX_ struct perl_vars *plvarsp)
 {
+    int veto = plvarsp->Gveto_cleanup;
+
     PERL_ARGS_ASSERT_FREE_GLOBAL_STRUCT;
 # ifdef PERL_GLOBAL_STRUCT
 #  ifdef PERL_UNSET_VARS
     PERL_UNSET_VARS(plvarsp);
 #  endif
+    if (veto)
+        return;
     free(plvarsp->Gppaddr);
     free(plvarsp->Gcheck);
 #  ifdef PERL_GLOBAL_STRUCT_PRIVATE
