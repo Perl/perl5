@@ -5,7 +5,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';
-    plan( tests => 94 );
+    plan( tests => 95 );
 }
 
 my @c;
@@ -318,6 +318,18 @@ sub doof { caller(0) }
 print +(doof())[3];
 END
     "caller should not SEGV when the current package is undefined";
+
+# caller should not SEGV when the eval entry has been cleared #120998
+fresh_perl_is <<'END', 'main', {},
+$SIG{__DIE__} = \&dbdie;
+eval '/x';
+sub dbdie {
+    @x = caller(1);
+    print $x[0];
+}
+END
+    "caller should not SEGV for eval '' stack frames";
+
 $::testing_caller = 1;
 
 do './op/caller.pl' or die $@;

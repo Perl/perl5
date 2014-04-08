@@ -1847,9 +1847,16 @@ PP(pp_caller)
     if (CxTYPE(cx) == CXt_EVAL) {
 	/* eval STRING */
 	if (CxOLD_OP_TYPE(cx) == OP_ENTEREVAL) {
-	    PUSHs(newSVpvn_flags(SvPVX(cx->blk_eval.cur_text),
-				 SvCUR(cx->blk_eval.cur_text)-2,
-				 SvUTF8(cx->blk_eval.cur_text)|SVs_TEMP));
+            SV *cur_text = cx->blk_eval.cur_text;
+            if (SvCUR(cur_text) >= 2) {
+                PUSHs(newSVpvn_flags(SvPVX(cur_text), SvCUR(cur_text)-2,
+                                     SvUTF8(cur_text)|SVs_TEMP));
+            }
+            else {
+                /* I think this is will always be "", but be sure */
+                PUSHs(sv_2mortal(newSVsv(cur_text)));
+            }
+
 	    PUSHs(&PL_sv_no);
 	}
 	/* require */
