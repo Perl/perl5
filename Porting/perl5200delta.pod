@@ -21,11 +21,20 @@ XXX Any important notices here
 
 =head1 Core Enhancements
 
-XXX New core language features go here.  Summarize user-visible core language
-enhancements.  Particularly prominent performance optimisations could go
-here, but most should go in the L</Performance Enhancements> section.
+=head2 More consistent prototype parsing
 
-[ List each enhancement as a =head2 entry ]
+Multiple semicolons in subroutine prototypes have long been tolerated and
+treated as a single semicolon.  There was one case where this did not
+happen.  A subroutine whose prototype begins with "*" or ";*" can affect
+whether a bareword is considered a method name or sub call.  This now
+applies also to ";;;*".
+
+Whitespace has long been allowed inside subroutine prototypes, so
+C<sub( $ $ )> is equivalent to C<sub($$)>, but until now it was stripped
+when the subroutine was parsed.  Hence, whitespace was I<not> allowed in
+prototypes set by C<Scalar::Util::set_prototype>.  Now it is permitted,
+and the parser no longer strips whitespace.  This means
+C<prototype &mysub> returns the original prototype, whitespace and all.
 
 =head1 Security
 
@@ -122,10 +131,9 @@ It can be disabled (for now) in a perl build with:
 
     -Accflags=PERL_NO_COW
 
-
 =item *
 
-XXX
+Precomputed hash values are now used in more places during method lookup.
 
 =back
 
@@ -211,6 +219,30 @@ XXX Changes which significantly change existing files in F<pod/> go here.
 However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
 section.
 
+=head3 L<perlexperiment>
+
+=over
+
+=item *
+
+C<\s> matching C<\cK> is marked experimental
+
+=item *
+
+ithreads were accepted in 5.8.0
+
+=item *
+
+Long doubles are not experimental
+
+=item *
+
+Code in regular expressions, regular expression backtracking verbs,
+and lvalue subroutines are no longer listed as experimental.  (This
+also affects L<perlre> and L<perlsub>.)
+
+=back
+
 =head3 L<perlfunc>
 
 =over
@@ -234,23 +266,11 @@ Noted that C<chop> and C<chomp> can reset the hash iterator
 
 Improved C<fileno> example
 
-=back
-
-=head3 L<perlexperiment>
-
-=over
-
 =item *
 
-C<\s> matching C<\cK> is marked experimental
-
-=item *
-
-ithreads were accepted in 5.8.0
-
-=item *
-
-Long doubles are not experimental
+Since Perl v5.10, it has been possible for subroutines in @INC to return
+a reference to a scalar holding initial source code to prepend to the file.
+This is now documented.
 
 =back
 
@@ -261,6 +281,29 @@ Long doubles are not experimental
 =item *
 
 Update to mention fc(), \F
+
+=back
+
+=head3 L<perlop>
+
+=over 4
+
+=item *
+
+The language design of Perl has always called for monomorphic operators.
+This is now mentioned explicitly.
+
+=back
+
+=head3 L<perlre>
+
+=over 4
+
+=item *
+
+The fact that the regexp engine makes no effort to call (?{}) and (??{})
+constructs any specified number of times (although it will basically DWIM
+in case of a successful match) has been documented.
 
 =back
 
@@ -312,6 +355,14 @@ These two deprecation warnings involving C<\N{...}> were incorrectly
 implemented.  They did not warn by default (now they do) and could not be
 made fatal via C<< use warnings FATAL => 'deprecated' >> (now they can).
 
+=item *
+
+L<Missing ']' in prototype for %s : %s|perldiag/"Missing ']' in prototype
+for %s : %s">
+
+(W illegalproto) A grouping was started with C<[> but never closed with
+C<]>.
+
 =back
 
 =head2 Changes to Existing Diagnostics
@@ -322,7 +373,40 @@ XXX Changes (i.e. rewording) of diagnostic messages go here
 
 =item *
 
-XXX Describe change here
+Under rare circumstances, one could get a "Can't coerce readonly REF to
+string" instead of the customary "Modification of a read-only value".  This
+alternate error message has been removed.
+
+=item *
+
+"Ambiguous use of * resolved as operator *": This and similar warnings
+about "%" and "&" used to occur in some circumstances where there was no
+operator of the type cited, so the warning was completely wrong.  This has
+been fixed [perl #117535, #76910].
+
+=item *
+
+Warnings about malformed subroutine prototypes are now more consistent in
+how the prototypes are rendered.  Some of these warnings would truncate
+prototypes containing nulls.  In other cases one warning would suppress
+another.  The warning about illegal characters in prototypes no longer says
+"after '_'" if the bad character came before the underscore.
+
+=item *
+
+L<Perl folding rules are not up-to-date for 0x%X; please use the perlbug
+utility to report; in regex; marked by <-- HERE in
+mE<sol>%sE<sol>|perldiag/"Perl folding rules are not up-to-date for 0x%X;
+please use the perlbug utility to report; in regex; marked by <-- HERE in
+m/%s/">
+
+This message is now only in the regexp category, and not in the deprecated
+category.  It is still a default (i.e., severe) warning [perl #89648].
+
+=item *
+
+The debugger's "n" command now respects lvalue subroutines and steps over
+them [perl #118839].
 
 =back
 
@@ -385,7 +469,32 @@ L</Platform Support> section, instead.
 
 =item *
 
-XXX
+F<installperl> and F<installman>'s option handling has been refactored to use
+L<Getopt::Long>. Both are used by the F<Makefile> C<install> targets, and
+are not installed, so these changes are only likely to affect custom
+installation scripts.
+
+=over 4
+
+=item *
+
+single letter options now also have long names
+
+=item *
+
+invalid options are now rejected
+
+=item *
+
+command line arguments that are not options are now rejected
+
+=item *
+
+Each now has a C<--help> option to display the usage message.
+
+=back
+
+The behaviour for all valid documented invocations is unchanged.
 
 =back
 
@@ -451,6 +560,13 @@ L</Modules and Pragmata> section.
 
 =over 4
 
+=item MidnightBSD
+
+C<objformat> was removed from version 0.4-RELEASE of MidnightBSD and had been
+deprecated on earlier versions.  This caused the build environment to be
+erroneously configured for C<a.out> rather than C<elf>.  This has been now
+been corrected.
+
 =item Mixed-endian platforms
 
 The code supporting C<pack> and C<unpack> operations on mixed endian
@@ -475,9 +591,59 @@ XXX Changes which affect the interface available to C<XS> code go here.  Other
 significant internal changes for future core maintainers should be noted as
 well.
 
-[ List each change as a =item entry ]
-
 =over 4
+
+=item *
+
+The Makefile shortcut targets for many rarely (or never) used testing and
+profiling targets have been removed, or merged into the only other Makefile
+target that uses them.  Specifically, these targets are gone, along with
+documentation that referenced them or explained how to use them:
+
+    check.third check.utf16 check.utf8 coretest minitest.prep
+    minitest.utf16 perl.config.dashg perl.config.dashpg
+    perl.config.gcov perl.gcov perl.gprof perl.gprof.config
+    perl.pixie perl.pixie.atom perl.pixie.config perl.pixie.irix
+    perl.third perl.third.config perl.valgrind.config purecovperl
+    pureperl quantperl test.deparse test.taintwarn test.third
+    test.torture test.utf16 test.utf8 test_notty.deparse
+    test_notty.third test_notty.valgrind test_prep.third
+    test_prep.valgrind torturetest ucheck ucheck.third ucheck.utf16
+    ucheck.valgrind utest utest.third utest.utf16 utest.valgrind
+
+It's still possible to run the relevant commands by "hand" - no underlying
+functionality has been removed.
+
+=item *
+
+It is now possible to keep Perl from initializing locale handling.
+For the most part, Perl doesn't pay attention to locale.  (See
+L<perllocale>.)  Nonetheless, until now, on startup, it has always
+initialized locale handling to the system default, just in case the
+program being executed ends up using locales.  (This is one of the first
+things a locale-aware program should do, long before Perl knows if it
+will actually be needed or not.)  This works well except when Perl is
+embedded in another application which wants a locale that isn't the
+system default.  Now, if the environment variable
+C<PERL_SKIP_LOCALE_INIT> is set at the time Perl is started, this
+initialization step is skipped.  Prior to this, on Windows platforms,
+the only workaround for this deficiency was to use a hacked-up copy of
+internal Perl code.  Applications that need to use older Perls can
+discover if the embedded Perl they are using needs the workaround by
+testing that the C preprocessor symbol C<HAS_SKIP_LOCALE_INIT> is not
+defined.  (RT #38193)
+
+=item *
+
+C<BmRARE> and C<BmPREVIOUS> have been removed.  They were not used anywhere
+and are not part of the API.  For XS modules, they are now #defined as 0.
+
+=item *
+
+C<sv_force_normal>, which usually croaks on read-only values, used to allow
+read-only values to be modified at compile time.  This has been changed to
+croak on read-only values regardless.  This change uncovered several core
+bugs.
 
 =item *
 
@@ -723,6 +889,125 @@ C<\x80..\xff> followed a UTF-8 string, e.g.
 
 Stringification of NVs are not cached so that the lexical locale controls
 stringification of the decimal point [perl #108378] [perl #115800]
+
+=item *
+
+There have been several fixes related to Perl's handling of locales.  perl
+#38193 was described above in L</Internal Changes>.
+Also fixed is #112208 in which the error string in C<$!> displayed as
+garbage in many UTF-8 locales;
+#118197, where the radix (decimal point) character had to be an ASCII
+character (which doesn't work for some non-Western languages);
+and #115808, in which C<POSIX::setlocale()> on failure returned an
+C<undef> which didn't warn about not being defined even if those
+warnings were enabled.
+
+=item *
+
+The dtrace sub-entry probe now works with lexical subs, instead of
+crashing [perl #118305].
+
+=item *
+
+Compiling a C<split> operator whose third argument is a named constant
+evaulating to 0 no longer causes the constant's value to change.
+
+=item *
+
+A named constant used as the second argument to C<index> no longer gets
+coerced to a string if it is a reference, regular expression, dualvar, etc.
+
+=item *
+
+A named constant evaluating to the undefined value used as the second
+argument to C<index> no longer produces "uninitialized" warnings at compile
+time.  It will still produce them at run time.
+
+=item *
+
+When a scalar was returned from a subroutine in @INC, the referenced scalar
+was magically converted into an IO thingy, possibly resulting in "Bizarre
+copy" errors if that scalar continued to be used elsewhere.  Now Perl uses
+an internal copy of the scalar instead.
+
+=item *
+
+Undefining an inlinable lexical subroutine (C<my sub foo() { 42 } undef
+&foo>) would result in a crash if warnings were turned on.
+
+=item *
+
+Certain uses of the C<sort> operator are optimised to modify an array in
+place, such as C<@a = sort @a>.  During the sorting, the array is made
+read-only.  If a sort block should happen to die, then the array remained
+read-only even outside the C<sort>.  This has been fixed.
+
+=item *
+
+C<$a> and C<$b> inside a sort block are aliased to the actual arguments to
+C<sort>, so they can be modified through those two variables.  This did not
+always work, e.g., for lvalue subs and C<$#ary>, and probably many other
+operators.  It works now.
+
+=item *
+
+The arguments to C<sort> are now all in list context.  If the C<sort>
+itself were called in void or scalar context, then I<some>, but not all, of
+the arguments used to be in void or scalar context.
+
+=item *
+
+Subroutine prototypes with Unicode characters above U+00FF were getting
+mangled during closure cloning.  This would happen with subroutines closing
+over lexical variables declared outside, and with lexical subs.
+
+=item *
+
+In regular expressions containing multiple code blocks, the values of
+C<$1>, C<$2>, etc., set by nested regular expression calls would leak from
+one block to the next.  Now these variables always refer to the outer
+regular expression at the start of an embedded block [perl #117917].
+
+=item *
+
+C<UNIVERSAL::can> now treats its first argument the same way that method
+calls do: Typeglobs and glob references with non-empty IO slots are treated
+as handles, and strings are treated as filehandles, rather than packages,
+if a handle with that name exists [perl #113932].
+
+=item *
+
+Method calls on typeglobs (e.g., C<< *ARGV->getline >>) used to stringify
+the typeglob and then look it up again.  Combined with changes in Perl
+5.18.0, this allowed C<< *foo->bar >> to call methods on the "foo" package
+(like C<< foo->bar >>).  In some cases it could cause the method to be
+called on the wrong handle.  Now a typeglob argument is treated as a
+handle (just like C<< (\*foo)->bar >>), or, if its IO slot is empty, an
+error is raised.
+
+=item *
+
+Under copy-on-write builds (the default as of 5.19.1) C<< ${'_<-e'}[0] >>
+no longer gets mangled.  This is the first line of input saved for the
+debugger's use for one-liners [perl #118627].
+
+=item *
+
+Assigning a vstring to a tied variable or to a subroutine argument aliased
+to a nonexistent hash or array element now works, without flattening the
+vstring into a regular string.
+
+=item *
+
+C<pos>, C<tie>, C<tied> and C<untie> did not work
+properly on subroutine arguments aliased to nonexistent
+hash and array elements [perl #77814, #27010].
+
+=item *
+
+The C<< => >> fat arrow operator can now quote built-in keywords even if it
+occurs on the next line, making it consistent with how it treats other
+barewords.
 
 =back
 
