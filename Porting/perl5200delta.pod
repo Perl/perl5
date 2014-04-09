@@ -36,13 +36,21 @@ prototypes set by C<Scalar::Util::set_prototype>.  Now it is permitted,
 and the parser no longer strips whitespace.  This means
 C<prototype &mysub> returns the original prototype, whitespace and all.
 
+=head2 B<-F> now implies B<-a> and B<-a> implies B<-n>
+
+Previously B<-F> without B<-a> was a no-op, and B<-a> without B<-n> or B<-p>
+was a no-op, with this change, if you supply B<-F> then both B<-a> and B<-n>
+are implied and if you supply B<-a> then B<-n> is implied.
+
+You can still use B<-p> for its extra behaviour. [perl #116190]
+
 =head1 Security
 
-XXX Any security-related notices go here.  In particular, any security
-vulnerabilities closed should be noted here rather than in the
-L</Selected Bug Fixes> section.
+=head2 Avoid possible read of free()d memory during parsing
 
-[ List each security issue as a =head2 entry ]
+It was possible that free()d memory could be read during parsing in the unusual
+circumstance of the Perl program ending with a heredoc and the last line of the
+file on disk having no terminating newline character.  This has now been fixed.
 
 =head1 Incompatible Changes
 
@@ -272,6 +280,12 @@ Since Perl v5.10, it has been possible for subroutines in @INC to return
 a reference to a scalar holding initial source code to prepend to the file.
 This is now documented.
 
+=item *
+
+The documentation of C<ref> has been updated to recommend the use of
+C<blessed>, C<isa> and C<reftype> when dealing with references to blessed
+objects.
+
 =back
 
 =head3 L<perllocale>
@@ -295,6 +309,22 @@ This is now mentioned explicitly.
 
 =back
 
+=head3 L<perlopentut>
+
+=over 4
+
+=item *
+
+The C<open> tutorial has been completely rewritten by Tom Christiansen, and now
+focuses on covering only the basics, rather than providing a comprehensive
+reference to all things openable.  This rewrite came as the result of a
+vigorous discussion on perl5-porters kicked off by a set of improvements
+written by Alexander Hartmaier to the existing L<perlopentut>.  A "more than
+you ever wanted to know about C<open>" document may follow in subsequent
+versions of perl.
+
+=back
+
 =head3 L<perlre>
 
 =over 4
@@ -305,6 +335,22 @@ The fact that the regexp engine makes no effort to call (?{}) and (??{})
 constructs any specified number of times (although it will basically DWIM
 in case of a successful match) has been documented.
 
+=item *
+
+The C</r> modifier (for non-destructive substitution) is now documented. [perl
+#119151]
+
+=back
+
+=head3 L<perlsub>
+
+=over 4
+
+=item *
+
+The need to predeclare recursive functions with prototypes in order for the
+prototype to be honoured in the recursive call is now documented. [perl #2726]
+
 =back
 
 =head3 L<perltrap>
@@ -314,6 +360,27 @@ in case of a successful match) has been documented.
 =item *
 
 There is now a L<JavaScript|perltrap/JavaScript Traps> section.
+
+=back
+
+=head3 L<perlvar>
+
+=over 4
+
+=item *
+
+A new section explaining the performance issues of $`, $& and $', including
+workarounds and changes in different versions of Perl, has been added.
+
+=back
+
+=head3 L<perlxs>
+
+=over 4
+
+=item *
+
+Several problems in the C<MY_CXT> example have been fixed.
 
 =back
 
@@ -337,7 +404,12 @@ and New Warnings
 
 =item *
 
-XXX L<message|perldiag/"message">
+L<Magical list constants are not supported|perldiag/"Magical list constants are
+not supported">
+
+(F) You assigned a magical array to a stash element, and then tried to use the
+subroutine from the same slot.  You are asking Perl to do something it cannot
+do, details subject to change between Perl versions.
 
 =back
 
@@ -362,6 +434,29 @@ for %s : %s">
 
 (W illegalproto) A grouping was started with C<[> but never closed with
 C<]>.
+
+=item *
+
+L<Argument "%s" treated as 0 in increment (++)|perldiag/"Argument "%s" treated
+as 0 in increment (++)">
+
+(W numeric) The indicated string was fed as an argument to the C<++> operator
+which expects either a number or a string matching C</^[a-zA-Z]*[0-9]*\z/>.
+See L<perlop/Auto-increment and Auto-decrement> for details.
+
+=item *
+
+L<Unexpected exit %u|perldiag/"Unexpected exit %u">
+
+(S) exit() was called or the script otherwise finished gracefully when
+C<PERL_EXIT_WARN> was set in C<PL_exit_flags>.
+
+=item *
+
+L<Unexpected exit failure %u|perldiag/"Unexpected exit failure %u">
+
+(S) An uncaught die() was called when C<PERL_EXIT_WARN> was set in
+C<PL_exit_flags>.
 
 =back
 
@@ -512,7 +607,18 @@ that they represent may be covered elsewhere.
 
 =item *
 
-XXX
+The behaviour of C<pos> on very large strings is now tested in the new test
+script F<t/bigmem/pos.t>.
+
+=item *
+
+The test script F<t/porting/ss_dup.t> has been created to test that ss_dup()
+handles all savestack items.
+
+=item *
+
+The new behaviour of B<-F> and B<-a> (see the L</Core Enhancements> section) is
+tested in the new test script F<t/run/switchF2.t>.
 
 =back
 
@@ -727,6 +833,16 @@ The code dealt rather inconsistently with uids and gids. Some
 places assumed that they could be safely stored in UVs, others
 in IVs, others in ints. Four new macros are introduced:
 SvUID(), sv_setuid(), SvGID(), and sv_setgid()
+
+=item *
+
+C<sv_pos_b2u_flags> has been added to the API.  It is similar to C<sv_pos_b2u>,
+but supports long strings on 64-bit platforms.
+
+=item *
+
+C<PL_exit_flags> can now be used by perl embedders or other XS code to have
+perl C<warn> or C<abort> on an attempted exit. [perl #52000]
 
 =back
 
@@ -1008,6 +1124,170 @@ hash and array elements [perl #77814, #27010].
 The C<< => >> fat arrow operator can now quote built-in keywords even if it
 occurs on the next line, making it consistent with how it treats other
 barewords.
+
+=item *
+
+Autovivifying a subroutine stub via C<\&$glob> started causing crashes in Perl
+5.18.0 if the $glob was merely a copy of a real glob, i.e., a scalar that had
+had a glob assigned to it.  This has been fixed. [perl #119051]
+
+=item *
+
+On 64-bit platforms C<pos> can now be set to a value higher than 2**31-1.
+[perl #72766]
+
+=item *
+
+Perl used to leak an implementation detail when it came to referencing the
+return values of certain operators.  C<for ($a+$b) { warn \$_; warn \$_ }> used
+to display two different memory addresses, because the C<\> operator was
+copying the variable.  Under threaded builds, it would also happen for
+constants (C<for(1) { ... }>).  This has been fixed. [perl #21979, #78194,
+#89188, #109746, #114838, #115388]
+
+=item *
+
+The range operator C<..> was returning the same modifiable scalars with each
+call, unless it was the only thing in a C<foreach> loop header.  This meant
+that changes to values within the list returned would be visible the next time
+the operator was executed. [perl #3105]
+
+=item *
+
+Constant folding and subroutine inlining no longer cause operations that would
+normally return new modifiable scalars to return read-only values instead.
+
+=item *
+
+Closures of the form C<sub () { $some_variable }> are no longer inlined,
+causing changes to the variable to be ignored by callers of the subroutine.
+[perl #79908]
+
+=item *
+
+Return values of certain operators such as C<ref> would sometimes be shared
+between recursive calls to the same subroutine, causing the inner call to
+modify the value returned by C<ref> in the outer call.  This has been fixed.
+
+=item *
+
+C<__PACKAGE__> and constants returning a package name or hash key are now
+consistently read-only.  In various previous Perl releases, they have become
+mutable under certain circumstances.
+
+=item *
+
+C</$qr/p> was broken in Perl 5.18.0; the C</p> flag was ignored.  This has been
+fixed. [perl #118213]
+
+=item *
+
+Starting in Perl 5.18.0, a construct like C</[#](?{})/x> would have its C<#>
+incorrectly interpreted as a comment.  The code block would be skipped,
+unparsed.  This has been corrected.
+
+=item *
+
+Starting in Perl 5.001, a regular expression like C</[#$a]/x> or C</[#]$a/x>
+would have its C<#> incorrectly interpreted as a comment, so the variable would
+not interpolate.  This has been corrected. [perl #45667]
+
+=item *
+
+On non-threaded builds, setting C<${"_E<lt>filename"}> to a reference or
+typeglob no longer causes C<__FILE__> and some error messages to produce a
+corrupt string, and no longer prevents C<#line> directives in string evals from
+providing the source lines to the debugger.  Threaded builds were unaffected.
+
+=item *
+
+Enabling "used once" warnings no longer causes crashes on stash circularities
+created at compile time (C<*Foo::Bar::Foo:: = *Foo::>).
+
+=item *
+
+Undef constants used in hash keys (C<use constant u =E<gt> undef; $h{+u}>) no
+longer produce "uninitialized" warnings at compile time.
+
+=item *
+
+Modifying a substitution target inside the substitution replacement no longer
+causes crashes.
+
+=item *
+
+The first statement inside a string eval used to use the wrong pragma setting
+sometimes during constant folding.  C<eval 'uc chr 0xe0'> would randomly choose
+between Unicode, byte, and locale semantics.  This has been fixed.
+
+=item *
+
+The handling of return values of @INC filters (subroutines returned by
+subroutines in @INC) has been fixed in various ways.  Previously tied variables
+were mishandled, and setting $_ to a reference or typeglob could result in
+crashes.
+
+=item *
+
+The C<SvPVbyte> XS function has been fixed to work with tied scalars returning
+something other than a string.  It used to return utf8 in those cases where
+C<SvPV> would.
+
+=item *
+
+Perl 5.18.0 inadvertently made dereferenced regular expressions
+S<(C<${ qr// }>)> false as booleans.  This has been fixed.
+
+=item *
+
+Perl 5.18.0 inadvertently made C<--> and C<++> crash on dereferenced regular
+expressions, and stopped C<++> from flattening vstrings.
+
+=item *
+
+C<bless> no longer dies with "Can't bless non-reference value" if its first
+argument is a tied reference.
+
+=item *
+
+C<reset> with an argument no longer skips copy-on-write scalars, regular
+expressions, typeglob copies, and vstrings.  Also, when encountering those or
+read-only values, it no longer skips any array or hash with the same name.
+
+=item *
+
+C<reset> with an argument now skips scalars aliased to typeglobs
+(C<for $z (*foo) { reset "z" }>).  Previously it would corrupt memory or crash.
+
+=item *
+
+C<ucfirst> and C<lcfirst> were not respecting the bytes pragma.  This was a
+regression from Perl 5.12. [perl #117355]
+
+=item *
+
+The use of C<\G> in regular expressions, where it's not at the start of the
+pattern, is now slightly less buggy (although it is still somewhat
+problematic).
+
+=item *
+
+Where a regular expression included code blocks (C</(?{...})/>), and where the
+use of constant overloading triggered a re-compilation of the code block, the
+second compilation didn't see its outer lexical scope.  This was a regression
+in Perl 5.18.0.
+
+=item *
+
+Changes to C<UNIVERSAL::DESTROY> now update DESTROY caches in all classes,
+instead of causing classes that have already had objects destroyed to continue
+using the old sub.  This was a regression in Perl 5.18. [perl #114864]
+
+=item *
+
+All known false-positive occurrences of the deprecation warning "Useless use of
+'\'; doesn't escape metacharacter '%c'", added in Perl 5.18.0, have been
+removed. [perl #119101]
 
 =back
 
