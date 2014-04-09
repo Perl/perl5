@@ -366,13 +366,11 @@ XXX Changes which affect the interface available to C<XS> code go here.  Other
 significant internal changes for future core maintainers should be noted as
 well.
 
-[ List each change as a =item entry ]
-
 =over 4
 
 =item *
 
-XXX
+The deprecated variable C<PL_sv_objcount> has been removed.
 
 =back
 

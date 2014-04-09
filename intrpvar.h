@@ -109,9 +109,6 @@ PERLVAR(I, mainstack,	AV *)		/* the stack when nothing funny is
 
 /* memory management */
 PERLVAR(I, sv_count,	IV)		/* how many SV* are currently allocated */
-PERLVAR(I, sv_objcount,	IV)		/* DEPRECATED AND UNMAINTAINED.
-                                         * Will be removed in Perl 5.22.
-                                         * Used to be: how many objects are currently allocated. */
 
 PERLVAR(I, sv_root,	SV *)		/* storage for SVs belonging to interp */
 PERLVAR(I, sv_arenaroot, SV *)		/* list of areas for garbage collection */

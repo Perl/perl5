@@ -304,7 +304,6 @@
 #define PL_sv_consts		(vTHX->Isv_consts)
 #define PL_sv_count		(vTHX->Isv_count)
 #define PL_sv_no		(vTHX->Isv_no)
-#define PL_sv_objcount		(vTHX->Isv_objcount)
 #define PL_sv_root		(vTHX->Isv_root)
 #define PL_sv_serial		(vTHX->Isv_serial)
 #define PL_sv_undef		(vTHX->Isv_undef)
