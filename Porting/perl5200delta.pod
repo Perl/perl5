@@ -127,11 +127,34 @@ L<XXX> has been upgraded from version A.xx to B.yy.
 
 =head2 Removed Modules and Pragmata
 
-=over 4
+The distributions below have been removed from the core, but are still
+available on the CPAN.  In many cases, the named distribution includes
+multiple modules, which are not listed individually.  For a
+comprehensive list of removals, consult:
 
-=item *
+  $ corelist --dif 5.18.0 5.20.0 | grep absent
 
-XXX
+=over
+
+=item Archive-Extract
+
+=item B-Lint
+
+=item CPANPLUS
+
+=item File-CheckTree
+
+=item Log-Message
+
+=item Module-Pluggable
+
+=item Object-Accessor
+
+=item Pod-LaTeX
+
+=item Term-UI
+
+=item Text-Soundex
 
 =back
 
