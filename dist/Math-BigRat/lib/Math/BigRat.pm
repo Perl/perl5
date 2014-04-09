@@ -1592,6 +1592,8 @@ sub import
 
 __END__
 
+=pod
+
 =head1 NAME
 
 Math::BigRat - Arbitrary big rational numbers
@@ -1989,19 +1991,60 @@ This is an internal routine that turns scalars into objects.
 
 =head1 BUGS
 
-Some things are not yet implemented, or only implemented half-way:
+Please report any bugs or feature requests to
+C<bug-math-bigrat at rt.cpan.org>, or through the web interface at
+L<https://rt.cpan.org/Ticket/Create.html?Queue=Math-BigRat>
+(requires login).
+We will be notified, and then you'll automatically be notified of progress on
+your bug as I make changes.
 
-=over 2
+=head1 SUPPORT
 
-=item inf handling (partial)
+You can find documentation for this module with the perldoc command.
 
-=item NaN handling (partial)
+    perldoc Math::BigRat
 
-=item rounding (not implemented except for bceil/bfloor)
+You can also look for information at:
 
-=item $x ** $y where $y is not an integer
+=over 4
 
-=item bmod(), blog(), bmodinv() and bmodpow() (partial)
+=item * RT: CPAN's request tracker
+
+L<https://rt.cpan.org/Public/Dist/Display.html?Name=Math-BigRat>
+
+=item * AnnoCPAN: Annotated CPAN documentation
+
+L<http://annocpan.org/dist/Math-BigRat>
+
+=item * CPAN Ratings
+
+L<http://cpanratings.perl.org/dist/Math-BigRat>
+
+=item * Search CPAN
+
+L<http://search.cpan.org/dist/Math-BigRat/>
+
+=item * CPAN Testers Matrix
+
+L<http://matrix.cpantesters.org/?dist=Math-BigRat>
+
+=item * The Bignum mailing list
+
+=over 4
+
+=item * Post to mailing list
+
+C<bignum at lists.scsys.co.uk>
+
+=item * View mailing list
+
+L<http://lists.scsys.co.uk/pipermail/bignum/>
+
+=item * Subscribe/Unsubscribe
+
+L<http://lists.scsys.co.uk/cgi-bin/mailman/listinfo/bignum>
+
+=back
 
 =back
 
@@ -2012,14 +2055,8 @@ the same terms as Perl itself.
 
 =head1 SEE ALSO
 
-L<Math::BigFloat> and L<Math::Big> as well as
-L<Math::BigInt::Pari> and  L<Math::BigInt::GMP>.
-
-See L<http://search.cpan.org/search?dist=bignum> for a way to use
-Math::BigRat.
-
-The package at L<http://search.cpan.org/search?dist=Math%3A%3ABigRat>
-may contain more documentation and examples as well as testcases.
+L<bigrat>, L<Math::BigFloat> and L<Math::BigInt> as well as the backends
+L<Math::BigInt::FastCalc>, L<Math::BigInt::GMP>, and L<Math::BigInt::Pari>.
 
 =head1 AUTHORS
 
