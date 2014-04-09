@@ -3,6 +3,7 @@
 b51c3e77db (craigb) - Reduce excessive stat calls in glob on VMS
 7742aa6637 (davem)  - [perl #121484] /m causing false negative
 e141190569 (tonyc)  - [perl #121366] avoid using an invalid SvPVX() in Perl_sv_pvn_force_flags
+9fdd5a7ac7 (alh)    - RT-121512 - Allow -I/dir/ with trailing slash to find .pmc files.
 
 =encoding utf8
 
@@ -125,6 +126,21 @@ XXX
 
 =item *
 
+L<Carp> has been upgraded from version 1.33 to 1.3301.
+
+No changes have been made to the installed code other than the version bump to
+keep in sync with the latest CPAN release.
+
+=item *
+
+L<DB> has been upgraded from 1.43 to 1.44.
+
+The debugger now correctly restores its input and output filehandles after
+using the pager command.
+[L<perl #121456|https://rt.perl.org/Public/Bug/Display.html?id=121456>]
+
+=item *
+
 L<ExtUtils::Install> has been upgraded from version 1.63 to 1.64.
 
 The MM_TEST_ROOT feature has been removed from the tests.
@@ -141,6 +157,12 @@ A regression in MM_Unix.pm has been resolved.
 L<Module::CoreList> has been upgraded from version 3.09 to 3.10.
 
 The list of Perl versions covered has been updated.
+
+=item *
+
+L<Storable> has been upgraded from version 2.48 to 2.49.
+
+Recognition of tied SVs has been tightened up.
 
 =back
 
@@ -328,21 +350,30 @@ L</Modules and Pragmata> section.
 
 =item Win32
 
+The time taken to build perl on Windows has been reduced quite significantly
+(time savings in the region of 30-40% are typically seen) by reducing the
+number of, usually failing, I/O calls for each L<perlfunc/require> (for
+miniperl only).
+[L<perl #121119|https://rt.perl.org/Public/Bug/Display.html?id=121119>]
+
 About 15 minutes of idle sleeping was removed from running C<make test> due to
 a bug in which the timeout monitor used for tests could not be cancelled once
 the test completes, and the full timeout period elapsed before running the next
 test file.
 [L<perl #121395|https://rt.perl.org/Public/Bug/Display.html?id=121395>]
 
-XXX: Reword this and fix spelling mistakes:
-On a Perl built without psuedo-fork (psuedo-fork builds were not affected by
-this bug), probably since prcess tree kill feature was implemented on Win32,
-killing a process tree with L<perlfunc/kill> and a negative signal, resulted
-in kill inverting the returned value.  This ment successfully killing
-1 process tree PID returned 0, and also passing 2 invalid PID, returned 2.
-This has been corrected so the documented behavior for return values for kill
-executes.
+On a perl built without psuedo-fork (psuedo-fork builds were not affected by
+this bug), killing a process tree with L<perlfunc/kill> and a negative signal
+resulted in kill() inverting the returned value.  For example, if kill() killed
+1 process tree PID then it returned 0 instead of 1, and if kill() was passed 2
+invalid PIDs then it returned 2 instead of 0.  This has probably been the case
+since the process tree kill feature was implemented on Win32.  It has now been
+corrected to follow the documented behaviour.
 [L<perl #121230|https://rt.perl.org/Public/Bug/Display.html?id=121230>]
+
+The test harness now has no failures when perl is built on a FAT drive with the
+Windows OS on an NTFS drive.
+[L<perl #21442|https://rt.perl.org/Public/Bug/Display.html?id=21442>]
 
 =back
 
@@ -384,7 +415,6 @@ has been reverted for v5.20.
 This re-breaks the bugs it fixed,
 L<perl #112208|https://rt.perl.org/Ticket/Display.html?id=112208>, so
 an alternative fix is planned for v5.22
-
 
 =back
 
