@@ -12,7 +12,7 @@ package Math::BigFloat;
 #   _a	: accuracy
 #   _p	: precision
 
-$VERSION = '1.9991';
+$VERSION = '1.9993';
 require 5.006002;
 
 require Exporter;
@@ -3829,6 +3829,8 @@ sub length
 
 __END__
 
+=pod
+
 =head1 NAME
 
 Math::BigFloat - Arbitrary size floating point math package
@@ -4368,10 +4370,6 @@ C<Math::BigFloat> exports nothing by default, but can export the C<bpi()> method
 
 	print bpi(10), "\n";
 
-=head1 BUGS
-
-Please see the file BUGS in the CPAN distribution Math::BigInt for known bugs.
-
 =head1 CAVEATS
 
 Do not try to be clever to insert some operations in between switching
@@ -4496,22 +4494,77 @@ influence any further operation.
 
 =back
 
-=head1 SEE ALSO
+=head1 BUGS
 
-L<Math::BigInt>, L<Math::BigRat> and L<Math::Big> as well as
-L<Math::BigInt::Pari> and  L<Math::BigInt::GMP>.
+Please report any bugs or feature requests to
+C<bug-math-bigint at rt.cpan.org>, or through the web interface at
+L<https://rt.cpan.org/Ticket/Create.html?Queue=Math-BigInt>
+(requires login).
+We will be notified, and then you'll automatically be notified of progress on
+your bug as I make changes.
 
-The pragmas L<bignum>, L<bigint> and L<bigrat> might also be of interest
-because they solve the autoupgrading/downgrading issue, at least partly.
+=head1 SUPPORT
 
-The package at L<http://search.cpan.org/~tels/Math-BigInt> contains
-more documentation including a full version history, testcases, empty
-subclass files and benchmarks.
+You can find documentation for this module with the perldoc command.
+
+    perldoc Math::BigFloat
+
+You can also look for information at:
+
+=over 4
+
+=item * RT: CPAN's request tracker
+
+L<https://rt.cpan.org/Public/Dist/Display.html?Name=Math-BigInt>
+
+=item * AnnoCPAN: Annotated CPAN documentation
+
+L<http://annocpan.org/dist/Math-BigInt>
+
+=item * CPAN Ratings
+
+L<http://cpanratings.perl.org/dist/Math-BigInt>
+
+=item * Search CPAN
+
+L<http://search.cpan.org/dist/Math-BigInt/>
+
+=item * CPAN Testers Matrix
+
+L<http://matrix.cpantesters.org/?dist=Math-BigInt>
+
+=item * The Bignum mailing list
+
+=over 4
+
+=item * Post to mailing list
+
+C<bignum at lists.scsys.co.uk>
+
+=item * View mailing list
+
+L<http://lists.scsys.co.uk/pipermail/bignum/>
+
+=item * Subscribe/Unsubscribe
+
+L<http://lists.scsys.co.uk/cgi-bin/mailman/listinfo/bignum>
+
+=back
+
+=back
 
 =head1 LICENSE
 
 This program is free software; you may redistribute it and/or modify it under
 the same terms as Perl itself.
+
+=head1 SEE ALSO
+
+L<Math::BigFloat> and L<Math::BigInt> as well as the backends
+L<Math::BigInt::FastCalc>, L<Math::BigInt::GMP>, and L<Math::BigInt::Pari>.
+
+The pragmas L<bignum>, L<bigint> and L<bigrat> also might be of interest
+because they solve the autoupgrading/downgrading issue, at least partly.
 
 =head1 AUTHORS
 
