@@ -43,7 +43,9 @@ XXX For a release on a stable branch, this section aspires to be:
     If any exist, they are bugs, and we request that you submit a
     report.  See L</Reporting Bugs> below.
 
-[ List each incompatible change as a =head2 entry ]
+=head2 In double-quotish C<\cI<X>>, I<X> must now be a printable ASCII character
+
+In prior releases, failure to do this raised a deprecation warning.
 
 =head1 Deprecations
 

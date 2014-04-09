@@ -1299,15 +1299,10 @@ Perhaps you need to copy the value to a temporary, and repeat that.
 
 =item Character following "\c" must be printable ASCII
 
-(F)(D deprecated, syntax) In C<\cI<X>>, I<X> must be a printable
-(non-control) ASCII character.  This is fatal starting in v5.20 for
-non-ASCII characters, and it is planned to make this fatal in all
-instances in Perl v5.22.  In
-the cases where it isn't fatal, the character this evaluates to is
-derived by exclusive or'ing the code point of this character with 0x40.
+(F) In C<\cI<X>>, I<X> must be a printable (non-control) ASCII character.
 
 Note that ASCII characters that don't map to control characters are
-discouraged here as well, and will generate the warning (when enabled)
+discouraged, and will generate the warning (when enabled)
 L</""\c%c" is more clearly written simply as "%s"">.
 
 =item Character in 'C' format wrapped in pack

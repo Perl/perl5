@@ -52,14 +52,8 @@ S_grok_bslash_c(pTHX_ const char source, const bool output_warning)
     U8 result;
 
     if (! isPRINT_A(source)) {
-        const char msg[] = "Character following \"\\c\" must be printable ASCII";
-        if (! isASCII(source)) {
-            Perl_croak(aTHX_ "%s", msg);
-        }
-        else if (output_warning) {  /* Unprintables can be removed in v5.22 */
-            Perl_ck_warner_d(aTHX_ packWARN2(WARN_DEPRECATED, WARN_SYNTAX), "%s",
-                                                                            msg);
-	}
+        Perl_croak(aTHX_ "%s",
+                        "Character following \"\\c\" must be printable ASCII");
     }
     else if (source == '{') {
         assert(isPRINT_A(toCTRL('{')));
