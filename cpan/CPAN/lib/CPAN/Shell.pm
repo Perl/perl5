@@ -47,7 +47,7 @@ use vars qw(
              "CPAN/Tarzip.pm",
              "CPAN/Version.pm",
             );
-$VERSION = "5.5003";
+$VERSION = "5.5004";
 # record the initial timestamp for reload.
 $reload = { map {$INC{$_} ? ($_,(stat $INC{$_})[9]) : ()} @relo };
 @CPAN::Shell::ISA = qw(CPAN::Debug);
@@ -1814,6 +1814,7 @@ sub unrecoverable_error {
 
 #-> sub CPAN::Shell::mysleep ;
 sub mysleep {
+    return if $ENV{AUTOMATED_TESTING} || ! -t STDOUT;
     my($self, $sleep) = @_;
     if (CPAN->has_inst("Time::HiRes")) {
         Time::HiRes::sleep($sleep);

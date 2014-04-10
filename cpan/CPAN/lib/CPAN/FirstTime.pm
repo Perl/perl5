@@ -10,7 +10,7 @@ use File::Path ();
 use File::Spec ();
 use CPAN::Mirrors ();
 use vars qw($VERSION $auto_config);
-$VERSION = "5.5305";
+$VERSION = "5.5306";
 
 =head1 NAME
 
@@ -1333,16 +1333,18 @@ sub init {
 sub _local_lib_config {
     # Set environment stuff for this process
     require local::lib;
-    my %env = local::lib->build_environment_vars_for(_local_lib_path(), 1);
-    while ( my ($k, $v) = each %env ) {
-        $ENV{$k} = $v;
-    }
 
     # Tell user about environment vars to set
     $CPAN::Frontend->myprint($prompts{local_lib_installed});
     local $ENV{SHELL} = $CPAN::Config->{shell} || $ENV{SHELL};
     my $shellvars = local::lib->environment_vars_string_for(_local_lib_path());
     $CPAN::Frontend->myprint($shellvars);
+
+    # Set %ENV after getting string above
+    my %env = local::lib->build_environment_vars_for(_local_lib_path(), 1);
+    while ( my ($k, $v) = each %env ) {
+        $ENV{$k} = $v;
+    }
 
     # Offer to mangle the shell config
     my $munged_rc;

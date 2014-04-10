@@ -9,7 +9,7 @@ use CPAN::InfoObj;
 use File::Path ();
 @CPAN::Distribution::ISA = qw(CPAN::InfoObj);
 use vars qw($VERSION);
-$VERSION = "2.01";
+$VERSION = "2.02";
 
 # Accessors
 sub cpan_comment {
@@ -3311,11 +3311,6 @@ sub prereq_pm {
 sub shortcut_test {
     my ($self) = @_;
 
-    $self->debug("checking notest[$self->{ID}]") if $CPAN::DEBUG;
-    if ($self->{notest}) {
-        return $self->success("Skipping test because of notest pragma");
-    }
-
     $self->debug("checking badtestcnt[$self->{ID}]") if $CPAN::DEBUG;
     $self->{badtestcnt} ||= 0;
     if ($self->{badtestcnt} > 0) {
@@ -3352,6 +3347,11 @@ sub shortcut_test {
             }
             return $self->success("Has already been tested successfully");
         }
+    }
+
+    if ($self->{notest}) {
+        $self->{make_test} = CPAN::Distrostatus->new("YES");
+        return $self->success("Skipping test because of notest pragma");
     }
 
     return undef; # no shortcut

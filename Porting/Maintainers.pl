@@ -252,12 +252,13 @@ use File::Glob qw(:case);
     },
 
     'CPAN' => {
-        'DISTRIBUTION' => 'ANDK/CPAN-2.04-TRIAL.tar.gz',
+        'DISTRIBUTION' => 'ANDK/CPAN-2.05-TRIAL.tar.gz',
         'FILES'        => q[cpan/CPAN],
         'EXCLUDED'     => [
             qr{^distroprefs/},
             qr{^inc/Test/},
-            qr{^t/CPAN/authors/},
+            qr{^t/CPAN/},
+            qr{^t/data/},
             qw( lib/CPAN/Admin.pm
                 scripts/cpan-mirrors
                 PAUSE2015.pub
@@ -272,26 +273,14 @@ use File::Glob qw(:case);
                 t/31sessions.t
                 t/41distribution.t
                 t/42distroprefs.t
-                t/44cpanmeta.t
                 t/43distroprefspref.t
+                t/44cpanmeta.t
                 t/50pod.t
                 t/51pod.t
                 t/52podcover.t
                 t/60credentials.t
                 t/70_critic.t
                 t/71_minimumversion.t
-                t/CPAN/CpanTestDummies-1.55.pm
-                t/CPAN/TestConfig.pm
-                t/CPAN/TestMirroredBy
-                t/CPAN/TestPatch.txt
-                t/CPAN/modules/02packages.details.txt
-                t/CPAN/modules/03modlist.data
-                t/data/META-dynamic.json
-                t/data/META-dynamic.yml
-                t/data/META-static.json
-                t/data/META-static.yml
-                t/data/MYMETA.json
-                t/data/MYMETA.yml
                 t/local_utils.pm
                 t/perlcriticrc
                 t/yaml_code.yml

@@ -133,7 +133,13 @@ keep in sync with the latest CPAN release.
 
 =item *
 
-L<DB> has been upgraded from 1.43 to 1.44.
+L<CPAN> has been upgraded from version 2.04-TRIAL to 2.05-TRIAL.
+
+TODO
+
+=item *
+
+L<DB> has been upgraded from version 1.43 to 1.44.
 
 The debugger now correctly restores its input and output filehandles after
 using the pager command.
