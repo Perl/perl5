@@ -97,7 +97,7 @@ PERLVAR(G, hints_mutex, perl_mutex)    /* Mutex for refcounted he refcounting */
 #endif
 
 #ifdef DEBUGGING
-PERLVAR(G, watch_pvx,	char *)
+PERLVARI(G, watch_pvx,	char *, NULL)
 #endif
 
 /*
