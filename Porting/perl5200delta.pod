@@ -2,9 +2,6 @@
 
 =head1 NAME
 
-[ this is a template for a new perldelta file.  Any text flagged as XXX needs
-to be processed before release. ]
-
 perldelta - what is new for perl v5.20.0
 
 =head1 DESCRIPTION
@@ -15,41 +12,28 @@ This document describes differences between the 5.18.0 release and the
 If you are upgrading from an earlier release such as 5.16.0, first read
 L<perl5180delta>, which describes differences between 5.16.0 and 5.18.0.
 
-=head1 Notice
-
-XXX Any important notices here
-
 =head1 Core Enhancements
 
-=head2 C<rand> now uses a consistent random number generator
+=head2 Subroutine signatures
 
-Previously perl would use a platform specific random number generator, varying
-between the libc rand(), random() or drand48().
+Declarative syntax to unwrap argument list into lexical variables.
+C<sub foo ($a,$b) {...}> checks the number of arguments and puts the
+arguments into lexical variables.  Signatures are not equivalent to
+the existing idiom of C<sub foo { my($a,$b) = @_; ... }>.  Signatures
+are only available by enabling a non-default feature, and generate
+warnings about being experimental.  The syntactic clash with
+prototypes is managed by disabling the short prototype syntax when
+signatures are enabled.
 
-This meant that the quality of perl's random numbers would vary from platform
-to platform, from the 15 bits of rand() on Windows to 48-bits on POSIX
-platforms such as Linux with drand48().
+See L<perlsub/Signatures> for details.
 
-Perl now uses its own internal drand48() implementation on all platforms.  This
-does not make perl's C<rand> cryptographically secure.  [perl #115928]
+=head2 C<sub>s now take a C<prototype> attribute
 
-=head2 Better 64-bit support
+When declaring or defining a C<sub>, the prototype can now be specified inside
+of a C<prototype> attribute instead of in parens following the name.
 
-On 64-bit platforms, the internal array functions now use 64-bit offsets,
-allowing Perl arrays to hold more than 2**31 elements, if you have the memory
-available.
-
-The regular expression engine now supports strings longer than 2**31
-characters.  [perl #112790, #116907]
-
-The functions PerlIO_get_bufsiz, PerlIO_get_cnt, PerlIO_set_cnt and
-PerlIO_set_ptrcnt now have SSize_t, rather than int, return values and
-parameters.
-
-=head2 New slice syntax
-
-The new C<%hash{...}> and C<%array[...]> syntax returns a list of key/value (or
-index/value) pairs.  See L<perldata/"Key/Value Hash Slices">.
+For example, C<sub foo($$){}> could be rewritten as
+C<sub foo : prototype($$){}>.
 
 =head2 More consistent prototype parsing
 
@@ -66,19 +50,22 @@ prototypes set by C<Scalar::Util::set_prototype>.  Now it is permitted,
 and the parser no longer strips whitespace.  This means
 C<prototype &mysub> returns the original prototype, whitespace and all.
 
-=head2 B<-F> now implies B<-a> and B<-a> implies B<-n>
+=head2 C<rand> now uses a consistent random number generator
 
-Previously B<-F> without B<-a> was a no-op, and B<-a> without B<-n> or B<-p>
-was a no-op, with this change, if you supply B<-F> then both B<-a> and B<-n>
-are implied and if you supply B<-a> then B<-n> is implied.
+Previously perl would use a platform specific random number generator, varying
+between the libc rand(), random() or drand48().
 
-You can still use B<-p> for its extra behaviour. [perl #116190]
+This meant that the quality of perl's random numbers would vary from platform
+to platform, from the 15 bits of rand() on Windows to 48-bits on POSIX
+platforms such as Linux with drand48().
 
-=head2 Unicode 6.3 now supported
+Perl now uses its own internal drand48() implementation on all platforms.  This
+does not make perl's C<rand> cryptographically secure.  [perl #115928]
 
-Perl now supports and is shipped with Unicode 6.3 (though Perl may be
-recompiled with any previous Unicode release as well).  A detailed list of
-Unicode 6.3 changes is at L<http://www.unicode.org/versions/Unicode6.3.0/>.
+=head2 New slice syntax
+
+The new C<%hash{...}> and C<%array[...]> syntax returns a list of key/value (or
+index/value) pairs.  See L<perldata/"Key/Value Hash Slices">.
 
 =head2 Experimental Postfix Dereferencing
 
@@ -108,33 +95,29 @@ they are suppressed.
 For more information, consult L<the Postfix Dereference Syntax section of
 perlref|perlref/Postfix Dereference Syntax>.
 
-=head2 C<sub>s now take a C<prototype> attribute
+=head2 Unicode 6.3 now supported
 
-When declaring or defining a C<sub>, the prototype can now be specified inside
-of a C<prototype> attribute instead of in parens following the name.
-
-For example, C<sub foo($$){}> could be rewritten as
-C<sub foo : prototype($$){}>.
-
-=head2 $a and $b warnings exemption
-
-The special variables $a and $b, used in C<sort>, are now exempt from "used
-once" warnings, even where C<sort> is not used.  This makes it easier for
-CPAN modules to provide functions using $a and $b for similar purposes.
-[perl #120462]
+Perl now supports and is shipped with Unicode 6.3 (though Perl may be
+recompiled with any previous Unicode release as well).  A detailed list of
+Unicode 6.3 changes is at L<http://www.unicode.org/versions/Unicode6.3.0/>.
 
 =head2 New C<\p{Unicode}> regular expression pattern property
 
 This is a synonym for C<\p{Any}> and matches the set of Unicode-defined
 code points 0 - 0x10FFFF.
 
-=head2 C<S<use locale>> now compiles on systems without locale ability
+=head2 Better 64-bit support
 
-Previously doing this caused the program to not compile.  Within its
-scope the program behaves as if in the "C" locale.  Thus programs
-written for platforms that support locales can run on locale-less
-platforms without change.  Attempts to change the locale away from the
-"C" locale will, of course, fail.
+On 64-bit platforms, the internal array functions now use 64-bit offsets,
+allowing Perl arrays to hold more than 2**31 elements, if you have the memory
+available.
+
+The regular expression engine now supports strings longer than 2**31
+characters.  [perl #112790, #116907]
+
+The functions PerlIO_get_bufsiz, PerlIO_get_cnt, PerlIO_set_cnt and
+PerlIO_set_ptrcnt now have SSize_t, rather than int, return values and
+parameters.
 
 =head2 PERL_DEBUG_READONLY_COW
 
@@ -146,23 +129,13 @@ correctly.  See L<perlguts/"Copy on Write"> for detail.
 This feature was actually added in 5.19.8, but was unintentionally omitted
 from its delta document.
 
-=head2 C<-DL> runtime option now added for tracing locale setting
+=head2 C<S<use locale>> now compiles on systems without locale ability
 
-This is designed for Perl core developers to aid in field debugging bugs
-regarding locales.
-
-=head2 Subroutine signatures
-
-Declarative syntax to unwrap argument list into lexical variables.
-C<sub foo ($a,$b) {...}> checks the number of arguments and puts the
-arguments into lexical variables.  Signatures are not equivalent to
-the existing idiom of C<sub foo { my($a,$b) = @_; ... }>.  Signatures
-are only available by enabling a non-default feature, and generate
-warnings about being experimental.  The syntactic clash with
-prototypes is managed by disabling the short prototype syntax when
-signatures are enabled.
-
-See L<perlsub/Signatures> for details.
+Previously doing this caused the program to not compile.  Within its
+scope the program behaves as if in the "C" locale.  Thus programs
+written for platforms that support locales can run on locale-less
+platforms without change.  Attempts to change the locale away from the
+"C" locale will, of course, fail.
 
 =head2 More locale initialization fallback options
 
@@ -174,6 +147,26 @@ both set, and using the C<LC_ALL> locale fails, Perl will now try the
 C<LANG> locale, and only if that fails, will it fall back to C<"C">.  On
 Windows machines, Perl will try, ahead of using C<"C">, the system
 default locale if all the locales given by environment variables fail.
+
+=head2 C<-DL> runtime option now added for tracing locale setting
+
+This is designed for Perl core developers to aid in field debugging bugs
+regarding locales.
+
+=head2 B<-F> now implies B<-a> and B<-a> implies B<-n>
+
+Previously B<-F> without B<-a> was a no-op, and B<-a> without B<-n> or B<-p>
+was a no-op, with this change, if you supply B<-F> then both B<-a> and B<-n>
+are implied and if you supply B<-a> then B<-n> is implied.
+
+You can still use B<-p> for its extra behaviour. [perl #116190]
+
+=head2 $a and $b warnings exemption
+
+The special variables $a and $b, used in C<sort>, are now exempt from "used
+once" warnings, even where C<sort> is not used.  This makes it easier for
+CPAN modules to provide functions using $a and $b for similar purposes.
+[perl #120462]
 
 =head1 Security
 
