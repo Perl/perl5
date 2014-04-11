@@ -123,6 +123,11 @@ once" warnings, even where C<sort> is not used.  This makes it easier for
 CPAN modules to provide functions using $a and $b for similar purposes.
 [perl #120462]
 
+=head2 New C<\p{Unicode}> regular expression pattern property
+
+This is a synonym for C<\p{Any}> and matches the set of Unicode-defined
+code points 0 - 0x10FFFF.
+
 =head1 Security
 
 =head2 Avoid possible read of free()d memory during parsing
@@ -208,6 +213,40 @@ they may fail.
 
 To avoid this problem in your code, test against the data structure
 from evaluating the dumped structure, instead of the dump itself.
+
+=head2 C<do> can no longer be used to call subroutines
+
+The C<do SUBROUTINE(LIST)> form has resulted in a deprecation warning
+since Perl v5.0.0, and is now a syntax error.
+
+=head2 C<\p{}>, C<\P{}> matching has changed for non-Unicode code
+points.
+
+C<\p{}> and C<\P{}> are defined by Unicode only on Unicode-defined code
+points (C<U+0000> through C<U+10FFFF>).  Their behavior on matching
+these legal Unicode code points is unchanged, but there are changes for
+code points C<0x110000> and above.  Previously, Perl treated the result
+of matching C<\p{}> and C<\P{}> against these as C<undef>, which
+translates into "false".  For C<\P{}>, this was then complemented into
+"true".  A warning was supposed to be raised when this happened.
+However, various optimizations could prevent the warning, and the
+results were often counter-intuitive, with both a match and its seeming
+complement being false.  Now all non-Unicode code points are treated as
+typical unassigned Unicode code points.  This generally is more
+Do-What-I-Mean.  A warning is raised only if the results are arguably
+different from a strict Unicode approach, and from what Perl used to do.
+Code that needs to be strictly Unicode compliant can make this warning
+fatal, and then Perl always raises the warning.
+
+Details are in L<perlunicode/Beyond Unicode code points>.
+
+=head2 C<\p{All}> has been expanded to match all possible code points
+
+The Perl-defined regular expression pattern element C<\p{All}>, unused
+on CPAN, used to match just the Unicode code points; now it matches all
+possible code points; that is, it is equivalent to C<qr/./s>.  Thus
+C<\p{All}> is no longer synonymous with C<\p{Any}>, which continues to
+match just the Unicode code points, as Unicode says it should.
 
 =head1 Deprecations
 
@@ -302,6 +341,21 @@ well.
 Combined C<and> and C<or> operators in void context, like those
 generated for C<< unless ($a && $b) >> and C<< if ($a || b) >> now
 short circuit directly to the end of the statement. [perl #120128]
+
+=item *
+
+In certain situations, when C<return> is the last statement in a subroutine's
+main scope, it will be optimized out. This means code like:
+
+  sub baz { return $cat; }
+
+will now behave like:
+
+  sub baz { $cat; }
+
+which is notably faster.
+
+[perl #120765]
 
 =back
 
@@ -606,6 +660,17 @@ A list of subroutine names used by the perl implementation is now included.
 =item *
 
 There is now a L<JavaScript|perltrap/JavaScript Traps> section.
+
+=back
+
+=head3 L<perlunicode>
+
+=over 4
+
+=item *
+
+The documentation  has been updated to reflect C<Bidi_Class> changes in
+Unicode 6.3.
 
 =back
 
@@ -917,6 +982,33 @@ The error messages for C<my($a?$b$c)> and C<my(do{})> now mention "conditional
 expression" and "do block", respectively, instead of reading 'Can't declare
 null operation in "my"'.
 
+=item *
+
+L<%s on a reference is experimental|perldiag/"%s on a reference is experimental">:
+
+The "auto-deref" feature is experimental.
+
+Starting in v5.14.0, it was possible to use push, pop, keys, and other
+built-in functions not only on aggregate types, but on references to
+them.  The feature was not deployed to its original intended
+specification, and now may become redundant to postfix dereferencing.
+It has always been categorized as an experimental feature, and in
+v5.20.0 is carries a warning as such.
+
+Warnings will now be issued at compile time when these operations are
+detected.
+
+  no if $] >= 5.01908, warnings => "experimental::autoderef";
+
+Consider, though, replacing the use of these features, as they may
+change behavior again before becoming stable.
+
+=item *
+
+L<Matched non-Unicode code point 0x%X against Unicode property; may not be portable|perldiag/"Matched non-Unicode code point 0x%X against Unicode property; may not be portable">.
+This replaces the message "Code point 0x%X is not Unicode, all \p{}
+matches fail; all \P{} matches succeed".
+
 =back
 
 =head1 Utility Changes
@@ -976,6 +1068,21 @@ building.
 
 Now has fixups to enable building several more historical ranges of bleadperl,
 which can be useful for pinpointing the origins of bugs or behaviour changes.
+
+=back
+
+=head3 L<perlbug>
+
+=over 4
+
+=item *
+
+F<perlbug> now has a C<-p> option for attaching patches with a bug report.
+
+=item *
+
+F<perlbug> now does input in the encoding of the current locale and
+output raw.
 
 =back
 
@@ -1119,6 +1226,25 @@ Various tests in F<t/porting/> are no longer skipped when the perl
 F<.git> directory is outside the perl tree and pointed to by
 C<$GIT_DIR>. [perl #120505]
 
+=item *
+
+Distinct library basenames with C<d_libname_unique>.
+
+When compiling perl with this option, the library files for XS modules are
+named something "unique" -- for example, Hash/Util/Util.so becomes
+Hash/Util/PL_Hash__Util.so.  This behavior is similar to what currently
+happens on VMS, and serves as groundwork for the Android port.
+
+=item *
+
+C<sysroot> option to indicate the logical root directory under gcc and clang.
+
+When building with this option set, both Configure and the compilers search
+for all headers and libraries under this new sysroot, instead of /.
+
+This is a huge time saver if cross-compiling, but can also help
+on native builds if your toolchain's files have non-standard locations.
+
 =back
 
 =head1 Platform Support
@@ -1161,6 +1287,18 @@ should build now. The basic problems are the non-standard location for tools.
 XXX List any platforms that this version of perl no longer compiles on.
 
 =over 4
+
+=item C<sfio>
+
+Code related to supporting C<sfio> has been removed.
+
+Perl 5.004 added support to use the native API of C<sfio>, AT&T's Safe/Fast
+I/O library. This code still built with v5.8.0, albeit with many regression
+tests failing, but was inadvertently broken before the v5.8.1 release,
+meaning that it has not worked on any version of Perl released since then.
+In over a decade we have received no bug reports about this, hence it is clear
+that no-one is using this functionality on any version of Perl that is still
+supported to any degree.
 
 =item AT&T 3b1
 
@@ -1258,6 +1396,14 @@ C<nmake -f Makefile.ce all>.
 
 Support for building with EVC (Embedded Visual C++) 4 has been restored.  Perl
 can also be built using Smart Devices for Visual C++ 2005 or 2008.
+
+=item Cygwin
+
+recv() on a connected handle would populate the returned sender
+address with whatever happened to be in the working buffer.  recv()
+now uses a workaround similar to the Win32 recv() wrapper and returns
+an empty string when recvfrom(2) doesn't modify the supplied address
+length. [perl #118843]
 
 =back
 
@@ -1476,6 +1622,33 @@ checking the SV's flags through public API Sv*OK* macros or directly using
 private API C<SvFLAGS>, and if C<sv> is NULL, then calling the sv_2*v functions
 with a NULL litteral or passing the C<sv> containing a NULL value.
 
+=item *
+
+newATTRSUB is now a macro
+
+The public API newATTRSUB was previously a macro to the private
+function Perl_newATTRSUB. Function Perl_newATTRSUB has been removed. newATTRSUB
+is now macro to a different internal function.
+
+=item *
+
+Changes in warnings raised by C<utf8n_to_uvchr()>
+
+This bottom level function decodes the first character of a UTF-8 string
+into a code point.  It is accessible to C<XS> level code, but it's
+discouraged from using it directly.  There are higher level functions
+that call this that should be used instead, such as
+L<perlapi/utf8_to_uvchr_buf>.  For completeness though, this documents
+some changes to it.  Now, tests for malformations are done before any
+tests for other potential issues.  One of those issues involves code
+points so large that they have never appeared in any official standard
+(the current standard has scaled back the highest acceptable code point
+from earlier versions).  It is possible (though not done in CPAN) to
+warn and/or forbid these code points, while accepting smaller code
+points that are still above the legal Unicode maximum.  The warning
+message for this now includes the code point if representable on the
+machine.  Previously it always displayed raw bytes, which is what it
+still does for non-representable code points.
 
 =back
 
@@ -2418,6 +2591,44 @@ assertion in a regexp, the assertion referred to a named subpattern,
 complaining the lookbehind was variable when it wasn't. This has been
 fixed. [perl #120600], [perl #120618]. The current fix may be improved
 on in the future.
+
+=item *
+
+In v5.19.6, C<do CORE()> was inadvertently changed from being interpreted
+as do-file (i.e., C<do +CORE()>) to do-sub (i.e., C<&CORE()>).  It has now
+been changed back.
+
+=item *
+
+v5.19.7 inadvertently caused freed scalars to be passed to subroutines in
+@INC if it contained multiple subs.  This has been fixed. [perl #120657]
+
+=item *
+
+Individually-tied elements of @INC (as in C<tie $INC[0]...>) are now
+handled correctly.  Formerly, whether a sub returned by such a tied element
+would be treated as a sub depended on whether a FETCH had occurred
+previously.
+
+=item *
+
+C<getc> on a byte-sized handle after the same C<getc> operator had been
+used on a utf8 handle used to treat the bytes as utf8, resulting in erratic
+behavior (e.g., malformed UTF-8 warnings).
+
+=item *
+
+An initial C<{> at the beginning of a format argument line was always
+interpreted as the beginning of a block prior to v5.18.  In Perl v5.18, it
+started being treated as an ambiguous token.  The parser would guess
+whether it was supposed to be an anonymous hash constructor or a block
+based on the contents.  Now the previous behavious has been restored.
+[perl #119973]
+
+=item *
+
+In Perl v5.18 C<undef *_; goto &sub> and C<local *_; goto &sub> started
+crashing.  This has been fixed. [perl #119949]
 
 =back
 
