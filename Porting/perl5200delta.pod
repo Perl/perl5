@@ -128,6 +128,53 @@ CPAN modules to provide functions using $a and $b for similar purposes.
 This is a synonym for C<\p{Any}> and matches the set of Unicode-defined
 code points 0 - 0x10FFFF.
 
+=head2 C<S<use locale>> now compiles on systems without locale ability
+
+Previously doing this caused the program to not compile.  Within its
+scope the program behaves as if in the "C" locale.  Thus programs
+written for platforms that support locales can run on locale-less
+platforms without change.  Attempts to change the locale away from the
+"C" locale will, of course, fail.
+
+=head2 PERL_DEBUG_READONLY_COW
+
+On some operating systems Perl can be compiled in such a way that any
+attempt to modify string buffers shared by multiple SVs will crash.  This
+way XS authors can test that their modules handle copy-on-write scalars
+correctly.  See L<perlguts/"Copy on Write"> for detail.
+
+This feature was actually added in 5.19.8, but was unintentionally omitted
+from its delta document.
+
+=head2 C<-DL> runtime option now added for tracing locale setting
+
+This is designed for Perl core developers to aid in field debugging bugs
+regarding locales.
+
+=head2 Subroutine signatures
+
+Declarative syntax to unwrap argument list into lexical variables.
+C<sub foo ($a,$b) {...}> checks the number of arguments and puts the
+arguments into lexical variables.  Signatures are not equivalent to
+the existing idiom of C<sub foo { my($a,$b) = @_; ... }>.  Signatures
+are only available by enabling a non-default feature, and generate
+warnings about being experimental.  The syntactic clash with
+prototypes is managed by disabling the short prototype syntax when
+signatures are enabled.
+
+See L<perlsub/Signatures> for details.
+
+=head2 More locale initialization fallback options
+
+If there was an error with locales during Perl start-up, it immediately
+gave up and tried to use the C<"C"> locale.  Now it first tries using
+other locales given by the environment variables, as detailed in
+L<perllocale/ENVIRONMENT>.  For example, if C<LC_ALL> and C<LANG> are
+both set, and using the C<LC_ALL> locale fails, Perl will now try the
+C<LANG> locale, and only if that fails, will it fall back to C<"C">.  On
+Windows machines, Perl will try, ahead of using C<"C">, the system
+default locale if all the locales given by environment variables fail.
+
 =head1 Security
 
 =head2 Avoid possible read of free()d memory during parsing
@@ -248,7 +295,43 @@ possible code points; that is, it is equivalent to C<qr/./s>.  Thus
 C<\p{All}> is no longer synonymous with C<\p{Any}>, which continues to
 match just the Unicode code points, as Unicode says it should.
 
+=head2 Tainting happens under more circumstances; now conforms to documentation
+
+This affects regular expression matching and changing the case of a
+string (C<lc>, C<"\U">, I<etc>.) within the scope of C<use locale>.
+The result is now tainted based on the operation, no matter what the
+contents of the string were, as the documentation (L<perlsec>,
+L<perllocale/SECURITY>) indicates it should.  Previously, for the case
+change operation, if the string contained no characters whose case
+change could be affected by the locale, the result would not be tainted.
+For example, the result of C<uc()> on an empty string or one containing
+only above-Latin1 code points is now tainted, and wasn't before.  This
+leads to more consistent tainting results.  Regular expression patterns
+taint their non-binary results (like C<$&>, C<$2>) if and only if the
+pattern contains elements whose matching depends on the current
+(potentially tainted) locale.  Like the case changing functions, the
+actual contents of the string being matched now do not matter, whereas
+formerly it did.  For example, if the pattern contains a C<\w>, the
+results will be tainted even if the match did not have to use that
+portion of the pattern to succeed or fail, because what a C<\w> matches
+depends on locale.  However, for example, a C<.> in a pattern will not
+enable tainting, because the dot matches any single character, and what
+the current locale is doesn't change in any way what matches and what
+doesn't.
+
+=head2 Quote-like escape changes
+
+The character after C<\c> in a double-quoted string ("..." or qq(...))
+or regular expression must now be a printable character and may not be
+C<{>.
+
+A literal C<{> after C<\B> or C<\b> is now fatal.
+
+These were deprecated in perl v5.14.
+
 =head1 Deprecations
+
+=head2 The C</\C/> character class
 
 The C</\C/> regular expression character class is deprecated. From perl
 5.22 onwards it will generate a warning, and from perl 5.24 onwards it
@@ -267,6 +350,30 @@ The literal control form is being deprecated for two main reasons.  It has what
 are likely unfixable bugs, such as $\cI not working as an alias for $^I, and
 their usage not being portable to non-ASCII platforms: While $^T will work
 everywhere, \cT is whitespace in EBCDIC.  [perl #119123]
+
+=head2 References to non-integers and non-positive integers in C<$/>
+
+Setting C<$/> to a reference to zero or a reference to a negative integer is
+now deprecated, and will behave B<exactly> as though it was set to C<undef>.
+If you want slurp behavior set C<$/> to C<undef> explicitly.
+
+Setting C<$/> to a reference to a non integer is now forbidden and will
+throw an error. Perl has never documented what would happen in this
+context and while it used to behave the same as setting C<$/> to
+the address of the references in future it may behave differently, so we
+have forbidden this usage.
+
+=head2 Character matching routines in POSIX
+
+Use of any of these functions in the C<POSIX> module is now deprecated:
+C<isalnum>, C<isalpha>, C<iscntrl>, C<isdigit>, C<isgraph>, C<islower>,
+C<isprint>, C<ispunct>, C<isspace>, C<isupper>, and C<isxdigit>.  The
+functions are buggy and don't work on UTF-8 encoded strings.  See their
+entries in L<POSIX> for more information.
+
+A warning is raised on the first call to any of them from each place in
+the code that they are called.  (Hence a repeated statement in a loop
+will raise just the one warning.)
 
 =head2 Module removals
 
@@ -356,6 +463,28 @@ will now behave like:
 which is notably faster.
 
 [perl #120765]
+
+=item *
+
+Code like:
+
+  my $x; # or @x, %x
+  my $y;
+
+is now optimized to:
+
+  my ($x, $y);
+
+In combination with the padrange optimization, this means longer
+uninitialized my variable statements are also optimized, so:
+
+  my $x; my @y; my %z;
+
+becomes:
+
+  my ($x, @y, %z);
+
+[perl #121077]
 
 =back
 
@@ -523,6 +652,11 @@ The documentation of C<ref> has been updated to recommend the use of
 C<blessed>, C<isa> and C<reftype> when dealing with references to blessed
 objects.
 
+=item *
+
+L<perlfunc/exec>'s handling of arguments is now more clearly
+documented.
+
 =back
 
 =head3 L<perlguts>
@@ -533,6 +667,12 @@ objects.
 
 Numerous minor changes have been made to reflect changes made to the perl
 internals in this release.
+
+=item *
+
+New sections on L<Read-Only Values|perlguts/"Read-Only Values"> and
+L<Copy on Write|perlguts/"Copy on Write"> have been added.  They were
+actually added in 5.19.8 but accidentally omitted from its delta document.
 
 =back
 
@@ -740,6 +880,10 @@ not supported">
 (F) You assigned a magical array to a stash element, and then tried to use the
 subroutine from the same slot.  You are asking Perl to do something it cannot
 do, details subject to change between Perl versions.
+
+=item *
+
+Added L<Setting $E<sol> to a %s reference is forbidden|perldiag/"Setting $E<sol> to %s reference is forbidden">
 
 =back
 
@@ -1009,6 +1153,10 @@ L<Matched non-Unicode code point 0x%X against Unicode property; may not be porta
 This replaces the message "Code point 0x%X is not Unicode, all \p{}
 matches fail; all \P{} matches succeed".
 
+=item *
+
+Added L<Setting $E<sol> to a reference to %s as a form of slurp is deprecated, treating as undef|perldiag/"Setting $E<sol> to a reference to %s as a form of slurp is deprecated, treating as undef">
+
 =back
 
 =head1 Utility Changes
@@ -1245,6 +1393,37 @@ for all headers and libraries under this new sysroot, instead of /.
 This is a huge time saver if cross-compiling, but can also help
 on native builds if your toolchain's files have non-standard locations.
 
+=item *
+
+The cross-compilation model has been renovated.
+There's several new options, and some backwards-incompatible changes:
+
+We now build binaries for miniperl and generate_uudmap to be used on the host, rather than running
+every miniperl call on the target; this means that, short of 'make test',
+we no longer need access to the target system once Configure is done.
+You can provide already-built binaries through the C<hostperl> and
+C<hostgenerate> options to Configure.
+
+Additionally, if targeting an EBCDIC platform from an ASCII host,
+or viceversa, you'll need to run Configure with C<-Uhostgenerate>, to
+indicate that generate_uudmap should be run on the target.
+
+Finally, there's also a way of having Configure end early, right after
+building the host binaries, by cross-compiling without specifying a
+C<targethost>.
+
+The incompatible changes include no longer using xconfig.h, xlib, or
+Cross.pm, so canned config files and Makefiles will have to be updated.
+
+=item *
+
+Related to the above, there is now a way of specifying the location of sh
+(or equivalent) on the target system: C<targetsh>.
+
+For example, Android has its sh in /system/bin/sh, so if cross-compiling
+from a more normal Unixy system with sh in /bin/sh, "targetsh" would end
+up as /system/bin/sh, and "sh" as /bin/sh.
+
 =back
 
 =head1 Platform Support
@@ -1262,6 +1441,12 @@ directories, or new subdirectories and F<README> files at the top level of the
 source tree.
 
 =over 4
+
+=item Android
+
+Perl can now be built for Android, either natively or through
+cross-compilation, for all three currently available architectures (ARM,
+MIPS, and x86), on a wide range of versions.
 
 =item Bitrig
 
@@ -1404,6 +1589,17 @@ address with whatever happened to be in the working buffer.  recv()
 now uses a workaround similar to the Win32 recv() wrapper and returns
 an empty string when recvfrom(2) doesn't modify the supplied address
 length. [perl #118843]
+
+=item VMS
+
+Skip access checks on remotes in opendir().  [perl #121002]
+
+=item Cygwin
+
+Fixed a build error in cygwin.c on Cygwin 1.7.28.
+
+Tests now handle the errors that occur when C<cygserver> isn't
+running.
 
 =back
 
@@ -1649,6 +1845,42 @@ points that are still above the legal Unicode maximum.  The warning
 message for this now includes the code point if representable on the
 machine.  Previously it always displayed raw bytes, which is what it
 still does for non-representable code points.
+
+=item *
+
+Regexp Engine Changes That Affect The Pluggable Regex Engine Interface
+
+Many flags that used to be exposed via regexp.h and used to populate the
+extflags member of struct regexp have been removed. These fields were
+technically private to Perl's own regexp engine and should not have been
+exposed there in the first place.
+
+The affected flags are:
+
+    RXf_NOSCAN
+    RXf_CANY_SEEN
+    RXf_GPOS_SEEN
+    RXf_GPOS_FLOAT
+    RXf_ANCH_BOL
+    RXf_ANCH_MBOL
+    RXf_ANCH_SBOL
+    RXf_ANCH_GPOS
+
+As well as the follow flag masks:
+
+    RXf_ANCH_SINGLE
+    RXf_ANCH
+
+All have been renamed to PREGf_ equivalents and moved to regcomp.h.
+
+The behavior previously achieved by setting one or more of the RXf_ANCH_
+flags (via the RXf_ANCH mask) have now been replaced by a *single* flag bit
+in extflags:
+
+    RXf_IS_ANCHORED
+
+pluggable regex engines which previously used to set these flags should
+now set this flag ALONE.
 
 =back
 
@@ -2629,6 +2861,81 @@ based on the contents.  Now the previous behavious has been restored.
 
 In Perl v5.18 C<undef *_; goto &sub> and C<local *_; goto &sub> started
 crashing.  This has been fixed. [perl #119949]
+
+=item *
+
+Backticks (C< `` > or C< qx// >) combined with multiple threads on
+Win32 could result in output sent to stdout on one thread being
+captured by backticks of an external command in another thread.
+
+This could occur for pseudo-forked processes too, as Win32's
+pseudo-fork is implemented in terms of threads.  [perl #77672]
+
+=item *
+
+C<< open $fh, ">+", undef >> no longer leaks memory when TMPDIR is set
+but points to a directory a temporary file cannot be created in.  [perl
+#120951]
+
+=item *
+
+C<$^R> wasn't available outside of the regular expression that
+initialized it.  [perl #121070]
+
+=item *
+
+Fixed a regular expression bug introduced in 5.19.5 where \S, \W etc
+could fail for above ASCII.  [perl #121144]
+
+=item *
+
+A large set of fixes and refactoring for re_intuit_start() was merged,
+the highlights are:
+
+=over
+
+=item *
+
+Fixed a panic when compiling the regular expression
+C</\x{100}[xy]\x{100}{2}/>.
+
+=item *
+
+Fixed a performance regression when performing a global pattern match
+against a UTF-8 string.  [perl #120692]
+
+=item *
+
+Fixed another performance issue where matching a regular expression
+like C</ab.{1,2}x/> against a long UTF-8 string would unnecessarily
+calculate byte offsets for a large portion of the string. [perl
+#120692]
+
+=back
+
+=item *
+
+C< for ( $h{k} || '' ) > no longer auto-vivifies C<$h{k}>.  [perl
+#120374]
+
+=item *
+
+On Windows machines, Perl now emulates the POSIX use of the environment
+for locale initialization.  Previously, the environment was ignored.
+See L<perllocale/ENVIRONMENT>.
+
+=item *
+
+Fixed a crash when destroying a self-referencing GLOB.  [perl #121242]
+
+=item *
+
+Call set-magic when setting $DB::sub.  [perl #121255]
+
+=item *
+
+Fixed an alignment error when compiling regular expressions when built
+with GCC on HP-UX 64-bit.
 
 =back
 
