@@ -375,6 +375,16 @@ A warning is raised on the first call to any of them from each place in
 the code that they are called.  (Hence a repeated statement in a loop
 will raise just the one warning.)
 
+=head2 Interpreter-based threads are now I<discouraged>
+
+The "interpreter-based threads" provided by Perl are not the fast, lightweight
+system for multitasking that one might expect or hope for.  Threads are
+implemented in a way that make them easy to misuse.  Few people know how to
+use them correctly or will be able to provide help.
+
+The use of interpreter-based threads in perl is officially
+L<discouraged|perlpolicy/discouraged>.
+
 =head2 Module removals
 
 The following modules will be removed from the core distribution in a
@@ -485,6 +495,68 @@ becomes:
   my ($x, @y, %z);
 
 [perl #121077]
+
+=item *
+
+When doing a global regex match on a string that came from the C<readline>
+or C<E<lt>E<gt>> operator, the data is no longer copied unnecessarily.
+[perl #121259]
+
+=item *
+
+Executing a regex that contains the C<^> anchor (or its variant under the
+C</m> flag) has been made much faster in several situations.
+
+=item *
+
+It is now faster to create certain sorts of lists, including array and hash
+slices.
+
+=item *
+
+The optimisation for arrays indexed with a small constant integer is now
+applied for integers in the range -128..127, rather than 0..255. This should
+speed up Perl code using expressions like C<$x[-1]>, at the expense of
+(presumably much rarer) code using expressions like C<$x[200]>.
+
+=item *
+
+Dereferencing (as in C<$obj-E<gt>[0]> or C<$obj-E<gt>{k}>) is now faster
+when C<$obj> is an instance of a class that has overloaded methods, but
+doesn't overload any of the dereferencing methods C<@{}>, C<%{}>, and so on.
+
+=item *
+
+The first iteration over a large hash (using C<keys> or C<each>) is now
+faster. This is achieved by preallocating the hash's internal iterator
+state, rather than lazily creating it when the hash is first iterated. (For
+small hashes, the iterator is still created only when first needed. The
+assumption is that small hashes are more likely to be used as objects, and
+therefore never allocated. For large hashes, that's less likely to be true,
+and the cost of allocating the iterator is swamped by the cost of allocating
+space for the hash itself.)
+
+=item *
+
+Perl's optimiser no longer skips optimising code that follows certain
+C<eval {}> expressions (including those with an apparent infinite loop).
+
+=item *
+
+The implementation now does a better job of avoiding meaningless work at
+runtime. Internal effect-free "null" operations (created as a side-effect of
+parsing Perl programs) are normally deleted during compilation. That
+deletion is now applied in some situations that weren't previously handled.
+
+=item *
+
+A few micro-optimisations have been applied to performance-sensitive parts
+of the implementation, including subroutine invocation and scope exit.
+
+=item *
+
+Perl now does less disk I/O when dealing with Unicode properties that cover
+up to three ranges of consecutive code points.
 
 =back
 
@@ -704,7 +776,11 @@ usage.
 
 =item *
 
-A note has been added to users of C<FATAL> warnings of the risk of upgrades.
+The L<perllexwarn> documentation used to describe the hierarchy of warning
+categories understood by the L<warnings> pragma. That description has now
+been moved to the L<warnings> documentation itself, leaving L<perllexwarn>
+as a stub that points to it. This change consolidates all documentation for
+lexical warnings in a single place.
 
 =back
 
@@ -1036,6 +1112,38 @@ L<Useless use of greediness modifier|perldiag/"Useless use of greediness modifie
 
 This fixes [Perl #42957].
 
+=item *
+
+L<%s on a reference is experimental|perldiag/"%s on a reference is experimental">:
+
+The "auto-deref" feature is experimental.
+
+Starting in v5.14.0, it was possible to use push, pop, keys, and other
+built-in functions not only on aggregate types, but on references to
+them.  The feature was not deployed to its original intended
+specification, and now may become redundant to postfix dereferencing.
+It has always been categorized as an experimental feature, and in
+v5.20.0 is carries a warning as such.
+
+Warnings will now be issued at compile time when these operations are
+detected.
+
+  no if $] >= 5.01908, warnings => "experimental::autoderef";
+
+Consider, though, replacing the use of these features, as they may
+change behavior again before becoming stable.
+
+=item *
+
+L<Matched non-Unicode code point 0x%X against Unicode property; may not be portable|perldiag/"Matched non-Unicode code point 0x%X against Unicode property; may not be portable">.
+This replaces the message "Code point 0x%X is not Unicode, all \p{}
+matches fail; all \P{} matches succeed".
+
+=item *
+
+Added L<Setting $E<sol> to a reference to %s as a form of slurp is deprecated, treating as undef|perldiag/"Setting $E<sol> to a reference to %s as a form of slurp is deprecated, treating as undef">
+
+
 =back
 
 =head2 Changes to Existing Diagnostics
@@ -1128,34 +1236,8 @@ null operation in "my"'.
 
 =item *
 
-L<%s on a reference is experimental|perldiag/"%s on a reference is experimental">:
-
-The "auto-deref" feature is experimental.
-
-Starting in v5.14.0, it was possible to use push, pop, keys, and other
-built-in functions not only on aggregate types, but on references to
-them.  The feature was not deployed to its original intended
-specification, and now may become redundant to postfix dereferencing.
-It has always been categorized as an experimental feature, and in
-v5.20.0 is carries a warning as such.
-
-Warnings will now be issued at compile time when these operations are
-detected.
-
-  no if $] >= 5.01908, warnings => "experimental::autoderef";
-
-Consider, though, replacing the use of these features, as they may
-change behavior again before becoming stable.
-
-=item *
-
-L<Matched non-Unicode code point 0x%X against Unicode property; may not be portable|perldiag/"Matched non-Unicode code point 0x%X against Unicode property; may not be portable">.
-This replaces the message "Code point 0x%X is not Unicode, all \p{}
-matches fail; all \P{} matches succeed".
-
-=item *
-
-Added L<Setting $E<sol> to a reference to %s as a form of slurp is deprecated, treating as undef|perldiag/"Setting $E<sol> to a reference to %s as a form of slurp is deprecated, treating as undef">
+When C<use re "debug"> executes a regex containing a backreference, the
+debugging output now shows what string is being matched.
 
 =back
 
@@ -1280,6 +1362,19 @@ Each now has a C<--help> option to display the usage message.
 =back
 
 The behaviour for all valid documented invocations is unchanged.
+
+=item *
+
+Where possible, the build now avoids recursive invocations of F<make> when
+building pure-Perl extensions, without removing any parallelism from the
+build. Currently around 80 extensions can be processed directly by the
+F<make_ext.pl> tool, meaning that 80 invocations of F<make> and 160
+invocations of F<miniperl> are no longer made.
+
+=item *
+
+The build system now works correctly when compiling under GCC or Clang with
+link-time optimization enabled (the C<-flto> option). [perl #113022]
 
 =back
 
@@ -1423,6 +1518,20 @@ Related to the above, there is now a way of specifying the location of sh
 For example, Android has its sh in /system/bin/sh, so if cross-compiling
 from a more normal Unixy system with sh in /bin/sh, "targetsh" would end
 up as /system/bin/sh, and "sh" as /bin/sh.
+
+=item *
+
+The test suite no longer fails when the user's interactive shell maintains a
+C<$PWD> environment variable, but the F</bin/sh> used for running tests
+doesn't.
+
+=item *
+
+The C<test.valgrind> make target now allows tests to be run in parallel.
+This target allows Perl's test suite to be run under Valgrind, which detects
+certain sorts of C programming errors, though at significant cost in running
+time. On suitable hardware, allowing parallel execution claws back a lot of
+that additional cost. [perl #121431]
 
 =back
 
@@ -1600,6 +1709,24 @@ Fixed a build error in cygwin.c on Cygwin 1.7.28.
 
 Tests now handle the errors that occur when C<cygserver> isn't
 running.
+
+=item Linux
+
+The hints file now looks for C<libgdbm_compat> only if C<libgdbm> itself is
+also wanted. The former is never useful without the latter, and in some
+circumstances, including it could actually prevent building.
+
+=item Mac OS
+
+The build system now honours an C<ld> setting supplied by the user running
+F<Configure>.
+
+=item Win32
+
+Killing a process tree with L<perlfunc/kill> and a negative signal, was broken
+starting in 5.18.0. In this bug, C<kill> always returned 0 for a negative
+signal even for valid PIDs, and no processes were terminated. This has been
+fixed [perl #121230].
 
 =back
 
@@ -1881,6 +2008,19 @@ in extflags:
 
 pluggable regex engines which previously used to set these flags should
 now set this flag ALONE.
+
+=item *
+
+The Perl core now consistently uses C<av_tindex()> ("the top index of an
+array") as a more clearly-named synonym for C<av_len()>.
+
+=item *
+
+The obscure interpreter variable C<PL_timesbuf> is expected to be removed
+early in the 5.21.x development series, so that Perl 5.22.0 will not provide
+it to XS authors.  While the variable still exists in 5.19.10 (and will
+continue to exist in 5.20.0), we hope that this advance warning of the
+deprecation will help anyone who is using that variable.
 
 =back
 
@@ -2936,6 +3076,11 @@ Call set-magic when setting $DB::sub.  [perl #121255]
 
 Fixed an alignment error when compiling regular expressions when built
 with GCC on HP-UX 64-bit.
+
+=item *
+
+The debugger's "n" command now respects lvalue subroutines and steps over
+them [perl #118839].
 
 =back
 
