@@ -74,6 +74,46 @@ are implied and if you supply B<-a> then B<-n> is implied.
 
 You can still use B<-p> for its extra behaviour. [perl #116190]
 
+=head2 Unicode 6.3 now supported
+
+Perl now supports and is shipped with Unicode 6.3 (though Perl may be
+recompiled with any previous Unicode release as well).  A detailed list of
+Unicode 6.3 changes is at L<http://www.unicode.org/versions/Unicode6.3.0/>.
+
+=head2 Experimental Postfix Dereferencing
+
+When the C<postderef> feature is in effect, the following syntactical
+equivalencies are set up:
+
+  $sref->$*;  # same as ${ $sref }  # interpolates
+  $aref->@*;  # same as @{ $aref }  # interpolates
+  $href->%*;  # same as %{ $href }
+  $cref->&*;  # same as &{ $cref }
+  $gref->**;  # same as *{ $gref }
+
+  $gref->*{ $slot }; # same as *{ $gref }{ $slot }
+
+  $aref->@[ ... ];  # same as @$aref[ ... ]  # interpolates
+  $href->@{ ... };  # same as @$href{ ... }  # interpolates
+  $aref->%[ ... ];  # same as %$aref[ ... ]
+  $href->%{ ... };  # same as %$href{ ... }
+
+Those marked as interpolating only interpolate if the associated
+C<postderef_qq> feature is also enabled.  This feature is B<experimental> and
+will trigger C<experimental::postderef>-category warnings when used, unless
+they are suppressed.
+
+For more information, consult L<the Postfix Dereference Syntax section of
+perlref|perlref/Postfix Dereference Syntax>.
+
+=head2 C<sub>s now take a C<prototype> attribute
+
+When declaring or defining a C<sub>, the prototype can now be specified inside
+of a C<prototype> attribute instead of in parens following the name.
+
+For example, C<sub foo($$){}> could be rewritten as
+C<sub foo : prototype($$){}>.
+
 =head1 Security
 
 =head2 Avoid possible read of free()d memory during parsing
@@ -142,6 +182,11 @@ EINVAL is 22).  (E* values E<gt> 100, if present, were redefined to WSAE*
 values anyway, so compatibility can be achieved by using the E* constants,
 which will work both before and after this change, albeit using different
 numeric values under the hood.)
+
+=head2 Functions C<PerlIO_vsprintf> and C<PerlIO_sprintf> have been removed
+
+These two functions, undocumented, unused in CPAN, and problematic, have been
+removed.
 
 =head1 Deprecations
 
@@ -220,6 +265,12 @@ It can be disabled (for now) in a perl build with:
 =item *
 
 Precomputed hash values are now used in more places during method lookup.
+
+=item *
+
+Perl has an optimizer for regular expression patterns.  It analyzes the pattern
+to find things such as the minimum length a string has to be to match, etc.  It
+now better handles code points that are above the Latin1 range.
 
 =back
 
@@ -465,6 +516,17 @@ The C</r> modifier (for non-destructive substitution) is now documented. [perl
 
 =back
 
+=head3 L<perlreguts>
+
+=over 4
+
+=item *
+
+The documentation has been updated in the light of recent changes to
+F<regcomp.c>.
+
+=back
+
 =head3 L<perlsub>
 
 =over 4
@@ -499,6 +561,11 @@ There is now a L<JavaScript|perltrap/JavaScript Traps> section.
 
 A new section explaining the performance issues of $`, $& and $', including
 workarounds and changes in different versions of Perl, has been added.
+
+=item *
+
+Three L<English> variable names which have long been documented but do not
+actually exist have been removed from the documentation.
 
 =back
 
@@ -665,6 +732,39 @@ L<Unexpected exit failure %u|perldiag/"Unexpected exit failure %u">
 (S) An uncaught die() was called when C<PERL_EXIT_WARN> was set in
 C<PL_exit_flags>.
 
+=item *
+
+L<Attribute prototype(%s) discards earlier prototype attribute in same sub|perldiag/"Attribute prototype(%s) discards earlier prototype attribute in same sub">
+
+(W misc) A sub was declared as sub foo : prototype(A) : prototype(B) {}, for
+example.  Since each sub can only have one prototype, the earlier
+declaration(s) are discarded while the last one is applied.
+
+=item *
+
+L<Postfix dereference is experimental|perldiag/"Postfix dereference is experimental">
+
+(S experimental::postderef) This warning is emitted if you use the experimental
+postfix dereference syntax.  Simply suppress the warning if you want to use the
+feature, but know that in doing so you are taking the risk of using an
+experimental feature which may change or be removed in a future Perl version:
+
+    no warnings "experimental::postderef";
+    use feature "postderef", "postderef_qq";
+    $ref->$*;
+    $aref->@*;
+    $aref->@[@indices];
+    ... etc ...
+
+=item *
+
+L<Prototype '%s' overridden by attribute 'prototype(%s)' in %s|perldiag/"Prototype '%s' overridden by attribute 'prototype(%s)' in %s">
+
+(W prototype) A prototype was declared in both the parentheses after the sub
+name and via the prototype attribute.  The prototype in parentheses is useless,
+since it will be replaced by the prototype from the attribute before it's ever
+used.
+
 =back
 
 =head2 Changes to Existing Diagnostics
@@ -737,6 +837,17 @@ them [perl #118839].
 =back
 
 =head1 Utility Changes
+
+=head3 L<a2p>
+
+=over 4
+
+=item *
+
+A possible crash from an off-by-one error when trying to access before the
+beginning of a buffer has been fixed.  [perl #120244]
+
+=back
 
 =head3 L<find2perl>
 
@@ -845,6 +956,23 @@ that they represent may be covered elsewhere.
 [ List each test improvement as a =item entry ]
 
 =over 4
+
+=item *
+
+The new prototype attribute syntax is tested by a new test script,
+F<t/op/attrproto.t>.
+
+=item *
+
+The new test script F<t/io/closepid.t> tests that C<close> on the original of a
+popen handle dupped to a standard handle no longer blocks internally on
+C<waitpid(0, ...)>.
+
+=item *
+
+The new postfix dereference syntax is tested by a new test script,
+F<t/op/postfixderef.t>.
+
 
 =item *
 
@@ -1005,6 +1133,12 @@ perl-static.exe too) were broken for MinGW builds. This has now been fixed.
 
 The ALL_STATIC option has also been improved to include the Encode and Win32
 extensions (for both VC++ and MinGW builds).
+
+=item Windows
+
+The Windows MinGW/gcc build was broken in Perl 5.19.4 for some recent versions
+of gcc-4.8, including those from http://mingw-w64.sourceforge.net/ .  This has
+now been fixed.  [perl #120236]
 
 =back
 
@@ -1824,6 +1958,47 @@ A possible segmentation fault in filehandle duplication has been fixed.
 A subroutine in @INC can return a reference to a scalar containing the initial
 contents of the file.  However, that scalar was freed prematurely if not
 referenced elsewhere, giving random results.
+
+=item *
+
+C<last> no longer returns values that the same statement has accumulated so
+far, fixing amongst other things the long-standing bug that C<push @a, last>
+would try to return the @a, copying it like a scalar in the process and
+resulting in the error, "Bizarre copy of ARRAY in last."  [perl #3112]
+
+=item *
+
+An optimization in Perl 5.18 made incorrect assumptions causing a bad
+interaction with the L<Devel::CallParser> CPAN module.  This was partially
+fixed in Perl 5.19.4, but the fix was not sufficient and another fault has now
+been corrected.
+
+=item *
+
+In some cases, closing file handles opened to pipe to or from a process, which
+had been duplicated into a standard handle, would call perl's internal waitpid
+wrapper with a pid of zero.  With the fix for [perl #85228] this zero pid was
+passed to C<waitpid>, possibly blocking the process.  This wait for process
+zero no longer occurs.  [perl #119893]
+
+=item *
+
+The code that parses regex backrefs (or ambiguous backref/octals) such as \123
+did a simple atoi(), which could wrap round to negative values on long digit
+strings and cause segmentation faults.  This has now been fixed.  [perl
+#119505]
+
+=item *
+
+C<select> used to ignore magic on the fourth (timeout) argument, leading to
+effects such as C<select> blocking indefinitely rather than the expected sleep
+time.  This has now been fixed.  [perl #120102]
+
+=item *
+
+The class name in C<for my class $foo> is now parsed correctly.  In the case of
+the second character of the class name being followed by a digit (e.g. 'a1b')
+this used to give the error "Missing $ on loop variable".  [perl #120112]
 
 =back
 
