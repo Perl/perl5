@@ -178,18 +178,85 @@ file on disk having no terminating newline character.  This has now been fixed.
 
 =head1 Incompatible Changes
 
-XXX For a release on a stable branch, this section aspires to be:
+=head2 C<do> can no longer be used to call subroutines
 
-    There are no changes intentionally incompatible with 5.XXX.XXX
-    If any exist, they are bugs, and we request that you submit a
-    report.  See L</Reporting Bugs> below.
+The C<do SUBROUTINE(LIST)> form has resulted in a deprecation warning
+since Perl v5.0.0, and is now a syntax error.
 
-[ List each incompatible change as a =head2 entry ]
+=head2 Quote-like escape changes
 
-=head2 Most regex engine global state eliminated
+The character after C<\c> in a double-quoted string ("..." or qq(...))
+or regular expression must now be a printable character and may not be
+C<{>.
 
-As part of this series of fixes it was necessary to change the API of
-Perl_re_intuit_start().  See L</Internal Changes> for more.
+A literal C<{> after C<\B> or C<\b> is now fatal.
+
+These were deprecated in perl v5.14.0.
+
+=head2 Tainting happens under more circumstances; now conforms to documentation
+
+This affects regular expression matching and changing the case of a
+string (C<lc>, C<"\U">, I<etc>.) within the scope of C<use locale>.
+The result is now tainted based on the operation, no matter what the
+contents of the string were, as the documentation (L<perlsec>,
+L<perllocale/SECURITY>) indicates it should.  Previously, for the case
+change operation, if the string contained no characters whose case
+change could be affected by the locale, the result would not be tainted.
+For example, the result of C<uc()> on an empty string or one containing
+only above-Latin1 code points is now tainted, and wasn't before.  This
+leads to more consistent tainting results.  Regular expression patterns
+taint their non-binary results (like C<$&>, C<$2>) if and only if the
+pattern contains elements whose matching depends on the current
+(potentially tainted) locale.  Like the case changing functions, the
+actual contents of the string being matched now do not matter, whereas
+formerly it did.  For example, if the pattern contains a C<\w>, the
+results will be tainted even if the match did not have to use that
+portion of the pattern to succeed or fail, because what a C<\w> matches
+depends on locale.  However, for example, a C<.> in a pattern will not
+enable tainting, because the dot matches any single character, and what
+the current locale is doesn't change in any way what matches and what
+doesn't.
+
+=head2 C<\p{}>, C<\P{}> matching has changed for non-Unicode code
+points.
+
+C<\p{}> and C<\P{}> are defined by Unicode only on Unicode-defined code
+points (C<U+0000> through C<U+10FFFF>).  Their behavior on matching
+these legal Unicode code points is unchanged, but there are changes for
+code points C<0x110000> and above.  Previously, Perl treated the result
+of matching C<\p{}> and C<\P{}> against these as C<undef>, which
+translates into "false".  For C<\P{}>, this was then complemented into
+"true".  A warning was supposed to be raised when this happened.
+However, various optimizations could prevent the warning, and the
+results were often counter-intuitive, with both a match and its seeming
+complement being false.  Now all non-Unicode code points are treated as
+typical unassigned Unicode code points.  This generally is more
+Do-What-I-Mean.  A warning is raised only if the results are arguably
+different from a strict Unicode approach, and from what Perl used to do.
+Code that needs to be strictly Unicode compliant can make this warning
+fatal, and then Perl always raises the warning.
+
+Details are in L<perlunicode/Beyond Unicode code points>.
+
+=head2 C<\p{All}> has been expanded to match all possible code points
+
+The Perl-defined regular expression pattern element C<\p{All}>, unused
+on CPAN, used to match just the Unicode code points; now it matches all
+possible code points; that is, it is equivalent to C<qr/./s>.  Thus
+C<\p{All}> is no longer synonymous with C<\p{Any}>, which continues to
+match just the Unicode code points, as Unicode says it should.
+
+=head2 Data::Dumper's output may change
+
+Depending on the data structures dumped and the settings set for
+Data::Dumper, the dumped output may have changed from previous
+versions.
+
+If you have tests that depend on the exact output of Data::Dumper,
+they may fail.
+
+To avoid this problem in your code, test against the data structure
+from evaluating the dumped structure, instead of the dump itself.
 
 =head2 Locale decimal point character no longer leaks outside of S<C<use locale>> scope
 
@@ -241,86 +308,6 @@ numeric values under the hood.)
 
 These two functions, undocumented, unused in CPAN, and problematic, have been
 removed.
-
-=head2 Data::Dumper's output may change
-
-Depending on the data structures dumped and the settings set for
-Data::Dumper, the dumped output may have changed from previous
-versions.
-
-If you have tests that depend on the exact output of Data::Dumper,
-they may fail.
-
-To avoid this problem in your code, test against the data structure
-from evaluating the dumped structure, instead of the dump itself.
-
-=head2 C<do> can no longer be used to call subroutines
-
-The C<do SUBROUTINE(LIST)> form has resulted in a deprecation warning
-since Perl v5.0.0, and is now a syntax error.
-
-=head2 C<\p{}>, C<\P{}> matching has changed for non-Unicode code
-points.
-
-C<\p{}> and C<\P{}> are defined by Unicode only on Unicode-defined code
-points (C<U+0000> through C<U+10FFFF>).  Their behavior on matching
-these legal Unicode code points is unchanged, but there are changes for
-code points C<0x110000> and above.  Previously, Perl treated the result
-of matching C<\p{}> and C<\P{}> against these as C<undef>, which
-translates into "false".  For C<\P{}>, this was then complemented into
-"true".  A warning was supposed to be raised when this happened.
-However, various optimizations could prevent the warning, and the
-results were often counter-intuitive, with both a match and its seeming
-complement being false.  Now all non-Unicode code points are treated as
-typical unassigned Unicode code points.  This generally is more
-Do-What-I-Mean.  A warning is raised only if the results are arguably
-different from a strict Unicode approach, and from what Perl used to do.
-Code that needs to be strictly Unicode compliant can make this warning
-fatal, and then Perl always raises the warning.
-
-Details are in L<perlunicode/Beyond Unicode code points>.
-
-=head2 C<\p{All}> has been expanded to match all possible code points
-
-The Perl-defined regular expression pattern element C<\p{All}>, unused
-on CPAN, used to match just the Unicode code points; now it matches all
-possible code points; that is, it is equivalent to C<qr/./s>.  Thus
-C<\p{All}> is no longer synonymous with C<\p{Any}>, which continues to
-match just the Unicode code points, as Unicode says it should.
-
-=head2 Tainting happens under more circumstances; now conforms to documentation
-
-This affects regular expression matching and changing the case of a
-string (C<lc>, C<"\U">, I<etc>.) within the scope of C<use locale>.
-The result is now tainted based on the operation, no matter what the
-contents of the string were, as the documentation (L<perlsec>,
-L<perllocale/SECURITY>) indicates it should.  Previously, for the case
-change operation, if the string contained no characters whose case
-change could be affected by the locale, the result would not be tainted.
-For example, the result of C<uc()> on an empty string or one containing
-only above-Latin1 code points is now tainted, and wasn't before.  This
-leads to more consistent tainting results.  Regular expression patterns
-taint their non-binary results (like C<$&>, C<$2>) if and only if the
-pattern contains elements whose matching depends on the current
-(potentially tainted) locale.  Like the case changing functions, the
-actual contents of the string being matched now do not matter, whereas
-formerly it did.  For example, if the pattern contains a C<\w>, the
-results will be tainted even if the match did not have to use that
-portion of the pattern to succeed or fail, because what a C<\w> matches
-depends on locale.  However, for example, a C<.> in a pattern will not
-enable tainting, because the dot matches any single character, and what
-the current locale is doesn't change in any way what matches and what
-doesn't.
-
-=head2 Quote-like escape changes
-
-The character after C<\c> in a double-quoted string ("..." or qq(...))
-or regular expression must now be a printable character and may not be
-C<{>.
-
-A literal C<{> after C<\B> or C<\b> is now fatal.
-
-These were deprecated in perl v5.14.
 
 =head1 Deprecations
 
