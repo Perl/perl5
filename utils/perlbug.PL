@@ -76,9 +76,11 @@ BEGIN {
     $::HaveTemp = ($@ eq "");
     eval { require Module::CoreList; };
     $::HaveCoreList = ($@ eq "");
+    eval { require Encode; };
+    $::Have_Encode = ($@ eq "");
 };
 
-my $Version = "1.40";
+my $Version = "1.41";
 
 #TODO:
 #       make sure failure (transmission-wise) of Mail::Send is accounted for.
@@ -96,6 +98,8 @@ my( $file, $usefile, $cc, $address, $bugaddress, $testaddress, $thanksaddress,
 my $perl_version = $^V ? sprintf("%vd", $^V) : $];
 
 my $config_tag2 = "$perl_version - $Config{cf_time}";
+
+my $report_layer = 'utf8';
 
 Init();
 
@@ -188,7 +192,7 @@ sub Init {
     $Is_Linux = lc($^O) eq 'linux';
     $Is_OpenBSD = lc($^O) eq 'openbsd';
 
-    if (!getopts("Adhva:s:b:f:F:r:e:SCc:to:n:T:p:", \%opt)) { Help(); exit; };
+    if (!getopts("Adhva:s:b:f:F:r:e:SCc:to:n:T:p:E:", \%opt)) { Help(); exit; };
 
     # This comment is needed to notify metaconfig that we are
     # using the $perladmin, $cf_by, and $cf_time definitions.
@@ -254,7 +258,30 @@ sub Init {
 
     # Body of report
     $body = $opt{b} || "";
-	
+
+    # Override default encoding of report file.
+    my $encoding = $opt{E} || "";
+    if ($encoding) {
+        if ($::Have_Encode) {
+            my $canonical_encoding = Encode::find_encoding($encoding);
+            if ($canonical_encoding) {
+                if (Encode::perlio_ok($canonical_encoding->name)) {
+                    $report_layer = 'encoding(' . $canonical_encoding->name . ')';
+                }
+                else {
+                    warn $canonical_encoding->name
+                         . " is not supported by PerlIO, defaulting to '$report_layer'";
+                }
+            }
+            else {
+                warn "No encoding found for '$encoding', defaulting to '$report_layer'";
+            }
+        }
+        else {
+            warn "The Encode module is not available, defaulting to '$report_layer'";
+        }
+    }
+
     # Editor
     $ed = $opt{e} || $ENV{VISUAL} || $ENV{EDITOR} || $ENV{EDIT}
 	|| ($Is_VMS && "edit/tpu")
@@ -599,9 +626,7 @@ EOF
     }
 
     # Generate report
-    open(REP, '>:raw', $filename) or die "Unable to create report file '$filename': $!\n";
-    binmode(REP, ':raw :crlf') if $Is_MSWin32;
-
+    open(REP, ">:$report_layer", $filename) or die "Unable to create report file '$filename': $!\n";
     my $reptype = !$ok ? ($thanks ? 'thank-you' : 'bug')
 	: $opt{n} ? "build failure" : "success";
 
@@ -614,9 +639,8 @@ EOF
     if ($body) {
 	print REP $body;
     } elsif ($usefile) {
-	open(F, '<:raw', $file)
+	open(F, "<:$report_layer", $file)
 		or die "Unable to read report file from '$file': $!\n";
-	binmode(F, ':raw :crlf') if $Is_MSWin32;
 	while (<F>) {
 	    print REP $_
 	}
@@ -834,8 +858,7 @@ EOF
             if ( SaveMessage() ) { exit }
 	    } elsif ($action =~ /^(d|l|sh)/i ) { # <D>isplay, <L>ist, <Sh>ow
 		# Display the message
-		open(REP, '<:raw', $filename) or die "Couldn't open file '$filename': $!\n";
-		binmode(REP, ':raw :crlf') if $Is_MSWin32;
+		open(REP, "<:$report_layer", $filename) or die "Couldn't open file '$filename': $!\n";
 		while (<REP>) { print $_ }
 		close(REP) or die "Error closing report file '$filename': $!";
 		if ($have_attachment) {
@@ -1024,36 +1047,43 @@ sub _prompt {
 }
 
 sub _build_header {
-    my %attr = (@_);
-
+    my @heads = @{_message_headers()};
     my $head = '';
-    for my $header (keys %attr) {
-        $head .= "$header: ".$attr{$header}."\n";
+    for my $header (@heads) {
+        $head .= "$header\n";
     }
-    return $head;
+    return $head . "\n\n";
 }
 
 sub _message_headers {
-    my %headers = ( To => $address, Subject => $subject );
-    $headers{'Cc'}         = $cc        if ($cc);
-    $headers{'Message-Id'} = $messageid if ($messageid);
-    $headers{'Reply-To'}   = $from      if ($from);
-    $headers{'From'}       = $from      if ($from);
+    my @headers;
+    push @headers, "To: $address";
+    push @headers, "Subject: $subject";
+    push @headers, "Cc: $cc"                  if ($cc);
+    push @headers, "Message-Id: $messageid"   if ($messageid);
+    push @headers, "Reply-To: $from"          if ($from);
+    push @headers, "From: $from"              if ($from);
+    push @headers, "MIME-Version: 1.0";
     if ($have_attachment) {
-        $headers{'MIME-Version'} = '1.0';
-        $headers{'Content-Type'} = qq{multipart/mixed; boundary=\"$mime_boundary\"};
+        push @headers, qq{Content-Type: multipart/mixed; boundary=\"$mime_boundary\"};
     }
-    return \%headers;
+    else {
+        push @headers, "Content-Type: text/plain; charset=UTF-8; format=fixed";
+        push @headers, "Content-Transfer-Encoding: 8bit";
+    }
+    return \@headers;
 }
 
 sub _add_body_start {
-    my $body_start = <<"BODY_START";
+    my $body_start = '';
+    $body_start .= <<"BODY_START" if $have_attachment;
 This is a multi-part message in MIME format.
 --$mime_boundary
-Content-Type: text/plain; format=fixed
+Content-Type: text/plain; charset=UTF-8; format=fixed
 Content-Transfer-Encoding: 8bit
 
 BODY_START
+
     return $body_start;
 }
 
@@ -1080,27 +1110,28 @@ ATTACHMENT
     return $attach;
 }
 
-sub build_complete_message {
-    my $content = _build_header(%{_message_headers()}) . "\n\n";
-    $content .= _add_body_start() if $have_attachment;
-    open( REP, "<:raw", $filename ) or die "Couldn't open file '$filename': $!\n";
-    binmode(REP, ':raw :crlf') if $Is_MSWin32;
+sub _build_message_body {
+    my $content = '';
+    $content .= _add_body_start();
+    open( REP, "<:$report_layer", $filename ) or die "Couldn't open file '$filename': $!\n";
     while (<REP>) { $content .= $_; }
     close(REP) or die "Error closing report file '$filename': $!";
-    $content .= _add_attachments() if $have_attachment;
     return $content;
 }
 
 sub save_message_to_disk {
     my $file = shift;
 
-        open OUTFILE, '>:raw', $file or do { warn  "Couldn't open '$file': $!\n"; return undef};
-        binmode(OUTFILE, ':raw :crlf') if $Is_MSWin32;
-
-        print OUTFILE build_complete_message();
-        close(OUTFILE) or do { warn  "Error closing $file: $!"; return undef };
-	    print "\nMessage saved.\n";
-        return 1;
+    open OUTFILE, ">:utf8", $file or do { warn  "Couldn't open '$file': $!\n"; return undef};
+    print OUTFILE _build_header();
+    print OUTFILE _build_message_body();
+    if ($have_attachment) {
+        binmode(OUTFILE, ':raw');
+        print OUTFILE _add_attachments();
+    }
+    close(OUTFILE) or do { warn  "Error closing $file: $!"; return undef };
+    print "\nMessage saved.\n";
+    return 1;
 }
 
 sub _send_message_vms {
@@ -1112,12 +1143,18 @@ sub _send_message_vms {
     map { $_ =~ s/^[^<]*<//;
           $_ =~ s/>[^>]*//; } ($mail_from, $rcpt_to_to, $rcpt_to_cc);
 
-    if ( open my $sff_fh, '|-:raw', 'MCR TCPIP$SYSTEM:TCPIP$SMTP_SFF.EXE SYS$INPUT:' ) {
+    if ( open my $sff_fh, '|-:utf8', 'MCR TCPIP$SYSTEM:TCPIP$SMTP_SFF.EXE SYS$INPUT:' ) {
         print $sff_fh "MAIL FROM:<$mail_from>\n";
         print $sff_fh "RCPT TO:<$rcpt_to_to>\n";
         print $sff_fh "RCPT TO:<$rcpt_to_cc>\n" if $rcpt_to_cc;
         print $sff_fh "DATA\n";
-        print $sff_fh build_complete_message();
+        print $sff_fh _build_header();
+        print $sff_fh _build_message_body();
+        if ($have_attachment) {
+            binmode($sff_fh, ':raw');
+            print $sff_fh _add_attachments();
+        }
+
         my $success = close $sff_fh;
         if ($success ) {
             print "\nMessage sent\n";
@@ -1129,19 +1166,19 @@ sub _send_message_vms {
 
 sub _send_message_mailsend {
     my $msg = Mail::Send->new();
-    my %headers = %{_message_headers()};
-    for my $key ( keys %headers) {
-        $msg->add($key => $headers{$key});
+    my @headers = @{_message_headers()};
+    for my $header (@headers) {
+        my ($key, $value) = split /: /, $header;
+        $msg->add($key => $value);
     }
 
     $fh = $msg->open;
-    binmode($fh, ':raw');
-    print $fh _add_body_start() if $have_attachment;
-    open(REP, "<:raw", $filename) or die "Couldn't open '$filename': $!\n";
-    binmode(REP, ':raw :crlf') if $Is_MSWin32;
-    while (<REP>) { print $fh $_ }
-    close(REP) or die "Error closing $filename: $!";
-    print $fh _add_attachments() if $have_attachment;
+    binmode($fh, ':utf8');
+    print $fh build_message_body();
+    if ($have_attachment) {
+        binmode($fh, ':raw');
+        print $fh _add_attachments();
+    }
     $fh->close or die "Error sending mail: $!";
 
     print "\nMessage sent.\n";
@@ -1184,9 +1221,14 @@ send to '$address' with your normal mail client.
 EOF
     }
 
-    open( SENDMAIL, "|-:raw", $sendmail, "-t", "-oi", "-f", $from )
+    open( SENDMAIL, "|-:utf8", $sendmail, "-t", "-oi", "-f", $from )
         || die "'|$sendmail -t -oi -f $from' failed: $!";
-    print SENDMAIL build_complete_message();
+    print SENDMAIL _build_header();
+    print SENDMAIL _build_message_body();
+    if ($have_attachment) {
+        binmode(SENDMAIL, ':raw');
+        print SENDMAIL _add_attachments();
+    }
     if ( close(SENDMAIL) ) {
         print "\nMessage sent\n";
     } else {
@@ -1206,8 +1248,7 @@ sub _fingerprint_lines_in_report {
     # we can track whether the user does any editing.
     # yes, *all* whitespace is ignored.
 
-    open(REP, '<:raw', $filename) or die "Unable to open report file '$filename': $!\n";
-    binmode(REP, ':raw :crlf') if $Is_MSWin32;
+    open(REP, "<:$report_layer", $filename) or die "Unable to open report file '$filename': $!\n";
     while (my $line = <REP>) {
         $line =~ s/\s+//g;
         $new_lines++ if (!$REP{$line});
@@ -1460,6 +1501,14 @@ with B<-v> to get more complete data.
 =item B<-e>
 
 Editor to use.
+
+=item B<-E>
+
+Character set encoding of the report body.  It must be an encoding
+supported by the Encode module.  Defaults to UTF-8 if unspecified and
+will be converted to UTF-8 for mail transport.  When editing a report,
+be sure that your editor understands the encoding you specify and will
+leave it unchanged when you save.
 
 =item B<-f>
 
