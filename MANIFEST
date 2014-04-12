@@ -972,6 +972,8 @@ cpan/encoding-warnings/t/1-warning.t	tests for encoding::warnings
 cpan/encoding-warnings/t/2-fatal.t	tests for encoding::warnings
 cpan/encoding-warnings/t/3-normal.t	tests for encoding::warnings
 cpan/encoding-warnings/t/4-lexical.t	tests for encoding::warnings
+cpan/experimental/lib/experimental.pm
+cpan/experimental/t/basic.t
 cpan/ExtUtils-Constant/lib/ExtUtils/Constant/Base.pm		generate XS code to import C header constants
 cpan/ExtUtils-Constant/lib/ExtUtils/Constant.pm			generate XS code to import C header constants
 cpan/ExtUtils-Constant/lib/ExtUtils/Constant/ProxySubs.pm	generate XS code for proxy constants

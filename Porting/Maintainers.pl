@@ -407,6 +407,15 @@ use File::Glob qw(:case);
         'EXCLUDED'     => [qr{^t/release-.*\.t}],
     },
 
+    'experimental' => {
+        'DISTRIBUTION' => 'LEONT/experimental-0.007.tar.gz',
+        'FILES'        => q[cpan/experimental],
+        'EXCLUDED'     => [
+          qr{^t/release-.*\.t},
+          't/00-compile.t',
+        ],
+    },
+
     'Exporter' => {
         'DISTRIBUTION' => 'TODDR/Exporter-5.68.tar.gz',
         'FILES'        => q[dist/Exporter],

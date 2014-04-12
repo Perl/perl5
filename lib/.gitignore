@@ -200,6 +200,7 @@
 /constant.pm
 /encoding.pm
 /encoding/
+/experimental.pm
 /fields.pm
 /if.pm
 /inc/
