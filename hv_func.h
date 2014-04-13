@@ -455,7 +455,7 @@ S_perl_hash_murmur3(const unsigned char * const seed, const unsigned char *ptr, 
 PERL_STATIC_INLINE U32
 S_perl_hash_djb2(const unsigned char * const seed, const unsigned char *str, const STRLEN len) {
     const unsigned char * const end = (const unsigned char *)str + len;
-    U32 hash = *((U32*)seed + len);
+    U32 hash = *((U32*)seed) + len;
     while (str < end) {
         hash = ((hash << 5) + hash) + *str++;
     }
@@ -465,7 +465,7 @@ S_perl_hash_djb2(const unsigned char * const seed, const unsigned char *str, con
 PERL_STATIC_INLINE U32
 S_perl_hash_sdbm(const unsigned char * const seed, const unsigned char *str, const STRLEN len) {
     const unsigned char * const end = (const unsigned char *)str + len;
-    U32 hash = *((U32*)seed + len);
+    U32 hash = *((U32*)seed) + len;
     while (str < end) {
         hash = (hash << 6) + (hash << 16) - hash + *str++;
     }
