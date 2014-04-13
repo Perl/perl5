@@ -236,6 +236,13 @@ L<Unicode::Normalize> has been upgraded from version 1.17 to 1.18.
 
 The XSUB implementation has been removed in favour of pure Perl.
 
+=item *
+
+L<Hash::Util> has been upgraded from version 0.16 to 0.17.
+
+Minor bug fixes and documentation fixes to Hash::Util::hash_stats()
+
+
 =back
 
 =head2 Removed Modules and Pragmata

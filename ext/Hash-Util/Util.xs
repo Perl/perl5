@@ -128,8 +128,13 @@ bucket_info(rhv)
     nothing (the empty list).
 
     */
+    const HV * hv;
     if (SvROK(rhv) && SvTYPE(SvRV(rhv))==SVt_PVHV && !SvMAGICAL(SvRV(rhv))) {
-        const HV * const hv = (const HV *) SvRV(rhv);
+        hv = (const HV *) SvRV(rhv);
+    } else if (!SvOK(rhv)) {
+        hv = PL_strtab;
+    }
+    if (hv) {
         U32 max_bucket_index= HvMAX(hv);
         U32 total_keys= HvUSEDKEYS(hv);
         HE **bucket_array= HvARRAY(hv);
@@ -183,8 +188,13 @@ bucket_array(rhv)
      * of the hash store, combined with regular remappings means that relative
      * order of keys changes each remap.
      */
+    const HV * hv;
     if (SvROK(rhv) && SvTYPE(SvRV(rhv))==SVt_PVHV && !SvMAGICAL(SvRV(rhv))) {
-        const HV * const hv = (const HV *) SvRV(rhv);
+        hv = (const HV *) SvRV(rhv);
+    } else if (!SvOK(rhv)) {
+        hv = PL_strtab;
+    }
+    if (hv) {
         HE **he_ptr= HvARRAY(hv);
         if (!he_ptr) {
             XSRETURN(0);
