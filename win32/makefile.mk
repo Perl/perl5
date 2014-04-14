@@ -1016,6 +1016,9 @@ config.w32 : $(CFGSH_TMPL)
 	@echo.>>$@
 	@echo #ifndef _config_h_footer_>>$@
 	@echo #define _config_h_footer_>>$@
+	@echo #undef Off_t>>$@
+	@echo #undef LSEEKSIZE>>$@
+	@echo #undef Off_t_size>>$@
 	@echo #undef PTRSIZE>>$@
 	@echo #undef SSize_t>>$@
 	@echo #undef HAS_ATOLL>>$@
@@ -1034,6 +1037,15 @@ config.w32 : $(CFGSH_TMPL)
 	@echo #undef UVXf>>$@
 	@echo #undef USE_64_BIT_INT>>$@
 	@echo #undef Size_t_size>>$@
+.IF "$(USE_LARGE_FILES)"=="define"
+	@echo #define Off_t $(INT64)>>$@
+	@echo #define LSEEKSIZE ^8>>$@
+	@echo #define Off_t_size ^8>>$@
+.ELSE
+	@echo #define Off_t long>>$@
+	@echo #define LSEEKSIZE ^4>>$@
+	@echo #define Off_t_size ^4>>$@
+.ENDIF
 .IF "$(WIN64)"=="define"
 	@echo #define PTRSIZE ^8>>$@
 	@echo #define SSize_t $(INT64)>>$@

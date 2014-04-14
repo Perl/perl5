@@ -392,6 +392,12 @@ since the process tree kill feature was implemented on Win32.  It has now been
 corrected to follow the documented behaviour.
 [L<perl #121230|https://rt.perl.org/Public/Bug/Display.html?id=121230>]
 
+When building a 64-bit perl, an uninitialized memory read in B<miniperl.exe>,
+used during the build process, could lead to a 4GB B<wperl.exe> being created.
+This has now been fixed.  (Note that B<perl.exe> itself was unaffected, but
+obviously B<wperl.exe> would have been completely broken.)
+[L<perl #121471|https://rt.perl.org/Public/Bug/Display.html?id=121471>]
+
 The test harness now has no failures when perl is built on a FAT drive with the
 Windows OS on an NTFS drive.
 [L<perl #21442|https://rt.perl.org/Public/Bug/Display.html?id=21442>]
