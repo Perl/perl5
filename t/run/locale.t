@@ -200,6 +200,15 @@ EOF
 	"Uses the above test to verify that on Windows the system default locale has lower priority than LC_NUMERIC");
     }
 
+
+    # within this block, STDERR is closed. This is because fresh_perl_is()
+    # forks a shell, and some shells (like bash) can complain noisily when
+    #LC_ALL or similar is set to an invalid value
+
+    {
+        open my $saved_stderr, ">&STDERR" or die "Can't dup STDERR: $!";
+        close STDERR;
+
     for ($different) {
         local $ENV{LC_ALL} = "invalid";
 	local $ENV{LC_NUMERIC} = "invalid";
@@ -237,6 +246,9 @@ EOF
                 'C locale is used if LC_ALL, LC_NUMERIC, LANG are invalid');
             }
         }
+    }
+
+    open STDERR, ">&", $saved_stderr or die "Can't dup \$saved_stderr: $!";
     }
 
     for ($different) {
