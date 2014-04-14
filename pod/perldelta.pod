@@ -1,7 +1,6 @@
 =for todo
 
 b51c3e77db (craigb) - Reduce excessive stat calls in glob on VMS
-e141190569 (tonyc)  - [perl #121366] avoid using an invalid SvPVX() in Perl_sv_pvn_force_flags
 869747506f/00051dd553 (merijn) - gcc 4.9 by default does some optimizations that break perl / -fwrapv is broken prior to gcc-4.3 (#121505)
 fc6f6f37f8 (craigb) - Make perlbug encoding-agnostic in handling prepared reports.
 7e6b9e3a66 (craigb) - Attempt to satisfy CRLF expectations in perlbug on Windows.
@@ -462,6 +461,14 @@ A regression was introduced in the fix for
 prevented C<perl -I /somedir/> (with a trailing slash) from finding .pmc files. This has
 been fixed.
 [L<perl #121512|https://rt.perl.org/Public/Bug/Display.html?id=121512>].
+
+=item *
+
+Fixed a bug detected by valgrind where sv_pvn_force_flags() would
+check SvPVX() even when the SV hadn't been upgraded to a C<SVt_PV>.
+SvPVX() is only initialized when the SV is upgraded to a C<SVt_PV> or
+higher.  [L<perl
+#121366|https://rt.perl.org/Public/Bug/Display.html?id=121366>].
 
 =back
 
