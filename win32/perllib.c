@@ -291,7 +291,7 @@ EndSockets(void);
 EXTERN_C		/* GCC in C++ mode mangles the name, otherwise */
 #endif
 BOOL APIENTRY
-DllMain(HANDLE hModule,		/* DLL module handle */
+DllMain(HINSTANCE hModule,	/* DLL module handle */
 	DWORD fdwReason,	/* reason called */
 	LPVOID lpvReserved)	/* reserved */
 { 

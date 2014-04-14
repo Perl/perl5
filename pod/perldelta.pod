@@ -398,6 +398,13 @@ This has now been fixed.  (Note that B<perl.exe> itself was unaffected, but
 obviously B<wperl.exe> would have been completely broken.)
 [L<perl #121471|https://rt.perl.org/Public/Bug/Display.html?id=121471>]
 
+Perl can now be built with B<gcc> version 4.8.1 from L<http://www.mingw.org>.
+This was previously broken due to an incorrect definition of C<DllMain()> in
+one of perl's source files.  Earlier B<gcc> versions were also affected when
+using version 4 of the w32api package.  Versions of B<gcc> available from
+L<http://mingw-w64.sourceforge.net/> were not affected.
+[L<perl #121643|https://rt.perl.org/Public/Bug/Display.html?id=121643>]
+
 The test harness now has no failures when perl is built on a FAT drive with the
 Windows OS on an NTFS drive.
 [L<perl #21442|https://rt.perl.org/Public/Bug/Display.html?id=21442>]
