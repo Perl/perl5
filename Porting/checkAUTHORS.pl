@@ -910,7 +910,7 @@ thomas.dorner\100start.de               tdorner\100amadeus.net
 tjenness\100cpan.org                    t.jenness\100jach.hawaii.edu
 +                                       timj\100jach.hawaii.edu
 tobez\100tobez.org                      tobez\100plab.ku.dk
-toddr\100cpanel.net                     toddr\100cpan.org
+toddr\100cpan.org                       toddr\100cpanel.net
 tom\100compton.nu                       thh\100cyberscience.com
 tom.horsley\100mail.ccur.com            tom.horsley\100ccur.com
 +                                       tom\100amber.ssd.hcsc.com

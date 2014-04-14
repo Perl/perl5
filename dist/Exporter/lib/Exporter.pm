@@ -9,7 +9,7 @@ require 5.006;
 our $Debug = 0;
 our $ExportLevel = 0;
 our $Verbose ||= 0;
-our $VERSION = '5.70';
+our $VERSION = '5.71';
 our (%Cache);
 
 sub as_heavy {
@@ -163,7 +163,7 @@ try to use C<@EXPORT_OK> in preference to C<@EXPORT> and avoid short or
 common symbol names to reduce the risk of name clashes.
 
 Generally anything not exported is still accessible from outside the
-module using the C<YourModule::item_name> (or C<< $blessed_ref->method>>)
+module using the C<YourModule::item_name> (or C<< $blessed_ref->method >>)
 syntax.  By convention you can use a leading underscore on names to
 informally indicate that they are 'internal' and not for public use.
 
