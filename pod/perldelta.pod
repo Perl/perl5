@@ -1,7 +1,6 @@
 =for todo
 
 b51c3e77db (craigb) - Reduce excessive stat calls in glob on VMS
-7742aa6637 (davem)  - [perl #121484] /m causing false negative
 e141190569 (tonyc)  - [perl #121366] avoid using an invalid SvPVX() in Perl_sv_pvn_force_flags
 9fdd5a7ac7 (alh)    - RT-121512 - Allow -I/dir/ with trailing slash to find .pmc files.
 869747506f/00051dd553 (merijn) - gcc 4.9 by default does some optimizations that break perl / -fwrapv is broken prior to gcc-4.3 (#121505)
@@ -438,6 +437,11 @@ has been reverted for v5.20.
 This re-breaks the bugs it fixed,
 L<perl #112208|https://rt.perl.org/Ticket/Display.html?id=112208>, so
 an alternative fix is planned for v5.22
+
+=item *
+
+A regression was introduced in v5.19.10 that under some circumstances
+caused C<//m> matches to falsely fail. Now fixed.
 
 =back
 
