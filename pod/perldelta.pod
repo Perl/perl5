@@ -4,6 +4,10 @@ b51c3e77db (craigb) - Reduce excessive stat calls in glob on VMS
 7742aa6637 (davem)  - [perl #121484] /m causing false negative
 e141190569 (tonyc)  - [perl #121366] avoid using an invalid SvPVX() in Perl_sv_pvn_force_flags
 9fdd5a7ac7 (alh)    - RT-121512 - Allow -I/dir/ with trailing slash to find .pmc files.
+869747506f/00051dd553 (merijn) - gcc 4.9 by default does some optimizations that break perl / -fwrapv is broken prior to gcc-4.3 (#121505)
+fc6f6f37f8 (craigb) - Make perlbug encoding-agnostic in handling prepared reports.
+7e6b9e3a66 (craigb) - Attempt to satisfy CRLF expectations in perlbug on Windows.
+78beb4ca6d (tonyc)  - [perl #120998] avoid caller() crashing on eval '' stack frames
 
 =encoding utf8
 
@@ -149,6 +153,11 @@ using the pager command.
 
 L<ExtUtils::Install> has been upgraded from version 1.63 to 1.64.
 
+When upgrading an already-installed file, L<ExtUtils::Install> could mess up
+the permissions of files if the old versions of files were hard or symbolic
+links.  This has now been fixed.
+[L<perl #72028|https://rt.perl.org/Public/Bug/Display.html?id=72028>]
+
 The MM_TEST_ROOT feature has been removed from the tests.
 
 =item *
@@ -163,6 +172,12 @@ A regression in MM_Unix.pm has been resolved.
 L<Module::CoreList> has been upgraded from version 3.09 to 3.10.
 
 The list of Perl versions covered has been updated.
+
+=item *
+
+L<PerlIO> has been upgraded from version 1.08 to 1.09.
+
+The warning about the use of the C<:utf8> layer has been made more prominent.
 
 =item *
 
@@ -253,7 +268,9 @@ XXX Changes (i.e. rewording) of diagnostic messages go here
 
 =item *
 
-XXX Describe change here
+The now fatal error message C<Character following "\c" must be ASCII> has been
+reworded as C<Character following "\c" must be printable ASCII> to emphasize
+that in C<\cI<X>>, I<X> must be a I<printable (non-control)> ASCII character.
 
 =back
 
