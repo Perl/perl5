@@ -4,7 +4,6 @@ b51c3e77db (craigb) - Reduce excessive stat calls in glob on VMS
 869747506f/00051dd553 (merijn) - gcc 4.9 by default does some optimizations that break perl / -fwrapv is broken prior to gcc-4.3 (#121505)
 fc6f6f37f8 (craigb) - Make perlbug encoding-agnostic in handling prepared reports.
 7e6b9e3a66 (craigb) - Attempt to satisfy CRLF expectations in perlbug on Windows.
-78beb4ca6d (tonyc)  - [perl #120998] avoid caller() crashing on eval '' stack frames
 
 =encoding utf8
 
@@ -468,7 +467,19 @@ Fixed a bug detected by valgrind where sv_pvn_force_flags() would
 check SvPVX() even when the SV hadn't been upgraded to a C<SVt_PV>.
 SvPVX() is only initialized when the SV is upgraded to a C<SVt_PV> or
 higher.  [L<perl
-#121366|https://rt.perl.org/Public/Bug/Display.html?id=121366>].
+#121366|https://rt.perl.org/Public/Bug/Display.html?id=121366>]
+
+=item *
+
+Fixed a bug in caller() introduced in 5.18.0.  In some circumstances
+when caller() was called on an C<eval STRING> stack frame it would
+attempt to allocate the limit of the address space minus one, which
+would croak with an out of memory error, which would be caught by the
+eval.  A change in 5.19.1 which increased allocation sizes to allow
+COW to operate more often rounded that allocation size up and wrapped
+to a zero allocation size, resulting in a crash when the source string
+was copied over.  [L<perl
+#120998|https://rt.perl.org/Public/Bug/Display.html?id=120998>].
 
 =back
 
