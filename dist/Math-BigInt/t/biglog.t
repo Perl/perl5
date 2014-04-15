@@ -46,17 +46,17 @@ $cl = "Math::BigFloat";
 # some alarm()?
 
 # this triggers the calculation and caching of ln(2):
-ok ($cl->new(5)->blog(undef,71), 
+is ($cl->new(5)->blog(undef,71),
 '1.6094379124341003746007593332261876395256013542685177219126478914741790');
 
 # if the cache was correct, we should get this result, fast:
-ok ($cl->new(2)->blog(undef,71), 
+is ($cl->new(2)->blog(undef,71),
 '0.69314718055994530941723212145817656807550013436025525412068000949339362');
 
-ok ($cl->new(10)->blog(undef,71), 
-'2.3025850929940456840179914546843642076011014886287729760333279009675726');
+is ($cl->new(11)->blog(undef,71),
+'2.3978952727983705440619435779651292998217068539374171752185677091305736');
 
-ok ($cl->new(21)->blog(undef,71), 
+is ($cl->new(21)->blog(undef,71),
 '3.0445224377234229965005979803657054342845752874046106401940844835750742');
 
 #############################################################################
@@ -65,52 +65,52 @@ ok ($cl->new(21)->blog(undef,71),
 # Don't attempt to run them with older versions. You are warned.
 
 # $x < 0 => NaN
-ok ($cl->new(-2)->blog(), 'NaN');
-ok ($cl->new(-1)->blog(), 'NaN');
-ok ($cl->new(-10)->blog(), 'NaN');
-ok ($cl->new(-2,2)->blog(), 'NaN');
+is ($cl->new(-2)->blog(), 'NaN');
+is ($cl->new(-1)->blog(), 'NaN');
+is ($cl->new(-10)->blog(), 'NaN');
+is ($cl->new(-2,2)->blog(), 'NaN');
 
 my $ten = $cl->new(10)->blog();
 
 # 10 is cached (up to 75 digits)
-ok ($cl->new(10)->blog(), '2.302585092994045684017991454684364207601');
+is ($cl->new(10)->blog(), '2.302585092994045684017991454684364207601');
 
 # 0.1 is using the cached value for log(10), too
 
-ok ($cl->new(0.1)->blog(), -$ten);
-ok ($cl->new(0.01)->blog(), -$ten * 2);
-ok ($cl->new(0.001)->blog(), -$ten * 3);
-ok ($cl->new(0.0001)->blog(), -$ten * 4);
+is ($cl->new(0.1)->blog(), -$ten);
+is ($cl->new(0.01)->blog(), -$ten * 2);
+is ($cl->new(0.001)->blog(), -$ten * 3);
+is ($cl->new(0.0001)->blog(), -$ten * 4);
 
 # also cached
-ok ($cl->new(2)->blog(), '0.6931471805599453094172321214581765680755');
-ok ($cl->new(4)->blog(), $cl->new(2)->blog * 2);
+is ($cl->new(2)->blog(), '0.6931471805599453094172321214581765680755');
+is ($cl->new(4)->blog(), $cl->new(2)->blog * 2);
 
 # These are still slow, so do them only to 10 digits
 
-ok ($cl->new('0.2')->blog(undef,10), '-1.609437912');
-ok ($cl->new('0.3')->blog(undef,10), '-1.203972804');
-ok ($cl->new('0.4')->blog(undef,10), '-0.9162907319');
-ok ($cl->new('0.5')->blog(undef,10), '-0.6931471806');
-ok ($cl->new('0.6')->blog(undef,10), '-0.5108256238');
-ok ($cl->new('0.7')->blog(undef,10), '-0.3566749439');
-ok ($cl->new('0.8')->blog(undef,10), '-0.2231435513');
-ok ($cl->new('0.9')->blog(undef,10), '-0.1053605157');
+is ($cl->new('0.2')->blog(undef,10), '-1.609437912');
+is ($cl->new('0.3')->blog(undef,10), '-1.203972804');
+is ($cl->new('0.4')->blog(undef,10), '-0.9162907319');
+is ($cl->new('0.5')->blog(undef,10), '-0.6931471806');
+is ($cl->new('0.6')->blog(undef,10), '-0.5108256238');
+is ($cl->new('0.7')->blog(undef,10), '-0.3566749439');
+is ($cl->new('0.8')->blog(undef,10), '-0.2231435513');
+is ($cl->new('0.9')->blog(undef,10), '-0.1053605157');
 
-ok ($cl->new('9')->blog(undef,10), '2.197224577');
+is ($cl->new('9')->blog(undef,10), '2.197224577');
 
-ok ($cl->new('10')->blog(10,10),   '1.000000000');
-ok ($cl->new('20')->blog(20,10),   '1.000000000');
-ok ($cl->new('100')->blog(100,10), '1.000000000');
+is ($cl->new('10')->blog(10,10),   '1.000000000');
+is ($cl->new('20')->blog(20,10),   '1.000000000');
+is ($cl->new('100')->blog(100,10), '1.000000000');
 
-ok ($cl->new('100')->blog(10,10),  '2.000000000');	# 10 ** 2 == 100
-ok ($cl->new('400')->blog(20,10),  '2.000000000');	# 20 ** 2 == 400
+is ($cl->new('100')->blog(10,10),  '2.000000000');	# 10 ** 2 == 100
+is ($cl->new('400')->blog(20,10),  '2.000000000');	# 20 ** 2 == 400
 
-ok ($cl->new('4')->blog(2,10),  '2.000000000');		# 2 ** 2 == 4
-ok ($cl->new('16')->blog(2,10), '4.000000000');		# 2 ** 4 == 16
+is ($cl->new('4')->blog(2,10),  '2.000000000');		# 2 ** 2 == 4
+is ($cl->new('16')->blog(2,10), '4.000000000');		# 2 ** 4 == 16
 
-ok ($cl->new('1.2')->bpow('0.3',10),  '1.056219968');	
-ok ($cl->new('10')->bpow('0.6',10),   '3.981071706');
+is ($cl->new('1.2')->bpow('0.3',10),  '1.056219968');
+is ($cl->new('10')->bpow('0.6',10),   '3.981071706');
 
 # blog should handle bigint input
 is (Math::BigFloat::blog(Math::BigInt->new(100),10), 2, "blog(100)");

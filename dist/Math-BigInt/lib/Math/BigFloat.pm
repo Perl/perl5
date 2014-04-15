@@ -1498,6 +1498,10 @@ sub _log_10
       }
     $l_2->bmul($twos);		# * -2 => subtract, * 2 => add
     }
+  else
+    {
+      undef $l_2;
+    }
   
   $self->_log($x,$scale);			# need to do the "normal" way
   $x->badd($l_10) if defined $l_10; 		# correct it by ln(10)
