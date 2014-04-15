@@ -1899,6 +1899,7 @@ sub bdiv
     {
     if ($y_not_one)
       {
+      $x -> bint();
       $rem->bmod($y,@params);			# copy already done
       }
     if ($fallback)

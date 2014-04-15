@@ -1406,8 +1406,8 @@ NaNmul:-inf:NaN
 &fdiv-list
 0:0:NaN,NaN
 0:1:0,0
-9:4:2.25,1
-9:5:1.8,4
+9:4:2,1
+9:5:1,4
 # bug in v1.74 with bdiv in list context, when $y is 1 or -1
 2.1:-1:-2.1,0
 2.1:1:2.1,0
