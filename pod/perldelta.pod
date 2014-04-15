@@ -147,7 +147,7 @@ using the pager command.
 
 =item *
 
-L<ExtUtils::Install> has been upgraded from version 1.63 to 1.64.
+L<ExtUtils::Install> has been upgraded from version 1.63 to 1.65.
 
 When upgrading an already-installed file, L<ExtUtils::Install> could mess up
 the permissions of files if the old versions of files were hard or symbolic
