@@ -3197,8 +3197,8 @@ PP(pp_index)
     SV *temp = NULL;
     STRLEN biglen;
     STRLEN llen = 0;
-    I32 offset;
-    I32 retval;
+    SSize_t offset = 0;
+    SSize_t retval;
     const char *big_p;
     const char *little_p;
     bool big_utf8;
@@ -3281,13 +3281,13 @@ PP(pp_index)
 	offset = is_index ? 0 : biglen;
     else {
 	if (big_utf8 && offset > 0)
-	    sv_pos_u2b(big, &offset, 0);
+	    offset = sv_pos_u2b_flags(big, offset, 0, SV_CONST_RETURN);
 	if (!is_index)
 	    offset += llen;
     }
     if (offset < 0)
 	offset = 0;
-    else if (offset > (I32)biglen)
+    else if (offset > (SSize_t)biglen)
 	offset = biglen;
     if (!(little_p = is_index
 	  ? fbm_instr((unsigned char*)big_p + offset,
@@ -3298,7 +3298,7 @@ PP(pp_index)
     else {
 	retval = little_p - big_p;
 	if (retval > 0 && big_utf8)
-	    sv_pos_b2u(big, &retval);
+	    retval = sv_pos_b2u_flags(big, retval, SV_CONST_RETURN);
     }
     SvREFCNT_dec(temp);
  fail:
