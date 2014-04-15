@@ -181,6 +181,14 @@ L<Storable> has been upgraded from version 2.48 to 2.49.
 
 Recognition of tied SVs has been tightened up.
 
+=item *
+
+L<Win32> has been upgraded from version 0.48 to 0.49.
+
+This fixes a problem when building with B<gcc> version 4.8.1 from
+L<http://www.mingw.org>.
+[L<cpan #94730|https://rt.cpan.org/Public/Bug/Display.html?id=94730>]
+
 =back
 
 =head2 Removed Modules and Pragmata

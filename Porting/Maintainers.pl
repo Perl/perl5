@@ -1302,7 +1302,7 @@ use File::Glob qw(:case);
     },
 
     'Win32' => {
-        'DISTRIBUTION' => "JDB/Win32-0.48.tar.gz",
+        'DISTRIBUTION' => "JDB/Win32-0.49.tar.gz",
         'FILES'        => q[cpan/Win32],
     },
 
