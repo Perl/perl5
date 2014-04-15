@@ -226,7 +226,10 @@ SKIP: {
                          },
     ]);
 
-    ok( !-w "$bigdir/DummyHard.pm", 'DummyHard.pm not writeable' );
+    SKIP: {
+      skip 'everywhere is writable to root', 1 if $> == 0;
+      ok( !-w "$bigdir/DummyHard.pm", 'DummyHard.pm not writeable' );
+    }
 
     use File::Compare;
     ok(compare("$bigdir/Dummy.pm", "$bigdir/DummyHard.pm"),
@@ -250,7 +253,10 @@ SKIP: {
                          },
     ]);
 
-    ok( !-w "$bigdir/DummyOrig.pm", 'DummyOrig.pm not writeable' );
+    SKIP: {
+      skip 'everywhere is writable to root', 1 if $> == 0;
+      ok( !-w "$bigdir/DummyOrig.pm", 'DummyOrig.pm not writeable' );
+    }
     ok( !-l "$bigdir/Dummy.pm", 'Dummy.pm not a link' );
     ok(compare("$bigdir/Dummy.pm", "$bigdir/DummyOrig.pm"),
         "orig file should be different");
