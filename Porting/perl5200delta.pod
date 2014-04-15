@@ -1259,99 +1259,6 @@ invocations of F<miniperl> are no longer made.
 The build system now works correctly when compiling under GCC or Clang with
 link-time optimization enabled (the C<-flto> option). [perl #113022]
 
-=back
-
-=head1 Testing
-
-XXX Any significant changes to the testing of a freshly built perl should be
-listed here.  Changes which create B<new> files in F<t/> go here as do any
-large changes to the testing harness (e.g. when parallel testing was added).
-Changes to existing files in F<t/> aren't worth summarizing, although the bugs
-that they represent may be covered elsewhere.
-
-[ List each test improvement as a =item entry ]
-
-=over 4
-
-=item *
-
-The new prototype attribute syntax is tested by a new test script,
-F<t/op/attrproto.t>.
-
-=item *
-
-The new test script F<t/io/closepid.t> tests that C<close> on the original of a
-popen handle dupped to a standard handle no longer blocks internally on
-C<waitpid(0, ...)>.
-
-=item *
-
-The new postfix dereference syntax is tested by a new test script,
-F<t/op/postfixderef.t>.
-
-
-=item *
-
-The behaviour of C<pos> on very large strings is now tested in the new test
-script F<t/bigmem/pos.t>.
-
-=item *
-
-The test script F<t/porting/ss_dup.t> has been created to test that ss_dup()
-handles all savestack items.
-
-=item *
-
-The new behaviour of B<-F> and B<-a> (see the L</Core Enhancements> section) is
-tested in the new test script F<t/run/switchF2.t>.
-
-=item *
-
-The test script F<t/bigmem/regexp.t> has been added to test that regular
-expression matches on very large strings now succeed as expected.
-
-=item *
-
-A bug that was fixed in Perl 5.15.4 is now tested by the new test script
-F<t/io/eintr_print.t>.  [perl #119097]
-
-=item *
-
-The new test scripts F<t/op/kvaslice.t> and F<t/op/kvhslice.t> test the new
-index/value array slice and key/value hash slice syntax respectively.
-
-=item *
-
-Various cases of C<die>, C<last>, C<goto> and C<exit> triggering C<DESTROY> are
-now tested by the new test script F<t/op/rt119311.t>.
-
-=item *
-
-The new test script F<t/op/waitpid.t> tests the fix for [perl #85228] (see
-L</Selected Bug Fixes>).
-
-=item *
-
-The latest copyright years in the top-level F<README> file and the B<perl -v>
-output are now tested as matching each other by the new test script
-F<t/porting/copyright.t>
-
-=item *
-
-The new test script F<t/win32/signal.t> tests that $! and $^E are now preserved
-across signal handlers by the Win32 signal emulation code.
-
-=item *
-
-The test script F<t/x2p/find2perl.t> has been added to test the F<find2perl>
-program on platforms where it is practical to do so.
-
-=item *
-
-Various tests in F<t/porting/> are no longer skipped when the perl
-F<.git> directory is outside the perl tree and pointed to by
-C<$GIT_DIR>. [perl #120505]
-
 =item *
 
 Distinct library basenames with C<d_libname_unique>.
@@ -1376,10 +1283,10 @@ on native builds if your toolchain's files have non-standard locations.
 The cross-compilation model has been renovated.
 There's several new options, and some backwards-incompatible changes:
 
-We now build binaries for miniperl and generate_uudmap to be used on the host, rather than running
-every miniperl call on the target; this means that, short of 'make test',
-we no longer need access to the target system once Configure is done.
-You can provide already-built binaries through the C<hostperl> and
+We now build binaries for miniperl and generate_uudmap to be used on the host,
+rather than running every miniperl call on the target; this means that, short
+of 'make test', we no longer need access to the target system once Configure is
+done.  You can provide already-built binaries through the C<hostperl> and
 C<hostgenerate> options to Configure.
 
 Additionally, if targeting an EBCDIC platform from an ASCII host,
@@ -1402,11 +1309,11 @@ For example, Android has its sh in /system/bin/sh, so if cross-compiling
 from a more normal Unixy system with sh in /bin/sh, "targetsh" would end
 up as /system/bin/sh, and "sh" as /bin/sh.
 
-=item *
+=back
 
-The test suite no longer fails when the user's interactive shell maintains a
-C<$PWD> environment variable, but the F</bin/sh> used for running tests
-doesn't.
+=head1 Testing
+
+=over 4
 
 =item *
 
@@ -1416,21 +1323,23 @@ certain sorts of C programming errors, though at significant cost in running
 time. On suitable hardware, allowing parallel execution claws back a lot of
 that additional cost. [perl #121431]
 
+=item *
+
+Various tests in F<t/porting/> are no longer skipped when the perl
+F<.git> directory is outside the perl tree and pointed to by
+C<$GIT_DIR>. [perl #120505]
+
+=item *
+
+The test suite no longer fails when the user's interactive shell maintains a
+C<$PWD> environment variable, but the F</bin/sh> used for running tests
+doesn't.
+
 =back
 
 =head1 Platform Support
 
-XXX Any changes to platform support should be listed in the sections below.
-
-[ Within the sections, list each platform as a =item entry with specific
-changes as paragraphs below it. ]
-
 =head2 New Platforms
-
-XXX List any platforms that this version of perl compiles on, that previous
-versions did not.  These will either be enabled by new files in the F<hints/>
-directories, or new subdirectories and F<README> files at the top level of the
-source tree.
 
 =over 4
 
@@ -1461,13 +1370,11 @@ should build now. The basic problems are the non-standard location for tools.
 
 =head2 Discontinued Platforms
 
-XXX List any platforms that this version of perl no longer compiles on.
-
 =over 4
 
 =item C<sfio>
 
-Code related to supporting C<sfio> has been removed.
+Code related to supporting the C<sfio> I/O system has been removed.
 
 Perl 5.004 added support to use the native API of C<sfio>, AT&T's Safe/Fast
 I/O library. This code still built with v5.8.0, albeit with many regression
@@ -1491,12 +1398,43 @@ It only runs on Data General's own hardware.
 
 =head2 Platform-Specific Notes
 
-XXX List any changes for specific platforms.  This could include configuration
-and compilation changes or changes in portability/compatibility.  However,
-changes within modules for platforms should generally be listed in the
-L</Modules and Pragmata> section.
+=over 4
+
+=item Cygwin
 
 =over 4
+
+=item *
+
+recv() on a connected handle would populate the returned sender
+address with whatever happened to be in the working buffer.  recv()
+now uses a workaround similar to the Win32 recv() wrapper and returns
+an empty string when recvfrom(2) doesn't modify the supplied address
+length. [perl #118843]
+
+=item *
+
+Fixed a build error in cygwin.c on Cygwin 1.7.28.
+
+Tests now handle the errors that occur when C<cygserver> isn't
+running.
+
+=back
+
+=item GNU/Hurd
+
+The BSD compatibility library C<libbsd> is no longer required for builds.
+
+=item Linux
+
+The hints file now looks for C<libgdbm_compat> only if C<libgdbm> itself is
+also wanted. The former is never useful without the latter, and in some
+circumstances, including it could actually prevent building.
+
+=item Mac OS
+
+The build system now honours an C<ld> setting supplied by the user running
+F<Configure>.
 
 =item MidnightBSD
 
@@ -1514,15 +1452,72 @@ that this change will affect any platforms which are able to build v5.18.0.
 
 =item VMS
 
+=over 4
+
+=item *
+
 The C<PERL_ENV_TABLES> feature to control the population of %ENV at perl
 start-up was broken in Perl 5.16.0 but has now been fixed.
 
+=item *
+
+Skip access checks on remotes in opendir().  [perl #121002]
+
+=back
+
 =item Win32
+
+=over 4
+
+=item *
 
 C<rename> and C<link> on Win32 now set $! to ENOSPC and EDQUOT when
 appropriate.  [perl #119857]
 
+=item *
+
+The BUILD_STATIC and ALL_STATIC makefile options for linking some or (nearly)
+all extensions statically (into perl519.dll, and into a separate
+perl-static.exe too) were broken for MinGW builds. This has now been fixed.
+
+The ALL_STATIC option has also been improved to include the Encode and Win32
+extensions (for both VC++ and MinGW builds).
+
+=item *
+
+The Windows MinGW/gcc build was broken in Perl 5.19.4 for some recent versions
+of gcc-4.8, including those from http://mingw-w64.sourceforge.net/ .  This has
+now been fixed.  [perl #120236]
+
+=item *
+
+Support for building with Visual C++ 2013 has been added.  There are currently
+two possible test failures (see L<perlwin32/"Testing Perl on Windows">) which
+will hopefully be resolved soon.
+
+Experimental support for building with Intel C++ Compiler has been added. Only
+the nmake makefile (win32/Makefile) can be used. A "nmake test" will not pass
+at this time due to F<cpan/CGI/t/url.t>.
+
+=item *
+
+Experimental support for building with Intel C++ Compiler has been extended to
+cover the dmake makefile (win32/makefile.mk) as well.
+
+=item *
+
+Killing a process tree with L<perlfunc/kill> and a negative signal, was broken
+starting in 5.18.0. In this bug, C<kill> always returned 0 for a negative
+signal even for valid PIDs, and no processes were terminated. This has been
+fixed [perl #121230].
+
+=back
+
 =item WinCE
+
+=over 4
+
+=item *
 
 Perl now builds again on WinCE, following locale-related breakage (WinCE has
 non-existent locale support) introduced around 5.19.1.  [perl #119443]
@@ -1532,41 +1527,7 @@ The building of XS modules has largely been restored.  Several still cannot
 of further patches (to L<Socket> and L<ExtUtils::MakeMaker>), hopefully to be
 incorporated soon.
 
-=item GNU/Hurd
-
-The BSD compatibility library C<libbsd> is no longer required for builds.
-
-=item Windows
-
-The BUILD_STATIC and ALL_STATIC makefile options for linking some or (nearly)
-all extensions statically (into perl519.dll, and into a separate
-perl-static.exe too) were broken for MinGW builds. This has now been fixed.
-
-The ALL_STATIC option has also been improved to include the Encode and Win32
-extensions (for both VC++ and MinGW builds).
-
-=item Windows
-
-The Windows MinGW/gcc build was broken in Perl 5.19.4 for some recent versions
-of gcc-4.8, including those from http://mingw-w64.sourceforge.net/ .  This has
-now been fixed.  [perl #120236]
-
-=item Windows
-
-Support for building with Visual C++ 2013 has been added.  There are currently
-two possible test failures (see L<perlwin32/"Testing Perl on Windows">) which
-will hopefully be resolved soon.
-
-Experimental support for building with Intel C++ Compiler has been added. Only
-the nmake makefile (win32/Makefile) can be used. A "nmake test" will not pass
-at this time due to "cpan/CGI/t/url.t".
-
-=item Windows
-
-Experimental support for building with Intel C++ Compiler has been extended to
-cover the dmake makefile (win32/makefile.mk) as well.
-
-=item WinCE
+=item *
 
 Perl can now be built in one shot with no user intervention on WinCE by running
 C<nmake -f Makefile.ce all>.
@@ -1574,42 +1535,7 @@ C<nmake -f Makefile.ce all>.
 Support for building with EVC (Embedded Visual C++) 4 has been restored.  Perl
 can also be built using Smart Devices for Visual C++ 2005 or 2008.
 
-=item Cygwin
-
-recv() on a connected handle would populate the returned sender
-address with whatever happened to be in the working buffer.  recv()
-now uses a workaround similar to the Win32 recv() wrapper and returns
-an empty string when recvfrom(2) doesn't modify the supplied address
-length. [perl #118843]
-
-=item VMS
-
-Skip access checks on remotes in opendir().  [perl #121002]
-
-=item Cygwin
-
-Fixed a build error in cygwin.c on Cygwin 1.7.28.
-
-Tests now handle the errors that occur when C<cygserver> isn't
-running.
-
-=item Linux
-
-The hints file now looks for C<libgdbm_compat> only if C<libgdbm> itself is
-also wanted. The former is never useful without the latter, and in some
-circumstances, including it could actually prevent building.
-
-=item Mac OS
-
-The build system now honours an C<ld> setting supplied by the user running
-F<Configure>.
-
-=item Win32
-
-Killing a process tree with L<perlfunc/kill> and a negative signal, was broken
-starting in 5.18.0. In this bug, C<kill> always returned 0 for a negative
-signal even for valid PIDs, and no processes were terminated. This has been
-fixed [perl #121230].
+=back
 
 =back
 
