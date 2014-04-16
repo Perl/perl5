@@ -34,6 +34,8 @@ shaclose(s)
 CODE:
        RETVAL = shaclose(s);
        sv_setiv(SvRV(ST(0)), 0);
+OUTPUT:
+	RETVAL
 
 int
 shadump(file, s)
@@ -186,6 +188,8 @@ PREINIT:
 	SHA *state;
 	int result;
 PPCODE:
+	if (!sv_isa(self, "Digest::SHA"))
+		XSRETURN_UNDEF;
 	state = INT2PTR(SHA *, SvIV(SvRV(SvRV(self))));
 	result = ix ? shaalg(state) : shadsize(state) << 3;
 	ST(0) = sv_2mortal(newSViv(result));
@@ -200,6 +204,8 @@ PREINIT:
 	STRLEN len;
 	SHA *state;
 PPCODE:
+	if (!sv_isa(self, "Digest::SHA"))
+		XSRETURN_UNDEF;
 	state = INT2PTR(SHA *, SvIV(SvRV(SvRV(self))));
 	for (i = 1; i < items; i++) {
 		data = (unsigned char *) (SvPVbyte(ST(i), len));
@@ -224,6 +230,8 @@ PREINIT:
 	SHA *state;
 	char *result;
 PPCODE:
+	if (!sv_isa(self, "Digest::SHA"))
+		XSRETURN_UNDEF;
 	state = INT2PTR(SHA *, SvIV(SvRV(SvRV(self))));
 	shafinish(state);
 	len = 0;
