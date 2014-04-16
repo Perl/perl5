@@ -460,6 +460,7 @@ an alternative fix is planned for v5.22
 
 A regression was introduced in v5.19.10 that under some circumstances
 caused C<//m> matches to falsely fail. Now fixed.
+[L<perl #121484|https://rt.perl.org/Public/Bug/Display.html?id=121484>]
 
 =item *
 
