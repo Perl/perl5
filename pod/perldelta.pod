@@ -339,7 +339,13 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 =item *
 
 C<&xsub> and C<goto &xsub> no longer crash if *_ has been undefined and has no
-ARRAY entry (i.e. @_ does not exist).
+ARRAY entry (i.e. @_ does not exist). [perl #119949]
+
+=item *
+
+Copy the values used to perturb hash iteration when cloning an
+interpreter.  This was fairly harmless but caused C<valgrind> to
+complain. [perl #121336]
 
 =back
 
