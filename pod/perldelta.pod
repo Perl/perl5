@@ -493,17 +493,14 @@ was copied over.  [L<perl
 
 =head1 Known Problems
 
-XXX Descriptions of platform agnostic bugs we know we can't fix go here.  Any
-tests that had to be C<TODO>ed for the release would be noted here.  Unfixed
-platform specific bugs also go here.
-
-[ List each fix as a =item entry ]
-
 =over 4
 
 =item *
 
-XXX
+One test in F<ext/POSIX/t/time.t> is known to fail on Windows when building
+with certain versions of B<gcc> from L<http://www.mingw.org> due to a known bug
+in the MinGW build, which is logged here:
+L<http://sourceforge.net/p/mingw/bugs/2152/>.
 
 =back
 
