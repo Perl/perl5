@@ -338,7 +338,8 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+C<&xsub> and C<goto &xsub> no longer crash if *_ has been undefined and has no
+ARRAY entry (i.e. @_ does not exist).
 
 =back
 
