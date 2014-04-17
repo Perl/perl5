@@ -116,25 +116,25 @@ while ( <DATA> ) {
         $str = sprintf "0x%02X", $cp;        # Is a numeric constant
     }
     else {
-    $str = join "", map { sprintf "\\x%02X", $_ }
-                       unpack("U0C*", pack("U", $cp));
+        $str = join "", map { sprintf "\\x%02X", $_ }
+                        unpack("U0C*", pack("U", $cp));
 
-    $suffix = '_UTF8';
-    if (! defined $flag  || $flag =~ /^ string (_skip_if_undef)? $/x) {
-        $str = "\"$str\"";  # Will be a string constant
-    } elsif ($flag eq 'tail') {
-            $str =~ s/\\x..//;  # Remove the first byte
-            $suffix .= '_TAIL';
+        $suffix = '_UTF8';
+        if (! defined $flag || $flag =~ /^ string (_skip_if_undef)? $/x) {
             $str = "\"$str\"";  # Will be a string constant
-    }
-    elsif ($flag eq 'first') {
-        $str =~ s/ \\x ( .. ) .* /$1/x; # Get the two nibbles of the 1st byte
-        $suffix .= '_FIRST_BYTE';
-        $str = "0x$str";        # Is a numeric constant
-    }
-    else {
-        die "Unknown flag at line $.: $_\n";
-    }
+        } elsif ($flag eq 'tail') {
+                $str =~ s/\\x..//;  # Remove the first byte
+                $suffix .= '_TAIL';
+                $str = "\"$str\"";  # Will be a string constant
+        }
+        elsif ($flag eq 'first') {
+            $str =~ s/ \\x ( .. ) .* /$1/x; # Get the two nibbles of the 1st byte
+            $suffix .= '_FIRST_BYTE';
+            $str = "0x$str";        # Is a numeric constant
+        }
+        else {
+            die "Unknown flag at line $.: $_\n";
+        }
     }
     printf $out_fh "#define %s%s  %s    /* U+%04X */\n", $name, $suffix, $str, $U_cp;
 }
