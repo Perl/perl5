@@ -1,8 +1,6 @@
 =for todo
 
 869747506f/00051dd553 (merijn) - gcc 4.9 by default does some optimizations that break perl / -fwrapv is broken prior to gcc-4.3 (#121505)
-fc6f6f37f8 (craigb) - Make perlbug encoding-agnostic in handling prepared reports.
-7e6b9e3a66 (craigb) - Attempt to satisfy CRLF expectations in perlbug on Windows.
 
 =encoding utf8
 
@@ -286,13 +284,18 @@ Most of these are built within the directories F<utils> and F<x2p>.
 entries for each change
 Use L<XXX> with program names to get proper documentation linking. ]
 
-=head3 L<XXX>
+=head3 L<perlbug>
 
 =over 4
 
 =item *
 
-XXX
+L<perlbug> has been modified to supply the report template with CRLF line
+endings on Windows, resolving perl #121277.
+
+L<perlbug> now makes as few assumptions as possible about the encoding of
+the report.  This will likely change in the future to assume UTF-8 by default
+but allow a user override.
 
 =back
 
