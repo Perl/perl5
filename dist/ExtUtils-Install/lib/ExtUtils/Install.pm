@@ -38,7 +38,7 @@ ExtUtils::Install - install files from here to there
 
 =head1 VERSION
 
-1.66
+1.67
 
 =cut
 
