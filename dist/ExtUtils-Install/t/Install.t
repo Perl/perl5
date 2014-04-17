@@ -192,6 +192,17 @@ close DUMMY;
 }
 
 
+# do a -w style test, but based on just on file perms rather than UID
+# (on UNIX, root sees everything as writeable)
+
+sub writeable {
+    my ($file) = @_;
+    my @stat = stat $file;
+    return 0 unless defined $stat[2]; # mode
+    return $stat[2] & 0200;
+}
+
+
 # really this test should be run on any platform that supports
 # symbolic and hard links, but this representative sample should do for
 # now
@@ -226,10 +237,7 @@ SKIP: {
                          },
     ]);
 
-    SKIP: {
-      skip 'everywhere is writable to root', 1 if $> == 0;
-      ok( !-w "$bigdir/DummyHard.pm", 'DummyHard.pm not writeable' );
-    }
+    ok( !writeable("$bigdir/DummyHard.pm"), 'DummyHard.pm not writeable' );
 
     use File::Compare;
     ok(compare("$bigdir/Dummy.pm", "$bigdir/DummyHard.pm"),
@@ -253,10 +261,7 @@ SKIP: {
                          },
     ]);
 
-    SKIP: {
-      skip 'everywhere is writable to root', 1 if $> == 0;
-      ok( !-w "$bigdir/DummyOrig.pm", 'DummyOrig.pm not writeable' );
-    }
+    ok( !writeable("$bigdir/DummyOrig.pm"), 'DummyOrig.pm not writeable' );
     ok( !-l "$bigdir/Dummy.pm", 'Dummy.pm not a link' );
     ok(compare("$bigdir/Dummy.pm", "$bigdir/DummyOrig.pm"),
         "orig file should be different");
