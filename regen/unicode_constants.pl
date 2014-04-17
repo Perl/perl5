@@ -108,10 +108,18 @@ while ( <DATA> ) {
     $name = $desired_name if $name eq "" && $desired_name;
     $name =~ s/[- ]/_/g;   # The macro name can have no blanks nor dashes
 
-    my $str = join "", map { sprintf "\\x%02X", $_ }
+    my $str;
+    my $suffix;
+    if (defined $flag && $flag eq 'native') {
+        die "Are you sure you want to run this on an above-Latin1 code point?" if $cp > 0xff;
+        $suffix = '_NATIVE';
+        $str = sprintf "0x%02X", $cp;        # Is a numeric constant
+    }
+    else {
+    $str = join "", map { sprintf "\\x%02X", $_ }
                        unpack("U0C*", pack("U", $cp));
 
-    my $suffix = '_UTF8';
+    $suffix = '_UTF8';
     if (! defined $flag  || $flag =~ /^ string (_skip_if_undef)? $/x) {
         $str = "\"$str\"";  # Will be a string constant
     } elsif ($flag eq 'tail') {
@@ -124,13 +132,9 @@ while ( <DATA> ) {
         $suffix .= '_FIRST_BYTE';
         $str = "0x$str";        # Is a numeric constant
     }
-    elsif ($flag eq 'native') {
-        die "Are you sure you want to run this on an above-Latin1 code point?" if $cp > 0xff;
-        $suffix = '_NATIVE';
-        $str = sprintf "0x%02X", $cp;        # Is a numeric constant
-    }
     else {
         die "Unknown flag at line $.: $_\n";
+    }
     }
     printf $out_fh "#define %s%s  %s    /* U+%04X */\n", $name, $suffix, $str, $U_cp;
 }
