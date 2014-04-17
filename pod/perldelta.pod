@@ -1,6 +1,5 @@
 =for todo
 
-b51c3e77db (craigb) - Reduce excessive stat calls in glob on VMS
 869747506f/00051dd553 (merijn) - gcc 4.9 by default does some optimizations that break perl / -fwrapv is broken prior to gcc-4.3 (#121505)
 fc6f6f37f8 (craigb) - Make perlbug encoding-agnostic in handling prepared reports.
 7e6b9e3a66 (craigb) - Attempt to satisfy CRLF expectations in perlbug on Windows.
@@ -348,9 +347,12 @@ source tree.
 
 =over 4
 
-=item XXX-some-platform
+=item VMS
 
-XXX
+On VMS only, a check for glob metacharacters in a path returned by the C<glob>
+operator has been replaced with a check for VMS wildcard characters.  This
+saves a significant number of unnecessary C<lstat()> calls such that some
+simple glob operations become 60-80% faster.
 
 =back
 
