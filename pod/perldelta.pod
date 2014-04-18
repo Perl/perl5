@@ -6,9 +6,6 @@
 
 =head1 NAME
 
-[ this is a template for a new perldelta file.  Any text flagged as XXX needs
-to be processed before release. ]
-
 perldelta - what is new for perl v5.19.11
 
 =head1 DESCRIPTION
@@ -19,93 +16,7 @@ release.
 If you are upgrading from an earlier release such as 5.19.9, first read
 L<perl51910delta>, which describes differences between 5.19.9 and 5.19.10.
 
-=head1 Notice
-
-XXX Any important notices here
-
-=head1 Core Enhancements
-
-XXX New core language features go here.  Summarize user-visible core language
-enhancements.  Particularly prominent performance optimisations could go
-here, but most should go in the L</Performance Enhancements> section.
-
-[ List each enhancement as a =head2 entry ]
-
-=head1 Security
-
-XXX Any security-related notices go here.  In particular, any security
-vulnerabilities closed should be noted here rather than in the
-L</Selected Bug Fixes> section.
-
-[ List each security issue as a =head2 entry ]
-
-=head1 Incompatible Changes
-
-XXX For a release on a stable branch, this section aspires to be:
-
-    There are no changes intentionally incompatible with 5.XXX.XXX
-    If any exist, they are bugs, and we request that you submit a
-    report.  See L</Reporting Bugs> below.
-
-[ List each incompatible change as a =head2 entry ]
-
-=head1 Deprecations
-
-XXX Any deprecated features, syntax, modules etc. should be listed here.
-
-=head2 Module removals
-
-XXX Remove this section if inapplicable.
-
-The following modules will be removed from the core distribution in a
-future release, and will at that time need to be installed from CPAN.
-Distributions on CPAN which require these modules will need to list them as
-prerequisites.
-
-The core versions of these modules will now issue C<"deprecated">-category
-warnings to alert you to this fact.  To silence these deprecation warnings,
-install the modules in question from CPAN.
-
-Note that these are (with rare exceptions) fine modules that you are encouraged
-to continue to use.  Their disinclusion from core primarily hinges on their
-necessity to bootstrapping a fully functional, CPAN-capable Perl installation,
-not usually on concerns over their design.
-
-=over
-
-=item XXX
-
-XXX Note that deprecated modules should be listed here even if they are listed
-as an updated module in the L</Modules and Pragmata> section.
-
-=back
-
-[ List each other deprecation as a =head2 entry ]
-
-=head1 Performance Enhancements
-
-XXX Changes which enhance performance without changing behaviour go here.
-There may well be none in a stable release.
-
-[ List each enhancement as a =item entry ]
-
-=over 4
-
-=item *
-
-XXX
-
-=back
-
 =head1 Modules and Pragmata
-
-XXX All changes to installed files in F<cpan/>, F<dist/>, F<ext/> and F<lib/>
-go here.  If Module::CoreList is updated, generate an initial draft of the
-following sections using F<Porting/corelist-perldelta.pl>.  A paragraph summary
-for important changes should then be added by hand.  In an ideal world,
-dual-life modules would have a F<Changes> file that could be cribbed.
-
-[ Within each section, list entries as a =item entry ]
 
 =head2 New Modules and Pragmata
 
@@ -113,7 +24,10 @@ dual-life modules would have a F<Changes> file that could be cribbed.
 
 =item *
 
-XXX
+L<experimental> version 0.007 has been added.
+
+This pragma provides an easy and convenient way to enable or disable
+experimental features.
 
 =back
 
@@ -145,7 +59,7 @@ using the pager command.
 
 =item *
 
-L<ExtUtils::Install> has been upgraded from version 1.63 to 1.65.
+L<ExtUtils::Install> has been upgraded from version 1.63 to 1.67.
 
 When upgrading an already-installed file, L<ExtUtils::Install> could mess up
 the permissions of files if the old versions of files were hard or symbolic
@@ -159,7 +73,7 @@ The MM_TEST_ROOT feature has been removed from the tests.
 L<ExtUtils::MakeMaker> has been upgraded from version 6.92 to 6.94.
 
 A regression in MM_Unix.pm has been resolved.
-[L<#96|https://github.com/Perl-Toolchain-Gang/ExtUtils-MakeMaker/issues/96>]
+[L<Issue #96|https://github.com/Perl-Toolchain-Gang/ExtUtils-MakeMaker/issues/96>]
 
 =item *
 
@@ -189,82 +103,13 @@ L<http://www.mingw.org>.
 
 =back
 
-=head2 Removed Modules and Pragmata
-
-=over 4
-
-=item *
-
-XXX
-
-=back
-
-=head1 Documentation
-
-XXX Changes to files in F<pod/> go here.  Consider grouping entries by
-file and be sure to link to the appropriate page, e.g. L<perlfunc>.
-
-=head2 New Documentation
-
-XXX Changes which create B<new> files in F<pod/> go here.
-
-=head3 L<XXX>
-
-XXX Description of the purpose of the new file here
-
-=head2 Changes to Existing Documentation
-
-XXX Changes which significantly change existing files in F<pod/> go here.
-However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
-section.
-
-=head3 L<XXX>
-
-=over 4
-
-=item *
-
-XXX Description of the change here
-
-=back
-
 =head1 Diagnostics
 
 The following additions or changes have been made to diagnostic output,
 including warnings and fatal error messages.  For the complete list of
 diagnostic messages, see L<perldiag>.
 
-XXX New or changed warnings emitted by the core's C<C> code go here.  Also
-include any changes in L<perldiag> that reconcile it to the C<C> code.
-
-=head2 New Diagnostics
-
-XXX Newly added diagnostic messages go under here, separated into New Errors
-and New Warnings
-
-=head3 New Errors
-
-=over 4
-
-=item *
-
-XXX L<message|perldiag/"message">
-
-=back
-
-=head3 New Warnings
-
-=over 4
-
-=item *
-
-XXX L<message|perldiag/"message">
-
-=back
-
 =head2 Changes to Existing Diagnostics
-
-XXX Changes (i.e. rewording) of diagnostic messages go here
 
 =over 4
 
@@ -278,115 +123,44 @@ that in C<\cI<X>>, I<X> must be a I<printable (non-control)> ASCII character.
 
 =head1 Utility Changes
 
-XXX Changes to installed programs such as F<perlbug> and F<xsubpp> go here.
-Most of these are built within the directories F<utils> and F<x2p>.
-
-[ List utility changes as a =head3 entry for each utility and =item
-entries for each change
-Use L<XXX> with program names to get proper documentation linking. ]
-
-=head3 L<perlbug>
+=head2 L<perlbug>
 
 =over 4
 
 =item *
 
 L<perlbug> has been modified to supply the report template with CRLF line
-endings on Windows, resolving perl #121277.
-
-L<perlbug> now makes as few assumptions as possible about the encoding of
-the report.  This will likely change in the future to assume UTF-8 by default
-but allow a user override.
-
-=back
-
-=head1 Configuration and Compilation
-
-XXX Changes to F<Configure>, F<installperl>, F<installman>, and analogous tools
-go here.  Any other changes to the Perl build process should be listed here.
-However, any platform-specific changes should be listed in the
-L</Platform Support> section, instead.
-
-[ List changes as a =item entry ].
-
-=over 4
+endings on Windows.
+[L<perl #121277|https://rt.perl.org/Public/Bug/Display.html?id=121277>]
 
 =item *
 
-XXX
-
-=back
-
-=head1 Testing
-
-XXX Any significant changes to the testing of a freshly built perl should be
-listed here.  Changes which create B<new> files in F<t/> go here as do any
-large changes to the testing harness (e.g. when parallel testing was added).
-Changes to existing files in F<t/> aren't worth summarizing, although the bugs
-that they represent may be covered elsewhere.
-
-[ List each test improvement as a =item entry ]
-
-=over 4
-
-=item *
-
-XXX
+L<perlbug> now makes as few assumptions as possible about the encoding of the
+report.  This will likely change in the future to assume UTF-8 by default but
+allow a user override.
 
 =back
 
 =head1 Platform Support
 
-XXX Any changes to platform support should be listed in the sections below.
-
-[ Within the sections, list each platform as a =item entry with specific
-changes as paragraphs below it. ]
-
-=head2 New Platforms
-
-XXX List any platforms that this version of perl compiles on, that previous
-versions did not.  These will either be enabled by new files in the F<hints/>
-directories, or new subdirectories and F<README> files at the top level of the
-source tree.
+=head2 Platform-Specific Notes
 
 =over 4
 
 =item VMS
 
-On VMS only, a check for glob metacharacters in a path returned by the C<glob>
-operator has been replaced with a check for VMS wildcard characters.  This
-saves a significant number of unnecessary C<lstat()> calls such that some
-simple glob operations become 60-80% faster.
-
-=back
-
-=head2 Discontinued Platforms
-
-XXX List any platforms that this version of perl no longer compiles on.
-
-=over 4
-
-=item XXX-some-platform
-
-XXX
-
-=back
-
-=head2 Platform-Specific Notes
-
-XXX List any changes for specific platforms.  This could include configuration
-and compilation changes or changes in portability/compatibility.  However,
-changes within modules for platforms should generally be listed in the
-L</Modules and Pragmata> section.
-
-=over 4
+On VMS only, a check for glob metacharacters in a path returned by the
+L<C<glob()>|perlfunc/glob> operator has been replaced with a check for VMS
+wildcard characters.  This saves a significant number of unnecessary
+L<C<lstat()>|perlfunc/lstat> calls such that some simple glob operations become
+60-80% faster.
 
 =item Win32
 
 The time taken to build perl on Windows has been reduced quite significantly
 (time savings in the region of 30-40% are typically seen) by reducing the
-number of, usually failing, I/O calls for each L<perlfunc/require> (for
-miniperl only).
+number of, usually failing, I/O calls for each L<C<require()>|perlfunc/require>
+(for B<miniperl.exe> only).
 [L<perl #121119|https://rt.perl.org/Public/Bug/Display.html?id=121119>]
 
 About 15 minutes of idle sleeping was removed from running C<make test> due to
@@ -396,12 +170,12 @@ test file.
 [L<perl #121395|https://rt.perl.org/Public/Bug/Display.html?id=121395>]
 
 On a perl built without psuedo-fork (psuedo-fork builds were not affected by
-this bug), killing a process tree with L<perlfunc/kill> and a negative signal
-resulted in kill() inverting the returned value.  For example, if kill() killed
-1 process tree PID then it returned 0 instead of 1, and if kill() was passed 2
-invalid PIDs then it returned 2 instead of 0.  This has probably been the case
-since the process tree kill feature was implemented on Win32.  It has now been
-corrected to follow the documented behaviour.
+this bug), killing a process tree with L<C<kill()>|perlfunc/kill> and a negative
+signal resulted in C<kill()> inverting the returned value.  For example, if
+C<kill()> killed 1 process tree PID then it returned 0 instead of 1, and if
+C<kill()> was passed 2 invalid PIDs then it returned 2 instead of 0.  This has
+probably been the case since the process tree kill feature was implemented on
+Win32.  It has now been corrected to follow the documented behaviour.
 [L<perl #121230|https://rt.perl.org/Public/Bug/Display.html?id=121230>]
 
 When building a 64-bit perl, an uninitialized memory read in B<miniperl.exe>,
@@ -411,9 +185,9 @@ obviously B<wperl.exe> would have been completely broken.)
 [L<perl #121471|https://rt.perl.org/Public/Bug/Display.html?id=121471>]
 
 Perl can now be built with B<gcc> version 4.8.1 from L<http://www.mingw.org>.
-This was previously broken due to an incorrect definition of C<DllMain()> in
-one of perl's source files.  Earlier B<gcc> versions were also affected when
-using version 4 of the w32api package.  Versions of B<gcc> available from
+This was previously broken due to an incorrect definition of DllMain() in one
+of perl's source files.  Earlier B<gcc> versions were also affected when using
+version 4 of the w32api package.  Versions of B<gcc> available from
 L<http://mingw-w64.sourceforge.net/> were not affected.
 [L<perl #121643|https://rt.perl.org/Public/Bug/Display.html?id=121643>]
 
@@ -425,48 +199,37 @@ Windows OS on an NTFS drive.
 
 =head1 Internal Changes
 
-XXX Changes which affect the interface available to C<XS> code go here.  Other
-significant internal changes for future core maintainers should be noted as
-well.
-
-[ List each change as a =item entry ]
-
 =over 4
 
 =item *
 
-C<LC_NUMERIC> is now initialized to the C locale.  This affects only
-C<XS> modules, as the Perl core usages always make sure this locale
-category is correctly set for their purposes.  C<XS> code remains
-vulnerable to other code changing this category's locale.  Further fixes
-are planned in v5.22 to reduce these long-standing vulnerabilities.
+C<LC_NUMERIC> is now initialized to the C locale.  This affects only XS
+modules, as the Perl core usages always make sure this locale category is
+correctly set for their purposes.  XS code remains vulnerable to other code
+changing this category's locale.  Further fixes are planned in Perl 5.22 to
+reduce these long-standing vulnerabilities.
 [L<perl #121317|https://rt.perl.org/Public/Bug/Display.html?id=121317>]
 
 =back
 
 =head1 Selected Bug Fixes
 
-XXX Important bug fixes in the core language are summarized here.  Bug fixes in
-files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
-
-[ List each fix as a =item entry ]
-
 =over 4
 
 =item *
 
-A regression involving the string value of C<$!> introduced in v5.19.2
-has been reverted for v5.20.
+A regression involving the string value of L<C<$!>|perlvar/$!> introduced in
+Perl 5.19.2 has been reverted for Perl 5.20.
 [L<perl #119499|https://rt.perl.org/Public/Bug/Display.html?id=119499>]
 
 This re-breaks the bugs it fixed,
-L<perl #112208|https://rt.perl.org/Public/Bug/Display.html?id=112208>, so
-an alternative fix is planned for v5.22
+L<perl #112208|https://rt.perl.org/Public/Bug/Display.html?id=112208>, so an
+alternative fix is planned for Perl 5.22
 
 =item *
 
-A regression was introduced in v5.19.10 that under some circumstances
-caused C<//m> matches to falsely fail. Now fixed.
+A regression was introduced in Perl 5.19.10 that under some circumstances
+caused C<//m> matches to falsely fail.  Now fixed.
 [L<perl #121484|https://rt.perl.org/Public/Bug/Display.html?id=121484>]
 
 =item *
@@ -479,23 +242,21 @@ This has been fixed.
 
 =item *
 
-Fixed a bug detected by valgrind where sv_pvn_force_flags() would
-check SvPVX() even when the SV hadn't been upgraded to a C<SVt_PV>.
-SvPVX() is only initialized when the SV is upgraded to a C<SVt_PV> or
-higher.  [L<perl
-#121366|https://rt.perl.org/Public/Bug/Display.html?id=121366>]
+Fixed a bug detected by valgrind where sv_pvn_force_flags() would check SvPVX()
+even when the SV hadn't been upgraded to a SVt_PV.  SvPVX() is only initialized
+when the SV is upgraded to a SVt_PV or higher.
+[L<perl #121366|https://rt.perl.org/Public/Bug/Display.html?id=121366>]
 
 =item *
 
-Fixed a bug in caller() introduced in 5.18.0.  In some circumstances
-when caller() was called on an C<eval STRING> stack frame it would
-attempt to allocate the limit of the address space minus one, which
-would croak with an out of memory error, which would be caught by the
-eval.  A change in 5.19.1 which increased allocation sizes to allow
-COW to operate more often rounded that allocation size up and wrapped
-to a zero allocation size, resulting in a crash when the source string
-was copied over.  [L<perl
-#120998|https://rt.perl.org/Public/Bug/Display.html?id=120998>].
+Fixed a bug in L<C<caller()>|perlfunc/caller> introduced in Perl 5.18.0.  In
+some circumstances when C<caller()> was called on an C<eval STRING> stack frame
+it would attempt to allocate the limit of the address space minus one, which
+would croak with an out of memory error, which would be caught by the eval.  A
+change in Perl 5.19.1 which increased allocation sizes to allow COW to operate
+more often rounded that allocation size up and wrapped to a zero allocation
+size, resulting in a crash when the source string was copied over.
+[L<perl #120998|https://rt.perl.org/Public/Bug/Display.html?id=120998>].
 
 =back
 
@@ -512,22 +273,6 @@ L<http://sourceforge.net/p/mingw/bugs/2152/>.
 
 =back
 
-=head1 Errata From Previous Releases
-
-=over 4
-
-=item *
-
-XXX Add anything here that we forgot to add, or were mistaken about, in
-the perldelta of a previous release.
-
-=back
-
-=head1 Obituary
-
-XXX If any significant core contributor has died, we've added a short obituary
-here.
-
 =head1 Acknowledgements
 
 XXX Generate this with:
@@ -538,8 +283,8 @@ XXX Generate this with:
 
 If you find what you think is a bug, you might check the articles recently
 posted to the comp.lang.perl.misc newsgroup and the perl bug database at
-https://rt.perl.org/ .  There may also be information at
-http://www.perl.org/ , the Perl Home Page.
+https://rt.perl.org/ .  There may also be information at http://www.perl.org/ ,
+the Perl Home Page.
 
 If you believe you have an unreported bug, please run the L<perlbug> program
 included with your release.  Be sure to trim your bug down to a tiny but

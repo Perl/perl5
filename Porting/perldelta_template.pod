@@ -213,11 +213,11 @@ XXX Describe change here
 XXX Changes to installed programs such as F<perlbug> and F<xsubpp> go here.
 Most of these are built within the directories F<utils> and F<x2p>.
 
-[ List utility changes as a =head3 entry for each utility and =item
+[ List utility changes as a =head2 entry for each utility and =item
 entries for each change
 Use L<XXX> with program names to get proper documentation linking. ]
 
-=head3 L<XXX>
+=head2 L<XXX>
 
 =over 4
 
