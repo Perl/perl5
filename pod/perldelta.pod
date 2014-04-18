@@ -44,7 +44,7 @@ keep in sync with the latest CPAN release.
 
 =item *
 
-L<CPAN> has been upgraded from version 2.04-TRIAL to 2.05-TRIAL2.
+L<CPAN> has been upgraded from version 2.04-TRIAL to 2.05.
 
 This fixes L<local::lib> shell variable string output and prevents an endless
 loop when running "notest test Module" for some Module having dependencies.

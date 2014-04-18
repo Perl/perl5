@@ -3758,7 +3758,7 @@ which to try in which order.
 
 Henk P. Penning maintains a site that collects data about CPAN sites:
 
-  http://www.cs.uu.nl/people/henkp/mirmon/cpan.html
+  http://mirrors.cpan.org/
 
 Also, feel free to play with experimental features. Run
 
