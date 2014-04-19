@@ -522,7 +522,7 @@ SKIP: {
 
     my $x = "Perlα";
     $x =~ tr/αα/βγ/;
-    note $x;
+    { no warnings 'utf8'; print "# $x\n"; } # No note() to avoid wide warning.
     is($x, "Perlβ", "Only first of multiple transliterations is used");
 }
 

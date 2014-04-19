@@ -418,9 +418,14 @@ foreach my $test_ref (@CF) {
 }
 
 
-{
+SKIP: {
     use feature qw( fc unicode_strings );
-    use if $Config{d_setlocale}, qw(POSIX locale_h);
+
+    eval { require POSIX; import POSIX 'locale_h'; };
+    unless (defined &POSIX::LC_ALL) {
+       skip "no POSIX (or no Fcntl, or no dynamic loading)", 256;
+    }
+
     setlocale(&POSIX::LC_ALL, "C") if $Config{d_setlocale};
 
     # This tests both code paths in pp_fc
