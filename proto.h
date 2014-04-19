@@ -6701,6 +6701,12 @@ PERL_STATIC_INLINE U8	S_compute_EXACTish(pTHX_ RExC_state_t *pRExC_state)
 #define PERL_ARGS_ASSERT_COMPUTE_EXACTISH	\
 	assert(pRExC_state)
 
+STATIC regnode *	S_construct_ahocorasick_from_trie(pTHX_ RExC_state_t *pRExC_state, regnode *source, U32 depth)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_CONSTRUCT_AHOCORASICK_FROM_TRIE	\
+	assert(pRExC_state); assert(source)
+
 STATIC bool	S_could_it_be_a_POSIX_class(pTHX_ RExC_state_t *pRExC_state)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_COULD_IT_BE_A_POSIX_CLASS	\
@@ -6827,13 +6833,6 @@ STATIC I32	S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, re
 			__attribute__nonnull__(pTHX_5);
 #define PERL_ARGS_ASSERT_MAKE_TRIE	\
 	assert(pRExC_state); assert(startbranch); assert(first); assert(last); assert(tail)
-
-STATIC void	S_make_trie_failtable(pTHX_ RExC_state_t *pRExC_state, regnode *source, regnode *stclass, U32 depth)
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2)
-			__attribute__nonnull__(pTHX_3);
-#define PERL_ARGS_ASSERT_MAKE_TRIE_FAILTABLE	\
-	assert(pRExC_state); assert(source); assert(stclass)
 
 STATIC char *	S_nextchar(pTHX_ RExC_state_t *pRExC_state)
 			__attribute__nonnull__(pTHX_1);

@@ -2984,8 +2984,8 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
              : MADE_TRIE;
 }
 
-STATIC void
-S_make_trie_failtable(pTHX_ RExC_state_t *pRExC_state, regnode *source,  regnode *stclass, U32 depth)
+STATIC regnode *
+S_construct_ahocorasick_from_trie(pTHX_ RExC_state_t *pRExC_state, regnode *source, U32 depth)
 {
 /* The Trie is constructed and compressed now so we can build a fail array if
  * it's needed
@@ -3023,13 +3023,26 @@ S_make_trie_failtable(pTHX_ RExC_state_t *pRExC_state, regnode *source,  regnode
     U32 *fail;
     reg_ac_data *aho;
     const U32 data_slot = add_data( pRExC_state, STR_WITH_LEN("T"));
+    regnode *stclass;
     GET_RE_DEBUG_FLAGS_DECL;
 
-    PERL_ARGS_ASSERT_MAKE_TRIE_FAILTABLE;
+    PERL_ARGS_ASSERT_CONSTRUCT_AHOCORASICK_FROM_TRIE;
 #ifndef DEBUGGING
     PERL_UNUSED_ARG(depth);
 #endif
 
+    if ( OP(source) == TRIE ) {
+        struct regnode_1 *op = (struct regnode_1 *)
+            PerlMemShared_calloc(1, sizeof(struct regnode_1));
+        StructCopy(source,op,struct regnode_1);
+        stclass = (regnode *)op;
+    } else {
+        struct regnode_charclass *op = (struct regnode_charclass *)
+            PerlMemShared_calloc(1, sizeof(struct regnode_charclass));
+        StructCopy(source,op,struct regnode_charclass);
+        stclass = (regnode *)op;
+    }
+    OP(stclass)+=2; /* covert the TRIE type to its AHO-CORASICK equivalent */
 
     ARG_SET( stclass, data_slot );
     aho = (reg_ac_data *) PerlMemShared_calloc( 1, sizeof(reg_ac_data) );
@@ -3096,6 +3109,7 @@ S_make_trie_failtable(pTHX_ RExC_state_t *pRExC_state, regnode *source,  regnode
     });
     Safefree(q);
     /*RExC_seen |= REG_TRIEDFA_SEEN;*/
+    return stclass;
 }
 
 
@@ -6824,22 +6838,8 @@ reStudy:
 	else if (PL_regkind[OP(first)] == TRIE &&
 	        ((reg_trie_data *)ri->data->data[ ARG(first) ])->minlen>0)
 	{
-	    regnode *trie_op;
-	    /* this can happen only on restudy */
-	    if ( OP(first) == TRIE ) {
-                struct regnode_1 *trieop = (struct regnode_1 *)
-		    PerlMemShared_calloc(1, sizeof(struct regnode_1));
-                StructCopy(first,trieop,struct regnode_1);
-                trie_op=(regnode *)trieop;
-            } else {
-                struct regnode_charclass *trieop = (struct regnode_charclass *)
-		    PerlMemShared_calloc(1, sizeof(struct regnode_charclass));
-                StructCopy(first,trieop,struct regnode_charclass);
-                trie_op=(regnode *)trieop;
-            }
-            OP(trie_op)+=2;
-            make_trie_failtable(pRExC_state, (regnode *)first, trie_op, 0);
-	    ri->regstclass = trie_op;
+            /* this can happen only on restudy */
+            ri->regstclass = construct_ahocorasick_from_trie(pRExC_state, (regnode *)first, 0);
 	}
 #endif
 	else if (REGNODE_SIMPLE(OP(first)))
@@ -16192,7 +16192,16 @@ Perl_regfree_internal(pTHX_ REGEXP * const rx)
                         PerlMemShared_free(aho->fail);
 			 /* do this last!!!! */
                         PerlMemShared_free(ri->data->data[n]);
-                        PerlMemShared_free(ri->regstclass);
+                        /* we should only ever get called once, so
+                         * assert as much, and also guard the free
+                         * which /might/ happen twice. At the least
+                         * it will make code anlyzers happy and it
+                         * doesn't cost much. - Yves */
+                        assert(ri->regstclass);
+                        if (ri->regstclass) {
+                            PerlMemShared_free(ri->regstclass);
+                            ri->regstclass = 0;
+                        }
                     }
                 }
                 break;
