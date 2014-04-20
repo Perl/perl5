@@ -17,6 +17,27 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.19.11 - Lautréamont, Les Chants de Maldoror
+
+L<Announced on 2014-04-20 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2014/04/msg214580.html>
+
+O rigorous mathematics, I have not forgotten you since your wise lessons,
+sweeter than honey, filtered into my heart like a refreshing wave.
+Instinctively, from the cradle, I had longed to drink from your source, older
+than the sun, and I continue to tread the sacred sanctuary of your solemn
+temple, I, the most faithful of your devotees.  There was a vagueness in my
+mind, something thick as smoke; but I managed to mount the steps which lead to
+your altar, and you drove away this dark veil, as the wind blows the
+draught-board.  You replaced it with excessive coldness, consummate prudence and
+implacable logic.  With the aid of your fortifying milk, my intellect developed
+rapidly and took on immense proportions amid the ravishing lucidity which you
+bestow as a gift on all those who sincerely love you.  Arithmetic!  Algebra!
+Geometry!  Awe-inspiring trinity!  Luminous triangle!  He who has not known you
+is a fool!
+
+  -- Isidore-Lucien Ducasse [as "Comte de Lautréamont"],
+     /Les Chants de Maldoror/, trans. Paul Knight
+
 =head2 v5.19.10 - John Chadwick, The Decipherment of Linear B
 
 L<Announced on 2014-03-20 by Aaron Crane|http://www.nntp.perl.org/group/perl.perl5.porters/2014/03/msg213851.html>
