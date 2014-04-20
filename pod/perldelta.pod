@@ -183,7 +183,7 @@ the test completes, and the full timeout period elapsed before running the next
 test file.
 [L<perl #121395|https://rt.perl.org/Public/Bug/Display.html?id=121395>]
 
-On a perl built without psuedo-fork (psuedo-fork builds were not affected by
+On a perl built without pseudo-fork (pseudo-fork builds were not affected by
 this bug), killing a process tree with L<C<kill()>|perlfunc/kill> and a negative
 signal resulted in C<kill()> inverting the returned value.  For example, if
 C<kill()> killed 1 process tree PID then it returned 0 instead of 1, and if
@@ -289,9 +289,33 @@ L<http://sourceforge.net/p/mingw/bugs/2152/>.
 
 =head1 Acknowledgements
 
-XXX Generate this with:
+Perl 5.19.11 represents approximately 4 weeks of development since Perl 5.19.10
+and contains approximately 3,600 lines of changes across 140 files from 18
+authors.
 
-  perl Porting/acknowledgements.pl v5.19.10..HEAD
+Excluding auto-generated files, documentation and release tools, there were
+approximately 850 lines of changes to 72 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its third decade thanks to a vibrant community
+of users and developers.  The following people are known to have contributed
+the improvements that became Perl 5.19.11:
+
+Aaron Crane, Chris 'BinGOs' Williams, Craig A. Berry, Daniel Dragan, David
+Golden, David Mitchell, H.Merijn Brand, Hiroo Hayashi, Karl Williamson, Matthew
+Horsfall, Ricardo Signes, Shirakata Kentaro, Smylers, Steve Hay, Thomas Sibley,
+Tony Cook, Zefram, Ævar Arnfjörð Bjarmason.
+
+The list above is almost certainly incomplete as it is automatically generated
+from version control history.  In particular, it does not include the names of
+the (very much appreciated) contributors who reported issues to the Perl bug
+tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core.  We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please see
+the F<AUTHORS> file in the Perl source distribution.
 
 =head1 Reporting Bugs
 
