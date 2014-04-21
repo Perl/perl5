@@ -1129,6 +1129,12 @@ null operation in "my"'.
 When C<use re "debug"> executes a regex containing a backreference, the
 debugging output now shows what string is being matched.
 
+=item *
+
+The now fatal error message C<Character following "\c" must be ASCII> has been
+reworded as C<Character following "\c" must be printable ASCII> to emphasize
+that in C<\cI<X>>, I<X> must be a I<printable (non-control)> ASCII character.
+
 =back
 
 =head1 Utility Changes
@@ -1201,8 +1207,15 @@ F<perlbug> now has a C<-p> option for attaching patches with a bug report.
 
 =item *
 
-F<perlbug> now does input in the encoding of the current locale and
-output raw.
+L<perlbug> has been modified to supply the report template with CRLF line
+endings on Windows.
+[L<perl #121277|https://rt.perl.org/Public/Bug/Display.html?id=121277>]
+
+=item *
+
+L<perlbug> now makes as few assumptions as possible about the encoding of the
+report.  This will likely change in the future to assume UTF-8 by default but
+allow a user override.
 
 =back
 
@@ -1308,6 +1321,17 @@ Related to the above, there is now a way of specifying the location of sh
 For example, Android has its sh in /system/bin/sh, so if cross-compiling
 from a more normal Unixy system with sh in /bin/sh, "targetsh" would end
 up as /system/bin/sh, and "sh" as /bin/sh.
+
+=item *
+
+By default, B<gcc> 4.9 does some optimizations that break perl.  The B<-fwrapv>
+option disables those optimizations (and probably others), so for B<gcc> 4.9
+(and later, since the optimizations probably won't go away), F<Configure> now
+adds B<-fwrapv> unless the user requests B<-fno-wrapv>, which disables
+B<-fwrapv>, or B<-fsanitize=undefined>, which turns the overflows B<-fwrapv>
+ignores into runtime errors.  (This is not done prior to B<gcc> 4.3, since
+B<-fwrapv> was broken then.)
+[L<perl #121505|https://rt.perl.org/Public/Bug/Display.html?id=121505>]
 
 =back
 
@@ -1463,6 +1487,14 @@ start-up was broken in Perl 5.16.0 but has now been fixed.
 
 Skip access checks on remotes in opendir().  [perl #121002]
 
+=item *
+
+A check for glob metacharacters in a path returned by the
+L<C<glob()>|perlfunc/glob> operator has been replaced with a check for VMS
+wildcard characters.  This saves a significant number of unnecessary
+L<C<lstat()>|perlfunc/lstat> calls such that some simple glob operations become
+60-80% faster.
+
 =back
 
 =item Win32
@@ -1510,6 +1542,56 @@ Killing a process tree with L<perlfunc/kill> and a negative signal, was broken
 starting in 5.18.0. In this bug, C<kill> always returned 0 for a negative
 signal even for valid PIDs, and no processes were terminated. This has been
 fixed [perl #121230].
+
+=item *
+
+The time taken to build perl on Windows has been reduced quite significantly
+(time savings in the region of 30-40% are typically seen) by reducing the
+number of, usually failing, I/O calls for each L<C<require()>|perlfunc/require>
+(for B<miniperl.exe> only).
+[L<perl #121119|https://rt.perl.org/Public/Bug/Display.html?id=121119>]
+
+=item *
+
+About 15 minutes of idle sleeping was removed from running C<make test> due to
+a bug in which the timeout monitor used for tests could not be cancelled once
+the test completes, and the full timeout period elapsed before running the next
+test file.
+[L<perl #121395|https://rt.perl.org/Public/Bug/Display.html?id=121395>]
+
+=item *
+
+On a perl built without pseudo-fork (pseudo-fork builds were not affected by
+this bug), killing a process tree with L<C<kill()>|perlfunc/kill> and a negative
+signal resulted in C<kill()> inverting the returned value.  For example, if
+C<kill()> killed 1 process tree PID then it returned 0 instead of 1, and if
+C<kill()> was passed 2 invalid PIDs then it returned 2 instead of 0.  This has
+probably been the case since the process tree kill feature was implemented on
+Win32.  It has now been corrected to follow the documented behaviour.
+[L<perl #121230|https://rt.perl.org/Public/Bug/Display.html?id=121230>]
+
+=item *
+
+When building a 64-bit perl, an uninitialized memory read in B<miniperl.exe>,
+used during the build process, could lead to a 4GB B<wperl.exe> being created.
+This has now been fixed.  (Note that B<perl.exe> itself was unaffected, but
+obviously B<wperl.exe> would have been completely broken.)
+[L<perl #121471|https://rt.perl.org/Public/Bug/Display.html?id=121471>]
+
+=item *
+
+Perl can now be built with B<gcc> version 4.8.1 from L<http://www.mingw.org>.
+This was previously broken due to an incorrect definition of DllMain() in one
+of perl's source files.  Earlier B<gcc> versions were also affected when using
+version 4 of the w32api package.  Versions of B<gcc> available from
+L<http://mingw-w64.sourceforge.net/> were not affected.
+[L<perl #121643|https://rt.perl.org/Public/Bug/Display.html?id=121643>]
+
+=item *
+
+The test harness now has no failures when perl is built on a FAT drive with the
+Windows OS on an NTFS drive.
+[L<perl #21442|https://rt.perl.org/Public/Bug/Display.html?id=21442>]
 
 =back
 
@@ -2935,7 +3017,7 @@ L<HTML::StripScripts> version 1.05
 
 L<LaTeX::Encode> version 0.08
 
-=item
+=item *
 
 L<Mail::SpamAssassin> version 3.3.2
 
