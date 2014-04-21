@@ -15831,10 +15831,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
     }
     else if (k == POSIXD || k == NPOSIXD) {
         U8 index = FLAGS(o) * 2;
-        if (index > (sizeof(anyofs) / sizeof(anyofs[0]))) {
-            Perl_sv_catpvf(aTHX_ sv, "[illegal type=%d])", index);
-        }
-        else {
+        if (index < C_ARRAY_LENGTH(anyofs)) {
             if (*anyofs[index] != '[')  {
                 sv_catpv(sv, "[");
             }
@@ -15842,6 +15839,9 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
             if (*anyofs[index] != '[')  {
                 sv_catpv(sv, "]");
             }
+        }
+        else {
+            Perl_sv_catpvf(aTHX_ sv, "[illegal type=%d])", index);
         }
     }
     else if (k == BRANCHJ && (OP(o) == UNLESSM || OP(o) == IFMATCH))
