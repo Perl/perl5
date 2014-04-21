@@ -205,7 +205,12 @@ an experimental feature useful and want to help shape its future.
 =item deprecated
 
 If something in the Perl core is marked as B<deprecated>, we may remove it
-from the core in the next stable release series, though we may not. As of
+from the core in the future, though we might not.  Generally, backward
+incompatible changes will have deprecation warnings for two release
+cycles before being removed, but may be removed after just one cycle if
+the risk seems quite low or the benefits quite high.
+
+As of
 Perl 5.12, deprecated features and modules warn the user as they're used.
 When a module is deprecated, it will also be made available on CPAN.
 Installing it from CPAN will silence deprecation warnings for that module.
@@ -221,14 +226,14 @@ features.
 
 From time to time, we may mark language constructs and features which we
 consider to have been mistakes as B<discouraged>.  Discouraged features
-aren't candidates for removal in the next major release series, but
+aren't currently candidates for removal, but
 we may later deprecate them if they're found to stand in the way of a
 significant improvement to the Perl core.
 
 =item removed
 
-Once a feature, construct or module has been marked as deprecated for a
-stable release cycle, we may remove it from the Perl core.  Unsurprisingly,
+Once a feature, construct or module has been marked as deprecated, we
+may remove it from the Perl core.  Unsurprisingly,
 we say we've B<removed> these things.  When a module is removed, it will
 no longer ship with Perl, but will continue to be available on CPAN.
 
