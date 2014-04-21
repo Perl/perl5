@@ -63,9 +63,7 @@ S_grok_bslash_c(pTHX_ const char source, const bool output_warning)
     }
 
     result = toCTRL(source);
-    if (output_warning && ! isCNTRL_L1(result)) {
-        /* We use isCNTRL_L1 above and not simply isCNTRL, because on EBCDIC
-         * machines, things like \cT map into a C1 control. */
+    if (output_warning && isPRINT_A(result)) {
         U8 clearer[3];
         U8 i = 0;
         if (! isWORDCHAR(result)) {
