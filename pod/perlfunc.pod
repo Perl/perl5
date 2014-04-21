@@ -1368,9 +1368,10 @@ in their corresponding positions.
 delete() may also be used on arrays and array slices, but its behavior is less
 straightforward.  Although exists() will return false for deleted entries,
 deleting array elements never changes indices of existing values; use shift()
-or splice() for that.  However, if all deleted elements fall at the end of an
+or splice() for that.  However, if any deleted elements fall at the end of an
 array, the array's size shrinks to the position of the highest element that
-still tests true for exists(), or to 0 if none do.
+still tests true for exists(), or to 0 if none do. In other words, an
+array won't have trailing nonexistent elements after a delete.
 
 B<WARNING:> Calling delete on array values is deprecated and likely to
 be removed in a future version of Perl.
