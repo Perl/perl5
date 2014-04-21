@@ -7796,20 +7796,19 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
 	    SV * const sw = _get_regclass_nonbitmap_data(prog, n, TRUE, 0,
                                                             &only_utf8_locale);
 	    if (sw) {
+                U8 utf8_buffer[2];
 		U8 * utf8_p;
 		if (utf8_target) {
 		    utf8_p = (U8 *) p;
 		} else { /* Convert to utf8 */
-		    STRLEN len = 1;
-		    utf8_p = bytes_to_utf8(p, &len);
+		    utf8_p = utf8_buffer;
+                    append_utf8_from_native_byte(*p, &utf8_p);
+		    utf8_p = utf8_buffer;
 		}
 
 		if (swash_fetch(sw, utf8_p, TRUE)) {
 		    match = TRUE;
                 }
-
-		/* If we allocated a string above, free it */
-		if (! utf8_target) Safefree(utf8_p);
 	    }
             if (! match && only_utf8_locale && IN_UTF8_CTYPE_LOCALE) {
                 match = _invlist_contains_cp(only_utf8_locale, c);
