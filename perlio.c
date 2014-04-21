@@ -2905,6 +2905,7 @@ PerlIOStdio_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg, PerlIO_funcs *tab
 		PerlIOSelf(f, PerlIOStdio)->stdio = stdio;
 	    	/* We never call down so do any pending stuff now */
 	    	PerlIO_flush(PerlIONext(f));
+                return PerlIOBase_pushed(aTHX_ f, mode, arg, tab);
 	    }
 	    else {
 		return -1;
