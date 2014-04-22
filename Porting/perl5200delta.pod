@@ -2919,12 +2919,6 @@ Fixed a crash when destroying a self-referencing GLOB.  [perl #121242]
 
 =head1 Known Problems
 
-XXX Descriptions of platform agnostic bugs we know we can't fix go here.  Any
-tests that had to be C<TODO>ed for the release would be noted here.  Unfixed
-platform specific bugs also go here.
-
-[ List each fix as a =item entry ]
-
 =over 4
 
 =item *
@@ -2971,11 +2965,6 @@ L<XML::LibXML> version 2.0108.  A patch to XML::LibXML has been submitted.
 =back
 
 =back
-
-=head1 Obituary
-
-XXX If any significant core contributor has died, we've added a short obituary
-here.
 
 =head1 Acknowledgements
 
