@@ -1962,6 +1962,52 @@ them [perl #118839].
 
 =back
 
+=head2 Lexical Subroutines
+
+=over 4
+
+=item *
+
+Lexical constants (C<my sub a() { 42 }>) no longer crash when inlined.
+
+=item *
+
+Parameter prototypes attached to lexical subroutines are now respected when
+compiling sub calls without parentheses.  Previously, the prototypes were
+honoured only for calls I<with> parentheses. [RT #116735]
+
+=item *
+
+Syntax errors in lexical subroutines in combination with calls to the same
+subroutines no longer cause crashes at compile time.
+
+=item *
+
+Deep recursion warnings no longer crash lexical subroutines. [RT #118521]
+
+=item *
+
+The dtrace sub-entry probe now works with lexical subs, instead of
+crashing [perl #118305].
+
+=item *
+
+Undefining an inlinable lexical subroutine (C<my sub foo() { 42 } undef
+&foo>) would result in a crash if warnings were turned on.
+
+=item *
+
+An undefined lexical sub used as an inherited method no longer crashes.
+
+=item *
+
+The presence of a lexical sub named "CORE" no longer stops the CORE::
+prefix from working.
+
+=back
+
+=head2 Everything Else
+
 =over 4
 
 =item *
@@ -2004,25 +2050,6 @@ taking precedeence.  The old behaviour has been restored. [RT #118159]
 Since Perl v5.12, inlining of constants that override built-in keywords of
 the same name had countermanded C<use subs>, causing subsequent mentions of
 the constant to use the built-in keyword instead.  This has been fixed.
-
-=item *
-
-Lexical constants (C<my sub a() { 42 }>) no longer crash when inlined.
-
-=item *
-
-Parameter prototypes attached to lexical subroutines are now respected when
-compiling sub calls without parentheses.  Previously, the prototypes were
-honoured only for calls I<with> parentheses. [RT #116735]
-
-=item *
-
-Syntax errors in lexical subroutines in combination with calls to the same
-subroutines no longer cause crashes at compile time.
-
-=item *
-
-Deep recursion warnings no longer crash lexical subroutines. [RT #118521]
 
 =item *
 
@@ -2118,11 +2145,6 @@ warnings were enabled.
 
 =item *
 
-The dtrace sub-entry probe now works with lexical subs, instead of
-crashing [perl #118305].
-
-=item *
-
 Compiling a C<split> operator whose third argument is a named constant
 evaulating to 0 no longer causes the constant's value to change.
 
@@ -2143,11 +2165,6 @@ When a scalar was returned from a subroutine in @INC, the referenced scalar
 was magically converted into an IO thingy, possibly resulting in "Bizarre
 copy" errors if that scalar continued to be used elsewhere.  Now Perl uses
 an internal copy of the scalar instead.
-
-=item *
-
-Undefining an inlinable lexical subroutine (C<my sub foo() { 42 } undef
-&foo>) would result in a crash if warnings were turned on.
 
 =item *
 
@@ -2640,10 +2657,6 @@ disallowed once more, as in 5.16.
 
 =item *
 
-An undefined lexical sub used as an inherited method no longer crashes.
-
-=item *
-
 C<< $x->{key} >> where $x was declared as C<my Class $x> no longer crashes
 if a Class::FIELDS subroutine stub has been declared.
 
@@ -2685,11 +2698,6 @@ operators act like C<q{}>, suppressing interpolation.  [perl #115330]
 
 C<<<<`...`> here-docs (with backticks as the delimiters) now call
 C<readpipe> overrides.  [perl #119827]
-
-=item *
-
-The presence of a lexical sub named "CORE" no longer stops the CORE::
-prefix from working.
 
 =item *
 
