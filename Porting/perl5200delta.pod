@@ -1523,7 +1523,7 @@ appropriate.  [perl #119857]
 =item *
 
 The BUILD_STATIC and ALL_STATIC makefile options for linking some or (nearly)
-all extensions statically (into perl519.dll, and into a separate
+all extensions statically (into perl520.dll, and into a separate
 perl-static.exe too) were broken for MinGW builds. This has now been fixed.
 
 The ALL_STATIC option has also been improved to include the Encode and Win32
