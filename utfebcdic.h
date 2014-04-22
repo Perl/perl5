@@ -7,15 +7,15 @@
  *    License or the Artistic License, as specified in the README file.
  *
  * Macros to implement UTF-EBCDIC as perl's internal encoding
- * Taken from version 7.1 of Unicode Technical Report #16:
+ * Adapted from version 7.1 of Unicode Technical Report #16:
  *  http://www.unicode.org/unicode/reports/tr16
  *
  * To summarize, the way it works is:
  * To convert an EBCDIC character to UTF-EBCDIC:
  *  1)	convert to Unicode.  The table in this file that does this for
- *	EBCDIC bytes is PL_e2a (with inverse PLa2e).  The 'a' stands for
- *	ASCIIish, meaning latin1.
- *  2)	convert that to a utf8-like string called I8 (I stands for
+ *	EBCDIC bytes is PL_e2a (with inverse PL_a2e).  The 'a' stands for
+ *     ASCII platform, meaning latin1.
+ *  2)	convert that to a utf8-like string called I8 ('I' stands for
  *	intermediate) with variant characters occupying multiple bytes.  This
  *	step is similar to the utf8-creating step from Unicode, but the details
  *	are different.  This transformation is called UTF8-Mod.  There is a
@@ -29,20 +29,21 @@
  *			    trailing 0 for the very largest possible allocation
  *			    in I8, far beyond the current Unicode standard's
  *			    max, as shown in the comment later in this file.)
- *  3)	Use the table published in tr16 to convert each byte from step 2 into
- *	final UTF-EBCDIC.  That table is reproduced in this file as PL_utf2e,
- *	and its inverse is PL_e2utf.  They are constructed so that all EBCDIC
- *	invariants remain invariant, but no others do.  For example, the
- *	ordinal value of 'A' is 193 in EBCDIC, and also is 193 in UTF-EBCDIC.
- *	Step 1) converts it to 65, Step 2 leaves it at 65, and Step 3 converts
- *	it back to 193.  As an example of how a variant character works, take
- *	LATIN SMALL LETTER Y WITH DIAERESIS, which is typically 0xDF in
- *	EBCDIC.  Step 1 converts it to the Unicode value, 0xFF.  Step 2
- *	converts that to two bytes = 11000111 10111111 = C7 BF, and Step 3
- *	converts those to 0x8B 0x73.  The table is constructed so that the
- *	first byte of the final form of a variant will always have its upper
- *	bit set (at least in the encodings that Perl recognizes, and probably
- *	all).  But note that the upper bit of some invariants is also 1.
+ *  3)	Use the algorithm in tr16 to convert each byte from step 2 into
+ *	final UTF-EBCDIC.  This is done by table lookup from a table
+ *	constructed from the algorithm, reproduced in this file as
+ *	PL_utf2e, with its inverse being PL_e2utf.  They are constructed so that
+ *	all EBCDIC invariants remain invariant, but no others do, and the first
+ *	byte of a variant will always have its upper bit set.  But note that
+ *	the upper bit of some invariants is also 1.
+ *
+ *  For example, the ordinal value of 'A' is 193 in EBCDIC, and also is 193 in
+ *  UTF-EBCDIC.  Step 1) converts it to 65, Step 2 leaves it at 65, and Step 3
+ *  converts it back to 193.  As an example of how a variant character works,
+ *  take LATIN SMALL LETTER Y WITH DIAERESIS, which is typically 0xDF in
+ *  EBCDIC.  Step 1 converts it to the Unicode value, 0xFF.  Step 2 converts
+ *  that to two bytes = 11000111 10111111 = C7 BF, and Step 3 converts those to
+ *  0x8B 0x73.
  *
  * If you're starting from Unicode, skip step 1.  For UTF-EBCDIC to straight
  * EBCDIC, reverse the steps.
@@ -56,20 +57,38 @@
  * The purpose of Step 3 is to make the encoding be invariant for the chosen
  * characters.  This messes up the convenient patterns found in step 2, so
  * generally, one has to undo step 3 into a temporary to use them.  However,
- * a "shadow", or parallel table, PL_utf8skip, has been constructed so that for
- * each byte, it says how long the sequence is if that byte were to begin it
+ * one "shadow", or parallel table, PL_utf8skip, has been constructed that
+ * doesn't require undoing things.  It is such that for each byte, it says
+ * how long the sequence is if that (UTF-EBCDIC) byte were to begin it
  *
- * There are actually 3 slightly different UTF-EBCDIC encodings in this file,
- * one for each of the code pages recognized by Perl.  That means that there
- * are actually three different sets of tables, one for each code page.  (If
- * Perl is compiled on platforms using another EBCDIC code page, it may not
- * compile, or Perl may silently mistake it for one of the three.)
+ * There are actually 3 slightly different UTF-EBCDIC encodings in
+ * this file, one for each of the code pages recognized by Perl.  That
+ * means that there are actually three different sets of tables, one for each
+ * code page.  (If Perl is compiled on platforms using another EBCDIC code
+ * page, it may not compile, or Perl may silently mistake it for one of the
+ * three.)
+ *
+ * Note that tr16 actually only specifies one version of UTF-EBCDIC, based on
+ * the 1047 encoding, and which is supposed to be used for all code pages.
+ * But this doesn't work.  To illustrate the problem, consider the '^' character.
+ * On a 037 code page it is the single byte 176, whereas under 1047 UTF-EBCDIC
+ * it is the single byte 95.  If Perl implemented tr16 exactly, it would mean
+ * that changing a string containing '^' to UTF-EBCDIC would change that '^'
+ * from 176 to 95 (and vice-versa), violating the rule that ASCII-range
+ * characters are the same in UTF-8 or not.  Much code in Perl assumes this
+ * rule.  See for example
+ * http://grokbase.com/t/perl/mvs/025xf0yhmn/utf-ebcdic-for-posix-bc-malformed-utf-8-character
+ * What Perl does is create a version of UTF-EBCDIC suited to each code page;
+ * the one for the 1047 code page is identical to what's specified in tr16.
+ * This complicates interchanging files between computers using different code
+ * pages.  Best is to convert to I8 before sending them, as the I8
+ * representation is the same no matter what the underlying code page is.
  *
  * EBCDIC characters above 0xFF are the same as Unicode in Perl's
  * implementation of all 3 encodings, so for those Step 1 is trivial.
  *
  * (Note that the entries for invariant characters are necessarily the same in
- * PL_e2a and PLe2f, and the same for their inverses.)
+ * PL_e2a and PL_e2utf; likewise for their inverses.)
  *
  * UTF-EBCDIC strings are the same length or longer than UTF-8 representations
  * of the same string.  The maximum code point representable as 2 bytes in
