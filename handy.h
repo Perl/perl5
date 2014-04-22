@@ -1106,40 +1106,32 @@ EXTCONST U32 PL_charclass[];
 #   ifdef EBCDIC
         /* Use the native functions.  They likely will return false for all
          * non-ASCII values, but this makes sure */
-#       define isALPHA_A(c)    (isASCII(c) && isalpha(c))
-#       define isALPHANUMERIC_A(c) (isASCII(c) && isalnum(c))
-#       define isCNTRL_A(c)    (isASCII(c) && iscntrl(c))
-#       define isDIGIT_A(c)    (isASCII(c) && isdigit(c))
-#       define isGRAPH_A(c)    (isASCII(c) && isgraph(c))
 #       define isLOWER_A(c)    (isASCII(c) && islower(c))
 #       define isPRINT_A(c)    (isASCII(c) && isprint(c))
-#       define isPUNCT_A(c)    (isASCII(c) && ispunct(c))
-#       define isSPACE_A(c)    (isASCII(c) && isspace(c))
 #       define isUPPER_A(c)    (isASCII(c) && isupper(c))
-#       define isXDIGIT_A(c)   (isASCII(c) && isxdigit(c))
 #   else   /* ASCII platform.  These are coded based on first principals */
-#       define isALPHA_A(c)  (isUPPER_A(c) || isLOWER_A(c))
-#       define isALPHANUMERIC_A(c) (isALPHA_A(c) || isDIGIT_A(c))
-#       define isCNTRL_A(c)  (isASCII(c) && (! isPRINT_A(c)))
-#       define isDIGIT_A(c)  ((c) <= '9' && (c) >= '0')
-#       define isGRAPH_A(c)  (isPRINT_A(c) && (c) != ' ')
 #       define isLOWER_A(c)  ((c) >= 'a' && (c) <= 'z')
 #       define isPRINT_A(c)  (((c) >= 32 && (c) < 127))
-#       define isPUNCT_A(c)  (isGRAPH_A(c) && (! isALPHANUMERIC_A(c)))
-#       define isSPACE_A(c)  ((c) == ' '                                     \
-                              || (c) == '\t'                                 \
-                              || (c) == '\n'                                 \
-                              || (c) == '\r'                                 \
-                              || (c) =='\v'                                  \
-                              || (c) == '\f')
 #       define isUPPER_A(c)  ((c) <= 'Z' && (c) >= 'A')
-#       define isXDIGIT_A(c) (isDIGIT_A(c)                                   \
-                              || ((c) >= 'a' && (c) <= 'f')                  \
-                              || ((c) <= 'F' && (c) >= 'A'))
 #   endif   /* Below are common definitions for ASCII and non-ASCII */
+#   define isALPHA_A(c)  (isUPPER_A(c) || isLOWER_A(c))
+#   define isALPHANUMERIC_A(c) (isALPHA_A(c) || isDIGIT_A(c))
 #   define isBLANK_A(c)      ((c) == ' ' || (c) == '\t')
+#   define isCNTRL_A(c)  (isASCII(c) && (! isPRINT_A(c)))
+#   define isDIGIT_A(c)  ((c) <= '9' && (c) >= '0')
+#   define isGRAPH_A(c)  (isPRINT_A(c) && (c) != ' ')
 #   define isIDFIRST_A(c)    (isALPHA_A(c) || (c) == '_')
+#   define isPUNCT_A(c)  (isGRAPH_A(c) && (! isALPHANUMERIC_A(c)))
+#   define isSPACE_A(c)  ((c) == ' '                                         \
+                       || (c) == '\t'                                        \
+                       || (c) == '\n'                                        \
+                       || (c) == '\r'                                        \
+                       || (c) == '\v'                                        \
+                       || (c) == '\f')
 #   define isWORDCHAR_A(c)   (isALPHANUMERIC_A(c) || (c) == '_')
+#   define isXDIGIT_A(c) (isDIGIT_A(c)                                       \
+                          || ((c) >= 'a' && (c) <= 'f')                      \
+                          || ((c) <= 'F' && (c) >= 'A'))
 
     /* The _L1 macros may be unnecessary for both the utilities and for
      * bootstrapping; I (khw) added them during debugging of bootstrapping, and
