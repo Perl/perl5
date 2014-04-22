@@ -1908,15 +1908,9 @@ variable.
 
 =head1 Selected Bug Fixes
 
+=head2 Perl 5 Debugger and -d
+
 =over 4
-
-=item *
-
-The OP allocation code now returns correctly aligned memory in all cases
-for C<struct pmop>. Previously it could return memory only aligned to a
-4-byte boundary, which is not correct for an ithreads build with 64 bit IVs
-on some 32 bit platforms. Notably, this caused the build to fail completely
-on sparc GNU/Linux. [RT #118055]
 
 =item *
 
@@ -1928,6 +1922,55 @@ all now work again.
 
 C<@_> is now correctly visible in the debugger, fixing a regression
 introduced in v5.18.0's debugger. [RT #118169]
+
+=item *
+
+Under copy-on-write builds (the default as of 5.20.0) C<< ${'_<-e'}[0] >>
+no longer gets mangled.  This is the first line of input saved for the
+debugger's use for one-liners [perl #118627].
+
+=item *
+
+On non-threaded builds, setting C<${"_E<lt>filename"}> to a reference or
+typeglob no longer causes C<__FILE__> and some error messages to produce a
+corrupt string, and no longer prevents C<#line> directives in string evals from
+providing the source lines to the debugger.  Threaded builds were unaffected.
+
+=item *
+
+Starting with Perl 5.12, line numbers were off by one if the B<-d> switch was
+used on the #! line.  Now they are correct.
+
+=item *
+
+C<*DB::DB = sub {} if 0> no longer stops Perl's debugging mode from finding
+C<DB::DB> subs declared thereafter.
+
+=item *
+
+C<%{'_<...'}> hashes now set breakpoints on the corresponding C<@{'_<...'}>
+rather than whichever array C<@DB::dbline> is aliased to.  [perl #119799]
+
+=item *
+
+Call set-magic when setting $DB::sub.  [perl #121255]
+
+=item *
+
+The debugger's "n" command now respects lvalue subroutines and steps over
+them [perl #118839].
+
+=back
+
+=over 4
+
+=item *
+
+The OP allocation code now returns correctly aligned memory in all cases
+for C<struct pmop>. Previously it could return memory only aligned to a
+4-byte boundary, which is not correct for an ithreads build with 64 bit IVs
+on some 32 bit platforms. Notably, this caused the build to fail completely
+on sparc GNU/Linux. [RT #118055]
 
 =item *
 
@@ -2158,12 +2201,6 @@ error is raised.
 
 =item *
 
-Under copy-on-write builds (the default as of 5.20.0) C<< ${'_<-e'}[0] >>
-no longer gets mangled.  This is the first line of input saved for the
-debugger's use for one-liners [perl #118627].
-
-=item *
-
 Assigning a vstring to a tied variable or to a subroutine argument aliased
 to a nonexistent hash or array element now works, without flattening the
 vstring into a regular string.
@@ -2246,13 +2283,6 @@ unparsed.  This has been corrected.
 Starting in Perl 5.001, a regular expression like C</[#$a]/x> or C</[#]$a/x>
 would have its C<#> incorrectly interpreted as a comment, so the variable would
 not interpolate.  This has been corrected. [perl #45667]
-
-=item *
-
-On non-threaded builds, setting C<${"_E<lt>filename"}> to a reference or
-typeglob no longer causes C<__FILE__> and some error messages to produce a
-corrupt string, and no longer prevents C<#line> directives in string evals from
-providing the source lines to the debugger.  Threaded builds were unaffected.
 
 =item *
 
@@ -2447,11 +2477,6 @@ markers occur on the same line.
 
 =item *
 
-Starting with Perl 5.12, line numbers were off by one if the B<-d> switch was
-used on the #! line.  Now they are correct.
-
-=item *
-
 An optimization in Perl 5.18 made incorrect assumptions causing a bad
 interaction with the L<Devel::CallParser> CPAN module.  If the module was
 loaded then lexical variables declared in separate statements following a
@@ -2565,11 +2590,6 @@ through $_.
 
 =item *
 
-C<*DB::DB = sub {} if 0> no longer stops Perl's debugging mode from finding
-C<DB::DB> subs declared thereafter.
-
-=item *
-
 C<stat> and C<readline> remember the last handle used; the former
 for the special C<_> filehandle, the latter for C<${^LAST_FH}>.
 C<eval "*foo if 0"> where *foo was the last handle passed to C<stat>
@@ -2585,11 +2605,6 @@ have been fixed.  [perl #54044]
 
 Assigning another typeglob to C<*^R> no longer makes the regular expression
 engine crash.
-
-=item *
-
-C<%{'_<...'}> hashes now set breakpoints on the corresponding C<@{'_<...'}>
-rather than whichever array C<@DB::dbline> is aliased to.  [perl #119799]
 
 =item *
 
@@ -2639,11 +2654,6 @@ field checking ("No such class field"; see L<fields>) but no longer are.
 
 =item *
 
-That compile-time field checking also applies now to the C<%$obj{'key'}>
-syntax.
-
-=item *
-
 A nonexistent array element with a large index passed to a subroutine that
 ties the array and then tries to access the element no longer results in a
 crash.
@@ -2673,7 +2683,7 @@ operators act like C<q{}>, suppressing interpolation.  [perl #115330]
 
 =item *
 
-C<<<`...`> here-docs (with backticks as the delimiters) now call
+C<<<<`...`> here-docs (with backticks as the delimiters) now call
 C<readpipe> overrides.  [perl #119827]
 
 =item *
@@ -2723,21 +2733,13 @@ C</(?</>) have been fixed to produce the proper error message instead of
 Strange vars like ties, overloads, or stringified refs (and in recent
 perls, pure NOK vars) would generally do the wrong thing in formats
 when the var is treated as a string and repeatedly chopped, as in
-^<<<~~ and similar. This has now been resolved.
+C<< ^<<<~~ >> and similar. This has now been resolved.
 
 =item *
 
 C<< semctl(..., SETVAL, ...) >> would set the semaphore to the top
 32-bits of the supplied integer instead of the bottom 32-bits on
 64-bit big-endian systems. [perl #120635]
-
-=item *
-
-A regression since v5.18.0 has been fixed in which C<qr/[[:^ascii:]]/d>
-failed to match any character in the range C<\x80> - C<\xFF> if its
-surrounding character class contained anything else.  (That is, the bug
-didn't happen if the C<[:^ascii:]> was the only element of the character
-class.) [perl #120799]
 
 =item *
 
@@ -2896,17 +2898,8 @@ Fixed a crash when destroying a self-referencing GLOB.  [perl #121242]
 
 =item *
 
-Call set-magic when setting $DB::sub.  [perl #121255]
-
-=item *
-
 Fixed an alignment error when compiling regular expressions when built
 with GCC on HP-UX 64-bit.
-
-=item *
-
-The debugger's "n" command now respects lvalue subroutines and steps over
-them [perl #118839].
 
 =back
 
