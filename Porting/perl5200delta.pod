@@ -1908,6 +1908,211 @@ variable.
 
 =head1 Selected Bug Fixes
 
+=head2 Regular Expressions
+
+=over 4
+
+=item *
+
+Fixed a small number of regexp constructions that could either fail to
+match or crash perl when the string being matched against was
+allocated above the 2GB line on 32-bit systems. [RT #118175]
+
+=item *
+
+Various memory leaks involving the parsing of the C<(?[...])> regular
+expression construct have been fixed.
+
+=item *
+
+C<(?[...])> now allows interpolation of precompiled patterns consisting of
+C<(?[...])> with bracketed character classes inside (C<$pat =
+S<qr/(?[ [a] ])/;> S</(?[ $pat ])/>>).  Formerly, the brackets would
+confuse the regular expression parser.
+
+=item *
+
+The "Quantifier unexpected on zero-length expression" warning message could
+appear twice starting in Perl v5.10 for a regular expression also
+containing alternations (e.g., "a|b") triggering the trie optimisation.
+
+=item *
+
+Perl v5.18 inadvertently introduced a bug whereby interpolating mixed up-
+and down-graded UTF-8 strings in a regex could result in malformed UTF-8
+in the pattern: specifically if a downgraded character in the range
+C<\x80..\xff> followed a UTF-8 string, e.g.
+
+    utf8::upgrade(  my $u = "\x{e5}");
+    utf8::downgrade(my $d = "\x{e5}");
+    /$u$d/
+
+[RT #118297]
+
+=item *
+
+In regular expressions containing multiple code blocks, the values of
+C<$1>, C<$2>, etc., set by nested regular expression calls would leak from
+one block to the next.  Now these variables always refer to the outer
+regular expression at the start of an embedded block [perl #117917].
+
+=item *
+
+C</$qr/p> was broken in Perl 5.18.0; the C</p> flag was ignored.  This has been
+fixed. [perl #118213]
+
+=item *
+
+Starting in Perl 5.18.0, a construct like C</[#](?{})/x> would have its C<#>
+incorrectly interpreted as a comment.  The code block would be skipped,
+unparsed.  This has been corrected.
+
+=item *
+
+Starting in Perl 5.001, a regular expression like C</[#$a]/x> or C</[#]$a/x>
+would have its C<#> incorrectly interpreted as a comment, so the variable would
+not interpolate.  This has been corrected. [perl #45667]
+
+=item *
+
+Perl 5.18.0 inadvertently made dereferenced regular expressions
+S<(C<${ qr// }>)> false as booleans.  This has been fixed.
+
+=item *
+
+The use of C<\G> in regular expressions, where it's not at the start of the
+pattern, is now slightly less buggy (although it is still somewhat
+problematic).
+
+=item *
+
+Where a regular expression included code blocks (C</(?{...})/>), and where the
+use of constant overloading triggered a re-compilation of the code block, the
+second compilation didn't see its outer lexical scope.  This was a regression
+in Perl 5.18.0.
+
+=item *
+
+The string position set by C<pos> could shift if the string changed
+representation internally to or from utf8.  This could happen, e.g., with
+references to objects with string overloading.
+
+=item *
+
+Taking references to the return values of two C<pos> calls with the same
+argument, and then assigning a reference to one and C<undef> to the other,
+could result in assertion failures or memory leaks.
+
+=item *
+
+Elements of @- and @+ now update correctly when they refer to non-existent
+captures.  Previously, a referenced element (C<$ref = \$-[1]>) could refer to
+the wrong match after subsequent matches.
+
+=item *
+
+The code that parses regex backrefs (or ambiguous backref/octals) such as \123
+did a simple atoi(), which could wrap round to negative values on long digit
+strings and cause segmentation faults.  This has now been fixed.  [perl
+#119505]
+
+=item *
+
+Assigning another typeglob to C<*^R> no longer makes the regular expression
+engine crash.
+
+=item *
+
+The C<\N> regular expression escape, when used without the curly braces (to
+mean C<[^\n]>), was ignoring a following C<*> if followed by whitespace
+under /x.  It had been this way since C<\N> to mean C<[^\n]> was introduced
+in 5.12.0.
+
+=item *
+
+C<s///>, C<tr///> and C<y///> now work when a wide character is used as the
+delimiter.  [perl #120463]
+
+=item *
+
+Some cases of unterminated (?...) sequences in regular expressions (e.g.,
+C</(?</>) have been fixed to produce the proper error message instead of
+"panic: memory wrap".  Other cases (e.g., C</(?(/>) have yet to be fixed.
+
+=item *
+
+When a reference to a reference to an overloaded object was returned from
+a regular expression C<(??{...})> code block, an incorrect implicit
+dereference could take place if the inner reference had been returned by
+a code block previously.
+
+=item *
+
+A tied variable returned from C<(??{...})> sees the inner values of match
+variables (i.e., the $1 etc. from any matches inside the block) in its
+FETCH method.  This was not the case if a reference to an overloaded object
+was the last thing assigned to the tied variable.  Instead, the match
+variables referred to the outer pattern during the FETCH call.
+
+=item *
+
+Fix unexpected tainting via regexp using locale. Previously, under certain
+conditions, the use of character classes could cause tainting when it
+shouldn't. Some character classes are locale-dependent, but before this
+patch, sometimes tainting was happening even for character classes that
+don't depend on the locale. [perl #120675]
+
+=item *
+
+Under certain conditions, Perl would throw an error if in an lookbehind
+assertion in a regexp, the assertion referred to a named subpattern,
+complaining the lookbehind was variable when it wasn't. This has been
+fixed. [perl #120600], [perl #120618]. The current fix may be improved
+on in the future.
+
+=item *
+
+C<$^R> wasn't available outside of the regular expression that
+initialized it.  [perl #121070]
+
+=item *
+
+A large set of fixes and refactoring for re_intuit_start() was merged,
+the highlights are:
+
+=over
+
+=item *
+
+Fixed a panic when compiling the regular expression
+C</\x{100}[xy]\x{100}{2}/>.
+
+=item *
+
+Fixed a performance regression when performing a global pattern match
+against a UTF-8 string.  [perl #120692]
+
+=item *
+
+Fixed another performance issue where matching a regular expression
+like C</ab.{1,2}x/> against a long UTF-8 string would unnecessarily
+calculate byte offsets for a large portion of the string. [perl
+#120692]
+
+=back
+
+=item *
+
+Fixed an alignment error when compiling regular expressions when built
+with GCC on HP-UX 64-bit.
+
+=item *
+
+On 64-bit platforms C<pos> can now be set to a value higher than 2**31-1.
+[perl #72766]
+
+=back
+
 =head2 Perl 5 Debugger and -d
 
 =over 4
@@ -2027,12 +2232,6 @@ That would be 1 IV overhead for every object built from a hash. [RT #114576]
 
 =item *
 
-Fixed a small number of regexp constructions that could either fail to
-match or crash perl when the string being matched against was
-allocated above the 2GB line on 32-bit systems. [RT #118175]
-
-=item *
-
 Perl v5.16 inadvertently introduced a bug whereby calls to XSUBs that were
 not visible at compile time were treated as lvalues and could be assigned
 to, even when the subroutine was not an lvalue sub.  This has been fixed.
@@ -2055,24 +2254,6 @@ the constant to use the built-in keyword instead.  This has been fixed.
 
 The warning produced by C<-l $handle> now applies to IO refs and globs, not
 just to glob refs.  That warning is also now UTF8-clean. [RT #117595]
-
-=item *
-
-Various memory leaks involving the parsing of the C<(?[...])> regular
-expression construct have been fixed.
-
-=item *
-
-C<(?[...])> now allows interpolation of precompiled patterns consisting of
-C<(?[...])> with bracketed character classes inside (C<$pat =
-S<qr/(?[ [a] ])/;> S</(?[ $pat ])/>>).  Formerly, the brackets would
-confuse the regular expression parser.
-
-=item *
-
-The "Quantifier unexpected on zero-length expression" warning message could
-appear twice starting in Perl v5.10 for a regular expression also
-containing alternations (e.g., "a|b") triggering the trie optimisation.
 
 =item *
 
@@ -2112,19 +2293,6 @@ category.
 
 The "Replacement list is longer that search list" warning for C<tr///> and
 C<y///> no longer occurs in the presence of the C</c> flag. [RT #118047]
-
-=item *
-
-Perl v5.18 inadvertently introduced a bug whereby interpolating mixed up-
-and down-graded UTF-8 strings in a regex could result in malformed UTF-8
-in the pattern: specifically if a downgraded character in the range
-C<\x80..\xff> followed a UTF-8 string, e.g.
-
-    utf8::upgrade(  my $u = "\x{e5}");
-    utf8::downgrade(my $d = "\x{e5}");
-    /$u$d/
-
-[RT #118297]
 
 =item *
 
@@ -2194,13 +2362,6 @@ over lexical variables declared outside, and with lexical subs.
 
 =item *
 
-In regular expressions containing multiple code blocks, the values of
-C<$1>, C<$2>, etc., set by nested regular expression calls would leak from
-one block to the next.  Now these variables always refer to the outer
-regular expression at the start of an embedded block [perl #117917].
-
-=item *
-
 C<UNIVERSAL::can> now treats its first argument the same way that method
 calls do: Typeglobs and glob references with non-empty IO slots are treated
 as handles, and strings are treated as filehandles, rather than packages,
@@ -2239,11 +2400,6 @@ barewords.
 Autovivifying a subroutine stub via C<\&$glob> started causing crashes in Perl
 5.18.0 if the $glob was merely a copy of a real glob, i.e., a scalar that had
 had a glob assigned to it.  This has been fixed. [perl #119051]
-
-=item *
-
-On 64-bit platforms C<pos> can now be set to a value higher than 2**31-1.
-[perl #72766]
 
 =item *
 
@@ -2286,23 +2442,6 @@ mutable under certain circumstances.
 
 =item *
 
-C</$qr/p> was broken in Perl 5.18.0; the C</p> flag was ignored.  This has been
-fixed. [perl #118213]
-
-=item *
-
-Starting in Perl 5.18.0, a construct like C</[#](?{})/x> would have its C<#>
-incorrectly interpreted as a comment.  The code block would be skipped,
-unparsed.  This has been corrected.
-
-=item *
-
-Starting in Perl 5.001, a regular expression like C</[#$a]/x> or C</[#]$a/x>
-would have its C<#> incorrectly interpreted as a comment, so the variable would
-not interpolate.  This has been corrected. [perl #45667]
-
-=item *
-
 Enabling "used once" warnings no longer causes crashes on stash circularities
 created at compile time (C<*Foo::Bar::Foo:: = *Foo::>).
 
@@ -2337,11 +2476,6 @@ C<SvPV> would.
 
 =item *
 
-Perl 5.18.0 inadvertently made dereferenced regular expressions
-S<(C<${ qr// }>)> false as booleans.  This has been fixed.
-
-=item *
-
 Perl 5.18.0 inadvertently made C<--> and C<++> crash on dereferenced regular
 expressions, and stopped C<++> from flattening vstrings.
 
@@ -2365,19 +2499,6 @@ C<reset> with an argument now skips scalars aliased to typeglobs
 
 C<ucfirst> and C<lcfirst> were not respecting the bytes pragma.  This was a
 regression from Perl 5.12. [perl #117355]
-
-=item *
-
-The use of C<\G> in regular expressions, where it's not at the start of the
-pattern, is now slightly less buggy (although it is still somewhat
-problematic).
-
-=item *
-
-Where a regular expression included code blocks (C</(?{...})/>), and where the
-use of constant overloading triggered a re-compilation of the code block, the
-second compilation didn't see its outer lexical scope.  This was a regression
-in Perl 5.18.0.
 
 =item *
 
@@ -2441,24 +2562,6 @@ eat up all your memory instead.  [perl #119161]
 
 C<__DATA__> now puts the C<DATA> handle in the right package, even if the
 current package has been renamed through glob assignment.
-
-=item *
-
-The string position set by C<pos> could shift if the string changed
-representation internally to or from utf8.  This could happen, e.g., with
-references to objects with string overloading.
-
-=item *
-
-Taking references to the return values of two C<pos> calls with the same
-argument, and then assigning a reference to one and C<undef> to the other,
-could result in assertion failures or memory leaks.
-
-=item *
-
-Elements of @- and @+ now update correctly when they refer to non-existent
-captures.  Previously, a referenced element (C<$ref = \$-[1]>) could refer to
-the wrong match after subsequent matches.
 
 =item *
 
@@ -2563,13 +2666,6 @@ zero no longer occurs.  [perl #119893]
 
 =item *
 
-The code that parses regex backrefs (or ambiguous backref/octals) such as \123
-did a simple atoi(), which could wrap round to negative values on long digit
-strings and cause segmentation faults.  This has now been fixed.  [perl
-#119505]
-
-=item *
-
 C<select> used to ignore magic on the fourth (timeout) argument, leading to
 effects such as C<select> blocking indefinitely rather than the expected sleep
 time.  This has now been fixed.  [perl #120102]
@@ -2620,11 +2716,6 @@ have been fixed.  [perl #54044]
 
 =item *
 
-Assigning another typeglob to C<*^R> no longer makes the regular expression
-engine crash.
-
-=item *
-
 Setting C<$!> to EACCESS before calling C<require> could affect
 C<require>'s behaviour.  This has been fixed.
 
@@ -2634,13 +2725,6 @@ The "Can't use \1 to mean $1 in expression" warning message now only occurs
 on the right-hand (replacement) part of a substitution.  Formerly it could
 happen in code embedded in the left-hand side, or in any other quote-like
 operator.
-
-=item *
-
-The C<\N> regular expression escape, when used without the curly braces (to
-mean C<[^\n]>), was ignoring a following C<*> if followed by whitespace
-under /x.  It had been this way since C<\N> to mean C<[^\n]> was introduced
-in 5.12.0.
 
 =item *
 
@@ -2719,22 +2803,11 @@ the new subroutine has been installed.
 
 =item *
 
-C<s///>, C<tr///> and C<y///> now work when a wide character is used as the
-delimiter.  [perl #120463]
-
-=item *
-
 On Windows, perl no longer calls CloseHandle() on a socket handle.  This makes
 debugging easier on Windows by removing certain irrelevant bad handle
 exceptions.  It also fixes a race condition that made socket functions randomly
 fail in a Perl process with multiple OS threads, and possible test failures in
 F<dist/IO/t/cachepropagate-tcp.t>.  [perl #120091/118059]
-
-=item *
-
-Some cases of unterminated (?...) sequences in regular expressions (e.g.,
-C</(?</>) have been fixed to produce the proper error message instead of
-"panic: memory wrap".  Other cases (e.g., C</(?(/>) have yet to be fixed.
 
 =item *
 
@@ -2767,21 +2840,6 @@ runs the risk of crashing due to stack corruption.
 
 =item *
 
-When a reference to a reference to an overloaded object was returned from
-a regular expression C<(??{...})> code block, an incorrect implicit
-dereference could take place if the inner reference had been returned by
-a code block previously.
-
-=item *
-
-A tied variable returned from C<(??{...})> sees the inner values of match
-variables (i.e., the $1 etc. from any matches inside the block) in its
-FETCH method.  This was not the case if a reference to an overloaded object
-was the last thing assigned to the tied variable.  Instead, the match
-variables referred to the outer pattern during the FETCH call.
-
-=item *
-
 Perl 5.18 broke autoloading via C<< ->SUPER::foo >> method calls by looking
 up AUTOLOAD from the current package rather than the current package's
 superclass.  This has been fixed. [perl #120694]
@@ -2799,22 +2857,6 @@ Fix HP-UX $! failure. HP-UX strerror() returns an empty string for an
 unknown error code.  This caused an assertion to fail under DEBUGGING
 builds.  This patch removes the assertion and changes the return into
 a non-empty string indicating the errno is for an unknown error.
-
-=item *
-
-Fix unexpected tainting via regexp using locale. Previously, under certain
-conditions, the use of character classes could cause tainting when it
-shouldn't. Some character classes are locale-dependent, but before this
-patch, sometimes tainting was happening even for character classes that
-don't depend on the locale. [perl #120675]
-
-=item *
-
-Under certain conditions, Perl would throw an error if in an lookbehind
-assertion in a regexp, the assertion referred to a named subpattern,
-complaining the lookbehind was variable when it wasn't. This has been
-fixed. [perl #120600], [perl #120618]. The current fix may be improved
-on in the future.
 
 =item *
 
@@ -2860,37 +2902,6 @@ but points to a directory a temporary file cannot be created in.  [perl
 
 =item *
 
-C<$^R> wasn't available outside of the regular expression that
-initialized it.  [perl #121070]
-
-=item *
-
-A large set of fixes and refactoring for re_intuit_start() was merged,
-the highlights are:
-
-=over
-
-=item *
-
-Fixed a panic when compiling the regular expression
-C</\x{100}[xy]\x{100}{2}/>.
-
-=item *
-
-Fixed a performance regression when performing a global pattern match
-against a UTF-8 string.  [perl #120692]
-
-=item *
-
-Fixed another performance issue where matching a regular expression
-like C</ab.{1,2}x/> against a long UTF-8 string would unnecessarily
-calculate byte offsets for a large portion of the string. [perl
-#120692]
-
-=back
-
-=item *
-
 C< for ( $h{k} || '' ) > no longer auto-vivifies C<$h{k}>.  [perl
 #120374]
 
@@ -2903,11 +2914,6 @@ See L<perllocale/ENVIRONMENT>.
 =item *
 
 Fixed a crash when destroying a self-referencing GLOB.  [perl #121242]
-
-=item *
-
-Fixed an alignment error when compiling regular expressions when built
-with GCC on HP-UX 64-bit.
 
 =back
 
