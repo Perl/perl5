@@ -1036,7 +1036,7 @@ EXTCONST U32 PL_charclass[];
 
     /* For internal core Perl use only: the base macro for defining macros like
      * isALPHA */
-#   define _generic_isCC(c, classnum) cBOOL(FITS_IN_8_BITS(c) \
+#   define _generic_isCC(c, classnum) cBOOL(FITS_IN_8_BITS(c)    \
                 && (PL_charclass[(U8) (c)] & _CC_mask(classnum)))
 
     /* The mask for the _A versions of the macros; it just adds in the bit for
@@ -1524,8 +1524,9 @@ EXTCONST U32 PL_charclass[];
                       _generic_utf8(classnum, p, _is_utf8_FOO(classnum, p))
 
 /* Like the above, but should be used only when it is known that there are no
- * characters in the range 128-255 which the class is TRUE for.  Hence it can
- * skip the tests for this range.  'above_latin1' should include its arguments */
+ * characters in the upper-Latin1 range (128-255 on ASCII platforms) which the
+ * class is TRUE for.  Hence it can skip the tests for this range.
+ * 'above_latin1' should include its arguments */
 #define _generic_utf8_no_upper_latin1(classnum, p, above_latin1)               \
                                          (UTF8_IS_INVARIANT(*(p))              \
                                          ? _generic_isCC(*(p), classnum)       \
