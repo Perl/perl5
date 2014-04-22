@@ -14,7 +14,7 @@ L<perl5180delta>, which describes differences between 5.16.0 and 5.18.0.
 
 =head1 Core Enhancements
 
-=head2 Subroutine signatures
+=head2 Experimental Subroutine signatures
 
 Declarative syntax to unwrap argument list into lexical variables.
 C<sub foo ($a,$b) {...}> checks the number of arguments and puts the
