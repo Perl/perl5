@@ -1486,7 +1486,7 @@ been corrected.
 The code supporting C<pack> and C<unpack> operations on mixed endian
 platforms has been removed. We believe that Perl has long been unable to
 build on mixed endian architectures (such as PDP-11s), so we don't think
-that this change will affect any platforms which are able to build v5.18.0.
+that this change will affect any platforms which were able to build v5.18.0.
 
 =item VMS
 
