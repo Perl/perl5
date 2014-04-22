@@ -108,15 +108,16 @@ foreach my $charset (@charsets) {
                 my $match = 1;      # Calculated whether test regex should
                                     # match or not
 
-                # Everything always matches in ASCII, or under /u
+                # Everything always matches in ASCII, or under /u, or under /l
+                # with a UTF-8 locale
                 if ($ord < 128 || $charset eq 'u' || $charset eq 'L') {
                     $reason = "\"$char\" is a $class under /$charset_display";
                     $neg_reason = "\"$char\" is not a $complement under /$charset_display";
                 }
                 elsif ($charset eq "a" || $charset eq "aa") {
                     $match = 0;
-                    $reason = "\"$char\" is non-ASCII, which can't be a $class under /a";
-                    $neg_reason = "\"$char\" is non-ASCII, which is a $complement under /a";
+                    $reason = "\"$char\" is non-ASCII, which can't be a $class under /$charset_display";
+                    $neg_reason = "\"$char\" is non-ASCII, which is a $complement under /$charset_display";
                 }
                 elsif ($ord > 255) {
                     $reason = "\"$char\" is a $class under /$charset_display";
@@ -127,17 +128,17 @@ foreach my $charset (@charsets) {
                     # We are using the C locale, which is essentially ASCII,
                     # but under utf8, the above-latin1 chars are treated as
                     # Unicode)
-                    $reason = "\"$char\" is not a $class in the C locale under /l";
-                    $neg_reason = "\"$char\" is a $complement in the C locale under /l";
+                    $reason = "\"$char\" is not a $class in the C locale under /$charset_mod";
+                    $neg_reason = "\"$char\" is a $complement in the C locale under /$charset_mod";
                     $match = 0;
                 }
                 elsif ($upgrade) {
-                    $reason = "\"$char\" is a $class in utf8 under /d";
-                    $neg_reason = "\"$char\" is not a $complement in utf8 under /d";
+                    $reason = "\"$char\" is a $class in utf8 under /$charset_display";
+                    $neg_reason = "\"$char\" is not a $complement in utf8 under /$charset_display";
                 }
                 else {
-                    $reason = "\"$char\" is above-ASCII latin1, which requires utf8 to be a $class under /d";
-                    $neg_reason = "\"$char\" is above-ASCII latin1, which is a $complement under /d (unless in utf8)";
+                    $reason = "\"$char\" is above-ASCII latin1, which requires utf8 to be a $class under /$charset_display";
+                    $neg_reason = "\"$char\" is above-ASCII latin1, which is a $complement under /$charset_display (unless in utf8)";
                     $match = 0;
                 }
                 $reason = "; $reason" if $reason;
