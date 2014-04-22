@@ -676,6 +676,10 @@ EXTCONST char * const PL_reg_extflags_name[] = {
 };
 #endif /* DOINIT */
 
+#ifdef DEBUGGING
+#  define REG_EXTFLAGS_NAME_SIZE 32
+#endif
+
 /* PL_reg_intflags_name[] - Opcode/state names in string form, for debugging */
 
 #ifndef DOINIT
@@ -698,6 +702,10 @@ EXTCONST char * const PL_reg_intflags_name[] = {
 	"ANCH_GPOS",                  /* 0x00002000 - PREGf_ANCH_GPOS */
 };
 #endif /* DOINIT */
+
+#ifdef DEBUGGING
+#  define REG_INTFLAGS_NAME_SIZE 14
+#endif
 
 /* The following have no fixed length. U8 so we can do strchr() on it. */
 #define REGNODE_VARIES(node) (PL_varies_bitmask[(node) >> 3] & (1 << ((node) & 7)))

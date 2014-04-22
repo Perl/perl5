@@ -15365,7 +15365,9 @@ S_regdump_intflags(pTHX_ const char *lead, const U32 flags)
     int bit;
     int set=0;
 
-    for (bit=0; bit<32; bit++) {
+    ASSUME(REG_INTFLAGS_NAME_SIZE <= sizeof(flags)*8);
+
+    for (bit=0; bit<REG_INTFLAGS_NAME_SIZE; bit++) {
         if (flags & (1<<bit)) {
             if (!set++ && lead)
                 PerlIO_printf(Perl_debug_log, "%s",lead);
@@ -15387,7 +15389,9 @@ S_regdump_extflags(pTHX_ const char *lead, const U32 flags)
     int set=0;
     regex_charset cs;
 
-    for (bit=0; bit<32; bit++) {
+    ASSUME(REG_EXTFLAGS_NAME_SIZE <= sizeof(flags)*8);
+
+    for (bit=0; bit<REG_EXTFLAGS_NAME_SIZE; bit++) {
         if (flags & (1<<bit)) {
 	    if ((1<<bit) & RXf_PMf_CHARSET) {	/* Output separately, below */
 		continue;

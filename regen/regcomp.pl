@@ -261,6 +261,7 @@ my %rxfv;
 my %definitions;    # Remember what the symbol definitions are
 my $val = 0;
 my %reverse;
+my $REG_EXTFLAGS_NAME_SIZE = 0;
 foreach my $file ("op_reg_common.h", "regexp.h") {
     open FH,"<$file" or die "Can't read $file: $!";
     while (<FH>) {
@@ -332,6 +333,7 @@ for (0..31) {
     s/\bRXf_(PMf_)?// for $n, $extra;
     printf $out qq(\t%-20s/* 0x%08x%s */\n),
         qq("$n",),$power_of_2, $extra;
+    $REG_EXTFLAGS_NAME_SIZE++;
 }  
  
 print $out <<EOP;
@@ -339,6 +341,12 @@ print $out <<EOP;
 #endif /* DOINIT */
 
 EOP
+print $out <<EOQ
+#ifdef DEBUGGING
+#  define REG_EXTFLAGS_NAME_SIZE $REG_EXTFLAGS_NAME_SIZE
+#endif
+
+EOQ
 }
 {
 print $out <<EOP;
@@ -354,6 +362,7 @@ my %rxfv;
 my %definitions;    # Remember what the symbol definitions are
 my $val = 0;
 my %reverse;
+my $REG_INTFLAGS_NAME_SIZE = 0;
 foreach my $file ("regcomp.h") {
     open my $fh, "<", $file or die "Can't read $file: $!";
     while (<$fh>) {
@@ -369,6 +378,7 @@ foreach my $file ("regcomp.h") {
             $comment= $comment ? " - $comment" : "";
 
             printf $out qq(\t%-30s/* 0x%08x - %s%s */\n), qq("$abbr",), $val, $define, $comment;
+            $REG_INTFLAGS_NAME_SIZE++;
         }
     }
 }
@@ -378,8 +388,13 @@ print $out <<EOP;
 #endif /* DOINIT */
 
 EOP
-}
+print $out <<EOQ;
+#ifdef DEBUGGING
+#  define REG_INTFLAGS_NAME_SIZE $REG_INTFLAGS_NAME_SIZE
+#endif
 
+EOQ
+}
 
 print $out process_flags('V', 'varies', <<'EOC');
 /* The following have no fixed length. U8 so we can do strchr() on it. */
