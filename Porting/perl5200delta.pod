@@ -2666,12 +2666,6 @@ resulting in the error, "Bizarre copy of ARRAY in last."  [perl #3112]
 
 =item *
 
-An optimization in Perl 5.18 made incorrect assumptions causing a bad
-interaction with the L<Devel::CallParser> CPAN module.  This has now
-been corrected.
-
-=item *
-
 In some cases, closing file handles opened to pipe to or from a process, which
 had been duplicated into a standard handle, would call perl's internal waitpid
 wrapper with a pid of zero.  With the fix for [perl #85228] this zero pid was
