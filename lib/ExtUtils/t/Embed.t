@@ -177,6 +177,8 @@ int main(int argc, char **argv, char **env) {
 #ifdef PERL_GLOBAL_STRUCT
     struct perl_vars *my_vars = init_global_struct();
 #  ifdef PERL_GLOBAL_STRUCT_PRIVATE
+    int veto;
+
     my_plvarsp = my_vars;
 #  endif
 #endif /* PERL_GLOBAL_STRUCT */
@@ -215,9 +217,13 @@ int main(int argc, char **argv, char **env) {
     PERL_SYS_TERM();
 
 #ifdef PERL_GLOBAL_STRUCT
+#  ifdef PERL_GLOBAL_STRUCT_PRIVATE
+    veto = my_plvarsp->Gveto_cleanup;
+#  endif
     free_global_struct(my_vars);
 #  ifdef PERL_GLOBAL_STRUCT_PRIVATE
-    my_plvarsp = NULL;
+    if (!veto)
+        my_plvarsp = NULL;
     /* Remember, functions registered with atexit() can run after this point,
        and may access "global" variables, and hence end up calling
        Perl_GetVarsPrivate()  */
