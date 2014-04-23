@@ -1087,9 +1087,9 @@ earlier too (e.g.):
 =head3 update epigraphs.pod
 
 Add your quote to F<Porting/epigraphs.pod> and commit it.
-Your release announcement will probably not have reached the web-visible
-archives yet, so you won't be able to include the customary link to the
-release announcement yet.
+You can include the customary link to the release announcement even before your
+message reaches the web-visible archives by looking for the X-List-Archive
+header in your message after receiving it back via perl5-porters.
 
 =head3 blog about your epigraph
 
