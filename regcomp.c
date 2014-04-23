@@ -9412,8 +9412,9 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
             int internal_argval = 0; /* internal_argval is only useful if
                                         !argok */
 
-            if (has_intervening_patws && SIZE_ONLY) {
-                ckWARNregdep(RExC_parse + 1, "In '(*VERB...)', splitting the initial '(*' is deprecated");
+            if (has_intervening_patws) {
+                RExC_parse++;
+                vFAIL("In '(*VERB...)', the '(' and '*' must be adjacent");
             }
 	    while ( *RExC_parse && *RExC_parse != ')' ) {
 	        if ( *RExC_parse == ':' ) {
@@ -9519,8 +9520,9 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
         else if (*RExC_parse == '?') { /* (?...) */
 	    bool is_logical = 0;
 	    const char * const seqstart = RExC_parse;
-            if (has_intervening_patws && SIZE_ONLY) {
-                ckWARNregdep(RExC_parse + 1, "In '(?...)', splitting the initial '(?' is deprecated");
+            if (has_intervening_patws) {
+                RExC_parse++;
+                vFAIL("In '(?...)', the '(' and '?' must be adjacent");
             }
 
 	    RExC_parse++;

@@ -226,6 +226,8 @@ my @death =
  'm/\g{/'  => 'Sequence \g{... not terminated {#} m/\g{{#}/',
  'm/\k</'  => 'Sequence \k<... not terminated {#} m/\k<{#}/',
  'm/\cß/' => "Character following \"\\c\" must be printable ASCII",
+ '/((?# This is a comment in the middle of a token)?:foo)/' => 'In \'(?...)\', the \'(\' and \'?\' must be adjacent {#} m/((?# This is a comment in the middle of a token)?{#}:foo)/',
+ '/((?# This is a comment in the middle of a token)*FAIL)/' => 'In \'(*VERB...)\', the \'(\' and \'*\' must be adjacent {#} m/((?# This is a comment in the middle of a token)*{#}FAIL)/',
 );
 
 my @death_utf8 = mark_as_utf8(
@@ -416,8 +418,6 @@ my @experimental_regex_sets = (
 my @deprecated = (
     "/(?x)latin1\\\x{85}\x{85}\\\x{85}/" => 'Escape literal pattern white space under /x {#} ' . "m/(?x)latin1\\\x{85}\x{85}{#}\\\x{85}/",
     'use utf8; /(?x)utf8\\/' => 'Escape literal pattern white space under /x {#} ' . "m/(?x)utf8\\\N{NEXT LINE}\N{NEXT LINE}{#}\\\N{NEXT LINE}/",
-    '/((?# This is a comment in the middle of a token)?:foo)/' => 'In \'(?...)\', splitting the initial \'(?\' is deprecated {#} m/((?# This is a comment in the middle of a token)?{#}:foo)/',
-    '/((?# This is a comment in the middle of a token)*FAIL)/' => 'In \'(*VERB...)\', splitting the initial \'(*\' is deprecated {#} m/((?# This is a comment in the middle of a token)*{#}FAIL)/',
 );
 
 while (my ($regex, $expect) = splice @death, 0, 2) {

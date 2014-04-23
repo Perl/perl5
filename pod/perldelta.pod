@@ -47,6 +47,11 @@ XXX For a release on a stable branch, this section aspires to be:
 
 In prior releases, failure to do this raised a deprecation warning.
 
+=head2 Splitting the tokens C<(?> and C<(*> in regular expressions is
+now a fatal compilation error.
+
+These had been deprecated since v5.18.
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.
