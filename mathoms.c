@@ -544,6 +544,7 @@ int
 Perl_fprintf_nocontext(PerlIO *stream, const char *format, ...)
 {
     dTHXs;
+    int ret = 0;
     va_list(arglist);
 
     /* Easier to special case this here than in embed.pl. (Look at what it
@@ -553,7 +554,9 @@ Perl_fprintf_nocontext(PerlIO *stream, const char *format, ...)
 #endif
 
     va_start(arglist, format);
-    return PerlIO_vprintf(stream, format, arglist);
+    ret = PerlIO_vprintf(stream, format, arglist);
+    va_end(arglist);
+    return ret;
 }
 
 int
@@ -561,13 +564,16 @@ Perl_printf_nocontext(const char *format, ...)
 {
     dTHX;
     va_list(arglist);
+    int ret = 0;
 
 #ifdef PERL_IMPLICIT_CONTEXT
     PERL_ARGS_ASSERT_PRINTF_NOCONTEXT;
 #endif
 
     va_start(arglist, format);
-    return PerlIO_vprintf(PerlIO_stdout(), format, arglist);
+    ret = PerlIO_vprintf(PerlIO_stdout(), format, arglist);
+    va_end(arglist);
+    return ret;
 }
 
 #if defined(HUGE_VAL) || (defined(USE_LONG_DOUBLE) && defined(HUGE_VALL))

@@ -68,15 +68,16 @@ PerlIOVia_method(pTHX_ PerlIO * f, const char *method, CV ** save, int flags,
 		 ...)
 {
     PerlIOVia *s = PerlIOSelf(f, PerlIOVia);
+    SV *result = Nullsv;
     CV *cv =
 	(*save) ? *save : PerlIOVia_fetchmethod(aTHX_ s, method, save);
-    SV *result = Nullsv;
-    va_list ap;
-    va_start(ap, flags);
     if (cv != (CV *) - 1) {
 	IV count;
 	dSP;
 	SV *arg;
+        va_list ap;
+
+        va_start(ap, flags);
 	PUSHSTACKi(PERLSI_MAGIC);
 	ENTER;
 	PUSHMARK(sp);
@@ -84,6 +85,7 @@ PerlIOVia_method(pTHX_ PerlIO * f, const char *method, CV ** save, int flags,
 	while ((arg = va_arg(ap, SV *))) {
 	    XPUSHs(arg);
 	}
+        va_end(ap);
 	if (*PerlIONext(f)) {
 	    if (!s->fh) {
 		GV *gv;
@@ -121,7 +123,6 @@ PerlIOVia_method(pTHX_ PerlIO * f, const char *method, CV ** save, int flags,
 	LEAVE;
 	POPSTACK;
     }
-    va_end(ap);
     return result;
 }
 
