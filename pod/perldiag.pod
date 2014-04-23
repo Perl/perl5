@@ -5742,8 +5742,14 @@ with the characters in the Lao and Thai scripts.
 (S nonchar) Certain codepoints, such as U+FFFE and U+FFFF, are
 defined by the Unicode standard to be non-characters.  Those are
 legal codepoints, but are reserved for internal use; so, applications
-shouldn't attempt to exchange them.  If you know what you are doing
+shouldn't attempt to exchange them.  An application may not be
+expecting any of these characters at all, and receiving them
+may lead to bugs.  If you know what you are doing
 you can turn off this warning by C<no warnings 'nonchar';>.
+
+This is not really a "serious" error, but it is supposed to be raised
+by default even if warnings are not enabled, and currently the only
+way to do that in Perl is to mark it as serious.
 
 =item Unicode surrogate U+%X is illegal in UTF-8
 
