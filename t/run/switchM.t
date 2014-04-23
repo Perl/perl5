@@ -22,7 +22,7 @@ like(runperl(switches => ['-Irun/flib/', '-Mbroken'], stderr => 1),
      "Ensure -Irun/flib/ produces correct filename in warnings");
 
 SKIP: {
-    if ( $Config{ccflags} =~ /-DPERL_DISABLE_PMC/ ) {
+    if ( $Config{ccflags} =~ /(?:^|\s)-DPERL_DISABLE_PMC\b/ ) {
         skip('Tests fail without PMC support', 2);
     }
 
