@@ -119,6 +119,18 @@ The functions PerlIO_get_bufsiz, PerlIO_get_cnt, PerlIO_set_cnt and
 PerlIO_set_ptrcnt now have SSize_t, rather than int, return values and
 parameters.
 
+=head2 C<S<use locale>> now works on UTF-8 locales
+
+Until this release, only single-byte locales, such as the ISO 8859
+series were supported.  Now, the increasingly common multi-byte UTF-8
+locales are also supported.  A UTF-8 locale is one in which the
+character set is Unicode and the encoding is UTF-8.  The POSIX
+C<LC_CTYPE> category operations (case changing (like C<lc()>, C<"\U">),
+and character classification (C<\w>, C<\D>, C<qr/[[:punct:]]/>)) under
+such a locale work just as if not under locale, but instead as if under
+C<S<use feature 'unicode_strings'>>, except taint rules are followed.
+Sorting remains by code point order in this release.  [perl #56820].
+
 =head2 C<S<use locale>> now compiles on systems without locale ability
 
 Previously doing this caused the program to not compile.  Within its
@@ -311,7 +323,8 @@ C<utf8::encode()> on the string (or a copy) first.
 
 =head2 Literal control characters in variable names
 
-This deprecation affects things like $\cT, where \cT is a literal control in
+This deprecation affects things like $\cT, where \cT is a literal control (such
+as a C<NAK> or C<NEGATIVE ACKNOWLEDGE> character) in
 the source code.  Surprisingly, it appears that originally this was intended as
 the canonical way of accessing variables like $^T, with the caret form only
 being added as an alternative.
@@ -688,7 +701,8 @@ lexical warnings in a single place.
 
 =item *
 
-The documentation now mentions F<fc()> and C<\F>.
+The documentation now mentions F<fc()> and C<\F>, and includes many
+clarifications and corrections in general.
 
 =back
 
@@ -1025,8 +1039,8 @@ L<Use of literal control characters in variable names is deprecated|perldiag/"Us
 
 (D deprecated) Using literal control characters in the source to refer to the
 ^FOO variables, like $^X and ${^GLOBAL_PHASE} is now deprecated.  This only
-affects code like $\cT, where \cT is a control in the source code: ${"\cT"} and
-$^T remain valid.
+affects code like $\cT, where \cT is a control (like a C<SOH>) in the
+source code: ${"\cT"} and $^T remain valid.
 
 =item *
 
@@ -1638,18 +1652,19 @@ underlying hash key when that key is not stored as a SV.  [perl #79074]
 
 =item *
 
-Certain rarely used functions and macros available to XS code are now, or are
-planned to be, deprecated.  These are:
-C<utf8n_to_uvuni> (use C<utf8_to_uvchr_buf> instead),
-C<utf8_to_uni_buf> (use C<utf8_to_uvchr_buf> instead),
+Certain rarely used functions and macros available to XS code are now
+deprecated.  These are:
+C<utf8_to_uvuni_buf> (use C<utf8_to_uvchr_buf> instead),
 C<valid_utf8_to_uvuni> (use C<utf8_to_uvchr_buf> instead),
-C<uvuni_to_utf8> (use C<uvchr_to_utf8> instead),
 C<NATIVE_TO_NEED> (this did not work properly anyway),
 and C<ASCII_TO_NEED>  (this did not work properly anyway).
 
 Starting in this release, almost never does application code need to
 distinguish between the platform's character set and Latin1, on which the
-lowest 256 characters of Unicode are based.
+lowest 256 characters of Unicode are based.  New code should not use
+C<utf8n_to_uvuni> (use C<utf8_to_uvchr_buf> instead),
+nor
+C<uvuni_to_utf8> (use C<uvchr_to_utf8> instead),
 
 =item *
 
@@ -2303,8 +2318,7 @@ stringification of the decimal point [perl #108378] [perl #115800]
 
 There have been several fixes related to Perl's handling of locales.  perl
 #38193 was described above in L</Internal Changes>.
-Also fixed is #112208 in which the error string in C<$!> displayed as
-garbage in many UTF-8 locales;
+Also fixed is 
 #118197, where the radix (decimal point) character had to be an ASCII
 character (which doesn't work for some non-Western languages);
 and #115808, in which C<POSIX::setlocale()> on failure returned an
@@ -2853,10 +2867,10 @@ crashed intermittently. [perl #72406]
 
 =item *
 
-Fix HP-UX $! failure. HP-UX strerror() returns an empty string for an
+Fix HP-UX C<$!> failure. HP-UX strerror() returns an empty string for an
 unknown error code.  This caused an assertion to fail under DEBUGGING
-builds.  This patch removes the assertion and changes the return into
-a non-empty string indicating the errno is for an unknown error.
+builds.  Now instead, the returned string for C<"$!"> contains text
+indicating the code is for an unknown error.
 
 =item *
 
