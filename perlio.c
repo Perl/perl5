@@ -4919,6 +4919,7 @@ PerlIO_vprintf(PerlIO *f, const char *fmt, va_list ap)
     s = SvPV_const(sv, len);
     wrote = PerlIO_write(f, s, len);
     SvREFCNT_dec(sv);
+    va_end(apc);
     return wrote;
 }
 

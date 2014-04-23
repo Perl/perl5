@@ -4936,6 +4936,7 @@ Perl_my_vsnprintf(char *buffer, const Size_t len, const char *format, va_list ap
     retval = vsprintf(buffer, format, ap);
 # endif
 #endif /* #ifdef NEED_VA_COPY */
+    va_end(apc);
     /* vsprintf() shows failure with < 0 */
     if (retval < 0
 #ifdef HAS_VSNPRINTF
