@@ -3762,7 +3762,9 @@ S_open_script(pTHX_ const char *scriptname, bool dosearch, bool *suidscript)
 	const char * const err = "Failed to create a fake bit bucket";
 	if (strEQ(scriptname, BIT_BUCKET)) {
 #ifdef HAS_MKSTEMP /* Hopefully mkstemp() is safe here. */
+            int old_umask = umask(0600);
 	    int tmpfd = mkstemp(tmpname);
+            umask(old_umask);
 	    if (tmpfd > -1) {
 		scriptname = tmpname;
 		close(tmpfd);

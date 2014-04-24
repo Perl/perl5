@@ -4962,6 +4962,7 @@ PerlIO_tmpfile(void)
      char tempname[] = "/tmp/PerlIO_XXXXXX";
      const char * const tmpdir = TAINTING_get ? NULL : PerlEnv_getenv("TMPDIR");
      SV * sv = NULL;
+     int old_umask = umask(0600);
      /*
       * I have no idea how portable mkstemp() is ... NI-S
       */
@@ -4983,6 +4984,7 @@ PerlIO_tmpfile(void)
          sv_catpv(sv, tempname + 4);
          fd = mkstemp(SvPVX(sv));
      }
+     umask(old_umask);
      if (fd >= 0) {
 	  f = PerlIO_fdopen(fd, "w+");
 	  if (f)
