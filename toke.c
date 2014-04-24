@@ -2865,8 +2865,9 @@ S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e)
      * look to see that the first character is legal.  Then loop through the
      * rest checking that each is a continuation */
 
-    /* This code needs to be sync'ed with a regex in _charnames.pm which does
-     * the same thing */
+    /* This code makes the reasonable assumption that the only Latin1-range
+     * characters that begin a character name alias are alphabetic, otherwise
+     * would have to create a isCHARNAME_BEGIN macro */
 
     if (! UTF) {
         if (! isALPHAU(*s)) {

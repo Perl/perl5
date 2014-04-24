@@ -7,7 +7,7 @@ package _charnames;
 use strict;
 use warnings;
 use File::Spec;
-our $VERSION = '1.39';
+our $VERSION = '1.41';
 use unicore::Name;    # mktables-generated algorithmically-defined names
 
 use bytes ();          # for $bytes::hint_bits
@@ -169,14 +169,20 @@ sub alias (@) # Set up a single alias
         $^H{charnames_inverse_ords}{sprintf("%05X", $value)} = $name;
     }
     else {
-        # This regex needs to be sync'd with the code in toke.c that checks
-        # for the same thing
-        if ($name !~ / ^
-                       \p{_Perl_Charname_Begin}
-                       \p{_Perl_Charname_Continue}*
-                       $ /x) {
+        my $ok_portion = "";
+        $ok_portion = $1 if $name =~ / ^ (
+                                            \p{_Perl_Charname_Begin}
+                                            \p{_Perl_Charname_Continue}*
+                                         ) /x;
 
-          push @errors, $name;
+        # If the name was fully correct, the above should have matched all of
+        # it.
+        if (length $ok_portion < length $name) {
+          my $first_bad = substr($name, length($ok_portion), 1);
+          push @errors, "Invalid character in charnames alias definition; "
+                        . "marked by <-- HERE in '$ok_portion$first_bad<-- HERE "
+                        . substr($name, length($ok_portion) + 1)
+                        . "'";
         }
         else {
           $^H{charnames_name_aliases}{$name} = $value;
@@ -199,13 +205,6 @@ sub alias (@) # Set up a single alias
   # We find and output all errors from this :alias definition, rather than
   # failing on the first one, so fewer runs are needed to get it to compile
   if (@errors) {
-    foreach my $name (@errors) {
-      my $ok = "";
-      my $nbsp = chr utf8::unicode_to_native(0xa0);
-      $ok = $1 if $name =~ / ^ ( \p{Alpha} [-\p{XPosixWord} ():$nbsp]* ) /x;
-      my $first_bad = substr($name, length($ok), 1);
-      $name = "Invalid character in charnames alias definition; marked by <-- HERE in '$ok$first_bad<-- HERE " . substr($name, length($ok) + 1) . "'";
-    }
     croak join "\n", @errors;
   }
 
