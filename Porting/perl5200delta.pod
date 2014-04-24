@@ -413,11 +413,11 @@ This feature was already available in 5.18.0, but wasn't enabled by
 default. It is the default now, and so you no longer need build perl with
 the F<Configure> argument:
 
-    -Accflags=PERL_NEW_COPY_ON_WRITE
+    -Accflags=-DPERL_NEW_COPY_ON_WRITE
 
 It can be disabled (for now) in a perl build with:
 
-    -Accflags=PERL_NO_COW
+    -Accflags=-DPERL_NO_COW
 
 On some operating systems Perl can be compiled in such a way that any
 attempt to modify string buffers shared by multiple SVs will crash.  This
