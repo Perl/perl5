@@ -375,6 +375,7 @@ Unknown charname '転車に乗る人' at - line \d+, within string
 # NAME various wrong UTF-8 characters in :alias are errors
 # First has a punctuation, KATAKANA MIDDLE DOT, in it; second begins with a
 # digit: ARABIC-INDIC DIGIT FOUR
+# Note that output order is alphabetical by character name
 use utf8;
 use open qw( :utf8 :std );
 use charnames ":full", ":alias" => { "自転車・に乗る人" => "BICYCLIST",
