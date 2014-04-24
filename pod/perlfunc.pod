@@ -1012,6 +1012,9 @@ change your current working directory, which is unaffected.)  For security
 reasons, this call is restricted to the superuser.  If FILENAME is
 omitted, does a C<chroot> to C<$_>.
 
+B<NOTE:>  It is good security practice to do C<chdir("/")> (to the root
+directory) immediately after a C<chroot()>.
+
 Portability issues: L<perlport/chroot>.
 
 =item close FILEHANDLE
