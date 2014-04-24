@@ -191,12 +191,20 @@ result of the value of the environment variable PERLIO.
 (D deprecated) Really old Perl let you omit the @ on array names in some
 spots.  This is now heavily deprecated.
 
-=item A sequence of multiple spaces in a charnames alias definition is deprecated
+=item charnames alias definitions may not contain a sequence of multiple spaces
 
-(D deprecated) You defined a character name which had multiple space
+(F) You defined a character name which had multiple space
 characters in a row.  Change them to single spaces.  Usually these
 names are defined in the C<:alias> import argument to C<use charnames>, but
 they could be defined by a translator installed into C<$^H{charnames}>.
+See L<charnames/CUSTOM ALIASES>.
+
+=item charnames alias definitions may not contain trailing white-space
+
+(F) You defined a character name which ended in a space
+character.  Remove the trailing space(s).  Usually these names are
+defined in the C<:alias> import argument to C<use charnames>, but they
+could be defined by a translator installed into C<$^H{charnames}>.
 See L<charnames/CUSTOM ALIASES>.
 
 =item assertion botched: %s
@@ -5547,14 +5555,6 @@ Check the #! line, or manually feed your script into Perl yourself.
 
 (F) The regular expression ends with an unbackslashed backslash.
 Backslash it.   See L<perlre>.
-
-=item Trailing white-space in a charnames alias definition is deprecated
-
-(D deprecated) You defined a character name which ended in a space
-character.  Remove the trailing space(s).  Usually these names are
-defined in the C<:alias> import argument to C<use charnames>, but they
-could be defined by a translator installed into C<$^H{charnames}>.
-See L<charnames/CUSTOM ALIASES>.
 
 =item Transliteration pattern not terminated
 

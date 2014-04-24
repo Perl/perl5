@@ -185,19 +185,23 @@ sub alias (@) # Set up a single alias
                         . "'";
         }
         else {
-          $^H{charnames_name_aliases}{$name} = $value;
-
-          if (warnings::enabled('deprecated')) {
             if ($name =~ / ( .* \s ) ( \s* ) $ /x) {
-              carp "Trailing white-space in a charnames alias definition is deprecated; marked by <-- HERE in '$1 <-- HERE " . $2 . "'";
+              push @errors, "charnames alias definitions may not contain "
+                            . "trailing white-space; marked by <-- HERE in "
+                            . "'$1 <-- HERE " . $2 . "'";
+              next;
             }
 
             # Use '+' instead of '*' in this regex, because any trailing
-            # blanks have already been warned about.
+            # blanks have already been found
             if ($name =~ / ( .*? \s{2} ) ( .+ ) /x) {
-              carp "A sequence of multiple spaces in a charnames alias definition is deprecated; marked by <-- HERE in '$1 <-- HERE " . $2 . "'";
+              push @errors, "charnames alias definitions may not contain a "
+                            . "sequence of multiple spaces; marked by <-- HERE "
+                            . "in '$1 <-- HERE " . $2 . "'";
+              next;
             }
-          }
+
+            $^H{charnames_name_aliases}{$name} = $value;
         }
     }
   }

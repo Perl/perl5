@@ -2878,17 +2878,10 @@ S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e)
             if (! isCHARNAME_CONT(*s)) {
                 goto bad_charname;
             }
-	    if (*s == ' ' && *(s-1) == ' ' && ckWARN_d(WARN_DEPRECATED)) {
-                Perl_warner(aTHX_ packWARN(WARN_DEPRECATED),
-                           "A sequence of multiple spaces in a charnames "
-                           "alias definition is deprecated");
+	    if (*s == ' ' && *(s-1) == ' ') {
+                goto multi_spaces;
             }
             s++;
-        }
-        if (*(s-1) == ' ' && ckWARN_d(WARN_DEPRECATED)) {
-            Perl_warner(aTHX_ packWARN(WARN_DEPRECATED),
-                        "Trailing white-space in a charnames alias "
-                        "definition is deprecated");
         }
     }
     else {
@@ -2925,11 +2918,8 @@ S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e)
                 if (! isCHARNAME_CONT(*s)) {
                     goto bad_charname;
                 }
-                if (*s == ' ' && *(s-1) == ' '
-                 && ckWARN_d(WARN_DEPRECATED)) {
-                    Perl_warner(aTHX_ packWARN(WARN_DEPRECATED),
-                               "A sequence of multiple spaces in a charnam"
-                               "es alias definition is deprecated");
+                if (*s == ' ' && *(s-1) == ' ') {
+                    goto multi_spaces;
                 }
                 s++;
             }
@@ -2954,11 +2944,17 @@ S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e)
                 s += UTF8SKIP(s);
             }
         }
-        if (*(s-1) == ' ' && ckWARN_d(WARN_DEPRECATED)) {
-            Perl_warner(aTHX_ packWARN(WARN_DEPRECATED),
-                       "Trailing white-space in a charnames alias "
-                       "definition is deprecated");
-        }
+    }
+    if (*(s-1) == ' ') {
+        yyerror_pv(
+            Perl_form(aTHX_
+            "charnames alias definitions may not contain trailing "
+            "white-space; marked by <-- HERE in %.*s<-- HERE %.*s",
+            (int)(s - backslash_ptr + 1), backslash_ptr,
+            (int)(e - s + 1), s + 1
+            ),
+        UTF ? SVf_UTF8 : 0);
+        return NULL;
     }
 
     if (SvUTF8(res)) { /* Don't accept malformed input */
@@ -2989,19 +2985,29 @@ S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e)
     return res;
 
   bad_charname: {
-        int bad_char_size = ((UTF) ? UTF8SKIP(s) : 1);
 
         /* The final %.*s makes sure that should the trailing NUL be missing
          * that this print won't run off the end of the string */
         yyerror_pv(
           Perl_form(aTHX_
             "Invalid character in \\N{...}; marked by <-- HERE in %.*s<-- HERE %.*s",
-            (int)(s - backslash_ptr + bad_char_size), backslash_ptr,
-            (int)(e - s + bad_char_size), s + bad_char_size
+            (int)(s - backslash_ptr + 1), backslash_ptr,
+            (int)(e - s + 1), s + 1
           ),
           UTF ? SVf_UTF8 : 0);
         return NULL;
     }
+
+  multi_spaces:
+        yyerror_pv(
+          Perl_form(aTHX_
+            "charnames alias definitions may not contain a sequence of "
+            "multiple spaces; marked by <-- HERE in %.*s<-- HERE %.*s",
+            (int)(s - backslash_ptr + 1), backslash_ptr,
+            (int)(e - s + 1), s + 1
+          ),
+          UTF ? SVf_UTF8 : 0);
+        return NULL;
 }
 
 /*

@@ -380,28 +380,16 @@ use utf8;
 use open qw( :utf8 :std );
 use charnames ":full", ":alias" => { "自転車・に乗る人" => "BICYCLIST",
                                      "٤転車に乗る人" => "BICYCLIST",
+                                "TOO  MANY SPACES" => "NO ENTRY SIGN",
+                                "TRAILING SPACE " => "FACE WITH NO GOOD GESTURE"
                                     };
+print "ok\n" if "\N{TOO  MANY SPACES}" eq "\x{1F6AB}";
+print "ok\n" if "\N{TRAILING SPACE }" eq "\x{1F645}";
 print "ok\n" if "\N{自転車・に乗る人}" eq "\x{1F6B4}";
 print "ok\n" if "\N{٤転車に乗る人}" eq "\x{1F6B4}";
 EXPECT
-OPTIONS regex
+OPTIONS regex fatal
+charnames alias definitions may not contain a sequence of multiple spaces; marked by <-- HERE in 'TOO   <-- HERE MANY SPACES'
+charnames alias definitions may not contain trailing white-space; marked by <-- HERE in 'TRAILING SPACE  <-- HERE '
 Invalid character in charnames alias definition; marked by <-- HERE in '٤<-- HERE 転車に乗る人'
 Invalid character in charnames alias definition; marked by <-- HERE in '自転車・<-- HERE に乗る人' at - line \d+
-########
-# NAME trailing and sequences of multiple spaces in :alias names are deprectated
-use charnames ":alias" => { "TOO  MANY SPACES" => "NO ENTRY SIGN",
-                            "TRAILING SPACE " => "FACE WITH NO GOOD GESTURE"
-                          };
-print "ok\n" if "\N{TOO  MANY SPACES}" eq "\x{1F6AB}";
-print "ok\n" if "\N{TRAILING SPACE }" eq "\x{1F645}";
-no warnings 'deprecated';
-print "ok\n" if "\N{TOO  MANY SPACES}" eq "\x{1F6AB}";
-print "ok\n" if "\N{TRAILING SPACE }" eq "\x{1F645}";
-EXPECT
-OPTIONS regex
-A sequence of multiple spaces in a charnames alias definition is deprecated; marked by <-- HERE in 'TOO   <-- HERE MANY SPACES' at - line \d+.
-Trailing white-space in a charnames alias definition is deprecated; marked by <-- HERE in 'TRAILING SPACE  <-- HERE ' at - line \d+.
-ok
-ok
-ok
-ok
