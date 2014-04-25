@@ -14153,7 +14153,7 @@ parseit:
                 && ((prevvalue >= 'a' && value <= 'z')
                     || (prevvalue >= 'A' && value <= 'Z')))
             {
-                _invlist_intersection(this_range, PL_ASCII,
+                _invlist_intersection(this_range, PL_XPosix_ptrs[_CC_ASCII],
                                       &this_range);
 
                 /* Since this above only contains ascii, the intersection of it
