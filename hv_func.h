@@ -810,7 +810,7 @@ S_perl_hash_aeshash(const unsigned char * const seed, const unsigned char *str, 
                  * 16 bytes than this...
                  * We copy the key into the buffer, and then
                  * fill the unused portion with bytes set to
-                 * the number of used bytes. (So for instance
+                 * the number of unused bytes. (So for instance
                  * if we have 15 bytes then the tail is 0x01,
                  * but if we have 14 bytes then the tail is 0x0202
                  * and etc.
