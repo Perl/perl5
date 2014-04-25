@@ -14718,7 +14718,7 @@ parseit:
            /* We don't optimize if we are supposed to make sure all non-Unicode
             * code points raise a warning, as only ANYOF nodes have this check.
             * */
-        && ! ((ANYOF_FLAGS(ret) | ANYOF_WARN_SUPER) && ALWAYS_WARN_SUPER))
+        && ! ((ANYOF_FLAGS(ret) & ANYOF_WARN_SUPER) && ALWAYS_WARN_SUPER))
     {
         UV start, end;
         U8 op = END;  /* The optimzation node-type */
