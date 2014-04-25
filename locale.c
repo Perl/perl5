@@ -1181,20 +1181,20 @@ S_is_cur_LC_category_utf8(pTHX_ int category)
         && *(save_input_locale + final_pos - 3) == '5'
         && *(save_input_locale + final_pos - 4) == '6')
     {
-        Safefree(save_input_locale);
         DEBUG_L(PerlIO_printf(Perl_debug_log,
                         "Locale %s ends with 10056 in name, is UTF-8 locale\n",
                         save_input_locale));
+        Safefree(save_input_locale);
         return TRUE;
     }
 #endif
 
     /* Other common encodings are the ISO 8859 series, which aren't UTF-8 */
     if (instr(save_input_locale, "8859")) {
-        Safefree(save_input_locale);
         DEBUG_L(PerlIO_printf(Perl_debug_log,
                              "Locale %s has 8859 in name, not UTF-8 locale\n",
                              save_input_locale));
+        Safefree(save_input_locale);
         return FALSE;
     }
 
