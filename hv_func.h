@@ -27,6 +27,7 @@
         || defined(PERL_HASH_FUNC_MURMUR_HASH_64A) \
         || defined(PERL_HASH_FUNC_MURMUR_HASH_64B) \
         || defined(PERL_HASH_FUNC_WRAPPED) \
+        || defined(PERL_HASH_FUNC_AESHASH) \
     )
 #define PERL_HASH_FUNC_WRAPPED
 #endif
@@ -79,6 +80,10 @@
 #   define PERL_HASH_FUNC "LOOKUP3"
 #   define PERL_HASH_SEED_BYTES 4
 #   define PERL_HASH_WITH_SEED(seed,hash,str,len) (hash)= S_perl_hash_lookup3_hashlittle((seed),(U8*)(str),(len))
+#elif defined(PERL_HASH_FUNC_AESHASH)
+#   define PERL_HASH_FUNC "AESHASH"
+#   define PERL_HASH_SEED_BYTES 48
+#   define PERL_HASH_WITH_SEED(seed,hash,str,len) (hash)= S_perl_hash_aeshash((seed),(U8*)(str),(len))
 #elif defined(PERL_HASH_FUNC_WRAPPED)
 #   define PERL_HASH_FUNC "WRAPPED"
 #   define PERL_HASH_SEED_BYTES 12
@@ -773,6 +778,59 @@ S_perl_hash_murmur_hash_64b (const unsigned char * const seed, const unsigned ch
         return h2;
 }
 #endif
+#include <wmmintrin.h>
+PERL_STATIC_INLINE U32
+S_perl_hash_aeshash(const unsigned char * const seed, const unsigned char *str, const STRLEN len) {
+        __m128i acc= _mm_loadu_si128((__m128i *) seed);
+        __m128i s0=  _mm_loadu_si128((__m128i *)(seed + 16));
+        __m128i s1=  _mm_loadu_si128((__m128i *)(seed + 32));
+        __m128i block;
+        uint32_t _out[4] __attribute__((aligned(16)));
+        STRLEN tail= len & 0xF;
+        const unsigned char * const end= str + len - tail;
+
+        if ((STRLEN)str & 0x0F) {
+                for ( ; str < end ; str+=16 ) {
+                        block = _mm_loadu_si128((__m128i *) str); /* unaligned */
+
+                        acc = _mm_aesenc_si128( block, acc );
+                        acc = _mm_aesenc_si128( s0, acc  );
+                }
+        } else {
+                for ( ; str < end ; str+=16 ) {
+                        block = _mm_load_si128((__m128i *) str); /* aligned */
+
+                        acc = _mm_aesenc_si128( block, acc );
+                        acc = _mm_aesenc_si128( s0, acc );
+                }
+        }
+
+        if ( tail ) {
+                /* There must be a better way to read less than
+                 * 16 bytes than this...
+                 * We copy the key into the buffer, and then
+                 * fill the unused portion with bytes set to
+                 * the number of used bytes. (So for instance
+                 * if we have 15 bytes then the tail is 0x01,
+                 * but if we have 14 bytes then the tail is 0x0202
+                 * and etc.
+                 * */
+                uint8_t _block[16] __attribute__((aligned(16)));
+                memcpy( _block, str, tail );
+                memset( _block + tail, 16 - tail, 16 - tail );
+                block = _mm_load_si128((__m128i *) _block);
+
+                acc = _mm_aesenc_si128( block, acc );
+                acc = _mm_aesenc_si128( acc, s0 );
+        }
+
+        acc = _mm_aesenc_si128( acc, s0 );
+        acc = _mm_aesenc_si128( acc, s1 );
+        acc = _mm_aesenclast_si128( acc, s1 );
+
+        _mm_store_si128((__m128i *) _out, acc);
+        return _out[0];
+}
 
 /* legacy - only mod_perl should be doing this.  */
 #ifdef PERL_HASH_INTERNAL_ACCESS
