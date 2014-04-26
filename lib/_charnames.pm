@@ -144,6 +144,7 @@ sub carp
 sub alias (@) # Set up a single alias
 {
   my @errors;
+  my $nbsp = chr utf8::unicode_to_native(0xA0);
 
   my $alias = ref $_[0] ? $_[0] : { @_ };
   foreach my $name (sort keys %$alias) {  # Sort only because it helps having
@@ -202,6 +203,13 @@ sub alias (@) # Set up a single alias
             }
 
             $^H{charnames_name_aliases}{$name} = $value;
+            if (warnings::enabled('deprecated')
+                && $name =~ / ( .* $nbsp ) ( .* ) $ /x)
+            {
+                  carp "NO-BREAK SPACE in a charnames alias definition is "
+                       . "deprecated; marked by <-- HERE in '$1 <-- HERE "
+                       . $2 . "'";
+            }
         }
     }
   }

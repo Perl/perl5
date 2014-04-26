@@ -157,6 +157,9 @@ U+D800 first FIRST_SURROGATE
 BOM first
 BOM tail
 
+NBSP native
+NBSP string
+
 DEL native
 CR  native
 LF  native

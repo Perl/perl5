@@ -37,6 +37,9 @@
 #define BOM_UTF8_FIRST_BYTE  0xEF    /* U+FEFF */
 #define BOM_UTF8_TAIL  "\xBB\xBF"    /* U+FEFF */
 
+#define NBSP_NATIVE  0xA0    /* U+00A0 */
+#define NBSP_UTF8  "\xC2\xA0"    /* U+00A0 */
+
 #define DEL_NATIVE  0x7F    /* U+007F */
 #define CR_NATIVE  0x0D    /* U+000D */
 #define LF_NATIVE  0x0A    /* U+000A */

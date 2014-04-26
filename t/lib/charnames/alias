@@ -393,3 +393,18 @@ charnames alias definitions may not contain a sequence of multiple spaces; marke
 charnames alias definitions may not contain trailing white-space; marked by <-- HERE in 'TRAILING SPACE  <-- HERE '
 Invalid character in charnames alias definition; marked by <-- HERE in '٤<-- HERE 転車に乗る人'
 Invalid character in charnames alias definition; marked by <-- HERE in '自転車・<-- HERE に乗る人' at - line \d+
+########
+# NAME Using NBSP in :alias names is deprectated
+use utf8;
+use open qw( :utf8 :std );
+use charnames ":alias" => { "NBSP SEPARATED SPACE" => "BLACK SMILING FACE" };
+print "ok\n" if "\N{NBSP SEPARATED SPACE}" eq "\x{263B}";
+print "ok\n" if "\N{NBSP SEPARATED SPACE}" eq "\x{263B}";
+no warnings 'deprecated';
+print "ok\n" if "\N{NBSP SEPARATED SPACE}" eq "\x{263B}";
+EXPECT
+OPTIONS regex
+NO-BREAK SPACE in a charnames alias definition is deprecated; marked by <-- HERE in 'NBSP SEPARATED  <-- HERE SPACE' at - line \d+.
+ok
+ok
+ok

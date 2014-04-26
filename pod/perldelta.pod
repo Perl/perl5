@@ -56,6 +56,13 @@ These had been deprecated since v5.18.
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.
 
+=head2 Using a NO-BREAK space in a character alias for C<\N{...}> is now
+deprecated
+
+This non-graphic character is essentially indistinguishable from a
+regular space, and so should not be allowed.  See
+L<charnames/CUSTOM ALIASES>.
+
 =head2 Module removals
 
 XXX Remove this section if inapplicable.
