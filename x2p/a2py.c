@@ -70,7 +70,7 @@ main(int argc, const char **argv)
 
     myname = argv[0];
     linestr = str_new(80);
-    str = str_new(0);		/* first used for -I flags */
+    /* first used for -I flags */
     for (argc--,argv++; argc; argc--,argv++) {
 	if (argv[0][0] != '-' || !argv[0][1])
 	    break;

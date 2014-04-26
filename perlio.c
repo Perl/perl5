@@ -2948,7 +2948,7 @@ PerlIO_importFILE(FILE *stdio, const char *mode)
 	    }
 	    fclose(f2);
 	}
-	if ((f = PerlIO_push(aTHX_(f = PerlIO_allocate(aTHX)), PERLIO_FUNCS_CAST(&PerlIO_stdio), mode, NULL))) {
+	if ((f = PerlIO_push(aTHX_(PerlIO_allocate(aTHX)), PERLIO_FUNCS_CAST(&PerlIO_stdio), mode, NULL))) {
 	    s = PerlIOSelf(f, PerlIOStdio);
 	    s->stdio = stdio;
 	    PerlIOUnix_refcnt_inc(fileno(stdio));
@@ -2971,8 +2971,8 @@ PerlIOStdio_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers,
 	if (!IS_SAFE_PATHNAME(path, len, "open"))
             return NULL;
 	PerlIOUnix_refcnt_dec(fileno(s->stdio));
-	stdio = PerlSIO_freopen(path, (mode = PerlIOStdio_mode(mode, tmode)),
-			    s->stdio);
+	stdio = PerlSIO_freopen(path, PerlIOStdio_mode(mode, tmode),
+                                s->stdio);
 	if (!s->stdio)
 	    return NULL;
 	s->stdio = stdio;

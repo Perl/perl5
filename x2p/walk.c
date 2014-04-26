@@ -254,7 +254,6 @@ sub Pick {\n\
 	break;
     case OHUNK:
 	if (len == 1) {
-	    str = str_new(0);
 	    str = walk(0,level,oper1(OPRINT,0),&numarg,P_MIN);
 	    str_cat(str," if ");
 	    str_scat(str,fstr=walk(0,level,ops[node+1].ival,&numarg,P_MIN));
@@ -1104,7 +1103,7 @@ sub Pick {\n\
 	if (!do_fancy_opens) {
 	    t = tmpstr->str_ptr;
 	    if (*t == '"' || *t == '\'')
-		t = cpytill(tokenbuf,t+1,*t);
+		cpytill(tokenbuf,t+1,*t);
 	    else
 		fatal("Internal error: OCLOSE %s",t);
 	    s = savestr(tokenbuf);

@@ -10399,7 +10399,6 @@ S_scan_inputsymbol(pTHX_ char *start)
 	    Copy("ARGV",d,5,char);
 
 	/* Check whether readline() is overriden */
-	gv_readline = gv_fetchpvs("readline", GV_NOTQUAL, SVt_PVCV);
 	if ((gv_readline = gv_override("readline",8)))
 	    readline_overriden = TRUE;
 

@@ -1457,10 +1457,10 @@ common(params)
 	if ((svp = hv_fetchs(params, "hash", 0)))
 	    hash = SvUV(*svp);
 
-	if ((svp = hv_fetchs(params, "hash_pv", 0))) {
+	if (hv_fetchs(params, "hash_pv", 0)) {
 	    PERL_HASH(hash, key, klen);
 	}
-	if ((svp = hv_fetchs(params, "hash_sv", 0))) {
+	if (hv_fetchs(params, "hash_sv", 0)) {
 	    STRLEN len;
 	    const char *const p = SvPV(keysv, len);
 	    PERL_HASH(hash, p, len);
