@@ -1036,6 +1036,19 @@ sub run_tests {
         }
 
         undef $w;
+        my $Cedilla_Latin1 = "GAR"
+                           . latin1_to_native("\xC7")
+                           . "ON";
+        my $Cedilla_utf8 = $Cedilla_Latin1;
+        utf8::upgrade($Cedilla_utf8);
+        eval qq[is("\\N{$Cedilla_Latin1}", "$Cedilla_Latin1", "A cedilla in character name works")];
+        undef $w;
+            {
+            use feature 'unicode_eval';
+            eval qq[use utf8; is("\\N{$Cedilla_utf8}", "$Cedilla_utf8", "... same under 'use utf8': they work")];
+        }
+
+        undef $w;
         {
             BEGIN { no strict; *CnameTest:: = *{"_charnames\0A::" } }
             package CnameTest { sub translator { pop } }

@@ -3766,6 +3766,10 @@ S_scan_const(pTHX_ char *start)
 			    const STRLEN off = d - SvPVX_const(sv);
 			    d = off + SvGROW(sv, off + len + (STRLEN)(send - s) + 1);
 			}
+                        if (! SvUTF8(res)) {    /* Make sure is \N{} return is UTF-8 */
+                            sv_utf8_upgrade(res);
+                            str = SvPV_const(res, len);
+                        }
 			Copy(str, d, len, char);
 			d += len;
 		    }
