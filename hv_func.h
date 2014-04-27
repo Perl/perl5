@@ -29,7 +29,7 @@
         || defined(PERL_HASH_FUNC_WRAPPED) \
         || defined(PERL_HASH_FUNC_AESHASH) \
     )
-#define PERL_HASH_FUNC_LOOKUP3
+#define PERL_HASH_FUNC_AESHASH
 #endif
 
 #if defined(PERL_HASH_FUNC_SIPHASH_1_2)
