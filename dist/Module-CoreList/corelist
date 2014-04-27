@@ -174,7 +174,7 @@ if(exists $Opts{r} ){
 if(exists $Opts{v} ){
     if( !$Opts{v} ) {
         print "\nModule::CoreList has info on the following perl versions:\n";
-        print format_perl_version($_)."\n" for sort keys %Module::CoreList::version;
+        print format_perl_version($_)."\n" for grep !/0[01]0$/, sort keys %Module::CoreList::version;
         print "\n";
         exit 0;
     }
@@ -383,7 +383,7 @@ sub max {
 sub display_a {
     my $mod = shift;
 
-    for my $v (grep !/000$/, sort keys %Module::CoreList::version ) {
+    for my $v (grep !/0[01]0$/, sort keys %Module::CoreList::version ) {
         next unless exists $Module::CoreList::version{$v}{$mod};
 
         my $mod_v = $Module::CoreList::version{$v}{$mod} || 'undef';
