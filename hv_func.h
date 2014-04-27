@@ -788,7 +788,7 @@ S_perl_hash_murmur_hash_64b (const unsigned char * const seed, const unsigned ch
 /* requires -Accflags="-msse2 -maes" in ./Configure */
 #include <wmmintrin.h>
 #include <pmmintrin.h>
-
+#include <tmmintrin.h>
 
 #define PERL_HASH_FUNC_INIT(seed) S_perl_hash_aeshash_init(seed)
 
@@ -816,36 +816,93 @@ S_perl_hash_aeshash_init(unsigned char *seed) {
     _mm_storeu_si128(seedp+2, K2);
 }
 
+/*  simple mask to get rid of data in the high part of the register. */
+static const uint32_t __andmask[64] __attribute__((aligned(16))) = {
+        0x00000000, 0x00000000, 0x00000000, 0x00000000,
+        0x000000ff, 0x00000000, 0x00000000, 0x00000000,
+        0x0000ffff, 0x00000000, 0x00000000, 0x00000000,
+        0x00ffffff, 0x00000000, 0x00000000, 0x00000000,
+        0xffffffff, 0x00000000, 0x00000000, 0x00000000,
+        0xffffffff, 0x000000ff, 0x00000000, 0x00000000,
+        0xffffffff, 0x0000ffff, 0x00000000, 0x00000000,
+        0xffffffff, 0x00ffffff, 0x00000000, 0x00000000,
+        0xffffffff, 0xffffffff, 0x00000000, 0x00000000,
+        0xffffffff, 0xffffffff, 0x000000ff, 0x00000000,
+        0xffffffff, 0xffffffff, 0x0000ffff, 0x00000000,
+        0xffffffff, 0xffffffff, 0x00ffffff, 0x00000000,
+        0xffffffff, 0xffffffff, 0xffffffff, 0x00000000,
+        0xffffffff, 0xffffffff, 0xffffffff, 0x000000ff,
+        0xffffffff, 0xffffffff, 0xffffffff, 0x0000ffff,
+        0xffffffff, 0xffffffff, 0xffffffff, 0x00ffffff
+};
+
+/* these are arguments to pshufb.  They move data down from
+ * the high bytes of the register to the low bytes of the register.
+ * index is how many bytes to move.
+ */
+static const uint32_t __shufmask[64] __attribute__((aligned(16))) = {
+        0x00000000, 0x00000000, 0x00000000, 0x00000000,
+        0xffffff0f, 0xffffffff, 0xffffffff, 0xffffffff,
+        0xffff0f0e, 0xffffffff, 0xffffffff, 0xffffffff,
+        0xff0f0e0d, 0xffffffff, 0xffffffff, 0xffffffff,
+        0x0f0e0d0c, 0xffffffff, 0xffffffff, 0xffffffff,
+        0x0e0d0c0b, 0xffffff0f, 0xffffffff, 0xffffffff,
+        0x0d0c0b0a, 0xffff0f0e, 0xffffffff, 0xffffffff,
+        0x0c0b0a09, 0xff0f0e0d, 0xffffffff, 0xffffffff,
+        0x0b0a0908, 0x0f0e0d0c, 0xffffffff, 0xffffffff,
+        0x0a090807, 0x0e0d0c0b, 0xffffff0f, 0xffffffff,
+        0x09080706, 0x0d0c0b0a, 0xffff0f0e, 0xffffffff,
+        0x08070605, 0x0c0b0a09, 0xff0f0e0d, 0xffffffff,
+        0x07060504, 0x0b0a0908, 0x0f0e0d0c, 0xffffffff,
+        0x06050403, 0x0a090807, 0x0e0d0c0b, 0xffffff0f,
+        0x05040302, 0x09080706, 0x0d0c0b0a, 0xffff0f0e,
+        0x04030201, 0x08070605, 0x0c0b0a09, 0xff0f0e0d
+};
+
 
 PERL_STATIC_INLINE U32
 S_perl_hash_aeshash(const unsigned char * const seed, const unsigned char *str, const STRLEN len) {
-        __m128i acc= _mm_lddqu_si128((__m128i *) seed);
-        __m128i s0=  _mm_lddqu_si128((__m128i *)(seed + 16));
-        __m128i s1=  _mm_lddqu_si128((__m128i *)(seed + 32));
-        __m128i block;
+        __m128i s0= _mm_lddqu_si128((__m128i *) seed);       /* unaligned - faster than _mm_loadu_si128 */
+        __m128i s1= _mm_lddqu_si128((__m128i *)(seed + 16)); /* unaligned - faster than _mm_loadu_si128 */
+        __m128i s2= _mm_lddqu_si128((__m128i *)(seed + 32)); /* unaligned - faster than _mm_loadu_si128 */
         uint32_t _out[4] __attribute__((aligned(16)));
-        STRLEN tail= len & 0xF;
-        const unsigned char * const end= str + len - tail;
+        const STRLEN tail = len & 0x0F;
+        __m128i block;
+        __m128i acc;
 
-        if ((STRLEN)str & 0x0F) {
-                for ( ; str < end ; str+=16 ) {
-                        block = _mm_lddqu_si128((__m128i *) str); /* unaligned */
+        block= _mm_set_epi64((__m64)tail, (__m64)len);
+        acc=   _mm_xor_si128( s0, block );
+        acc=   _mm_aesenc_si128( acc, s1 );
+        acc=   _mm_aesenc_si128( acc, s2 );
 
-                        acc = _mm_xor_si128( acc, block );
-                        acc = _mm_aesenc_si128( acc, s0 );
-                        acc = _mm_aesenc_si128( acc, s1 );
-                }
+        if (len >= 16) {
+            const unsigned char * const end= str + len - tail;
+
+            for ( ; str < end ; str+=16 ) {
+                block= _mm_lddqu_si128((__m128i *) str);
+
+                acc=  _mm_xor_si128( acc, block );
+                acc=  _mm_aesenc_si128( acc, s1 );
+                acc=  _mm_aesenc_si128( acc, s2 );
+            }
+            if (tail) {
+                block= _mm_lddqu_si128((__m128i *)(end - 16));
+
+                acc=  _mm_xor_si128( acc, block );
+                acc=  _mm_aesenc_si128( acc, s1 );
+                acc=  _mm_aesenc_si128( acc, s2 );
+            }
         } else {
-                for ( ; str < end ; str+=16 ) {
-                        block = _mm_load_si128((__m128i *) str); /* aligned */
-
-                        acc = _mm_xor_si128( acc, block );
-                        acc = _mm_aesenc_si128( acc, s0 );
-                        acc = _mm_aesenc_si128( acc, s1 );
+            if (1) {
+                if ((((STRLEN)str) & 0xFF) > 0xF0) {
+                    block= _mm_loadu_si128((__m128i *) str);
+                    block= _mm_and_si128(block, ((__m128i *)__andmask)[len]);
+                } else {
+                    block= _mm_loadu_si128((__m128i *)(str + len - 16));
+                    block= _mm_shuffle_epi8(block, ((__m128i *)__shufmask)[len]);
                 }
-        }
+            } else {
 
-        if ( tail ) {
                 /* There must be a better way to read less than
                  * 16 bytes than this...
                  * We copy the key into the buffer, and then
@@ -856,18 +913,19 @@ S_perl_hash_aeshash(const unsigned char * const seed, const unsigned char *str, 
                  * and etc. This is one of many ways to pad a block
                  * cipher */
                 uint8_t _block[16] __attribute__((aligned(16)));
-                memcpy( _block, str, tail );
-                memset( _block + tail, 16 - tail, 16 - tail );
-                block = _mm_load_si128((__m128i *) _block);
+                memcpy( _block, str, len );
+                memset( _block + len, 16 - len, 16 - len );
+                block= _mm_load_si128((__m128i *) _block);
+            }
 
-                acc = _mm_xor_si128( acc, block );
-                acc = _mm_aesenc_si128( acc, s0 );
-                acc = _mm_aesenc_si128( acc, s1 );
+            acc= _mm_xor_si128( acc, block );
+            acc= _mm_aesenc_si128( acc, s1 );
+            acc= _mm_aesenc_si128( acc, s2 );
         }
 
-        acc = _mm_aesenc_si128( acc, s0 );
-        acc = _mm_aesenc_si128( acc, s1 );
-        acc = _mm_aesenc_si128( acc, s0 );
+        acc= _mm_aesenc_si128( acc, s1 );
+        acc= _mm_aesenc_si128( acc, s2 );
+        acc= _mm_aesenc_si128( acc, s1 );
 
         _mm_store_si128((__m128i *) _out, acc);
         return _out[0];
