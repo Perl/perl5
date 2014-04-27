@@ -4729,7 +4729,7 @@ Perl_get_hash_seed(pTHX_ unsigned char * const seed_buffer)
         if (env_pv[0] == '0' && env_pv[1] == 'x')
             env_pv += 2;
 
-        for( i = 0; isXDIGIT(*env_pv) && i < PERL_HASH_SEED_BYTES; i++ ) {
+        for( i = 0; isXDIGIT(*env_pv) && i < PERL_HASH_SEED_BYTES_INIT; i++ ) {
             seed_buffer[i] = READ_XDIGIT(env_pv) << 4;
             if ( isXDIGIT(*env_pv)) {
                 seed_buffer[i] |= READ_XDIGIT(env_pv);
@@ -4750,9 +4750,12 @@ Perl_get_hash_seed(pTHX_ unsigned char * const seed_buffer)
     {
         (void)seedDrand01((Rand_seed_t)seed());
 
-        for( i = 0; i < PERL_HASH_SEED_BYTES; i++ ) {
+        for( i = 0; i < PERL_HASH_SEED_BYTES_INIT; i++ ) {
             seed_buffer[i] = (unsigned char)(Drand01() * (U8_MAX+1));
         }
+#ifdef PERL_HASH_SEED_POST_PROCESS
+        PERL_HASH_SEED_POST_PROCESS(seedbuffer);
+#endif
     }
 #ifdef USE_PERL_PERTURB_KEYS
     {   /* initialize PL_hash_rand_bits from the hash seed.

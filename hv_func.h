@@ -83,11 +83,17 @@
 #elif defined(PERL_HASH_FUNC_AESHASH)
 #   define PERL_HASH_FUNC "AESHASH"
 #   define PERL_HASH_SEED_BYTES 48
+#   define PERL_HASH_SEED_BYTES_INIT 16
+#   define BUILD_PERL_HASH_FUNC_AESHASH
 #   define PERL_HASH_WITH_SEED(seed,hash,str,len) (hash)= S_perl_hash_aeshash((seed),(U8*)(str),(len))
 #elif defined(PERL_HASH_FUNC_WRAPPED)
 #   define PERL_HASH_FUNC "WRAPPED"
 #   define PERL_HASH_SEED_BYTES 12
 #   define PERL_HASH_WITH_SEED(seed,hash,str,len) (hash)= S_perl_hash_wrapped((seed),(U8*)(str),(len))
+#endif
+
+#ifndef PERL_HASH_SEED_BYTES_INIT
+#define PERL_HASH_SEED_BYTES PERL_HASH_SEED_BYTES
 #endif
 
 #ifndef PERL_HASH_WITH_SEED
@@ -778,12 +784,44 @@ S_perl_hash_murmur_hash_64b (const unsigned char * const seed, const unsigned ch
         return h2;
 }
 #endif
+#ifdef BUILD_PERL_HASH_FUNC_AESHASH
+/* requires -Accflags="-msse2 -maes" in ./Configure */
 #include <wmmintrin.h>
+#include <pmmintrin.h>
+
+
+#define PERL_HASH_FUNC_INIT(seed) S_perl_hash_aeshash_init(seed)
+
+PERL_STATIC_INLINE __m128i
+S_perl_hash_aes128_keyexpand(__m128i key, __m128i keygened)
+{
+        key = _mm_xor_si128(key, _mm_slli_si128(key, 4));
+        key = _mm_xor_si128(key, _mm_slli_si128(key, 4));
+        key = _mm_xor_si128(key, _mm_slli_si128(key, 4));
+        keygened = _mm_shuffle_epi32(keygened, _MM_SHUFFLE(3,3,3,3));
+        return _mm_xor_si128(key, keygened);
+}
+
+#define KEYEXP(K, I) S_perl_hash_aes128_keyexpand(K, _mm_aeskeygenassist_si128(K, I))
+
+PERL_STATIC_INLINE void
+S_perl_hash_aeshash_init(unsigned char *seed) {
+    __m128i *seedp= (__m128i*)(seed);
+
+    __m128i K0  = _mm_lddqu_si128(seedp);
+    __m128i K1  = KEYEXP(K0, 0x01);
+    __m128i K2  = KEYEXP(K1, 0x02);
+
+    _mm_storeu_si128(seedp+1, K1);
+    _mm_storeu_si128(seedp+2, K2);
+}
+
+
 PERL_STATIC_INLINE U32
 S_perl_hash_aeshash(const unsigned char * const seed, const unsigned char *str, const STRLEN len) {
-        __m128i acc= _mm_loadu_si128((__m128i *) seed);
-        __m128i s0=  _mm_loadu_si128((__m128i *)(seed + 16));
-        __m128i s1=  _mm_loadu_si128((__m128i *)(seed + 32));
+        __m128i acc= _mm_lddqu_si128((__m128i *) seed);
+        __m128i s0=  _mm_lddqu_si128((__m128i *)(seed + 16));
+        __m128i s1=  _mm_lddqu_si128((__m128i *)(seed + 32));
         __m128i block;
         uint32_t _out[4] __attribute__((aligned(16)));
         STRLEN tail= len & 0xF;
@@ -791,17 +829,19 @@ S_perl_hash_aeshash(const unsigned char * const seed, const unsigned char *str, 
 
         if ((STRLEN)str & 0x0F) {
                 for ( ; str < end ; str+=16 ) {
-                        block = _mm_loadu_si128((__m128i *) str); /* unaligned */
+                        block = _mm_lddqu_si128((__m128i *) str); /* unaligned */
 
-                        acc = _mm_aesenc_si128( block, acc );
-                        acc = _mm_aesenc_si128( s0, acc  );
+                        acc = _mm_xor_si128( acc, block );
+                        acc = _mm_aesenc_si128( acc, s0 );
+                        acc = _mm_aesenc_si128( acc, s1 );
                 }
         } else {
                 for ( ; str < end ; str+=16 ) {
                         block = _mm_load_si128((__m128i *) str); /* aligned */
 
-                        acc = _mm_aesenc_si128( block, acc );
-                        acc = _mm_aesenc_si128( s0, acc );
+                        acc = _mm_xor_si128( acc, block );
+                        acc = _mm_aesenc_si128( acc, s0 );
+                        acc = _mm_aesenc_si128( acc, s1 );
                 }
         }
 
@@ -810,27 +850,29 @@ S_perl_hash_aeshash(const unsigned char * const seed, const unsigned char *str, 
                  * 16 bytes than this...
                  * We copy the key into the buffer, and then
                  * fill the unused portion with bytes set to
-                 * the number of unused bytes. (So for instance
+                 * the number of unused bytes. So for instance
                  * if we have 15 bytes then the tail is 0x01,
                  * but if we have 14 bytes then the tail is 0x0202
-                 * and etc.
-                 * */
+                 * and etc. This is one of many ways to pad a block
+                 * cipher */
                 uint8_t _block[16] __attribute__((aligned(16)));
                 memcpy( _block, str, tail );
                 memset( _block + tail, 16 - tail, 16 - tail );
                 block = _mm_load_si128((__m128i *) _block);
 
-                acc = _mm_aesenc_si128( block, acc );
+                acc = _mm_xor_si128( acc, block );
                 acc = _mm_aesenc_si128( acc, s0 );
+                acc = _mm_aesenc_si128( acc, s1 );
         }
 
         acc = _mm_aesenc_si128( acc, s0 );
         acc = _mm_aesenc_si128( acc, s1 );
-        acc = _mm_aesenclast_si128( acc, s1 );
+        acc = _mm_aesenc_si128( acc, s0 );
 
         _mm_store_si128((__m128i *) _out, acc);
         return _out[0];
 }
+#endif
 
 /* legacy - only mod_perl should be doing this.  */
 #ifdef PERL_HASH_INTERNAL_ACCESS
