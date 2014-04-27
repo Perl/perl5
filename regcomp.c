@@ -14201,6 +14201,26 @@ parseit:
                     op = POSIXA;
                 }
             }
+            else if (prevvalue == 'A') {
+                if (value == 'Z'
+#ifdef EBCDIC
+                    && literal_endpoint == 2
+#endif
+                ) {
+                    arg = (FOLD) ? _CC_ALPHA : _CC_UPPER;
+                    op = POSIXA;
+                }
+            }
+            else if (prevvalue == 'a') {
+                if (value == 'z'
+#ifdef EBCDIC
+                    && literal_endpoint == 2
+#endif
+                ) {
+                    arg = (FOLD) ? _CC_ALPHA : _CC_LOWER;
+                    op = POSIXA;
+                }
+            }
         }
 
         /* Here, we have changed <op> away from its initial value iff we found
