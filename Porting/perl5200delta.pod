@@ -288,7 +288,7 @@ where possible, and assigns those values to $!.  The E* constants exported by
 L<Errno> and L<POSIX> are updated to match so that testing $! against them,
 wherever previously possible, will continue to work as expected, and all E*
 constants found in F<errno.h> are now exported from those modules with their
-original F<errno.h> values
+original F<errno.h> values.
 
 In order to avoid breakage in existing Perl code which assigns WSAE* values to
 $!, perl now intercepts the assignment and performs the same mapping to E*
@@ -588,11 +588,11 @@ The C<DB::goto> and C<DB::lsub> debugger subroutines are now documented.  [perl
 
 =item *
 
-C<\s> matching C<\cK> is marked experimental
+C<\s> matching C<\cK> is marked experimental.
 
 =item *
 
-ithreads were accepted in v5.8.0 (but are discouraged as of v5.20.0)
+ithreads were accepted in v5.8.0 (but are discouraged as of v5.20.0).
 
 =item *
 
@@ -621,7 +621,7 @@ C<exec>'s handling of arguments is now more clearly documented.
 =item *
 
 C<eval EXPR> now has caveats about expanding floating point numbers in some
-locales
+locales.
 
 =item *
 
@@ -797,7 +797,7 @@ There is now a L<JavaScript|perltrap/JavaScript Traps> section.
 
 =item *
 
-The documentation  has been updated to reflect C<Bidi_Class> changes in
+The documentation has been updated to reflect C<Bidi_Class> changes in
 Unicode 6.3.
 
 =back
@@ -1119,7 +1119,7 @@ them [perl #118839].
 
 =item *
 
-L<%%s[%s] in scalar context better written as $%s[%s]|perldiag/"%%s[%s] in scalar context better written as $%s[%s]">:
+L<%%s[%s] in scalar context better written as $%s[%s]|perldiag/"%%s[%s] in scalar context better written as $%s[%s]">
 
 This warning now occurs for any C<%array[$index]> or C<%hash{key}> known to
 be in scalar context at compile time.  Previously it was worded "Scalar
@@ -1255,15 +1255,15 @@ installation scripts.
 
 =item *
 
-single letter options now also have long names
+Single letter options now also have long names.
 
 =item *
 
-invalid options are now rejected
+Invalid options are now rejected.
 
 =item *
 
-command line arguments that are not options are now rejected
+Command line arguments that are not options are now rejected.
 
 =item *
 
