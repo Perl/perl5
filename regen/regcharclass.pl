@@ -1652,5 +1652,5 @@ PROBLEMATIC_LOCALE_FOLDEDS_START : The first folded character of folds which are
 \p{_Perl_Problematic_Locale_Foldeds_Start}
 
 PATWS: pattern white space
-=> generic generic_non_low cp : safe
+=> generic cp : safe
 \p{PatWS}

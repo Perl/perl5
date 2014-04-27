@@ -181,6 +181,21 @@ in C<\p{...}> there can be spaces that follow the Unicode rules, for which see
 L<perluniprops/Properties accessible through \p{} and \P{}>.
 X</x>
 
+The set of characters that are deemed whitespace are those that Unicode
+calls "Pattern White Space", namely:
+
+ U+0009 CHARACTER TABULATION
+ U+000A LINE FEED
+ U+000B LINE TABULATION
+ U+000C FORM FEED
+ U+000D CARRIAGE RETURN
+ U+0020 SPACE
+ U+0085 NEXT LINE
+ U+200E LEFT-TO-RIGHT MARK
+ U+200F RIGHT-TO-LEFT MARK
+ U+2028 LINE SEPARATOR
+ U+2029 PARAGRAPH SEPARATOR
+
 =head3 Character set modifiers
 
 C</d>, C</u>, C</a>, and C</l>, available starting in 5.14, are called

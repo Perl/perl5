@@ -10676,7 +10676,8 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state, regnode** node_p,
      * modifier.  The other meaning does not, so use a temporary until we find
      * out which we are being called with */
     p = (RExC_flags & RXf_PMf_EXTENDED)
-	? regwhite( pRExC_state, RExC_parse )
+	? regpatws(pRExC_state, RExC_parse,
+                                TRUE) /* means recognize comments */
 	: RExC_parse;
 
     /* Disambiguate between \N meaning a named character versus \N meaning
@@ -11640,7 +11641,8 @@ tryagain:
 
     case '#':
 	if (RExC_flags & RXf_PMf_EXTENDED) {
-	    if ( reg_skipcomment( pRExC_state ) )
+	    RExC_parse = reg_skipcomment( pRExC_state, RExC_parse );
+	    if (RExC_parse < RExC_end)
 		goto tryagain;
 	}
 	/* FALLTHROUGH */
@@ -11721,7 +11723,8 @@ tryagain:
 		oldp = p;
 
 		if (RExC_flags & RXf_PMf_EXTENDED)
-		    p = regwhite( pRExC_state, p );
+                    p = regpatws(pRExC_state, p,
+                                          TRUE); /* means recognize comments */
 		switch ((U8)*p) {
 		case '^':
 		case '$':
@@ -11949,15 +11952,6 @@ tryagain:
 		    break;
 		default:    /* A literal character */
 
-                    if (! SIZE_ONLY
-                        && RExC_flags & RXf_PMf_EXTENDED
-                        && ckWARN_d(WARN_DEPRECATED)
-                        && is_PATWS_non_low_safe(p, RExC_end, UTF))
-                    {
-                        vWARN_dep(p + ((UTF) ? UTF8SKIP(p) : 1),
-                                "Escape literal pattern white space under /x");
-                    }
-
 		  normal_default:
 		    if (UTF8_IS_START(*p) && UTF) {
 			STRLEN numlen;
@@ -11975,7 +11969,8 @@ tryagain:
 		 */
 
 		if ( RExC_flags & RXf_PMf_EXTENDED)
-		    p = regwhite( pRExC_state, p );
+                    p = regpatws(pRExC_state, p,
+                                          TRUE); /* means recognize comments */
 
                 /* If the next thing is a quantifier, it applies to this
                  * character only, which means that this character has to be in
@@ -12330,39 +12325,11 @@ tryagain:
 }
 
 STATIC char *
-S_regwhite( RExC_state_t *pRExC_state, char *p )
-{
-    const char *e = RExC_end;
-
-    PERL_ARGS_ASSERT_REGWHITE;
-
-    while (p < e) {
-	if (isSPACE(*p))
-	    ++p;
-	else if (*p == '#') {
-            bool ended = 0;
-	    do {
-		if (*p++ == '\n') {
-		    ended = 1;
-		    break;
-		}
-	    } while (p < e);
-	    if (!ended)
-                RExC_seen |= REG_RUN_ON_COMMENT_SEEN;
-	}
-	else
-	    break;
-    }
-    return p;
-}
-
-STATIC char *
-S_regpatws( RExC_state_t *pRExC_state, char *p , const bool recognize_comment )
+S_regpatws(pTHX_ RExC_state_t *pRExC_state, char *p , const bool recognize_comment )
 {
     /* Returns the next non-pattern-white space, non-comment character (the
      * latter only if 'recognize_comment is true) in the string p, which is
-     * ended by RExC_end.  If there is no line break ending a comment,
-     * RExC_seen has added the REG_RUN_ON_COMMENT_SEEN flag; */
+     * ended by RExC_end.  See also reg_skipcomment */
     const char *e = RExC_end;
 
     PERL_ARGS_ASSERT_REGPATWS;
@@ -12373,16 +12340,7 @@ S_regpatws( RExC_state_t *pRExC_state, char *p , const bool recognize_comment )
 	    p += len;
         }
 	else if (recognize_comment && *p == '#') {
-            bool ended = 0;
-	    do {
-                p++;
-                if (is_LNBREAK_safe(p, e, UTF)) {
-		    ended = 1;
-		    break;
-		}
-	    } while (p < e);
-	    if (!ended)
-                RExC_seen |= REG_RUN_ON_COMMENT_SEEN;
+            p = reg_skipcomment(pRExC_state, p);
 	}
 	else
 	    break;
@@ -12710,7 +12668,7 @@ S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV** return_invlist,
         while (RExC_parse < RExC_end) {
             SV* current = NULL;
             RExC_parse = regpatws(pRExC_state, RExC_parse,
-                                TRUE); /* means recognize comments */
+                                          TRUE); /* means recognize comments */
             switch (*RExC_parse) {
                 case '?':
                     if (RExC_parse[1] == '[') depth++, RExC_parse++;
@@ -12827,7 +12785,7 @@ S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV** return_invlist,
 
         /* Skip white space */
         RExC_parse = regpatws(pRExC_state, RExC_parse,
-                                TRUE); /* means recognize comments */
+                                         TRUE /* means recognize comments */ );
         if (RExC_parse >= RExC_end) {
             Perl_croak(aTHX_ "panic: Read past end of '(?[ ])'");
         }
@@ -13299,7 +13257,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 
     if (skip_white) {
         RExC_parse = regpatws(pRExC_state, RExC_parse,
-                              FALSE /* means don't recognize comments */);
+                              FALSE /* means don't recognize comments */ );
     }
 
     if (UCHARAT(RExC_parse) == '^') {	/* Complement of range. */
@@ -13309,7 +13267,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
         RExC_naughty++;
         if (skip_white) {
             RExC_parse = regpatws(pRExC_state, RExC_parse,
-                                  FALSE /* means don't recognize comments */);
+                                  FALSE /* means don't recognize comments */ );
         }
     }
 
@@ -13347,7 +13305,7 @@ parseit:
 
         if (skip_white) {
             RExC_parse = regpatws(pRExC_state, RExC_parse,
-                                  FALSE /* means don't recognize comments */);
+                                  FALSE /* means don't recognize comments */ );
         }
 
         if  (UCHARAT(RExC_parse) == ']') {
@@ -13858,7 +13816,7 @@ parseit:
 
         if (skip_white) {
             RExC_parse = regpatws(pRExC_state, RExC_parse,
-                                FALSE /* means don't recognize comments */);
+                                FALSE /* means don't recognize comments */ );
         }
 
 	if (range) {
@@ -14955,35 +14913,34 @@ S_set_ANYOF_arg(pTHX_ RExC_state_t* const pRExC_state,
 
 /* reg_skipcomment()
 
-   Absorbs an /x style # comments from the input stream.
-   Returns true if there is more text remaining in the stream.
-   Will set the REG_RUN_ON_COMMENT_SEEN flag if the comment
-   terminates the pattern without including a newline.
+   Absorbs an /x style # comment from the input stream,
+   returning a pointer to the first character beyond the comment, or if the
+   comment terminates the pattern without anything following it, this returns
+   one past the final character of the pattern (in other words, RExC_end) and
+   sets the REG_RUN_ON_COMMENT_SEEN flag.
 
-   Note its the callers responsibility to ensure that we are
+   Note it's the callers responsibility to ensure that we are
    actually in /x mode
 
 */
 
-STATIC bool
-S_reg_skipcomment(pTHX_ RExC_state_t *pRExC_state)
+PERL_STATIC_INLINE char*
+S_reg_skipcomment(pTHX_ RExC_state_t *pRExC_state, char* p)
 {
-    bool ended = 0;
-
     PERL_ARGS_ASSERT_REG_SKIPCOMMENT;
 
-    while (RExC_parse < RExC_end)
-        if (*RExC_parse++ == '\n') {
-            ended = 1;
-            break;
+    assert(*p = '#');
+
+    while (p < RExC_end) {
+        if (*(++p) == '\n') {
+            return p+1;
         }
-    if (!ended) {
-        /* we ran off the end of the pattern without ending
-           the comment, so we have to add an \n when wrapping */
-        RExC_seen |= REG_RUN_ON_COMMENT_SEEN;
-        return 0;
-    } else
-        return 1;
+    }
+
+    /* we ran off the end of the pattern without ending the comment, so we have
+     * to add an \n when wrapping */
+    RExC_seen |= REG_RUN_ON_COMMENT_SEEN;
+    return p;
 }
 
 /* nextchar()
@@ -15021,16 +14978,14 @@ S_nextchar(pTHX_ RExC_state_t *pRExC_state)
 	    continue;
 	}
 	if (RExC_flags & RXf_PMf_EXTENDED) {
-	    if (isSPACE(*RExC_parse)) {
-		RExC_parse++;
-		continue;
-	    }
-	    else if (*RExC_parse == '#') {
-	        if ( reg_skipcomment( pRExC_state ) )
-	            continue;
-	    }
+            char * p = regpatws(pRExC_state, RExC_parse,
+                                          TRUE); /* means recognize comments */
+            if (p != RExC_parse) {
+                RExC_parse = p;
+                continue;
+            }
 	}
-	return retval;
+        return retval;
     }
 }
 

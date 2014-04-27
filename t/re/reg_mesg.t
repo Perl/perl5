@@ -416,8 +416,6 @@ my @experimental_regex_sets = (
 );
 
 my @deprecated = (
-    "/(?x)latin1\\\x{85}\x{85}\\\x{85}/" => 'Escape literal pattern white space under /x {#} ' . "m/(?x)latin1\\\x{85}\x{85}{#}\\\x{85}/",
-    'use utf8; /(?x)utf8\\/' => 'Escape literal pattern white space under /x {#} ' . "m/(?x)utf8\\\N{NEXT LINE}\N{NEXT LINE}{#}\\\N{NEXT LINE}/",
 );
 
 while (my ($regex, $expect) = splice @death, 0, 2) {

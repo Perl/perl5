@@ -1797,23 +1797,6 @@ single form when it must operate on them directly.  Either you've passed
 an invalid file specification to Perl, or you've found a case the
 conversion routines don't handle.  Drat.
 
-=item Escape literal pattern white space under /x
-
-(D deprecated) You compiled a regular expression pattern with C</x> to
-ignore white space, and you used, as a literal, one of the characters
-that Perl plans to eventually treat as white space.  The character must
-be escaped somehow, or it will work differently on a future Perl that
-does treat it as white space.  The easiest way is to insert a backslash
-immediately before it, or to enclose it with square brackets.  This
-change is to bring Perl into conformance with Unicode recommendations.
-Here are the five characters that generate this warning:
-U+0085 NEXT LINE,
-U+200E LEFT-TO-RIGHT MARK,
-U+200F RIGHT-TO-LEFT MARK,
-U+2028 LINE SEPARATOR,
-and
-U+2029 PARAGRAPH SEPARATOR.
-
 =item Eval-group in insecure regular expression
 
 (F) Perl detected tainted data when trying to compile a regular

@@ -2093,16 +2093,14 @@ Es	|U32	|join_exact	|NN RExC_state_t *pRExC_state \
 				|NN regnode *scan|NN UV *min_subtract  \
 				|NN bool *unfolded_multi_char          \
 				|U32 flags|NULLOK regnode *val|U32 depth
-EsRn	|char *	|regwhite	|NN RExC_state_t *pRExC_state \
-				|NN char *p
-EsRn	|char *	|regpatws	|NN RExC_state_t *pRExC_state \
+EsR	|char *	|regpatws	|NN RExC_state_t *pRExC_state \
 				|NN char *p|const bool recognize_comment
 Ei	|void   |alloc_maybe_populate_EXACT|NN RExC_state_t *pRExC_state \
 				|NN regnode *node|NN I32 *flagp|STRLEN len \
 				|UV code_point|bool downgradable
 Ei	|U8   |compute_EXACTish|NN RExC_state_t *pRExC_state
 Es	|char *	|nextchar	|NN RExC_state_t *pRExC_state
-Es	|bool	|reg_skipcomment|NN RExC_state_t *pRExC_state
+Ei	|char *	|reg_skipcomment|NN RExC_state_t *pRExC_state|NN char * p
 Es	|void	|scan_commit	|NN const RExC_state_t *pRExC_state \
 				|NN struct scan_data_t *data        \
 				|NN SSize_t *minlenp		    \

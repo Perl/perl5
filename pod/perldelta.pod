@@ -27,6 +27,20 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 C<qr/foo/x> now ignores any Unicode pattern white space
+
+The C</x> regular expression modifier allows the pattern to contain
+white space and comments, both of which are ignored, for improved
+readability.  Until now, not all the white space characters that Unicode
+designates for this purpose were handled.  The additional ones now
+recognized are
+U+0085 NEXT LINE,
+U+200E LEFT-TO-RIGHT MARK,
+U+200F RIGHT-TO-LEFT MARK,
+U+2028 LINE SEPARATOR,
+and
+U+2029 PARAGRAPH SEPARATOR.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
@@ -51,6 +65,24 @@ In prior releases, failure to do this raised a deprecation warning.
 now a fatal compilation error.
 
 These had been deprecated since v5.18.
+
+=head2 5 additional characters are treated as white space under C</x> in
+regex patterns (unless escaped)
+
+The use of these characters with C</x> outside bracketed character
+classes and when not preceeded by a backslash has raised a deprecation
+warning since v5.18.  Now they will be ignored.  See L</qrE<sol>fooE<sol>x>
+for the list of the five characters.
+
+=head2 Comment lines within S<C<(?[ ])>> now are ended only by a C<\n>
+
+S<C<(?[ ])>>  is an experimental feature, introduced in v5.18.  It operates
+as if C</x> is always enabled.  But there was a difference, comment
+lines (following a C<#> character) were terminated by anything matching
+C<\R> which includes all vertical whitespace, such as form feeds.  For
+consistency, this is now changed to match what terminates comment lines
+outside S<C<(?[ ])>>, namely a C<\n> (even if escaped), which is the
+same as what terminates a heredoc string and formats.
 
 =head1 Deprecations
 

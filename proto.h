@@ -6842,10 +6842,11 @@ STATIC SV *	S_reg_scan_name(pTHX_ RExC_state_t *pRExC_state, U32 flags)
 #define PERL_ARGS_ASSERT_REG_SCAN_NAME	\
 	assert(pRExC_state)
 
-STATIC bool	S_reg_skipcomment(pTHX_ RExC_state_t *pRExC_state)
-			__attribute__nonnull__(pTHX_1);
+PERL_STATIC_INLINE char *	S_reg_skipcomment(pTHX_ RExC_state_t *pRExC_state, char * p)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_REG_SKIPCOMMENT	\
-	assert(pRExC_state)
+	assert(pRExC_state); assert(p)
 
 STATIC regnode*	S_reganode(pTHX_ RExC_state_t *pRExC_state, U8 op, U32 arg)
 			__attribute__nonnull__(pTHX_1);
@@ -6876,10 +6877,10 @@ STATIC void	S_reginsert(pTHX_ RExC_state_t *pRExC_state, U8 op, regnode *opnd, U
 #define PERL_ARGS_ASSERT_REGINSERT	\
 	assert(pRExC_state); assert(opnd)
 
-STATIC char *	S_regpatws(RExC_state_t *pRExC_state, char *p, const bool recognize_comment)
+STATIC char *	S_regpatws(pTHX_ RExC_state_t *pRExC_state, char *p, const bool recognize_comment)
 			__attribute__warn_unused_result__
-			__attribute__nonnull__(1)
-			__attribute__nonnull__(2);
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_REGPATWS	\
 	assert(pRExC_state); assert(p)
 
@@ -6906,13 +6907,6 @@ PERL_STATIC_INLINE STRLEN	S_reguni(pTHX_ const RExC_state_t *pRExC_state, UV uv,
 			__attribute__nonnull__(pTHX_3);
 #define PERL_ARGS_ASSERT_REGUNI	\
 	assert(pRExC_state); assert(s)
-
-STATIC char *	S_regwhite(RExC_state_t *pRExC_state, char *p)
-			__attribute__warn_unused_result__
-			__attribute__nonnull__(1)
-			__attribute__nonnull__(2);
-#define PERL_ARGS_ASSERT_REGWHITE	\
-	assert(pRExC_state); assert(p)
 
 STATIC void	S_scan_commit(pTHX_ const RExC_state_t *pRExC_state, struct scan_data_t *data, SSize_t *minlenp, int is_inf)
 			__attribute__nonnull__(pTHX_1)

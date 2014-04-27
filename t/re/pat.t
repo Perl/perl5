@@ -20,7 +20,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 732;  # Update this when adding/deleting tests.
+plan tests => 733;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1597,6 +1597,11 @@ EOP
         ok("\x{100}" =~ /\x{101}/i, "A WITH MACRON u =~ l");
         ok("\x{101}" =~ /\x{100}/i, "A WITH MACRON l =~ u");
         ok("\x{101}" =~ /\x{101}/i, "A WITH MACRON l =~ l");
+    }
+
+    {
+        use utf8;
+        ok("abc" =~ /abc/x, "NEL is white-space under /x");
     }
 
 } # End of sub run_tests
