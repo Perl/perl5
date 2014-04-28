@@ -3,6 +3,7 @@ use v5.15.8;
 use strict;
 use warnings;
 require 'regen/regen_lib.pl';
+require 'regen/charset_translations.pl';
 
 # This program outputs l1_charclass_tab.h, which defines the guts of the
 # PL_charclass table.  Each line is a bit map of properties that the Unicode
@@ -229,7 +230,17 @@ my $out_fh = open_new('l1_char_class_tab.h', '>',
 		      {style => '*', by => $0,
                       from => "property definitions"});
 
+print $out_fh <<END;
+/* For code points whose position is not the same as Unicode,  both are shown
+ * in the comment*/
+END
+
 # Output the table using fairly short names for each char.
+foreach my $charset (get_supported_code_pages()) {
+    my @a2n = get_a2n($charset);
+    my @out;
+
+    print $out_fh "\n" . get_conditional_compile_line_start($charset);
 for my $ord (0..255) {
     my $name;
     my $char = chr $ord;
@@ -284,7 +295,13 @@ for my $ord (0..255) {
             $name =~ s/:.*//;
         }
     }
-    printf $out_fh "/* U+%02X %s */ %s,\n", $ord, $name, $bits[$ord];
+    my $index = $a2n[$ord];
+    $out[$index] = ($ord == $index)
+                   ? sprintf "/* U+%02X %s */ %s,\n", $ord, $name, $bits[$ord]
+                   : sprintf "/* 0x%02X U+%02X %s */ %s,\n", $index, $ord, $name, $bits[$ord];
+}
+    print $out_fh join "", @out;
+    print $out_fh "\n" . get_conditional_compile_line_end();
 }
 
 read_only_bottom_close_and_rename($out_fh)
