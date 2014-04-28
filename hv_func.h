@@ -868,9 +868,9 @@ S_perl_hash_aeshash(const unsigned char * const seed, const unsigned char *str, 
         __m128i block;
         __m128i acc;
 
-        __m128i s0= _mm_lddqu_si128((__m128i *) seed);       /* unaligned - faster than _mm_loadu_si128 */
-        __m128i s1= _mm_lddqu_si128((__m128i *)(seed + 16)); /* unaligned - faster than _mm_loadu_si128 */
-        __m128i s2= _mm_lddqu_si128((__m128i *)(seed + 32)); /* unaligned - faster than _mm_loadu_si128 */
+        __m128i s0= _mm_load_si128((__m128i *) seed);       /* aligned - faster than _mm_loadu_si128 */
+        __m128i s1= _mm_load_si128((__m128i *)(seed + 16)); /* aligned - faster than _mm_loadu_si128 */
+        __m128i s2= _mm_load_si128((__m128i *)(seed + 32)); /* aligned - faster than _mm_loadu_si128 */
 
 
         block= _mm_set1_epi64x((int64_t)len); /* sets both 64bit sub buffers to len */
