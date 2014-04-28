@@ -153,126 +153,127 @@ for my $charset (get_supported_code_pages()) {
     print $out_fh "\n" . get_conditional_compile_line_start($charset);
 
     my @a2n = get_a2n($charset);
-for my $prop (qw(
-                ASCII
-                Cased
-		VertSpace
-                XPerlSpace
-                XPosixAlnum
-                XPosixAlpha
-                XPosixBlank
-                XPosixCntrl
-                XPosixDigit
-                XPosixGraph
-                XPosixLower
-                XPosixPrint
-                XPosixPunct
-                XPosixSpace
-                XPosixUpper
-                XPosixWord
-                XPosixXDigit
-                _Perl_Any_Folds
-                &NonL1_Perl_Non_Final_Folds
-                _Perl_Folds_To_Multi_Char
-                &UpperLatin1
-                _Perl_IDStart
-                _Perl_IDCont
-    )
-) {
+    for my $prop (qw(
+                    ASCII
+                    Cased
+                    VertSpace
+                    XPerlSpace
+                    XPosixAlnum
+                    XPosixAlpha
+                    XPosixBlank
+                    XPosixCntrl
+                    XPosixDigit
+                    XPosixGraph
+                    XPosixLower
+                    XPosixPrint
+                    XPosixPunct
+                    XPosixSpace
+                    XPosixUpper
+                    XPosixWord
+                    XPosixXDigit
+                    _Perl_Any_Folds
+                    &NonL1_Perl_Non_Final_Folds
+                    _Perl_Folds_To_Multi_Char
+                    &UpperLatin1
+                    _Perl_IDStart
+                    _Perl_IDCont
+        )
+    ) {
 
-    # For the Latin1 properties, we change to use the eXtended version of the
-    # base property, then go through the result and get rid of everything not
-    # in Latin1 (above 255).  Actually, we retain the element for the range
-    # that crosses the 255/256 boundary if it is one that matches the
-    # property.  For example, in the Word property, there is a range of code
-    # points that start at U+00F8 and goes through U+02C1.  Instead of
-    # artificially cutting that off at 256 because 256 is the first code point
-    # above Latin1, we let the range go to its natural ending.  That gives us
-    # extra information with no added space taken.  But if the range that
-    # crosses the boundary is one that doesn't match the property, we don't
-    # start a new range above 255, as that could be construed as going to
-    # infinity.  For example, the Upper property doesn't include the character
-    # at 255, but does include the one at 256.  We don't include the 256 one.
-    my $prop_name = $prop;
-    my $is_local_sub = $prop_name =~ s/^&//;
-    my $lookup_prop = $prop_name;
-    my $l1_only = ($lookup_prop =~ s/^L1Posix/XPosix/ or $lookup_prop =~ s/^L1//);
-    my $nonl1_only = 0;
-    $nonl1_only = $lookup_prop =~ s/^NonL1// unless $l1_only;
+        # For the Latin1 properties, we change to use the eXtended version of the
+        # base property, then go through the result and get rid of everything not
+        # in Latin1 (above 255).  Actually, we retain the element for the range
+        # that crosses the 255/256 boundary if it is one that matches the
+        # property.  For example, in the Word property, there is a range of code
+        # points that start at U+00F8 and goes through U+02C1.  Instead of
+        # artificially cutting that off at 256 because 256 is the first code point
+        # above Latin1, we let the range go to its natural ending.  That gives us
+        # extra information with no added space taken.  But if the range that
+        # crosses the boundary is one that doesn't match the property, we don't
+        # start a new range above 255, as that could be construed as going to
+        # infinity.  For example, the Upper property doesn't include the character
+        # at 255, but does include the one at 256.  We don't include the 256 one.
+        my $prop_name = $prop;
+        my $is_local_sub = $prop_name =~ s/^&//;
+        my $lookup_prop = $prop_name;
+        my $l1_only = ($lookup_prop =~ s/^L1Posix/XPosix/
+                       or $lookup_prop =~ s/^L1//);
+        my $nonl1_only = 0;
+        $nonl1_only = $lookup_prop =~ s/^NonL1// unless $l1_only;
 
-    my @invlist;
-    if ($is_local_sub) {
-        @invlist = eval $lookup_prop;
-    }
-    else {
-        @invlist = prop_invlist($lookup_prop, '_perl_core_internal_ok');
-    }
-    die "Could not find inversion list for '$lookup_prop'" unless @invlist;
-    my @full_list;
-    for (my $i = 0; $i < @invlist; $i += 2) {
-        my $upper = ($i + 1) < @invlist
-                    ? $invlist[$i+1] - 1      # In range
-                    : $Unicode::UCD::MAX_CP;  # To infinity.  You may want
-                                            # to stop much much earlier;
-                                            # going this high may expose
-                                            # perl deficiencies with very
-                                            # large numbers.
-        for my $j ($invlist[$i] .. $upper) {
-            if ($j < 256) {
-                push @full_list, $a2n[$j];
-            }
-            else {
-                push @full_list, $j;
+        my @invlist;
+        if ($is_local_sub) {
+            @invlist = eval $lookup_prop;
+        }
+        else {
+            @invlist = prop_invlist($lookup_prop, '_perl_core_internal_ok');
+        }
+        die "Could not find inversion list for '$lookup_prop'" unless @invlist;
+        my @full_list;
+        for (my $i = 0; $i < @invlist; $i += 2) {
+            my $upper = ($i + 1) < @invlist
+                        ? $invlist[$i+1] - 1      # In range
+                        : $Unicode::UCD::MAX_CP;  # To infinity.  You may want
+                                                # to stop much much earlier;
+                                                # going this high may expose
+                                                # perl deficiencies with very
+                                                # large numbers.
+            for my $j ($invlist[$i] .. $upper) {
+                if ($j < 256) {
+                    push @full_list, $a2n[$j];
+                }
+                else {
+                    push @full_list, $j;
+                }
             }
         }
-    }
-    @full_list = sort { $a <=> $b } @full_list;
-    @invlist = mk_invlist_from_cp_list(\@full_list);
+        @full_list = sort { $a <=> $b } @full_list;
+        @invlist = mk_invlist_from_cp_list(\@full_list);
 
-    if ($l1_only) {
-        for my $i (0 .. @invlist - 1 - 1) {
-            if ($invlist[$i] > 255) {
+        if ($l1_only) {
+            for my $i (0 .. @invlist - 1 - 1) {
+                if ($invlist[$i] > 255) {
 
-                # In an inversion list, even-numbered elements give the code
-                # points that begin ranges that match the property;
-                # odd-numbered give ones that begin ranges that don't match.
-                # If $i is odd, we are at the first code point above 255 that
-                # doesn't match, which means the range it is ending does
-                # match, and crosses the 255/256 boundary.  We want to include
-                # this ending point, so increment $i, so the splice below
-                # includes it.  Conversely, if $i is even, it is the first
-                # code point above 255 that matches, which means there was no
-                # matching range that crossed the boundary, and we don't want
-                # to include this code point, so splice before it.
-                $i++ if $i % 2 != 0;
+                    # In an inversion list, even-numbered elements give the code
+                    # points that begin ranges that match the property;
+                    # odd-numbered give ones that begin ranges that don't match.
+                    # If $i is odd, we are at the first code point above 255 that
+                    # doesn't match, which means the range it is ending does
+                    # match, and crosses the 255/256 boundary.  We want to include
+                    # this ending point, so increment $i, so the splice below
+                    # includes it.  Conversely, if $i is even, it is the first
+                    # code point above 255 that matches, which means there was no
+                    # matching range that crossed the boundary, and we don't want
+                    # to include this code point, so splice before it.
+                    $i++ if $i % 2 != 0;
 
-                # Remove everything past this.
-                splice @invlist, $i;
+                    # Remove everything past this.
+                    splice @invlist, $i;
+                    last;
+                }
+            }
+        }
+        elsif ($nonl1_only) {
+            my $found_nonl1 = 0;
+            for my $i (0 .. @invlist - 1 - 1) {
+                next if $invlist[$i] < 256;
+
+                # Here, we have the first element in the array that indicates an
+                # element above Latin1.  Get rid of all previous ones.
+                splice @invlist, 0, $i;
+
+                # If this one's index is not divisible by 2, it means that this
+                # element is inverting away from being in the list, which means
+                # all code points from 256 to this one are in this list.
+                unshift @invlist, 256 if $i % 2 != 0;
+                $found_nonl1 = 1;
                 last;
             }
+            die "No non-Latin1 code points in $lookup_prop" unless $found_nonl1;
         }
+
+        output_invlist($prop_name, \@invlist, $charset);
     }
-    elsif ($nonl1_only) {
-        my $found_nonl1 = 0;
-        for my $i (0 .. @invlist - 1 - 1) {
-            next if $invlist[$i] < 256;
-
-            # Here, we have the first element in the array that indicates an
-            # element above Latin1.  Get rid of all previous ones.
-            splice @invlist, 0, $i;
-
-            # If this one's index is not divisible by 2, it means that this
-            # element is inverting away from being in the list, which means
-            # all code points from 256 to this one are in this list.
-            unshift @invlist, 256 if $i % 2 != 0;
-            $found_nonl1 = 1;
-            last;
-        }
-        die "No non-Latin1 code points in $lookup_prop" unless $found_nonl1;
-    }
-
-    output_invlist($prop_name, \@invlist, $charset);
-}
     print $out_fh "\n" . get_conditional_compile_line_end();
 }
 
