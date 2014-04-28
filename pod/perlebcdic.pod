@@ -85,7 +85,7 @@ are known as the 13 "variant" characters and are:
 
     \ [ ] { } ^ ~ ! # | $ @ `
 
-When Perl is compiled for a platform, it looks at some of these characters to
+When Perl is compiled for a platform, it looks at all of these characters to
 guess which EBCDIC character set the platform uses, and adapts itself
 accordingly to that platform.  If the platform uses a character set that is not
 one of the three Perl knows about, Perl will either fail to compile, or

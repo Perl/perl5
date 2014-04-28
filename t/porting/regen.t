@@ -39,7 +39,9 @@ die "Can't find __END__ in regen.pl"
     if eof $fh;
 
 foreach (qw(embed_lib.pl regen_lib.pl uconfig_h.pl
-            regcharclass_multi_char_folds.pl),
+            regcharclass_multi_char_folds.pl
+            charset_translations.pl
+            ),
          map {chomp $_; $_} <$fh>) {
     ++$skip{"regen/$_"};
 }
