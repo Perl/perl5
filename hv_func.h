@@ -785,7 +785,7 @@ S_perl_hash_murmur_hash_64b (const unsigned char * const seed, const unsigned ch
 }
 #endif
 #ifdef BUILD_PERL_HASH_FUNC_AESHASH
-/* requires -Accflags="-msse2 -maes" in ./Configure */
+/* requires -Accflags="-msse2 -maes -mssse3" in ./Configure */
 #include <wmmintrin.h>
 #include <pmmintrin.h>
 #include <tmmintrin.h>
