@@ -861,66 +861,53 @@ static const uint32_t __shufmask[64] __attribute__((aligned(16))) = {
 
 
 PERL_STATIC_INLINE U32
-S_perl_hash_aeshash(const unsigned char * const seed, const unsigned char *str, const STRLEN len) {
-        __m128i s0= _mm_lddqu_si128((__m128i *) seed);       /* unaligned - faster than _mm_loadu_si128 */
-        __m128i s1= _mm_lddqu_si128((__m128i *)(seed + 16)); /* unaligned - faster than _mm_loadu_si128 */
-        __m128i s2= _mm_lddqu_si128((__m128i *)(seed + 32)); /* unaligned - faster than _mm_loadu_si128 */
+S_perl_hash_aeshash(const unsigned char * const seed, const unsigned char *str, STRLEN len) {
         uint32_t _out[4] __attribute__((aligned(16)));
-        const STRLEN tail = len & 0x0F;
         __m128i block;
         __m128i acc;
 
-        block= _mm_set_epi64((__m64)tail, (__m64)len);
-        acc=   _mm_xor_si128( s0, block );
-        acc=   _mm_aesenc_si128( acc, s1 );
-        acc=   _mm_aesenc_si128( acc, s2 );
+        __m128i s0= _mm_lddqu_si128((__m128i *) seed);       /* unaligned - faster than _mm_loadu_si128 */
+        __m128i s1= _mm_lddqu_si128((__m128i *)(seed + 16)); /* unaligned - faster than _mm_loadu_si128 */
+        __m128i s2= _mm_lddqu_si128((__m128i *)(seed + 32)); /* unaligned - faster than _mm_loadu_si128 */
 
-        if (len >= 16) {
-            const unsigned char * const end= str + len - tail;
+        block= _mm_set1_epi64((__m64)len); /* sets both 64bit sub buffers to len */
+        acc=   _mm_xor_si128( s0, block ); /* and then xor the whole thing with the seed */
 
-            for ( ; str < end ; str+=16 ) {
+        if ( len >= 16 ) {
+            do {
                 block= _mm_lddqu_si128((__m128i *) str);
+                str += 16;
+                len -= 16;
 
-                acc=  _mm_xor_si128( acc, block );
                 acc=  _mm_aesenc_si128( acc, s1 );
-                acc=  _mm_aesenc_si128( acc, s2 );
-            }
-            if (tail) {
-                block= _mm_lddqu_si128((__m128i *)(end - 16));
+                acc=  _mm_aesenc_si128( acc, block );
 
-                acc=  _mm_xor_si128( acc, block );
-                acc=  _mm_aesenc_si128( acc, s1 );
+            } while (len >= 16);
+
+            if ( len > 0 ) {
+                block= _mm_lddqu_si128((__m128i *)(str + len - 16));
+
                 acc=  _mm_aesenc_si128( acc, s2 );
+                acc=  _mm_aesenc_si128( acc, block );
             }
-        } else {
-            if (1) {
-                if ((((STRLEN)str) & 0xFF) > 0xF0) {
-                    block= _mm_loadu_si128((__m128i *) str);
-                    block= _mm_and_si128(block, ((__m128i *)__andmask)[len]);
-                } else {
-                    block= _mm_loadu_si128((__m128i *)(str + len - 16));
-                    block= _mm_shuffle_epi8(block, ((__m128i *)__shufmask)[len]);
-                }
+        } else if (len) {
+            /* check if we are going to cross a page boundary
+             * by reading 16 bytes */
+            if ((((STRLEN)str) & 0xFF) > 0xF0) {
+                /* might cross a page boundary, read from the end to the start
+                 * and then use PSHUFB to move the bytes back */
+                block= _mm_loadu_si128((__m128i *)(str + len - 16));
+                block= _mm_shuffle_epi8(block, ((__m128i *)__shufmask)[len]);
             } else {
-
-                /* There must be a better way to read less than
-                 * 16 bytes than this...
-                 * We copy the key into the buffer, and then
-                 * fill the unused portion with bytes set to
-                 * the number of unused bytes. So for instance
-                 * if we have 15 bytes then the tail is 0x01,
-                 * but if we have 14 bytes then the tail is 0x0202
-                 * and etc. This is one of many ways to pad a block
-                 * cipher */
-                uint8_t _block[16] __attribute__((aligned(16)));
-                memcpy( _block, str, len );
-                memset( _block + len, 16 - len, 16 - len );
-                block= _mm_load_si128((__m128i *) _block);
+                /* not crossing boundary, we can load it directly and then
+                 * mask off the bytes we aren't going to use (remember endianness) */
+                block= _mm_loadu_si128((__m128i *) str);
+                block= _mm_and_si128(block, ((__m128i *)__andmask)[len]);
             }
 
-            acc= _mm_xor_si128( acc, block );
-            acc= _mm_aesenc_si128( acc, s1 );
-            acc= _mm_aesenc_si128( acc, s2 );
+            acc=  _mm_aesenc_si128( acc, s2 );
+            acc=  _mm_aesenc_si128( acc, block );
+
         }
 
         acc= _mm_aesenc_si128( acc, s1 );
