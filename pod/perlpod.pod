@@ -296,14 +296,16 @@ module.  Examples:
 
   =encoding big5
 
-=back
-
 C<=encoding> affects the whole document, and must occur only once.
 
-And don't forget, when using any other command, that the command lasts up
+=back
+
+And don't forget, all commands but C<=encoding> last up
 until the end of its I<paragraph>, not its line.  So in the
 examples below, you can see that every command needs the blank
-line after it, to end its paragraph.
+line after it, to end its paragraph.  (And some older
+Pod translators may require the C<=encoding> line to be similarly
+separated.)
 
 Some examples of lists include:
 
