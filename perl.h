@@ -327,6 +327,32 @@
 #  define PERL_UNUSED_CONTEXT
 #endif
 
+/* Use PERL_UNUSED_RESULT() to suppress the warnings about unused results
+ * of function calls, e.g. PERL_UNUSED_RESULT(foo(a, b)).  Use it sparingly,
+ * though, since usually the warning is there for a good reason,
+ * e.g. for realloc(): the new pointer is not necessarily the old pointer.
+ *
+ * But sometimes you just want to ignore the return value, e.g. on
+ * codepaths soon ending up in abort, or in "best effort" attempts.
+ * Sometimes you can capture the return value and use PERL_UNUSED_VAR
+ * on that.
+ *
+ * The combination of gcc -Wunused-result (part of -Wall) and the gcc
+ * warn_unused_result attribute cannot be silenced with (void).
+ *
+ * The __typeof__() is unused instead of typeof() since typeof() is
+ * not available under stricter ANSI modes, and because of compilers
+ * masquerading as gcc (clang and icc), we want exactly the gcc
+ * extension __typeof__ and nothing else.
+ */
+#ifndef PERL_UNUSED_RESULT
+#  ifdef __GNUC__
+#    define PERL_UNUSED_RESULT(v) ({ __typeof__(v) z = (v); (void)sizeof(z); })
+#  else
+#    define PERL_UNUSED_RESULT(v) ((void)(v))
+#  endif
+#endif
+
 /* on gcc (and clang), specify that a warning should be temporarily
  * ignored; e.g.
  *

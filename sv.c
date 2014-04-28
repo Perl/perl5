@@ -113,13 +113,6 @@
  * has a mandatory return value, even though that value is just the same
  * as the buf arg */
 
-#define V_Gconvert(x,n,t,b) \
-{ \
-    char *rc = (char *)Gconvert(x,n,t,b); \
-    PERL_UNUSED_VAR(rc); \
-}
-
-
 #ifdef PERL_UTF8_CACHE_ASSERT
 /* if adding more checks watch out for the following tests:
  *   t/op/index.t t/op/length.t t/op/pat.t t/op/substr.t
@@ -2993,12 +2986,12 @@ Perl_sv_2pv_flags(pTHX_ SV *const sv, STRLEN *const lp, const I32 flags)
 	    /* some Xenix systems wipe out errno here */
 
 #ifndef USE_LOCALE_NUMERIC
-            V_Gconvert(SvNVX(sv), NV_DIG, 0, s);
+            PERL_UNUSED_RESULT(Gconvert(SvNVX(sv), NV_DIG, 0, s));
             SvPOK_on(sv);
 #else
             {
                 DECLARE_STORE_LC_NUMERIC_SET_TO_NEEDED();
-                V_Gconvert(SvNVX(sv), NV_DIG, 0, s);
+                PERL_UNUSED_RESULT(Gconvert(SvNVX(sv), NV_DIG, 0, s));
 
                 /* If the radix character is UTF-8, and actually is in the
                  * output, turn on the UTF-8 flag for the scalar */
@@ -10696,7 +10689,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 		if (digits && digits < sizeof(ebuf) - NV_DIG - 10) {
 		     /* 0, point, slack */
                     STORE_LC_NUMERIC_SET_TO_NEEDED();
-		    V_Gconvert(nv, (int)digits, 0, ebuf);
+		    PERL_UNUSED_RESULT(Gconvert(nv, (int)digits, 0, ebuf));
 		    sv_catpv_nomg(sv, ebuf);
 		    if (*ebuf)	/* May return an empty string for digits==0 */
 			return;
@@ -11554,7 +11547,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 		   aka precis is 0  */
 		if ( c == 'g' && precis) {
                     STORE_LC_NUMERIC_SET_TO_NEEDED();
-		    V_Gconvert((NV)nv, (int)precis, 0, PL_efloatbuf);
+		    PERL_UNUSED_RESULT(Gconvert((NV)nv, (int)precis, 0, PL_efloatbuf));
 		    /* May return an empty string for digits==0 */
 		    if (*PL_efloatbuf) {
 			elen = strlen(PL_efloatbuf);
@@ -11985,7 +11978,6 @@ Perl_dirp_dup(pTHX_ DIR *const dp, CLONE_PARAMS *const param)
     DIR *ret;
 
 #if defined(HAS_FCHDIR) && defined(HAS_TELLDIR) && defined(HAS_SEEKDIR)
-    int rc = 0;
     DIR *pwd;
     const Direntry_t *dirent;
     char smallbuf[256];
@@ -12022,9 +12014,8 @@ Perl_dirp_dup(pTHX_ DIR *const dp, CLONE_PARAMS *const param)
     /* Now we should have two dir handles pointing to the same dir. */
 
     /* Be nice to the calling code and chdir back to where we were. */
-    rc = fchdir(my_dirfd(pwd));
     /* XXX If this fails, then what? */
-    PERL_UNUSED_VAR(rc);
+    PERL_UNUSED_RESULT(fchdir(my_dirfd(pwd)));
 
     /* We have no need of the pwd handle any more. */
     PerlDir_close(pwd);
