@@ -785,10 +785,13 @@ S_perl_hash_murmur_hash_64b (const unsigned char * const seed, const unsigned ch
 }
 #endif
 #ifdef BUILD_PERL_HASH_FUNC_AESHASH
-/* requires -Accflags="-msse2 -maes -mssse3" in ./Configure */
+/* requires -Accflags="-msse2 -maes -mssse3 -msse4" in ./Configure */
+
 #include <wmmintrin.h>
-#include <pmmintrin.h>
-#include <tmmintrin.h>
+/* various intrinsics __m128i, aesenc etc */
+
+#include <smmintrin.h>
+/* for _mm_exract_epi32 */
 
 #define PERL_HASH_FUNC_INIT(seed) S_perl_hash_aeshash_init(seed)
 
@@ -862,7 +865,6 @@ static const uint32_t __shufmask[64] __attribute__((aligned(16))) = {
 
 PERL_STATIC_INLINE U32
 S_perl_hash_aeshash(const unsigned char * const seed, const unsigned char *str, STRLEN len) {
-        uint32_t _out[4] __attribute__((aligned(16)));
         __m128i block;
         __m128i acc;
 
@@ -870,7 +872,8 @@ S_perl_hash_aeshash(const unsigned char * const seed, const unsigned char *str, 
         __m128i s1= _mm_lddqu_si128((__m128i *)(seed + 16)); /* unaligned - faster than _mm_loadu_si128 */
         __m128i s2= _mm_lddqu_si128((__m128i *)(seed + 32)); /* unaligned - faster than _mm_loadu_si128 */
 
-        block= _mm_set1_epi64((__m64)len); /* sets both 64bit sub buffers to len */
+
+        block= _mm_set1_epi64x((int64_t)len); /* sets both 64bit sub buffers to len */
         acc=   _mm_xor_si128( s0, block ); /* and then xor the whole thing with the seed */
 
         if ( len >= 16 ) {
@@ -887,8 +890,7 @@ S_perl_hash_aeshash(const unsigned char * const seed, const unsigned char *str, 
             if ( len > 0 ) {
                 block= _mm_lddqu_si128((__m128i *)(str + len - 16));
 
-                acc=  _mm_aesenc_si128( acc, s2 );
-                acc=  _mm_aesenc_si128( acc, block );
+                goto partial;
             }
         } else if (len) {
             /* check if we are going to cross a page boundary
@@ -905,6 +907,7 @@ S_perl_hash_aeshash(const unsigned char * const seed, const unsigned char *str, 
                 block= _mm_and_si128(block, ((__m128i *)__andmask)[len]);
             }
 
+partial:
             acc=  _mm_aesenc_si128( acc, s2 );
             acc=  _mm_aesenc_si128( acc, block );
 
@@ -914,8 +917,7 @@ S_perl_hash_aeshash(const unsigned char * const seed, const unsigned char *str, 
         acc= _mm_aesenc_si128( acc, s2 );
         acc= _mm_aesenc_si128( acc, s1 );
 
-        _mm_store_si128((__m128i *) _out, acc);
-        return _out[0];
+        return _mm_extract_epi32(acc,0);
 }
 #endif
 
