@@ -241,65 +241,65 @@ foreach my $charset (get_supported_code_pages()) {
     my @out;
 
     print $out_fh "\n" . get_conditional_compile_line_start($charset);
-for my $ord (0..255) {
-    my $name;
-    my $char = chr $ord;
-    if ($char =~ /\p{PosixGraph}/) {
-        my $quote = $char eq "'" ? '"' : "'";
-        $name = $quote . chr($ord) . $quote;
-    }
-    elsif ($char =~ /\p{XPosixGraph}/) {
-        use charnames();
-        $name = charnames::viacode($ord);
-        $name =~ s/LATIN CAPITAL LETTER //
-                or $name =~ s/LATIN SMALL LETTER (.*)/\L$1/
-                or $name =~ s/ SIGN\b//
-                or $name =~ s/EXCLAMATION MARK/'!'/
-                or $name =~ s/QUESTION MARK/'?'/
-                or $name =~ s/QUOTATION MARK/QUOTE/
-                or $name =~ s/ INDICATOR//;
-        $name =~ s/\bWITH\b/\L$&/;
-        $name =~ s/\bONE\b/1/;
-        $name =~ s/\b(TWO|HALF)\b/2/;
-        $name =~ s/\bTHREE\b/3/;
-        $name =~ s/\b QUARTER S? \b/4/x;
-        $name =~ s/VULGAR FRACTION (.) (.)/$1\/$2/;
-        $name =~ s/\bTILDE\b/'~'/i
-                or $name =~ s/\bCIRCUMFLEX\b/'^'/i
-                or $name =~ s/\bSTROKE\b/'\/'/i
-                or $name =~ s/ ABOVE\b//i;
-    }
-    else {
-        use Unicode::UCD qw(prop_invmap);
-        my ($list_ref, $map_ref, $format) = prop_invmap("Name_Alias");
-        if ($format !~ /^s/) {
-            use Carp;
-            carp "Unexpected format '$format' for 'Name_Alias";
-            last;
+    for my $ord (0..255) {
+        my $name;
+        my $char = chr $ord;
+        if ($char =~ /\p{PosixGraph}/) {
+            my $quote = $char eq "'" ? '"' : "'";
+            $name = $quote . chr($ord) . $quote;
         }
-        my $which = Unicode::UCD::search_invlist($list_ref, $ord);
-        if (! defined $which) {
-            use Carp;
-            carp "No name found for code pont $ord";
+        elsif ($char =~ /\p{XPosixGraph}/) {
+            use charnames();
+            $name = charnames::viacode($ord);
+            $name =~ s/LATIN CAPITAL LETTER //
+                    or $name =~ s/LATIN SMALL LETTER (.*)/\L$1/
+                    or $name =~ s/ SIGN\b//
+                    or $name =~ s/EXCLAMATION MARK/'!'/
+                    or $name =~ s/QUESTION MARK/'?'/
+                    or $name =~ s/QUOTATION MARK/QUOTE/
+                    or $name =~ s/ INDICATOR//;
+            $name =~ s/\bWITH\b/\L$&/;
+            $name =~ s/\bONE\b/1/;
+            $name =~ s/\b(TWO|HALF)\b/2/;
+            $name =~ s/\bTHREE\b/3/;
+            $name =~ s/\b QUARTER S? \b/4/x;
+            $name =~ s/VULGAR FRACTION (.) (.)/$1\/$2/;
+            $name =~ s/\bTILDE\b/'~'/i
+                    or $name =~ s/\bCIRCUMFLEX\b/'^'/i
+                    or $name =~ s/\bSTROKE\b/'\/'/i
+                    or $name =~ s/ ABOVE\b//i;
         }
         else {
-            my $map = $map_ref->[$which];
-            if (! ref $map) {
-                $name = $map;
+            use Unicode::UCD qw(prop_invmap);
+            my ($list_ref, $map_ref, $format) = prop_invmap("Name_Alias");
+            if ($format !~ /^s/) {
+                use Carp;
+                carp "Unexpected format '$format' for 'Name_Alias";
+                last;
+            }
+            my $which = Unicode::UCD::search_invlist($list_ref, $ord);
+            if (! defined $which) {
+                use Carp;
+                carp "No name found for code pont $ord";
             }
             else {
-                # Just pick the first abbreviation if more than one
-                my @names = grep { $_ =~ /abbreviation/ } @$map;
-                $name = $names[0];
+                my $map = $map_ref->[$which];
+                if (! ref $map) {
+                    $name = $map;
+                }
+                else {
+                    # Just pick the first abbreviation if more than one
+                    my @names = grep { $_ =~ /abbreviation/ } @$map;
+                    $name = $names[0];
+                }
+                $name =~ s/:.*//;
             }
-            $name =~ s/:.*//;
         }
+        my $index = $a2n[$ord];
+        $out[$index] = ($ord == $index)
+                    ? sprintf "/* U+%02X %s */ %s,\n", $ord, $name, $bits[$ord]
+                    : sprintf "/* 0x%02X U+%02X %s */ %s,\n", $index, $ord, $name, $bits[$ord];
     }
-    my $index = $a2n[$ord];
-    $out[$index] = ($ord == $index)
-                   ? sprintf "/* U+%02X %s */ %s,\n", $ord, $name, $bits[$ord]
-                   : sprintf "/* 0x%02X U+%02X %s */ %s,\n", $index, $ord, $name, $bits[$ord];
-}
     print $out_fh join "", @out;
     print $out_fh "\n" . get_conditional_compile_line_end();
 }
