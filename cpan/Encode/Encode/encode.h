@@ -1,7 +1,7 @@
 #ifndef ENCODE_H
 #define ENCODE_H
 
-#ifndef U8
+#if !defined(U8) && !defined(U8TYPE)
 /* 
    A tad devious this:
    perl normally has a #define for U8 - if that isn't present then we

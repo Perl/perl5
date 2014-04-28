@@ -6,7 +6,6 @@
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
-#define U8 U8
 #include "encode.h"
 
 # define PERLIO_MODNAME  "PerlIO::encoding"

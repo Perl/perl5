@@ -1,4 +1,8 @@
 Digest::MD5 cpan/Digest-MD5/t/files.t bdbe05b705d9da305fedce7a9f4b6ba63250c7cf
+Encode cpan/Encode/Encode.pm cf239e1b3a79a564d01a9a011f7ebc80f4551a65
+Encode cpan/Encode/Encode.xs 4edcc474315eb3f38f53e24418bca7e7c2809cc8
+Encode cpan/Encode/Encode/encode.h e2565cefa0b9a0ff82801d7fa740a2df831932ca
+Encode cpan/Encode/Unicode/Unicode.xs 27731231063734c063c661f3af4d95150f9d87ac
 Module::Build cpan/Module-Build/lib/Module/Build/ConfigData.pm 85eb9656e68d1f256737dc52d86b5d0fed28f832
 PerlIO::via::QuotedPrint cpan/PerlIO-via-QuotedPrint/t/QuotedPrint.t ca39f0146e89de02c746e199c45dcb3e5edad691
 Text::Balanced cpan/Text-Balanced/t/01_compile.t 1598cf491a48fa546260a2ec41142abe84da533d

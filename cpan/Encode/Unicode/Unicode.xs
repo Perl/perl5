@@ -6,7 +6,6 @@
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
-#define U8 U8
 #include "../Encode/encode.h"
 
 #define FBCHAR			0xFFFd
