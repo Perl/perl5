@@ -3421,6 +3421,7 @@ doop.c			Support code for various operations
 dosish.h		Some defines for MS/DOSish machines
 dquote_static.c		Static functions for double quotish contexts
 dump.c			Debugging output
+ebcdic_tables.h		Generated tables included in utfebcdic.h
 embed.fnc		Database used by embed.pl
 embed.h			Maps symbols to safer names
 embedvar.h		C namespace management
@@ -4691,6 +4692,7 @@ regcomp.c			Regular expression compiler
 regcomp.h			Private declarations for above
 regcomp.sym			Data for regnodes.h
 regen/charset_translations.pl	Character set utilities
+regen/ebcdic.pl			Generates ebcdic_tables.h
 regen/embed_lib.pl		Reads embed.fnc and regen/opcodes
 regen/embed.pl			Produces {embed,embedvar,proto}.h
 regen/feature.pl		Generates feature.pm
