@@ -22,9 +22,18 @@ my $out_fh = open_new('charclass_invlists.h', '>',
 		      {style => '*', by => $0,
                       from => "Unicode::UCD"});
 
+my $is_in_ifndef_ext_re = 0;
+
 print $out_fh "/* See the generating file for comments */\n\n";
 
 my %include_in_ext_re = ( NonL1_Perl_Non_Final_Folds => 1 );
+
+sub end_ifndef_ext_re {
+    if ($is_in_ifndef_ext_re) {
+        print $out_fh "\n#endif\t/* #ifndef PERL_IN_XSUB_RE */\n";
+        $is_in_ifndef_ext_re = 0;
+    }
+}
 
 sub output_invlist ($$;$) {
     my $name = shift;
@@ -46,7 +55,16 @@ sub output_invlist ($$;$) {
     }
     my $count = @$invlist;
 
-    print $out_fh "\n#ifndef PERL_IN_XSUB_RE\n" unless exists $include_in_ext_re{$name};
+    if ($is_in_ifndef_ext_re) {
+        if (exists $include_in_ext_re{$name}) {
+            end_ifndef_ext_re;
+        }
+    }
+    elsif (! exists $include_in_ext_re{$name}) {
+        print $out_fh "\n#ifndef PERL_IN_XSUB_RE\n" unless exists $include_in_ext_re{$name};
+        $is_in_ifndef_ext_re = 1;
+    }
+
     print $out_fh "\nstatic const UV ${name}_invlist[] = {";
     print $out_fh " /* for $charset */" if $charset;
     print $out_fh "\n";
@@ -67,7 +85,6 @@ sub output_invlist ($$;$) {
     print $out_fh "\t$invlist->[-1]\n";
 
     print $out_fh "};\n";
-    print $out_fh "\n#endif\n" unless exists $include_in_ext_re{$name};
 }
 
 sub mk_invlist_from_cp_list {
@@ -125,6 +142,8 @@ sub UpperLatin1 {
 
 output_invlist("Latin1", [ 0, 256 ]);
 output_invlist("AboveLatin1", [ 256 ]);
+
+end_ifndef_ext_re;
 
 # We construct lists for all the POSIX and backslash sequence character
 # classes in two forms:
@@ -274,6 +293,7 @@ for my $charset (get_supported_code_pages()) {
 
         output_invlist($prop_name, \@invlist, $charset);
     }
+    end_ifndef_ext_re;
     print $out_fh "\n" . get_conditional_compile_line_end();
 }
 

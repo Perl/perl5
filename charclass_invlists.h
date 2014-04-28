@@ -18,10 +18,6 @@ static const UV Latin1_invlist[] = {
 	256
 };
 
-#endif
-
-#ifndef PERL_IN_XSUB_RE
-
 static const UV AboveLatin1_invlist[] = {
 	2,	/* Number of elements */
 	148565664, /* Version and data structure type */
@@ -31,7 +27,7 @@ static const UV AboveLatin1_invlist[] = {
 	256
 };
 
-#endif
+#endif	/* #ifndef PERL_IN_XSUB_RE */
 
 #if 'A' == 65 /* ASCII/Latin1 */
 
@@ -45,10 +41,6 @@ static const UV ASCII_invlist[] = { /* for ASCII/Latin1 */
 	0,
 	128
 };
-
-#endif
-
-#ifndef PERL_IN_XSUB_RE
 
 static const UV Cased_invlist[] = { /* for ASCII/Latin1 */
 	239,	/* Number of elements */
@@ -296,10 +288,6 @@ static const UV Cased_invlist[] = { /* for ASCII/Latin1 */
 	120780
 };
 
-#endif
-
-#ifndef PERL_IN_XSUB_RE
-
 static const UV VertSpace_invlist[] = { /* for ASCII/Latin1 */
 	7,	/* Number of elements */
 	148565664, /* Version and data structure type */
@@ -313,10 +301,6 @@ static const UV VertSpace_invlist[] = { /* for ASCII/Latin1 */
 	8232,
 	8234
 };
-
-#endif
-
-#ifndef PERL_IN_XSUB_RE
 
 static const UV XPerlSpace_invlist[] = { /* for ASCII/Latin1 */
 	21,	/* Number of elements */
@@ -345,10 +329,6 @@ static const UV XPerlSpace_invlist[] = { /* for ASCII/Latin1 */
 	12288,
 	12289
 };
-
-#endif
-
-#ifndef PERL_IN_XSUB_RE
 
 static const UV XPosixAlnum_invlist[] = { /* for ASCII/Latin1 */
 	1133,	/* Number of elements */
@@ -1490,10 +1470,6 @@ static const UV XPosixAlnum_invlist[] = { /* for ASCII/Latin1 */
 	195102
 };
 
-#endif
-
-#ifndef PERL_IN_XSUB_RE
-
 static const UV XPosixAlpha_invlist[] = { /* for ASCII/Latin1 */
 	1081,	/* Number of elements */
 	148565664, /* Version and data structure type */
@@ -2582,10 +2558,6 @@ static const UV XPosixAlpha_invlist[] = { /* for ASCII/Latin1 */
 	195102
 };
 
-#endif
-
-#ifndef PERL_IN_XSUB_RE
-
 static const UV XPosixBlank_invlist[] = { /* for ASCII/Latin1 */
 	17,	/* Number of elements */
 	148565664, /* Version and data structure type */
@@ -2610,10 +2582,6 @@ static const UV XPosixBlank_invlist[] = { /* for ASCII/Latin1 */
 	12289
 };
 
-#endif
-
-#ifndef PERL_IN_XSUB_RE
-
 static const UV XPosixCntrl_invlist[] = { /* for ASCII/Latin1 */
 	4,	/* Number of elements */
 	148565664, /* Version and data structure type */
@@ -2624,10 +2592,6 @@ static const UV XPosixCntrl_invlist[] = { /* for ASCII/Latin1 */
 	127,
 	160
 };
-
-#endif
-
-#ifndef PERL_IN_XSUB_RE
 
 static const UV XPosixDigit_invlist[] = { /* for ASCII/Latin1 */
 	85,	/* Number of elements */
@@ -2720,10 +2684,6 @@ static const UV XPosixDigit_invlist[] = { /* for ASCII/Latin1 */
 	120782,
 	120832
 };
-
-#endif
-
-#ifndef PERL_IN_XSUB_RE
 
 static const UV XPosixGraph_invlist[] = { /* for ASCII/Latin1 */
 	1089,	/* Number of elements */
@@ -3820,10 +3780,6 @@ static const UV XPosixGraph_invlist[] = { /* for ASCII/Latin1 */
 	1048576,
 	1114110
 };
-
-#endif
-
-#ifndef PERL_IN_XSUB_RE
 
 static const UV XPosixLower_invlist[] = { /* for ASCII/Latin1 */
 	1237,	/* Number of elements */
@@ -5069,10 +5025,6 @@ static const UV XPosixLower_invlist[] = { /* for ASCII/Latin1 */
 	120780
 };
 
-#endif
-
-#ifndef PERL_IN_XSUB_RE
-
 static const UV XPosixPrint_invlist[] = { /* for ASCII/Latin1 */
 	1083,	/* Number of elements */
 	148565664, /* Version and data structure type */
@@ -6163,10 +6115,6 @@ static const UV XPosixPrint_invlist[] = { /* for ASCII/Latin1 */
 	1114110
 };
 
-#endif
-
-#ifndef PERL_IN_XSUB_RE
-
 static const UV XPosixPunct_invlist[] = { /* for ASCII/Latin1 */
 	273,	/* Number of elements */
 	148565664, /* Version and data structure type */
@@ -6447,10 +6395,6 @@ static const UV XPosixPunct_invlist[] = { /* for ASCII/Latin1 */
 	74868
 };
 
-#endif
-
-#ifndef PERL_IN_XSUB_RE
-
 static const UV XPosixSpace_invlist[] = { /* for ASCII/Latin1 */
 	21,	/* Number of elements */
 	148565664, /* Version and data structure type */
@@ -6478,10 +6422,6 @@ static const UV XPosixSpace_invlist[] = { /* for ASCII/Latin1 */
 	12288,
 	12289
 };
-
-#endif
-
-#ifndef PERL_IN_XSUB_RE
 
 static const UV XPosixUpper_invlist[] = { /* for ASCII/Latin1 */
 	1221,	/* Number of elements */
@@ -7711,10 +7651,6 @@ static const UV XPosixUpper_invlist[] = { /* for ASCII/Latin1 */
 	120779
 };
 
-#endif
-
-#ifndef PERL_IN_XSUB_RE
-
 static const UV XPosixWord_invlist[] = { /* for ASCII/Latin1 */
 	1131,	/* Number of elements */
 	148565664, /* Version and data structure type */
@@ -8853,10 +8789,6 @@ static const UV XPosixWord_invlist[] = { /* for ASCII/Latin1 */
 	918000
 };
 
-#endif
-
-#ifndef PERL_IN_XSUB_RE
-
 static const UV XPosixXDigit_invlist[] = { /* for ASCII/Latin1 */
 	13,	/* Number of elements */
 	148565664, /* Version and data structure type */
@@ -8876,10 +8808,6 @@ static const UV XPosixXDigit_invlist[] = { /* for ASCII/Latin1 */
 	65345,
 	65351
 };
-
-#endif
-
-#ifndef PERL_IN_XSUB_RE
 
 static const UV _Perl_Any_Folds_invlist[] = { /* for ASCII/Latin1 */
 	229,	/* Number of elements */
@@ -9117,7 +9045,7 @@ static const UV _Perl_Any_Folds_invlist[] = { /* for ASCII/Latin1 */
 	66640
 };
 
-#endif
+#endif	/* #ifndef PERL_IN_XSUB_RE */
 
 static const UV NonL1_Perl_Non_Final_Folds_invlist[] = { /* for ASCII/Latin1 */
 	45,	/* Number of elements */
@@ -9239,10 +9167,6 @@ static const UV _Perl_Folds_To_Multi_Char_invlist[] = { /* for ASCII/Latin1 */
 	64280
 };
 
-#endif
-
-#ifndef PERL_IN_XSUB_RE
-
 static const UV UpperLatin1_invlist[] = { /* for ASCII/Latin1 */
 	3,	/* Number of elements */
 	148565664, /* Version and data structure type */
@@ -9252,10 +9176,6 @@ static const UV UpperLatin1_invlist[] = { /* for ASCII/Latin1 */
 	128,
 	256
 };
-
-#endif
-
-#ifndef PERL_IN_XSUB_RE
 
 static const UV _Perl_IDStart_invlist[] = { /* for ASCII/Latin1 */
 	995,	/* Number of elements */
@@ -10258,10 +10178,6 @@ static const UV _Perl_IDStart_invlist[] = { /* for ASCII/Latin1 */
 	194560,
 	195102
 };
-
-#endif
-
-#ifndef PERL_IN_XSUB_RE
 
 static const UV _Perl_IDCont_invlist[] = { /* for ASCII/Latin1 */
 	1143,	/* Number of elements */
@@ -11413,7 +11329,7 @@ static const UV _Perl_IDCont_invlist[] = { /* for ASCII/Latin1 */
 	918000
 };
 
-#endif
+#endif	/* #ifndef PERL_IN_XSUB_RE */
 
 #endif	/* ASCII/Latin1 */
 
@@ -11484,10 +11400,6 @@ static const UV ASCII_invlist[] = { /* for EBCDIC 1047 */
 	240,
 	250
 };
-
-#endif
-
-#ifndef PERL_IN_XSUB_RE
 
 static const UV Cased_invlist[] = { /* for EBCDIC 1047 */
 	265,	/* Number of elements */
@@ -11761,10 +11673,6 @@ static const UV Cased_invlist[] = { /* for EBCDIC 1047 */
 	120780
 };
 
-#endif
-
-#ifndef PERL_IN_XSUB_RE
-
 static const UV VertSpace_invlist[] = { /* for EBCDIC 1047 */
 	9,	/* Number of elements */
 	148565664, /* Version and data structure type */
@@ -11780,10 +11688,6 @@ static const UV VertSpace_invlist[] = { /* for EBCDIC 1047 */
 	8232,
 	8234
 };
-
-#endif
-
-#ifndef PERL_IN_XSUB_RE
 
 static const UV XPerlSpace_invlist[] = { /* for EBCDIC 1047 */
 	23,	/* Number of elements */
@@ -11814,10 +11718,6 @@ static const UV XPerlSpace_invlist[] = { /* for EBCDIC 1047 */
 	12288,
 	12289
 };
-
-#endif
-
-#ifndef PERL_IN_XSUB_RE
 
 static const UV XPosixAlnum_invlist[] = { /* for EBCDIC 1047 */
 	1157,	/* Number of elements */
@@ -12983,10 +12883,6 @@ static const UV XPosixAlnum_invlist[] = { /* for EBCDIC 1047 */
 	195102
 };
 
-#endif
-
-#ifndef PERL_IN_XSUB_RE
-
 static const UV XPosixAlpha_invlist[] = { /* for EBCDIC 1047 */
 	1107,	/* Number of elements */
 	148565664, /* Version and data structure type */
@@ -14101,10 +13997,6 @@ static const UV XPosixAlpha_invlist[] = { /* for EBCDIC 1047 */
 	195102
 };
 
-#endif
-
-#ifndef PERL_IN_XSUB_RE
-
 static const UV XPosixBlank_invlist[] = { /* for EBCDIC 1047 */
 	15,	/* Number of elements */
 	148565664, /* Version and data structure type */
@@ -14127,10 +14019,6 @@ static const UV XPosixBlank_invlist[] = { /* for EBCDIC 1047 */
 	12289
 };
 
-#endif
-
-#ifndef PERL_IN_XSUB_RE
-
 static const UV XPosixCntrl_invlist[] = { /* for EBCDIC 1047 */
 	4,	/* Number of elements */
 	148565664, /* Version and data structure type */
@@ -14141,10 +14029,6 @@ static const UV XPosixCntrl_invlist[] = { /* for EBCDIC 1047 */
 	255,
 	256
 };
-
-#endif
-
-#ifndef PERL_IN_XSUB_RE
 
 static const UV XPosixDigit_invlist[] = { /* for EBCDIC 1047 */
 	85,	/* Number of elements */
@@ -14237,10 +14121,6 @@ static const UV XPosixDigit_invlist[] = { /* for EBCDIC 1047 */
 	120782,
 	120832
 };
-
-#endif
-
-#ifndef PERL_IN_XSUB_RE
 
 static const UV XPosixGraph_invlist[] = { /* for EBCDIC 1047 */
 	1089,	/* Number of elements */
@@ -15337,10 +15217,6 @@ static const UV XPosixGraph_invlist[] = { /* for EBCDIC 1047 */
 	1048576,
 	1114110
 };
-
-#endif
-
-#ifndef PERL_IN_XSUB_RE
 
 static const UV XPosixLower_invlist[] = { /* for EBCDIC 1047 */
 	1245,	/* Number of elements */
@@ -16594,10 +16470,6 @@ static const UV XPosixLower_invlist[] = { /* for EBCDIC 1047 */
 	120780
 };
 
-#endif
-
-#ifndef PERL_IN_XSUB_RE
-
 static const UV XPosixPrint_invlist[] = { /* for EBCDIC 1047 */
 	1083,	/* Number of elements */
 	148565664, /* Version and data structure type */
@@ -17688,10 +17560,6 @@ static const UV XPosixPrint_invlist[] = { /* for EBCDIC 1047 */
 	1114110
 };
 
-#endif
-
-#ifndef PERL_IN_XSUB_RE
-
 static const UV XPosixPunct_invlist[] = { /* for EBCDIC 1047 */
 	281,	/* Number of elements */
 	148565664, /* Version and data structure type */
@@ -17980,10 +17848,6 @@ static const UV XPosixPunct_invlist[] = { /* for EBCDIC 1047 */
 	74868
 };
 
-#endif
-
-#ifndef PERL_IN_XSUB_RE
-
 static const UV XPosixSpace_invlist[] = { /* for EBCDIC 1047 */
 	23,	/* Number of elements */
 	148565664, /* Version and data structure type */
@@ -18013,10 +17877,6 @@ static const UV XPosixSpace_invlist[] = { /* for EBCDIC 1047 */
 	12288,
 	12289
 };
-
-#endif
-
-#ifndef PERL_IN_XSUB_RE
 
 static const UV XPosixUpper_invlist[] = { /* for EBCDIC 1047 */
 	1239,	/* Number of elements */
@@ -19264,10 +19124,6 @@ static const UV XPosixUpper_invlist[] = { /* for EBCDIC 1047 */
 	120779
 };
 
-#endif
-
-#ifndef PERL_IN_XSUB_RE
-
 static const UV XPosixWord_invlist[] = { /* for EBCDIC 1047 */
 	1155,	/* Number of elements */
 	148565664, /* Version and data structure type */
@@ -20430,10 +20286,6 @@ static const UV XPosixWord_invlist[] = { /* for EBCDIC 1047 */
 	918000
 };
 
-#endif
-
-#ifndef PERL_IN_XSUB_RE
-
 static const UV XPosixXDigit_invlist[] = { /* for EBCDIC 1047 */
 	13,	/* Number of elements */
 	148565664, /* Version and data structure type */
@@ -20453,10 +20305,6 @@ static const UV XPosixXDigit_invlist[] = { /* for EBCDIC 1047 */
 	65345,
 	65351
 };
-
-#endif
-
-#ifndef PERL_IN_XSUB_RE
 
 static const UV _Perl_Any_Folds_invlist[] = { /* for EBCDIC 1047 */
 	261,	/* Number of elements */
@@ -20726,7 +20574,7 @@ static const UV _Perl_Any_Folds_invlist[] = { /* for EBCDIC 1047 */
 	66640
 };
 
-#endif
+#endif	/* #ifndef PERL_IN_XSUB_RE */
 
 static const UV NonL1_Perl_Non_Final_Folds_invlist[] = { /* for EBCDIC 1047 */
 	45,	/* Number of elements */
@@ -20848,10 +20696,6 @@ static const UV _Perl_Folds_To_Multi_Char_invlist[] = { /* for EBCDIC 1047 */
 	64280
 };
 
-#endif
-
-#ifndef PERL_IN_XSUB_RE
-
 static const UV UpperLatin1_invlist[] = { /* for EBCDIC 1047 */
 	55,	/* Number of elements */
 	148565664, /* Version and data structure type */
@@ -20913,10 +20757,6 @@ static const UV UpperLatin1_invlist[] = { /* for EBCDIC 1047 */
 	250,
 	256
 };
-
-#endif
-
-#ifndef PERL_IN_XSUB_RE
 
 static const UV _Perl_IDStart_invlist[] = { /* for EBCDIC 1047 */
 	1021,	/* Number of elements */
@@ -21945,10 +21785,6 @@ static const UV _Perl_IDStart_invlist[] = { /* for EBCDIC 1047 */
 	194560,
 	195102
 };
-
-#endif
-
-#ifndef PERL_IN_XSUB_RE
 
 static const UV _Perl_IDCont_invlist[] = { /* for EBCDIC 1047 */
 	1167,	/* Number of elements */
@@ -23124,7 +22960,7 @@ static const UV _Perl_IDCont_invlist[] = { /* for EBCDIC 1047 */
 	918000
 };
 
-#endif
+#endif	/* #ifndef PERL_IN_XSUB_RE */
 
 #endif	/* EBCDIC 1047 */
 
@@ -23197,10 +23033,6 @@ static const UV ASCII_invlist[] = { /* for EBCDIC 037 */
 	240,
 	250
 };
-
-#endif
-
-#ifndef PERL_IN_XSUB_RE
 
 static const UV Cased_invlist[] = { /* for EBCDIC 037 */
 	261,	/* Number of elements */
@@ -23470,10 +23302,6 @@ static const UV Cased_invlist[] = { /* for EBCDIC 037 */
 	120780
 };
 
-#endif
-
-#ifndef PERL_IN_XSUB_RE
-
 static const UV VertSpace_invlist[] = { /* for EBCDIC 037 */
 	9,	/* Number of elements */
 	148565664, /* Version and data structure type */
@@ -23489,10 +23317,6 @@ static const UV VertSpace_invlist[] = { /* for EBCDIC 037 */
 	8232,
 	8234
 };
-
-#endif
-
-#ifndef PERL_IN_XSUB_RE
 
 static const UV XPerlSpace_invlist[] = { /* for EBCDIC 037 */
 	23,	/* Number of elements */
@@ -23523,10 +23347,6 @@ static const UV XPerlSpace_invlist[] = { /* for EBCDIC 037 */
 	12288,
 	12289
 };
-
-#endif
-
-#ifndef PERL_IN_XSUB_RE
 
 static const UV XPosixAlnum_invlist[] = { /* for EBCDIC 037 */
 	1153,	/* Number of elements */
@@ -24688,10 +24508,6 @@ static const UV XPosixAlnum_invlist[] = { /* for EBCDIC 037 */
 	195102
 };
 
-#endif
-
-#ifndef PERL_IN_XSUB_RE
-
 static const UV XPosixAlpha_invlist[] = { /* for EBCDIC 037 */
 	1103,	/* Number of elements */
 	148565664, /* Version and data structure type */
@@ -25802,10 +25618,6 @@ static const UV XPosixAlpha_invlist[] = { /* for EBCDIC 037 */
 	195102
 };
 
-#endif
-
-#ifndef PERL_IN_XSUB_RE
-
 static const UV XPosixBlank_invlist[] = { /* for EBCDIC 037 */
 	15,	/* Number of elements */
 	148565664, /* Version and data structure type */
@@ -25828,10 +25640,6 @@ static const UV XPosixBlank_invlist[] = { /* for EBCDIC 037 */
 	12289
 };
 
-#endif
-
-#ifndef PERL_IN_XSUB_RE
-
 static const UV XPosixCntrl_invlist[] = { /* for EBCDIC 037 */
 	4,	/* Number of elements */
 	148565664, /* Version and data structure type */
@@ -25842,10 +25650,6 @@ static const UV XPosixCntrl_invlist[] = { /* for EBCDIC 037 */
 	255,
 	256
 };
-
-#endif
-
-#ifndef PERL_IN_XSUB_RE
 
 static const UV XPosixDigit_invlist[] = { /* for EBCDIC 037 */
 	85,	/* Number of elements */
@@ -25938,10 +25742,6 @@ static const UV XPosixDigit_invlist[] = { /* for EBCDIC 037 */
 	120782,
 	120832
 };
-
-#endif
-
-#ifndef PERL_IN_XSUB_RE
 
 static const UV XPosixGraph_invlist[] = { /* for EBCDIC 037 */
 	1089,	/* Number of elements */
@@ -27038,10 +26838,6 @@ static const UV XPosixGraph_invlist[] = { /* for EBCDIC 037 */
 	1048576,
 	1114110
 };
-
-#endif
-
-#ifndef PERL_IN_XSUB_RE
 
 static const UV XPosixLower_invlist[] = { /* for EBCDIC 037 */
 	1245,	/* Number of elements */
@@ -28295,10 +28091,6 @@ static const UV XPosixLower_invlist[] = { /* for EBCDIC 037 */
 	120780
 };
 
-#endif
-
-#ifndef PERL_IN_XSUB_RE
-
 static const UV XPosixPrint_invlist[] = { /* for EBCDIC 037 */
 	1083,	/* Number of elements */
 	148565664, /* Version and data structure type */
@@ -29389,10 +29181,6 @@ static const UV XPosixPrint_invlist[] = { /* for EBCDIC 037 */
 	1114110
 };
 
-#endif
-
-#ifndef PERL_IN_XSUB_RE
-
 static const UV XPosixPunct_invlist[] = { /* for EBCDIC 037 */
 	283,	/* Number of elements */
 	148565664, /* Version and data structure type */
@@ -29683,10 +29471,6 @@ static const UV XPosixPunct_invlist[] = { /* for EBCDIC 037 */
 	74868
 };
 
-#endif
-
-#ifndef PERL_IN_XSUB_RE
-
 static const UV XPosixSpace_invlist[] = { /* for EBCDIC 037 */
 	23,	/* Number of elements */
 	148565664, /* Version and data structure type */
@@ -29716,10 +29500,6 @@ static const UV XPosixSpace_invlist[] = { /* for EBCDIC 037 */
 	12288,
 	12289
 };
-
-#endif
-
-#ifndef PERL_IN_XSUB_RE
 
 static const UV XPosixUpper_invlist[] = { /* for EBCDIC 037 */
 	1235,	/* Number of elements */
@@ -30963,10 +30743,6 @@ static const UV XPosixUpper_invlist[] = { /* for EBCDIC 037 */
 	120779
 };
 
-#endif
-
-#ifndef PERL_IN_XSUB_RE
-
 static const UV XPosixWord_invlist[] = { /* for EBCDIC 037 */
 	1151,	/* Number of elements */
 	148565664, /* Version and data structure type */
@@ -32125,10 +31901,6 @@ static const UV XPosixWord_invlist[] = { /* for EBCDIC 037 */
 	918000
 };
 
-#endif
-
-#ifndef PERL_IN_XSUB_RE
-
 static const UV XPosixXDigit_invlist[] = { /* for EBCDIC 037 */
 	13,	/* Number of elements */
 	148565664, /* Version and data structure type */
@@ -32148,10 +31920,6 @@ static const UV XPosixXDigit_invlist[] = { /* for EBCDIC 037 */
 	65345,
 	65351
 };
-
-#endif
-
-#ifndef PERL_IN_XSUB_RE
 
 static const UV _Perl_Any_Folds_invlist[] = { /* for EBCDIC 037 */
 	257,	/* Number of elements */
@@ -32417,7 +32185,7 @@ static const UV _Perl_Any_Folds_invlist[] = { /* for EBCDIC 037 */
 	66640
 };
 
-#endif
+#endif	/* #ifndef PERL_IN_XSUB_RE */
 
 static const UV NonL1_Perl_Non_Final_Folds_invlist[] = { /* for EBCDIC 037 */
 	45,	/* Number of elements */
@@ -32539,10 +32307,6 @@ static const UV _Perl_Folds_To_Multi_Char_invlist[] = { /* for EBCDIC 037 */
 	64280
 };
 
-#endif
-
-#ifndef PERL_IN_XSUB_RE
-
 static const UV UpperLatin1_invlist[] = { /* for EBCDIC 037 */
 	57,	/* Number of elements */
 	148565664, /* Version and data structure type */
@@ -32606,10 +32370,6 @@ static const UV UpperLatin1_invlist[] = { /* for EBCDIC 037 */
 	250,
 	256
 };
-
-#endif
-
-#ifndef PERL_IN_XSUB_RE
 
 static const UV _Perl_IDStart_invlist[] = { /* for EBCDIC 037 */
 	1017,	/* Number of elements */
@@ -33634,10 +33394,6 @@ static const UV _Perl_IDStart_invlist[] = { /* for EBCDIC 037 */
 	194560,
 	195102
 };
-
-#endif
-
-#ifndef PERL_IN_XSUB_RE
 
 static const UV _Perl_IDCont_invlist[] = { /* for EBCDIC 037 */
 	1163,	/* Number of elements */
@@ -34809,7 +34565,7 @@ static const UV _Perl_IDCont_invlist[] = { /* for EBCDIC 037 */
 	918000
 };
 
-#endif
+#endif	/* #ifndef PERL_IN_XSUB_RE */
 
 #endif	/* EBCDIC 037 */
 
@@ -34884,10 +34640,6 @@ static const UV ASCII_invlist[] = { /* for EBCDIC POSIX-BC */
 	255,
 	256
 };
-
-#endif
-
-#ifndef PERL_IN_XSUB_RE
 
 static const UV Cased_invlist[] = { /* for EBCDIC POSIX-BC */
 	263,	/* Number of elements */
@@ -35159,10 +34911,6 @@ static const UV Cased_invlist[] = { /* for EBCDIC POSIX-BC */
 	120780
 };
 
-#endif
-
-#ifndef PERL_IN_XSUB_RE
-
 static const UV VertSpace_invlist[] = { /* for EBCDIC POSIX-BC */
 	9,	/* Number of elements */
 	148565664, /* Version and data structure type */
@@ -35178,10 +34926,6 @@ static const UV VertSpace_invlist[] = { /* for EBCDIC POSIX-BC */
 	8232,
 	8234
 };
-
-#endif
-
-#ifndef PERL_IN_XSUB_RE
 
 static const UV XPerlSpace_invlist[] = { /* for EBCDIC POSIX-BC */
 	23,	/* Number of elements */
@@ -35212,10 +34956,6 @@ static const UV XPerlSpace_invlist[] = { /* for EBCDIC POSIX-BC */
 	12288,
 	12289
 };
-
-#endif
-
-#ifndef PERL_IN_XSUB_RE
 
 static const UV XPosixAlnum_invlist[] = { /* for EBCDIC POSIX-BC */
 	1155,	/* Number of elements */
@@ -36379,10 +36119,6 @@ static const UV XPosixAlnum_invlist[] = { /* for EBCDIC POSIX-BC */
 	195102
 };
 
-#endif
-
-#ifndef PERL_IN_XSUB_RE
-
 static const UV XPosixAlpha_invlist[] = { /* for EBCDIC POSIX-BC */
 	1105,	/* Number of elements */
 	148565664, /* Version and data structure type */
@@ -37495,10 +37231,6 @@ static const UV XPosixAlpha_invlist[] = { /* for EBCDIC POSIX-BC */
 	195102
 };
 
-#endif
-
-#ifndef PERL_IN_XSUB_RE
-
 static const UV XPosixBlank_invlist[] = { /* for EBCDIC POSIX-BC */
 	15,	/* Number of elements */
 	148565664, /* Version and data structure type */
@@ -37521,10 +37253,6 @@ static const UV XPosixBlank_invlist[] = { /* for EBCDIC POSIX-BC */
 	12289
 };
 
-#endif
-
-#ifndef PERL_IN_XSUB_RE
-
 static const UV XPosixCntrl_invlist[] = { /* for EBCDIC POSIX-BC */
 	4,	/* Number of elements */
 	148565664, /* Version and data structure type */
@@ -37535,10 +37263,6 @@ static const UV XPosixCntrl_invlist[] = { /* for EBCDIC POSIX-BC */
 	95,
 	96
 };
-
-#endif
-
-#ifndef PERL_IN_XSUB_RE
 
 static const UV XPosixDigit_invlist[] = { /* for EBCDIC POSIX-BC */
 	85,	/* Number of elements */
@@ -37631,10 +37355,6 @@ static const UV XPosixDigit_invlist[] = { /* for EBCDIC POSIX-BC */
 	120782,
 	120832
 };
-
-#endif
-
-#ifndef PERL_IN_XSUB_RE
 
 static const UV XPosixGraph_invlist[] = { /* for EBCDIC POSIX-BC */
 	1089,	/* Number of elements */
@@ -38731,10 +38451,6 @@ static const UV XPosixGraph_invlist[] = { /* for EBCDIC POSIX-BC */
 	1048576,
 	1114110
 };
-
-#endif
-
-#ifndef PERL_IN_XSUB_RE
 
 static const UV XPosixLower_invlist[] = { /* for EBCDIC POSIX-BC */
 	1249,	/* Number of elements */
@@ -39992,10 +39708,6 @@ static const UV XPosixLower_invlist[] = { /* for EBCDIC POSIX-BC */
 	120780
 };
 
-#endif
-
-#ifndef PERL_IN_XSUB_RE
-
 static const UV XPosixPrint_invlist[] = { /* for EBCDIC POSIX-BC */
 	1083,	/* Number of elements */
 	148565664, /* Version and data structure type */
@@ -41086,10 +40798,6 @@ static const UV XPosixPrint_invlist[] = { /* for EBCDIC POSIX-BC */
 	1114110
 };
 
-#endif
-
-#ifndef PERL_IN_XSUB_RE
-
 static const UV XPosixPunct_invlist[] = { /* for EBCDIC POSIX-BC */
 	279,	/* Number of elements */
 	148565664, /* Version and data structure type */
@@ -41376,10 +41084,6 @@ static const UV XPosixPunct_invlist[] = { /* for EBCDIC POSIX-BC */
 	74868
 };
 
-#endif
-
-#ifndef PERL_IN_XSUB_RE
-
 static const UV XPosixSpace_invlist[] = { /* for EBCDIC POSIX-BC */
 	23,	/* Number of elements */
 	148565664, /* Version and data structure type */
@@ -41409,10 +41113,6 @@ static const UV XPosixSpace_invlist[] = { /* for EBCDIC POSIX-BC */
 	12288,
 	12289
 };
-
-#endif
-
-#ifndef PERL_IN_XSUB_RE
 
 static const UV XPosixUpper_invlist[] = { /* for EBCDIC POSIX-BC */
 	1241,	/* Number of elements */
@@ -42662,10 +42362,6 @@ static const UV XPosixUpper_invlist[] = { /* for EBCDIC POSIX-BC */
 	120779
 };
 
-#endif
-
-#ifndef PERL_IN_XSUB_RE
-
 static const UV XPosixWord_invlist[] = { /* for EBCDIC POSIX-BC */
 	1153,	/* Number of elements */
 	148565664, /* Version and data structure type */
@@ -43826,10 +43522,6 @@ static const UV XPosixWord_invlist[] = { /* for EBCDIC POSIX-BC */
 	918000
 };
 
-#endif
-
-#ifndef PERL_IN_XSUB_RE
-
 static const UV XPosixXDigit_invlist[] = { /* for EBCDIC POSIX-BC */
 	13,	/* Number of elements */
 	148565664, /* Version and data structure type */
@@ -43849,10 +43541,6 @@ static const UV XPosixXDigit_invlist[] = { /* for EBCDIC POSIX-BC */
 	65345,
 	65351
 };
-
-#endif
-
-#ifndef PERL_IN_XSUB_RE
 
 static const UV _Perl_Any_Folds_invlist[] = { /* for EBCDIC POSIX-BC */
 	259,	/* Number of elements */
@@ -44120,7 +43808,7 @@ static const UV _Perl_Any_Folds_invlist[] = { /* for EBCDIC POSIX-BC */
 	66640
 };
 
-#endif
+#endif	/* #ifndef PERL_IN_XSUB_RE */
 
 static const UV NonL1_Perl_Non_Final_Folds_invlist[] = { /* for EBCDIC POSIX-BC */
 	45,	/* Number of elements */
@@ -44242,10 +43930,6 @@ static const UV _Perl_Folds_To_Multi_Char_invlist[] = { /* for EBCDIC POSIX-BC *
 	64280
 };
 
-#endif
-
-#ifndef PERL_IN_XSUB_RE
-
 static const UV UpperLatin1_invlist[] = { /* for EBCDIC POSIX-BC */
 	57,	/* Number of elements */
 	148565664, /* Version and data structure type */
@@ -44309,10 +43993,6 @@ static const UV UpperLatin1_invlist[] = { /* for EBCDIC POSIX-BC */
 	254,
 	255
 };
-
-#endif
-
-#ifndef PERL_IN_XSUB_RE
 
 static const UV _Perl_IDStart_invlist[] = { /* for EBCDIC POSIX-BC */
 	1019,	/* Number of elements */
@@ -45339,10 +45019,6 @@ static const UV _Perl_IDStart_invlist[] = { /* for EBCDIC POSIX-BC */
 	194560,
 	195102
 };
-
-#endif
-
-#ifndef PERL_IN_XSUB_RE
 
 static const UV _Perl_IDCont_invlist[] = { /* for EBCDIC POSIX-BC */
 	1165,	/* Number of elements */
@@ -46516,7 +46192,7 @@ static const UV _Perl_IDCont_invlist[] = { /* for EBCDIC POSIX-BC */
 	918000
 };
 
-#endif
+#endif	/* #ifndef PERL_IN_XSUB_RE */
 
 #endif	/* EBCDIC POSIX-BC */
 
