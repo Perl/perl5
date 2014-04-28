@@ -303,9 +303,9 @@ C<=encoding> affects the whole document, and must occur only once.
 And don't forget, all commands but C<=encoding> last up
 until the end of its I<paragraph>, not its line.  So in the
 examples below, you can see that every command needs the blank
-line after it, to end its paragraph.  (And some older
-Pod translators may require the C<=encoding> line to be similarly
-separated.)
+line after it, to end its paragraph.  (And some older Pod translators
+may require the C<=encoding> line to have a following blank line as
+well, even though it should be legal to omit.)
 
 Some examples of lists include:
 
