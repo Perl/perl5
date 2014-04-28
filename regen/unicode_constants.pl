@@ -2,10 +2,11 @@ use v5.16.0;
 use strict;
 use warnings;
 require 'regen/regen_lib.pl';
+require 'regen/charset_translations.pl';
 use charnames qw(:loose);
 
 my $out_fh = open_new('unicode_constants.h', '>',
-		      {style => '*', by => $0,
+        {style => '*', by => $0,
                       from => "Unicode data"});
 
 print $out_fh <<END;
@@ -56,7 +57,14 @@ END
 # of UTF-8, and to generate proper EBCDIC as well as ASCII without manually
 # having to figure things out.
 
-while ( <DATA> ) {
+my @data = <DATA>;
+
+foreach my $charset (get_supported_code_pages()) {
+    print $out_fh "\n" . get_conditional_compile_line_start($charset);
+
+    my @a2n = get_a2n($charset);
+
+for ( @data ) {
     chomp;
 
     # Convert any '#' comments to /* ... */; empty lines and comments are
@@ -96,14 +104,16 @@ while ( <DATA> ) {
             die "Unknown code point '$name_or_cp' at line $.: $_\n" unless $undef_ok;
             $name = "";
         }
-        $cp = utf8::unicode_to_native($U_cp);
     }
     else {
         $name = $name_or_cp;
-        $cp = charnames::vianame($name =~ s/_/ /gr);
-        $U_cp = utf8::native_to_unicode($cp);
         die "Unknown name '$name' at line $.: $_\n" unless defined $name;
+        $U_cp = charnames::vianame($name =~ s/_/ /gr);
     }
+
+    $cp = ($U_cp < 256)
+          ? $a2n[$U_cp]
+          : $U_cp;
 
     $name = $desired_name if $name eq "" && $desired_name;
     $name =~ s/[- ]/_/g;   # The macro name can have no blanks nor dashes
@@ -116,8 +126,7 @@ while ( <DATA> ) {
         $str = sprintf "0x%02X", $cp;        # Is a numeric constant
     }
     else {
-        $str = join "", map { sprintf "\\x%02X", $_ }
-                        unpack("U0C*", pack("U", $cp));
+        $str = join "", map { sprintf "\\x%02X", ord $_ } split //, cp_2_utfbytes($U_cp, $charset);
 
         $suffix = '_UTF8';
         if (! defined $flag || $flag =~ /^ string (_skip_if_undef)? $/x) {
@@ -136,7 +145,9 @@ while ( <DATA> ) {
             die "Unknown flag at line $.: $_\n";
         }
     }
-    printf $out_fh "#define %s%s  %s    /* U+%04X */\n", $name, $suffix, $str, $U_cp;
+    printf $out_fh "#   define %s%s  %s    /* U+%04X */\n", $name, $suffix, $str, $U_cp;
+}
+    print $out_fh "\n" . get_conditional_compile_line_end();
 }
 
 print $out_fh "\n#endif /* H_UNICODE_CONSTANTS */\n";
