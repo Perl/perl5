@@ -64,89 +64,89 @@ foreach my $charset (get_supported_code_pages()) {
 
     my @a2n = get_a2n($charset);
 
-for ( @data ) {
-    chomp;
+    for ( @data ) {
+        chomp;
 
-    # Convert any '#' comments to /* ... */; empty lines and comments are
-    # output as blank lines
-    if ($_ =~ m/ ^ \s* (?: \# ( .* ) )? $ /x) {
-        my $comment_body = $1 // "";
-        if ($comment_body ne "") {
-            print $out_fh "/* $comment_body */\n";
+        # Convert any '#' comments to /* ... */; empty lines and comments are
+        # output as blank lines
+        if ($_ =~ m/ ^ \s* (?: \# ( .* ) )? $ /x) {
+            my $comment_body = $1 // "";
+            if ($comment_body ne "") {
+                print $out_fh "/* $comment_body */\n";
+            }
+            else {
+                print $out_fh "\n";
+            }
+            next;
+        }
+
+        unless ($_ =~ m/ ^ ( [^\ ]* )           # Name or code point token
+                        (?: [\ ]+ ( [^ ]* ) )?  # optional flag
+                        (?: [\ ]+ ( .* ) )?  # name if unnamed; flag is required
+                    /x)
+        {
+            die "Unexpected syntax at line $.: $_\n";
+        }
+
+        my $name_or_cp = $1;
+        my $flag = $2;
+        my $desired_name = $3;
+
+        my $name;
+        my $cp;
+        my $U_cp;   # code point in Unicode (not-native) terms
+        my $undef_ok = $desired_name || $flag =~ /skip_if_undef/;
+
+        if ($name_or_cp =~ /^U\+(.*)/) {
+            $U_cp = hex $1;
+            $name = charnames::viacode($name_or_cp);
+            if (! defined $name) {
+                die "Unknown code point '$name_or_cp' at line $.: $_\n" unless $undef_ok;
+                $name = "";
+            }
         }
         else {
-            print $out_fh "\n";
+            $name = $name_or_cp;
+            die "Unknown name '$name' at line $.: $_\n" unless defined $name;
+            $U_cp = charnames::vianame($name =~ s/_/ /gr);
         }
-        next;
-    }
 
-    unless ($_ =~ m/ ^ ( [^\ ]* )           # Name or code point token
-                       (?: [\ ]+ ( [^ ]* ) )?  # optional flag
-                       (?: [\ ]+ ( .* ) )?  # name if unnamed; flag is required
-                   /x)
-    {
-        die "Unexpected syntax at line $.: $_\n";
-    }
+        $cp = ($U_cp < 256)
+            ? $a2n[$U_cp]
+            : $U_cp;
 
-    my $name_or_cp = $1;
-    my $flag = $2;
-    my $desired_name = $3;
+        $name = $desired_name if $name eq "" && $desired_name;
+        $name =~ s/[- ]/_/g;   # The macro name can have no blanks nor dashes
 
-    my $name;
-    my $cp;
-    my $U_cp;   # code point in Unicode (not-native) terms
-    my $undef_ok = $desired_name || $flag =~ /skip_if_undef/;
-
-    if ($name_or_cp =~ /^U\+(.*)/) {
-        $U_cp = hex $1;
-        $name = charnames::viacode($name_or_cp);
-        if (! defined $name) {
-            die "Unknown code point '$name_or_cp' at line $.: $_\n" unless $undef_ok;
-            $name = "";
+        my $str;
+        my $suffix;
+        if (defined $flag && $flag eq 'native') {
+            die "Are you sure you want to run this on an above-Latin1 code point?" if $cp > 0xff;
+            $suffix = '_NATIVE';
+            $str = sprintf "0x%02X", $cp;        # Is a numeric constant
         }
-    }
-    else {
-        $name = $name_or_cp;
-        die "Unknown name '$name' at line $.: $_\n" unless defined $name;
-        $U_cp = charnames::vianame($name =~ s/_/ /gr);
-    }
+        else {
+            $str = join "", map { sprintf "\\x%02X", ord $_ } split //, cp_2_utfbytes($U_cp, $charset);
 
-    $cp = ($U_cp < 256)
-          ? $a2n[$U_cp]
-          : $U_cp;
-
-    $name = $desired_name if $name eq "" && $desired_name;
-    $name =~ s/[- ]/_/g;   # The macro name can have no blanks nor dashes
-
-    my $str;
-    my $suffix;
-    if (defined $flag && $flag eq 'native') {
-        die "Are you sure you want to run this on an above-Latin1 code point?" if $cp > 0xff;
-        $suffix = '_NATIVE';
-        $str = sprintf "0x%02X", $cp;        # Is a numeric constant
-    }
-    else {
-        $str = join "", map { sprintf "\\x%02X", ord $_ } split //, cp_2_utfbytes($U_cp, $charset);
-
-        $suffix = '_UTF8';
-        if (! defined $flag || $flag =~ /^ string (_skip_if_undef)? $/x) {
-            $str = "\"$str\"";  # Will be a string constant
-        } elsif ($flag eq 'tail') {
-                $str =~ s/\\x..//;  # Remove the first byte
-                $suffix .= '_TAIL';
+            $suffix = '_UTF8';
+            if (! defined $flag || $flag =~ /^ string (_skip_if_undef)? $/x) {
                 $str = "\"$str\"";  # Will be a string constant
+            } elsif ($flag eq 'tail') {
+                    $str =~ s/\\x..//;  # Remove the first byte
+                    $suffix .= '_TAIL';
+                    $str = "\"$str\"";  # Will be a string constant
+            }
+            elsif ($flag eq 'first') {
+                $str =~ s/ \\x ( .. ) .* /$1/x; # Get the two nibbles of the 1st byte
+                $suffix .= '_FIRST_BYTE';
+                $str = "0x$str";        # Is a numeric constant
+            }
+            else {
+                die "Unknown flag at line $.: $_\n";
+            }
         }
-        elsif ($flag eq 'first') {
-            $str =~ s/ \\x ( .. ) .* /$1/x; # Get the two nibbles of the 1st byte
-            $suffix .= '_FIRST_BYTE';
-            $str = "0x$str";        # Is a numeric constant
-        }
-        else {
-            die "Unknown flag at line $.: $_\n";
-        }
+        printf $out_fh "#   define %s%s  %s    /* U+%04X */\n", $name, $suffix, $str, $U_cp;
     }
-    printf $out_fh "#   define %s%s  %s    /* U+%04X */\n", $name, $suffix, $str, $U_cp;
-}
     print $out_fh "\n" . get_conditional_compile_line_end();
 }
 
