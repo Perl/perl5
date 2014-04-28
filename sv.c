@@ -12778,8 +12778,10 @@ Perl_cx_dup(pTHX_ PERL_CONTEXT *cxs, I32 ix, I32 max, CLONE_PARAMS* param)
 					   ? av_dup_inc(ncx->blk_sub.argarray,
 							param)
 					   : NULL);
-		ncx->blk_sub.savearray	= av_dup_inc(ncx->blk_sub.savearray,
-						     param);
+		ncx->blk_sub.savearray	=  (CxHASARGS(ncx)
+                                            ? av_dup_inc(ncx->blk_sub.savearray,
+						     param)
+					   : NULL);
 		ncx->blk_sub.oldcomppad = (PAD*)ptr_table_fetch(PL_ptr_table,
 					   ncx->blk_sub.oldcomppad);
 		break;

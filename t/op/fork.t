@@ -505,3 +505,17 @@ EXPECT
 2
 3
 4
+########
+# this used to SEGV. RT # 121721
+$|=1;
+&main;
+sub main {
+    if (my $pid = fork) {
+	waitpid($pid, 0);
+    }
+    else {
+        print "foo\n";
+    }
+}
+EXPECT
+foo
