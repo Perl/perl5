@@ -243,4 +243,4 @@ PERLVAR(G, malloc_mutex, perl_mutex)	/* Mutex for malloc */
 #endif
 
 PERLVARI(G, hash_seed_set, bool, FALSE)	/* perl.c */
-PERLVARA(G, hash_seed, PERL_HASH_SEED_BYTES, unsigned char) /* perl.c and hv.h */
+PERLVARA(G, hash_seed, PERL_HASH_SEED_BYTES, unsigned char __attribute__((aligned(16)))) /* perl.c and hv.h */
