@@ -4165,7 +4165,7 @@ hints/vos.sh			Hints for named architecture
 hv.c				Hash value code
 hv_func.h			Hash value static inline function header
 hv.h				Hash value header
-hv_lookup3.h                        Used by hv_func.h for doing "lookup3" hashing
+hv_func.h			Used by hv_func.h for doing "lookup3" hashing
 inline.h			Static inline functions
 INSTALL				Detailed installation instructions
 installhtml			Perl script to install html files for pods
