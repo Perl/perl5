@@ -4,6 +4,7 @@ use strict;
 use warnings;
 use Unicode::UCD qw(prop_invlist prop_invmap);
 require 'regen/regen_lib.pl';
+require 'regen/charset_translations.pl';
 
 # This program outputs charclass_invlists.h, which contains various inversion
 # lists in the form of C arrays that are to be used as-is for inversion lists.
@@ -25,9 +26,10 @@ print $out_fh "/* See the generating file for comments */\n\n";
 
 my %include_in_ext_re = ( NonL1_Perl_Non_Final_Folds => 1 );
 
-sub output_invlist ($$) {
+sub output_invlist ($$;$) {
     my $name = shift;
     my $invlist = shift;     # Reference to inversion list array
+    my $charset = shift // "";  # name of character set for comment
 
     die "No inversion list for $name" unless defined $invlist
                                              && ref $invlist eq 'ARRAY'
@@ -45,7 +47,9 @@ sub output_invlist ($$) {
     my $count = @$invlist;
 
     print $out_fh "\n#ifndef PERL_IN_XSUB_RE\n" unless exists $include_in_ext_re{$name};
-    print $out_fh "\nstatic const UV ${name}_invlist[] = {\n";
+    print $out_fh "\nstatic const UV ${name}_invlist[] = {";
+    print $out_fh " /* for $charset */" if $charset;
+    print $out_fh "\n";
 
     print $out_fh "\t$count,\t/* Number of elements */\n";
     print $out_fh "\t$VERSION_DATA_STRUCTURE_TYPE, /* Version and data structure type */\n";
@@ -64,7 +68,6 @@ sub output_invlist ($$) {
 
     print $out_fh "};\n";
     print $out_fh "\n#endif\n" unless exists $include_in_ext_re{$name};
-
 }
 
 sub mk_invlist_from_cp_list {
@@ -117,11 +120,7 @@ sub _Perl_Non_Final_Folds {
 }
 
 sub UpperLatin1 {
-    my @upper_latin1;
-    for my $i (0 .. 255) {  # Complicated because of EBCDIC
-        push @upper_latin1, $i if chr($i) =~ /[[:^ascii:]]/;
-    }
-    return mk_invlist_from_cp_list(\@upper_latin1);
+    return mk_invlist_from_cp_list([ 128 .. 255 ]);
 }
 
 output_invlist("Latin1", [ 0, 256 ]);
@@ -150,6 +149,10 @@ output_invlist("AboveLatin1", [ 256 ]);
 # An initial & means to use the subroutine from this file instead of an
 # official inversion list.
 
+for my $charset (get_supported_code_pages()) {
+    print $out_fh "\n" . get_conditional_compile_line_start($charset);
+
+    my @a2n = get_a2n($charset);
 for my $prop (qw(
                 ASCII
                 Cased
@@ -205,6 +208,26 @@ for my $prop (qw(
         @invlist = prop_invlist($lookup_prop, '_perl_core_internal_ok');
     }
     die "Could not find inversion list for '$lookup_prop'" unless @invlist;
+    my @full_list;
+    for (my $i = 0; $i < @invlist; $i += 2) {
+        my $upper = ($i + 1) < @invlist
+                    ? $invlist[$i+1] - 1      # In range
+                    : $Unicode::UCD::MAX_CP;  # To infinity.  You may want
+                                            # to stop much much earlier;
+                                            # going this high may expose
+                                            # perl deficiencies with very
+                                            # large numbers.
+        for my $j ($invlist[$i] .. $upper) {
+            if ($j < 256) {
+                push @full_list, $a2n[$j];
+            }
+            else {
+                push @full_list, $j;
+            }
+        }
+    }
+    @full_list = sort { $a <=> $b } @full_list;
+    @invlist = mk_invlist_from_cp_list(\@full_list);
 
     if ($l1_only) {
         for my $i (0 .. @invlist - 1 - 1) {
@@ -248,7 +271,9 @@ for my $prop (qw(
         die "No non-Latin1 code points in $lookup_prop" unless $found_nonl1;
     }
 
-    output_invlist($prop_name, \@invlist);
+    output_invlist($prop_name, \@invlist, $charset);
+}
+    print $out_fh "\n" . get_conditional_compile_line_end();
 }
 
 read_only_bottom_close_and_rename($out_fh)
