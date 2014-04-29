@@ -13119,6 +13119,74 @@ S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV** return_invlist,
 }
 #undef IS_OPERAND
 
+STATIC void
+S_add_above_Latin1_folds(pTHX_ RExC_state_t *pRExC_state, const U8 cp, SV** invlist)
+{
+    /* This hard-codes the Latin1/above-Latin1 folding rules, so that an
+     * innocent-looking character class, like /[ks]/i won't have to go out to
+     * disk to find the possible matches.
+     *
+     * This should be called only for a Latin1-range code points, cp, which is
+     * known to be involved in a fold with other code points above Latin1.  It
+     * would give false results if /aa has been specified.  Multi-char folds
+     * are outside the scope of this, and must be handled specially.
+     *
+     * XXX It would be better to generate these via regen, in case a new
+     * version of the Unicode standard adds new mappings, though that is not
+     * really likely, and may be caught by the default: case of the switch
+     * below. */
+
+    PERL_ARGS_ASSERT_ADD_ABOVE_LATIN1_FOLDS;
+
+    switch (cp) {
+        case 'k':
+        case 'K':
+          *invlist =
+             add_cp_to_invlist(*invlist, KELVIN_SIGN);
+            break;
+        case 's':
+        case 'S':
+          *invlist = add_cp_to_invlist(*invlist, LATIN_SMALL_LETTER_LONG_S);
+            break;
+        case MICRO_SIGN:
+          *invlist = add_cp_to_invlist(*invlist, GREEK_CAPITAL_LETTER_MU);
+          *invlist = add_cp_to_invlist(*invlist, GREEK_SMALL_LETTER_MU);
+            break;
+        case LATIN_CAPITAL_LETTER_A_WITH_RING_ABOVE:
+        case LATIN_SMALL_LETTER_A_WITH_RING_ABOVE:
+          *invlist = add_cp_to_invlist(*invlist, ANGSTROM_SIGN);
+            break;
+        case LATIN_SMALL_LETTER_Y_WITH_DIAERESIS:
+          *invlist = add_cp_to_invlist(*invlist,
+                                        LATIN_CAPITAL_LETTER_Y_WITH_DIAERESIS);
+            break;
+        case LATIN_SMALL_LETTER_SHARP_S:
+          *invlist = add_cp_to_invlist(*invlist, LATIN_CAPITAL_LETTER_SHARP_S);
+            break;
+        case 'F': case 'f':
+        case 'I': case 'i':
+        case 'L': case 'l':
+        case 'T': case 't':
+        case 'A': case 'a':
+        case 'H': case 'h':
+        case 'J': case 'j':
+        case 'N': case 'n':
+        case 'W': case 'w':
+        case 'Y': case 'y':
+            /* These all are targets of multi-character folds from code points
+             * that require UTF8 to express, so they can't match unless the
+             * target string is in UTF-8, so no action here is necessary, as
+             * regexec.c properly handles the general case for UTF-8 matching
+             * and multi-char folds */
+            break;
+        default:
+            /* Use deprecated warning to increase the chances of this being
+             * output */
+            ckWARN2reg_d(RExC_parse, "Perl folding rules are not up-to-date for 0x%02X; please use the perlbug utility to report;", cp);
+            break;
+    }
+}
+
 /* The names of properties whose definitions are not known at compile time are
  * stored in this SV, after a constant heading.  So if the length has been
  * changed since initialization, then there is a run-time definition. */
@@ -14338,15 +14406,6 @@ parseit:
 
                     if (j < 256) {
 
-                        /* We have the latin1 folding rules hard-coded here so
-                         * that an innocent-looking character class, like
-                         * /[ks]/i won't have to go out to disk to find the
-                         * possible matches.  XXX It would be better to
-                         * generate these via regen, in case a new version of
-                         * the Unicode standard adds new mappings, though that
-                         * is not really likely, and may be caught by the
-                         * default: case of the switch below. */
-
                         if (IS_IN_SOME_FOLD_L1(j)) {
 
                             /* ASCII is always matched; non-ASCII is matched
@@ -14366,69 +14425,9 @@ parseit:
                         if (HAS_NONLATIN1_FOLD_CLOSURE(j)
                             && (! isASCII(j) || ! ASCII_FOLD_RESTRICTED))
                         {
-                            /* Certain Latin1 characters have matches outside
-                            * Latin1.  To get here, <j> is one of those
-                            * characters.   None of these matches is valid for
-                            * ASCII characters under /aa, which is why the 'if'
-                            * just above excludes those.  These matches only
-                            * happen when the target string is utf8.  The code
-                            * below adds the single fold closures for <j> to the
-                            * inversion list. */
-
-                            switch (j) {
-                                case 'k':
-                                case 'K':
-                                  *use_list =
-                                     add_cp_to_invlist(*use_list, KELVIN_SIGN);
-                                    break;
-                                case 's':
-                                case 'S':
-                                  *use_list = add_cp_to_invlist(*use_list,
-                                                    LATIN_SMALL_LETTER_LONG_S);
-                                    break;
-                                case MICRO_SIGN:
-                                  *use_list = add_cp_to_invlist(*use_list,
-                                                      GREEK_CAPITAL_LETTER_MU);
-                                  *use_list = add_cp_to_invlist(*use_list,
-                                                        GREEK_SMALL_LETTER_MU);
-                                    break;
-                                case LATIN_CAPITAL_LETTER_A_WITH_RING_ABOVE:
-                                case LATIN_SMALL_LETTER_A_WITH_RING_ABOVE:
-                                  *use_list =
-                                   add_cp_to_invlist(*use_list, ANGSTROM_SIGN);
-                                    break;
-                                case LATIN_SMALL_LETTER_Y_WITH_DIAERESIS:
-                                  *use_list = add_cp_to_invlist(*use_list,
-                                        LATIN_CAPITAL_LETTER_Y_WITH_DIAERESIS);
-                                    break;
-                                case LATIN_SMALL_LETTER_SHARP_S:
-                                  *use_list = add_cp_to_invlist(*use_list,
-                                                 LATIN_CAPITAL_LETTER_SHARP_S);
-                                    break;
-                                case 'F': case 'f':
-                                case 'I': case 'i':
-                                case 'L': case 'l':
-                                case 'T': case 't':
-                                case 'A': case 'a':
-                                case 'H': case 'h':
-                                case 'J': case 'j':
-                                case 'N': case 'n':
-                                case 'W': case 'w':
-                                case 'Y': case 'y':
-                                    /* These all are targets of multi-character
-                                     * folds from code points that require UTF8
-                                     * to express, so they can't match unless
-                                     * the target string is in UTF-8, so no
-                                     * action here is necessary, as regexec.c
-                                     * properly handles the general case for
-                                     * UTF-8 matching and multi-char folds */
-                                    break;
-                                default:
-                                    /* Use deprecated warning to increase the
-                                    * chances of this being output */
-                                    ckWARN2reg_d(RExC_parse, "Perl folding rules are not up-to-date for 0x%"UVXf"; please use the perlbug utility to report;", j);
-                                    break;
-                            }
+                            add_above_Latin1_folds(pRExC_state,
+                                                   (U8) j,
+                                                   use_list);
                         }
                         continue;
                     }

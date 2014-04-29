@@ -4147,7 +4147,7 @@ redirected it with select().)
 "Can't locate object method \"%s\" via package \"%s\"".  It often means
 that a method requires a package that has not been loaded.
 
-=item Perl folding rules are not up-to-date for 0x%X; please use the perlbug 
+=item Perl folding rules are not up-to-date for 0x%X; please use the perlbug
 utility to report; in regex; marked by S<<-- HERE> in m/%s/
 
 (S regexp) You used a regular expression with case-insensitive matching,
