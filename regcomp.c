@@ -5500,7 +5500,8 @@ S_add_data(RExC_state_t* const pRExC_state, const char* const s, const U32 n)
     return count;
 }
 
-/*XXX: todo make this not included in a non debugging perl */
+/*XXX: todo make this not included in a non debugging perl, but appears to be
+ * used anyway there, in 'use re' */
 #ifndef PERL_IN_XSUB_RE
 void
 Perl_reginitcolors(pTHX)
