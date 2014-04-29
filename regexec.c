@@ -3698,14 +3698,7 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
                 /* Load the folds hash, if not already done */
                 SV** listp;
                 if (! PL_utf8_foldclosures) {
-                    if (! PL_utf8_tofold) {
-                        U8 dummy[UTF8_MAXBYTES_CASE+1];
-
-                        /* Force loading this by folding an above-Latin1 char */
-                        to_utf8_fold((U8*) HYPHEN_UTF8, dummy, NULL);
-                        assert(PL_utf8_tofold); /* Verify that worked */
-                    }
-                    PL_utf8_foldclosures = _swash_inversion_hash(PL_utf8_tofold);
+                    _load_PL_utf8_foldclosures();
                 }
 
                 /* The fold closures data structure is a hash with the keys

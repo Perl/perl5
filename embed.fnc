@@ -1529,6 +1529,7 @@ ApM	|SV*	|_get_regclass_nonbitmap_data				   \
 				|NN const struct regnode *node|bool doinit \
 				|NULLOK SV **listsvp			   \
 				|NULLOK SV **lonly_utf8_locale
+EXp	|void|_load_PL_utf8_foldclosures|
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined (PERL_IN_DUMP_C)
 EXMp	|void	|_invlist_dump	|NN PerlIO *file|I32 level   \

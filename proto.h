@@ -7025,6 +7025,7 @@ PERL_CALLCONV SV*	Perl__get_regclass_nonbitmap_data(pTHX_ const regexp *prog, co
 #define PERL_ARGS_ASSERT__GET_REGCLASS_NONBITMAP_DATA	\
 	assert(node)
 
+PERL_CALLCONV void	Perl__load_PL_utf8_foldclosures(pTHX);
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_UTF8_C)
 PERL_CALLCONV SV*	Perl__get_swash_invlist(pTHX_ SV* const swash)
