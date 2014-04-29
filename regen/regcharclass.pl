@@ -1389,6 +1389,14 @@ EOF
             my ( $type, $ret )= split /-/, $type_spec;
             $ret ||= 'len';
             foreach my $mod ( @mods ) {
+
+                # 'safe' is irrelevant with code point macros, so skip if
+                # there is also a 'fast', but don't skip if this is the only
+                # way a cp macro will get generated.  Below we convert 'safe'
+                # to 'fast' in this instance
+                next if $type =~ /^cp/
+                        && $mod eq 'safe'
+                        && grep { 'fast' eq $_ } @mods;
                 delete $mods{$mod};
                 my $macro= $obj->make_macro(
                     type     => $type,
