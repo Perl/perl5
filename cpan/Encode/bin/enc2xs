@@ -187,7 +187,6 @@ END
     print C "#include <EXTERN.h>\n";
     print C "#include <perl.h>\n";
     print C "#include <XSUB.h>\n";
-    print C "#define U8 U8\n";
    }
   print C "#include \"encode.h\"\n\n";
 

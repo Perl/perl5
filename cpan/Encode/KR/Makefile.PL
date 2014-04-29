@@ -79,7 +79,6 @@ sub post_initialize
 #include <EXTERN.h>
 #include <perl.h>
 #include <XSUB.h>
-#define U8 U8
 #include "encode.h"
 END
     foreach my $table (sort keys %tables) {

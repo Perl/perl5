@@ -392,7 +392,23 @@ use File::Glob qw(:case);
         'FILES'        => q[cpan/Encode],
         'CUSTOMIZED'   => [
             # Waiting to be merged upstream: see CPAN RT#95130
-            qw(	Encode.pm Encode.xs Encode/encode.h Unicode/Unicode.xs ),
+            qw(
+                bin/enc2xs
+                Byte/Makefile.PL
+                CN/Makefile.PL
+                EBCDIC/Makefile.PL
+                encengine.c
+                Encode/encode.h
+                Encode/encode.h
+                Encode/Makefile_PL.e2x
+                Encode.pm
+                Encode.xs
+                JP/Makefile.PL
+                KR/Makefile.PL
+                Symbol/Makefile.PL
+                TW/Makefile.PL
+                Unicode/Unicode.xs
+            ),
         ],
     },
 

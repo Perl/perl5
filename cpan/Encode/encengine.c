@@ -88,7 +88,6 @@ we add a flag to re-add the removed byte to the source we could handle
 
 #include <EXTERN.h>
 #include <perl.h>
-#define U8 U8
 #include "encode.h"
 
 int
