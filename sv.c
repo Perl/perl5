@@ -12898,14 +12898,13 @@ Perl_cx_dup(pTHX_ PERL_CONTEXT *cxs, I32 ix, I32 max, CLONE_PARAMS* param)
 		ncx->blk_sub.cv		= (ncx->blk_sub.olddepth == 0
 					   ? cv_dup_inc(ncx->blk_sub.cv, param)
 					   : cv_dup(ncx->blk_sub.cv,param));
-		ncx->blk_sub.argarray	= (CxHASARGS(ncx)
-					   ? av_dup_inc(ncx->blk_sub.argarray,
-							param)
-					   : NULL);
-		ncx->blk_sub.savearray	=  (CxHASARGS(ncx)
-                                            ? av_dup_inc(ncx->blk_sub.savearray,
-						     param)
-					   : NULL);
+		if(CxHASARGS(ncx)){
+		    ncx->blk_sub.argarray = av_dup_inc(ncx->blk_sub.argarray,param);
+		    ncx->blk_sub.savearray = av_dup_inc(ncx->blk_sub.savearray,param);
+		} else {
+		    ncx->blk_sub.argarray = NULL;
+		    ncx->blk_sub.savearray = NULL;
+		}
 		ncx->blk_sub.oldcomppad = (PAD*)ptr_table_fetch(PL_ptr_table,
 					   ncx->blk_sub.oldcomppad);
 		break;
