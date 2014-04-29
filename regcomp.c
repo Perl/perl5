@@ -14456,9 +14456,8 @@ parseit:
                         for (k = 0; k <= av_tindex(list); k++) {
                             SV** c_p = av_fetch(list, k, FALSE);
                             UV c;
-                            if (c_p == NULL) {
-                                Perl_croak(aTHX_ "panic: invalid PL_utf8_foldclosures structure");
-                            }
+                            assert(c_p);
+
                             c = SvUV(*c_p);
 
                             /* /aa doesn't allow folds between ASCII and non- */
