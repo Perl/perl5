@@ -4249,11 +4249,13 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 	    }
 	    flags &= ~SCF_DO_STCLASS;
 	}
-	else if (PL_regkind[OP(scan)] == EXACT) { /* But OP != EXACT! */
+        else if (PL_regkind[OP(scan)] == EXACT) { /* But OP != EXACT!, so is
+                                                     EXACTFish */
 	    SSize_t l = STR_LEN(scan);
 	    UV uc = *((U8*)STRING(scan));
             SV* EXACTF_invlist = _new_invlist(4); /* Start out big enough for 2
                                                      separate code points */
+            const U8 * s = (U8*)STRING(scan);
 
 	    /* Search for fixed substrings supports EXACT only. */
 	    if (flags & SCF_DO_SUBSTR) {
@@ -4261,7 +4263,6 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                 scan_commit(pRExC_state, data, minlenp, is_inf);
 	    }
 	    if (UTF) {
-		const U8 * const s = (U8 *)STRING(scan);
 		uc = utf8_to_uvchr_buf(s, s + l, NULL);
 		l = utf8_length(s, s + l);
 	    }
@@ -4281,71 +4282,140 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    data->longest = &(data->longest_float);
 		}
 	    }
-            if (OP(scan) == EXACTFL) {
 
-                /* We don't know what the folds are; it could be anything. XXX
-                 * Actually, we only support UTF-8 encoding for code points
-                 * above Latin1, so we could know what those folds are. */
-                EXACTF_invlist = _add_range_to_invlist(EXACTF_invlist,
-                                                       0,
-                                                       UV_MAX);
+            if (OP(scan) != EXACTFL && flags & SCF_DO_STCLASS_AND) {
+                ssc_clear_locale(data->start_class);
             }
-            else {  /* Non-locale EXACTFish */
-                EXACTF_invlist = add_cp_to_invlist(EXACTF_invlist, uc);
-                if (flags & SCF_DO_STCLASS_AND) {
-                    ssc_clear_locale(data->start_class);
-                }
-                if (uc < 256) { /* We know what the Latin1 folds are ... */
-                    if (IS_IN_SOME_FOLD_L1(uc)) {   /* For instance, we
-                                                       know if anything folds
-                                                       with this */
-                        EXACTF_invlist = add_cp_to_invlist(EXACTF_invlist,
-                                                           PL_fold_latin1[uc]);
-                        if (OP(scan) != EXACTFA) { /* The folds below aren't
-                                                      legal under /iaa */
-                            if (isARG2_lower_or_UPPER_ARG1('s', uc)) {
-                                EXACTF_invlist
-                                    = add_cp_to_invlist(EXACTF_invlist,
-                                                LATIN_SMALL_LETTER_SHARP_S);
-                            }
-                            else if (uc == LATIN_SMALL_LETTER_SHARP_S) {
-                                EXACTF_invlist
-                                    = add_cp_to_invlist(EXACTF_invlist, 's');
-                                EXACTF_invlist
-                                    = add_cp_to_invlist(EXACTF_invlist, 'S');
-                            }
-                        }
 
-                        /* We also know if there are above-Latin1 code points
-                         * that fold to this (none legal for ASCII and /iaa) */
-                        if ((! isASCII(uc) || OP(scan) != EXACTFA)
-                            && HAS_NONLATIN1_FOLD_CLOSURE(uc))
-                        {
-                            /* XXX We could know exactly what does fold to this
-                             * if the reverse folds are loaded, as currently in
-                             * S_regclass() */
-                            _invlist_union(EXACTF_invlist,
-                                           PL_AboveLatin1,
-                                           &EXACTF_invlist);
-                        }
-                    }
-                }
-                else {  /* Non-locale, above Latin1.  XXX We don't currently
-                           know what participates in folds with this, so have
-                           to assume anything could */
+            if (! UTF) {
 
-                    /* XXX We could know exactly what does fold to this if the
-                     * reverse folds are loaded, as currently in S_regclass().
-                     * But we do know that under /iaa nothing in the ASCII
-                     * range can participate */
-                    if (OP(scan) == EXACTFA) {
-                        _invlist_union_complement_2nd(EXACTF_invlist,
-                                                      PL_XPosix_ptrs[_CC_ASCII],
-                                                      &EXACTF_invlist);
+                /* We punt and assume can match anything if the node begins
+                 * with a multi-character fold.  Things are complicated.  For
+                 * example, /ffi/i could match any of:
+                 *  "\N{LATIN SMALL LIGATURE FFI}"
+                 *  "\N{LATIN SMALL LIGATURE FF}I"
+                 *  "F\N{LATIN SMALL LIGATURE FI}"
+                 *  plus several other things; and making sure we have all the
+                 *  possibilities is hard. */
+                if (is_MULTI_CHAR_FOLD_latin1_safe(s, s + STR_LEN(scan))) {
+                    EXACTF_invlist =
+                             _add_range_to_invlist(EXACTF_invlist, 0, UV_MAX);
+                }
+                else {
+
+                    /* Any Latin1 range character can potentially match any
+                     * other depending on the locale */
+                    if (OP(scan) == EXACTFL) {
+                        _invlist_union(EXACTF_invlist, PL_Latin1,
+                                                              &EXACTF_invlist);
                     }
                     else {
-                        EXACTF_invlist = _add_range_to_invlist(EXACTF_invlist,
-                                                               0, UV_MAX);
+                        /* But otherwise, it matches at least itself.  We can
+                         * quickly tell if it has a distinct fold, and if so,
+                         * it matches that as well */
+                        EXACTF_invlist = add_cp_to_invlist(EXACTF_invlist, uc);
+                        if (IS_IN_SOME_FOLD_L1(uc)) {
+                            EXACTF_invlist = add_cp_to_invlist(EXACTF_invlist,
+                                                           PL_fold_latin1[uc]);
+                        }
+                    }
+
+                    /* Some characters match above-Latin1 ones under /i.  This
+                     * is true of EXACTFL ones when the locale is UTF-8 */
+                    if (HAS_NONLATIN1_FOLD_CLOSURE(uc)
+                        && (! isASCII(uc) || (OP(scan) != EXACTFA
+                                            && OP(scan) != EXACTFA_NO_TRIE)))
+                    {
+                        add_above_Latin1_folds(pRExC_state,
+                                               (U8) uc,
+                                               &EXACTF_invlist);
+                    }
+                }
+            }
+            else {  /* Pattern is UTF-8 */
+                U8 folded[UTF8_MAX_FOLD_CHAR_EXPAND * UTF8_MAXBYTES_CASE + 1] = { '\0' };
+                STRLEN foldlen = UTF8SKIP(s);
+                const U8* e = s + STR_LEN(scan);
+                SV** listp;
+
+                /* The only code points that aren't folded in a UTF EXACTFish
+                 * node are are the problematic ones in EXACTFL nodes */
+                if (OP(scan) == EXACTFL
+                    && is_PROBLEMATIC_LOCALE_FOLDEDS_START_cp(uc))
+                {
+                    /* We need to check for the possibility that this EXACTFL
+                     * node begins with a multi-char fold.  Therefore we fold
+                     * the first few characters of it so that we can make that
+                     * check */
+                    U8 *d = folded;
+                    int i;
+
+                    for (i = 0; i < UTF8_MAX_FOLD_CHAR_EXPAND && s < e; i++) {
+                        if (isASCII(*s)) {
+                            *(d++) = (U8) toFOLD(*s);
+                            s++;
+                        }
+                        else {
+                            STRLEN len;
+                            to_utf8_fold(s, d, &len);
+                            d += len;
+                            s += UTF8SKIP(s);
+                        }
+                    }
+
+                    /* And set up so the code below that looks in this folded
+                     * buffer instead of the node's string */
+                    e = d;
+                    foldlen = UTF8SKIP(folded);
+                    s = folded;
+                }
+
+                /* When we reach here 's' points to the fold of the first
+                 * character(s) of the node; and 'e' points to far enough along
+                 * the folded string to be just past any possible multi-char
+                 * fold. 'foldlen' is the length in bytes of the first
+                 * character in 's'
+                 *
+                 * Unlike the non-UTF-8 case, the macro for determining if a
+                 * string is a multi-char fold requires all the characters to
+                 * already be folded.  This is because of all the complications
+                 * if not.  Note that they are folded anyway, except in EXACTFL
+                 * nodes.  Like the non-UTF case above, we punt if the node
+                 * begins with a multi-char fold  */
+
+                if (is_MULTI_CHAR_FOLD_utf8_safe(s, e)) {
+                    EXACTF_invlist =
+                             _add_range_to_invlist(EXACTF_invlist, 0, UV_MAX);
+                }
+                else {  /* Single char fold */
+
+                    /* It matches all the things that fold to it, which are
+                     * found in PL_utf8_foldclosures (including itself) */
+                    EXACTF_invlist = add_cp_to_invlist(EXACTF_invlist, uc);
+                    if (! PL_utf8_foldclosures) {
+                        _load_PL_utf8_foldclosures();
+                    }
+                    if ((listp = hv_fetch(PL_utf8_foldclosures,
+                                        (char *) s, foldlen, FALSE)))
+                    {
+                        AV* list = (AV*) *listp;
+                        IV k;
+                        for (k = 0; k <= av_tindex(list); k++) {
+                            SV** c_p = av_fetch(list, k, FALSE);
+                            UV c;
+                            assert(c_p);
+
+                            c = SvUV(*c_p);
+
+                            /* /aa doesn't allow folds between ASCII and non- */
+                            if ((OP(scan) == EXACTFA || OP(scan) == EXACTFA_NO_TRIE)
+                                && isASCII(c) != isASCII(uc))
+                            {
+                                continue;
+                            }
+
+                            EXACTF_invlist = add_cp_to_invlist(EXACTF_invlist, c);
+                        }
                     }
                 }
             }
