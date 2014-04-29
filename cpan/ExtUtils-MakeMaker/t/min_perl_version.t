@@ -12,7 +12,7 @@ use Config;
 use Test::More
     $ENV{PERL_CORE} && $Config{'usecrosscompile'}
     ? (skip_all => "no toolchain installed when cross-compiling")
-    : (tests => 32);
+    : (tests => 36);
 
 use TieOut;
 use MakeMaker::Test::Utils;
@@ -64,6 +64,28 @@ note "Argument verification"; {
         WriteMakefile(
             NAME             => 'Min::PerlVers',
             MIN_PERL_VERSION => '5.4.4',
+        );
+    };
+    is( $warnings, '', 'MIN_PERL_VERSION=X.Y.Z does not trigger a warning' );
+    is( $@, '',        '  nor a hard failure' );
+
+
+    $warnings = '';
+    eval {
+        WriteMakefile(
+            NAME             => 'Min::PerlVers',
+            MIN_PERL_VERSION => 5.4.4,
+        );
+    };
+    is( $warnings, '', 'MIN_PERL_VERSION=X.Y.Z does not trigger a warning' );
+    is( $@, '',        '  nor a hard failure' );
+
+
+    $warnings = '';
+    eval {
+        WriteMakefile(
+            NAME             => 'Min::PerlVers',
+            MIN_PERL_VERSION => v5.4.4,
         );
     };
     is( $warnings, '', 'MIN_PERL_VERSION=X.Y.Z does not trigger a warning' );

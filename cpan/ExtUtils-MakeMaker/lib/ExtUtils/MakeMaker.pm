@@ -18,7 +18,7 @@ our @Overridable;
 my @Prepend_parent;
 my %Recognized_Att_Keys;
 
-our $VERSION = '6.94';
+our $VERSION = '6.98';
 $VERSION = eval $VERSION;  ## no critic [BuiltinFunctions::ProhibitStringyEval]
 
 # Emulate something resembling CVS $Revision$
@@ -441,9 +441,22 @@ sub new {
 
     check_hints($self);
 
+    if ( defined $self->{MIN_PERL_VERSION}
+          && $self->{MIN_PERL_VERSION} !~ /^v?[\d_\.]+$/ ) {
+      require version;
+      my $normal = eval {
+        local $SIG{__WARN__} = sub {
+            # simulate "use warnings FATAL => 'all'" for vintage perls
+            die @_;
+        };
+        version->parse( $self->{MIN_PERL_VERSION} )
+      };
+      $self->{MIN_PERL_VERSION} = $normal if defined $normal && !$@;
+    }
+
     # Translate X.Y.Z to X.00Y00Z
     if( defined $self->{MIN_PERL_VERSION} ) {
-        $self->{MIN_PERL_VERSION} =~ s{ ^ (\d+) \. (\d+) \. (\d+) $ }
+        $self->{MIN_PERL_VERSION} =~ s{ ^v? (\d+) \. (\d+) \. (\d+) $ }
                                       {sprintf "%d.%03d%03d", $1, $2, $3}ex;
     }
 
