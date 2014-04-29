@@ -3417,9 +3417,9 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
                 else { /* Here is a generic multi-char fold. */
                     U8* multi_end  = s + len;
 
-                    /* Count how many characters in it.  In the case of /aa, no
-                     * folds which contain ASCII code points are allowed, so
-                     * check for those, and skip if found. */
+                    /* Count how many characters are in it.  In the case of
+                     * /aa, no folds which contain ASCII code points are
+                     * allowed, so check for those, and skip if found. */
                     if (OP(scan) != EXACTFA && OP(scan) != EXACTFA_NO_TRIE) {
                         count = utf8_length(s, multi_end);
                         s = multi_end;
