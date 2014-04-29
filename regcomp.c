@@ -13789,6 +13789,11 @@ parseit:
                     ANYOF_POSIXL_ZERO(ret);
                 }
 
+                /* Coverity thinks it is possible for this to be negative; both
+                 * jhi and khw think it's not, but be safer */
+                assert(! (ANYOF_FLAGS(ret) & ANYOF_POSIXL)
+                       || (namedclass + ((namedclass % 2) ? -1 : 1)) >= 0);
+
                 /* See if it already matches the complement of this POSIX
                  * class */
                 if ((ANYOF_FLAGS(ret) & ANYOF_POSIXL)
