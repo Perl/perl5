@@ -9706,18 +9706,6 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 	    case '@':           /* (?@...) */
 		vFAIL2("Sequence (?%c...) not implemented", (int)paren);
 		break;
-            case '#':           /* (?#...) */
-                /* XXX As soon as we disallow separating the '?' and '*' (by
-                 * spaces or (?#...) comment), it is believed that this case
-                 * will be unreachable and can be removed.  See
-                 * [perl #117327] */
-                while (*RExC_parse && *RExC_parse != ')')
-		    RExC_parse++;
-		if (*RExC_parse != ')')
-		    FAIL("Sequence (?#... not terminated");
-		nextchar(pRExC_state);
-		*flagp = TRYAGAIN;
-		return NULL;
 	    case '0' :           /* (?0) */
 	    case 'R' :           /* (?R) */
 		if (*RExC_parse != ')')
