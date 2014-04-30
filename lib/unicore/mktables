@@ -16928,15 +16928,17 @@ sub write_all_tables() {
     # (sort so that if there is an immutable file name, it has precedence, so
     # some other property can't come in and take over its file name.  (We
     # don't care if both defined, as they had better be different anyway.)
-    # We also sort by the property's name.  This is just for repeatability of
-    # the outputs between runs of this program, but does not affect
-    # correctness.
+    # The property named 'Perl' needs to be first (it doesn't have any
+    # immutable file name) because empty properties are defined in terms of
+    # its table named 'All' under the -annotate option.)   We also sort by
+    # the property's name.  This is just for repeatability of the outputs
+    # between runs of this program, but does not affect correctness.
     PROPERTY:
-    foreach my $property (sort { return -1 if defined $a->file;
+    foreach my $property ($perl,
+                          sort { return -1 if defined $a->file;
                                  return 1 if defined $b->file;
                                  return $a->name cmp $b->name;
-                                }
-                                  property_ref('*'))
+                                } grep { $_ != $perl } property_ref('*'))
     {
         my $type = $property->type;
 
