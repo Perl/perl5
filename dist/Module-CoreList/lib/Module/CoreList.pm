@@ -1709,6 +1709,7 @@ for my $version ( sort { $a <=> $b } keys %released ) {
             'Time::HiRes'           => '1.59',
             'Unicode'               => '4.0.1',
             'Unicode::UCD'          => '0.22',
+            'Win32'                 => '0.23',
             'base'                  => '2.05',
             'bigint'                => '0.05',
             'bignum'                => '0.15',
