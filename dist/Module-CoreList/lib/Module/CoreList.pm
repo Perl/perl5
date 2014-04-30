@@ -11016,7 +11016,7 @@ sub _create_aliases {
     my ($hash) = @_;
 
     for my $version (keys %$hash) {
-        next unless $version >= 5.010;
+        next unless $version >= 5.006;
 
         my $padded = sprintf "%0.6f", $version;
 
