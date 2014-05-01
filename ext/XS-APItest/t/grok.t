@@ -74,4 +74,39 @@ foreach my $leader ('', ' ', '  ') {
     }
 }
 
+# format tests
+my @groks =
+  (
+   # input, in flags, out uv, out flags
+   [ "1",    0,                  1,     IS_NUMBER_IN_UV ],
+   [ "1x",   0,                  undef, 0 ],
+   [ "1x",   PERL_SCAN_TRAILING, 1,     IS_NUMBER_IN_UV | IS_NUMBER_TRAILING ],
+   [ "3.1",  0,                  3,     IS_NUMBER_IN_UV | IS_NUMBER_NOT_INT ],
+   [ "3.1a", 0,                  undef, 0 ],
+   [ "3.1a", PERL_SCAN_TRAILING, 3,
+     IS_NUMBER_IN_UV | IS_NUMBER_NOT_INT | IS_NUMBER_TRAILING ],
+   [ "3e5",  0,                  undef, IS_NUMBER_NOT_INT ],
+   [ "3e",   0,                  undef, 0 ],
+   [ "3e",   PERL_SCAN_TRAILING, 3,     IS_NUMBER_IN_UV | IS_NUMBER_TRAILING ],
+   [ "3e+",  0,                  undef, 0 ],
+   [ "3e+",  PERL_SCAN_TRAILING, 3,     IS_NUMBER_IN_UV | IS_NUMBER_TRAILING ],
+   [ "Inf",  0,                  undef,
+     IS_NUMBER_INFINITY | IS_NUMBER_NOT_INT ],
+   [ "In",   0,                  undef, 0 ],
+   [ "Infin",0,                  undef, 0 ],
+   # this doesn't work and hasn't been needed yet
+   #[ "Infin",PERL_SCAN_TRAILING, undef,
+   #  IS_NUMBER_INFINITY | IS_NUMBER_NOT_INT | IS_NUMBER_TRAILING ],
+   [ "nan",  0,                  undef, IS_NUMBER_NAN | IS_NUMBER_NOT_INT ],
+   [ "nanx", 0,                  undef, 0 ],
+   [ "nanx", PERL_SCAN_TRAILING, undef,
+     IS_NUMBER_NAN | IS_NUMBER_NOT_INT | IS_NUMBER_TRAILING],
+  );
+
+for my $grok (@groks) {
+  my ($out_flags, $out_uv) = grok_number_flags($grok->[0], $grok->[1]);
+  is($out_uv,    $grok->[2], "'$grok->[0]' flags $grok->[1] - check number");
+  is($out_flags, $grok->[3], "'$grok->[0]' flags $grok->[1] - check flags");
+}
+
 done_testing();
