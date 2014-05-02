@@ -2289,6 +2289,19 @@ EOP
         return "!B6\n";
     }
 
+    {   # From Lingua::Stem::UniNE; no ticket filed but related to #121778
+        use utf8;
+        my $word = 'рабта';
+        $word =~ s{ (?:
+                          ия  # definite articles for nouns:
+                        | ът  # ∙ masculine
+                        | та  # ∙ feminine
+                        | то  # ∙ neutral
+                        | те  # ∙ plural
+                    ) $ }{}x;
+        is($word, 'раб', "Handles UTF8 trie correctly");
+    }
+
     #
     # Keep the following tests last -- they may crash perl
     #

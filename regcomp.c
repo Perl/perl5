@@ -2054,10 +2054,10 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
         regnode *noper = NEXTOPER( cur );
         const U8 *uc = (U8*)STRING( noper );
         const U8 *e  = uc + STR_LEN( noper );
-        STRLEN foldlen = 0;
+        int foldlen = 0;
         U32 wordlen      = 0;         /* required init */
-        STRLEN minbytes = 0;
-        STRLEN maxbytes = 0;
+        STRLEN minchars = 0;
+        STRLEN maxchars = 0;
         bool set_bit = trie->bitmap ? 1 : 0; /*store the first char in the
                                                bitmap?*/
 
@@ -2082,58 +2082,74 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                 TRIE_BITMAP_SET(trie, LATIN_SMALL_LETTER_SHARP_S);
             }
         }
-        for ( ; uc < e ; uc += len ) {
+        for ( ; uc < e ; uc += len ) {  /* Look at each char in the current
+                                           branch */
             TRIE_CHARCOUNT(trie)++;
             TRIE_READ_CHAR;
 
-            /* Acummulate to the current values, the range in the number of
-             * bytes that this character could match.  The max is presumed to
-             * be the same as the folded input (which TRIE_READ_CHAR returns),
-             * except that when this is not in UTF-8, it could be matched
-             * against a string which is UTF-8, and the variant characters
-             * could be 2 bytes instead of the 1 here.  Likewise, for the
-             * minimum number of bytes when not folded.  When folding, the min
-             * is assumed to be 1 byte could fold to match the single character
-             * here, or in the case of a multi-char fold, 1 byte can fold to
-             * the whole sequence.  'foldlen' is used to denote whether we are
-             * in such a sequence, skipping the min setting if so.  XXX TODO
-             * Use the exact list of what folds to each character, from
-             * PL_utf8_foldclosures */
-            if (UTF) {
-                maxbytes += UTF8SKIP(uc);
-                if (! folder) {
-                    /* A non-UTF-8 string could be 1 byte to match our 2 */
-                    minbytes += (UTF8_IS_DOWNGRADEABLE_START(*uc))
-                                ? 1
-                                : UTF8SKIP(uc);
-                }
-                else {
-                    if (foldlen) {
-                        foldlen -= UTF8SKIP(uc);
-                    }
-                    else {
-                        foldlen = is_MULTI_CHAR_FOLD_utf8_safe(uc, e);
-                        minbytes++;
-                    }
-                }
+            /* TRIE_READ_CHAR returns the current character, or its fold if /i
+             * is in effect.  Under /i, this character can match itself, or
+             * anything that folds to it.  If not under /i, it can match just
+             * itself.  Most folds are 1-1, for example k, K, and KELVIN SIGN
+             * all fold to k, and all are single characters.   But some folds
+             * expand to more than one character, so for example LATIN SMALL
+             * LIGATURE FFI folds to the three character sequence 'ffi'.  If
+             * the string beginning at 'uc' is 'ffi', it could be matched by
+             * three characters, or just by the one ligature character. (It
+             * could also be matched by two characters: LATIN SMALL LIGATURE FF
+             * followed by 'i', or by 'f' followed by LATIN SMALL LIGATURE FI).
+             * (Of course 'I' and/or 'F' instead of 'i' and 'f' can also
+             * match.)  The trie needs to know the minimum and maximum number
+             * of characters that could match so that it can use size alone to
+             * quickly reject many match attempts.  The max is simple: it is
+             * the number of folded characters in this branch (since a fold is
+             * never shorter than what folds to it. */
+
+            maxchars++;
+
+            /* And the min is equal to the max if not under /i (indicated by
+             * 'folder' being NULL), or there are no multi-character folds.  If
+             * there is a multi-character fold, the min is incremented just
+             * once, for the character that folds to the sequence.  Each
+             * character in the sequence needs to be added to the list below of
+             * characters in the trie, but we count only the first towards the
+             * min number of characters needed.  This is done through the
+             * variable 'foldlen', which is returned by the macros that look
+             * for these sequences as the number of bytes the sequence
+             * occupies.  Each time through the loop, we decrement 'foldlen' by
+             * how many bytes the current char occupies.  Only when it reaches
+             * 0 do we increment 'minchars' or look for another multi-character
+             * sequence. */
+            if (folder == NULL) {
+                minchars++;
+            }
+            else if (foldlen > 0) {
+                foldlen -= (UTF) ? UTF8SKIP(uc) : 1;
             }
             else {
-                maxbytes += (UNI_IS_INVARIANT(*uc))
-                             ? 1
-                             : 2;
-                if (! folder) {
-                    minbytes++;
+                minchars++;
+
+                /* See if *uc is the beginning of a multi-character fold.  If
+                 * so, we decrement the length remaining to look at, to account
+                 * for the current character this iteration.  (We can use 'uc'
+                 * instead of the fold returned by TRIE_READ_CHAR because for
+                 * non-UTF, the latin1_safe macro is smart enough to account
+                 * for all the unfolded characters, and because for UTF, the
+                 * string will already have been folded earlier in the
+                 * compilation process */
+                if (UTF) {
+                    if ((foldlen = is_MULTI_CHAR_FOLD_utf8_safe(uc, e))) {
+                        foldlen -= UTF8SKIP(uc);
+                    }
                 }
-                else {
-                    if (foldlen) {
-                        foldlen--;
-                    }
-                    else {
-                        foldlen = is_MULTI_CHAR_FOLD_latin1_safe(uc, e);
-                        minbytes++;
-                    }
+                else if ((foldlen = is_MULTI_CHAR_FOLD_latin1_safe(uc, e))) {
+                    foldlen--;
                 }
             }
+
+            /* The current character (and any potential folds) should be added
+             * to the possible matching characters for this position in this
+             * branch */
             if ( uvc < 256 ) {
                 if ( folder ) {
                     U8 folded= folder[ (U8) uvc ];
@@ -2164,6 +2180,14 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                     set_bit = 0; /* We've done our bit :-) */
                 }
             } else {
+
+                /* XXX We could come up with the list of code points that fold
+                 * to this using PL_utf8_foldclosures, except not for
+                 * multi-char folds, as there may be multiple combinations
+                 * there that could work, which needs to wait until runtime to
+                 * resolve (The comment about LIGATURE FFI above is such an
+                 * example */
+
                 SV** svpp;
                 if ( !widecharmap )
                     widecharmap = newHV();
@@ -2178,14 +2202,17 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                     TRIE_STORE_REVCHAR(uvc);
                 }
             }
-        }
+        } /* end loop through characters in this branch of the trie */
+
+        /* We take the min and max for this branch and combine to find the min
+         * and max for all branches processed so far */
         if( cur == first ) {
-            trie->minlen = minbytes;
-            trie->maxlen = maxbytes;
-        } else if (minbytes < trie->minlen) {
-            trie->minlen = minbytes;
-        } else if (maxbytes > trie->maxlen) {
-            trie->maxlen = maxbytes;
+            trie->minlen = minchars;
+            trie->maxlen = maxchars;
+        } else if (minchars < trie->minlen) {
+            trie->minlen = minchars;
+        } else if (maxchars > trie->maxlen) {
+            trie->maxlen = maxchars;
         }
     } /* end first pass */
     DEBUG_TRIE_COMPILE_r(
