@@ -761,13 +761,14 @@ Perl_do_vecget(pTHX_ SV *sv, SSize_t offset, int size)
 {
     dVAR;
     STRLEN srclen, len, uoffset, bitoffs = 0;
-    const unsigned char *s = (const unsigned char *) SvPV_flags_const(sv, srclen,
-                             SV_GMAGIC | ((PL_op->op_flags & OPf_MOD || LVRET)
-                                          ? SV_UNDEF_RETURNS_NULL : 0));
+    const I32 svpv_flags = ((PL_op->op_flags & OPf_MOD || LVRET)
+                                          ? SV_UNDEF_RETURNS_NULL : 0);
+    unsigned char *s = (unsigned char *)
+                            SvPV_flags(sv, srclen, (svpv_flags|SV_GMAGIC));
     UV retnum = 0;
 
     if (!s) {
-      s = (const unsigned char *)"";
+      s = (unsigned char *)"";
     }
     
     PERL_ARGS_ASSERT_DO_VECGET;
@@ -777,8 +778,11 @@ Perl_do_vecget(pTHX_ SV *sv, SSize_t offset, int size)
     if (size < 1 || (size & (size-1))) /* size < 1 or not a power of two */
 	Perl_croak(aTHX_ "Illegal number of bits in vec");
 
-    if (SvUTF8(sv))
+    if (SvUTF8(sv)) {
 	(void) Perl_sv_utf8_downgrade(aTHX_ sv, TRUE);
+        /* PVX may have changed */
+        s = (unsigned char *) SvPV_flags(sv, srclen, svpv_flags);
+    }
 
     if (size < 8) {
 	bitoffs = ((offset%8)*size)%8;
