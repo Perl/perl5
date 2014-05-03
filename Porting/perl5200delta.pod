@@ -1535,14 +1535,11 @@ Support for building with Visual C++ 2013 has been added.  There are currently
 two possible test failures (see L<perlwin32/"Testing Perl on Windows">) which
 will hopefully be resolved soon.
 
-Experimental support for building with Intel C++ Compiler has been added. Only
-the nmake makefile (win32/Makefile) can be used. A "nmake test" will not pass
-at this time due to F<cpan/CGI/t/url.t>.
-
 =item *
 
-Experimental support for building with Intel C++ Compiler has been extended to
-cover the dmake makefile (win32/makefile.mk) as well.
+Experimental support for building with Intel C++ Compiler has been added.  The
+nmake makefile (win32/Makefile) and the dmake makefile (win32/makefile.mk) can
+be used.  A "nmake test" will not pass at this time due to F<cpan/CGI/t/url.t>.
 
 =item *
 
