@@ -1933,11 +1933,6 @@ for my $version ( sort { $a <=> $b } keys %released ) {
             'JPL::AutoLoader'       => 1,
             'JPL::Class'            => 1,
             'JPL::Compile'          => 1,
-            'OS2::DLL'              => 1,
-            'OS2::ExtAttr'          => 1,
-            'OS2::PrfDB'            => 1,
-            'OS2::Process'          => 1,
-            'OS2::REXX'             => 1,
         }
     },
     5.008008 => {
