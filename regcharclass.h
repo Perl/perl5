@@ -647,7 +647,7 @@
 */
 /*** GENERATED CODE ***/
 #define is_PROBLEMATIC_LOCALE_FOLD_utf8(s)                                  \
-( ( ( NATIVE_TO_LATIN1(((U8*)s)[0]) & 0x80 ) == 0x00 ) ? 1                  \
+( ( NATIVE_TO_LATIN1(((U8*)s)[0]) <= 0x7F ) ? 1                             \
 : ( ( NATIVE_TO_LATIN1(((U8*)s)[0]) & 0xFE ) == 0xC2 ) ?                    \
     2                                                                       \
 : ( 0xC4 == NATIVE_TO_LATIN1(((U8*)s)[0]) || 0xC7 == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ?\
@@ -684,7 +684,7 @@
 */
 /*** GENERATED CODE ***/
 #define is_PROBLEMATIC_LOCALE_FOLDEDS_START_utf8(s)                         \
-( ( ( NATIVE_TO_LATIN1(((U8*)s)[0]) & 0x80 ) == 0x00 ) ? 1                  \
+( ( NATIVE_TO_LATIN1(((U8*)s)[0]) <= 0x7F ) ? 1                             \
 : ( ( NATIVE_TO_LATIN1(((U8*)s)[0]) & 0xFE ) == 0xC2 ) ?                    \
     2                                                                       \
 : ( 0xC4 == NATIVE_TO_LATIN1(((U8*)s)[0]) || 0xC7 == NATIVE_TO_LATIN1(((U8*)s)[0]) ) ?\

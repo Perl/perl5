@@ -1097,6 +1097,21 @@ sub _cond_as_str {
             $ranges[$i] =           # Trivial case: single element range
                     sprintf "$self->{val_fmt} == $test", $ranges[$i]->[0];
         }
+        elsif ($ranges[$i]->[0] == 0) {
+            # If the range matches all 256 possible bytes, it is trivially
+            # true.
+            return 1 if $ranges[0]->[1] == 0xFF;    # @ranges must be 1 in
+                                                    # this case
+            $ranges[$i] = sprintf "( $test <= $self->{val_fmt} )",
+                                                               $ranges[$i]->[1];
+        }
+        elsif ($ranges[$i]->[1] == 255) {
+
+            # Similarly the max possible is 255, so can omit an upper bound
+            # test if the calculated max is the max possible one.
+            $ranges[$i] = sprintf "( $test >= $self->{val_fmt} )",
+                                                                $ranges[0]->[0];
+        }
         else {
             my $output = "";
 
