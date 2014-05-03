@@ -114,6 +114,7 @@ find(
             $module =~ s{^B/O}{O},
             $module =~ s{^Devel-PPPort}{Devel},
             $module =~ s{^libnet/}{},
+            $module =~ s{^PathTools/}{},
             $module =~ s{^Encode/encoding}{encoding},
             $module =~ s{^IPC-SysV/}{IPC/},
             $module =~ s{^MIME-Base64/QuotedPrint}{MIME/QuotedPrint},
