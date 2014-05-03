@@ -107,7 +107,7 @@ find(
         $version =~ /\d/ and $version = "'$version'";
 
         # some heuristics to figure out the module name from the file name
-        $module =~ s{^(lib|cpan|dist|(?:symbian/)?ext)/}{}
+        $module =~ s{^(lib|cpan|dist|(?:symbian/)?ext|os2/OS2)/}{}
 			and $1 ne 'lib'
             and (
             $module =~ s{\b(\w+)/\1\b}{$1},
@@ -115,6 +115,7 @@ find(
             $module =~ s{^Devel-PPPort}{Devel},
             $module =~ s{^libnet/}{},
             $module =~ s{^PathTools/}{},
+            $module =~ s{REXX/DLL}{DLL},
             $module =~ s{^Encode/encoding}{encoding},
             $module =~ s{^IPC-SysV/}{IPC/},
             $module =~ s{^MIME-Base64/QuotedPrint}{MIME/QuotedPrint},
@@ -130,6 +131,7 @@ find(
         $lines{$module}          = $version;
         $module_to_file{$module} = $File::Find::name;
     },
+    'os2/OS2',
     'symbian/ext',
     'lib',
     'ext',
