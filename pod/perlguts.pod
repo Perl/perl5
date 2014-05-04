@@ -43,7 +43,7 @@ possible to have it point to other things  For example, it could point
 to an array of UVs.  But,
 using it for non-strings requires care, as the underlying assumption of
 much of the internals is that PVs are just for strings.  Often, for
-example, a trailing NUL is tacked on automatically.  The non-string use
+example, a trailing C<NUL> is tacked on automatically.  The non-string use
 is documented only in this paragraph.)
 
 The seven routines are:
@@ -63,7 +63,7 @@ any string that perl can handle.
 In the unlikely case of a SV requiring more complex initialization, you
 can create an empty SV with newSV(len).  If C<len> is 0 an empty SV of
 type NULL is returned, else an SV of type PV is returned with len + 1 (for
-the NUL) bytes of storage allocated, accessible via SvPVX.  In both cases
+the C<NUL>) bytes of storage allocated, accessible via SvPVX.  In both cases
 the SV has the undef value.
 
     SV *sv = newSV(0);   /* no storage allocated  */
@@ -87,7 +87,7 @@ assigned by using C<sv_setpvn>, C<newSVpvn>, or C<newSVpv>, or you may
 allow Perl to calculate the length by using C<sv_setpv> or by specifying
 0 as the second argument to C<newSVpv>.  Be warned, though, that Perl will
 determine the string's length by using C<strlen>, which depends on the
-string terminating with a NUL character, and not otherwise containing
+string terminating with a C<NUL> character, and not otherwise containing
 NULs.
 
 The arguments of C<sv_setpvf> are processed like C<sprintf>, and the
@@ -105,11 +105,11 @@ the format.
 The C<sv_set*()> functions are not generic enough to operate on values
 that have "magic".  See L<Magic Virtual Tables> later in this document.
 
-All SVs that contain strings should be terminated with a NUL character.
-If it is not NUL-terminated there is a risk of
+All SVs that contain strings should be terminated with a C<NUL> character.
+If it is not C<NUL>-terminated there is a risk of
 core dumps and corruptions from code which passes the string to C
-functions or system calls which expect a NUL-terminated string.
-Perl's own functions typically add a trailing NUL for this reason.
+functions or system calls which expect a C<NUL>-terminated string.
+Perl's own functions typically add a trailing C<NUL> for this reason.
 Nevertheless, you should be very careful when you pass a string stored
 in an SV to a C function or system call.
 
@@ -131,7 +131,7 @@ Historically the C<SvPV> macro with the global variable C<PL_na> has been
 used in this case.  But that can be quite inefficient because C<PL_na> must
 be accessed in thread-local storage in threaded Perl.  In any case, remember
 that Perl allows arbitrary strings of data that may both contain NULs and
-might not be terminated by a NUL.
+might not be terminated by a C<NUL>.
 
 Also remember that C doesn't allow you to safely say C<foo(SvPV(s, len),
 len);>.  It might work with your
@@ -156,7 +156,7 @@ Perl to allocate more memory for your SV, you can use the macro
 which will determine if more memory needs to be allocated.  If so, it will
 call the function C<sv_grow>.  Note that C<SvGROW> can only increase, not
 decrease, the allocated memory of an SV and that it does not automatically
-add space for the trailing NUL byte (perl's own string functions typically do
+add space for the trailing C<NUL> byte (perl's own string functions typically do
 C<SvGROW(sv, len + 1)>).
 
 If you have an SV and want to know what kind of data Perl thinks is stored
