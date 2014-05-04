@@ -793,6 +793,7 @@ Perl_op_clear(pTHX_ OP *o)
 	    o->op_targ = 0;
 	    goto retry;
 	}
+        /* FALLTHROUGH */
     case OP_ENTERTRY:
     case OP_ENTEREVAL:	/* Was holding hints. */
 	o->op_targ = 0;
@@ -1678,6 +1679,7 @@ Perl_scalarvoid(pTHX_ OP *o)
 	    }
 	    op_null(kid);
 	}
+        /* FALLTHROUGH */
 
     case OP_DOR:
     case OP_COND_EXPR:
@@ -1974,6 +1976,7 @@ S_finalize_op(pTHX_ OP* o)
 
     case OP_HSLICE:
 	S_scalar_slice_warning(aTHX_ o);
+        /* FALLTHROUGH */
 
     case OP_KVHSLICE:
         kid = cLISTOPo->op_first->op_sibling;
@@ -2278,6 +2281,7 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 	/* FALL THROUGH */
     case OP_GV:
 	PL_hints |= HINT_BLOCK_SCOPE;
+        /* FALL THROUGH */
     case OP_SASSIGN:
     case OP_ANDASSIGN:
     case OP_ORASSIGN:
@@ -2346,6 +2350,7 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
     case OP_LEAVE:
     case OP_LEAVELOOP:
 	o->op_private |= OPpLVALUE;
+        /* FALL THROUGH */
     case OP_SCOPE:
     case OP_ENTER:
     case OP_LINESEQ:
@@ -10488,6 +10493,7 @@ Perl_ck_entersub_args_proto(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 		/* _ must be at the end */
 		if (proto[1] && !strchr(";@%", proto[1]))
 		    goto oops;
+                /* FALLTHROUGH */
 	    case '$':
 		proto++;
 		arg++;

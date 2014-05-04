@@ -696,6 +696,7 @@ PP(pp_formline)
 
 	case FF_LINESNGL: /* process ^*  */
 	    chopspace = 0;
+            /* FALLTHROUGH */
 
 	case FF_LINEGLOB: /* process @*  */
 	    {
@@ -1400,6 +1401,7 @@ S_dopoptosub_at(pTHX_ const PERL_CONTEXT *cxstk, I32 startingblock)
              * code block. Hide this faked entry from the world. */
             if (cx->cx_type & CXp_SUB_RE_FAKE)
                 continue;
+            /* FALLTHROUGH */
 	case CXt_EVAL:
 	case CXt_FORMAT:
 	    DEBUG_l( Perl_deb(aTHX_ "(dopoptosub_at(): found sub at cx=%ld)\n", (long)i));

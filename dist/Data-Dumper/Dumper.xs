@@ -207,6 +207,7 @@ esc_q(char *d, const char *s, STRLEN slen)
 	case '\\':
 	    *d = '\\';
 	    ++d; ++ret;
+            /* FALLTHROUGH */
 	default:
 	    *d = *s;
 	    ++d; ++s; --slen;

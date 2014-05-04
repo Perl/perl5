@@ -6747,6 +6747,7 @@ Perl_yylex(pTHX)
 	    s += 2;
 	    AOPERATOR(DORDOR);
 	}
+	/* FALLTHROUGH */
      case '?':			/* may either be conditional or pattern */
 	if (PL_expect == XOPERATOR) {
 	     char tmp = *s++;
@@ -11722,6 +11723,7 @@ S_swallow_bom(pTHX_ U8 *s)
 #endif
 	     }
 	}
+        break;
 
     default:
 	 if (slen > 3 && s[1] == 0 && s[2] != 0 && s[3] == 0) {

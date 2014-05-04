@@ -9661,6 +9661,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                 RExC_seen |= REG_LOOKBEHIND_SEEN;
 		RExC_in_lookbehind++;
 		RExC_parse++;
+                /* FALLTHROUGH */
 	    case '=':           /* (?=...) */
 		RExC_seen_zerolen++;
                 break;
@@ -11896,6 +11897,7 @@ tryagain:
                             --p;
                             goto loopdone;
                         }
+                        /* FALLTHROUGH */
                     case '0':
 			{
 			    I32 flags = PERL_SCAN_SILENT_ILLDIGIT;
