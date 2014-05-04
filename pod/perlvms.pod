@@ -1001,8 +1001,8 @@ logical name to be created, it is defined in supervisor mode.
 (The same is done if an existing logical name was defined in
 executive or kernel mode; an existing user or supervisor mode
 logical name is reset to the new value.)  If the value is an empty
-string, the logical name's translation is defined as a single NUL
-(ASCII 00) character, since a logical name cannot translate to a
+string, the logical name's translation is defined as a single C<NUL>
+(ASCII C<\0>) character, since a logical name cannot translate to a
 zero-length string.  (This restriction does not apply to CLI symbols
 or CRTL C<environ> values; they are set to the empty string.)
 An element of the CRTL C<environ> array can be set only if your

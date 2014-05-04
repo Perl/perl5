@@ -290,7 +290,7 @@ S_isALNUM_lazy(pTHX_ const char* p)
 /*
 =for apidoc AiR|bool|is_safe_syscall|const char *pv|STRLEN len|const char *what|const char *op_name
 
-Test that the given C<pv> doesn't contain any internal NUL characters.
+Test that the given C<pv> doesn't contain any internal C<NUL> characters.
 If it does, set C<errno> to ENOENT, optionally warn, and return FALSE.
 
 Return TRUE if the name is safe.

@@ -1036,7 +1036,7 @@ Perl_savepv(pTHX_ const char *pv)
 Perl's version of what C<strndup()> would be if it existed.  Returns a
 pointer to a newly allocated string which is a duplicate of the first
 C<len> bytes from C<pv>, plus a trailing
-NUL byte.  The memory allocated for
+C<NUL> byte.  The memory allocated for
 the new string can be freed with the C<Safefree()> function.
 
 On some platforms, Windows for example, all allocated memory owned by a thread
@@ -5209,17 +5209,17 @@ Perl_xs_apiversion_bootcheck(pTHX_ SV *module, const char *api_p,
 =for apidoc my_strlcat
 
 The C library C<strlcat> if available, or a Perl implementation of it.
-This operates on C NUL-terminated strings.
+This operates on C C<NUL>-terminated strings.
 
 C<my_strlcat()> appends string C<src> to the end of C<dst>.  It will append at
-most S<C<size - strlen(dst) - 1>> characters.  It will then NUL-terminate,
+most S<C<size - strlen(dst) - 1>> characters.  It will then C<NUL>-terminate,
 unless C<size> is 0 or the original C<dst> string was longer than C<size> (in
 practice this should not happen as it means that either C<size> is incorrect or
-that C<dst> is not a proper NUL-terminated string).
+that C<dst> is not a proper C<NUL>-terminated string).
 
 Note that C<size> is the full size of the destination buffer and
-the result is guaranteed to be NUL-terminated if there is room.  Note that room
-for the NUL should be included in C<size>.
+the result is guaranteed to be C<NUL>-terminated if there is room.  Note that
+room for the C<NUL> should be included in C<size>.
 
 =cut
 
@@ -5247,10 +5247,10 @@ Perl_my_strlcat(char *dst, const char *src, Size_t size)
 =for apidoc my_strlcpy
 
 The C library C<strlcpy> if available, or a Perl implementation of it.
-This operates on C NUL-terminated strings.
+This operates on C C<NUL>-terminated strings.
 
 C<my_strlcpy()> copies up to S<C<size - 1>> characters from the string C<src>
-to C<dst>, NUL-terminating the result if C<size> is not 0.
+to C<dst>, C<NUL>-terminating the result if C<size> is not 0.
 
 =cut
 

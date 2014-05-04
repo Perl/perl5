@@ -3285,9 +3285,9 @@ finds something that won't fit into a byte.  Otherwise it tries to not upgrade
 and just use bytes.  But some things that do fit into a byte are variants in
 utf8, and the caller may not have been keeping track of these.)
 
-If the routine itself changes the string, it adds a trailing NUL.  Such a NUL
-isn't guaranteed due to having other routines do the work in some input cases,
-or if the input is already flagged as being in utf8.
+If the routine itself changes the string, it adds a trailing C<NUL>.  Such a
+C<NUL> isn't guaranteed due to having other routines do the work in some input
+cases, or if the input is already flagged as being in utf8.
 
 The speed of this could perhaps be improved for many cases if someone wanted to
 write a fast function that counts the number of variant characters in a string,
@@ -4855,7 +4855,7 @@ giving it to sv_usepvn, and neither should any pointers from "behind"
 that pointer (e.g. ptr + 1) be used.
 
 If C<flags> & SV_SMAGIC is true, will call SvSETMAGIC.  If C<flags> &
-SV_HAS_TRAILING_NUL is true, then C<ptr[len]> must be NUL, and the realloc
+SV_HAS_TRAILING_NUL is true, then C<ptr[len]> must be C<NUL>, and the realloc
 will be skipped (i.e. the buffer is actually at least 1 byte longer than
 C<len>, and already meets the requirements for storing in C<SvPVX>).
 
@@ -5417,7 +5417,7 @@ Perl_sv_catpv_mg(pTHX_ SV *const sv, const char *const ptr)
 
 Creates a new SV.  A non-zero C<len> parameter indicates the number of
 bytes of preallocated string space the SV should have.  An extra byte for a
-trailing NUL is also reserved.  (SvPOK is not set for the SV even if string
+trailing C<NUL> is also reserved.  (SvPOK is not set for the SV even if string
 space is allocated.)  The reference count for the new SV is set to 1.
 
 In 5.9.3, newSV() replaces the older NEWSV() API, and drops the first
@@ -8959,7 +8959,7 @@ Perl_newSVpv(pTHX_ const char *const s, const STRLEN len)
 /*
 =for apidoc newSVpvn
 
-Creates a new SV and copies a buffer into it, which may contain NUL characters
+Creates a new SV and copies a string into it, which may contain C<NUL> characters
 (C<\0>) and other binary data.  The reference count for the SV is set to 1.
 Note that if C<len> is zero, Perl will create a zero length (Perl) string.  You
 are responsible for ensuring that the source buffer is at least
@@ -9098,7 +9098,7 @@ Perl_newSVpvn_share(pTHX_ const char *src, I32 len, U32 hash)
 /*
 =for apidoc newSVpv_share
 
-Like C<newSVpvn_share>, but takes a nul-terminated string instead of a
+Like C<newSVpvn_share>, but takes a C<NUL>-terminated string instead of a
 string/length pair.
 
 =cut

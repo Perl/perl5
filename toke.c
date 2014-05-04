@@ -869,7 +869,7 @@ through normal scalar means.
 
 Direct pointer to the end of the chunk of text currently being lexed, the
 end of the lexer buffer.  This is equal to C<SvPVX(PL_parser-E<gt>linestr)
-+ SvCUR(PL_parser-E<gt>linestr)>.  A NUL character (zero octet) is
++ SvCUR(PL_parser-E<gt>linestr)>.  A C<NUL> character (zero octet) is
 always located at the end of the buffer, and does not count as part of
 the buffer's contents.
 
@@ -936,7 +936,7 @@ Perl_lex_bufutf8(pTHX)
 =for apidoc Amx|char *|lex_grow_linestr|STRLEN len
 
 Reallocates the lexer buffer (L</PL_parser-E<gt>linestr>) to accommodate
-at least I<len> octets (including terminating NUL).  Returns a
+at least I<len> octets (including terminating C<NUL>).  Returns a
 pointer to the reallocated buffer.  This is necessary before making
 any direct modification of the buffer that would increase its length.
 L</lex_stuff_pvn> provides a more convenient way to insert text into

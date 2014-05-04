@@ -773,7 +773,7 @@ attributable to C<SvOOK>.  See C<SvCUR>.
 =for apidoc Am|char*|SvEND|SV* sv
 Returns a pointer to the spot just after the last character in
 the string which is in the SV, where there is usually a trailing
-null (even though Perl scalars do not strictly require it).
+C<NUL> byte (even though Perl scalars do not strictly require it).
 See C<SvCUR>.  Access the character as *(SvEND(sv)).
 
 Warning: If C<SvCUR> is equal to C<SvLEN>, then C<SvEND> points to
@@ -2044,7 +2044,7 @@ has been loaded.
 =for apidoc Am|char *|SvGROW|SV* sv|STRLEN len
 Expands the character buffer in the SV so that it has room for the
 indicated number of bytes (remember to reserve space for an extra trailing
-NUL character).  Calls C<sv_grow> to perform the expansion if necessary.
+C<NUL> character).  Calls C<sv_grow> to perform the expansion if necessary.
 Returns a pointer to the character
 buffer.  SV must be of type >= SVt_PV.  One
 alternative is to call C<sv_grow> if you are not sure of the type of SV.
