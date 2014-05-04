@@ -1052,19 +1052,20 @@ install: install-all
 
 for name in all notify silent strip verbose; do
     flags="--$name";
+    flags=`echo $flags | sed -e 's/--all//'`
     if test "X$hostperl" != X; then
         $spitshell >>$Makefile <<EOT
 
 install_$name install-$name: \$(INSTALL_DEPENDENCE) installperl all installman
-	\$(HOST_PERL) installperl --destdir=\$(DESTDIR) ${flags%--all} \$(INSTALLFLAGS) \$(STRIPFLAGS)
-	\$(HOST_PERL) installman --destdir=\$(DESTDIR) ${flags%--all}
+	\$(HOST_PERL) installperl --destdir=\$(DESTDIR) $flags \$(INSTALLFLAGS) \$(STRIPFLAGS)
+	\$(HOST_PERL) installman --destdir=\$(DESTDIR) $flags
 EOT
     else
         $spitshell >>$Makefile <<EOT
 
 install_$name install-$name: \$(INSTALL_DEPENDENCE) installperl all installman
-	\$(RUN_PERL) installperl --destdir=\$(DESTDIR) ${flags%--all} \$(INSTALLFLAGS) \$(STRIPFLAGS)
-	\$(RUN_PERL) installman --destdir=\$(DESTDIR) ${flags%--all}
+	\$(RUN_PERL) installperl --destdir=\$(DESTDIR) $flags \$(INSTALLFLAGS) \$(STRIPFLAGS)
+	\$(RUN_PERL) installman --destdir=\$(DESTDIR) $flags
 EOT
     fi
 
