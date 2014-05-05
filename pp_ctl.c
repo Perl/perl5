@@ -337,7 +337,7 @@ PP(pp_substcont)
 	)
 	    (RX_MATCH_TAINTED_on(rx)); /* taint $1 et al */
 
-	if (cx->sb_iters > 1 && (cx->sb_rxtainted & 
+	if (cx->sb_iters > 1 && (cx->sb_rxtainted &
 			(SUBST_TAINT_STR|SUBST_TAINT_PAT|SUBST_TAINT_REPL)))
 	    SvTAINTED_on((pm->op_pmflags & PMf_NONDESTRUCT)
 			 ? cx->sb_dstr : cx->sb_targ);
@@ -3062,7 +3062,7 @@ PP(pp_goto) /* also pp_dump */
 	    PL_lastgotoprobe = gotoprobe;
 	}
 	if (!retop)
-	    DIE(aTHX_ "Can't find label %"UTF8f, 
+	    DIE(aTHX_ "Can't find label %"UTF8f,
 		       UTF8fARG(label_flags, label_len, label));
 
 	/* if we're leaving an eval, check before we pop any frames
@@ -3778,7 +3778,7 @@ PP(pp_require)
      * To prevent this, the key must be stored in UNIX format if the VMS
      * name can be translated to UNIX.
      */
-    
+
     if ((unixname =
 	  tounixspec(name, SvPVX(sv_2mortal(newSVpv("", VMS_MAXRSS-1)))))
 	 != NULL) {
@@ -3992,7 +3992,7 @@ PP(pp_require)
 				       "%s\\%s",
 				       dir, name);
 #  else
-		    /* The equivalent of		    
+		    /* The equivalent of
 		       Perl_sv_setpvf(aTHX_ namesv, "%s/%s", dir, name);
 		       but without the need to parse the format string, or
 		       call strlen on either pointer, and with the correct
@@ -4269,7 +4269,7 @@ PP(pp_entereval)
 	SAVEDELETE(PL_defstash, safestr, len);
 	saved_delete = TRUE;
     }
-    
+
     PUTBACK;
 
     if (doeval(gimme, runcv, seq, saved_hh)) {
@@ -4358,7 +4358,7 @@ Perl_delete_eval_scope(pTHX)
     I32 gimme;
     PERL_CONTEXT *cx;
     I32 optype;
-	
+
     POPBLOCK(cx,newpm);
     POPEVAL(cx);
     PL_curpm = newpm;
@@ -4375,7 +4375,7 @@ Perl_create_eval_scope(pTHX_ U32 flags)
 {
     PERL_CONTEXT *cx;
     const I32 gimme = GIMME_V;
-	
+
     ENTER_with_name("eval_scope");
     SAVETMPS;
 
@@ -4392,7 +4392,7 @@ Perl_create_eval_scope(pTHX_ U32 flags)
     }
     return cx;
 }
-    
+
 PP(pp_entertry)
 {
     dVAR;
@@ -4430,7 +4430,7 @@ PP(pp_entergiven)
     dVAR; dSP;
     PERL_CONTEXT *cx;
     const I32 gimme = GIMME_V;
-    
+
     ENTER_with_name("given");
     SAVETMPS;
 
@@ -4495,7 +4495,7 @@ S_matcher_matches_sv(pTHX_ PMOP *matcher, SV *sv)
     dSP;
 
     PERL_ARGS_ASSERT_MATCHER_MATCHES_SV;
-    
+
     PL_op = (OP *) matcher;
     XPUSHs(sv);
     PUTBACK;
@@ -4531,7 +4531,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
 {
     dVAR;
     dSP;
-    
+
     bool object_on_left = FALSE;
     SV *e = TOPs;	/* e is for 'expression' */
     SV *d = TOPm1s;	/* d is for 'default', as in PL_defgv */
@@ -4715,13 +4715,13 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
 
 		DEBUG_M(Perl_deb(aTHX_ "        comparing hash key...\n"));
 	    	++ this_key_count;
-	    	
+
 	    	if(!hv_exists_ent(other_hv, key, 0)) {
 	    	    (void) hv_iterinit(hv);	/* reset iterator */
 		    RETPUSHNO;
 	    	}
 	    }
-	    
+
 	    if (other_tied) {
 		(void) hv_iterinit(other_hv);
 		while ( hv_iternext(other_hv) )
@@ -4729,7 +4729,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
 	    }
 	    else
 		other_key_count = HvUSEDKEYS(other_hv);
-	    
+
 	    if (this_key_count != other_key_count)
 		RETPUSHNO;
 	    else
@@ -4847,13 +4847,13 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
 				&PL_sv_undef, 0);
 			PUSHs(*other_elem);
 			PUSHs(*this_elem);
-			
+
 			PUTBACK;
 			DEBUG_M(Perl_deb(aTHX_ "        recursively comparing array element...\n"));
 			(void) do_smartmatch(seen_this, seen_other, 0);
 			SPAGAIN;
 			DEBUG_M(Perl_deb(aTHX_ "        recursion finished\n"));
-			
+
 			if (!SvTRUEx(POPs))
 			    RETPUSHNO;
 		    }
@@ -4991,7 +4991,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
 	else
 	    RETPUSHNO;
     }
-    
+
     /* As a last resort, use string comparison */
     DEBUG_M(Perl_deb(aTHX_ "    applying rule Any-Any\n"));
     PUSHs(d); PUSHs(e);
@@ -5081,14 +5081,14 @@ PP(pp_continue)
     PMOP *newpm;
 
     PERL_UNUSED_VAR(gimme);
-    
-    cxix = dopoptowhen(cxstack_ix); 
-    if (cxix < 0)   
+
+    cxix = dopoptowhen(cxstack_ix);
+    if (cxix < 0)
 	DIE(aTHX_ "Can't \"continue\" outside a when block");
 
     if (cxix < cxstack_ix)
         dounwind(cxix);
-    
+
     POPBLOCK(cx,newpm);
     assert(CxTYPE(cx) == CXt_WHEN);
 
@@ -5101,11 +5101,11 @@ PP(pp_continue)
 
 PP(pp_break)
 {
-    dVAR;   
+    dVAR;
     I32 cxix;
     PERL_CONTEXT *cx;
 
-    cxix = dopoptogiven(cxstack_ix); 
+    cxix = dopoptogiven(cxstack_ix);
     if (cxix < 0)
 	DIE(aTHX_ "Can't \"break\" outside a given block");
 
@@ -5474,7 +5474,7 @@ S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
     upstream = ((SvOK(buf_sv) && sv_len(buf_sv)) || SvGMAGICAL(buf_sv))
 	? sv_newmortal() : buf_sv;
     SvUPGRADE(upstream, SVt_PV);
-	
+
     if (filter_has_file) {
 	status = FILTER_READ(idx+1, upstream, 0);
     }

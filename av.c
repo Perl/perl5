@@ -80,7 +80,7 @@ Perl_av_extend(pTHX_ AV *av, SSize_t key)
 	return;
     }
     av_extend_guts(av,key,&AvMAX(av),&AvALLOC(av),&AvARRAY(av));
-}    
+}
 
 /* The guts of av_extend.  *Not* for general use! */
 void
@@ -131,9 +131,9 @@ Perl_av_extend_guts(pTHX_ AV *av, SSize_t key, SSize_t *maxp, SV ***allocp,
 		newmax = Perl_safesysmalloc_size((void*)*allocp) /
 		    sizeof(const SV *) - 1;
 
-		if (key <= newmax) 
+		if (key <= newmax)
 		    goto resized;
-#endif 
+#endif
 		newmax = key + *maxp / 5;
 	      resize:
 		{
@@ -182,7 +182,7 @@ Perl_av_extend_guts(pTHX_ AV *av, SSize_t key, SSize_t *maxp, SV ***allocp,
 		while (tmp)
 		    ary[--tmp] = NULL;
 	    }
-	    
+
 	    *arrayp = *allocp;
 	    *maxp = newmax;
 	}
@@ -198,7 +198,7 @@ it wasn't real before), which you can then modify.  Check that the return
 value is non-null before dereferencing it to a C<SV*>.
 
 See L<perlguts/"Understanding the Magic of Tied Hashes and Arrays"> for
-more information on how to use this function on tied arrays. 
+more information on how to use this function on tied arrays.
 
 The rough perl equivalent is C<$myarray[$idx]>.
 
@@ -463,7 +463,7 @@ Perl_av_clear(pTHX_ AV *av)
 	if (PL_delaymagic && mg && mg->mg_type == PERL_MAGIC_isa)
 	    PL_delaymagic |= DM_ARRAY_ISA;
         else
-	    mg_clear(MUTABLE_SV(av)); 
+	    mg_clear(MUTABLE_SV(av));
     }
 
     if (AvMAX(av) < 0)
@@ -510,7 +510,7 @@ Perl_av_undef(pTHX_ AV *av)
     assert(SvTYPE(av) == SVt_PVAV);
 
     /* Give any tie a chance to cleanup first */
-    if (SvTIED_mg((const SV *)av, PERL_MAGIC_tied)) 
+    if (SvTIED_mg((const SV *)av, PERL_MAGIC_tied))
 	av_fill(av, -1);
 
     if ((real = !!AvREAL(av))) {
@@ -563,7 +563,7 @@ Perl equivalent: C<push @myarray, $elem;>.
 
 void
 Perl_av_push(pTHX_ AV *av, SV *val)
-{             
+{
     dVAR;
     MAGIC *mg;
 
@@ -682,7 +682,7 @@ Perl_av_unshift(pTHX_ AV *av, SSize_t num)
 	if (i > num)
 	    i = num;
 	num -= i;
-    
+
 	AvMAX(av) += i;
 	AvFILLp(av) += i;
 	AvARRAY(av) = AvARRAY(av) - i;
@@ -823,7 +823,7 @@ Perl_av_fill(pTHX_ AV *av, SSize_t fill)
 	    while (key < fill)
 		ary[++key] = NULL;
 	}
-	    
+
 	AvFILLp(av) = fill;
 	if (SvSMAGICAL(av))
 	    mg_set(MUTABLE_SV(av));

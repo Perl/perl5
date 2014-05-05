@@ -1,5 +1,5 @@
 /* Copyright (c) 2004-2005 Nokia. All rights reserved. */
- 
+
 /* The PerlRecog application is licensed under the same terms as Perl itself. */
 
 #include <apmrec.h>
@@ -54,4 +54,4 @@ GLDEF_C TInt E32Dll(TDllReason /* aReason */)
 }
 
 
-    
+

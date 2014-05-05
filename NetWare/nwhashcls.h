@@ -10,7 +10,7 @@
 /*
  * FILENAME     :  nwhashcls.h
  * DESCRIPTION  :  Equivalent of Hash class
- *                 
+ *
  * Author       :  Srivathsa M
  * Date	Created :  July 26 2001
  */

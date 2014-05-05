@@ -339,14 +339,14 @@ is no conversion of op type.
 
 /* Private for OP_(MAP|GREP)(WHILE|START) */
 #define OPpGREP_LEX		2	/* iterate over lexical $_ */
-    
+
 /* Private for OP_ENTEREVAL */
 #define OPpEVAL_HAS_HH		2	/* Does it have a copy of %^H */
 #define OPpEVAL_UNICODE		4
 #define OPpEVAL_BYTES		8
 #define OPpEVAL_COPHH		16	/* Construct %^H from cop hints */
 #define OPpEVAL_RE_REPARSING	32	/* eval_sv(..., G_RE_REPARSING) */
-    
+
 /* Private for OP_CALLER, OP_WANTARRAY and OP_RUNCV */
 #define OPpOFFBYONE		128	/* Treat caller(1) as caller(2) */
 
@@ -926,7 +926,7 @@ Reenable a member of the XOP which has been disabled.
 */
 
 struct custom_op {
-    U32		    xop_flags;    
+    U32		    xop_flags;
     const char	   *xop_name;
     const char	   *xop_desc;
     U32		    xop_class;

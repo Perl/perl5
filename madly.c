@@ -4,7 +4,7 @@
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
- * 
+ *
  * Note that this file is essentially empty, and just #includes perly.c,
  * to allow compilation of a second parser, Perl_madparse, that is
  * identical to Perl_yyparse, but which includes extra code for dumping

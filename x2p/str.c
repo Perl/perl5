@@ -124,7 +124,7 @@ STR *
 str_new(int len)
 {
     STR *str;
-    
+
     if (freestrroot) {
 	str = freestrroot;
 	freestrroot = str->str_link.str_next;
@@ -208,7 +208,7 @@ str_gets(STR *str, FILE *fp)
 		}
 	    }
 	}
-	
+
 	FILE_cnt(fp) = cnt;		/* deregisterize cnt and ptr */
 	FILE_ptr(fp) = ptr;
 	i = getc(fp);		/* get more characters */

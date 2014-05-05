@@ -473,7 +473,7 @@ PP(pp_rv2cv)
     if (cv) NOOP;
     else if ((flags == (GV_ADD|GV_NOEXPAND)) && gv && SvROK(gv)) {
 	cv = MUTABLE_CV(gv);
-    }    
+    }
     else
 	cv = MUTABLE_CV(&PL_sv_undef);
     SETs(MUTABLE_SV(cv));
@@ -1196,18 +1196,18 @@ PP(pp_pow)
 			else if (result <= (UV)IV_MAX)
 			    /* answer negative, fits in IV */
 			    SETi( -(IV)result );
-			else if (result == (UV)IV_MIN) 
+			else if (result == (UV)IV_MIN)
 			    /* 2's complement assumption: special case IV_MIN */
 			    SETi( IV_MIN );
 			else
 			    /* answer negative, doesn't fit */
 			    SETn( -(NV)result );
 			RETURN;
-		    } 
+		    }
 		}
     }
   float_it:
-#endif    
+#endif
     {
 	NV right = SvNV_nomg(svr);
 	NV left  = SvNV_nomg(svl);
@@ -1815,7 +1815,7 @@ PP(pp_subtract)
 	    UV result;
 	    UV buv;
 	    bool buvok = SvUOK(svr);
-	
+
 	    if (buvok)
 		buv = SvUVX(svr);
 	    else {
@@ -2739,7 +2739,7 @@ PP(pp_rand)
 	dSP;
 	NV value;
 	EXTEND(SP, 1);
-    
+
 	if (MAXARG < 1)
 	    value = 1.0;
 	else {
@@ -2898,7 +2898,7 @@ PP(pp_oct)
 	 /* If Unicode, try to downgrade
 	  * If not possible, croak. */
 	 SV* const tsv = sv_2mortal(newSVsv(sv));
-	
+
 	 SvUTF8_on(tsv);
 	 sv_utf8_downgrade(tsv, FALSE);
 	 tmps = SvPV_const(tsv, len);
@@ -3455,7 +3455,7 @@ PP(pp_crypt)
 #endif
 }
 
-/* Generally UTF-8 and UTF-EBCDIC are indistinguishable at this level.  So 
+/* Generally UTF-8 and UTF-EBCDIC are indistinguishable at this level.  So
  * most comments below say UTF-8, when in fact they mean UTF-EBCDIC as well */
 
 PP(pp_ucfirst)
@@ -3518,7 +3518,7 @@ PP(pp_ucfirst)
     }
     else { /* Non-zero length, non-UTF-8,  Need to consider locale and if
 	    * latin1 is treated as caseless.  Note that a locale takes
-	    * precedence */ 
+	    * precedence */
 	ulen = 1;	/* Original character is 1 byte */
 	tculen = 1;	/* Most characters will require one byte, but this will
 			 * need to be overridden for the tricky ones */
@@ -3847,14 +3847,14 @@ PP(pp_uc)
 		    /* The mainstream case is the tight loop above.  To avoid
 		     * extra tests in that, all three characters that require
 		     * special handling are mapped by the MOD to the one tested
-		     * just above.  
+		     * just above.
 		     * Use the source to distinguish between the three cases */
 
 		    if (*s == LATIN_SMALL_LETTER_SHARP_S) {
 
 			/* uc() of this requires 2 characters, but they are
 			 * ASCII.  If not enough room, grow the string */
-			if (SvLEN(dest) < ++min) {	
+			if (SvLEN(dest) < ++min) {
 			    const UV o = d - (U8*)SvPVX_const(dest);
 			    SvGROW(dest, min);
 			    d = (U8*)SvPVX(dest) + o;
@@ -5113,7 +5113,7 @@ PP(pp_splice)
 	i = -diff;
 	while (i)
 	    dst[--i] = NULL;
-	
+
 	if (newlen) {
  	    Copy( tmparyval, AvARRAY(ary) + offset, newlen, SV* );
 	    Safefree(tmparyval);
@@ -5530,7 +5530,7 @@ PP(pp_split)
             } else {
                 while (m < strend && !isSPACE(*m))
                     ++m;
-            }  
+            }
 	    if (m >= strend)
 		break;
 
@@ -5564,7 +5564,7 @@ PP(pp_split)
             } else {
                 while (s < strend && isSPACE(*s))
                     ++s;
-            } 	    
+            }
 	}
     }
     else if (RX_EXTFLAGS(rx) & RXf_START_ONLY) {

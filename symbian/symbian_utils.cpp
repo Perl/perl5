@@ -171,7 +171,7 @@ extern "C" {
 	  ckerr.Copy(kerrp);
 	  cdesc.Copy(descp);
 	  buf8.Format(_L8("K%S (%d) %S"), &ckerr, error, &cdesc);
-		     
+
 	} else {
 	  buf8.Format(_L8("Symbian error %d"), error);
 	}
@@ -224,7 +224,7 @@ extern "C" {
     }
 #define SEC_USEC_TO_CLK_TCK(s, u) \
         (((s) * PERL_SYMBIAN_CLK_TCK) + (u / (1000000 / PERL_SYMBIAN_CLK_TCK)))
-    EXPORT_C clock_t symbian_times(struct tms *tmsbuf) 
+    EXPORT_C clock_t symbian_times(struct tms *tmsbuf)
     {
         long s, u;
         if (symbian_get_cpu_time(&s, &u) == -1) {
@@ -296,7 +296,7 @@ extern "C" {
                 error = proc.Create(aFilename,
                                     func,
                                     KStackSize,
-#ifdef __SERIES60_3X__                                    
+#ifdef __SERIES60_3X__
                                     KHeapMin,
                                     KHeapMax,
                                     (TAny*)command,
@@ -306,7 +306,7 @@ extern "C" {
                                     RThread().Heap(),
                                     KHeapMin,
                                     KHeapMax,
-#endif                                    
+#endif
                                     EOwnerProcess);
             else
                 error = KErrNotFound;
@@ -355,7 +355,7 @@ extern "C" {
                         aFilename.Append(p[1]);
                         p++;
                     }
-                    
+
                 }
                 else
                     aFilename.Append(*p);

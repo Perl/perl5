@@ -164,7 +164,7 @@ S_do_trans_complex(pTHX_ SV * const sv)
 			p = d++;
 		}
 		else if (ch == -1)	/* -1 is unmapped character */
-		    *d++ = *s;	
+		    *d++ = *s;
 		else if (ch == -2)	/* -2 is delete character */
 		    matches++;
 		s++;
@@ -518,7 +518,7 @@ S_do_trans_complex_utf8(pTHX_ SV * const sv)
 	UV puv = 0xfeedface;
 	while (s < send) {
 	    UV uv = swash_fetch(rv, s, TRUE);
-	
+
 	    if (d > dend) {
 		const STRLEN clen = d - dstart;
 		const STRLEN nlen = dend - dstart + len + UTF8_MAXBYTES;
@@ -770,7 +770,7 @@ Perl_do_vecget(pTHX_ SV *sv, SSize_t offset, int size)
     if (!s) {
       s = (unsigned char *)"";
     }
-    
+
     PERL_ARGS_ASSERT_DO_VECGET;
 
     if (offset < 0)

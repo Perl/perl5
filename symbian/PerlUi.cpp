@@ -6,7 +6,7 @@
 
 #ifdef __SERIES60__
 # include <avkon.hrh>
-# include <aknnotewrappers.h> 
+# include <aknnotewrappers.h>
 # include <AknCommonDialogs.h>
 # ifndef __SERIES60_1X__
 #  include <CAknFileSelectionDialog.h>

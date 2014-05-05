@@ -208,7 +208,7 @@ Perl_grok_bin(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result)
 			   "Illegal binary digit '%c' ignored", *s);
         break;
     }
-    
+
     if (   ( overflowed && value_nv > 4294967295.0)
 #if UVSIZE > 4
 	|| (!overflowed && value > 0xffffffff
@@ -330,7 +330,7 @@ Perl_grok_hex(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result)
                         "Illegal hexadecimal digit '%c' ignored", *s);
         break;
     }
-    
+
     if (   ( overflowed && value_nv > 4294967295.0)
 #if UVSIZE > 4
 	|| (!overflowed && value > 0xffffffff
@@ -437,7 +437,7 @@ Perl_grok_oct(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result)
         }
         break;
     }
-    
+
     if (   ( overflowed && value_nv > 4294967295.0)
 #if UVSIZE > 4
 	|| (!overflowed && value > 0xffffffff
@@ -533,7 +533,7 @@ Perl_grok_numeric_radix(pTHX_ const char **sp, const char *send)
         const char * const radix = SvPV(PL_numeric_radix_sv, len);
         if (*sp + len <= send && memEQ(*sp, radix, len)) {
             *sp += len;
-            return TRUE; 
+            return TRUE;
         }
     }
     /* always try "." if numeric radix didn't match because
@@ -780,11 +780,11 @@ S_mulexp10(NV value, I32 exponent)
 
     /* On OpenVMS VAX we by default use the D_FLOAT double format,
      * and that format does not have *easy* capabilities [1] for
-     * overflowing doubles 'silently' as IEEE fp does.  We also need 
-     * to support G_FLOAT on both VAX and Alpha, and though the exponent 
-     * range is much larger than D_FLOAT it still doesn't do silent 
-     * overflow.  Therefore we need to detect early whether we would 
-     * overflow (this is the behaviour of the native string-to-float 
+     * overflowing doubles 'silently' as IEEE fp does.  We also need
+     * to support G_FLOAT on both VAX and Alpha, and though the exponent
+     * range is much larger than D_FLOAT it still doesn't do silent
+     * overflow.  Therefore we need to detect early whether we would
+     * overflow (this is the behaviour of the native string-to-float
      * conversion routines, and therefore of native applications, too).
      *
      * [1] Trying to establish a condition handler to trap floating point
@@ -835,7 +835,7 @@ S_mulexp10(NV value, I32 exponent)
 	    exponent ^= bit;
 	    result *= power;
 	    /* Floating point exceptions are supposed to be turned off,
-	     *  but if we're obviously done, don't risk another iteration.  
+	     *  but if we're obviously done, don't risk another iteration.
 	     */
 	     if (exponent == 0) break;
 	}
@@ -1095,7 +1095,7 @@ Perl_my_frexpl(long double x, int *e) {
 =for apidoc Perl_signbit
 
 Return a non-zero integer if the sign bit on an NV is set, and 0 if
-it is not.  
+it is not.
 
 If Configure detects this system has a signbit() that will work with
 our NVs, then we just use it via the #define in perl.h.  Otherwise,

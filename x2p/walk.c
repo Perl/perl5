@@ -627,7 +627,7 @@ sub Pick {\n\
 	else
 	    tmpstr = str_make("");
 	sprintf(tokenbuf," = &Getline%d(%s)",len,tmpstr->str_ptr);
-	str_cat(str,tokenbuf); 
+	str_cat(str,tokenbuf);
 	str_free(tmpstr);
 	if (useval)
 	    str_cat(str,",$getline_ok)");

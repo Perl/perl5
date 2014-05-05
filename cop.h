@@ -59,35 +59,35 @@ typedef struct jmpenv JMPENV;
 
 /*
  *   PERL_FLEXIBLE_EXCEPTIONS
- * 
+ *
  * All the flexible exceptions code has been removed.
  * See the following threads for details:
  *
  *   http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2004-07/msg00378.html
- * 
+ *
  * Joshua's original patches (which weren't applied) and discussion:
- * 
+ *
  *   http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/1998-02/msg01396.html
  *   http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/1998-02/msg01489.html
  *   http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/1998-02/msg01491.html
  *   http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/1998-02/msg01608.html
  *   http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/1998-02/msg02144.html
  *   http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/1998-02/msg02998.html
- * 
+ *
  * Chip's reworked patch and discussion:
- * 
+ *
  *   http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/1999-03/msg00520.html
- * 
+ *
  * The flaw in these patches (which went unnoticed at the time) was
  * that they moved some code that could potentially die() out of the
  * region protected by the setjmp()s.  This caused exceptions within
  * END blocks and such to not be handled by the correct setjmp().
- * 
+ *
  * The original patches that introduces flexible exceptions were:
  *
  * http://perl5.git.perl.org/perl.git/commit/312caa8e97f1c7ee342a9895c2f0e749625b4929
- * http://perl5.git.perl.org/perl.git/commit/14dd3ad8c9bf82cf09798a22cc89a9862dfd6d1a                                        
- *  
+ * http://perl5.git.perl.org/perl.git/commit/14dd3ad8c9bf82cf09798a22cc89a9862dfd6d1a
+ *
  */
 
 #define dJMPENV		JMPENV cur_env
@@ -397,7 +397,7 @@ struct cop {
 #  define CopFILE(c)		((c)->cop_file)
 #  define CopFILEGV(c)		(CopFILE(c) \
 				 ? gv_fetchfile(CopFILE(c)) : NULL)
-				 
+
 #  ifdef NETWARE
 #    define CopFILE_set(c,pv)	((c)->cop_file = savepv(pv))
 #    define CopFILE_setn(c,pv,l)  ((c)->cop_file = savepvn((pv),(l)))
@@ -967,7 +967,7 @@ struct context {
    this bit needs to be kept clear for most everything else. For reasons I
    haven't investigated, it can coexist with CXp_FOR_DEF */
 #define CXp_MULTICALL	0x10	/* part of a multicall (so don't
-				   tear down context on exit). */ 
+				   tear down context on exit). */
 
 /* private flags for CXt_SUB and CXt_FORMAT */
 #define CXp_HASARGS	0x20
@@ -999,7 +999,7 @@ struct context {
 
 #define CXINC (cxstack_ix < cxstack_max ? ++cxstack_ix : (cxstack_ix = cxinc()))
 
-/* 
+/*
 =head1 "Gimme" Values
 */
 

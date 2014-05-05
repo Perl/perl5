@@ -6,7 +6,7 @@
 int getsockopt(int a, int b, int c, void *d, int *e)
 {
     croak("Function \"getsockopt\" not implemented in this version of perl.");
-    return (int)NULL; 
+    return (int)NULL;
 }
 
 int setsockopt(int a, int b, int c, void *d, int *e)
@@ -20,13 +20,13 @@ int recvmsg(int a, struct msghdr *b, int c)
 {
     croak("Function \"recvmsg\" not implemented in this version of perl.");
     return (int)NULL;
-} 
+}
 
 int sendmsg(int a, struct msghdr *b, int c)
 {
     croak("Function \"sendmsg\" not implemented in this version of perl.");
     return (int)NULL;
-} 
+}
 
 
 /* Functions mentioned in <netdb.h> but not implemented */

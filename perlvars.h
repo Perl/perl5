@@ -135,7 +135,7 @@ Instead, use the function L</wrap_op_checker>.
 #if defined(USE_ITHREADS)
 PERLVAR(G, check_mutex,	perl_mutex)	/* Mutex for PL_check */
 #endif
-#ifdef PERL_GLOBAL_STRUCT 
+#ifdef PERL_GLOBAL_STRUCT
 PERLVAR(G, ppaddr,	Perl_ppaddr_t *) /* or opcode.h */
 PERLVAR(G, check,	Perl_check_t *) /* or opcode.h */
 PERLVARA(G, fold_locale, 256, unsigned char) /* or perl.h */

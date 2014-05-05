@@ -74,7 +74,7 @@ Remove_Thread_Ctx(void)
 
 
 //PL_thr_key - Not very sure if this is global or per thread.  When multiple scripts
-//run simultaneously on NetWare, this will give problems.  Hence in nwtinfo.c, the 
-//current thread id is used as the TLS index & PL_thr_key is not used.  
+//run simultaneously on NetWare, this will give problems.  Hence in nwtinfo.c, the
+//current thread id is used as the TLS index & PL_thr_key is not used.
 //This has to be checked???? - sgp
 
