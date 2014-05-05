@@ -141,6 +141,12 @@ USE_LARGE_FILES	*= define
 CCTYPE		*= GCC
 
 #
+# If you are using GCC, 4.3 or later by default we add the -fwrapv option.
+# See https://rt.perl.org/Ticket/Display.html?id=121505
+#
+#GCCWRAPV       *= define
+
+#
 # If you are using Intel C++ Compiler uncomment this
 #
 #__ICC		*= define
@@ -408,6 +414,8 @@ INST_HTML	= $(INST_TOP)$(INST_VER)\html
 
 .USESHELL :
 
+MINIBUILDOPT    *=
+
 .IF "$(CCTYPE)" == "GCC"
 
 .IF "$(GCCCROSS)" == "define"
@@ -419,6 +427,13 @@ LINK32		= $(ARCHPREFIX)g++
 LIB32		= $(ARCHPREFIX)ar rc
 IMPLIB		= $(ARCHPREFIX)dlltool
 RSC		= $(ARCHPREFIX)windres
+
+GCCWRAPV *= $(shell for /f "delims=. tokens=1,2,3" %i in ('$(CC) -dumpversion') do @if "%i"=="4" (if "%j" geq "3" echo define) else if "%i" geq "5" (echo define))
+
+.IF "$(GCCWRAPV)" == "define"
+BUILDOPT        += -fwrapv
+MINIBUILDOPT    += -fwrapv
+.ENDIF
 
 i = .i
 o = .o
@@ -1139,10 +1154,10 @@ $(MINIDIR) :
 	if not exist "$(MINIDIR)" mkdir "$(MINIDIR)"
 
 $(MINICORE_OBJ) : $(CORE_NOCFG_H)
-	$(CC) -c $(CFLAGS) -DPERL_EXTERNAL_GLOB -DPERL_IS_MINIPERL $(OBJOUT_FLAG)$@ ..\$(*B).c
+	$(CC) -c $(CFLAGS) $(MINIBUILDOPT) -DPERL_EXTERNAL_GLOB -DPERL_IS_MINIPERL $(OBJOUT_FLAG)$@ ..\$(*B).c
 
 $(MINIWIN32_OBJ) : $(CORE_NOCFG_H)
-	$(CC) -c $(CFLAGS) -DPERL_IS_MINIPERL $(OBJOUT_FLAG)$@ $(*B).c
+	$(CC) -c $(CFLAGS) $(MINIBUILDOPT) -DPERL_IS_MINIPERL $(OBJOUT_FLAG)$@ $(*B).c
 
 # -DPERL_IMPLICIT_SYS needs C++ for perllib.c
 # rules wrapped in .IFs break Win9X build (we end up with unbalanced []s unless
