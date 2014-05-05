@@ -2163,7 +2163,8 @@ struct clone_params {
 /*
 =for apidoc Am|SV*|newSVpvn_utf8|NULLOK const char* s|STRLEN len|U32 utf8
 
-Creates a new SV and copies a string into it.  If utf8 is true, calls
+Creates a new SV and copies a string (which may contain C<NUL> (C<\0>)
+characters) into it.  If utf8 is true, calls
 C<SvUTF8_on> on the new SV.  Implemented as a wrapper around C<newSVpvn_flags>.
 
 =cut

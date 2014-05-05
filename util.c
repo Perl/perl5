@@ -1002,8 +1002,9 @@ Perl_foldEQ_locale(const char *s1, const char *s2, I32 len)
 
 Perl's version of C<strdup()>.  Returns a pointer to a newly allocated
 string which is a duplicate of C<pv>.  The size of the string is
-determined by C<strlen()>.  The memory allocated for the new string can
-be freed with the C<Safefree()> function.
+determined by C<strlen()>, which means it may not contain embedded C<NUL>
+characters and must have a trailing C<NUL>.  The memory allocated for the new
+string can be freed with the C<Safefree()> function.
 
 On some platforms, Windows for example, all allocated memory owned by a thread
 is deallocated when that thread ends.  So if you need that not to happen, you

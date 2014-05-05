@@ -8866,7 +8866,8 @@ Perl_sv_newmortal(pTHX)
 /*
 =for apidoc newSVpvn_flags
 
-Creates a new SV and copies a string into it.  The reference count for the
+Creates a new SV and copies a string (which may contain C<NUL> (C<\0>)
+characters) into it.  The reference count for the
 SV is set to 1.  Note that if C<len> is zero, Perl will create a zero length
 string.  You are responsible for ensuring that the source string is at least
 C<len> bytes long.  If the C<s> argument is NULL the new SV will be undefined.
@@ -8940,9 +8941,13 @@ Perl_sv_2mortal(pTHX_ SV *const sv)
 /*
 =for apidoc newSVpv
 
-Creates a new SV and copies a string into it.  The reference count for the
+Creates a new SV and copies a string (which may contain C<NUL> (C<\0>)
+characters) into it.  The reference count for the
 SV is set to 1.  If C<len> is zero, Perl will compute the length using
-strlen().  For efficiency, consider using C<newSVpvn> instead.
+strlen(), (which means if you use this option, that C<s> can't have embedded
+C<NUL> characters and has to have a terminating C<NUL> byte).
+
+For efficiency, consider using C<newSVpvn> instead.
 
 =cut
 */
