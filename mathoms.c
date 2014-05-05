@@ -19,10 +19,10 @@
 
 
 
-/* 
+/*
  * This file contains mathoms, various binary artifacts from previous
  * versions of Perl.  For binary or source compatibility reasons, though,
- * we cannot completely remove them from the core code.  
+ * we cannot completely remove them from the core code.
  *
  * SMP - Oct. 24, 2005
  *
@@ -913,7 +913,7 @@ Perl_hv_fetch_ent(pTHX_ HV *hv, SV *keysv, I32 lval, U32 hash)
 {
     PERL_ARGS_ASSERT_HV_FETCH_ENT;
 
-    return (HE *)hv_common(hv, keysv, NULL, 0, 0, 
+    return (HE *)hv_common(hv, keysv, NULL, 0, 0,
 		     (lval ? HV_FETCH_LVALUE : 0), NULL, hash);
 }
 
@@ -1031,7 +1031,7 @@ Perl_newHV(pTHX)
 }
 
 void
-Perl_sv_insert(pTHX_ SV *const bigstr, const STRLEN offset, const STRLEN len, 
+Perl_sv_insert(pTHX_ SV *const bigstr, const STRLEN offset, const STRLEN len,
               const char *const little, const STRLEN littlelen)
 {
     PERL_ARGS_ASSERT_SV_INSERT;

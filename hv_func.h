@@ -507,29 +507,29 @@ PERL_STATIC_INLINE U32
 S_perl_hash_one_at_a_time_hard(const unsigned char * const seed, const unsigned char *str, const STRLEN len) {
     const unsigned char * const end = (const unsigned char *)str + len;
     U32 hash = *((U32*)seed) + len;
-    
+
     while (str < end) {
         hash += (hash << 10);
         hash ^= (hash >> 6);
         hash += *str++;
     }
-    
+
     hash += (hash << 10);
     hash ^= (hash >> 6);
     hash += seed[4];
-    
+
     hash += (hash << 10);
     hash ^= (hash >> 6);
     hash += seed[5];
-    
+
     hash += (hash << 10);
     hash ^= (hash >> 6);
     hash += seed[6];
-    
+
     hash += (hash << 10);
     hash ^= (hash >> 6);
     hash += seed[7];
-    
+
     hash += (hash << 10);
     hash ^= (hash >> 6);
 

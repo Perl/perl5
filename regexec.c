@@ -229,7 +229,7 @@ static const char* const non_utf8_target_but_utf8_required
 
 #define HAS_TEXT(rn) ( IS_EXACT(rn) || PL_regkind[OP(rn)] == REF )
 
-#if 0 
+#if 0
 /* Currently these are only used when PL_regkind[OP(rn)] == EXACT so
    we don't need this definition. */
 #define IS_TEXT(rn)   ( OP(rn)==EXACT   || OP(rn)==REF   || OP(rn)==NREF   )
@@ -260,7 +260,7 @@ static const char* const non_utf8_target_but_utf8_required
 	    rn = (rn->flags == 0) ? NEXTOPER(NEXTOPER(rn)) : rn + ARG(rn); \
 	else rn += NEXT_OFF(rn); \
     } \
-} STMT_END 
+} STMT_END
 
 /* These constants are for finding GCB=LV and GCB=LVT in the CLUMP regnode.
  * These are for the pre-composed Hangul syllables, which are all in a
@@ -311,7 +311,7 @@ S_regcppush(pTHX_ const regexp *rex, I32 parenfloor, U32 maxopenparen)
                    (long)parenfloor);
 
     SSGROW(total_elems + REGCP_FRAME_ELEMS);
-    
+
     DEBUG_BUFFERS_r(
 	if ((int)maxopenparen > (int)parenfloor)
 	    PerlIO_printf(Perl_debug_log,
@@ -799,7 +799,7 @@ Perl_re_intuit_start(pTHX_
 	        /* Substring at constant offset from beg-of-str... */
 	        SSize_t slen = SvCUR(check);
                 char *s = HOP3c(strpos, prog->check_offset_min, strend);
-	    
+
                 DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
                     "  Looking for check substr at fixed offset %"IVdf"...\n",
                     (IV)prog->check_offset_min));
@@ -844,7 +844,7 @@ Perl_re_intuit_start(pTHX_
 #endif
 
   restart:
-    
+
     /* This is the (re)entry point of the main loop in this function.
      * The goal of this loop is to:
      * 1) find the "check" substring in the region rx_origin..strend
@@ -885,7 +885,7 @@ Perl_re_intuit_start(pTHX_
                 (IV)end_shift,
                 (IV)prog->check_end_shift);
         });
-        
+
         if (prog->intflags & PREGf_CANY_SEEN) {
             start_point= (U8*)(rx_origin + start_shift);
             end_point= (U8*)(strend - end_shift);
@@ -930,7 +930,7 @@ Perl_re_intuit_start(pTHX_
 	DEBUG_OPTIMISE_MORE_r({
             PerlIO_printf(Perl_debug_log, "  fbm_instr len=%d str=<%.*s>\n",
                 (int)(end_point - start_point),
-                (int)(end_point - start_point) > 20 ? 20 : (int)(end_point - start_point), 
+                (int)(end_point - start_point) > 20 ? 20 : (int)(end_point - start_point),
                 start_point);
         });
 
@@ -1274,9 +1274,9 @@ Perl_re_intuit_start(pTHX_
 	    rx_max_float = HOP3c(check_at, -start_shift, strbeg);
 	    endpos= HOP3c(rx_max_float, cl_l, strend);
         }
-        else 
+        else
             endpos= strend;
-		    
+
         DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
             "  looking for class: start_shift: %"IVdf" check_at: %"IVdf
             " rx_origin: %"IVdf" endpos: %"IVdf"\n",
@@ -1566,7 +1566,7 @@ if ((reginfo->intuit || regtry(reginfo, &s))) \
     else {                                                     \
 	REXEC_FBC_CLASS_SCAN(CoNd);                            \
     }
-    
+
 #define DUMP_EXEC_POS(li,s,doutf8)                          \
     dump_exec_pos(li,s,(reginfo->strend),(reginfo->strbeg), \
                 startpos, doutf8)
@@ -1658,7 +1658,7 @@ if ((reginfo->intuit || regtry(reginfo, &s))) \
    in regmatch. /grrr */
 
 STATIC char *
-S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s, 
+S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
     const char *strend, regmatch_info *reginfo)
 {
     dVAR;
@@ -2572,13 +2572,13 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
     }
 
     multiline = prog->extflags & RXf_PMf_MULTILINE;
-    
+
     if (strend - s < (minlen+(prog->check_offset_min<0?prog->check_offset_min:0))) {
         DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
 			      "String too short [regexec_flags]...\n"));
 	goto phooey;
     }
-    
+
     /* Check validity of program. */
     if (UCHARAT(progi->program) != REG_MAGIC) {
 	Perl_croak(aTHX_ "corrupted regexp program");
@@ -2864,7 +2864,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
 	    back_max = prog->float_max_offset;
 	    back_min = prog->float_min_offset;
 	}
-	    
+
         if (back_min<0) {
 	    last = strend;
 	} else {
@@ -2923,7 +2923,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
 			      ((must == prog->anchored_substr || must == prog->anchored_utf8)
 			       ? "anchored" : "floating"),
                 quoted, RE_SV_TAIL(must));
-        });		    
+        });
 	goto phooey;
     }
     else if ( (c = progi->regstclass) ) {
@@ -3100,7 +3100,7 @@ got_it:
 
     LEAVE_SCOPE(oldsave);
 
-    if (RXp_PAREN_NAMES(prog)) 
+    if (RXp_PAREN_NAMES(prog))
         (void)hv_iterinit(RXp_PAREN_NAMES(prog));
 
     RX_MATCH_UTF8_set(rx, utf8_target);
@@ -3211,7 +3211,7 @@ S_regtry(pTHX_ regmatch_info *reginfo, char **startposp)
 #define sayNO goto no
 #define sayNO_SILENT goto no_silent
 
-/* we dont use STMT_START/END here because it leads to 
+/* we dont use STMT_START/END here because it leads to
    "unreachable code" warnings, which are bogus, but distracting. */
 #define CACHEsayNO \
     if (ST.cache_mask) \
@@ -3219,7 +3219,7 @@ S_regtry(pTHX_ regmatch_info *reginfo, char **startposp)
     sayNO
 
 /* this is used to determine how far from the left messages like
-   'failed...' are printed. It should be set such that messages 
+   'failed...' are printed. It should be set such that messages
    are inline with the regop output that created them.
 */
 #define REPORT_CODE_OFF 32
@@ -3391,7 +3391,7 @@ end of the pattern, rather than at X in the following:
 The only exceptions to this are lookahead/behind assertions and the cut,
 (?>A), which pop all the backtrack states associated with A before
 continuing.
- 
+
 Backtrack state structs are allocated in slabs of about 4K in size.
 PL_regmatch_state and st always point to the currently active state,
 and PL_regmatch_slab points to the slab currently containing
@@ -3401,7 +3401,7 @@ is full, a new one is allocated and chained to the end. At exit from
 regmatch(), slabs allocated since entry are freed.
 
 */
- 
+
 
 #define DEBUG_STATE_pp(pp)				    \
     DEBUG_STATE_r({					    \
@@ -3430,33 +3430,33 @@ S_debug_start_match(pTHX_ const REGEXP *prog, const bool utf8_target,
 
     PERL_ARGS_ASSERT_DEBUG_START_MATCH;
 
-    if (!PL_colorset)   
-            reginitcolors();    
+    if (!PL_colorset)
+            reginitcolors();
     {
-        RE_PV_QUOTED_DECL(s0, utf8_pat, PERL_DEBUG_PAD_ZERO(0), 
-            RX_PRECOMP_const(prog), RX_PRELEN(prog), 60);   
-        
+        RE_PV_QUOTED_DECL(s0, utf8_pat, PERL_DEBUG_PAD_ZERO(0),
+            RX_PRECOMP_const(prog), RX_PRELEN(prog), 60);
+
         RE_PV_QUOTED_DECL(s1, utf8_target, PERL_DEBUG_PAD_ZERO(1),
-            start, end - start, 60); 
-        
-        PerlIO_printf(Perl_debug_log, 
-            "%s%s REx%s %s against %s\n", 
-		       PL_colors[4], blurb, PL_colors[5], s0, s1); 
-        
+            start, end - start, 60);
+
+        PerlIO_printf(Perl_debug_log,
+            "%s%s REx%s %s against %s\n",
+		       PL_colors[4], blurb, PL_colors[5], s0, s1);
+
         if (utf8_target||utf8_pat)
             PerlIO_printf(Perl_debug_log, "UTF-8 %s%s%s...\n",
                 utf8_pat ? "pattern" : "",
                 utf8_pat && utf8_target ? " and " : "",
                 utf8_target ? "string" : ""
-            ); 
+            );
     }
 }
 
 STATIC void
-S_dump_exec_pos(pTHX_ const char *locinput, 
-                      const regnode *scan, 
-                      const char *loc_regeol, 
-                      const char *loc_bostr, 
+S_dump_exec_pos(pTHX_ const char *locinput,
+                      const regnode *scan,
+                      const char *loc_regeol,
+                      const char *loc_bostr,
                       const char *loc_reg_starttry,
                       const bool utf8_target)
 {
@@ -3492,11 +3492,11 @@ S_dump_exec_pos(pTHX_ const char *locinput,
 
 	RE_PV_COLOR_DECL(s0,len0,is_uni,PERL_DEBUG_PAD(0),
 	    (locinput - pref_len),pref0_len, 60, 4, 5);
-	
+
 	RE_PV_COLOR_DECL(s1,len1,is_uni,PERL_DEBUG_PAD(1),
 		    (locinput - pref_len + pref0_len),
 		    pref_len - pref0_len, 60, 2, 3);
-	
+
 	RE_PV_COLOR_DECL(s2,len2,is_uni,PERL_DEBUG_PAD(2),
 		    locinput, loc_regeol - locinput, 10, 0, 1);
 
@@ -3516,7 +3516,7 @@ S_dump_exec_pos(pTHX_ const char *locinput,
 #endif
 
 /* reg_check_named_buff_matched()
- * Checks to see if a named buffer has matched. The data array of 
+ * Checks to see if a named buffer has matched. The data array of
  * buffer numbers corresponding to the buffer is expected to reside
  * in the regexp->data->data array in the slot stored in the ARG() of
  * node involved. Note that this routine doesn't actually care about the
@@ -3892,7 +3892,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
         3 * rex->nparens : MAX_RECURSE_EVAL_NOCHANGE_DEPTH;
     regmatch_state *yes_state = NULL; /* state to pop to on success of
 							    subpattern */
-    /* mark_state piggy backs on the yes_state logic so that when we unwind 
+    /* mark_state piggy backs on the yes_state logic so that when we unwind
        the stack on success we can update the mark_state as we go */
     regmatch_state *mark_state = NULL; /* last mark state we have seen */
     regmatch_state *cur_eval = NULL; /* most recent EVAL_AB state */
@@ -3903,10 +3903,10 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
     char *startpoint = locinput;
     SV *popmark = NULL;     /* are we looking for a mark? */
     SV *sv_commit = NULL;   /* last mark name seen in failure */
-    SV *sv_yes_mark = NULL; /* last mark name we have seen 
+    SV *sv_yes_mark = NULL; /* last mark name we have seen
                                during a successful match */
     U32 lastopen = 0;       /* last open we saw */
-    bool has_cutgroup = RX_HAS_CUTGROUP(rex) ? 1 : 0;   
+    bool has_cutgroup = RX_HAS_CUTGROUP(rex) ? 1 : 0;
     SV* const oreplsv = GvSVn(PL_replgv);
     /* these three flags are set by various ops to signal information to
      * the very next op. They have a useful lifetime of exactly one loop
@@ -3966,12 +3966,12 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    regnode *rnext=regnext(scan);
 	    DUMP_EXEC_POS( locinput, scan, utf8_target );
             regprop(rex, prop, scan, reginfo);
-            
+
 	    PerlIO_printf(Perl_debug_log,
 		    "%3"IVdf":%*s%s(%"IVdf")\n",
 		    (IV)(scan - rexi->program), depth*2, "",
 		    SvPVX_const(prop),
-		    (PL_regkind[OP(scan)] == END || !rnext) ? 
+		    (PL_regkind[OP(scan)] == END || !rnext) ?
 		        0 : (IV)(rnext - rexi->program));
 	});
 
@@ -4058,7 +4058,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 #define ST st->u.trie
         case TRIEC: /* (ab|cd) with known charclass */
             /* In this case the charclass data is available inline so
-               we can fail fast without a lot of extra overhead. 
+               we can fail fast without a lot of extra overhead.
              */
             if(!NEXTCHR_IS_EOS && !ANYOF_BITMAP_TEST(scan, nextchr)) {
                 DEBUG_EXECUTE_r(
@@ -4146,7 +4146,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
         	   }
                 }
 
-            { 
+            {
 		U8 *uc = ( U8* )locinput;
 
 		STRLEN len = 0;
@@ -4267,7 +4267,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	        DEBUG_EXECUTE_r({
 		    PerlIO_printf( Perl_debug_log,
 			"%*s  %sTRIE failed...%s\n",
-			REPORT_CODE_OFF+depth*2, "", 
+			REPORT_CODE_OFF+depth*2, "",
 			PL_colors[4],
 			PL_colors[5] );
 		});
@@ -4359,7 +4359,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    DEBUG_EXECUTE_r({
 		PerlIO_printf( Perl_debug_log,
 		    "%*s  %sTRIE matched word #%d, continuing%s\n",
-		    REPORT_CODE_OFF+depth*2, "", 
+		    REPORT_CODE_OFF+depth*2, "",
 		    PL_colors[4],
 		    ST.nextword,
 		    PL_colors[5]
@@ -4385,7 +4385,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		    tmp ? pv_pretty(sv, SvPV_nolen_const(*tmp), SvCUR(*tmp), 0,
 			    PL_colors[0], PL_colors[1],
 			    (SvUTF8(*tmp) ? PERL_PV_ESCAPE_UNI : 0)|PERL_PV_ESCAPE_NONASCII
-			) 
+			)
 		    : "not compiled under -Dr",
 		    PL_colors[5] );
 	    });
@@ -5019,7 +5019,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		if (locinput > reginfo->strend) sayNO;
 	    }
 	    break;
-            
+
 	case NREFFL:  /*  /\g{name}/il  */
 	{   /* The capture buffer cases.  The ones beginning with N for the
 	       named buffers just convert to the equivalent numbered and
@@ -5175,10 +5175,10 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	case GOSTART: /*  (?R)  */
 	case GOSUB: /*    /(...(?1))/   /(...(?&foo))/   */
 	    if (cur_eval && cur_eval->locinput==locinput) {
-                if (cur_eval->u.eval.close_paren == (U32)ARG(scan)) 
+                if (cur_eval->u.eval.close_paren == (U32)ARG(scan))
                     Perl_croak(aTHX_ "Infinite recursion in regex");
                 if ( ++nochange_depth > max_nochange_depth )
-                    Perl_croak(aTHX_ 
+                    Perl_croak(aTHX_
                         "Pattern subroutine nesting without pos change"
                         " exceeded limit in regex");
             } else {
@@ -5204,13 +5204,13 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
             assert(0); /* NOTREACHED */
 
-        case EVAL:  /*   /(?{A})B/   /(??{A})B/  and /(?(?{A})X|Y)B/   */        
+        case EVAL:  /*   /(?{A})B/   /(??{A})B/  and /(?(?{A})X|Y)B/   */
             if (cur_eval && cur_eval->locinput==locinput) {
 		if ( ++nochange_depth > max_nochange_depth )
                     Perl_croak(aTHX_ "EVAL without pos change exceeded limit in regex");
             } else {
                 nochange_depth = 0;
-            }    
+            }
 	    {
 		/* execute the code in the {...} */
 
@@ -5308,7 +5308,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		}
 		nop = nop->op_next;
 
-		DEBUG_STATE_r( PerlIO_printf(Perl_debug_log, 
+		DEBUG_STATE_r( PerlIO_printf(Perl_debug_log,
 		    "  re EVAL PL_op=0x%"UVxf"\n", PTR2UV(nop)) );
 
 		rex->offs[0].end = locinput - reginfo->strbeg;
@@ -5444,7 +5444,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 DEBUG_EXECUTE_r(
                     debug_start_match(re_sv, utf8_target, locinput,
                                     reginfo->strend, "Matching embedded");
-		);		
+		);
 		startpoint = rei->program + 1;
                	ST.close_paren = 0; /* only used for GOSUB */
                 /* Save all the seen positions so far. */
@@ -5517,7 +5517,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             is_utf8_pat = reginfo->is_utf8_pat = cBOOL(RX_UTF8(rex_sv));
 	    SET_reg_curpm(rex_sv);
 	    rex = ReANY(rex_sv);
-	    rexi = RXi_GET(rex); 
+	    rexi = RXi_GET(rex);
 
 	    REGCP_UNWIND(ST.lastcp);
 	    regcppop(rex, &maxopenparen);
@@ -5567,15 +5567,15 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    rex->lastcloseparen = n;
             if (cur_eval && cur_eval->u.eval.close_paren == n) {
 	        goto fake_end;
-	    }    
+	    }
 	    break;
 
         case ACCEPT:  /*  (*ACCEPT)  */
             if (ARG(scan)){
                 regnode *cursor;
                 for (cursor=scan;
-                     cursor && OP(cursor)!=END; 
-                     cursor=regnext(cursor)) 
+                     cursor && OP(cursor)!=END;
+                     cursor=regnext(cursor))
                 {
                     if ( OP(cursor)==CLOSE ){
                         n = ARG(cursor);
@@ -5592,7 +5592,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 }
             }
 	    goto fake_end;
-	    /*NOTREACHED*/	    
+	    /*NOTREACHED*/
 
 	case GROUPP:  /*  (?(1))  */
 	    n = ARG(scan);  /* which paren pair */
@@ -5695,19 +5695,19 @@ I and O refer to inner and outer, C and W refer to CURLYX and WHILEM:
 cur_
 curlyx backtrack stack
 ------ ---------------
-NULL   
+NULL
 CO     <CO prev=NULL> <WO>
-CI     <CO prev=NULL> <WO> <CI prev=CO> <WI> ai 
-CO     <CO prev=NULL> <WO> <CI prev=CO> <WI> ai <WI prev=CI> bi 
+CI     <CO prev=NULL> <WO> <CI prev=CO> <WI> ai
+CO     <CO prev=NULL> <WO> <CI prev=CO> <WI> ai <WI prev=CI> bi
 NULL   <CO prev=NULL> <WO> <CI prev=CO> <WI> ai <WI prev=CI> bi <WO prev=CO> bo
 
 At this point the pattern succeeds, and we work back down the stack to
 clean up, restoring as we go:
 
-CO     <CO prev=NULL> <WO> <CI prev=CO> <WI> ai <WI prev=CI> bi 
-CI     <CO prev=NULL> <WO> <CI prev=CO> <WI> ai 
+CO     <CO prev=NULL> <WO> <CI prev=CO> <WI> ai <WI prev=CI> bi
+CI     <CO prev=NULL> <WO> <CI prev=CO> <WI> ai
 CO     <CO prev=NULL> <WO>
-NULL   
+NULL
 
 *******************************************************************/
 
@@ -5717,7 +5717,7 @@ NULL
 	{
 	    /* No need to save/restore up to this paren */
 	    I32 parenfloor = scan->flags;
-	    
+
 	    assert(next); /* keep Coverity happy */
 	    if (OP(PREVOPER(next)) == NOTHING) /* LONGJMP */
 		next += ARG(next);
@@ -5773,7 +5773,7 @@ NULL
 	    ST.save_lastloc = cur_curlyx->u.curlyx.lastloc;
 	    ST.cache_offset = 0;
 	    ST.cache_mask = 0;
-	    
+
 
 	    DEBUG_EXECUTE_r( PerlIO_printf(Perl_debug_log,
 		  "%*s  whilem: matched %ld out of %d..%d\n",
@@ -6037,7 +6037,7 @@ NULL
             no_final = 1;
             if (st->u.mark.mark_name)
                 sv_commit = st->u.mark.mark_name;
-            sayNO;	    
+            sayNO;
             assert(0); /* NOTREACHED */
 
         case BRANCH_next:
@@ -6057,7 +6057,7 @@ NULL
 	        DEBUG_EXECUTE_r({
 		    PerlIO_printf( Perl_debug_log,
 			"%*s  %sBRANCH failed...%s\n",
-			REPORT_CODE_OFF+depth*2, "", 
+			REPORT_CODE_OFF+depth*2, "",
 			PL_colors[4],
 			PL_colors[5] );
 		});
@@ -6065,7 +6065,7 @@ NULL
             }
 	    continue; /* execute next BRANCH[J] op */
 	    assert(0); /* NOTREACHED */
-    
+
 	case MINMOD: /* next op will be non-greedy, e.g. A*?  */
 	    minmod = 1;
 	    break;
@@ -6134,10 +6134,10 @@ NULL
 			  (IV) ST.count, (IV)ST.alen)
 	    );
 
-	    if (cur_eval && cur_eval->u.eval.close_paren && 
-	        cur_eval->u.eval.close_paren == (U32)ST.me->flags) 
+	    if (cur_eval && cur_eval->u.eval.close_paren &&
+	        cur_eval->u.eval.close_paren == (U32)ST.me->flags)
 	        goto fake_end;
-	        
+
 	    {
 		I32 max = (ST.minmod ? ARG1(ST.me) : ARG2(ST.me));
 		if ( max == REG_INFTY || ST.count < max )
@@ -6148,7 +6148,7 @@ NULL
 	case CURLYM_A_fail: /* just failed to match an A */
 	    REGCP_UNWIND(ST.cp);
 
-	    if (ST.minmod || ST.count < ARG1(ST.me) /* min*/ 
+	    if (ST.minmod || ST.count < ARG1(ST.me) /* min*/
 	        || (cur_eval && cur_eval->u.eval.close_paren &&
 	            cur_eval->u.eval.close_paren == (U32)ST.me->flags))
 		sayNO;
@@ -6162,13 +6162,13 @@ NULL
 		    regnode *text_node = ST.B;
 		    if (! HAS_TEXT(text_node))
 			FIND_NEXT_IMPT(text_node);
-	            /* this used to be 
-	                
+	            /* this used to be
+
 	                (HAS_TEXT(text_node) && PL_regkind[OP(text_node)] == EXACT)
-	                
+
 	            	But the former is redundant in light of the latter.
-	            	
-	            	if this changes back then the macro for 
+
+	            	if this changes back then the macro for
 	            	IS_TEXT and friends need to change.
 	             */
 		    if (PL_regkind[OP(text_node)] == EXACT) {
@@ -6233,15 +6233,15 @@ NULL
 		else
 		    rex->offs[paren].end = -1;
 		if (cur_eval && cur_eval->u.eval.close_paren &&
-		    cur_eval->u.eval.close_paren == (U32)ST.me->flags) 
+		    cur_eval->u.eval.close_paren == (U32)ST.me->flags)
 		{
-		    if (ST.count) 
+		    if (ST.count)
 	                goto fake_end;
 	            else
 	                sayNO;
 	        }
 	    }
-	    
+
 	    PUSH_STATE_GOTO(CURLYM_B, ST.B, locinput); /* match B */
 	    assert(0); /* NOTREACHED */
 
@@ -6332,7 +6332,7 @@ NULL
             else {
 		regnode *text_node = next;
 
-		if (! HAS_TEXT(text_node)) 
+		if (! HAS_TEXT(text_node))
 		    FIND_NEXT_IMPT(text_node);
 
 		if (! HAS_TEXT(text_node))
@@ -6342,12 +6342,12 @@ NULL
 			ST.c1 = ST.c2 = CHRTEST_VOID;
 		    }
 		    else {
-                    
-                    /*  Currently we only get here when 
-                        
+
+                    /*  Currently we only get here when
+
                         PL_rekind[OP(text_node)] == EXACT
-                    
-                        if this changes back then the macro for IS_TEXT and 
+
+                        if this changes back then the macro for IS_TEXT and
                         friends need to change. */
                         if (! S_setup_EXACTISH_ST_c1_c2(aTHX_
                            text_node, &ST.c1, ST.c1_utf8, &ST.c2, ST.c2_utf8,
@@ -6491,7 +6491,7 @@ NULL
                     assert(n == REG_INFTY || locinput == li);
 		}
 		CURLY_SETPAREN(ST.paren, ST.count);
-		if (cur_eval && cur_eval->u.eval.close_paren && 
+		if (cur_eval && cur_eval->u.eval.close_paren &&
 		    cur_eval->u.eval.close_paren == (U32)ST.paren) {
 		    goto fake_end;
 	        }
@@ -6623,7 +6623,7 @@ NULL
 				      (long)(locinput - startpos),
 				      (long)(reginfo->till - startpos),
 				      PL_colors[5]));
-               				      
+
 		sayNO_SILENT;		/* Cannot match: too short. */
 	    }
 	    sayYES;			/* Success! */
@@ -6644,7 +6644,7 @@ NULL
 	case SUSPEND:	/* (?>A) */
 	    ST.wanted = 1;
 	    newstart = locinput;
-	    goto do_ifmatch;	
+	    goto do_ifmatch;
 
 	case UNLESSM:	/* -ve lookaround: (?!A), or with flags, (?<!A) */
 	    ST.wanted = 0;
@@ -6677,7 +6677,7 @@ NULL
 	    ST.me = scan;
 	    ST.logical = logical;
 	    logical = 0; /* XXX: reset state of logical once it has been saved into ST */
-	    
+
 	    /* execute body of (?...A) */
 	    PUSH_YES_STATE_GOTO(IFMATCH_A, NEXTOPER(NEXTOPER(scan)), newstart);
 	    assert(0); /* NOTREACHED */
@@ -6723,8 +6723,8 @@ NULL
 	    assert(0); /* NOTREACHED */
 
 	case COMMIT_next_fail:
-	    no_final = 1;    
-	    /* FALLTHROUGH */	    
+	    no_final = 1;
+	    /* FALLTHROUGH */
 
 	case OPFAIL:   /* (*FAIL)  */
 	    sayNO;
@@ -6733,7 +6733,7 @@ NULL
 #define ST st->u.mark
         case MARKPOINT: /*  (*MARK:foo)  */
             ST.prev_mark = mark_state;
-            ST.mark_name = sv_commit = sv_yes_mark 
+            ST.mark_name = sv_commit = sv_yes_mark
                 = MUTABLE_SV(rexi->data->data[ ARG( scan ) ]);
             mark_state = st;
             ST.mark_loc = locinput;
@@ -6746,7 +6746,7 @@ NULL
             assert(0); /* NOTREACHED */
 
         case MARKPOINT_next_fail:
-            if (popmark && sv_eq(ST.mark_name,popmark)) 
+            if (popmark && sv_eq(ST.mark_name,popmark))
             {
                 if (ST.mark_loc > startpoint)
 	            reginfo->cutpoint = HOPBACKc(ST.mark_loc, 1);
@@ -6756,12 +6756,12 @@ NULL
                 DEBUG_EXECUTE_r({
                         PerlIO_printf(Perl_debug_log,
 		            "%*s  %ssetting cutpoint to mark:%"SVf"...%s\n",
-		            REPORT_CODE_OFF+depth*2, "", 
+		            REPORT_CODE_OFF+depth*2, "",
 		            PL_colors[4], SVfARG(sv_commit), PL_colors[5]);
 		});
             }
             mark_state = ST.prev_mark;
-            sv_yes_mark = mark_state ? 
+            sv_yes_mark = mark_state ?
                 mark_state->u.mark.mark_name : NULL;
             sayNO;
             assert(0); /* NOTREACHED */
@@ -6773,41 +6773,41 @@ NULL
                 ST.mark_loc = locinput;
                 PUSH_STATE_GOTO(SKIP_next,next, locinput);
             } else {
-                /* (*SKIP:NAME) : if there is a (*MARK:NAME) fail where it was, 
-                   otherwise do nothing.  Meaning we need to scan 
+                /* (*SKIP:NAME) : if there is a (*MARK:NAME) fail where it was,
+                   otherwise do nothing.  Meaning we need to scan
                  */
                 regmatch_state *cur = mark_state;
                 SV *find = MUTABLE_SV(rexi->data->data[ ARG( scan ) ]);
-                
+
                 while (cur) {
-                    if ( sv_eq( cur->u.mark.mark_name, 
-                                find ) ) 
+                    if ( sv_eq( cur->u.mark.mark_name,
+                                find ) )
                     {
                         ST.mark_name = find;
                         PUSH_STATE_GOTO( SKIP_next, next, locinput);
                     }
                     cur = cur->u.mark.prev_mark;
                 }
-            }    
+            }
             /* Didn't find our (*MARK:NAME) so ignore this (*SKIP:NAME) */
-            break;    
+            break;
 
 	case SKIP_next_fail:
 	    if (ST.mark_name) {
-	        /* (*CUT:NAME) - Set up to search for the name as we 
+	        /* (*CUT:NAME) - Set up to search for the name as we
 	           collapse the stack*/
-	        popmark = ST.mark_name;	   
+	        popmark = ST.mark_name;
 	    } else {
 	        /* (*CUT) - No name, we cut here.*/
 	        if (ST.mark_loc > startpoint)
 	            reginfo->cutpoint = HOPBACKc(ST.mark_loc, 1);
 	        /* but we set sv_commit to latest mark_name if there
 	           is one so they can test to see how things lead to this
-	           cut */    
-                if (mark_state) 
-                    sv_commit=mark_state->u.mark.mark_name;	            
-            } 
-            no_final = 1; 
+	           cut */
+                if (mark_state)
+                    sv_commit=mark_state->u.mark.mark_name;
+            }
+            no_final = 1;
             sayNO;
             assert(0); /* NOTREACHED */
 #undef ST
@@ -6837,8 +6837,8 @@ NULL
             else
                 locinput++;
             break;
-	    
-	} /* end switch */ 
+
+	} /* end switch */
 
         /* switch break jumps here */
 	scan = next; /* prepare to execute the next op and ... */
@@ -6873,12 +6873,12 @@ NULL
                     if (curyes == cur)
 	                curyes = cur->u.yes.prev_yes_state;
                 }
-            } else 
+            } else
                 DEBUG_STATE_pp("push")
             );
 	    depth++;
 	    st->locinput = locinput;
-	    newst = st+1; 
+	    newst = st+1;
 	    if (newst >  SLAB_LAST(PL_regmatch_slab))
 		newst = S_push_slab(aTHX);
 	    PL_regmatch_state = newst;
@@ -6912,7 +6912,7 @@ yes:
 	    }
 	    DEBUG_STATE_r({
 	        if (no_final) {
-	            DEBUG_STATE_pp("pop (no final)");        
+	            DEBUG_STATE_pp("pop (no final)");
 	        } else {
 	            DEBUG_STATE_pp("pop (yes)");
 	        }
@@ -6933,7 +6933,7 @@ yes:
 	st = yes_state;
 	yes_state = st->u.yes.prev_yes_state;
 	PL_regmatch_state = st;
-        
+
         if (no_final)
             locinput= st->locinput;
 	state_num = st->resume_state + no_final;
@@ -6963,7 +6963,7 @@ no:
     DEBUG_EXECUTE_r(
 	PerlIO_printf(Perl_debug_log,
             "%*s  %sfailed...%s\n",
-            REPORT_CODE_OFF+depth*2, "", 
+            REPORT_CODE_OFF+depth*2, "",
             PL_colors[4], PL_colors[5])
 	);
 
@@ -6974,7 +6974,7 @@ no_silent:
         } else {
             goto final_exit;
         }
-    }    
+    }
     if (depth) {
 	/* there's a previous state to backtrack to */
 	st--;
@@ -7001,10 +7001,10 @@ no_silent:
         SV *sv_mrk = get_sv("REGMARK", 1);
         if (result) {
             sv_commit = &PL_sv_no;
-            if (!sv_yes_mark) 
+            if (!sv_yes_mark)
                 sv_yes_mark = &PL_sv_yes;
         } else {
-            if (!sv_commit) 
+            if (!sv_commit)
                 sv_commit = &PL_sv_yes;
             sv_yes_mark = &PL_sv_no;
         }
@@ -7604,7 +7604,7 @@ Perl__get_regclass_nonbitmap_data(pTHX_ const regexp *prog,
 	    AV * const av = MUTABLE_AV(SvRV(rv));
 	    SV **const ary = AvARRAY(av);
 	    U8 swash_init_flags = _CORE_SWASH_INIT_ACCEPT_INVLIST;
-	
+
 	    si = *ary;	/* ary[0] = the string to initialize the swash with */
 
 	    /* Elements 3 and 4 are either both present or both absent. [3] is
@@ -7651,7 +7651,7 @@ Perl__get_regclass_nonbitmap_data(pTHX_ const regexp *prog,
 	    }
 	}
     }
-	
+
     /* If requested, return a printable version of what this swash matches */
     if (listsvp) {
 	SV* matches_string = newSVpvn("", 0);
@@ -7681,7 +7681,7 @@ Perl__get_regclass_nonbitmap_data(pTHX_ const regexp *prog,
 
 /*
  - reginclass - determine if a character falls into a character class
- 
+
   n is the ANYOF regnode
   p is the target string
   p_end points to one byte beyond the end of the target string

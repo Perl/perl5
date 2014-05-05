@@ -32,7 +32,7 @@
 #define PERL_IN_PP_PACK_C
 #include "perl.h"
 
-/* Types used by pack/unpack */ 
+/* Types used by pack/unpack */
 typedef enum {
   e_no_len,     /* no length  */
   e_number,     /* number, [] */
@@ -46,7 +46,7 @@ typedef struct tempsym {
   const char*    grpend;   /* end of ()-group       */
   I32      code;     /* template code (!<>)   */
   I32      length;   /* length/repeat count   */
-  howlen_t howlen;   /* how length is given   */ 
+  howlen_t howlen;   /* how length is given   */
   int      level;    /* () nesting level      */
   U32      flags;    /* /=4, comma=2, pack=1  */
                      /*   and group modifiers */

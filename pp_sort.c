@@ -271,7 +271,7 @@ dynprep(pTHX_ gptr *list1, gptr *list2, size_t nmemb, const SVCOMPARE_t cmp)
  *
  * By contrast, consider how the original mergesort algorithm worked.
  * Suppose we have five runs (each typically of length 2 after dynprep).
- * 
+ *
  * pass               base                        aux
  *  0              1 2 3 4 5
  *  1                                           12 34 5
@@ -305,7 +305,7 @@ dynprep(pTHX_ gptr *list1, gptr *list2, size_t nmemb, const SVCOMPARE_t cmp)
  * }
  * mgsort2(0, $runs, $base, $aux, $base);
  *
- * For our 5 runs, the tree of calls looks like 
+ * For our 5 runs, the tree of calls looks like
  *
  *           5
  *      3        2
@@ -1700,7 +1700,7 @@ PP(pp_sort)
 		}
 	    }
 	    cx->cx_type |= CXp_MULTICALL;
-	    
+
 	    start = p1 - max;
 	    sortsvp(aTHX_ start, max,
 		    (is_xsub ? S_sortcv_xsub : hasargs ? S_sortcv_stacked : S_sortcv),
@@ -1778,7 +1778,7 @@ S_sortcv(pTHX_ SV *const a, SV *const b)
     PMOP * const pm = PL_curpm;
     OP * const sortop = PL_op;
     COP * const cop = PL_curcop;
- 
+
     PERL_ARGS_ASSERT_SORTCV;
 
     GvSV(PL_firstgv) = a;

@@ -618,7 +618,7 @@ S_openn_cleanup(pTHX_ GV *gv, IO *io, PerlIO *fp, char *mode, const char *oname,
     if (!fp) {
 	if (IoTYPE(io) == IoTYPE_RDONLY && ckWARN(WARN_NEWLINE)
 	    && strchr(oname, '\n')
-	    
+
 	)
         {
             GCC_DIAG_IGNORE(-Wformat-nonliteral); /* PL_warn_nl is constant */
@@ -2478,7 +2478,7 @@ Perl_start_glob (pTHX_ SV *tmpglob, IO *io)
 #ifdef VMS /* expand the wildcards right here, rather than opening a pipe, */
            /* since spawning off a process is a real performance hit */
 
-PerlIO * 
+PerlIO *
 Perl_vms_start_glob
    (pTHX_ SV *tmpglob,
     IO *io);

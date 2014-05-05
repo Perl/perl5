@@ -1,4 +1,4 @@
-/*   intrpvar.h 
+/*   intrpvar.h
  *
  *    Copyright (C) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005,
  *    2006, 2007, 2008 by Larry Wall and others
@@ -737,7 +737,7 @@ PERLVAR(I, debug_pad,	struct perl_debug_pad)	/* always needed because of the re 
 PERLVARI(I, globhook,	globhook_t, NULL)
 
 /* The last unconditional member of the interpreter structure when 5.19.12 was
-   released. The offset of the end of this is baked into a global variable in 
+   released. The offset of the end of this is baked into a global variable in
    any shared perl library which will allow a sanity test in future perl
    releases.  */
 #define PERL_LAST_5_18_0_INTERP_MEMBER	Iglobhook

@@ -17,17 +17,17 @@
 =head1 Variables created by C<xsubpp> and C<xsubpp> internal functions
 
 =for apidoc Amn|char*|CLASS
-Variable which is setup by C<xsubpp> to indicate the 
+Variable which is setup by C<xsubpp> to indicate the
 class name for a C++ XS constructor.  This is always a C<char*>.  See C<THIS>.
 
 =for apidoc Amn|(whatever)|RETVAL
-Variable which is setup by C<xsubpp> to hold the return value for an 
-XSUB.  This is always the proper type for the XSUB.  See 
+Variable which is setup by C<xsubpp> to hold the return value for an
+XSUB.  This is always the proper type for the XSUB.  See
 L<perlxs/"The RETVAL Variable">.
 
 =for apidoc Amn|(whatever)|THIS
-Variable which is setup by C<xsubpp> to designate the object in a C++ 
-XSUB.  This is always the proper type for the C++ object.  See C<CLASS> and 
+Variable which is setup by C<xsubpp> to designate the object in a C++
+XSUB.  This is always the proper type for the C++ object.  See C<CLASS> and
 L<perlxs/"Using XS With C++">.
 
 =for apidoc Amn|I32|ax
@@ -36,11 +36,11 @@ used by the C<ST>, C<XSprePUSH> and C<XSRETURN> macros.  The C<dMARK> macro
 must be called prior to setup the C<MARK> variable.
 
 =for apidoc Amn|I32|items
-Variable which is setup by C<xsubpp> to indicate the number of 
+Variable which is setup by C<xsubpp> to indicate the number of
 items on the stack.  See L<perlxs/"Variable-length Parameter Lists">.
 
 =for apidoc Amn|I32|ix
-Variable which is setup by C<xsubpp> to indicate which of an 
+Variable which is setup by C<xsubpp> to indicate which of an
 XSUB's aliases was used to invoke it.  See L<perlxs/"The ALIAS: Keyword">.
 
 =for apidoc Am|SV*|ST|int ix
@@ -212,7 +212,7 @@ Place a double into the specified position C<pos> on the stack.  The value
 is stored in a new mortal SV.
 
 =for apidoc Am|void|XST_mPV|int pos|char* str
-Place a copy of a string into the specified position C<pos> on the stack. 
+Place a copy of a string into the specified position C<pos> on the stack.
 The value is stored in a new mortal SV.
 
 =for apidoc Am|void|XST_mNO|int pos
@@ -388,7 +388,7 @@ Rethrows a previously caught exception.  See L<perlguts/"Exception Handling">.
             if (name[7] == 's'){                                \
                 arg = sv_2mortal(arg);                          \
             }                                                   \
-	} } STMT_END                                                     
+	} } STMT_END
 
 #if 1		/* for compatibility */
 #  define VTBL_sv		&PL_vtbl_sv

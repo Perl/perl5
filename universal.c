@@ -59,7 +59,7 @@ S_isa_lookup(pTHX_ HV *stash, const char * const name, STRLEN len, U32 flags)
 	return TRUE;
     }
 
-    /* A stash/class can go by many names (ie. User == main::User), so 
+    /* A stash/class can go by many names (ie. User == main::User), so
        we use the HvENAME in the stash itself, which is canonical, falling
        back to HvNAME if necessary.  */
     our_stash = gv_stashpvn(name, len, flags);
@@ -130,7 +130,7 @@ Perl_sv_derived_from(pTHX_ SV *sv, const char *const name)
 /*
 =for apidoc sv_derived_from_pv
 
-Exactly like L</sv_derived_from_pvn>, but takes a nul-terminated string 
+Exactly like L</sv_derived_from_pvn>, but takes a nul-terminated string
 instead of a string/length pair.
 
 =cut
@@ -640,7 +640,7 @@ XS(XS_Internals_SvREFCNT)	/* This is dangerous stuff. */
                 /* we free one ref on exit */
                 (SvREFCNT(sv) = SvUV(ST(1)) + 1)
                 : SvREFCNT(sv);
-    XSRETURN_UV(refcnt - 1); /* Minus the ref created for us. */        
+    XSRETURN_UV(refcnt - 1); /* Minus the ref created for us. */
 
 }
 
@@ -689,7 +689,7 @@ XS(XS_PerlIO_get_layers)
 			    break;
 		       }
 		       goto fail;
-		  case 'o': 
+		  case 'o':
 		       if (klen == 6 && memEQ(key, "output", 6)) {
 			    input = !SvTRUE(*valp);
 			    break;
@@ -724,7 +724,7 @@ XS(XS_PerlIO_get_layers)
 	     SSize_t i;
 	     const SSize_t last = av_tindex(av);
 	     SSize_t nitem = 0;
-	     
+
 	     for (i = last; i >= 0; i -= 3) {
 		  SV * const * const namsvp = av_fetch(av, i - 2, FALSE);
 		  SV * const * const argsvp = av_fetch(av, i - 1, FALSE);
@@ -789,7 +789,7 @@ XS(XS_PerlIO_get_layers)
 XS(XS_re_is_regexp); /* prototype to pass -Wmissing-prototypes */
 XS(XS_re_is_regexp)
 {
-    dVAR; 
+    dVAR;
     dXSARGS;
     PERL_UNUSED_VAR(cv);
 
@@ -808,7 +808,7 @@ XS(XS_re_regnames_count)
 {
     REGEXP *rx = PL_curpm ? PM_GETRE(PL_curpm) : NULL;
     SV * ret;
-    dVAR; 
+    dVAR;
     dXSARGS;
 
     if (items != 0)
@@ -903,7 +903,7 @@ XS(XS_re_regnames)
     EXTEND(SP, length+1); /* better extend stack just once */
     for (i = 0; i <= length; i++) {
         entry = av_fetch(av, i, FALSE);
-        
+
         if (!entry)
             Perl_croak(aTHX_ "NULL array element in re::regnames()");
 

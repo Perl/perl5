@@ -10,7 +10,7 @@
 #include <e32base.h>
 #include "PerlBase.h"
 
-#ifdef __SERIES60_3X__ 
+#ifdef __SERIES60_3X__
 EXPORT_C GLDEF_C TInt E32Dll(/*TDllReason aReason*/) { return KErrNone; }
 #else
 EXPORT_C GLDEF_C TInt E32Dll(TDllReason /*aReason*/) { return KErrNone; }

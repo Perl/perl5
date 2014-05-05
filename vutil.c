@@ -333,9 +333,9 @@ Perl_scan_version(pTHX_ const char *s, SV *rv, bool qv)
 			orev = rev;
  			rev += (*s - '0') * mult;
  			mult /= 10;
-			if (   (PERL_ABS(orev) > PERL_ABS(rev)) 
+			if (   (PERL_ABS(orev) > PERL_ABS(rev))
 			    || (PERL_ABS(rev) > VERSION_MAX )) {
-			    Perl_ck_warner(aTHX_ packWARN(WARN_OVERFLOW), 
+			    Perl_ck_warner(aTHX_ packWARN(WARN_OVERFLOW),
 					   "Integer overflow in version %d",VERSION_MAX);
 			    s = end - 1;
 			    rev = VERSION_MAX;
@@ -351,16 +351,16 @@ Perl_scan_version(pTHX_ const char *s, SV *rv, bool qv)
 			orev = rev;
  			rev += (*end - '0') * mult;
  			mult *= 10;
-			if (   (PERL_ABS(orev) > PERL_ABS(rev)) 
+			if (   (PERL_ABS(orev) > PERL_ABS(rev))
 			    || (PERL_ABS(rev) > VERSION_MAX )) {
-			    Perl_ck_warner(aTHX_ packWARN(WARN_OVERFLOW), 
+			    Perl_ck_warner(aTHX_ packWARN(WARN_OVERFLOW),
 					   "Integer overflow in version");
 			    end = s - 1;
 			    rev = VERSION_MAX;
 			    vinf = 1;
 			}
  		    }
- 		} 
+ 		}
   	    }
 
   	    /* Append revision */
@@ -468,7 +468,7 @@ Perl_new_version(pTHX_ SV *ver)
 	AV * const av = newAV();
 	AV *sav;
 	/* This will get reblessed later if a derived class*/
-	SV * const hv = newSVrv(rv, "version"); 
+	SV * const hv = newSVrv(rv, "version");
 	(void)sv_upgrade(hv, SVt_PVHV); /* needs to be an HV type */
 #ifndef NODEFAULT_SHAREKEYS
 	HvSHAREKEYS_on(hv);         /* key-sharing on by default */
@@ -585,7 +585,7 @@ VER_NV:
     {
 	STRLEN len;
 
-	/* may get too much accuracy */ 
+	/* may get too much accuracy */
 	char tbuf[64];
 	SV *sv = SvNVX(ver) > 10e50 ? newSV(64) : 0;
 	char *buf;
@@ -676,8 +676,8 @@ VER_PV:
     }
 
     s = SCAN_VERSION(version, ver, qv);
-    if ( *s != '\0' ) 
-	Perl_ck_warner(aTHX_ packWARN(WARN_MISC), 
+    if ( *s != '\0' )
+	Perl_ck_warner(aTHX_ packWARN(WARN_MISC),
 		       "Version string '%s' contains invalid data; "
 		       "ignoring: '%s'", version, s);
 
@@ -954,7 +954,7 @@ Perl_vstringify(pTHX_ SV *vs)
 /*
 =for apidoc vcmp
 
-Version object aware cmp.  Both operands must already have been 
+Version object aware cmp.  Both operands must already have been
 converted into version objects.
 
 =cut

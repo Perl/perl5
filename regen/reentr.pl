@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-# 
+#
 # Regenerate (overwriting only if changed):
 #
 #    reentr.h
@@ -29,7 +29,7 @@ getopts('Uv', \%opts);
 my %map = (
 	   V => "void",
 	   A => "char*",	# as an input argument
-	   B => "char*",	# as an output argument 
+	   B => "char*",	# as an output argument
 	   C => "const char*",	# as a read-only input argument
 	   I => "int",
 	   L => "long",
@@ -81,7 +81,7 @@ print $h <<EOF;
 #endif
 
 #ifdef USE_REENTRANT_API
- 
+
 /* Deprecations: some platforms have the said reentrant interfaces
  * but they are declared obsolete and are not to be used.  Often this
  * means that the platform has threadsafed the interfaces (hopefully).
@@ -115,7 +115,7 @@ print $h <<EOF;
 #    define REENTR_MEMZERO(a,b) memzero(a,b)
 #else
 #    define REENTR_MEMZERO(a,b) 0
-#endif 
+#endif
 
 #ifdef NETDB_R_OBSOLETE
 #   undef HAS_ENDHOSTENT_R
@@ -322,7 +322,7 @@ EOF
 esac
 
 EOF
-	close(U);		    
+	close(U);
     }
 }
 
@@ -545,7 +545,7 @@ EOF
 	PL_reentrant_buffer->$sz = REENTRANTUSUALSIZE;
 #           endif
 #       endif
-#   endif 
+#   endif
 EOF
 	    pushinitfree $genfunc;
 	    pushssif $endif;
@@ -574,7 +574,7 @@ EOF
     	    push @struct, <<EOF;
 #   ifdef USE_${GENFUNC}_ERRNO
 	int	_${genfunc}_errno;
-#   endif 
+#   endif
 EOF
 	    push @size, <<EOF;
 #if   !($D)
@@ -625,7 +625,7 @@ EOF
 EOF
 
         # Write out what we have learned.
-	
+
         my @v = 'a'..'z';
         my $v = join(", ", @v[0..$seenu{$func}-1]);
 	for my $p (@p) {
@@ -739,7 +739,7 @@ typedef struct {
 @wrap
 
 #endif /* USE_REENTRANT_API */
- 
+
 #endif
 EOF
 
@@ -757,7 +757,7 @@ my $c = open_print_header('reentr.c', <<'EOQ');
  * various library calls, such as getpwent_r.  The wrapping is done so
  * that other files like pp_sys.c calling those library functions need not
  * care about the differences between various platforms' idiosyncrasies
- * regarding these reentrant interfaces.  
+ * regarding these reentrant interfaces.
  */
 EOQ
 

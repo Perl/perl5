@@ -136,7 +136,7 @@ char *strcpy(), *strcat();
 
 #ifdef VMS
 #  include "handy.h"
-#else 
+#else
 #  include "../handy.h"
 #endif
 

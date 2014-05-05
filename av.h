@@ -22,7 +22,7 @@ struct xpvav {
  * Some things like "@_" and the scratchpad list do not set this, to
  * indicate that they are cheating (for efficiency) by not refcounting
  * the AV's contents.
- * 
+ *
  * SVpav_REIFY is only meaningful on such "fake" AVs (i.e. where SVpav_REAL
  * is not set).  It indicates that the fake AV is capable of becoming
  * real if the array needs to be modified in some way.  Functions that
@@ -78,7 +78,7 @@ Same as C<av_top_index()>.
 
 
 #define AvREALISH(av)	(SvFLAGS(av) & (SVpav_REAL|SVpav_REIFY))
-                                          
+
 #define AvFILL(av)	((SvRMAGICAL((const SV *) (av))) \
 			 ? mg_size(MUTABLE_SV(av)) : AvFILLp(av))
 #define av_tindex(av)   av_top_index(av)

@@ -545,14 +545,14 @@ PP(pp_defined)
     }
 
     if (is_dor) {
-        if(defined) 
-            RETURN; 
+        if(defined)
+            RETURN;
         if(op_type == OP_DOR)
             --SP;
         RETURNOP(cLOGOP->op_other);
     }
     /* assuming OP_DEFINED */
-    if(defined) 
+    if(defined)
         RETPUSHYES;
     RETPUSHNO;
 }
@@ -648,7 +648,7 @@ PP(pp_add)
 	    UV result;
 	    UV buv;
 	    bool buvok = SvUOK(svr);
-	
+
 	    if (buvok)
 		buv = SvUVX(svr);
 	    else {
@@ -890,7 +890,7 @@ PP(pp_rv2av)
     }
     else if (UNLIKELY(SvTYPE(sv) != type)) {
 	    GV *gv;
-	
+
 	    if (!isGV_with_GP(sv)) {
 		gv = Perl_softref2xv(aTHX_ sv, is_pp_rv2av ? an_array : a_hash,
 				     type, &sp);
@@ -1984,7 +1984,7 @@ There are three possible sources of taint
     * the source string
     * the pattern (both compile- and run-time, RXf_TAINTED / RXf_TAINTED_SEEN)
     * the replacement string (or expression under /e)
-    
+
 There are four destinations of taint and they are affected by the sources
 according to the rules below:
 
@@ -2162,7 +2162,7 @@ PP(pp_subst)
 	c = NULL;
 	doutf8 = FALSE;
     }
-    
+
     /* can do inplace substitution? */
     if (c
 #ifdef PERL_ANY_COW
@@ -2702,7 +2702,7 @@ try_autoload:
 
 	    Copy(MARK+1,AvARRAY(av),items,SV*);
 	    AvFILLp(av) = items - 1;
-	
+
 	    MARK = AvARRAY(av);
 	    while (items--) {
 		if (*MARK)
@@ -2768,7 +2768,7 @@ try_autoload:
 		    }
 		}
 		SP += items;
-		PUTBACK ;		
+		PUTBACK ;
 	    }
 	}
 	else {
@@ -3018,8 +3018,8 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
                 PL_stashcache, NULL, packname, packlen,
                 packname_is_utf8 ? HVhek_UTF8 : 0, 0, NULL, 0
 	    );
-	  
-        if (he) { 
+
+        if (he) {
             stash = INT2PTR(HV*,SvIV(HeVAL(he)));
             DEBUG_o(Perl_deb(aTHX_ "PL_stashcache hit %p for '%"SVf"'\n",
                              stash, sv));

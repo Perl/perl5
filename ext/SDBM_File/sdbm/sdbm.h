@@ -2,7 +2,7 @@
  * sdbm - ndbm work-alike hashed database library
  * based on Per-Ake Larson's Dynamic Hashing algorithms. BIT 18 (1978).
  * author: oz@nexus.yorku.ca
- * status: public domain. 
+ * status: public domain.
  */
 #define DBLKSIZ 4096
 #define PBLKSIZ 1024
@@ -204,7 +204,7 @@ Free_t   Perl_mfree proto((Malloc_t where));
 
 #ifdef I_MEMORY
 #include <memory.h>
-#endif      
+#endif
 
 #ifdef __cplusplus
 #define HAS_MEMCPY

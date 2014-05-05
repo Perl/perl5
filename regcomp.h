@@ -116,7 +116,7 @@
 	regnode program[1];	/* Unwarranted chumminess with compiler. */
 } regexp_internal;
 
-#define RXi_SET(x,y) (x)->pprivate = (void*)(y)   
+#define RXi_SET(x,y) (x)->pprivate = (void*)(y)
 #define RXi_GET(x)   ((regexp_internal *)((x)->pprivate))
 #define RXi_GET_DECL(r,ri) regexp_internal *ri = RXi_GET(r)
 /*
@@ -157,7 +157,7 @@ struct regnode_string {
     char string[1];
 };
 
-/* Argument bearing node - workhorse, 
+/* Argument bearing node - workhorse,
    arg1 is often for the data field */
 struct regnode_1 {
     U8	flags;
@@ -597,11 +597,11 @@ START_EXTERN_C
 #ifndef DOINIT
 EXTCONST regexp_engine PL_core_reg_engine;
 #else /* DOINIT */
-EXTCONST regexp_engine PL_core_reg_engine = { 
+EXTCONST regexp_engine PL_core_reg_engine = {
         Perl_re_compile,
         Perl_regexec_flags,
         Perl_re_intuit_start,
-        Perl_re_intuit_string, 
+        Perl_re_intuit_string,
         Perl_regfree_internal,
         Perl_reg_numbered_buff_fetch,
         Perl_reg_numbered_buff_store,
@@ -609,9 +609,9 @@ EXTCONST regexp_engine PL_core_reg_engine = {
         Perl_reg_named_buff,
         Perl_reg_named_buff_iter,
         Perl_reg_qr_package,
-#if defined(USE_ITHREADS)        
+#if defined(USE_ITHREADS)
         Perl_regdupe_internal,
-#endif        
+#endif
         Perl_re_op_compile
 };
 #endif /* DOINIT */
@@ -729,7 +729,7 @@ struct _reg_trie_data {
     reg_trie_state  *states;         /* state data */
     reg_trie_trans  *trans;          /* array of transition elements */
     char            *bitmap;         /* stclass bitmap */
-    U16 	    *jump;           /* optional 1 indexed array of offsets before tail 
+    U16 	    *jump;           /* optional 1 indexed array of offsets before tail
                                         for the node following a given word. */
     reg_trie_wordinfo *wordinfo;     /* array of info per word */
     U16             uniquecharcount; /* unique chars in trie (width of trans table) */
@@ -737,7 +737,7 @@ struct _reg_trie_data {
     STRLEN          minlen;          /* minimum length of words in trie - build/opt only? */
     STRLEN          maxlen;          /* maximum length of words in trie - build/opt only? */
     U32             prefixlen;       /* #chars in common prefix */
-    U32             statecount;      /* Build only - number of states in the states array 
+    U32             statecount;      /* Build only - number of states in the states array
                                         (including the unused zero state) */
     U32             wordcount;       /* Build only */
 #ifdef DEBUGGING
@@ -808,7 +808,7 @@ The three groups are: Compile, Execute, Extra. There is room for a
 further group, as currently only the low three bytes are used.
 
     Compile Options:
-    
+
     PARSE
     PEEP
     TRIE
@@ -953,7 +953,7 @@ re.pm, especially to the documentation.
 
 #define RE_SV_DUMPLEN(ItEm) (SvCUR(ItEm) - (SvTAIL(ItEm)!=0))
 #define RE_SV_TAIL(ItEm) (SvTAIL(ItEm) ? "$" : "")
-    
+
 #else /* if not DEBUGGING */
 
 #define GET_RE_DEBUG_FLAGS_DECL

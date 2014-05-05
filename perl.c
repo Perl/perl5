@@ -36,7 +36,7 @@
 #include "charclass_invlists.h"
 
 #ifdef NETWARE
-#include "nwutil.h"	
+#include "nwutil.h"
 #endif
 
 #ifdef DEBUG_LEAKING_SCALARS_FORK_DUMP
@@ -85,7 +85,7 @@ static void
 S_init_tls_and_interp(PerlInterpreter *my_perl)
 {
     dVAR;
-    if (!PL_curinterp) {			
+    if (!PL_curinterp) {
 	PERL_SET_INTERP(my_perl);
 #if defined(USE_ITHREADS)
 	INIT_THREADS;
@@ -681,7 +681,7 @@ perl_destruct(pTHXx)
 
 		vec[0].iov_base = (void*)&target;
 		vec[0].iov_len = sizeof(target);
-      
+
 		got = recvmsg(sock, &msg, 0);
 
 		if(got == 0)
@@ -762,7 +762,7 @@ perl_destruct(pTHXx)
 	close(fd[1]);
     }
 #endif
-    
+
     /* We must account for everything.  */
 
     /* Destroy the main CV and syntax tree */
@@ -839,7 +839,7 @@ perl_destruct(pTHXx)
 	    safesysfree(environ[i]);
 
 	/* Must use safesysfree() when working with environ. */
-	safesysfree(environ);		
+	safesysfree(environ);
 
 	environ = PL_origenviron;
     }
@@ -1517,7 +1517,7 @@ perl_parse(pTHXx_ XSINIT_t xsinit, int argc, char **argv, char **env)
 		   if ((PL_origargv[i] == s + 1
 #ifdef OS2
 			|| PL_origargv[i] == s + 2
-#endif 
+#endif
 			    )
 		       ||
 		       (aligned &&
@@ -1657,7 +1657,7 @@ S_Internals_V(pTHX_ CV *cv)
 #endif
     const int entries = 3 + local_patch_count;
     int i;
-    static const char non_bincompat_options[] = 
+    static const char non_bincompat_options[] =
 #  ifdef DEBUGGING
 			     " DEBUGGING"
 #  endif
@@ -1750,7 +1750,7 @@ S_Internals_V(pTHX_ CV *cv)
 #  endif
 #  ifdef USE_FAST_STDIO
 			     " USE_FAST_STDIO"
-#  endif	       
+#  endif
 #  ifdef USE_HASH_SEED_EXPLICIT
 			     " USE_HASH_SEED_EXPLICIT"
 #  endif
@@ -1762,10 +1762,10 @@ S_Internals_V(pTHX_ CV *cv)
 #  endif
 #  ifdef USE_PERL_ATOF
 			     " USE_PERL_ATOF"
-#  endif	       
+#  endif
 #  ifdef USE_SITECUSTOMIZE
 			     " USE_SITECUSTOMIZE"
-#  endif	       
+#  endif
 	;
     PERL_UNUSED_ARG(cv);
     PERL_UNUSED_ARG(items);
@@ -2491,7 +2491,7 @@ Perl_get_sv(pTHX_ const char *name, I32 flags)
 =for apidoc p||get_av
 
 Returns the AV of the specified Perl global or package array with the given
-name (so it won't work on lexical variables).  C<flags> are passed 
+name (so it won't work on lexical variables).  C<flags> are passed
 to C<gv_fetchpv>.  If C<GV_ADD> is set and the
 Perl variable does not exist then it will be created.  If C<flags> is zero
 and the variable does not exist then NULL is returned.
@@ -2596,7 +2596,7 @@ Perl_get_cv(pTHX_ const char *name, I32 flags)
 
 =for apidoc p||call_argv
 
-Performs a callback to the specified named and package-scoped Perl subroutine 
+Performs a callback to the specified named and package-scoped Perl subroutine
 with C<argv> (a NULL-terminated array of strings) as arguments.  See
 L<perlcall>.
 
@@ -3233,7 +3233,7 @@ Perl_moreswitches(pTHX_ const char *s)
 	}
 	return s;
     case 'D':
-    {	
+    {
 #ifdef DEBUGGING
 	forbid_setid('D', FALSE);
 	s++;
@@ -3245,7 +3245,7 @@ Perl_moreswitches(pTHX_ const char *s)
 	for (s++; isWORDCHAR(*s); s++) ;
 #endif
 	return s;
-    }	
+    }
     case 'h':
 	usage();
     case 'i':
@@ -3337,7 +3337,7 @@ Perl_moreswitches(pTHX_ const char *s)
 	    /* We allow -M'Module qw(Foo Bar)'	*/
 	    while(isWORDCHAR(*s) || *s==':') {
 		if( *s++ == ':' ) {
-		    if( *s == ':' ) 
+		    if( *s == ':' )
 			s++;
 		    else
 			colon = TRUE;
@@ -3346,7 +3346,7 @@ Perl_moreswitches(pTHX_ const char *s)
 	    if (s == start)
 		Perl_croak(aTHX_ "Module name required with -%c option",
 				    option);
-	    if (colon) 
+	    if (colon)
 		Perl_croak(aTHX_ "Invalid module name %.*s with -%c option: "
 				    "contains single ':'",
 				    (int)(s - start), start, option);
@@ -3717,7 +3717,7 @@ S_open_script(pTHX_ const char *scriptname, bool dosearch, bool *suidscript)
 		 * suidperl?
 		 */
 		*suidscript = TRUE;
-		/* PSz 20 Feb 04  
+		/* PSz 20 Feb 04
 		 * Be supersafe and do some sanity-checks.
 		 * Still, can we be sure we got the right thing?
 		 */
@@ -3753,7 +3753,7 @@ S_open_script(pTHX_ const char *scriptname, bool dosearch, bool *suidscript)
 	 * filter magic is used to implement it. ) This is *not* a general
 	 * replacement for a /dev/null.  What we do here is create a temp
 	 * file (an empty file), open up that as the script, and then
-	 * immediately close and unlink it.  Close enough for jazz. */ 
+	 * immediately close and unlink it.  Close enough for jazz. */
 #define FAKE_BIT_BUCKET_PREFIX "/tmp/perlnull-"
 #define FAKE_BIT_BUCKET_SUFFIX "XXXXXXXX"
 #define FAKE_BIT_BUCKET_TEMPLATE FAKE_BIT_BUCKET_PREFIX FAKE_BIT_BUCKET_SUFFIX
@@ -4143,7 +4143,7 @@ S_init_predump_symbols(pTHX)
        So a compromise is to set up the correct @IO::File::ISA,
        so that code that does C<use IO::Handle>; will still work.
     */
-		   
+
     Perl_populate_isa(aTHX_ STR_WITH_LEN("IO::File::ISA"),
 		      STR_WITH_LEN("IO::Handle::"),
 		      STR_WITH_LEN("IO::Seekable::"),

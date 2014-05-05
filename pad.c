@@ -109,7 +109,7 @@ write is called (if necessary).
 The flag SVs_PADSTALE is cleared on lexicals each time the my() is executed,
 and set on scope exit.  This allows the
 'Variable $x is not available' warning
-to be generated in evals, such as 
+to be generated in evals, such as
 
     { my $x = 1; sub f { eval '$x'} } f();
 
@@ -617,7 +617,7 @@ Perl_pad_add_name_pvn(pTHX_ const char *namepv, STRLEN namelen,
 		   (UV)flags);
 
     namesv = newSV_type((ourstash || typestash) ? SVt_PVMG : SVt_PVNV);
-    
+
     if ((is_utf8 = ((flags & padadd_UTF8_NAME) != 0))) {
         namepv = (const char*)bytes_from_utf8((U8*)namepv, &namelen, &is_utf8);
     }
@@ -981,7 +981,7 @@ Perl_pad_findmy_pvn(pTHX_ const char *namepv, STRLEN namelen, U32 flags)
 
     offset = pad_findlex(namepv, namelen, flags,
                 PL_compcv, PL_cop_seqmax, 1, NULL, &out_sv, &out_flags);
-    if ((PADOFFSET)offset != NOT_IN_PAD) 
+    if ((PADOFFSET)offset != NOT_IN_PAD)
 	return offset;
 
     /* look for an our that's being introduced; this allows
@@ -1250,7 +1250,7 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv,
 		DEBUG_Xv(PerlIO_printf(Perl_debug_log,
 		    "Pad findlex cv=0x%"UVxf" matched: offset=%ld flags=0x%lx index=%lu\n",
 		    PTR2UV(cv), (long)offset, (unsigned long)*out_flags,
-		    (unsigned long) PARENT_PAD_INDEX(*out_name_sv) 
+		    (unsigned long) PARENT_PAD_INDEX(*out_name_sv)
 		));
 	    }
 
@@ -2087,7 +2087,7 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside, bool newcv)
 		    S_unavailable(aTHX_ namesv);
 		    sv = NULL;
 		}
-		else 
+		else
 		    SvREFCNT_inc_simple_void_NN(sv);
 	    }
 	    if (!sv) {
@@ -2312,7 +2312,7 @@ Perl_pad_push(pTHX_ PADLIST *padlist, int depth)
 		    av_store(newpad, ix, SvREFCNT_inc(oldpad[ix]));
 		}
 		else {		/* our own lexical */
-		    SV *sv; 
+		    SV *sv;
 		    if (sigil == '@')
 			sv = MUTABLE_SV(newAV());
 		    else if (sigil == '%')
@@ -2447,8 +2447,8 @@ Perl_padlist_dup(pTHX_ PADLIST *srcpad, CLONE_PARAMS *param)
 			       interacts with lexicals.  */
 			    pad1a[ix] = sv_dup_inc(oldpad[ix], param);
 			} else {
-			    SV *sv; 
-			    
+			    SV *sv;
+
 			    if (sigil == '@')
 				sv = MUTABLE_SV(newAV());
 			    else if (sigil == '%')
