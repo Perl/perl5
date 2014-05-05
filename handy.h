@@ -304,19 +304,20 @@ typedef U64TYPE U64;
 =head1 SV-Body Allocation
 
 =for apidoc Ama|SV*|newSVpvs|const char* s
-Like C<newSVpvn>, but takes a literal string instead of a string/length pair.
+Like C<newSVpvn>, but takes a literal C<NUL>-terminated string instead of a
+string/length pair.
 
 =for apidoc Ama|SV*|newSVpvs_flags|const char* s|U32 flags
-Like C<newSVpvn_flags>, but takes a literal string instead of a string/length
-pair.
+Like C<newSVpvn_flags>, but takes a literal C<NUL>-terminated string instead of
+a string/length pair.
 
 =for apidoc Ama|SV*|newSVpvs_share|const char* s
-Like C<newSVpvn_share>, but takes a literal string instead of a string/length
-pair and omits the hash parameter.
+Like C<newSVpvn_share>, but takes a literal C<NUL>-terminated string instead of
+a string/length pair and omits the hash parameter.
 
 =for apidoc Am|void|sv_catpvs_flags|SV* sv|const char* s|I32 flags
-Like C<sv_catpvn_flags>, but takes a literal string instead of a
-string/length pair.
+Like C<sv_catpvn_flags>, but takes a literal C<NUL>-terminated string instead
+of a string/length pair.
 
 =for apidoc Am|void|sv_catpvs_nomg|SV* sv|const char* s
 Like C<sv_catpvn_nomg>, but takes a literal string instead of a
@@ -343,7 +344,8 @@ string/length pair.
 =head1 Memory Management
 
 =for apidoc Ama|char*|savepvs|const char* s
-Like C<savepvn>, but takes a literal string instead of a string/length pair.
+Like C<savepvn>, but takes a literal C<NUL>-terminated string instead of a
+string/length pair.
 
 =for apidoc Ama|char*|savesharedpvs|const char* s
 A version of C<savepvs()> which allocates the duplicate string in memory
