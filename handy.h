@@ -951,8 +951,7 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
 #  define _HIGHEST_REGCOMP_DOT_H_SYNC _CC_VERTSPACE
 
 /* The members of the third group below do not need to be coordinated with data
- * structures in regcomp.[ch] and regexec.c.  But they should be added to
- * bootstrap_ctype() */
+ * structures in regcomp.[ch] and regexec.c. */
 #  define _CC_IDFIRST           17
 #  define _CC_CHARNAME_CONT     18
 #  define _CC_NONLATIN1_FOLD    19
@@ -1029,9 +1028,6 @@ EXTCONST  U32 PL_charclass[] = {
 #  else /* ! DOINIT */
 EXTCONST U32 PL_charclass[];
 #  endif
-#endif  /* Has perl.h */
-
-#if defined(H_PERL) && ! defined(BOOTSTRAP_CHARSET)
 
     /* The 1U keeps Solaris from griping when shifting sets the uppermost bit */
 #   define _CC_mask(classnum) (1U << (classnum))
@@ -1094,17 +1090,11 @@ EXTCONST U32 PL_charclass[];
                                             _generic_isCC(c, _CC_NON_FINAL_FOLD)
 #   define _IS_IN_SOME_FOLD_ONLY_FOR_USE_BY_REGCOMP_DOT_C(c) \
                                             _generic_isCC(c, _CC_IS_IN_SOME_FOLD)
-#else   /* Either don't have perl.h or don't want to use char_class_tab.h */
+#else   /* else we don't have perl.h */
 
     /* If we don't have perl.h, we are compiling a utility program.  Below we
      * hard-code various macro definitions that wouldn't otherwise be available
-     * to it.  We can also get here if we are configured to bootstrap up Perl
-     * on a non-ASCII platform that doesn't have a working Perl (currently only
-     * EBCDIC).  For these we currently use the native definitions to get
-     * things going.  (It should also be possible to use the translation
-     * function NATIVE_TO_LATIN1(), but that is an extra layer of dependence on
-     * Perl, so it is currently avoided for the macros where it's possible to
-     * do so.) */
+     * to it. */
 #   ifdef EBCDIC
         /* Use the native functions.  They likely will return false for all
          * non-ASCII values, but this makes sure */
@@ -1135,9 +1125,8 @@ EXTCONST U32 PL_charclass[];
                           || ((c) >= 'a' && (c) <= 'f')                      \
                           || ((c) <= 'F' && (c) >= 'A'))
 
-    /* The _L1 macros may be unnecessary for both the utilities and for
-     * bootstrapping; I (khw) added them during debugging of bootstrapping, and
-     * it seems best to keep them. */
+    /* The _L1 macros may be unnecessary for the utilities; I (khw) added them
+     * during debugging, and it seems best to keep them. */
 #   define isPSXSPC_A(c)     isSPACE_A(c) /* XXX Assumes SPACE matches '\v' */
 #   define isALPHA_L1(c)     (isUPPER_L1(c) || isLOWER_L1(c))
 #   define isALPHANUMERIC_L1(c) (isALPHA_L1(c) || isDIGIT_A(c))
@@ -1204,7 +1193,7 @@ EXTCONST U32 PL_charclass[];
          (FITS_IN_8_BITS(c) && S_bootstrap_ctype((U8) (c), (classnum), TRUE))
 #   define _generic_isCC_A(c, classnum)                                      \
          (FITS_IN_8_BITS(c) && S_bootstrap_ctype((U8) (c), (classnum), FALSE))
-#endif  /* End of no perl.h or have BOOTSTRAP_CHARSET */
+#endif  /* End of no perl.h */
 
 #define isALPHANUMERIC(c)  isALPHANUMERIC_A(c)
 #define isALPHA(c)   isALPHA_A(c)
