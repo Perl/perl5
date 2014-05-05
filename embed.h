@@ -1612,11 +1612,9 @@
 #define glob_assign_ref(a,b)	S_glob_assign_ref(aTHX_ a,b)
 #define more_sv()		S_more_sv(aTHX)
 #define not_a_number(a)		S_not_a_number(aTHX_ a)
-#define not_incrementable(a)	S_not_incrementable(aTHX_ a)
 #define ptr_table_find		S_ptr_table_find
 #define sv_2iuv_common(a)	S_sv_2iuv_common(aTHX_ a)
 #define sv_add_arena(a,b,c)	S_sv_add_arena(aTHX_ a,b,c)
-#define sv_display(a,b,c)	S_sv_display(aTHX_ a,b,c)
 #define sv_pos_b2u_midway(a,b,c,d)	S_sv_pos_b2u_midway(aTHX_ a,b,c,d)
 #define sv_pos_u2b_cached(a,b,c,d,e,f,g)	S_sv_pos_u2b_cached(aTHX_ a,b,c,d,e,f,g)
 #define sv_pos_u2b_forwards	S_sv_pos_u2b_forwards

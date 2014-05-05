@@ -134,12 +134,15 @@ like $warning,
     'spaces in warnings with periods at the end are matched lightly';
 
 # Wrapped links
+SKIP: {
+skip("We no longer have any multi-line links", 1);
 seek STDERR, 0,0;
 $warning = '';
 warn "Argument \"%s\" treated as 0 in increment (++)";
 like $warning,
     qr/Auto-increment.*Auto-decrement/s,
     'multiline links are not truncated';
+}
 
 {
 # Find last warning in perldiag.pod, and last items if any
