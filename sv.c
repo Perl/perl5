@@ -1923,9 +1923,9 @@ S_glob_2number(pTHX_ GV * const gv)
    Instead, IV/UV and NV need to be given equal rights. So as to not lose
    precision as a side effect of conversion (which would lead to insanity
    and the dragon(s) in t/op/numconvert.t getting very angry) the intent is
-   1) to distinguish between IV/UV/NV slots that have cached a valid
-      conversion where precision was lost and IV/UV/NV slots that have a
-      valid conversion which has lost no precision
+   1) to distinguish between IV/UV/NV slots that have a valid conversion cached
+      where precision was lost, and IV/UV/NV slots that have a valid conversion
+      which has lost no precision
    2) to ensure that if a numeric conversion to one form is requested that
       would lose precision, the precise conversion (or differently
       imprecise conversion) is also performed and cached, to prevent
