@@ -13443,12 +13443,12 @@ parseit:
 		    e = strchr(RExC_parse++, '}');
                     if (!e)
                         vFAIL2("Missing right brace on \\%c{}", c);
-		    while (isSPACE(UCHARAT(RExC_parse)))
+		    while (isSPACE(*RExC_parse))
 		        RExC_parse++;
                     if (e == RExC_parse)
                         vFAIL2("Empty \\%c{}", c);
 		    n = e - RExC_parse;
-		    while (isSPACE(UCHARAT(RExC_parse + n - 1)))
+		    while (isSPACE(*(RExC_parse + n - 1)))
 		        n--;
 		}
 		else {
@@ -13468,7 +13468,7 @@ parseit:
                           * that bit) */
                          value ^= 'P' ^ 'p';
 
-			 while (isSPACE(UCHARAT(RExC_parse))) {
+			 while (isSPACE(*RExC_parse)) {
 			      RExC_parse++;
 			      n--;
 			 }
