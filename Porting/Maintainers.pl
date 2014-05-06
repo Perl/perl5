@@ -388,28 +388,8 @@ use File::Glob qw(:case);
     },
 
     'Encode' => {
-        'DISTRIBUTION' => 'DANKOGAI/Encode-2.57.tar.gz',
+        'DISTRIBUTION' => 'DANKOGAI/Encode-2.60.tar.gz',
         'FILES'        => q[cpan/Encode],
-        'CUSTOMIZED'   => [
-            # Waiting to be merged upstream: see CPAN RT#95130
-            qw(
-                bin/enc2xs
-                Byte/Makefile.PL
-                CN/Makefile.PL
-                EBCDIC/Makefile.PL
-                encengine.c
-                Encode/encode.h
-                Encode/encode.h
-                Encode/Makefile_PL.e2x
-                Encode.pm
-                Encode.xs
-                JP/Makefile.PL
-                KR/Makefile.PL
-                Symbol/Makefile.PL
-                TW/Makefile.PL
-                Unicode/Unicode.xs
-            ),
-        ],
     },
 
     'encoding::warnings' => {

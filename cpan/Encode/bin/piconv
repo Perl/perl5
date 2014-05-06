@@ -1,5 +1,5 @@
 #!./perl
-# $Id: piconv,v 2.5 2013/04/26 18:30:46 dankogai Exp $
+# $Id: piconv,v 2.6 2014/03/28 02:37:42 dankogai Exp $
 #
 use 5.8.0;
 use strict;
@@ -68,14 +68,16 @@ To:     $to => $cto
 EOT
 }
 
-my %use_bom = map { $_ => 1 } qw/UTF-16 UTF-32/;
+my %use_bom =
+  map { $_ => 1 } qw/UTF-16 UTF-16BE UTF-16LE UTF-32 UTF-32BE UTF-32LE/;
 
 # we do not use <> (or ARGV) for the sake of binmode()
 @ARGV or push @ARGV, \*STDIN;
 
 unless ( $scheme eq 'perlio' ) {
     binmode STDOUT;
-    my $need2slurp = $use_bom{ find_encoding($to)->name };
+    my $need2slurp = $use_bom{ find_encoding($to)->name }
+      || $use_bom{ find_encoding($from)->name };
     for my $argv (@ARGV) {
         my $ifh = ref $argv ? $argv : undef;
 	$ifh or open $ifh, "<", $argv or warn "Can't open $argv: $!" and next;
@@ -169,7 +171,7 @@ The following are mainly of interest to Encode hackers:
   -D,--debug          show debug information
   -S,--scheme scheme  use the scheme for conversion
 Those are handy when you can only see ASCII characters:
-  -p,--perlqq         transliterate characters missing in encoding to \x{HHHH}
+  -p,--perlqq         transliterate characters missing in encoding to \\x{HHHH}
                       where HHHH is the hexadecimal Unicode code point
   --htmlcref          transliterate characters missing in encoding to &#NNN;
                       where NNN is the decimal Unicode code point
