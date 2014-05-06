@@ -631,7 +631,7 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
 /* regen/regcharclass.pl generates is_UTF8_CHAR_utf8_safe() macros for up to
  * these number of bytes.  So this has to be coordinated with it */
 #ifdef EBCDIC
-#   define IS_UTF8_CHAR_FAST(n) ((n) <= 5)
+#   define IS_UTF8_CHAR_FAST(n) ((n) <= 3)
 #else
 #   define IS_UTF8_CHAR_FAST(n) ((n) <= 4)
 #endif

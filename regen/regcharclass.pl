@@ -12,9 +12,8 @@ our $hex_fmt= "0x%02X";
 sub DEBUG () { 0 }
 $|=1 if DEBUG;
 
-sub ASCII_PLATFORM { (ord('A') == 65) }
-
 require 'regen/regen_lib.pl';
+require 'regen/charset_translations.pl';
 require "regen/regcharclass_multi_char_folds.pl";
 
 =head1 NAME
@@ -162,38 +161,36 @@ License or the Artistic License, as specified in the README file.
 #
 
 sub __uni_latin1 {
+    my $charset= shift;
     my $str= shift;
     my $max= 0;
     my @cp;
     my @cp_high;
     my $only_has_invariants = 1;
+    my @a2n = get_a2n($charset);
     for my $ch ( split //, $str ) {
         my $cp= ord $ch;
-        push @cp, $cp;
-        push @cp_high, $cp if $cp > 255;
         $max= $cp if $max < $cp;
-        if (! ASCII_PLATFORM && $only_has_invariants) {
-            if ($cp > 255) {
-                $only_has_invariants = 0;
-            }
-            else {
-                my $temp = chr($cp);
-                utf8::upgrade($temp);
-                my @utf8 = unpack "U0C*", $temp;
-                $only_has_invariants = (@utf8 == 1 && $utf8[0] == $cp);
-            }
+        if ($cp > 255) {
+            push @cp, $cp;
+            push @cp_high, $cp;
+        }
+        else {
+            push @cp, $a2n[$cp];
         }
     }
     my ( $n, $l, $u );
-    $only_has_invariants = $max < 128 if ASCII_PLATFORM;
+    $only_has_invariants = ($charset =~ /ascii/i) ? $max < 128 : $max < 160;
     if ($only_has_invariants) {
         $n= [@cp];
     } else {
         $l= [@cp] if $max && $max < 256;
 
-        $u= $str;
-        utf8::upgrade($u);
-        $u= [ unpack "U0C*", $u ] if defined $u;
+        my @u;
+        for my $ch ( split //, $str ) {
+            push @u, map { ord } split //, cp_2_utfbytes(ord $ch, $charset);
+        }
+        $u = \@u;
     }
     return ( \@cp, \@cp_high, $n, $l, $u );
 }
@@ -354,10 +351,6 @@ sub new {
             $str= chr eval $str;
         } elsif ( $str =~ /^0x/ ) {
             $str= eval $str;
-
-            # Convert from Unicode/ASCII to native, if necessary
-            $str = utf8::unicode_to_native($str) if ! ASCII_PLATFORM
-                                                    && $str <= 0xFF;
             $str = chr $str;
         } elsif ( $str =~ / \s* \\p \{ ( .*? ) \} /x) {
             my $property = $1;
@@ -393,7 +386,7 @@ sub new {
         } else {
             die "Unparsable line: $txt\n";
         }
-        my ( $cp, $cp_high, $low, $latin1, $utf8 )= __uni_latin1( $str );
+        my ( $cp, $cp_high, $low, $latin1, $utf8 )= __uni_latin1( $opt{charset}, $str );
         my $UTF8= $low   || $utf8;
         my $LATIN1= $low || $latin1;
         my $high = (scalar grep { $_ < 256 } @$cp) ? 0 : $utf8;
@@ -1107,8 +1100,8 @@ sub _cond_as_str {
             # bounds.  (No legal UTF-8 character can begin with anything in
             # this range, so we don't have to worry about this being a
             # continuation byte or not.)
-            if (ASCII_PLATFORM
-                && ! $opts_ref->{safe}
+            if ($opts_ref->{charset} =~ /ascii/i
+                && (! $opts_ref->{safe} && ! $opts_ref->{no_length_checks})
                 && $opts_ref->{type} =~ / ^ (?: utf8 | high ) $ /xi)
             {
                 my $lower_limit_is_80 = ($ranges[$i]->[0] == 0x80);
@@ -1359,19 +1352,21 @@ WARNING: These macros are for internal Perl core use only, and may be
 changed or removed without notice.
 EOF
     );
-    print $out_fh "\n#ifndef H_REGCHARCLASS   /* Guard against nested #includes */\n#define H_REGCHARCLASS 1\n\n";
+    print $out_fh "\n#ifndef H_REGCHARCLASS   /* Guard against nested #includes */\n#define H_REGCHARCLASS 1\n";
 
     my ( $op, $title, @txt, @types, %mods );
-    my $doit= sub {
+    my $doit= sub ($) {
         return unless $op;
 
+        my $charset = shift;
+
         # Skip if to compile on a different platform.
-        return if delete $mods{only_ascii_platform} && ! ASCII_PLATFORM;
-        return if delete $mods{only_ebcdic_platform} && ord 'A' != 193;
+        return if delete $mods{only_ascii_platform} && $charset !~ /ascii/i;
+        return if delete $mods{only_ebcdic_platform} && $charset !~ /ebcdic/i;
 
         print $out_fh "/*\n\t$op: $title\n\n";
         print $out_fh join "\n", ( map { "\t$_" } @txt ), "*/", "";
-        my $obj= __PACKAGE__->new( op => $op, title => $title, txt => \@txt );
+        my $obj= __PACKAGE__->new( op => $op, title => $title, txt => \@txt, charset => $charset);
 
         #die Dumper(\@types,\%mods);
 
@@ -1402,18 +1397,30 @@ EOF
                     type     => $type,
                     ret_type => $ret,
                     safe     => $mod eq 'safe' && $type !~ /^cp/,
+                    charset  => $charset,
                 );
                 print $out_fh $macro, "\n";
             }
         }
     };
 
-    while ( <DATA> ) {
+    my @data = <DATA>;
+    foreach my $charset (get_supported_code_pages()) {
+        my $first_time = 1;
+        undef $op;
+        undef $title;
+        undef @txt;
+        undef @types;
+        undef %mods;
+        print $out_fh "\n", get_conditional_compile_line_start($charset);
+        my @data_copy = @data;
+        for (@data_copy) {
         s/^ \s* (?: \# .* ) ? $ //x;    # squeeze out comment and blanks
         next unless /\S/;
         chomp;
         if ( /^[A-Z]/ ) {
-            $doit->();  # This starts a new definition; do the previous one
+            $doit->($charset) unless $first_time;  # This starts a new definition; do the previous one
+            $first_time = 0;
             ( $op, $title )= split /\s*:\s*/, $_, 2;
             @txt= ();
         } elsif ( s/^=>// ) {
@@ -1425,7 +1432,9 @@ EOF
             push @txt, "$_";
         }
     }
-    $doit->();
+    $doit->($charset);
+        print $out_fh get_conditional_compile_line_end();
+    }
 
     print $out_fh "\n#endif /* H_REGCHARCLASS */\n";
 
@@ -1526,9 +1535,9 @@ EOF
 #   fast        The input string is valid UTF-8.  No bounds checking is done,
 #               and the macro can make assumptions that lead to faster
 #               execution.
-#   only_ascii_platform   Skip this definition if this program is being run on
+#   only_ascii_platform   Skip this definition if the character set is for
 #               a non-ASCII platform.
-#   only_ebcdic_platform  Skip this definition if this program is being run on
+#   only_ebcdic_platform  Skip this definition if the character set is for
 #               a non-EBCDIC platform.
 # No modifier need be specified; fast is assumed for this case.  If both
 # 'fast', and 'safe' are specified, two macros will be created for each
@@ -1623,12 +1632,9 @@ GCB_V: Grapheme_Cluster_Break=V
 #=> UTF8 :safe only_ascii_platform
 #0x0 - 0x1FFFFF
 
-# This hasn't been commented out, because we haven't an EBCDIC platform to run
-# it on, and the 3 types of EBCDIC allegedly supported by Perl would have
-# different results
-UTF8_CHAR: Matches utf8 from 1 to 5 bytes
+UTF8_CHAR: Matches utf8 from 1 to 3 bytes
 => UTF8 :safe only_ebcdic_platform
-0x0 - 0x3FFFFF:
+0x0 - 0x3FFF
 
 QUOTEMETA: Meta-characters that \Q should quote
 => high :fast
