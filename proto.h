@@ -57,11 +57,12 @@ PERL_CALLCONV bool	Perl__is_utf8_FOO(pTHX_ const U8 classnum, const U8 *p)
 #define PERL_ARGS_ASSERT__IS_UTF8_FOO	\
 	assert(p)
 
-PERL_STATIC_INLINE STRLEN	S__is_utf8_char_slow(const U8 *s, const STRLEN len)
+PERL_STATIC_INLINE STRLEN	S__is_utf8_char_slow(const U8 *s, const U8 *e)
 			__attribute__warn_unused_result__
-			__attribute__nonnull__(1);
+			__attribute__nonnull__(1)
+			__attribute__nonnull__(2);
 #define PERL_ARGS_ASSERT__IS_UTF8_CHAR_SLOW	\
-	assert(s)
+	assert(s); assert(e)
 
 PERL_CALLCONV bool	Perl__is_utf8_mark(pTHX_ const U8 *p)
 			__attribute__warn_unused_result__

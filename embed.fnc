@@ -633,7 +633,7 @@ pR	|OP*	|invert		|NULLOK OP* cmd
 ApR	|I32	|is_lvalue_sub
 : Used in cop.h
 XopR	|I32	|was_lvalue_sub
-iRn	|STRLEN	|_is_utf8_char_slow|NN const U8 *s|const STRLEN len
+iRn	|STRLEN	|_is_utf8_char_slow|NN const U8 *s|NN const U8 *e
 ADMpPR	|U32	|to_uni_upper_lc|U32 c
 ADMpPR	|U32	|to_uni_title_lc|U32 c
 ADMpPR	|U32	|to_uni_lower_lc|U32 c

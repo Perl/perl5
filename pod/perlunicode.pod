@@ -1701,7 +1701,7 @@ are valid UTF-8.
 
 =item *
 
-C<is_utf8_char_buf(buf, buf_end)> returns true if the pointer points to
+C<isUTF8_CHAR(buf, buf_end)> returns true if the pointer points to
 a valid UTF-8 character.
 
 =item *

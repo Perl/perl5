@@ -310,13 +310,7 @@ Perl_uvchr_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
 /*
 =for apidoc is_utf8_char_buf
 
-Returns the number of bytes that comprise the first UTF-8 encoded character in
-buffer C<buf>.  C<buf_end> should point to one position beyond the end of the
-buffer.  0 is returned if C<buf> does not point to a complete, valid UTF-8
-encoded character.
-
-Note that an INVARIANT character (i.e. ASCII on non-EBCDIC
-machines) is a valid UTF-8 character.
+This is identical to the macro isUTF8_CHAR.
 
 =cut */
 
@@ -324,22 +318,9 @@ STRLEN
 Perl_is_utf8_char_buf(const U8 *buf, const U8* buf_end)
 {
 
-    STRLEN len;
-
     PERL_ARGS_ASSERT_IS_UTF8_CHAR_BUF;
 
-    if (buf_end <= buf) {
-	return 0;
-    }
-
-    len = buf_end - buf;
-    if (len > UTF8SKIP(buf)) {
-	len = UTF8SKIP(buf);
-    }
-
-    if (IS_UTF8_CHAR_FAST(len))
-        return IS_UTF8_CHAR(buf, len) ? len : 0;
-    return _is_utf8_char_slow(buf, len);
+    return isUTF8_CHAR(buf, buf_end);
 }
 
 /*
@@ -362,7 +343,7 @@ Perl_is_utf8_char(const U8 *s)
     PERL_ARGS_ASSERT_IS_UTF8_CHAR;
 
     /* Assumes we have enough space, which is why this is deprecated */
-    return is_utf8_char_buf(s, s + UTF8SKIP(s));
+    return isUTF8_CHAR(s, s + UTF8SKIP(s));
 }
 
 
@@ -389,28 +370,11 @@ Perl_is_utf8_string(const U8 *s, STRLEN len)
     PERL_ARGS_ASSERT_IS_UTF8_STRING;
 
     while (x < send) {
-	 /* Inline the easy bits of is_utf8_char() here for speed... */
-	 if (UTF8_IS_INVARIANT(*x)) {
-	    x++;
-	 }
-	 else {
-	      /* ... and call is_utf8_char() only if really needed. */
-	     const STRLEN c = UTF8SKIP(x);
-	     const U8* const next_char_ptr = x + c;
-
-	     if (next_char_ptr > send) {
-		 return FALSE;
-	     }
-
-	     if (IS_UTF8_CHAR_FAST(c)) {
-	         if (!IS_UTF8_CHAR(x, c))
-		     return FALSE;
-	     }
-	     else if (! _is_utf8_char_slow(x, c)) {
-		 return FALSE;
-	     }
-	     x = next_char_ptr;
-	 }
+        STRLEN len = isUTF8_CHAR(x, send);
+        if (UNLIKELY(! len)) {
+            return FALSE;
+        }
+        x += len;
     }
 
     return TRUE;
@@ -444,34 +408,17 @@ Perl_is_utf8_string_loclen(const U8 *s, STRLEN len, const U8 **ep, STRLEN *el)
 {
     const U8* const send = s + (len ? len : strlen((const char *)s));
     const U8* x = s;
-    STRLEN c;
     STRLEN outlen = 0;
 
     PERL_ARGS_ASSERT_IS_UTF8_STRING_LOCLEN;
 
     while (x < send) {
-	 const U8* next_char_ptr;
-
-	 /* Inline the easy bits of is_utf8_char() here for speed... */
-	 if (UTF8_IS_INVARIANT(*x))
-	     next_char_ptr = x + 1;
-	 else {
-	     /* ... and call is_utf8_char() only if really needed. */
-	     c = UTF8SKIP(x);
-	     next_char_ptr = c + x;
-	     if (next_char_ptr > send) {
-		 goto out;
-	     }
-	     if (IS_UTF8_CHAR_FAST(c)) {
-	         if (!IS_UTF8_CHAR(x, c))
-		     c = 0;
-	     } else
-	         c = _is_utf8_char_slow(x, c);
-	     if (!c)
-	         goto out;
-	 }
-         x = next_char_ptr;
-	 outlen++;
+        STRLEN len = isUTF8_CHAR(x, send);
+        if (UNLIKELY(! len)) {
+            goto out;
+        }
+        x += len;
+        outlen++;
     }
 
  out:
@@ -1811,7 +1758,7 @@ S_is_utf8_common(pTHX_ const U8 *const p, SV **swash,
      * as far as there being enough bytes available in it to accommodate the
      * character without reading beyond the end, and pass that number on to the
      * validating routine */
-    if (! is_utf8_char_buf(p, p + UTF8SKIP(p))) {
+    if (! isUTF8_CHAR(p, p + UTF8SKIP(p))) {
         if (ckWARN_d(WARN_UTF8)) {
             Perl_warner(aTHX_ packWARN2(WARN_DEPRECATED,WARN_UTF8),
 		    "Passing malformed UTF-8 to \"%s\" is deprecated", swashname);
