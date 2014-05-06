@@ -6848,6 +6848,8 @@ Perl_yylex(pTHX)
 
     case '\'':
 	s = scan_str(s,!!PL_madskills,FALSE,FALSE,FALSE,NULL);
+	if (!s)
+	    missingterm(NULL);
 	COPLINE_SET_FROM_MULTI_END;
 	DEBUG_T( { printbuf("### Saw string before %s\n", s); } );
 	if (PL_expect == XOPERATOR) {
@@ -6857,8 +6859,6 @@ Perl_yylex(pTHX)
 	    else
 		no_op("String",s);
 	}
-	if (!s)
-	    missingterm(NULL);
 	pl_yylval.ival = OP_CONST;
 	TERM(sublex_start());
 
@@ -8385,9 +8385,9 @@ Perl_yylex(pTHX)
 
 	case KEY_q:
 	    s = scan_str(s,!!PL_madskills,FALSE,FALSE,FALSE,NULL);
-	    COPLINE_SET_FROM_MULTI_END;
 	    if (!s)
 		missingterm(NULL);
+	    COPLINE_SET_FROM_MULTI_END;
 	    pl_yylval.ival = OP_CONST;
 	    TERM(sublex_start());
 
@@ -8397,9 +8397,9 @@ Perl_yylex(pTHX)
 	case KEY_qw: {
 	    OP *words = NULL;
 	    s = scan_str(s,!!PL_madskills,FALSE,FALSE,FALSE,NULL);
-	    COPLINE_SET_FROM_MULTI_END;
 	    if (!s)
 		missingterm(NULL);
+	    COPLINE_SET_FROM_MULTI_END;
 	    PL_expect = XOPERATOR;
 	    if (SvCUR(PL_lex_stuff)) {
 		int warned_comma = !ckWARN(WARN_QW);
