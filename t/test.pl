@@ -1660,7 +1660,7 @@ WATCHDOG_VIA_ALARM:
 sub native_to_latin1($) {
     my $string = shift;
 
-    return $string if ord('^') == 94;   # ASCII, Latin1
+    return $string if $::IS_ASCII;
     my $output = "";
     for my $i (0 .. length($string) - 1) {
         $output .= chr(ord_native_to_latin1(ord(substr($string, $i, 1))));
@@ -1675,7 +1675,7 @@ sub native_to_latin1($) {
 sub latin1_to_native($) {
     my $string = shift;
 
-    return $string if ord('^') == 94;   # ASCII, Latin1
+    return $string if $::IS_ASCII;
     my $output = "";
     for my $i (0 .. length($string) - 1) {
         $output .= chr(ord_latin1_to_native(ord(substr($string, $i, 1))));
@@ -1692,7 +1692,7 @@ sub ord_latin1_to_native {
     # equivalent value.  Anything above latin1 is itself.
 
     my $ord = shift;
-    return $ord if ord('^') == 94;   # ASCII, Latin1
+    return $ord if $::IS_ASCII;
     return utf8::unicode_to_native($ord);
 }
 
