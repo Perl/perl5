@@ -308,38 +308,6 @@ Perl_uvchr_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
 }
 
 /*
-
-Tests if the first C<len> bytes of string C<s> form a valid UTF-8
-character.  Note that an INVARIANT (i.e. ASCII on non-EBCDIC) character is a
-valid UTF-8 character.  The number of bytes in the UTF-8 character
-will be returned if it is valid, otherwise 0.
-
-This is the "slow" version as opposed to the "fast" version which is
-the "unrolled" IS_UTF8_CHAR().  E.g. for t/uni/class.t the speed
-difference is a factor of 2 to 3.  For lengths (UTF8SKIP(s)) of four
-or less you should use the IS_UTF8_CHAR(), for lengths of five or more
-you should use the _slow().  In practice this means that the _slow()
-will be used very rarely, since the maximum Unicode code point (as of
-Unicode 4.1) is U+10FFFF, which encodes in UTF-8 to four bytes.  Only
-the "Perl extended UTF-8" (e.g, the infamous 'v-strings') will encode into
-five bytes or more.
-
-=cut */
-PERL_STATIC_INLINE STRLEN
-S_is_utf8_char_slow(const U8 *s, const STRLEN len)
-{
-    dTHX;   /* The function called below requires thread context */
-
-    STRLEN actual_len;
-
-    PERL_ARGS_ASSERT_IS_UTF8_CHAR_SLOW;
-
-    utf8n_to_uvchr(s, len, &actual_len, UTF8_CHECK_ONLY);
-
-    return (actual_len == (STRLEN) -1) ? 0 : actual_len;
-}
-
-/*
 =for apidoc is_utf8_char_buf
 
 Returns the number of bytes that comprise the first UTF-8 encoded character in
@@ -371,7 +339,7 @@ Perl_is_utf8_char_buf(const U8 *buf, const U8* buf_end)
 
     if (IS_UTF8_CHAR_FAST(len))
         return IS_UTF8_CHAR(buf, len) ? len : 0;
-    return is_utf8_char_slow(buf, len);
+    return _is_utf8_char_slow(buf, len);
 }
 
 /*
@@ -438,7 +406,7 @@ Perl_is_utf8_string(const U8 *s, STRLEN len)
 	         if (!IS_UTF8_CHAR(x, c))
 		     return FALSE;
 	     }
-	     else if (! is_utf8_char_slow(x, c)) {
+	     else if (! _is_utf8_char_slow(x, c)) {
 		 return FALSE;
 	     }
 	     x = next_char_ptr;
@@ -498,7 +466,7 @@ Perl_is_utf8_string_loclen(const U8 *s, STRLEN len, const U8 **ep, STRLEN *el)
 	         if (!IS_UTF8_CHAR(x, c))
 		     c = 0;
 	     } else
-	         c = is_utf8_char_slow(x, c);
+	         c = _is_utf8_char_slow(x, c);
 	     if (!c)
 	         goto out;
 	 }
