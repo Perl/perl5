@@ -15,6 +15,7 @@ $|=1 if DEBUG;
 sub ASCII_PLATFORM { (ord('A') == 65) }
 
 require 'regen/regen_lib.pl';
+require "regen/regcharclass_multi_char_folds.pl";
 
 =head1 NAME
 
@@ -1635,7 +1636,6 @@ QUOTEMETA: Meta-characters that \Q should quote
 
 MULTI_CHAR_FOLD: multi-char strings that are folded to by a single character
 => UTF8 :safe
-do regen/regcharclass_multi_char_folds.pl
 
 # 1 => All folds
 &regcharclass_multi_char_folds::multi_char_folds(1)

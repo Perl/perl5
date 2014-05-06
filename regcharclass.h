@@ -361,7 +361,6 @@
 /*
 	MULTI_CHAR_FOLD: multi-char strings that are folded to by a single character
 
-	do regen/regcharclass_multi_char_folds.pl
 	&regcharclass_multi_char_folds::multi_char_folds(1)
 */
 /*** GENERATED CODE ***/
