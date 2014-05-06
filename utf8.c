@@ -310,7 +310,7 @@ Perl_uvchr_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
 /*
 =for apidoc is_utf8_char_buf
 
-This is identical to the macro isUTF8_CHAR.
+This is identical to the macro L</isUTF8_CHAR>.
 
 =cut */
 

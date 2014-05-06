@@ -649,6 +649,8 @@ machines) is a valid UTF-8 character.
                                    ? is_UTF8_CHAR_utf8_no_length_checks(s)  \
                                    : _is_utf8_char_slow(s, e))
 
+#define is_utf8_char_buf(buf, buf_end) isUTF8_CHAR(buf, buf_end)
+
 /* Do not use; should be deprecated.  Use isUTF8_CHAR() instead; this is
  * retained solely for backwards compatibility */
 #define IS_UTF8_CHAR(p, n)      (isUTF8_CHAR(p, (p) + (n)) == n)

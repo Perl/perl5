@@ -1992,9 +1992,9 @@ PERL_CALLCONV STRLEN	Perl_is_utf8_char(const U8 *s)
 #define PERL_ARGS_ASSERT_IS_UTF8_CHAR	\
 	assert(s)
 
-PERL_CALLCONV STRLEN	Perl_is_utf8_char_buf(const U8 *buf, const U8 *buf_end)
+/* PERL_CALLCONV STRLEN	Perl_is_utf8_char_buf(const U8 *buf, const U8 *buf_end)
 			__attribute__nonnull__(1)
-			__attribute__nonnull__(2);
+			__attribute__nonnull__(2); */
 #define PERL_ARGS_ASSERT_IS_UTF8_CHAR_BUF	\
 	assert(buf); assert(buf_end)
 
