@@ -1646,12 +1646,16 @@ GCB_V: Grapheme_Cluster_Break=V
 # wants a maximum other than 4 bytes, or this program creates better
 # optimizations.  Trying with 5 bytes used too much memory to calculate.
 #
+# We don't generate code for invariants here because the EBCDIC form is too
+# complicated and would slow things down; instead the user should test for
+# invariants first.
+#
 # NOTE: The number of bytes generated here must match the value in
 # IS_UTF8_CHAR_FAST in utf8.h
 #
-#UTF8_CHAR: Matches legal UTF-8 encoded characters from 1 through 4 bytes
+#UTF8_CHAR: Matches legal UTF-8 encoded characters from 2 through 4 bytes
 #=> UTF8 :no_length_checks only_ascii_platform
-#0x0 - 0x1FFFFF
+#0x80 - 0x1FFFFF
 
 # This hasn't been commented out, but the number of bytes it works on has been
 # cut down to 3, so it doesn't cover the full legal Unicode range.  Making it
@@ -1662,9 +1666,9 @@ GCB_V: Grapheme_Cluster_Break=V
 # NOTE: The number of bytes generated here must match the value in
 # IS_UTF8_CHAR_FAST in utf8.h
 #
-UTF8_CHAR: Matches legal UTF-EBCDIC encoded characters from 1 through 3 bytes
+UTF8_CHAR: Matches legal UTF-EBCDIC encoded characters from 2 through 3 bytes
 => UTF8 :no_length_checks only_ebcdic_platform
-0x0 - 0x3FFF
+0xA0 - 0x3FFF
 
 QUOTEMETA: Meta-characters that \Q should quote
 => high :fast

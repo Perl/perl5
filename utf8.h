@@ -606,48 +606,38 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
  * don't take too long to generate, and there is a separate one for each code
  * page, so they are in regcharclass.h instead of here */
 /*
-	UTF8_CHAR: Matches utf8 from 1 to 4 bytes
+	UTF8_CHAR: Matches legal UTF-8 encoded characters from 2 through 4 bytes
 
-	0x0 - 0x1FFFFF
+	0x80 - 0x1FFFFF
 */
 /*** GENERATED CODE ***/
-#define is_UTF8_CHAR_utf8_safe(s,e)                                         \
-( ((e)-(s) > 3) ?                                                           \
-    ( ( ( ((U8*)s)[0] & 0x80 ) == 0x00 ) ? 1                                \
-    : ( 0xC2 <= ((U8*)s)[0] && ((U8*)s)[0] <= 0xDF ) ?                      \
-	( ( ( ((U8*)s)[1] & 0xC0 ) == 0x80 ) ? 2 : 0 )                      \
-    : ( 0xE0 == ((U8*)s)[0] ) ?                                             \
-	( ( ( ( ((U8*)s)[1] & 0xE0 ) == 0xA0 ) && ( ( ((U8*)s)[2] & 0xC0 ) == 0x80 ) ) ? 3 : 0 )\
-    : ( 0xE1 <= ((U8*)s)[0] && ((U8*)s)[0] <= 0xEF ) ?                      \
-	( ( ( ( ((U8*)s)[1] & 0xC0 ) == 0x80 ) && ( ( ((U8*)s)[2] & 0xC0 ) == 0x80 ) ) ? 3 : 0 )\
-    : ( 0xF0 == ((U8*)s)[0] ) ?                                             \
-	( ( ( ( 0x90 <= ((U8*)s)[1] && ((U8*)s)[1] <= 0xBF ) && ( ( ((U8*)s)[2] & 0xC0 ) == 0x80 ) ) && ( ( ((U8*)s)[3] & 0xC0 ) == 0x80 ) ) ? 4 : 0 )\
-    : ( ( ( ( 0xF1 <= ((U8*)s)[0] && ((U8*)s)[0] <= 0xF7 ) && ( ( ((U8*)s)[1] & 0xC0 ) == 0x80 ) ) && ( ( ((U8*)s)[2] & 0xC0 ) == 0x80 ) ) && ( ( ((U8*)s)[3] & 0xC0 ) == 0x80 ) ) ? 4 : 0 )\
-: ((e)-(s) > 2) ?                                                           \
-    ( ( ( ((U8*)s)[0] & 0x80 ) == 0x00 ) ? 1                                \
-    : ( 0xC2 <= ((U8*)s)[0] && ((U8*)s)[0] <= 0xDF ) ?                      \
-	( ( ( ((U8*)s)[1] & 0xC0 ) == 0x80 ) ? 2 : 0 )                      \
-    : ( 0xE0 == ((U8*)s)[0] ) ?                                             \
-	( ( ( ( ((U8*)s)[1] & 0xE0 ) == 0xA0 ) && ( ( ((U8*)s)[2] & 0xC0 ) == 0x80 ) ) ? 3 : 0 )\
-    : ( ( ( 0xE1 <= ((U8*)s)[0] && ((U8*)s)[0] <= 0xEF ) && ( ( ((U8*)s)[1] & 0xC0 ) == 0x80 ) ) && ( ( ((U8*)s)[2] & 0xC0 ) == 0x80 ) ) ? 3 : 0 )\
-: ((e)-(s) > 1) ?                                                           \
-    ( ( ( ((U8*)s)[0] & 0x80 ) == 0x00 ) ? 1                                \
-    : ( ( 0xC2 <= ((U8*)s)[0] && ((U8*)s)[0] <= 0xDF ) && ( ( ((U8*)s)[1] & 0xC0 ) == 0x80 ) ) ? 2 : 0 )\
-: ((e)-(s) > 0) ?                                                           \
-    ( ( ((U8*)s)[0] & 0x80 ) == 0x00 )                                      \
-: 0 )
+#define is_UTF8_CHAR_utf8_no_length_checks(s)                               \
+( ( 0xC2 <= ((U8*)s)[0] && ((U8*)s)[0] <= 0xDF ) ?                          \
+    ( ( ( ((U8*)s)[1] & 0xC0 ) == 0x80 ) ? 2 : 0 )                          \
+: ( 0xE0 == ((U8*)s)[0] ) ?                                                 \
+    ( ( ( ( ((U8*)s)[1] & 0xE0 ) == 0xA0 ) && ( ( ((U8*)s)[2] & 0xC0 ) == 0x80 ) ) ? 3 : 0 )\
+: ( 0xE1 <= ((U8*)s)[0] && ((U8*)s)[0] <= 0xEF ) ?                          \
+    ( ( ( ( ((U8*)s)[1] & 0xC0 ) == 0x80 ) && ( ( ((U8*)s)[2] & 0xC0 ) == 0x80 ) ) ? 3 : 0 )\
+: ( 0xF0 == ((U8*)s)[0] ) ?                                                 \
+    ( ( ( ( 0x90 <= ((U8*)s)[1] && ((U8*)s)[1] <= 0xBF ) && ( ( ((U8*)s)[2] & 0xC0 ) == 0x80 ) ) && ( ( ((U8*)s)[3] & 0xC0 ) == 0x80 ) ) ? 4 : 0 )\
+: ( ( ( ( 0xF1 <= ((U8*)s)[0] && ((U8*)s)[0] <= 0xF7 ) && ( ( ((U8*)s)[1] & 0xC0 ) == 0x80 ) ) && ( ( ((U8*)s)[2] & 0xC0 ) == 0x80 ) ) && ( ( ((U8*)s)[3] & 0xC0 ) == 0x80 ) ) ? 4 : 0 )
 #endif
 
 /*
- * =for apidoc isUTF8_CHAR
- *
- * Returns the number of bytes beginning at C<s> which form a legal UTF-8 (or
- * UTF-EBCDIC) encoded character, looking no further than C<e - s> bytes into
- * C<s>.  Returns 0 if the sequence starting at C<s> through C<e - 1> is not
- * well-formed UTF-8
+=head1 Unicode Support
+
+=for apidoc Am|STRLEN|isUTF8_CHAR|const U8 *s|const U8 *e
+
+Returns the number of bytes beginning at C<s> which form a legal UTF-8 (or
+UTF-EBCDIC) encoded character, looking no further than C<e - s> bytes into
+C<s>.  Returns 0 if the sequence starting at C<s> through C<e - 1> is not
+well-formed UTF-8
 
 Note that an INVARIANT character (i.e. ASCII on non-EBCDIC
-machines) is a valid UTF-8 character. */
+machines) is a valid UTF-8 character.
+
+=cut
+*/
 
 #define isUTF8_CHAR(s, e)   (((e) <= (s))                                   \
                              ? 0                                            \
@@ -656,7 +646,7 @@ machines) is a valid UTF-8 character. */
                                : (((e) - (s)) < UTF8SKIP(s))                \
                                  ? 0                                        \
                                  : (IS_UTF8_CHAR_FAST(UTF8SKIP(s)))         \
-                                   ? is_UTF8_CHAR_utf8_safe(s,e)            \
+                                   ? is_UTF8_CHAR_utf8_no_length_checks(s)  \
                                    : _is_utf8_char_slow(s, e))
 
 /* Do not use; should be deprecated.  Use isUTF8_CHAR() instead; this is
