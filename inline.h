@@ -219,33 +219,17 @@ S_append_utf8_from_native_byte(const U8 byte, U8** dest)
     }
 }
 
-/* These two exist only to replace the macros they formerly were so that their
- * use can be deprecated */
-
-PERL_STATIC_INLINE bool
-S_isIDFIRST_lazy(pTHX_ const char* p)
-{
-    PERL_ARGS_ASSERT_ISIDFIRST_LAZY;
-
-    return isIDFIRST_lazy_if(p,1);
-}
-
-PERL_STATIC_INLINE bool
-S_isALNUM_lazy(pTHX_ const char* p)
-{
-    PERL_ARGS_ASSERT_ISALNUM_LAZY;
-
-    return isALNUM_lazy_if(p,1);
-}
-
 /*
+
 A helper function for the macro isUTF8_CHAR(), which should be used instead of
 this function.  The macro will handle smaller code points directly saving time,
 using this function as a fall-back for higher code points.
+
 Tests if the first bytes of string C<s> form a valid UTF-8 character.  0 is
 returned if the bytes starting at C<s> up to but not including C<e> do not form a
 complete well-formed UTF-8 character; otherwise the number of bytes in the
 character is returned.
+
 Note that an INVARIANT (i.e. ASCII on non-EBCDIC) character is a valid UTF-8
 character.
 

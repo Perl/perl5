@@ -64,6 +64,18 @@ PERL_STATIC_INLINE STRLEN	S__is_utf8_char_slow(const U8 *s, const U8 *e)
 #define PERL_ARGS_ASSERT__IS_UTF8_CHAR_SLOW	\
 	assert(s); assert(e)
 
+PERL_CALLCONV bool	Perl__is_utf8_idcont(pTHX_ const U8 *p)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT__IS_UTF8_IDCONT	\
+	assert(p)
+
+PERL_CALLCONV bool	Perl__is_utf8_idstart(pTHX_ const U8 *p)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT__IS_UTF8_IDSTART	\
+	assert(p)
+
 PERL_CALLCONV bool	Perl__is_utf8_mark(pTHX_ const U8 *p)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
@@ -80,6 +92,18 @@ PERL_CALLCONV bool	Perl__is_utf8_perl_idstart(pTHX_ const U8 *p)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT__IS_UTF8_PERL_IDSTART	\
+	assert(p)
+
+PERL_CALLCONV bool	Perl__is_utf8_xidcont(pTHX_ const U8 *p)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT__IS_UTF8_XIDCONT	\
+	assert(p)
+
+PERL_CALLCONV bool	Perl__is_utf8_xidstart(pTHX_ const U8 *p)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT__IS_UTF8_XIDSTART	\
 	assert(p)
 
 PERL_CALLCONV UV	Perl__to_uni_fold_flags(pTHX_ UV c, U8 *p, STRLEN *lenp, U8 flags)
@@ -1769,7 +1793,7 @@ PERL_CALLCONV bool	Perl_io_close(pTHX_ IO* io, bool not_implicit)
 #define PERL_ARGS_ASSERT_IO_CLOSE	\
 	assert(io)
 
-PERL_STATIC_INLINE bool	S_isALNUM_lazy(pTHX_ const char* p)
+PERL_CALLCONV bool	Perl_isALNUM_lazy(pTHX_ const char* p)
 			__attribute__deprecated__
 			__attribute__warn_unused_result__
 			__attribute__pure__
@@ -1777,7 +1801,7 @@ PERL_STATIC_INLINE bool	S_isALNUM_lazy(pTHX_ const char* p)
 #define PERL_ARGS_ASSERT_ISALNUM_LAZY	\
 	assert(p)
 
-PERL_STATIC_INLINE bool	S_isIDFIRST_lazy(pTHX_ const char* p)
+PERL_CALLCONV bool	Perl_isIDFIRST_lazy(pTHX_ const char* p)
 			__attribute__deprecated__
 			__attribute__warn_unused_result__
 			__attribute__pure__

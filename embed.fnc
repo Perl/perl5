@@ -654,8 +654,8 @@ ADMpPR	|bool	|is_uni_punct	|UV c
 ADMpPR	|bool	|is_uni_xdigit	|UV c
 AMp	|UV	|to_uni_upper	|UV c|NN U8 *p|NN STRLEN *lenp
 AMp	|UV	|to_uni_title	|UV c|NN U8 *p|NN STRLEN *lenp
-iDMPR	|bool	|isIDFIRST_lazy	|NN const char* p
-iDMPR	|bool	|isALNUM_lazy	|NN const char* p
+ADMpPR	|bool	|isIDFIRST_lazy	|NN const char* p
+ADMpPR	|bool	|isALNUM_lazy	|NN const char* p
 #ifdef PERL_IN_UTF8_C
 sR	|U8	|to_lower_latin1|const U8 c|NULLOK U8 *p|NULLOK STRLEN *lenp
 #endif
@@ -697,6 +697,10 @@ ADMpR	|bool	|is_utf8_alnum	|NN const U8 *p
 ADMpR	|bool	|is_utf8_alnumc	|NN const U8 *p
 ADMpR	|bool	|is_utf8_idfirst|NN const U8 *p
 ADMpR	|bool	|is_utf8_xidfirst|NN const U8 *p
+AMpR	|bool	|_is_utf8_idcont|NN const U8 *p
+AMpR	|bool	|_is_utf8_idstart|NN const U8 *p
+AMpR	|bool	|_is_utf8_xidcont|NN const U8 *p
+AMpR	|bool	|_is_utf8_xidstart|NN const U8 *p
 AMpR	|bool	|_is_utf8_perl_idcont|NN const U8 *p
 AMpR	|bool	|_is_utf8_perl_idstart|NN const U8 *p
 ADMpR	|bool	|is_utf8_idcont	|NN const U8 *p
