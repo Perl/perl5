@@ -639,13 +639,13 @@ machines) is a valid UTF-8 character.
 =cut
 */
 
-#define isUTF8_CHAR(s, e)   (((e) <= (s))                                   \
+#define isUTF8_CHAR(s, e)   (UNLIKELY((e) <= (s))                           \
                              ? 0                                            \
                              : (UTF8_IS_INVARIANT(*s))                      \
                                ? 1                                          \
-                               : (((e) - (s)) < UTF8SKIP(s))                \
+                               : UNLIKELY(((e) - (s)) < UTF8SKIP(s))        \
                                  ? 0                                        \
-                                 : (IS_UTF8_CHAR_FAST(UTF8SKIP(s)))         \
+                                 : LIKELY(IS_UTF8_CHAR_FAST(UTF8SKIP(s)))   \
                                    ? is_UTF8_CHAR_utf8_no_length_checks(s)  \
                                    : _is_utf8_char_slow(s, e))
 

@@ -671,8 +671,9 @@ sub length_optree {
             # have only a few things that can match past this, so I (khw)
             # don't think it is worth it.  (Even better would be to use
             # calculate_mask(keys %$utf8) instead of UTF8_IS_START, and use it
-            # if it saves a bunch.
-            my $cond = "(((e) - (s)) >= UTF8SKIP(s))";
+            # if it saves a bunch.  We assume that input text likely to be
+            # well-formed .
+            my $cond = "LIKELY(((e) - (s)) >= UTF8SKIP(s))";
             $else = __cond_join($cond, $utf8, $else);
 
             # For 'generic', we also will want the latin1 UTF-8 variants for
@@ -715,7 +716,7 @@ sub length_optree {
             }
 
             # We need at least one byte available to start off the tests
-            $else = __cond_join("((e) > (s))", $else, 0);
+            $else = __cond_join("LIKELY((e) > (s))", $else, 0);
         }
         else {  # Here, we don't want or there aren't any variants.  A single
                 # byte available is enough.
