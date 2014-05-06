@@ -110,6 +110,13 @@ include it, and it is a NULL.
 
 =back
 
+The above isn't quite complete, as for specialized purposes one can get a
+macro like C<is_WHATEVER_utf8_no_length_checks(s)>, which assumes that it is
+already known that there is enough space to hold the character starting at
+C<s>, but otherwise checks that it is well-formed.  In other words, this is
+intermediary in checking between C<is_WHATEVER_utf8(s)> and
+C<is_WHATEVER_utf8_safe(s,e)>.
+
 =head2 CODE FORMAT
 
 perltidy  -st -bt=1 -bbt=0 -pt=0 -sbt=1 -ce -nwls== "%f"
@@ -1275,9 +1282,11 @@ sub render {
 # make a macro of a given type.
 # calls into make_trie and (generic_|length_)optree as needed
 # Opts are:
-# type     : 'cp','cp_high', 'generic','high','low','latin1','utf8','LATIN1','UTF8'
-# ret_type : 'cp' or 'len'
-# safe     : add length guards to macro
+# type             : 'cp','cp_high', 'generic','high','low','latin1','utf8','LATIN1','UTF8'
+# ret_type         : 'cp' or 'len'
+# safe             : don't assume is well-formed UTF-8, so don't skip any range
+#                    checks, and add length guards to macro
+# no_length_checks : like safe, but don't add length guards.
 #
 # type defaults to 'generic', and ret_type to 'len' unless type is 'cp'
 # in which case it defaults to 'cp' as well.
@@ -1324,6 +1333,7 @@ sub make_macro {
     my $ext= $type     =~ /generic/ ? ''          : '_' . lc( $type );
     $ext .= '_non_low' if $type eq 'generic_non_low';
     $ext .= "_safe" if $opts{safe};
+    $ext .= "_no_length_checks" if $opts{no_length_checks};
     my $argstr= join ",", @args;
     my $def_fmt="$pfx$self->{op}$ext%s($argstr)";
     my $optree= $self->$method( %opts, type => $type, ret_type => $ret_type );
@@ -1372,6 +1382,7 @@ EOF
 
         my @mods;
         push @mods, 'safe' if delete $mods{safe};
+        push @mods, 'no_length_checks' if delete $mods{no_length_checks};
         unshift @mods, 'fast' if delete $mods{fast} || ! @mods; # Default to 'fast'
                                                                 # do this one
                                                                 # first, as
@@ -1390,14 +1401,15 @@ EOF
                 # way a cp macro will get generated.  Below we convert 'safe'
                 # to 'fast' in this instance
                 next if $type =~ /^cp/
-                        && $mod eq 'safe'
-                        && grep { 'fast' eq $_ } @mods;
+                        && ($mod eq 'safe' || $mod eq 'no_length_checks')
+                        && grep { 'fast' =~ $_ } @mods;
                 delete $mods{$mod};
                 my $macro= $obj->make_macro(
                     type     => $type,
                     ret_type => $ret,
                     safe     => $mod eq 'safe' && $type !~ /^cp/,
                     charset  => $charset,
+                    no_length_checks => $mod eq 'no_length_checks' && $type !~ /^cp/,
                 );
                 print $out_fh $macro, "\n";
             }
@@ -1534,6 +1546,9 @@ EOF
 #               string.  In the case of non-UTF8, it makes sure that the
 #               string has at least one byte in it.  The macro name has
 #               '_safe' appended to it.
+#   no_length_checks  The input string is not necessarily valid UTF-8, but it
+#               is to be assumed that the length has already been checked and
+#               found to be valid
 #   fast        The input string is valid UTF-8.  No bounds checking is done,
 #               and the macro can make assumptions that lead to faster
 #               execution.
@@ -1629,13 +1644,26 @@ GCB_V: Grapheme_Cluster_Break=V
 # then this was commented out because it takes so long to figure out these 2
 # million code points.  The results would not change unless utf8.h decides it
 # wants a maximum other than 4 bytes, or this program creates better
-# optimizations
-#UTF8_CHAR: Matches utf8 from 1 to 4 bytes
-#=> UTF8 :safe only_ascii_platform
+# optimizations.  Trying with 5 bytes used too much memory to calculate.
+#
+# NOTE: The number of bytes generated here must match the value in
+# IS_UTF8_CHAR_FAST in utf8.h
+#
+#UTF8_CHAR: Matches legal UTF-8 encoded characters from 1 through 4 bytes
+#=> UTF8 :no_length_checks only_ascii_platform
 #0x0 - 0x1FFFFF
 
-UTF8_CHAR: Matches utf8 from 1 to 3 bytes
-=> UTF8 :safe only_ebcdic_platform
+# This hasn't been commented out, but the number of bytes it works on has been
+# cut down to 3, so it doesn't cover the full legal Unicode range.  Making it
+# 5 bytes would cover beyond the full range, but takes quite a bit of time and
+# memory to calculate.  The generated table varies depending on the EBCDIC
+# code page.
+
+# NOTE: The number of bytes generated here must match the value in
+# IS_UTF8_CHAR_FAST in utf8.h
+#
+UTF8_CHAR: Matches legal UTF-EBCDIC encoded characters from 1 through 3 bytes
+=> UTF8 :no_length_checks only_ebcdic_platform
 0x0 - 0x3FFF
 
 QUOTEMETA: Meta-characters that \Q should quote
