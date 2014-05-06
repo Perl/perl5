@@ -1632,14 +1632,13 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 		PUSHs(newSVpvn_flags(aptr, len, SVs_TEMP));
 	    }
 	    break;
-#if IVSIZE >= 8
+#if defined(HAS_QUAD) && IVSIZE >= 8
 	case 'q':
 	    while (len-- > 0) {
 		Quad_t aquad;
                 SHIFT_VAR(utf8, s, strend, aquad, datumtype, needs_swap);
 		if (!checksum)
-                    mPUSHs(aquad >= IV_MIN && aquad <= IV_MAX ?
-			   newSViv((IV)aquad) : newSVnv((NV)aquad));
+                    mPUSHs(newSViv((IV)aquad));
 		else if (checksum > bits_in_uv)
 		    cdouble += (NV)aquad;
 		else
@@ -1651,8 +1650,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 		Uquad_t auquad;
                 SHIFT_VAR(utf8, s, strend, auquad, datumtype, needs_swap);
 		if (!checksum)
-		    mPUSHs(auquad <= UV_MAX ?
-			   newSVuv((UV)auquad) : newSVnv((NV)auquad));
+		    mPUSHs(newSVuv((UV)auquad));
 		else if (checksum > bits_in_uv)
 		    cdouble += (NV)auquad;
 		else
@@ -2982,7 +2980,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
                 PUSH32(utf8, cur, &ai32, needs_swap);
 	    }
 	    break;
-#if IVSIZE >= 8
+#if defined(HAS_QUAD) && IVSIZE >= 8
 	case 'Q':
 	    while (len-- > 0) {
 		Uquad_t auquad;
