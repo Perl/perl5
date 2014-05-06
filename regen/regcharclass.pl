@@ -1288,7 +1288,7 @@ sub render {
 #
 # It is also illegal to do a non-safe macro on a pattern with multi-codepoint
 # sequences in it, as even if it is known to be well-formed, we need to not
-# run off the end of the buffer when say the buffer ends with the first two
+# run off the end of the buffer when, say, the buffer ends with the first two
 # characters, but three are looked at by the macro.
 #
 # returns the macro.
@@ -1415,24 +1415,26 @@ EOF
         print $out_fh "\n", get_conditional_compile_line_start($charset);
         my @data_copy = @data;
         for (@data_copy) {
-        s/^ \s* (?: \# .* ) ? $ //x;    # squeeze out comment and blanks
-        next unless /\S/;
-        chomp;
-        if ( /^[A-Z]/ ) {
-            $doit->($charset) unless $first_time;  # This starts a new definition; do the previous one
-            $first_time = 0;
-            ( $op, $title )= split /\s*:\s*/, $_, 2;
-            @txt= ();
-        } elsif ( s/^=>// ) {
-            my ( $type, $modifier )= split /:/, $_;
-            @types= split ' ', $type;
-            undef %mods;
-            map { $mods{$_} = 1 } split ' ',  $modifier;
-        } else {
-            push @txt, "$_";
+            s/^ \s* (?: \# .* ) ? $ //x;    # squeeze out comment and blanks
+            next unless /\S/;
+            chomp;
+            if ( /^[A-Z]/ ) {
+                $doit->($charset) unless $first_time;  # This starts a new
+                                                       # definition; do the
+                                                       # previous one
+                $first_time = 0;
+                ( $op, $title )= split /\s*:\s*/, $_, 2;
+                @txt= ();
+            } elsif ( s/^=>// ) {
+                my ( $type, $modifier )= split /:/, $_;
+                @types= split ' ', $type;
+                undef %mods;
+                map { $mods{$_} = 1 } split ' ',  $modifier;
+            } else {
+                push @txt, "$_";
+            }
         }
-    }
-    $doit->($charset);
+        $doit->($charset);
         print $out_fh get_conditional_compile_line_end();
     }
 
