@@ -1,10 +1,10 @@
 #
-# $Id: Encode.pm,v 2.57 2014/01/03 04:51:39 dankogai Exp $
+# $Id: Encode.pm,v 2.60 2014/04/29 16:26:49 dankogai Exp dankogai $
 #
 package Encode;
 use strict;
 use warnings;
-our $VERSION = sprintf "%d.%02d", q$Revision: 2.57_01 $ =~ /(\d+)/g;
+our $VERSION = sprintf "%d.%02d", q$Revision: 2.60 $ =~ /(\d+)/g;
 use constant DEBUG => !!$ENV{PERL_ENCODE_DEBUG};
 use XSLoader ();
 XSLoader::load( __PACKAGE__, $VERSION );
@@ -801,12 +801,23 @@ If you're not interested in this, then bitwise-OR it with the bitmask.
 =head2 coderef for CHECK
 
 As of C<Encode> 2.12, C<CHECK> can also be a code reference which takes the
-ordinal value of the unmapped character as an argument and returns a string
-that represents the fallback character.  For instance:
+ordinal value of the unmapped character as an argument and returns
+octets that represent the fallback character.  For instance:
 
   $ascii = encode("ascii", $utf8, sub{ sprintf "<U+%04X>", shift });
 
 Acts like C<FB_PERLQQ> but U+I<XXXX> is used instead of C<\x{I<XXXX>}>.
+
+Even the fallback for C<decode> must return octets, which are
+then decoded with the character encoding that C<decode> accepts. So for
+example if you wish to decode octests as UTF-8, and use ISO-8859-15 as
+a fallback for bytes that are not valid UTF-8, you could write
+
+    $str = decode 'UTF-8', $octets, sub {
+        my $tmp = chr shift;
+        from_to $tmp, 'ISO-8859-15', 'UTF-8';
+        return $tmp;
+    };
 
 =head1 Defining Encodings
 

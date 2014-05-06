@@ -1,5 +1,5 @@
 /*
- $Id: Unicode.xs,v 2.10 2013/04/26 18:30:46 dankogai Exp $
+ $Id: Unicode.xs,v 2.11 2014/04/29 16:25:06 dankogai Exp dankogai $
  */
 
 #define PERL_NO_GET_CONTEXT
@@ -79,7 +79,7 @@ enc_unpack(pTHX_ U8 **sp, U8 *e, STRLEN size, U8 endian)
 	if (endian == 'v')
 	    break;
 	v |= (*s++ << 16);
-	v |= (*s++ << 24);
+	v |= ((UV)*s++ << 24);
 	break;
     default:
 	croak("Unknown endian %c",(char) endian);

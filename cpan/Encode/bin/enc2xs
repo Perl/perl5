@@ -10,7 +10,7 @@ use warnings;
 use Getopt::Std;
 use Config;
 my @orig_ARGV = @ARGV;
-our $VERSION  = do { my @r = (q$Revision: 2.9 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION  = do { my @r = (q$Revision: 2.12 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 # These may get re-ordered.
 # RAW is a do_now as inserted by &enter
@@ -313,8 +313,11 @@ Encode_XSEncoding(pTHX_ encode_t *enc)
 {
  dSP;
  HV *stash = gv_stashpv("Encode::XS", TRUE);
- SV *sv    = sv_bless(newRV_noinc(newSViv(PTR2IV(enc))),stash);
+ SV *iv    = newSViv(PTR2IV(enc));
+ SV *sv    = sv_bless(newRV_noinc(iv),stash);
  int i = 0;
+ SvFLAGS(iv) |= SVp_POK;
+ SvPVX(iv) = enc->name[0];
  PUSHMARK(sp);
  XPUSHs(sv);
  while (enc->name[i])
