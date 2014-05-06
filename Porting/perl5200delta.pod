@@ -1114,11 +1114,6 @@ category.  It is still a default (i.e., severe) warning [perl #89648].
 
 =item *
 
-The debugger's "n" command now respects lvalue subroutines and steps over
-them [perl #118839].
-
-=item *
-
 L<%%s[%s] in scalar context better written as $%s[%s]|perldiag/"%%s[%s] in scalar context better written as $%s[%s]">
 
 This warning now occurs for any C<%array[$index]> or C<%hash{key}> known to
