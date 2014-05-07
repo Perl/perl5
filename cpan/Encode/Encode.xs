@@ -1,5 +1,5 @@
 /*
- $Id: Encode.xs,v 2.27 2014/04/29 16:25:06 dankogai Exp dankogai $
+ $Id: Encode.xs,v 2.24 2013/08/29 16:47:39 dankogai Exp $
  */
 
 #define PERL_NO_GET_CONTEXT
@@ -44,11 +44,8 @@ Encode_XSEncoding(pTHX_ encode_t * enc)
 {
     dSP;
     HV *stash = gv_stashpv("Encode::XS", TRUE);
-    SV *iv    = newSViv(PTR2IV(enc));
-    SV *sv    = sv_bless(newRV_noinc(iv),stash);
+    SV *sv = sv_bless(newRV_noinc(newSViv(PTR2IV(enc))), stash);
     int i = 0;
-    SvFLAGS(iv) |= SVp_POK;
-    SvPVX(iv) = enc->name[0];
     PUSHMARK(sp);
     XPUSHs(sv);
     while (enc->name[i]) {
