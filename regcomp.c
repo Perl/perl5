@@ -13619,6 +13619,19 @@ parseit:
                                 "Property '%"UTF8f"' is unknown",
                                 UTF8fARG(UTF, n, name));
                         }
+
+                        /* If the property name doesn't already have a package
+                         * name, add the current one to it so that it can be
+                         * referred to outside it. [perl #121777] */
+                        if (! instr(name, "::") && PL_curstash) {
+                            char* full_name = Perl_form(aTHX_
+                                                        "%s::%s",
+                                                        HvNAME(PL_curstash),
+                                                        name);
+                            n = strlen(full_name);
+                            Safefree(name);
+                            name = savepvn(full_name, n);
+                        }
                         Perl_sv_catpvf(aTHX_ listsv, "%cutf8::%"UTF8f"\n",
                                         (value == 'p' ? '+' : '!'),
                                         UTF8fARG(UTF, n, name));

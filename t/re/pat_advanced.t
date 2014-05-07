@@ -2299,6 +2299,24 @@ EOP
         return "!B6\n";
     }
 
+    {   # [perl 121777]
+        my $regex;
+        { package Some;
+            # define a Unicode propertyIs_q
+            sub Is_q
+            {
+                sprintf '%x', ord 'q'
+            }
+            $regex = qr/\p{Is_q}/;
+
+            # If we uncomment the following line, prior to the patch that
+            # fixed this, it would no longer break.
+            #'q' =~ $regex;
+        }
+
+        like('q', $regex, 'User-defined property matches outside package');
+    }
+
     {   # From Lingua::Stem::UniNE; no ticket filed but related to #121778
         use utf8;
         my $word = 'рабта';
