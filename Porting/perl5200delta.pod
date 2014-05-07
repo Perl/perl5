@@ -2941,11 +2941,6 @@ L<Data::Util> version 0.62
 
 =item *
 
-L<HTML::FormHandler>.  The test failures are actually due to a bug in
-L<Data::Clone> version 0.003.  A patch to Data::Clone has been submitted.
-
-=item *
-
 L<HTML::StripScripts> version 1.05
 
 =item *
