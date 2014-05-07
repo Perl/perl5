@@ -1593,6 +1593,13 @@ The test harness now has no failures when perl is built on a FAT drive with the
 Windows OS on an NTFS drive.
 [L<perl #21442|https://rt.perl.org/Public/Bug/Display.html?id=21442>]
 
+=item *
+
+When cloning the context stack in fork() emulation, Perl_cx_dup()
+would crash accessing parameter information for context stack entries
+that included no parameters, as with C<&foo;>.
+[L<perl #121721|https://rt.perl.org/Public/Bug/Display.html?id=121721>]
+
 =back
 
 =item WinCE
