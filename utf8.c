@@ -2808,7 +2808,7 @@ Perl_swash_fetch(pTHX_ SV *swash, const U8 *ptr, bool do_utf8)
     HV *const hv = MUTABLE_HV(SvRV(swash));
     U32 klen;
     U32 off;
-    STRLEN slen;
+    STRLEN slen = 0;
     STRLEN needents;
     const U8 *tmps = NULL;
     U32 bit;
