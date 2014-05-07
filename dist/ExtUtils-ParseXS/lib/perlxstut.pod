@@ -51,8 +51,9 @@ in F<Makefile.PL> for this purpose:
     eval { require 5.007 }
         or die <<EOD;
     ############
-    ### This module uses frobnication framework which is not available before
-    ### version 5.007 of Perl.  Upgrade your Perl before installing Kara::Mba.
+    ### This module uses frobnication framework which is not available
+    ### before version 5.007 of Perl.  Upgrade your Perl before
+    ### installing Kara::Mba.
     ############
     EOD
 
@@ -154,7 +155,8 @@ The file Mytest.pm should start with something like this:
 
     1;
     __END__
-    # Below is the stub of documentation for your module. You better edit it!
+    # Below is the stub of documentation for your module. You better
+    # edit it!
 
 The rest of the .pm file contains sample code for providing documentation for
 the extension.
@@ -194,22 +196,22 @@ Now, running make will produce output that looks something like this (some
 long lines have been shortened for clarity and some extraneous lines have
 been deleted):
 
-    % make
-    cp lib/Mytest.pm blib/lib/Mytest.pm
-    perl xsubpp  -typemap typemap  Mytest.xs > Mytest.xsc && \
-    mv Mytest.xsc Mytest.c
-    Please specify prototyping behavior for Mytest.xs (see perlxs manual)
-    cc -c     Mytest.c
-    Running Mkbootstrap for Mytest ()
-    chmod 644 Mytest.bs
-    rm -f blib/arch/auto/Mytest/Mytest.so
-    cc -shared -L/usr/local/lib Mytest.o -o blib/arch/auto/Mytest/Mytest.so
+ % make
+ cp lib/Mytest.pm blib/lib/Mytest.pm
+ perl xsubpp  -typemap typemap  Mytest.xs > Mytest.xsc && \
+ mv Mytest.xsc Mytest.c
+ Please specify prototyping behavior for Mytest.xs (see perlxs manual)
+ cc -c     Mytest.c
+ Running Mkbootstrap for Mytest ()
+ chmod 644 Mytest.bs
+ rm -f blib/arch/auto/Mytest/Mytest.so
+ cc -shared -L/usr/local/lib Mytest.o -o blib/arch/auto/Mytest/Mytest.so
 
-    chmod 755 blib/arch/auto/Mytest/Mytest.so
-    cp Mytest.bs blib/arch/auto/Mytest/Mytest.bs
-    chmod 644 blib/arch/auto/Mytest/Mytest.bs
-    Manifying blib/man3/Mytest.3pm
-    %
+ chmod 755 blib/arch/auto/Mytest/Mytest.so
+ cp Mytest.bs blib/arch/auto/Mytest/Mytest.bs
+ chmod 644 blib/arch/auto/Mytest/Mytest.bs
+ Manifying blib/man3/Mytest.3pm
+ %
 
 You can safely ignore the line about "prototyping behavior" - it is
 explained in L<perlxs/"The PROTOTYPES: Keyword">.
@@ -270,9 +272,9 @@ when the test is correct, "not ok" when it is not.
 
     #########################
 
-    # Insert your test code below, the Test::More module is use()ed here so
-    # read its man page ( perldoc Test::More ) for help writing this test
-    # script.
+    # Insert your test code below, the Test::More module is use()ed here
+    # so read its man page ( perldoc Test::More ) for help writing this
+    # test script.
 
     is(&Mytest::is_even(0), 1);
     is(&Mytest::is_even(1), 0);
@@ -281,13 +283,13 @@ when the test is correct, "not ok" when it is not.
 We will be calling the test script through the command "C<make test>".  You
 should see output that looks something like this:
 
-    %make test
-    PERL_DL_NONLAZY=1 /usr/bin/perl "-MExtUtils::Command::MM" "-e"
-    "test_harness(0, 'blib/lib', 'blib/arch')" t/*.t
-    t/Mytest....ok
-    All tests successful.
-    Files=1, Tests=4,  0 wallclock secs ( 0.03 cusr +  0.00 csys =  0.03 CPU)
-    %
+ %make test
+ PERL_DL_NONLAZY=1 /usr/bin/perl "-MExtUtils::Command::MM" "-e"
+ "test_harness(0, 'blib/lib', 'blib/arch')" t/*.t
+ t/Mytest....ok
+ All tests successful.
+ Files=1, Tests=4, 0 wallclock secs ( 0.03 cusr + 0.00 csys = 0.03 CPU)
+ %
 
 =head2 What has gone on?
 
