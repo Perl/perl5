@@ -2121,6 +2121,11 @@ a term, so it's looking for the corresponding right angle bracket, and
 not finding it.  Chances are you left some needed parentheses out
 earlier in the line, and you really meant a "less than".
 
+=item gmtime(%f) failed
+
+(W overflow) You called C<gmtime> with a number that it could not handle:
+too large, too small, or NaN.  The returned value is C<undef>.
+
 =item gmtime(%f) too large
 
 (W overflow) You called C<gmtime> with a number that was larger than
@@ -2779,6 +2784,11 @@ L<perlfunc/listen>.
 (F) On some platforms, notably Windows, the three-or-more-arguments
 form of C<open> does not support pipes, such as C<open($pipe, '|-', @args)>.
 Use the two-argument C<open($pipe, '|prog arg1 arg2...')> form instead.
+
+=item localtime(%f) failed
+
+(W overflow) You called C<localtime> with a number that it could not handle:
+too large, too small, or NaN.  The returned value is C<undef>.
 
 =item localtime(%f) too large
 

@@ -4483,30 +4483,29 @@ PP(pp_gmtime)
     }
 
     if (err == NULL) {
+	/* diag_listed_as: gmtime(%f) failed */
 	/* XXX %lld broken for quads */
 	Perl_ck_warner(aTHX_ packWARN(WARN_OVERFLOW),
 		       "%s(%.0" NVff ") failed", opname, when);
     }
 
     if (GIMME != G_ARRAY) {	/* scalar context */
-	SV *tsv;
-	/* XXX newSVpvf()'s %lld type is broken, so cheat with a double */
-	double year = (double)tmbuf.tm_year + 1900;
-
         EXTEND(SP, 1);
         EXTEND_MORTAL(1);
 	if (err == NULL)
 	    RETPUSHUNDEF;
-
-	tsv = Perl_newSVpvf(aTHX_ "%s %s %2d %02d:%02d:%02d %.0f",
-			    dayname[tmbuf.tm_wday],
-			    monname[tmbuf.tm_mon],
-			    tmbuf.tm_mday,
-			    tmbuf.tm_hour,
-			    tmbuf.tm_min,
-			    tmbuf.tm_sec,
-			    year);
-	mPUSHs(tsv);
+       else {
+           mPUSHs(Perl_newSVpvf(aTHX_ "%s %s %2d %02d:%02d:%02d %.0f",
+                                dayname[tmbuf.tm_wday],
+                                monname[tmbuf.tm_mon],
+                                tmbuf.tm_mday,
+                                tmbuf.tm_hour,
+                                tmbuf.tm_min,
+                                tmbuf.tm_sec,
+                                /* XXX newSVpvf()'s %lld type is broken,
+                                 * so cheat with a double */
+                                (double)tmbuf.tm_year + 1900));
+        }
     }
     else {			/* list context */
 	if ( err == NULL )
