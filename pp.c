@@ -4533,15 +4533,15 @@ S_do_delete_local(pTHX)
     const MAGIC *mg;
     HV *stash;
     const bool sliced = !!(PL_op->op_private & OPpSLICE);
-    SV *unsliced_keysv = sliced ? NULL : POPs;
+    SV **unsliced_keysv = sliced ? NULL : sp--;
     SV * const osv = POPs;
-    SV **mark = sliced ? PL_stack_base + POPMARK : &unsliced_keysv-1;
+    SV **mark = sliced ? PL_stack_base + POPMARK : unsliced_keysv-1;
     dORIGMARK;
     const bool tied = SvRMAGICAL(osv)
 			    && mg_find((const SV *)osv, PERL_MAGIC_tied);
     const bool can_preserve = SvCANEXISTDELETE(osv);
     const U32 type = SvTYPE(osv);
-    SV ** const end = sliced ? SP : &unsliced_keysv;
+    SV ** const end = sliced ? SP : unsliced_keysv;
 
     if (type == SVt_PVHV) {			/* hash element */
 	    HV * const hv = MUTABLE_HV(osv);
@@ -4631,7 +4631,7 @@ S_do_delete_local(pTHX)
 	}
     }
     else if (gimme != G_VOID)
-	PUSHs(unsliced_keysv);
+	PUSHs(*unsliced_keysv);
 
     RETURN;
 }
