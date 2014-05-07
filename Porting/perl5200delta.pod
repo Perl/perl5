@@ -1326,12 +1326,12 @@ up as /system/bin/sh, and "sh" as /bin/sh.
 =item *
 
 By default, B<gcc> 4.9 does some optimizations that break perl.  The B<-fwrapv>
-option disables those optimizations (and probably others), so for B<gcc> 4.9
-(and later, since the optimizations probably won't go away), F<Configure> now
-adds B<-fwrapv> unless the user requests B<-fno-wrapv>, which disables
-B<-fwrapv>, or B<-fsanitize=undefined>, which turns the overflows B<-fwrapv>
-ignores into runtime errors.  (This is not done prior to B<gcc> 4.3, since
-B<-fwrapv> was broken then.)
+option disables those optimizations (and probably others), so for B<gcc> 4.3
+and later (since the there might be similar problems lurking on older versions
+too, but B<-fwrapv> was broken before 4.3, and the optimizations probably won't
+go away), F<Configure> now adds B<-fwrapv> unless the user requests
+B<-fno-wrapv>, which disables B<-fwrapv>, or B<-fsanitize=undefined>, which
+turns the overflows B<-fwrapv> ignores into runtime errors.
 [L<perl #121505|https://rt.perl.org/Public/Bug/Display.html?id=121505>]
 
 =back
