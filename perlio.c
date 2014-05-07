@@ -2661,6 +2661,7 @@ PerlIOUnix_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers,
 	}
 	if (!PerlIOValid(f)) {
 	    if (!(f = PerlIO_push(aTHX_ f, self, mode, PerlIOArg))) {
+		PerlLIO_close(fd);
 		return NULL;
 	    }
 	}
@@ -2696,6 +2697,7 @@ PerlIOUnix_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param, int flags)
 	    PerlIOUnix_setfd(aTHX_ f, fd, os->oflags);
 	    return f;
 	}
+        PerlLIO_close(fd);
     }
     return NULL;
 }
@@ -3050,6 +3052,7 @@ PerlIOStdio_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers,
 		}
 		return f;
 	    }
+            PerlLIO_close(fd);
 	}
     }
     return NULL;
