@@ -3695,7 +3695,7 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
         }
         else { /* an EXACTFish node which doesn't begin with a multi-char fold */
             c1 = is_utf8_pat ? valid_utf8_to_uvchr(pat, NULL) : *pat;
-            if (c1 > 256) {
+            if (c1 > 255) {
                 /* Load the folds hash, if not already done */
                 SV** listp;
                 if (! PL_utf8_foldclosures) {
@@ -3748,10 +3748,10 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
                         /* Folds that cross the 255/256 boundary are forbidden
                          * if EXACTFL (and isnt a UTF8 locale), or EXACTFA and
                          * one is ASCIII.  Since the pattern character is above
-                         * 256, and its only other match is below 256, the only
+                         * 255, and its only other match is below 256, the only
                          * legal match will be to itself.  We have thrown away
                          * the original, so have to compute which is the one
-                         * above 255 */
+                         * above 255. */
                         if ((c1 < 256) != (c2 < 256)) {
                             if ((OP(text_node) == EXACTFL
                                  && ! IN_UTF8_CTYPE_LOCALE)
@@ -3770,7 +3770,7 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
                     }
                 }
             }
-            else /* Here, c1 is < 255 */
+            else /* Here, c1 is <= 255 */
                 if (utf8_target
                     && HAS_NONLATIN1_FOLD_CLOSURE(c1)
                     && ( ! (OP(text_node) == EXACTFL && ! IN_UTF8_CTYPE_LOCALE))

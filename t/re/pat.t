@@ -20,7 +20,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 721;  # Update this when adding/deleting tests.
+plan tests => 733;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1580,7 +1580,31 @@ EOP
         like "\x{AA}", qr/a?[\W_]/d, "\\W with /d synthetic start class works";
     }
 
+    {
+        # Verify that the very last Latin-1 U+00FF
+        # (LATIN SMALL LETTER Y WITH DIAERESIS)
+        # and its UPPER counterpart (U+0178 which is pure Unicode),
+        # and likewise for the very first pure Unicode
+        # (LATIN CAPITAL LETTER A WITH MACRON) fold-match properly,
+        # and there are no off-by-one logic errors in the transition zone.
 
+        ok("\xFF" =~ /\xFF/i, "Y WITH DIAERESIS l =~ l");
+        ok("\xFF" =~ /\x{178}/i, "Y WITH DIAERESIS l =~ u");
+        ok("\x{178}" =~ /\xFF/i, "Y WITH DIAERESIS u =~ l");
+        ok("\x{178}" =~ /\x{178}/i, "Y WITH DIAERESIS u =~ u");
+
+        # U+00FF with U+05D0 (non-casing Hebrew letter).
+        ok("\xFF\x{5D0}" =~ /\xFF\x{5D0}/i, "Y WITH DIAERESIS l =~ l");
+        ok("\xFF\x{5D0}" =~ /\x{178}\x{5D0}/i, "Y WITH DIAERESIS l =~ u");
+        ok("\x{178}\x{5D0}" =~ /\xFF\x{5D0}/i, "Y WITH DIAERESIS u =~ l");
+        ok("\x{178}\x{5D0}" =~ /\x{178}\x{5D0}/i, "Y WITH DIAERESIS u =~ u");
+
+        # U+0100.
+        ok("\x{100}" =~ /\x{100}/i, "A WITH MACRON u =~ u");
+        ok("\x{100}" =~ /\x{101}/i, "A WITH MACRON u =~ l");
+        ok("\x{101}" =~ /\x{100}/i, "A WITH MACRON l =~ u");
+        ok("\x{101}" =~ /\x{101}/i, "A WITH MACRON l =~ l");
+    }
 
 } # End of sub run_tests
 
