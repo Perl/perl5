@@ -196,14 +196,14 @@ been deleted):
 
     % make
     cp lib/Mytest.pm blib/lib/Mytest.pm
-    perl xsubpp  -typemap typemap  Mytest.xs > Mytest.xsc && mv Mytest.xsc Mytest.c
+    perl xsubpp  -typemap typemap  Mytest.xs > Mytest.xsc && \
+    mv Mytest.xsc Mytest.c
     Please specify prototyping behavior for Mytest.xs (see perlxs manual)
     cc -c     Mytest.c
     Running Mkbootstrap for Mytest ()
     chmod 644 Mytest.bs
     rm -f blib/arch/auto/Mytest/Mytest.so
-    cc  -shared -L/usr/local/lib Mytest.o  -o blib/arch/auto/Mytest/Mytest.so   \
-                \
+    cc -shared -L/usr/local/lib Mytest.o -o blib/arch/auto/Mytest/Mytest.so
 
     chmod 755 blib/arch/auto/Mytest/Mytest.so
     cp Mytest.bs blib/arch/auto/Mytest/Mytest.bs
@@ -270,8 +270,9 @@ when the test is correct, "not ok" when it is not.
 
     #########################
 
-    # Insert your test code below, the Test::More module is use()ed here so read
-    # its man page ( perldoc Test::More ) for help writing this test script.
+    # Insert your test code below, the Test::More module is use()ed here so
+    # read its man page ( perldoc Test::More ) for help writing this test
+    # script.
 
     is(&Mytest::is_even(0), 1);
     is(&Mytest::is_even(1), 0);
@@ -650,8 +651,8 @@ and add the following lines to the end of the script:
 equality, but rather that the difference between the expected and actual
 result is below a certain amount (called epsilon) which is 0.01 in this case)
 
-Run "C<make test>" and all should be well. There are some warnings on missing tests
-for the Mytest2::mylib extension, but you can ignore them.
+Run "C<make test>" and all should be well. There are some warnings on missing
+tests for the Mytest2::mylib extension, but you can ignore them.
 
 =head2 What has happened here?
 
@@ -862,11 +863,12 @@ For example, consider:
 		char	&a
 		char *	b
 
-The first Perl argument to this function would be treated as a char and assigned
-to the variable a, and its address would be passed into the function foo.
-The second Perl argument would be treated as a string pointer and assigned to the
-variable b.  The I<value> of b would be passed into the function foo.  The
-actual call to the function foo that B<xsubpp> generates would look like this:
+The first Perl argument to this function would be treated as a char and
+assigned to the variable a, and its address would be passed into the function
+foo. The second Perl argument would be treated as a string pointer and assigned
+to the variable b. The I<value> of b would be passed into the function foo.
+The actual call to the function foo that B<xsubpp> generates would look like
+this:
 
 	foo(&a, b);
 
@@ -1175,18 +1177,18 @@ true, which indicates that paths is a valid reference.  (Simply
 checking C<SvROK> won't trigger FETCH on a tied variable.)  It
 then verifies that the object referenced by paths is an array, using C<SvRV>
 to dereference paths, and C<SvTYPE> to discover its type.  As an added test,
-it checks that the array referenced by paths is non-empty, using the C<av_top_index>
-function (which returns -1 if the array is empty).  The XSRETURN_UNDEF macro
-is used to abort the XSUB and return the undefined value whenever all three of
-these conditions are not met.
+it checks that the array referenced by paths is non-empty, using the
+C<av_top_index> function (which returns -1 if the array is empty). The
+XSRETURN_UNDEF macro is used to abort the XSUB and return the undefined value
+whenever all three of these conditions are not met.
 
 =item *
 
 We manipulate several arrays in this XSUB.  Note that an array is represented
 internally by an AV* pointer.  The functions and macros for manipulating
-arrays are similar to the functions in Perl: C<av_top_index> returns the highest
-index in an AV*, much like $#array; C<av_fetch> fetches a single scalar value
-from an array, given its index; C<av_push> pushes a scalar value onto the
+arrays are similar to the functions in Perl: C<av_top_index> returns the
+highest index in an AV*, much like $#array; C<av_fetch> fetches a single scalar
+value from an array, given its index; C<av_push> pushes a scalar value onto the
 end of the array, automatically extending the array as necessary.
 
 Specifically, we read pathnames one at a time from the input array, and

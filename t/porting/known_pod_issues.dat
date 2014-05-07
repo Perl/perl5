@@ -198,7 +198,7 @@ YAML
 YAML::Syck
 YAML::Tiny
 dist/data-dumper/dumper.pm	? Should you be using L<...> instead of	1
-dist/extutils-parsexs/lib/perlxstut.pod	Verbatim line length including indents exceeds 79 by	9
+dist/extutils-parsexs/lib/perlxstut.pod	Verbatim line length including indents exceeds 79 by	8
 dist/math-bigint/lib/math/bigint.pm	Verbatim line length including indents exceeds 79 by	71
 dist/math-bigrat/lib/math/bigrat.pm	Verbatim line length including indents exceeds 79 by	7
 dist/module-corelist/lib/module/corelist.pod	Verbatim line length including indents exceeds 79 by	4
