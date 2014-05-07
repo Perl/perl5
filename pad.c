@@ -2197,6 +2197,25 @@ S_cv_clone(pTHX_ CV *proto, CV *cv, CV *outside)
 	cv_dump(cv,	 "To");
     );
 
+    if (CvCONST(cv)) {
+	/* Constant sub () { $x } closing over $x - see lib/constant.pm:
+	 * The prototype was marked as a candiate for const-ization,
+	 * so try to grab the current const value, and if successful,
+	 * turn into a const sub:
+	 */
+	SV* const const_sv = op_const_sv(CvSTART(cv), cv);
+	if (const_sv) {
+	    SvREFCNT_dec_NN(cv);
+            /* For this calling case, op_const_sv returns a *copy*, which we
+               donate to newCONSTSUB. Yes, this is ugly, and should be killed.
+               Need to fix how lib/constant.pm works to eliminate this.  */
+	    cv = newCONSTSUB(CvSTASH(proto), NULL, const_sv);
+	}
+	else {
+	    CvCONST_off(cv);
+	}
+    }
+
     return cv;
 }
 

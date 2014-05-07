@@ -7248,10 +7248,28 @@ Perl_cv_const_sv_or_av(pTHX_ const CV * const cv)
 }
 
 /* op_const_sv:  examine an optree to determine whether it's in-lineable.
+ * Can be called in 3 ways:
+ *
+ * !cv
+ * 	look for a single OP_CONST with attached value: return the value
+ *
+ * cv && CvCLONE(cv) && !CvCONST(cv)
+ *
+ * 	examine the clone prototype, and if contains only a single
+ * 	OP_CONST referencing a pad const, or a single PADSV referencing
+ * 	an outer lexical, return a non-zero value to indicate the CV is
+ * 	a candidate for "constizing" at clone time
+ *
+ * cv && CvCONST(cv)
+ *
+ *	We have just cloned an anon prototype that was marked as a const
+ *	candidate. Try to grab the current value, and in the case of
+ *	PADSV, ignore it if it has multiple references. In this case we
+ *	return a newly created *copy* of the value.
  */
 
 SV *
-Perl_op_const_sv(pTHX_ const OP *o)
+Perl_op_const_sv(pTHX_ const OP *o, CV *cv)
 {
     dVAR;
     SV *sv = NULL;
@@ -7284,6 +7302,27 @@ Perl_op_const_sv(pTHX_ const OP *o)
 	    return NULL;
 	if (type == OP_CONST && cSVOPo->op_sv)
 	    sv = cSVOPo->op_sv;
+	else if (cv && type == OP_CONST) {
+	    sv = PAD_BASE_SV(CvPADLIST(cv), o->op_targ);
+	    if (!sv)
+		return NULL;
+	}
+	else if (cv && type == OP_PADSV) {
+	    if (CvCONST(cv)) { /* newly cloned anon */
+		sv = PAD_BASE_SV(CvPADLIST(cv), o->op_targ);
+		/* the candidate should have 1 ref from this pad and 1 ref
+		 * from the parent */
+		if (!sv || SvREFCNT(sv) != 2)
+		    return NULL;
+		sv = newSVsv(sv);
+		SvREADONLY_on(sv);
+		return sv;
+	    }
+	    else {
+		if (PAD_COMPNAME_FLAGS(o->op_targ) & SVf_FAKE)
+		    sv = &PL_sv_undef; /* an arbitrary non-null value */
+	    }
+	}
 	else {
 	    return NULL;
 	}
@@ -7455,7 +7494,7 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	)
 	const_sv = NULL;
     else
-	const_sv = op_const_sv(block);
+	const_sv = op_const_sv(block, NULL);
 
     if (cv) {
         const bool exists = CvROOT(cv) || CvXSUB(cv);
@@ -7627,6 +7666,12 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
     /* now that optimizer has done its work, adjust pad values */
 
     pad_tidy(CvCLONE(cv) ? padtidy_SUBCLONE : padtidy_SUB);
+
+    if (CvCLONE(cv)) {
+	assert(!CvCONST(cv));
+	if (ps && !*ps && op_const_sv(block, cv))
+	    CvCONST_on(cv);
+    }
 
   attrs:
     if (attrs) {
@@ -7822,7 +7867,7 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 	)
 	const_sv = NULL;
     else
-	const_sv = op_const_sv(block);
+	const_sv = op_const_sv(block, NULL);
 
     if (cv) {
         const bool exists = CvROOT(cv) || CvXSUB(cv);
@@ -7983,6 +8028,12 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
     /* now that optimizer has done its work, adjust pad values */
 
     pad_tidy(CvCLONE(cv) ? padtidy_SUBCLONE : padtidy_SUB);
+
+    if (CvCLONE(cv)) {
+	assert(!CvCONST(cv));
+	if (ps && !*ps && op_const_sv(block, cv))
+	    CvCONST_on(cv);
+    }
 
   attrs:
     if (attrs) {
