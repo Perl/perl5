@@ -135,8 +135,11 @@ sub _loose_name ($) {
 
 
                 my $caller0 = caller(0);
-                my $caller1 = $type =~ s/(.+)::// ? $1 : $caller0 eq 'main' ?
-                'main' : caller(1);
+                my $caller1 = $type =~ s/(.+):://
+                              ? $1
+                              : $caller0 eq 'main'
+                                ? 'main'
+                                : caller(1);
 
                 if (defined $caller1 && $type =~ /^I[ns]\w+$/) {
                     my $prop = "${caller1}::$type";
