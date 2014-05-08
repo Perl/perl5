@@ -2949,6 +2949,10 @@ L<LaTeX::Encode> version 0.08
 
 =item *
 
+L<List::Gather> version 0.08.
+
+=item *
+
 L<Mail::SpamAssassin> version 3.3.2
 
 =item *
