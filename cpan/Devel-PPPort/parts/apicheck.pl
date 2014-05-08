@@ -146,7 +146,6 @@ print OUT <<HEAD;
 #define NEED_load_module
 #define NEED_my_snprintf
 #define NEED_my_sprintf
-#define NEED_mg_findext
 #define NEED_my_strlcat
 #define NEED_my_strlcpy
 #define NEED_newCONSTSUB

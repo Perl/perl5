@@ -15,7 +15,6 @@ SvREFCNT_inc
 SvREFCNT_inc_simple
 SvREFCNT_inc_NN
 SvREFCNT_inc_void
-SvREFCNT_dec_NN
 __UNDEFINED__
 
 =implementation
@@ -77,20 +76,6 @@ __UNDEFINED__
 #  endif
 #endif
 
-#ifndef SvREFCNT_dec_NN
-#  ifdef PERL_USE_GCC_BRACE_GROUPS
-#    define SvREFCNT_dec_NN(sv)        \
-      ({                               \
-          SV * const _sv = (SV*)(sv);  \
-          SvREFCNT(_sv)--;             \
-          _sv;                         \
-      })
-#  else
-#    define SvREFCNT_dec_NN(sv) \
-          (PL_Sv=(SV*)(sv),--(SvREFCNT(PL_Sv)),PL_Sv)
-#  endif
-#endif
-
 __UNDEFINED__  SvREFCNT_inc_simple_void(sv)     STMT_START { if (sv) SvREFCNT(sv)++; } STMT_END
 __UNDEFINED__  SvREFCNT_inc_simple_NN(sv)       (++SvREFCNT(sv), (SV*)(sv))
 __UNDEFINED__  SvREFCNT_inc_void_NN(sv)         (void)(++SvREFCNT((SV*)(sv)))
@@ -125,15 +110,13 @@ SvREFCNT()
                 mXPUSHi(SvREFCNT(sv) == 8);
                 SvREFCNT_inc_simple_void_NN(sv);
                 mXPUSHi(SvREFCNT(sv) == 9);
-                SvREFCNT_dec_NN(sv);
-                mXPUSHi(SvREFCNT(sv) == 8);
                 while (SvREFCNT(sv) > 1)
                   SvREFCNT_dec(sv);
                 mXPUSHi(SvREFCNT(sv) == 1);
                 SvREFCNT_dec(sv);
-                XSRETURN(15);
+                XSRETURN(14);
 
-=tests plan => 15
+=tests plan => 14
 
 for (Devel::PPPort::SvREFCNT()) {
   ok(defined $_ and $_);
