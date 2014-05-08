@@ -641,6 +641,15 @@ PP(pp_bless)
     RETURN;
 }
 
+PP(pp_gelemfast)
+{
+    dVAR; dSP;
+    GV * const gv = MUTABLE_GV(POPs);
+
+    PUTBACK;
+    return do_gelem(gv, PL_op->op_private);
+}
+
 PP(pp_gelem)
 {
     dVAR; dSP;
@@ -649,7 +658,7 @@ PP(pp_gelem)
     STRLEN len;
     const char * const elem = SvPV_const(sv, len);
     GV * const gv = MUTABLE_GV(POPs);
-    SV * tmpRef = NULL;
+    I32 which = 0;
 
     sv = NULL;
     if (elem) {
@@ -659,63 +668,53 @@ PP(pp_gelem)
 	case 'A':
 	    if (len == 5 && strEQ(second_letter, "RRAY"))
 	    {
-		tmpRef = MUTABLE_SV(GvAV(gv));
-		if (tmpRef && !AvREAL((const AV *)tmpRef)
-		 && AvREIFY((const AV *)tmpRef))
-		    av_reify(MUTABLE_AV(tmpRef));
+		which = OPpGELEM_ARRAY;
 	    }
 	    break;
 	case 'C':
 	    if (len == 4 && strEQ(second_letter, "ODE"))
-		tmpRef = MUTABLE_SV(GvCVu(gv));
+		which = OPpGELEM_CODE;
 	    break;
 	case 'F':
 	    if (len == 10 && strEQ(second_letter, "ILEHANDLE")) {
 		/* finally deprecated in 5.8.0 */
 		deprecate("*glob{FILEHANDLE}");
-		tmpRef = MUTABLE_SV(GvIOp(gv));
+		which = OPpGELEM_IO;
 	    }
 	    else
 		if (len == 6 && strEQ(second_letter, "ORMAT"))
-		    tmpRef = MUTABLE_SV(GvFORM(gv));
+		    which = OPpGELEM_FORMAT;
 	    break;
 	case 'G':
 	    if (len == 4 && strEQ(second_letter, "LOB"))
-		tmpRef = MUTABLE_SV(gv);
+		which = OPpGELEM_GLOB;
 	    break;
 	case 'H':
 	    if (len == 4 && strEQ(second_letter, "ASH"))
-		tmpRef = MUTABLE_SV(GvHV(gv));
+		which = OPpGELEM_HASH;
 	    break;
 	case 'I':
 	    if (*second_letter == 'O' && !elem[2] && len == 2)
-		tmpRef = MUTABLE_SV(GvIOp(gv));
+		which = OPpGELEM_IO;
 	    break;
 	case 'N':
 	    if (len == 4 && strEQ(second_letter, "AME"))
-		sv = newSVhek(GvNAME_HEK(gv));
+		which = OPpGELEM_NAME;
 	    break;
 	case 'P':
 	    if (len == 7 && strEQ(second_letter, "ACKAGE")) {
-		const HV * const stash = GvSTASH(gv);
-		const HEK * const hek = stash ? HvNAME_HEK(stash) : NULL;
-		sv = hek ? newSVhek(hek) : newSVpvs("__ANON__");
+		which = OPpGELEM_PACKAGE;
 	    }
 	    break;
 	case 'S':
 	    if (len == 6 && strEQ(second_letter, "CALAR"))
-		tmpRef = GvSVn(gv);
+		which = OPpGELEM_SCALAR;
 	    break;
 	}
     }
-    if (tmpRef)
-	sv = newRV(tmpRef);
-    if (sv)
-	sv_2mortal(sv);
-    else
-	sv = &PL_sv_undef;
-    XPUSHs(sv);
-    RETURN;
+    
+    PUTBACK;
+    return do_gelem(gv, which);
 }
 
 /* Pattern matching */

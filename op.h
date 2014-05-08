@@ -364,6 +364,17 @@ is no conversion of op type.
 /* Private for OP_SPLIT */
 #define OPpSPLIT_IMPLIM		128	/* implicit limit */
 
+/* Private for OP_GELEMFAST, as well as the flags for do_gelem() */
+#define OPpGELEM_SCALAR		1
+#define OPpGELEM_ARRAY		2
+#define OPpGELEM_HASH		3
+#define OPpGELEM_CODE		4
+#define OPpGELEM_FORMAT		5
+#define OPpGELEM_GLOB		6
+#define OPpGELEM_IO		7
+#define OPpGELEM_NAME		8
+#define OPpGELEM_PACKAGE	9
+
 struct op {
     BASEOP
 };

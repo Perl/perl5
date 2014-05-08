@@ -181,7 +181,10 @@ is (*{*x{GLOB}}, "*main::STDOUT");
     local $SIG{__WARN__} = sub {
 	$warn .= $_[0];
     };
-    my $val = *x{FILEHANDLE};
+    # The *x{FILEHANDLE} variant now warns just once, at compile time,
+    # rather than several times at runtime.
+    my $x = "FILEHANDLE";
+    my $val = *x{$x};
     print {*x{IO}} ($warn =~ /is deprecated/
 		    ? "ok $test\n" : "not ok $test\n");
     curr_test(++$test);

@@ -1100,6 +1100,7 @@
 #define do_dump_pad(a,b,c,d)	Perl_do_dump_pad(aTHX_ a,b,c,d)
 #define do_eof(a)		Perl_do_eof(aTHX_ a)
 #define do_execfree()		Perl_do_execfree(aTHX)
+#define do_gelem(a,b)		Perl_do_gelem(aTHX_ a,b)
 #define do_ncmp(a,b)		Perl_do_ncmp(aTHX_ a,b)
 #define do_open6(a,b,c,d,e,f)	Perl_do_open6(aTHX_ a,b,c,d,e,f)
 #define do_open_raw(a,b,c,d,e)	Perl_do_open_raw(aTHX_ a,b,c,d,e)

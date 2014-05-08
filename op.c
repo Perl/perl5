@@ -11744,6 +11744,80 @@ Perl_rpeep(pTHX_ OP *o)
             break;
         }
 
+    /* Try to optimize this into a GELEMFAST */
+    case OP_GELEM: {
+        OP * const pop = cUNOPo->op_first->op_sibling;
+        SV * constsv;
+        
+        if ( pop->op_type != OP_CONST ) {
+            break;
+        }
+        constsv = cSVOPx_sv(pop);
+        if ( constsv != &PL_sv_undef ) {
+            STRLEN len;
+            const char * const elem = SvPV_const(constsv, len);
+            U8 i = 0;
+
+            if (elem) {
+            /* elem will always be NUL terminated.  */
+            const char * const second_letter = elem + 1;
+            switch (*elem) {
+            case 'A':
+                if (len == 5 && strEQ(second_letter, "RRAY")) {
+                    i = OPpGELEM_ARRAY;
+                }
+                break;
+            case 'C':
+                if (len == 4 && strEQ(second_letter, "ODE"))
+                    i = OPpGELEM_CODE;
+                break;
+            case 'F':
+                if (len == 10 && strEQ(second_letter, "ILEHANDLE")) {
+                    deprecate("*glob{FILEHANDLE}");
+                    i = OPpGELEM_IO;
+                }
+                else if (len == 6 && strEQ(second_letter, "ORMAT")) {
+                    i = OPpGELEM_FORMAT;
+                }
+                break;
+            case 'G':
+                if (len == 4 && strEQ(second_letter, "LOB"))
+                    i = OPpGELEM_GLOB;
+                break;
+            case 'H':
+                if (len == 4 && strEQ(second_letter, "ASH"))
+                    i = OPpGELEM_HASH;
+                break;
+            case 'I':
+                if (*second_letter == 'O' && !elem[2] && len == 2)
+                    i = OPpGELEM_IO;
+                break;
+            case 'N':
+                if (len == 4 && strEQ(second_letter, "AME"))
+                    i = OPpGELEM_NAME;
+                break;
+            case 'P':
+                if (len == 7 && strEQ(second_letter, "ACKAGE")) {
+                    i = OPpGELEM_PACKAGE;
+                }
+                break;
+            case 'S':
+                if (len == 6 && strEQ(second_letter, "CALAR"))
+                    i = OPpGELEM_SCALAR;
+                break;
+            }
+            }
+            
+            if ( i ) {
+                op_null(pop);
+                o->op_ppaddr  = PL_ppaddr[OP_GELEMFAST];
+                o->op_private = (U8)i;
+                o->op_type    = OP_GELEMFAST;
+            }
+        }
+        
+        break;
+    }
 	case OP_PADAV:
 	case OP_GV:
 	    if (o->op_type == OP_PADAV || o->op_next->op_type == OP_RV2AV) {

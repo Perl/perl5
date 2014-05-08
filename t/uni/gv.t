@@ -181,7 +181,8 @@ is (*{*Ẋ{GLOB}}, "*main::STDOUT");
     local $SIG{__WARN__} = sub {
 	$warn .= $_[0];
     };
-    my $val = *Ẋ{FILEHANDLE};
+    my $x = "FILEHANDLE";
+    my $val = *Ẋ{$x};
     print {*Ẋ{IO}} ($warn =~ /is deprecated/
 		    ? "ok $test\n" : "not ok $test\n");
     curr_test(++$test);

@@ -1294,6 +1294,62 @@ Perl_do_kv(pTHX)
     return NORMAL;
 }
 
+OP *
+Perl_do_gelem(pTHX_ GV* gv, I32 which)
+{
+    dVAR; dSP;
+    SV * sv       = NULL;
+    SV * tmpRef   = NULL;
+
+    PERL_ARGS_ASSERT_DO_GELEM;
+    
+    switch (which) {
+    case OPpGELEM_SCALAR: /* SCALAR */
+        tmpRef = GvSVn(gv);
+        break;
+    case OPpGELEM_ARRAY: /* ARRAY */
+        tmpRef = MUTABLE_SV(GvAV(gv));
+        if (tmpRef && !AvREAL((const AV *)tmpRef)
+         && AvREIFY((const AV *)tmpRef))
+            av_reify(MUTABLE_AV(tmpRef));
+        break;
+    case OPpGELEM_HASH: /* HASH */
+        tmpRef = MUTABLE_SV(GvHV(gv));
+        break;
+    case OPpGELEM_CODE: /* CODE */
+        tmpRef = MUTABLE_SV(GvCVu(gv));
+        break;
+    case OPpGELEM_FORMAT: /* FORMAT */
+        tmpRef = MUTABLE_SV(GvFORM(gv));
+        break;
+    case OPpGELEM_GLOB: /* GLOB */
+        tmpRef = MUTABLE_SV(gv);
+        break;
+    case OPpGELEM_IO: /* IO and FILEHANDLE */
+        tmpRef = MUTABLE_SV(GvIOp(gv));
+        break;
+    case OPpGELEM_NAME: /* NAME */
+        sv = newSVhek(GvNAME_HEK(gv));
+        break;
+    case OPpGELEM_PACKAGE: /* PACKAGE */
+        {
+        const HV * const stash = GvSTASH(gv);
+        const HEK * const hek = stash ? HvNAME_HEK(stash) : NULL;
+        sv = hek ? newSVhek(hek) : newSVpvs("__ANON__");
+        break;
+        }
+    }
+
+    if (tmpRef)
+        sv = newRV(tmpRef);
+    if (sv)
+        sv_2mortal(sv);
+    else
+        sv = &PL_sv_undef;
+    XPUSHs(sv);
+    RETURN;
+}
+
 /*
  * Local variables:
  * c-indentation-style: bsd

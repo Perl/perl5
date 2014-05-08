@@ -156,6 +156,7 @@ EXTCONST char* const PL_op_name[] = {
 	"const",
 	"gvsv",
 	"gv",
+	"gelemfast",
 	"gelem",
 	"padsv",
 	"padav",
@@ -543,6 +544,7 @@ EXTCONST char* const PL_op_desc[] = {
 	"constant item",
 	"scalar variable",
 	"glob value",
+	"constant glob elem",
 	"glob elem",
 	"private variable",
 	"private array",
@@ -944,6 +946,7 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	Perl_pp_const,
 	Perl_pp_gvsv,
 	Perl_pp_gv,
+	Perl_pp_gelemfast,
 	Perl_pp_gelem,
 	Perl_pp_padsv,
 	Perl_pp_padav,
@@ -1341,6 +1344,7 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	Perl_ck_svconst,	/* const */
 	Perl_ck_null,		/* gvsv */
 	Perl_ck_null,		/* gv */
+	Perl_ck_null,		/* gelemfast */
 	Perl_ck_null,		/* gelem */
 	Perl_ck_null,		/* padsv */
 	Perl_ck_null,		/* padav */
@@ -1732,6 +1736,7 @@ EXTCONST U32 PL_opargs[] = {
 	0x00000604,	/* const */
 	0x00000644,	/* gvsv */
 	0x00000644,	/* gv */
+	0x00011240,	/* gelemfast */
 	0x00011240,	/* gelem */
 	0x00000044,	/* padsv */
 	0x00000040,	/* padav */

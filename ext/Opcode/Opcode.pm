@@ -6,7 +6,7 @@ use strict;
 
 our($VERSION, @ISA, @EXPORT_OK);
 
-$VERSION = "1.27";
+$VERSION = "1.28";
 
 use Carp;
 use Exporter ();
@@ -396,7 +396,7 @@ account the magical open of ARGV.
 
 These are a hotchpotch of opcodes still waiting to be considered
 
-    gvsv gv gelem
+    gvsv gv gelem gelemfast
 
     padsv padav padhv padcv padany padrange introcv clonecv
 

@@ -884,6 +884,11 @@ PERL_CALLCONV bool	Perl_do_eof(pTHX_ GV* gv)
 	assert(gv)
 
 PERL_CALLCONV void	Perl_do_execfree(pTHX);
+PERL_CALLCONV OP*	Perl_do_gelem(pTHX_ GV* gv, I32 which)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_DO_GELEM	\
+	assert(gv)
+
 PERL_CALLCONV void	Perl_do_gv_dump(pTHX_ I32 level, PerlIO *file, const char *name, GV *sv)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3);

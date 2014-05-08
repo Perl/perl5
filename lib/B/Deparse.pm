@@ -20,7 +20,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
          CVf_METHOD CVf_LVALUE
 	 PMf_KEEP PMf_GLOBAL PMf_CONTINUE PMf_EVAL PMf_ONCE
 	 PMf_MULTILINE PMf_SINGLELINE PMf_FOLD PMf_EXTENDED);
-$VERSION = '1.26';
+$VERSION = '1.27';
 use strict;
 use vars qw/$AUTOLOAD/;
 use warnings ();
@@ -3560,6 +3560,32 @@ sub pp_gelem {
     my $scope = is_scope($glob);
     $glob = $self->deparse($glob, 0);
     $part = $self->deparse($part, 1);
+    return "*" . ($scope ? "{$glob}" : $glob) . "{$part}";
+}
+
+my @gelemfast_op_private = qw(
+    SCALAR
+    ARRAY
+    HASH
+    CODE
+    FORMAT
+    GLOB
+    IO
+    NAME
+    PACKAGE
+);
+sub pp_gelemfast {
+    my $self = shift;
+    my($op, $cx) = @_;
+
+    my $glob = $op->first;
+    $glob = $glob->first; # skip rv2gv
+    $glob = $glob->first if $glob->name eq "rv2gv"; # this one's a bug
+    my $scope = is_scope($glob);
+    $glob = $self->deparse($glob, 0);
+
+    my $part = $gelemfast_op_private[$op->private - 1];
+
     return "*" . ($scope ? "{$glob}" : $glob) . "{$part}";
 }
 

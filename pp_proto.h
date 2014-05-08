@@ -81,6 +81,7 @@ PERL_CALLCONV OP *Perl_pp_fttext(pTHX);
 PERL_CALLCONV OP *Perl_pp_fttty(pTHX);
 PERL_CALLCONV OP *Perl_pp_ge(pTHX);
 PERL_CALLCONV OP *Perl_pp_gelem(pTHX);
+PERL_CALLCONV OP *Perl_pp_gelemfast(pTHX);
 PERL_CALLCONV OP *Perl_pp_getc(pTHX);
 PERL_CALLCONV OP *Perl_pp_getlogin(pTHX);
 PERL_CALLCONV OP *Perl_pp_getpeername(pTHX);
