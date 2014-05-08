@@ -645,9 +645,10 @@ PP(pp_gelemfast)
 {
     dVAR; dSP;
     GV * const gv = MUTABLE_GV(POPs);
+    SV * sv = do_gelem(gv, PL_op->op_private);
 
-    PUTBACK;
-    return do_gelem(gv, PL_op->op_private);
+    XPUSHs(sv);
+    RETURN;
 }
 
 PP(pp_gelem)
@@ -713,8 +714,9 @@ PP(pp_gelem)
 	}
     }
     
-    PUTBACK;
-    return do_gelem(gv, which);
+    sv = do_gelem(gv, which);
+    XPUSHs(sv);
+    RETURN;
 }
 
 /* Pattern matching */

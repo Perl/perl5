@@ -432,7 +432,7 @@ p	|UV	|do_vecget	|NN SV* sv|SSize_t offset|int size
 p	|void	|do_vecset	|NN SV* sv
 : Defined in doop.c, used only in pp.c
 p	|void	|do_vop		|I32 optype|NN SV* sv|NN SV* left|NN SV* right
-p	|OP*	|do_gelem	|NN GV* gv|I32 which
+p	|SV*	|do_gelem	|NN GV* gv|I32 which
 : Used in perly.y
 p	|OP*	|dofile		|NN OP* term|I32 force_builtin
 ApR	|I32	|dowantarray

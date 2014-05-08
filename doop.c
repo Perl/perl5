@@ -1294,10 +1294,9 @@ Perl_do_kv(pTHX)
     return NORMAL;
 }
 
-OP *
+SV *
 Perl_do_gelem(pTHX_ GV* gv, I32 which)
 {
-    dVAR; dSP;
     SV * sv       = NULL;
     SV * tmpRef   = NULL;
 
@@ -1346,8 +1345,7 @@ Perl_do_gelem(pTHX_ GV* gv, I32 which)
         sv_2mortal(sv);
     else
         sv = &PL_sv_undef;
-    XPUSHs(sv);
-    RETURN;
+    return sv;
 }
 
 /*
