@@ -53,6 +53,12 @@
 #   ifndef SV_COWBUF_THRESHOLD
 #    define SV_COWBUF_THRESHOLD	1250	/* min string length for cow */
 #   endif				/* over existing buffer */
+#   ifndef SV_COW_WASTE_THRESHOLD
+#    define SV_COW_WASTE_THRESHOLD 1024
+#   endif
+#   ifndef SV_COWBUF_WASTE_THRESHOLD
+#    define SV_COWBUF_WASTE_THRESHOLD 1024
+#   endif
 #endif
 /* void Gconvert: on Linux at least, gcvt (which Gconvert gets deffed to),
  * has a mandatory return value, even though that value is just the same
@@ -4028,15 +4034,30 @@ S_glob_assign_ref(pTHX_ SV *const dstr, SV *const sstr)
 /* Work around compiler warnings about unsigned >= THRESHOLD when thres-
    hold is 0. */
 #if SV_COW_THRESHOLD
-# define GE_COW_THRESHOLD(len)		((len) >= SV_COW_THRESHOLD)
+# define GE_COW_THRESHOLD(cur)                ((cur) >= SV_COW_THRESHOLD)
 #else
-# define GE_COW_THRESHOLD(len)		1
+# define GE_COW_THRESHOLD(cur)                1
 #endif
 #if SV_COWBUF_THRESHOLD
-# define GE_COWBUF_THRESHOLD(len)	((len) >= SV_COWBUF_THRESHOLD)
+# define GE_COWBUF_THRESHOLD(cur)        ((cur) >= SV_COWBUF_THRESHOLD)
 #else
-# define GE_COWBUF_THRESHOLD(len)	1
+# define GE_COWBUF_THRESHOLD(cur)        1
 #endif
+#if SV_COW_WASTE_THRESHOLD
+# define GE_COW_WASTE_THRESHOLD(cur,len)    (((len)-(cur)) < SV_COW_WASTE_THRESHOLD)
+#else
+# define GE_COW_WASTE_THRESHOLD(cur,len)    1
+#endif
+#if SV_COWBUF_WASTE_THRESHOLD
+# define GE_COWBUF_WASTE_THRESHOLD(cur,len) (((len)-(cur)) < SV_COWBUF_WASTE_THRESHOLD)
+#else
+# define GE_COWBUF_WASTE_THRESHOLD(cur,len) 1
+#endif
+
+#define CHECK_COW_THRESHOLD(cur,len)       (GE_COW_THRESHOLD((cur)) && GE_COW_WASTE_THRESHOLD((cur),(len)))
+#define CHECK_COWBUF_THRESHOLD(cur,len)     (GE_COWBUF_THRESHOLD((cur)) && GE_COWBUF_WASTE_THRESHOLD((cur),(len)))
+
+
 
 #ifdef PERL_DEBUG_READONLY_COW
 # include <sys/mman.h>
@@ -4404,7 +4425,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, SV* sstr, const I32 flags)
                  || ((sflags & (SVs_PADTMP|SVf_READONLY|SVf_IsCOW))
                        == SVs_PADTMP
                                 /* whose buffer is worth stealing */
-                     && GE_COWBUF_THRESHOLD(cur)
+                     && CHECK_COWBUF_THRESHOLD(cur,len)
                     )
                  ) &&
                  !(sflags & SVf_OOK) &&   /* and not involved in OOK hack? */
@@ -4438,14 +4459,14 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, SV* sstr, const I32 flags)
 #elif defined(PERL_NEW_COPY_ON_WRITE)
 		 (sflags & SVf_IsCOW
 		   ? (!len ||
-		       (  (GE_COWBUF_THRESHOLD(cur) || SvLEN(dstr) < cur+1)
+                       (  (CHECK_COWBUF_THRESHOLD(cur,len) || SvLEN(dstr) < cur+1)
 			  /* If this is a regular (non-hek) COW, only so
 			     many COW "copies" are possible. */
 		       && CowREFCNT(sstr) != SV_COW_REFCNT_MAX  ))
 		   : (  (sflags & CAN_COW_MASK) == CAN_COW_FLAGS
 		     && !(SvFLAGS(dstr) & SVf_BREAK)
-		     && GE_COW_THRESHOLD(cur) && cur+1 < len
-		     && (GE_COWBUF_THRESHOLD(cur) || SvLEN(dstr) < cur+1)
+                     && CHECK_COW_THRESHOLD(cur,len) && cur+1 < len
+                     && (CHECK_COWBUF_THRESHOLD(cur,len) || SvLEN(dstr) < cur+1)
 		    ))
 #else
 		 sflags & SVf_IsCOW
