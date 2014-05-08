@@ -46,6 +46,14 @@
   char *gconvert(double, int, int,  char *);
 #endif
 
+#ifdef PERL_NEW_COPY_ON_WRITE
+#   ifndef SV_COW_THRESHOLD
+#    define SV_COW_THRESHOLD	0	/* min string length for cow */
+#   endif
+#   ifndef SV_COWBUF_THRESHOLD
+#    define SV_COWBUF_THRESHOLD	1250	/* min string length for cow */
+#   endif				/* over existing buffer */
+#endif
 /* void Gconvert: on Linux at least, gcvt (which Gconvert gets deffed to),
  * has a mandatory return value, even though that value is just the same
  * as the buf arg */
