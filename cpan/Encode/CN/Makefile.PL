@@ -96,8 +96,11 @@ Encode_XSEncoding(pTHX_ encode_t *enc)
  SV *iv    = newSViv(PTR2IV(enc));
  SV *sv    = sv_bless(newRV_noinc(iv),stash);
  int i = 0;
+ /* with the SvLEN() == 0 hack, PVX won't be freed. We cast away name's
+ constness, in the hope that perl won't mess with it. */
+ assert(SvTYPE(iv) >= SVt_PV); assert(SvLEN(iv) == 0);
  SvFLAGS(iv) |= SVp_POK;
- SvPVX(iv) = enc->name[0];
+ SvPVX(iv) = (char*) enc->name[0];
  PUSHMARK(sp);
  XPUSHs(sv);
  while (enc->name[i])
