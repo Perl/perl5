@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 59;
+plan tests => 57;
 
 $h{'abc'} = 'ABC';
 $h{'def'} = 'DEF';
@@ -105,25 +105,6 @@ keys(%hash) = $size + 100;
 isnt ($size, (split('/', scalar %hash))[1]);
 
 is (keys(%hash), 10, "keys (%hash)");
-
-{
-    no warnings 'deprecated';
-    is (keys(hash), 10, "keys (hash)");
-}
-
-$i = 0;
-%h = (a => A, b => B, c=> C, d => D, abc => ABC);
-{
-    no warnings 'deprecated';
-    @keys = keys(h);
-    @values = values(h);
-    while (($key, $value) = each(h)) {
-	if ($key eq $keys[$i] && $value eq $values[$i] && $key eq lc($value)) {
-		$i++;
-	}
-    }
-}
-is ($i, 5);
 
 @tests = (&next_test, &next_test, &next_test);
 {

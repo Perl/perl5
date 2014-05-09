@@ -84,6 +84,12 @@ consistency, this is now changed to match what terminates comment lines
 outside S<C<(?[ ])>>, namely a C<\n> (even if escaped), which is the
 same as what terminates a heredoc string and formats.
 
+=head2 Omitting % and @ on hash and array names is no longer permitted
+
+Really old Perl let you omit the @ on array names and the % on hash
+names in some spots.  This has issued a deprecation warning since Perl
+5.0, and is no longer permitted.
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.

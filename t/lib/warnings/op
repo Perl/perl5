@@ -61,17 +61,11 @@
        format FRED =
        .
  
-     Array @%s missing the @ in argument %d of %s() 
-	push fred ;
- 
      push on reference is experimental			[ck_fun]
      pop on reference is experimental
      shift on reference is experimental
      unshift on reference is experimental
      splice on reference is experimental
- 
-     Hash %%%s missing the %% in argument %d of %s() 
-	keys joe ;
  
      Statement unlikely to be reached
      	(Maybe you meant system() when you said exec()?
@@ -235,12 +229,6 @@ my @s = @f{"]", "a"};
 @h{m ""};
 use constant phoo => 1..3;
 @h{+phoo}; # rv2av
-{
-    no warnings 'deprecated';
-    @h{each H};
-    @h{values H};
-    @h{keys H};
-}
 @h{sort foo};
 @h{reverse foo};
 @h{caller 0};
@@ -284,12 +272,6 @@ my @s = @f["]", "a"];
 @h[m ""];
 use constant phoo => 1..3;
 @h[+phoo]; # rv2av
-{
-    no warnings 'deprecated';
-    @h[each H];
-    @h[values H];
-    @h[keys H];
-}
 @h[sort foo];
 @h[reverse foo];
 @h[caller 0];
@@ -1025,13 +1007,6 @@ format FRED =
 EXPECT
 Format FRED redefined at - line 5.
 ########
-# op.c
-push FRED;
-no warnings 'deprecated' ;
-push FRED;
-EXPECT
-Array @FRED missing the @ in argument 1 of push() at - line 2.
-########
 # op.c [Perl_ck_fun]
 $fred = [];
 push $fred;
@@ -1051,13 +1026,6 @@ pop on reference is experimental at - line 4.
 shift on reference is experimental at - line 5.
 unshift on reference is experimental at - line 6.
 splice on reference is experimental at - line 7.
-########
-# op.c
-@a = keys FRED ;
-no warnings 'deprecated' ;
-@a = keys FRED ;
-EXPECT
-Hash %FRED missing the % in argument 1 of keys() at - line 2.
 ########
 # op.c
 use warnings 'exec' ;

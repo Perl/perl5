@@ -186,11 +186,6 @@ point and did not attempt to push this layer.  If your program
 didn't explicitly request the failing operation, it may be the
 result of the value of the environment variable PERLIO.
 
-=item Array @%s missing the @ in argument %d of %s()
-
-(D deprecated) Really old Perl let you omit the @ on array names in some
-spots.  This is now heavily deprecated.
-
 =item charnames alias definitions may not contain a sequence of multiple spaces
 
 (F) You defined a character name which had multiple space
@@ -2161,11 +2156,6 @@ something: a template character or a ()-group.  See L<perlfunc/pack>.
 (S internal) A routine asked for a symbol from a symbol table that ought
 to have existed already, but for some reason it didn't, and had to be
 created on an emergency basis to prevent a core dump.
-
-=item Hash %%s missing the % in argument %d of %s()
-
-(D deprecated) Really old Perl let you omit the % on hash names in some
-spots.  This is now heavily deprecated.
 
 =item %s has too many errors
 

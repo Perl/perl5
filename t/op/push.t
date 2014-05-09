@@ -20,7 +20,7 @@ BEGIN {
 -4,			4 5 6 7,	0 1 2 3
 EOF
 
-plan tests => 16 + @tests*4;
+plan tests => 14 + @tests*4;
 die "blech" unless @tests;
 
 @x = (1,2,3);
@@ -28,18 +28,6 @@ push(@x,@x);
 is( join(':',@x), '1:2:3:1:2:3', 'push array onto array');
 push(@x,4);
 is( join(':',@x), '1:2:3:1:2:3:4', 'push integer onto array');
-
-# test for push/pop intuiting @ on array
-{
-    no warnings 'deprecated';
-    push(x,3);
-}
-is( join(':',@x), '1:2:3:1:2:3:4:3', 'push intuiting @ on array');
-{
-    no warnings 'deprecated';
-    pop(x);
-}
-is( join(':',@x), '1:2:3:1:2:3:4', 'pop intuiting @ on array');
 
 no warnings 'experimental::autoderef';
 

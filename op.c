@@ -9221,24 +9221,7 @@ Perl_ck_fun(pTHX_ OP *o)
 				   "Useless use of %s with no values",
 				   PL_op_desc[type]);
 
-		if (kid->op_type == OP_CONST &&
-		    (kid->op_private & OPpCONST_BARE))
-		{
-		    OP * const newop = newAVREF(newGVOP(OP_GV, 0,
-			gv_fetchsv(((SVOP*)kid)->op_sv, GV_ADD, SVt_PVAV) ));
-		    Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED),
-				   "Array @%"SVf" missing the @ in argument %"IVdf" of %s()",
-				   SVfARG(((SVOP*)kid)->op_sv), (IV)numargs, PL_op_desc[type]);
-#ifdef PERL_MAD
-		    op_getmad(kid,newop,'K');
-#else
-		    op_free(kid);
-#endif
-		    kid = newop;
-		    kid->op_sibling = sibl;
-		    *tokid = kid;
-		}
-		else if (kid->op_type == OP_CONST
+		if (kid->op_type == OP_CONST
 		      && (  !SvROK(cSVOPx_sv(kid)) 
 		         || SvTYPE(SvRV(cSVOPx_sv(kid))) != SVt_PVAV  )
 		        )
@@ -9256,24 +9239,7 @@ Perl_ck_fun(pTHX_ OP *o)
 		}
 		break;
 	    case OA_HVREF:
-		if (kid->op_type == OP_CONST &&
-		    (kid->op_private & OPpCONST_BARE))
-		{
-		    OP * const newop = newHVREF(newGVOP(OP_GV, 0,
-			gv_fetchsv(((SVOP*)kid)->op_sv, GV_ADD, SVt_PVHV) ));
-		    Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED),
-				   "Hash %%%"SVf" missing the %% in argument %"IVdf" of %s()",
-				   SVfARG(((SVOP*)kid)->op_sv), (IV)numargs, PL_op_desc[type]);
-#ifdef PERL_MAD
-		    op_getmad(kid,newop,'K');
-#else
-		    op_free(kid);
-#endif
-		    kid = newop;
-		    kid->op_sibling = sibl;
-		    *tokid = kid;
-		}
-		else if (kid->op_type != OP_RV2HV && kid->op_type != OP_PADHV)
+		if (kid->op_type != OP_RV2HV && kid->op_type != OP_PADHV)
 		    bad_type_pv(numargs, "hash", PL_op_desc[type], 0, kid);
 		op_lvalue(kid, type);
 		break;
