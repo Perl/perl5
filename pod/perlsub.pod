@@ -1653,20 +1653,82 @@ the constant folding doesn't reduce them to a single constant:
 	}
     }
 
-If you redefine a subroutine that was eligible for inlining, you'll get
-a warning by default.  (You can use this warning to tell whether or not a
-particular subroutine is considered inlinable.)  The warning is
-considered severe enough not to be affected by the B<-w>
-switch (or its absence) because previously compiled
-invocations of the function will still be using the old value of the
-function.  If you need to be able to redefine the subroutine, you need to
-ensure that it isn't inlined, either by dropping the C<()> prototype
-(which changes calling semantics, so beware) or by thwarting the
-inlining mechanism in some other way, such as
+As alluded to earlier you can also declare inlined subs dynamically at
+BEGIN time if their body consists of a lexically-scoped scalar which
+has no other references. Only the first example here will be inlined:
 
-    sub not_inlined () {
-    	23 if $];
+    BEGIN {
+        my $var = 1;
+        no strict 'refs';
+        *INLINED = sub () { $var };
     }
+
+    BEGIN {
+        my $var = 1;
+        my $ref = \$var;
+        no strict 'refs';
+        *NOT_INLINED = sub () { $var };
+    }
+
+A not so obvious caveat with this (see [RT #79908]) is that the
+variable will be immediately inlined, and will stop behaving like a
+normal lexical variable, e.g. this will print C<79907>, not C<79908>:
+
+    BEGIN {
+        my $x = 79907;
+        *RT_79908 = sub () { $x };
+        $x++;
+    }
+    print RT_79908(); # prints 79907
+
+If you really want a subroutine with a C<()> prototype that returns a
+lexical variable you can easily force it to not be inlined by adding
+an explicit C<return>:
+
+    BEGIN {
+        my $x = 79907;
+        *RT_79908 = sub () { return $x };
+        $x++;
+    }
+    print RT_79908(); # prints 79908
+
+The easiest way to tell if a subroutine was inlined is by using
+L<B::Deparse>, consider this example of two subroutines returning
+C<1>, one with a C<()> prototype causing it to be inlined, and one
+without (with deparse output truncated for clarity):
+
+    $ perl -MO=Deparse -le 'sub ONE { 1 } if (ONE) { print ONE if ONE }'
+    sub ONE {
+        1;
+    }
+    if (ONE ) {
+        print ONE() if ONE ;
+    }
+    $ perl -MO=Deparse -le 'sub ONE () { 1 } if (ONE) { print ONE if ONE }'
+    sub ONE () { 1 }
+    do {
+        print 1
+    };
+
+If you redefine a subroutine that was eligible for inlining, you'll
+get a warning by default. You can use this warning to tell whether or
+not a particular subroutine is considered inlinable, since it's
+different than the warning for overriding non-inlined subroutines:
+
+    $ perl -e 'sub one () {1} sub one () {2}'
+    Constant subroutine one redefined at -e line 1.
+    $ perl -we 'sub one {1} sub one {2}'
+    Subroutine one redefined at -e line 1.
+
+The warning is considered severe enough not to be affected by the
+B<-w> switch (or its absence) because previously compiled invocations
+of the function will still be using the old value of the function.  If
+you need to be able to redefine the subroutine, you need to ensure
+that it isn't inlined, either by dropping the C<()> prototype (which
+changes calling semantics, so beware) or by thwarting the inlining
+mechanism in some other way, e.g. by adding an explicit C<return>:
+
+    sub not_inlined () { return 23 }
 
 =head2 Overriding Built-in Functions
 X<built-in> X<override> X<CORE> X<CORE::GLOBAL>
