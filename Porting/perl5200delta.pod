@@ -1420,6 +1420,11 @@ AT&T 7300), has been removed.
 DG/UX was a Unix sold by Data General. The last release was in April 2001.
 It only runs on Data General's own hardware.
 
+=item EBCDIC
+
+In the absence of a regular source of smoke reports, code intended to support
+native EBCDIC platforms will be removed from perl before 5.22.0.
+
 =back
 
 =head2 Platform-Specific Notes
