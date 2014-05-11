@@ -952,14 +952,15 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
 
 /* The members of the third group below do not need to be coordinated with data
  * structures in regcomp.[ch] and regexec.c. */
-#  define _CC_IDFIRST           17
-#  define _CC_CHARNAME_CONT     18
-#  define _CC_NONLATIN1_FOLD    19
-#  define _CC_QUOTEMETA         20
-#  define _CC_NON_FINAL_FOLD    21
-#  define _CC_IS_IN_SOME_FOLD   22
+#  define _CC_IDFIRST                  17
+#  define _CC_CHARNAME_CONT            18
+#  define _CC_NONLATIN1_FOLD           19
+#  define _CC_NONLATIN1_SIMPLE_FOLD    20
+#  define _CC_QUOTEMETA                21
+#  define _CC_NON_FINAL_FOLD           22
+#  define _CC_IS_IN_SOME_FOLD          23
 #  define _CC_BACKSLASH_FOO_LBRACE_IS_META 31 /* temp, see mk_PL_charclass.pl */
-/* Unused: 23-30
+/* Unused: 24-30
  * If more bits are needed, one could add a second word for non-64bit
  * QUAD_IS_INT systems, using some #ifdefs to distinguish between having a 2nd
  * word or not.  The IS_IN_SOME_FOLD bit is the most easily expendable, as it
@@ -1081,8 +1082,10 @@ EXTCONST U32 PL_charclass[];
 #   define isWORDCHAR_L1(c) _generic_isCC(c, _CC_WORDCHAR)
 #   define isIDFIRST_L1(c) _generic_isCC(c, _CC_IDFIRST)
 
-    /* Either participates in a fold with a character above 255, or is a
-     * multi-char fold */
+    /* Participates in a single-character fold with a character above 255 */
+#   define _HAS_NONLATIN1_SIMPLE_FOLD_CLOSURE_ONLY_FOR_USE_BY_REGCOMP_DOT_C_AND_REGEXEC_DOT_C(c) ((! cBOOL(FITS_IN_8_BITS(c))) || (PL_charclass[(U8) (c)] & _CC_mask(_CC_NONLATIN1_SIMPLE_FOLD)))
+
+    /* Like the above, but also can be part of a multi-char fold */
 #   define _HAS_NONLATIN1_FOLD_CLOSURE_ONLY_FOR_USE_BY_REGCOMP_DOT_C_AND_REGEXEC_DOT_C(c) ((! cBOOL(FITS_IN_8_BITS(c))) || (PL_charclass[(U8) (c)] & _CC_mask(_CC_NONLATIN1_FOLD)))
 
 #   define _isQUOTEMETA(c) _generic_isCC(c, _CC_QUOTEMETA)

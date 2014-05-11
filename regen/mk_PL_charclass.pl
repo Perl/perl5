@@ -23,6 +23,7 @@ require 'regen/charset_translations.pl';
 # new Unicode release, to make sure things haven't been changed by it.
 
 my @properties = qw(
+    NONLATIN1_SIMPLE_FOLD
     NONLATIN1_FOLD
     ALPHANUMERIC
     ALPHA
@@ -52,6 +53,7 @@ my @properties = qw(
 # Read in the case fold mappings.
 my %folded_closure;
 my @hex_non_final_folds;
+my @non_latin1_simple_folds;
 my @folds;
 use Unicode::UCD;
 
@@ -108,8 +110,8 @@ BEGIN { # Have to do this at compile time because using user-defined \p{property
 
         my $from = hex $hex_from;
 
-        # Perl only deals with C and F folds
-        next if $fold_type ne 'C' and $fold_type ne 'F';
+        # Perl only deals with S, C, and F folds
+        next if $fold_type ne 'C' and $fold_type ne 'F' and $fold_type ne 'S';
 
         # Get each code point in the range that participates in this line's fold.
         # The hash has keys of each code point in the range, and values of what it
@@ -120,9 +122,20 @@ BEGIN { # Have to do this at compile time because using user-defined \p{property
             push @{$folded_closure{$fold}}, $from if $fold < 256;
             push @{$folded_closure{$from}}, $fold if $from < 256;
 
-            if ($i < @folded-1
-                && $fold < 256
-                && ! grep { $_ eq $hex_fold } @hex_non_final_folds)
+            if (($fold_type eq 'C' || $fold_type eq 'S')
+                && ($fold < 256 != $from < 256))
+            {
+                # Fold is simple (hence can't be a non-final fold, so the 'if'
+                # above is mutualy exclusive from the 'if below) and crosses
+                # 255/256 boundary.  We keep track of the Latin1 code points
+                # in such folds.
+                push @non_latin1_simple_folds, ($fold < 256)
+                                                ? $fold
+                                                : $from;
+            }
+            elsif ($i < @folded-1
+                   && $fold < 256
+                   && ! grep { $_ eq $hex_fold } @hex_non_final_folds)
             {
                 push @hex_non_final_folds, $hex_fold;
 
@@ -141,6 +154,16 @@ BEGIN { # Have to do this at compile time because using user-defined \p{property
             push @{$folded_closure{$from}}, @{$folded_closure{$folded}};
         }
     }
+
+    # We have the single-character folds that cross the 255/256, like KELVIN
+    # SIGN => 'k', but we need the closure, so add like 'K' to it
+    foreach my $folded (@non_latin1_simple_folds) {
+        foreach my $fold (@{$folded_closure{$folded}}) {
+            if ($fold < 256 && ! grep { $fold == $_ } @non_latin1_simple_folds) {
+                push @non_latin1_simple_folds, $fold;
+            }
+        }
+    }
 }
 
 sub Is_Non_Latin1_Fold {
@@ -151,6 +174,12 @@ sub Is_Non_Latin1_Fold {
                                                      @{$folded_closure{$folded}};
     }
     return join("\n", @return) . "\n";
+}
+
+sub Is_Non_Latin1_Simple_Fold { # Latin1 code points that are folded to by
+                                # non-Latin1 code points as single character
+                                # folds
+    return join("\n", map { sprintf "%X", $_ } @non_latin1_simple_folds) . "\n";
 }
 
 sub Is_Non_Final_Fold {
@@ -201,6 +230,8 @@ for my $ord (0..255) {
             $re = qr/\p{_Perl_Quotemeta}/;
         } elsif ($name eq 'NONLATIN1_FOLD') {
             $re = qr/\p{Is_Non_Latin1_Fold}/;
+        } elsif ($name eq 'NONLATIN1_SIMPLE_FOLD') {
+            $re = qr/\p{Is_Non_Latin1_Simple_Fold}/;
         } elsif ($name eq 'NON_FINAL_FOLD') {
             $re = qr/\p{Is_Non_Final_Fold}/;
         } elsif ($name eq 'IS_IN_SOME_FOLD') {

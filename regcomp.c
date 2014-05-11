@@ -93,6 +93,8 @@ EXTERN_C const struct regexp_engine my_reg_engine;
 
 #define HAS_NONLATIN1_FOLD_CLOSURE(i) \
  _HAS_NONLATIN1_FOLD_CLOSURE_ONLY_FOR_USE_BY_REGCOMP_DOT_C_AND_REGEXEC_DOT_C(i)
+#define HAS_NONLATIN1_SIMPLE_FOLD_CLOSURE(i) \
+ _HAS_NONLATIN1_SIMPLE_FOLD_CLOSURE_ONLY_FOR_USE_BY_REGCOMP_DOT_C_AND_REGEXEC_DOT_C(i)
 #define IS_NON_FINAL_FOLD(c) _IS_NON_FINAL_FOLD_ONLY_FOR_USE_BY_REGCOMP_DOT_C(c)
 #define IS_IN_SOME_FOLD_L1(c) _IS_IN_SOME_FOLD_ONLY_FOR_USE_BY_REGCOMP_DOT_C(c)
 
@@ -4322,7 +4324,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 
                     /* Some characters match above-Latin1 ones under /i.  This
                      * is true of EXACTFL ones when the locale is UTF-8 */
-                    if (HAS_NONLATIN1_FOLD_CLOSURE(uc)
+                    if (HAS_NONLATIN1_SIMPLE_FOLD_CLOSURE(uc)
                         && (! isASCII(uc) || (OP(scan) != EXACTFA
                                             && OP(scan) != EXACTFA_NO_TRIE)))
                     {
@@ -14509,7 +14511,7 @@ parseit:
                             }
                         }
 
-                        if (HAS_NONLATIN1_FOLD_CLOSURE(j)
+                        if (HAS_NONLATIN1_SIMPLE_FOLD_CLOSURE(j)
                             && (! isASCII(j) || ! ASCII_FOLD_RESTRICTED))
                         {
                             add_above_Latin1_folds(pRExC_state,
