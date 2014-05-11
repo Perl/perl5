@@ -478,8 +478,9 @@ is now optimized to:
 
   my ($x, $y);
 
-In combination with the padrange optimization, this means longer
-uninitialized my variable statements are also optimized, so:
+In combination with the L<padrange optimization introduced in
+v5.18.0|perl5180delta/Internal Changes>, this means longer uninitialized my
+variable statements are also optimized, so:
 
   my $x; my @y; my %z;
 
