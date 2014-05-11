@@ -1459,7 +1459,7 @@ circumstances, including it could actually prevent building.
 
 =item Mac OS
 
-The build system now honours an C<ld> setting supplied by the user running
+The build system now honors an C<ld> setting supplied by the user running
 F<Configure>.
 
 =item MidnightBSD
