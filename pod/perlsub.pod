@@ -1697,18 +1697,18 @@ L<B::Deparse>, consider this example of two subroutines returning
 C<1>, one with a C<()> prototype causing it to be inlined, and one
 without (with deparse output truncated for clarity):
 
-    $ perl -MO=Deparse -le 'sub ONE { 1 } if (ONE) { print ONE if ONE }'
-    sub ONE {
-        1;
-    }
-    if (ONE ) {
-        print ONE() if ONE ;
-    }
-    $ perl -MO=Deparse -le 'sub ONE () { 1 } if (ONE) { print ONE if ONE }'
-    sub ONE () { 1 }
-    do {
-        print 1
-    };
+ $ perl -MO=Deparse -le 'sub ONE { 1 } if (ONE) { print ONE if ONE }'
+ sub ONE {
+     1;
+ }
+ if (ONE ) {
+     print ONE() if ONE ;
+ }
+ $ perl -MO=Deparse -le 'sub ONE () { 1 } if (ONE) { print ONE if ONE }'
+ sub ONE () { 1 }
+ do {
+     print 1
+ };
 
 If you redefine a subroutine that was eligible for inlining, you'll
 get a warning by default. You can use this warning to tell whether or
