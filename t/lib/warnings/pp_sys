@@ -572,10 +572,15 @@ getpeername() on unopened socket FOO at - line 64.
 # pp_sys.c [pp_stat]
 use warnings 'newline' ;
 stat "abc\ndef";
+stat "abcdef\n";
+stat "abcdef\n\0";
 no warnings 'newline' ;
 stat "abc\ndef";
+stat "abcdef\n";
+stat "abcdef\n\0";
 EXPECT
-Unsuccessful stat on filename containing newline at - line 3.
+Unsuccessful stat on filename containing newline at - line 4.
+Unsuccessful stat on filename containing newline at - line 5.
 ########
 # pp_sys.c [pp_fttext]
 use warnings qw(unopened closed) ;
@@ -603,10 +608,15 @@ stat() on unopened filehandle foo at - line 9.
 # pp_sys.c [pp_fttext]
 use warnings 'newline' ;
 -T "abc\ndef" ;
+-T "abcdef\n" ;
+-T "abcdef\n\0" ;
 no warnings 'newline' ;
 -T "abc\ndef" ;
+-T "abcdef\n" ;
+-T "abcdef\n\0" ;
 EXPECT
-Unsuccessful open on filename containing newline at - line 3.
+Unsuccessful open on filename containing newline at - line 4.
+Unsuccessful open on filename containing newline at - line 5.
 ########
 # pp_sys.c [pp_sysread]
 use warnings 'io' ;

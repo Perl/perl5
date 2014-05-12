@@ -323,6 +323,38 @@ S_is_safe_syscall(pTHX_ const char *pv, STRLEN len, const char *what, const char
 }
 
 /*
+
+Return true if the supplied filename has a newline character
+immediately before the final NUL.
+
+My original look at this incorrectly used the len from SvPV(), but
+that's incorrect, since we allow for a NUL in pv[len-1].
+
+So instead, strlen() and work from there.
+
+This allow for the user reading a filename, forgetting to chomp it,
+then calling:
+
+  open my $foo, "$file\0";
+
+*/
+
+#ifdef PERL_CORE
+
+PERL_STATIC_INLINE bool
+S_should_warn_nl(const char *pv) {
+    STRLEN len;
+
+    PERL_ARGS_ASSERT_SHOULD_WARN_NL;
+
+    len = strlen(pv);
+
+    return len > 0 && pv[len-1] == '\n';
+}
+
+#endif
+
+/*
  * Local variables:
  * c-indentation-style: bsd
  * c-basic-offset: 4

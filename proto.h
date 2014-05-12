@@ -3849,6 +3849,12 @@ PERL_CALLCONV HEK*	Perl_share_hek(pTHX_ const char* str, I32 len, U32 hash)
 #define PERL_ARGS_ASSERT_SHARE_HEK	\
 	assert(str)
 
+PERL_STATIC_INLINE bool	S_should_warn_nl(const char *pv)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(1);
+#define PERL_ARGS_ASSERT_SHOULD_WARN_NL	\
+	assert(pv)
+
 PERL_CALLCONV void	Perl_sortsv(pTHX_ SV** array, size_t num_elts, SVCOMPARE_t cmp)
 			__attribute__nonnull__(pTHX_3);
 #define PERL_ARGS_ASSERT_SORTSV	\

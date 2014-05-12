@@ -2784,6 +2784,7 @@ PP(pp_stat)
 	}
     }
     else {
+        const char *file;
 	if (SvROK(sv) && SvTYPE(SvRV(sv)) == SVt_PVIO) { 
             io = MUTABLE_IO(SvRV(sv));
             if (PL_op->op_type == OP_LSTAT)
@@ -2795,14 +2796,13 @@ PP(pp_stat)
 	sv_setpv(PL_statname, SvPV_nomg_const_nolen(sv));
 	PL_statgv = NULL;
 	PL_laststype = PL_op->op_type;
+        file = SvPV_nolen_const(PL_statname);
 	if (PL_op->op_type == OP_LSTAT)
-	    PL_laststatval = PerlLIO_lstat(SvPV_nolen_const(PL_statname), &PL_statcache);
+	    PL_laststatval = PerlLIO_lstat(file, &PL_statcache);
 	else
-	    PL_laststatval = PerlLIO_stat(SvPV_nolen_const(PL_statname), &PL_statcache);
+	    PL_laststatval = PerlLIO_stat(file, &PL_statcache);
 	if (PL_laststatval < 0) {
-	    if (ckWARN(WARN_NEWLINE) &&
-                    strchr(SvPV_nolen_const(PL_statname), '\n'))
-            {
+	    if (ckWARN(WARN_NEWLINE) && should_warn_nl(file)) {
                 /* PL_warn_nl is constant */
                 GCC_DIAG_IGNORE(-Wformat-nonliteral);
 		Perl_warner(aTHX_ packWARN(WARN_NEWLINE), PL_warn_nl, "stat");
@@ -3339,17 +3339,18 @@ PP(pp_fttext)
 	}
     }
     else {
+        const char *file;
+
 	sv_setpv(PL_statname, SvPV_nomg_const_nolen(sv));
       really_filename:
+        file = SvPVX_const(PL_statname);
 	PL_statgv = NULL;
-	if (!(fp = PerlIO_open(SvPVX_const(PL_statname), "r"))) {
+	if (!(fp = PerlIO_open(file, "r"))) {
 	    if (!gv) {
 		PL_laststatval = -1;
 		PL_laststype = OP_STAT;
 	    }
-	    if (ckWARN(WARN_NEWLINE) && strchr(SvPV_nolen_const(PL_statname),
-					       '\n'))
-            {
+	    if (ckWARN(WARN_NEWLINE) && should_warn_nl(file)) {
                 /* PL_warn_nl is constant */
                 GCC_DIAG_IGNORE(-Wformat-nonliteral);
 		Perl_warner(aTHX_ packWARN(WARN_NEWLINE), PL_warn_nl, "open");
