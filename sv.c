@@ -8165,7 +8165,7 @@ Perl_sv_gets(pTHX_ SV *const sv, PerlIO *const fp, I32 append)
      * on the amount of data we might read of the current buffer
      * into our sv. Knowing this allows us to preallocate the pv
      * to be able to hold that maximum, which allows us to simplify
-     * a lot of logic. /*
+     * a lot of logic. */
 
     /*
      * We're going to steal some values from the stdio struct
