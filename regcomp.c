@@ -1718,7 +1718,7 @@ S_dump_trie_interim_table(pTHX_ const struct _reg_trie_data *trie,
 	       May be the same as tail.
   tail       : item following the branch sequence
   count      : words in the sequence
-  flags      : currently the OP() type we will be building one of /EXACT(|F|Fl)/
+  flags      : currently the OP() type we will be building one of /EXACT(|F|FA|FU|FU_SS)/
   depth      : indent depth
 
 Inplace optimizes a sequence of 2 or more Branch-Exact nodes into a TRIE node.
