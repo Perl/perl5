@@ -13197,9 +13197,10 @@ S_add_above_Latin1_folds(pTHX_ RExC_state_t *pRExC_state, const U8 cp, SV** invl
      * disk to find the possible matches.
      *
      * This should be called only for a Latin1-range code points, cp, which is
-     * known to be involved in a fold with other code points above Latin1.  It
-     * would give false results if /aa has been specified.  Multi-char folds
-     * are outside the scope of this, and must be handled specially.
+     * known to be involved in a simple fold with other code points above
+     * Latin1.  It would give false results if /aa has been specified.
+     * Multi-char folds are outside the scope of this, and must be handled
+     * specially.
      *
      * XXX It would be better to generate these via regen, in case a new
      * version of the Unicode standard adds new mappings, though that is not
@@ -13207,6 +13208,8 @@ S_add_above_Latin1_folds(pTHX_ RExC_state_t *pRExC_state, const U8 cp, SV** invl
      * below. */
 
     PERL_ARGS_ASSERT_ADD_ABOVE_LATIN1_FOLDS;
+
+    assert(HAS_NONLATIN1_SIMPLE_FOLD_CLOSURE(cp));
 
     switch (cp) {
         case 'k':
@@ -13232,22 +13235,6 @@ S_add_above_Latin1_folds(pTHX_ RExC_state_t *pRExC_state, const U8 cp, SV** invl
             break;
         case LATIN_SMALL_LETTER_SHARP_S:
           *invlist = add_cp_to_invlist(*invlist, LATIN_CAPITAL_LETTER_SHARP_S);
-            break;
-        case 'F': case 'f':
-        case 'I': case 'i':
-        case 'L': case 'l':
-        case 'T': case 't':
-        case 'A': case 'a':
-        case 'H': case 'h':
-        case 'J': case 'j':
-        case 'N': case 'n':
-        case 'W': case 'w':
-        case 'Y': case 'y':
-            /* These all are targets of multi-character folds from code points
-             * that require UTF8 to express, so they can't match unless the
-             * target string is in UTF-8, so no action here is necessary, as
-             * regexec.c properly handles the general case for UTF-8 matching
-             * and multi-char folds */
             break;
         default:
             /* Use deprecated warning to increase the chances of this being
