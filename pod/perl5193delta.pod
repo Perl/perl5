@@ -41,6 +41,13 @@ case-insensitive pattern matching has been largely resolved.  In particular,
 the disabled optimization is now restored for every ASCII-range character.
 [perl #107816]
 
+=item *
+
+A performance regression introduced in Perl 5.11.2 in non-Unicode
+case-insensitive pattern matching has been largely resolved.  In particular,
+the disabled optimization is now restored for every ASCII-range character.
+[perl #107816]
+
 =back
 
 =head1 Modules and Pragmata
