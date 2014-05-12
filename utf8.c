@@ -230,9 +230,9 @@ Perl_uvoffuni_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
 =for apidoc uvchr_to_utf8
 
 Adds the UTF-8 representation of the native code point C<uv> to the end
-of the string C<d>; C<d> should have at least C<UTF8_MAXBYTES+1> free
-bytes available.  The return value is the pointer to the byte after the
-end of the new character.  In other words,
+of the string C<d>; C<d> should have at least C<UNISKIP(uv)+1> (up to
+C<UTF8_MAXBYTES+1>) free bytes available.  The return value is the pointer to
+the byte after the end of the new character.  In other words,
 
     d = uvchr_to_utf8(d, uv);
 
@@ -259,9 +259,9 @@ Perl_uvchr_to_utf8(pTHX_ U8 *d, UV uv)
 =for apidoc uvchr_to_utf8_flags
 
 Adds the UTF-8 representation of the native code point C<uv> to the end
-of the string C<d>; C<d> should have at least C<UTF8_MAXBYTES+1> free
-bytes available.  The return value is the pointer to the byte after the
-end of the new character.  In other words,
+of the string C<d>; C<d> should have at least C<UNISKIP(uv)+1> (up to
+C<UTF8_MAXBYTES+1>) free bytes available.  The return value is the pointer to
+the byte after the end of the new character.  In other words,
 
     d = uvchr_to_utf8_flags(d, uv, flags);
 
