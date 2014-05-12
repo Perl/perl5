@@ -2,7 +2,7 @@ package SelfLoader;
 use 5.008;
 use strict;
 use IO::Handle;
-our $VERSION = "1.21";
+our $VERSION = "1.22";
 
 # The following bit of eval-magic is necessary to make this work on
 # perls < 5.009005.
@@ -100,17 +100,25 @@ sub _load_stubs {
     # Protect: fork() shares the file pointer between the parent and the kid
     if(sysseek($fh, tell($fh), 0)) {
       open my $nfh, '<&', $fh or croak "reopen: $!";# dup() the fd
-      close $fh or die "close: $!";                 # autocloses, but be paranoid
+      close $fh or die "close: $!";                 # autocloses, but be
+                                                    # paranoid
       open $fh, '<&', $nfh or croak "reopen2: $!";  # dup() the fd "back"
-      close $nfh or die "close after reopen: $!";   # autocloses, but be paranoid
+      close $nfh or die "close after reopen: $!";   # autocloses, but be
+                                                    # paranoid
       $fh->untaint;
     }
     $Cache{"${currpack}::<DATA"} = 1;   # indicate package is cached
 
     local($/) = "\n";
     while(defined($line = <$fh>) and $line !~ m/^__END__/) {
-	if ($line =~ m/^\s*sub\s+([\w:]+)\s*((?:\([\\\$\@\%\&\*\;]*\))?(?:$AttrList)?)/) {
-            push(@stubs, $self->_add_to_cache($name, $currpack, \@lines, $protoype));
+	if ($line =~ m/ ^\s*                        # indentation
+	                sub\s+([\w:]+)\s*           # 'sub' and sub name
+	                (
+	                 (?:\([\\\$\@\%\&\*\;]*\))? # optional prototype sigils
+	                 (?:$AttrList)?             # optional attribute list
+	                )/x) {
+            push(@stubs, $self->_add_to_cache($name, $currpack,
+                                              \@lines, $protoype));
             $protoype = $2;
             @lines = ($line);
             if (index($1,'::') == -1) {         # simple sub name
@@ -127,7 +135,8 @@ sub _load_stubs {
                 }
             }
         } elsif ($line =~ m/^package\s+([\w:]+)/) { # A package declared
-            push(@stubs, $self->_add_to_cache($name, $currpack, \@lines, $protoype));
+            push(@stubs, $self->_add_to_cache($name, $currpack,
+                                              \@lines, $protoype));
             $self->_package_defined($line);
             $name = '';
             @lines = ();
@@ -165,7 +174,9 @@ sub _add_to_cache {
     return () unless $fullname;
     carp("Redefining sub $fullname")
       if exists $Cache{$fullname};
-    $Cache{$fullname} = join('', "\n\#line 1 \"sub $fullname\"\npackage $pack; ", @$lines);
+    $Cache{$fullname} = join('',
+                             "\n\#line 1 \"sub $fullname\"\npackage $pack; ",
+                             @$lines);
     #$Cache{$fullname} = join('', "package $pack; ",@$lines);
     print STDERR "SelfLoader cached $fullname: $Cache{$fullname}" if DEBUG;
     # return stub to be eval'd
@@ -407,7 +418,7 @@ This package has the same copyright and license as the perl core:
     Kit, in the file named "Artistic".  If not, I'll be glad to provide one.
 
     You should also have received a copy of the GNU General Public License
-    along with this program in the file named "Copying". If not, write to the 
+    along with this program in the file named "Copying". If not, write to the
     Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
     MA 02110-1301, USA or visit their web page on the internet at
     http://www.gnu.org/copyleft/gpl.html.
