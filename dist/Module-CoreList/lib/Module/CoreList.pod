@@ -18,7 +18,8 @@ Module::CoreList - what modules shipped with versions of perl
 
  print join ', ', Module::CoreList->find_modules(qr/Data/);
     # prints 'Data::Dumper'
- print join ', ', Module::CoreList->find_modules(qr/test::h.*::.*s/i, 5.008008);
+ print join ', ',
+            Module::CoreList->find_modules(qr/test::h.*::.*s/i, 5.008008);
     # prints 'Test::Harness::Assert, Test::Harness::Straps'
 
  print join ", ", @{ $Module::CoreList::families{5.005} };
