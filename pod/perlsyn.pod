@@ -958,16 +958,15 @@ the form C<!/REGEX/>, C<$foo !~ /REGEX/>, or C<$foo !~ EXPR>.
 
 A smart match that uses an explicit C<~~> operator, such as C<EXPR ~~ EXPR>.
 
+B<NOTE:> You will often have to use C<$c ~~ $_> because the default case 
+uses C<$_ ~~ $c> , which is frequentlythe opposite of what you want.
+
 =item Z<>4.
 
 A boolean comparison operator such as C<$_ E<lt> 10> or C<$x eq "abc">.  The
 relational operators that this applies to are the six numeric comparisons
 (C<< < >>, C<< > >>, C<< <= >>, C<< >= >>, C<< == >>, and C<< != >>), and
 the six string comparisons (C<lt>, C<gt>, C<le>, C<ge>, C<eq>, and C<ne>).
-
-B<NOTE:> You will often have to use C<$c ~~ $_> because
-the default case uses C<$_ ~~ $c> , which is frequently
-the opposite of what you want.
 
 =item Z<>5.
 
