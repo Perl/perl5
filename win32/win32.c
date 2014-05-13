@@ -1774,6 +1774,8 @@ win32_getenvironmentstrings(void)
     WideCharToMultiByte(CP_ACP, WC_NO_BEST_FIT_CHARS, lpWStr, wenvstrings_len, lpStr, 
                         aenvstrings_len, NULL, NULL);
 
+    FreeEnvironmentStrings(lpWStr);
+
     return(lpStr);
 }
 
