@@ -2584,6 +2584,8 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
 	Perl_croak(aTHX_ "corrupted regexp program");
     }
 
+    RX_MATCH_TAINTED_off(rx);
+
     reginfo->prog = rx;	 /* Yes, sorry that this is confusing.  */
     reginfo->intuit = 0;
     reginfo->is_utf8_target = cBOOL(utf8_target);

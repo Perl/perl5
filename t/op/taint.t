@@ -17,7 +17,7 @@ BEGIN {
 use strict;
 use Config;
 
-plan tests => 798;
+plan tests => 800;
 
 $| = 1;
 
@@ -1057,6 +1057,18 @@ my $TEST = 'TEST';
 	is($s,   'abcd',   "$desc: s value");
 	is($res, 'xyz',    "$desc: res value");
 	is($one, 'abcd',   "$desc: \$1 value");
+
+        # [perl #121854] match taintedness became sticky
+        # when one match has a taintess result, subseqent matches
+        # using the same pattern shouldn't necessarily be tainted
+
+        {
+            my $f = sub { $_[0] =~ /(.*)/ or die; $1 };
+            $res = $f->($TAINT);
+            is_tainted($res,   "121854: res tainted");
+            $res = $f->("abc");
+            isnt_tainted($res,   "121854: res not tainted");
+        }
     }
 
     $foo = $1 if 'bar' =~ /(.+)$TAINT/;

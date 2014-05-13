@@ -7110,7 +7110,7 @@ reStudy:
     }
 
     if (RExC_contains_locale) {
-        RXp_EXTFLAGS(r) |= RXf_TAINTED_SEEN;
+        RXp_EXTFLAGS(r) |= RXf_TAINTED;
     }
 
 #ifdef DEBUGGING

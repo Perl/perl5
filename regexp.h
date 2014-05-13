@@ -415,8 +415,7 @@ get_regex_charset_name(const U32 flags, STRLEN* const lenp)
 /* Copy and tainted info */
 #define RXf_COPY_DONE   	(1<<(RXf_BASE_SHIFT+16))
 
-/* during execution: pattern temporarily tainted by executing locale ops;
- * post-execution: $1 et al are tainted */
+/* post-execution: $1 et al are tainted */
 #define RXf_TAINTED_SEEN	(1<<(RXf_BASE_SHIFT+17))
 /* this pattern was tainted during compilation */
 #define RXf_TAINTED		(1<<(RXf_BASE_SHIFT+18))

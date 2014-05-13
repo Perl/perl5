@@ -1964,8 +1964,8 @@ While the pattern is being assembled/concatenated and then compiled,
 PL_tainted will get set (via TAINT_set) if any component of the pattern
 is tainted, e.g. /.*$tainted/.  At the end of pattern compilation,
 the RXf_TAINTED flag is set on the pattern if PL_tainted is set (via
-TAINT_get).  Also, if any component of the pattern matches based on
-locale-dependent behavior, the RXf_TAINTED_SEEN flag is set.
+TAINT_get).  It will also be set if any component of the pattern matches
+based on locale-dependent behavior.
 
 When the pattern is copied, e.g. $r = qr/..../, the SV holding the ref to
 the pattern is marked as tainted. This means that subsequent usage, such
