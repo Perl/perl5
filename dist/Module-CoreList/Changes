@@ -1,5 +1,5 @@
 3.11
-  - Prepared for v5.19.12
+  - Prepared for v5.20.0
   - Fix regression in corelist with -v output listing the same perl
     multiple times
   - Fix regression in corelist with v5.x.10 appearing twice in -a output
