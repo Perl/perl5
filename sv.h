@@ -1509,8 +1509,10 @@ Like C<SvPV_force>, but doesn't process get magic.
 =for apidoc Am|char*|SvPV|SV* sv|STRLEN len
 Returns a pointer to the string in the SV, or a stringified form of
 the SV if the SV does not contain a string.  The SV may cache the
-stringified version becoming C<SvPOK>.  Handles 'get' magic.  See also
-C<SvPVx> for a version which guarantees to evaluate sv only once.
+stringified version becoming C<SvPOK>.  Handles 'get' magic.  The
+C<len> variable will be set to the length of the string (this is a macro, so
+don't use C<&len>). See also C<SvPVx> for a version which guarantees to
+evaluate sv only once.
 
 Note that there is no guarantee that the return value of C<SvPV()> is
 equal to C<SvPVX(sv)>, or that C<SvPVX(sv)> contains valid data, or that
