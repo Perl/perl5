@@ -80,8 +80,8 @@ SKIP: {
     skip("no locale available where LC_NUMERIC makes a difference", &last - 4 )
 	if !$different;     # -4 is 2 tests before this block; 2 after
     note("using the '$different' locale for LC_NUMERIC tests");
-    for ($different) {
-	local $ENV{LC_NUMERIC} = $_;
+    {
+	local $ENV{LC_NUMERIC} = $different;
 	local $ENV{LC_ALL}; # so it never overrides LC_NUMERIC
 
 	fresh_perl_is(<<'EOF', "4.2", {},
@@ -173,8 +173,8 @@ EOF
             "", {}, "version does not clobber version (via eval)");
     }
 
-    for ($different) {
-	local $ENV{LC_NUMERIC} = $_;
+    {
+	local $ENV{LC_NUMERIC} = $different;
 	local $ENV{LC_ALL}; # so it never overrides LC_NUMERIC
 	fresh_perl_is(<<'EOF', "$difference "x4, {},
             use locale;
@@ -186,8 +186,8 @@ EOF
 	"sprintf() and printf() look at LC_NUMERIC regardless of constant folding");
     }
 
-    for ($different) {
-	local $ENV{LC_NUMERIC} = $_;
+    {
+	local $ENV{LC_NUMERIC} = $different;
 	local $ENV{LC_ALL}; # so it never overrides LC_NUMERIC
 	local $ENV{LANG};   # so on Windows gets sys default locale
 	fresh_perl_is(<<'EOF', "$difference "x4, {},
@@ -209,10 +209,10 @@ EOF
         open my $saved_stderr, ">&STDERR" or die "Can't dup STDERR: $!";
         close STDERR;
 
-        for ($different) {
+        {
             local $ENV{LC_ALL} = "invalid";
             local $ENV{LC_NUMERIC} = "invalid";
-            local $ENV{LANG} = $_;
+            local $ENV{LANG} = $different;
 
             # Can't turn off the warnings, so send them to /dev/null
             fresh_perl_is(<<'EOF', "$difference", { stderr => "devnull" },
@@ -231,7 +231,7 @@ EOF
                         1);
             }
             else {
-                for ($different) {
+                {
                     local $ENV{LC_ALL} = "invalid";
                     local $ENV{LC_NUMERIC} = "invalid";
                     local $ENV{LANG} = "invalid";
@@ -252,13 +252,13 @@ EOF
     open STDERR, ">&", $saved_stderr or die "Can't dup \$saved_stderr: $!";
     }
 
-    for ($different) {
-	local $ENV{LC_NUMERIC} = $_;
+    {
+	local $ENV{LC_NUMERIC} = $different;
 	local $ENV{LC_ALL}; # so it never overrides LC_NUMERIC
 	fresh_perl_is(<<"EOF",
 	    use POSIX qw(locale_h);
 
-            BEGIN { setlocale(LC_NUMERIC, \"$_\"); };
+            BEGIN { setlocale(LC_NUMERIC, \"$different\"); };
             setlocale(LC_ALL, "C");
             use 5.008;
             print setlocale(LC_NUMERIC);
