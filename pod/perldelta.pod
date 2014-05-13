@@ -877,7 +877,7 @@ Added L<Setting $E<sol> to a %s reference is forbidden|perldiag/"Setting $E<sol>
 
 =item *
 
-L<%s on a reference is experimental|perldiag/"%s on a reference is experimental">:
+L<%s on reference is experimental|perldiag/"push on reference is experimental">:
 
 The "auto-deref" feature is experimental.
 
@@ -985,7 +985,7 @@ used.
 
 =item *
 
-L<Scalar value %%s[%s] better written as $%s[%s]|perldiag/"Scalar value %%s[%s] better written as $%s[%s]">
+L<Scalar value @%s[%s] better written as $%s[%s]|perldiag/"Scalar value @%s[%s] better written as $%s[%s]">
 
 (W syntax) In scalar context, you've used an array index/value slice (indicated
 by %) to select a single element of an array.  Generally it's better to ask for
@@ -998,7 +998,7 @@ the value.
 
 =item *
 
-L<Scalar value %%s{%s} better written as $%s{%s}|perldiag/"Scalar value %%s{%s} better written as $%s{%s}">
+L<Scalar value @%s{%s} better written as $%s{%s}|perldiag/"Scalar value @%s{%s} better written as $%s{%s}">
 
 (W syntax) In scalar context, you've used a hash key/value slice (indicated by
 %) to select a single element of a hash.  Generally it's better to ask for a
@@ -1021,7 +1021,7 @@ C<PERL_EXIT_WARN> was set in C<PL_exit_flags>.
 
 =item *
 
-L<Unexpected exit failure %u|perldiag/"Unexpected exit failure %u">
+L<Unexpected exit failure %d|perldiag/"Unexpected exit failure %d">
 
 (S) An uncaught die() was called when C<PERL_EXIT_WARN> was set in
 C<PL_exit_flags>.
