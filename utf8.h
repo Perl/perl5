@@ -270,6 +270,10 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
 #error UTF8_MAXBYTES must be at least 12
 #endif
 
+/* ^? is defined to be DEL on ASCII systems.  See the definition of toCTRL()
+ * for more */
+#define QUESTION_MARK_CTRL  DEL_NATIVE
+
 #define MAX_UTF8_TWO_BYTE 0x7FF
 
 #define UTF8_MAXBYTES_CASE	UTF8_MAXBYTES

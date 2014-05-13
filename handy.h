@@ -1653,11 +1653,13 @@ EXTCONST U32 PL_charclass[];
 #ifndef EBCDIC
 #  define toCTRL(c)    (toUPPER(c) ^ 64)
 #else
-#  define toCTRL(c)    ((c) == '?'                               \
-                        ? LATIN1_TO_NATIVE(0x9F)                 \
-                        : (c) == LATIN1_TO_NATIVE(0x9F)          \
-                          ? '?'                                  \
-                          : (NATIVE_TO_LATIN1(toUPPER(c)) ^ 64))
+#  define toCTRL(c)    ((isPRINT_A(c))                          \
+                       ? UNLIKELY((c) == '?')                   \
+                         ? QUESTION_MARK_CTRL                   \
+                         : (NATIVE_TO_LATIN1(toUPPER(c)) ^ 64)  \
+                       : UNLIKELY((c) == QUESTION_MARK_CTRL)    \
+                         ? ((c) == '?')                         \
+                         : (LATIN1_TO_NATIVE((c) ^ 64)))
 #endif
 
 /* Line numbers are unsigned, 32 bits. */

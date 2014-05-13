@@ -194,6 +194,10 @@ END_EXTERN_C
  * character occupies 5 bytes, therefore this number is 15 */
 #define UTF8_MAXBYTES_CASE	15
 
+/* ^? is defined to be APC on EBCDIC systems.  See the definition of toCTRL()
+ * for more */
+#define QUESTION_MARK_CTRL   LATIN1_TO_NATIVE(0x9F)
+
 #define MAX_UTF8_TWO_BYTE 0x3FF
 
 /*
