@@ -2970,6 +2970,15 @@ L<XML::LibXML> version 2.0108.  A patch to XML::LibXML has been submitted.
 
 =back
 
+=head1 Obituary                                                                   
+
+Diana Rosa, 27, of Rio de Janeiro, went to her long rest on May 10,
+2014, along with the plush camel she kept hanging on her computer screen
+all the time. She was a passionate Perl hacker who loved the language and its
+community, and who never missed a Rio.pm event. She was a true artist, an
+enthusiast about writing code, singing arias and graffiting walls. We'll never
+forget you.
+
 =head1 Acknowledgements
 
 XXX Generate this with:
