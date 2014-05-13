@@ -1,4 +1,4 @@
-# This file is the data file for t/porting/podcheck.t.
+# This file is the data file for porting/podcheck.t.
 # There are three types of lines.
 # Comment lines are white-space only or begin with a '#', like this one.  Any
 #   changes you make to the comment lines will be lost when the file is
@@ -44,7 +44,9 @@ Crypt::Random
 curl(1)
 Data::Entropy
 Data::Float
+Data::Structure::Util
 Data::Types
+Data::Util
 Date::Pcalc
 DateTime
 DB_File(3)
@@ -74,6 +76,7 @@ fsync(3c)
 gcc(1)
 Getopt::Std
 getpriority(2)
+HTML::StripScripts
 HTTP::Lite
 inetd(8)
 IO::Socket::IP
@@ -81,7 +84,9 @@ IPC::Run
 IPC::Signal
 kill(3)
 langinfo(3)
+LaTeX::Encode
 Lingua::KO::Hangul::Util
+List::Gather
 local::lib
 Log::Message
 Log::Message::Config
@@ -89,6 +94,7 @@ Log::Message::Handlers
 Log::Message::Item
 Log::Message::Simple
 Mail::Send
+Mail::SpamAssassin
 man(5)
 man(7)
 Math::Big
@@ -147,6 +153,7 @@ pstruct
 ptar(1)
 ptargrep(1)
 pwd_mkdb(8)
+RDF::Trine
 Readonly
 recvmsg(3)
 Role::Tiny
@@ -194,6 +201,7 @@ wait(2)
 waitpid(3)
 wget(1)
 Win32::Locale
+XML::LibXML
 YAML
 YAML::Syck
 YAML::Tiny
@@ -234,6 +242,7 @@ pod/perlcygwin.pod	Verbatim line length including indents exceeds 79 by	25
 pod/perldebguts.pod	Verbatim line length including indents exceeds 79 by	34
 pod/perldebtut.pod	Verbatim line length including indents exceeds 79 by	22
 pod/perldebug.pod	Verbatim line length including indents exceeds 79 by	3
+pod/perldelta.pod	Apparent broken link	8
 pod/perldsc.pod	Verbatim line length including indents exceeds 79 by	4
 pod/perldtrace.pod	Verbatim line length including indents exceeds 79 by	26
 pod/perlebcdic.pod	Verbatim line length including indents exceeds 79 by	3
