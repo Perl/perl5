@@ -1259,7 +1259,7 @@ S_hsplit(pTHX_ HV *hv, STRLEN const oldsize, STRLEN newsize)
                  * and use the new low bit to decide if we insert at top,
                  * or next from top. IOW, we only rotate on a collision.*/
                 if (aep[j] && PL_HASH_RAND_BITS_ENABLED) {
-                    PL_hash_rand_bits+= ROTL_UV(HeHASH(entry), 17);
+                    PL_hash_rand_bits+= ROTL32(HeHASH(entry), 17);
                     PL_hash_rand_bits= ROTL_UV(PL_hash_rand_bits,1);
                     if (PL_hash_rand_bits & 1) {
                         HeNEXT(entry)= HeNEXT(aep[j]);
