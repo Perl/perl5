@@ -35,7 +35,7 @@ if (not defined $id) {
     my $info = "semget failed: $!";
     if ($! == &IPC::SysV::ENOSPC || $! == &IPC::SysV::ENOSYS ||
 	$! == &IPC::SysV::ENOMEM || $! == &IPC::SysV::EACCES) {
-        plan(skip_all => $info);
+        skip_all($info);
     }
     else {
         die $info;
