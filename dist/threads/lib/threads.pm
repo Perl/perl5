@@ -1006,7 +1006,8 @@ signalling behavior is only in effect in the following situations:
 
 =item * Perl has been built with C<PERL_OLD_SIGNALS> (see C<perl -V>).
 
-=item * The environment variable C<PERL_SIGNALS> is set to C<unsafe> (see L<perlrun/"PERL_SIGNALS">).
+=item * The environment variable C<PERL_SIGNALS> is set to C<unsafe>
+(see L<perlrun/"PERL_SIGNALS">).
 
 =item * The module L<Perl::Unsafe::Signals> is used.
 
