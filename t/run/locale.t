@@ -215,7 +215,7 @@ EOF
             local $ENV{LANG} = $different;
 
             # Can't turn off the warnings, so send them to /dev/null
-            fresh_perl_is(<<"EOF", "$difference", { stderr => "devnull" },
+            if (! fresh_perl_is(<<"EOF", "$difference", { stderr => "devnull" },
                 if (\$ENV{LC_ALL} ne "invalid") {
                     # Make the test pass if the sh didn't accept the ENV set
                     print "$difference\n";
@@ -227,7 +227,10 @@ EOF
                 my \$in = 4.2;
                 printf("%g", \$in);
 EOF
-            "LANG is used if LC_ALL, LC_NUMERIC are invalid");
+            "LANG is used if LC_ALL, LC_NUMERIC are invalid"))
+           {
+              note "To see details change this .t to not close STDERR";
+           }
         }
 
         SKIP: {
@@ -241,7 +244,7 @@ EOF
                 local $ENV{LANG} = "invalid";
 
                 # Can't turn off the warnings, so send them to /dev/null
-                fresh_perl_is(<<"EOF", 4.2, { stderr => "devnull" },
+                if (! fresh_perl_is(<<"EOF", 4.2, { stderr => "devnull" },
                     if (\$ENV{LC_ALL} ne "invalid") {
                         print "$difference\n";
                         exit 0;
@@ -252,7 +255,10 @@ EOF
                     my \$in = 4.2;
                     printf("%g", \$in);
 EOF
-                'C locale is used if LC_ALL, LC_NUMERIC, LANG are invalid');
+                'C locale is used if LC_ALL, LC_NUMERIC, LANG are invalid'))
+                {
+                    note "To see details change this .t to not close STDERR";
+                }
             }
         }
 
