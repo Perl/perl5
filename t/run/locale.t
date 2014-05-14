@@ -236,25 +236,23 @@ EOF
                         1);
             }
             else {
-                {
-                    local $ENV{LC_ALL} = "invalid";
-                    local $ENV{LC_NUMERIC} = "invalid";
-                    local $ENV{LANG} = "invalid";
+                local $ENV{LC_ALL} = "invalid";
+                local $ENV{LC_NUMERIC} = "invalid";
+                local $ENV{LANG} = "invalid";
 
-                    # Can't turn off the warnings, so send them to /dev/null
-                    fresh_perl_is(<<"EOF", 4.2, { stderr => "devnull" },
-                        if (\$ENV{LC_ALL} ne "invalid") {
-                            print "$difference\n";
-                            exit 0;
-                        }
-                        use locale;
-                        use POSIX qw(locale_h);
-                        setlocale(LC_NUMERIC, "");
-                        my \$in = 4.2;
-                        printf("%g", \$in);
+                # Can't turn off the warnings, so send them to /dev/null
+                fresh_perl_is(<<"EOF", 4.2, { stderr => "devnull" },
+                    if (\$ENV{LC_ALL} ne "invalid") {
+                        print "$difference\n";
+                        exit 0;
+                    }
+                    use locale;
+                    use POSIX qw(locale_h);
+                    setlocale(LC_NUMERIC, "");
+                    my \$in = 4.2;
+                    printf("%g", \$in);
 EOF
-                    'C locale is used if LC_ALL, LC_NUMERIC, LANG are invalid');
-                }
+                'C locale is used if LC_ALL, LC_NUMERIC, LANG are invalid');
             }
         }
 
