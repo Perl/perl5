@@ -901,6 +901,11 @@ localeconv()
     CODE:
 #ifdef HAS_LOCALECONV
 	struct lconv *lcbuf;
+
+        /* localeconv() deals with both LC_NUMERIC and LC_MONETARY, but
+         * LC_MONETARY is already in the correct locale */
+        STORE_NUMERIC_STANDARD_FORCE_LOCAL();
+
 	RETVAL = newHV();
 	sv_2mortal((SV*)RETVAL);
 	if ((lcbuf = localeconv())) {
@@ -924,6 +929,7 @@ localeconv()
 				    strlen(integers->name), newSViv(value), 0);
 	    } while ((++integers)->name);
 	}
+        RESTORE_NUMERIC_STANDARD();
 #else
 	localeconv(); /* A stub to call not_here(). */
 #endif

@@ -106,6 +106,16 @@ EOF
         }
 
         {
+	    fresh_perl_is(<<'EOF', ",,", {},
+print localeconv()->{decimal_point};
+use POSIX;
+use locale;
+print localeconv()->{decimal_point};
+EOF
+	    "localeconv() looks at LC_NUMERIC with and without 'use locale'");
+        }
+
+        {
 	    fresh_perl_is(<<'EOF', $difference, {},
 use locale ":not_characters";
 format STDOUT =
@@ -348,4 +358,4 @@ EOF
 
     }
 
-sub last { 19 }
+sub last { 20 }

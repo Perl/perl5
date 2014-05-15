@@ -621,7 +621,9 @@ because these things are not that standardized.
 
 The C<POSIX::localeconv()> function allows you to get particulars of the
 locale-dependent numeric formatting information specified by the current
-C<LC_NUMERIC> and C<LC_MONETARY> locales.  (If you just want the name of
+underlying C<LC_NUMERIC> and C<LC_MONETARY> locales (regardless of
+whether called from within the scope of C<S<use locale>> or not).  (If
+you just want the name of
 the current locale for a particular category, use C<POSIX::setlocale()>
 with a single parameter--see L<The setlocale function>.)
 

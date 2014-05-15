@@ -492,6 +492,11 @@ A small previously intentional memory leak in PERL_SYS_INIT/PERL_SYS_INIT3 on
 Win32 builds was fixed. This might affect embedders who repeatedly create and
 destroy perl engines within the same process.
 
+=item *
+
+C<POSIX::localeconv()> now returns the data for the program's underlying
+locale even when called from outside the scope of S<C<use locale>>.
+
 =back
 
 =head1 Known Problems
