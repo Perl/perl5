@@ -1795,6 +1795,13 @@ the string from the passed SV (if any), and would sometimes get it wrong
 
 =item *
 
+The signature of the C<Perl_regexec_flags()> regex function has
+changed; the function pointer C<exec> in the regex engine plugin
+structure has also changed to match.  The C<minend> parameter now has
+type C<SSize_t> to better support 64-bit systems.
+
+=item *
+
 XS code may use various macros to change the case of a character or code
 point (for example C<toLOWER_utf8()>).  Only a couple of these were
 documented until now;
