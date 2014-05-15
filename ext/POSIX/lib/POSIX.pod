@@ -1491,7 +1491,9 @@ POSIX-compliant systems set C<$!> (C<$ERRNO>) to indicate a translation
 error, so clear C<$!> before calling strtod.  However, non-POSIX systems
 may not check for overflow, and therefore will never set C<$!>.
 
-strtod respects any POSIX I<setlocale()> settings.
+strtod respects any POSIX I<setlocale()> C<LC_TIME> settings,
+regardless of whether or not it is called from Perl code that is within
+the scope of S<C<use locale>>.
 
 To parse a string C<$str> as a floating point number use
 
