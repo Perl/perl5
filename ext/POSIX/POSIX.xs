@@ -314,6 +314,21 @@ const struct lconv_offset lconv_strings[] = {
     {NULL, 0}
 };
 
+#ifdef USE_LOCALE_NUMERIC
+
+/* The Linux man pages say these are the field names for the structure
+ * components that are LC_NUMERIC; the rest being LC_MONETARY */
+#   define isLC_NUMERIC_STRING(name) (strcmp(name, "decimal_point")     \
+                                      || strcmp(name, "thousands_sep")  \
+                                                                        \
+                                      /* There should be no harm done   \
+                                       * checking for this, even if     \
+                                       * NO_LOCALECONV_GROUPING */      \
+                                      || strcmp(name, "grouping"))
+#else
+#   define isLC_NUMERIC_STRING(name) (0)
+#endif
+
 const struct lconv_offset lconv_integers[] = {
 #ifdef USE_LOCALE_MONETARY
     {"int_frac_digits",   STRUCT_OFFSET(struct lconv, int_frac_digits)},
@@ -922,11 +937,37 @@ localeconv()
 	    const char *ptr = (const char *) lcbuf;
 
 	    do {
+                /* This string may be controlled by either LC_NUMERIC, or
+                 * LC_MONETARY */
+                bool is_utf8_locale
+#if defined(USE_LOCALE_NUMERIC) && defined(USE_LOCALE_MONETARY)
+                 = _is_cur_LC_category_utf8((isLC_NUMERIC_STRING(strings->name))
+                                             ? LC_NUMERIC
+                                             : LC_MONETARY);
+#elif defined(USE_LOCALE_NUMERIC)
+                 = _is_cur_LC_category_utf8(LC_NUMERIC);
+#elif defined(USE_LOCALE_MONETARY)
+                 = _is_cur_LC_category_utf8(LC_MONETARY);
+#else
+                 = FALSE;
+#endif
+
 		const char *value = *((const char **)(ptr + strings->offset));
 
-		if (value && *value)
-		    (void) hv_store(RETVAL, strings->name, strlen(strings->name),
-				    newSVpv(value, 0), 0);
+		if (value && *value) {
+		    (void) hv_store(RETVAL,
+                        strings->name,
+                        strlen(strings->name),
+                        newSVpvn_utf8(value,
+                                      strlen(value),
+
+                                      /* We mark it as UTF-8 if a utf8 locale
+                                       * and is valid, non-ascii UTF-8 */
+                                      is_utf8_locale
+                                        && ! is_ascii_string((U8 *) value, 0)
+                                        && is_utf8_string((U8 *) value, 0)),
+                        0);
+                  }
 	    } while ((++strings)->name);
 
 	    do {

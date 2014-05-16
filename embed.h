@@ -830,6 +830,9 @@
 #define sv_dup(a,b)		Perl_sv_dup(aTHX_ a,b)
 #define sv_dup_inc(a,b)		Perl_sv_dup_inc(aTHX_ a,b)
 #endif
+#if defined(USE_LOCALE)     && (defined(PERL_IN_LOCALE_C) || defined (PERL_EXT_POSIX))
+#define _is_cur_LC_category_utf8(a)	Perl__is_cur_LC_category_utf8(aTHX_ a)
+#endif
 #if defined(USE_LOCALE_COLLATE)
 #define sv_collxfrm_flags(a,b,c)	Perl_sv_collxfrm_flags(aTHX_ a,b,c)
 #endif
@@ -1437,10 +1440,6 @@
 #define share_hek_flags(a,b,c,d)	S_share_hek_flags(aTHX_ a,b,c,d)
 #define unshare_hek_or_pvn(a,b,c,d)	S_unshare_hek_or_pvn(aTHX_ a,b,c,d)
 #  endif
-#  if defined(PERL_IN_LOCALE_C) && defined(USE_LOCALE)
-#define is_cur_LC_category_utf8(a)	S_is_cur_LC_category_utf8(aTHX_ a)
-#define stdize_locale(a)	S_stdize_locale(aTHX_ a)
-#  endif
 #  if defined(PERL_IN_MALLOC_C)
 #define adjust_size_and_find_bucket	S_adjust_size_and_find_bucket
 #  endif
@@ -1759,6 +1758,9 @@
 #  if defined(USE_ITHREADS)
 #define mro_meta_dup(a,b)	Perl_mro_meta_dup(aTHX_ a,b)
 #define padlist_dup(a,b)	Perl_padlist_dup(aTHX_ a,b)
+#  endif
+#  if defined(USE_LOCALE)     && (defined(PERL_IN_LOCALE_C) || defined (PERL_EXT_POSIX))
+#define stdize_locale(a)	S_stdize_locale(aTHX_ a)
 #  endif
 #  if defined(USE_LOCALE_COLLATE)
 #define magic_setcollxfrm(a,b)	Perl_magic_setcollxfrm(aTHX_ a,b)

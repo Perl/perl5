@@ -5996,14 +5996,6 @@ PERL_CALLCONV SV*	Perl_hfree_next_entry(pTHX_ HV *hv, STRLEN *indexp)
 	assert(hv); assert(indexp)
 
 #endif
-#if defined(PERL_IN_LOCALE_C) && defined(USE_LOCALE)
-STATIC bool	S_is_cur_LC_category_utf8(pTHX_ int category);
-STATIC char*	S_stdize_locale(pTHX_ char* locs)
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_STDIZE_LOCALE	\
-	assert(locs)
-
-#endif
 #if defined(PERL_IN_MALLOC_C)
 STATIC int	S_adjust_size_and_find_bucket(size_t *nbytes_p)
 			__attribute__nonnull__(1);
@@ -8059,6 +8051,14 @@ PERL_CALLCONV SV*	Perl_sv_dup_inc(pTHX_ const SV *const sstr, CLONE_PARAMS *cons
 			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_SV_DUP_INC	\
 	assert(param)
+
+#endif
+#if defined(USE_LOCALE)     && (defined(PERL_IN_LOCALE_C) || defined (PERL_EXT_POSIX))
+PERL_CALLCONV bool	Perl__is_cur_LC_category_utf8(pTHX_ int category);
+STATIC char*	S_stdize_locale(pTHX_ char* locs)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_STDIZE_LOCALE	\
+	assert(locs)
 
 #endif
 #if defined(USE_LOCALE_COLLATE)

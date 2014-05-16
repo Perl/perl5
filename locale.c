@@ -109,7 +109,7 @@ Perl_set_numeric_radix(pTHX)
 		PL_numeric_radix_sv = newSVpv(lc->decimal_point, 0);
             if (! is_ascii_string((U8 *) lc->decimal_point, 0)
                 && is_utf8_string((U8 *) lc->decimal_point, 0)
-                && is_cur_LC_category_utf8(LC_NUMERIC))
+                && _is_cur_LC_category_utf8(LC_NUMERIC))
             {
 		SvUTF8_on(PL_numeric_radix_sv);
             }
@@ -254,7 +254,7 @@ Perl_new_ctype(pTHX_ const char *newctype)
 
     PERL_ARGS_ASSERT_NEW_CTYPE;
 
-    PL_in_utf8_CTYPE_locale = is_cur_LC_category_utf8(LC_CTYPE);
+    PL_in_utf8_CTYPE_locale = _is_cur_LC_category_utf8(LC_CTYPE);
 
     /* A UTF-8 locale gets standard rules.  But note that code still has to
      * handle this specially because of the three problematic code points */
@@ -894,7 +894,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
      * $ENV{PERL_UNICODE}) are true, perl.c:S_parse_body() will turn on the
      * PerlIO :utf8 layer on STDIN, STDOUT, STDERR, _and_ the default open
      * discipline.  */
-    PL_utf8locale = is_cur_LC_category_utf8(LC_CTYPE);
+    PL_utf8locale = _is_cur_LC_category_utf8(LC_CTYPE);
 
     /* Set PL_unicode to $ENV{PERL_UNICODE} if using PerlIO.
        This is an alternative to using the -C command line switch
@@ -988,8 +988,8 @@ Perl_mem_collxfrm(pTHX_ const char *s, STRLEN len, STRLEN *xlen)
 
 #ifdef USE_LOCALE
 
-STATIC bool
-S_is_cur_LC_category_utf8(pTHX_ int category)
+bool
+Perl__is_cur_LC_category_utf8(pTHX_ int category)
 {
     /* Returns TRUE if the current locale for 'category' is UTF-8; FALSE
      * otherwise. 'category' may not be LC_ALL.  If the platform doesn't have

@@ -505,6 +505,12 @@ to disregard either or both of these locale categories.  In such
 circumstances, there are now no entries for the corresponding values in
 the hash returned by C<localeconv()>.
 
+=item *
+
+C<POSIX::localeconv()> now marks appropriately the values it returns as
+UTF-8 or not.  Previously they were always returned as a bytes, even if
+they were supposed to be encoded as UTF-8.
+
 =back
 
 =head1 Known Problems

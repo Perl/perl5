@@ -55,7 +55,8 @@ EOF
 # try to find out a locale where LC_NUMERIC makes a difference
 my $original_locale = setlocale(LC_NUMERIC);
 
-my ($base, $different, $comma, $difference);
+my ($base, $different, $comma, $difference, $utf8_radix);
+my $radix_encoded_as_utf8;
 for ("C", @locales) { # prefer C for the base if available
     BEGIN {
         if($Config{d_setlocale}) {
@@ -69,16 +70,36 @@ for ("C", @locales) { # prefer C for the base if available
     } else {
 	$different ||= $_;
 	$difference ||= $s;
-        $comma ||= $_ if localeconv()->{decimal_point} eq ',';
+        my $radix = localeconv()->{decimal_point};
+
+        # For utf8 locales with a non-ascii radix, it should be encoded as
+        # UTF-8 with the internal flag so set.
+        if (! defined $utf8_radix
+            && $radix =~ /[[:^ascii:]]/
+            && is_locale_utf8($_))
+        {
+            $utf8_radix = $_;
+            $radix_encoded_as_utf8 = utf8::is_utf8($radix);
+        }
+        else {
+            $comma ||= $_ if $radix eq ',';
+        }
     }
 
-    last if $base && $different && $comma;
+    last if $base && $different && $comma && $utf8_radix;
 }
 setlocale(LC_NUMERIC, $original_locale);
 
 SKIP: {
-    skip("no locale available where LC_NUMERIC makes a difference", &last - 4 )
-	if !$different;     # -4 is 2 tests before this block; 2 after
+    skip("no UTF-8 locale available where LC_NUMERIC radix isn't ASCII", 1 )
+        unless $utf8_radix;
+    ok($radix_encoded_as_utf8 == 1, "UTF-8 locale '$utf8_radix' with non-ASCII"
+                                    . " radix is marked UTF-8");
+}
+
+SKIP: {
+    skip("no locale available where LC_NUMERIC makes a difference", &last - 5 )
+	if !$different;     # -5 is 3 tests before this block; 2 after
     note("using the '$different' locale for LC_NUMERIC tests");
     {
 	local $ENV{LC_NUMERIC} = $different;
@@ -358,4 +379,4 @@ EOF
 
     }
 
-sub last { 20 }
+sub last { 21 }
