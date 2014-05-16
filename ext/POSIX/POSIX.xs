@@ -282,7 +282,9 @@ END_EXTERN_C
 #endif
 #endif
 
-#ifdef HAS_LOCALECONV
+#ifndef HAS_LOCALECONV
+#   define localeconv() not_here("localeconv")
+#else
 struct lconv_offset {
     const char *name;
     size_t offset;
@@ -320,9 +322,7 @@ const struct lconv_offset lconv_integers[] = {
     {NULL, 0}
 };
 
-#else
-#define localeconv() not_here("localeconv")
-#endif
+#endif /* HAS_LOCALECONV */
 
 #ifdef HAS_LONG_DOUBLE
 #  if LONG_DOUBLESIZE > NVSIZE
@@ -899,7 +899,9 @@ open(filename, flags = O_RDONLY, mode = 0666)
 HV *
 localeconv()
     CODE:
-#ifdef HAS_LOCALECONV
+#ifndef HAS_LOCALECONV
+	localeconv(); /* A stub to call not_here(). */
+#else
 	struct lconv *lcbuf;
 
         /* localeconv() deals with both LC_NUMERIC and LC_MONETARY, but
@@ -930,9 +932,7 @@ localeconv()
 	    } while ((++integers)->name);
 	}
         RESTORE_NUMERIC_STANDARD();
-#else
-	localeconv(); /* A stub to call not_here(). */
-#endif
+#endif  /* HAS_LOCALECONV */
     OUTPUT:
 	RETVAL
 
