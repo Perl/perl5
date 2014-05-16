@@ -2998,9 +2998,55 @@ forget you.
 
 =head1 Acknowledgements
 
-XXX Generate this with:
+Perl 5.20.0 represents approximately 12 months of development since Perl 5.18.0
+and contains approximately 470,000 lines of changes across 2,900 files from 124
+authors.
 
-  perl Porting/acknowledgements.pl v5.20.0..HEAD
+Excluding auto-generated files, documentation and release tools, there were
+approximately 280,000 lines of changes to 1,800 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its third decade thanks to a vibrant community
+of users and developers. The following people are known to have contributed the
+improvements that became Perl 5.20.0:
+
+Aaron Crane, Abhijit Menon-Sen, Abigail, Abir Viqar, Alan Haggai Alavi, Alan
+Hourihane, Alexander Voronov, Alexandr Ciornii, Andy Dougherty, Anno Siegel,
+Aristotle Pagaltzis, Arthur Axel 'fREW' Schmidt, Brad Gilbert, Brendan Byrd,
+Brian Childs, Brian Fraser, Brian Gottreu, Chris 'BinGOs' Williams, Christian
+Millour, Colin Kuskie, Craig A. Berry, Dabrien 'Dabe' Murphy, Dagfinn Ilmari
+Mannsåker, Daniel Dragan, Darin McBride, David Golden, David Leadbeater, David
+Mitchell, David Nicol, David Steinbrunner, Dennis Kaarsemaker, Dominic
+Hargreaves, Ed Avis, Eric Brine, Evan Zacks, Father Chrysostomos, Florian
+Ragwitz, François Perrad, Gavin Shelley, Gideon Israel Dsouza, Gisle Aas,
+Graham Knop, H.Merijn Brand, Hauke D, Heiko Eissfeldt, Hiroo Hayashi, Hojung
+Youn, James E Keenan, Jarkko Hietaniemi, Jerry D. Hedden, Jess Robinson, Jesse
+Luehrs, Johan Vromans, John Gardiner Myers, John Goodyear, John P. Linderman,
+John Peacock, kafka, Kang-min Liu, Karen Etheridge, Karl Williamson, Keedi Kim,
+Kent Fredric, kevin dawson, Kevin Falcone, Kevin Ryde, Leon Timmermans, Lukas
+Mai, Marc Simpson, Marcel Grünauer, Marco Peereboom, Marcus Holland-Moritz,
+Mark Jason Dominus, Martin McGrath, Matthew Horsfall, Max Maischein, Mike
+Doherty, Moritz Lenz, Nathan Glenn, Nathan Trapuzzano, Neil Bowers, Neil
+Williams, Nicholas Clark, Niels Thykier, Niko Tyni, Olivier Mengué, Owain G.
+Ainsworth, Paul Green, Paul Johnson, Peter John Acklam, Peter Martini, Peter
+Rabbitson, Petr Písař, Philip Boulain, Philip Guenther, Piotr Roszatycki,
+Rafael Garcia-Suarez, Reini Urban, Reuben Thomas, Ricardo Signes, Ruslan
+Zakirov, Sergey Alekseev, Shirakata Kentaro, Shlomi Fish, Slaven Rezic,
+Smylers, Steffen Müller, Steve Hay, Sullivan Beck, Thomas Sibley, Tobias
+Leich, Toby Inkster, Tokuhiro Matsuno, Tom Christiansen, Tom Hukins, Tony Cook,
+Victor Efimov, Viktor Turskyi, Vladimir Timofeev, YAMASHINA Hio, Yves Orton,
+Zefram, Zsbán Ambrus, Ævar Arnfjörð Bjarmason.
+
+The list above is almost certainly incomplete as it is automatically generated
+from version control history. In particular, it does not include the names of
+the (very much appreciated) contributors who reported issues to the Perl bug
+tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please see
+the F<AUTHORS> file in the Perl source distribution.
 
 =head1 Reporting Bugs
 
