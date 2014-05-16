@@ -528,6 +528,8 @@ the strings?).
  Aaron     5.19.10      2014-Mar-20
  Steve     5.19.11      2014-Apr-20
 
+ Ricardo   5.20.0-RC1   2014-May-16     The 5.20 maintenance track
+
 =head2 SELECTED RELEASE SIZES
 
 For example the notation "core: 212  29" in the release 1.000 means that
@@ -607,6 +609,7 @@ explained below.
  5.14.0         5328 104   1100 114  17779 2479   7697 2130   5871 188
  5.16.0         5562 109   1077  80  20504 2702   8750 2375   4815 152
  5.18.0         5892 113   1088  79  20077 2760   9365 2439   4943 154
+ 5.20.0         6243 115   1187  75  19499 2701   9620 2457   5145 159
 
 The "core"..."doc" mean the following files from the Perl source code
 distribution.  The glob notation ** means recursively, (.) means
@@ -908,6 +911,28 @@ the Perl source distribution for somewhat more selected releases.
  vos            16    8    16    8     17    8     9    7      8     7
  win32        1841   73  1841   73   1833   72  1655   67   1157    62
  x2p           345   19   345   19    346   19   345   19    344    20
+
+ ======================================================================
+
+                  5.20.0
+
+ Configure    552      1
+ Cross        118     15
+ NetWare      467     61
+ Porting     1204     68
+ djgpp         18      7
+ h2pl          13     15
+ hints        355     90
+ mad          174      8
+ os2          510     70
+ plan9        316     17
+ qnx            1      4
+ symbian      290     54
+ utils        241     27
+ vms          538     12
+ vos            8      7
+ win32       1183     64
+ x2p          341     19
 
 =head2 SELECTED PATCH SIZES
 
