@@ -67,7 +67,8 @@ sub _decode_encodings {
 sub find_locales ($) {  # Returns an array of all the locales we found on the
                         # system.  The parameter is either a single locale
                         # category or a reference to a list of categories to
-                        # find valid locales for it or them
+                        # find valid locales for it (or in the case of
+                        # multiple) for all of them
     my $categories = shift;
 
     use Config;;
