@@ -684,6 +684,10 @@ parameters as integers correctly formatted in the current locale:
     }
     print "\n";
 
+Note that if the platform doesn't have C<LC_NUMERIC> and/or
+C<LC_MONETARY> available or enabled, the corresponding elements of the
+hash will be missing.
+
 =head2 I18N::Langinfo
 
 Another interface for querying locale-dependent information is the

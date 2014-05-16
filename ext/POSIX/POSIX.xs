@@ -291,26 +291,31 @@ struct lconv_offset {
 };
 
 const struct lconv_offset lconv_strings[] = {
+#ifdef USE_LOCALE_NUMERIC
     {"decimal_point",     STRUCT_OFFSET(struct lconv, decimal_point)},
     {"thousands_sep",     STRUCT_OFFSET(struct lconv, thousands_sep)},
-#ifndef NO_LOCALECONV_GROUPING
+#  ifndef NO_LOCALECONV_GROUPING
     {"grouping",          STRUCT_OFFSET(struct lconv, grouping)},
+#  endif
 #endif
+#ifdef USE_LOCALE_MONETARY
     {"int_curr_symbol",   STRUCT_OFFSET(struct lconv, int_curr_symbol)},
     {"currency_symbol",   STRUCT_OFFSET(struct lconv, currency_symbol)},
     {"mon_decimal_point", STRUCT_OFFSET(struct lconv, mon_decimal_point)},
-#ifndef NO_LOCALECONV_MON_THOUSANDS_SEP
+#  ifndef NO_LOCALECONV_MON_THOUSANDS_SEP
     {"mon_thousands_sep", STRUCT_OFFSET(struct lconv, mon_thousands_sep)},
-#endif
-#ifndef NO_LOCALECONV_MON_GROUPING
+#  endif
+#  ifndef NO_LOCALECONV_MON_GROUPING
     {"mon_grouping",      STRUCT_OFFSET(struct lconv, mon_grouping)},
-#endif
+#  endif
     {"positive_sign",     STRUCT_OFFSET(struct lconv, positive_sign)},
     {"negative_sign",     STRUCT_OFFSET(struct lconv, negative_sign)},
+#endif
     {NULL, 0}
 };
 
 const struct lconv_offset lconv_integers[] = {
+#ifdef USE_LOCALE_MONETARY
     {"int_frac_digits",   STRUCT_OFFSET(struct lconv, int_frac_digits)},
     {"frac_digits",       STRUCT_OFFSET(struct lconv, frac_digits)},
     {"p_cs_precedes",     STRUCT_OFFSET(struct lconv, p_cs_precedes)},
@@ -319,6 +324,7 @@ const struct lconv_offset lconv_integers[] = {
     {"n_sep_by_space",    STRUCT_OFFSET(struct lconv, n_sep_by_space)},
     {"p_sign_posn",       STRUCT_OFFSET(struct lconv, p_sign_posn)},
     {"n_sign_posn",       STRUCT_OFFSET(struct lconv, n_sign_posn)},
+#endif
     {NULL, 0}
 };
 

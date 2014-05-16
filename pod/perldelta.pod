@@ -497,6 +497,14 @@ destroy perl engines within the same process.
 C<POSIX::localeconv()> now returns the data for the program's underlying
 locale even when called from outside the scope of S<C<use locale>>.
 
+=item *
+
+C<POSIX::localeconv()> now works properly on platforms which don't have
+C<LC_NUMERIC> and/or C<LC_MONETARY>, or for which Perl has been compiled
+to disregard either or both of these locale categories.  In such
+circumstances, there are now no entries for the corresponding values in
+the hash returned by C<localeconv()>.
+
 =back
 
 =head1 Known Problems
