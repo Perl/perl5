@@ -522,11 +522,7 @@ sub run_tests {
       SKIP: {
             skip 'No locale testing without d_setlocale', 1 if(!$Config{d_setlocale});
 
-            BEGIN {
-                if($Config{d_setlocale}) {
-                    require locale; import locale;
-                }
-            }
+            use locale;
             $locale = qr/\b\v$/;
             is($locale,    '(?^l:\b\v$)', 'Verify has l modifier when compiled under use locale');
             no locale;
@@ -555,11 +551,7 @@ sub run_tests {
       SKIP: {
             skip 'No locale testing without d_setlocale', 2 if(!$Config{d_setlocale});
 
-             BEGIN {
-                if($Config{d_setlocale}) {
-                    require locale; import locale;
-                }
-            }
+             use locale;
             is(qr/abc$dual/,    '(?^l:abc(?^:\b\v$))', 'Verify retains d meaning when interpolated under locale');
             is(qr/abc$unicode/,    '(?^l:abc(?^u:\b\v$))', 'Verify retains u when interpolated under locale');
         }

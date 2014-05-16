@@ -78,7 +78,7 @@ is(length(quotemeta($char)), 1, "quotemeta '\\N{U+D8}'  in UTF-8 length");
 
   SKIP: {
     skip 'No locale testing without d_setlocale', 8 if(!$Config{d_setlocale});
-    require locale; import locale;
+    use locale;
 
     my $char = ":";
     is(quotemeta($char), "\\$char", "quotemeta '$char' locale");
@@ -107,11 +107,7 @@ is(length(quotemeta($char)), 1, "quotemeta '\\N{U+D8}'  in UTF-8 length");
 
   SKIP: {
     skip 'No locale testing without d_setlocale', 12 if(!$Config{d_setlocale});
-    BEGIN {
-        if($Config{d_setlocale}) {
-            require locale; import locale;
-        }
-    }
+    use locale;
 
     my $char = ":";
     utf8::upgrade($char);

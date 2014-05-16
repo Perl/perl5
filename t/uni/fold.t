@@ -437,12 +437,8 @@ SKIP: {
         utf8::upgrade($utf8);
         is(fc($latin1), fc($utf8), "fc() gives the same results for \\x{$_} in Latin-1 and UTF-8 under unicode_strings");
         SKIP: {
-              skip 'No locale testing without d_setlocale', 2 if(!$Config{d_setlocale});
-              BEGIN {
-                  if($Config{d_setlocale}) {
-                      require locale; import locale;
-                  }
-              }
+            skip 'No locale testing without d_setlocale', 2 if(!$Config{d_setlocale});
+            use locale;
             is(fc($latin1), lc($latin1), "use locale; fc(qq{\\x{$_}}), lc(qq{\\x{$_}}) when qq{\\x{$_}} is in latin-1");
             is(fc($utf8), lc($utf8), "use locale; fc(qq{\\x{$_}}), lc(qq{\\x{$_}}) when qq{\\x{$_}} is in latin-1");
         }

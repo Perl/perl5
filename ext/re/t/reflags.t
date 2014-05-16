@@ -60,11 +60,7 @@ SKIP: {
   ) {
     skip "no locale support", 7
   }
-  BEGIN {
-      if($Config::Config{d_setlocale}) {
-          require locale; import locale;
-      }
-  }
+  use locale;
   use re '/u';
   is qr//, '(?^u:)', 'use re "/u" with active locale';
   no re '/u';

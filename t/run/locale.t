@@ -58,11 +58,7 @@ my $original_locale = setlocale(LC_NUMERIC);
 my ($base, $different, $comma, $difference, $utf8_radix);
 my $radix_encoded_as_utf8;
 for ("C", @locales) { # prefer C for the base if available
-    BEGIN {
-        if($Config{d_setlocale}) {
-            require locale; import locale;
-        }
-    }
+    use locale;
     setlocale(LC_NUMERIC, $_) or next;
     my $in = 4.2; # avoid any constant folding bugs
     if ((my $s = sprintf("%g", $in)) eq "4.2")  {
@@ -154,7 +150,7 @@ format STDOUT =
 @.#
 4.179
 .
-{ require locale; import locale; write; }
+{ use locale; write; }
 EOF
 	    "too late to look at the locale at write() time");
         }
@@ -176,11 +172,7 @@ EOF
         # do not let "use 5.000" affect the locale!
         # this test is to prevent regression of [rt.perl.org #105784]
         fresh_perl_is(<<"EOF",
-            BEGIN {
-                if("$Config{d_setlocale}") {
-                    require locale; import locale;
-                }
-            }
+            use locale;
             use POSIX;
             my \$i = 0.123;
             POSIX::setlocale(POSIX::LC_NUMERIC(),"$different");

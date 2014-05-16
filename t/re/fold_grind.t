@@ -423,7 +423,7 @@ my @charsets = qw(d u a aa);
 if($Config{d_setlocale}) {
     my $current_locale = POSIX::setlocale( &POSIX::LC_CTYPE, "C") // "";
     if ($current_locale eq 'C') {
-        require locale; import locale;
+        use locale;
 
         # Some implementations don't have the 128-255 range characters all
         # mean nothing under the C locale (an example being VMS).  This is

@@ -22,11 +22,7 @@ if($Config{d_setlocale}) {
     require POSIX;
     $locale = POSIX::setlocale( &POSIX::LC_ALL, "C");
     if (defined $locale && $locale eq 'C') {
-        BEGIN {
-            if($Config{d_setlocale}) {
-                require locale; import locale; # make \w work right in non-ASCII lands
-            }
-        }
+        use locale; # make \w work right in non-ASCII lands
 
         # Some locale implementations don't have the 128-255 characters all
         # mean nothing.  Skip the locale tests in that situation
@@ -154,8 +150,7 @@ foreach my $name (sort keys %properties) {
             }
 
             if (defined $locale) {
-                require locale; import locale;
-
+                use locale;
                 POSIX::setlocale( &POSIX::LC_ALL, "C");
                 $ret = truth eval "test_is${function}_LC($i)";
                 if ($@) {
@@ -193,8 +188,7 @@ foreach my $name (sort keys %properties) {
         }
 
         if (defined $locale && $name ne 'vertws') {
-            require locale; import locale;
-
+            use locale;
             POSIX::setlocale( &POSIX::LC_ALL, "C");
             $ret = truth eval "test_is${function}_LC_uvchr('$i')";
             if ($@) {
@@ -232,8 +226,7 @@ foreach my $name (sort keys %properties) {
         }
 
         if ($name ne 'vertws' && defined $locale) {
-            require locale; import locale;
-
+            use locale;
             POSIX::setlocale( &POSIX::LC_ALL, "C");
             $ret = truth eval "test_is${function}_LC_utf8('$char')";
             if ($@) {
@@ -348,9 +341,8 @@ foreach my $name (sort keys %to_properties) {
 
         if ($name ne 'TITLE') { # Test _LC;  titlecase is not defined in locales.
             if (defined $locale) {
-                require locale; import locale;
-
-                    POSIX::setlocale( &POSIX::LC_ALL, "C");
+                use locale;
+                POSIX::setlocale( &POSIX::LC_ALL, "C");
                 $ret = eval "test_to${function}_LC($j)";
                 if ($@) {
                     fail($@);

@@ -303,11 +303,7 @@ my $TEST = 'TEST';
 
         $s = 'abcd';
         {
-            BEGIN {
-                if($Config{d_setlocale}) {
-                    require locale; import locale;
-                }
-            }
+            use locale;
             $res = $s =~ /(\w+)/; $one = $1;
         }
         isnt_tainted($s,   "$desc: s not tainted");
@@ -320,11 +316,7 @@ my $TEST = 'TEST';
 
         $s = 'abcd';
         {
-            BEGIN {
-                if($Config{d_setlocale}) {
-                    require locale; import locale;
-                }
-            }
+            use locale;
             $res = $s =~ /(\w)/g; $one = $1;
         }
         isnt_tainted($s,   "$desc: s not tainted");
@@ -364,11 +356,7 @@ my $TEST = 'TEST';
 
         $s = 'abcd';
         {
-            BEGIN {
-                if($Config{d_setlocale}) {
-                    require locale; import locale;
-                }
-            }
+            use locale;
             ($res) = $s =~ /(\w+)/; $one = $1;
         }
         isnt_tainted($s,   "$desc: s not tainted");
@@ -381,11 +369,7 @@ my $TEST = 'TEST';
 
         $s = 'abcd';
         {
-            BEGIN {
-                if($Config{d_setlocale}) {
-                    require locale; import locale;
-                }
-            }
+            use locale;
             ($res, $res2) = $s =~ /(\w)/g; $one = $1;
         }
         isnt_tainted($s,   "$desc: s not tainted");
@@ -524,11 +508,7 @@ my $TEST = 'TEST';
 
         $s = 'abcd';
         {
-            BEGIN {
-                if($Config{d_setlocale}) {
-                    require locale; import locale;
-                }
-            }
+            use locale;
             $res = $s =~ s/(\w+)/xyz/; $one = $1;
         }
         is_tainted($s,     "$desc: s tainted");
@@ -542,11 +522,7 @@ my $TEST = 'TEST';
 
         $s = 'abcd';
         {
-            BEGIN {
-                if($Config{d_setlocale}) {
-                    require locale; import locale;
-                }
-            }
+            use locale;
             $res = $s =~ s/(\w)/x/g; $one = $1;
         }
         is_tainted($s,     "$desc: s tainted");
@@ -560,11 +536,7 @@ my $TEST = 'TEST';
 
         $s = 'abcd';
         {
-            BEGIN {
-                if($Config{d_setlocale}) {
-                    require locale; import locale;
-                }
-            }
+            use locale;
             $res = $s =~ s/(\w+)/xyz/r; $one = $1;
         }
         isnt_tainted($s,   "$desc: s not tainted");
@@ -720,11 +692,7 @@ my $TEST = 'TEST';
 
         $s = 'abcd';
         {
-            BEGIN {
-                if($Config{d_setlocale}) {
-                    require locale; import locale;
-                }
-            }
+            use locale;
             $res = $s =~ /(\w+)/; $one = $1;
         }
         isnt_tainted($s,   "$desc: s not tainted");
@@ -737,11 +705,7 @@ my $TEST = 'TEST';
 
         $s = 'abcd';
         {
-            BEGIN {
-                if($Config{d_setlocale}) {
-                    require locale; import locale;
-                }
-            }
+            use locale;
             $res = $s =~ /(\w)/g; $one = $1;
         }
         isnt_tainted($s,   "$desc: s not tainted");
@@ -781,11 +745,7 @@ my $TEST = 'TEST';
 
         $s = 'abcd';
         {
-            BEGIN {
-                if($Config{d_setlocale}) {
-                    require locale; import locale;
-                }
-            }
+            use locale;
             ($res) = $s =~ /(\w+)/; $one = $1;
         }
         isnt_tainted($s,   "$desc: s not tainted");
@@ -798,11 +758,7 @@ my $TEST = 'TEST';
 
         $s = 'abcd';
         {
-            BEGIN {
-                if($Config{d_setlocale}) {
-                    require locale; import locale;
-                }
-            }
+            use locale;
             ($res, $res2) = $s =~ /(\w)/g; $one = $1;
         }
         isnt_tainted($s,   "$desc: s not tainted");
@@ -942,11 +898,7 @@ my $TEST = 'TEST';
 
         $s = 'abcd';
         {
-            BEGIN {
-                if($Config{d_setlocale}) {
-                    require locale; import locale;
-                }
-            }
+            use locale;
             $res = $s =~ s/(\w+)/xyz/; $one = $1;
         }
         is_tainted($s,     "$desc: s tainted");
@@ -960,11 +912,7 @@ my $TEST = 'TEST';
 
         $s = 'abcd';
         {
-            BEGIN {
-                if($Config{d_setlocale}) {
-                    require locale; import locale;
-                }
-            }
+            use locale;
             $res = $s =~ s/(\w)/x/g; $one = $1;
         }
         is_tainted($s,     "$desc: s tainted");
@@ -978,11 +926,7 @@ my $TEST = 'TEST';
 
         $s = 'abcd';
         {
-            BEGIN {
-                if($Config{d_setlocale}) {
-                    require locale; import locale;
-                }
-            }
+            use locale;
             $res = $s =~ s/(\w+)/xyz/r; $one = $1;
         }
         isnt_tainted($s,   "$desc: s not tainted");
@@ -2343,11 +2287,7 @@ SKIP: {
     skip 'No locale testing without d_setlocale', 4 if(!$Config{d_setlocale});
 
     use feature 'fc';
-    BEGIN {
-        if($Config{d_setlocale}) {
-            require locale; import locale;
-        }
-    }
+    use locale;
     my ($latin1, $utf8) = ("\xDF") x 2;
     utf8::downgrade($latin1);
     utf8::upgrade($utf8);
