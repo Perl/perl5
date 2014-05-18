@@ -2987,12 +2987,13 @@ S_share_hek_flags(pTHX_ const char *str, I32 len, U32 hash, int flags)
     }
 
     if (!entry) {
-	/* What used to be head of the list.
-	   If this is NULL, then we're the first entry for this slot, which
-	   means we need to increate fill.  */
 	struct shared_he *new_entry;
 	HEK *hek;
 	char *k;
+        /* What used to be head of the list.
+           If this is NULL, then we're the first entry for this slot, which
+           means we need to increate fill
+           - Except apparently in practice we don't bother. - Yves*/
 	HE **const head = &HvARRAY(PL_strtab)[hindex];
 	HE *const next = *head;
 
