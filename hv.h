@@ -400,17 +400,16 @@ C<SV*>.
 #define HEK_KEY(hek)		(hek)->hek_key
 #define HEK_FLAGS(hek)	(*((unsigned char *)(HEK_KEY(hek))+HEK_LEN(hek)+1))
 
-#define HVhek_UTF8	0x01 /* Key is utf8 encoded. */
-#define HVhek_WASUTF8	0x02 /* Key is bytes here, but was supplied as utf8. */
-#define HVhek_UNSHARED	0x08 /* This key isn't a shared hash key. */
-/* the following flags are options for functions, they are not stored in heks */
-#define HVhek_FREEKEY	0x100 /* Internal flag to say key is Newx()ed.  */
-#define HVhek_PLACEHOLD	0x200 /* Internal flag to create placeholder.
-                               * (may change, but Storable is a core module) */
-#define HVhek_KEYCANONICAL 0x400 /* Internal flag - key is in canonical form.
+#define HVhek_UTF8          0x001 /* Key is utf8 encoded. */
+#define HVhek_WASUTF8       0x002 /* Key is bytes here, but was supplied as utf8. */
+#define HVhek_UNSHARED      0x008 /* This key isn't a shared hash key. */
+#define HVhek_FREEKEY       0x100 /* Internal flag to say key is malloc()ed.  */
+#define HVhek_PLACEHOLD     0x200 /* Internal flag to create placeholder.
+                                   * (may change, but Storable is a core module) */
+#define HVhek_KEYCANONICAL  0x400 /* Internal flag - key is in canonical form.
 				    If the string is UTF-8, it cannot be
 				    converted to bytes. */
-#define HVhek_MASK	0xFF
+#define HVhek_MASK          0x0FF
 
 #define HVhek_ENABLEHVKFLAGS        (HVhek_MASK & ~(HVhek_UNSHARED))
 
