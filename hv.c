@@ -75,7 +75,7 @@ S_new_he(pTHX)
 STATIC HEK *
 S_save_hek_flags(const char *str, I32 len, U32 hash, int flags)
 {
-    const int flags_masked = flags & HVhek_MASK;
+    const int flags_masked = flags & HVhek_MASK_cmp;
     char *k;
     HEK *hek;
 
@@ -627,6 +627,8 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
     else if (!hash)
         PERL_HASH(hash, key, klen);
 
+    /* NOTE: We don't use HVhek_MASK_cmp as we want the shared bit here,
+     * and we check against the UTF8 bit explicitly later anyway */
     masked_flags = (flags & HVhek_MASK);
 
 #ifdef DYNAMIC_ENV_FETCH
@@ -1075,6 +1077,8 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
     else if (!hash)
         PERL_HASH(hash, key, klen);
 
+    /* NOTE: We don't use HVhek_MASK_cmp as we want the shared bit here,
+     * and we check against the UTF8 bit explicitly later anyway */
     masked_flags = (k_flags & HVhek_MASK);
 
     first_entry = oentry = &(HvARRAY(hv))[hash & (I32) HvMAX(hv)];
@@ -2885,7 +2889,7 @@ S_unshare_hek_or_pvn(pTHX_ const HEK *hek, const char *str, I32 len, U32 hash)
                 break;
         }
     } else {
-        const int flags_masked = k_flags & HVhek_MASK;
+        const int flags_masked = k_flags & HVhek_MASK_cmp;
         for (entry = *oentry; entry; oentry = &HeNEXT(entry), entry = *oentry) {
             if (HeHASH(entry) != hash)		/* strings can't be equal */
                 continue;
@@ -2957,7 +2961,7 @@ STATIC HEK *
 S_share_hek_flags(pTHX_ const char *str, I32 len, U32 hash, int flags)
 {
     HE *entry;
-    const int flags_masked = flags & HVhek_MASK;
+    const int flags_masked = flags & HVhek_MASK_cmp;
     const U32 hindex = hash & (I32) HvMAX(PL_strtab);
     XPVHV * const xhv = (XPVHV*)SvANY(PL_strtab);
 
@@ -3502,7 +3506,7 @@ Perl_refcounted_he_new_pvn(pTHX_ struct refcounted_he *parent,
     he->refcounted_he_keylen = keylen;
     Copy(keypv, he->refcounted_he_data + key_offset, keylen, char);
 #else
-    he->refcounted_he_hek = share_hek_flags(keypv, keylen, hash, hekflags);
+    he->refcounted_he_hek = share_hek_flags(keypv, keylen, hash, hekflags); /* XXX */
 #endif
 
     he->refcounted_he_data[0] = hekflags;

@@ -403,15 +403,18 @@ C<SV*>.
 #define HVhek_UTF8          0x001 /* Key is utf8 encoded. */
 #define HVhek_WASUTF8       0x002 /* Key is bytes here, but was supplied as utf8. */
 #define HVhek_UNSHARED      0x008 /* This key isn't a shared hash key. */
+/* NOTE: HVrhek_XXX uses 0x0F0 for its own purposes! */
 #define HVhek_FREEKEY       0x100 /* Internal flag to say key is malloc()ed.  */
 #define HVhek_PLACEHOLD     0x200 /* Internal flag to create placeholder.
                                    * (may change, but Storable is a core module) */
 #define HVhek_KEYCANONICAL  0x400 /* Internal flag - key is in canonical form.
 				    If the string is UTF-8, it cannot be
 				    converted to bytes. */
-#define HVhek_MASK          0x0FF
 
-#define HVhek_ENABLEHVKFLAGS        (HVhek_MASK & ~(HVhek_UNSHARED))
+#define HVhek_MASK          0x00F /* UTF8, WASUTF8, UNSHARED */
+#define HVhek_MASK_cmp      0x003 /* UTF8, WASUTF8 */
+
+#define HVhek_ENABLEHVKFLAGS HVhek_MASK_cmp     /* (HVhek_MASK & ~(HVhek_UNSHARED)) */
 
 #define HEK_UTF8(hek)		(HEK_FLAGS(hek) & HVhek_UTF8)
 #define HEK_UTF8_on(hek)	(HEK_FLAGS(hek) |= HVhek_UTF8)
