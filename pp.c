@@ -4847,15 +4847,19 @@ PP(pp_kvhslice)
 
 PP(pp_list)
 {
-    dVAR; dSP; dMARK;
+    dVAR;
+    I32 markidx = POPMARK;
     if (GIMME != G_ARRAY) {
+	SV **mark = PL_stack_base + markidx;
+	dSP;
 	if (++MARK <= SP)
 	    *MARK = *SP;		/* unwanted list, return last item */
 	else
 	    *MARK = &PL_sv_undef;
 	SP = MARK;
+	PUTBACK;
     }
-    RETURN;
+    return NORMAL;
 }
 
 PP(pp_lslice)
