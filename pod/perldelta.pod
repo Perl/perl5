@@ -3568,12 +3568,15 @@ Fixed a crash when destroying a self-referencing GLOB.  [perl #121242]
 
 =item *
 
+L<IO::Socket> is known to fail tests on AIX 5.3.  There is
+L<a patch|https://rt.perl.org/Ticket/Display.html?id=120835> in the request
+tracker, #120835, which may be applied to future releases.
+
+=item *
+
 The following modules are known to have test failures with this version of
 Perl.  Patches have been submitted, so there will hopefully be new releases
 soon:
-
-XXX Go through this list just before the release of 5.20 and remove any
-modules that have been fixed.
 
 =over
 
@@ -3583,28 +3586,11 @@ L<Data::Structure::Util> version 0.15
 
 =item *
 
-L<Data::Util> version 0.62
-
-=item *
-
 L<HTML::StripScripts> version 1.05
 
 =item *
 
-L<LaTeX::Encode> version 0.08
-
-=item *
-
 L<List::Gather> version 0.08.
-
-=item *
-
-L<Mail::SpamAssassin> version 3.3.2
-
-=item *
-
-L<RDF::Trine>.  The test failures are actually due to a bug in
-L<XML::LibXML> version 2.0108.  A patch to XML::LibXML has been submitted.
 
 =back
 
