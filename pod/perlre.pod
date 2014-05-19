@@ -150,6 +150,8 @@ whitespace or C<#> characters in the pattern (outside a bracketed character
 class, which is unaffected by C</x>), then you'll either have to
 escape them (using backslashes or C<\Q...\E>) or encode them using octal,
 hex, or C<\N{}> escapes.
+It is ineffective to try to continue a comment onto the next line by
+escaping the C<\n> with a backslash or C<\Q>.
 
 You can use L</(?#text)> to create a comment that ends earlier than the
 end of the current line, but C<text> also can't contain the closing
