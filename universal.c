@@ -1059,8 +1059,7 @@ Perl_boot_core_UNIVERSAL(pTHX)
     dVAR;
     static const char file[] = __FILE__;
     const struct xsub_details *xsub = details;
-    const struct xsub_details *end
-	= details + sizeof(details) / sizeof(details[0]);
+    const struct xsub_details *end = C_ARRAY_END(details);
 
     do {
 	newXS_flags(xsub->name, xsub->xsub, file, xsub->proto, 0);
