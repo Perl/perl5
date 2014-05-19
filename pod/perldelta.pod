@@ -3456,10 +3456,12 @@ F<dist/IO/t/cachepropagate-tcp.t>.  [perl #120091/118059]
 
 =item *
 
-Strange vars like ties, overloads, or stringified refs (and in recent
+Formats involving UTF-8 encoded strings, or strange vars like ties,
+overloads, or stringified refs (and in recent
 perls, pure NOK vars) would generally do the wrong thing in formats
 when the var is treated as a string and repeatedly chopped, as in
 C<< ^<<<~~ >> and similar. This has now been resolved.
+[perl #33832/45325/113868/119847/119849/119851]
 
 =item *
 
