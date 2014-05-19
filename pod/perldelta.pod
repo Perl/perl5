@@ -465,6 +465,12 @@ index() and rindex() no longer crash when used on strings over 2GB in
 size.
 L<[perl #121562]|https://rt.perl.org/Ticket/Display.html?id=121562>.
 
+=item *
+
+A small previously intentional memory leak in PERL_SYS_INIT/PERL_SYS_INIT3 on
+Win32 builds was fixed. This might affect embedders who repeatedly create and
+destroy perl engines within the same process.
+
 =back
 
 =head1 Known Problems

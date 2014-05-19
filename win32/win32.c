@@ -4356,13 +4356,7 @@ ansify_path(void)
          * will not call mg_set() if it initializes %ENV from `environ`.
          */
         SetEnvironmentVariableA("PATH", ansi_path+5);
-        /* We are intentionally leaking the ansi_path string here because
-         * the some runtime libraries puts it directly into the environ
-         * array.  The Microsoft runtime library seems to make a copy,
-         * but will leak the copy should it be replaced again later.
-         * Since this code is only called once during PERL_SYS_INIT this
-         * shouldn't really matter.
-         */
+        win32_free(ansi_path);
     }
     win32_free(wide_path);
 }
