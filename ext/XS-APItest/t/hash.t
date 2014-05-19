@@ -69,8 +69,35 @@ main_tests (\@keys, \@testkeys, ' [utf8 hash]');
     };
     $what = $prefix . 'delete';
     like ($@, qr/^$what/, $what);
-    # I can't work out how to get to the code that flips the wasutf8 flag on
-    # the hash key without some ikcy XS
+    # Test the WASUT8 flag.
+    # We want a string that is NOT going to be in PL_strtab to test this.
+    my $wasutf8_key= "testing_key_that_hopefully_is_not_in_memory";
+    # store the key in PL_strtab WITHOUT the WASUTF8 flag
+    my %temp_hash= ($wasutf8_key=>1);
+    # now upgrade the string, this effectively turns on the UTF8 flag and nothing else.
+    utf8::upgrade($wasutf8_key); # now it should have the UTF8 flag on
+    eval {
+        # When we look up a UTF8 on key we first try to downgrad the string, which
+        # if successful sets the WASUTF8 flag on the key to true to denote it should
+        # be upgraded before being returned by each() or keys().
+        # Presumably this is intended to help with code points like \x{DF} which behave
+        # differently in certain contexts when encoded as latin-1 or utf8.
+        # If we look up a key with this flag set we should blow up.
+        # (NOTE, I think this is all a bad idea and needs to be reimplemented more
+        # sanely, and specificaly this test shoud not be seen as a binding commitment
+        # to continue working like this - Yves)
+        $strtab->{$wasutf8_key}++; # lvalue fetch
+    };
+
+    $what = $prefix . 'fetch';
+    like($@, qr/^$what/, $what);
+
+    # I dont know why this one is reported as a fetch and not as a store.
+    eval {
+        $strtab->{$wasutf8_key}= 0; # store
+    };
+    $what = $prefix . 'fetch';
+    like($@, qr/^$what/, $what);
 }
 
 {
