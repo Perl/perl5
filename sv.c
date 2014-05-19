@@ -5593,7 +5593,7 @@ Perl_sv_magic(pTHX_ SV *const sv, SV *const obj, const int how,
 
     PERL_ARGS_ASSERT_SV_MAGIC;
 
-    if (how < 0 || (unsigned)how > C_ARRAY_LENGTH(PL_magic_data)
+    if (how < 0 || (unsigned)how >= C_ARRAY_LENGTH(PL_magic_data)
 	|| ((flags = PL_magic_data[how]),
 	    (vtable_index = flags & PERL_MAGIC_VTABLE_MASK)
 	    > magic_vtable_max))
@@ -12274,8 +12274,7 @@ Perl_ptr_table_store(pTHX_ PTR_TBL_t *const tbl, const void *const oldsv, void *
 	    new_arena->next = tbl->tbl_arena;
 	    tbl->tbl_arena = new_arena;
 	    tbl->tbl_arena_next = new_arena->array;
-	    tbl->tbl_arena_end = new_arena->array
-		+ sizeof(new_arena->array) / sizeof(new_arena->array[0]);
+	    tbl->tbl_arena_end = C_ARRAY_END(new_arena->array);
 	}
 
 	tblent = tbl->tbl_arena_next++;

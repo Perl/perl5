@@ -1938,8 +1938,13 @@ void Perl_mem_log_del_sv(const SV *sv, const char *filename, const int linenumbe
 #define StructCopy(s,d,t) Copy(s,d,1,t)
 #endif
 
+/* C_ARRAY_LENGTH is the number of elements in the C array (so you
+ * want your zero-based indices to be less than but not equal to).
+ *
+ * C_ARRAY_END is one past the last: half-open/half-closed range,
+ * not last-inclusive range. */
 #define C_ARRAY_LENGTH(a)	(sizeof(a)/sizeof((a)[0]))
-#define C_ARRAY_END(a)		(a) + (sizeof(a)/sizeof((a)[0]))
+#define C_ARRAY_END(a)		((a) + C_ARRAY_LENGTH(a))
 
 #ifdef NEED_VA_COPY
 # ifdef va_copy

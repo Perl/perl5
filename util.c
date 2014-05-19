@@ -4577,8 +4577,8 @@ Perl_init_global_struct(pTHX)
 {
     struct perl_vars *plvarsp = NULL;
 # ifdef PERL_GLOBAL_STRUCT
-    const IV nppaddr = sizeof(Gppaddr)/sizeof(Perl_ppaddr_t);
-    const IV ncheck  = sizeof(Gcheck) /sizeof(Perl_check_t);
+    const IV nppaddr = C_ARRAY_LENGTH(Gppaddr);
+    const IV ncheck  = C_ARRAY_LENGTH(Gcheck);
 #  ifdef PERL_GLOBAL_STRUCT_PRIVATE
     /* PerlMem_malloc() because can't use even safesysmalloc() this early. */
     plvarsp = (struct perl_vars*)PerlMem_malloc(sizeof(struct perl_vars));

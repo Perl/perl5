@@ -677,7 +677,7 @@ perl_destruct(pTHXx)
 		msg.msg_name = NULL;
 		msg.msg_namelen = 0;
 		msg.msg_iov = vec;
-		msg.msg_iovlen = sizeof(vec)/sizeof(vec[0]);
+		msg.msg_iovlen = C_ARRAY_LENGTH(vec);
 
 		vec[0].iov_base = (void*)&target;
 		vec[0].iov_len = sizeof(target);

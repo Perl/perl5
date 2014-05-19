@@ -868,8 +868,7 @@ const struct op_private_by_op op_private_names[] = {
 static bool
 S_op_private_to_names(pTHX_ SV *tmpsv, U32 optype, U32 op_private) {
     const struct op_private_by_op *start = op_private_names;
-    const struct op_private_by_op *const end
-	= op_private_names + C_ARRAY_LENGTH(op_private_names);
+    const struct op_private_by_op *const end = C_ARRAY_END(op_private_names);
 
     /* This is a linear search, but no worse than the code that it replaced.
        It's debugging code - size is more important than speed.  */
@@ -1894,7 +1893,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	if (HvARRAY(sv) && usedkeys) {
 	    /* Show distribution of HEs in the ARRAY */
 	    int freq[200];
-#define FREQ_MAX ((int)(sizeof freq / sizeof freq[0] - 1))
+#define FREQ_MAX ((int)(C_ARRAY_LENGTH(freq) - 1))
 	    int i;
 	    int max = 0;
 	    U32 pow2 = 2, keys = usedkeys;
