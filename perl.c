@@ -1364,8 +1364,11 @@ perl_free(pTHXx)
 			    "free this thread's memory\n");
 		PL_debug &= ~ DEBUG_m_FLAG;
 	    }
-	    while(aTHXx->Imemory_debug_header.next != &(aTHXx->Imemory_debug_header))
-		safesysfree(PERL_MEMORY_DEBUG_HEADER_SIZE + (char *)(aTHXx->Imemory_debug_header.next));
+	    while(aTHXx->Imemory_debug_header.next != &(aTHXx->Imemory_debug_header)){
+		char * next = (char *)(aTHXx->Imemory_debug_header.next);
+		Malloc_t ptr = PERL_MEMORY_DEBUG_HEADER_SIZE + next;
+		safesysfree(ptr);
+	    }
 	    PL_debug = old_debug;
 	}
     }

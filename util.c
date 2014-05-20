@@ -172,14 +172,17 @@ Perl_safesysmalloc(MEM_SIZE size)
 #endif
         ptr = (Malloc_t)((char*)ptr+PERL_MEMORY_DEBUG_HEADER_SIZE);
 	DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%"UVxf": (%05ld) malloc %ld bytes\n",PTR2UV(ptr),(long)PL_an++,(long)size));
+	ret:
 	return ptr;
 }
     else {
 #ifndef ALWAYS_NEED_THX
 	dTHX;
 #endif
-	if (PL_nomemok)
-	    return NULL;
+	if (PL_nomemok){
+	    ptr = NULL;
+	    goto ret;
+	}
 	else {
 	    croak_no_mem();
 	}
@@ -207,11 +210,14 @@ Perl_safesysrealloc(Malloc_t where,MEM_SIZE size)
 
     if (!size) {
 	safesysfree(where);
-	return NULL;
+	ptr = NULL;
+	goto ret;
     }
 
-    if (!where)
-	return safesysmalloc(size);
+    if (!where) {
+	ptr = safesysmalloc(size);
+	goto ret;
+    }
 #ifdef USE_MDH
     where = (Malloc_t)((char*)where-PERL_MEMORY_DEBUG_HEADER_SIZE);
     size += PERL_MEMORY_DEBUG_HEADER_SIZE;
@@ -293,14 +299,17 @@ Perl_safesysrealloc(Malloc_t where,MEM_SIZE size)
 
 
     if (ptr != NULL) {
+	ret:
 	return ptr;
     }
     else {
 #ifndef ALWAYS_NEED_THX
 	dTHX;
 #endif
-	if (PL_nomemok)
-	    return NULL;
+	if (PL_nomemok){
+	    ptr = NULL;
+	    goto ret;
+	}
 	else {
 	    croak_no_mem();
 	}
@@ -319,10 +328,10 @@ Perl_safesysfree(Malloc_t where)
     DEBUG_m( PerlIO_printf(Perl_debug_log, "0x%"UVxf": (%05ld) free\n",PTR2UV(where),(long)PL_an++));
     if (where) {
 #ifdef USE_MDH
-        where = (Malloc_t)((char*)where-PERL_MEMORY_DEBUG_HEADER_SIZE);
+	Malloc_t where_intrn = (Malloc_t)((char*)where-PERL_MEMORY_DEBUG_HEADER_SIZE);
 	{
 	    struct perl_memory_debug_header *const header
-		= (struct perl_memory_debug_header *)where;
+		= (struct perl_memory_debug_header *)where_intrn;
 
 # ifdef MDH_HAS_SIZE
 	    const MEM_SIZE size = header->size;
@@ -352,21 +361,23 @@ Perl_safesysfree(Malloc_t where)
 	    maybe_protect_ro(header->prev);
 	    maybe_protect_rw(header);
 #  ifdef PERL_POISON
-	    PoisonNew(where, size, char);
+	    PoisonNew(where_intrn, size, char);
 #  endif
 	    /* Trigger the duplicate free warning.  */
 	    header->next = NULL;
 # endif
 # ifdef PERL_DEBUG_READONLY_COW
-	    if (munmap(where, size)) {
+	    if (munmap(where_intrn, size)) {
 		perror("munmap failed");
 		abort();
 	    }	
 # endif
 	}
-#endif
+#else
+	Malloc_t where_intrn = where;
+#endif /* USE_MDH */
 #ifndef PERL_DEBUG_READONLY_COW
-	PerlMem_free(where);
+	PerlMem_free(where_intrn);
 #endif
     }
 }
