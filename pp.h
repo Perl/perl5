@@ -271,23 +271,31 @@ Does not use C<TARG>.  See also C<XPUSHu>, C<mPUSHu> and C<PUSHu>.
 */
 
 #ifdef STRESS_REALLOC
-# define EXTEND(p,n)	(void)(sp = stack_grow(sp,p, (SSize_t)(n)))
-/* Same thing, but update mark register too. */
-# define MEXTEND(p,n)	STMT_START {					\
-			    const int markoff = mark - PL_stack_base;	\
-			    sp = stack_grow(sp,p,(SSize_t) (n));	\
-			    mark = PL_stack_base + markoff;		\
-			} STMT_END
-#else
-# define EXTEND(p,n)   (void)(UNLIKELY(PL_stack_max - p < (SSize_t)(n)) &&     \
-			    (sp = stack_grow(sp,p, (SSize_t) (n))))
-
-/* Same thing, but update mark register too. */
-# define MEXTEND(p,n)  STMT_START {if (UNLIKELY(PL_stack_max - p < (int)(n))) {\
-                           const int markoff = mark - PL_stack_base;           \
-                           sp = stack_grow(sp,p,(SSize_t) (n));                \
-                           mark = PL_stack_base + markoff;                     \
+# define EXTEND(p,n)   STMT_START {                                     \
+                           sp = stack_grow(sp,p,(SSize_t) (n));         \
+                           PERL_UNUSED_VAR(sp);                         \
                        } } STMT_END
+/* Same thing, but update mark register too. */
+# define MEXTEND(p,n)   STMT_START {                                    \
+                            const int markoff = mark - PL_stack_base;   \
+                            sp = stack_grow(sp,p,(SSize_t) (n)));       \
+                            mark = PL_stack_base + markoff;             \
+                            PERL_UNUSED_VAR(sp);                        \
+                        } STMT_END
+#else
+# define EXTEND(p,n)   STMT_START {                                     \
+                         if (UNLIKELY(PL_stack_max - p < (int)(n))) {   \
+                           sp = stack_grow(sp,p,(SSize_t) (n));         \
+                           PERL_UNUSED_VAR(sp);                         \
+                         } } STMT_END
+/* Same thing, but update mark register too. */
+# define MEXTEND(p,n)  STMT_START {                                     \
+                         if (UNLIKELY(PL_stack_max - p < (int)(n))) {   \
+                           const int markoff = mark - PL_stack_base;    \
+                           sp = stack_grow(sp,p,(SSize_t) (n));         \
+                           mark = PL_stack_base + markoff;              \
+                           PERL_UNUSED_VAR(sp);                         \
+                         } } STMT_END
 #endif
 
 #define PUSHs(s)	(*++sp = (s))
