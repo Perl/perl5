@@ -397,6 +397,21 @@ installation, not on concerns over their design.
 
 =back
 
+=head2 Utility removals
+
+The following utilities will be removed from the core distribution in a
+future release, and will at that time need to be installed from CPAN.
+
+=over 4
+
+=item L<find2perl>
+
+=item L<s2p>
+
+=item L<a2p>
+
+=back
+
 =head1 Performance Enhancements
 
 =over 4
