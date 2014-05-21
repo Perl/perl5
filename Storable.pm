@@ -1,6 +1,6 @@
 #
 #  Copyright (c) 1995-2001, Raphael Manfredi
-#  Copyright (c) 2002-2013 by the Perl 5 Porters
+#  Copyright (c) 2002-2014 by the Perl 5 Porters
 #  
 #  You may redistribute only under the same terms as Perl 5, as specified
 #  in the README file that comes with the distribution.
@@ -22,7 +22,7 @@ package Storable; @ISA = qw(Exporter);
 
 use vars qw($canonical $forgive_me $VERSION);
 
-$VERSION = '2.49';
+$VERSION = '2.50';
 
 BEGIN {
     if (eval { local $SIG{__DIE__}; require Log::Agent; 1 }) {

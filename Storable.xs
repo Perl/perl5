@@ -3052,6 +3052,10 @@ static int store_hook(
 	 */
 
 	if (!count) {
+		/* free empty list returned by the hook */
+		av_undef(av);
+		sv_free((SV *) av);
+		
 		/*
 		 * They must not change their mind in the middle of a serialization.
 		 */
