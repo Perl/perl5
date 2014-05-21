@@ -435,7 +435,7 @@ SH_to_target() {
     echo $@ | sed -e s/\\\.SH//g -e s/_/./g
 }
 
-SH='Makefile.SH cflags.SH config_h.SH makedepend.SH myconfig.SH runtests.SH pod/Makefile.SH x2p/Makefile.SH'
+SH='Makefile.SH cflags.SH config_h.SH makedepend.SH myconfig.SH runtests.SH pod/Makefile.SH'
 shextract=`SH_to_target $SH`
 
 ## In the following dollars and backticks do not need the extra backslash.
@@ -589,30 +589,15 @@ perl$(OBJ_EXT): git_version.h
 case "$usedl$static_cwd" in
 defineundef)
     util_deps='$(MINIPERL_EXE) $(CONFIGPM) lib/auto/Cwd/Cwd$(DLSUFFIX) FORCE'
-     x2p_deps="\$(MINIPERL_EXE) \$(CONFIGPM) \$(dynamic_ext) x2p/$firstmakefile FORCE"
     ;;
 definedefine)
     util_deps='$(PERL_EXE) $(CONFIGPM) FORCE'
-     x2p_deps="\$(PERL_EXE) \$(CONFIGPM) \$(dynamic_ext) x2p/$firstmakefile FORCE"
     ;;
 *)  util_deps='$(PERL_EXE) $(CONFIGPM) FORCE'
-     x2p_deps="\$(PERL_EXE) \$(CONFIGPM) x2p/$firstmakefile FORCE"
     ;;
 esac
 
 $spitshell >>$Makefile <<!GROK!THIS!
-x2p/$firstmakefile:	makedepend
-	cd x2p; \$(MAKE) depend
-
-translators:	$x2p_deps
-	@echo " "; echo "	Making x2p stuff"; cd x2p; \$(LDLIBPTH) \$(MAKE) all
-
-x2p/s2p: $x2p_deps
-	cd x2p; \$(LDLIBPTH) \$(MAKE) s2p
-
-x2p/find2perl: $x2p_deps
-	cd x2p; \$(LDLIBPTH) \$(MAKE) find2perl
-
 utils/Makefile: \$(MINIPERL_EXE) \$(CONFIGPM) utils/Makefile.PL
 	\$(MINIPERL) -Ilib utils/Makefile.PL
 
@@ -1269,7 +1254,6 @@ _mopup:
 _tidy:
 	-cd pod; $(LDLIBPTH) $(MAKE) clean
 	-cd utils; $(LDLIBPTH) $(MAKE) clean
-	-cd x2p; $(LDLIBPTH) $(MAKE) clean
 	-rm -f lib/Config_git.pl git_version.h
 	-@for x in $(DYNALOADER) $(dynamic_ext) $(static_ext) $(nonxs_ext) ; do \
 	$(MINIPERL) make_ext.pl --target=clean $$x MAKE=$(MAKE) ; \
@@ -1279,7 +1263,6 @@ _cleaner1:
 	-cd os2; rm -f Makefile
 	-cd pod; $(LDLIBPTH) $(MAKE) $(CLEAN)
 	-cd utils; $(LDLIBPTH) $(MAKE) $(CLEAN)
-	-cd x2p; $(LDLIBPTH) $(MAKE) $(CLEAN)
 	-@if test -f $(MINIPERL_EXE) ; then \
 	for x in $(DYNALOADER) $(dynamic_ext) $(static_ext) $(nonxs_ext) ; do \
 	$(MINIPERL) make_ext.pl --target=$(CLEAN) $$x MAKE=$(MAKE) ; \
@@ -1409,15 +1392,14 @@ test_prep_pre: preplibrary utilities $(nonxs_ext)
 case "$targethost" in
 '') $spitshell >>$Makefile <<'!NO!SUBS!'
 test_prep test-prep: test_prep_pre $(MINIPERL_EXE) $(unidatafiles) $(PERL_EXE) \
-	$(dynamic_ext) $(TEST_PERL_DLL) runtests x2p/s2p x2p/find2perl \
-	$(generated_pods)
+	$(dynamic_ext) $(TEST_PERL_DLL) runtests $(generated_pods)
 	cd t && (rm -f $(PERL_EXE); $(LNS) ../$(PERL_EXE) $(PERL_EXE))
 
 !NO!SUBS!
 ;;
 *) $spitshell >>$Makefile <<!GROK!THIS!
 test_prep test-prep: test_prep_pre \$(MINIPERL_EXE) \$(unidatafiles) \$(PERL_EXE) \
-	\$(dynamic_ext) \$(TEST_PERL_DLL) runtests x2p/s2p x2p/find2perl \
+	\$(dynamic_ext) \$(TEST_PERL_DLL) runtests \
 	\$(generated_pods)
 	$to libperl.*
 	$to t/*
@@ -1454,8 +1436,6 @@ test_prep test-prep: test_prep_pre \$(MINIPERL_EXE) \$(unidatafiles) \$(PERL_EXE
 # --- For Module::Build
 	$to cpan/Module-Build/lib/*
 	$to *.h
-# --- For t/x2p/s2p.t
-	$to x2p
 # --- For t/TEST
 	$to config.sh
 # --- For lib/diagnostics.t with -Duseshrplib
@@ -1608,44 +1588,6 @@ define)
     echo "This is an EBCDIC system, checking if any parser files need regenerating." >&2
 case "$osname" in
 os390|posix-bc)
-    if cd x2p
-    then
-        rm -f y.tab.c y.tab.h
-        case "$osname" in
-        posix-bc)
-           # we are using two different yaccs in BS2000 Posix!
-           byacc a2p.y >/dev/null 2>&1
-           ;;
-        *) # e.g. os390
-           yacc  a2p.y >/dev/null 2>&1
-           ;;
-        esac
-        if cmp -s y.tab.c a2p.c
-        then
-            rm -f y.tab.c
-        else
-            echo "a2p.y -> a2p.c" >&2
-            mv -f y.tab.c a2p.c
-            chmod u+w a2p.c
-            sed -e 's/fprintf *( *stderr *,/PerlIO_printf(Perl_debug_log,/g' \
-		-e 's|^static void __YY_YACC_MAIN.*BS2000.*|/*static main deleted*/|' \
-                -e 's/y\.tab/a2p/g' a2p.c >a2p.tmp && mv a2p.tmp a2p.c
-            xxx="$xxx a2p.c"
-        fi
-        # In case somebody yacc -d:ed the a2p.y.
-        if test -f y.tab.h
-        then
-            if cmp -s y.tab.h a2p.h
-            then
-                rm -f y.tab.h
-            else
-                echo "a2p.h -> a2p.h" >&2
-                mv -f y.tab.h a2p.h
-                xxx="$xxx a2p.h"
-            fi
-        fi
-        cd ..
-    fi
     ;;
 *)
     echo "'$osname' is an EBCDIC system I don't know that well." >&4

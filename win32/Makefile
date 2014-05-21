@@ -581,7 +581,6 @@ WPERLEXE	= ..\wperl.exe
 PERLEXESTATIC	= ..\perl-static.exe
 GLOBEXE		= ..\perlglob.exe
 CONFIGPM	= ..\lib\Config.pm ..\lib\Config_heavy.pl
-X2P		= ..\x2p\a2p.exe
 GENUUDMAP	= ..\generate_uudmap.exe
 !IF "$(BUILD_STATIC)" == "define" || "$(ALL_STATIC)" == "define"
 PERLSTATIC	= static
@@ -640,9 +639,6 @@ UTILS		=			\
 		..\utils\instmodsh	\
 		..\utils\json_pp	\
 		..\utils\pod2html	\
-		..\x2p\find2perl	\
-		..\x2p\psed		\
-		..\x2p\s2p		\
 		bin\exetype.pl		\
 		bin\runperl.pl		\
 		bin\pl2bat.pl		\
@@ -722,13 +718,6 @@ WIN32_SRC	= $(WIN32_SRC) .\win32io.c
 #!ENDIF
 
 
-X2P_SRC		=		\
-		..\x2p\a2p.c	\
-		..\x2p\hash.c	\
-		..\x2p\str.c	\
-		..\x2p\util.c	\
-		..\x2p\walk.c
-
 CORE_NOCFG_H	=		\
 		..\av.h		\
 		..\cop.h	\
@@ -786,7 +775,6 @@ MINICORE_OBJ	= $(MICROCORE_OBJ:..\=.\mini\)	\
 MINIWIN32_OBJ	= $(WIN32_OBJ:.\=.\mini\)
 MINI_OBJ	= $(MINICORE_OBJ) $(MINIWIN32_OBJ)
 DLL_OBJ		= $(DYNALOADER)
-X2P_OBJ		= $(X2P_SRC:.c=.obj)
 GENUUDMAP_OBJ	= $(GENUUDMAP:.exe=.obj)
 
 PERLDLL_OBJ	= $(CORE_OBJ)
@@ -845,7 +833,7 @@ CFG_VARS	=					\
 #
 
 all : .\config.h ..\git_version.h $(GLOBEXE) $(CONFIGPM) \
-	$(UNIDATAFILES) MakePPPort $(PERLEXE) $(X2P) Extensions_nonxs Extensions $(PERLSTATIC)
+	$(UNIDATAFILES) MakePPPort $(PERLEXE) Extensions_nonxs Extensions $(PERLSTATIC)
 	@echo	Everything is up to date. '$(MAKE_BARE) test' to run test suite.
 
 regnodes : ..\regnodes.h
@@ -855,7 +843,7 @@ regnodes : ..\regnodes.h
 ..\regexec$(o) : ..\regnodes.h ..\regcharclass.h
 
 reonly : regnodes .\config.h ..\git_version.h $(GLOBEXE) $(CONFIGPM) \
-	$(UNIDATAFILES) $(PERLEXE) $(X2P) Extensions_reonly
+	$(UNIDATAFILES) $(PERLEXE) Extensions_reonly
 	@echo	Perl and 're' are up to date.
 
 static: $(PERLEXESTATIC)
@@ -1024,7 +1012,6 @@ $(MINI_OBJ)	: $(CORE_NOCFG_H)
 $(WIN32_OBJ)	: $(CORE_H)
 $(CORE_OBJ)	: $(CORE_H)
 $(DLL_OBJ)	: $(CORE_H)
-$(X2P_OBJ)	: $(CORE_H)
 
 perldll.def : $(MINIPERL) $(CONFIGPM) ..\embed.fnc ..\makedef.pl create_perllibst_h.pl
 	$(MINIPERL) -I..\lib create_perllibst_h.pl
@@ -1045,29 +1032,6 @@ $(PERLSTATICLIB): Extensions_static
 	$(XCOPY) $(PERLSTATICLIB) $(COREDIR)
 
 $(PERLEXE_RES): perlexe.rc $(PERLEXE_MANIFEST) $(PERLEXE_ICO)
-
-..\x2p\a2p$(o) : ..\x2p\a2p.c
-	$(CC) -I..\x2p $(CFLAGS) $(OBJOUT_FLAG)$@ -c ..\x2p\a2p.c
-
-..\x2p\hash$(o) : ..\x2p\hash.c
-	$(CC) -I..\x2p  $(CFLAGS) $(OBJOUT_FLAG)$@ -c ..\x2p\hash.c
-
-..\x2p\str$(o) : ..\x2p\str.c
-	$(CC) -I..\x2p  $(CFLAGS) $(OBJOUT_FLAG)$@ -c ..\x2p\str.c
-
-..\x2p\util$(o) : ..\x2p\util.c
-	$(CC) -I..\x2p  $(CFLAGS) $(OBJOUT_FLAG)$@ -c ..\x2p\util.c
-
-..\x2p\walk$(o) : ..\x2p\walk.c
-	$(CC) -I..\x2p  $(CFLAGS) $(OBJOUT_FLAG)$@ -c ..\x2p\walk.c
-
-$(X2P) : $(MINIPERL) $(X2P_OBJ) Extensions
-	$(MINIPERL) -I..\lib ..\x2p\find2perl.PL
-	$(MINIPERL) -I..\lib ..\x2p\s2p.PL
-	$(LINK32) -subsystem:console -out:$@ @<<
-		$(LINK_FLAGS) $(LIBFILES) $(X2P_OBJ)
-<<
-	$(EMBED_EXE_MANI)
 
 $(MINIDIR)\globals$(o) : $(GENERATED_HEADERS)
 
@@ -1154,7 +1118,7 @@ doc: $(PERLEXE) ..\pod\perltoc.pod
 # Note that this next section is parsed (and regenerated) by pod/buildtoc
 # so please check that script before making structural changes here
 
-utils: $(PERLEXE) $(X2P) ..\utils\Makefile
+utils: $(PERLEXE) ..\utils\Makefile
 	cd ..\utils
 	$(MAKE) PERL=$(MINIPERL)
 	cd ..\pod
@@ -1299,7 +1263,6 @@ distclean: realclean
 	-cd ..\utils && del /f h2ph splain perlbug pl2pm c2ph pstruct h2xs \
 	    perldoc perlivp libnetcfg enc2xs piconv cpan *.bat \
 	    xsubpp pod2html instmodsh json_pp prove ptar ptardiff ptargrep shasum corelist zipdetails
-	-cd ..\x2p && del /f find2perl s2p psed *.bat
 	-del /f ..\config.sh perlmain.c dlutils.c config.h.new \
 	        perlmainst.c
 	-del /f $(CONFIGPM)
@@ -1326,7 +1289,6 @@ installbare : utils ..\pod\perltoc.pod
 	if exist $(PERLEXESTATIC) $(XCOPY) $(PERLEXESTATIC) $(INST_BIN)\*.*
 	$(XCOPY) $(GLOBEXE) $(INST_BIN)\*.*
 	if exist ..\perl*.pdb $(XCOPY) ..\perl*.pdb $(INST_BIN)\*.*
-	if exist ..\x2p\a2p.pdb $(XCOPY) ..\x2p\a2p.pdb $(INST_BIN)\*.*
 	$(XCOPY) bin\*.bat $(INST_SCRIPT)\*.*
 
 installhtml : doc
@@ -1414,10 +1376,8 @@ _clean :
 	-@$(DEL) $(UNIDATAFILES)
 	-@$(DEL) $(WIN32_OBJ)
 	-@$(DEL) $(DLL_OBJ)
-	-@$(DEL) $(X2P_OBJ)
 	-@$(DEL) ..\*$(o) ..\*.lib ..\*.exp *$(o) *.lib *.exp *.res
 	-@$(DEL) ..\t\*.exe ..\t\*.dll ..\t\*.bat
-	-@$(DEL) ..\x2p\*.exe ..\x2p\*.bat
 	-@$(DEL) *.ilk
 	-@$(DEL) *.pdb
 	-@$(DEL) Extensions_static

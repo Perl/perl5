@@ -27,7 +27,6 @@ regen/regcharclass.pl
 regen/uconfig_h.pl
 runtests.SH
 t/TEST
-x2p/Makefile.SH
 Porting/Maintainers.pl
 Porting/add-package.pl
 Porting/bisect.pl
