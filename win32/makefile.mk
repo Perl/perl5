@@ -2,7 +2,7 @@
 # Makefile to build perl on Windows using DMAKE.
 # Supported compilers:
 #	Microsoft Visual C++ 6.0 or later
-#	MinGW with gcc-3.2 or later
+#	MinGW with gcc-3.4.5 or later
 #	Windows SDK 64-bit compiler and tools
 #
 # This is set up to build a perl.exe that runs off a shared library
@@ -137,7 +137,7 @@ USE_LARGE_FILES	*= define
 #CCTYPE		= MSVC120
 # Visual C++ 2013 Express Edition (aka Visual C++ 12.x) (free version)
 #CCTYPE		= MSVC120FREE
-# MinGW or mingw-w64 with gcc-3.2 or later
+# MinGW or mingw-w64 with gcc-3.4.5 or later
 CCTYPE		*= GCC
 
 #
