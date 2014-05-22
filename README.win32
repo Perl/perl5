@@ -40,7 +40,7 @@ system).  Currently, this port is capable of using one of the
 following compilers on the Intel x86 architecture:
 
       Microsoft Visual C++    version 6.0 or later
-      Gcc by mingw.org        gcc version 3.2 or later
+      Gcc by mingw.org        gcc version 3.4.5 or later
       Gcc by mingw-w64.sf.net gcc version 4.4.3 or later
 
 Note that the last two of these are actually competing projects both
@@ -305,7 +305,7 @@ shells available after you install the Platform SDK from the Start Menu.
 
 =item MinGW release 3 with gcc
 
-Perl can be compiled with gcc from MinGW release 3 and later (using gcc 3.2.x
+Perl can be compiled with gcc from MinGW release 3 and later (using gcc 3.4.5
 and later).  It can be downloaded here:
 
 L<http://www.mingw.org/>
