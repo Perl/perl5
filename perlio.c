@@ -4913,13 +4913,13 @@ PerlIO_vprintf(PerlIO *f, const char *fmt, va_list ap)
     va_list apc;
     Perl_va_copy(ap, apc);
     sv = vnewSVpvf(fmt, &apc);
+    va_end(apc);
 #else
     sv = vnewSVpvf(fmt, &ap);
 #endif
     s = SvPV_const(sv, len);
     wrote = PerlIO_write(f, s, len);
     SvREFCNT_dec(sv);
-    va_end(apc);
     return wrote;
 }
 
