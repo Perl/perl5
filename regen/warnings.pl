@@ -99,7 +99,7 @@ my $tree = {
                                 'experimental::autoderef' =>
                                     [ 5.019, DEFAULT_ON ],
                                 'experimental::signatures' =>
-                                    [ 5.019, DEFAULT_ON ],
+                                    [ 5.019, DEFAULT_OFF ],
                         }],
 
        	 #'default'	=> [ 5.008, DEFAULT_ON ],
