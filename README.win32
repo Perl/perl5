@@ -405,6 +405,10 @@ L<https://connect.microsoft.com/VisualStudio/feedback/details/811534/utime-somet
 if you need fixed C<stat> and C<utime> functions then have a look at the
 CPAN distribution Win32::UTCFileTime.
 
+If you build with certain versions (e.g. 4.8.1) of gcc from www.mingw.org then
+F<ext/POSIX/t/time.t> may fail test 17 due to a known bug in those gcc builds:
+see L<http://sourceforge.net/p/mingw/bugs/2152/>.
+
 Some test failures may occur if you use a command shell other than the
 native "cmd.exe", or if you are building from a path that contains
 spaces.  So don't do that.
