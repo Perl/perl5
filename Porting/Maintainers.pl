@@ -897,7 +897,7 @@ use File::Glob qw(:case);
     },
 
     'PathTools' => {
-        'DISTRIBUTION' => 'SMUELLER/PathTools-3.40.tar.gz',
+        'DISTRIBUTION' => 'SMUELLER/PathTools-3.47.tar.gz',
         'FILES'        => q[dist/PathTools],
         'EXCLUDED'     => [qr{^t/lib/Test/}],
     },
