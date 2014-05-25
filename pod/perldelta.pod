@@ -3622,6 +3622,19 @@ community, and who never missed a Rio.pm event. She was a true artist, an
 enthusiast about writing code, singing arias and graffiting walls. We'll never
 forget you.
 
+Greg McCarroll died on August 28, 2013.
+
+Greg was well known for many good reasons. He was one of the organisers of
+the first YAPC::Europe, which concluded with an unscheduled auction where he
+frantically tried to raise extra money to avoid the conference making a
+loss. It was Greg who mistakenly arrived for a london.pm meeting a week
+late; some years later he was the one who sold the choice of official
+meeting date at a YAPC::Europe auction, and eventually as glorious leader of
+london.pm he got to inherit the irreverent confusion that he had created.
+
+Always helpful, friendly and cheerfully optimistic, you will be missed, but
+never forgotten.
+
 =head1 Acknowledgements
 
 Perl 5.20.0 represents approximately 12 months of development since Perl 5.18.0
