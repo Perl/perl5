@@ -529,6 +529,7 @@ the strings?).
  Steve     5.19.11      2014-Apr-20
 
  Ricardo   5.20.0-RC1   2014-May-16     The 5.20 maintenance track
+ Ricardo   5.20.0       2014-May-27
 
 =head2 SELECTED RELEASE SIZES
 
