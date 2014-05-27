@@ -47,7 +47,7 @@ the CPAN.
 
 =head1 Acknowledgements
 
-Perl 5.20.1 represents approximately 12 hours of development since Perl 5.20.0
+Perl 5.21.0 represents approximately 12 hours of development since Perl 5.20.0
 and contains approximately 44,000 lines of changes across 190 files from 1
 author.
 
@@ -56,7 +56,7 @@ approximately 33,000 lines of changes to 140 .pm, .t, .c and .h files.
 
 Perl continues to flourish into its third decade thanks to a vibrant community
 of users and developers. The following people are known to have contributed the
-improvements that became Perl 5.20.1:
+improvements that became Perl 5.21.0:
 
 Ricardo Signes.
 
