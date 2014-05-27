@@ -6,7 +6,7 @@ BEGIN {
     chdir 't';
     @INC = '../lib';
     require Config; import Config;
-    require './test.pl';
+    require './test.pl'; require './charset_tools.pl';
     require './loc_tools.pl';   # Contains find_utf8_ctype_locale()
 }
 

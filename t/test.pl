@@ -1652,39 +1652,4 @@ WATCHDOG_VIA_ALARM:
     }
 }
 
-# The following 2 functions allow tests to work on both EBCDIC and
-# ASCII-ish platforms.  They convert string scalars between the native
-# character set and the set of 256 characters which is usually called
-# Latin1.
-
-sub native_to_latin1($) {
-    my $string = shift;
-
-    return $string if $::IS_ASCII;
-    my $output = "";
-    for my $i (0 .. length($string) - 1) {
-        $output .= chr(utf8::native_to_unicode(ord(substr($string, $i, 1))));
-    }
-    # Preserve utf8ness of input onto the output, even if it didn't need to be
-    # utf8
-    utf8::upgrade($output) if utf8::is_utf8($string);
-
-    return $output;
-}
-
-sub latin1_to_native($) {
-    my $string = shift;
-
-    return $string if $::IS_ASCII;
-    my $output = "";
-    for my $i (0 .. length($string) - 1) {
-        $output .= chr(utf8::unicode_to_native(ord(substr($string, $i, 1))));
-    }
-    # Preserve utf8ness of input onto the output, even if it didn't need to be
-    # utf8
-    utf8::upgrade($output) if utf8::is_utf8($string);
-
-    return $output;
-}
-
 1;

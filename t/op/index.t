@@ -3,7 +3,7 @@
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
-    require './test.pl';
+    require './test.pl'; require './charset_tools.pl';
 }
 
 use strict;

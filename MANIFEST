@@ -4787,6 +4787,7 @@ t/bigmem/pos.t			Check that pos() handles large offsets
 t/bigmem/read.t			Check read() handles large offsets
 t/bigmem/regexp.t		Test regular expressions with large strings
 t/bigmem/vec.t			Check vec() handles large offsets
+t/charset_tools.pl		To aid in portable testing across platforms with different character sets
 t/cmd/elsif.t			See if else-if works
 t/cmd/for.t			See if for loops work
 t/cmd/mod.t			See if statement modifiers work

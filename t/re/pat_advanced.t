@@ -17,7 +17,7 @@ $| = 1;
 BEGIN {
     chdir 't' if -d 't';
     @INC = ('../lib','.');
-    require './test.pl';
+    require './test.pl'; require './charset_tools.pl';
     skip_all_if_miniperl("miniperl can't load Tie::Hash::NamedCapture, need for %+ and %-");
 }
 
