@@ -1005,21 +1005,23 @@ PP(pp_tied)
     dVAR;
     dSP;
     const MAGIC *mg;
-    SV *sv = POPs;
+    dTOPss;
     const char how = (SvTYPE(sv) == SVt_PVHV || SvTYPE(sv) == SVt_PVAV)
 		? PERL_MAGIC_tied : PERL_MAGIC_tiedscalar;
 
     if (isGV_with_GP(sv) && !SvFAKE(sv) && !(sv = MUTABLE_SV(GvIOp(sv))))
-	RETPUSHUNDEF;
+	goto ret_undef;
 
     if (SvTYPE(sv) == SVt_PVLV && LvTYPE(sv) == 'y' &&
-	!(sv = defelem_target(sv, NULL))) RETPUSHUNDEF;
+	!(sv = defelem_target(sv, NULL))) goto ret_undef;
 
     if ((mg = SvTIED_mg(sv, how))) {
-	PUSHs(SvTIED_obj(sv, mg));
-	RETURN;
+	SETs(SvTIED_obj(sv, mg));
+	return NORMAL; /* PUTBACK not needed, pp_tied never moves SP */
     }
-    RETPUSHUNDEF;
+    ret_undef:
+    SETs(&PL_sv_undef);
+    return NORMAL;
 }
 
 PP(pp_dbmopen)
