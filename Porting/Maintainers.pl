@@ -130,10 +130,11 @@ use File::Glob qw(:case);
     },
 
     'autodie' => {
-        'DISTRIBUTION' => 'PJF/autodie-2.23.tar.gz',
+        'DISTRIBUTION' => 'PJF/autodie-2.25.tar.gz',
         'FILES'        => q[cpan/autodie],
         'EXCLUDED'     => [
             qr{benchmarks},
+            qr{README\.md},
             # All these tests depend upon external
             # modules that don't exist when we're
             # building the core.  Hence, they can
