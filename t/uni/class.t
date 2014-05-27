@@ -6,7 +6,8 @@ BEGIN {
 
 plan tests => 11;
 
-my $str = join "", map latin1_to_native(chr($_)), 0x20 .. 0x6F;
+
+my $str = join "", map { chr utf8::unicode_to_native($_) } 0x20 .. 0x6F;
 
 is(($str =~ /(\p{IsMyUniClass}+)/)[0], '0123456789:;<=>?@ABCDEFGHIJKLMNO',
                                 'user-defined class compiled before defined');

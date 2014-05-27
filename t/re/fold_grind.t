@@ -541,7 +541,7 @@ foreach my $test (sort { numerically } keys %tests) {
           if (! $target_has_ascii) {
             foreach my $cp (@target) {
               if (exists $folds{$cp}
-                  && grep { ord_native_to_latin1($_) < 128 } @{$folds{$cp}} )
+                  && grep { utf8::native_to_unicode($_) < 128 } @{$folds{$cp}} )
               {
                   $target_has_ascii = 1;
                   last;
@@ -551,7 +551,7 @@ foreach my $test (sort { numerically } keys %tests) {
           if (! $pattern_has_ascii) {
             foreach my $cp (@pattern) {
               if (exists $folds{$cp}
-                  && grep { ord_native_to_latin1($_) < 128 } @{$folds{$cp}} )
+                  && grep { utf8::native_to_unicode($_) < 128 } @{$folds{$cp}} )
               {
                   $pattern_has_ascii = 1;
                   last;

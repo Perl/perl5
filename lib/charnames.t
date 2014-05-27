@@ -209,10 +209,10 @@ sub test_vianame ($$$) {
 
     use charnames ':full';
     my $text = "\N{LATIN CAPITAL LETTER A WITH DIAERESIS}";
-    is($text, latin1_to_native("\xc4"), 'Verify \N{} returns correct string under "no utf8"');
+    is($text, chr utf8::unicode_to_native(0xc4), 'Verify \N{} returns correct string under "no utf8"');
 
     # I'm not sure that this tests anything different from the above.
-    cmp_ok(ord($text), '==', ord(latin1_to_native("\xc4")), '... and ords are ok');
+    cmp_ok(ord($text), '==', utf8::unicode_to_native(0xc4), '... and ords are ok');
 }
 
 {
@@ -279,7 +279,7 @@ is("\N{LINE FEED (LF)}", "\n", 'Verify "\N{LINE FEED (LF)}" eq "\n"');
 is("\N{LINE FEED}", "\n", 'Verify "\N{LINE FEED}" eq "\n"');
 is("\N{LF}", "\n", 'Verify "\N{LF}" eq "\n"');
 
-my $nel = latin1_to_native("\x85");
+my $nel = chr utf8::unicode_to_native(0x85);
 $nel = qr/^$nel$/;
 
 like("\N{NEXT LINE (NEL)}", $nel, 'Verify "\N{NEXT LINE (NEL)}" is correct');

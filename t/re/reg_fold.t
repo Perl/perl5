@@ -123,8 +123,8 @@ my @fold_latin1 = @fold_ascii;
 # characters, but in posix anything outside ASCII maps to itself, as we've
 # already set up.
 for my $i (0x41 .. 0x5A, 0xC0 .. 0xD6, 0xD8 .. 0xDE) {
-    my $upper_ord = ord_latin1_to_native($i);
-    my $lower_ord = ord_latin1_to_native($i + 32);
+    my $upper_ord = utf8::unicode_to_native($i);
+    my $lower_ord = utf8::unicode_to_native($i + 32);
 
     $fold_latin1[$upper_ord] = $lower_ord;
 
@@ -134,8 +134,8 @@ for my $i (0x41 .. 0x5A, 0xC0 .. 0xD6, 0xD8 .. 0xDE) {
 
 # Same for folding lower to the upper equivalents
 for my $i (0x61 .. 0x7A, 0xE0 .. 0xF6, 0xF8 .. 0xFE) {
-    my $lower_ord = ord_latin1_to_native($i);
-    my $upper_ord = ord_latin1_to_native($i - 32);
+    my $lower_ord = utf8::unicode_to_native($i);
+    my $upper_ord = utf8::unicode_to_native($i - 32);
 
     $fold_latin1[$lower_ord] = $upper_ord;
 

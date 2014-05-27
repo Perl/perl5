@@ -1663,7 +1663,7 @@ sub native_to_latin1($) {
     return $string if $::IS_ASCII;
     my $output = "";
     for my $i (0 .. length($string) - 1) {
-        $output .= chr(ord_native_to_latin1(ord(substr($string, $i, 1))));
+        $output .= chr(utf8::native_to_unicode(ord(substr($string, $i, 1))));
     }
     # Preserve utf8ness of input onto the output, even if it didn't need to be
     # utf8
@@ -1678,31 +1678,13 @@ sub latin1_to_native($) {
     return $string if $::IS_ASCII;
     my $output = "";
     for my $i (0 .. length($string) - 1) {
-        $output .= chr(ord_latin1_to_native(ord(substr($string, $i, 1))));
+        $output .= chr(utf8::unicode_to_native(ord(substr($string, $i, 1))));
     }
     # Preserve utf8ness of input onto the output, even if it didn't need to be
     # utf8
     utf8::upgrade($output) if utf8::is_utf8($string);
 
     return $output;
-}
-
-sub ord_latin1_to_native {
-    # given an input code point, return the platform's native
-    # equivalent value.  Anything above latin1 is itself.
-
-    my $ord = shift;
-    return $ord if $::IS_ASCII;
-    return utf8::unicode_to_native($ord);
-}
-
-sub ord_native_to_latin1 {
-    # given an input platform code point, return the latin1 equivalent value.
-    # Anything above latin1 is itself.
-
-    my $ord = shift;
-    return $ord if ord('^') == 94;   # ASCII, Latin1
-    return utf8::native_to_unicode($ord);
 }
 
 1;
