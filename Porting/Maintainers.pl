@@ -838,12 +838,6 @@ use File::Glob qw(:case);
         'EXCLUDED'     => [qr{^demo/}],
     },
 
-    'Package::Constants' => {
-        'DISTRIBUTION' => 'BINGOS/Package-Constants-0.04.tar.gz',
-        'FILES'        => q[cpan/Package-Constants],
-        'DEPRECATED'   => '5.019006',
-    },
-
     'Params::Check' => {
         'DISTRIBUTION' => 'BINGOS/Params-Check-0.38.tar.gz',
         'FILES'        => q[cpan/Params-Check],
