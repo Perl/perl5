@@ -4,7 +4,7 @@ use 5.006;
 use strict;
 use warnings;
 
-our $VERSION = '1.001002';
+our $VERSION = '1.001003';
 $VERSION = eval $VERSION;    ## no critic (BuiltinFunctions::ProhibitStringyEval)
 
 BEGIN {
@@ -2642,6 +2642,14 @@ Test::Simple, Test::More, Test::Harness
 
 Original code by chromatic, maintained by Michael G Schwern
 E<lt>schwern@pobox.comE<gt>
+
+=head1 MAINTAINERS
+
+=over 4
+
+=item Chad Granum E<lt>exodist@cpan.orgE<gt>
+
+=back
 
 =head1 COPYRIGHT
 

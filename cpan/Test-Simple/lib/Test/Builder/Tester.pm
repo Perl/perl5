@@ -1,7 +1,7 @@
 package Test::Builder::Tester;
 
 use strict;
-our $VERSION = "1.23_002";
+our $VERSION = "1.23_003";
 
 use Test::Builder 0.98;
 use Symbol;
@@ -443,6 +443,14 @@ permission.
 
 This program is free software; you can redistribute it
 and/or modify it under the same terms as Perl itself.
+
+=head1 MAINTAINERS
+
+=over 4
+
+=item Chad Granum E<lt>exodist@cpan.orgE<gt>
+
+=back
 
 =head1 NOTES
 

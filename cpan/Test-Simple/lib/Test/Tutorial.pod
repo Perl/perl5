@@ -594,6 +594,14 @@ bugs!
 
 Michael G Schwern E<lt>schwern@pobox.comE<gt> and the perl-qa dancers!
 
+=head1 MAINTAINERS
+
+=over 4
+
+=item Chad Granum E<lt>exodist@cpan.orgE<gt>
+
+=back
+
 =head1 COPYRIGHT
 
 Copyright 2001 by Michael G Schwern E<lt>schwern@pobox.comE<gt>.

@@ -4,7 +4,7 @@ use 5.006;
 
 use strict;
 
-our $VERSION = '1.001002';
+our $VERSION = '1.001003';
 $VERSION = eval $VERSION;    ## no critic (BuiltinFunctions::ProhibitStringyEval)
 
 use Test::Builder::Module 0.99;
@@ -199,6 +199,13 @@ Look in Test::More's SEE ALSO for more testing modules.
 Idea by Tony Bowden and Paul Johnson, code by Michael G Schwern
 E<lt>schwern@pobox.comE<gt>, wardrobe by Calvin Klein.
 
+=head1 MAINTAINERS
+
+=over 4
+
+=item Chad Granum E<lt>exodist@cpan.orgE<gt>
+
+=back
 
 =head1 COPYRIGHT
 

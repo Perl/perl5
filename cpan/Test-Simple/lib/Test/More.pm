@@ -17,7 +17,7 @@ sub _carp {
     return warn @_, " at $file line $line\n";
 }
 
-our $VERSION = '1.001002';
+our $VERSION = '1.001003';
 $VERSION = eval $VERSION;    ## no critic (BuiltinFunctions::ProhibitStringyEval)
 
 use Test::Builder::Module 0.99;
@@ -1887,6 +1887,14 @@ from Joshua Pritikin's Test module and lots of help from Barrie
 Slaymaker, Tony Bowden, blackstar.co.uk, chromatic, Fergal Daly and
 the perl-qa gang.
 
+=head1 MAINTAINERS
+
+=over 4
+
+=item Chad Granum E<lt>exodist@cpan.orgE<gt>
+
+=back
+
 
 =head1 BUGS
 
@@ -1896,7 +1904,7 @@ See F<http://rt.cpan.org> to report and view bugs.
 =head1 SOURCE
 
 The source code repository for Test::More can be found at
-F<http://github.com/schwern/test-more/>.
+F<http://github.com/Test-More/test-more/>.
 
 
 =head1 COPYRIGHT
