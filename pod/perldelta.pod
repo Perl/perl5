@@ -58,7 +58,7 @@ Perl continues to flourish into its third decade thanks to a vibrant community
 of users and developers. The following people are known to have contributed the
 improvements that became Perl 5.21.0:
 
-Ricardo Signes.
+Nicholas Clark, Ricardo Signes.
 
 For a more complete list of all of Perl's historical contributors, please see
 the F<AUTHORS> file in the Perl source distribution.
