@@ -918,11 +918,10 @@ my %delta = (
         }
     },
     5.021000 => {
-        delta_from => 5.02,
+        delta_from => 5.020000,
         changed => {
         },
         removed => {
-          'config_data' => 1,
         }
     },
 );
