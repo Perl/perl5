@@ -17,6 +17,19 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.21.0 - Friedrich von Schiller, The Song of the Bell
+
+L<Announced on 2014-05-27 by Ricardo Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2014/05/msg215826.html>
+
+  Walled in fast within the earth
+  Stands the form burnt out of clay.
+  This must be the bell’s great birth!
+  Fellows, lend a hand to-day.
+    Sweat must trickle now
+    From the burning brow,
+  Till the work its master honour.
+  Blessing comes from Heaven’s Donor.
+
 =head2 v5.20.0 - William Shakespeare, Sonnet 18
 
 L<Announced on 2014-05-27 by Ricardo Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2014/05/msg215815.html>
