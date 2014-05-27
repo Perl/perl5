@@ -182,7 +182,7 @@ use File::Glob qw(:case);
     },
 
     'bignum' => {
-        'DISTRIBUTION' => 'FLORA/bignum-0.32.tar.gz',
+        'DISTRIBUTION' => 'PJACKLAM/bignum-0.37.tar.gz',
         'FILES'        => q[dist/bignum],
         'EXCLUDED'     => [
             qr{^inc/Module/},
@@ -422,7 +422,7 @@ use File::Glob qw(:case);
     },
 
     'Exporter' => {
-        'DISTRIBUTION' => 'TODDR/Exporter-5.68.tar.gz',
+        'DISTRIBUTION' => 'TODDR/Exporter-5.70.tar.gz',
         'FILES'        => q[dist/Exporter],
         'EXCLUDED' => [
             qw( t/pod.t
@@ -706,7 +706,7 @@ use File::Glob qw(:case);
     },
 
     'Locale::Maketext' => {
-        'DISTRIBUTION' => 'TODDR/Locale-Maketext-1.23.tar.gz',
+        'DISTRIBUTION' => 'TODDR/Locale-Maketext-1.25.tar.gz',
         'FILES'        => q[dist/Locale-Maketext],
         'EXCLUDED'     => [
             qw(
@@ -723,7 +723,7 @@ use File::Glob qw(:case);
     },
 
     'Math::BigInt' => {
-        'DISTRIBUTION' => 'PJACKLAM/Math-BigInt-1.997.tar.gz',
+        'DISTRIBUTION' => 'PJACKLAM/Math-BigInt-1.9993.tar.gz',
         'FILES'        => q[dist/Math-BigInt],
         'EXCLUDED'     => [
             qr{^inc/},
@@ -737,7 +737,7 @@ use File::Glob qw(:case);
     },
 
     'Math::BigInt::FastCalc' => {
-        'DISTRIBUTION' => 'PJACKLAM/Math-BigInt-FastCalc-0.30.tar.gz',
+        'DISTRIBUTION' => 'PJACKLAM/Math-BigInt-FastCalc-0.31.tar.gz',
         'FILES'        => q[dist/Math-BigInt-FastCalc],
         'EXCLUDED'     => [
             qr{^inc/},
@@ -760,7 +760,7 @@ use File::Glob qw(:case);
     },
 
     'Math::BigRat' => {
-        'DISTRIBUTION' => 'PJACKLAM/Math-BigRat-0.2602.tar.gz',
+        'DISTRIBUTION' => 'PJACKLAM/Math-BigRat-0.2606.tar.gz',
         'FILES'        => q[dist/Math-BigRat],
         'EXCLUDED'     => [
             qr{^inc/},
@@ -1196,7 +1196,7 @@ use File::Glob qw(:case);
     },
 
     'Tie::File' => {
-        'DISTRIBUTION' => 'TODDR/Tie-File-0.98.tar.gz',
+        'DISTRIBUTION' => 'TODDR/Tie-File-1.00.tar.gz',
         'FILES'        => q[dist/Tie-File],
     },
 
