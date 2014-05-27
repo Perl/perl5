@@ -27,6 +27,7 @@ bzip2(1)
 Carp::Always
 Carp::Assert
 Carp::Clan
+CGI
 chcp(1)
 Class::Accessor
 Class::C3

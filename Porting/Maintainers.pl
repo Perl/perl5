@@ -197,19 +197,6 @@ use File::Glob qw(:case);
         'FILES'        => q[dist/Carp],
     },
 
-    'CGI' => {
-        'DISTRIBUTION' => 'MARKSTOS/CGI.pm-3.65.tar.gz',
-        'FILES'        => q[cpan/CGI],
-        'EXCLUDED'     => [
-            qr{^examples/},
-            qw( cgi_docs.html
-                t/gen-tests/gen-start-end-tags.pl
-                t/fast.t
-                ),
-        ],
-        'DEPRECATED' => '5.019007',
-    },
-
     'Compress::Raw::Bzip2' => {
         'DISTRIBUTION' => 'PMQS/Compress-Raw-Bzip2-2.064.tar.gz',
         'FILES'        => q[cpan/Compress-Raw-Bzip2],

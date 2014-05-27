@@ -1430,7 +1430,6 @@ distclean: realclean
 	-if exist $(LIBDIR)\Attribute rmdir /s /q $(LIBDIR)\Attribute
 	-if exist $(LIBDIR)\autodie rmdir /s /q $(LIBDIR)\autodie
 	-if exist $(LIBDIR)\Carp rmdir /s /q $(LIBDIR)\Carp
-	-if exist $(LIBDIR)\CGI rmdir /s /q $(LIBDIR)\CGI
 	-if exist $(LIBDIR)\Compress rmdir /s /q $(LIBDIR)\Compress
 	-if exist $(LIBDIR)\Config\Perl rmdir /s /q $(LIBDIR)\Config\Perl
 	-if exist $(LIBDIR)\CPAN rmdir /s /q $(LIBDIR)\CPAN
