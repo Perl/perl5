@@ -3,15 +3,17 @@ use warnings;
 use Test::More tests => 3;
 use Module::Metadata;
 
-*fh_from_string = $] < 5.008
-  ? require IO::Scalar && sub ($) {
-    IO::Scalar->new(\$_[0]);
-  }
-  : sub ($) {
-    open my $fh, '<', \$_[0];
-    $fh
-  }
-;
+BEGIN {
+  *fh_from_string = $] < 5.008
+    ? require IO::Scalar && sub ($) {
+      IO::Scalar->new(\$_[0]);
+    }
+    : sub ($) {
+      open my $fh, '<', \$_[0];
+      $fh
+    }
+  ;
+}
 
 {
     my $src = <<'...';

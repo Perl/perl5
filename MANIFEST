@@ -1566,10 +1566,7 @@ cpan/Module-Metadata/t/lib/0_2/Foo.pm
 cpan/Module-Metadata/t/lib/BOMTest/UTF16BE.pm
 cpan/Module-Metadata/t/lib/BOMTest/UTF16LE.pm
 cpan/Module-Metadata/t/lib/BOMTest/UTF8.pm
-cpan/Module-Metadata/t/lib/DistGen.pm
 cpan/Module-Metadata/t/lib/ENDPOD.pm
-cpan/Module-Metadata/t/lib/MBTest.pm
-cpan/Module-Metadata/t/lib/Tie/CPHash.pm
 cpan/Module-Metadata/t/metadata.t
 cpan/Module-Metadata/t/taint.t
 cpan/Module-Metadata/t/version.t

@@ -4,14 +4,19 @@
 
 use strict;
 use warnings;
-use lib 't/lib';
+use Test::More;
 use IO::File;
-use MBTest;
+use File::Spec;
+use File::Temp;
+use File::Basename;
+use Cwd ();
+use File::Path;
+use Data::Dumper;
 
 my $undef;
 
 # parse various module $VERSION lines
-# these will be reversed later to create %modules
+# format: expected version => code snippet
 my @modules = (
   $undef => <<'---', # no $VERSION line
 package Simple;
@@ -146,15 +151,15 @@ our $VERSION = "1.23";
   package Simple;
   use version; our $VERSION = version->new('1.23');
 ---
-  '1.23' => <<'---', # $VERSION using version.pm and qv()
+  'v1.230' => <<'---', # $VERSION using version.pm and qv()
   package Simple;
   use version; our $VERSION = qv('1.230');
 ---
-  '1.23' => <<'---', # Two version assignments, should ignore second one
+  '1.230' => <<'---', # Two version assignments, should ignore second one
   $Simple::VERSION = '1.230';
   $Simple::VERSION = eval $Simple::VERSION;
 ---
-  '1.23' => <<'---', # declared & defined on same line with 'our'
+  '1.230000' => <<'---', # declared & defined on same line with 'our'
 package Simple;
 our $VERSION = '1.23_00_00';
 ---
@@ -217,8 +222,8 @@ package Simple;
 }
 ---
 );
-my %modules = reverse @modules;
 
+# format: expected package name => code snippet
 my @pkg_names = (
   [ 'Simple' ] => <<'---', # package NAME
 package Simple;
@@ -257,99 +262,161 @@ package Simple''Edward;
 package Simple-Edward;
 ---
 );
-my %pkg_names = reverse @pkg_names;
 
-plan tests => 54 + (2 * keys( %modules )) + (2 * keys( %pkg_names ));
+# 2 tests per each pair of @modules (plus 1 for defined keys), 2 per pair of @pkg_names
+plan tests => 63
+  + ( @modules + grep { defined $modules[2*$_] } 0..$#modules/2 )
+  + ( @pkg_names );
 
 require_ok('Module::Metadata');
 
-# class method C<find_module_by_name>
-my $module = Module::Metadata->find_module_by_name(
-               'Module::Metadata' );
-ok( -e $module, 'find_module_by_name() succeeds' );
+{
+    # class method C<find_module_by_name>
+    my $module = Module::Metadata->find_module_by_name(
+                   'Module::Metadata' );
+    ok( -e $module, 'find_module_by_name() succeeds' );
+}
 
 #########################
 
-my $tmp = MBTest->tmpdir;
+BEGIN {
+  my $cwd = File::Spec->rel2abs(Cwd::cwd);
+  sub original_cwd { return $cwd }
+}
 
-use DistGen;
-my $dist = DistGen->new( dir => $tmp );
-$dist->regen;
+# Setup a temp directory
+sub tmpdir {
+  my (@args) = @_;
+  my $dir = $ENV{PERL_CORE} ? original_cwd : File::Spec->tmpdir;
+  return File::Temp::tempdir('MMD-XXXXXXXX', CLEANUP => 0, DIR => $dir, @args);
+}
 
-$dist->chdir_in;
+my $tmp;
+BEGIN { $tmp = tmpdir; diag "using temp dir $tmp"; }
+
+END {
+  die "tests failed; leaving temp dir $tmp behind"
+    if $ENV{AUTHOR_TESTING} and not Test::Builder->new->is_passing;
+  diag "removing temp dir $tmp";
+  chdir original_cwd;
+  File::Path::rmtree($tmp);
+}
+
+# generates a new distribution:
+# files => { relative filename => $content ... }
+# returns the name of the distribution (not including version),
+# and the absolute path name to the dist.
+{
+  my $test_num = 0;
+  sub new_dist {
+    my %opts = @_;
+
+    my $distname = 'Simple' . $test_num++;
+    my $distdir = File::Spec->catdir($tmp, $distname);
+    note "using dist $distname in $distdir";
+
+    File::Path::mkpath($distdir) or die "failed to create '$distdir'";
+
+    foreach my $rel_filename (keys %{$opts{files}})
+    {
+      my $abs_filename = File::Spec->catfile($distdir, $rel_filename);
+      my $dirname = File::Basename::dirname($abs_filename);
+      unless (-d $dirname) {
+        File::Path::mkpath($dirname) or die "Can't create '$dirname'";
+      }
+
+      note "creating $abs_filename";
+      my $fh = IO::File->new(">$abs_filename") or die "Can't write '$abs_filename'\n";
+      print $fh $opts{files}{$rel_filename};
+      close $fh;
+    }
+
+    chdir $distdir;
+    return ($distname, $distdir);
+  }
+}
+
+{
+  # fail on invalid module name
+  my $pm_info = Module::Metadata->new_from_module(
+                  'Foo::Bar', inc => [] );
+  ok( !defined( $pm_info ), 'fail if can\'t find module by module name' );
+}
+
+{
+  # fail on invalid filename
+  my $file = File::Spec->catfile( 'Foo', 'Bar.pm' );
+  my $pm_info = Module::Metadata->new_from_file( $file, inc => [] );
+  ok( !defined( $pm_info ), 'fail if can\'t find module by file name' );
+}
+
+{
+  my $file = File::Spec->catfile('lib', 'Simple.pm');
+  my ($dist_name, $dist_dir) = new_dist(files => { $file => "package Simple;\n" });
+
+  # construct from module filename
+  my $pm_info = Module::Metadata->new_from_file( $file );
+  ok( defined( $pm_info ), 'new_from_file() succeeds' );
+
+  # construct from filehandle
+  my $handle = IO::File->new($file);
+  $pm_info = Module::Metadata->new_from_handle( $handle, $file );
+  ok( defined( $pm_info ), 'new_from_handle() succeeds' );
+  $pm_info = Module::Metadata->new_from_handle( $handle );
+  is( $pm_info, undef, "new_from_handle() without filename returns undef" );
+  close($handle);
+}
+
+{
+  # construct from module name, using custom include path
+  my $pm_info = Module::Metadata->new_from_module(
+               'Simple', inc => [ 'lib', @INC ] );
+  ok( defined( $pm_info ), 'new_from_module() succeeds' );
+}
 
 
-# fail on invalid module name
-my $pm_info = Module::Metadata->new_from_module(
-		'Foo::Bar', inc => [] );
-ok( !defined( $pm_info ), 'fail if can\'t find module by module name' );
-
-
-# fail on invalid filename
-my $file = File::Spec->catfile( 'Foo', 'Bar.pm' );
-$pm_info = Module::Metadata->new_from_file( $file, inc => [] );
-ok( !defined( $pm_info ), 'fail if can\'t find module by file name' );
-
-
-# construct from module filename
-$file = File::Spec->catfile( 'lib', split( /::/, $dist->name ) ) . '.pm';
-$pm_info = Module::Metadata->new_from_file( $file );
-ok( defined( $pm_info ), 'new_from_file() succeeds' );
-
-# construct from filehandle
-my $handle = IO::File->new($file);
-$pm_info = Module::Metadata->new_from_handle( $handle, $file );
-ok( defined( $pm_info ), 'new_from_handle() succeeds' );
-$pm_info = Module::Metadata->new_from_handle( $handle );
-is( $pm_info, undef, "new_from_handle() without filename returns undef" );
-close($handle);
-
-# construct from module name, using custom include path
-$pm_info = Module::Metadata->new_from_module(
-	     $dist->name, inc => [ 'lib', @INC ] );
-ok( defined( $pm_info ), 'new_from_module() succeeds' );
-
-
-foreach my $module ( sort keys %modules ) {
-    my $expected = $modules{$module};
+# iterate through @modules pairwise
+my $test_case = 0;
+while (++$test_case and my ($expected_version, $code) = splice @modules, 0, 2 ) {
  SKIP: {
-    skip( "No our() support until perl 5.6", 2 )
-        if $] < 5.006 && $module =~ /\bour\b/;
-    skip( "No package NAME VERSION support until perl 5.11.1", 2 )
-        if $] < 5.011001 && $module =~ /package\s+[\w\:\']+\s+v?[0-9._]+/;
+    skip( "No our() support until perl 5.6", (defined $expected_version ? 3 : 2) )
+        if $] < 5.006 && $code =~ /\bour\b/;
+    skip( "No package NAME VERSION support until perl 5.11.1", (defined $expected_version ? 3 : 2) )
+        if $] < 5.011001 && $code =~ /package\s+[\w\:\']+\s+v?[0-9._]+/;
 
-    $dist->change_file( 'lib/Simple.pm', $module );
-    $dist->regen;
+    my $file = File::Spec->catfile('lib', 'Simple.pm');
+    my ($dist_name, $dist_dir) = new_dist(files => { $file => $code });
 
     my $warnings = '';
     local $SIG{__WARN__} = sub { $warnings .= $_ for @_ };
     my $pm_info = Module::Metadata->new_from_file( $file );
 
-    # Test::Builder will prematurely numify objects, so use this form
     my $errs;
     my $got = $pm_info->version;
-    if ( defined $expected ) {
-        ok( $got eq $expected,
-            "correct module version (expected '$expected')" )
-            or $errs++;
-    } else {
-        ok( !defined($got),
-            "correct module version (expected undef)" )
-            or $errs++;
-    }
-    is( $warnings, '', 'no warnings from parsing' ) or $errs++;
-    diag "Got: '$got'\nModule contents:\n$module" if $errs;
+
+    # note that in Test::More 0.94 and earlier, is() stringifies first before comparing;
+    # from 0.95_01 and later, it just lets the objects figure out how to handle 'eq'
+    # We want to ensure we preserve the original, as long as it's legal, so we
+    # explicitly check the stringified form.
+    isa_ok($got, 'version') if defined $expected_version;
+    is(
+      (defined $got ? "$got" : $got),
+      $expected_version,
+      "case $test_case: correct module version ("
+        . (defined $expected_version? "'$expected_version'" : 'undef')
+        . ')'
+    )
+    or $errs++;
+
+    is( $warnings, '', "case $test_case: no warnings from parsing" ) or $errs++;
+    diag Dumper({ got => $pm_info->version, module_contents => $code }) if $errs;
   }
 }
 
-# revert to pristine state
-$dist->regen( clean => 1 );
-
-foreach my $pkg_name ( sort keys %pkg_names ) {
-    my $expected = $pkg_names{$pkg_name};
-
-    $dist->change_file( 'lib/Simple.pm', $pkg_name );
-    $dist->regen;
+$test_case = 0;
+while (++$test_case and my ($expected_name, $code) = splice @pkg_names, 0, 2) {
+    my $file = File::Spec->catfile('lib', 'Simple.pm');
+    my ($dist_name, $dist_dir) = new_dist(files => { $file => $code });
 
     my $warnings = '';
     local $SIG{__WARN__} = sub { $warnings .= $_ for @_ };
@@ -358,18 +425,17 @@ foreach my $pkg_name ( sort keys %pkg_names ) {
     # Test::Builder will prematurely numify objects, so use this form
     my $errs;
     my @got = $pm_info->packages_inside();
-    is_deeply( \@got, $expected,
-               "correct package names (expected '" . join(', ', @$expected) . "')" )
+    is_deeply( \@got, $expected_name,
+               "case $test_case: correct package names (expected '" . join(', ', @$expected_name) . "')" )
             or $errs++;
-    is( $warnings, '', 'no warnings from parsing' ) or $errs++;
-    diag "Got: '" . join(', ', @got) . "'\nModule contents:\n$pkg_name" if $errs;
+    is( $warnings, '', "case $test_case: no warnings from parsing" ) or $errs++;
+    diag "Got: '" . join(', ', @got) . "'\nModule contents:\n$code" if $errs;
 }
 
-# revert to pristine state
-$dist->regen( clean => 1 );
-
-# Find each package only once
-$dist->change_file( 'lib/Simple.pm', <<'---' );
+{
+  # Find each package only once
+  my $file = File::Spec->catfile('lib', 'Simple.pm');
+  my ($dist_name, $dist_dir) = new_dist(files => { $file => <<'---' } );
 package Simple;
 $VERSION = '1.23';
 package Error::Simple;
@@ -377,50 +443,49 @@ $VERSION = '2.34';
 package Simple;
 ---
 
-$dist->regen;
+  my $pm_info = Module::Metadata->new_from_file( $file );
 
-$pm_info = Module::Metadata->new_from_file( $file );
+  my @packages = $pm_info->packages_inside;
+  is( @packages, 2, 'record only one occurence of each package' );
+}
 
-my @packages = $pm_info->packages_inside;
-is( @packages, 2, 'record only one occurence of each package' );
-
-
-# Module 'Simple.pm' does not contain package 'Simple';
-# constructor should not complain, no default module name or version
-$dist->change_file( 'lib/Simple.pm', <<'---' );
+{
+  # Module 'Simple.pm' does not contain package 'Simple';
+  # constructor should not complain, no default module name or version
+  my $file = File::Spec->catfile('lib', 'Simple.pm');
+  my ($dist_name, $dist_dir) = new_dist(files => { $file => <<'---' } );
 package Simple::Not;
 $VERSION = '1.23';
 ---
 
-$dist->regen;
-$pm_info = Module::Metadata->new_from_file( $file );
+  my $pm_info = Module::Metadata->new_from_file( $file );
 
-is( $pm_info->name, undef, 'no default package' );
-is( $pm_info->version, undef, 'no version w/o default package' );
+  is( $pm_info->name, undef, 'no default package' );
+  is( $pm_info->version, undef, 'no version w/o default package' );
+}
 
-# Module 'Simple.pm' contains an alpha version
-# constructor should report first $VERSION found
-$dist->change_file( 'lib/Simple.pm', <<'---' );
+{
+  # Module 'Simple.pm' contains an alpha version
+  # constructor should report first $VERSION found
+  my $file = File::Spec->catfile('lib', 'Simple.pm');
+  my ($dist_name, $dist_dir) = new_dist(files => { $file => <<'---' } );
 package Simple;
 $VERSION = '1.23_01';
 $VERSION = eval $VERSION;
 ---
 
-$dist->regen;
-$pm_info = Module::Metadata->new_from_file( $file );
+  my $pm_info = Module::Metadata->new_from_file( $file );
 
-is( $pm_info->version, '1.23_01', 'alpha version reported');
+  is( $pm_info->version, '1.23_01', 'alpha version reported');
 
-# NOTE the following test has be done this way because Test::Builder is
-# too smart for our own good and tries to see if the version object is a
-# dual-var, which breaks with alpha versions:
-#    Argument "1.23_0100" isn't numeric in addition (+) at
-#    /usr/lib/perl5/5.8.7/Test/Builder.pm line 505.
+  # NOTE the following test has be done this way because Test::Builder is
+  # too smart for our own good and tries to see if the version object is a
+  # dual-var, which breaks with alpha versions:
+  #    Argument "1.23_0100" isn't numeric in addition (+) at
+  #    /usr/lib/perl5/5.8.7/Test/Builder.pm line 505.
 
-ok( $pm_info->version > 1.23, 'alpha version greater than non');
-
-# revert to pristine state
-$dist->regen( clean => 1 );
+  ok( $pm_info->version > 1.23, 'alpha version greater than non');
+}
 
 # parse $VERSION lines scripts for package main
 my @scripts = (
@@ -474,18 +539,18 @@ $::VERSION = 0.01;
 
 my ( $i, $n ) = ( 1, scalar( @scripts ) );
 foreach my $script ( @scripts ) {
-  $dist->change_file( 'bin/simple.plx', $script );
-  $dist->regen;
-  $pm_info = Module::Metadata->new_from_file(
-	       File::Spec->catfile( 'bin', 'simple.plx' ) );
+  my $file = File::Spec->catfile('bin', 'simple.plx');
+  my ($dist_name, $dist_dir) = new_dist(files => { $file => $script } );
+  my $pm_info = Module::Metadata->new_from_file( $file );
 
   is( $pm_info->version, '0.01', "correct script version ($i of $n)" );
   $i++;
 }
 
-
-# examine properties of a module: name, pod, etc
-$dist->change_file( 'lib/Simple.pm', <<'---' );
+{
+  # examine properties of a module: name, pod, etc
+  my $file = File::Spec->catfile('lib', 'Simple.pm');
+  my ($dist_name, $dist_dir) = new_dist(files => { $file => <<'---' } );
 package Simple;
 $VERSION = '0.01';
 package Simple::Ex;
@@ -504,44 +569,42 @@ You can find me on the IRC channel
 
 =cut
 ---
-$dist->regen;
 
-$pm_info = Module::Metadata->new_from_module(
-             $dist->name, inc => [ 'lib', @INC ] );
+  my $pm_info = Module::Metadata->new_from_module(
+             'Simple', inc => [ 'lib', @INC ] );
 
-is( $pm_info->name, 'Simple', 'found default package' );
-is( $pm_info->version, '0.01', 'version for default package' );
+  is( $pm_info->name, 'Simple', 'found default package' );
+  is( $pm_info->version, '0.01', 'version for default package' );
 
-# got correct version for secondary package
-is( $pm_info->version( 'Simple::Ex' ), '0.02',
-    'version for secondary package' );
+  # got correct version for secondary package
+  is( $pm_info->version( 'Simple::Ex' ), '0.02',
+      'version for secondary package' );
 
-my $filename = $pm_info->filename;
-ok( defined( $filename ) && -e $filename,
-    'filename() returns valid path to module file' );
+  my $filename = $pm_info->filename;
+  ok( defined( $filename ) && -e $filename,
+      'filename() returns valid path to module file' );
 
-@packages = $pm_info->packages_inside;
-is( @packages, 2, 'found correct number of packages' );
-is( $packages[0], 'Simple', 'packages stored in order found' );
+  my @packages = $pm_info->packages_inside;
+  is( @packages, 2, 'found correct number of packages' );
+  is( $packages[0], 'Simple', 'packages stored in order found' );
 
-# we can detect presence of pod regardless of whether we are collecting it
-ok( $pm_info->contains_pod, 'contains_pod() succeeds' );
+  # we can detect presence of pod regardless of whether we are collecting it
+  ok( $pm_info->contains_pod, 'contains_pod() succeeds' );
 
-my @pod = $pm_info->pod_inside;
-is_deeply( \@pod, [qw(NAME AUTHOR)], 'found all pod sections' );
+  my @pod = $pm_info->pod_inside;
+  is_deeply( \@pod, [qw(NAME AUTHOR)], 'found all pod sections' );
 
-is( $pm_info->pod('NONE') , undef,
-    'return undef() if pod section not present' );
+  is( $pm_info->pod('NONE') , undef,
+      'return undef() if pod section not present' );
 
-is( $pm_info->pod('NAME'), undef,
-    'return undef() if pod section not collected' );
+  is( $pm_info->pod('NAME'), undef,
+      'return undef() if pod section not collected' );
 
 
-# collect_pod
-$pm_info = Module::Metadata->new_from_module(
-             $dist->name, inc => [ 'lib', @INC ], collect_pod => 1 );
+  # collect_pod
+  $pm_info = Module::Metadata->new_from_module(
+               'Simple', inc => [ 'lib', @INC ], collect_pod => 1 );
 
-{
   my %pod;
   for my $section (qw(NAME AUTHOR)) {
     my $content = $pm_info->pod( $section );
@@ -570,7 +633,8 @@ EXPECTED
 
 {
   # test things that look like POD, but aren't
-$dist->change_file( 'lib/Simple.pm', <<'---' );
+  my $file = File::Spec->catfile('lib', 'Simple.pm');
+  my ($dist_name, $dist_dir) = new_dist(files => { $file => <<'---' } );
 package Simple;
 
 =YES THIS STARTS POD
@@ -589,15 +653,15 @@ our $VERSION = '666';
 our $VERSION = '1.23';
 
 ---
-  $dist->regen;
-  $pm_info = Module::Metadata->new_from_file('lib/Simple.pm');
+  my $pm_info = Module::Metadata->new_from_file('lib/Simple.pm');
   is( $pm_info->name, 'Simple', 'found default package' );
   is( $pm_info->version, '1.23', 'version for default package' );
 }
 
 {
   # Make sure processing stops after __DATA__
-  $dist->change_file( 'lib/Simple.pm', <<'---' );
+  my $file = File::Spec->catfile('lib', 'Simple.pm');
+  my ($dist_name, $dist_dir) = new_dist(files => { $file => <<'---' } );
 package Simple;
 $VERSION = '0.01';
 __DATA__
@@ -605,9 +669,8 @@ __DATA__
   foo();
 };
 ---
-  $dist->regen;
 
-  $pm_info = Module::Metadata->new_from_file('lib/Simple.pm');
+  my $pm_info = Module::Metadata->new_from_file('lib/Simple.pm');
   is( $pm_info->name, 'Simple', 'found default package' );
   is( $pm_info->version, '0.01', 'version for default package' );
   my @packages = $pm_info->packages_inside;
@@ -616,15 +679,15 @@ __DATA__
 
 {
   # Make sure we handle version.pm $VERSIONs well
-  $dist->change_file( 'lib/Simple.pm', <<'---' );
+  my $file = File::Spec->catfile('lib', 'Simple.pm');
+  my ($dist_name, $dist_dir) = new_dist(files => { $file => <<'---' } );
 package Simple;
 $VERSION = version->new('0.60.' . (qw$Revision: 128 $)[1]);
 package Simple::Simon;
 $VERSION = version->new('0.61.' . (qw$Revision: 129 $)[1]);
 ---
-  $dist->regen;
 
-  $pm_info = Module::Metadata->new_from_file('lib/Simple.pm');
+  my $pm_info = Module::Metadata->new_from_file('lib/Simple.pm');
   is( $pm_info->name, 'Simple', 'found default package' );
   is( $pm_info->version, '0.60.128', 'version for default package' );
   my @packages = $pm_info->packages_inside;
@@ -634,7 +697,9 @@ $VERSION = version->new('0.61.' . (qw$Revision: 129 $)[1]);
 
 # check that package_versions_from_directory works
 
-$dist->change_file( 'lib/Simple.pm', <<'---' );
+{
+  my $file = File::Spec->catfile('lib', 'Simple.pm');
+  my ($dist_name, $dist_dir) = new_dist(files => { $file => <<'---' } );
 package Simple;
 $VERSION = '0.01';
 package Simple::Ex;
@@ -659,23 +724,22 @@ Simple Simon
 
 =cut
 ---
-$dist->regen;
 
-my $exp_pvfd = {
-  'Simple' => {
-    'file' => 'Simple.pm',
-    'version' => '0.01'
-  },
-  'Simple::Ex' => {
-    'file' => 'Simple.pm',
-    'version' => '0.02'
-  }
-};
+  my $exp_pvfd = {
+    'Simple' => {
+      'file' => 'Simple.pm',
+      'version' => '0.01'
+    },
+    'Simple::Ex' => {
+      'file' => 'Simple.pm',
+      'version' => '0.02'
+    }
+  };
 
-my $got_pvfd = Module::Metadata->package_versions_from_directory('lib');
+  my $got_pvfd = Module::Metadata->package_versions_from_directory('lib');
 
-is_deeply( $got_pvfd, $exp_pvfd, "package_version_from_directory()" )
-  or diag explain $got_pvfd;
+  is_deeply( $got_pvfd, $exp_pvfd, "package_version_from_directory()" )
+    or diag explain $got_pvfd;
 
 {
   my $got_provides = Module::Metadata->provides(dir => 'lib', version => 2);
@@ -710,22 +774,29 @@ is_deeply( $got_pvfd, $exp_pvfd, "package_version_from_directory()" )
   is_deeply( $got_provides, $exp_provides, "provides()" )
     or diag explain $got_provides;
 }
+}
 
 # Check package_versions_from_directory with regard to case-sensitivity
 {
-  $dist->change_file( 'lib/Simple.pm', <<'---' );
+  my $file = File::Spec->catfile('lib', 'Simple.pm');
+  my ($dist_name, $dist_dir) = new_dist(files => { $file => <<'---' } );
 package simple;
 $VERSION = '0.01';
 ---
-  $dist->regen;
 
-  $pm_info = Module::Metadata->new_from_file('lib/Simple.pm');
+  my $pm_info = Module::Metadata->new_from_file('lib/Simple.pm');
   is( $pm_info->name, undef, 'no default package' );
   is( $pm_info->version, undef, 'version for default package' );
   is( $pm_info->version('simple'), '0.01', 'version for lower-case package' );
   is( $pm_info->version('Simple'), undef, 'version for capitalized package' );
+  ok( $pm_info->is_indexable(), 'an indexable package is found' );
+  ok( $pm_info->is_indexable('simple'), 'the simple package is indexable' );
+  ok( !$pm_info->is_indexable('Simple'), 'the Simple package would not be indexed' );
+}
 
-  $dist->change_file( 'lib/Simple.pm', <<'---' );
+{
+  my $file = File::Spec->catfile('lib', 'Simple.pm');
+  my ($dist_name, $dist_dir) = new_dist(files => { $file => <<'---' } );
 package simple;
 $VERSION = '0.01';
 package Simple;
@@ -733,12 +804,28 @@ $VERSION = '0.02';
 package SiMpLe;
 $VERSION = '0.03';
 ---
-  $dist->regen;
 
-  $pm_info = Module::Metadata->new_from_file('lib/Simple.pm');
+  my $pm_info = Module::Metadata->new_from_file('lib/Simple.pm');
   is( $pm_info->name, 'Simple', 'found default package' );
   is( $pm_info->version, '0.02', 'version for default package' );
   is( $pm_info->version('simple'), '0.01', 'version for lower-case package' );
   is( $pm_info->version('Simple'), '0.02', 'version for capitalized package' );
   is( $pm_info->version('SiMpLe'), '0.03', 'version for mixed-case package' );
+  ok( $pm_info->is_indexable('simple'), 'the simple package is indexable' );
+  ok( $pm_info->is_indexable('Simple'), 'the Simple package is indexable' );
+}
+
+{
+  my $file = File::Spec->catfile('lib', 'Simple.pm');
+  my ($dist_name, $dist_dir) = new_dist(files => { $file => <<'---' } );
+package ## hide from PAUSE
+   simple;
+$VERSION = '0.01';
+---
+
+  my $pm_info = Module::Metadata->new_from_file('lib/Simple.pm');
+  is( $pm_info->name, undef, 'no package names found' );
+  ok( !$pm_info->is_indexable('simple'), 'the simple package would not be indexed' );
+  ok( !$pm_info->is_indexable('Simple'), 'the Simple package would not be indexed' );
+  ok( !$pm_info->is_indexable(), 'no indexable package is found' );
 }
