@@ -115,7 +115,7 @@
          "vxs.inc"
       ]
    },
-   "release_status" : "stable",
+   "release_status" : "unstable",
    "resources" : {
       "bugtracker" : {
          "web" : "https://rt.perl.org/"
@@ -128,5 +128,5 @@
          "url" : "http://perl5.git.perl.org/"
       }
    },
-   "version" : "5.020000"
+   "version" : "5.021000"
 }
