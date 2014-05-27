@@ -17,6 +17,19 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.20.0 - William Shakespeare, Sonnet 18
+
+L<Announced on 2014-05-27 by Ricardo Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2014/05/msg215815.html>
+
+  But thy eternal summer shall not fade,
+  Nor lose possession of that fair thou ow'st;
+  Nor shall Death brag thou wander'st in his shade,
+  When in eternal lines to time thou grow'st:
+    So long as men can breathe or eyes can see,
+    So long lives this, and this gives life to thee.
+
+  -- William Shakespeare, Sonnet 18
+
 =head2 v5.19.11 - Lautréamont, Les Chants de Maldoror
 
 L<Announced on 2014-04-20 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2014/04/msg214580.html>
