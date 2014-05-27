@@ -125,6 +125,7 @@ Object::InsideOut
 open(2)
 OS2::Proc
 OS2::WinObject
+Package::Constants
 PadWalker
 passwd(1)
 perl(1)
