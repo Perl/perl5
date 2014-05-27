@@ -5,7 +5,6 @@ cpan/Pod-Checker/blib/script/podchecker
 cpan/Pod-Parser/blib/script/podselect
 utils/c2ph      # link = utils/pstruct
 utils/cpan
-utils/config_data
 utils/corelist
 utils/enc2xs
 utils/h2ph

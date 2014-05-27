@@ -107,6 +107,7 @@ Math::Random::Secure
 Math::TrulyRandom
 md5sum(1)
 mmap(2)
+Module::Build
 Module::CPANTS::Analyse
 Module::Find
 Module::Info

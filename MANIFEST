@@ -1532,93 +1532,6 @@ cpan/MIME-Base64/t/base64.t		See whether MIME::Base64 works
 cpan/MIME-Base64/t/length.t	See whether MIME::QuotedPrint works
 cpan/MIME-Base64/t/quoted-print.t	See whether MIME::QuotedPrint works
 cpan/MIME-Base64/t/unicode.t		See whether MIME::Base64 works
-cpan/Module-Build/bin/config_data
-cpan/Module-Build/lib/inc/latest.pm
-cpan/Module-Build/lib/inc/latest/private.pm
-cpan/Module-Build/lib/Module/Build/API.pod
-cpan/Module-Build/lib/Module/Build/Authoring.pod
-cpan/Module-Build/lib/Module/Build/Base.pm
-cpan/Module-Build/lib/Module/Build/Bundling.pod
-cpan/Module-Build/lib/Module/Build/Compat.pm
-cpan/Module-Build/lib/Module/Build/ConfigData.pm
-cpan/Module-Build/lib/Module/Build/Config.pm
-cpan/Module-Build/lib/Module/Build/Cookbook.pm
-cpan/Module-Build/lib/Module/Build/Dumper.pm
-cpan/Module-Build/lib/Module/Build/ModuleInfo.pm
-cpan/Module-Build/lib/Module/Build/Notes.pm
-cpan/Module-Build/lib/Module/Build/Platform/aix.pm
-cpan/Module-Build/lib/Module/Build/Platform/cygwin.pm
-cpan/Module-Build/lib/Module/Build/Platform/darwin.pm
-cpan/Module-Build/lib/Module/Build/Platform/Default.pm
-cpan/Module-Build/lib/Module/Build/Platform/MacOS.pm
-cpan/Module-Build/lib/Module/Build/Platform/os2.pm
-cpan/Module-Build/lib/Module/Build/Platform/Unix.pm
-cpan/Module-Build/lib/Module/Build/Platform/VMS.pm
-cpan/Module-Build/lib/Module/Build/Platform/VOS.pm
-cpan/Module-Build/lib/Module/Build/Platform/Windows.pm
-cpan/Module-Build/lib/Module/Build.pm
-cpan/Module-Build/lib/Module/Build/PodParser.pm
-cpan/Module-Build/lib/Module/Build/PPMMaker.pm
-cpan/Module-Build/lib/Module/Build/Version.pm
-cpan/Module-Build/lib/Module/Build/YAML.pm
-cpan/Module-Build/t/00-compile.t
-cpan/Module-Build/t/actions/installdeps.t
-cpan/Module-Build/t/actions/manifest_skip.t
-cpan/Module-Build/t/add_property_array.t
-cpan/Module-Build/t/add_property_hash.t
-cpan/Module-Build/t/add_property.t
-cpan/Module-Build/t/basic.t
-cpan/Module-Build/t/bundled/Software/License.pm
-cpan/Module-Build/t/bundled/Tie/CPHash.pm
-cpan/Module-Build/t/bundle_inc.t
-cpan/Module-Build/t/compat/exit.t
-cpan/Module-Build/t/compat.t
-cpan/Module-Build/t/debug.t
-cpan/Module-Build/t/destinations.t
-cpan/Module-Build/t/extend.t
-cpan/Module-Build/t/ext.t
-cpan/Module-Build/t/files.t
-cpan/Module-Build/t/help.t
-cpan/Module-Build/t/install_extra_target.t
-cpan/Module-Build/t/install.t
-cpan/Module-Build/t/lib/DistGen.pm
-cpan/Module-Build/t/lib/MBTest.pm
-cpan/Module-Build/t/lib/Module/Signature.pm
-cpan/Module-Build/t/lib/Software/License/VaporWare.pm
-cpan/Module-Build/t/manifypods.t
-cpan/Module-Build/t/manifypods_with_utf8.t
-cpan/Module-Build/t/metadata2.t
-cpan/Module-Build/t/metadata.t
-cpan/Module-Build/t/mymeta.t
-cpan/Module-Build/t/new_from_context.t
-cpan/Module-Build/t/notes.t
-cpan/Module-Build/t/parents.t
-cpan/Module-Build/t/perl_mb_opt.t
-cpan/Module-Build/t/PL_files.t
-cpan/Module-Build/t/pod_parser.t
-cpan/Module-Build/t/ppm.t
-cpan/Module-Build/t/properties/dist_suffix.t
-cpan/Module-Build/t/properties/license.t
-cpan/Module-Build/t/properties/module_name.t
-cpan/Module-Build/t/properties/needs_compiler.t
-cpan/Module-Build/t/properties/release_status.t
-cpan/Module-Build/t/properties/requires.t
-cpan/Module-Build/t/properties/share_dir.t
-cpan/Module-Build/t/README.pod
-cpan/Module-Build/t/resume.t
-cpan/Module-Build/t/runthrough.t
-cpan/Module-Build/t/sample.t
-cpan/Module-Build/t/script_dist.t
-cpan/Module-Build/t/test_file_exts.t
-cpan/Module-Build/t/test_reqs.t
-cpan/Module-Build/t/test_types.t
-cpan/Module-Build/t/test_type.t
-cpan/Module-Build/t/tilde.t
-cpan/Module-Build/t/unit_run_test_harness.t
-cpan/Module-Build/t/use_tap_harness.t
-cpan/Module-Build/t/versions.t
-cpan/Module-Build/t/write_default_maniskip.t
-cpan/Module-Build/t/xs.t
 cpan/Module-Load-Conditional/lib/Module/Load/Conditional.pm	Module::Conditional
 cpan/Module-Load-Conditional/t/01_Module_Load_Conditional.t	Module::Conditional tests
 cpan/Module-Load-Conditional/t/test_lib/a/X.pm			Module::Conditional tests
@@ -5474,7 +5387,6 @@ utfebcdic.h			Unicode on EBCDIC (UTF-EBCDIC, tr16) header
 util.c				Utility routines
 util.h				Dummy header
 utils/c2ph.PL			program to translate dbx stabs to perl
-utils/config_data.PL		Module::Build tool
 utils/corelist.PL		Module::CoreList
 utils/cpan.PL			easily interact with CPAN from the command line
 utils/enc2xs.PL			Encode module generator

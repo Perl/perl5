@@ -287,7 +287,7 @@ utils1 = [.utils]perldoc.com [.utils]c2ph.com [.utils]h2ph.com
 utils2 = [.utils]h2xs.com [.utils]libnetcfg.com [.lib]perlbug.com [.utils]json_pp.com
 utils3 = [.utils]perlivp.com [.lib]splain.com [.utils]pl2pm.com [.utils]xsubpp.com [.utils]pod2html.com [.utils]instmodsh.com
 utils4 = [.utils]enc2xs.com [.utils]piconv.com [.utils]cpan.com [.utils]prove.com [.utils]ptar.com [.utils]ptardiff.com [.utils]shasum.com
-utils5 = [.utils]corelist.com [.utils]config_data.com [.utils]ptargrep.com [.utils]zipdetails.com
+utils5 = [.utils]corelist.com [.utils]ptargrep.com [.utils]zipdetails.com
 
 .ifdef NOX2P
 all : base extras archcorefiles preplibrary [.pod]perltoc.pod
@@ -471,9 +471,6 @@ nonxsext : $(LIBPREREQ) preplibrary $(MINIPERL_EXE) [.pod]perlfunc.pod
 	$(MINIPERL) -"I[-.lib]" $(MMS$SOURCE)
 
 [.utils]shasum.com : [.utils]shasum.PL $(ARCHDIR)Config.pm
-	$(MINIPERL) -"I[-.lib]" $(MMS$SOURCE)
-
-[.utils]config_data.com : [.utils]config_data.PL $(ARCHDIR)Config.pm
 	$(MINIPERL) -"I[-.lib]" $(MMS$SOURCE)
 
 [.utils]corelist.com : [.utils]corelist.PL $(ARCHDIR)Config.pm

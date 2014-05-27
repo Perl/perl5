@@ -1312,8 +1312,8 @@ _cleaner2:
 	rm -rf pod/perlfunc pod/perlipc
 	-rmdir ext/B/lib
 	rm -f so_locations $(LIBPERL_NONSHR) $(MINIPERL_NONSHR)
-	-rmdir lib/version lib/threads lib/inc/latest lib/inc lib/encoding
-	-rmdir lib/autodie/exception lib/autodie lib/XS lib/Win32API lib/VMS
+	-rmdir lib/version lib/threads lib/encoding lib/autodie/exception
+	-rmdir lib/autodie lib/XS lib/Win32API lib/VMS
 	-rmdir lib/Unicode/Collate/Locale lib/Unicode/Collate/CJK
 	-rmdir lib/Unicode/Collate lib/Tie/Hash lib/Thread lib/Text
 	-rmdir lib/Test/Builder/Tester lib/Test/Builder lib/Test lib/Term
@@ -1325,18 +1325,17 @@ _cleaner2:
 	-rmdir lib/Scalar lib/Pod/Text lib/Pod/Simple lib/Pod/Perldoc
 	-rmdir lib/PerlIO/via lib/PerlIO lib/Perl lib/Parse/CPAN lib/Parse
 	-rmdir lib/Params lib/Package lib/Net/FTP lib/Module/Load
-	-rmdir lib/Module/CoreList lib/Module/Build/Platform lib/Module/Build
-	-rmdir lib/Module lib/Memoize lib/Math/BigInt lib/Math/BigFloat
-	-rmdir lib/Math lib/MIME lib/Locale/Maketext lib/Locale/Codes
-	-rmdir lib/Locale lib/List/Util lib/List lib/JSON/PP lib/JSON lib/IPC
-	-rmdir lib/IO/Uncompress/Adapter lib/IO/Uncompress lib/IO/Socket
-	-rmdir lib/IO/Compress/Zlib lib/IO/Compress/Zip lib/IO/Compress/Gzip
-	-rmdir lib/IO/Compress/Base lib/IO/Compress/Adapter lib/IO/Compress
-	-rmdir lib/IO lib/I18N/LangTags lib/I18N lib/Hash/Util lib/Hash
-	-rmdir lib/HTTP lib/Filter/Util lib/Filter lib/File/Spec
-	-rmdir lib/ExtUtils/Typemaps lib/ExtUtils/ParseXS
-	-rmdir lib/ExtUtils/MakeMaker lib/ExtUtils/Liblist
-	-rmdir lib/ExtUtils/Constant lib/ExtUtils/Command
+	-rmdir lib/Module/CoreList lib/Module lib/Memoize lib/Math/BigInt
+	-rmdir lib/Math/BigFloat lib/Math lib/MIME lib/Locale/Maketext
+	-rmdir lib/Locale/Codes lib/Locale lib/List/Util lib/List lib/JSON/PP
+	-rmdir lib/JSON lib/IPC lib/IO/Uncompress/Adapter lib/IO/Uncompress
+	-rmdir lib/IO/Socket lib/IO/Compress/Zlib lib/IO/Compress/Zip
+	-rmdir lib/IO/Compress/Gzip lib/IO/Compress/Base
+	-rmdir lib/IO/Compress/Adapter lib/IO/Compress lib/IO
+	-rmdir lib/I18N/LangTags lib/I18N lib/Hash/Util lib/Hash lib/HTTP
+	-rmdir lib/Filter/Util lib/Filter lib/File/Spec lib/ExtUtils/Typemaps
+	-rmdir lib/ExtUtils/ParseXS lib/ExtUtils/MakeMaker
+	-rmdir lib/ExtUtils/Liblist lib/ExtUtils/Constant lib/ExtUtils/Command
 	-rmdir lib/ExtUtils/CBuilder/Platform/Windows
 	-rmdir lib/ExtUtils/CBuilder/Platform lib/ExtUtils/CBuilder
 	-rmdir lib/Exporter lib/Encode/Unicode lib/Encode/MIME/Header

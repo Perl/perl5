@@ -201,7 +201,6 @@
 /experimental.pm
 /fields.pm
 /if.pm
-/inc/
 /lib.pm
 /mro.pm
 /ops.pm

@@ -794,26 +794,6 @@ use File::Glob qw(:case);
         'EXCLUDED'     => ['t/bad-sv.t'],
     },
 
-    #
-    # To update Module-Build in blead see
-    # https://github.com/Perl-Toolchain-Gang/Module-Build/blob/master/devtools/patching_blead.pod
-    #
-
-    'Module::Build' => {
-        'DISTRIBUTION' => 'LEONT/Module-Build-0.4205.tar.gz',
-        'FILES'        => q[cpan/Module-Build],
-        'EXCLUDED'     => [
-            qw( t/par.t
-                t/signature.t
-                ),
-            qr{^contrib/},
-            qr{^inc},
-        ],
-        # Generated file, not part of the CPAN distro:
-        'CUSTOMIZED' => ['lib/Module/Build/ConfigData.pm'],
-        'DEPRECATED' => '5.019000',
-    },
-
     'Module::CoreList' => {
         'DISTRIBUTION' => 'BINGOS/Module-CoreList-3.10.tar.gz',
         'FILES'        => q[dist/Module-CoreList],
