@@ -1424,6 +1424,12 @@ tmpnam()
     CODE:
 	RETVAL = newSVpvn("", 0);
 	SvGROW(RETVAL, L_tmpnam);
+	/* Yes, we know tmpnam() is bad.  So bad that some compilers
+	 * and linkers warn against using it.  But it is here for
+	 * completeness.  POSIX.pod warns against using it.
+	 *
+	 * Then again, maybe this should be removed at some point.
+	 * No point in enabling dangerous interfaces. */
 	len = strlen(tmpnam(SvPV(RETVAL, i)));
 	SvCUR_set(RETVAL, len);
     OUTPUT:
