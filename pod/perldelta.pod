@@ -157,6 +157,13 @@ L<Term::Cap> has been upgraded from version 1.15 to 1.16.
 
 The last resort attempt to fake up a termcap from terminfo now works.
 
+=item *
+
+L<Unicode::Collate> has been upgraded from version 1.04 to 1.07.
+
+Version 0.67's improved discontiguous contractions is invalidated by default
+and is supported as a parameter 'long_contraction'.
+
 =back
 
 =head2 Removed Modules and Pragmata

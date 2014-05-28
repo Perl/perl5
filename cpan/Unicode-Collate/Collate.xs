@@ -11,9 +11,9 @@
 #include "ucatbl.h"
 
 /* Perl 5.6.1 ? */
-#ifndef utf8n_to_uvuni
+#ifdef utf8_to_uv
 #define utf8n_to_uvuni  utf8_to_uv
-#endif /* utf8n_to_uvuni */
+#endif /* utf8_to_uv */
 
 /* UTF8_ALLOW_BOM is used before Perl 5.8.0 */
 #ifndef UTF8_ALLOW_BOM
@@ -590,36 +590,28 @@ varCE (self, vce)
     /* variable: checked only the first char and the length,
        trusting checkCollator() and %VariableOK in Perl ... */
 
-    if (vlen < VCE_Length /* ignore short VCE (unexpected) */
-	||
-	*a == 'n') /* non-ignorable */
-	1;
-    else if (*v) {
-	if (*a == 's') { /* shifted or shift-trimmed */
-	    d[7] = d[1]; /* wt level 1 to 4 */
-	    d[8] = d[2];
-	} /* else blanked */
-
-	d[1] = d[2] = d[3] = d[4] = d[5] = d[6] = '\0';
-    }
-    else if (*a == 'b') /* blanked */
-	1;
-    else if (*a == 's') { /* shifted or shift-trimmed */
-	totwt = d[1] + d[2] + d[3] + d[4] + d[5] + d[6];
-	if (alen == 7 && totwt != 0) { /* shifted */
-	    if (d[1] == 0 && d[2] == 1) { /* XXX: CollationAuxiliary-6.2.0 */
+    if (vlen >= VCE_Length && *a != 'n') {
+	if (*v) {
+	    if (*a == 's') { /* shifted or shift-trimmed */
 		d[7] = d[1]; /* wt level 1 to 4 */
 		d[8] = d[2];
-	    } else {
-		d[7] = (U8)(Shift4Wt >> 8);
-		d[8] = (U8)(Shift4Wt & 0xFF);
+	    } /* else blanked */
+	    d[1] = d[2] = d[3] = d[4] = d[5] = d[6] = '\0';
+	} else if (*a == 's') { /* shifted or shift-trimmed */
+	    totwt = d[1] + d[2] + d[3] + d[4] + d[5] + d[6];
+	    if (alen == 7 && totwt != 0) { /* shifted */
+		if (d[1] == 0 && d[2] == 1) { /* XXX: CollationAuxiliary-6.2.0 */
+		    d[7] = d[1]; /* wt level 1 to 4 */
+		    d[8] = d[2];
+		} else {
+		    d[7] = (U8)(Shift4Wt >> 8);
+		    d[8] = (U8)(Shift4Wt & 0xFF);
+		}
+	    } else { /* shift-trimmed or completely ignorable */
+		d[7] = d[8] = '\0';
 	    }
-	} else { /* shift-trimmed or completely ignorable */
-	    d[7] = d[8] = '\0';
-	}
-    }
-    else
-	croak("unknown variable value '%s'", a);
+	} /* else blanked */
+    } /* else non-ignorable */
     RETVAL = dst;
 OUTPUT:
     RETVAL
