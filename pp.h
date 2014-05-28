@@ -274,11 +274,11 @@ Does not use C<TARG>.  See also C<XPUSHu>, C<mPUSHu> and C<PUSHu>.
 # define EXTEND(p,n)   STMT_START {                                     \
                            sp = stack_grow(sp,p,(SSize_t) (n));         \
                            PERL_UNUSED_VAR(sp);                         \
-                       } } STMT_END
+                       } STMT_END
 /* Same thing, but update mark register too. */
 # define MEXTEND(p,n)   STMT_START {                                    \
                             const int markoff = mark - PL_stack_base;   \
-                            sp = stack_grow(sp,p,(SSize_t) (n)));       \
+                            sp = stack_grow(sp,p,(SSize_t) (n));        \
                             mark = PL_stack_base + markoff;             \
                             PERL_UNUSED_VAR(sp);                        \
                         } STMT_END
