@@ -1907,7 +1907,7 @@ nothing in the core.
 		    tot--;
 		else if (S_ISDIR(PL_statbuf.st_mode)) {
 		    tot--;
-		    SETERRNO(EISDIR, SS$_NOPRIV);
+		    SETERRNO(EISDIR, SS_NOPRIV);
 		}
 		else {
 		    if (UNLINK(s))
