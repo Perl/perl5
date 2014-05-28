@@ -193,30 +193,47 @@ typedef U64TYPE U64;
 #   endif
 #endif /* PERL_CORE */
 
+/* INT64_C/UINT64_C are C99 from <stdint.h> (so they will not be
+ * available in strict C89 mode), but they are nice, so let's define
+ * them if necessary. */
 #if defined(HAS_QUAD) && defined(USE_64_BIT_INT)
-#   if defined(HAS_LONG_LONG) && QUADKIND == QUAD_IS_LONG_LONG
-#       define PeRl_INT64_C(c)	CAT2(c,LL)
-#       define PeRl_UINT64_C(c)	CAT2(c,ULL)
-#   else
-#       if QUADKIND == QUAD_IS___INT64
-#           define PeRl_INT64_C(c)	CAT2(c,I64)
-#           define PeRl_UINT64_C(c)	CAT2(c,UI64)
-#       else
-#           if LONGSIZE == 8 && QUADKIND == QUAD_IS_LONG
-#               define PeRl_INT64_C(c)	CAT2(c,L)
-#               define PeRl_UINT64_C(c)	CAT2(c,UL)
-#           else
-#               define PeRl_INT64_C(c)	((I64TYPE)(c))
-#               define PeRl_UINT64_C(c)	((U64TYPE)(c))
-#           endif
-#       endif
-#   endif
-#   ifndef UINT64_C
-#   define UINT64_C(c) PeRl_UINT64_C(c)
-#   endif
-#   ifndef INT64_C
-#   define INT64_C(c) PeRl_INT64_C(c)
-#   endif
+#  undef PeRl_INT64_C
+#  undef PeRl_UINT64_C
+/* Prefer the native integer types (int and long) over long long
+ * (which is not C89) and Win32-specific __int64. */
+#  if QUADKIND == QUAD_IS_INT && INTSIZE == 8
+#    define PeRl_INT64_C(c)	(c)
+#    define PeRl_UINT64_C(c)	CAT2(c,U)
+#  endif
+#  if QUADKIND == QUAD_IS_LONG && LONGSIZE == 8
+#    define PeRl_INT64_C(c)	CAT2(c,L)
+#    define PeRl_UINT64_C(c)	CAT2(c,UL)
+#  endif
+#  if QUADKIND == QUAD_IS_LONG_LONG && defined(HAS_LONG_LONG)
+#    define PeRl_INT64_C(c)	CAT2(c,LL)
+#    define PeRl_UINT64_C(c)	CAT2(c,ULL)
+#  endif
+#  if QUADKIND == QUAD_IS___INT64
+#    define PeRl_INT64_C(c)	CAT2(c,I64)
+#    define PeRl_UINT64_C(c)	CAT2(c,UI64)
+#  endif
+#  ifndef PeRl_INT64_C
+#    define PeRl_INT64_C(c)	((I64TYPE)(c)) /* last resort */
+#    define PeRl_UINT64_C(c)	((U64TYPE)(c))
+#  endif
+/* In OS X the INT64_C/UINT64_C are defined with LL/ULL, which will
+ * not fly with C89-pedantic gcc, so let's undefine them first so that
+ * we can redefine them with our native integer preferring versions. */
+#  if defined(__APPLE__) && defined(PERL_GCC_PEDANTIC)
+#    undef INT64_C
+#    undef UINT64_C
+#  endif
+#  ifndef INT64_C
+#    define INT64_C(c) PeRl_INT64_C(c)
+#  endif
+#  ifndef UINT64_C
+#    define UINT64_C(c) PeRl_UINT64_C(c)
+#  endif
 #endif
 
 #if defined(UINT8_MAX) && defined(INT16_MAX) && defined(INT32_MAX)
