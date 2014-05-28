@@ -2002,13 +2002,15 @@ cpan/Sys-Syslog/win32/PerlLog_dll.uu	Sys::Syslog extension Win32 related file
 cpan/Sys-Syslog/win32/PerlLog.mc	Sys::Syslog extension Win32 related file
 cpan/Sys-Syslog/win32/PerlLog_RES.uu	Sys::Syslog extension Win32 related file
 cpan/Sys-Syslog/win32/Win32.pm		Sys::Syslog extension Win32 related file
-cpan/Term-ANSIColor/ANSIColor.pm	Perl module supporting termcap usage
-cpan/Term-ANSIColor/t/aliases-func.t
-cpan/Term-ANSIColor/t/basic256.t
-cpan/Term-ANSIColor/t/basic.t		Tests for Term::ANSIColor
-cpan/Term-ANSIColor/t/eval.t
-cpan/Term-ANSIColor/t/stringify.t		Tests for Term::ANSIColor
-cpan/Term-ANSIColor/t/taint.t
+cpan/Term-ANSIColor/lib/Term/ANSIColor.pm
+cpan/Term-ANSIColor/t/lib/Test/RRA/Config.pm
+cpan/Term-ANSIColor/t/lib/Test/RRA.pm
+cpan/Term-ANSIColor/t/module/aliases-func.t
+cpan/Term-ANSIColor/t/module/basic256.t
+cpan/Term-ANSIColor/t/module/basic.t
+cpan/Term-ANSIColor/t/module/eval.t
+cpan/Term-ANSIColor/t/module/stringify.t
+cpan/Term-ANSIColor/t/taint/basic.t
 cpan/Term-Cap/Cap.pm			Perl module supporting termcap usage
 cpan/Term-Cap/test.pl			See if Term::Cap works
 cpan/Test-Harness/bin/prove				The prove harness utility

@@ -2,8 +2,8 @@
 #
 # Basic test suite for the Term::ANSIColor Perl module.
 #
-# Copyright 1997, 1998, 2000, 2001, 2002, 2005, 2006, 2009, 2010, 2012
-#     Russ Allbery <rra@stanford.edu>
+# Copyright 1997, 1998, 2000, 2001, 2002, 2005, 2006, 2009, 2010, 2012, 2014
+#     Russ Allbery <rra@cpan.org>
 #
 # This program is free software; you may redistribute it and/or modify it
 # under the same terms as Perl itself.
@@ -241,7 +241,6 @@ like(
 
 # Test error reporting when calling unrecognized Term::ANSIColor subs that go
 # through AUTOLOAD.
-## no critic (ErrorHandling::RequireCheckingReturnValueOfEval)
 ok(!eval { Term::ANSIColor::RSET() }, 'Running invalid constant');
 like(
     $@,

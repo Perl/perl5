@@ -3,7 +3,7 @@
 # Test suite for stringify interaction.
 #
 # Copyright 2011 Revilo Reegiles
-# Copyright 2011 Russ Allbery <rra@stanford.edu>
+# Copyright 2011, 2014 Russ Allbery <rra@cpan.org>
 #
 # This program is free software; you may redistribute it and/or modify it
 # under the same terms as Perl itself.
@@ -17,7 +17,7 @@ use Test::More tests => 6;
 ## no critic (Modules::ProhibitMultiplePackages)
 package Test::Stringify;
 use overload '""' => 'stringify';
-sub new { return bless {}, 'Test::Stringify' }
+sub new { return bless({}, 'Test::Stringify') }
 sub stringify { return "Foo Bar\n" }
 
 # Back to the main package.
@@ -44,6 +44,7 @@ $result = colored($test, 'bold blue');
 is($result, "\e[1;34mFoo Bar\n\e[0m", 'colored with a non-array reference');
 
 # Create a hash reference and try stringifying it.
+## no critic (RegularExpressions::ProhibitEscapedMetacharacters)
 my %foo = (foo => 'bar');
 $result = colored(\%foo, 'bold blue');
 like(

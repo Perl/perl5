@@ -1,7 +1,7 @@
 # Term::ANSIColor -- Color screen output using ANSI escape sequences.
 #
 # Copyright 1996, 1997, 1998, 2000, 2001, 2002, 2005, 2006, 2008, 2009, 2010,
-#     2011, 2012, 2013 Russ Allbery <rra@stanford.edu>
+#     2011, 2012, 2013, 2014 Russ Allbery <rra@cpan.org>
 # Copyright 1996 Zenin
 # Copyright 2012 Kurt Starsinic <kstarsinic@gmail.com>
 #
@@ -40,7 +40,7 @@ our $AUTOLOAD;
 # against circular module loading (not that we load any modules, but
 # consistency is good).
 BEGIN {
-    $VERSION = '4.02';
+    $VERSION = '4.03';
 
     # All of the basic supported constants, used in %EXPORT_TAGS.
     my @colorlist = qw(
@@ -60,14 +60,13 @@ BEGIN {
     );
 
     # 256-color constants, used in %EXPORT_TAGS.
-    ## no critic (ValuesAndExpressions::ProhibitMagicNumbers)
     my @colorlist256 = (
         (map { ("ANSI$_", "ON_ANSI$_") } 0 .. 15),
         (map { ("GREY$_", "ON_GREY$_") } 0 .. 23),
     );
     for my $r (0 .. 5) {
         for my $g (0 .. 5) {
-            push @colorlist256, map { ("RGB$r$g$_", "ON_RGB$r$g$_") } 0 .. 5;
+            push(@colorlist256, map { ("RGB$r$g$_", "ON_RGB$r$g$_") } 0 .. 5);
         }
     }
 
@@ -144,7 +143,6 @@ our %ATTRIBUTES = (
 
 # Generating the 256-color codes involves a lot of codes and offsets that are
 # not helped by turning them into constants.
-## no critic (ValuesAndExpressions::ProhibitMagicNumbers)
 
 # The first 16 256-color codes are duplicates of the 16 ANSI colors,
 # included for completeness.
@@ -171,8 +169,6 @@ for my $n (0 .. 23) {
     $ATTRIBUTES{"grey$n"}    = "38;5;$code";
     $ATTRIBUTES{"on_grey$n"} = "48;5;$code";
 }
-
-## use critic (ValuesAndExpressions::ProhibitMagicNumbers)
 
 # Reverse lookup.  Alphabetically first name for a sequence is preferred.
 our %ATTRIBUTES_R;
@@ -244,14 +240,14 @@ sub AUTOLOAD {
 
     # Check if we were called with something that doesn't look like an
     # attribute.
-    if (!$attr || !defined $ATTRIBUTES{ lc $attr }) {
+    if (!($attr && defined($ATTRIBUTES{ lc $attr }))) {
         croak("undefined subroutine &$AUTOLOAD called");
     }
 
     # If colors are disabled, just return the input.  Do this without
     # installing a sub for (marginal, unbenchmarked) speed.
     if ($ENV{ANSI_COLORS_DISABLED}) {
-        return join q{}, @_;
+        return join(q{}, @_);
     }
 
     # We've untainted the name of the sub.
@@ -273,13 +269,13 @@ sub AUTOLOAD {
     my $eval_result = eval qq{
         sub $AUTOLOAD {
             if (\$ENV{ANSI_COLORS_DISABLED}) {
-                return join q{}, \@_;
+                return join(q{}, \@_);
             } elsif (\$AUTOLOCAL && \@_) {
                 return PUSHCOLOR('$escape') . join(q{}, \@_) . POPCOLOR;
             } elsif (\$AUTORESET && \@_) {
                 return '$escape' . join(q{}, \@_) . "\e[0m";
             } else {
-                return '$escape' . join q{}, \@_;
+                return '$escape' . join(q{}, \@_);
             }
         }
         1;
@@ -309,7 +305,7 @@ sub AUTOLOAD {
 # Returns: The text passed in
 sub PUSHCOLOR {
     my (@text) = @_;
-    my $text = join q{}, @text;
+    my $text = join(q{}, @text);
 
     # Extract any number of color-setting escape sequences from the start of
     # the string.
@@ -324,7 +320,7 @@ sub PUSHCOLOR {
     }
 
     # Push the color onto the stack.
-    push @COLORSTACK, $color;
+    push(@COLORSTACK, $color);
     return $text;
 }
 
@@ -336,9 +332,9 @@ sub PUSHCOLOR {
 # Returns: The concatenation of @text prepended with the new stack color
 sub POPCOLOR {
     my (@text) = @_;
-    pop @COLORSTACK;
+    pop(@COLORSTACK);
     if (@COLORSTACK) {
-        return $COLORSTACK[-1] . join q{}, @text;
+        return $COLORSTACK[-1] . join(q{}, @text);
     } else {
         return RESET(@text);
     }
@@ -353,7 +349,7 @@ sub POPCOLOR {
 # Returns: The concatenation of the text and the proper color reset sequence.
 sub LOCALCOLOR {
     my (@text) = @_;
-    return PUSHCOLOR(join q{}, @text) . POPCOLOR();
+    return PUSHCOLOR(join(q{}, @text)) . POPCOLOR();
 }
 
 ##############################################################################
@@ -379,10 +375,10 @@ sub color {
     # Build the attribute string from semicolon-separated numbers.
     my $attribute = q{};
     for my $code (@codes) {
-        $code = lc $code;
-        if (defined $ATTRIBUTES{$code}) {
+        $code = lc($code);
+        if (defined($ATTRIBUTES{$code})) {
             $attribute .= $ATTRIBUTES{$code} . q{;};
-        } elsif (defined $ALIASES{$code}) {
+        } elsif (defined($ALIASES{$code})) {
             $attribute .= $ALIASES{$code} . q{;};
         } else {
             croak("Invalid attribute name $code");
@@ -390,7 +386,7 @@ sub color {
     }
 
     # We added one too many semicolons for simplicity.  Remove the last one.
-    chop $attribute;
+    chop($attribute);
 
     # Return undef if there were no attributes.
     return ($attribute ne q{}) ? "\e[${attribute}m" : undef;
@@ -416,12 +412,12 @@ sub uncolor {
         $escape =~ s{ \A \e\[ }{}xms;
         $escape =~ s{ m \z }   {}xms;
         my ($attrs) = $escape =~ m{ \A ((?:\d+;)* \d*) \z }xms;
-        if (!defined $attrs) {
+        if (!defined($attrs)) {
             croak("Bad escape sequence $escape");
         }
 
         # Pull off 256-color codes (38;5;n or 48;5;n) as a unit.
-        push @nums, $attrs =~ m{ ( 0*[34]8;0*5;\d+ | \d+ ) (?: ; | \z ) }xmsg;
+        push(@nums, $attrs =~ m{ ( 0*[34]8;0*5;\d+ | \d+ ) (?: ; | \z ) }xmsg);
     }
 
     # Now, walk the list of numbers and convert them to attribute names.
@@ -430,10 +426,10 @@ sub uncolor {
     for my $num (@nums) {
         $num =~ s{ ( \A | ; ) 0+ (\d) }{$1$2}xmsg;
         my $name = $ATTRIBUTES_R{$num};
-        if (!defined $name) {
+        if (!defined($name)) {
             croak("No name for escape sequence $num");
         }
-        push @result, $name;
+        push(@result, $name);
     }
 
     # Return the attribute names.
@@ -461,7 +457,7 @@ sub colored {
     my ($string, @codes);
     if (ref($first) && ref($first) eq 'ARRAY') {
         @codes = @{$first};
-        $string = join q{}, @rest;
+        $string = join(q{}, @rest);
     } else {
         $string = $first;
         @codes  = @rest;
@@ -477,11 +473,11 @@ sub colored {
 
     # If $EACHLINE is defined, split the string on line boundaries, suppress
     # empty segments, and then colorize each of the line sections.
-    if (defined $EACHLINE) {
+    if (defined($EACHLINE)) {
         my @text = map { ($_ ne $EACHLINE) ? $attr . $_ . "\e[0m" : $_ }
           grep { length($_) > 0 }
-          split m{ (\Q$EACHLINE\E) }xms, $string;
-        return join q{}, @text;
+          split(m{ (\Q$EACHLINE\E) }xms, $string);
+        return join(q{}, @text);
     } else {
         return $attr . $string . "\e[0m";
     }
@@ -498,7 +494,7 @@ sub colored {
 #          standard color name as an alias, or an unknown standard color name
 sub coloralias {
     my ($alias, $color) = @_;
-    if (!defined $color) {
+    if (!defined($color)) {
         if (!exists $ALIASES{$alias}) {
             return;
         } else {
@@ -529,7 +525,7 @@ sub colorstrip {
     for my $string (@string) {
         $string =~ s{ \e\[ [\d;]* m }{}xmsg;
     }
-    return wantarray ? @string : join q{}, @string;
+    return wantarray ? @string : join(q{}, @string);
 }
 
 # Given a list of color attributes (arguments for color, for instance), return
@@ -540,9 +536,9 @@ sub colorstrip {
 # Returns: True if all the attributes are valid, false otherwise.
 sub colorvalid {
     my (@codes) = @_;
-    @codes = map { split q{ }, lc $_ } @codes;
+    @codes = map { split(q{ }, lc($_)) } @codes;
     for my $code (@codes) {
-        if (!defined $ATTRIBUTES{$code} && !defined $ALIASES{$code}) {
+        if (!defined($ATTRIBUTES{$code}) && !defined($ALIASES{$code})) {
             return;
         }
     }
@@ -562,24 +558,25 @@ __END__
 Term::ANSIColor - Color screen output using ANSI escape sequences
 
 =for stopwords
-cyan colorize namespace runtime TMTOWTDI cmd.exe 4nt.exe command.com NT
-ESC Delvare SSH OpenSSH aixterm ECMA-048 Fraktur overlining Zenin
-reimplemented Allbery PUSHCOLOR POPCOLOR LOCALCOLOR openmethods.com
-grey ATTR urxvt mistyped prepending Bareword filehandle Cygwin Starsinic
-aterm rxvt CPAN RGB Solarized Whitespace alphanumerics undef
+cyan colorize namespace runtime TMTOWTDI cmd.exe cmd.exe. 4nt.exe. 4nt.exe
+command.com NT ESC Delvare SSH OpenSSH aixterm ECMA-048 Fraktur overlining
+Zenin reimplemented Allbery PUSHCOLOR POPCOLOR LOCALCOLOR openmethods.com
+openmethods.com. grey ATTR urxvt mistyped prepending Bareword filehandle
+Cygwin Starsinic aterm rxvt CPAN RGB Solarized Whitespace alphanumerics
+undef
 
 =head1 SYNOPSIS
 
     use Term::ANSIColor;
-    print color 'bold blue';
+    print color('bold blue');
     print "This text is bold blue.\n";
-    print color 'reset';
+    print color('reset');
     print "This text is normal.\n";
     print colored("Yellow on magenta.", 'yellow on_magenta'), "\n";
     print "This text is normal.\n";
-    print colored ['yellow on_magenta'], 'Yellow on magenta.', "\n";
-    print colored ['red on_bright_yellow'], 'Red on bright yellow.', "\n";
-    print colored ['bright_red on_black'], 'Bright red on black.', "\n";
+    print colored(['yellow on_magenta'], 'Yellow on magenta.', "\n");
+    print colored(['red on_bright_yellow'], 'Red on bright yellow.', "\n");
+    print colored(['bright_red on_black'], 'Bright red on black.', "\n");
     print "\n";
 
     # Map escape sequences back to color names.
@@ -589,7 +586,7 @@ aterm rxvt CPAN RGB Solarized Whitespace alphanumerics undef
 
     # Strip all color escape sequences.
     use Term::ANSIColor 2.01 qw(colorstrip);
-    print colorstrip '\e[1mThis is bold\e[0m', "\n";
+    print colorstrip("\e[1mThis is bold\e[0m"), "\n";
 
     # Determine whether a color is valid.
     use Term::ANSIColor 2.02 qw(colorvalid);
@@ -729,7 +726,7 @@ C<rgb000> or C<rgb515>.  Similarly, the recognized background colors are:
   on_ansi0 .. on_ansi15
   on_grey0 .. on_grey23
 
-plus C<on_rgbI<RGB>> for for I<R>, I<G>, and I<B> values from 0 to 5.
+plus C<on_rgbI<RGB>> for I<R>, I<G>, and I<B> values from 0 to 5.
 
 For any of the above listed attributes, case is not significant.
 
@@ -1092,11 +1089,11 @@ Support for italic was added in Term::ANSIColor 3.02, included in Perl
 Support for colors 16 through 256 (the C<ansi>, C<rgb>, and C<grey>
 colors), the C<:constants256> import tag, the coloralias() function, and
 support for the ANSI_COLORS_ALIASES environment variable were added in
-Term::ANSIColor 4.00.
+Term::ANSIColor 4.00, included in Perl 5.17.8.
 
 $Term::ANSIColor::AUTOLOCAL was changed to take precedence over
 $Term::ANSIColor::AUTORESET, rather than the other way around, in
-Term::ANSIColor 4.00.
+Term::ANSIColor 4.00, included in Perl 5.17.8.
 
 =head1 RESTRICTIONS
 
@@ -1181,7 +1178,30 @@ supported by this module.
 Most modern X terminal emulators support 256 colors.  Known to not support
 those colors are aterm, rxvt, Terminal.app, and TTY/VC.
 
+=head1 AUTHORS
+
+Original idea (using constants) by Zenin, reimplemented using subs by Russ
+Allbery <rra@cpan.org>, and then combined with the original idea by
+Russ with input from Zenin.  256-color support is based on work by Kurt
+Starsinic.  Russ Allbery now maintains this module.
+
+PUSHCOLOR, POPCOLOR, and LOCALCOLOR were contributed by openmethods.com
+voice solutions.
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright 1996 Zenin.  Copyright 1996, 1997, 1998, 2000, 2001, 2002, 2005,
+2006, 2008, 2009, 2010, 2011, 2012, 2013, 2014 Russ Allbery
+<rra@cpan.org>.  Copyright 2012 Kurt Starsinic <kstarsinic@gmail.com>.
+This program is free software; you may redistribute it and/or modify it
+under the same terms as Perl itself.
+
 =head1 SEE ALSO
+
+The CPAN module L<Term::ExtendedColor> provides a different and more
+comprehensive interface for 256-color emulators that may be more
+convenient.  The CPAN module L<Win32::Console::ANSI> provides ANSI color
+(and other escape sequence) support in the Win32 Console environment.
 
 ECMA-048 is available on-line (at least at the time of this writing) at
 L<http://www.ecma-international.org/publications/standards/Ecma-048.htm>.
@@ -1192,32 +1212,11 @@ ECMA-048 and the latter is available for free, there seems little reason
 to obtain the ISO standard.
 
 The 256-color control sequences are documented at
-L<http://www.xfree86.org/current/ctlseqs.html> (search for 256-color).
-
-The CPAN module Term::ExtendedColor provides a different and more
-comprehensive interface for 256-color emulators that may be more
-convenient.
+L<http://invisible-island.net/xterm/ctlseqs/ctlseqs.html> (search for
+256-color).
 
 The current version of this module is always available from its web site
 at L<http://www.eyrie.org/~eagle/software/ansicolor/>.  It is also part of
 the Perl core distribution as of 5.6.0.
-
-=head1 AUTHORS
-
-Original idea (using constants) by Zenin, reimplemented using subs by Russ
-Allbery <rra@stanford.edu>, and then combined with the original idea by
-Russ with input from Zenin.  256-color support is based on work by Kurt
-Starsinic.  Russ Allbery now maintains this module.
-
-PUSHCOLOR, POPCOLOR, and LOCALCOLOR were contributed by openmethods.com
-voice solutions.
-
-=head1 COPYRIGHT AND LICENSE
-
-Copyright 1996 Zenin.  Copyright 1996, 1997, 1998, 2000, 2001, 2002, 2005,
-2006, 2008, 2009, 2010, 2011, 2012 Russ Allbery <rra@stanford.edu>.
-Copyright 2012 Kurt Starsinic <kstarsinic@gmail.com>.  This program is
-free software; you may redistribute it and/or modify it under the same
-terms as Perl itself.
 
 =cut

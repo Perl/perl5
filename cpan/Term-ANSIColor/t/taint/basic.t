@@ -7,7 +7,7 @@
 # an environment variable).  Term::ANSIColor does the work to untaint it; be
 # sure that the taint flag is properly cleared.
 #
-# Copyright 2012 Russ Allbery <rra@stanford.edu>
+# Copyright 2012 Russ Allbery <rra@cpan.org>
 #
 # This program is free software; you may redistribute it and/or modify it
 # under the same terms as Perl itself.

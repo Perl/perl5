@@ -1004,20 +1004,14 @@ use File::Glob qw(:case);
     },
 
     'Term::ANSIColor' => {
-        'DISTRIBUTION' => 'RRA/Term-ANSIColor-4.02.tar.gz',
+        'DISTRIBUTION' => 'RRA/Term-ANSIColor-4.03.tar.gz',
         'FILES'        => q[cpan/Term-ANSIColor],
         'EXCLUDED'     => [
             qr{^examples/},
             qr{^t/data/},
-            qw( t/aliases-env.t
-                t/critic.t
-                t/minimum-version.t
-                t/pod-spelling.t
-                t/pod-coverage.t
-                t/pod.t
-                t/strict.t
-                t/synopsis.t
-                ),
+            qr{^t/docs/},
+            qr{^t/style/},
+            qw( t/module/aliases-env.t ),
         ],
     },
 
