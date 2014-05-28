@@ -32,12 +32,14 @@ sub FETCH {
 sub EXISTS {
     my ($self, $key) = @_;
 
+    restart:
     if (exists $self->{changed}{$key}) {
         return 1;
     } elsif (exists $self->{removed}{$key}) {
         return '';
     } elsif (defined $self->{parent}) {
-        return exists $self->{parent}{$key};
+        $self = tied %{$self->{parent}}; #avoid extreme magic/tie recursion
+        goto restart;
     }
     return '';
 }
