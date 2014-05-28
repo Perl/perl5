@@ -1073,7 +1073,23 @@ heap memory accesses.  As of version 3.3.0, Valgrind only supports Linux
 on x86, x86-64 and PowerPC and Darwin (OS X) on x86 and x86-64).  The
 special "test.valgrind" target can be used to run the tests under
 valgrind.  Found errors and memory leaks are logged in files named
-F<testfile.valgrind>.
+F<testfile.valgrind> and by default output is displayed inline.
+
+Example usage:
+
+    make test.valgrind
+
+Since valgrind adds significant overhead, tests will take much longer to
+run.  The valgrind tests support being run in parallel to help with this:
+
+    TEST_JOBS=9 make test.valgrind
+
+Note that the above two invocations will be very verbose as reachable
+memory and leak-checking is enabled by default.  If you want to just see
+pure errors, try:
+    
+    VG_OPTS='-q --leak-check=no --show-reachable=no' TEST_JOBS=9 \
+        make test.valgrind
 
 Valgrind also provides a cachegrind tool, invoked on perl as:
 
