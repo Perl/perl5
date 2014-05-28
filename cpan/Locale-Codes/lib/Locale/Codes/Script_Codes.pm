@@ -3,7 +3,7 @@ Locale::Codes::Script_Codes;
 
 # This file was automatically generated.  Any changes to this file will
 # be lost the next time 'harvest_data' is run.
-#    Generated on: Thu Feb 27 15:45:43 EST 2014
+#    Generated on: Wed May 28 11:22:35 EDT 2014
 
 use strict;
 require 5.006;
@@ -11,7 +11,7 @@ use warnings;
 use utf8;
 
 our($VERSION);
-$VERSION='3.30';
+$VERSION='3.31';
 
 $Locale::Codes::Data{'script'}{'id'} = '0166';
 

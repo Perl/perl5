@@ -26,7 +26,18 @@ codes, I will add them to the module and release a new version.
 
 =head1 VERSION 3.32  (planned 2014-09-01; sbeck)
 
-=head1 VERSION 3.31  (planned 2014-06-01; sbeck)
+=head1 VERSION 3.31  (2014-06-01; sbeck)
+
+NEW CODE(s)
+
+=over 4
+
+=item B<Bug fixes>
+
+Fixed a bug in the scripts used to extract data from spreadsheets
+that prevented the SHP currency code from being found.  RT 94229
+
+=back
 
 =head1 VERSION 3.30  (2014-03-04; sbeck)
 

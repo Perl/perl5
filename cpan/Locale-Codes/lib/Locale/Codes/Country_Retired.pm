@@ -3,7 +3,7 @@ Locale::Codes::Country_Retired;
 
 # This file was automatically generated.  Any changes to this file will
 # be lost the next time 'deprecate_codes' is run.
-#    Generated on: Tue Mar  4 13:19:40 EST 2014
+#    Generated on: Wed May 28 11:24:54 EDT 2014
 
 use strict;
 require 5.006;
@@ -11,7 +11,7 @@ use warnings;
 use utf8;
 
 our($VERSION);
-$VERSION='3.30';
+$VERSION='3.31';
 
 $Locale::Codes::Retired{'country'}{'alpha-2'}{'code'} = {
    q(an) => q(Netherlands Antilles),
@@ -301,7 +301,10 @@ $Locale::Codes::Retired{'country'}{'dom'}{'code'} = {
    q(ZM) => q(Zambia),
    q(ZW) => q(Zimbabwe),
    q(ac) => q(Ascension Island),
+   q(an) => q(Netherlands Antilles),
    q(eu) => q(European Union),
+   q(su) => q(USSR),
+   q(tp) => q(East Timor),
    q(uk) => q(United Kingdom),
 };
 
@@ -328,6 +331,7 @@ $Locale::Codes::Retired{'country'}{'alpha-2'}{'name'} = {
    q(bolivia) => [ q(bo), q(Bolivia) ],
    q(bonaire, saint eustatius and saba) => [ q(bq), q(Bonaire, Saint Eustatius and Saba) ],
    q(bosnia and herzegowina) => [ q(ba), q(Bosnia and Herzegowina) ],
+   q(cape verde) => [ q(cv), q(Cape Verde) ],
    q(congo, the democratic republic of the) => [ q(cd), q(Congo, The Democratic Republic of the) ],
    q(east timor) => [ q(tl), q(East Timor) ],
    q(falkland islands (malvinas)) => [ q(fk), q(Falkland Islands (Malvinas)) ],
@@ -446,7 +450,9 @@ $Locale::Codes::Retired{'country'}{'dom'}{'name'} = {
    q(ascension island) => [ q(ac), q(Ascension Island) ],
    q(bonaire, saint eustatius and saba) => [ q(bq), q(Bonaire, Saint Eustatius and Saba) ],
    q(bonaire, sint eustatius and saba) => [ q(BQ), q(Bonaire, Sint Eustatius and Saba) ],
+   q(cape verde) => [ q(cv), q(Cape Verde) ],
    q(congo, the democratic republic of the) => [ q(cd), q(Congo, The Democratic Republic of the) ],
+   q(east timor) => [ q(tp), q(East Timor) ],
    q(european union) => [ q(eu), q(European Union) ],
    q(falkland islands (malvinas)) => [ q(fk), q(Falkland Islands (Malvinas)) ],
    q(france, metropolitan) => [ q(FX), q(France, Metropolitan) ],
@@ -457,6 +463,7 @@ $Locale::Codes::Retired{'country'}{'dom'}{'name'} = {
    q(libyan arab jamahiriya) => [ q(LY), q(Libyan Arab Jamahiriya) ],
    q(micronesia, federated states of) => [ q(fm), q(Micronesia, Federated States of) ],
    q(moldova, republic of) => [ q(md), q(Moldova, Republic of) ],
+   q(netherlands antilles) => [ q(an), q(Netherlands Antilles) ],
    q(portuguese timor) => [ q(TP), q(Portuguese Timor) ],
    q(portuguese timor ) => [ q(TP), q(Portuguese Timor ) ],
    q(saint helena, ascension and tristan da cunha) => [ q(SH), q(Saint Helena, Ascension and Tristan da Cunha) ],
@@ -465,6 +472,7 @@ $Locale::Codes::Retired{'country'}{'dom'}{'name'} = {
    q(soviet union ) => [ q(SU), q(Soviet Union ) ],
    q(taiwan) => [ q(TW), q(Taiwan) ],
    q(taiwan, province of china) => [ q(tw), q(Taiwan, Province of China) ],
+   q(ussr) => [ q(su), q(USSR) ],
    q(venezuela, bolivarian republic of) => [ q(ve), q(Venezuela, Bolivarian Republic of) ],
    q(virgin islands, british) => [ q(vg), q(Virgin Islands, British) ],
    q(virgin islands, u.s.) => [ q(vi), q(Virgin Islands, U.S.) ],

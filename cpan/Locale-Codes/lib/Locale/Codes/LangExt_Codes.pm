@@ -3,7 +3,7 @@ Locale::Codes::LangExt_Codes;
 
 # This file was automatically generated.  Any changes to this file will
 # be lost the next time 'harvest_data' is run.
-#    Generated on: Thu Feb 27 15:45:50 EST 2014
+#    Generated on: Wed May 28 11:23:46 EDT 2014
 
 use strict;
 require 5.006;
@@ -11,9 +11,9 @@ use warnings;
 use utf8;
 
 our($VERSION);
-$VERSION='3.30';
+$VERSION='3.31';
 
-$Locale::Codes::Data{'langext'}{'id'} = '0228';
+$Locale::Codes::Data{'langext'}{'id'} = '0229';
 
 $Locale::Codes::Data{'langext'}{'id2names'} = {
    q(0001) => [
@@ -298,6 +298,7 @@ $Locale::Codes::Data{'langext'}{'id2names'} = {
       q(Ho Chi Minh City Sign Language),
       ],
    q(0093) => [
+      q(Hawai'i Sign Language (HSL)),
       q(Hawai'i Pidgin Sign Language),
       ],
    q(0094) => [
@@ -690,24 +691,27 @@ $Locale::Codes::Data{'langext'}{'id2names'} = {
       q(Yiddish Sign Language),
       ],
    q(0221) => [
-      q(Yugoslavian Sign Language),
+      q(Yolnu Sign Language),
       ],
    q(0222) => [
-      q(Yue Chinese),
+      q(Yugoslavian Sign Language),
       ],
    q(0223) => [
-      q(Zimbabwe Sign Language),
+      q(Yue Chinese),
       ],
    q(0224) => [
-      q(Malay (individual language)),
+      q(Zimbabwe Sign Language),
       ],
    q(0225) => [
-      q(Negeri Sembilan Malay),
+      q(Malay (individual language)),
       ],
    q(0226) => [
-      q(Zambian Sign Language),
+      q(Negeri Sembilan Malay),
       ],
    q(0227) => [
+      q(Zambian Sign Language),
+      ],
+   q(0228) => [
       q(Standard Malay),
       ],
 };
@@ -1019,6 +1023,10 @@ $Locale::Codes::Data{'langext'}{'alias2id'} = {
       ],
    q(hawai'i pidgin sign language) => [
       q(0093),
+      q(1),
+      ],
+   q(hawai'i sign language (hsl)) => [
+      q(0093),
       q(0),
       ],
    q(heung kong sau yue) => [
@@ -1222,7 +1230,7 @@ $Locale::Codes::Data{'langext'}{'alias2id'} = {
       q(0),
       ],
    q(malay (individual language)) => [
-      q(0224),
+      q(0225),
       q(0),
       ],
    q(malaysian sign language) => [
@@ -1318,7 +1326,7 @@ $Locale::Codes::Data{'langext'}{'alias2id'} = {
       q(0),
       ],
    q(negeri sembilan malay) => [
-      q(0225),
+      q(0226),
       q(0),
       ],
    q(nepalese sign language) => [
@@ -1518,7 +1526,7 @@ $Locale::Codes::Data{'langext'}{'alias2id'} = {
       q(0),
       ],
    q(standard malay) => [
-      q(0227),
+      q(0228),
       q(0),
       ],
    q(sudanese arabic) => [
@@ -1653,24 +1661,28 @@ $Locale::Codes::Data{'langext'}{'alias2id'} = {
       q(0220),
       q(0),
       ],
+   q(yolnu sign language) => [
+      q(0221),
+      q(0),
+      ],
    q(yucatec maya sign language) => [
       q(0142),
       q(0),
       ],
    q(yue chinese) => [
-      q(0222),
+      q(0223),
       q(0),
       ],
    q(yugoslavian sign language) => [
-      q(0221),
+      q(0222),
       q(0),
       ],
    q(zambian sign language) => [
-      q(0226),
+      q(0227),
       q(0),
       ],
    q(zimbabwe sign language) => [
-      q(0223),
+      q(0224),
       q(0),
       ],
 };
@@ -2557,32 +2569,36 @@ $Locale::Codes::Data{'langext'}{'code2id'} = {
          q(0220),
          q(0),
          ],
-      q(ysl) => [
+      q(ygs) => [
          q(0221),
          q(0),
          ],
-      q(yue) => [
+      q(ysl) => [
          q(0222),
          q(0),
          ],
-      q(zib) => [
+      q(yue) => [
          q(0223),
          q(0),
          ],
-      q(zlm) => [
+      q(zib) => [
          q(0224),
          q(0),
          ],
-      q(zmi) => [
+      q(zlm) => [
          q(0225),
          q(0),
          ],
-      q(zsl) => [
+      q(zmi) => [
          q(0226),
          q(0),
          ],
-      q(zsm) => [
+      q(zsl) => [
          q(0227),
+         q(0),
+         ],
+      q(zsm) => [
+         q(0228),
          q(0),
          ],
       },
@@ -2810,13 +2826,14 @@ $Locale::Codes::Data{'langext'}{'id2code'} = {
       q(0218) => q(xmm),
       q(0219) => q(xms),
       q(0220) => q(yds),
-      q(0221) => q(ysl),
-      q(0222) => q(yue),
-      q(0223) => q(zib),
-      q(0224) => q(zlm),
-      q(0225) => q(zmi),
-      q(0226) => q(zsl),
-      q(0227) => q(zsm),
+      q(0221) => q(ygs),
+      q(0222) => q(ysl),
+      q(0223) => q(yue),
+      q(0224) => q(zib),
+      q(0225) => q(zlm),
+      q(0226) => q(zmi),
+      q(0227) => q(zsl),
+      q(0228) => q(zsm),
       },
 };
 

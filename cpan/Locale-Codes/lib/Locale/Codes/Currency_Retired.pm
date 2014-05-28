@@ -3,7 +3,7 @@ Locale::Codes::Currency_Retired;
 
 # This file was automatically generated.  Any changes to this file will
 # be lost the next time 'deprecate_codes' is run.
-#    Generated on: Tue Mar  4 13:19:40 EST 2014
+#    Generated on: Wed May 28 11:24:54 EDT 2014
 
 use strict;
 require 5.006;
@@ -11,7 +11,7 @@ use warnings;
 use utf8;
 
 our($VERSION);
-$VERSION='3.30';
+$VERSION='3.31';
 
 $Locale::Codes::Retired{'currency'}{'alpha'}{'code'} = {
    q(ADP) => q(Andorran Peseta),
@@ -55,6 +55,7 @@ $Locale::Codes::Retired{'currency'}{'alpha'}{'code'} = {
    q(TPE) => q(Timor Escudo),
    q(TRL) => q(Turkish Lira),
    q(UAK) => q(Karbovanets),
+   q(USS) => q(US Dollar (Same day)),
    q(VEB) => q(Bolivar),
    q(XB5) => q(European Unit of Account 17),
    q(XEU) => q(ECU (until 1998-12-31)),
@@ -69,6 +70,7 @@ $Locale::Codes::Retired{'currency'}{'alpha'}{'code'} = {
 $Locale::Codes::Retired{'currency'}{'num'}{'code'} = {
    q(428) => q(Latvian Lats),
    q(654) => q(Saint Helena Pound),
+   q(998) => q(US Dollar (Same day)),
 };
 
 $Locale::Codes::Retired{'currency'}{'alpha'}{'name'} = {
@@ -141,6 +143,7 @@ $Locale::Codes::Retired{'currency'}{'alpha'}{'name'} = {
    q(unidades de fomento) => [ q(CLF), q(Unidades de fomento) ],
    q(unidades de formento) => [ q(CLF), q(Unidades de Formento) ],
    q(uruguay peso en unidades indexadas) => [ q(UYI), q(Uruguay Peso en Unidades Indexadas) ],
+   q(us dollar (same day)) => [ q(USS), q(US Dollar (Same day)) ],
 };
 
 $Locale::Codes::Retired{'currency'}{'num'}{'name'} = {
@@ -152,6 +155,7 @@ $Locale::Codes::Retired{'currency'}{'num'}{'name'} = {
    q(new manat) => [ q(934), q(New Manat) ],
    q(saint helena pound) => [ q(654), q(Saint Helena Pound) ],
    q(unidades de fomento) => [ q(990), q(Unidades de fomento) ],
+   q(us dollar (same day)) => [ q(998), q(US Dollar (Same day)) ],
 };
 
 
