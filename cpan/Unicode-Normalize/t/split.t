@@ -12,8 +12,8 @@ BEGIN {
 
 BEGIN {
     if ($ENV{PERL_CORE}) {
-        chdir('t') if -d 't';
-        @INC = $^O eq 'MacOS' ? qw(::lib) : qw(../lib);
+	chdir('t') if -d 't';
+	@INC = $^O eq 'MacOS' ? qw(::lib) : qw(../lib);
     }
 }
 
@@ -92,11 +92,11 @@ sub arraynorm {
     my $result = "";
     my $unproc = "";
     foreach my $str (@string) {
-        $unproc .= $str;
-        my $n = normalize($form, $unproc);
-        my($p, $u) = splitOnLastStarter($n);
-        $result .= $p;
-        $unproc  = $u;
+	$unproc .= $str;
+	my $n = normalize($form, $unproc);
+	my($p, $u) = splitOnLastStarter($n);
+	$result .= $p;
+	$unproc  = $u;
     }
     $result .= $unproc;
     return $result;

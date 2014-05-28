@@ -1239,15 +1239,8 @@ use File::Glob qw(:case);
     },
 
     'Unicode::Normalize' => {
-        'DISTRIBUTION' => 'SADAHIRO/Unicode-Normalize-1.17.tar.gz',
+        'DISTRIBUTION' => 'SADAHIRO/Unicode-Normalize-1.18.tar.gz',
         'FILES'        => q[cpan/Unicode-Normalize],
-        'EXCLUDED'     => [
-            qw( MANIFEST.N
-                Normalize.pmN
-                disableXS
-                enableXS
-                ),
-        ],
     },
 
     'version' => {
