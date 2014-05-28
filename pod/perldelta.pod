@@ -204,7 +204,10 @@ XXX Changes (i.e. rewording) of diagnostic messages go here
 
 =item *
 
-XXX Describe change here
+L<Unsuccessful %s on filename containing newline|perldiag/"Unsuccessful %s on filename containing newline">
+
+This warning is now only produced when the newline is at the end of
+the filename.
 
 =back
 
