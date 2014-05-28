@@ -327,6 +327,19 @@
 #  define PERL_UNUSED_CONTEXT
 #endif
 
+/* gcc (-ansi) -pedantic doesn't allow gcc statement expressions,
+ * g++ allows them but seems to have problems with them
+ * (insane errors ensue).
+ * g++ does not give insane errors now (RMB 2008-01-30, gcc 4.2.2).
+ */
+#if defined(PERL_GCC_PEDANTIC) || \
+    (defined(__GNUC__) && defined(__cplusplus) && \
+	((__GNUC__ < 4) || ((__GNUC__ == 4) && (__GNUC_MINOR__ < 2))))
+#  ifndef PERL_GCC_BRACE_GROUPS_FORBIDDEN
+#    define PERL_GCC_BRACE_GROUPS_FORBIDDEN
+#  endif
+#endif
+
 /* Use PERL_UNUSED_RESULT() to suppress the warnings about unused results
  * of function calls, e.g. PERL_UNUSED_RESULT(foo(a, b)).  Use it sparingly,
  * though, since usually the warning is there for a good reason,
@@ -346,7 +359,7 @@
  * extension __typeof__ and nothing else.
  */
 #ifndef PERL_UNUSED_RESULT
-#  ifdef __GNUC__
+#  if defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
 #    define PERL_UNUSED_RESULT(v) ({ __typeof__(v) z = (v); (void)sizeof(z); })
 #  else
 #    define PERL_UNUSED_RESULT(v) ((void)(v))
@@ -470,19 +483,6 @@
 #    define PERL_XS_EXPORT_C extern "C"
 #  else
 #    define PERL_XS_EXPORT_C
-#  endif
-#endif
-
-/* gcc (-ansi) -pedantic doesn't allow gcc statement expressions,
- * g++ allows them but seems to have problems with them
- * (insane errors ensue).
- * g++ does not give insane errors now (RMB 2008-01-30, gcc 4.2.2).
- */
-#if defined(PERL_GCC_PEDANTIC) || \
-    (defined(__GNUC__) && defined(__cplusplus) && \
-	((__GNUC__ < 4) || ((__GNUC__ == 4) && (__GNUC_MINOR__ < 2))))
-#  ifndef PERL_GCC_BRACE_GROUPS_FORBIDDEN
-#    define PERL_GCC_BRACE_GROUPS_FORBIDDEN
 #  endif
 #endif
 
