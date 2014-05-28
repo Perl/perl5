@@ -349,7 +349,9 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+index() and rindex() no longer crash when used on strings over 2GB in
+size.
+L<[perl #121562]|https://rt.perl.org/Ticket/Display.html?id=121562>.
 
 =back
 
