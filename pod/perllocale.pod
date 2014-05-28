@@ -1161,7 +1161,7 @@ If the locale given by an environment variable is not valid, Perl tries
 the next lower one in priority.  If none are valid, on Windows, the
 system default locale is then tried.  If all else fails, the C<"C">
 locale is used.  If even that doesn't work, something is badly broken,
-but Perl tries to forge ahead with whatever the locale settinga might
+but Perl tries to forge ahead with whatever the locale settings might
 be.
 
 =over 12
