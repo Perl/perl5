@@ -192,10 +192,10 @@
 PERL_STATIC_INLINE U32
 S_perl_hash_siphash_2_4(const unsigned char * const seed, const unsigned char *in, const STRLEN inlen) {
   /* "somepseudorandomlygeneratedbytes" */
-  U64TYPE v0 = 0x736f6d6570736575ULL;
-  U64TYPE v1 = 0x646f72616e646f6dULL;
-  U64TYPE v2 = 0x6c7967656e657261ULL;
-  U64TYPE v3 = 0x7465646279746573ULL;
+  U64TYPE v0 = UINT64_C(0x736f6d6570736575);
+  U64TYPE v1 = UINT64_C(0x646f72616e646f6d);
+  U64TYPE v2 = UINT64_C(0x6c7967656e657261);
+  U64TYPE v3 = UINT64_C(0x7465646279746573);
 
   U64TYPE b;
   U64TYPE k0 = ((U64TYPE*)seed)[0];
