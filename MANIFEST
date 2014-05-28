@@ -244,6 +244,7 @@ cpan/CPAN-Meta-Requirements/t/from-hash.t
 cpan/CPAN-Meta-Requirements/t/merge.t
 cpan/CPAN-Meta/t/converter-bad.t
 cpan/CPAN-Meta/t/converter-fail.t
+cpan/CPAN-Meta/t/converter-fragments.t
 cpan/CPAN-Meta/t/converter.t
 cpan/CPAN-Meta/t/data-fail/META-1_0.yml
 cpan/CPAN-Meta/t/data-fail/META-1_1.yml
