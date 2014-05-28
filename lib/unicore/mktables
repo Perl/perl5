@@ -17879,10 +17879,12 @@ sub make_property_test_script() {
 
     &write($t_path,
            0,           # Not utf8;
-           [<DATA>,
+           [$HEADER,
+            <DATA>,
             @output,
             (map {"Test_X('$_');\n"} @backslash_X_tests),
-            "Finished();\n"]);
+            "Finished();\n"
+           ]);
     return;
 }
 
