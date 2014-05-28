@@ -128,6 +128,12 @@ L<[perl #121574]|https://rt.perl.org/Ticket/Display.html?id=121574>
 
 =item *
 
+L<Math::BigRat> has been upgraded from version 0.2606 to 0.2607.
+
+Synchronize POD changes from the CPAN release.
+
+=item *
+
 L<perl5db.pl> has been upgraded from version 1.44 to 1.45.
 
 fork() in the debugger under C<tmux> will now create a new window for
