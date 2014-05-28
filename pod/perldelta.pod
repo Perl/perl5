@@ -163,14 +163,6 @@ The debugger now saves the current working directory on startup and
 restores it when you restart your program with C<R> or <rerun>. L<[perl
 #121509]|https://rt.perl.org/Ticket/Display.html?id=121509>
 
-=item *
-
-L<Term::Cap> has been upgraded from version 1.15 to 1.16.
-
-The last resort attempt to fake up a termcap from terminfo now works.
-
-=item *
-
 L<Unicode::Collate> has been upgraded from version 1.04 to 1.07.
 
 Version 0.67's improved discontiguous contractions is invalidated by default
