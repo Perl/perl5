@@ -289,34 +289,34 @@ struct lconv_offset {
 };
 
 const struct lconv_offset lconv_strings[] = {
-    {"decimal_point",     offsetof(struct lconv, decimal_point)},
-    {"thousands_sep",     offsetof(struct lconv, thousands_sep)},
+    {"decimal_point",     STRUCT_OFFSET(struct lconv, decimal_point)},
+    {"thousands_sep",     STRUCT_OFFSET(struct lconv, thousands_sep)},
 #ifndef NO_LOCALECONV_GROUPING
-    {"grouping",          offsetof(struct lconv, grouping)},
+    {"grouping",          STRUCT_OFFSET(struct lconv, grouping)},
 #endif
-    {"int_curr_symbol",   offsetof(struct lconv, int_curr_symbol)},
-    {"currency_symbol",   offsetof(struct lconv, currency_symbol)},
-    {"mon_decimal_point", offsetof(struct lconv, mon_decimal_point)},
+    {"int_curr_symbol",   STRUCT_OFFSET(struct lconv, int_curr_symbol)},
+    {"currency_symbol",   STRUCT_OFFSET(struct lconv, currency_symbol)},
+    {"mon_decimal_point", STRUCT_OFFSET(struct lconv, mon_decimal_point)},
 #ifndef NO_LOCALECONV_MON_THOUSANDS_SEP
-    {"mon_thousands_sep", offsetof(struct lconv, mon_thousands_sep)},
+    {"mon_thousands_sep", STRUCT_OFFSET(struct lconv, mon_thousands_sep)},
 #endif
 #ifndef NO_LOCALECONV_MON_GROUPING
-    {"mon_grouping",      offsetof(struct lconv, mon_grouping)},
+    {"mon_grouping",      STRUCT_OFFSET(struct lconv, mon_grouping)},
 #endif
-    {"positive_sign",     offsetof(struct lconv, positive_sign)},
-    {"negative_sign",     offsetof(struct lconv, negative_sign)},
+    {"positive_sign",     STRUCT_OFFSET(struct lconv, positive_sign)},
+    {"negative_sign",     STRUCT_OFFSET(struct lconv, negative_sign)},
     {NULL, 0}
 };
 
 const struct lconv_offset lconv_integers[] = {
-    {"int_frac_digits",   offsetof(struct lconv, int_frac_digits)},
-    {"frac_digits",       offsetof(struct lconv, frac_digits)},
-    {"p_cs_precedes",     offsetof(struct lconv, p_cs_precedes)},
-    {"p_sep_by_space",    offsetof(struct lconv, p_sep_by_space)},
-    {"n_cs_precedes",     offsetof(struct lconv, n_cs_precedes)},
-    {"n_sep_by_space",    offsetof(struct lconv, n_sep_by_space)},
-    {"p_sign_posn",       offsetof(struct lconv, p_sign_posn)},
-    {"n_sign_posn",       offsetof(struct lconv, n_sign_posn)},
+    {"int_frac_digits",   STRUCT_OFFSET(struct lconv, int_frac_digits)},
+    {"frac_digits",       STRUCT_OFFSET(struct lconv, frac_digits)},
+    {"p_cs_precedes",     STRUCT_OFFSET(struct lconv, p_cs_precedes)},
+    {"p_sep_by_space",    STRUCT_OFFSET(struct lconv, p_sep_by_space)},
+    {"n_cs_precedes",     STRUCT_OFFSET(struct lconv, n_cs_precedes)},
+    {"n_sep_by_space",    STRUCT_OFFSET(struct lconv, n_sep_by_space)},
+    {"p_sign_posn",       STRUCT_OFFSET(struct lconv, p_sign_posn)},
+    {"n_sign_posn",       STRUCT_OFFSET(struct lconv, n_sign_posn)},
     {NULL, 0}
 };
 

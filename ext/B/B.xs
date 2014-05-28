@@ -614,7 +614,7 @@ typedef PADLIST	*B__PADLIST;
 
 #ifdef MULTIPLICITY
 #  define ASSIGN_COMMON_ALIAS(prefix, var) \
-    STMT_START { XSANY.any_i32 = offsetof(struct interpreter, prefix##var); } STMT_END
+    STMT_START { XSANY.any_i32 = STRUCT_OFFSET(struct interpreter, prefix##var); } STMT_END
 #else
 #  define ASSIGN_COMMON_ALIAS(prefix, var) \
     STMT_START { XSANY.any_ptr = (void *)&PL_##var; } STMT_END
@@ -660,47 +660,47 @@ struct OP_methods {
     U8    type; /* if op_offset_special, access is handled on a case-by-case basis */
     U16 offset;
 } op_methods[] = {
-  { STR_WITH_LEN("next"),    OPp,    offsetof(struct op, op_next),     },/* 0*/
-  { STR_WITH_LEN("sibling"), OPp,    offsetof(struct op, op_sibling),  },/* 1*/
-  { STR_WITH_LEN("targ"),    PADOFFSETp, offsetof(struct op, op_targ), },/* 2*/
-  { STR_WITH_LEN("flags"),   U8p,    offsetof(struct op, op_flags),    },/* 3*/
-  { STR_WITH_LEN("private"), U8p,    offsetof(struct op, op_private),  },/* 4*/
-  { STR_WITH_LEN("first"),   OPp,    offsetof(struct unop, op_first),  },/* 5*/
-  { STR_WITH_LEN("last"),    OPp,    offsetof(struct binop, op_last),  },/* 6*/
-  { STR_WITH_LEN("other"),   OPp,    offsetof(struct logop, op_other), },/* 7*/
+  { STR_WITH_LEN("next"),    OPp,    STRUCT_OFFSET(struct op, op_next),     },/* 0*/
+  { STR_WITH_LEN("sibling"), OPp,    STRUCT_OFFSET(struct op, op_sibling),  },/* 1*/
+  { STR_WITH_LEN("targ"),    PADOFFSETp, STRUCT_OFFSET(struct op, op_targ), },/* 2*/
+  { STR_WITH_LEN("flags"),   U8p,    STRUCT_OFFSET(struct op, op_flags),    },/* 3*/
+  { STR_WITH_LEN("private"), U8p,    STRUCT_OFFSET(struct op, op_private),  },/* 4*/
+  { STR_WITH_LEN("first"),   OPp,    STRUCT_OFFSET(struct unop, op_first),  },/* 5*/
+  { STR_WITH_LEN("last"),    OPp,    STRUCT_OFFSET(struct binop, op_last),  },/* 6*/
+  { STR_WITH_LEN("other"),   OPp,    STRUCT_OFFSET(struct logop, op_other), },/* 7*/
   { STR_WITH_LEN("pmreplstart"), op_offset_special, 0,                 },/* 8*/
-  { STR_WITH_LEN("redoop"),  OPp,    offsetof(struct loop, op_redoop), },/* 9*/
-  { STR_WITH_LEN("nextop"),  OPp,    offsetof(struct loop, op_nextop), },/*10*/
-  { STR_WITH_LEN("lastop"),  OPp,    offsetof(struct loop, op_lastop), },/*11*/
-  { STR_WITH_LEN("pmflags"), U32p,   offsetof(struct pmop, op_pmflags),},/*12*/
+  { STR_WITH_LEN("redoop"),  OPp,    STRUCT_OFFSET(struct loop, op_redoop), },/* 9*/
+  { STR_WITH_LEN("nextop"),  OPp,    STRUCT_OFFSET(struct loop, op_nextop), },/*10*/
+  { STR_WITH_LEN("lastop"),  OPp,    STRUCT_OFFSET(struct loop, op_lastop), },/*11*/
+  { STR_WITH_LEN("pmflags"), U32p,   STRUCT_OFFSET(struct pmop, op_pmflags),},/*12*/
 #if PERL_VERSION >= 17
-  { STR_WITH_LEN("code_list"),OPp,   offsetof(struct pmop, op_code_list),},/*13*/
+  { STR_WITH_LEN("code_list"),OPp,   STRUCT_OFFSET(struct pmop, op_code_list),},/*13*/
 #else
   { STR_WITH_LEN("code_list"),op_offset_special, 0,
 #endif
-  { STR_WITH_LEN("sv"),      SVp,     offsetof(struct svop, op_sv),    },/*14*/
-  { STR_WITH_LEN("gv"),      SVp,     offsetof(struct svop, op_sv),    },/*15*/
-  { STR_WITH_LEN("padix"),   PADOFFSETp,offsetof(struct padop, op_padix),},/*16*/
-  { STR_WITH_LEN("cop_seq"), U32p,    offsetof(struct cop, cop_seq),   },/*17*/
-  { STR_WITH_LEN("line"),    line_tp, offsetof(struct cop, cop_line),  },/*18*/
-  { STR_WITH_LEN("hints"),   U32p,    offsetof(struct cop, cop_hints), },/*19*/
+  { STR_WITH_LEN("sv"),      SVp,     STRUCT_OFFSET(struct svop, op_sv),    },/*14*/
+  { STR_WITH_LEN("gv"),      SVp,     STRUCT_OFFSET(struct svop, op_sv),    },/*15*/
+  { STR_WITH_LEN("padix"),   PADOFFSETp,STRUCT_OFFSET(struct padop, op_padix),},/*16*/
+  { STR_WITH_LEN("cop_seq"), U32p,    STRUCT_OFFSET(struct cop, cop_seq),   },/*17*/
+  { STR_WITH_LEN("line"),    line_tp, STRUCT_OFFSET(struct cop, cop_line),  },/*18*/
+  { STR_WITH_LEN("hints"),   U32p,    STRUCT_OFFSET(struct cop, cop_hints), },/*19*/
 #ifdef USE_ITHREADS
-  { STR_WITH_LEN("pmoffset"),IVp,     offsetof(struct pmop, op_pmoffset),},/*20*/
+  { STR_WITH_LEN("pmoffset"),IVp,     STRUCT_OFFSET(struct pmop, op_pmoffset),},/*20*/
   { STR_WITH_LEN("filegv"),  op_offset_special, 0,                     },/*21*/
-  { STR_WITH_LEN("file"),    char_pp, offsetof(struct cop, cop_file),  },/*22*/
+  { STR_WITH_LEN("file"),    char_pp, STRUCT_OFFSET(struct cop, cop_file),  },/*22*/
   { STR_WITH_LEN("stash"),   op_offset_special, 0,                     },/*23*/
 #  if PERL_VERSION < 17
-  { STR_WITH_LEN("stashpv"), char_pp, offsetof(struct cop, cop_stashpv),}, /*24*/
+  { STR_WITH_LEN("stashpv"), char_pp, STRUCT_OFFSET(struct cop, cop_stashpv),}, /*24*/
   { STR_WITH_LEN("stashoff"),op_offset_special, 0,                     },/*25*/
 #  else
   { STR_WITH_LEN("stashpv"), op_offset_special, 0,                     },/*24*/
-  { STR_WITH_LEN("stashoff"),PADOFFSETp,offsetof(struct cop,cop_stashoff),},/*25*/
+  { STR_WITH_LEN("stashoff"),PADOFFSETp,STRUCT_OFFSET(struct cop,cop_stashoff),},/*25*/
 #  endif
 #else
   { STR_WITH_LEN("pmoffset"),op_offset_special, 0,                     },/*20*/
-  { STR_WITH_LEN("filegv"),  SVp,     offsetof(struct cop, cop_filegv),},/*21*/
+  { STR_WITH_LEN("filegv"),  SVp,     STRUCT_OFFSET(struct cop, cop_filegv),},/*21*/
   { STR_WITH_LEN("file"),    op_offset_special, 0,                     },/*22*/
-  { STR_WITH_LEN("stash"),   SVp,     offsetof(struct cop, cop_stash), },/*23*/
+  { STR_WITH_LEN("stash"),   SVp,     STRUCT_OFFSET(struct cop, cop_stash), },/*23*/
   { STR_WITH_LEN("stashpv"), op_offset_special, 0,                     },/*24*/
   { STR_WITH_LEN("stashoff"),op_offset_special, 0,                     },/*25*/
 #endif
@@ -1292,72 +1292,72 @@ MODULE = B	PACKAGE = B::IV
 #define sv_I32p		0xA0000
 #define sv_U16p		0xB0000
 
-#define IV_ivx_ix	sv_IVp | offsetof(struct xpviv, xiv_iv)
-#define IV_uvx_ix	sv_UVp | offsetof(struct xpvuv, xuv_uv)
-#define NV_nvx_ix	sv_NVp | offsetof(struct xpvnv, xnv_u.xnv_nv)
+#define IV_ivx_ix	sv_IVp | STRUCT_OFFSET(struct xpviv, xiv_iv)
+#define IV_uvx_ix	sv_UVp | STRUCT_OFFSET(struct xpvuv, xuv_uv)
+#define NV_nvx_ix	sv_NVp | STRUCT_OFFSET(struct xpvnv, xnv_u.xnv_nv)
 
 #define NV_cop_seq_range_low_ix \
-			sv_U32p | offsetof(struct xpvnv, xnv_u.xpad_cop_seq.xlow)
+			sv_U32p | STRUCT_OFFSET(struct xpvnv, xnv_u.xpad_cop_seq.xlow)
 #define NV_cop_seq_range_high_ix \
-			sv_U32p | offsetof(struct xpvnv, xnv_u.xpad_cop_seq.xhigh)
+			sv_U32p | STRUCT_OFFSET(struct xpvnv, xnv_u.xpad_cop_seq.xhigh)
 #define NV_parent_pad_index_ix \
-			sv_U32p | offsetof(struct xpvnv, xnv_u.xpad_cop_seq.xlow)
+			sv_U32p | STRUCT_OFFSET(struct xpvnv, xnv_u.xpad_cop_seq.xlow)
 #define NV_parent_fakelex_flags_ix \
-			sv_U32p | offsetof(struct xpvnv, xnv_u.xpad_cop_seq.xhigh)
+			sv_U32p | STRUCT_OFFSET(struct xpvnv, xnv_u.xpad_cop_seq.xhigh)
 
-#define PV_cur_ix	sv_STRLENp | offsetof(struct xpv, xpv_cur)
-#define PV_len_ix	sv_STRLENp | offsetof(struct xpv, xpv_len)
+#define PV_cur_ix	sv_STRLENp | STRUCT_OFFSET(struct xpv, xpv_cur)
+#define PV_len_ix	sv_STRLENp | STRUCT_OFFSET(struct xpv, xpv_len)
 
-#define PVMG_stash_ix	sv_SVp | offsetof(struct xpvmg, xmg_stash)
+#define PVMG_stash_ix	sv_SVp | STRUCT_OFFSET(struct xpvmg, xmg_stash)
 
 #if PERL_VERSION > 18
-#    define PVBM_useful_ix	sv_IVp | offsetof(struct xpviv, xiv_u.xivu_iv)
+#    define PVBM_useful_ix	sv_IVp | STRUCT_OFFSET(struct xpviv, xiv_u.xivu_iv)
 #elif PERL_VERSION > 14
-#    define PVBM_useful_ix	sv_I32p | offsetof(struct xpvgv, xnv_u.xbm_s.xbm_useful)
+#    define PVBM_useful_ix	sv_I32p | STRUCT_OFFSET(struct xpvgv, xnv_u.xbm_s.xbm_useful)
 #else
-#define PVBM_useful_ix	sv_I32p | offsetof(struct xpvgv, xiv_u.xivu_i32)
+#define PVBM_useful_ix	sv_I32p | STRUCT_OFFSET(struct xpvgv, xiv_u.xivu_i32)
 #endif
 
-#define PVLV_targoff_ix	sv_U32p | offsetof(struct xpvlv, xlv_targoff)
-#define PVLV_targlen_ix	sv_U32p | offsetof(struct xpvlv, xlv_targlen)
-#define PVLV_targ_ix	sv_SVp | offsetof(struct xpvlv, xlv_targ)
-#define PVLV_type_ix	sv_char_p | offsetof(struct xpvlv, xlv_type)
+#define PVLV_targoff_ix	sv_U32p | STRUCT_OFFSET(struct xpvlv, xlv_targoff)
+#define PVLV_targlen_ix	sv_U32p | STRUCT_OFFSET(struct xpvlv, xlv_targlen)
+#define PVLV_targ_ix	sv_SVp | STRUCT_OFFSET(struct xpvlv, xlv_targ)
+#define PVLV_type_ix	sv_char_p | STRUCT_OFFSET(struct xpvlv, xlv_type)
 
-#define PVGV_stash_ix	sv_SVp | offsetof(struct xpvgv, xnv_u.xgv_stash)
-#define PVGV_flags_ix	sv_STRLENp | offsetof(struct xpvgv, xpv_cur)
-#define PVIO_lines_ix	sv_IVp | offsetof(struct xpvio, xiv_iv)
+#define PVGV_stash_ix	sv_SVp | STRUCT_OFFSET(struct xpvgv, xnv_u.xgv_stash)
+#define PVGV_flags_ix	sv_STRLENp | STRUCT_OFFSET(struct xpvgv, xpv_cur)
+#define PVIO_lines_ix	sv_IVp | STRUCT_OFFSET(struct xpvio, xiv_iv)
 
-#define PVIO_page_ix	    sv_IVp | offsetof(struct xpvio, xio_page)
-#define PVIO_page_len_ix    sv_IVp | offsetof(struct xpvio, xio_page_len)
-#define PVIO_lines_left_ix  sv_IVp | offsetof(struct xpvio, xio_lines_left)
-#define PVIO_top_name_ix    sv_char_pp | offsetof(struct xpvio, xio_top_name)
-#define PVIO_top_gv_ix	    sv_SVp | offsetof(struct xpvio, xio_top_gv)
-#define PVIO_fmt_name_ix    sv_char_pp | offsetof(struct xpvio, xio_fmt_name)
-#define PVIO_fmt_gv_ix	    sv_SVp | offsetof(struct xpvio, xio_fmt_gv)
-#define PVIO_bottom_name_ix sv_char_pp | offsetof(struct xpvio, xio_bottom_name)
-#define PVIO_bottom_gv_ix   sv_SVp | offsetof(struct xpvio, xio_bottom_gv)
-#define PVIO_type_ix	    sv_char_p | offsetof(struct xpvio, xio_type)
-#define PVIO_flags_ix	    sv_U8p | offsetof(struct xpvio, xio_flags)
+#define PVIO_page_ix	    sv_IVp | STRUCT_OFFSET(struct xpvio, xio_page)
+#define PVIO_page_len_ix    sv_IVp | STRUCT_OFFSET(struct xpvio, xio_page_len)
+#define PVIO_lines_left_ix  sv_IVp | STRUCT_OFFSET(struct xpvio, xio_lines_left)
+#define PVIO_top_name_ix    sv_char_pp | STRUCT_OFFSET(struct xpvio, xio_top_name)
+#define PVIO_top_gv_ix	    sv_SVp | STRUCT_OFFSET(struct xpvio, xio_top_gv)
+#define PVIO_fmt_name_ix    sv_char_pp | STRUCT_OFFSET(struct xpvio, xio_fmt_name)
+#define PVIO_fmt_gv_ix	    sv_SVp | STRUCT_OFFSET(struct xpvio, xio_fmt_gv)
+#define PVIO_bottom_name_ix sv_char_pp | STRUCT_OFFSET(struct xpvio, xio_bottom_name)
+#define PVIO_bottom_gv_ix   sv_SVp | STRUCT_OFFSET(struct xpvio, xio_bottom_gv)
+#define PVIO_type_ix	    sv_char_p | STRUCT_OFFSET(struct xpvio, xio_type)
+#define PVIO_flags_ix	    sv_U8p | STRUCT_OFFSET(struct xpvio, xio_flags)
 
-#define PVAV_max_ix	sv_SSize_tp | offsetof(struct xpvav, xav_max)
+#define PVAV_max_ix	sv_SSize_tp | STRUCT_OFFSET(struct xpvav, xav_max)
 
-#define PVCV_stash_ix	sv_SVp | offsetof(struct xpvcv, xcv_stash) 
+#define PVCV_stash_ix	sv_SVp | STRUCT_OFFSET(struct xpvcv, xcv_stash) 
 #if PERL_VERSION > 17 || (PERL_VERSION == 17 && PERL_SUBVERSION >= 3)
-# define PVCV_gv_ix	sv_SVp | offsetof(struct xpvcv, xcv_gv_u.xcv_gv)
+# define PVCV_gv_ix	sv_SVp | STRUCT_OFFSET(struct xpvcv, xcv_gv_u.xcv_gv)
 #else
-# define PVCV_gv_ix	sv_SVp | offsetof(struct xpvcv, xcv_gv)
+# define PVCV_gv_ix	sv_SVp | STRUCT_OFFSET(struct xpvcv, xcv_gv)
 #endif
-#define PVCV_file_ix	sv_char_pp | offsetof(struct xpvcv, xcv_file)
-#define PVCV_outside_ix	sv_SVp | offsetof(struct xpvcv, xcv_outside)
-#define PVCV_outside_seq_ix sv_U32p | offsetof(struct xpvcv, xcv_outside_seq)
-#define PVCV_flags_ix	sv_U32p | offsetof(struct xpvcv, xcv_flags)
+#define PVCV_file_ix	sv_char_pp | STRUCT_OFFSET(struct xpvcv, xcv_file)
+#define PVCV_outside_ix	sv_SVp | STRUCT_OFFSET(struct xpvcv, xcv_outside)
+#define PVCV_outside_seq_ix sv_U32p | STRUCT_OFFSET(struct xpvcv, xcv_outside_seq)
+#define PVCV_flags_ix	sv_U32p | STRUCT_OFFSET(struct xpvcv, xcv_flags)
 
-#define PVHV_max_ix	sv_STRLENp | offsetof(struct xpvhv, xhv_max)
+#define PVHV_max_ix	sv_STRLENp | STRUCT_OFFSET(struct xpvhv, xhv_max)
 
 #if PERL_VERSION > 12
-#define PVHV_keys_ix	sv_STRLENp | offsetof(struct xpvhv, xhv_keys)
+#define PVHV_keys_ix	sv_STRLENp | STRUCT_OFFSET(struct xpvhv, xhv_keys)
 #else
-#define PVHV_keys_ix	sv_IVp | offsetof(struct xpvhv, xhv_keys)
+#define PVHV_keys_ix	sv_IVp | STRUCT_OFFSET(struct xpvhv, xhv_keys)
 #endif
 
 # The type checking code in B has always been identical for all SV types,
@@ -1740,16 +1740,16 @@ void*
 GvGP(gv)
 	B::GV	gv
 
-#define GP_sv_ix	(SVp << 16) | offsetof(struct gp, gp_sv)
-#define GP_io_ix	(SVp << 16) | offsetof(struct gp, gp_io)
-#define GP_cv_ix	(SVp << 16) | offsetof(struct gp, gp_cv)
-#define GP_cvgen_ix	(U32p << 16) | offsetof(struct gp, gp_cvgen)
-#define GP_refcnt_ix	(U32p << 16) | offsetof(struct gp, gp_refcnt)
-#define GP_hv_ix	(SVp << 16) | offsetof(struct gp, gp_hv)
-#define GP_av_ix	(SVp << 16) | offsetof(struct gp, gp_av)
-#define GP_form_ix	(SVp << 16) | offsetof(struct gp, gp_form)
-#define GP_egv_ix	(SVp << 16) | offsetof(struct gp, gp_egv)
-#define GP_line_ix	(line_tp << 16) | offsetof(struct gp, gp_line)
+#define GP_sv_ix	(SVp << 16) | STRUCT_OFFSET(struct gp, gp_sv)
+#define GP_io_ix	(SVp << 16) | STRUCT_OFFSET(struct gp, gp_io)
+#define GP_cv_ix	(SVp << 16) | STRUCT_OFFSET(struct gp, gp_cv)
+#define GP_cvgen_ix	(U32p << 16) | STRUCT_OFFSET(struct gp, gp_cvgen)
+#define GP_refcnt_ix	(U32p << 16) | STRUCT_OFFSET(struct gp, gp_refcnt)
+#define GP_hv_ix	(SVp << 16) | STRUCT_OFFSET(struct gp, gp_hv)
+#define GP_av_ix	(SVp << 16) | STRUCT_OFFSET(struct gp, gp_av)
+#define GP_form_ix	(SVp << 16) | STRUCT_OFFSET(struct gp, gp_form)
+#define GP_egv_ix	(SVp << 16) | STRUCT_OFFSET(struct gp, gp_egv)
+#define GP_line_ix	(line_tp << 16) | STRUCT_OFFSET(struct gp, gp_line)
 
 void
 SV(gv)
