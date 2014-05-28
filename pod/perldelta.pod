@@ -119,7 +119,10 @@ XXX
 
 =item *
 
-L<XXX> has been upgraded from version A.xx to B.yy.
+L<perl5db.pl> has been upgraded from version 1.44 to 1.45.
+
+fork() in the debugger under C<tmux> will now create a new window for
+the forked process.
 
 =back
 
