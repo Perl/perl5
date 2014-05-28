@@ -1109,7 +1109,7 @@ S_is_cur_LC_category_utf8(pTHX_ int category)
             (void) mbtowc(&wc, NULL, 0);    /* Reset any shift state */
             GCC_DIAG_RESTORE;
             errno = 0;
-            if (mbtowc(&wc, HYPHEN_UTF8, strlen(HYPHEN_UTF8))
+            if ((size_t)mbtowc(&wc, HYPHEN_UTF8, strlen(HYPHEN_UTF8))
                                                         != strlen(HYPHEN_UTF8)
                 || wc != (wchar_t) 0x2010)
             {

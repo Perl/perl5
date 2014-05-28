@@ -11080,7 +11080,7 @@ S_backref_value(char *p)
 {
     char *q = p;
 
-    for (;isDIGIT(*q); q++); /* calculate length of num */
+    for (;isDIGIT(*q); q++) {} /* calculate length of num */
     if (q - p == 0 || q - p > 9)
         return I32_MAX;
     return atoi(p);
