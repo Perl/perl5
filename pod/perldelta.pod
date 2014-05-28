@@ -119,6 +119,15 @@ XXX
 
 =item *
 
+L<Carp> has been upgraded from version 1.3301 to 1.34.
+
+Carp::Heavy now ignores version mismatches with Carp if Carp is newer
+than 1.12, since Carp::Heavy's guts were merged into Carp at that
+point.
+L<[perl #121574]|https://rt.perl.org/Ticket/Display.html?id=121574>
+
+=item *
+
 L<perl5db.pl> has been upgraded from version 1.44 to 1.45.
 
 fork() in the debugger under C<tmux> will now create a new window for
