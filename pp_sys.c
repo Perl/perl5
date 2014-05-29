@@ -3406,6 +3406,7 @@ PP(pp_fttext)
         const char *file;
         int fd; 
 
+        assert(sv);
 	sv_setpv(PL_statname, SvPV_nomg_const_nolen(sv));
       really_filename:
         file = SvPVX_const(PL_statname);

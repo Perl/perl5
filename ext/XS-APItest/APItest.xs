@@ -1457,12 +1457,16 @@ common(params)
 	    hash = SvUV(*svp);
 
 	if (hv_fetchs(params, "hash_pv", 0)) {
+            assert(key);
 	    PERL_HASH(hash, key, klen);
 	}
 	if (hv_fetchs(params, "hash_sv", 0)) {
-	    STRLEN len;
-	    const char *const p = SvPV(keysv, len);
-	    PERL_HASH(hash, p, len);
+            assert(keysv);
+            {
+              STRLEN len;
+              const char *const p = SvPV(keysv, len);
+              PERL_HASH(hash, p, len);
+            }
 	}
 
 	result = (HE *)hv_common(hv, keysv, key, klen, flags, action, val, hash);
