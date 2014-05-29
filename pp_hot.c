@@ -3078,6 +3078,7 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
 	const HE* const he = hv_fetch_ent(stash, meth, 0, *hashp);
 	if (he) {
 	    gv = MUTABLE_GV(HeVAL(he));
+	    assert(stash);
 	    if (isGV(gv) && GvCV(gv) &&
 		(!GvCVGEN(gv) || GvCVGEN(gv)
                   == (PL_sub_generation + HvMROMETA(stash)->cache_gen)))
@@ -3085,9 +3086,9 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
 	}
     }
 
+    assert(stash || packsv);
     gv = gv_fetchmethod_sv_flags(stash ? stash : MUTABLE_HV(packsv),
-			             meth, GV_AUTOLOAD | GV_CROAK);
-
+                                 meth, GV_AUTOLOAD | GV_CROAK);
     assert(gv);
 
     return isGV(gv) ? MUTABLE_SV(GvCV(gv)) : MUTABLE_SV(gv);

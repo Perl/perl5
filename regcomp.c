@@ -2007,6 +2007,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
     });
 
     re_trie_maxbuff = get_sv(RE_TRIE_MAXBUF_NAME, 1);
+    assert(re_trie_maxbuff);
     if (!SvIOK(re_trie_maxbuff)) {
         sv_setiv(re_trie_maxbuff, RE_TRIE_MAXBUF_INIT);
     }
@@ -14923,6 +14924,7 @@ S_set_ANYOF_arg(pTHX_ RExC_state_t* const pRExC_state,
 	av_store(av, 0, (runtime_defns)
 			? SvREFCNT_inc(runtime_defns) : &PL_sv_undef);
 	if (swash) {
+	    assert(cp_list);
 	    av_store(av, 1, swash);
 	    SvREFCNT_dec_NN(cp_list);
 	}
@@ -16612,6 +16614,7 @@ S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
         last= plast;
 
     while (PL_regkind[op] != END && (!last || node < last)) {
+        assert(node);
 	/* While that wasn't END last time... */
 	NODE_ALIGN(node);
 	op = OP(node);

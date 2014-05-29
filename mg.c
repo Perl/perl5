@@ -1675,6 +1675,7 @@ Perl_magic_clearisa(pTHX_ SV *sv, MAGIC *mg)
 	   same function. */
 	mg = mg_find(mg->mg_obj, PERL_MAGIC_isa);
 
+    assert(mg);
     if (SvTYPE(mg->mg_obj) == SVt_PVAV) { /* multiple stashes */
 	SV **svp = AvARRAY((AV *)mg->mg_obj);
 	I32 items = AvFILLp((AV *)mg->mg_obj) + 1;
@@ -3437,6 +3438,7 @@ Perl_magic_copycallchecker(pTHX_ SV *sv, MAGIC *mg, SV *nsv,
 
     sv_magic(nsv, &PL_sv_undef, mg->mg_type, NULL, 0);
     nmg = mg_find(nsv, mg->mg_type);
+    assert(nmg);
     if (nmg->mg_flags & MGf_REFCOUNTED) SvREFCNT_dec(nmg->mg_obj);
     nmg->mg_ptr = mg->mg_ptr;
     nmg->mg_obj = SvREFCNT_inc_simple(mg->mg_obj);

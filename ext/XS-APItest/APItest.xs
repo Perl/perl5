@@ -2095,6 +2095,7 @@ newCONSTSUB(stash, name, flags, sv)
                break;
         }
         EXTEND(SP, 2);
+        assert(mycv);
         PUSHs( CvCONST(mycv) ? &PL_sv_yes : &PL_sv_no );
         PUSHs((SV*)CvGV(mycv));
 

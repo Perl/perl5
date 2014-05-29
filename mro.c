@@ -638,12 +638,14 @@ Perl_mro_isa_changed_in(pTHX_ HV* stash)
                       hv_storehek(mroisarev, namehek, &PL_sv_yes);
                 }
 
-                if((SV *)isa != &PL_sv_undef)
+                if ((SV *)isa != &PL_sv_undef) {
+                    assert(namehek);
                     mro_clean_isarev(
                      isa, HEK_KEY(namehek), HEK_LEN(namehek),
                      HvMROMETA(revstash)->isa, HEK_HASH(namehek),
                      HEK_UTF8(namehek)
                     );
+                }
             }
         }
     }

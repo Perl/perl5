@@ -850,8 +850,9 @@ Perl_fbm_instr(pTHX_ unsigned char *big, unsigned char *bigend, SV *littlestr, U
 
     {
 	const MAGIC *const mg = mg_find(littlestr, PERL_MAGIC_bm);
-	const unsigned char * const table = (const unsigned char *) mg->mg_ptr;
 	const unsigned char *oldlittle;
+
+	assert(mg);
 
 	--littlelen;			/* Last char found by table lookup */
 
@@ -859,6 +860,7 @@ Perl_fbm_instr(pTHX_ unsigned char *big, unsigned char *bigend, SV *littlestr, U
 	little += littlelen;		/* last char */
 	oldlittle = little;
 	if (s < bigend) {
+	    const unsigned char * const table = (const unsigned char *) mg->mg_ptr;
 	    I32 tmp;
 
 	  top2:

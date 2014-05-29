@@ -2227,6 +2227,7 @@ PerlIOBase_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param, int flags)
 	PerlIO_funcs * const self = PerlIOBase(o)->tab;
 	SV *arg = NULL;
 	char buf[8];
+	assert(self);
 	PerlIO_debug("PerlIOBase_dup %s f=%p o=%p param=%p\n",
 		     self ? self->name : "(Null)",
 		     (void*)f, (void*)o, (void*)param);

@@ -2912,6 +2912,7 @@ S_my_kid(pTHX_ OP *o, OP *attrs, OP **imopsp)
 	    S_cant_declare(aTHX_ o);
 	} else if (attrs) {
 	    GV * const gv = cGVOPx_gv(cUNOPo->op_first);
+	    assert(PL_parser);
 	    PL_parser->in_my = FALSE;
 	    PL_parser->in_my_stash = NULL;
 	    apply_attrs(GvSTASH(gv),
@@ -2934,6 +2935,7 @@ S_my_kid(pTHX_ OP *o, OP *attrs, OP **imopsp)
     else if (attrs && type != OP_PUSHMARK) {
 	HV *stash;
 
+        assert(PL_parser);
 	PL_parser->in_my = FALSE;
 	PL_parser->in_my_stash = NULL;
 
@@ -10238,6 +10240,7 @@ Perl_ck_split(pTHX_ OP *o)
 	op_append_elem(OP_SPLIT, o, newDEFSVOP());
 
     kid = kid->op_sibling;
+    assert(kid);
     scalar(kid);
 
     if (!kid->op_sibling)
@@ -10912,6 +10915,7 @@ Perl_cv_set_call_checker(pTHX_ CV *cv, Perl_call_checker ckfun, SV *ckobj)
 	MAGIC *callmg;
 	sv_magic((SV*)cv, &PL_sv_undef, PERL_MAGIC_checkcall, NULL, 0);
 	callmg = mg_find((SV*)cv, PERL_MAGIC_checkcall);
+	assert(callmg);
 	if (callmg->mg_flags & MGf_REFCOUNTED) {
 	    SvREFCNT_dec(callmg->mg_obj);
 	    callmg->mg_flags &= ~MGf_REFCOUNTED;

@@ -471,6 +471,7 @@ Perl_sv_peek(pTHX_ SV *sv)
   finish:
     while (unref--)
 	sv_catpv(t, ")");
+    /* XXX when is sv ever NULL? */
     if (TAINTING_get && SvTAINTED(sv))
 	sv_catpv(t, " [tainted]");
     return SvPV_nolen(t);

@@ -7010,6 +7010,8 @@ no_silent:
                 sv_commit = &PL_sv_yes;
             sv_yes_mark = &PL_sv_no;
         }
+        assert(sv_err);
+        assert(sv_mrk);
         sv_setsv(sv_err, sv_commit);
         sv_setsv(sv_mrk, sv_yes_mark);
     }
@@ -7620,6 +7622,7 @@ Perl__get_regclass_nonbitmap_data(pTHX_ const regexp *prog,
                     *only_utf8_locale_ptr = ary[2];
                 }
                 else {
+                    assert(only_utf8_locale_ptr);
                     *only_utf8_locale_ptr = NULL;
                 }
 
@@ -7641,7 +7644,7 @@ Perl__get_regclass_nonbitmap_data(pTHX_ const regexp *prog,
 	    }
 	    else if (doinit && ((si && si != &PL_sv_undef)
                                  || (invlist && invlist != &PL_sv_undef))) {
-
+		assert(si);
 		sw = _core_swash_init("utf8", /* the utf8 package */
 				      "", /* nameless */
 				      si,
