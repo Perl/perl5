@@ -2034,12 +2034,12 @@ Perl_my_setenv(pTHX_ const char *nam, const char *val)
     }
     else
        safesysfree(environ[i]);
-       nlen = strlen(nam);
-       vlen = strlen(val);
+    nlen = strlen(nam);
+    vlen = strlen(val);
 
-       environ[i] = (char*)safesysmalloc((nlen+vlen+2) * sizeof(char));
-       /* all that work just for this */
-       my_setenv_format(environ[i], nam, nlen, val, vlen);
+    environ[i] = (char*)safesysmalloc((nlen+vlen+2) * sizeof(char));
+    /* all that work just for this */
+    my_setenv_format(environ[i], nam, nlen, val, vlen);
     } else {
 # endif
 #   if defined(__CYGWIN__)|| defined(__SYMBIAN32__) || defined(__riscos__)
