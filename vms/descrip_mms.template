@@ -665,6 +665,8 @@ $(ARCHAUTO)time.stamp :
 # AUTOMATICALLY GENERATED MAKE DEPENDENCIES--PUT NOTHING BELOW THIS LINE
 av$(O) : av.c $(h)
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
+caretx$(O) : caretx.c $(h)
+	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
 deb$(O) : deb.c $(h)
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
 doio$(O) : doio.c $(h)
