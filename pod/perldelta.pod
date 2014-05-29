@@ -128,13 +128,6 @@ L<[perl #121574]|https://rt.perl.org/Ticket/Display.html?id=121574>
 
 =item *
 
-L<Digest::SHA> has been upgraded from version 5.88 to 5.91.
-
-Numerous enhancements, bug fixes and performance improvements have been made.
-See the F<Changes> file in the CPAN distribution for full details.
-
-=item *
-
 L<Math::BigInt> has been upgraded from version 1.9993 to 1.9994.
 
 Synchronize POD changes from the CPAN release.

@@ -686,7 +686,6 @@ cpan/Digest-SHA/lib/Digest/SHA.pm	Digest::SHA extension
 cpan/Digest-SHA/Makefile.PL		Digest::SHA Makefile.PL
 cpan/Digest-SHA/shasum			shasum script
 cpan/Digest-SHA/SHA.xs			Digest::SHA extension
-cpan/Digest-SHA/src/sdf.c		Digest::SHA extension
 cpan/Digest-SHA/src/sha64bit.c		Digest::SHA extension
 cpan/Digest-SHA/src/sha64bit.h		Digest::SHA extension
 cpan/Digest-SHA/src/sha.c		Digest::SHA extension
@@ -699,7 +698,6 @@ cpan/Digest-SHA/t/fips198.t		See if Digest::SHA works
 cpan/Digest-SHA/t/gglong.t		See if Digest::SHA works
 cpan/Digest-SHA/t/gg.t			See if Digest::SHA works
 cpan/Digest-SHA/t/hmacsha.t		See if Digest::SHA works
-cpan/Digest-SHA/t/inheritance.t		See if Digest::SHA works
 cpan/Digest-SHA/t/ireland.t		See if Digest::SHA works
 cpan/Digest-SHA/t/methods.t		See if Digest::SHA works
 cpan/Digest-SHA/t/nistbit.t		See if Digest::SHA works

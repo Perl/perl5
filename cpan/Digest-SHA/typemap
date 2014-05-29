@@ -1,7 +1,2 @@
-TYPEMAP
-SHA *		T_SHA
-PerlIO *	T_IN
-
-INPUT
-T_SHA
-	$var = getSHA($arg)
+SHA *						T_PTROBJ
+HMAC *						T_PTROBJ
