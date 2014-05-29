@@ -1185,25 +1185,33 @@ PP(pp_flop)
 	SvGETMAGIC(right);
 
 	if (RANGE_IS_NUMERIC(left,right)) {
-	    IV i, j;
-	    IV max;
+	    IV i, j, n;
 	    if ((SvOK(left) && !SvIOK(left) && SvNV_nomg(left) < IV_MIN) ||
 		(SvOK(right) && (SvIOK(right)
 				 ? SvIsUV(right) && SvUV(right) > IV_MAX
 				 : SvNV_nomg(right) > IV_MAX)))
 		DIE(aTHX_ "Range iterator outside integer range");
 	    i = SvIV_nomg(left);
-	    max = SvIV_nomg(right);
-	    if (max >= i) {
-		j = max - i + 1;
-		if (j > SSize_t_MAX)
-		    Perl_croak(aTHX_ "Out of memory during list extend");
-		EXTEND_MORTAL(j);
-		EXTEND(SP, j);
+	    j = SvIV_nomg(right);
+	    if (j >= i) {
+                /* Dance carefully around signed max. */
+                bool overflow = (i <= 0 && j > SSize_t_MAX + i - 1);
+                if (!overflow) {
+                    n = j - i + 1;
+                    /* The wraparound of signed integers is undefined
+                     * behavior, but here we aim for count >=1, and
+                     * negative count is just wrong. */
+                    if (n < 1)
+                        overflow = TRUE;
+                }
+                if (overflow)
+                    Perl_croak(aTHX_ "Out of memory during list extend");
+		EXTEND_MORTAL(n);
+		EXTEND(SP, n);
 	    }
 	    else
-		j = 0;
-	    while (j--) {
+		n = 0;
+	    while (n--) {
 		SV * const sv = sv_2mortal(newSViv(i++));
 		PUSHs(sv);
 	    }
