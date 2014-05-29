@@ -48,7 +48,7 @@ The checklist of a typical release cycle is as follows:
     a few weeks before the release, a number of steps are performed,
 	including bumping the version to 5.10.2
 
-    ...a few weeks passes...
+    ...a few weeks pass...
 
     perl-5.10.2-RC1 is released
 
