@@ -566,22 +566,18 @@ sockatmark (sock)
    InputStream sock
    PROTOTYPE: $
    PREINIT:
-     int fd = PerlIO_fileno(sock);
+     int fd;
    CODE:
-   {
-#ifdef HAS_SOCKATMARK
+     fd = PerlIO_fileno(sock);
      if (fd < 0) {
        errno = EBADF;
        RETVAL = -1;
-     } else {
+     }
+#ifdef HAS_SOCKATMARK
+     else {
        RETVAL = sockatmark(fd);
      }
 #else
-     {
-     if (fd < 0) {
-       errno = EBADF;
-       RETVAL = -1;
-     }
      else {
        int flag = 0;
 #   ifdef SIOCATMARK
@@ -596,9 +592,7 @@ sockatmark (sock)
 #   endif
        RETVAL = flag;
      }
-     }
 #endif
-   }
    OUTPUT:
      RETVAL
 
