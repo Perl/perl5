@@ -171,7 +171,7 @@ use strict;
 use Exporter;
 use vars qw(@ISA @EXPORT @EXPORT_OK $VERSION);
 
-$VERSION = '3.47';
+$VERSION = '3.48';
 my $xs_version = $VERSION;
 $VERSION =~ tr/_//;
 
@@ -356,7 +356,8 @@ if ($^O =~ /android/) {
         $pwd_cmd = "$Config::Config{targetsh} -c pwd"
     }
     else {
-        $pwd_cmd = "$Config::Config{sh} -c pwd"
+        my $sh = $Config::Config{sh} || (-x '/system/bin/sh' ? '/system/bin/sh' : 'sh');
+        $pwd_cmd = "$sh -c pwd"
     }
 }
 
