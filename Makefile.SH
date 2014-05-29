@@ -874,7 +874,7 @@ $(LIBPERL): $& $(obj) $(DYNALOADER) $(LIBPERLEXPORT)
 # lib/buildcustomize.pl despite the reality that lib/buildcustomize.pl needs
 # miniperl to exist first permits us to
 # a) have one rule generate both miniperl and lib/buildcustomize.pl
-#    (so that lib/buildcustomise.pl is always available. This simplifies things)
+#    (so that lib/buildcustomize.pl is always available. This simplifies things)
 # b) have the rest of the Makefile depend on the more obvious $(MINIPERL_EXE)
 
 $(MINIPERL_EXE): lib/buildcustomize.pl
