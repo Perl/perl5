@@ -3129,7 +3129,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	/bin/pdksh, /bin/ash, /bin/bash, or even something such as
  *	D:/bin/sh.exe.
  */
-#define SH_PATH "$sh"  /**/
+#define SH_PATH "$targetsh"  /**/
 
 /* SIG_NAME:
  *	This symbol contains a list of signal names in order of
