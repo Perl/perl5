@@ -1643,7 +1643,9 @@ Ap     |I32    |whichsig_pv    |NN const char* sig
 Ap     |I32    |whichsig_pvn   |NN const char* sig|STRLEN len
 : used to check for NULs in pathnames and other names
 AiR	|bool	|is_safe_syscall|NN const char *pv|STRLEN len|NN const char *what|NN const char *op_name
+#ifdef PERL_CORE
 inR	|bool	|should_warn_nl|NN const char *pv
+#endif
 : Used in pp_ctl.c
 p	|void	|write_to_stderr|NN SV* msv
 : Used in op.c

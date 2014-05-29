@@ -1242,7 +1242,6 @@
 #define scalar(a)		Perl_scalar(aTHX_ a)
 #define scalarvoid(a)		Perl_scalarvoid(aTHX_ a)
 #define set_caret_X()		Perl_set_caret_X(aTHX)
-#define should_warn_nl		S_should_warn_nl
 #define sub_crush_depth(a)	Perl_sub_crush_depth(aTHX_ a)
 #define sv_2num(a)		Perl_sv_2num(aTHX_ a)
 #define sv_clean_all()		Perl_sv_clean_all(aTHX)
@@ -1360,6 +1359,7 @@
 #define opslab_free(a)		Perl_opslab_free(aTHX_ a)
 #define opslab_free_nopad(a)	Perl_opslab_free_nopad(aTHX_ a)
 #define parser_free_nexttoke_ops(a,b)	Perl_parser_free_nexttoke_ops(aTHX_ a,b)
+#define should_warn_nl		S_should_warn_nl
 #    if defined(PERL_DEBUG_READONLY_OPS)
 #define Slab_to_ro(a)		Perl_Slab_to_ro(aTHX_ a)
 #define Slab_to_rw(a)		Perl_Slab_to_rw(aTHX_ a)
