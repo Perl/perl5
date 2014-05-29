@@ -377,6 +377,7 @@ cpan/DB_File/t/db-recno.t	See if DB_File works
 cpan/DB_File/typemap		Berkeley DB extension interface types
 cpan/DB_File/version.c		Berkeley DB extension interface version check
 cpan/Devel-PPPort/apicheck_c.PL		Devel::PPPort apicheck generator
+cpan/Devel-PPPort/Changes	Devel::PPPort
 cpan/Devel-PPPort/devel/buildperl.pl	Devel::PPPort perl version builder
 cpan/Devel-PPPort/devel/devtools.pl	Devel::PPPort development utilities
 cpan/Devel-PPPort/devel/mkapidoc.sh	Devel::PPPort apidoc collector
@@ -386,6 +387,10 @@ cpan/Devel-PPPort/devel/regenerate	Devel::PPPort API re-generator
 cpan/Devel-PPPort/devel/scanprov	Devel::PPPort provided API scanner
 cpan/Devel-PPPort/HACKERS		Devel::PPPort hackers documentation
 cpan/Devel-PPPort/Makefile.PL		Devel::PPPort makefile writer
+cpan/Devel-PPPort/MANIFEST	Devel::PPPort
+cpan/Devel-PPPort/MANIFEST.SKIP	Devel::PPPort
+cpan/Devel-PPPort/META.json	Devel::PPPort
+cpan/Devel-PPPort/META.yml	Devel::PPPort
 cpan/Devel-PPPort/mktests.PL		Devel::PPPort test file writer
 cpan/Devel-PPPort/module2.c		Devel::PPPort test file
 cpan/Devel-PPPort/module3.c		Devel::PPPort test file
@@ -628,6 +633,8 @@ cpan/Devel-PPPort/ppport_h.PL		Devel::PPPort ppport.h writer
 cpan/Devel-PPPort/PPPort_pm.PL		Devel::PPPort PPPort.pm writer
 cpan/Devel-PPPort/PPPort.xs		Devel::PPPort dummy PPPort.xs
 cpan/Devel-PPPort/PPPort_xs.PL		Devel::PPPort RealPPPort.xs writer
+cpan/Devel-PPPort/README	Devel::PPPort
+cpan/Devel-PPPort/README.md	Devel::PPPort
 cpan/Devel-PPPort/soak			Devel::PPPort Test Harness to run under various Perls
 cpan/Devel-PPPort/t/call.t		Devel::PPPort test file
 cpan/Devel-PPPort/t/cop.t		Devel::PPPort test file
@@ -646,6 +653,7 @@ cpan/Devel-PPPort/t/newCONSTSUB.t	Devel::PPPort test file
 cpan/Devel-PPPort/t/newRV.t		Devel::PPPort test file
 cpan/Devel-PPPort/t/newSVpv.t		Devel::PPPort test file
 cpan/Devel-PPPort/t/newSV_type.t	Devel::PPPort test file
+cpan/Devel-PPPort/TODO	Devel::PPPort
 cpan/Devel-PPPort/t/podtest.t		Devel::PPPort test file
 cpan/Devel-PPPort/t/ppphtest.t		Devel::PPPort test file
 cpan/Devel-PPPort/t/pvs.t		Devel::PPPort test file

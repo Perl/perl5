@@ -79,7 +79,7 @@ sub parse_partspec
   while (<F>) {
     /[ \t]+$/ and warn "$file:$.: warning: trailing whitespace\n";
     if ($section eq 'implementation') {
-      m!//! && !m!(?:=~|s/).*//! && !m!(?:ht|f)tp://!
+      m!//! && !m!(?:=~|s/).*//! && !m!(?:ht|f)tp(?:s)://!
           and warn "$file:$.: warning: potential C++ comment\n";
     }
     /^##/ and next;

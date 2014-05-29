@@ -30,9 +30,9 @@ BEGIN {
     require 'testutil.pl' if $@;
   }
 
-  if (39) {
+  if (41) {
     load();
-    plan(tests => 39);
+    plan(tests => 41);
   }
 }
 
@@ -126,4 +126,14 @@ ok(Devel::PPPort::SVf('abc'), $] >= 5.004 ? '[abc]' : 'abc');
 ok(&Devel::PPPort::Perl_ppaddr_t("FOO"), "foo");
 
 ok(&Devel::PPPort::ptrtests(), 63);
+
+if ($] >= 5.009000) {
+  eval q{
+    ok(&Devel::PPPort::check_HeUTF8("hello"), "norm");
+    ok(&Devel::PPPort::check_HeUTF8("\N{U+263a}"), "utf8");
+  };
+} else {
+  ok(1, 1);
+  ok(1, 1);
+}
 

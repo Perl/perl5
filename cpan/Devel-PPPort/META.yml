@@ -1,0 +1,23 @@
+---
+abstract: Perl/Pollution/Portability
+author:
+  - 'Marcus Holland-Moritz <mhx@cpan.org>'
+build_requires:
+  ExtUtils::MakeMaker: '0'
+configure_requires:
+  ExtUtils::MakeMaker: '0'
+dynamic_config: 1
+generated_by: 'ExtUtils::MakeMaker version 6.86, CPAN::Meta::Converter version 2.140640'
+license: perl
+meta-spec:
+  url: http://module-build.sourceforge.net/META-spec-v1.4.html
+  version: '1.4'
+name: Devel-PPPort
+no_index:
+  directory:
+    - t
+    - inc
+resources:
+  bugtracker: https://github.com/mhx/Devel-PPPort/issues/
+  repository: git://github.com/mhx/Devel-PPPort.git
+version: '3.24'
