@@ -224,7 +224,7 @@ typedef U64TYPE U64;
 /* In OS X the INT64_C/UINT64_C are defined with LL/ULL, which will
  * not fly with C89-pedantic gcc, so let's undefine them first so that
  * we can redefine them with our native integer preferring versions. */
-#  if defined(__APPLE__) && defined(PERL_GCC_PEDANTIC)
+#  if defined(PERL_DARWIN) && defined(PERL_GCC_PEDANTIC)
 #    undef INT64_C
 #    undef UINT64_C
 #  endif
