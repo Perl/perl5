@@ -83,7 +83,6 @@ typedef void (freeent_function)(pTHX_ HV *, HE *);
 
 void
 test_freeent(freeent_function *f) {
-    dTHX;
     dSP;
     HV *test_hash = newHV();
     HE *victim;
