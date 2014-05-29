@@ -135,6 +135,12 @@ See the F<Changes> file in the CPAN distribution for full details.
 
 =item *
 
+L<Math::BigInt> has been upgraded from version 1.9993 to 1.9994.
+
+Synchronize POD changes from the CPAN release.
+
+=item *
+
 L<Math::BigRat> has been upgraded from version 0.2606 to 0.2607.
 
 Synchronize POD changes from the CPAN release.
