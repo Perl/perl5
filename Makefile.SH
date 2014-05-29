@@ -1433,8 +1433,6 @@ test_prep test-prep: test_prep_pre \$(MINIPERL_EXE) \$(unidatafiles) \$(PERL_EXE
 	$to config_h.SH
 	$to perl.h
 	$to cflags
-# --- For Module::Build
-	$to cpan/Module-Build/lib/*
 	$to *.h
 # --- For t/TEST
 	$to config.sh
