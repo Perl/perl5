@@ -850,7 +850,7 @@ Perl_do_vecget(pTHX_ SV *sv, SSize_t offset, int size)
 			((UV) s[uoffset + 1] << 48) +
 			((UV) s[uoffset + 2] << 40) +
 			((UV) s[uoffset + 3] << 32) +
-			(     s[uoffset + 4] << 24);
+			((UV) s[uoffset + 4] << 24);
 		else if (uoffset + 6 >= srclen)
 		    retnum =
 			((UV) s[uoffset    ] << 56) +
@@ -867,7 +867,7 @@ Perl_do_vecget(pTHX_ SV *sv, SSize_t offset, int size)
 			((UV) s[uoffset + 3] << 32) +
 			((UV) s[uoffset + 4] << 24) +
 			((UV) s[uoffset + 5] << 16) +
-			(     s[uoffset + 6] <<  8);
+			((UV) s[uoffset + 6] <<  8);
 	    }
 #endif
 	}

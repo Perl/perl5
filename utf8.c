@@ -2811,7 +2811,6 @@ Perl_swash_fetch(pTHX_ SV *swash, const U8 *ptr, bool do_utf8)
     STRLEN slen = 0;
     STRLEN needents;
     const U8 *tmps = NULL;
-    U32 bit;
     SV *swatch;
     const U8 c = *ptr;
 
@@ -2941,17 +2940,21 @@ Perl_swash_fetch(pTHX_ SV *swash, const U8 *ptr, bool do_utf8)
 
     switch ((int)((slen << 3) / needents)) {
     case 1:
-	bit = 1 << (off & 7);
-	off >>= 3;
-	return (tmps[off] & bit) != 0;
+	return ((UV) tmps[off >> 3] & (1 << (off & 7))) != 0;
     case 8:
-	return tmps[off];
+	return ((UV) tmps[off]);
     case 16:
 	off <<= 1;
-	return (tmps[off] << 8) + tmps[off + 1] ;
+	return
+            ((UV) tmps[off    ] << 8) +
+            ((UV) tmps[off + 1]);
     case 32:
 	off <<= 2;
-	return (tmps[off] << 24) + (tmps[off+1] << 16) + (tmps[off+2] << 8) + tmps[off + 3] ;
+	return
+            ((UV) tmps[off    ] << 24) +
+            ((UV) tmps[off + 1] << 16) +
+            ((UV) tmps[off + 2] <<  8) +
+            ((UV) tmps[off + 3]);
     }
     Perl_croak(aTHX_ "panic: swash_fetch got swatch of unexpected bit width, "
 	       "slen=%"UVuf", needents=%"UVuf, (UV)slen, (UV)needents);
