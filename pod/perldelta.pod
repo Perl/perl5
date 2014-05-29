@@ -139,6 +139,12 @@ L<Math::BigInt> has been upgraded from version 1.9993 to 1.9994.
 
 Synchronize POD changes from the CPAN release.
 
+C<< Math::BigFloat->blog(x) >> would sometimes return blog(2*x) when
+the accuracy was greater than 70 digits.
+
+The result of C<< Math::BigFloat->bdiv() >> in list context now
+satisfies C<< x = quotient * divisor + remainder >>.
+
 =item *
 
 L<Math::BigRat> has been upgraded from version 0.2606 to 0.2607.
