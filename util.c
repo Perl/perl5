@@ -1712,13 +1712,16 @@ void
 Perl_croak_no_mem(void)
 {
     dTHX;
-    int rc;
 
-    /* Can't use PerlIO to write as it allocates memory */
-    rc = PerlLIO_write(PerlIO_fileno(Perl_error_log),
-		  PL_no_mem, sizeof(PL_no_mem)-1);
-    /* silently ignore failures */
-    PERL_UNUSED_VAR(rc);
+    int fd = PerlIO_fileno(Perl_error_log);
+    if (fd < 0)
+        SETERRNO(EBADF,RMS_IFI);
+    else {
+        /* Can't use PerlIO to write as it allocates memory */
+        int rc = PerlLIO_write(fd, PL_no_mem, sizeof(PL_no_mem)-1);
+        /* silently ignore failures */
+        PERL_UNUSED_VAR(rc);
+    }
     my_exit(1);
 }
 
@@ -2310,7 +2313,8 @@ Perl_my_popen_list(pTHX_ const char *mode, int n, SV **args)
 	    PerlLIO_close(pp[0]);
 #if defined(HAS_FCNTL) && defined(F_SETFD)
 	    /* Close error pipe automatically if exec works */
-	    fcntl(pp[1], F_SETFD, FD_CLOEXEC);
+	    if (fcntl(pp[1], F_SETFD, FD_CLOEXEC) < 0)
+                return NULL;
 #endif
 	}
 	/* Now dup our end of _the_ pipe to right position */
@@ -2455,7 +2459,8 @@ Perl_my_popen(pTHX_ const char *cmd, const char *mode)
 	if (did_pipes) {
 	    PerlLIO_close(pp[0]);
 #if defined(HAS_FCNTL) && defined(F_SETFD)
-	    fcntl(pp[1], F_SETFD, FD_CLOEXEC);
+            if (fcntl(pp[1], F_SETFD, FD_CLOEXEC) < 0)
+                return NULL;
 #endif
 	}
 	if (p[THIS] != (*mode == 'r')) {

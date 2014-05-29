@@ -3690,6 +3690,7 @@ S_open_script(pTHX_ const char *scriptname, bool dosearch, bool *suidscript)
     PerlIO *rsfp = NULL;
     dVAR;
     Stat_t tmpstatbuf;
+    int fd;
 
     PERL_ARGS_ASSERT_OPEN_SCRIPT;
 
@@ -3797,13 +3798,20 @@ S_open_script(pTHX_ const char *scriptname, bool dosearch, bool *suidscript)
 	    Perl_croak(aTHX_ "Can't open perl script \"%s\": %s\n",
 		    CopFILE(PL_curcop), Strerror(errno));
     }
+    fd = PerlIO_fileno(rsfp);
 #if defined(HAS_FCNTL) && defined(F_SETFD)
-    /* ensure close-on-exec */
-    fcntl(PerlIO_fileno(rsfp), F_SETFD, 1);
+    if (fd >= 0) {
+        /* ensure close-on-exec */
+        if (fcntl(fd, F_SETFD, 1) < 0) {
+            Perl_croak(aTHX_ "Can't open perl script \"%s\": %s\n",
+                       CopFILE(PL_curcop), Strerror(errno));
+        }
+    }
 #endif
 
-    if (PerlLIO_fstat(PerlIO_fileno(rsfp), &tmpstatbuf) >= 0
-        && S_ISDIR(tmpstatbuf.st_mode))
+    if (fd < 0 ||
+        (PerlLIO_fstat(fd, &tmpstatbuf) >= 0
+         && S_ISDIR(tmpstatbuf.st_mode)))
         Perl_croak(aTHX_ "Can't open perl script \"%s\": %s\n",
             CopFILE(PL_curcop),
             Strerror(EISDIR));
@@ -3834,12 +3842,18 @@ S_validate_suid(pTHX_ PerlIO *rsfp)
 
     if (my_euid != my_uid || my_egid != my_gid) {	/* (suidperl doesn't exist, in fact) */
 	dVAR;
-
-	PerlLIO_fstat(PerlIO_fileno(rsfp),&PL_statbuf);	/* may be either wrapped or real suid */
-	if ((my_euid != my_uid && my_euid == PL_statbuf.st_uid && PL_statbuf.st_mode & S_ISUID)
-	    ||
-	    (my_egid != my_gid && my_egid == PL_statbuf.st_gid && PL_statbuf.st_mode & S_ISGID)
-	   )
+        int fd = PerlIO_fileno(rsfp);
+        if (fd < 0) {
+            Perl_croak(aTHX_ "Illegal suidscript");
+        } else {
+            if (PerlLIO_fstat(fd, &PL_statbuf) < 0) {	/* may be either wrapped or real suid */
+                Perl_croak(aTHX_ "Illegal suidscript");
+            }
+        }
+        if ((my_euid != my_uid && my_euid == PL_statbuf.st_uid && PL_statbuf.st_mode & S_ISUID)
+            ||
+            (my_egid != my_gid && my_egid == PL_statbuf.st_gid && PL_statbuf.st_mode & S_ISGID)
+            )
 	    if (!PL_do_undump)
 		Perl_croak(aTHX_ "YOU HAVEN'T DISABLED SET-ID SCRIPTS IN THE KERNEL YET!\n\
 FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");

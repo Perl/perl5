@@ -102,13 +102,19 @@ not_here(const char *s)
 static int
 io_blocking(pTHX_ InputStream f, int block)
 {
+    int fd = -1;
 #if defined(HAS_FCNTL)
     int RETVAL;
-    if(!f) {
+    if (!f) {
 	errno = EBADF;
 	return -1;
     }
-    RETVAL = fcntl(PerlIO_fileno(f), F_GETFL, 0);
+    fd = PerlIO_fileno(f);
+    if (fd < 0) {
+      errno = EBADF;
+      return -1;
+    }
+    RETVAL = fcntl(fd, F_GETFL, 0);
     if (RETVAL >= 0) {
 	int mode = RETVAL;
 	int newmode = mode;
@@ -143,7 +149,7 @@ io_blocking(pTHX_ InputStream f, int block)
 	}
 #endif
 	if (newmode != mode) {
-	    const int ret = fcntl(PerlIO_fileno(f),F_SETFL,newmode);
+            const int ret = fcntl(fd, F_SETFL, newmode);
 	    if (ret < 0)
 		RETVAL = ret;
 	}
@@ -154,7 +160,7 @@ io_blocking(pTHX_ InputStream f, int block)
     if (block >= 0) {
 	unsigned long flags = !block;
 	/* ioctl claims to take char* but really needs a u_long sized buffer */
-	const int ret = ioctl(PerlIO_fileno(f), FIONBIO, (char*)&flags);
+	const int ret = ioctl(fd, FIONBIO, (char*)&flags);
 	if (ret != 0)
 	    return -1;
 	/* Win32 has no way to get the current blocking status of a socket.
@@ -524,9 +530,15 @@ fsync(arg)
 	handle = IoOFP(sv_2io(arg));
 	if (!handle)
 	    handle = IoIFP(sv_2io(arg));
-	if(handle)
-	    RETVAL = fsync(PerlIO_fileno(handle));
-	else {
+	if (handle) {
+	    int fd = PerlIO_fileno(handle);
+	    if (fd >= 0) {
+		RETVAL = fsync(fd);
+	    } else {
+		RETVAL = -1;
+		errno = EBADF;
+	    }
+	} else {
 	    RETVAL = -1;
 	    errno = EINVAL;
 	}
@@ -557,9 +569,14 @@ sockatmark (sock)
      int fd;
    CODE:
    {
-     fd = PerlIO_fileno(sock);
 #ifdef HAS_SOCKATMARK
-     RETVAL = sockatmark(fd);
+     int fd = PerlIO_fileno(sock);
+     if (fd < 0) {
+       errno = EBADF;
+       RETVAL = -1;
+     } else {
+       RETVAL = sockatmark(fd);
+     }
 #else
      {
        int flag = 0;

@@ -646,9 +646,9 @@ S_openn_cleanup(pTHX_ GV *gv, IO *io, PerlIO *fp, char *mode, const char *oname,
     }
 
     fd = PerlIO_fileno(fp);
-    /* If there is no fd (e.g. PerlIO::scalar) assume it isn't a
-     * socket - this covers PerlIO::scalar - otherwise unless we "know" the
-     * type probe for socket-ness.
+    /* Do NOT do: "if (fd < 0) goto say_false;" here.  If there is no
+     * fd assume it isn't a socket - this covers PerlIO::scalar -
+     * otherwise unless we "know" the type probe for socket-ness.
      */
     if (IoTYPE(io) && IoTYPE(io) != IoTYPE_PIPE && IoTYPE(io) != IoTYPE_STD && fd >= 0) {
 	if (PerlLIO_fstat(fd,&PL_statbuf) < 0) {
@@ -696,7 +696,10 @@ S_openn_cleanup(pTHX_ GV *gv, IO *io, PerlIO *fp, char *mode, const char *oname,
 	       is assigned to (say) STDOUT - for now let dup2() fail
 	       and provide the error
 	     */
-	    if (PerlLIO_dup2(fd, savefd) < 0) {
+	    if (fd < 0) {
+                SETERRNO(EBADF,RMS_IFI);
+		goto say_false;
+            } else if (PerlLIO_dup2(fd, savefd) < 0) {
 		(void)PerlIO_close(fp);
 		goto say_false;
 	    }
@@ -732,13 +735,23 @@ S_openn_cleanup(pTHX_ GV *gv, IO *io, PerlIO *fp, char *mode, const char *oname,
 	    if (was_fdopen) {
                 /* need to close fp without closing underlying fd */
                 int ofd = PerlIO_fileno(fp);
-                int dupfd = PerlLIO_dup(ofd);
+                int dupfd = ofd >= 0 ? PerlLIO_dup(ofd) : -1;
 #if defined(HAS_FCNTL) && defined(F_SETFD)
 		/* Assume if we have F_SETFD we have F_GETFD */
-                int coe = fcntl(ofd,F_GETFD);
+                int coe = ofd >= 0 ? fcntl(ofd, F_GETFD) : -1;
+                if (coe < 0) {
+                    if (dupfd >= 0)
+                        PerlLIO_close(dupfd);
+                    goto say_false;
+                }
 #endif
+                if (ofd < 0 || dupfd < 0) {
+                    if (dupfd >= 0)
+                        PerlLIO_close(dupfd);
+                    goto say_false;
+                }
                 PerlIO_close(fp);
-                PerlLIO_dup2(dupfd,ofd);
+                PerlLIO_dup2(dupfd, ofd);
 #if defined(HAS_FCNTL) && defined(F_SETFD)
 		/* The dup trick has lost close-on-exec on ofd */
 		fcntl(ofd,F_SETFD, coe);
@@ -754,9 +767,10 @@ S_openn_cleanup(pTHX_ GV *gv, IO *io, PerlIO *fp, char *mode, const char *oname,
     }
 #if defined(HAS_FCNTL) && defined(F_SETFD)
     if (fd >= 0) {
-	dSAVE_ERRNO;
-	fcntl(fd,F_SETFD,fd > PL_maxsysfd); /* can change errno */
-	RESTORE_ERRNO;
+        if (fcntl(fd, F_SETFD, fd > PL_maxsysfd) < 0) {
+            PerlLIO_close(fd);
+            goto say_false;
+        }
     }
 #endif
     IoIFP(io) = fp;
@@ -956,23 +970,25 @@ Perl_nextargv(pTHX_ GV *gv)
 		}
 		setdefout(PL_argvoutgv);
 		PL_lastfd = PerlIO_fileno(IoIFP(GvIOp(PL_argvoutgv)));
-		(void)PerlLIO_fstat(PL_lastfd,&PL_statbuf);
+                if (PL_lastfd >= 0) {
+                    (void)PerlLIO_fstat(PL_lastfd,&PL_statbuf);
 #ifdef HAS_FCHMOD
-		(void)fchmod(PL_lastfd,PL_filemode);
+                    (void)fchmod(PL_lastfd,PL_filemode);
 #else
-		(void)PerlLIO_chmod(PL_oldname,PL_filemode);
+                    (void)PerlLIO_chmod(PL_oldname,PL_filemode);
 #endif
-		if (fileuid != PL_statbuf.st_uid || filegid != PL_statbuf.st_gid) {
-                    int rc = 0;
+                    if (fileuid != PL_statbuf.st_uid || filegid != PL_statbuf.st_gid) {
+                        int rc = 0;
 #ifdef HAS_FCHOWN
-		    rc = fchown(PL_lastfd,fileuid,filegid);
+                        rc = fchown(PL_lastfd,fileuid,filegid);
 #else
 #ifdef HAS_CHOWN
-		    rc = PerlLIO_chown(PL_oldname,fileuid,filegid);
+                        rc = PerlLIO_chown(PL_oldname,fileuid,filegid);
 #endif
 #endif
-                    /* XXX silently ignore failures */
-                    PERL_UNUSED_VAR(rc);
+                        /* XXX silently ignore failures */
+                        PERL_UNUSED_VAR(rc);
+                    }
 		}
                 return IoIFP(GvIOp(gv));
 	    }
@@ -1169,8 +1185,12 @@ Perl_do_sysseek(pTHX_ GV *gv, Off_t pos, int whence)
 
     PERL_ARGS_ASSERT_DO_SYSSEEK;
 
-    if (io && (fp = IoIFP(io)))
-	return PerlLIO_lseek(PerlIO_fileno(fp), pos, whence);
+    if (io && (fp = IoIFP(io))) {
+        int fd = PerlIO_fileno(fp);
+        if (fd >= 0) {
+            return PerlLIO_lseek(fd, pos, whence);
+        }
+    }
     report_evil_fh(gv);
     SETERRNO(EBADF,RMS_IFI);
     return (Off_t)-1;
@@ -1376,7 +1396,10 @@ Perl_my_stat_flags(pTHX_ const U32 flags)
         sv_setpvs(PL_statname, "");
         if(io) {
 	    if (IoIFP(io)) {
-	        return (PL_laststatval = PerlLIO_fstat(PerlIO_fileno(IoIFP(io)), &PL_statcache));
+                int fd = PerlIO_fileno(IoIFP(io));
+                if (fd >= 0) {
+                    return (PL_laststatval = PerlLIO_fstat(fd, &PL_statcache));
+                }
             } else if (IoDIRP(io)) {
                 return (PL_laststatval = PerlLIO_fstat(my_dirfd(IoDIRP(io)), &PL_statcache));
             }
@@ -1739,9 +1762,13 @@ Perl_apply(pTHX_ I32 type, SV **mark, SV **sp)
                 if ((gv = MAYBE_DEREF_GV(*mark))) {
 		    if (GvIO(gv) && IoIFP(GvIOp(gv))) {
 #ifdef HAS_FCHMOD
+                        int fd = PerlIO_fileno(IoIFP(GvIOn(gv)));
 			APPLY_TAINT_PROPER();
-			if (fchmod(PerlIO_fileno(IoIFP(GvIOn(gv))), val))
-			    tot--;
+                        if (fd < 0) {
+                            SETERRNO(EBADF,RMS_IFI);
+                            tot--;
+                        } else if (fchmod(fd, val))
+                            tot--;
 #else
 			Perl_die(aTHX_ PL_no_func, "fchmod");
 #endif
@@ -1775,8 +1802,12 @@ Perl_apply(pTHX_ I32 type, SV **mark, SV **sp)
 		if ((gv = MAYBE_DEREF_GV(*mark))) {
 		    if (GvIO(gv) && IoIFP(GvIOp(gv))) {
 #ifdef HAS_FCHOWN
+                        int fd = PerlIO_fileno(IoIFP(GvIOn(gv)));
 			APPLY_TAINT_PROPER();
-			if (fchown(PerlIO_fileno(IoIFP(GvIOn(gv))), val, val2))
+                        if (fd < 0) {
+                            SETERRNO(EBADF,RMS_IFI);
+			    tot--;
+                        } else if (fchown(fd, val, val2))
 			    tot--;
 #else
 			Perl_die(aTHX_ PL_no_func, "fchown");
@@ -1965,9 +1996,12 @@ nothing in the core.
                 if ((gv = MAYBE_DEREF_GV(*mark))) {
 		    if (GvIO(gv) && IoIFP(GvIOp(gv))) {
 #ifdef HAS_FUTIMES
+                        int fd =  PerlIO_fileno(IoIFP(GvIOn(gv)));
 			APPLY_TAINT_PROPER();
-			if (futimes(PerlIO_fileno(IoIFP(GvIOn(gv))),
-                            (struct timeval *) utbufp))
+                        if (fd < 0) {
+                            SETERRNO(EBADF,RMS_IFI);
+                            tot--;
+			} else if (futimes(fd, (struct timeval *) utbufp))
 			    tot--;
 #else
 			Perl_die(aTHX_ PL_no_func, "futimes");
@@ -2082,15 +2116,17 @@ S_ingroup(pTHX_ Gid_t testgid, bool effective)
         bool rc = FALSE;
 
 	anum = getgroups(0, gary);
-        Newx(gary, anum, Groups_t);
-        anum = getgroups(anum, gary);
-	while (--anum >= 0)
-	    if (gary[anum] == testgid) {
-                rc = TRUE;
-                break;
-            }
+        if (anum > 0) {
+            Newx(gary, anum, Groups_t);
+            anum = getgroups(anum, gary);
+            while (--anum >= 0)
+                if (gary[anum] == testgid) {
+                    rc = TRUE;
+                    break;
+                }
 
-        Safefree(gary);
+            Safefree(gary);
+        }
         return rc;
     }
 #else

@@ -40,8 +40,12 @@ PerlIOMmap_map(pTHX_ PerlIO *f)
 	abort();
     if (flags & PERLIO_F_CANREAD) {
 	PerlIOBuf * const b = PerlIOSelf(f, PerlIOBuf);
-	const int fd = PerlIO_fileno(f);
 	Stat_t st;
+	const int fd = PerlIO_fileno(f);
+        if (fd < 0) {
+          SETERRNO(EBADF,RMS_IFI);
+          return -1;
+        }
 	code = Fstat(fd, &st);
 	if (code == 0 && S_ISREG(st.st_mode)) {
 	    SSize_t len = st.st_size - b->posn;

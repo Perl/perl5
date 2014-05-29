@@ -715,8 +715,10 @@ PP(pp_pipe_op)
 	goto badexit;
     }
 #if defined(HAS_FCNTL) && defined(F_SETFD)
-    fcntl(fd[0],F_SETFD,fd[0] > PL_maxsysfd);	/* ensure close-on-exec */
-    fcntl(fd[1],F_SETFD,fd[1] > PL_maxsysfd);	/* ensure close-on-exec */
+    /* ensure close-on-exec */
+    if ((fcntl(fd[0], F_SETFD,fd[0] > PL_maxsysfd) < 0) ||
+        (fcntl(fd[1], F_SETFD,fd[1] > PL_maxsysfd) < 0))
+        goto badexit;
 #endif
     RETPUSHYES;
 
@@ -1627,8 +1629,9 @@ PP(pp_sysread)
     bool charstart = FALSE;
     STRLEN charskip = 0;
     STRLEN skip = 0;
-
     GV * const gv = MUTABLE_GV(*++MARK);
+    int fd;
+
     if ((PL_op->op_type == OP_READ || PL_op->op_type == OP_SYSREAD)
 	&& gv && (io = GvIO(gv)) )
     {
@@ -1659,6 +1662,10 @@ PP(pp_sysread)
 	SETERRNO(EBADF,RMS_IFI);
 	goto say_undef;
     }
+
+    /* Note that fd can here validly be -1, don't check it yet. */
+    fd = PerlIO_fileno(IoIFP(io));
+
     if ((fp_utf8 = PerlIO_isutf8(IoIFP(io))) && !IN_BYTES) {
 	buffer = SvPVutf8_force(bufsv, blen);
 	/* UTF-8 may not have been set if they are all low bytes */
@@ -1682,6 +1689,10 @@ PP(pp_sysread)
     if (PL_op->op_type == OP_RECV) {
 	Sock_size_t bufsize;
 	char namebuf[MAXPATHLEN];
+        if (fd < 0) {
+            SETERRNO(EBADF,SS_IVCHAN);
+            RETPUSHUNDEF;
+        }
 #if (defined(VMS_DO_SOCKETS) && defined(DECCRTL_SOCKETS)) || defined(__QNXNTO__)
 	bufsize = sizeof (struct sockaddr_in);
 #else
@@ -1693,7 +1704,7 @@ PP(pp_sysread)
 #endif
 	buffer = SvGROW(bufsv, (STRLEN)(length+1));
 	/* 'offset' means 'flags' here */
-	count = PerlSock_recvfrom(PerlIO_fileno(IoIFP(io)), buffer, length, offset,
+	count = PerlSock_recvfrom(fd, buffer, length, offset,
 				  (struct sockaddr *)namebuf, &bufsize);
 	if (count < 0)
 	    RETPUSHUNDEF;
@@ -1735,7 +1746,11 @@ PP(pp_sysread)
 	else
 	    offset = utf8_hop((U8 *)buffer,offset) - (U8 *) buffer;
     }
+
  more_bytes:
+    /* Reestablish the fd in case it shifted from underneath us. */
+    fd = PerlIO_fileno(IoIFP(io));
+
     orig_size = SvCUR(bufsv);
     /* Allocating length + offset + 1 isn't perfect in the case of reading
        bytes from a byte file handle into a UTF8 buffer, but it won't harm us
@@ -1765,14 +1780,22 @@ PP(pp_sysread)
     if (PL_op->op_type == OP_SYSREAD) {
 #ifdef PERL_SOCK_SYSREAD_IS_RECV
 	if (IoTYPE(io) == IoTYPE_SOCKET) {
-	    count = PerlSock_recv(PerlIO_fileno(IoIFP(io)),
-				   buffer, length, 0);
+            if (fd < 0) {
+                SETERRNO(EBADF,SS_IVCHAN);
+                count = -1;
+            }
+            else
+                count = PerlSock_recv(fd, buffer, length, 0);
 	}
 	else
 #endif
 	{
-	    count = PerlLIO_read(PerlIO_fileno(IoIFP(io)),
-				  buffer, length);
+            if (fd < 0) {
+                SETERRNO(EBADF,RMS_IFI);
+                count = -1;
+            }
+            else
+                count = PerlLIO_read(fd, buffer, length);
 	}
     }
     else
@@ -1856,6 +1879,7 @@ PP(pp_syswrite)
     U8 *tmpbuf = NULL;
     GV *const gv = MUTABLE_GV(*++MARK);
     IO *const io = GvIO(gv);
+    int fd;
 
     if (op_type == OP_SYSWRITE && io) {
 	const MAGIC * const mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
@@ -1885,6 +1909,12 @@ PP(pp_syswrite)
 	    report_evil_fh(gv);
 	SETERRNO(EBADF,RMS_IFI);
 	goto say_undef;
+    }
+    fd = PerlIO_fileno(IoIFP(io));
+    if (fd < 0) {
+        SETERRNO(EBADF,SS_IVCHAN);
+        retval = -1;
+        goto say_undef;
     }
 
     /* Do this first to trigger any overloading.  */
@@ -1920,12 +1950,11 @@ PP(pp_syswrite)
 	if (SP > MARK) {
 	    STRLEN mlen;
 	    char * const sockbuf = SvPVx(*++MARK, mlen);
-	    retval = PerlSock_sendto(PerlIO_fileno(IoIFP(io)), buffer, blen,
+	    retval = PerlSock_sendto(fd, buffer, blen,
 				     flags, (struct sockaddr *)sockbuf, mlen);
 	}
 	else {
-	    retval
-		= PerlSock_send(PerlIO_fileno(IoIFP(io)), buffer, blen, flags);
+	    retval = PerlSock_send(fd, buffer, blen, flags);
 	}
     }
     else
@@ -2008,15 +2037,13 @@ PP(pp_syswrite)
 	}
 #ifdef PERL_SOCK_SYSWRITE_IS_SEND
 	if (IoTYPE(io) == IoTYPE_SOCKET) {
-	    retval = PerlSock_send(PerlIO_fileno(IoIFP(io)),
-				   buffer, length, 0);
+	    retval = PerlSock_send(fd, buffer, length, 0);
 	}
 	else
 #endif
 	{
 	    /* See the note at doio.c:do_print about filesize limits. --jhi */
-	    retval = PerlLIO_write(PerlIO_fileno(IoIFP(io)),
-				   buffer, length);
+            retval = PerlLIO_write(fd, buffer, length);
 	}
     }
 
@@ -2224,13 +2251,19 @@ PP(pp_truncate)
 		    result = 0;
 		}
 		else {
-		    PerlIO_flush(fp);
+                    int fd = PerlIO_fileno(fp);
+                    if (fd < 0) {
+                        SETERRNO(EBADF,RMS_IFI);
+                        result = 0;
+                    } else {
+                        PerlIO_flush(fp);
 #ifdef HAS_TRUNCATE
-		    if (ftruncate(PerlIO_fileno(fp), len) < 0)
+                        if (ftruncate(fd, len) < 0)
 #else
-		    if (my_chsize(PerlIO_fileno(fp), len) < 0)
+                        if (my_chsize(fd, len) < 0)
 #endif
-			result = 0;
+                            result = 0;
+                    }
 		}
 	    }
 	}
@@ -2248,9 +2281,10 @@ PP(pp_truncate)
 	    {
 		const int tmpfd = PerlLIO_open(name, O_RDWR);
 
-		if (tmpfd < 0)
+		if (tmpfd < 0) {
+                    SETERRNO(EBADF,RMS_IFI);
 		    result = 0;
-		else {
+		} else {
 		    if (my_chsize(tmpfd, len) < 0)
 		        result = 0;
 		    PerlLIO_close(tmpfd);
@@ -2388,8 +2422,10 @@ PP(pp_socket)
 
     TAINT_PROPER("socket");
     fd = PerlSock_socket(domain, type, protocol);
-    if (fd < 0)
+    if (fd < 0) {
+        SETERRNO(EBADF,RMS_IFI);
 	RETPUSHUNDEF;
+    }
     IoIFP(io) = PerlIO_fdopen(fd, "r"SOCKET_OPEN_MODE);	/* stdio gets confused about sockets */
     IoOFP(io) = PerlIO_fdopen(fd, "w"SOCKET_OPEN_MODE);
     IoTYPE(io) = IoTYPE_SOCKET;
@@ -2400,7 +2436,8 @@ PP(pp_socket)
 	RETPUSHUNDEF;
     }
 #if defined(HAS_FCNTL) && defined(F_SETFD)
-    fcntl(fd, F_SETFD, fd > PL_maxsysfd);	/* ensure close-on-exec */
+    if (fcntl(fd, F_SETFD, fd > PL_maxsysfd) < 0)	/* ensure close-on-exec */
+	RETPUSHUNDEF;
 #endif
 
     RETPUSHYES;
@@ -2445,8 +2482,10 @@ PP(pp_sockpair)
 	RETPUSHUNDEF;
     }
 #if defined(HAS_FCNTL) && defined(F_SETFD)
-    fcntl(fd[0],F_SETFD,fd[0] > PL_maxsysfd);	/* ensure close-on-exec */
-    fcntl(fd[1],F_SETFD,fd[1] > PL_maxsysfd);	/* ensure close-on-exec */
+    /* ensure close-on-exec */
+    if ((fcntl(fd[0],F_SETFD,fd[0] > PL_maxsysfd) < 0) ||
+        (fcntl(fd[1],F_SETFD,fd[1] > PL_maxsysfd) < 0))
+	RETPUSHUNDEF;
 #endif
 
     RETPUSHYES;
@@ -2467,16 +2506,20 @@ PP(pp_bind)
     IO * const io = GvIOn(gv);
     STRLEN len;
     int op_type;
+    int fd;
 
     if (!IoIFP(io))
 	goto nuts;
+    fd = PerlIO_fileno(IoIFP(io));
+    if (fd < 0)
+        goto nuts;
 
     addr = SvPV_const(addrsv, len);
     op_type = PL_op->op_type;
     TAINT_PROPER(PL_op_desc[op_type]);
     if ((op_type == OP_BIND
-	 ? PerlSock_bind(PerlIO_fileno(IoIFP(io)), (struct sockaddr *)addr, len)
-	 : PerlSock_connect(PerlIO_fileno(IoIFP(io)), (struct sockaddr *)addr, len))
+	 ? PerlSock_bind(fd, (struct sockaddr *)addr, len)
+	 : PerlSock_connect(fd, (struct sockaddr *)addr, len))
 	>= 0)
 	RETPUSHYES;
     else
@@ -2554,7 +2597,8 @@ PP(pp_accept)
 	goto badexit;
     }
 #if defined(HAS_FCNTL) && defined(F_SETFD)
-    fcntl(fd, F_SETFD, fd > PL_maxsysfd);	/* ensure close-on-exec */
+    if (fcntl(fd, F_SETFD, fd > PL_maxsysfd) < 0)	/* ensure close-on-exec */
+        goto badexit;
 #endif
 
 #ifdef __SCO_VERSION__
@@ -2608,6 +2652,8 @@ PP(pp_ssockopt)
 	goto nuts;
 
     fd = PerlIO_fileno(IoIFP(io));
+    if (fd < 0)
+        goto nuts;
     switch (optype) {
     case OP_GSOCKOPT:
 	SvGROW(sv, 257);
@@ -2683,6 +2729,8 @@ PP(pp_getpeername)
     SvCUR_set(sv, len);
     *SvEND(sv) ='\0';
     fd = PerlIO_fileno(IoIFP(io));
+    if (fd < 0)
+        goto nuts;
     switch (optype) {
     case OP_GETSOCKNAME:
 	if (PerlSock_getsockname(fd, (struct sockaddr *)SvPVX(sv), &len) < 0)
@@ -2764,9 +2812,14 @@ PP(pp_stat)
 	    }
             if (io) {
                     if (IoIFP(io)) {
-                        PL_laststatval = 
-                            PerlLIO_fstat(PerlIO_fileno(IoIFP(io)), &PL_statcache);   
-                        havefp = TRUE;
+                        int fd = PerlIO_fileno(IoIFP(io));
+                        if (fd < 0) {
+                            PL_laststatval = -1;
+                            SETERRNO(EBADF,RMS_IFI);
+                        } else {
+                            PL_laststatval = PerlLIO_fstat(fd, &PL_statcache);
+                            havefp = TRUE;
+                        }
                     } else if (IoDIRP(io)) {
                         PL_laststatval =
                             PerlLIO_fstat(my_dirfd(IoDIRP(io)), &PL_statcache);
@@ -3256,9 +3309,13 @@ PP(pp_fttty)
     if (GvIO(gv) && IoIFP(GvIOp(gv)))
 	fd = PerlIO_fileno(IoIFP(GvIOp(gv)));
     else if (name && isDIGIT(*name))
-	    fd = atoi(name);
+        fd = atoi(name);
     else
 	FT_RETURNUNDEF;
+    if (fd < 0) {
+        SETERRNO(EBADF,RMS_IFI);
+	FT_RETURNUNDEF;
+    }
     if (PerlLIO_isatty(fd))
 	FT_RETURNYES;
     FT_RETURNNO;
@@ -3307,9 +3364,15 @@ PP(pp_fttext)
 	PL_laststatval = -1;
 	PL_laststype = OP_STAT;
 	if (io && IoIFP(io)) {
+	    int fd;
 	    if (! PerlIO_has_base(IoIFP(io)))
 		DIE(aTHX_ "-T and -B not implemented on filehandles");
-	    PL_laststatval = PerlLIO_fstat(PerlIO_fileno(IoIFP(io)), &PL_statcache);
+	    fd = PerlIO_fileno(IoIFP(io));
+	    if (fd < 0) {
+                SETERRNO(EBADF,RMS_IFI);
+		FT_RETURNUNDEF;
+            }
+	    PL_laststatval = PerlLIO_fstat(fd, &PL_statcache);
 	    if (PL_laststatval < 0)
 		FT_RETURNUNDEF;
 	    if (S_ISDIR(PL_statcache.st_mode)) { /* handle NFS glitch */
@@ -3341,6 +3404,7 @@ PP(pp_fttext)
     }
     else {
         const char *file;
+        int fd; 
 
 	sv_setpv(PL_statname, SvPV_nomg_const_nolen(sv));
       really_filename:
@@ -3360,9 +3424,16 @@ PP(pp_fttext)
 	    FT_RETURNUNDEF;
 	}
 	PL_laststype = OP_STAT;
-	PL_laststatval = PerlLIO_fstat(PerlIO_fileno(fp), &PL_statcache);
+        fd = PerlIO_fileno(fp);
+        if (fd < 0) {
+	    (void)PerlIO_close(fp);
+            SETERRNO(EBADF,RMS_IFI);
+	    FT_RETURNUNDEF;
+        }
+	PL_laststatval = PerlLIO_fstat(fd, &PL_statcache);
 	if (PL_laststatval < 0)	{
 	    (void)PerlIO_close(fp);
+            SETERRNO(EBADF,RMS_IFI);
 	    FT_RETURNUNDEF;
 	}
 	PerlIO_binmode(aTHX_ fp, '<', O_BINARY, NULL);
@@ -3477,19 +3548,19 @@ PP(pp_chdir)
 	    if (IoDIRP(io)) {
 		PUSHi(fchdir(my_dirfd(IoDIRP(io))) >= 0);
 	    } else if (IoIFP(io)) {
-                PUSHi(fchdir(PerlIO_fileno(IoIFP(io))) >= 0);
+                int fd = PerlIO_fileno(IoIFP(io));
+                if (fd < 0) {
+                    goto nuts;
+                }
+                PUSHi(fchdir(fd) >= 0);
 	    }
 	    else {
-		report_evil_fh(gv);
-		SETERRNO(EBADF, RMS_IFI);
-		PUSHi(0);
+                goto nuts;
 	    }
+        } else {
+            goto nuts;
         }
-	else {
-	    report_evil_fh(gv);
-	    SETERRNO(EBADF,RMS_IFI);
-	    PUSHi(0);
-	}
+
 #else
 	DIE(aTHX_ PL_no_func, "fchdir");
 #endif
@@ -3501,6 +3572,12 @@ PP(pp_chdir)
      * in the future. */
     hv_delete(GvHVn(PL_envgv),"DEFAULT",7,G_DISCARD);
 #endif
+    RETURN;
+
+ nuts:
+    report_evil_fh(gv);
+    SETERRNO(EBADF,RMS_IFI);
+    PUSHi(0);
     RETURN;
 }
 
@@ -4196,7 +4273,8 @@ PP(pp_system)
 	if (did_pipes) {
 	    PerlLIO_close(pp[0]);
 #if defined(HAS_FCNTL) && defined(F_SETFD)
-	    fcntl(pp[1], F_SETFD, FD_CLOEXEC);
+	    if (fcntl(pp[1], F_SETFD, FD_CLOEXEC) < 0)
+                RETPUSHUNDEF;
 #endif
 	}
 	if (PL_op->op_flags & OPf_STACKED) {

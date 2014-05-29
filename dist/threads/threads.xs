@@ -713,11 +713,12 @@ S_ithread_create(
     }
     PERL_SET_CONTEXT(aTHX);
     if (!thread) {
-        int rc;
         MUTEX_UNLOCK(&MY_POOL.create_destruct_mutex);
-        rc = PerlLIO_write(PerlIO_fileno(Perl_error_log),
-                            PL_no_mem, strlen(PL_no_mem));
-        PERL_UNUSED_VAR(rc);
+        int fd = PerlIO_fileno(Perl_error_log);
+        if (fd >= 0) {
+          /* If there's no error_log, we cannot scream about it missing. */
+          PERL_UNUSED_RESULT(PerlLIO_write(fd, PL_no_mem, strlen(PL_no_mem)));
+        }
         my_exit(1);
     }
     Zero(thread, 1, ithread);

@@ -2290,6 +2290,10 @@ The C<"+"> is valid only when followed by digits, indicating a
 capturing group.  See
 L<C<(?I<PARNO>)>|perlre/(?PARNO) (?-PARNO) (?+PARNO) (?R) (?0)>.
 
+=item Illegal suidscript
+
+(F) The script run under suidperl was somehow illegal.
+
 =item Illegal switch in PERL5OPT: -%c
 
 (X) The PERL5OPT environment variable may only be used to set the

@@ -1120,12 +1120,15 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 #ifdef HAS_GETGROUPS
 	{
 	    Groups_t *gary = NULL;
-	    I32 i, num_groups = getgroups(0, gary);
-            Newx(gary, num_groups, Groups_t);
-            num_groups = getgroups(num_groups, gary);
-	    for (i = 0; i < num_groups; i++)
-		Perl_sv_catpvf(aTHX_ sv, " %"IVdf, (IV)gary[i]);
-            Safefree(gary);
+	    I32 i;
+            I32 num_groups = getgroups(0, gary);
+            if (num_groups > 0) {
+                Newx(gary, num_groups, Groups_t);
+                num_groups = getgroups(num_groups, gary);
+                for (i = 0; i < num_groups; i++)
+                    Perl_sv_catpvf(aTHX_ sv, " %"IVdf, (IV)gary[i]);
+                Safefree(gary);
+            }
 	}
 	(void)SvIOK_on(sv);	/* what a wonderful hack! */
 #endif

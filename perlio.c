@@ -2928,6 +2928,10 @@ PerlIO_importFILE(FILE *stdio, const char *mode)
     PerlIO *f = NULL;
     if (stdio) {
 	PerlIOStdio *s;
+        int fd0 = fileno(stdio);
+        if (fd0 < 0) {
+            return NULL;
+        }
 	if (!mode || !*mode) {
 	    /* We need to probe to see how we can open the stream
 	       so start with read/write and then try write and read
@@ -2936,8 +2940,12 @@ PerlIO_importFILE(FILE *stdio, const char *mode)
 	       Note that the errno value set by a failing fdopen
 	       varies between stdio implementations.
 	     */
-	    const int fd = PerlLIO_dup(fileno(stdio));
-	    FILE *f2 = PerlSIO_fdopen(fd, (mode = "r+"));
+            const int fd = PerlLIO_dup(fd0);
+	    FILE *f2;
+            if (fd < 0) {
+                return f;
+            }
+	    f2 = PerlSIO_fdopen(fd, (mode = "r+"));
 	    if (!f2) {
 		f2 = PerlSIO_fdopen(fd, (mode = "w"));
 	    }
@@ -3357,8 +3365,8 @@ PerlIOStdio_unread(pTHX_ PerlIO *f, const void *vbuf, Size_t count)
 	    }
 	    if ((STDCHAR*)PerlSIO_get_ptr(s) != --eptr || ((*eptr & 0xFF) != ch)) {
 		/* Did not change pointer as expected */
-		fgetc(s);  /* get char back again */
-		break;
+		if (fgetc(s) != EOF)  /* get char back again */
+                    break;
 	    }
 	    /* It worked ! */
 	    count--;
@@ -3674,6 +3682,10 @@ PerlIO_exportFILE(PerlIO * f, const char *mode)
     FILE *stdio = NULL;
     if (PerlIOValid(f)) {
 	char buf[8];
+        int fd = PerlIO_fileno(f);
+        if (fd < 0) {
+            return NULL;
+        }
 	PerlIO_flush(f);
 	if (!mode || !*mode) {
 	    mode = PerlIO_modestr(f, buf);
