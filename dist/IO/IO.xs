@@ -566,11 +566,10 @@ sockatmark (sock)
    InputStream sock
    PROTOTYPE: $
    PREINIT:
-     int fd;
+     int fd = PerlIO_fileno(sock);
    CODE:
    {
 #ifdef HAS_SOCKATMARK
-     int fd = PerlIO_fileno(sock);
      if (fd < 0) {
        errno = EBADF;
        RETVAL = -1;
@@ -579,6 +578,11 @@ sockatmark (sock)
      }
 #else
      {
+     if (fd < 0) {
+       errno = EBADF;
+       RETVAL = -1;
+     }
+     else {
        int flag = 0;
 #   ifdef SIOCATMARK
 #     if defined(NETWARE) || defined(WIN32)
@@ -591,6 +595,7 @@ sockatmark (sock)
        not_here("IO::Socket::atmark");
 #   endif
        RETVAL = flag;
+     }
      }
 #endif
    }
