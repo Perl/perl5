@@ -1992,54 +1992,54 @@ Perl_my_setenv(pTHX_ const char *nam, const char *val)
   {
 #ifndef PERL_USE_SAFE_PUTENV
     if (!PL_use_safe_putenv) {
-    /* most putenv()s leak, so we manipulate environ directly */
-    I32 i;
-    const I32 len = strlen(nam);
-    int nlen, vlen;
+        /* most putenv()s leak, so we manipulate environ directly */
+        I32 i;
+        const I32 len = strlen(nam);
+        int nlen, vlen;
 
-    /* where does it go? */
-    for (i = 0; environ[i]; i++) {
-        if (strnEQ(environ[i],nam,len) && environ[i][len] == '=')
-            break;
-    }
+        /* where does it go? */
+        for (i = 0; environ[i]; i++) {
+            if (strnEQ(environ[i],nam,len) && environ[i][len] == '=')
+                break;
+        }
 
-    if (environ == PL_origenviron) {   /* need we copy environment? */
-       I32 j;
-       I32 max;
-       char **tmpenv;
+        if (environ == PL_origenviron) {   /* need we copy environment? */
+            I32 j;
+            I32 max;
+            char **tmpenv;
 
-       max = i;
-       while (environ[max])
-           max++;
-       tmpenv = (char**)safesysmalloc((max+2) * sizeof(char*));
-       for (j=0; j<max; j++) {         /* copy environment */
-           const int len = strlen(environ[j]);
-           tmpenv[j] = (char*)safesysmalloc((len+1)*sizeof(char));
-           Copy(environ[j], tmpenv[j], len+1, char);
-       }
-       tmpenv[max] = NULL;
-       environ = tmpenv;               /* tell exec where it is now */
-    }
-    if (!val) {
-       safesysfree(environ[i]);
-       while (environ[i]) {
-           environ[i] = environ[i+1];
-           i++;
-	}
-       return;
-    }
-    if (!environ[i]) {                 /* does not exist yet */
-       environ = (char**)safesysrealloc(environ, (i+2) * sizeof(char*));
-       environ[i+1] = NULL;    /* make sure it's null terminated */
-    }
-    else
-       safesysfree(environ[i]);
-    nlen = strlen(nam);
-    vlen = strlen(val);
+            max = i;
+            while (environ[max])
+                max++;
+            tmpenv = (char**)safesysmalloc((max+2) * sizeof(char*));
+            for (j=0; j<max; j++) {         /* copy environment */
+                const int len = strlen(environ[j]);
+                tmpenv[j] = (char*)safesysmalloc((len+1)*sizeof(char));
+                Copy(environ[j], tmpenv[j], len+1, char);
+            }
+            tmpenv[max] = NULL;
+            environ = tmpenv;               /* tell exec where it is now */
+        }
+        if (!val) {
+            safesysfree(environ[i]);
+            while (environ[i]) {
+                environ[i] = environ[i+1];
+                i++;
+            }
+            return;
+        }
+        if (!environ[i]) {                 /* does not exist yet */
+            environ = (char**)safesysrealloc(environ, (i+2) * sizeof(char*));
+            environ[i+1] = NULL;    /* make sure it's null terminated */
+        }
+        else
+            safesysfree(environ[i]);
+        nlen = strlen(nam);
+        vlen = strlen(val);
 
-    environ[i] = (char*)safesysmalloc((nlen+vlen+2) * sizeof(char));
-    /* all that work just for this */
-    my_setenv_format(environ[i], nam, nlen, val, vlen);
+        environ[i] = (char*)safesysmalloc((nlen+vlen+2) * sizeof(char));
+        /* all that work just for this */
+        my_setenv_format(environ[i], nam, nlen, val, vlen);
     } else {
 # endif
 #   if defined(__CYGWIN__)|| defined(__SYMBIAN32__) || defined(__riscos__)
