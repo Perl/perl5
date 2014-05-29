@@ -109,7 +109,7 @@ ndbm_STORE(db, key, value, flags = DBM_REPLACE)
 	    if (RETVAL < 0 && errno == EPERM)
 		croak("No write permission to ndbm file");
 	    croak("ndbm store returned %d, errno %d, key \"%s\"",
-			RETVAL,errno,key.dptr);
+                  RETVAL, errno, (const char *)key.dptr);
 	    dbm_clearerr(db->dbp);
 	}
 
