@@ -3098,7 +3098,7 @@ PP(pp_goto) /* also pp_dump */
 	    I32 oldsave;
 
 	    if (ix < 0)
-		ix = 0;
+		DIE(aTHX_ "panic: docatch: illegal ix=%ld", (long)ix);
 	    dounwind(ix);
 	    TOPBLOCK(cx);
 	    oldsave = PL_scopestack[PL_scopestack_ix];
