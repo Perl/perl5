@@ -514,8 +514,14 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
                     (printwarn &&
                      (!(p = PerlEnv_getenv("PERL_BADLANG")) || atoi(p))));
     bool done = FALSE;
+#ifdef WIN32
+    /* In some systems you can find out the system default locale
+     * and use that as the fallback locale. */
+#   define SYSTEM_DEFAULT_LOCALE
+#endif
+#ifdef SYSTEM_DEFAULT_LOCALE
     const char *system_default_locale = NULL;
-
+#endif
 
 #ifndef LOCALE_ENVIRON_REQUIRED
     PERL_UNUSED_VAR(done);
@@ -600,8 +606,8 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
              * sense */
             setlocale_failure = FALSE;
 
-#ifdef WIN32
-
+#ifdef SYSTEM_DEFAULT_LOCALE
+#  ifdef WIN32
             /* On Windows machines, an entry of "" after the 0th means to use
              * the system default locale, which we now proceed to get. */
             if (strEQ(trial_locale, "")) {
@@ -624,7 +630,8 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 
                 trial_locale = system_default_locale;
             }
-#endif
+#  endif /* WIN32 */
+#endif /* SYSTEM_DEFAULT_LOCALE */
         }
 
 #ifdef LC_ALL
@@ -846,12 +853,14 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
                 description = "the standard locale";
                 name = "C";
             }
+#ifdef SYSTEM_DEFAULT_LOCALE
             else if (strEQ(trial_locales[i], "")) {
                 description = "the system default locale";
                 if (system_default_locale) {
                     name = system_default_locale;
                 }
             }
+#endif /* SYSTEM_DEFAULT_LOCALE */
             else {
                 description = "a fallback locale";
                 name = trial_locales[i];
