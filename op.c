@@ -8621,6 +8621,7 @@ Perl_ck_anoncode(pTHX_ OP *o)
 static void
 S_io_hints(pTHX_ OP *o)
 {
+#ifdef PERLIO_BINARY_AND_TEXT_DIFFERENT_AND_EFFECTIVE
     HV * const table =
 	PL_hints & HINT_LOCALIZE_HH ? GvHV(PL_hintgv) : NULL;;
     if (table) {
@@ -8646,6 +8647,9 @@ S_io_hints(pTHX_ OP *o)
 		o->op_private |= OPpOPEN_OUT_CRLF;
 	}
     }
+#else
+    PERL_UNUSED_ARG(o);
+#endif
 }
 
 OP *

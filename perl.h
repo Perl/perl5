@@ -5665,7 +5665,7 @@ int flock(int fd, int op);
 #endif
 
 #if O_TEXT != O_BINARY
-    /* If you have different O_TEXT and O_BINARY and you are a CLRF shop,
+    /* If you have different O_TEXT and O_BINARY and you are a CRLF shop,
      * that is, you are somehow DOSish. */
 #   if defined(__HAIKU__) || defined(__VOS__) || defined(__CYGWIN__)
     /* Haiku has O_TEXT != O_BINARY but O_TEXT and O_BINARY have no effect;
@@ -5678,6 +5678,14 @@ int flock(int fd, int op);
 #   else
     /* If you really are DOSish. */
 #      define PERLIO_USING_CRLF 1
+#   endif
+#   if O_TEXT != 0 && O_BINARY != 0
+#     if !defined(__HAIKU__)
+        /* If you have O_TEXT different from your O_BINARY and
+         * they are both not zero (being zero would make testing
+         * with bit-and interesting) and they have an effect. */
+#       define PERLIO_BINARY_AND_TEXT_DIFFERENT_AND_EFFECTIVE
+#     endif
 #   endif
 #endif
 
