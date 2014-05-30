@@ -1488,8 +1488,8 @@ Perl_my_lstat_flags(pTHX_ const U32 flags)
 	    /* diag_listed_as: Use of -l on filehandle%s */
             Perl_warner(aTHX_ packWARN(WARN_IO),
                              "Use of -l on filehandle %"HEKf,
-                              GvENAME_HEK((const GV *)
-                                          (SvROK(sv) ? SvRV(sv) : sv)));
+                              HEKfARG(GvENAME_HEK((const GV *)
+                                          (SvROK(sv) ? SvRV(sv) : sv))));
     }
     file = SvPV_flags_const_nolen(sv, flags);
     sv_setpv(PL_statname,file);
