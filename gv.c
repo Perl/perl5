@@ -2399,7 +2399,7 @@ Perl_gp_free(pTHX_ GV *gv)
          Somehow gp->gp_hv can end up pointing at freed garbage.  */
       if (hv && SvTYPE(hv) == SVt_PVHV) {
         const HEK *hvname_hek = HvNAME_HEK(hv);
-        DEBUG_o(Perl_deb(aTHX_ "gp_free clearing PL_stashcache for '%"HEKf"'\n", hvname_hek));
+        DEBUG_o(Perl_deb(aTHX_ "gp_free clearing PL_stashcache for '%"HEKf"'\n", HEKfARG(hvname_hek)));
         if (PL_stashcache && hvname_hek)
            (void)hv_deletehek(PL_stashcache, hvname_hek, G_DISCARD);
 	SvREFCNT_dec(hv);

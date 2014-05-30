@@ -3504,7 +3504,7 @@ Perl_report_wrongway_fh(pTHX_ const GV *gv, const char have)
 	if (name && HEK_LEN(name))
 	    Perl_warner(aTHX_ packWARN(WARN_IO),
 			"Filehandle %"HEKf" opened only for %sput",
-			name, direction);
+			HEKfARG(name), direction);
 	else
 	    Perl_warner(aTHX_ packWARN(WARN_IO),
 			"Filehandle opened only for %sput", direction);
