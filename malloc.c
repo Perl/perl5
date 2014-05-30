@@ -995,27 +995,9 @@ get_emergency_buffer(IV *size)
     return pv;
 }
 
-/* Returns 0 on success, -1 on bad alignment, -2 if not implemented */
-int
-set_emergency_buffer(char *b, IV size)
-{
-    if (PTR2UV(b) & (NEEDED_ALIGNMENT - 1))
-	return -1;
-    if (MallocCfg[MallocCfg_emergency_buffer_prepared_size])
-	add_to_chain((void*)emergency_buffer_prepared,
-		     MallocCfg[MallocCfg_emergency_buffer_prepared_size], 0);
-    emergency_buffer_prepared = b;
-    MallocCfg[MallocCfg_emergency_buffer_prepared_size] = size;
-    return 0;
-}
 #    define GET_EMERGENCY_BUFFER(p)	get_emergency_buffer(p)
 #  else		/* NO_MALLOC_DYNAMIC_CFG */
 #    define GET_EMERGENCY_BUFFER(p)	NULL
-int
-set_emergency_buffer(char *b, IV size)
-{
-    return -1;
-}
 #  endif
 
 static Malloc_t
