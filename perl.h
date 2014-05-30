@@ -921,7 +921,7 @@ EXTERN_C int usleep(unsigned int);
 #  define CHECK_MALLOC_TAINT(newval)				\
 	CHECK_MALLOC_TOO_LATE_FOR_(				\
 		if (newval) {					\
-		  panic_write2("panic: tainting with $ENV{PERL_MALLOC_OPT}\n");\
+		  PERL_UNUSED_RESULT(panic_write2("panic: tainting with $ENV{PERL_MALLOC_OPT}\n"));\
 		  exit(1); })
 #  define MALLOC_CHECK_TAINT(argc,argv,env)	STMT_START {	\
 	if (doing_taint(argc,argv,env)) {			\
