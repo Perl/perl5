@@ -1213,7 +1213,7 @@ Perl_mode_from_discipline(pTHX_ const char *s, STRLEN len)
 			len -= 4;
 			break;
 		    }
-		    /* FALL THROUGH */
+		    /* FALLTHROUGH */
 		case 'c':
 		    if (s[2] == 'r' && s[3] == 'l' && s[4] == 'f'
 			&& (!s[5] || s[5] == ':' || isSPACE(s[5])))
@@ -1223,7 +1223,7 @@ Perl_mode_from_discipline(pTHX_ const char *s, STRLEN len)
 			len -= 5;
 			break;
 		    }
-		    /* FALL THROUGH */
+		    /* FALLTHROUGH */
 		default:
 		    goto fail_discipline;
 		}

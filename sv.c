@@ -7811,7 +7811,7 @@ Perl_sv_cmp_locale_flags(pTHX_ SV *const sv1, SV *const sv2,
      */
 
   raw_compare:
-    /*FALLTHROUGH*/
+    /* FALLTHROUGH */
 
 #else
     PERL_UNUSED_ARG(flags);
@@ -9443,7 +9443,7 @@ Perl_sv_2io(pTHX_ SV *const sv)
                                     HEKfARG(GvNAME_HEK(gv)));
 	    break;
 	}
-	/* FALL THROUGH */
+	/* FALLTHROUGH */
     default:
 	if (!SvOK(sv))
 	    Perl_croak(aTHX_ PL_no_usym, "filehandle");
@@ -11034,7 +11034,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 #endif
 #if IVSIZE >= 8 || defined(HAS_LONG_DOUBLE)
 	case 'L':			/* Ld */
-	    /*FALLTHROUGH*/
+	    /* FALLTHROUGH */
 #if IVSIZE >= 8
 	case 'q':			/* qd */
 #endif
@@ -11169,7 +11169,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 #else
 	    intsize = 'l';
 #endif
-	    /*FALLTHROUGH*/
+	    /* FALLTHROUGH */
 	case 'd':
 	case 'i':
 	    if (vectorize) {
@@ -11245,7 +11245,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 #else
 	    intsize = 'l';
 #endif
-	    /*FALLTHROUGH*/
+	    /* FALLTHROUGH */
 	case 'u':
 	    base = 10;
 	    goto uns_integer;
@@ -11261,7 +11261,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 #else
 	    intsize = 'l';
 #endif
-	    /*FALLTHROUGH*/
+	    /* FALLTHROUGH */
 	case 'o':
 	    base = 8;
 	    goto uns_integer;
@@ -11387,7 +11387,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 
 	case 'F':
 	    c = 'f';		/* maybe %F isn't supported here */
-	    /*FALLTHROUGH*/
+	    /* FALLTHROUGH */
 	case 'e': case 'E':
 	case 'f':
 	case 'g': case 'G':
@@ -11408,7 +11408,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 		break;
 /* [perl #20339] - we should accept and ignore %lf rather than die */
 	    case 'l':
-		/*FALLTHROUGH*/
+		/* FALLTHROUGH */
 	    default:
 #if defined(USE_LONG_DOUBLE)
 		intsize = args ? 0 : 'q';
@@ -11418,7 +11418,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 #if defined(HAS_LONG_DOUBLE)
 		break;
 #else
-		/*FALLTHROUGH*/
+		/* FALLTHROUGH */
 #endif
 	    case 'c':
 	    case 'h':
@@ -12790,7 +12790,7 @@ S_sv_dup_common(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
 		if (!(param->flags & CLONEf_COPY_STACKS)) {
 		    CvDEPTH(dstr) = 0;
 		}
-		/*FALLTHROUGH*/
+		/* FALLTHROUGH */
 	    case SVt_PVFM:
 		/* NOTE: not refcounted */
 		SvANY(MUTABLE_CV(dstr))->xcv_stash =
@@ -13085,13 +13085,13 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 	case SAVEt_HELEM:		/* hash element */
 	    sv = (const SV *)POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = sv_dup_inc(sv, param);
-	    /* fall through */
+	    /* FALLTHROUGH */
 	case SAVEt_ITEM:			/* normal string */
         case SAVEt_GVSV:			/* scalar slot in GV */
         case SAVEt_SV:				/* scalar reference */
 	    sv = (const SV *)POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = sv_dup_inc(sv, param);
-	    /* fall through */
+	    /* FALLTHROUGH */
 	case SAVEt_FREESV:
 	case SAVEt_MORTALIZESV:
 	case SAVEt_READONLY_OFF:
@@ -13123,7 +13123,7 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
         case SAVEt_AV:				/* array reference */
 	    sv = (const SV *) POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = sv_dup_inc(sv, param);
-	    /* fall through */
+	    /* FALLTHROUGH */
 	case SAVEt_COMPPAD:
 	case SAVEt_NSTAB:
 	    sv = (const SV *) POPPTR(ss,ix);
@@ -13165,7 +13165,7 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 	case SAVEt_VPTR:			/* random* reference */
 	    ptr = POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = any_dup(ptr, proto_perl);
-	    /* Fall through */
+	    /* FALLTHROUGH */
 	case SAVEt_INT_SMALL:
 	case SAVEt_I32_SMALL:
 	case SAVEt_I16:				/* I16 reference */
@@ -13229,7 +13229,7 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 	    TOPPTR(nss,ix) = hv_dup_inc(hv, param);
 	    i = POPINT(ss,ix);
 	    TOPINT(nss,ix) = i;
-	    /* Fall through */
+	    /* FALLTHROUGH */
 	case SAVEt_FREEPV:
 	    c = (char*)POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = pv_dup_inc(c);
@@ -14941,7 +14941,7 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
     case OP_CHOMP:
 	if (SvROK(PL_rs) && uninit_sv == SvRV(PL_rs))
 	    return newSVpvs_flags("${$/}", SVs_TEMP);
-	/*FALLTHROUGH*/
+	/* FALLTHROUGH */
 
     default:
     do_op:

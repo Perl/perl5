@@ -497,7 +497,7 @@ S_measure_struct(pTHX_ tempsym_t* symptr)
 		if (!len)		/* Avoid division by 0 */
 		    len = 1;
 		len = total % len;	/* Assumed: the start is aligned. */
-		/* FALL THROUGH */
+		/* FALLTHROUGH */
 	    case 'X':
 		size = -1;
 		if (total < len)
@@ -511,7 +511,7 @@ S_measure_struct(pTHX_ tempsym_t* symptr)
 		    len = len - star;
 		else
 		    len = 0;
-		/* FALL THROUGH */
+		/* FALLTHROUGH */
 	    case 'x':
 	    case 'A':
 	    case 'Z':
@@ -1013,7 +1013,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 		break;
 	    }
 	    len = (s - strbeg) % len;
- 	    /* FALL THROUGH */
+ 	    /* FALLTHROUGH */
 	case 'X':
 	    if (utf8) {
 		while (len > 0) {
@@ -1040,7 +1040,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 	    if (ai32 == 0) break;
 	    len -= ai32;
             }
- 	    /* FALL THROUGH */
+ 	    /* FALLTHROUGH */
 	case 'x':
 	    if (utf8) {
 		while (len>0) {
@@ -1232,7 +1232,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 		    utf8 = (symptr->flags & FLAG_DO_UTF8) ? 1 : 0;
 		break;
 	    }
-	    /* FALL THROUGH */
+	    /* FALLTHROUGH */
 	case 'c':
 	    while (len-- > 0 && s < strend) {
 		int aint;
@@ -1346,7 +1346,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 	    }
 	    break;
 #else
-	    /* Fallthrough! */
+	    /* FALLTHROUGH */
 #endif
 	case 's':
 	    while (len-- > 0) {
@@ -1383,7 +1383,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 	    }
 	    break;
 #else
-            /* Fallthrough! */
+            /* FALLTHROUGH */
 #endif
 	case 'v':
 	case 'n':
@@ -1492,7 +1492,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 	    }
 	    break;
 #else
-	    /* Fallthrough! */
+	    /* FALLTHROUGH */
 #endif
 	case 'l':
 	    while (len-- > 0) {
@@ -1526,7 +1526,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 	    }
 	    break;
 #else
-            /* Fall through! */
+            /* FALLTHROUGH */
 #endif
 	case 'V':
 	case 'N':
@@ -2256,7 +2256,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		break;
 	    }
 	    len = (cur-start) % len;
-	    /* FALL THROUGH */
+	    /* FALLTHROUGH */
 	case 'X':
 	    if (utf8) {
 		if (len < 1) goto no_change;
@@ -2298,7 +2298,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 	    if (ai32 == 0) goto no_change;
 	    len -= ai32;
 	}
-	/* FALL THROUGH */
+	/* FALLTHROUGH */
 	case 'x':
 	    goto grow;
 	case 'A':
@@ -2769,7 +2769,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 	    }
             break;
 #else
-            /* Fall through! */
+            /* FALLTHROUGH */
 #endif
 	case 'S':
 	    while (len-- > 0) {
@@ -2789,7 +2789,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 	    }
             break;
 #else
-            /* Fall through! */
+            /* FALLTHROUGH */
 #endif
 	case 's':
 	    while (len-- > 0) {
@@ -3001,7 +3001,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 	case 'P':
 	    len = 1;		/* assume SV is correct length */
 	    GROWING(utf8, cat, start, cur, sizeof(char *));
-	    /* Fall through! */
+	    /* FALLTHROUGH */
 	case 'p':
 	    while (len-- > 0) {
 		const char *aptr;

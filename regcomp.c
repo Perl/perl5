@@ -4390,7 +4390,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		if (flags & SCF_DO_SUBSTR)
 		    data->pos_min++;
 		min++;
-		/* Fall through. */
+		/* FALLTHROUGH */
 	    case STAR:
 		if (flags & SCF_DO_STCLASS) {
 		    mincount = 0;
@@ -4862,7 +4862,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
 
 		case NPOSIXL:
                     invert = 1;
-                    /* FALL THROUGH */
+                    /* FALLTHROUGH */
 
 		case POSIXL:
                     namedclass = classnum_to_namedclass(FLAGS(scan)) + invert;
@@ -4903,7 +4903,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
                 case NPOSIXA:   /* For these, we always know the exact set of
                                    what's matched */
                     invert = 1;
-                    /* FALL THROUGH */
+                    /* FALLTHROUGH */
 		case POSIXA:
                     if (FLAGS(scan) == _CC_ASCII) {
                         my_invlist = PL_XPosix_ptrs[_CC_ASCII];
@@ -4918,7 +4918,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
 		case NPOSIXD:
 		case NPOSIXU:
                     invert = 1;
-                    /* FALL THROUGH */
+                    /* FALLTHROUGH */
 		case POSIXD:
 		case POSIXU:
                     my_invlist = invlist_clone(PL_XPosix_ptrs[FLAGS(scan)]);
@@ -9735,7 +9735,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                     RExC_parse--; /* rewind to let it be handled later */
                     goto parse_flags;
                 }
-                /*FALLTHROUGH */
+                /* FALLTHROUGH */
             case '1': case '2': case '3': case '4': /* (?1) */
 	    case '5': case '6': case '7': case '8': case '9':
 	        RExC_parse--;
@@ -9807,7 +9807,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 		}
 		*flagp |= POSTPONED;
 		paren = *RExC_parse++;
-		/* FALL THROUGH */
+		/* FALLTHROUGH */
 	    case '{':           /* (?{...}) */
 	    {
 		U32 n = 0;
@@ -10152,7 +10152,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 	case '=':
 	case '!':
 	    *flagp &= ~HASWIDTH;
-	    /* FALL THROUGH */
+	    /* FALLTHROUGH */
 	case '>':
 	    ender = reg_node(pRExC_state, SUCCEED);
 	    break;
@@ -11265,7 +11265,7 @@ tryagain:
 	    RExC_parse++;
 	    goto defchar;
 	}
-	/* FALL THROUGH */
+	/* FALLTHROUGH */
     case '?':
     case '+':
     case '*':
@@ -11428,7 +11428,7 @@ tryagain:
             }
 
 	    *flagp |= HASWIDTH|SIMPLE;
-            /* FALL THROUGH */
+            /* FALLTHROUGH */
 
          finish_meta_pat:
 	    nextchar(pRExC_state);
@@ -11627,7 +11627,7 @@ tryagain:
 	case '\0':
 	    if (RExC_parse >= RExC_end)
 		FAIL("Trailing \\");
-	    /* FALL THROUGH */
+	    /* FALLTHROUGH */
 	default:
 	    /* Do not generate "unrecognized" warnings here, we fall
 	       back into the quick-grab loop below */
@@ -11641,7 +11641,7 @@ tryagain:
 	    if ( reg_skipcomment( pRExC_state ) )
 		goto tryagain;
 	}
-	/* FALL THROUGH */
+	/* FALLTHROUGH */
 
     default:
 
@@ -11933,7 +11933,7 @@ tryagain:
 		    case '\0':
 			if (p >= RExC_end)
 			    FAIL("Trailing \\");
-			/* FALL THROUGH */
+			/* FALLTHROUGH */
 		    default:
 			if (!SIZE_ONLY&& isALPHANUMERIC(*p)) {
 			    /* Include any { following the alpha to emphasize
@@ -12712,7 +12712,7 @@ S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV** return_invlist,
             switch (*RExC_parse) {
                 case '?':
                     if (RExC_parse[1] == '[') depth++, RExC_parse++;
-                    /* FALL THROUGH */
+                    /* FALLTHROUGH */
                 default:
                     break;
                 case '\\':
@@ -12899,7 +12899,7 @@ S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV** return_invlist,
                     RExC_flags = save_flags;
                     goto handle_operand;
                 }
-                /* FALL THROUGH */
+                /* FALLTHROUGH */
 
             default:
                 RExC_parse += (UTF) ? UTF8SKIP(RExC_parse) : 1;
@@ -12995,7 +12995,7 @@ S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV** return_invlist,
                 top_index -= 2;
                 SvREFCNT_dec_NN(lparen);
 
-                /* FALL THROUGH */
+                /* FALLTHROUGH */
             }
 
               handle_operand:
@@ -16348,12 +16348,12 @@ Perl_regdupe_internal(pTHX_ REGEXP * const rx, CLONE_PARAMS *param)
 		 * when the corresponding reg_ac_data struct is freed.
 		 */
 		reti->regstclass= ri->regstclass;
-		/* Fall through */
+		/* FALLTHROUGH */
 	    case 't':
 		OP_REFCNT_LOCK;
 		((reg_trie_data*)ri->data->data[i])->refcount++;
 		OP_REFCNT_UNLOCK;
-		/* Fall through */
+		/* FALLTHROUGH */
 	    case 'l':
 	    case 'L':
 		d->data[i] = ri->data->data[i];

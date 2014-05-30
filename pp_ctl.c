@@ -3043,7 +3043,7 @@ PP(pp_goto) /* also pp_dump */
 		    gotoprobe = CvROOT(cx->blk_sub.cv);
 		    break;
 		}
-		/* FALL THROUGH */
+		/* FALLTHROUGH */
 	    case CXt_FORMAT:
 	    case CXt_NULL:
 		DIE(aTHX_ "Can't \"goto\" out of a pseudo block");
@@ -3243,7 +3243,7 @@ S_docatch(pTHX_ OP *o)
 	    PL_restartop = 0;
 	    goto redo_body;
 	}
-	/* FALL THROUGH */
+	/* FALLTHROUGH */
     default:
 	JMPENV_POP;
 	PL_op = oldop;
@@ -5223,7 +5223,7 @@ S_doparseform(pTHX_ SV *sv)
 		s++;
 	    }
 	    noblank = TRUE;
-	    /* FALL THROUGH */
+	    /* FALLTHROUGH */
 	case ' ': case '\t':
 	    skipspaces++;
 	    continue;

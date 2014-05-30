@@ -903,7 +903,7 @@ PP(pp_tie)
 		vivify_defelem(varsv);
 		varsv = LvTARG(varsv);
 	    }
-	    /* FALL THROUGH */
+	    /* FALLTHROUGH */
 	default:
 	    methname = "TIESCALAR";
 	    how = PERL_MAGIC_tiedscalar;
@@ -3063,7 +3063,7 @@ PP(pp_ftrread)
 	access_mode = W_OK;
 #endif
 	stat_mode = S_IWUSR;
-	/* fall through */
+	/* FALLTHROUGH */
 
     case OP_FTEREAD:
 #ifndef PERL_EFF_ACCESS

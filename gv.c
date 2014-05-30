@@ -1694,7 +1694,7 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
 	    case 'b':
 		if (len == 1 && sv_type == SVt_PV)
 		    GvMULTI_on(gv);
-		/* FALL THROUGH */
+		/* FALLTHROUGH */
 	    default:
 		goto try_core;
 	    }
@@ -1969,7 +1969,7 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
 	case '\023':	/* $^S */
 	ro_magicalize:
 	    SvREADONLY_on(GvSVn(gv));
-	    /* FALL THROUGH */
+	    /* FALLTHROUGH */
 	case '0':		/* $0 */
 	case '^':		/* $^ */
 	case '~':		/* $~ */

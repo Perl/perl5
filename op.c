@@ -802,7 +802,7 @@ Perl_op_clear(pTHX_ OP *o)
 	if (!(o->op_flags & OPf_REF)
 	    || (PL_check[o->op_type] != Perl_ck_ftst))
 	    break;
-	/* FALL THROUGH */
+	/* FALLTHROUGH */
     case OP_GVSV:
     case OP_GV:
     case OP_AELEMFAST:
@@ -874,7 +874,7 @@ Perl_op_clear(pTHX_ OP *o)
     case OP_REDO:
 	if (o->op_flags & (OPf_SPECIAL|OPf_STACKED|OPf_KIDS))
 	    break;
-	/* FALL THROUGH */
+	/* FALLTHROUGH */
     case OP_TRANS:
     case OP_TRANSR:
 	if (o->op_private & (OPpTRANS_FROM_UTF|OPpTRANS_TO_UTF)) {
@@ -907,7 +907,7 @@ Perl_op_clear(pTHX_ OP *o)
 #else
 	SvREFCNT_dec(MUTABLE_SV(cPMOPo->op_pmreplrootu.op_pmtargetgv));
 #endif
-	/* FALL THROUGH */
+	/* FALLTHROUGH */
     case OP_MATCH:
     case OP_QR:
 clear_pmop:
@@ -1301,7 +1301,7 @@ Perl_scalar(pTHX_ OP *o)
 	for (kid = cUNOPo->op_first->op_sibling; kid; kid = kid->op_sibling)
 	    scalar(kid);
 	break;
-	/* FALL THROUGH */
+	/* FALLTHROUGH */
     case OP_SPLIT:
     case OP_MATCH:
     case OP_QR:
@@ -1435,7 +1435,7 @@ Perl_scalarvoid(pTHX_ OP *o)
     default:
 	if (!(PL_opargs[o->op_type] & OA_FOLDCONST))
 	    break;
-	/* FALL THROUGH */
+	/* FALLTHROUGH */
     case OP_REPEAT:
 	if (o->op_flags & OPf_STACKED)
 	    break;
@@ -1443,7 +1443,7 @@ Perl_scalarvoid(pTHX_ OP *o)
     case OP_SUBSTR:
 	if (o->op_private == 4)
 	    break;
-	/* FALL THROUGH */
+	/* FALLTHROUGH */
     case OP_GVSV:
     case OP_WANTARRAY:
     case OP_GV:
@@ -1692,14 +1692,14 @@ Perl_scalarvoid(pTHX_ OP *o)
     case OP_NULL:
 	if (o->op_flags & OPf_STACKED)
 	    break;
-	/* FALL THROUGH */
+	/* FALLTHROUGH */
     case OP_NEXTSTATE:
     case OP_DBSTATE:
     case OP_ENTERTRY:
     case OP_ENTER:
 	if (!(o->op_flags & OPf_KIDS))
 	    break;
-	/* FALL THROUGH */
+	/* FALLTHROUGH */
     case OP_SCOPE:
     case OP_LEAVE:
     case OP_LEAVETRY:
@@ -2188,7 +2188,7 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 		    break;
 	    }
 	}
-	/* FALL THROUGH */
+	/* FALLTHROUGH */
     default:
       nomod:
 	if (flags & OP_LVALUE_NO_CROAK) return NULL;
@@ -2242,16 +2242,16 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
            PL_modcount = RETURN_UNLIMITED_NUMBER;
 	    return o;		/* Treat \(@foo) like ordinary list. */
 	}
-	/* FALL THROUGH */
+	/* FALLTHROUGH */
     case OP_RV2GV:
 	if (scalar_mod_type(o, type))
 	    goto nomod;
 	ref(cUNOPo->op_first, o->op_type);
-	/* FALL THROUGH */
+	/* FALLTHROUGH */
     case OP_ASLICE:
     case OP_HSLICE:
 	localize = 1;
-	/* FALL THROUGH */
+	/* FALLTHROUGH */
     case OP_AASSIGN:
 	/* Do not apply the lvsub flag for rv2[ah]v in scalar context.  */
 	if (type == OP_LEAVESUBLV && (
@@ -2259,7 +2259,7 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 	     || (o->op_flags & OPf_WANT) != OPf_WANT_SCALAR
 	   ))
 	    o->op_private |= OPpMAYBE_LVSUB;
-	/* FALL THROUGH */
+	/* FALLTHROUGH */
     case OP_NEXTSTATE:
     case OP_DBSTATE:
        PL_modcount = RETURN_UNLIMITED_NUMBER;
@@ -2278,10 +2278,10 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
     case OP_RV2SV:
 	ref(cUNOPo->op_first, o->op_type);
 	localize = 1;
-	/* FALL THROUGH */
+	/* FALLTHROUGH */
     case OP_GV:
 	PL_hints |= HINT_BLOCK_SCOPE;
-        /* FALL THROUGH */
+        /* FALLTHROUGH */
     case OP_SASSIGN:
     case OP_ANDASSIGN:
     case OP_ORASSIGN:
@@ -2305,7 +2305,7 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 	if ((o->op_flags & OPf_WANT) != OPf_WANT_SCALAR
 	  && type == OP_LEAVESUBLV)
 	    o->op_private |= OPpMAYBE_LVSUB;
-	/* FALL THROUGH */
+	/* FALLTHROUGH */
     case OP_PADSV:
 	PL_modcount++;
 	if (!type) /* local() */
@@ -2325,7 +2325,7 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
     case OP_SUBSTR:
 	if (o->op_private == 4) /* don't allow 4 arg substr as lvalue */
 	    goto nomod;
-	/* FALL THROUGH */
+	/* FALLTHROUGH */
     case OP_POS:
     case OP_VEC:
       lvalue_func:
@@ -2350,7 +2350,7 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
     case OP_LEAVE:
     case OP_LEAVELOOP:
 	o->op_private |= OPpLVALUE;
-        /* FALL THROUGH */
+        /* FALLTHROUGH */
     case OP_SCOPE:
     case OP_ENTER:
     case OP_LINESEQ:
@@ -2369,7 +2369,7 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 	    op_lvalue(cBINOPo->op_first, type);
 	    break;
 	}
-	/* FALL THROUGH */
+	/* FALLTHROUGH */
     case OP_LIST:
 	localize = 0;
 	for (kid = cLISTOPo->op_first; kid; kid = kid->op_sibling)
@@ -2438,7 +2438,7 @@ S_scalar_mod_type(const OP *o, I32 type)
     case OP_SASSIGN:
 	if (o && o->op_type == OP_RV2GV)
 	    return FALSE;
-	/* FALL THROUGH */
+	/* FALLTHROUGH */
     case OP_PREINC:
     case OP_PREDEC:
     case OP_POSTINC:
@@ -2490,7 +2490,7 @@ S_is_handle_constructor(const OP *o, I32 numargs)
     case OP_SOCKPAIR:
 	if (numargs == 2)
 	    return TRUE;
-	/* FALL THROUGH */
+	/* FALLTHROUGH */
     case OP_SYSOPEN:
     case OP_OPEN:
     case OP_SELECT:		/* XXX c.f. SelectSaver.pm */
@@ -2555,7 +2555,7 @@ Perl_doref(pTHX_ OP *o, I32 type, bool set_op_ref)
 	if (type == OP_DEFINED)
 	    o->op_flags |= OPf_SPECIAL;		/* don't create GV */
 	doref(cUNOPo->op_first, o->op_type, set_op_ref);
-	/* FALL THROUGH */
+	/* FALLTHROUGH */
     case OP_PADSV:
 	if (type == OP_RV2SV || type == OP_RV2AV || type == OP_RV2HV) {
 	    o->op_private |= (type == OP_RV2AV ? OPpDEREF_AV
@@ -2569,7 +2569,7 @@ Perl_doref(pTHX_ OP *o, I32 type, bool set_op_ref)
     case OP_RV2HV:
 	if (set_op_ref)
 	    o->op_flags |= OPf_REF;
-	/* FALL THROUGH */
+	/* FALLTHROUGH */
     case OP_RV2GV:
 	if (type == OP_DEFINED)
 	    o->op_flags |= OPf_SPECIAL;		/* don't create GV */
@@ -2602,7 +2602,7 @@ Perl_doref(pTHX_ OP *o, I32 type, bool set_op_ref)
     case OP_SCOPE:
     case OP_LEAVE:
 	set_op_ref = FALSE;
-	/* FALL THROUGH */
+	/* FALLTHROUGH */
     case OP_ENTER:
     case OP_LIST:
 	if (!(o->op_flags & OPf_KIDS))
@@ -7089,7 +7089,7 @@ S_looks_like_bool(pTHX_ const OP *o)
 	    else
 		return FALSE;
 
-	/* FALL THROUGH */
+	/* FALLTHROUGH */
 	default:
 	    return FALSE;
     }
@@ -8798,13 +8798,13 @@ Perl_ck_delete(pTHX_ OP *o)
 	switch (kid->op_type) {
 	case OP_ASLICE:
 	    o->op_flags |= OPf_SPECIAL;
-	    /* FALL THROUGH */
+	    /* FALLTHROUGH */
 	case OP_HSLICE:
 	    o->op_private |= OPpSLICE;
 	    break;
 	case OP_AELEM:
 	    o->op_flags |= OPf_SPECIAL;
-	    /* FALL THROUGH */
+	    /* FALLTHROUGH */
 	case OP_HELEM:
 	    break;
 	case OP_KVASLICE:
@@ -11550,7 +11550,7 @@ Perl_rpeep(pTHX_ OP *o)
 	       though (See 20010220.007). AMS 20010719 */
 	    /* op_seq functionality is now replaced by op_opt */
 	    o->op_opt = 0;
-	    /* FALL THROUGH */
+	    /* FALLTHROUGH */
 	case OP_SCALAR:
 	case OP_LINESEQ:
 	case OP_SCOPE:
@@ -12514,7 +12514,7 @@ Perl_coresub_op(pTHX_ SV * const coreargssv, const int code,
 	                            OP_SSELECT),
 	                 coresub_op(coreargssv, 0, OP_SELECT)
 	           );
-	/* FALL THROUGH */
+	/* FALLTHROUGH */
     default:
 	switch (PL_opargs[opnum] & OA_CLASS_MASK) {
 	case OA_BASEOP:

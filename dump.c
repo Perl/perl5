@@ -181,7 +181,7 @@ Perl_pv_escape( pTHX_ SV *dsv, char const * const str,
 	        chsize = 2;
                 switch (c) {
                 
-		case '\\' : /* fallthrough */
+		case '\\' : /* FALLTHROUGH */
 		case '%'  : if ( c == esc )  {
 		                octbuf[1] = esc;  
 		            } else {
@@ -1664,7 +1664,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 		sv_catpv(d, " ),");
 	    }
 	}
-	/* FALL THROUGH */
+	/* FALLTHROUGH */
     default:
     evaled_or_uv:
 	if (SvEVALED(sv))	sv_catpv(d, "EVALED,");
@@ -1675,7 +1675,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	if (SvVALID(sv))	sv_catpv(d, "VALID,");
 	if (SvPAD_TYPED(sv))	sv_catpv(d, "TYPED,");
 	if (SvPAD_OUR(sv))	sv_catpv(d, "OUR,");
-	/* FALL THROUGH */
+	/* FALLTHROUGH */
     case SVt_PVNV:
 	if (SvPAD_STATE(sv))	sv_catpv(d, "STATE,");
 	goto evaled_or_uv;
@@ -2134,7 +2134,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 			     generic_pv_escape(tmpsv, proto, CvPROTOLEN(sv),
                                 SvUTF8(sv)));
 	}
-	/* FALL THROUGH */
+	/* FALLTHROUGH */
     case SVt_PVFM:
 	do_hv_dump(level, file, "  COMP_STASH", CvSTASH(sv));
 	if (!CvISXSUB(sv)) {

@@ -1615,7 +1615,7 @@ perl_parse(pTHXx_ XSINIT_t xsinit, int argc, char **argv, char **env)
 	break;
     case 1:
 	STATUS_ALL_FAILURE;
-	/* FALL THROUGH */
+	/* FALLTHROUGH */
     case 2:
 	/* my_exit() was called */
 	while (PL_scopestack_ix > oldscope)
@@ -1896,7 +1896,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 
 	case 'E':
 	    PL_minus_E = TRUE;
-	    /* FALL THROUGH */
+	    /* FALLTHROUGH */
 	case 'e':
 	    forbid_setid('e', FALSE);
 	    if (!PL_e_script) {
@@ -1977,7 +1977,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 	    if (strEQ(s, "help"))
 		usage();
 	    s--;
-	    /* FALL THROUGH */
+	    /* FALLTHROUGH */
 	default:
 	    Perl_croak(aTHX_ "Unrecognized switch: -%s  (-h will show valid options)",s);
 	}
@@ -2369,7 +2369,7 @@ perl_run(pTHXx)
     case 0:				/* normal completion */
  redo_body:
 	run_body(oldscope);
-	/* FALL THROUGH */
+	/* FALLTHROUGH */
     case 2:				/* my_exit() */
 	while (PL_scopestack_ix > oldscope)
 	    LEAVE;
@@ -2775,7 +2775,7 @@ Perl_call_sv(pTHX_ SV *sv, VOL I32 flags)
 	    break;
 	case 1:
 	    STATUS_ALL_FAILURE;
-	    /* FALL THROUGH */
+	    /* FALLTHROUGH */
 	case 2:
 	    /* my_exit() was called */
 	    SET_CURSTASH(PL_defstash);
@@ -2884,7 +2884,7 @@ Perl_eval_sv(pTHX_ SV *sv, I32 flags)
 	break;
     case 1:
 	STATUS_ALL_FAILURE;
-	/* FALL THROUGH */
+	/* FALLTHROUGH */
     case 2:
 	/* my_exit() was called */
 	SET_CURSTASH(PL_defstash);
@@ -3318,7 +3318,7 @@ Perl_moreswitches(pTHX_ const char *s)
 	return s;
     case 'M':
 	forbid_setid('M', FALSE);	/* XXX ? */
-	/* FALL THROUGH */
+	/* FALLTHROUGH */
     case 'm':
 	forbid_setid('m', FALSE);	/* XXX ? */
 	if (*++s) {
@@ -4907,7 +4907,7 @@ Perl_call_list(pTHX_ I32 oldscope, AV *paramList)
 	    break;
 	case 1:
 	    STATUS_ALL_FAILURE;
-	    /* FALL THROUGH */
+	    /* FALLTHROUGH */
 	case 2:
 	    /* my_exit() was called */
 	    while (PL_scopestack_ix > oldscope)

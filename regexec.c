@@ -1451,7 +1451,7 @@ STMT_START {                                                                    
     switch (trie_type) {                                                            \
     case trie_utf8_exactfa_fold:                                                    \
         flags |= FOLD_FLAGS_NOMIX_ASCII;                                            \
-        /* FALL THROUGH */                                                          \
+        /* FALLTHROUGH */                                                          \
     case trie_utf8_fold:                                                            \
         if ( foldlen>0 ) {                                                          \
             uvc = utf8n_to_uvchr( (const U8*) uscan, UTF8_MAXLEN, &len, uniflags ); \
@@ -1468,7 +1468,7 @@ STMT_START {                                                                    
         break;                                                                      \
     case trie_latin_utf8_exactfa_fold:                                              \
         flags |= FOLD_FLAGS_NOMIX_ASCII;                                            \
-        /* FALL THROUGH */                                                          \
+        /* FALLTHROUGH */                                                          \
     case trie_latin_utf8_fold:                                                      \
         if ( foldlen>0 ) {                                                          \
             uvc = utf8n_to_uvchr( (const U8*) uscan, UTF8_MAXLEN, &len, uniflags ); \
@@ -1707,7 +1707,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 
     case EXACTFA_NO_TRIE:   /* This node only generated for non-utf8 patterns */
         assert(! is_utf8_pat);
-	/* FALL THROUGH */
+	/* FALLTHROUGH */
     case EXACTFA:
         if (is_utf8_pat || utf8_target) {
             utf8_fold_flags = FOLDEQ_UTF8_NOMIX_ASCII;
@@ -1754,7 +1754,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         fold_array = PL_fold_latin1;
         folder = foldEQ_latin1;
 
-        /* FALL THROUGH */
+        /* FALLTHROUGH */
 
     do_exactf_non_utf8: /* Neither pattern nor string are UTF8, and there
                            are no glitches with fold-length differences
@@ -1982,7 +1982,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                                            macros */
                 case _CC_ENUM_SPACE: /* XXX would require separate code if we
                                         revert the change of \v matching this */
-                    /* FALL THROUGH */
+                    /* FALLTHROUGH */
 
                 case _CC_ENUM_PSXSPC:
                     REXEC_FBC_UTF8_CLASS_SCAN(
@@ -3811,7 +3811,7 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
                     case EXACTFA_NO_TRIE:   /* This node only generated for
                                             non-utf8 patterns */
                         assert(! is_utf8_pat);
-                        /* FALL THROUGH */
+                        /* FALLTHROUGH */
                     case EXACTFA:
                     case EXACTFU_SS:
                     case EXACTFU:
@@ -4026,7 +4026,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    break;
 
 	case EOL: /* /..$/  */
-            /* FALL THROUGH */
+            /* FALLTHROUGH */
 	case SEOL: /* /..$/s  */
 	    if (!NEXTCHR_IS_EOS && nextchr != '\n')
 		sayNO;
@@ -4071,7 +4071,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 sayNO_SILENT;
                 assert(0); /* NOTREACHED */
             }
-            /* FALL THROUGH */
+            /* FALLTHROUGH */
 	case TRIE:  /* (ab|cd)  */
 	    /* the basic plan of execution of the trie is:
 	     * At the beginning, run though all the states, and
@@ -4499,7 +4499,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
         case EXACTFA_NO_TRIE:   /* This node only generated for non-utf8
                                    patterns */
             assert(! is_utf8_pat);
-            /* FALL THROUGH */
+            /* FALLTHROUGH */
 	case EXACTFA:            /*  /abc/iaa     */
 	    folder = foldEQ_latin1;
 	    fold_array = PL_fold_latin1;
@@ -5934,7 +5934,7 @@ NULL
 	    assert(0); /* NOTREACHED */
 
 	case WHILEM_A_min_fail: /* just failed to match A in a minimal match */
-	    /* FALL THROUGH */
+	    /* FALLTHROUGH */
 	case WHILEM_A_pre_fail: /* just failed to match even minimal A */
 	    REGCP_UNWIND(ST.lastcp);
 	    regcppop(rex, &maxopenparen);
@@ -6011,7 +6011,7 @@ NULL
 	    if (next == scan)
 		next = NULL;
 	    scan = NEXTOPER(scan);
-	    /* FALL THROUGH */
+	    /* FALLTHROUGH */
 
 	case BRANCH:	    /*  /(...|A|...)/ */
 	    scan = NEXTOPER(scan); /* scan now points to inner node */
@@ -6566,7 +6566,7 @@ NULL
 		    assert(0); /* NOTREACHED */
 		}
 	    }
-	    /* FALL THROUGH */
+	    /* FALLTHROUGH */
 
 	case CURLY_B_max_fail:
 	    /* failed to find B in a greedy match */
@@ -6687,7 +6687,7 @@ NULL
 
 	case IFMATCH_A_fail: /* body of (?...A) failed */
 	    ST.wanted = !ST.wanted;
-	    /* FALL THROUGH */
+	    /* FALLTHROUGH */
 
 	case IFMATCH_A: /* body of (?...A) succeeded */
 	    if (ST.logical) {
@@ -6851,7 +6851,7 @@ NULL
 	/* push a state that backtracks on success */
 	st->u.yes.prev_yes_state = yes_state;
 	yes_state = st;
-	/* FALL THROUGH */
+	/* FALLTHROUGH */
       push_state:
 	/* push a new regex state, then continue at scan  */
 	{
@@ -7188,7 +7188,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
 
     case EXACTFA_NO_TRIE:   /* This node only generated for non-utf8 patterns */
         assert(! reginfo->is_utf8_pat);
-        /* FALL THROUGH */
+        /* FALLTHROUGH */
     case EXACTFA:
         utf8_flags = FOLDEQ_UTF8_NOMIX_ASCII;
 	goto do_exactf;
@@ -7328,7 +7328,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
             to_complement = 1;
             goto utf8_posix;
         }
-        /* FALL THROUGH */
+        /* FALLTHROUGH */
 
     case NPOSIXA:
         if (! utf8_target) {
@@ -7410,7 +7410,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
                     case _CC_ENUM_SPACE:    /* XXX would require separate code
                                                if we revert the change of \v
                                                matching this */
-                        /* FALL THROUGH */
+                        /* FALLTHROUGH */
                     case _CC_ENUM_PSXSPC:
                         while (hardcount < max
                                && scan < loceol

@@ -947,7 +947,7 @@ Perl_my_atof2(pTHX_ const char* orig, NV* value)
     switch (*s) {
 	case '-':
 	    negative = 1;
-	    /* fall through */
+	    /* FALLTHROUGH */
 	case '+':
 	    ++s;
     }
@@ -1045,7 +1045,7 @@ Perl_my_atof2(pTHX_ const char* orig, NV* value)
 	switch (*s) {
 	    case '-':
 		expnegative = 1;
-		/* fall through */
+		/* FALLTHROUGH */
 	    case '+':
 		++s;
 	}

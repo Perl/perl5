@@ -2555,7 +2555,7 @@ PP(pp_entersub)
             break;
         case SVt_PVLV:
             if(isGV_with_GP(sv)) goto we_have_a_glob;
-            /*FALLTHROUGH*/
+            /* FALLTHROUGH */
         default:
             if (sv == &PL_sv_yes) {		/* unfound import, ignore */
                 if (hasargs)
@@ -2585,7 +2585,7 @@ PP(pp_entersub)
             cv = MUTABLE_CV(SvRV(sv));
             if (SvTYPE(cv) == SVt_PVCV)
                 break;
-            /* FALL THROUGH */
+            /* FALLTHROUGH */
         case SVt_PVHV:
         case SVt_PVAV:
             DIE(aTHX_ "Not a CODE reference");

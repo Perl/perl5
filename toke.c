@@ -3415,7 +3415,7 @@ S_scan_const(pTHX_ char *start)
 		    *d++ = *s++;
 		    continue;
 		}
-		/* FALL THROUGH */
+		/* FALLTHROUGH */
 	    default:
 	        {
 		    if ((isALPHANUMERIC(*s)))
@@ -5032,7 +5032,7 @@ Perl_yylex(pTHX)
 	    PL_lex_state = LEX_INTERPNORMAL;	/* false alarm, more expr */
 	    break;
 	}
-	/* FALL THROUGH */
+	/* FALLTHROUGH */
 
     case LEX_INTERPEND:
 	if (PL_lex_dojoin) {
@@ -6133,7 +6133,7 @@ Perl_yylex(pTHX)
 			force_next('-');
 		}
 	    }
-	    /* FALL THROUGH */
+	    /* FALLTHROUGH */
 	case XATTRBLOCK:
 	case XBLOCK:
 	    PL_lex_brackstack[PL_lex_brackets++] = XSTATE;
@@ -6838,7 +6838,7 @@ Perl_yylex(pTHX)
 	    }
 	    Aop(OP_CONCAT);
 	}
-	/* FALL THROUGH */
+	/* FALLTHROUGH */
     case '0': case '1': case '2': case '3': case '4':
     case '5': case '6': case '7': case '8': case '9':
 	s = scan_num(s, &pl_yylval);
@@ -11087,14 +11087,14 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 		case '8': case '9':
 		    if (shift == 3)
 			yyerror(Perl_form(aTHX_ "Illegal octal digit '%c'", *s));
-		    /* FALL THROUGH */
+		    /* FALLTHROUGH */
 
 	        /* octal digits */
 		case '2': case '3': case '4':
 		case '5': case '6': case '7':
 		    if (shift == 1)
 			yyerror(Perl_form(aTHX_ "Illegal binary digit '%c'", *s));
-		    /* FALL THROUGH */
+		    /* FALLTHROUGH */
 
 		case '0': case '1':
 		    b = *s++ & 15;		/* ASCII digit -> value of digit */
