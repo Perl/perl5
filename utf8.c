@@ -2997,6 +2997,7 @@ S_swash_scan_list_line(pTHX_ U8* l, U8* const lend, UV* min, UV* max, UV* val,
     /* Get the first number on the line: the range minimum */
     numlen = lend - l;
     *min = grok_hex((char *)l, &numlen, &flags, NULL);
+    *max = *min;    /* So can never return without setting max */
     if (numlen)	    /* If found a hex number, position past it */
 	l += numlen;
     else if (nl) {	    /* Else, go handle next line, if any */
@@ -3048,7 +3049,6 @@ S_swash_scan_list_line(pTHX_ U8* l, U8* const lend, UV* min, UV* max, UV* val,
     }
     else { /* Nothing following range min, should be single element with no
 	      mapping expected */
-	*max = *min;
 	if (wants_value) {
 	    *val = 0;
 	    if (typeto) {
