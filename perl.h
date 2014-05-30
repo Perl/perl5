@@ -879,6 +879,11 @@ EXTERN_C int usleep(unsigned int);
 #   define STRUCT_OFFSET(s,m)  (Size_t)(&(((s *)0)->m))
 #endif
 
+/* ptrdiff_t is C11, so undef it under pedantic builds */
+#ifdef PERL_GCC_PEDANTIC
+#   undef HAS_PTRDIFF_T
+#endif
+
 #ifndef __SYMBIAN32__
 #  if defined(I_STRING) || defined(__cplusplus)
 #     include <string.h>
