@@ -511,7 +511,7 @@ STATIC OP *
 S_too_few_arguments_sv(pTHX_ OP *o, SV *namesv, U32 flags)
 {
     PERL_ARGS_ASSERT_TOO_FEW_ARGUMENTS_SV;
-    yyerror_pv(Perl_form(aTHX_ "Not enough arguments for %"SVf, namesv),
+    yyerror_pv(Perl_form(aTHX_ "Not enough arguments for %"SVf, SVfARG(namesv)),
                                     SvUTF8(namesv) | flags);
     return o;
 }
@@ -1272,8 +1272,8 @@ S_scalar_slice_warning(pTHX_ const OP *o)
 	Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
 		   "Scalar value @%"SVf"%c%"SVf"%c better written as $%"
 		    SVf"%c%"SVf"%c",
-		    SVfARG(name), lbrack, keysv, rbrack,
-		    SVfARG(name), lbrack, keysv, rbrack);
+		    SVfARG(name), lbrack, SVfARG(keysv), rbrack,
+		    SVfARG(name), lbrack, SVfARG(keysv), rbrack);
 }
 
 OP *
@@ -1375,8 +1375,8 @@ Perl_scalar(pTHX_ OP *o)
 	    Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
 		       "%%%"SVf"%c%"SVf"%c in scalar context better "
 		       "written as $%"SVf"%c%"SVf"%c",
-			SVfARG(name), lbrack, keysv, rbrack,
-			SVfARG(name), lbrack, keysv, rbrack);
+			SVfARG(name), lbrack, SVfARG(keysv), rbrack,
+			SVfARG(name), lbrack, SVfARG(keysv), rbrack);
     }
     }
     return o;
@@ -1590,7 +1590,7 @@ Perl_scalarvoid(pTHX_ OP *o)
                     SvREFCNT_dec_NN(dsv);
 		}
 		else if (SvOK(sv)) {
-		    useless_sv = Perl_newSVpvf(aTHX_ "a constant (%"SVf")", sv);
+		    useless_sv = Perl_newSVpvf(aTHX_ "a constant (%"SVf")", SVfARG(sv));
 		}
 		else
 		    useless = "a constant (undef)";
@@ -1723,7 +1723,7 @@ Perl_scalarvoid(pTHX_ OP *o)
         /* mortalise it, in case warnings are fatal.  */
         Perl_ck_warner(aTHX_ packWARN(WARN_VOID),
                        "Useless use of %"SVf" in void context",
-                       sv_2mortal(useless_sv));
+                       SVfARG(sv_2mortal(useless_sv)));
     }
     else if (useless) {
        Perl_ck_warner(aTHX_ packWARN(WARN_VOID),
@@ -3034,7 +3034,7 @@ Perl_bind_match(pTHX_ I32 type, OP *left, OP *right)
       if (name)
 	Perl_warner(aTHX_ packWARN(WARN_MISC),
              "Applying %s to %"SVf" will act on scalar(%"SVf")",
-             desc, name, name);
+             desc, SVfARG(name), SVfARG(name));
       else {
 	const char * const sample = (isary
 	     ? "@array" : "%hash");
@@ -11130,7 +11130,7 @@ Perl_ck_length(pTHX_ OP *o)
                 Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
                     "length() used on %"SVf" (did you mean \"scalar(%s%"SVf
                     ")\"?)",
-                    name, hash ? "keys " : "", name
+                    SVfARG(name), hash ? "keys " : "", SVfARG(name)
                 );
             else if (hash)
      /* diag_listed_as: length() used on %s (did you mean "scalar(%s)"?) */
@@ -12577,7 +12577,7 @@ Perl_report_redefined_cv(pTHX_ const SV *name, const CV *old_cv,
 			  is_const
 			    ? "Constant subroutine %"SVf" redefined"
 			    : "Subroutine %"SVf" redefined",
-			  name);
+			  SVfARG(name));
 }
 
 /*

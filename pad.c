@@ -904,7 +904,7 @@ S_pad_check_dup(pTHX_ SV *name, U32 flags, const HV *ourstash)
 		"\"%s\" %s %"SVf" masks earlier declaration in same %s",
 		(is_our ? "our" : PL_parser->in_my == KEY_my ? "my" : "state"),
 		*SvPVX(sv) == '&' ? "subroutine" : "variable",
-		sv,
+		SVfARG(sv),
 		(COP_SEQ_RANGE_HIGH(sv) == PERL_PADSEQ_INTRO
 		    ? "scope" : "statement"));
 	    --off;
@@ -924,7 +924,7 @@ S_pad_check_dup(pTHX_ SV *name, U32 flags, const HV *ourstash)
 		&& sv_eq(name, sv))
 	    {
 		Perl_warner(aTHX_ packWARN(WARN_MISC),
-		    "\"our\" variable %"SVf" redeclared", sv);
+		    "\"our\" variable %"SVf" redeclared", SVfARG(sv));
 		if ((I32)off <= PL_comppad_name_floor)
 		    Perl_warner(aTHX_ packWARN(WARN_MISC),
 			"\t(Did you mean \"local\" instead of \"our\"?)\n");
@@ -1147,7 +1147,7 @@ S_unavailable(pTHX_ SV *namesv)
 			 *SvPVX_const(namesv) == '&'
 					 ? "Subroutin"
 					 : "Variabl",
-			 namesv);
+			 SVfARG(namesv));
 }
 
 STATIC PADOFFSET
@@ -1287,9 +1287,9 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv,
 			newwarn = 0;
 			Perl_warner(aTHX_ packWARN(WARN_CLOSURE),
 			    "Variable \"%"SVf"\" will not stay shared",
-                            newSVpvn_flags(namepv, namelen,
+                            SVfARG(newSVpvn_flags(namepv, namelen,
                                 SVs_TEMP |
-                                (flags & padadd_UTF8_NAME ? SVf_UTF8 : 0)));
+                                (flags & padadd_UTF8_NAME ? SVf_UTF8 : 0))));
 		    }
 
 		    if (fake_offset && CvANON(cv)
