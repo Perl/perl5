@@ -382,7 +382,7 @@ Perl_cv_undef(pTHX_ CV *cv)
 	LEAVE;
     }
 #ifdef DEBUGGING
-    else if (slabbed) Perl_warn(aTHX_ "Slab leaked from cv %p", cv);
+    else if (slabbed) Perl_warn(aTHX_ "Slab leaked from cv %p", (void*)cv);
 #endif
     SvPOK_off(MUTABLE_SV(cv));		/* forget prototype */
     sv_unmagic((SV *)cv, PERL_MAGIC_checkcall);
@@ -522,7 +522,7 @@ Perl_cv_forget_slab(pTHX_ CV *cv)
     if      (CvROOT(cv))  slab = OpSLAB(CvROOT(cv));
     else if (CvSTART(cv)) slab = (OPSLAB *)CvSTART(cv);
 #ifdef DEBUGGING
-    else if (slabbed)     Perl_warn(aTHX_ "Slab leaked from cv %p", cv);
+    else if (slabbed)     Perl_warn(aTHX_ "Slab leaked from cv %p", (void*)cv);
 #endif
 
     if (slab) {
