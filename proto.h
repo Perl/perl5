@@ -7705,6 +7705,17 @@ PERL_STATIC_INLINE bool	S_is_utf8_common(pTHX_ const U8 *const p, SV **swash, co
 #define PERL_ARGS_ASSERT_IS_UTF8_COMMON	\
 	assert(p); assert(swash); assert(swashname)
 
+STATIC U8*	S_swash_scan_list_line(pTHX_ U8* l, U8* const lend, UV* min, UV* max, UV* val, const bool wants_value, const U8* const typestr)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2)
+			__attribute__nonnull__(pTHX_3)
+			__attribute__nonnull__(pTHX_4)
+			__attribute__nonnull__(pTHX_5)
+			__attribute__nonnull__(pTHX_7);
+#define PERL_ARGS_ASSERT_SWASH_SCAN_LIST_LINE	\
+	assert(l); assert(lend); assert(min); assert(max); assert(val); assert(typestr)
+
 STATIC SV*	S_swatch_get(pTHX_ SV* swash, UV start, UV span)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);

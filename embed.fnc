@@ -2396,6 +2396,9 @@ iRn	|STRLEN	|is_utf8_char_slow|NN const U8 *s|const STRLEN len
 sRM	|UV	|check_locale_boundary_crossing|NN const U8* const p|const UV result|NN U8* const ustrp|NN STRLEN *lenp
 iR	|bool	|is_utf8_common	|NN const U8 *const p|NN SV **swash|NN const char * const swashname|NULLOK SV* const invlist
 sR	|SV*	|swatch_get	|NN SV* swash|UV start|UV span
+sRM	|U8*	|swash_scan_list_line|NN U8* l|NN U8* const lend|NN UV* min \
+		|NN UV* max|NN UV* val|const bool wants_value		    \
+		|NN const U8* const typestr
 #endif
 
 AiMn	|void	|append_utf8_from_native_byte|const U8 byte|NN U8** dest

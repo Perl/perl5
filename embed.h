@@ -1693,6 +1693,7 @@
 #define check_locale_boundary_crossing(a,b,c,d)	S_check_locale_boundary_crossing(aTHX_ a,b,c,d)
 #define is_utf8_char_slow	S_is_utf8_char_slow
 #define is_utf8_common(a,b,c,d)	S_is_utf8_common(aTHX_ a,b,c,d)
+#define swash_scan_list_line(a,b,c,d,e,f,g)	S_swash_scan_list_line(aTHX_ a,b,c,d,e,f,g)
 #define swatch_get(a,b,c)	S_swatch_get(aTHX_ a,b,c)
 #define to_lower_latin1(a,b,c)	S_to_lower_latin1(aTHX_ a,b,c)
 #  endif

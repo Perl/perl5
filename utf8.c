@@ -2992,6 +2992,8 @@ S_swash_scan_list_line(pTHX_ U8* l, U8* const lend, UV* min, UV* max, UV* val,
     /* nl points to the next \n in the scan */
     U8* const nl = (U8*)memchr(l, '\n', lend - l);
 
+    PERL_ARGS_ASSERT_SWASH_SCAN_LIST_LINE;
+
     /* Get the first number on the line: the range minimum */
     numlen = lend - l;
     *min = grok_hex((char *)l, &numlen, &flags, NULL);
@@ -3161,8 +3163,8 @@ S_swatch_get(pTHX_ SV* swash, UV start, UV span)
     lend = l + lcur;
     while (l < lend) {
 	UV min, max, val, upper;
-	l = S_swash_scan_list_line(aTHX_ l, lend, &min, &max, &val,
-					 cBOOL(octets), typestr);
+	l = swash_scan_list_line(l, lend, &min, &max, &val,
+                                                        cBOOL(octets), typestr);
 	if (l > lend) {
 	    break;
 	}
@@ -3573,8 +3575,8 @@ Perl__swash_inversion_hash(pTHX_ SV* const swash)
     while (l < lend) {
 	UV min, max, val;
 	UV inverse;
-	l = S_swash_scan_list_line(aTHX_ l, lend, &min, &max, &val,
-					 cBOOL(octets), typestr);
+	l = swash_scan_list_line(l, lend, &min, &max, &val,
+                                                     cBOOL(octets), typestr);
 	if (l > lend) {
 	    break;
 	}
@@ -3772,8 +3774,8 @@ Perl__swash_to_invlist(pTHX_ SV* const swash)
             UV start, end;
             UV val;		/* Not used by this function */
 
-            l = S_swash_scan_list_line(aTHX_ l, lend, &start, &end, &val,
-                                            cBOOL(octets), typestr);
+            l = swash_scan_list_line(l, lend, &start, &end, &val,
+                                                        cBOOL(octets), typestr);
 
             if (l > lend) {
                 break;
