@@ -415,6 +415,7 @@ S_tokereport(pTHX_ I32 rv, const YYSTYPE* lvalp)
 
     PERL_ARGS_ASSERT_TOKEREPORT;
 
+#ifdef DEBUGGING
     if (DEBUG_T_TEST) {
 	const char *name = NULL;
 	enum token_type type = TOKENTYPE_NONE;
@@ -469,6 +470,7 @@ S_tokereport(pTHX_ I32 rv, const YYSTYPE* lvalp)
 	}
         PerlIO_printf(Perl_debug_log, "### %s\n\n", SvPV_nolen_const(report));
     };
+#endif
     return (int)rv;
 }
 
@@ -11667,7 +11669,9 @@ S_swallow_bom(pTHX_ U8 *s)
 		/* diag_listed_as: Unsupported script encoding %s */
 		Perl_croak(aTHX_ "Unsupported script encoding UTF-32LE");
 #ifndef PERL_NO_UTF16_FILTER
+#  ifdef DEBUGGING
 	    if (DEBUG_p_TEST || DEBUG_T_TEST) PerlIO_printf(Perl_debug_log, "UTF-16LE script encoding (BOM)\n");
+#  endif
 	    s += 2;
 	    if (PL_bufend > (char*)s) {
 		s = add_utf16_textfilter(s, TRUE);
@@ -11681,7 +11685,9 @@ S_swallow_bom(pTHX_ U8 *s)
     case 0xFE:
 	if (s[1] == 0xFF) {   /* UTF-16 big-endian? */
 #ifndef PERL_NO_UTF16_FILTER
+#  ifdef DEBUGGING
 	    if (DEBUG_p_TEST || DEBUG_T_TEST) PerlIO_printf(Perl_debug_log, "UTF-16BE script encoding (BOM)\n");
+#  endif
 	    s += 2;
 	    if (PL_bufend > (char *)s) {
 		s = add_utf16_textfilter(s, FALSE);
@@ -11695,7 +11701,9 @@ S_swallow_bom(pTHX_ U8 *s)
     case BOM_UTF8_FIRST_BYTE: {
         const STRLEN len = sizeof(BOM_UTF8_TAIL) - 1; /* Exclude trailing NUL */
         if (slen > len && memEQ(s+1, BOM_UTF8_TAIL, len)) {
+#ifdef DEBUGGING
             if (DEBUG_p_TEST || DEBUG_T_TEST) PerlIO_printf(Perl_debug_log, "UTF-8 script encoding (BOM)\n");
+#endif
             s += len + 1;                      /* UTF-8 */
         }
         break;
@@ -11714,7 +11722,9 @@ S_swallow_bom(pTHX_ U8 *s)
 		   * 00 xx 00 xx
 		   * are a good indicator of UTF-16BE. */
 #ifndef PERL_NO_UTF16_FILTER
+#  ifdef DEBUGGING
 		  if (DEBUG_p_TEST || DEBUG_T_TEST) PerlIO_printf(Perl_debug_log, "UTF-16BE script encoding (no BOM)\n");
+#  endif
 		  s = add_utf16_textfilter(s, FALSE);
 #else
 		  /* diag_listed_as: Unsupported script encoding %s */
@@ -11730,8 +11740,10 @@ S_swallow_bom(pTHX_ U8 *s)
 		   * xx 00 xx 00
 		   * are a good indicator of UTF-16LE. */
 #ifndef PERL_NO_UTF16_FILTER
+#  ifdef DEBUGGING
 	      if (DEBUG_p_TEST || DEBUG_T_TEST) PerlIO_printf(Perl_debug_log, "UTF-16LE script encoding (no BOM)\n");
 	      s = add_utf16_textfilter(s, TRUE);
+#  endif
 #else
 	      /* diag_listed_as: Unsupported script encoding %s */
 	      Perl_croak(aTHX_ "Unsupported script encoding UTF-16LE");
