@@ -2067,8 +2067,8 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 	    (void)Perl_av_create_and_unshift_one(aTHX_ &PL_preambleav,
 						 Perl_newSVpvf(aTHX_
         "BEGIN { do {local $!; -f q%c%"SVf"/buildcustomize.pl%c} and do q%c%"SVf"/buildcustomize.pl%c || die $@ }",
-							       0, *inc0, 0,
-							       0, *inc0, 0));
+							       0, SVfARG(*inc0), 0,
+							       0, SVfARG(*inc0), 0));
 	}
 #  else
 	/* SITELIB_EXP is a function call on Win32.  */
@@ -2081,8 +2081,8 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 	    (void)Perl_av_create_and_unshift_one(aTHX_ &PL_preambleav,
 						 Perl_newSVpvf(aTHX_
 							       "BEGIN { do {local $!; -f q%c%s/sitecustomize.pl%c} && do q%c%s/sitecustomize.pl%c }",
-							       0, sitelib, 0,
-							       0, sitelib, 0));
+							       0, SVfARG(sitelib), 0,
+							       0, SVfARG(sitelib), 0));
 	    assert (SvREFCNT(sitelib_sv) == 1);
 	    SvREFCNT_dec(sitelib_sv);
 	}
@@ -3487,7 +3487,7 @@ S_minus_v(pTHX)
 		"\nThis is perl "	STRINGIFY(PERL_REVISION)
 		", version "		STRINGIFY(PERL_VERSION)
 		", subversion "		STRINGIFY(PERL_SUBVERSION)
-		" (%"SVf") built for "	ARCHNAME, level
+		" (%"SVf") built for "	ARCHNAME, SVfARG(level)
 		);
 	    SvREFCNT_dec_NN(level);
 	}

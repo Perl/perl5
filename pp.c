@@ -3359,7 +3359,7 @@ PP(pp_chr)
 		    top = top2;
 		}
 		Perl_warner(aTHX_ packWARN(WARN_UTF8),
-			   "Invalid negative number (%"SVf") in chr", top);
+			   "Invalid negative number (%"SVf") in chr", SVfARG(top));
 	    }
 	    value = UNICODE_REPLACEMENT;
     } else {

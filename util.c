@@ -5159,10 +5159,10 @@ Perl_xs_version_bootcheck(pTHX_ U32 items, U32 ax, const char *xs_p,
     else {
 	/* XXX GV_ADDWARN */
 	vn = "XS_VERSION";
-	sv = get_sv(Perl_form(aTHX_ "%"SVf"::%s", module, vn), 0);
+	sv = get_sv(Perl_form(aTHX_ "%"SVf"::%s", SVfARG(module), vn), 0);
 	if (!sv || !SvOK(sv)) {
 	    vn = "VERSION";
-	    sv = get_sv(Perl_form(aTHX_ "%"SVf"::%s", module, vn), 0);
+	    sv = get_sv(Perl_form(aTHX_ "%"SVf"::%s", SVfARG(module), vn), 0);
 	}
     }
     if (sv) {
@@ -5173,16 +5173,16 @@ Perl_xs_version_bootcheck(pTHX_ U32 items, U32 ax, const char *xs_p,
 	if ( vcmp(pmsv,xssv) ) {
 	    SV *string = vstringify(xssv);
 	    SV *xpt = Perl_newSVpvf(aTHX_ "%"SVf" object version %"SVf
-				    " does not match ", module, string);
+				    " does not match ", SVfARG(module), SVfARG(string));
 
 	    SvREFCNT_dec(string);
 	    string = vstringify(pmsv);
 
 	    if (vn) {
-		Perl_sv_catpvf(aTHX_ xpt, "$%"SVf"::%s %"SVf, module, vn,
-			       string);
+		Perl_sv_catpvf(aTHX_ xpt, "$%"SVf"::%s %"SVf, SVfARG(module), vn,
+			       SVfARG(string));
 	    } else {
-		Perl_sv_catpvf(aTHX_ xpt, "bootstrap parameter %"SVf, string);
+		Perl_sv_catpvf(aTHX_ xpt, "bootstrap parameter %"SVf, SVfARG(string));
 	    }
 	    SvREFCNT_dec(string);
 
@@ -5211,7 +5211,8 @@ Perl_xs_apiversion_bootcheck(pTHX_ SV *module, const char *api_p,
 	SV *runver_string = vstringify(runver);
 	xpt = Perl_newSVpvf(aTHX_ "Perl API version %"SVf
 			    " of %"SVf" does not match %"SVf,
-			    compver_string, module, runver_string);
+			    SVfARG(compver_string), SVfARG(module),
+			    SVfARG(runver_string));
 	Perl_sv_2mortal(aTHX_ xpt);
 
 	SvREFCNT_dec(compver_string);

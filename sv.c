@@ -6401,7 +6401,7 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
 		{
 		    if (PL_stashcache) {
                     DEBUG_o(Perl_deb(aTHX_ "sv_clear clearing PL_stashcache for '%"SVf"'\n",
-                                     sv));
+                                     SVfARG(sv)));
 			(void)hv_deletehek(PL_stashcache,
 					   HvNAME_HEK((HV*)sv), G_DISCARD);
                     }
