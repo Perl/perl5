@@ -934,6 +934,7 @@ i_sysin=''
 i_poll=''
 i_prot=''
 i_pthread=''
+d_ptrdiff_t=''
 d_pwage=''
 d_pwchange=''
 d_pwclass=''
@@ -16358,6 +16359,25 @@ $rm_try
 set d_off64_t
 eval $setvar
 
+: check for ptrdiff_t
+echo " "
+echo "Checking to see if you have ptrdiff_t..." >&4
+$cat >try.c <<EOCP
+#include <stddef.h>
+int main() { ptrdiff_t x = 7; }
+EOCP
+set try
+if eval $compile; then
+	val="$define"
+	echo "You have ptrdiff_t."
+else
+	val="$undef"
+	echo "You do not have ptrdiff_t."
+fi
+$rm_try
+set d_ptrdiff_t
+eval $setvar
+
 : how to create joinable pthreads
 if test "X$usethreads" = "X$define" -a "X$i_pthread" = "X$define"; then
 	echo " "
@@ -23289,6 +23309,7 @@ d_pseudofork='$d_pseudofork'
 d_pthread_atfork='$d_pthread_atfork'
 d_pthread_attr_setscope='$d_pthread_attr_setscope'
 d_pthread_yield='$d_pthread_yield'
+d_ptrdiff_t='$d_ptrdiff_t'
 d_pwage='$d_pwage'
 d_pwchange='$d_pwchange'
 d_pwclass='$d_pwclass'

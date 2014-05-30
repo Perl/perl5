@@ -3844,6 +3844,11 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_off64_t	HAS_OFF64_T    		/**/
 
+/* HAS_PTRDIFF_T:
+ *	This symbol will be defined if the C compiler supports ptrdiff_t.
+ */
+#$d_ptrdiff_t	HAS_PTRDIFF_T    		/**/
+
 /* HAS_PRCTL:
  *	This symbol, if defined, indicates that the prctl routine is
  *	available to set process title.
