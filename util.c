@@ -925,7 +925,7 @@ Perl_screaminstr(pTHX_ SV *bigstr, SV *littlestr, I32 start_shift, I32 end_shift
     /* This function must only ever be called on a scalar with study magic,
        but those do not happen any more. */
     Perl_croak(aTHX_ "panic: screaminstr");
-    return NULL;
+    NORETURN_FUNCTION_END;
 }
 
 /*
@@ -1568,7 +1568,7 @@ Perl_die_sv(pTHX_ SV *baseex)
     PERL_ARGS_ASSERT_DIE_SV;
     croak_sv(baseex);
     assert(0); /* NOTREACHED */
-    return NULL;
+    NORETURN_FUNCTION_END;
 }
 
 /*
@@ -1591,7 +1591,7 @@ Perl_die_nocontext(const char* pat, ...)
     vcroak(pat, &args);
     assert(0); /* NOTREACHED */
     va_end(args);
-    return NULL;
+    NORETURN_FUNCTION_END;
 }
 #endif /* PERL_IMPLICIT_CONTEXT */
 
@@ -1603,7 +1603,7 @@ Perl_die(pTHX_ const char* pat, ...)
     vcroak(pat, &args);
     assert(0); /* NOTREACHED */
     va_end(args);
-    return NULL;
+    NORETURN_FUNCTION_END;
 }
 
 /*
