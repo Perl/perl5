@@ -4767,7 +4767,7 @@ S_mem_log_common(enum mem_log_type mlt, const UV n,
 	    if (strchr(pmlenv, 't')) {
 		len = my_snprintf(buf, sizeof(buf),
 				MEM_LOG_TIME_FMT, MEM_LOG_TIME_ARG);
-		PerlLIO_write(fd, buf, len);
+		PERL_UNUSED_RESULT(PerlLIO_write(fd, buf, len));
 	    }
 	    switch (mlt) {
 	    case MLT_ALLOC:
@@ -4802,7 +4802,7 @@ S_mem_log_common(enum mem_log_type mlt, const UV n,
 	    default:
 		len = 0;
 	    }
-	    PerlLIO_write(fd, buf, len);
+	    PERL_UNUSED_RESULT(PerlLIO_write(fd, buf, len));
 	}
     }
 }

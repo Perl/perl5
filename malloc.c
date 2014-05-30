@@ -1065,7 +1065,7 @@ emergency_sbrk(MEM_SIZE size)
 #endif	/* defined PERL_EMERGENCY_SBRK */
 
 /* Don't use PerlIO buffered writes as they allocate memory. */
-#define MYMALLOC_WRITE2STDERR(s) PerlLIO_write(PerlIO_fileno(PerlIO_stderr()),s,strlen(s))
+#define MYMALLOC_WRITE2STDERR(s) PERL_UNUSED_RESULT(PerlLIO_write(PerlIO_fileno(PerlIO_stderr()),s,strlen(s)))
 
 #ifdef DEBUGGING
 #undef ASSERT
