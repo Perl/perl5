@@ -3122,6 +3122,10 @@ typedef pthread_key_t	perl_key;
 #  define __attribute__warn_unused_result__
 #endif
 
+#if defined(DEBUGGING) && defined(I_ASSERT)
+#  include <assert.h>
+#endif
+
 /* For functions that are marked as __attribute__noreturn__, it's not
    appropriate to call return.  In either case, include the lint directive.
  */
@@ -3786,10 +3790,6 @@ Gid_t getegid (void);
     Perl_deb(aTHX_ "%s scope %ld (savestack=%ld) at %s:%d\n",	\
 		    where, (long)PL_scopestack_ix, (long)PL_savestack_ix, \
 		    __FILE__, __LINE__));
-
-#if defined(DEBUGGING) && defined(I_ASSERT)
-#  include <assert.h>
-#endif
 
 /* Keep the old croak based assert for those who want it, and as a fallback if
    the platform is so heretically non-ANSI that it can't assert.  */
