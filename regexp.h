@@ -382,7 +382,7 @@ get_regex_charset_name(const U32 flags, STRLEN* const lenp)
 	    *lenp = 2;
 	    return ASCII_MORE_RESTRICT_PAT_MODS;
         default:
-	    NOT_REACHED; /* NOTREACHED */
+	    return "?";	    /* Unknown */
     }
 }
 
