@@ -112,10 +112,6 @@
 #define debstackptrs()		Perl_debstackptrs(aTHX)
 #define delimcpy		Perl_delimcpy
 #define despatch_signals()	Perl_despatch_signals(aTHX)
-#ifndef PERL_IMPLICIT_CONTEXT
-#define die			Perl_die
-#endif
-#define die_sv(a)		Perl_die_sv(aTHX_ a)
 #define do_binmode(a,b,c)	Perl_do_binmode(aTHX_ a,b,c)
 #define do_close(a,b)		Perl_do_close(aTHX_ a,b)
 #define do_gv_dump(a,b,c,d)	Perl_do_gv_dump(aTHX_ a,b,c,d)
@@ -543,7 +539,6 @@
 #define scan_oct(a,b,c)		Perl_scan_oct(aTHX_ a,b,c)
 #define scan_version(a,b,c)	Perl_scan_version(aTHX_ a,b,c)
 #define scan_vstring(a,b,c)	Perl_scan_vstring(aTHX_ a,b,c)
-#define screaminstr(a,b,c,d,e,f)	Perl_screaminstr(aTHX_ a,b,c,d,e,f)
 #define seed()			Perl_seed(aTHX)
 #define set_context		Perl_set_context
 #define set_numeric_local()	Perl_set_numeric_local(aTHX)
@@ -741,6 +736,16 @@
 #if !(defined(PERL_MAD))
 #define newFORM(a,b,c)		Perl_newFORM(aTHX_ a,b,c)
 #endif
+#if !(defined(_MSC_VER))
+#ifndef PERL_IMPLICIT_CONTEXT
+#define die			Perl_die
+#endif
+#define die_sv(a)		Perl_die_sv(aTHX_ a)
+#define screaminstr(a,b,c,d,e,f)	Perl_screaminstr(aTHX_ a,b,c,d,e,f)
+#  if defined(PERL_IMPLICIT_CONTEXT)
+#define die_nocontext		Perl_die_nocontext
+#  endif
+#endif
 #if !defined(HAS_BZERO) && !defined(HAS_MEMSET)
 #define my_bzero		Perl_my_bzero
 #endif
@@ -786,7 +791,6 @@
 #if defined(PERL_IMPLICIT_CONTEXT)
 #define croak_nocontext		Perl_croak_nocontext
 #define deb_nocontext		Perl_deb_nocontext
-#define die_nocontext		Perl_die_nocontext
 #define form_nocontext		Perl_form_nocontext
 #define fprintf_nocontext	Perl_fprintf_nocontext
 #define load_module_nocontext	Perl_load_module_nocontext
@@ -799,6 +803,9 @@
 #define sv_setpvf_nocontext	Perl_sv_setpvf_nocontext
 #define warn_nocontext		Perl_warn_nocontext
 #define warner_nocontext	Perl_warner_nocontext
+#  if defined(_MSC_VER)
+#define die_nocontext		Perl_die_nocontext
+#  endif
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_PERL_C) || defined(PERL_IN_UTF8_C)
 #define _new_invlist_C_array(a)	Perl__new_invlist_C_array(aTHX_ a)
@@ -873,6 +880,13 @@
 #define do_aspawn(a,b,c)	Perl_do_aspawn(aTHX_ a,b,c)
 #define do_spawn(a)		Perl_do_spawn(aTHX_ a)
 #define do_spawn_nowait(a)	Perl_do_spawn_nowait(aTHX_ a)
+#endif
+#if defined(_MSC_VER)
+#ifndef PERL_IMPLICIT_CONTEXT
+#define die			Perl_die
+#endif
+#define die_sv(a)		Perl_die_sv(aTHX_ a)
+#define screaminstr(a,b,c,d,e,f)	Perl_screaminstr(aTHX_ a,b,c,d,e,f)
 #endif
 #if defined(PERL_CORE) || defined(PERL_EXT)
 #define av_reify(a)		Perl_av_reify(aTHX_ a)
