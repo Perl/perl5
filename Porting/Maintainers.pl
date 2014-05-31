@@ -678,7 +678,7 @@ use File::Glob qw(:case);
     },
 
     'libnet' => {
-        'DISTRIBUTION' => 'SHAY/libnet-1.25.tar.gz',
+        'DISTRIBUTION' => 'SHAY/libnet-1.27.tar.gz',
         'FILES'        => q[cpan/libnet],
         'EXCLUDED'     => [
             qw( Configure
@@ -686,9 +686,6 @@ use File::Glob qw(:case);
                 ),
             qr(^demos/),
         ],
-        # Customized for perl since we cannot use either an auto-generated
-        # script or the version in the CPAN distro.
-        'CUSTOMIZED' => ['Makefile.PL'],
     },
 
     'Locale-Codes' => {
