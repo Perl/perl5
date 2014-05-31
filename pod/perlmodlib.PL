@@ -37,7 +37,6 @@ my %exceptions = (
     'abbrev' => 'Text::Abbrev',
     'carp' => 'Carp',
     'getopt' => 'Getopt::Std',
-    'B<CGI::Carp>' => 'CGI::Carp',
     'ModuleInfo' => 'Module::Build::ModuleInfo',
     '$notes_name' => 'Module::Build::Notes',
     'Encode::MIME::NAME' => 'Encode::MIME::Name',

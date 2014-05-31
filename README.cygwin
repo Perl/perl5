@@ -564,7 +564,7 @@ be kept as clean as possible.
   dist/Cwd/Changes ext/Compress-Raw-Zlib/Changes
   ext/Compress-Raw-Zlib/README ext/Compress-Zlib/Changes
   ext/DB_File/Changes ext/Encode/Changes ext/Sys-Syslog/Changes
-  ext/Time-HiRes/Changes ext/Win32API-File/Changes lib/CGI/Changes
+  ext/Time-HiRes/Changes ext/Win32API-File/Changes
   lib/ExtUtils/CBuilder/Changes lib/ExtUtils/Changes lib/ExtUtils/NOTES
   lib/ExtUtils/PATCHING lib/ExtUtils/README lib/Module/Build/Changes
   lib/Net/Ping/Changes lib/Test/Harness/Changes
@@ -664,7 +664,6 @@ be kept as clean as possible.
                         - _open_osfhandle not implemented under Cygwin
   ext/Win32CORE/Win32CORE.pm
                         - History of Win32CORE under Cygwin
-  lib/CGI.pm            - binmode and path separator
   lib/Cwd.pm            - hook to internal Cwd::cwd
   lib/ExtUtils/CBuilder/Platform/cygwin.pm
                         - use gcc for ld, and link to libperl.dll.a
