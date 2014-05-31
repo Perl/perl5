@@ -389,14 +389,13 @@ PerlIO_debug(const char *fmt, ...)
 	}
     }
     if (PL_perlio_debug_fd > 0) {
-        int rc = 0;
 #ifdef USE_ITHREADS
 	const char * const s = CopFILE(PL_curcop);
 	/* Use fixed buffer as sv_catpvf etc. needs SVs */
 	char buffer[1024];
 	const STRLEN len1 = my_snprintf(buffer, sizeof(buffer), "%.40s:%" IVdf " ", s ? s : "(none)", (IV) CopLINE(PL_curcop));
 	const STRLEN len2 = my_vsnprintf(buffer + len1, sizeof(buffer) - len1, fmt, ap);
-	rc = PerlLIO_write(PL_perlio_debug_fd, buffer, len1 + len2);
+	PERL_UNUSED_RESULT(PerlLIO_write(PL_perlio_debug_fd, buffer, len1 + len2));
 #else
 	const char *s = CopFILE(PL_curcop);
 	STRLEN len;
@@ -405,11 +404,9 @@ PerlIO_debug(const char *fmt, ...)
 	Perl_sv_vcatpvf(aTHX_ sv, fmt, &ap);
 
 	s = SvPV_const(sv, len);
-	rc = PerlLIO_write(PL_perlio_debug_fd, s, len);
+	PERL_UNUSED_RESULT(PerlLIO_write(PL_perlio_debug_fd, s, len));
 	SvREFCNT_dec(sv);
 #endif
-        /* silently ignore failures */
-        PERL_UNUSED_VAR(rc);
     }
     va_end(ap);
 }

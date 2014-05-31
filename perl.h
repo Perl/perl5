@@ -341,26 +341,33 @@
 #endif
 
 /* Use PERL_UNUSED_RESULT() to suppress the warnings about unused results
- * of function calls, e.g. PERL_UNUSED_RESULT(foo(a, b)).  Use it sparingly,
- * though, since usually the warning is there for a good reason,
- * e.g. for realloc(): the new pointer is not necessarily the old pointer.
+ * of function calls, e.g. PERL_UNUSED_RESULT(foo(a, b)).
+ *
+ * The main reason for this is that the combination of gcc -Wunused-result
+ * (part of -Wall) and the __attribute__((warn_unused_result)) cannot
+ * be silenced with casting to void.  This causes trouble when the system
+ * header files use the attribute.
+ *
+ * Use PERL_UNUSED_RESULT sparingly, though, since usually the warning
+ * is there for a good reason: you might lose success/failure information,
+ * or leak resources, or changes in resources.
  *
  * But sometimes you just want to ignore the return value, e.g. on
- * codepaths soon ending up in abort, or in "best effort" attempts.
- * Sometimes you can capture the return value and use PERL_UNUSED_VAR
- * on that.
+ * codepaths soon ending up in abort, or in "best effort" attempts,
+ * or in situations where there is no good way to handle failures.
  *
- * The combination of gcc -Wunused-result (part of -Wall) and the gcc
- * warn_unused_result attribute cannot be silenced with (void).
+ * Sometimes PERL_UNUSED_RESULT might not be the most natural way:
+ * another possibility is that you can capture the return value
+ * and use PERL_UNUSED_VAR on that.
  *
- * The __typeof__() is unused instead of typeof() since typeof() is
- * not available under stricter ANSI modes, and because of compilers
- * masquerading as gcc (clang and icc), we want exactly the gcc
- * extension __typeof__ and nothing else.
+ * The __typeof__() is used instead of typeof() since typeof() is not
+ * available under strict C89, and because of compilers masquerading
+ * as gcc (clang and icc), we want exactly the gcc extension
+ * __typeof__ and nothing else.
  */
 #ifndef PERL_UNUSED_RESULT
-#  if defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
-#    define PERL_UNUSED_RESULT(v) ({ __typeof__(v) z = (v); (void)sizeof(z); })
+#  if defined(__GNUC__) && defined(HASATTRIBUTE_WARN_UNUSED_RESULT)
+#    define PERL_UNUSED_RESULT(v) STMT_START { __typeof__(v) z = (v); (void)sizeof(z); } STMT_END
 #  else
 #    define PERL_UNUSED_RESULT(v) ((void)(v))
 #  endif

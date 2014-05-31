@@ -1719,9 +1719,7 @@ Perl_croak_no_mem(void)
         SETERRNO(EBADF,RMS_IFI);
     else {
         /* Can't use PerlIO to write as it allocates memory */
-        int rc = PerlLIO_write(fd, PL_no_mem, sizeof(PL_no_mem)-1);
-        /* silently ignore failures */
-        PERL_UNUSED_VAR(rc);
+        PERL_UNUSED_RESULT(PerlLIO_write(fd, PL_no_mem, sizeof(PL_no_mem)-1));
     }
     my_exit(1);
 }
