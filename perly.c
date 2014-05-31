@@ -93,6 +93,7 @@ do {								\
 static void
 yysymprint(pTHX_ PerlIO * const yyoutput, int yytype, const YYSTYPE * const yyvaluep)
 {
+    PERL_UNUSED_CONTEXT;
     if (yytype < YYNTOKENS) {
 	YYFPRINTF (yyoutput, "token %s (", yytname[yytype]);
 #   ifdef YYPRINT

@@ -1086,6 +1086,9 @@ Perl_savesharedpv(pTHX_ const char *pv)
 {
     char *newaddr;
     STRLEN pvlen;
+
+    PERL_UNUSED_CONTEXT;
+
     if (!pv)
 	return NULL;
 
@@ -1111,6 +1114,7 @@ Perl_savesharedpvn(pTHX_ const char *const pv, const STRLEN len)
 {
     char *const newaddr = (char*)PerlMemShared_malloc(len + 1);
 
+    PERL_UNUSED_CONTEXT;
     /* PERL_ARGS_ASSERT_SAVESHAREDPVN; */
 
     if (!newaddr) {
@@ -3587,12 +3591,14 @@ Perl_init_tm(pTHX_ struct tm *ptm)	/* see mktime, strftime and asctime */
 #ifdef HAS_TM_TM_ZONE
     Time_t now;
     const struct tm* my_tm;
+    PERL_UNUSED_CONTEXT;
     PERL_ARGS_ASSERT_INIT_TM;
     (void)time(&now);
     my_tm = localtime(&now);
     if (my_tm)
         Copy(my_tm, ptm, 1, struct tm);
 #else
+    PERL_UNUSED_CONTEXT;
     PERL_ARGS_ASSERT_INIT_TM;
     PERL_UNUSED_ARG(ptm);
 #endif
@@ -5377,8 +5383,10 @@ Perl_my_dirfd(pTHX_ DIR * dir) {
     if(!dir)
         return -1;
 #ifdef HAS_DIRFD
+    PERL_UNUSED_CONTEXT;
     return dirfd(dir);
 #elif defined(HAS_DIR_DD_FD)
+    PERL_UNUSED_CONTEXT;
     return dir->dd_fd;
 #else
     Perl_die(aTHX_ PL_no_func, "dirfd");

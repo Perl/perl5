@@ -12334,6 +12334,7 @@ Perl_ptr_table_split(pTHX_ PTR_TBL_t *const tbl)
 void
 Perl_ptr_table_clear(pTHX_ PTR_TBL_t *const tbl)
 {
+    PERL_UNUSED_CONTEXT;
     if (tbl && tbl->tbl_items) {
 	struct ptr_tbl_arena *arena = tbl->tbl_arena;
 
@@ -12359,6 +12360,8 @@ void
 Perl_ptr_table_free(pTHX_ PTR_TBL_t *const tbl)
 {
     struct ptr_tbl_arena *arena;
+
+    PERL_UNUSED_CONTEXT;
 
     if (!tbl) {
         return;

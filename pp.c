@@ -2969,6 +2969,7 @@ Perl_translate_substr_offsets(pTHX_ STRLEN curlen, IV pos1_iv,
     int    pos2_is_uv;
 
     PERL_ARGS_ASSERT_TRANSLATE_SUBSTR_OFFSETS;
+    PERL_UNUSED_CONTEXT;
 
     if (!pos1_is_uv && pos1_iv < 0 && curlen) {
 	pos1_is_uv = curlen-1 > ~(UV)pos1_iv;
