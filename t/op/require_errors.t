@@ -55,7 +55,7 @@ for my $file ("$nonfile.ph", ".ph") {
 }
 
 eval 'require <foom>';
-like $@, qr/^<> should be quotes at /, 'require <> error';
+like $@, qr/^<> at require-statement should be quotes at /, 'require <> error';
 
 my $module   = tempfile();
 my $mod_file = "$module.pm";

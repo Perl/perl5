@@ -5019,7 +5019,7 @@ take the risk of using this feature, simply disable this warning:
 interpreted as the != (numeric not equal) and ~ (1's complement)
 operators: probably not what you intended.
 
-=item <> should be quotes
+=item <> at require-statement should be quotes
 
 (F) You wrote C<< require <file> >> when you should have written
 C<require 'file'>.
