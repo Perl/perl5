@@ -31,7 +31,6 @@ my %abs = (
 	   '../cpan/Archive-Tar' => 1,
 	   '../cpan/AutoLoader' => 1,
 	   '../cpan/CPAN' => 1,
-	   '../cpan/Class-ISA' => 1,
 	   '../cpan/Devel-PPPort' => 1,
 	   '../cpan/Encode' => 1,
 	   '../cpan/ExtUtils-Constant' => 1,
