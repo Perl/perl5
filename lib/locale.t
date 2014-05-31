@@ -67,7 +67,7 @@ sub debugf {
     printf @_ if $debug;
 }
 
-$a = 'abc %';
+$a = 'abc %9';
 
 my $test_num = 0;
 
@@ -192,6 +192,47 @@ check_taint_not  $2, "\t\$2";
 /(.)/;	# untaint $&, $`, $', $+, $1.
 check_taint_not  $&, "\$& from /(.)/";
 
+"0" =~ /(\d)/;	# taint $&, $`, $', $+, $1.
+check_taint      $&, "\$& from /(\\d)/";
+check_taint      $`, "\t\$`";
+check_taint      $', "\t\$'";
+check_taint      $+, "\t\$+";
+check_taint      $1, "\t\$1";
+check_taint_not  $2, "\t\$2";
+
+/(.)/;	# untaint $&, $`, $', $+, $1.
+check_taint_not  $&, "\$& from /(.)/";
+
+/(\D)/;	# taint $&, $`, $', $+, $1.
+check_taint      $&, "\$& from /(\\D)/";
+check_taint      $`, "\t\$`";
+check_taint      $', "\t\$'";
+check_taint      $+, "\t\$+";
+check_taint      $1, "\t\$1";
+check_taint_not  $2, "\t\$2";
+
+/(.)/;	# untaint $&, $`, $', $+, $1.
+check_taint_not  $&, "\$& from /(.)/";
+
+/([[:alnum:]])/;	# taint $&, $`, $', $+, $1.
+check_taint      $&, "\$& from /([[:alnum:]])/";
+check_taint      $`, "\t\$`";
+check_taint      $', "\t\$'";
+check_taint      $+, "\t\$+";
+check_taint      $1, "\t\$1";
+check_taint_not  $2, "\t\$2";
+
+/(.)/;	# untaint $&, $`, $', $+, $1.
+check_taint_not  $&, "\$& from /(.)/";
+
+/([[:^alnum:]])/;	# taint $&, $`, $', $+, $1.
+check_taint      $&, "\$& from /([[:^alnum:]])/";
+check_taint      $`, "\t\$`";
+check_taint      $', "\t\$'";
+check_taint      $+, "\t\$+";
+check_taint      $1, "\t\$1";
+check_taint_not  $2, "\t\$2";
+
 "a" =~ /(a)|(\w)/;	# taint $&, $`, $', $+, $1.
 check_taint      $&, "\$& from /(a)|(\\w)/";
 check_taint      $`, "\t\$`";
@@ -217,6 +258,14 @@ check_taint_not      $2, "\t\$2";
 
 /(.)/;	# untaint $&, $`, $', $+, $1.
 check_taint_not  $&, "\$& from /./";
+
+"(\N{KELVIN SIGN})" =~ /(\N{KELVIN SIGN})/i;	# taints because depends on locale
+check_taint      $&, "\$& from /(\\N{KELVIN SIGN})/i";
+check_taint      $`, "\t\$`";
+check_taint      $', "\t\$'";
+check_taint      $+, "\t\$+";
+check_taint      $1, "\t\$1";
+check_taint_not      $2, "\t\$2";
 
 /(.)/;	# untaint $&, $`, $', $+, $1.
 check_taint_not  $&, "\$& from /(.)/";
