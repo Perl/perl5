@@ -2816,36 +2816,39 @@ $define|true|[yY]*)
 	*)	case "$lns:$issymlink" in
 		*"ln"*" -s:"*"test -"?)
 			echo "Creating the symbolic links..." >&4
-			echo "(First creating the subdirectories...)" >&4
 			cd ..
-			awk '{print $1}' $src/MANIFEST | grep / | sed 's:/[^/]*$::' | sort -u | while true; do
-				read directory
-				test -z "$directory" && break
-				mkdir -p $directory
-			done
+			awk '{print $1}' $src/MANIFEST | sed -e 's:/\([^/]*\)$: \1:' |
+			awk 'NF == 1 {
+				dir=".";
+				file=$1 "";
+			     }
+			     NF == 2 {
+				dir=$1 "";
+				file=$2 "";
+			     }
+			     {
+				 print "# dir = ", dir, "file = ", file
+				 mf[dir] = mf[dir]" "src"/"dir"/"file;
+			     } END {
+				 for (d in mf) {
+				     if (d != ".") { print("mkdir -p "d) }
+				     print("ln -sf "mf[d]" "d);
+				 }
+			     }' src="$src" > UU/mksymlinks.$$
+			sh UU/mksymlinks.$$
+			rm UU/mksymlinks.$$
 			# Sanity check 1.
 			if test ! -d t/base; then
 				echo "Failed to create the subdirectories.  Aborting." >&4
 				exit 1
 			fi
-			echo "(Then creating the symlinks...)" >&4
-			awk '{print $1}' $src/MANIFEST | while true; do
-				read filename
-				test -z "$filename" && break
-				if test -f $filename; then
-					if $issymlink $filename; then
-						rm -f $filename
-					fi
-				fi
-				if test -f $filename; then
-					echo "$filename already exists, not symlinking."
-				else
-					ln -s $src/$filename $filename
-				fi
-			done
 			# Sanity check 2.
 			if test ! -f t/base/lex.t; then
 				echo "Failed to create the symlinks (t/base/lex.t missing).  Aborting." >&4
+				exit 1
+			fi
+			if test ! -f win32/win32.c; then
+				echo "Failed to create the symlinks (win32/win32.c missing).  Aborting." >&4
 				exit 1
 			fi
 			cd UU
