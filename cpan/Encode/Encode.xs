@@ -1,5 +1,5 @@
 /*
- $Id: Encode.xs,v 2.27 2014/04/29 16:25:06 dankogai Exp dankogai $
+ $Id: Encode.xs,v 2.29 2014/05/31 12:12:39 dankogai Exp dankogai $
  */
 
 #define PERL_NO_GET_CONTEXT
@@ -843,7 +843,7 @@ OUTPUT:
     RETVAL
 
 #ifndef SvIsCOW
-# define SvIsCOW (SvREADONLY(sv) && SvFAKE(sv))
+# define SvIsCOW(sv) (SvREADONLY(sv) && SvFAKE(sv))
 #endif
 
 SV *

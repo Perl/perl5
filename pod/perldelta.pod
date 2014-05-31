@@ -174,6 +174,14 @@ L<[perl #121574]|https://rt.perl.org/Ticket/Display.html?id=121574>
 
 =item *
 
+L<Encode> has been upgraded from version 2.60_01 to 2.62.
+
+B<piconv> now has better error handling when the encoding name is nonexistent,
+and a build breakage when upgrading L<Encode> in perl-5.8.2 and earlier has
+been fixed.
+
+=item *
+
 The libnet collection of modules has been upgraded from version 1.25 to 1.27.
 
 There are only whitespace changes to the installed files.
