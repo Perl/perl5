@@ -2205,7 +2205,6 @@ make install will install the following:
 			if your cc -E can't read from stdin.
 	c2ph, pstruct	Scripts for handling C structures in header
                         files.
-	config_data	Manage Module::Build-like module configuration.
 	corelist	Shows versions of modules that come with
                         different
 			versions of perl.

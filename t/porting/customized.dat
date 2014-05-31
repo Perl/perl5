@@ -10,7 +10,6 @@ Encode cpan/Encode/JP/Makefile.PL a9ca9c836424cc2ecbefa4933d9da5db54131b98
 Encode cpan/Encode/KR/Makefile.PL 0e46ded62ec6b128e5562277658132700425a48c
 Encode cpan/Encode/Symbol/Makefile.PL 4beddbbd00f638b7de9c6cd0821d9d38020a8218
 Encode cpan/Encode/TW/Makefile.PL 0cc44f95e59f45c0fb3b66bde41525f13c19a25c
-Module::Build cpan/Module-Build/lib/Module/Build/ConfigData.pm 85eb9656e68d1f256737dc52d86b5d0fed28f832
 PerlIO::via::QuotedPrint cpan/PerlIO-via-QuotedPrint/t/QuotedPrint.t ca39f0146e89de02c746e199c45dcb3e5edad691
 Text::Balanced cpan/Text-Balanced/t/01_compile.t 1598cf491a48fa546260a2ec41142abe84da533d
 Text::Balanced cpan/Text-Balanced/t/02_extbrk.t 6ba1b64a4604e822dc2260b8ffcea6b406339ee8

@@ -40,7 +40,6 @@ my %abs = (
 	   '../cpan/IPC-Cmd' => 1,
 	   '../cpan/IPC-SysV' => 1,
 	   '../cpan/Locale-Codes' => 1,
-	   '../cpan/Module-Build' => 1,
 	   '../cpan/Module-Load' => 1,
 	   '../cpan/Module-Load-Conditional' => 1,
 	   '../cpan/Package-Constants' => 1,
