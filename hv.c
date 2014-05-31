@@ -3500,6 +3500,7 @@ struct refcounted_he *
 Perl_refcounted_he_inc(pTHX_ struct refcounted_he *he)
 {
     dVAR;
+    PERL_UNUSED_CONTEXT;
     if (he) {
 	HINTS_REFCNT_LOCK;
 	he->refcounted_he_refcnt++;
@@ -3524,6 +3525,7 @@ Perl_cop_fetch_label(pTHX_ COP *const cop, STRLEN *len, U32 *flags) {
     struct refcounted_he *const chain = cop->cop_hints_hash;
 
     PERL_ARGS_ASSERT_COP_FETCH_LABEL;
+    PERL_UNUSED_CONTEXT;
 
     if (!chain)
 	return NULL;

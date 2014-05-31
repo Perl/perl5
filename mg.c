@@ -700,6 +700,7 @@ int
 Perl_magic_regdatum_set(pTHX_ SV *sv, MAGIC *mg)
 {
     PERL_ARGS_ASSERT_MAGIC_REGDATUM_SET;
+    PERL_UNUSED_CONTEXT;
     PERL_UNUSED_ARG(sv);
     PERL_UNUSED_ARG(mg);
     Perl_croak_no_modify();
@@ -1433,6 +1434,7 @@ Perl_csighandler_init(void)
 static void
 unblock_sigmask(pTHX_ void* newset)
 {
+    PERL_UNUSED_CONTEXT;
     sigprocmask(SIG_UNBLOCK, (sigset_t*)newset, NULL);
 }
 #endif
@@ -2066,6 +2068,7 @@ Perl_magic_cleararylen_p(pTHX_ SV *sv, MAGIC *mg)
 
     PERL_ARGS_ASSERT_MAGIC_CLEARARYLEN_P;
     PERL_UNUSED_ARG(sv);
+    PERL_UNUSED_CONTEXT;
 
     /* Reset the iterator when the array is cleared */
 #if IVSIZE == I32SIZE

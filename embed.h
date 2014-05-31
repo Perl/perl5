@@ -934,32 +934,32 @@
 #  endif
 #  if defined(PERL_IN_REGCOMP_C)
 #define _append_range_to_invlist(a,b,c)	S__append_range_to_invlist(aTHX_ a,b,c)
-#define _invlist_array_init(a,b)	S__invlist_array_init(aTHX_ a,b)
+#define _invlist_array_init	S__invlist_array_init
 #define add_above_Latin1_folds(a,b,c)	S_add_above_Latin1_folds(aTHX_ a,b,c)
 #define add_cp_to_invlist(a,b)	S_add_cp_to_invlist(aTHX_ a,b)
 #define add_data		S_add_data
 #define alloc_maybe_populate_EXACT(a,b,c,d,e,f)	S_alloc_maybe_populate_EXACT(aTHX_ a,b,c,d,e,f)
-#define compute_EXACTish(a)	S_compute_EXACTish(aTHX_ a)
+#define compute_EXACTish	S_compute_EXACTish
 #define construct_ahocorasick_from_trie(a,b,c)	S_construct_ahocorasick_from_trie(aTHX_ a,b,c)
-#define could_it_be_a_POSIX_class(a)	S_could_it_be_a_POSIX_class(aTHX_ a)
+#define could_it_be_a_POSIX_class	S_could_it_be_a_POSIX_class
 #define get_ANYOF_cp_list_for_ssc(a,b)	S_get_ANYOF_cp_list_for_ssc(aTHX_ a,b)
-#define get_invlist_iter_addr(a)	S_get_invlist_iter_addr(aTHX_ a)
-#define get_invlist_previous_index_addr(a)	S_get_invlist_previous_index_addr(aTHX_ a)
+#define get_invlist_iter_addr	S_get_invlist_iter_addr
+#define get_invlist_previous_index_addr	S_get_invlist_previous_index_addr
 #define grok_bslash_N(a,b,c,d,e,f,g)	S_grok_bslash_N(aTHX_ a,b,c,d,e,f,g)
 #define handle_regex_sets(a,b,c,d,e)	S_handle_regex_sets(aTHX_ a,b,c,d,e)
-#define invlist_array(a)	S_invlist_array(aTHX_ a)
+#define invlist_array		S_invlist_array
 #define invlist_clone(a)	S_invlist_clone(aTHX_ a)
 #define invlist_extend(a,b)	S_invlist_extend(aTHX_ a,b)
-#define invlist_highest(a)	S_invlist_highest(aTHX_ a)
-#define invlist_is_iterating(a)	S_invlist_is_iterating(aTHX_ a)
-#define invlist_iterfinish(a)	S_invlist_iterfinish(aTHX_ a)
-#define invlist_iterinit(a)	S_invlist_iterinit(aTHX_ a)
-#define invlist_iternext(a,b,c)	S_invlist_iternext(aTHX_ a,b,c)
-#define invlist_max(a)		S_invlist_max(aTHX_ a)
-#define invlist_previous_index(a)	S_invlist_previous_index(aTHX_ a)
+#define invlist_highest		S_invlist_highest
+#define invlist_is_iterating	S_invlist_is_iterating
+#define invlist_iterfinish	S_invlist_iterfinish
+#define invlist_iterinit	S_invlist_iterinit
+#define invlist_iternext	S_invlist_iternext
+#define invlist_max		S_invlist_max
+#define invlist_previous_index	S_invlist_previous_index
 #define invlist_set_len(a,b,c)	S_invlist_set_len(aTHX_ a,b,c)
-#define invlist_set_previous_index(a,b)	S_invlist_set_previous_index(aTHX_ a,b)
-#define invlist_trim(a)		S_invlist_trim(aTHX_ a)
+#define invlist_set_previous_index	S_invlist_set_previous_index
+#define invlist_trim		S_invlist_trim
 #define join_exact(a,b,c,d,e,f,g)	S_join_exact(aTHX_ a,b,c,d,e,f,g)
 #define make_trie(a,b,c,d,e,f,g,h)	S_make_trie(aTHX_ a,b,c,d,e,f,g,h)
 #define nextchar(a)		S_nextchar(aTHX_ a)
@@ -969,13 +969,13 @@
 #define reg_node(a,b)		S_reg_node(aTHX_ a,b)
 #define reg_recode(a,b)		S_reg_recode(aTHX_ a,b)
 #define reg_scan_name(a,b)	S_reg_scan_name(aTHX_ a,b)
-#define reg_skipcomment(a,b)	S_reg_skipcomment(aTHX_ a,b)
+#define reg_skipcomment		S_reg_skipcomment
 #define reganode(a,b,c)		S_reganode(aTHX_ a,b,c)
 #define regatom(a,b,c)		S_regatom(aTHX_ a,b,c)
 #define regbranch(a,b,c,d)	S_regbranch(aTHX_ a,b,c,d)
 #define regclass(a,b,c,d,e,f,g)	S_regclass(aTHX_ a,b,c,d,e,f,g)
 #define reginsert(a,b,c,d)	S_reginsert(aTHX_ a,b,c,d)
-#define regpatws(a,b,c)		S_regpatws(aTHX_ a,b,c)
+#define regpatws		S_regpatws
 #define regpiece(a,b,c)		S_regpiece(aTHX_ a,b,c)
 #define regpposixcc(a,b,c)	S_regpposixcc(aTHX_ a,b,c)
 #define regtail(a,b,c,d)	S_regtail(aTHX_ a,b,c,d)
@@ -985,13 +985,13 @@
 #define ssc_add_range(a,b,c)	S_ssc_add_range(aTHX_ a,b,c)
 #define ssc_and(a,b,c)		S_ssc_and(aTHX_ a,b,c)
 #define ssc_anything(a)		S_ssc_anything(aTHX_ a)
-#define ssc_clear_locale(a)	S_ssc_clear_locale(aTHX_ a)
+#define ssc_clear_locale	S_ssc_clear_locale
 #define ssc_cp_and(a,b)		S_ssc_cp_and(aTHX_ a,b)
 #define ssc_finalize(a,b)	S_ssc_finalize(aTHX_ a,b)
 #define ssc_init(a,b)		S_ssc_init(aTHX_ a,b)
 #define ssc_intersection(a,b,c)	S_ssc_intersection(aTHX_ a,b,c)
-#define ssc_is_anything(a)	S_ssc_is_anything(aTHX_ a)
-#define ssc_is_cp_posixl_init(a,b)	S_ssc_is_cp_posixl_init(aTHX_ a,b)
+#define ssc_is_anything		S_ssc_is_anything
+#define ssc_is_cp_posixl_init	S_ssc_is_cp_posixl_init
 #define ssc_or(a,b,c)		S_ssc_or(aTHX_ a,b,c)
 #define ssc_union(a,b,c)	S_ssc_union(aTHX_ a,b,c)
 #define study_chunk(a,b,c,d,e,f,g,h,i,j,k)	S_study_chunk(aTHX_ a,b,c,d,e,f,g,h,i,j,k)
@@ -1004,12 +1004,12 @@
 #  endif
 #  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_UTF8_C)
 #define _get_swash_invlist(a)	Perl__get_swash_invlist(aTHX_ a)
-#define _invlist_contains_cp(a,b)	S__invlist_contains_cp(aTHX_ a,b)
+#define _invlist_contains_cp	S__invlist_contains_cp
 #define _invlist_contents(a)	Perl__invlist_contents(aTHX_ a)
-#define _invlist_len(a)		S__invlist_len(aTHX_ a)
-#define _invlist_search(a,b)	Perl__invlist_search(aTHX_ a,b)
+#define _invlist_len		S__invlist_len
+#define _invlist_search		Perl__invlist_search
 #define _swash_inversion_hash(a)	Perl__swash_inversion_hash(aTHX_ a)
-#define get_invlist_offset_addr(a)	S_get_invlist_offset_addr(aTHX_ a)
+#define get_invlist_offset_addr	S_get_invlist_offset_addr
 #  endif
 #  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_UTF8_C) || defined(PERL_IN_TOKE_C)
 #define _core_swash_init(a,b,c,d,e,f,g)	Perl__core_swash_init(aTHX_ a,b,c,d,e,f,g)
@@ -1025,7 +1025,7 @@
 #define _add_range_to_invlist(a,b,c)	Perl__add_range_to_invlist(aTHX_ a,b,c)
 #define _invlist_intersection_maybe_complement_2nd(a,b,c,d)	Perl__invlist_intersection_maybe_complement_2nd(aTHX_ a,b,c,d)
 #define _invlist_invert(a)	Perl__invlist_invert(aTHX_ a)
-#define _invlist_populate_swatch(a,b,c,d)	Perl__invlist_populate_swatch(aTHX_ a,b,c,d)
+#define _invlist_populate_swatch	Perl__invlist_populate_swatch
 #define _invlist_union_maybe_complement_2nd(a,b,c,d)	Perl__invlist_union_maybe_complement_2nd(aTHX_ a,b,c,d)
 #define _new_invlist(a)		Perl__new_invlist(aTHX_ a)
 #define _setup_canned_invlist(a,b,c)	Perl__setup_canned_invlist(aTHX_ a,b,c)
@@ -1035,7 +1035,7 @@
 #define find_byclass(a,b,c,d,e)	S_find_byclass(aTHX_ a,b,c,d,e)
 #define isFOO_lc(a,b)		S_isFOO_lc(aTHX_ a,b)
 #define isFOO_utf8_lc(a,b)	S_isFOO_utf8_lc(aTHX_ a,b)
-#define reg_check_named_buff_matched(a,b)	S_reg_check_named_buff_matched(aTHX_ a,b)
+#define reg_check_named_buff_matched	S_reg_check_named_buff_matched
 #define regcppop(a,b)		S_regcppop(aTHX_ a,b)
 #define regcppush(a,b,c)	S_regcppush(aTHX_ a,b,c)
 #define reghop3			S_reghop3

@@ -3526,7 +3526,7 @@ S_dump_exec_pos(pTHX_ const char *locinput,
  * or 0 if non of the buffers matched.
  */
 STATIC I32
-S_reg_check_named_buff_matched(pTHX_ const regexp *rex, const regnode *scan)
+S_reg_check_named_buff_matched(const regexp *rex, const regnode *scan)
 {
     I32 n;
     RXi_GET_DECL(rex,rexi);

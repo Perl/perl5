@@ -1499,22 +1499,22 @@ Ap	|UV	|swash_fetch	|NN SV *swash|NN const U8 *ptr|bool do_utf8
 #ifdef PERL_IN_REGCOMP_C
 EiMR	|SV*	|add_cp_to_invlist	|NULLOK SV* invlist|const UV cp
 EsM	|void	|_append_range_to_invlist   |NN SV* const invlist|const UV start|const UV end
-EiMR	|UV*	|_invlist_array_init	|NN SV* const invlist|const bool will_have_0
-EiMR	|UV*	|invlist_array	|NN SV* const invlist
+EiMRn	|UV*	|_invlist_array_init	|NN SV* const invlist|const bool will_have_0
+EiMRn	|UV*	|invlist_array	|NN SV* const invlist
 EsM	|void	|invlist_extend    |NN SV* const invlist|const UV len
-EiMR	|UV	|invlist_max	|NN SV* const invlist
+EiMRn	|UV	|invlist_max	|NN SV* const invlist
 EiM	|void	|invlist_set_len|NN SV* const invlist|const UV len|const bool offset
-EiMR	|IV*	|get_invlist_previous_index_addr|NN SV* invlist
-EiMR	|IV	|invlist_previous_index|NN SV* const invlist
-EiM	|void	|invlist_set_previous_index|NN SV* const invlist|const IV index
-EiM	|void	|invlist_trim	|NN SV* const invlist
+EiMRn	|IV*	|get_invlist_previous_index_addr|NN SV* invlist
+EiMRn	|IV	|invlist_previous_index|NN SV* const invlist
+EiMn	|void	|invlist_set_previous_index|NN SV* const invlist|const IV index
+EiMn	|void	|invlist_trim	|NN SV* const invlist
 EiMR	|SV*	|invlist_clone	|NN SV* const invlist
-EiMR	|bool	|invlist_is_iterating|NN SV* const invlist
-EiMR	|STRLEN*|get_invlist_iter_addr	|NN SV* invlist
-EiM	|void	|invlist_iterinit|NN SV* invlist
-EsMR	|bool	|invlist_iternext|NN SV* invlist|NN UV* start|NN UV* end
-EiM	|void	|invlist_iterfinish|NN SV* invlist
-EiMR	|UV	|invlist_highest|NN SV* const invlist
+EiMRn	|bool	|invlist_is_iterating|NN SV* const invlist
+EiMRn	|STRLEN*|get_invlist_iter_addr	|NN SV* invlist
+EiMn	|void	|invlist_iterinit|NN SV* invlist
+EsMRn	|bool	|invlist_iternext|NN SV* invlist|NN UV* start|NN UV* end
+EiMn	|void	|invlist_iterfinish|NN SV* invlist
+EiMRn	|UV	|invlist_highest|NN SV* const invlist
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_UTF8_C)
 EXmM	|void	|_invlist_intersection	|NN SV* const a|NN SV* const b|NN SV** i
@@ -1531,7 +1531,7 @@ EXMpR	|SV*	|_new_invlist	|IV initial_size
 EXMpR	|SV*	|_swash_to_invlist	|NN SV* const swash
 EXMpR	|SV*	|_add_range_to_invlist	|NULLOK SV* invlist|const UV start|const UV end
 EXMpR	|SV*	|_setup_canned_invlist|const STRLEN size|const UV element0|NN UV** other_elements_ptr
-EXMp	|void	|_invlist_populate_swatch   |NN SV* const invlist|const UV start|const UV end|NN U8* swatch
+EXMpn	|void	|_invlist_populate_swatch   |NN SV* const invlist|const UV start|const UV end|NN U8* swatch
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_UTF8_C) || defined(PERL_IN_TOKE_C)
 EXp	|SV*	|_core_swash_init|NN const char* pkg|NN const char* name \
@@ -1540,10 +1540,10 @@ EXp	|SV*	|_core_swash_init|NN const char* pkg|NN const char* name \
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_UTF8_C)
 EXMpR	|SV*	|_invlist_contents|NN SV* const invlist
-EiMR	|bool*	|get_invlist_offset_addr|NN SV* invlist
-EiMR	|UV	|_invlist_len	|NN SV* const invlist
-EMiR	|bool	|_invlist_contains_cp|NN SV* const invlist|const UV cp
-EXpMR	|IV	|_invlist_search	|NN SV* const invlist|const UV cp
+EiMRn	|bool*	|get_invlist_offset_addr|NN SV* invlist
+EiMRn	|UV	|_invlist_len	|NN SV* const invlist
+EMiRn	|bool	|_invlist_contains_cp|NN SV* const invlist|const UV cp
+EXpMRn	|IV	|_invlist_search	|NN SV* const invlist|const UV cp
 EXMpR	|SV*	|_get_swash_invlist|NN SV* const swash
 EXMpR	|HV*	|_swash_inversion_hash	|NN SV* const swash
 #endif
@@ -2104,7 +2104,7 @@ Es	|regnode*|regclass	|NN RExC_state_t *pRExC_state \
 				|NULLOK SV** ret_invlist
 Es	|void|add_above_Latin1_folds|NN RExC_state_t *pRExC_state|const U8 cp \
 				|NN SV** invlist
-Es	|bool|could_it_be_a_POSIX_class|NN RExC_state_t *pRExC_state
+Esn	|bool|could_it_be_a_POSIX_class|NN RExC_state_t *pRExC_state
 Es	|regnode*|handle_regex_sets|NN RExC_state_t *pRExC_state \
 				|NULLOK SV ** return_invlist            \
 				|NN I32 *flagp|U32 depth                \
@@ -2128,24 +2128,24 @@ Es	|U32	|join_exact	|NN RExC_state_t *pRExC_state \
 				|NN regnode *scan|NN UV *min_subtract  \
 				|NN bool *unfolded_multi_char          \
 				|U32 flags|NULLOK regnode *val|U32 depth
-EsR	|char *	|regpatws	|NN RExC_state_t *pRExC_state \
+EsRn	|char *	|regpatws	|NN RExC_state_t *pRExC_state \
 				|NN char *p|const bool recognize_comment
 Ei	|void   |alloc_maybe_populate_EXACT|NN RExC_state_t *pRExC_state \
 				|NN regnode *node|NN I32 *flagp|STRLEN len \
 				|UV code_point|bool downgradable
-Ei	|U8   |compute_EXACTish|NN RExC_state_t *pRExC_state
+Ein	|U8   |compute_EXACTish|NN RExC_state_t *pRExC_state
 Es	|char *	|nextchar	|NN RExC_state_t *pRExC_state
-Ei	|char *	|reg_skipcomment|NN RExC_state_t *pRExC_state|NN char * p
+Ein	|char *	|reg_skipcomment|NN RExC_state_t *pRExC_state|NN char * p
 Es	|void	|scan_commit	|NN const RExC_state_t *pRExC_state \
 				|NN struct scan_data_t *data        \
 				|NN SSize_t *minlenp		    \
 				|int is_inf
 Es	|void	|populate_ANYOF_from_invlist|NN regnode *node|NN SV** invlist_ptr
 Es	|void	|ssc_anything	|NN regnode_ssc *ssc
-EsR	|int	|ssc_is_anything|NN const regnode_ssc *ssc
+EsRn	|int	|ssc_is_anything|NN const regnode_ssc *ssc
 Es	|void	|ssc_init	|NN const RExC_state_t *pRExC_state \
 				|NN regnode_ssc *ssc
-EsR	|int	|ssc_is_cp_posixl_init|NN const RExC_state_t *pRExC_state \
+EsRn	|int	|ssc_is_cp_posixl_init|NN const RExC_state_t *pRExC_state \
 				|NN const regnode_ssc *ssc
 Es	|void	|ssc_and	|NN const RExC_state_t *pRExC_state \
 				|NN regnode_ssc *ssc                \
@@ -2164,7 +2164,7 @@ Ei	|void	|ssc_add_range	|NN regnode_ssc *ssc \
 				|UV const start|UV const end
 Ei	|void	|ssc_cp_and	|NN regnode_ssc *ssc \
 				|UV const cp
-Ei	|void	|ssc_clear_locale|NN regnode_ssc *ssc
+Ein	|void	|ssc_clear_locale|NN regnode_ssc *ssc
 Es	|void	|ssc_finalize	|NN RExC_state_t *pRExC_state \
 				|NN regnode_ssc *ssc
 Es	|SSize_t|study_chunk	|NN RExC_state_t *pRExC_state \
@@ -2238,7 +2238,7 @@ ERs	|char*	|find_byclass	|NN regexp * prog|NN const regnode *c \
 				|NULLOK regmatch_info *reginfo
 Es	|void	|to_utf8_substr	|NN regexp * prog
 Es	|bool	|to_byte_substr	|NN regexp * prog
-ERs	|I32	|reg_check_named_buff_matched	|NN const regexp *rex \
+ERsn	|I32	|reg_check_named_buff_matched	|NN const regexp *rex \
 						|NN const regnode *scan
 #  ifdef DEBUGGING
 Es	|void	|dump_exec_pos	|NN const char *locinput|NN const regnode *scan|NN const char *loc_regeol\

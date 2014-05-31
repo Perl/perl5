@@ -895,7 +895,7 @@ S_ssc_anything(pTHX_ regnode_ssc *ssc)
 }
 
 STATIC int
-S_ssc_is_anything(pTHX_ const regnode_ssc *ssc)
+S_ssc_is_anything(const regnode_ssc *ssc)
 {
     /* Returns TRUE if the SSC 'ssc' can match the empty string and any code
      * point; FALSE otherwise.  Thus, this is used to see if using 'ssc' buys
@@ -967,8 +967,8 @@ S_ssc_init(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc)
 }
 
 STATIC int
-S_ssc_is_cp_posixl_init(pTHX_ const RExC_state_t *pRExC_state,
-                              const regnode_ssc *ssc)
+S_ssc_is_cp_posixl_init(const RExC_state_t *pRExC_state,
+                        const regnode_ssc *ssc)
 {
     /* Returns TRUE if the SSC 'ssc' is in its initial state with regard only
      * to the list of code points matched, and locale posix classes; hence does
@@ -1412,10 +1412,9 @@ S_ssc_cp_and(pTHX_ regnode_ssc *ssc, const UV cp)
 }
 
 PERL_STATIC_INLINE void
-S_ssc_clear_locale(pTHX_ regnode_ssc *ssc)
+S_ssc_clear_locale(regnode_ssc *ssc)
 {
     /* Set the SSC 'ssc' to not match any locale things */
-
     PERL_ARGS_ASSERT_SSC_CLEAR_LOCALE;
 
     assert(is_ANYOF_SYNTHETIC(ssc));
@@ -5926,6 +5925,8 @@ S_has_runtime_code(pTHX_ RExC_state_t * const pRExC_state,
 {
     int n = 0;
     STRLEN s;
+    
+    PERL_UNUSED_CONTEXT;
 
     for (s = 0; s < plen; s++) {
 	if (n < pRExC_state->num_code_blocks
@@ -7832,7 +7833,7 @@ S_reg_scan_name(pTHX_ RExC_state_t *pRExC_state, U32 flags)
 /* The header definitions are in F<inline_invlist.c> */
 
 PERL_STATIC_INLINE UV*
-S__invlist_array_init(pTHX_ SV* const invlist, const bool will_have_0)
+S__invlist_array_init(SV* const invlist, const bool will_have_0)
 {
     /* Returns a pointer to the first element in the inversion list's array.
      * This is called upon initialization of an inversion list.  Where the
@@ -7858,7 +7859,7 @@ S__invlist_array_init(pTHX_ SV* const invlist, const bool will_have_0)
 }
 
 PERL_STATIC_INLINE UV*
-S_invlist_array(pTHX_ SV* const invlist)
+S_invlist_array(SV* const invlist)
 {
     /* Returns the pointer to the inversion list's array.  Every time the
      * length changes, this needs to be called in case malloc or realloc moved
@@ -7883,7 +7884,7 @@ S_invlist_set_len(pTHX_ SV* const invlist, const UV len, const bool offset)
 {
     /* Sets the current number of elements stored in the inversion list.
      * Updates SvCUR correspondingly */
-
+    PERL_UNUSED_CONTEXT;
     PERL_ARGS_ASSERT_INVLIST_SET_LEN;
 
     assert(SvTYPE(invlist) == SVt_INVLIST);
@@ -7896,11 +7897,10 @@ S_invlist_set_len(pTHX_ SV* const invlist, const UV len, const bool offset)
 }
 
 PERL_STATIC_INLINE IV*
-S_get_invlist_previous_index_addr(pTHX_ SV* invlist)
+S_get_invlist_previous_index_addr(SV* invlist)
 {
     /* Return the address of the IV that is reserved to hold the cached index
      * */
-
     PERL_ARGS_ASSERT_GET_INVLIST_PREVIOUS_INDEX_ADDR;
 
     assert(SvTYPE(invlist) == SVt_INVLIST);
@@ -7909,7 +7909,7 @@ S_get_invlist_previous_index_addr(pTHX_ SV* invlist)
 }
 
 PERL_STATIC_INLINE IV
-S_invlist_previous_index(pTHX_ SV* const invlist)
+S_invlist_previous_index(SV* const invlist)
 {
     /* Returns cached index of previous search */
 
@@ -7919,7 +7919,7 @@ S_invlist_previous_index(pTHX_ SV* const invlist)
 }
 
 PERL_STATIC_INLINE void
-S_invlist_set_previous_index(pTHX_ SV* const invlist, const IV index)
+S_invlist_set_previous_index(SV* const invlist, const IV index)
 {
     /* Caches <index> for later retrieval */
 
@@ -7931,7 +7931,7 @@ S_invlist_set_previous_index(pTHX_ SV* const invlist, const IV index)
 }
 
 PERL_STATIC_INLINE UV
-S_invlist_max(pTHX_ SV* const invlist)
+S_invlist_max(SV* const invlist)
 {
     /* Returns the maximum number of elements storable in the inversion list's
      * array, without having to realloc() */
@@ -8050,7 +8050,7 @@ S_invlist_extend(pTHX_ SV* const invlist, const UV new_max)
 }
 
 PERL_STATIC_INLINE void
-S_invlist_trim(pTHX_ SV* const invlist)
+S_invlist_trim(SV* const invlist)
 {
     PERL_ARGS_ASSERT_INVLIST_TRIM;
 
@@ -8149,7 +8149,7 @@ S__append_range_to_invlist(pTHX_ SV* const invlist,
 #ifndef PERL_IN_XSUB_RE
 
 IV
-Perl__invlist_search(pTHX_ SV* const invlist, const UV cp)
+Perl__invlist_search(SV* const invlist, const UV cp)
 {
     /* Searches the inversion list for the entry that contains the input code
      * point <cp>.  If <cp> is not in the list, -1 is returned.  Otherwise, the
@@ -8237,8 +8237,8 @@ Perl__invlist_search(pTHX_ SV* const invlist, const UV cp)
 }
 
 void
-Perl__invlist_populate_swatch(pTHX_ SV* const invlist,
-                                    const UV start, const UV end, U8* swatch)
+Perl__invlist_populate_swatch(SV* const invlist,
+                              const UV start, const UV end, U8* swatch)
 {
     /* populates a swatch of a swash the same way swatch_get() does in utf8.c,
      * but is used when the swash has an inversion list.  This makes this much
@@ -8950,7 +8950,7 @@ S_invlist_clone(pTHX_ SV* const invlist)
 }
 
 PERL_STATIC_INLINE STRLEN*
-S_get_invlist_iter_addr(pTHX_ SV* invlist)
+S_get_invlist_iter_addr(SV* invlist)
 {
     /* Return the address of the UV that contains the current iteration
      * position */
@@ -8963,7 +8963,7 @@ S_get_invlist_iter_addr(pTHX_ SV* invlist)
 }
 
 PERL_STATIC_INLINE void
-S_invlist_iterinit(pTHX_ SV* invlist)	/* Initialize iterator for invlist */
+S_invlist_iterinit(SV* invlist)	/* Initialize iterator for invlist */
 {
     PERL_ARGS_ASSERT_INVLIST_ITERINIT;
 
@@ -8971,7 +8971,7 @@ S_invlist_iterinit(pTHX_ SV* invlist)	/* Initialize iterator for invlist */
 }
 
 PERL_STATIC_INLINE void
-S_invlist_iterfinish(pTHX_ SV* invlist)
+S_invlist_iterfinish(SV* invlist)
 {
     /* Terminate iterator for invlist.  This is to catch development errors.
      * Any iteration that is interrupted before completed should call this
@@ -8987,7 +8987,7 @@ S_invlist_iterfinish(pTHX_ SV* invlist)
 }
 
 STATIC bool
-S_invlist_iternext(pTHX_ SV* invlist, UV* start, UV* end)
+S_invlist_iternext(SV* invlist, UV* start, UV* end)
 {
     /* An C<invlist_iterinit> call on <invlist> must be used to set this up.
      * This call sets in <*start> and <*end>, the next range in <invlist>.
@@ -9022,7 +9022,7 @@ S_invlist_iternext(pTHX_ SV* invlist, UV* start, UV* end)
 }
 
 PERL_STATIC_INLINE bool
-S_invlist_is_iterating(pTHX_ SV* const invlist)
+S_invlist_is_iterating(SV* const invlist)
 {
     PERL_ARGS_ASSERT_INVLIST_IS_ITERATING;
 
@@ -9030,7 +9030,7 @@ S_invlist_is_iterating(pTHX_ SV* const invlist)
 }
 
 PERL_STATIC_INLINE UV
-S_invlist_highest(pTHX_ SV* const invlist)
+S_invlist_highest(SV* const invlist)
 {
     /* Returns the highest code point that matches an inversion list.  This API
      * has an ambiguity, as it returns 0 under either the highest is actually
@@ -10982,7 +10982,7 @@ S_reg_recode(pTHX_ const char value, SV **encp)
 }
 
 PERL_STATIC_INLINE U8
-S_compute_EXACTish(pTHX_ RExC_state_t *pRExC_state)
+S_compute_EXACTish(RExC_state_t *pRExC_state)
 {
     U8 op;
 
@@ -12403,7 +12403,7 @@ tryagain:
 }
 
 STATIC char *
-S_regpatws(pTHX_ RExC_state_t *pRExC_state, char *p , const bool recognize_comment )
+S_regpatws(RExC_state_t *pRExC_state, char *p , const bool recognize_comment )
 {
     /* Returns the next non-pattern-white space, non-comment character (the
      * latter only if 'recognize_comment is true) in the string p, which is
@@ -12647,7 +12647,7 @@ S_regpposixcc(pTHX_ RExC_state_t *pRExC_state, I32 value, const bool strict)
 }
 
 STATIC bool
-S_could_it_be_a_POSIX_class(pTHX_ RExC_state_t *pRExC_state)
+S_could_it_be_a_POSIX_class(RExC_state_t *pRExC_state)
 {
     /* This applies some heuristics at the current parse position (which should
      * be at a '[') to see if what follows might be intended to be a [:posix:]
@@ -15026,7 +15026,7 @@ S_set_ANYOF_arg(pTHX_ RExC_state_t* const pRExC_state,
 */
 
 PERL_STATIC_INLINE char*
-S_reg_skipcomment(pTHX_ RExC_state_t *pRExC_state, char* p)
+S_reg_skipcomment(RExC_state_t *pRExC_state, char* p)
 {
     PERL_ARGS_ASSERT_REG_SKIPCOMMENT;
 

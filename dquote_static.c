@@ -21,6 +21,7 @@ S_regcurly(pTHX_ const char *s,
                                                 is an abnormal case */
     )
 {
+    PERL_UNUSED_CONTEXT;
     PERL_ARGS_ASSERT_REGCURLY;
 
     if (*s++ != '{')

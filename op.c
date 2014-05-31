@@ -115,7 +115,7 @@ recursive, but it's recursive on basic blocks, not on tree nodes.
  */
 
 STATIC void
-S_prune_chain_head(pTHX_ OP** op_p)
+S_prune_chain_head(OP** op_p)
 {
     while (*op_p
         && (   (*op_p)->op_type == OP_NULL
@@ -162,6 +162,10 @@ S_new_slab(pTHX_ size_t sz)
     slab->opslab_size = (U16)sz;
 #else
     OPSLAB *slab = (OPSLAB *)PerlMemShared_calloc(sz, sizeof(I32 *));
+#endif
+#ifndef WIN32
+    /* The context is unused in non-Windows */
+    PERL_UNUSED_CONTEXT;
 #endif
     slab->opslab_first = (OPSLOT *)((I32 **)slab + sz - 1);
     return slab;
@@ -3323,7 +3327,7 @@ Perl_newPROG(pTHX_ OP *o)
 	ENTER;
 	CALL_PEEP(PL_eval_start);
 	finalize_optree(PL_eval_root);
-        S_prune_chain_head(aTHX_ &PL_eval_start);
+        S_prune_chain_head(&PL_eval_start);
 	LEAVE;
 	PL_savestack_ix = i;
     }
@@ -3368,7 +3372,7 @@ Perl_newPROG(pTHX_ OP *o)
 	PL_main_root->op_next = 0;
 	CALL_PEEP(PL_main_start);
 	finalize_optree(PL_main_root);
-        S_prune_chain_head(aTHX_ &PL_main_start);
+        S_prune_chain_head(&PL_main_start);
 	cv_forget_slab(PL_compcv);
 	PL_compcv = 0;
 
@@ -3690,7 +3694,7 @@ S_gen_constant_list(pTHX_ OP *o)
     curop = LINKLIST(o);
     o->op_next = 0;
     CALL_PEEP(curop);
-    S_prune_chain_head(aTHX_ &curop);
+    S_prune_chain_head(&curop);
     PL_op = curop;
     Perl_pp_pushmark(aTHX);
     CALLRUNOPS(aTHX);
@@ -4918,7 +4922,7 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg, I32 floor)
 	    /* have to peep the DOs individually as we've removed it from
 	     * the op_next chain */
 	    CALL_PEEP(o);
-            S_prune_chain_head(aTHX_ &(o->op_next));
+            S_prune_chain_head(&(o->op_next));
 	    if (is_compiletime)
 		/* runtime finalizes as part of finalizing whole tree */
 		finalize_optree(o);
@@ -7681,7 +7685,7 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
     CvROOT(cv)->op_next = 0;
     CALL_PEEP(CvSTART(cv));
     finalize_optree(CvROOT(cv));
-    S_prune_chain_head(aTHX_ &CvSTART(cv));
+    S_prune_chain_head(&CvSTART(cv));
 
     /* now that optimizer has done its work, adjust pad values */
 
@@ -8043,7 +8047,7 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
     CvROOT(cv)->op_next = 0;
     CALL_PEEP(CvSTART(cv));
     finalize_optree(CvROOT(cv));
-    S_prune_chain_head(aTHX_ &CvSTART(cv));
+    S_prune_chain_head(&CvSTART(cv));
 
     /* now that optimizer has done its work, adjust pad values */
 
@@ -8447,7 +8451,7 @@ Perl_newFORM(pTHX_ I32 floor, OP *o, OP *block)
     CvROOT(cv)->op_next = 0;
     CALL_PEEP(CvSTART(cv));
     finalize_optree(CvROOT(cv));
-    S_prune_chain_head(aTHX_ &CvSTART(cv));
+    S_prune_chain_head(&CvSTART(cv));
     cv_forget_slab(cv);
 
   finish:
@@ -8673,6 +8677,7 @@ S_io_hints(pTHX_ OP *o)
 	}
     }
 #else
+    PERL_UNUSED_CONTEXT;
     PERL_UNUSED_ARG(o);
 #endif
 }
@@ -11240,7 +11245,7 @@ S_inplace_aassign(pTHX_ OP *o) {
     if (defer_ix == (MAX_DEFERRED-1)) { \
         OP **defer = defer_queue[defer_base]; \
         CALL_RPEEP(*defer); \
-        S_prune_chain_head(aTHX_ defer); \
+        S_prune_chain_head(defer); \
 	defer_base = (defer_base + 1) % MAX_DEFERRED; \
 	defer_ix--; \
     } \
@@ -11298,7 +11303,7 @@ Perl_rpeep(pTHX_ OP *o)
                 OP **defer =
                         defer_queue[(defer_base + defer_ix--) % MAX_DEFERRED];
                 CALL_RPEEP(*defer);
-                S_prune_chain_head(aTHX_ defer);
+                S_prune_chain_head(defer);
             }
 	    break;
 	}
@@ -12647,6 +12652,7 @@ Perl_wrap_op_checker(pTHX_ Optype opcode,
 {
     dVAR;
 
+    PERL_UNUSED_CONTEXT;
     PERL_ARGS_ASSERT_WRAP_OP_CHECKER;
     if (*old_checker_p) return;
     OP_CHECK_MUTEX_LOCK;
