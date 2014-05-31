@@ -84,6 +84,8 @@
  * pages.  Best is to convert to I8 before sending them, as the I8
  * representation is the same no matter what the underlying code page is.
  *
+ * tr16 also says that NEL and LF be swapped.  We don't do that.
+ *
  * EBCDIC characters above 0xFF are the same as Unicode in Perl's
  * implementation of all 3 encodings, so for those Step 1 is trivial.
  *
