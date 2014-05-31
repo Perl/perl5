@@ -1584,6 +1584,9 @@ Perl_sv_grow(pTHX_ SV *const sv, STRLEN newlen)
 	if (newlen < minlen)
 	    newlen = minlen;
 #ifndef PERL_UNWARANTED_CHUMMINESS_WITH_MALLOC
+
+        /* Don't round up on the first allocation, as odds are pretty good that
+         * the initial request is accurate as to what is really needed */
         if (SvLEN(sv)) {
             newlen = PERL_STRLEN_ROUNDUP(newlen);
         }
