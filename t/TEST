@@ -42,7 +42,6 @@ my %abs = (
 	   '../cpan/Locale-Codes' => 1,
 	   '../cpan/Module-Load' => 1,
 	   '../cpan/Module-Load-Conditional' => 1,
-	   '../cpan/Package-Constants' => 1,
 	   '../cpan/Parse-CPAN-Meta' => 1,
 	   '../cpan/Pod-Simple' => 1,
 	   '../cpan/Test-Simple' => 1,
