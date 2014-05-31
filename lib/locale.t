@@ -112,6 +112,8 @@ check_taint_not   $&, "not tainted outside 'use locale'";
 
 use locale;	# engage locale and therefore locale taint.
 
+# BE SURE TO COPY ANYTHING YOU ADD to these tests to the block below for
+# ":notcharacters"
 
 check_taint_not   $a, '$a';
 
@@ -410,168 +412,283 @@ check_taint_not $1, '"foo.bar_baz" =~ /^(.*)[._](.*?)$/';
 
     use locale ':not_characters'; # engage restricted locale with different
                                   # tainting rules
+    check_taint_not   $a, '$a';
 
-    check_taint_not   $a;
+    check_taint_not   uc($a), 'uc($a)';
+    check_taint_not   "\U$a", '"\U$a"';
+    check_taint_not   ucfirst($a), 'ucfirst($a)';
+    check_taint_not   "\u$a", '"\u$a"';
+    check_taint_not   lc($a), 'lc($a)';
+    check_taint_not   fc($a), 'fc($a)';
+    check_taint_not   "\L$a", '"\L$a"';
+    check_taint_not   "\F$a", '"\F$a"';
+    check_taint_not   lcfirst($a), 'lcfirst($a)';
+    check_taint_not   "\l$a", '"\l$a"';
 
-    check_taint_not	uc($a);
-    check_taint_not	"\U$a";
-    check_taint_not	ucfirst($a);
-    check_taint_not	"\u$a";
-    check_taint_not	lc($a);
-    check_taint_not	fc($a);
-    check_taint_not	"\L$a";
-    check_taint_not	"\F$a";
-    check_taint_not	lcfirst($a);
-    check_taint_not	"\l$a";
-
-    check_taint_not  sprintf('%e', 123.456);
-    check_taint_not  sprintf('%f', 123.456);
-    check_taint_not  sprintf('%g', 123.456);
-    check_taint_not  sprintf('%d', 123.456);
-    check_taint_not  sprintf('%x', 123.456);
+    check_taint_not  sprintf('%e', 123.456), "sprintf('%e', 123.456)";
+    check_taint_not  sprintf('%f', 123.456), "sprintf('%f', 123.456)";
+    check_taint_not  sprintf('%g', 123.456), "sprintf('%g', 123.456)";
+    check_taint_not  sprintf('%d', 123.456), "sprintf('%d', 123.456)";
+    check_taint_not  sprintf('%x', 123.456), "sprintf('%x', 123.456)";
 
     $_ = $a;	# untaint $_
 
-    $_ = uc($a);	# taint $_
+    $_ = uc($a);
 
-    check_taint_not	$_;
+    check_taint_not  $_, '$_ = uc($a)';
 
-    /(\w)/;	# taint $&, $`, $', $+, $1.
-    check_taint_not	$&;
-    check_taint_not	$`;
-    check_taint_not	$';
-    check_taint_not	$+;
-    check_taint_not	$1;
-    check_taint_not  $2;
+    /(\w)/;
+    check_taint_not  $&, "\$& from /(\\w)/";
+    check_taint_not  $`, "\t\$`";
+    check_taint_not  $', "\t\$'";
+    check_taint_not  $+, "\t\$+";
+    check_taint_not  $1, "\t\$1";
+    check_taint_not  $2, "\t\$2";
 
     /(.)/;	# untaint $&, $`, $', $+, $1.
-    check_taint_not  $&;
-    check_taint_not  $`;
-    check_taint_not  $';
-    check_taint_not  $+;
-    check_taint_not  $1;
-    check_taint_not  $2;
+    check_taint_not  $&, "\$& from /(.)/";
+    check_taint_not  $`, "\t\$`";
+    check_taint_not  $', "\t\$'";
+    check_taint_not  $+, "\t\$+";
+    check_taint_not  $1, "\t\$1";
+    check_taint_not  $2, "\t\$2";
 
-    /(\W)/;	# taint $&, $`, $', $+, $1.
-    check_taint_not	$&;
-    check_taint_not	$`;
-    check_taint_not	$';
-    check_taint_not	$+;
-    check_taint_not	$1;
-    check_taint_not  $2;
+    /(\W)/;
+    check_taint_not  $&, "\$& from /(\\W)/";
+    check_taint_not  $`, "\t\$`";
+    check_taint_not  $', "\t\$'";
+    check_taint_not  $+, "\t\$+";
+    check_taint_not  $1, "\t\$1";
+    check_taint_not  $2, "\t\$2";
 
-    /(\s)/;	# taint $&, $`, $', $+, $1.
-    check_taint_not	$&;
-    check_taint_not	$`;
-    check_taint_not	$';
-    check_taint_not	$+;
-    check_taint_not	$1;
-    check_taint_not  $2;
+    /(.)/;	# untaint $&, $`, $', $+, $1.
+    check_taint_not  $&, "\$& from /(.)/";
+    check_taint_not  $`, "\t\$`";
+    check_taint_not  $', "\t\$'";
+    check_taint_not  $+, "\t\$+";
+    check_taint_not  $1, "\t\$1";
+    check_taint_not  $2, "\t\$2";
 
-    /(\S)/;	# taint $&, $`, $', $+, $1.
-    check_taint_not	$&;
-    check_taint_not	$`;
-    check_taint_not	$';
-    check_taint_not	$+;
-    check_taint_not	$1;
-    check_taint_not  $2;
+    /(\s)/;
+    check_taint_not  $&, "\$& from /(\\s)/";
+    check_taint_not  $`, "\t\$`";
+    check_taint_not  $', "\t\$'";
+    check_taint_not  $+, "\t\$+";
+    check_taint_not  $1, "\t\$1";
+    check_taint_not  $2, "\t\$2";
+
+    /(.)/;	# untaint $&, $`, $', $+, $1.
+    check_taint_not  $&, "\$& from /(.)/";
+
+    /(\S)/;
+    check_taint_not  $&, "\$& from /(\\S)/";
+    check_taint_not  $`, "\t\$`";
+    check_taint_not  $', "\t\$'";
+    check_taint_not  $+, "\t\$+";
+    check_taint_not  $1, "\t\$1";
+    check_taint_not  $2, "\t\$2";
+
+    /(.)/;	# untaint $&, $`, $', $+, $1.
+    check_taint_not  $&, "\$& from /(.)/";
+
+    "0" =~ /(\d)/;
+    check_taint_not  $&, "\$& from /(\\d)/";
+    check_taint_not  $`, "\t\$`";
+    check_taint_not  $', "\t\$'";
+    check_taint_not  $+, "\t\$+";
+    check_taint_not  $1, "\t\$1";
+    check_taint_not  $2, "\t\$2";
+
+    /(.)/;	# untaint $&, $`, $', $+, $1.
+    check_taint_not  $&, "\$& from /(.)/";
+
+    /(\D)/;
+    check_taint_not  $&, "\$& from /(\\D)/";
+    check_taint_not  $`, "\t\$`";
+    check_taint_not  $', "\t\$'";
+    check_taint_not  $+, "\t\$+";
+    check_taint_not  $1, "\t\$1";
+    check_taint_not  $2, "\t\$2";
+
+    /(.)/;	# untaint $&, $`, $', $+, $1.
+    check_taint_not  $&, "\$& from /(.)/";
+
+    /([[:alnum:]])/;
+    check_taint_not  $&, "\$& from /([[:alnum:]])/";
+    check_taint_not  $`, "\t\$`";
+    check_taint_not  $', "\t\$'";
+    check_taint_not  $+, "\t\$+";
+    check_taint_not  $1, "\t\$1";
+    check_taint_not  $2, "\t\$2";
+
+    /(.)/;	# untaint $&, $`, $', $+, $1.
+    check_taint_not  $&, "\$& from /(.)/";
+
+    /([[:^alnum:]])/;
+    check_taint_not  $&, "\$& from /([[:^alnum:]])/";
+    check_taint_not  $`, "\t\$`";
+    check_taint_not  $', "\t\$'";
+    check_taint_not  $+, "\t\$+";
+    check_taint_not  $1, "\t\$1";
+    check_taint_not  $2, "\t\$2";
+
+    "a" =~ /(a)|(\w)/;
+    check_taint_not  $&, "\$& from /(a)|(\\w)/";
+    check_taint_not  $`, "\t\$`";
+    check_taint_not  $', "\t\$'";
+    check_taint_not  $+, "\t\$+";
+    check_taint_not  $1, "\t\$1";
+    ok($1 eq 'a', ("\t" x 5) . "\$1 is 'a'");
+    ok(! defined $2, ("\t" x 5) . "\$2 is undefined");
+    check_taint_not  $2, "\t\$2";
+    check_taint_not  $3, "\t\$3";
+
+    /(.)/;	# untaint $&, $`, $', $+, $1.
+    check_taint_not  $&, "\$& from /(.)/";
+
+    "\N{CYRILLIC SMALL LETTER A}" =~ /(\N{CYRILLIC CAPITAL LETTER A})/i;
+    check_taint_not      $&, "\$& from /(\\N{CYRILLIC CAPITAL LETTER A})/i";
+    check_taint_not      $`, "\t\$`";
+    check_taint_not      $', "\t\$'";
+    check_taint_not      $+, "\t\$+";
+    check_taint_not      $1, "\t\$1";
+    ok($1 eq "\N{CYRILLIC SMALL LETTER A}", ("\t" x 4) . "\t\$1 is 'small cyrillic a'");
+    check_taint_not      $2, "\t\$2";
+
+    /(.)/;	# untaint $&, $`, $', $+, $1.
+    check_taint_not  $&, "\$& from /./";
+
+    "(\N{KELVIN SIGN})" =~ /(\N{KELVIN SIGN})/i;
+    check_taint_not  $&, "\$& from /(\\N{KELVIN SIGN})/i";
+    check_taint_not  $`, "\t\$`";
+    check_taint_not  $', "\t\$'";
+    check_taint_not  $+, "\t\$+";
+    check_taint_not  $1, "\t\$1";
+    check_taint_not      $2, "\t\$2";
+
+    /(.)/;	# untaint $&, $`, $', $+, $1.
+    check_taint_not  $&, "\$& from /(.)/";
+
+    "a:" =~ /(.)\b(.)/;
+    check_taint_not  $&, "\$& from /(.)\\b(.)/";
+    check_taint_not  $`, "\t\$`";
+    check_taint_not  $', "\t\$'";
+    check_taint_not  $+, "\t\$+";
+    check_taint_not  $1, "\t\$1";
+    check_taint_not  $2, "\t\$2";
+    check_taint_not  $3, "\t\$3";
+
+    /(.)/;	# untaint $&, $`, $', $+, $1.
+    check_taint_not  $&, "\$& from /./";
+
+    "aa" =~ /(.)\B(.)/;
+    check_taint_not  $&, "\$& from /(.)\\B(.)/";
+    check_taint_not  $`, "\t\$`";
+    check_taint_not  $', "\t\$'";
+    check_taint_not  $+, "\t\$+";
+    check_taint_not  $1, "\t\$1";
+    check_taint_not  $2, "\t\$2";
+    check_taint_not  $3, "\t\$3";
+
+    /(.)/;	# untaint $&, $`, $', $+, $1.
+    check_taint_not  $&, "\$& from /./";
+
+    "aaa" =~ /(.).(\1)/i;	# notaint because not locale dependent
+    check_taint_not      $&, "\$ & from /(.).(\\1)/";
+    check_taint_not      $`, "\t\$`";
+    check_taint_not      $', "\t\$'";
+    check_taint_not      $+, "\t\$+";
+    check_taint_not      $1, "\t\$1";
+    check_taint_not      $2, "\t\$2";
+    check_taint_not      $3, "\t\$3";
+
+    /(.)/;	# untaint $&, $`, $', $+, $1.
+    check_taint_not  $&, "\$ & from /./";
 
     $_ = $a;	# untaint $_
 
-    check_taint_not  $_;
+    check_taint_not  $_, 'untainting $_ works';
 
-    /(b)/;		# this must not taint
-    check_taint_not  $&;
-    check_taint_not  $`;
-    check_taint_not  $';
-    check_taint_not  $+;
-    check_taint_not  $1;
-    check_taint_not  $2;
-
-    $_ = $a;	# untaint $_
-
-    check_taint_not  $_;
-
-    $b = uc($a);	# taint $b
-    s/(.+)/$b/;	# this must taint only the $_
-
-    check_taint_not	$_;
-    check_taint_not  $&;
-    check_taint_not  $`;
-    check_taint_not  $';
-    check_taint_not  $+;
-    check_taint_not  $1;
-    check_taint_not  $2;
+    /(b)/;
+    check_taint_not  $&, "\$ & from /(b)/";
+    check_taint_not  $`, "\t\$`";
+    check_taint_not  $', "\t\$'";
+    check_taint_not  $+, "\t\$+";
+    check_taint_not  $1, "\t\$1";
+    check_taint_not  $2, "\t\$2";
 
     $_ = $a;	# untaint $_
 
-    s/(.+)/b/;	# this must not taint
-    check_taint_not  $_;
-    check_taint_not  $&;
-    check_taint_not  $`;
-    check_taint_not  $';
-    check_taint_not  $+;
-    check_taint_not  $1;
-    check_taint_not  $2;
+    check_taint_not  $_, 'untainting $_ works';
+
+    s/(.+)/b/;
+    check_taint_not  $_, '$_ (wasn\'t tainted) from s/(.+)/b/';
+    check_taint_not  $&, "\t\$&";
+    check_taint_not  $`, "\t\$`";
+    check_taint_not  $', "\t\$'";
+    check_taint_not  $+, "\t\$+";
+    check_taint_not  $1, "\t\$1";
+    check_taint_not  $2, "\t\$2";
 
     $b = $a;	# untaint $b
 
     ($b = $a) =~ s/\w/$&/;
-    check_taint_not	$b;	# $b should be tainted.
-    check_taint_not  $a;	# $a should be not.
+    check_taint_not     $b, '$b from ($b = $a) =~ s/\w/$&/';
+    check_taint_not  $a, '$a from ($b = $a) =~ s/\w/$&/';
 
     $_ = $a;	# untaint $_
 
-    s/(\w)/\l$1/;	# this must taint
-    check_taint_not	$_;
-    check_taint_not	$&;
-    check_taint_not	$`;
-    check_taint_not	$';
-    check_taint_not	$+;
-    check_taint_not	$1;
-    check_taint_not  $2;
+    s/(\w)/\l$1/;
+    check_taint_not     $_, '$_ (wasn\'t tainted) from s/(\w)/\l$1/,';	# this must taint
+    check_taint_not     $&, "\t\$&";
+    check_taint_not     $`, "\t\$`";
+    check_taint_not     $', "\t\$'";
+    check_taint_not     $+, "\t\$+";
+    check_taint_not     $1, "\t\$1";
+    check_taint_not  $2, "\t\$2";
 
     $_ = $a;	# untaint $_
 
-    s/(\w)/\L$1/;	# this must taint
-    check_taint_not	$_;
-    check_taint_not	$&;
-    check_taint_not	$`;
-    check_taint_not	$';
-    check_taint_not	$+;
-    check_taint_not	$1;
-    check_taint_not  $2;
+    s/(\w)/\L$1/;
+    check_taint_not     $_, '$_ (wasn\'t tainted) from s/(\w)/\L$1/,';
+    check_taint_not     $&, "\t\$&";
+    check_taint_not     $`, "\t\$`";
+    check_taint_not     $', "\t\$'";
+    check_taint_not     $+, "\t\$+";
+    check_taint_not     $1, "\t\$1";
+    check_taint_not  $2, "\t\$2";
 
     $_ = $a;	# untaint $_
 
-    s/(\w)/\u$1/;	# this must taint
-    check_taint_not	$_;
-    check_taint_not	$&;
-    check_taint_not	$`;
-    check_taint_not	$';
-    check_taint_not	$+;
-    check_taint_not	$1;
-    check_taint_not  $2;
+    s/(\w)/\u$1/;
+    check_taint_not     $_, '$_ (wasn\'t tainted) from s/(\w)/\u$1/';
+    check_taint_not     $&, "\t\$&";
+    check_taint_not     $`, "\t\$`";
+    check_taint_not     $', "\t\$'";
+    check_taint_not     $+, "\t\$+";
+    check_taint_not     $1, "\t\$1";
+    check_taint_not  $2, "\t\$2";
 
     $_ = $a;	# untaint $_
 
-    s/(\w)/\U$1/;	# this must taint
-    check_taint_not	$_;
-    check_taint_not	$&;
-    check_taint_not	$`;
-    check_taint_not	$';
-    check_taint_not	$+;
-    check_taint_not	$1;
-    check_taint_not  $2;
+    s/(\w)/\U$1/;
+    check_taint_not     $_, '$_ (wasn\'t tainted) from s/(\w)/\U$1/';
+    check_taint_not     $&, "\t\$&";
+    check_taint_not     $`, "\t\$`";
+    check_taint_not     $', "\t\$'";
+    check_taint_not     $+, "\t\$+";
+    check_taint_not     $1, "\t\$1";
+    check_taint_not  $2, "\t\$2";
 
     # After all this tainting $a should be cool.
 
-    check_taint_not  $a;
+    check_taint_not  $a, '$a still not tainted';
 
     "a" =~ /([a-z])/;
     check_taint_not $1, '"a" =~ /([a-z])/';
     "foo.bar_baz" =~ /^(.*)[._](.*?)$/;  # Bug 120675
     check_taint_not $1, '"foo.bar_baz" =~ /^(.*)[._](.*?)$/';
+
 }
 
 # Here are in scope of 'use locale'
