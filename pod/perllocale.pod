@@ -53,36 +53,36 @@ note here):
 
 =over
 
-=item Category LC_NUMERIC: Numeric formatting
+=item Category C<LC_NUMERIC>: Numeric formatting
 
 This indicates how numbers should be formatted for human readability,
 for example the character used as the decimal point.
 
-=item Category LC_MONETARY: Formatting of monetary amounts
+=item Category C<LC_MONETARY>: Formatting of monetary amounts
 
 =for comment
 The nbsp below makes this look better (though not great)
 
 E<160>
 
-=item Category LC_TIME: Date/Time formatting
+=item Category C<LC_TIME>: Date/Time formatting
 
 =for comment
 The nbsp below makes this look better (though not great)
 
 E<160>
 
-=item Category LC_MESSAGES: Error and other messages
+=item Category C<LC_MESSAGES>: Error and other messages
 
 This is used by Perl itself only for accessing operating system error
 messages via L<$!|perlvar/$ERRNO> and L<$^E|perlvar/$EXTENDED_OS_ERROR>.
 
-=item Category LC_COLLATE: Collation
+=item Category C<LC_COLLATE>: Collation
 
 This indicates the ordering of letters for comparison and sorting.
 In Latin alphabets, for example, "b", generally follows "a".
 
-=item Category LC_CTYPE: Character Types
+=item Category C<LC_CTYPE>: Character Types
 
 This indicates, for example if a character is an uppercase letter.
 
@@ -334,7 +334,7 @@ perform a char-by-char comparison, and only returns I<0> (equal) if the
 operands are char-for-char identical.  If you really want to know whether
 two strings--which C<eq> and C<cmp> may consider different--are equal
 as far as collation in the locale is concerned, see the discussion in
-L<Category LC_COLLATE: Collation>.
+L<Category C<LC_COLLATE>: Collation>.
 
 =item *
 
@@ -395,13 +395,13 @@ hints on the naming of locales: not all systems name locales as in the
 example.
 
 If no second argument is provided and the category is something other
-than LC_ALL, the function returns a string naming the current locale
+than C<LC_ALL>, the function returns a string naming the current locale
 for the category.  You can use this value as the second argument in a
 subsequent call to C<setlocale()>, B<but> on some platforms the string
 is opaque, not something that most people would be able to decipher as
 to what locale it means.
 
-If no second argument is provided and the category is LC_ALL, the
+If no second argument is provided and the category is C<LC_ALL>, the
 result is implementation-dependent.  It may be a string of
 concatenated locale names (separator also implementation-dependent)
 or a single locale name.  Please consult your L<setlocale(3)> man page for
@@ -499,7 +499,7 @@ You may encounter the following warning message at Perl startup:
 	    are supported and installed on your system.
 	perl: warning: Falling back to the standard locale ("C").
 
-This means that your locale settings had LC_ALL set to "En_US" and
+This means that your locale settings had C<LC_ALL> set to "En_US" and
 LANG exists but has no value.  Perl tried to believe you but could not.
 Instead, Perl gave up and fell back to the "C" locale, the default locale
 that is supposed to work no matter what.  (On Windows, it first tries
@@ -531,21 +531,21 @@ The two quickest fixes are either to render Perl silent about any
 locale inconsistencies or to run Perl under the default locale "C".
 
 Perl's moaning about locale problems can be silenced by setting the
-environment variable PERL_BADLANG to a zero value, for example "0".
+environment variable C<PERL_BADLANG> to a zero value, for example "0".
 This method really just sweeps the problem under the carpet: you tell
 Perl to shut up even when Perl sees that something is wrong.  Do not
 be surprised if later something locale-dependent misbehaves.
 
 Perl can be run under the "C" locale by setting the environment
-variable LC_ALL to "C".  This method is perhaps a bit more civilized
-than the PERL_BADLANG approach, but setting LC_ALL (or
+variable C<LC_ALL> to "C".  This method is perhaps a bit more civilized
+than the C<PERL_BADLANG> approach, but setting C<LC_ALL> (or
 other locale variables) may affect other programs as well, not just
 Perl.  In particular, external programs run from within Perl will see
 these changes.  If you make the new settings permanent (read on), all
 programs you run see the changes.  See L<"ENVIRONMENT"> for
 the full list of relevant environment variables and L<USING LOCALES>
 for their effects in Perl.  Effects in other programs are
-easily deducible.  For example, the variable LC_COLLATE may well affect
+easily deducible.  For example, the variable C<LC_COLLATE> may well affect
 your B<sort> program (or whatever the program that arranges "records"
 alphabetically in your system is called).
 
@@ -714,7 +714,7 @@ The following subsections describe basic locale categories.  Beyond these,
 some combination categories allow manipulation of more than one
 basic category at a time.  See L<"ENVIRONMENT"> for a discussion of these.
 
-=head2 Category LC_COLLATE: Collation
+=head2 Category C<LC_COLLATE>: Collation
 
 In the scope of S<C<use locale>> (but not a
 C<use locale ':not_characters'>), Perl looks to the C<LC_COLLATE>
@@ -801,7 +801,7 @@ needed: C<strcoll()> and C<strxfrm()> are POSIX functions
 which use the standard system-supplied C<libc> functions that
 always obey the current C<LC_COLLATE> locale.
 
-=head2 Category LC_CTYPE: Character Types
+=head2 Category C<LC_CTYPE>: Character Types
 
 In the scope of S<C<use locale>> (but not a
 C<use locale ':not_characters'>), Perl obeys the C<LC_CTYPE> locale
@@ -889,7 +889,7 @@ so on. (See L<The localeconv function> if you care about these things.)
 
 See also L<I18N::Langinfo> and C<RADIXCHAR>.
 
-=head2 Category LC_MONETARY: Formatting of monetary amounts
+=head2 Category C<LC_MONETARY>: Formatting of monetary amounts
 
 The C standard defines the C<LC_MONETARY> category, but not a function
 that is affected by its contents.  (Those with experience of standards
@@ -904,7 +904,7 @@ to crack.
 
 See also L<I18N::Langinfo> and C<CRNCYSTR>.
 
-=head2 LC_TIME
+=head2 C<LC_TIME>
 
 Output produced by C<POSIX::strftime()>, which builds a formatted
 human-readable date/time string, is affected by the current C<LC_TIME>
@@ -957,7 +957,7 @@ characters such as "E<gt>" and "|" are alphanumeric.
 =item *
 
 String interpolation with case-mapping, as in, say, C<$dest =
-"C:\U$name.$ext">, may produce dangerous results if a bogus LC_CTYPE
+"C:\U$name.$ext">, may produce dangerous results if a bogus C<LC_CTYPE>
 case-mapping table is in effect.
 
 =item *
@@ -1147,7 +1147,7 @@ variable is absent, or has a value that does not evaluate to integer
 zero--that is, "0" or ""-- Perl will complain about locale setting
 failures.
 
-B<NOTE>: PERL_BADLANG only gives you a way to hide the warning message.
+B<NOTE>: C<PERL_BADLANG> only gives you a way to hide the warning message.
 The message tells about some problem in your system's locale support,
 and you should investigate what the problem is.
 
@@ -1166,12 +1166,12 @@ be.
 
 =over 12
 
-=item LC_ALL
+=item C<LC_ALL>
 
 C<LC_ALL> is the "override-all" locale environment variable. If
 set, it overrides all the rest of the locale environment variables.
 
-=item LANGUAGE
+=item C<LANGUAGE>
 
 B<NOTE>: C<LANGUAGE> is a GNU extension, it affects you only if you
 are using the GNU libc.  This is the case if you are using e.g. Linux.
@@ -1185,47 +1185,47 @@ priority than C<LC_ALL>.  Moreover, it's not a single value but
 instead a "path" (":"-separated list) of I<languages> (not locales).
 See the GNU C<gettext> library documentation for more information.
 
-=item LC_CTYPE
+=item C<LC_CTYPE>.
 
 In the absence of C<LC_ALL>, C<LC_CTYPE> chooses the character type
 locale.  In the absence of both C<LC_ALL> and C<LC_CTYPE>, C<LANG>
 chooses the character type locale.
 
-=item LC_COLLATE
+=item C<LC_COLLATE>
 
 In the absence of C<LC_ALL>, C<LC_COLLATE> chooses the collation
 (sorting) locale.  In the absence of both C<LC_ALL> and C<LC_COLLATE>,
 C<LANG> chooses the collation locale.
 
-=item LC_MONETARY
+=item C<LC_MONETARY>
 
 In the absence of C<LC_ALL>, C<LC_MONETARY> chooses the monetary
 formatting locale.  In the absence of both C<LC_ALL> and C<LC_MONETARY>,
 C<LANG> chooses the monetary formatting locale.
 
-=item LC_NUMERIC
+=item C<LC_NUMERIC>
 
 In the absence of C<LC_ALL>, C<LC_NUMERIC> chooses the numeric format
 locale.  In the absence of both C<LC_ALL> and C<LC_NUMERIC>, C<LANG>
 chooses the numeric format.
 
-=item LC_TIME
+=item C<LC_TIME>
 
 In the absence of C<LC_ALL>, C<LC_TIME> chooses the date and time
 formatting locale.  In the absence of both C<LC_ALL> and C<LC_TIME>,
 C<LANG> chooses the date and time formatting locale.
 
-=item LANG
+=item C<LANG>
 
 C<LANG> is the "catch-all" locale environment variable. If it is set, it
 is used as the last resort after the overall C<LC_ALL> and the
-category-specific C<LC_...>.
+category-specific C<LC_I<foo>>
 
 =back
 
 =head2 Examples
 
-The LC_NUMERIC controls the numeric output:
+The C<LC_NUMERIC> controls the numeric output:
 
    use locale;
    use POSIX qw(locale_h); # Imports setlocale() and the LC_ constants.
@@ -1406,7 +1406,7 @@ simply because both
 they and Perl store characters that take up multiple bytes the same way.
 However, some, if not most, C library implementations may not process
 the characters in the upper half of the Latin-1 range (128 - 255)
-properly under LC_CTYPE.  To see if a character is a particular type
+properly under C<LC_CTYPE>.  To see if a character is a particular type
 under a locale, Perl uses the functions like C<isalnum()>.  Your C
 library may not work for UTF-8 locales with those functions, instead
 only working under the newer wide library functions like C<iswalnum()>.
