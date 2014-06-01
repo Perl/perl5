@@ -652,7 +652,7 @@ Also, "\t" is a C<HORIZONTAL TABULATION> character so that:
     $is_ascii  = ord("\t") == 9;
     $is_ebcdic = ord("\t") == 5;
 
-To distinguish EBCDIC code pages try looking at one or more of
+To distinguish between EBCDIC code pages try looking at one or more of
 the characters that differ between them.  For example:
 
     $is_ebcdic_37   = "\n" eq chr(37);
@@ -1318,14 +1318,6 @@ or z/OS.
 XXX.
 
 =head1 BUGS
-
-This pod document contains literal Latin 1 characters and may encounter
-translation difficulties.  In particular one popular nroff implementation
-was known to strip accented characters to their unaccented counterparts
-while attempting to view this document through the B<pod2man> program
-(for example, you may see a plain C<y> rather than one with a diaeresis
-as in E<yuml>).  Another nroff truncated the resultant manpage at
-the first occurrence of 8 bit characters.
 
 Not all shells will allow multiple C<-e> string arguments to perl to
 be concatenated together properly as recipes 0, 2, 4, 5, and 6 might
