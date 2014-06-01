@@ -2673,14 +2673,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	This symbol, if defined, indicates that this system uses
  *	EBCDIC encoding.
  */
-/* BOOTSTRAP_CHARSET:
- *	This symbol, if defined, indicates that this system needs
- *	converting various files to the native character set before
- *	bringing up perl on a system that has a non-ASCII character
- *	set and no working perl.
- */
 #$ebcdic	EBCDIC 		/**/
-#$bootstrap_charset	BOOTSTRAP_CHARSET	/**/
 
 /* Fpos_t:
  *	This symbol holds the type used to declare file positions in libc.

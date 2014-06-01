@@ -164,10 +164,6 @@ bison (Loc.U):
 	full pathname (if any) of the bison program.  After Configure runs,
 	the value is reset to a plain "bison" and is not useful.
 
-bootstrap_charset (ebcdic.U):
-	This variable conditionally defines BOOTSTRAP_CHARSET if
-	this system uses non-ASCII encoding.
-
 byacc (Loc.U):
 	This variable is used internally by Configure to determine the
 	full pathname (if any) of the byacc program.  After Configure runs,
@@ -2945,11 +2941,12 @@ hint (Oldconfig.U):
 	Gives the type of hints used for previous answers. May be one of
 	"default", "recommended" or "previous".
 
-hostperl (Cross.U):
-	This variable contains the path to a miniperl binary that can be
-	run on the host OS when cross-compiling.  Useful and available only
-	during Perl build.
-	Empty string '' if not cross-compiling.
+hostcat (nis.U):
+	This variable contains a command that produces the text of the
+	/etc/hosts file.  This is normally "cat /etc/hosts", but can be
+	"ypcat hosts" when NIS is used.
+	On some systems, such as os390, there may be no equivalent
+	command, in which case this variable is unset.
 
 hostgenerate (Cross.U):
 	This variable contains the path to a generate_uudmap binary that
@@ -2963,12 +2960,11 @@ hostosname (Cross.U):
 	when running build code in the host.
 	Empty string '' if not cross-compiling.
 
-hostcat (nis.U):
-	This variable contains a command that produces the text of the
-	/etc/hosts file.  This is normally "cat /etc/hosts", but can be
-	"ypcat hosts" when NIS is used.
-	On some systems, such as os390, there may be no equivalent
-	command, in which case this variable is unset.
+hostperl (Cross.U):
+	This variable contains the path to a miniperl binary that can be
+	run on the host OS when cross-compiling.  Useful and available only
+	during Perl build.
+	Empty string '' if not cross-compiling.
 
 html1dir (html1dir.U):
 	This variable contains the name of the directory in which html
@@ -4938,7 +4934,7 @@ targetport (Cross.U):
 	This variable contains the number of a network port to be used to
 	connect to the host in targethost, if unset defaults to 22 for ssh.
 
-targetsh (Cross.U):
+targetsh (sh.U):
 	If cross-compiling, this variable contains the location of sh on the
 	target system.
 	If not, this will be the same as $sh.
