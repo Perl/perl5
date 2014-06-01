@@ -336,6 +336,11 @@ my_inet_aton(register const char *cp, struct in_addr *addr)
  */
 #undef interface
 
+/* STRUCT_OFFSET should have come from from perl.h, but if not,
+ * roll our own (not using offsetof() since that is C99). */
+#ifndef STRUCT_OFFSET
+#  define STRUCT_OFFSET(s,m)  (Size_t)(&(((s *)0)->m))
+#endif
 
 static int
 not_here(const char *s)
@@ -643,10 +648,10 @@ sockaddr_family(sockaddr)
 	STRLEN sockaddr_len;
 	char *sockaddr_pv = SvPVbyte(sockaddr, sockaddr_len);
 	CODE:
-	if (sockaddr_len < offsetof(struct sockaddr, sa_data))
+	if (sockaddr_len < STRUCT_OFFSET(struct sockaddr, sa_data))
 		croak("Bad arg length for %s, length is %"UVuf", should be at least %"UVuf,
 		      "Socket::sockaddr_family", (UV)sockaddr_len,
-		      (UV)offsetof(struct sockaddr, sa_data));
+		      (UV)STRUCT_OFFSET(struct sockaddr, sa_data));
 	ST(0) = sv_2mortal(newSViv(((struct sockaddr*)sockaddr_pv)->sa_family));
 
 void
@@ -757,7 +762,7 @@ unpack_sockaddr_un(sun_sv)
 	{
 #   if defined(HAS_SOCKADDR_SA_LEN)
 		/* On *BSD sun_path not always ends with a '\0' */
-		int maxlen = addr.sun_len - 2; /* should use offsetof(struct sockaddr_un, sun_path) instead of 2 */
+		int maxlen = addr.sun_len - 2; /* should use STRUCT_OFFSET(struct sockaddr_un, sun_path) instead of 2 */
 		if (maxlen > (int)sizeof(addr.sun_path))
 		  maxlen = (int)sizeof(addr.sun_path);
 #   else
@@ -817,7 +822,7 @@ unpack_sockaddr_in(sin_sv)
 	char *	sin = SvPVbyte(sin_sv,sockaddrlen);
 	if (sockaddrlen != sizeof(addr)) {
 	    croak("Bad arg length for %s, length is %"UVuf", should be %"UVuf,
-		  "Socket::unpack_sockaddr_in", sockaddrlen, sizeof(addr));
+		  "Socket::unpack_sockaddr_in", (UV)sockaddrlen, (UV)sizeof(addr));
 	}
 	Copy(sin, &addr, sizeof(addr), char);
 	if (addr.sin_family != AF_INET) {

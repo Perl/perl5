@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 30;
+use Test::More tests => 31;
 
 use Socket qw(:addrinfo AF_INET SOCK_STREAM IPPROTO_TCP unpack_sockaddr_in inet_aton);
 
@@ -98,6 +98,13 @@ SKIP: {
 	    diag( "  addr=" . join( ", ", map { sprintf '0x%02x', ord $_ } split m//, $r->{addr} ) );
 	}
     }
+}
+
+# Numeric addresses with AI_NUMERICHOST should pass (RT95758)
+{
+    ( $err, @res ) = getaddrinfo( "127.0.0.1", 80, { flags => AI_NUMERICHOST } );
+    ok( $err == 0, "\$err == 0 for 127.0.0.1/80/flags=AI_NUMERICHOST" ) or
+	diag( "\$err is $err" );
 }
 
 # Now check that names with AI_NUMERICHOST fail
