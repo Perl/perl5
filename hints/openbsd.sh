@@ -44,7 +44,7 @@ esac
 #
 ARCH=`arch | sed 's/^OpenBSD.//'`
 case "${ARCH}-${osvers}" in
-alpha-2.[0-8]|mips-2.[0-8]|powerpc-2.[0-7]|m88k-*|hppa-*|vax-*)
+alpha-2.[0-8]|mips-2.[0-8]|powerpc-2.[0-7]|m88k-[2-4].*|m88k-5.[0-2]|hppa-3.[0-5]|vax-*)
 	test -z "$usedl" && usedl=$undef
 	;;
 *)
@@ -93,12 +93,12 @@ d_suidsafe=$define
 
 # cc is gcc so we can do better than -O
 # Allow a command-line override, such as -Doptimize=-g
-case ${ARCH} in
-m88k)
-   optimize='-O0'
+case "${ARCH}-${osvers}" in
+hppa-3.3|m88k-2.*|m88k-3.[0-3])
+   test "$optimize" || optimize='-O0'
    ;;
-hppa)
-   optimize='-O0'
+m88k-3.4)
+   test "$optimize" || optimize='-O1'
    ;;
 *)
    test "$optimize" || optimize='-O2'
@@ -123,7 +123,7 @@ $define|true|[yY]*)
 	esac
 	case "$osvers" in
 	[012].*|3.[0-6])
-        	# Broken at least up to OpenBSD 3.6, we'll see about 3.7
+        	# Broken up to OpenBSD 3.6, fixed in OpenBSD 3.7
 		d_getservbyname_r=$undef ;;
 	esac
 esac
