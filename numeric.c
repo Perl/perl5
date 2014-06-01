@@ -528,13 +528,18 @@ Perl_grok_numeric_radix(pTHX_ const char **sp, const char *send)
 
     PERL_ARGS_ASSERT_GROK_NUMERIC_RADIX;
 
-    if (PL_numeric_radix_sv && IN_SOME_LOCALE_FORM) {
+    if (IN_SOME_LOCALE_FORM) {
+        DECLARE_STORE_LC_NUMERIC_SET_TO_NEEDED();
+        if (PL_numeric_radix_sv) {
         STRLEN len;
         const char * const radix = SvPV(PL_numeric_radix_sv, len);
         if (*sp + len <= send && memEQ(*sp, radix, len)) {
             *sp += len;
+            RESTORE_LC_NUMERIC();
             return TRUE; 
         }
+        }
+        RESTORE_LC_NUMERIC();
     }
     /* always try "." if numeric radix didn't match because
      * we may have data from different locales mixed */
