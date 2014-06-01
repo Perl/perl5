@@ -2638,14 +2638,7 @@
  *	This symbol, if defined, indicates that this system uses
  *	EBCDIC encoding.
  */
-/* BOOTSTRAP_CHARSET:
- *	This symbol, if defined, indicates that this system needs
- *	converting various files to the native character set before
- *	bringing up perl on a system that has a non-ASCII character
- *	set and no working perl.
- */
 /*#define	EBCDIC 		/ **/
-/*#define	BOOTSTRAP_CHARSET	/ **/
 
 /* Fpos_t:
  *	This symbol holds the type used to declare file positions in libc.
@@ -4718,6 +4711,6 @@
 #endif
 
 /* Generated from:
- * 7557e985de18f71e80f627226b454bc8eaf20477dcf0c45b5b2c51ec792f5c89 config_h.SH
+ * 0c557b295352d0f05dcf3397478783eb763c947618aef92c2a0f86ba2540da40 config_h.SH
  * a61a38253be27e9d2b4ff63b9f34ef9c6870a03037609f2c89840ad890a7aef8 uconfig.sh
  * ex: set ro: */
