@@ -5363,11 +5363,12 @@ typedef struct am_table_short AMTS;
 
 /* The next two macros set unconditionally.  These should be rarely used, and
  * only after being sure that this is what is needed */
-#define SET_NUMERIC_STANDARD() \
-	set_numeric_standard();
+#define SET_NUMERIC_STANDARD()                                              \
+	STMT_START { if (! PL_numeric_standard) set_numeric_standard();     \
+                                                                 } STMT_END
 
-#define SET_NUMERIC_LOCAL() \
-	set_numeric_local();
+#define SET_NUMERIC_LOCAL()                                                 \
+	STMT_START { if (! PL_numeric_local) set_numeric_local(); } STMT_END
 
 /* The rest of these LC_NUMERIC macros toggle to one or the other state, with
  * the RESTORE_foo ones called to switch back, but only if need be */
