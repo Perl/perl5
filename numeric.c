@@ -531,13 +531,13 @@ Perl_grok_numeric_radix(pTHX_ const char **sp, const char *send)
     if (IN_SOME_LOCALE_FORM) {
         DECLARE_STORE_LC_NUMERIC_SET_TO_NEEDED();
         if (PL_numeric_radix_sv) {
-        STRLEN len;
-        const char * const radix = SvPV(PL_numeric_radix_sv, len);
-        if (*sp + len <= send && memEQ(*sp, radix, len)) {
-            *sp += len;
-            RESTORE_LC_NUMERIC();
-            return TRUE; 
-        }
+            STRLEN len;
+            const char * const radix = SvPV(PL_numeric_radix_sv, len);
+            if (*sp + len <= send && memEQ(*sp, radix, len)) {
+                *sp += len;
+                RESTORE_LC_NUMERIC();
+                return TRUE;
+            }
         }
         RESTORE_LC_NUMERIC();
     }
