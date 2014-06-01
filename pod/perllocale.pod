@@ -230,19 +230,17 @@ locale isn't exposed to Perl space.
 
 XS modules for all categories but C<LC_NUMERIC> get the underlying
 locale, and hence any C library functions they call will use that
-underlying locale.  Perl always initializes C<LC_NUMERIC> to C<"C">
+underlying locale.
+
+Perl tries to keep C<LC_NUMERIC> set to C<"C">
 because too many modules are unable to cope with the decimal point in a
 floating point number not being a dot (it's a comma in many locales).
-But note that these modules are vulnerable because C<LC_NUMERIC>
-currently can be changed at any time by a call to the C C<set_locale()>
-by XS code or by something XS code calls, or by C<POSIX::setlocale()> by
-Perl code.  This is true also for the Perl-provided lite wrappers for XS
-modules to use some C library C<printf> functions:
-C<Gconvert>,
-L<my_sprintf|perlapi/my_sprintf>,
-L<my_snprintf|perlapi/my_snprintf>,
-and
-L<my_vsnprintf|perlapi/my_vsnprintf>.
+Macros are provided for XS code to temporarily change to use the
+underlying locale when necessary; however buggy code that fails to
+restore when done can break other XS code (but not Perl code) in this
+regard.  The API for these macros has not yet been nailed down, but will be
+during the course of v5.21.  Send email to
+L<mailto:perl5-porters@perl.org> for guidance.
 
 =back
 

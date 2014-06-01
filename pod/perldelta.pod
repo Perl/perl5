@@ -469,6 +469,21 @@ well.
 
 The deprecated variable C<PL_sv_objcount> has been removed.
 
+=item *
+
+Perl now tries to keep the locale category C<LC_NUMERIC> set to "C"
+except around operations that need it to be set to the program's
+underlying locale.  This protects the many XS modules that cannot cope
+with the decimal radix character not being a dot.  Prior to this
+release, Perl initialized this category to "C", but a call to
+C<POSIX::setlocale()> would change it.  Now such a call will change the
+underlying locale of the C<LC_NUMERIC> category for the program, but the
+locale exposed to XS code will remain "C".  There is an API under
+development for those relatively few modules that need to use the
+underlying locale.  This API will be nailed down during the course of
+developing v5.21.  Send email to L<mailto:perl5-porters@perl.org> for
+guidance.
+
 =back
 
 =head1 Selected Bug Fixes

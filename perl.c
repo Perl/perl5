@@ -256,13 +256,6 @@ perl_construct(pTHXx)
 
     init_i18nl10n(1);
 
-    /* Keep LC_NUMERIC in the C locale for backwards compatibility for XS
-     * modules.  (Core operations that need the underlying locale change to it
-     * temporarily).  An explicit call to POSIX::setlocale() still will cause
-     * XS module failures, but this is how it has been for a long time [perl
-     * #121317] */
-    SET_NUMERIC_STANDARD();
-
 #if defined(LOCAL_PATCH_COUNT)
     PL_localpatches = local_patches;	/* For possible -v */
 #endif

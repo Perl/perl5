@@ -4796,3 +4796,18 @@ test_toTITLE_utf8(SV * p)
         RETVAL = av;
     OUTPUT:
         RETVAL
+
+SV *
+test_Gconvert(SV * number, SV * num_digits)
+    PREINIT:
+        char buffer[100];
+        int len;
+    CODE:
+        len = (int) SvIV(num_digits);
+        if (len > 99) croak("Too long a number for test_Gconvert");
+        PERL_UNUSED_RESULT(Gconvert(SvNV(number), len,
+                 0,    /* No trailing zeroes */
+                 buffer));
+        RETVAL = newSVpv(buffer, 0);
+    OUTPUT:
+        RETVAL
