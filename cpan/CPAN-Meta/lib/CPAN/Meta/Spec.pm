@@ -7,7 +7,7 @@ use 5.006;
 use strict;
 use warnings;
 package CPAN::Meta::Spec;
-our $VERSION = '2.141170'; # VERSION
+our $VERSION = '2.141520'; # VERSION
 
 1;
 
@@ -28,7 +28,7 @@ CPAN::Meta::Spec - specification for CPAN distribution metadata
 
 =head1 VERSION
 
-version 2.141170
+version 2.141520
 
 =head1 SYNOPSIS
 
@@ -696,7 +696,8 @@ have a Map with the following valid subkeys:
 
 This field is required.  It must contain a Unix-style relative file path
 from the root of the distribution directory to a file that contains or
-generates the package.
+generates the package.  It may be given as C<META.yml> or C<META.json>
+to claim a package for indexing without needing a C<*.pm>.
 
 =item version
 

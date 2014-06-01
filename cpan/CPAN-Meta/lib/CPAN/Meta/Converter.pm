@@ -2,7 +2,7 @@ use 5.006;
 use strict;
 use warnings;
 package CPAN::Meta::Converter;
-our $VERSION = '2.141170'; # VERSION
+our $VERSION = '2.141520'; # VERSION
 
 #pod =head1 SYNOPSIS
 #pod
@@ -1475,7 +1475,7 @@ CPAN::Meta::Converter - Convert CPAN distribution metadata structures
 
 =head1 VERSION
 
-version 2.141170
+version 2.141520
 
 =head1 SYNOPSIS
 
