@@ -5,8 +5,8 @@
  *
  * Copyright (C) 2003-2014 Mark Shelor, All Rights Reserved
  *
- * Version: 5.88
- * Mon Mar 17 08:46:10 MST 2014
+ * Version: 5.92
+ * Sun Jun  1 00:15:44 MST 2014
  *
  */
 
@@ -14,7 +14,6 @@
 
 #undef sha_384_512
 #undef W64
-#undef strto64
 #undef sha512
 #undef H0384
 #undef H0512
@@ -92,17 +91,6 @@ C64(0x22312194fc2bf72c), C64(0x9f555fa3c84c64c2), C64(0x2393b86b6f53b151),
 C64(0x963877195940eabd), C64(0x96283ee2a88effe3), C64(0xbe5e1e2553863992),
 C64(0x2b0199fc2c85b8aa), C64(0x0eb72ddc81c52ca2)
 };
-
-/* strto64: converts hex string to a 64-bit word */
-static W64 strto64(char *s)
-{
-	char str[2] = {0, 0};
-	W64 u = C64(0);
-
-	while (isxdigit(str[0] = *s++))
-		u = (u << 4) + strtoul(str, NULL, 16);
-	return(u);
-}
 
 static void sha512(SHA *s, unsigned char *block) /* SHA-384/512 transform */
 {

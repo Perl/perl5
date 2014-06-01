@@ -5,8 +5,8 @@
  *
  * Copyright (C) 2003-2014 Mark Shelor, All Rights Reserved
  *
- * Version: 5.88
- * Mon Mar 17 08:46:10 MST 2014
+ * Version: 5.92
+ * Sun Jun  1 00:15:44 MST 2014
  *
  */
 
@@ -79,10 +79,10 @@
 
 #if defined(BYTEORDER) && (BYTEORDER & 0xffff) == 0x4321
 	#if defined(SHA32_ALIGNED)
-		#define SHA32_SCHED(W, b)	memcpy(W, b, 64)
+		#define SHA32_SCHED(W, b)	Copy(b, W, 64, char)
 	#endif
 	#if defined(SHA64) && defined(SHA64_ALIGNED)
-		#define SHA64_SCHED(W, b)	memcpy(W, b, 128)
+		#define SHA64_SCHED(W, b)	Copy(b, W, 128, char)
 	#endif
 #endif
 
@@ -101,10 +101,6 @@
 			(SHA64) b[4] << 24 | (SHA64) b[5] << 16 |	\
 			(SHA64) b[6] <<  8 | (SHA64) b[7]; }
 #endif
-
-#define SHA_new		New
-#define SHA_newz	Newz
-#define SHA_free	Safefree
 
 #define SHA1		1
 #define SHA224		224
@@ -156,9 +152,9 @@ typedef struct SHA {
 } SHA;
 
 typedef struct {
-	SHA *ksha;
-	SHA *isha;
-	SHA *osha;
+	SHA isha;
+	SHA osha;
+	int digestlen;
 	unsigned char key[SHA_MAX_BLOCK_BITS/8];
 } HMAC;
 
