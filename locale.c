@@ -201,7 +201,7 @@ Perl_set_numeric_standard(pTHX)
      * should use the macros like SET_NUMERIC_STANDARD() in perl.h instead of
      * calling this directly. */
 
-    if (! PL_numeric_standard) {
+    if (_NOT_IN_NUMERIC_STANDARD) {
 	setlocale(LC_NUMERIC, "C");
 	PL_numeric_standard = TRUE;
 	PL_numeric_local = FALSE;
@@ -223,7 +223,7 @@ Perl_set_numeric_local(pTHX)
      * already there.  Probably should use the macros like SET_NUMERIC_LOCAL()
      * in perl.h instead of calling this directly. */
 
-    if (! PL_numeric_local) {
+    if (_NOT_IN_NUMERIC_LOCAL) {
 	setlocale(LC_NUMERIC, PL_numeric_name);
 	PL_numeric_standard = FALSE;
 	PL_numeric_local = TRUE;

@@ -5335,18 +5335,21 @@ typedef struct am_table_short AMTS;
  * RESTORE_LC_NUMERIC() in all cases restores the locale to what it was before
  * these were called */
 
+#define _NOT_IN_NUMERIC_STANDARD (! PL_numeric_standard)
+#define _NOT_IN_NUMERIC_LOCAL    (! PL_numeric_local)
+
 #define DECLARATION_FOR_STORE_LC_NUMERIC_SET_TO_NEEDED                       \
     void (*_restore_LC_NUMERIC_function)(pTHX) = NULL;
 
 #define STORE_LC_NUMERIC_SET_TO_NEEDED()                                     \
     if (IN_SOME_LOCALE_FORM) {                                               \
-        if (! PL_numeric_local) {                                            \
-            SET_NUMERIC_LOCAL();                                             \
+        if (_NOT_IN_NUMERIC_LOCAL) {                                         \
+            set_numeric_local();                                             \
             _restore_LC_NUMERIC_function = &Perl_set_numeric_standard;       \
         }                                                                    \
     }                                                                        \
     else {                                                                   \
-        if (! PL_numeric_standard) {                                         \
+        if (_NOT_IN_NUMERIC_STANDARD) {                                      \
             SET_NUMERIC_STANDARD();                                          \
             _restore_LC_NUMERIC_function = &Perl_set_numeric_local;          \
         }                                                                    \
@@ -5364,35 +5367,37 @@ typedef struct am_table_short AMTS;
 /* The next two macros set unconditionally.  These should be rarely used, and
  * only after being sure that this is what is needed */
 #define SET_NUMERIC_STANDARD()                                              \
-	STMT_START { if (! PL_numeric_standard) set_numeric_standard();     \
+	STMT_START { if (_NOT_IN_NUMERIC_STANDARD) set_numeric_standard();  \
                                                                  } STMT_END
 
 #define SET_NUMERIC_LOCAL()                                                 \
-	STMT_START { if (! PL_numeric_local) set_numeric_local(); } STMT_END
+	STMT_START { if (_NOT_IN_NUMERIC_LOCAL)                             \
+                                            set_numeric_local(); } STMT_END
 
 /* The rest of these LC_NUMERIC macros toggle to one or the other state, with
  * the RESTORE_foo ones called to switch back, but only if need be */
-#define STORE_NUMERIC_LOCAL_SET_STANDARD() \
-	bool was_local = PL_numeric_local; \
-	if (was_local) SET_NUMERIC_STANDARD();
+#define STORE_NUMERIC_LOCAL_SET_STANDARD()          \
+	bool _was_local = _NOT_IN_NUMERIC_STANDARD; \
+	if (_was_local) set_numeric_standard();
 
 /* Doesn't change to underlying locale unless within the scope of some form of
  * 'use locale'.  This is the usual desired behavior. */
-#define STORE_NUMERIC_STANDARD_SET_LOCAL() \
-	bool was_standard = PL_numeric_standard && IN_SOME_LOCALE_FORM; \
-	if (was_standard) SET_NUMERIC_LOCAL();
+#define STORE_NUMERIC_STANDARD_SET_LOCAL()              \
+	bool _was_standard = _NOT_IN_NUMERIC_LOCAL      \
+                            && IN_LC(LC_NUMERIC);       \
+	if (_was_standard) set_numeric_local();
 
 /* Rarely, we want to change to the underlying locale even outside of 'use
  * locale'.  This is principally in the POSIX:: functions */
-#define STORE_NUMERIC_STANDARD_FORCE_LOCAL() \
-	bool was_standard = PL_numeric_standard; \
-	if (was_standard) SET_NUMERIC_LOCAL();
+#define STORE_NUMERIC_STANDARD_FORCE_LOCAL()            \
+	bool _was_standard = _NOT_IN_NUMERIC_LOCAL;     \
+	if (_was_standard) set_numeric_local();
 
 #define RESTORE_NUMERIC_LOCAL() \
-	if (was_local) SET_NUMERIC_LOCAL();
+	if (_was_local) set_numeric_local();
 
 #define RESTORE_NUMERIC_STANDARD() \
-	if (was_standard) SET_NUMERIC_STANDARD();
+	if (_was_standard) SET_NUMERIC_STANDARD();
 
 #define Atof				my_atof
 
