@@ -837,7 +837,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 			(void)SvREFCNT_inc(sv);
 			av_push(keys, sv);
 		    }
-# ifdef USE_LOCALE_NUMERIC
+# ifdef USE_LOCALE_COLLATE
 #       ifdef IN_LC     /* Use this if available */
                     if (IN_LC(LC_COLLATE))
 #       else
