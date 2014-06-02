@@ -5303,8 +5303,6 @@ typedef struct am_table_short AMTS;
 #define PERLDB_SAVESRC_NOSUBS	(PL_perldb && (PL_perldb & PERLDBf_SAVESRC_NOSUBS))
 #define PERLDB_SAVESRC_INVALID	(PL_perldb && (PL_perldb & PERLDBf_SAVESRC_INVALID))
 
-#ifdef USE_LOCALE_NUMERIC
-
 /* Returns TRUE if the plain locale pragma without a parameter is in effect
  */
 #define IN_LOCALE_RUNTIME	cBOOL(CopHINTS_get(PL_curcop) & HINT_LOCALE)
@@ -5322,6 +5320,8 @@ typedef struct am_table_short AMTS;
 #define IN_SOME_LOCALE_FORM \
 	(IN_PERL_COMPILETIME ? IN_SOME_LOCALE_FORM_COMPILETIME \
 	                     : IN_SOME_LOCALE_FORM_RUNTIME)
+
+#ifdef USE_LOCALE_NUMERIC
 
 /* These macros are for toggling between the underlying locale (LOCAL) and the
  * C locale. */
