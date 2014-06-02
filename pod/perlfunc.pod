@@ -3337,9 +3337,9 @@ What gets returned depends on several factors:
 The results follow ASCII rules.  Only the characters C<A-Z> change,
 to C<a-z> respectively.
 
-=item Otherwise, if C<use locale> (but not C<use locale ':not_characters'>) is in effect:
+=item Otherwise, if C<use locale> for C<LC_CTYPE> is in effect:
 
-Respects current LC_CTYPE locale for code points < 256; and uses Unicode
+Respects current C<LC_CTYPE> locale for code points < 256; and uses Unicode
 rules for the remaining code points (this last can only happen if
 the UTF8 flag is also set).  See L<perllocale>.
 
@@ -5240,10 +5240,11 @@ LIST are actually parsed as a single list.  The first argument
 of the list will be interpreted as the C<printf> format.  This
 means that C<printf(@_)> will use C<$_[0]> as the format.  See
 L<sprintf|/sprintf FORMAT, LIST> for an
-explanation of the format argument.  If C<use locale> (including
-C<use locale ':not_characters'>) is in effect and
+explanation of the format argument.  If C<use locale> for C<LC_NUMERIC>
+Look for this throught pod
+is in effect and
 POSIX::setlocale() has been called, the character used for the decimal
-separator in formatted floating-point numbers is affected by the LC_NUMERIC
+separator in formatted floating-point numbers is affected by the C<LC_NUMERIC>
 locale setting.  See L<perllocale> and L<POSIX>.
 
 For historical reasons, if you omit the list, C<$_> is used as the format;
@@ -7373,7 +7374,7 @@ index, the C<$> may need escaping:
 If C<use locale> (including C<use locale 'not_characters'>) is in effect
 and POSIX::setlocale() has been called,
 the character used for the decimal separator in formatted floating-point
-numbers is affected by the LC_NUMERIC locale.  See L<perllocale>
+numbers is affected by the C<LC_NUMERIC> locale.  See L<perllocale>
 and L<POSIX>.
 
 =item sqrt EXPR

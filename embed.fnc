@@ -1102,6 +1102,7 @@ ApOM	|void	|new_numeric	|NULLOK const char* newcoll
 Ap	|void	|set_numeric_local
 Ap	|void	|set_numeric_radix
 Ap	|void	|set_numeric_standard
+ApM	|bool	|_is_in_locale_category|const bool compiling|const int category
 ApdO	|void	|require_pv	|NN const char* pv
 Apd	|void	|pack_cat	|NN SV *cat|NN const char *pat|NN const char *patend \
 				|NN SV **beglist|NN SV **endlist|NN SV ***next_in_list|U32 flags

@@ -1727,7 +1727,7 @@ PP(pp_sort)
 		        ? ( ( ( priv & OPpSORT_INTEGER) || all_SIVs)
 			    ? ( overloading ? S_amagic_i_ncmp : S_sv_i_ncmp)
 			    : ( overloading ? S_amagic_ncmp : S_sv_ncmp ) )
-			: ( IN_LOCALE_RUNTIME
+			: ( IN_LC_RUNTIME(LC_COLLATE)
 			    ? ( overloading
 				? (SVCOMPARE_t)S_amagic_cmp_locale
 				: (SVCOMPARE_t)sv_cmp_locale_static)

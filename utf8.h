@@ -422,8 +422,11 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
 #define IN_BYTES (CopHINTS_get(PL_curcop) & HINT_BYTES)
 #define DO_UTF8(sv) (SvUTF8(sv) && !IN_BYTES)
 #define IN_UNI_8_BIT \
-	    (CopHINTS_get(PL_curcop) & (HINT_UNI_8_BIT|HINT_LOCALE_NOT_CHARS) \
-	     && ! IN_LOCALE_RUNTIME && ! IN_BYTES)
+	    (((CopHINTS_get(PL_curcop) & (HINT_UNI_8_BIT))                       \
+               || (CopHINTS_get(PL_curcop) & HINT_LOCALE_PARTIAL                 \
+                   /* -1 below is for :not_characters */                         \
+                   && _is_in_locale_category(FALSE, -1)))                        \
+              && ! IN_BYTES)
 
 
 #define UTF8_ALLOW_EMPTY		0x0001	/* Allow a zero length string */

@@ -41,6 +41,12 @@ U+2028 LINE SEPARATOR,
 and
 U+2029 PARAGRAPH SEPARATOR.
 
+=head2 S<C<use locale>> can restrict which locale categories are affected
+
+It is now possible to pass a parameter to S<C<use locale>> to specify
+a subset of locale categories to be locale-aware, with the remaining
+ones unaffected.  See L<perllocale/The "use locale" pragma> for details.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security

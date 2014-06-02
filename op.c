@@ -3523,14 +3523,20 @@ S_fold_constants(pTHX_ OP *o)
     case OP_UC:
     case OP_LC:
     case OP_FC:
+	if (IN_LC_COMPILETIME(LC_CTYPE))
+	    goto nope;
+        break;
     case OP_SLT:
     case OP_SGT:
     case OP_SLE:
     case OP_SGE:
     case OP_SCMP:
+	if (IN_LC_COMPILETIME(LC_COLLATE))
+	    goto nope;
+        break;
     case OP_SPRINTF:
 	/* XXX what about the numeric ops? */
-	if (IN_LOCALE_COMPILETIME)
+	if (IN_LC_COMPILETIME(LC_NUMERIC))
 	    goto nope;
 	break;
     case OP_PACK:
@@ -4731,7 +4737,7 @@ Perl_newPMOP(pTHX_ I32 type, I32 flags)
 
     if (PL_hints & HINT_RE_TAINT)
 	pmop->op_pmflags |= PMf_RETAINT;
-    if (IN_LOCALE_COMPILETIME) {
+    if (IN_LC_COMPILETIME(LC_CTYPE)) {
 	set_regex_charset(&(pmop->op_pmflags), REGEX_LOCALE_CHARSET);
     }
     else if (IN_UNI_8_BIT) {

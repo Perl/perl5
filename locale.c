@@ -1385,6 +1385,27 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
 
 #endif
 
+
+bool
+Perl__is_in_locale_category(pTHX_ const bool compiling, const int category)
+{
+    /* Internal function which returns if we are in the scope of a pragma that
+     * enables the locale category 'category'.  'compiling' should indicate if
+     * this is during the compilation phase (TRUE) or not (FALSE). */
+
+    const COP * const cop = (compiling) ? &PL_compiling : PL_curcop;
+
+    SV *categories = cop_hints_fetch_pvs(cop, "locale", 0);
+    if (! categories || categories == &PL_sv_placeholder) {
+        return FALSE;
+    }
+
+    /* The pseudo-category 'not_characters' is -1, so just add 1 to each to get
+     * a valid unsigned */
+    assert(category >= -1);
+    return cBOOL(SvUV(categories) & (1U << (category + 1)));
+}
+
 /*
  * Local variables:
  * c-indentation-style: bsd

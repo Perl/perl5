@@ -1186,7 +1186,7 @@ L<a section devoted to this function|perllocale/The setlocale function>.
 The discussion here is merely a summary reference for C<setlocale()>.
 Note that Perl itself is almost entirely unaffected by the locale
 except within the scope of S<C<"use locale">>.  (Exceptions are listed
-in L<perllocale/Not within the scope of any "use locale" variant>.)
+in L<perllocale/Not within the scope of "use locale">.)
 
 The following examples assume
 

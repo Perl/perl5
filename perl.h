@@ -4794,12 +4794,18 @@ typedef enum {
    However, bitops store HINT_INTEGER in their op_private.
 
     NOTE: The typical module using these has the bit value hard-coded, so don't
-    blindly change the values of these */
+    blindly change the values of these.
+
+   If we run out of bits, the 2 locale ones could be combined.  The PARTIAL one
+   is for "use locale 'FOO'" which excludes some categories.  It requires going
+   to %^H to find out which are in and which are out.  This could be extended
+   for the normal case of a plain HINT_LOCALE, so that %^H would be used for
+   any locale form. */
 #define HINT_INTEGER		0x00000001 /* integer pragma */
 #define HINT_STRICT_REFS	0x00000002 /* strict pragma */
 #define HINT_LOCALE		0x00000004 /* locale pragma */
 #define HINT_BYTES		0x00000008 /* bytes pragma */
-#define HINT_LOCALE_NOT_CHARS	0x00000010 /* locale ':not_characters' pragma */
+#define HINT_LOCALE_PARTIAL	0x00000010 /* locale, but a subset of categories */
 
 #define HINT_EXPLICIT_STRICT_REFS	0x00000020 /* strict.pm */
 #define HINT_EXPLICIT_STRICT_SUBS	0x00000040 /* strict.pm */
@@ -5303,23 +5309,34 @@ typedef struct am_table_short AMTS;
 #define PERLDB_SAVESRC_NOSUBS	(PL_perldb && (PL_perldb & PERLDBf_SAVESRC_NOSUBS))
 #define PERLDB_SAVESRC_INVALID	(PL_perldb && (PL_perldb & PERLDBf_SAVESRC_INVALID))
 
+/* These locale things are all subject to change */
 /* Returns TRUE if the plain locale pragma without a parameter is in effect
  */
 #define IN_LOCALE_RUNTIME	cBOOL(CopHINTS_get(PL_curcop) & HINT_LOCALE)
 
 /* Returns TRUE if either form of the locale pragma is in effect */
 #define IN_SOME_LOCALE_FORM_RUNTIME   \
-           cBOOL(CopHINTS_get(PL_curcop) & (HINT_LOCALE|HINT_LOCALE_NOT_CHARS))
+           cBOOL(CopHINTS_get(PL_curcop) & (HINT_LOCALE|HINT_LOCALE_PARTIAL))
 
 #define IN_LOCALE_COMPILETIME	cBOOL(PL_hints & HINT_LOCALE)
 #define IN_SOME_LOCALE_FORM_COMPILETIME \
-                          cBOOL(PL_hints & (HINT_LOCALE|HINT_LOCALE_NOT_CHARS))
+                          cBOOL(PL_hints & (HINT_LOCALE|HINT_LOCALE_PARTIAL))
 
 #define IN_LOCALE \
 	(IN_PERL_COMPILETIME ? IN_LOCALE_COMPILETIME : IN_LOCALE_RUNTIME)
 #define IN_SOME_LOCALE_FORM \
 	(IN_PERL_COMPILETIME ? IN_SOME_LOCALE_FORM_COMPILETIME \
 	                     : IN_SOME_LOCALE_FORM_RUNTIME)
+
+#define IN_LC_ALL_COMPILETIME   IN_LOCALE_COMPILETIME
+#define IN_LC_ALL_RUNTIME       IN_LOCALE_RUNTIME
+
+#define IN_LC_PARTIAL_COMPILETIME   cBOOL(PL_hints & HINT_LOCALE_PARTIAL)
+#define IN_LC_PARTIAL_RUNTIME       cBOOL(CopHINTS_get(PL_curcop) & HINT_LOCALE_PARTIAL)
+
+#define IN_LC_COMPILETIME(category)     (IN_LC_ALL_COMPILETIME || (IN_LC_PARTIAL_COMPILETIME && _is_in_locale_category(TRUE, (category))))
+#define IN_LC_RUNTIME(category)         (IN_LC_ALL_RUNTIME || (IN_LC_PARTIAL_RUNTIME && _is_in_locale_category(FALSE, (category))))
+#define IN_LC(category)                 (IN_LC_COMPILETIME(category) || IN_LC_RUNTIME(category))
 
 #ifdef USE_LOCALE_NUMERIC
 
@@ -5345,7 +5362,7 @@ typedef struct am_table_short AMTS;
     void (*_restore_LC_NUMERIC_function)(pTHX) = NULL;
 
 #define STORE_LC_NUMERIC_SET_TO_NEEDED()                                     \
-    if (IN_SOME_LOCALE_FORM) {                                               \
+    if (IN_LC(LC_NUMERIC)) {                                                 \
         if (_NOT_IN_NUMERIC_LOCAL) {                                         \
             set_numeric_local();                                             \
             _restore_LC_NUMERIC_function = &Perl_set_numeric_standard;       \

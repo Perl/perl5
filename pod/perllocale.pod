@@ -91,7 +91,7 @@ This indicates, for example if a character is an uppercase letter.
 Some platforms have other categories, dealing with such things as
 measurement units and paper sizes.  None of these are used directly by
 Perl, but outside operations that Perl interacts with may use
-these.  See L</Not within the scope of any "use locale" variant> below.
+these.  See L</Not within the scope of "use locale"> below.
 
 =back
 
@@ -140,7 +140,7 @@ C<define>.
 
 If you want a Perl application to process and present your data
 according to a particular locale, the application code should include
-the S<C<use locale>> pragma (see L<The use locale pragma>) where
+the S<C<use locale>> pragma (see L<The "use locale" pragma>) where
 appropriate, and B<at least one> of the following must be true:
 
 =over 4
@@ -160,24 +160,12 @@ L<The setlocale function>.
 
 =head1 USING LOCALES
 
-=head2 The use locale pragma
+=head2 The C<"use locale"> pragma
 
 By default, Perl itself ignores the current locale.  The S<C<use locale>>
 pragma tells Perl to use the current locale for some operations.
-Starting in v5.16, there is an optional parameter to this pragma:
-
-    use locale ':not_characters';
-
-This parameter allows better mixing of locales and Unicode (less useful
-in v5.20 and later), and is
-described fully in L</Unicode and UTF-8>, but briefly, it tells Perl to
-not use the character portions of the locale definition, that is
-the C<LC_CTYPE> and C<LC_COLLATE> categories.  Instead it will use the
-native character set (extended by Unicode).  When using this parameter,
-you are responsible for getting the external character set translated
-into the native/Unicode one (which it already will be if it is one of
-the increasingly popular UTF-8 locales).  There are convenient ways of
-doing this, as described in L</Unicode and UTF-8>.
+Starting in v5.16, there are optional parameters to this pragma,
+described below, which restrict which operations are affected by it.
 
 The current locale is set at execution time by
 L<setlocale()|/The setlocale function> described below.  If that function
@@ -194,9 +182,10 @@ The operations that are affected by locale are:
 
 =over 4
 
-=item B<Not within the scope of any C<"use locale"> variant>
+=item B<Not within the scope of C<"use locale">>
 
-Only operations originating outside Perl should be affected, as follows:
+Only certain operations originating outside Perl should be affected, as
+follows:
 
 =over 4
 
@@ -252,7 +241,7 @@ E<160>
 =item B<Lingering effects of C<S<use locale>>>
 
 Certain Perl operations that are set-up within the scope of a
-C<use locale> variant retain that effect even outside the scope.
+C<use locale> retain that effect even outside the scope.
 These include:
 
 =over 4
@@ -262,7 +251,7 @@ These include:
 The output format of a L<write()|perlfunc/write> is determined by an
 earlier format declaration (L<perlfunc/format>), so whether or not the
 output is affected by locale is determined by if the C<format()> is
-within the scope of a C<use locale> variant, not whether the C<write()>
+within the scope of a C<use locale>, not whether the C<write()>
 is.
 
 =item *
@@ -278,15 +267,16 @@ behavior, not if the matches are done within such a scope or not.
 =for comment
 The nbsp below makes this look better (though not great)
 
+
 E<160>
 
-=item B<Under C<"use locale ':not_characters';">>
+=item B<Under C<"use locale";>>
 
 =over 4
 
 =item *
 
-All the non-Perl operations.
+All the above operations
 
 =item *
 
@@ -302,21 +292,6 @@ C<printf()>,
 C<say()>,
 and
 C<sprintf()>.
-
-=back
-
-=for comment
-The nbsp below makes this look better (though not great)
-
-E<160>
-
-=item B<Under just plain C<"use locale";>>
-
-=over 4
-
-=item *
-
-All the above operations
 
 =item *
 
@@ -352,6 +327,66 @@ the outer scope's rules at the end of the inner scope.
 The string result of any operation that uses locale
 information is tainted, as it is possible for a locale to be
 untrustworthy.  See L<"SECURITY">.
+
+Starting in Perl v5.16 in a very limited way, and more generally in
+v5.22, you can restrict which category or categories are enabled by this
+particular instance of the pragma by adding parameters to it.  For
+example,
+
+ use locale qw(:ctype :numeric);
+
+enables locale awareness within its scope of only those operations
+(listed above) that are affected by C<LC_CTYPE> and C<LC_NUMERIC>.
+
+The possible categories are: C<:collate>, C<:ctype>, C<:messages>,
+C<:monetary>, C<:numeric>, C<:time>, and the pseudo category
+C<:characters> (described below).
+
+Thus you can say
+
+ use locale ':messages';
+
+and only L<$!|perlvar/$ERRNO> and L<$^E|perlvar/$EXTENDED_OS_ERROR>
+will be locale aware.  Everything else is unaffected.
+
+Since Perl doesn't currently do anything with the C<LC_MONETARY>
+category, specifying C<:monetary> does effectively nothing.  Some
+systems have other categories, such as C<LC_PAPER_SIZE>, but Perl
+also doesn't know anything about them, and there is no way to specify
+them in this pragma's arguments.
+
+You can also easily say to use all categories but one, by either, for
+example,
+
+ use locale ':!ctype';
+ use locale ':not_ctype';
+
+both of which mean to enable locale awarness of all categories but
+C<LC_CTYPE>.  Only one category argument may be specified in a
+S<C<use locale>> if it is of the negated form.
+
+Prior to v5.22 only one form of the pragma with arguments is available:
+
+ use locale ':not_characters';
+
+(and you have to say C<not_>; you can't use the bang C<!> form).  This
+pseudo category is a shorthand for specifying both C<:collate> and
+C<:ctype>.  Hence, in the negated form, it is nearly the same thing as
+saying
+
+ use locale qw(:messages :monetary :numeric :time);
+
+We use the term "nearly", because C<:not_characters> also turns on
+S<C<use feature 'unicode_strings'>> within its scope.  This form is
+less useful in v5.20 and later, and is described fully in
+L</Unicode and UTF-8>, but briefly, it tells Perl to not use the
+character portions of the locale definition, that is the C<LC_CTYPE> and
+C<LC_COLLATE> categories.  Instead it will use the native character set
+(extended by Unicode).  When using this parameter, you are responsible
+for getting the external character set translated into the
+native/Unicode one (which it already will be if it is one of the
+increasingly popular UTF-8 locales).  There are convenient ways of doing
+this, as described in L</Unicode and UTF-8>.
 
 =head2 The setlocale function
 
@@ -419,8 +454,8 @@ return to the default that was in force when Perl started up: changes
 to the environment made by the application after startup may or may not
 be noticed, depending on your system's C library.
 
-Note that Perl ignores the current C<LC_CTYPE> and C<LC_COLLATE> locales
-within the scope of a C<use locale ':not_characters'>.
+Note that when a form of C<use locale> that doesn't include all
+categories is specified, Perl ignores the excluded categories.
 
 If C<set_locale()> fails for some reason (for example, an attempt to set
 to a locale unknown to the system), the locale for the category is not
@@ -720,8 +755,8 @@ basic category at a time.  See L<"ENVIRONMENT"> for a discussion of these.
 
 =head2 Category C<LC_COLLATE>: Collation
 
-In the scope of S<C<use locale>> (but not a
-C<use locale ':not_characters'>), Perl looks to the C<LC_COLLATE>
+In the scope of a S<C<use locale>> form that includes collation, Perl
+looks to the C<LC_COLLATE>
 environment variable to determine the application's notions on collation
 (ordering) of characters.  For example, "b" follows "a" in Latin
 alphabets, but where do "E<aacute>" and "E<aring>" belong?  And while
@@ -807,8 +842,8 @@ always obey the current C<LC_COLLATE> locale.
 
 =head2 Category C<LC_CTYPE>: Character Types
 
-In the scope of S<C<use locale>> (but not a
-C<use locale ':not_characters'>), Perl obeys the C<LC_CTYPE> locale
+In the scope of a S<C<use locale>> form that includes C<LC_CTYPE>, Perl
+obeys the C<LC_CTYPE> locale
 setting.  This controls the application's notion of which characters are
 alphabetic, numeric, punctuation, I<etc>.  This affects Perl's C<\w>
 regular expression metanotation,
@@ -866,10 +901,10 @@ should use C<\w> with the C</a> regular expression modifier.  See L<"SECURITY">.
 
 =head2 Category C<LC_NUMERIC>: Numeric Formatting
 
-After a proper C<POSIX::setlocale()> call, and within the scope of one
-of the C<use locale> variants, Perl obeys the C<LC_NUMERIC>
-locale information, which controls an application's idea of how numbers
-should be formatted for human readability.
+After a proper C<POSIX::setlocale()> call, and within the scope of
+of a C<use locale> form that includes numerics, Perl obeys the
+C<LC_NUMERIC> locale information, which controls an application's idea
+of how numbers should be formatted for human readability.
 In most implementations the only effect is to
 change the character used for the decimal point--perhaps from "."  to ",".
 The functions aren't aware of such niceties as thousands separation and
@@ -1011,8 +1046,8 @@ Scalar true/false (or less/equal/greater) result is never tainted.
 
 B<Case-mapping interpolation> (with C<\l>, C<\L>, C<\u>, C<\U>, or C<\F>)
 
-Result string containing interpolated material is tainted if
-C<use locale> (but not S<C<use locale ':not_characters'>>) is in effect.
+The result string containing interpolated material is tainted if
+a C<use locale> form that includes C<LC_CTYPE> is in effect.
 
 =item  *
 
@@ -1021,8 +1056,8 @@ B<Matching operator> (C<m//>):
 Scalar true/false result never tainted.
 
 All subpatterns, either delivered as a list-context result or as C<$1>
-I<etc>., are tainted if C<use locale> (but not
-S<C<use locale ':not_characters'>>) is in effect, and the subpattern
+I<etc>., are tainted if a C<use locale> form that includes
+C<LC_CTYPE> is in effect, and the subpattern
 regular expression contains a locale-dependent construct.  These
 constructs include C<\w> (to match an alphanumeric character), C<\W>
 (non-alphanumeric character), C<\b> and C<\B> (word-boundary and
@@ -1046,8 +1081,8 @@ The matched-pattern variables, C<$&>, C<$`> (pre-match), C<$'>
 B<Substitution operator> (C<s///>):
 
 Has the same behavior as the match operator.  Also, the left
-operand of C<=~> becomes tainted when C<use locale>
-(but not S<C<use locale ':not_characters'>>) is in effect if modified as
+operand of C<=~> becomes tainted when a C<use locale>
+form that includes C<LC_CTYPE> is in effect, if modified as
 a result of a substitution based on a regular
 expression match involving any of the things mentioned in the previous
 item, or of case-mapping, such as C<\l>, C<\L>,C<\u>, C<\U>, or C<\F>.
@@ -1064,8 +1099,8 @@ effect.
 
 B<Case-mapping functions> (C<lc()>, C<lcfirst()>, C<uc()>, C<ucfirst()>):
 
-Results are tainted if C<use locale> (but not
-S<C<use locale ':not_characters'>>) is in effect.
+Results are tainted if a C<use locale> form that includes C<LC_CTYPE> is
+in effect.
 
 =item *
 
@@ -1274,6 +1309,10 @@ something like:
 
 This prints C<2.7>.
 
+You could also exclude C<LC_NUMERIC>, if you don't need it, by
+
+ use locale ':!numeric';
+
 =head2 Backward compatibility
 
 Versions of Perl prior to 5.004 B<mostly> ignored locale information,
@@ -1282,7 +1321,7 @@ always in force, even if the program environment suggested otherwise
 (see L<The setlocale function>).  By default, Perl still behaves this
 way for backward compatibility.  If you want a Perl application to pay
 attention to locale information, you B<must> use the S<C<use locale>>
-pragma (see L<The use locale pragma>) or, in the unlikely event
+pragma (see L<The "use locale" pragma>) or, in the unlikely event
 that you want to do so for just pattern matching, the
 C</l> regular expression modifier (see L<perlre/Character set
 modifiers>) to instruct it to do so.

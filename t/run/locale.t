@@ -111,7 +111,8 @@ EOF
 	    "format() does not look at LC_NUMERIC without 'use locale'");
 
         {
-	    fresh_perl_is(<<'EOF', $difference, {},
+	    fresh_perl_is(<<'EOF', "$difference\n", {},
+use POSIX;
 use locale;
 format STDOUT =
 @.#
@@ -133,15 +134,55 @@ EOF
         }
 
         {
-	    fresh_perl_is(<<'EOF', $difference, {},
-use locale ":not_characters";
+            my $categories = ":collate :characters :collate :ctype :monetary :time";
+            fresh_perl_is(<<"EOF", "4.2", {},
+use locale qw($categories);
 format STDOUT =
 @.#
 4.179
 .
 write;
 EOF
-	    "format() looks at LC_NUMERIC with 'use locale \":not_characters\"'");
+	    "format() does not look at LC_NUMERIC with 'use locale qw($categories)'");
+        }
+
+        {
+	    fresh_perl_is(<<'EOF', $difference, {},
+use locale;
+format STDOUT =
+@.#
+4.179
+.
+write;
+EOF
+	    "format() looks at LC_NUMERIC with 'use locale'");
+        }
+
+        for my $category (qw(collate characters collate ctype monetary time)) {
+            for my $negation ("!", "not_") {
+                fresh_perl_is(<<"EOF", $difference, {},
+use locale ":$negation$category";
+format STDOUT =
+@.#
+4.179
+.
+write;
+EOF
+                "format() looks at LC_NUMERIC with 'use locale \":"
+                . "$negation$category\"'");
+            }
+        }
+
+        {
+	    fresh_perl_is(<<'EOF', $difference, {},
+use locale ":numeric";
+format STDOUT =
+@.#
+4.179
+.
+write;
+EOF
+	    "format() looks at LC_NUMERIC with 'use locale \":numeric\"'");
         }
 
         {
@@ -371,4 +412,4 @@ EOF
 
     }
 
-sub last { 21 }
+sub last { 35 }

@@ -2133,7 +2133,7 @@ PP(pp_sle)
     tryAMAGICbin_MG(amg_type, AMGf_set);
     {
       dPOPTOPssrl;
-      const int cmp = (IN_LOCALE_RUNTIME
+      const int cmp = (IN_LC_RUNTIME(LC_COLLATE)
 		 ? sv_cmp_locale_flags(left, right, 0)
 		 : sv_cmp_flags(left, right, 0));
       SETs(boolSV(cmp * multiplier < rhs));
@@ -2169,7 +2169,7 @@ PP(pp_scmp)
     tryAMAGICbin_MG(scmp_amg, 0);
     {
       dPOPTOPssrl;
-      const int cmp = (IN_LOCALE_RUNTIME
+      const int cmp = (IN_LC_RUNTIME(LC_COLLATE)
 		 ? sv_cmp_locale_flags(left, right, 0)
 		 : sv_cmp_flags(left, right, 0));
       SETi( cmp );
@@ -3506,10 +3506,10 @@ PP(pp_ucfirst)
 	doing_utf8 = TRUE;
         ulen = UTF8SKIP(s);
         if (op_type == OP_UCFIRST) {
-	    _to_utf8_title_flags(s, tmpbuf, &tculen, IN_LOCALE_RUNTIME);
+	    _to_utf8_title_flags(s, tmpbuf, &tculen, IN_LC_RUNTIME(LC_CTYPE));
 	}
         else {
-	    _to_utf8_lower_flags(s, tmpbuf, &tculen, IN_LOCALE_RUNTIME);
+	    _to_utf8_lower_flags(s, tmpbuf, &tculen, IN_LC_RUNTIME(LC_CTYPE));
 	}
 
         /* we can't do in-place if the length changes.  */
@@ -3527,11 +3527,11 @@ PP(pp_ucfirst)
 	if (op_type == OP_LCFIRST) {
 
 	    /* lower case the first letter: no trickiness for any character */
-	    *tmpbuf = (IN_LOCALE_RUNTIME) ? toLOWER_LC(*s) :
+	    *tmpbuf = (IN_LC_RUNTIME(LC_CTYPE)) ? toLOWER_LC(*s) :
 			((IN_UNI_8_BIT) ? toLOWER_LATIN1(*s) : toLOWER(*s));
 	}
 	/* is ucfirst() */
-	else if (IN_LOCALE_RUNTIME) {
+	else if (IN_LC_RUNTIME(LC_CTYPE)) {
             if (IN_UTF8_CTYPE_LOCALE) {
                 goto do_uni_rules;
             }
@@ -3683,7 +3683,7 @@ PP(pp_ucfirst)
 	    SvCUR_set(dest, need - 1);
 	}
     }
-    if (IN_LOCALE_RUNTIME) {
+    if (IN_LC_RUNTIME(LC_CTYPE)) {
         TAINT;
         SvTAINTED_on(dest);
     }
@@ -3714,7 +3714,7 @@ PP(pp_uc)
 	(SvTEMP(source) && !SvSMAGICAL(source) && SvREFCNT(source) == 1))
 	&& !SvREADONLY(source) && SvPOK(source)
 	&& !DO_UTF8(source)
-	&& ((IN_LOCALE_RUNTIME)
+	&& ((IN_LC_RUNTIME(LC_CTYPE))
             ? ! IN_UTF8_CTYPE_LOCALE
             : ! IN_UNI_8_BIT))
     {
@@ -3781,7 +3781,7 @@ PP(pp_uc)
              * and copy it to the output buffer */
 
             u = UTF8SKIP(s);
-            uv = _to_utf8_upper_flags(s, tmpbuf, &ulen, IN_LOCALE_RUNTIME);
+            uv = _to_utf8_upper_flags(s, tmpbuf, &ulen, IN_LC_RUNTIME(LC_CTYPE));
 #define GREEK_CAPITAL_LETTER_IOTA 0x0399
 #define COMBINING_GREEK_YPOGEGRAMMENI 0x0345
             if (uv == GREEK_CAPITAL_LETTER_IOTA
@@ -3824,7 +3824,7 @@ PP(pp_uc)
 	    /* Use locale casing if in locale; regular style if not treating
 	     * latin1 as having case; otherwise the latin1 casing.  Do the
 	     * whole thing in a tight loop, for speed, */
-	    if (IN_LOCALE_RUNTIME) {
+	    if (IN_LC_RUNTIME(LC_CTYPE)) {
                 if (IN_UTF8_CTYPE_LOCALE) {
                     goto do_uni_rules;
                 }
@@ -3926,7 +3926,7 @@ PP(pp_uc)
 	    SvCUR_set(dest, d - (U8*)SvPVX_const(dest));
 	}
     } /* End of isn't utf8 */
-    if (IN_LOCALE_RUNTIME) {
+    if (IN_LC_RUNTIME(LC_CTYPE)) {
         TAINT;
         SvTAINTED_on(dest);
     }
@@ -3987,7 +3987,7 @@ PP(pp_lc)
 	    const STRLEN u = UTF8SKIP(s);
 	    STRLEN ulen;
 
-	    _to_utf8_lower_flags(s, tmpbuf, &ulen, IN_LOCALE_RUNTIME);
+	    _to_utf8_lower_flags(s, tmpbuf, &ulen, IN_LC_RUNTIME(LC_CTYPE));
 
 	    /* Here is where we would do context-sensitive actions.  See the
 	     * commit message for 86510fb15 for why there isn't any */
@@ -4024,7 +4024,7 @@ PP(pp_lc)
 	    /* Use locale casing if in locale; regular style if not treating
 	     * latin1 as having case; otherwise the latin1 casing.  Do the
 	     * whole thing in a tight loop, for speed, */
-            if (IN_LOCALE_RUNTIME) {
+            if (IN_LC_RUNTIME(LC_CTYPE)) {
 		for (; s < send; d++, s++)
 		    *d = toLOWER_LC(*s);
             }
@@ -4044,7 +4044,7 @@ PP(pp_lc)
 	    SvCUR_set(dest, d - (U8*)SvPVX_const(dest));
 	}
     }
-    if (IN_LOCALE_RUNTIME) {
+    if (IN_LC_RUNTIME(LC_CTYPE)) {
         TAINT;
         SvTAINTED_on(dest);
     }
@@ -4081,7 +4081,7 @@ PP(pp_quotemeta)
 
 		    /* In locale, we quote all non-ASCII Latin1 chars.
 		     * Otherwise use the quoting rules */
-		    if (IN_LOCALE_RUNTIME
+		    if (IN_LC_RUNTIME(LC_CTYPE)
 			|| _isQUOTEMETA(TWO_BYTE_UTF8_TO_NATIVE(*s, *(s + 1))))
 		    {
 			to_quote = TRUE;
@@ -4143,7 +4143,7 @@ PP(pp_fc)
     U8 tmpbuf[UTF8_MAXBYTES_CASE + 1];
     const bool full_folding = TRUE;
     const U8 flags = ( full_folding      ? FOLD_FLAGS_FULL   : 0 )
-                   | ( IN_LOCALE_RUNTIME ? FOLD_FLAGS_LOCALE : 0 );
+                   | ( IN_LC_RUNTIME(LC_CTYPE) ? FOLD_FLAGS_LOCALE : 0 );
 
     /* This is a facsimile of pp_lc, but with a thousand bugs thanks to me.
      * You are welcome(?) -Hugmeir
@@ -4191,7 +4191,7 @@ PP(pp_fc)
         SvUTF8_on(dest);
     } /* Unflagged string */
     else if (len) {
-        if ( IN_LOCALE_RUNTIME ) { /* Under locale */
+        if ( IN_LC_RUNTIME(LC_CTYPE) ) { /* Under locale */
             if (IN_UTF8_CTYPE_LOCALE) {
                 goto do_uni_folding;
             }
@@ -4270,7 +4270,7 @@ PP(pp_fc)
     *d = '\0';
     SvCUR_set(dest, d - (U8*)SvPVX_const(dest));
 
-    if (IN_LOCALE_RUNTIME) {
+    if (IN_LC_RUNTIME(LC_CTYPE)) {
         TAINT;
         SvTAINTED_on(dest);
     }

@@ -3470,7 +3470,7 @@ PP(pp_fttext)
 #else
 	else if (*s & 128) {
 #ifdef USE_LOCALE
-	    if (IN_LOCALE_RUNTIME && isALPHA_LC(*s))
+	    if (IN_LC_RUNTIME(LC_CTYPE) && isALPHA_LC(*s))
 		continue;
 #endif
 	    /* utf8 characters don't count as odd */
