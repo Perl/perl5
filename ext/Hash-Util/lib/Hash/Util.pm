@@ -523,8 +523,9 @@ See also bucket_stats() and bucket_array().
 
 Returns a list of statistics about a hash.
 
-    my ($keys, $buckets, $used, $quality, $utilization_ratio, $collision_pct,
-        $mean, $stddev, @length_counts) = bucket_stats($hashref);
+ my ($keys, $buckets, $used, $quality, $utilization_ratio,
+        $collision_pct, $mean, $stddev, @length_counts)
+    = bucket_stats($hashref);
 
 Fields are as follows:
 
@@ -604,18 +605,18 @@ sub bucket_stats {
 Return a formatted report of the information returned by bucket_stats().
 An example report looks like this:
 
-    Keys: 50 Buckets: 33/64 Quality-Score: 1.01 (Good)
-    Utilized Buckets: 51.56% Optimal: 78.12% Keys In Collision: 34.00%
-    Chain Length - mean: 1.52 stddev: 0.66
-    Buckets 64          [0000000000000000000000000000000111111111111111111122222222222333]
-    Len   0 Pct:  48.44 [###############################]
-    Len   1 Pct:  29.69 [###################]
-    Len   2 Pct:  17.19 [###########]
-    Len   3 Pct:   4.69 [###]
-    Keys    50          [11111111111111111111111111111111122222222222222333]
-    Pos   1 Pct:  66.00 [#################################]
-    Pos   2 Pct:  28.00 [##############]
-    Pos   3 Pct:   6.00 [###]
+ Keys: 50 Buckets: 33/64 Quality-Score: 1.01 (Good)
+ Utilized Buckets: 51.56% Optimal: 78.12% Keys In Collision: 34.00%
+ Chain Length - mean: 1.52 stddev: 0.66
+ Buckets 64          [0000000000000000000000000000000111111111111111111122222222222333]
+ Len   0 Pct:  48.44 [###############################]
+ Len   1 Pct:  29.69 [###################]
+ Len   2 Pct:  17.19 [###########]
+ Len   3 Pct:   4.69 [###]
+ Keys    50          [11111111111111111111111111111111122222222222222333]
+ Pos   1 Pct:  66.00 [#################################]
+ Pos   2 Pct:  28.00 [##############]
+ Pos   3 Pct:   6.00 [###]
 
 The first set of stats gives some summary statistical information,
 including the quality score translated into "Good", "Poor" and "Bad",
