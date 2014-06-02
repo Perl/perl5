@@ -866,7 +866,7 @@ your application.  For strict matching of (mundane) ASCII letters and
 digits--for example, in command strings--locale-aware applications
 should use C<\w> with the C</a> regular expression modifier.  See L<"SECURITY">.
 
-=head2 Category LC_NUMERIC: Numeric Formatting
+=head2 Category C<LC_NUMERIC>: Numeric Formatting
 
 After a proper C<POSIX::setlocale()> call, and within the scope of one
 of the C<use locale> variants, Perl obeys the C<LC_NUMERIC>
