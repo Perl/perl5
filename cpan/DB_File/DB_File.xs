@@ -164,7 +164,7 @@
 #  ifndef DB_VERSION_MAJOR
 
 #    undef  dNOOP
-#    define dNOOP extern int Perl___notused
+#    define dNOOP extern int DB_File___notused
 
     /* Ditto for dXSARGS. */
 #    undef  dXSARGS
