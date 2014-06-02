@@ -8,10 +8,13 @@ BEGIN {
     ? require IO::Scalar && sub ($) {
       IO::Scalar->new(\$_[0]);
     }
-    : sub ($) {
+    # hide in n eval'd string so Perl::MinimumVersion doesn't clutch its pearls
+    : eval <<'EVAL'
+    sub ($) {
       open my $fh, '<', \$_[0];
       $fh
     }
+EVAL
   ;
 }
 

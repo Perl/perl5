@@ -1,6 +1,11 @@
 # -*- mode: cperl; tab-width: 8; indent-tabs-mode: nil; basic-offset: 2 -*-
 # vim:ts=8:sw=2:et:sta:sts=2
 package Module::Metadata;
+BEGIN {
+  $Module::Metadata::AUTHORITY = 'cpan:MSTROUT';
+}
+# git description: v1.000022-4-ge460e95
+$Module::Metadata::VERSION = '1.000023';
 
 # Adapted from Perl-licensed code originally distributed with
 # Module-Build by Ken Williams
@@ -11,9 +16,6 @@ package Module::Metadata;
 
 use strict;
 use warnings;
-
-our $VERSION = '1.000022';
-$VERSION = eval $VERSION;
 
 use Carp qw/croak/;
 use File::Spec;
@@ -665,7 +667,7 @@ sub _evaluate_version_line {
   local $^W;
   # Try to get the $VERSION
   eval $eval;
-  # some modules say $VERSION = $Foo::Bar::VERSION, but Foo::Bar isn't
+  # some modules say $VERSION <equal sign> $Foo::Bar::VERSION, but Foo::Bar isn't
   # installed, so we need to hunt in ./lib for it
   if ( $@ =~ /Can't locate/ && -d 'lib' ) {
     local @INC = ('lib',@INC);
