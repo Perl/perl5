@@ -4734,10 +4734,7 @@ Perl_newPMOP(pTHX_ I32 type, I32 flags)
     if (IN_LOCALE_COMPILETIME) {
 	set_regex_charset(&(pmop->op_pmflags), REGEX_LOCALE_CHARSET);
     }
-    else if ((! (PL_hints & HINT_BYTES))
-                /* Both UNI_8_BIT and locale :not_characters imply Unicode */
-	     && (PL_hints & (HINT_UNI_8_BIT|HINT_LOCALE_NOT_CHARS)))
-    {
+    else if (IN_UNI_8_BIT) {
 	set_regex_charset(&(pmop->op_pmflags), REGEX_UNICODE_CHARSET);
     }
     if (PL_hints & HINT_RE_FLAGS) {
