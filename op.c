@@ -2744,11 +2744,11 @@ S_move_proto_attr(pTHX_ OP **proto, OP **attrs, const GV * name)
             *attrs = NULL;
         }
     } else if (o->op_type == OP_LIST) {
-        OP * lasto = NULL;
+        OP * lasto;
         assert(o->op_flags & OPf_KIDS);
-        assert(cLISTOPo->op_first->op_type == OP_PUSHMARK);
-        /* Counting on the first op to hit the lasto = o line */
-        for (o = cLISTOPo->op_first; o; o=o->op_sibling) {
+        lasto = cLISTOPo->op_first;
+        assert(lasto->op_type == OP_PUSHMARK);
+        for (o = lasto->op_sibling; o; o=o->op_sibling) {
             if (o->op_type == OP_CONST) {
                 pv = SvPV(cSVOPo_sv, pvlen);
                 if (pvlen >= 10 && memEQ(pv, "prototype(", 10)) {
