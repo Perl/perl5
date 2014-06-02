@@ -845,7 +845,9 @@ d_charvspr=''
 d_vprintf=''
 d_wait4=''
 d_waitpid=''
+d_wcscmp=''
 d_wcstombs=''
+d_wcsxfrm=''
 d_wctomb=''
 d_writev=''
 dlext=''
@@ -19198,9 +19200,66 @@ eval $inlibc
 set waitpid d_waitpid
 eval $inlibc
 
+: look for wcscmp
+echo " "
+$cat >try.c <<'EOCP'
+#include <stdio.h>
+#include <wchar.h>
+int main ()
+{
+    wchar_t *s = L" ";
+    return (wcscmp (s, s) ? 1 : 0);
+    }
+EOCP
+set try
+val="$undef"
+if eval $compile; then
+    `$run ./try`
+    case "$?" in
+	0)  echo "A working wcscmp() found." >&4
+	    val="$define" ;;
+	*)  echo "wcscmp() found, but it doesn't work" >&4
+	    ;;
+	esac
+else
+    echo "wcscmp() NOT found." >&4
+    fi
+set d_wcscmp
+eval $setvar
+$rm_try
+
 : see if wcstombs exists
 set wcstombs d_wcstombs
 eval $inlibc
+
+: look for wcsxfrm
+echo " "
+$cat >try.c <<'EOCP'
+#include <errno.h>
+#include <wchar.h>
+int main ()
+{
+    wchar_t dst[4], *src = L" ";
+    errno = 0;
+    return (wcsxfrm (dst, src, 1) ? errno ? errno : 0 : 1);
+    }
+EOCP
+set try
+val="$undef"
+if eval $compile; then
+    `$run ./try`
+    case "$?" in
+	0)  echo "A working wcsxfrm() found." >&4
+	    val="$define" ;;
+	*)  echo "wcsxfrm() found, but it doesn't work" >&4
+	    ;;
+	esac
+else
+    echo "wcsxfrm() NOT found." >&4
+    fi
+set d_wcsxfrm
+eval $setvar
+$rm_try
 
 : see if wctomb exists
 set wctomb d_wctomb
@@ -23409,7 +23468,9 @@ d_vprintf='$d_vprintf'
 d_vsnprintf='$d_vsnprintf'
 d_wait4='$d_wait4'
 d_waitpid='$d_waitpid'
+d_wcscmp='$d_wcscmp'
 d_wcstombs='$d_wcstombs'
+d_wcsxfrm='$d_wcsxfrm'
 d_wctomb='$d_wctomb'
 d_writev='$d_writev'
 d_xenix='$d_xenix'

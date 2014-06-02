@@ -2503,10 +2503,20 @@ d_waitpid (d_waitpid.U):
 	This variable conditionally defines HAS_WAITPID if waitpid() is
 	available to wait for child process.
 
+d_wcscmp (d_wcscmp.U):
+	This variable conditionally defines the HAS_WCSCMP symbol if the
+	wcscmp() routine is available and can be used to compare wide
+	character strings.
+
 d_wcstombs (d_wcstombs.U):
 	This variable conditionally defines the HAS_WCSTOMBS symbol, which
 	indicates to the C program that the wcstombs() routine is available
 	to convert wide character strings to multibyte strings.
+
+d_wcsxfrm (d_wcsxfrm.U):
+	This variable conditionally defines the HAS_WCSXFRM symbol if the
+	wcsxfrm() routine is available and can be used to compare wide
+	character strings.
 
 d_wctomb (d_wctomb.U):
 	This variable conditionally defines the HAS_WCTOMB symbol, which

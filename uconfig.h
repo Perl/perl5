@@ -246,13 +246,13 @@
 
 /* HAS_MBSTOWCS:
  *	This symbol, if defined, indicates that the mbstowcs routine is
- *	available to covert a multibyte string into a wide character string.
+ *	available to convert a multibyte string into a wide character string.
  */
 /*#define	HAS_MBSTOWCS		/ **/
 
 /* HAS_MBTOWC:
  *	This symbol, if defined, indicates that the mbtowc routine is available
- *	to covert a multibyte to a wide character.
+ *	to convert a multibyte to a wide character.
  */
 /*#define HAS_MBTOWC		/ **/
 
@@ -614,7 +614,7 @@
 
 /* HAS_WCTOMB:
  *	This symbol, if defined, indicates that the wctomb routine is available
- *	to covert a wide character to a multibyte.
+ *	to convert a wide character to a multibyte.
  */
 /*#define HAS_WCTOMB		/ **/
 
@@ -4131,6 +4131,18 @@
  */
 /*#define HAS_USTAT		/ **/
 
+/* HAS_WCSCMP:
+ *	This symbol, if defined, indicates that the wcscmp routine is
+ *	available to compare two wide character strings.
+ */
+/*#define HAS_WCSCMP	/ **/
+
+/* HAS_WCSXFRM:
+ *	This symbol, if defined, indicates that the wcsxfrm routine is
+ *	available to tranform a wide character string for wcscmp().
+ */
+/*#define HAS_WCSXFRM	/ **/
+
 /* HAS_WRITEV:
  *	This symbol, if defined, indicates that the writev routine is
  *	available to do scatter writes.
@@ -4711,6 +4723,6 @@
 #endif
 
 /* Generated from:
- * 0c557b295352d0f05dcf3397478783eb763c947618aef92c2a0f86ba2540da40 config_h.SH
- * a61a38253be27e9d2b4ff63b9f34ef9c6870a03037609f2c89840ad890a7aef8 uconfig.sh
+ * 06dae33599ea14bee0e39e3b22e1f685aaae36422af2c567dc1de19203950835 config_h.SH
+ * a350679952164b71c20f5b09afd8c2ffe982e97dddffa15031edc7584b357796 uconfig.sh
  * ex: set ro: */
