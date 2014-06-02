@@ -199,10 +199,12 @@ PerlIO_intmode2str(int rawmode, char *mode, int *writing)
 	    mode[ix++] = '+';
 	}
     }
-#ifdef PERLIO_BINARY_AND_TEXT_DIFFERENT_AND_EFFECTIVE
+#if O_BINARY != 0
+    /* Unless O_BINARY is different from zero, bit-and:ing
+     * with it won't do much good. */
     if (rawmode & O_BINARY)
 	mode[ix++] = 'b';
-#endif
+# endif
     mode[ix] = '\0';
     return ptype;
 }
@@ -2529,25 +2531,42 @@ PerlIOUnix_oflags(const char *mode)
 	    oflags |= O_WRONLY;
 	break;
     }
-#ifdef PERLIO_BINARY_AND_TEXT_DIFFERENT_AND_EFFECTIVE
-    if (*mode == 'b') {
-	oflags |= O_BINARY;
+
+    /* XXX TODO: PerlIO_open() test that exercises 'rb' and 'rt'. */
+
+    /* Unless O_BINARY is different from O_TEXT, first bit-or:ing one
+     * of them in, and then bit-and-masking the other them away, won't
+     * have much of an effect. */
+    switch (*mode) {
+    case 'b':
+#if O_TEXT != O_BINARY
+        oflags |= O_BINARY;
 	oflags &= ~O_TEXT;
-	mode++;
-    }
-    else if (*mode == 't') {
+#endif
+        mode++;
+        break;
+    case 't':
+#if O_TEXT != O_BINARY
 	oflags |= O_TEXT;
 	oflags &= ~O_BINARY;
-	mode++;
-    }
-    else {
+#endif
+        mode++;
+        break;
+    default:
+#  if O_BINARY != 0
+        /* bit-or:ing with zero O_BINARY would be useless. */
 	/*
 	 * If neither "t" nor "b" was specified, open the file
 	 * in O_BINARY mode.
+         *
+         * Note that if something else than the zero byte was seen
+         * here (e.g. bogus mode "rx"), just few lines later we will
+         * set the errno and invalidate the flags.
 	 */
 	oflags |= O_BINARY;
+#  endif
+        break;
     }
-#endif
     if (*mode || oflags == -1) {
 	SETERRNO(EINVAL, LIB_INVARG);
 	oflags = -1;

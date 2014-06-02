@@ -5689,14 +5689,6 @@ int flock(int fd, int op);
     /* If you really are DOSish. */
 #      define PERLIO_USING_CRLF 1
 #   endif
-#   if O_TEXT != 0 && O_BINARY != 0
-#     if !defined(__HAIKU__)
-        /* If you have O_TEXT different from your O_BINARY and
-         * they are both not zero (being zero would make testing
-         * with bit-and interesting) and they have an effect. */
-#       define PERLIO_BINARY_AND_TEXT_DIFFERENT_AND_EFFECTIVE
-#     endif
-#   endif
 #endif
 
 #ifdef I_LIBUTIL

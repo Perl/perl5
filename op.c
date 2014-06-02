@@ -8623,7 +8623,7 @@ Perl_ck_anoncode(pTHX_ OP *o)
 static void
 S_io_hints(pTHX_ OP *o)
 {
-#ifdef PERLIO_BINARY_AND_TEXT_DIFFERENT_AND_EFFECTIVE
+#if O_BINARY != 0 || O_TEXT != 0
     HV * const table =
 	PL_hints & HINT_LOCALIZE_HH ? GvHV(PL_hintgv) : NULL;;
     if (table) {
@@ -8632,10 +8632,15 @@ S_io_hints(pTHX_ OP *o)
 	    STRLEN len = 0;
 	    const char *d = SvPV_const(*svp, len);
 	    const I32 mode = mode_from_discipline(d, len);
+            /* bit-and:ing with zero O_BINARY or O_TEXT would be useless. */
+#  if O_BINARY != 0
 	    if (mode & O_BINARY)
 		o->op_private |= OPpOPEN_IN_RAW;
-	    else if (mode & O_TEXT)
+#  endif
+#  if O_TEXT != 0
+	    if (mode & O_TEXT)
 		o->op_private |= OPpOPEN_IN_CRLF;
+#  endif
 	}
 
 	svp = hv_fetchs(table, "open_OUT", FALSE);
@@ -8643,10 +8648,15 @@ S_io_hints(pTHX_ OP *o)
 	    STRLEN len = 0;
 	    const char *d = SvPV_const(*svp, len);
 	    const I32 mode = mode_from_discipline(d, len);
+            /* bit-and:ing with zero O_BINARY or O_TEXT would be useless. */
+#  if O_BINARY != 0
 	    if (mode & O_BINARY)
 		o->op_private |= OPpOPEN_OUT_RAW;
-	    else if (mode & O_TEXT)
+#  endif
+#  if O_TEXT != 0
+	    if (mode & O_TEXT)
 		o->op_private |= OPpOPEN_OUT_CRLF;
+#  endif
 	}
     }
 #else
