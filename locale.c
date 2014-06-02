@@ -1406,6 +1406,39 @@ Perl__is_in_locale_category(pTHX_ const bool compiling, const int category)
     return cBOOL(SvUV(categories) & (1U << (category + 1)));
 }
 
+char *
+Perl_my_strerror(pTHX_ const int errnum) {
+
+    /* Uses C locale for the error text unless within scope of 'use locale' for
+     * LC_MESSAGES */
+
+#ifdef USE_LOCALE_MESSAGES
+    if (IN_LC(LC_MESSAGES)) {
+        char * save_locale = setlocale(LC_MESSAGES, NULL);
+        if (! ((*save_locale == 'C' && save_locale[1] == '\0')
+                || strEQ(save_locale, "POSIX")))
+        {
+            char *errstr;
+
+            /* The next setlocale likely will zap this, so create a copy */
+            save_locale = savepv(save_locale);
+
+            setlocale(LC_MESSAGES, "C");
+
+            /* This points to the static space in Strerror, with all its
+             * limitations */
+            errstr = Strerror(errnum);
+
+            setlocale(LC_MESSAGES, save_locale);
+            Safefree(save_locale);
+            return errstr;
+        }
+    }
+#endif
+
+    return Strerror(errnum);
+}
+
 /*
  * Local variables:
  * c-indentation-style: bsd

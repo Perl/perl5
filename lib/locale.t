@@ -1663,6 +1663,7 @@ foreach my $Locale (@Locale) {
     my $ok12;
     my $ok13;
     my $ok14;
+    my $ok14_5;
     my $ok15;
     my $ok16;
     my $ok17;
@@ -1728,7 +1729,7 @@ foreach my $Locale (@Locale) {
             $ok11 = $f == $c;
             $ok12 = abs(($f + $g) - 3.57) < 0.01;
             $ok13 = $w == 0;
-            $ok14 = $ok15 = $ok16 = 1;  # Skip for non-utf8 locales
+            $ok14 = $ok14_5 = $ok15 = $ok16 = 1;  # Skip for non-utf8 locales
         }
         {
             no locale;
@@ -1785,12 +1786,15 @@ foreach my $Locale (@Locale) {
             # such is NOT in UTF-8 (the others almost certainly will be like
             # the first)  See [perl #119499].
             $ok14 = 1;
+            $ok14_5 = 1;
             foreach my $err (keys %!) {
                 use Errno;
                 $! = eval "&Errno::$err";   # Convert to strerror() output
                 my $strerror = "$!";
                 if ("$strerror" =~ /\P{ASCII}/) {
                     $ok14 = ! utf8::is_utf8($strerror);
+                    no locale;
+                    $ok14_5 = "$!" !~ /\P{ASCII}/;
                     last;
                 }
             }
@@ -1873,6 +1877,9 @@ foreach my $Locale (@Locale) {
 
     report_result($Locale, ++$locales_test_number, $ok14);
     $test_names{$locales_test_number} = 'Verify that non-ASCII UTF-8 error messages are NOT in UTF-8';
+
+    report_result($Locale, ++$locales_test_number, $ok14_5);
+    $test_names{$locales_test_number} = '... and are ASCII outside "use locale"';
 
     report_result($Locale, ++$locales_test_number, $ok15);
     $test_names{$locales_test_number} = 'Verify that a number with a UTF-8 radix has a UTF-8 stringification';

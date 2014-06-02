@@ -5480,7 +5480,7 @@ Perl_drand48_r(perl_drand48_t *random_state)
     }
 #endif
 }
- 
+
 
 /*
  * Local variables:

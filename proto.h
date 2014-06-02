@@ -2724,6 +2724,7 @@ PERL_CALLCONV int	Perl_my_snprintf(char *buffer, const Size_t len, const char *f
 PERL_CALLCONV int	Perl_my_socketpair(int family, int type, int protocol, int fd[2]);
 /* PERL_CALLCONV I32	Perl_my_stat(pTHX); */
 PERL_CALLCONV I32	Perl_my_stat_flags(pTHX_ const U32 flags);
+PERL_CALLCONV char*	Perl_my_strerror(pTHX_ const int errnum);
 PERL_CALLCONV char *	Perl_my_strftime(pTHX_ const char *fmt, int sec, int min, int hour, int mday, int mon, int year, int wday, int yday, int isdst)
 			__attribute__format__(__strftime__,pTHX_1,0)
 			__attribute__nonnull__(pTHX_1);

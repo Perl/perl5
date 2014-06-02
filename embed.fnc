@@ -1096,6 +1096,7 @@ AmPM	|char*	|my_setlocale	|int category|NULLOK const char* locale
 #endif
 ApOM	|int	|init_i18nl10n	|int printwarn
 ApOM	|int	|init_i18nl14n	|int printwarn
+ApM	|char*	|my_strerror	|const int errnum
 ApOM	|void	|new_collate	|NULLOK const char* newcoll
 ApOM	|void	|new_ctype	|NN const char* newctype
 ApOM	|void	|new_numeric	|NULLOK const char* newcoll

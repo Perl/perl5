@@ -850,7 +850,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 #elif defined(OS2)
         if (!(_emx_env & 0x200)) {	/* Under DOS */
             sv_setnv(sv, (NV)errno);
-            sv_setpv(sv, errno ? Strerror(errno) : "");
+            sv_setpv(sv, errno ? my_strerror(errno) : "");
         } else {
             if (errno != errno_isOS2) {
                 const int tmp = _syserrno();
@@ -905,7 +905,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
                 /* Strerror can return NULL on some platforms, which will
                  * result in 'sv' not being considered SvOK.  The SvNOK_on()
                  * below will cause just the number part to be valid */
-                sv_setpv(sv, Strerror(errno));
+                sv_setpv(sv, my_strerror(errno));
                 if (SvOK(sv)) {
                     fixup_errno_string(sv);
                 }

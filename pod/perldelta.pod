@@ -96,6 +96,15 @@ Really old Perl let you omit the @ on array names and the % on hash
 names in some spots.  This has issued a deprecation warning since Perl
 5.0, and is no longer permitted.
 
+=head2 C<"$!"> text is now in English outside C<"use locale"> scope
+
+Previously, the text, unlike almost everything else, always came out
+based on the current underlying locale of the program.  (Also affected
+on some systems is C<"$^E>".)  For programs that are unprepared to
+handle locale, this can cause garbage text to be displayed.  It's better
+to display text that is translatable via some tool than garbage text
+which is much harder to figure out.
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.

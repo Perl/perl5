@@ -191,14 +191,6 @@ follows:
 
 =item *
 
-The variables L<$!|perlvar/$ERRNO> (and its synonyms C<$ERRNO> and
-C<$OS_ERROR>) and L<$^E|perlvar/$EXTENDED_OS_ERROR> (and its synonym
-C<$EXTENDED_OS_ERROR>) when used as strings always are in terms of the
-current locale and as if within the scope of L<"use bytes"|bytes>.  This is
-likely to change in Perl v5.22.
-
-=item *
-
 The current locale is also used when going outside of Perl with
 operations like L<system()|perlfunc/system LIST> or
 L<qxE<sol>E<sol>|perlop/qxE<sol>STRINGE<sol>>, if those operations are
@@ -313,6 +305,12 @@ L<Category C<LC_COLLATE>: Collation>.
 
 B<Regular expressions and case-modification functions> (C<uc()>, C<lc()>,
 C<ucfirst()>, and C<lcfirst()>) use C<LC_CTYPE>
+
+=item *
+
+The variables L<$!|perlvar/$ERRNO> (and its synonyms C<$ERRNO> and
+C<$OS_ERROR>) and L<$^E|perlvar/$EXTENDED_OS_ERROR> (and its synonym
+C<$EXTENDED_OS_ERROR>) when used as strings use C<LC_MESSAGES>.
 
 =back
 
