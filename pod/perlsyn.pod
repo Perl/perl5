@@ -429,6 +429,21 @@ those variables is exactly the C<for> loop (the body of the loop
 and the control sections).
 X<my>
 
+As a special case, if the test in the C<for> loop (or the corresponding
+C<while> loop) is empty, it is treated as true.  That is, both
+
+    for (;;) {
+	...
+    }
+
+and
+
+    while () {
+	...
+    }
+
+are treated as infinite loops.
+
 Besides the normal array index looping, C<for> can lend itself
 to many other interesting applications.  Here's one that avoids the
 problem you get into if you explicitly test for end-of-file on
