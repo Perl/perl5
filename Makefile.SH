@@ -345,7 +345,7 @@ DYNALOADER = DynaLoader\$(OBJ_EXT)
 
 libs = $perllibs $cryptlib
 
-public = \$(PERL_EXE) utilities translators
+public = \$(PERL_EXE) utilities
 
 shellflags = $shellflags
 
@@ -569,7 +569,7 @@ all: $(FIRSTMAKEFILE) $(MINIPERL_EXE) $(generated_pods) $(private) $(unidatafile
 	@echo " ";
 	@echo "	Everything is up to date. Type '$(MAKE) test' to run test suite."
 
-.PHONY: all translators utilities
+.PHONY: all utilities
 
 # Both git_version.h and lib/Config_git.pl are built
 # by make_patchnum.pl.
@@ -583,7 +583,7 @@ perl$(OBJ_EXT): git_version.h
 
 !NO!SUBS!
 
-# Making utilities and translators require Cwd.  If we have dynamic
+# Making utilities requires Cwd.  If we have dynamic
 # loading, we only need miniperl and Cwd.$dlext.  If we have static
 # loading, we need to build perl first.
 case "$usedl$static_cwd" in
