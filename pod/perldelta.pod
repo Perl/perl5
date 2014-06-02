@@ -188,6 +188,14 @@ There are only whitespace changes to the installed files.
 
 =item *
 
+The Locale-Codes collection of modules has been upgraded from vesion 3.30 to 3.31.
+
+Fixed a bug in the scripts used to extract data from spreadsheets that
+prevented the SHP currency code from being found.
+L<[cpan #94229]|https://rt.cpan.org/Ticket/Display.html?id=94229>
+
+=item *
+
 L<Math::BigInt> has been upgraded from version 1.9993 to 1.9994.
 
 Synchronize POD changes from the CPAN release.
