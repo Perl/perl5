@@ -860,7 +860,7 @@ Perl_my_atof(pTHX_ const char* s)
 
     {
         DECLARE_STORE_LC_NUMERIC_SET_TO_NEEDED();
-        if (PL_numeric_local && PL_numeric_radix_sv && IN_SOME_LOCALE_FORM) {
+        if (PL_numeric_radix_sv && IN_SOME_LOCALE_FORM) {
             const char *standard = NULL, *local = NULL;
             bool use_standard_radix;
 
