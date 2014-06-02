@@ -565,7 +565,7 @@ PERLVARI(I, perl_destruct_level, signed char,	0)
 
 #ifdef USE_LOCALE_NUMERIC
 
-PERLVARI(I, numeric_standard, bool, TRUE)
+PERLVARI(I, numeric_standard, int, TRUE)
 					/* Assume simple numerics */
 PERLVARI(I, numeric_local, bool, TRUE)
 					/* Assume local numerics */

@@ -5336,7 +5336,10 @@ typedef struct am_table_short AMTS;
  * these were called */
 
 #define _NOT_IN_NUMERIC_STANDARD (! PL_numeric_standard)
-#define _NOT_IN_NUMERIC_LOCAL    (! PL_numeric_local)
+
+/* We can lock the category to stay in the C locale, making requests to the
+ * contrary noops, in the dynamic scope by setting PL_numeric_standard to 2 */
+#define _NOT_IN_NUMERIC_LOCAL    (! PL_numeric_local && PL_numeric_standard < 2)
 
 #define DECLARATION_FOR_STORE_LC_NUMERIC_SET_TO_NEEDED                       \
     void (*_restore_LC_NUMERIC_function)(pTHX) = NULL;
@@ -5392,6 +5395,15 @@ typedef struct am_table_short AMTS;
 #define STORE_NUMERIC_STANDARD_FORCE_LOCAL()            \
 	bool _was_standard = _NOT_IN_NUMERIC_LOCAL;     \
 	if (_was_standard) set_numeric_local();
+
+/* Lock to the C locale until unlock is called */
+#define LOCK_NUMERIC_STANDARD()                         \
+        (__ASSERT_(PL_numeric_standard)                 \
+        PL_numeric_standard = 2)
+
+#define UNLOCK_NUMERIC_STANDARD()                       \
+        (__ASSERT_(PL_numeric_standard == 2)            \
+        PL_numeric_standard = 1)
 
 #define RESTORE_NUMERIC_LOCAL() \
 	if (_was_local) set_numeric_local();

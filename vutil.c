@@ -590,6 +590,7 @@ VER_NV:
 	SV *sv = SvNVX(ver) > 10e50 ? newSV(64) : 0;
 	char *buf;
         STORE_NUMERIC_LOCAL_SET_STANDARD();
+        LOCK_NUMERIC_STANDARD();
 	if (sv) {
 	    Perl_sv_catpvf(aTHX_ sv, "%.9"NVff, SvNVX(ver));
 	    len = SvCUR(sv);
@@ -599,6 +600,7 @@ VER_NV:
 	    len = my_snprintf(tbuf, sizeof(tbuf), "%.9"NVff, SvNVX(ver));
 	    buf = tbuf;
 	}
+        UNLOCK_NUMERIC_STANDARD();
         RESTORE_NUMERIC_LOCAL();
 	while (buf[len-1] == '0' && len > 0) len--;
 	if ( buf[len-1] == '.' ) len--; /* eat the trailing decimal */
