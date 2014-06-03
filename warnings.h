@@ -102,9 +102,13 @@
 #define WARN_EXPERIMENTAL__SIGNATURES 58
 #define WARN_SYSCALLS		 59
 
-#define WARNsize		15
-#define WARN_ALLstring		"\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125"
-#define WARN_NONEstring		"\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
+/* Warnings Categories added in Perl 5.021 */
+
+#define WARN_EXPERIMENTAL__WIN32_PERLIO 60
+
+#define WARNsize		16
+#define WARN_ALLstring		"\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125"
+#define WARN_NONEstring		"\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
 
 #define isLEXWARN_on 	(PL_curcop->cop_warnings != pWARN_STD)
 #define isLEXWARN_off	(PL_curcop->cop_warnings == pWARN_STD)
