@@ -2309,7 +2309,7 @@ Perl_dump_mstats(pTHX_ const char *s)
 
 #ifdef USE_PERL_SBRK
 
-#   if defined(NeXT) || defined(__NeXT__) || defined(PURIFY)
+#   if defined(PURIFY)
 #      define PERL_SBRK_VIA_MALLOC
 #   endif
 

@@ -67,10 +67,6 @@ int putenv(char *);
 
 #define FLUSH
 
-#if defined(HAS_FCNTL) && defined(F_SETFD) && !defined(FD_CLOEXEC)
-#  define FD_CLOEXEC 1			/* NeXT needs this */
-#endif
-
 /* NOTE:  Do not call the next three routines directly.  Use the macros
  * in handy.h, so that we can easily redefine everything to do tracking of
  * allocated hunks back to the original New to track down any memory leaks.

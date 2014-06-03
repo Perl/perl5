@@ -689,21 +689,7 @@
 #  endif
 #endif
 
-#ifdef USE_NEXT_CTYPE
-
-#if NX_CURRENT_COMPILER_RELEASE >= 500
-#  include <bsd/ctypes.h>
-#else
-#  if NX_CURRENT_COMPILER_RELEASE >= 400
-#    include <objc/NXCType.h>
-#  else /*  NX_CURRENT_COMPILER_RELEASE < 400 */
-#    include <appkit/NXCType.h>
-#  endif /*  NX_CURRENT_COMPILER_RELEASE >= 400 */
-#endif /*  NX_CURRENT_COMPILER_RELEASE >= 500 */
-
-#else /* !USE_NEXT_CTYPE */
 #include <ctype.h>
-#endif /* USE_NEXT_CTYPE */
 
 #ifdef METHOD 	/* Defined by OSF/1 v3.0 by ctype.h */
 #undef METHOD
@@ -1341,10 +1327,6 @@ EXTERN_C char *crypt(const char *, const char *);
 /* Configure already sets Direntry_t */
 #if defined(I_DIRENT)
 #   include <dirent.h>
-    /* NeXT needs dirent + sys/dir.h */
-#   if  defined(I_SYS_DIR) && (defined(NeXT) || defined(__NeXT__))
-#	include <sys/dir.h>
-#   endif
 #else
 #   ifdef I_SYS_NDIR
 #	include <sys/ndir.h>
@@ -2698,9 +2680,6 @@ freeing any remaining Perl interpreters.
 #      else
 #        ifdef I_MACH_CTHREADS
 #          include <mach/cthreads.h>
-#          if (defined(NeXT) || defined(__NeXT__)) && defined(PERL_POLLUTE_MALLOC)
-#            define MUTEX_INIT_CALLS_MALLOC
-#          endif
 typedef cthread_t	perl_os_thread;
 typedef mutex_t		perl_mutex;
 typedef condition_t	perl_cond;
@@ -3936,15 +3915,11 @@ END_EXTERN_C
 #endif
 
 #ifndef __cplusplus
-#  if defined(NeXT) || defined(__NeXT__) /* or whatever catches all NeXTs */
-char *crypt ();       /* Maybe more hosts will need the unprototyped version */
-#  else
-#    if !defined(WIN32) && !defined(VMS)
+#  if !defined(WIN32) && !defined(VMS)
 #ifndef crypt
 char *crypt (const char*, const char*);
 #endif
-#    endif /* !WIN32 */
-#  endif /* !NeXT && !__NeXT__ */
+#  endif /* !WIN32 */
 #  ifndef DONT_DECLARE_STD
 #    ifndef getenv
 char *getenv (const char*);
@@ -4146,19 +4121,9 @@ typedef OP* (*PPADDR_t[]) (pTHX);
 typedef bool (*destroyable_proc_t) (pTHX_ SV *sv);
 typedef void (*despatch_signals_proc_t) (pTHX);
 
-/* NeXT has problems with crt0.o globals */
-#if defined(__DYNAMIC__) && \
-    (defined(NeXT) || defined(__NeXT__) || defined(PERL_DARWIN))
-#  if defined(NeXT) || defined(__NeXT)
-#    include <mach-o/dyld.h>
-#    define environ (*environ_pointer)
-EXT char *** environ_pointer;
-#  else
-#    if defined(PERL_DARWIN) && defined(PERL_CORE)
-#      include <crt_externs.h>	/* for the env array */
-#      define environ (*_NSGetEnviron())
-#    endif
-#  endif
+#if defined(__DYNAMIC__) && defined(PERL_DARWIN) && defined(PERL_CORE)
+#  include <crt_externs.h>	/* for the env array */
+#  define environ (*_NSGetEnviron())
 #else
    /* VMS and some other platforms don't use the environ array */
 #  ifdef USE_ENVIRON_ARRAY

@@ -306,11 +306,6 @@ perl_construct(pTHXx)
 
     Zero(PL_sv_consts, SV_CONSTS_COUNT, SV*);
 
-#if defined(__DYNAMIC__) && (defined(NeXT) || defined(__NeXT__))
-    _dyld_lookup_and_bind
-	("__environ", (unsigned long *) &environ_pointer, NULL);
-#endif /* environ */
-
 #ifndef PERL_MICRO
 #   ifdef  USE_ENVIRON_ARRAY
     PL_origenviron = environ;

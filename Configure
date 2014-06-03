@@ -3279,8 +3279,6 @@ EOM
 	$test -f /unicosmk && osname=unicosmk && osvers=`$uname -r`
 	$test -f /unicosmk.ar && osname=unicosmk && osvers=`$uname -r`
 	$test -f /bin/mips && /bin/mips && osname=mips
-	$test -d /NextApps && set X `hostinfo | grep 'NeXT Mach.*:' | \
-		$sed -e 's/://' -e 's/\./_/'` && osname=next && osvers=$4
 	$test -d /usr/apollo/bin && osname=apollo
 	$test -f /etc/saf/_sactab && osname=svr4
 	$test -d /usr/include/minix && osname=minix
@@ -3317,7 +3315,6 @@ EOM
 			*) osname=mips ;;
 			esac;;
 		[23]100) osname=mips ;;
-		next*) osname=next ;;
 		i386*)
 			tmp=`/bin/uname -X 2>/dev/null|awk '/3\.2v[45]/{ print $(NF) }'`
 			if $test "$tmp" != "" -a "$3" = "3.2" -a -f '/etc/systemid'; then
@@ -3415,7 +3412,6 @@ EOM
 			*) osname=newsos ;;
 			esac
 			;;
-		next*) osname=next ;;
 		nonstop-ux) osname=nonstopux ;;
 		openbsd) osname=openbsd
                 	osvers="$3"
@@ -8131,7 +8127,6 @@ EOM
 	    '') case "$gccversion" in
 		'') case "$osname" in
 			hpux)	dflt='+z' ;;
-			next)	dflt='none' ;;
 			irix*)	dflt='-KPIC' ;;
 			svr4*|esix*|solaris|nonstopux) dflt='-KPIC' ;;
 			sunos)	dflt='-pic' ;;
@@ -8248,7 +8243,6 @@ EOM
 			  esac
 			  ;;
 		    *linux*|irix*|gnu*)  dflt="-shared $optimize" ;;
-		    next)  dflt='none' ;;
 		    solaris) # See [perl #66604].
 			    # On Solaris 11, gcc -m64 on amd64
 			    # appears not to understand -G.  gcc versions at
@@ -8327,7 +8321,7 @@ EOM
 	case "$ccdlflags" in
 	    '') case "$osname" in
 		    *linux*|hpux|gnu*) dflt='-Wl,-E' ;;
-		    next|sunos)      dflt='none'   ;;
+		    sunos)      dflt='none'   ;;
 		    *)               dflt='none'   ;;
 		esac ;;
 	    ' ') dflt='none' ;;
@@ -8390,15 +8384,6 @@ $undef)
 			dflt=y
 			also='Building a shared libperl is required for dynamic loading to work on your system.'
 			;;
-		next*)
-			case "$osvers" in
-			4*)	dflt=y
-				also='Building a shared libperl is needed for MAB support.'
-				;;
-			*)	dflt=n
-				;;
-			esac
-			;;
 		*)	dflt=n
 			;;
 		esac
@@ -8456,10 +8441,6 @@ true)
 		# I'd prefer to keep the os-specific stuff here to a minimum, and
 		# rely on figuring it out from the naming of libc.
 		case "${osname}${osvers}" in
-		next4*)
-			dflt=libperl.5.$so
-			# XXX How handle the --version stuff for MAB?
-			;;
 		*linux*|gnu*)  # ld won't link with a bare -lperl otherwise.
 			dflt=libperl.$so
 			;;
@@ -8553,9 +8534,6 @@ if "$useshrplib"; then
 		;;
 	bsdos|linux|irix*|dec_osf|gnu*)
 		xxx="-Wl,-rpath,$shrpdir"
-		;;
-	next)
-		# next doesn't like the default...
 		;;
 	haiku)
 		# Haiku doesn't like the default, either.
@@ -8823,26 +8801,6 @@ esac
 
 : see if we have to deal with yellow pages, now NIS.
 if $test -d /usr/etc/yp || $test -d /etc/yp || $test -d /usr/lib/yp; then
-	if $test -f /usr/etc/nibindd; then
-		echo " "
-		echo "I'm fairly confident you're on a NeXT."
-		echo " "
-		rp='Do you get the hosts file via NetInfo?'
-		dflt=y
-		case "$hostcat" in
-		nidump*) ;;
-		'') ;;
-		*) dflt=n;;
-		esac
-		. ./myread
-		case "$ans" in
-		y*) hostcat='nidump hosts .';;
-		*)	case "$hostcat" in
-			nidump*) hostcat='';;
-			esac
-			;;
-		esac
-	fi
 	case "$hostcat" in
 	nidump*) ;;
 	*)
@@ -12203,9 +12161,6 @@ $cat >dirfd.c <<EOM
 #endif
 #if defined(I_DIRENT)
 #include <dirent.h>
-#if defined(NeXT) && defined(I_SYS_DIR) /* NeXT needs dirent + sys/dir.h */
-#include <sys/dir.h>
-#endif
 #else
 #ifdef I_SYS_NDIR
 #include <sys/ndir.h>
@@ -18946,7 +18901,7 @@ eval $setvar
 
 : Check if is a multiplatform env
 case "$osname" in
-next|darwin) multiarch="$define" ;;
+darwin) multiarch="$define" ;;
 esac
 case "$multiarch" in
 ''|[nN]*) multiarch="$undef" ;;
@@ -19187,9 +19142,6 @@ case "$d_closedir" in
 #endif
 #if defined(I_DIRENT)
 #include <dirent.h>
-#if defined(NeXT) && defined(I_SYS_DIR) /* NeXT needs dirent + sys/dir.h */
-#include <sys/dir.h>
-#endif
 #else
 #ifdef I_SYS_NDIR
 #include <sys/ndir.h>

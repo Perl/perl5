@@ -3477,7 +3477,6 @@ ext/DynaLoader/dl_dlopen.xs	BSD/SunOS4&5 dlopen() style implementation
 ext/DynaLoader/dl_dyld.xs	NeXT/Apple dyld implementation
 ext/DynaLoader/dl_freemint.xs	GNU dld style implementation for FreeMINT
 ext/DynaLoader/dl_hpux.xs	HP-UX implementation
-ext/DynaLoader/dl_next.xs	NeXT implementation
 ext/DynaLoader/dl_none.xs	Stub implementation
 ext/DynaLoader/dl_symbian.xs	Symbian implementation
 ext/DynaLoader/dlutils.c	Dynamic loader utilities for dl_*.xs files
@@ -3670,7 +3669,6 @@ ext/POSIX/hints/gnuknetbsd.pl	Hint for POSIX for named architecture
 ext/POSIX/hints/linux.pl	Hint for POSIX for named architecture
 ext/POSIX/hints/mint.pl		Hint for POSIX for named architecture
 ext/POSIX/hints/netbsd.pl	Hint for POSIX for named architecture
-ext/POSIX/hints/next_3.pl	Hint for POSIX for named architecture
 ext/POSIX/hints/openbsd.pl	Hint for POSIX for named architecture
 ext/POSIX/hints/sunos_4.pl	Hint for POSIX for named architecture
 ext/POSIX/hints/svr4.pl		Hint for POSIX for named architecture
@@ -3944,9 +3942,6 @@ hints/mpc.sh			Hints for named architecture
 hints/ncr_tower.sh		Hints for named architecture
 hints/netbsd.sh			Hints for named architecture
 hints/newsos4.sh		Hints for named architecture
-hints/next_3_0.sh		Hints for named architecture
-hints/next_3.sh			Hints for named architecture
-hints/next_4.sh			Hints for named architecture
 hints/nonstopux.sh		Hints for named architecture
 hints/openbsd.sh		Hints for named architecture
 hints/opus.sh			Hints for named architecture

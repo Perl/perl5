@@ -179,10 +179,6 @@ static const char zero_but_true[ZBTLEN + 1] = "0 but true";
 #  include <sys/access.h>
 #endif
 
-#if defined(HAS_FCNTL) && defined(F_SETFD) && !defined(FD_CLOEXEC)
-#  define FD_CLOEXEC 1		/* NeXT needs this */
-#endif
-
 #include "reentr.h"
 
 #ifdef __Lynx__
@@ -1155,7 +1151,7 @@ PP(pp_sselect)
     /* If SELECT_MIN_BITS is greater than one we most probably will want
      * to align the sizes with SELECT_MIN_BITS/8 because for example
      * in many little-endian (Intel, Alpha) systems (Linux, OS/2, Digital
-     * UNIX, Solaris, NeXT, Darwin) the smallest quantum select() operates
+     * UNIX, Solaris, Darwin) the smallest quantum select() operates
      * on (sets/tests/clears bits) is 32 bits.  */
     growsize = maxlen + (SELECT_MIN_BITS/8 - (maxlen % (SELECT_MIN_BITS/8)));
 #  endif

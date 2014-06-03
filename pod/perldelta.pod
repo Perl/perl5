@@ -516,9 +516,12 @@ XXX List any platforms that this version of perl no longer compiles on.
 
 =over 4
 
-=item XXX-some-platform
+=item NeXTSTEP/OPENSTEP
 
-XXX
+NeXTSTEP was proprietary OS bundled with NeXT's workstations in the early
+to mid 90's; OPENSTEP was an API specification that provided a NeXTSTEP-like 
+environment on a non-NeXTSTEP system.  Both are now long dead, so support
+for building Perl on them has been removed.
 
 =back
 

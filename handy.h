@@ -96,19 +96,6 @@ Null SV pointer.  (No longer available when C<PERL_CORE> is defined.)
 # endif
 #endif
 
-/* The NeXT dynamic loader headers will not build with the bool macro
-   So declare them now to clear confusion.
-*/
-#if defined(NeXT) || defined(__NeXT__)
-# undef FALSE
-# undef TRUE
-  typedef enum bool { FALSE = 0, TRUE = 1 } bool;
-# define ENUM_BOOL 1
-# ifndef HAS_BOOL
-#  define HAS_BOOL 1
-# endif /* !HAS_BOOL */
-#endif /* NeXT || __NeXT__ */
-
 #ifndef HAS_BOOL
 # ifdef bool
 #  undef bool
@@ -1337,46 +1324,21 @@ EXTCONST U32 PL_charclass[];
                          _generic_toLOWER_LC(c, function, cast)))
 
 /* Use the libc versions for these if available. */
-#if defined(HAS_ISASCII) && ! defined(USE_NEXT_CTYPE)
+#if defined(HAS_ISASCII)
 #   define isASCII_LC(c) (FITS_IN_8_BITS(c) && isascii( (U8) (c)))
 #else
 #   define isASCII_LC(c) isASCII(c)
 #endif
 
-#if defined(HAS_ISBLANK) && ! defined(USE_NEXT_CTYPE)
+#if defined(HAS_ISBLANK)
 #   define isBLANK_LC(c) _generic_LC(c, _CC_BLANK, isblank)
 #else /* Unlike isASCII, varies if in a UTF-8 locale */
 #   define isBLANK_LC(c) (IN_UTF8_CTYPE_LOCALE) ? isBLANK_L1(c) : isBLANK(c)
 #endif
 
-#ifdef USE_NEXT_CTYPE   /* NeXT computers */
+#define _LC_CAST U8
 
-#    define _LC_CAST unsigned int   /* Needed by _generic_LC.  NeXT functions
-                                       use this as their input type */
-
-#    define isALPHA_LC(c)   _generic_LC(c, _CC_ALPHA, NXIsAlpha)
-#    define isALPHANUMERIC_LC(c)  _generic_LC(c, _CC_ALPHANUMERIC, NXIsAlNum)
-#    define isCNTRL_LC(c)    _generic_LC(c, _CC_CNTRL, NXIsCntrl)
-#    define isDIGIT_LC(c)    _generic_LC(c, _CC_DIGIT, NXIsDigit)
-#    define isGRAPH_LC(c)    _generic_LC(c, _CC_GRAPH, NXIsGraph)
-#    define isIDFIRST_LC(c)  _generic_LC_underscore(c, _CC_IDFIRST, NXIsAlpha)
-#    define isLOWER_LC(c)    _generic_LC(c, _CC_LOWER, NXIsLower)
-#    define isPRINT_LC(c)    _generic_LC(c, _CC_PRINT, NXIsPrint)
-#    define isPUNCT_LC(c)    _generic_LC(c, _CC_PUNCT, NXIsPunct)
-#    define isSPACE_LC(c)    _generic_LC(c, _CC_SPACE, NXIsSpace)
-#    define isUPPER_LC(c)    _generic_LC(c, _CC_UPPER, NXIsUpper)
-#    define isWORDCHAR_LC(c) _generic_LC_underscore(c, _CC_WORDCHAR, NXIsAlNum)
-#    define isXDIGIT_LC(c)   _generic_LC(c, _CC_XDIGIT, NXIsXdigit)
-
-#    define toLOWER_LC(c) _generic_toLOWER_LC((c), NXToLower, unsigned int)
-#    define toUPPER_LC(c) _generic_toUPPER_LC((c), NXToUpper, unsigned int)
-#    define toFOLD_LC(c)  _generic_toFOLD_LC((c), NXToLower, unsigned int)
-
-#else /* !USE_NEXT_CTYPE */
-
-#  define _LC_CAST U8
-
-#  ifdef WIN32
+#ifdef WIN32
     /* The Windows functions don't bother to follow the POSIX standard, which
      * for example says that something can't both be a printable and a control.
      * But Windows treats the \t control as a printable, and does such things
@@ -1387,69 +1349,68 @@ EXTCONST U32 PL_charclass[];
      * Not all possible weirdnesses are checked for, just the ones that were
      * detected on actual Microsoft code pages */
 
-#    define isCNTRL_LC(c)    _generic_LC(c, _CC_CNTRL, iscntrl)
-#    define isSPACE_LC(c)    _generic_LC(c, _CC_SPACE, isspace)
+#  define isCNTRL_LC(c)    _generic_LC(c, _CC_CNTRL, iscntrl)
+#  define isSPACE_LC(c)    _generic_LC(c, _CC_SPACE, isspace)
 
-#    define isALPHA_LC(c)    (_generic_LC(c, _CC_ALPHA, isalpha) && isALPHANUMERIC_LC(c))
-#    define isALPHANUMERIC_LC(c)  (_generic_LC(c, _CC_ALPHANUMERIC, isalnum) && ! isPUNCT_LC(c))
-#    define isDIGIT_LC(c)    (_generic_LC(c, _CC_DIGIT, isdigit) && isALPHANUMERIC_LC(c))
-#    define isGRAPH_LC(c)    (_generic_LC(c, _CC_GRAPH, isgraph) && isPRINT_LC(c))
-#    define isIDFIRST_LC(c)  (((c) == '_') || (_generic_LC(c, _CC_IDFIRST, isalpha) && ! isPUNCT_LC(c)))
-#    define isLOWER_LC(c)    (_generic_LC(c, _CC_LOWER, islower) && isALPHA_LC(c))
-#    define isPRINT_LC(c)    (_generic_LC(c, _CC_PRINT, isprint) && ! isCNTRL_LC(c))
-#    define isPUNCT_LC(c)    (_generic_LC(c, _CC_PUNCT, ispunct) && ! isCNTRL_LC(c))
-#    define isUPPER_LC(c)    (_generic_LC(c, _CC_UPPER, isupper) && isALPHA_LC(c))
-#    define isWORDCHAR_LC(c) (((c) == '_') || isALPHANUMERIC_LC(c))
-#    define isXDIGIT_LC(c)   (_generic_LC(c, _CC_XDIGIT, isxdigit) && isALPHANUMERIC_LC(c))
+#  define isALPHA_LC(c)    (_generic_LC(c, _CC_ALPHA, isalpha) && isALPHANUMERIC_LC(c))
+#  define isALPHANUMERIC_LC(c)  (_generic_LC(c, _CC_ALPHANUMERIC, isalnum) && ! isPUNCT_LC(c))
+#  define isDIGIT_LC(c)    (_generic_LC(c, _CC_DIGIT, isdigit) && isALPHANUMERIC_LC(c))
+#  define isGRAPH_LC(c)    (_generic_LC(c, _CC_GRAPH, isgraph) && isPRINT_LC(c))
+#  define isIDFIRST_LC(c)  (((c) == '_') || (_generic_LC(c, _CC_IDFIRST, isalpha) && ! isPUNCT_LC(c)))
+#  define isLOWER_LC(c)    (_generic_LC(c, _CC_LOWER, islower) && isALPHA_LC(c))
+#  define isPRINT_LC(c)    (_generic_LC(c, _CC_PRINT, isprint) && ! isCNTRL_LC(c))
+#  define isPUNCT_LC(c)    (_generic_LC(c, _CC_PUNCT, ispunct) && ! isCNTRL_LC(c))
+#  define isUPPER_LC(c)    (_generic_LC(c, _CC_UPPER, isupper) && isALPHA_LC(c))
+#  define isWORDCHAR_LC(c) (((c) == '_') || isALPHANUMERIC_LC(c))
+#  define isXDIGIT_LC(c)   (_generic_LC(c, _CC_XDIGIT, isxdigit) && isALPHANUMERIC_LC(c))
 
-#    define toLOWER_LC(c) _generic_toLOWER_LC((c), tolower, U8)
-#    define toUPPER_LC(c) _generic_toUPPER_LC((c), toupper, U8)
-#    define toFOLD_LC(c)  _generic_toFOLD_LC((c), tolower, U8)
+#  define toLOWER_LC(c) _generic_toLOWER_LC((c), tolower, U8)
+#  define toUPPER_LC(c) _generic_toUPPER_LC((c), toupper, U8)
+#  define toFOLD_LC(c)  _generic_toFOLD_LC((c), tolower, U8)
 
-#  elif defined(CTYPE256) || (!defined(isascii) && !defined(HAS_ISASCII))
+#elif defined(CTYPE256) || (!defined(isascii) && !defined(HAS_ISASCII))
     /* For most other platforms */
 
-#    define isALPHA_LC(c)   _generic_LC(c, _CC_ALPHA, isalpha)
-#    define isALPHANUMERIC_LC(c)  _generic_LC(c, _CC_ALPHANUMERIC, isalnum)
-#    define isCNTRL_LC(c)    _generic_LC(c, _CC_CNTRL, iscntrl)
-#    define isDIGIT_LC(c)    _generic_LC(c, _CC_DIGIT, isdigit)
-#    define isGRAPH_LC(c)    _generic_LC(c, _CC_GRAPH, isgraph)
-#    define isIDFIRST_LC(c)  _generic_LC_underscore(c, _CC_IDFIRST, isalpha)
-#    define isLOWER_LC(c)    _generic_LC(c, _CC_LOWER, islower)
-#    define isPRINT_LC(c)    _generic_LC(c, _CC_PRINT, isprint)
-#    define isPUNCT_LC(c)    _generic_LC(c, _CC_PUNCT, ispunct)
-#    define isSPACE_LC(c)    _generic_LC(c, _CC_SPACE, isspace)
-#    define isUPPER_LC(c)    _generic_LC(c, _CC_UPPER, isupper)
-#    define isWORDCHAR_LC(c) _generic_LC_underscore(c, _CC_WORDCHAR, isalnum)
-#    define isXDIGIT_LC(c)   _generic_LC(c, _CC_XDIGIT, isxdigit)
+#  define isALPHA_LC(c)   _generic_LC(c, _CC_ALPHA, isalpha)
+#  define isALPHANUMERIC_LC(c)  _generic_LC(c, _CC_ALPHANUMERIC, isalnum)
+#  define isCNTRL_LC(c)    _generic_LC(c, _CC_CNTRL, iscntrl)
+#  define isDIGIT_LC(c)    _generic_LC(c, _CC_DIGIT, isdigit)
+#  define isGRAPH_LC(c)    _generic_LC(c, _CC_GRAPH, isgraph)
+#  define isIDFIRST_LC(c)  _generic_LC_underscore(c, _CC_IDFIRST, isalpha)
+#  define isLOWER_LC(c)    _generic_LC(c, _CC_LOWER, islower)
+#  define isPRINT_LC(c)    _generic_LC(c, _CC_PRINT, isprint)
+#  define isPUNCT_LC(c)    _generic_LC(c, _CC_PUNCT, ispunct)
+#  define isSPACE_LC(c)    _generic_LC(c, _CC_SPACE, isspace)
+#  define isUPPER_LC(c)    _generic_LC(c, _CC_UPPER, isupper)
+#  define isWORDCHAR_LC(c) _generic_LC_underscore(c, _CC_WORDCHAR, isalnum)
+#  define isXDIGIT_LC(c)   _generic_LC(c, _CC_XDIGIT, isxdigit)
 
 
-#    define toLOWER_LC(c) _generic_toLOWER_LC((c), tolower, U8)
-#    define toUPPER_LC(c) _generic_toUPPER_LC((c), toupper, U8)
-#    define toFOLD_LC(c)  _generic_toFOLD_LC((c), tolower, U8)
+#  define toLOWER_LC(c) _generic_toLOWER_LC((c), tolower, U8)
+#  define toUPPER_LC(c) _generic_toUPPER_LC((c), toupper, U8)
+#  define toFOLD_LC(c)  _generic_toFOLD_LC((c), tolower, U8)
 
-#  else  /* The final fallback position */
+#else  /* The final fallback position */
 
-#    define isALPHA_LC(c)	(isascii(c) && isalpha(c))
-#    define isALPHANUMERIC_LC(c) (isascii(c) && isalnum(c))
-#    define isCNTRL_LC(c)	(isascii(c) && iscntrl(c))
-#    define isDIGIT_LC(c)	(isascii(c) && isdigit(c))
-#    define isGRAPH_LC(c)	(isascii(c) && isgraph(c))
-#    define isIDFIRST_LC(c)	(isascii(c) && (isalpha(c) || (c) == '_'))
-#    define isLOWER_LC(c)	(isascii(c) && islower(c))
-#    define isPRINT_LC(c)	(isascii(c) && isprint(c))
-#    define isPUNCT_LC(c)	(isascii(c) && ispunct(c))
-#    define isSPACE_LC(c)	(isascii(c) && isspace(c))
-#    define isUPPER_LC(c)	(isascii(c) && isupper(c))
-#    define isWORDCHAR_LC(c)	(isascii(c) && (isalnum(c) || (c) == '_'))
-#    define isXDIGIT_LC(c)      (isascii(c) && isxdigit(c))
+#  define isALPHA_LC(c)	(isascii(c) && isalpha(c))
+#  define isALPHANUMERIC_LC(c) (isascii(c) && isalnum(c))
+#  define isCNTRL_LC(c)	(isascii(c) && iscntrl(c))
+#  define isDIGIT_LC(c)	(isascii(c) && isdigit(c))
+#  define isGRAPH_LC(c)	(isascii(c) && isgraph(c))
+#  define isIDFIRST_LC(c)	(isascii(c) && (isalpha(c) || (c) == '_'))
+#  define isLOWER_LC(c)	(isascii(c) && islower(c))
+#  define isPRINT_LC(c)	(isascii(c) && isprint(c))
+#  define isPUNCT_LC(c)	(isascii(c) && ispunct(c))
+#  define isSPACE_LC(c)	(isascii(c) && isspace(c))
+#  define isUPPER_LC(c)	(isascii(c) && isupper(c))
+#  define isWORDCHAR_LC(c)	(isascii(c) && (isalnum(c) || (c) == '_'))
+#  define isXDIGIT_LC(c)      (isascii(c) && isxdigit(c))
 
-#    define toLOWER_LC(c)	(isascii(c) ? tolower(c) : (c))
-#    define toUPPER_LC(c)	(isascii(c) ? toupper(c) : (c))
-#    define toFOLD_LC(c)	(isascii(c) ? tolower(c) : (c))
+#  define toLOWER_LC(c)	(isascii(c) ? tolower(c) : (c))
+#  define toUPPER_LC(c)	(isascii(c) ? toupper(c) : (c))
+#  define toFOLD_LC(c)	(isascii(c) ? tolower(c) : (c))
 
-#  endif
-#endif /* USE_NEXT_CTYPE */
+#endif
 
 #define isIDCONT(c)             isWORDCHAR(c)
 #define isIDCONT_A(c)           isWORDCHAR_A(c)
