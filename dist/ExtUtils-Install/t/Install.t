@@ -37,6 +37,8 @@ END {
 
 chdir 'Big-Dummy';
 
+local $ENV{PERL_INSTALL_QUIET};
+
 my $stdout = tie *STDOUT, 'TieOut';
 pm_to_blib( { 'lib/Big/Dummy.pm' => 'blib/lib/Big/Dummy.pm' },
             'blib/lib/auto'

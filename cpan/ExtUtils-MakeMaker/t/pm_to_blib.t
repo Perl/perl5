@@ -22,6 +22,7 @@ my $perl     = which_perl();
 my $makefile = makefile_name();
 my $make     = make_run();
 
+local $ENV{PERL_INSTALL_QUIET};
 
 # Setup our test environment
 {

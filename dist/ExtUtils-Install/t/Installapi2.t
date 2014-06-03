@@ -33,8 +33,9 @@ END {
 }
 # ensure the env doesn't pollute our tests
 local $ENV{EU_INSTALL_ALWAYS_COPY};
-local $ENV{EU_ALWAYS_COPY};    
-    
+local $ENV{EU_ALWAYS_COPY};
+local $ENV{PERL_INSTALL_QUIET};
+
 chdir 'Big-Dummy';
 
 my $stdout = tie *STDOUT, 'TieOut';

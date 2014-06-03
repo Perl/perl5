@@ -38,11 +38,11 @@ ExtUtils::Install - install files from here to there
 
 =head1 VERSION
 
-1.67
+1.68
 
 =cut
 
-$VERSION = '1.67';  # <-- do not forget to update the POD section just above this line!
+$VERSION = '1.68';  # <-- do not forget to update the POD section just above this line!
 $VERSION = eval $VERSION;
 
 =pod
@@ -1171,6 +1171,9 @@ output the new module contents.
 You can have an environment variable PERL_INSTALL_ROOT set which will
 be prepended as a directory to each installed file (and directory).
 
+By default verbose output is generated, setting the PERL_INSTALL_QUIET
+environment variable will silence this output.
+
 =cut
 
 sub pm_to_blib {
@@ -1179,7 +1182,7 @@ sub pm_to_blib {
     _mkpath($autodir,0,0755);
     while(my($from, $to) = each %$fromto) {
         if( -f $to && -s $from == -s $to && -M $to < -M $from ) {
-            print "Skip $to (unchanged)\n";
+            print "Skip $to (unchanged)\n" unless $ENV{PERL_INSTALL_QUIET};
             next;
         }
 
@@ -1192,7 +1195,7 @@ sub pm_to_blib {
                              $from =~ /\.pm$/;
 
         if (!$need_filtering && 0 == compare($from,$to)) {
-            print "Skip $to (unchanged)\n";
+            print "Skip $to (unchanged)\n" unless $ENV{PERL_INSTALL_QUIET};
             next;
         }
         if (-f $to){
@@ -1206,7 +1209,7 @@ sub pm_to_blib {
             print "$pm_filter <$from >$to\n";
         } else {
             _copy( $from, $to );
-            print "cp $from $to\n";
+            print "cp $from $to\n" unless $ENV{PERL_INSTALL_QUIET};
         }
         my($mode,$atime,$mtime) = (stat $from)[2,8,9];
         utime($atime,$mtime+$Is_VMS,$to);
