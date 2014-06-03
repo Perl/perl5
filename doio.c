@@ -1392,10 +1392,13 @@ Perl_my_stat_flags(pTHX_ const U32 flags)
         PL_laststype = OP_STAT;
         PL_statgv = gv ? gv : (GV *)io;
         sv_setpvs(PL_statname, "");
-        if(io) {
+        if (io) {
 	    if (IoIFP(io)) {
                 int fd = PerlIO_fileno(IoIFP(io));
-                if (fd >= 0) {
+                if (fd < 0) {
+                    /* E.g. PerlIO::scalar has no real fd. */
+                    return (PL_laststatval = -1);
+                } else {
                     return (PL_laststatval = PerlLIO_fstat(fd, &PL_statcache));
                 }
             } else if (IoDIRP(io)) {
