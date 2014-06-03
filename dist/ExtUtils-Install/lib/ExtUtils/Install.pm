@@ -113,6 +113,7 @@ my $Inc_uninstall_warn_handler;
 # install relative to here
 
 my $INSTALL_ROOT = $ENV{PERL_INSTALL_ROOT};
+my $INSTALL_QUIET = $ENV{PERL_INSTALL_QUIET};
 
 my $Curdir = File::Spec->curdir;
 my $Updir  = File::Spec->updir;
@@ -1182,7 +1183,7 @@ sub pm_to_blib {
     _mkpath($autodir,0,0755);
     while(my($from, $to) = each %$fromto) {
         if( -f $to && -s $from == -s $to && -M $to < -M $from ) {
-            print "Skip $to (unchanged)\n" unless $ENV{PERL_INSTALL_QUIET};
+            print "Skip $to (unchanged)\n" unless $INSTALL_QUIET;
             next;
         }
 
@@ -1195,7 +1196,7 @@ sub pm_to_blib {
                              $from =~ /\.pm$/;
 
         if (!$need_filtering && 0 == compare($from,$to)) {
-            print "Skip $to (unchanged)\n" unless $ENV{PERL_INSTALL_QUIET};
+            print "Skip $to (unchanged)\n" unless $INSTALL_QUIET;
             next;
         }
         if (-f $to){
@@ -1209,7 +1210,7 @@ sub pm_to_blib {
             print "$pm_filter <$from >$to\n";
         } else {
             _copy( $from, $to );
-            print "cp $from $to\n" unless $ENV{PERL_INSTALL_QUIET};
+            print "cp $from $to\n" unless $INSTALL_QUIET;
         }
         my($mode,$atime,$mtime) = (stat $from)[2,8,9];
         utime($atime,$mtime+$Is_VMS,$to);

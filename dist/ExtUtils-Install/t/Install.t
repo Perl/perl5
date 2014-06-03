@@ -16,10 +16,13 @@ use Test::More tests => 60;
 
 use MakeMaker::Test::Setup::BFD;
 
-BEGIN { use_ok('ExtUtils::Install') }
+BEGIN {
+  local $ENV{PERL_INSTALL_QUIET};
+  use_ok('ExtUtils::Install');
+}
 # ensure the env doesn't pollute our tests
 local $ENV{EU_INSTALL_ALWAYS_COPY};
-local $ENV{EU_ALWAYS_COPY};    
+local $ENV{EU_ALWAYS_COPY};
 
 # Check exports.
 foreach my $func (qw(install uninstall pm_to_blib install_default)) {
@@ -36,8 +39,6 @@ END {
 }
 
 chdir 'Big-Dummy';
-
-local $ENV{PERL_INSTALL_QUIET};
 
 my $stdout = tie *STDOUT, 'TieOut';
 pm_to_blib( { 'lib/Big/Dummy.pm' => 'blib/lib/Big/Dummy.pm' },
