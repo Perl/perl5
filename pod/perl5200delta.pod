@@ -1320,7 +1320,7 @@ usage.
 
 =back
 
-=head2 L<perllexwarn>
+=head3 L<perllexwarn>
 
 =over 4
 
