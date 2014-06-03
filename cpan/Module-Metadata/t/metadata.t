@@ -4,7 +4,7 @@
 
 use strict;
 use warnings;
-use Test::More;
+use Test::More 0.82;
 use IO::File;
 use File::Spec;
 use File::Temp;

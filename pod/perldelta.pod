@@ -214,7 +214,7 @@ Synchronize POD changes from the CPAN release.
 
 =item *
 
-L<Module::Metadata> has been upgraded from version 1.000022 to 1.000023.
+L<Module::Metadata> has been upgraded from version 1.000022 to 1.000024.
 
 Support installations on older perls with an L<ExtUtils::MakeMaker> earlier
 than 6.63_03

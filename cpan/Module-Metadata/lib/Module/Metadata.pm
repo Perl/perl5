@@ -4,8 +4,8 @@ package Module::Metadata;
 BEGIN {
   $Module::Metadata::AUTHORITY = 'cpan:MSTROUT';
 }
-# git description: v1.000022-4-ge460e95
-$Module::Metadata::VERSION = '1.000023';
+# git description: v1.000023-1-g6bfd8b6
+$Module::Metadata::VERSION = '1.000024';
 
 # Adapted from Perl-licensed code originally distributed with
 # Module-Build by Ken Williams
