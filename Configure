@@ -422,9 +422,11 @@ d_dbminitproto=''
 d_difftime=''
 d_dir_dd_fd=''
 d_dirfd=''
+d_dladdr=''
 d_dlerror=''
 d_dlopen=''
 d_dlsymun=''
+d_backtrace=''
 d_dosuid=''
 d_suidsafe=''
 d_drand48_r=''
@@ -883,6 +885,7 @@ html3direxp=''
 installhtml3dir=''
 i_arpainet=''
 i_assert=''
+i_bfd=''
 i_crypt=''
 db_hashtype=''
 db_prefixtype=''
@@ -896,6 +899,7 @@ d_dirnamlen=''
 direntrytype=''
 i_dirent=''
 i_dlfcn=''
+i_execinfo=''
 i_fcntl=''
 i_float=''
 i_fp=''
@@ -1233,6 +1237,7 @@ uidtype=''
 archname64=''
 use64bitall=''
 use64bitint=''
+usecbacktrace=''
 dtrace=''
 usedtrace=''
 usefaststdio=''
@@ -5151,6 +5156,9 @@ case "$libswanted" in
 esac
 case "$usesocks" in
 "$define") libswanted="$libswanted socks5 socks5_sh" ;;
+esac
+case "$usecbacktrace" in
+"$define") libswanted="$libswanted bfd" ;;
 esac
 libsfound=''
 libsfiles=''
@@ -12209,6 +12217,10 @@ set d_dirfd
 eval $setvar
 $rm -f dirfd*
 
+: see if dladdr exists
+set dladdr d_dladdr
+eval $inlibc
+
 : see if dlerror exists
 xxx_runnm="$runnm"
 runnm=false
@@ -12330,6 +12342,21 @@ $rm -f fred fred.* dyna.$dlext dyna.* tmp-dyna.*
 
 set d_dlsymun
 eval $setvar
+
+: see if backtrace exists
+set backtrace d_backtrace
+eval $inlibc
+
+: add flags if using c backtrace
+case "$usecbacktrace" in
+[yY]*|true|$define)
+  case " $ccflags " in
+  *" -DUSE_C_BACKTRACE "*) ;; # Already there.
+  *) ccflags="$ccflags -DUSE_C_BACKTRACE -g"
+     ;;
+  esac
+  ;;
+esac
 
 : see if drand48_r exists
 set drand48_r d_drand48_r
@@ -12795,6 +12822,10 @@ case "$d_endservent_r" in
 *)	endservent_r_proto=0
 	;;
 esac
+
+: see if this is an execinfo.h system
+set execinfo.h i_execinfo
+eval $inhdr
 
 : Locate the flags for 'open()'
 echo " "
@@ -21924,6 +21955,10 @@ esac
 set assert.h i_assert
 eval $inhdr
 
+: see if this is a bfd.h system
+set bfd.h i_bfd
+eval $inhdr
+
 : see if this is a fp.h system
 set fp.h i_fp
 eval $inhdr
@@ -23084,9 +23119,11 @@ d_difftime='$d_difftime'
 d_dir_dd_fd='$d_dir_dd_fd'
 d_dirfd='$d_dirfd'
 d_dirnamlen='$d_dirnamlen'
+d_dladdr='$d_dladdr'
 d_dlerror='$d_dlerror'
 d_dlopen='$d_dlopen'
 d_dlsymun='$d_dlsymun'
+d_backtrace='$d_backtrace'
 d_dosuid='$d_dosuid'
 d_drand48_r='$d_drand48_r'
 d_drand48proto='$d_drand48proto'
@@ -23573,12 +23610,14 @@ i8size='$i8size'
 i8type='$i8type'
 i_arpainet='$i_arpainet'
 i_assert='$i_assert'
+i_bfd='$i_assert'
 i_bsdioctl='$i_bsdioctl'
 i_crypt='$i_crypt'
 i_db='$i_db'
 i_dbm='$i_dbm'
 i_dirent='$i_dirent'
 i_dlfcn='$i_dlfcn'
+i_execinfo='$i_execinfo'
 i_fcntl='$i_fcntl'
 i_float='$i_float'
 i_fp='$i_fp'
@@ -23969,6 +24008,7 @@ uquadtype='$uquadtype'
 use5005threads='$use5005threads'
 use64bitall='$use64bitall'
 use64bitint='$use64bitint'
+usecbacktrace='$usecbacktrace'
 usecrosscompile='$usecrosscompile'
 usedevel='$usedevel'
 usedl='$usedl'

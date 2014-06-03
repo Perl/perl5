@@ -96,12 +96,24 @@
  */
 /*#define HAS_DIFFTIME		/ **/
 
+/* HAS_DLADDR:
+ *	This symbol, if defined, indicates that the dladdr routine is
+ *	available to return information about stack addresses.
+ */
+/*#define HAS_DLADDR	/ **/
+
 /* HAS_DLERROR:
  *	This symbol, if defined, indicates that the dlerror routine is
  *	available to return a string describing the last error that
  *	occurred from a call to dlopen(), dlclose() or dlsym().
  */
 /*#define HAS_DLERROR	/ **/
+
+/* HAS_BACKTRACE:
+ *	This symbol, if defined, indicates that the backtrace routine is
+ *	available to return backtrace information about the C stack.
+ */
+/*#define HAS_BACKTRACE	/ **/
 
 /* HAS_DUP2:
  *	This symbol, if defined, indicates that the dup2 routine is
@@ -653,6 +665,12 @@
  *	be included.
  */
 /*#define I_DLFCN		/ **/
+
+/* I_EXECINFO:
+ *	This symbol, if defined, indicates that <execinfo.h> exists and should
+ *	be included.
+ */
+/*#define I_EXECINFO		/ **/
 
 /* I_FCNTL:
  *	This manifest constant tells the C program to include <fcntl.h>.
@@ -4177,6 +4195,12 @@
  */
 #define	I_ASSERT		/**/
 
+/* I_BFD:
+ *	This symbol, if defined, indicates that <bfd.h> exists and
+ *	could be included by the C program to use the BFD library.
+ */
+/*#define	I_BFD		/ **/
+
 /* I_CRYPT:
  *	This symbol, if defined, indicates that <crypt.h> exists and
  *	should be included.
@@ -4723,6 +4747,6 @@
 #endif
 
 /* Generated from:
- * 06dae33599ea14bee0e39e3b22e1f685aaae36422af2c567dc1de19203950835 config_h.SH
- * 6859e7550b3ae0da512f0a8b99762af72df599ab734520206d7b3574459e948f uconfig.sh
+ * 45e2c6b42b88b07e21adb94c47d9bd7bcb8da04e2bbb38d7223eb516eb7d99de config_h.SH
+ * 6d0cc2cac48fbe8139cf8a89bdd458a93797d18e649f3ed80896bfe4d218b0a2 uconfig.sh
  * ex: set ro: */

@@ -7913,6 +7913,18 @@ PERL_CALLCONV I32	Perl_unlnk(pTHX_ const char* f)
 	assert(f)
 
 #endif
+#if defined(USE_C_BACKTRACE)
+PERL_CALLCONV bool	Perl_dump_c_backtrace(pTHX_ PerlIO* fp, int max_depth, int skip)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_DUMP_C_BACKTRACE	\
+	assert(fp)
+
+/* PERL_CALLCONV void	free_c_backtrace(pTHX_ Perl_c_backtrace* bt)
+			__attribute__nonnull__(pTHX_1); */
+
+PERL_CALLCONV Perl_c_backtrace*	Perl_get_c_backtrace(pTHX_ int max_depth, int skip);
+PERL_CALLCONV SV*	Perl_get_c_backtrace_dump(pTHX_ int max_depth, int skip);
+#endif
 #if defined(USE_ITHREADS)
 PERL_CALLCONV PADOFFSET	Perl_alloccopstash(pTHX_ HV *hv)
 			__attribute__nonnull__(pTHX_1);

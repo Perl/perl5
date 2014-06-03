@@ -5895,6 +5895,16 @@ extern void moncontrol(int);
 #define PERL_PV_PRETTY_DUMP  PERL_PV_PRETTY_ELLIPSES|PERL_PV_PRETTY_QUOTE
 #define PERL_PV_PRETTY_REGPROP PERL_PV_PRETTY_ELLIPSES|PERL_PV_PRETTY_LTGT|PERL_PV_ESCAPE_RE|PERL_PV_ESCAPE_NONASCII
 
+#if defined(USE_C_BACKTRACE) && defined(I_BFD)
+#  define USE_BFD
+#  ifdef PERL_DARWIN
+#    undef USE_BFD /* BFD is useless in OS X. */
+#  endif
+#  ifdef USE_BFD
+#    include <bfd.h>
+#  endif
+#endif
+
 /*
 
    (KEEP THIS LAST IN perl.h!)

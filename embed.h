@@ -812,6 +812,10 @@
 #if defined(UNLINK_ALL_VERSIONS)
 #define unlnk(a)		Perl_unlnk(aTHX_ a)
 #endif
+#if defined(USE_C_BACKTRACE)
+#define dump_c_backtrace(a,b,c)	Perl_dump_c_backtrace(aTHX_ a,b,c)
+#define get_c_backtrace_dump(a,b)	Perl_get_c_backtrace_dump(aTHX_ a,b)
+#endif
 #if defined(USE_ITHREADS)
 #define alloccopstash(a)	Perl_alloccopstash(aTHX_ a)
 #define any_dup(a,b)		Perl_any_dup(aTHX_ a,b)
@@ -1756,6 +1760,9 @@
 #  endif
 #  if defined(PERL_USES_PL_PIDSTATUS) && defined(PERL_IN_UTIL_C)
 #define pidgone(a,b)		S_pidgone(aTHX_ a,b)
+#  endif
+#  if defined(USE_C_BACKTRACE)
+#define get_c_backtrace(a,b)	Perl_get_c_backtrace(aTHX_ a,b)
 #  endif
 #  if defined(USE_ITHREADS)
 #define mro_meta_dup(a,b)	Perl_mro_meta_dup(aTHX_ a,b)

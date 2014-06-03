@@ -1397,6 +1397,82 @@ New Display -> Edit Menu
 
 Note: you can define up to 20 conversion shortcuts in the gdb section.
 
+=head2 C backtrace
+
+Starting from Perl 5.21.1, on some platforms Perl supports retrieving
+the C level backtrace (similar to what symbolic debuggers like gdb do).
+
+The backtrace returns the stack trace of the C call frames,
+with the symbol names (function names), the object names (like "perl"),
+and if it can, also the source code locations (file:line).
+
+The supported platforms are Linux and OS X (some *BSD might work at
+least partly, but they have not yet been tested).
+
+The feature needs to be enabled with C<Configure -Dusecbacktrace>.
+
+The C<-Dusecbacktrace> also enables keeping the debug information
+when compiling.  Many compilers/linkers do support having both
+optimization and keeping the debug information.  The debug information
+is needed for the symbol names and the source locations.
+
+Source code locations, even if available, can often be missing or
+misleading if the compiler has e.g. inlined code.
+
+=over 4
+
+=item Linux
+
+You B<must> need to have the BFD (-lbfd) library installed, otherwise
+C<perl> will fail to link.  The BFD is usually distributed as part of
+the binutils.
+
+Summary: C<Configure ... -Dusecbacktrace>
+and you need C<-lbfd>.
+
+=item OS X
+
+The source code locations are supported only if you have both C<-g>
+and have the Developer Tools installed.
+
+Summary: C<Configure ... -Dusecbacktrace>
+and installing the Developer Tools would be good.
+
+=back
+
+Optionally, for trying out the feature, you may want to enable
+automatic dumping of the backtrace just before a warning message
+is emitted (this includes coincidentally croaking) by adding
+C<-Accflags=-DUSE_C_BACKTRACE_ON_WARN> for Configure.
+
+Unless the above additional feature is enabled, nothing about the
+backtrace functionality is visible, except for the Perl/XS level.
+
+Furthermore, even if you have enabled this feature to be compiled,
+you need to enable it in runtime with an environment variable:
+C<PERL_C_BACKTRACE_ON_WARN=10>.  It must be an integer higher
+than zero, and it tells the desired frame count.
+
+Retrieving the backtrace from Perl level (using for example an XS
+extension) would be much less exciting than one would hope: normally
+you would see C<runops>, C<entersub>, and not much else.  This API is
+intended to be called B<from within> the Perl implementation, not from
+Perl level execution.
+
+The C API for the backtrace is as follows (see L<perlintern>) for details).
+
+=over 4
+
+=item get_c_backtrace
+
+=item free_c_backtrace
+
+=item get_c_backtrace_dump
+
+=item dump_c_backtrace
+
+=back
+
 =head2 Poison
 
 If you see in a debugger a memory area mysteriously full of 0xABABABAB

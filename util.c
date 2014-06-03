@@ -51,6 +51,16 @@ int putenv(char *);
 # endif
 #endif
 
+/* <bfd.h> will have been included, if necessary, by "perl.h" */
+#ifdef USE_C_BACKTRACE
+#  ifdef I_DLFCN
+#    include <dlfcn.h>
+#  endif
+#  ifdef I_EXECINFO
+#    include <execinfo.h>
+#  endif
+#endif
+
 #ifdef PERL_DEBUG_READONLY_COW
 # include <sys/mman.h>
 #endif
@@ -1354,6 +1364,18 @@ Perl_mess_sv(pTHX_ SV *basemsg, bool consume)
 {
     dVAR;
     SV *sv;
+
+#if defined(USE_C_BACKTRACE) && defined(USE_C_BACKTRACE_ON_WARN)
+    {
+        char *ws;
+        int wi;
+        /* The PERL_C_BACKTRACE_ON_WARN must be an integer of one or more. */
+        if ((ws = PerlEnv_getenv("PERL_C_BACKTRACE_ON_WARN")) &&
+            (wi = atoi(ws)) > 0) {
+            Perl_dump_c_backtrace(aTHX_ Perl_debug_log, wi, 1);
+        }
+    }
+#endif
 
     PERL_ARGS_ASSERT_MESS_SV;
 
@@ -5481,6 +5503,648 @@ Perl_drand48_r(perl_drand48_t *random_state)
 #endif
 }
 
+#ifdef USE_C_BACKTRACE
+
+/* Possibly move all this USE_C_BACKTRACE code into a new file. */
+
+#ifdef USE_BFD
+
+typedef struct {
+    bfd* abfd;
+    asymbol** bfd_syms;
+    asection* bfd_text;
+    /* Since opening the executable and scanning its symbols is quite
+     * heavy operation, we remember the filename we used the last time,
+     * and do the opening and scanning only if the filename changes.
+     * This removes most (but not all) open+scan cycles. */
+    const char* fname_prev;
+} bfd_context;
+
+/* Given a dl_info, update the BFD context if necessary. */
+static void bfd_update(bfd_context* ctx, Dl_info* dl_info)
+{
+    /* BFD open and scan only if the filename changed. */
+    if (ctx->fname_prev == NULL ||
+        strNE(dl_info->dli_fname, ctx->fname_prev)) {
+        ctx->abfd = bfd_openr(dl_info->dli_fname, 0);
+        if (ctx->abfd) {
+            if (bfd_check_format(ctx->abfd, bfd_object)) {
+                IV symbol_size = bfd_get_symtab_upper_bound(ctx->abfd);
+                if (symbol_size > 0) {
+                    Safefree(ctx->bfd_syms);
+                    Newx(ctx->bfd_syms, symbol_size, asymbol*);
+                    ctx->bfd_text =
+                        bfd_get_section_by_name(ctx->abfd, ".text");
+                }
+                else
+                    ctx->abfd = NULL;
+            }
+            else
+                ctx->abfd = NULL;
+        }
+        ctx->fname_prev = dl_info->dli_fname;
+    }
+}
+
+/* Given a raw frame, try to symbolize it and store
+ * symbol information (source file, line number) away. */
+static void bfd_symbolize(bfd_context* ctx,
+                          void* raw_frame,
+                          char** symbol_name,
+                          STRLEN* symbol_name_size,
+                          char** source_name,
+                          STRLEN* source_name_size,
+                          STRLEN* source_line)
+{
+    *symbol_name = NULL;
+    *symbol_name_size = 0;
+    if (ctx->abfd) {
+        IV offset = PTR2IV(raw_frame) - PTR2IV(ctx->bfd_text->vma);
+        if (offset > 0 &&
+            bfd_canonicalize_symtab(ctx->abfd, ctx->bfd_syms) > 0) {
+            const char *file;
+            const char *func;
+            unsigned int line = 0;
+            if (bfd_find_nearest_line(ctx->abfd, ctx->bfd_text,
+                                      ctx->bfd_syms, offset,
+                                      &file, &func, &line) &&
+                file && func && line > 0) {
+                /* Size and copy the source file, use only
+                 * the basename of the source file.
+                 *
+                 * NOTE: the basenames are fine for the
+                 * Perl source files, but may not always
+                 * be the best idea for XS files. */
+                const char *p, *b = NULL;
+                /* Look for the last slash. */
+                for (p = file; *p; p++) {
+                    if (*p == '/')
+                        b = p + 1;
+                }
+                if (b == NULL || *b == 0) {
+                    b = file;
+                }
+                *source_name_size = p - b + 1;
+                Newx(*source_name, *source_name_size + 1, char);
+                Copy(b, *source_name, *source_name_size + 1, char);
+
+                *symbol_name_size = strlen(func);
+                Newx(*symbol_name, *symbol_name_size + 1, char);
+                Copy(func, *symbol_name, *symbol_name_size + 1, char);
+
+                *source_line = line;
+            }
+        }
+    }
+}
+
+#endif /* #ifdef USE_BFD */
+
+#ifdef PERL_DARWIN
+
+/* OS X has no public API for for 'symbolicating' (Apple official term)
+ * stack addresses to {function_name, source_file, line_number}.
+ * Good news: there is command line utility atos(1) which does that.
+ * Bad news 1: it's a command line utility.
+ * Bad news 2: one needs to have the Developer Tools installed.
+ * Bad news 3: in newer releases it needs to be run as 'xcrun atos'.
+ *
+ * To recap: we need to open a pipe for reading for a utility which
+ * might not exist, or exists in different locations, and then parse
+ * the output.  And since this is all for a low-level API, we cannot
+ * use high-level stuff.  Thanks, Apple. */
+
+typedef struct {
+    const char* tool;
+    const char* format;
+    bool unavail;
+    const char* fname;
+    void* object_base_addr;
+} atos_context;
+
+/* Given |dl_info|, updates the context.  If the context has been
+ * marked unavailable, return immediately.  If not but the tool has
+ * not been set, set it to either "xcrun atos" or "atos" (also set the
+ * format to use for creating commands for piping), or if neither is
+ * unavailable (one needs the Developer Tools installed), mark the context
+ * an unavailable.  Finally, update the filename (object name),
+ * and its base address. */
+
+static void atos_update(atos_context* ctx,
+                        Dl_info* dl_info)
+{
+    if (ctx->unavail)
+        return;
+    if (ctx->tool == NULL) {
+        const char* tools[] = {
+            "/usr/bin/xcrun",
+            "/usr/bin/atos"
+        };
+        const char* formats[] = {
+            "/usr/bin/xcrun atos -o '%s' -l %08x %08x 2>&1",
+            "/usr/bin/atos -d -o '%s' -l %08x %08x 2>&1"
+        };
+        struct stat st;
+        UV i;
+        for (i = 0; i < C_ARRAY_LENGTH(tools); i++) {
+            if (stat(tools[i], &st) == 0 && S_ISREG(st.st_mode)) {
+                ctx->tool = tools[i];
+                ctx->format = formats[i];
+                break;
+            }
+        }
+        if (ctx->tool == NULL) {
+            ctx->unavail = TRUE;
+            return;
+        }
+    }
+    if (ctx->fname == NULL ||
+        strNE(dl_info->dli_fname, ctx->fname)) {
+        ctx->fname = dl_info->dli_fname;
+        ctx->object_base_addr = dl_info->dli_fbase;
+    }
+}
+
+/* Given an output buffer end |p| and its |start|, matches
+ * for the atos output, extracting the source code location
+ * if possible, returning NULL otherwise. */
+static const char* atos_parse(const char* p,
+                              const char* start,
+                              STRLEN* source_name_size,
+                              STRLEN* source_line) {
+    /* atos() outputs is something like:
+     * perl_parse (in miniperl) (perl.c:2314)\n\n".
+     * We cannot use Perl regular expressions, because we need to
+     * stay low-level.  Therefore here we have a rolled-out version
+     * of a state machine which matches _backwards_from_the_end_ and
+     * if there's a success, returns the starts of the filename,
+     * also setting the filename size and the source line number.
+     * The matched regular expression is roughly "\(.*:\d+\)\s*$" */
+    const char* source_number_start;
+    const char* source_name_end;
+    /* Skip trailing whitespace. */
+    while (p > start && isspace(*p)) p--;
+    /* Now we should be at the close paren. */
+    if (p == start || *p != ')')
+        return NULL;
+    p--;
+    /* Now we should be in the line number. */
+    if (p == start || !isdigit(*p))
+        return NULL;
+    /* Skip over the digits. */
+    while (p > start && isdigit(*p))
+        p--;
+    /* Now we should be at the colon. */
+    if (p == start || *p != ':')
+        return NULL;
+    source_number_start = p + 1;
+    source_name_end = p; /* Just beyond the end. */
+    p--;
+    /* Look for the open paren. */
+    while (p > start && *p != '(')
+        p--;
+    if (p == start)
+        return NULL;
+    p++;
+    *source_name_size = source_name_end - p;
+    *source_line = atoi(source_number_start);
+    return p;
+}
+
+/* Given a raw frame, read a pipe from the symbolicator (that's the
+ * technical term) atos, reads the result, and parses the source code
+ * location.  We must stay low-level, so we use snprintf(), pipe(),
+ * and fread(), and then also parse the output ourselves. */
+static void atos_symbolize(atos_context* ctx,
+                           void* raw_frame,
+                           char** source_name,
+                           STRLEN* source_name_size,
+                           STRLEN* source_line)
+{
+    char cmd[1024];
+    const char* p;
+    Size_t cnt;
+
+    if (ctx->unavail)
+        return;
+    /* Simple security measure: if there's any funny business with
+     * the object name (used as "-o '%s'" ), leave since at least
+     * partially the user controls it. */
+    for (p = ctx->fname; *p; p++) {
+        if (*p == '\'' || iscntrl(*p)) {
+            ctx->unavail = TRUE;
+            return;
+        }
+    }
+    cnt = snprintf(cmd, sizeof(cmd), ctx->format,
+                   ctx->fname, ctx->object_base_addr, raw_frame);
+    if (cnt < sizeof(cmd)) {
+        /* Undo nostdio.h #defines that disable stdio.
+         * This is somewhat naughty, but is used elsewhere
+         * in the core, and affects only OS X. */
+#undef FILE
+#undef popen
+#undef fread
+#undef pclose
+        FILE* fp = popen(cmd, "r");
+        /* At the moment we open a new pipe for each stack frame.
+         * This is naturally somewhat slow, but hopefully generating
+         * stack traces is never going to in a performance critical path.
+         *
+         * We could play tricks with atos by batching the stack
+         * addresses to be resolved: atos can either take multiple
+         * addresses from the command line, or read addresses from
+         *
+         * a file (though the mess of creating temporary files would
+         * probably negate much of any possible speedup).
+         *
+         * Normally there are only two objects present in the backtrace:
+         * perl itself, and the libdyld.dylib.  (Note that the object
+         * filenames contain the full pathname, so perl may not always
+         * be in the same place.)  Whenever the object in the
+         * backtrace changes, the base address also changes.
+         *
+         * The problem with batching the addresses, though, would be
+         * matching the results with the addresses: the parsing of
+         * the results is already painful enough with a single address. */
+        if (fp) {
+            char out[1024];
+            UV cnt = fread(out, 1, sizeof(out), fp);
+            if (cnt < sizeof(out)) {
+                const char* p = atos_parse(out + cnt, out,
+                                           source_name_size,
+                                           source_line);
+                if (p) {
+                    Newx(*source_name,
+                         *source_name_size + 1, char);
+                    Copy(p, *source_name,
+                         *source_name_size + 1,  char);
+                }
+            }
+            pclose(fp);
+        }
+    }
+}
+
+#endif /* #ifdef PERL_DARWIN */
+
+/*
+=for apidoc get_c_backtrace
+
+Collects the backtrace (aka "stacktrace") into a single linear
+malloced buffer, which the caller B<must> Perl_free_c_backtrace().
+
+Scans the frames back by depth + skip, then drops the skip innermost,
+returning at most depth frames.
+
+=cut
+*/
+
+Perl_c_backtrace*
+Perl_get_c_backtrace(pTHX_ int depth, int skip)
+{
+    /* Note that here we must stay as low-level as possible: Newx(),
+     * Copy(), Safefree(); since we may be called from anywhere,
+     * so we should avoid higher level constructs like SVs or AVs.
+     *
+     * Since we are using safesysmalloc() via Newx(), don't try
+     * getting backtrace() there, unless you like deep recursion. */
+
+    /* Currently only implemented with backtrace() and dladdr(),
+     * for other platforms NULL is returned. */
+
+#if defined(HAS_BACKTRACE) && defined(HAS_DLADDR)
+    /* backtrace() is available via <execinfo.h> in glibc and in most
+     * modern BSDs; dladdr() is available via <dlfcn.h>. */
+
+    /* We try fetching this many frames total, but then discard
+     * the |skip| first ones.  For the remaining ones we will try
+     * retrieving more information with dladdr(). */
+    int try_depth = skip +  depth;
+
+    /* The addresses (program counters) returned by backtrace(). */
+    void** raw_frames;
+
+    /* Retrieved with dladdr() from the addresses returned by backtrace(). */
+    Dl_info* dl_infos;
+
+    /* Sizes _including_ the terminating \0 of the object name
+     * and symbol name strings. */
+    STRLEN* object_name_sizes;
+    STRLEN* symbol_name_sizes;
+
+#ifdef USE_BFD
+    /* The symbol names comes either from dli_sname,
+     * or if using BFD, they can come from BFD. */
+    char** symbol_names;
+#endif
+
+    /* The source code location information.  Dug out with e.g. BFD. */
+    char** source_names;
+    STRLEN* source_name_sizes;
+    STRLEN* source_lines;
+
+    Perl_c_backtrace* bt = NULL;  /* This is what will be returned. */
+    int got_depth; /* How many frames were returned from backtrace(). */
+    UV frame_count = 0; /* How many frames we return. */
+    UV total_bytes = 0; /* The size of the whole returned backtrace. */
+
+#ifdef USE_BFD
+    bfd_context bfd_ctx;
+#endif
+#ifdef PERL_DARWIN
+    atos_context atos_ctx;
+#endif
+
+    /* Here are probably possibilities for optimizing.  We could for
+     * example have a struct that contains most of these and then
+     * allocate |try_depth| of them, saving a bunch of malloc calls.
+     * Note, however, that |frames| could not be part of that struct
+     * because backtrace() will want an array of just them.  Also be
+     * careful about the name strings. */
+    Newx(raw_frames, try_depth, void*);
+    Newx(dl_infos, try_depth, Dl_info);
+    Newx(object_name_sizes, try_depth, STRLEN);
+    Newx(symbol_name_sizes, try_depth, STRLEN);
+    Newx(source_names, try_depth, char*);
+    Newx(source_name_sizes, try_depth, STRLEN);
+    Newx(source_lines, try_depth, STRLEN);
+#ifdef USE_BFD
+    Newx(symbol_names, try_depth, char*);
+#endif
+
+    /* Get the raw frames. */
+    got_depth = (int)backtrace(raw_frames, try_depth);
+
+    /* We use dladdr() instead of backtrace_symbols() because we want
+     * the full details instead of opaque strings.  This is useful for
+     * two reasons: () the details are needed for further symbolic
+     * digging (2) by having the details we fully control the output,
+     * which in turn is useful when more platforms are added:
+     * we can keep out output "portable". */
+
+    /* We want a single linear allocation, which can then be freed
+     * with a single swoop.  We will do the usual trick of first
+     * walking over the structure and seeing how much we need to
+     * allocate, then allocating, and then walking over the structure
+     * the second time and populating it. */
+
+    /* First we must compute the total size of the buffer. */
+    total_bytes = sizeof(Perl_c_backtrace_header);
+    if (got_depth > skip) {
+        int i;
+#ifdef USE_BFD
+        bfd_init(); /* Is this safe to call multiple times? */
+        Zero(&bfd_ctx, 1, bfd_context);
+#endif
+#ifdef PERL_DARWIN
+        Zero(&atos_ctx, 1, atos_context);
+#endif
+        for (i = skip; i < try_depth; i++) {
+            Dl_info* dl_info = &dl_infos[i];
+
+            total_bytes += sizeof(Perl_c_backtrace_frame);
+
+            source_names[i] = NULL;
+            source_name_sizes[i] = 0;
+            source_lines[i] = 0;
+
+            /* Yes, zero from dladdr() is failure. */
+            if (dladdr(raw_frames[i], dl_info)) {
+                object_name_sizes[i] =
+                    dl_info->dli_fname ? strlen(dl_info->dli_fname) : 0;
+                symbol_name_sizes[i] =
+                    dl_info->dli_sname ? strlen(dl_info->dli_sname) : 0;
+#ifdef USE_BFD
+                bfd_update(&bfd_ctx, dl_info);
+                bfd_symbolize(&bfd_ctx, raw_frames[i],
+                              &symbol_names[i],
+                              &symbol_name_sizes[i],
+                              &source_names[i],
+                              &source_name_sizes[i],
+                              &source_lines[i]);
+#endif
+#if PERL_DARWIN
+                atos_update(&atos_ctx, dl_info);
+                atos_symbolize(&atos_ctx,
+                               raw_frames[i],
+                               &source_names[i],
+                               &source_name_sizes[i],
+                               &source_lines[i]);
+#endif
+
+                /* Plus ones for the terminating \0. */
+                total_bytes += object_name_sizes[i] + 1;
+                total_bytes += symbol_name_sizes[i] + 1;
+                total_bytes += source_name_sizes[i] + 1;
+
+                frame_count++;
+            } else {
+                break;
+            }
+        }
+#ifdef USE_BFD
+        Safefree(bfd_ctx.bfd_syms);
+#endif
+    }
+
+    /* Now we can allocate and populate the result buffer. */
+    Newxc(bt, total_bytes, char, Perl_c_backtrace);
+    Zero(bt, total_bytes, char);
+    bt->header.frame_count = frame_count;
+    bt->header.total_bytes = total_bytes;
+    if (frame_count > 0) {
+        Perl_c_backtrace_frame* frame = bt->frame_info;
+        char* name_base = (char *)(frame + frame_count);
+        char* name_curr = name_base; /* Outputting the name strings here. */
+        UV i;
+        for (i = skip; i < skip + frame_count; i++) {
+            Dl_info* dl_info = &dl_infos[i];
+
+            frame->addr = raw_frames[i];
+            frame->object_base_addr = dl_info->dli_fbase;
+            frame->symbol_addr = dl_info->dli_saddr;
+
+            /* Copies a string, including the \0, and advances the name_curr.
+             * Also copies the start and the size to the frame. */
+#define PERL_C_BACKTRACE_STRCPY(frame, doffset, src, dsize, size) \
+            if (size && src) \
+                Copy(src, name_curr, size, char); \
+            frame->doffset = name_curr - (char*)bt; \
+            frame->dsize = size; \
+            name_curr += size; \
+            *name_curr++ = 0;
+
+            PERL_C_BACKTRACE_STRCPY(frame, object_name_offset,
+                                    dl_info->dli_fname,
+                                    object_name_size, object_name_sizes[i]);
+
+#ifdef USE_BFD
+            PERL_C_BACKTRACE_STRCPY(frame, symbol_name_offset,
+                                    symbol_names[i],
+                                    symbol_name_size, symbol_name_sizes[i]);
+            Safefree(symbol_names[i]);
+#else
+            PERL_C_BACKTRACE_STRCPY(frame, symbol_name_offset,
+                                    dl_info->dli_sname,
+                                    symbol_name_size, symbol_name_sizes[i]);
+#endif
+
+            PERL_C_BACKTRACE_STRCPY(frame, source_name_offset,
+                                    source_names[i],
+                                    source_name_size, source_name_sizes[i]);
+            Safefree(source_names[i]);
+
+#undef PERL_C_BACKTRACE_STRCPY
+
+            frame->source_line_number = source_lines[i];
+
+            frame++;
+        }
+        assert(total_bytes ==
+               (UV)(sizeof(Perl_c_backtrace_header) +
+                    frame_count * sizeof(Perl_c_backtrace_frame) +
+                    name_curr - name_base));
+    }
+#ifdef USE_BFD
+    Safefree(symbol_names);
+#endif
+    Safefree(source_lines);
+    Safefree(source_name_sizes);
+    Safefree(source_names);
+    Safefree(symbol_name_sizes);
+    Safefree(object_name_sizes);
+    /* Assuming the strings returned by dladdr() are pointers
+     * to read-only static memory (the object file), so that
+     * they do not need freeing (and cannot be). */
+    Safefree(dl_infos);
+    Safefree(raw_frames);
+    return bt;
+#else
+    PERL_UNUSED_ARGV(depth);
+    PERL_UNUSED_ARGV(skip);
+    return NULL;
+#endif
+}
+
+/*
+=for apidoc free_c_backtrace
+
+Deallocates a backtrace received from get_c_bracktrace.
+
+=cut
+*/
+
+/*
+=for apidoc get_c_backtrace_dump
+
+Returns a SV a dump of |depth| frames of the call stack, skipping
+the |skip| innermost ones.  depth of 20 is usually enough.
+
+The appended output looks like:
+
+...
+1   10e004812:0082   Perl_croak   util.c:1716    /usr/bin/perl
+2   10df8d6d2:1d72   perl_parse   perl.c:3975    /usr/bin/perl
+...
+
+The fields are tab-separated.  The first column is the depth (zero
+being the innermost non-skipped frame).  In the hex:offset, the hex is
+where the program counter was in S_parse_body, and the :offset (might
+be missing) tells how much inside the S_parse_body the program counter was.
+
+The util.c:1716 is the source code file and line number.
+
+The /usr/bin/perl is obvious (hopefully).
+
+Unknowns are C<"-">.  Unknowns can happen unfortunately quite easily:
+if the platform doesn't support retrieving the information;
+if the binary is missing the debug information;
+if the optimizer has transformed the code by for example inlining.
+
+=cut
+*/
+
+SV*
+Perl_get_c_backtrace_dump(pTHX_ int depth, int skip)
+{
+    Perl_c_backtrace* bt;
+
+    bt = get_c_backtrace(depth, skip + 1 /* Hide ourselves. */);
+    if (bt) {
+        Perl_c_backtrace_frame* frame;
+        SV* dsv = newSVpvs("");
+        UV i;
+        for (i = 0, frame = bt->frame_info;
+             i < bt->header.frame_count; i++, frame++) {
+            Perl_sv_catpvf(aTHX_ dsv, "%d", (int)i);
+            Perl_sv_catpvf(aTHX_ dsv, "\t%p", frame->addr ? frame->addr : "-");
+            /* Symbol (function) names might disappear without debug info.
+             *
+             * The source code location might disappear in case of the
+             * optimizer inlining or otherwise rearranging the code. */
+            if (frame->symbol_addr) {
+                Perl_sv_catpvf(aTHX_ dsv, ":%04x",
+                               (int)
+                               ((char*)frame->addr - (char*)frame->symbol_addr));
+            }
+            Perl_sv_catpvf(aTHX_ dsv, "\t%s",
+                           frame->symbol_name_size &&
+                           frame->symbol_name_offset ?
+                           (char*)bt + frame->symbol_name_offset : "-");
+            if (frame->source_name_size &&
+                frame->source_name_offset &&
+                frame->source_line_number) {
+                Perl_sv_catpvf(aTHX_ dsv, "\t%s:%"UVuf,
+                               (char*)bt + frame->source_name_offset,
+                               (UV)frame->source_line_number);
+            } else {
+                Perl_sv_catpvf(aTHX_ dsv, "\t-");
+            }
+            Perl_sv_catpvf(aTHX_ dsv, "\t%s",
+                           frame->object_name_size &&
+                           frame->object_name_offset ?
+                           (char*)bt + frame->object_name_offset : "-");
+            /* The frame->object_base_addr is not output,
+             * but it is used for symbolizing/symbolicating. */
+            sv_catpvs(dsv, "\n");
+        }
+
+        Perl_free_c_backtrace(aTHX_ bt);
+
+        return dsv;
+    }
+
+    return NULL;
+}
+
+/*
+=for apidoc dump_c_backtrace
+
+Dumps the C backtrace to the given fp.
+
+Returns true if a backtrace could be retrieved, false if not.
+
+=cut
+*/
+
+bool
+Perl_dump_c_backtrace(pTHX_ PerlIO* fp, int depth, int skip)
+{
+    SV* sv;
+
+    PERL_ARGS_ASSERT_DUMP_C_BACKTRACE;
+
+    sv = Perl_get_c_backtrace_dump(aTHX_ depth, skip);
+    if (sv) {
+        sv_2mortal(sv);
+        PerlIO_printf(fp, "%s", SvPV_nolen(sv));
+        return TRUE;
+    }
+    return FALSE;
+}
+
+#endif /* #ifdef USE_C_BACKTRACE */
 
 /*
  * Local variables:

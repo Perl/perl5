@@ -131,12 +131,24 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_difftime HAS_DIFFTIME		/**/
 
+/* HAS_DLADDR:
+ *	This symbol, if defined, indicates that the dladdr routine is
+ *	available to return information about stack addresses.
+ */
+#$d_dladdr HAS_DLADDR	/**/
+
 /* HAS_DLERROR:
  *	This symbol, if defined, indicates that the dlerror routine is
  *	available to return a string describing the last error that
  *	occurred from a call to dlopen(), dlclose() or dlsym().
  */
 #$d_dlerror HAS_DLERROR	/**/
+
+/* HAS_BACKTRACE:
+ *	This symbol, if defined, indicates that the backtrace routine is
+ *	available to return backtrace information about the C stack.
+ */
+#$d_backtrace HAS_BACKTRACE	/**/
 
 /* HAS_DUP2:
  *	This symbol, if defined, indicates that the dup2 routine is
@@ -688,6 +700,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	be included.
  */
 #$i_dlfcn I_DLFCN		/**/
+
+/* I_EXECINFO:
+ *	This symbol, if defined, indicates that <execinfo.h> exists and should
+ *	be included.
+ */
+#$i_execinfo I_EXECINFO		/**/
 
 /* I_FCNTL:
  *	This manifest constant tells the C program to include <fcntl.h>.
@@ -4211,6 +4229,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	could be included by the C program to get the assert() macro.
  */
 #$i_assert	I_ASSERT		/**/
+
+/* I_BFD:
+ *	This symbol, if defined, indicates that <bfd.h> exists and
+ *	could be included by the C program to use the BFD library.
+ */
+#$i_bfd	I_BFD		/**/
 
 /* I_CRYPT:
  *	This symbol, if defined, indicates that <crypt.h> exists and

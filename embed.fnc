@@ -1643,6 +1643,12 @@ Afp	|void	|warner		|U32 err|NN const char* pat|...
 Afp	|void	|ck_warner	|U32 err|NN const char* pat|...
 Afp	|void	|ck_warner_d	|U32 err|NN const char* pat|...
 Ap	|void	|vwarner	|U32 err|NN const char* pat|NULLOK va_list* args
+#ifdef USE_C_BACKTRACE
+pd	|Perl_c_backtrace*|get_c_backtrace|int max_depth|int skip
+dm	|void	|free_c_backtrace|NN Perl_c_backtrace* bt
+Apd	|SV*	|get_c_backtrace_dump|int max_depth|int skip
+Apd	|bool	|dump_c_backtrace|NN PerlIO* fp|int max_depth|int skip
+#endif
 : FIXME
 p	|void	|watch		|NN char** addr
 Am	|I32	|whichsig	|NN const char* sig

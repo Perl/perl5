@@ -522,6 +522,11 @@ unless ($define{USE_LOCALE_NUMERIC}) {
 			 );
 }
 
+unless ($define{'USE_C_BACKTRACE'}) {
+    ++$skip{Perl_get_c_backtrace_dump};
+    ++$skip{Perl_dump_c_backtrace};
+}
+
 unless ($define{HAVE_INTERP_INTERN}) {
     ++$skip{$_} foreach qw(
 		    Perl_sys_intern_clear
