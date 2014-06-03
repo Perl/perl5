@@ -34,7 +34,7 @@ holds the key and hash value.
 #define PERL_HASH_INTERNAL_ACCESS
 #include "perl.h"
 
-#define DO_HSPLIT(xhv) ((xhv)->xhv_keys > (xhv)->xhv_max) /* HvTOTALKEYS(hv) > HvMAX(hv) */
+#define DO_HSPLIT(xhv) (((xhv)->xhv_keys - 1) > (xhv)->xhv_max) /* HvTOTALKEYS(hv) > HvMAX(hv) */
 #define HV_FILL_THRESHOLD 31
 
 static const char S_strtab_error[]
@@ -341,6 +341,7 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
     XPVHV* xhv;
     HE *entry;
     HE **oentry;
+    HE **oentry_orig;
     SV *sv;
     bool is_utf8;
     int masked_flags;
@@ -810,7 +811,7 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	HvARRAY(hv) = (HE**)array;
     }
 
-    oentry = &(HvARRAY(hv))[hash & (I32) xhv->xhv_max];
+    oentry_orig= oentry = &(HvARRAY(hv))[hash & (I32) xhv->xhv_max];
 
     entry = new_HE();
     /* share_hek_flags will do the free for us.  This might be considered
@@ -884,7 +885,7 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	HvHASKFLAGS_on(hv);
 
     xhv->xhv_keys++; /* HvTOTALKEYS(hv)++ */
-    if ( DO_HSPLIT(xhv) ) {
+    if ( HeNEXT(*oentry_orig) && DO_HSPLIT(xhv) ) {
         const STRLEN oldsize = xhv->xhv_max + 1;
         const U32 items = (U32)HvPLACEHOLDERS_get(hv);
 

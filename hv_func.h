@@ -82,7 +82,7 @@
 #   define PERL_HASH_WITH_SEED(seed,hash,str,len) (hash)= S_perl_hash_lookup3_hashlittle((seed),(U8*)(str),(len))
 #elif defined(PERL_HASH_FUNC_AESHASH)
 #   define PERL_HASH_FUNC "AESHASH"
-#   define PERL_HASH_SEED_BYTES 48
+#   define PERL_HASH_SEED_BYTES 64
 #   define PERL_HASH_SEED_BYTES_INIT 16
 #   define BUILD_PERL_HASH_FUNC_AESHASH
 #   define PERL_HASH_WITH_SEED(seed,hash,str,len) (hash)= S_perl_hash_aeshash((seed),(U8*)(str),(len))
@@ -814,9 +814,11 @@ S_perl_hash_aeshash_init(unsigned char *seed) {
     __m128i K0  = _mm_lddqu_si128(seedp);
     __m128i K1  = KEYEXP(K0, 0x01);
     __m128i K2  = KEYEXP(K1, 0x02);
+    __m128i K3  = KEYEXP(K1, 0x04);
 
     _mm_storeu_si128(seedp+1, K1);
     _mm_storeu_si128(seedp+2, K2);
+    _mm_storeu_si128(seedp+3, K3);
 }
 
 /*  simple mask to get rid of data in the high part of the register. */
@@ -871,6 +873,7 @@ S_perl_hash_aeshash(const unsigned char * const seed, const unsigned char *str, 
         __m128i s0= _mm_load_si128((__m128i *) seed);       /* aligned - faster than _mm_loadu_si128 */
         __m128i s1= _mm_load_si128((__m128i *)(seed + 16)); /* aligned - faster than _mm_loadu_si128 */
         __m128i s2= _mm_load_si128((__m128i *)(seed + 32)); /* aligned - faster than _mm_loadu_si128 */
+        __m128i s3= _mm_load_si128((__m128i *)(seed + 48)); /* aligned - faster than _mm_loadu_si128 */
 
 
         block= _mm_set1_epi64x((int64_t)len); /* sets both 64bit sub buffers to len */
@@ -913,9 +916,8 @@ partial:
 
         }
 
-        acc= _mm_aesenc_si128( acc, s1 );
-        acc= _mm_aesenc_si128( acc, s2 );
-        acc= _mm_aesenc_si128( acc, s1 );
+        acc= _mm_aesenc_si128( acc, s3 );
+        acc= _mm_aesenc_si128( acc, s0 );
 
         return _mm_extract_epi32(acc,0);
 }
