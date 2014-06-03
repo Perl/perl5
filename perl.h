@@ -5171,6 +5171,25 @@ EXTCONST bool PL_valid_types_NV_set[];
 
 #endif
 
+
+/* if these never got defined, they need defaults */
+#ifndef PERL_SET_CONTEXT
+#  define PERL_SET_CONTEXT(i)		PERL_SET_INTERP(i)
+#endif
+
+#ifndef PERL_GET_CONTEXT
+#  define PERL_GET_CONTEXT		PERL_GET_INTERP
+#endif
+
+#ifndef PERL_GET_THX
+#  define PERL_GET_THX			((void*)NULL)
+#endif
+
+#ifndef PERL_SET_THX
+#  define PERL_SET_THX(t)		NOOP
+#endif
+
+
 #ifndef PERL_NO_INLINE_FUNCTIONS
 /* Static inline funcs that depend on includes and declarations above.
    Some of these reference functions in the perl object files, and some
@@ -5455,24 +5474,6 @@ typedef struct am_table_short AMTS;
 #endif
 #ifndef Atoul
 #   define Atoul(s)	Strtoul(s, NULL, 10)
-#endif
-
-
-/* if these never got defined, they need defaults */
-#ifndef PERL_SET_CONTEXT
-#  define PERL_SET_CONTEXT(i)		PERL_SET_INTERP(i)
-#endif
-
-#ifndef PERL_GET_CONTEXT
-#  define PERL_GET_CONTEXT		PERL_GET_INTERP
-#endif
-
-#ifndef PERL_GET_THX
-#  define PERL_GET_THX			((void*)NULL)
-#endif
-
-#ifndef PERL_SET_THX
-#  define PERL_SET_THX(t)		NOOP
 #endif
 
 #ifndef PERL_SCRIPT_MODE
