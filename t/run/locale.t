@@ -243,7 +243,6 @@ EOF
 	fresh_perl_is(<<'EOF', "$difference "x4, {},
             use locale;
 	    use POSIX qw(locale_h);
-	    setlocale(LC_NUMERIC, "");
 	    my $in = 4.2;
 	    printf("%g %g %s %s ", $in, 4.2, sprintf("%g", $in), sprintf("%g", 4.2));
 EOF
@@ -257,7 +256,6 @@ EOF
 	fresh_perl_is(<<'EOF', "$difference "x4, {},
             use locale;
 	    use POSIX qw(locale_h);
-	    setlocale(LC_NUMERIC, "");
 	    my $in = 4.2;
 	    printf("%g %g %s %s ", $in, 4.2, sprintf("%g", $in), sprintf("%g", 4.2));
 EOF
@@ -287,7 +285,6 @@ EOF
                 }
                 use locale;
                 use POSIX qw(locale_h);
-                setlocale(LC_NUMERIC, "");
                 my \$in = 4.2;
                 printf("%g", \$in);
 EOF
@@ -315,7 +312,6 @@ EOF
                     }
                     use locale;
                     use POSIX qw(locale_h);
-                    setlocale(LC_NUMERIC, "");
                     my \$in = 4.2;
                     printf("%g", \$in);
 EOF
