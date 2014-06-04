@@ -753,24 +753,19 @@ S_fixup_errno_string(pTHX_ SV* sv)
     if(strEQ(SvPVX(sv), "")) {
 	sv_catpv(sv, UNKNOWN_ERRNO_MSG);
     }
-#if 0
-    /* This is disabled to get v5.20 out the door.  It means that $! behaves as
-     * if in the scope of both 'use locale' and 'use bytes'.  This can cause
-     * mixed encodings and double utf8 upgrading,  See towards the end of the
-     * thread for [perl #119499] */
     else {
 
         /* In some locales the error string may come back as UTF-8, in which
          * case we should turn on that flag.  This didn't use to happen, and to
-         * avoid any possible backward compatibility issues, we don't turn on
-         * the flag unless we have to.  So the flag stays off for an entirely
-         * ASCII string.  We assume that if the string looks like UTF-8, it
-         * really is UTF-8:  "text in any other encoding that uses bytes with
-         * the high bit set is extremely unlikely to pass a UTF-8 validity
-         * test" (http://en.wikipedia.org/wiki/Charset_detection).  There is a
-         * potential that we will get it wrong however, especially on short
-         * error message text.  (If it turns out to be necessary, we could also
-         * keep track if the current LC_MESSAGES locale is UTF-8) */
+         * avoid as many possible backward compatibility issues as possible, we
+         * don't turn on the flag unless we have to.  So the flag stays off for
+         * an entirely ASCII string.  We assume that if the string looks like
+         * UTF-8, it really is UTF-8:  "text in any other encoding that uses
+         * bytes with the high bit set is extremely unlikely to pass a UTF-8
+         * validity test" (http://en.wikipedia.org/wiki/Charset_detection).
+         * There is a potential that we will get it wrong however, especially
+         * on short error message text.  (If it turns out to be necessary, we
+         * could also keep track if the current LC_MESSAGES locale is UTF-8) */
         if (! IN_BYTES  /* respect 'use bytes' */
             && ! is_ascii_string((U8*) SvPVX_const(sv), SvCUR(sv))
             && is_utf8_string((U8*) SvPVX_const(sv), SvCUR(sv)))
@@ -778,7 +773,6 @@ S_fixup_errno_string(pTHX_ SV* sv)
             SvUTF8_on(sv);
         }
     }
-#endif
 }
 
 #ifdef VMS

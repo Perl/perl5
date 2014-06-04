@@ -1765,10 +1765,6 @@ It can be used immediately before invoking the C<die()> operator,
 to set the exit value, or to inspect the system error string
 corresponding to error I<n>, or to restore C<$!> to a meaningful state.
 
-Note that when stringified, the text is always returned as if both
-S<L<C<"use locale">|perllocale>> and S<L<C<"use bytes">|bytes>> are in
-effect.  This is likely to change in v5.22.
-
 Mnemonic: What just went bang?
 
 =item %OS_ERROR

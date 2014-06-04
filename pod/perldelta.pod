@@ -105,6 +105,18 @@ handle locale, this can cause garbage text to be displayed.  It's better
 to display text that is translatable via some tool than garbage text
 which is much harder to figure out.
 
+=head2 C<"$!"> text will be returned in UTF-8 when appropriate
+
+The stringification of C<$!> and C<$^E> will have the UTF-8 flag set
+when the text is actually non-ASCII UTF-8.  This will enable programs
+that are set up to be locale-aware to properly output messages in the
+user's native language.  Code that needs to continue the 5.20 and
+earlier behavior can do the stringification within the scopes of both
+'use bytes' and 'use locale ":messages".  No other Perl operations will
+be affected by locale; only C<$!> and C<$^E> stringification.  The
+'bytes' pragma causes the UTF-8 flag to not be set, just as in previous
+Perl releases.  This resolves [perl #112208].
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.
