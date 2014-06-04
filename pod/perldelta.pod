@@ -553,6 +553,27 @@ C<POSIX::localeconv()> now marks appropriately the values it returns as
 UTF-8 or not.  Previously they were always returned as a bytes, even if
 they were supposed to be encoded as UTF-8.
 
+=item *
+
+On Microsoft Windows, within the scope of C<S<use locale>>, the following
+POSIX character classes gave results for many locales that did not
+conform to the POSIX standard:
+C<[[:alnum:]]>,
+C<[[:alpha:]]>,
+C<[[:blank:]]>,
+C<[[:digit:]]>,
+C<[[:graph:]]>,
+C<[[:lower:]]>,
+C<[[:print:]]>,
+C<[[:punct:]]>,
+C<[[:upper:]]>,
+C<[[:word:]]>,
+and
+C<[[:xdigit:]]>.
+These are because the underlying Microsoft implementation does not
+follow the standard.  Perl now takes special precautions to correct for
+this.
+
 =back
 
 =head1 Known Problems

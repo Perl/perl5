@@ -1359,7 +1359,37 @@ EXTCONST U32 PL_charclass[];
 
 #  define _LC_CAST U8
 
-#  if defined(CTYPE256) || (!defined(isascii) && !defined(HAS_ISASCII))
+#  ifdef WIN32
+    /* The Windows functions don't bother to follow the POSIX standard, which
+     * for example says that something can't both be a printable and a control.
+     * But Windows treats the \t control as a printable, and does such things
+     * as making superscripts into both digits and punctuation.  This tames
+     * these flaws by assuming that the definitions of both controls and space
+     * are correct, and then making sure that other definitions don't have
+     * weirdnesses, by making sure that isalnum() isn't also ispunct(), etc.
+     * Not all possible weirdnesses are checked for, just the ones that were
+     * detected on actual Microsoft code pages */
+
+#    define isCNTRL_LC(c)    _generic_LC(c, _CC_CNTRL, iscntrl)
+#    define isSPACE_LC(c)    _generic_LC(c, _CC_SPACE, isspace)
+
+#    define isALPHA_LC(c)    (_generic_LC(c, _CC_ALPHA, isalpha) && isALPHANUMERIC_LC(c))
+#    define isALPHANUMERIC_LC(c)  (_generic_LC(c, _CC_ALPHANUMERIC, isalnum) && ! isPUNCT_LC(c))
+#    define isDIGIT_LC(c)    (_generic_LC(c, _CC_DIGIT, isdigit) && isALPHANUMERIC_LC(c))
+#    define isGRAPH_LC(c)    (_generic_LC(c, _CC_GRAPH, isgraph) && isPRINT_LC(c))
+#    define isIDFIRST_LC(c)  (((c) == '_') || (_generic_LC(c, _CC_IDFIRST, isalpha) && ! isPUNCT_LC(c)))
+#    define isLOWER_LC(c)    (_generic_LC(c, _CC_LOWER, islower) && isALPHA_LC(c))
+#    define isPRINT_LC(c)    (_generic_LC(c, _CC_PRINT, isprint) && ! isCNTRL_LC(c))
+#    define isPUNCT_LC(c)    (_generic_LC(c, _CC_PUNCT, ispunct) && ! isCNTRL_LC(c))
+#    define isUPPER_LC(c)    (_generic_LC(c, _CC_UPPER, isupper) && isALPHA_LC(c))
+#    define isWORDCHAR_LC(c) (((c) == '_') || isALPHANUMERIC_LC(c))
+#    define isXDIGIT_LC(c)   (_generic_LC(c, _CC_XDIGIT, isxdigit) && isALPHANUMERIC_LC(c))
+
+#    define toLOWER_LC(c) _generic_toLOWER_LC((c), tolower, U8)
+#    define toUPPER_LC(c) _generic_toUPPER_LC((c), toupper, U8)
+#    define toFOLD_LC(c)  _generic_toFOLD_LC((c), tolower, U8)
+
+#  elif defined(CTYPE256) || (!defined(isascii) && !defined(HAS_ISASCII))
     /* For most other platforms */
 
 #    define isALPHA_LC(c)   _generic_LC(c, _CC_ALPHA, isalpha)
