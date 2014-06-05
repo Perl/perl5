@@ -1991,9 +1991,9 @@ and passed directly to C<execvp>, which is more efficient.  Examples:
 If you don't really want to execute the first argument, but want to lie
 to the program you are executing about its own name, you can specify
 the program you actually want to run as an "indirect object" (without a
-comma) in front of the LIST.  (This always forces interpretation of the
-LIST as a multivalued list, even if there is only a single scalar in
-the list.)  Example:
+comma) in front of the LIST, as in C<exec PROGRAM LIST>.  (This always
+forces interpretation of the LIST as a multivalued list, even if there
+is only a single scalar in the list.)  Example:
 
     $shell = '/bin/csh';
     exec $shell '-sh';    # pretend it's a login shell
@@ -2022,6 +2022,10 @@ The first version, the one without the indirect object, ran the I<echo>
 program, passing it C<"surprise"> an argument.  The second version didn't;
 it tried to run a program named I<"echo surprise">, didn't find it, and set
 C<$?> to a non-zero value indicating failure.
+
+On Windows, only the C<exec PROGRAM LIST> indirect object syntax will
+reliably avoid using the shell; C<exec LIST>, even with more than one
+element, will fall back to the shell if the first spawn fails.
 
 Perl attempts to flush all files opened for output before the exec,
 but this may not be supported on some platforms (see L<perlport>).
@@ -7983,7 +7987,9 @@ entire argument is passed to the system's command shell for parsing
 (this is C</bin/sh -c> on Unix platforms, but varies on other
 platforms).  If there are no shell metacharacters in the argument,
 it is split into words and passed directly to C<execvp>, which is
-more efficient.
+more efficient.  On Windows, only the C<system PROGRAM LIST> syntax will
+reliably avoid using the shell; C<system LIST>, even with more than one
+element, will fall back to the shell if the first spawn fails.
 
 Perl will attempt to flush all files opened for
 output before any operation that may do a fork, but this may not be
