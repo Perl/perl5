@@ -2535,7 +2535,7 @@ PERL_CALLCONV Malloc_t	Perl_malloc(MEM_SIZE nbytes)
 			__attribute__malloc__
 			__attribute__warn_unused_result__;
 
-PERL_CALLCONV void	Perl_markstack_grow(pTHX);
+PERL_CALLCONV I32 *	Perl_markstack_grow(pTHX);
 PERL_CALLCONV SV*	Perl_mess(pTHX_ const char* pat, ...)
 			__attribute__format__(__printf__,pTHX_1,pTHX_2)
 			__attribute__nonnull__(pTHX_1);

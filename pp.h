@@ -57,9 +57,10 @@ Refetch the stack pointer.  Used after a callback.  See L<perlcall>.
 
 #define PUSHMARK(p)	\
 	STMT_START {					\
-	    if (UNLIKELY(++PL_markstack_ptr == PL_markstack_max))	\
-	    markstack_grow();				\
-	    *PL_markstack_ptr = (I32)((p) - PL_stack_base);\
+	    I32 * mark_stack_entry;			\
+	    if (UNLIKELY((mark_stack_entry = ++PL_markstack_ptr) == PL_markstack_max))	\
+	    mark_stack_entry = markstack_grow();					\
+	    *mark_stack_entry  = (I32)((p) - PL_stack_base);				\
 	} STMT_END
 
 #define TOPMARK		(*PL_markstack_ptr)
