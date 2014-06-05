@@ -5037,6 +5037,7 @@ S_sv_uncow(pTHX_ SV * const sv, const U32 flags)
 	    }
 # endif
             SvPV_set(sv, NULL);
+            SvCUR_set(sv, 0);
             SvLEN_set(sv, 0);
             if (flags & SV_COW_DROP_PV) {
                 /* OK, so we don't need to copy our buffer.  */
