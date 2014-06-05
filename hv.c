@@ -18,7 +18,6 @@
 
 /* 
 =head1 Hash Manipulation Functions
-
 A HV structure represents a Perl hash.  It consists mainly of an array
 of pointers, each of which points to a linked list of HE structures.  The
 array is indexed by the hash function of the key, so each linked list

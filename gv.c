@@ -21,7 +21,6 @@
 
 /*
 =head1 GV Functions
-
 A GV is a structure which corresponds to to a Perl typeglob, ie *foo.
 It is a structure that holds a pointer to a scalar, an array, a hash etc,
 corresponding to $foo, @foo, %foo.

@@ -17,7 +17,6 @@
 
 /*
 =head1 MRO Functions
-
 These functions are related to the method resolution order of perl classes
 
 =cut

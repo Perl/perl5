@@ -139,7 +139,6 @@
 /* ============================================================================
 
 =head1 Allocation and deallocation of SVs.
-
 An SV (or AV, HV, etc.) is allocated in two parts: the head (struct
 sv, av, hv...) contains type and reference count information, and for
 many types, a pointer to the body (struct xrv, xpv, xpviv...), which
@@ -164,12 +163,12 @@ slot in the arena.  SV-bodies are further described later.
 
 The following global variables are associated with arenas:
 
-    PL_sv_arenaroot	pointer to list of SV arenas
-    PL_sv_root		pointer to list of free SV structures
+ PL_sv_arenaroot     pointer to list of SV arenas
+ PL_sv_root          pointer to list of free SV structures
 
-    PL_body_arenas	head of linked-list of body arenas
-    PL_body_roots[]	array of pointers to list of free bodies of svtype
-			arrays are indexed by the svtype needed
+ PL_body_arenas      head of linked-list of body arenas
+ PL_body_roots[]     array of pointers to list of free bodies of svtype
+                     arrays are indexed by the svtype needed
 
 A few special SV heads are not allocated from an arena, but are
 instead directly created in the interpreter structure, eg PL_sv_undef.
@@ -742,6 +741,7 @@ Deallocate the memory used by all arenas.  Note that all the individual SV
 heads and bodies within the arenas must already have been freed.
 
 =cut
+
 */
 void
 Perl_sv_free_arenas(pTHX)
@@ -11789,6 +11789,8 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 
 =head1 Cloning an interpreter
 
+=cut
+
 All the macros and functions in this section are for the private use of
 the main function, perl_clone().
 
@@ -11796,8 +11798,6 @@ The foo_dup() functions make an exact copy of an existing foo thingy.
 During the course of a cloning, a hash table is used to map old addresses
 to new addresses.  The table is created and manipulated with the
 ptr_table_* functions.
-
-=cut
 
  * =========================================================================*/
 

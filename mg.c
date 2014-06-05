@@ -17,7 +17,6 @@
 
 /*
 =head1 Magical Functions
-
 "Magic" is special data attached to SV structures in order to give them
 "magical" properties.  When any Perl code tries to read from, or assign to,
 an SV marked as magical, it calls the 'get' or 'set' function associated
@@ -34,6 +33,8 @@ of functions that implement the get(), set(), length() etc functions,
 plus space for some flags and pointers.  For example, a tied variable has
 a MAGIC structure that contains a pointer to the object associated with the
 tie.
+
+=cut
 
 */
 

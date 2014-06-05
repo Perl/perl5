@@ -23,7 +23,6 @@
 
 /*
 =head1 Lexer interface
-
 This is the lower layer of the Perl parser, managing characters and tokens.
 
 =for apidoc AmU|yy_parser *|PL_parser

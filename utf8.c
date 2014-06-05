@@ -39,8 +39,7 @@ static const char unees[] =
 
 /*
 =head1 Unicode Support
-
-This file contains various utility functions for manipulating UTF8-encoded
+These are various utility functions for manipulating UTF8-encoded
 strings.  For the uninitiated, this is a method of representing arbitrary
 Unicode characters as a variable number of bytes, in such a way that
 characters in the ASCII range are unmodified, and a zero byte never appears
