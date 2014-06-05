@@ -1606,6 +1606,9 @@ Invokes VMS debugger. (VMS)
 
 =item exec
 
+C<exec LIST> without the use of indirect object syntax (C<exec PROGRAM LIST>)
+may fall back to trying the shell if the first spawn() fails.  (Win32)
+
 Does not automatically flush output handles on some platforms.
 (SunOS, Solaris, HP-UX)
 
@@ -2010,6 +2013,9 @@ emulation of the stdin, stdout, stderr in force in the parent, providing
 the child program uses a compatible version of the emulation library.
 I<scalar> will call the native command line direct and no such emulation
 of a child Unix program will exists.  Mileage B<will> vary.  (S<RISC OS>)
+
+C<system LIST> without the use of indirect object syntax (C<system PROGRAM LIST>)
+may fall back to trying the shell if the first spawn() fails.  (Win32)
 
 Does not automatically flush output handles on some platforms.
 (SunOS, Solaris, HP-UX)
