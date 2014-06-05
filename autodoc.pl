@@ -249,6 +249,14 @@ removed without notice.\n\n$docs" if $flags =~ /x/;
     print $fh "=for hackers\nFound in file $file\n\n";
 }
 
+sub sort_helper {
+    # Do a case-insensitive dictionary sort, with only alphabetics
+    # significant, falling back to using everything for determinancy
+    return (uc($a =~ s/[[^:alpha]]//r) cmp uc($b =~ s/[[^:alpha]]//r))
+           || uc($a) cmp uc($b)
+           || $a cmp $b;
+}
+
 sub output {
     my ($podname, $header, $dochash, $missing, $footer) = @_;
     my $fh = open_new("pod/$podname.pod", undef,
@@ -258,8 +266,7 @@ sub output {
     print $fh $header;
 
     my $key;
-    # case insensitive sort, with fallback for determinacy
-    for $key (sort { uc($a) cmp uc($b) || $a cmp $b } keys %$dochash) {
+    for $key (sort sort_helper keys %$dochash) {
 	my $section = $dochash->{$key}; 
 	print $fh "\n=head1 $key\n\n";
 
@@ -271,8 +278,7 @@ sub output {
         }
 	print $fh "=over 8\n\n";
 
-	# Again, fallback for determinacy
-	for my $key (sort { uc($a) cmp uc($b) || $a cmp $b } keys %$section) {
+	for my $key (sort sort_helper keys %$section) {
 	    docout($fh, $key, $section->{$key});
 	}
 	print $fh "\n=back\n";
