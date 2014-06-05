@@ -4779,13 +4779,13 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    /* It is counted once already... */
 		    data->pos_min += minnext * (mincount - counted);
 #if 0
-PerlIO_printf(Perl_debug_log, "counted=%"UVdf" deltanext=%"UVdf
-                              " SSize_t_MAX=%"UVdf" minnext=%"UVdf
-                              " maxcount=%"UVdf" mincount=%"UVdf"\n",
+PerlIO_printf(Perl_debug_log, "counted=%"UVuf" deltanext=%"UVuf
+                              " SSize_t_MAX=%"UVuf" minnext=%"UVuf
+                              " maxcount=%"UVuf" mincount=%"UVuf"\n",
     (UV)counted, (UV)deltanext, (UV)SSize_t_MAX, (UV)minnext, (UV)maxcount,
     (UV)mincount);
 if (deltanext != SSize_t_MAX)
-PerlIO_printf(Perl_debug_log, "LHS=%"UVdf" RHS=%"UVdf"\n",
+PerlIO_printf(Perl_debug_log, "LHS=%"UVuf" RHS=%"UVuf"\n",
     (UV)(-counted * deltanext + (minnext + deltanext) * maxcount
           - minnext * mincount), (UV)(SSize_t_MAX - data->pos_delta));
 #endif
