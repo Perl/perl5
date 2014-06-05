@@ -506,7 +506,7 @@ C<strncmp>).
 
 /*
 
-=head1 Character classes
+=head1 Character classification
 This section is about functions (really macros) that classify characters
 into types, such as punctuation versus alphabetic, etc.  Most of these are
 analogous to regular expression character classes.  (See
@@ -562,14 +562,16 @@ is tested.
 =for apidoc Am|bool|isALPHA|char ch
 Returns a boolean indicating whether the specified character is an
 alphabetic character, analogous to C<m/[[:alpha:]]/>.
-See the L<top of this section|/Character classes> for an explanation of variants
+See the L<top of this section|/Character classification> for an explanation of
+variants
 C<isALPHA_A>, C<isALPHA_L1>, C<isALPHA_uni>, C<isALPHA_utf8>, C<isALPHA_LC>,
 C<isALPHA_LC_uvchr>, and C<isALPHA_LC_utf8>.
 
 =for apidoc Am|bool|isALPHANUMERIC|char ch
 Returns a boolean indicating whether the specified character is a either an
 alphabetic character or decimal digit, analogous to C<m/[[:alnum:]]/>.
-See the L<top of this section|/Character classes> for an explanation of variants
+See the L<top of this section|/Character classification> for an explanation of
+variants
 C<isALPHANUMERIC_A>, C<isALPHANUMERIC_L1>, C<isALPHANUMERIC_uni>,
 C<isALPHANUMERIC_utf8>, C<isALPHANUMERIC_LC>, C<isALPHANUMERIC_LC_uvchr>, and
 C<isALPHANUMERIC_LC_utf8>.
@@ -580,7 +582,8 @@ characters in the ASCII character set, analogous to C<m/[[:ascii:]]/>.
 On non-ASCII platforms, it returns TRUE iff this
 character corresponds to an ASCII character.  Variants C<isASCII_A()> and
 C<isASCII_L1()> are identical to C<isASCII()>.
-See the L<top of this section|/Character classes> for an explanation of variants
+See the L<top of this section|/Character classification> for an explanation of
+variants
 C<isASCII_uni>, C<isASCII_utf8>, C<isASCII_LC>, C<isASCII_LC_uvchr>, and
 C<isASCII_LC_utf8>.  Note, however, that some platforms do not have the C
 library routine C<isascii()>.  In these cases, the variants whose names contain
@@ -595,7 +598,8 @@ work properly on any string encoded or not in UTF-8.
 =for apidoc Am|bool|isBLANK|char ch
 Returns a boolean indicating whether the specified character is a
 character considered to be a blank, analogous to C<m/[[:blank:]]/>.
-See the L<top of this section|/Character classes> for an explanation of variants
+See the L<top of this section|/Character classification> for an explanation of
+variants
 C<isBLANK_A>, C<isBLANK_L1>, C<isBLANK_uni>, C<isBLANK_utf8>, C<isBLANK_LC>,
 C<isBLANK_LC_uvchr>, and C<isBLANK_LC_utf8>.  Note, however, that some
 platforms do not have the C library routine C<isblank()>.  In these cases, the
@@ -605,7 +609,8 @@ without.
 =for apidoc Am|bool|isCNTRL|char ch
 Returns a boolean indicating whether the specified character is a
 control character, analogous to C<m/[[:cntrl:]]/>.
-See the L<top of this section|/Character classes> for an explanation of variants
+See the L<top of this section|/Character classification> for an explanation of
+variants
 C<isCNTRL_A>, C<isCNTRL_L1>, C<isCNTRL_uni>, C<isCNTRL_utf8>, C<isCNTRL_LC>,
 C<isCNTRL_LC_uvchr>, and C<isCNTRL_LC_utf8>
 On EBCDIC platforms, you almost always want to use the C<isCNTRL_L1> variant.
@@ -614,21 +619,24 @@ On EBCDIC platforms, you almost always want to use the C<isCNTRL_L1> variant.
 Returns a boolean indicating whether the specified character is a
 digit, analogous to C<m/[[:digit:]]/>.
 Variants C<isDIGIT_A> and C<isDIGIT_L1> are identical to C<isDIGIT>.
-See the L<top of this section|/Character classes> for an explanation of variants
+See the L<top of this section|/Character classification> for an explanation of
+variants
 C<isDIGIT_uni>, C<isDIGIT_utf8>, C<isDIGIT_LC>, C<isDIGIT_LC_uvchr>, and
 C<isDIGIT_LC_utf8>.
 
 =for apidoc Am|bool|isGRAPH|char ch
 Returns a boolean indicating whether the specified character is a
 graphic character, analogous to C<m/[[:graph:]]/>.
-See the L<top of this section|/Character classes> for an explanation of variants
+See the L<top of this section|/Character classification> for an explanation of
+variants
 C<isGRAPH_A>, C<isGRAPH_L1>, C<isGRAPH_uni>, C<isGRAPH_utf8>, C<isGRAPH_LC>,
 C<isGRAPH_LC_uvchr>, and C<isGRAPH_LC_utf8>.
 
 =for apidoc Am|bool|isLOWER|char ch
 Returns a boolean indicating whether the specified character is a
 lowercase character, analogous to C<m/[[:lower:]]/>.
-See the L<top of this section|/Character classes> for an explanation of variants
+See the L<top of this section|/Character classification> for an explanation of
+variants
 C<isLOWER_A>, C<isLOWER_L1>, C<isLOWER_uni>, C<isLOWER_utf8>, C<isLOWER_LC>,
 C<isLOWER_LC_uvchr>, and C<isLOWER_LC_utf8>.
 
@@ -644,7 +652,8 @@ punctuation character, analogous to C<m/[[:punct:]]/>.
 Note that the definition of what is punctuation isn't as
 straightforward as one might desire.  See L<perlrecharclass/POSIX Character
 Classes> for details.
-See the L<top of this section|/Character classes> for an explanation of variants
+See the L<top of this section|/Character classification> for an explanation of
+variants
 C<isPUNCT_A>, C<isPUNCT_L1>, C<isPUNCT_uni>, C<isPUNCT_utf8>, C<isPUNCT_LC>,
 C<isPUNCT_LC_uvchr>, and C<isPUNCT_LC_utf8>.
 
@@ -659,7 +668,8 @@ locale forms of this macro (the ones with C<LC> in their names) matched
 precisely what C<m/[[:space:]]/> does.  In those releases, the only difference,
 in the non-locale variants, was that C<isSPACE()> did not match a vertical tab.
 (See L</isPSXSPC> for a macro that matches a vertical tab in all releases.)
-See the L<top of this section|/Character classes> for an explanation of variants
+See the L<top of this section|/Character classification> for an explanation of
+variants
 C<isSPACE_A>, C<isSPACE_L1>, C<isSPACE_uni>, C<isSPACE_utf8>, C<isSPACE_LC>,
 C<isSPACE_LC_uvchr>, and C<isSPACE_LC_utf8>.
 
@@ -675,21 +685,24 @@ non-locale forms differ from their C<isSPACE()> forms only in that the
 C<isSPACE()> forms don't match a Vertical Tab, and the C<isPSXSPC()> forms do.
 Otherwise they are identical.  Thus this macro is analogous to what
 C<m/[[:space:]]/> matches in a regular expression.
-See the L<top of this section|/Character classes> for an explanation of variants
+See the L<top of this section|/Character classification> for an explanation of
+variants
 C<isPSXSPC_A>, C<isPSXSPC_L1>, C<isPSXSPC_uni>, C<isPSXSPC_utf8>, C<isPSXSPC_LC>,
 C<isPSXSPC_LC_uvchr>, and C<isPSXSPC_LC_utf8>.
 
 =for apidoc Am|bool|isUPPER|char ch
 Returns a boolean indicating whether the specified character is an
 uppercase character, analogous to C<m/[[:upper:]]/>.
-See the L<top of this section|/Character classes> for an explanation of variants
+See the L<top of this section|/Character classification> for an explanation of
+variants
 C<isUPPER_A>, C<isUPPER_L1>, C<isUPPER_uni>, C<isUPPER_utf8>, C<isUPPER_LC>,
 C<isUPPER_LC_uvchr>, and C<isUPPER_LC_utf8>.
 
 =for apidoc Am|bool|isPRINT|char ch
 Returns a boolean indicating whether the specified character is a
 printable character, analogous to C<m/[[:print:]]/>.
-See the L<top of this section|/Character classes> for an explanation of variants
+See the L<top of this section|/Character classification> for an explanation of
+variants
 C<isPRINT_A>, C<isPRINT_L1>, C<isPRINT_uni>, C<isPRINT_utf8>, C<isPRINT_LC>,
 C<isPRINT_LC_uvchr>, and C<isPRINT_LC_utf8>.
 
@@ -702,7 +715,8 @@ a "mark" character that attaches to one of those (like some sort of accent).
 C<isALNUM()> is a synonym provided for backward compatibility, even though a
 word character includes more than the standard C language meaning of
 alphanumeric.
-See the L<top of this section|/Character classes> for an explanation of variants
+See the L<top of this section|/Character classification> for an explanation of
+variants
 C<isWORDCHAR_A>, C<isWORDCHAR_L1>, C<isWORDCHAR_uni>, C<isWORDCHAR_utf8>,
 C<isWORDCHAR_LC>, C<isWORDCHAR_LC_uvchr>, and C<isWORDCHAR_LC_utf8>.
 
@@ -710,7 +724,8 @@ C<isWORDCHAR_LC>, C<isWORDCHAR_LC_uvchr>, and C<isWORDCHAR_LC_utf8>.
 Returns a boolean indicating whether the specified character is a hexadecimal
 digit.  In the ASCII range these are C<[0-9A-Fa-f]>.  Variants C<isXDIGIT_A()>
 and C<isXDIGIT_L1()> are identical to C<isXDIGIT()>.
-See the L<top of this section|/Character classes> for an explanation of variants
+See the L<top of this section|/Character classification> for an explanation of
+variants
 C<isXDIGIT_uni>, C<isXDIGIT_utf8>, C<isXDIGIT_LC>, C<isXDIGIT_LC_uvchr>, and
 C<isXDIGIT_LC_utf8>.
 
@@ -719,7 +734,8 @@ Returns a boolean indicating whether the specified character can be the first
 character of an identifier.  This is very close to, but not quite the same as
 the official Unicode property C<XID_Start>.  The difference is that this
 returns true only if the input character also matches L</isWORDCHAR>.
-See the L<top of this section|/Character classes> for an explanation of variants
+See the L<top of this section|/Character classification> for an explanation of
+variants
 C<isIDFIRST_A>, C<isIDFIRST_L1>, C<isIDFIRST_uni>, C<isIDFIRST_utf8>,
 C<isIDFIRST_LC>, C<isIDFIRST_LC_uvchr>, and C<isIDFIRST_LC_utf8>.
 
@@ -728,7 +744,8 @@ Returns a boolean indicating whether the specified character can be the
 second or succeeding character of an identifier.  This is very close to, but
 not quite the same as the official Unicode property C<XID_Continue>.  The
 difference is that this returns true only if the input character also matches
-L</isWORDCHAR>.  See the L<top of this section|/Character classes> for an
+L</isWORDCHAR>.  See the L<top of this section|/Character classification> for
+an
 explanation of variants C<isIDCONT_A>, C<isIDCONT_L1>, C<isIDCONT_uni>,
 C<isIDCONT_utf8>, C<isIDCONT_LC>, C<isIDCONT_LC_uvchr>, and
 C<isIDCONT_LC_utf8>.

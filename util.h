@@ -39,6 +39,8 @@
 #endif		/* VMS */
 
 /*
+=head1 Miscellaneous Functions
+
 =for apidoc ibcmp
 
 This is a synonym for (! foldEQ())

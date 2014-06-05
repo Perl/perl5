@@ -28,7 +28,15 @@
  *
  * The compilation of this file can be suppressed; see INSTALL
  *
+=head1 Obsolete backwards compatibility functions
+Some of these are also deprecated.  You can exclude these from
+your compiled Perl by adding this option to Configure:
+C<-Accflags='-DNO_MATHOMS'>
+
+=cut
+
  */
+
 
 #include "EXTERN.h"
 #define PERL_IN_MATHOMS_C

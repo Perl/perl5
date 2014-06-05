@@ -1711,6 +1711,9 @@ PP(pp_xor)
 }
 
 /*
+
+=head1 CV Manipulation Functions
+
 =for apidoc caller_cx
 
 The XSUB-writer's equivalent of L<caller()|perlfunc/caller>.  The

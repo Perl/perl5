@@ -20,6 +20,8 @@
  * by Devel::Peek.
  *
  * It also holds the debugging version of the  runops function.
+
+=head1 Display and Dump functions
  */
 
 #include "EXTERN.h"

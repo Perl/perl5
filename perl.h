@@ -2582,6 +2582,8 @@ typedef SV PADNAME;
 #endif
 
 /*
+=head1 Miscellaneous Functions
+
 =for apidoc Am|void|PERL_SYS_INIT|int *argc|char*** argv
 Provides system-specific tune up of the C runtime environment necessary to
 run Perl interpreters.  This should be called only once, before creating

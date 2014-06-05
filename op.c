@@ -643,6 +643,8 @@ Perl_allocmy(pTHX_ const char *const name, const STRLEN len, const U32 flags)
 }
 
 /*
+=head1 Optree Manipulation Functions
+
 =for apidoc alloccopstash
 
 Available only under threaded builds, this function allocates an entry in
@@ -1084,7 +1086,6 @@ Perl_op_contextualize(pTHX_ OP *o, I32 context)
 }
 
 /*
-=head1 Optree Manipulation Functions
 
 =for apidoc Am|OP*|op_linklist|OP *o
 This function is the implementation of the L</LINKLIST> macro.  It should
@@ -12351,9 +12352,9 @@ Perl_custom_op_register(pTHX_ Perl_ppaddr_t ppaddr, const XOP *xop)
 }
 
 /*
-=head1 Functions in file op.c
 
 =for apidoc core_prototype
+
 This function assigns the prototype of the named core function to C<sv>, or
 to a new mortal SV if C<sv> is NULL.  It returns the modified C<sv>, or
 NULL if the core function has no prototype.  C<code> is a code as returned

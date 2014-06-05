@@ -810,6 +810,9 @@ first_symbol(const char *pat, const char *patend) {
 }
 
 /*
+
+=head1 Pack and Unpack
+
 =for apidoc unpackstring
 
 The engine implementing the unpack() Perl function.

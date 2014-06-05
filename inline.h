@@ -252,6 +252,8 @@ S__is_utf8_char_slow(const U8 *s, const U8 *e)
 /* ------------------------------- perl.h ----------------------------- */
 
 /*
+=head1 Miscellaneous Functions
+
 =for apidoc AiR|bool|is_safe_syscall|const char *pv|STRLEN len|const char *what|const char *op_name
 
 Test that the given C<pv> doesn't contain any internal C<NUL> characters.

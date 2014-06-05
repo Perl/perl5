@@ -14,7 +14,7 @@
 /* first, some documentation for xsubpp-generated items */
 
 /*
-=head1 Variables created by C<xsubpp> and C<xsubpp> internal functions
+=head1 C<xsubpp> variables and internal functions
 
 =for apidoc Amn|char*|CLASS
 Variable which is setup by C<xsubpp> to indicate the 
@@ -274,7 +274,7 @@ C<xsubpp>.  See L<perlxs/"The VERSIONCHECK: Keyword">.
 Macro to verify that the perl api version an XS module has been compiled against
 matches the api version of the perl interpreter it's being loaded into.
 
-=head1 Simple Exception Handling Macros
+=head1 Exception Handling (simple) Macros
 
 =for apidoc Ams||dXCPT
 Set up necessary local variables for exception handling.

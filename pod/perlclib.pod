@@ -154,7 +154,7 @@ There are several types of character class tests that Perl implements.
 The only ones described here are those that directly correspond to C
 library functions that operate on 8-bit characters, but there are
 equivalents that operate on wide characters, and UTF-8 encoded strings.
-All are more fully described in L<perlapi/Character classes> and
+All are more fully described in L<perlapi/Character classification> and
 L<perlapi/Character case changing>.
 
 The C library routines listed in the table below return values based on

@@ -1247,6 +1247,9 @@ PP(pp_sselect)
 }
 
 /*
+
+=head1 GV Functions
+
 =for apidoc setdefout
 
 Sets PL_defoutgv, the default file handle for output, to the passed in
