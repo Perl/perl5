@@ -31,9 +31,12 @@
 #define PERL_IN_SV_C
 #include "perl.h"
 #include "regcomp.h"
+#ifdef __VMS
+# include <rms.h>
+#endif
 
 #ifndef HAS_C99
-# if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L && !defined(VMS)
+# if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L && !defined(__VMS)
 #  define HAS_C99 1
 # endif
 #endif
@@ -7918,8 +7921,7 @@ S_sv_gets_read_record(pTHX_ SV *const sv, PerlIO *const fp, I32 append)
     char *buffer = SvGROW(sv, (STRLEN)(recsize + append + 1)) + append;
     
     /* Go yank in */
-#ifdef VMS
-#include <rms.h>
+#ifdef __VMS
     int fd;
     Stat_t st;
 
@@ -8184,7 +8186,7 @@ Perl_sv_gets(pTHX_ SV *const sv, PerlIO *const fp, I32 append)
                            amount left, otherwise this is the amount it
                            can hold. */
 
-#if defined(VMS) && defined(PERLIO_IS_STDIO)
+#if defined(__VMS) && defined(PERLIO_IS_STDIO)
     /* An ungetc()d char is handled separately from the regular
      * buffer, so we getc() it back out and stuff it in the buffer.
      */
@@ -13556,7 +13558,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
     PL_maxsysfd		= proto_perl->Imaxsysfd;
     PL_statusvalue	= proto_perl->Istatusvalue;
-#ifdef VMS
+#ifdef __VMS
     PL_statusvalue_vms	= proto_perl->Istatusvalue_vms;
 #else
     PL_statusvalue_posix = proto_perl->Istatusvalue_posix;
