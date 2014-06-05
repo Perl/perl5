@@ -9682,7 +9682,7 @@ vms_image_init(int *argcp, char ***argvp)
     tabvec[tabidx]->dsc$w_length  = len;
     tabvec[tabidx]->dsc$b_dtype   = DSC$K_DTYPE_T;
     tabvec[tabidx]->dsc$b_class   = DSC$K_CLASS_S;
-    tabvec[tabidx]->dsc$a_pointer = PerlMem_malloc(len + 1);
+    tabvec[tabidx]->dsc$a_pointer = (char *)PerlMem_malloc(len + 1);
     if (tabvec[tabidx]->dsc$a_pointer == NULL) _ckvmssts_noperl(SS$_INSFMEM);
     my_strlcpy(tabvec[tabidx]->dsc$a_pointer, eqv, len + 1);
   }
