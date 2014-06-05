@@ -1,29 +1,19 @@
 #!./perl
 
-BEGIN {
-    unless (-d 'blib') {
-	chdir 't' if -d 't';
-	@INC = '../lib';
-	require Config; import Config;
-	keys %Config; # Silence warning
-	if ($Config{extensions} !~ /\bList\/Util\b/) {
-	    print "1..0 # Skip: List::Util was not built\n";
-	    exit 0;
-	}
-    }
-}
+use strict;
+use warnings;
 
 use Scalar::Util ();
 use Test::More  (grep { /set_prototype/ } @Scalar::Util::EXPORT_FAIL)
 			? (skip_all => 'set_prototype requires XS version')
-			: (tests => 13);
+			: (tests => 14);
 
 Scalar::Util->import('set_prototype');
 
 sub f { }
 is( prototype('f'),	undef,	'no prototype');
 
-$r = set_prototype(\&f,'$');
+my $r = set_prototype(\&f,'$');
 is( prototype('f'),	'$',	'set prototype');
 is( $r,			\&f,	'return value');
 
@@ -57,3 +47,24 @@ ok($@ =~ /^set_prototype: not a reference/,	'not a reference');
 
 eval { &set_prototype( \'f', '' ); };
 ok($@ =~ /^set_prototype: not a subroutine reference/,	'not a sub reference');
+
+# RT 72080
+
+{
+  package TiedCV;
+  sub TIESCALAR {
+    my $class = shift;
+    return bless {@_}, $class;
+  }
+  sub FETCH {
+    return \&my_subr;
+  }
+  sub my_subr {
+  }
+}
+
+my $cv;
+tie $cv, 'TiedCV';
+
+&Scalar::Util::set_prototype($cv, '$$');
+is( prototype($cv), '$$', 'set_prototype() on tied CV ref' );

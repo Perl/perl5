@@ -1960,7 +1960,6 @@ cpan/Scalar-List-Utils/t/maxstr.t		List::Util
 cpan/Scalar-List-Utils/t/max.t			List::Util
 cpan/Scalar-List-Utils/t/minstr.t		List::Util
 cpan/Scalar-List-Utils/t/min.t			List::Util
-cpan/Scalar-List-Utils/t/multicall-refcount.t
 cpan/Scalar-List-Utils/t/openhan.t		Scalar::Util
 cpan/Scalar-List-Utils/t/pair.t
 cpan/Scalar-List-Utils/t/product.t		List::Util

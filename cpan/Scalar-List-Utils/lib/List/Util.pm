@@ -14,7 +14,7 @@ our @EXPORT_OK  = qw(
   all any first min max minstr maxstr none notall product reduce sum sum0 shuffle
   pairmap pairgrep pairfirst pairs pairkeys pairvalues
 );
-our $VERSION    = "1.38";
+our $VERSION    = "1.39";
 our $XS_VERSION = $VERSION;
 $VERSION    = eval $VERSION;
 
@@ -33,6 +33,10 @@ sub import
 
   goto &Exporter::import;
 }
+
+# For objects returned by pairs()
+sub List::Util::_Pair::key   { shift->[0] }
+sub List::Util::_Pair::value { shift->[1] }
 
 1;
 
@@ -108,6 +112,8 @@ idea.
 
 =head2 $b = any { BLOCK } @list
 
+I<Since version 1.33.>
+
 Similar to C<grep> in that it evaluates C<BLOCK> setting C<$_> to each element
 of C<@list> in turn. C<any> returns true if any element makes the C<BLOCK>
 return a true value. If C<BLOCK> never returns true or C<@list> was empty then
@@ -122,6 +128,8 @@ instead, as it can short-circuit after the first true result.
 
 =head2 $b = all { BLOCK } @list
 
+I<Since version 1.33.>
+
 Similar to C<any>, except that it requires all elements of the C<@list> to make
 the C<BLOCK> return true. If any element returns false, then it returns false.
 If the C<BLOCK> never returns false or the C<@list> was empty then it returns
@@ -130,6 +138,8 @@ true.
 =head2 $b = none { BLOCK } @list
 
 =head2 $b = notall { BLOCK } @list
+
+I<Since version 1.33.>
 
 Similar to C<any> and C<all>, but with the return sense inverted. C<none>
 returns true only if no value in the LIST causes the BLOCK to return true, and
@@ -186,6 +196,8 @@ empty then C<undef> is returned.
 
 =head2 $num = product @list
 
+I<Since version 1.35.>
+
 Returns the numerical product of all the elements in C<@list>. If C<@list> is
 empty then C<1> is returned.
 
@@ -202,6 +214,8 @@ compatibility, if C<@list> is empty then C<undef> is returned.
     $foo = sum @bar, @baz           # whatever
 
 =head2 $num = sum0 @list
+
+I<Since version 1.26.>
 
 Similar to C<sum>, except this returns 0 when given an empty list, rather than
 C<undef>.
@@ -221,6 +235,8 @@ value - nor even do they require that the first of each pair be a plain string.
 =head2 @kvlist = pairgrep { BLOCK } @kvlist
 
 =head2 $count = pairgrep { BLOCK } @kvlist
+
+I<Since version 1.29.>
 
 Similar to perl's C<grep> keyword, but interprets the given list as an
 even-sized list of pairs. It invokes the C<BLOCK> multiple times, in scalar
@@ -242,6 +258,8 @@ will be visible to the caller.
 
 =head2 $found = pairfirst { BLOCK } @kvlist
 
+I<Since version 1.30.>
+
 Similar to the C<first> function, but interprets the given list as an
 even-sized list of pairs. It invokes the C<BLOCK> multiple times, in scalar
 context, with C<$a> and C<$b> set to successive pairs of values from the
@@ -262,6 +280,8 @@ will be visible to the caller.
 
 =head2 $count = pairmap { BLOCK } @kvlist
 
+I<Since version 1.29.>
+
 Similar to perl's C<map> keyword, but interprets the given list as an
 even-sized list of pairs. It invokes the C<BLOCK> multiple times, in list
 context, with C<$a> and C<$b> set to successive pairs of values from the
@@ -277,7 +297,11 @@ As with C<map> aliasing C<$_> to list elements, C<pairmap> aliases C<$a> and
 C<$b> to elements of the given list. Any modifications of it by the code block
 will be visible to the caller.
 
+See L</KNOWN BUGS> for a known-bug with C<pairmap>, and a workaround.
+
 =head2 @pairs = pairs @kvlist
+
+I<Since version 1.29.>
 
 A convenient shortcut to operating on even-sized lists of pairs, this function
 returns a list of ARRAY references, each containing two items from the given
@@ -287,12 +311,23 @@ list. It is a more efficient version of
 
 It is most convenient to use in a C<foreach> loop, for example:
 
-    foreach ( pairs @KVLIST ) {
-       my ( $key, $value ) = @$_;
+    foreach my $pair ( pairs @KVLIST ) {
+       my ( $key, $value ) = @$pair;
+       ...
+    }
+
+Since version C<1.39> these ARRAY references are blessed objects, recognising
+the two methods C<key> and C<value>. The following code is equivalent:
+
+    foreach my $pair ( pairs @KVLIST ) {
+       my $key   = $pair->key;
+       my $value = $pair->value;
        ...
     }
 
 =head2 @keys = pairkeys @kvlist
+
+I<Since version 1.29.>
 
 A convenient shortcut to operating on even-sized lists of pairs, this function
 returns a list of the the first values of each of the pairs in the given list.
@@ -301,6 +336,8 @@ It is a more efficient version of
     @keys = pairmap { $a } @kvlist
 
 =head2 @values = pairvalues @kvlist
+
+I<Since version 1.29.>
 
 A convenient shortcut to operating on even-sized lists of pairs, this function
 returns a list of the the second values of each of the pairs in the given list.
@@ -324,8 +361,48 @@ Returns the values of the input in a random order
 
 =head1 KNOWN BUGS
 
-With perl versions prior to 5.005 there are some cases where reduce will return
-an incorrect result. This will show up as test 7 of reduce.t failing.
+=head2 RT #95409
+
+L<https://rt.cpan.org/Ticket/Display.html?id=95409>
+
+If the block of code given to C<pairmap> contains lexical variables that are
+captured by a returned closure, and the closure is executed after the block
+has been re-used for the next iteration, these lexicals will not see the
+correct values. For example:
+
+ my @subs = pairmap {
+    my $var = "$a is $b";
+    sub { print "$var\n" };
+ } one => 1, two => 2, three => 3;
+
+ $_->() for @subs;
+
+Will incorrectly print
+
+ three is 3
+ three is 3
+ three is 3
+
+This is due to the performance optimisation of using C<MULTICALL> for the code
+block, which means that fresh SVs do not get allocated for each call to the
+block. Instead, the same SV is re-assigned for each iteration, and all the
+closures will share the value seen on the final iteration.
+
+To work around this bug, surround the code with a second set of braces. This
+creates an inner block that defeats the C<MULTICALL> logic, and does get fresh
+SVs allocated each time:
+
+ my @subs = pairmap {
+    {
+       my $var = "$a is $b";
+       sub { print "$var\n"; }
+    }
+ } one => 1, two => 2, three => 3;
+
+This bug only affects closures that are generated by the block but used
+afterwards. Lexical variables that are only used during the lifetime of the
+block's execution will take their individual values for each invocation, as
+normal.
 
 =head1 SUGGESTED ADDITIONS
 

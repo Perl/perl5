@@ -16,7 +16,7 @@ our @EXPORT_OK = qw(
 
   dualvar isdual isvstring looks_like_number openhandle readonly set_prototype tainted
 );
-our $VERSION    = "1.38";
+our $VERSION    = "1.39";
 $VERSION   = eval $VERSION;
 
 our @EXPORT_FAIL;
@@ -156,6 +156,8 @@ array.
 
 =head2 unweaken( REF )
 
+I<Since version 1.36.>
+
 The lvalue C<REF> will be turned from a weak reference back into a normal
 (strong) reference again. This function mutates the lvalue passed as its
 argument and returns no value. This undoes the action performed by
@@ -197,6 +199,8 @@ C<$string> in a string context.
     $str = $foo . " world";             # Hello world
 
 =head2 $dual = isdual( $var )
+
+I<Since version 1.26.>
 
 If C<$var> is a scalar that has both numeric and string values, the result is
 true.

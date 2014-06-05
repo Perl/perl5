@@ -66,6 +66,22 @@ my_sv_copypv(pTHX_ SV *const dsv, SV *const ssv)
 #  define croak_no_modify() croak("%s", PL_no_modify)
 #endif
 
+enum slu_accum {
+    ACC_IV,
+    ACC_NV,
+    ACC_SV,
+};
+
+static enum slu_accum accum_type(SV *sv) {
+    if(SvAMAGIC(sv))
+        return ACC_SV;
+
+    if(SvIOK(sv) && !SvNOK(sv) && !SvUOK(sv))
+        return ACC_IV;
+
+    return ACC_NV;
+}
+
 MODULE=List::Util       PACKAGE=List::Util
 
 void
@@ -129,11 +145,13 @@ CODE:
 {
     dXSTARG;
     SV *sv;
+    IV retiv = 0;
+    NV retnv = 0.0;
     SV *retsv = NULL;
     int index;
-    NV retval = 0;
-    int magic;
+    enum slu_accum accum;
     int is_product = (ix == 2);
+    SV *tmpsv;
 
     if(!items)
         switch(ix) {
@@ -143,52 +161,88 @@ CODE:
         }
 
     sv    = ST(0);
-    magic = SvAMAGIC(sv);
-    if(magic) {
+    switch((accum = accum_type(sv))) {
+    case ACC_SV:
         retsv = TARG;
         sv_setsv(retsv, sv);
-    }
-    else {
-        retval = slu_sv_value(sv);
+        break;
+    case ACC_IV:
+        retiv = SvIV(sv);
+        break;
+    case ACC_NV:
+        retnv = slu_sv_value(sv);
+        break;
     }
 
     for(index = 1 ; index < items ; index++) {
         sv = ST(index);
-        if(!magic && SvAMAGIC(sv)){
-            magic = TRUE;
+        if(accum < ACC_SV && SvAMAGIC(sv)){
             if(!retsv)
                 retsv = TARG;
-            sv_setnv(retsv,retval);
+            sv_setnv(retsv, accum == ACC_NV ? retnv : retiv);
+            accum = ACC_SV;
         }
-        if(magic) {
-            SV *const tmpsv = amagic_call(retsv, sv, 
+        switch(accum) {
+        case ACC_SV:
+            tmpsv = amagic_call(retsv, sv,
                 is_product ? mult_amg : add_amg,
                 SvAMAGIC(retsv) ? AMGf_assign : 0);
             if(tmpsv) {
-                magic = SvAMAGIC(tmpsv);
-                if(!magic) {
-                    retval = slu_sv_value(tmpsv);
-                }
-                else {
+                switch((accum = accum_type(tmpsv))) {
+                case ACC_SV:
                     retsv = tmpsv;
+                    break;
+                case ACC_IV:
+                    retiv = SvIV(tmpsv);
+                    break;
+                case ACC_NV:
+                    retnv = slu_sv_value(tmpsv);
+                    break;
                 }
             }
             else {
                 /* fall back to default */
-                magic = FALSE;
-                is_product ? (retval = SvNV(retsv) * SvNV(sv))
-                           : (retval = SvNV(retsv) + SvNV(sv));
+                accum = ACC_NV;
+                is_product ? (retnv = SvNV(retsv) * SvNV(sv))
+                           : (retnv = SvNV(retsv) + SvNV(sv));
             }
-        }
-        else {
-            is_product ? (retval *= slu_sv_value(sv))
-                       : (retval += slu_sv_value(sv));
+            break;
+        case ACC_IV:
+            if(is_product) {
+                if(!SvNOK(sv) && SvIOK(sv) && (SvIV(sv) < IV_MAX / retiv)) {
+                    retiv *= SvIV(sv);
+                    break;
+                }
+                /* else fallthrough */
+            }
+            else {
+                if(!SvNOK(sv) && SvIOK(sv) && (SvIV(sv) < IV_MAX - retiv)) {
+                    retiv += SvIV(sv);
+                    break;
+                }
+                /* else fallthrough */
+            }
+
+            /* fallthrough to NV now */
+            retnv = retiv;
+            accum = ACC_NV;
+        case ACC_NV:
+            is_product ? (retnv *= slu_sv_value(sv))
+                       : (retnv += slu_sv_value(sv));
+            break;
         }
     }
-    if(!magic) {
-        if(!retsv)
-            retsv = TARG;
-        sv_setnv(retsv,retval);
+
+    if(!retsv)
+        retsv = TARG;
+
+    switch(accum) {
+    case ACC_IV:
+        sv_setiv(retsv, retiv);
+        break;
+    case ACC_NV:
+        sv_setnv(retsv, retnv);
+        break;
     }
 
     ST(0) = retsv;
@@ -715,6 +769,7 @@ PPCODE:
 {
     int argi = 0;
     int reti = 0;
+    HV *pairstash = get_hv("List::Util::_Pair::", GV_ADD);
 
     if(items % 2 && ckWARN(WARN_MISC))
         warn("Odd number of elements in pairs");
@@ -728,7 +783,9 @@ PPCODE:
             av_push(av, newSVsv(a));
             av_push(av, newSVsv(b));
 
-            ST(reti++) = sv_2mortal(newRV_noinc((SV *)av));
+            ST(reti) = sv_2mortal(newRV_noinc((SV *)av));
+            sv_bless(ST(reti), pairstash);
+            reti++;
         }
     }
 
@@ -1019,13 +1076,13 @@ CODE:
     }
 #if PERL_BCDVERSION < 0x5008005
     if(SvPOK(sv) || SvPOKp(sv)) {
-        RETVAL = looks_like_number(sv);
+        RETVAL = !!looks_like_number(sv);
     }
     else {
         RETVAL = SvFLAGS(sv) & (SVf_NOK|SVp_NOK|SVf_IOK|SVp_IOK);
     }
 #else
-    RETVAL = looks_like_number(sv);
+    RETVAL = !!looks_like_number(sv);
 #endif
 OUTPUT:
     RETVAL
@@ -1037,6 +1094,7 @@ set_prototype(subref, proto)
 PROTOTYPE: &$
 CODE:
 {
+    SvGETMAGIC(subref);
     if(SvROK(subref)) {
         SV *sv = SvRV(subref);
         if(SvTYPE(sv) != SVt_PVCV) {
