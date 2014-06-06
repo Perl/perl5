@@ -5433,7 +5433,7 @@ $   d_gethostprotos="define"
 $   d_getnetprotos="define"
 $   d_getprotoprotos="define"
 $   d_getservprotos="define"
-$   socksizetype="unsigned int"
+$   socksizetype="size_t"
 $ ELSE
 $   d_vms_do_sockets="undef"
 $   d_htonl="undef"
