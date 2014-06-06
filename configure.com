@@ -2889,10 +2889,6 @@ $ DELETE/SYMBOL extlen
 $ DELETE/SYMBOL extension_dir_name
 $ xs_extensions = F$EDIT(xs_extensions,"TRIM,COMPRESS")
 $ dflt = xs_extensions
-$ IF ccname .NES. "DEC" .AND. ccname .NES. "CXX"
-$ THEN
-$   dflt = dflt - "POSIX"             ! not with VAX C or GCC
-$ ENDIF
 $ dflt = dflt - "ByteLoader"          ! needs to be ported
 $ dflt = dflt - "DB_File"             ! needs to be ported
 $ dflt = dflt - "GDBM_File"           ! needs porting/special library
@@ -3320,12 +3316,7 @@ $ startperl="""$ perl 'f$env(\""procedure\"")' \""'"+"'p1'\"" \""'"+"'p2'\"" \""
 $ startperl=startperl + "$ exit++ + ++$status!=0 and $exit=$status=undef; while($#ARGV != -1 and $ARGV[$#ARGV] eq '"+"'){pop @ARGV;}"""
 $!
 $ libs=" "
-$ IF ccname .EQS. "DEC" .OR. ccname .EQS. "CXX"
-$ THEN
-$   libc="(DECCRTL)"
-$ ELSE
-$   libc=" "
-$ ENDIF
+$ libc="(DECCRTL)"
 $!
 $! perllibs should be libs with all non-core libs (such as gdbm) removed.
 $!
@@ -5391,41 +5382,24 @@ $!
 $! Dec C alone
 $ IF ccname .EQS. "DEC" .OR. ccname .EQS. "CXX"
 $ THEN
-$   d_faststdio="define"
-$   d_locconv="define"
-$   d_mblen="define"
-$   d_mbstowcs="define"
-$   d_mbtowc="define"
-$   d_mktime="define"
-$   d_nl_langinfo="define"
-$   d_setlocale="define"
-$   d_stdiobase="define"
-$   d_stdio_cnt_lval="define"
-$   d_stdio_ptr_lval="define"
-$   d_stdstdio="define"
-$   d_strcoll="define"
-$   d_strxfrm="define"
-$   i_langinfo="define"
-$   i_locale="define"
 $   vms_cc_type="decc"
-$ ELSE
-$   d_faststdio="undef"
-$   d_locconv="undef"
-$   d_mblen="undef"
-$   d_mbstowcs="undef"
-$   d_mbtowc="undef"
-$   d_mktime="undef"
-$   d_nl_langinfo="undef"
-$   d_setlocale="undef"
-$   d_stdiobase="undef"
-$   d_stdio_cnt_lval="undef"
-$   d_stdio_ptr_lval="undef"
-$   d_stdstdio="undef"
-$   d_strcoll="undef"
-$   d_strxfrm="undef"
-$   i_langinfo="undef"
-$   i_locale="undef"
 $ ENDIF
+$ d_faststdio="define"
+$ d_locconv="define"
+$ d_mblen="define"
+$ d_mbstowcs="define"
+$ d_mbtowc="define"
+$ d_mktime="define"
+$ d_nl_langinfo="define"
+$ d_setlocale="define"
+$ d_stdiobase="define"
+$ d_stdio_cnt_lval="define"
+$ d_stdio_ptr_lval="define"
+$ d_stdstdio="define"
+$ d_strcoll="define"
+$ d_strxfrm="define"
+$ i_langinfo="define"
+$ i_locale="define"
 $ d_stdio_ptr_lval_sets_cnt="undef"
 $ d_stdio_ptr_lval_nochange_cnt="define"
 $ usefaststdio="undef"
@@ -5459,12 +5433,7 @@ $   d_gethostprotos="define"
 $   d_getnetprotos="define"
 $   d_getprotoprotos="define"
 $   d_getservprotos="define"
-$   IF ccname .EQS. "DEC" .OR. ccname .EQS. "CXX"
-$   THEN
-$     socksizetype="unsigned int"
-$   ELSE
-$     socksizetype="int *"
-$   ENDIF
+$   socksizetype="unsigned int"
 $ ELSE
 $   d_vms_do_sockets="undef"
 $   d_htonl="undef"
