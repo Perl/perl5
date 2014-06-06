@@ -1667,6 +1667,7 @@ foreach my $Locale (@Locale) {
     my $ok18;
     my $ok19;
     my $ok20;
+    my $ok21;
 
     my $c;
     my $d;
@@ -1823,6 +1824,18 @@ foreach my $Locale (@Locale) {
         $ok20 = $date =~ / ^ \p{ASCII}+ $ /x || utf8::is_utf8($date);
     }
 
+    $ok21 = 1;
+    foreach my $err (keys %!) {
+        no locale;
+        use Errno;
+        $! = eval "&Errno::$err";   # Convert to strerror() output
+        my $strerror = "$!";
+        if ("$strerror" =~ /\P{ASCII}/) {
+            $ok21 = 0;
+            last;
+        }
+    }
+
     report_result($Locale, ++$locales_test_number, $ok1);
     $test_names{$locales_test_number} = 'Verify that an intervening printf doesn\'t change assignment results';
     my $first_a_test = $locales_test_number;
@@ -1905,6 +1918,9 @@ foreach my $Locale (@Locale) {
 
     report_result($Locale, ++$locales_test_number, $ok20);
     $test_names{$locales_test_number} = 'Verify that strftime returns date with UTF-8 flag appropriately set';
+
+    report_result($Locale, ++$locales_test_number, $ok21);
+    $test_names{$locales_test_number} = '"$!" is ASCII only outside of locale scope';
 
     debug "# $first_f_test..$locales_test_number: \$f = $f, \$g = $g, back to locale = $Locale\n";
 

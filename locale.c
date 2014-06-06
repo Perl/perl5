@@ -1414,7 +1414,7 @@ Perl_my_strerror(pTHX_ const int errnum) {
      * LC_MESSAGES */
 
 #ifdef USE_LOCALE_MESSAGES
-    if (IN_LC(LC_MESSAGES)) {
+    if (! IN_LC(LC_MESSAGES)) {
         char * save_locale = setlocale(LC_MESSAGES, NULL);
         if (! ((*save_locale == 'C' && save_locale[1] == '\0')
                 || strEQ(save_locale, "POSIX")))
