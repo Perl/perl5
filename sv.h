@@ -773,7 +773,7 @@ attributable to C<SvOOK>.  See C<SvCUR>.
 =for apidoc Am|char*|SvEND|SV* sv
 Returns a pointer to the spot just after the last character in
 the string which is in the SV, where there is usually a trailing
-C<NUL> byte (even though Perl scalars do not strictly require it).
+C<NUL> character (even though Perl scalars do not strictly require it).
 See C<SvCUR>.  Access the character as *(SvEND(sv)).
 
 Warning: If C<SvCUR> is equal to C<SvLEN>, then C<SvEND> points to
@@ -792,7 +792,8 @@ C<SvIV_set> instead of the lvalue assignment to C<SvIVX>.
 Set the value of the NV pointer in sv to val.  See C<SvIV_set>.
 
 =for apidoc Am|void|SvPV_set|SV* sv|char* val
-Set the value of the PV pointer in sv to val.  See also C<SvIV_set>.
+Set the value of the PV pointer in C<sv> to the C<NUL>-terminated string
+C<val>.  See also C<SvIV_set>.
 
 Beware that the existing pointer may be involved in copy-on-write or other
 mischief, so do C<SvOOK_off(sv)> and use C<sv_force_normal> or
