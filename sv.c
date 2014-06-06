@@ -4688,7 +4688,8 @@ Perl_sv_setsv_cow(pTHX_ SV *dstr, SV *sstr)
 /*
 =for apidoc sv_setpvn
 
-Copies a string into an SV.  The C<len> parameter indicates the number of
+Copies a string (possibly containing embedded C<NUL> characters) into an SV.
+The C<len> parameter indicates the number of
 bytes to be copied.  If the C<ptr> argument is NULL the SV will become
 undefined.  Does not handle 'set' magic.  See C<sv_setpvn_mg>.
 
@@ -4746,8 +4747,9 @@ Perl_sv_setpvn_mg(pTHX_ SV *const sv, const char *const ptr, const STRLEN len)
 /*
 =for apidoc sv_setpv
 
-Copies a string into an SV.  The string must be null-terminated.  Does not
-handle 'set' magic.  See C<sv_setpv_mg>.
+Copies a string into an SV.  The string must be terminated with a C<NUL>
+character.
+Does not handle 'set' magic.  See C<sv_setpv_mg>.
 
 =cut
 */
@@ -4844,7 +4846,7 @@ Perl_sv_sethek(pTHX_ SV *const sv, const HEK *const hek)
 =for apidoc sv_usepvn_flags
 
 Tells an SV to use C<ptr> to find its string value.  Normally the
-string is stored inside the SV but sv_usepvn allows the SV to use an
+string is stored inside the SV, but sv_usepvn allows the SV to use an
 outside string.  The C<ptr> should point to memory that was allocated
 by L<Newx|perlclib/Memory Management and String Handling>. It must be
 the start of a Newx-ed block of memory, and not a pointer to the
@@ -5350,7 +5352,8 @@ Perl_sv_catsv_flags(pTHX_ SV *const dsv, SV *const ssv, const I32 flags)
 /*
 =for apidoc sv_catpv
 
-Concatenates the string onto the end of the string which is in the SV.
+Concatenates the C<NUL>-terminated string onto the end of the string which is
+in the SV.
 If the SV has the UTF-8 status set, then the bytes appended should be
 valid UTF-8.  Handles 'get' magic, but not 'set' magic.  See C<sv_catpv_mg>.
 
@@ -5382,7 +5385,8 @@ Perl_sv_catpv(pTHX_ SV *const sv, const char *ptr)
 /*
 =for apidoc sv_catpv_flags
 
-Concatenates the string onto the end of the string which is in the SV.
+Concatenates the C<NUL>-terminated string onto the end of the string which is
+in the SV.
 If the SV has the UTF-8 status set, then the bytes appended should
 be valid UTF-8.  If C<flags> has the C<SV_SMAGIC> bit set, will C<mg_set>
 on the modified SV if appropriate.
