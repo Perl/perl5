@@ -1666,6 +1666,7 @@ foreach my $Locale (@Locale) {
     my $ok17;
     my $ok18;
     my $ok19;
+    my $ok20;
 
     my $c;
     my $d;
@@ -1737,6 +1738,8 @@ foreach my $Locale (@Locale) {
         }
         $ok18 = $j eq sprintf("%g:%g", $h, $i);
         $ok19 = POSIX::strftime("%p",@times) ne "%p"; # [perl #119425]
+        my $date = POSIX::strftime("%A %B %Z",@times);
+        $ok20 = $date =~ / ^ \p{ASCII}+ $ /x || ! utf8::is_utf8($date);
     }
     else {
         use locale ':not_characters';
@@ -1816,6 +1819,8 @@ foreach my $Locale (@Locale) {
         }
         $ok18 = $j eq sprintf("%g:%g", $h, $i);
         $ok19 = POSIX::strftime("%p",@times) ne "%p"; # [perl #119425]
+        my $date = POSIX::strftime("%A %B %Z",@times);
+        $ok20 = $date =~ / ^ \p{ASCII}+ $ /x || utf8::is_utf8($date);
     }
 
     report_result($Locale, ++$locales_test_number, $ok1);
@@ -1897,6 +1902,9 @@ foreach my $Locale (@Locale) {
 
     report_result($Locale, ++$locales_test_number, $ok19);
     $test_names{$locales_test_number} = 'Verify that strftime doesn\'t return "%p" in locales where %p is empty';
+
+    report_result($Locale, ++$locales_test_number, $ok20);
+    $test_names{$locales_test_number} = 'Verify that strftime returns date with UTF-8 flag appropriately set';
 
     debug "# $first_f_test..$locales_test_number: \$f = $f, \$g = $g, back to locale = $Locale\n";
 

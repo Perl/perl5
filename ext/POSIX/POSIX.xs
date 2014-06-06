@@ -1747,8 +1747,13 @@ strftime(fmt, sec, min, hour, mday, mon, year, wday = -1, yday = -1, isdst = -1)
             GCC_DIAG_RESTORE;
             sv = sv_newmortal();
 	    if (buf) {
-		sv_usepvn_flags(sv, buf, strlen(buf), SV_HAS_TRAILING_NUL);
-		if (SvUTF8(fmt)) {
+                STRLEN len = strlen(buf);
+		sv_usepvn_flags(sv, buf, len, SV_HAS_TRAILING_NUL);
+		if (SvUTF8(fmt)
+                    || (! is_ascii_string((U8*) buf, len)
+                        && is_utf8_string((U8*) buf, len)
+                        && _is_cur_LC_category_utf8(LC_TIME)))
+                {
 		    SvUTF8_on(sv);
 		}
             }
