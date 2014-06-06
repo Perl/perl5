@@ -14,7 +14,7 @@ deemed necessary by the Pumpking.
 =head2 Perl 5.20
 
   2014-05-27  5.20.0 ✓        Ricardo Signes
-  2014-08-??  5.20.1          ??
+  2014-08-??  5.20.1          Steve Hay
 
 =head2 Perl 5.18
 
@@ -45,7 +45,7 @@ you should reset the version numbers to the next blead series.
   2014-06-20  5.21.1          Matthew Horsfall
   2014-07-20  5.21.2          Abigail
   2014-08-20  5.21.3          Peter Martini
-  2014-09-20  5.21.4          ?
+  2014-09-20  5.21.4          Steve Hay
   2014-10-20  5.21.5          ?
   2014-11-20  5.21.6          ?
   2014-12-20  5.21.7          ?
