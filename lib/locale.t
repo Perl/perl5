@@ -1665,6 +1665,7 @@ foreach my $Locale (@Locale) {
     my $ok16;
     my $ok17;
     my $ok18;
+    my $ok19;
 
     my $c;
     my $d;
@@ -1674,6 +1675,8 @@ foreach my $Locale (@Locale) {
     my $h;
     my $i;
     my $j;
+
+    my @times = CORE::localtime();
 
     if (! $is_utf8_locale) {
         use locale;
@@ -1733,6 +1736,7 @@ foreach my $Locale (@Locale) {
             $ok17 = "1.5:1.25" eq sprintf("%g:%g", $h, $i);
         }
         $ok18 = $j eq sprintf("%g:%g", $h, $i);
+        $ok19 = POSIX::strftime("%p",@times) ne "%p"; # [perl #119425]
     }
     else {
         use locale ':not_characters';
@@ -1811,6 +1815,7 @@ foreach my $Locale (@Locale) {
             $ok17 = "1.5:1.25" eq sprintf("%g:%g", $h, $i);
         }
         $ok18 = $j eq sprintf("%g:%g", $h, $i);
+        $ok19 = POSIX::strftime("%p",@times) ne "%p"; # [perl #119425]
     }
 
     report_result($Locale, ++$locales_test_number, $ok1);
@@ -1889,6 +1894,9 @@ foreach my $Locale (@Locale) {
 
     report_result($Locale, ++$locales_test_number, $ok18);
     $test_names{$locales_test_number} = 'Verify that a sprintf of a number back within locale scope uses locale radix';
+
+    report_result($Locale, ++$locales_test_number, $ok19);
+    $test_names{$locales_test_number} = 'Verify that strftime doesn\'t return "%p" in locales where %p is empty';
 
     debug "# $first_f_test..$locales_test_number: \$f = $f, \$g = $g, back to locale = $Locale\n";
 

@@ -1737,6 +1737,7 @@ strftime(fmt, sec, min, hour, mday, mon, year, wday = -1, yday = -1, isdst = -1)
     CODE:
 	{
 	    char *buf;
+            SV *sv;
 
             /* allowing user-supplied (rather than literal) formats
              * is normally frowned upon as a potential security risk;
@@ -1744,14 +1745,23 @@ strftime(fmt, sec, min, hour, mday, mon, year, wday = -1, yday = -1, isdst = -1)
             GCC_DIAG_IGNORE(-Wformat-nonliteral);
 	    buf = my_strftime(SvPV_nolen(fmt), sec, min, hour, mday, mon, year, wday, yday, isdst);
             GCC_DIAG_RESTORE;
+            sv = sv_newmortal();
 	    if (buf) {
-		SV *const sv = sv_newmortal();
 		sv_usepvn_flags(sv, buf, strlen(buf), SV_HAS_TRAILING_NUL);
 		if (SvUTF8(fmt)) {
 		    SvUTF8_on(sv);
 		}
-		ST(0) = sv;
-	    }
+            }
+            else {  /* We can't distinguish between errors and just an empty
+                     * return; in all cases just return an empty string */
+                SvUPGRADE(sv, SVt_PV);
+                SvPV_set(sv, (char *) "");
+                SvPOK_on(sv);
+                SvCUR_set(sv, 0);
+                SvLEN_set(sv, 0);   /* Won't attempt to free the string when sv
+                                       gets destroyed */
+            }
+            ST(0) = sv;
 	}
 
 void
