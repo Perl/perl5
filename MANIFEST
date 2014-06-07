@@ -2117,7 +2117,6 @@ cpan/Test-Harness/t/parse.t				Test::Harness test
 cpan/Test-Harness/t/perl5lib.t				Test::Harness test
 cpan/Test-Harness/t/premature-bailout.t			Test::Harness test
 cpan/Test-Harness/t/process.t				Test::Harness test
-cpan/Test-Harness/t/proveenv.t				Test::Harness test
 cpan/Test-Harness/t/proverc/emptyexec			Test data for Test::Harness
 cpan/Test-Harness/t/proverc.t				Test::Harness test
 cpan/Test-Harness/t/proverun.t				Test::Harness test

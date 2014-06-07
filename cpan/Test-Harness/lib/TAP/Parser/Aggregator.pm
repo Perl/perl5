@@ -12,11 +12,11 @@ TAP::Parser::Aggregator - Aggregate TAP::Parser results
 
 =head1 VERSION
 
-Version 3.30
+Version 3.31
 
 =cut
 
-our $VERSION = '3.30';
+our $VERSION = '3.31';
 
 =head1 SYNOPSIS
 
