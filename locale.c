@@ -1389,6 +1389,7 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
 bool
 Perl__is_in_locale_category(pTHX_ const bool compiling, const int category)
 {
+    dVAR;
     /* Internal function which returns if we are in the scope of a pragma that
      * enables the locale category 'category'.  'compiling' should indicate if
      * this is during the compilation phase (TRUE) or not (FALSE). */
