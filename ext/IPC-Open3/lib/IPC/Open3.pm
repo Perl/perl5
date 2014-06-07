@@ -9,7 +9,7 @@ require Exporter;
 use Carp;
 use Symbol qw(gensym qualify);
 
-$VERSION	= '1.16';
+$VERSION	= '1.17';
 @ISA		= qw(Exporter);
 @EXPORT		= qw(open3);
 
@@ -246,6 +246,7 @@ sub _open3 {
 		# A tie in the parent should not be allowed to cause problems.
 		untie *STDIN;
 		untie *STDOUT;
+		untie *STDERR;
 
 		close $stat_r;
 		require Fcntl;
