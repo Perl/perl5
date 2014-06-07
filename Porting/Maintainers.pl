@@ -166,7 +166,7 @@ use File::Glob qw(:case);
     },
 
     'autouse' => {
-        'DISTRIBUTION' => 'FLORA/autouse-1.07.tar.gz',
+        'DISTRIBUTION' => 'WOLFSAGE/autouse-1.08.tar.gz',
         'FILES'        => q[dist/autouse],
         'EXCLUDED'     => [qr{^t/release-.*\.t}],
     },
