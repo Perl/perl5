@@ -45,6 +45,12 @@ XXX For a release on a stable branch, this section aspires to be:
 
 [ List each incompatible change as a =head2 entry ]
 
+=head2 S<C<use UNIVERSAL '...'>> is now a fatal error
+
+Importing functions from C<UNIVERSAL> has been deprecated since v5.12, and
+is now a fatal error.  S<C<"use UNIVERSAL">> without any arguments is still
+allowed.
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.
