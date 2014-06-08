@@ -3624,20 +3624,12 @@ PerlIOStdio_fill(pTHX_ PerlIO *f)
     }
 #endif
 
-#if defined(VMS)
-    /* An ungetc()d char is handled separately from the regular
-     * buffer, so we stuff it in the buffer ourselves.
-     * Should never get called as should hit code above
-     */
-    *(--((*stdio)->_ptr)) = (unsigned char) c;
-    (*stdio)->_cnt++;
-#else
     /* If buffer snoop scheme above fails fall back to
        using ungetc().
      */
     if (PerlSIO_ungetc(c, stdio) != c)
 	return EOF;
-#endif
+
     return 0;
 }
 

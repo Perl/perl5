@@ -315,7 +315,7 @@ struct IPerlStdIOInfo
 #define PerlSIO_fputs(s,f)		fputs(s,f)
 #define PerlSIO_fflush(f)		Fflush(f)
 #define PerlSIO_fgets(s, n, f)		fgets(s,n,f)
-#if defined(VMS) && defined(__DECC)
+#if defined(__VMS)
      /* Unusual definition of ungetc() here to accommodate fast_sv_gets()'
       * belief that it can mix getc/ungetc with reads from stdio buffer */
      int decc$ungetc(int __c, FILE *__stream);
