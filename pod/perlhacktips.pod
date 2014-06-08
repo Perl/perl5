@@ -1423,9 +1423,8 @@ misleading if the compiler has e.g. inlined code.
 
 =item Linux
 
-You B<must> need to have the BFD (-lbfd) library installed, otherwise
-C<perl> will fail to link.  The BFD is usually distributed as part of
-the binutils.
+You B<must> have the BFD (-lbfd) library installed, otherwise C<perl> will
+fail to link.  The BFD is usually distributed as part of the binutils.
 
 Summary: C<Configure ... -Dusecbacktrace>
 and you need C<-lbfd>.
