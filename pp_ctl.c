@@ -3962,11 +3962,11 @@ PP(pp_require)
 		    filter_has_file = 0;
 		    filter_cache = NULL;
 		    if (filter_state) {
-			SvREFCNT_dec(filter_state);
+			SvREFCNT_dec_NN(filter_state);
 			filter_state = NULL;
 		    }
 		    if (filter_sub) {
-			SvREFCNT_dec(filter_sub);
+			SvREFCNT_dec_NN(filter_sub);
 			filter_sub = NULL;
 		    }
 		}
