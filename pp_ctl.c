@@ -3649,7 +3649,7 @@ S_doopen_pm(pTHX_ SV *name)
 	Stat_t pmcstat;
 
 	SvSetSV_nosteal(pmcsv,name);
-	sv_catpvn(pmcsv, "c", 1);
+	sv_catpvs(pmcsv, "c");
 
 	if (PerlLIO_stat(SvPV_nolen_const(pmcsv), &pmcstat) >= 0)
 	    return check_type_and_open(pmcsv);
@@ -4078,7 +4078,7 @@ PP(pp_require)
 			sv_catpv(msg, " (you may need to install the ");
 			for (c = name; c < e; c++) {
 			    if (*c == '/') {
-				sv_catpvn(msg, "::", 2);
+				sv_catpvs(msg, "::");
 			    }
 			    else {
 				sv_catpvn(msg, c, 1);

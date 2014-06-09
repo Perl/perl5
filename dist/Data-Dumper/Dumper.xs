@@ -498,13 +498,13 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 			SV *postentry;
 			
 			if (realtype == SVt_PVHV)
-			    sv_catpvn(retval, "{}", 2);
+			    sv_catpvs(retval, "{}");
 			else if (realtype == SVt_PVAV)
-			    sv_catpvn(retval, "[]", 2);
+			    sv_catpvs(retval, "[]");
 			else
-			    sv_catpvn(retval, "do{my $o}", 9);
+			    sv_catpvs(retval, "do{my $o}");
 			postentry = newSVpvn(name, namelen);
-			sv_catpvn(postentry, " = ", 3);
+			sv_catpvs(postentry, " = ");
 			sv_catsv(postentry, othername);
 			av_push(postav, postentry);
 		    }
@@ -517,9 +517,9 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 			    }
 			    else {
 				sv_catpvn(retval, name, 1);
-				sv_catpvn(retval, "{", 1);
+				sv_catpvs(retval, "{");
 				sv_catsv(retval, othername);
-				sv_catpvn(retval, "}", 1);
+				sv_catpvs(retval, "}");
 			    }
 			}
 			else
@@ -584,9 +584,9 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	if (!purity && maxdepth > 0 && *levelp >= maxdepth) {
 	    STRLEN vallen;
 	    const char * const valstr = SvPV(val,vallen);
-	    sv_catpvn(retval, "'", 1);
+	    sv_catpvs(retval, "'");
 	    sv_catpvn(retval, valstr, vallen);
-	    sv_catpvn(retval, "'", 1);
+	    sv_catpvs(retval, "'");
 	    return 1;
 	}
 
@@ -594,7 +594,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	    STRLEN blesslen;
 	    const char * const blessstr = SvPV(bless, blesslen);
 	    sv_catpvn(retval, blessstr, blesslen);
-	    sv_catpvn(retval, "( ", 2);
+	    sv_catpvs(retval, "( ");
 	    if (indent >= 2) {
 		blesspad = apad;
 		apad = newSVsv(apad);
@@ -646,18 +646,18 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	    rval = SvPV(sv_pattern, rlen);
 	    rend = rval+rlen;
 	    slash = rval;
-	    sv_catpvn(retval, "qr/", 3);
+	    sv_catpvs(retval, "qr/");
 	    for (;slash < rend; slash++) {
 	      if (*slash == '\\') { ++slash; continue; }
 	      if (*slash == '/') {    
 		sv_catpvn(retval, rval, slash-rval);
-		sv_catpvn(retval, "\\/", 2);
+		sv_catpvs(retval, "\\/");
 		rlen -= slash-rval+1;
 		rval = slash+1;
 	      }
 	    }
 	    sv_catpvn(retval, rval, rlen);
-	    sv_catpvn(retval, "/", 1);
+	    sv_catpvs(retval, "/");
 	    if (sv_flags)
 	      sv_catsv(retval, sv_flags);
 	} 
@@ -670,17 +670,17 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	) {			     /* scalar ref */
 	    SV * const namesv = newSVpvs("${");
 	    sv_catpvn(namesv, name, namelen);
-	    sv_catpvn(namesv, "}", 1);
+	    sv_catpvs(namesv, "}");
 	    if (realpack) {				     /* blessed */
-		sv_catpvn(retval, "do{\\(my $o = ", 13);
+		sv_catpvs(retval, "do{\\(my $o = ");
 		DD_dump(aTHX_ ival, SvPVX_const(namesv), SvCUR(namesv), retval, seenhv,
 			postav, levelp,	indent, pad, xpad, apad, sep, pair,
 			freezer, toaster, purity, deepcopy, quotekeys, bless,
 			maxdepth, sortkeys, use_sparse_seen_hash, useqq);
-		sv_catpvn(retval, ")}", 2);
+		sv_catpvs(retval, ")}");
 	    }						     /* plain */
 	    else {
-		sv_catpvn(retval, "\\", 1);
+		sv_catpvs(retval, "\\");
 		DD_dump(aTHX_ ival, SvPVX_const(namesv), SvCUR(namesv), retval, seenhv,
 			postav, levelp,	indent, pad, xpad, apad, sep, pair,
 			freezer, toaster, purity, deepcopy, quotekeys, bless,
@@ -691,8 +691,8 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	else if (realtype == SVt_PVGV) {		     /* glob ref */
 	    SV * const namesv = newSVpvs("*{");
 	    sv_catpvn(namesv, name, namelen);
-	    sv_catpvn(namesv, "}", 1);
-	    sv_catpvn(retval, "\\", 1);
+	    sv_catpvs(namesv, "}");
+	    sv_catpvs(retval, "\\");
 	    DD_dump(aTHX_ ival, SvPVX_const(namesv), SvCUR(namesv), retval, seenhv,
 		    postav, levelp,	indent, pad, xpad, apad, sep, pair,
 		    freezer, toaster, purity, deepcopy, quotekeys, bless,
@@ -710,11 +710,11 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	    (void)strcpy(iname, name);
 	    inamelen = namelen;
 	    if (name[0] == '@') {
-		sv_catpvn(retval, "(", 1);
+		sv_catpvs(retval, "(");
 		iname[0] = '$';
 	    }
 	    else {
-		sv_catpvn(retval, "[", 1);
+		sv_catpvs(retval, "[");
 		/* omit "->" in $foo{bar}->[0], but not in ${$foo}->[0] */
 		/*if (namelen > 0
 		    && name[namelen-1] != ']' && name[namelen-1] != '}'
@@ -761,7 +761,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		if (indent >= 3) {
 		    sv_catsv(retval, totpad);
 		    sv_catsv(retval, ipad);
-		    sv_catpvn(retval, "#", 1);
+		    sv_catpvs(retval, "#");
 		    sv_catsv(retval, ixsv);
 		}
 		sv_catsv(retval, totpad);
@@ -771,7 +771,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 			freezer, toaster, purity, deepcopy, quotekeys, bless,
 			maxdepth, sortkeys, use_sparse_seen_hash, useqq);
 		if (ix < ixmax)
-		    sv_catpvn(retval, ",", 1);
+		    sv_catpvs(retval, ",");
 	    }
 	    if (ixmax >= 0) {
 		SV * const opad = sv_x(aTHX_ Nullsv, SvPVX_const(xpad), SvCUR(xpad), (*levelp)-1);
@@ -780,9 +780,9 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		SvREFCNT_dec(opad);
 	    }
 	    if (name[0] == '@')
-		sv_catpvn(retval, ")", 1);
+		sv_catpvs(retval, ")");
 	    else
-		sv_catpvn(retval, "]", 1);
+		sv_catpvs(retval, "]");
 	    SvREFCNT_dec(ixsv);
 	    SvREFCNT_dec(totpad);
 	    Safefree(iname);
@@ -798,11 +798,11 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	
 	    SV * const iname = newSVpvn(name, namelen);
 	    if (name[0] == '%') {
-		sv_catpvn(retval, "(", 1);
+		sv_catpvs(retval, "(");
 		(SvPVX(iname))[0] = '$';
 	    }
 	    else {
-		sv_catpvn(retval, "{", 1);
+		sv_catpvs(retval, "{");
 		/* omit "->" in $foo[0]->{bar}, but not in ${$foo}->{bar} */
 		if ((namelen > 0
 		     && name[namelen-1] != ']' && name[namelen-1] != '}')
@@ -810,16 +810,16 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		        && (name[1] == '{'
 			    || (name[0] == '\\' && name[2] == '{'))))
 		{
-		    sv_catpvn(iname, "->", 2);
+		    sv_catpvs(iname, "->");
 		}
 	    }
 	    if (name[0] == '*' && name[namelen-1] == '}' && namelen >= 8 &&
 		(instr(name+namelen-8, "{SCALAR}") ||
 		 instr(name+namelen-7, "{ARRAY}") ||
 		 instr(name+namelen-6, "{HASH}"))) {
-		sv_catpvn(iname, "->", 2);
+		sv_catpvs(iname, "->");
 	    }
-	    sv_catpvn(iname, "{", 1);
+	    sv_catpvs(iname, "{");
 	    totpad = newSVsv(sep);
 	    sv_catsv(totpad, pad);
 	    sv_catsv(totpad, apad);
@@ -894,7 +894,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
                }
 
 		if (i)
-		    sv_catpvn(retval, ",", 1);
+		    sv_catpvs(retval, ",");
 
 		if (sortkeys) {
 		    char *key;
@@ -961,7 +961,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		}
                 sname = newSVsv(iname);
                 sv_catpvn(sname, nkey, nlen);
-                sv_catpvn(sname, "}", 1);
+                sv_catpvs(sname, "}");
 
 		sv_catsv(retval, pair);
 		if (indent >= 2) {
@@ -994,14 +994,14 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		SvREFCNT_dec(opad);
 	    }
 	    if (name[0] == '%')
-		sv_catpvn(retval, ")", 1);
+		sv_catpvs(retval, ")");
 	    else
-		sv_catpvn(retval, "}", 1);
+		sv_catpvs(retval, "}");
 	    SvREFCNT_dec(iname);
 	    SvREFCNT_dec(totpad);
 	}
 	else if (realtype == SVt_PVCV) {
-	    sv_catpvn(retval, "sub { \"DUMMY\" }", 15);
+	    sv_catpvs(retval, "sub { \"DUMMY\" }");
 	    if (purity)
 		warn("Encountered CODE ref, using dummy placeholder");
 	}
@@ -1017,7 +1017,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		SvREFCNT_dec(apad);
 		apad = blesspad;
 	    }
-	    sv_catpvn(retval, ", '", 3);
+	    sv_catpvs(retval, ", '");
 
 	    plen = strlen(realpack);
 	    pticks = num_q(realpack, plen);
@@ -1036,11 +1036,11 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	    else {
 	        sv_catpvn(retval, realpack, strlen(realpack));
 	    }
-	    sv_catpvn(retval, "' )", 3);
+	    sv_catpvs(retval, "' )");
 	    if (toaster && SvPOK(toaster) && SvCUR(toaster)) {
-		sv_catpvn(retval, "->", 2);
+		sv_catpvs(retval, "->");
 		sv_catsv(retval, toaster);
-		sv_catpvn(retval, "()", 2);
+		sv_catpvs(retval, "()");
 	    }
 	}
 	SvREFCNT_dec(ipad);
@@ -1065,9 +1065,9 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		if ((svp = av_fetch(seenentry, 0, FALSE)) && (othername = *svp)
 		    && (svp = av_fetch(seenentry, 2, FALSE)) && *svp && SvIV(*svp) > 0)
 		{
-		    sv_catpvn(retval, "${", 2);
+		    sv_catpvs(retval, "${");
 		    sv_catsv(retval, othername);
-		    sv_catpvn(retval, "}", 1);
+		    sv_catpvs(retval, "}");
 		    return 1;
 		}
 	    }
@@ -1178,7 +1178,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 			
 			sv_setsv(nname, postentry);
 			sv_catpvn(nname, entries[j], sizes[j]);
-			sv_catpvn(postentry, " = ", 3);
+			sv_catpvs(postentry, " = ");
 			av_push(postav, postentry);
 			e = newRV_inc(e);
 			
@@ -1200,7 +1200,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	    }
 	}
 	else if (val == &PL_sv_undef || !SvOK(val)) {
-	    sv_catpvn(retval, "undef", 5);
+	    sv_catpvs(retval, "undef");
 	}
 #ifdef SvVOK
 	else if (SvMAGICAL(val) && (mg = mg_find(val, 'V'))) {
@@ -1455,7 +1455,7 @@ Data_Dumper_Dumpxs(href, ...)
 		    if (postlen >= 0 || !terse) {
 			sv_insert(valstr, 0, 0, " = ", 3);
 			sv_insert(valstr, 0, 0, SvPVX_const(name), SvCUR(name));
-			sv_catpvn(valstr, ";", 1);
+			sv_catpvs(valstr, ";");
 		    }
 		    sv_catsv(retval, pad);
 		    sv_catsv(retval, valstr);
@@ -1469,13 +1469,13 @@ Data_Dumper_Dumpxs(href, ...)
 			    if (svp && (elem = *svp)) {
 				sv_catsv(retval, elem);
 				if (i < postlen) {
-				    sv_catpvn(retval, ";", 1);
+				    sv_catpvs(retval, ";");
 				    sv_catsv(retval, sep);
 				    sv_catsv(retval, pad);
 				}
 			    }
 			}
-			sv_catpvn(retval, ";", 1);
+			sv_catpvs(retval, ";");
 			    sv_catsv(retval, sep);
 		    }
 		    sv_setpvn(valstr, "", 0);

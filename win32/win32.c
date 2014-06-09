@@ -360,7 +360,7 @@ get_emd_part(SV **prev_pathp, STRLEN *const len, char *trailing_path, ...)
 	if (!*prev_pathp)
 	    *prev_pathp = sv_2mortal(newSVpvs(""));
 	else if (SvPVX(*prev_pathp))
-	    sv_catpvn(*prev_pathp, ";", 1);
+	    sv_catpvs(*prev_pathp, ";");
 	sv_catpv(*prev_pathp, mod_name);
 	if(len)
 	    *len = SvCUR(*prev_pathp);
@@ -418,7 +418,7 @@ win32_get_xlib(const char *pl, const char *xlib, const char *libname,
 	sv1 = sv2;
     } else if (sv2) {
         dTHX;
-	sv_catpvn(sv1, ";", 1);
+	sv_catpv(sv1, ";");
 	sv_catsv(sv1, sv2);
     }
 
