@@ -700,8 +700,18 @@ sub runloop {
     # getting a too low initial $n in the initial, 'find the minimum' loop
     # in &countit.  This, in turn, can reduce the number of calls to
     # &runloop a lot, and thus reduce additive errors.
+    #
+    # Note that its possible for the act of reading the system clock to
+    # burn lots of system CPU while we burn very little user clock in the
+    # busy loop, which can cause the loop to run for a very long wall time.
+    # So gradually ramp up the duration of the loop. See RT #122003
+    #
     my $tbase = Benchmark->new(0)->[1];
-    while ( ( $t0 = Benchmark->new(0) )->[1] == $tbase ) {} ;
+    my $limit = 1;
+    while ( ( $t0 = Benchmark->new(0) )->[1] == $tbase ) {
+        for (my $i=0; $i < $limit; $i++) { my $x = $i / 1.5 } # burn user CPU
+        $limit *= 1.1;
+    }
     $subref->();
     $t1 = Benchmark->new($n);
     $td = &timediff($t1, $t0);
