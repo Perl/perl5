@@ -1163,7 +1163,7 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, const OP *o)
     }
     if (o->op_flags & OPf_KIDS) {
 	OP *kid;
-	for (kid = cUNOPo->op_first; kid; kid = kid->op_sibling)
+	for (kid = cUNOPo->op_first; kid; kid = OP_SIBLING(kid))
 	    do_op_dump(level, file, kid);
     }
     Perl_dump_indent(aTHX_ level-1, file, "}\n");

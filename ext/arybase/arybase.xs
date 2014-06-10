@@ -176,7 +176,7 @@ STATIC OP *ab_ck_sassign(pTHX_ OP *o) {
  o = (*ab_old_ck_sassign)(aTHX_ o);
  if (o->op_type == OP_SASSIGN && FEATURE_ARYBASE_IS_ENABLED) {
   OP *right = cBINOPx(o)->op_first;
-  OP *left = right->op_sibling;
+  OP *left = OP_SIBLING(right);
   if (left) ab_process_assignment(left, right);
  }
  return o;
@@ -186,8 +186,9 @@ STATIC OP *ab_ck_aassign(pTHX_ OP *o) {
  o = (*ab_old_ck_aassign)(aTHX_ o);
  if (o->op_type == OP_AASSIGN && FEATURE_ARYBASE_IS_ENABLED) {
   OP *right = cBINOPx(o)->op_first;
-  OP *left = cBINOPx(right->op_sibling)->op_first->op_sibling;
-  right = cBINOPx(right)->op_first->op_sibling;
+  OP *left = OP_SIBLING(right);
+  left = OP_SIBLING(cBINOPx(left)->op_first);
+  right = OP_SIBLING(cBINOPx(right)->op_first);
   ab_process_assignment(left, right);
  }
  return o;
@@ -375,10 +376,11 @@ static OP *ab_ck_base(pTHX_ OP *o)
    ab_map_store(o, o->op_ppaddr, base);
    o->op_ppaddr = new_pp;
    /* Break the aelemfast optimisation */
-   if (o->op_type == OP_AELEM &&
-       cBINOPo->op_first->op_sibling->op_type == OP_CONST) {
-     cBINOPo->op_first->op_sibling
-      = newUNOP(OP_NULL,0,cBINOPo->op_first->op_sibling);
+   if (o->op_type == OP_AELEM) {
+    OP *const first = cBINOPo->op_first;
+    if ( OP_SIBLING(first)->op_type == OP_CONST) {
+     OP_SIBLING_set(first, newUNOP(OP_NULL,0,OP_SIBLING(first)));
+    }
    }
   }
   else ab_map_delete(o);

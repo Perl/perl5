@@ -14765,9 +14765,9 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
 	if (   o->op_type == OP_PUSHMARK
 	   || (o->op_type == OP_NULL && o->op_targ == OP_PUSHMARK)
         )
-	    o = o->op_sibling;
+	    o = OP_SIBLING(o);
 
-	if (!o->op_sibling) {
+	if (!OP_HAS_SIBLING(o)) {
 	    /* one-arg version of open is highly magical */
 
 	    if (o->op_type == OP_GV) { /* open FOO; */
@@ -14812,7 +14812,7 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
             &&
                (   o->op_type == OP_PUSHMARK
                || (o->op_type == OP_NULL && o->op_targ == OP_PUSHMARK)))
-	    o = o->op_sibling->op_sibling;
+	    o = OP_SIBLING(OP_SIBLING(o));
 	goto do_op2;
 
 
@@ -14943,7 +14943,7 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
          * it replaced are still in the tree, so we work on them instead.
 	 */
 	o2 = NULL;
-	for (kid=o; kid; kid = kid->op_sibling) {
+	for (kid=o; kid; kid = OP_SIBLING(kid)) {
 	    const OPCODE type = kid->op_type;
 	    if ( (type == OP_CONST && SvOK(cSVOPx_sv(kid)))
 	      || (type == OP_NULL  && ! (kid->op_flags & OPf_KIDS))
@@ -14966,7 +14966,7 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
 	    sv = find_uninit_var(o, uninit_sv, 1);
 	    if (sv)
 		return sv;
-	    o = o->op_sibling;
+	    o = OP_SIBLING(o);
 	}
 	break;
     }

@@ -528,7 +528,7 @@ walkoptree(pTHX_ OP *o, const char *method, SV *ref)
     PUTBACK;
     perl_call_method(method, G_DISCARD);
     if (o && (o->op_flags & OPf_KIDS)) {
-	for (kid = ((UNOP*)o)->op_first; kid; kid = kid->op_sibling) {
+	for (kid = ((UNOP*)o)->op_first; kid; kid = OP_SIBLING(kid)) {
 	    ref = walkoptree(aTHX_ kid, method, ref);
 	}
     }
@@ -554,7 +554,7 @@ oplist(pTHX_ OP *o, SV **SP)
             continue;
 	case OP_SORT:
 	    if (o->op_flags & OPf_STACKED && o->op_flags & OPf_SPECIAL) {
-		OP *kid = cLISTOPo->op_first->op_sibling;   /* pass pushmark */
+		OP *kid = OP_SIBLING(cLISTOPo->op_first);   /* pass pushmark */
 		kid = kUNOP->op_first;                      /* pass rv2gv */
 		kid = kUNOP->op_first;                      /* pass leave */
 		SP = oplist(aTHX_ kid->op_next, SP);
@@ -661,7 +661,7 @@ struct OP_methods {
     U16 offset;
 } op_methods[] = {
   { STR_WITH_LEN("next"),    OPp,    STRUCT_OFFSET(struct op, op_next),     },/* 0*/
-  { STR_WITH_LEN("sibling"), OPp,    STRUCT_OFFSET(struct op, op_sibling),  },/* 1*/
+  { STR_WITH_LEN("sibling"), op_offset_special, 0,                          },/* 1*/
   { STR_WITH_LEN("targ"),    PADOFFSETp, STRUCT_OFFSET(struct op, op_targ), },/* 2*/
   { STR_WITH_LEN("flags"),   U8p,    STRUCT_OFFSET(struct op, op_flags),    },/* 3*/
   { STR_WITH_LEN("private"), U8p,    STRUCT_OFFSET(struct op, op_private),  },/* 4*/
@@ -1024,6 +1024,10 @@ next(o)
 
 	if (op_methods[ix].type == op_offset_special)
 	    switch (ix) {
+	    case 1: /* op_sibling */
+		ret = make_op_object(aTHX_ OP_SIBLING(o));
+		break;
+
 	    case 8: /* pmreplstart */
 		ret = make_op_object(aTHX_
 				cPMOPo->op_type == OP_SUBST
@@ -1100,7 +1104,7 @@ next(o)
 		{
 		    OP *kid;
 		    UV i = 0;
-		    for (kid = ((LISTOP*)o)->op_first; kid; kid = kid->op_sibling)
+		    for (kid = ((LISTOP*)o)->op_first; kid; kid = OP_SIBLING(kid))
 			i++;
 		    ret = sv_2mortal(newSVuv(i));
 		}

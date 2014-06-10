@@ -1016,6 +1016,15 @@ is also available as well as C<OP_TYPE_IS_OR_WAS_NN>
 and C<OP_TYPE_ISNT_AND_WASNT_NN> which elide
 the NULL pointer check.
 
+=for apidoc Am|bool|OP_HAS_SIBLING|OP *o
+Returns true if o has a sibling
+
+=for apidoc Am|bool|OP_SIBLING|OP *o
+Returns the sibling of o, or NULL if there is no sibling
+
+=for apidoc Am|bool|OP_SIBLING_set|OP *o|OP *sib
+Sets the sibling of o to sib
+
 =cut
 */
 
@@ -1051,6 +1060,10 @@ the NULL pointer check.
 
 #define OP_TYPE_ISNT_AND_WASNT(o, type) \
     ( (o) && OP_TYPE_ISNT_AND_WASNT_NN(o, type) )
+
+#define OP_HAS_SIBLING(o)      (cBOOL((o)->op_sibling))
+#define OP_SIBLING(o)          (0 + (o)->op_sibling)
+#define OP_SIBLING_set(o, sib) ((o)->op_sibling = (sib))
 
 #define newATTRSUB(f, o, p, a, b) Perl_newATTRSUB_x(aTHX_  f, o, p, a, b, FALSE)
 #define newSUB(f, o, p, b)	newATTRSUB((f), (o), (p), NULL, (b))

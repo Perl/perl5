@@ -191,7 +191,7 @@ static OP *
 io_ck_lineseq(pTHX_ OP *o)
 {
     OP *kid = cBINOPo->op_first;
-    for (; kid; kid = kid->op_sibling)
+    for (; kid; kid = OP_SIBLING(kid))
 	if (kid->op_type == OP_NEXTSTATE || kid->op_type == OP_DBSTATE)
 	    kid->op_ppaddr = io_pp_nextstate;
     return o;

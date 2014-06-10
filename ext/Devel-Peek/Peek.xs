@@ -360,12 +360,13 @@ S_ck_dump(pTHX_ OP *entersubop, GV *namegv, SV *cv)
 			   newSVpvn_flags("$;$", 3, SVs_TEMP));
 
     aop = cUNOPx(entersubop)->op_first;
-    if (!aop->op_sibling)
+    if (!OP_HAS_SIBLING(aop))
 	aop = cUNOPx(aop)->op_first;
     prev = aop;
-    aop = aop->op_sibling;
+    aop = OP_SIBLING(aop);
     first = aop;
-    prev->op_sibling = first->op_sibling;
+    OP_SIBLING_set(prev, OP_SIBLING(first));
+
     if (first->op_type == OP_RV2AV ||
 	first->op_type == OP_PADAV ||
 	first->op_type == OP_RV2HV ||
@@ -374,7 +375,7 @@ S_ck_dump(pTHX_ OP *entersubop, GV *namegv, SV *cv)
 	first->op_flags |= OPf_REF;
     else
 	first->op_flags &= ~OPf_MOD;
-    aop = aop->op_sibling;
+    aop = OP_SIBLING(aop);
     if (!aop) {
 	/* It doesn’t really matter what we return here, as this only
 	   occurs after yyerror.  */
@@ -384,12 +385,12 @@ S_ck_dump(pTHX_ OP *entersubop, GV *namegv, SV *cv)
 
     /* aop now points to the second arg if there is one, the cvop otherwise
      */
-    if (aop->op_sibling) {
-	prev->op_sibling = aop->op_sibling;
+    if (OP_HAS_SIBLING(aop)) {
+	OP_SIBLING_set(prev, OP_SIBLING(aop));
 	second = aop;
-	second->op_sibling = NULL;
+	OP_SIBLING_set(second, NULL);
     }
-    first->op_sibling = second;
+    OP_SIBLING_set(first, second);
 
     op_free(entersubop);
 

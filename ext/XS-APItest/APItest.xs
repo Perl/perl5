@@ -400,9 +400,9 @@ THX_ck_entersub_args_scalars(pTHX_ OP *entersubop, GV *namegv, SV *ckobj)
     OP *aop = cUNOPx(entersubop)->op_first;
     PERL_UNUSED_ARG(namegv);
     PERL_UNUSED_ARG(ckobj);
-    if (!aop->op_sibling)
+    if (!OP_HAS_SIBLING(aop))
 	aop = cUNOPx(aop)->op_first;
-    for (aop = aop->op_sibling; aop->op_sibling; aop = aop->op_sibling) {
+    for (aop = OP_SIBLING(aop); OP_HAS_SIBLING(aop); aop = OP_SIBLING(aop)) {
 	op_contextualize(aop, G_SCALAR);
     }
     return entersubop;
@@ -415,14 +415,14 @@ THX_ck_entersub_multi_sum(pTHX_ OP *entersubop, GV *namegv, SV *ckobj)
     OP *pushop = cUNOPx(entersubop)->op_first;
     PERL_UNUSED_ARG(namegv);
     PERL_UNUSED_ARG(ckobj);
-    if (!pushop->op_sibling)
+    if (!OP_HAS_SIBLING(pushop))
 	pushop = cUNOPx(pushop)->op_first;
     while (1) {
-	OP *aop = pushop->op_sibling;
-	if (!aop->op_sibling)
+	OP *aop = OP_SIBLING(pushop);
+	if (!OP_HAS_SIBLING(aop))
 	    break;
-	pushop->op_sibling = aop->op_sibling;
-	aop->op_sibling = NULL;
+	OP_SIBLING_set(pushop, OP_SIBLING(aop));
+	OP_SIBLING_set(aop, NULL);
 	op_contextualize(aop, G_SCALAR);
 	if (sumop) {
 	    sumop = newBINOP(OP_ADD, 0, sumop, aop);
@@ -449,7 +449,7 @@ test_op_list_describe_part(SV *res, OP *o)
     if (o->op_flags & OPf_KIDS) {
 	OP *k;
 	sv_catpvs(res, "[");
-	for (k = cUNOPx(o)->op_first; k; k = k->op_sibling)
+	for (k = cUNOPx(o)->op_first; k; k = OP_SIBLING(k))
 	    test_op_list_describe_part(res, k);
 	sv_catpvs(res, "]");
     } else {
@@ -491,7 +491,7 @@ THX_mkBINOP(pTHX_ U32 type, OP *first, OP *last)
     binop->op_first     = first;
     binop->op_flags     = OPf_KIDS;
     binop->op_last      = last;
-    first->op_sibling   = last;
+    OP_SIBLING_set(first, last);
     return (OP *)binop;
 }
 
@@ -504,8 +504,8 @@ THX_mkLISTOP(pTHX_ U32 type, OP *first, OP *sib, OP *last)
     listop->op_type     = (OPCODE)type;
     listop->op_flags    = OPf_KIDS;
     listop->op_first    = first;
-    first->op_sibling   = sib;
-    sib->op_sibling     = last;
+    OP_SIBLING_set(first, sib);
+    OP_SIBLING_set(sib, last);
     listop->op_last     = last;
     return (OP *)listop;
 }
@@ -560,10 +560,11 @@ THX_ck_entersub_establish_cleanup(pTHX_ OP *entersubop, GV *namegv, SV *ckobj)
     OP *pushop, *argop, *estop;
     ck_entersub_args_proto(entersubop, namegv, ckobj);
     pushop = cUNOPx(entersubop)->op_first;
-    if(!pushop->op_sibling) pushop = cUNOPx(pushop)->op_first;
-    argop = pushop->op_sibling;
-    pushop->op_sibling = argop->op_sibling;
-    argop->op_sibling = NULL;
+    if(!OP_HAS_SIBLING(pushop))
+        pushop = cUNOPx(pushop)->op_first;
+    argop = OP_SIBLING(pushop);
+    OP_SIBLING_set(pushop, OP_SIBLING(argop));
+    OP_SIBLING_set(argop, NULL);
     op_free(entersubop);
     NewOpSz(0, estop, sizeof(UNOP));
     estop->op_type = OP_RAND;
@@ -580,10 +581,11 @@ THX_ck_entersub_postinc(pTHX_ OP *entersubop, GV *namegv, SV *ckobj)
     OP *pushop, *argop;
     ck_entersub_args_proto(entersubop, namegv, ckobj);
     pushop = cUNOPx(entersubop)->op_first;
-    if(!pushop->op_sibling) pushop = cUNOPx(pushop)->op_first;
-    argop = pushop->op_sibling;
-    pushop->op_sibling = argop->op_sibling;
-    argop->op_sibling = NULL;
+    if(!OP_HAS_SIBLING(pushop))
+        pushop = cUNOPx(pushop)->op_first;
+    argop = OP_SIBLING(pushop);
+    OP_SIBLING_set(pushop, OP_SIBLING(argop));
+    OP_SIBLING_set(argop, NULL);
     op_free(entersubop);
     return newUNOP(OP_POSTINC, 0,
 	op_lvalue(op_contextualize(argop, G_SCALAR), OP_POSTINC));
@@ -597,12 +599,13 @@ THX_ck_entersub_pad_scalar(pTHX_ OP *entersubop, GV *namegv, SV *ckobj)
     SV *a0, *a1;
     ck_entersub_args_proto(entersubop, namegv, ckobj);
     pushop = cUNOPx(entersubop)->op_first;
-    if(!pushop->op_sibling) pushop = cUNOPx(pushop)->op_first;
-    argop = pushop->op_sibling;
-    if(argop->op_type != OP_CONST || argop->op_sibling->op_type != OP_CONST)
+    if(!OP_HAS_SIBLING(pushop))
+        pushop = cUNOPx(pushop)->op_first;
+    argop = OP_SIBLING(pushop);
+    if(argop->op_type != OP_CONST || OP_SIBLING(argop)->op_type != OP_CONST)
 	croak("bad argument expression type for pad_scalar()");
     a0 = cSVOPx_sv(argop);
-    a1 = cSVOPx_sv(argop->op_sibling);
+    a1 = cSVOPx_sv(OP_SIBLING(argop));
     switch(SvIV(a0)) {
 	case 1: {
 	    SV *namesv = sv_2mortal(newSVpvs("$"));
@@ -690,11 +693,11 @@ static OP *THX_parse_var(pTHX)
 }
 
 #define push_rpn_item(o) \
-    (tmpop = (o), tmpop->op_sibling = stack, stack = tmpop)
+    (tmpop = (o), OP_SIBLING_set(tmpop, stack), stack = tmpop)
 #define pop_rpn_item() \
     (!stack ? (croak("RPN stack underflow"), (OP*)NULL) : \
-     (tmpop = stack, stack = stack->op_sibling, \
-      tmpop->op_sibling = NULL, tmpop))
+     (tmpop = stack, stack = OP_SIBLING(stack), \
+      OP_SIBLING_set(tmpop, NULL), tmpop))
 
 #define parse_rpn_expr() THX_parse_rpn_expr(aTHX)
 static OP *THX_parse_rpn_expr(pTHX)
@@ -1091,10 +1094,10 @@ addissub_myck_add(pTHX_ OP *op)
     OP *aop, *bop;
     U8 flags;
     if (!(flag_svp && SvTRUE(*flag_svp) && (op->op_flags & OPf_KIDS) &&
-	    (aop = cBINOPx(op)->op_first) && (bop = aop->op_sibling) &&
-	    !bop->op_sibling))
+	    (aop = cBINOPx(op)->op_first) && (bop = OP_SIBLING(aop)) &&
+	    !OP_HAS_SIBLING(bop)))
 	return addissub_nxck_add(aTHX_ op);
-    aop->op_sibling = NULL;
+    OP_SIBLING_set(aop, NULL);
     cBINOPx(op)->op_first = NULL;
     op->op_flags &= ~OPf_KIDS;
     flags = op->op_flags;
