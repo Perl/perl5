@@ -43,7 +43,7 @@ $Is_Dosish  = $Is_Dos || $Is_OS2 || $Is_MSWin32 || $Is_NetWare;
 
 $Is_UFS     = $Is_Darwin && (() = `df -t ufs . 2>/dev/null`) == 2;
 
-if ($Is_Cygwin) {
+if ($Is_Cygwin && !is_miniperl) {
   require Win32;
   Win32->import;
 }
@@ -186,6 +186,8 @@ SKIP: {
         # Going to try to switch away from root.  Might not work.
         my $olduid = $>;
         eval { $> = 1; };
+	skip "Can't test if an admin user in miniperl", 2,
+	  if $Is_Cygwin && is_miniperl();
         skip "Can't test -r or -w meaningfully if you're superuser", 2
           if ($Is_Cygwin ? Win32::IsAdminUser : $> == 0);
 
@@ -530,9 +532,13 @@ SKIP: {
     my $s2 = -s _;
     is($s1, $s2, q(-T _ doesn't break the statbuffer));
     SKIP: {
+	my $root_uid = $Is_Cygwin ? 18 : 0;
 	skip "No lstat", 1 unless $Config{d_lstat};
-	skip "uid=0", 1 unless $<&&$>;
-	skip "Readable by group/other means readable by me", 1 if $^O eq 'VMS';
+	skip "uid=0", 1 if $< == $root_uid or $> == $root_uid;
+	skip "Can't check if admin user in miniperl", 1
+	  if $^O =~ /^(cygwin|MSWin32|msys)$/ && is_miniperl();
+	skip "Readable by group/other means readable by me on $^O", 1 if $^O eq 'VMS'
+          or ($^O =~ /^(cygwin|MSWin32|msys)$/ and Win32::IsAdminUser());
 	lstat($tmpfile);
 	-T _;
 	ok(eval { lstat _ },
