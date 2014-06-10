@@ -39,7 +39,8 @@ END
 my @charsets = get_supported_code_pages();
 shift @charsets;    # ASCII is the 0th, and we don't deal with that here.
 foreach my $charset (@charsets) {
-    my @a2e = get_a2n($charset);
+    # we process the whole array several times, make a copy
+    my @a2e = @{get_a2n($charset)};
 
     print $out_fh "\n" . get_conditional_compile_line_start($charset);
     print $out_fh "\n";

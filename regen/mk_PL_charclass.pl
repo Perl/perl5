@@ -260,7 +260,7 @@ END
 
 # Output the table using fairly short names for each char.
 foreach my $charset (get_supported_code_pages()) {
-    my @a2n = get_a2n($charset);
+    my @a2n = @{get_a2n($charset)};
     my @out;
 
     print $out_fh "\n" . get_conditional_compile_line_start($charset);
