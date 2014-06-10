@@ -8625,7 +8625,7 @@ Perl_ck_fun(pTHX_ OP *o)
     }
 
     if (o->op_flags & OPf_KIDS) {
-        OP **tokid = &cLISTOPo->op_first;
+        OP *prev_kid = NULL;
         OP *kid = cLISTOPo->op_first;
         OP *sibl;
         I32 numargs = 0;
@@ -8634,7 +8634,7 @@ Perl_ck_fun(pTHX_ OP *o)
 	if (kid->op_type == OP_PUSHMARK ||
 	    (kid->op_type == OP_NULL && kid->op_targ == OP_PUSHMARK))
 	{
-	    tokid = &kid->op_sibling;
+	    prev_kid = kid;
 	    kid = OP_SIBLING(kid);
 	}
 	if (kid && kid->op_type == OP_COREARGS) {
@@ -8650,8 +8650,13 @@ Perl_ck_fun(pTHX_ OP *o)
 
 	while (oa) {
 	    if (oa & OA_OPTIONAL || (oa & 7) == OA_LIST) {
-		if (!kid && !seen_optional && PL_opargs[type] & OA_DEFGV)
-		    *tokid = kid = newDEFSVOP();
+		if (!kid && !seen_optional && PL_opargs[type] & OA_DEFGV) {
+		    kid = newDEFSVOP();
+                    if (prev_kid)
+                        OP_SIBLING_set(prev_kid, kid);
+                    else
+                        cLISTOPo->op_first = kid;
+                }
 		seen_optional = TRUE;
 	    }
 	    if (!kid) break;
@@ -8712,7 +8717,10 @@ Perl_ck_fun(pTHX_ OP *o)
 		    newop->op_next = newop;
 		    kid = newop;
 		    OP_SIBLING_set(kid, sibl);
-		    *tokid = kid;
+                    if (prev_kid)
+                        OP_SIBLING_set(prev_kid, kid);
+                    else
+                        cLISTOPo->op_first = kid;
 		}
 		break;
 	    case OA_FILEREF:
@@ -8831,7 +8839,10 @@ Perl_ck_fun(pTHX_ OP *o)
 			kid->op_private |= priv;
 		    }
 		    OP_SIBLING_set(kid, sibl);
-		    *tokid = kid;
+                    if (prev_kid)
+                        OP_SIBLING_set(prev_kid, kid);
+                    else
+                        cLISTOPo->op_first = kid;
 		}
 		scalar(kid);
 		break;
@@ -8844,7 +8855,7 @@ Perl_ck_fun(pTHX_ OP *o)
 		break;
 	    }
 	    oa >>= 4;
-	    tokid = &kid->op_sibling;
+	    prev_kid = kid;
 	    kid = OP_SIBLING(kid);
 	}
 	/* FIXME - should the numargs or-ing move after the too many
