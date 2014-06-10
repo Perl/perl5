@@ -112,7 +112,7 @@ sub get_a2n($) {
         die "Unknown character set '$charset'";
     }
 
-    return @{$ebcdic_translations{$charset}};
+    return $ebcdic_translations{$charset};
 }
 
 sub get_I8_2_utf($) {
