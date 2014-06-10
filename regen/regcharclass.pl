@@ -448,7 +448,15 @@ sub make_trie {
     return 0 + keys( %trie ) ? \%trie : undef;
 }
 
+my %pop_counts;
+
 sub pop_count ($) {
+    my $word = shift;
+
+    return @{$pop_counts{$word} ||= _pop_count($word)};
+}
+
+sub _pop_count ($) {
     my $word = shift;
 
     # This returns a list of the positions of the bits in the input word that
@@ -461,7 +469,7 @@ sub pop_count ($) {
         $position++;
         $word >>= 1;
     }
-    return @positions;
+    return \@positions;
 }
 
 # my $optree= _optree()
