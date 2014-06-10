@@ -56,7 +56,7 @@ foreach my $charset (@charsets) {
         output_table(\@e2a, "PL_e2a");
     }
 
-    my @i82utf = get_I8_2_utf($charset);
+    my @i82utf = @{get_I8_2_utf($charset)};
     print $out_fh <<END;
 /* (Confusingly named) Index is $charset I8 byte; value is
  * $charset UTF-EBCDIC equivalent */
