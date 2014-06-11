@@ -173,6 +173,12 @@ footprint.
 
 L<[perl #121436]|https://rt.perl.org/Ticket/Display.html?id=121436>
 
+=item *
+
+C<-T> and C<-B> filetests will return sooner when an empty file is detected.
+
+L<perl #121489|https://rt.perl.org/Ticket/Display.html?id=121489>
+
 =back
 
 =head1 Modules and Pragmata
