@@ -9210,7 +9210,7 @@ Perl_ck_sassign(pTHX_ OP *o)
 	     )
 	    )
 		&& (kkid->op_private & OPpLVAL_INTRO)
-		&& SvPAD_STATE(*av_fetch(PL_comppad_name, kkid->op_targ, FALSE))) {
+		&& SvPAD_STATE(PAD_COMPNAME_SV(kkid->op_targ))) {
 	    const PADOFFSET target = kkid->op_targ;
 	    OP *const other = newOP(OP_PADSV,
 				    kkid->op_flags
@@ -9571,7 +9571,7 @@ S_simplify_sort(pTHX_ OP *o)
 	kid = kBINOP->op_first;
 	do {
 	    if (kid->op_type == OP_PADSV) {
-		SV * const name = AvARRAY(PL_comppad_name)[kid->op_targ];
+		SV * const name = PAD_COMPNAME_SV(kid->op_targ);
 		if (SvCUR(name) == 2 && *SvPVX(name) == '$'
 		 && (SvPVX(name)[1] == 'a' || SvPVX(name)[1] == 'b'))
 		    /* diag_listed_as: "my %s" used in sort comparison */

@@ -398,7 +398,7 @@ ling pad (lvalue) to C<gen>.  Note that C<SvUV_set> is hijacked for this purpose
 */
 
 #define PAD_COMPNAME(po)	PAD_COMPNAME_SV(po)
-#define PAD_COMPNAME_SV(po) (*av_fetch(PL_comppad_name, (po), FALSE))
+#define PAD_COMPNAME_SV(po) (AvARRAY(PL_comppad_name)[(po)])
 #define PAD_COMPNAME_FLAGS(po) SvFLAGS(PAD_COMPNAME_SV(po))
 #define PAD_COMPNAME_FLAGS_isOUR(po) SvPAD_OUR(PAD_COMPNAME_SV(po))
 #define PAD_COMPNAME_PV(po) SvPV_nolen(PAD_COMPNAME_SV(po))
