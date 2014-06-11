@@ -385,6 +385,7 @@ d_attribute_pure=''
 d_attribute_unused=''
 d_attribute_warn_unused_result=''
 d_printf_format_null=''
+d_backtrace=''
 d_bcmp=''
 d_bcopy=''
 d_builtin_choose_expr=''
@@ -426,7 +427,6 @@ d_dladdr=''
 d_dlerror=''
 d_dlopen=''
 d_dlsymun=''
-d_backtrace=''
 d_dosuid=''
 d_suidsafe=''
 d_drand48_r=''
@@ -10840,6 +10840,10 @@ set d_attribute_warn_unused_result
 eval $setvar
 $rm -f attrib*
 
+: see if backtrace exists
+set backtrace d_backtrace
+eval $inlibc
+
 : see if bcmp exists
 set bcmp d_bcmp
 eval $inlibc
@@ -12343,10 +12347,6 @@ $rm -f fred fred.* dyna.$dlext dyna.* tmp-dyna.*
 set d_dlsymun
 eval $setvar
 
-: see if backtrace exists
-set backtrace d_backtrace
-eval $inlibc
-
 : add flags if using c backtrace
 case "$usecbacktrace" in
 [yY]*|true|$define)
@@ -12822,10 +12822,6 @@ case "$d_endservent_r" in
 *)	endservent_r_proto=0
 	;;
 esac
-
-: see if this is an execinfo.h system
-set execinfo.h i_execinfo
-eval $inhdr
 
 : Locate the flags for 'open()'
 echo " "
@@ -19300,13 +19296,6 @@ eval $inlibc
 set writev d_writev
 eval $inlibc
 
-: preserve RCS keywords in files with variable substitution, grrr
-Date='$Date'
-Id='$Id'
-Log='$Log'
-RCSfile='$RCSfile'
-Revision='$Revision'
-
 : check for alignment requirements
 echo " "
 case "$alignbytes" in
@@ -21959,6 +21948,10 @@ eval $inhdr
 set bfd.h i_bfd
 eval $inhdr
 
+: see if this is an execinfo.h system
+set execinfo.h i_execinfo
+eval $inhdr
+
 : see if this is a fp.h system
 set fp.h i_fp
 eval $inhdr
@@ -23082,6 +23075,7 @@ d_attribute_noreturn='$d_attribute_noreturn'
 d_attribute_pure='$d_attribute_pure'
 d_attribute_unused='$d_attribute_unused'
 d_attribute_warn_unused_result='$d_attribute_warn_unused_result'
+d_backtrace='$d_backtrace'
 d_bcmp='$d_bcmp'
 d_bcopy='$d_bcopy'
 d_bsd='$d_bsd'
@@ -23123,7 +23117,6 @@ d_dladdr='$d_dladdr'
 d_dlerror='$d_dlerror'
 d_dlopen='$d_dlopen'
 d_dlsymun='$d_dlsymun'
-d_backtrace='$d_backtrace'
 d_dosuid='$d_dosuid'
 d_drand48_r='$d_drand48_r'
 d_drand48proto='$d_drand48proto'
@@ -23610,7 +23603,7 @@ i8size='$i8size'
 i8type='$i8type'
 i_arpainet='$i_arpainet'
 i_assert='$i_assert'
-i_bfd='$i_assert'
+i_bfd='$i_bfd'
 i_bsdioctl='$i_bsdioctl'
 i_crypt='$i_crypt'
 i_db='$i_db'
@@ -24105,6 +24098,13 @@ EOM
 		;;
 	esac
 fi
+
+: preserve RCS keywords in files with variable substitution, grrr
+Date='$Date'
+Id='$Id'
+Log='$Log'
+RCSfile='$RCSfile'
+Revision='$Revision'
 
 : Finish up by extracting the .SH files
 case "$alldone" in
