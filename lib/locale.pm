@@ -96,9 +96,14 @@ sub import {
 
             $arg =~ s/^://;
 
+            eval { require POSIX; import POSIX 'locale_h'; };
+            unless (defined &POSIX::LC_CTYPE) {
+              return;
+            }
+
             # Map our names to the ones defined by POSIX
             $arg = "LC_" . uc($arg);
-            use POSIX 'locale_h';
+
             my $bit = eval "&POSIX::$arg";
             if (defined $bit) {
                 # 1 is added so that the pseudo-category :characters, which is

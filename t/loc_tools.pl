@@ -90,7 +90,10 @@ sub find_locales ($) {  # Returns an array of all the locales we found on the
 
     # Done this way in case this is 'required' in the caller before seeing if
     # this is miniperl.
-    require POSIX; import POSIX 'locale_h';
+    eval { require POSIX; import POSIX 'locale_h'; };
+    unless (defined &POSIX::LC_CTYPE) {
+      return;
+    }
 
     _trylocale("C", $categories, \@Locale);
     _trylocale("POSIX", $categories, \@Locale);
