@@ -168,7 +168,10 @@ There may well be none in a stable release.
 
 =item *
 
-XXX
+C<av_delete> has been refactored to improve performance and reduce its memory 
+footprint.
+
+L<[perl #121436]|https://rt.perl.org/Ticket/Display.html?id=121436>
 
 =back
 
