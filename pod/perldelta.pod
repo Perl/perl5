@@ -346,6 +346,19 @@ L<[perl #121523]|https://rt.perl.org/Ticket/Display.html?id=121523>
 
 =back
 
+=head3 L<perlapi>
+
+=over 4
+
+=item *
+
+C<sv_usepvn_flags> - Fix documentation to mention the use of C<NewX> instead of 
+C<malloc>.
+
+L<[perl #121869]|https://rt.perl.org/Ticket/Display.html?id=121869>
+
+=back
+
 =head1 Diagnostics
 
 The following additions or changes have been made to diagnostic output,
