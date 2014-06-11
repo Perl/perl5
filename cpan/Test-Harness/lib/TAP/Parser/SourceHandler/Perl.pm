@@ -21,11 +21,11 @@ TAP::Parser::SourceHandler::Perl - Stream TAP from a Perl executable
 
 =head1 VERSION
 
-Version 3.31
+Version 3.32
 
 =cut
 
-our $VERSION = '3.31';
+our $VERSION = '3.32';
 
 =head1 SYNOPSIS
 

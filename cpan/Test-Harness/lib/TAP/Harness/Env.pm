@@ -7,7 +7,7 @@ use constant IS_VMS => ( $^O eq 'VMS' );
 use TAP::Object;
 use Text::ParseWords qw/shellwords/;
 
-our $VERSION = '3.31';
+our $VERSION = '3.32';
 
 # Get the parts of @INC which are changed from the stock list AND
 # preserve reordering of stock directories.
@@ -91,7 +91,7 @@ sub create {
         ignore_exit => $ENV{HARNESS_IGNORE_EXIT} || 0,
     );
 
-    my $class = $input{harness_class} || $ENV{HARNESS_SUBCLASS} || 'TAP::Harness';
+    my $class = delete $input{harness_class} || $ENV{HARNESS_SUBCLASS} || 'TAP::Harness';
     if ( defined( my $env_opt = $ENV{HARNESS_OPTIONS} ) ) {
         for my $opt ( split /:/, $env_opt ) {
             if ( $opt =~ /^j(\d*)$/ ) {
@@ -126,7 +126,7 @@ TAP::Harness::Env - Parsing harness related environmental variables where approp
 
 =head1 VERSION
 
-Version 3.31
+Version 3.32
 
 =head1 SYNOPSIS
 
