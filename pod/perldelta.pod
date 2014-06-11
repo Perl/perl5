@@ -429,19 +429,22 @@ the filename.
 =head1 Utility Changes
 
 XXX Changes to installed programs such as F<perlbug> and F<xsubpp> go here.
-Most of these are built within the directories F<utils> and F<x2p>.
+Most of these are built within the directory F<utils>.
 
 [ List utility changes as a =head2 entry for each utility and =item
 entries for each change
 Use L<XXX> with program names to get proper documentation linking. ]
 
-=head2 L<XXX>
+=head2 F<x2p/>
 
 =over 4
 
 =item *
 
-XXX
+The F<x2p/> directory has been removed from the Perl core. 
+
+This removes find2perl, s2p and a2p. They have all been released to CPAN as 
+separate distributions (App::find2perl, App::s2p, App::a2p).
 
 =back
 

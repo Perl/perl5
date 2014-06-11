@@ -211,7 +211,7 @@ XXX Describe change here
 =head1 Utility Changes
 
 XXX Changes to installed programs such as F<perlbug> and F<xsubpp> go here.
-Most of these are built within the directories F<utils> and F<x2p>.
+Most of these are built within the directory F<utils>.
 
 [ List utility changes as a =head2 entry for each utility and =item
 entries for each change
