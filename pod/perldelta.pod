@@ -359,6 +359,18 @@ L<[perl #121869]|https://rt.perl.org/Ticket/Display.html?id=121869>
 
 =back
 
+=head3 L<perlhacktips>
+
+=over 4
+
+=item *
+
+Updated documentation for the C<test.valgrind> C<make> target.
+
+L<[perl #121431]|https://rt.perl.org/Ticket/Display.html?id=121431>
+
+=back
+
 =head1 Diagnostics
 
 The following additions or changes have been made to diagnostic output,
@@ -446,7 +458,15 @@ L</Platform Support> section, instead.
 
 =item *
 
-XXX
+C<make test.valgrind> now supports parallel testing.
+
+For example:
+
+    TEST_JOBS=9 make test.valgrind
+
+See L<perlhacktips/valgrind> for more information.
+
+L<[perl #121431]|https://rt.perl.org/Ticket/Display.html?id=121431>
 
 =back
 
