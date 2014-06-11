@@ -594,6 +594,11 @@ These are because the underlying Microsoft implementation does not
 follow the standard.  Perl now takes special precautions to correct for
 this.
 
+=item *
+
+Many issues have been detected by L<Coverity|http://www.coverity.com/> and 
+fixed.
+
 =back
 
 =head1 Known Problems
