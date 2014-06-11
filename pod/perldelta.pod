@@ -168,10 +168,12 @@ There may well be none in a stable release.
 
 =item *
 
-C<av_delete> has been refactored to improve performance and reduce its memory 
-footprint.
+Many internal functions have been refactored to improve performance and reduce
+their memory footprints.
 
 L<[perl #121436]|https://rt.perl.org/Ticket/Display.html?id=121436>
+L<[perl #121906]|https://rt.perl.org/Ticket/Display.html?id=121906>
+L<[perl #121969]|https://rt.perl.org/Ticket/Display.html?id=121969>
 
 =item *
 
