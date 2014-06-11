@@ -371,6 +371,17 @@ L<[perl #121431]|https://rt.perl.org/Ticket/Display.html?id=121431>
 
 =back
 
+=head3 L<perlre>
+
+=over 4
+
+=item *
+
+The C</x> modifier has been clarified to note that comments cannot be continued 
+onto the next line by escaping them.
+
+=back
+
 =head1 Diagnostics
 
 The following additions or changes have been made to diagnostic output,
