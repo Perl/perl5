@@ -28,7 +28,7 @@
 # See Porting/pumpkin.pod for more information on metaconfig.
 #
 
-# Generated on Wed Jun  4 08:58:13 CEST 2014 [metaconfig 3.5 PL0]
+# Generated using [metaconfig 3.5 PL0]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -9364,6 +9364,29 @@ rp='Pathname where add-on public executable scripts should be installed?'
 prefixvar=sitescript
 . ./setprefixvar
 
+: see if backtrace exists
+set backtrace d_backtrace
+eval $inlibc
+
+: add flags if using c backtrace
+case "$usecbacktrace" in
+  "") usecbacktrace=$undef ;;
+  [yY]*|true|$define)
+    case "$d_backtrace" in
+      [yY]*|true|$define)
+        case " $ccflags " in
+	  *" -DUSE_C_BACKTRACE "*) ;; # Already there.
+	  *) ccflags="$ccflags -DUSE_C_BACKTRACE -g" ;;
+	  esac
+        ;;
+      *)
+        echo "This system does not support backtrace" >&4
+        usecbacktrace=$undef
+        ;;
+      esac
+    ;;
+  esac
+
 : Check if faststdio is requested and available
 case "$usefaststdio" in
 $define|true|[yY]*|'')
@@ -10839,10 +10862,6 @@ esac
 set d_attribute_warn_unused_result
 eval $setvar
 $rm -f attrib*
-
-: see if backtrace exists
-set backtrace d_backtrace
-eval $inlibc
 
 : see if bcmp exists
 set bcmp d_bcmp
@@ -12346,17 +12365,6 @@ $rm -f fred fred.* dyna.$dlext dyna.* tmp-dyna.*
 
 set d_dlsymun
 eval $setvar
-
-: add flags if using c backtrace
-case "$usecbacktrace" in
-[yY]*|true|$define)
-  case " $ccflags " in
-  *" -DUSE_C_BACKTRACE "*) ;; # Already there.
-  *) ccflags="$ccflags -DUSE_C_BACKTRACE -g"
-     ;;
-  esac
-  ;;
-esac
 
 : see if drand48_r exists
 set drand48_r d_drand48_r
@@ -24100,11 +24108,7 @@ EOM
 fi
 
 : preserve RCS keywords in files with variable substitution, grrr
-Date='$Date'
 Id='$Id'
-Log='$Log'
-RCSfile='$RCSfile'
-Revision='$Revision'
 
 : Finish up by extracting the .SH files
 case "$alldone" in

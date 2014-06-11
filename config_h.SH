@@ -131,24 +131,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_difftime HAS_DIFFTIME		/**/
 
-/* HAS_DLADDR:
- *	This symbol, if defined, indicates that the dladdr routine is
- *	available to return information about stack addresses.
- */
-#$d_dladdr HAS_DLADDR	/**/
-
 /* HAS_DLERROR:
  *	This symbol, if defined, indicates that the dlerror routine is
  *	available to return a string describing the last error that
  *	occurred from a call to dlopen(), dlclose() or dlsym().
  */
 #$d_dlerror HAS_DLERROR	/**/
-
-/* HAS_BACKTRACE:
- *	This symbol, if defined, indicates that the backtrace routine is
- *	available to return backtrace information about the C stack.
- */
-#$d_backtrace HAS_BACKTRACE	/**/
 
 /* HAS_DUP2:
  *	This symbol, if defined, indicates that the dup2 routine is
@@ -700,12 +688,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	be included.
  */
 #$i_dlfcn I_DLFCN		/**/
-
-/* I_EXECINFO:
- *	This symbol, if defined, indicates that <execinfo.h> exists and should
- *	be included.
- */
-#$i_execinfo I_EXECINFO		/**/
 
 /* I_FCNTL:
  *	This manifest constant tells the C program to include <fcntl.h>.
@@ -3338,6 +3320,26 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #$d_vendorlib PERL_VENDORLIB_EXP "$vendorlibexp"		/**/
 #$d_vendorlib PERL_VENDORLIB_STEM "$vendorlib_stem"		/**/
 
+/* HAS_BACKTRACE:
+ *	This symbol, if defined, indicates that the backtrace() routine is
+ *	available to get a stack trace.  The <execinfo.h> header must be
+ *	included to use this routine.
+ */
+#$d_backtrace HAS_BACKTRACE	/**/
+
+/* HAS_DLADDR:
+ *	This symbol, if defined, indicates that the dladdr() routine is
+ *	available to get a stack trace.  The <execinfo.h> header must be
+ *	included to use this routine.
+ */
+#$d_dladdr HAS_DLADDR	/**/
+
+/* I_EXECINFO:
+ *	This symbol, if defined, indicates to the C program that it should
+ *	include <execinfo.h> for backtrace() support.
+ */
+#$i_execinfo I_EXECINFO		/**/
+
 /* I_TERMIO:
  *	This symbol, if defined, indicates that the program should include
  *	<termio.h> rather than <sgtty.h>.  There are also differences in
@@ -4232,7 +4234,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 
 /* I_BFD:
  *	This symbol, if defined, indicates that <bfd.h> exists and
- *	could be included by the C program to use the BFD library.
+ *	can be included.
  */
 #$i_bfd	I_BFD		/**/
 
@@ -4700,6 +4702,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #ifndef USE_64_BIT_ALL
 #$use64bitall	USE_64_BIT_ALL		/**/
 #endif
+
+/* USE_CBACKTRACE:
+ *	This symbol, if defined, indicates that Perl should
+ *	be built with support for backtrace.
+ */
+#$usecbacktrace USE_CBACKTRACE		/**/
 
 /* USE_DTRACE:
  *	This symbol, if defined, indicates that Perl should

@@ -478,6 +478,11 @@ d_attribute_warn_unused_result (d_attribut.U):
 	compiler can know that certain functions have a return values
 	that must not be ignored, such as malloc() or open().
 
+d_backtrace (d_backtrace.U):
+	This variable conditionally defines the HAS_BACKTRACE symbol, which
+	indicates to the C program that the backtrace() routine is available
+	to get a stack trace.
+
 d_bcmp (d_bcmp.U):
 	This variable conditionally defines the HAS_BCMP symbol if
 	the bcmp() routine is available to compare strings.
@@ -649,6 +654,11 @@ d_dirnamlen (i_dirent.U):
 	This variable conditionally defines DIRNAMLEN, which indicates
 	to the C program that the length of directory entry names is
 	provided by a d_namelen field.
+
+d_dladdr (d_dladdr.U):
+	This variable conditionally defines the HAS_DLADDR symbol, which
+	indicates to the C program that the dladdr() routine is available
+	to get a stack trace.
 
 d_dlerror (d_dlerror.U):
 	This variable conditionally defines the HAS_DLERROR symbol, which
@@ -3030,6 +3040,10 @@ i_assert (i_assert.U):
 	indicates to the C program that <assert.h> exists and could be
 	included.
 
+i_bfd (i_bfd.U):
+	This variable conditionally defines the I_BFD symbol, and
+	indicates whether a C program can include <bfd.h>.
+
 i_bsdioctl (i_sysioctl.U):
 	This variable conditionally defines the I_SYS_BSDIOCTL symbol, which
 	indicates to the C program that <sys/bsdioctl.h> exists and should
@@ -3056,6 +3070,10 @@ i_dlfcn (i_dlfcn.U):
 	This variable conditionally defines the I_DLFCN symbol, which
 	indicates to the C program that <dlfcn.h> exists and should
 	be included.
+
+i_execinfo (i_execinfo.U):
+	This variable conditionally defines the I_EXECINFO symbol, and indicates
+	whether a C program may include <execinfo.h>, for backtrace() support.
 
 i_fcntl (i_fcntl.U):
 	This variable controls the value of I_FCNTL (which tells
@@ -5083,6 +5101,10 @@ use64bitint (use64bits.U):
 	is employed, just enough to get 64-bit integers into Perl.
 	This may mean using for example "long longs", while your memory
 	may still be limited to 2 gigabytes.
+
+usecbacktrace (usebacktrace.U):
+	This variable indicates whether we are compiling with backtrace
+	support.
 
 usecrosscompile (Cross.U):
 	This variable conditionally defines the USE_CROSS_COMPILE symbol,
