@@ -121,6 +121,12 @@ typedef struct {
      * output - quite disgusting.  And that won't work if the
      * Developer Tools isn't installed. */
 
+    /* FreeBSD notes: execinfo.h exists, but probably would need also
+     * the library -lexecinfo.  BFD exists if the pkg devel/binutils
+     * has been installed, but there seems to be a known problem that
+     * the "bfd.h" getting installed refers to "ansidecl.h", which
+     * doesn't get installed. */
+
     /* Win32 notes: as moral equivalents of backtrace() + dladdr(),
      * one could possibly first use GetCurrentProcess() +
      * SymInitialize(), and then CaptureStackBackTrace() +

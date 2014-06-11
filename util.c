@@ -51,8 +51,16 @@ int putenv(char *);
 # endif
 #endif
 
-/* <bfd.h> will have been included, if necessary, by "perl.h" */
 #ifdef USE_C_BACKTRACE
+#  ifdef I_BFD
+#    define USE_BFD
+#    ifdef PERL_DARWIN
+#      undef USE_BFD /* BFD is useless in OS X. */
+#    endif
+#    ifdef USE_BFD
+#      include <bfd.h>
+#    endif
+#  endif
 #  ifdef I_DLFCN
 #    include <dlfcn.h>
 #  endif
@@ -1361,12 +1369,12 @@ Perl_mess_sv(pTHX_ SV *basemsg, bool consume)
     dVAR;
     SV *sv;
 
-#if defined(USE_C_BACKTRACE) && defined(USE_C_BACKTRACE_ON_WARN)
+#if defined(USE_C_BACKTRACE) && defined(USE_C_BACKTRACE_ON_ERROR)
     {
         char *ws;
         int wi;
         /* The PERL_C_BACKTRACE_ON_WARN must be an integer of one or more. */
-        if ((ws = PerlEnv_getenv("PERL_C_BACKTRACE_ON_WARN")) &&
+        if ((ws = PerlEnv_getenv("PERL_C_BACKTRACE_ON_ERROR")) &&
             (wi = atoi(ws)) > 0) {
             Perl_dump_c_backtrace(aTHX_ Perl_debug_log, wi, 1);
         }
@@ -5506,8 +5514,11 @@ Perl_drand48_r(perl_drand48_t *random_state)
 #ifdef USE_BFD
 
 typedef struct {
+    /* abfd is the BFD handle. */
     bfd* abfd;
+    /* bfd_syms is the BFD symbol table. */
     asymbol** bfd_syms;
+    /* bfd_text is handle to the the ".text" section of the object file. */
     asection* bfd_text;
     /* Since opening the executable and scanning its symbols is quite
      * heavy operation, we remember the filename we used the last time,
@@ -5611,10 +5622,20 @@ static void bfd_symbolize(bfd_context* ctx,
  * use high-level stuff.  Thanks, Apple. */
 
 typedef struct {
+    /* tool is set to the absolute pathname of the tool to use:
+     * xcrun or atos. */
     const char* tool;
+    /* format is set to a printf format string used for building
+     * the external command to run. */
     const char* format;
+    /* unavail is set if e.g. xcrun cannot be found, or something
+     * else happens that makes getting the backtrace dubious.  Note,
+     * however, that the context isn't persistent, the next call to
+     * get_c_backtrace() will start from scratch. */
     bool unavail;
+    /* fname is the current object file name. */
     const char* fname;
+    /* object_base_addr is the base address of the shared object. */
     void* object_base_addr;
 } atos_context;
 
@@ -5750,7 +5771,6 @@ static void atos_symbolize(atos_context* ctx,
          * We could play tricks with atos by batching the stack
          * addresses to be resolved: atos can either take multiple
          * addresses from the command line, or read addresses from
-         *
          * a file (though the mess of creating temporary files would
          * probably negate much of any possible speedup).
          *
@@ -5875,9 +5895,9 @@ Perl_get_c_backtrace(pTHX_ int depth, int skip)
     /* We use dladdr() instead of backtrace_symbols() because we want
      * the full details instead of opaque strings.  This is useful for
      * two reasons: () the details are needed for further symbolic
-     * digging (2) by having the details we fully control the output,
-     * which in turn is useful when more platforms are added:
-     * we can keep out output "portable". */
+     * digging, for example in OS X (2) by having the details we fully
+     * control the output, which in turn is useful when more platforms
+     * are added: we can keep out output "portable". */
 
     /* We want a single linear allocation, which can then be freed
      * with a single swoop.  We will do the usual trick of first
