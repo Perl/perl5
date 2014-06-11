@@ -331,13 +331,16 @@ XXX Changes which significantly change existing files in F<pod/> go here.
 However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
 section.
 
-=head3 L<XXX>
+=head3 L<perlfunc>
 
 =over 4
 
 =item *
 
-XXX Description of the change here
+C<-l> now notes that it will return false if symlinks aren't supported by the 
+file system.
+
+L<[perl #121523]|https://rt.perl.org/Ticket/Display.html?id=121523>
 
 =back
 
