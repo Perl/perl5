@@ -363,6 +363,11 @@ C<exec> and backticks: the commands would end up looking for F</bin/sh>
 instead of F</system/bin/sh>, and so would fail for the vast majority of
 devices, leaving C<$!> as C<ENOENT>.
 
+=item *
+
+Many issues have been detected by L<Coverity|http://www.coverity.com/> and 
+fixed.
+
 =back
 
 =head1 Known Problems
