@@ -5262,31 +5262,37 @@ typedef struct am_table_short AMTS;
 /* These locale things are all subject to change */
 /* Returns TRUE if the plain locale pragma without a parameter is in effect
  */
-#define IN_LOCALE_RUNTIME	cBOOL(CopHINTS_get(PL_curcop) & HINT_LOCALE)
+#   define IN_LOCALE_RUNTIME	cBOOL(CopHINTS_get(PL_curcop) & HINT_LOCALE)
 
 /* Returns TRUE if either form of the locale pragma is in effect */
-#define IN_SOME_LOCALE_FORM_RUNTIME   \
+#   define IN_SOME_LOCALE_FORM_RUNTIME   \
            cBOOL(CopHINTS_get(PL_curcop) & (HINT_LOCALE|HINT_LOCALE_PARTIAL))
 
-#define IN_LOCALE_COMPILETIME	cBOOL(PL_hints & HINT_LOCALE)
-#define IN_SOME_LOCALE_FORM_COMPILETIME \
+#   define IN_LOCALE_COMPILETIME	cBOOL(PL_hints & HINT_LOCALE)
+#   define IN_SOME_LOCALE_FORM_COMPILETIME \
                           cBOOL(PL_hints & (HINT_LOCALE|HINT_LOCALE_PARTIAL))
 
-#define IN_LOCALE \
+#   define IN_LOCALE \
 	(IN_PERL_COMPILETIME ? IN_LOCALE_COMPILETIME : IN_LOCALE_RUNTIME)
-#define IN_SOME_LOCALE_FORM \
+#   define IN_SOME_LOCALE_FORM \
 	(IN_PERL_COMPILETIME ? IN_SOME_LOCALE_FORM_COMPILETIME \
 	                     : IN_SOME_LOCALE_FORM_RUNTIME)
 
-#define IN_LC_ALL_COMPILETIME   IN_LOCALE_COMPILETIME
-#define IN_LC_ALL_RUNTIME       IN_LOCALE_RUNTIME
+#   define IN_LC_ALL_COMPILETIME   IN_LOCALE_COMPILETIME
+#   define IN_LC_ALL_RUNTIME       IN_LOCALE_RUNTIME
 
-#define IN_LC_PARTIAL_COMPILETIME   cBOOL(PL_hints & HINT_LOCALE_PARTIAL)
-#define IN_LC_PARTIAL_RUNTIME       cBOOL(CopHINTS_get(PL_curcop) & HINT_LOCALE_PARTIAL)
+#   define IN_LC_PARTIAL_COMPILETIME   cBOOL(PL_hints & HINT_LOCALE_PARTIAL)
+#   define IN_LC_PARTIAL_RUNTIME  \
+                        cBOOL(CopHINTS_get(PL_curcop) & HINT_LOCALE_PARTIAL)
 
-#define IN_LC_COMPILETIME(category)     (IN_LC_ALL_COMPILETIME || (IN_LC_PARTIAL_COMPILETIME && _is_in_locale_category(TRUE, (category))))
-#define IN_LC_RUNTIME(category)         (IN_LC_ALL_RUNTIME || (IN_LC_PARTIAL_RUNTIME && _is_in_locale_category(FALSE, (category))))
-#define IN_LC(category)                 (IN_LC_COMPILETIME(category) || IN_LC_RUNTIME(category))
+#   define IN_LC_COMPILETIME(category)                                       \
+       (IN_LC_ALL_COMPILETIME || (IN_LC_PARTIAL_COMPILETIME                  \
+                                  && _is_in_locale_category(TRUE, (category))))
+#   define IN_LC_RUNTIME(category)                                           \
+       (IN_LC_ALL_RUNTIME || (IN_LC_PARTIAL_RUNTIME                          \
+                              && _is_in_locale_category(FALSE, (category))))
+#   define IN_LC(category)  \
+                    (IN_LC_COMPILETIME(category) || IN_LC_RUNTIME(category))
 
 #else   /* No locale usage */
 #   define IN_LOCALE_RUNTIME                0
