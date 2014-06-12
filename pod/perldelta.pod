@@ -361,6 +361,10 @@ C<malloc>.
 
 L<[perl #121869]|https://rt.perl.org/Ticket/Display.html?id=121869>
 
+=item *
+
+Clarify where C<NUL> may be embedded or is required to terminate a string.
+
 =back
 
 =head3 L<perlhacktips>
