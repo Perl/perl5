@@ -230,6 +230,12 @@ been fixed.
 
 =item *
 
+L<Hash::Util> has been upgraded from version 0.16 to 0.17.
+
+Minor bug fixes and documentation fixes to Hash::Util::hash_stats()
+
+=item *
+
 The libnet collection of modules has been upgraded from version 1.25 to 1.27.
 
 There are only whitespace changes to the installed files.
@@ -271,15 +277,6 @@ than 6.63_03
 
 L<perl5db.pl> has been upgraded from version 1.44 to 1.45.
 
-=item *
-
-A mismatch between the documentation and the code in utf8::downgrade()
-was fixed in favour of the documentation. The optional second argument
-is now correctly treated as a perl boolean (true/false semantics) and
-not as an integer.
-
-=item *
-
 fork() in the debugger under C<tmux> will now create a new window for
 the forked process. L<[perl
 #121333]|https://rt.perl.org/Ticket/Display.html?id=121333>
@@ -287,6 +284,8 @@ the forked process. L<[perl
 The debugger now saves the current working directory on startup and
 restores it when you restart your program with C<R> or <rerun>. L<[perl
 #121509]|https://rt.perl.org/Ticket/Display.html?id=121509>
+
+=item *
 
 L<Unicode::Collate> has been upgraded from version 1.04 to 1.07.
 
@@ -301,10 +300,10 @@ The XSUB implementation has been removed in favour of pure Perl.
 
 =item *
 
-L<Hash::Util> has been upgraded from version 0.16 to 0.17.
-
-Minor bug fixes and documentation fixes to Hash::Util::hash_stats()
-
+A mismatch between the documentation and the code in utf8::downgrade()
+was fixed in favour of the documentation. The optional second argument
+is now correctly treated as a perl boolean (true/false semantics) and
+not as an integer.
 
 =back
 
