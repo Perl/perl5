@@ -1593,7 +1593,6 @@
 #  endif
 #  if defined(PERL_IN_PP_SORT_C)
 #define amagic_cmp(a,b)		S_amagic_cmp(aTHX_ a,b)
-#define amagic_cmp_locale(a,b)	S_amagic_cmp_locale(aTHX_ a,b)
 #define amagic_i_ncmp(a,b)	S_amagic_i_ncmp(aTHX_ a,b)
 #define amagic_ncmp(a,b)	S_amagic_ncmp(aTHX_ a,b)
 #define qsortsvu(a,b,c)		S_qsortsvu(aTHX_ a,b,c)
@@ -1602,6 +1601,9 @@
 #define sortcv_xsub(a,b)	S_sortcv_xsub(aTHX_ a,b)
 #define sv_i_ncmp(a,b)		S_sv_i_ncmp(aTHX_ a,b)
 #define sv_ncmp(a,b)		S_sv_ncmp(aTHX_ a,b)
+#    if defined(USE_LOCALE_COLLATE)
+#define amagic_cmp_locale(a,b)	S_amagic_cmp_locale(aTHX_ a,b)
+#    endif
 #  endif
 #  if defined(PERL_IN_PP_SYS_C)
 #define doform(a,b,c)		S_doform(aTHX_ a,b,c)

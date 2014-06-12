@@ -5276,6 +5276,7 @@ typedef struct am_table_short AMTS;
 #define PERLDB_SAVESRC_NOSUBS	(PL_perldb && (PL_perldb & PERLDBf_SAVESRC_NOSUBS))
 #define PERLDB_SAVESRC_INVALID	(PL_perldb && (PL_perldb & PERLDBf_SAVESRC_INVALID))
 
+#ifdef USE_LOCALE
 /* These locale things are all subject to change */
 /* Returns TRUE if the plain locale pragma without a parameter is in effect
  */
@@ -5304,6 +5305,22 @@ typedef struct am_table_short AMTS;
 #define IN_LC_COMPILETIME(category)     (IN_LC_ALL_COMPILETIME || (IN_LC_PARTIAL_COMPILETIME && _is_in_locale_category(TRUE, (category))))
 #define IN_LC_RUNTIME(category)         (IN_LC_ALL_RUNTIME || (IN_LC_PARTIAL_RUNTIME && _is_in_locale_category(FALSE, (category))))
 #define IN_LC(category)                 (IN_LC_COMPILETIME(category) || IN_LC_RUNTIME(category))
+
+#else   /* No locale usage */
+#   define IN_LOCALE_RUNTIME                0
+#   define IN_SOME_LOCALE_FORM_RUNTIME      0
+#   define IN_LOCALE_COMPILETIME            0
+#   define IN_SOME_LOCALE_FORM_COMPILETIME  0
+#   define IN_LOCALE                        0
+#   define IN_SOME_LOCALE_FORM              0
+#   define IN_LC_ALL_COMPILETIME            0
+#   define IN_LC_ALL_RUNTIME                0
+#   define IN_LC_PARTIAL_COMPILETIME        0
+#   define IN_LC_PARTIAL_RUNTIME            0
+#   define IN_LC_COMPILETIME(category)      0
+#   define IN_LC_RUNTIME(category)          0
+#   define IN_LC(category)                  0
+#endif
 
 #ifdef USE_LOCALE_NUMERIC
 
@@ -5415,8 +5432,6 @@ typedef struct am_table_short AMTS;
 #define UNLOCK_NUMERIC_STANDARD()
 
 #define Atof				my_atof
-#define IN_LOCALE_RUNTIME		0
-#define IN_LOCALE_COMPILETIME		0
 
 #endif /* !USE_LOCALE_NUMERIC */
 

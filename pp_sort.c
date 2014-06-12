@@ -2001,6 +2001,8 @@ S_amagic_cmp(pTHX_ SV *const str1, SV *const str2)
     return sv_cmp(str1, str2);
 }
 
+#ifdef USE_LOCALE_COLLATE
+
 static I32
 S_amagic_cmp_locale(pTHX_ SV *const str1, SV *const str2)
 {
@@ -2021,6 +2023,8 @@ S_amagic_cmp_locale(pTHX_ SV *const str1, SV *const str2)
     }
     return sv_cmp_locale(str1, str2);
 }
+
+#endif
 
 /*
  * Local variables:

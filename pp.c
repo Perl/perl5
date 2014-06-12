@@ -3574,8 +3574,9 @@ PP(pp_ucfirst)
             /* Here, is ucfirst non-UTF-8, not in locale (unless that locale is
              * UTF-8, which we treat as not in locale), and cased latin1 */
 	    UV title_ord;
-
+#ifdef USE_LOCALE_CTYPE
       do_uni_rules:
+#endif
 
 	    title_ord = _to_upper_title_latin1(*s, tmpbuf, &tculen, 's');
 	    if (tculen > 1) {
@@ -3875,7 +3876,9 @@ PP(pp_uc)
 		}
 	    }
 	    else {
+#ifdef USE_LOCALE_CTYPE
           do_uni_rules:
+#endif
 		for (; s < send; d++, s++) {
 		    *d = toUPPER_LATIN1_MOD(*s);
 		    if (LIKELY(*d != LATIN_SMALL_LETTER_Y_WITH_DIAERESIS)) {
@@ -4259,7 +4262,9 @@ PP(pp_fc)
                 *d = toFOLD(*s);
         }
         else {
+#ifdef USE_LOCALE_CTYPE
       do_uni_folding:
+#endif
             /* For ASCII and the Latin-1 range, there's only two troublesome
              * folds, \x{DF} (\N{LATIN SMALL LETTER SHARP S}), which under full
              * casefolding becomes 'ss'; and \x{B5} (\N{MICRO SIGN}), which

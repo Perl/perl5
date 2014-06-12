@@ -6588,12 +6588,6 @@ STATIC I32	S_amagic_cmp(pTHX_ SV *const str1, SV *const str2)
 #define PERL_ARGS_ASSERT_AMAGIC_CMP	\
 	assert(str1); assert(str2)
 
-STATIC I32	S_amagic_cmp_locale(pTHX_ SV *const str1, SV *const str2)
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2);
-#define PERL_ARGS_ASSERT_AMAGIC_CMP_LOCALE	\
-	assert(str1); assert(str2)
-
 STATIC I32	S_amagic_i_ncmp(pTHX_ SV *const a, SV *const b)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
@@ -6641,6 +6635,14 @@ STATIC I32	S_sv_ncmp(pTHX_ SV *const a, SV *const b)
 #define PERL_ARGS_ASSERT_SV_NCMP	\
 	assert(a); assert(b)
 
+#  if defined(USE_LOCALE_COLLATE)
+STATIC I32	S_amagic_cmp_locale(pTHX_ SV *const str1, SV *const str2)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_AMAGIC_CMP_LOCALE	\
+	assert(str1); assert(str2)
+
+#  endif
 #endif
 #if defined(PERL_IN_PP_SYS_C)
 STATIC OP*	S_doform(pTHX_ CV *cv, GV *gv, OP *retop)
