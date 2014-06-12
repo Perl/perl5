@@ -83,11 +83,11 @@ sub SKIP_TEST {
 $Data::Dumper::Useperl = 1;
 if (defined &Data::Dumper::Dumpxs) {
   print "### XS extension loaded, will run XS tests\n";
-  $TMAX = 432; $XS = 1;
+  $TMAX = 438; $XS = 1;
 }
 else {
   print "### XS extensions not loaded, will NOT run XS tests\n";
-  $TMAX = 216; $XS = 0;
+  $TMAX = 219; $XS = 0;
 }
 
 print "1..$TMAX\n";
@@ -1670,3 +1670,17 @@ OLD
     if $XS;
 }
 ############# 432
+
+{
+  sub foo {}
+  $WANT = <<'EOW';
+#*a = sub { "DUMMY" };
+#$b = \&a;
+EOW
+
+  TEST q(Data::Dumper->new([ \&foo, \\&foo ], [ "*a", "b" ])->Dump), "name of code in *foo";
+  local $TODO = "XS code broken";
+  TEST q(Data::Dumper->new([ \&foo, \\&foo ], [ "*a", "b" ])->Dumpxs), "name of code in *foo xs"
+    if $XS;
+}
+############# 436
