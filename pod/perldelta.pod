@@ -163,6 +163,16 @@ file system.
 
 L<[perl #121523]|https://rt.perl.org/Ticket/Display.html?id=121523>
 
+=item *
+
+Note that C<exec LIST> and C<system LIST> may fall back to the shell on
+Win32. Only C<exec PROGRAM LIST> and C<system PROGRAM LIST> indirect object
+syntax will reliably avoid using the shell.
+
+This has also been noted in L<perlport>.
+
+L<[perl #122046]|https://rt.perl.org/Ticket/Display.html?id=122046>
+
 =back
 
 =head3 L<perlapi>
