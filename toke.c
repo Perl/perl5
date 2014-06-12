@@ -10498,7 +10498,8 @@ intro_sym:
 /* scan_str
    takes:
 	start			position in buffer
-	keep_quoted		preserve \ on the embedded delimiter(s)
+        keep_bracketed_quoted   preserve \ quoting of embedded delimiters, but
+                                only if they are of the open/close form
 	keep_delims		preserve the delimiters around the string
 	re_reparse		compiling a run-time /(?{})/:
 				   collapse // to /,  and skip encoding src
@@ -10550,7 +10551,7 @@ intro_sym:
 */
 
 STATIC char *
-S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims, int re_reparse,
+S_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int re_reparse,
 		 bool deprecate_escaped_meta, char **delimp
     )
 {
@@ -10625,6 +10626,13 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims, int re_reparse,
             || ! ckWARN_d(WARN_DEPRECATED)))
     {
         deprecate_escaped_meta = FALSE;
+
+    /* By only preserving quoting of open/close delimiters, we avoid a conflict
+     * with 're_reparse', which in one place below is looked at only if
+     * 'keep_bracketed_quoted' is FALSE, but also only if the opening and
+     * closing delimiters are different */
+    if (PL_multi_open == PL_multi_close) {
+        keep_bracketed_quoted = FALSE;
     }
 
     /* create a new SV to hold the contents.  79 is the SV's initial length.
@@ -10710,7 +10718,7 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims, int re_reparse,
 			for (t = svlast-2; t >= SvPVX_const(sv) && *t == '\\';)
 			    t--;
 			if ((svlast-1 - t) % 2) {
-			    if (!keep_quoted) {
+			    if (!keep_bracketed_quoted) {
 				*(svlast-1) = term;
 				*svlast = '\0';
 				SvCUR_set(sv, SvCUR(sv) - 1);
@@ -10728,7 +10736,7 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims, int re_reparse,
 			    /* At here, all closes are "was quoted" one,
 			       so we don't check PL_multi_close. */
 			    if (*t == '\\') {
-				if (!keep_quoted && *(t+1) == PL_multi_open)
+				if (!keep_bracketed_quoted && *(t+1) == PL_multi_open)
 				    t++;
 				else
 				    *w++ = *t++;
@@ -10769,13 +10777,12 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims, int re_reparse,
 		    COPLINE_INC_WITH_HERELINES;
 		/* handle quoted delimiters */
 		if (*s == '\\' && s+1 < PL_bufend && term != '\\') {
-		    if (!keep_quoted
+		    if (!keep_bracketed_quoted
 		        && (s[1] == term
 			    || (re_reparse && s[1] == '\\'))
 		    )
 			s++;
-		    /* any other quotes are simply copied straight through */
-		    else
+		    else /* any other quotes are simply copied straight through */
 			*to++ = *s++;
 		}
 		/* terminate when run out of buffer (the for() condition), or
@@ -10804,7 +10811,7 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims, int re_reparse,
 		    COPLINE_INC_WITH_HERELINES;
 		/* backslashes can escape the open or closing characters */
 		if (*s == '\\' && s+1 < PL_bufend) {
-		    if (!keep_quoted &&
+		    if (!keep_bracketed_quoted &&
 			((s[1] == PL_multi_open) || (s[1] == PL_multi_close)))
                     {
 			s++;
