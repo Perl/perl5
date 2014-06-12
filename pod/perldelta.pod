@@ -448,6 +448,14 @@ XXX Changes (i.e. rewording) of diagnostic messages go here
 
 =item *
 
+<> should be quotes
+
+This warning has been changed to
+L<< <> at require-statement should be quotes|perldiag/"<> at require-statement should be quotes" >>
+to make the issue more identifiable.
+
+=item *
+
 L<Unsuccessful %s on filename containing newline|perldiag/"Unsuccessful %s on filename containing newline">
 
 This warning is now only produced when the newline is at the end of
