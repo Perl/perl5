@@ -3514,22 +3514,18 @@ PP(pp_ucfirst)
 	doing_utf8 = TRUE;
         ulen = UTF8SKIP(s);
         if (op_type == OP_UCFIRST) {
-	    _to_utf8_title_flags(s, tmpbuf, &tculen,
 #ifdef USE_LOCALE_CTYPE
-                                                     IN_LC_RUNTIME(LC_CTYPE)
+	    _to_utf8_title_flags(s, tmpbuf, &tculen, IN_LC_RUNTIME(LC_CTYPE));
 #else
-                                                     0
+	    _to_utf8_title_flags(s, tmpbuf, &tculen, 0);
 #endif
-            );
 	}
         else {
-	    _to_utf8_lower_flags(s, tmpbuf, &tculen,
 #ifdef USE_LOCALE_CTYPE
-                                                     IN_LC_RUNTIME(LC_CTYPE)
+	    _to_utf8_lower_flags(s, tmpbuf, &tculen, IN_LC_RUNTIME(LC_CTYPE));
 #else
-                                                     0
+	    _to_utf8_lower_flags(s, tmpbuf, &tculen, 0);
 #endif
-            );
 	}
 
         /* we can't do in-place if the length changes.  */
@@ -3816,13 +3812,11 @@ PP(pp_uc)
              * and copy it to the output buffer */
 
             u = UTF8SKIP(s);
-            uv = _to_utf8_upper_flags(s, tmpbuf, &ulen,
 #ifdef USE_LOCALE_CTYPE
-                                                        IN_LC_RUNTIME(LC_CTYPE)
+            uv = _to_utf8_upper_flags(s, tmpbuf, &ulen, IN_LC_RUNTIME(LC_CTYPE));
 #else
-                                                        0
+            uv = _to_utf8_upper_flags(s, tmpbuf, &ulen, 0);
 #endif
-            );
 #define GREEK_CAPITAL_LETTER_IOTA 0x0399
 #define COMBINING_GREEK_YPOGEGRAMMENI 0x0345
             if (uv == GREEK_CAPITAL_LETTER_IOTA
@@ -4033,13 +4027,11 @@ PP(pp_lc)
 	    const STRLEN u = UTF8SKIP(s);
 	    STRLEN ulen;
 
-	    _to_utf8_lower_flags(s, tmpbuf, &ulen,
 #ifdef USE_LOCALE_CTYPE
-                                                   IN_LC_RUNTIME(LC_CTYPE)
+	    _to_utf8_lower_flags(s, tmpbuf, &ulen, IN_LC_RUNTIME(LC_CTYPE));
 #else
-                                                   0
+	    _to_utf8_lower_flags(s, tmpbuf, &ulen, 0);
 #endif
-            );
 
 	    /* Here is where we would do context-sensitive actions.  See the
 	     * commit message for 86510fb15 for why there isn't any */
