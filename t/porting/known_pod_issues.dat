@@ -211,11 +211,9 @@ YAML::Tiny
 dist/data-dumper/dumper.pm	? Should you be using L<...> instead of	1
 dist/math-bigint/lib/math/bigint.pm	Verbatim line length including indents exceeds 79 by	71
 dist/math-bigrat/lib/math/bigrat.pm	Verbatim line length including indents exceeds 79 by	7
-dist/module-corelist/lib/module/corelist.pod	Verbatim line length including indents exceeds 79 by	4
 dist/module-corelist/lib/module/corelist/utils.pm	Verbatim line length including indents exceeds 79 by	2
 dist/storable/storable.pm	Verbatim line length including indents exceeds 79 by	4
 dist/thread-queue/lib/thread/queue.pm	Verbatim line length including indents exceeds 79 by	4
-dist/threads/lib/threads.pm	Verbatim line length including indents exceeds 79 by	3
 dist/tie-file/lib/tie/file.pm	Verbatim line length including indents exceeds 79 by	3
 ext/devel-peek/peek.pm	? Should you be using L<...> instead of	2
 ext/dynaloader/dynaloader.pm	Verbatim line length including indents exceeds 79 by	1
