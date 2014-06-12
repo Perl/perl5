@@ -380,6 +380,17 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 XXX
 
+=item *
+
+system() and friends should now work properly on more Android builds.
+
+Due to an oversight, the value specified through -Dtargetsh to Configure
+would end up being ignored by some of the build process.  This caused perls
+cross-compiled for Android to end up with defective versions of system(),
+exec() and backticks: the commands would end up looking for C</bin/sh>
+instead of C</system/bin/sh>, and so would fail for the vast majority
+of devices, leaving C<$!> as C<ENOENT>.
+
 =back
 
 =head1 Known Problems
