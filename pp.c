@@ -3527,8 +3527,11 @@ PP(pp_ucfirst)
 	if (op_type == OP_LCFIRST) {
 
 	    /* lower case the first letter: no trickiness for any character */
-	    *tmpbuf = (IN_LC_RUNTIME(LC_CTYPE)) ? toLOWER_LC(*s) :
-			((IN_UNI_8_BIT) ? toLOWER_LATIN1(*s) : toLOWER(*s));
+            *tmpbuf = (IN_LC_RUNTIME(LC_CTYPE))
+                      ? toLOWER_LC(*s)
+                      : (IN_UNI_8_BIT)
+                         ? toLOWER_LATIN1(*s)
+                         : toLOWER(*s);
 	}
 	/* is ucfirst() */
 	else if (IN_LC_RUNTIME(LC_CTYPE)) {
