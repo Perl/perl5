@@ -28,8 +28,9 @@
         || defined(PERL_HASH_FUNC_MURMUR_HASH_64B) \
         || defined(PERL_HASH_FUNC_WRAPPED) \
         || defined(PERL_HASH_FUNC_AESHASH) \
+        || defined(PERL_HASH_FUNC_CRC32) \
     )
-#define PERL_HASH_FUNC_AESHASH
+#define PERL_HASH_FUNC_CRC32
 #endif
 
 #if defined(PERL_HASH_FUNC_SIPHASH_1_2)
@@ -90,10 +91,14 @@
 #   define PERL_HASH_FUNC "WRAPPED"
 #   define PERL_HASH_SEED_BYTES 12
 #   define PERL_HASH_WITH_SEED(seed,hash,str,len) (hash)= S_perl_hash_wrapped((seed),(U8*)(str),(len))
+#elif defined(PERL_HASH_FUNC_CRC32)
+#   define PERL_HASH_FUNC "CRC32"
+#   define PERL_HASH_SEED_BYTES 4
+#   define PERL_HASH_WITH_SEED(seed,hash,str,len) (hash)= S_perl_hash_crc32((seed),(U8*)(str),(len))
 #endif
 
 #ifndef PERL_HASH_SEED_BYTES_INIT
-#define PERL_HASH_SEED_BYTES PERL_HASH_SEED_BYTES
+#define PERL_HASH_SEED_BYTES_INIT PERL_HASH_SEED_BYTES
 #endif
 
 #ifndef PERL_HASH_WITH_SEED
@@ -921,6 +926,55 @@ partial:
 
         return _mm_extract_epi32(acc,0);
 }
+#endif
+
+#ifdef PERL_HASH_FUNC_CRC32
+
+/* merged from https://raw.githubusercontent.com/rurban/perl-hash-stats/master/crc.patch */
+
+#ifdef __SSE4_2__
+#include <smmintrin.h>
+#endif
+
+/* Byte-boundary alignment issues */
+#define PERL_HASH_CRC_ALIGN_SIZE      0x08UL
+#define PERL_HASH_CRC_ALIGN_MASK      (PERL_HASH_CRC_ALIGN_SIZE - 1)
+#define PERL_HASH_CRC_CALC(op, crc, type, buf, len)                           \
+  STMT_START {                                                                    \
+    for (; (len) >= sizeof (type); (len) -= sizeof(type), buf += sizeof (type)) { \
+      (crc) = op((crc), *(type *) (buf));                                         \
+    }                                                                             \
+  } STMT_END
+
+PERL_STATIC_INLINE U32
+S_perl_hash_crc32(const unsigned char * const seed, const unsigned char *str, const STRLEN inlen) {
+    /* tested + len: much higher collision costs, not needed for \0, safe even with PERL_HASH_SEED=0 */
+    U32 hash = *((U32*)seed);
+    const char* buf = (const char*)str;
+    STRLEN len = inlen;
+
+#ifdef __SSE4_2__
+    /* 32 bit only */
+    hash ^= 0xFFFFFFFF;
+    /* Align the input to the word boundary */
+   for (; (len > 0) && ((size_t)buf & PERL_HASH_CRC_ALIGN_MASK); len--, buf++) {
+        hash = _mm_crc32_u8(hash, *buf);
+    }
+
+#ifdef __x86_64__
+    PERL_HASH_CRC_CALC(_mm_crc32_u64, hash, uint64_t, buf, len);
+#endif
+    PERL_HASH_CRC_CALC(_mm_crc32_u32, hash, uint32_t, buf, len);
+    PERL_HASH_CRC_CALC(_mm_crc32_u16, hash, uint16_t, buf, len);
+    PERL_HASH_CRC_CALC(_mm_crc32_u8, hash, uint8_t, buf, len);
+#else
+    #error SW crc32 not good. Need Intel SSE4 processor for PERL_HASH_FUNC_CRC32
+#endif
+
+    /* 32 bit only */
+    return (hash ^ 0xFFFFFFFF);
+}
+
 #endif
 
 /* legacy - only mod_perl should be doing this.  */
