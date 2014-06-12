@@ -1754,8 +1754,10 @@ strftime(fmt, sec, min, hour, mday, mon, year, wday = -1, yday = -1, isdst = -1)
 		if (SvUTF8(fmt)
                     || (! is_ascii_string((U8*) buf, len)
                         && is_utf8_string((U8*) buf, len)
-                        && _is_cur_LC_category_utf8(LC_TIME)))
-                {
+#ifdef USE_LOCALE_TiME
+                        && _is_cur_LC_category_utf8(LC_TIME)
+#endif
+                )) {
 		    SvUTF8_on(sv);
 		}
             }

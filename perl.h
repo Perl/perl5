@@ -5411,6 +5411,8 @@ typedef struct am_table_short AMTS;
 #define STORE_LC_NUMERIC_SET_TO_NEEDED()
 #define DECLARE_STORE_LC_NUMERIC_SET_TO_NEEDED()
 #define RESTORE_LC_NUMERIC()
+#define LOCK_NUMERIC_STANDARD()
+#define UNLOCK_NUMERIC_STANDARD()
 
 #define Atof				my_atof
 #define IN_LOCALE_RUNTIME		0

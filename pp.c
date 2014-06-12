@@ -2133,9 +2133,13 @@ PP(pp_sle)
     tryAMAGICbin_MG(amg_type, AMGf_set);
     {
       dPOPTOPssrl;
-      const int cmp = (IN_LC_RUNTIME(LC_COLLATE)
-		 ? sv_cmp_locale_flags(left, right, 0)
-		 : sv_cmp_flags(left, right, 0));
+      const int cmp =
+#ifdef USE_LC_COLLATE
+                      (IN_LC_RUNTIME(LC_COLLATE))
+		      ? sv_cmp_locale_flags(left, right, 0)
+                      :
+#endif
+		        sv_cmp_flags(left, right, 0);
       SETs(boolSV(cmp * multiplier < rhs));
       RETURN;
     }
@@ -2169,9 +2173,13 @@ PP(pp_scmp)
     tryAMAGICbin_MG(scmp_amg, 0);
     {
       dPOPTOPssrl;
-      const int cmp = (IN_LC_RUNTIME(LC_COLLATE)
-		 ? sv_cmp_locale_flags(left, right, 0)
-		 : sv_cmp_flags(left, right, 0));
+      const int cmp =
+#ifdef USE_LC_COLLATE
+                      (IN_LC_RUNTIME(LC_COLLATE))
+		      ? sv_cmp_locale_flags(left, right, 0)
+		      :
+#endif
+                        sv_cmp_flags(left, right, 0);
       SETi( cmp );
       RETURN;
     }
@@ -3506,10 +3514,22 @@ PP(pp_ucfirst)
 	doing_utf8 = TRUE;
         ulen = UTF8SKIP(s);
         if (op_type == OP_UCFIRST) {
-	    _to_utf8_title_flags(s, tmpbuf, &tculen, IN_LC_RUNTIME(LC_CTYPE));
+	    _to_utf8_title_flags(s, tmpbuf, &tculen,
+#ifdef USE_LOCALE_CTYPE
+                                                     IN_LC_RUNTIME(LC_CTYPE)
+#else
+                                                     0
+#endif
+            );
 	}
         else {
-	    _to_utf8_lower_flags(s, tmpbuf, &tculen, IN_LC_RUNTIME(LC_CTYPE));
+	    _to_utf8_lower_flags(s, tmpbuf, &tculen,
+#ifdef USE_LOCALE_CTYPE
+                                                     IN_LC_RUNTIME(LC_CTYPE)
+#else
+                                                     0
+#endif
+            );
 	}
 
         /* we can't do in-place if the length changes.  */
@@ -3527,13 +3547,18 @@ PP(pp_ucfirst)
 	if (op_type == OP_LCFIRST) {
 
 	    /* lower case the first letter: no trickiness for any character */
-            *tmpbuf = (IN_LC_RUNTIME(LC_CTYPE))
+            *tmpbuf =
+#ifdef USE_LOCALE_CTYPE
+                      (IN_LC_RUNTIME(LC_CTYPE))
                       ? toLOWER_LC(*s)
-                      : (IN_UNI_8_BIT)
+                      :
+#endif
+                         (IN_UNI_8_BIT)
                          ? toLOWER_LATIN1(*s)
                          : toLOWER(*s);
 	}
 	/* is ucfirst() */
+#ifdef USE_LOCALE_CTYPE
 	else if (IN_LC_RUNTIME(LC_CTYPE)) {
             if (IN_UTF8_CTYPE_LOCALE) {
                 goto do_uni_rules;
@@ -3543,6 +3568,7 @@ PP(pp_ucfirst)
                                               locales have upper and title case
                                               different */
 	}
+#endif
 	else if (! IN_UNI_8_BIT) {
 	    *tmpbuf = toUPPER(*s);	/* Returns caseless for non-ascii, or
 					 * on EBCDIC machines whatever the
@@ -3686,10 +3712,12 @@ PP(pp_ucfirst)
 	    SvCUR_set(dest, need - 1);
 	}
     }
+#ifdef USE_LOCALE_CTYPE
     if (IN_LC_RUNTIME(LC_CTYPE)) {
         TAINT;
         SvTAINTED_on(dest);
     }
+#endif
     if (dest != source && SvTAINTED(source))
 	SvTAINT(dest);
     SvSETMAGIC(dest);
@@ -3717,9 +3745,13 @@ PP(pp_uc)
 	(SvTEMP(source) && !SvSMAGICAL(source) && SvREFCNT(source) == 1))
 	&& !SvREADONLY(source) && SvPOK(source)
 	&& !DO_UTF8(source)
-	&& ((IN_LC_RUNTIME(LC_CTYPE))
+	&& (
+#ifdef USE_LOCALE_CTYPE
+            (IN_LC_RUNTIME(LC_CTYPE))
             ? ! IN_UTF8_CTYPE_LOCALE
-            : ! IN_UNI_8_BIT))
+            :
+#endif
+              ! IN_UNI_8_BIT))
     {
 
         /* We can convert in place.  The reason we can't if in UNI_8_BIT is to
@@ -3784,7 +3816,13 @@ PP(pp_uc)
              * and copy it to the output buffer */
 
             u = UTF8SKIP(s);
-            uv = _to_utf8_upper_flags(s, tmpbuf, &ulen, IN_LC_RUNTIME(LC_CTYPE));
+            uv = _to_utf8_upper_flags(s, tmpbuf, &ulen,
+#ifdef USE_LOCALE_CTYPE
+                                                        IN_LC_RUNTIME(LC_CTYPE)
+#else
+                                                        0
+#endif
+            );
 #define GREEK_CAPITAL_LETTER_IOTA 0x0399
 #define COMBINING_GREEK_YPOGEGRAMMENI 0x0345
             if (uv == GREEK_CAPITAL_LETTER_IOTA
@@ -3827,6 +3865,7 @@ PP(pp_uc)
 	    /* Use locale casing if in locale; regular style if not treating
 	     * latin1 as having case; otherwise the latin1 casing.  Do the
 	     * whole thing in a tight loop, for speed, */
+#ifdef USE_LOCALE_CTYPE
 	    if (IN_LC_RUNTIME(LC_CTYPE)) {
                 if (IN_UTF8_CTYPE_LOCALE) {
                     goto do_uni_rules;
@@ -3834,7 +3873,9 @@ PP(pp_uc)
 		for (; s < send; d++, s++)
                     *d = (U8) toUPPER_LC(*s);
 	    }
-	    else if (! IN_UNI_8_BIT) {
+	    else
+#endif
+                 if (! IN_UNI_8_BIT) {
 		for (; s < send; d++, s++) {
 		    *d = toUPPER(*s);
 		}
@@ -3929,10 +3970,12 @@ PP(pp_uc)
 	    SvCUR_set(dest, d - (U8*)SvPVX_const(dest));
 	}
     } /* End of isn't utf8 */
+#ifdef USE_LOCALE_CTYPE
     if (IN_LC_RUNTIME(LC_CTYPE)) {
         TAINT;
         SvTAINTED_on(dest);
     }
+#endif
     if (dest != source && SvTAINTED(source))
 	SvTAINT(dest);
     SvSETMAGIC(dest);
@@ -3990,7 +4033,13 @@ PP(pp_lc)
 	    const STRLEN u = UTF8SKIP(s);
 	    STRLEN ulen;
 
-	    _to_utf8_lower_flags(s, tmpbuf, &ulen, IN_LC_RUNTIME(LC_CTYPE));
+	    _to_utf8_lower_flags(s, tmpbuf, &ulen,
+#ifdef USE_LOCALE_CTYPE
+                                                   IN_LC_RUNTIME(LC_CTYPE)
+#else
+                                                   0
+#endif
+            );
 
 	    /* Here is where we would do context-sensitive actions.  See the
 	     * commit message for 86510fb15 for why there isn't any */
@@ -4027,11 +4076,14 @@ PP(pp_lc)
 	    /* Use locale casing if in locale; regular style if not treating
 	     * latin1 as having case; otherwise the latin1 casing.  Do the
 	     * whole thing in a tight loop, for speed, */
+#ifdef USE_LOCALE_CTYPE
             if (IN_LC_RUNTIME(LC_CTYPE)) {
 		for (; s < send; d++, s++)
 		    *d = toLOWER_LC(*s);
             }
-	    else if (! IN_UNI_8_BIT) {
+	    else
+#endif
+            if (! IN_UNI_8_BIT) {
 		for (; s < send; d++, s++) {
 		    *d = toLOWER(*s);
 		}
@@ -4047,10 +4099,12 @@ PP(pp_lc)
 	    SvCUR_set(dest, d - (U8*)SvPVX_const(dest));
 	}
     }
+#ifdef USE_LOCALE_CTYPE
     if (IN_LC_RUNTIME(LC_CTYPE)) {
         TAINT;
         SvTAINTED_on(dest);
     }
+#endif
     if (dest != source && SvTAINTED(source))
 	SvTAINT(dest);
     SvSETMAGIC(dest);
@@ -4081,7 +4135,7 @@ PP(pp_quotemeta)
 		    }
 		}
 		else if (UTF8_IS_DOWNGRADEABLE_START(*s)) {
-
+#ifdef USE_LOCALE_CTYPE
 		    /* In locale, we quote all non-ASCII Latin1 chars.
 		     * Otherwise use the quoting rules */
 		    if (IN_LC_RUNTIME(LC_CTYPE)
@@ -4089,6 +4143,7 @@ PP(pp_quotemeta)
 		    {
 			to_quote = TRUE;
 		    }
+#endif
 		}
 		else if (is_QUOTEMETA_high(s)) {
 		    to_quote = TRUE;
@@ -4146,7 +4201,10 @@ PP(pp_fc)
     U8 tmpbuf[UTF8_MAXBYTES_CASE + 1];
     const bool full_folding = TRUE;
     const U8 flags = ( full_folding      ? FOLD_FLAGS_FULL   : 0 )
-                   | ( IN_LC_RUNTIME(LC_CTYPE) ? FOLD_FLAGS_LOCALE : 0 );
+#ifdef USE_LOCALE_CTYPE
+                   | ( IN_LC_RUNTIME(LC_CTYPE) ? FOLD_FLAGS_LOCALE : 0 )
+#endif
+    ;
 
     /* This is a facsimile of pp_lc, but with a thousand bugs thanks to me.
      * You are welcome(?) -Hugmeir
@@ -4194,6 +4252,7 @@ PP(pp_fc)
         SvUTF8_on(dest);
     } /* Unflagged string */
     else if (len) {
+#ifdef USE_LOCALE_CTYPE
         if ( IN_LC_RUNTIME(LC_CTYPE) ) { /* Under locale */
             if (IN_UTF8_CTYPE_LOCALE) {
                 goto do_uni_folding;
@@ -4201,7 +4260,9 @@ PP(pp_fc)
             for (; s < send; d++, s++)
                 *d = (U8) toFOLD_LC(*s);
         }
-        else if ( !IN_UNI_8_BIT ) { /* Under nothing, or bytes */
+        else
+#endif
+        if ( !IN_UNI_8_BIT ) { /* Under nothing, or bytes */
             for (; s < send; d++, s++)
                 *d = toFOLD(*s);
         }
@@ -4273,10 +4334,12 @@ PP(pp_fc)
     *d = '\0';
     SvCUR_set(dest, d - (U8*)SvPVX_const(dest));
 
+#ifdef USE_LOCALE_CTYPE
     if (IN_LC_RUNTIME(LC_CTYPE)) {
         TAINT;
         SvTAINTED_on(dest);
     }
+#endif
     if (SvTAINTED(source))
 	SvTAINT(dest);
     SvSETMAGIC(dest);

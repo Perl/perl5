@@ -3468,7 +3468,7 @@ PP(pp_fttext)
             odd++;
 #else
 	else if (*s & 128) {
-#ifdef USE_LOCALE
+#ifdef USE_LOCALE_CTYPE
 	    if (IN_LC_RUNTIME(LC_CTYPE) && isALPHA_LC(*s))
 		continue;
 #endif
