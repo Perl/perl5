@@ -650,6 +650,16 @@ L</Modules and Pragmata> section.
 
 XXX
 
+=item OpenBSD
+
+On OpenBSD, Perl will now default to using the system C<malloc> due to the
+security features it provides. Perl's own malloc wrapper has been in use
+since v5.14 due to performance reasons, but the OpenBSD project believes
+the tradeoff is worth it and would prefer that users who need the speed
+specifically ask for it.
+
+L<[perl #122000]|https://rt.perl.org/Ticket/Display.html?id=122000>.
+
 =back
 
 =head1 Internal Changes
