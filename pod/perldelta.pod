@@ -27,6 +27,24 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 Experimental C Backtrace API
+
+Starting from Perl 5.21.1, on some platforms Perl supports retrieving
+the C level backtrace (similar to what symbolic debuggers like gdb do).
+
+The backtrace returns the stack trace of the C call frames,
+with the symbol names (function names), the object names (like "perl"),
+and if it can, also the source code locations (file:line).
+
+The supported platforms are Linux and OS X (some *BSD might work at
+least partly, but they have not yet been tested).
+
+The feature needs to be enabled with C<Configure -Dusecbacktrace>.
+
+Also included is a C API to retrieve backtraces.
+
+See L<perlhacktips/"C backtrace"> for more information.
+
 =head2 C<qr/foo/x> now ignores any Unicode pattern white space
 
 The C</x> regular expression modifier allows the pattern to contain
