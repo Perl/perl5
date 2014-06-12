@@ -396,6 +396,19 @@ L<[perl #121869]|https://rt.perl.org/Ticket/Display.html?id=121869>
 
 Clarify where C<NUL> may be embedded or is required to terminate a string.
 
+=item *
+
+Previously missing documentation due to formatting errors are now included.
+
+=item *
+
+Entries are now organized into groups rather than by file where they are found.
+
+=item *
+
+Alphabetical sorting of entries is now handled by the POD generator to make 
+entries easier to find when scanning.
+
 =back
 
 =head3 L<perlhacktips>
