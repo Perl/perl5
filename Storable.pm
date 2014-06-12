@@ -1,7 +1,7 @@
 #
 #  Copyright (c) 1995-2001, Raphael Manfredi
 #  Copyright (c) 2002-2014 by the Perl 5 Porters
-#  
+#
 #  You may redistribute only under the same terms as Perl 5, as specified
 #  in the README file that comes with the distribution.
 #
@@ -22,7 +22,7 @@ package Storable; @ISA = qw(Exporter);
 
 use vars qw($canonical $forgive_me $VERSION);
 
-$VERSION = '2.50';
+$VERSION = '2.51';
 
 BEGIN {
     if (eval { local $SIG{__DIE__}; require Log::Agent; 1 }) {
@@ -241,7 +241,8 @@ sub _store {
 	if ($use_locking) {
 		open(FILE, ">>$file") || logcroak "can't write into $file: $!";
 		unless (&CAN_FLOCK) {
-			logcarp "Storable::lock_store: fcntl/flock emulation broken on $^O";
+			logcarp
+				"Storable::lock_store: fcntl/flock emulation broken on $^O";
 			return undef;
 		}
 		flock(FILE, LOCK_EX) ||
@@ -372,7 +373,8 @@ sub _retrieve {
 	my $da = $@;							# Could be from exception handler
 	if ($use_locking) {
 		unless (&CAN_FLOCK) {
-			logcarp "Storable::lock_store: fcntl/flock emulation broken on $^O";
+			logcarp
+				"Storable::lock_store: fcntl/flock emulation broken on $^O";
 			return undef;
 		}
 		flock(FILE, LOCK_SH) || logcroak "can't get shared lock on $file: $!";
@@ -1212,8 +1214,10 @@ the bill.
 
 =head1 AUTHOR
 
-Storable was written by Raphael Manfredi F<E<lt>Raphael_Manfredi@pobox.comE<gt>>
-Maintenance is now done by the perl5-porters F<E<lt>perl5-porters@perl.orgE<gt>>
+Storable was written by Raphael Manfredi
+F<E<lt>Raphael_Manfredi@pobox.comE<gt>>
+Maintenance is now done by the perl5-porters
+F<E<lt>perl5-porters@perl.orgE<gt>>
 
 Please e-mail us with problems, bug fixes, comments and complaints,
 although if you have compliments you should send them to Raphael.
