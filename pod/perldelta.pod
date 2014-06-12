@@ -222,6 +222,16 @@ L<[perl #121574]|https://rt.perl.org/Ticket/Display.html?id=121574>
 
 =item *
 
+L<Data::Dumper> has been upgraded from version 2.151 to 2.152.
+
+Changes to resolve Coverity issues.
+
+XS dumps incorrectly stored the name of code references stored in a
+GLOB.
+L<[perl #122070]|https://rt.perl.org/Ticket/Display.html?id=122070>
+
+=item *
+
 L<Encode> has been upgraded from version 2.60_01 to 2.62.
 
 B<piconv> now has better error handling when the encoding name is nonexistent,
@@ -275,6 +285,10 @@ than 6.63_03
 
 =item *
 
+L<OS2::Process> has been upgraded from version 1.09 to 1.10.
+
+=item *
+
 L<perl5db.pl> has been upgraded from version 1.44 to 1.45.
 
 fork() in the debugger under C<tmux> will now create a new window for
@@ -284,6 +298,24 @@ the forked process. L<[perl
 The debugger now saves the current working directory on startup and
 restores it when you restart your program with C<R> or <rerun>. L<[perl
 #121509]|https://rt.perl.org/Ticket/Display.html?id=121509>
+
+=item *
+
+L<PerlIO::encoding> has been upgraded from version 0.18 to 0.19.
+
+No changes in behaviour.
+
+=item *
+
+L<PerlIO::mmap> has been upgraded from version 0.012 to 0.013.
+
+No changes in behaviour.
+
+=item *
+
+L<PerlIO::scalar> has been upgraded from version 0.18 to 0.19.
+
+No changes in behaviour.
 
 =item *
 
