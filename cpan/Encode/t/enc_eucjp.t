@@ -2,6 +2,8 @@
 # This is the twin of enc_utf8.t .
 
 BEGIN {
+    print "1..0 # Skip: 'use encoding' has been removed\n";
+    exit 0;
     require Config; import Config;
     if ($Config{'extensions'} !~ /\bEncode\b/) {
       print "1..0 # Skip: Encode was not built\n";

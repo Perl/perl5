@@ -6,6 +6,7 @@
 
 BEGIN {
     require './test.pl';
+    skip_all("'use encoding' has been removed");
     skip_all_without_dynamic_extension('Encode');
     skip_all("EBCDIC") if $::IS_EBCDIC;
     skip_all_without_perlio();

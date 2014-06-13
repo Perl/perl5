@@ -102,6 +102,9 @@ sub _get_locale_encoding {
 }
 
 sub import {
+    if ($] >= 5.020) {
+        Carp::croak("encoding: pragma has been removed");
+    }
     if ($] >= 5.017) {
 	warnings::warnif("deprecated",
 			 "Use of the encoding pragma is deprecated")

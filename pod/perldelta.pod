@@ -81,6 +81,11 @@ XXX For a release on a stable branch, this section aspires to be:
     If any exist, they are bugs, and we request that you submit a
     report.  See L</Reporting Bugs> below.
 
+=head2 S<C<"use encoding">> now is a fatal error
+
+The C<encoding> pragma has been deprecated since v5.18, and its use now
+is a fatal error.
+
 =head2 C<\N{}> with a sequence of multiple spaces is now a fatal error.
 
 This has been deprecated since v5.18.

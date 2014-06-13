@@ -18,3 +18,9 @@ podlators cpan/podlators/scripts/pod2text.PL b4693fcfe4a0a1b38a215cfb8985a65d5d0
 version cpan/version/lib/version.pm fa9931d4db05aff9a0a6ef558610b1a472d9306e
 version vutil.c abd88f59a6e0cfe7b4e45b1859f414042ea254aa
 version vxs.inc 9064aacbdfe42bb584a068f62b505dd11dbb4dc4
+Encode cpan/Encode/encoding.pm 156567bed188fd57e469915a58a3d09df020681c
+Encode cpan/Encode/t/enc_data.t 82e46d0908fdd381ab01b700240050034336a66d
+Encode cpan/Encode/t/enc_eucjp.t 9b386c1ef035f22798b124aa361bfecb833456c0
+Encode cpan/Encode/t/enc_utf8.t 3414490ad30b155241f07e3e3f2079743de16d40
+Encode cpan/Encode/t/encoding.t 4ac06c1f1c1b958c4e4b11304b8372bc94396c11
+Encode cpan/Encode/t/jperl.t 3c21d9c62d1a68dc6da7431f364f8aa4b3e9d040
