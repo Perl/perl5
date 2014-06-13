@@ -352,7 +352,7 @@ Perl_gv_init_pvn(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, U32 flag
 	case SVt_PVIO:
             Perl_croak(aTHX_ "Cannot convert a reference to %s to typeglob",
 		       sv_reftype(has_constant, 0));
-            break;
+
 	default: NOOP;
 	}
 	SvRV_set(gv, NULL);
@@ -2969,7 +2969,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
 	 case regexp_amg:
 	     /* FAIL safe */
 	     return NULL;	/* Delegate operation to standard mechanisms. */
-	     break;
+
 	 case to_sv_amg:
 	 case to_av_amg:
 	 case to_hv_amg:
@@ -2977,7 +2977,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
 	 case to_cv_amg:
 	     /* FAIL safe */
 	     return left;	/* Delegate operation to standard mechanisms. */
-	     break;
+
 	 default:
 	   goto not_found;
 	 }
@@ -3044,7 +3044,6 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
 	 case to_cv_amg:
 	     /* FAIL safe */
 	     return left;	/* Delegate operation to standard mechanisms. */
-	     break;
       }
       if (ocvp && (cv=ocvp[nomethod_amg])) { /* Call report method */
 	notfound = 1; lr = -1;

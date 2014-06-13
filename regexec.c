@@ -2258,7 +2258,6 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         break;
     default:
         Perl_croak(aTHX_ "panic: unknown regstclass %d", (int)OP(c));
-        break;
     }
     return 0;
   got_it:
@@ -2455,7 +2454,6 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
     /* Be paranoid... */
     if (prog == NULL || stringarg == NULL) {
 	Perl_croak(aTHX_ "NULL regexp parameter");
-	return 0;
     }
 
     DEBUG_EXECUTE_r(
@@ -4618,7 +4616,6 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 			break;
 		    default:
 			Perl_croak(aTHX_ "panic: Unexpected FLAGS %u in op %u", FLAGS(scan), OP(scan));
-			break;
 		}
 	    }
 	    /* Note requires that all BOUNDs be lower than all NBOUNDs in

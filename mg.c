@@ -348,9 +348,9 @@ Perl_mg_size(pTHX_ SV *sv)
 	    /* FIXME */
 	default:
 	    Perl_croak(aTHX_ "Size magic not implemented");
-	    break;
+
     }
-    return 0;
+    NOT_REACHED; /* NOTREACHED */
 }
 
 /*
