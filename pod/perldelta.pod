@@ -698,6 +698,12 @@ underlying locale.  This API will be nailed down during the course of
 developing v5.21.  Send email to L<mailto:perl5-porters@perl.org> for
 guidance.
 
+=item *
+
+A new macro L<C<isUTF8_CHAR>|perlapi/isUTF8_CHAR> has been written which
+efficiently determines if the string given by its parameters begins
+with a well-formed UTF-8 encoded character.
+
 =back
 
 =head1 Selected Bug Fixes
