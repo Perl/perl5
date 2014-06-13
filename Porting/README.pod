@@ -124,6 +124,10 @@ F<perldelta*> files.
 
 Generates info for Module::CoreList from this perl tree.
 
+=head2 F<deparse-skips.txt>
+
+List of test files to ignore/skip for deparse tests.
+
 =head2 F<epigraphs.pod>
 
 List of Perl release epigraphs.

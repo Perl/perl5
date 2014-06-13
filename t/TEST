@@ -14,6 +14,11 @@
 # In which case, we need to stop t/TEST actually running tests, as all
 # t/harness needs are its subroutines.
 
+# If we're doing deparse tests, ignore failures for these
+my $deparse_failures;
+
+# And skip even running these
+my $deparse_skips;
 
 # directories with special sets of test switches
 my %dir_to_switch =
@@ -133,6 +138,7 @@ our $show_elapsed_time = $ENV{HARNESS_TIMER} || 0;
 	if ($1 =~ /^deparse(,.+)?$/) {
 	    $::deparse = 1;
 	    $::deparse_opts = $1;
+            _process_deparse_config();
 	}
     }
     @ARGV = @argv;
@@ -545,15 +551,8 @@ EOT
 	if ($test =~ /^$/) {
 	    next;
 	}
-	if ($type eq 'deparse') {
-	    if ($test eq "comp/redef.t") {
-		# Redefinition happens at compile time
-		next;
-	    }
-	    elsif ($test =~ m{lib/Switch/t/}) {
-		# B::Deparse doesn't support source filtering
-		next;
-	    }
+	if ($type eq 'deparse' && $test =~ $deparse_skips) {
+	    next;
 	}
 	my $te = $::path_to_name{$test} . '.'
 		    x ($dotdotdot - length($::path_to_name{$test})) .' ';
@@ -666,7 +665,7 @@ EOT
 
 	_check_valgrind(\$toolnm, \$grind_ct, \$test);
 
-	if ($type eq 'deparse') {
+	if ($type eq 'deparse' && !$ENV{KEEP_DEPARSE_FILES}) {
 	    unlink "./$test.dp";
 	}
 	if (not defined $failure and $next != $max) {
@@ -677,6 +676,19 @@ EOT
 	    and $? )
 	{
 	    $failure = "FAILED--non-zero wait status: $?";
+	}
+
+	# Deparse? Should it have passed or failed?
+	if ($type eq 'deparse' && $test =~ $deparse_failures) {
+	    if (!$failure) {
+		# Wait, it didn't fail? Great news! Tell someone!
+		$failure = "FAILED--all tests passed but test should have failed";
+	    } else {
+		# Bah, still failing. Mask it.
+		print "${te}skipped\n";
+		$tested_files = $tested_files - 1;
+		next;
+	    }
 	}
 
 	if (defined $failure) {
@@ -899,6 +911,53 @@ sub _cleanup_valgrind {
 	unlink _find_files('cachegrind.out.\d+$',
 		     qw ( ../t ../cpan ../ext ../dist/ ));
     }
+}
+
+# Generate regexps of known bad filenames / skips from Porting/deparse-skips.txt
+my $in;
+
+sub _process_deparse_config {
+    my @deparse_failures;
+    my @deparse_skips;
+
+    my $f = '../Porting/deparse-skips.txt';
+
+    my $skips;
+    if (!open($skips, '<', $f)) {
+        warn "Failed to find $f: $!\n";
+        return;
+    }
+
+    while(<$skips>) {
+        if (/__DEPARSE_FAILURES__/) {
+            $in = \@deparse_failures; next;
+        } elsif (/__DEPARSE_SKIPS__/) {
+            $in = \@deparse_skips; next;
+        } elsif (!$in) {
+            next;
+	}
+
+        s/#.*$//; # Kill comments
+        s/\s+$//; # And trailing whitespace
+
+        next unless $_;
+
+        push @$in, $_;
+    }
+
+    for my $f (@deparse_failures, @deparse_skips) {
+        if ($f =~ m|/$|) { # Dir? Skip everything below it
+            $f = qr/\Q$f\E.*/;
+        } else {
+            $f = qr/\Q$f\E/;
+        }
+    }
+
+    $deparse_failures = join('|', @deparse_failures);
+    $deparse_failures = qr/^(?:$deparse_failures)$/;
+
+    $deparse_skips = join('|', @deparse_skips);
+    $deparse_skips = qr/^(?:$deparse_skips)$/;
 }
 
 # ex: set ts=8 sts=4 sw=4 noet:
