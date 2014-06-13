@@ -557,6 +557,7 @@ EOS
     }
     my @targ = ($target, @$pass_through);
     print "Making $target in $ext_dir\n@make @targ\n";
+    local $ENV{PERL_INSTALL_QUIET} = 1;
     my $code = system(@make, @targ);
     die "Unsuccessful make($ext_dir): code=$code" if $code != 0;
 
@@ -689,6 +690,7 @@ sub just_pm_to_blib {
     }
     # This is running under miniperl, so no autodie
     if ($target eq 'all') {
+        local $ENV{PERL_INSTALL_QUIET} = 1;
         require ExtUtils::Install;
         ExtUtils::Install::pm_to_blib(\%pm, '../../lib/auto');
         open my $fh, '>', $pm_to_blib
