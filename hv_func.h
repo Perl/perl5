@@ -30,13 +30,13 @@
         || defined(PERL_HASH_FUNC_AESHASH) \
         || defined(PERL_HASH_FUNC_CRC32) \
     )
-#define PERL_HASH_FUNC_CRC32
+#define PERL_HASH_FUNC_AESHASH
 #endif
 
 #if defined(PERL_HASH_FUNC_SIPHASH_1_2)
 #   define PERL_HASH_FUNC "SIPHASH_1_2"
 #   define PERL_HASH_SEED_BYTES 16
-#   define PERL_HASH(hash,str,len) (hash)= S_perl_hash_siphash_1_2(PERL_HASH_SEED,(U8*)(str),(len))
+#   define PERL_HASH_WITH_SEED(seed,hash,str,len) (hash)= S_perl_hash_siphash_1_2((seed),(U8*)(str),(len))
 #elif defined(PERL_HASH_FUNC_SIPHASH_2_4)
 #   define PERL_HASH_FUNC "SIPHASH_2_4"
 #   define PERL_HASH_SEED_BYTES 16
