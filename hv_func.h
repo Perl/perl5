@@ -798,7 +798,7 @@ S_perl_hash_murmur_hash_64b (const unsigned char * const seed, const unsigned ch
 #include <smmintrin.h>
 /* for _mm_exract_epi32 */
 
-#define PERL_HASH_FUNC_INIT(seed) S_perl_hash_aeshash_init(seed)
+#define PERL_HASH_SEED_INIT(seed) S_perl_hash_aeshash_init(seed)
 
 PERL_STATIC_INLINE __m128i
 S_perl_hash_aes128_keyexpand(__m128i key, __m128i keygened)

@@ -4753,8 +4753,8 @@ Perl_get_hash_seed(pTHX_ unsigned char * const seed_buffer)
         for( i = 0; i < PERL_HASH_SEED_BYTES_INIT; i++ ) {
             seed_buffer[i] = (unsigned char)(Drand01() * (U8_MAX+1));
         }
-#ifdef PERL_HASH_SEED_POST_PROCESS
-        PERL_HASH_SEED_POST_PROCESS(seedbuffer);
+#ifdef PERL_HASH_SEED_INIT
+        PERL_HASH_SEED_INIT(seed_buffer);
 #endif
     }
 #ifdef USE_PERL_PERTURB_KEYS

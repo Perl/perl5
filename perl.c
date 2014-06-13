@@ -1507,6 +1507,14 @@ perl_parse(pTHXx_ XSINIT_t xsinit, int argc, char **argv, char **env)
             while (seed < seed_end) {
                 PerlIO_printf(Perl_debug_log, "%02x", *seed++);
             }
+            if (PERL_HASH_SEED_BYTES>PERL_HASH_SEED_BYTES_INIT) {
+                seed_end= PERL_HASH_SEED + PERL_HASH_SEED_BYTES;
+                PerlIO_printf(Perl_debug_log, "[");
+                while (seed < seed_end) {
+                    PerlIO_printf(Perl_debug_log, "%02x", *seed++);
+                }
+                PerlIO_printf(Perl_debug_log, "]");
+            }
 #ifdef PERL_HASH_RANDOMIZE_KEYS
             PerlIO_printf(Perl_debug_log, " PERTURB_KEYS = %d (%s)",
                     PL_HASH_RAND_BITS_ENABLED,
