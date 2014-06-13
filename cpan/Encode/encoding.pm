@@ -212,9 +212,7 @@ encoding - allows you to write your script in non-ascii or non-utf8
 
 =head1 WARNING
 
-This module is deprecated under perl 5.18.  It uses a mechanism provided by
-perl that is deprecated under 5.18 and higher, and may be removed in a
-future version.
+This module has been removed after being deprecated since perl 5.18.
 
 The easiest and the best alternative is to write your script in UTF-8
 and declear:
@@ -222,6 +220,9 @@ and declear:
   use utf8; # not use encoding ':utf8';
 
 See L<perluniintro> and L<utf8> for details.
+
+For reference only, the documentation of how it was supposed to work (some
+bugs never got fixed) is below.
 
 =head1 SYNOPSIS
 
