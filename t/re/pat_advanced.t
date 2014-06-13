@@ -1873,8 +1873,6 @@ EOP
 	   'IsPunct disagrees with [:punct:] outside ASCII');
 
         my @isPunctLatin1 = eval q {
-            no warnings 'deprecated';
-            use encoding 'latin1';
             grep {/[[:punct:]]/ != /\p{IsPunct}/} map {chr} 0x80 .. 0xff;
         };
         skip "Eval failed ($@)", 1 if $@;
