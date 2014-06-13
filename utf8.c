@@ -3405,15 +3405,17 @@ Perl__swash_inversion_hash(pTHX_ SV* const swash)
 	    for (i = 0; i <= av_tindex(list); i++) {
 		SV** entryp = av_fetch(list, i, FALSE);
 		SV* entry;
+		UV uv;
 		if (entryp == NULL) {
 		    Perl_croak(aTHX_ "panic: av_fetch() unexpectedly failed");
 		}
 		entry = *entryp;
-		/*DEBUG_U(PerlIO_printf(Perl_debug_log, "list for %"UVXf" contains %"UVXf"\n", val, SvUV(entry)));*/
-		if (SvUV(entry) == val) {
+		uv = SvUV(entry);
+		/*DEBUG_U(PerlIO_printf(Perl_debug_log, "list for %"UVXf" contains %"UVXf"\n", val, uv));*/
+		if (uv == val) {
 		    found_key = TRUE;
 		}
-		if (SvUV(entry) == inverse) {
+		if (uv == inverse) {
 		    found_inverse = TRUE;
 		}
 
