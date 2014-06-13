@@ -1453,7 +1453,8 @@ sub { # do not actually call require
 EXPECT
 ########
 # toke.c
-# [perl #113094], [perl #119101]
+# [perl #113094], [perl #119101], since reverted so no warnings generated
+use warnings;
 print "aa" =~ m{^a\{1,2\}$}, "\n";
 print "aa" =~ m{^a\x\{61\}$}, "\n";
 print "a\\x{6F}" =~ m{^a\\x\{6F\}$}, "\n";
@@ -1463,35 +1464,20 @@ print "a\\\\o"     =~ m{^a\\\\\x\{6F\}$}, "\n";
 print "aa" =~ m{^a{1,2}$}, "\n";
 print "aq" =~ m[^a\[a-z\]$], "\n";
 print "aq" =~ m(^a\(q\)$), "\n";
-no warnings 'deprecated';
-print "aa" =~ m{^a\{1,2\}$}, "\n";
-print "aa" =~ m{^a\x\{61\}$}, "\n";
-print "a\\x{6F}" =~ m{^a\\x\{6F\}$}, "\n";
-print "a\\o" =~ m{^a\\\x\{6f\}$}, "\n";
-print "aq" =~ m[^a\[a-z\]$], "\n";
-print "aq" =~ m(^a\(q\)$), "\n";
 EXPECT
-Useless use of '\'; doesn't escape metacharacter '{' at - line 3.
-Useless use of '\'; doesn't escape metacharacter '{' at - line 4.
-Useless use of '\'; doesn't escape metacharacter '{' at - line 6.
-Useless use of '\'; doesn't escape metacharacter '{' at - line 8.
-Useless use of '\'; doesn't escape metacharacter '[' at - line 10.
-Useless use of '\'; doesn't escape metacharacter '(' at - line 11.
+Illegal hexadecimal digit '\' ignored at - line 5.
+Illegal hexadecimal digit '\' ignored at - line 5.
+Illegal hexadecimal digit '\' ignored at - line 7.
+Illegal hexadecimal digit '\' ignored at - line 7.
+Illegal hexadecimal digit '\' ignored at - line 9.
+Illegal hexadecimal digit '\' ignored at - line 9.
+
+
 1
+
 1
+
 1
-1
-1
-1
-1
-1
-q
-1
-1
-1
-1
-1
-q
 ########
 # toke.c
 #[perl #119123] disallow literal control character variables

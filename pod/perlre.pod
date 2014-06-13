@@ -556,20 +556,12 @@ X<metacharacter> X<quantifier> X<*> X<+> X<?> X<{n}> X<{n,}> X<{n,m}>
 
 (If a curly bracket occurs in any other context and does not form part of
 a backslashed sequence like C<\x{...}>, it is treated as a regular
-character.  In particular, the lower quantifier bound is not optional,
-and a typo in a quantifier silently causes it to be treated as the
-literal characters.  For example,
-
-    /o{4,a}/
-
-compiles to match the sequence of six characters
-S<C<"o { 4 , a }">>.  It is planned to eventually require literal uses
-of curly brackets to be escaped, say by preceding them with a backslash
-or enclosing them within square brackets, (C<"\{"> or C<"[{]">).  This
-change will allow for future syntax extensions (like making the lower
-bound of a quantifier optional), and better error checking.  In the
-meantime, you should get in the habit of escaping all instances where
-you mean a literal "{".)
+character.  However, a deprecation warning is raised for all such
+occurrences, and in Perl v5.26, literal uses of a curly bracket will be
+required to be escaped, say by preceding them with a backslash (C<"\{">)
+or enclosing them within square brackets  (C<"[{]">).  This change will
+allow for future syntax extensions (like making the lower bound of a
+quantifier optional), and better error checking of quantifiers.)
 
 The "*" quantifier is equivalent to C<{0,}>, the "+"
 quantifier to C<{1,}>, and the "?" quantifier to C<{0,1}>.  n and m are limited

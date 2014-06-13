@@ -20,7 +20,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 733;  # Update this when adding/deleting tests.
+plan tests => 737;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1594,6 +1594,16 @@ EOP
     {
         use utf8;
         ok("abc" =~ /abc/x, "NEL is white-space under /x");
+    }
+
+    {
+        ok('a(b)c' =~ qr(a\(b\)c), "'\\(' is a literal in qr(...)");
+        ok('a[b]c' =~ qr[a\[b\]c], "'\\[' is a literal in qr[...]");
+        ok('a{3}c' =~ qr{a\{3\}c},  # Only failed when { could be a meta
+              "'\\{' is a literal in qr{...}, where it could be a quantifier");
+
+        # This one is for completeness
+        ok('a<b>c' =~ qr<a\<b\>c>, "'\\<' is a literal in qr<...>)");
     }
 
 } # End of sub run_tests

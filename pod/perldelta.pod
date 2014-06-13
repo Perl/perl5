@@ -150,6 +150,15 @@ This non-graphic character is essentially indistinguishable from a
 regular space, and so should not be allowed.  See
 L<charnames/CUSTOM ALIASES>.
 
+=head2 A literal C<"{"> should now be escaped in a pattern
+
+If you want a literal left curly bracket (also called a left brace) in a
+regular expression pattern, you should now escape it by either
+preceding it with a backslash (C<"\{">) or enclosing it within square
+brackets C<"[{]">, or by using C<\Q>; otherwise a deprecation warning
+will be raised.  This was first announced as forthcoming in the v5.16
+release; it will allow future extensions to the language to happen.
+
 =head2 Module removals
 
 XXX Remove this section if inapplicable.
@@ -767,6 +776,18 @@ cross-compiled for Android to end up with defective versions of system(),
 exec() and backticks: the commands would end up looking for C</bin/sh>
 instead of C</system/bin/sh>, and so would fail for the vast majority
 of devices, leaving C<$!> as C<ENOENT>.
+
+=item *
+
+C<qr(...\(...\)...)>,
+C<qr[...\[...\]...]>,
+and
+C<qr{...\{...\}...}>
+now work.  Previously it was impossible to escape these three
+left-characters with a backslash within a regular expression pattern
+where otherwise they would be considered metacharacters, and the pattern
+opening delimiter was the character, and the closing delimiter was its
+mirror character.
 
 =back
 

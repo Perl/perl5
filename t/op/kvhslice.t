@@ -151,7 +151,7 @@ plan tests => 44;
         my $v = eval '%h{a}';
         is (scalar @warn, 1, 'warning in scalar context');
         like $warn[0],
-             qr{^%h{"a"} in scalar context better written as \$h{"a"}},
+             qr{^%h\{"a"\} in scalar context better written as \$h\{"a"\}},
             "correct warning text";
     }
     {

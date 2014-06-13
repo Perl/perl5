@@ -1260,6 +1260,7 @@ sub run_tests {
 
     {
         # \, breaks {3,4}
+        no warnings qw{deprecated regexp};
         ok "xaaay"    !~ /xa{3\,4}y/, '\, in a pattern';
         ok "xa{3,4}y" =~ /xa{3\,4}y/, '\, in a pattern';
 

@@ -15,11 +15,7 @@
     Pulled from regcomp.c.
  */
 PERL_STATIC_INLINE I32
-S_regcurly(pTHX_ const char *s,
-           const bool rbrace_must_be_escaped /* Should the terminating '} be
-                                                preceded by a backslash?  This
-                                                is an abnormal case */
-    )
+S_regcurly(pTHX_ const char *s)
 {
     PERL_UNUSED_CONTEXT;
     PERL_ARGS_ASSERT_REGCURLY;
@@ -36,9 +32,7 @@ S_regcurly(pTHX_ const char *s,
 	    s++;
     }
 
-    return (rbrace_must_be_escaped)
-           ? *s == '\\' && *(s+1) == '}'
-           : *s == '}';
+    return *s == '}';
 }
 
 /* XXX Add documentation after final interface and behavior is decided */

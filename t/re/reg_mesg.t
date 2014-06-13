@@ -339,7 +339,6 @@ my @warning = (
     '/(?=a)*/' => '(?=a)* matches null string many times {#} m/(?=a)*{#}/',
     'my $x = \'\m\'; qr/a$x/' => 'Unrecognized escape \m passed through {#} m/a\m{#}/',
     '/\q/' => 'Unrecognized escape \q passed through {#} m/\q{#}/',
-    '/\q{/' => 'Unrecognized escape \q{ passed through {#} m/\q{{#}/',
     '/(?=a){1,3}/' => 'Quantifier unexpected on zero-length expression {#} m/(?=a){1,3}{#}/',
     '/(a|b)(?=a){3}/' => 'Quantifier unexpected on zero-length expression {#} m/(a|b)(?=a){3}{#}/',
     '/\_/' => "",
@@ -416,6 +415,12 @@ my @experimental_regex_sets = (
 );
 
 my @deprecated = (
+    '/\w{/' => 'Unescaped left brace in regex is deprecated, passed through {#} m/\w{{#}/',
+    '/\q{/' => [
+                 'Unrecognized escape \q{ passed through {#} m/\q{{#}/',
+                 'Unescaped left brace in regex is deprecated, passed through {#} m/\q{{#}/'
+               ],
+    '/:{4,a}/' => 'Unescaped left brace in regex is deprecated, passed through {#} m/:{{#}4,a}/',
 );
 
 while (my ($regex, $expect) = splice @death, 0, 2) {

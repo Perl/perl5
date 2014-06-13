@@ -225,7 +225,7 @@ struct RExC_state_t {
 
 #define	ISMULT1(c)	((c) == '*' || (c) == '+' || (c) == '?')
 #define	ISMULT2(s)	((*s) == '*' || (*s) == '+' || (*s) == '?' || \
-	((*s) == '{' && regcurly(s, FALSE)))
+	((*s) == '{' && regcurly(s)))
 
 /*
  * Flags to be passed up and down.
@@ -10484,7 +10484,7 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 
     op = *RExC_parse;
 
-    if (op == '{' && regcurly(RExC_parse, FALSE)) {
+    if (op == '{' && regcurly(RExC_parse)) {
 	maxpos = NULL;
 #ifdef RE_TRACK_PATTERN_OFFSETS
         parse_start = RExC_parse; /* MJD */
@@ -10760,7 +10760,7 @@ S_grok_bslash_N(pTHX_ RExC_state_t *pRExC_state, regnode** node_p,
 
     /* Disambiguate between \N meaning a named character versus \N meaning
      * [^\n].  The former is assumed when it can't be the latter. */
-    if (*p != '{' || regcurly(p, FALSE)) {
+    if (*p != '{' || regcurly(p)) {
 	RExC_parse = p;
 	if (! node_p) {
 	    /* no bare \N allowed in a charclass */
@@ -11341,12 +11341,6 @@ tryagain:
 	vFAIL("Internal urp");
 				/* Supposed to be caught earlier. */
 	break;
-    case '{':
-	if (!regcurly(RExC_parse, FALSE)) {
-	    RExC_parse++;
-	    goto defchar;
-	}
-	/* FALLTHROUGH */
     case '?':
     case '+':
     case '*':
@@ -12028,8 +12022,18 @@ tryagain:
 			goto normal_default;
 		    } /* End of switch on '\' */
 		    break;
+		case '{':
+		    /* Currently we don't warn when the lbrace is at the start
+		     * of a construct.  This catches it in the middle of a
+		     * literal string, or when its the first thing after
+		     * something like "\b" */
+		    if (! SIZE_ONLY
+			&& (len || (p > RExC_start && isALPHA_A(*(p -1)))))
+		    {
+			ckWARNregdep(p + 1, "Unescaped left brace in regex is deprecated, passed through");
+		    }
+		    /*FALLTHROUGH*/
 		default:    /* A literal character */
-
 		  normal_default:
 		    if (UTF8_IS_START(*p) && UTF) {
 			STRLEN numlen;

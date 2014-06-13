@@ -47,7 +47,6 @@ my @properties = qw(
     XDIGIT
     VERTSPACE
     IS_IN_SOME_FOLD
-    BACKSLASH_FOO_LBRACE_IS_META
 );
 
 # Read in the case fold mappings.
@@ -236,13 +235,6 @@ for my $ord (0..255) {
             $re = qr/\p{Is_Non_Final_Fold}/;
         } elsif ($name eq 'IS_IN_SOME_FOLD') {
             $re = qr/\p{_Perl_Any_Folds}/;
-        } elsif ($name eq 'BACKSLASH_FOO_LBRACE_IS_META') {
-
-            # This is true for FOO where FOO is the varying character in:
-            # \a{, \b{, \c{, ...
-            # and the sequence has non-literal meaning to Perl; so it is true
-            # for 'x' because \x{ is special, but not 'a' because \a{ isn't.
-            $re = qr/[gkNopPx]/;
         } else {    # The remainder have the same name and values as Unicode
             $re = eval "qr/\\p{$name}/";
             use Carp;

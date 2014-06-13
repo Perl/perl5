@@ -91,9 +91,9 @@ sub testit {
 
 	my $got_text = $deparse->coderef2text($code_ref);
 
-	unless ($got_text =~ /^{
+	unless ($got_text =~ /^\{
     package test;
-    BEGIN {\${\^WARNING_BITS} = "[^"]*"}
+    BEGIN \{\$\{\^WARNING_BITS} = "[^"]*"}
     use strict 'refs', 'subs';
     use feature [^\n]+
     \Q$vars\E\(\) = (.*)

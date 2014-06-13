@@ -5657,6 +5657,18 @@ C<undef *foo>.
 (A) You've accidentally run your script through B<csh> instead of Perl.
 Check the #! line, or manually feed your script into Perl yourself.
 
+=item Unescaped left brace in regex is deprecated, passed through in regex;
+marked by <-- HERE in m/%s/
+
+(D deprecated, regexp) You used a literal C<"{"> character in a regular
+expression pattern. You should change to use C<"\{"> instead, because a future
+version of Perl (tentatively v5.26) will consider this to be a syntax error.  If
+the pattern delimiters are also braces, any matching right brace
+(C<"}">) should also be escaped to avoid confusing the parser, for
+example,
+
+    qr{abc\{def\}ghi}
+
 =item unexec of %s into %s failed!
 
 (F) The unexec() routine failed for some reason.  See your local FSF
@@ -6127,31 +6139,6 @@ discovered.  See L<perlre>.
 (W misc) You have used the /d modifier where the searchlist has the
 same length as the replacelist.  See L<perlop> for more information
 about the /d modifier.
-
-=item Useless use of '\'; doesn't escape metacharacter '%c'
-
-(D deprecated) You wrote a regular expression pattern something like
-one of these:
-
- m{ \x\{FF\} }x
- m{foo\{1,3\}}
- qr(foo\(bar\))
- s[foo\[a-z\]bar][baz]
-
-The interior braces, square brackets, and parentheses are treated as
-metacharacters even though they are backslashed; instead write:
-
- m{ \x{FF} }x
- m{foo{1,3}}
- qr(foo(bar))
- s[foo[a-z]bar][baz]
-
-The backslashes have no effect when a regular expression pattern is
-delimited by C<{}>, C<[]>, or C<()>, which ordinarily are
-metacharacters, and the delimiters are also used, paired, within the
-interior of the pattern.  It is planned that a future Perl release will
-change the meaning of constructs like these so that the backslashes
-will have an effect, so remove them from your code.
 
 =item Useless use of \E
 
