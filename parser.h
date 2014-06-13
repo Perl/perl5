@@ -98,28 +98,9 @@ typedef struct yy_parser {
     AV		*rsfp_filters;	/* holds chain of active source filters */
     U8		form_lex_state;	/* remember lex_state when parsing fmt */
 
-#ifdef PERL_MAD
-    SV		*endwhite;
-    I32		faketokens;
-    I32		lasttoke;
-    SV		*nextwhite;
-    I32		realtokenstart;
-    SV		*skipwhite;
-    SV		*thisclose;
-    MADPROP *	thismad;
-    SV		*thisopen;
-    SV		*thisstuff;
-    SV		*thistoken;
-    SV		*thiswhite;
-
-/* What we know when we're in LEX_KNOWNEXT state. */
-    NEXTTOKE	nexttoke[5];	/* value of next token, if any */
-    I32		curforce;
-#else
     YYSTYPE	nextval[5];	/* value of next token, if any */
     I32		nexttype[5];	/* type of next token */
     I32		nexttoke;
-#endif
 
     COP		*saved_curcop;	/* the previous PL_curcop */
     char	tokenbuf[256];

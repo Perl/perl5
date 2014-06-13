@@ -78,7 +78,6 @@ for file do
     gv) ;;
     hv) ;;
     locale) ;;
-    madly) ;;
     main) ;;
     malloc) ;;
     mg) ;;

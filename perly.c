@@ -19,10 +19,6 @@
  *	restriction.  This special exception was added by the Free
  *	Software Foundation in version 1.24 of Bison.
  *
- * Note that this file is also #included in madly.c, to allow compilation
- * of a second parser, Perl_madparse, that is identical to Perl_yyparse,
- * but which includes extra code for dumping the parse tree.
- * This is controlled by the PERL_IN_MADLY_C define.
  */
 
 #include "EXTERN.h"
@@ -144,9 +140,6 @@ yy_stack_print (pTHX_ const yy_parser *parser)
 		    : "(Nullop)"
 	    );
 	    break;
-#ifndef PERL_IN_MADLY_C
-	case toketype_i_tkval:
-#endif
 	case toketype_ival:
 	    PerlIO_printf(Perl_debug_log, " %8"IVdf, (IV)ps->val.ival);
 	    break;
@@ -241,11 +234,7 @@ S_clear_yystack(pTHX_  const yy_parser *parser)
 `----------*/
 
 int
-#ifdef PERL_IN_MADLY_C
-Perl_madparse (pTHX_ int gramtype)
-#else
 Perl_yyparse (pTHX_ int gramtype)
-#endif
 {
     dVAR;
     int yystate;
@@ -264,13 +253,6 @@ Perl_yyparse (pTHX_ int gramtype)
     /* The variable used to return semantic value and location from the
 	  action routines: ie $$.  */
     YYSTYPE yyval;
-
-#ifndef PERL_IN_MADLY_C
-#  ifdef PERL_MAD
-    if (PL_madskills)
-	return madparse(gramtype);
-#  endif
-#endif
 
     YYDPRINTF ((Perl_debug_log, "Starting parse\n"));
 
@@ -338,11 +320,7 @@ Perl_yyparse (pTHX_ int gramtype)
     /* YYCHAR is either YYEMPTY or YYEOF or a valid lookahead symbol.  */
     if (parser->yychar == YYEMPTY) {
 	YYDPRINTF ((Perl_debug_log, "Reading a token: "));
-#ifdef PERL_IN_MADLY_C
-	parser->yychar = PL_madskills ? madlex() : yylex();
-#else
 	parser->yychar = yylex();
-#endif
 
 /* perly.tab is shipped based on an ASCII system; if it were to be regenerated
  * on a platform that doesn't use ASCII, this translation back would need to be
@@ -434,26 +412,6 @@ Perl_yyparse (pTHX_ int gramtype)
     YY_REDUCE_PRINT (yyn);
 
     switch (yyn) {
-
-#ifdef PERL_IN_MADLY_C
-#  define IVAL(i) (i)->tk_lval.ival
-#  define PVAL(p) (p)->tk_lval.pval
-#  define TOKEN_GETMAD(a,b,c) token_getmad((a),(b),(c))
-#  define TOKEN_FREE(a) token_free(a)
-#  define OP_GETMAD(a,b,c) op_getmad((a),(b),(c))
-#  define IF_MAD(a,b) (a)
-#  define DO_MAD(a) a
-#  define MAD
-#else
-#  define IVAL(i) (i)
-#  define PVAL(p) (p)
-#  define TOKEN_GETMAD(a,b,c)
-#  define TOKEN_FREE(a)
-#  define OP_GETMAD(a,b,c)
-#  define IF_MAD(a,b) (b)
-#  define DO_MAD(a)
-#  undef MAD
-#endif
 
 /* contains all the rule actions; auto-generated from perly.y */
 #include "perly.act"

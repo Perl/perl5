@@ -4425,12 +4425,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #$d_PRIeldbl PERL_PRIeldbl	$sPRIeldbl	/**/
 #$d_SCNfldbl PERL_SCNfldbl	$sSCNfldbl	/**/
 
-/* PERL_MAD:
- *	This symbol, if defined, indicates that the Misc Attribution
- *	Declaration code should be conditionally compiled.
- */
-#$mad	PERL_MAD		/**/
-
 /* NEED_VA_COPY:
  *	This symbol, if defined, indicates that the system stores
  *	the variable argument list datatype, va_list, in a format

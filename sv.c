@@ -11928,27 +11928,9 @@ Perl_parser_dup(pTHX_ const yy_parser *const proto, CLONE_PARAMS *const param)
     Copy(proto->tokenbuf, parser->tokenbuf, 256, char);
 
 
-#ifdef PERL_MAD
-    parser->endwhite	= proto->endwhite;
-    parser->faketokens	= proto->faketokens;
-    parser->lasttoke	= proto->lasttoke;
-    parser->nextwhite	= proto->nextwhite;
-    parser->realtokenstart = proto->realtokenstart;
-    parser->skipwhite	= proto->skipwhite;
-    parser->thisclose	= proto->thisclose;
-    parser->thismad	= proto->thismad;
-    parser->thisopen	= proto->thisopen;
-    parser->thisstuff	= proto->thisstuff;
-    parser->thistoken	= proto->thistoken;
-    parser->thiswhite	= proto->thiswhite;
-
-    Copy(proto->nexttoke, parser->nexttoke, 5, NEXTTOKE);
-    parser->curforce	= proto->curforce;
-#else
     Copy(proto->nextval, parser->nextval, 5, YYSTYPE);
     Copy(proto->nexttype, parser->nexttype, 5,	I32);
     parser->nexttoke	= proto->nexttoke;
-#endif
 
     /* XXX should clone saved_curcop here, but we aren't passed
      * proto_perl; so do it in perl_clone_using instead */

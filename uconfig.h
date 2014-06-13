@@ -4390,12 +4390,6 @@
 /*#define PERL_PRIeldbl	"lle"	/ **/
 /*#define PERL_SCNfldbl	"llf"	/ **/
 
-/* PERL_MAD:
- *	This symbol, if defined, indicates that the Misc Attribution
- *	Declaration code should be conditionally compiled.
- */
-/*#define	PERL_MAD		/ **/
-
 /* NEED_VA_COPY:
  *	This symbol, if defined, indicates that the system stores
  *	the variable argument list datatype, va_list, in a format
@@ -4748,6 +4742,6 @@
 #endif
 
 /* Generated from:
- * 4cb92587c221c8c3b0fe3f9c2fbab1293d6798f426cca6a0be90491d0fd04185 config_h.SH
- * 87a71147b46045d5a12e0e15b269db96e2af06d021d25ab516cfe4d0efb6b87b uconfig.sh
+ * a37f46da5285428077feb313bcbe68661740bac16d76fa658d723d9fcc91c2c4 config_h.SH
+ * 4b709c0b049c660c04c0932eaa8481f9ca6fdc697ec4ffaa86b7bef21ee886a8 uconfig.sh
  * ex: set ro: */

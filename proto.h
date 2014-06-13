@@ -2773,6 +2773,7 @@ PERL_CALLCONV OP*	Perl_newCVREF(pTHX_ I32 flags, OP* o)
 			__attribute__malloc__
 			__attribute__warn_unused_result__;
 
+PERL_CALLCONV void	Perl_newFORM(pTHX_ I32 floor, OP* o, OP* block);
 PERL_CALLCONV OP*	Perl_newFOROP(pTHX_ I32 flags, OP* sv, OP* expr, OP* block, OP* cont)
 			__attribute__malloc__
 			__attribute__warn_unused_result__
@@ -3129,6 +3130,11 @@ PERL_CALLCONV void	Perl_pack_cat(pTHX_ SV *cat, const char *pat, const char *pat
 			__attribute__nonnull__(pTHX_6);
 #define PERL_ARGS_ASSERT_PACK_CAT	\
 	assert(cat); assert(pat); assert(patend); assert(beglist); assert(endlist); assert(next_in_list)
+
+PERL_CALLCONV void	Perl_package(pTHX_ OP* o)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_PACKAGE	\
+	assert(o)
 
 PERL_CALLCONV void	Perl_package_version(pTHX_ OP* v)
 			__attribute__nonnull__(pTHX_1);
@@ -4863,6 +4869,11 @@ PERL_CALLCONV UV	Perl_utf8n_to_uvuni(pTHX_ const U8 *s, STRLEN curlen, STRLEN *r
 #define PERL_ARGS_ASSERT_UTF8N_TO_UVUNI	\
 	assert(s)
 
+PERL_CALLCONV void	Perl_utilize(pTHX_ int aver, I32 floor, OP* version, OP* idop, OP* arg)
+			__attribute__nonnull__(pTHX_4);
+#define PERL_ARGS_ASSERT_UTILIZE	\
+	assert(idop)
+
 /* PERL_CALLCONV U8*	uvchr_to_utf8(pTHX_ U8 *d, UV uv)
 			__attribute__nonnull__(pTHX_1); */
 
@@ -5098,19 +5109,6 @@ PERL_CALLCONV void*	Perl_my_cxt_init(pTHX_ int *index, size_t size)
 	assert(index)
 
 #  endif
-#endif
-#if !(defined(PERL_MAD))
-PERL_CALLCONV void	Perl_newFORM(pTHX_ I32 floor, OP* o, OP* block);
-PERL_CALLCONV void	Perl_package(pTHX_ OP* o)
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_PACKAGE	\
-	assert(o)
-
-PERL_CALLCONV void	Perl_utilize(pTHX_ int aver, I32 floor, OP* version, OP* idop, OP* arg)
-			__attribute__nonnull__(pTHX_4);
-#define PERL_ARGS_ASSERT_UTILIZE	\
-	assert(idop)
-
 #endif
 #if !(defined(WIN32))
 /* PERL_CALLCONV char*	my_setlocale(pTHX_ int category, const char* locale)
@@ -5844,15 +5842,6 @@ STATIC SV*	S_pm_description(pTHX_ const PMOP *pm)
 	assert(pm)
 
 STATIC UV	S_sequence_num(pTHX_ const OP *o);
-#  if defined(PERL_MAD)
-STATIC void	S_xmldump_attr(pTHX_ I32 level, PerlIO *file, const char* pat, ...)
-			__attribute__format__(__printf__,pTHX_3,pTHX_4)
-			__attribute__nonnull__(pTHX_2)
-			__attribute__nonnull__(pTHX_3);
-#define PERL_ARGS_ASSERT_XMLDUMP_ATTR	\
-	assert(file); assert(pat)
-
-#  endif
 #endif
 #if defined(PERL_IN_DUMP_C) || defined(PERL_IN_HV_C) || defined(PERL_IN_SV_C) || defined(PERL_IN_SCOPE_C)
 PERL_CALLCONV void	Perl_hv_kill_backrefs(pTHX_ HV *hv)
@@ -7692,25 +7681,6 @@ STATIC int	S_yywarn(pTHX_ const char *const s, U32 flags)
 #define PERL_ARGS_ASSERT_YYWARN	\
 	assert(s)
 
-#  if defined(PERL_MAD)
-STATIC void	S_curmad(pTHX_ char slot, SV *sv);
-STATIC char*	S_skipspace0(pTHX_ char *s)
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_SKIPSPACE0	\
-	assert(s)
-
-STATIC char*	S_skipspace1(pTHX_ char *s)
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_SKIPSPACE1	\
-	assert(s)
-
-STATIC char*	S_skipspace2(pTHX_ char *s, SV **sv)
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_SKIPSPACE2	\
-	assert(s)
-
-STATIC void	S_start_force(pTHX_ int where);
-#  endif
 #endif
 #if defined(PERL_IN_UNIVERSAL_C)
 STATIC bool	S_isa_lookup(pTHX_ HV *stash, const char * const name, STRLEN len, U32 flags)
@@ -7792,129 +7762,6 @@ STATIC void	S_mem_log_common(enum mem_log_type mlt, const UV n, const UV typesiz
 	assert(type_name); assert(filename); assert(funcname)
 
 #  endif
-#endif
-#if defined(PERL_MAD)
-PERL_CALLCONV void	Perl_addmad(pTHX_ MADPROP* tm, MADPROP** root, char slot);
-PERL_CALLCONV void	Perl_append_madprops(pTHX_ MADPROP* tm, OP* o, char slot);
-PERL_CALLCONV void	Perl_do_op_xmldump(pTHX_ I32 level, PerlIO *file, const OP *o)
-			__attribute__nonnull__(pTHX_2);
-#define PERL_ARGS_ASSERT_DO_OP_XMLDUMP	\
-	assert(file)
-
-PERL_CALLCONV void	Perl_do_pmop_xmldump(pTHX_ I32 level, PerlIO *file, const PMOP *pm)
-			__attribute__nonnull__(pTHX_2);
-#define PERL_ARGS_ASSERT_DO_PMOP_XMLDUMP	\
-	assert(file)
-
-PERL_CALLCONV void	Perl_mad_free(pTHX_ MADPROP* mp);
-PERL_CALLCONV int	Perl_madlex(pTHX);
-PERL_CALLCONV int	Perl_madparse(pTHX_ int gramtype);
-PERL_CALLCONV OP*	Perl_newFORM(pTHX_ I32 floor, OP* o, OP* block);
-PERL_CALLCONV MADPROP*	Perl_newMADPROP(pTHX_ char key, char type, void* val, I32 vlen);
-PERL_CALLCONV MADPROP*	Perl_newMADsv(pTHX_ char key, SV* sv)
-			__attribute__nonnull__(pTHX_2);
-#define PERL_ARGS_ASSERT_NEWMADSV	\
-	assert(sv)
-
-PERL_CALLCONV TOKEN*	Perl_newTOKEN(pTHX_ I32 optype, YYSTYPE lval, MADPROP* madprop);
-PERL_CALLCONV void	Perl_op_getmad(pTHX_ OP* from, OP* o, char slot);
-PERL_CALLCONV void	Perl_op_getmad_weak(pTHX_ OP* from, OP* o, char slot);
-PERL_CALLCONV void	Perl_op_xmldump(pTHX_ const OP *o)
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_OP_XMLDUMP	\
-	assert(o)
-
-PERL_CALLCONV OP*	Perl_package(pTHX_ OP* o)
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_PACKAGE	\
-	assert(o)
-
-PERL_CALLCONV void	Perl_pad_peg(const char* s)
-			__attribute__nonnull__(1);
-#define PERL_ARGS_ASSERT_PAD_PEG	\
-	assert(s)
-
-PERL_CALLCONV void	Perl_pmop_xmldump(pTHX_ const PMOP* pm);
-PERL_CALLCONV void	Perl_prepend_madprops(pTHX_ MADPROP* mp, OP* o, char slot);
-PERL_CALLCONV char*	Perl_sv_catxmlpv(pTHX_ SV *dsv, const char *pv, int utf8)
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2);
-#define PERL_ARGS_ASSERT_SV_CATXMLPV	\
-	assert(dsv); assert(pv)
-
-PERL_CALLCONV char*	Perl_sv_catxmlpvn(pTHX_ SV *dsv, const char *pv, STRLEN len, int utf8)
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2);
-#define PERL_ARGS_ASSERT_SV_CATXMLPVN	\
-	assert(dsv); assert(pv)
-
-PERL_CALLCONV char*	Perl_sv_catxmlsv(pTHX_ SV *dsv, SV *ssv)
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2);
-#define PERL_ARGS_ASSERT_SV_CATXMLSV	\
-	assert(dsv); assert(ssv)
-
-PERL_CALLCONV char*	Perl_sv_xmlpeek(pTHX_ SV* sv)
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_SV_XMLPEEK	\
-	assert(sv)
-
-PERL_CALLCONV void	Perl_token_free(pTHX_ TOKEN *tk)
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_TOKEN_FREE	\
-	assert(tk)
-
-PERL_CALLCONV void	Perl_token_getmad(pTHX_ TOKEN *tk, OP *o, char slot)
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_TOKEN_GETMAD	\
-	assert(tk)
-
-PERL_CALLCONV OP *	Perl_utilize(pTHX_ int aver, I32 floor, OP* version, OP* idop, OP* arg)
-			__attribute__nonnull__(pTHX_4);
-#define PERL_ARGS_ASSERT_UTILIZE	\
-	assert(idop)
-
-PERL_CALLCONV void	Perl_xmldump_all(pTHX);
-PERL_CALLCONV void	Perl_xmldump_all_perl(pTHX_ bool justperl);
-PERL_CALLCONV void	Perl_xmldump_eval(pTHX);
-PERL_CALLCONV void	Perl_xmldump_form(pTHX_ const GV* gv)
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_XMLDUMP_FORM	\
-	assert(gv)
-
-PERL_CALLCONV void	Perl_xmldump_indent(pTHX_ I32 level, PerlIO *file, const char* pat, ...)
-			__attribute__format__(__printf__,pTHX_3,pTHX_4)
-			__attribute__nonnull__(pTHX_2)
-			__attribute__nonnull__(pTHX_3);
-#define PERL_ARGS_ASSERT_XMLDUMP_INDENT	\
-	assert(file); assert(pat)
-
-PERL_CALLCONV void	Perl_xmldump_packsubs(pTHX_ const HV* stash)
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_XMLDUMP_PACKSUBS	\
-	assert(stash)
-
-PERL_CALLCONV void	Perl_xmldump_packsubs_perl(pTHX_ const HV* stash, bool justperl)
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_XMLDUMP_PACKSUBS_PERL	\
-	assert(stash)
-
-PERL_CALLCONV void	Perl_xmldump_sub(pTHX_ const GV* gv)
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_XMLDUMP_SUB	\
-	assert(gv)
-
-PERL_CALLCONV void	Perl_xmldump_sub_perl(pTHX_ const GV* gv, bool justperl)
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_XMLDUMP_SUB_PERL	\
-	assert(gv)
-
-PERL_CALLCONV void	Perl_xmldump_vindent(pTHX_ I32 level, PerlIO *file, const char* pat, va_list *args)
-			__attribute__nonnull__(pTHX_2)
-			__attribute__nonnull__(pTHX_3);
-#define PERL_ARGS_ASSERT_XMLDUMP_VINDENT	\
-	assert(file); assert(pat)
-
 #endif
 #if defined(PERL_USES_PL_PIDSTATUS) && defined(PERL_IN_UTIL_C)
 STATIC void	S_pidgone(pTHX_ Pid_t pid, int status);

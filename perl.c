@@ -2244,32 +2244,6 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
     }
     }
 
-#ifdef PERL_MAD
-    {
-	const char *s;
-    if (!TAINTING_get &&
-        (s = PerlEnv_getenv("PERL_XMLDUMP"))) {
-	PL_madskills = 1;
-	PL_minus_c = 1;
-	if (!s || !s[0])
-	    PL_xmlfp = PerlIO_stdout();
-	else {
-	    PL_xmlfp = PerlIO_open(s, "w");
-	    if (!PL_xmlfp)
-		Perl_croak(aTHX_ "Can't open %s", s);
-	}
-	my_setenv("PERL_XMLDUMP", NULL);	/* hide from subprocs */
-    }
-    }
-
-    {
-	const char *s;
-    if ((s = PerlEnv_getenv("PERL_MADSKILLS"))) {
-	PL_madskills = atoi(s);
-	my_setenv("PERL_MADSKILLS", NULL);	/* hide from subprocs */
-    }
-    }
-#endif
 
     lex_start(linestr_sv, rsfp, lex_start_flags);
     SvREFCNT_dec(linestr_sv);
@@ -2398,12 +2372,6 @@ S_run_body(pTHX_ I32 oldscope)
                     (unsigned int)(PL_sawampersand)));
 
     if (!PL_restartop) {
-#ifdef PERL_MAD
-	if (PL_xmlfp) {
-	    xmldump_all();
-	    exit(0);	/* less likely to core dump than my_exit(0) */
-	}
-#endif
 #ifdef DEBUGGING
 	if (DEBUG_x_TEST || DEBUG_B_TEST)
 	    dump_all_perl(!DEBUG_B_TEST);
@@ -4858,21 +4826,12 @@ Perl_call_list(pTHX_ I32 oldscope, AV *paramList)
 		Perl_av_create_and_push(aTHX_ &PL_unitcheckav_save, MUTABLE_SV(cv));
 	    }
 	} else {
-	    if (!PL_madskills)
-		SAVEFREESV(cv);
+            SAVEFREESV(cv);
 	}
 	JMPENV_PUSH(ret);
 	switch (ret) {
 	case 0:
-#ifdef PERL_MAD
-	    if (PL_madskills)
-		PL_madskills |= 16384;
-#endif
 	    CALL_LIST_BODY(cv);
-#ifdef PERL_MAD
-	    if (PL_madskills)
-		PL_madskills &= ~16384;
-#endif
 	    atsv = ERRSV;
 	    (void)SvPV_const(atsv, len);
 	    if (len) {

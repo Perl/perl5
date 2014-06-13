@@ -2256,11 +2256,6 @@ int isnan(double d);
 
 typedef MEM_SIZE STRLEN;
 
-#ifdef PERL_MAD
-typedef struct token TOKEN;
-typedef struct madprop MADPROP;
-typedef struct nexttoken NEXTTOKE;
-#endif
 typedef struct op OP;
 typedef struct cop COP;
 typedef struct unop UNOP;
@@ -3294,13 +3289,6 @@ typedef        struct crypt_data {     /* straight from /usr/include/crypt.h */
 #endif
 #include "perly.h"
 
-#ifdef PERL_MAD
-struct nexttoken {
-    YYSTYPE next_val;	/* value of next token, if any */
-    I32 next_type;	/* type of next token */
-    MADPROP *next_mad;	/* everything else about that token */
-};
-#endif
 
 /* macros to define bit-fields in structs. */
 #ifndef PERL_BITFIELD8
@@ -4611,9 +4599,6 @@ EXTCONST char PL_bincompat_options[] =
 #  ifdef PERL_IMPLICIT_SYS
 			     " PERL_IMPLICIT_SYS"
 #  endif
-#  ifdef PERL_MAD
-			     " PERL_MAD"
-#  endif
 #  ifdef PERL_MICRO
 			     " PERL_MICRO"
 #  endif
@@ -5032,12 +5017,6 @@ struct tempsym; /* defined in pp_pack.c */
 #if !defined(PERL_FOR_X2P)
 #  include "embedvar.h"
 #endif
-#ifndef PERL_MAD
-#  undef PL_madskills
-#  undef PL_xmlfp
-#  define PL_madskills 0
-#  define PL_xmlfp 0
-#endif
 
 /* Now include all the 'global' variables
  * If we don't have threads or multiple interpreters
@@ -5064,10 +5043,6 @@ END_EXTERN_C
    In particular, need the relevant *ish file included already, as it may
    define HAVE_INTERP_INTERN  */
 #include "embed.h"
-#ifndef PERL_MAD
-#  undef op_getmad
-#  define op_getmad(arg,pegop,slot) NOOP
-#endif
 
 #ifndef PERL_GLOBAL_STRUCT
 START_EXTERN_C

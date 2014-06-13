@@ -453,13 +453,6 @@ unless ($define{'PERL_TRACK_MEMPOOL'}) {
     ++$skip{PL_memory_debug_header};
 }
 
-unless ($define{PERL_MAD}) {
-    ++$skip{$_} foreach qw(
-		    PL_madskills
-		    PL_xmlfp
-			 );
-}
-
 unless ($define{'MULTIPLICITY'}) {
     ++$skip{$_} foreach qw(
 		    PL_interp_size

@@ -135,9 +135,7 @@ typedef enum {
  * whether PL_comppad and PL_curpad are consistent and whether they have
  * active values */
 
-#ifndef PERL_MAD
 #  define pad_peg(label)
-#endif
 
 #ifdef DEBUGGING
 #  define ASSERT_CURPAD_LEGAL(label) \

@@ -757,11 +757,6 @@ PERLVAR(I, memory_debug_header, struct perl_memory_debug_header)
 PERLVARI(I, dumper_fd,	int,	-1)
 #endif
 
-#ifdef PERL_MAD
-PERLVARI(I, madskills,	bool,	FALSE)	/* preserve all syntactic info */
-					/* (MAD = Misc Attribute Decoration) */
-PERLVARI(I, xmlfp,	PerlIO *, NULL)
-#endif
 
 #ifdef DEBUG_LEAKING_SCALARS
 PERLVARI(I, sv_serial,	U32,	0)	/* SV serial number, used in sv.c */

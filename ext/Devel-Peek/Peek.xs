@@ -364,19 +364,8 @@ S_ck_dump(pTHX_ OP *entersubop, GV *namegv, SV *cv)
 	aop = cUNOPx(aop)->op_first;
     prev = aop;
     aop = aop->op_sibling;
-    while (PL_madskills && aop->op_type == OP_STUB) {
-	prev = aop;
-	aop = aop->op_sibling;
-    }
-    if (PL_madskills && aop->op_type == OP_NULL) {
-	first = ((UNOP*)aop)->op_first;
-	((UNOP*)aop)->op_first = NULL;
-	prev = aop;
-    }
-    else {
-	first = aop;
-	prev->op_sibling = first->op_sibling;
-    }
+    first = aop;
+    prev->op_sibling = first->op_sibling;
     if (first->op_type == OP_RV2AV ||
 	first->op_type == OP_PADAV ||
 	first->op_type == OP_RV2HV ||
@@ -386,10 +375,6 @@ S_ck_dump(pTHX_ OP *entersubop, GV *namegv, SV *cv)
     else
 	first->op_flags &= ~OPf_MOD;
     aop = aop->op_sibling;
-    while (PL_madskills && aop->op_type == OP_STUB) {
-	prev = aop;
-	aop = aop->op_sibling;
-    }
     if (!aop) {
 	/* It doesn’t really matter what we return here, as this only
 	   occurs after yyerror.  */

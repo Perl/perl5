@@ -352,6 +352,7 @@
 #define newCONSTSUB(a,b,c)	Perl_newCONSTSUB(aTHX_ a,b,c)
 #define newCONSTSUB_flags(a,b,c,d,e)	Perl_newCONSTSUB_flags(aTHX_ a,b,c,d,e)
 #define newCVREF(a,b)		Perl_newCVREF(aTHX_ a,b)
+#define newFORM(a,b,c)		Perl_newFORM(aTHX_ a,b,c)
 #define newFOROP(a,b,c,d,e)	Perl_newFOROP(aTHX_ a,b,c,d,e)
 #define newGIVENOP(a,b,c)	Perl_newGIVENOP(aTHX_ a,b,c)
 #define newGVOP(a,b,c)		Perl_newGVOP(aTHX_ a,b,c)
@@ -733,9 +734,6 @@
 #if !(defined(NO_MATHOMS))
 #define sv_nounlocking(a)	Perl_sv_nounlocking(aTHX_ a)
 #endif
-#if !(defined(PERL_MAD))
-#define newFORM(a,b,c)		Perl_newFORM(aTHX_ a,b,c)
-#endif
 #if !(defined(_MSC_VER))
 #ifndef PERL_IMPLICIT_CONTEXT
 #define die			Perl_die
@@ -812,9 +810,6 @@
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C)
 #define _get_regclass_nonbitmap_data(a,b,c,d,e)	Perl__get_regclass_nonbitmap_data(aTHX_ a,b,c,d,e)
-#endif
-#if defined(PERL_MAD)
-#define newFORM(a,b,c)		Perl_newFORM(aTHX_ a,b,c)
 #endif
 #if defined(UNLINK_ALL_VERSIONS)
 #define unlnk(a)		Perl_unlnk(aTHX_ a)
@@ -1238,6 +1233,7 @@
 #define oopsHV(a)		Perl_oopsHV(aTHX_ a)
 #define op_const_sv(a,b)	Perl_op_const_sv(aTHX_ a,b)
 #define op_unscope(a)		Perl_op_unscope(aTHX_ a)
+#define package(a)		Perl_package(aTHX_ a)
 #define package_version(a)	Perl_package_version(aTHX_ a)
 #define pad_block_start(a)	Perl_pad_block_start(aTHX_ a)
 #define pad_fixup_inner_anons(a,b,c)	Perl_pad_fixup_inner_anons(aTHX_ a,b,c)
@@ -1287,6 +1283,7 @@
 #define tied_method		Perl_tied_method
 #endif
 #define unshare_hek(a)		Perl_unshare_hek(aTHX_ a)
+#define utilize(a,b,c,d,e)	Perl_utilize(aTHX_ a,b,c,d,e)
 #define vivify_ref(a,b)		Perl_vivify_ref(aTHX_ a,b)
 #define wait4pid(a,b,c)		Perl_wait4pid(aTHX_ a,b,c)
 #define watch(a)		Perl_watch(aTHX_ a)
@@ -1308,10 +1305,6 @@
 #  endif
 #  if !(defined(PERL_DEFAULT_DO_EXEC3_IMPLEMENTATION))
 #define do_exec(a)		Perl_do_exec(aTHX_ a)
-#  endif
-#  if !(defined(PERL_MAD))
-#define package(a)		Perl_package(aTHX_ a)
-#define utilize(a,b,c,d,e)	Perl_utilize(aTHX_ a,b,c,d,e)
 #  endif
 #  if !(defined(_MSC_VER))
 #define magic_regdatum_set(a,b)	Perl_magic_regdatum_set(aTHX_ a,b)
@@ -1706,13 +1699,6 @@
 #define tokeq(a)		S_tokeq(aTHX_ a)
 #define update_debugger_info(a,b,c)	S_update_debugger_info(aTHX_ a,b,c)
 #define yywarn(a,b)		S_yywarn(aTHX_ a,b)
-#    if defined(PERL_MAD)
-#define curmad(a,b)		S_curmad(aTHX_ a,b)
-#define skipspace0(a)		S_skipspace0(aTHX_ a)
-#define skipspace1(a)		S_skipspace1(aTHX_ a)
-#define skipspace2(a,b)		S_skipspace2(aTHX_ a,b)
-#define start_force(a)		S_start_force(aTHX_ a)
-#    endif
 #  endif
 #  if defined(PERL_IN_UNIVERSAL_C)
 #define isa_lookup(a,b,c,d)	S_isa_lookup(aTHX_ a,b,c,d)
@@ -1735,44 +1721,6 @@
 #    if defined(PERL_MEM_LOG) && !defined(PERL_MEM_LOG_NOIMPL)
 #define mem_log_common		S_mem_log_common
 #    endif
-#  endif
-#  if defined(PERL_MAD)
-#define addmad(a,b,c)		Perl_addmad(aTHX_ a,b,c)
-#define append_madprops(a,b,c)	Perl_append_madprops(aTHX_ a,b,c)
-#define do_op_xmldump(a,b,c)	Perl_do_op_xmldump(aTHX_ a,b,c)
-#define do_pmop_xmldump(a,b,c)	Perl_do_pmop_xmldump(aTHX_ a,b,c)
-#define mad_free(a)		Perl_mad_free(aTHX_ a)
-#define madlex()		Perl_madlex(aTHX)
-#define madparse(a)		Perl_madparse(aTHX_ a)
-#define newMADPROP(a,b,c,d)	Perl_newMADPROP(aTHX_ a,b,c,d)
-#define newMADsv(a,b)		Perl_newMADsv(aTHX_ a,b)
-#define newTOKEN(a,b,c)		Perl_newTOKEN(aTHX_ a,b,c)
-#define op_getmad(a,b,c)	Perl_op_getmad(aTHX_ a,b,c)
-#define op_getmad_weak(a,b,c)	Perl_op_getmad_weak(aTHX_ a,b,c)
-#define op_xmldump(a)		Perl_op_xmldump(aTHX_ a)
-#define package(a)		Perl_package(aTHX_ a)
-#define pad_peg			Perl_pad_peg
-#define pmop_xmldump(a)		Perl_pmop_xmldump(aTHX_ a)
-#define prepend_madprops(a,b,c)	Perl_prepend_madprops(aTHX_ a,b,c)
-#define sv_catxmlpv(a,b,c)	Perl_sv_catxmlpv(aTHX_ a,b,c)
-#define sv_catxmlpvn(a,b,c,d)	Perl_sv_catxmlpvn(aTHX_ a,b,c,d)
-#define sv_catxmlsv(a,b)	Perl_sv_catxmlsv(aTHX_ a,b)
-#define sv_xmlpeek(a)		Perl_sv_xmlpeek(aTHX_ a)
-#define token_free(a)		Perl_token_free(aTHX_ a)
-#define token_getmad(a,b,c)	Perl_token_getmad(aTHX_ a,b,c)
-#define utilize(a,b,c,d,e)	Perl_utilize(aTHX_ a,b,c,d,e)
-#define xmldump_all()		Perl_xmldump_all(aTHX)
-#define xmldump_all_perl(a)	Perl_xmldump_all_perl(aTHX_ a)
-#define xmldump_eval()		Perl_xmldump_eval(aTHX)
-#define xmldump_form(a)		Perl_xmldump_form(aTHX_ a)
-#ifndef PERL_IMPLICIT_CONTEXT
-#define xmldump_indent		Perl_xmldump_indent
-#endif
-#define xmldump_packsubs(a)	Perl_xmldump_packsubs(aTHX_ a)
-#define xmldump_packsubs_perl(a,b)	Perl_xmldump_packsubs_perl(aTHX_ a,b)
-#define xmldump_sub(a)		Perl_xmldump_sub(aTHX_ a)
-#define xmldump_sub_perl(a,b)	Perl_xmldump_sub_perl(aTHX_ a,b)
-#define xmldump_vindent(a,b,c,d)	Perl_xmldump_vindent(aTHX_ a,b,c,d)
 #  endif
 #  if defined(PERL_USES_PL_PIDSTATUS) && defined(PERL_IN_UTIL_C)
 #define pidgone(a,b)		S_pidgone(aTHX_ a,b)

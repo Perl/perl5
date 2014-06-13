@@ -949,11 +949,7 @@ Apd	|CV*	|newCONSTSUB	|NULLOK HV* stash|NULLOK const char* name|NULLOK SV* sv
 Apd	|CV*	|newCONSTSUB_flags|NULLOK HV* stash \
 				  |NULLOK const char* name|STRLEN len \
 				  |U32 flags|NULLOK SV* sv
-#ifdef PERL_MAD
-Ap	|OP*	|newFORM	|I32 floor|NULLOK OP* o|NULLOK OP* block
-#else
 Ap	|void	|newFORM	|I32 floor|NULLOK OP* o|NULLOK OP* block
-#endif
 Apda	|OP*	|newFOROP	|I32 flags|NULLOK OP* sv|NN OP* expr|NULLOK OP* block|NULLOK OP* cont
 Apda	|OP*	|newGIVENOP	|NN OP* cond|NN OP* block|PADOFFSET defsv_off
 Apda	|OP*	|newLOGOP	|I32 optype|I32 flags|NN OP *first|NN OP *other
@@ -1055,11 +1051,7 @@ p	|void	|opslab_free_nopad|NN OPSLAB *slab
 p	|void	|opslab_force_free|NN OPSLAB *slab
 #endif
 : Used in perly.y
-#ifdef PERL_MAD
-p	|OP*	|package	|NN OP* o
-#else
 p	|void	|package	|NN OP* o
-#endif
 : Used in perly.y
 p	|void	|package_version|NN OP* v
 : Used in toke.c and perly.y
@@ -1593,12 +1585,7 @@ Ap	|void	|unsharepvn	|NULLOK const char* sv|I32 len|U32 hash
 : Used in gv.c, hv.c
 p	|void	|unshare_hek	|NULLOK HEK* hek
 : Used in perly.y
-#ifdef PERL_MAD
-p	|OP *	|utilize	|int aver|I32 floor|NULLOK OP* version \
-				|NN OP* idop|NULLOK OP* arg
-#else
 p	|void	|utilize	|int aver|I32 floor|NULLOK OP* version|NN OP* idop|NULLOK OP* arg
-#endif
 Ap	|U8*	|utf16_to_utf8	|NN U8* p|NN U8 *d|I32 bytelen|NN I32 *newlen
 Ap	|U8*	|utf16_to_utf8_reversed|NN U8* p|NN U8 *d|I32 bytelen|NN I32 *newlen
 AdpPR	|STRLEN	|utf8_length	|NN const U8* s|NN const U8 *e
@@ -2494,9 +2481,6 @@ s	|void	|deb_stack_n	|NN SV** stack_base|I32 stack_min \
 #endif
 
 : pad API
-#ifdef PERL_MAD
-Mnpd	|void	|pad_peg	|NN const char* s
-#endif
 Apda	|PADLIST*|pad_new	|int flags
 #if defined(PERL_IN_PAD_C)
 s	|PADOFFSET|pad_alloc_name|NN SV *namesv|U32 flags \
@@ -2663,58 +2647,6 @@ Apnod	|Size_t	|my_strlcat	|NULLOK char *dst|NULLOK const char *src|Size_t size
 Apnod     |Size_t |my_strlcpy     |NULLOK char *dst|NULLOK const char *src|Size_t size
 #endif
 
-#ifdef PERL_MAD
-#if defined(PERL_IN_DUMP_C)
-sf	|void	|xmldump_attr	|I32 level|NN PerlIO *file|NN const char* pat \
-				|...
-#endif
-Mfp	|void	|xmldump_indent	|I32 level|NN PerlIO *file|NN const char* pat \
-				|...
-Mp	|void	|xmldump_vindent|I32 level|NN PerlIO *file|NN const char* pat \
-				|NULLOK va_list *args
-Mp	|void	|xmldump_all
-p	|void	|xmldump_all_perl	|bool justperl
-Mp	|void	|xmldump_packsubs	|NN const HV* stash
-p	|void	|xmldump_packsubs_perl	|NN const HV* stash|bool justperl
-Mp	|void	|xmldump_sub	|NN const GV* gv
-Mp	|void	|xmldump_sub_perl	|NN const GV* gv|bool justperl
-Mp	|void	|xmldump_form	|NN const GV* gv
-Mp	|void	|xmldump_eval
-Mp	|char*	|sv_catxmlsv	|NN SV *dsv|NN SV *ssv
-Mp	|char*	|sv_catxmlpvn	|NN SV *dsv|NN const char *pv|STRLEN len|int utf8
-Mp	|char*	|sv_catxmlpv	|NN SV *dsv|NN const char *pv|int utf8
-Mp	|char*	|sv_xmlpeek	|NN SV* sv
-Mp	|void	|do_pmop_xmldump|I32 level|NN PerlIO *file \
-				|NULLOK const PMOP *pm
-Mp	|void	|pmop_xmldump	|NULLOK const PMOP* pm
-Mp	|void	|do_op_xmldump	|I32 level|NN PerlIO *file|NULLOK const OP *o
-Mp	|void	|op_xmldump	|NN const OP *o
-
-Mp	|TOKEN*	|newTOKEN	|I32 optype|YYSTYPE lval \
-				|NULLOK MADPROP* madprop
-Mp	|void	|token_free	|NN TOKEN *tk
-Mp	|void	|token_getmad	|NN TOKEN *tk|NULLOK OP *o|char slot
-Mp	|void	|op_getmad_weak	|NULLOK OP* from|NULLOK OP* o|char slot
-Mp	|void	|op_getmad	|NULLOK OP* from|NULLOK OP* o|char slot
-Mp	|void	|prepend_madprops|NULLOK MADPROP* mp|NULLOK OP* o|char slot
-Mp	|void	|append_madprops|NULLOK MADPROP* tm|NULLOK OP* o|char slot
-Mp	|void	|addmad		|NULLOK MADPROP* tm|NULLOK MADPROP** root \
-				|char slot
-Mp	|MADPROP*|newMADsv	|char key|NN SV* sv
-Mp	|MADPROP*|newMADPROP	|char key|char type|NULLOK void* val \
-				|I32 vlen
-Mp	|void	|mad_free	|NULLOK MADPROP* mp
-
-#  if defined(PERL_IN_TOKE_C)
-s	|char*	|skipspace0	|NN char *s
-s	|char*	|skipspace1	|NN char *s
-s	|char*	|skipspace2	|NN char *s|NULLOK SV **sv
-s	|void	|start_force	|int where
-s	|void	|curmad		|char slot|NULLOK SV *sv
-#  endif
-Mp	|int	|madlex
-Mp	|int	|madparse	|int gramtype
-#endif
 #if !defined(HAS_SIGNBIT)
 AMdnoP	|int	|Perl_signbit	|NV f
 #endif

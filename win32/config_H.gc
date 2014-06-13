@@ -4372,12 +4372,6 @@
 /*#define PERL_PRIeldbl	"e"	/ **/
 /*#define PERL_SCNfldbl	"f"	/ **/
 
-/* PERL_MAD:
- *	This symbol, if defined, indicates that the Misc Attribution
- *	Declaration code should be conditionally compiled.
- */
-/*#define	PERL_MAD		/ **/
-
 /* NEED_VA_COPY:
  *	This symbol, if defined, indicates that the system stores
  *	the variable argument list datatype, va_list, in a format

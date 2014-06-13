@@ -4235,13 +4235,6 @@ lib/warnings.pm			For "use warnings"
 lib/warnings/register.pm	For "use warnings::register"
 lib/warnings.t			See if warning controls work
 locale.c			locale-specific utility functions
-madly.c				parser code for MAD build
-mad/Nomad.pm			Converts MAD XML dump to Perl 5
-mad/p55				Perl 5 to Perl 5 translator - driver for nomad
-mad/P5AST.pm			Used by nomad
-mad/P5re.pm			Used by nomad
-mad/PLXML.pm			Used by nomad
-mad/t/p55.t			Test for the Perl 5 to Perl 5 translator
 makedef.pl			Create symbol export lists for linking
 makedepend.SH			Precursor to makedepend
 make_ext.pl			Used by Makefile to execute extension Makefiles
@@ -5305,7 +5298,6 @@ t/run/flib/t2.pm		Test for .pmcs with -I/dir/
 t/run/flib/t2.pmc		Test for .pmcs with -I/dir/
 t/run/fresh_perl.t		Tests that require a fresh perl.
 t/run/locale.t		Tests related to locale handling
-t/run/mad.t			Test vs MAD environment
 t/run/noswitch.t		Test aliasing ARGV for other switch tests
 t/run/runenv.t			Test if perl honors its environment variables.
 t/run/script.t			See if script invocation works

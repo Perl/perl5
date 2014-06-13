@@ -3830,22 +3830,6 @@ lseektype (lseektype.U):
 	or whatever type is used to declare lseek offset's type in the
 	kernel (which also appears to be lseek's return type).
 
-mad (mad.U):
-	This variable indicates that the Misc Attribute Definition code is to
-	be compiled.
-
-madlyh (mad.U):
-	If the Misc Attribute Decoration is to be compiled, this variable is
-	set to the name of the extra header files to be used, else it is ''
-
-madlyobj (mad.U):
-	If the Misc Attribute Decoration is to be compiled, this variable is
-	set to the name of the extra object files to be used, else it is ''
-
-madlysrc (mad.U):
-	If the Misc Attribute Decoration is to be compiled, this variable is
-	set to the name of the extra C source files to be used, else it is ''
-
 mail (Loc.U):
 	This variable is defined but not used by Configure.
 	The value is the empty string and is not useful.

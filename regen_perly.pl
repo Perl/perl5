@@ -272,7 +272,7 @@ sub make_type_tab {
     my $default_token;
     open my $fh, '<', $y_file or die "Can't open $y_file: $!\n";
     while (<$fh>) {
-	if (/(\$\d+)\s*=/) {
+	if (/(\$\d+)\s*=[^=]/) {
 	    warn "$y_file:$.: dangerous assignment to $1: $_";
 	}
 

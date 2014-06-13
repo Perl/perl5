@@ -153,28 +153,6 @@ Points directly to the body of the L</PL_comppad> array.
   STMT_START { ((XPVNV*)SvANY(sv))->xnv_u.xpad_cop_seq.xhigh = (val); } STMT_END
 
 /*
-=for apidoc mx|void|pad_peg|const char *s
-
-When PERL_MAD is enabled, this is a small no-op function that gets called
-at the start of each pad-related function.  It can be breakpointed to
-track all pad operations.  The parameter is a string indicating the type
-of pad operation being performed.
-
-=cut
-*/
-
-#ifdef PERL_MAD
-void pad_peg(const char* s) {
-    static int pegcnt; /* XXX not threadsafe */
-    PERL_UNUSED_ARG(s);
-
-    PERL_ARGS_ASSERT_PAD_PEG;
-
-    pegcnt++;
-}
-#endif
-
-/*
 This is basically sv_eq_flags() in sv.c, but we avoid the magic
 and bytes checking.
 */

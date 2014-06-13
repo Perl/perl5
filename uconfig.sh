@@ -653,7 +653,6 @@ longlongsize=8
 longsize='4'
 lseeksize=4
 lseektype=int
-mad='undef'
 malloctype='int*'
 malloctype='void *'
 mmaptype='void *'
