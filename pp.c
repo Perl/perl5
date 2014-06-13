@@ -4195,7 +4195,8 @@ PP(pp_fc)
     const U8 *send;
     U8 *d;
     U8 tmpbuf[UTF8_MAXBYTES_CASE + 1];
-    const bool full_folding = TRUE;
+    const bool full_folding = TRUE; /* This variable is here so we can easily
+                                       move to more generality later */
     const U8 flags = ( full_folding      ? FOLD_FLAGS_FULL   : 0 )
 #ifdef USE_LOCALE_CTYPE
                    | ( IN_LC_RUNTIME(LC_CTYPE) ? FOLD_FLAGS_LOCALE : 0 )
