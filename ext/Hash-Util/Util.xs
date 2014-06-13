@@ -70,17 +70,28 @@ hash_seed()
 
 
 void
-hash_value(string)
+hash_value(string,...)
         SV* string
-    PROTOTYPE: $
+    PROTOTYPE: $;$
     PPCODE:
-    STRLEN len;
-    char *pv;
+{
     UV uv;
+    STRLEN len;
+    char *pv= SvPV(string,len);
+    if (items<2) {
+        PERL_HASH(uv, pv, len);
+    } else {
+        STRLEN seedlen;
+        char *seedbuf= SvPV(ST(1),seedlen);
+        if ( seedlen < PERL_HASH_SEED_BYTES ) {
+            sv_dump(ST(1));
+            Perl_croak(aTHX_ "seed len must be at least %d long only got %d bytes", PERL_HASH_SEED_BYTES, seedlen);
+        }
 
-    pv= SvPV(string,len);
-    PERL_HASH(uv,pv,len);
+        PERL_HASH_WITH_SEED(seedbuf, uv, pv, len);
+    }
     XSRETURN_UV(uv);
+}
 
 void
 hash_traversal_mask(rhv, ...)
