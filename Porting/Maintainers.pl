@@ -48,7 +48,7 @@ use File::Glob qw(:case);
 # of the module is, but this is no longer stated explicitly. It is now
 # understood to be either the Perl 5 Porters if UPSTREAM is 'blead', or else
 # the CPAN author whose PAUSE user ID forms the first part of the DISTRIBUTION
-# value, e.g. 'BINGOS' in the case of 'BINGOS/Archive-Tar-1.96.tar.gz'.
+# value, e.g. 'BINGOS' in the case of 'BINGOS/Archive-Tar-1.98.tar.gz'.
 # (PAUSE's View Permissions page may be consulted to find other authors who
 # have owner or co-maint permissions for the module in question.)
 
@@ -119,9 +119,12 @@ use File::Glob qw(:case);
 %Modules = (
 
     'Archive::Tar' => {
-        'DISTRIBUTION' => 'BINGOS/Archive-Tar-1.96.tar.gz',
+        'DISTRIBUTION' => 'BINGOS/Archive-Tar-1.98.tar.gz',
         'FILES'        => q[cpan/Archive-Tar],
         'BUGS'         => 'bug-archive-tar@rt.cpan.org',
+        'EXCLUDED'     => [
+            qw(t/07_ptardiff.t),
+        ],
     },
 
     'Attribute::Handlers' => {
