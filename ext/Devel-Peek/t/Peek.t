@@ -1030,6 +1030,23 @@ SV = PVAV\($ADDR\) at $ADDR
     FLAGS = \(IOK,pIOK\)
     IV = 3
 ARRAY
+
+do_test('Dump @array,1', '@array,1', <<'ARRAY', '', '', 1);
+SV = PVAV\($ADDR\) at $ADDR
+  REFCNT = 1
+  FLAGS = \(\)
+  ARRAY = $ADDR
+  FILL = 2
+  MAX = 3
+  ARYLEN = 0x0
+  FLAGS = \(REAL\)
+  Elt No. 0
+  SV = IV\($ADDR\) at $ADDR
+    REFCNT = 1
+    FLAGS = \(IOK,pIOK\)
+    IV = 1
+ARRAY
+
 %hash = 1..2;
 do_test('Dump %hash', '%hash', <<'HASH', '', '', 1);
 SV = PVHV\($ADDR\) at $ADDR
@@ -1046,6 +1063,7 @@ SV = PVHV\($ADDR\) at $ADDR
     FLAGS = \(IOK,pIOK\)
     IV = 2
 HASH
+
 $_ = "hello";
 do_test('rvalue substr', 'substr $_, 1, 2', <<'SUBSTR', '', '', 1);
 SV = PV\($ADDR\) at $ADDR
