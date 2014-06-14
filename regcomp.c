@@ -9472,7 +9472,6 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
     bool is_open = 0;
     I32 freeze_paren = 0;
     I32 after_freeze = 0;
-    I32 num; /* numeric backreferences */
 
     char * parse_start = RExC_parse; /* MJD */
     char * const oregcomp_parse = RExC_parse;
@@ -9790,7 +9789,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 		nextchar(pRExC_state);
 		return ret;
 		/*notreached*/
-            /* named and numeric backreferences */
+            { /* named and numeric backreferences */
+                I32 num;
             case '&':            /* (?&NAME) */
                 parse_start = RExC_parse - 1;
               named_recursion:
@@ -9872,7 +9872,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                 *flagp |= POSTPONED;
                 nextchar(pRExC_state);
                 return ret;
-
+            } /* named and numeric backreferences */
             assert(0); /* NOT REACHED */
 
 	    case '?':           /* (??...) */
@@ -11245,7 +11245,6 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
     char *parse_start = RExC_parse;
     U8 op;
     int invert = 0;
-    U8 arg;
 
     GET_RE_DEBUG_FLAGS_DECL;
 
@@ -11362,6 +11361,7 @@ tryagain:
 	   literal text handling code.
 	*/
 	switch ((U8)*++RExC_parse) {
+            U8 arg;
 	/* Special Escapes */
 	case 'A':
 	    RExC_seen_zerolen++;

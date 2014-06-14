@@ -1357,8 +1357,9 @@ Perl_block_gimme(pTHX)
 	return G_ARRAY;
     default:
 	Perl_croak(aTHX_ "panic: bad gimme: %d\n", cxstack[cxix].blk_gimme);
+	assert(0); /* NOTREACHED */
+	return 0;
     }
-    NOT_REACHED; /* NOTREACHED */
 }
 
 I32
@@ -4335,8 +4336,8 @@ PP(pp_leaveeval)
 			SvPVX_const(namesv),
                         SvUTF8(namesv) ? -(I32)SvCUR(namesv) : (I32)SvCUR(namesv),
 			G_DISCARD);
-	Perl_die(aTHX_ "%"SVf" did not return a true value", SVfARG(namesv));
-        NOT_REACHED; /* NOTREACHED */
+	retop = Perl_die(aTHX_ "%"SVf" did not return a true value",
+			       SVfARG(namesv));
 	/* die_unwind() did LEAVE, or we won't be here */
     }
     else {

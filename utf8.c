@@ -2453,7 +2453,7 @@ Perl__core_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 m
 		Perl_croak(aTHX_
 			   "Can't find Unicode property definition \"%"SVf"\"",
 			   SVfARG(retval));
-                NOT_REACHED; /* NOTREACHED */
+	    Perl_croak(aTHX_ "SWASHNEW didn't return an HV ref");
 	}
     } /* End of calling the module to find the swash */
 

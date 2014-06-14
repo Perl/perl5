@@ -448,7 +448,7 @@ S_measure_struct(pTHX_ tempsym_t* symptr)
 	  case e_star:
    	    Perl_croak(aTHX_ "Within []-length '*' not allowed in %s",
                         _action( symptr ) );
-
+            break;
 	  default:
 	    /* e_no_len and e_number */
 	    len = symptr->length;
@@ -567,7 +567,7 @@ S_group_end(pTHX_ const char *patptr, const char *patend, char ender)
     }
     Perl_croak(aTHX_ "No group ending character '%c' found in template",
                ender);
-    NOT_REACHED; /* NOTREACHED */
+    return 0;
 }
 
 
@@ -934,7 +934,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 	    cuv = 0;
 	    cdouble = 0;
 	    continue;
-
+	    break;
 	case '(':
 	{
             tempsym_t savsym = *symptr;
@@ -1060,7 +1060,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 	    break;
 	case '/':
 	    Perl_croak(aTHX_ "'/' must follow a numeric type in unpack");
-
+            break;
 	case 'A':
 	case 'Z':
 	case 'a':
@@ -2083,7 +2083,6 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
     bool found = next_symbol(symptr);
     bool utf8 = (symptr->flags & FLAG_PARSE_UTF8) ? 1 : 0;
     bool warn_utf8 = ckWARN(WARN_UTF8);
-    char* from;
 
     PERL_ARGS_ASSERT_PACK_REC;
 
@@ -2164,7 +2163,8 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		       (int) TYPE_NO_MODIFIERS(datumtype));
 	case '%':
 	    Perl_croak(aTHX_ "'%%' may not be used in pack");
-
+	{
+	    char *from;
 	case '.' | TYPE_IS_SHRIEKING:
 	case '.':
 	    if (howlen == e_star) from = start;
@@ -2213,7 +2213,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		goto shrink;
 	    }
 	    break;
-
+	}
 	case '(': {
             tempsym_t savsym = *symptr;
 	    U32 group_modifiers = TYPE_MODIFIERS(datumtype & ~symptr->flags);

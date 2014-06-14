@@ -1071,6 +1071,7 @@ Perl_op_contextualize(pTHX_ OP *o, I32 context)
 	default:
 	    Perl_croak(aTHX_ "panic: op_contextualize bad context %ld",
 		       (long) context);
+	    return o;
     }
 }
 
@@ -9817,7 +9818,7 @@ Perl_rv2cv_op_cv(pTHX_ OP *cvop, U32 flags)
 	} break;
 	default: {
 	    return NULL;
-	} NOT_REACHED; /* NOTREACHED */
+	} break;
     }
     if (SvTYPE((SV*)cv) != SVt_PVCV)
 	return NULL;
@@ -9994,7 +9995,7 @@ Perl_ck_entersub_args_proto(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 		break;
 	    case '[': case ']':
 		goto oops;
-
+		break;
 	    case '\\':
 		proto++;
 		arg++;
@@ -10009,7 +10010,7 @@ Perl_ck_entersub_args_proto(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 			else
 			    goto oops;
 			goto again;
-
+			break;
 		    case ']':
 			if (contextclass) {
 			    const char *p = proto;
@@ -10703,8 +10704,6 @@ Perl_rpeep(pTHX_ OP *o)
     OP** defer_queue[MAX_DEFERRED]; /* small queue of deferred branches */
     int defer_base = 0;
     int defer_ix = -1;
-    OP *fop;
-    OP *sop;
 
     if (!o || o->op_opt)
 	return;
@@ -11278,6 +11277,10 @@ Perl_rpeep(pTHX_ OP *o)
 
 	    break;
         
+        {
+            OP *fop;
+            OP *sop;
+            
 #define HV_OR_SCALARHV(op)                                   \
     (  (op)->op_type == OP_PADHV || (op)->op_type == OP_RV2HV \
        ? (op)                                                  \
@@ -11363,7 +11366,8 @@ Perl_rpeep(pTHX_ OP *o)
 	    if ((fop = HV_OR_SCALARHV(cLOGOP->op_first)))
 		fop->op_private |= OPpTRUEBOOL;
 #undef HV_OR_SCALARHV
-	    /* GERONIMO! */ /* FALLTHROUGH */
+	    /* GERONIMO! */
+	}    
 
 	case OP_MAPWHILE:
 	case OP_GREPWHILE:

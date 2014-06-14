@@ -519,8 +519,7 @@ PP(pp_die)
 	    exsv = newSVpvs_flags("Died", SVs_TEMP);
 	}
     }
-    die_sv(exsv);
-    NOT_REACHED; /* NOTREACHED */
+    return die_sv(exsv);
 }
 
 /* I/O. */

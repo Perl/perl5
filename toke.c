@@ -5233,10 +5233,8 @@ Perl_yylex(pTHX)
 	    goto just_a_word_zero_gv;
 	}
 	s++;
-        {
-        OP *attrs;
-
 	switch (PL_expect) {
+	    OP *attrs;
 	case XOPERATOR:
 	    if (!PL_in_my || PL_lex_state != LEX_NORMAL)
 		break;
@@ -5375,7 +5373,6 @@ Perl_yylex(pTHX)
 		force_next(THING);
 	    }
 	    TOKEN(COLONATTR);
-	}
 	}
 	if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_CLOSING) {
 	    s--;

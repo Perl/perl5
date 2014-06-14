@@ -2379,7 +2379,6 @@ I32
 Perl_debop(pTHX_ const OP *o)
 {
     dVAR;
-    int count;
 
     PERL_ARGS_ASSERT_DEBOP;
 
@@ -2410,6 +2409,9 @@ Perl_debop(pTHX_ const OP *o)
 	else
 	    PerlIO_printf(Perl_debug_log, "(NULL)");
 	break;
+
+    {
+        int count;
 
     case OP_PADSV:
     case OP_PADAV:
@@ -2444,6 +2446,7 @@ Perl_debop(pTHX_ const OP *o)
             PerlIO_printf(Perl_debug_log, ")");
         }
         break;
+    }
 
     default:
 	break;

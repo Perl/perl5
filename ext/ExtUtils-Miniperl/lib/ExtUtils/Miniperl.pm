@@ -191,6 +191,7 @@ main(int argc, char **argv, char **env)
 #endif /* PERL_GLOBAL_STRUCT */
 
     exit(exitstatus);
+    return exitstatus;
 }
 
 /* Register any extra external extensions */
