@@ -156,6 +156,7 @@ Intel*) ;; # # Is that you, Intel C++?
        *) rm -f _cflags$_exe
           case "`$cc -DPERL_NO_INLINE_FUNCTIONS $ccflags $warn $stdflags $opt _cflags.c -o _cflags$_exe 2>&1`" in
           *"unrecognized"*) ;;
+          *"unknown"*) ;;
           *"implicit declaration"*) ;; # Was something useful hidden?
           *"Invalid"*) ;;
           *"is valid for C"*) ;;
