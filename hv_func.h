@@ -635,6 +635,20 @@ S_perl_hash_one_at_a_time_hard(const unsigned char * const seed, const unsigned 
 }
 
 PERL_STATIC_INLINE U32
+S_perl_hash_old_one_at_a_time(const unsigned char * const seed, const unsigned char *str, const STRLEN len) {
+    const unsigned char * const end = (const unsigned char *)str + len;
+    U32 hash = *((U32*)seed);
+    while (str < end) {
+        hash += *str++;
+        hash += (hash << 10);
+        hash ^= (hash >> 6);
+    }
+    hash += (hash << 3);
+    hash ^= (hash >> 11);
+    return (hash + (hash << 15));
+}
+
+PERL_STATIC_INLINE U32
 S_perl_hash_wrapped(const unsigned char * const seed, const unsigned char *str, const STRLEN len) {
     if (len > 1) {
         return S_perl_hash_lookup3_hashlittle(seed + 8, str, len);
@@ -648,19 +662,6 @@ S_perl_hash_wrapped(const unsigned char * const seed, const unsigned char *str, 
     }
 }
 
-PERL_STATIC_INLINE U32
-S_perl_hash_old_one_at_a_time(const unsigned char * const seed, const unsigned char *str, const STRLEN len) {
-    const unsigned char * const end = (const unsigned char *)str + len;
-    U32 hash = *((U32*)seed);
-    while (str < end) {
-        hash += *str++;
-        hash += (hash << 10);
-        hash ^= (hash >> 6);
-    }
-    hash += (hash << 3);
-    hash ^= (hash >> 11);
-    return (hash + (hash << 15));
-}
 
 #ifdef PERL_HASH_FUNC_MURMUR_HASH_64A
 /* This code is from Austin Appleby and is in the public domain.
