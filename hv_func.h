@@ -965,9 +965,6 @@ S_perl_hash_crc32(const unsigned char * const seed, const unsigned char *str, co
         hash = _mm_crc32_u8(hash, *buf);
     }
 
-#ifdef __x86_64__
-    PERL_HASH_CRC_CALC(_mm_crc32_u64, hash, uint64_t, buf, len);
-#endif
     PERL_HASH_CRC_CALC(_mm_crc32_u32, hash, uint32_t, buf, len);
     PERL_HASH_CRC_CALC(_mm_crc32_u16, hash, uint16_t, buf, len);
     PERL_HASH_CRC_CALC(_mm_crc32_u8, hash, uint8_t, buf, len);
