@@ -890,8 +890,9 @@ S_perl_hash_aeshash(const unsigned char * const seed, const unsigned char *str, 
                 str += 16;
                 len -= 16;
 
-                acc=  _mm_aesenc_si128( acc, s1 );
                 acc=  _mm_aesenc_si128( acc, block );
+                acc=  _mm_aesenc_si128( acc, s1 );
+                acc=  _mm_aesenc_si128( acc, s2 );
 
             } while (len >= 16);
 
@@ -916,13 +917,16 @@ S_perl_hash_aeshash(const unsigned char * const seed, const unsigned char *str, 
             }
 
 partial:
-            acc=  _mm_aesenc_si128( acc, s2 );
             acc=  _mm_aesenc_si128( acc, block );
+            acc=  _mm_aesenc_si128( acc, s1 );
+            acc=  _mm_aesenc_si128( acc, s2 );
 
         }
 
         acc= _mm_aesenc_si128( acc, s3 );
         acc= _mm_aesenc_si128( acc, s0 );
+        acc= _mm_aesenc_si128( acc, s1 );
+        acc= _mm_aesenc_si128( acc, s2 );
 
         return _mm_extract_epi32(acc,0);
 }
