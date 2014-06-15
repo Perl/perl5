@@ -11,7 +11,7 @@ my $tartest = File::Spec->catfile("t", "tartest");
 my $foo = File::Spec->catfile("t", "tartest", "foo");
 my $tarfile = File::Spec->catfile("t", "tartest.tar");
 my $ptargrep = File::Spec->catfile($Bin, "..", "bin", "ptargrep");
-my $cmd = "$^X $ptargrep --list-only 'file foo' $tarfile";
+my $cmd = qq/$^X $ptargrep --list-only "file foo" $tarfile/;
 
 # create directory/files
 mkdir $tartest;
@@ -30,7 +30,7 @@ cmp_ok($out, '=~', qr{^t.*tartest.*foo$}m, "ptargrep shows matched file");
 
 # cleanup
 END {
-    unlink $tarfile;
+    unlink $tarfile or die $!;
     unlink $foo or die $!;
     rmdir $tartest or die $!;
 }
