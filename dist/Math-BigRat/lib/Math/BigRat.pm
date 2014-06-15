@@ -24,7 +24,7 @@ use vars qw($VERSION @ISA $upgrade $downgrade
 
 @ISA = qw(Math::BigFloat);
 
-$VERSION = '0.2607';
+$VERSION = '0.2608';
 $VERSION = eval $VERSION;
 
 # inherit overload from Math::BigFloat, but disable the bitwise ops that don't
@@ -403,11 +403,13 @@ sub bnorm
   # Both parts must be objects of whatever we are using today.
   if ( my $c = $MBI->_check($x->{_n}) )
     {
-    require Carp; Carp::croak ("n did not pass the self-check ($c) in bnorm()");
+    require Carp; Carp::croak(
+        "n did not pass the self-check ($c) in bnorm()");
     }
   if ( my $c = $MBI->_check($x->{_d}) )
     {
-    require Carp; Carp::croak ("d did not pass the self-check ($c) in bnorm()");
+    require Carp; Carp::croak(
+        "d did not pass the self-check ($c) in bnorm()");
     }
 
   # no normalize for NaN, inf etc.
@@ -447,7 +449,8 @@ sub bneg
   return $x if $x->modify('bneg');
 
   # for +0 do not negate (to have always normalized +0). Does nothing for 'NaN'
-  $x->{sign} =~ tr/+-/-+/ unless ($x->{sign} eq '+' && $MBI->_is_zero($x->{_n}));
+  $x->{sign} =~ tr/+-/-+/
+    unless ($x->{sign} eq '+' && $MBI->_is_zero($x->{_n}));
   $x;
   }
 
@@ -1079,8 +1082,10 @@ sub bexp
   if ($scale <= 75)
     {
     # set $x directly from a cached string form
-    $x->{_n} = $MBI->_new("90933395208605785401971970164779391644753259799242");
-    $x->{_d} = $MBI->_new("33452526613163807108170062053440751665152000000000");
+    $x->{_n} =
+        $MBI->_new("90933395208605785401971970164779391644753259799242");
+    $x->{_d} =
+        $MBI->_new("33452526613163807108170062053440751665152000000000");
     $x->{sign} = '+';
     }
   else
