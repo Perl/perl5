@@ -226,8 +226,9 @@ S_rv2gv(pTHX_ SV *sv, const bool vivify_sv, const bool strict,
 	    SvREFCNT_inc_void_NN(sv);
 	    sv = MUTABLE_SV(gv);
 	}
-	else if (!isGV_with_GP(sv))
-	    return (SV *)Perl_die(aTHX_ "Not a GLOB reference");
+	else if (!isGV_with_GP(sv)) {
+	    Perl_die(aTHX_ "Not a GLOB reference");
+        }
     }
     else {
 	if (!isGV_with_GP(sv)) {
@@ -257,8 +258,9 @@ S_rv2gv(pTHX_ SV *sv, const bool vivify_sv, const bool strict,
 		    SvSETMAGIC(sv);
 		    goto wasref;
 		}
-		if (PL_op->op_flags & OPf_REF || strict)
-		    return (SV *)Perl_die(aTHX_ PL_no_usym, "a symbol");
+		if (PL_op->op_flags & OPf_REF || strict) {
+		    Perl_die(aTHX_ PL_no_usym, "a symbol");
+                }
 		if (ckWARN(WARN_UNINITIALIZED))
 		    report_uninit(sv);
 		return &PL_sv_undef;
@@ -271,14 +273,14 @@ S_rv2gv(pTHX_ SV *sv, const bool vivify_sv, const bool strict,
 		    return &PL_sv_undef;
 	    }
 	    else {
-		if (strict)
-		    return
-		     (SV *)Perl_die(aTHX_
-		            S_no_symref_sv,
-		            sv,
-		            (SvPOKp(sv) && SvCUR(sv)>32 ? "..." : ""),
-		            "a symbol"
-		           );
+		if (strict) {
+                    Perl_die(aTHX_
+                             S_no_symref_sv,
+                             sv,
+                             (SvPOKp(sv) && SvCUR(sv)>32 ? "..." : ""),
+                             "a symbol"
+                             );
+                }
 		if ((PL_op->op_private & (OPpLVAL_INTRO|OPpDONT_INIT_GV))
 		    == OPpDONT_INIT_GV) {
 		    /* We are the target of a coderef assignment.  Return

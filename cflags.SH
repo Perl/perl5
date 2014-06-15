@@ -176,6 +176,10 @@ Intel*) ;; # # Is that you, Intel C++?
 esac
 rm -f _cflags.c _cflags$_exe
 
+# XXX There is something wrong in the below: furious editing on ccflags,
+# but that ccflags will be overwritten by the source of config.sh in the
+# extracted cflags.
+
 case "$gccversion" in
 '') ;;
 *)

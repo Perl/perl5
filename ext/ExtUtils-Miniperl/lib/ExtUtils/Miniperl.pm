@@ -8,7 +8,7 @@ use vars qw($VERSION @ISA @EXPORT);
 
 @ISA = qw(Exporter);
 @EXPORT = qw(writemain);
-$VERSION = '1.01';
+$VERSION = '1.02';
 
 # blead will run this with miniperl, hence we can't use autodie or File::Temp
 my $temp;
@@ -191,7 +191,6 @@ main(int argc, char **argv, char **env)
 #endif /* PERL_GLOBAL_STRUCT */
 
     exit(exitstatus);
-    return exitstatus;
 }
 
 /* Register any extra external extensions */

@@ -355,37 +355,6 @@ and check for NULL.
 #   error "RXf_SPLIT does not match RXf_PMf_SPLIT"
 #endif
 
-/* Manually decorate this function with gcc-style attributes just to
- * avoid having to restructure the header files and their called order,
- * as proto.h would have to be included before this file, and isn't */
-
-PERL_STATIC_INLINE const char *
-get_regex_charset_name(const U32 flags, STRLEN* const lenp)
-    __attribute__warn_unused_result__;
-
-#define MAX_CHARSET_NAME_LENGTH 2
-
-PERL_STATIC_INLINE const char *
-get_regex_charset_name(const U32 flags, STRLEN* const lenp)
-{
-    /* Returns a string that corresponds to the name of the regex character set
-     * given by 'flags', and *lenp is set the length of that string, which
-     * cannot exceed MAX_CHARSET_NAME_LENGTH characters */
-
-    *lenp = 1;
-    switch (get_regex_charset(flags)) {
-        case REGEX_DEPENDS_CHARSET: return DEPENDS_PAT_MODS;
-        case REGEX_LOCALE_CHARSET:  return LOCALE_PAT_MODS;
-        case REGEX_UNICODE_CHARSET: return UNICODE_PAT_MODS;
-	case REGEX_ASCII_RESTRICTED_CHARSET: return ASCII_RESTRICT_PAT_MODS;
-	case REGEX_ASCII_MORE_RESTRICTED_CHARSET:
-	    *lenp = 2;
-	    return ASCII_MORE_RESTRICT_PAT_MODS;
-        default:
-	    return "?";	    /* Unknown */
-    }
-}
-
 /* Do we have some sort of anchor? */
 #define RXf_IS_ANCHORED         (1<<(RXf_BASE_SHIFT+0))
 #define RXf_UNUSED1             (1<<(RXf_BASE_SHIFT+1))

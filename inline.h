@@ -320,6 +320,33 @@ S_should_warn_nl(const char *pv) {
 
 #endif
 
+/* ------------------ pp.c, regcomp.c, toke.c, universal.c ------------ */
+
+#define MAX_CHARSET_NAME_LENGTH 2
+
+PERL_STATIC_INLINE const char *
+get_regex_charset_name(const U32 flags, STRLEN* const lenp)
+{
+    /* Returns a string that corresponds to the name of the regex character set
+     * given by 'flags', and *lenp is set the length of that string, which
+     * cannot exceed MAX_CHARSET_NAME_LENGTH characters */
+
+    *lenp = 1;
+    switch (get_regex_charset(flags)) {
+        case REGEX_DEPENDS_CHARSET: return DEPENDS_PAT_MODS;
+        case REGEX_LOCALE_CHARSET:  return LOCALE_PAT_MODS;
+        case REGEX_UNICODE_CHARSET: return UNICODE_PAT_MODS;
+	case REGEX_ASCII_RESTRICTED_CHARSET: return ASCII_RESTRICT_PAT_MODS;
+	case REGEX_ASCII_MORE_RESTRICTED_CHARSET:
+	    *lenp = 2;
+	    return ASCII_MORE_RESTRICT_PAT_MODS;
+    }
+    /* The NOT_REACHED; hides an assert() which has a rather complex
+     * definition in perl.h. */
+    NOT_REACHED; /* NOTREACHED */
+    return "?";	    /* Unknown */
+}
+
 /*
  * Local variables:
  * c-indentation-style: bsd
