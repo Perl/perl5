@@ -253,10 +253,10 @@ Apd	|const PERL_CONTEXT *	|caller_cx|I32 level \
 				|NULLOK const PERL_CONTEXT **dbcxp
 : Used in several source files
 pR	|bool	|cando		|Mode_t mode|bool effective|NN const Stat_t* statbufp
-ApR	|U32	|cast_ulong	|NV f
-ApR	|I32	|cast_i32	|NV f
-ApR	|IV	|cast_iv	|NV f
-ApR	|UV	|cast_uv	|NV f
+ApRn	|U32	|cast_ulong	|NV f
+ApRn	|I32	|cast_i32	|NV f
+ApRn	|IV	|cast_iv	|NV f
+ApRn	|UV	|cast_uv	|NV f
 #if !defined(HAS_TRUNCATE) && !defined(HAS_CHSIZE) && defined(F_FREESP)
 ApR	|I32	|my_chsize	|int fd|Off_t length
 #endif
@@ -312,8 +312,8 @@ EMXp	|void	|cv_ckproto_len_flags	|NN const CV* cv|NULLOK const GV* gv\
                                 |const U32 flags
 : Used in pp.c and pp_sys.c
 ApdR	|SV*	|gv_const_sv	|NN GV* gv
-ApdR	|SV*	|cv_const_sv	|NULLOK const CV *const cv
-pR	|SV*	|cv_const_sv_or_av|NULLOK const CV *const cv
+ApdRn	|SV*	|cv_const_sv	|NULLOK const CV *const cv
+pRn	|SV*	|cv_const_sv_or_av|NULLOK const CV *const cv
 : Used in pad.c
 pR	|SV*	|op_const_sv	|NULLOK const OP* o|NULLOK CV* cv
 Apd	|void	|cv_undef	|NN CV* cv
@@ -881,18 +881,18 @@ Apd	|int	|mg_copy	|NN SV *sv|NN SV *nsv|NULLOK const char *key \
 				|I32 klen
 : Defined in mg.c, used only in scope.c
 pd	|void	|mg_localize	|NN SV* sv|NN SV* nsv|bool setmagic
-ApdR	|MAGIC*	|mg_find	|NULLOK const SV* sv|int type
-ApdR	|MAGIC*	|mg_findext	|NULLOK const SV* sv|int type|NULLOK const MGVTBL *vtbl
+ApdRn	|MAGIC*	|mg_find	|NULLOK const SV* sv|int type
+ApdRn	|MAGIC*	|mg_findext	|NULLOK const SV* sv|int type|NULLOK const MGVTBL *vtbl
 : exported for re.pm
 EXpR	|MAGIC*	|mg_find_mglob	|NN SV* sv
 Apd	|int	|mg_free	|NN SV* sv
 Apd	|void	|mg_free_type	|NN SV* sv|int how
 Apd	|int	|mg_get		|NN SV* sv
 ApdD	|U32	|mg_length	|NN SV* sv
-Apd	|void	|mg_magical	|NN SV* sv
+Apdn	|void	|mg_magical	|NN SV* sv
 Apd	|int	|mg_set		|NN SV* sv
 Ap	|I32	|mg_size	|NN SV* sv
-Ap	|void	|mini_mktime	|NN struct tm *ptm
+Apn	|void	|mini_mktime	|NN struct tm *ptm
 AMmd	|OP*	|op_lvalue	|NULLOK OP* o|I32 type
 poX	|OP*	|op_lvalue_flags|NULLOK OP* o|I32 type|U32 flags
 p	|void	|finalize_optree		|NN OP* o
@@ -1162,7 +1162,7 @@ Ap	|char*	|re_intuit_start|NN REGEXP * const rx \
 				|NULLOK re_scream_pos_data *data
 Ap	|SV*	|re_intuit_string|NN REGEXP  *const r
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_TOKE_C)
-EiPR	|I32	|regcurly	|NN const char *s
+EiPRn	|I32	|regcurly	|NN const char *s
 #endif
 Ap	|I32	|regexec_flags	|NN REGEXP *const rx|NN char *stringarg \
 				|NN char *strend|NN char *strbeg \
@@ -1349,7 +1349,7 @@ Apd	|I32	|sv_true	|NULLOK SV *const sv
 sd	|void	|sv_add_arena	|NN char *const ptr|const U32 size \
 				|const U32 flags
 #endif
-Apd	|int	|sv_backoff	|NN SV *const sv
+Apdn	|int	|sv_backoff	|NN SV *const sv
 Apd	|SV*	|sv_bless	|NN SV *const sv|NN HV *const stash
 #if defined(PERL_DEBUG_READONLY_COW)
 p	|void	|sv_buf_to_ro	|NN SV *sv
@@ -1568,7 +1568,7 @@ Abmd	|UV	|to_utf8_fold	|NN const U8 *p|NN U8* ustrp|NULLOK STRLEN *lenp
 AMp	|UV	|_to_utf8_fold_flags|NN const U8 *p|NN U8* ustrp       \
 				|NULLOK STRLEN *lenp|U8 flags
 #if defined(PERL_IN_MG_C) || defined(PERL_IN_PP_C)
-p	|bool	|translate_substr_offsets|STRLEN curlen|IV pos1_iv \
+pn	|bool	|translate_substr_offsets|STRLEN curlen|IV pos1_iv \
 					 |bool pos1_is_uv|IV len_iv \
 					 |bool len_is_uv|NN STRLEN *posp \
 					 |NN STRLEN *lenp
@@ -1590,7 +1590,7 @@ Ap	|U8*	|utf16_to_utf8	|NN U8* p|NN U8 *d|I32 bytelen|NN I32 *newlen
 Ap	|U8*	|utf16_to_utf8_reversed|NN U8* p|NN U8 *d|I32 bytelen|NN I32 *newlen
 AdpPR	|STRLEN	|utf8_length	|NN const U8* s|NN const U8 *e
 ApdPR	|IV	|utf8_distance	|NN const U8 *a|NN const U8 *b
-ApdPR	|U8*	|utf8_hop	|NN const U8 *s|I32 off
+ApdPRn	|U8*	|utf8_hop	|NN const U8 *s|I32 off
 ApMd	|U8*	|utf8_to_bytes	|NN U8 *s|NN STRLEN *len
 Apd	|int	|bytes_cmp_utf8	|NN const U8 *b|STRLEN blen|NN const U8 *u \
 				|STRLEN ulen
@@ -2434,7 +2434,7 @@ Apmd	|void	|sv_copypv_nomg	|NN SV *const dsv|NN SV *const ssv
 Apd	|void	|sv_copypv_flags	|NN SV *const dsv|NN SV *const ssv|const I32 flags
 Ap	|char*	|my_atof2	|NN const char *s|NN NV* value
 Apn	|int	|my_socketpair	|int family|int type|int protocol|int fd[2]
-Ap	|int	|my_dirfd	|NULLOK DIR* dir
+Apn	|int	|my_dirfd	|NULLOK DIR* dir
 #ifdef PERL_ANY_COW
 : Used in pp_hot.c and regexec.c
 pMXE	|SV*	|sv_setsv_cow	|NULLOK SV* dstr|NN SV* sstr

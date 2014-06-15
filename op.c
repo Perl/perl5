@@ -6829,10 +6829,9 @@ L<perlsub/"Constant Functions">.
 =cut
 */
 SV *
-Perl_cv_const_sv(pTHX_ const CV *const cv)
+Perl_cv_const_sv(const CV *const cv)
 {
     SV *sv;
-    PERL_UNUSED_CONTEXT;
     if (!cv)
 	return NULL;
     if (!(SvTYPE(cv) == SVt_PVCV || SvTYPE(cv) == SVt_PVFM))
@@ -6843,9 +6842,8 @@ Perl_cv_const_sv(pTHX_ const CV *const cv)
 }
 
 SV *
-Perl_cv_const_sv_or_av(pTHX_ const CV * const cv)
+Perl_cv_const_sv_or_av(const CV * const cv)
 {
-    PERL_UNUSED_CONTEXT;
     if (!cv)
 	return NULL;
     assert (SvTYPE(cv) == SVt_PVCV || SvTYPE(cv) == SVt_PVFM);

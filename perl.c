@@ -3531,7 +3531,6 @@ Internet, point your browser at http://www.perl.org/, the Perl Home Page.\n\n");
 void
 Perl_my_unexec(pTHX)
 {
-    PERL_UNUSED_CONTEXT;
 #ifdef UNEXEC
     SV *    prog = newSVpv(BIN_EXP, 0);
     SV *    file = newSVpv(PL_origfilename, 0);
@@ -3545,10 +3544,11 @@ Perl_my_unexec(pTHX)
     /* unexec prints msg to stderr in case of failure */
     PerlProc_exit(status);
 #else
+    PERL_UNUSED_CONTEXT;
 #  ifdef VMS
      lib$signal(SS$_DEBUG);  /* ssdef.h #included from vmsish.h */
 #  elif defined(WIN32) || defined(__CYGWIN__)
-    Perl_croak(aTHX_ "dump is not supported");
+    Perl_croak_nocontext("dump is not supported");
 #  else
     ABORT();		/* for use with undump */
 #  endif

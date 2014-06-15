@@ -327,7 +327,12 @@ well.
 
 =item *
 
-XXX
+The following private API functions had their context parameter removed,
+C<Perl_cast_ulong>,  C<Perl_cast_i32>, C<Perl_cast_iv>,    C<Perl_cast_uv>,
+C<Perl_cv_const_sv>, C<Perl_mg_find>,  C<Perl_mg_findext>, C<Perl_mg_magical>,
+C<Perl_mini_mktime>, C<Perl_my_dirfd>, C<Perl_sv_backoff>, C<Perl_utf8_hop>.
+
+Users of the public API prefix-less calls remain unaffected.
 
 =back
 

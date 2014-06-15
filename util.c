@@ -3617,13 +3617,12 @@ Perl_init_tm(pTHX_ struct tm *ptm)	/* see mktime, strftime and asctime */
  * semantics (and overhead) of mktime().
  */
 void
-Perl_mini_mktime(pTHX_ struct tm *ptm)
+Perl_mini_mktime(struct tm *ptm)
 {
     int yearday;
     int secs;
     int month, mday, year, jday;
     int odd_cent, odd_year;
-    PERL_UNUSED_CONTEXT;
 
     PERL_ARGS_ASSERT_MINI_MKTIME;
 
@@ -5390,19 +5389,17 @@ Perl_get_db_sub(pTHX_ SV **svp, CV *cv)
 }
 
 int
-Perl_my_dirfd(pTHX_ DIR * dir) {
+Perl_my_dirfd(DIR * dir) {
 
     /* Most dirfd implementations have problems when passed NULL. */
     if(!dir)
         return -1;
 #ifdef HAS_DIRFD
-    PERL_UNUSED_CONTEXT;
     return dirfd(dir);
 #elif defined(HAS_DIR_DD_FD)
-    PERL_UNUSED_CONTEXT;
     return dir->dd_fd;
 #else
-    Perl_die(aTHX_ PL_no_func, "dirfd");
+    Perl_croak_nocontext(PL_no_func, "dirfd");
     assert(0); /* NOT REACHED */
     return 0;
 #endif 

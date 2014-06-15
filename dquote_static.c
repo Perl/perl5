@@ -15,9 +15,8 @@
     Pulled from regcomp.c.
  */
 PERL_STATIC_INLINE I32
-S_regcurly(pTHX_ const char *s)
+S_regcurly(const char *s)
 {
-    PERL_UNUSED_CONTEXT;
     PERL_ARGS_ASSERT_REGCURLY;
 
     if (*s++ != '{')

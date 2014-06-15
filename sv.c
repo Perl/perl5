@@ -1509,13 +1509,12 @@ wrapper instead.
 */
 
 int
-Perl_sv_backoff(pTHX_ SV *const sv)
+Perl_sv_backoff(SV *const sv)
 {
     STRLEN delta;
     const char * const s = SvPVX_const(sv);
 
     PERL_ARGS_ASSERT_SV_BACKOFF;
-    PERL_UNUSED_CONTEXT;
 
     assert(SvOOK(sv));
     assert(SvTYPE(sv) != SVt_PVHV);

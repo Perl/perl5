@@ -77,10 +77,10 @@
 #define call_pv(a,b)		Perl_call_pv(aTHX_ a,b)
 #define call_sv(a,b)		Perl_call_sv(aTHX_ a,b)
 #define caller_cx(a,b)		Perl_caller_cx(aTHX_ a,b)
-#define cast_i32(a)		Perl_cast_i32(aTHX_ a)
-#define cast_iv(a)		Perl_cast_iv(aTHX_ a)
-#define cast_ulong(a)		Perl_cast_ulong(aTHX_ a)
-#define cast_uv(a)		Perl_cast_uv(aTHX_ a)
+#define cast_i32		Perl_cast_i32
+#define cast_iv			Perl_cast_iv
+#define cast_ulong		Perl_cast_ulong
+#define cast_uv			Perl_cast_uv
 #define ck_entersub_args_list(a)	Perl_ck_entersub_args_list(aTHX_ a)
 #define ck_entersub_args_proto(a,b,c)	Perl_ck_entersub_args_proto(aTHX_ a,b,c)
 #define ck_entersub_args_proto_or_list(a,b,c)	Perl_ck_entersub_args_proto_or_list(aTHX_ a,b,c)
@@ -98,7 +98,7 @@
 #define custom_op_desc(a)	Perl_custom_op_desc(aTHX_ a)
 #define custom_op_name(a)	Perl_custom_op_name(aTHX_ a)
 #define cv_clone(a)		Perl_cv_clone(aTHX_ a)
-#define cv_const_sv(a)		Perl_cv_const_sv(aTHX_ a)
+#define cv_const_sv		Perl_cv_const_sv
 #define cv_get_call_checker(a,b,c)	Perl_cv_get_call_checker(aTHX_ a,b,c)
 #define cv_set_call_checker(a,b,c)	Perl_cv_set_call_checker(aTHX_ a,b,c)
 #define cv_undef(a)		Perl_cv_undef(aTHX_ a)
@@ -317,22 +317,22 @@
 #define mess_sv(a,b)		Perl_mess_sv(aTHX_ a,b)
 #define mg_clear(a)		Perl_mg_clear(aTHX_ a)
 #define mg_copy(a,b,c,d)	Perl_mg_copy(aTHX_ a,b,c,d)
-#define mg_find(a,b)		Perl_mg_find(aTHX_ a,b)
-#define mg_findext(a,b,c)	Perl_mg_findext(aTHX_ a,b,c)
+#define mg_find			Perl_mg_find
+#define mg_findext		Perl_mg_findext
 #define mg_free(a)		Perl_mg_free(aTHX_ a)
 #define mg_free_type(a,b)	Perl_mg_free_type(aTHX_ a,b)
 #define mg_get(a)		Perl_mg_get(aTHX_ a)
 #define mg_length(a)		Perl_mg_length(aTHX_ a)
-#define mg_magical(a)		Perl_mg_magical(aTHX_ a)
+#define mg_magical		Perl_mg_magical
 #define mg_set(a)		Perl_mg_set(aTHX_ a)
 #define mg_size(a)		Perl_mg_size(aTHX_ a)
-#define mini_mktime(a)		Perl_mini_mktime(aTHX_ a)
+#define mini_mktime		Perl_mini_mktime
 #define moreswitches(a)		Perl_moreswitches(aTHX_ a)
 #define mro_get_linear_isa(a)	Perl_mro_get_linear_isa(aTHX_ a)
 #define mro_method_changed_in(a)	Perl_mro_method_changed_in(aTHX_ a)
 #define my_atof(a)		Perl_my_atof(aTHX_ a)
 #define my_atof2(a,b)		Perl_my_atof2(aTHX_ a,b)
-#define my_dirfd(a)		Perl_my_dirfd(aTHX_ a)
+#define my_dirfd		Perl_my_dirfd
 #define my_exit(a)		Perl_my_exit(aTHX_ a)
 #define my_failure_exit()	Perl_my_failure_exit(aTHX)
 #define my_fflush_all()		Perl_my_fflush_all(aTHX)
@@ -563,7 +563,7 @@
 #define sv_2pvbyte(a,b)		Perl_sv_2pvbyte(aTHX_ a,b)
 #define sv_2pvutf8(a,b)		Perl_sv_2pvutf8(aTHX_ a,b)
 #define sv_2uv_flags(a,b)	Perl_sv_2uv_flags(aTHX_ a,b)
-#define sv_backoff(a)		Perl_sv_backoff(aTHX_ a)
+#define sv_backoff		Perl_sv_backoff
 #define sv_bless(a,b)		Perl_sv_bless(aTHX_ a,b)
 #define sv_cat_decode(a,b,c,d,e,f)	Perl_sv_cat_decode(aTHX_ a,b,c,d,e,f)
 #define sv_catpv(a,b)		Perl_sv_catpv(aTHX_ a,b)
@@ -692,7 +692,7 @@
 #define utf16_to_utf8(a,b,c,d)	Perl_utf16_to_utf8(aTHX_ a,b,c,d)
 #define utf16_to_utf8_reversed(a,b,c,d)	Perl_utf16_to_utf8_reversed(aTHX_ a,b,c,d)
 #define utf8_distance(a,b)	Perl_utf8_distance(aTHX_ a,b)
-#define utf8_hop(a,b)		Perl_utf8_hop(aTHX_ a,b)
+#define utf8_hop		Perl_utf8_hop
 #define utf8_length(a,b)	Perl_utf8_length(aTHX_ a,b)
 #define utf8_to_bytes(a,b)	Perl_utf8_to_bytes(aTHX_ a,b)
 #define utf8_to_uvchr(a,b)	Perl_utf8_to_uvchr(aTHX_ a,b)
@@ -1015,7 +1015,7 @@
 #define grok_bslash_c(a,b)	S_grok_bslash_c(aTHX_ a,b)
 #define grok_bslash_o(a,b,c,d,e,f,g)	S_grok_bslash_o(aTHX_ a,b,c,d,e,f,g)
 #define grok_bslash_x(a,b,c,d,e,f,g)	S_grok_bslash_x(aTHX_ a,b,c,d,e,f,g)
-#define regcurly(a)		S_regcurly(aTHX_ a)
+#define regcurly		S_regcurly
 #  endif
 #  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_UTF8_C)
 #define _add_range_to_invlist(a,b,c)	Perl__add_range_to_invlist(aTHX_ a,b,c)
@@ -1115,7 +1115,7 @@
 #define croak_popstack		Perl_croak_popstack
 #define custom_op_get_field(a,b)	Perl_custom_op_get_field(aTHX_ a,b)
 #define cv_clone_into(a,b)	Perl_cv_clone_into(aTHX_ a,b)
-#define cv_const_sv_or_av(a)	Perl_cv_const_sv_or_av(aTHX_ a)
+#define cv_const_sv_or_av	Perl_cv_const_sv_or_av
 #define cv_forget_slab(a)	Perl_cv_forget_slab(aTHX_ a)
 #define cvgv_set(a,b)		Perl_cvgv_set(aTHX_ a,b)
 #define cvstash_set(a,b)	Perl_cvstash_set(aTHX_ a,b)
@@ -1465,7 +1465,7 @@
 #define unwind_handler_stack(a)	S_unwind_handler_stack(aTHX_ a)
 #  endif
 #  if defined(PERL_IN_MG_C) || defined(PERL_IN_PP_C)
-#define translate_substr_offsets(a,b,c,d,e,f,g)	Perl_translate_substr_offsets(aTHX_ a,b,c,d,e,f,g)
+#define translate_substr_offsets	Perl_translate_substr_offsets
 #  endif
 #  if defined(PERL_IN_MRO_C)
 #define mro_clean_isarev(a,b,c,d,e,f)	S_mro_clean_isarev(aTHX_ a,b,c,d,e,f)

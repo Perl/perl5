@@ -2390,7 +2390,6 @@ Perl_hv_backreferences_p(pTHX_ HV *hv) {
     struct xpvhv_aux * const iter = SvOOK(hv) ? HvAUX(hv) : hv_auxinit(hv);
 
     PERL_ARGS_ASSERT_HV_BACKREFERENCES_P;
-    PERL_UNUSED_CONTEXT;
 
     return &(iter->xhv_backreferences);
 }

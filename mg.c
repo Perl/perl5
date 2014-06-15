@@ -136,11 +136,10 @@ Turns on the magical status of an SV.  See C<sv_magic>.
 */
 
 void
-Perl_mg_magical(pTHX_ SV *sv)
+Perl_mg_magical(SV *sv)
 {
     const MAGIC* mg;
     PERL_ARGS_ASSERT_MG_MAGICAL;
-    PERL_UNUSED_CONTEXT;
 
     SvMAGICAL_off(sv);
     if ((mg = SvMAGIC(sv))) {
@@ -387,10 +386,8 @@ Perl_mg_clear(pTHX_ SV *sv)
 }
 
 static MAGIC*
-S_mg_findext_flags(pTHX_ const SV *sv, int type, const MGVTBL *vtbl, U32 flags)
+S_mg_findext_flags(const SV *sv, int type, const MGVTBL *vtbl, U32 flags)
 {
-    PERL_UNUSED_CONTEXT;
-
     assert(flags <= 1);
 
     if (sv) {
@@ -417,9 +414,9 @@ Finds the magic pointer for type matching the SV.  See C<sv_magic>.
 */
 
 MAGIC*
-Perl_mg_find(pTHX_ const SV *sv, int type)
+Perl_mg_find(const SV *sv, int type)
 {
-    return S_mg_findext_flags(aTHX_ sv, type, NULL, 0);
+    return S_mg_findext_flags(sv, type, NULL, 0);
 }
 
 /*
@@ -432,9 +429,9 @@ C<sv_magicext>.
 */
 
 MAGIC*
-Perl_mg_findext(pTHX_ const SV *sv, int type, const MGVTBL *vtbl)
+Perl_mg_findext(const SV *sv, int type, const MGVTBL *vtbl)
 {
-    return S_mg_findext_flags(aTHX_ sv, type, vtbl, 1);
+    return S_mg_findext_flags(sv, type, vtbl, 1);
 }
 
 MAGIC *
@@ -448,7 +445,7 @@ Perl_mg_find_mglob(pTHX_ SV *sv)
         sv = LvTARG(sv);
     }
     if (SvTYPE(sv) >= SVt_PVMG && SvMAGIC(sv))
-        return S_mg_findext_flags(aTHX_ sv, PERL_MAGIC_regex_global, 0, 0);
+        return S_mg_findext_flags(sv, PERL_MAGIC_regex_global, 0, 0);
     return NULL;
 }
 
@@ -3086,7 +3083,6 @@ Perl_whichsig_sv(pTHX_ SV *sigsv)
     const char *sigpv;
     STRLEN siglen;
     PERL_ARGS_ASSERT_WHICHSIG_SV;
-    PERL_UNUSED_CONTEXT;
     sigpv = SvPV_const(sigsv, siglen);
     return whichsig_pvn(sigpv, siglen);
 }
@@ -3095,7 +3091,6 @@ I32
 Perl_whichsig_pv(pTHX_ const char *sig)
 {
     PERL_ARGS_ASSERT_WHICHSIG_PV;
-    PERL_UNUSED_CONTEXT;
     return whichsig_pvn(sig, strlen(sig));
 }
 

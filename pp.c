@@ -2972,16 +2972,15 @@ PP(pp_length)
    always be true for an explicit 0.
 */
 bool
-Perl_translate_substr_offsets(pTHX_ STRLEN curlen, IV pos1_iv,
-				    bool pos1_is_uv, IV len_iv,
-				    bool len_is_uv, STRLEN *posp,
-				    STRLEN *lenp)
+Perl_translate_substr_offsets( STRLEN curlen, IV pos1_iv,
+				bool pos1_is_uv, IV len_iv,
+				bool len_is_uv, STRLEN *posp,
+				STRLEN *lenp)
 {
     IV pos2_iv;
     int    pos2_is_uv;
 
     PERL_ARGS_ASSERT_TRANSLATE_SUBSTR_OFFSETS;
-    PERL_UNUSED_CONTEXT;
 
     if (!pos1_is_uv && pos1_iv < 0 && curlen) {
 	pos1_is_uv = curlen-1 > ~(UV)pos1_iv;

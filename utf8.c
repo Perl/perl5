@@ -1010,11 +1010,10 @@ on the first byte of character or just after the last byte of a character.
 */
 
 U8 *
-Perl_utf8_hop(pTHX_ const U8 *s, I32 off)
+Perl_utf8_hop(const U8 *s, I32 off)
 {
     PERL_ARGS_ASSERT_UTF8_HOP;
 
-    PERL_UNUSED_CONTEXT;
     /* Note: cannot use UTF8_IS_...() too eagerly here since e.g
      * the bitops (especially ~) can create illegal UTF-8.
      * In other words: in Perl UTF-8 is not just for Unicode. */
@@ -1057,7 +1056,6 @@ Perl_bytes_cmp_utf8(pTHX_ const U8 *b, STRLEN blen, const U8 *u, STRLEN ulen)
     const U8 *const uend = u + ulen;
 
     PERL_ARGS_ASSERT_BYTES_CMP_UTF8;
-    PERL_UNUSED_CONTEXT;
 
     while (b < bend && u < uend) {
         U8 c = *u++;
