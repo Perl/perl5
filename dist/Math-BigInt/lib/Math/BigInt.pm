@@ -2675,18 +2675,6 @@ sub objectify {
     for my $i (1 .. $count) {
         my $ref = ref $a[$i];
 
-        # If it is an object of the right class, all is fine.
-
-        if ($ref eq $a[0]) {
-            next;
-        }
-
-        # Don't do anything with undefs.
-
-        unless (defined($a[$i])) {
-            next;
-        }
-
         # Perl scalars are fed to the appropriate constructor.
 
         unless ($ref) {
@@ -2694,9 +2682,15 @@ sub objectify {
             next;
         }
 
+        # If it is an object of the right class, all is fine.
+
+        if ($ref -> isa($a[0])) {
+            next;
+        }
+
         # Upgrading is OK, so skip further tests if the argument is upgraded.
 
-        if (defined $up && $ref eq $up) {
+        if (defined $up && $ref -> isa($up)) {
             next;
         }
 
