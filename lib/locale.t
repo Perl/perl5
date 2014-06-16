@@ -1678,8 +1678,6 @@ foreach my $Locale (@Locale) {
     my $i;
     my $j;
 
-    my @times = CORE::localtime();
-
     if (! $is_utf8_locale) {
         use locale;
 
@@ -1738,9 +1736,6 @@ foreach my $Locale (@Locale) {
             $ok17 = "1.5:1.25" eq sprintf("%g:%g", $h, $i);
         }
         $ok18 = $j eq sprintf("%g:%g", $h, $i);
-        $ok19 = POSIX::strftime("%p",@times) ne "%p"; # [perl #119425]
-        my $date = POSIX::strftime("%A %B %Z",@times);
-        $ok20 = $date =~ / ^ \p{ASCII}+ $ /x || ! utf8::is_utf8($date);
     }
     else {
         use locale ':not_characters';
@@ -1819,9 +1814,20 @@ foreach my $Locale (@Locale) {
             $ok17 = "1.5:1.25" eq sprintf("%g:%g", $h, $i);
         }
         $ok18 = $j eq sprintf("%g:%g", $h, $i);
-        $ok19 = POSIX::strftime("%p",@times) ne "%p"; # [perl #119425]
-        my $date = POSIX::strftime("%A %B %Z",@times);
-        $ok20 = $date =~ / ^ \p{ASCII}+ $ /x || utf8::is_utf8($date);
+    }
+
+    { # These tests aren't affected by :not_characters
+
+        my @times = CORE::localtime();
+
+        use locale;
+        $ok19 = POSIX::strftime("%p", @times) ne "%p"; # [perl #119425]
+        my $date = POSIX::strftime("%A %B %Z", @times);
+
+        # If there is any non-ascii, it better be UTF-8 in a UTF-8 locale, and
+        # not UTF-8 if the locale isn't UTF-8.
+        $ok20 = $date =~ / ^ \p{ASCII}+ $ /x
+                || $is_utf8_locale == utf8::is_utf8($date);
     }
 
     $ok21 = 1;
