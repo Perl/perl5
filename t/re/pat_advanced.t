@@ -2309,7 +2309,9 @@ EOP
             $regex = qr/\p{Is_q}/;
 
             # If we uncomment the following line, prior to the patch that
-            # fixed this, it would no longer break.
+            # fixed this, everything would work because we would have expanded
+            # the property by the time the regex in the 'like' below got
+            # compiled.
             #'q' =~ $regex;
         }
 
