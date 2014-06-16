@@ -13635,13 +13635,13 @@ parseit:
                         if (curpkg && ! instr(name, "::")) {
                             char* pkgname = HvNAME(curpkg);
                             if (strNE(pkgname, "main")) {
-                            char* full_name = Perl_form(aTHX_
-                                                        "%s::%s",
-                                                        pkgname,
-                                                        name);
-                            n = strlen(full_name);
-                            Safefree(name);
-                            name = savepvn(full_name, n);
+                                char* full_name = Perl_form(aTHX_
+                                                            "%s::%s",
+                                                            pkgname,
+                                                            name);
+                                n = strlen(full_name);
+                                Safefree(name);
+                                name = savepvn(full_name, n);
                             }
                         }
                         Perl_sv_catpvf(aTHX_ listsv, "%cutf8::%"UTF8f"\n",
