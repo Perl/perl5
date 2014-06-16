@@ -82,7 +82,7 @@ hash_value(string,...)
         PERL_HASH(uv, pv, len);
     } else {
         STRLEN seedlen;
-        char *seedbuf= SvPV(ST(1),seedlen);
+        U8 *seedbuf= (U8 *)SvPV(ST(1),seedlen);
         if ( seedlen < PERL_HASH_SEED_BYTES ) {
             sv_dump(ST(1));
             Perl_croak(aTHX_ "seed len must be at least %d long only got %d bytes", PERL_HASH_SEED_BYTES, seedlen);
