@@ -300,8 +300,9 @@ S_regcppush(pTHX_ const regexp *rex, I32 parenfloor, U32 maxopenparen)
     PERL_ARGS_ASSERT_REGCPPUSH;
 
     if (paren_elems_to_push < 0)
-        Perl_croak(aTHX_ "panic: paren_elems_to_push, %i < 0, maxopenparen: %i parenfloor: %i REGCP_PAREN_ELEMS: %i",
-                   paren_elems_to_push, maxopenparen, parenfloor, REGCP_PAREN_ELEMS);
+        Perl_croak(aTHX_ "panic: paren_elems_to_push, %i < 0, maxopenparen: %i parenfloor: %i REGCP_PAREN_ELEMS: %u",
+                   (int)paren_elems_to_push, (int)maxopenparen,
+                   (int)parenfloor, (unsigned)REGCP_PAREN_ELEMS);
 
     if ((elems_shifted >> SAVE_TIGHT_SHIFT) != total_elems)
 	Perl_croak(aTHX_ "panic: paren_elems_to_push offset %"UVuf
