@@ -35,9 +35,15 @@ Perl_taint_proper(pTHX_ const char *f, const char *const s)
 	const Uid_t  uid = PerlProc_getuid();
 	const Uid_t euid = PerlProc_geteuid();
 
+#if Uid_t_sign == 1 /* uid_t is unsigned. */
 	DEBUG_u(PerlIO_printf(Perl_debug_log,
-			       "%s %d %"Uid_t_f" %"Uid_t_f"\n",
-			       s, TAINT_get, uid, euid));
+                              "%s %d %"UVuf" %"UVuf"\n",
+                              s, TAINT_get, (UV)uid, (UV)euid));
+#else /* uid_t is signed (Uid_t_sign == -1), or don't know. */
+	DEBUG_u(PerlIO_printf(Perl_debug_log,
+                              "%s %d %"IVdf" %"IVdf"\n",
+                              s, TAINT_get, (IV)uid, (IV)euid));
+#endif
     }
 #endif
 
