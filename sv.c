@@ -12044,8 +12044,8 @@ Perl_dirp_dup(pTHX_ DIR *const dp, CLONE_PARAMS *const param)
 	for(;;) {
 	    pos = PerlDir_tell(ret);
 	    if ((dirent = PerlDir_read(ret))) {
-		if (len == d_namlen(dirent)
-		 && memEQ(name, dirent->d_name, len)) {
+		if (len == (STRLEN)d_namlen(dirent)
+                    && memEQ(name, dirent->d_name, len)) {
 		    /* found it */
 		    PerlDir_seek(ret, pos); /* step back */
 		    break;
