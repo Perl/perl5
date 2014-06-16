@@ -2150,12 +2150,20 @@ foreach $test_num ($first_locales_test_number..$final_locales_test_number) {
             my $percent_fail = (int(.5 + (1000 * scalar(keys $Problem{$test_num})
                                           / scalar(@Locale))))
                                / 10;
-            if (! $debug && $percent_fail < $acceptable_failure_percentage)
-            {
-                $test_names{$test_num} .= 'TODO';
-                print "# ", 100 - $percent_fail, "% of locales pass the following test, so it is likely that the failures\n";
-                print "# are errors in the locale definitions.  The test is marked TODO, as the\n";
-                print "# problem is not likely to be Perl's\n";
+            if ($percent_fail < $acceptable_failure_percentage) {
+                if (! $debug) {
+                    $test_names{$test_num} .= 'TODO';
+                    print "# ", 100 - $percent_fail, "% of locales pass the following test, so it is likely that the failures\n";
+                    print "# are errors in the locale definitions.  The test is marked TODO, as the\n";
+                    print "# problem is not likely to be Perl's\n";
+                }
+            }
+            elsif ($debug) {
+                print "# $percent_fail% of locales (",
+                      scalar(keys $Problem{$test_num}),
+                      " of ",
+                      scalar(@Locale),
+                      ") fail the following test\n";
             }
         }
         print "#\n";
