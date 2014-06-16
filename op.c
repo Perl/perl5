@@ -11711,7 +11711,15 @@ Perl_custom_op_get_field(pTHX_ const OP *o, const xop_flags_enum field)
 	    if(flags & field) {
 		switch(field) {
 		case XOPe_xop_name:
+                    /* Some gcc releases emit a warning for this function:
+                     * op.c: In function 'Perl_custom_op_get_field':
+                     * op.c:...: warning: 'any.xop_name' may be used uninitialized in this function [-Wmaybe-uninitialized]
+                     * This does seem to be a false warning: the xop,
+                     * including xop_name, does get initialized on all
+                     * execution paths. */
+                    GCC_DIAG_IGNORE(-Wmaybe-uninitialized);
 		    any.xop_name = xop->xop_name;
+                    GCC_DIAG_RESTORE;
 		    break;
 		case XOPe_xop_desc:
 		    any.xop_desc = xop->xop_desc;
