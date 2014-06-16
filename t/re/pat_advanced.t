@@ -2316,6 +2316,10 @@ EOP
         }
 
         like('q', $regex, 'User-defined property matches outside package');
+
+        package Some {
+            main::like('abcq', qr/abc$regex/, 'Run-time compiled in-package user-defined property matches');
+        }
     }
 
     {   # From Lingua::Stem::UniNE; no ticket filed but related to #121778

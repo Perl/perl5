@@ -13610,6 +13610,9 @@ parseit:
                                              &swash_init_flags
                                             );
                     if (! swash || ! (invlist = _get_swash_invlist(swash))) {
+                        HV* curpkg = (IN_PERL_COMPILETIME)
+                                      ? PL_curstash
+                                      : CopSTASH(PL_curcop);
                         if (swash) {
                             SvREFCNT_dec_NN(swash);
                             swash = NULL;
@@ -13629,14 +13632,17 @@ parseit:
                         /* If the property name doesn't already have a package
                          * name, add the current one to it so that it can be
                          * referred to outside it. [perl #121777] */
-                        if (! instr(name, "::") && PL_curstash) {
+                        if (curpkg && ! instr(name, "::")) {
+                            char* pkgname = HvNAME(curpkg);
+                            if (strNE(pkgname, "main")) {
                             char* full_name = Perl_form(aTHX_
                                                         "%s::%s",
-                                                        HvNAME(PL_curstash),
+                                                        pkgname,
                                                         name);
                             n = strlen(full_name);
                             Safefree(name);
                             name = savepvn(full_name, n);
+                            }
                         }
                         Perl_sv_catpvf(aTHX_ listsv, "%cutf8::%"UTF8f"\n",
                                         (value == 'p' ? '+' : '!'),
