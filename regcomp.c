@@ -15114,7 +15114,7 @@ S_reg_node(pTHX_ RExC_state_t *pRExC_state, U8 op)
     }
     if (RExC_emit >= RExC_emit_bound)
         Perl_croak(aTHX_ "panic: reg_node overrun trying to emit %d, %p>=%p",
-		   op, RExC_emit, RExC_emit_bound);
+		   op, (void*)RExC_emit, (void*)RExC_emit_bound);
 
     NODE_ALIGN_FILL(ret);
     ptr = ret;
@@ -15171,7 +15171,7 @@ S_reganode(pTHX_ RExC_state_t *pRExC_state, U8 op, U32 arg)
     }
     if (RExC_emit >= RExC_emit_bound)
         Perl_croak(aTHX_ "panic: reg_node overrun trying to emit %d, %p>=%p",
-		   op, RExC_emit, RExC_emit_bound);
+		   op, (void*)RExC_emit, (void*)RExC_emit_bound);
 
     NODE_ALIGN_FILL(ret);
     ptr = ret;
