@@ -5901,7 +5901,7 @@ Perl_sv_del_backref(pTHX_ SV *const tsv, SV *const sv)
 	if (PL_phase == PERL_PHASE_DESTRUCT && SvREFCNT(tsv) == 0)
 	    return;
 	Perl_croak(aTHX_ "panic: del_backref, *svp=%p phase=%s refcnt=%" UVuf,
-		   *svp, PL_phase_names[PL_phase], (UV)SvREFCNT(tsv));
+		   (void*)*svp, PL_phase_names[PL_phase], (UV)SvREFCNT(tsv));
     }
 
     if (SvTYPE(*svp) == SVt_PVAV) {
@@ -5960,7 +5960,8 @@ Perl_sv_del_backref(pTHX_ SV *const tsv, SV *const sv)
     else {
 	/* optimisation: only a single backref, stored directly */
 	if (*svp != sv)
-	    Perl_croak(aTHX_ "panic: del_backref, *svp=%p, sv=%p", *svp, sv);
+	    Perl_croak(aTHX_ "panic: del_backref, *svp=%p, sv=%p",
+                       (void*)*svp, (void*)sv);
 	*svp = NULL;
     }
 
