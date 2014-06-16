@@ -300,33 +300,60 @@ syntax error at - line 4, near "[]"
 Execution of - aborted due to compilation errors.
 ########
 # op.c
-my (@foo, %foo);
+my %foo;
 %main::foo->{"bar"};
+EXPECT
+OPTION fatal
+Can't use a hash as a reference at - line 3.
+########
+# op.c
+my %foo;
 %foo->{"bar"};
+EXPECT
+OPTION fatal
+Can't use a hash as a reference at - line 3.
+########
+# op.c
+my @foo;
 @main::foo->[23];
+EXPECT
+OPTION fatal
+Can't use an array as a reference at - line 3.
+########
+# op.c
+my @foo;
 @foo->[23];
+EXPECT
+OPTION fatal
+Can't use an array as a reference at - line 3.
+########
+# op.c
+my %foo;
 $main::foo = {}; %$main::foo->{"bar"};
+EXPECT
+OPTION fatal
+Can't use a hash as a reference at - line 3.
+########
+# op.c
+my %foo;
 $foo = {}; %$foo->{"bar"};
+EXPECT
+OPTION fatal
+Can't use a hash as a reference at - line 3.
+########
+# op.c
+my @foo;
 $main::foo = []; @$main::foo->[34];
-$foo = []; @$foo->[34];
-no warnings 'deprecated';
-%main::foo->{"bar"};
-%foo->{"bar"};
-@main::foo->[23];
-@foo->[23];
-$main::foo = {}; %$main::foo->{"bar"};
-$foo = {}; %$foo->{"bar"};
-$main::foo = []; @$main::foo->[34];
+EXPECT
+OPTION fatal
+Can't use an array as a reference at - line 3.
+########
+# op.c
+my @foo;
 $foo = []; @$foo->[34];
 EXPECT
-Using a hash as a reference is deprecated at - line 3.
-Using a hash as a reference is deprecated at - line 4.
-Using an array as a reference is deprecated at - line 5.
-Using an array as a reference is deprecated at - line 6.
-Using a hash as a reference is deprecated at - line 7.
-Using a hash as a reference is deprecated at - line 8.
-Using an array as a reference is deprecated at - line 9.
-Using an array as a reference is deprecated at - line 10.
+OPTION fatal
+Can't use an array as a reference at - line 3.
 ########
 # op.c
 use warnings 'void' ; no warnings 'experimental::smartmatch'; close STDIN ;

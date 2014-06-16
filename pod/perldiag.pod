@@ -1187,6 +1187,18 @@ indicates that such a conversion was attempted.
 (F) You tried to call perl with the B<-m> switch, but you put something
 other than "=" after the module name.
 
+=item Can't use a hash as a reference
+
+(F) You tried to use a hash as a reference, as in
+C<< %foo->{"bar"} >> or C<< %$ref->{"hello"} >>.  Versions of perl <= 5.6.1
+used to allow this syntax, but shouldn't have.
+
+=item Can't use an array as a reference
+
+(F) You tried to use an array as a reference, as in
+C<< @foo->[23] >> or C<< @$ref->[99] >>.  Versions of perl <= 5.6.1 used to
+allow this syntax, but shouldn't have.
+
 =item Can't use anonymous symbol table for method lookup
 
 (F) The internal routine that does method lookup was handed a symbol
@@ -6433,20 +6445,6 @@ or if you meant this
  (?[ [ \x{BE} E F ] ])
 
 You need to add either braces or blanks to disambiguate.
-
-=item Using a hash as a reference is deprecated
-
-(D deprecated) You tried to use a hash as a reference, as in
-C<< %foo->{"bar"} >> or C<< %$ref->{"hello"} >>.  Versions of perl <= 5.6.1
-used to allow this syntax, but shouldn't have.  It is now
-deprecated, and will be removed in a future version.
-
-=item Using an array as a reference is deprecated
-
-(D deprecated) You tried to use an array as a reference, as in
-C<< @foo->[23] >> or C<< @$ref->[99] >>.  Versions of perl <= 5.6.1 used to
-allow this syntax, but shouldn't have.  It is now deprecated,
-and will be removed in a future version.
 
 =item Using just the first character returned by \N{} in character class in 
 regex; marked by S<<-- HERE> in m/%s/
