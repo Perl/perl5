@@ -4776,25 +4776,32 @@ Perl_yylex(pTHX)
 		     * at least, set argv[0] to the basename of the Perl
 		     * interpreter. So, having found "#!", we'll set it right.
 		     */
-		    SV * const x = GvSV(gv_fetchpvs("\030", GV_ADD|GV_NOTQUAL,
-						    SVt_PV)); /* $^X */
-		    assert(SvPOK(x) || SvGMAGICAL(x));
-		    if (sv_eq(x, CopFILESV(PL_curcop))) {
-			sv_setpvn(x, ipath, ipathend - ipath);
-			SvSETMAGIC(x);
-		    }
-		    else {
-			STRLEN blen;
-			STRLEN llen;
-			const char *bstart = SvPV_const(CopFILESV(PL_curcop),blen);
-			const char * const lstart = SvPV_const(x,llen);
-			if (llen < blen) {
-			    bstart += blen - llen;
-			    if (strnEQ(bstart, lstart, llen) &&	bstart[-1] == '/') {
-				sv_setpvn(x, ipath, ipathend - ipath);
-				SvSETMAGIC(x);
-			    }
+                    SV* copfilesv = CopFILESV(PL_curcop);
+                    if (copfilesv) {
+                        SV * const x =
+                            GvSV(gv_fetchpvs("\030", GV_ADD|GV_NOTQUAL,
+                                             SVt_PV)); /* $^X */
+                        assert(SvPOK(x) || SvGMAGICAL(x));
+                        if (sv_eq(x, copfilesv)) {
+                            sv_setpvn(x, ipath, ipathend - ipath);
+                            SvSETMAGIC(x);
+                        }
+                        else {
+                            STRLEN blen;
+                            STRLEN llen;
+                            const char *bstart = SvPV_const(copfilesv, blen);
+                            const char * const lstart = SvPV_const(x, llen);
+                            if (llen < blen) {
+                                bstart += blen - llen;
+                                if (strnEQ(bstart, lstart, llen) &&	bstart[-1] == '/') {
+                                    sv_setpvn(x, ipath, ipathend - ipath);
+                                    SvSETMAGIC(x);
+                                }
+                            }
 			}
+                    }
+                    else {
+                        /* Anything to do if no copfilesv? */
 		    }
 		    TAINT_NOT;	/* $^X is always tainted, but that's OK */
 		}
