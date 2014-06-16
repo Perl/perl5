@@ -351,7 +351,7 @@ S_pp_dump(pTHX)
 static OP *
 S_ck_dump(pTHX_ OP *entersubop, GV *namegv, SV *cv)
 {
-    OP *aop, *prev, *first, *second = NULL;
+    OP *parent, *pm, *first, *second;
     BINOP *newop;
 
     PERL_UNUSED_ARG(cv);
@@ -359,13 +359,24 @@ S_ck_dump(pTHX_ OP *entersubop, GV *namegv, SV *cv)
     ck_entersub_args_proto(entersubop, namegv,
 			   newSVpvn_flags("$;$", 3, SVs_TEMP));
 
-    aop = cUNOPx(entersubop)->op_first;
-    if (!OP_HAS_SIBLING(aop))
-	aop = cUNOPx(aop)->op_first;
-    prev = aop;
-    aop = OP_SIBLING(aop);
-    first = aop;
-    OP_SIBLING_set(prev, OP_SIBLING(first));
+    parent = entersubop;
+    pm = cUNOPx(entersubop)->op_first;
+    if (!OP_HAS_SIBLING(pm)) {
+        parent = pm;
+	pm = cUNOPx(pm)->op_first;
+    }
+    first = OP_SIBLING(pm);
+    second = OP_SIBLING(first);
+    if (!second) {
+	/* It doesn’t really matter what we return here, as this only
+	   occurs after yyerror.  */
+	return entersubop;
+    }
+    /* we either have Dump($x):   [pushmark]->[first]->[ex-cvop]
+     * or             Dump($x,1); [pushmark]->[first]->[second]->[ex-cvop]
+     */
+    if (!OP_HAS_SIBLING(second))
+        second = NULL;
 
     if (first->op_type == OP_RV2AV ||
 	first->op_type == OP_PADAV ||
@@ -375,24 +386,14 @@ S_ck_dump(pTHX_ OP *entersubop, GV *namegv, SV *cv)
 	first->op_flags |= OPf_REF;
     else
 	first->op_flags &= ~OPf_MOD;
-    aop = OP_SIBLING(aop);
-    if (!aop) {
-	/* It doesn’t really matter what we return here, as this only
-	   occurs after yyerror.  */
-	op_free(first);
-	return entersubop;
-    }
 
-    /* aop now points to the second arg if there is one, the cvop otherwise
-     */
-    if (OP_HAS_SIBLING(aop)) {
-	OP_SIBLING_set(prev, OP_SIBLING(aop));
-	second = aop;
-	OP_SIBLING_set(second, NULL);
-    }
-    OP_SIBLING_set(first, second);
+    /* splice out first (and optionally second) ops, then discard the rest
+     * of the op tree */
 
+    op_sibling_splice(parent, pm, second ? 2 : 1, NULL);
     op_free(entersubop);
+
+    /* then attach first (and second) to a new binop */
 
     NewOp(1234, newop, 1, BINOP);
     newop->op_type   = OP_CUSTOM;

@@ -156,7 +156,8 @@ STATIC void ab_neuter_dollar_bracket(pTHX_ OP *o) {
  oldc = cUNOPx(o)->op_first;
  newc = newGVOP(OP_GV, 0,
    gv_fetchpvs("arybase::leftbrack", GV_ADDMULTI, SVt_PVGV));
- cUNOPx(o)->op_first = newc;
+ /* replace oldc with newc */
+ op_sibling_splice(o, NULL, 1, newc);
  op_free(oldc);
 }
 
@@ -378,8 +379,14 @@ static OP *ab_ck_base(pTHX_ OP *o)
    /* Break the aelemfast optimisation */
    if (o->op_type == OP_AELEM) {
     OP *const first = cBINOPo->op_first;
-    if ( OP_SIBLING(first)->op_type == OP_CONST) {
-     OP_SIBLING_set(first, newUNOP(OP_NULL,0,OP_SIBLING(first)));
+    OP *second = OP_SIBLING(first);
+    OP *newop;
+    if (second->op_type == OP_CONST) {
+     /* cut out second arg and replace it with a new unop which is
+      * the parent of that arg */
+     op_sibling_splice(o, first, 1, NULL);
+     newop = newUNOP(OP_NULL,0,second);
+     op_sibling_splice(o, first, 0, newop);
     }
    }
   }
