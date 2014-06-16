@@ -1989,6 +1989,7 @@ S_adjust_stack_on_leave(pTHX_ SV **newsp, SV **sp, SV **mark, I32 gimme,
     bool padtmp = 0;
     PERL_ARGS_ASSERT_ADJUST_STACK_ON_LEAVE;
 
+    TAINT_NOT;
     if (flags & SVs_PADTMP) {
 	flags &= ~SVs_PADTMP;
 	padtmp = 1;
@@ -2058,7 +2059,6 @@ PP(pp_leave)
 
     gimme = OP_GIMME(PL_op, (cxstack_ix >= 0) ? gimme : G_SCALAR);
 
-    TAINT_NOT;
     SP = adjust_stack_on_leave(newsp, SP, newsp, gimme, SVs_PADTMP|SVs_TEMP,
 			       PL_op->op_private & OPpLVALUE);
     PL_curpm = newpm;	/* Don't pop $1 et al till now */
@@ -2221,7 +2221,6 @@ PP(pp_leaveloop)
     mark = newsp;
     newsp = PL_stack_base + cx->blk_loop.resetsp;
 
-    TAINT_NOT;
     SP = adjust_stack_on_leave(newsp, SP, MARK, gimme, 0,
 			       PL_op->op_private & OPpLVALUE);
     PUTBACK;
@@ -4280,7 +4279,6 @@ PP(pp_leaveeval)
     retop = cx->blk_eval.retop;
     evalcv = cx->blk_eval.cv;
 
-    TAINT_NOT;
     SP = adjust_stack_on_leave((gimme == G_VOID) ? SP : newsp, SP, newsp,
 				gimme, SVs_TEMP, FALSE);
     PL_curpm = newpm;	/* Don't pop $1 et al till now */
@@ -4378,7 +4376,6 @@ PP(pp_leavetry)
     POPEVAL(cx);
     PERL_UNUSED_VAR(optype);
 
-    TAINT_NOT;
     SP = adjust_stack_on_leave(newsp, SP, newsp, gimme,
 			       SVs_PADTMP|SVs_TEMP, FALSE);
     PL_curpm = newpm;	/* Don't pop $1 et al till now */
@@ -4425,7 +4422,6 @@ PP(pp_leavegiven)
     POPBLOCK(cx,newpm);
     assert(CxTYPE(cx) == CXt_GIVEN);
 
-    TAINT_NOT;
     SP = adjust_stack_on_leave(newsp, SP, newsp, gimme,
 			       SVs_PADTMP|SVs_TEMP, FALSE);
     PL_curpm = newpm;	/* Don't pop $1 et al till now */
@@ -4999,7 +4995,6 @@ PP(pp_leavewhen)
     POPBLOCK(cx,newpm);
     assert(CxTYPE(cx) == CXt_WHEN);
 
-    TAINT_NOT;
     SP = adjust_stack_on_leave(newsp, SP, newsp, gimme,
 			       SVs_PADTMP|SVs_TEMP, FALSE);
     PL_curpm = newpm;   /* pop $1 et al */
