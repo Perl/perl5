@@ -627,29 +627,22 @@ sub run_tests {
 	}
 
 	# and make sure things are freed at the right time
-
-        SKIP: {
-            if ($Config{mad}) {
-                skip "MAD doesn't free eval CVs", 3;
-	    }
-
+	{
+	    sub Foo99::DESTROY { $Foo99::d++ }
+	    $Foo99::d = 0;
+	    my $r1;
 	    {
-		sub Foo99::DESTROY { $Foo99::d++ }
-		$Foo99::d = 0;
-		my $r1;
-		{
-		    my $x = bless [1], 'Foo99';
-		    $r1 = eval 'qr/(??{$x->[0]})/';
-		}
-		my $r2 = eval 'qr/a$r1/';
-		my $x = 2;
-		ok(eval '"a1" =~ qr/^$r2$/', "match while in scope");
-		# make sure PL_reg_curpm isn't holding on to anything
-		"a" =~ /a(?{1})/;
-		is($Foo99::d, 0, "before scope exit");
+	        my $x = bless [1], 'Foo99';
+	        $r1 = eval 'qr/(??{$x->[0]})/';
 	    }
-	    ::is($Foo99::d, 1, "after scope exit");
+	    my $r2 = eval 'qr/a$r1/';
+	    my $x = 2;
+	    ok(eval '"a1" =~ qr/^$r2$/', "match while in scope");
+	    # make sure PL_reg_curpm isn't holding on to anything
+	    "a" =~ /a(?{1})/;
+	    is($Foo99::d, 0, "before scope exit");
 	}
+	::is($Foo99::d, 1, "after scope exit");
 
 	# forward declared subs should Do The Right Thing with any anon CVs
 	# within them (i.e. pad_fixup_inner_anons() should work)

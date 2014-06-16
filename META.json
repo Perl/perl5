@@ -56,7 +56,6 @@
          "dist/threads-shared",
          "dist/Tie-File",
          "dist/XSLoader",
-         "mad",
          "win32"
       ],
       "file" : [

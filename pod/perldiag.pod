@@ -1026,12 +1026,6 @@ grep().  You can usually double the curlies to get the same effect
 though, because the inner curlies will be considered a block that loops
 once.  See L<perlfunc/next>.
 
-=item Can't open %s
-
-(F) You tried to run a perl built with MAD support with
-the PERL_XMLDUMP environment variable set, but the file
-named by that variable could not be opened.
-
 =item Can't open %s: %s
 
 (S inplace) The implicit opening of a file through use of the C<< <> >>

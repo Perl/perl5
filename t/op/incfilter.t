@@ -173,10 +173,7 @@ BEGIN {prepend_block_counting_filter};
 pas("SSS make s fast SSS");
 EOC
 
-TODO: {
-    todo_skip "disabled under -Dmad", 50 if $Config{mad};
-    do [$fh, sub {s/s/ss/gs; s/([\nS])/$1$1$1/gs; return;}] or die;
-}
+do [$fh, sub {s/s/ss/gs; s/([\nS])/$1$1$1/gs; return;}] or die;
 
 sub prepend_line_counting_filter {
     filter_add(sub {
