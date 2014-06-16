@@ -4116,7 +4116,7 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	    rend = r + len;
 	}
 
-/* There is a  snag with this code on EBCDIC: scan_const() in toke.c has
+/* There is a snag with this code on EBCDIC: scan_const() in toke.c has
  * encoded chars in native encoding which makes ranges in the EBCDIC 0..255
  * odd.  */
 
