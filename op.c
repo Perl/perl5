@@ -11745,7 +11745,7 @@ Perl_custom_op_get_field(pTHX_ const OP *o, const xop_flags_enum field)
         /* Some gcc releases emit a warning for this function:
          * op.c: In function 'Perl_custom_op_get_field':
          * op.c:...: warning: 'any.xop_name' may be used uninitialized in this function [-Wmaybe-uninitialized]
-         * Whether this is true, is currently unknown *./
+         * Whether this is true, is currently unknown. */
 	return any;
     }
 }
