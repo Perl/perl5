@@ -1846,17 +1846,17 @@ foreach my $Locale (@Locale) {
             $ok14 = 1;
             $ok14_5 = 1;
             if (setlocale(&POSIX::LC_MESSAGES, $Locale)) {
-            foreach my $err (keys %!) {
-                use Errno;
-                $! = eval "&Errno::$err";   # Convert to strerror() output
-                my $strerror = "$!";
-                if ("$strerror" =~ /\P{ASCII}/) {
-                    $ok14 = utf8::is_utf8($strerror);
-                    no locale;
-                    $ok14_5 = "$!" !~ /\P{ASCII}/;
-                    last;
+                foreach my $err (keys %!) {
+                    use Errno;
+                    $! = eval "&Errno::$err";   # Convert to strerror() output
+                    my $strerror = "$!";
+                    if ("$strerror" =~ /\P{ASCII}/) {
+                        $ok14 = utf8::is_utf8($strerror);
+                        no locale;
+                        $ok14_5 = "$!" !~ /\P{ASCII}/;
+                        last;
+                    }
                 }
-            }
             }
 
             # Similarly, we verify that a non-ASCII radix is in UTF-8.  This
