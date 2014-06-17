@@ -50,7 +50,7 @@ my $dumper = Dumpvalue->new(
                            );
 sub debug {
   return unless $debug;
-  my($mess) = join "", @_;
+  my($mess) = join "", '# ', @_;
   chop $mess;
   print $dumper->stringify($mess,1), "\n";
 }
@@ -699,15 +699,15 @@ my $final_without_setlocale = $test_num;
 
 # Find locales.
 
-debug "# Scanning for locales...\n";
+debug "Scanning for locales...\n";
 
 require POSIX; import POSIX ':locale_h';
 
 my @Locale = find_locales([ &POSIX::LC_CTYPE, &POSIX::LC_NUMERIC, &POSIX::LC_ALL ]);
 
-debug "# Locales =\n";
+debug "Locales =\n";
 for ( @Locale ) {
-    debug "# $_\n";
+    debug "$_\n";
 }
 
 unless (@Locale) {
@@ -811,7 +811,7 @@ sub report_result {
     $message = "  ($message)" if $message;
     unless ($pass_fail) {
 	$Problem{$i}{$Locale} = 1;
-	debug "# failed $i ($test_names{$i}) with locale '$Locale'$message\n";
+	debug "failed $i ($test_names{$i}) with locale '$Locale'$message\n";
     } else {
 	push @{$Okay{$i}}, $Locale;
     }
@@ -838,8 +838,8 @@ my %setlocale_failed;   # List of locales that setlocale() didn't work on
 
 foreach my $Locale (@Locale) {
     $locales_test_number = $first_locales_test_number - 1;
-    debug "#\n";
-    debug "# Locale = $Locale\n";
+    debug "\n";
+    debug "Locale = $Locale\n";
 
     unless (setlocale(&POSIX::LC_ALL, $Locale)) {
         $setlocale_failed{$Locale} = $Locale;
@@ -857,14 +857,14 @@ foreach my $Locale (@Locale) {
 
     my $is_utf8_locale = is_locale_utf8($Locale);
 
-    debug "# is utf8 locale? = $is_utf8_locale\n";
+    debug "is utf8 locale? = $is_utf8_locale\n";
 
     my $radix = localeconv()->{decimal_point};
     if ($radix !~ / ^ [[:ascii:]] + $/x) {
         use bytes;
         $radix = disp_chars(split "", $radix);
     }
-    debug "# radix = $radix\n";
+    debug "radix = $radix\n";
 
     if (! $is_utf8_locale) {
         use locale;
@@ -928,21 +928,21 @@ foreach my $Locale (@Locale) {
 
     # Ordered, where possible,  in groups of "this is a subset of the next
     # one"
-    debug "# :upper:  = ", disp_chars(@{$posixes{'upper'}}), "\n";
-    debug "# :lower:  = ", disp_chars(@{$posixes{'lower'}}), "\n";
-    debug "# :cased:  = ", disp_chars(@{$posixes{'cased'}}), "\n";
-    debug "# :alpha:  = ", disp_chars(@{$posixes{'alpha'}}), "\n";
-    debug "# :alnum:  = ", disp_chars(@{$posixes{'alnum'}}), "\n";
-    debug "#  w       = ", disp_chars(@{$posixes{'word'}}), "\n";
-    debug "# :graph:  = ", disp_chars(@{$posixes{'graph'}}), "\n";
-    debug "# :print:  = ", disp_chars(@{$posixes{'print'}}), "\n";
-    debug "#  d       = ", disp_chars(@{$posixes{'digit'}}), "\n";
-    debug "# :xdigit: = ", disp_chars(@{$posixes{'xdigit'}}), "\n";
-    debug "# :blank:  = ", disp_chars(@{$posixes{'blank'}}), "\n";
-    debug "#  s       = ", disp_chars(@{$posixes{'space'}}), "\n";
-    debug "# :punct:  = ", disp_chars(@{$posixes{'punct'}}), "\n";
-    debug "# :cntrl:  = ", disp_chars(@{$posixes{'cntrl'}}), "\n";
-    debug "# :ascii:  = ", disp_chars(@{$posixes{'ascii'}}), "\n";
+    debug ":upper:  = ", disp_chars(@{$posixes{'upper'}}), "\n";
+    debug ":lower:  = ", disp_chars(@{$posixes{'lower'}}), "\n";
+    debug ":cased:  = ", disp_chars(@{$posixes{'cased'}}), "\n";
+    debug ":alpha:  = ", disp_chars(@{$posixes{'alpha'}}), "\n";
+    debug ":alnum:  = ", disp_chars(@{$posixes{'alnum'}}), "\n";
+    debug " w       = ", disp_chars(@{$posixes{'word'}}), "\n";
+    debug ":graph:  = ", disp_chars(@{$posixes{'graph'}}), "\n";
+    debug ":print:  = ", disp_chars(@{$posixes{'print'}}), "\n";
+    debug " d       = ", disp_chars(@{$posixes{'digit'}}), "\n";
+    debug ":xdigit: = ", disp_chars(@{$posixes{'xdigit'}}), "\n";
+    debug ":blank:  = ", disp_chars(@{$posixes{'blank'}}), "\n";
+    debug " s       = ", disp_chars(@{$posixes{'space'}}), "\n";
+    debug ":punct:  = ", disp_chars(@{$posixes{'punct'}}), "\n";
+    debug ":cntrl:  = ", disp_chars(@{$posixes{'cntrl'}}), "\n";
+    debug ":ascii:  = ", disp_chars(@{$posixes{'ascii'}}), "\n";
 
     foreach (keys %UPPER) {
 
@@ -966,10 +966,10 @@ foreach my $Locale (@Locale) {
         }
     }
 
-    debug "# UPPER    = ", disp_chars(sort { ord $a <=> ord $b } keys %UPPER), "\n";
-    debug "# lower    = ", disp_chars(sort { ord $a <=> ord $b } keys %lower), "\n";
-    debug "# BoThCaSe = ", disp_chars(sort { ord $a <=> ord $b } keys %BoThCaSe), "\n";
-    debug "# Unassigned = ", disp_chars(sort { ord $a <=> ord $b } keys %Unassigned), "\n";
+    debug "UPPER    = ", disp_chars(sort { ord $a <=> ord $b } keys %UPPER), "\n";
+    debug "lower    = ", disp_chars(sort { ord $a <=> ord $b } keys %lower), "\n";
+    debug "BoThCaSe = ", disp_chars(sort { ord $a <=> ord $b } keys %BoThCaSe), "\n";
+    debug "Unassigned = ", disp_chars(sort { ord $a <=> ord $b } keys %Unassigned), "\n";
 
     my @failures;
     my @fold_failures;
@@ -1040,7 +1040,7 @@ foreach my $Locale (@Locale) {
 
     @Added_alpha = sort { ord $a <=> ord $b } @Added_alpha;
 
-    debug "# Added_alpha = ", disp_chars(@Added_alpha), "\n";
+    debug "Added_alpha = ", disp_chars(@Added_alpha), "\n";
 
     # Cross-check the whole 8-bit character set.
 
@@ -1625,20 +1625,20 @@ foreach my $Locale (@Locale) {
             }
             report_result($Locale, $locales_test_number, $test == 0);
             if ($test) {
-                debug "# lesser  = '$lesser'\n";
-                debug "# greater = '$greater'\n";
-                debug "# lesser cmp greater = ",
+                debug "lesser  = '$lesser'\n";
+                debug "greater = '$greater'\n";
+                debug "lesser cmp greater = ",
                         $lesser cmp $greater, "\n";
-                debug "# greater cmp lesser = ",
+                debug "greater cmp lesser = ",
                         $greater cmp $lesser, "\n";
-                debug "# (greater) from = $from, to = $to\n";
+                debug "(greater) from = $from, to = $to\n";
                 for my $ti (@test) {
                     debugf("# %-40s %-4s", $ti,
                             $test{$ti} ? 'FAIL' : 'ok');
                     if ($ti =~ /\(\.*(\$.+ +cmp +\$[^\)]+)\.*\)/) {
                         debugf("(%s == %4d)", $1, eval $1);
                     }
-                    debug "\n#";
+                    debugf("\n#");
                 }
 
                 last;
@@ -1846,7 +1846,7 @@ foreach my $Locale (@Locale) {
     $test_names{$locales_test_number} = 'Verify that an intervening printf doesn\'t change assignment results';
     my $first_a_test = $locales_test_number;
 
-    debug "# $first_a_test..$locales_test_number: \$a = $a, \$b = $b, Locale = $Locale\n";
+    debug "$first_a_test..$locales_test_number: \$a = $a, \$b = $b, Locale = $Locale\n";
 
     report_result($Locale, ++$locales_test_number, $ok2);
     $test_names{$locales_test_number} = 'Verify that an intervening sprintf doesn\'t change assignment results';
@@ -1865,7 +1865,7 @@ foreach my $Locale (@Locale) {
     $test_names{$locales_test_number} = 'Verify that a different locale radix works when doing "==" with a scalar and an intervening sprintf';
     $problematical_tests{$locales_test_number} = 1;
 
-    debug "# $first_c_test..$locales_test_number: \$c = $c, \$d = $d, Locale = $Locale\n";
+    debug "$first_c_test..$locales_test_number: \$c = $c, \$d = $d, Locale = $Locale\n";
 
     report_result($Locale, ++$locales_test_number, $ok6);
     $test_names{$locales_test_number} = 'Verify that can assign stringified under inner no-locale block';
@@ -1878,7 +1878,7 @@ foreach my $Locale (@Locale) {
     $test_names{$locales_test_number} = 'Verify that "==" with a scalar and an intervening sprintf still works in inner no locale';
     $problematical_tests{$locales_test_number} = 1;
 
-    debug "# $first_e_test..$locales_test_number: \$e = $e, no locale\n";
+    debug "$first_e_test..$locales_test_number: \$e = $e, no locale\n";
 
     report_result($Locale, ++$locales_test_number, $ok9);
     $test_names{$locales_test_number} = 'Verify that after a no-locale block, a different locale radix still works when doing "==" with a constant';
@@ -1928,7 +1928,7 @@ foreach my $Locale (@Locale) {
     report_result($Locale, ++$locales_test_number, $ok21);
     $test_names{$locales_test_number} = '"$!" is ASCII only outside of locale scope';
 
-    debug "# $first_f_test..$locales_test_number: \$f = $f, \$g = $g, back to locale = $Locale\n";
+    debug "$first_f_test..$locales_test_number: \$f = $f, \$g = $g, back to locale = $Locale\n";
 
     # Does taking lc separately differ from taking
     # the lc "in-line"?  (This was the bug 19990704.002, change #3568.)
@@ -1992,7 +1992,7 @@ foreach my $Locale (@Locale) {
             if (! $is_utf8_locale) {
                 my $y = lc $x;
                 next unless uc $y eq $x;
-                debug_more( "# UPPER=", disp_chars(($x)),
+                debug_more( "UPPER=", disp_chars(($x)),
                             "; lc=", disp_chars(($y)), "; ",
                             "; fc=", disp_chars((fc $x)), "; ",
                             disp_chars(($x)), "=~/", disp_chars(($y)), "/i=",
@@ -2038,7 +2038,7 @@ foreach my $Locale (@Locale) {
                 use locale ':not_characters';
                 my $y = lc $x;
                 next unless uc $y eq $x;
-                debug_more( "# UPPER=", disp_chars(($x)),
+                debug_more( "UPPER=", disp_chars(($x)),
                             "; lc=", disp_chars(($y)), "; ",
                             "; fc=", disp_chars((fc $x)), "; ",
                             disp_chars(($x)), "=~/", disp_chars(($y)), "/i=",
@@ -2060,7 +2060,7 @@ foreach my $Locale (@Locale) {
             if (! $is_utf8_locale) {
                 my $y = uc $x;
                 next unless lc $y eq $x;
-                debug_more( "# lower=", disp_chars(($x)),
+                debug_more( "lower=", disp_chars(($x)),
                             "; uc=", disp_chars(($y)), "; ",
                             "; fc=", disp_chars((fc $x)), "; ",
                             disp_chars(($x)), "=~/", disp_chars(($y)), "/i=",
@@ -2081,7 +2081,7 @@ foreach my $Locale (@Locale) {
                 use locale ':not_characters';
                 my $y = uc $x;
                 next unless lc $y eq $x;
-                debug_more( "# lower=", disp_chars(($x)),
+                debug_more( "lower=", disp_chars(($x)),
                             "; uc=", disp_chars(($y)), "; ",
                             "; fc=", disp_chars((fc $x)), "; ",
                             disp_chars(($x)), "=~/", disp_chars(($y)), "/i=",
