@@ -3241,6 +3241,12 @@ length that is less than 0.  This is difficult to imagine.
 (F) When C<vec> is called in an lvalue context, the second argument must be
 greater than or equal to zero.
 
+=item Negative repeat count does nothing
+
+(W numeric) You tried to execute the
+L<C<x>|perlop/Multiplicative Operators> repetition operator fewer than 0
+times, which doesn't make sense.
+
 =item Nested quantifiers in regex; marked by S<<-- HERE> in m/%s/
 
 (F) You can't quantify a quantifier without intervening parentheses.

@@ -1656,22 +1656,24 @@ PP(pp_repeat)
 	      else
 		   count = uv;
 	 } else {
-	      const IV iv = SvIV_nomg(sv);
-	      if (iv < 0)
-		   count = 0;
-	      else
-		   count = iv;
+	      count = SvIV_nomg(sv);
 	 }
     }
     else if (SvNOKp(sv)) {
 	 const NV nv = SvNV_nomg(sv);
 	 if (nv < 0.0)
-	      count = 0;
+              count = -1;   /* An arbitrary negative integer */
 	 else
 	      count = (IV)nv;
     }
     else
 	 count = SvIV_nomg(sv);
+
+    if (count < 0) {
+        count = 0;
+        Perl_ck_warner(aTHX_ packWARN(WARN_NUMERIC),
+                                         "Negative repeat count does nothing");
+    }
 
     if (GIMME == G_ARRAY && PL_op->op_private & OPpREPEAT_DOLIST) {
 	dMARK;

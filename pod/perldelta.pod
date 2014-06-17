@@ -546,6 +546,17 @@ simply disable this warning:
 
     no warnings "experimental::win32_perlio";
 
+=item  *
+
+L<Negative repeat count does nothing|perldiag/Negative repeat count does nothing>
+
+(W numeric)  This warns when the repeat count of the
+L<C<x>|perlop/Multiplicative Operators> repetition operator is
+negative.
+
+This warning may be changed or removed if it turn out that it was
+unwise to have added it.
+
 =back
 
 =head2 Changes to Existing Diagnostics

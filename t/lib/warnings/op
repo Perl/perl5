@@ -1914,3 +1914,15 @@ sub bbb ($a) { 4 }
 $aaa = sub { 2 };
 $bbb = sub ($a) { 4 };
 EXPECT
+########
+use warnings 'numeric';
+my $c = -4.5;
+my $a = "y" x $c;
+my $b = "y" x -3;
+no warnings 'numeric';
+my $d = "y" x $c;
+my $e = "y" x -3;
+no warnings 'numeric';
+EXPECT
+Negative repeat count does nothing at - line 3.
+Negative repeat count does nothing at - line 4.
