@@ -14,7 +14,7 @@ use utf8;
 use open qw( :utf8 :std );
 use warnings;
 
-plan( tests => 211 );
+plan( tests => 207 );
 
 # type coersion on assignment
 $ᕘ = 'ᕘ';
@@ -192,18 +192,6 @@ is (*{*Ẋ{GLOB}}, "*main::STDOUT");
     # test if defined() doesn't create any new symbols
 
     my $a = "Sʎｍ000";
-    ok(!defined *{$a});
-
-    {
-	no warnings 'deprecated';
-	ok(!defined @{$a});
-    }
-    ok(!defined *{$a});
-
-    {
-	no warnings 'deprecated';
-	ok(!defined %{$a});
-    }
     ok(!defined *{$a});
 
     ok(!defined ${$a});

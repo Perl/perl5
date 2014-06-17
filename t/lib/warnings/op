@@ -71,13 +71,11 @@
      	(Maybe you meant system() when you said exec()?
  	exec "true" ; my $a
 
-     defined(@array) is deprecated
-     	(Maybe you should just omit the defined()?)
+     Can't use defined(@array) (Maybe you should just omit the defined()?)
 	my @a ; defined @a ;
 	defined (@a = (1,2,3)) ;
 
-     defined(%hash) is deprecated
-     	(Maybe you should just omit the defined()?)
+     Can't use defined(%hash) (Maybe you should just omit the defined()?)
 	my %h ; defined %h ;
 
      "my %s" used in sort comparison
@@ -1071,32 +1069,32 @@ EXPECT
 # op.c
 defined(@a);
 EXPECT
-defined(@array) is deprecated at - line 2.
-	(Maybe you should just omit the defined()?)
+OPTION fatal
+Can't use 'defined(@array)' (Maybe you should just omit the defined()?) at - line 2.
 ########
 # op.c
 my @a; defined(@a);
 EXPECT
-defined(@array) is deprecated at - line 2.
-	(Maybe you should just omit the defined()?)
+OPTION fatal
+Can't use 'defined(@array)' (Maybe you should just omit the defined()?) at - line 2.
 ########
 # op.c
 defined(@a = (1,2,3));
 EXPECT
-defined(@array) is deprecated at - line 2.
-	(Maybe you should just omit the defined()?)
+OPTION fatal
+Can't use 'defined(@array)' (Maybe you should just omit the defined()?) at - line 2.
 ########
 # op.c
 defined(%h);
 EXPECT
-defined(%hash) is deprecated at - line 2.
-	(Maybe you should just omit the defined()?)
+OPTION fatal
+Can't use 'defined(%hash)' (Maybe you should just omit the defined()?) at - line 2.
 ########
 # op.c
 my %h; defined(%h);
 EXPECT
-defined(%hash) is deprecated at - line 2.
-	(Maybe you should just omit the defined()?)
+OPTION fatal
+Can't use 'defined(%hash)' (Maybe you should just omit the defined()?) at - line 2.
 ########
 # op.c
 no warnings 'exec' ;

@@ -1227,6 +1227,34 @@ provide symbolic names for C<$!> errno values.
 byte-order at the same time, so this combination of modifiers is not
 allowed.  See L<perlfunc/pack>.
 
+=item Can't use 'defined(@array)' (Maybe you should just omit the defined()?)
+
+(F) defined() is not useful on arrays because it
+checks for an undefined I<scalar> value.  If you want to see if the
+array is empty, just use C<if (@array) { # not empty }> for example.
+
+=item Can't use 'defined(%hash)' (Maybe you should just omit the defined()?)
+
+(F) C<defined()> is not usually right on hashes.
+
+Although C<defined %hash> is false on a plain not-yet-used hash, it
+becomes true in several non-obvious circumstances, including iterators,
+weak references, stash names, even remaining true after C<undef %hash>.
+These things make C<defined %hash> fairly useless in practice, so it now
+generates a fatal error.
+
+If a check for non-empty is what you wanted then just put it in boolean
+context (see L<perldata/Scalar values>):
+
+    if (%hash) {
+       # not empty
+    }
+
+If you had C<defined %Foo::Bar::QUUX> to check whether such a package
+variable exists then that's never really been reliable, and isn't
+a good way to enquire about the features of a package, or whether
+it's loaded, etc.
+
 =item Can't use %s for loop variable
 
 (F) Only a simple scalar variable may be used as a loop variable on a
@@ -1566,35 +1594,6 @@ which case it indicates something else.
 
 This threshold can be changed from 100, by recompiling the F<perl> binary,
 setting the C pre-processor macro C<PERL_SUB_DEPTH_WARN> to the desired value.
-
-=item defined(@array) is deprecated
-
-(D deprecated) defined() is not usually useful on arrays because it
-checks for an undefined I<scalar> value.  If you want to see if the
-array is empty, just use C<if (@array) { # not empty }> for example.
-
-=item defined(%hash) is deprecated
-
-(D deprecated) C<defined()> is not usually right on hashes and has been
-discouraged since 5.004.
-
-Although C<defined %hash> is false on a plain not-yet-used hash, it
-becomes true in several non-obvious circumstances, including iterators,
-weak references, stash names, even remaining true after C<undef %hash>.
-These things make C<defined %hash> fairly useless in practice.
-
-If a check for non-empty is what you wanted then just put it in boolean
-context (see L<perldata/Scalar values>):
-
-    if (%hash) {
-       # not empty
-    }
-
-If you had C<defined %Foo::Bar::QUUX> to check whether such a package
-variable exists then that's never really been reliable, and isn't
-a good way to enquire about the features of a package, or whether
-it's loaded, etc.
-
 
 =item (?(DEFINE)....) does not allow branches in regex; marked by
 S<<-- HERE> in m/%s/

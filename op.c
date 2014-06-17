@@ -9062,17 +9062,13 @@ Perl_ck_defined(pTHX_ OP *o)		/* 19990527 MJD */
 	case OP_RV2AV:
 	case OP_PADAV:
 	case OP_AASSIGN:		/* Is this a good idea? */
-	    Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED),
-			   "defined(@array) is deprecated");
-	    Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED),
-			   "\t(Maybe you should just omit the defined()?)\n");
+	    Perl_croak(aTHX_ "Can't use 'defined(@array)'"
+			     " (Maybe you should just omit the defined()?)");
 	break;
 	case OP_RV2HV:
 	case OP_PADHV:
-	    Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED),
-			   "defined(%%hash) is deprecated");
-	    Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED),
-			   "\t(Maybe you should just omit the defined()?)\n");
+	    Perl_croak(aTHX_ "Can't use 'defined(%%hash)'"
+			     " (Maybe you should just omit the defined()?)");
 	    break;
 	default:
 	    /* no warning */

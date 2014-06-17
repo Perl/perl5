@@ -12,7 +12,7 @@ BEGIN {
 
 use warnings;
 
-plan( tests => 271 );
+plan( tests => 267 );
 
 # type coercion on assignment
 $foo = 'foo';
@@ -198,18 +198,6 @@ is *x{PACKAGE}, 'main', 'and *foo{PACKAGE} the original package';
     # test if defined() doesn't create any new symbols
 
     my $a = "SYM000";
-    ok(!defined *{$a});
-
-    {
-	no warnings 'deprecated';
-	ok(!defined @{$a});
-    }
-    ok(!defined *{$a});
-
-    {
-	no warnings 'deprecated';
-	ok(!defined %{$a});
-    }
     ok(!defined *{$a});
 
     ok(!defined ${$a});

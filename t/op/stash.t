@@ -7,7 +7,7 @@ BEGIN {
 
 BEGIN { require "./test.pl"; }
 
-plan( tests => 58 );
+plan( tests => 49 );
 
 # Used to segfault (bug #15479)
 fresh_perl_like(
@@ -36,18 +36,6 @@ SKIP: {
   );
 }
 
-{
-    no warnings 'deprecated';
-    ok( defined %oedipa::maas::, q(stashes happen to be defined if not used) );
-    ok( defined %{"oedipa::maas::"}, q(- work with hard refs too) );
-
-    ok( defined %tyrone::slothrop::, q(stashes are defined if seen at compile time) );
-    ok( defined %{"tyrone::slothrop::"}, q(- work with hard refs too) );
-
-    ok( defined %bongo::shaftsbury::, q(stashes are defined if a var is seen at compile time) );
-    ok( defined %{"bongo::shaftsbury::"}, q(- work with hard refs too) );
-}
-
 package tyrone::slothrop;
 $bongo::shaftsbury::scalar = 1;
 
@@ -73,17 +61,10 @@ package main;
 		  );
 }
 
-# now tests in eval
-
-ok( eval  { no warnings 'deprecated'; defined %achtfaden:: },   'works in eval{}' );
-ok( eval q{ no warnings 'deprecated'; defined %schoenmaker:: }, 'works in eval("")' );
-
 # now tests with strictures
 
 {
     use strict;
-    no warnings 'deprecated';
-    ok( defined %pig::, q(referencing a non-existent stash doesn't produce stricture errors) );
     ok( !exists $pig::{bodine}, q(referencing a non-existent stash element doesn't produce stricture errors) );
 }
 
