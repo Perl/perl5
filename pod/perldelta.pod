@@ -181,6 +181,10 @@ L<[perl #122046]|https://rt.perl.org/Ticket/Display.html?id=122046>
 
 =item *
 
+Note that C<SvSetSV> doesn't do set magic.
+
+=item *
+
 C<sv_usepvn_flags> - Fix documentation to mention the use of C<NewX> instead of 
 C<malloc>.
 
