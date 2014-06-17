@@ -43,6 +43,17 @@ L<Announced on 2014-05-27 by Ricardo Signes|http://www.nntp.perl.org/group/perl.
 
   -- William Shakespeare, Sonnet 18
 
+=head2 v5.20.0-RC1 - Lindsey Buckingham, "Second Hand News"
+
+L<Announced on 2014-05-17 by Ricardo Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2014/05/msg215479.html>
+
+  When times go bad
+  when times go rough
+  Won't you lay me down in tall grass
+  And let me do my stuff
+
+  -- Lindsey Buckingham, "Second Hand News"
+
 =head2 v5.19.11 - Lautréamont, Les Chants de Maldoror
 
 L<Announced on 2014-04-20 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2014/04/msg214580.html>
