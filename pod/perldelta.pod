@@ -532,13 +532,156 @@ and New Warnings
 
 =item *
 
-XXX L<message|perldiag/"message">
+L<In '(?...)', the '(' and '?' must be adjacent in regex; marked by S<<-- HERE> in mE<sol>%sE<sol>|perldiag/"In '(?...)', the '(' and '?' must be adjacent in regex; marked by <-- HERE in m/%s/">
+
+(F) The two-character sequence C<"(?"> in
+this context in a regular expression pattern should be an
+indivisible token, with nothing intervening between the C<"(">
+and the C<"?">, but you separated them.
+
+=item *
+
+L<In '(*VERB...)', the '(' and '*' must be adjacent in regex; marked by S<<-- HERE> in mE<sol>%sE<sol>|perldiag/"In '(*VERB...)', the '(' and '*' must be adjacent in regex; marked by <-- HERE in m/%s/">
+
+(F) The two-character sequence C<"(*"> in
+this context in a regular expression pattern should be an
+indivisible token, with nothing intervening between the C<"(">
+and the C<"*">, but you separated them.
+
+=item *
+
+L<charnames alias definitions may not contain a sequence of multiple spaces|perldiag/"charnames alias definitions may not contain a sequence of multiple spaces">
+
+(F) You defined a character name which had multiple space
+ characters in a row.  Change them to single spaces.  Usually these
+ names are defined in the C<:alias> import argument to C<use charnames>, but
+ they could be defined by a translator installed into C<$^H{charnames}>.
+ See L<charnames/CUSTOM ALIASES>.
+
+=item *
+
+L<charnames alias definitions may not contain trailing white-space|perldiag/"charnames alias definitions may not contain trailing white-space">
+
+(F) You defined a character name which ended in a space
+character.  Remove the trailing space(s).  Usually these names are
+defined in the C<:alias> import argument to C<use charnames>, but they
+could be defined by a translator installed into C<$^H{charnames}>.
+See L<charnames/CUSTOM ALIASES>.
+
+=item *
+
+L<Can't use a hash as a reference|perldiag/"Can't use a hash as a reference">
+
+(F) You tried to use a hash as a reference, as in
+C<< %foo->{"bar"} >> or C<< %$ref->{"hello"} >>.  Versions of perl <= 5.6.1
+used to allow this syntax, but shouldn't have.
+
+=item *
+
+L<Can't use an array as a reference|perldiag/"Can't use an array as a reference">
+
+(F) You tried to use an array as a reference, as in
+C<< @foo->[23] >> or C<< @$ref->[99] >>.  Versions of perl <= 5.6.1 used to
+allow this syntax, but shouldn't have.
+
+=item *
+
+L<Can't use 'defined(@array)' (Maybe you should just omit the defined()?)|perldiag/"Can't use 'defined(@array)' (Maybe you should just omit the defined()?)">
+
+(F) defined() is not useful on arrays because it
+checks for an undefined I<scalar> value.  If you want to see if the
+array is empty, just use C<if (@array) { # not empty }> for example.
+
+=item *
+
+L<Can't use 'defined(%hash)' (Maybe you should just omit the defined()?)|perldiag/"Can't use 'defined(%hash)' (Maybe you should just omit the defined()?)">
+
+(F) C<defined()> is not usually right on hashes.
+
+Although C<defined %hash> is false on a plain not-yet-used hash, it
+becomes true in several non-obvious circumstances, including iterators,
+weak references, stash names, even remaining true after C<undef %hash>.
+These things make C<defined %hash> fairly useless in practice, so it now
+generates a fatal error.
+
+If a check for non-empty is what you wanted then just put it in boolean
+context (see L<perldata/Scalar values>):
+
+    if (%hash) {
+       # not empty
+    }
+
+If you had C<defined %Foo::Bar::QUUX> to check whether such a package
+variable exists then that's never really been reliable, and isn't
+a good way to enquire about the features of a package, or whether
+it's loaded, etc.
+
+=item *
+
+L<Illegal suidscript|perldiag/"Illegal suidscript">
+
+(F) The script run under suidperl was somehow illegal.
 
 =back
 
 =head3 New Warnings
 
 =over 4
+
+=item *
+
+L<Unescaped left brace in regex is deprecated, passed through in regex; marked by <-- HERE in mE<sol>%sE<sol>|perldiag/"Unescaped left brace in regex is deprecated, passed through in regex; marked by <-- HERE in m/%s/">
+
+(D deprecated, regexp) You used a literal C<"{"> character in a regular
+expression pattern. You should change to use C<"\{"> instead, because a future
+version of Perl (tentatively v5.26) will consider this to be a syntax error.  If
+the pattern delimiters are also braces, any matching right brace
+(C<"}">) should also be escaped to avoid confusing the parser, for
+example,
+
+    qr{abc\{def\}ghi}
+
+=item *
+
+L<NO-BREAK SPACE in a charnames alias definition is deprecated|perldiag/"NO-BREAK SPACE in a charnames alias definition is deprecated">
+
+(D deprecated) You defined a character name which contained a no-break
+space character.  Change it to a regular space.  Usually these names are
+defined in the C<:alias> import argument to C<use charnames>, but they
+could be defined by a translator installed into C<$^H{charnames}>.  See
+L<charnames/CUSTOM ALIASES>.
+
+=item *
+
+L<PerlIO layer ':win32' is experimental|perldiag/"PerlIO layer ':win32' is experimental">
+
+(S experimental::win32_perlio) The C<:win32> PerlIO layer is
+experimental.  If you want to take the risk of using this layer,
+simply disable this warning:
+
+    no warnings "experimental::win32_perlio";
+
+=item *
+
+L<Negative repeat count does nothing|perldiag/"Negative repeat count does nothing">
+
+(W numeric) You tried to execute the
+L<C<x>|perlop/Multiplicative Operators> repetition operator fewer than 0
+times, which doesn't make sense.
+
+=item *
+
+L<localtime(%f) failed|perldiag/"localtime(%f) failed">
+
+(W overflow) You called C<localtime> with a number that it could not handle:
+too large, too small, or NaN.  The returned value is C<undef>.
+
+=item *
+
+L<gmtime(%f) failed|perldiag/"gmtime(%f) failed">
+
+(W overflow) You called C<gmtime> with a number that it could not handle:
+too large, too small, or NaN.  The returned value is C<undef>.
 
 =item *
 
@@ -550,7 +693,7 @@ simply disable this warning:
 
     no warnings "experimental::win32_perlio";
 
-=item  *
+=item *
 
 L<Negative repeat count does nothing|perldiag/Negative repeat count does nothing>
 
