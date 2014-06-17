@@ -1874,8 +1874,9 @@ foreach my $Locale (@Locale) {
         $ok18 = $j eq sprintf("%g:%g", $h, $i);
     }
 
-    { # These tests aren't affected by :not_characters
-
+    $ok19 = $ok20 = 1;
+    if (setlocale(&POSIX::LC_TIME, $Locale)) { # These tests aren't affected by
+                                               # :not_characters
         my @times = CORE::localtime();
 
         use locale;
