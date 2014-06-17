@@ -6524,7 +6524,20 @@ front of your variable.
 =item Variable length lookbehind not implemented in regex m/%s/
 
 (F) Lookbehind is allowed only for subexpressions whose length is fixed and
-known at compile time.  See L<perlre>.
+known at compile time.  For positive lookbehind, you can use the C<\K>
+regex construct as a way to get the equivalent functionality.  See
+L<perlre/(?<=pattern) \K>.
+
+There are non-obvious Unicode rules under C</i> that can match variably,
+but which you might not think could.  For example, the substring C<"ss">
+can match the single character LATIN SMALL LETTER SHARP S.  There are
+other sequences of ASCII characters that can match single ligature
+characters, such as LATIN SMALL LIGATURE FFI matching C<qr/ffi/i>.
+Starting in Perl v5.16, if you only care about ASCII matches, adding the
+C</aa> modifier to the regex will exclude all these non-obvious matches,
+thus getting rid of this message.  You can also say C<S<use re qw(/aa)>>
+to apply C</aa> to all regular expressions compiled within its scope.
+See L<re>.
 
 =item "%s" variable %s masks earlier declaration in same %s
 
