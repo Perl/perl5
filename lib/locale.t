@@ -1984,6 +1984,8 @@ foreach my $Locale (@Locale) {
 
     report_result($Locale, ++$locales_test_number, $ok20);
     $test_names{$locales_test_number} = 'Verify that strftime returns date with UTF-8 flag appropriately set';
+    $problematical_tests{$locales_test_number} = 1;   # This is broken in
+                                                      # OS X 10.9.3
 
     report_result($Locale, ++$locales_test_number, $ok21);
     $test_names{$locales_test_number} = '"$!" is ASCII only outside of locale scope';
