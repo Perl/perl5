@@ -509,18 +509,6 @@ check the return value of your socket() call?  See L<perlfunc/bind>.
 (W unopened) You tried binmode() on a filehandle that was never opened.
 Check your control flow and number of arguments.
 
-=item "\b{" is deprecated; use "\b\{" or "\b[{]" instead in regex; marked
-by S<<-- HERE> in m/%s/
-
-=item "\B{" is deprecated; use "\B\{" or "\B[{]" instead in regex; marked
-by S<<-- HERE> in m/%s/
-
-(D deprecated) Use of an unescaped "{" immediately following
-a C<\b> or C<\B> is now deprecated so as to reserve its use for Perl
-itself in a future release.  You can either precede the brace
-with a backslash, or enclose it in square brackets; the latter
-is the way to go if the pattern delimiters are C<{}>.
-
 =item Bit vector size > 32 non-portable
 
 (W portable) Using bit vector sizes larger than 32 is non-portable.
