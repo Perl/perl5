@@ -1842,9 +1842,10 @@ foreach my $Locale (@Locale) {
 
             # Look for non-ASCII error messages, and verify that the first
             # such is in UTF-8 (the others almost certainly will be like the
-            # first).
+            # first).  This is only done if the current locale has LC_MESSAGES
             $ok14 = 1;
             $ok14_5 = 1;
+            if (setlocale(&POSIX::LC_MESSAGES, $Locale)) {
             foreach my $err (keys %!) {
                 use Errno;
                 $! = eval "&Errno::$err";   # Convert to strerror() output
@@ -1855,6 +1856,7 @@ foreach my $Locale (@Locale) {
                     $ok14_5 = "$!" !~ /\P{ASCII}/;
                     last;
                 }
+            }
             }
 
             # Similarly, we verify that a non-ASCII radix is in UTF-8.  This
