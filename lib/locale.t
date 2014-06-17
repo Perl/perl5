@@ -805,6 +805,64 @@ sub disp_chars {
     return $output;
 }
 
+sub disp_str ($) {
+    my $string = shift;
+
+    # Displays the string unambiguously.  ASCII printables are always output
+    # as-is, though perhaps separated by blanks from other characters.  If
+    # entirely printable ASCII, just returns the string.  Otherwise if valid
+    # UTF-8 it uses the character names for non-printable-ASCII.  Otherwise it
+    # outputs hex for each non-ASCII-printable byte.
+
+    return $string if $string =~ / ^ [[:print:]]* $/xa;
+
+    my $result = "";
+    my $prev_was_punct = 1; # Beginning is considered punct
+    if (utf8::valid($string) && utf8::is_utf8($string)) {
+        use charnames ();
+        foreach my $char (split "", $string) {
+
+            # Keep punctuation adjacent to other characters; otherwise
+            # separate them with a blank
+            if ($char =~ /[[:punct:]]/a) {
+                $result .= $char;
+                $prev_was_punct = 1;
+            }
+            elsif ($char =~ /[[:print:]]/a) {
+                $result .= "  " unless $prev_was_punct;
+                $result .= $char;
+                $prev_was_punct = 0;
+            }
+            else {
+                $result .= "  " unless $prev_was_punct;
+                $result .= charnames::viacode(ord $char);
+                $prev_was_punct = 0;
+            }
+        }
+    }
+    else {
+        use bytes;
+        foreach my $char (split "", $string) {
+            if ($char =~ /[[:punct:]]/a) {
+                $result .= $char;
+                $prev_was_punct = 1;
+            }
+            elsif ($char =~ /[[:print:]]/a) {
+                $result .= " " unless $prev_was_punct;
+                $result .= $char;
+                $prev_was_punct = 0;
+            }
+            else {
+                $result .= " " unless $prev_was_punct;
+                $result .= sprintf("%02X", ord $char);
+                $prev_was_punct = 0;
+            }
+        }
+    }
+
+    return $result;
+}
+
 sub report_result {
     my ($Locale, $i, $pass_fail, $message) = @_;
     $message //= "";
