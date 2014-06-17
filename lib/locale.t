@@ -1880,7 +1880,8 @@ foreach my $Locale (@Locale) {
 
         use locale;
         $ok19 = POSIX::strftime("%p", @times) ne "%p"; # [perl #119425]
-        my $date = POSIX::strftime("%A %B %Z", @times);
+        my $date = POSIX::strftime("'%A'  '%B'  '%Z'", @times);
+        debug("'Day' 'Month' 'TZ' = ", disp_str($date));
 
         # If there is any non-ascii, it better be UTF-8 in a UTF-8 locale, and
         # not UTF-8 if the locale isn't UTF-8.
