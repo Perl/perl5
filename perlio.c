@@ -3535,7 +3535,20 @@ PerlIOStdio_set_ptrcnt(pTHX_ PerlIO *f, STDCHAR * ptr, SSize_t cnt)
     FILE * const stdio = PerlIOSelf(f, PerlIOStdio)->stdio;
     if (ptr != NULL) {
 #ifdef STDIO_PTR_LVALUE
+        /* This is a long-standing infamous mess.  The root of the
+         * problem is that one cannot know the signedness of char, and
+         * more precisely the signedness of FILE._ptr.  The following
+         * things have been tried, and they have all failed (across
+         * different compilers (remember that core needs to to build
+         * also with c++) and compiler options:
+         *
+         * - casting the RHS to (void*) -- works in *some* places
+         * - casting the LHS to (void*) -- totally unportable
+         *
+         * So let's try silencing the warning at least for gcc. */
+        GCC_DIAG_IGNORE(-Wpointer-sign);
 	PerlSIO_set_ptr(stdio, ptr); /* LHS STDCHAR* cast non-portable */
+        GCC_DIAG_RESTORE;
 #ifdef STDIO_PTR_LVAL_SETS_CNT
 	assert(PerlSIO_get_cnt(stdio) == (cnt));
 #endif
