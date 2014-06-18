@@ -3026,6 +3026,7 @@ S_construct_ahocorasick_from_trie(pTHX_ RExC_state_t *pRExC_state, regnode *sour
     GET_RE_DEBUG_FLAGS_DECL;
 
     PERL_ARGS_ASSERT_CONSTRUCT_AHOCORASICK_FROM_TRIE;
+    PERL_UNUSED_CONTEXT;
 #ifndef DEBUGGING
     PERL_UNUSED_ARG(depth);
 #endif
@@ -15231,6 +15232,7 @@ S_reginsert(pTHX_ RExC_state_t *pRExC_state, U8 op, regnode *opnd, U32 depth)
     GET_RE_DEBUG_FLAGS_DECL;
 
     PERL_ARGS_ASSERT_REGINSERT;
+    PERL_UNUSED_CONTEXT;
     PERL_UNUSED_ARG(depth);
 /* (PL_regkind[(U8)op] == CURLY ? EXTRA_STEP_2ARGS : 0); */
     DEBUG_PARSE_FMT("inst"," - %s",PL_reg_name[op]);

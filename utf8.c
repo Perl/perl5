@@ -869,6 +869,7 @@ Perl_valid_utf8_to_uvchr(pTHX_ const U8 *s, STRLEN *retlen)
     UV uv = *s;
 
     PERL_ARGS_ASSERT_VALID_UTF8_TO_UVCHR;
+    PERL_UNUSED_CONTEXT;
 
     if (retlen) {
         *retlen = expectlen;
@@ -1056,7 +1057,6 @@ Perl_bytes_cmp_utf8(pTHX_ const U8 *b, STRLEN blen, const U8 *u, STRLEN ulen)
     const U8 *const uend = u + ulen;
 
     PERL_ARGS_ASSERT_BYTES_CMP_UTF8;
-
     PERL_UNUSED_CONTEXT;
 
     while (b < bend && u < uend) {
@@ -1123,6 +1123,7 @@ Perl_utf8_to_bytes(pTHX_ U8 *s, STRLEN *len)
     U8 *d;
 
     PERL_ARGS_ASSERT_UTF8_TO_BYTES;
+    PERL_UNUSED_CONTEXT;
 
     /* ensure valid UTF-8 and chars < 256 before updating string */
     while (s < send) {
@@ -1174,7 +1175,6 @@ Perl_bytes_from_utf8(pTHX_ const U8 *s, STRLEN *len, bool *is_utf8)
     I32 count = 0;
 
     PERL_ARGS_ASSERT_BYTES_FROM_UTF8;
-
     PERL_UNUSED_CONTEXT;
     if (!*is_utf8)
         return (U8 *)start;
@@ -1490,7 +1490,7 @@ Perl_to_uni_title(pTHX_ UV c, U8* p, STRLEN *lenp)
 }
 
 STATIC U8
-S_to_lower_latin1(pTHX_ const U8 c, U8* p, STRLEN *lenp)
+S_to_lower_latin1(const U8 c, U8* p, STRLEN *lenp)
 {
     /* We have the latin1-range values compiled into the core, so just use
      * those, converting the result to utf8.  Since the result is always just
@@ -1540,6 +1540,7 @@ Perl__to_fold_latin1(pTHX_ const U8 c, U8* p, STRLEN *lenp, const unsigned int f
     UV converted;
 
     PERL_ARGS_ASSERT__TO_FOLD_LATIN1;
+    PERL_UNUSED_CONTEXT;
 
     assert (! (flags & FOLD_FLAGS_LOCALE));
 

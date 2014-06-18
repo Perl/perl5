@@ -728,6 +728,7 @@ bool
 Perl_is_utf8_string_loc(pTHX_ const U8 *s, STRLEN len, const U8 **ep)
 {
     PERL_ARGS_ASSERT_IS_UTF8_STRING_LOC;
+    PERL_UNUSED_CONTEXT;
 
     return is_utf8_string_loclen(s, len, ep, 0);
 }
@@ -1278,84 +1279,98 @@ Perl_is_uni_alpha(pTHX_ UV c)
 bool
 Perl_is_uni_ascii(pTHX_ UV c)
 {
+    PERL_UNUSED_CONTEXT;
     return isASCII_uni(c);
 }
 
 bool
 Perl_is_uni_blank(pTHX_ UV c)
 {
+    PERL_UNUSED_CONTEXT;
     return isBLANK_uni(c);
 }
 
 bool
 Perl_is_uni_space(pTHX_ UV c)
 {
+    PERL_UNUSED_CONTEXT;
     return isSPACE_uni(c);
 }
 
 bool
 Perl_is_uni_digit(pTHX_ UV c)
 {
+    PERL_UNUSED_CONTEXT;
     return isDIGIT_uni(c);
 }
 
 bool
 Perl_is_uni_upper(pTHX_ UV c)
 {
+    PERL_UNUSED_CONTEXT;
     return isUPPER_uni(c);
 }
 
 bool
 Perl_is_uni_lower(pTHX_ UV c)
 {
+    PERL_UNUSED_CONTEXT;
     return isLOWER_uni(c);
 }
 
 bool
 Perl_is_uni_cntrl(pTHX_ UV c)
 {
+    PERL_UNUSED_CONTEXT;
     return isCNTRL_L1(c);
 }
 
 bool
 Perl_is_uni_graph(pTHX_ UV c)
 {
+    PERL_UNUSED_CONTEXT;
     return isGRAPH_uni(c);
 }
 
 bool
 Perl_is_uni_print(pTHX_ UV c)
 {
+    PERL_UNUSED_CONTEXT;
     return isPRINT_uni(c);
 }
 
 bool
 Perl_is_uni_punct(pTHX_ UV c)
 {
+    PERL_UNUSED_CONTEXT;
     return isPUNCT_uni(c);
 }
 
 bool
 Perl_is_uni_xdigit(pTHX_ UV c)
 {
+    PERL_UNUSED_CONTEXT;
     return isXDIGIT_uni(c);
 }
 
 bool
 Perl_is_uni_alnum_lc(pTHX_ UV c)
 {
+    PERL_UNUSED_CONTEXT;
     return isWORDCHAR_LC_uvchr(c);
 }
 
 bool
 Perl_is_uni_alnumc_lc(pTHX_ UV c)
 {
+    PERL_UNUSED_CONTEXT;
     return isALPHANUMERIC_LC_uvchr(c);
 }
 
 bool
 Perl_is_uni_idfirst_lc(pTHX_ UV c)
 {
+    PERL_UNUSED_CONTEXT;
     /* XXX Should probably be something that resolves to the old IDFIRST, but
      * this function is deprecated, so not bothering */
     return isIDFIRST_LC_uvchr(c);
@@ -1364,24 +1379,28 @@ Perl_is_uni_idfirst_lc(pTHX_ UV c)
 bool
 Perl_is_uni_alpha_lc(pTHX_ UV c)
 {
+    PERL_UNUSED_CONTEXT;
     return isALPHA_LC_uvchr(c);
 }
 
 bool
 Perl_is_uni_ascii_lc(pTHX_ UV c)
 {
+    PERL_UNUSED_CONTEXT;
     return isASCII_LC_uvchr(c);
 }
 
 bool
 Perl_is_uni_blank_lc(pTHX_ UV c)
 {
+    PERL_UNUSED_CONTEXT;
     return isBLANK_LC_uvchr(c);
 }
 
 bool
 Perl_is_uni_space_lc(pTHX_ UV c)
 {
+    PERL_UNUSED_CONTEXT;
     return isSPACE_LC_uvchr(c);
 }
 
@@ -1550,6 +1569,7 @@ Perl_is_utf8_ascii(pTHX_ const U8 *p)
     dVAR;
 
     PERL_ARGS_ASSERT_IS_UTF8_ASCII;
+    PERL_UNUSED_CONTEXT;
 
     return isASCII_utf8(p);
 }
@@ -1560,6 +1580,7 @@ Perl_is_utf8_blank(pTHX_ const U8 *p)
     dVAR;
 
     PERL_ARGS_ASSERT_IS_UTF8_BLANK;
+    PERL_UNUSED_CONTEXT;
 
     return isBLANK_utf8(p);
 }
@@ -1570,6 +1591,7 @@ Perl_is_utf8_space(pTHX_ const U8 *p)
     dVAR;
 
     PERL_ARGS_ASSERT_IS_UTF8_SPACE;
+    PERL_UNUSED_CONTEXT;
 
     return isSPACE_utf8(p);
 }
@@ -1580,6 +1602,7 @@ Perl_is_utf8_perl_space(pTHX_ const U8 *p)
     dVAR;
 
     PERL_ARGS_ASSERT_IS_UTF8_PERL_SPACE;
+    PERL_UNUSED_CONTEXT;
 
     /* Only true if is an ASCII space-like character, and ASCII is invariant
      * under utf8, so can just use the macro */
@@ -1592,6 +1615,7 @@ Perl_is_utf8_perl_word(pTHX_ const U8 *p)
     dVAR;
 
     PERL_ARGS_ASSERT_IS_UTF8_PERL_WORD;
+    PERL_UNUSED_CONTEXT;
 
     /* Only true if is an ASCII word character, and ASCII is invariant
      * under utf8, so can just use the macro */
@@ -1614,6 +1638,7 @@ Perl_is_utf8_posix_digit(pTHX_ const U8 *p)
     dVAR;
 
     PERL_ARGS_ASSERT_IS_UTF8_POSIX_DIGIT;
+    PERL_UNUSED_CONTEXT;
 
     /* Only true if is an ASCII digit character, and ASCII is invariant
      * under utf8, so can just use the macro */
@@ -1646,6 +1671,7 @@ Perl_is_utf8_cntrl(pTHX_ const U8 *p)
     dVAR;
 
     PERL_ARGS_ASSERT_IS_UTF8_CNTRL;
+    PERL_UNUSED_CONTEXT;
 
     return isCNTRL_utf8(p);
 }
@@ -1686,6 +1712,7 @@ Perl_is_utf8_xdigit(pTHX_ const U8 *p)
     dVAR;
 
     PERL_ARGS_ASSERT_IS_UTF8_XDIGIT;
+    PERL_UNUSED_CONTEXT;
 
     return isXDIGIT_utf8(p);
 }

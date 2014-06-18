@@ -94,6 +94,8 @@ Perl_debstackptrs(pTHX)
 		  PTR2UV(PL_mainstack), PTR2UV(AvARRAY(PL_curstack)),
 		  PTR2UV(PL_mainstack), PTR2UV(AvFILLp(PL_curstack)),
 		  PTR2UV(AvMAX(PL_curstack)));
+#else
+    PERL_UNUSED_CONTEXT;
 #endif /* DEBUGGING */
     return 0;
 }

@@ -375,6 +375,7 @@ Perl_opslab_free(pTHX_ OPSLAB *slab)
     dVAR;
     OPSLAB *slab2;
     PERL_ARGS_ASSERT_OPSLAB_FREE;
+    PERL_UNUSED_CONTEXT;
     DEBUG_S_warn((aTHX_ "freeing slab %p", (void*)slab));
     assert(slab->opslab_refcnt == 1);
     for (; slab; slab = slab2) {

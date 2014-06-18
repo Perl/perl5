@@ -1198,6 +1198,7 @@ int
 Perl_mode_from_discipline(pTHX_ const char *s, STRLEN len)
 {
     int mode = O_BINARY;
+    PERL_UNUSED_CONTEXT;
     if (s) {
 	while (*s) {
 	    if (*s == ':') {
@@ -2049,6 +2050,7 @@ Perl_cando(pTHX_ Mode_t mode, bool effective, const Stat_t *statbufp)
     dVAR;
 
     PERL_ARGS_ASSERT_CANDO;
+    PERL_UNUSED_CONTEXT;
 
 #ifdef DOSISH
     /* [Comments and code from Len Reed]
@@ -2107,6 +2109,10 @@ static bool
 S_ingroup(pTHX_ Gid_t testgid, bool effective)
 {
     dVAR;
+#ifndef PERL_IMPLICIT_SYS
+    /* PERL_IMPLICIT_SYS like Win32: getegid() etc. require the context. */
+    PERL_UNUSED_CONTEXT;
+#endif
     if (testgid == (effective ? PerlProc_getegid() : PerlProc_getgid()))
 	return TRUE;
 #ifdef HAS_GETGROUPS
