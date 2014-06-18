@@ -178,17 +178,26 @@ Intel*) ;; # # Is that you, Intel C++?
           *) if test -x _cflags$_exe
              then
                case "$opt" in
-               -std*) stdflags="$stdflags $opt" ;;
+               -std*)
+                 echo "cflags.SH: Adding $opt."
+                 stdflags="$stdflags $opt"
+                 ;;
                *) case "$opt" in
                   -W)
                     # -Wextra is the modern form of -W, so add
                     # -W only if -Wextra is not there already.
                     case " $warn " in
                     *-Wextra*) ;;
-                    *) warn="$warn opt" ;;
+                    *)
+                      echo "cflags.SH: Adding $opt."
+                      warn="$warn opt"
+                      ;;
                     esac
                     ;;
-                  *) warn="$warn $opt" ;;
+                  *)
+                     echo "cflags.SH: Adding $opt."
+                     warn="$warn $opt"
+                     ;;
                   esac
                esac
              fi
