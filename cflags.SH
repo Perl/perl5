@@ -139,9 +139,9 @@ stdflags=''
 # Note that some problems may only show up with combinations of options,
 # e.g. a warning might show up only with -Wall -ansi, not with either
 # one individually.
-# TODO:  Ponder whether to migrate this back to Configure so hints files can 
+# TODO:  Ponder whether to migrate this back to Configure so hints files can
 # tweak it.  Also, be paranoid about whether results we've deduced in Configure
-# (especially about things like long long, which are not in C89) will still be 
+# (especially about things like long long, which are not in C89) will still be
 # valid if we now add flags like -std=c89.
 
 case "$gccversion" in
@@ -194,7 +194,7 @@ case "$gccversion" in
     # Similarly, since 'long long' isn't part of C89, FreeBSD 6.2 headers
     # don't declare atoll() under -std=c89, but we need it.  In general,
     # insisting on -std=c89 is inconsistent with insisting on using
-    # 'long long'. So drop -std=c89 and -ansi as well if we're using 
+    # 'long long'. So drop -std=c89 and -ansi as well if we're using
     # 'long long' as our main integral type.
     case "$ivtype" in
     "long long")
@@ -247,7 +247,7 @@ done
 # XXX this is related to the unfortunate fact that bare -Wall (without
 # amending -Wno-unused-...) is too much for XS code because of all the
 # often generated but unused things.
-#  
+#
 case "$ccflags$warn" in
 *-Wall*)
   is_clang=undef
@@ -284,10 +284,10 @@ case "$ccflags$warn" in
     do
       case "$warn" in
       *"$f"*) ;;
-      *) 
+      *)
         echo "cflags.SH: Adding $f because of clang."
         warn="$warn $f" ;;
-      esac  
+      esac
     done
     ;;
   esac
