@@ -241,39 +241,6 @@ do
   esac
 done
 
-# -Wall includes -Wunused-value and -Wunused-parameter, which may be too much
-# with some compilers.
-#
-# XXX this is related to the unfortunate fact that bare -Wall (without
-# amending -Wno-unused-...) is too much for XS code because of all the
-# often generated but unused things.
-#
-case "$ccflags$warn" in
-*-Wall*)
-  case "$cc" in
-  *g++*)
-    # Without -Wno-unused-variable g++ 4.x compiles are rather unwatchable
-    # because of all the warnings about Perl___notused, and g++ doesn't do
-    # __attribute__((unused)) (and even if at some stage it may, people do
-    # have older gcc installations), and ((void)x) isn't enough to silence
-    # the noises about XS functions not using their cv parameter, so we need
-    # the -Wno-unused-parameter too.
-    # Yes, we lose some valid warnings, but hopefully other compilers
-    # (like gcc) will still pick up those warnings.
-    for f in -Wno-unused-variable -Wno-unused-parameter
-    do
-      case "$warn" in
-      *"$f"*) ;;
-      *)
-        echo "cflags.SH: Adding $f because of g++."
-        warn="$warn $f" ;;
-      esac
-    done
-    ;;
-  esac
-  ;;
-esac
-
 # Code to set any extra flags here.
 extra=''
 
