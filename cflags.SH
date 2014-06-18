@@ -1,12 +1,23 @@
 #!/bin/sh
 
 # Generate the cflags script, which is used to determine what cflags
-# to pass to the compiler.
-# We create a temporary test c program and repeatedly compile it with
+# to pass to the compiler for compiling the core perl.
+#
+# This does NOT affect the XS compilation (ext, dist, cpan)
+# since that uses %Config values directly.
+#
+# For example, since -Wall adds -Wunused-*, a bare -Wall (without
+# amending that with -Wno-unused-..., or with the PERL_UNUSED_...)
+# would be too much for XS code because there are too many generated
+# but often unused things.
+#
+# We create a temporary test C program and repeatedly compile it with
 # various candidate flags, and from the compiler output, determine what
 # flags are supported.
+#
 # From this we initialise the following variables in the cflags script:
 #
+#   $myccflags (possibly edited version of $Config{ccflags})
 #   $warn
 #   $stdflags
 #   $extra
