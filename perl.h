@@ -394,8 +394,8 @@
                              GCC_DIAG_DO_PRAGMA_(GCC diagnostic ignored #x)
 #  define GCC_DIAG_RESTORE   _Pragma("GCC diagnostic pop")
 #else
-#  define GCC_DIAG_IGNORE(w) dNOOP
-#  define GCC_DIAG_RESTORE dNOOP
+#  define GCC_DIAG_IGNORE(w)
+#  define GCC_DIAG_RESTORE
 #endif
 
 #define NOOP /*EMPTY*/(void)0
