@@ -14,7 +14,6 @@ BEGIN {
 plan 3;
 
 SKIP: {
-skip("XXX 'use encoding' is gone.  This test needs to be rewritten", 1);
 skip_if_miniperl("no dynamic loading on miniperl, no Encode", 1);
 fresh_perl_is <<'end', "ok\n", {},
     no warnings 'deprecated';
