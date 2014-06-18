@@ -188,7 +188,7 @@ S_sv_or_pv_pos_u2b(pTHX_ SV *sv, const char *pv, STRLEN pos, STRLEN *lenp)
 /* ------------------------------- handy.h ------------------------------- */
 
 /* saves machine code for a common noreturn idiom typically used in Newx*() */
-GCC_DIAG_IGNORE(-Wunused-function)
+GCC_DIAG_IGNORE(-Wunused-function);
 static void
 S_croak_memory_wrap(void)
 {
