@@ -164,7 +164,7 @@ Intel*) ;; # # Is that you, Intel C++?
 # since -std=c89 -pedantic implies the -Werror=...
 *)  for opt in -ansi -std=c89 -W -Wextra \
 		-Werror=declaration-after-statement \
-		-Wendif-labels -Wc++-compat -Wwrite-strings
+		-Wc++-compat -Wwrite-strings
     do
        case " $ccflags " in
        *" $opt "*) ;; # Skip if already there.
