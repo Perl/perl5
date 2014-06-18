@@ -159,9 +159,14 @@ case "$gccversion" in
 '') ;;
 [12]*) ;; # gcc versions 1 (gasp!) and 2 are not good for this.
 Intel*) ;; # # Is that you, Intel C++?
-# XXX if -pedantic (or -pedantic-errors!) is ever added,
+# XXX Note that -std=c89 without -pedantic is rather pointless.
+# Just -std=c89 means "if there is room for interpretation,
+# interpret the C89 way."  It does NOT mean "strict C89",
+# you would need to add the -pedantic to get that.
+#
+# XXX If -pedantic (or -pedantic-errors!) is ever added,
 # the -Werror=declaration-after-statement can be removed
-# since -std=c89 -pedantic implies the -Werror=...
+# since "-std=c89 -pedantic" implies the -Werror=d-a-s.
 *)  for opt in -ansi -std=c89 -Wextra -W \
 		-Werror=declaration-after-statement \
 		-Wc++-compat -Wwrite-strings
