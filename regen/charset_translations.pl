@@ -112,7 +112,7 @@ sub get_a2n($) {
         die "Unknown character set '$charset'";
     }
 
-    return @{$ebcdic_translations{$charset}};
+    return $ebcdic_translations{$charset};
 }
 
 sub get_I8_2_utf($) {
@@ -163,7 +163,7 @@ sub get_I8_2_utf($) {
         }
     }
 
-    return @{$I8_TO_NATIVE_UTF8{$charset}};
+    return $I8_TO_NATIVE_UTF8{$charset};
 }
 
 { # Closure
@@ -262,7 +262,7 @@ sub cp_2_utfbytes($$) {
             return chr $ebcdic_translations{$charset}[$ucp];
         }
 
-        my @I8_2_utf = get_I8_2_utf($charset);
+        my $I8_2_utf = get_I8_2_utf($charset);
 
         my $len = $ucp < 0xA0      ? 1 :
 		  $ucp < 0x400     ? 2 :
@@ -273,11 +273,11 @@ sub cp_2_utfbytes($$) {
 
         my @str;
 	for (1 .. $len - 1) {
-            unshift @str, chr $I8_2_utf[($ucp & 0x1f) | 0xA0];
+            unshift @str, chr $I8_2_utf->[($ucp & 0x1f) | 0xA0];
 	    $ucp >>= 5;
 	}
 
-	unshift @str, chr $I8_2_utf[($ucp & _UTF_START_MASK($len)) | _UTF_START_MARK($len)];
+	unshift @str, chr $I8_2_utf->[($ucp & _UTF_START_MASK($len)) | _UTF_START_MARK($len)];
 
         return join "", @str;
     }

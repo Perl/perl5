@@ -174,7 +174,7 @@ sub __uni_latin1 {
     my @cp;
     my @cp_high;
     my $only_has_invariants = 1;
-    my @a2n = get_a2n($charset);
+    my $a2n = get_a2n($charset);
     for my $ch ( split //, $str ) {
         my $cp= ord $ch;
         $max= $cp if $max < $cp;
@@ -183,7 +183,7 @@ sub __uni_latin1 {
             push @cp_high, $cp;
         }
         else {
-            push @cp, $a2n[$cp];
+            push @cp, $a2n->[$cp];
         }
     }
     my ( $n, $l, $u );

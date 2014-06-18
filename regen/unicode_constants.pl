@@ -62,7 +62,7 @@ my @data = <DATA>;
 foreach my $charset (get_supported_code_pages()) {
     print $out_fh "\n" . get_conditional_compile_line_start($charset);
 
-    my @a2n = get_a2n($charset);
+    my @a2n = @{get_a2n($charset)};
 
     for ( @data ) {
         chomp;
