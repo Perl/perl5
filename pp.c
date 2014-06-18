@@ -2138,7 +2138,7 @@ PP(pp_sle)
     {
       dPOPTOPssrl;
       const int cmp =
-#ifdef USE_LC_COLLATE
+#ifdef USE_LOCALE_COLLATE
                       (IN_LC_RUNTIME(LC_COLLATE))
 		      ? sv_cmp_locale_flags(left, right, 0)
                       :
@@ -2178,7 +2178,7 @@ PP(pp_scmp)
     {
       dPOPTOPssrl;
       const int cmp =
-#ifdef USE_LC_COLLATE
+#ifdef USE_LOCALE_COLLATE
                       (IN_LC_RUNTIME(LC_COLLATE))
 		      ? sv_cmp_locale_flags(left, right, 0)
 		      :
