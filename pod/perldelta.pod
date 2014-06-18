@@ -152,6 +152,17 @@ can be available for use in new operators.  Write C<m?PATTERN?> instead,
 explicitly using the C<m> operator: the question mark delimiter still
 invokes match-once behaviour.
 
+=head2 C<defined(@array)> and C<defined(%hash)> are now fatal errors
+
+These have been deprecated since v5.6.1 and have raised deprecation
+warnings since v5.16.
+
+=head2 Using a hash or an array as a reference are now fatal errors.
+
+For example, C<%foo-E<gt>{"bar"}> now causes a fatal compilation
+error.  These have been deprecated since before v5.8, and have raised
+deprecation warnings since then.
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.
