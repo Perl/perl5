@@ -162,7 +162,7 @@ Intel*) ;; # # Is that you, Intel C++?
 # XXX if -pedantic (or -pedantic-errors!) is ever added,
 # the -Werror=declaration-after-statement can be removed
 # since -std=c89 -pedantic implies the -Werror=...
-*)  for opt in -ansi -std=c89 -W -Wextra \
+*)  for opt in -ansi -std=c89 -Wextra -W \
 		-Werror=declaration-after-statement \
 		-Wc++-compat -Wwrite-strings
     do
@@ -179,7 +179,17 @@ Intel*) ;; # # Is that you, Intel C++?
              then
                case "$opt" in
                -std*) stdflags="$stdflags $opt" ;;
-               *) warn="$warn $opt" ;;
+               *) case "$opt" in
+                  -W)
+                    # -Wextra is the modern form of -W, so add
+                    # -W only if -Wextra is not there already.
+                    case " $warn " in
+                    *-Wextra*) ;;
+                    *) warn="$warn opt" ;;
+                    esac
+                    ;;
+                  *) warn="$warn $opt" ;;
+                  esac
                esac
              fi
              ;;
