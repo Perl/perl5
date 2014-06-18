@@ -304,11 +304,14 @@ interfaces are subject to change.  Functions that are not listed in this
 document are not intended for public use, and should NOT be used under any
 circumstances.
 
-If you use one of the undocumented functions below, you may wish to consider
-creating and submitting documentation
-for it.  If your patch is accepted, this
-will indicate that the interface is stable (unless it is explicitly marked
-otherwise).
+If you feel you need to use one of these functions, first send email to
+L<perl5-porters@perl.org|mailto:perl5-porters@perl.org>.  It may be
+that there is a good reason for the function not being documented, and it
+should be removed from this list; or it may just be that no one has gotten
+around to documenting it.  In the latter case, you will be asked to submit a
+patch to document the function.  Once your patch is accepted, it will indicate
+that the interface is stable (unless it is explicitly marked otherwise) and
+usable by you.
 
 =over
 
