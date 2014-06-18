@@ -386,7 +386,7 @@
  * clang only pretends to be GCC 4.2, but still supports push/pop.
  */
 
-#if defined(__clang) || \
+#if defined(__clang__) || defined(__clang) || \
        (defined( __GNUC__) && ((__GNUC__ * 100) + __GNUC_MINOR__) >= 406)
 #  define GCC_DIAG_DO_PRAGMA_(x) _Pragma (#x)
 
