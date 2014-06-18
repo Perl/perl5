@@ -250,7 +250,6 @@ done
 #
 case "$ccflags$warn" in
 *-Wall*)
-  is_clang=undef
   case "$cc" in
   *g++*)
     # Without -Wno-unused-variable g++ 4.x compiles are rather unwatchable
@@ -267,25 +266,6 @@ case "$ccflags$warn" in
       *"$f"*) ;;
       *)
         echo "cflags.SH: Adding $f because of g++."
-        warn="$warn $f" ;;
-      esac
-    done
-    ;;
-  *clang*) is_clang=define ;;
-  *) # clang may not be called clang, it may be called cc.
-    case "`$cc -v 2>&1`" in
-    *clang*) is_clang=define ;;
-    esac ;;
-  esac
-
-  case "$is_clang" in
-  define)
-    for f in -Wno-unused-value
-    do
-      case "$warn" in
-      *"$f"*) ;;
-      *)
-        echo "cflags.SH: Adding $f because of clang."
         warn="$warn $f" ;;
       esac
     done
