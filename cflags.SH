@@ -159,7 +159,11 @@ case "$gccversion" in
 '') ;;
 [12]*) ;; # gcc versions 1 (gasp!) and 2 are not good for this.
 Intel*) ;; # # Is that you, Intel C++?
-*)  for opt in -ansi -std=c89 -W -Wextra -Wdeclaration-after-statement \
+# XXX if -pedantic (or -pedantic-errors!) is ever added,
+# the -Werror=declaration-after-statement can be removed
+# since -std=c89 -pedantic implies the -Werror=...
+*)  for opt in -ansi -std=c89 -W -Wextra \
+		-Werror=declaration-after-statement \
 		-Wendif-labels -Wc++-compat -Wwrite-strings
     do
        case " $ccflags " in
@@ -232,7 +236,12 @@ case "$cc" in
   # Extra paranoia in case people have bad canned ccflags:
   # bad in the sense that the flags are accepted by g++,
   # but then whined about.
-  for f in -Wdeclaration-after-statement -std=c89
+  #
+  # -Werror=d-a-s option is valid for g++, by definition,
+  # but we remove it just for cleanliness and shorter command lines.
+  for f in -Wdeclaration-after-statement \
+		-Werror=declaration-after-statement \
+		-std=c89
   do
     case "$ccflags" in
     *"$f"*)
@@ -243,7 +252,7 @@ case "$cc" in
   ;;
 esac
 
-for f in -Wdeclaration-after-statement
+for f in -Wdeclaration-after-statement -Werror=declaration-after-statement
 do
   case "$cppflags" in
   *"$f"*)
