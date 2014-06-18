@@ -144,15 +144,6 @@ be affected by locale; only C<$!> and C<$^E> stringification.  The
 'bytes' pragma causes the UTF-8 flag to not be set, just as in previous
 Perl releases.  This resolves [perl #112208].
 
-=head2 MAD build option has been removed
-
-MAD = Misc Attribute Decoration; unmaintained attempt at preserving
-the Perl parse tree more faithfully so that automatic conversion of
-Perl 5 to Perl 6 would have been easier.
-
-This build-time configuration option had been unmaintained for years,
-and had probably seriously diverged on both Perl 5 and Perl 6 sides.
-
 =head2 Support for C<?PATTERN?> without explicit operator has been removed
 
 Starting regular expressions matching only once directly with the
@@ -774,6 +765,17 @@ For example:
 See L<perlhacktips/valgrind> for more information.
 
 L<[perl #121431]|https://rt.perl.org/Ticket/Display.html?id=121431>
+
+=item *
+
+The MAD (Misc Attribute Decoration) build option has been removed
+
+This was an unmaintained attempt at preserving
+the Perl parse tree more faithfully so that automatic conversion of
+Perl 5 to Perl 6 would have been easier.
+
+This build-time configuration option had been unmaintained for years,
+and had probably seriously diverged on both Perl 5 and Perl 6 sides.
 
 =back
 
