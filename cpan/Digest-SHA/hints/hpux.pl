@@ -10,4 +10,3 @@ if ($Config{cc} eq 'cc' &&
     $self->{OPTIMIZE} = '+O1';
   }
 }
-

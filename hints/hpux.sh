@@ -761,3 +761,7 @@ case "$d_oldpthreads" in
 	d_strerror_r_proto='undef'
 	;;
     esac
+
+# H.Merijn says it's not 1998 anymore: ODBM is not needed,
+# and it seems to be buggy in HP-UX anyway.
+i_dbm=undef
