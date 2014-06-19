@@ -1571,7 +1571,8 @@ Perl_die_sv(pTHX_ SV *baseex)
 {
     PERL_ARGS_ASSERT_DIE_SV;
     croak_sv(baseex);
-    assert(0); /* NOTREACHED */
+    /* NOTREACHED */
+    assert(0);
     NORETURN_FUNCTION_END;
 }
 
@@ -1593,7 +1594,8 @@ Perl_die_nocontext(const char* pat, ...)
     va_list args;
     va_start(args, pat);
     vcroak(pat, &args);
-    assert(0); /* NOTREACHED */
+    /* NOTREACHED */
+    assert(0);
     va_end(args);
     NORETURN_FUNCTION_END;
 }
@@ -1605,7 +1607,8 @@ Perl_die(pTHX_ const char* pat, ...)
     va_list args;
     va_start(args, pat);
     vcroak(pat, &args);
-    assert(0); /* NOTREACHED */
+    /* NOTREACHED */
+    assert(0);
     va_end(args);
     NORETURN_FUNCTION_END;
 }
@@ -1705,7 +1708,8 @@ Perl_croak_nocontext(const char *pat, ...)
     va_list args;
     va_start(args, pat);
     vcroak(pat, &args);
-    assert(0); /* NOTREACHED */
+    /* NOTREACHED */
+    assert(0);
     va_end(args);
 }
 #endif /* PERL_IMPLICIT_CONTEXT */
@@ -1716,7 +1720,8 @@ Perl_croak(pTHX_ const char *pat, ...)
     va_list args;
     va_start(args, pat);
     vcroak(pat, &args);
-    assert(0); /* NOTREACHED */
+    /* NOTREACHED */
+    assert(0);
     va_end(args);
 }
 

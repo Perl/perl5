@@ -292,7 +292,8 @@ PP(pp_substcont)
 	    POPSUBST(cx);
 	    PERL_ASYNC_CHECK();
 	    RETURNOP(pm->op_next);
-	    assert(0); /* NOTREACHED */
+	    /* NOTREACHED */
+	    assert(0);
 	}
 	cx->sb_iters = saviters;
     }
@@ -1358,7 +1359,8 @@ Perl_block_gimme(pTHX)
     default:
 	Perl_croak(aTHX_ "panic: bad gimme: %d\n", cxstack[cxix].blk_gimme);
     }
-    NOT_REACHED; /* NOTREACHED */
+    /* NOTREACHED */
+    NOT_REACHED;
 }
 
 I32
@@ -1691,13 +1693,15 @@ Perl_die_unwind(pTHX_ SV *msv)
 	    PL_restartjmpenv = restartjmpenv;
 	    PL_restartop = restartop;
 	    JMPENV_JUMP(3);
-	    assert(0); /* NOTREACHED */
+	    /* NOTREACHED */
+	    assert(0);
 	}
     }
 
     write_to_stderr(exceptsv);
     my_failure_exit();
-    assert(0); /* NOTREACHED */
+    /* NOTREACHED */
+    assert(0);
 }
 
 PP(pp_xor)
@@ -3244,7 +3248,8 @@ S_docatch(pTHX_ OP *o)
 	JMPENV_POP;
 	PL_op = oldop;
 	JMPENV_JUMP(ret);
-	assert(0); /* NOTREACHED */
+	/* NOTREACHED */
+	assert(0);
     }
     JMPENV_POP;
     PL_op = oldop;
@@ -3343,7 +3348,8 @@ S_try_yyparse(pTHX_ int gramtype)
     default:
 	JMPENV_POP;
 	JMPENV_JUMP(ret);
-	assert(0); /* NOTREACHED */
+	/* NOTREACHED */
+	assert(0);
     }
     JMPENV_POP;
     return ret;
@@ -4336,7 +4342,8 @@ PP(pp_leaveeval)
                         SvUTF8(namesv) ? -(I32)SvCUR(namesv) : (I32)SvCUR(namesv),
 			G_DISCARD);
 	Perl_die(aTHX_ "%"SVf" did not return a true value", SVfARG(namesv));
-        NOT_REACHED; /* NOTREACHED */
+        /* NOTREACHED */
+        NOT_REACHED;
 	/* die_unwind() did LEAVE, or we won't be here */
     }
     else {

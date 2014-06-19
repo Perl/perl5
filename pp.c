@@ -2063,7 +2063,8 @@ Perl_do_ncmp(pTHX_ SV* const left, SV * const right)
 		    return (leftuv > (UV)rightiv) - (leftuv < (UV)rightiv);
 		}
 	    }
-	    assert(0); /* NOTREACHED */
+	    /* NOTREACHED */
+	    assert(0);
     }
 #endif
     {

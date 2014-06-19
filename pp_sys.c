@@ -520,7 +520,8 @@ PP(pp_die)
 	}
     }
     die_sv(exsv);
-    NOT_REACHED; /* NOTREACHED */
+    /* NOTREACHED */
+    NOT_REACHED;
     return NULL; /* avoid missing return from non-void function warning */
 }
 

@@ -1423,7 +1423,8 @@ Perl__to_upper_title_latin1(pTHX_ const U8 c, U8* p, STRLEN *lenp, const char S_
 		return 'S';
 	    default:
 		Perl_croak(aTHX_ "panic: to_upper_title_latin1 did not expect '%c' to map to '%c'", c, LATIN_SMALL_LETTER_Y_WITH_DIAERESIS);
-		assert(0); /* NOTREACHED */
+		/* NOTREACHED */
+		assert(0);
 	}
     }
 
@@ -2453,7 +2454,8 @@ Perl__core_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 m
 		Perl_croak(aTHX_
 			   "Can't find Unicode property definition \"%"SVf"\"",
 			   SVfARG(retval));
-                NOT_REACHED; /* NOTREACHED */
+                /* NOTREACHED */
+                NOT_REACHED;
 	}
     } /* End of calling the module to find the swash */
 
