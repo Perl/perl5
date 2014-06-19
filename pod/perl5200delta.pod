@@ -2980,7 +2980,7 @@ warnings were enabled.
 =item *
 
 Compiling a C<split> operator whose third argument is a named constant
-evaulating to 0 no longer causes the constant's value to change.
+evaluating to 0 no longer causes the constant's value to change.
 
 =item *
 
