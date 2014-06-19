@@ -267,10 +267,12 @@ case "$cc" in
 		-Werror=declaration-after-statement \
 		-std=c89
   do
-    case "$ccflags" in
+    case "$ccflags$warn" in
     *"$f"*)
-      echo "cflags.SH: Removing $ccflags because of g++."
-      ccflags=`echo $ccflags|sed 's/$f/ /'` ;;
+      echo "cflags.SH: Removing $f because of g++."
+      ccflags=`echo $ccflags|sed 's/$f/ /'`
+      warn=`echo $warn|sed 's/$f/ /'`
+      ;;
     esac
   done
   ;;
