@@ -428,6 +428,9 @@ PerlIO_verify_head(pTHX_ PerlIO *f)
 {
     PerlIOl *head, *p;
     int seen = 0;
+#ifndef PERL_IMPLICIT_SYS
+    PERL_UNUSED_CONTEXT;
+#endif
     if (!PerlIOValid(f))
 	return;
     p = head = PerlIOBase(f)->head;
@@ -2250,6 +2253,10 @@ S_more_refcounted_fds(pTHX_ const int new_fd) {
     const int new_max = 16 + (new_fd & ~15);
     int *new_array;
 
+#ifndef PERL_IMPLICIT_SYS
+    PERL_UNUSED_CONTEXT;
+#endif
+
     PerlIO_debug("More fds - old=%d, need %d, new=%d\n",
 		 old_max, new_fd, new_max);
 
@@ -2464,6 +2471,9 @@ typedef struct {
 static void
 S_lockcnt_dec(pTHX_ const void* f)
 {
+#ifndef PERL_IMPLICIT_SYS
+    PERL_UNUSED_CONTEXT;
+#endif
     PerlIO_lockcnt((PerlIO*)f)--;
 }
 
