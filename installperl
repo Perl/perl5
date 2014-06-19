@@ -112,7 +112,6 @@ my (@scripts, @tolink);
 open SCRIPTS, "utils.lst" or die "Can't open utils.lst: $!";
 while (<SCRIPTS>) {
     next if /^#/;
-    next if /a2p/; # a2p is binary, to be installed separately
     chomp;
     if (/(\S*)\s*#\s*link\s*=\s*(\S*)/) {
 	push @scripts, $1;
@@ -290,9 +289,6 @@ if ($Is_VMS) {
         safe_unlink("$installbin/$ndbg$perl$exe_ext");
         copy("$ndbg$perl$exe_ext", "$installbin/$ndbg$perl$exe_ext");
         chmod(0755, "$installbin/$ndbg$perl$exe_ext");
-	safe_unlink("$installbin/${dbg}a2p$exe_ext");
-	copy("x2p/${dbg}a2p$exe_ext", "$installbin/${dbg}a2p$exe_ext");
-	chmod(0755, "$installbin/${dbg}a2p$exe_ext");
     }
 }
 elsif ($^O ne 'dos') {
@@ -305,12 +301,11 @@ elsif ($^O ne 'dos') {
     else {
 	# If installing onto a NetWare server
         if ($opts{netware}) {
-	    # Copy perl.nlm, echo.nlm, type.nlm, a2p.nlm & cgi2perl.nlm
+	    # Copy perl.nlm, echo.nlm, type.nlm & cgi2perl.nlm
             mkpath($Config{installnwsystem});
 	    copy("netware\\".$ENV{'MAKE_TYPE'}."\\perl.nlm", $Config{installnwsystem});
 	    copy("netware\\testnlm\\echo\\echo.nlm", $Config{installnwsystem});
 	    copy("netware\\testnlm\\type\\type.nlm", $Config{installnwsystem});
-	    copy("x2p\\a2p.nlm", $Config{installnwsystem});
 	    chmod(0755, "$Config{installnwsystem}\\perl.nlm");
             mkpath($Config{installnwlcgi});
 	    copy("lib\\auto\\cgi2perl\\cgi2perl.nlm", $Config{installnwlcgi});
@@ -450,18 +445,6 @@ if ($Config{installusrbinperl} && $Config{installusrbinperl} eq 'define' &&
 	copy($instperl, $usrbinperl);
 
 	$mainperl_is_instperl = 1;
-    }
-}
-
-# Make links to ordinary names if installbin directory isn't current directory.
-if (!$Is_NetWare && $dbg eq '') {
-    if (! samepath($installbin, 'x2p')) {
-	my $base = 'a2p';
-	$base .= $ver if $versiononly;
-	safe_unlink("$installbin/$base$exe_ext");
-	copy("x2p/a2p$exe_ext", "$installbin/$base$exe_ext");
-	strip("$installbin/$base$exe_ext");
-	chmod(0755, "$installbin/$base$exe_ext");
     }
 }
 
