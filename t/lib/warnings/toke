@@ -1456,15 +1456,15 @@ EXPECT
 # toke.c
 # [perl #113094], [perl #119101], since reverted so no warnings generated
 use warnings;
-print "aa" =~ m{^a\{1,2\}$}, "\n";
-print "aa" =~ m{^a\x\{61\}$}, "\n";
-print "a\\x{6F}" =~ m{^a\\x\{6F\}$}, "\n";
-print "a\\o" =~ m{^a\\\x\{6F\}$}, "\n";
-print "a\\\\x{6F}" =~ m{^a\\\\x\{6F\}$}, "\n";
-print "a\\\\o"     =~ m{^a\\\\\x\{6F\}$}, "\n";
-print "aa" =~ m{^a{1,2}$}, "\n";
-print "aq" =~ m[^a\[a-z\]$], "\n";
-print "aq" =~ m(^a\(q\)$), "\n";
+print "aa" =~ m{^a\{1,2\}$}, "A\n";
+print "aa" =~ m{^a\x\{61\}$}, "B\n";
+print "a\\x{6F}" =~ m{^a\\x\{6F\}$}, "C\n";
+print "a\\o" =~ m{^a\\\x\{6F\}$}, "D\n";
+print "a\\\\x{6F}" =~ m{^a\\\\x\{6F\}$}, "E\n";
+print "a\\\\o"     =~ m{^a\\\\\x\{6F\}$}, "F\n";
+print "aa" =~ m{^a{1,2}$}, "G\n";
+print "aq" =~ m[^a\[a-z\]$], "H\n";
+print "aq" =~ m(^a\(q\)$), "I\n";
 EXPECT
 Illegal hexadecimal digit '\' ignored at - line 5.
 Illegal hexadecimal digit '\' ignored at - line 5.
@@ -1472,13 +1472,15 @@ Illegal hexadecimal digit '\' ignored at - line 7.
 Illegal hexadecimal digit '\' ignored at - line 7.
 Illegal hexadecimal digit '\' ignored at - line 9.
 Illegal hexadecimal digit '\' ignored at - line 9.
-
-
-1
-
-1
-
-1
+A
+B
+1C
+D
+1E
+F
+1G
+H
+I
 ########
 # toke.c
 #[perl #119123] disallow literal control character variables
