@@ -11719,7 +11719,6 @@ Perl_custom_op_get_field(pTHX_ const OP *o, const xop_flags_enum field)
 		    any.xop_peep = xop->xop_peep;
 		    break;
 		default:
-		    /* NOTREACHED */
 		    NOT_REACHED;
 		    break;
 		}
@@ -11738,7 +11737,6 @@ Perl_custom_op_get_field(pTHX_ const OP *o, const xop_flags_enum field)
 		    any.xop_peep = XOPd_xop_peep;
 		    break;
 		default:
-		    /* NOTREACHED */
 		    NOT_REACHED;
 		    break;
 		}

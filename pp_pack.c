@@ -567,8 +567,7 @@ S_group_end(pTHX_ const char *patptr, const char *patend, char ender)
     }
     Perl_croak(aTHX_ "No group ending character '%c' found in template",
                ender);
-    /* NOTREACHED */
-    NOT_REACHED;
+    NOT_REACHED; /* NOTREACHED */
 }
 
 

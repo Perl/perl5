@@ -1056,8 +1056,7 @@ emergency_sbrk(MEM_SIZE size)
   do_croak:
     MALLOC_UNLOCK;
     emergency_sbrk_croak("Out of memory during request for %"UVuf" bytes, total sbrk() is %"UVuf" bytes", (UV)size, (UV)(goodsbrk + sbrk_slack));
-    /* NOTREACHED */
-    assert(0);
+    assert(0); /* NOTREACHED */
     return NULL;
 }
 

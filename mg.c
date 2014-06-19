@@ -350,8 +350,7 @@ Perl_mg_size(pTHX_ SV *sv)
 	    Perl_croak(aTHX_ "Size magic not implemented");
 
     }
-    /* NOTREACHED */
-    NOT_REACHED;
+    NOT_REACHED; /* NOTREACHED */
 }
 
 /*

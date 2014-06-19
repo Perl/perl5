@@ -2411,8 +2411,7 @@ S_run_body(pTHX_ I32 oldscope)
 	CALLRUNOPS(aTHX);
     }
     my_exit(0);
-    /* NOTREACHED */
-    assert(0);
+    assert(0); /* NOTREACHED */
 }
 
 /*
@@ -2739,8 +2738,7 @@ Perl_call_sv(pTHX_ SV *sv, VOL I32 flags)
 	    FREETMPS;
 	    JMPENV_POP;
 	    my_exit_jump();
-	    /* NOTREACHED */
-	    assert(0);
+	    assert(0); /* NOTREACHED */
 	case 3:
 	    if (PL_restartop) {
 		PL_restartjmpenv = NULL;
@@ -2849,8 +2847,7 @@ Perl_eval_sv(pTHX_ SV *sv, I32 flags)
 	FREETMPS;
 	JMPENV_POP;
 	my_exit_jump();
-	/* NOTREACHED */
-	assert(0);
+	assert(0); /* NOTREACHED */
     case 3:
 	if (PL_restartop) {
 	    PL_restartjmpenv = NULL;
@@ -4868,8 +4865,7 @@ Perl_call_list(pTHX_ I32 oldscope, AV *paramList)
 	    CopLINE_set(PL_curcop, oldline);
 	    JMPENV_POP;
 	    my_exit_jump();
-	    /* NOTREACHED */
-	    assert(0);
+	    assert(0); /* NOTREACHED */
 	case 3:
 	    if (PL_restartop) {
 		PL_curcop = &PL_compiling;

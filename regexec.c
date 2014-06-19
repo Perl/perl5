@@ -487,8 +487,7 @@ S_isFOO_lc(pTHX_ const U8 classnum, const U8 character)
             Perl_croak(aTHX_ "panic: isFOO_lc() has an unexpected character class '%d'", classnum);
     }
 
-    /* NOTREACHED */
-    assert(0);
+    assert(0); /* NOTREACHED */
     return FALSE;
 }
 
@@ -543,8 +542,7 @@ S_isFOO_utf8_lc(pTHX_ const U8 classnum, const U8* character)
                                                below 256 */
     }
 
-    /* NOTREACHED */
-    assert(0);
+    assert(0); /* NOTREACHED */
     return FALSE;
 }
 
@@ -2013,8 +2011,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 
                 default:
                     Perl_croak(aTHX_ "panic: find_byclass() node %d='%s' has an unexpected character class '%d'", OP(c), PL_reg_name[OP(c)], classnum);
-                    /* NOTREACHED */
-                    assert(0);
+                    assert(0); /* NOTREACHED */
             }
         }
         break;
@@ -3814,8 +3811,7 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
 
                     default:
                         Perl_croak(aTHX_ "panic: Unexpected op %u", OP(text_node));
-                        /* NOTREACHED */
-                        assert(0);
+                        assert(0); /* NOTREACHED */
                 }
             }
         }
@@ -4064,8 +4060,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                               REPORT_CODE_OFF+depth*2, "", PL_colors[4], PL_colors[5])
                 );
                 sayNO_SILENT;
-                /* NOTREACHED */
-                assert(0);
+                assert(0); /* NOTREACHED */
             }
             /* FALLTHROUGH */
 	case TRIE:  /* (ab|cd)  */
@@ -4252,8 +4247,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		);
 		goto trie_first_try; /* jump into the fail handler */
 	    }}
-	    /* NOTREACHED */
-	    assert(0);
+	    assert(0); /* NOTREACHED */
 
 	case TRIE_next_fail: /* we failed - try next alternative */
         {
@@ -4367,8 +4361,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
 	    if (ST.accepted > 1 || has_cutgroup) {
 		PUSH_STATE_GOTO(TRIE_next, scan, (char*)uc);
-		/* NOTREACHED */
-		assert(0);
+		assert(0); /* NOTREACHED */
 	    }
 	    /* only one choice left - just continue */
 	    DEBUG_EXECUTE_r({
@@ -4392,8 +4385,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
 	    locinput = (char*)uc;
 	    continue; /* execute rest of RE */
-	    /* NOTREACHED */
-	    assert(0);
+	    assert(0); /* NOTREACHED */
         }
 #undef  ST
 
@@ -5202,8 +5194,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             /* and then jump to the code we share with EVAL */
             goto eval_recurse_doit;
 
-            /* NOTREACHED */
-            assert(0);
+            assert(0); /* NOTREACHED */
 
         case EVAL:  /*   /(?{A})B/   /(??{A})B/  and /(?(?{A})X|Y)B/   */        
             if (cur_eval && cur_eval->locinput==locinput) {
@@ -5484,8 +5475,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		cur_eval = st;
 		/* now continue from first node in postoned RE */
 		PUSH_YES_STATE_GOTO(EVAL_AB, startpoint, locinput);
-		/* NOTREACHED */
-		assert(0);
+		assert(0); /* NOTREACHED */
 	}
 
 	case EVAL_AB: /* cleanup after a successful (??{A})B */
@@ -5744,22 +5734,19 @@ NULL
 	    ST.lastloc = NULL;  /* this will be updated by WHILEM */
 
 	    PUSH_YES_STATE_GOTO(CURLYX_end, PREVOPER(next), locinput);
-	    /* NOTREACHED */
-	    assert(0);
+	    assert(0); /* NOTREACHED */
 	}
 
 	case CURLYX_end: /* just finished matching all of A*B */
 	    cur_curlyx = ST.prev_curlyx;
 	    sayYES;
-	    /* NOTREACHED */
-	    assert(0);
+	    assert(0); /* NOTREACHED */
 
 	case CURLYX_end_fail: /* just failed to match all of A*B */
 	    regcpblow(ST.cp);
 	    cur_curlyx = ST.prev_curlyx;
 	    sayNO;
-	    /* NOTREACHED */
-	    assert(0);
+	    assert(0); /* NOTREACHED */
 
 
 #undef ST
@@ -5794,8 +5781,7 @@ NULL
 		REGCP_SET(ST.lastcp);
 
 		PUSH_STATE_GOTO(WHILEM_A_pre, A, locinput);
-		/* NOTREACHED */
-		assert(0);
+		assert(0); /* NOTREACHED */
 	    }
 
 	    /* If degenerate A matches "", assume A done. */
@@ -5907,8 +5893,7 @@ NULL
 		REGCP_SET(ST.lastcp);
 		PUSH_YES_STATE_GOTO(WHILEM_B_min, ST.save_curlyx->u.curlyx.B,
                                     locinput);
-		/* NOTREACHED */
-		assert(0);
+		assert(0); /* NOTREACHED */
 	    }
 
 	    /* Prefer A over B for maximal matching. */
@@ -5919,28 +5904,24 @@ NULL
 		cur_curlyx->u.curlyx.lastloc = locinput;
 		REGCP_SET(ST.lastcp);
 		PUSH_STATE_GOTO(WHILEM_A_max, A, locinput);
-		/* NOTREACHED */
-		assert(0);
+		assert(0); /* NOTREACHED */
 	    }
 	    goto do_whilem_B_max;
 	}
-	/* NOTREACHED */
-	assert(0);
+	assert(0); /* NOTREACHED */
 
 	case WHILEM_B_min: /* just matched B in a minimal match */
 	case WHILEM_B_max: /* just matched B in a maximal match */
 	    cur_curlyx = ST.save_curlyx;
 	    sayYES;
-	    /* NOTREACHED */
-	    assert(0);
+	    assert(0); /* NOTREACHED */
 
 	case WHILEM_B_max_fail: /* just failed to match B in a maximal match */
 	    cur_curlyx = ST.save_curlyx;
 	    cur_curlyx->u.curlyx.lastloc = ST.save_lastloc;
 	    cur_curlyx->u.curlyx.count--;
 	    CACHEsayNO;
-	    /* NOTREACHED */
-	    assert(0);
+	    assert(0); /* NOTREACHED */
 
 	case WHILEM_A_min_fail: /* just failed to match A in a minimal match */
 	    /* FALLTHROUGH */
@@ -5950,8 +5931,7 @@ NULL
 	    cur_curlyx->u.curlyx.lastloc = ST.save_lastloc;
 	    cur_curlyx->u.curlyx.count--;
 	    CACHEsayNO;
-	    /* NOTREACHED */
-	    assert(0);
+	    assert(0); /* NOTREACHED */
 
 	case WHILEM_A_max_fail: /* just failed to match A in a maximal match */
 	    REGCP_UNWIND(ST.lastcp);
@@ -5977,8 +5957,7 @@ NULL
 	    cur_curlyx = cur_curlyx->u.curlyx.prev_curlyx;
 	    PUSH_YES_STATE_GOTO(WHILEM_B_max, ST.save_curlyx->u.curlyx.B,
                                 locinput);
-	    /* NOTREACHED */
-	    assert(0);
+	    assert(0); /* NOTREACHED */
 
 	case WHILEM_B_min_fail: /* just failed to match B in a minimal match */
 	    cur_curlyx = ST.save_curlyx;
@@ -6012,8 +5991,7 @@ NULL
 	    PUSH_STATE_GOTO(WHILEM_A_min,
 		/*A*/ NEXTOPER(ST.save_curlyx->u.curlyx.me) + EXTRA_STEP_2ARGS,
                 locinput);
-	    /* NOTREACHED */
-	    assert(0);
+	    assert(0); /* NOTREACHED */
 
 #undef  ST
 #define ST st->u.branch
@@ -6038,15 +6016,13 @@ NULL
 	    } else {
 	        PUSH_STATE_GOTO(BRANCH_next, scan, locinput);
 	    }
-	    /* NOTREACHED */
-	    assert(0);
+	    assert(0); /* NOTREACHED */
 
         case CUTGROUP:  /*  /(*THEN)/  */
             sv_yes_mark = st->u.mark.mark_name = scan->flags ? NULL :
                 MUTABLE_SV(rexi->data->data[ ARG( scan ) ]);
             PUSH_STATE_GOTO(CUTGROUP_next, next, locinput);
-            /* NOTREACHED */
-            assert(0);
+            assert(0); /* NOTREACHED */
 
         case CUTGROUP_next_fail:
             do_cutgroup = 1;
@@ -6054,13 +6030,11 @@ NULL
             if (st->u.mark.mark_name)
                 sv_commit = st->u.mark.mark_name;
             sayNO;	    
-            /* NOTREACHED */
-            assert(0);
+            assert(0); /* NOTREACHED */
 
         case BRANCH_next:
             sayYES;
-            /* NOTREACHED */
-            assert(0);
+            assert(0); /* NOTREACHED */
 
 	case BRANCH_next_fail: /* that branch failed; try the next, if any */
 	    if (do_cutgroup) {
@@ -6082,8 +6056,7 @@ NULL
 		sayNO_SILENT;
             }
 	    continue; /* execute next BRANCH[J] op */
-	    /* NOTREACHED */
-	    assert(0);
+	    assert(0); /* NOTREACHED */
     
 	case MINMOD: /* next op will be non-greedy, e.g. A*?  */
 	    minmod = 1;
@@ -6127,8 +6100,7 @@ NULL
 
 	  curlym_do_A: /* execute the A in /A{m,n}B/  */
 	    PUSH_YES_STATE_GOTO(CURLYM_A, ST.A, locinput); /* match A */
-	    /* NOTREACHED */
-	    assert(0);
+	    assert(0); /* NOTREACHED */
 
 	case CURLYM_A: /* we've just matched an A */
 	    ST.count++;
@@ -6263,8 +6235,7 @@ NULL
 	    }
 	    
 	    PUSH_STATE_GOTO(CURLYM_B, ST.B, locinput); /* match B */
-	    /* NOTREACHED */
-	    assert(0);
+	    assert(0); /* NOTREACHED */
 
 	case CURLYM_B_fail: /* just failed to match a B */
 	    REGCP_UNWIND(ST.cp);
@@ -6442,8 +6413,7 @@ NULL
 		REGCP_SET(ST.cp);
 		goto curly_try_B_max;
 	    }
-	    /* NOTREACHED */
-	    assert(0);
+	    assert(0); /* NOTREACHED */
 
 
 	case CURLY_B_min_known_fail:
@@ -6519,8 +6489,7 @@ NULL
 	        }
 		PUSH_STATE_GOTO(CURLY_B_min_known, ST.B, locinput);
 	    }
-	    /* NOTREACHED */
-	    assert(0);
+	    assert(0); /* NOTREACHED */
 
 
 	case CURLY_B_min_fail:
@@ -6553,8 +6522,7 @@ NULL
 		}
 	    }
             sayNO;
-	    /* NOTREACHED */
-	    assert(0);
+	    assert(0); /* NOTREACHED */
 
 
 	curly_try_B_max:
@@ -6585,8 +6553,7 @@ NULL
                 if (ST.c1 == CHRTEST_VOID || could_match) {
 		    CURLY_SETPAREN(ST.paren, ST.count);
 		    PUSH_STATE_GOTO(CURLY_B_max, ST.B, locinput);
-		    /* NOTREACHED */
-		    assert(0);
+		    assert(0); /* NOTREACHED */
 		}
 	    }
 	    /* FALLTHROUGH */
@@ -6705,8 +6672,7 @@ NULL
 	    
 	    /* execute body of (?...A) */
 	    PUSH_YES_STATE_GOTO(IFMATCH_A, NEXTOPER(NEXTOPER(scan)), newstart);
-	    /* NOTREACHED */
-	    assert(0);
+	    assert(0); /* NOTREACHED */
         }
 
 	case IFMATCH_A_fail: /* body of (?...A) failed */
@@ -6746,8 +6712,7 @@ NULL
 	    if (!scan->flags)
 	        sv_yes_mark = sv_commit = MUTABLE_SV(rexi->data->data[ ARG( scan ) ]);
 	    PUSH_STATE_GOTO(COMMIT_next, next, locinput);
-	    /* NOTREACHED */
-	    assert(0);
+	    assert(0); /* NOTREACHED */
 
 	case COMMIT_next_fail:
 	    no_final = 1;    
@@ -6755,8 +6720,7 @@ NULL
 
 	case OPFAIL:   /* (*FAIL)  */
 	    sayNO;
-	    /* NOTREACHED */
-	    assert(0);
+	    assert(0); /* NOTREACHED */
 
 #define ST st->u.mark
         case MARKPOINT: /*  (*MARK:foo)  */
@@ -6766,14 +6730,12 @@ NULL
             mark_state = st;
             ST.mark_loc = locinput;
             PUSH_YES_STATE_GOTO(MARKPOINT_next, next, locinput);
-            /* NOTREACHED */
-            assert(0);
+            assert(0); /* NOTREACHED */
 
         case MARKPOINT_next:
             mark_state = ST.prev_mark;
             sayYES;
-            /* NOTREACHED */
-            assert(0);
+            assert(0); /* NOTREACHED */
 
         case MARKPOINT_next_fail:
             if (popmark && sv_eq(ST.mark_name,popmark)) 
@@ -6794,8 +6756,7 @@ NULL
             sv_yes_mark = mark_state ? 
                 mark_state->u.mark.mark_name : NULL;
             sayNO;
-            /* NOTREACHED */
-            assert(0);
+            assert(0); /* NOTREACHED */
 
         case SKIP:  /*  (*SKIP)  */
             if (scan->flags) {
@@ -6840,8 +6801,7 @@ NULL
             } 
             no_final = 1; 
             sayNO;
-            /* NOTREACHED */
-            assert(0);
+            assert(0); /* NOTREACHED */
 #undef ST
 
         case LNBREAK: /* \R */
@@ -6875,8 +6835,7 @@ NULL
         /* switch break jumps here */
 	scan = next; /* prepare to execute the next op and ... */
 	continue;    /* ... jump back to the top, reusing st */
-	/* NOTREACHED */
-	assert(0);
+	assert(0); /* NOTREACHED */
 
       push_yes_state:
 	/* push a state that backtracks on success */
@@ -6919,8 +6878,7 @@ NULL
 	    locinput = pushinput;
 	    st = newst;
 	    continue;
-	    /* NOTREACHED */
-	    assert(0);
+	    assert(0); /* NOTREACHED */
 	}
     }
 
@@ -7557,8 +7515,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
 
     default:
         Perl_croak(aTHX_ "panic: regrepeat() called with unrecognized node type %d='%s'", OP(p), PL_reg_name[OP(p)]);
-        /* NOTREACHED */
-        assert(0);
+        assert(0); /* NOTREACHED */
 
     }
 

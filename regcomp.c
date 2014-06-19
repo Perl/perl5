@@ -10347,8 +10347,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 	}
 	else
 	    FAIL("Junk on end of regexp");	/* "Can't happen". */
-	/* NOTREACHED */
-	assert(0);
+	assert(0); /* NOTREACHED */
     }
 
     if (RExC_in_lookbehind) {

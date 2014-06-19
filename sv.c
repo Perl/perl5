@@ -4215,8 +4215,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, SV* sstr, const I32 flags)
 	else
 	    Perl_croak(aTHX_ "Bizarre copy of %s", type);
 	}
-	/* NOTREACHED */
-	NOT_REACHED;
+	NOT_REACHED; /* NOTREACHED */
 
     case SVt_REGEXP:
       upgregexp:
@@ -14679,8 +14678,7 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
 	    return varname(gv, '$', 0,
 		    NULL, (I8)obase->op_private, FUV_SUBSCRIPT_ARRAY);
 	}
-	/* NOTREACHED */
-	NOT_REACHED;
+	NOT_REACHED; /* NOTREACHED */
 
     case OP_EXISTS:
 	o = cUNOPx(obase)->op_first;
@@ -14782,8 +14780,7 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
 		? '@' : '%',
 		o->op_targ, NULL, 0, FUV_SUBSCRIPT_WITHIN);
 	}
-	/* NOTREACHED */
-	NOT_REACHED;
+	NOT_REACHED; /* NOTREACHED */
     }
 
     case OP_AASSIGN:
