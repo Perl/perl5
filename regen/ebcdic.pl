@@ -14,16 +14,27 @@ sub output_table ($$) {
     my $table_ref = shift;
     my $name = shift;
 
+    # Tables in hex easier to debug, but don't fit into 80 columns
+    my $print_in_hex = 0;
+
     die "Requres 256 entries in table $name, got @$table_ref" if @$table_ref != 256;
 
     print $out_fh "EXTCONST U8 $name\[\] = {\n";
 
+    print $out_fh "/*          _0    _1    _2    _3    _4    _5    _6    _7    _8    _9    _A    _B    _C    _D    _E    _F        */\n" if $print_in_hex;
     for my $i (0 .. 255) {
-        printf $out_fh "%4d", $table_ref->[$i];
-        #printf $out_fh " 0x%02X", $table_ref->[$i];
+        if ($print_in_hex) {
+            printf $out_fh "/* %X_ */ ", $i / 16 if $i % 16 == 0;
+            printf $out_fh " 0x%02X", $table_ref->[$i];
+        }
+        else {
+            printf $out_fh "%4d", $table_ref->[$i];
+        }
+        printf $out_fh "  /* %X_ */", $i / 16 if $print_in_hex && $i % 16 == 15;
         print $out_fh ",", if $i < 255;
         print $out_fh "\n" if $i % 16 == 15;
     }
+    print $out_fh "/*          _0    _1    _2    _3    _4    _5    _6    _7    _8    _9    _A    _B    _C    _D    _E    _F        */\n" if $print_in_hex;
     print $out_fh "};\n\n";
 }
 
