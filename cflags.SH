@@ -265,6 +265,7 @@ case "$cc" in
   # but we remove it just for cleanliness and shorter command lines.
   for f in -Wdeclaration-after-statement \
 		-Werror=declaration-after-statement \
+		-Wc++-compat \
 		-std=c89
   do
     case "$ccflags$warn" in
