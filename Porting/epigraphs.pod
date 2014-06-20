@@ -28,7 +28,7 @@ L<Announced on 2014-06-20 by Matthew Horsfall|http://www.nntp.perl.org/group/per
 
     --     Anonymous fragment of a poem believed
        written near the end of the previous Age,
-                  know by some as the Third Age.
+                 known by some as the Third Age.
               Sometimes attributed to the Dragon
                                          Reborn.
 
