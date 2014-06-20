@@ -82,8 +82,8 @@ These had been deprecated since v5.18.
 regex patterns (unless escaped)
 
 The use of these characters with C</x> outside bracketed character
-classes and when not preceeded by a backslash has raised a deprecation
-warning since v5.18.  Now they will be ignored.  See L</qrE<sol>fooE<sol>x>
+classes and when not preceded by a backslash has raised a deprecation
+warning since v5.18.  Now they will be ignored.  See L</"qr/foo/x">
 for the list of the five characters.
 
 =head2 Comment lines within S<C<(?[ ])>> now are ended only by a C<\n>
@@ -183,31 +183,50 @@ L<perl #121489|https://rt.perl.org/Ticket/Display.html?id=121489>
 
 =head1 Modules and Pragmata
 
-XXX All changes to installed files in F<cpan/>, F<dist/>, F<ext/> and F<lib/>
-go here.  If Module::CoreList is updated, generate an initial draft of the
-following sections using F<Porting/corelist-perldelta.pl>.  A paragraph summary
-for important changes should then be added by hand.  In an ideal world,
-dual-life modules would have a F<Changes> file that could be cribbed.
-
-[ Within each section, list entries as a =item entry ]
-
-=head2 New Modules and Pragmata
-
-=over 4
-
-=item *
-
-XXX
-
-=back
-
 =head2 Updated Modules and Pragmata
 
 =over 4
 
 =item *
 
-L<Module::CoreList> has been upgraded from version 3.11 to 5.021001_01.
+The libnet collection of modules has been upgraded from version 1.25 to 1.27.
+
+There are only whitespace changes to the installed files.
+
+=item *
+
+A mismatch between the documentation and the code in utf8::downgrade()
+was fixed in favour of the documentation. The optional second argument
+is now correctly treated as a perl boolean (true/false semantics) and
+not as an integer.
+
+=item *
+
+The Locale-Codes collection of modules has been upgraded from version 3.30 to 3.31.
+
+Fixed a bug in the scripts used to extract data from spreadsheets that
+prevented the SHP currency code from being found.
+L<[cpan #94229]|https://rt.cpan.org/Ticket/Display.html?id=94229>
+
+=item *
+
+L<Archive::Tar> has been upgraded from version 1.96 to 2.00.
+
+=item *
+
+L<autodie> has been upgraded from version 2.23 to 2.25.
+
+=item *
+
+L<B> has been upgraded from version 1.48 to 1.49.
+
+=item *
+
+L<B::Deparse> has been upgraded from version 1.26 to 1.27.
+
+=item *
+
+L<Benchmark> has been upgraded from version 1.18 to 1.19.
 
 =item *
 
@@ -217,6 +236,14 @@ Carp::Heavy now ignores version mismatches with Carp if Carp is newer
 than 1.12, since Carp::Heavy's guts were merged into Carp at that
 point.
 L<[perl #121574]|https://rt.perl.org/Ticket/Display.html?id=121574>
+
+=item *
+
+L<charnames> has been upgraded from version 1.40 to 1.41.
+
+=item *
+
+L<CPAN::Meta> has been upgraded from version 2.140640 to 2.141520.
 
 =item *
 
@@ -230,11 +257,55 @@ L<[perl #122070]|https://rt.perl.org/Ticket/Display.html?id=122070>
 
 =item *
 
-L<Encode> has been upgraded from version 2.60_01 to 2.62.
+L<Devel::Peek> has been upgraded from version 1.16 to 1.17.
+
+=item *
+
+L<Devel::PPPort> has been upgraded from version 3.21 to 3.24.
+
+=item *
+
+L<Digest::SHA> has been upgraded from version 5.88 to 5.92.
+
+=item *
+
+L<DynaLoader> has been upgraded from version 1.25 to 1.26.
+
+=item *
+
+L<Encode> has been upgraded from version 2.60 to 2.62.
 
 B<piconv> now has better error handling when the encoding name is nonexistent,
 and a build breakage when upgrading L<Encode> in perl-5.8.2 and earlier has
 been fixed.
+
+=item *
+
+L<Errno> has been upgraded from version 1.20_03 to 1.20_04.
+
+=item *
+
+L<Exporter> has been upgraded from version 5.70 to 5.71.
+
+=item *
+
+L<ExtUtils::Install> has been upgraded from version 1.67 to 1.68.
+
+=item *
+
+L<ExtUtils::Miniperl> has been upgraded from version 1.01 to 1.02.
+
+=item *
+
+L<ExtUtils::ParseXS> has been upgraded from version 3.24 to 3.25.
+
+=item *
+
+L<ExtUtils::Typemaps> has been upgraded from version 3.24 to 3.25.
+
+=item *
+
+L<File::Spec> has been upgraded from version 3.47 to 3.48.
 
 =item *
 
@@ -244,21 +315,23 @@ Minor bug fixes and documentation fixes to Hash::Util::hash_stats()
 
 =item *
 
-The libnet collection of modules has been upgraded from version 1.25 to 1.27.
-
-There are only whitespace changes to the installed files.
+L<IO> has been upgraded from version 1.31 to 1.32.
 
 =item *
 
-The Locale-Codes collection of modules has been upgraded from vesion 3.30 to 3.31.
-
-Fixed a bug in the scripts used to extract data from spreadsheets that
-prevented the SHP currency code from being found.
-L<[cpan #94229]|https://rt.cpan.org/Ticket/Display.html?id=94229>
+L<List::Util> has been upgraded from version 1.38 to 1.39.
 
 =item *
 
-L<Math::BigInt> has been upgraded from version 1.9993 to 1.9994.
+L<locale> has been upgraded from version 1.03 to 1.04.
+
+=item *
+
+L<Locale::Codes> has been upgraded from version 3.30 to 3.31.
+
+=item *
+
+L<Math::BigInt> has been upgraded from version 1.9993 to 1.9995.
 
 Synchronize POD changes from the CPAN release.
 
@@ -270,16 +343,24 @@ satisfies C<< x = quotient * divisor + remainder >>.
 
 =item *
 
-L<Math::BigRat> has been upgraded from version 0.2606 to 0.2607.
+L<Math::BigRat> has been upgraded from version 0.2606 to 0.2608.
 
 Synchronize POD changes from the CPAN release.
 
 =item *
 
-L<Module::Metadata> has been upgraded from version 1.000022 to 1.000024.
+L<Module::CoreList> has been upgraded from version 5.021001 to 5.021001_01.
+
+=item *
+
+L<Module::Metadata> has been upgraded from version 1.000019 to 1.000024.
 
 Support installations on older perls with an L<ExtUtils::MakeMaker> earlier
 than 6.63_03
+
+=item *
+
+L<NDBM_File> has been upgraded from version 1.12 to 1.13.
 
 =item *
 
@@ -294,7 +375,7 @@ the forked process. L<[perl
 #121333]|https://rt.perl.org/Ticket/Display.html?id=121333>
 
 The debugger now saves the current working directory on startup and
-restores it when you restart your program with C<R> or <rerun>. L<[perl
+restores it when you restart your program with C<R> or C<rerun>. L<[perl
 #121509]|https://rt.perl.org/Ticket/Display.html?id=121509>
 
 =item *
@@ -305,7 +386,7 @@ No changes in behaviour.
 
 =item *
 
-L<PerlIO::mmap> has been upgraded from version 0.012 to 0.013.
+L<PerlIO::mmap> has been upgraded from version 0.011 to 0.013.
 
 No changes in behaviour.
 
@@ -314,6 +395,54 @@ No changes in behaviour.
 L<PerlIO::scalar> has been upgraded from version 0.18 to 0.19.
 
 No changes in behaviour.
+
+=item *
+
+L<PerlIO::via> has been upgraded from version 0.14 to 0.15.
+
+=item *
+
+L<Pod::Html> has been upgraded from version 1.21 to 1.22.
+
+=item *
+
+L<POSIX> has been upgraded from version 1.38_03 to 1.40.
+
+=item *
+
+L<Scalar::Util> has been upgraded from version 1.38 to 1.39.
+
+=item *
+
+L<SelfLoader> has been upgraded from version 1.21 to 1.22.
+
+=item *
+
+L<Socket> has been upgraded from version 2.013 to 2.014.
+
+=item *
+
+L<Storable> has been upgraded from version 2.49 to 2.51.
+
+=item *
+
+L<Term::ANSIColor> has been upgraded from version 4.02 to 4.03.
+
+=item *
+
+L<Test::Harness> has been upgraded from version 3.30 to 3.32.
+
+=item *
+
+L<Test::Simple> has been upgraded from version 1.001002 to 1.001003.
+
+=item *
+
+L<threads> has been upgraded from version 1.93 to 1.94.
+
+=item *
+
+L<Tie::File> has been upgraded from version 1.00 to 1.01.
 
 =item *
 
@@ -330,20 +459,15 @@ The XSUB implementation has been removed in favour of pure Perl.
 
 =item *
 
-A mismatch between the documentation and the code in utf8::downgrade()
-was fixed in favour of the documentation. The optional second argument
-is now correctly treated as a perl boolean (true/false semantics) and
-not as an integer.
-
-=back
-
-=head2 Removed Modules and Pragmata
-
-=over 4
+L<Unicode::UCD> has been upgraded from version 0.57 to 0.58.
 
 =item *
 
-XXX
+L<utf8> has been upgraded from version 1.13 to 1.14.
+
+=item *
+
+L<warnings> has been upgraded from version 1.23 to 1.24.
 
 =back
 
@@ -496,7 +620,7 @@ See L<charnames/CUSTOM ALIASES>.
 L<Can't use a hash as a reference|perldiag/"Can't use a hash as a reference">
 
 (F) You tried to use a hash as a reference, as in
-C<< %foo->{"bar"} >> or C<< %$ref->{"hello"} >>.  Versions of perl <= 5.6.1
+C<< %foo->{"bar"} >> or C<< %$ref->{"hello"} >>.  Versions of perl E<lt>= 5.6.1
 used to allow this syntax, but shouldn't have.
 
 =item *
@@ -504,7 +628,7 @@ used to allow this syntax, but shouldn't have.
 L<Can't use an array as a reference|perldiag/"Can't use an array as a reference">
 
 (F) You tried to use an array as a reference, as in
-C<< @foo->[23] >> or C<< @$ref->[99] >>.  Versions of perl <= 5.6.1 used to
+C<< @foo->[23] >> or C<< @$ref->[99] >>.  Versions of perl E<lt>= 5.6.1 used to
 allow this syntax, but shouldn't have.
 
 =item *
@@ -618,7 +742,7 @@ simply disable this warning:
 
 =item *
 
-L<Negative repeat count does nothing|perldiag/Negative repeat count does nothing>
+L<Negative repeat count does nothing|perldiag/"Negative repeat count does nothing">
 
 (W numeric)  This warns when the repeat count of the
 L<C<x>|perlop/Multiplicative Operators> repetition operator is
