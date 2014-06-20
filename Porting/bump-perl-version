@@ -223,6 +223,7 @@ my %SKIP_FILES = map { ($_ => 1) } qw(
     pp_ctl.c
 );
 my @SKIP_DIRS = qw(
+    dist
     ext
     lib
     pod
@@ -250,7 +251,7 @@ exit 0;
 
 sub do_scan {
     for my $file (@mani_files) {
-	next if grep $file =~ m{$_/}, @SKIP_DIRS;
+	next if grep $file =~ m{^$_/}, @SKIP_DIRS;
 	if ($SKIP_FILES{$file}) {
 	    warn "(skipping $file)\n";
 	    next;
