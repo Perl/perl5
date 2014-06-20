@@ -207,6 +207,10 @@ XXX
 
 =item *
 
+L<Module::CoreList> has been upgraded from version 3.11 to 5.021001_01.
+
+=item *
+
 L<Carp> has been upgraded from version 1.3301 to 1.34.
 
 Carp::Heavy now ignores version mismatches with Carp if Carp is newer
