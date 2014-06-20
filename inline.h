@@ -189,7 +189,7 @@ S_sv_or_pv_pos_u2b(pTHX_ SV *sv, const char *pv, STRLEN pos, STRLEN *lenp)
 
 /* saves machine code for a common noreturn idiom typically used in Newx*() */
 #ifdef GCC_DIAG_PRAGMA
-GCC_DIAG_IGNORE(-Wunused-function);
+GCC_DIAG_IGNORE(-Wunused-function) /* Intentionally left semicolonless. */
 #endif
 static void
 S_croak_memory_wrap(void)
@@ -197,7 +197,7 @@ S_croak_memory_wrap(void)
     Perl_croak_nocontext("%s",PL_memory_wrap);
 }
 #ifdef GCC_DIAG_PRAGMA
-GCC_DIAG_RESTORE;
+GCC_DIAG_RESTORE /* Intentionally left semicolonless. */
 #endif
 
 /* ------------------------------- utf8.h ------------------------------- */

@@ -391,12 +391,8 @@
  * semicolon being left alone on a line:
  * ;
  * which makes compilers mildly cranky.  Therefore at file level one
- * should use the #ifdef GCC_DIAG_PRAGMA guard around the GCC_DIAG_IGNORE
- * and GCC_DIAG_RESTORE.
- *
- * (An alternative solution would be not to use the semicolon, and then
- * the empty definition would be just empty, but that would make the code
- * look odd, and might mess up e.g. smart editors indenting the code.)
+ * should use the GCC_DIAG_IGNORE and GCC_DIAG_RESTORE_FILE *without*
+ * the semicolons.
  *
  * (A dead-on-arrival solution would be to try to define the macros as
  * NOOP or dNOOP, those don't work both inside functions and outside.)
