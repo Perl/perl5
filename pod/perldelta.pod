@@ -121,6 +121,10 @@ XXX
 
 L<XXX> has been upgraded from version A.xx to B.yy.
 
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.021001_1 to 5.021002.
+
 =back
 
 =head2 Removed Modules and Pragmata
