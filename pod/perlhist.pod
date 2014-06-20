@@ -32,7 +32,7 @@ Leon Brocard, Dave Mitchell, Jesse Vincent, Ricardo Signes, Steve Hay,
 Matt S Trout, David Golden, Florian Ragwitz, Tatsuhiko Miyagawa,
 Chris C<BinGOs> Williams, Zefram, Ævar Arnfjörð Bjarmason, Stevan
 Little, Dave Rolsky, Max Maischein, Abigail, Jesse Luehrs, Tony Cook,
-Dominic Hargreaves, Aaron Crane and Aristotle Pagaltzis.
+Dominic Hargreaves, Aaron Crane, Aristotle Pagaltzis and Matthew Horsfall.
 
 =head2 PUMPKIN?
 
@@ -532,6 +532,7 @@ the strings?).
  Ricardo   5.20.0       2014-May-27
 
  Ricardo   5.21.0       2014-May-27     The 5.21 development track
+ Matthew H 5.21.1       2014-Jun-20
 
 =head2 SELECTED RELEASE SIZES
 
