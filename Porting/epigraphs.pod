@@ -17,6 +17,21 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.21.1 - Robert Jordan, The Crossroads of Twilights, Book 10 of the Wheel of Time
+
+L<Announced on 2014-06-20 by Matthew Horsfall|http://www.nntp.perl.org/group/perl.perl5.porters/2014/06/msg217030.html>
+
+  We rode on the winds of the rising storm,
+    We ran to the sounds of the thunder.
+   We danced among the lightning bolts,
+       and tore the world asunder.
+
+    --     Anonymous fragment of a poem believed
+       written near the end of the previous Age,
+                  know by some as the Third Age.
+              Sometimes attributed to the Dragon
+                                         Reborn.
+
 =head2 v5.21.0 - Friedrich von Schiller, The Song of the Bell
 
 L<Announced on 2014-05-27 by Ricardo Signes|http://www.nntp.perl.org/group/perl.perl5.porters/2014/05/msg215826.html>
