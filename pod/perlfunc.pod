@@ -4341,23 +4341,45 @@ X<our> X<global>
 
 =for Pod::Functions +5.6.0 declare and assign a package variable (lexical scoping)
 
-C<our> makes a lexical alias to a package variable of the same name in the current
-package for use within the current lexical scope.
+C<our> makes a lexical alias to a package (i.e. global) variable of the
+same name in the current package for use within the current lexical scope.
 
-C<our> has the same scoping rules as C<my> or C<state>, but C<our> only
-declares an alias, whereas C<my> or C<state> both declare a variable name and
-allocate storage for that name within the current scope.
+C<our> has the same scoping rules as C<my> or C<state>, meaning that it is
+only valid within a lexical scope.  Unlike C<my> and C<state>, which both
+declare new (lexical) variables, C<our> only creates an alias to an
+existing variable: a package variable of the same name.
 
 This means that when C<use strict 'vars'> is in effect, C<our> lets you use
 a package variable without qualifying it with the package name, but only within
-the lexical scope of the C<our> declaration.  In this way, C<our> differs from
-C<use vars>, which allows use of an unqualified name I<only> within the
-affected package, but across scopes.
+the lexical scope of the C<our> declaration.
+
+    package Foo;
+    use strict;
+
+    $Foo::foo = 23;
+
+    {
+        our $foo;   # alias to $Foo::foo
+        print $foo; # prints 23
+    }
+
+    print $Foo::foo; # prints 23
+
+    print $foo; # ERROR: requires explicit package name
+
+This works even if the package variable has not been used before, as
+package variables spring into existence when first used.
+
+    package Foo;
+    use strict;
+
+    our $foo = 23;   # just like $Foo::foo = 23
+
+    print $Foo::foo; # prints 23
 
 If more than one variable is listed, the list must be placed
 in parentheses.
 
-    our $foo;
     our($bar, $baz);
 
 An C<our> declaration declares an alias for a package variable that will be visible
@@ -4407,6 +4429,9 @@ Note that with a parenthesised list, C<undef> can be used as a dummy
 placeholder, for example to skip assignment of initial values:
 
     our ( undef, $min, $hour ) = localtime;
+
+C<our> differs from C<use vars>, which allows use of an unqualified name
+I<only> within the affected package, but across scopes.
 
 =item pack TEMPLATE,LIST
 X<pack>
