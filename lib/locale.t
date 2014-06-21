@@ -2228,12 +2228,14 @@ foreach $test_num ($first_locales_test_number..$final_locales_test_number) {
                     print "# problem is not likely to be Perl's\n";
                 }
             }
-            elsif ($debug) {
+            if ($debug) {
                 print "# $percent_fail% of locales (",
                       scalar(keys $Problem{$test_num}),
                       " of ",
                       scalar(@Locale),
-                      ") fail the following test\n";
+                      ") fail the above test (TODO cut-off is ",
+                      $acceptable_failure_percentage,
+                      "%)\n";
             }
         }
         print "#\n";
