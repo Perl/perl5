@@ -8,7 +8,11 @@ BEGIN {
     require './test.pl';
 }   
 
-plan tests => 1406;
+# We'll run 12 extra tests (see below) if $Q is false.
+eval { my $q = pack "q", 0 };
+my $Q = $@ eq '';
+
+plan tests => 1406 + ($Q ? 0 : 12);
 
 use strict;
 use Config;
@@ -282,9 +286,6 @@ foreach my $n (2**1e100, -2**1e100, 2**1e100/2**1e100) { # +Inf, -Inf, NaN
 }
 
 # test %ll formats with and without HAS_QUAD
-eval { my $q = pack "q", 0 };
-my $Q = $@ eq '';
-
 my @tests = (
   [ '%lld' => [qw( 4294967296 -100000000000000 )] ],
   [ '%lli' => [qw( 4294967296 -100000000000000 )] ],
