@@ -1275,7 +1275,7 @@ SKIP: {
   # comma warning only once
   @warning = ();
   $x = pack( 'C(C,C)C,C', 65..71  );
-  like( scalar @warning, 1 );
+  cmp_ok( scalar(@warning), '==', 1 );
 
   # forbidden code in []
   eval { my $x = pack( 'A[@4]', 'XXXX' ); };

@@ -404,7 +404,7 @@ is $kalled, 1, 'calling a class method via a magic variable';
 
     *NulTest::AUTOLOAD = sub { our $AUTOLOAD; return $AUTOLOAD };
 
-    like(NulTest->${ \"nul\0test" }, "nul\0test", "AUTOLOAD is nul-clean");
+    like(NulTest->${ \"nul\0test" }, qr/nul\0test/, "AUTOLOAD is nul-clean");
 }
 
 

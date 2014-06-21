@@ -41,7 +41,7 @@ use charnames ":full";
 1
 EOE
 
-    like($@, "above 0xFF", "Verify get warning for \\N{above ff} under 'use bytes' with :full");
+    like($@, qr/above 0xFF/, "Verify get warning for \\N{above ff} under 'use bytes' with :full");
     ok(! defined $res, "... and result is undefined");
 
     $res = eval <<'EOE';
@@ -49,7 +49,7 @@ use charnames 'cyrillic';
 "Here: \N{Be}!";
 1
 EOE
-    like($@, "CYRILLIC CAPITAL LETTER BE.*above 0xFF", "Verify get warning under 'use bytes' with explicit script");
+    like($@, qr/CYRILLIC CAPITAL LETTER BE.*above 0xFF/, "Verify get warning under 'use bytes' with explicit script");
     ok(! defined $res, "... and result is undefined");
 
     $res = eval <<'EOE';

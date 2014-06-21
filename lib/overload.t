@@ -305,7 +305,7 @@ is($na, '_!_xx_!_');
 $na = 0;
 
 $na = eval { ~$aI };
-like($@, '');
+is($@, '');
 
 bless \$x, OscalarI;
 

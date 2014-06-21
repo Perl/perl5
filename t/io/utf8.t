@@ -223,7 +223,7 @@ is($failed, undef);
     print F chr(0x100);
     close(F);
 
-    like( $@, 'Wide character in print' );
+    like( $@, qr/Wide character in print/ );
 
     undef $@;
     open F, ">:utf8", $a_file;
@@ -257,7 +257,7 @@ is($failed, undef);
     print F chr(0x100);
     close(F);
 
-    like( $@, 'Wide character in print' );
+    like( $@, qr/Wide character in print/ );
 }
 
 {

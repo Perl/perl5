@@ -882,13 +882,13 @@ $tests += 3;
 
 test_proto 'time';
 $tests += 2;
-like &mytime, '^\d+\z', '&time in scalar context';
-like join('-', &mytime), '^\d+\z', '&time in list context';
+like &mytime, qr/^\d+\z/, '&time in scalar context';
+like join('-', &mytime), qr/^\d+\z/, '&time in list context';
 
 test_proto 'times';
 $tests += 2;
-like &mytimes, '^[\d.]+\z', '&times in scalar context';
-like join('-',&mytimes), '^[\d.]+-[\d.]+-[\d.]+-[\d.]+\z',
+like &mytimes, qr/^[\d.]+\z/, '&times in scalar context';
+like join('-',&mytimes), qr/^[\d.]+-[\d.]+-[\d.]+-[\d.]+\z/,
    '&times in list context';
 
 test_proto 'uc', 'aa', 'AA';

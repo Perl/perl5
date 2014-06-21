@@ -155,7 +155,7 @@ for my $i (0 .. 255) {
 
 push @tests, qq[like chr(0x0430), qr/[=\x{0410}-\x{0411}]/i, 'Bug #71752 Unicode /i char in a range'];
 push @tests, qq[like 'a', qr/\\p{Upper}/i, "'a' =~ /\\\\p{Upper}/i"];
-push @tests, q[my $c = "\x{212A}"; my $p = qr/(?:^[K_]+$)/i; utf8::upgrade($p); like $c, $p, 'Bug #78994: my $c = "\x{212A}"; my $p = qr/(?:^[K_]+$)/i; utf8::upgrade($p); $c =~ $p'];
+push @tests, q[my $c = "\x{212A}"; my $p = qr/(?:^[K_]+$)/i; utf8::upgrade($p); like $c, qr/$p/, 'Bug #78994: my $c = "\x{212A}"; my $p = qr/(?:^[K_]+$)/i; utf8::upgrade($p); $c =~ $p'];
 
 use charnames ":full";
 my $e_grave = latin1_to_native("\xE8");

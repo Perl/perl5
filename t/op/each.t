@@ -196,7 +196,7 @@ for my $k (qw(each keys values)) {
     isnt($v1,$v2,"if(%foo) didnt mess with each (value)");
     is($rest,3,"Got the expect number of keys");
     my $hsv=1 && %foo;
-    like($hsv,'/',"Got bucket stats from %foo in scalar assignment context");
+    like($hsv,qr[/],"Got bucket stats from %foo in scalar assignment context");
     my @arr=%foo&&%foo;
     is(@arr,10,"Got expected number of elements in list context");
 }    
@@ -215,7 +215,7 @@ for my $k (qw(each keys values)) {
     isnt($v1,$v2,"if(%foo) didnt mess with each (value)");
     is($rest,3,"Got the expect number of keys");
     my $hsv=1 && %foo;
-    like($hsv,'/',"Got bucket stats from %foo in scalar assignment context");
+    like($hsv,qr[/],"Got bucket stats from %foo in scalar assignment context");
     my @arr=%foo&&%foo;
     is(@arr,10,"Got expected number of elements in list context");
 }    

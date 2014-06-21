@@ -457,14 +457,14 @@ $out =
  runperl(
   switches => ["-MO=Concise,-nobanner,foo"], prog=>'sub foo{}', stderr => 1
  );
-unlike $out, 'main::foo', '-nobanner';
+unlike $out, qr/main::foo/, '-nobanner';
 
 # glob
 $out =
  runperl(
   switches => ["-MO=Concise"], prog=>'glob(q{.})', stderr => 1
  );
-like $out, '\*<none>::', 'glob(q{.})';
+like $out, qr/\*<none>::/, 'glob(q{.})';
 
 # Test op_other in -debug
 $out = runperl(
@@ -486,7 +486,7 @@ EOF
 
 $end =~ s/\r\n/\n/g;
 
-like $out, $end, 'OP_AND has op_other';
+like $out, qr/$end/, 'OP_AND has op_other';
 
 # like(..) above doesn't fill in $1
 $out =~ $end;
@@ -502,6 +502,6 @@ EOF
 
 $end =~ s/<NEXT>/$next/;
 
-like $out, $end, 'OP_AND->op_other points correctly';
+like $out, qr/$end/, 'OP_AND->op_other points correctly';
 
 __END__

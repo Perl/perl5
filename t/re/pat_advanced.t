@@ -2191,7 +2191,7 @@ EOP
     {   # This was failing unless an explicit /d was added
         my $p = qr/[\xE0_]/i;
         utf8::upgrade($p);
-        like("\xC0", $p, "Verify \"\\xC0\" =~ /[\\xE0_]/i; pattern in utf8");
+        like("\xC0", qr/$p/, "Verify \"\\xC0\" =~ /[\\xE0_]/i; pattern in utf8");
     }
 
     ok "x" =~ /\A(?>(?:(?:)A|B|C?x))\z/,
@@ -2432,7 +2432,7 @@ EOP
     { # Regexp:Grammars was broken:
   # http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2013-06/msg01290.html
         fresh_perl_like('use warnings; "abc" =~ qr{(?&foo){0}abc(?<foo>)}',
-                        'Quantifier unexpected on zero-length expression',
+                        qr/Quantifier unexpected on zero-length expression/,
                         {},
                         'No segfault on qr{(?&foo){0}abc(?<foo>)}');
     }

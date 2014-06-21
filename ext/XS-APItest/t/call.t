@@ -279,7 +279,7 @@ for my $fn_type (0..2) { #   0:eval_pv   1:eval_sv   2:call_sv
 	    }
 	    else {
 		is($warn_msg, undef, "$desc - __WARN__ not called");
-		unlike($@, 'pre-err', "$desc - \$@ modified");
+		unlike($@, qr/pre-err/, "$desc - \$@ modified");
 	    }
 	    like($@,
 		(

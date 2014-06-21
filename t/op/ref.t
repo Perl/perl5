@@ -617,7 +617,7 @@ is ( (sub {"bar"})[0]->(), "bar", 'code deref from list slice w/ ->' );
 {
     local $@;
     eval { ()[0]{foo} };
-    like ( "$@", "Can't use an undefined value as a HASH reference",
+    like ( "$@", qr/Can't use an undefined value as a HASH reference/,
            "deref of undef from list slice fails" );
 }
 

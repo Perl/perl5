@@ -121,7 +121,7 @@ my $out = run_perl(prog => 'use threads 1.92;' .
     local $TODO = 'VMS exit semantics not like POSIX exit semantics' if $^O eq 'VMS';
     is($?>>8, 99, "exit(status) in thread");
 }
-like($out, '1 finished and unjoined', "exit(status) in thread");
+like($out, qr/1 finished and unjoined/, "exit(status) in thread");
 
 
 $out = run_perl(prog => 'use threads 1.92 qw(exit thread_only);' .
@@ -138,7 +138,7 @@ $out = run_perl(prog => 'use threads 1.92 qw(exit thread_only);' .
     local $TODO = 'VMS exit semantics not like POSIX exit semantics' if $^O eq 'VMS';
     is($?>>8, 99, "set_thread_exit_only(0)");
 }
-like($out, '1 finished and unjoined', "set_thread_exit_only(0)");
+like($out, qr/1 finished and unjoined/, "set_thread_exit_only(0)");
 
 
 run_perl(prog => 'use threads 1.92;' .

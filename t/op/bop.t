@@ -353,7 +353,7 @@ is($a, "\xFF", "~ works with utf-8");
 # This would cause a segfault without malloc wrap
 SKIP: {
   skip "No malloc wrap checks" unless $Config::Config{usemallocwrap};
-  like( runperl(prog => 'eval q($#a>>=1); print 1'), "^1\n?" );
+  like( runperl(prog => 'eval q($#a>>=1); print 1'), qr/^1\n?/ );
 }
 
 # [perl #37616] Bug in &= (string) and/or m//

@@ -12,7 +12,7 @@ plan tests => 30;
 # TARG. Test that we respect SvREADONLY.
 use constant roref => \2;
 eval { for (roref) { $_ = <FH> } };
-like($@, 'Modification of a read-only value attempted', '[perl #19566]');
+like($@, qr/Modification of a read-only value attempted/, '[perl #19566]');
 
 # [perl #21628]
 {
