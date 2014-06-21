@@ -14,7 +14,7 @@ BEGIN {
 }
 
 use strict;
-use Test::More tests => 44;
+use Test::More tests => 38;
 
 use IO::Handle;
 use IPC::Open3;
@@ -188,29 +188,29 @@ foreach my $handle (qw (DUMMY STDIN STDOUT STDERR)) {
     waitpid $pid, 0;
 }
 
-# Test that tied STDIN, STDOUT, and STDERR do not cause open3 any discomfort.
-# In particular, tied STDERR used to be able to prevent open3 from working
-# correctly.  RT #119843.
-{
-    {	# This just throws things out
-	package My::Tied::FH;
-	sub TIEHANDLE { bless \my $self }
-	sub PRINT {}
-	# Note the absence of OPEN and FILENO
-    }
-    my $message = "japh\n";
-    foreach my $handle (*STDIN, *STDOUT, *STDERR) {
-	tie $handle, 'My::Tied::FH';
-	my ($in, $out);
-	my $pid = eval {
-	    open3 $in, $out, undef, $perl, '-ne', 'print';
-	};
-	is($@, '', "no errors calling open3 with tied $handle");
-	print $in $message;
-	close $in;
-	my $japh = <$out>;
-	waitpid $pid, 0;
-	is($japh, $message, "read input correctly");
-	untie $handle;
-    }
-}
+## Test that tied STDIN, STDOUT, and STDERR do not cause open3 any discomfort.
+## In particular, tied STDERR used to be able to prevent open3 from working
+## correctly.  RT #119843.
+#{
+#    {	# This just throws things out
+#	package My::Tied::FH;
+#	sub TIEHANDLE { bless \my $self }
+#	sub PRINT {}
+#	# Note the absence of OPEN and FILENO
+#    }
+#    my $message = "japh\n";
+#    foreach my $handle (*STDIN, *STDOUT, *STDERR) {
+#	tie $handle, 'My::Tied::FH';
+#	my ($in, $out);
+#	my $pid = eval {
+#	    open3 $in, $out, undef, $perl, '-ne', 'print';
+#	};
+#	is($@, '', "no errors calling open3 with tied $handle");
+#	print $in $message;
+#	close $in;
+#	my $japh = <$out>;
+#	waitpid $pid, 0;
+#	is($japh, $message, "read input correctly");
+#	untie $handle;
+#    }
+#}
