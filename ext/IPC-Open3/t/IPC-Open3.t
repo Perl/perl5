@@ -191,7 +191,7 @@ foreach my $handle (qw (DUMMY STDIN STDOUT STDERR)) {
 # Test that tied STDIN, STDOUT, and STDERR do not cause open3 any discomfort.
 # In particular, tied STDERR used to be able to prevent open3 from working
 # correctly.  RT #119843.
-{
+SKIP: {
     if (&IPC::Open3::DO_SPAWN) {
       skip "Calling open3 with tied filehandles does not work here", 6
     }
