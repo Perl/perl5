@@ -4921,6 +4921,9 @@ Perl_my_snprintf(char *buffer, const Size_t len, const char *format, ...)
     int retval;
     va_list ap;
     PERL_ARGS_ASSERT_MY_SNPRINTF;
+#ifndef HAS_VSNPRINTF
+    PERL_UNUSED_VAR(len);
+#endif
     va_start(ap, format);
 #ifdef HAS_VSNPRINTF
     retval = vsnprintf(buffer, len, format, ap);
@@ -4959,7 +4962,9 @@ Perl_my_vsnprintf(char *buffer, const Size_t len, const char *format, va_list ap
     va_list apc;
 
     PERL_ARGS_ASSERT_MY_VSNPRINTF;
-
+#ifndef HAS_VSNPRINTF
+    PERL_UNUSED_VAR(len);
+#endif
     Perl_va_copy(ap, apc);
 # ifdef HAS_VSNPRINTF
     retval = vsnprintf(buffer, len, format, apc);
