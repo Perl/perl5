@@ -297,9 +297,17 @@ my @tests = (
 for my $t (@tests) {
   my($fmt, $nums) = @$t;
   for my $num (@$nums) {
-    my $w; local $SIG{__WARN__} = sub { $w = shift };
-    is(sprintf($fmt, $num), $Q ? $num : $fmt, "quad: $fmt -> $num");
-    like($w, $Q ? '' : qr/Invalid conversion in sprintf: "$fmt"/, "warning: $fmt");
+    my $w = '';
+    local $SIG{__WARN__} = sub { $w .= shift };
+    my $sprintf_got = sprintf($fmt, $num);
+    if ($Q) {
+      is($sprintf_got, $num, "quad: $fmt -> $num");
+      is($w, '', "no warnings for: $fmt -> $num");
+    } else {
+      is($sprintf_got, $fmt, "quad unsupported: $fmt -> $fmt");
+      like($w, qr/Invalid conversion in sprintf: "$fmt"/, "got warning about invalid conversion from fmt : $fmt");
+      like($w, qr/Missing argument in sprintf/, "got warning about missing argument in sprintf from fmt : $fmt");
+    }
   }
 }
 
