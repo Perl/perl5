@@ -1502,10 +1502,10 @@ STMT_START {                                                                    
     }                                                                               \
 } STMT_END
 
-#define REXEC_FBC_EXACTISH_SCAN(CoNd)                     \
+#define REXEC_FBC_EXACTISH_SCAN(COND)                     \
 STMT_START {                                              \
     while (s <= e) {                                      \
-	if ( (CoNd)                                       \
+	if ( (COND)                                       \
 	     && (ln == 1 || folder(s, pat_string, ln))    \
 	     && (reginfo->intuit || regtry(reginfo, &s)) )\
 	    goto got_it;                                  \
@@ -1513,25 +1513,25 @@ STMT_START {                                              \
     }                                                     \
 } STMT_END
 
-#define REXEC_FBC_UTF8_SCAN(CoDe)                     \
+#define REXEC_FBC_UTF8_SCAN(CODE)                     \
 STMT_START {                                          \
     while (s < strend) {                              \
-	CoDe                                          \
+	CODE                                          \
 	s += UTF8SKIP(s);                             \
     }                                                 \
 } STMT_END
 
-#define REXEC_FBC_SCAN(CoDe)                          \
+#define REXEC_FBC_SCAN(CODE)                          \
 STMT_START {                                          \
     while (s < strend) {                              \
-	CoDe                                          \
+	CODE                                          \
 	s++;                                          \
     }                                                 \
 } STMT_END
 
-#define REXEC_FBC_UTF8_CLASS_SCAN(CoNd)               \
+#define REXEC_FBC_UTF8_CLASS_SCAN(COND)               \
 REXEC_FBC_UTF8_SCAN(                                  \
-    if (CoNd) {                                       \
+    if (COND) {                                       \
 	if (tmp && (reginfo->intuit || regtry(reginfo, &s))) \
 	    goto got_it;                              \
 	else                                          \
@@ -1541,9 +1541,9 @@ REXEC_FBC_UTF8_SCAN(                                  \
 	tmp = 1;                                      \
 )
 
-#define REXEC_FBC_CLASS_SCAN(CoNd)                    \
+#define REXEC_FBC_CLASS_SCAN(COND)                    \
 REXEC_FBC_SCAN(                                       \
-    if (CoNd) {                                       \
+    if (COND) {                                       \
 	if (tmp && (reginfo->intuit || regtry(reginfo, &s)))  \
 	    goto got_it;                              \
 	else                                          \
@@ -1557,12 +1557,12 @@ REXEC_FBC_SCAN(                                       \
 if ((reginfo->intuit || regtry(reginfo, &s))) \
     goto got_it
 
-#define REXEC_FBC_CSCAN(CoNdUtF8,CoNd)                         \
+#define REXEC_FBC_CSCAN(CONDUTF8,COND)                         \
     if (utf8_target) {                                         \
-	REXEC_FBC_UTF8_CLASS_SCAN(CoNdUtF8);                   \
+	REXEC_FBC_UTF8_CLASS_SCAN(CONDUTF8);                   \
     }                                                          \
     else {                                                     \
-	REXEC_FBC_CLASS_SCAN(CoNd);                            \
+	REXEC_FBC_CLASS_SCAN(COND);                            \
     }
     
 #define DUMP_EXEC_POS(li,s,doutf8)                          \
@@ -1583,7 +1583,7 @@ if ((reginfo->intuit || regtry(reginfo, &s))) \
 	    }                                                                  \
 	);                                                                     \
 
-#define UTF8_LOAD(TeSt1_UtF8, TeSt2_UtF8, IF_SUCCESS, IF_FAIL)                 \
+#define UTF8_LOAD(TEST1_UTF8, TEST2_UTF8, IF_SUCCESS, IF_FAIL)                 \
 	if (s == reginfo->strbeg) {                                            \
 	    tmp = '\n';                                                        \
 	}                                                                      \
@@ -1592,10 +1592,10 @@ if ((reginfo->intuit || regtry(reginfo, &s))) \
 	    tmp = utf8n_to_uvchr(r, (U8*) reginfo->strend - r,                 \
                                                        0, UTF8_ALLOW_DEFAULT); \
 	}                                                                      \
-	tmp = TeSt1_UtF8;                                                      \
+	tmp = TEST1_UTF8;                                                      \
 	LOAD_UTF8_CHARCLASS_ALNUM();                                           \
 	REXEC_FBC_UTF8_SCAN(                                                   \
-	    if (tmp == ! (TeSt2_UtF8)) {                                       \
+	    if (tmp == ! (TEST2_UTF8)) {                                       \
 		tmp = !tmp;                                                    \
 		IF_SUCCESS;                                                    \
 	    }                                                                  \
