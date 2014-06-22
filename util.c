@@ -3450,7 +3450,7 @@ Perl_get_vtbl(pTHX_ int vtbl_id)
     PERL_UNUSED_CONTEXT;
 
     return (vtbl_id < 0 || vtbl_id >= magic_vtable_max)
-	? NULL : PL_magic_vtables + vtbl_id;
+	? NULL : (MGVTBL*)PL_magic_vtables + vtbl_id;
 }
 
 I32
