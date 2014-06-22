@@ -814,6 +814,8 @@ Perl_sv_free_arenas(pTHX)
 
 =head1 SV-Body Allocation
 
+=cut
+
 Allocation of SV-bodies is similar to SV-heads, differing as follows;
 the allocation mechanism is used for many body types, so is somewhat
 more complicated, it uses arena-sets, and has no need for still-live

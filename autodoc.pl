@@ -15,12 +15,12 @@
 #
 # This script is invoked as part of 'make all'
 #
-# '=head1' are the only headings looked for.  If the next line after the
-# heading begins with a word character, it is considered to be the first line
-# of documentation that applies to the heading itself.  That is, it is output
-# immediately after the heading, before the first function, and not indented.
-# The next input line that is a pod directive terminates this heading-level
-# documentation.
+# '=head1' are the only headings looked for.  If the first non-blank line after
+# the heading begins with a word character, it is considered to be the first 
+# line of documentation that applies to the heading itself.  That is, it is 
+# output immediately after the heading, before the first function, and not 
+# indented. The next input line that is a pod directive terminates this 
+# heading-level documentation.
 
 use strict;
 
@@ -54,8 +54,12 @@ my $curheader = "Unknown section";
 sub autodoc ($$) { # parse a file and extract documentation info
     my($fh,$file) = @_;
     my($in, $doc, $line, $header_doc);
+
+    # Count lines easier
+    my $get_next_line = sub { $line++; return <$fh> };
+
 FUNC:
-    while (defined($in = <$fh>)) {
+    while (defined($in = $get_next_line->())) {
 	if ($in =~ /^#\s*define\s+([A-Za-z_][A-Za-z_0-9]+)\(/ &&
 	    ($file ne 'embed.h' || $file ne 'proto.h')) {
 	    $macro{$1} = $file;
@@ -64,26 +68,31 @@ FUNC:
         if ($in=~ /^=head1 (.*)/) {
             $curheader = $1;
 
-            # If the next line begins with a word char, then is the start of
-            # heading-level documentation.
-	    if (defined($doc = <$fh>)) {
+            # If the next non-space line begins with a word char, then it is
+            # the start of heading-ldevel documentation.
+	    if (defined($doc = $get_next_line->())) {
+                # Skip over empty lines
+                while ($doc =~ /^\s+$/) {
+                    if (! defined($doc = $get_next_line->())) {
+                        next FUNC;
+                    }
+                }
+
                 if ($doc !~ /^\w/) {
                     $in = $doc;
                     redo FUNC;
                 }
                 $header_doc = $doc;
-                $line++;
 
                 # Continue getting the heading-level documentation until read
                 # in any pod directive (or as a fail-safe, find a closing
                 # comment to this pod in a C language file
 HDR_DOC:
-                while (defined($doc = <$fh>)) {
+                while (defined($doc = $get_next_line->())) {
                     if ($doc =~ /^=\w/) {
                         $in = $doc;
                         redo FUNC;
                     }
-                    $line++;
 
                     if ($doc =~ m:^\s*\*/$:) {
                         warn "=cut missing? $file:$line:$doc";;
@@ -94,15 +103,13 @@ HDR_DOC:
             }
             next FUNC;
         }
-	$line++;
 	if ($in =~ /^=for\s+apidoc\s+(.*?)\s*\n/) {
 	    my $proto = $1;
 	    $proto = "||$proto" unless $proto =~ /\|/;
 	    my($flags, $ret, $name, @args) = split /\|/, $proto;
 	    my $docs = "";
 DOC:
-	    while (defined($doc = <$fh>)) {
-		$line++;
+	    while (defined($doc = $get_next_line->())) {
 		last DOC if $doc =~ /^=\w+/;
 		if ($doc =~ m:^\*/$:) {
 		    warn "=cut missing? $file:$line:$doc";;
