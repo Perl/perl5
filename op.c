@@ -8254,6 +8254,7 @@ PERL_STATIC_INLINE bool
 is_dollar_bracket(pTHX_ const OP * const o)
 {
     const OP *kid;
+    PERL_UNUSED_CONTEXT;
     return o->op_type == OP_RV2SV && o->op_flags & OPf_KIDS
 	&& (kid = cUNOPx(o)->op_first)
 	&& kid->op_type == OP_GV
@@ -10265,6 +10266,7 @@ Perl_cv_get_call_checker(pTHX_ CV *cv, Perl_call_checker *ckfun_p, SV **ckobj_p)
 {
     MAGIC *callmg;
     PERL_ARGS_ASSERT_CV_GET_CALL_CHECKER;
+    PERL_UNUSED_CONTEXT;
     callmg = SvMAGICAL((SV*)cv) ? mg_find((SV*)cv, PERL_MAGIC_checkcall) : NULL;
     if (callmg) {
 	*ckfun_p = DPTR2FPTR(Perl_call_checker, callmg->mg_ptr);

@@ -769,6 +769,7 @@ print $c <<"EOF";
 
 void
 Perl_reentrant_size(pTHX) {
+	PERL_UNUSED_CONTEXT;
 #ifdef USE_REENTRANT_API
 #define REENTRANTSMALLSIZE	 256	/* Make something up. */
 #define REENTRANTUSUALSIZE	4096	/* Make something up. */
@@ -778,6 +779,7 @@ Perl_reentrant_size(pTHX) {
 
 void
 Perl_reentrant_init(pTHX) {
+	PERL_UNUSED_CONTEXT;
 #ifdef USE_REENTRANT_API
 	Newx(PL_reentrant_buffer, 1, REENTR);
 	Perl_reentrant_size(aTHX);
@@ -787,6 +789,7 @@ Perl_reentrant_init(pTHX) {
 
 void
 Perl_reentrant_free(pTHX) {
+	PERL_UNUSED_CONTEXT;
 #ifdef USE_REENTRANT_API
 @free
 	Safefree(PL_reentrant_buffer);

@@ -3390,7 +3390,8 @@ Perl_set_context(void *t)
 struct perl_vars *
 Perl_GetVars(pTHX)
 {
- return &PL_Vars;
+    PERL_UNUSED_CONTEXT;
+    return &PL_Vars;
 }
 #endif
 
@@ -4615,6 +4616,7 @@ Perl_init_global_struct(pTHX)
 # ifdef PERL_GLOBAL_STRUCT
     const IV nppaddr = C_ARRAY_LENGTH(Gppaddr);
     const IV ncheck  = C_ARRAY_LENGTH(Gcheck);
+    PERL_UNUSED_CONTEXT;
 #  ifdef PERL_GLOBAL_STRUCT_PRIVATE
     /* PerlMem_malloc() because can't use even safesysmalloc() this early. */
     plvarsp = (struct perl_vars*)PerlMem_malloc(sizeof(struct perl_vars));
@@ -4672,6 +4674,7 @@ Perl_free_global_struct(pTHX_ struct perl_vars *plvarsp)
     int veto = plvarsp->Gveto_cleanup;
 
     PERL_ARGS_ASSERT_FREE_GLOBAL_STRUCT;
+    PERL_UNUSED_CONTEXT;
 # ifdef PERL_GLOBAL_STRUCT
 #  ifdef PERL_UNSET_VARS
     PERL_UNSET_VARS(plvarsp);

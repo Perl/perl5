@@ -152,6 +152,7 @@ SV *
 Perl_gv_const_sv(pTHX_ GV *gv)
 {
     PERL_ARGS_ASSERT_GV_CONST_SV;
+    PERL_UNUSED_CONTEXT;
 
     if (SvTYPE(gv) == SVt_PVGV)
 	return cv_const_sv(GvCVu(gv));

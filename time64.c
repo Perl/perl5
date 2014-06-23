@@ -321,7 +321,6 @@ static struct tm * S_localtime_r(const time_t *clock, struct tm *result) {
 #ifndef HAS_GMTIME_R
 /* Simulate gmtime_r() to the best of our ability */
 static struct tm * S_gmtime_r(const time_t *clock, struct tm *result) {
-    dTHX;    /* in case the following is defined as Perl_my_gmtime(aTHX_ ...) */
     const struct tm *static_result = gmtime(clock);
 
     assert(result != NULL);

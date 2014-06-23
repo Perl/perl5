@@ -321,7 +321,7 @@
 #  define PERL_UNUSED_VAR(x) ((void)x)
 #endif
 
-#ifdef USE_ITHREADS
+#if defined(USE_ITHREADS) || defined(PERL_GLOBAL_STRUCT)
 #  define PERL_UNUSED_CONTEXT PERL_UNUSED_ARG(my_perl)
 #else
 #  define PERL_UNUSED_CONTEXT
