@@ -1692,8 +1692,18 @@ REXEC_FBC_SCAN( /* Loops while (s < strend) */                 \
 	    }                                                                  \
 	);                                                                     \
     }                                                                          \
-    if ((!prog->minlen && tmp) && (reginfo->intuit || regtry(reginfo, &s)))    \
-	goto got_it;
+    /* Here, things have been set up by the previous code so that tmp is the   \
+     * return of TEST_NON_UTF(s-1) or TEST_UTF8(s-1) (depending on the         \
+     * utf8ness of the target).  We also have to check if this matches against \
+     * the EOS, which we treat as a \n (which is the same value in both UTF-8  \
+     * or non-UTF8, so can use the non-utf8 test condition even for a UTF-8    \
+     * string */                                                               \
+    if (tmp == ! TEST_NON_UTF8('\n')) {                                        \
+        IF_SUCCESS;                                                            \
+    }                                                                          \
+    else {                                                                     \
+        IF_FAIL;                                                               \
+    }
 
 
 /* We know what class REx starts with.  Try to find this position... */
