@@ -170,9 +170,9 @@ if ($? != 0) {
         warn "If not, remove them from \@writables in Porting/makerel\n";
     }
     exit 1;
-} else {
-    warn $out if $out;
 }
+
+warn $out if $out;
 
 chdir ".." or die $!;
 
