@@ -1626,7 +1626,16 @@ if ((reginfo->intuit || regtry(reginfo, &s))) \
  * must be different.  Find the "wordness" of the character just prior to this
  * one, and compare it with the wordness of this one.  If they differ, we have
  * a boundary.  At the beginning of the string, pretend that the previous
- * character was a new-line */
+ * character was a new-line.
+ *
+ * 'tmp' below in the REXEC_FBC_SCAN loop is a loop invariant, a bool giving
+ * the return of TEST_NON_UTF8(s-1).  To see this, note that that's what it is
+ * defined to be at entry to the loop, and to get to the IF_FAIL branch, tmp
+ * must equal TEST_NON_UTF8(s), and in the opposite branch, IF_SUCCESS, tmp is
+ * that complement.  But in that branch we complement tmp, meaning that at the
+ * bottom of the loop tmp is always going to be equal to TEST_NON_UTF8(s),
+ * which means at the top of the loop in the next iteration, it is
+ * TEST_NON_UTF8(s-1) */
 #define FBC_BOUND_COMMON(UTF8_CODE, TEST_NON_UTF8, IF_SUCCESS, IF_FAIL)        \
     if (utf8_target) {                                                         \
 		UTF8_CODE                                                      \
@@ -1636,8 +1645,8 @@ if ((reginfo->intuit || regtry(reginfo, &s))) \
 	tmp = TEST_NON_UTF8(tmp);                                              \
 	REXEC_FBC_SCAN(                                                        \
 	    if (tmp == ! TEST_NON_UTF8((U8) *s)) {                             \
-		tmp = !tmp;                                                    \
 		IF_SUCCESS;                                                    \
+		tmp = !tmp;                                                    \
 	    }                                                                  \
 	    else {                                                             \
 		IF_FAIL;                                                       \
