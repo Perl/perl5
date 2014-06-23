@@ -5229,6 +5229,7 @@ t/porting/filenames.t		Check the MANIFEST for filename portability.
 t/porting/FindExt.t		Test win32/FindExt.pm
 t/porting/globvar.t		Check that globvar.sym is sane
 t/porting/known_pod_issues.dat	Data file for porting/podcheck.t
+t/porting/libperl.t		Check libperl.a sanity
 t/porting/maintainers.t		Test that Porting/Maintainers.pl is up to date
 t/porting/manifest.t		Test that this MANIFEST file is well formed
 t/porting/pending-author.t	Check if any pending commit would break tests

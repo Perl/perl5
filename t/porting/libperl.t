@@ -1,0 +1,318 @@
+#!/usr/bin/perl -w
+
+# Try opening libperl.a with nm, and verifying it has the kind of symbols
+# we expected.  Fail softly, expect things only on known platforms.
+#
+# Also, if the rarely-used builds options -DPERL_GLOBAL_STRUCT or
+# -DPERL_GLOBAL_STRUCT_PRIVATE are used, verify that they did what
+# they were meant to do, hide the global variables (see perlguts for
+# the details).
+
+BEGIN {
+    chdir 't' if -d 't';
+    @INC = '../lib';
+    require "./test.pl";
+}
+
+use strict;
+
+use Config;
+
+if ($Config{cc} =~ /g\+\+/) {
+    # XXX Could use c++filt, maybe.
+    skip_all "on g++";
+}
+
+my $libperl_a;
+
+for my $f (qw(../libperl.a libperl.a)) {
+  if (-f $f) {
+    $libperl_a = $f;
+    last;
+  }
+}
+
+unless (defined $libperl_a) {
+  skip_all "no libperl.a";
+}
+
+print "# libperl = $libperl_a\n";
+
+my $nm;
+my $nm_opt = '';
+my $nm_style;
+
+if ($^O eq 'linux') {
+    $nm = '/usr/bin/nm';
+    $nm_style = 'gnu';
+} elsif ($^O eq 'darwin') {
+    $nm = '/usr/bin/nm';
+    $nm_style = 'darwin';
+    # With the -m option we get better information than the BSD-like
+    # default: with the default, a lot of symbols get dumped into 'S'
+    # or 's', for example one cannot tell the difference between const
+    # and non-const symbols.
+    $nm_opt = '-m';
+}
+
+unless (defined $nm) {
+  skip_all "no nm";
+}
+
+unless (defined $nm_style) {
+  skip_all "no nm style";
+}
+
+print "# nm = $nm\n";
+print "# nm_style = $nm_style\n";
+print "# nm_opt = $nm_opt\n";
+
+unless (-x $nm) {
+    skip_all "no executable nm $nm";
+}
+
+if ($nm_style eq 'gnu') {
+    open(my $nm_fh, "$nm --version|") or
+        skip_all "nm failed: $!";
+    my $gnu_verified;
+    while (<$nm_fh>) {
+        if (/^GNU nm/) {
+            $gnu_verified = 1;
+            last;
+        }
+    }
+    unless ($gnu_verified) {
+        plan skil_all => "no GNU nm";
+    }
+}
+
+open(my $nm_fh, "$nm $nm_opt $libperl_a |") or
+    skip_all "$nm $nm_opt $libperl_a failed: $!";
+
+sub nm_parse_gnu {
+    my $symbols = shift;
+    if (m{^(\w+\.o):$}) {
+        $symbols->{obj}{$1}++;
+        $symbols->{o} = $1;
+    } else {
+        die "$0: undefined current object: $_" unless defined $symbols->{o};
+	if (/^[0-9a-f]{16} [Rr] (\w+)$/) {
+	    $symbols->{data}{const}{$1}{$symbols->{o}}++;
+	} elsif (/^[0-9a-f]{16} r .+$/) {
+	    # Skip local const.
+	} elsif (/^[0-9a-f]{16} [Tti] (\w+)(\..+)?$/) {
+	    $symbols->{text}{$1}{$symbols->{o}}++;
+	} elsif (/^[0-9a-f]{16} C (\w+)$/) {
+	    $symbols->{data}{common}{$1}{$symbols->{o}}++;
+	} elsif (/^[0-9a-f]{16} [BbSs] (\w+)(\.\d+)?$/) {
+	    $symbols->{data}{bss}{$1}{$symbols->{o}}++;
+	} elsif (/^0{16} D _LIB_VERSION$/) {
+	    # Skip the _LIB_VERSION (not ours).
+	} elsif (/^[0-9a-f]{16} [DdGg] (\w+)$/) {
+	    $symbols->{data}{data}{$1}{$symbols->{o}}++;
+	} elsif (/^ {16} U (\w+)$/) {
+	    # Skip the undefined.
+	} elsif (/^[0-9a-f]{16} . \.?(\w+)$/) {
+	    # Skip the unknown types.
+            print "# Unknown type: $_ ($symbols->{o})\n";
+	} else {
+            print "# Unexpected nm output '$_' ($symbols->{o})\n";
+	}
+    }
+}
+
+sub nm_parse_darwin {
+    my $symbols = shift;
+    if (m{^(?:\.\./)?libperl\.a\((\w+\.o)\):$}) {
+        $symbols->{obj}{$1}++;
+        $symbols->{o} = $1;
+    } else {
+        die "$0: undefined current object: $_" unless defined $symbols->{o};
+        if (/^[0-9a-f]{16} \(__TEXT,__(?:eh_frame|cstring)\) /) {
+            # Skip the eh_frame and cstring.
+        } elsif (/^[0-9a-f]{16} \(__TEXT,__(?:const|literal\d+)\) (?:non-)?external _?(\w+)(\.\w+)?$/) {
+            my ($symbol, $suffix) = ($1, $2);
+            # Ignore function-local constants like
+            # _Perl_av_extend_guts.oom_array_extend
+            return if defined $suffix && /__TEXT,__const/;
+            $symbols->{data}{const}{$symbol}{$symbols->{o}}++;
+        } elsif (/^[0-9a-f]{16} \(__TEXT,__text\) (?:non-)?external _(\w+)$/) {
+            $symbols->{text}{$1}{$symbols->{o}}++;
+        } elsif (/^[0-9a-f]{16} \(__DATA,__(const|data|bss|common)\) (?:non-)?external _(\w+)(\.\w+)?$/) {
+            my ($dtype, $symbol, $suffix) = ($1, $2, $3);
+            # Ignore function-local constants like
+            # _Perl_pp_gmtime.dayname
+            return if defined $suffix;
+            $symbols->{data}{$dtype}{$symbol}{$symbols->{o}}++;
+        } elsif (/^[0-9a-f]{16} \(__DATA,__const\) non-external _\.memset_pattern\d*$/) {
+            # Skip this, whatever it is (some inlined leakage from darwin libc?)
+        } elsif (/^ {16} \(undefined\) /) {
+            # Skip the undefined.
+        } elsif (/^[0-9a-f]{16} \(__\w+,__\w+\) /) {
+            # Skip the unknown types.
+            print "# Unknown type: $_ ($symbols->{o})\n";
+        } else {
+            print "# Unexpected nm output '$_' ($symbols->{o})\n";
+        }
+    }
+}
+
+my $nm_parse;
+
+if ($nm_style eq 'gnu') {
+    $nm_parse = \&nm_parse_gnu;
+} elsif ($nm_style eq 'darwin') {
+    $nm_parse = \&nm_parse_darwin;
+}
+
+unless (defined $nm_parse) {
+    skip_all "no nm parser";
+}
+
+my %symbols;
+
+while (<$nm_fh>) {
+    next if /^$/;
+    chomp;
+    $nm_parse->(\%symbols);
+}
+
+# use Data::Dumper; print Dumper(\%symbols);
+
+if (keys %symbols == 0) {
+    skip_all "no symbols\n";
+}
+
+# These should always be true for everyone.
+
+ok($symbols{obj}{'pp.o'}, "has object pp.o");
+ok($symbols{text}{'Perl_peep'}, "has text Perl_peep");
+ok($symbols{text}{'Perl_pp_uc'}{'pp.o'}, "has text Perl_pp_uc in pp.o");
+ok(exists $symbols{data}{const}, "has data const symbols");
+ok($symbols{data}{const}{PL_no_mem}{'globals.o'}, "has PL_no_mem");
+
+my $DEBUGGING = $Config{ccflags} =~ /-DDEBUGGING/ ? 1 : 0;
+
+my $GS  = $Config{ccflags} =~ /-DPERL_GLOBAL_STRUCT\b/ ? 1 : 0;
+my $GSP = $Config{ccflags} =~ /-DPERL_GLOBAL_STRUCT_PRIVATE/ ? 1 : 0;
+
+print "# GS  = $GS\n";
+print "# GSP = $GSP\n";
+
+my %data_symbols;
+
+for my $dtype (sort keys %{$symbols{data}}) {
+    for my $symbol (sort keys %{$symbols{data}{$dtype}}) {
+        $data_symbols{$symbol}++;
+    }
+}
+
+# Since we are deprived of Test::More.
+sub is_deeply {
+    my ($a, $b) = @_;
+    if (ref $a eq 'ARRAY' && ref $b eq 'ARRAY') {
+	if (@$a == @$b) {
+	    for my $i (0..$#$a) {
+		unless ($a->[$i] eq $b->[$i]) {
+                    printf("# LHS elem #%d '%s' ne RHS elem #%d '%s'\n",
+                           $a->[$i], $b->[$i]);
+		    return 0;
+		}
+	    }
+	    return 1;
+	} else {
+            printf("# LHS length %d, RHS length %d\n",
+                   @$a, @$b);
+	    return 0;
+	}
+    } else {
+	die "$0: Unexpcted: is_deeply $a $b\n";
+    }
+}
+
+# The following tests differ between vanilla vs $GSP or $GS.
+#
+# Some terminology:
+# - "text" symbols are code
+# - "data" symbols are data (duh), with subdivisions:
+#   - "bss": (Block-Started-by-Symbol: originally from IBM assembler...),
+#     uninitialized data, which often even doesn't exist in the object
+#     file as such, only its size does, which is then created on demand
+#     by the loader
+#  - "const": initialized read-only data, like string literals
+#  - "common": uninitialized data unless initialized...
+#    (the full story is too long for here, see "man nm")
+#  - "data": initialized read-write data
+#    (somewhat confusingly below: "data data", but it makes code simpler)
+
+if ($GSP) {
+    print "# -DPERL_GLOBAL_STRUCT_PRIVATE\n";
+    ok(!exists $data_symbols{PL_hash_seed}, "has no PL_hash_seed");
+    ok(!exists $data_symbols{PL_ppaddr}, "has no PL_ppaddr");
+
+    ok(! exists $symbols{data}{bss}, "has no data bss symbols");
+    ok(! exists $symbols{data}{data}, "has no data data symbols");
+    ok(! exists $symbols{data}{common}, "has no data common symbols");
+
+    # -DPERL_GLOBAL_STRUCT_PRIVATE should NOT have
+    # the extra text symbol for accessing the vars
+    # (as opposed to "just" -DPERL_GLOBAL_STRUCT)
+    ok(! exists $symbols{text}{Perl_GetVars}, "has no Perl_GetVars");
+} elsif ($GS) {
+    print "# -DPERL_GLOBAL_STRUCT\n";
+    ok(!exists $data_symbols{PL_hash_seed}, "has no PL_hash_seed");
+    ok(!exists $data_symbols{PL_ppaddr}, "has no PL_ppaddr");
+
+    ok(! exists $symbols{data}{bss}, "has no data bss symbols");
+
+    # These PerlIO data symbols are left visible with
+    # -DPERL_GLOBAL_STRUCT (as opposed to -DPERL_GLOBAL_STRUCT_PRIVATE)
+    my @PerlIO =
+        qw(
+           PerlIO_byte
+           PerlIO_crlf
+           PerlIO_pending
+           PerlIO_perlio
+           PerlIO_raw
+           PerlIO_remove
+           PerlIO_stdio
+           PerlIO_unix
+           PerlIO_utf8
+          );
+
+    # PL_magic_vtables is const with -DPERL_GLOBAL_STRUCT_PRIVATE but
+    # otherwise not const -- because of SWIG which wants to modify
+    # the table.  Evil SWIG, eeevil.
+
+    # my_cxt_index is used with PERL_IMPLICIT_CONTEXT, which
+    # -DPERL_GLOBAL_STRUCT has turned on.
+    is_deeply([sort keys %{$symbols{data}{data}}],
+              [sort('PL_VarsPtr',
+                    @PerlIO,
+                    'PL_magic_vtables',
+                    'my_cxt_index')],
+              "data data symbols");
+
+    # Only one data common symbol, our "supervariable".
+    is_deeply([sort keys %{$symbols{data}{common}}],
+              ['PL_Vars'],
+              "data common symbols");
+
+    ok($symbols{data}{data}{PL_VarsPtr}{'globals.o'}, "has PL_VarsPtr");
+    ok($symbols{data}{common}{PL_Vars}{'globals.o'}, "has PL_Vars");
+
+    # -DPERL_GLOBAL_STRUCT has extra text symbol for accessing the vars.
+    ok($symbols{text}{Perl_GetVars}{'util.o'}, "has Perl_GetVars");
+} else {
+    print "# neither -DPERL_GLOBAL_STRUCT nor -DPERL_GLOBAL_STRUCT_PRIVATE\n";
+
+    ok($symbols{data}{common}{PL_hash_seed}{'globals.o'}, "has PL_hash_seed");
+    ok($symbols{data}{data}{PL_ppaddr}{'globals.o'}, "has PL_ppaddr");
+
+    # None of the GLOBAL_STRUCT* business here.
+    ok(! exists $symbols{data}{data}{PL_VarsPtr}, "has no PL_VarsPtr");
+    ok(! exists $symbols{data}{common}{PL_Vars}, "has no PL_Vars");
+    ok(! exists $symbols{text}{Perl_GetVars}, "has no Perl_GetVars");
+}
+
+done_testing();
