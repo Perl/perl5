@@ -891,6 +891,9 @@ to find willing victims.
 
 Check that basic configuration and tests work on each test machine:
 
+    $ ./Configure -des && make all test
+
+    # Or for a development release:
     $ ./Configure -Dusedevel -des && make all test
 
 =head4 Run the test harness and install
