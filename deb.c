@@ -166,7 +166,6 @@ I32
 Perl_debstack(pTHX)
 {
 #ifndef SKIP_DEBUGGING
-    dVAR;
     if (CopSTASH_eq(PL_curcop, PL_debstash) && !DEBUG_J_TEST_)
 	return 0;
 

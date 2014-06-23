@@ -101,7 +101,6 @@ GV *
 Perl_gv_fetchfile_flags(pTHX_ const char *const name, const STRLEN namelen,
 			const U32 flags)
 {
-    dVAR;
     char smallbuf[128];
     char *tmpbuf;
     const STRLEN tmplen = namelen + 2;
@@ -330,7 +329,6 @@ Perl_gv_init_pv(pTHX_ GV *gv, HV *stash, const char *name, U32 flags)
 void
 Perl_gv_init_pvn(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, U32 flags)
 {
-    dVAR;
     const U32 old_type = SvTYPE(gv);
     const bool doproto = old_type > SVt_NULL;
     char * const proto = (doproto && SvPOK(gv))
@@ -645,7 +643,6 @@ obtained from the GV with the C<GvCV> macro.
 GV *
 Perl_gv_fetchmeth_pvn(pTHX_ HV *stash, const char *name, STRLEN len, I32 level, U32 flags)
 {
-    dVAR;
     GV** gvp;
     AV* linear_av;
     SV** linear_svp;
@@ -948,7 +945,6 @@ Perl_gv_fetchmethod_pv_flags(pTHX_ HV *stash, const char *name, U32 flags)
 GV *
 Perl_gv_fetchmethod_pvn_flags(pTHX_ HV *stash, const char *name, const STRLEN len, U32 flags)
 {
-    dVAR;
     const char *nend;
     const char *nsplit = NULL;
     GV* gv;
@@ -1098,7 +1094,6 @@ Perl_gv_autoload_pv(pTHX_ HV *stash, const char *namepv, U32 flags)
 GV*
 Perl_gv_autoload_pvn(pTHX_ HV *stash, const char *name, STRLEN len, U32 flags)
 {
-    dVAR;
     GV* gv;
     CV* cv;
     HV* varstash;
@@ -1246,7 +1241,6 @@ Perl_gv_autoload_pvn(pTHX_ HV *stash, const char *name, STRLEN len, U32 flags)
 STATIC HV*
 S_require_tie_mod(pTHX_ GV *gv, const char *varpv, SV* namesv, const char *methpv,const U32 flags)
 {
-    dVAR;
     HV* stash = gv_stashsv(namesv, 0);
 
     PERL_ARGS_ASSERT_REQUIRE_TIE_MOD;
@@ -2084,7 +2078,6 @@ GV *
 Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 		       const svtype sv_type)
 {
-    dVAR;
     const char *name = nambeg;
     GV *gv = NULL;
     GV**gvp;
@@ -2262,7 +2255,6 @@ Perl_gv_efullname4(pTHX_ SV *sv, const GV *gv, const char *prefix, bool keepmain
 void
 Perl_gv_check(pTHX_ HV *stash)
 {
-    dVAR;
     I32 i;
 
     PERL_ARGS_ASSERT_GV_CHECK;
@@ -2316,7 +2308,6 @@ Perl_gv_check(pTHX_ HV *stash)
 GV *
 Perl_newGVgen_flags(pTHX_ const char *pack, U32 flags)
 {
-    dVAR;
     PERL_ARGS_ASSERT_NEWGVGEN_FLAGS;
     assert(!(flags & ~SVf_UTF8));
 
@@ -2331,7 +2322,6 @@ Perl_newGVgen_flags(pTHX_ const char *pack, U32 flags)
 GP*
 Perl_gp_ref(pTHX_ GP *gp)
 {
-    dVAR;
     if (!gp)
 	return NULL;
     gp->gp_refcnt++;
@@ -2351,7 +2341,6 @@ Perl_gp_ref(pTHX_ GP *gp)
 void
 Perl_gp_free(pTHX_ GV *gv)
 {
-    dVAR;
     GP* gp;
     int attempts = 100;
 
@@ -2465,7 +2454,6 @@ Perl_magic_freeovrld(pTHX_ SV *sv, MAGIC *mg)
 int
 Perl_Gv_AMupdate(pTHX_ HV *stash, bool destructing)
 {
-  dVAR;
   MAGIC* const mg = mg_find((const SV *)stash, PERL_MAGIC_overload_table);
   AMT amt;
   const struct mro_meta* stash_meta = HvMROMETA(stash);
@@ -2633,7 +2621,6 @@ Perl_Gv_AMupdate(pTHX_ HV *stash, bool destructing)
 CV*
 Perl_gv_handler(pTHX_ HV *stash, I32 id)
 {
-    dVAR;
     MAGIC *mg;
     AMT *amtp;
     U32 newgen;
@@ -2685,7 +2672,6 @@ Perl_gv_handler(pTHX_ HV *stash, I32 id)
 
 bool
 Perl_try_amagic_un(pTHX_ int method, int flags) {
-    dVAR;
     dSP;
     SV* tmpsv;
     SV* const arg = TOPs;
@@ -2728,7 +2714,6 @@ Perl_try_amagic_un(pTHX_ int method, int flags) {
 
 bool
 Perl_try_amagic_bin(pTHX_ int method, int flags) {
-    dVAR;
     dSP;
     SV* const left = TOPm1s;
     SV* const right = TOPs;

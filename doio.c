@@ -64,7 +64,6 @@ static IO *
 S_openn_setup(pTHX_ GV *gv, char *mode, PerlIO **saveifp, PerlIO **saveofp,
               int *savefd,  char *savetype)
 {
-    dVAR;
     IO * const io = GvIOn(gv);
 
     PERL_ARGS_ASSERT_OPENN_SETUP;
@@ -145,7 +144,6 @@ bool
 Perl_do_open_raw(pTHX_ GV *gv, const char *oname, STRLEN len,
                  int rawmode, int rawperm)
 {
-    dVAR;
     PerlIO *saveifp;
     PerlIO *saveofp;
     int savefd;
@@ -215,7 +213,6 @@ bool
 Perl_do_open6(pTHX_ GV *gv, const char *oname, STRLEN len,
               PerlIO *supplied_fp, SV **svp, U32 num_svs)
 {
-    dVAR;
     PerlIO *saveifp;
     PerlIO *saveofp;
     int savefd;
@@ -804,7 +801,6 @@ say_false:
 PerlIO *
 Perl_nextargv(pTHX_ GV *gv)
 {
-    dVAR;
     IO * const io = GvIOp(gv);
 
     PERL_ARGS_ASSERT_NEXTARGV;
@@ -1027,7 +1023,6 @@ Perl_nextargv(pTHX_ GV *gv)
 bool
 Perl_do_close(pTHX_ GV *gv, bool not_implicit)
 {
-    dVAR;
     bool retval;
     IO *io;
 
@@ -1059,7 +1054,6 @@ Perl_do_close(pTHX_ GV *gv, bool not_implicit)
 bool
 Perl_io_close(pTHX_ IO *io, bool not_implicit)
 {
-    dVAR;
     bool retval = FALSE;
 
     PERL_ARGS_ASSERT_IO_CLOSE;
@@ -1100,7 +1094,6 @@ Perl_io_close(pTHX_ IO *io, bool not_implicit)
 bool
 Perl_do_eof(pTHX_ GV *gv)
 {
-    dVAR;
     IO * const io = GvIO(gv);
 
     PERL_ARGS_ASSERT_DO_EOF;
@@ -1145,7 +1138,6 @@ Perl_do_eof(pTHX_ GV *gv)
 Off_t
 Perl_do_tell(pTHX_ GV *gv)
 {
-    dVAR;
     IO *const io = GvIO(gv);
     PerlIO *fp;
 
@@ -1162,7 +1154,6 @@ Perl_do_tell(pTHX_ GV *gv)
 bool
 Perl_do_seek(pTHX_ GV *gv, Off_t pos, int whence)
 {
-    dVAR;
     IO *const io = GvIO(gv);
     PerlIO *fp;
 
@@ -1177,7 +1168,6 @@ Perl_do_seek(pTHX_ GV *gv, Off_t pos, int whence)
 Off_t
 Perl_do_sysseek(pTHX_ GV *gv, Off_t pos, int whence)
 {
-    dVAR;
     IO *const io = GvIO(gv);
     PerlIO *fp;
 
@@ -1305,8 +1295,6 @@ my_chsize(int fd, Off_t length)
 bool
 Perl_do_print(pTHX_ SV *sv, PerlIO *fp)
 {
-    dVAR;
-
     PERL_ARGS_ASSERT_DO_PRINT;
 
     /* assuming fp is checked earlier */
@@ -1378,7 +1366,6 @@ Perl_do_print(pTHX_ SV *sv, PerlIO *fp)
 I32
 Perl_my_stat_flags(pTHX_ const U32 flags)
 {
-    dVAR;
     dSP;
     IO *io;
     GV* gv;
@@ -1445,7 +1432,6 @@ Perl_my_stat_flags(pTHX_ const U32 flags)
 I32
 Perl_my_lstat_flags(pTHX_ const U32 flags)
 {
-    dVAR;
     static const char* const no_prev_lstat = "The stat preceding -l _ wasn't an lstat";
     dSP;
     const char *file;
@@ -1561,7 +1547,6 @@ Perl_do_aexec5(pTHX_ SV *really, SV **mark, SV **sp,
 void
 Perl_do_execfree(pTHX)
 {
-    dVAR;
     Safefree(PL_Argv);
     PL_Argv = NULL;
     Safefree(PL_Cmd);
@@ -1710,7 +1695,6 @@ Perl_do_exec3(pTHX_ const char *incmd, int fd, int do_report)
 I32
 Perl_apply(pTHX_ I32 type, SV **mark, SV **sp)
 {
-    dVAR;
     I32 val;
     I32 tot = 0;
     const char *const what = PL_op_name[type];
@@ -2047,8 +2031,6 @@ Perl_cando(pTHX_ Mode_t mode, bool effective, const Stat_t *statbufp)
  *  is in the list of groups returned from getgroups().
  */
 {
-    dVAR;
-
     PERL_ARGS_ASSERT_CANDO;
     PERL_UNUSED_CONTEXT;
 
@@ -2108,7 +2090,6 @@ Perl_cando(pTHX_ Mode_t mode, bool effective, const Stat_t *statbufp)
 static bool
 S_ingroup(pTHX_ Gid_t testgid, bool effective)
 {
-    dVAR;
 #ifndef PERL_IMPLICIT_SYS
     /* PERL_IMPLICIT_SYS like Win32: getegid() etc. require the context. */
     PERL_UNUSED_CONTEXT;
@@ -2145,7 +2126,6 @@ S_ingroup(pTHX_ Gid_t testgid, bool effective)
 I32
 Perl_do_ipcget(pTHX_ I32 optype, SV **mark, SV **sp)
 {
-    dVAR;
     const key_t key = (key_t)SvNVx(*++mark);
     SV *nsv = optype == OP_MSGGET ? NULL : *++mark;
     const I32 flags = SvIVx(*++mark);
@@ -2180,7 +2160,6 @@ Perl_do_ipcget(pTHX_ I32 optype, SV **mark, SV **sp)
 I32
 Perl_do_ipcctl(pTHX_ I32 optype, SV **mark, SV **sp)
 {
-    dVAR;
     char *a;
     I32 ret = -1;
     const I32 id  = SvIVx(*++mark);
@@ -2314,7 +2293,6 @@ Perl_do_ipcctl(pTHX_ I32 optype, SV **mark, SV **sp)
 I32
 Perl_do_msgsnd(pTHX_ SV **mark, SV **sp)
 {
-    dVAR;
 #ifdef HAS_MSG
     STRLEN len;
     const I32 id = SvIVx(*++mark);
@@ -2343,7 +2321,6 @@ I32
 Perl_do_msgrcv(pTHX_ SV **mark, SV **sp)
 {
 #ifdef HAS_MSG
-    dVAR;
     char *mbuf;
     long mtype;
     I32 msize, flags, ret;
@@ -2384,7 +2361,6 @@ I32
 Perl_do_semop(pTHX_ SV **mark, SV **sp)
 {
 #ifdef HAS_SEM
-    dVAR;
     STRLEN opsize;
     const I32 id = SvIVx(*++mark);
     SV * const opstr = *++mark;
@@ -2430,7 +2406,6 @@ I32
 Perl_do_shmio(pTHX_ I32 optype, SV **mark, SV **sp)
 {
 #ifdef HAS_SHM
-    dVAR;
     char *shm;
     struct shmid_ds shmds;
     const I32 id = SvIVx(*++mark);
@@ -2504,7 +2479,6 @@ Moving it away shrinks pp_hot.c; shrinking pp_hot.c helps speed perl up.
 PerlIO *
 Perl_start_glob (pTHX_ SV *tmpglob, IO *io)
 {
-    dVAR;
     SV * const tmpcmd = newSV(0);
     PerlIO *fp;
     STRLEN len;

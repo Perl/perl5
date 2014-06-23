@@ -474,7 +474,6 @@ S_deprecate_commaless_var_list(pTHX) {
 STATIC int
 S_ao(pTHX_ int toketype)
 {
-    dVAR;
     if (*PL_bufptr == '=') {
 	PL_bufptr++;
 	if (toketype == ANDAND)
@@ -504,7 +503,6 @@ S_ao(pTHX_ int toketype)
 STATIC void
 S_no_op(pTHX_ const char *const what, char *s)
 {
-    dVAR;
     char * const oldbp = PL_bufptr;
     const bool is_first = (PL_oldbufptr == PL_linestart);
 
@@ -551,7 +549,6 @@ S_no_op(pTHX_ const char *const what, char *s)
 STATIC void
 S_missingterm(pTHX_ char *s)
 {
-    dVAR;
     char tmpbuf[3];
     char q;
     if (s) {
@@ -582,7 +579,6 @@ S_missingterm(pTHX_ char *s)
 bool
 Perl_feature_is_enabled(pTHX_ const char *const name, STRLEN namelen)
 {
-    dVAR;
     char he_name[8 + MAX_FEATURE_LEN] = "feature_";
 
     PERL_ARGS_ASSERT_FEATURE_IS_ENABLED;
@@ -674,7 +670,6 @@ used by perl internally, so extensions should always pass zero.
 void
 Perl_lex_start(pTHX_ SV *line, PerlIO *rsfp, U32 flags)
 {
-    dVAR;
     const char *s = NULL;
     yy_parser *parser, *oparser;
     if (flags && flags & ~LEX_START_FLAGS)
@@ -1638,7 +1633,6 @@ Perl_validate_proto(pTHX_ SV *name, SV *proto, bool warn)
 STATIC void
 S_incline(pTHX_ const char *s)
 {
-    dVAR;
     const char *t;
     const char *n;
     const char *e;
@@ -1823,7 +1817,6 @@ S_skipspace_flags(pTHX_ char *s, U32 flags)
 STATIC void
 S_check_uni(pTHX)
 {
-    dVAR;
     const char *s;
     const char *t;
 
@@ -1860,8 +1853,6 @@ S_check_uni(pTHX)
 STATIC I32
 S_lop(pTHX_ I32 f, int x, char *s)
 {
-    dVAR;
-
     PERL_ARGS_ASSERT_LOP;
 
     pl_yylval.ival = f;
@@ -1897,7 +1888,6 @@ S_lop(pTHX_ I32 f, int x, char *s)
 STATIC void
 S_force_next(pTHX_ I32 type)
 {
-    dVAR;
 #ifdef DEBUGGING
     if (DEBUG_T_TEST) {
         PerlIO_printf(Perl_debug_log, "### forced token:\n");
@@ -1925,7 +1915,6 @@ S_force_next(pTHX_ I32 type)
 static int
 S_postderef(pTHX_ int const funny, char const next)
 {
-    dVAR;
     assert(funny == DOLSHARP || strchr("$@%&*", funny));
     assert(strchr("*[{", next));
     if (next == '*') {
@@ -1972,7 +1961,6 @@ Perl_yyunlex(pTHX)
 STATIC SV *
 S_newSV_maybe_utf8(pTHX_ const char *const start, STRLEN len)
 {
-    dVAR;
     SV * const sv = newSVpvn_utf8(start, len,
 				  !IN_BYTES
 				  && UTF
@@ -2001,7 +1989,6 @@ S_newSV_maybe_utf8(pTHX_ const char *const start, STRLEN len)
 STATIC char *
 S_force_word(pTHX_ char *start, int token, int check_keyword, int allow_pack)
 {
-    dVAR;
     char *s;
     STRLEN len;
 
@@ -2049,8 +2036,6 @@ S_force_word(pTHX_ char *start, int token, int check_keyword, int allow_pack)
 STATIC void
 S_force_ident(pTHX_ const char *s, int kind)
 {
-    dVAR;
-
     PERL_ARGS_ASSERT_FORCE_IDENT;
 
     if (s[0]) {
@@ -2122,7 +2107,6 @@ Perl_str_to_version(pTHX_ SV *sv)
 STATIC char *
 S_force_version(pTHX_ char *s, int guessing)
 {
-    dVAR;
     OP *version = NULL;
     char *d;
 
@@ -2167,7 +2151,6 @@ S_force_version(pTHX_ char *s, int guessing)
 STATIC char *
 S_force_strict_version(pTHX_ char *s)
 {
-    dVAR;
     OP *version = NULL;
     const char *errstr = NULL;
 
@@ -2208,7 +2191,6 @@ S_force_strict_version(pTHX_ char *s)
 STATIC SV *
 S_tokeq(pTHX_ SV *sv)
 {
-    dVAR;
     char *s;
     char *send;
     char *d;
@@ -2279,7 +2261,6 @@ S_tokeq(pTHX_ SV *sv)
 STATIC I32
 S_sublex_start(pTHX)
 {
-    dVAR;
     const I32 op_type = pl_yylval.ival;
 
     if (op_type == OP_NULL) {
@@ -2329,7 +2310,6 @@ S_sublex_start(pTHX)
 STATIC I32
 S_sublex_push(pTHX)
 {
-    dVAR;
     LEXSHARED *shared;
     const bool is_heredoc = PL_multi_close == '<';
     ENTER;
@@ -2426,7 +2406,6 @@ S_sublex_push(pTHX)
 STATIC I32
 S_sublex_done(pTHX)
 {
-    dVAR;
     if (!PL_lex_starts++) {
 	SV * const sv = newSVpvs("");
 	if (SvUTF8(PL_linestr))
@@ -2806,7 +2785,6 @@ S_get_and_check_backslash_N_name(pTHX_ const char* s, const char* const e)
 STATIC char *
 S_scan_const(pTHX_ char *start)
 {
-    dVAR;
     char *send = PL_bufend;		/* end of the constant */
     SV *sv = newSV(send - start);		/* sv for the constant.  See
 						   note below on sizing. */
@@ -3671,8 +3649,6 @@ S_scan_const(pTHX_ char *start)
 STATIC int
 S_intuit_more(pTHX_ char *s)
 {
-    dVAR;
-
     PERL_ARGS_ASSERT_INTUIT_MORE;
 
     if (PL_lex_brackets)
@@ -3833,7 +3809,6 @@ S_intuit_more(pTHX_ char *s)
 STATIC int
 S_intuit_method(pTHX_ char *start, GV *gv, CV *cv)
 {
-    dVAR;
     char *s = start + (*start == '$');
     char tmpbuf[sizeof PL_tokenbuf];
     STRLEN len;
@@ -3916,7 +3891,6 @@ S_intuit_method(pTHX_ char *start, GV *gv, CV *cv)
 SV *
 Perl_filter_add(pTHX_ filter_t funcp, SV *datasv)
 {
-    dVAR;
     if (!funcp)
 	return NULL;
 
@@ -3985,7 +3959,6 @@ Perl_filter_add(pTHX_ filter_t funcp, SV *datasv)
 void
 Perl_filter_del(pTHX_ filter_t funcp)
 {
-    dVAR;
     SV *datasv;
 
     PERL_ARGS_ASSERT_FILTER_DEL;
@@ -4013,7 +3986,6 @@ Perl_filter_del(pTHX_ filter_t funcp)
 I32
 Perl_filter_read(pTHX_ int idx, SV *buf_sv, int maxlen)
 {
-    dVAR;
     filter_t funcp;
     SV *datasv = NULL;
     /* This API is bad. It should have been using unsigned int for maxlen.
@@ -4103,8 +4075,6 @@ Perl_filter_read(pTHX_ int idx, SV *buf_sv, int maxlen)
 STATIC char *
 S_filter_gets(pTHX_ SV *sv, STRLEN append)
 {
-    dVAR;
-
     PERL_ARGS_ASSERT_FILTER_GETS;
 
 #ifdef PERL_CR_FILTER
@@ -4127,7 +4097,6 @@ S_filter_gets(pTHX_ SV *sv, STRLEN append)
 STATIC HV *
 S_find_in_my_stash(pTHX_ const char *pkgname, STRLEN len)
 {
-    dVAR;
     GV *gv;
 
     PERL_ARGS_ASSERT_FIND_IN_MY_STASH;
@@ -4156,8 +4125,6 @@ S_find_in_my_stash(pTHX_ const char *pkgname, STRLEN len)
 
 STATIC char *
 S_tokenize_use(pTHX_ int is_use, char *s) {
-    dVAR;
-
     PERL_ARGS_ASSERT_TOKENIZE_USE;
 
     if (PL_expect != XSTATE)
@@ -8107,7 +8074,6 @@ Perl_yylex(pTHX)
 static int
 S_pending_ident(pTHX)
 {
-    dVAR;
     PADOFFSET tmp = 0;
     const char pit = (char)pl_yylval.ival;
     const STRLEN tokenbuf_len = strlen(PL_tokenbuf);
@@ -8227,8 +8193,6 @@ S_pending_ident(pTHX)
 STATIC void
 S_checkcomma(pTHX_ const char *s, const char *name, const char *what)
 {
-    dVAR;
-
     PERL_ARGS_ASSERT_CHECKCOMMA;
 
     if (*s == ' ' && s[1] == '(') {	/* XXX gotta be a better way */
@@ -8290,7 +8254,7 @@ STATIC SV *
 S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, STRLEN keylen,
 	       SV *sv, SV *pv, const char *type, STRLEN typelen)
 {
-    dVAR; dSP;
+    dSP;
     HV * table = GvHV(PL_hintgv);		 /* ^H */
     SV *res;
     SV *errsv = NULL;
@@ -8426,7 +8390,6 @@ now_ok:
 
 PERL_STATIC_INLINE void
 S_parse_ident(pTHX_ char **s, char **d, char * const e, int allow_package, bool is_utf8) {
-    dVAR;
     PERL_ARGS_ASSERT_PARSE_IDENT;
 
     for (;;) {
@@ -8478,7 +8441,6 @@ S_parse_ident(pTHX_ char **s, char **d, char * const e, int allow_package, bool 
 STATIC char *
 S_scan_word(pTHX_ char *s, char *dest, STRLEN destlen, int allow_package, STRLEN *slp)
 {
-    dVAR;
     char *d = dest;
     char * const e = d + destlen - 3;  /* two-character token, ending NUL */
     bool is_utf8 = cBOOL(UTF);
@@ -8494,7 +8456,6 @@ S_scan_word(pTHX_ char *s, char *dest, STRLEN destlen, int allow_package, STRLEN
 STATIC char *
 S_scan_ident(pTHX_ char *s, char *dest, STRLEN destlen, I32 ck_uni)
 {
-    dVAR;
     I32 herelines = PL_parser->herelines;
     SSize_t bracket = -1;
     char funny = *s++;
@@ -8786,7 +8747,6 @@ S_pmflag(pTHX_ const char* const valid_flags, U32 * pmfl, char** s, char* charse
 STATIC char *
 S_scan_pat(pTHX_ char *start, I32 type)
 {
-    dVAR;
     PMOP *pm;
     char *s;
     const char * const valid_flags =
@@ -8857,7 +8817,6 @@ S_scan_pat(pTHX_ char *start, I32 type)
 STATIC char *
 S_scan_subst(pTHX_ char *start)
 {
-    dVAR;
     char *s;
     PMOP *pm;
     I32 first_start;
@@ -8940,7 +8899,6 @@ S_scan_subst(pTHX_ char *start)
 STATIC char *
 S_scan_trans(pTHX_ char *start)
 {
-    dVAR;
     char* s;
     OP *o;
     U8 squash;
@@ -9030,7 +8988,6 @@ S_scan_trans(pTHX_ char *start)
 STATIC char *
 S_scan_heredoc(pTHX_ char *s)
 {
-    dVAR;
     I32 op_type = OP_SCALAR;
     I32 len;
     SV *tmpstr;
@@ -9303,7 +9260,6 @@ S_scan_heredoc(pTHX_ char *s)
 STATIC char *
 S_scan_inputsymbol(pTHX_ char *start)
 {
-    dVAR;
     char *s = start;		/* current position in buffer */
     char *end;
     I32 len;
@@ -9495,7 +9451,6 @@ S_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int re
 		 char **delimp
     )
 {
-    dVAR;
     SV *sv;			/* scalar value: string */
     const char *tmps;		/* temp string, used for delimiter matching */
     char *s = start;		/* current position in the buffer */
@@ -9833,7 +9788,6 @@ S_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int re
 char *
 Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 {
-    dVAR;
     const char *s = start;	/* current position in buffer */
     char *d;			/* destination in temp buffer */
     char *e;			/* end of temp buffer */
@@ -10212,7 +10166,6 @@ vstring:
 STATIC char *
 S_scan_formline(pTHX_ char *s)
 {
-    dVAR;
     char *eol;
     char *t;
     SV * const stuff = newSVpvs("");
@@ -10314,7 +10267,6 @@ S_scan_formline(pTHX_ char *s)
 I32
 Perl_start_subparse(pTHX_ I32 is_format, U32 flags)
 {
-    dVAR;
     const I32 oldsavestack_ix = PL_savestack_ix;
     CV* const outsidecv = PL_compcv;
 
@@ -10339,8 +10291,6 @@ Perl_start_subparse(pTHX_ I32 is_format, U32 flags)
 static int
 S_yywarn(pTHX_ const char *const s, U32 flags)
 {
-    dVAR;
-
     PERL_ARGS_ASSERT_YYWARN;
 
     PL_in_eval |= EVAL_WARNONLY;
@@ -10366,7 +10316,6 @@ Perl_yyerror_pv(pTHX_ const char *const s, U32 flags)
 int
 Perl_yyerror_pvn(pTHX_ const char *const s, STRLEN len, U32 flags)
 {
-    dVAR;
     const char *context = NULL;
     int contlen = -1;
     SV *msg;
@@ -10471,7 +10420,6 @@ Perl_yyerror_pvn(pTHX_ const char *const s, STRLEN len, U32 flags)
 STATIC char*
 S_swallow_bom(pTHX_ U8 *s)
 {
-    dVAR;
     const STRLEN slen = SvCUR(PL_linestr);
 
     PERL_ARGS_ASSERT_SWALLOW_BOM;
@@ -10563,7 +10511,6 @@ S_swallow_bom(pTHX_ U8 *s)
 static I32
 S_utf16_textfilter(pTHX_ int idx, SV *sv, int maxlen)
 {
-    dVAR;
     SV *const filter = FILTER_DATA(idx);
     /* We re-use this each time round, throwing the contents away before we
        return.  */
@@ -10731,7 +10678,6 @@ sv_2mortal.
 char *
 Perl_scan_vstring(pTHX_ const char *s, const char *const e, SV *sv)
 {
-    dVAR;
     const char *pos = s;
     const char *start = s;
 

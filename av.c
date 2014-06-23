@@ -26,7 +26,6 @@
 void
 Perl_av_reify(pTHX_ AV *av)
 {
-    dVAR;
     SSize_t key;
 
     PERL_ARGS_ASSERT_AV_REIFY;
@@ -65,7 +64,6 @@ extended.
 void
 Perl_av_extend(pTHX_ AV *av, SSize_t key)
 {
-    dVAR;
     MAGIC *mg;
 
     PERL_ARGS_ASSERT_AV_EXTEND;
@@ -87,8 +85,6 @@ void
 Perl_av_extend_guts(pTHX_ AV *av, SSize_t key, SSize_t *maxp, SV ***allocp,
 			  SV ***arrayp)
 {
-    dVAR;
-
     PERL_ARGS_ASSERT_AV_EXTEND_GUTS;
 
     if (key > *maxp) {
@@ -234,8 +230,6 @@ S_adjust_index(pTHX_ AV *av, const MAGIC *mg, SSize_t *keyp)
 SV**
 Perl_av_fetch(pTHX_ AV *av, SSize_t key, I32 lval)
 {
-    dVAR;
-
     PERL_ARGS_ASSERT_AV_FETCH;
     assert(SvTYPE(av) == SVt_PVAV);
 
@@ -305,7 +299,6 @@ more information on how to use this function on tied arrays.
 SV**
 Perl_av_store(pTHX_ AV *av, SSize_t key, SV *val)
 {
-    dVAR;
     SV** ary;
 
     PERL_ARGS_ASSERT_AV_STORE;
@@ -441,7 +434,6 @@ Perl equivalent: C<@myarray = ();>.
 void
 Perl_av_clear(pTHX_ AV *av)
 {
-    dVAR;
     SSize_t extra;
     bool real;
 
@@ -564,7 +556,6 @@ Perl equivalent: C<push @myarray, $elem;>.
 void
 Perl_av_push(pTHX_ AV *av, SV *val)
 {             
-    dVAR;
     MAGIC *mg;
 
     PERL_ARGS_ASSERT_AV_PUSH;
@@ -596,7 +587,6 @@ Perl equivalent: C<pop(@myarray);>
 SV *
 Perl_av_pop(pTHX_ AV *av)
 {
-    dVAR;
     SV *retval;
     MAGIC* mg;
 
@@ -657,7 +647,6 @@ Perl equivalent: C<unshift @myarray, ( (undef) x $n );>
 void
 Perl_av_unshift(pTHX_ AV *av, SSize_t num)
 {
-    dVAR;
     SSize_t i;
     MAGIC* mg;
 
@@ -722,7 +711,6 @@ Perl equivalent: C<shift(@myarray);>
 SV *
 Perl_av_shift(pTHX_ AV *av)
 {
-    dVAR;
     SV *retval;
     MAGIC* mg;
 
@@ -799,7 +787,6 @@ the same as C<av_clear(av)>.
 void
 Perl_av_fill(pTHX_ AV *av, SSize_t fill)
 {
-    dVAR;
     MAGIC *mg;
 
     PERL_ARGS_ASSERT_AV_FILL;
@@ -851,7 +838,6 @@ C<G_DISCARD> version.
 SV *
 Perl_av_delete(pTHX_ AV *av, SSize_t key, I32 flags)
 {
-    dVAR;
     SV *sv;
 
     PERL_ARGS_ASSERT_AV_DELETE;
@@ -929,7 +915,6 @@ Perl equivalent: C<exists($myarray[$key])>.
 bool
 Perl_av_exists(pTHX_ AV *av, SSize_t key)
 {
-    dVAR;
     PERL_ARGS_ASSERT_AV_EXISTS;
     assert(SvTYPE(av) == SVt_PVAV);
 
@@ -983,7 +968,6 @@ Perl_av_exists(pTHX_ AV *av, SSize_t key)
 
 static MAGIC *
 S_get_aux_mg(pTHX_ AV *av) {
-    dVAR;
     MAGIC *mg;
 
     PERL_ARGS_ASSERT_GET_AUX_MG;

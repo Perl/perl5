@@ -259,7 +259,6 @@ on this platform.
 UV
 Perl_grok_hex(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result)
 {
-    dVAR;
     const char *s = start;
     STRLEN len = *len_p;
     UV value = 0;
@@ -520,8 +519,6 @@ bool
 Perl_grok_numeric_radix(pTHX_ const char **sp, const char *send)
 {
 #ifdef USE_LOCALE_NUMERIC
-    dVAR;
-
     PERL_ARGS_ASSERT_GROK_NUMERIC_RADIX;
 
     if (IN_LC(LC_NUMERIC)) {
@@ -850,8 +847,6 @@ Perl_my_atof(pTHX_ const char* s)
 {
     NV x = 0.0;
 #ifdef USE_LOCALE_NUMERIC
-    dVAR;
-
     PERL_ARGS_ASSERT_MY_ATOF;
 
     {

@@ -50,7 +50,6 @@ static const char S_strtab_error[]
 STATIC HE*
 S_new_he(pTHX)
 {
-    dVAR;
     HE* he;
     void ** const root = &PL_body_roots[HE_SVSLOT];
 
@@ -101,7 +100,6 @@ S_save_hek_flags(const char *str, I32 len, U32 hash, int flags)
 void
 Perl_free_tied_hv_pool(pTHX)
 {
-    dVAR;
     HE *he = PL_hv_fetch_ent_mh;
     while (he) {
 	HE * const ohe = he;
@@ -1165,7 +1163,6 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 STATIC void
 S_hsplit(pTHX_ HV *hv, STRLEN const oldsize, STRLEN newsize)
 {
-    dVAR;
     STRLEN i = 0;
     char *a = (char*) HvARRAY(hv);
     HE **aep;
@@ -1289,7 +1286,6 @@ S_hsplit(pTHX_ HV *hv, STRLEN const oldsize, STRLEN newsize)
 void
 Perl_hv_ksplit(pTHX_ HV *hv, IV newmax)
 {
-    dVAR;
     XPVHV* xhv = (XPVHV*)SvANY(hv);
     const I32 oldsize = (I32) xhv->xhv_max+1; /* HvMAX(hv)+1 (sick) */
     I32 newsize;
@@ -1475,7 +1471,6 @@ Perl_hv_copy_hints_hv(pTHX_ HV *const ohv)
 STATIC SV*
 S_hv_free_ent_ret(pTHX_ HV *hv, HE *entry)
 {
-    dVAR;
     SV *val;
 
     PERL_ARGS_ASSERT_HV_FREE_ENT_RET;
@@ -1497,7 +1492,6 @@ S_hv_free_ent_ret(pTHX_ HV *hv, HE *entry)
 void
 Perl_hv_free_ent(pTHX_ HV *hv, HE *entry)
 {
-    dVAR;
     SV *val;
 
     PERL_ARGS_ASSERT_HV_FREE_ENT;
@@ -1512,8 +1506,6 @@ Perl_hv_free_ent(pTHX_ HV *hv, HE *entry)
 void
 Perl_hv_delayfree_ent(pTHX_ HV *hv, HE *entry)
 {
-    dVAR;
-
     PERL_ARGS_ASSERT_HV_DELAYFREE_ENT;
 
     if (!entry)
@@ -1609,7 +1601,6 @@ See Hash::Util::lock_keys() for an example of its use.
 void
 Perl_hv_clear_placeholders(pTHX_ HV *hv)
 {
-    dVAR;
     const U32 items = (U32)HvPLACEHOLDERS_get(hv);
 
     PERL_ARGS_ASSERT_HV_CLEAR_PLACEHOLDERS;
@@ -1778,7 +1769,6 @@ See also L</hv_clear>.
 void
 Perl_hv_undef_flags(pTHX_ HV *hv, U32 flags)
 {
-    dVAR;
     XPVHV* xhv;
     bool save;
 
@@ -2322,7 +2312,6 @@ This is called when a stash is deleted from the symbol table.
 void
 Perl_hv_ename_delete(pTHX_ HV *hv, const char *name, U32 len, U32 flags)
 {
-    dVAR;
     struct xpvhv_aux *aux;
 
     PERL_ARGS_ASSERT_HV_ENAME_DELETE;
@@ -2724,7 +2713,6 @@ Perl_unshare_hek(pTHX_ HEK *hek)
 STATIC void
 S_unshare_hek_or_pvn(pTHX_ const HEK *hek, const char *str, I32 len, U32 hash)
 {
-    dVAR;
     XPVHV* xhv;
     HE *entry;
     HE **oentry;
@@ -2847,7 +2835,6 @@ Perl_share_hek(pTHX_ const char *str, I32 len, U32 hash)
 STATIC HEK *
 S_share_hek_flags(pTHX_ const char *str, I32 len, U32 hash, int flags)
 {
-    dVAR;
     HE *entry;
     const int flags_masked = flags & HVhek_MASK;
     const U32 hindex = hash & (I32) HvMAX(PL_strtab);
@@ -2932,7 +2919,6 @@ S_share_hek_flags(pTHX_ const char *str, I32 len, U32 hash, int flags)
 SSize_t *
 Perl_hv_placeholders_p(pTHX_ HV *hv)
 {
-    dVAR;
     MAGIC *mg = mg_find((const SV *)hv, PERL_MAGIC_rhash);
 
     PERL_ARGS_ASSERT_HV_PLACEHOLDERS_P;
@@ -2951,7 +2937,6 @@ Perl_hv_placeholders_p(pTHX_ HV *hv)
 I32
 Perl_hv_placeholders_get(pTHX_ const HV *hv)
 {
-    dVAR;
     MAGIC * const mg = mg_find((const SV *)hv, PERL_MAGIC_rhash);
 
     PERL_ARGS_ASSERT_HV_PLACEHOLDERS_GET;
@@ -2963,7 +2948,6 @@ Perl_hv_placeholders_get(pTHX_ const HV *hv)
 void
 Perl_hv_placeholders_set(pTHX_ HV *hv, I32 ph)
 {
-    dVAR;
     MAGIC * const mg = mg_find((const SV *)hv, PERL_MAGIC_rhash);
 
     PERL_ARGS_ASSERT_HV_PLACEHOLDERS_SET;
@@ -3462,7 +3446,9 @@ no action occurs in this case.
 
 void
 Perl_refcounted_he_free(pTHX_ struct refcounted_he *he) {
+#ifdef USE_ITHREADS
     dVAR;
+#endif
     PERL_UNUSED_CONTEXT;
 
     while (he) {
@@ -3499,7 +3485,9 @@ to this function: no action occurs and a null pointer is returned.
 struct refcounted_he *
 Perl_refcounted_he_inc(pTHX_ struct refcounted_he *he)
 {
+#ifdef USE_ITHREADS
     dVAR;
+#endif
     PERL_UNUSED_CONTEXT;
     if (he) {
 	HINTS_REFCNT_LOCK;

@@ -75,8 +75,6 @@ print $c <<"END";
 I32
 Perl_keyword (pTHX_ const char *name, I32 len, bool all_keywords)
 {
-  dVAR;
-
   PERL_ARGS_ASSERT_KEYWORD;
 
 $switch

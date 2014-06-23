@@ -291,7 +291,7 @@ S_emulate_eaccess(pTHX_ const char* path, Mode_t mode)
 
 PP(pp_backtick)
 {
-    dVAR; dSP; dTARGET;
+    dSP; dTARGET;
     PerlIO *fp;
     const char * const tmps = POPpconstx;
     const I32 gimme = GIMME_V;
@@ -352,7 +352,6 @@ PP(pp_backtick)
 
 PP(pp_glob)
 {
-    dVAR;
     OP *result;
     dSP;
     GV * const gv = (PL_op->op_flags & OPf_SPECIAL) ? NULL : (GV *)POPs;
@@ -412,14 +411,13 @@ PP(pp_glob)
 
 PP(pp_rcatline)
 {
-    dVAR;
     PL_last_in_gv = cGVOP_gv;
     return do_readline();
 }
 
 PP(pp_warn)
 {
-    dVAR; dSP; dMARK;
+    dSP; dMARK;
     SV *exsv;
     STRLEN len;
     if (SP - MARK > 1) {
@@ -468,7 +466,7 @@ PP(pp_warn)
 
 PP(pp_die)
 {
-    dVAR; dSP; dMARK;
+    dSP; dMARK;
     SV *exsv;
     STRLEN len;
 #ifdef VMS
@@ -595,7 +593,7 @@ Perl_tied_method(pTHX_ SV *methname, SV **sp, SV *const sv,
 
 PP(pp_open)
 {
-    dVAR; dSP;
+    dSP;
     dMARK; dORIGMARK;
     dTARGET;
     SV *sv;
@@ -649,7 +647,7 @@ PP(pp_open)
 
 PP(pp_close)
 {
-    dVAR; dSP;
+    dSP;
     GV * const gv =
 	MAXARG == 0 || (!TOPs && !POPs) ? PL_defoutgv : MUTABLE_GV(POPs);
 
@@ -672,7 +670,6 @@ PP(pp_close)
 PP(pp_pipe_op)
 {
 #ifdef HAS_PIPE
-    dVAR;
     dSP;
     IO *rstio;
     IO *wstio;
@@ -729,7 +726,7 @@ badexit:
 
 PP(pp_fileno)
 {
-    dVAR; dSP; dTARGET;
+    dSP; dTARGET;
     GV *gv;
     IO *io;
     PerlIO *fp;
@@ -761,7 +758,6 @@ PP(pp_fileno)
 
 PP(pp_umask)
 {
-    dVAR;
     dSP;
 #ifdef HAS_UMASK
     dTARGET;
@@ -792,7 +788,7 @@ PP(pp_umask)
 
 PP(pp_binmode)
 {
-    dVAR; dSP;
+    dSP;
     GV *gv;
     IO *io;
     PerlIO *fp;
@@ -853,7 +849,7 @@ PP(pp_binmode)
 
 PP(pp_tie)
 {
-    dVAR; dSP; dMARK;
+    dSP; dMARK;
     HV* stash;
     GV *gv = NULL;
     SV *sv;
@@ -960,7 +956,7 @@ PP(pp_tie)
 
 PP(pp_untie)
 {
-    dVAR; dSP;
+    dSP;
     MAGIC *mg;
     SV *sv = POPs;
     const char how = (SvTYPE(sv) == SVt_PVHV || SvTYPE(sv) == SVt_PVAV)
@@ -1000,7 +996,6 @@ PP(pp_untie)
 
 PP(pp_tied)
 {
-    dVAR;
     dSP;
     const MAGIC *mg;
     dTOPss;
@@ -1024,7 +1019,7 @@ PP(pp_tied)
 
 PP(pp_dbmopen)
 {
-    dVAR; dSP;
+    dSP;
     dPOPPOPssrl;
     HV* stash;
     GV *gv = NULL;
@@ -1081,7 +1076,7 @@ PP(pp_dbmopen)
 PP(pp_sselect)
 {
 #ifdef HAS_SELECT
-    dVAR; dSP; dTARGET;
+    dSP; dTARGET;
     I32 i;
     I32 j;
     char *s;
@@ -1261,7 +1256,6 @@ of the typeglob that PL_defoutgv points to is decreased by one.
 void
 Perl_setdefout(pTHX_ GV *gv)
 {
-    dVAR;
     PERL_ARGS_ASSERT_SETDEFOUT;
     SvREFCNT_inc_simple_void_NN(gv);
     SvREFCNT_dec(PL_defoutgv);
@@ -1270,7 +1264,7 @@ Perl_setdefout(pTHX_ GV *gv)
 
 PP(pp_select)
 {
-    dVAR; dSP; dTARGET;
+    dSP; dTARGET;
     HV *hv;
     GV * const newdefout = (PL_op->op_private > 0) ? (MUTABLE_GV(POPs)) : NULL;
     GV * egv = GvEGVx(PL_defoutgv);
@@ -1301,7 +1295,7 @@ PP(pp_select)
 
 PP(pp_getc)
 {
-    dVAR; dSP; dTARGET;
+    dSP; dTARGET;
     GV * const gv =
 	MAXARG==0 || (!TOPs && !POPs) ? PL_stdingv : MUTABLE_GV(POPs);
     IO *const io = GvIO(gv);
@@ -1348,7 +1342,6 @@ PP(pp_getc)
 STATIC OP *
 S_doform(pTHX_ CV *cv, GV *gv, OP *retop)
 {
-    dVAR;
     PERL_CONTEXT *cx;
     const I32 gimme = GIMME_V;
 
@@ -1375,7 +1368,6 @@ S_doform(pTHX_ CV *cv, GV *gv, OP *retop)
 
 PP(pp_enterwrite)
 {
-    dVAR;
     dSP;
     GV *gv;
     IO *io;
@@ -1415,7 +1407,7 @@ PP(pp_enterwrite)
 
 PP(pp_leavewrite)
 {
-    dVAR; dSP;
+    dSP;
     GV * const gv = cxstack[cxstack_ix].blk_format.gv;
     IO * const io = GvIOp(gv);
     PerlIO *ofp;
@@ -1532,7 +1524,7 @@ PP(pp_leavewrite)
 
 PP(pp_prtf)
 {
-    dVAR; dSP; dMARK; dORIGMARK;
+    dSP; dMARK; dORIGMARK;
     PerlIO *fp;
 
     GV * const gv
@@ -1593,7 +1585,6 @@ PP(pp_prtf)
 
 PP(pp_sysopen)
 {
-    dVAR;
     dSP;
     const int perm = (MAXARG > 3 && (TOPs || POPs)) ? POPi : 0666;
     const int mode = POPi;
@@ -1615,7 +1606,7 @@ PP(pp_sysopen)
 
 PP(pp_sysread)
 {
-    dVAR; dSP; dMARK; dORIGMARK; dTARGET;
+    dSP; dMARK; dORIGMARK; dTARGET;
     SSize_t offset;
     IO *io;
     char *buffer;
@@ -1871,7 +1862,7 @@ PP(pp_sysread)
 
 PP(pp_syswrite)
 {
-    dVAR; dSP; dMARK; dORIGMARK; dTARGET;
+    dSP; dMARK; dORIGMARK; dTARGET;
     SV *bufsv;
     const char *buffer;
     SSize_t retval;
@@ -2072,7 +2063,7 @@ PP(pp_syswrite)
 
 PP(pp_eof)
 {
-    dVAR; dSP;
+    dSP;
     GV *gv;
     IO *io;
     const MAGIC *mg;
@@ -2135,7 +2126,7 @@ PP(pp_eof)
 
 PP(pp_tell)
 {
-    dVAR; dSP; dTARGET;
+    dSP; dTARGET;
     GV *gv;
     IO *io;
 
@@ -2169,7 +2160,7 @@ PP(pp_tell)
 
 PP(pp_sysseek)
 {
-    dVAR; dSP;
+    dSP;
     const int whence = POPi;
 #if LSEEKSIZE > IVSIZE
     const Off_t offset = (Off_t)SvNVx(POPs);
@@ -2216,7 +2207,6 @@ PP(pp_sysseek)
 
 PP(pp_truncate)
 {
-    dVAR;
     dSP;
     /* There seems to be no consensus on the length type of truncate()
      * and ftruncate(), both off_t and size_t have supporters. In
@@ -2306,7 +2296,7 @@ PP(pp_truncate)
 
 PP(pp_ioctl)
 {
-    dVAR; dSP; dTARGET;
+    dSP; dTARGET;
     SV * const argsv = POPs;
     const unsigned int func = POPu;
     int optype;
@@ -2382,7 +2372,7 @@ PP(pp_ioctl)
 PP(pp_flock)
 {
 #ifdef FLOCK
-    dVAR; dSP; dTARGET;
+    dSP; dTARGET;
     I32 value;
     const int argtype = POPi;
     GV * const gv = MUTABLE_GV(POPs);
@@ -2412,7 +2402,7 @@ PP(pp_flock)
 
 PP(pp_socket)
 {
-    dVAR; dSP;
+    dSP;
     const int protocol = POPi;
     const int type = POPi;
     const int domain = POPi;
@@ -2450,7 +2440,7 @@ PP(pp_socket)
 PP(pp_sockpair)
 {
 #if defined (HAS_SOCKETPAIR) || (defined (HAS_SOCKET) && defined(SOCK_DGRAM) && defined(AF_INET) && defined(PF_INET))
-    dVAR; dSP;
+    dSP;
     int fd[2];
     const int protocol = POPi;
     const int type = POPi;
@@ -2501,7 +2491,7 @@ PP(pp_sockpair)
 
 PP(pp_bind)
 {
-    dVAR; dSP;
+    dSP;
     SV * const addrsv = POPs;
     /* OK, so on what platform does bind modify addr?  */
     const char *addr;
@@ -2536,7 +2526,7 @@ nuts:
 
 PP(pp_listen)
 {
-    dVAR; dSP;
+    dSP;
     const int backlog = POPi;
     GV * const gv = MUTABLE_GV(POPs);
     IO * const io = GvIOn(gv);
@@ -2557,7 +2547,7 @@ nuts:
 
 PP(pp_accept)
 {
-    dVAR; dSP; dTARGET;
+    dSP; dTARGET;
     IO *nstio;
     char namebuf[MAXPATHLEN];
 #if (defined(VMS_DO_SOCKETS) && defined(DECCRTL_SOCKETS)) || defined(__QNXNTO__)
@@ -2622,7 +2612,7 @@ badexit:
 
 PP(pp_shutdown)
 {
-    dVAR; dSP; dTARGET;
+    dSP; dTARGET;
     const int how = POPi;
     GV * const gv = MUTABLE_GV(POPs);
     IO * const io = GvIOn(gv);
@@ -2641,7 +2631,7 @@ nuts:
 
 PP(pp_ssockopt)
 {
-    dVAR; dSP;
+    dSP;
     const int optype = PL_op->op_type;
     SV * const sv = (optype == OP_GSOCKOPT) ? sv_2mortal(newSV(257)) : POPs;
     const unsigned int optname = (unsigned int) POPi;
@@ -2715,7 +2705,7 @@ nuts2:
 
 PP(pp_getpeername)
 {
-    dVAR; dSP;
+    dSP;
     const int optype = PL_op->op_type;
     GV * const gv = MUTABLE_GV(POPs);
     IO * const io = GvIOn(gv);
@@ -2779,7 +2769,6 @@ nuts2:
 
 PP(pp_stat)
 {
-    dVAR;
     dSP;
     GV *gv = NULL;
     IO *io = NULL;
@@ -2979,7 +2968,6 @@ S_ft_return_true(pTHX_ SV *ret) {
 
 STATIC OP *
 S_try_amagic_ftest(pTHX_ char chr) {
-    dVAR;
     SV *const arg = *PL_stack_sp;
 
     assert(chr != '?');
@@ -3004,7 +2992,6 @@ S_try_amagic_ftest(pTHX_ char chr) {
 
 PP(pp_ftrread)
 {
-    dVAR;
     I32 result;
     /* Not const, because things tweak this below. Not bool, because there's
        no guarantee that OPp_FT_ACCESS is <= CHAR_MAX  */
@@ -3122,7 +3109,6 @@ PP(pp_ftrread)
 
 PP(pp_ftis)
 {
-    dVAR;
     I32 result;
     const int op_type = PL_op->op_type;
     char opchar = '?';
@@ -3174,7 +3160,6 @@ PP(pp_ftis)
 
 PP(pp_ftrowned)
 {
-    dVAR;
     I32 result;
     char opchar = '?';
 
@@ -3276,7 +3261,6 @@ PP(pp_ftrowned)
 
 PP(pp_ftlink)
 {
-    dVAR;
     I32 result;
 
     tryAMAGICftest_MG('l');
@@ -3291,7 +3275,6 @@ PP(pp_ftlink)
 
 PP(pp_fttty)
 {
-    dVAR;
     int fd;
     GV *gv;
     char *name = NULL;
@@ -3326,7 +3309,6 @@ PP(pp_fttty)
 
 PP(pp_fttext)
 {
-    dVAR;
     I32 i;
     SSize_t len;
     I32 odd = 0;
@@ -3509,7 +3491,7 @@ PP(pp_fttext)
 
 PP(pp_chdir)
 {
-    dVAR; dSP; dTARGET;
+    dSP; dTARGET;
     const char *tmps = NULL;
     GV *gv = NULL;
 
@@ -3587,7 +3569,7 @@ PP(pp_chdir)
 
 PP(pp_chown)
 {
-    dVAR; dSP; dMARK; dTARGET;
+    dSP; dMARK; dTARGET;
     const I32 value = (I32)apply(PL_op->op_type, MARK, SP);
 
     SP = MARK;
@@ -3598,7 +3580,7 @@ PP(pp_chown)
 PP(pp_chroot)
 {
 #ifdef HAS_CHROOT
-    dVAR; dSP; dTARGET;
+    dSP; dTARGET;
     char * const tmps = POPpx;
     TAINT_PROPER("chroot");
     PUSHi( chroot(tmps) >= 0 );
@@ -3610,7 +3592,7 @@ PP(pp_chroot)
 
 PP(pp_rename)
 {
-    dVAR; dSP; dTARGET;
+    dSP; dTARGET;
     int anum;
     const char * const tmps2 = POPpconstx;
     const char * const tmps = SvPV_nolen_const(TOPs);
@@ -3636,7 +3618,7 @@ PP(pp_rename)
 #if defined(HAS_LINK) || defined(HAS_SYMLINK)
 PP(pp_link)
 {
-    dVAR; dSP; dTARGET;
+    dSP; dTARGET;
     const int op_type = PL_op->op_type;
     int result;
 
@@ -3684,7 +3666,6 @@ PP(pp_link)
 
 PP(pp_readlink)
 {
-    dVAR;
     dSP;
 #ifdef HAS_SYMLINK
     dTARGET;
@@ -3812,7 +3793,7 @@ S_dooneliner(pTHX_ const char *cmd, const char *filename)
 
 PP(pp_mkdir)
 {
-    dVAR; dSP; dTARGET;
+    dSP; dTARGET;
     STRLEN len;
     const char *tmps;
     bool copy = FALSE;
@@ -3839,7 +3820,7 @@ PP(pp_mkdir)
 
 PP(pp_rmdir)
 {
-    dVAR; dSP; dTARGET;
+    dSP; dTARGET;
     STRLEN len;
     const char *tmps;
     bool copy = FALSE;
@@ -3861,7 +3842,7 @@ PP(pp_rmdir)
 PP(pp_open_dir)
 {
 #if defined(Direntry_t) && defined(HAS_READDIR)
-    dVAR; dSP;
+    dSP;
     const char * const dirname = POPpconstx;
     GV * const gv = MUTABLE_GV(POPs);
     IO * const io = GvIOn(gv);
@@ -3893,7 +3874,6 @@ PP(pp_readdir)
 #if !defined(I_DIRENT) && !defined(VMS)
     Direntry_t *readdir (DIR *);
 #endif
-    dVAR;
     dSP;
 
     SV *sv;
@@ -3941,7 +3921,7 @@ nope:
 PP(pp_telldir)
 {
 #if defined(HAS_TELLDIR) || defined(telldir)
-    dVAR; dSP; dTARGET;
+    dSP; dTARGET;
  /* XXX does _anyone_ need this? --AD 2/20/1998 */
  /* XXX netbsd still seemed to.
     XXX HAS_TELLDIR_PROTO is new style, NEED_TELLDIR_PROTO is old style.
@@ -3973,7 +3953,7 @@ nope:
 PP(pp_seekdir)
 {
 #if defined(HAS_SEEKDIR) || defined(seekdir)
-    dVAR; dSP;
+    dSP;
     const long along = POPl;
     GV * const gv = MUTABLE_GV(POPs);
     IO * const io = GvIOn(gv);
@@ -3999,7 +3979,7 @@ nope:
 PP(pp_rewinddir)
 {
 #if defined(HAS_REWINDDIR) || defined(rewinddir)
-    dVAR; dSP;
+    dSP;
     GV * const gv = MUTABLE_GV(POPs);
     IO * const io = GvIOn(gv);
 
@@ -4023,7 +4003,7 @@ nope:
 PP(pp_closedir)
 {
 #if defined(Direntry_t) && defined(HAS_READDIR)
-    dVAR; dSP;
+    dSP;
     GV * const gv = MUTABLE_GV(POPs);
     IO * const io = GvIOn(gv);
 
@@ -4058,7 +4038,7 @@ nope:
 PP(pp_fork)
 {
 #ifdef HAS_FORK
-    dVAR; dSP; dTARGET;
+    dSP; dTARGET;
     Pid_t childpid;
 #ifdef HAS_SIGPROCMASK
     sigset_t oldmask, newmask;
@@ -4115,7 +4095,7 @@ PP(pp_fork)
 PP(pp_wait)
 {
 #if (!defined(DOSISH) || defined(OS2) || defined(WIN32)) && !defined(__LIBCATAMOUNT__)
-    dVAR; dSP; dTARGET;
+    dSP; dTARGET;
     Pid_t childpid;
     int argflags;
 
@@ -4143,7 +4123,7 @@ PP(pp_wait)
 PP(pp_waitpid)
 {
 #if (!defined(DOSISH) || defined(OS2) || defined(WIN32)) && !defined(__LIBCATAMOUNT__)
-    dVAR; dSP; dTARGET;
+    dSP; dTARGET;
     const int optype = POPi;
     const Pid_t pid = TOPi;
     Pid_t result;
@@ -4172,7 +4152,7 @@ PP(pp_waitpid)
 
 PP(pp_system)
 {
-    dVAR; dSP; dMARK; dORIGMARK; dTARGET;
+    dSP; dMARK; dORIGMARK; dTARGET;
 #if defined(__LIBCATAMOUNT__)
     PL_statusvalue = -1;
     SP = ORIGMARK;
@@ -4326,7 +4306,7 @@ PP(pp_system)
 
 PP(pp_exec)
 {
-    dVAR; dSP; dMARK; dORIGMARK; dTARGET;
+    dSP; dMARK; dORIGMARK; dTARGET;
     I32 value;
 
     if (TAINTING_get) {
@@ -4366,7 +4346,7 @@ PP(pp_exec)
 PP(pp_getppid)
 {
 #ifdef HAS_GETPPID
-    dVAR; dSP; dTARGET;
+    dSP; dTARGET;
     XPUSHi( getppid() );
     RETURN;
 #else
@@ -4377,7 +4357,7 @@ PP(pp_getppid)
 PP(pp_getpgrp)
 {
 #ifdef HAS_GETPGRP
-    dVAR; dSP; dTARGET;
+    dSP; dTARGET;
     Pid_t pgrp;
     const Pid_t pid =
 	(MAXARG < 1) ? 0 : TOPs ? SvIVx(POPs) : ((void)POPs, 0);
@@ -4399,7 +4379,7 @@ PP(pp_getpgrp)
 PP(pp_setpgrp)
 {
 #ifdef HAS_SETPGRP
-    dVAR; dSP; dTARGET;
+    dSP; dTARGET;
     Pid_t pgrp;
     Pid_t pid;
     pgrp = MAXARG == 2 && (TOPs||POPs) ? POPi : 0;
@@ -4435,7 +4415,7 @@ PP(pp_setpgrp)
 PP(pp_getpriority)
 {
 #ifdef HAS_GETPRIORITY
-    dVAR; dSP; dTARGET;
+    dSP; dTARGET;
     const int who = POPi;
     const int which = TOPi;
     SETi( getpriority(PRIORITY_WHICH_T(which), who) );
@@ -4448,7 +4428,7 @@ PP(pp_getpriority)
 PP(pp_setpriority)
 {
 #ifdef HAS_SETPRIORITY
-    dVAR; dSP; dTARGET;
+    dSP; dTARGET;
     const int niceval = POPi;
     const int who = POPi;
     const int which = TOPi;
@@ -4466,7 +4446,7 @@ PP(pp_setpriority)
 
 PP(pp_time)
 {
-    dVAR; dSP; dTARGET;
+    dSP; dTARGET;
 #ifdef BIG_TIME
     XPUSHn( time(NULL) );
 #else
@@ -4478,7 +4458,6 @@ PP(pp_time)
 PP(pp_tms)
 {
 #ifdef HAS_TIMES
-    dVAR;
     dSP;
     struct tms timesbuf;
 
@@ -4520,7 +4499,6 @@ PP(pp_tms)
 
 PP(pp_gmtime)
 {
-    dVAR;
     dSP;
     Time64_T when;
     struct TM tmbuf;
@@ -4613,7 +4591,7 @@ PP(pp_gmtime)
 PP(pp_alarm)
 {
 #ifdef HAS_ALARM
-    dVAR; dSP; dTARGET;
+    dSP; dTARGET;
     int anum;
     anum = POPi;
     anum = alarm((unsigned int)anum);
@@ -4628,7 +4606,7 @@ PP(pp_alarm)
 
 PP(pp_sleep)
 {
-    dVAR; dSP; dTARGET;
+    dSP; dTARGET;
     I32 duration;
     Time_t lasttime;
     Time_t when;
@@ -4651,7 +4629,7 @@ PP(pp_sleep)
 PP(pp_shmwrite)
 {
 #if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
-    dVAR; dSP; dMARK; dTARGET;
+    dSP; dMARK; dTARGET;
     const int op_type = PL_op->op_type;
     I32 value;
 
@@ -4683,7 +4661,7 @@ PP(pp_shmwrite)
 PP(pp_semget)
 {
 #if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
-    dVAR; dSP; dMARK; dTARGET;
+    dSP; dMARK; dTARGET;
     const int anum = do_ipcget(PL_op->op_type, MARK, SP);
     SP = MARK;
     if (anum == -1)
@@ -4698,7 +4676,7 @@ PP(pp_semget)
 PP(pp_semctl)
 {
 #if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
-    dVAR; dSP; dMARK; dTARGET;
+    dSP; dMARK; dTARGET;
     const int anum = do_ipcctl(PL_op->op_type, MARK, SP);
     SP = MARK;
     if (anum == -1)
@@ -4743,7 +4721,7 @@ S_space_join_names_mortal(pTHX_ char *const *array)
 PP(pp_ghostent)
 {
 #if defined(HAS_GETHOSTBYNAME) || defined(HAS_GETHOSTBYADDR) || defined(HAS_GETHOSTENT)
-    dVAR; dSP;
+    dSP;
     I32 which = PL_op->op_type;
     char **elem;
     SV *sv;
@@ -4833,7 +4811,7 @@ PP(pp_ghostent)
 PP(pp_gnetent)
 {
 #if defined(HAS_GETNETBYNAME) || defined(HAS_GETNETBYADDR) || defined(HAS_GETNETENT)
-    dVAR; dSP;
+    dSP;
     I32 which = PL_op->op_type;
     SV *sv;
 #ifndef HAS_GETNET_PROTOS /* XXX Do we need individual probes? */
@@ -4906,7 +4884,7 @@ PP(pp_gnetent)
 PP(pp_gprotoent)
 {
 #if defined(HAS_GETPROTOBYNAME) || defined(HAS_GETPROTOBYNUMBER) || defined(HAS_GETPROTOENT)
-    dVAR; dSP;
+    dSP;
     I32 which = PL_op->op_type;
     SV *sv;
 #ifndef HAS_GETPROTO_PROTOS /* XXX Do we need individual probes? */
@@ -4966,7 +4944,7 @@ PP(pp_gprotoent)
 PP(pp_gservent)
 {
 #if defined(HAS_GETSERVBYNAME) || defined(HAS_GETSERVBYPORT) || defined(HAS_GETSERVENT)
-    dVAR; dSP;
+    dSP;
     I32 which = PL_op->op_type;
     SV *sv;
 #ifndef HAS_GETSERV_PROTOS /* XXX Do we need individual probes? */
@@ -5030,7 +5008,7 @@ PP(pp_gservent)
 
 PP(pp_shostent)
 {
-    dVAR; dSP;
+    dSP;
     const int stayopen = TOPi;
     switch(PL_op->op_type) {
     case OP_SHOSTENT:
@@ -5067,7 +5045,7 @@ PP(pp_shostent)
 
 PP(pp_ehostent)
 {
-    dVAR; dSP;
+    dSP;
     switch(PL_op->op_type) {
     case OP_EHOSTENT:
 #ifdef HAS_ENDHOSTENT
@@ -5133,7 +5111,7 @@ PP(pp_ehostent)
 PP(pp_gpwent)
 {
 #ifdef HAS_PASSWD
-    dVAR; dSP;
+    dSP;
     I32 which = PL_op->op_type;
     SV *sv;
     struct passwd *pwent  = NULL;
@@ -5348,7 +5326,7 @@ PP(pp_gpwent)
 PP(pp_ggrent)
 {
 #ifdef HAS_GROUP
-    dVAR; dSP;
+    dSP;
     const I32 which = PL_op->op_type;
     const struct group *grent;
 
@@ -5414,7 +5392,7 @@ PP(pp_ggrent)
 PP(pp_getlogin)
 {
 #ifdef HAS_GETLOGIN
-    dVAR; dSP; dTARGET;
+    dSP; dTARGET;
     char *tmps;
     EXTEND(SP, 1);
     if (!(tmps = PerlProc_getlogin()))
@@ -5432,7 +5410,7 @@ PP(pp_getlogin)
 PP(pp_syscall)
 {
 #ifdef HAS_SYSCALL
-    dVAR; dSP; dMARK; dORIGMARK; dTARGET;
+    dSP; dMARK; dORIGMARK; dTARGET;
     I32 items = SP - MARK;
     unsigned long a[20];
     I32 i = 0;

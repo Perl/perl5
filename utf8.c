@@ -489,7 +489,6 @@ warn.
 UV
 Perl_utf8n_to_uvchr(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
 {
-    dVAR;
     const U8 * const s0 = s;
     U8 overflow_byte = '\0';	/* Save byte in case of overflow */
     U8 * send;
@@ -947,7 +946,6 @@ up past C<e>, croaks.
 STRLEN
 Perl_utf8_length(pTHX_ const U8 *s, const U8 *e)
 {
-    dVAR;
     STRLEN len = 0;
 
     PERL_ARGS_ASSERT_UTF8_LENGTH;
@@ -1357,7 +1355,6 @@ Perl__is_uni_FOO(pTHX_ const U8 classnum, const UV c)
 bool
 Perl__is_utf8_idstart(pTHX_ const U8 *p)
 {
-    dVAR;
     PERL_ARGS_ASSERT__IS_UTF8_IDSTART;
 
     if (*p == '_')
@@ -1452,8 +1449,6 @@ Perl__to_upper_title_latin1(pTHX_ const U8 c, U8* p, STRLEN *lenp, const char S_
 UV
 Perl_to_uni_upper(pTHX_ UV c, U8* p, STRLEN *lenp)
 {
-    dVAR;
-
     /* Convert the Unicode character whose ordinal is <c> to its uppercase
      * version and store that in UTF-8 in <p> and its length in bytes in <lenp>.
      * Note that the <p> needs to be at least UTF8_MAXBYTES_CASE+1 bytes since
@@ -1475,8 +1470,6 @@ Perl_to_uni_upper(pTHX_ UV c, U8* p, STRLEN *lenp)
 UV
 Perl_to_uni_title(pTHX_ UV c, U8* p, STRLEN *lenp)
 {
-    dVAR;
-
     PERL_ARGS_ASSERT_TO_UNI_TITLE;
 
     if (c < 256) {
@@ -1513,8 +1506,6 @@ S_to_lower_latin1(const U8 c, U8* p, STRLEN *lenp)
 UV
 Perl_to_uni_lower(pTHX_ UV c, U8* p, STRLEN *lenp)
 {
-    dVAR;
-
     PERL_ARGS_ASSERT_TO_UNI_LOWER;
 
     if (c < 256) {
@@ -1640,8 +1631,6 @@ S_is_utf8_common(pTHX_ const U8 *const p, SV **swash,
      * have been checked before this call for mal-formedness enough to assure
      * that. */
 
-    dVAR;
-
     PERL_ARGS_ASSERT_IS_UTF8_COMMON;
 
     /* The API should have included a length for the UTF-8 character in <p>,
@@ -1677,8 +1666,6 @@ S_is_utf8_common(pTHX_ const U8 *const p, SV **swash,
 bool
 Perl__is_utf8_FOO(pTHX_ const U8 classnum, const U8 *p)
 {
-    dVAR;
-
     PERL_ARGS_ASSERT__IS_UTF8_FOO;
 
     assert(classnum < _FIRST_NON_SWASH_CC);
@@ -1692,7 +1679,6 @@ Perl__is_utf8_FOO(pTHX_ const U8 classnum, const U8 *p)
 bool
 Perl__is_utf8_perl_idstart(pTHX_ const U8 *p)
 {
-    dVAR;
     SV* invlist = NULL;
 
     PERL_ARGS_ASSERT__IS_UTF8_PERL_IDSTART;
@@ -1706,8 +1692,6 @@ Perl__is_utf8_perl_idstart(pTHX_ const U8 *p)
 bool
 Perl__is_utf8_xidstart(pTHX_ const U8 *p)
 {
-    dVAR;
-
     PERL_ARGS_ASSERT__IS_UTF8_XIDSTART;
 
     if (*p == '_')
@@ -1718,7 +1702,6 @@ Perl__is_utf8_xidstart(pTHX_ const U8 *p)
 bool
 Perl__is_utf8_perl_idcont(pTHX_ const U8 *p)
 {
-    dVAR;
     SV* invlist = NULL;
 
     PERL_ARGS_ASSERT__IS_UTF8_PERL_IDCONT;
@@ -1732,8 +1715,6 @@ Perl__is_utf8_perl_idcont(pTHX_ const U8 *p)
 bool
 Perl__is_utf8_idcont(pTHX_ const U8 *p)
 {
-    dVAR;
-
     PERL_ARGS_ASSERT__IS_UTF8_IDCONT;
 
     return is_utf8_common(p, &PL_utf8_idcont, "IdContinue", NULL);
@@ -1742,8 +1723,6 @@ Perl__is_utf8_idcont(pTHX_ const U8 *p)
 bool
 Perl__is_utf8_xidcont(pTHX_ const U8 *p)
 {
-    dVAR;
-
     PERL_ARGS_ASSERT__IS_UTF8_XIDCONT;
 
     return is_utf8_common(p, &PL_utf8_idcont, "XIdContinue", NULL);
@@ -1752,8 +1731,6 @@ Perl__is_utf8_xidcont(pTHX_ const U8 *p)
 bool
 Perl__is_utf8_mark(pTHX_ const U8 *p)
 {
-    dVAR;
-
     PERL_ARGS_ASSERT__IS_UTF8_MARK;
 
     return is_utf8_common(p, &PL_utf8_mark, "IsM", NULL);
@@ -1790,7 +1767,6 @@ UV
 Perl_to_utf8_case(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp,
 			SV **swashp, const char *normal, const char *special)
 {
-    dVAR;
     STRLEN len = 0;
     const UV uv1 = valid_utf8_to_uvchr(p, NULL);
 
@@ -1947,8 +1923,6 @@ Instead use L</toUPPER_utf8>.
 UV
 Perl__to_utf8_upper_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, bool flags)
 {
-    dVAR;
-
     UV result;
 
     PERL_ARGS_ASSERT__TO_UTF8_UPPER_FLAGS;
@@ -2014,8 +1988,6 @@ Instead use L</toTITLE_utf8>.
 UV
 Perl__to_utf8_title_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, bool flags)
 {
-    dVAR;
-
     UV result;
 
     PERL_ARGS_ASSERT__TO_UTF8_TITLE_FLAGS;
@@ -2081,8 +2053,6 @@ UV
 Perl__to_utf8_lower_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, bool flags)
 {
     UV result;
-
-    dVAR;
 
     PERL_ARGS_ASSERT__TO_UTF8_LOWER_FLAGS;
 
@@ -2152,8 +2122,6 @@ Instead use L</toFOLD_utf8>.
 UV
 Perl__to_utf8_fold_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, U8 flags)
 {
-    dVAR;
-
     UV result;
 
     PERL_ARGS_ASSERT__TO_UTF8_FOLD_FLAGS;
@@ -2347,7 +2315,6 @@ Perl__core_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 m
      *
      * <invlist> is only valid for binary properties */
 
-    dVAR;
     SV* retval = &PL_sv_undef;
     HV* swash_hv = NULL;
     const int invlist_swash_boundary =
@@ -2598,7 +2565,6 @@ Perl__core_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 m
 UV
 Perl_swash_fetch(pTHX_ SV *swash, const U8 *ptr, bool do_utf8)
 {
-    dVAR;
     HV *const hv = MUTABLE_HV(SvRV(swash));
     U32 klen;
     U32 off;
@@ -3904,7 +3870,6 @@ L<http://www.unicode.org/unicode/reports/tr21/> (Case Mappings).
 I32
 Perl_foldEQ_utf8_flags(pTHX_ const char *s1, char **pe1, UV l1, bool u1, const char *s2, char **pe2, UV l2, bool u2, U32 flags)
 {
-    dVAR;
     const U8 *p1  = (const U8*)s1; /* Point to current char */
     const U8 *p2  = (const U8*)s2;
     const U8 *g1 = NULL;       /* goal for s1 */

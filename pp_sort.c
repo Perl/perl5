@@ -347,14 +347,12 @@ typedef struct {
 static I32
 cmp_desc(pTHX_ gptr const a, gptr const b)
 {
-    dVAR;
     return -PL_sort_RealCmp(aTHX_ a, b);
 }
 
 STATIC void
 S_mergesortsv(pTHX_ gptr *base, size_t nmemb, SVCOMPARE_t cmp, U32 flags)
 {
-    dVAR;
     IV i, run, offset;
     I32 sense, level;
     gptr *f1, *f2, *t, *b, *p;
@@ -1322,7 +1320,6 @@ S_qsortsvu(pTHX_ SV ** array, size_t num_elts, SVCOMPARE_t compare)
 static I32
 cmpindir(pTHX_ gptr const a, gptr const b)
 {
-    dVAR;
     gptr * const ap = (gptr *)a;
     gptr * const bp = (gptr *)b;
     const I32 sense = PL_sort_RealCmp(aTHX_ *ap, *bp);
@@ -1335,7 +1332,6 @@ cmpindir(pTHX_ gptr const a, gptr const b)
 static I32
 cmpindir_desc(pTHX_ gptr const a, gptr const b)
 {
-    dVAR;
     gptr * const ap = (gptr *)a;
     gptr * const bp = (gptr *)b;
     const I32 sense = PL_sort_RealCmp(aTHX_ *ap, *bp);
@@ -1351,7 +1347,6 @@ cmpindir_desc(pTHX_ gptr const a, gptr const b)
 STATIC void
 S_qsortsv(pTHX_ gptr *list1, size_t nmemb, SVCOMPARE_t cmp, U32 flags)
 {
-    dVAR;
     if ((flags & SORTf_STABLE) != 0) {
 	 gptr **pp, *q;
 	 size_t n, j, i;
@@ -1475,7 +1470,7 @@ Perl_sortsv_flags(pTHX_ SV **array, size_t nmemb, SVCOMPARE_t cmp, U32 flags)
 
 PP(pp_sort)
 {
-    dVAR; dSP; dMARK; dORIGMARK;
+    dSP; dMARK; dORIGMARK;
     SV **p1 = ORIGMARK+1, **p2;
     SSize_t max, i;
     AV* av = NULL;
@@ -1774,7 +1769,6 @@ PP(pp_sort)
 static I32
 S_sortcv(pTHX_ SV *const a, SV *const b)
 {
-    dVAR;
     const I32 oldsaveix = PL_savestack_ix;
     const I32 oldscopeix = PL_scopestack_ix;
     I32 result;
@@ -1816,7 +1810,6 @@ S_sortcv(pTHX_ SV *const a, SV *const b)
 static I32
 S_sortcv_stacked(pTHX_ SV *const a, SV *const b)
 {
-    dVAR;
     const I32 oldsaveix = PL_savestack_ix;
     const I32 oldscopeix = PL_scopestack_ix;
     I32 result;
@@ -1873,7 +1866,7 @@ S_sortcv_stacked(pTHX_ SV *const a, SV *const b)
 static I32
 S_sortcv_xsub(pTHX_ SV *const a, SV *const b)
 {
-    dVAR; dSP;
+    dSP;
     const I32 oldsaveix = PL_savestack_ix;
     const I32 oldscopeix = PL_scopestack_ix;
     CV * const cv=MUTABLE_CV(PL_sortcop);
@@ -1941,7 +1934,6 @@ S_sv_i_ncmp(pTHX_ SV *const a, SV *const b)
 static I32
 S_amagic_ncmp(pTHX_ SV *const a, SV *const b)
 {
-    dVAR;
     SV * const tmpsv = tryCALL_AMAGICbin(a,b,ncmp_amg);
 
     PERL_ARGS_ASSERT_AMAGIC_NCMP;
@@ -1962,7 +1954,6 @@ S_amagic_ncmp(pTHX_ SV *const a, SV *const b)
 static I32
 S_amagic_i_ncmp(pTHX_ SV *const a, SV *const b)
 {
-    dVAR;
     SV * const tmpsv = tryCALL_AMAGICbin(a,b,ncmp_amg);
 
     PERL_ARGS_ASSERT_AMAGIC_I_NCMP;
@@ -1983,7 +1974,6 @@ S_amagic_i_ncmp(pTHX_ SV *const a, SV *const b)
 static I32
 S_amagic_cmp(pTHX_ SV *const str1, SV *const str2)
 {
-    dVAR;
     SV * const tmpsv = tryCALL_AMAGICbin(str1,str2,scmp_amg);
 
     PERL_ARGS_ASSERT_AMAGIC_CMP;
@@ -2006,7 +1996,6 @@ S_amagic_cmp(pTHX_ SV *const str1, SV *const str2)
 static I32
 S_amagic_cmp_locale(pTHX_ SV *const str1, SV *const str2)
 {
-    dVAR;
     SV * const tmpsv = tryCALL_AMAGICbin(str1,str2,scmp_amg);
 
     PERL_ARGS_ASSERT_AMAGIC_CMP_LOCALE;

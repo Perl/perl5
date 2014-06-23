@@ -1948,7 +1948,6 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                   regnode *first, regnode *last, regnode *tail,
                   U32 word_count, U32 flags, U32 depth)
 {
-    dVAR;
     /* first pass, loop through and scan words */
     reg_trie_data *trie;
     HV *widecharmap = NULL;
@@ -3594,7 +3593,6 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 			/* recursed: which subroutines have we recursed into */
 			/* and_withp: Valid if flags & SCF_DO_STCLASS_OR */
 {
-    dVAR;
     /* There must be at least this number of characters to match */
     SSize_t min = 0;
     I32 pars = 0, code;
@@ -5522,7 +5520,6 @@ S_add_data(RExC_state_t* const pRExC_state, const char* const s, const U32 n)
 void
 Perl_reginitcolors(pTHX)
 {
-    dVAR;
     const char * const s = PerlEnv_getenv("PERL_RE_COLORS");
     if (s) {
 	char *t = savepv(s);
@@ -5576,8 +5573,6 @@ Perl_reginitcolors(pTHX)
 regexp_engine const *
 Perl_current_re_engine(pTHX)
 {
-    dVAR;
-
     if (IN_PERL_COMPILETIME) {
 	HV * const table = GvHV(PL_hintgv);
 	SV **ptr;
@@ -5604,7 +5599,6 @@ Perl_current_re_engine(pTHX)
 REGEXP *
 Perl_pregcomp(pTHX_ SV * const pattern, const U32 flags)
 {
-    dVAR;
     regexp_engine const *eng = current_re_engine();
     GET_RE_DEBUG_FLAGS_DECL;
 
@@ -6243,7 +6237,6 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 		    OP *expr, const regexp_engine* eng, REGEXP *old_re,
 		     bool *is_bare_re, U32 orig_rx_flags, U32 pm_flags)
 {
-    dVAR;
     REGEXP *rx;
     struct regexp *r;
     regexp_internal *ri;
@@ -9462,7 +9455,6 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
      * RExC_parse beyond the '('.  Things like '(?' are indivisible tokens, and
      * this flag alerts us to the need to check for that */
 {
-    dVAR;
     regnode *ret;		/* Will be the head of the group. */
     regnode *br;
     regnode *lastbr;
@@ -10371,7 +10363,6 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 STATIC regnode *
 S_regbranch(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, I32 first, U32 depth)
 {
-    dVAR;
     regnode *ret;
     regnode *chain = NULL;
     regnode *latest;
@@ -10453,7 +10444,6 @@ S_regbranch(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, I32 first, U32 depth)
 STATIC regnode *
 S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 {
-    dVAR;
     regnode *ret;
     char op;
     char *next;
@@ -11241,7 +11231,6 @@ S_backref_value(char *p)
 STATIC regnode *
 S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 {
-    dVAR;
     regnode *ret = NULL;
     I32 flags = 0;
     char *parse_start = RExC_parse;
@@ -12511,7 +12500,6 @@ S_populate_ANYOF_from_invlist(pTHX_ regnode *node, SV** invlist_ptr)
 PERL_STATIC_INLINE I32
 S_regpposixcc(pTHX_ RExC_state_t *pRExC_state, I32 value, const bool strict)
 {
-    dVAR;
     I32 namedclass = OOB_NAMEDCLASS;
 
     PERL_ARGS_ASSERT_REGPPOSIXCC;
@@ -13307,7 +13295,6 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
      * to be restarted.  This can only happen if ret_invlist is non-NULL.
      */
 
-    dVAR;
     UV prevvalue = OOB_UNICODE, save_prevvalue = OOB_UNICODE;
     IV range = 0;
     UV value = OOB_UNICODE, save_value = OOB_UNICODE;
@@ -15108,7 +15095,6 @@ S_nextchar(pTHX_ RExC_state_t *pRExC_state)
 STATIC regnode *			/* Location. */
 S_reg_node(pTHX_ RExC_state_t *pRExC_state, U8 op)
 {
-    dVAR;
     regnode *ptr;
     regnode * const ret = RExC_emit;
     GET_RE_DEBUG_FLAGS_DECL;
@@ -15151,7 +15137,6 @@ S_reg_node(pTHX_ RExC_state_t *pRExC_state, U8 op)
 STATIC regnode *			/* Location. */
 S_reganode(pTHX_ RExC_state_t *pRExC_state, U8 op, U32 arg)
 {
-    dVAR;
     regnode *ptr;
     regnode * const ret = RExC_emit;
     GET_RE_DEBUG_FLAGS_DECL;
@@ -15209,8 +15194,6 @@ S_reganode(pTHX_ RExC_state_t *pRExC_state, U8 op, U32 arg)
 PERL_STATIC_INLINE STRLEN
 S_reguni(pTHX_ const RExC_state_t *pRExC_state, UV uv, char* s)
 {
-    dVAR;
-
     PERL_ARGS_ASSERT_REGUNI;
 
     return SIZE_ONLY ? UNISKIP(uv) : (uvchr_to_utf8((U8*)s, uv) - (U8*)s);
@@ -15224,7 +15207,6 @@ S_reguni(pTHX_ const RExC_state_t *pRExC_state, UV uv, char* s)
 STATIC void
 S_reginsert(pTHX_ RExC_state_t *pRExC_state, U8 op, regnode *opnd, U32 depth)
 {
-    dVAR;
     regnode *src;
     regnode *dst;
     regnode *place;
@@ -15316,7 +15298,6 @@ STATIC void
 S_regtail(pTHX_ RExC_state_t *pRExC_state, regnode *p,
                 const regnode *val,U32 depth)
 {
-    dVAR;
     regnode *scan;
     GET_RE_DEBUG_FLAGS_DECL;
 
@@ -15967,7 +15948,6 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
 SV *
 Perl_re_intuit_string(pTHX_ REGEXP * const r)
 {				/* Assume that RE_INTUIT is set */
-    dVAR;
     struct regexp *const prog = ReANY(r);
     GET_RE_DEBUG_FLAGS_DECL;
 
@@ -16015,7 +15995,6 @@ Perl_pregfree(pTHX_ REGEXP *r)
 void
 Perl_pregfree2(pTHX_ REGEXP *rx)
 {
-    dVAR;
     struct regexp *const r = ReANY(rx);
     GET_RE_DEBUG_FLAGS_DECL;
 
@@ -16144,7 +16123,6 @@ Perl_reg_temp_copy (pTHX_ REGEXP *ret_x, REGEXP *rx)
 void
 Perl_regfree_internal(pTHX_ REGEXP * const rx)
 {
-    dVAR;
     struct regexp *const r = ReANY(rx);
     RXi_GET_DECL(r,ri);
     GET_RE_DEBUG_FLAGS_DECL;
@@ -16197,6 +16175,9 @@ Perl_regfree_internal(pTHX_ REGEXP * const rx)
                      Used in stclass optimization only */
                     U32 refcount;
                     reg_ac_data *aho=(reg_ac_data*)ri->data->data[n];
+#ifdef USE_ITHREADS
+                    dVAR;
+#endif
                     OP_REFCNT_LOCK;
                     refcount = --aho->refcount;
                     OP_REFCNT_UNLOCK;
@@ -16223,6 +16204,9 @@ Perl_regfree_internal(pTHX_ REGEXP * const rx)
 	            /* trie structure. */
 	            U32 refcount;
 	            reg_trie_data *trie=(reg_trie_data*)ri->data->data[n];
+#ifdef USE_ITHREADS
+                    dVAR;
+#endif
                     OP_REFCNT_LOCK;
                     refcount = --trie->refcount;
                     OP_REFCNT_UNLOCK;
@@ -16473,7 +16457,6 @@ Perl_regdupe_internal(pTHX_ REGEXP * const rx, CLONE_PARAMS *param)
 regnode *
 Perl_regnext(pTHX_ regnode *p)
 {
-    dVAR;
     I32 offset;
 
     if (!p)
@@ -16529,8 +16512,6 @@ S_re_croak2(pTHX_ bool utf8, const char* pat1,const char* pat2,...)
 void
 Perl_save_re_context(pTHX)
 {
-    dVAR;
-
     /* Save $1..$n (#18107: UTF-8 s/(\w+)/uc($1)/e); AMS 20021106. */
     if (PL_curpm) {
 	const REGEXP * const rx = PM_GETRE(PL_curpm);

@@ -288,7 +288,6 @@ static regmatch_state * S_push_slab(pTHX);
 STATIC CHECKPOINT
 S_regcppush(pTHX_ const regexp *rex, I32 parenfloor, U32 maxopenparen)
 {
-    dVAR;
     const int retval = PL_savestack_ix;
     const int paren_elems_to_push =
                 (maxopenparen - parenfloor) * REGCP_PAREN_ELEMS;
@@ -369,7 +368,6 @@ S_regcppush(pTHX_ const regexp *rex, I32 parenfloor, U32 maxopenparen)
 STATIC void
 S_regcppop(pTHX_ regexp *rex, U32 *maxopenparen_p)
 {
-    dVAR;
     UV i;
     U32 paren;
     GET_RE_DEBUG_FLAGS_DECL;
@@ -649,7 +647,6 @@ Perl_re_intuit_start(pTHX_
                     const U32 flags,
                     re_scream_pos_data *data)
 {
-    dVAR;
     struct regexp *const prog = ReANY(rx);
     SSize_t start_shift = prog->check_offset_min;
     /* Should be nonnegative! */
@@ -2433,7 +2430,6 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
 /* flags:     For optimizations. See REXEC_* in regexp.h */
 
 {
-    dVAR;
     struct regexp *const prog = ReANY(rx);
     char *s;
     regnode *c;
@@ -3154,7 +3150,6 @@ phooey:
 STATIC I32			/* 0 failure, 1 success */
 S_regtry(pTHX_ regmatch_info *reginfo, char **startposp)
 {
-    dVAR;
     CHECKPOINT lastcp;
     REGEXP *const rx = reginfo->prog;
     regexp *const prog = ReANY(rx);
@@ -7035,7 +7030,6 @@ STATIC I32
 S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
             regmatch_info *const reginfo, I32 max, int depth)
 {
-    dVAR;
     char *scan;     /* Pointer to current position in target string */
     I32 c;
     char *loceol = reginfo->strend;   /* local version */
@@ -7576,7 +7570,6 @@ Perl__get_regclass_nonbitmap_data(pTHX_ const regexp *prog,
      *    swash are returned  (in a printable form).
      * Tied intimately to how regcomp.c sets up the data structure */
 
-    dVAR;
     SV *sw  = NULL;
     SV *si  = NULL;         /* Input swash initialization string */
     SV*  invlist = NULL;
@@ -7839,8 +7832,6 @@ S_reghop3(U8 *s, SSize_t off, const U8* lim)
      * 'off' >= 0, backwards if negative.  But don't go outside of position
      * 'lim', which better be < s  if off < 0 */
 
-    dVAR;
-
     PERL_ARGS_ASSERT_REGHOP3;
 
     if (off >= 0) {
@@ -7865,8 +7856,6 @@ S_reghop3(U8 *s, SSize_t off, const U8* lim)
 STATIC U8 *
 S_reghop4(U8 *s, SSize_t off, const U8* llim, const U8* rlim)
 {
-    dVAR;
-
     PERL_ARGS_ASSERT_REGHOP4;
 
     if (off >= 0) {
@@ -7894,8 +7883,6 @@ S_reghop4(U8 *s, SSize_t off, const U8* llim, const U8* rlim)
 STATIC U8 *
 S_reghopmaybe3(U8* s, SSize_t off, const U8* lim)
 {
-    dVAR;
-
     PERL_ARGS_ASSERT_REGHOPMAYBE3;
 
     if (off >= 0) {
@@ -8012,7 +7999,6 @@ S_setup_eval_state(pTHX_ regmatch_info *const reginfo)
 static void
 S_cleanup_regmatch_info_aux(pTHX_ void *arg)
 {
-    dVAR;
     regmatch_info_aux *aux = (regmatch_info_aux *) arg;
     regmatch_info_aux_eval *eval_state =  aux->info_aux_eval;
     regmatch_slab *s;
@@ -8104,7 +8090,6 @@ S_to_byte_substr(pTHX_ regexp *prog)
     /* Converts substr fields in prog from UTF-8 to bytes, calling fbm_compile
      * on the converted value; returns FALSE if can't be converted. */
 
-    dVAR;
     int i = 1;
 
     PERL_ARGS_ASSERT_TO_BYTE_SUBSTR;

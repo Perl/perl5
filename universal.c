@@ -41,7 +41,6 @@
 STATIC bool
 S_isa_lookup(pTHX_ HV *stash, const char * const name, STRLEN len, U32 flags)
 {
-    dVAR;
     const struct mro_meta *const meta = HvMROMETA(stash);
     HV *isa = meta->isa;
     const HV *our_stash;
@@ -147,7 +146,6 @@ Perl_sv_derived_from_pv(pTHX_ SV *sv, const char *const name, U32 flags)
 bool
 Perl_sv_derived_from_pvn(pTHX_ SV *sv, const char *const name, const STRLEN len, U32 flags)
 {
-    dVAR;
     HV *stash;
 
     PERL_ARGS_ASSERT_SV_DERIVED_FROM_PVN;
@@ -331,7 +329,6 @@ Perl_croak_xs_usage(const CV *const cv, const char *const params)
 XS(XS_UNIVERSAL_isa); /* prototype to pass -Wmissing-prototypes */
 XS(XS_UNIVERSAL_isa)
 {
-    dVAR;
     dXSARGS;
 
     if (items != 2)
@@ -352,7 +349,6 @@ XS(XS_UNIVERSAL_isa)
 XS(XS_UNIVERSAL_can); /* prototype to pass -Wmissing-prototypes */
 XS(XS_UNIVERSAL_can)
 {
-    dVAR;
     dXSARGS;
     SV   *sv;
     SV   *rv;
@@ -404,7 +400,6 @@ XS(XS_UNIVERSAL_can)
 XS(XS_UNIVERSAL_DOES); /* prototype to pass -Wmissing-prototypes */
 XS(XS_UNIVERSAL_DOES)
 {
-    dVAR;
     dXSARGS;
     PERL_UNUSED_ARG(cv);
 
@@ -422,7 +417,6 @@ XS(XS_UNIVERSAL_DOES)
 XS(XS_utf8_is_utf8); /* prototype to pass -Wmissing-prototypes */
 XS(XS_utf8_is_utf8)
 {
-     dVAR;
      dXSARGS;
      if (items != 1)
 	 croak_xs_usage(cv, "sv");
@@ -440,7 +434,6 @@ XS(XS_utf8_is_utf8)
 XS(XS_utf8_valid); /* prototype to pass -Wmissing-prototypes */
 XS(XS_utf8_valid)
 {
-     dVAR;
      dXSARGS;
      if (items != 1)
 	 croak_xs_usage(cv, "sv");
@@ -459,7 +452,6 @@ XS(XS_utf8_valid)
 XS(XS_utf8_encode); /* prototype to pass -Wmissing-prototypes */
 XS(XS_utf8_encode)
 {
-    dVAR;
     dXSARGS;
     if (items != 1)
 	croak_xs_usage(cv, "sv");
@@ -471,7 +463,6 @@ XS(XS_utf8_encode)
 XS(XS_utf8_decode); /* prototype to pass -Wmissing-prototypes */
 XS(XS_utf8_decode)
 {
-    dVAR;
     dXSARGS;
     if (items != 1)
 	croak_xs_usage(cv, "sv");
@@ -489,7 +480,6 @@ XS(XS_utf8_decode)
 XS(XS_utf8_upgrade); /* prototype to pass -Wmissing-prototypes */
 XS(XS_utf8_upgrade)
 {
-    dVAR;
     dXSARGS;
     if (items != 1)
 	croak_xs_usage(cv, "sv");
@@ -507,7 +497,6 @@ XS(XS_utf8_upgrade)
 XS(XS_utf8_downgrade); /* prototype to pass -Wmissing-prototypes */
 XS(XS_utf8_downgrade)
 {
-    dVAR;
     dXSARGS;
     if (items < 1 || items > 2)
 	croak_xs_usage(cv, "sv, failok=0");
@@ -524,7 +513,6 @@ XS(XS_utf8_downgrade)
 XS(XS_utf8_native_to_unicode); /* prototype to pass -Wmissing-prototypes */
 XS(XS_utf8_native_to_unicode)
 {
- dVAR;
  dXSARGS;
  const UV uv = SvUV(ST(0));
 
@@ -538,7 +526,6 @@ XS(XS_utf8_native_to_unicode)
 XS(XS_utf8_unicode_to_native); /* prototype to pass -Wmissing-prototypes */
 XS(XS_utf8_unicode_to_native)
 {
- dVAR;
  dXSARGS;
  const UV uv = SvUV(ST(0));
 
@@ -552,7 +539,6 @@ XS(XS_utf8_unicode_to_native)
 XS(XS_Internals_SvREADONLY); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Internals_SvREADONLY)	/* This is dangerous stuff. */
 {
-    dVAR;
     dXSARGS;
     SV * const svz = ST(0);
     SV * sv;
@@ -590,7 +576,6 @@ XS(XS_Internals_SvREADONLY)	/* This is dangerous stuff. */
 XS(XS_constant__make_const); /* prototype to pass -Wmissing-prototypes */
 XS(XS_constant__make_const)	/* This is dangerous stuff. */
 {
-    dVAR;
     dXSARGS;
     SV * const svz = ST(0);
     SV * sv;
@@ -621,7 +606,6 @@ XS(XS_constant__make_const)	/* This is dangerous stuff. */
 XS(XS_Internals_SvREFCNT); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Internals_SvREFCNT)	/* This is dangerous stuff. */
 {
-    dVAR;
     dXSARGS;
     SV * const svz = ST(0);
     SV * sv;
@@ -647,7 +631,6 @@ XS(XS_Internals_SvREFCNT)	/* This is dangerous stuff. */
 XS(XS_Internals_hv_clear_placehold); /* prototype to pass -Wmissing-prototypes */
 XS(XS_Internals_hv_clear_placehold)
 {
-    dVAR;
     dXSARGS;
 
     if (items != 1 || !SvROK(ST(0)))
@@ -662,7 +645,6 @@ XS(XS_Internals_hv_clear_placehold)
 XS(XS_PerlIO_get_layers); /* prototype to pass -Wmissing-prototypes */
 XS(XS_PerlIO_get_layers)
 {
-    dVAR;
     dXSARGS;
     if (items < 1 || items % 2 == 0)
 	croak_xs_usage(cv, "filehandle[,args]");
@@ -789,7 +771,6 @@ XS(XS_PerlIO_get_layers)
 XS(XS_re_is_regexp); /* prototype to pass -Wmissing-prototypes */
 XS(XS_re_is_regexp)
 {
-    dVAR; 
     dXSARGS;
     PERL_UNUSED_VAR(cv);
 
@@ -808,7 +789,6 @@ XS(XS_re_regnames_count)
 {
     REGEXP *rx = PL_curpm ? PM_GETRE(PL_curpm) : NULL;
     SV * ret;
-    dVAR; 
     dXSARGS;
 
     if (items != 0)
@@ -830,7 +810,6 @@ XS(XS_re_regnames_count)
 XS(XS_re_regname); /* prototype to pass -Wmissing-prototypes */
 XS(XS_re_regname)
 {
-    dVAR;
     dXSARGS;
     REGEXP * rx;
     U32 flags;
@@ -863,7 +842,6 @@ XS(XS_re_regname)
 XS(XS_re_regnames); /* prototype to pass -Wmissing-prototypes */
 XS(XS_re_regnames)
 {
-    dVAR;
     dXSARGS;
     REGEXP * rx;
     U32 flags;
@@ -919,7 +897,6 @@ XS(XS_re_regnames)
 XS(XS_re_regexp_pattern); /* prototype to pass -Wmissing-prototypes */
 XS(XS_re_regexp_pattern)
 {
-    dVAR;
     dXSARGS;
     REGEXP *re;
 
@@ -1056,7 +1033,6 @@ static const struct xsub_details details[] = {
 void
 Perl_boot_core_UNIVERSAL(pTHX)
 {
-    dVAR;
     static const char file[] = __FILE__;
     const struct xsub_details *xsub = details;
     const struct xsub_details *end = C_ARRAY_END(details);

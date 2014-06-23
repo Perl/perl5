@@ -315,8 +315,6 @@ Perl_safesysfree(Malloc_t where)
 {
 #ifdef ALWAYS_NEED_THX
     dTHX;
-#else
-    dVAR;
 #endif
     DEBUG_m( PerlIO_printf(Perl_debug_log, "0x%"UVxf": (%05ld) free\n",PTR2UV(where),(long)PL_an++));
     if (where) {
@@ -473,25 +471,33 @@ Perl_safesyscalloc(MEM_SIZE count, MEM_SIZE size)
 
 Malloc_t Perl_malloc (MEM_SIZE nbytes)
 {
-    dTHXs;
+#ifdef PERL_IMPLICIT_SYS
+    dTHX;
+#endif
     return (Malloc_t)PerlMem_malloc(nbytes);
 }
 
 Malloc_t Perl_calloc (MEM_SIZE elements, MEM_SIZE size)
 {
-    dTHXs;
+#ifdef PERL_IMPLICIT_SYS
+    dTHX;
+#endif
     return (Malloc_t)PerlMem_calloc(elements, size);
 }
 
 Malloc_t Perl_realloc (Malloc_t where, MEM_SIZE nbytes)
 {
-    dTHXs;
+#ifdef PERL_IMPLICIT_SYS
+    dTHX;
+#endif
     return (Malloc_t)PerlMem_realloc(where, nbytes);
 }
 
 Free_t   Perl_mfree (Malloc_t where)
 {
-    dTHXs;
+#ifdef PERL_IMPLICIT_SYS
+    dTHX;
+#endif
     PerlMem_free(where);
 }
 
@@ -622,7 +628,6 @@ Analyses the string in order to make fast searches on it using fbm_instr()
 void
 Perl_fbm_compile(pTHX_ SV *sv, U32 flags)
 {
-    dVAR;
     const U8 *s;
     STRLEN i;
     STRLEN len;
@@ -913,7 +918,6 @@ Perl_fbm_instr(pTHX_ unsigned char *big, unsigned char *bigend, SV *littlestr, U
 char *
 Perl_screaminstr(pTHX_ SV *bigstr, SV *littlestr, I32 start_shift, I32 end_shift, I32 *old_posp, I32 last)
 {
-    dVAR;
     PERL_ARGS_ASSERT_SCREAMINSTR;
     PERL_UNUSED_ARG(bigstr);
     PERL_UNUSED_ARG(littlestr);
@@ -1184,7 +1188,6 @@ Perl_savesharedsvpv(pTHX_ SV *sv)
 STATIC SV *
 S_mess_alloc(pTHX)
 {
-    dVAR;
     SV *sv;
     XPVMG *any;
 
@@ -1307,7 +1310,6 @@ const COP*
 Perl_closest_cop(pTHX_ const COP *cop, const OP *o, const OP *curop,
 		       bool opnext)
 {
-    dVAR;
     /* Look for curop starting from o.  cop is the last COP we've seen. */
     /* opnext means that curop is actually the ->op_next of the op we are
        seeking. */
@@ -1370,7 +1372,6 @@ required) to modify and return C<basemsg> instead of allocating a new SV.
 SV *
 Perl_mess_sv(pTHX_ SV *basemsg, bool consume)
 {
-    dVAR;
     SV *sv;
 
 #if defined(USE_C_BACKTRACE) && defined(USE_C_BACKTRACE_ON_ERROR)
@@ -1462,7 +1463,6 @@ this function.
 SV *
 Perl_vmess(pTHX_ const char *pat, va_list *args)
 {
-    dVAR;
     SV * const sv = mess_alloc();
 
     PERL_ARGS_ASSERT_VMESS;
@@ -1474,7 +1474,6 @@ Perl_vmess(pTHX_ const char *pat, va_list *args)
 void
 Perl_write_to_stderr(pTHX_ SV* msv)
 {
-    dVAR;
     IO *io;
     MAGIC *mg;
 
@@ -1514,7 +1513,6 @@ S_with_queued_errors(pTHX_ SV *ex)
 STATIC bool
 S_invoke_exception_hook(pTHX_ SV *ex, bool warn)
 {
-    dVAR;
     HV *stash;
     GV *gv;
     CV *cv;
@@ -1930,7 +1928,6 @@ Perl_vwarner(pTHX_ U32  err, const char* pat, va_list* args)
 bool
 Perl_ckwarn(pTHX_ U32 w)
 {
-    dVAR;
     /* If lexical warnings have not been set, use $^W.  */
     if (isLEXWARN_off)
 	return PL_dowarn & G_WARN_ON;
@@ -1943,7 +1940,6 @@ Perl_ckwarn(pTHX_ U32 w)
 bool
 Perl_ckwarn_d(pTHX_ U32 w)
 {
-    dVAR;
     /* If lexical warnings have not been set then default classes warn.  */
     if (isLEXWARN_off)
 	return TRUE;
@@ -2296,7 +2292,6 @@ PerlIO *
 Perl_my_popen_list(pTHX_ const char *mode, int n, SV **args)
 {
 #if (!defined(DOSISH) || defined(HAS_FORK) || defined(AMIGAOS)) && !defined(OS2) && !defined(VMS) && !defined(NETWARE) && !defined(__LIBCATAMOUNT__)
-    dVAR;
     int p[2];
     I32 This, that;
     Pid_t pid;
@@ -2437,7 +2432,6 @@ Perl_my_popen_list(pTHX_ const char *mode, int n, SV **args)
 PerlIO *
 Perl_my_popen(pTHX_ const char *cmd, const char *mode)
 {
-    dVAR;
     int p[2];
     I32 This, that;
     Pid_t pid;
@@ -2609,8 +2603,8 @@ Perl_my_popen(pTHX_ const char *cmd, const char *mode)
 void
 Perl_atfork_lock(void)
 {
-   dVAR;
 #if defined(USE_ITHREADS)
+    dVAR;
     /* locks must be held in locking order (if any) */
 #  ifdef USE_PERLIO
     MUTEX_LOCK(&PL_perlio_mutex);
@@ -2626,8 +2620,8 @@ Perl_atfork_lock(void)
 void
 Perl_atfork_unlock(void)
 {
-    dVAR;
 #if defined(USE_ITHREADS)
+    dVAR;
     /* locks must be released in same order as in atfork_lock() */
 #  ifdef USE_PERLIO
     MUTEX_UNLOCK(&PL_perlio_mutex);
@@ -2701,10 +2695,10 @@ dup2(int oldfd, int newfd)
 Sighandler_t
 Perl_rsignal(pTHX_ int signo, Sighandler_t handler)
 {
-    dVAR;
     struct sigaction act, oact;
 
 #ifdef USE_ITHREADS
+    dVAR;
     /* only "parent" interpreter can diddle signals */
     if (PL_curinterp != aTHX)
 	return (Sighandler_t) SIG_ERR;
@@ -2742,7 +2736,9 @@ Perl_rsignal_state(pTHX_ int signo)
 int
 Perl_rsignal_save(pTHX_ int signo, Sighandler_t handler, Sigsave_t *save)
 {
+#ifdef USE_ITHREADS
     dVAR;
+#endif
     struct sigaction act;
 
     PERL_ARGS_ASSERT_RSIGNAL_SAVE;
@@ -2770,7 +2766,10 @@ Perl_rsignal_save(pTHX_ int signo, Sighandler_t handler, Sigsave_t *save)
 int
 Perl_rsignal_restore(pTHX_ int signo, Sigsave_t *save)
 {
+#ifdef USE_ITHREADS
     dVAR;
+#endif
+    PERL_UNUSED_CONTEXT;
 #ifdef USE_ITHREADS
     /* only "parent" interpreter can diddle signals */
     if (PL_curinterp != aTHX)
@@ -2852,7 +2851,6 @@ Perl_rsignal_restore(pTHX_ int signo, Sigsave_t *save)
 I32
 Perl_my_pclose(pTHX_ PerlIO *ptr)
 {
-    dVAR;
     int status;
     SV **svp;
     Pid_t pid;
@@ -2909,7 +2907,6 @@ Perl_my_pclose(pTHX_ PerlIO *ptr)
 I32
 Perl_wait4pid(pTHX_ Pid_t pid, int *statusp, int flags)
 {
-    dVAR;
     I32 result = 0;
     PERL_ARGS_ASSERT_WAIT4PID;
 #ifdef PERL_USES_PL_PIDSTATUS
@@ -3124,7 +3121,6 @@ char*
 Perl_find_script(pTHX_ const char *scriptname, bool dosearch,
 		 const char *const *const search_ext, I32 flags)
 {
-    dVAR;
     const char *xfound = NULL;
     char *xfailed = NULL;
     char tmpbuf[MAXPATHLEN];
@@ -3344,8 +3340,8 @@ Perl_find_script(pTHX_ const char *scriptname, bool dosearch,
 void *
 Perl_get_context(void)
 {
-    dVAR;
 #if defined(USE_ITHREADS)
+    dVAR;
 #  ifdef OLD_PTHREADS_API
     pthread_addr_t t;
     int error = pthread_getspecific(PL_thr_key, &t)
@@ -3367,7 +3363,9 @@ Perl_get_context(void)
 void
 Perl_set_context(void *t)
 {
+#if defined(USE_ITHREADS)
     dVAR;
+#endif
     PERL_ARGS_ASSERT_SET_CONTEXT;
 #if defined(USE_ITHREADS)
 #  ifdef I_MACH_CTHREADS
@@ -3923,7 +3921,6 @@ int
 Perl_getcwd_sv(pTHX_ SV *sv)
 {
 #ifndef PERL_MICRO
-    dVAR;
     SvTAINTED_on(sv);
 
     PERL_ARGS_ASSERT_GETCWD_SV;
@@ -4445,7 +4442,6 @@ Perl_parse_unicode_opts(pTHX_ const char **popt)
 U32
 Perl_seed(pTHX)
 {
-    dVAR;
     /*
      * This is really just a quick hack which grabs various garbage
      * values.  It really should be a real hash algorithm which
@@ -4526,7 +4522,6 @@ Perl_seed(pTHX)
 void
 Perl_get_hash_seed(pTHX_ unsigned char * const seed_buffer)
 {
-    dVAR;
     const char *env_pv;
     unsigned long i;
 
@@ -5332,7 +5327,6 @@ S_gv_has_usable_name(pTHX_ GV *gv)
 void
 Perl_get_db_sub(pTHX_ SV **svp, CV *cv)
 {
-    dVAR;
     SV * const dbsv = GvSVn(PL_DBsub);
     const bool save_taint = TAINT_get;
 

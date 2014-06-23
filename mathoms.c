@@ -551,7 +551,6 @@ Perl_sv_utf8_upgrade(pTHX_ SV *sv)
 int
 Perl_fprintf_nocontext(PerlIO *stream, const char *format, ...)
 {
-    dTHXs;
     int ret = 0;
     va_list(arglist);
 
@@ -775,8 +774,6 @@ Perl_sv_nounlocking(pTHX_ SV *sv)
 void
 Perl_save_long(pTHX_ long int *longp)
 {
-    dVAR;
-
     PERL_ARGS_ASSERT_SAVE_LONG;
 
     SSCHECK(3);
@@ -788,8 +785,6 @@ Perl_save_long(pTHX_ long int *longp)
 void
 Perl_save_iv(pTHX_ IV *ivp)
 {
-    dVAR;
-
     PERL_ARGS_ASSERT_SAVE_IV;
 
     SSCHECK(3);
@@ -801,8 +796,6 @@ Perl_save_iv(pTHX_ IV *ivp)
 void
 Perl_save_nogv(pTHX_ GV *gv)
 {
-    dVAR;
-
     PERL_ARGS_ASSERT_SAVE_NOGV;
 
     SSCHECK(2);
@@ -813,7 +806,6 @@ Perl_save_nogv(pTHX_ GV *gv)
 void
 Perl_save_list(pTHX_ SV **sarg, I32 maxsarg)
 {
-    dVAR;
     I32 i;
 
     PERL_ARGS_ASSERT_SAVE_LIST;
@@ -1056,15 +1048,12 @@ Perl_sv_insert(pTHX_ SV *const bigstr, const STRLEN offset, const STRLEN len,
 void
 Perl_save_freesv(pTHX_ SV *sv)
 {
-    dVAR;
     save_freesv(sv);
 }
 
 void
 Perl_save_mortalizesv(pTHX_ SV *sv)
 {
-    dVAR;
-
     PERL_ARGS_ASSERT_SAVE_MORTALIZESV;
 
     save_mortalizesv(sv);
@@ -1073,21 +1062,18 @@ Perl_save_mortalizesv(pTHX_ SV *sv)
 void
 Perl_save_freeop(pTHX_ OP *o)
 {
-    dVAR;
     save_freeop(o);
 }
 
 void
 Perl_save_freepv(pTHX_ char *pv)
 {
-    dVAR;
     save_freepv(pv);
 }
 
 void
 Perl_save_op(pTHX)
 {
-    dVAR;
     save_op();
 }
 
@@ -1421,8 +1407,6 @@ Perl_is_uni_idfirst(pTHX_ UV c)
 bool
 Perl_is_utf8_idfirst(pTHX_ const U8 *p) /* The naming is historical. */
 {
-    dVAR;
-
     PERL_ARGS_ASSERT_IS_UTF8_IDFIRST;
 
     return _is_utf8_idstart(p);
@@ -1431,8 +1415,6 @@ Perl_is_utf8_idfirst(pTHX_ const U8 *p) /* The naming is historical. */
 bool
 Perl_is_utf8_xidfirst(pTHX_ const U8 *p) /* The naming is historical. */
 {
-    dVAR;
-
     PERL_ARGS_ASSERT_IS_UTF8_XIDFIRST;
 
     return _is_utf8_xidstart(p);
@@ -1441,8 +1423,6 @@ Perl_is_utf8_xidfirst(pTHX_ const U8 *p) /* The naming is historical. */
 bool
 Perl_is_utf8_idcont(pTHX_ const U8 *p)
 {
-    dVAR;
-
     PERL_ARGS_ASSERT_IS_UTF8_IDCONT;
 
     return _is_utf8_idcont(p);
@@ -1451,8 +1431,6 @@ Perl_is_utf8_idcont(pTHX_ const U8 *p)
 bool
 Perl_is_utf8_xidcont(pTHX_ const U8 *p)
 {
-    dVAR;
-
     PERL_ARGS_ASSERT_IS_UTF8_XIDCONT;
 
     return _is_utf8_xidcont(p);
@@ -1533,8 +1511,6 @@ Perl_to_uni_lower_lc(pTHX_ U32 c)
 bool
 Perl_is_utf8_alnum(pTHX_ const U8 *p)
 {
-    dVAR;
-
     PERL_ARGS_ASSERT_IS_UTF8_ALNUM;
 
     /* NOTE: "IsWord", not "IsAlnum", since Alnum is a true
@@ -1546,8 +1522,6 @@ Perl_is_utf8_alnum(pTHX_ const U8 *p)
 bool
 Perl_is_utf8_alnumc(pTHX_ const U8 *p)
 {
-    dVAR;
-
     PERL_ARGS_ASSERT_IS_UTF8_ALNUMC;
 
     return isALPHANUMERIC_utf8(p);
@@ -1556,8 +1530,6 @@ Perl_is_utf8_alnumc(pTHX_ const U8 *p)
 bool
 Perl_is_utf8_alpha(pTHX_ const U8 *p)
 {
-    dVAR;
-
     PERL_ARGS_ASSERT_IS_UTF8_ALPHA;
 
     return isALPHA_utf8(p);
@@ -1566,8 +1538,6 @@ Perl_is_utf8_alpha(pTHX_ const U8 *p)
 bool
 Perl_is_utf8_ascii(pTHX_ const U8 *p)
 {
-    dVAR;
-
     PERL_ARGS_ASSERT_IS_UTF8_ASCII;
     PERL_UNUSED_CONTEXT;
 
@@ -1577,8 +1547,6 @@ Perl_is_utf8_ascii(pTHX_ const U8 *p)
 bool
 Perl_is_utf8_blank(pTHX_ const U8 *p)
 {
-    dVAR;
-
     PERL_ARGS_ASSERT_IS_UTF8_BLANK;
     PERL_UNUSED_CONTEXT;
 
@@ -1588,8 +1556,6 @@ Perl_is_utf8_blank(pTHX_ const U8 *p)
 bool
 Perl_is_utf8_space(pTHX_ const U8 *p)
 {
-    dVAR;
-
     PERL_ARGS_ASSERT_IS_UTF8_SPACE;
     PERL_UNUSED_CONTEXT;
 
@@ -1599,8 +1565,6 @@ Perl_is_utf8_space(pTHX_ const U8 *p)
 bool
 Perl_is_utf8_perl_space(pTHX_ const U8 *p)
 {
-    dVAR;
-
     PERL_ARGS_ASSERT_IS_UTF8_PERL_SPACE;
     PERL_UNUSED_CONTEXT;
 
@@ -1612,8 +1576,6 @@ Perl_is_utf8_perl_space(pTHX_ const U8 *p)
 bool
 Perl_is_utf8_perl_word(pTHX_ const U8 *p)
 {
-    dVAR;
-
     PERL_ARGS_ASSERT_IS_UTF8_PERL_WORD;
     PERL_UNUSED_CONTEXT;
 
@@ -1625,8 +1587,6 @@ Perl_is_utf8_perl_word(pTHX_ const U8 *p)
 bool
 Perl_is_utf8_digit(pTHX_ const U8 *p)
 {
-    dVAR;
-
     PERL_ARGS_ASSERT_IS_UTF8_DIGIT;
 
     return isDIGIT_utf8(p);
@@ -1635,8 +1595,6 @@ Perl_is_utf8_digit(pTHX_ const U8 *p)
 bool
 Perl_is_utf8_posix_digit(pTHX_ const U8 *p)
 {
-    dVAR;
-
     PERL_ARGS_ASSERT_IS_UTF8_POSIX_DIGIT;
     PERL_UNUSED_CONTEXT;
 
@@ -1648,8 +1606,6 @@ Perl_is_utf8_posix_digit(pTHX_ const U8 *p)
 bool
 Perl_is_utf8_upper(pTHX_ const U8 *p)
 {
-    dVAR;
-
     PERL_ARGS_ASSERT_IS_UTF8_UPPER;
 
     return isUPPER_utf8(p);
@@ -1658,8 +1614,6 @@ Perl_is_utf8_upper(pTHX_ const U8 *p)
 bool
 Perl_is_utf8_lower(pTHX_ const U8 *p)
 {
-    dVAR;
-
     PERL_ARGS_ASSERT_IS_UTF8_LOWER;
 
     return isLOWER_utf8(p);
@@ -1668,8 +1622,6 @@ Perl_is_utf8_lower(pTHX_ const U8 *p)
 bool
 Perl_is_utf8_cntrl(pTHX_ const U8 *p)
 {
-    dVAR;
-
     PERL_ARGS_ASSERT_IS_UTF8_CNTRL;
     PERL_UNUSED_CONTEXT;
 
@@ -1679,8 +1631,6 @@ Perl_is_utf8_cntrl(pTHX_ const U8 *p)
 bool
 Perl_is_utf8_graph(pTHX_ const U8 *p)
 {
-    dVAR;
-
     PERL_ARGS_ASSERT_IS_UTF8_GRAPH;
 
     return isGRAPH_utf8(p);
@@ -1689,8 +1639,6 @@ Perl_is_utf8_graph(pTHX_ const U8 *p)
 bool
 Perl_is_utf8_print(pTHX_ const U8 *p)
 {
-    dVAR;
-
     PERL_ARGS_ASSERT_IS_UTF8_PRINT;
 
     return isPRINT_utf8(p);
@@ -1699,8 +1647,6 @@ Perl_is_utf8_print(pTHX_ const U8 *p)
 bool
 Perl_is_utf8_punct(pTHX_ const U8 *p)
 {
-    dVAR;
-
     PERL_ARGS_ASSERT_IS_UTF8_PUNCT;
 
     return isPUNCT_utf8(p);
@@ -1709,8 +1655,6 @@ Perl_is_utf8_punct(pTHX_ const U8 *p)
 bool
 Perl_is_utf8_xdigit(pTHX_ const U8 *p)
 {
-    dVAR;
-
     PERL_ARGS_ASSERT_IS_UTF8_XDIGIT;
     PERL_UNUSED_CONTEXT;
 
@@ -1720,8 +1664,6 @@ Perl_is_utf8_xdigit(pTHX_ const U8 *p)
 bool
 Perl_is_utf8_mark(pTHX_ const U8 *p)
 {
-    dVAR;
-
     PERL_ARGS_ASSERT_IS_UTF8_MARK;
 
     return _is_utf8_mark(p);

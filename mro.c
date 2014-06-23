@@ -492,7 +492,6 @@ by the C<setisa> magic, should not need to invoke directly.
 void
 Perl_mro_isa_changed_in(pTHX_ HV* stash)
 {
-    dVAR;
     HV* isarev;
     AV* linear_mro;
     HE* iter;
@@ -1402,7 +1401,6 @@ XS(XS_mro_method_changed_in);
 void
 Perl_boot_core_mro(pTHX)
 {
-    dVAR;
     static const char file[] = __FILE__;
 
     Perl_mro_register(aTHX_ &dfs_alg);
@@ -1412,7 +1410,6 @@ Perl_boot_core_mro(pTHX)
 
 XS(XS_mro_method_changed_in)
 {
-    dVAR;
     dXSARGS;
     SV* classname;
     HV* class_stash;

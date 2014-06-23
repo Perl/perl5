@@ -40,7 +40,6 @@
 
 PP(pp_wantarray)
 {
-    dVAR;
     dSP;
     I32 cxix;
     const PERL_CONTEXT *cx;
@@ -68,14 +67,12 @@ PP(pp_wantarray)
 
 PP(pp_regcreset)
 {
-    dVAR;
     TAINT_NOT;
     return NORMAL;
 }
 
 PP(pp_regcomp)
 {
-    dVAR;
     dSP;
     PMOP *pm = (PMOP*)cLOGOP->op_other;
     SV **args;
@@ -191,7 +188,6 @@ PP(pp_regcomp)
 
 PP(pp_substcont)
 {
-    dVAR;
     dSP;
     PERL_CONTEXT *cx = &cxstack[cxstack_ix];
     PMOP * const pm = (PMOP*) cLOGOP->op_other;
@@ -457,7 +453,7 @@ S_rxres_free(pTHX_ void **rsp)
 
 PP(pp_formline)
 {
-    dVAR; dSP; dMARK; dORIGMARK;
+    dSP; dMARK; dORIGMARK;
     SV * const tmpForm = *++MARK;
     SV *formsv;		    /* contains text of original format */
     U32 *fpc;	    /* format ops program counter */
@@ -916,7 +912,7 @@ PP(pp_formline)
 
 PP(pp_grepstart)
 {
-    dVAR; dSP;
+    dSP;
     SV *src;
 
     if (PL_stack_base + *PL_markstack_ptr == SP) {
@@ -958,7 +954,7 @@ PP(pp_grepstart)
 
 PP(pp_mapwhile)
 {
-    dVAR; dSP;
+    dSP;
     const I32 gimme = GIMME_V;
     I32 items = (SP - PL_stack_base) - *PL_markstack_ptr; /* how many new items */
     I32 count;
@@ -1110,7 +1106,6 @@ PP(pp_mapwhile)
 
 PP(pp_range)
 {
-    dVAR;
     if (GIMME == G_ARRAY)
 	return NORMAL;
     if (SvTRUEx(PAD_SV(PL_op->op_targ)))
@@ -1121,7 +1116,6 @@ PP(pp_range)
 
 PP(pp_flip)
 {
-    dVAR;
     dSP;
 
     if (GIMME == G_ARRAY) {
@@ -1176,7 +1170,7 @@ PP(pp_flip)
 
 PP(pp_flop)
 {
-    dVAR; dSP;
+    dSP;
 
     if (GIMME == G_ARRAY) {
 	dPOPPOPssrl;
@@ -1280,7 +1274,6 @@ static const char * const context_name[] = {
 STATIC I32
 S_dopoptolabel(pTHX_ const char *label, STRLEN len, U32 flags)
 {
-    dVAR;
     I32 i;
 
     PERL_ARGS_ASSERT_DOPOPTOLABEL;
@@ -1335,7 +1328,6 @@ S_dopoptolabel(pTHX_ const char *label, STRLEN len, U32 flags)
 I32
 Perl_dowantarray(pTHX)
 {
-    dVAR;
     const I32 gimme = block_gimme();
     return (gimme == G_VOID) ? G_SCALAR : gimme;
 }
@@ -1343,7 +1335,6 @@ Perl_dowantarray(pTHX)
 I32
 Perl_block_gimme(pTHX)
 {
-    dVAR;
     const I32 cxix = dopoptosub(cxstack_ix);
     if (cxix < 0)
 	return G_VOID;
@@ -1364,7 +1355,6 @@ Perl_block_gimme(pTHX)
 I32
 Perl_is_lvalue_sub(pTHX)
 {
-    dVAR;
     const I32 cxix = dopoptosub(cxstack_ix);
     assert(cxix >= 0);  /* We should only be called from inside subs */
 
@@ -1378,7 +1368,6 @@ Perl_is_lvalue_sub(pTHX)
 I32
 Perl_was_lvalue_sub(pTHX)
 {
-    dVAR;
     const I32 cxix = dopoptosub(cxstack_ix-1);
     assert(cxix >= 0);  /* We should only be called from inside subs */
 
@@ -1391,7 +1380,6 @@ Perl_was_lvalue_sub(pTHX)
 STATIC I32
 S_dopoptosub_at(pTHX_ const PERL_CONTEXT *cxstk, I32 startingblock)
 {
-    dVAR;
     I32 i;
 
     PERL_ARGS_ASSERT_DOPOPTOSUB_AT;
@@ -1424,7 +1412,6 @@ S_dopoptosub_at(pTHX_ const PERL_CONTEXT *cxstk, I32 startingblock)
 STATIC I32
 S_dopoptoeval(pTHX_ I32 startingblock)
 {
-    dVAR;
     I32 i;
     for (i = startingblock; i >= 0; i--) {
 	const PERL_CONTEXT *cx = &cxstack[i];
@@ -1442,7 +1429,6 @@ S_dopoptoeval(pTHX_ I32 startingblock)
 STATIC I32
 S_dopoptoloop(pTHX_ I32 startingblock)
 {
-    dVAR;
     I32 i;
     for (i = startingblock; i >= 0; i--) {
 	const PERL_CONTEXT * const cx = &cxstack[i];
@@ -1472,7 +1458,6 @@ S_dopoptoloop(pTHX_ I32 startingblock)
 STATIC I32
 S_dopoptogiven(pTHX_ I32 startingblock)
 {
-    dVAR;
     I32 i;
     for (i = startingblock; i >= 0; i--) {
 	const PERL_CONTEXT *cx = &cxstack[i];
@@ -1500,7 +1485,6 @@ S_dopoptogiven(pTHX_ I32 startingblock)
 STATIC I32
 S_dopoptowhen(pTHX_ I32 startingblock)
 {
-    dVAR;
     I32 i;
     for (i = startingblock; i >= 0; i--) {
 	const PERL_CONTEXT *cx = &cxstack[i];
@@ -1518,7 +1502,6 @@ S_dopoptowhen(pTHX_ I32 startingblock)
 void
 Perl_dounwind(pTHX_ I32 cxix)
 {
-    dVAR;
     I32 optype;
 
     if (!PL_curstackinfo) /* can happen if die during thread cloning */
@@ -1560,8 +1543,6 @@ Perl_dounwind(pTHX_ I32 cxix)
 void
 Perl_qerror(pTHX_ SV *err)
 {
-    dVAR;
-
     PERL_ARGS_ASSERT_QERROR;
 
     if (PL_in_eval) {
@@ -1583,7 +1564,6 @@ Perl_qerror(pTHX_ SV *err)
 void
 Perl_die_unwind(pTHX_ SV *msv)
 {
-    dVAR;
     SV *exceptsv = sv_mortalcopy(msv);
     U8 in_eval = PL_in_eval;
     PERL_ARGS_ASSERT_DIE_UNWIND;
@@ -1705,7 +1685,7 @@ Perl_die_unwind(pTHX_ SV *msv)
 
 PP(pp_xor)
 {
-    dVAR; dSP; dPOPTOPssrl;
+    dSP; dPOPTOPssrl;
     if (SvTRUE(left) != SvTRUE(right))
 	RETSETYES;
     else
@@ -1777,7 +1757,6 @@ Perl_caller_cx(pTHX_ I32 count, const PERL_CONTEXT **dbcxp)
 
 PP(pp_caller)
 {
-    dVAR;
     dSP;
     const PERL_CONTEXT *cx;
     const PERL_CONTEXT *dbcx;
@@ -1937,7 +1916,6 @@ PP(pp_caller)
 
 PP(pp_reset)
 {
-    dVAR;
     dSP;
     const char * tmps;
     STRLEN len = 0;
@@ -1954,7 +1932,6 @@ PP(pp_reset)
 
 PP(pp_dbstate)
 {
-    dVAR;
     PL_curcop = (COP*)PL_op;
     TAINT_NOT;		/* Each statement is presumed innocent */
     PL_stack_sp = PL_stack_base + cxstack[cxstack_ix].blk_oldsp;
@@ -2067,7 +2044,7 @@ S_adjust_stack_on_leave(pTHX_ SV **newsp, SV **sp, SV **mark, I32 gimme,
 
 PP(pp_enter)
 {
-    dVAR; dSP;
+    dSP;
     PERL_CONTEXT *cx;
     I32 gimme = GIMME_V;
 
@@ -2081,7 +2058,7 @@ PP(pp_enter)
 
 PP(pp_leave)
 {
-    dVAR; dSP;
+    dSP;
     PERL_CONTEXT *cx;
     SV **newsp;
     PMOP *newpm;
@@ -2108,7 +2085,7 @@ PP(pp_leave)
 
 PP(pp_enteriter)
 {
-    dVAR; dSP; dMARK;
+    dSP; dMARK;
     PERL_CONTEXT *cx;
     const I32 gimme = GIMME_V;
     void *itervar; /* location of the iteration variable */
@@ -2231,7 +2208,7 @@ PP(pp_enteriter)
 
 PP(pp_enterloop)
 {
-    dVAR; dSP;
+    dSP;
     PERL_CONTEXT *cx;
     const I32 gimme = GIMME_V;
 
@@ -2247,7 +2224,7 @@ PP(pp_enterloop)
 
 PP(pp_leaveloop)
 {
-    dVAR; dSP;
+    dSP;
     PERL_CONTEXT *cx;
     I32 gimme;
     SV **newsp;
@@ -2385,7 +2362,7 @@ S_return_lvalues(pTHX_ SV **mark, SV **sp, SV **newsp, I32 gimme,
 
 PP(pp_return)
 {
-    dVAR; dSP; dMARK;
+    dSP; dMARK;
     PERL_CONTEXT *cx;
     bool popsub2 = FALSE;
     bool clear_errsv = FALSE;
@@ -2526,7 +2503,7 @@ PP(pp_return)
  * pp_return */
 PP(pp_leavesublv)
 {
-    dVAR; dSP;
+    dSP;
     SV **newsp;
     PMOP *newpm;
     I32 gimme;
@@ -2555,7 +2532,6 @@ PP(pp_leavesublv)
 static I32
 S_unwind_loop(pTHX_ const char * const opname)
 {
-    dVAR;
     I32 cxix;
     if (PL_op->op_flags & OPf_SPECIAL) {
 	cxix = dopoptoloop(cxstack_ix);
@@ -2594,7 +2570,6 @@ S_unwind_loop(pTHX_ const char * const opname)
 
 PP(pp_last)
 {
-    dVAR;
     PERL_CONTEXT *cx;
     I32 pop2 = 0;
     I32 gimme;
@@ -2661,7 +2636,6 @@ PP(pp_last)
 
 PP(pp_next)
 {
-    dVAR;
     PERL_CONTEXT *cx;
     const I32 inner = PL_scopestack_ix;
 
@@ -2679,7 +2653,6 @@ PP(pp_next)
 
 PP(pp_redo)
 {
-    dVAR;
     const I32 cxix = S_unwind_loop(aTHX_ "redo");
     PERL_CONTEXT *cx;
     I32 oldsave;
@@ -2704,7 +2677,6 @@ PP(pp_redo)
 STATIC OP *
 S_dofindlabel(pTHX_ OP *o, const char *label, STRLEN len, U32 flags, OP **opstack, OP **oplimit)
 {
-    dVAR;
     OP **ops = opstack;
     static const char* const too_deep = "Target of goto is too deeply nested";
 
@@ -3146,7 +3118,6 @@ PP(pp_goto) /* also pp_dump */
 
 PP(pp_exit)
 {
-    dVAR;
     dSP;
     I32 anum;
 
@@ -3215,7 +3186,6 @@ establish a local jmpenv to handle exception traps.
 STATIC OP *
 S_docatch(pTHX_ OP *o)
 {
-    dVAR;
     int ret;
     OP * const oldop = PL_op;
     dJMPENV;
@@ -3277,7 +3247,6 @@ Perl_find_runcv(pTHX_ U32 *db_seqp)
 CV *
 Perl_find_runcv_where(pTHX_ U8 cond, IV arg, U32 *db_seqp)
 {
-    dVAR;
     PERL_SI	 *si;
     int		 level = 0;
 
@@ -3370,7 +3339,7 @@ S_try_yyparse(pTHX_ int gramtype)
 STATIC bool
 S_doeval(pTHX_ int gimme, CV* outside, U32 seq, HV *hh)
 {
-    dVAR; dSP;
+    dSP;
     OP * const saveop = PL_op;
     bool clear_hints = saveop->op_type != OP_ENTEREVAL;
     COP * const oldcurcop = PL_curcop;
@@ -3679,7 +3648,7 @@ S_path_is_searchable(const char *name)
 
 PP(pp_require)
 {
-    dVAR; dSP;
+    dSP;
     PERL_CONTEXT *cx;
     SV *sv;
     const char *name;
@@ -4165,7 +4134,6 @@ PP(pp_require)
 
 PP(pp_hintseval)
 {
-    dVAR;
     dSP;
     mXPUSHs(MUTABLE_SV(hv_copy_hints_hv(MUTABLE_HV(cSVOP_sv))));
     RETURN;
@@ -4174,7 +4142,7 @@ PP(pp_hintseval)
 
 PP(pp_entereval)
 {
-    dVAR; dSP;
+    dSP;
     PERL_CONTEXT *cx;
     SV *sv;
     const I32 gimme = GIMME_V;
@@ -4302,7 +4270,7 @@ PP(pp_entereval)
 
 PP(pp_leaveeval)
 {
-    dVAR; dSP;
+    dSP;
     SV **newsp;
     PMOP *newpm;
     I32 gimme;
@@ -4399,7 +4367,6 @@ Perl_create_eval_scope(pTHX_ U32 flags)
     
 PP(pp_entertry)
 {
-    dVAR;
     PERL_CONTEXT * const cx = create_eval_scope(0);
     cx->blk_eval.retop = cLOGOP->op_other->op_next;
     return DOCATCH(PL_op->op_next);
@@ -4407,7 +4374,7 @@ PP(pp_entertry)
 
 PP(pp_leavetry)
 {
-    dVAR; dSP;
+    dSP;
     SV **newsp;
     PMOP *newpm;
     I32 gimme;
@@ -4431,7 +4398,7 @@ PP(pp_leavetry)
 
 PP(pp_entergiven)
 {
-    dVAR; dSP;
+    dSP;
     PERL_CONTEXT *cx;
     const I32 gimme = GIMME_V;
     
@@ -4456,7 +4423,7 @@ PP(pp_entergiven)
 
 PP(pp_leavegiven)
 {
-    dVAR; dSP;
+    dSP;
     PERL_CONTEXT *cx;
     I32 gimme;
     SV **newsp;
@@ -4479,7 +4446,6 @@ PP(pp_leavegiven)
 STATIC PMOP *
 S_make_matcher(pTHX_ REGEXP *re)
 {
-    dVAR;
     PMOP *matcher = (PMOP *) newPMOP(OP_MATCH, OPf_WANT_SCALAR | OPf_STACKED);
 
     PERL_ARGS_ASSERT_MAKE_MATCHER;
@@ -4495,7 +4461,6 @@ S_make_matcher(pTHX_ REGEXP *re)
 STATIC bool
 S_matcher_matches_sv(pTHX_ PMOP *matcher, SV *sv)
 {
-    dVAR;
     dSP;
 
     PERL_ARGS_ASSERT_MATCHER_MATCHES_SV;
@@ -4511,8 +4476,6 @@ S_matcher_matches_sv(pTHX_ PMOP *matcher, SV *sv)
 STATIC void
 S_destroy_matcher(pTHX_ PMOP *matcher)
 {
-    dVAR;
-
     PERL_ARGS_ASSERT_DESTROY_MATCHER;
     PERL_UNUSED_ARG(matcher);
 
@@ -4533,7 +4496,6 @@ PP(pp_smartmatch)
 STATIC OP *
 S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
 {
-    dVAR;
     dSP;
     
     bool object_on_left = FALSE;
@@ -5005,7 +4967,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
 
 PP(pp_enterwhen)
 {
-    dVAR; dSP;
+    dSP;
     PERL_CONTEXT *cx;
     const I32 gimme = GIMME_V;
 
@@ -5029,7 +4991,7 @@ PP(pp_enterwhen)
 
 PP(pp_leavewhen)
 {
-    dVAR; dSP;
+    dSP;
     I32 cxix;
     PERL_CONTEXT *cx;
     I32 gimme;
@@ -5077,7 +5039,7 @@ PP(pp_leavewhen)
 
 PP(pp_continue)
 {
-    dVAR; dSP;
+    dSP;
     I32 cxix;
     PERL_CONTEXT *cx;
     I32 gimme;
@@ -5105,7 +5067,6 @@ PP(pp_continue)
 
 PP(pp_break)
 {
-    dVAR;   
     I32 cxix;
     PERL_CONTEXT *cx;
 
@@ -5408,7 +5369,6 @@ S_num_overflow(NV value, I32 fldsize, I32 frcsize)
 static I32
 S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
 {
-    dVAR;
     SV * const datasv = FILTER_DATA(idx);
     const int filter_has_file = IoLINES(datasv);
     SV * const filter_state = MUTABLE_SV(IoTOP_GV(datasv));

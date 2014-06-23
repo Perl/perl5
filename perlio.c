@@ -466,7 +466,6 @@ PerlIO_init_table(pTHX)
 PerlIO *
 PerlIO_allocate(pTHX)
 {
-    dVAR;
     /*
      * Find a free slot in the table, allocating new table as necessary
      */
@@ -563,7 +562,6 @@ PerlIO_list_free(pTHX_ PerlIO_list_t *list)
 void
 PerlIO_list_push(pTHX_ PerlIO_list_t *list, PerlIO_funcs *funcs, SV *arg)
 {
-    dVAR;
     PerlIO_pair_t *p;
     PERL_UNUSED_CONTEXT;
 
@@ -633,7 +631,6 @@ PerlIO_clone(pTHX_ PerlInterpreter *proto, CLONE_PARAMS *param)
 void
 PerlIO_destruct(pTHX)
 {
-    dVAR;
     PerlIOl **table = &PL_perlio;
     PerlIOl *f;
 #ifdef USE_ITHREADS
@@ -699,7 +696,6 @@ PerlIO_pop(pTHX_ PerlIO *f)
 AV *
 PerlIO_get_layers(pTHX_ PerlIO *f)
 {
-    dVAR;
     AV * const av = newAV();
 
     if (PerlIOValid(f)) {
@@ -733,7 +729,7 @@ PerlIO_get_layers(pTHX_ PerlIO *f)
 PerlIO_funcs *
 PerlIO_find_layer(pTHX_ const char *name, STRLEN len, int load)
 {
-    dVAR;
+
     IV i;
     if ((SSize_t) len <= 0)
 	len = strlen(name);
@@ -870,7 +866,6 @@ XS(XS_PerlIO__Layer__NoWarnings)
     /* This is used as a %SIG{__WARN__} handler to suppress warnings
        during loading of layers.
      */
-    dVAR;
     dXSARGS;
     PERL_UNUSED_ARG(cv);
     if (items)
@@ -881,7 +876,6 @@ XS(XS_PerlIO__Layer__NoWarnings)
 XS(XS_PerlIO__Layer__find); /* prototype to pass -Wmissing-prototypes */
 XS(XS_PerlIO__Layer__find)
 {
-    dVAR;
     dXSARGS;
     PERL_UNUSED_ARG(cv);
     if (items < 2)
@@ -901,7 +895,6 @@ XS(XS_PerlIO__Layer__find)
 void
 PerlIO_define_layer(pTHX_ PerlIO_funcs *tab)
 {
-    dVAR;
     if (!PL_known_layers)
 	PL_known_layers = PerlIO_list_alloc(aTHX);
     PerlIO_list_push(aTHX_ PL_known_layers, tab, NULL);
@@ -911,7 +904,6 @@ PerlIO_define_layer(pTHX_ PerlIO_funcs *tab)
 int
 PerlIO_parse_layers(pTHX_ PerlIO_list_t *av, const char *names)
 {
-    dVAR;
     if (names) {
 	const char *s = names;
 	while (*s) {
@@ -1004,7 +996,6 @@ PerlIO_parse_layers(pTHX_ PerlIO_list_t *av, const char *names)
 void
 PerlIO_default_buffer(pTHX_ PerlIO_list_t *av)
 {
-    dVAR;
     PERLIO_FUNCS_DECL(*tab) = &PerlIO_perlio;
 #ifdef PERLIO_USING_CRLF
     tab = &PerlIO_crlf;
@@ -1084,7 +1075,6 @@ PERLIO_FUNCS_DECL(PerlIO_remove) = {
 PerlIO_list_t *
 PerlIO_default_layers(pTHX)
 {
-    dVAR;
     if (!PL_def_layerlist) {
 	const char * const s = TAINTING_get ? NULL : PerlEnv_getenv("PERLIO");
 	PERLIO_FUNCS_DECL(*osLayer) = &PerlIO_unix;
@@ -1133,7 +1123,6 @@ Perl_boot_core_PerlIO(pTHX)
 PerlIO_funcs *
 PerlIO_default_layer(pTHX_ I32 n)
 {
-    dVAR;
     PerlIO_list_t * const av = PerlIO_default_layers(aTHX);
     if (n < 0)
 	n += av->cur;
@@ -1146,7 +1135,6 @@ PerlIO_default_layer(pTHX_ I32 n)
 void
 PerlIO_stdstreams(pTHX)
 {
-    dVAR;
     if (!PL_perlio) {
 	PerlIO_init_table(aTHX);
 	PerlIO_fdopen(0, "Ir" PERLIO_STDTEXT);
@@ -1420,15 +1408,13 @@ Perl_PerlIO_close(pTHX_ PerlIO *f)
 int
 Perl_PerlIO_fileno(pTHX_ PerlIO *f)
 {
-    dVAR;
-     Perl_PerlIO_or_Base(f, Fileno, fileno, -1, (aTHX_ f));
+    Perl_PerlIO_or_Base(f, Fileno, fileno, -1, (aTHX_ f));
 }
 
 
 static PerlIO_funcs *
 PerlIO_layer_from_ref(pTHX_ SV *sv)
 {
-    dVAR;
     /*
      * For any scalar type load the handler which is bundled with perl
      */
@@ -1463,7 +1449,6 @@ PerlIO_list_t *
 PerlIO_resolve_layers(pTHX_ const char *layers,
 		      const char *mode, int narg, SV **args)
 {
-    dVAR;
     PerlIO_list_t *def = PerlIO_default_layers(aTHX);
     int incdef = 1;
     if (!PL_perlio)
@@ -1517,7 +1502,6 @@ PerlIO *
 PerlIO_openn(pTHX_ const char *layers, const char *mode, int fd,
 	     int imode, int perm, PerlIO *f, int narg, SV **args)
 {
-    dVAR;
     if (!f && narg == 1 && *args == &PL_sv_undef) {
 	if ((f = PerlIO_tmpfile())) {
 	    if (!layers || !*layers)
@@ -1641,7 +1625,6 @@ Perl_PerlIO_tell(pTHX_ PerlIO *f)
 int
 Perl_PerlIO_flush(pTHX_ PerlIO *f)
 {
-    dVAR;
     if (f) {
 	if (*f) {
 	    const PerlIO_funcs *tab = PerlIOBase(f)->tab;
@@ -1684,7 +1667,6 @@ Perl_PerlIO_flush(pTHX_ PerlIO *f)
 void
 PerlIOBase_flush_linebuf(pTHX)
 {
-    dVAR;
     PerlIOl **table = &PL_perlio;
     PerlIOl *f;
     while ((f = *table)) {
@@ -2391,7 +2373,6 @@ PerlIOUnix_refcnt(int fd)
 void
 PerlIO_cleanup(pTHX)
 {
-    dVAR;
     int i;
 #ifdef USE_ITHREADS
     PerlIO_debug("Cleanup layers for %p\n",(void*)aTHX);
@@ -2735,7 +2716,6 @@ PerlIOUnix_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param, int flags)
 SSize_t
 PerlIOUnix_read(pTHX_ PerlIO *f, void *vbuf, Size_t count)
 {
-    dVAR;
     int fd;
     if (PerlIO_lockcnt(f)) /* in use: abort ungracefully */
 	return -1;
@@ -2772,7 +2752,6 @@ PerlIOUnix_read(pTHX_ PerlIO *f, void *vbuf, Size_t count)
 SSize_t
 PerlIOUnix_write(pTHX_ PerlIO *f, const void *vbuf, Size_t count)
 {
-    dVAR;
     int fd;
     if (PerlIO_lockcnt(f)) /* in use: abort ungracefully */
 	return -1;
@@ -2810,7 +2789,6 @@ PerlIOUnix_tell(pTHX_ PerlIO *f)
 IV
 PerlIOUnix_close(pTHX_ PerlIO *f)
 {
-    dVAR;
     const int fd = PerlIOSelf(f, PerlIOUnix)->fd;
     int code = 0;
     if (PerlIOBase(f)->flags & PERLIO_F_OPEN) {
@@ -3316,7 +3294,6 @@ PerlIOStdio_close(pTHX_ PerlIO *f)
 SSize_t
 PerlIOStdio_read(pTHX_ PerlIO *f, void *vbuf, Size_t count)
 {
-    dVAR;
     FILE * s;
     SSize_t got = 0;
     if (PerlIO_lockcnt(f)) /* in use: abort ungracefully */
@@ -3409,7 +3386,6 @@ PerlIOStdio_unread(pTHX_ PerlIO *f, const void *vbuf, Size_t count)
 SSize_t
 PerlIOStdio_write(pTHX_ PerlIO *f, const void *vbuf, Size_t count)
 {
-    dVAR;
     SSize_t got;
     if (PerlIO_lockcnt(f)) /* in use: abort ungracefully */
 	return -1;
@@ -3776,7 +3752,6 @@ PerlIO_findFILE(PerlIO *f)
 void
 PerlIO_releaseFILE(PerlIO *p, FILE *f)
 {
-    dVAR;
     PerlIOl *l;
     while ((l = *p)) {
 	if (l->tab == &PerlIO_stdio) {
@@ -4808,7 +4783,6 @@ PERLIO_FUNCS_DECL(PerlIO_crlf) = {
 PerlIO *
 Perl_PerlIO_stdin(pTHX)
 {
-    dVAR;
     if (!PL_perlio) {
 	PerlIO_stdstreams(aTHX);
     }
@@ -4818,7 +4792,6 @@ Perl_PerlIO_stdin(pTHX)
 PerlIO *
 Perl_PerlIO_stdout(pTHX)
 {
-    dVAR;
     if (!PL_perlio) {
 	PerlIO_stdstreams(aTHX);
     }
@@ -4828,7 +4801,6 @@ Perl_PerlIO_stdout(pTHX)
 PerlIO *
 Perl_PerlIO_stderr(pTHX)
 {
-    dVAR;
     if (!PL_perlio) {
 	PerlIO_stdstreams(aTHX);
     }
@@ -5066,7 +5038,6 @@ PerlIO_tmpfile(void)
 const char *
 Perl_PerlIO_context_layers(pTHX_ const char *mode)
 {
-    dVAR;
     const char *direction = NULL;
     SV *layers;
     /*

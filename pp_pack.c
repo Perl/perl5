@@ -337,7 +337,6 @@ uni_to_bytes(pTHX_ const char **s, const char *end, const char *buf, int buf_len
 STATIC bool
 next_uni_uu(pTHX_ const char **s, const char *end, I32 *out)
 {
-    dVAR;
     STRLEN retlen;
     const UV val = utf8n_to_uvchr((U8 *) *s, end-*s, &retlen, UTF8_CHECK_ONLY);
     if (val >= 0x100 || !ISUUCHAR(val) ||
@@ -862,7 +861,7 @@ Perl_unpackstring(pTHX_ const char *pat, const char *patend, const char *s, cons
 STATIC I32
 S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const char *strend, const char **new_s )
 {
-    dVAR; dSP;
+    dSP;
     SV *sv = NULL;
     const I32 start_sp_offset = SP - PL_stack_base;
     howlen_t howlen;
@@ -1842,7 +1841,6 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 
 PP(pp_unpack)
 {
-    dVAR;
     dSP;
     dPOPPOPssrl;
     I32 gimme = GIMME_V;
@@ -1975,7 +1973,6 @@ The engine implementing pack() Perl function.
 void
 Perl_packlist(pTHX_ SV *cat, const char *pat, const char *patend, SV **beglist, SV **endlist )
 {
-    dVAR;
     tempsym_t sym;
 
     PERL_ARGS_ASSERT_PACKLIST;
@@ -2077,7 +2074,6 @@ STATIC
 SV **
 S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 {
-    dVAR;
     tempsym_t lookahead;
     I32 items  = endlist - beglist;
     bool found = next_symbol(symptr);
@@ -3092,7 +3088,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 
 PP(pp_pack)
 {
-    dVAR; dSP; dMARK; dORIGMARK; dTARGET;
+    dSP; dMARK; dORIGMARK; dTARGET;
     SV *cat = TARG;
     STRLEN fromlen;
     SV *pat_sv = *++MARK;

@@ -30,7 +30,6 @@
 STATIC I32
 S_do_trans_simple(pTHX_ SV * const sv)
 {
-    dVAR;
     I32 matches = 0;
     STRLEN len;
     U8 *s = (U8*)SvPV_nomg(sv,len);
@@ -99,7 +98,6 @@ S_do_trans_simple(pTHX_ SV * const sv)
 STATIC I32
 S_do_trans_count(pTHX_ SV * const sv)
 {
-    dVAR;
     STRLEN len;
     const U8 *s = (const U8*)SvPV_nomg_const(sv, len);
     const U8 * const send = s + len;
@@ -137,7 +135,6 @@ S_do_trans_count(pTHX_ SV * const sv)
 STATIC I32
 S_do_trans_complex(pTHX_ SV * const sv)
 {
-    dVAR;
     STRLEN len;
     U8 *s = (U8*)SvPV_nomg(sv, len);
     U8 * const send = s+len;
@@ -301,7 +298,6 @@ S_do_trans_complex(pTHX_ SV * const sv)
 STATIC I32
 S_do_trans_simple_utf8(pTHX_ SV * const sv)
 {
-    dVAR;
     U8 *s;
     U8 *send;
     U8 *d;
@@ -406,7 +402,6 @@ S_do_trans_simple_utf8(pTHX_ SV * const sv)
 STATIC I32
 S_do_trans_count_utf8(pTHX_ SV * const sv)
 {
-    dVAR;
     const U8 *s;
     const U8 *start = NULL;
     const U8 *send;
@@ -456,7 +451,6 @@ S_do_trans_count_utf8(pTHX_ SV * const sv)
 STATIC I32
 S_do_trans_complex_utf8(pTHX_ SV * const sv)
 {
-    dVAR;
     U8 *start, *send;
     U8 *d;
     I32 matches = 0;
@@ -624,7 +618,6 @@ S_do_trans_complex_utf8(pTHX_ SV * const sv)
 I32
 Perl_do_trans(pTHX_ SV *sv)
 {
-    dVAR;
     STRLEN len;
     const I32 hasutf = (PL_op->op_private &
                     (OPpTRANS_FROM_UTF|OPpTRANS_TO_UTF));
@@ -672,7 +665,6 @@ Perl_do_trans(pTHX_ SV *sv)
 void
 Perl_do_join(pTHX_ SV *sv, SV *delim, SV **mark, SV **sp)
 {
-    dVAR;
     SV ** const oldmark = mark;
     I32 items = sp - mark;
     STRLEN len;
@@ -731,7 +723,6 @@ Perl_do_join(pTHX_ SV *sv, SV *delim, SV **mark, SV **sp)
 void
 Perl_do_sprintf(pTHX_ SV *sv, I32 len, SV **sarg)
 {
-    dVAR;
     STRLEN patlen;
     const char * const pat = SvPV_const(*sarg, patlen);
     bool do_taint = FALSE;
@@ -759,7 +750,6 @@ Perl_do_sprintf(pTHX_ SV *sv, I32 len, SV **sarg)
 UV
 Perl_do_vecget(pTHX_ SV *sv, SSize_t offset, int size)
 {
-    dVAR;
     STRLEN srclen, len, uoffset, bitoffs = 0;
     const I32 svpv_flags = ((PL_op->op_flags & OPf_MOD || LVRET)
                                           ? SV_UNDEF_RETURNS_NULL : 0);
@@ -914,7 +904,6 @@ Perl_do_vecget(pTHX_ SV *sv, SSize_t offset, int size)
 void
 Perl_do_vecset(pTHX_ SV *sv)
 {
-    dVAR;
     SSize_t offset, bitoffs = 0;
     int size;
     unsigned char *s;
@@ -1001,7 +990,6 @@ Perl_do_vecset(pTHX_ SV *sv)
 void
 Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
 {
-    dVAR;
 #ifdef LIBERAL
     long *dl;
     long *ll;
@@ -1230,7 +1218,6 @@ finish:
 OP *
 Perl_do_kv(pTHX)
 {
-    dVAR;
     dSP;
     HV * const keys = MUTABLE_HV(POPs);
     HE *entry;

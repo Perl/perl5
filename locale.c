@@ -93,7 +93,6 @@ void
 Perl_set_numeric_radix(pTHX)
 {
 #ifdef USE_LOCALE_NUMERIC
-    dVAR;
 # ifdef HAS_LOCALECONV
     const struct lconv* const lc = localeconv();
 
@@ -164,7 +163,6 @@ Perl_new_numeric(pTHX_ const char *newnum)
      * POSIX::setlocale() */
 
     char *save_newnum;
-    dVAR;
 
     if (! newnum) {
 	Safefree(PL_numeric_name);
@@ -198,8 +196,6 @@ void
 Perl_set_numeric_standard(pTHX)
 {
 #ifdef USE_LOCALE_NUMERIC
-    dVAR;
-
     /* Toggle the LC_NUMERIC locale to C, if not already there.  Probably
      * should use the macros like SET_NUMERIC_STANDARD() in perl.h instead of
      * calling this directly. */
@@ -220,8 +216,6 @@ void
 Perl_set_numeric_local(pTHX)
 {
 #ifdef USE_LOCALE_NUMERIC
-    dVAR;
-
     /* Toggle the LC_NUMERIC locale to the current underlying default, if not
      * already there.  Probably should use the macros like SET_NUMERIC_LOCAL()
      * in perl.h instead of calling this directly. */
@@ -299,8 +293,6 @@ Perl_new_collate(pTHX_ const char *newcoll)
      * POSIX::setlocale, which calls this function.  Therefore this function
      * should be called directly only from this file and from
      * POSIX::setlocale() */
-
-    dVAR;
 
     if (! newcoll) {
 	if (PL_collation_name) {
@@ -493,8 +485,6 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
     int ok = 1;
 
 #if defined(USE_LOCALE)
-    dVAR;
-
 #ifdef USE_LOCALE_CTYPE
     char *curctype   = NULL;
 #endif /* USE_LOCALE_CTYPE */
@@ -945,7 +935,6 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 char *
 Perl_mem_collxfrm(pTHX_ const char *s, STRLEN len, STRLEN *xlen)
 {
-    dVAR;
     char *xbuf;
     STRLEN xAlloc, xin, xout; /* xalloc is a reserved word in VC */
 

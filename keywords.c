@@ -13,8 +13,6 @@
 I32
 Perl_keyword (pTHX_ const char *name, I32 len, bool all_keywords)
 {
-  dVAR;
-
   PERL_ARGS_ASSERT_KEYWORD;
 
   switch (len)
@@ -3439,5 +3437,5 @@ unknown:
 }
 
 /* Generated from:
- * 7c6d47fd2890b2422a40331ec90eac08f9808209b01f2b9c113141410fea91b5 regen/keywords.pl
+ * 963511f90d23994583c88b07c3cf2258473567702972e94b59a635727c4aa944 regen/keywords.pl
  * ex: set ro: */

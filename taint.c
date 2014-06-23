@@ -79,7 +79,6 @@ Perl_taint_proper(pTHX_ const char *f, const char *const s)
 void
 Perl_taint_env(pTHX)
 {
-    dVAR;
     SV** svp;
     MAGIC* mg;
     const char* const *e;

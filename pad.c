@@ -210,7 +210,6 @@ flags can be OR'ed together:
 PADLIST *
 Perl_pad_new(pTHX_ int flags)
 {
-    dVAR;
     PADLIST *padlist;
     PAD *padname, *pad;
     PAD **ary;
@@ -317,7 +316,6 @@ children can still follow the full lexical scope chain.
 void
 Perl_cv_undef(pTHX_ CV *cv)
 {
-    dVAR;
     const PADLIST *padlist = CvPADLIST(cv);
     bool const slabbed = !!CvSLABBED(cv);
 
@@ -532,7 +530,6 @@ is done.  Returns the offset of the allocated pad slot.
 static PADOFFSET
 S_pad_alloc_name(pTHX_ SV *namesv, U32 flags, HV *typestash, HV *ourstash)
 {
-    dVAR;
     const PADOFFSET offset = pad_alloc(OP_PADSV, SVs_PADMY);
 
     PERL_ARGS_ASSERT_PAD_ALLOC_NAME;
@@ -583,7 +580,6 @@ PADOFFSET
 Perl_pad_add_name_pvn(pTHX_ const char *namepv, STRLEN namelen,
 		U32 flags, HV *typestash, HV *ourstash)
 {
-    dVAR;
     PADOFFSET offset;
     SV *namesv;
     bool is_utf8;
@@ -715,7 +711,6 @@ but is used for debugging.
 PADOFFSET
 Perl_pad_alloc(pTHX_ I32 optype, U32 tmptype)
 {
-    dVAR;
     SV *sv;
     I32 retval;
 
@@ -795,7 +790,6 @@ but is used for debugging.
 PADOFFSET
 Perl_pad_add_anon(pTHX_ CV* func, I32 optype)
 {
-    dVAR;
     PADOFFSET ix;
     SV* const name = newSV_type(SVt_PVNV);
 
@@ -847,7 +841,6 @@ C<is_our> indicates that the name to check is an 'our' declaration.
 STATIC void
 S_pad_check_dup(pTHX_ SV *name, U32 flags, const HV *ourstash)
 {
-    dVAR;
     SV		**svp;
     PADOFFSET	top, off;
     const U32	is_our = flags & padadd_OUR;
@@ -932,7 +925,6 @@ or C<NOT_IN_PAD> if no such lexical is in scope.
 PADOFFSET
 Perl_pad_findmy_pvn(pTHX_ const char *namepv, STRLEN namelen, U32 flags)
 {
-    dVAR;
     SV *out_sv;
     int out_flags;
     I32 offset;
@@ -1034,7 +1026,6 @@ L</find_rundefsv> is likely to be more convenient.
 PADOFFSET
 Perl_find_rundefsvoffset(pTHX)
 {
-    dVAR;
     SV *out_sv;
     int out_flags;
     return pad_findlex("$_", 2, 0, find_runcv(NULL), PL_curcop->cop_seq, 1,
@@ -1132,7 +1123,6 @@ STATIC PADOFFSET
 S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv, U32 seq,
 	int warn, SV** out_capture, SV** out_name_sv, int *out_flags)
 {
-    dVAR;
     I32 offset, new_offset;
     SV *new_capture;
     SV **new_capturep;
@@ -1468,7 +1458,6 @@ Update the pad compilation state variables on entry to a new block.
 void
 Perl_pad_block_start(pTHX_ int full)
 {
-    dVAR;
     ASSERT_CURPAD_ACTIVE("pad_block_start");
     SAVEI32(PL_comppad_name_floor);
     PL_comppad_name_floor = AvFILLp(PL_comppad_name);
@@ -1498,7 +1487,6 @@ subsequent statements.
 U32
 Perl_intro_my(pTHX)
 {
-    dVAR;
     SV **svp;
     I32 i;
     U32 seq;
@@ -1548,7 +1536,6 @@ lexicals in this scope and warn of any lexicals that never got introduced.
 OP *
 Perl_pad_leavemy(pTHX)
 {
-    dVAR;
     I32 off;
     OP *o = NULL;
     SV * const * const svp = AvARRAY(PL_comppad_name);
@@ -1606,7 +1593,6 @@ new one.
 void
 Perl_pad_swipe(pTHX_ PADOFFSET po, bool refadjust)
 {
-    dVAR;
     ASSERT_CURPAD_LEGAL("pad_swipe");
     if (!PL_curpad)
 	return;
@@ -1661,7 +1647,6 @@ Mark all the current temporaries for reuse
 static void
 S_pad_reset(pTHX)
 {
-    dVAR;
 #ifdef USE_BROKEN_PAD_RESET
     if (AvARRAY(PL_comppad) != PL_curpad)
 	Perl_croak(aTHX_ "panic: pad_reset curpad, %p!=%p",
@@ -1826,7 +1811,6 @@ Free the SV at offset po in the current pad.
 void
 Perl_pad_free(pTHX_ PADOFFSET po)
 {
-    dVAR;
     SV *sv;
     ASSERT_CURPAD_LEGAL("pad_free");
     if (!PL_curpad)
@@ -1862,7 +1846,6 @@ Dump the contents of a padlist
 void
 Perl_do_dump_pad(pTHX_ I32 level, PerlIO *file, PADLIST *padlist, int full)
 {
-    dVAR;
     const AV *pad_name;
     const AV *pad;
     SV **pname;
@@ -1981,7 +1964,6 @@ static CV *S_cv_clone(pTHX_ CV *proto, CV *cv, CV *outside);
 static void
 S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside, bool newcv)
 {
-    dVAR;
     I32 ix;
     PADLIST* const protopadlist = CvPADLIST(proto);
     PAD *const protopad_name = *PadlistARRAY(protopadlist);
@@ -2136,7 +2118,9 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside, bool newcv)
 static CV *
 S_cv_clone(pTHX_ CV *proto, CV *cv, CV *outside)
 {
+#ifdef USE_ITHREADS
     dVAR;
+#endif
     const bool newcv = !cv;
 
     assert(!CvUNIQUE(proto));
@@ -2228,7 +2212,6 @@ moved to a pre-existing CV struct.
 void
 Perl_pad_fixup_inner_anons(pTHX_ PADLIST *padlist, CV *old_cv, CV *new_cv)
 {
-    dVAR;
     I32 ix;
     AV * const comppad_name = PadlistARRAY(padlist)[0];
     AV * const comppad = PadlistARRAY(padlist)[1];
@@ -2285,8 +2268,6 @@ the new pad an @_ in slot zero.
 void
 Perl_pad_push(pTHX_ PADLIST *padlist, int depth)
 {
-    dVAR;
-
     PERL_ARGS_ASSERT_PAD_PUSH;
 
     if (depth > PadlistMAX(padlist) || !PadlistARRAY(padlist)[depth]) {
@@ -2351,7 +2332,6 @@ class to which it is typed is returned.  If not, C<NULL> is returned.
 HV *
 Perl_pad_compname_type(pTHX_ const PADOFFSET po)
 {
-    dVAR;
     SV* const av = PAD_COMPNAME_SV(po);
     if ( SvPAD_TYPED(av) ) {
         return SvSTASH(av);
@@ -2493,7 +2473,6 @@ Perl_padlist_dup(pTHX_ PADLIST *srcpad, CLONE_PARAMS *param)
 PAD **
 Perl_padlist_store(pTHX_ PADLIST *padlist, I32 key, PAD *val)
 {
-    dVAR;
     PAD **ary;
     SSize_t const oldmax = PadlistMAX(padlist);
 

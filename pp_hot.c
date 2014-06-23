@@ -39,7 +39,6 @@
 
 PP(pp_const)
 {
-    dVAR;
     dSP;
     XPUSHs(cSVOP_sv);
     RETURN;
@@ -47,7 +46,6 @@ PP(pp_const)
 
 PP(pp_nextstate)
 {
-    dVAR;
     PL_curcop = (COP*)PL_op;
     TAINT_NOT;		/* Each statement is presumed innocent */
     PL_stack_sp = PL_stack_base + cxstack[cxstack_ix].blk_oldsp;
@@ -58,7 +56,6 @@ PP(pp_nextstate)
 
 PP(pp_gvsv)
 {
-    dVAR;
     dSP;
     EXTEND(SP,1);
     if (UNLIKELY(PL_op->op_private & OPpLVAL_INTRO))
@@ -70,21 +67,19 @@ PP(pp_gvsv)
 
 PP(pp_null)
 {
-    dVAR;
     return NORMAL;
 }
 
 /* This is sometimes called directly by pp_coreargs and pp_grepstart. */
 PP(pp_pushmark)
 {
-    dVAR;
     PUSHMARK(PL_stack_sp);
     return NORMAL;
 }
 
 PP(pp_stringify)
 {
-    dVAR; dSP; dTARGET;
+    dSP; dTARGET;
     SV * const sv = TOPs;
     SETs(TARG);
     sv_copypv(TARG, sv);
@@ -95,14 +90,13 @@ PP(pp_stringify)
 
 PP(pp_gv)
 {
-    dVAR; dSP;
+    dSP;
     XPUSHs(MUTABLE_SV(cGVOP_gv));
     RETURN;
 }
 
 PP(pp_and)
 {
-    dVAR;
     PERL_ASYNC_CHECK();
     {
 	/* SP is not used to remove a variable that is saved across the
@@ -123,7 +117,7 @@ PP(pp_and)
 
 PP(pp_sassign)
 {
-    dVAR; dSP;
+    dSP;
     /* sassign keeps its args in the optree traditionally backwards.
        So we pop them differently.
     */
@@ -228,7 +222,7 @@ PP(pp_sassign)
 
 PP(pp_cond_expr)
 {
-    dVAR; dSP;
+    dSP;
     PERL_ASYNC_CHECK();
     if (SvTRUEx(POPs))
 	RETURNOP(cLOGOP->op_other);
@@ -238,7 +232,6 @@ PP(pp_cond_expr)
 
 PP(pp_unstack)
 {
-    dVAR;
     PERL_ASYNC_CHECK();
     TAINT_NOT;		/* Each statement is presumed innocent */
     PL_stack_sp = PL_stack_base + cxstack[cxstack_ix].blk_oldsp;
@@ -252,7 +245,7 @@ PP(pp_unstack)
 
 PP(pp_concat)
 {
-  dVAR; dSP; dATARGET; tryAMAGICbin_MG(concat_amg, AMGf_assign);
+  dSP; dATARGET; tryAMAGICbin_MG(concat_amg, AMGf_assign);
   {
     dPOPTOPssrl;
     bool lbyte;
@@ -357,7 +350,7 @@ S_pushav(pTHX_ AV* const av)
 
 PP(pp_padrange)
 {
-    dVAR; dSP;
+    dSP;
     PADOFFSET base = PL_op->op_targ;
     int count = (int)(PL_op->op_private) & OPpPADRANGE_COUNTMASK;
     int i;
@@ -398,7 +391,7 @@ PP(pp_padrange)
 
 PP(pp_padsv)
 {
-    dVAR; dSP;
+    dSP;
     EXTEND(SP, 1);
     {
 	OP * const op = PL_op;
@@ -428,7 +421,6 @@ PP(pp_padsv)
 
 PP(pp_readline)
 {
-    dVAR;
     dSP;
     if (TOPs) {
 	SvGETMAGIC(TOPs);
@@ -452,7 +444,7 @@ PP(pp_readline)
 
 PP(pp_eq)
 {
-    dVAR; dSP;
+    dSP;
     SV *left, *right;
 
     tryAMAGICbin_MG(eq_amg, AMGf_set|AMGf_numeric);
@@ -468,7 +460,7 @@ PP(pp_eq)
 
 PP(pp_preinc)
 {
-    dVAR; dSP;
+    dSP;
     const bool inc =
 	PL_op->op_type == OP_PREINC || PL_op->op_type == OP_I_PREINC;
     if (UNLIKELY(SvTYPE(TOPs) >= SVt_PVAV || (isGV_with_GP(TOPs) && !SvFAKE(TOPs))))
@@ -488,7 +480,7 @@ PP(pp_preinc)
 
 PP(pp_or)
 {
-    dVAR; dSP;
+    dSP;
     PERL_ASYNC_CHECK();
     if (SvTRUE(TOPs))
 	RETURN;
@@ -501,7 +493,7 @@ PP(pp_or)
 
 PP(pp_defined)
 {
-    dVAR; dSP;
+    dSP;
     SV* sv;
     bool defined;
     const int op_type = PL_op->op_type;
@@ -559,7 +551,7 @@ PP(pp_defined)
 
 PP(pp_add)
 {
-    dVAR; dSP; dATARGET; bool useleft; SV *svl, *svr;
+    dSP; dATARGET; bool useleft; SV *svl, *svr;
     tryAMAGICbin_MG(add_amg, AMGf_assign|AMGf_numeric);
     svr = TOPs;
     svl = TOPm1s;
@@ -724,7 +716,7 @@ PP(pp_add)
 
 PP(pp_aelemfast)
 {
-    dVAR; dSP;
+    dSP;
     AV * const av = PL_op->op_type == OP_AELEMFAST_LEX
 	? MUTABLE_AV(PAD_SV(PL_op->op_targ)) : GvAVn(cGVOP_gv);
     const U32 lval = PL_op->op_flags & OPf_MOD;
@@ -743,7 +735,7 @@ PP(pp_aelemfast)
 
 PP(pp_join)
 {
-    dVAR; dSP; dMARK; dTARGET;
+    dSP; dMARK; dTARGET;
     MARK++;
     do_join(TARG, *MARK, MARK, SP);
     SP = MARK;
@@ -753,7 +745,7 @@ PP(pp_join)
 
 PP(pp_pushre)
 {
-    dVAR; dSP;
+    dSP;
 #ifdef DEBUGGING
     /*
      * We ass_u_me that LvTARGOFF() comes first, and that two STRLENs
@@ -774,7 +766,7 @@ PP(pp_pushre)
 
 PP(pp_print)
 {
-    dVAR; dSP; dMARK; dORIGMARK;
+    dSP; dMARK; dORIGMARK;
     PerlIO *fp;
     MAGIC *mg;
     GV * const gv
@@ -868,7 +860,7 @@ PP(pp_print)
 
 PP(pp_rv2av)
 {
-    dVAR; dSP; dTOPss;
+    dSP; dTOPss;
     const I32 gimme = GIMME_V;
     static const char an_array[] = "an ARRAY";
     static const char a_hash[] = "a HASH";
@@ -962,8 +954,6 @@ PP(pp_rv2av)
 STATIC void
 S_do_oddball(pTHX_ SV **oddkey, SV **firstkey)
 {
-    dVAR;
-
     PERL_ARGS_ASSERT_DO_ODDBALL;
 
     if (*oddkey) {
@@ -1295,7 +1285,7 @@ PP(pp_aassign)
 
 PP(pp_qr)
 {
-    dVAR; dSP;
+    dSP;
     PMOP * const pm = cPMOP;
     REGEXP * rx = PM_GETRE(pm);
     SV * const pkg = rx ? CALLREG_PACKAGE(rx) : NULL;
@@ -1335,7 +1325,7 @@ PP(pp_qr)
 
 PP(pp_match)
 {
-    dVAR; dSP; dTARG;
+    dSP; dTARG;
     PMOP *pm = cPMOP;
     PMOP *dynpm = pm;
     const char *s;
@@ -1531,7 +1521,7 @@ nope:
 OP *
 Perl_do_readline(pTHX)
 {
-    dVAR; dSP; dTARGETSTACKED;
+    dSP; dTARGETSTACKED;
     SV *sv;
     STRLEN tmplen = 0;
     STRLEN offset;
@@ -1739,7 +1729,7 @@ Perl_do_readline(pTHX)
 
 PP(pp_helem)
 {
-    dVAR; dSP;
+    dSP;
     HE* he;
     SV **svp;
     SV * const keysv = POPs;
@@ -1819,7 +1809,7 @@ PP(pp_helem)
 
 PP(pp_iter)
 {
-    dVAR; dSP;
+    dSP;
     PERL_CONTEXT *cx;
     SV *oldsv;
     SV **itersvp;
@@ -2023,7 +2013,7 @@ pp_match is just a simpler version of the above.
 
 PP(pp_subst)
 {
-    dVAR; dSP; dTARG;
+    dSP; dTARG;
     PMOP *pm = cPMOP;
     PMOP *rpm = pm;
     char *s;
@@ -2404,7 +2394,7 @@ PP(pp_subst)
 
 PP(pp_grepwhile)
 {
-    dVAR; dSP;
+    dSP;
 
     if (SvTRUEx(POPs))
 	PL_stack_base[PL_markstack_ptr[-1]++] = PL_stack_base[*PL_markstack_ptr];
@@ -2461,7 +2451,7 @@ PP(pp_grepwhile)
 
 PP(pp_leavesub)
 {
-    dVAR; dSP;
+    dSP;
     SV **mark;
     SV **newsp;
     PMOP *newpm;
@@ -2528,7 +2518,7 @@ PP(pp_leavesub)
 
 PP(pp_entersub)
 {
-    dVAR; dSP; dPOPss;
+    dSP; dPOPss;
     GV *gv;
     CV *cv;
     PERL_CONTEXT *cx;
@@ -2830,7 +2820,7 @@ Perl_sub_crush_depth(pTHX_ CV *cv)
 
 PP(pp_aelem)
 {
-    dVAR; dSP;
+    dSP;
     SV** svp;
     SV* const elemsv = POPs;
     IV elem = SvIV(elemsv);
@@ -2943,7 +2933,7 @@ Perl_vivify_ref(pTHX_ SV *sv, U32 to_what)
 
 PP(pp_method)
 {
-    dVAR; dSP;
+    dSP;
     SV* const sv = TOPs;
 
     if (SvROK(sv)) {
@@ -2960,7 +2950,7 @@ PP(pp_method)
 
 PP(pp_method_named)
 {
-    dVAR; dSP;
+    dSP;
     SV* const sv = cSVOP_sv;
     U32 hash = SvSHARED_HASH(sv);
 
@@ -2971,7 +2961,6 @@ PP(pp_method_named)
 STATIC SV *
 S_method_common(pTHX_ SV* meth, U32* hashp)
 {
-    dVAR;
     SV* ob;
     GV* gv;
     HV* stash;
