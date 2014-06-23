@@ -1583,7 +1583,7 @@ if ((reginfo->intuit || regtry(reginfo, &s))) \
 	    }                                                                  \
 	);                                                                     \
 
-#define FBC_UTF8(TEST_UV, TEST2_UTF8, IF_SUCCESS, IF_FAIL)                     \
+#define FBC_UTF8(TEST_UV, TEST_UTF8, IF_SUCCESS, IF_FAIL)                      \
 	if (s == reginfo->strbeg) {                                            \
 	    tmp = '\n';                                                        \
 	}                                                                      \
@@ -1595,7 +1595,7 @@ if ((reginfo->intuit || regtry(reginfo, &s))) \
 	tmp = TEST_UV(tmp);                                                    \
 	LOAD_UTF8_CHARCLASS_ALNUM();                                           \
 	REXEC_FBC_UTF8_SCAN(                                                   \
-	    if (tmp == ! (TEST2_UTF8)) {                                       \
+	    if (tmp == ! (TEST_UTF8((U8 *) s))) {                              \
 		tmp = !tmp;                                                    \
 		IF_SUCCESS;                                                    \
 	    }                                                                  \
@@ -1608,21 +1608,19 @@ if ((reginfo->intuit || regtry(reginfo, &s))) \
  * REXEC_FBC_TRYIT is called when matched in BOUND, and when non-matched in
  * NBOUND.  This is accomplished by passing it in either the if or else clause,
  * with the other one being empty */
-#define FBC_BOUND(TEST_NON_UTF8, TEST_UV, TEST2_UTF8) \
-    FBC_BOUND_COMMON(FBC_UTF8(TEST_UV, TEST2_UTF8, REXEC_FBC_TRYIT, PLACEHOLDER), TEST_NON_UTF8, REXEC_FBC_TRYIT, PLACEHOLDER)
+#define FBC_BOUND(TEST_NON_UTF8, TEST_UV, TEST_UTF8) \
+    FBC_BOUND_COMMON(FBC_UTF8(TEST_UV, TEST_UTF8, REXEC_FBC_TRYIT, PLACEHOLDER), TEST_NON_UTF8, REXEC_FBC_TRYIT, PLACEHOLDER)
 
-#define FBC_BOUND_A(TEST_NON_UTF8, TEST_UV, TEST2_UTF8) \
+#define FBC_BOUND_A(TEST_NON_UTF8, TEST_UV, TEST_UTF8) \
     FBC_BOUND_COMMON(FBC_UTF8_A(TEST_NON_UTF8, REXEC_FBC_TRYIT, PLACEHOLDER), TEST_NON_UTF8, REXEC_FBC_TRYIT, PLACEHOLDER)
 
-#define FBC_NBOUND(TEST_NON_UTF8, TEST_UV, TEST2_UTF8) \
-    FBC_BOUND_COMMON(FBC_UTF8(TEST_UV, TEST2_UTF8, PLACEHOLDER, REXEC_FBC_TRYIT), TEST_NON_UTF8, PLACEHOLDER, REXEC_FBC_TRYIT)
+#define FBC_NBOUND(TEST_NON_UTF8, TEST_UV, TEST_UTF8) \
+    FBC_BOUND_COMMON(FBC_UTF8(TEST_UV, TEST_UTF8, PLACEHOLDER, REXEC_FBC_TRYIT), TEST_NON_UTF8, PLACEHOLDER, REXEC_FBC_TRYIT)
 
-#define FBC_NBOUND_A(TEST_NON_UTF8, TEST_UV, TEST2_UTF8) \
+#define FBC_NBOUND_A(TEST_NON_UTF8, TEST_UV, TEST_UTF8) \
     FBC_BOUND_COMMON(FBC_UTF8_A(TEST_NON_UTF8, PLACEHOLDER, REXEC_FBC_TRYIT), TEST_NON_UTF8, PLACEHOLDER, REXEC_FBC_TRYIT)
 
-/* Common to the BOUND and NBOUND cases.  Unfortunately the UTF8 tests need to
- * be passed in completely with the variable name being tested, which isn't
- * such a clean interface, but this is easier to read than it was before.  We
+/* Common to the BOUND and NBOUND cases.  We
  * are looking for the boundary (or non-boundary between a word and non-word
  * character.  The utf8 and non-utf8 cases have the same logic, but the details
  * must be different.  Find the "wordness" of the character just prior to this
@@ -1842,45 +1840,30 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         }
         break;
     }
+
     case BOUNDL:
-        FBC_BOUND(isWORDCHAR_LC,
-                  isWORDCHAR_LC_uvchr,
-                  isWORDCHAR_LC_utf8((U8*)s));
+        FBC_BOUND(isWORDCHAR_LC, isWORDCHAR_LC_uvchr, isWORDCHAR_LC_utf8);
         break;
     case NBOUNDL:
-        FBC_NBOUND(isWORDCHAR_LC,
-                   isWORDCHAR_LC_uvchr,
-                   isWORDCHAR_LC_utf8((U8*)s));
+        FBC_NBOUND(isWORDCHAR_LC, isWORDCHAR_LC_uvchr, isWORDCHAR_LC_utf8);
         break;
     case BOUND:
-        FBC_BOUND(isWORDCHAR,
-                  isWORDCHAR_uni,
-                  cBOOL(swash_fetch(PL_utf8_swash_ptrs[_CC_WORDCHAR], (U8*)s, utf8_target)));
+        FBC_BOUND(isWORDCHAR, isWORDCHAR_uni, isWORDCHAR_utf8);
         break;
     case BOUNDA:
-        FBC_BOUND_A(isWORDCHAR_A,
-                    isWORDCHAR_A,
-                    isWORDCHAR_A((U8*)s));
+        FBC_BOUND_A(isWORDCHAR_A, isWORDCHAR_A, isWORDCHAR_A);
         break;
     case NBOUND:
-        FBC_NBOUND(isWORDCHAR,
-                   isWORDCHAR_uni,
-                   cBOOL(swash_fetch(PL_utf8_swash_ptrs[_CC_WORDCHAR], (U8*)s, utf8_target)));
+        FBC_NBOUND(isWORDCHAR, isWORDCHAR_uni, isWORDCHAR_utf8);
         break;
     case NBOUNDA:
-        FBC_NBOUND_A(isWORDCHAR_A,
-                     isWORDCHAR_A,
-                     isWORDCHAR_A((U8*)s));
+        FBC_NBOUND_A(isWORDCHAR_A, isWORDCHAR_A, isWORDCHAR_A);
         break;
     case BOUNDU:
-        FBC_BOUND(isWORDCHAR_L1,
-                  isWORDCHAR_uni,
-                  cBOOL(swash_fetch(PL_utf8_swash_ptrs[_CC_WORDCHAR], (U8*)s, utf8_target)));
+        FBC_BOUND(isWORDCHAR_L1, isWORDCHAR_uni, isWORDCHAR_utf8);
         break;
     case NBOUNDU:
-        FBC_NBOUND(isWORDCHAR_L1,
-                   isWORDCHAR_uni,
-                   cBOOL(swash_fetch(PL_utf8_swash_ptrs[_CC_WORDCHAR], (U8*)s, utf8_target)));
+        FBC_NBOUND(isWORDCHAR_L1, isWORDCHAR_uni, isWORDCHAR_utf8);
         break;
     case LNBREAK:
         REXEC_FBC_CSCAN(is_LNBREAK_utf8_safe(s, strend),
