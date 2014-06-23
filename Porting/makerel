@@ -161,8 +161,18 @@ my @writables = qw(
     win32/config_H.vc
     uconfig.h
 );
-system("chmod u+w @writables") == 0
-    or die "system: $!";
+
+my $out = `chmod u+w @writables 2>&1`;
+if ($? != 0) {
+    warn $out;
+    if ($out =~ /no such file/i) {
+        warn "Check that the files above still exist in the Perl core.\n";
+        warn "If not, remove them from \@writables in Porting/makerel\n";
+    }
+    exit 1;
+} else {
+    warn $out if $out;
+}
 
 chdir ".." or die $!;
 
