@@ -1570,7 +1570,7 @@ if ((reginfo->intuit || regtry(reginfo, &s))) \
                 startpos, doutf8)
 
 
-#define UTF8_NOLOAD(TEST_NON_UTF8, IF_SUCCESS, IF_FAIL)                        \
+#define FBC_UTF8_A(TEST_NON_UTF8, IF_SUCCESS, IF_FAIL)                         \
 	tmp = (s != reginfo->strbeg) ? UCHARAT(s - 1) : '\n';                  \
 	tmp = TEST_NON_UTF8(tmp);                                              \
 	REXEC_FBC_UTF8_SCAN(                                                   \
@@ -1583,7 +1583,7 @@ if ((reginfo->intuit || regtry(reginfo, &s))) \
 	    }                                                                  \
 	);                                                                     \
 
-#define UTF8_LOAD(TEST1_UTF8, TEST2_UTF8, IF_SUCCESS, IF_FAIL)                 \
+#define FBC_UTF8(TEST1_UTF8, TEST2_UTF8, IF_SUCCESS, IF_FAIL)                  \
 	if (s == reginfo->strbeg) {                                            \
 	    tmp = '\n';                                                        \
 	}                                                                      \
@@ -1609,16 +1609,16 @@ if ((reginfo->intuit || regtry(reginfo, &s))) \
  * NBOUND.  This is accomplished by passing it in either the if or else clause,
  * with the other one being empty */
 #define FBC_BOUND(TEST_NON_UTF8, TEST1_UTF8, TEST2_UTF8) \
-    FBC_BOUND_COMMON(UTF8_LOAD(TEST1_UTF8, TEST2_UTF8, REXEC_FBC_TRYIT, PLACEHOLDER), TEST_NON_UTF8, REXEC_FBC_TRYIT, PLACEHOLDER)
+    FBC_BOUND_COMMON(FBC_UTF8(TEST1_UTF8, TEST2_UTF8, REXEC_FBC_TRYIT, PLACEHOLDER), TEST_NON_UTF8, REXEC_FBC_TRYIT, PLACEHOLDER)
 
-#define FBC_BOUND_NOLOAD(TEST_NON_UTF8, TEST1_UTF8, TEST2_UTF8) \
-    FBC_BOUND_COMMON(UTF8_NOLOAD(TEST_NON_UTF8, REXEC_FBC_TRYIT, PLACEHOLDER), TEST_NON_UTF8, REXEC_FBC_TRYIT, PLACEHOLDER)
+#define FBC_BOUND_A(TEST_NON_UTF8, TEST1_UTF8, TEST2_UTF8) \
+    FBC_BOUND_COMMON(FBC_UTF8_A(TEST_NON_UTF8, REXEC_FBC_TRYIT, PLACEHOLDER), TEST_NON_UTF8, REXEC_FBC_TRYIT, PLACEHOLDER)
 
 #define FBC_NBOUND(TEST_NON_UTF8, TEST1_UTF8, TEST2_UTF8) \
-    FBC_BOUND_COMMON(UTF8_LOAD(TEST1_UTF8, TEST2_UTF8, PLACEHOLDER, REXEC_FBC_TRYIT), TEST_NON_UTF8, PLACEHOLDER, REXEC_FBC_TRYIT)
+    FBC_BOUND_COMMON(FBC_UTF8(TEST1_UTF8, TEST2_UTF8, PLACEHOLDER, REXEC_FBC_TRYIT), TEST_NON_UTF8, PLACEHOLDER, REXEC_FBC_TRYIT)
 
-#define FBC_NBOUND_NOLOAD(TEST_NON_UTF8, TEST1_UTF8, TEST2_UTF8) \
-    FBC_BOUND_COMMON(UTF8_NOLOAD(TEST_NON_UTF8, PLACEHOLDER, REXEC_FBC_TRYIT), TEST_NON_UTF8, PLACEHOLDER, REXEC_FBC_TRYIT)
+#define FBC_NBOUND_A(TEST_NON_UTF8, TEST1_UTF8, TEST2_UTF8) \
+    FBC_BOUND_COMMON(FBC_UTF8_A(TEST_NON_UTF8, PLACEHOLDER, REXEC_FBC_TRYIT), TEST_NON_UTF8, PLACEHOLDER, REXEC_FBC_TRYIT)
 
 
 /* Common to the BOUND and NBOUND cases.  Unfortunately the UTF8 tests need to
@@ -1859,9 +1859,9 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                   cBOOL(swash_fetch(PL_utf8_swash_ptrs[_CC_WORDCHAR], (U8*)s, utf8_target)));
         break;
     case BOUNDA:
-        FBC_BOUND_NOLOAD(isWORDCHAR_A,
-                         isWORDCHAR_A(tmp),
-                         isWORDCHAR_A((U8*)s));
+        FBC_BOUND_A(isWORDCHAR_A,
+                    isWORDCHAR_A(tmp),
+                    isWORDCHAR_A((U8*)s));
         break;
     case NBOUND:
         FBC_NBOUND(isWORDCHAR,
@@ -1869,9 +1869,9 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                    cBOOL(swash_fetch(PL_utf8_swash_ptrs[_CC_WORDCHAR], (U8*)s, utf8_target)));
         break;
     case NBOUNDA:
-        FBC_NBOUND_NOLOAD(isWORDCHAR_A,
-                          isWORDCHAR_A(tmp),
-                          isWORDCHAR_A((U8*)s));
+        FBC_NBOUND_A(isWORDCHAR_A,
+                     isWORDCHAR_A(tmp),
+                     isWORDCHAR_A((U8*)s));
         break;
     case BOUNDU:
         FBC_BOUND(isWORDCHAR_L1,
