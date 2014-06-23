@@ -159,6 +159,58 @@ decrease, the allocated memory of an SV and that it does not automatically
 add space for the trailing C<NUL> byte (perl's own string functions typically do
 C<SvGROW(sv, len + 1)>).
 
+If you want to write to an existing SV's buffer and set its value to a
+string, use SvPV_force() or one of its variants to force the SV to be
+a PV.  This will remove any of various types of non-stringness from
+the SV while preserving the content of the SV in the PV.  This can be
+used, for example, to append data from an API function to a buffer
+without extra copying:
+
+    (void)SvPVbyte_force(sv, len);
+    s = SvGROW(sv, len + needlen + 1);
+    /* something that modifies up to needlen bytes at s+len, but
+       modifies newlen bytes
+         eg. newlen = read(fd, s + len, needlen);
+       ignoring errors for these examples
+     */
+    s[len + newlen] = '\0';
+    SvCUR_set(sv, len + newlen);
+    SvUTF8_off(sv);
+    SvSETMAGIC(sv);
+
+If you already have the data in memory or if you want to keep your
+code simple, you can use one of the sv_cat*() variants, such as
+sv_catpvn().  If you want to insert anywhere in the string you can use
+sv_insert() or sv_insert_flags().
+
+If you don't need the existing content of the SV, you can avoid some
+copying with:
+
+    sv_setpvn(sv, "", 0);
+    s = SvGROW(sv, needlen + 1);
+    /* something that modifies up to needlen bytes at s, but modifies
+       newlen bytes
+         eg. newlen = read(fd, s. needlen);
+     */
+    s[newlen] = '\0';
+    SvCUR_set(sv, newlen);
+    SvPOK_only(sv); /* also clears SVf_UTF8 */
+    SvSETMAGIC(sv);
+
+Again, if you already have the data in memory or want to avoid the
+complexity of the above, you can use sv_setpvn().
+
+If you have a buffer allocated with Newx() and want to set that as the
+SV's value, you can use sv_usepvn_flags().  That has some requirements
+if you want to avoid perl re-allocating the buffer to fit the trailing
+NUL:
+
+   Newx(buf, somesize+1, char);
+   /* ... fill in buf ... */
+   buf[somesize] = '\0';
+   sv_usepvn_flags(sv, buf, somesize, SV_SMAGIC | SV_HAS_TRAILING_NUL);
+   /* buf now belongs to perl, don't release it */
+
 If you have an SV and want to know what kind of data Perl thinks is stored
 in it, you can use the following macros to check the type of SV you have.
 
