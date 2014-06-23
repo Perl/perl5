@@ -965,6 +965,9 @@ Bootstrap the CPAN client on the clean install:
 
     $ bin/cpan
 
+    # Or, perhaps:
+    $ bin/cpan5.xx.x
+
 =head4 Install the Inline module with CPAN and test it
 
 Try installing a popular CPAN module that's reasonably complex and that
