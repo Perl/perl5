@@ -609,7 +609,7 @@ Add a perldelta entry for the new Module::CoreList version.
 
 =head4 Update C<%Module::CoreList::released> and C<CAVEATS>
 
-In addition, if this is a final release (rather than a release candidate):
+For any release except an RC:
 
 =over 4
 
