@@ -776,10 +776,9 @@ Add an entry to F<pod/perlhist.pod> with the release date, e.g.:
 
     David    5.10.1       2009-Aug-06
 
-Make sure that the correct pumpking is listed in the left-hand column, and
-if this is the first release under the stewardship of a new pumpking, make
-sure that his or her name is listed in the section entitled
-C<THE KEEPERS OF THE PUMPKIN>.
+List yourself in the left-hand column, and if this is the first release
+that you've ever done, make sure that your name is listed in the section
+entitled C<THE KEEPERS OF THE PUMPKIN>.
 
 I<If you're making a BLEAD-FINAL release>, also update the "SELECTED
 RELEASE SIZES" section with the output of
