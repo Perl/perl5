@@ -848,7 +848,6 @@ Create a tarball. Use the C<-s> option to specify a suitable suffix for
 the tarball and directory name:
 
  $ cd root/of/perl/tree
- $ make distclean
  $ git clean -xdf       # make sure perl and git agree on files
  $ git status           # and there's nothing lying around
 
