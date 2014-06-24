@@ -3379,8 +3379,10 @@ S_scan_const(pTHX_ char *start)
                                 d += 5;
                                 while (str < str_end) {
                                     char hex_string[4];
-                                    my_snprintf(hex_string, sizeof(hex_string),
-                                                "%02X.", (U8) *str);
+                                    PERL_UNUSED_RESULT(
+                                        my_snprintf(hex_string,
+                                                    sizeof(hex_string),
+                                                    "%02X.", (U8) *str));
                                     Copy(hex_string, d, 3, char);
                                     d += 3;
                                     str++;
@@ -7439,7 +7441,7 @@ Perl_yylex(pTHX)
 		if (!PL_in_my_stash) {
 		    char tmpbuf[1024];
 		    PL_bufptr = s;
-		    my_snprintf(tmpbuf, sizeof(tmpbuf), "No such class %.1000s", PL_tokenbuf);
+		    PERL_UNUSED_RESULT(my_snprintf(tmpbuf, sizeof(tmpbuf), "No such class %.1000s", PL_tokenbuf));
 		    yyerror_pv(tmpbuf, UTF ? SVf_UTF8 : 0);
 		}
 	    }

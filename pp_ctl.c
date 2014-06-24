@@ -838,10 +838,10 @@ PP(pp_formline)
 	    /* Formats aren't yet marked for locales, so assume "yes". */
 	    {
                 DECLARE_STORE_LC_NUMERIC_SET_TO_NEEDED();
-		arg &= ~(FORM_NUM_POINT|FORM_NUM_BLANK);
+                arg &= ~(FORM_NUM_POINT|FORM_NUM_BLANK);
                 /* we generate fmt ourselves so it is safe */
                 GCC_DIAG_IGNORE(-Wformat-nonliteral);
-		my_snprintf(t, SvLEN(PL_formtarget) - (t - SvPVX(PL_formtarget)), fmt, (int) fieldsize, (int) arg, value);
+                PERL_UNUSED_RESULT(my_snprintf(t, SvLEN(PL_formtarget) - (t - SvPVX(PL_formtarget)), fmt, (int) fieldsize, (int) arg, value));
                 GCC_DIAG_RESTORE;
                 RESTORE_LC_NUMERIC();
 	    }
