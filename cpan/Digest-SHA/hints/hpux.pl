@@ -8,10 +8,9 @@
 # but the ticket was rejected since MSHELOR thinks Digest::SHA
 # is doing nothing wrong.
 if (defined $self->{OPTIMIZE}) {
+  $self->{OPTIMIZE} =~ s/ \+O[a-z_]+(?:=[\w,]+)?//; # Drop HP-UX +Onolimit etc.
   # This will turn -O0 to -O1, but we will burn that bridge when we cross it.
   $self->{OPTIMIZE} =~ s/[\+\-]O[0-9]*/-O1/;
-  $self->{OPTIMIZE} =~ s/NO_OPT/-O0/;
-  $self->{OPTIMIZE} =~ s/ \+Onolimit//;
 } else {
   $self->{OPTIMIZE} = '-O1';
 }
