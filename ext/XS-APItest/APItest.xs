@@ -3642,7 +3642,7 @@ test_get_vtbl()
 	MGVTBL *want;
     CODE:
 #define test_get_this_vtable(name) \
-	want = CAT2(&PL_vtbl_, name); \
+	want = (MGVTBL*)CAT2(&PL_vtbl_, name); \
 	have = get_vtbl(CAT2(want_vtbl_, name)); \
 	if (have != want) \
 	    croak("fail %p!=%p for get_vtbl(want_vtbl_" STRINGIFY(name) ") at " __FILE__ " line %d", have, want, __LINE__)
