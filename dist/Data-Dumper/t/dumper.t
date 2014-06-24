@@ -1679,7 +1679,6 @@ OLD
 EOW
 
   TEST q(Data::Dumper->new([ \&foo, \\&foo ], [ "*a", "b" ])->Dump), "name of code in *foo";
-  local $TODO = "XS code broken";
   TEST q(Data::Dumper->new([ \&foo, \\&foo ], [ "*a", "b" ])->Dumpxs), "name of code in *foo xs"
     if $XS;
 }
