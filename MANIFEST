@@ -5113,6 +5113,7 @@ t/op/loopctl.t			See if next/last/redo work
 t/op/lop.t			See if logical operators work
 t/op/magic-27839.t		Test for #27839, skipped for minitest
 t/op/magic.t			See if magic variables work
+t/op/magic_threads.t		Check signal delivery under threads
 t/op/method.t			See if method calls work
 t/op/mkdir.t			See if mkdir works
 t/op/mydef.t			See if "my $_" works

@@ -345,6 +345,10 @@ PERLVAR(I, statusvalue_posix, I32)
 PERLVARI(I, sig_pending, int, 0)	/* Number if highest signal pending */
 PERLVAR(I, psig_pend, int *)		/* per-signal "count" of pending */
 
+#ifdef USE_ITHREADS
+PERLVAR(I, sighand_set, int *)   /* which signal handlers have been set in the current thread */
+#endif
+
 /* shortcuts to various I/O objects */
 PERLVAR(I, stdingv,	GV *)		/*  *STDIN      */
 PERLVAR(I, stderrgv,	GV *)		/*  *STDERR     */

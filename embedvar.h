@@ -270,6 +270,7 @@
 #define PL_secondgv		(vTHX->Isecondgv)
 #define PL_sharehook		(vTHX->Isharehook)
 #define PL_sig_pending		(vTHX->Isig_pending)
+#define PL_sighand_set		(vTHX->Isighand_set)
 #define PL_sighandlerp		(vTHX->Isighandlerp)
 #define PL_signalhook		(vTHX->Isignalhook)
 #define PL_signals		(vTHX->Isignals)

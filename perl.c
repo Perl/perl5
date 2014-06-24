@@ -1278,6 +1278,13 @@ perl_destruct(pTHXx)
 	PL_psig_pend = (int*)NULL;
 	Safefree(psig_save);
     }
+#ifdef USE_ITHREADS
+    {
+        int *sighand_save = PL_sighand_set;
+        PL_sighand_set = (int*)NULL;
+        Safefree(sighand_save);
+    }
+#endif
     nuke_stacks();
     TAINTING_set(FALSE);
     TAINT_WARN_set(FALSE);

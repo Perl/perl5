@@ -13944,6 +13944,10 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 	PL_psig_name	= (SV**)NULL;
     }
 
+#ifdef USE_ITHREADS
+    PL_sighand_set = NULL;
+#endif
+
     if (flags & CLONEf_COPY_STACKS) {
 	Newx(PL_tmps_stack, PL_tmps_max, SV*);
 	sv_dup_inc_multiple(proto_perl->Itmps_stack, PL_tmps_stack,

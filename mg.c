@@ -1353,6 +1353,15 @@ Perl_csighandler(int sig)
     PERL_UNUSED_ARG(sip);
     PERL_UNUSED_ARG(uap);
 #endif
+#ifdef USE_ITHREADS
+    /* handle a signal received in a non-perl thread, eg. a thread
+       created by a framework */
+    if (!my_perl) {
+        my_perl = PL_curinterp;
+        PERL_SET_THX(my_perl);
+    }
+#endif
+
 #ifdef FAKE_PERSISTENT_SIGNAL_HANDLERS
     (void) rsignal(sig, PL_csighandlerp);
     if (PL_sig_ignoring[sig]) return;
@@ -1387,13 +1396,27 @@ Perl_csighandler(int sig)
 	if (!PL_psig_pend) return;
 	/* Set a flag to say this signal is pending, that is awaiting delivery after
 	 * the current Perl opcode completes */
-	PL_psig_pend[sig]++;
+#ifdef USE_ITHREADS
+        if (PL_sighand_set && PL_sighand_set[sig]) {
+            PL_psig_pend[sig]++;
+            ++PL_sig_pending;
+        }
+        else {
+            /* no handler specific to thread, deliver to the main thread */
+            dTHXa(PL_curinterp);
+            PL_psig_pend[sig]++;
+            ++PL_sig_pending;
+        }
+#else
+        ++PL_sig_pending;
+        PL_psig_pend[sig]++;
+#endif
 
 #ifndef SIG_PENDING_DIE_COUNT
 #  define SIG_PENDING_DIE_COUNT 120
 #endif
 	/* Add one to say _a_ signal is pending */
-	if (++PL_sig_pending >= SIG_PENDING_DIE_COUNT)
+	if (PL_sig_pending >= SIG_PENDING_DIE_COUNT)
 	    Perl_croak(aTHX_ "Maximal count of pending signals (%lu) exceeded",
 		       (unsigned long)SIG_PENDING_DIE_COUNT);
     }
@@ -1573,9 +1596,17 @@ Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
 	    PL_psig_ptr[i] = NULL;
 	}
     }
+#ifdef USE_ITHREADS
+    if (!PL_sighand_set) {
+        Newxz(PL_sighand_set, SIG_SIZE, int);
+    }
+#endif
     if (sv && (isGV_with_GP(sv) || SvROK(sv))) {
 	if (i) {
 	    (void)rsignal(i, PL_csighandlerp);
+#ifdef USE_ITHREADS
+            PL_sighand_set[i] = 1;
+#endif
 	}
 	else
 	    *svp = SvREFCNT_inc_simple_NN(sv);
@@ -1593,6 +1624,9 @@ Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
 #else
 		(void)rsignal(i, (Sighandler_t) SIG_IGN);
 #endif
+#ifdef USE_ITHREADS
+                PL_sighand_set[i] = 0;
+#endif
 	    }
 	}
 	else if (!sv || memEQs(s, len,"DEFAULT") || !len) {
@@ -1602,6 +1636,9 @@ Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
 		(void)rsignal(i, PL_csighandlerp);
 #else
 		(void)rsignal(i, (Sighandler_t) SIG_DFL);
+#endif
+#ifdef USE_ITHREADS
+                PL_sighand_set[i] = 0;
 #endif
 	    }
 	}
@@ -1614,8 +1651,12 @@ Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
 	    if (!strchr(s,':') && !strchr(s,'\''))
 		Perl_sv_insert_flags(aTHX_ sv, 0, 0, STR_WITH_LEN("main::"),
 				     SV_GMAGIC);
-	    if (i)
+	    if (i) {
 		(void)rsignal(i, PL_csighandlerp);
+#ifdef USE_ITHREADS
+                PL_sighand_set[i] = 1;
+#endif
+            }
 	    else
 		*svp = SvREFCNT_inc_simple_NN(sv);
 	}
@@ -3092,6 +3133,7 @@ Perl_sighandler(int sig)
     GV *gv = NULL;
     SV *sv = NULL;
     SV * const tSv = PL_Sv;
+    SV * sig_ptr = PL_psig_ptr[sig];
     CV *cv = NULL;
     OP *myop = PL_op;
     U32 flags = 0;
@@ -3099,8 +3141,7 @@ Perl_sighandler(int sig)
     I32 old_ss_ix = PL_savestack_ix;
     SV *errsv_save = NULL;
 
-
-    if (!PL_psig_ptr[sig]) {
+    if (!sig_ptr) {
 		PerlIO_printf(Perl_error_log, "Signal SIG%s received, but no signal handler set.\n",
 				 PL_sig_name[sig]);
 		exit(sig);
@@ -3115,6 +3156,46 @@ Perl_sighandler(int sig)
 	    SAVEDESTRUCTOR_X(S_unwind_handler_stack, NULL);
 	}
     }
+
+#ifdef USE_ITHREADS
+    if (!isGV_with_GP(sig_ptr) && !SvROK(sig_ptr) && SvOK(sig_ptr)) {
+        /* handle a thread receiving a signal it isn't expecting,
+           there's a few ways this can occur, see [perl #81074] and
+           [perl #120951] for some examples and discussion.
+        */
+        STRLEN siglen;
+        const char *signame = SvPV_const(sig_ptr, siglen);
+        if (memEQs(signame, siglen, "IGNORE")) {
+            if (aTHX != PL_curinterp) {
+                dTHXa(PL_curinterp);
+                PL_psig_pend[sig]++;
+                ++PL_sig_pending;
+            }
+            /* else drop it on the floor, since it's ignored */
+
+            goto cleanup;
+        }
+        else if (memEQs(signame, siglen, "DEFAULT")) {
+            if (aTHX == PL_curinterp) {
+                /* what to do here?  The user is probably doing
+                   something fairly strange or advanced, beat them
+                   with a stick */
+                PerlIO_printf(Perl_error_log, "Signal SIG%s received with DEFAULT signal handler set.\n",
+                              PL_sig_name[sig]);
+                exit(sig);
+            }
+            else {
+                /* hopefully the main thread knows what to do with it */
+                dTHXa(PL_curinterp);
+                PL_psig_pend[sig]++;
+                ++PL_sig_pending;
+
+                goto cleanup;
+            }
+        }
+    }
+#endif
+
     /* sv_2cv is too complicated, try a simpler variant first: */
     if (!SvROK(PL_psig_ptr[sig]) || !(cv = MUTABLE_CV(SvRV(PL_psig_ptr[sig])))
 	|| SvTYPE(cv) != SVt_PVCV) {

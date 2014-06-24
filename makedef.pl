@@ -366,6 +366,7 @@ unless ($define{'USE_ITHREADS'}) {
 		    PL_hints_mutex
 		    PL_my_ctx_mutex
 		    PL_perlio_mutex
+		    PL_sighand_set
 		    PL_stashpad
 		    PL_stashpadix
 		    PL_stashpadmax
