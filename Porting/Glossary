@@ -1746,6 +1746,9 @@ d_pthread_yield (d_pthread_y.U):
 	symbol if the pthread_yield routine is available to yield
 	the execution of the current thread.
 
+d_ptrdiff_t (unknown.U):
+	This symbol will be defined if the C compiler supports ptrdiff_t.
+
 d_pwage (i_pwd.U):
 	This variable conditionally defines PWAGE, which indicates
 	that struct passwd contains pw_age.
