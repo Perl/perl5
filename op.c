@@ -2181,6 +2181,46 @@ S_finalize_op(pTHX_ OP* o)
 
     if (o->op_flags & OPf_KIDS) {
 	OP *kid;
+
+#ifdef DEBUGGING
+        /* check that op_last points to the last sibling */
+        U32 type = o->op_type;
+        U32 family;
+
+        if (type == OP_NULL) {
+            type = o->op_targ;
+            /* ck_glob creates a null UNOP with ex-type GLOB
+             * (which is a list op. So pretend it wasn't a listop */
+            if (type == OP_GLOB)
+                type = OP_NULL;
+        }
+        family = PL_opargs[type] & OA_CLASS_MASK;
+
+        if (
+            /* XXX list form of 'x' is has a null op_last. This is wrong,
+             * but requires too much hacking (e.g. in Deparse) to fix for
+             * now */
+            !(type == OP_REPEAT && (o->op_private & OPpREPEAT_DOLIST))
+            && (
+                   family == OA_BINOP
+                || family == OA_LISTOP
+                || family == OA_PMOP
+                || family == OA_LOOP
+            )
+        )
+        {
+            OP *kid;
+            for (kid = cUNOPo->op_first; kid; kid = OP_SIBLING(kid)) {
+                if (!OP_HAS_SIBLING(kid)) {
+                    if (kid != cLISTOPo->op_last)
+                    {
+                        assert(kid == cLISTOPo->op_last);
+                    }
+                }
+            }
+        }
+#endif
+
 	for (kid = cUNOPo->op_first; kid; kid = OP_SIBLING(kid))
 	    finalize_op(kid);
     }
@@ -3818,8 +3858,15 @@ Perl_convert(pTHX_ I32 type, I32 flags, OP *o)
 {
     dVAR;
     if (type < 0) type = -type, flags |= OPf_SPECIAL;
-    if (!o || o->op_type != OP_LIST)
+    if (!o || o->op_type != OP_LIST) {
+        OP* last = o;
 	o = newLISTOP(OP_LIST, 0, o, NULL);
+        if (last) {
+            while (OP_HAS_SIBLING(last))
+                last = OP_SIBLING(last);
+            cLISTOPo->op_last = last;
+        }
+    }
     else
 	o->op_flags &= ~OPf_WANT;
 
@@ -3982,8 +4029,15 @@ Perl_newNULLLIST(pTHX)
 static OP *
 S_force_list(pTHX_ OP *o)
 {
-    if (!o || o->op_type != OP_LIST)
+    if (!o || o->op_type != OP_LIST) {
+        OP* last = o;
 	o = newLISTOP(OP_LIST, 0, o, NULL);
+        if (last) {
+            while (OP_HAS_SIBLING(last))
+                last = OP_SIBLING(last);
+            cLISTOPo->op_last = last;
+        }
+    }
     op_null(o);
     return o;
 }
