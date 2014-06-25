@@ -1541,12 +1541,14 @@ EXTERN_C char *crypt(const char *, const char *);
  * that should be true only if the snprintf()/vsnprintf() are true
  * to the standard. */
 
+#define PERL_SNPRINTF_CHECK(len, max, api) STMT_START { if ((max) > 0 && (Size_t)len >= (max)) Perl_croak_nocontext("panic: %s buffer overflow", STRINGIFY(api)); } STMT_END
+
 #if defined(HAS_SNPRINTF) && defined(HAS_C99_VARIADIC_MACROS) && !(defined(DEBUGGING) && !defined(PERL_USE_GCC_BRACE_GROUPS)) && !defined(PERL_GCC_PEDANTIC)
 #  ifdef PERL_USE_GCC_BRACE_GROUPS
-#      define my_snprintf(buffer, len, ...) ({ int __len__ = snprintf(buffer, len, __VA_ARGS__); if ((len) > 0 && (Size_t)__len__ >= (len)) Perl_croak_nocontext("panic: snprintf buffer overflow"); __len__; })
+#      define my_snprintf(buffer, max, ...) ({ int len = snprintf(buffer, max, __VA_ARGS__); PERL_SNPRINTF_CHECK(len, max, snprintf); len; })
 #      define PERL_MY_SNPRINTF_GUARDED
 #  else
-#    define my_snprintf(buffer, len, ...) snprintf(buffer, len, __VA_ARGS__)
+#    define my_snprintf(buffer, max, ...) snprintf(buffer, max, __VA_ARGS__)
 #  endif
 #else
 #  define my_snprintf  Perl_my_snprintf
@@ -1555,14 +1557,45 @@ EXTERN_C char *crypt(const char *, const char *);
 
 #if defined(HAS_VSNPRINTF) && defined(HAS_C99_VARIADIC_MACROS) && !(defined(DEBUGGING) && !defined(PERL_USE_GCC_BRACE_GROUPS)) && !defined(PERL_GCC_PEDANTIC)
 #  ifdef PERL_USE_GCC_BRACE_GROUPS
-#      define my_vsnprintf(buffer, len, ...) ({ int __len__ = vsnprintf(buffer, len, __VA_ARGS__); if ((len) > 0 && (Size_t)__len__ >= (Size_t)(len)) Perl_croak_nocontext("panic: vsnprintf buffer overflow"); __len__; })
+#      define my_vsnprintf(buffer, max, ...) ({ int len = vsnprintf(buffer, max, __VA_ARGS__); PERL_SNPRINTF_CHECK(len, max, vsnprintf); len; })
 #      define PERL_MY_VSNPRINTF_GUARDED
 #  else
-#    define my_vsnprintf(buffer, len, ...) vsnprintf(buffer, len, __VA_ARGS__)
+#    define my_vsnprintf(buffer, max, ...) vsnprintf(buffer, max, __VA_ARGS__)
 #  endif
 #else
 #  define my_vsnprintf Perl_my_vsnprintf
 #  define PERL_MY_VSNPRINTF_GUARDED
+#endif
+
+/* You will definitely need to use the PERL_MY_SNPRINTF_POST_GUARD()
+ * or PERL_MY_VSNPRINTF_POST_GUARD() if you otherwise decide to ignore
+ * the result of my_snprintf() or my_vsnprintf().  (No, you should not
+ * completely ignore it: otherwise you cannot know whether your output
+ * was too long.)
+ *
+ * int len = my_sprintf(buf, max, ...);
+ * PERL_MY_SNPRINTF_POST_GUARD(len, max);
+ *
+ * The trick is that in certain platforms [a] the my_sprintf() already
+ * contains the sanity check, while in certain platforms [b] it needs
+ * to be done as a separate step.  The POST_GUARD is that step-- in [a]
+ * platforms the POST_GUARD actually does nothing since the check has
+ * already been done.  Watch out for the max being the same in both calls.
+ *
+ * If you actually use the snprintf/vsnprintf return value already,
+ * you assumedly are checking its validity somehow.  But you can
+ * insert the POST_GUARD() also in that case. */
+
+#ifndef PERL_MY_SNPRINTF_GUARDED
+#  define PERL_MY_SNPRINTF_POST_GUARD(len, max) PERL_SNPRINTF_CHECK(len, max, snprintf)
+#else
+#  define PERL_MY_SNPRINTF_POST_GUARD(len, max) PERL_UNUSED_VAR(len)
+#endif
+
+#ifndef  PERL_MY_VSNPRINTF_GUARDED
+#  define PERL_MY_VSNPRINTF_POST_GUARD(len, max) PERL_SNPRINTF_CHECK(len, max, vsnprintf)
+#else
+#  define PERL_MY_VSNPRINTF_POST_GUARD(len, max) PERL_UNUSED_VAR(len)
 #endif
 
 #ifdef HAS_STRLCAT

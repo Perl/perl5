@@ -833,11 +833,14 @@ PP(pp_formline)
 	    }
 	    /* Formats aren't yet marked for locales, so assume "yes". */
 	    {
+                Size_t max = SvLEN(PL_formtarget) - (t - SvPVX(PL_formtarget));
+                int len;
                 DECLARE_STORE_LC_NUMERIC_SET_TO_NEEDED();
                 arg &= ~(FORM_NUM_POINT|FORM_NUM_BLANK);
                 /* we generate fmt ourselves so it is safe */
                 GCC_DIAG_IGNORE(-Wformat-nonliteral);
-                PERL_UNUSED_RESULT(my_snprintf(t, SvLEN(PL_formtarget) - (t - SvPVX(PL_formtarget)), fmt, (int) fieldsize, (int) arg, value));
+                len = my_snprintf(t, max, fmt, (int) fieldsize, (int) arg, value);
+                PERL_MY_SNPRINTF_POST_GUARD(len, max);
                 GCC_DIAG_RESTORE;
                 RESTORE_LC_NUMERIC();
 	    }

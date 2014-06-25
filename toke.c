@@ -3357,10 +3357,11 @@ S_scan_const(pTHX_ char *start)
                                 d += 5;
                                 while (str < str_end) {
                                     char hex_string[4];
-                                    PERL_UNUSED_RESULT(
+                                    int len =
                                         my_snprintf(hex_string,
                                                     sizeof(hex_string),
-                                                    "%02X.", (U8) *str));
+                                                    "%02X.", (U8) *str);
+                                    PERL_MY_SNPRINTF_POST_GUARD(len, sizeof(hex_string));
                                     Copy(hex_string, d, 3, char);
                                     d += 3;
                                     str++;
@@ -7407,8 +7408,10 @@ Perl_yylex(pTHX)
 		PL_in_my_stash = find_in_my_stash(PL_tokenbuf, len);
 		if (!PL_in_my_stash) {
 		    char tmpbuf[1024];
+                    int len;
 		    PL_bufptr = s;
-		    PERL_UNUSED_RESULT(my_snprintf(tmpbuf, sizeof(tmpbuf), "No such class %.1000s", PL_tokenbuf));
+		    len = my_snprintf(tmpbuf, sizeof(tmpbuf), "No such class %.1000s", PL_tokenbuf);
+                    PERL_MY_SNPRINTF_POST_GUARD(len, sizeof(tmpbuf));
 		    yyerror_pv(tmpbuf, UTF ? SVf_UTF8 : 0);
 		}
 	    }
