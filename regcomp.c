@@ -6864,6 +6864,7 @@ reStudy:
 	    goto again;
 	}
 	else if ((!sawopen || !RExC_sawback) &&
+            !sawlookahead &&
 	    (OP(first) == STAR &&
 	    PL_regkind[OP(NEXTOPER(first))] == REG_ANY) &&
             !(r->intflags & PREGf_ANCH) && !pRExC_state->num_code_blocks)
