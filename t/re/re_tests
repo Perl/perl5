@@ -1057,6 +1057,7 @@ X(?:ABCF[cC]x*|ABCD|ABCF):(?:DIT|DID|DIM)	XABCFCxxxxxxxxxx:DIM	y	$&	XABCFCxxxxxx
 (?=foo)	foo	y	pos	0
 (?=foo)	XfooY	y	pos	1
 .*(?=foo)	XfooY	y	pos	1
+(?=.*P)P	aP	y	pos	2
 (?<=foo)	foo	y	pos	3
 (?<=foo)	XfooY	y	pos	4
 .*(?<=foo)	foo	y	pos	3
