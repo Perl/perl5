@@ -1502,6 +1502,10 @@ STMT_START {                                                                    
     }                                                                               \
 } STMT_END
 
+#define DUMP_EXEC_POS(li,s,doutf8)                          \
+    dump_exec_pos(li,s,(reginfo->strend),(reginfo->strbeg), \
+                startpos, doutf8)
+
 #define REXEC_FBC_EXACTISH_SCAN(COND)                     \
 STMT_START {                                              \
     while (s <= e) {                                      \
@@ -1553,12 +1557,6 @@ REXEC_FBC_SCAN( /* Loops while (s < strend) */                 \
 	tmp = 1;                                               \
 )
 
-/* This is the macro to use when we want to see if something that looks like it
- * could match, actually does, and if so exits the loop */
-#define REXEC_FBC_TRYIT                            \
-    if ((reginfo->intuit || regtry(reginfo, &s)))  \
-        goto got_it
-
 #define REXEC_FBC_CSCAN(CONDUTF8,COND)                         \
     if (utf8_target) {                                         \
 	REXEC_FBC_UTF8_CLASS_SCAN(CONDUTF8);                   \
@@ -1566,10 +1564,6 @@ REXEC_FBC_SCAN( /* Loops while (s < strend) */                 \
     else {                                                     \
 	REXEC_FBC_CLASS_SCAN(COND);                            \
     }
-
-#define DUMP_EXEC_POS(li,s,doutf8)                          \
-    dump_exec_pos(li,s,(reginfo->strend),(reginfo->strbeg), \
-                startpos, doutf8)
 
 /* The three macros below are slightly different versions of the same logic.
  *
@@ -1644,34 +1638,6 @@ REXEC_FBC_SCAN( /* Loops while (s < strend) */                 \
         }                                                                      \
     );
 
-/* The only difference between the BOUND and NBOUND cases is that
- * REXEC_FBC_TRYIT is called when matched in BOUND, and when non-matched in
- * NBOUND.  This is accomplished by passing it as either the if or else clause,
- * with the other one being empty (PLACEHOLDER is defined as empty).
- *
- * The TEST_FOO parameters are for operating on different forms of input, but
- * all should be ones that return identically for the same underlying code
- * points */
-#define FBC_BOUND(TEST_NON_UTF8, TEST_UV, TEST_UTF8)                           \
-    FBC_BOUND_COMMON(                                                          \
-          FBC_UTF8(TEST_UV, TEST_UTF8, REXEC_FBC_TRYIT, PLACEHOLDER),          \
-          TEST_NON_UTF8, REXEC_FBC_TRYIT, PLACEHOLDER)
-
-#define FBC_BOUND_A(TEST_NON_UTF8, TEST_UV, TEST_UTF8)                         \
-    FBC_BOUND_COMMON(                                                          \
-            FBC_UTF8_A(TEST_NON_UTF8, REXEC_FBC_TRYIT, PLACEHOLDER),           \
-            TEST_NON_UTF8, REXEC_FBC_TRYIT, PLACEHOLDER)
-
-#define FBC_NBOUND(TEST_NON_UTF8, TEST_UV, TEST_UTF8)                          \
-    FBC_BOUND_COMMON(                                                          \
-          FBC_UTF8(TEST_UV, TEST_UTF8, PLACEHOLDER, REXEC_FBC_TRYIT),          \
-          TEST_NON_UTF8, PLACEHOLDER, REXEC_FBC_TRYIT)
-
-#define FBC_NBOUND_A(TEST_NON_UTF8, TEST_UV, TEST_UTF8)                        \
-    FBC_BOUND_COMMON(                                                          \
-            FBC_UTF8_A(TEST_NON_UTF8, PLACEHOLDER, REXEC_FBC_TRYIT),           \
-            TEST_NON_UTF8, PLACEHOLDER, REXEC_FBC_TRYIT)
-
 /* Like the above two macros.  UTF8_CODE is the complete code for handling
  * UTF-8.  Common to the BOUND and NBOUND cases, set-up by the FBC_BOUND, etc
  * macros below */
@@ -1704,6 +1670,40 @@ REXEC_FBC_SCAN( /* Loops while (s < strend) */                 \
     else {                                                                     \
         IF_FAIL;                                                               \
     }
+
+/* This is the macro to use when we want to see if something that looks like it
+ * could match, actually does, and if so exits the loop */
+#define REXEC_FBC_TRYIT                            \
+    if ((reginfo->intuit || regtry(reginfo, &s)))  \
+        goto got_it
+
+/* The only difference between the BOUND and NBOUND cases is that
+ * REXEC_FBC_TRYIT is called when matched in BOUND, and when non-matched in
+ * NBOUND.  This is accomplished by passing it as either the if or else clause,
+ * with the other one being empty (PLACEHOLDER is defined as empty).
+ *
+ * The TEST_FOO parameters are for operating on different forms of input, but
+ * all should be ones that return identically for the same underlying code
+ * points */
+#define FBC_BOUND(TEST_NON_UTF8, TEST_UV, TEST_UTF8)                           \
+    FBC_BOUND_COMMON(                                                          \
+          FBC_UTF8(TEST_UV, TEST_UTF8, REXEC_FBC_TRYIT, PLACEHOLDER),          \
+          TEST_NON_UTF8, REXEC_FBC_TRYIT, PLACEHOLDER)
+
+#define FBC_BOUND_A(TEST_NON_UTF8, TEST_UV, TEST_UTF8)                         \
+    FBC_BOUND_COMMON(                                                          \
+            FBC_UTF8_A(TEST_NON_UTF8, REXEC_FBC_TRYIT, PLACEHOLDER),           \
+            TEST_NON_UTF8, REXEC_FBC_TRYIT, PLACEHOLDER)
+
+#define FBC_NBOUND(TEST_NON_UTF8, TEST_UV, TEST_UTF8)                          \
+    FBC_BOUND_COMMON(                                                          \
+          FBC_UTF8(TEST_UV, TEST_UTF8, PLACEHOLDER, REXEC_FBC_TRYIT),          \
+          TEST_NON_UTF8, PLACEHOLDER, REXEC_FBC_TRYIT)
+
+#define FBC_NBOUND_A(TEST_NON_UTF8, TEST_UV, TEST_UTF8)                        \
+    FBC_BOUND_COMMON(                                                          \
+            FBC_UTF8_A(TEST_NON_UTF8, PLACEHOLDER, REXEC_FBC_TRYIT),           \
+            TEST_NON_UTF8, PLACEHOLDER, REXEC_FBC_TRYIT)
 
 
 /* We know what class REx starts with.  Try to find this position... */
