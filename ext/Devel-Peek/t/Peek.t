@@ -1527,7 +1527,7 @@ dumpindent is 4 at - line 1.
 {
 1   TYPE = leave  ===> NULL
     TARG = 1
-    FLAGS = (VOID,KIDS,PARENS,SLABBED)
+    FLAGS = (VOID,KIDS,PARENS,SLABBED,LASTSIB)
     PRIVATE = (REFCOUNTED)
     REFCNT = 1
     {
@@ -1543,12 +1543,12 @@ dumpindent is 4 at - line 1.
     {
 5       TYPE = entersub  ===> 1
         TARG = TARGS_REPLACE
-        FLAGS = (VOID,KIDS,STACKED,SLABBED)
+        FLAGS = (VOID,KIDS,STACKED,SLABBED,LASTSIB)
         PRIVATE = (HASTARG)
         {
 6           TYPE = null  ===> (5)
               (was list)
-            FLAGS = (UNKNOWN,KIDS,SLABBED)
+            FLAGS = (UNKNOWN,KIDS,SLABBED,LASTSIB)
             {
 4               TYPE = pushmark  ===> 7
                 FLAGS = (SCALAR,SLABBED)
@@ -1556,10 +1556,10 @@ dumpindent is 4 at - line 1.
             {
 8               TYPE = null  ===> (6)
                   (was rv2cv)
-                FLAGS = (SCALAR,KIDS,SLABBED)
+                FLAGS = (SCALAR,KIDS,SLABBED,LASTSIB)
                 {
 7                   TYPE = gv  ===> 5
-                    FLAGS = (SCALAR,SLABBED)
+                    FLAGS = (SCALAR,SLABBED,LASTSIB)
                     GV_OR_PADIX
                 }
             }

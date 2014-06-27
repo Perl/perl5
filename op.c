@@ -194,7 +194,10 @@ Perl_Slab_Alloc(pTHX_ size_t sz)
        don't use a slab, but allocate the OP directly from the heap.  */
     if (!PL_compcv || CvROOT(PL_compcv)
      || (CvSTART(PL_compcv) && !CvSLABBED(PL_compcv)))
-	return PerlMemShared_calloc(1, sz);
+    {
+	o = (OP*)PerlMemShared_calloc(1, sz);
+        goto gotit;
+    }
 
     /* While the subroutine is under construction, the slabs are accessed via
        CvSTART(), to avoid needing to expand PVCV by one pointer for something
@@ -229,7 +232,7 @@ Perl_Slab_Alloc(pTHX_ size_t sz)
 	    *too = o->op_next;
 	    Zero(o, opsz, I32 *);
 	    o->op_slabbed = 1;
-	    return (void *)o;
+	    goto gotit;
 	}
     }
 
@@ -275,6 +278,12 @@ Perl_Slab_Alloc(pTHX_ size_t sz)
 	slot = &slab2->opslab_slots;
     INIT_OPSLOT;
     DEBUG_S_warn((aTHX_ "allocating op at %p, slab %p", (void*)o, (void*)slab));
+
+  gotit:
+    /* lastsib == 1, op_sibling == 0 implies a solitary unattached op */
+    o->op_lastsib = 1;
+    assert(!o->op_sibling);
+
     return (void *)o;
 }
 
@@ -1057,8 +1066,8 @@ A general function for editing the structure of an existing chain of
 op_sibling nodes. By analogy with the perl-level splice() function, allows
 you to delete zero or more sequential nodes, replacing them with zero or
 more different nodes.  Performs the necessary op_first/op_last
-housekeeping on the parent node and op_silbing manipulation on the
-children. The op_silbing field of the last deleted node will be set to
+housekeeping on the parent node and op_sibling manipulation on the
+children. The op_sibling field of the last deleted node will be set to
 NULL.
 
 Note that op_next is not manipulated, and nodes are not freed; that is the
@@ -1125,6 +1134,7 @@ Perl_op_sibling_splice(pTHX_ OP *parent, OP *start, int del_count, OP* insert)
             last_del = OP_SIBLING(last_del);
         rest = OP_SIBLING(last_del);
         OP_SIBLING_set(last_del, NULL);
+        last_del->op_lastsib = 1;
     }
     else
         rest = first;
@@ -1134,32 +1144,67 @@ Perl_op_sibling_splice(pTHX_ OP *parent, OP *start, int del_count, OP* insert)
         while (OP_HAS_SIBLING(last_ins))
             last_ins = OP_SIBLING(last_ins);
         OP_SIBLING_set(last_ins, rest);
+        last_ins->op_lastsib = rest ? 0 : 1;
     }
     else
         insert = rest;
 
-    if (start)
+    if (start) {
         OP_SIBLING_set(start, insert);
+        start->op_lastsib = insert ? 0 : 1;
+    }
     else
         cLISTOPx(parent)->op_first = insert;
 
     if (!rest) {
-        /* update op_last */
+        /* update op_last etc */
         U32 type = parent->op_type;
+        OP *lastop;
 
         if (type == OP_NULL)
             type = parent->op_targ;
         type = PL_opargs[type] & OA_CLASS_MASK;
 
+        lastop = last_ins ? last_ins : start ? start : NULL;
         if (   type == OA_BINOP
             || type == OA_LISTOP
             || type == OA_PMOP
             || type == OA_LOOP
         )
-            cLISTOPx(parent)->op_last =
-                (last_ins ? last_ins : start ? start : NULL);
+            cLISTOPx(parent)->op_last = lastop;
+
+        if (lastop) {
+            lastop->op_lastsib = 1;
+#ifdef PERL_OP_PARENT
+            lastop->op_sibling = parent;
+#endif
+        }
     }
     return last_del ? first : NULL;
+}
+
+/*
+=for apidoc op_parent
+
+returns the parent OP of o, if it has a parent. Returns NULL otherwise.
+(Currently perl must be built with C<-DPERL_OP_PARENT> for this feature to
+work.
+
+=cut
+*/
+
+OP *
+Perl_op_parent(pTHX_ OP *o)
+{
+    PERL_ARGS_ASSERT_OP_PARENT;
+#ifdef PERL_OP_PARENT
+    while (OP_HAS_SIBLING(o))
+        o = OP_SIBLING(o);
+    return o->op_sibling;
+#else
+    PERL_UNUSED_ARG(o);
+    return NULL;
+#endif
 }
 
 
@@ -1204,11 +1249,20 @@ LOGOP *
 S_alloc_LOGOP(pTHX_ I32 type, OP *first, OP* other)
 {
     LOGOP *logop;
+    OP *kid = first;
     NewOp(1101, logop, 1, LOGOP);
     logop->op_type = type;
     logop->op_first = first;
     logop->op_other = other;
     logop->op_flags = OPf_KIDS;
+    while (kid && OP_HAS_SIBLING(kid))
+        kid = OP_SIBLING(kid);
+    if (kid) {
+        kid->op_lastsib = 1;
+#ifdef PERL_OP_PARENT
+        kid->op_sibling = (OP*)logop;
+#endif
+    }
     return logop;
 }
 
@@ -1266,9 +1320,10 @@ Perl_op_linklist(pTHX_ OP *o)
 	o->op_next = LINKLIST(first);
 	kid = first;
 	for (;;) {
-	    if (OP_HAS_SIBLING(kid)) {
-		kid->op_next = LINKLIST(OP_SIBLING(kid));
-		kid = OP_SIBLING(kid);
+            OP *sibl = OP_SIBLING(kid);
+            if (sibl) {
+                kid->op_next = LINKLIST(sibl);
+                kid = sibl;
 	    } else {
 		kid->op_next = o;
 		break;
@@ -2211,12 +2266,20 @@ S_finalize_op(pTHX_ OP* o)
         {
             OP *kid;
             for (kid = cUNOPo->op_first; kid; kid = OP_SIBLING(kid)) {
+#  ifdef PERL_OP_PARENT
                 if (!OP_HAS_SIBLING(kid)) {
-                    if (kid != cLISTOPo->op_last)
-                    {
-                        assert(kid == cLISTOPo->op_last);
-                    }
+                    assert(kid == cLISTOPo->op_last);
+                    assert(kid->op_sibling == o);
                 }
+#  else
+                if (OP_HAS_SIBLING(kid)) {
+                    assert(!kid->op_lastsib);
+                }
+                else {
+                    assert(kid->op_lastsib);
+                    assert(kid == cLISTOPo->op_last);
+                }
+#  endif
             }
         }
 #endif
@@ -3853,20 +3916,17 @@ S_gen_constant_list(pTHX_ OP *o)
     return list(o);
 }
 
+/* convert o (and any siblings) into a list if not already, then
+ * convert the parent OP_LIST to type 'type', and CHECKOP() and fold it
+ */
+
 OP *
 Perl_convert(pTHX_ I32 type, I32 flags, OP *o)
 {
     dVAR;
     if (type < 0) type = -type, flags |= OPf_SPECIAL;
-    if (!o || o->op_type != OP_LIST) {
-        OP* last = o;
-	o = newLISTOP(OP_LIST, 0, o, NULL);
-        if (last) {
-            while (OP_HAS_SIBLING(last))
-                last = OP_SIBLING(last);
-            cLISTOPo->op_last = last;
-        }
-    }
+    if (!o || o->op_type != OP_LIST)
+        o = force_list(o, 0);
     else
 	o->op_flags &= ~OPf_WANT;
 
@@ -3958,8 +4018,13 @@ Perl_op_append_list(pTHX_ I32 type, OP *first, OP *last)
     if (last->op_type != (unsigned)type)
 	return op_append_elem(type, first, last);
 
+    ((LISTOP*)first)->op_last->op_lastsib = 0;
     OP_SIBLING_set(((LISTOP*)first)->op_last, ((LISTOP*)last)->op_first);
     ((LISTOP*)first)->op_last = ((LISTOP*)last)->op_last;
+    ((LISTOP*)first)->op_last->op_lastsib = 1;
+#ifdef PERL_OP_PARENT
+    ((LISTOP*)first)->op_last->op_sibling = first;
+#endif
     first->op_flags |= (last->op_flags & OPf_KIDS);
 
 
@@ -4026,19 +4091,36 @@ Perl_newNULLLIST(pTHX)
     return newOP(OP_STUB, 0);
 }
 
+/* promote o and any siblings to be a list if its not already; i.e.
+ *
+ *  o - A - B
+ *
+ * becomes
+ *
+ *  list
+ *    |
+ *  pushmark - o - A - B
+ *
+ * If nullit it true, the list op is nulled.
+ */
+
 static OP *
-S_force_list(pTHX_ OP *o)
+S_force_list(pTHX_ OP *o, bool nullit)
 {
     if (!o || o->op_type != OP_LIST) {
-        OP* last = o;
-	o = newLISTOP(OP_LIST, 0, o, NULL);
-        if (last) {
-            while (OP_HAS_SIBLING(last))
-                last = OP_SIBLING(last);
-            cLISTOPo->op_last = last;
+        OP *rest = NULL;
+        if (o) {
+            /* manually detach any siblings then add them back later */
+            rest = OP_SIBLING(o);
+            OP_SIBLING_set(o, NULL);
+            o->op_lastsib = 1;
         }
+	o = newLISTOP(OP_LIST, 0, o, NULL);
+        if (rest)
+            op_sibling_splice(o, cLISTOPo->op_last, 0, rest);
     }
-    op_null(o);
+    if (nullit)
+        op_null(o);
     return o;
 }
 
@@ -4080,11 +4162,20 @@ Perl_newLISTOP(pTHX_ I32 type, I32 flags, OP *first, OP *last)
     listop->op_last = last;
     if (type == OP_LIST) {
 	OP* const pushop = newOP(OP_PUSHMARK, 0);
+        pushop->op_lastsib = 0;
 	OP_SIBLING_set(pushop, first);
 	listop->op_first = pushop;
 	listop->op_flags |= OPf_KIDS;
 	if (!last)
 	    listop->op_last = pushop;
+    }
+    if (first)
+        first->op_lastsib = 0;
+    if (listop->op_last) {
+        listop->op_last->op_lastsib = 1;
+#ifdef PERL_OP_PARENT
+        listop->op_last->op_sibling = (OP*)listop;
+#endif
     }
 
     return CHECKOP(type, listop);
@@ -4124,7 +4215,6 @@ Perl_newOP(pTHX_ I32 type, I32 flags)
 
     o->op_next = o;
     o->op_private = (U8)(0 | (flags >> 8));
-
     if (PL_opargs[type] & OA_RETSCALAR)
 	scalar(o);
     if (PL_opargs[type] & OA_TARGET)
@@ -4168,7 +4258,7 @@ Perl_newUNOP(pTHX_ I32 type, I32 flags, OP *first)
     if (!first)
 	first = newOP(OP_STUB, 0);
     if (PL_opargs[type] & OA_MARK)
-	first = force_list(first);
+	first = force_list(first, 1);
 
     NewOp(1101, unop, 1, UNOP);
     unop->op_type = (OPCODE)type;
@@ -4176,6 +4266,12 @@ Perl_newUNOP(pTHX_ I32 type, I32 flags, OP *first)
     unop->op_first = first;
     unop->op_flags = (U8)(flags | OPf_KIDS);
     unop->op_private = (U8)(1 | (flags >> 8));
+
+#ifdef PERL_OP_PARENT
+    if (!OP_HAS_SIBLING(first)) /* true unless weird syntax error */
+        first->op_sibling = (OP*)unop;
+#endif
+
     unop = (UNOP*) CHECKOP(type, unop);
     if (unop->op_next)
 	return (OP*)unop;
@@ -4222,13 +4318,23 @@ Perl_newBINOP(pTHX_ I32 type, I32 flags, OP *first, OP *last)
     else {
 	binop->op_private = (U8)(2 | (flags >> 8));
 	OP_SIBLING_set(first, last);
+        first->op_lastsib = 0;
     }
+
+#ifdef PERL_OP_PARENT
+    if (!OP_HAS_SIBLING(last)) /* true unless weird syntax error */
+        last->op_sibling = (OP*)binop;
+#endif
 
     binop = (BINOP*)CHECKOP(type, binop);
     if (binop->op_next || binop->op_type != (OPCODE)type)
 	return (OP*)binop;
 
     binop->op_last = OP_SIBLING(binop->op_first);
+#ifdef PERL_OP_PARENT
+    if (binop->op_last)
+        binop->op_last->op_sibling = (OP*)binop;
+#endif
 
     return fold_constants(op_integerize(op_std_init((OP *)binop)));
 }
@@ -4928,7 +5034,7 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg, I32 floor)
 	    cv_targ = expr->op_targ;
 	    expr = newUNOP(OP_REFGEN, 0, expr);
 
-	    expr = list(force_list(newUNOP(OP_ENTERSUB, 0, scalar(expr))));
+	    expr = list(force_list(newUNOP(OP_ENTERSUB, 0, scalar(expr)), 1));
 	}
 
         rcop = S_alloc_LOGOP(aTHX_ OP_REGCOMP, scalar(expr), o);
@@ -5461,8 +5567,8 @@ OP *
 Perl_newSLICEOP(pTHX_ I32 flags, OP *subscript, OP *listval)
 {
     return newBINOP(OP_LSLICE, flags,
-	    list(force_list(subscript)),
-	    list(force_list(listval)) );
+	    list(force_list(subscript, 1)),
+	    list(force_list(listval,   1)) );
 }
 
 STATIC I32
@@ -5628,8 +5734,8 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 
 	PL_modcount = 0;
 	left = op_lvalue(left, OP_AASSIGN);
-	curop = list(force_list(left));
-	o = newBINOP(OP_AASSIGN, flags, list(force_list(right)), curop);
+	curop = list(force_list(left, 1));
+	o = newBINOP(OP_AASSIGN, flags, list(force_list(right, 1)), curop);
 	o->op_private = (U8)(0 | (flags >> 8));
 
 	if (OP_TYPE_IS_OR_WAS(left, OP_LIST))
@@ -6207,7 +6313,7 @@ Perl_newCONDOP(pTHX_ I32 flags, OP *first, OP *trueop, OP *falseop)
     start = LINKLIST(first);
     first->op_next = (OP*)logop;
 
-    /* make first, trueop, falseop silbings */
+    /* make first, trueop, falseop siblings */
     op_sibling_splice((OP*)logop, first,  0, trueop);
     op_sibling_splice((OP*)logop, trueop, 0, falseop);
 
@@ -6590,7 +6696,7 @@ Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
     }
 
     if (expr->op_type == OP_RV2AV || expr->op_type == OP_PADAV) {
-	expr = op_lvalue(force_list(scalar(ref(expr, OP_ITER))), OP_GREPSTART);
+	expr = op_lvalue(force_list(scalar(ref(expr, OP_ITER)), 1), OP_GREPSTART);
 	iterflags |= OPf_STACKED;
     }
     else if (expr->op_type == OP_NULL &&
@@ -6623,7 +6729,7 @@ Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
 	iterflags |= OPf_STACKED;
     }
     else {
-        expr = op_lvalue(force_list(expr), OP_GREPSTART);
+        expr = op_lvalue(force_list(expr, 1), OP_GREPSTART);
     }
 
     loop = (LOOP*)list(convert(OP_ENTERITER, iterflags,
@@ -6639,6 +6745,10 @@ Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
 	LOOP *tmp;
 	NewOp(1234,tmp,1,LOOP);
 	Copy(loop,tmp,1,LISTOP);
+#ifdef PERL_OP_PARENT
+        assert(loop->op_last->op_sibling == (OP*)loop);
+        loop->op_last->op_sibling = (OP*)tmp; /*point back to new parent */
+#endif
 	S_op_destroy(aTHX_ (OP*)loop);
 	loop = tmp;
     }
@@ -6811,9 +6921,13 @@ S_looks_like_bool(pTHX_ const OP *o)
 	    return looks_like_bool(cLOGOPo->op_first);
 
 	case OP_AND:
+        {
+            OP* sibl = OP_SIBLING(cLOGOPo->op_first);
+            ASSUME(sibl);
 	    return (
 	    	looks_like_bool(cLOGOPo->op_first)
-	     && looks_like_bool(OP_SIBLING(cLOGOPo->op_first)));
+	     && looks_like_bool(sibl));
+        }
 
 	case OP_NULL:
 	case OP_SCALAR:
@@ -8379,7 +8493,7 @@ Perl_ck_backtick(pTHX_ OP *o)
     if (o->op_flags & OPf_KIDS && (sibl = OP_SIBLING(cUNOPo->op_first))
      && (gv = gv_override("readpipe",8)))
     {
-        /* detach rest of silbings from o and its first child */
+        /* detach rest of siblings from o and its first child */
         op_sibling_splice(o, cUNOPo->op_first, -1, NULL);
 	newop = S_new_entersubop(aTHX_ gv, sibl);
     }
@@ -9278,7 +9392,7 @@ Perl_ck_listiob(pTHX_ OP *o)
 
     kid = cLISTOPo->op_first;
     if (!kid) {
-	o = force_list(o);
+	o = force_list(o, 1);
 	kid = cLISTOPo->op_first;
     }
     if (kid->op_type == OP_PUSHMARK)
@@ -9404,7 +9518,11 @@ Perl_ck_sassign(pTHX_ OP *o)
 	       assignment binop->op_last = OP_SIBLING(binop->op_first); at the
 	       end of Perl_newBINOP(). So need to do it here. */
 	    cBINOPo->op_last = OP_SIBLING(cBINOPo->op_first);
-
+            cBINOPo->op_first->op_lastsib = 0;
+            cBINOPo->op_last ->op_lastsib = 1;
+#ifdef PERL_OP_PARENT
+            cBINOPo->op_last->op_sibling = o;
+#endif
 	    return nullop;
 	}
     }
@@ -9497,9 +9615,11 @@ Perl_ck_repeat(pTHX_ OP *o)
     PERL_ARGS_ASSERT_CK_REPEAT;
 
     if (cBINOPo->op_first->op_flags & OPf_PARENS) {
+        OP* kids;
 	o->op_private |= OPpREPEAT_DOLIST;
-        /* promote the siblings to a list if they're not already */
-        op_sibling_splice(o, NULL, -1, force_list(cBINOPo->op_first));
+        kids = op_sibling_splice(o, NULL, -1, NULL); /* detach all kids */
+        kids = force_list(kids, 1); /* promote them to a list */
+        op_sibling_splice(o, NULL, 0, kids); /* and add back */
     }
     else
 	scalar(o);
@@ -10367,7 +10487,7 @@ Perl_ck_entersub_args_core(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 	op_free(cvop);
 	if (aop == cvop) aop = NULL;
 
-        /* detach remaining silbings from the first silbing, then
+        /* detach remaining siblings from the first sibling, then
          * dispose of original optree */
 
         if (aop)
@@ -11013,7 +11133,7 @@ Perl_rpeep(pTHX_ OP *o)
 		ns3  = pad2->op_next;
 
                 /* we assume here that the op_next chain is the same as
-                 * the op_silbing chain */
+                 * the op_sibling chain */
                 assert(OP_SIBLING(o)    == pad1);
                 assert(OP_SIBLING(pad1) == ns2);
                 assert(OP_SIBLING(ns2)  == pad2);
@@ -11038,6 +11158,7 @@ Perl_rpeep(pTHX_ OP *o)
 
 		OP_SIBLING_set(o, newop);
 		OP_SIBLING_set(newop, ns3);
+                newop->op_lastsib = 0;
 
 		newop->op_flags = (newop->op_flags & ~OPf_WANT) | OPf_WANT_VOID;
 

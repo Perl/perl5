@@ -3035,14 +3035,17 @@ PP(pp_goto) /* also pp_dump */
 		break;
 	    }
 	    if (gotoprobe) {
+                OP *sibl1, *sibl2;
+
 		retop = dofindlabel(gotoprobe, label, label_len, label_flags,
 				    enterops, enterops + GOTO_DEPTH);
 		if (retop)
 		    break;
-		if (OP_HAS_SIBLING(gotoprobe) &&
-			OP_SIBLING(gotoprobe)->op_type == OP_UNSTACK &&
-			OP_HAS_SIBLING(OP_SIBLING(gotoprobe))) {
-		    retop = dofindlabel(OP_SIBLING(OP_SIBLING(gotoprobe)),
+		if ( (sibl1 = OP_SIBLING(gotoprobe)) &&
+		     sibl1->op_type == OP_UNSTACK &&
+		     (sibl2 = OP_SIBLING(sibl1)))
+                {
+		    retop = dofindlabel(sibl2,
 					label, label_len, label_flags, enterops,
 					enterops + GOTO_DEPTH);
 		    if (retop)

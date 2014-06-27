@@ -3121,6 +3121,11 @@ PERL_CALLCONV void	Perl_op_null(pTHX_ OP* o)
 #define PERL_ARGS_ASSERT_OP_NULL	\
 	assert(o)
 
+PERL_CALLCONV OP*	Perl_op_parent(pTHX_ OP *o)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_OP_PARENT	\
+	assert(o)
+
 PERL_CALLCONV OP*	Perl_op_prepend_elem(pTHX_ I32 optype, OP* first, OP* last);
 PERL_CALLCONV void	Perl_op_refcnt_lock(pTHX);
 PERL_CALLCONV void	Perl_op_refcnt_unlock(pTHX);
@@ -6128,7 +6133,7 @@ STATIC OP*	S_fold_constants(pTHX_ OP *o)
 #define PERL_ARGS_ASSERT_FOLD_CONSTANTS	\
 	assert(o)
 
-STATIC OP*	S_force_list(pTHX_ OP* arg);
+STATIC OP*	S_force_list(pTHX_ OP* arg, bool nullit);
 STATIC void	S_forget_pmop(pTHX_ PMOP *const o)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_FORGET_PMOP	\

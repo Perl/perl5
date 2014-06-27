@@ -398,10 +398,9 @@ S_ck_dump(pTHX_ OP *entersubop, GV *namegv, SV *cv)
     NewOp(1234, newop, 1, BINOP);
     newop->op_type   = OP_CUSTOM;
     newop->op_ppaddr = S_pp_dump;
-    newop->op_first  = first;
-    newop->op_last   = second;
     newop->op_private= second ? 2 : 1;
     newop->op_flags  = OPf_KIDS|OPf_WANT_SCALAR;
+    op_sibling_splice((OP*)newop, NULL, 0, first);
 
     return (OP *)newop;
 }

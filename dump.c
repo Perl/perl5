@@ -901,6 +901,7 @@ S_op_private_to_names(pTHX_ SV *tmpsv, U32 optype, U32 op_private) {
         if (o->op_savefree) sv_catpvs(tmpsv, ",SAVEFREE");              \
         if (o->op_static)   sv_catpvs(tmpsv, ",STATIC");                \
         if (o->op_folded)   sv_catpvs(tmpsv, ",FOLDED");                \
+        if (o->op_lastsib)  sv_catpvs(tmpsv, ",LASTSIB");               \
         Perl_dump_indent(aTHX_ level, file, "FLAGS = (%s)\n",           \
                          SvCUR(tmpsv) ? SvPVX_const(tmpsv) + 1 : "");   \
     }

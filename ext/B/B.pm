@@ -1089,6 +1089,11 @@ data structure.  See top of C<op.h> for more info.
 
 =item sibling
 
+=item parent
+
+Returns the OP's parent. If it has no parent, or if your perl wasn't built
+with C<-DPERL_OP_PARENT>, returns NULL.
+
 =item name
 
 This returns the op name as a string (e.g. "add", "rv2av").

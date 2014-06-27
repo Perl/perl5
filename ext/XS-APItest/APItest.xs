@@ -479,8 +479,7 @@ THX_mkUNOP(pTHX_ U32 type, OP *first)
     UNOP *unop;
     NewOp(1103, unop, 1, UNOP);
     unop->op_type   = (OPCODE)type;
-    unop->op_first  = first;
-    unop->op_flags  = OPf_KIDS;
+    op_sibling_splice((OP*)unop, NULL, 0, first);
     return (OP *)unop;
 }
 
@@ -491,11 +490,8 @@ THX_mkBINOP(pTHX_ U32 type, OP *first, OP *last)
     BINOP *binop;
     NewOp(1103, binop, 1, BINOP);
     binop->op_type      = (OPCODE)type;
-    binop->op_first     = first;
-    binop->op_flags     = OPf_KIDS;
-    binop->op_last      = last;
-    if (last)
-        OP_SIBLING_set(first, last);
+    op_sibling_splice((OP*)binop, NULL, 0, last);
+    op_sibling_splice((OP*)binop, NULL, 0, first);
     return (OP *)binop;
 }
 
@@ -506,11 +502,9 @@ THX_mkLISTOP(pTHX_ U32 type, OP *first, OP *sib, OP *last)
     LISTOP *listop;
     NewOp(1103, listop, 1, LISTOP);
     listop->op_type     = (OPCODE)type;
-    listop->op_flags    = OPf_KIDS;
-    listop->op_first    = first;
-    OP_SIBLING_set(first, sib);
-    OP_SIBLING_set(sib, last);
-    listop->op_last     = last;
+    op_sibling_splice((OP*)listop, NULL, 0, last);
+    op_sibling_splice((OP*)listop, NULL, 0, sib);
+    op_sibling_splice((OP*)listop, NULL, 0, first);
     return (OP *)listop;
 }
 

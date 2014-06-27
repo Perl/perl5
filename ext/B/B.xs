@@ -731,6 +731,8 @@ struct OP_methods {
   { STR_WITH_LEN("static"),  op_offset_special, 0,                     },/*49*/
 #  if PERL_VERSION >= 19
   { STR_WITH_LEN("folded"),  op_offset_special, 0,                     },/*50*/
+  { STR_WITH_LEN("lastsib"), op_offset_special, 0,                     },/*51*/
+  { STR_WITH_LEN("parent"),  op_offset_special, 0,                     },/*52*/
 #  endif
 #endif
 };
@@ -1008,6 +1010,8 @@ next(o)
 	B::OP::savefree      = 48
 	B::OP::static        = 49
 	B::OP::folded        = 50
+	B::OP::lastsib       = 51
+	B::OP::parent        = 52
     PREINIT:
 	SV *ret;
     PPCODE:
@@ -1088,6 +1092,7 @@ next(o)
 	    case 49: /* static   */
 #if PERL_VERSION >= 19
 	    case 50: /* folded   */
+	    case 51: /* lastsib  */
 #endif
 #endif
 	    /* These are all bitfields, so we can't take their addresses */
@@ -1098,6 +1103,7 @@ next(o)
 		                    : ix == 48 ? o->op_savefree
 		                    : ix == 49 ? o->op_static
 		                    : ix == 50 ? o->op_folded
+		                    : ix == 51 ? o->op_lastsib
 		                    :            o->op_spare)));
 		break;
 	    case 33: /* children */
@@ -1203,6 +1209,9 @@ next(o)
 		ret = sv_newmortal();
 		sv_setiv(newSVrv(ret, "B::RHE"),
 			PTR2IV(CopHINTHASH_get(cCOPo)));
+		break;
+	    case 52: /* parent */
+		ret = make_op_object(aTHX_ op_parent(o));
 		break;
 	    default:
 		croak("method %s not implemented", op_methods[ix].name);
