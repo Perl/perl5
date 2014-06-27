@@ -139,7 +139,7 @@ bucket_info(rhv)
     nothing (the empty list).
 
     */
-    const HV * hv;
+    const HV * hv = NULL;
     if (SvROK(rhv) && SvTYPE(SvRV(rhv))==SVt_PVHV && !SvMAGICAL(SvRV(rhv))) {
         hv = (const HV *) SvRV(rhv);
     } else if (!SvOK(rhv)) {
@@ -199,7 +199,7 @@ bucket_array(rhv)
      * of the hash store, combined with regular remappings means that relative
      * order of keys changes each remap.
      */
-    const HV * hv;
+    const HV * hv = NULL;
     if (SvROK(rhv) && SvTYPE(SvRV(rhv))==SVt_PVHV && !SvMAGICAL(SvRV(rhv))) {
         hv = (const HV *) SvRV(rhv);
     } else if (!SvOK(rhv)) {
