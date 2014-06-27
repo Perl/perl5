@@ -15029,7 +15029,7 @@ S_reg_skipcomment(RExC_state_t *pRExC_state, char* p)
 {
     PERL_ARGS_ASSERT_REG_SKIPCOMMENT;
 
-    assert(*p = '#');
+    assert(*p == '#');
 
     while (p < RExC_end) {
         if (*(++p) == '\n') {
