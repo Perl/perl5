@@ -34,7 +34,7 @@ our @EXPORT_OK  = qw(
 
                      hash_traversal_mask
                     );
-our $VERSION = '0.17';
+our $VERSION = '0.18';
 require XSLoader;
 XSLoader::load();
 
