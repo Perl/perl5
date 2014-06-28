@@ -86,7 +86,13 @@ if ($nm_style eq 'gnu') {
     }
 }
 
-open(my $nm_fh, "$nm $nm_opt $libperl_a |") or
+my $nm_err_tmp = "libperl$$";
+
+END {
+    unlink $nm_err_tmp;
+}
+
+open(my $nm_fh, "$nm $nm_opt $libperl_a 2>$nm_err_tmp |") or
     skip_all "$nm $nm_opt $libperl_a failed: $!";
 
 sub nm_parse_gnu {
@@ -313,6 +319,21 @@ if ($GSP) {
     ok(! exists $symbols{data}{data}{PL_VarsPtr}, "has no PL_VarsPtr");
     ok(! exists $symbols{data}{common}{PL_Vars}, "has no PL_Vars");
     ok(! exists $symbols{text}{Perl_GetVars}, "has no Perl_GetVars");
+}
+
+if (open(my $nm_err_fh, $nm_err_tmp)) {
+    my $error;
+    while (<$nm_err_fh>) {
+        if (/warning: .+nm: no name list/ && $^O eq 'darwin') {
+            print "# $^O ignoring $nm output: $_";
+            next;
+        }
+        warn "$0: Unexpected $nm error: $_";
+        $error++;
+    }
+    die "$0: Unexpected $nm errors\n" if $error;
+} else {
+    warn "Failed to open '$nm_err_tmp': $!\n";
 }
 
 done_testing();
