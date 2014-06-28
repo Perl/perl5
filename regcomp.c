@@ -16568,40 +16568,104 @@ S_put_range(pTHX_ SV *sv, UV start, UV end)
 {
 
     /* Appends to 'sv' a displayable version of the range of code points from
-     * 'start' to 'end' */
+     * 'start' to 'end'.  It assumes that only ASCII printables are displayable
+     * as-is (though some of these will be escaped by put_byte()).  For the
+     * time being, this subroutine only works for latin1 (< 256) code points */
 
     assert(start <= end);
 
     PERL_ARGS_ASSERT_PUT_RANGE;
 
-    if (end - start < 3) {  /* Individual chars in short ranges */
-        for (; start <= end; start++)
-            put_byte(sv, start);
-    }
-    else if (   end > 255
-             || ! isALPHANUMERIC(start)
-             || ! isALPHANUMERIC(end)
-             || isDIGIT(start) != isDIGIT(end)
-             || isUPPER(start) != isUPPER(end)
-             || isLOWER(start) != isLOWER(end)
+    while (start <= end) {
+        if (end - start < 3) {  /* Individual chars in short ranges */
+            for (; start <= end; start++) {
+                put_byte(sv, start);
+            }
+            break;
+        }
 
-                /* This final test should get optimized out except on EBCDIC
-                 * platforms, where it causes ranges that cross discontinuities
-                 * like i/j to be shown as hex instead of the misleading,
-                 * e.g. H-K (since that range includes more than H, I, J, K).
-                 * */
-             || (end - start) != NATIVE_TO_ASCII(end) - NATIVE_TO_ASCII(start))
-    {
+        /* For small ranges that include printable ASCII characters, it's more
+         * legible to print those characters rather than hex values.  For
+         * larger ranges that include more than printables, it's probably
+         * clearer to just give the start and end points of the range in hex,
+         * and that's all we can do if there aren't any printables within the
+         * range
+         *
+         * On ASCII platforms the range of printables is contiguous.  If the
+         * entire range is printable, we print each character as such.  If the
+         * range is partially printable and partially not, it's less likely
+         * that the individual printables are meaningful, especially if all or
+         * almost all of them are in the range.  But we err on the side of the
+         * individual printables being meaningful by using the hex only if the
+         * range contains all but 2 of the printables.
+         *
+         * On EBCDIC platforms, the printables are scattered around so that the
+         * maximum range length containing only them is about 10.  Anything
+         * longer we treat as hex; otherwise we examine the range character by
+         * character to see */
+#ifdef EBCDIC
+        if (start < 256 && (((end < 255) ? end : 255) - start <= 10))
+#else
+        if ((isPRINT_A(start) && isPRINT_A(end))
+            || (end >= 0x7F && (isPRINT_A(start) && start > 0x21))
+            || ((end < 0x7D && isPRINT_A(end)) && start < 0x20))
+#endif
+        {
+            /* If the range beginning isn't an ASCII printable, we find the
+             * last such in the range, then split the output, so all the
+             * non-printables are in one subrange; then process the remaining
+             * portion as usual.  If the entire range isn't printables, we
+             * don't split, but drop down to print as hex */
+            if (! isPRINT_A(start)) {
+                UV temp_end = start + 1;
+                while (temp_end <= end && ! isPRINT_A(temp_end)) {
+                    temp_end++;
+                }
+                if (temp_end <= end) {
+                    put_range(sv, start, temp_end - 1);
+                    start = temp_end;
+                    continue;
+                }
+            }
+
+            /* If the range beginning is a digit, output a subrange of just the
+             * digits, then process the remaining portion as usual */
+            if (isDIGIT_A(start)) {
+                put_byte(sv, start);
+                sv_catpvs(sv, "-");
+                while (start <= end && isDIGIT_A(start)) start++;
+                put_byte(sv, start - 1);
+                continue;
+            }
+
+            /* Similarly for alphabetics.  Because in both ASCII and EBCDIC,
+             * the code points for upper and lower A-Z and a-z aren't
+             * intermixed, the resulting subrange will consist solely of either
+             * upper- or lower- alphabetics */
+            if (isALPHA_A(start)) {
+                put_byte(sv, start);
+                sv_catpvs(sv, "-");
+                while (start <= end && isALPHA_A(start)) start++;
+                put_byte(sv, start - 1);
+                continue;
+            }
+
+            /* We output any remaining printables as individual characters */
+            if (isPUNCT_A(start) || isSPACE_A(start)) {
+                while (start <= end && (isPUNCT_A(start) || isSPACE_A(start))) {
+                    put_byte(sv, start);
+                    start++;
+                }
+                continue;
+            }
+        }
+
+        /* Here is a control or non-ascii.  Output the range or subrange as
+         * hex. */
         Perl_sv_catpvf(aTHX_ sv, "\\x{%02" UVXf "}-\\x{%02" UVXf "}",
                        start,
                        (end < 256) ? end : 255);
-    }
-    else { /* Here, the ends of the range are both digits, or both uppercase,
-              or both lowercase; and there's no discontinuity in the range
-              (which could happen on EBCDIC platforms) */
-        put_byte(sv, start);
-        sv_catpvs(sv, "-");
-        put_byte(sv, end);
+        break;
     }
 }
 
