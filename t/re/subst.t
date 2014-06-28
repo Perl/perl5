@@ -1034,10 +1034,11 @@ SKIP: {
     is("$division$division$division" =~ s/\B/!/ugr, "!$division!$division!$division!", '\\B matches Latin1 before string, mid, and end, /u');
     is("\x{2028}\x{2028}\x{2028}" =~ s/\B/!/ugr, "!\x{2028}!\x{2028}!\x{2028}!", '\\B matches above-Latin1 before string, mid, and end, /u');
 
-    eval { require POSIX; POSIX->import("locale_h") };
-    skip "Can't test locale", 6 unless $@;
+SKIP: {
+    eval { require POSIX; POSIX->import("locale_h"); };
+    if ($@) { skip "Can't test locale (maybe you are missing POSIX)", 6; }
 
-    POSIX::setlocale(&POSIX::LC_ALL, "C");
+    setlocale(&POSIX::LC_ALL, "C");
     use locale;
     is("a.b" =~ s/\b/!/gr, "!a!.!b!", '\\b matches ASCII before string, mid, and end, /l');
     is("$a_acute.$egrave" =~ s/\b/!/gr, "$a_acute.$egrave", '\\b matches Latin1 before string, mid, and end, /l');
@@ -1046,4 +1047,6 @@ SKIP: {
     is("..." =~ s/\B/!/gr, "!.!.!.!", '\\B matches ASCII before string, mid, and end, /l');
     is("$division$division$division" =~ s/\B/!/gr, "!$division!$division!$division!", '\\B matches Latin1 before string, mid, and end, /l');
     is("\x{2028}\x{2028}\x{2028}" =~ s/\B/!/gr, "!\x{2028}!\x{2028}!\x{2028}!", '\\B matches above-Latin1 before string, mid, and end, /l');
+}
+
 }
