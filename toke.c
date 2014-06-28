@@ -2786,20 +2786,19 @@ STATIC char *
 S_scan_const(pTHX_ char *start)
 {
     char *send = PL_bufend;		/* end of the constant */
-    SV *sv = newSV(send - start);		/* sv for the constant.  See
-						   note below on sizing. */
+    SV *sv = newSV(send - start);       /* sv for the constant.  See note below
+                                           on sizing. */
     char *s = start;			/* start of the constant */
     char *d = SvPVX(sv);		/* destination for copies */
-    bool dorange = FALSE;			/* are we in a translit range? */
-    bool didrange = FALSE;		        /* did we just finish a range? */
-    bool in_charclass = FALSE;			/* within /[...]/ */
-    bool has_utf8 = FALSE;			/* Output constant is UTF8 */
-    bool  this_utf8 = cBOOL(UTF);		/* Is the source string assumed
-						   to be UTF8?  But, this can
-						   show as true when the source
-						   isn't utf8, as for example
-						   when it is entirely composed
-						   of hex constants */
+    bool dorange = FALSE;               /* are we in a translit range? */
+    bool didrange = FALSE;              /* did we just finish a range? */
+    bool in_charclass = FALSE;          /* within /[...]/ */
+    bool has_utf8 = FALSE;              /* Output constant is UTF8 */
+    bool  this_utf8 = cBOOL(UTF);       /* Is the source string assumed to be
+                                           UTF8?  But, this can show as true
+                                           when the source isn't utf8, as for
+                                           example when it is entirely composed
+                                           of hex constants */
     SV *res;		                /* result from charnames */
 
     /* Note on sizing:  The scanned constant is placed into sv, which is
@@ -2867,9 +2866,9 @@ S_scan_const(pTHX_ char *start)
 		i = d - SvPVX_const(sv);		/* remember current offset */
 #ifdef EBCDIC
                 SvGROW(sv,
-		       SvLEN(sv) + (has_utf8 ?
-				    (512 - UTF_CONTINUATION_MARK +
-				     UNISKIP(0x100))
+		       SvLEN(sv) + ((has_utf8)
+                                    ?  (512 - UTF_CONTINUATION_MARK
+                                        + UNISKIP(0x100))
 				    : 256));
                 /* How many two-byte within 0..255: 128 in UTF-8,
 		 * 96 in UTF-8-mod. */
@@ -2910,6 +2909,8 @@ S_scan_const(pTHX_ char *start)
                 }
 
 #ifdef EBCDIC
+                /* Because of the discontinuities in EBCDIC A-Z and a-z, expand
+                 * any subsets of these ranges into individual characters */
 		if (literal_endpoint == 2 &&
 		    ((isLOWER_A(min) && isLOWER_A(max)) ||
 		     (isUPPER_A(min) && isUPPER_A(max))))
