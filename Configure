@@ -22000,7 +22000,8 @@ bull c cadmus clipper CMU COFF COMPILER_VERSION
 concurrent convex cpu cray CRAY CRAYMPP ctix CX_UX
 CYGWIN DECC DGUX DGUX_SOURCE DJGPP dmert DOLPHIN DPX2 DSO
 Dynix DynixPTX ELF encore EPI EXTENSIONS FAVOR_BSD
-FILE_OFFSET_BITS FreeBSD GCC_NEW_VARARGS gcos gcx gimpel
+FILE_OFFSET_BITS FreeBSD FORTIFY_SOURCE
+GCC_NEW_VARARGS gcos gcx gimpel
 GLIBC GLIBC_MINOR
 GNU_SOURCE GNUC GNUC_MINOR GNU_LIBRARY GO32 gould GOULD_PN
 H3050R H3050RX hbullx20 hcx host_mips
@@ -22208,6 +22209,21 @@ else
 		$test "$silent" || sleep 1
 	fi
 fi
+
+: add -D_FORTIFY_SOURCE if feasible and not already there
+case "$gccversion" in
+4.*)	case "$ccflags$cppsymbols" in
+	*_FORTIFY_SOURCE=*) # Don't add it again.
+		echo "You seem to have -D_FORTIFY_SOURCE already..." >&4
+		;;
+	*)	ccflags="$ccflags -D_FORTIFY_SOURCE=2"
+		echo "Adding -D_FORTIFY_SOURCE=2 to ccflags..." >&4
+		;;
+	esac
+	;;
+*)	echo "You seem not to have gcc 4.*, not adding -D_FORTIFY_SOURCE." >&4
+	;;
+esac
 
 : see if this is a termio system
 val="$undef"
