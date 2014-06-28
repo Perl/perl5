@@ -2,14 +2,11 @@
 /perlaix.pod
 /perlamiga.pod
 /perlandroid.pod
-/perlbeos.pod
 /perlbs2000.pod
 /perlce.pod
 /perlcn.pod
 /perlcygwin.pod
-/perldgux.pod
 /perldos.pod
-/perlepoc.pod
 /perlfreebsd.pod
 /perlhaiku.pod
 /perlhpux.pod
@@ -21,7 +18,6 @@
 /perlmacos.pod
 /perlmacosx.pod
 /perlmodlib.pod
-/perlmpeix.pod
 /perlnetware.pod
 /perlopenbsd.pod
 /perlos2.pod
@@ -37,8 +33,6 @@
 /perltru64.pod
 /perltw.pod
 /perluniprops.pod
-/perluts.pod
-/perlvmesa.pod
 /perlvms.pod
 /perlvos.pod
 /perlwin32.pod
