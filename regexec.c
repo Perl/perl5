@@ -5791,11 +5791,14 @@ NULL
 	{
 	    /* see the discussion above about CURLYX/WHILEM */
 	    I32 n;
-	    int min = ARG1(cur_curlyx->u.curlyx.me);
-	    int max = ARG2(cur_curlyx->u.curlyx.me);
-	    regnode *A = NEXTOPER(cur_curlyx->u.curlyx.me) + EXTRA_STEP_2ARGS;
+	    int min, max;
+	    regnode *A;
 
 	    assert(cur_curlyx); /* keep Coverity happy */
+
+	    min = ARG1(cur_curlyx->u.curlyx.me);
+	    max = ARG2(cur_curlyx->u.curlyx.me);
+	    A = NEXTOPER(cur_curlyx->u.curlyx.me) + EXTRA_STEP_2ARGS;
 	    n = ++cur_curlyx->u.curlyx.count; /* how many A's matched */
 	    ST.save_lastloc = cur_curlyx->u.curlyx.lastloc;
 	    ST.cache_offset = 0;
