@@ -312,6 +312,12 @@ if ($GSP) {
 } else {
     print "# neither -DPERL_GLOBAL_STRUCT nor -DPERL_GLOBAL_STRUCT_PRIVATE\n";
 
+    if ( !$symbols{data}{common} ) {
+        # This is likely because Perl was compiled with 
+        # -Accflags="-fno-common"
+        $symbols{data}{common} = $symbols{data}{bss};
+    }
+    
     ok($symbols{data}{common}{PL_hash_seed}{'globals.o'}, "has PL_hash_seed");
     ok($symbols{data}{data}{PL_ppaddr}{'globals.o'}, "has PL_ppaddr");
 
