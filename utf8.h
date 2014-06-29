@@ -485,7 +485,9 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
  * U+10FFFF: \xF4\x8F\xBF\xBF	\xF9\xA1\xBF\xBF\xBF	max legal Unicode
  * U+110000: \xF4\x90\x80\x80	\xF9\xA2\xA0\xA0\xA0
  * U+110001: \xF4\x90\x80\x81	\xF9\xA2\xA0\xA0\xA1
- */
+ *
+ * BE AWARE that this test doesn't rule out malformed code points, in
+ * particular overlongs */
 #ifdef EBCDIC /* Both versions assume well-formed UTF8 */
 #   define UTF8_IS_SUPER(s) (NATIVE_UTF8_TO_I8(* (U8*) (s)) >= 0xF9             \
                          && (NATIVE_UTF8_TO_I8(* (U8*) (s)) > 0xF9              \
