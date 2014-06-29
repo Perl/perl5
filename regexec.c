@@ -6188,6 +6188,7 @@ NULL
 		/* calculate c1 and c2 for possible match of 1st char
 		 * following curly */
 		ST.c1 = ST.c2 = CHRTEST_VOID;
+                assert(ST.B);
 		if (HAS_TEXT(ST.B) || JUMPABLE(ST.B)) {
 		    regnode *text_node = ST.B;
 		    if (! HAS_TEXT(text_node))
