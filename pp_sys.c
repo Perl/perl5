@@ -2392,7 +2392,7 @@ PP(pp_flock)
     PUSHi(value);
     RETURN;
 #else
-    DIE(aTHX_ PL_no_func, "flock()");
+    DIE(aTHX_ PL_no_func, "flock");
 #endif
 }
 
@@ -4372,7 +4372,7 @@ PP(pp_getpgrp)
     XPUSHi(pgrp);
     RETURN;
 #else
-    DIE(aTHX_ PL_no_func, "getpgrp()");
+    DIE(aTHX_ PL_no_func, "getpgrp");
 #endif
 }
 
@@ -4402,7 +4402,7 @@ PP(pp_setpgrp)
 #endif /* USE_BSDPGRP */
     RETURN;
 #else
-    DIE(aTHX_ PL_no_func, "setpgrp()");
+    DIE(aTHX_ PL_no_func, "setpgrp");
 #endif
 }
 
@@ -4421,7 +4421,7 @@ PP(pp_getpriority)
     SETi( getpriority(PRIORITY_WHICH_T(which), who) );
     RETURN;
 #else
-    DIE(aTHX_ PL_no_func, "getpriority()");
+    DIE(aTHX_ PL_no_func, "getpriority");
 #endif
 }
 
@@ -4436,7 +4436,7 @@ PP(pp_setpriority)
     SETi( setpriority(PRIORITY_WHICH_T(which), who, niceval) >= 0 );
     RETURN;
 #else
-    DIE(aTHX_ PL_no_func, "setpriority()");
+    DIE(aTHX_ PL_no_func, "setpriority");
 #endif
 }
 
