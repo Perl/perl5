@@ -12997,11 +12997,15 @@ int main()
 	int pu[2];
 	char buf[1];
 	char string[100];
+	int ret;
 
-	pipe(pd);	/* Down: child -> parent */
-	pipe(pu);	/* Up: parent -> child */
+	ret = pipe(pd);	/* Down: child -> parent */
+	if (ret != 0)
+		exit(3);
+	ret = pipe(pu);	/* Up: parent -> child */
+	if (ret != 0)
+		exit(3);
 	if (0 != fork()) {
-		int ret;
 		close(pd[1]);	/* Parent reads from pd[0] */
 		close(pu[0]);	/* Parent writes (blocking) to pu[1] */
 #ifdef F_SETFL
@@ -13015,7 +13019,9 @@ int main()
 		if ((ret = read(pd[0], buf, 1)) > 0)	/* Nothing to read! */
 			exit(2);
 		sprintf(string, "%d\n", ret);
-		write(2, string, strlen(string));
+		ret = write(2, string, strlen(string));
+		if (ret != strlen(string))
+			exit(3);
 		alarm(0);
 #ifdef EAGAIN
 		if (errno == EAGAIN) {
@@ -13028,19 +13034,25 @@ int main()
 			printf("EWOULDBLOCK\n");
 #endif
 	ok:
-		write(pu[1], buf, 1);	/* Unblocks child, tell it to close our pipe */
+		ret = write(pu[1], buf, 1);	/* Unblocks child, tell it to close our pipe */
+		if (ret != 1)
+			exit(3);
 		sleep(2);				/* Give it time to close our pipe */
 		alarm(5);
 		ret = read(pd[0], buf, 1);	/* Should read EOF */
 		alarm(0);
 		sprintf(string, "%d\n", ret);
-		write(4, string, strlen(string));
+		ret = write(4, string, strlen(string));
+		if (ret != strlen(string))
+			exit(3);
 		exit(0);
 	}
 
 	close(pd[0]);			/* We write to pd[1] */
 	close(pu[1]);			/* We read from pu[0] */
-	read(pu[0], buf, 1);	/* Wait for parent to signal us we may continue */
+	ret = read(pu[0], buf, 1);	/* Wait for parent to signal us we may continue */
+	if (ret != 1)
+		exit(3);
 	close(pd[1]);			/* Pipe pd is now fully closed! */
 	exit(0);				/* Bye bye, thank you for playing! */
 }
