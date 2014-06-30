@@ -2238,9 +2238,13 @@ S_finalize_op(pTHX_ OP* o)
 	OP *kid;
 
 #ifdef DEBUGGING
-        /* check that op_last points to the last sibling */
+        /* check that op_last points to the last sibling, and that
+         * the last op_sibling field points back to the parent, and
+         * that the only ops with KIDS are those which are entitled to
+         * them */
         U32 type = o->op_type;
         U32 family;
+        bool has_last;
 
         if (type == OP_NULL) {
             type = o->op_targ;
@@ -2251,36 +2255,48 @@ S_finalize_op(pTHX_ OP* o)
         }
         family = PL_opargs[type] & OA_CLASS_MASK;
 
-        if (
-            /* XXX list form of 'x' is has a null op_last. This is wrong,
-             * but requires too much hacking (e.g. in Deparse) to fix for
-             * now */
-            !(type == OP_REPEAT && (o->op_private & OPpREPEAT_DOLIST))
-            && (
-                   family == OA_BINOP
-                || family == OA_LISTOP
-                || family == OA_PMOP
-                || family == OA_LOOP
-            )
-        )
-        {
-            OP *kid;
-            for (kid = cUNOPo->op_first; kid; kid = OP_SIBLING(kid)) {
+        has_last = (   family == OA_BINOP
+                    || family == OA_LISTOP
+                    || family == OA_PMOP
+                    || family == OA_LOOP
+                   );
+        assert(  has_last /* has op_first and op_last, or ...
+              ... has (or may have) op_first: */
+              || family == OA_UNOP
+              || family == OA_LOGOP
+              || family == OA_BASEOP_OR_UNOP
+              || family == OA_FILESTATOP
+              || family == OA_LOOPEXOP
+              /* I don't know why SASSIGN is tagged as OA_BASEOP - DAPM */
+              || type == OP_SASSIGN
+              || type == OP_CUSTOM
+              || type == OP_NULL /* new_logop does this */
+              );
+        /* XXX list form of 'x' is has a null op_last. This is wrong,
+         * but requires too much hacking (e.g. in Deparse) to fix for
+         * now */
+        if (type == OP_REPEAT && (o->op_private & OPpREPEAT_DOLIST)) {
+            assert(has_last);
+            has_last = 0;
+        }
+
+        for (kid = cUNOPo->op_first; kid; kid = OP_SIBLING(kid)) {
 #  ifdef PERL_OP_PARENT
-                if (!OP_HAS_SIBLING(kid)) {
+            if (!OP_HAS_SIBLING(kid)) {
+                if (has_last)
                     assert(kid == cLISTOPo->op_last);
-                    assert(kid->op_sibling == o);
-                }
-#  else
-                if (OP_HAS_SIBLING(kid)) {
-                    assert(!kid->op_lastsib);
-                }
-                else {
-                    assert(kid->op_lastsib);
-                    assert(kid == cLISTOPo->op_last);
-                }
-#  endif
+                assert(kid->op_sibling == o);
             }
+#  else
+            if (OP_HAS_SIBLING(kid)) {
+                assert(!kid->op_lastsib);
+            }
+            else {
+                assert(kid->op_lastsib);
+                if (has_last)
+                    assert(kid == cLISTOPo->op_last);
+            }
+#  endif
         }
 #endif
 
