@@ -35,6 +35,16 @@ L</Selected Bug Fixes> section.
 
 [ List each security issue as a =head2 entry ]
 
+=head2 Perl is now always compiled with -D_FORTIFY_SOURCE=2 if available
+
+The 'code hardening' option called C<_FORTIFY_SOURCE>, available in
+gcc 4.*, is now always used for compiling Perl, if available.
+
+Note that this isn't necessarily a huge step since in many platforms
+the step had already been taken several years ago: many Linux
+distributions (like Fedora) have been using this option for Perl,
+and OS X has enforced the same for many years.
+
 =head1 Incompatible Changes
 
 XXX For a release on a stable branch, this section aspires to be:
