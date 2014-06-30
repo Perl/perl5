@@ -2189,7 +2189,7 @@ Es	|const regnode*|dumpuntil|NN const regexp *r|NN const regnode *start \
 				|NULLOK const regnode *plast \
 				|NN SV* sv|I32 indent|U32 depth
 Es	|void	|put_byte	|NN SV* sv|int c
-Es	|bool	|put_latin1_charclass_innards|NN SV* sv|NN char* bitmap
+Es	|bool	|put_charclass_bitmap_innards|NN SV* sv|NN char* bitmap
 Es	|void	|put_range	|NN SV* sv|UV start|UV end
 Es	|void	|dump_trie	|NN const struct _reg_trie_data *trie\
 				|NULLOK HV* widecharmap|NN AV *revcharmap\

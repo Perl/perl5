@@ -184,8 +184,9 @@ struct regnode_2 {
     U16 arg2;
 };
 
+#define NUM_ANYOF_CODE_POINTS   256
 
-#define ANYOF_BITMAP_SIZE	(256 / 8)   /* 8 bits/Byte */
+#define ANYOF_BITMAP_SIZE	(NUM_ANYOF_CODE_POINTS / 8)   /* 8 bits/Byte */
 
 /* Note that these form structs which are supersets of the next smaller one, by
  * appending fields.  Alignment problems can occur if one of those optional
@@ -551,9 +552,13 @@ struct regnode_ssc {
 	memset (ANYOF_BITMAP(p), 255, ANYOF_BITMAP_SIZE)
 #define ANYOF_BITMAP_CLEARALL(p)	\
 	Zero (ANYOF_BITMAP(p), ANYOF_BITMAP_SIZE)
-/* Check that all 256 bits are all set.  Used in S_cl_is_anything()  */
-#define ANYOF_BITMAP_TESTALLSET(p)	/* Assumes sizeof(p) == 32 */     \
+#if ANYOF_BITMAP_SIZE == 32
+/* Check that all 256 bits are all set. */
+#   define ANYOF_BITMAP_TESTALLSET(p)	/* Assumes sizeof(p) == 32 */     \
 	memEQ (ANYOF_BITMAP(p), "\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377\377", ANYOF_BITMAP_SIZE)
+#else
+#   error Need to fix this if raise bitmap size.  (As of this writing this macro is unused in the core)
+#endif
 
 #define ANYOF_SKIP		((ANYOF_SIZE - 1)/sizeof(regnode))
 #define ANYOF_POSIXL_SKIP	((ANYOF_POSIXL_SIZE - 1)/sizeof(regnode))

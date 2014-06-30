@@ -7787,7 +7787,7 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
     }
 
     /* If this character is potentially in the bitmap, check it */
-    if (c < 256) {
+    if (c < NUM_ANYOF_CODE_POINTS) {
 	if (ANYOF_BITMAP_TEST(n, c))
 	    match = TRUE;
 	else if (flags & ANYOF_NON_UTF8_NON_ASCII_ALL

@@ -1048,15 +1048,16 @@ S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state,
         }
     }
 
-    /* An ANYOF node contains a bitmap for the first 256 code points, and an
-     * inversion list for the others, but if there are code points that should
-     * match only conditionally on the target string being UTF-8, those are
-     * placed in the inversion list, and not the bitmap.  Since there are
-     * circumstances under which they could match, they are included in the
-     * SSC.  But if the ANYOF node is to be inverted, we have to exclude them
-     * here, so that when we invert below, the end result actually does include
-     * them.  (Think about "\xe0" =~ /[^\xc0]/di;).  We have to do this here
-     * before we add the unconditionally matched code points */
+    /* An ANYOF node contains a bitmap for the first NUM_ANYOF_CODE_POINTS
+     * code points, and an inversion list for the others, but if there are code
+     * points that should match only conditionally on the target string being
+     * UTF-8, those are placed in the inversion list, and not the bitmap.
+     * Since there are circumstances under which they could match, they are
+     * included in the SSC.  But if the ANYOF node is to be inverted, we have
+     * to exclude them here, so that when we invert below, the end result
+     * actually does include them.  (Think about "\xe0" =~ /[^\xc0]/di;).  We
+     * have to do this here before we add the unconditionally matched code
+     * points */
     if (ANYOF_FLAGS(node) & ANYOF_INVERT) {
         _invlist_intersection_complement_2nd(invlist,
                                              PL_UpperLatin1,
@@ -1064,7 +1065,7 @@ S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state,
     }
 
     /* Add in the points from the bit map */
-    for (i = 0; i < 256; i++) {
+    for (i = 0; i < NUM_ANYOF_CODE_POINTS; i++) {
         if (ANYOF_BITMAP_TEST(node, i)) {
             invlist = add_cp_to_invlist(invlist, i);
             new_node_has_latin1 = TRUE;
@@ -1428,7 +1429,8 @@ S_ssc_finalize(pTHX_ RExC_state_t *pRExC_state, regnode_ssc *ssc)
 {
     /* The inversion list in the SSC is marked mortal; now we need a more
      * permanent copy, which is stored the same way that is done in a regular
-     * ANYOF node, with the first 256 code points in a bit map */
+     * ANYOF node, with the first NUM_ANYOF_CODE_POINTS code points in a bit
+     * map */
 
     SV* invlist = invlist_clone(ssc->invlist);
 
@@ -12470,14 +12472,16 @@ S_populate_ANYOF_from_invlist(pTHX_ regnode *node, SV** invlist_ptr)
             }
 
 	    /* Quit if are above what we should change */
-	    if (start > 255) {
+	    if (start >= NUM_ANYOF_CODE_POINTS) {
 		break;
 	    }
 
 	    change_invlist = TRUE;
 
 	    /* Set all the bits in the range, up to the max that we are doing */
-	    high = (end < 255) ? end : 255;
+	    high = (end < NUM_ANYOF_CODE_POINTS - 1)
+                   ? end
+                   : NUM_ANYOF_CODE_POINTS - 1;
 	    for (i = start; i <= (int) high; i++) {
 		if (! ANYOF_BITMAP_TEST(node, i)) {
 		    ANYOF_BITMAP_SET(node, i);
@@ -13289,11 +13293,11 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
      * ignored in the recursion by means of a flag:
      * <RExC_in_multi_char_class>.)
      *
-     * ANYOF nodes contain a bit map for the first 256 characters, with the
-     * corresponding bit set if that character is in the list.  For characters
-     * above 255, a range list or swash is used.  There are extra bits for \w,
-     * etc. in locale ANYOFs, as what these match is not determinable at
-     * compile time
+     * ANYOF nodes contain a bit map for the first NUM_ANYOF_CODE_POINTS
+     * characters, with the corresponding bit set if that character is in the
+     * list.  For characters above this, a range list or swash is used.  There
+     * are extra bits for \w, etc. in locale ANYOFs, as what these match is not
+     * determinable at compile time
      *
      * Returns NULL, setting *flagp to RESTART_UTF8 if the sizing scan needs
      * to be restarted.  This can only happen if ret_invlist is non-NULL.
@@ -15723,7 +15727,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         );
         if ( IS_ANYOF_TRIE(op) || trie->bitmap ) {
             sv_catpvs(sv, "[");
-            (void) put_latin1_charclass_innards(sv, IS_ANYOF_TRIE(op)
+            (void) put_charclass_bitmap_innards(sv, IS_ANYOF_TRIE(op)
                                                    ? ANYOF_BITMAP(o)
                                                    : TRIE_BITMAP(trie));
             sv_catpvs(sv, "]");
@@ -15799,8 +15803,9 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
 	if (flags & ANYOF_INVERT)
 	    sv_catpvs(sv, "^");
 
-	/* output what the standard cp 0-255 bitmap matches */
-        do_sep = put_latin1_charclass_innards(sv, ANYOF_BITMAP(o));
+        /* output what the standard cp 0-NUM_ANYOF_CODE_POINTS-1 bitmap matches
+         * */
+        do_sep = put_charclass_bitmap_innards(sv, ANYOF_BITMAP(o));
 
         /* output any special charclass tests (used entirely under use
          * locale) * */
@@ -16570,8 +16575,7 @@ S_put_range(pTHX_ SV *sv, UV start, UV end)
 
     /* Appends to 'sv' a displayable version of the range of code points from
      * 'start' to 'end'.  It assumes that only ASCII printables are displayable
-     * as-is (though some of these will be escaped by put_byte()).  For the
-     * time being, this subroutine only works for latin1 (< 256) code points */
+     * as-is (though some of these will be escaped by put_byte()). */
 
     assert(start <= end);
 
@@ -16665,13 +16669,15 @@ S_put_range(pTHX_ SV *sv, UV start, UV end)
          * hex. */
         Perl_sv_catpvf(aTHX_ sv, "\\x{%02" UVXf "}-\\x{%02" UVXf "}",
                        start,
-                       (end < 256) ? end : 255);
+                       (end < NUM_ANYOF_CODE_POINTS)
+                       ? end
+                       : NUM_ANYOF_CODE_POINTS - 1);
         break;
     }
 }
 
 STATIC bool
-S_put_latin1_charclass_innards(pTHX_ SV *sv, char *bitmap)
+S_put_charclass_bitmap_innards(pTHX_ SV *sv, char *bitmap)
 {
     /* Appends to 'sv' a displayable version of the innards of the bracketed
      * character class whose bitmap is 'bitmap';  Returns 'TRUE' if it actually
@@ -16680,15 +16686,15 @@ S_put_latin1_charclass_innards(pTHX_ SV *sv, char *bitmap)
     int i;
     bool has_output_anything = FALSE;
 
-    PERL_ARGS_ASSERT_PUT_LATIN1_CHARCLASS_INNARDS;
+    PERL_ARGS_ASSERT_PUT_CHARCLASS_BITMAP_INNARDS;
 
-    for (i = 0; i < 256; i++) {
+    for (i = 0; i < NUM_ANYOF_CODE_POINTS; i++) {
         if (BITMAP_TEST((U8 *) bitmap,i)) {
 
             /* The character at index i should be output.  Find the next
              * character that should NOT be output */
             int j;
-            for (j = i + 1; j < 256; j++) {
+            for (j = i + 1; j < NUM_ANYOF_CODE_POINTS; j++) {
                 if (! BITMAP_TEST((U8 *) bitmap, j)) {
                     break;
                 }
