@@ -1067,12 +1067,12 @@ op_sibling nodes. By analogy with the perl-level splice() function, allows
 you to delete zero or more sequential nodes, replacing them with zero or
 more different nodes.  Performs the necessary op_first/op_last
 housekeeping on the parent node and op_sibling manipulation on the
-children. The op_sibling field of the last deleted node will be set to
-NULL.
+children. The last deleted node will be marked as as the last node by
+updating the op_sibling or op_lastsib field as appropriate.
 
 Note that op_next is not manipulated, and nodes are not freed; that is the
-responsibility of the caller. It also won't create new a list op for an empty
-list etc; use higher-level functions like op_append_elem() for that.
+responsibility of the caller. It also won't create a new list op for an
+empty list etc; use higher-level functions like op_append_elem() for that.
 
 parent is the parent node of the sibling chain.
 
@@ -1088,7 +1088,7 @@ remaining kids are deleted.
 insert is the first of a chain of nodes to be inserted in place of the nodes.
 If NULL, no nodes are inserted.
 
-The head of the chain of deleted op is returned, or NULL uif no ops were
+The head of the chain of deleted ops is returned, or NULL if no ops were
 deleted.
 
 For example:
@@ -1097,16 +1097,16 @@ For example:
     ------                    -----       -----         -------
 
                               P           P
-    splice(P, A, 2, X-Y)      |           |             B-C
-                              A-B-C-D     A-X-Y-D
+    splice(P, A, 2, X-Y-Z)    |           |             B-C
+                              A-B-C-D     A-X-Y-Z-D
 
                               P           P
     splice(P, NULL, 1, X-Y)   |           |             A
                               A-B-C-D     X-Y-B-C-D
 
                               P           P
-    splice(P, NULL, 1, NULL)  |           |             A
-                              A-B-C-D     B-C-D
+    splice(P, NULL, 3, NULL)  |           |             A-B-C
+                              A-B-C-D     D
 
                               P           P
     splice(P, B, 0, X-Y)      |           |             NULL
@@ -1116,7 +1116,7 @@ For example:
 */
 
 OP *
-Perl_op_sibling_splice(pTHX_ OP *parent, OP *start, int del_count, OP* insert)
+Perl_op_sibling_splice(OP *parent, OP *start, int del_count, OP* insert)
 {
     dVAR;
     OP *first = start ? OP_SIBLING(start) : cLISTOPx(parent)->op_first;
@@ -1194,7 +1194,7 @@ work.
 */
 
 OP *
-Perl_op_parent(pTHX_ OP *o)
+Perl_op_parent(OP *o)
 {
     PERL_ARGS_ASSERT_OP_PARENT;
 #ifdef PERL_OP_PARENT
@@ -1251,7 +1251,7 @@ S_alloc_LOGOP(pTHX_ I32 type, OP *first, OP* other)
     LOGOP *logop;
     OP *kid = first;
     NewOp(1101, logop, 1, LOGOP);
-    logop->op_type = type;
+    logop->op_type = (OPCODE)type;
     logop->op_first = first;
     logop->op_other = other;
     logop->op_flags = OPf_KIDS;

@@ -3121,8 +3121,8 @@ PERL_CALLCONV void	Perl_op_null(pTHX_ OP* o)
 #define PERL_ARGS_ASSERT_OP_NULL	\
 	assert(o)
 
-PERL_CALLCONV OP*	Perl_op_parent(pTHX_ OP *o)
-			__attribute__nonnull__(pTHX_1);
+PERL_CALLCONV OP*	Perl_op_parent(OP *o)
+			__attribute__nonnull__(1);
 #define PERL_ARGS_ASSERT_OP_PARENT	\
 	assert(o)
 
@@ -3130,8 +3130,8 @@ PERL_CALLCONV OP*	Perl_op_prepend_elem(pTHX_ I32 optype, OP* first, OP* last);
 PERL_CALLCONV void	Perl_op_refcnt_lock(pTHX);
 PERL_CALLCONV void	Perl_op_refcnt_unlock(pTHX);
 PERL_CALLCONV OP*	Perl_op_scope(pTHX_ OP* o);
-PERL_CALLCONV OP*	Perl_op_sibling_splice(pTHX_ OP *parent, OP *start, int del_count, OP* insert)
-			__attribute__nonnull__(pTHX_1);
+PERL_CALLCONV OP*	Perl_op_sibling_splice(OP *parent, OP *start, int del_count, OP* insert)
+			__attribute__nonnull__(1);
 #define PERL_ARGS_ASSERT_OP_SIBLING_SPLICE	\
 	assert(parent)
 

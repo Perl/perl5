@@ -771,9 +771,9 @@ Apd	|void	|op_null	|NN OP* o
 EXp	|void	|op_clear	|NN OP* o
 Ap	|void	|op_refcnt_lock
 Ap	|void	|op_refcnt_unlock
-Apd	|OP*	|op_sibling_splice|NN OP *parent|NULLOK OP *start \
+Apdn	|OP*	|op_sibling_splice|NN OP *parent|NULLOK OP *start \
 		|int del_count|NULLOK OP* insert
-Apd	|OP*	|op_parent|NN OP *o
+Apdn	|OP*	|op_parent|NN OP *o
 #if defined(PERL_IN_OP_C)
 s	|OP*	|listkids	|NULLOK OP* o
 #endif
