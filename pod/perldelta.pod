@@ -323,9 +323,12 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
+=item Solaris
 
-XXX
+Builds on Solaris 10 with C<-Dusedtrace> would fail early since make
+didn't follow implied dependencies to build C<perldtrace.h>.  Added an
+explicit dependency to C<depend>.
+L<[perl #120120]|https://rt.perl.org/Ticket/Display.html?id=120120>
 
 =back
 
