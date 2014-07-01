@@ -56,15 +56,14 @@ $SIG{INT} = sub {
 		};
 		$SIG{INT} = $reset;
 		sleep 2;
-		curr_test(curr_test()+1);
 		ok(!$got_int, "signal not received by child after $reset reset");
 	    });
 	sleep 1; # wait for the child to initialize
 	my $sent_error = XS::APItest::pthread_kill($thread->_handle, "INT");
-	ok(!$sent_error, "send a signal to the child thread ($reset)")
-	  or diag "Signal send error: $sent_error";
 	$thread->join();
 	curr_test(curr_test()+1);
+	ok(!$sent_error, "send a signal to the child thread ($reset)")
+	  or diag "Signal send error: $sent_error";
 	is($got_int, 1, "signal handled by main thread after child reset with $reset");
     }
 }
