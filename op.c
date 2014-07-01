@@ -8727,7 +8727,11 @@ Perl_ck_eval(pTHX_ OP *o)
     else {
 	const U8 priv = o->op_private;
 	op_free(o);
-	o = newUNOP(OP_ENTEREVAL, priv <<8, newDEFSVOP());
+        /* the newUNOP will recursively call ck_eval(), which will handle
+         * all the stuff at the end of this function, like adding
+         * OP_HINTSEVAL
+         */
+	return newUNOP(OP_ENTEREVAL, priv <<8, newDEFSVOP());
     }
     o->op_targ = (PADOFFSET)PL_hints;
     if (o->op_private & OPpEVAL_BYTES) o->op_targ &= ~HINT_UTF8;
