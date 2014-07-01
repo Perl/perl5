@@ -13,12 +13,14 @@ BEGIN {
 }
 
 use threads;
+use Thread::Semaphore;
 use strict;
 use POSIX qw(SIGINT sigaction);
 use XS::APItest;
 
 watchdog(60);
 
+++$|;
 
 my $got_int = 0;
 $SIG{INT} = sub {
@@ -26,16 +28,23 @@ $SIG{INT} = sub {
   ++$got_int;
 };
 
+# used for synchronization
+my $child_ready  = Thread::Semaphore->new(0);
+my $parent_ready = Thread::Semaphore->new(0);
+
 # signals across threads, see [perl #81074]
 # if the child doesn't set a handler, it's delivered to the parent
 {
     note "signals sent to a child that doesn't set a handler are sent to the parent\n";
     my $thread = threads->create(
         sub {
-	    sleep 2;
+	    $child_ready->up;
+	    $parent_ready->down;
+	    1; # anything
         });
-    sleep 1; # wait for the child to initialize
+    $child_ready->down;
     my $sent_error = XS::APItest::pthread_kill($thread->_handle, "INT");
+    $parent_ready->up;
     ok(!$sent_error, "send a signal to the child thread")
       or diag "Signal send error: $sent_error";
     $thread->join();
@@ -55,11 +64,14 @@ $SIG{INT} = sub {
 		    ++$got_int;
 		};
 		$SIG{INT} = $reset;
-		sleep 2;
+		$child_ready->up;
+		$parent_ready->down;
+		#sleep 1; # give ourselves a chance to deliver some signals
 		ok(!$got_int, "signal not received by child after $reset reset");
 	    });
-	sleep 1; # wait for the child to initialize
+	$child_ready->down;
 	my $sent_error = XS::APItest::pthread_kill($thread->_handle, "INT");
+	$parent_ready->up;
 	$thread->join();
 	curr_test(curr_test()+1);
 	ok(!$sent_error, "send a signal to the child thread ($reset)")
@@ -79,11 +91,13 @@ $SIG{INT} = sub {
 	        print "# child thread handler\n";
 	        ++$got_int;
 	    };
-	    sleep 2;
+	    $child_ready->up;
+	    $parent_ready->down;
 	    ok($got_int, "signal received by child");
 	});
-    sleep 1; # wait for the child to set its handler
+    $child_ready->down;
     my $sent_error = XS::APItest::pthread_kill($thread->_handle, "INT");
+    $parent_ready->up;
     $thread->join();
     curr_test(curr_test()+1);
     ok(!$sent_error, "send a signal to the child thread")
@@ -122,13 +136,15 @@ $SIG{INT} = "DEFAULT";
 	      );
 	    $handler_action->safe(1);
 	    sigaction(SIGINT, $handler_action);
-	    sleep(2);
+	    $child_ready->up();
+	    $parent_ready->down();
 	    sigaction(SIGINT, $default_action);
 	    ok($got_int, "child received signal");
 	    is($warn, "", "no warnings raised in child");
 	});
-    sleep 1; # wait for child to initialize
+    $child_ready->down;
     my $sent_error = XS::APItest::pthread_kill($thread->_handle, "INT");
+    $parent_ready->up;
     $thread->join();
     curr_test(curr_test()+2);
     ok(!$sent_error, "send a signal to the child thread")
@@ -183,11 +199,9 @@ SKIP:
 	    ok(sigaction(SIGINT, $handler_action), "set signal handler in child")
 	      or diag("sigaction: $!");
 	    # fall off the end without removing our handler
-	    sleep(1);
 	});
     $thread->join();
     my $sent_ok = kill "INT", $$;
-    sleep(1);
     my $sigset = POSIX::SigSet->new(SIGINT);
     my $default_action = POSIX::SigAction->new
       (
