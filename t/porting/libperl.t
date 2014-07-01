@@ -330,7 +330,9 @@ if ($GSP) {
 if (open(my $nm_err_fh, $nm_err_tmp)) {
     my $error;
     while (<$nm_err_fh>) {
-        if (/warning: .+nm: no name list/ && $^O eq 'darwin') {
+        # OS X has weird error where nm warns about
+        # "no name list" but then outputs fine.
+        if (/nm: no name list/ && $^O eq 'darwin') {
             print "# $^O ignoring $nm output: $_";
             next;
         }
