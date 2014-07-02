@@ -1,5 +1,11 @@
-	[perl #121928] Fix memory leak for dclone inside freeze hook
-	(Alex Solovey)
+Wed Jul  2 16:25:25 IST 2014   Abhijit Menon-Sen <ams@toroid.org>
+    Version 2.51
+
+	* [perl #121928] Fix memory leak for dclone inside freeze hook
+	  (Alex Solovey)
+	* Do not call DESTROY for empty objects
+	  (Vladimir Timofeev)
+	* Other bugfixes
 
 Sat Jul 13 18:34:27 IST 2013   Abhijit Menon-Sen <ams@toroid.org>
     Version 2.45
