@@ -531,7 +531,7 @@ else
     if test ! -f Makefile ; then
 	echo "Warning: No Makefile!"
     fi
-    make -s $clean_target MAKE='@make' @pass_through
+    @make $clean_target MAKE='@make' @pass_through
 fi
 cd $return_dir
 EOS
