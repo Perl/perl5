@@ -51,13 +51,15 @@ my $ext_dirs_re = '(?:' . join('|', @ext_dirs) . ')';
 # It may be deleted in a later release of perl so try to
 # avoid using it for other purposes.
 
-my (%excl, %incl, %opts, @extspec, @pass_through);
+my (%excl, %incl, %opts, @extspec, @pass_through, $verbose);
 
 foreach (@ARGV) {
     if (/^!(.*)$/) {
 	$excl{$1} = 1;
     } elsif (/^\+(.*)$/) {
 	$incl{$1} = 1;
+    } elsif (/^--verbose$/ or /^-v$/) {
+	$verbose = 1;
     } elsif (/^--([\w\-]+)$/) {
 	$opts{$1} = 1;
     } elsif (/^--([\w\-]+)=(.*)$/) {
@@ -153,11 +155,11 @@ if ($is_Win32) {
     my $pl2bat = "$topdir\\win32\\bin\\pl2bat";
     unless (-f "$pl2bat.bat") {
 	my @args = ($perl, "-I$topdir\\lib", ("$pl2bat.pl") x 2);
-	print "@args\n";
+	print "@args\n" if $verbose;
 	system(@args) unless IS_CROSS;
     }
 
-    print "In $build";
+    print "In $build" if $verbose;
     foreach my $dir (@dirs) {
 	chdir($dir) or die "Cannot cd to $dir: $!\n";
 	(my $ext = Cwd::getcwd()) =~ s{/}{\\}g;
@@ -252,7 +254,7 @@ foreach my $spec (@extspec)  {
 	}
     }
 
-    print "\tMaking $mname ($target)\n";
+    print "\tMaking $mname ($target)\n" if $verbose;
 
     build_extension($ext_pathname, $perl, $mname, $target,
 		    [@pass_through, @{$extra_passthrough{$spec} || []}]);
@@ -348,7 +350,7 @@ sub build_extension {
                 return;
             }
 
-	    print "\nCreating Makefile.PL in $ext_dir for $mname\n";
+	    print "\nCreating Makefile.PL in $ext_dir for $mname\n" if $verbose;
 	    my ($fromname, $key, $value);
 	    if ($mname eq 'podlators') {
 		# We need to special case this somewhere, and this is fewer
@@ -491,7 +493,7 @@ EOM
 	}
 
         # We are going to have to use Makefile.PL:
-	print "\nRunning Makefile.PL in $ext_dir\n";
+	print "\nRunning Makefile.PL in $ext_dir\n" if $verbose;
 
 	my @args = ("-I$lib_dir", 'Makefile.PL');
 	if ($is_VMS) {
@@ -503,7 +505,7 @@ EOM
 	}
 	push @args, @$pass_through;
 	_quote_args(\@args) if $is_VMS;
-	print join(' ', $perl, @args), "\n";
+	print join(' ', $perl, @args), "\n" if $verbose;
 	my $code = system $perl, @args;
 	warn "$code from $ext_dir\'s Makefile.PL" if $code;
 
@@ -529,7 +531,7 @@ else
     if test ! -f Makefile ; then
 	echo "Warning: No Makefile!"
     fi
-    make $clean_target MAKE='@make' @pass_through
+    @make $clean_target MAKE='@make' @pass_through
 fi
 cd $return_dir
 EOS
@@ -556,7 +558,7 @@ EOS
 	system(@make, @args) and print "@make @args failed, continuing anyway...\n";
     }
     my @targ = ($target, @$pass_through);
-    print "Making $target in $ext_dir\n@make @targ\n";
+    print "Making $target in $ext_dir\n@make @targ\n" if $verbose;
     local $ENV{PERL_INSTALL_QUIET} = 1;
     my $code = system(@make, @targ);
     die "Unsuccessful make($ext_dir): code=$code" if $code != 0;
