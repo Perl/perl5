@@ -319,8 +319,8 @@ PP(pp_substcont)
 	if (!(mg = mg_find_mglob(sv))) {
 	    mg = sv_magicext_mglob(sv);
 	}
-	assert(SvPOK(dstr));
-	MgBYTEPOS_set(mg, sv, SvPVX(dstr), m - orig);
+	assert(SvPOK(sv));
+	MgBYTEPOS_set(mg, sv, SvPVX(sv), m - orig);
     }
     if (old != rx)
 	(void)ReREFCNT_inc(rx);
