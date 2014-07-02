@@ -53,6 +53,7 @@ sub plan {
 	}
     } else {
 	my %plan = @_;
+	$plan{skip_all} and skip_all($plan{skip_all});
 	$n = $plan{tests};
     }
     _print "1..$n\n" unless $noplan;
