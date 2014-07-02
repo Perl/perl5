@@ -1082,7 +1082,7 @@ PerlIO_default_layers(pTHX)
 	PerlIO_define_layer(aTHX_ PERLIO_FUNCS_CAST(&PerlIO_unix));
 #if defined(WIN32)
 	PerlIO_define_layer(aTHX_ PERLIO_FUNCS_CAST(&PerlIO_win32));
-#if 0
+#if 1
 	osLayer = &PerlIO_win32;
 #endif
 #endif
