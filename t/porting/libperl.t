@@ -82,14 +82,15 @@ if ($nm_style eq 'gnu') {
         }
     }
     unless ($gnu_verified) {
-        plan skil_all => "no GNU nm";
+        skip_all "no GNU nm";
     }
 }
 
 my $nm_err_tmp = "libperl$$";
 
 END {
-    unlink $nm_err_tmp;
+    # this is still executed when we skip_all above, avoid a warning
+    unlink $nm_err_tmp if $nm_err_tmp;
 }
 
 open(my $nm_fh, "$nm $nm_opt $libperl_a 2>$nm_err_tmp |") or
