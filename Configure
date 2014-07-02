@@ -22221,12 +22221,17 @@ fi
 
 : add -D_FORTIFY_SOURCE if feasible and not already there
 case "$gccversion" in
-4.*)	case "$ccflags$cppsymbols" in
-	*_FORTIFY_SOURCE=*) # Don't add it again.
-		echo "You seem to have -D_FORTIFY_SOURCE already..." >&4
+4.*)	case "$optimize$ccflags" in
+	*-O*)	case "$ccflags$cppsymbols" in
+		*_FORTIFY_SOURCE=*) # Don't add it again.
+			echo "You seem to have -D_FORTIFY_SOURCE already, not adding it." >&4
+			;;
+		*)	echo "Adding -D_FORTIFY_SOURCE=2 to ccflags..." >&4
+			ccflags="$ccflags -D_FORTIFY_SOURCE=2"
+			;;
+		esac
 		;;
-	*)	ccflags="$ccflags -D_FORTIFY_SOURCE=2"
-		echo "Adding -D_FORTIFY_SOURCE=2 to ccflags..." >&4
+	*)	echo "You have gcc 4.* but not optimizing, not adding -D_FORTIFY_SOURCE." >&4
 		;;
 	esac
 	;;
