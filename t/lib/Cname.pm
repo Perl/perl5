@@ -28,6 +28,8 @@ sub translator {
         $str = "\xDF\xDFabc";
         utf8::upgrade($str);
          
+        no warnings 'deprecated';
+
         # Create a malformed in first and second characters.
         $str =~ s/^\C/A/;
         $str =~ s/^(\C\C)\C/$1A/;

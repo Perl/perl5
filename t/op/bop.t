@@ -448,7 +448,11 @@ SKIP: {
   # U+0800 is three bytes in UTF-8/UTF-EBCDIC.
 
   no warnings "utf8";
-  { use bytes; $str =~ s/\C\C\z//; }
+  {
+    use bytes;
+    no warnings 'deprecated';
+    $str =~ s/\C\C\z//;
+  }
 
   # it's really bogus that (~~malformed) is \0.
   my $ref = "\x{10000}\0";
@@ -458,7 +462,11 @@ SKIP: {
   # exercises a different branch in pp_subsr()
 
   $str = "\x{10000}\x{800}";
-  { use bytes; $str =~ s/\C\C\z/\0\0\0/; }
+  {
+    use bytes;
+    no warnings 'deprecated';
+    $str =~ s/\C\C\z/\0\0\0/;
+  }
 
   # it's also bogus that (~~malformed) is \0\0\0\0.
   my $ref = "\x{10000}\0\0\0\0";

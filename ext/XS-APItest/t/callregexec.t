@@ -42,7 +42,10 @@ sub try {
     try "ax",          qr/a$/m,           1, 'MEOL';
     try "ax",          qr/a$/s,           1, 'SEOL';
     try "abx",         qr/^(ab|X)./s,     0, 'SANY';
-    try "abx",         qr/^(ab|X)\C/,     0, 'CANY';
+    {
+        no warnings 'deprecated';
+        try "abx",         qr/^(ab|X)\C/,     0, 'CANY';
+    }
     try "abx",         qr/^(ab|X)./,      0, 'REG_ANY';
     try "abx",         qr/^ab(c|d|e|x)/,  0, 'TRIE/TRIEC';
     try "abx",         qr/^abx/,          0, 'EXACT';

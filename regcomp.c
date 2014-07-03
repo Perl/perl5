@@ -11388,6 +11388,9 @@ tryagain:
 	    ret = reg_node(pRExC_state, CANY);
             RExC_seen |= REG_CANY_SEEN;
 	    *flagp |= HASWIDTH|SIMPLE;
+            if (SIZE_ONLY) {
+                ckWARNdep(RExC_parse+1, "\\C is deprecated");
+            }
 	    goto finish_meta_pat;
 	case 'X':
 	    ret = reg_node(pRExC_state, CLUMP);

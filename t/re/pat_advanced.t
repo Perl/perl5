@@ -29,6 +29,8 @@ run_tests() unless caller;
 sub run_tests {
 
     {
+        no warnings 'deprecated';
+
         my $message = '\C matches octet';
         $_ = "a\x{100}b";
         ok(/(.)(\C)(\C)(.)/, $message);
@@ -51,6 +53,8 @@ sub run_tests {
     }
 
     {
+        no warnings 'deprecated';
+
         my $message = '\C matches octet';
         $_ = "\x{100}";
         ok(/(\C)/g, $message);
@@ -280,6 +284,8 @@ sub run_tests {
     }
 
     {
+        no warnings 'deprecated';
+
         my $message = '. matches \n with /s';
         my $str1 = "foo\nbar";
         my $str2 = "foo\n\x{100}bar";
@@ -486,6 +492,8 @@ sub run_tests {
                                          =~ /^(\X)!/ &&
                $1 eq "\N{LATIN CAPITAL LETTER E}\N{COMBINING GRAVE ACCENT}", $message);
 
+        no warnings 'deprecated';
+
         $message = '\C and \X';
         like("!abc!", qr/a\Cc/, $message);
         like("!abc!", qr/a\Xc/, $message);
@@ -544,10 +552,13 @@ sub run_tests {
             $& eq "Francais", $message);
         ok("Fran\N{LATIN SMALL LETTER C WITH CEDILLA}ais" =~ /Fran.ais/ &&
             $& eq "Fran\N{LATIN SMALL LETTER C WITH CEDILLA}ais", $message);
-        ok("Fran\N{LATIN SMALL LETTER C}ais" =~ /Fran\Cais/ &&
-            $& eq "Francais", $message);
-        # COMBINING CEDILLA is two bytes when encoded
-        like("Franc\N{COMBINING CEDILLA}ais", qr/Franc\C\Cais/, $message);
+        {
+            no warnings 'deprecated';
+            ok("Fran\N{LATIN SMALL LETTER C}ais" =~ /Fran\Cais/ &&
+                $& eq "Francais", $message);
+            # COMBINING CEDILLA is two bytes when encoded
+            like("Franc\N{COMBINING CEDILLA}ais", qr/Franc\C\Cais/, $message);
+        }
         ok("Fran\N{LATIN SMALL LETTER C}ais" =~ /Fran\Xais/ &&
             $& eq "Francais", $message);
         ok("Fran\N{LATIN SMALL LETTER C WITH CEDILLA}ais" =~ /Fran\Xais/  &&

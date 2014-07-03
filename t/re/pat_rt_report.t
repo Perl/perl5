@@ -91,6 +91,7 @@ sub run_tests {
     }
 
     {
+        no warnings 'deprecated';
         my $message = '\C and É; Bug 20001230.002';
         ok("École" =~ /^\C\C(.)/ && $1 eq 'c', $message);
         like("École", qr/^\C\C(c)/, $message);
@@ -237,6 +238,8 @@ sub run_tests {
         our $a = "x\x{100}";
         chop $a;    # Leaves the UTF-8 flag
         $a .= "y";  # 1 byte before 'y'.
+
+        no warnings 'deprecated';
 
         like($a, qr/^\C/,        'match one \C on 1-byte UTF-8; Bug 15763');
         like($a, qr/^\C{1}/,     'match \C{1}; Bug 15763');
@@ -1172,7 +1175,10 @@ EOP
 
 	# this one segfaulted under the conditions above
 	# of course, CANY is evil, maybe it should crash
-	ok($s =~ /.\C+/, "CANY pointer wrap");
+        {
+            no warnings 'deprecated';
+            ok($s =~ /.\C+/, "CANY pointer wrap");
+        }
     }
 } # End of sub run_tests
 

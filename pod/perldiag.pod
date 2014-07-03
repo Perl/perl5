@@ -536,6 +536,16 @@ encountered an invalid data type.
 iterate over %ENV, it encountered a logical name or symbol definition
 which was too long, so it was truncated to the string shown.
 
+=item \C is deprecated in regex; marked by <-- HERE in m/%s/
+
+(D deprecated, regexp) The \C character class is deprecated, and will
+become a compile-time error in a future release of perl (tentatively
+v5.24). This construct allows you to match a single byte of what makes up
+a multi-byte single UTF8 character, and breaks encapsulation. It is
+currently also very buggy. If you really need to process the individual
+bytes, you probably want to convert your string to one where each
+underlying byte is stored as a character, with utf8::encode().
+
 =item Callback called exit
 
 (F) A subroutine invoked from an external package via call_sv()
