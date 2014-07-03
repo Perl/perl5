@@ -25,6 +25,8 @@ struct _FILE;
 #define FILE struct _FILE
 #endif
 
+#ifndef EBCDIC
+
 #define _CANNOT "CANNOT"
 
 #undef clearerr
@@ -124,6 +126,8 @@ struct _FILE;
 #ifndef OS2
 #define pclose(f)  _CANNOT _pclose_
 #endif
+
+#endif /*not define EBCDIC */
 
 /*
  * Local variables:
