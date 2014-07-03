@@ -210,7 +210,12 @@ XXX L<message|perldiag/"message">
 
 =item *
 
-XXX L<message|perldiag/"message">
+L<Argument "%s" treated as 0 in increment (++)|perldiag/"Argument "%s" treated
+as 0 in increment (++)">
+
+(W numeric) The indicated string was fed as an argument to the C<++> operator
+which expects either a number or a string matching C</^[a-zA-Z]*[0-9]*\z/>.
+See L<perlop/Auto-increment and Auto-decrement> for details.
 
 =back
 
