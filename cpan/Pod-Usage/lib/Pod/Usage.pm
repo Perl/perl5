@@ -11,7 +11,7 @@ package Pod::Usage;
 use strict;
 
 use vars qw($VERSION @ISA @EXPORT);
-$VERSION = '1.63';  ## Current version of this package
+$VERSION = '1.64';  ## Current version of this package
 require  5.006;    ## requires this Perl version or later
 
 #use diagnostics;
@@ -360,7 +360,7 @@ __END__
 
 =head1 NAME
 
-Pod::Usage, pod2usage() - print a usage message from embedded pod documentation
+Pod::Usage - print a usage message from embedded pod documentation
 
 =head1 SYNOPSIS
 
@@ -594,13 +594,15 @@ use them by default if you don't expressly tell it to do otherwise.  The
 ability of B<pod2usage()> to accept a single number or a string makes it
 convenient to use as an innocent looking error message handling function:
 
+    use strict;
     use Pod::Usage;
     use Getopt::Long;
 
     ## Parse options
-    GetOptions("help", "man", "flag1")  ||  pod2usage(2);
-    pod2usage(1)  if ($opt_help);
-    pod2usage(-verbose => 2)  if ($opt_man);
+    my %opt;
+    GetOptions(\%opt, "help|?", "man", "flag1")  ||  pod2usage(2);
+    pod2usage(1)  if ($opt{help});
+    pod2usage(-exitval => 0, -verbose => 2)  if ($opt{man});
 
     ## Check for too many filenames
     pod2usage("$0: Too many files given.\n")  if (@ARGV > 1);
@@ -609,22 +611,34 @@ Some user's however may feel that the above "economy of expression" is
 not particularly readable nor consistent and may instead choose to do
 something more like the following:
 
-    use Pod::Usage;
-    use Getopt::Long;
+    use strict;
+    use Pod::Usage qw(pod2usage);
+    use Getopt::Long qw(GetOptions);
 
     ## Parse options
-    GetOptions("help", "man", "flag1")  ||  pod2usage(-verbose => 0);
-    pod2usage(-verbose => 1)  if ($opt_help);
-    pod2usage(-verbose => 2)  if ($opt_man);
+    my %opt;
+    GetOptions(\%opt, "help|?", "man", "flag1")  ||
+      pod2usage(-verbose => 0);
+
+    pod2usage(-verbose => 1)  if ($opt{help});
+    pod2usage(-verbose => 2)  if ($opt{man});
 
     ## Check for too many filenames
     pod2usage(-verbose => 2, -message => "$0: Too many files given.\n")
-        if (@ARGV > 1);
+      if (@ARGV > 1);
+
 
 As with all things in Perl, I<there's more than one way to do it>, and
 B<pod2usage()> adheres to this philosophy.  If you are interested in
 seeing a number of different ways to invoke B<pod2usage> (although by no
 means exhaustive), please refer to L<"EXAMPLES">.
+
+=head2 Scripts
+
+The Pod::Usage distribution comes with a script pod2usage which offers
+a command line interface to the functionality of Pod::Usage. See
+L<pod2usage>.
+
 
 =head1 EXAMPLES
 
@@ -709,8 +723,9 @@ provide a means of printing their complete documentation to C<STDOUT>
 uses B<Pod::Usage> in combination with B<Getopt::Long> to do all of these
 things:
 
-    use Getopt::Long;
-    use Pod::Usage;
+    use strict;
+    use Getopt::Long qw(GetOptions);
+    use Pod::Usage qw(pod2usage);
 
     my $man = 0;
     my $help = 0;
@@ -723,6 +738,7 @@ things:
     ## If no arguments were given, then allow STDIN to be used only
     ## if it's not connected to a terminal (otherwise print usage)
     pod2usage("$0: No files given.")  if ((@ARGV == 0) && (-t STDIN));
+
     __END__
 
     =head1 NAME
@@ -739,7 +755,7 @@ things:
 
     =head1 OPTIONS
 
-    =over 8
+    =over 4
 
     =item B<-help>
 
