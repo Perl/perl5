@@ -189,6 +189,8 @@ Perl_new_numeric(pTHX_ const char *newnum)
 
     set_numeric_radix();
 
+#else
+    PERL_UNUSED_ARG(newnum);
 #endif /* USE_LOCALE_NUMERIC */
 }
 
@@ -329,6 +331,8 @@ Perl_new_collate(pTHX_ const char *newcoll)
 	}
     }
 
+#else
+    PERL_UNUSED_ARG(newcoll);
 #endif /* USE_LOCALE_COLLATE */
 }
 
@@ -916,6 +920,8 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
     Safefree(curnum);
 #endif /* USE_LOCALE_NUMERIC */
 
+#else  /* !USE_LOCALE */
+    PERL_UNUSED_ARG(printwarn);
 #endif /* USE_LOCALE */
 
     return ok;
