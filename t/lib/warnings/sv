@@ -397,3 +397,21 @@ sprintf "%vd", new version v1.1_0;
 EXPECT
 vector argument not supported with alpha versions at - line 2.
 vector argument not supported with alpha versions at - line 4.
+########
+# sv.c
+my $x = "a_c";
+++$x;
+use warnings "numeric";
+$x = "a_c"; ++$x;
+$x = ${ qr/abc/ }; ++$x;
+$x = "123x"; ++$x;
+$x = "123e"; ++$x;
+$x = 0; ++$x; # none of these should warn
+$x = "ABC"; ++$x;
+$x = "ABC123"; ++$x;
+$x = " +10"; ++$x;
+EXPECT
+Argument "a_c" treated as 0 in increment (++) at - line 5.
+Argument "(?^:abc)" treated as 0 in increment (++) at - line 6.
+Argument "123x" isn't numeric in preincrement (++) at - line 7.
+Argument "123e" isn't numeric in preincrement (++) at - line 8.

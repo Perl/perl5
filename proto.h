@@ -1308,6 +1308,11 @@ PERL_CALLCONV int	Perl_grok_number(pTHX_ const char *pv, STRLEN len, UV *valuep)
 #define PERL_ARGS_ASSERT_GROK_NUMBER	\
 	assert(pv)
 
+PERL_CALLCONV int	Perl_grok_number_flags(pTHX_ const char *pv, STRLEN len, UV *valuep, U32 flags)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_GROK_NUMBER_FLAGS	\
+	assert(pv)
+
 PERL_CALLCONV bool	Perl_grok_numeric_radix(pTHX_ const char **sp, const char *send)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1)
@@ -7378,6 +7383,11 @@ STATIC void	S_not_a_number(pTHX_ SV *const sv)
 #define PERL_ARGS_ASSERT_NOT_A_NUMBER	\
 	assert(sv)
 
+STATIC void	S_not_incrementable(pTHX_ SV *const sv)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_NOT_INCREMENTABLE	\
+	assert(sv)
+
 STATIC PTR_TBL_ENT_t *	S_ptr_table_find(PTR_TBL_t *const tbl, const void *const sv)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(1);
@@ -7393,6 +7403,12 @@ STATIC void	S_sv_add_arena(pTHX_ char *const ptr, const U32 size, const U32 flag
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_SV_ADD_ARENA	\
 	assert(ptr)
+
+STATIC const char *	S_sv_display(pTHX_ SV *const sv, char *tmpbuf, STRLEN tmpbuf_size)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_SV_DISPLAY	\
+	assert(sv); assert(tmpbuf)
 
 STATIC STRLEN	S_sv_pos_b2u_midway(pTHX_ const U8 *const s, const U8 *const target, const U8 *end, STRLEN endu)
 			__attribute__nonnull__(pTHX_1)

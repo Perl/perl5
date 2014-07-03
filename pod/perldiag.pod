@@ -186,6 +186,13 @@ point and did not attempt to push this layer.  If your program
 didn't explicitly request the failing operation, it may be the
 result of the value of the environment variable PERLIO.
 
+=item Argument "%s" treated as 0 in increment (++)
+
+(W numeric) The indicated string was fed as an argument to the C<++>
+operator which expects either a number or a string matching
+C</^[a-zA-Z]*[0-9]*\z/>.  See L<perlop/Auto-increment and
+Auto-decrement> for details.
+
 =item charnames alias definitions may not contain a sequence of multiple spaces
 
 (F) You defined a character name which had multiple space

@@ -548,7 +548,7 @@ Perl_grok_numeric_radix(pTHX_ const char **sp, const char *send)
 }
 
 /*
-=for apidoc grok_number
+=for apidoc grok_number_flags
 
 Recognise (or not) a number.  The type of the number is returned
 (0 if unrecognised), otherwise it is a bit-ORed combination of
@@ -568,10 +568,26 @@ IS_NUMBER_NEG if the number is negative (in which case *valuep holds the
 absolute value).  IS_NUMBER_IN_UV is not set if e notation was used or the
 number is larger than a UV.
 
+C<flags> allows only C<PERL_SCAN_TRAILING>, which allows for trailing
+non-numeric text on an otherwise successful I<grok>, setting
+C<IS_NUMBER_TRAILING> on the result.
+
+=for apidoc grok_number
+
+Identical to grok_number_flags() with flags set to zero.
+
 =cut
  */
 int
 Perl_grok_number(pTHX_ const char *pv, STRLEN len, UV *valuep)
+{
+    PERL_ARGS_ASSERT_GROK_NUMBER;
+
+    return grok_number_flags(pv, len, valuep, 0);
+}
+
+int
+Perl_grok_number_flags(pTHX_ const char *pv, STRLEN len, UV *valuep, U32 flags)
 {
   const char *s = pv;
   const char * const send = pv + len;
@@ -581,7 +597,7 @@ Perl_grok_number(pTHX_ const char *pv, STRLEN len, UV *valuep)
   int sawinf = 0;
   int sawnan = 0;
 
-  PERL_ARGS_ASSERT_GROK_NUMBER;
+  PERL_ARGS_ASSERT_GROK_NUMBER_FLAGS;
 
   while (s < send && isSPACE(*s))
     s++;
@@ -736,9 +752,6 @@ Perl_grok_number(pTHX_ const char *pv, STRLEN len, UV *valuep)
   } else if (s < send) {
     /* we can have an optional exponent part */
     if (*s == 'e' || *s == 'E') {
-      /* The only flag we keep is sign.  Blow away any "it's UV"  */
-      numtype &= IS_NUMBER_NEG;
-      numtype |= IS_NUMBER_NOT_INT;
       s++;
       if (s < send && (*s == '-' || *s == '+'))
         s++;
@@ -747,8 +760,14 @@ Perl_grok_number(pTHX_ const char *pv, STRLEN len, UV *valuep)
           s++;
         } while (s < send && isDIGIT(*s));
       }
+      else if (flags & PERL_SCAN_TRAILING)
+        return numtype | IS_NUMBER_TRAILING;
       else
-      return 0;
+        return 0;
+
+      /* The only flag we keep is sign.  Blow away any "it's UV"  */
+      numtype &= IS_NUMBER_NEG;
+      numtype |= IS_NUMBER_NOT_INT;
     }
   }
   while (s < send && isSPACE(*s))
@@ -760,6 +779,10 @@ Perl_grok_number(pTHX_ const char *pv, STRLEN len, UV *valuep)
       *valuep = 0;
     return IS_NUMBER_IN_UV;
   }
+  else if (flags & PERL_SCAN_TRAILING) {
+    return numtype | IS_NUMBER_TRAILING;
+  }
+
   return 0;
 }
 

@@ -5758,6 +5758,7 @@ int flock(int fd, int op);
 #define IS_NUMBER_NEG		      0x08 /* leading minus sign */
 #define IS_NUMBER_INFINITY	      0x10 /* this is big */
 #define IS_NUMBER_NAN                 0x20 /* this is not */
+#define IS_NUMBER_TRAILING            0x40 /* number has trailing trash */
 
 #define GROK_NUMERIC_RADIX(sp, send) grok_numeric_radix(sp, send)
 
@@ -5767,6 +5768,9 @@ int flock(int fd, int op);
 #define PERL_SCAN_SILENT_ILLDIGIT     0x04 /* grok_??? not warn about illegal digits */
 #define PERL_SCAN_SILENT_NON_PORTABLE 0x08 /* grok_??? not warn about very large
 					      numbers which are <= UV_MAX */
+#define PERL_SCAN_TRAILING            0x10 /* grok_number_flags() allow trailing
+                                              and set IS_NUMBER_TRAILING */
+
 /* Output flags: */
 #define PERL_SCAN_GREATER_THAN_UV_MAX 0x02 /* should this merge with above? */
 
