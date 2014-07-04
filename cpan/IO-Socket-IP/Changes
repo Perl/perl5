@@ -1,5 +1,11 @@
 Revision history for IO-Socket-IP
 
+0.30    2014/07/03 23:28:43
+        [CHANGES]
+         * Invoke $self->connect fully-qualified in case of subclasses with
+           override (RT95983)
+         * Added extra diag() call in t/15io-socket.t (RT96914)
+
 0.29    2014/02/24 16:06:29
         [BUGFIXES]
          * Workaround for OSes that disobey AI_ADDRCONFIG and yield AIs on

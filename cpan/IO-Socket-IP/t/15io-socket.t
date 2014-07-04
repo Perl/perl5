@@ -17,7 +17,8 @@ use IO::Socket::IP -register;
       LocalPort => 0,
    );
 
-   isa_ok( $sock, "IO::Socket::IP", 'IO::Socket->new( Domain => AF_INET )' );
+   isa_ok( $sock, "IO::Socket::IP", 'IO::Socket->new( Domain => AF_INET )' ) or
+      diag( "  error was $@" );
 
    $sock = IO::Socket->new(
       Domain    => AF_INET,

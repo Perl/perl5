@@ -7,7 +7,7 @@ package IO::Socket::IP;
 # $VERSION needs to be set before  use base 'IO::Socket'
 #  - https://rt.cpan.org/Ticket/Display.html?id=92107
 BEGIN {
-   $VERSION = '0.29';
+   $VERSION = '0.30';
 }
 
 use strict;
@@ -601,7 +601,7 @@ sub setup
       }
 
       if( defined( my $addr = $info->{peeraddr} ) ) {
-         if( $self->connect( $addr ) ) {
+         if( $self->IO::Socket::IP::connect( $addr ) ) {
             $! = 0;
             return 1;
          }
@@ -651,7 +651,7 @@ sub connect
    # (still in progress). This even works on MSWin32.
    my $addr = ${*$self}{io_socket_ip_infos}[${*$self}{io_socket_ip_idx}]{peeraddr};
 
-   if( $self->connect( $addr ) or $! == EISCONN ) {
+   if( $self->IO::Socket::IP::connect( $addr ) or $! == EISCONN ) {
       delete ${*$self}{io_socket_ip_connect_in_progress};
       $! = 0;
       return 1;
