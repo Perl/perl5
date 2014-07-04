@@ -320,7 +320,7 @@ PerlIOWin32_close(pTHX_ PerlIO *f)
 PerlIO *
 PerlIOWin32_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *params, int flags)
 {
- PerlIOWin32 *os = PerlIOSelf(f,PerlIOWin32);
+ PerlIOWin32 *os = PerlIOSelf(o,PerlIOWin32);
  HANDLE proc = GetCurrentProcess();
  HANDLE new_h;
  if (DuplicateHandle(proc, os->h, proc, &new_h, 0, TRUE,  DUPLICATE_SAME_ACCESS))
