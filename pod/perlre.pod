@@ -1677,7 +1677,7 @@ An example of how this might be used is as follows:
   /(?<NAME>(?&NAME_PAT))(?<ADDR>(?&ADDRESS_PAT))
    (?(DEFINE)
      (?<NAME_PAT>....)
-     (?<ADRESS_PAT>....)
+     (?<ADDRESS_PAT>....)
    )/x
 
 Note that capture groups matched inside of recursion are not accessible
