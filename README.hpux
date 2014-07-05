@@ -663,13 +663,24 @@ best fix is to patch the header to match:
 
 =head1 Redeclaration of "sendpath" with a different storage class specifier
 
-The following compilation warnings seem to be unavoidable but harmless:
+The following compilation warnings may happen in HP-UX releases
+earlier than 11.31 but are harmless:
 
   cc: "/usr/include/sys/socket.h", line 535: warning 562: Redeclaration of "sendfile" with a different storage class specifier: "sendfile" will have internal linkage.
   cc: "/usr/include/sys/socket.h", line 536: warning 562: Redeclaration of "sendpath" with a different storage class specifier: "sendpath" will have internal linkage.
 
 They seem to be caused by broken system header files, and also other
-open source projects are seeing them.
+open source projects are seeing them.  The following HP-UX patches
+should make the warnings go away:
+
+  CR JAGae12001: PHNE_27063
+  Warning 562 on sys/socket.h due to redeclaration of prototypes
+
+  CR JAGae16787:
+  Warning 562 from socket.h sendpath/sendfile -D_FILEFFSET_BITS=64
+
+  CR JAGae73470 (11.23)
+  ER: Compiling socket.h with cc -D_FILEFFSET_BITS=64 warning 267/562
 
 =head1 Miscellaneous
 
