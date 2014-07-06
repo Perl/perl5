@@ -346,7 +346,7 @@ S_exit_warning(pTHX)
 /* Called from perl_destruct() in each thread.  If it's the main thread,
  * stop it from freeing everything if there are other threads still running.
  */
-int
+STATIC int
 Perl_ithread_hook(pTHX)
 {
     dMY_POOL;
@@ -356,7 +356,7 @@ Perl_ithread_hook(pTHX)
 
 /* MAGIC (in mg.h sense) hooks */
 
-int
+STATIC int
 ithread_mg_get(pTHX_ SV *sv, MAGIC *mg)
 {
     ithread *thread = (ithread *)mg->mg_ptr;
@@ -365,7 +365,7 @@ ithread_mg_get(pTHX_ SV *sv, MAGIC *mg)
     return (0);
 }
 
-int
+STATIC int
 ithread_mg_free(pTHX_ SV *sv, MAGIC *mg)
 {
     ithread *thread = (ithread *)mg->mg_ptr;
@@ -375,7 +375,7 @@ ithread_mg_free(pTHX_ SV *sv, MAGIC *mg)
     return (0);
 }
 
-int
+STATIC int
 ithread_mg_dup(pTHX_ MAGIC *mg, CLONE_PARAMS *param)
 {
     PERL_UNUSED_ARG(param);
@@ -383,7 +383,7 @@ ithread_mg_dup(pTHX_ MAGIC *mg, CLONE_PARAMS *param)
     return (0);
 }
 
-MGVTBL ithread_vtbl = {
+STATIC const MGVTBL ithread_vtbl = {
     ithread_mg_get,     /* get */
     0,                  /* set */
     0,                  /* len */
