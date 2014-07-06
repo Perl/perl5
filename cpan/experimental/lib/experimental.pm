@@ -1,7 +1,8 @@
 package experimental;
-$experimental::VERSION = '0.007';
+$experimental::VERSION = '0.008';
 use strict;
 use warnings;
+use version ();
 
 use feature ();
 use Carp qw/croak carp/;
@@ -10,12 +11,12 @@ my %warnings = map { $_ => 1 } grep { /^experimental::/ } keys %warnings::Offset
 my %features = map { $_ => 1 } keys %feature::feature;
 
 my %min_version = (
-	array_base    => 5,
-	autoderef     => 5.014000,
-	lexical_topic => 5.010000,
-	regex_sets    => 5.018000,
-	smartmatch    => 5.010001,
-	signatures    => 5.019009, # change to 5.20.0 someday? -- rjbs, 2014-02-08
+	array_base    => version->new('5'),
+	autoderef     => version->new('5.14.0'),
+	lexical_topic => version->new('5.10.0'),
+	regex_sets    => version->new('5.18.0'),
+	smartmatch    => version->new('5.10.1'),
+	signatures    => version->new('5.20.0'),
 );
 
 my %additional = (
@@ -38,7 +39,7 @@ sub _enable {
 		croak "Can't enable unknown feature $pragma";
 	}
 	elsif ($min_version{$pragma} > $]) {
-		croak "Need perl version $min_version{$pragma} or later for feature $pragma";
+		croak "Need perl $min_version{$pragma} or later for feature $pragma";
 	}
 }
 
@@ -92,7 +93,7 @@ experimental - Experimental features made easy
 
 =head1 VERSION
 
-version 0.007
+version 0.008
 
 =head1 SYNOPSIS
 
@@ -130,7 +131,8 @@ The supported features, documented further below, are:
 	                in interpolating strings
 	regex_sets    - allow extended bracketed character classes in regexps
 	signatures    - allow subroutine signatures (for named arguments)
-	smartmatch    - allow the use of ~~, given, and when
+	smartmatch    - allow the use of ~~
+	switch        - allow the use of ~~, given, and when
 
 =head2 Disclaimer
 
