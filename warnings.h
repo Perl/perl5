@@ -104,9 +104,8 @@
 
 /* Warnings Categories added in Perl 5.021 */
 
-#define WARN_EXPERIMENTAL__WIN32_PERLIO 60
-#define WARN_MISSING		 61
-#define WARN_REDUNDANT		 62
+#define WARN_MISSING		 60
+#define WARN_REDUNDANT		 61
 
 #define WARNsize		16
 #define WARN_ALLstring		"\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125"

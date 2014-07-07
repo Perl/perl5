@@ -100,8 +100,6 @@ my $tree = {
                                     [ 5.019, DEFAULT_ON ],
                                 'experimental::signatures' =>
                                     [ 5.019, DEFAULT_ON ],
-                                'experimental::win32_perlio' =>
-                                    [ 5.021, DEFAULT_ON ],
                         }],
 
        	'missing'	=> [ 5.021, DEFAULT_OFF],

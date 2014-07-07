@@ -4238,14 +4238,6 @@ are as follows.
 Both numeric and string values are accepted, but note that string values are
 case sensitive.  The default for this setting is "RANDOM" or 1.
 
-=item PerlIO layer ':win32' is experimental
-
-(S experimental::win32_perlio) The C<:win32> PerlIO layer is
-experimental.  If you want to take the risk of using this layer,
-simply disable this warning:
-
-    no warnings "experimental::win32_perlio";
-
 =item pid %x not a child
 
 (W exec) A warning peculiar to VMS.  Waitpid() was asked to wait for a
