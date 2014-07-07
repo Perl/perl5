@@ -217,10 +217,10 @@ Perl_set_numeric_standard(pTHX)
      * to our records (which could be wrong if some XS code has changed the
      * locale behind our back) */
 
-	setlocale(LC_NUMERIC, "C");
-	PL_numeric_standard = TRUE;
-	PL_numeric_local = isNAME_C_OR_POSIX(PL_numeric_name);
-	set_numeric_radix();
+    setlocale(LC_NUMERIC, "C");
+    PL_numeric_standard = TRUE;
+    PL_numeric_local = isNAME_C_OR_POSIX(PL_numeric_name);
+    set_numeric_radix();
     DEBUG_L(PerlIO_printf(Perl_debug_log,
                           "Underlying LC_NUMERIC locale now is C\n"));
 
@@ -236,10 +236,11 @@ Perl_set_numeric_local(pTHX)
      * calling this directly.  The macro avoids calling this routine if
      * toggling isn't necessary according to our records (which could be wrong
      * if some XS code has changed the locale behind our back) */
-	setlocale(LC_NUMERIC, PL_numeric_name);
-	PL_numeric_standard = isNAME_C_OR_POSIX(PL_numeric_name);
-	PL_numeric_local = TRUE;
-	set_numeric_radix();
+
+    setlocale(LC_NUMERIC, PL_numeric_name);
+    PL_numeric_standard = isNAME_C_OR_POSIX(PL_numeric_name);
+    PL_numeric_local = TRUE;
+    set_numeric_radix();
     DEBUG_L(PerlIO_printf(Perl_debug_log,
                           "Underlying LC_NUMERIC locale now is %s\n",
                           PL_numeric_name));
