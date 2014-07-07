@@ -990,18 +990,48 @@ setlocale(category, locale = 0)
     PREINIT:
 	char *		retval;
     CODE:
+#ifdef USE_LOCALE_NUMERIC
+        /* A 0 (or NULL) locale means only query what the current one is.  We
+         * have the LC_NUMERIC name saved, because we are normally switched
+         * into the C locale for it.  Switch back so an LC_ALL query will yield
+         * the correct results; all other categories don't require special
+         * handling */
+        if (locale == 0) {
+            if (category == LC_NUMERIC) {
+                XSRETURN_PV(PL_numeric_name);
+            }
+#   ifdef LC_ALL
+            else if (category == LC_ALL) {
+                SET_NUMERIC_LOCAL();
+            }
+#   endif
+        }
+#endif
 #ifdef WIN32    /* Use wrapper on Windows */
 	retval = Perl_my_setlocale(aTHX_ category, locale);
 #else
 	retval = setlocale(category, locale);
 #endif
 	if (! retval) {
+            /* Should never happen that a query would return an error, but be
+             * sure and reset to C locale */
+            if (locale == 0) {
+                SET_NUMERIC_STANDARD();
+            }
             XSRETURN_UNDEF;
         }
+
+        /* Save retval since subsequent setlocale() calls may overwrite it. */
+        retval = savepv(retval);
+
+        /* For locale == 0, we may have switched to NUMERIC_LOCAL.  Switch back
+         * */
+        if (locale == 0) {
+            SET_NUMERIC_STANDARD();
+            XSRETURN_PV(retval);
+        }
         else {
-	    /* Save retval since subsequent setlocale() calls
-	     * may overwrite it. */
-	    RETVAL = savepv(retval);
+	    RETVAL = retval;
 #ifdef USE_LOCALE_CTYPE
 	    if (category == LC_CTYPE
 #ifdef LC_ALL

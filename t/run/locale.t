@@ -25,6 +25,16 @@ my @locales = eval { find_locales( [ &LC_ALL, &LC_CTYPE, &LC_NUMERIC ] ) };
 skip_all("no locales available") unless @locales;
 
 plan tests => &last;
+
+foreach my $locale (@locales) {
+    next if $locale eq "C";
+    setlocale(LC_NUMERIC, $locale) or next;
+    isnt(setlocale(LC_NUMERIC), "C", "retrieving current non-C LC_ALL doesn't give 'C'");
+    setlocale(LC_ALL, $locale) or next;
+    isnt(setlocale(LC_ALL), "C", "retrieving current non-C LC_ALL doesn't give 'C'");
+    last;
+}
+
 fresh_perl_is("for (qw(@locales)) {\n" . <<'EOF',
     use POSIX qw(locale_h);
     use locale;
@@ -408,4 +418,4 @@ EOF
 
     }
 
-sub last { 35 }
+sub last { 37 }
