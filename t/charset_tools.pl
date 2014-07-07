@@ -29,7 +29,7 @@ sub latin1_to_native($) {
     return $string if $::IS_ASCII;
     my $output = "";
     for my $i (0 .. length($string) - 1) {
-        $output .= chr(ord_latin1_to_native(ord(substr($string, $i, 1))));
+        $output .= chr(utf8::unicode_to_native(ord(substr($string, $i, 1))));
     }
     # Preserve utf8ness of input onto the output, even if it didn't need to be
     # utf8
