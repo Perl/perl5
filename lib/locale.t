@@ -917,12 +917,7 @@ foreach my $Locale (@Locale) {
 
     debug "is utf8 locale? = $is_utf8_locale\n";
 
-    my $radix = localeconv()->{decimal_point};
-    if ($radix !~ / ^ [[:ascii:]] + $/x) {
-        use bytes;
-        $radix = disp_chars(split "", $radix);
-    }
-    debug "radix = $radix\n";
+    debug "radix = " . disp_str(localeconv()->{decimal_point}) . "\n";
 
     if (! $is_utf8_locale) {
         use locale;
