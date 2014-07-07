@@ -986,7 +986,7 @@ localeconv()
 char *
 setlocale(category, locale = 0)
 	int		category
-	const char *		locale
+	const char *    locale
     PREINIT:
 	char *		retval;
     CODE:
