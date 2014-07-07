@@ -126,6 +126,20 @@ Perl_set_numeric_radix(pTHX)
 #endif /* USE_LOCALE_NUMERIC */
 }
 
+/* Is the C string input 'name' "C" or "POSIX"?  If so, and 'name' is the
+ * return of setlocale(), then this is extremely likely to be the C or POSIX
+ * locale.  However, the output of setlocale() is documented to be opaque, but
+ * the odds are extremely small that it would return these two strings for some
+ * other locale.  Note that VMS in these two locales includes many non-ASCII
+ * characters as controls and punctuation (below are hex bytes):
+ *   cntrl:  00-1F 7F 84-97 9B-9F
+ *   punct:  21-2F 3A-40 5B-60 7B-7E A1-A3 A5 A7-AB B0-B3 B5-B7 B9-BD BF-CF D1-DD DF-EF F1-FD
+ * Oddly, none there are listed as alphas, though some represent alphabetics
+ * http://www.nntp.perl.org/group/perl.perl5.porters/2013/02/msg198753.html */
+#define isNAME_C_OR_POSIX(name) ((name) != NULL                          \
+                                  && ((*(name) == 'C' && (*(name) + 1) == '\0') \
+                                       || strEQ((name), "POSIX")))
+
 void
 Perl_new_numeric(pTHX_ const char *newnum)
 {
@@ -178,8 +192,7 @@ Perl_new_numeric(pTHX_ const char *newnum)
 	PL_numeric_name = save_newnum;
     }
 
-    PL_numeric_standard = ((*save_newnum == 'C' && save_newnum[1] == '\0')
-                            || strEQ(save_newnum, "POSIX"));
+    PL_numeric_standard = isNAME_C_OR_POSIX(save_newnum);
     PL_numeric_local = TRUE;
 
     /* Keep LC_NUMERIC in the C locale.  This is for XS modules, so they don't
@@ -312,8 +325,7 @@ Perl_new_collate(pTHX_ const char *newcoll)
 	++PL_collation_ix;
 	Safefree(PL_collation_name);
 	PL_collation_name = stdize_locale(savepv(newcoll));
-	PL_collation_standard = ((*newcoll == 'C' && newcoll[1] == '\0')
-				 || strEQ(newcoll, "POSIX"));
+	PL_collation_standard = isNAME_C_OR_POSIX(newcoll);
 
 	{
 	  /*  2: at most so many chars ('a', 'b'). */
@@ -1017,9 +1029,7 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
         return FALSE;   /* XXX maybe should croak */
     }
     save_input_locale = stdize_locale(savepv(save_input_locale));
-    if ((*save_input_locale == 'C' && save_input_locale[1] == '\0')
-        || strEQ(save_input_locale, "POSIX"))
-    {
+    if (isNAME_C_OR_POSIX(save_input_locale)) {
         DEBUG_L(PerlIO_printf(Perl_debug_log,
                               "Current locale for category %d is %s\n",
                               category, save_input_locale));
@@ -1411,9 +1421,7 @@ Perl_my_strerror(pTHX_ const int errnum) {
 #ifdef USE_LOCALE_MESSAGES
     if (! IN_LC(LC_MESSAGES)) {
         char * save_locale = setlocale(LC_MESSAGES, NULL);
-        if (! ((*save_locale == 'C' && save_locale[1] == '\0')
-                || strEQ(save_locale, "POSIX")))
-        {
+        if (! isNAME_C_OR_POSIX(save_locale)) {
             char *errstr;
 
             /* The next setlocale likely will zap this, so create a copy */
