@@ -218,7 +218,7 @@ Perl_set_numeric_standard(pTHX)
     if (_NOT_IN_NUMERIC_STANDARD) {
 	setlocale(LC_NUMERIC, "C");
 	PL_numeric_standard = TRUE;
-	PL_numeric_local = FALSE;
+	PL_numeric_local = isNAME_C_OR_POSIX(PL_numeric_name);
 	set_numeric_radix();
     }
     DEBUG_L(PerlIO_printf(Perl_debug_log,
@@ -237,7 +237,7 @@ Perl_set_numeric_local(pTHX)
 
     if (_NOT_IN_NUMERIC_LOCAL) {
 	setlocale(LC_NUMERIC, PL_numeric_name);
-	PL_numeric_standard = FALSE;
+	PL_numeric_standard = isNAME_C_OR_POSIX(PL_numeric_name);
 	PL_numeric_local = TRUE;
 	set_numeric_radix();
     }
