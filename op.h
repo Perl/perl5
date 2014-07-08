@@ -52,7 +52,7 @@ typedef PERL_BITFIELD16 Optype;
     PERL_BITFIELD16 op_savefree:1;	\
     PERL_BITFIELD16 op_static:1;	\
     PERL_BITFIELD16 op_folded:1;	\
-    PERL_BITFIELD16 op_lastsib;		\
+    PERL_BITFIELD16 op_lastsib:1;       \
     PERL_BITFIELD16 op_spare:1;		\
     U8		op_flags;		\
     U8		op_private;
