@@ -95,9 +95,9 @@ sub _loose_name ($) {
         #   keys TYPE, BITS, EXTRAS, LIST, and NONE with values having the
         #   same meanings as the input parameters.
         #   SPECIALS contains a reference to any special-treatment hash in the
+        #       property.
         #   INVERT_IT is non-zero if the result should be inverted before use
         #   USER_DEFINED is non-zero if the result came from a user-defined
-        #       property.
         my $file; ## file to load data from, and also part of the %Cache key.
 
         # Change this to get a different set of Unicode tables
