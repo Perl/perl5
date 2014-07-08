@@ -258,7 +258,10 @@ if ($GSP) {
     ok(!exists $data_symbols{PL_ppaddr}, "has no PL_ppaddr");
 
     ok(! exists $symbols{data}{bss}, "has no data bss symbols");
-    ok(! exists $symbols{data}{data}, "has no data data symbols");
+    ok(! exists $symbols{data}{data} ||
+            # clang with ASAN seems to add this symbol to every object file:
+            !grep($_ ne '__unnamed_1', keys %{$symbols{data}{data}}),
+        "has no data data symbols");
     ok(! exists $symbols{data}{common}, "has no data common symbols");
 
     # -DPERL_GLOBAL_STRUCT_PRIVATE should NOT have
