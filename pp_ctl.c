@@ -1811,7 +1811,7 @@ PP(pp_caller)
 	PUSHTARG;
     }
     mPUSHs(newSVpv(OutCopFILE(cx->blk_oldcop), 0));
-    lcop = closest_cop(cx->blk_oldcop, cx->blk_oldcop->op_sibling,
+    lcop = closest_cop(cx->blk_oldcop, OP_SIBLING(cx->blk_oldcop),
 		       cx->blk_sub.retop, TRUE);
     if (!lcop)
 	lcop = cx->blk_oldcop;
@@ -2701,7 +2701,7 @@ S_dofindlabel(pTHX_ OP *o, const char *label, STRLEN len, U32 flags, OP **opstac
     if (o->op_flags & OPf_KIDS) {
 	OP *kid;
 	/* First try all the kids at this level, since that's likeliest. */
-	for (kid = cUNOPo->op_first; kid; kid = kid->op_sibling) {
+	for (kid = cUNOPo->op_first; kid; kid = OP_SIBLING(kid)) {
 	    if (kid->op_type == OP_NEXTSTATE || kid->op_type == OP_DBSTATE) {
                 STRLEN kid_label_len;
                 U32 kid_label_flags;
@@ -2721,7 +2721,7 @@ S_dofindlabel(pTHX_ OP *o, const char *label, STRLEN len, U32 flags, OP **opstac
 		    return kid;
 	    }
 	}
-	for (kid = cUNOPo->op_first; kid; kid = kid->op_sibling) {
+	for (kid = cUNOPo->op_first; kid; kid = OP_SIBLING(kid)) {
 	    if (kid == PL_lastgotoprobe)
 		continue;
 	    if (kid->op_type == OP_NEXTSTATE || kid->op_type == OP_DBSTATE) {
@@ -3007,13 +3007,13 @@ PP(pp_goto) /* also pp_dump */
 	    case CXt_LOOP_PLAIN:
 	    case CXt_GIVEN:
 	    case CXt_WHEN:
-		gotoprobe = cx->blk_oldcop->op_sibling;
+		gotoprobe = OP_SIBLING(cx->blk_oldcop);
 		break;
 	    case CXt_SUBST:
 		continue;
 	    case CXt_BLOCK:
 		if (ix) {
-		    gotoprobe = cx->blk_oldcop->op_sibling;
+		    gotoprobe = OP_SIBLING(cx->blk_oldcop);
 		    in_block = TRUE;
 		} else
 		    gotoprobe = PL_main_root;
@@ -3035,14 +3035,17 @@ PP(pp_goto) /* also pp_dump */
 		break;
 	    }
 	    if (gotoprobe) {
+                OP *sibl1, *sibl2;
+
 		retop = dofindlabel(gotoprobe, label, label_len, label_flags,
 				    enterops, enterops + GOTO_DEPTH);
 		if (retop)
 		    break;
-		if (gotoprobe->op_sibling &&
-			gotoprobe->op_sibling->op_type == OP_UNSTACK &&
-			gotoprobe->op_sibling->op_sibling) {
-		    retop = dofindlabel(gotoprobe->op_sibling->op_sibling,
+		if ( (sibl1 = OP_SIBLING(gotoprobe)) &&
+		     sibl1->op_type == OP_UNSTACK &&
+		     (sibl2 = OP_SIBLING(sibl1)))
+                {
+		    retop = dofindlabel(sibl2,
 					label, label_len, label_flags, enterops,
 					enterops + GOTO_DEPTH);
 		    if (retop)

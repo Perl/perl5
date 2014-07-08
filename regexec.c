@@ -5318,7 +5318,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 			assert(o->op_targ == OP_LEAVE);
 			o = cUNOPo->op_first;
 			assert(o->op_type == OP_ENTER);
-			o = o->op_sibling;
+			o = OP_SIBLING(o);
 		    }
 
 		    if (o->op_type != OP_STUB) {

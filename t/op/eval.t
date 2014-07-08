@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan(tests => 130);
+plan(tests => 132);
 
 eval 'pass();';
 
@@ -515,6 +515,16 @@ END_EVAL_TEST
     my $s = "a";
     $s =~ s/a/$t = \%^H;  qq( qq() );/ee;
     is(Internals::SvREFCNT(%$t), $count_expected, 'RT 63110');
+}
+
+# make sure default arg eval only adds a hints hash once to entereval
+#
+{
+    local $_ = "21+12";
+    is(eval, 33, 'argless eval without hints');
+    use feature qw(:5.10);
+    local $_ = "42+24";
+    is(eval, 66, 'argless eval with hints');
 }
 
 {

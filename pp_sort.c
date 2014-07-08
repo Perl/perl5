@@ -1507,7 +1507,7 @@ PP(pp_sort)
     SAVEVPTR(PL_sortcop);
     if (flags & OPf_STACKED) {
 	if (flags & OPf_SPECIAL) {
-	    OP *nullop = cLISTOP->op_first->op_sibling;	/* pass pushmark */
+	    OP *nullop = OP_SIBLING(cLISTOP->op_first);	/* pass pushmark */
             assert(nullop->op_type == OP_NULL);
 	    PL_sortcop = nullop->op_next;
 	}

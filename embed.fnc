@@ -466,7 +466,7 @@ pR	|OP *	|parse_subsignature
 p	|char*	|find_script	|NN const char *scriptname|bool dosearch \
 				|NULLOK const char *const *const search_ext|I32 flags
 #if defined(PERL_IN_OP_C)
-s	|OP*	|force_list	|NULLOK OP* arg
+s	|OP*	|force_list	|NULLOK OP* arg|bool nullit
 i	|OP*	|op_integerize	|NN OP *o
 i	|OP*	|op_std_init	|NN OP *o
 : FIXME
@@ -771,6 +771,9 @@ Apd	|void	|op_null	|NN OP* o
 EXp	|void	|op_clear	|NN OP* o
 Ap	|void	|op_refcnt_lock
 Ap	|void	|op_refcnt_unlock
+Apdn	|OP*	|op_sibling_splice|NN OP *parent|NULLOK OP *start \
+		|int del_count|NULLOK OP* insert
+Apdn	|OP*	|op_parent|NN OP *o
 #if defined(PERL_IN_OP_C)
 s	|OP*	|listkids	|NULLOK OP* o
 #endif

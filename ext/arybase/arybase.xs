@@ -156,7 +156,8 @@ STATIC void ab_neuter_dollar_bracket(pTHX_ OP *o) {
  oldc = cUNOPx(o)->op_first;
  newc = newGVOP(OP_GV, 0,
    gv_fetchpvs("arybase::leftbrack", GV_ADDMULTI, SVt_PVGV));
- cUNOPx(o)->op_first = newc;
+ /* replace oldc with newc */
+ op_sibling_splice(o, NULL, 1, newc);
  op_free(oldc);
 }
 
@@ -176,7 +177,7 @@ STATIC OP *ab_ck_sassign(pTHX_ OP *o) {
  o = (*ab_old_ck_sassign)(aTHX_ o);
  if (o->op_type == OP_SASSIGN && FEATURE_ARYBASE_IS_ENABLED) {
   OP *right = cBINOPx(o)->op_first;
-  OP *left = right->op_sibling;
+  OP *left = OP_SIBLING(right);
   if (left) ab_process_assignment(left, right);
  }
  return o;
@@ -186,8 +187,9 @@ STATIC OP *ab_ck_aassign(pTHX_ OP *o) {
  o = (*ab_old_ck_aassign)(aTHX_ o);
  if (o->op_type == OP_AASSIGN && FEATURE_ARYBASE_IS_ENABLED) {
   OP *right = cBINOPx(o)->op_first;
-  OP *left = cBINOPx(right->op_sibling)->op_first->op_sibling;
-  right = cBINOPx(right)->op_first->op_sibling;
+  OP *left = OP_SIBLING(right);
+  left = OP_SIBLING(cBINOPx(left)->op_first);
+  right = OP_SIBLING(cBINOPx(right)->op_first);
   ab_process_assignment(left, right);
  }
  return o;
@@ -375,10 +377,17 @@ static OP *ab_ck_base(pTHX_ OP *o)
    ab_map_store(o, o->op_ppaddr, base);
    o->op_ppaddr = new_pp;
    /* Break the aelemfast optimisation */
-   if (o->op_type == OP_AELEM &&
-       cBINOPo->op_first->op_sibling->op_type == OP_CONST) {
-     cBINOPo->op_first->op_sibling
-      = newUNOP(OP_NULL,0,cBINOPo->op_first->op_sibling);
+   if (o->op_type == OP_AELEM) {
+    OP *const first = cBINOPo->op_first;
+    OP *second = OP_SIBLING(first);
+    OP *newop;
+    if (second->op_type == OP_CONST) {
+     /* cut out second arg and replace it with a new unop which is
+      * the parent of that arg */
+     op_sibling_splice(o, first, 1, NULL);
+     newop = newUNOP(OP_NULL,0,second);
+     op_sibling_splice(o, first, 0, newop);
+    }
    }
   }
   else ab_map_delete(o);

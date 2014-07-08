@@ -422,4 +422,23 @@ EOS
     is($k, "\x{100}", "check utf8 preserved by B::HV::ARRAY");
 }
 
+# test op_parent
+
+SKIP: {
+    unless ($Config::Config{ccflags} =~ /PERL_OP_PARENT/) {
+        skip "op_parent only present with -DPERL_OP_PARENT builds", 6;
+    }
+    my $lineseq = B::svref_2object(sub{my $x = 1})->ROOT->first;
+    is ($lineseq->type,  B::opnumber('lineseq'),
+                                'op_parent: top op is lineseq');
+    my $first  = $lineseq->first;
+    my $second = $first->sibling;
+    is(ref $second->sibling, "B::NULL", 'op_parent: second sibling is null');
+    is($first->lastsib,  0 , 'op_parent: first  sibling: !lastsib');
+    is($second->lastsib, 1,  'op_parent: second sibling: lastsib');
+    is($$lineseq,  ${$first->parent},   'op_parent: first  sibling okay');
+    is($$lineseq,  ${$second->parent},  'op_parent: second sibling okay');
+}
+
+
 done_testing();

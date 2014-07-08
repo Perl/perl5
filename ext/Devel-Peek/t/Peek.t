@@ -1030,6 +1030,23 @@ SV = PVAV\($ADDR\) at $ADDR
     FLAGS = \(IOK,pIOK\)
     IV = 3
 ARRAY
+
+do_test('Dump @array,1', '@array,1', <<'ARRAY', '', '', 1);
+SV = PVAV\($ADDR\) at $ADDR
+  REFCNT = 1
+  FLAGS = \(\)
+  ARRAY = $ADDR
+  FILL = 2
+  MAX = 3
+  ARYLEN = 0x0
+  FLAGS = \(REAL\)
+  Elt No. 0
+  SV = IV\($ADDR\) at $ADDR
+    REFCNT = 1
+    FLAGS = \(IOK,pIOK\)
+    IV = 1
+ARRAY
+
 %hash = 1..2;
 do_test('Dump %hash', '%hash', <<'HASH', '', '', 1);
 SV = PVHV\($ADDR\) at $ADDR
@@ -1046,6 +1063,7 @@ SV = PVHV\($ADDR\) at $ADDR
     FLAGS = \(IOK,pIOK\)
     IV = 2
 HASH
+
 $_ = "hello";
 do_test('rvalue substr', 'substr $_, 1, 2', <<'SUBSTR', '', '', 1);
 SV = PV\($ADDR\) at $ADDR
@@ -1509,7 +1527,7 @@ dumpindent is 4 at - line 1.
 {
 1   TYPE = leave  ===> NULL
     TARG = 1
-    FLAGS = (VOID,KIDS,PARENS,SLABBED)
+    FLAGS = (VOID,KIDS,PARENS,SLABBED,LASTSIB)
     PRIVATE = (REFCOUNTED)
     REFCNT = 1
     {
@@ -1525,12 +1543,12 @@ dumpindent is 4 at - line 1.
     {
 5       TYPE = entersub  ===> 1
         TARG = TARGS_REPLACE
-        FLAGS = (VOID,KIDS,STACKED,SLABBED)
+        FLAGS = (VOID,KIDS,STACKED,SLABBED,LASTSIB)
         PRIVATE = (HASTARG)
         {
 6           TYPE = null  ===> (5)
               (was list)
-            FLAGS = (UNKNOWN,KIDS,SLABBED)
+            FLAGS = (UNKNOWN,KIDS,SLABBED,LASTSIB)
             {
 4               TYPE = pushmark  ===> 7
                 FLAGS = (SCALAR,SLABBED)
@@ -1538,10 +1556,10 @@ dumpindent is 4 at - line 1.
             {
 8               TYPE = null  ===> (6)
                   (was rv2cv)
-                FLAGS = (SCALAR,KIDS,SLABBED)
+                FLAGS = (SCALAR,KIDS,SLABBED,LASTSIB)
                 {
 7                   TYPE = gv  ===> 5
-                    FLAGS = (SCALAR,SLABBED)
+                    FLAGS = (SCALAR,SLABBED,LASTSIB)
                     GV_OR_PADIX
                 }
             }

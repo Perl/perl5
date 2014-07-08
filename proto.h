@@ -3121,10 +3121,20 @@ PERL_CALLCONV void	Perl_op_null(pTHX_ OP* o)
 #define PERL_ARGS_ASSERT_OP_NULL	\
 	assert(o)
 
+PERL_CALLCONV OP*	Perl_op_parent(OP *o)
+			__attribute__nonnull__(1);
+#define PERL_ARGS_ASSERT_OP_PARENT	\
+	assert(o)
+
 PERL_CALLCONV OP*	Perl_op_prepend_elem(pTHX_ I32 optype, OP* first, OP* last);
 PERL_CALLCONV void	Perl_op_refcnt_lock(pTHX);
 PERL_CALLCONV void	Perl_op_refcnt_unlock(pTHX);
 PERL_CALLCONV OP*	Perl_op_scope(pTHX_ OP* o);
+PERL_CALLCONV OP*	Perl_op_sibling_splice(OP *parent, OP *start, int del_count, OP* insert)
+			__attribute__nonnull__(1);
+#define PERL_ARGS_ASSERT_OP_SIBLING_SPLICE	\
+	assert(parent)
+
 PERL_CALLCONV OP*	Perl_op_unscope(pTHX_ OP* o);
 PERL_CALLCONV void	Perl_pack_cat(pTHX_ SV *cat, const char *pat, const char *patend, SV **beglist, SV **endlist, SV ***next_in_list, U32 flags)
 			__attribute__nonnull__(pTHX_1)
@@ -6123,7 +6133,7 @@ STATIC OP*	S_fold_constants(pTHX_ OP *o)
 #define PERL_ARGS_ASSERT_FOLD_CONSTANTS	\
 	assert(o)
 
-STATIC OP*	S_force_list(pTHX_ OP* arg);
+STATIC OP*	S_force_list(pTHX_ OP* arg, bool nullit);
 STATIC void	S_forget_pmop(pTHX_ PMOP *const o)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_FORGET_PMOP	\

@@ -1323,7 +1323,7 @@ Perl_closest_cop(pTHX_ const COP *cop, const OP *o, const OP *curop,
 
     if (o->op_flags & OPf_KIDS) {
 	const OP *kid;
-	for (kid = cUNOPo->op_first; kid; kid = kid->op_sibling) {
+	for (kid = cUNOPo->op_first; kid; kid = OP_SIBLING(kid)) {
 	    const COP *new_cop;
 
 	    /* If the OP_NEXTSTATE has been optimised away we can still use it
@@ -1416,7 +1416,7 @@ Perl_mess_sv(pTHX_ SV *basemsg, bool consume)
 	 */
 
 	const COP *cop =
-	    closest_cop(PL_curcop, PL_curcop->op_sibling, PL_op, FALSE);
+	    closest_cop(PL_curcop, OP_SIBLING(PL_curcop), PL_op, FALSE);
 	if (!cop)
 	    cop = PL_curcop;
 

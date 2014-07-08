@@ -528,7 +528,7 @@ walkoptree(pTHX_ OP *o, const char *method, SV *ref)
     PUTBACK;
     perl_call_method(method, G_DISCARD);
     if (o && (o->op_flags & OPf_KIDS)) {
-	for (kid = ((UNOP*)o)->op_first; kid; kid = kid->op_sibling) {
+	for (kid = ((UNOP*)o)->op_first; kid; kid = OP_SIBLING(kid)) {
 	    ref = walkoptree(aTHX_ kid, method, ref);
 	}
     }
@@ -554,7 +554,7 @@ oplist(pTHX_ OP *o, SV **SP)
             continue;
 	case OP_SORT:
 	    if (o->op_flags & OPf_STACKED && o->op_flags & OPf_SPECIAL) {
-		OP *kid = cLISTOPo->op_first->op_sibling;   /* pass pushmark */
+		OP *kid = OP_SIBLING(cLISTOPo->op_first);   /* pass pushmark */
 		kid = kUNOP->op_first;                      /* pass rv2gv */
 		kid = kUNOP->op_first;                      /* pass leave */
 		SP = oplist(aTHX_ kid->op_next, SP);
@@ -661,7 +661,7 @@ struct OP_methods {
     U16 offset;
 } op_methods[] = {
   { STR_WITH_LEN("next"),    OPp,    STRUCT_OFFSET(struct op, op_next),     },/* 0*/
-  { STR_WITH_LEN("sibling"), OPp,    STRUCT_OFFSET(struct op, op_sibling),  },/* 1*/
+  { STR_WITH_LEN("sibling"), op_offset_special, 0,                          },/* 1*/
   { STR_WITH_LEN("targ"),    PADOFFSETp, STRUCT_OFFSET(struct op, op_targ), },/* 2*/
   { STR_WITH_LEN("flags"),   U8p,    STRUCT_OFFSET(struct op, op_flags),    },/* 3*/
   { STR_WITH_LEN("private"), U8p,    STRUCT_OFFSET(struct op, op_private),  },/* 4*/
@@ -731,6 +731,8 @@ struct OP_methods {
   { STR_WITH_LEN("static"),  op_offset_special, 0,                     },/*49*/
 #  if PERL_VERSION >= 19
   { STR_WITH_LEN("folded"),  op_offset_special, 0,                     },/*50*/
+  { STR_WITH_LEN("lastsib"), op_offset_special, 0,                     },/*51*/
+  { STR_WITH_LEN("parent"),  op_offset_special, 0,                     },/*52*/
 #  endif
 #endif
 };
@@ -1008,6 +1010,8 @@ next(o)
 	B::OP::savefree      = 48
 	B::OP::static        = 49
 	B::OP::folded        = 50
+	B::OP::lastsib       = 51
+	B::OP::parent        = 52
     PREINIT:
 	SV *ret;
     PPCODE:
@@ -1024,6 +1028,10 @@ next(o)
 
 	if (op_methods[ix].type == op_offset_special)
 	    switch (ix) {
+	    case 1: /* op_sibling */
+		ret = make_op_object(aTHX_ OP_SIBLING(o));
+		break;
+
 	    case 8: /* pmreplstart */
 		ret = make_op_object(aTHX_
 				cPMOPo->op_type == OP_SUBST
@@ -1084,6 +1092,7 @@ next(o)
 	    case 49: /* static   */
 #if PERL_VERSION >= 19
 	    case 50: /* folded   */
+	    case 51: /* lastsib  */
 #endif
 #endif
 	    /* These are all bitfields, so we can't take their addresses */
@@ -1094,13 +1103,14 @@ next(o)
 		                    : ix == 48 ? o->op_savefree
 		                    : ix == 49 ? o->op_static
 		                    : ix == 50 ? o->op_folded
+		                    : ix == 51 ? o->op_lastsib
 		                    :            o->op_spare)));
 		break;
 	    case 33: /* children */
 		{
 		    OP *kid;
 		    UV i = 0;
-		    for (kid = ((LISTOP*)o)->op_first; kid; kid = kid->op_sibling)
+		    for (kid = ((LISTOP*)o)->op_first; kid; kid = OP_SIBLING(kid))
 			i++;
 		    ret = sv_2mortal(newSVuv(i));
 		}
@@ -1199,6 +1209,9 @@ next(o)
 		ret = sv_newmortal();
 		sv_setiv(newSVrv(ret, "B::RHE"),
 			PTR2IV(CopHINTHASH_get(cCOPo)));
+		break;
+	    case 52: /* parent */
+		ret = make_op_object(aTHX_ op_parent(o));
 		break;
 	    default:
 		croak("method %s not implemented", op_methods[ix].name);

@@ -414,10 +414,12 @@
 #define op_free(a)		Perl_op_free(aTHX_ a)
 #define op_linklist(a)		Perl_op_linklist(aTHX_ a)
 #define op_null(a)		Perl_op_null(aTHX_ a)
+#define op_parent		Perl_op_parent
 #define op_prepend_elem(a,b,c)	Perl_op_prepend_elem(aTHX_ a,b,c)
 #define op_refcnt_lock()	Perl_op_refcnt_lock(aTHX)
 #define op_refcnt_unlock()	Perl_op_refcnt_unlock(aTHX)
 #define op_scope(a)		Perl_op_scope(aTHX_ a)
+#define op_sibling_splice	Perl_op_sibling_splice
 #define pack_cat(a,b,c,d,e,f,g)	Perl_pack_cat(aTHX_ a,b,c,d,e,f,g)
 #define packlist(a,b,c,d,e)	Perl_packlist(aTHX_ a,b,c,d,e)
 #define pad_add_anon(a,b)	Perl_pad_add_anon(aTHX_ a,b)
@@ -1487,7 +1489,7 @@
 #define finalize_op(a)		S_finalize_op(aTHX_ a)
 #define find_and_forget_pmops(a)	S_find_and_forget_pmops(aTHX_ a)
 #define fold_constants(a)	S_fold_constants(aTHX_ a)
-#define force_list(a)		S_force_list(aTHX_ a)
+#define force_list(a,b)		S_force_list(aTHX_ a,b)
 #define forget_pmop(a)		S_forget_pmop(aTHX_ a)
 #define gen_constant_list(a)	S_gen_constant_list(aTHX_ a)
 #define gv_ename(a)		S_gv_ename(aTHX_ a)

@@ -901,6 +901,7 @@ S_op_private_to_names(pTHX_ SV *tmpsv, U32 optype, U32 op_private) {
         if (o->op_savefree) sv_catpvs(tmpsv, ",SAVEFREE");              \
         if (o->op_static)   sv_catpvs(tmpsv, ",STATIC");                \
         if (o->op_folded)   sv_catpvs(tmpsv, ",FOLDED");                \
+        if (o->op_lastsib)  sv_catpvs(tmpsv, ",LASTSIB");               \
         Perl_dump_indent(aTHX_ level, file, "FLAGS = (%s)\n",           \
                          SvCUR(tmpsv) ? SvPVX_const(tmpsv) + 1 : "");   \
     }
@@ -1163,7 +1164,7 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, const OP *o)
     }
     if (o->op_flags & OPf_KIDS) {
 	OP *kid;
-	for (kid = cUNOPo->op_first; kid; kid = kid->op_sibling)
+	for (kid = cUNOPo->op_first; kid; kid = OP_SIBLING(kid))
 	    do_op_dump(level, file, kid);
     }
     Perl_dump_indent(aTHX_ level-1, file, "}\n");

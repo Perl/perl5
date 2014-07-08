@@ -15,7 +15,7 @@ require Exporter;
 # walkoptree comes from B.xs
 
 BEGIN {
-    $B::VERSION = '1.49';
+    $B::VERSION = '1.50';
     @B::EXPORT_OK = ();
 
     # Our BOOT code needs $VERSION set, and will append to @EXPORT_OK.
@@ -1088,6 +1088,11 @@ data structure.  See top of C<op.h> for more info.
 =item next
 
 =item sibling
+
+=item parent
+
+Returns the OP's parent. If it has no parent, or if your perl wasn't built
+with C<-DPERL_OP_PARENT>, returns NULL.
 
 =item name
 
