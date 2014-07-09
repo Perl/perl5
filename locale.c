@@ -1160,87 +1160,22 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
 
 #endif /* HAS_NL_LANGINFO etc */
 
-    /* nl_langinfo not available or failed somehow.  Look at the locale name to
-     * see if it matches qr/UTF -? 8 /ix  */
-
-    final_pos = strlen(save_input_locale) - 1;
-    if (final_pos >= 3) {
-        char *name = save_input_locale;
-
-        /* Find next 'U' or 'u' and look from there */
-        while ((name += strcspn(name, "Uu") + 1)
-                                            <= save_input_locale + final_pos - 2)
-        {
-            if (toFOLD(*(name)) != 't'
-                || toFOLD(*(name + 1)) != 'f')
-            {
-                continue;
-            }
-            name += 2;
-            if (*(name) == '-') {
-                if ((name > save_input_locale + final_pos - 1)) {
-                    break;
-                }
-                name++;
-            }
-            if (*(name) == '8') {
-                Safefree(save_input_locale);
-                DEBUG_L(PerlIO_printf(Perl_debug_log,
-                                      "Locale %s ends with UTF-8 in name\n",
-                                      save_input_locale));
-                return TRUE;
-            }
-        }
-        DEBUG_L(PerlIO_printf(Perl_debug_log,
-                              "Locale %s doesn't end with UTF-8 in name\n",
-                                save_input_locale));
-    }
-
-#ifdef WIN32
-    /* http://msdn.microsoft.com/en-us/library/windows/desktop/dd317756.aspx */
-    if (final_pos >= 4
-        && *(save_input_locale + final_pos - 0) == '1'
-        && *(save_input_locale + final_pos - 1) == '0'
-        && *(save_input_locale + final_pos - 2) == '0'
-        && *(save_input_locale + final_pos - 3) == '5'
-        && *(save_input_locale + final_pos - 4) == '6')
-    {
-        DEBUG_L(PerlIO_printf(Perl_debug_log,
-                        "Locale %s ends with 10056 in name, is UTF-8 locale\n",
-                        save_input_locale));
-        Safefree(save_input_locale);
-        return TRUE;
-    }
-#endif
-
-    /* Other common encodings are the ISO 8859 series, which aren't UTF-8 */
-    if (instr(save_input_locale, "8859")) {
-        DEBUG_L(PerlIO_printf(Perl_debug_log,
-                             "Locale %s has 8859 in name, not UTF-8 locale\n",
-                             save_input_locale));
-        Safefree(save_input_locale);
-        return FALSE;
-    }
+    /* nl_langinfo not available or failed somehow.  Next try looking at the
+     * currency symbol to see if it disambiguates things.  Often that will be
+     * in the native script, and if the symbol isn't in UTF-8, we know that the
+     * locale isn't.  If it is non-ASCII UTF-8, we infer that the locale is
+     * too. */
 
 #ifdef HAS_LOCALECONV
-
 #   ifdef USE_LOCALE_MONETARY
-
-    /* Here, there is nothing in the locale name to indicate whether the locale
-     * is UTF-8 or not.  This "name", the return of setlocale(), is actually
-     * defined to be opaque, so we can't really rely on the absence of various
-     * substrings in the name to indicate its UTF-8ness.  Look at the locale's
-     * currency symbol.  Often that will be in the native script, and if the
-     * symbol isn't in UTF-8, we know that the locale isn't.  If it is
-     * non-ASCII UTF-8, we infer that the locale is too.
-     * To do this, like above for LC_CTYPE, we first set LC_MONETARY to the
-     * locale of the desired category, if it isn't that locale already */
-
     {
         char *save_monetary_locale = NULL;
         bool illegal_utf8 = FALSE;
         bool only_ascii = FALSE;
         const struct lconv* const lc = localeconv();
+
+        /* Like above for LC_CTYPE, we first set LC_MONETARY to the locale of
+         * the desired category, if it isn't that locale already */
 
         if (category != LC_MONETARY) {
 
@@ -1378,6 +1313,76 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
     }
   cant_use_messages:
 
+#endif
+
+    /* As a last resort, look at the locale name to see if it matches
+     * qr/UTF -?  * 8 /ix, or some other common locale names.  This "name", the
+     * return of setlocale(), is actually defined to be opaque, so we can't
+     * really rely on the absence of various substrings in the name to indicate
+     * its UTF-8ness, but if it has UTF8 in the name, it is extremely likely to
+     * be a UTF-8 locale.  Similarly for the other common names */
+
+    final_pos = strlen(save_input_locale) - 1;
+    if (final_pos >= 3) {
+        char *name = save_input_locale;
+
+        /* Find next 'U' or 'u' and look from there */
+        while ((name += strcspn(name, "Uu") + 1)
+                                            <= save_input_locale + final_pos - 2)
+        {
+            if (toFOLD(*(name)) != 't'
+                || toFOLD(*(name + 1)) != 'f')
+            {
+                continue;
+            }
+            name += 2;
+            if (*(name) == '-') {
+                if ((name > save_input_locale + final_pos - 1)) {
+                    break;
+                }
+                name++;
+            }
+            if (*(name) == '8') {
+                Safefree(save_input_locale);
+                DEBUG_L(PerlIO_printf(Perl_debug_log,
+                                      "Locale %s ends with UTF-8 in name\n",
+                                      save_input_locale));
+                return TRUE;
+            }
+        }
+        DEBUG_L(PerlIO_printf(Perl_debug_log,
+                              "Locale %s doesn't end with UTF-8 in name\n",
+                                save_input_locale));
+    }
+
+#ifdef WIN32
+    /* http://msdn.microsoft.com/en-us/library/windows/desktop/dd317756.aspx */
+    if (final_pos >= 4
+        && *(save_input_locale + final_pos - 0) == '1'
+        && *(save_input_locale + final_pos - 1) == '0'
+        && *(save_input_locale + final_pos - 2) == '0'
+        && *(save_input_locale + final_pos - 3) == '5'
+        && *(save_input_locale + final_pos - 4) == '6')
+    {
+        DEBUG_L(PerlIO_printf(Perl_debug_log,
+                        "Locale %s ends with 10056 in name, is UTF-8 locale\n",
+                        save_input_locale));
+        Safefree(save_input_locale);
+        return TRUE;
+    }
+#endif
+
+    /* Other common encodings are the ISO 8859 series, which aren't UTF-8.  But
+     * since we are about to return FALSE anyway, there is no point in doing
+     * this extra work */
+#if 0
+    if (instr(save_input_locale, "8859")) {
+        DEBUG_L(PerlIO_printf(Perl_debug_log,
+                             "Locale %s has 8859 in name, not UTF-8 locale\n",
+                             save_input_locale));
+        Safefree(save_input_locale);
+        return FALSE;
+    }
 #endif
 
     DEBUG_L(PerlIO_printf(Perl_debug_log,
