@@ -1218,6 +1218,14 @@ const struct lconv_offset lconv_integers[] = {
     {"n_sep_by_space",    STRUCT_OFFSET(struct lconv, n_sep_by_space)},
     {"p_sign_posn",       STRUCT_OFFSET(struct lconv, p_sign_posn)},
     {"n_sign_posn",       STRUCT_OFFSET(struct lconv, n_sign_posn)},
+#ifdef HAS_LC_MONETARY_2008
+    {"int_p_cs_precedes",  STRUCT_OFFSET(struct lconv, int_p_cs_precedes)},
+    {"int_p_sep_by_space", STRUCT_OFFSET(struct lconv, int_p_sep_by_space)},
+    {"int_n_cs_precedes",  STRUCT_OFFSET(struct lconv, int_n_cs_precedes)},
+    {"int_n_sep_by_space", STRUCT_OFFSET(struct lconv, int_n_sep_by_space)},
+    {"int_p_sign_posn",    STRUCT_OFFSET(struct lconv, int_p_sign_posn)},
+    {"int_n_sign_posn",    STRUCT_OFFSET(struct lconv, int_n_sign_posn)},
+#endif
 #endif
     {NULL, 0}
 };

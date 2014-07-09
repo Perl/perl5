@@ -1362,6 +1362,11 @@ d_killpg (d_killpg.U):
 	indicates to the C program that the killpg() routine is available
 	to kill process groups.
 
+d_lc_monetary_2008 (d_lc_monetary_2008.U):
+	This variable conditionally defines HAS_LC_MONETARY_2008 if libc
+	has the international currency locale rules from POSIX
+	1003.1-2008.
+
 d_lchown (d_lchown.U):
 	This variable conditionally defines the HAS_LCHOWN symbol, which
 	indicates to the C program that the lchown() routine is available

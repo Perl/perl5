@@ -27,6 +27,21 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 Perl now supports POSIX 2008 locale currency additions.
+
+On platforms that are able to handle POSIX.1-2008, the
+hash returned by
+L<C<POSIX::localeconv()>|perllocale/The localeconv function>
+includes the international currency fields added by that version of the
+POSIX standard.  These are
+C<int_n_cs_precedes>,
+C<int_n_sep_by_space>,
+C<int_n_sign_posn>,
+C<int_p_cs_precedes>,
+C<int_p_sep_by_space>,
+and
+C<int_p_sign_posn>.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security

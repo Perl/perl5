@@ -600,6 +600,7 @@ d_localtime_r=''
 d_localtime_r_needs_tzset=''
 localtime_r_proto=''
 d_locconv=''
+d_lc_monetary_2008=''
 d_lockf=''
 d_ldexpl=''
 d_longdbl=''
@@ -15928,6 +15929,27 @@ $rm_try
 set localeconv d_locconv
 eval $inlibc
 
+: see if libc has the POSIX.1-2008 currency locale rules
+case "$d_locconv:$d_lc_monetary_2008" in
+  $define:)
+	$cat >try.c <<EOCP
+#include <locale.h>
+int main() {
+	struct lconv *lc = localeconv();
+	char int_p_cs_precedes = lc->int_p_cs_precedes;
+	return 0;
+}
+EOCP
+	set try
+	if eval $compile; then
+		d_lc_monetary_2008="$define"
+	else
+		d_lc_monetary_2008="$undef"
+	fi;
+	$rm_try
+	;;
+esac
+
 : see if lockf exists
 set lockf d_lockf
 eval $inlibc
@@ -23656,6 +23678,7 @@ d_localtime64='$d_localtime64'
 d_localtime_r='$d_localtime_r'
 d_localtime_r_needs_tzset='$d_localtime_r_needs_tzset'
 d_locconv='$d_locconv'
+d_lc_monetary_2008='$d_lc_monetary_2008'
 d_lockf='$d_lockf'
 d_longdbl='$d_longdbl'
 d_longlong='$d_longlong'
