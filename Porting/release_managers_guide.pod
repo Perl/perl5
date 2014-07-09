@@ -396,6 +396,10 @@ some of which need to be left unchanged.
 The line in F<INSTALL> about "is binary incompatible with" requires a
 correct choice of earlier version to declare incompatibility with.
 
+For the first RC release leading up to a BLEAD-FINAL release, update the
+description of which releases are now "officially" supported in
+F<pod/perlpolicy.pod>.
+
 When doing a BLEAD-POINT or BLEAD-FINAL release, also make sure the
 C<PERL_API_*> constants in F<patchlevel.h> are in sync with the version
 you're releasing, unless you're absolutely sure the release you're about to
