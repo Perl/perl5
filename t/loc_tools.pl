@@ -16,7 +16,7 @@ sub _trylocale {    # Adds the locale given by the first parameter to the list
     my $locale = shift;
     my $categories = shift;
     my $list = shift;
-    return if grep { $locale eq $_ } @$list;
+    return if ! $locale || grep { $locale eq $_ } @$list;
 
     $categories = [ $categories ] unless ref $categories;
 
