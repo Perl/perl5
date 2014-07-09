@@ -1285,6 +1285,10 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
             Safefree(save_monetary_locale);
         }
 
+        if (only_ascii) {
+            goto cant_use_monetary;
+        }
+
         Safefree(save_input_locale);
 
         /* It isn't a UTF-8 locale if the symbol is not legal UTF-8; otherwise
@@ -1292,13 +1296,8 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
          * UTF-8.  (We can't really tell if the locale is UTF-8 or not if the
          * symbol is just a '$', so we err on the side of it not being UTF-8)
          * */
-        DEBUG_L(PerlIO_printf(Perl_debug_log, "\tis_utf8=%d\n", (illegal_utf8)
-                                                               ? FALSE
-                                                               : ! only_ascii));
-        return (illegal_utf8)
-                ? FALSE
-                : ! only_ascii;
-
+        DEBUG_L(PerlIO_printf(Perl_debug_log, "\tis_utf8=%d\n", ! illegal_utf8));
+        return ! illegal_utf8;
     }
   cant_use_monetary:
 
