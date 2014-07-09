@@ -734,6 +734,9 @@
 #   if !defined(NO_LOCALE_MONETARY) && defined(LC_MONETARY)
 #	define USE_LOCALE_MONETARY
 #   endif
+#   if !defined(NO_LOCALE_TIME) && defined(LC_TIME)
+#	define USE_LOCALE_TIME
+#   endif
 #   ifndef WIN32    /* No wrapper except on Windows */
 #       define my_setlocale(a,b) setlocale(a,b)
 #   endif
@@ -4689,6 +4692,9 @@ EXTCONST char PL_bincompat_options[] =
 #  endif
 #  ifdef USE_LOCALE_NUMERIC
 			     " USE_LOCALE_NUMERIC"
+#  endif
+#  ifdef USE_LOCALE_TIME
+			     " USE_LOCALE_TIME"
 #  endif
 #  ifdef USE_LONG_DOUBLE
 			     " USE_LONG_DOUBLE"
