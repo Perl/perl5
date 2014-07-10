@@ -136,8 +136,8 @@ Perl_set_numeric_radix(pTHX)
  *   punct:  21-2F 3A-40 5B-60 7B-7E A1-A3 A5 A7-AB B0-B3 B5-B7 B9-BD BF-CF D1-DD DF-EF F1-FD
  * Oddly, none there are listed as alphas, though some represent alphabetics
  * http://www.nntp.perl.org/group/perl.perl5.porters/2013/02/msg198753.html */
-#define isNAME_C_OR_POSIX(name) ((name) != NULL                          \
-                                  && ((*(name) == 'C' && (*(name) + 1) == '\0') \
+#define isNAME_C_OR_POSIX(name) ((name) != NULL                                 \
+                                  && ((*(name) == 'C' && (*(name + 1)) == '\0') \
                                        || strEQ((name), "POSIX")))
 
 void
