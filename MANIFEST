@@ -1290,15 +1290,7 @@ cpan/IO-Compress/t/cz-06gzsetp.t			IO::Compress
 cpan/IO-Compress/t/cz-08encoding.t			IO::Compress
 cpan/IO-Compress/t/cz-14gzopen.t			IO::Compress
 cpan/IO-Compress/t/globmapper.t				IO::Compress
-cpan/IO-Socket-IP/Build.PL				IO::Socket::IP
-cpan/IO-Socket-IP/Changes				IO::Socket::IP
 cpan/IO-Socket-IP/lib/IO/Socket/IP.pm			IO::Socket::IP
-cpan/IO-Socket-IP/LICENSE				IO::Socket::IP
-cpan/IO-Socket-IP/Makefile.PL				IO::Socket::IP
-cpan/IO-Socket-IP/MANIFEST				IO::Socket::IP
-cpan/IO-Socket-IP/META.json				IO::Socket::IP
-cpan/IO-Socket-IP/META.yml				IO::Socket::IP
-cpan/IO-Socket-IP/README				IO::Socket::IP
 cpan/IO-Socket-IP/t/00use.t				IO::Socket::IP tests
 cpan/IO-Socket-IP/t/01local-client-v4.t			IO::Socket::IP tests
 cpan/IO-Socket-IP/t/02local-server-v4.t			IO::Socket::IP tests
