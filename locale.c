@@ -1173,9 +1173,9 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
 #   ifdef USE_LOCALE_MONETARY
     {
         char *save_monetary_locale = NULL;
-        bool illegal_utf8 = FALSE;
         bool only_ascii = FALSE;
-        const struct lconv* const lc = localeconv();
+        bool is_utf8 = FALSE;
+        struct lconv* lc;
 
         /* Like above for LC_CTYPE, we first set LC_MONETARY to the locale of
          * the desired category, if it isn't that locale already */
@@ -1190,31 +1190,32 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
             }
             save_monetary_locale = stdize_locale(savepv(save_monetary_locale));
 
-            if (strNE(save_monetary_locale, save_input_locale)) {
-                if (! setlocale(LC_MONETARY, save_input_locale)) {
+            if (strEQ(save_monetary_locale, save_input_locale)) {
+                Safefree(save_monetary_locale);
+                save_monetary_locale = NULL;
+            }
+            else if (! setlocale(LC_MONETARY, save_input_locale)) {
                     DEBUG_L(PerlIO_printf(Perl_debug_log,
                                 "Could not change LC_MONETARY locale to %s\n",
                                                             save_input_locale));
                     Safefree(save_monetary_locale);
                     goto cant_use_monetary;
-                }
             }
         }
 
         /* Here the current LC_MONETARY is set to the locale of the category
          * whose information is desired. */
 
-        if (lc && lc->currency_symbol) {
-            if (! is_utf8_string((U8 *) lc->currency_symbol, 0)) {
-                DEBUG_L(PerlIO_printf(Perl_debug_log,
-                            "Currency symbol for %s is not legal UTF-8\n",
-                                        save_input_locale));
-                illegal_utf8 = TRUE;
-            }
-            else if (is_ascii_string((U8 *) lc->currency_symbol, 0)) {
-                DEBUG_L(PerlIO_printf(Perl_debug_log, "Currency symbol for %s contains only ASCII; can't use for determining if UTF-8 locale\n", save_input_locale));
-                only_ascii = TRUE;
-            }
+        lc = localeconv();
+        if (! lc
+            || ! lc->currency_symbol
+            || is_ascii_string((U8 *) lc->currency_symbol, 0))
+        {
+            DEBUG_L(PerlIO_printf(Perl_debug_log, "Couldn't get currency symbol for %s, or contains only ASCII; can't use for determining if UTF-8 locale\n", save_input_locale));
+            only_ascii = TRUE;
+        }
+        else {
+            is_utf8 = is_utf8_string((U8 *) lc->currency_symbol, 0);
         }
 
         /* If we changed it, restore LC_MONETARY to its original locale */
@@ -1223,19 +1224,16 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
             Safefree(save_monetary_locale);
         }
 
-        if (only_ascii) {
-            goto cant_use_monetary;
-        }
-
-        Safefree(save_input_locale);
+        if (! only_ascii) {
 
         /* It isn't a UTF-8 locale if the symbol is not legal UTF-8; otherwise
          * assume the locale is UTF-8 if and only if the symbol is non-ascii
-         * UTF-8.  (We can't really tell if the locale is UTF-8 or not if the
-         * symbol is just a '$', so we err on the side of it not being UTF-8)
-         * */
-        DEBUG_L(PerlIO_printf(Perl_debug_log, "\tis_utf8=%d\n", ! illegal_utf8));
-        return ! illegal_utf8;
+         * UTF-8. */
+        DEBUG_L(PerlIO_printf(Perl_debug_log, "\t?Currency symbol for %s is UTF-8=%d\n",
+                                save_input_locale, is_utf8));
+        Safefree(save_input_locale);
+        return is_utf8;
+        }
     }
   cant_use_monetary:
 
