@@ -1158,7 +1158,9 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
 
   cant_use_nllanginfo:
 
-#endif /* HAS_NL_LANGINFO etc */
+#else   /* nl_langinfo should work if available, so don't bother compiling this
+           fallback code.  The final fallback of looking at the name is
+           compiled, and will be executed if nl_langinfo fails */
 
     /* nl_langinfo not available or failed somehow.  Next try looking at the
      * currency symbol to see if it disambiguates things.  Often that will be
@@ -1314,6 +1316,8 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
   cant_use_messages:
 
 #endif
+
+#endif /* the code that is compiled when no nl_langinfo */
 
     /* As a last resort, look at the locale name to see if it matches
      * qr/UTF -?  * 8 /ix, or some other common locale names.  This "name", the
