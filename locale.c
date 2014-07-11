@@ -1240,7 +1240,99 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
 #   endif /* USE_LOCALE_MONETARY */
 #endif /* HAS_LOCALECONV */
 
-#if 0 && defined(HAS_STRERROR) && defined(USE_LOCALE_MESSAGES)
+#if defined(HAS_STRFTIME) && defined(USE_LOCALE_TIME)
+
+/* Still haven't found a non-ASCII string to disambiguate UTF-8 or not.  Try
+ * the names of the months and weekdays, timezone, and am/pm indicator */
+    {
+        char *save_time_locale = NULL;
+        int hour = 10;
+        bool is_dst = FALSE;
+        int dom = 1;
+        int month = 0;
+        int i;
+        char * formatted_time;
+
+
+        /* Like above for LC_MONETARY, we set LC_TIME to the locale of the
+         * desired category, if it isn't that locale already */
+
+        if (category != LC_TIME) {
+
+            save_time_locale = setlocale(LC_TIME, NULL);
+            if (! save_time_locale) {
+                DEBUG_L(PerlIO_printf(Perl_debug_log,
+                            "Could not find current locale for LC_TIME\n"));
+                goto cant_use_time;
+            }
+            save_time_locale = stdize_locale(savepv(save_time_locale));
+
+            if (strEQ(save_time_locale, save_input_locale)) {
+                Safefree(save_time_locale);
+                save_time_locale = NULL;
+            }
+            else if (! setlocale(LC_TIME, save_input_locale)) {
+                DEBUG_L(PerlIO_printf(Perl_debug_log,
+                            "Could not change LC_TIME locale to %s\n",
+                                                        save_input_locale));
+                Safefree(save_time_locale);
+                goto cant_use_time;
+            }
+        }
+
+        /* Here the current LC_TIME is set to the locale of the category
+         * whose information is desired.  Look at all the days of the week and
+         * month names, and the timezone and am/pm indicator for non-ASCII
+         * characters.  The first such a one found will tell us if the locale
+         * is UTF-8 or not */
+
+        for (i = 0; i < 7 + 12; i++) {  /* 7 days; 12 months */
+            formatted_time = my_strftime("%A %B %Z %p",
+                                    0, 0, hour, dom, month, 112, 0, 0, is_dst);
+            if (! formatted_time || is_ascii_string((U8 *) formatted_time, 0)) {
+
+                /* Here, we didn't find a non-ASCII.  Try the next time through
+                 * with the complemented dst and am/pm, and try with the next
+                 * weekday.  After we have gotten all weekdays, try the next
+                 * month */
+                is_dst = ! is_dst;
+                hour = (hour + 12) % 24;
+                dom++;
+                if (i > 6) {
+                    month++;
+                }
+                continue;
+            }
+
+            /* Here, we have a non-ASCII.  Return TRUE is it is valid UTF8;
+             * false otherwise.  But first, restore LC_TIME to its original
+             * locale if we changed it */
+            if (save_time_locale) {
+                setlocale(LC_TIME, save_time_locale);
+                Safefree(save_time_locale);
+            }
+
+            DEBUG_L(PerlIO_printf(Perl_debug_log, "\t?time-related strings for %s are UTF-8=%d\n",
+                                save_input_locale,
+                                is_utf8_string((U8 *) formatted_time, 0)));
+            Safefree(save_input_locale);
+            return is_utf8_string((U8 *) formatted_time, 0);
+        }
+
+        /* Falling off the end of the loop indicates all the names were just
+         * ASCII.  Go on to the next test.  If we changed it, restore LC_TIME
+         * to its original locale */
+        if (save_time_locale) {
+            setlocale(LC_TIME, save_time_locale);
+            Safefree(save_time_locale);
+        }
+        DEBUG_L(PerlIO_printf(Perl_debug_log, "All time-related words for %s contain only ASCII; can't use for determining if UTF-8 locale\n", save_input_locale));
+    }
+  cant_use_time:
+
+#endif
+
+#if 0 && defined(USE_LOCALE_MESSAGES) && defined(HAS_SYS_ERRLIST)
 
 /* This code is ifdefd out because it was found to not be necessary in testing
  * on our dromedary test machine, which has over 700 locales.  There, looking
