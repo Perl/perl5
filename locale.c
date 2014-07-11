@@ -1348,10 +1348,10 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
                 name++;
             }
             if (*(name) == '8') {
-                Safefree(save_input_locale);
                 DEBUG_L(PerlIO_printf(Perl_debug_log,
                                       "Locale %s ends with UTF-8 in name\n",
                                       save_input_locale));
+                Safefree(save_input_locale);
                 return TRUE;
             }
         }
