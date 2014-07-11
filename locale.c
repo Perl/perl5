@@ -1048,12 +1048,13 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
         if (category != LC_CTYPE) { /* These work only on LC_CTYPE */
 
             /* Get the current LC_CTYPE locale */
-            save_ctype_locale = stdize_locale(savepv(setlocale(LC_CTYPE, NULL)));
+            save_ctype_locale = setlocale(LC_CTYPE, NULL);
             if (! save_ctype_locale) {
                 DEBUG_L(PerlIO_printf(Perl_debug_log,
                                "Could not find current locale for LC_CTYPE\n"));
                 goto cant_use_nllanginfo;
             }
+            save_ctype_locale = stdize_locale(savepv(save_ctype_locale));
 
             /* If LC_CTYPE and the desired category use the same locale, this
              * means that finding the value for LC_CTYPE is the same as finding
@@ -1081,8 +1082,9 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
 
 #   if defined(HAS_NL_LANGINFO) && defined(CODESET)
         {
-            char *codeset = savepv(nl_langinfo(CODESET));
+            char *codeset = nl_langinfo(CODESET);
             if (codeset && strNE(codeset, "")) {
+                codeset = savepv(codeset);
 
                 /* If we switched LC_CTYPE, switch back */
                 if (save_ctype_locale) {
@@ -1100,7 +1102,6 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
                 Safefree(save_input_locale);
                 return is_utf8;
             }
-            Safefree(codeset);
         }
 
 #   endif
@@ -1181,13 +1182,13 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
 
         if (category != LC_MONETARY) {
 
-            save_monetary_locale = stdize_locale(savepv(setlocale(LC_MONETARY,
-                                                                  NULL)));
+            save_monetary_locale = setlocale(LC_MONETARY, NULL);
             if (! save_monetary_locale) {
                 DEBUG_L(PerlIO_printf(Perl_debug_log,
                             "Could not find current locale for LC_MONETARY\n"));
                 goto cant_use_monetary;
             }
+            save_monetary_locale = stdize_locale(savepv(save_monetary_locale));
 
             if (strNE(save_monetary_locale, save_input_locale)) {
                 if (! setlocale(LC_MONETARY, save_input_locale)) {
