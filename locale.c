@@ -1195,11 +1195,11 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
                 save_monetary_locale = NULL;
             }
             else if (! setlocale(LC_MONETARY, save_input_locale)) {
-                    DEBUG_L(PerlIO_printf(Perl_debug_log,
-                                "Could not change LC_MONETARY locale to %s\n",
-                                                            save_input_locale));
-                    Safefree(save_monetary_locale);
-                    goto cant_use_monetary;
+                DEBUG_L(PerlIO_printf(Perl_debug_log,
+                            "Could not change LC_MONETARY locale to %s\n",
+                                                        save_input_locale));
+                Safefree(save_monetary_locale);
+                goto cant_use_monetary;
             }
         }
 
@@ -1226,13 +1226,13 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
 
         if (! only_ascii) {
 
-        /* It isn't a UTF-8 locale if the symbol is not legal UTF-8; otherwise
-         * assume the locale is UTF-8 if and only if the symbol is non-ascii
-         * UTF-8. */
-        DEBUG_L(PerlIO_printf(Perl_debug_log, "\t?Currency symbol for %s is UTF-8=%d\n",
-                                save_input_locale, is_utf8));
-        Safefree(save_input_locale);
-        return is_utf8;
+            /* It isn't a UTF-8 locale if the symbol is not legal UTF-8;
+             * otherwise assume the locale is UTF-8 if and only if the symbol
+             * is non-ascii UTF-8. */
+            DEBUG_L(PerlIO_printf(Perl_debug_log, "\t?Currency symbol for %s is UTF-8=%d\n",
+                                    save_input_locale, is_utf8));
+            Safefree(save_input_locale);
+            return is_utf8;
         }
     }
   cant_use_monetary:
