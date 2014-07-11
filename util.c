@@ -3804,6 +3804,9 @@ char *
 Perl_my_strftime(pTHX_ const char *fmt, int sec, int min, int hour, int mday, int mon, int year, int wday, int yday, int isdst)
 {
 #ifdef HAS_STRFTIME
+
+  /* Note that yday and wday effectively are ignored by this function, as mini_mktime() overwrites them */
+
   char *buf;
   int buflen;
   struct tm mytm;
