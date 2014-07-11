@@ -1010,8 +1010,10 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
     /* Returns TRUE if the current locale for 'category' is UTF-8; FALSE
      * otherwise. 'category' may not be LC_ALL.  If the platform doesn't have
      * nl_langinfo(), nor MB_CUR_MAX, this employs a heuristic, which hence
-     * could give the wrong result.  It errs on the side of not being a UTF-8
-     * locale. */
+     * could give the wrong result.  The result will very likely be correct for
+     * languages that have commonly used non-ASCII characters, but for notably
+     * English, it comes down to if the locale's name ends in something like
+     * "UTF-8".  It errs on the side of not being a UTF-8 locale. */
 
     char *save_input_locale = NULL;
     STRLEN final_pos;
@@ -1167,7 +1169,8 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
      * currency symbol to see if it disambiguates things.  Often that will be
      * in the native script, and if the symbol isn't in UTF-8, we know that the
      * locale isn't.  If it is non-ASCII UTF-8, we infer that the locale is
-     * too. */
+     * too, as the odds of a non-UTF8 string being valid UTF-8 are quite small
+     * */
 
 #ifdef HAS_LOCALECONV
 #   ifdef USE_LOCALE_MONETARY
