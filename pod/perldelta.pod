@@ -129,6 +129,14 @@ XXX
 
 =item *
 
+L<IO::Socket::IP> has been upgraded from verion 0.29 to 0.31.
+
+A better fix for subclassing C<connect()>.
+L<[cpan #95983]|https://rt.cpan.org/Ticket/Display.html?id=95983>
+L<[cpan #97050]|https://rt.cpan.org/Ticket/Display.html?id=97050>
+
+=item *
+
 L<Math::BigInt> has been upgraded from version 1.9995 to 1.9996.
 
 Correct handling of subclasses.

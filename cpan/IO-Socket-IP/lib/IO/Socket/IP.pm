@@ -7,7 +7,7 @@ package IO::Socket::IP;
 # $VERSION needs to be set before  use base 'IO::Socket'
 #  - https://rt.cpan.org/Ticket/Display.html?id=92107
 BEGIN {
-   $VERSION = '0.30';
+   $VERSION = '0.31';
 }
 
 use strict;
@@ -601,7 +601,7 @@ sub setup
       }
 
       if( defined( my $addr = $info->{peeraddr} ) ) {
-         if( $self->IO::Socket::IP::connect( $addr ) ) {
+         if( $self->connect( $addr ) ) {
             $! = 0;
             return 1;
          }
@@ -610,6 +610,13 @@ sub setup
             ${*$self}{io_socket_ip_connect_in_progress} = 1;
             return 0;
          }
+
+	 # If connect failed but we have no system error there must be an error
+	 # at the application layer, like a bad certificate with
+	 # IO::Socket::SSL.
+	 # In this case don't continue IP based multi-homing because the problem
+	 # cannot be solved at the IP layer.
+	 return 0 if ! $!;
 
          ${*$self}{io_socket_ip_errors}[0] = $!;
          next;
@@ -651,7 +658,7 @@ sub connect
    # (still in progress). This even works on MSWin32.
    my $addr = ${*$self}{io_socket_ip_infos}[${*$self}{io_socket_ip_idx}]{peeraddr};
 
-   if( $self->IO::Socket::IP::connect( $addr ) or $! == EISCONN ) {
+   if( CORE::connect( $self, $addr ) or $! == EISCONN ) {
       delete ${*$self}{io_socket_ip_connect_in_progress};
       $! = 0;
       return 1;
