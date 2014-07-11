@@ -1335,63 +1335,68 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
 #if 0 && defined(USE_LOCALE_MESSAGES) && defined(HAS_SYS_ERRLIST)
 
 /* This code is ifdefd out because it was found to not be necessary in testing
- * on our dromedary test machine, which has over 700 locales.  There, looking
- * at just the currency symbol gave essentially the same results as doing this
- * extra work.  Executing this also caused segfaults in miniperl.  I left it in
- * so as to avoid rewriting it if real-world experience indicates that
- * dromedary is an outlier.  Essentially, instead of returning abpve if we
+ * on our dromedary test machine, which has over 700 locales.  There, this
+ * added no value to looking at the currency symbol and the time strings.  I
+ * left it in so as to avoid rewriting it if real-world experience indicates
+ * that dromedary is an outlier.  Essentially, instead of returning abpve if we
  * haven't found illegal utf8, we continue on and examine all the strerror()
  * messages on the platform for utf8ness.  If all are ASCII, we still don't
  * know the answer; but otherwise we have a pretty good indication of the
- * utf8ness.  The reason this doesn't necessarily help much is that the
- * messages may not have been translated into the locale.  The currency symbol
- * is much more likely to have been translated.  The code below would need to
- * be altered somewhat to just be a continuation of testing the currency
- * symbol. */
+ * utf8ness.  The reason this doesn't help much is that the messages may not
+ * have been translated into the locale.  The currency symbol and time strings
+ * are much more likely to have been translated.  */
+    {
         int e;
-        unsigned int failures = 0, non_ascii = 0;
+        bool is_utf8 = FALSE;
+        bool non_ascii = FALSE;
         char *save_messages_locale = NULL;
+        const char * errmsg = NULL;
 
-        /* Like above for LC_CTYPE, we set LC_MESSAGES to the locale of the
-         * desired category, if it isn't that locale already */
+        /* Like above, we set LC_MESSAGES to the locale of the desired
+         * category, if it isn't that locale already */
 
         if (category != LC_MESSAGES) {
 
-            save_messages_locale = stdize_locale(savepv(setlocale(LC_MESSAGES,
-                                                                  NULL)));
+            save_messages_locale = setlocale(LC_MESSAGES, NULL);
             if (! save_messages_locale) {
+                DEBUG_L(PerlIO_printf(Perl_debug_log,
+                            "Could not find current locale for LC_MESSAGES\n"));
                 goto cant_use_messages;
             }
+            save_messages_locale = stdize_locale(savepv(save_messages_locale));
 
             if (strEQ(save_messages_locale, save_input_locale)) {
-                Safefree(save_input_locale);
+                Safefree(save_messages_locale);
+                save_messages_locale = NULL;
             }
             else if (! setlocale(LC_MESSAGES, save_input_locale)) {
+                DEBUG_L(PerlIO_printf(Perl_debug_log,
+                            "Could not change LC_MESSAGES locale to %s\n",
+                                                        save_input_locale));
                 Safefree(save_messages_locale);
                 goto cant_use_messages;
             }
         }
 
         /* Here the current LC_MESSAGES is set to the locale of the category
-         * whose information is desired.  Look through all the messages */
+         * whose information is desired.  Look through all the messages.  We
+         * can't use Strerror() here because it may expand to code that
+         * segfaults in miniperl */
 
-        for (e = 0;
-#ifdef HAS_SYS_ERRLIST
-             e <= sys_nerr
-#endif
-             ; e++)
-        {
-            const U8* const errmsg = (U8 *) Strerror(e) ;
-            if (!errmsg)
-                break;
-            if (! is_utf8_string(errmsg, 0)) {
-                failures++;
+        for (e = 0; e <= sys_nerr; e++) {
+            errno = 0;
+            errmsg = sys_errlist[e];
+            if (errno || !errmsg) {
                 break;
             }
-            else if (! is_ascii_string(errmsg, 0)) {
-                non_ascii++;
+            errmsg = savepv(errmsg);
+            if (! is_ascii_string((U8 *) errmsg, 0)) {
+                non_ascii = TRUE;
+                is_utf8 = is_utf8_string((U8 *) errmsg, 0);
+                break;
             }
         }
+        Safefree(errmsg);
 
         /* And, if we changed it, restore LC_MESSAGES to its original locale */
         if (save_messages_locale) {
@@ -1399,10 +1404,18 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
             Safefree(save_messages_locale);
         }
 
-        /* Any non-UTF-8 message means not a UTF-8 locale; if all are valid,
-         * any non-ascii means it is one; otherwise we assume it isn't */
-        return (failures) ? FALSE : non_ascii;
+        if (non_ascii) {
 
+            /* Any non-UTF-8 message means not a UTF-8 locale; if all are valid,
+             * any non-ascii means it is one; otherwise we assume it isn't */
+            DEBUG_L(PerlIO_printf(Perl_debug_log, "\t?error messages for %s are UTF-8=%d\n",
+                                save_input_locale,
+                                is_utf8));
+            Safefree(save_input_locale);
+            return is_utf8;
+        }
+
+        DEBUG_L(PerlIO_printf(Perl_debug_log, "All error messages for %s contain only ASCII; can't use for determining if UTF-8 locale\n", save_input_locale));
     }
   cant_use_messages:
 
