@@ -69,7 +69,7 @@ PerlIOWin32_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers, IV n, const ch
 {
  const char *tmode = mode;
  HANDLE h = INVALID_HANDLE_VALUE;
- if (f)
+ if (PerlIOValid(f))
   {
    /* Close if already open */
    if (PerlIOBase(f)->flags & PERLIO_F_OPEN)
