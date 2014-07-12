@@ -6,6 +6,7 @@ require 5.006 ;
 use private::MakeUtil;
 use ExtUtils::MakeMaker 5.16 ;
 use ExtUtils::Install (); # only needed to check for version
+use Config;
 
 my $ZLIB_LIB ;
 my $ZLIB_INCLUDE ;
@@ -14,6 +15,10 @@ my $OLD_ZLIB = '' ;
 my $WALL = '' ;
 my $GZIP_OS_CODE = -1 ;
 my $USE_PPPORT_H = ($ENV{PERL_CORE}) ? '' : '-DUSE_PPPORT_H';
+my $OPTIMIZE = $Config{'optimize'};
+if ($Config{'gccversion'} and $OPTIMIZE =~ /-g (gdb)? 3/x) {
+  $OPTIMIZE =~ s/-g(gdb)?3/-g/g; # [88936] out of memory with -g3 since 2.062
+}
 
 #$WALL = ' -pedantic ' if $Config{'cc'} =~ /gcc/ ;
 #$WALL = ' -Wall -Wno-comment ' if $Config{'cc'} =~ /gcc/ ;
@@ -81,7 +86,9 @@ WriteMakefile(
         ? zlib_files($ZLIB_LIB)
         : (LIBS => [ "-L$ZLIB_LIB -lz " ])
     ),
-      
+
+    OPTIMIZE => $OPTIMIZE,
+
     INSTALLDIRS => ($] >= 5.009 && $] < 5.011 ? 'perl' : 'site'),
 
     META_MERGE => {
