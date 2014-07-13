@@ -586,16 +586,21 @@ S_refto(pTHX_ SV *sv)
 
 PP(pp_ref)
 {
-    dSP; dTARGET;
-    SV * const sv = POPs;
+    dSP;
+    SV * const sv = TOPs;
 
     SvGETMAGIC(sv);
     if (!SvROK(sv))
-	RETPUSHNO;
+	SETs(&PL_sv_no);
+    else {
+	dTARGET;
+	SETs(TARG);
+	/* use the return value that is in a register, its the same as TARG */
+	TARG = sv_ref(TARG,SvRV(sv),TRUE);
+	SvSETMAGIC(TARG);
+    }
 
-    (void)sv_ref(TARG,SvRV(sv),TRUE);
-    PUSHTARG;
-    RETURN;
+    return NORMAL;
 }
 
 PP(pp_bless)
