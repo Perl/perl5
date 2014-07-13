@@ -205,7 +205,7 @@ Perl_sv_does_sv(pTHX_ SV *sv, SV *namesv, U32 flags)
 	return FALSE;
     }
 
-    if (sv_isobject(sv)) {
+    if (SvROK(sv) && SvOBJECT(SvRV(sv))) {
 	classname = sv_ref(NULL,SvRV(sv),TRUE);
     } else {
 	classname = sv;

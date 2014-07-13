@@ -4599,11 +4599,11 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
 	    RETPUSHYES;
     }
 
-    if (sv_isobject(e) && (SvTYPE(SvRV(e)) != SVt_REGEXP)) {
+    if (SvROK(e) && SvOBJECT(SvRV(e)) && (SvTYPE(SvRV(e)) != SVt_REGEXP)) {
 	DEBUG_M(Perl_deb(aTHX_ "    applying rule Any-Object\n"));
 	Perl_croak(aTHX_ "Smart matching a non-overloaded object breaks encapsulation");
     }
-    if (sv_isobject(d) && (SvTYPE(SvRV(d)) != SVt_REGEXP))
+    if (SvROK(d) && SvOBJECT(SvRV(d)) && (SvTYPE(SvRV(d)) != SVt_REGEXP))
 	object_on_left = TRUE;
 
     /* ~~ sub */

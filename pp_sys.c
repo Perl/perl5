@@ -1082,9 +1082,11 @@ PP(pp_dbmopen)
 	PUTBACK;
 	call_sv(MUTABLE_SV(GvCV(gv)), G_SCALAR);
 	SPAGAIN;
+        if (sv_isobject(TOPs))
+            goto retie;
     }
-
-    if (sv_isobject(TOPs)) {
+    else {
+        retie:
 	sv_unmagic(MUTABLE_SV(hv), PERL_MAGIC_tied);
 	sv_magic(MUTABLE_SV(hv), TOPs, PERL_MAGIC_tied, NULL, 0);
     }
