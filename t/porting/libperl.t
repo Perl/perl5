@@ -86,6 +86,10 @@ if ($nm_style eq 'gnu') {
     }
 }
 
+if ($^O eq 'darwin') {
+    skip_all 'nm peculiarities on darwin need study: RT #122267'
+}
+
 my $nm_err_tmp = "libperl$$";
 
 END {
