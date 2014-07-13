@@ -1,7 +1,9 @@
 #!/usr/bin/perl -w
 
-# Try opening libperl.a with nm, and verifying it has the kind of symbols
-# we expected.  Fail softly, expect things only on known platforms.
+# Try opening libperl.a with nm, and verifying it has the kind of
+# symbols we expect, and no symbols we should avoid.
+#
+# Fail softly, expect things only on known platforms.
 #
 # Also, if the rarely-used builds options -DPERL_GLOBAL_STRUCT or
 # -DPERL_GLOBAL_STRUCT_PRIVATE are used, verify that they did what
@@ -11,6 +13,23 @@
 # Debugging tip: nm output (this script's input) can be faked by
 # giving one command line argument for this script: it should be
 # either the filename to read, or "-" for STDIN.
+#
+# Some terminology:
+# - "text" symbols are code
+# - "data" symbols are data (duh), with subdivisions:
+#   - "bss": (Block-Started-by-Symbol: originally from IBM assembler...),
+#     uninitialized data, which often even doesn't exist in the object
+#     file as such, only its size does, which is then created on demand
+#     by the loader
+#  - "const": initialized read-only data, like string literals
+#  - "common": uninitialized data unless initialized...
+#    (the full story is too long for here, see "man nm")
+#  - "data": initialized read-write data
+#    (somewhat confusingly below: "data data", but it makes code simpler)
+#  - "undefined": external symbol referred to by an object,
+#    most likely a text symbol.  Can be either a symbol defined by
+#    a Perl object file but referred to by other Perl object files,
+#    or a completely external symbol from libc, or other system libraries.
 
 BEGIN {
     chdir 't' if -d 't';
@@ -116,7 +135,11 @@ if (@ARGV == 1) {
     open($nm_fh, "$nm $nm_opt $libperl_a 2>$nm_err_tmp |") or
         skip_all "$nm $nm_opt $libperl_a failed: $!";
 }
- 
+
+sub is_perlish_symbol {
+    $_[0] =~ /^(?:PL_|Perl|PerlIO)/;
+}
+
 sub nm_parse_gnu {
     my $symbols = shift;
     my $line = $_;
@@ -147,8 +170,10 @@ sub nm_parse_gnu {
                 print "# Unknown type: $line ($symbols->{o})\n";
             }
             return;
-        } elsif (/^ {8}(?: {8})? U (\w+)$/) {
-            # Skip the undefined.
+        } elsif (/^ {8}(?: {8})? U _?(\w+)$/) {
+            my ($symbol) = $1;
+            return if is_perlish_symbol($symbol);
+            $symbols->{undef}{$symbol}{$symbols->{o}}++;
             return;
 	}
     }
@@ -192,8 +217,10 @@ sub nm_parse_darwin {
                 print "# Unknown type: $line ($symbols->{o})\n";
             }
             return;
-        } elsif (/^ {8}(?: {8})? \(undefined\) /) {
-            # Skip the undefined.
+        } elsif (/^ {8}(?: {8})? \(undefined(?: \[lazy bound\])?\) external _?(.+)/) {
+            my ($symbol) = $1;
+            return if is_perlish_symbol($symbol);
+            $symbols->{undef}{$symbol}{$symbols->{o}}++;
             return;
         }
     }
@@ -251,19 +278,6 @@ for my $dtype (sort keys %{$symbols{data}}) {
 }
 
 # The following tests differ between vanilla vs $GSP or $GS.
-#
-# Some terminology:
-# - "text" symbols are code
-# - "data" symbols are data (duh), with subdivisions:
-#   - "bss": (Block-Started-by-Symbol: originally from IBM assembler...),
-#     uninitialized data, which often even doesn't exist in the object
-#     file as such, only its size does, which is then created on demand
-#     by the loader
-#  - "const": initialized read-only data, like string literals
-#  - "common": uninitialized data unless initialized...
-#    (the full story is too long for here, see "man nm")
-#  - "data": initialized read-write data
-#    (somewhat confusingly below: "data data", but it makes code simpler)
 
 if ($GSP) {
     print "# -DPERL_GLOBAL_STRUCT_PRIVATE\n";
@@ -330,11 +344,11 @@ if ($GSP) {
     print "# neither -DPERL_GLOBAL_STRUCT nor -DPERL_GLOBAL_STRUCT_PRIVATE\n";
 
     if ( !$symbols{data}{common} ) {
-        # This is likely because Perl was compiled with 
+        # This is likely because Perl was compiled with
         # -Accflags="-fno-common"
         $symbols{data}{common} = $symbols{data}{bss};
     }
-    
+
     ok($symbols{data}{common}{PL_hash_seed}{'globals.o'}, "has PL_hash_seed");
     ok($symbols{data}{data}{PL_ppaddr}{'globals.o'}, "has PL_ppaddr");
 
@@ -342,6 +356,26 @@ if ($GSP) {
     ok(! exists $symbols{data}{data}{PL_VarsPtr}, "has no PL_VarsPtr");
     ok(! exists $symbols{data}{common}{PL_Vars}, "has no PL_Vars");
     ok(! exists $symbols{text}{Perl_GetVars}, "has no Perl_GetVars");
+}
+
+ok(keys %{$symbols{undef}}, "has undefined symbols");
+
+my @good = qw(memchr memcmp memcpy chmod socket getenv sigaction sqrt time);
+if ($Config{usedl}) {
+    push @good, 'dlopen';
+}
+for my $good (@good) {
+    my @o = exists $symbols{undef}{$good} ?
+        sort keys %{ $symbols{undef}{$good} } : ();
+    ok(@o, "uses $good (@o)");
+}
+
+my @bad = qw(gets strcpy strcat strncpy strncat sprintf vsprintf);
+# XXX: add atoi() to @bad
+for my $bad (@bad) {
+    my @o = exists $symbols{undef}{$bad} ?
+        sort keys %{ $symbols{undef}{$bad} } : ();
+    is(@o, 0, "uses no $bad (@o)");
 }
 
 if (defined $nm_err_tmp) {
