@@ -7,6 +7,10 @@
 # -DPERL_GLOBAL_STRUCT_PRIVATE are used, verify that they did what
 # they were meant to do, hide the global variables (see perlguts for
 # the details).
+#
+# Debugging tip: nm output (this script's input) can be faked by
+# giving one command line argument for this script: it should be
+# either the filename to read, or "-" for STDIN.
 
 BEGIN {
     chdir 't' if -d 't';
@@ -97,9 +101,24 @@ END {
     unlink $nm_err_tmp if $nm_err_tmp;
 }
 
-open(my $nm_fh, "$nm $nm_opt $libperl_a 2>$nm_err_tmp |") or
-    skip_all "$nm $nm_opt $libperl_a failed: $!";
+my $nm_fh;
 
+if (@ARGV == 1) {
+    my $fake = shift @ARGV;
+    print "# Faking nm output from $fake\n";
+    if ($fake eq '-') {
+        open($nm_fh, "<&STDIN") or
+            skip_all "Duping STDIN failed: $!";
+    } else {
+        open($nm_fh, "<", $fake) or
+            skip_all "Opening '$fake' failed: $!";
+    }
+    undef $nm_err_tmp; # In this case there will be no nm errors.
+} else {
+    open($nm_fh, "$nm $nm_opt $libperl_a 2>$nm_err_tmp |") or
+        skip_all "$nm $nm_opt $libperl_a failed: $!";
+}
+ 
 sub nm_parse_gnu {
     my $symbols = shift;
     if (m{^(\w+\.o):$}) {
@@ -335,21 +354,23 @@ if ($GSP) {
     ok(! exists $symbols{text}{Perl_GetVars}, "has no Perl_GetVars");
 }
 
-if (open(my $nm_err_fh, $nm_err_tmp)) {
-    my $error;
-    while (<$nm_err_fh>) {
-        # OS X has weird error where nm warns about
-        # "no name list" but then outputs fine.
-        if (/nm: no name list/ && $^O eq 'darwin') {
-            print "# $^O ignoring $nm output: $_";
-            next;
+if (defined $nm_err_tmp) {
+    if (open(my $nm_err_fh, $nm_err_tmp)) {
+        my $error;
+        while (<$nm_err_fh>) {
+            # OS X has weird error where nm warns about
+            # "no name list" but then outputs fine.
+            if (/nm: no name list/ && $^O eq 'darwin') {
+                print "# $^O ignoring $nm output: $_";
+                next;
+            }
+            warn "$0: Unexpected $nm error: $_";
+            $error++;
         }
-        warn "$0: Unexpected $nm error: $_";
-        $error++;
+        die "$0: Unexpected $nm errors\n" if $error;
+    } else {
+        warn "Failed to open '$nm_err_tmp': $!\n";
     }
-    die "$0: Unexpected $nm errors\n" if $error;
-} else {
-    warn "Failed to open '$nm_err_tmp': $!\n";
 }
 
 done_testing();
