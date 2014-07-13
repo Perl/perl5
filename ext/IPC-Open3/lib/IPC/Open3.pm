@@ -362,7 +362,7 @@ sub open3 {
 sub spawn_with_handles {
     my $fds = shift;		# Fields: handle, mode, open_as
     my $close_in_child = shift;
-    my ($fd, $pid, @saved_fh, $saved, %saved, @errs);
+    my ($fd, $fileno, $open_as, $pid, @saved_fh, $saved, %saved, @errs);
 
     foreach $fd (@$fds) {
 	$fd->{tmp_copy} = IO::Handle->new_from_fd($fd->{handle}, $fd->{mode});
@@ -373,9 +373,9 @@ sub spawn_with_handles {
 	    unless eval { $fd->{handle}->isa('IO::Handle') } ;
 	# If some of handles to redirect-to coincide with handles to
 	# redirect, we need to use saved variants:
-	$fd->{handle}->fdopen(defined fileno $fd->{open_as}
-			      ? $saved{fileno $fd->{open_as}} || $fd->{open_as}
-			      : $fd->{open_as},
+	$fd->{handle}->fdopen(defined($fileno = fileno($open_as = $fd->{open_as}))
+			      ? $saved{$fileno} || $open_as
+			      : $open_as,
 			      $fd->{mode});
     }
     unless ($^O eq 'MSWin32') {
