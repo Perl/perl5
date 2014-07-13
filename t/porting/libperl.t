@@ -90,10 +90,6 @@ if ($nm_style eq 'gnu') {
     }
 }
 
-if ($^O eq 'darwin') {
-    skip_all 'nm peculiarities on darwin need study: RT #122267'
-}
-
 my $nm_err_tmp = "libperl$$";
 
 END {
@@ -121,70 +117,82 @@ if (@ARGV == 1) {
  
 sub nm_parse_gnu {
     my $symbols = shift;
+    my $line = $_;
     if (m{^(\w+\.o):$}) {
         $symbols->{obj}{$1}++;
         $symbols->{o} = $1;
+        return;
     } else {
-        die "$0: undefined current object: $_" unless defined $symbols->{o};
-	if (/^[0-9a-f]{16} [Rr] (\w+)$/) {
-	    $symbols->{data}{const}{$1}{$symbols->{o}}++;
-	} elsif (/^[0-9a-f]{16} r .+$/) {
-	    # Skip local const.
-	} elsif (/^[0-9a-f]{16} [Tti] (\w+)(\..+)?$/) {
-	    $symbols->{text}{$1}{$symbols->{o}}++;
-	} elsif (/^[0-9a-f]{16} C (\w+)$/) {
-	    $symbols->{data}{common}{$1}{$symbols->{o}}++;
-	} elsif (/^[0-9a-f]{16} [BbSs] (\w+)(\.\d+)?$/) {
-	    $symbols->{data}{bss}{$1}{$symbols->{o}}++;
-	} elsif (/^0{16} D _LIB_VERSION$/) {
-	    # Skip the _LIB_VERSION (not ours).
-	} elsif (/^[0-9a-f]{16} [DdGg] (\w+)$/) {
-	    $symbols->{data}{data}{$1}{$symbols->{o}}++;
-	} elsif (/^ {16} U (\w+)$/) {
-	    # Skip the undefined.
-	} elsif (/^[0-9a-f]{16} . \.?(\w+)$/) {
-	    # Skip the unknown types.
-            print "# Unknown type: $_ ($symbols->{o})\n";
-	} else {
-            print "# Unexpected nm output '$_' ($symbols->{o})\n";
+        die "$0: undefined current object: $line"
+            unless defined $symbols->{o};
+        if (s/^[0-9a-f]{8}(?:[0-9a-f]{8})? //) {
+            if (/^[Rr] (\w+)$/) {
+                $symbols->{data}{const}{$1}{$symbols->{o}}++;
+            } elsif (/^r .+$/) {
+                # Skip local const.
+            } elsif (/^[Tti] (\w+)(\..+)?$/) {
+                $symbols->{text}{$1}{$symbols->{o}}++;
+            } elsif (/^C (\w+)$/) {
+                $symbols->{data}{common}{$1}{$symbols->{o}}++;
+            } elsif (/^[BbSs] (\w+)(\.\d+)?$/) {
+                $symbols->{data}{bss}{$1}{$symbols->{o}}++;
+            } elsif (/^0{16} D _LIB_VERSION$/) {
+                # Skip the _LIB_VERSION (not ours).
+            } elsif (/^[DdGg] (\w+)$/) {
+                $symbols->{data}{data}{$1}{$symbols->{o}}++;
+            } elsif (/^. \.?(\w+)$/) {
+                # Skip the unknown types.
+                print "# Unknown type: $line ($symbols->{o})\n";
+            }
+            return;
+        } elsif (/^ {8}(?: {8})? U (\w+)$/) {
+            # Skip the undefined.
+            return;
 	}
     }
+    print "# Unexpected nm output '$line' ($symbols->{o})\n";
 }
 
 sub nm_parse_darwin {
     my $symbols = shift;
+    my $line = $_;
     if (m{^(?:\.\./)?libperl\.a\((\w+\.o)\):$}) {
         $symbols->{obj}{$1}++;
         $symbols->{o} = $1;
+        return;
     } else {
-        die "$0: undefined current object: $_" unless defined $symbols->{o};
-        if (/^[0-9a-f]{16} \(__TEXT,__(?:eh_frame|cstring)\) /) {
-            # Skip the eh_frame and cstring.
-        } elsif (/^[0-9a-f]{16} \(__TEXT,__(?:const|literal\d+)\) (?:non-)?external _?(\w+)(\.\w+)?$/) {
-            my ($symbol, $suffix) = ($1, $2);
-            # Ignore function-local constants like
-            # _Perl_av_extend_guts.oom_array_extend
-            return if defined $suffix && /__TEXT,__const/;
-            $symbols->{data}{const}{$symbol}{$symbols->{o}}++;
-        } elsif (/^[0-9a-f]{16} \(__TEXT,__text\) (?:non-)?external _(\w+)$/) {
-            $symbols->{text}{$1}{$symbols->{o}}++;
-        } elsif (/^[0-9a-f]{16} \(__DATA,__(const|data|bss|common)\) (?:non-)?external _(\w+)(\.\w+)?$/) {
-            my ($dtype, $symbol, $suffix) = ($1, $2, $3);
-            # Ignore function-local constants like
-            # _Perl_pp_gmtime.dayname
-            return if defined $suffix;
-            $symbols->{data}{$dtype}{$symbol}{$symbols->{o}}++;
-        } elsif (/^[0-9a-f]{16} \(__DATA,__const\) non-external _\.memset_pattern\d*$/) {
-            # Skip this, whatever it is (some inlined leakage from darwin libc?)
-        } elsif (/^ {16} \(undefined\) /) {
+        die "$0: undefined current object: $line" unless defined $symbols->{o};
+        if (s/^[0-9a-f]{8}(?:[0-9a-f]{8})? //) {
+            if (/^\(__TEXT,__(?:eh_frame|cstring)\) /) {
+                # Skip the eh_frame and cstring.
+            } elsif (/^\(__TEXT,__(?:const|literal\d+)\) (?:non-)?external _?(\w+)(\.\w+)?$/) {
+                my ($symbol, $suffix) = ($1, $2);
+                # Ignore function-local constants like
+                # _Perl_av_extend_guts.oom_array_extend
+                return if defined $suffix && /__TEXT,__const/;
+                $symbols->{data}{const}{$symbol}{$symbols->{o}}++;
+            } elsif (/^\(__TEXT,__text\) (?:non-)?external _(\w+)$/) {
+                $symbols->{text}{$1}{$symbols->{o}}++;
+            } elsif (/^\(__DATA,__(const|data|bss|common)\) (?:non-)?external _(\w+)(\.\w+)?$/) {
+                my ($dtype, $symbol, $suffix) = ($1, $2, $3);
+                # Ignore function-local constants like
+                # _Perl_pp_gmtime.dayname
+                return if defined $suffix;
+                $symbols->{data}{$dtype}{$symbol}{$symbols->{o}}++;
+            } elsif (/^\(__DATA,__const\) non-external _\.memset_pattern\d*$/) {
+                # Skip this, whatever it is (some inlined leakage from
+                # darwin libc?)
+            } elsif (/^\(__\w+,__\w+\) /) {
+                # Skip the unknown types.
+                print "# Unknown type: $line ($symbols->{o})\n";
+            }
+            return;
+        } elsif (/^ {8}(?: {8})? \(undefined\) /) {
             # Skip the undefined.
-        } elsif (/^[0-9a-f]{16} \(__\w+,__\w+\) /) {
-            # Skip the unknown types.
-            print "# Unknown type: $_ ($symbols->{o})\n";
-        } else {
-            print "# Unexpected nm output '$_' ($symbols->{o})\n";
+            return;
         }
     }
+    print "# Unexpected nm output '$line' ($symbols->{o})\n";
 }
 
 my $nm_parse;
