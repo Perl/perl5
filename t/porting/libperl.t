@@ -247,29 +247,6 @@ for my $dtype (sort keys %{$symbols{data}}) {
     }
 }
 
-# Since we are deprived of Test::More.
-sub is_deeply {
-    my ($a, $b) = @_;
-    if (ref $a eq 'ARRAY' && ref $b eq 'ARRAY') {
-	if (@$a == @$b) {
-	    for my $i (0..$#$a) {
-		unless ($a->[$i] eq $b->[$i]) {
-                    printf("# LHS elem #%d '%s' ne RHS elem #%d '%s'\n",
-                           $a->[$i], $b->[$i]);
-		    return 0;
-		}
-	    }
-	    return 1;
-	} else {
-            printf("# LHS length %d, RHS length %d\n",
-                   @$a, @$b);
-	    return 0;
-	}
-    } else {
-	die "$0: Unexpcted: is_deeply $a $b\n";
-    }
-}
-
 # The following tests differ between vanilla vs $GSP or $GS.
 #
 # Some terminology:
@@ -329,17 +306,17 @@ if ($GSP) {
 
     # my_cxt_index is used with PERL_IMPLICIT_CONTEXT, which
     # -DPERL_GLOBAL_STRUCT has turned on.
-    is_deeply([sort keys %{$symbols{data}{data}}],
-              [sort('PL_VarsPtr',
-                    @PerlIO,
-                    'PL_magic_vtables',
-                    'my_cxt_index')],
-              "data data symbols");
+    eq_array([sort keys %{$symbols{data}{data}}],
+             [sort('PL_VarsPtr',
+                   @PerlIO,
+                   'PL_magic_vtables',
+                   'my_cxt_index')],
+             "data data symbols");
 
     # Only one data common symbol, our "supervariable".
-    is_deeply([sort keys %{$symbols{data}{common}}],
-              ['PL_Vars'],
-              "data common symbols");
+    eq_array([sort keys %{$symbols{data}{common}}],
+             ['PL_Vars'],
+             "data common symbols");
 
     ok($symbols{data}{data}{PL_VarsPtr}{'globals.o'}, "has PL_VarsPtr");
     ok($symbols{data}{common}{PL_Vars}{'globals.o'}, "has PL_Vars");
