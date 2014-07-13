@@ -40,6 +40,8 @@ unless (defined $libperl_a) {
   skip_all "no libperl.a";
 }
 
+print "# \$^O = $^O\n";
+print "# \$Config{cc} = $Config{cc}\n";
 print "# libperl = $libperl_a\n";
 
 my $nm;
@@ -204,7 +206,7 @@ if ($nm_style eq 'gnu') {
 }
 
 unless (defined $nm_parse) {
-    skip_all "no nm parser";
+    skip_all "no nm parser ($nm_style $nm_style, \$^O $^O)";
 }
 
 my %symbols;
