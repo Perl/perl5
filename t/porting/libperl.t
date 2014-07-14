@@ -165,13 +165,13 @@ sub nm_parse_darwin {
     } else {
         die "$0: undefined current object: $line" unless defined $symbols->{o};
         if (s/^[0-9a-f]{8}(?:[0-9a-f]{8})? //) {
-            if (/^\(__TEXT,__(?:eh_frame|cstring)\) /) {
-                # Skip the eh_frame and cstring.
-            } elsif (/^\(__TEXT,__(?:const|literal\d+)\) (?:non-)?external _?(\w+)(\.\w+)?$/) {
+            if (/^\(__TEXT,__(?:const|cstring|literal\d+)\) (?:non-)?external _?(\w+)(\.\w+)?$/) {
                 my ($symbol, $suffix) = ($1, $2);
                 # Ignore function-local constants like
                 # _Perl_av_extend_guts.oom_array_extend
                 return if defined $suffix && /__TEXT,__const/;
+                # Ignore the cstring unnamed strings.
+                return if $symbol =~ /^L\.str\d+$/;
                 $symbols->{data}{const}{$symbol}{$symbols->{o}}++;
             } elsif (/^\(__TEXT,__text\) (?:non-)?external _(\w+)$/) {
                 $symbols->{text}{$1}{$symbols->{o}}++;
@@ -184,6 +184,9 @@ sub nm_parse_darwin {
             } elsif (/^\(__DATA,__const\) non-external _\.memset_pattern\d*$/) {
                 # Skip this, whatever it is (some inlined leakage from
                 # darwin libc?)
+            } elsif (/^\(__TEXT,__eh_frame/) {
+                # Skip the eh_frame symbols.
+                return;
             } elsif (/^\(__\w+,__\w+\) /) {
                 # Skip the unknown types.
                 print "# Unknown type: $line ($symbols->{o})\n";
