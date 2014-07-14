@@ -6113,6 +6113,13 @@ STATIC void	S_bad_type_pv(pTHX_ I32 n, const char *t, const char *name, U32 flag
 #define PERL_ARGS_ASSERT_BAD_TYPE_PV	\
 	assert(t); assert(name); assert(kid)
 
+STATIC void	S_clear_special_blocks(pTHX_ const char *const fullname, GV *const gv, CV *const cv)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2)
+			__attribute__nonnull__(pTHX_3);
+#define PERL_ARGS_ASSERT_CLEAR_SPECIAL_BLOCKS	\
+	assert(fullname); assert(gv); assert(cv)
+
 STATIC void	S_cop_free(pTHX_ COP *cop)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_COP_FREE	\

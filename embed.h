@@ -1485,6 +1485,7 @@
 #define apply_attrs_my(a,b,c,d)	S_apply_attrs_my(aTHX_ a,b,c,d)
 #define bad_type_gv(a,b,c,d,e)	S_bad_type_gv(aTHX_ a,b,c,d,e)
 #define bad_type_pv(a,b,c,d,e)	S_bad_type_pv(aTHX_ a,b,c,d,e)
+#define clear_special_blocks(a,b,c)	S_clear_special_blocks(aTHX_ a,b,c)
 #define cop_free(a)		S_cop_free(aTHX_ a)
 #define dup_attrlist(a)		S_dup_attrlist(aTHX_ a)
 #define finalize_op(a)		S_finalize_op(aTHX_ a)

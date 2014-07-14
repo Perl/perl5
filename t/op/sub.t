@@ -223,11 +223,9 @@ ok !exists $INC{"re.pm"}, 're.pm not loaded yet';
       'Pure-Perl sub clobbering sub whose DESTROY assigns to the glob';
 }
 
-{ local $TODO = "fixed in next commit";
 # [perl #122107] previously this would return
 #  Subroutine BEGIN redefined at (eval 2) line 2.
 fresh_perl_is(<<'EOS', "", { stderr => 1 },
 use strict; use warnings; eval q/use File::{Spec}/; eval q/use File::Spec/;
 EOS
 	       "check special blocks are cleared on error");
-}
