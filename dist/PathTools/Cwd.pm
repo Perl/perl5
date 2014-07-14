@@ -171,7 +171,7 @@ use strict;
 use Exporter;
 use vars qw(@ISA @EXPORT @EXPORT_OK $VERSION);
 
-$VERSION = '3.48';
+$VERSION = '3.49';
 my $xs_version = $VERSION;
 $VERSION =~ tr/_//;
 
@@ -242,8 +242,10 @@ sub _vms_efs {
 
 
 # If loading the XS stuff doesn't work, we can fall back to pure perl
-unless (defined &getcwd) {
-  eval {
+if(! defined &getcwd && defined &DynaLoader::boot_DynaLoader) {
+  eval {#eval is questionable since we are handling potential errors like
+        #"Cwd object version 3.48 does not match bootstrap parameter 3.49
+        #at lib/DynaLoader.pm line 216." by having this eval
     if ( $] >= 5.006 ) {
       require XSLoader;
       XSLoader::load( __PACKAGE__, $xs_version);

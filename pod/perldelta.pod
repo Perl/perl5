@@ -149,6 +149,11 @@ L<Module::CoreList> has been upgraded from version 5.021001_1 to 5.021002.
 
 =item *
 
+The PathTools module collection has been upgraded from version 3.48 to
+3.49.
+
+=item *
+
 L<threads> has been upgraded from version 1.94 to 1.95.
 
 =back
