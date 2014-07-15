@@ -28,7 +28,7 @@
 # See Porting/pumpkin.pod for more information on metaconfig.
 #
 
-# Generated on Wed Apr  9 12:24:24 CEST 2014 [metaconfig 3.5 PL0]
+# Generated on Wed Jun  4 08:58:13 CEST 2014 [metaconfig 3.5 PL0]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -17748,13 +17748,13 @@ freebsd)
         h_shm=false
 	val="$undef"
 	set shmctl d_shmctl
-	evat $setvar
+	eval $setvar
 	set shmget d_shmget
-	evat $setvar
+	eval $setvar
 	set shmat d_shmat
-	evat $setvar
+	eval $setvar
 	set shmdt d_shmdt
-	evat $setvar
+	eval $setvar
 	;;
     esac
     ;;
