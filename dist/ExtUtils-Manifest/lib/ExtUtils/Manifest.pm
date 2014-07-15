@@ -10,8 +10,9 @@ use Carp;
 use strict;
 use warnings;
 
+use Exporter 5.57 'import';
+
 our $VERSION = '1.64';
-our @ISA=('Exporter');
 our @EXPORT_OK = qw(mkmanifest
                 manicheck  filecheck  fullcheck  skipcheck
                 manifind   maniread   manicopy   maniadd
