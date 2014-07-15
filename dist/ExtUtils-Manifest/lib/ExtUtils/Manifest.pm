@@ -8,24 +8,21 @@ use File::Find;
 use File::Spec;
 use Carp;
 use strict;
+use warnings;
 
-use vars qw($VERSION @ISA @EXPORT_OK
-          $Is_MacOS $Is_VMS $Is_VMS_mode $Is_VMS_lc $Is_VMS_nodot
-          $Debug $Verbose $Quiet $MANIFEST $DEFAULT_MSKIP);
-
-$VERSION = '1.63';
-@ISA=('Exporter');
-@EXPORT_OK = qw(mkmanifest
+our $VERSION = '1.63';
+our @ISA=('Exporter');
+our @EXPORT_OK = qw(mkmanifest
                 manicheck  filecheck  fullcheck  skipcheck
                 manifind   maniread   manicopy   maniadd
                 maniskip
                );
 
-$Is_MacOS = $^O eq 'MacOS';
-$Is_VMS   = $^O eq 'VMS';
-$Is_VMS_mode = 0;
-$Is_VMS_lc = 0;
-$Is_VMS_nodot = 0;  # No dots in dir names or double dots in files
+our $Is_MacOS = $^O eq 'MacOS';
+our $Is_VMS   = $^O eq 'VMS';
+our $Is_VMS_mode = 0;
+our $Is_VMS_lc = 0;
+our $Is_VMS_nodot = 0;  # No dots in dir names or double dots in files
 
 if ($Is_VMS) {
     require VMS::Filespec if $Is_VMS;
@@ -53,13 +50,13 @@ if ($Is_VMS) {
     $Is_VMS_nodot = 0 if ($vms_efs);
 }
 
-$Debug   = $ENV{PERL_MM_MANIFEST_DEBUG} || 0;
-$Verbose = defined $ENV{PERL_MM_MANIFEST_VERBOSE} ?
+our $Debug   = $ENV{PERL_MM_MANIFEST_DEBUG} || 0;
+our $Verbose = defined $ENV{PERL_MM_MANIFEST_VERBOSE} ?
                    $ENV{PERL_MM_MANIFEST_VERBOSE} : 1;
-$Quiet = 0;
-$MANIFEST = 'MANIFEST';
+our $Quiet = 0;
+our $MANIFEST = 'MANIFEST';
 
-$DEFAULT_MSKIP = File::Spec->catfile( dirname(__FILE__), "$MANIFEST.SKIP" );
+our $DEFAULT_MSKIP = File::Spec->catfile( dirname(__FILE__), "$MANIFEST.SKIP" );
 
 
 =head1 NAME
