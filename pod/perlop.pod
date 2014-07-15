@@ -1751,7 +1751,7 @@ test and never recompile by adding a C</o> (which stands for "once")
 after the trailing delimiter.
 Once upon a time, Perl would recompile regular expressions
 unnecessarily, and this modifier was useful to tell it not to do so, in the
-interests of speed.  But now, the only reasons to use C</o> are either:
+interests of speed.  But now, the only reasons to use C</o> are one of:
 
 =over
 
