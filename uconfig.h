@@ -1090,6 +1090,13 @@
 /*#define HASATTRIBUTE_UNUSED	/ **/
 /*#define HASATTRIBUTE_WARN_UNUSED_RESULT	/ **/
 
+/* HAS_BACKTRACE:
+ *	This symbol, if defined, indicates that the backtrace() routine is
+ *	available to get a stack trace.  The <execinfo.h> header must be
+ *	included to use this routine.
+ */
+/*#define HAS_BACKTRACE	/ **/
+
 /* CASTI32:
  *	This symbol is defined if the C compiler can cast negative
  *	or large floating point numbers to 32-bit ints.
@@ -1177,6 +1184,13 @@
  */
 /*#define HAS_CTIME_R	   / **/
 #define CTIME_R_PROTO 0	   /**/
+
+/* HAS_DLADDR:
+ *	This symbol, if defined, indicates that the dladdr() routine is
+ *	available to get a stack trace.  The <execinfo.h> header must be
+ *	included to use this routine.
+ */
+/*#define HAS_DLADDR	/ **/
 
 /* SETUID_SCRIPTS_ARE_SECURE_NOW:
  *	This symbol, if defined, indicates that the bug that prevents
@@ -2680,6 +2694,12 @@
 /*#define DIRNAMLEN	/ **/
 #define Direntry_t struct dirent
 
+/* I_EXECINFO:
+ *	This symbol, if defined, indicates to the C program that it should
+ *	include <execinfo.h> for backtrace() support.
+ */
+/*#define I_EXECINFO		/ **/
+
 /* I_GRP:
  *	This symbol, if defined, indicates to the C program that it should
  *	include <grp.h>.
@@ -2817,6 +2837,26 @@
  *	should be included.
  */
 /*#define	I_SYSUIO		/ **/
+
+/* I_TERMIO:
+ *	This symbol, if defined, indicates that the program should include
+ *	<termio.h> rather than <sgtty.h>.  There are also differences in
+ *	the ioctl() calls that depend on the value of this symbol.
+ */
+/* I_TERMIOS:
+ *	This symbol, if defined, indicates that the program should include
+ *	the POSIX termios.h rather than sgtty.h or termio.h.
+ *	There are also differences in the ioctl() calls that depend on the
+ *	value of this symbol.
+ */
+/* I_SGTTY:
+ *	This symbol, if defined, indicates that the program should include
+ *	<sgtty.h> rather than <termio.h>.  There are also differences in
+ *	the ioctl() calls that depend on the value of this symbol.
+ */
+/*#define I_TERMIO		/ **/
+/*#define I_TERMIOS		/ **/
+/*#define I_SGTTY		/ **/
 
 /* I_TIME:
  *	This symbol, if defined, indicates to the C program that it should
@@ -3272,46 +3312,6 @@
  */
 /*#define PERL_VENDORLIB_EXP ""		/ **/
 /*#define PERL_VENDORLIB_STEM ""		/ **/
-
-/* HAS_BACKTRACE:
- *	This symbol, if defined, indicates that the backtrace() routine is
- *	available to get a stack trace.  The <execinfo.h> header must be
- *	included to use this routine.
- */
-/*#define HAS_BACKTRACE	/ **/
-
-/* HAS_DLADDR:
- *	This symbol, if defined, indicates that the dladdr() routine is
- *	available to get a stack trace.  The <execinfo.h> header must be
- *	included to use this routine.
- */
-/*#define HAS_DLADDR	/ **/
-
-/* I_EXECINFO:
- *	This symbol, if defined, indicates to the C program that it should
- *	include <execinfo.h> for backtrace() support.
- */
-/*#define I_EXECINFO		/ **/
-
-/* I_TERMIO:
- *	This symbol, if defined, indicates that the program should include
- *	<termio.h> rather than <sgtty.h>.  There are also differences in
- *	the ioctl() calls that depend on the value of this symbol.
- */
-/* I_TERMIOS:
- *	This symbol, if defined, indicates that the program should include
- *	the POSIX termios.h rather than sgtty.h or termio.h.
- *	There are also differences in the ioctl() calls that depend on the
- *	value of this symbol.
- */
-/* I_SGTTY:
- *	This symbol, if defined, indicates that the program should include
- *	<sgtty.h> rather than <termio.h>.  There are also differences in
- *	the ioctl() calls that depend on the value of this symbol.
- */
-/*#define I_TERMIO		/ **/
-/*#define I_TERMIOS		/ **/
-/*#define I_SGTTY		/ **/
 
 /* USE_CROSS_COMPILE:
  *	This symbol, if defined, indicates that Perl is being cross-compiled.
@@ -3809,11 +3809,6 @@
  */
 /*#define	HAS_OFF64_T    		/ **/
 
-/* HAS_PTRDIFF_T:
- *	This symbol will be defined if the C compiler supports ptrdiff_t.
- */
-#define	HAS_PTRDIFF_T    		/**/
-
 /* HAS_PRCTL:
  *	This symbol, if defined, indicates that the prctl routine is
  *	available to set process title.
@@ -3845,6 +3840,11 @@
  *	a thread attribute object.
  */
 /*#define HAS_PTHREAD_ATTR_SETSCOPE		/ **/
+
+/* HAS_PTRDIFF_T:
+ *	This symbol will be defined if the C compiler supports ptrdiff_t.
+ */
+#define	HAS_PTRDIFF_T    		/**/
 
 /* HAS_READV:
  *	This symbol, if defined, indicates that the readv routine is
@@ -4742,6 +4742,6 @@
 #endif
 
 /* Generated from:
- * a37f46da5285428077feb313bcbe68661740bac16d76fa658d723d9fcc91c2c4 config_h.SH
+ * 98cefb1b37499a6b3f8f6fe5d97d411c53d52ae534d2b1a04b321f52fde4e808 config_h.SH
  * 4b709c0b049c660c04c0932eaa8481f9ca6fdc697ec4ffaa86b7bef21ee886a8 uconfig.sh
  * ex: set ro: */
