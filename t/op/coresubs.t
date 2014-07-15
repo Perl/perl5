@@ -156,6 +156,21 @@ $tests++;
 ok eval { *CORE::exit = \42 },
   '[rt.cpan.org #74289] *CORE::foo is not accidentally made read-only';
 
+for my $word (qw<keys values each>) {
+    # mykeys() etc were aliased to \&CORE::keys etc above
+    my $code = qq{
+        no warnings 'experimental::autoderef';
+        my \$x = [];
+        () = my$word(\$x);
+        'ok'
+    };
+    $tests++;
+    is(eval($code), 'ok', "inlined $word() on autoderef array") or diag $@;
+}
+
+inlinable_ok($_, '$_{k}', 'on hash')
+    for qw<delete exists>;
+
 @UNIVERSAL::ISA = CORE;
 is "just another "->ucfirst . "perl hacker,\n"->ucfirst,
    "Just another Perl hacker,\n", 'coresubs do not return TARG';

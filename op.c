@@ -10485,7 +10485,7 @@ Perl_ck_entersub_args_core(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
     }
     else {
 	OP *prev, *cvop, *first, *parent;
-	U32 flags;
+	U32 flags = 0;
 
         parent = entersubop;
 	if (!OP_HAS_SIBLING(aop)) {
@@ -10500,7 +10500,12 @@ Perl_ck_entersub_args_core(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 	     OP_HAS_SIBLING(cvop);
 	     prev = cvop, cvop = OP_SIBLING(cvop))
 	    ;
-	flags = OPf_SPECIAL * !(cvop->op_private & OPpENTERSUB_NOPAREN);
+        if (!(cvop->op_private & OPpENTERSUB_NOPAREN)
+            /* Usually, OPf_SPECIAL on a UNOP means that its arg had no
+             * parens, but these have their own meaning for that flag: */
+            && opnum != OP_VALUES && opnum != OP_KEYS && opnum != OP_EACH
+            && opnum != OP_DELETE && opnum != OP_EXISTS)
+                flags |= OPf_SPECIAL;
         /* excise cvop from end of sibling chain */
         op_sibling_splice(parent, prev, 1, NULL);
 	op_free(cvop);
