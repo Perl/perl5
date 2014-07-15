@@ -650,6 +650,7 @@ d_pthread_attr_setscope=''
 d_pthread_yield=''
 d_sched_yield=''
 sched_yield=''
+d_ptrdiff_t=''
 d_qgcvt=''
 d_random_r=''
 random_r_proto=''
@@ -934,7 +935,6 @@ i_sysin=''
 i_poll=''
 i_prot=''
 i_pthread=''
-d_ptrdiff_t=''
 d_pwage=''
 d_pwchange=''
 d_pwclass=''
@@ -8318,8 +8318,8 @@ EOM
 	case "$ccdlflags" in
 	    '') case "$osname" in
 		    *linux*|hpux|gnu*) dflt='-Wl,-E' ;;
-		    sunos)      dflt='none'   ;;
-		    *)               dflt='none'   ;;
+		    sunos)             dflt='none'   ;;
+		    *)                 dflt='none'   ;;
 		esac ;;
 	    ' ') dflt='none' ;;
 	    *)   dflt="$ccdlflags" ;;
@@ -16367,25 +16367,6 @@ $rm_try
 set d_off64_t
 eval $setvar
 
-: check for ptrdiff_t
-echo " "
-echo "Checking to see if you have ptrdiff_t..." >&4
-$cat >try.c <<EOCP
-#include <stddef.h>
-int main() { ptrdiff_t x = 7; }
-EOCP
-set try
-if eval $compile; then
-	val="$define"
-	echo "You have ptrdiff_t."
-else
-	val="$undef"
-	echo "You do not have ptrdiff_t."
-fi
-$rm_try
-set d_ptrdiff_t
-eval $setvar
-
 : how to create joinable pthreads
 if test "X$usethreads" = "X$define" -a "X$i_pthread" = "X$define"; then
 	echo " "
@@ -16656,6 +16637,25 @@ case "$sched_yield" in
 '') sched_yield=undef ;;
 esac
 $rm_try
+
+: check for ptrdiff_t
+echo " "
+echo "Checking to see if you have ptrdiff_t..." >&4
+$cat >try.c <<EOCP
+#include <stddef.h>
+int main() { ptrdiff_t x = 7; }
+EOCP
+set try
+if eval $compile; then
+	val="$define"
+	echo "You have ptrdiff_t."
+else
+	val="$undef"
+	echo "You do not have ptrdiff_t."
+fi
+$rm_try
+set d_ptrdiff_t
+eval $setvar
 
 : see if random_r exists
 set random_r d_random_r
@@ -21998,71 +21998,68 @@ eval $inhdr
 echo " "
 $echo "Guessing which symbols your C compiler and preprocessor define..." >&4
 $cat <<'EOSH' > Cppsym.know
-a29k aarch64 ABI64 aegis AES_SOURCE AIX AIX32 AIX370
-AIX41 AIX42 AIX43 AIX_SOURCE aixpc ALL_SOURCE
-alliant alpha am29000 AM29000 AMD64 amd64 amiga AMIGAOS AMIX
-ansi ANSI_C_SOURCE apollo ardent ARM32 ARM arch_ppc arch_pwr
-atarist att386 att3b BeOS BIG_ENDIAN BIT_MSF
-bsd BSD bsd43 bsd4_2 bsd4_3 BSD4_3 bsd4_4
-BSD_4_3 BSD_4_4 BSD_NET2 BSD_TIME BSD_TYPES BSDCOMPAT bsdi
-bull byteorder byte_order c cadmus clang clipper CMU COFF COMPILER_VERSION
-concurrent convex cpu cray CRAY CRAYMPP ctix CX_UX
-CYGWIN DECC DGUX DGUX_SOURCE DJGPP dmert DOLPHIN DPX2 DSO
-Dynix DynixPTX ELF encore EPI EXTENSIONS FAVOR_BSD
-FILE_OFFSET_BITS FreeBSD FORTIFY_SOURCE
-GCC_NEW_VARARGS gcos gcx gimpel
-GLIBC GLIBC_MINOR
-GNU_SOURCE GNUC GNUC_MINOR GNU_LIBRARY GO32 gould GOULD_PN
-H3050R H3050RX hbullx20 hcx host_mips
-hp200 hp300 hp700 HP700 hp800 hp9000
-hp9000s200 hp9000s300 hp9000s400 hp9000s500
-hp9000s700 hp9000s800 hp9k8 hp_osf hppa hpux HPUX_SOURCE
-i186 i286 i386 i486 i586 i686 i8086 i80960 i860 I960
-IA32 IA64 iAPX286 ibm ibm032 ibmesa IBMR2 ibmrt ILP32 ILP64
-INLINE_INTRINSICS INTRINSICS INT64 INTEL interdata is68k itanium ksr1
-LANGUAGE_C LARGE_FILE_API LARGEFILE64_SOURCE
-LARGEFILE_SOURCE LFS64_LARGEFILE LFS_LARGEFILE
-LIBCATAMOUNT Linux LITTLE_ENDIAN LONG64 LONG_DOUBLE LONG_LONG
-LONGDOUBLE LONGLONG LP64 luna luna88k Lynx
-M68000 m68k m88100 m88k M88KBCS_TARGET M_AMD64 M_ARM M_ARMT M_COFF
-M_I186 M_I286 M_I386 M_I8086 M_I86 M_I86SM M_IA64 M_IX86 M_PPC M_SYS3
-M_SYS5 M_SYSIII M_SYSV M_UNIX M_X86 M_XENIX MACH machine MachTen
-MATH_HAS_NO_SIDE_EFFECTS
-mc300 mc500 mc68000 mc68010 mc68020 mc68030 mc68040
-mc68060 mc68k mc68k32 mc700 mc88000 mc88100 merlin
-mert MiNT mips MIPS_FPSET MIPS_ISA MIPS_SIM MIPS_SZINT
-MIPS_SZLONG MIPS_SZPTR MIPSEB MIPSEL MODERN_C motorola
-mpeix MSDOS MTXINU MULTIMAX mvs MVS n16 ncl_el ncl_mr
-NetBSD news1500 news1700 news1800 news1900 news3700
-news700 news800 news900 NeXT NLS nonstopux ns16000 ns32000
-ns32016 ns32332 ns32k nsc32000
+a29k aarch64 ABI64 aegis AES_SOURCE AIX AIX32 AIX370 AIX41 AIX42
+AIX43 aixpc AIX_SOURCE alliant ALL_SOURCE alpha AM29000 am29000
+AMD64 amd64 amiga AMIGAOS AMIX ansi ANSI_C_SOURCE apollo arch_ppc
+arch_pwr ardent ARM ARM32 atarist att386 att3b
+BeOS BIG_ENDIAN BIT_MSF BSD bsd bsd43 bsd4_2 BSD4_3 bsd4_3 bsd4_4
+BSDCOMPAT bsdi BSD_4_3 BSD_4_4 BSD_NET2 BSD_TIME BSD_TYPES bull
+byteorder byte_order
+c cadmus clang clipper CMU COFF COMPILER_VERSION concurrent
+convex cpu CRAY cray CRAYMPP ctix CX_UX CYGWIN
+DECC DGUX DGUX_SOURCE DJGPP dmert DOLPHIN DPX2 DSO Dynix DynixPTX
+ELF encore EPI EXTENSIONS
+FAVOR_BSD FILE_OFFSET_BITS FORTIFY_SOURCE FreeBSD
+GCC_NEW_VARARGS gcos gcx gimpel GLIBC GLIBC_MINOR GNUC GNUC_MINOR
+GNU_LIBRARY GNU_SOURCE GO32 gould GOULD_PN
+H3050R H3050RX hbullx20 hcx host_mips hp200 hp300 HP700 hp700
+hp800 hp9000 hp9000s200 hp9000s300 hp9000s400 hp9000s500
+hp9000s700 hp9000s800 hp9k8 hppa hpux HPUX_SOURCE hp_osf
+i186 i286 i386 i486 i586 i686 i8086 i80960 i860 I960 IA32 IA64
+iAPX286 ibm ibm032 ibmesa IBMR2 ibmrt ILP32 ILP64
+INLINE_INTRINSICS INT64 INTEL interdata INTRINSICS is68k itanium
+ksr1
+LANGUAGE_C LARGEFILE64_SOURCE LARGEFILE_SOURCE LARGE_FILE_API
+LFS64_LARGEFILE LFS_LARGEFILE LIBCATAMOUNT Linux LITTLE_ENDIAN
+LONG64 LONGDOUBLE LONGLONG LONG_DOUBLE LONG_LONG LP64 luna
+luna88k Lynx
+M68000 m68k m88100 m88k M88KBCS_TARGET MACH machine MachTen
+MATH_HAS_NO_SIDE_EFFECTS mc300 mc500 mc68000 mc68010 mc68020
+mc68030 mc68040 mc68060 mc68k mc68k32 mc700 mc88000 mc88100
+merlin mert MiNT mips MIPSEB MIPSEL MIPS_FPSET MIPS_ISA MIPS_SIM
+MIPS_SZINT MIPS_SZLONG MIPS_SZPTR MODERN_C motorola mpeix MSDOS
+MTXINU MULTIMAX MVS mvs M_AMD64 M_ARM M_ARMT M_COFF M_I186 M_I286
+M_I386 M_I8086 M_I86 M_I86SM M_IA64 M_IX86 M_PPC M_SYS3 M_SYS5
+M_SYSIII M_SYSV M_UNIX M_X86 M_XENIX
+n16 ncl_el ncl_mr NetBSD news1500 news1700 news1800 news1900
+news3700 news700 news800 news900 NeXT NLS nonstopux ns16000
+ns32000 ns32016 ns32332 ns32k nsc32000
 OCS88 OEMVS OpenBSD os OS2 OS390 osf OSF1 OSF_SOURCE
-pa_risc PA_RISC1_1 PA_RISC2_0 PARAGON parisc
-pc532 pdp11 PGC PIC plexus PORTAR posix
-POSIX1B_SOURCE POSIX2_SOURCE POSIX4_SOURCE
-POSIX_C_SOURCE POSIX_SOURCE POWER powerpc
-PROTOTYPES ppc PWB pyr QNX QK_USER R3000 REENTRANT RES Rhapsody RISC6000
-riscix riscos RT S390 S390x SA110 scs SCO sequent sgi SGI_SOURCE SH SH3
-sinix SIZE_INT SIZE_LONG SIZE_PTR SOCKET_SOURCE SOCKETS_SOURCE
-sony sony_news sonyrisc sparc sparcv8 sparcv9 sparclite spectrum
-stardent stdc STDC_EXT stratos sun sun3 sun386
-Sun386i svr3 svr4 SVR4_2 SVR4_SOURCE svr5
-SX system SYSTYPE_BSD SYSTYPE_BSD43 SYSTYPE_BSD44
-SYSTYPE_SVR4 SYSTYPE_SVR5 SYSTYPE_SYSV SYSV SYSV3 SYSV4 SYSV5
-sysV68 sysV88 Tek4132 Tek4300 thumb thw_370 thw_intel thw_rs6000 titan
-TM3200 TM5400 TM5600
-tower tower32 tower32_200 tower32_600 tower32_700
+PARAGON parisc pa_risc PA_RISC1_1 PA_RISC2_0 pc532 pdp11 PGC PIC
+plexus PORTAR posix POSIX1B_SOURCE POSIX2_SOURCE POSIX4_SOURCE
+POSIX_C_SOURCE POSIX_SOURCE POWER powerpc ppc PROTOTYPES PWB pyr
+QK_USER QNX
+R3000 REENTRANT RES Rhapsody RISC6000 riscix riscos RT
+S390 S390x SA110 SCO scs sequent sgi SGI_SOURCE SH SH3 sinix
+SIZE_INT SIZE_LONG SIZE_PTR SOCKETS_SOURCE SOCKET_SOURCE sony
+sonyrisc sony_news sparc sparclite sparcv8 sparcv9 spectrum
+stardent stdc STDC_EXT stratos sun sun3 sun386 Sun386i svr3 svr4
+SVR4_2 SVR4_SOURCE svr5 SX system SYSTYPE_BSD SYSTYPE_BSD43
+SYSTYPE_BSD44 SYSTYPE_SVR4 SYSTYPE_SVR5 SYSTYPE_SYSV SYSV SYSV3
+SYSV4 SYSV5 sysV68 sysV88
+Tek4132 Tek4300 thumb thw_370 thw_intel thw_rs6000 titan TM3200
+TM5400 TM5600 tower tower32 tower32_200 tower32_600 tower32_700
 tower32_800 tower32_850 tss
-u370 u3b u3b2 u3b20 u3b200 u3b20d u3b5
-ultrix UMAXV UnicomPBB UnicomPBD UNICOS UNICOSMK
-unix UNIX95 UNIX99 unixpc unos
-USE_BSD USE_FILE_OFFSET64 USE_GNU USE_ISOC9X USE_LARGEFILE USE_LARGEFILE64
-USE_MISC USE_POSIX USE_POSIX199309 USE_POSIX199506 USE_POSIX2
-USE_REENTRANT USE_SVID USE_UNIX98 USE_XOPEN USE_XOPEN_EXTENDED
-USGr4 USGr4_2
-Utek UTek UTS UWIN uxpm uxps vax venix VMESA vms x86_64 xenix Xenix286
-XOPEN_SOURCE XOPEN_SOURCE_EXTENDED XPG2 XPG2_EXTENDED
-XPG3 XPG3_EXTENDED XPG4 XPG4_EXTENDED
+u370 u3b u3b2 u3b20 u3b200 u3b20d u3b5 ultrix UMAXV UnicomPBB
+UnicomPBD UNICOS UNICOSMK unix UNIX95 UNIX99 unixpc unos USE_BSD
+USE_FILE_OFFSET64 USE_GNU USE_ISOC9X USE_LARGEFILE
+USE_LARGEFILE64 USE_MISC USE_POSIX USE_POSIX199309
+USE_POSIX199506 USE_POSIX2 USE_REENTRANT USE_SVID USE_UNIX98
+USE_XOPEN USE_XOPEN_EXTENDED USGr4 USGr4_2 UTek Utek UTS UWIN
+uxpm uxps
+vax venix VMESA vms
+x86_64 xenix Xenix286 XOPEN_SOURCE XOPEN_SOURCE_EXTENDED XPG2
+XPG2_EXTENDED XPG3 XPG3_EXTENDED XPG4 XPG4_EXTENDED
 z8000 zarch
 EOSH
 # Maybe put other stuff here too.
@@ -22079,8 +22076,8 @@ $startsh
 if $test \$# -gt 0; then
     echo \$* | $tr " " "$trnl" | ./Cppsym.try > Cppsym.got
     if $test -s Cppsym.got; then
-        $rm -f Cppsym.got
-        exit 0
+	$rm -f Cppsym.got
+	exit 0
     fi
     $rm -f Cppsym.got
     exit 1
@@ -22169,9 +22166,9 @@ chmod +x ccsym
 $eunicefix ccsym
 ./ccsym > ccsym1.raw
 if $test -s ccsym1.raw; then
-       $sort ccsym1.raw | $uniq >ccsym.raw
+    $sort ccsym1.raw | $uniq >ccsym.raw
 else
-       mv ccsym1.raw ccsym.raw
+    mv ccsym1.raw ccsym.raw
 fi
 
 $awk '/\=/ { print $0; next }
@@ -22185,9 +22182,9 @@ if $test -z ccsym.raw; then
 	echo " "
 	echo "However, your C preprocessor defines the following symbols:"
 	$cat Cppsym.true
-    	ccsymbols=''
+	ccsymbols=''
 	cppsymbols=`$cat Cppsym.true`
-        cppsymbols=`echo $cppsymbols`
+	cppsymbols=`echo $cppsymbols`
 	cppccsymbols="$cppsymbols"
 else
 	if $test -s ccsym.com; then
@@ -22213,8 +22210,8 @@ else
 		echo "Your C compiler ${also}defines the following cpp symbols:"
 		$sed -e 's/\(..*\)=1/\1/' ccsym.own
 		$sed -e 's/\(..*\)=.*/\1/' ccsym.own | $uniq >>Cppsym.true
-	        ccsymbols=`$cat ccsym.own`
-	        ccsymbols=`echo $ccsymbols`
+		ccsymbols=`$cat ccsym.own`
+		ccsymbols=`echo $ccsymbols`
 		$test "$silent" || sleep 1
 	fi
 fi
