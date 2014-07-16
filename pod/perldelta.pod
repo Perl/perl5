@@ -178,6 +178,16 @@ L<[perl #121869]|https://rt.perl.org/Ticket/Display.html?id=121869>
 
 =back
 
+=head3 L<Unicode::UCD>
+
+=over 4
+
+=item *
+
+The documentation includes many clarifications and fixes.
+
+=back
+
 =head1 Diagnostics
 
 The following additions or changes have been made to diagnostic output,
