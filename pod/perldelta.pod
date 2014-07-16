@@ -19,14 +19,6 @@ L<perl5200delta>, which describes differences between 5.19.0 and 5.20.0.
 
 XXX Any important notices here
 
-=head1 Core Enhancements
-
-XXX New core language features go here.  Summarize user-visible core language
-enhancements.  Particularly prominent performance optimisations could go
-here, but most should go in the L</Performance Enhancements> section.
-
-[ List each enhancement as a =head2 entry ]
-
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
@@ -37,46 +29,9 @@ L</Selected Bug Fixes> section.
 
 =head1 Incompatible Changes
 
-XXX For a release on a stable branch, this section aspires to be:
-
-    There are no changes intentionally incompatible with 5.XXX.XXX
-    If any exist, they are bugs, and we request that you submit a
-    report.  See L</Reporting Bugs> below.
-
-[ List each incompatible change as a =head2 entry ]
-
-=head1 Deprecations
-
-XXX Any deprecated features, syntax, modules etc. should be listed here.
-
-=head2 Module removals
-
-XXX Remove this section if inapplicable.
-
-The following modules will be removed from the core distribution in a
-future release, and will at that time need to be installed from CPAN.
-Distributions on CPAN which require these modules will need to list them as
-prerequisites.
-
-The core versions of these modules will now issue C<"deprecated">-category
-warnings to alert you to this fact.  To silence these deprecation warnings,
-install the modules in question from CPAN.
-
-Note that these are (with rare exceptions) fine modules that you are encouraged
-to continue to use.  Their disinclusion from core primarily hinges on their
-necessity to bootstrapping a fully functional, CPAN-capable Perl installation,
-not usually on concerns over their design.
-
-=over
-
-=item XXX
-
-XXX Note that deprecated modules should be listed here even if they are listed
-as an updated module in the L</Modules and Pragmata> section.
-
-=back
-
-[ List each other deprecation as a =head2 entry ]
+There are no changes intentionally incompatible with 5.20.0.  If any exist,
+they are bugs, and we request that you submit a report.  See L</Reporting Bugs>
+below.
 
 =head1 Performance Enhancements
 
@@ -103,16 +58,6 @@ dual-life modules would have a F<Changes> file that could be cribbed.
 
 [ Within each section, list entries as a =item entry ]
 
-=head2 New Modules and Pragmata
-
-=over 4
-
-=item *
-
-XXX
-
-=back
-
 =head2 Updated Modules and Pragmata
 
 =over 4
@@ -120,16 +65,6 @@ XXX
 =item *
 
 L<XXX> has been upgraded from version A.xx to B.yy.
-
-=back
-
-=head2 Removed Modules and Pragmata
-
-=over 4
-
-=item *
-
-XXX
 
 =back
 
@@ -215,31 +150,6 @@ diagnostic messages, see L<perldiag>.
 XXX New or changed warnings emitted by the core's C<C> code go here.  Also
 include any changes in L<perldiag> that reconcile it to the C<C> code.
 
-=head2 New Diagnostics
-
-XXX Newly added diagnostic messages go under here, separated into New Errors
-and New Warnings
-
-=head3 New Errors
-
-=over 4
-
-=item *
-
-XXX L<message|perldiag/"message">
-
-=back
-
-=head3 New Warnings
-
-=over 4
-
-=item *
-
-XXX L<message|perldiag/"message">
-
-=back
-
 =head2 Changes to Existing Diagnostics
 
 XXX Changes (i.e. rewording) of diagnostic messages go here
@@ -315,33 +225,6 @@ XXX Any changes to platform support should be listed in the sections below.
 [ Within the sections, list each platform as a =item entry with specific
 changes as paragraphs below it. ]
 
-=head2 New Platforms
-
-XXX List any platforms that this version of perl compiles on, that previous
-versions did not.  These will either be enabled by new files in the F<hints/>
-directories, or new subdirectories and F<README> files at the top level of the
-source tree.
-
-=over 4
-
-=item XXX-some-platform
-
-XXX
-
-=back
-
-=head2 Discontinued Platforms
-
-XXX List any platforms that this version of perl no longer compiles on.
-
-=over 4
-
-=item XXX-some-platform
-
-XXX
-
-=back
-
 =head2 Platform-Specific Notes
 
 XXX List any changes for specific platforms.  This could include configuration
@@ -381,10 +264,6 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 [ List each fix as a =item entry ]
 
 =over 4
-
-=item *
-
-XXX
 
 =item *
 
