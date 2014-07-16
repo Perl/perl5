@@ -8,22 +8,26 @@ BEGIN {
     }
 }
 
-use Test::More tests => 15;
-
+my ($ok1, $ok2);
 BEGIN {
     require autouse;
     eval {
         "autouse"->import('Scalar::Util' => 'Scalar::Util::set_prototype(&$)');
     };
-    ok( !$@, "Function from package with custom 'import()' correctly imported" );
+    $ok1 = !$@;
 
     eval {
         "autouse"->import('Scalar::Util' => 'Foo::min');
     };
-    ok( $@, qr/^autouse into different package attempted/ );
+    $ok2 = $@;
 
     "autouse"->import('Scalar::Util' => qw(isdual set_prototype(&$)));
 }
+
+use Test::More tests => 15;
+
+ok( $ok1, "Function from package with custom 'import()' correctly imported" );
+ok( $ok2, qr/^autouse into different package attempted/ );
 
 ok( isdual($!),
     "Function imported via 'autouse' performs as expected");
