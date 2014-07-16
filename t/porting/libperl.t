@@ -144,26 +144,33 @@ sub nm_parse_gnu {
     my $symbols = shift;
     my $line = $_;
     if (m{^(\w+\.o):$}) {
+        # object file name
         $symbols->{obj}{$1}++;
         $symbols->{o} = $1;
         return;
     } else {
         die "$0: undefined current object: $line"
             unless defined $symbols->{o};
+        # 64-bit systems have 16 hexdigits, 32-bit systems have 8.
         if (s/^[0-9a-f]{8}(?:[0-9a-f]{8})? //) {
             if (/^[Rr] (\w+)$/) {
+                # R: read only (const)
                 $symbols->{data}{const}{$1}{$symbols->{o}}++;
             } elsif (/^r .+$/) {
-                # Skip local const.
+                # Skip local const (read only).
             } elsif (/^[Tti] (\w+)(\..+)?$/) {
                 $symbols->{text}{$1}{$symbols->{o}}++;
             } elsif (/^C (\w+)$/) {
                 $symbols->{data}{common}{$1}{$symbols->{o}}++;
             } elsif (/^[BbSs] (\w+)(\.\d+)?$/) {
+                # Bb: uninitialized data (bss)
+                # Ss: uninitialized data "for small objects"
                 $symbols->{data}{bss}{$1}{$symbols->{o}}++;
             } elsif (/^0{16} D _LIB_VERSION$/) {
-                # Skip the _LIB_VERSION (not ours).
+                # Skip the _LIB_VERSION (not ours, probably libm)
             } elsif (/^[DdGg] (\w+)$/) {
+                # Dd: initialized data
+                # Gg: initialized "for small objects"
                 $symbols->{data}{data}{$1}{$symbols->{o}}++;
             } elsif (/^. \.?(\w+)$/) {
                 # Skip the unknown types.
@@ -183,13 +190,18 @@ sub nm_parse_gnu {
 sub nm_parse_darwin {
     my $symbols = shift;
     my $line = $_;
-    if (m{^(?:\.\./)?libperl\.a\((\w+\.o)\):$}) {
+    if (m{^(?:.+)?libperl\.a\((\w+\.o)\):$}) {
+        # object file name
         $symbols->{obj}{$1}++;
         $symbols->{o} = $1;
         return;
     } else {
         die "$0: undefined current object: $line" unless defined $symbols->{o};
+        # 64-bit systems have 16 hexdigits, 32-bit systems have 8.
         if (s/^[0-9a-f]{8}(?:[0-9a-f]{8})? //) {
+            # String literals can live in different sections
+            # depending on the compiler and os release, assumedly
+            # also linker flags.
             if (/^\(__TEXT,__(?:const|cstring|literal\d+)\) (?:non-)?external _?(\w+)(\.\w+)?$/) {
                 my ($symbol, $suffix) = ($1, $2);
                 # Ignore function-local constants like
@@ -210,7 +222,7 @@ sub nm_parse_darwin {
                 # Skip this, whatever it is (some inlined leakage from
                 # darwin libc?)
             } elsif (/^\(__TEXT,__eh_frame/) {
-                # Skip the eh_frame symbols.
+                # Skip the eh_frame (exception handling) symbols.
                 return;
             } elsif (/^\(__\w+,__\w+\) /) {
                 # Skip the unknown types.
@@ -218,6 +230,8 @@ sub nm_parse_darwin {
             }
             return;
         } elsif (/^ {8}(?: {8})? \(undefined(?: \[lazy bound\])?\) external _?(.+)/) {
+            # darwin/ppc marks most undefined text symbols
+            # as "[lazy bound]".
             my ($symbol) = $1;
             return if is_perlish_symbol($symbol);
             $symbols->{undef}{$symbol}{$symbols->{o}}++;
