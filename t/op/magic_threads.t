@@ -156,6 +156,8 @@ $SIG{INT} = "DEFAULT";
 # [perl #120951]
 SKIP:
 {
+    $^O eq 'netbsd'
+	and skip "NetBSD 5.1.2 didn't initialize the thread specific storage to NULL", 2;
     local $SIG{INT} = sub {
         print "# main thread handler\n";
 	++$got_int;
