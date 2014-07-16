@@ -27,7 +27,7 @@ BEGIN {
 use Test::More tests => 15;
 
 ok( $ok1, "Function from package with custom 'import()' correctly imported" );
-ok( $ok2, qr/^autouse into different package attempted/ );
+like( $ok2, qr/^autouse into different package attempted/, "Catch autouse into different package" );
 
 ok( isdual($!),
     "Function imported via 'autouse' performs as expected");
