@@ -248,7 +248,9 @@ XXX Changes (i.e. rewording) of diagnostic messages go here
 
 =item *
 
-XXX Describe change here
+L<Variable length lookbehind not implemented in regex mE<sol>%sE<sol>|perldiag/"Variable length lookbehind not implemented in regex m/%s/">
+
+Information about Unicode behaviour has been added.
 
 =back
 
