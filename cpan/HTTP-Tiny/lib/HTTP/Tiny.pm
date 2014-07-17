@@ -3,60 +3,63 @@ package HTTP::Tiny;
 use strict;
 use warnings;
 # ABSTRACT: A small, simple, correct HTTP/1.1 client
-our $VERSION = '0.043'; # VERSION
+our $VERSION = '0.044'; # VERSION
 
 use Carp ();
 
-# =method new
-#
-#     $http = HTTP::Tiny->new( %attributes );
-#
-# This constructor returns a new HTTP::Tiny object.  Valid attributes include:
-#
-# =for :list
-# * C<agent>
-# A user-agent string (defaults to 'HTTP-Tiny/$VERSION'). If C<agent> ends in a space character, the default user-agent string is appended.
-# * C<cookie_jar>
-# An instance of L<HTTP::CookieJar> or equivalent class that supports the C<add> and C<cookie_header> methods
-# * C<default_headers>
-# A hashref of default headers to apply to requests
-# * C<local_address>
-# The local IP address to bind to
-# * C<keep_alive>
-# Whether to reuse the last connection (if for the same scheme, host and port) (defaults to 1)
-# * C<max_redirect>
-# Maximum number of redirects allowed (defaults to 5)
-# * C<max_size>
-# Maximum response size (only when not using a data callback).  If defined, responses larger than this will return an exception.
-# * C<http_proxy>
-# URL of a proxy server to use for HTTP connections (default is C<$ENV{http_proxy}> if set)
-# * C<https_proxy>
-# URL of a proxy server to use for HTTPS connections (default is C<$ENV{https_proxy}> if set)
-# * C<proxy>
-# URL of a generic proxy server for both HTTP and HTTPS connections (default is C<$ENV{all_proxy}> if set)
-# * C<no_proxy>
-# List of domain suffixes that should not be proxied.  Must be a comma-separated string or an array reference. (default is C<$ENV{no_proxy}>)
-# * C<timeout>
-# Request timeout in seconds (default is 60)
-# * C<verify_SSL>
-# A boolean that indicates whether to validate the SSL certificate of an C<https>
-# connection (default is false)
-# * C<SSL_options>
-# A hashref of C<SSL_*> options to pass through to L<IO::Socket::SSL>
-#
-# Exceptions from C<max_size>, C<timeout> or other errors will result in a
-# pseudo-HTTP status code of 599 and a reason of "Internal Exception". The
-# content field in the response will contain the text of the exception.
-#
-# The C<keep_alive> parameter enables a persistent connection, but only to a
-# single destination scheme, host and port.  Also, if any connection-relevant
-# attributes are modified, a persistent connection will be dropped.  If you want
-# persistent connections across multiple destinations, use multiple HTTP::Tiny
-# objects.
-#
-# See L</SSL SUPPORT> for more on the C<verify_SSL> and C<SSL_options> attributes.
-#
-# =cut
+#pod =method new
+#pod
+#pod     $http = HTTP::Tiny->new( %attributes );
+#pod
+#pod This constructor returns a new HTTP::Tiny object.  Valid attributes include:
+#pod
+#pod =for :list
+#pod * C<agent> —
+#pod     A user-agent string (defaults to 'HTTP-Tiny/$VERSION'). If C<agent> — ends in a space character, the default user-agent string is appended.
+#pod * C<cookie_jar> —
+#pod     An instance of L<HTTP::CookieJar> — or equivalent class that supports the C<add> and C<cookie_header> methods
+#pod * C<default_headers> —
+#pod     A hashref of default headers to apply to requests
+#pod * C<local_address> —
+#pod     The local IP address to bind to
+#pod * C<keep_alive> —
+#pod     Whether to reuse the last connection (if for the same scheme, host and port) (defaults to 1)
+#pod * C<max_redirect> —
+#pod     Maximum number of redirects allowed (defaults to 5)
+#pod * C<max_size> —
+#pod     Maximum response size (only when not using a data callback).  If defined, responses larger than this will return an exception.
+#pod * C<http_proxy> —
+#pod     URL of a proxy server to use for HTTP connections (default is C<$ENV{http_proxy}> — if set)
+#pod * C<https_proxy> —
+#pod     URL of a proxy server to use for HTTPS connections (default is C<$ENV{https_proxy}> — if set)
+#pod * C<proxy> —
+#pod     URL of a generic proxy server for both HTTP and HTTPS connections (default is C<$ENV{all_proxy}> — if set)
+#pod * C<no_proxy> —
+#pod     List of domain suffixes that should not be proxied.  Must be a comma-separated string or an array reference. (default is C<$ENV{no_proxy}> —)
+#pod * C<timeout> —
+#pod     Request timeout in seconds (default is 60)
+#pod * C<verify_SSL> —
+#pod     A boolean that indicates whether to validate the SSL certificate of an C<https> —
+#pod     connection (default is false)
+#pod * C<SSL_options> —
+#pod     A hashref of C<SSL_*> — options to pass through to L<IO::Socket::SSL>
+#pod
+#pod Passing an explicit C<undef> for C<proxy>, C<http_proxy> or C<https_proxy> will
+#pod prevent getting the corresponding proxies from the environment.
+#pod
+#pod Exceptions from C<max_size>, C<timeout> or other errors will result in a
+#pod pseudo-HTTP status code of 599 and a reason of "Internal Exception". The
+#pod content field in the response will contain the text of the exception.
+#pod
+#pod The C<keep_alive> parameter enables a persistent connection, but only to a
+#pod single destination scheme, host and port.  Also, if any connection-relevant
+#pod attributes are modified, a persistent connection will be dropped.  If you want
+#pod persistent connections across multiple destinations, use multiple HTTP::Tiny
+#pod objects.
+#pod
+#pod See L</SSL SUPPORT> for more on the C<verify_SSL> and C<SSL_options> attributes.
+#pod
+#pod =cut
 
 my @attributes;
 BEGIN {
@@ -120,36 +123,45 @@ sub new {
 sub _set_proxies {
     my ($self) = @_;
 
-    if (! $self->{proxy} ) {
+    # get proxies from %ENV only if not provided; explicit undef will disable
+    # getting proxies from the environment
+
+    # generic proxy
+    if (! exists $self->{proxy} ) {
         $self->{proxy} = $ENV{all_proxy} || $ENV{ALL_PROXY};
-        if ( defined $self->{proxy} ) {
-            $self->_split_proxy( 'generic proxy' => $self->{proxy} ); # validate
-        }
-        else {
-            delete $self->{proxy};
-        }
     }
 
-    if (! $self->{http_proxy} ) {
+    if ( defined $self->{proxy} ) {
+        $self->_split_proxy( 'generic proxy' => $self->{proxy} ); # validate
+    }
+    else {
+        delete $self->{proxy};
+    }
+
+    # http proxy
+    if (! exists $self->{http_proxy} ) {
         $self->{http_proxy} = $ENV{http_proxy} || $self->{proxy};
-        if ( defined $self->{http_proxy} ) {
-            $self->_split_proxy( http_proxy => $self->{http_proxy} ); # validate
-            $self->{_has_proxy}{http} = 1;
-        }
-        else {
-            delete $self->{http_proxy};
-        }
     }
 
-    if (! $self->{https_proxy} ) {
+    if ( defined $self->{http_proxy} ) {
+        $self->_split_proxy( http_proxy => $self->{http_proxy} ); # validate
+        $self->{_has_proxy}{http} = 1;
+    }
+    else {
+        delete $self->{http_proxy};
+    }
+
+    # https proxy
+    if (! exists $self->{https_proxy} ) {
         $self->{https_proxy} = $ENV{https_proxy} || $ENV{HTTPS_PROXY} || $self->{proxy};
-        if ( $self->{https_proxy} ) {
-            $self->_split_proxy( https_proxy => $self->{https_proxy} ); # validate
-            $self->{_has_proxy}{https} = 1;
-        }
-        else {
-            delete $self->{https_proxy};
-        }
+    }
+
+    if ( $self->{https_proxy} ) {
+        $self->_split_proxy( https_proxy => $self->{https_proxy} ); # validate
+        $self->{_has_proxy}{https} = 1;
+    }
+    else {
+        delete $self->{https_proxy};
     }
 
     # Split no_proxy to array reference if not provided as such
@@ -161,19 +173,19 @@ sub _set_proxies {
     return;
 }
 
-# =method get|head|put|post|delete
-#
-#     $response = $http->get($url);
-#     $response = $http->get($url, \%options);
-#     $response = $http->head($url);
-#
-# These methods are shorthand for calling C<request()> for the given method.  The
-# URL must have unsafe characters escaped and international domain names encoded.
-# See C<request()> for valid options and a description of the response.
-#
-# The C<success> field of the response will be true if the status code is 2XX.
-#
-# =cut
+#pod =method get|head|put|post|delete
+#pod
+#pod     $response = $http->get($url);
+#pod     $response = $http->get($url, \%options);
+#pod     $response = $http->head($url);
+#pod
+#pod These methods are shorthand for calling C<request()> for the given method.  The
+#pod URL must have unsafe characters escaped and international domain names encoded.
+#pod See C<request()> for valid options and a description of the response.
+#pod
+#pod The C<success> field of the response will be true if the status code is 2XX.
+#pod
+#pod =cut
 
 for my $sub_name ( qw/get head put post delete/ ) {
     my $req_method = uc $sub_name;
@@ -188,25 +200,25 @@ for my $sub_name ( qw/get head put post delete/ ) {
 HERE
 }
 
-# =method post_form
-#
-#     $response = $http->post_form($url, $form_data);
-#     $response = $http->post_form($url, $form_data, \%options);
-#
-# This method executes a C<POST> request and sends the key/value pairs from a
-# form data hash or array reference to the given URL with a C<content-type> of
-# C<application/x-www-form-urlencoded>.  If data is provided as an array
-# reference, the order is preserved; if provided as a hash reference, the terms
-# are sorted on key and value for consistency.  See documentation for the
-# C<www_form_urlencode> method for details on the encoding.
-#
-# The URL must have unsafe characters escaped and international domain names
-# encoded.  See C<request()> for valid options and a description of the response.
-# Any C<content-type> header or content in the options hashref will be ignored.
-#
-# The C<success> field of the response will be true if the status code is 2XX.
-#
-# =cut
+#pod =method post_form
+#pod
+#pod     $response = $http->post_form($url, $form_data);
+#pod     $response = $http->post_form($url, $form_data, \%options);
+#pod
+#pod This method executes a C<POST> request and sends the key/value pairs from a
+#pod form data hash or array reference to the given URL with a C<content-type> of
+#pod C<application/x-www-form-urlencoded>.  If data is provided as an array
+#pod reference, the order is preserved; if provided as a hash reference, the terms
+#pod are sorted on key and value for consistency.  See documentation for the
+#pod C<www_form_urlencode> method for details on the encoding.
+#pod
+#pod The URL must have unsafe characters escaped and international domain names
+#pod encoded.  See C<request()> for valid options and a description of the response.
+#pod Any C<content-type> header or content in the options hashref will be ignored.
+#pod
+#pod The C<success> field of the response will be true if the status code is 2XX.
+#pod
+#pod =cut
 
 sub post_form {
     my ($self, $url, $data, $args) = @_;
@@ -230,28 +242,28 @@ sub post_form {
     );
 }
 
-# =method mirror
-#
-#     $response = $http->mirror($url, $file, \%options)
-#     if ( $response->{success} ) {
-#         print "$file is up to date\n";
-#     }
-#
-# Executes a C<GET> request for the URL and saves the response body to the file
-# name provided.  The URL must have unsafe characters escaped and international
-# domain names encoded.  If the file already exists, the request will include an
-# C<If-Modified-Since> header with the modification timestamp of the file.  You
-# may specify a different C<If-Modified-Since> header yourself in the C<<
-# $options->{headers} >> hash.
-#
-# The C<success> field of the response will be true if the status code is 2XX
-# or if the status code is 304 (unmodified).
-#
-# If the file was modified and the server response includes a properly
-# formatted C<Last-Modified> header, the file modification time will
-# be updated accordingly.
-#
-# =cut
+#pod =method mirror
+#pod
+#pod     $response = $http->mirror($url, $file, \%options)
+#pod     if ( $response->{success} ) {
+#pod         print "$file is up to date\n";
+#pod     }
+#pod
+#pod Executes a C<GET> request for the URL and saves the response body to the file
+#pod name provided.  The URL must have unsafe characters escaped and international
+#pod domain names encoded.  If the file already exists, the request will include an
+#pod C<If-Modified-Since> header with the modification timestamp of the file.  You
+#pod may specify a different C<If-Modified-Since> header yourself in the C<<
+#pod $options->{headers} >> hash.
+#pod
+#pod The C<success> field of the response will be true if the status code is 2XX
+#pod or if the status code is 304 (unmodified).
+#pod
+#pod If the file was modified and the server response includes a properly
+#pod formatted C<Last-Modified> header, the file modification time will
+#pod be updated accordingly.
+#pod
+#pod =cut
 
 sub mirror {
     my ($self, $url, $file, $args) = @_;
@@ -284,86 +296,90 @@ sub mirror {
     return $response;
 }
 
-# =method request
-#
-#     $response = $http->request($method, $url);
-#     $response = $http->request($method, $url, \%options);
-#
-# Executes an HTTP request of the given method type ('GET', 'HEAD', 'POST',
-# 'PUT', etc.) on the given URL.  The URL must have unsafe characters escaped and
-# international domain names encoded.
-#
-# If the URL includes a "user:password" stanza, they will be used for Basic-style
-# authorization headers.  (Authorization headers will not be included in a
-# redirected request.) For example:
-#
-#     $http->request('GET', 'http://Aladdin:open sesame@example.com/');
-#
-# If the "user:password" stanza contains reserved characters, they must
-# be percent-escaped:
-#
-#     $http->request('GET', 'http://john%40example.com:password@example.com/');
-#
-# A hashref of options may be appended to modify the request.
-#
-# Valid options are:
-#
-# =for :list
-# * C<headers>
-# A hashref containing headers to include with the request.  If the value for
-# a header is an array reference, the header will be output multiple times with
-# each value in the array.  These headers over-write any default headers.
-# * C<content>
-# A scalar to include as the body of the request OR a code reference
-# that will be called iteratively to produce the body of the request
-# * C<trailer_callback>
-# A code reference that will be called if it exists to provide a hashref
-# of trailing headers (only used with chunked transfer-encoding)
-# * C<data_callback>
-# A code reference that will be called for each chunks of the response
-# body received.
-#
-# If the C<content> option is a code reference, it will be called iteratively
-# to provide the content body of the request.  It should return the empty
-# string or undef when the iterator is exhausted.
-#
-# If the C<content> option is the empty string, no C<content-type> or
-# C<content-length> headers will be generated.
-#
-# If the C<data_callback> option is provided, it will be called iteratively until
-# the entire response body is received.  The first argument will be a string
-# containing a chunk of the response body, the second argument will be the
-# in-progress response hash reference, as described below.  (This allows
-# customizing the action of the callback based on the C<status> or C<headers>
-# received prior to the content body.)
-#
-# The C<request> method returns a hashref containing the response.  The hashref
-# will have the following keys:
-#
-# =for :list
-# * C<success>
-# Boolean indicating whether the operation returned a 2XX status code
-# * C<url>
-# URL that provided the response. This is the URL of the request unless
-# there were redirections, in which case it is the last URL queried
-# in a redirection chain
-# * C<status>
-# The HTTP status code of the response
-# * C<reason>
-# The response phrase returned by the server
-# * C<content>
-# The body of the response.  If the response does not have any content
-# or if a data callback is provided to consume the response body,
-# this will be the empty string
-# * C<headers>
-# A hashref of header fields.  All header field names will be normalized
-# to be lower case. If a header is repeated, the value will be an arrayref;
-# it will otherwise be a scalar string containing the value
-#
-# On an exception during the execution of the request, the C<status> field will
-# contain 599, and the C<content> field will contain the text of the exception.
-#
-# =cut
+#pod =method request
+#pod
+#pod     $response = $http->request($method, $url);
+#pod     $response = $http->request($method, $url, \%options);
+#pod
+#pod Executes an HTTP request of the given method type ('GET', 'HEAD', 'POST',
+#pod 'PUT', etc.) on the given URL.  The URL must have unsafe characters escaped and
+#pod international domain names encoded.
+#pod
+#pod If the URL includes a "user:password" stanza, they will be used for Basic-style
+#pod authorization headers.  (Authorization headers will not be included in a
+#pod redirected request.) For example:
+#pod
+#pod     $http->request('GET', 'http://Aladdin:open sesame@example.com/');
+#pod
+#pod If the "user:password" stanza contains reserved characters, they must
+#pod be percent-escaped:
+#pod
+#pod     $http->request('GET', 'http://john%40example.com:password@example.com/');
+#pod
+#pod A hashref of options may be appended to modify the request.
+#pod
+#pod Valid options are:
+#pod
+#pod =for :list
+#pod * C<headers> —
+#pod     A hashref containing headers to include with the request.  If the value for
+#pod     a header is an array reference, the header will be output multiple times with
+#pod     each value in the array.  These headers over-write any default headers.
+#pod * C<content> —
+#pod     A scalar to include as the body of the request OR a code reference
+#pod     that will be called iteratively to produce the body of the request
+#pod * C<trailer_callback> —
+#pod     A code reference that will be called if it exists to provide a hashref
+#pod     of trailing headers (only used with chunked transfer-encoding)
+#pod * C<data_callback> —
+#pod     A code reference that will be called for each chunks of the response
+#pod     body received.
+#pod
+#pod The C<Host> header is generated from the URL in accordance with RFC 2616.  It
+#pod is a fatal error to specify C<Host> in the C<headers> option.  Other headers
+#pod may be ignored or overwritten if necessary for transport compliance.
+#pod
+#pod If the C<content> option is a code reference, it will be called iteratively
+#pod to provide the content body of the request.  It should return the empty
+#pod string or undef when the iterator is exhausted.
+#pod
+#pod If the C<content> option is the empty string, no C<content-type> or
+#pod C<content-length> headers will be generated.
+#pod
+#pod If the C<data_callback> option is provided, it will be called iteratively until
+#pod the entire response body is received.  The first argument will be a string
+#pod containing a chunk of the response body, the second argument will be the
+#pod in-progress response hash reference, as described below.  (This allows
+#pod customizing the action of the callback based on the C<status> or C<headers>
+#pod received prior to the content body.)
+#pod
+#pod The C<request> method returns a hashref containing the response.  The hashref
+#pod will have the following keys:
+#pod
+#pod =for :list
+#pod * C<success> —
+#pod     Boolean indicating whether the operation returned a 2XX status code
+#pod * C<url> —
+#pod     URL that provided the response. This is the URL of the request unless
+#pod     there were redirections, in which case it is the last URL queried
+#pod     in a redirection chain
+#pod * C<status> —
+#pod     The HTTP status code of the response
+#pod * C<reason> —
+#pod     The response phrase returned by the server
+#pod * C<content> —
+#pod     The body of the response.  If the response does not have any content
+#pod     or if a data callback is provided to consume the response body,
+#pod     this will be the empty string
+#pod * C<headers> —
+#pod     A hashref of header fields.  All header field names will be normalized
+#pod     to be lower case. If a header is repeated, the value will be an arrayref;
+#pod     it will otherwise be a scalar string containing the value
+#pod
+#pod On an exception during the execution of the request, the C<status> field will
+#pod contain 599, and the C<content> field will contain the text of the exception.
+#pod
+#pod =cut
 
 my %idempotent = map { $_ => 1 } qw/GET HEAD PUT DELETE OPTIONS TRACE/;
 
@@ -404,19 +420,19 @@ sub request {
     return $response;
 }
 
-# =method www_form_urlencode
-#
-#     $params = $http->www_form_urlencode( $data );
-#     $response = $http->get("http://example.com/query?$params");
-#
-# This method converts the key/value pairs from a data hash or array reference
-# into a C<x-www-form-urlencoded> string.  The keys and values from the data
-# reference will be UTF-8 encoded and escaped per RFC 3986.  If a value is an
-# array reference, the key will be repeated with each of the values of the array
-# reference.  If data is provided as a hash reference, the key/value pairs in the
-# resulting string will be sorted by key and value for consistent ordering.
-#
-# =cut
+#pod =method www_form_urlencode
+#pod
+#pod     $params = $http->www_form_urlencode( $data );
+#pod     $response = $http->get("http://example.com/query?$params");
+#pod
+#pod This method converts the key/value pairs from a data hash or array reference
+#pod into a C<x-www-form-urlencoded> string.  The keys and values from the data
+#pod reference will be UTF-8 encoded and escaped per RFC 3986.  If a value is an
+#pod array reference, the key will be repeated with each of the values of the array
+#pod reference.  If data is provided as a hash reference, the key/value pairs in the
+#pod resulting string will be sorted by key and value for consistent ordering.
+#pod
+#pod =cut
 
 sub www_form_urlencode {
     my ($self, $data) = @_;
@@ -641,6 +657,11 @@ sub _prepare_headers_and_cb {
             $request->{headers}{lc $k} = $v;
         }
     }
+
+    if (exists $request->{headers}{'host'}) {
+        die(qq/The 'Host' header must not be provided as header option\n/);
+    }
+
     $request->{headers}{'host'}         = $request->{host_port};
     $request->{headers}{'user-agent'} ||= $self->{agent};
     $request->{headers}{'connection'}   = "close"
@@ -757,31 +778,27 @@ sub _split_url {
     my $url = pop;
 
     # URI regex adapted from the URI module
-    my ($scheme, $authority, $path_query) = $url =~ m<\A([^:/?#]+)://([^/?#]*)([^#]*)>
+    my ($scheme, $host, $path_query) = $url =~ m<\A([^:/?#]+)://([^/?#]*)([^#]*)>
       or die(qq/Cannot parse URL: '$url'\n/);
 
     $scheme     = lc $scheme;
     $path_query = "/$path_query" unless $path_query =~ m<\A/>;
 
-    my ($auth,$host);
-    $authority = (length($authority)) ? $authority : 'localhost';
-    if ( $authority =~ /@/ ) {
-        ($auth,$host) = $authority =~ m/\A([^@]*)@(.*)\z/;   # user:pass@host
+    my $auth = '';
+    if ( (my $i = index $host, '@') != -1 ) {
+        # user:pass@host
+        $auth = substr $host, 0, $i, ''; # take up to the @ for auth
+        substr $host, 0, 1, '';          # knock the @ off the host
+
         # userinfo might be percent escaped, so recover real auth info
         $auth =~ s/%([0-9A-Fa-f]{2})/chr(hex($1))/eg;
     }
-    else {
-        $host = $authority;
-        $auth = '';
-    }
-    $host = lc $host;
-    my $port = do {
-       $host =~ s/:([0-9]*)\z// && length $1
-         ? $1
-         : ($scheme eq 'http' ? 80 : $scheme eq 'https' ? 443 : undef);
-    };
+    my $port = $host =~ s/:(\d*)\z// && length $1 ? $1
+             : $scheme eq 'http'                  ? 80
+             : $scheme eq 'https'                 ? 443
+             : undef;
 
-    return ($scheme, $host, $port, $path_query, $auth);
+    return ($scheme, (length $host ? lc $host : "localhost") , $port, $path_query, $auth);
 }
 
 # Date conversions adapted from HTTP::Date
@@ -1428,7 +1445,7 @@ HTTP::Tiny - A small, simple, correct HTTP/1.1 client
 
 =head1 VERSION
 
-version 0.043
+version 0.044
 
 =head1 SYNOPSIS
 
@@ -1473,90 +1490,64 @@ This constructor returns a new HTTP::Tiny object.  Valid attributes include:
 
 =item *
 
-C<agent>
-
-A user-agent string (defaults to 'HTTP-Tiny/$VERSION'). If C<agent> ends in a space character, the default user-agent string is appended.
+C<agent> — A user-agent string (defaults to 'HTTP-Tiny/$VERSION'). If C<agent> — ends in a space character, the default user-agent string is appended.
 
 =item *
 
-C<cookie_jar>
-
-An instance of L<HTTP::CookieJar> or equivalent class that supports the C<add> and C<cookie_header> methods
+C<cookie_jar> — An instance of L<HTTP::CookieJar> — or equivalent class that supports the C<add> and C<cookie_header> methods
 
 =item *
 
-C<default_headers>
-
-A hashref of default headers to apply to requests
+C<default_headers> — A hashref of default headers to apply to requests
 
 =item *
 
-C<local_address>
-
-The local IP address to bind to
+C<local_address> — The local IP address to bind to
 
 =item *
 
-C<keep_alive>
-
-Whether to reuse the last connection (if for the same scheme, host and port) (defaults to 1)
+C<keep_alive> — Whether to reuse the last connection (if for the same scheme, host and port) (defaults to 1)
 
 =item *
 
-C<max_redirect>
-
-Maximum number of redirects allowed (defaults to 5)
+C<max_redirect> — Maximum number of redirects allowed (defaults to 5)
 
 =item *
 
-C<max_size>
-
-Maximum response size (only when not using a data callback).  If defined, responses larger than this will return an exception.
+C<max_size> — Maximum response size (only when not using a data callback).  If defined, responses larger than this will return an exception.
 
 =item *
 
-C<http_proxy>
-
-URL of a proxy server to use for HTTP connections (default is C<$ENV{http_proxy}> if set)
+C<http_proxy> — URL of a proxy server to use for HTTP connections (default is C<$ENV{http_proxy}> — if set)
 
 =item *
 
-C<https_proxy>
-
-URL of a proxy server to use for HTTPS connections (default is C<$ENV{https_proxy}> if set)
+C<https_proxy> — URL of a proxy server to use for HTTPS connections (default is C<$ENV{https_proxy}> — if set)
 
 =item *
 
-C<proxy>
-
-URL of a generic proxy server for both HTTP and HTTPS connections (default is C<$ENV{all_proxy}> if set)
+C<proxy> — URL of a generic proxy server for both HTTP and HTTPS connections (default is C<$ENV{all_proxy}> — if set)
 
 =item *
 
-C<no_proxy>
-
-List of domain suffixes that should not be proxied.  Must be a comma-separated string or an array reference. (default is C<$ENV{no_proxy}>)
+C<no_proxy> — List of domain suffixes that should not be proxied.  Must be a comma-separated string or an array reference. (default is C<$ENV{no_proxy}> —)
 
 =item *
 
-C<timeout>
-
-Request timeout in seconds (default is 60)
+C<timeout> — Request timeout in seconds (default is 60)
 
 =item *
 
-C<verify_SSL>
-
-A boolean that indicates whether to validate the SSL certificate of an C<https>
-connection (default is false)
+C<verify_SSL> — A boolean that indicates whether to validate the SSL certificate of an C<https> — connection (default is false)
 
 =item *
 
-C<SSL_options>
-
-A hashref of C<SSL_*> options to pass through to L<IO::Socket::SSL>
+C<SSL_options> — A hashref of C<SSL_*> — options to pass through to L<IO::Socket::SSL>
 
 =back
+
+Passing an explicit C<undef> for C<proxy>, C<http_proxy> or C<https_proxy> will
+prevent getting the corresponding proxies from the environment.
 
 Exceptions from C<max_size>, C<timeout> or other errors will result in a
 pseudo-HTTP status code of 599 and a reason of "Internal Exception". The
@@ -1649,34 +1640,25 @@ Valid options are:
 
 =item *
 
-C<headers>
-
-A hashref containing headers to include with the request.  If the value for
-a header is an array reference, the header will be output multiple times with
-each value in the array.  These headers over-write any default headers.
+C<headers> — A hashref containing headers to include with the request.  If the value for a header is an array reference, the header will be output multiple times with each value in the array.  These headers over-write any default headers.
 
 =item *
 
-C<content>
-
-A scalar to include as the body of the request OR a code reference
-that will be called iteratively to produce the body of the request
+C<content> — A scalar to include as the body of the request OR a code reference that will be called iteratively to produce the body of the request
 
 =item *
 
-C<trailer_callback>
-
-A code reference that will be called if it exists to provide a hashref
-of trailing headers (only used with chunked transfer-encoding)
+C<trailer_callback> — A code reference that will be called if it exists to provide a hashref of trailing headers (only used with chunked transfer-encoding)
 
 =item *
 
-C<data_callback>
-
-A code reference that will be called for each chunks of the response
-body received.
+C<data_callback> — A code reference that will be called for each chunks of the response body received.
 
 =back
+
+The C<Host> header is generated from the URL in accordance with RFC 2616.  It
+is a fatal error to specify C<Host> in the C<headers> option.  Other headers
+may be ignored or overwritten if necessary for transport compliance.
 
 If the C<content> option is a code reference, it will be called iteratively
 to provide the content body of the request.  It should return the empty
@@ -1699,45 +1681,27 @@ will have the following keys:
 
 =item *
 
-C<success>
-
-Boolean indicating whether the operation returned a 2XX status code
+C<success> — Boolean indicating whether the operation returned a 2XX status code
 
 =item *
 
-C<url>
-
-URL that provided the response. This is the URL of the request unless
-there were redirections, in which case it is the last URL queried
-in a redirection chain
+C<url> — URL that provided the response. This is the URL of the request unless there were redirections, in which case it is the last URL queried in a redirection chain
 
 =item *
 
-C<status>
-
-The HTTP status code of the response
+C<status> — The HTTP status code of the response
 
 =item *
 
-C<reason>
-
-The response phrase returned by the server
+C<reason> — The response phrase returned by the server
 
 =item *
 
-C<content>
-
-The body of the response.  If the response does not have any content
-or if a data callback is provided to consume the response body,
-this will be the empty string
+C<content> — The body of the response.  If the response does not have any content or if a data callback is provided to consume the response body, this will be the empty string
 
 =item *
 
-C<headers>
-
-A hashref of header fields.  All header field names will be normalized
-to be lower case. If a header is repeated, the value will be an arrayref;
-it will otherwise be a scalar string containing the value
+C<headers> — A hashref of header fields.  All header field names will be normalized to be lower case. If a header is repeated, the value will be an arrayref; it will otherwise be a scalar string containing the value
 
 =back
 
@@ -1775,7 +1739,7 @@ verify_SSL
 
 Direct C<https> connections are supported only if L<IO::Socket::SSL> 1.56 or
 greater and L<Net::SSLeay> 1.49 or greater are installed. An exception will be
-thrown if a new enough versions of these modules not installed or if the SSL
+thrown if new enough versions of these modules are not installed or if the SSL
 encryption fails. An C<https> connection may be made via an C<http> proxy that
 supports the CONNECT command (i.e. RFC 2817).  You may not proxy C<https> via
 a proxy that itself requires C<https> to communicate.
@@ -2035,7 +1999,7 @@ Chris Nehren <apeiron@cpan.org>
 
 =item *
 
-Chris Weyl <cweyl@alumni.drew.edu>
+Chris Weyl <rsrchboy@cpan.org>
 
 =item *
 
@@ -2056,6 +2020,10 @@ David Mitchell <davem@iabyn.com>
 =item *
 
 Edward Zborowski <ed@rubensteintech.com>
+
+=item *
+
+James Raspass <jraspass@gmail.com>
 
 =item *
 
