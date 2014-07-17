@@ -12,7 +12,9 @@
 #
 # Debugging tip: nm output (this script's input) can be faked by
 # giving one command line argument for this script: it should be
-# either the filename to read, or "-" for STDIN.
+# either the filename to read, or "-" for STDIN.  You can also append
+# "@style" (where style is a supported nm style, like "gnu" or "darwin")
+# to this filename for "cross-parsing".
 #
 # Some terminology:
 # - "text" symbols are code
@@ -66,18 +68,54 @@ print "# libperl = $libperl_a\n";
 my $nm;
 my $nm_opt = '';
 my $nm_style;
+my $nm_fh;
+my $nm_err_tmp = "libperl$$";
 
-if ($^O eq 'linux') {
-    $nm = '/usr/bin/nm';
-    $nm_style = 'gnu';
-} elsif ($^O eq 'darwin') {
-    $nm = '/usr/bin/nm';
-    $nm_style = 'darwin';
-    # With the -m option we get better information than the BSD-like
-    # default: with the default, a lot of symbols get dumped into 'S'
-    # or 's', for example one cannot tell the difference between const
-    # and non-const symbols.
-    $nm_opt = '-m';
+END {
+    # this is still executed when we skip_all above, avoid a warning
+    unlink $nm_err_tmp if $nm_err_tmp;
+}
+
+my $fake_input;
+my $fake_style;
+
+if (@ARGV == 1) {
+    $fake_input = shift @ARGV;
+    print "# Faking nm output from $fake_input\n";
+    if ($fake_input =~ s/\@(.+)$//) {
+        $fake_style = $1;
+        print "# Faking nm style from $fake_style\n";
+        if ($fake_style eq 'gnu' || $fake_style eq 'linux') {
+            $nm_style = 'gnu'
+        } elsif ($fake_style eq 'darwin' || $fake_style eq 'osx') {
+            $nm_style = 'darwin'
+        } else {
+            die "$0: Unknown explicit nm style '$fake_style'\n";
+        }
+    }
+}
+
+unless (defined $nm_style) {
+    if ($^O eq 'linux') {
+        $nm_style = 'gnu';
+    } elsif ($^O eq 'darwin') {
+        $nm_style = 'darwin';
+    }
+}
+
+if (defined $nm_style) {
+    if ($nm_style eq 'gnu') {
+        $nm = '/usr/bin/nm';
+    } elsif ($nm_style eq 'darwin') {
+        $nm = '/usr/bin/nm';
+        # With the -m option we get better information than the BSD-like
+        # default: with the default, a lot of symbols get dumped into 'S'
+        # or 's', for example one cannot tell the difference between const
+        # and non-const data symbols.
+        $nm_opt = '-m';
+    } else {
+        die "$0: Unexpected nm style '$nm_style'\n";
+    }
 }
 
 unless (defined $nm) {
@@ -96,11 +134,11 @@ unless (-x $nm) {
     skip_all "no executable nm $nm";
 }
 
-if ($nm_style eq 'gnu') {
-    open(my $nm_fh, "$nm --version|") or
+if ($nm_style eq 'gnu' && !defined $fake_style) {
+    open(my $gnu_verify, "$nm --version|") or
         skip_all "nm failed: $!";
     my $gnu_verified;
-    while (<$nm_fh>) {
+    while (<$gnu_verify>) {
         if (/^GNU nm/) {
             $gnu_verified = 1;
             last;
@@ -111,24 +149,13 @@ if ($nm_style eq 'gnu') {
     }
 }
 
-my $nm_err_tmp = "libperl$$";
-
-END {
-    # this is still executed when we skip_all above, avoid a warning
-    unlink $nm_err_tmp if $nm_err_tmp;
-}
-
-my $nm_fh;
-
-if (@ARGV == 1) {
-    my $fake = shift @ARGV;
-    print "# Faking nm output from $fake\n";
-    if ($fake eq '-') {
+if (defined $fake_input) {
+    if ($fake_input eq '-') {
         open($nm_fh, "<&STDIN") or
             skip_all "Duping STDIN failed: $!";
     } else {
-        open($nm_fh, "<", $fake) or
-            skip_all "Opening '$fake' failed: $!";
+        open($nm_fh, "<", $fake_input) or
+            skip_all "Opening '$fake_input' failed: $!";
     }
     undef $nm_err_tmp; # In this case there will be no nm errors.
 } else {
@@ -139,6 +166,9 @@ if (@ARGV == 1) {
 sub is_perlish_symbol {
     $_[0] =~ /^(?:PL_|Perl|PerlIO)/;
 }
+
+# XXX Implement "internal test" for this script (option -t?)
+# to verify that the parsing does what it's intended to.
 
 sub nm_parse_gnu {
     my $symbols = shift;
