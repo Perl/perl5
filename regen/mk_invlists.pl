@@ -171,31 +171,34 @@ for my $charset (get_supported_code_pages()) {
     print $out_fh "\n" . get_conditional_compile_line_start($charset);
 
     my @a2n = @{get_a2n($charset)};
-    for my $prop (qw(
-                    ASCII
-                    Cased
-                    VertSpace
-                    XPerlSpace
-                    XPosixAlnum
-                    XPosixAlpha
-                    XPosixBlank
-                    XPosixCntrl
-                    XPosixDigit
-                    XPosixGraph
-                    XPosixLower
-                    XPosixPrint
-                    XPosixPunct
-                    XPosixSpace
-                    XPosixUpper
-                    XPosixWord
-                    XPosixXDigit
-                    _Perl_Any_Folds
-                    &NonL1_Perl_Non_Final_Folds
-                    _Perl_Folds_To_Multi_Char
-                    &UpperLatin1
-                    _Perl_IDStart
-                    _Perl_IDCont
-        )
+                             # Ignore non-alpha in sort
+    for my $prop (sort {     lc ($a =~ s/[[:^alpha:]]//gr)
+                         cmp lc ($b =~ s/[[:^alpha:]]//gr)
+                       } qw(
+                             ASCII
+                             Cased
+                             VertSpace
+                             XPerlSpace
+                             XPosixAlnum
+                             XPosixAlpha
+                             XPosixBlank
+                             XPosixCntrl
+                             XPosixDigit
+                             XPosixGraph
+                             XPosixLower
+                             XPosixPrint
+                             XPosixPunct
+                             XPosixSpace
+                             XPosixUpper
+                             XPosixWord
+                             XPosixXDigit
+                             _Perl_Any_Folds
+                             &NonL1_Perl_Non_Final_Folds
+                             _Perl_Folds_To_Multi_Char
+                             &UpperLatin1
+                             _Perl_IDStart
+                             _Perl_IDCont
+                           )
     ) {
 
         # For the Latin1 properties, we change to use the eXtended version of the
