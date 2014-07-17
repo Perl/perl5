@@ -44,7 +44,16 @@ There may well be none in a stable release.
 
 =item *
 
-XXX
+An optimization to avoid problems with COW and deliberately overallocated PVs
+has been disabled because it interfered with another, more important,
+optimization, causing a slowdown on some platforms.
+L<[perl #121975]|https://rt.perl.org/Ticket/Display.html?id=121975>
+
+=item *
+
+Returning a string from a lexical variable could be slow in some cases.  This
+has now been fixed.
+L<[perl #121977]|https://rt.perl.org/Ticket/Display.html?id=121977>
 
 =back
 
@@ -136,11 +145,33 @@ This has also been noted in L<perlport>.
 
 L<[perl #122046]|https://rt.perl.org/Ticket/Display.html?id=122046>
 
+=item *
+
+Clarify the meaning of C<our>.
+L<[perl #122132]|https://rt.perl.org/Ticket/Display.html?id=122132>
+
+=back
+
+=head3 L<perlguts>
+
+=over 4
+
+=item *
+
+Explain various ways of modifying an existing SV's buffer.
+L<[perl #116925]|https://rt.perl.org/Ticket/Display.html?id=116925>
+
 =back
 
 =head3 L<perlapi>
 
 =over 4
+
+=item *
+
+C<av_len> - Emphasize that this returns the highest index in the array, not the
+size of the array.
+L<[perl #120386]|https://rt.perl.org/Ticket/Display.html?id=120386>
 
 =item *
 
@@ -156,6 +187,17 @@ L<[perl #121869]|https://rt.perl.org/Ticket/Display.html?id=121869>
 =item *
 
 Clarify where C<NUL> may be embedded or is required to terminate a string.
+
+=back
+
+=head3 L<perlsyn>
+
+=over 4
+
+=item *
+
+Mention the use of empty conditionals in C<for>/C<while> loops for infinite
+loops.
 
 =back
 
@@ -214,7 +256,9 @@ L</Platform Support> section, instead.
 
 =item *
 
-XXX
+Building Perl no longer writes to the source tree when configured with
+B<Configure -Dmksymlinks>.
+L<[perl #121585]|https://rt.perl.org/Ticket/Display.html?id=121585>
 
 =back
 
@@ -252,9 +296,10 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
+=item OpenBSD
 
-XXX
+Corrected architectures and version numbers used in configuration hints when
+building Perl.
 
 =back
 
@@ -282,6 +327,12 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 [ List each fix as a =item entry ]
 
 =over 4
+
+=item *
+
+Using C<s///e> on tainted utf8 strings could issue bogus "Malformed UTF-8
+character (unexpected end of string)" warnings.  This has now been fixed.
+L<[perl #122148]|https://rt.perl.org/Ticket/Display.html?id=122148>
 
 =item *
 
