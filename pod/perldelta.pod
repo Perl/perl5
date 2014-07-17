@@ -88,7 +88,7 @@ The list of Perl versions covered has been updated.
 The PathTools module collection has been upgraded from version 3.47 to 3.48.
 
 Fallbacks are now in place when cross-compiling for Android and
-$Config::Config{sh} is not yet defined.
+C<$Config::Config{sh}> is not yet defined.
 L<[perl #121963]|https://rt.perl.org/Ticket/Display.html?id=121963>
 
 =item *
@@ -124,25 +124,47 @@ XXX Changes which significantly change existing files in F<pod/> go here.
 However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
 section.
 
+=head3 L<perlapi>
+
+=over 4
+
+=item *
+
+C<av_len> - Emphasize that this returns the highest index in the array, not the
+size of the array.
+L<[perl #120386]|https://rt.perl.org/Ticket/Display.html?id=120386>
+
+=item *
+
+Note that C<SvSetSV> doesn't do set magic.
+
+=item *
+
+C<sv_usepvn_flags> - Fix documentation to mention the use of C<NewX> instead of
+C<malloc>.
+L<[perl #121869]|https://rt.perl.org/Ticket/Display.html?id=121869>
+
+=item *
+
+Clarify where C<NUL> may be embedded or is required to terminate a string.
+
+=back
+
 =head3 L<perlfunc>
 
 =over 4
 
 =item *
 
-C<-l> now notes that it will return false if symlinks aren't supported by the 
+C<-l> now notes that it will return false if symlinks aren't supported by the
 file system.
-
 L<[perl #121523]|https://rt.perl.org/Ticket/Display.html?id=121523>
 
 =item *
 
-Note that C<exec LIST> and C<system LIST> may fall back to the shell on
-Win32. Only C<exec PROGRAM LIST> and C<system PROGRAM LIST> indirect object
-syntax will reliably avoid using the shell.
-
-This has also been noted in L<perlport>.
-
+Note that C<exec LIST> and C<system LIST> may fall back to the shell on Win32.
+Only C<exec PROGRAM LIST> and C<system PROGRAM LIST> indirect object syntax
+will reliably avoid using the shell.  This has also been noted in L<perlport>.
 L<[perl #122046]|https://rt.perl.org/Ticket/Display.html?id=122046>
 
 =item *
@@ -160,33 +182,6 @@ L<[perl #122132]|https://rt.perl.org/Ticket/Display.html?id=122132>
 
 Explain various ways of modifying an existing SV's buffer.
 L<[perl #116925]|https://rt.perl.org/Ticket/Display.html?id=116925>
-
-=back
-
-=head3 L<perlapi>
-
-=over 4
-
-=item *
-
-C<av_len> - Emphasize that this returns the highest index in the array, not the
-size of the array.
-L<[perl #120386]|https://rt.perl.org/Ticket/Display.html?id=120386>
-
-=item *
-
-Note that C<SvSetSV> doesn't do set magic.
-
-=item *
-
-C<sv_usepvn_flags> - Fix documentation to mention the use of C<NewX> instead of 
-C<malloc>.
-
-L<[perl #121869]|https://rt.perl.org/Ticket/Display.html?id=121869>
-
-=item *
-
-Clarify where C<NUL> may be embedded or is required to terminate a string.
 
 =back
 
@@ -257,7 +252,7 @@ L</Platform Support> section, instead.
 =item *
 
 Building Perl no longer writes to the source tree when configured with
-B<Configure -Dmksymlinks>.
+F<Configure>'s B<-Dmksymlinks> option.
 L<[perl #121585]|https://rt.perl.org/Ticket/Display.html?id=121585>
 
 =back
@@ -336,14 +331,14 @@ L<[perl #122148]|https://rt.perl.org/Ticket/Display.html?id=122148>
 
 =item *
 
-system() and friends should now work properly on more Android builds.
+C<system> and friends should now work properly on more Android builds.
 
-Due to an oversight, the value specified through -Dtargetsh to Configure
+Due to an oversight, the value specified through B<-Dtargetsh> to F<Configure>
 would end up being ignored by some of the build process.  This caused perls
-cross-compiled for Android to end up with defective versions of system(),
-exec() and backticks: the commands would end up looking for C</bin/sh>
-instead of C</system/bin/sh>, and so would fail for the vast majority
-of devices, leaving C<$!> as C<ENOENT>.
+cross-compiled for Android to end up with defective versions of C<system>,
+C<exec> and backticks: the commands would end up looking for F</bin/sh>
+instead of F</system/bin/sh>, and so would fail for the vast majority of
+devices, leaving C<$!> as C<ENOENT>.
 
 =back
 
