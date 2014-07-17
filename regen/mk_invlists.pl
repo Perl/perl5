@@ -77,12 +77,11 @@ sub output_invlist ($$;$) {
 
     # The main body are the UVs passed in to this routine.  Do the final
     # element separately
-    for my $i (0 .. @$invlist - 1 - 1) {
-        print $out_fh "\t$invlist->[$i],\n";
+    for my $i (0 .. @$invlist - 1) {
+        printf $out_fh "\t0x%X", $invlist->[$i];
+        print $out_fh "," if $i < @$invlist - 1;
+        print $out_fh "\n";
     }
-
-    # The final element does not have a trailing comma, as C can't handle it.
-    print $out_fh "\t$invlist->[-1]\n";
 
     print $out_fh "};\n";
 }
