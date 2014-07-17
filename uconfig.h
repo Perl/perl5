@@ -1187,8 +1187,8 @@
 
 /* HAS_DLADDR:
  *	This symbol, if defined, indicates that the dladdr() routine is
- *	available to get a stack trace.  The <execinfo.h> header must be
- *	included to use this routine.
+ *	available to query dynamic linker information for an address.
+ *	The <dlfcn.h> header must be included to use this routine.
  */
 /*#define HAS_DLADDR	/ **/
 
@@ -4742,6 +4742,6 @@
 #endif
 
 /* Generated from:
- * 98cefb1b37499a6b3f8f6fe5d97d411c53d52ae534d2b1a04b321f52fde4e808 config_h.SH
+ * 727eb338c23fdd320f556ca32fd7eb5473f68b6ce74db8cec7d83399a2621346 config_h.SH
  * 4b709c0b049c660c04c0932eaa8481f9ca6fdc697ec4ffaa86b7bef21ee886a8 uconfig.sh
  * ex: set ro: */
