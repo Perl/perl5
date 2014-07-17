@@ -1222,8 +1222,8 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 
 /* HAS_DLADDR:
  *	This symbol, if defined, indicates that the dladdr() routine is
- *	available to get a stack trace.  The <execinfo.h> header must be
- *	included to use this routine.
+ *	available to query dynamic linker information for an address.
+ *	The <dlfcn.h> header must be included to use this routine.
  */
 #$d_dladdr HAS_DLADDR	/**/
 
