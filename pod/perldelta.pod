@@ -64,7 +64,35 @@ dual-life modules would have a F<Changes> file that could be cribbed.
 
 =item *
 
-L<XXX> has been upgraded from version A.xx to B.yy.
+L<Exporter> has been upgraded from version 5.70 to 5.71.
+
+Illegal POD syntax in the documentation has been corrected.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 3.11 to 5.020001.
+
+The list of Perl versions covered has been updated.
+
+=item *
+
+The PathTools module collection has been upgraded from version 3.47 to 3.48.
+
+Fallbacks are now in place when cross-compiling for Android and
+$Config::Config{sh} is not yet defined.
+L<[perl #121963]|https://rt.perl.org/Ticket/Display.html?id=121963>
+
+=item *
+
+L<Unicode::UCD> has been upgraded from version 0.57 to 0.58.
+
+The documentation includes many clarifications and fixes.
+
+=item *
+
+L<utf8> has been upgraded from version 1.13 to 1.13_01.
+
+The documentation has some minor formatting improvements.
 
 =back
 
@@ -128,16 +156,6 @@ L<[perl #121869]|https://rt.perl.org/Ticket/Display.html?id=121869>
 =item *
 
 Clarify where C<NUL> may be embedded or is required to terminate a string.
-
-=back
-
-=head3 L<Unicode::UCD>
-
-=over 4
-
-=item *
-
-The documentation includes many clarifications and fixes.
 
 =back
 
