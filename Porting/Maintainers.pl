@@ -478,9 +478,9 @@ use File::Glob qw(:case);
     },
 
     'ExtUtils::Manifest' => {
-        'DISTRIBUTION' => 'FLORA/ExtUtils-Manifest-1.63.tar.gz',
+        'DISTRIBUTION' => 'BINGOS/ExtUtils-Manifest-1.64.tar.gz',
         'FILES'        => q[dist/ExtUtils-Manifest],
-        'EXCLUDED'     => [qr(t/release-.*\.t)],
+        'EXCLUDED'     => [qr(^xt/)],
     },
 
     'ExtUtils::ParseXS' => {
