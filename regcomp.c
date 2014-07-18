@@ -8009,27 +8009,6 @@ S__invlist_array_init(SV* const invlist, const bool will_have_0)
     return zero_addr + *offset;
 }
 
-PERL_STATIC_INLINE UV*
-S_invlist_array(SV* const invlist)
-{
-    /* Returns the pointer to the inversion list's array.  Every time the
-     * length changes, this needs to be called in case malloc or realloc moved
-     * it */
-
-    PERL_ARGS_ASSERT_INVLIST_ARRAY;
-
-    /* Must not be empty.  If these fail, you probably didn't check for <len>
-     * being non-zero before trying to get the array */
-    assert(_invlist_len(invlist));
-
-    /* The very first element always contains zero, The array begins either
-     * there, or if the inversion list is offset, at the element after it.
-     * The offset header field determines which; it contains 0 or 1 to indicate
-     * how much additionally to add */
-    assert(0 == *(SvPVX(invlist)));
-    return ((UV *) SvPVX(invlist) + *get_invlist_offset_addr(invlist));
-}
-
 PERL_STATIC_INLINE void
 S_invlist_set_len(pTHX_ SV* const invlist, const UV len, const bool offset)
 {

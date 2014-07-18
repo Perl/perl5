@@ -1513,7 +1513,6 @@ Ap	|UV	|swash_fetch	|NN SV *swash|NN const U8 *ptr|bool do_utf8
 EiMR	|SV*	|add_cp_to_invlist	|NULLOK SV* invlist|const UV cp
 EsM	|void	|_append_range_to_invlist   |NN SV* const invlist|const UV start|const UV end
 EiMRn	|UV*	|_invlist_array_init	|NN SV* const invlist|const bool will_have_0
-EiMRn	|UV*	|invlist_array	|NN SV* const invlist
 EsM	|void	|invlist_extend    |NN SV* const invlist|const UV len
 EiMRn	|UV	|invlist_max	|NN SV* const invlist
 EiM	|void	|invlist_set_len|NN SV* const invlist|const UV len|const bool offset
@@ -1556,6 +1555,7 @@ EXp	|SV*	|_core_swash_init|NN const char* pkg|NN const char* name \
 		|NULLOK SV* invlist|NULLOK U8* const flags_p
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_UTF8_C)
+EiMRn	|UV*	|invlist_array	|NN SV* const invlist
 EXMpR	|SV*	|_invlist_contents|NN SV* const invlist
 EiMRn	|bool*	|get_invlist_offset_addr|NN SV* invlist
 EiMRn	|UV	|_invlist_len	|NN SV* const invlist
