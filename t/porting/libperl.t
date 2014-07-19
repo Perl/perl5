@@ -414,7 +414,12 @@ if ($GSP) {
 
 ok(keys %{$symbols{undef}}, "has undefined symbols");
 
-my @good = qw(memchr memcmp memcpy chmod socket getenv sigaction sqrt time);
+# memchr, memcmp, memcpy should be used all over the place.
+#
+# chmod, socket, getenv, sigaction, sqrt, time are system/library
+# calls that should each see at least one use.
+my @good = qw(memchr memcmp memcpy
+              chmod socket getenv sigaction sqrt time);
 if ($Config{usedl}) {
     push @good, 'dlopen';
 }
@@ -424,8 +429,25 @@ for my $good (@good) {
     ok(@o, "uses $good (@o)");
 }
 
-my @bad = qw(gets strcpy strcat strncpy strncat sprintf vsprintf);
-# XXX: add atoi() to @bad
+# gets is horribly unsafe.
+#
+# fgets should not be used (Perl has its own API), even without perlio.
+#
+# tmpfile is unsafe.
+#
+# strcpy, strcat, strncpy, strncpy are unsafe.
+#
+# sprintf and vsprintf should not be used because
+# Perl has its own safer and more portable implementations.
+# (One exception: for certain floating point outputs
+# the native sprintf is still used, see below.)
+#
+# XXX: add atoi() to @bad - unsafe and undefined failure modes.
+#
+my @bad = qw(gets fgets
+             tmpfile
+             strcpy strcat strncpy strncat tmpfile
+             sprintf vsprintf);
 for my $bad (@bad) {
     my @o = exists $symbols{undef}{$bad} ?
         sort keys %{ $symbols{undef}{$bad} } : ();
