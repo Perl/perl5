@@ -31,19 +31,5 @@ for my $proxy ("http://localhost:8080/", "http://localhost:8080"){
     like($@, qr{http_proxy URL must be in format http\[s\]://\[auth\@\]<host>:<port>/});
 }
 
-# Explicitly disable proxy
-{
-    local $ENV{all_proxy} = "http://localhost:8080";
-    local $ENV{http_proxy} = "http://localhost:8080";
-    local $ENV{https_proxy} = "http://localhost:8080";
-    my $c = HTTP::Tiny->new(
-        proxy => undef,
-        http_proxy => undef,
-        https_proxy => undef,
-    );
-    ok(!defined $c->proxy, "proxy => undef disables ENV proxy");
-    ok(!defined $c->http_proxy, "http_proxy => undef disables ENV proxy");
-    ok(!defined $c->https_proxy, "https_proxy => undef disables ENV proxy");
-}
 
 done_testing();

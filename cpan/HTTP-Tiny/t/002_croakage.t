@@ -35,8 +35,5 @@ for my $c ( @cases ) {
   like ($err, qr/\Q$usage{$method}\E/, join("|",@$c) );
 }
 
-my $res =  $http->get("http://www.example.com/", { headers => { host => "www.example2.com" } } );
-like( $res->{content}, qr/'Host' header/, "Providing a Host header is fatal" );
-
 done_testing;
 
