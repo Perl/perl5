@@ -230,6 +230,14 @@ for my $charset (get_supported_code_pages()) {
             @invlist = prop_invlist($lookup_prop, '_perl_core_internal_ok');
         }
         die "Could not find inversion list for '$lookup_prop'" unless @invlist;
+
+        # Re-order the Unicode code points to native ones for this platform;
+        # only needed for code points below 256, and only if the first range
+        # doesn't span the whole of 0..256 (256 not 255 because a re-ordering
+        # could cause 256 to need to be in the same range as 255.)
+        if (! $nonl1_only || ($invlist[0] < 256
+                              && ! ($invlist[0] == 0 && $invlist[1] > 256)))
+        {
         my @full_list;
         for (my $i = 0; $i < @invlist; $i += 2) {
             my $upper = ($i + 1) < @invlist
@@ -250,6 +258,7 @@ for my $charset (get_supported_code_pages()) {
         }
         @full_list = sort { $a <=> $b } @full_list;
         @invlist = mk_invlist_from_cp_list(\@full_list);
+        }
 
         if ($l1_only) {
             for my $i (0 .. @invlist - 1 - 1) {
