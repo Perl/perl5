@@ -238,26 +238,26 @@ for my $charset (get_supported_code_pages()) {
         if (! $nonl1_only || ($invlist[0] < 256
                               && ! ($invlist[0] == 0 && $invlist[1] > 256)))
         {
-        my @full_list;
-        for (my $i = 0; $i < @invlist; $i += 2) {
-            my $upper = ($i + 1) < @invlist
-                        ? $invlist[$i+1] - 1      # In range
-                        : $Unicode::UCD::MAX_CP;  # To infinity.  You may want
-                                                # to stop much much earlier;
-                                                # going this high may expose
-                                                # perl deficiencies with very
-                                                # large numbers.
-            for my $j ($invlist[$i] .. $upper) {
-                if ($j < 256) {
-                    push @full_list, $a2n[$j];
-                }
-                else {
-                    push @full_list, $j;
+            my @full_list;
+            for (my $i = 0; $i < @invlist; $i += 2) {
+                my $upper = ($i + 1) < @invlist
+                            ? $invlist[$i+1] - 1      # In range
+
+                              # To infinity.  You may want to stop much much
+                              # earlier; going this high may expose perl
+                              # deficiencies with very large numbers.
+                            : $Unicode::UCD::MAX_CP;
+                for my $j ($invlist[$i] .. $upper) {
+                    if ($j < 256) {
+                        push @full_list, $a2n[$j];
+                    }
+                    else {
+                        push @full_list, $j;
+                    }
                 }
             }
-        }
-        @full_list = sort { $a <=> $b } @full_list;
-        @invlist = mk_invlist_from_cp_list(\@full_list);
+            @full_list = sort { $a <=> $b } @full_list;
+            @invlist = mk_invlist_from_cp_list(\@full_list);
         }
 
         if ($l1_only) {
