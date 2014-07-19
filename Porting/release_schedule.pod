@@ -8,7 +8,7 @@ release_schedule - Perl 5 release schedule
 
 This schedule lists the projected or historical development and
 release schedules for the next, current and previous stable versions
-of Perl.  Dates with all question marks will only be releases if
+of Perl.  Dates with two or more question marks will only be releases if
 deemed necessary by the Pumpking.
 
 =head2 Perl 5.20
