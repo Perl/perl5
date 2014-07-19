@@ -5,7 +5,7 @@ use warnings;
 no warnings 'surrogate';    # surrogates can be inputs to this
 use charnames ();
 
-our $VERSION = '0.59';
+our $VERSION = '0.60';
 
 require Exporter;
 
@@ -248,7 +248,8 @@ The codes may be preceded by a word enclosed in angle brackets, then a space,
 like C<E<lt>compatE<gt> >, giving the type of decomposition
 
 This decomposition may be an intermediate one whose components are also
-decomposable.  Use L<Unicode::Normalize> to get the final decomposition.
+decomposable.  Use L<Unicode::Normalize> to get the final decomposition in one
+step.
 
 =item B<decimal>
 
@@ -307,19 +308,27 @@ mappings.)
 =item B<block>
 
 the block I<code> belongs to (used in C<\p{Blk=...}>).
-See L</Blocks versus Scripts>.
+The L</prop_value_aliases()> function can be used to get all the synonyms
+of the block name.
 
+See L</Blocks versus Scripts>.
 
 =item B<script>
 
 the script I<code> belongs to.
+The L</prop_value_aliases()> function can be used to get all the synonyms
+of the script name.
+
 See L</Blocks versus Scripts>.
 
 =back
 
 Note that you cannot do (de)composition and casing based solely on the
-I<decomposition>, I<combining>, I<lower>, I<upper>, and I<title> fields;
-you will need also the L</compexcl()>, and L</casespec()> functions.
+I<decomposition>, I<combining>, I<lower>, I<upper>, and I<title> fields; you
+will need also the L</casespec()> function and the C<Composition_Exclusion>
+property.  (Or you could just use the L<lc()|perlfunc/lc>,
+L<uc()|perlfunc/uc>, and L<ucfirst()|perlfunc/ucfirst> functions, and the
+L<Unicode::Normalize> module.)
 
 =cut
 
@@ -603,6 +612,9 @@ sub charinrange {
 With a L</code point argument> C<charblock()> returns the I<block> the code point
 belongs to, e.g.  C<Basic Latin>.  The old-style block name is returned (see
 L</Old-style versus new-style block names>).
+The L</prop_value_aliases()> function can be used to get all the synonyms
+of the block name.
+
 If the code point is unassigned, this returns the block it would belong to if
 it were assigned.  (If the Unicode version being used is so early as to not
 have blocks, all code points are considered to be in C<No_Block>.)
@@ -717,6 +729,8 @@ With a L</code point argument>, C<charscript()> returns the I<script> the
 code point belongs to, e.g., C<Latin>, C<Greek>, C<Han>.
 If the code point is unassigned or the Unicode version being used is so early
 that it doesn't have scripts, this function returns C<"Unknown">.
+The L</prop_value_aliases()> function can be used to get all the synonyms
+of the script name.
 
 If supplied with an argument that can't be a code point, charscript() tries
 to do the opposite and interpret the argument as a script name. The
@@ -2213,7 +2227,8 @@ our $MAX_UNICODE_CODEPOINT;
 sub prop_invlist ($;$) {
     my $prop = $_[0];
 
-    # Undocumented way to get at Perl internal properties
+    # Undocumented way to get at Perl internal properties; it may be changed
+    # or removed without notice at any time.
     my $internal_ok = defined $_[1] && $_[1] eq '_perl_core_internal_ok';
 
     return if ! defined $prop;
@@ -3673,7 +3688,7 @@ sub UnicodeVersion {
 =head2 B<Blocks versus Scripts>
 
 The difference between a block and a script is that scripts are closer
-to the linguistic notion of a set of code points required to present
+to the linguistic notion of a set of code points required to represent
 languages, while block is more of an artifact of the Unicode code point
 numbering and separation into blocks of consecutive code points (so far the
 size of a block is some multiple of 16, like 128 or 256).
