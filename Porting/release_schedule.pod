@@ -41,8 +41,8 @@ you should reset the version numbers to the next blead series.
 
 =head2 Perl 5.21
 
-  2014-05-20  5.21.0          Ricardo Signes
-  2014-06-20  5.21.1          Matthew Horsfall
+  2014-05-20  5.21.0 ✓        Ricardo Signes
+  2014-06-20  5.21.1 ✓        Matthew Horsfall
   2014-07-20  5.21.2          Abigail
   2014-08-20  5.21.3          Peter Martini
   2014-09-20  5.21.4          Steve Hay
