@@ -3,7 +3,11 @@
 # Try opening libperl.a with nm, and verifying it has the kind of
 # symbols we expect, and no symbols we should avoid.
 #
-# Fail softly, expect things only on known platforms.
+# Fail softly, expect things only on known platforms:
+# - linux
+# - darwin (OS X), both x86 and ppc
+# - freebsd
+# and on other platforms, and if things seem odd, just give up (skip_all).
 #
 # Also, if the rarely-used builds options -DPERL_GLOBAL_STRUCT or
 # -DPERL_GLOBAL_STRUCT_PRIVATE are used, verify that they did what
@@ -85,7 +89,9 @@ if (@ARGV == 1) {
     if ($fake_input =~ s/\@(.+)$//) {
         $fake_style = $1;
         print "# Faking nm style from $fake_style\n";
-        if ($fake_style eq 'gnu' || $fake_style eq 'linux') {
+        if ($fake_style eq 'gnu' ||
+            $fake_style eq 'linux' ||
+            $fake_style eq 'freebsd') {
             $nm_style = 'gnu'
         } elsif ($fake_style eq 'darwin' || $fake_style eq 'osx') {
             $nm_style = 'darwin'
@@ -97,6 +103,10 @@ if (@ARGV == 1) {
 
 unless (defined $nm_style) {
     if ($^O eq 'linux') {
+        # The 'gnu' style could be equally well be called 'bsd' style,
+        # since the output format of the GNU binutils nm is really BSD.
+        $nm_style = 'gnu';
+    } elsif ($^O eq 'freebsd') {
         $nm_style = 'gnu';
     } elsif ($^O eq 'darwin') {
         $nm_style = 'darwin';
@@ -419,7 +429,17 @@ my @bad = qw(gets strcpy strcat strncpy strncat sprintf vsprintf);
 for my $bad (@bad) {
     my @o = exists $symbols{undef}{$bad} ?
         sort keys %{ $symbols{undef}{$bad} } : ();
-    is(@o, 0, "uses no $bad (@o)");
+    # While sprintf() is bad in the general case,
+    # some platforms implement Gconvert via sprintf, in sv.o.
+    if ($bad eq 'sprintf' &&
+        $Config{d_Gconvert} =~ /^sprintf/ &&
+        @o == 1 && $o[0] eq 'sv.o') {
+      SKIP: {
+        skip("uses sprintf for Gconvert in sv.o");
+      }
+    } else {
+        is(@o, 0, "uses no $bad (@o)");
+    }
 }
 
 if (defined $nm_err_tmp) {
