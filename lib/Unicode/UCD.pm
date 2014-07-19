@@ -2824,15 +2824,21 @@ our @algorithmic_named_code_points;
 our $HANGUL_BEGIN;
 our $HANGUL_COUNT;
 
-sub prop_invmap ($) {
+sub prop_invmap ($;$) {
 
     croak __PACKAGE__, "::prop_invmap: must be called in list context" unless wantarray;
 
     my $prop = $_[0];
     return unless defined $prop;
 
+    # Undocumented way to get at Perl internal properties; it may be changed
+    # or removed without notice at any time.  It currently also changes the
+    # output to use the format specified in the file rather than the one we
+    # normally compute and return
+    my $internal_ok = defined $_[1] && $_[1] eq '_perl_core_internal_ok';
+
     # Fail internal properties
-    return if $prop =~ /^_/;
+    return if $prop =~ /^_/ && ! $internal_ok;
 
     # The values returned by this function.
     my (@invlist, @invmap, $format, $missing);
