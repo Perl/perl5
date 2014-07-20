@@ -238,26 +238,40 @@ for my $charset (get_supported_code_pages()) {
         if (! $nonl1_only || ($invlist[0] < 256
                               && ! ($invlist[0] == 0 && $invlist[1] > 256)))
         {
-            my @full_list;
-            for (my $i = 0; $i < @invlist; $i += 2) {
-                my $upper = ($i + 1) < @invlist
-                            ? $invlist[$i+1] - 1      # In range
+
+            # Look at all the ranges that start before 257.
+            my @latin1_list;
+            while (@invlist) {
+                last if $invlist[0] > 256;
+                my $upper = @invlist > 1
+                            ? $invlist[1] - 1      # In range
 
                               # To infinity.  You may want to stop much much
                               # earlier; going this high may expose perl
                               # deficiencies with very large numbers.
                             : $Unicode::UCD::MAX_CP;
-                for my $j ($invlist[$i] .. $upper) {
+                for my $j ($invlist[0] .. $upper) {
                     if ($j < 256) {
-                        push @full_list, $a2n[$j];
+                        push @latin1_list, $a2n[$j];
                     }
                     else {
-                        push @full_list, $j;
+                        push @latin1_list, $j;
                     }
                 }
+
+                shift @invlist; # Shift off the range that's in the list
+                shift @invlist; # Shift off the range not in the list
             }
-            @full_list = sort { $a <=> $b } @full_list;
-            @invlist = mk_invlist_from_cp_list(\@full_list);
+
+            # Here @invlist contains all the ranges in the original that start
+            # at code points above 256, and @latin1_list contains all the
+            # native code points for ranges that start with a Unicode code
+            # point below 257.  We sort the latter and convert it to inversion
+            # list format.  Then simply prepend it to the list of the higher
+            # code points.
+            @latin1_list = sort { $a <=> $b } @latin1_list;
+            @latin1_list = mk_invlist_from_cp_list(\@latin1_list);
+            unshift @invlist, @latin1_list;
         }
 
         if ($l1_only) {
