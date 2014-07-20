@@ -66,31 +66,50 @@ Hash lookups where the key is a constant is faster.
 
 =head1 Modules and Pragmata
 
-XXX All changes to installed files in F<cpan/>, F<dist/>, F<ext/> and F<lib/>
-go here.  If Module::CoreList is updated, generate an initial draft of the
-following sections using F<Porting/corelist-perldelta.pl>.  A paragraph summary
-for important changes should then be added by hand.  In an ideal world,
-dual-life modules would have a F<Changes> file that could be cribbed.
-
-[ Within each section, list entries as a =item entry ]
-
-=head2 New Modules and Pragmata
-
-=over 4
-
-=item *
-
-XXX
-
-=back
-
 =head2 Updated Modules and Pragmata
 
 =over 4
 
 =item *
 
-L<ExtUtils::Manifest> has been upgraded to 1.64.
+L<arybase> has been upgraded from version 0.07 to 0.08.
+
+=item *
+
+L<B> has been upgraded from version 1.49 to 1.50.
+
+=item *
+
+L<Devel::Peek> has been upgraded from version 1.17 to 1.18.
+
+=item *
+
+L<experimental> has been upgraded from version 0.007 to 0.008.
+
+=item *
+
+L<ExtUtils::Manifest> has been upgraded from version 1.63 to 1.64.
+
+=item *
+
+L<File::Copy> has been upgraded from version 2.29 to 2.30.
+
+=item *
+
+The PathTools module collection (L<File::Spec> and friends) has been
+upgraded from version 3.48 to 3.49.
+
+=item *
+
+L<Filter::Simple> has been upgraded from version 0.91 to 0.92.
+
+=item *
+
+L<Hash::Util> has been upgraded from version 0.17 to 0.18.
+
+=item *
+
+L<IO> has been upgraded from version 1.32 to 1.33.
 
 =item *
 
@@ -102,6 +121,10 @@ L<[cpan #97050]|https://rt.cpan.org/Ticket/Display.html?id=97050>
 
 =item *
 
+L<IPC::Open3> has been upgraded from version 1.16 to 1.17.
+
+=item *
+
 L<Math::BigInt> has been upgraded from version 1.9995 to 1.9996.
 
 Correct handling of subclasses.
@@ -110,26 +133,23 @@ L<[cpan #96329]|https://rt.cpan.org/Ticket/Display.html?id=96329>
 
 =item *
 
-L<Module::CoreList> has been upgraded from version 5.021001_1 to 5.021002.
+L<Module::CoreList> has been upgraded from version 5.021001_01 to 5.021002.
 
 =item *
 
-The PathTools module collection has been upgraded from version 3.48 to
-3.49.
+L<Pod::Usage> has been upgraded from version 1.63 to 1.64.
+
+=item *
+
+L<POSIX> has been upgraded from version 1.40 to 1.41.
 
 =item *
 
 L<threads> has been upgraded from version 1.94 to 1.95.
 
-=back
-
-=head2 Removed Modules and Pragmata
-
-=over 4
-
 =item *
 
-XXX
+L<warnings> has been upgraded from version 1.24 to 1.26.
 
 =back
 
@@ -291,9 +311,35 @@ C<< " P" =~ /(?=.*P)P/ >> should match, but did not. This is now fixed.
 
 =head1 Acknowledgements
 
-XXX Generate this with:
+Perl 5.21.2 represents approximately 4 weeks of development since Perl 5.21.1
+and contains approximately 11,000 lines of changes across 220 files from 27
+authors.
 
-  perl Porting/acknowledgements.pl v5.21.1..HEAD
+Excluding auto-generated files, documentation and release tools, there were
+approximately 5,700 lines of changes to 140 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its third decade thanks to a vibrant community
+of users and developers. The following people are known to have contributed the
+improvements that became Perl 5.21.2:
+
+Aaron Crane, Abhijit Menon-Sen, Abigail, Alexandr Ciornii, brian d foy, Brian
+Fraser, Chris 'BinGOs' Williams, Craig A. Berry, Daniel Dragan, David Golden,
+David Mitchell, Dmitri Tikhonov, George Greer, H.Merijn Brand, James E Keenan,
+Jarkko Hietaniemi, Karen Etheridge, Karl Williamson, Matthew Horsfall, Peter
+John Acklam, Peter Martini, Reini Urban, Ricardo Signes, Steve Hay, Tony Cook,
+Yves Orton, Ævar Arnfjörð Bjarmason.
+
+The list above is almost certainly incomplete as it is automatically generated
+from version control history. In particular, it does not include the names of
+the (very much appreciated) contributors who reported issues to the Perl bug
+tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please see
+the F<AUTHORS> file in the Perl source distribution.
 
 =head1 Reporting Bugs
 
