@@ -422,9 +422,13 @@ ok(keys %{$symbols{undef}}, "has undefined symbols");
 my @good = qw(memchr memcmp memcpy
               chmod socket getenv sigaction time);
 push @good, $Config{uselongdouble} && $Config{d_sqrtl} ? 'sqrtl' : 'sqrt';
+
+# DynaLoader will use dlopen, unless we are building static,
+# and in the platforms we are supporting in this test.
 if ($Config{usedl}) {
     push @good, 'dlopen';
 }
+
 for my $good (@good) {
     my @o = exists $symbols{undef}{$good} ?
         sort keys %{ $symbols{undef}{$good} } : ();
