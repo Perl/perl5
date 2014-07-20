@@ -412,28 +412,53 @@ if ($GSP) {
     ok(! exists $symbols{text}{Perl_GetVars}, "has no Perl_GetVars");
 }
 
+# See the comments in the beginning for what "undefined symbols"
+# really means.  We *should* have many of those, that is a good thing.
 ok(keys %{$symbols{undef}}, "has undefined symbols");
+
+# There are certain symbols we expect to see.
 
 # memchr, memcmp, memcpy should be used all over the place.
 #
 # chmod, socket, getenv, sigaction, sqrt, time are system/library
 # calls that should each see at least one use. sqrt can be sqrtl
 # if so configured.
-my @good = qw(memchr memcmp memcpy
-              chmod socket getenv sigaction time);
-push @good, $Config{uselongdouble} && $Config{d_sqrtl} ? 'sqrtl' : 'sqrt';
+my %expected = (
+    memchr => 'd_memchr',
+    memcmp => 'd_memcmp',
+    memcpy => 'd_memcpy',
+    chmod  => undef, # There is no Configure symbol for chmod.
+    socket => 'd_socket',
+    getenv => undef, # There is no Configure symbol for getenv,
+    sigaction => 'd_sigaction',
+    time   => 'd_time',
+    );
+
+if ($Config{uselongdouble} && $Config{d_longdbl}) {
+    $expected{sqrtl} = 'd_sqrtl';
+} else {
+    $expected{sqrt} = undef; # There is no Configure symbol for sqrt.
+}
 
 # DynaLoader will use dlopen, unless we are building static,
 # and in the platforms we are supporting in this test.
-if ($Config{usedl}) {
-    push @good, 'dlopen';
+if ($Config{usedl} ) {
+    $expected{dlopen} = 'd_dlopen';
 }
 
-for my $good (@good) {
-    my @o = exists $symbols{undef}{$good} ?
-        sort keys %{ $symbols{undef}{$good} } : ();
-    ok(@o, "uses $good (@o)");
+for my $symbol (sort keys %expected) {
+    if (defined $expected{$symbol} && !$Config{$expected{$symbol}}) {
+      SKIP: {
+        skip("no $symbol");
+      }
+      next;
+    }
+    my @o = exists $symbols{undef}{$symbol} ?
+        sort keys %{ $symbols{undef}{$symbol} } : ();
+    ok(@o, "uses $symbol (@o)");
 }
+
+# There are certain symbols we expect NOT to see.
 
 # gets is horribly unsafe.
 #
@@ -441,32 +466,44 @@ for my $good (@good) {
 #
 # tmpfile is unsafe.
 #
-# strcpy, strcat, strncpy, strncpy are unsafe.
+# strcat, strcpy, strncat, strncpy are unsafe.
 #
 # sprintf and vsprintf should not be used because
 # Perl has its own safer and more portable implementations.
 # (One exception: for certain floating point outputs
-# the native sprintf is still used, see below.)
+# the native sprintf is still used in some platforms, see below.)
 #
-# XXX: add atoi() to @bad - unsafe and undefined failure modes.
+# XXX: add atoi() to %unexpected - unsafe and undefined failure modes.
 #
-my @bad = qw(gets fgets
-             tmpfile
-             strcpy strcat strncpy strncat tmpfile
-             sprintf vsprintf);
-for my $bad (@bad) {
-    my @o = exists $symbols{undef}{$bad} ?
-        sort keys %{ $symbols{undef}{$bad} } : ();
+
+my %unexpected;
+
+for my $stdio (qw(gets fgets tmpfile sprintf vsprintf)) {
+    $unexpected{$stdio} = undef; # No Configure symbol for these.
+}
+for my $str (qw(strcat strcpy strncat strncpy)) {
+    $unexpected{$str} = undef; # No Configure symbol for these.
+}
+
+for my $symbol (sort keys %unexpected) {
+    if (defined $unexpected{$symbol} && !$Config{$unexpected{$symbol}}) {
+      SKIP: {
+        skip("no $symbol");
+      }
+      next;
+    }
+    my @o = exists $symbols{undef}{$symbol} ?
+        sort keys %{ $symbols{undef}{$symbol} } : ();
     # While sprintf() is bad in the general case,
     # some platforms implement Gconvert via sprintf, in sv.o.
-    if ($bad eq 'sprintf' &&
+    if ($symbol eq 'sprintf' &&
         $Config{d_Gconvert} =~ /^sprintf/ &&
         @o == 1 && $o[0] eq 'sv.o') {
       SKIP: {
         skip("uses sprintf for Gconvert in sv.o");
       }
     } else {
-        is(@o, 0, "uses no $bad (@o)");
+        is(@o, 0, "uses no $symbol (@o)");
     }
 }
 
