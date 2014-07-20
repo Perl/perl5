@@ -581,6 +581,7 @@ snprintf() - the return type is unportable.  Use my_snprintf() instead.
 =head2 Security problems
 
 Last but not least, here are various tips for safer coding.
+See also L<perlclib> for libc/stdio replacements one should use.
 
 =over 4
 
@@ -589,6 +590,12 @@ Last but not least, here are various tips for safer coding.
 Do not use gets()
 
 Or we will publicly ridicule you.  Seriously.
+
+=item *
+
+Do not use tmpfile()
+
+Use mkstemp() instead.
 
 =item *
 
