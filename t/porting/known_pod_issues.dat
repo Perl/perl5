@@ -285,7 +285,7 @@ pod/perltru64.pod	? Should you be using F<...> or maybe L<...> instead of	1
 pod/perltru64.pod	Verbatim line length including indents exceeds 79 by	5
 pod/perlvms.pod	? Should you be using F<...> or maybe L<...> instead of	1
 pod/perlwin32.pod	Verbatim line length including indents exceeds 79 by	12
-porting/epigraphs.pod	Verbatim line length including indents exceeds 79 by	18
+porting/epigraphs.pod	Verbatim line length including indents exceeds 79 by	23
 porting/expand-macro.pl	Verbatim line length including indents exceeds 79 by	2
 porting/release_managers_guide.pod	Verbatim line length including indents exceeds 79 by	6
 porting/todo.pod	Verbatim line length including indents exceeds 79 by	7
