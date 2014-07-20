@@ -17,6 +17,49 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.21.2 - Neil Armstrong, Buzz Aldrin, Charlie Duke, Final minutes of communication of the first manned moon landing, July 20, 1969.
+
+L<Announced on 2014-07-20 by Abigail|http://www.nntp.perl.org/group/perl.perl5.porters/2014/07/msg217937.html>
+
+    Armstrong: Okay. Here's a...Looks like a good area here.
+    Aldrin:    I got the shadow out there. 
+    Aldrin:    250, down at 2 1/2, 19 forward.
+    Aldrin:    Altitude, velocity lights. 
+    Aldrin:    3 1/2 down, 220 feet, 13 forward.
+    Aldrin:    11 forward. Coming down nicely.
+    Armstrong: Gonna be right over that crater. 
+    Aldrin:    200 feet, 4 1/2 down.
+    Aldrin:    5 1/2 down.
+    Armstrong: I got a good spot [garbled].
+    Aldrin:    160 feet, 6 1/2 down.
+    Aldrin:    5 1/2 down, 9 forward. You're looking good.
+    Aldrin:    120 feet.
+    Aldrin:    100 feet, 3 1/2 down, 9 forward. Five percent. Quantity light. 
+    Aldrin:    Okay. 75 feet. And it's looking good. Down a half, 6 forward.
+    Duke:      60 seconds.
+    Aldrin:    Light's on. 
+    Aldrin:    60 feet, down 2 1/2. 2 forward. 2 forward. That's good. 
+    Aldrin:    40 feet, down 2 1/2. Picking up some dust. 
+    Aldrin:    30 feet, 2 1/2 down. [Garbled] shadow. 
+    Aldrin:    4 forward. 4 forward. Drifting to the right a little. 20 feet,
+               down a half.
+    Duke:      30 seconds.
+    Aldrin:    Drifting forward just a little bit; that's good.
+    Aldrin:    Contact Light. 
+    Armstrong: Shutdown.
+    Aldrin:    Okay. Engine Stop. 
+    Aldrin:    ACA out of Detent.
+    Armstrong: Out of Detent. Auto.
+    Aldrin:    Mode Control, both Auto. Descent Engine Command Override, Off.
+               Engine Arm, Off. 413 is in. 
+    Duke:      We copy you down, Eagle.
+    Armstrong: Engine arm is off.
+    Armstrong: Houston, Tranquility Base here. The Eagle has landed.
+    Duke:      Roger, Twan...[correcting himself] Tranquility. We copy you on
+               the ground. You got a bunch of guys about to turn blue.
+               We're breathing again. Thanks a lot.
+    Aldrin:    Thank you. 
+
 =head2 v5.21.1 - Robert Jordan, The Crossroads of Twilights, Book 10 of the Wheel of Time
 
 L<Announced on 2014-06-20 by Matthew Horsfall|http://www.nntp.perl.org/group/perl.perl5.porters/2014/06/msg217030.html>
