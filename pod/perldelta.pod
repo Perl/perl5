@@ -311,9 +311,35 @@ C<< " P" =~ /(?=.*P)P/ >> should match, but did not. This is now fixed.
 
 =head1 Acknowledgements
 
-XXX Generate this with:
+Perl 5.21.2 represents approximately 4 weeks of development since Perl 5.21.1
+and contains approximately 11,000 lines of changes across 220 files from 27
+authors.
 
-  perl Porting/acknowledgements.pl v5.21.1..HEAD
+Excluding auto-generated files, documentation and release tools, there were
+approximately 5,700 lines of changes to 140 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its third decade thanks to a vibrant community
+of users and developers. The following people are known to have contributed the
+improvements that became Perl 5.21.2:
+
+Aaron Crane, Abhijit Menon-Sen, Abigail, Alexandr Ciornii, brian d foy, Brian
+Fraser, Chris 'BinGOs' Williams, Craig A. Berry, Daniel Dragan, David Golden,
+David Mitchell, Dmitri Tikhonov, George Greer, H.Merijn Brand, James E Keenan,
+Jarkko Hietaniemi, Karen Etheridge, Karl Williamson, Matthew Horsfall, Peter
+John Acklam, Peter Martini, Reini Urban, Ricardo Signes, Steve Hay, Tony Cook,
+Yves Orton, Ævar Arnfjörð Bjarmason.
+
+The list above is almost certainly incomplete as it is automatically generated
+from version control history. In particular, it does not include the names of
+the (very much appreciated) contributors who reported issues to the Perl bug
+tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please see
+the F<AUTHORS> file in the Perl source distribution.
 
 =head1 Reporting Bugs
 
