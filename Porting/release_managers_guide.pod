@@ -955,7 +955,7 @@ Bootstrap the CPAN client on the clean install:
 Try installing a popular CPAN module that's reasonably complex and that
 has dependencies; for example:
 
-    CPAN> install Inline
+    CPAN> install Inline::C
     CPAN> quit
 
 Check that your perl can run this:
