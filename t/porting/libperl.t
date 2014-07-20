@@ -416,10 +416,10 @@ ok(keys %{$symbols{undef}}, "has undefined symbols");
 
 # memchr, memcmp, memcpy should be used all over the place.
 #
-# chmod, socket, getenv, sigaction, sqrt, time are system/library
+# chmod, socket, getenv, sigaction, time are system/library
 # calls that should each see at least one use.
 my @good = qw(memchr memcmp memcpy
-              chmod socket getenv sigaction sqrt time);
+              chmod socket getenv sigaction time);
 if ($Config{usedl}) {
     push @good, 'dlopen';
 }
