@@ -200,7 +200,8 @@ C<toUPPER_uni>, as described in L<perlapi/Character case changing>.)
  Instead Of:                 Use:
 
  atof(s)                     Atof(s)
- atol(s)                     Atol(s)
+ atoi(s)                     grok_atou(s, &e)
+ atol(s)                     grok_atou(s, &e)
  strtod(s, &p)               Nothing.  Just don't use it.
  strtol(s, &p, n)            Strtol(s, &p, n)
  strtoul(s, &p, n)           Strtoul(s, &p, n)

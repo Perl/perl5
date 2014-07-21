@@ -623,6 +623,14 @@ of the program is UTF-8.  What happens is that the C<%s> and its operand are
 simply skipped without any notice.
 L<https://sourceware.org/bugzilla/show_bug.cgi?id=6530>.
 
+=item *
+
+Do not use atoi()
+
+Use grok_atou() instead.  atoi() has ill-defined behavior on overflows,
+and cannot be used for incremental parsing.  It is also affected by locale,
+which can be construed as a bug.
+
 =back
 
 =head1 DEBUGGING
