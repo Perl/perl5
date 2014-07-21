@@ -109,4 +109,118 @@ for my $grok (@groks) {
   is($out_flags, $grok->[3], "'$grok->[0]' flags $grok->[1] - check flags");
 }
 
+my $ATOU_MAX = ~0;
+
+# atou tests
+my @atous =
+  (
+   # [ input, endsv, out uv, out len ]
+
+   # Basic cases.
+   [ "0",    "",   0,   1 ],
+   [ "1",    "",   1,   1 ],
+   [ "2",    "",   2,   1 ],
+   [ "9",    "",   9,   1 ],
+   [ "12",   "",   12,  2 ],
+   [ "123",  "",   123, 3 ],
+
+   # Trailing whitespace  is accepted or rejected, depending on endptr.
+   [ "0 ",   " ",   0,  1 ],
+   [ "1 ",   " ",   1,  1 ],
+   [ "2 ",   " ",   2,  1 ],
+   [ "12 ",  " ",   12, 2 ],
+
+   # Trailing garbage is accepted or rejected, depending on endptr.
+   [ "0x",   "x",   0,  1 ],
+   [ "1x",   "x",   1,  1 ],
+   [ "2x",   "x",   2,  1 ],
+   [ "12x",  "x",   12, 2 ],
+
+   # Leading whitespace is failure.
+   [ " 0",   " 0",  0,  0 ],
+   [ " 1",   " 1",  0,  0 ],
+   [ " 12",  " 12", 0,  0 ],
+
+   # Leading garbage is outright failure.
+   [ "x0",   "x0",  0,  0 ],
+   [ "x1",   "x1",  0,  0 ],
+   [ "x12",  "x12", 0,  0 ],
+
+   # We do not parse decimal point.
+   [ "12.3",  ".3", 12, 2 ],
+
+   # Leading pluses or minuses are no good.
+   [ "+12", "+12",  0, 0 ],
+   [ "-12", "-12",  0, 0 ],
+
+   # Extra leading zeros cause overflow.
+   [ "00",   "00",  $ATOU_MAX,  0 ],
+   [ "01",   "01",  $ATOU_MAX,  0 ],
+   [ "012",  "012", $ATOU_MAX,  0 ],
+  );
+
+if ($Config{sizesize} == 8) {
+    push @atous,
+      (
+       [ "4294967294", "", 4294967294, 10, ],
+       [ "4294967295", "", 4294967295, 10, ],
+       [ "4294967296", "", 4294967296, 10, ],
+
+       [ "9999999999", "", 9999999999, 10, ],
+
+       [ "18446744073709551614", "", 18446744073709551614, 20, ],
+       [ "18446744073709551615", "", $ATOU_MAX, 20, ],
+       [ "18446744073709551616", "18446744073709551616", $ATOU_MAX, 0, ],
+      );
+} elsif ($Config{sizesize} == 4) {
+    push @atous,
+      (
+       [ "4294967294", "", 4294967294, 10, ],
+       [ "4294967295", "", $ATOU_MAX, 10, ],
+       [ "4294967296", "", $ATOU_MAX, 0, ],
+
+       [ "9999999999", "", $ATOU_MAX, 0, ],
+
+       [ "18446744073709551614", "", $ATOU_MAX, 0, ],
+       [ "18446744073709551615", "", $ATOU_MAX, 0, ],
+       [ "18446744073709551616", "18446744073709551616", $ATOU_MAX, 0, ],
+      );
+}
+
+# This will fail to fail once 128/256-bit systems arrive.
+push @atous,
+    (
+       [ "99999999999999999999", "99999999999999999999", $ATOU_MAX, 0 ],
+    );
+
+for my $grok (@atous) {
+    my $input = $grok->[0];
+    my $endsv = $grok->[1];
+
+    my ($out_uv, $out_len);
+
+    # First with endsv.
+    ($out_uv, $out_len) = grok_atou($input, $endsv);
+    is($out_uv,  $grok->[2],
+       "'$input' $endsv - number success (got $out_uv cf $grok->[2])");
+    ok($grok->[3] <= length $input, "'$input' $endsv - length sanity 1");
+    unless (length $grok->[1]) {
+        is($out_len, $grok->[3], "'$input' $endsv - length sanity 2");
+    } # else { ... } ?
+    is($endsv, substr($input, $out_len), "'$input' $endsv - length success");
+
+    # Then without endsv (undef == NULL).
+    ($out_uv, $out_len) = grok_atou($input, undef);
+    if (length $grok->[1]) {
+        if ($grok->[2] == $ATOU_MAX) {
+            is($out_uv,  $ATOU_MAX, "'$input' undef - number overflow");
+        } else {
+            is($out_uv,  0, "'$input' undef - number zero");
+        }
+    } else {
+        is($out_uv,  $grok->[2],
+           "'$input' undef - number success (got $out_uv cf $grok->[2])");
+    }
+}
+
 done_testing();

@@ -30,3 +30,26 @@ grok_number_flags(number, flags)
 	PUSHs(sv_2mortal(newSViv(result)));
 	if (result & IS_NUMBER_IN_UV)
 	    PUSHs(sv_2mortal(newSVuv(value)));
+
+void
+grok_atou(number, endsv)
+	SV *number
+	SV *endsv
+    PREINIT:
+	STRLEN len;
+	const char *pv = SvPV(number, len);
+	UV result;
+	const char* endptr;
+    PPCODE:
+	EXTEND(SP,2);
+	if (endsv == &PL_sv_undef) {
+          result = grok_atou(pv, NULL);
+        } else {
+          result = grok_atou(pv, &endptr);
+        }
+	PUSHs(sv_2mortal(newSVuv(result)));
+	if (endsv == &PL_sv_undef) {
+          PUSHs(sv_2mortal(newSVpvn(NULL, 0)));
+	} else {
+          PUSHs(sv_2mortal(newSViv(endptr - pv)));
+	}
