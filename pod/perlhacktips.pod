@@ -629,7 +629,15 @@ Do not use atoi()
 
 Use grok_atou() instead.  atoi() has ill-defined behavior on overflows,
 and cannot be used for incremental parsing.  It is also affected by locale,
-which can be construed as a bug.
+which is bad.
+
+=item *
+
+Do not use strtol() or strtoul()
+
+Use grok_atou() instead.  strtol() or strtoul() (or their IV/UV-friendly
+macro disguises, Strtol() and Strtoul(), or Atol() and Atoul() are
+affected by locale, which is bad.
 
 =back
 

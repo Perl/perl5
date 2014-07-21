@@ -789,16 +789,26 @@ Perl_grok_number_flags(pTHX_ const char *pv, STRLEN len, UV *valuep, U32 flags)
 /*
 =for perlapi
 
-grok_atou is a safer replacement for atoi.
+grok_atou is a safer replacement for atoi or strtoul.
 
-(atoi has severe problems with illegal inputs, and should not be used.
-atoi is also affected by locale settings, which can be seen as a bug.)
+atoi has severe problems with illegal inputs, and should not be used.
+
+atoi and strtoul are also affected by locale settings, which can
+be seen as a bug (global state controlled by user environment).
 
 Returns the unsigned value, if a valid one can be parsed.
 
 Only the decimal digits '0'..'9' are accepted.
 
-Does NOT allow optional leading whitespace, as opposed to atoi.
+As opposed to atoi or strtoul:
+- does NOT allow optional leading whitespace
+- does NOT allow negative inputs
+
+Also rejected:
+- leading plus signs
+- leading zeros (meaning that only "0" is the zero)
+
+Trailing non-digit bytes are allowed if the endptr is non-NULL.
 
 On return the *endptr will contain the pointer to the first non-digit byte.
 
