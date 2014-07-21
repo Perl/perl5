@@ -104,7 +104,7 @@ dl_generic_private_init(pTHX)	/* called by dl_*.xs dl_private_init() */
     }
 #endif
     if ( (perl_dl_nonlazy = getenv("PERL_DL_NONLAZY")) != NULL )
-	dl_nonlazy = atoi(perl_dl_nonlazy);
+	dl_nonlazy = grok_atou(perl_dl_nonlazy, NULL);
     if (dl_nonlazy)
 	DLDEBUG(1,PerlIO_printf(Perl_debug_log, "DynaLoader bind mode is 'non-lazy'\n"));
 #ifdef DL_LOADONCEONLY

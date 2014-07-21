@@ -546,7 +546,12 @@ perl_destruct(pTHXx)
     {
 	const char * const s = PerlEnv_getenv("PERL_DESTRUCT_LEVEL");
 	if (s) {
-            const int i = atoi(s);
+            int i;
+            if (strEQ(s, "-1")) { /* Special case: modperl folklore. */
+                i = -1;
+            } else {
+                i = grok_atou(s, NULL);
+            }
 #ifdef DEBUGGING
 	    if (destruct_level < i) destruct_level = i;
 #endif
@@ -1451,7 +1456,7 @@ perl_parse(pTHXx_ XSINIT_t xsinit, int argc, char **argv, char **env)
     {
         const char * const s = PerlEnv_getenv("PERL_HASH_SEED_DEBUG");
 
-        if (s && (atoi(s) == 1)) {
+        if (s && (grok_atou(s, NULL) == 1)) {
             unsigned char *seed= PERL_HASH_SEED;
             unsigned char *seed_end= PERL_HASH_SEED + PERL_HASH_SEED_BYTES;
             PerlIO_printf(Perl_debug_log, "HASH_FUNCTION = %s HASH_SEED = 0x", PERL_HASH_FUNC);
@@ -2285,8 +2290,8 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 #ifdef MYMALLOC
     {
 	const char *s;
-    if ((s=PerlEnv_getenv("PERL_DEBUG_MSTATS")) && atoi(s) >= 2)
-	dump_mstats("after compilation:");
+        if ((s=PerlEnv_getenv("PERL_DEBUG_MSTATS")) && grok_atou(s, NULL) >= 2)
+            dump_mstats("after compilation:");
     }
 #endif
 
@@ -3042,7 +3047,10 @@ Perl_get_debug_opts(pTHX_ const char **s, bool givehelp)
 	}
     }
     else if (isDIGIT(**s)) {
-	i = atoi(*s);
+        const char* e;
+	i = grok_atou(*s, &e);
+        if (e)
+            *s = e;
 	for (; isWORDCHAR(**s); (*s)++) ;
     }
     else if (givehelp) {
@@ -3650,9 +3658,9 @@ S_open_script(pTHX_ const char *scriptname, bool dosearch, bool *suidscript)
 
 	if (strnEQ(scriptname, "/dev/fd/", 8) && isDIGIT(scriptname[8]) ) {
             const char *s = scriptname + 8;
-	    fdscript = atoi(s);
-	    while (isDIGIT(*s))
-		s++;
+            const char* e;
+	    fdscript = grok_atou(s, &e);
+	    s = e;
 	    if (*s) {
 		/* PSz 18 Feb 04
 		 * Tell apart "normal" usage of fdscript, e.g.

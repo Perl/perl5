@@ -9605,6 +9605,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
         else if (*RExC_parse == '?') { /* (?...) */
 	    bool is_logical = 0;
 	    const char * const seqstart = RExC_parse;
+            const char * endptr;
             if (has_intervening_patws) {
                 RExC_parse++;
                 vFAIL("In '(?...)', the '(' and '?' must be adjacent");
@@ -9814,12 +9815,21 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 	    case '5': case '6': case '7': case '8': case '9':
 	        RExC_parse--;
               parse_recursion:
-		num = atoi(RExC_parse);
-  	        parse_start = RExC_parse - 1; /* MJD */
-	        if (*RExC_parse == '-')
-	            RExC_parse++;
-		while (isDIGIT(*RExC_parse))
-			RExC_parse++;
+                {
+                    bool is_neg = FALSE;
+                    parse_start = RExC_parse - 1; /* MJD */
+                    if (*RExC_parse == '-') {
+                        RExC_parse++;
+                        is_neg = TRUE;
+                    }
+                    num = grok_atou(RExC_parse, &endptr);
+                    if (endptr)
+			RExC_parse = (char*)endptr;
+                    if (is_neg) {
+                        /* Some limit for num? */
+                        num = -num;
+                    }
+                }
 	        if (*RExC_parse!=')')
 	            vFAIL("Expecting close bracket");
 
@@ -9996,9 +10006,9 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 		    RExC_parse++;
 		    parno = 0;
 		    if (RExC_parse[0] >= '1' && RExC_parse[0] <= '9' ) {
-		        parno = atoi(RExC_parse++);
-		        while (isDIGIT(*RExC_parse))
-			    RExC_parse++;
+		        parno = grok_atou(RExC_parse, &endptr);
+		        if (endptr)
+                            RExC_parse = (char*)endptr;
 		    } else if (RExC_parse[0] == '&') {
 		        SV *sv_dat;
 		        RExC_parse++;
@@ -10015,10 +10025,9 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                     /* (?(1)...) */
 		    char c;
 		    char *tmp;
-		    parno = atoi(RExC_parse++);
-
-		    while (isDIGIT(*RExC_parse))
-			RExC_parse++;
+		    parno = grok_atou(RExC_parse, &endptr);
+                    if (endptr)
+			RExC_parse = (char*)endptr;
                     ret = reganode(pRExC_state, GROUPP, parno);
 
                  insert_if_check_paren:
@@ -10492,15 +10501,16 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 	    next++;
 	}
 	if (*next == '}') {		/* got one */
+            const char* endptr;
 	    if (!maxpos)
 		maxpos = next;
 	    RExC_parse++;
-	    min = atoi(RExC_parse);
+	    min = grok_atou(RExC_parse, &endptr);
 	    if (*maxpos == ',')
 		maxpos++;
 	    else
 		maxpos = RExC_parse;
-	    max = atoi(maxpos);
+	    max = grok_atou(maxpos, &endptr);
 	    if (!max && *maxpos != '0')
 		max = REG_INFTY;		/* meaning "infinity" */
 	    else if (max >= REG_INFTY)
@@ -11147,18 +11157,17 @@ S_alloc_maybe_populate_EXACT(pTHX_ RExC_state_t *pRExC_state,
 }
 
 
-/* return atoi(p), unless it's too big to sensibly be a backref,
+/* Parse backref decimal value, unless it's too big to sensibly be a backref,
  * in which case return I32_MAX (rather than possibly 32-bit wrapping) */
 
 static I32
 S_backref_value(char *p)
 {
-    char *q = p;
-
-    for (;isDIGIT(*q); q++) {} /* calculate length of num */
-    if (q - p == 0 || q - p > 9)
+    const char* endptr;
+    Size_t val = grok_atou(p, &endptr);
+    if (endptr == p || endptr == NULL || val > 999999999)
         return I32_MAX;
-    return atoi(p);
+    return val;
 }
 
 

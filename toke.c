@@ -1686,7 +1686,7 @@ S_incline(pTHX_ const char *s)
     if (*e != '\n' && *e != '\0')
 	return;		/* false alarm */
 
-    line_num = atoi(n)-1;
+    line_num = grok_atou(n, &e) - 1;
 
     if (t - s > 0) {
 	const STRLEN len = t - s;

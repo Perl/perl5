@@ -3295,7 +3295,7 @@ PP(pp_fttty)
     if (GvIO(gv) && IoIFP(GvIOp(gv)))
 	fd = PerlIO_fileno(IoIFP(GvIOp(gv)));
     else if (name && isDIGIT(*name))
-        fd = atoi(name);
+        fd = grok_atou(name, NULL);
     else
 	FT_RETURNUNDEF;
     if (fd < 0) {

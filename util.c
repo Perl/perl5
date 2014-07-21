@@ -1380,7 +1380,7 @@ Perl_mess_sv(pTHX_ SV *basemsg, bool consume)
         int wi;
         /* The PERL_C_BACKTRACE_ON_WARN must be an integer of one or more. */
         if ((ws = PerlEnv_getenv("PERL_C_BACKTRACE_ON_ERROR")) &&
-            (wi = atoi(ws)) > 0) {
+            (wi = grok_atou(ws, NULL)) > 0) {
             Perl_dump_c_backtrace(aTHX_ Perl_debug_log, wi, 1);
         }
     }
@@ -4381,9 +4381,9 @@ Perl_parse_unicode_opts(pTHX_ const char **popt)
 
   if (*p) {
        if (isDIGIT(*p)) {
-	    opt = (U32) atoi(p);
-	    while (isDIGIT(*p))
-		p++;
+            const char* endptr;
+            opt = (U32) grok_atou(p, &endptr);
+	    p = endptr;
 	    if (*p && *p != '\n' && *p != '\r') {
 	     if(isSPACE(*p)) goto the_end_of_the_opts_parser;
 	     else
@@ -4698,7 +4698,7 @@ Perl_free_global_struct(pTHX_ struct perl_vars *plvarsp)
  * The default implementation reads a single env var, PERL_MEM_LOG,
  * expecting one or more of the following:
  *
- *    \d+ - fd		fd to write to		: must be 1st (atoi)
+ *    \d+ - fd		fd to write to		: must be 1st (grok_atou)
  *    'm' - memlog	was PERL_MEM_LOG=1
  *    's' - svlog	was PERL_SV_LOG=1
  *    't' - timestamp	was PERL_MEM_LOG_TIMESTAMP=1
@@ -4766,7 +4766,8 @@ S_mem_log_common(enum mem_log_type mlt, const UV n,
 	 * timeval. */
 	{
 	    STRLEN len;
-	    int fd = atoi(pmlenv);
+            const char* endptr;
+	    int fd = grok_atou(pmlenv, &endptr); /* Ignore endptr. */
 	    if (!fd)
 		fd = PERL_MEM_LOG_FD;
 
@@ -5695,12 +5696,12 @@ static void atos_update(atos_context* ctx,
 
 /* Given an output buffer end |p| and its |start|, matches
  * for the atos output, extracting the source code location
- * if possible, returning NULL otherwise. */
+ * and returning non-NULL if possible, returning NULL otherwise. */
 static const char* atos_parse(const char* p,
                               const char* start,
                               STRLEN* source_name_size,
                               STRLEN* source_line) {
-    /* atos() outputs is something like:
+    /* atos() output is something like:
      * perl_parse (in miniperl) (perl.c:2314)\n\n".
      * We cannot use Perl regular expressions, because we need to
      * stay low-level.  Therefore here we have a rolled-out version
@@ -5710,11 +5711,14 @@ static const char* atos_parse(const char* p,
      * The matched regular expression is roughly "\(.*:\d+\)\s*$" */
     const char* source_number_start;
     const char* source_name_end;
+    const char* source_line_end;
+    const char* close_paren;
     /* Skip trailing whitespace. */
     while (p > start && isspace(*p)) p--;
     /* Now we should be at the close paren. */
     if (p == start || *p != ')')
         return NULL;
+    close_paren = p;
     p--;
     /* Now we should be in the line number. */
     if (p == start || !isdigit(*p))
@@ -5735,7 +5739,9 @@ static const char* atos_parse(const char* p,
         return NULL;
     p++;
     *source_name_size = source_name_end - p;
-    *source_line = atoi(source_number_start);
+    *source_line = grok_atou(source_number_start, &source_line_end);
+    if (source_line_end != close_paren)
+        return NULL;
     return p;
 }
 

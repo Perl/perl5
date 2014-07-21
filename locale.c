@@ -527,7 +527,8 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
     char *p;
     const bool locwarn = (printwarn > 1 ||
                     (printwarn &&
-                     (!(p = PerlEnv_getenv("PERL_BADLANG")) || atoi(p))));
+                     (!(p = PerlEnv_getenv("PERL_BADLANG")) ||
+                      grok_atou(p, NULL))));
     bool done = FALSE;
 #ifdef WIN32
     /* In some systems you can find out the system default locale

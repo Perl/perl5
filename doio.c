@@ -391,7 +391,7 @@ Perl_do_open6(pTHX_ GV *gv, const char *oname, STRLEN len,
 			num_svs = 0;
 		    }
 		    else if (isDIGIT(*type)) {
-                        wanted_fd = atoi(type);
+                        wanted_fd = grok_atou(type, NULL);
 		    }
 		    else {
 			const IO* thatio;
