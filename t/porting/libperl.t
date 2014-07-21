@@ -482,7 +482,7 @@ for my $symbol (sort keys %expected) {
 # (One exception: for certain floating point outputs
 # the native sprintf is still used in some platforms, see below.)
 #
-# XXX: add atoi() to %unexpected - unsafe and undefined failure modes.
+# atoi has unsafe and undefined failure modes, and is affected by locale.
 #
 
 my %unexpected;
@@ -493,6 +493,7 @@ for my $stdio (qw(gets fgets tmpfile sprintf vsprintf)) {
 for my $str (qw(strcat strcpy strncat strncpy)) {
     $unexpected{$str} = undef; # No Configure symbol for these.
 }
+$unexpected{atoi} = undef; # No Configure symbol for atoi.
 
 for my $symbol (sort keys %unexpected) {
     if (defined $unexpected{$symbol} && !$Config{$unexpected{$symbol}}) {
