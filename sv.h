@@ -545,9 +545,14 @@ struct xpvlv {
 
 struct xpvinvlist {
     _XPV_HEAD;
-    IV          prev_index;
-    STRLEN	iterator;
-    bool	is_offset;	/* */
+    IV          prev_index;     /* caches result of previous invlist_search() */
+    STRLEN	iterator;       /* Stores where we are in iterating */
+    bool	is_offset;	/* The data structure for all inversion lists
+                                   begins with an element for code point U+0000.
+                                   If this bool is set, the actual list contains
+                                   that 0; otherwise, the list actually begins
+                                   with the following element.  Thus to invert
+                                   the list, merely toggle this flag  */
 };
 
 /* This structure works in 3 ways - regular scalar, GV with GP, or fast
