@@ -1843,7 +1843,7 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
 		    if (!isDIGIT(*end))
                         return addmg;
 		}
-                paren = strtoul(name, NULL, 10);
+                paren = grok_atou(name, NULL);
                 goto storeparen;
 	    }
 	    }
