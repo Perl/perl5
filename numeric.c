@@ -786,6 +786,80 @@ Perl_grok_number_flags(pTHX_ const char *pv, STRLEN len, UV *valuep, U32 flags)
   return 0;
 }
 
+/*
+=for perlapi
+
+grok_atou is a safer replacement for atoi.
+
+(atoi has severe problems with illegal inputs, and should not be used.
+atoi is also affected by locale settings, which can be seen as a bug.)
+
+Returns the unsigned value, if a valid one can be parsed.
+
+Only the decimal digits '0'..'9' are accepted.
+
+Does NOT allow optional leading whitespace, as opposed to atoi.
+
+On return the *endptr will contain the pointer to the first non-digit byte.
+
+If the value overflows, returns Size_t_MAX, and sets the *endptr
+to NULL, unless endptr is NULL.
+
+If the endptr is NULL, the first non-digit byte MUST be
+the zero byte terminating the pv, or either zero or Size_t_MAX
+will be returned, as appropriate.
+
+=cut
+*/
+
+Size_t
+Perl_grok_atou(const char *pv, const char** endptr)
+{
+    const char* s = pv;
+    const char** eptr;
+    const char* end2; /* Used in case endptr is NULL. */
+    Size_t val = 0; /* The return value. */
+
+    PERL_ARGS_ASSERT_GROK_ATOU;
+
+    eptr = endptr ? endptr : &end2;
+    if (isDIGIT(*s) && !isDIGIT(*(s + 1))) {
+        /* Quite common cases, and in addition the case of zero ("0")
+         * simplifies the decoding loop: not having to think whether
+         * "000" or "000123" are valid (now they are invalid). */
+        val = *s++ - '0';
+    } else {
+        Size_t tmp = 0; /* Temporary accumulator. */
+
+        while (*s) {
+            /* This could be unrolled like in grok_number(), but
+             * the expected uses of this are not speed-needy, and
+             * unlikely to need 64-bitness. */
+            if (isDIGIT(*s)) {
+                int digit = *s++ - '0';
+                tmp = tmp * 10 + digit;
+                if (tmp > val) { /* Rejects leading zeros. */
+                    val = tmp;
+                } else { /* Overflow. */
+                    *eptr = NULL;
+                    return Size_t_MAX;
+                }
+            } else {
+                break;
+            }
+        }
+        if (s == pv) {
+            *eptr = NULL; /* If no progress, failed to parse anything. */
+            return 0;
+        }
+    }
+    if (endptr == NULL && *s) {
+        return 0; /* If endptr is NULL, no trailing non-digits allowed. */
+    }
+    *eptr = s;
+    return val;
+}
+
 STATIC NV
 S_mulexp10(NV value, I32 exponent)
 {
