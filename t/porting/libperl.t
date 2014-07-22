@@ -206,7 +206,7 @@ sub nm_parse_gnu {
                 # Bb: uninitialized data (bss)
                 # Ss: uninitialized data "for small objects"
                 $symbols->{data}{bss}{$1}{$symbols->{o}}++;
-            } elsif (/^0{16} D _LIB_VERSION$/) {
+            } elsif (/^D _LIB_VERSION$/) {
                 # Skip the _LIB_VERSION (not ours, probably libm)
             } elsif (/^[DdGg] (\w+)$/) {
                 # Dd: initialized data
