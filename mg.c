@@ -2891,6 +2891,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	{
 	    const char *p = SvPV_const(sv, len);
             Groups_t *gary = NULL;
+            const char* endptr;
 #ifdef _SC_NGROUPS_MAX
            int maxgrp = sysconf(_SC_NGROUPS_MAX);
 
@@ -2902,19 +2903,20 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 
             while (isSPACE(*p))
                 ++p;
-            new_egid = (Gid_t)Atol(p);
+            new_egid = (Gid_t)grok_atou(p, &endptr);
             for (i = 0; i < maxgrp; ++i) {
-                while (*p && !isSPACE(*p))
-                    ++p;
+                if (endptr == NULL)
+                    break;
+                p = endptr;
                 while (isSPACE(*p))
                     ++p;
                 if (!*p)
                     break;
-                if(!gary)
+                if (!gary)
                     Newx(gary, i + 1, Groups_t);
                 else
                     Renew(gary, i + 1, Groups_t);
-                gary[i] = (Groups_t)Atol(p);
+                gary[i] = (Groups_t)grok_atou(p, &endptr);
             }
             if (i)
                 PERL_UNUSED_RESULT(setgroups(i, gary));
