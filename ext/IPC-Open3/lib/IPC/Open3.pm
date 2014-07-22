@@ -9,7 +9,7 @@ require Exporter;
 use Carp;
 use Symbol qw(gensym qualify);
 
-$VERSION	= '1.17';
+$VERSION	= '1.18';
 @ISA		= qw(Exporter);
 @EXPORT		= qw(open3);
 
@@ -362,7 +362,7 @@ sub open3 {
 sub spawn_with_handles {
     my $fds = shift;		# Fields: handle, mode, open_as
     my $close_in_child = shift;
-    my ($fd, $fileno, $open_as, $pid, @saved_fh, $saved, %saved, @errs);
+    my ($fd, %saved, @errs);
 
     foreach $fd (@$fds) {
 	$fd->{tmp_copy} = IO::Handle->new_from_fd($fd->{handle}, $fd->{mode});
@@ -373,10 +373,12 @@ sub spawn_with_handles {
 	    unless eval { $fd->{handle}->isa('IO::Handle') } ;
 	# If some of handles to redirect-to coincide with handles to
 	# redirect, we need to use saved variants:
-	$fd->{handle}->fdopen(defined($fileno = fileno($open_as = $fd->{open_as}))
-			      ? $saved{$fileno} || $open_as
-			      : $open_as,
-			      $fd->{mode});
+    my $open_as = $fd->{open_as};
+    my $fileno = fileno($open_as);
+    $fd->{handle}->fdopen(defined($fileno)
+                  ? $saved{$fileno} || $open_as
+                  : $open_as,
+                  $fd->{mode});
     }
     unless ($^O eq 'MSWin32') {
 	require Fcntl;
@@ -388,6 +390,7 @@ sub spawn_with_handles {
 	}
     }
 
+    my $pid;
     unless (@errs) {
 	if (FORCE_DEBUG_SPAWN) {
 	    pipe my $r, my $w or die "Pipe failed: $!";
