@@ -789,12 +789,15 @@ Perl_grok_number_flags(pTHX_ const char *pv, STRLEN len, UV *valuep, U32 flags)
 /*
 =for perlapi
 
-grok_atou is a safer replacement for atoi or strtoul.
+grok_atou is a safer replacement for atoi and strtoul.
 
-atoi has severe problems with illegal inputs, and should not be used.
+atoi has severe problems with illegal inputs, cannot be used
+for incremental parsing, and therefore should be avoided.
 
 atoi and strtoul are also affected by locale settings, which can
-be seen as a bug (global state controlled by user environment).
+also be seen as a bug (global state controlled by user environment).
+
+grok_atou parses a C-style zero-byte terminated string.
 
 Returns the unsigned value, if a valid one can be parsed.
 
@@ -804,20 +807,18 @@ As opposed to atoi or strtoul:
 - does NOT allow optional leading whitespace
 - does NOT allow negative inputs
 
-Also rejected:
+Also rejected are:
 - leading plus signs
 - leading zeros (meaning that only "0" is the zero)
 
 Trailing non-digit bytes are allowed if the endptr is non-NULL.
-
 On return the *endptr will contain the pointer to the first non-digit byte.
 
 If the value overflows, returns Size_t_MAX, and sets the *endptr
 to NULL, unless endptr is NULL.
 
 If the endptr is NULL, the first non-digit byte MUST be
-the zero byte terminating the pv, or either zero or Size_t_MAX
-will be returned, as appropriate.
+the zero byte terminating the pv, or zero will be returned.
 
 =cut
 */
@@ -828,6 +829,10 @@ Perl_grok_atou(const char *pv, const char** endptr)
     const char* s = pv;
     const char** eptr;
     const char* end2; /* Used in case endptr is NULL. */
+    /* With Size_t_size of 8 or 4 this works out to be the start plus
+     * either 20 or 10.  When 128 or 256-bit systems became reality,
+     * this overshoots (should get 39, 78, but gets 40 and 80). */
+    const char* maxend = s + 10 * (Size_t_size / 4);
     Size_t val = 0; /* The return value. */
 
     PERL_ARGS_ASSERT_GROK_ATOU;
@@ -841,10 +846,10 @@ Perl_grok_atou(const char *pv, const char** endptr)
     } else {
         Size_t tmp = 0; /* Temporary accumulator. */
 
-        while (*s) {
+        while (s < maxend && *s) {
             /* This could be unrolled like in grok_number(), but
              * the expected uses of this are not speed-needy, and
-             * unlikely to need 64-bitness. */
+             * unlikely to need full 64-bitness. */
             if (isDIGIT(*s)) {
                 int digit = *s++ - '0';
                 tmp = tmp * 10 + digit;
