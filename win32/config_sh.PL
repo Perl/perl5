@@ -121,7 +121,7 @@ if ($opt{cc} =~ /\b(?:cl|icl)/) {
 }
 elsif ($opt{cc} =~ /\bgcc\b/) {
     $int64  = 'long long';
-    $int64f = 'll';
+    $int64f = 'I64';
 }
 
 # set large files options
