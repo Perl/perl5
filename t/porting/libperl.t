@@ -456,7 +456,8 @@ for my $symbol (sort keys %expected) {
     my @o = exists $symbols{undef}{$symbol} ?
         sort keys %{ $symbols{undef}{$symbol} } : ();
     # In some FreeBSD versions memcmp disappears (compiler inlining?).
-    if (($^O eq 'freebsd' || $fake_style eq 'freebsd') &&
+    if (($^O eq 'freebsd' ||
+         (defined $fake_style && $fake_style eq 'freebsd')) &&
         $symbol eq 'memcmp' && @o == 0) {
         SKIP: {
             skip("freebsd memcmp");
