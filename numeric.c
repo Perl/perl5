@@ -787,38 +787,40 @@ Perl_grok_number_flags(pTHX_ const char *pv, STRLEN len, UV *valuep, U32 flags)
 }
 
 /*
-=for perlapi
+=for apidoc grok_atou
 
-grok_atou is a safer replacement for atoi and strtoul.
+grok_atou is a safer replacement for atoi and strtol.
 
-atoi has severe problems with illegal inputs, cannot be used
-for incremental parsing, and therefore should be avoided.
+grok_atou parses a C-style zero-byte terminated string, looking for
+a decimal unsigned integer.
 
-atoi and strtoul are also affected by locale settings, which can
-also be seen as a bug (global state controlled by user environment).
+Returns the unsigned integer, if a valid value can be parsed
+from the beginning of the string.
 
-grok_atou parses a C-style zero-byte terminated string.
+Accepts only the decimal digits '0'..'9'.
 
-Returns the unsigned value, if a valid one can be parsed.
+As opposed to atoi or strtol, grok_atou does NOT allow optional
+leading whitespace, or negative inputs.  If such features are
+required, the calling code needs to explicitly implement those.
 
-Only the decimal digits '0'..'9' are accepted.
+If a valid value cannot be parsed, returns either zero (if non-digits
+are met before any digits) or Size_t_MAX (if the value overflows).
 
-As opposed to atoi or strtoul:
-- does NOT allow optional leading whitespace
-- does NOT allow negative inputs
+Note that extraneous leading zeros also count as an overflow
+(meaning that only "0" is the zero).
 
-Also rejected are:
-- leading plus signs
-- leading zeros (meaning that only "0" is the zero)
+On failure, the *endptr is also set to NULL, unless endptr is NULL.
 
 Trailing non-digit bytes are allowed if the endptr is non-NULL.
 On return the *endptr will contain the pointer to the first non-digit byte.
 
-If the value overflows, returns Size_t_MAX, and sets the *endptr
-to NULL, unless endptr is NULL.
-
 If the endptr is NULL, the first non-digit byte MUST be
 the zero byte terminating the pv, or zero will be returned.
+
+Background: atoi has severe problems with illegal inputs, it cannot be
+used for incremental parsing, and therefore should be avoided
+atoi and strtol are also affected by locale settings, which can also be
+seen as a bug (global state controlled by user environment).
 
 =cut
 */
@@ -831,7 +833,7 @@ Perl_grok_atou(const char *pv, const char** endptr)
     const char* end2; /* Used in case endptr is NULL. */
     /* With Size_t_size of 8 or 4 this works out to be the start plus
      * either 20 or 10.  When 128 or 256-bit systems became reality,
-     * this overshoots (should get 39, 78, but gets 40 and 80). */
+     * this overshoots (should get 39, 78, but gets 40, 80). */
     const char* maxend = s + 10 * (Size_t_size / 4);
     Size_t val = 0; /* The return value. */
 
@@ -839,9 +841,10 @@ Perl_grok_atou(const char *pv, const char** endptr)
 
     eptr = endptr ? endptr : &end2;
     if (isDIGIT(*s) && !isDIGIT(*(s + 1))) {
-        /* Quite common cases, and in addition the case of zero ("0")
-         * simplifies the decoding loop: not having to think whether
-         * "000" or "000123" are valid (now they are invalid). */
+        /* Single-digit inputs are quite common cases, and in addition
+         * the case of zero ("0") here simplifies the decoding loop:
+         * not having to think whether "000" or "000123" are valid
+         * (now they are invalid). */
         val = *s++ - '0';
     } else {
         Size_t tmp = 0; /* Temporary accumulator. */
@@ -853,7 +856,7 @@ Perl_grok_atou(const char *pv, const char** endptr)
             if (isDIGIT(*s)) {
                 int digit = *s++ - '0';
                 tmp = tmp * 10 + digit;
-                if (tmp > val) { /* Rejects leading zeros. */
+                if (tmp > val) { /* This implictly rejects leading zeros. */
                     val = tmp;
                 } else { /* Overflow. */
                     *eptr = NULL;
