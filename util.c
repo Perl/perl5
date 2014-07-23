@@ -2039,7 +2039,7 @@ Perl_my_setenv(pTHX_ const char *nam, const char *val)
        my_setenv_format(environ[i], nam, nlen, val, vlen);
     } else {
 # endif
-#   if defined(__CYGWIN__)|| defined(__SYMBIAN32__) || defined(__riscos__)
+#   if defined(__CYGWIN__)|| defined(__SYMBIAN32__) || defined(__riscos__) || defined(__sun)
 #       if defined(HAS_UNSETENV)
         if (val == NULL) {
             (void)unsetenv(nam);
