@@ -804,7 +804,7 @@ leading whitespace, or negative inputs.  If such features are
 required, the calling code needs to explicitly implement those.
 
 If a valid value cannot be parsed, returns either zero (if non-digits
-are met before any digits) or Size_t_MAX (if the value overflows).
+are met before any digits) or UV_MAX (if the value overflows).
 
 Note that extraneous leading zeros also count as an overflow
 (meaning that only "0" is the zero).
@@ -825,51 +825,46 @@ seen as a bug (global state controlled by user environment).
 =cut
 */
 
-Size_t
+UV
 Perl_grok_atou(const char *pv, const char** endptr)
 {
     const char* s = pv;
     const char** eptr;
     const char* end2; /* Used in case endptr is NULL. */
-    /* With Size_t_size of 8 or 4 this works out to be the start plus
-     * either 20 or 10.  When 128 or 256-bit systems became reality,
-     * this overshoots (should get 39, 78, but gets 40, 80). */
-    const char* maxend = s + 10 * (Size_t_size / 4);
-    Size_t val = 0; /* The return value. */
+    UV val = 0; /* The return value. */
+    const UV max_div_10 = UV_MAX / 10;
+    const UV max_mod_10 = UV_MAX % 10;
 
     PERL_ARGS_ASSERT_GROK_ATOU;
 
     eptr = endptr ? endptr : &end2;
-    if (isDIGIT(*s) && !isDIGIT(*(s + 1))) {
-        /* Single-digit inputs are quite common cases, and in addition
-         * the case of zero ("0") here simplifies the decoding loop:
-         * not having to think whether "000" or "000123" are valid
-         * (now they are invalid). */
+    if (isDIGIT(*s)) {
+        /* Single-digit inputs are quite common. */
         val = *s++ - '0';
-    } else {
-        Size_t tmp = 0; /* Temporary accumulator. */
-
-        while (s < maxend && *s) {
-            /* This could be unrolled like in grok_number(), but
-             * the expected uses of this are not speed-needy, and
-             * unlikely to need full 64-bitness. */
-            if (isDIGIT(*s)) {
-                int digit = *s++ - '0';
-                tmp = tmp * 10 + digit;
-                if (tmp > val) { /* This implictly rejects leading zeros. */
-                    val = tmp;
-                } else { /* Overflow. */
+        if (isDIGIT(*s)) {
+            /* Extra leading zeros cause overflow. */
+            if (val == 0) {
+                *eptr = NULL;
+                return UV_MAX;
+            }
+            while (isDIGIT(*s)) {
+                /* This could be unrolled like in grok_number(), but
+                 * the expected uses of this are not speed-needy, and
+                 * unlikely to need full 64-bitness. */
+                U8 digit = *s++ - '0';
+                if (val < max_div_10 ||
+                    (val == max_div_10 && digit <= max_mod_10)) {
+                    val = val * 10 + digit;
+                } else {
                     *eptr = NULL;
-                    return Size_t_MAX;
+                    return UV_MAX;
                 }
-            } else {
-                break;
             }
         }
-        if (s == pv) {
-            *eptr = NULL; /* If no progress, failed to parse anything. */
-            return 0;
-        }
+    }
+    if (s == pv) {
+        *eptr = NULL; /* If no progress, failed to parse anything. */
+        return 0;
     }
     if (endptr == NULL && *s) {
         return 0; /* If endptr is NULL, no trailing non-digits allowed. */

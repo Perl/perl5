@@ -51,5 +51,9 @@ grok_atou(number, endsv)
 	if (endsv == &PL_sv_undef) {
           PUSHs(sv_2mortal(newSVpvn(NULL, 0)));
 	} else {
-          PUSHs(sv_2mortal(newSViv(endptr - pv)));
+	  if (endptr) {
+	    PUSHs(sv_2mortal(newSViv(endptr - pv)));
+	  } else {
+	    PUSHs(sv_2mortal(newSViv(0)));
+	  }
 	}
