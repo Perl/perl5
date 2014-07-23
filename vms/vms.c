@@ -13930,7 +13930,7 @@ set_feature_default(const char *name, int value)
      */
     if (value > 0) {
         status = simple_trnlnm(name, val_str, sizeof(val_str));
-        if ($VMS_STATUS_SUCCESS(status)) {
+        if (status) {
             val_str[0] = _toupper(val_str[0]);
             if (val_str[0] == 'D' || val_str[0] == '0' || val_str[0] == 'F')
 	        return 0;
@@ -13983,7 +13983,7 @@ vmsperl_set_features(void)
     /* Allow an exception to bring Perl into the VMS debugger */
     vms_debug_on_exception = 0;
     status = simple_trnlnm("PERL_VMS_EXCEPTION_DEBUG", val_str, sizeof(val_str));
-    if ($VMS_STATUS_SUCCESS(status)) {
+    if (status) {
        val_str[0] = _toupper(val_str[0]);
        if ((val_str[0] == 'E') || (val_str[0] == '1') || (val_str[0] == 'T'))
 	 vms_debug_on_exception = 1;
@@ -13994,7 +13994,7 @@ vmsperl_set_features(void)
     /* Debug unix/vms file translation routines */
     vms_debug_fileify = 0;
     status = simple_trnlnm("PERL_VMS_FILEIFY_DEBUG", val_str, sizeof(val_str));
-    if ($VMS_STATUS_SUCCESS(status)) {
+    if (status) {
 	val_str[0] = _toupper(val_str[0]);
         if ((val_str[0] == 'E') || (val_str[0] == '1') || (val_str[0] == 'T'))
 	    vms_debug_fileify = 1;
@@ -14014,7 +14014,7 @@ vmsperl_set_features(void)
     /* enable it so that the impact can be studied.                     */
     vms_bug_stat_filename = 0;
     status = simple_trnlnm("PERL_VMS_BUG_STAT_FILENAME", val_str, sizeof(val_str));
-    if ($VMS_STATUS_SUCCESS(status)) {
+    if (status) {
 	val_str[0] = _toupper(val_str[0]);
         if ((val_str[0] == 'E') || (val_str[0] == '1') || (val_str[0] == 'T'))
 	    vms_bug_stat_filename = 1;
@@ -14026,7 +14026,7 @@ vmsperl_set_features(void)
     /* Create VTF-7 filenames from Unicode instead of UTF-8 */
     vms_vtf7_filenames = 0;
     status = simple_trnlnm("PERL_VMS_VTF7_FILENAMES", val_str, sizeof(val_str));
-    if ($VMS_STATUS_SUCCESS(status)) {
+    if (status) {
        val_str[0] = _toupper(val_str[0]);
        if ((val_str[0] == 'E') || (val_str[0] == '1') || (val_str[0] == 'T'))
 	 vms_vtf7_filenames = 1;
@@ -14036,9 +14036,8 @@ vmsperl_set_features(void)
 
     /* unlink all versions on unlink() or rename() */
     vms_unlink_all_versions = 0;
-    status = simple_trnlnm
-	("PERL_VMS_UNLINK_ALL_VERSIONS", val_str, sizeof(val_str));
-    if ($VMS_STATUS_SUCCESS(status)) {
+    status = simple_trnlnm("PERL_VMS_UNLINK_ALL_VERSIONS", val_str, sizeof(val_str));
+    if (status) {
        val_str[0] = _toupper(val_str[0]);
        if ((val_str[0] == 'E') || (val_str[0] == '1') || (val_str[0] == 'T'))
 	 vms_unlink_all_versions = 1;
@@ -14050,7 +14049,7 @@ vmsperl_set_features(void)
     /* Detect running under GNV Bash or other UNIX like shell */
     gnv_unix_shell = 0;
     status = simple_trnlnm("GNV$UNIX_SHELL", val_str, sizeof(val_str));
-    if ($VMS_STATUS_SUCCESS(status)) {
+    if (status) {
 	 gnv_unix_shell = 1;
 	 set_feature_default("DECC$FILENAME_UNIX_NO_VERSION", 1);
 	 set_feature_default("DECC$FILENAME_UNIX_REPORT", 1);
@@ -14070,7 +14069,7 @@ vmsperl_set_features(void)
     /* PCP mode requires creating /dev/null special device file */
     decc_bug_devnull = 0;
     status = simple_trnlnm("DECC_BUG_DEVNULL", val_str, sizeof(val_str));
-    if ($VMS_STATUS_SUCCESS(status)) {
+    if (status) {
        val_str[0] = _toupper(val_str[0]);
        if ((val_str[0] == 'E') || (val_str[0] == '1') || (val_str[0] == 'T'))
           decc_bug_devnull = 1;
@@ -14151,7 +14150,7 @@ vmsperl_set_features(void)
 #else
     status = simple_trnlnm
 	("DECC$DISABLE_TO_VMS_LOGNAME_TRANSLATION", val_str, sizeof(val_str));
-    if ($VMS_STATUS_SUCCESS(status)) {
+    if (status) {
 	val_str[0] = _toupper(val_str[0]);
 	if ((val_str[0] == 'E') || (val_str[0] == '1') || (val_str[0] == 'T')) {
 	   decc_disable_to_vms_logname_translation = 1;
@@ -14160,7 +14159,7 @@ vmsperl_set_features(void)
 
 #ifndef __VAX
     status = simple_trnlnm("DECC$EFS_CASE_PRESERVE", val_str, sizeof(val_str));
-    if ($VMS_STATUS_SUCCESS(status)) {
+    if (status) {
 	val_str[0] = _toupper(val_str[0]);
 	if ((val_str[0] == 'E') || (val_str[0] == '1') || (val_str[0] == 'T')) {
 	   decc_efs_case_preserve = 1;
@@ -14169,14 +14168,14 @@ vmsperl_set_features(void)
 #endif
 
     status = simple_trnlnm("DECC$FILENAME_UNIX_REPORT", val_str, sizeof(val_str));
-    if ($VMS_STATUS_SUCCESS(status)) {
+    if (status) {
 	val_str[0] = _toupper(val_str[0]);
 	if ((val_str[0] == 'E') || (val_str[0] == '1') || (val_str[0] == 'T')) {
 	   decc_filename_unix_report = 1;
 	}
     }
     status = simple_trnlnm("DECC$FILENAME_UNIX_ONLY", val_str, sizeof(val_str));
-    if ($VMS_STATUS_SUCCESS(status)) {
+    if (status) {
 	val_str[0] = _toupper(val_str[0]);
 	if ((val_str[0] == 'E') || (val_str[0] == '1') || (val_str[0] == 'T')) {
 	   decc_filename_unix_only = 1;
@@ -14184,14 +14183,14 @@ vmsperl_set_features(void)
 	}
     }
     status = simple_trnlnm("DECC$FILENAME_UNIX_NO_VERSION", val_str, sizeof(val_str));
-    if ($VMS_STATUS_SUCCESS(status)) {
+    if (status) {
 	val_str[0] = _toupper(val_str[0]);
 	if ((val_str[0] == 'E') || (val_str[0] == '1') || (val_str[0] == 'T')) {
 	   decc_filename_unix_no_version = 1;
 	}
     }
     status = simple_trnlnm("DECC$READDIR_DROPDOTNOTYPE", val_str, sizeof(val_str));
-    if ($VMS_STATUS_SUCCESS(status)) {
+    if (status) {
 	val_str[0] = _toupper(val_str[0]);
 	if ((val_str[0] == 'E') || (val_str[0] == '1') || (val_str[0] == 'T')) {
 	   decc_readdir_dropdotnotype = 1;
@@ -14217,9 +14216,8 @@ vmsperl_set_features(void)
 
     /* USE POSIX/DCL Exit codes - Recommended, but needs to default to  */
     /* for strict backward compatibility */
-    status = simple_trnlnm
-	("PERL_VMS_POSIX_EXIT", val_str, sizeof(val_str));
-    if ($VMS_STATUS_SUCCESS(status)) {
+    status = simple_trnlnm("PERL_VMS_POSIX_EXIT", val_str, sizeof(val_str));
+    if (status) {
        val_str[0] = _toupper(val_str[0]);
        if ((val_str[0] == 'E') || (val_str[0] == '1') || (val_str[0] == 'T'))
 	 vms_posix_exit = 1;
