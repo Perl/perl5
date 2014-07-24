@@ -1084,6 +1084,8 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, const OP *o)
     case OP_CONST:
     case OP_HINTSEVAL:
     case OP_METHOD_NAMED:
+    case OP_METHOD_SUPER:
+    case OP_METHOD_REDIR:
 #ifndef USE_ITHREADS
 	/* with ITHREADS, consts are stored in the pad, and the right pad
 	 * may not be active here, so skip */
@@ -1776,9 +1778,8 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	    if (SvMAGIC(sv))
 		do_magic_dump(level, file, SvMAGIC(sv), nest+1, maxnest, dumpops, pvlim);
 	}
-	if (SvSTASH(sv))
+	if (SvSTASH(sv) && !(type == SVt_PVHV && HvNAME(sv))) /* dont dump stash on stashes (they have destructor CV* addr there) */
 	    do_hv_dump(level, file, "  STASH", SvSTASH(sv));
-
 	if ((type == SVt_PVMG || type == SVt_PVLV) && SvVALID(sv)) {
 	    Perl_dump_indent(aTHX_ level, file, "  USEFUL = %"IVdf"\n", (IV)BmUSEFUL(sv));
 	}
@@ -2494,7 +2495,6 @@ Perl_debprofdump(pTHX)
                                        PL_op_name[i]);
     }
 }
-
 
 /*
  * Local variables:

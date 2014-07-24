@@ -2854,6 +2854,7 @@ PP(pp_goto) /* also pp_dump */
 	    }
 
 	    /* Now do some callish stuff. */
+	    PL_methstash = NULL; /* goto is not a method call context */
 	    SAVETMPS;
 	    SAVEFREESV(cv); /* later, undo the 'avoid premature free' hack */
 	    if (CvISXSUB(cv)) {

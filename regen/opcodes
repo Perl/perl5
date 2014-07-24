@@ -307,8 +307,9 @@ redo		redo			ck_null		ds}
 dump		dump			ck_null		ds}	
 goto		goto			ck_null		ds}	
 exit		exit			ck_fun		ds%	S?
-method_named	method with known name	ck_null		d$
-
+method_named	method with known name		ck_null	d$
+method_super	super method with known name	ck_null	d$
+method_redir	redirect method with known name	ck_null	d$
 entergiven	given()			ck_null		d|
 leavegiven	leave given block	ck_null		1
 enterwhen	when()			ck_null		d|

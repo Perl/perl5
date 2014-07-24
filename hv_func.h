@@ -559,6 +559,52 @@ S_perl_hash_old_one_at_a_time(const unsigned char * const seed, const unsigned c
 #define PERL_HASH_INTERNAL(hash,str,len) PERL_HASH(hash,str,len)
 #endif
 
+#define PERL_HASH64(str,len) S_perl_hash64((const unsigned char*)(str),(len))
+
+PERL_STATIC_INLINE U64TYPE
+S_perl_hash64 (const unsigned char* str, const STRLEN len) {
+    const U64TYPE seed = 7;
+    const U64TYPE m = 0xc6a4a7935bd1e995LLU;
+    const int r = 47;
+    const U64TYPE* data;
+    const U64TYPE* end;
+    U64TYPE h;
+
+    data = (const U64TYPE*) str;
+    end = data + (len/8);
+
+    h = seed ^ (len * m);
+
+    while (data != end) {
+        U64TYPE k;
+        k = *data++;
+        k *= m;
+        k ^= k >> r;
+        k *= m;
+
+        h ^= k;
+        h *= m;
+    }
+
+    str = (const unsigned char*) data;
+    switch (len & 7) {
+    case 7: h ^= ((U64TYPE)str[6]) << 48;
+    case 6: h ^= ((U64TYPE)str[5]) << 40;
+    case 5: h ^= ((U64TYPE)str[4]) << 32;
+    case 4: h ^= ((U64TYPE)str[3]) << 24;
+    case 3: h ^= ((U64TYPE)str[2]) << 16;
+    case 2: h ^= ((U64TYPE)str[1]) << 8;
+    case 1: h ^= ((U64TYPE)str[0]);
+            h *= m;
+    };
+
+    h ^= h >> r;
+    h *= m;
+    h ^= h >> r;
+
+    return h;
+}
+
 #endif /*compile once*/
 
 /*

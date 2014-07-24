@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 40;
+use Test::More tests => 36;
 
 use_ok('XS::APItest');
 
@@ -24,7 +24,8 @@ for my $type ( 0..3 ) {
     ok !$::{$meth}, "...and doesn't vivify the glob.";
 
     ok !XS::APItest::gv_fetchmeth_type(\%::, $meth, $type, 0, 0), "With level = 0, $types[$type] still returns false.";
-    ok $::{$meth}, "...but does vivify the glob.";
+    # commented out - perl no longer stores it's method cache in stash's HV
+    #ok $::{$meth}, "...but does vivify the glob.";
 }
 
 {

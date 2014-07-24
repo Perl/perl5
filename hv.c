@@ -1837,11 +1837,25 @@ See also L</hv_clear>.
 =cut
 */
 
+PERL_STATIC_INLINE void
+S_mro_methcache_destroy (pTHX_ SVMAP** map) {
+    SVMAP_ENT* iter;
+    if (!*map) return;
+    HASHMAP_FOR_EACH(svmap, iter, **map) {
+        SvREFCNT_dec_NN(iter->value.gv);
+        unshare_hek(SvSHARED_HEK_FROM_PV(iter->name));
+    } HASHMAP_FOR_EACH_END
+    svmap_destroy(*map);
+    Safefree(*map);
+    *map = NULL;
+}
+
 void
 Perl_hv_undef_flags(pTHX_ HV *hv, U32 flags)
 {
     XPVHV* xhv;
     bool save;
+    const char* hvname;
 
     if (!hv)
 	return;
@@ -1859,13 +1873,10 @@ Perl_hv_undef_flags(pTHX_ HV *hv, U32 flags)
        if they will be freed anyway. */
     /* note that the code following prior to hfreeentries is duplicated
      * in sv_clear(), and changes here should be done there too */
-    if (PL_phase != PERL_PHASE_DESTRUCT && HvNAME(hv)) {
-        if (PL_stashcache) {
-            DEBUG_o(Perl_deb(aTHX_ "hv_undef_flags clearing PL_stashcache for '%"
-                             HEKf"'\n", HEKfARG(HvNAME_HEK(hv))));
-	    (void)hv_deletehek(PL_stashcache, HvNAME_HEK(hv), G_DISCARD);
-        }
-	hv_name_set(hv, NULL, 0, 0);
+    if (PL_phase != PERL_PHASE_DESTRUCT && (hvname = HvNAME(hv))) {
+        DEBUG_o(Perl_deb(aTHX_ "hv_undef_flags clearing PL_stashcache for '%"HEKf"'\n", HEKfARG(HvNAME_HEK(hv))));
+        gv_stashpvn_cache_invalidate(hvname, HvNAMELEN(hv), HvNAMEUTF8(hv) ? SVf_UTF8 : 0);
+        hv_name_set(hv, NULL, 0, 0);
     }
     if (save) {
 	ENTER;
@@ -1875,27 +1886,23 @@ Perl_hv_undef_flags(pTHX_ HV *hv, U32 flags)
     if (SvOOK(hv)) {
       struct mro_meta *meta;
       const char *name;
+      const char* hvename;
 
-      if (HvENAME_get(hv)) {
-	if (PL_phase != PERL_PHASE_DESTRUCT)
-	    mro_isa_changed_in(hv);
-        if (PL_stashcache) {
-            DEBUG_o(Perl_deb(aTHX_ "hv_undef_flags clearing PL_stashcache for effective name '%"
-                             HEKf"'\n", HEKfARG(HvENAME_HEK(hv))));
-	    (void)hv_deletehek(PL_stashcache, HvENAME_HEK(hv), G_DISCARD);
-        }
+      if ((hvename = HvENAME_get(hv))) {
+	    if (PL_phase != PERL_PHASE_DESTRUCT) mro_isa_changed_in(hv);
+        DEBUG_o(Perl_deb(aTHX_ "hv_undef_flags clearing PL_stashcache for effective name '%"HEKf"'\n", HEKfARG(HvENAME_HEK(hv))));
+        gv_stashpvn_cache_invalidate(hvename, HvENAMELEN(hv), HvENAMEUTF8(hv) ? SVf_UTF8 : 0);
       }
 
       /* If this call originated from sv_clear, then we must check for
        * effective names that need freeing, as well as the usual name. */
       name = HvNAME(hv);
       if (flags & HV_NAME_SETALL ? !!HvAUX(hv)->xhv_name_u.xhvnameu_name : !!name) {
-        if (name && PL_stashcache) {
-            DEBUG_o(Perl_deb(aTHX_ "hv_undef_flags clearing PL_stashcache for name '%"
-                             HEKf"'\n", HEKfARG(HvNAME_HEK(hv))));
-	    (void)hv_deletehek(PL_stashcache, HvNAME_HEK(hv), G_DISCARD);
+        if (name) {
+            DEBUG_o(Perl_deb(aTHX_ "hv_undef_flags clearing PL_stashcache for name '%"HEKf"'\n", HEKfARG(HvNAME_HEK(hv))));
+            gv_stashpvn_cache_invalidate(name, HvNAMELEN(hv), HvNAMEUTF8(hv) ? SVf_UTF8 : 0);
         }
-	hv_name_set(hv, NULL, 0, flags);
+        hv_name_set(hv, NULL, 0, flags);
       }
       if((meta = HvAUX(hv)->xhv_mro_meta)) {
 	if (meta->mro_linear_all) {
@@ -1906,10 +1913,11 @@ Perl_hv_undef_flags(pTHX_ HV *hv, U32 flags)
 	else
 	    /* Only the current MRO is stored, so this owns the data.
 	     */
-	    SvREFCNT_dec(meta->mro_linear_current);
+	SvREFCNT_dec(meta->mro_linear_current);
+	S_mro_methcache_destroy(aTHX_ &meta->mro_method);
+	S_mro_methcache_destroy(aTHX_ &meta->mro_supermethod);
 	SvREFCNT_dec(meta->mro_nextmethod);
 	SvREFCNT_dec(meta->isa);
-	SvREFCNT_dec(meta->super);
 	Safefree(meta);
 	HvAUX(hv)->xhv_mro_meta = NULL;
       }

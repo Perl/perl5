@@ -511,6 +511,7 @@ Apd	|GV*	|gv_fetchmeth_pv	|NULLOK HV* stash|NN const char* name \
                                         |I32 level|U32 flags
 Apd	|GV*	|gv_fetchmeth_pvn	|NULLOK HV* stash|NN const char* name \
                                         |STRLEN len|I32 level|U32 flags
+Apd	|GV*	|gv_fetchmeth_ent	|NULLOK HV* stash|NN const SVMAP_ENT* entry|I32 level|U32 flags
 Amd	|GV*	|gv_fetchmeth_autoload	|NULLOK HV* stash \
 					|NN const char* name|STRLEN len \
 					|I32 level
@@ -525,8 +526,8 @@ Apd	|GV*	|gv_fetchmethod_autoload|NN HV* stash|NN const char* name \
 ApM	|GV*	|gv_fetchmethod_sv_flags|NN HV* stash|NN SV* namesv|U32 flags
 ApM	|GV*	|gv_fetchmethod_pv_flags|NN HV* stash|NN const char* name \
  				|U32 flags
-ApM	|GV*	|gv_fetchmethod_pvn_flags|NN HV* stash|NN const char* name \
-				|const STRLEN len|U32 flags
+ApM	|GV*	|gv_fetchmethod_pvn_flags|NN HV* stash|NN const char* name|STRLEN len|U32 flags
+ApM |GV*    |gv_fetchmethod_ent|NN HV* stash|NN const SVMAP_ENT* entry|U32 flags
 Ap	|GV*	|gv_fetchpv	|NN const char *nambeg|I32 add|const svtype sv_type
 Ap	|void	|gv_fullname	|NN SV* sv|NN const GV* gv
 Apmb	|void	|gv_fullname3	|NN SV* sv|NN const GV* gv|NULLOK const char* prefix
@@ -547,8 +548,16 @@ px	|GV *	|gv_override	|NN const char * const name \
 				|const STRLEN len
 XMpd	|void	|gv_try_downgrade|NN GV* gv
 Apd	|HV*	|gv_stashpv	|NN const char* name|I32 flags
-Apd	|HV*	|gv_stashpvn	|NN const char* name|U32 namelen|I32 flags
+Apd	|HV*	|gv_stashpvn	|NN const char* name|STRLEN namelen|I32 flags
+Apd	|HV*	|gv_stashent	|NN const SVMAP_ENT* entry|I32 flags
+Apd |void   |gv_stashpvn_cache_invalidate    |NN const char* name|STRLEN namelen|I32 flags
+Apd |void   |gv_stashsv_cache_invalidate    |NN SV* sv
+Apd |void   |gv_stash_cache_invalidate
+Apd |void   |gv_stash_cache_init
+Apd |void   |gv_stash_cache_destroy
 Apd	|HV*	|gv_stashsv	|NN SV* sv|I32 flags
+Ap  |HV*    |curmethod_stash|NN SV** objptr|NULLOK CV* sub
+Ap  |HV*    |method_stash   |NN SV** objptr|NULLOK SV* meth
 Apd	|void	|hv_clear	|NULLOK HV *hv
 : used in SAVEHINTS() and op.c
 ApdR	|HV *	|hv_copy_hints_hv|NULLOK HV *const ohv
@@ -1017,6 +1026,8 @@ Apd	|SV*	|newSVrv	|NN SV *const rv|NULLOK const char *const classname
 Apda	|SV*	|newSVsv	|NULLOK SV *const old
 Apda	|SV*	|newSV_type	|const svtype type
 Apda	|OP*	|newUNOP	|I32 type|I32 flags|NULLOK OP* first
+Apda    |OP*    |newMETHOP  |I32 type|I32 flags|NULLOK OP* dynamic_meth
+Apda    |OP*    |newMETHOPnamed|I32 type|I32 flags|NN SV* const_meth
 Apda	|OP*	|newWHENOP	|NULLOK OP* cond|NN OP* block
 Apda	|OP*	|newWHILEOP	|I32 flags|I32 debuggable|NULLOK LOOP* loop \
 				|NULLOK OP* expr|NULLOK OP* block|NULLOK OP* cont \
@@ -2041,7 +2052,7 @@ s	|OP*	|do_smartmatch	|NULLOK HV* seen_this \
 
 #if defined(PERL_IN_PP_HOT_C)
 s	|void	|do_oddball	|NN SV **oddkey|NN SV **firstkey
-sR	|SV*	|method_common	|NN SV* meth|NULLOK U32* hashp
+sR	|HV*	|opmethod_stash	|NN METHOP* op|NN SV* meth
 #endif
 
 #if defined(PERL_IN_PP_SORT_C)
@@ -2598,6 +2609,7 @@ sMd	|SV*	|find_uninit_var|NULLOK const OP *const obase \
 		|NULLOK const SV *const uninit_sv|bool top
 #endif
 
+Ap	|HV*	|gv_stashof_pvn|NN const char *name|STRLEN len|I32 flags|const svtype sv_type|NULLOK const char** name_ret|NULLOK STRLEN *len_ret|NULLOK GV** gv_ret
 Ap	|GV*	|gv_fetchpvn_flags|NN const char* name|STRLEN len|I32 flags|const svtype sv_type
 Ap	|GV*	|gv_fetchsv|NN SV *name|I32 flags|const svtype sv_type
 
@@ -2696,6 +2708,7 @@ s	|void	|mro_gather_and_rename|NN HV * const stashes \
 pd	|void   |mro_isa_changed_in|NN HV* stash
 Apd	|void	|mro_method_changed_in	|NN HV* stash
 pdx	|void	|mro_package_moved	|NULLOK HV * const stash|NULLOK HV * const oldstash|NN const GV * const gv|U32 flags
+Ap  |void   |mro_global_method_cache_clear
 : Only used in perl.c
 p	|void   |boot_core_mro
 Apon	|void	|sys_init	|NN int* argc|NN char*** argv

@@ -350,6 +350,8 @@ EXTCONST char* const PL_op_name[] = {
 	"goto",
 	"exit",
 	"method_named",
+	"method_super",
+	"method_redir",
 	"entergiven",
 	"leavegiven",
 	"enterwhen",
@@ -737,6 +739,8 @@ EXTCONST char* const PL_op_desc[] = {
 	"goto",
 	"exit",
 	"method with known name",
+	"super method with known name",
+	"redirect method with known name",
 	"given()",
 	"leave given block",
 	"when()",
@@ -1138,6 +1142,8 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	Perl_pp_goto,
 	Perl_pp_exit,
 	Perl_pp_method_named,
+	Perl_pp_method_super,
+	Perl_pp_method_redir,
 	Perl_pp_entergiven,
 	Perl_pp_leavegiven,
 	Perl_pp_enterwhen,
@@ -1535,6 +1541,8 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	Perl_ck_null,		/* goto */
 	Perl_ck_fun,		/* exit */
 	Perl_ck_null,		/* method_named */
+	Perl_ck_null,		/* method_super */
+	Perl_ck_null,		/* method_redir */
 	Perl_ck_null,		/* entergiven */
 	Perl_ck_null,		/* leavegiven */
 	Perl_ck_null,		/* enterwhen */
@@ -1926,6 +1934,8 @@ EXTCONST U32 PL_opargs[] = {
 	0x00000d44,	/* goto */
 	0x00009b44,	/* exit */
 	0x00000640,	/* method_named */
+	0x00000640,	/* method_super */
+	0x00000640,	/* method_redir */
 	0x00000340,	/* entergiven */
 	0x00000100,	/* leavegiven */
 	0x00000340,	/* enterwhen */

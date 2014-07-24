@@ -264,6 +264,8 @@ Perl_save_gp(pTHX_ GV *gv, I32 empty)
     PERL_ARGS_ASSERT_SAVE_GP;
 
     save_pushptrptr(SvREFCNT_inc(gv), GvGP(gv), SAVEt_GP);
+    /* flag to help gv_method_changed and other cache-clearing functions realize that refcnt actually is 1 more than it is because of savestack*/
+    GvLOCALIZED_on(gv);
 
     if (empty) {
 	GP *gp = Perl_newGP(aTHX_ gv);
@@ -838,19 +840,16 @@ Perl_leave_scope(pTHX_ I32 base)
 	case SAVEt_GVSLOT:			/* any slot in GV */
         {
             HV *const hv = GvSTASH(ARG2_GV);
-	    svp = ARG1_SVP;
-	    if (hv && HvENAME(hv) && (
-		    (ARG0_SV && SvTYPE(ARG0_SV) == SVt_PVCV)
-		 || (*svp && SvTYPE(*svp) == SVt_PVCV)
-	       ))
-	    {
-		if ((char *)svp < (char *)GvGP(ARG2_GV)
-		 || (char *)svp > (char *)GvGP(ARG2_GV) + sizeof(struct gp)
-		 || GvREFCNT(ARG2_GV) > 1)
-		    PL_sub_generation++;
-		else mro_method_changed_in(hv);
-	    }
-	    goto restore_svp;
+            svp = ARG1_SVP;
+            if (hv && HvENAME(hv) && ((ARG0_SV && SvTYPE(ARG0_SV) == SVt_PVCV) || (*svp && SvTYPE(*svp) == SVt_PVCV))) {
+                /* reference from savestack must be invisible for gv_method_changed! otherwise cache is invalidated globally! */
+                if (GvLOCALIZED(ARG2_GV)) --GvREFCNT(ARG2_GV);
+                if ((char*)svp < (char*)GvGP(ARG2_GV) || (char*)svp > (char*)GvGP(ARG2_GV) + sizeof(GP) || GvREFCNT(ARG2_GV) > 1)
+                    PL_sub_generation++;
+                else mro_method_changed_in(hv);
+                if (GvLOCALIZED(ARG2_GV)) ++GvREFCNT(ARG2_GV);
+            }
+            goto restore_svp;
         }
 	case SAVEt_AV:				/* array reference */
 	    SvREFCNT_dec(GvAV(ARG1_GV));
@@ -925,6 +924,8 @@ Perl_leave_scope(pTHX_ I32 base)
 	    const bool had_method = !!GvCVu(ARG1_GV);
 	    gp_free(ARG1_GV);
 	    GvGP_set(ARG1_GV, (GP*)ARG0_PTR);
+	    GvLOCALIZED_off(ARG1_GV);
+	    /* reference from savestack must be invisible for gv_method_changed! otherwise cache is invalidated globally! */
 	    if ((hv=GvSTASH(ARG1_GV)) && HvENAME_get(hv)) {
 	        if (   GvNAMELEN(ARG1_GV) == 3
                     && strnEQ(GvNAME(ARG1_GV), "ISA", 3)
@@ -934,7 +935,6 @@ Perl_leave_scope(pTHX_ I32 base)
                     /* putting a method back into circulation ("local")*/	
                     gv_method_changed(ARG1_GV);
 	    }
-	    SvREFCNT_dec_NN(ARG1_GV);
 	    break;
         }
 	case SAVEt_FREESV:

@@ -849,7 +849,38 @@ Perl_op_clear(pTHX_ OP *o)
 	    }
 	}
 	break;
+    case OP_METHOD_REDIR:
+        SvREFCNT_dec(cMETHOPx(o)->op_rclass_sv);
+        cMETHOPx(o)->op_rclass_sv = NULL;
+        cMETHOPx(o)->op_rclass_hash = 0;
+#ifdef USE_ITHREADS
+        if (cMETHOPx(o)->op_rclass_targ) {
+            pad_swipe(cMETHOPx(o)->op_rclass_targ, 1);
+            cMETHOPx(o)->op_rclass_targ = 0;
+        }
+#endif
     case OP_METHOD_NAMED:
+    case OP_METHOD_SUPER:
+        SvREFCNT_dec(cMETHOPx(o)->op_u.op_sv);
+        cMETHOPx(o)->op_u.op_sv = NULL;
+        cMETHOPx(o)->op_hash = 0;
+#ifdef USE_ITHREADS
+        if (o->op_targ) {
+            pad_swipe(o->op_targ,1);
+            o->op_targ = 0;
+         }
+#endif
+    case OP_METHOD:
+        SvREFCNT_dec(cMETHOPx(o)->op_class_sv);
+        cMETHOPx(o)->op_class_sv = NULL;
+        cMETHOPx(o)->op_class_hash = 0;
+#ifdef USE_ITHREADS
+        if (cMETHOPx(o)->op_class_targ) {
+            pad_swipe(cMETHOPx(o)->op_class_targ, 1);
+            cMETHOPx(o)->op_class_targ = 0;
+        }
+#endif
+        break;
     case OP_CONST:
     case OP_HINTSEVAL:
 	SvREFCNT_dec(cSVOPo->op_sv);
@@ -1310,8 +1341,7 @@ Perl_op_linklist(pTHX_ OP *o)
 
     PERL_ARGS_ASSERT_OP_LINKLIST;
 
-    if (o->op_next)
-	return o->op_next;
+    if (o->op_next) return o->op_next;
 
     /* establish postfix order */
     first = cUNOPo->op_first;
@@ -2059,17 +2089,33 @@ Perl_finalize_optree(pTHX_ OP* o)
 
     ENTER;
     SAVEVPTR(PL_curcop);
-
     finalize_op(o);
 
     LEAVE;
 }
 
+#ifdef USE_ITHREADS
+/* Relocate sv to the pad for thread safety.
+ * Despite being a "constant", the SV is written to,
+ * for reference counts, sv_upgrade() etc. */
+PERL_STATIC_INLINE void
+S_relocate_opsv (pTHX_ SV** svp, PADOFFSET* targp) {
+    PADOFFSET ix;
+    if (!*svp) return;
+    ix = pad_alloc(OP_CONST, SVf_READONLY);
+    SvREFCNT_dec(PAD_SVl(ix));
+    PAD_SETSV(ix, *svp);
+    /* XXX I don't know how this isn't readonly already. */
+    if (!SvIsCOW(PAD_SVl(ix))) SvREADONLY_on(PAD_SVl(ix));
+    *svp = NULL;
+    *targp = ix;
+}
+#endif
+
 STATIC void
 S_finalize_op(pTHX_ OP* o)
 {
     PERL_ARGS_ASSERT_FINALIZE_OP;
-
 
     switch (o->op_type) {
     case OP_NEXTSTATE:
@@ -2117,21 +2163,21 @@ S_finalize_op(pTHX_ OP* o)
 	/* FALLTHROUGH */
 #ifdef USE_ITHREADS
     case OP_HINTSEVAL:
-    case OP_METHOD_NAMED:
-	/* Relocate sv to the pad for thread safety.
-	 * Despite being a "constant", the SV is written to,
-	 * for reference counts, sv_upgrade() etc. */
-	if (cSVOPo->op_sv) {
-	    const PADOFFSET ix = pad_alloc(OP_CONST, SVf_READONLY);
-	    SvREFCNT_dec(PAD_SVl(ix));
-	    PAD_SETSV(ix, cSVOPo->op_sv);
-	    /* XXX I don't know how this isn't readonly already. */
-	    if (!SvIsCOW(PAD_SVl(ix))) SvREADONLY_on(PAD_SVl(ix));
-	    cSVOPo->op_sv = NULL;
-	    o->op_targ = ix;
-	}
+        S_relocate_opsv(aTHX_ &cSVOPo->op_sv, &o->op_targ);
 #endif
 	break;
+
+#ifdef USE_ITHREADS
+    /* Relocate all the METHOP's SVs to the pad for thread safety. */
+    case OP_METHOD_REDIR:
+        S_relocate_opsv(aTHX_ &cMETHOPx(o)->op_rclass_sv, &cMETHOPx(o)->op_rclass_targ);
+    case OP_METHOD_NAMED:
+    case OP_METHOD_SUPER:
+        S_relocate_opsv(aTHX_ &cMETHOPx(o)->op_u.op_sv, &o->op_targ);
+    case OP_METHOD:
+        S_relocate_opsv(aTHX_ &cMETHOPx(o)->op_class_sv, &cMETHOPx(o)->op_class_targ);
+        break;
+#endif
 
     case OP_HELEM: {
 	UNOP *rop;
@@ -2907,7 +2953,7 @@ STATIC void
 S_apply_attrs_my(pTHX_ HV *stash, OP *target, OP *attrs, OP **imopsp)
 {
     OP *pack, *imop, *arg;
-    SV *meth, *stashsv, **svp;
+    SV *stashsv, **svp;
 
     PERL_ARGS_ASSERT_APPLY_ATTRS_MY;
 
@@ -2943,11 +2989,10 @@ S_apply_attrs_my(pTHX_ HV *stash, OP *target, OP *attrs, OP **imopsp)
 				    dup_attrlist(attrs)));
 
     /* Fake up a method call to import */
-    meth = newSVpvs_share("import");
     imop = convert(OP_ENTERSUB, OPf_STACKED|OPf_SPECIAL|OPf_WANT_VOID,
 		   op_append_elem(OP_LIST,
 			       op_prepend_elem(OP_LIST, pack, list(arg)),
-			       newSVOP(OP_METHOD_NAMED, 0, meth)));
+			       newMETHOPnamed(OP_METHOD_NAMED, 0, newSVpvs_share("import"))));
 
     /* Combine the ops. */
     *imopsp = op_append_elem(OP_LIST, *imopsp, imop);
@@ -4295,6 +4340,51 @@ Perl_newUNOP(pTHX_ I32 type, I32 flags, OP *first)
     return fold_constants(op_integerize(op_std_init((OP *) unop)));
 }
 
+static OP*
+S_newMETHOP(pTHX_ I32 type, I32 flags, OP* dynamic_meth, SV* const_meth) {
+    dVAR;
+    METHOP *methop;
+
+    assert((PL_opargs[type] & OA_CLASS_MASK) == OA_UNOP || (PL_opargs[type] & OA_CLASS_MASK) == OA_SVOP);
+
+    NewOp(1101, methop, 1, METHOP);
+    if (dynamic_meth) {
+        if (PL_opargs[type] & OA_MARK) dynamic_meth = force_list(dynamic_meth, 1);
+        methop->op_flags = (U8)(flags | OPf_KIDS);
+        methop->op_u.op_first = dynamic_meth;
+        methop->op_hash = 0;
+        methop->op_private = (U8)(1 | (flags >> 8));
+    }
+    else {
+        assert(const_meth);
+        methop->op_flags = (U8)(flags & ~OPf_KIDS);
+        methop->op_u.op_sv = const_meth;
+        methop->op_hash = PERL_HASH64(SvPVX(const_meth), SvCUR(const_meth));
+        methop->op_private = (U8)(0 | (flags >> 8));
+        methop->op_next = (OP*)methop;
+    }
+
+    methop->op_type = (OPCODE)type;
+    methop->op_ppaddr = PL_ppaddr[type];
+    methop->op_class_hash = methop->op_rclass_hash = 0;
+    methop = (METHOP*) CHECKOP(type, methop);
+
+    if (methop->op_next) return (OP*)methop;
+
+    return fold_constants(op_integerize(op_std_init((OP *) methop)));
+}
+
+OP *
+Perl_newMETHOP (pTHX_ I32 type, I32 flags, OP* dynamic_meth) {
+    return S_newMETHOP(aTHX_ type, flags, dynamic_meth, NULL);
+}
+
+OP *
+Perl_newMETHOPnamed (pTHX_ I32 type, I32 flags, SV* const_meth) {
+    PERL_ARGS_ASSERT_NEWMETHOPNAMED;
+    return S_newMETHOP(aTHX_ type, flags, NULL, const_meth);
+}
+
 /*
 =for apidoc Am|OP *|newBINOP|I32 type|I32 flags|OP *first|OP *last
 
@@ -5337,7 +5427,6 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
 	}
 	else {
 	    OP *pack;
-	    SV *meth;
 
 	    if (version->op_type != OP_CONST || !SvNIOKp(vesv))
 		Perl_croak(aTHX_ "Version number must be a constant number");
@@ -5346,11 +5435,10 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
 	    pack = newSVOP(OP_CONST, 0, newSVsv(((SVOP*)idop)->op_sv));
 
 	    /* Fake up a method call to VERSION */
-	    meth = newSVpvs_share("VERSION");
 	    veop = convert(OP_ENTERSUB, OPf_STACKED|OPf_SPECIAL,
 			    op_append_elem(OP_LIST,
 					op_prepend_elem(OP_LIST, pack, list(version)),
-					newSVOP(OP_METHOD_NAMED, 0, meth)));
+					newMETHOPnamed(OP_METHOD_NAMED, 0, newSVpvs_share("VERSION"))));
 	}
     }
 
@@ -5366,18 +5454,20 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
 	    idop->op_private |= OPpCONST_NOVER;
     }
     else {
-	SV *meth;
 
 	/* Make copy of idop so we don't free it twice */
 	pack = newSVOP(OP_CONST, 0, newSVsv(((SVOP*)idop)->op_sv));
 
 	/* Fake up a method call to import/unimport */
-	meth = aver
-	    ? newSVpvs_share("import") : newSVpvs_share("unimport");
 	imop = convert(OP_ENTERSUB, OPf_STACKED|OPf_SPECIAL,
 		       op_append_elem(OP_LIST,
 				   op_prepend_elem(OP_LIST, pack, list(arg)),
-				   newSVOP(OP_METHOD_NAMED, 0, meth)));
+				   newMETHOPnamed(OP_METHOD_NAMED, 0,
+					 aver ? newSVpvs_share("import") : 
+						newSVpvs_share("unimport")
+			)
+		)
+	);
     }
 
     /* Fake up the BEGIN {}, which does its thing immediately. */
@@ -7713,6 +7803,7 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 
     if (SvTYPE(gv) != SVt_PVGV) {	/* Maybe prototype now, and had at
 					   maximum a prototype before. */
+        HV* stash;
 	if (SvTYPE(gv) > SVt_NULL) {
 	    cv_ckproto_len_flags((const CV *)gv,
 				 o ? (const GV *)cSVOPo->op_sv : NULL, ps,
@@ -7724,6 +7815,9 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
         }
 	else
 	    sv_setiv(MUTABLE_SV(gv), -1);
+
+        stash = gv_stashof_pvn(name, namlen, name_is_utf8 ? (gv_fetch_flags|SVf_UTF8) : gv_fetch_flags, SVt_PVCV, NULL, NULL, NULL); 
+        if (stash) mro_method_changed_in(stash);
 
 	SvREFCNT_dec(PL_compcv);
 	cv = PL_compcv = NULL;
@@ -7760,6 +7854,7 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 	    }
 	}
     }
+
     if (const_sv) {
 	SvREFCNT_inc_simple_void_NN(const_sv);
 	SvFLAGS(const_sv) = (SvFLAGS(const_sv) & ~SVs_PADMY) | SVs_PADTMP;
@@ -7784,6 +7879,7 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 	PL_compcv = NULL;
 	goto done;
     }
+
     if (cv) {				/* must reuse cv if autoloaded */
 	/* transfer PL_compcv to cv */
 	if (block
@@ -9569,27 +9665,48 @@ Perl_ck_match(pTHX_ OP *o)
 OP *
 Perl_ck_method(pTHX_ OP *o)
 {
-    OP * const kid = cUNOPo->op_first;
+    SV *sv, *methsv;
+    const char* method;
+    int utf8;
+    STRLEN len, nsplit = 0, i;
+    OP* const kid = cMETHOPx(o)->op_u.op_first;
 
     PERL_ARGS_ASSERT_CK_METHOD;
 
-    if (kid->op_type == OP_CONST) {
-	SV* sv = kSVOP->op_sv;
-	const char * const method = SvPVX_const(sv);
-	if (!(strchr(method, ':') || strchr(method, '\''))) {
-	    OP *cmop;
-	    if (!SvIsCOW_shared_hash(sv)) {
-		sv = newSVpvn_share(method, SvUTF8(sv) ? -(I32)SvCUR(sv) : (I32)SvCUR(sv), 0);
-	    }
-	    else {
-		kSVOP->op_sv = NULL;
-	    }
-	    cmop = newSVOP(OP_METHOD_NAMED, 0, sv);
-	    op_free(o);
-	    return cmop;
-	}
+    if (kid->op_type != OP_CONST) return o;
+
+    sv = cSVOPx(kid)->op_sv;
+    method = SvPV(sv, len);
+    utf8 = SvUTF8(sv) ? -1 : 1;
+
+    for (i = len - 1; i > 0; --i) if (method[i] == ':') {
+        nsplit = i+1;
+        break;
     }
-    return o;
+
+    methsv = newSVpvn_share(method+nsplit, utf8*(len - nsplit), 0);
+
+    if (!nsplit) { /* $proto->method() */
+        op_free(o);
+        return newMETHOPnamed(OP_METHOD_NAMED, 0, methsv);
+    }
+
+    if (nsplit == 7 && memEQ(method, "SUPER::", nsplit)) { /* $proto->SUPER::method() */
+        op_free(o);
+        return newMETHOPnamed(OP_METHOD_SUPER, 0, methsv);
+    }
+    else if (nsplit >= 9 && strnEQ(method+nsplit-9, "::SUPER::", 9)) { /* $proto->MyClass::SUPER::method() */
+        OP* op = newMETHOPnamed(OP_METHOD_REDIR, (OPpMETHOD_SUPER << 8), methsv);
+        cMETHOPx_set_rclass(op, newSVpvn_share(method, utf8*(nsplit-9), 0));
+        op_free(o);
+        return op;
+    }
+    else { /* $proto->MyClass::method() redirect */
+        OP* op = newMETHOPnamed(OP_METHOD_REDIR, 0, methsv);
+        cMETHOPx_set_rclass(op, newSVpvn_share(method, utf8*(nsplit-2), 0));
+        op_free(o);
+        return op;
+    }
 }
 
 OP *
@@ -10647,6 +10764,7 @@ Perl_ck_subr(pTHX_ OP *o)
     OP *aop, *cvop;
     CV *cv;
     GV *namegv;
+    SV* sv = NULL;
 
     PERL_ARGS_ASSERT_CK_SUBR;
 
@@ -10663,17 +10781,36 @@ Perl_ck_subr(pTHX_ OP *o)
     o->op_private |= (PL_hints & HINT_STRICT_REFS);
     if (PERLDB_SUB && PL_curstash != PL_debstash)
 	o->op_private |= OPpENTERSUB_DB;
-    if (cvop->op_type == OP_RV2CV) {
-	o->op_private |= (cvop->op_private & OPpENTERSUB_AMPER);
-	op_null(cvop);
-    } else if (cvop->op_type == OP_METHOD || cvop->op_type == OP_METHOD_NAMED) {
-	if (aop->op_type == OP_CONST)
-	    aop->op_private &= ~OPpCONST_STRICT;
-	else if (aop->op_type == OP_LIST) {
-	    OP * const sib = OP_SIBLING(((UNOP*)aop)->op_first);
-	    if (sib && sib->op_type == OP_CONST)
-		sib->op_private &= ~OPpCONST_STRICT;
-	}
+    switch(cvop->op_type) {
+        case OP_RV2CV:
+            o->op_private |= (cvop->op_private & OPpENTERSUB_AMPER);
+            op_null(cvop);
+            break;
+        case OP_METHOD:
+        case OP_METHOD_NAMED:
+        case OP_METHOD_SUPER:
+        case OP_METHOD_REDIR:
+            o->op_private |= OPpENTERSUB_METHOD;
+            if (aop->op_type == OP_CONST) {
+                sv = cSVOPx(aop)->op_sv;
+                aop->op_private &= ~OPpCONST_STRICT;
+            }
+            else if (aop->op_type == OP_LIST) {
+                OP * const sib = OP_SIBLING(((UNOP*)aop)->op_first);
+                if (sib && sib->op_type == OP_CONST) {
+                    sv = cSVOPx(sib)->op_sv;
+                    sib->op_private &= ~OPpCONST_STRICT;
+                }
+            }
+            /* cache const class' name hash to speedup class method calls */
+            if (sv) {
+                STRLEN len;
+                const char* str = SvPV(sv, len);
+                if (len) cMETHOPx_set_class(cvop, newSVpvn_share(str, SvUTF8(sv) ? -len : len, 0));
+            }
+            break;
+        default:
+            break;
     }
 
     if (!cv) {

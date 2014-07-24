@@ -186,7 +186,8 @@ Perl_mro_meta_dup(pTHX_ struct mro_meta* smeta, CLONE_PARAMS* param)
 	newmeta->isa
 	    = MUTABLE_HV(sv_dup_inc((const SV *)newmeta->isa, param));
 
-    newmeta->super = NULL;
+    newmeta->mro_method      = NULL;
+    newmeta->mro_supermethod = NULL;
 
     return newmeta;
 }
@@ -509,7 +510,6 @@ Perl_mro_isa_changed_in(pTHX_ HV* stash)
 
     if(!stashname)
         Perl_croak(aTHX_ "Can't call mro_isa_changed_in() on anonymous symbol table");
-
 
     /* wipe out the cached linearizations for this stash */
     meta = HvMROMETA(stash);
@@ -958,13 +958,11 @@ S_mro_gather_and_rename(pTHX_ HV * const stashes, HV * const seen_stashes,
                 const U32 name_utf8 = SvUTF8(*svp);
 		STRLEN len;
 		const char *name = SvPVx_const(*svp, len);
-		if(PL_stashcache) {
-                    DEBUG_o(Perl_deb(aTHX_ "mro_gather_and_rename clearing PL_stashcache for '%"SVf"'\n",
-                                     SVfARG(*svp)));
-		   (void)hv_delete(PL_stashcache, name, name_utf8 ? -(I32)len : (I32)len, G_DISCARD);
-                }
-                ++svp;
-	        hv_ename_delete(oldstash, name, len, name_utf8);
+		DEBUG_o(Perl_deb(aTHX_ "mro_gather_and_rename clearing PL_stashcache for '%"SVf"'\n",SVfARG(*svp)));
+		gv_stashpvn_cache_invalidate(name, len, name_utf8);
+
+		++svp;
+		hv_ename_delete(oldstash, name, len, name_utf8);
 
 		if (!fetched_isarev) {
 		    /* If the name deletion caused a name change, then we
@@ -1312,9 +1310,55 @@ via, C<mro::method_changed_in(classname)>.
 
 =cut
 */
+
+PERL_STATIC_INLINE void
+S_mro_method_cache_clear (pTHX_ SVMAP** method_cache_ptr) {
+    SVMAP_ENT* iter;
+    SVMAP* method_cache = *method_cache_ptr;
+    *method_cache_ptr = NULL; /* we may fall back to perl code and gv_fetchmeth during destruction on GV. Must remove cache map first */
+    if (!method_cache) return;
+    HASHMAP_FOR_EACH(svmap, iter, *method_cache) {
+        SvREFCNT_dec_NN(iter->value.gv);
+        unshare_hek(SvSHARED_HEK_FROM_PV(iter->name));
+    } HASHMAP_FOR_EACH_END
+    svmap_destroy(method_cache);
+    Safefree(method_cache);
+}
+
+PERL_STATIC_INLINE void
+S_mro_method_cache_clear_recursive (pTHX_ HV* stash) {
+    HV* substash;
+    SV* value;
+    char *key, *name, *subname;
+    I32 keylen, nelem;
+    STRLEN namelen;
+    struct mro_meta* meta = HvMROMETA(stash);
+
+    if (meta->mro_method)      S_mro_method_cache_clear(aTHX_ &meta->mro_method);
+    if (meta->mro_supermethod) S_mro_method_cache_clear(aTHX_ &meta->mro_supermethod);
+
+    name = HvENAME_get(stash);
+    namelen = HvENAMELEN(stash);
+    nelem = hv_iterinit(stash);
+    while (nelem--) {
+        value = hv_iternextsv(stash, &key, &keylen);
+        if (keylen <= 2 || key[keylen-1] != ':' || key[keylen-2] != ':' || !isGV_with_GP(value) || !(substash = GvHV(value))) continue;
+        if (!(subname = HvENAME_get(substash)) || substash == stash) continue;
+        if (stash != PL_defstash && !memEQ(subname, name, namelen)) continue; /* avoid infinite recursion when Acme::META::{Acme::} == Acme:: */
+        S_mro_method_cache_clear_recursive(aTHX_ substash);
+    }
+}
+
+void
+Perl_mro_global_method_cache_clear (pTHX) {
+    PL_sub_generation++;
+    S_mro_method_cache_clear_recursive(aTHX_ PL_defstash);
+}
+
 void
 Perl_mro_method_changed_in(pTHX_ HV *stash)
 {
+    struct mro_meta* meta;
     const char * const stashname = HvENAME_get(stash);
     const STRLEN stashname_len = HvENAMELEN_get(stash);
 
@@ -1326,8 +1370,9 @@ Perl_mro_method_changed_in(pTHX_ HV *stash)
     if(!stashname)
         Perl_croak(aTHX_ "Can't call mro_method_changed_in() on anonymous symbol table");
 
+    meta = HvMROMETA(stash);
     /* Inc the package generation, since a local method changed */
-    HvMROMETA(stash)->pkg_gen++;
+    meta->pkg_gen++;
 
     /* DESTROY can be cached in SvSTASH. */
     if (!SvOBJECT(stash)) SvSTASH(stash) = NULL;

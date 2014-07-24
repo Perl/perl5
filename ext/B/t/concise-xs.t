@@ -176,6 +176,7 @@ my $testpkgs = {
 		     OP_GLOB PMf_SKIPWHITE RXf_PMf_CHARSET RXf_PMf_KEEPCOPY
 		     OPpEVAL_BYTES OPpSUBSTR_REPL_FIRST) : (),
 		     $] >= 5.019 ? qw(OP_PUSHMARK OP_NULL) : (),
+		     $] >= 5.020 ? qw(OPpMETHOD_SUPER) : (),
 		    'CVf_LOCKED', # This ends up as a constant, pre or post 5.10
 		    ],
 		 },

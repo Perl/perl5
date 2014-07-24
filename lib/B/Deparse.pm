@@ -20,7 +20,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
          CVf_METHOD CVf_LVALUE
 	 PMf_KEEP PMf_GLOBAL PMf_CONTINUE PMf_EVAL PMf_ONCE
 	 PMf_MULTILINE PMf_SINGLELINE PMf_FOLD PMf_EXTENDED);
-$VERSION = '1.27';
+$VERSION = '1.28';
 use strict;
 use vars qw/$AUTOLOAD/;
 use warnings ();
@@ -34,7 +34,7 @@ BEGIN {
 		OPpPAD_STATE PMf_SKIPWHITE RXf_SKIPWHITE
 		RXf_PMf_CHARSET RXf_PMf_KEEPCOPY
 		CVf_LOCKED OPpREVERSE_INPLACE OPpSUBSTR_REPL_FIRST
-		PMf_NONDESTRUCT OPpCONST_ARYBASE OPpEVAL_BYTES)) {
+		PMf_NONDESTRUCT OPpCONST_ARYBASE OPpEVAL_BYTES OPpMETHOD_SUPER)) {
 	eval { import B $_ };
 	no strict 'refs';
 	*{$_} = sub () {0} unless *{$_}{CODE};
@@ -556,7 +556,7 @@ sub begin_is_use {
     return unless $self->const_sv($svop)->PV eq $module;
 
     # Pull out the arguments
-    for ($svop=$svop->sibling; $svop->name ne "method_named";
+    for ($svop=$svop->sibling; $svop->name !~ /^method_/;
 		$svop = $svop->sibling) {
 	$args .= ", " if length($args);
 	$args .= $self->deparse($svop, 6);
@@ -3653,8 +3653,14 @@ sub _method {
 	$meth = $kid;
     }
 
-    if ($meth->name eq "method_named") {
-	$meth = $self->const_sv($meth)->PV;
+    if ($meth->name eq "method_named") { # $self->method
+	$meth = $self->const_meth($meth)->PV;
+    } elsif ($meth->name eq "method_super") { # $self->SUPER::method
+        $meth = "SUPER::".$self->const_meth($meth)->PV;
+    } elsif ($meth->name eq "method_redir") {
+        # one of : $self->Other::Class::method, $self->Other::SUPER::method 
+        my $super = ($meth->private & OPpMETHOD_SUPER) ? 'SUPER::' : '';
+        $meth = $self->const_rclass($meth)->PV."::$super".$self->const_meth($meth)->PV;
     } else {
 	$meth = $meth->first;
 	if ($meth->name eq "const") {
@@ -4257,6 +4263,26 @@ sub const_sv {
     my $sv = $op->sv;
     # the constant could be in the pad (under useithreads)
     $sv = $self->padval($op->targ) unless $$sv;
+    return $sv;
+}
+
+sub const_meth { shift->const_sv(@_) }
+
+sub const_rclass {
+    my $self = shift;
+    my $op = shift;
+    my $sv = $op->rclass_sv or return undef;
+    # the constant could be in the pad (under useithreads)
+    $sv = $self->padval($op->rclass_targ) unless $$sv;
+    return $sv;
+}
+
+sub const_class {
+    my $self = shift;
+    my $op = shift;
+    my $sv = $op->class_sv or return undef;
+    # the constant could be in the pad (under useithreads)
+    $sv = $self->padval($op->class_targ) unless $$sv;
     return $sv;
 }
 

@@ -1259,6 +1259,38 @@ oplist(o)
 	SP = oplist(aTHX_ o, SP);
 
 
+MODULE = B	PACKAGE = B::SVOP
+
+void
+class_sv (o)
+	B::SVOP	o
+ALIAS:
+	rclass_sv   = 1
+	class_targ  = 2
+	rclass_targ = 3
+PPCODE:
+	SV* sv;
+	if (o->op_type != OP_METHOD && o->op_type != OP_METHOD_NAMED && o->op_type != OP_METHOD_SUPER &&
+	    o->op_type != OP_METHOD_REDIR)
+		croak("B::SVOP::const_* : wrong op_type");
+	switch (ix) {
+		case 0:
+			if (!cMETHOPx(o)->op_class_hash) XSRETURN_UNDEF;
+			sv = cMETHOPx(o)->op_class_sv;
+			break;
+		case 1:
+			if (o->op_type != OP_METHOD_REDIR) croak("B::SVOP::const_rclass: wrong op_type");
+			sv = cMETHOPx(o)->op_rclass_sv;
+			break;
+		case 2:
+			XSRETURN_UV(cMETHOPx(o)->op_class_targ);
+		case 3:
+			XSRETURN_UV(cMETHOPx(o)->op_rclass_targ);
+	}
+	ST(0) = make_sv_object(aTHX_ sv);
+	XSRETURN(1);
+
+
 MODULE = B	PACKAGE = B::SV
 
 #define MAGICAL_FLAG_BITS (SVs_GMG|SVs_SMG|SVs_RMG)

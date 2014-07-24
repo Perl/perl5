@@ -1456,8 +1456,8 @@ Perl_sv_upgrade(pTHX_ SV *const sv, svtype new_type)
 	    SvOBJECT_on(io);
 	    /* Clear the stashcache because a new IO could overrule a package
 	       name */
-            DEBUG_o(Perl_deb(aTHX_ "sv_upgrade clearing PL_stashcache\n"));
-	    hv_clear(PL_stashcache);
+        DEBUG_o(Perl_deb(aTHX_ "sv_upgrade clearing PL_stashcache\n"));
+        gv_stash_cache_invalidate();
 
 	    SvSTASH_set(io, MUTABLE_HV(SvREFCNT_inc(GvHV(iogv))));
 	    IoPAGE_LEN(sv) = 60;
@@ -3853,13 +3853,12 @@ S_glob_assign_glob(pTHX_ SV *const dstr, SV *const sstr, const int dtype)
     }
     else if(mro_changes) mro_method_changed_in(GvSTASH(dstr));
     if (GvIO(dstr) && dtype == SVt_PVGV) {
-	DEBUG_o(Perl_deb(aTHX_
-			"glob_assign_glob clearing PL_stashcache\n"));
-	/* It's a cache. It will rebuild itself quite happily.
-	   It's a lot of effort to work out exactly which key (or keys)
-	   might be invalidated by the creation of the this file handle.
-	 */
-	hv_clear(PL_stashcache);
+        DEBUG_o(Perl_deb(aTHX_ "glob_assign_glob clearing PL_stashcache\n"));
+        /* It's a cache. It will rebuild itself quite happily.
+           It's a lot of effort to work out exactly which key (or keys)
+           might be invalidated by the creation of the this file handle.
+         */
+        gv_stash_cache_invalidate();
     }
     return;
 }
@@ -3967,7 +3966,12 @@ S_glob_assign_ref(pTHX_ SV *const dstr, SV *const sstr)
 	    }
 	    GvCVGEN(dstr) = 0; /* Switch off cacheness. */
 	    GvASSUMECV_on(dstr);
-	    if(GvSTASH(dstr)) gv_method_changed(dstr); /* sub foo { 1 } sub bar { 2 } *bar = \&foo */
+	    if(GvSTASH(dstr)) {
+            /* reference from savestack must be invisible for gv_method_changed! otherwise cache is invalidated globally! */
+	        if (GvLOCALIZED(dstr)) --GvREFCNT(dstr);
+	        gv_method_changed(dstr); /* sub foo { 1 } sub bar { 2 } *bar = \&foo */
+            if (GvLOCALIZED(dstr)) ++GvREFCNT(dstr);
+	    }
 	}
 	*location = SvREFCNT_inc_simple_NN(sref);
 	if (import_flag && !(GvFLAGS(dstr) & import_flag)
@@ -4046,7 +4050,7 @@ S_glob_assign_ref(pTHX_ SV *const dstr, SV *const sstr)
                It's a lot of effort to work out exactly which key (or keys)
                might be invalidated by the creation of the this file handle.
             */
-            hv_clear(PL_stashcache);
+            gv_stash_cache_invalidate();
         }
 	break;
     }
@@ -6382,12 +6386,8 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
 		if (   PL_phase != PERL_PHASE_DESTRUCT
 		    && (name = HvNAME((HV*)sv)))
 		{
-		    if (PL_stashcache) {
-                    DEBUG_o(Perl_deb(aTHX_ "sv_clear clearing PL_stashcache for '%"SVf"'\n",
-                                     SVfARG(sv)));
-			(void)hv_deletehek(PL_stashcache,
-					   HvNAME_HEK((HV*)sv), G_DISCARD);
-                    }
+                    DEBUG_o(Perl_deb(aTHX_ "sv_clear clearing PL_stashcache for '%"SVf"'\n", SVfARG(sv)));
+                    gv_stashpvn_cache_invalidate(name, HvNAMELEN((HV*)sv), HvNAMEUTF8((HV*)sv) ? SVf_UTF8 : 0);
 		    hv_name_set((HV*)sv, NULL, 0, 0);
 		}
 
@@ -6644,21 +6644,22 @@ S_curse(pTHX_ SV * const sv, const bool check_refcnt) {
 	  stash = SvSTASH(sv);
 	  assert(SvTYPE(stash) == SVt_PVHV);
 	  if (HvNAME(stash)) {
+	    struct mro_meta* meta;
 	    CV* destructor = NULL;
 	    assert (SvOOK(stash));
 	    if (!SvOBJECT(stash)) destructor = (CV *)SvSTASH(stash);
-	    if (!destructor || HvMROMETA(stash)->destroy_gen
-				!= PL_sub_generation)
+	    meta = HvMROMETA(stash);
+	    if (!destructor || meta->destroy_gen
+				!= meta->cache_gen + meta->pkg_gen + PL_sub_generation)
 	    {
-		GV * const gv =
-		    gv_fetchmeth_autoload(stash, "DESTROY", 7, 0);
+		/* GV * const gv = gv_fetchmethod_pvn_flags(stash, "DESTROY", 7, GV_AUTOLOAD); */ /* uncomment to support AUTOLOAD for DESTROY */
+                GV * const gv = gv_fetchmethod_pvn_flags(stash, "DESTROY", 7, 0);
 		if (gv) destructor = GvCV(gv);
 		if (!SvOBJECT(stash))
 		{
 		    SvSTASH(stash) =
 			destructor ? (HV *)destructor : ((HV *)0)+1;
-		    HvAUX(stash)->xhv_mro_meta->destroy_gen =
-			PL_sub_generation;
+		    meta->destroy_gen = meta->cache_gen + meta->pkg_gen + PL_sub_generation;
 		}
 	    }
 	    assert(!destructor || destructor == ((CV *)0)+1
@@ -14043,7 +14044,8 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_firstgv		= gv_dup_inc(proto_perl->Ifirstgv, param);
     PL_secondgv		= gv_dup_inc(proto_perl->Isecondgv, param);
 
-    PL_stashcache       = newHV();
+    gv_stash_cache_init();
+    PL_methstash	= proto_perl->Imethstash ? hv_dup(proto_perl->Imethstash, param) : NULL;
 
     PL_watchaddr	= (char **) ptr_table_fetch(PL_ptr_table,
 					    proto_perl->Iwatchaddr);
@@ -15008,6 +15010,10 @@ Perl_report_uninit(pTHX_ const SV *uninit_sv)
         GCC_DIAG_RESTORE;
     }
 }
+
+#define SVMAP_ENTRY_CMP(l, r)   (l->name != r->name && ((l->hash - r->hash) || (l->flags ^ r->flags) || memNE(l->name, r->name, r->len)))
+#define SVMAP_ENTRY_HASH(entry) entry->hash
+DECLARE_HASHMAP(svmap, SVMAP_ENTRY_CMP, SVMAP_ENTRY_HASH, Safefree, saferealloc);
 
 /*
  * Local variables:
