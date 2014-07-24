@@ -1588,7 +1588,7 @@ Perl_do_readline(pTHX)
 			goto have_fp;
 		    }
 		}
-		fp = nextargv(PL_last_in_gv);
+		fp = nextargv(PL_last_in_gv, PL_op->op_flags & OPf_SPECIAL);
 		if (!fp) { /* Note: fp != IoIFP(io) */
 		    (void)do_close(PL_last_in_gv, FALSE); /* now it does*/
 		}
@@ -1675,7 +1675,7 @@ Perl_do_readline(pTHX)
 	{
 	    PerlIO_clearerr(fp);
 	    if (IoFLAGS(io) & IOf_ARGV) {
-		fp = nextargv(PL_last_in_gv);
+		fp = nextargv(PL_last_in_gv, PL_op->op_flags & OPf_SPECIAL);
 		if (fp)
 		    continue;
 		(void)do_close(PL_last_in_gv, FALSE);

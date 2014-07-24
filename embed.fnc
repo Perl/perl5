@@ -1056,7 +1056,7 @@ Apd	|SV*	|vnormal	|NN SV *vs
 Apd	|SV*	|vstringify	|NN SV *vs
 Apd	|int	|vcmp		|NN SV *lhv|NN SV *rhv
 : Used in pp_hot.c and pp_sys.c
-p	|PerlIO*|nextargv	|NN GV* gv
+p	|PerlIO*|nextargv	|NN GV* gv|bool nomagicopen
 AnpP	|char*	|ninstr		|NN const char* big|NN const char* bigend \
 				|NN const char* little|NN const char* lend
 Apd	|void	|op_free	|NULLOK OP* arg

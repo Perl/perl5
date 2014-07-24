@@ -5796,7 +5796,7 @@ Perl_yylex(pTHX)
 	if (PL_expect != XOPERATOR) {
 	    if (s[1] != '<' && !strchr(s,'>'))
 		check_uni();
-	    if (s[1] == '<')
+	    if (s[1] == '<' && s[2] != '>')
 		s = scan_heredoc(s);
 	    else
 		s = scan_inputsymbol(s);
@@ -9279,6 +9279,7 @@ S_scan_heredoc(pTHX_ char *s)
    This code handles:
 
    <>		read from ARGV
+   <<>>		read from ARGV without magic open
    <FH> 	read from filehandle
    <pkg::FH>	read from package qualified filehandle
    <pkg'FH>	read from package qualified filehandle
@@ -9293,6 +9294,7 @@ S_scan_inputsymbol(pTHX_ char *start)
     char *s = start;		/* current position in buffer */
     char *end;
     I32 len;
+    bool nomagicopen = FALSE;
     char *d = PL_tokenbuf;					/* start of temp holding space */
     const char * const e = PL_tokenbuf + sizeof PL_tokenbuf;	/* end of temp holding space */
 
@@ -9301,7 +9303,14 @@ S_scan_inputsymbol(pTHX_ char *start)
     end = strchr(s, '\n');
     if (!end)
 	end = PL_bufend;
-    s = delimcpy(d, e, s + 1, end, '>', &len);	/* extract until > */
+    if (s[1] == '<' && s[2] == '>' && s[3] == '>') {
+        nomagicopen = TRUE;
+        *d = '\0';
+        len = 0;
+        s += 3;
+    }
+    else
+        s = delimcpy(d, e, s + 1, end, '>', &len);	/* extract until > */
 
     /* die if we didn't have space for the contents of the <>,
        or if it didn't end, or if we see a newline
@@ -9411,7 +9420,7 @@ intro_sym:
 			op_append_elem(OP_LIST,
 			    newGVOP(OP_GV, 0, gv),
 			    newCVREF(0, newGVOP(OP_GV, 0, gv_readline))))
-		: (OP*)newUNOP(OP_READLINE, 0, newGVOP(OP_GV, 0, gv));
+		: (OP*)newUNOP(OP_READLINE, nomagicopen ? OPf_SPECIAL : 0, newGVOP(OP_GV, 0, gv));
 	    pl_yylval.ival = OP_NULL;
 	}
     }

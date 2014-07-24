@@ -3100,7 +3100,7 @@ PERL_CALLCONV STRLEN *	Perl_new_warnings_bitfield(pTHX_ STRLEN *buffer, const ch
 #define PERL_ARGS_ASSERT_NEW_WARNINGS_BITFIELD	\
 	assert(bits)
 
-PERL_CALLCONV PerlIO*	Perl_nextargv(pTHX_ GV* gv)
+PERL_CALLCONV PerlIO*	Perl_nextargv(pTHX_ GV* gv, bool nomagicopen)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_NEXTARGV	\
 	assert(gv)

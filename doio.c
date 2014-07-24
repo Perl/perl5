@@ -799,7 +799,7 @@ say_false:
 }
 
 PerlIO *
-Perl_nextargv(pTHX_ GV *gv)
+Perl_nextargv(pTHX_ GV *gv, bool nomagicopen)
 {
     IO * const io = GvIOp(gv);
 
@@ -837,7 +837,10 @@ Perl_nextargv(pTHX_ GV *gv)
 	SvSETMAGIC(GvSV(gv));
 	PL_oldname = SvPVx(GvSV(gv), oldlen);
         if (LIKELY(!PL_inplace)) {
-            if (do_open6(gv, PL_oldname, oldlen, NULL, NULL, 0)) {
+            if (nomagicopen
+                    ? do_open6(gv, "<", 1, NULL, &GvSV(gv), 1)
+                    : do_open6(gv, PL_oldname, oldlen, NULL, NULL, 0)
+               ) {
                 return IoIFP(GvIOp(gv));
             }
         }
@@ -1126,7 +1129,7 @@ Perl_do_eof(pTHX_ GV *gv)
 		PerlIO_set_cnt(IoIFP(io),-1);
 	}
 	if (PL_op->op_flags & OPf_SPECIAL) { /* not necessarily a real EOF yet? */
-	    if (gv != PL_argvgv || !nextargv(gv))	/* get another fp handy */
+	    if (gv != PL_argvgv || !nextargv(gv, FALSE))	/* get another fp handy */
 		return TRUE;
 	}
 	else
