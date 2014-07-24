@@ -3731,63 +3731,83 @@ The pointer to the PV of the C<dsv> is returned.
 
 =cut */
 char *
-Perl_pv_uni_display(pTHX_ SV *dsv, const U8 *spv, STRLEN len, STRLEN pvlim, UV flags)
+Perl_str_uni_display(pTHX_ char *dest, STRLEN maxlen, const U8 *spv, STRLEN len, STRLEN pvlim, UV flags)
 {
     int truncated = 0;
     const char *s, *e;
+    char buf[32];
+
+    PERL_ARGS_ASSERT_STR_UNI_DISPLAY;
+
+    dest[0] = '\0';
+    for (s = (const char *)spv, e = s + len; s < e; s += UTF8SKIP(s)) {
+        UV u;
+        /* This serves double duty as a flag and a character to print after
+           a \ when flags & UNI_DISPLAY_BACKSLASH is true.
+           */
+        char ok = 0;
+
+        if (pvlim && strlen(dest) >= pvlim) {
+            truncated++;
+            break;
+        }
+        u = utf8_to_uvchr_buf((U8*)s, (U8*)e, 0);
+        if (u < 256) {
+            const unsigned char c = (unsigned char)u & 0xFF;
+            if (flags & UNI_DISPLAY_BACKSLASH) {
+                switch (c) {
+                    case '\n':
+                        ok = 'n'; break;
+                    case '\r':
+                        ok = 'r'; break;
+                    case '\t':
+                        ok = 't'; break;
+                    case '\f':
+                        ok = 'f'; break;
+                    case '\a':
+                        ok = 'a'; break;
+                    case '\\':
+                        ok = '\\'; break;
+                    default: break;
+                }
+                if (ok) {
+                    buf[0] = '\\';
+                    buf[1] = ok;
+                    buf[2] = '\0';
+                    my_strlcat(dest, buf, maxlen);
+                }
+            }
+            /* isPRINT() is the locale-blind version. */
+            if (!ok && (flags & UNI_DISPLAY_ISPRINT) && isPRINT(c)) {
+                buf[0] = c;
+                buf[1] = '\0';
+                my_strlcat(dest, buf, maxlen);
+                ok = 1;
+            }
+        }
+        if (!ok) {
+            my_snprintf(buf, sizeof(buf), "\\x{%"UVxf"}", u);
+            my_strlcat(dest, buf, maxlen);
+        }
+    }
+    if (truncated)
+        my_strlcat(dest, "...", maxlen);
+
+    return dest;
+}
+
+char *
+Perl_pv_uni_display(pTHX_ SV *dsv, const U8 *spv, STRLEN len, STRLEN pvlim, UV flags)
+{
+    char *buf;
+    STRLEN maxlen = 6 * (len + 1);
 
     PERL_ARGS_ASSERT_PV_UNI_DISPLAY;
 
-    sv_setpvs(dsv, "");
+    Newxz(buf, maxlen, char);
+    sv_setpv(dsv, str_uni_display(buf, maxlen, spv, len, pvlim, flags));
     SvUTF8_off(dsv);
-    for (s = (const char *)spv, e = s + len; s < e; s += UTF8SKIP(s)) {
-	 UV u;
-	  /* This serves double duty as a flag and a character to print after
-	     a \ when flags & UNI_DISPLAY_BACKSLASH is true.
-	  */
-	 char ok = 0;
-
-	 if (pvlim && SvCUR(dsv) >= pvlim) {
-	      truncated++;
-	      break;
-	 }
-	 u = utf8_to_uvchr_buf((U8*)s, (U8*)e, 0);
-	 if (u < 256) {
-	     const unsigned char c = (unsigned char)u & 0xFF;
-	     if (flags & UNI_DISPLAY_BACKSLASH) {
-	         switch (c) {
-		 case '\n':
-		     ok = 'n'; break;
-		 case '\r':
-		     ok = 'r'; break;
-		 case '\t':
-		     ok = 't'; break;
-		 case '\f':
-		     ok = 'f'; break;
-		 case '\a':
-		     ok = 'a'; break;
-		 case '\\':
-		     ok = '\\'; break;
-		 default: break;
-		 }
-		 if (ok) {
-		     const char string = ok;
-		     sv_catpvs(dsv, "\\");
-		     sv_catpvn(dsv, &string, 1);
-		 }
-	     }
-	     /* isPRINT() is the locale-blind version. */
-	     if (!ok && (flags & UNI_DISPLAY_ISPRINT) && isPRINT(c)) {
-		 const char string = c;
-		 sv_catpvn(dsv, &string, 1);
-		 ok = 1;
-	     }
-	 }
-	 if (!ok)
-	     Perl_sv_catpvf(aTHX_ dsv, "\\x{%"UVxf"}", u);
-    }
-    if (truncated)
-	 sv_catpvs(dsv, "...");
+    Safefree(buf);
 
     return SvPVX(dsv);
 }

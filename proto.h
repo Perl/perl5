@@ -3922,6 +3922,12 @@ PERL_CALLCONV NV	Perl_str_to_version(pTHX_ SV *sv)
 #define PERL_ARGS_ASSERT_STR_TO_VERSION	\
 	assert(sv)
 
+PERL_CALLCONV char*	Perl_str_uni_display(pTHX_ char *dest, STRLEN maxlen, const U8 *spv, STRLEN len, STRLEN pvlim, UV flags)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_3);
+#define PERL_ARGS_ASSERT_STR_UNI_DISPLAY	\
+	assert(dest); assert(spv)
+
 PERL_CALLCONV void	Perl_sub_crush_depth(pTHX_ CV* cv)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_SUB_CRUSH_DEPTH	\
