@@ -677,7 +677,7 @@ generate_uudmap$(OBJ_EXT): mg_raw.h
 # it on the target system if we're cross-compiling.
 # If it is defined, then we just run it locally.
 case "$hostgenerate" in
-'')
+''|'undef')
 $spitshell >>$Makefile <<!GROK!THIS!
 bitcount.h: generate_uudmap\$(HOST_EXE_EXT)
 	$run ./generate_uudmap\$(HOST_EXE_EXT) \$(generated_headers)
