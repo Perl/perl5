@@ -1036,7 +1036,9 @@ SKIP: {
 
 SKIP: {
     eval { require POSIX; POSIX->import("locale_h"); };
-    if ($@) { skip "Can't test locale (maybe you are missing POSIX)", 6; }
+    if ($@ || !eval { &POSIX::LC_ALL; 1 }) {
+        skip "Can't test locale (maybe you are missing POSIX)", 6;
+    }
 
     setlocale(&POSIX::LC_ALL, "C");
     use locale;
