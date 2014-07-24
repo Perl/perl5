@@ -586,13 +586,14 @@ Perl_grok_number(pTHX_ const char *pv, STRLEN len, UV *valuep)
     return grok_number_flags(pv, len, valuep, 0);
 }
 
+static const UV uv_max_div_10 = UV_MAX / 10;
+static const U8 uv_max_mod_10 = UV_MAX % 10;
+
 int
 Perl_grok_number_flags(pTHX_ const char *pv, STRLEN len, UV *valuep, U32 flags)
 {
   const char *s = pv;
   const char * const send = pv + len;
-  const UV max_div_10 = UV_MAX / 10;
-  const char max_mod_10 = UV_MAX % 10;
   int numtype = 0;
   int sawinf = 0;
   int sawnan = 0;
@@ -660,9 +661,9 @@ Perl_grok_number_flags(pTHX_ const char *pv, STRLEN len, UV *valuep, U32 flags)
                                          each time for overflow.  */
                                       digit = *s - '0';
                                       while (digit >= 0 && digit <= 9
-                                             && (value < max_div_10
-                                                 || (value == max_div_10
-                                                     && digit <= max_mod_10))) {
+                                             && (value < uv_max_div_10
+                                                 || (value == uv_max_div_10
+                                                     && digit <= uv_max_mod_10))) {
                                         value = value * 10 + digit;
                                         if (++s < send)
                                           digit = *s - '0';
@@ -832,8 +833,6 @@ Perl_grok_atou(const char *pv, const char** endptr)
     const char** eptr;
     const char* end2; /* Used in case endptr is NULL. */
     UV val = 0; /* The return value. */
-    const UV max_div_10 = UV_MAX / 10;
-    const UV max_mod_10 = UV_MAX % 10;
 
     PERL_ARGS_ASSERT_GROK_ATOU;
 
@@ -852,8 +851,8 @@ Perl_grok_atou(const char *pv, const char** endptr)
                  * the expected uses of this are not speed-needy, and
                  * unlikely to need full 64-bitness. */
                 U8 digit = *s++ - '0';
-                if (val < max_div_10 ||
-                    (val == max_div_10 && digit <= max_mod_10)) {
+                if (val < uv_max_div_10 ||
+                    (val == uv_max_div_10 && digit <= uv_max_mod_10)) {
                     val = val * 10 + digit;
                 } else {
                     *eptr = NULL;
