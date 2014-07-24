@@ -4128,15 +4128,18 @@ PP(pp_quotemeta)
 		    }
 		}
 		else if (UTF8_IS_DOWNGRADEABLE_START(*s)) {
+		    if (
 #ifdef USE_LOCALE_CTYPE
 		    /* In locale, we quote all non-ASCII Latin1 chars.
 		     * Otherwise use the quoting rules */
-		    if (IN_LC_RUNTIME(LC_CTYPE)
-			|| _isQUOTEMETA(TWO_BYTE_UTF8_TO_NATIVE(*s, *(s + 1))))
+		    
+		    IN_LC_RUNTIME(LC_CTYPE)
+			||
+#endif
+			_isQUOTEMETA(TWO_BYTE_UTF8_TO_NATIVE(*s, *(s + 1))))
 		    {
 			to_quote = TRUE;
 		    }
-#endif
 		}
 		else if (is_QUOTEMETA_high(s)) {
 		    to_quote = TRUE;
