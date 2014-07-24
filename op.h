@@ -114,7 +114,6 @@ Deprecated.  Use C<GIMME_V> instead.
 				/*  On OP_(ENTER|LEAVE)EVAL, don't clear $@ */
                                 /*  On pushre, rx is used as part of split, e.g. split " " */
 				/*  On regcomp, "use re 'eval'" was in scope */
-				/*  On OP_READLINE, was <$filehandle> */
 				/*  On RV2[ACGHS]V, don't create GV--in
 				    defined()*/
 				/*  On OP_DBSTATE, indicates breakpoint
