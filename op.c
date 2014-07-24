@@ -1118,7 +1118,6 @@ For example:
 OP *
 Perl_op_sibling_splice(OP *parent, OP *start, int del_count, OP* insert)
 {
-    dVAR;
     OP *first = start ? OP_SIBLING(start) : cLISTOPx(parent)->op_first;
     OP *rest;
     OP *last_del = NULL;

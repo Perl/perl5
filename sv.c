@@ -385,8 +385,6 @@ S_new_SV(pTHX_ const char *file, int line, const char *func)
 STATIC void
 S_del_sv(pTHX_ SV *p)
 {
-    dVAR;
-
     PERL_ARGS_ASSERT_DEL_SV;
 
     if (DEBUG_D_TEST) {
@@ -1855,7 +1853,6 @@ S_sv_display(pTHX_ SV *const sv, char *tmpbuf, STRLEN tmpbuf_size) {
 STATIC void
 S_not_a_number(pTHX_ SV *const sv)
 {
-     dVAR;
      char tmpbuf[64];
      const char *pv;
 
@@ -1876,7 +1873,6 @@ S_not_a_number(pTHX_ SV *const sv)
 
 STATIC void
 S_not_incrementable(pTHX_ SV *const sv) {
-     dVAR;
      char tmpbuf[64];
      const char *pv;
 

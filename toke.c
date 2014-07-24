@@ -378,8 +378,6 @@ static struct debug_tokens {
 STATIC int
 S_tokereport(pTHX_ I32 rv, const YYSTYPE* lvalp)
 {
-    dVAR;
-
     PERL_ARGS_ASSERT_TOKEREPORT;
 
     if (DEBUG_T_TEST) {

@@ -1402,7 +1402,6 @@ Use macro PAD_SV instead of calling this function directly.
 SV *
 Perl_pad_sv(pTHX_ PADOFFSET po)
 {
-    dVAR;
     ASSERT_CURPAD_ACTIVE("pad_sv");
 
     if (!po)
@@ -1426,8 +1425,6 @@ Use the macro PAD_SETSV() rather than calling this function directly.
 void
 Perl_pad_setsv(pTHX_ PADOFFSET po, SV* sv)
 {
-    dVAR;
-
     PERL_ARGS_ASSERT_PAD_SETSV;
 
     ASSERT_CURPAD_ACTIVE("pad_setsv");
@@ -1918,7 +1915,6 @@ dump the contents of a CV
 STATIC void
 S_cv_dump(pTHX_ const CV *cv, const char *title)
 {
-    dVAR;
     const CV * const outside = CvOUTSIDE(cv);
     PADLIST* const padlist = CvPADLIST(cv);
 

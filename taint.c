@@ -27,8 +27,6 @@ void
 Perl_taint_proper(pTHX_ const char *f, const char *const s)
 {
 #if defined(HAS_SETEUID) && defined(DEBUGGING)
-    dVAR;
-
     PERL_ARGS_ASSERT_TAINT_PROPER;
 
     {

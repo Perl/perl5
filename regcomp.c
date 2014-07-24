@@ -15356,7 +15356,6 @@ STATIC U8
 S_regtail_study(pTHX_ RExC_state_t *pRExC_state, regnode *p,
                       const regnode *val,U32 depth)
 {
-    dVAR;
     regnode *scan;
     U8 exact = PSEUDO;
 #ifdef EXPERIMENTAL_INPLACESCAN
@@ -15519,7 +15518,6 @@ void
 Perl_regdump(pTHX_ const regexp *r)
 {
 #ifdef DEBUGGING
-    dVAR;
     SV * const sv = sv_newmortal();
     SV *dsv= sv_newmortal();
     RXi_GET_DECL(r,ri);
@@ -15618,7 +15616,6 @@ void
 Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_info *reginfo)
 {
 #ifdef DEBUGGING
-    dVAR;
     int k;
 
     /* Should be synchronized with * ANYOF_ #xdefines in regcomp.h */
@@ -16719,7 +16716,6 @@ S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
 	    const regnode *last, const regnode *plast,
 	    SV* sv, I32 indent, U32 depth)
 {
-    dVAR;
     U8 op = PSEUDO;	/* Arbitrary non-END op. */
     const regnode *next;
     const regnode *optstart= NULL;
