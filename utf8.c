@@ -1495,8 +1495,10 @@ S_to_lower_latin1(const U8 c, U8* p, STRLEN *lenp)
 	    *lenp = 1;
 	}
 	else {
-	    *p = UTF8_TWO_BYTE_HI(converted);
-	    *(p+1) = UTF8_TWO_BYTE_LO(converted);
+            /* Result is known to always be < 256, so can use the EIGHT_BIT
+             * macros */
+	    *p = UTF8_EIGHT_BIT_HI(converted);
+	    *(p+1) = UTF8_EIGHT_BIT_LO(converted);
 	    *lenp = 2;
 	}
     }
