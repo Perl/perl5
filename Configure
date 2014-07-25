@@ -2521,7 +2521,7 @@ egrep)
 esac
 case "$less" in
 '')	;;
-*)	if $less -R </dev/null >/dev/null; then
+*)	if $less -R </dev/null >/dev/null 2>&1; then
 	       echo "Substituting less -R for less."
 	       less="$less -R"
 	       _less=$less
