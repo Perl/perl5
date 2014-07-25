@@ -4631,6 +4631,9 @@ EXTCONST char PL_bincompat_options[] =
 #  ifdef PERL_GLOBAL_STRUCT
 			     " PERL_GLOBAL_STRUCT"
 #  endif
+#  ifdef PERL_GLOBAL_STRUCT_PRIVATE
+			     " PERL_GLOBAL_STRUCT_PRIVATE"
+#  endif
 #  ifdef PERL_IMPLICIT_CONTEXT
 			     " PERL_IMPLICIT_CONTEXT"
 #  endif
