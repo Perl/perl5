@@ -22066,11 +22066,13 @@ EOSH
 cat <<EOSH >>Cppsym.know
 $osname
 EOSH
+./tr '-' '_' < Cppsym.know > Cppsym.know.tmp
+$cat Cppsym.know.tmp > Cppsym.know
 ./tr '[a-z]' '[A-Z]' < Cppsym.know > Cppsym.a
 ./tr '[A-Z]' '[a-z]' < Cppsym.know > Cppsym.b
 $cat Cppsym.know > Cppsym.c
 $cat Cppsym.a Cppsym.b Cppsym.c | $tr ' ' $trnl | $sort | $uniq > Cppsym.know
-$rm -f Cppsym.a Cppsym.b Cppsym.c
+$rm -f Cppsym.a Cppsym.b Cppsym.c Cppsym.know.tmp
 cat <<EOSH > Cppsym
 $startsh
 if $test \$# -gt 0; then
