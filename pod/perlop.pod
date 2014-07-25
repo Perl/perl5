@@ -1483,12 +1483,6 @@ the left with zeros to make three digits.  For larger ordinals, either use
 C<\o{}>, or convert to something else, such as to hex and use C<\x{}>
 instead.
 
-Having fewer than 3 digits may lead to a misleading warning message that says
-that what follows is ignored.  For example, C<"\128"> in the ASCII character set
-is equivalent to the two characters C<"\n8">, but the warning C<Illegal octal
-digit '8' ignored> will be thrown.  If C<"\n8"> is what you want, you can
-avoid this warning by padding your octal number with C<0>'s: C<"\0128">.
-
 =item [8]
 
 Several constructs above specify a character by a number.  That number
