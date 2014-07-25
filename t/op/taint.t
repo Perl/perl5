@@ -182,7 +182,9 @@ my $TEST = 'TEST';
 
 	local $ENV{PATH} = $tmp;
 	is(eval { `$echo 1` }, undef);
-	like($@, qr/^Insecure directory in \$ENV\{PATH}/);
+	# Message can be different depending on whether echo
+	# is a builtin or not
+	like($@, qr/^Insecure (?:directory in )?\$ENV\{PATH}/);
     }
 
     SKIP: {
