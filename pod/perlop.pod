@@ -1452,10 +1452,11 @@ L<perlebcdic/OPERATOR DIFFERENCES> for a full discussion of the
 differences between these for ASCII versus EBCDIC platforms.
 
 Use of any other character following the C<"c"> besides those listed above is
-discouraged, and some are deprecated with the intention of removing
-those in a later Perl version.  What happens for any of these
-other characters currently though, is that the value is derived by xor'ing
-with the seventh bit, which is 64.
+discouraged, and as of Perl v5.20, the only characters actually allowed
+are the printable ASCII ones, minus the left brace C<"{">.  What happens
+for any of the allowed other characters is that the value is derived by
+xor'ing with the seventh bit, which is 64, and a warning raised if
+enabled.  Using the non-allowed characters generates a fatal error.
 
 To get platform independent controls, you can use C<\N{...}>.
 
