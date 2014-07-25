@@ -2072,7 +2072,11 @@ Perl_my_setenv(pTHX_ const char *nam, const char *val)
         my_setenv_format(environ[i], nam, nlen, val, vlen);
     } else {
 # endif
-#   if defined(__CYGWIN__)|| defined(__SYMBIAN32__) || defined(__riscos__) || defined(__sun)
+    /* This next branch should only be called #if defined(HAS_SETENV), but
+       Configure doesn't test for that yet.  For Solaris, setenv() and unsetenv()
+       were introduced in Solaris 9, so testing for HAS UNSETENV is sufficient.
+    */
+#   if defined(__CYGWIN__)|| defined(__SYMBIAN32__) || defined(__riscos__) || (defined(__sun) && defined(HAS_UNSETENV))
 #       if defined(HAS_UNSETENV)
         if (val == NULL) {
             (void)unsetenv(nam);
