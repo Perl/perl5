@@ -1434,10 +1434,12 @@ table:
    \c[      chr(27)
    \c]      chr(29)
    \c^      chr(30)
-   \c?      chr(127)
+   \c_      chr(31)
+   \c?      chr(127) # (on ASCII platforms)
 
 In other words, it's the character whose code point has had 64 xor'd with
-its uppercase.  C<\c?> is DELETE because C<ord("?") ^ 64> is 127, and
+its uppercase.  C<\c?> is DELETE on ASCII platforms because
+S<C<ord("?") ^ 64>> is 127, and
 C<\c@> is NULL because the ord of "@" is 64, so xor'ing 64 itself produces 0.
 
 Also, C<\c\I<X>> yields C< chr(28) . "I<X>"> for any I<X>, but cannot come at the
@@ -1446,10 +1448,10 @@ quote.
 
 On ASCII platforms, the resulting characters from the list above are the
 complete set of ASCII controls.  This isn't the case on EBCDIC platforms; see
-L<perlebcdic/OPERATOR DIFFERENCES> for the complete list of what these
-sequences mean on both ASCII and EBCDIC platforms.
+L<perlebcdic/OPERATOR DIFFERENCES> for a full discussion of the
+differences between these for ASCII versus EBCDIC platforms.
 
-Use of any other character following the "c" besides those listed above is
+Use of any other character following the C<"c"> besides those listed above is
 discouraged, and some are deprecated with the intention of removing
 those in a later Perl version.  What happens for any of these
 other characters currently though, is that the value is derived by xor'ing
