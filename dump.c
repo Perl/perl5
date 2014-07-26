@@ -1640,7 +1640,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
     }
     append_flags(d, flags, first_sv_flags_names);
     if (flags & SVf_ROK)  {	
-    				_sv_catpv(d, "ROK,");
+        _sv_catpv(d, "ROK,");
 	if (SvWEAKREF(sv))	_sv_catpv(d, "WEAKREF,");
     }
     append_flags(d, flags, second_sv_flags_names);
