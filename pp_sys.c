@@ -3671,13 +3671,17 @@ PP(pp_readlink)
     dTARGET;
     const char *tmps;
     char buf[MAXPATHLEN];
-    int len;
+    SSize_t len;
 
     TAINT;
     tmps = POPpconstx;
+    /* NOTE: if the length returned by readlink() is sizeof(buf) - 1,
+     * it is impossible to know whether the result was truncated. */
     len = readlink(tmps, buf, sizeof(buf) - 1);
     if (len < 0)
 	RETPUSHUNDEF;
+    if (len != -1)
+        buf[len] = '\0';
     PUSHp(buf, len);
     RETURN;
 #else

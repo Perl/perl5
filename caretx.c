@@ -99,7 +99,13 @@ Perl_set_caret_X(pTHX) {
         }
 #  elif defined(HAS_PROCSELFEXE)
         char buf[MAXPATHLEN];
-        int len = readlink(PROCSELFEXE_PATH, buf, sizeof(buf) - 1);
+        Ssize_t len = readlink(PROCSELFEXE_PATH, buf, sizeof(buf) - 1);
+        /* NOTE: if the length returned by readlink() is sizeof(buf) - 1,
+         * it is impossible to know whether the result was truncated. */
+
+        if (len != -1) {
+            buf[len] = '\0';
+        }
 
         /* On Playstation2 Linux V1.0 (kernel 2.2.1) readlink(/proc/self/exe)
            includes a spurious NUL which will cause $^X to fail in system
