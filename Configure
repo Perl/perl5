@@ -22033,16 +22033,14 @@ XPG3 XPG3_EXTENDED XPG4 XPG4_EXTENDED
 z8000
 EOSH
 # Maybe put other stuff here too.
-cat <<EOSH >>Cppsym.know
+./tr '-' '_' <<EOSH >>Cppsym.know
 $osname
 EOSH
-./tr '-' '_' < Cppsym.know > Cppsym.know.tmp
-$cat Cppsym.know.tmp > Cppsym.know
 ./tr '[a-z]' '[A-Z]' < Cppsym.know > Cppsym.a
 ./tr '[A-Z]' '[a-z]' < Cppsym.know > Cppsym.b
 $cat Cppsym.know > Cppsym.c
 $cat Cppsym.a Cppsym.b Cppsym.c | $tr ' ' $trnl | $sort | $uniq > Cppsym.know
-$rm -f Cppsym.a Cppsym.b Cppsym.c Cppsym.know.tmp
+$rm -f Cppsym.a Cppsym.b Cppsym.c
 cat <<EOSH > Cppsym
 $startsh
 if $test \$# -gt 0; then
