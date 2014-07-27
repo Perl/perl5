@@ -2141,6 +2141,78 @@ S_modkids(pTHX_ OP *o, I32 type)
     return o;
 }
 
+
+/* for a helem/hslice/kvslice, if its a fixed hash, croak on invalid
+ * const fields. Also, convert CONST keys to HEK-in-SVs.
+ * rop is the op that retrieves the hash;
+ * key_op is the first key
+ */
+
+void
+S_check_hash_fields(pTHX_ UNOP *rop, SVOP *key_op)
+{
+    PADNAME *lexname;
+    GV **fields;
+    bool check_fields;
+
+    /* find the padsv corresponding to $lex->{} or @{$lex}{} */
+    if (rop) {
+        if (rop->op_first->op_type == OP_PADSV)
+            /* @$hash{qw(keys here)} */
+            rop = (UNOP*)rop->op_first;
+        else {
+            /* @{$hash}{qw(keys here)} */
+            if (rop->op_first->op_type == OP_SCOPE
+                && cLISTOPx(rop->op_first)->op_last->op_type == OP_PADSV)
+                {
+                    rop = (UNOP*)cLISTOPx(rop->op_first)->op_last;
+                }
+            else
+                rop = NULL;
+        }
+    }
+
+    lexname = NULL; /* just to silence compiler warnings */
+    fields  = NULL; /* just to silence compiler warnings */
+
+    check_fields =
+            rop
+         && (lexname = padnamelist_fetch(PL_comppad_name, rop->op_targ),
+             SvPAD_TYPED(lexname))
+         && (fields = (GV**)hv_fetchs(PadnameTYPE(lexname), "FIELDS", FALSE))
+         && isGV(*fields) && GvHV(*fields);
+
+    for (; key_op; key_op = (SVOP*)OP_SIBLING(key_op)) {
+        SV **svp, *sv;
+        if (key_op->op_type != OP_CONST)
+            continue;
+        svp = cSVOPx_svp(key_op);
+
+        /* Make the CONST have a shared SV */
+        if (   !SvIsCOW_shared_hash(sv = *svp)
+            && SvTYPE(sv) < SVt_PVMG
+            && SvOK(sv)
+            && !SvROK(sv))
+        {
+            SSize_t keylen;
+            const char * const key = SvPV_const(sv, *(STRLEN*)&keylen);
+            SV *nsv = newSVpvn_share(key, SvUTF8(sv) ? -keylen : keylen, 0);
+            SvREFCNT_dec_NN(sv);
+            *svp = nsv;
+        }
+
+        if (   check_fields
+            && !hv_fetch_ent(GvHV(*fields), *svp, FALSE, 0))
+        {
+            Perl_croak(aTHX_ "No such class field \"%"SVf"\" "
+                        "in variable %"PNf" of type %"HEKf,
+                        SVfARG(*svp), PNfARG(lexname),
+                        HEKfARG(HvNAME_HEK(PadnameTYPE(lexname))));
+        }
+    }
+}
+
+
 /*
 =for apidoc finalize_optree
 
@@ -2253,11 +2325,8 @@ S_finalize_op(pTHX_ OP* o)
 
     case OP_HELEM: {
 	UNOP *rop;
-	PADNAME *lexname;
-	GV **fields;
 	SVOP *key_op;
 	OP *kid;
-	bool check_fields;
 
 	if ((key_op = cSVOPx(((BINOP*)o)->op_last))->op_type != OP_CONST)
 	    break;
@@ -2286,58 +2355,9 @@ S_finalize_op(pTHX_ OP* o)
 	rop = (UNOP*)((LISTOP*)o)->op_last;
 
       check_keys:	
-	if (o->op_private & OPpLVAL_INTRO || rop->op_type != OP_RV2HV)
-	    rop = NULL;
-	else if (rop->op_first->op_type == OP_PADSV)
-	    /* @$hash{qw(keys here)} */
-	    rop = (UNOP*)rop->op_first;
-	else {
-	    /* @{$hash}{qw(keys here)} */
-	    if (rop->op_first->op_type == OP_SCOPE
-		&& cLISTOPx(rop->op_first)->op_last->op_type == OP_PADSV)
-		{
-		    rop = (UNOP*)cLISTOPx(rop->op_first)->op_last;
-		}
-	    else
-		rop = NULL;
-	}
-
-        lexname = NULL; /* just to silence compiler warnings */
-        fields  = NULL; /* just to silence compiler warnings */
-
-	check_fields =
-	    rop
-	 && (lexname = padnamelist_fetch(PL_comppad_name, rop->op_targ),
-	     SvPAD_TYPED(lexname))
-	 && (fields =
-		(GV**)hv_fetchs(PadnameTYPE(lexname), "FIELDS", FALSE))
-	 && isGV(*fields) && GvHV(*fields);
-	for (; key_op;
-	     key_op = (SVOP*)OP_SIBLING(key_op)) {
-	    SV **svp, *sv;
-	    if (key_op->op_type != OP_CONST)
-		continue;
-	    svp = cSVOPx_svp(key_op);
-
-	    /* Make the CONST have a shared SV */
-	    if ((!SvIsCOW_shared_hash(sv = *svp))
-	     && SvTYPE(sv) < SVt_PVMG && SvOK(sv) && !SvROK(sv)) {
-		SSize_t keylen;
-		const char * const key = SvPV_const(sv, *(STRLEN*)&keylen);
-		SV *nsv = newSVpvn_share(key,
-					 SvUTF8(sv) ? -keylen : keylen,	0);
-		SvREFCNT_dec_NN(sv);
-		*svp = nsv;
-	    }
-
-	    if (check_fields
-	     && !hv_fetch_ent(GvHV(*fields), *svp, FALSE, 0)) {
-		Perl_croak(aTHX_ "No such class field \"%"SVf"\" " 
-			   "in variable %"PNf" of type %"HEKf, 
-		      SVfARG(*svp), PNfARG(lexname),
-                      HEKfARG(HvNAME_HEK(PadnameTYPE(lexname))));
-	    }
-	}
+        if (o->op_private & OPpLVAL_INTRO || rop->op_type != OP_RV2HV)
+            rop = NULL;
+        S_check_hash_fields(aTHX_ rop, key_op);
 	break;
     }
     case OP_ASLICE:
