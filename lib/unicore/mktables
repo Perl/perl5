@@ -972,7 +972,7 @@ my %why_obsolete;    # Documentation only
         'Simple_Titlecase_Mapping' => "$simple.  Can access this through Unicode::UCD::charinfo or Unicode::UCD::prop_invmap()",
         'Simple_Uppercase_Mapping' => "$simple.  Can access this through Unicode::UCD::charinfo or Unicode::UCD::prop_invmap()",
 
-        FC_NFKC_Closure => 'Supplanted in usage by NFKC_Casefold; otherwise not useful',
+        FC_NFKC_Closure => 'Deprecated by Unicode, and supplanted in usage by NFKC_Casefold; otherwise not useful',
     );
 
     foreach my $property (
