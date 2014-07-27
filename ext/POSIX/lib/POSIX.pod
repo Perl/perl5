@@ -146,7 +146,7 @@ coordinate and the I<x> coordinate.  See also L<Math::Trig>.
 
 =item C<atexit>
 
-C<atexit()> is C-specific: use C<END {}> instead, see L<perlsub>.
+C<atexit()> is C-specific: use C<END {}> instead, see L<perlmod>.
 
 =item C<atof>
 
