@@ -86,7 +86,7 @@ sub output_invlist ($$;$) {
     print $out_fh "};\n";
 }
 
-sub mk_invlist_from_cp_list {
+sub mk_invlist_from_sorted_cp_list {
 
     # Returns an inversion list constructed from the sorted input array of
     # code points
@@ -132,11 +132,11 @@ for my $i (0 .. @$folds_ref - 1) {
 
 sub _Perl_Non_Final_Folds {
     @is_non_final_fold = sort { $a <=> $b } @is_non_final_fold;
-    return mk_invlist_from_cp_list(\@is_non_final_fold);
+    return mk_invlist_from_sorted_cp_list(\@is_non_final_fold);
 }
 
 sub UpperLatin1 {
-    return mk_invlist_from_cp_list([ 128 .. 255 ]);
+    return mk_invlist_from_sorted_cp_list([ 128 .. 255 ]);
 }
 
 output_invlist("Latin1", [ 0, 256 ]);
@@ -270,7 +270,7 @@ for my $charset (get_supported_code_pages()) {
             # list format.  Then simply prepend it to the list of the higher
             # code points.
             @latin1_list = sort { $a <=> $b } @latin1_list;
-            @latin1_list = mk_invlist_from_cp_list(\@latin1_list);
+            @latin1_list = mk_invlist_from_sorted_cp_list(\@latin1_list);
             unshift @invlist, @latin1_list;
         }
 
