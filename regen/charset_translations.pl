@@ -244,9 +244,9 @@ sub _UTF_START_MARK($) {
 
 sub cp_2_utfbytes($$) {
     # Returns a string consisting of the UTF-EBCDIC for the code page given by
-    # the first parameter and the code point within it given by the 2nd, using
-    # the UTF-MOD algorithm published in TR16.  (If the "code page" is ASCII,
-    # straight UTF-8 is returned.)
+    # the 2nd parameter, of the Unicode code point given by the first
+    # parameter, using the UTF-MOD algorithm published in TR16.  (If the "code
+    # page" is ASCII, straight UTF-8 is returned.)
 
     my ($ucp, $charset) = @_;
 
