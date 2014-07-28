@@ -79,6 +79,12 @@ Illegal POD syntax in the documentation has been corrected.
 
 =item *
 
+L<File::Copy> has been upgraded from version 2.29 to 2.30.
+
+The documentation now notes that C<copy> will not overwrite read-only files.
+
+=item *
+
 L<Module::CoreList> has been upgraded from version 3.11 to 5.020001.
 
 The list of Perl versions covered has been updated.
@@ -90,6 +96,12 @@ The PathTools module collection has been upgraded from version 3.47 to 3.48.
 Fallbacks are now in place when cross-compiling for Android and
 C<$Config::Config{sh}> is not yet defined.
 L<[perl #121963]|https://rt.perl.org/Ticket/Display.html?id=121963>
+
+=item *
+
+L<PerlIO::via> has been upgraded from version 0.14 to 0.15.
+
+A minor portability improvement has been made to the XS implementation.
 
 =item *
 
