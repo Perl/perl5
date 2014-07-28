@@ -336,9 +336,7 @@
 #  define ALLOC_THREAD_KEY \
     STMT_START {						\
 	if (pthread_key_create(&PL_thr_key, 0)) {		\
-            int rc;                                             \
-            rc = write(2, STR_WITH_LEN("panic: pthread_key_create failed\n")); \
-            PERL_UNUSED_VAR(rc);                                \
+            PERL_UNUSED_RESULT(write(2, STR_WITH_LEN("panic: pthread_key_create failed\n"))); \
 	    exit(1);						\
 	}							\
     } STMT_END

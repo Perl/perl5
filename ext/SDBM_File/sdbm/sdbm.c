@@ -379,8 +379,9 @@ makroom(DBM *db, long int hash, int need)
  */
 #ifdef BADMESS
 	rc = write(2, "sdbm: cannot insert after SPLTMAX attempts.\n", 44);
-        (void)rc;
-
+	/* PERL_UNUSED_VAR() or PERL_UNUSED_RESULT() would be
+	 * useful here but that would mean pulling in perl.h */
+	(void)rc;
 #endif
 	return 0;
 
