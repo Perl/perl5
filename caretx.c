@@ -99,7 +99,7 @@ Perl_set_caret_X(pTHX) {
         }
 #  elif defined(HAS_PROCSELFEXE)
         char buf[MAXPATHLEN];
-        Ssize_t len = readlink(PROCSELFEXE_PATH, buf, sizeof(buf) - 1);
+        SSize_t len = readlink(PROCSELFEXE_PATH, buf, sizeof(buf) - 1);
         /* NOTE: if the length returned by readlink() is sizeof(buf) - 1,
          * it is impossible to know whether the result was truncated. */
 
