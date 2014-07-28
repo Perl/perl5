@@ -11164,10 +11164,10 @@ static I32
 S_backref_value(char *p)
 {
     const char* endptr;
-    Size_t val = grok_atou(p, &endptr);
-    if (endptr == p || endptr == NULL || val > 999999999)
+    UV val = grok_atou(p, &endptr);
+    if (endptr == p || endptr == NULL || val > I32_MAX)
         return I32_MAX;
-    return val;
+    return (I32)val;
 }
 
 
