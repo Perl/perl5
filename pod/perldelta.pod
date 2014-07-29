@@ -197,6 +197,17 @@ L<[perl #116925]|https://rt.perl.org/Ticket/Display.html?id=116925>
 
 =back
 
+=head3 L<perlre>
+
+=over 4
+
+=item *
+
+The C</x> modifier has been clarified to note that comments cannot be continued
+onto the next line by escaping them.
+
+=back
+
 =head3 L<perlsyn>
 
 =over 4
