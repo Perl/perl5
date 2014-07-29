@@ -1433,6 +1433,7 @@ test_prep test-prep: test_prep_pre \$(MINIPERL_EXE) \$(unidatafiles) \$(PERL_EXE
 	$to dist/*/t
 	$to ext/*/t
 	$to cpan/Archive-Tar/*
+	$to cpan/Module-Metadata/*
 	$to cpan/Term-Cap/test.pl
 	$to cpan/Pod-Usage/*
 	$to cpan/Pod-Parser/*
