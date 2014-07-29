@@ -209,8 +209,7 @@ C<toUPPER_uni>, as described in L<perlapi/Character case changing>.)
 Notice also the C<grok_bin>, C<grok_hex>, and C<grok_oct> functions in
 F<numeric.c> for converting strings representing numbers in the respective
 bases into C<NV>s.  Note that grok_atou() doesn't handle negative inputs,
-or leading whitespace (being purposefully strict).  It also doesn't always
-handle full IV/UV-range, being limited to Size_t.
+or leading whitespace (being purposefully strict).
 
 Note that strtol() and strtoul() may be disguised as Strtol(), Strtoul(),
 Atol(), Atoul().  Avoid those, too.
