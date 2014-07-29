@@ -468,10 +468,11 @@ for my $symbol (sort keys %expected) {
 }
 
 # There are certain symbols we expect NOT to see.
-
+#
 # gets is horribly unsafe.
 #
-# fgets should not be used (Perl has its own API), even without perlio.
+# fgets should not be used (Perl has its own API, sv_gets),
+# even without perlio.
 #
 # tmpfile is unsafe.
 #
