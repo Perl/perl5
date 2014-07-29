@@ -536,16 +536,10 @@ S_isFOO_utf8_lc(pTHX_ const U8 classnum, const U8* character)
         case _CC_ENUM_BLANK:     return is_HORIZWS_high(character);
         case _CC_ENUM_XDIGIT:    return is_XDIGIT_high(character);
         case _CC_ENUM_VERTSPACE: return is_VERTWS_high(character);
-        default:                 return 0;  /* Things like CNTRL are always
-                                               below 256 */
+        default:                 break;
     }
 
-    /* NOTREACHED */
-    /* Some compilers/linters detect that this spot cannot be reached
-     * (because all code paths above already did return), while some
-     * others throw a fit unless we have a return at the end. */
-    assert(0);
-    return FALSE;
+    return FALSE; /* Things like CNTRL are always below 256 */
 }
 
 /*
