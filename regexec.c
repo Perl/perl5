@@ -3636,8 +3636,8 @@ S_setup_EXACTISH_ST_c1_c2(pTHX_ const regnode * const text_node, int *c1p,
 
     const bool utf8_target = reginfo->is_utf8_target;
 
-    UV c1 = CHRTEST_NOT_A_CP_1;
-    UV c2 = CHRTEST_NOT_A_CP_2;
+    UV c1 = (UV)CHRTEST_NOT_A_CP_1;
+    UV c2 = (UV)CHRTEST_NOT_A_CP_2;
     bool use_chrtest_void = FALSE;
     const bool is_utf8_pat = reginfo->is_utf8_pat;
 
