@@ -197,6 +197,17 @@ L<[perl #116925]|https://rt.perl.org/Ticket/Display.html?id=116925>
 
 =back
 
+=head3 L<perlpolicy>
+
+=over 4
+
+=item *
+
+We now have a code of conduct for the I<< p5p >> mailing list, as documented
+in L<< perlpolicy/STANDARDS OF CONDUCT >>.
+
+=back
+
 =head3 L<perlre>
 
 =over 4
