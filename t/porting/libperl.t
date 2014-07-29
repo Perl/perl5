@@ -483,8 +483,10 @@ for my $symbol (sort keys %expected) {
 # the native sprintf is still used in some platforms, see below.)
 #
 # atoi has unsafe and undefined failure modes, and is affected by locale.
+# Its cousins include atol and atoll.
 #
 # strtol and strtoul are affected by locale.
+# Cousins include strtoq.
 #
 # system should not be used, use pp_system or my_popen.
 #
@@ -503,8 +505,9 @@ for my $str (qw(strcat strcpy strncat strncpy)) {
 }
 
 $unexpected{atoi} = undef; # No Configure symbol for atoi.
+$unexpected{atol} = undef; # No Configure symbol for atol.
 
-for my $str (qw(strtol strtoul)) {
+for my $str (qw(atoll strtol strtoul strtoq)) {
     $unexpected{$str} = "d_$str";
 }
 
