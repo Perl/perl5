@@ -486,8 +486,14 @@ for my $symbol (sort keys %expected) {
 #
 # strtol and strtoul are affected by locale.
 #
+# system should not be used, use pp_system or my_popen.
+#
 
 my %unexpected;
+
+for my $str (qw(system)) {
+    $unexpected{$str} = "d_$str";
+}
 
 for my $stdio (qw(gets fgets tmpfile sprintf vsprintf)) {
     $unexpected{$stdio} = undef; # No Configure symbol for these.

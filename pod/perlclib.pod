@@ -224,7 +224,7 @@ everywhere by now.
                                PL_srand_called = TRUE; }
 
  exit(n)                     my_exit(n)
- system(s)                   Don't. Look at pp_system or use my_popen
+ system(s)                   Don't. Look at pp_system or use my_popen.
 
  getenv(s)                   PerlEnv_getenv(s)
  setenv(s, val)              my_putenv(s, val)
