@@ -18,7 +18,7 @@ my $r;
 my $tmpfile = tempfile();
 my $scriptfile = tempfile();
 
-my $b = pack("C*", unpack("U0C*", pack("U",256)));
+my $b = chr 256; utf8::encode $b;
 
 $r = runperl( switches => [ '-CO', '-w' ],
 	      prog     => 'print chr(256)',
