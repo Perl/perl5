@@ -30,7 +30,7 @@
         || defined(PERL_HASH_FUNC_AESHASH) \
         || defined(PERL_HASH_FUNC_CRC32) \
     )
-#define PERL_HASH_FUNC_AESHASH
+#define PERL_HASH_FUNC_ONE_AT_A_TIME_OLD
 #endif
 
 #if defined(PERL_HASH_FUNC_SIPHASH_1_2)

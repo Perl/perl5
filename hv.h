@@ -11,7 +11,7 @@
 /* These control hash traversal randomization and the environment variable PERL_PERTURB_KEYS.
  * Currently disabling this functionality will break a few tests, but should otherwise work fine.
  * See perlrun for more details. */
-
+#define PERL_PERTURB_KEYS_DISABLED
 #if defined(PERL_PERTURB_KEYS_DISABLED)
 #   define PL_HASH_RAND_BITS_ENABLED        0
 #   define PERL_HASH_ITER_BUCKET(iter)      ((iter)->xhv_riter)
