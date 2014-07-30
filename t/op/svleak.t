@@ -167,6 +167,7 @@ leak_expr(5, 0, q{"YYYYYa" =~ /.+?(a(.+?)|b)/ }, "trie leak");
     # operator at run time, not compile time, so the values will already be
     # on the stack before grep starts.
     my $_3 = 3;
+    qr/123/;
 
     grep qr/1/ && ($count[$_] = sv_count()) && 99,  0..$_3;
     is(@count[3] - @count[0], 0, "void   grep expr:  no new tmps per iter");

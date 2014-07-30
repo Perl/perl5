@@ -2307,6 +2307,7 @@ typedef MEM_SIZE STRLEN;
 typedef struct op OP;
 typedef struct cop COP;
 typedef struct unop UNOP;
+typedef struct methop METHOP;
 typedef struct binop BINOP;
 typedef struct listop LISTOP;
 typedef struct logop LOGOP;
@@ -2370,6 +2371,8 @@ typedef struct padlist PADLIST;
 typedef AV PAD;
 typedef AV PADNAMELIST;
 typedef SV PADNAME;
+
+typedef struct svmap_entry SVMAP_ENT;
 
 /* enable PERL_NEW_COPY_ON_WRITE by default */
 #if !defined(PERL_OLD_COPY_ON_WRITE) && !defined(PERL_NEW_COPY_ON_WRITE) && !defined(PERL_NO_COW)
@@ -3348,6 +3351,8 @@ typedef        struct crypt_data {     /* straight from /usr/include/crypt.h */
 #ifndef PERL_BITFIELD32
 #  define PERL_BITFIELD32 unsigned
 #endif
+
+#include "hashmap.h"
 
 #include "sv.h"
 #include "regexp.h"
@@ -5922,6 +5927,8 @@ extern void moncontrol(int);
 /* used by pv_display in dump.c*/
 #define PERL_PV_PRETTY_DUMP  PERL_PV_PRETTY_ELLIPSES|PERL_PV_PRETTY_QUOTE
 #define PERL_PV_PRETTY_REGPROP PERL_PV_PRETTY_ELLIPSES|PERL_PV_PRETTY_LTGT|PERL_PV_ESCAPE_RE|PERL_PV_ESCAPE_NONASCII
+
+#define PERLEXT_PANDA 1.0
 
 /*
 

@@ -3886,6 +3886,7 @@ haiku/Haiku/Haiku.xs		Haiku extension external subroutines
 haiku/haikuish.h		Header for the Haiku port
 haiku/Haiku/Makefile.PL		Haiku extension makefile writer
 handy.h				Handy definitions
+hashmap.h			Hashmap implementation
 hints/aix_3.sh			Hints for named architecture
 hints/aix_4.sh			Hints for named architecture
 hints/aix.sh			Hints for named architecture

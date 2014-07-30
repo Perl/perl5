@@ -48,7 +48,7 @@ package main;
 
 $| = 1;
 BEGIN { require './test.pl' }
-plan tests => 5194;
+plan tests => 5193;
 
 use Scalar::Util qw(tainted);
 
@@ -2364,14 +2364,11 @@ is eval {"$a"}, overload::StrVal($a),
 {
  package mane;
  use overload q\""\ => "bear::strength";
- use overload bool  => "bear'bouillon";
 }
 @bear::ISA = 'food';
 sub food::strength { 'twine' }
-sub food::bouillon { 0 }
 $a = bless[], mane::;
 is eval { "$a" }, 'twine', ':: in method name' or diag $@;
-is eval { !$a  },   1,      "' in method name" or diag $@;
 
 # [perl #113050] Half of CPAN assumes fallback is under "()"
 {

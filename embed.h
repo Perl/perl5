@@ -95,6 +95,7 @@
 #define croak_no_modify		Perl_croak_no_modify
 #define croak_sv(a)		Perl_croak_sv(aTHX_ a)
 #define croak_xs_usage		Perl_croak_xs_usage
+#define curmethod_stash(a,b)	Perl_curmethod_stash(aTHX_ a,b)
 #define custom_op_desc(a)	Perl_custom_op_desc(aTHX_ a)
 #define custom_op_name(a)	Perl_custom_op_name(aTHX_ a)
 #define cv_clone(a)		Perl_cv_clone(aTHX_ a)
@@ -188,6 +189,7 @@
 #define gv_efullname4(a,b,c,d)	Perl_gv_efullname4(aTHX_ a,b,c,d)
 #define gv_fetchfile(a)		Perl_gv_fetchfile(aTHX_ a)
 #define gv_fetchfile_flags(a,b,c)	Perl_gv_fetchfile_flags(aTHX_ a,b,c)
+#define gv_fetchmeth_ent(a,b,c,d)	Perl_gv_fetchmeth_ent(aTHX_ a,b,c,d)
 #define gv_fetchmeth_pv(a,b,c,d)	Perl_gv_fetchmeth_pv(aTHX_ a,b,c,d)
 #define gv_fetchmeth_pv_autoload(a,b,c,d)	Perl_gv_fetchmeth_pv_autoload(aTHX_ a,b,c,d)
 #define gv_fetchmeth_pvn(a,b,c,d,e)	Perl_gv_fetchmeth_pvn(aTHX_ a,b,c,d,e)
@@ -195,6 +197,7 @@
 #define gv_fetchmeth_sv(a,b,c,d)	Perl_gv_fetchmeth_sv(aTHX_ a,b,c,d)
 #define gv_fetchmeth_sv_autoload(a,b,c,d)	Perl_gv_fetchmeth_sv_autoload(aTHX_ a,b,c,d)
 #define gv_fetchmethod_autoload(a,b,c)	Perl_gv_fetchmethod_autoload(aTHX_ a,b,c)
+#define gv_fetchmethod_ent(a,b,c)	Perl_gv_fetchmethod_ent(aTHX_ a,b,c)
 #define gv_fetchmethod_pv_flags(a,b,c)	Perl_gv_fetchmethod_pv_flags(aTHX_ a,b,c)
 #define gv_fetchmethod_pvn_flags(a,b,c,d)	Perl_gv_fetchmethod_pvn_flags(aTHX_ a,b,c,d)
 #define gv_fetchmethod_sv_flags(a,b,c)	Perl_gv_fetchmethod_sv_flags(aTHX_ a,b,c)
@@ -208,9 +211,16 @@
 #define gv_init_pvn(a,b,c,d,e)	Perl_gv_init_pvn(aTHX_ a,b,c,d,e)
 #define gv_init_sv(a,b,c,d)	Perl_gv_init_sv(aTHX_ a,b,c,d)
 #define gv_name_set(a,b,c,d)	Perl_gv_name_set(aTHX_ a,b,c,d)
+#define gv_stash_cache_destroy()	Perl_gv_stash_cache_destroy(aTHX)
+#define gv_stash_cache_init()	Perl_gv_stash_cache_init(aTHX)
+#define gv_stash_cache_invalidate()	Perl_gv_stash_cache_invalidate(aTHX)
+#define gv_stashent(a,b)	Perl_gv_stashent(aTHX_ a,b)
+#define gv_stashof_pvn(a,b,c,d,e,f,g)	Perl_gv_stashof_pvn(aTHX_ a,b,c,d,e,f,g)
 #define gv_stashpv(a,b)		Perl_gv_stashpv(aTHX_ a,b)
 #define gv_stashpvn(a,b,c)	Perl_gv_stashpvn(aTHX_ a,b,c)
+#define gv_stashpvn_cache_invalidate(a,b,c)	Perl_gv_stashpvn_cache_invalidate(aTHX_ a,b,c)
 #define gv_stashsv(a,b)		Perl_gv_stashsv(aTHX_ a,b)
+#define gv_stashsv_cache_invalidate(a)	Perl_gv_stashsv_cache_invalidate(aTHX_ a)
 #define hv_clear(a)		Perl_hv_clear(aTHX_ a)
 #define hv_clear_placeholders(a)	Perl_hv_clear_placeholders(aTHX_ a)
 #define hv_common(a,b,c,d,e,f,g,h)	Perl_hv_common(aTHX_ a,b,c,d,e,f,g,h)
@@ -317,6 +327,7 @@
 #define mess			Perl_mess
 #endif
 #define mess_sv(a,b)		Perl_mess_sv(aTHX_ a,b)
+#define method_stash(a,b)	Perl_method_stash(aTHX_ a,b)
 #define mg_clear(a)		Perl_mg_clear(aTHX_ a)
 #define mg_copy(a,b,c,d)	Perl_mg_copy(aTHX_ a,b,c,d)
 #define mg_find			Perl_mg_find
@@ -331,6 +342,7 @@
 #define mini_mktime		Perl_mini_mktime
 #define moreswitches(a)		Perl_moreswitches(aTHX_ a)
 #define mro_get_linear_isa(a)	Perl_mro_get_linear_isa(aTHX_ a)
+#define mro_global_method_cache_clear()	Perl_mro_global_method_cache_clear(aTHX)
 #define mro_method_changed_in(a)	Perl_mro_method_changed_in(aTHX_ a)
 #define my_atof(a)		Perl_my_atof(aTHX_ a)
 #define my_atof2(a,b)		Perl_my_atof2(aTHX_ a,b)
@@ -367,6 +379,8 @@
 #define newLOGOP(a,b,c,d)	Perl_newLOGOP(aTHX_ a,b,c,d)
 #define newLOOPEX(a,b)		Perl_newLOOPEX(aTHX_ a,b)
 #define newLOOPOP(a,b,c,d)	Perl_newLOOPOP(aTHX_ a,b,c,d)
+#define newMETHOP(a,b,c)	Perl_newMETHOP(aTHX_ a,b,c)
+#define newMETHOPnamed(a,b,c)	Perl_newMETHOPnamed(aTHX_ a,b,c)
 #define newMYSUB(a,b,c,d,e)	Perl_newMYSUB(aTHX_ a,b,c,d,e)
 #define newNULLLIST()		Perl_newNULLLIST(aTHX)
 #define newOP(a,b)		Perl_newOP(aTHX_ a,b)
@@ -1585,7 +1599,7 @@
 #  endif
 #  if defined(PERL_IN_PP_HOT_C)
 #define do_oddball(a,b)		S_do_oddball(aTHX_ a,b)
-#define method_common(a,b)	S_method_common(aTHX_ a,b)
+#define opmethod_stash(a,b)	S_opmethod_stash(aTHX_ a,b)
 #  endif
 #  if defined(PERL_IN_PP_PACK_C)
 #define bytes_to_uni		S_bytes_to_uni

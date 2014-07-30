@@ -192,6 +192,7 @@
 #define PL_maxsysfd		(vTHX->Imaxsysfd)
 #define PL_memory_debug_header	(vTHX->Imemory_debug_header)
 #define PL_mess_sv		(vTHX->Imess_sv)
+#define PL_methstash		(vTHX->Imethstash)
 #define PL_min_intro_pending	(vTHX->Imin_intro_pending)
 #define PL_minus_E		(vTHX->Iminus_E)
 #define PL_minus_F		(vTHX->Iminus_F)

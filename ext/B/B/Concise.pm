@@ -14,7 +14,7 @@ use warnings; # uses #3 and #4, since warnings uses Carp
 
 use Exporter (); # use #5
 
-our $VERSION   = "0.992";
+our $VERSION   = "0.993";
 our @ISA       = qw(Exporter);
 our @EXPORT_OK = qw( set_style set_style_standard add_callback
 		     concise_subref concise_cv concise_main
@@ -659,6 +659,7 @@ $priv{$_}{128} = "+1" for qw(caller wantarray runcv);
 @{$priv{coreargs}}{1,2,64,128} = qw(DREF1 DREF2 $MOD MARK);
 $priv{$_}{128} = "UTF" for qw(last redo next goto dump);
 $priv{split}{128} = "IMPLIM";
+$priv{method_redir}{1} = "SUPER";
 
 our %hints; # used to display each COP's op_hints values
 
@@ -892,7 +893,7 @@ sub concise_op {
     elsif ($h{class} eq "SVOP" or $h{class} eq "PADOP") {
 	unless ($h{name} eq 'aelemfast' and $op->flags & OPf_SPECIAL) {
 	    my $idx = ($h{class} eq "SVOP") ? $op->targ : $op->padix;
-	    my $preferpv = $h{name} eq "method_named";
+	    my $preferpv = ($h{name} =~ /^method_/) ? 1 : 0;
 	    if ($h{class} eq "PADOP" or !${$op->sv}) {
 		my $sv = (($curcv->PADLIST->ARRAY)[1]->ARRAY)[$idx];
 		$h{arg} = "[" . concise_sv($sv, \%h, $preferpv) . "]";

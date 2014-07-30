@@ -76,13 +76,15 @@ struct mro_meta {
        is NULL, this owns the SV reference, else it is just a pointer to a
        value stored in and owned by mro_linear_all.  */
     SV      *mro_linear_current;
-    HV      *mro_nextmethod; /* next::method caching */
-    U32     cache_gen;       /* Bumping this invalidates our method cache */
-    U32     pkg_gen;         /* Bumps when local methods/@ISA change */
+    SVMAP   *mro_method;      /* fetchmeth_pvn method caching */
+    SVMAP   *mro_supermethod; /* fetchmeth_pvn + SUPER flag method caching */
+    HV      *mro_nextmethod;  /* next::method caching */
+    U32     cache_gen;        /* Bumping this invalidates our method cache */
+    U32     pkg_gen;          /* Bumps when local methods/@ISA change */
     const struct mro_alg *mro_which; /* which mro alg is in use? */
-    HV      *isa;            /* Everything this class @ISA */
-    HV      *super;          /* SUPER method cache */
-    U32     destroy_gen;     /* Generation number of DESTROY cache */
+    HV      *isa;             /* Everything this class @ISA */
+    U32     destroy_gen;      /* Generation number of DESTROY cache */
+
 };
 
 #define MRO_GET_PRIVATE_DATA(smeta, which)		   \

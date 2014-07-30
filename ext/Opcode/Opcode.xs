@@ -312,13 +312,16 @@ PPCODE:
 
     /* Invalidate ISA and method caches */
     ++PL_sub_generation;
-    hv_clear(PL_stashcache);
+    gv_stash_cache_invalidate();
 
     PUSHMARK(SP);
     perl_call_sv(codesv, GIMME|G_EVAL|G_KEEPERR); /* use callers context */
     sv_free( (SV *) dummy_hv);  /* get rid of what save_hash gave us*/
     SPAGAIN; /* for the PUTBACK added by xsubpp */
     LEAVE;
+    
+    ++PL_sub_generation;
+    gv_stash_cache_invalidate();
 
 
 int

@@ -223,7 +223,7 @@ Perl_sv_does_sv(pTHX_ SV *sv, SV *namesv, U32 flags)
     PUTBACK;
 
     methodname = newSVpvs_flags("isa", SVs_TEMP);
-    /* ugly hack: use the SvSCREAM flag so S_method_common
+    /* ugly hack: use the SvSCREAM flag so S_method_stash
      * can figure out we're calling DOES() and not isa(),
      * and report eventual errors correctly. --rgs */
     SvSCREAM_on(methodname);
@@ -350,47 +350,18 @@ XS(XS_UNIVERSAL_can); /* prototype to pass -Wmissing-prototypes */
 XS(XS_UNIVERSAL_can)
 {
     dXSARGS;
-    SV   *sv;
-    SV   *rv;
-    HV   *pkg = NULL;
-    GV   *iogv;
+    dMETHSTASH_NOCROAK;
+    SV* rv;
+    if (items != 2) croak_xs_usage(cv, "object-ref, method");
 
-    if (items != 2)
-	croak_xs_usage(cv, "object-ref, method");
-
-    sv = ST(0);
-
-    SvGETMAGIC(sv);
-
-    /* Reject undef and empty string.  Note that the string form takes
-       precedence here over the numeric form, as (!1)->foo treats the
-       invocant as the empty string, though it is a dualvar. */
-    if (!SvOK(sv) || (SvPOK(sv) && !SvCUR(sv)))
-	XSRETURN_UNDEF;
+    if (!stash) XSRETURN_UNDEF;
+    else if (SvTYPE(stash) != SVt_PVHV) stash = gv_stashpvs("UNIVERSAL", 0);
 
     rv = &PL_sv_undef;
 
-    if (SvROK(sv)) {
-        sv = MUTABLE_SV(SvRV(sv));
-        if (SvOBJECT(sv))
-            pkg = SvSTASH(sv);
-        else if (isGV_with_GP(sv) && GvIO(sv))
-	    pkg = SvSTASH(GvIO(sv));
-    }
-    else if (isGV_with_GP(sv) && GvIO(sv))
-        pkg = SvSTASH(GvIO(sv));
-    else if ((iogv = gv_fetchsv_nomg(sv, 0, SVt_PVIO)) && GvIO(iogv))
-        pkg = SvSTASH(GvIO(iogv));
-    else {
-        pkg = gv_stashsv(sv, 0);
-        if (!pkg)
-            pkg = gv_stashpvs("UNIVERSAL", 0);
-    }
-
-    if (pkg) {
-	GV * const gv = gv_fetchmethod_sv_flags(pkg, ST(1), 0);
-        if (gv && isGV(gv))
-	    rv = sv_2mortal(newRV(MUTABLE_SV(GvCV(gv))));
+    if (stash) {
+        GV * const gv = gv_fetchmethod_sv_flags(stash, ST(1), 0);
+        if (gv && isGV(gv)) rv = sv_2mortal(newRV(MUTABLE_SV(GvCV(gv))));
     }
 
     ST(0) = rv;

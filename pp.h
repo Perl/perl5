@@ -89,6 +89,9 @@ Refetch the stack pointer.  Used after a callback.  See L<perlcall>.
 #define NORMAL PL_op->op_next
 #define DIE return Perl_die
 
+#define dMETHSTASH         HV* stash = (PL_methstash && SvTYPE(PL_methstash) == SVt_PVHV ? PL_methstash : curmethod_stash(&ST(0), cv))
+#define dMETHSTASH_NOCROAK HV* stash = (PL_methstash && SvTYPE(PL_methstash) == SVt_PVHV ? PL_methstash : curmethod_stash(&ST(0), NULL))
+
 /*
 =for apidoc Ams||PUTBACK
 Closing bracket for XSUB arguments.  This is usually handled by C<xsubpp>.

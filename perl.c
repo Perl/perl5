@@ -322,7 +322,7 @@ perl_construct(pTHXx)
 #endif
 	 PL_clocktick = HZ;
 
-    PL_stashcache = newHV();
+    gv_stash_cache_init();
 
     PL_patchlevel = newSVpvs("v" PERL_VERSION_STRING);
     PL_apiversion = newSVpvs("v" PERL_API_VERSION_STRING);
@@ -563,16 +563,19 @@ perl_destruct(pTHXx)
     }
 #endif
 
+    /* flush all method caches as some poorly written code depend on refcnt of scalars on END phase */
+    mro_global_method_cache_clear();
+
     if (PL_exit_flags & PERL_EXIT_DESTRUCT_END) {
         dJMPENV;
         int x = 0;
 
         JMPENV_PUSH(x);
-	PERL_UNUSED_VAR(x);
+        PERL_UNUSED_VAR(x);
         if (PL_endav && !PL_minus_c) {
-	    PERL_SET_PHASE(PERL_PHASE_END);
+            PERL_SET_PHASE(PERL_PHASE_END);
             call_list(PL_scopestack_ix, PL_endav);
-	}
+        }
         JMPENV_POP;
     }
     LEAVE;
@@ -873,10 +876,6 @@ perl_destruct(pTHXx)
     }
 #endif
 
-
-    SvREFCNT_dec(MUTABLE_SV(PL_stashcache));
-    PL_stashcache = NULL;
-
     /* loosen bonds of global variables */
 
     /* XXX can PL_parser still be non-null here? */
@@ -1133,6 +1132,9 @@ perl_destruct(pTHXx)
         PL_sv_consts[i] = NULL;
     }
 
+    PL_methstash = NULL;
+    gv_stash_cache_destroy();
+
     /* Destruct the global string table. */
     {
 	/* Yell and reset the HeVAL() slots that are still holding refcounts,
@@ -1325,6 +1327,7 @@ perl_destruct(pTHXx)
 	Safefree(PL_mess_sv);
 	PL_mess_sv = NULL;
     }
+
     return STATUS_EXIT;
 }
 
@@ -2643,8 +2646,7 @@ Perl_call_sv(pTHX_ SV *sv, VOL I32 flags)
 {
     dVAR; dSP;
     LOGOP myop;		/* fake syntax tree node */
-    UNOP method_unop;
-    SVOP method_svop;
+    METHOP method_op;
     I32 oldmark;
     VOL I32 retval = 0;
     I32 oldscope;
@@ -2673,8 +2675,7 @@ Perl_call_sv(pTHX_ SV *sv, VOL I32 flags)
     PL_op = (OP*)&myop;
 
     EXTEND(PL_stack_sp, 1);
-    if (!(flags & G_METHOD_NAMED))
-        *++PL_stack_sp = sv;
+    *++PL_stack_sp = sv;
     oldmark = TOPMARK;
     oldscope = PL_scopestack_ix;
 
@@ -2688,23 +2689,13 @@ Perl_call_sv(pTHX_ SV *sv, VOL I32 flags)
 	myop.op_private |= OPpENTERSUB_DB;
 
     if (flags & (G_METHOD|G_METHOD_NAMED)) {
-        if ( flags & G_METHOD_NAMED ) {
-            Zero(&method_svop, 1, SVOP);
-            method_svop.op_next = (OP*)&myop;
-            method_svop.op_ppaddr = PL_ppaddr[OP_METHOD_NAMED];
-            method_svop.op_type = OP_METHOD_NAMED;
-            method_svop.op_sv = sv;
-            PL_op = (OP*)&method_svop;
-        } else {
-            Zero(&method_unop, 1, UNOP);
-            method_unop.op_next = (OP*)&myop;
-            method_unop.op_ppaddr = PL_ppaddr[OP_METHOD];
-            method_unop.op_type = OP_METHOD;
-            PL_op = (OP*)&method_unop;
-        }
+        Zero(&method_op, 1, METHOP);
+        method_op.op_next = (OP*)&myop;
+        method_op.op_type = OP_METHOD;
+        method_op.op_ppaddr = PL_ppaddr[OP_METHOD];
+        PL_op = (OP*)&method_op;
         myop.op_ppaddr = PL_ppaddr[OP_ENTERSUB];
         myop.op_type = OP_ENTERSUB;
-
     }
 
     if (!(flags & G_EVAL)) {

@@ -2511,6 +2511,7 @@ PP(pp_leavesub)
     POPSUB(cx,sv);	/* Stack values are safe: release CV and @_ ... */
     cxstack_ix--;
     PL_curpm = newpm;	/* ... and pop $1 et al */
+    PL_methstash = NULL; /* reset PL_methstash cache on func/method end */
 
     LEAVESUB(sv);
     return cx->blk_sub.retop;
@@ -2646,6 +2647,8 @@ try_autoload:
     }
 
     gimme = GIMME_V;
+
+    if (!(PL_op->op_private & OPpENTERSUB_METHOD)) PL_methstash = NULL; /* set NULL to PL_methstash if called as function */
 
     if (!(CvISXSUB(cv))) {
 	/* This path taken at least 75% of the time   */
@@ -2931,155 +2934,198 @@ Perl_vivify_ref(pTHX_ SV *sv, U32 to_what)
     return sv;
 }
 
+#define _METHOD_STASH_NORMALIZE_METH(meth)                                                                                \
+    if (!meth) return NULL;                                                                                               \
+    if (SvTYPE(meth) == SVt_PVCV) {                                                                                       \
+        GV* subgv = CvGV(MUTABLE_CV(meth));                                                                               \
+        if (subgv) meth = newSVpvn_flags(GvNAME(subgv), GvNAMELEN(subgv), SVs_TEMP | (GvNAMEUTF8(subgv) ? SVf_UTF8 : 0)); \
+        else meth = newSVpvs_flags("__ANON__", SVs_TEMP);                                                                 \
+    }
+
+HV*
+Perl_method_stash (pTHX_ SV** objptr, SV* meth) {
+    SV* const sv = *objptr;
+    HV* stash;
+    SV* ob;
+    PERL_ARGS_ASSERT_METHOD_STASH;
+    
+    if (UNLIKELY(!sv)) goto undefined;
+    
+    SvGETMAGIC(sv);
+    if (SvROK(sv)) ob = MUTABLE_SV(SvRV(sv));
+    else if (!SvOK(sv)) goto undefined;
+    else if (isGV_with_GP(sv)) {
+        if (!GvIO(sv)) goto nopackobj;
+        ob = sv;
+        if (SvTYPE(ob) == SVt_PVLV && LvTYPE(ob) == 'y') {
+            assert(!LvTARGLEN(ob));
+            ob = LvTARG(ob);
+            assert(ob);
+        }
+        *objptr = sv_2mortal(newRV(ob));
+    }
+    else {
+        /* this isn't a reference */
+        STRLEN packlen;
+        GV* iogv;
+        const char * const packname = SvPV_nomg_const(sv, packlen);
+        const I32 stashpvn_flags = SvUTF8(sv);
+        if (!packlen) goto nopackobj;
+
+        stash = gv_stashpvn(packname, packlen, stashpvn_flags | GV_CACHE_ONLY);
+        if (stash) {
+            DEBUG_o(Perl_deb(aTHX_ "PL_stashcache hit %p for '%"SVf"'\n", (void*)stash, SVfARG(sv)));
+            return stash;
+        }
+
+        if ( !(iogv = gv_fetchpvn_flags(packname, packlen, stashpvn_flags, SVt_PVIO)) || !(ob=MUTABLE_SV(GvIO(iogv))) ) {
+            /* this isn't the name of a filehandle either, assume it's a package name */
+            stash = gv_stashpvn(packname, packlen, stashpvn_flags);
+            if (stash) {
+                DEBUG_o(Perl_deb(aTHX_ "PL_stashcache caching %p for '%"SVf"'\n", (void*)stash, SVfARG(sv)));
+                return stash;
+            }
+            else return MUTABLE_HV(sv);
+        }
+            
+        /* it _is_ a filehandle name -- replace with a reference */
+        *objptr = sv_2mortal(newRV(MUTABLE_SV(iogv)));
+    }
+
+    /* if we got here, ob should be an object or a glob */
+    if (!ob || !(SvOBJECT(ob) || (isGV_with_GP(ob) && (ob = MUTABLE_SV(GvIO((const GV *)ob))) && SvOBJECT(ob))))
+        goto unblessed;
+
+    return SvSTASH(ob);
+
+    undefined:
+        _METHOD_STASH_NORMALIZE_METH(meth);
+        Perl_croak(aTHX_ "Can't call method \"%"SVf"\" on an undefined value", SVfARG(meth));
+    nopackobj:
+        _METHOD_STASH_NORMALIZE_METH(meth);
+        Perl_croak(aTHX_ "Can't call method \"%"SVf"\" without a package or object reference", SVfARG(meth));
+    unblessed:
+        _METHOD_STASH_NORMALIZE_METH(meth);
+        Perl_croak(aTHX_ "Can't call method \"%"SVf"\" on unblessed reference",
+                   SVfARG((SvSCREAM(meth) && strEQ(SvPV_nolen_const(meth),"isa")) ?
+                       newSVpvs_flags("DOES", SVs_TEMP) : meth));
+}
+
+PERL_STATIC_INLINE HV*
+S_opmethod_stash (pTHX_ METHOP* op, SV* meth) {
+    PERL_ARGS_ASSERT_OPMETHOD_STASH;
+    if (op->op_class_hash) {
+        SV*const const_class = cMETHOPx_class_sv(op);
+        const SVMAP_ENT entry = SVMAP_ENT_SV(const_class, op->op_class_hash);
+        HV* stash = gv_stashent(&entry, GV_CACHE_ONLY);
+        if (stash) {
+            DEBUG_o(Perl_deb(aTHX_ "PL_stashcache hit %p for '%"SVf"'\n", (void*)stash, SVfARG(const_class)));
+            return stash;
+        }
+    }
+
+    if (UNLIKELY(PL_stack_base + TOPMARK == PL_stack_sp))
+        Perl_croak(aTHX_ "Can't call method \"%"SVf"\" without a package or object reference", SVfARG(meth));
+
+    return method_stash(PL_stack_base + TOPMARK + 1, meth);
+}
+
+
+HV*
+Perl_curmethod_stash (pTHX_ SV** objptr, CV* sub) {
+    HV* stash;
+    PERL_ARGS_ASSERT_CURMETHOD_STASH;
+    stash = PL_methstash ? PL_methstash : method_stash(objptr, MUTABLE_SV(sub));
+    /* PL_methstash and method_stash can return SV (package name when not yet exists) */
+    if (!sub || SvTYPE(stash) == SVt_PVHV) return stash;
+    return gv_stashsv(MUTABLE_SV(stash), GV_ADD);
+}
+
 PP(pp_method)
 {
     dSP;
-    SV* const sv = TOPs;
+    GV* gv;
+    STRLEN methlen;
+    const char* methpv;
+    SV* const meth = TOPs;
 
-    if (SvROK(sv)) {
-	SV* const rsv = SvRV(sv);
-	if (SvTYPE(rsv) == SVt_PVCV) {
-	    SETs(rsv);
-	    RETURN;
-	}
+    if (SvROK(meth)) {
+        SV* const rsv = SvRV(meth);
+        if (SvTYPE(rsv) == SVt_PVCV) {
+            PL_methstash = NULL; /* $proto->$coderef() is not a method call context */
+            SETs(rsv);
+            RETURN;
+        }
     }
 
-    SETs(method_common(sv, NULL));
+    PL_methstash = opmethod_stash(cMETHOPx(PL_op), meth);
+
+    methpv = SvPV(meth, methlen);
+    gv = gv_fetchmethod_pvn_flags(PL_methstash, methpv, methlen, GV_AUTOLOAD|GV_CROAK|SvUTF8(meth));
+    assert(gv);
+
+    SETs(isGV(gv) ? MUTABLE_SV(GvCV(gv)) : MUTABLE_SV(gv));
     RETURN;
 }
 
 PP(pp_method_named)
 {
     dSP;
-    SV* const sv = cSVOP_sv;
-    U32 hash = SvSHARED_HASH(sv);
+    GV* gv;
+    SV* meth = cMETHOPx_meth_sv(PL_op);
+    const SVMAP_ENT meth_entry = SVMAP_ENT_SV(meth, cMETHOPx(PL_op)->op_hash);
 
-    XPUSHs(method_common(sv, &hash));
+    PL_methstash = opmethod_stash(cMETHOPx(PL_op), meth);
+
+    gv = gv_fetchmethod_ent(PL_methstash, &meth_entry, GV_AUTOLOAD|GV_CROAK);
+    assert(gv);
+
+    XPUSHs(isGV(gv) ? MUTABLE_SV(GvCV(gv)) : MUTABLE_SV(gv));
     RETURN;
 }
 
-STATIC SV *
-S_method_common(pTHX_ SV* meth, U32* hashp)
+PP(pp_method_super)
 {
-    SV* ob;
+    dSP;
     GV* gv;
-    HV* stash;
-    SV *packsv = NULL;
-    SV * const sv = PL_stack_base + TOPMARK == PL_stack_sp
-	? (Perl_croak(aTHX_ "Can't call method \"%"SVf"\" without a "
-			    "package or object reference", SVfARG(meth)),
-	   (SV *)NULL)
-	: *(PL_stack_base + TOPMARK + 1);
+    SV* meth = cMETHOPx_meth_sv(PL_op);
+    const SVMAP_ENT meth_entry = SVMAP_ENT_SV(meth, cMETHOPx(PL_op)->op_hash);
 
-    PERL_ARGS_ASSERT_METHOD_COMMON;
+    /* Actually, SUPER doesn't need real object's (or class') stash at all, as it uses CopSTASH
+     * However, we must ensure that object(class) is correct (this check is done by S_method_stash),
+     * and additionaly set PL_methstash to a real stash for possible usage in user's code.
+     * op_const_class is probably NULL as code like "MyClass->SUPER::meth()" doesn't make sense */
+    PL_methstash = opmethod_stash(cMETHOPx(PL_op), meth);
 
-    if (UNLIKELY(!sv))
-       undefined:
-	Perl_croak(aTHX_ "Can't call method \"%"SVf"\" on an undefined value",
-		   SVfARG(meth));
-
-    SvGETMAGIC(sv);
-    if (SvROK(sv))
-	ob = MUTABLE_SV(SvRV(sv));
-    else if (!SvOK(sv)) goto undefined;
-    else if (isGV_with_GP(sv)) {
-	if (!GvIO(sv))
-	    Perl_croak(aTHX_ "Can't call method \"%"SVf"\" "
-			     "without a package or object reference",
-			      SVfARG(meth));
-	ob = sv;
-	if (SvTYPE(ob) == SVt_PVLV && LvTYPE(ob) == 'y') {
-	    assert(!LvTARGLEN(ob));
-	    ob = LvTARG(ob);
-	    assert(ob);
-	}
-	*(PL_stack_base + TOPMARK + 1) = sv_2mortal(newRV(ob));
-    }
-    else {
-	/* this isn't a reference */
-	GV* iogv;
-        STRLEN packlen;
-        const char * const packname = SvPV_nomg_const(sv, packlen);
-        const bool packname_is_utf8 = !!SvUTF8(sv);
-        const HE* const he =
-	    (const HE *)hv_common(
-                PL_stashcache, NULL, packname, packlen,
-                packname_is_utf8 ? HVhek_UTF8 : 0, 0, NULL, 0
-	    );
-	  
-        if (he) { 
-            stash = INT2PTR(HV*,SvIV(HeVAL(he)));
-            DEBUG_o(Perl_deb(aTHX_ "PL_stashcache hit %p for '%"SVf"'\n",
-                             (void*)stash, SVfARG(sv)));
-            goto fetch;
-        }
-
-	if (!(iogv = gv_fetchpvn_flags(
-	        packname, packlen, SVf_UTF8 * packname_is_utf8, SVt_PVIO
-	     )) ||
-	    !(ob=MUTABLE_SV(GvIO(iogv))))
-	{
-	    /* this isn't the name of a filehandle either */
-	    if (!packlen)
-	    {
-		Perl_croak(aTHX_ "Can't call method \"%"SVf"\" "
-				 "without a package or object reference",
-				  SVfARG(meth));
-	    }
-	    /* assume it's a package name */
-	    stash = gv_stashpvn(packname, packlen, packname_is_utf8 ? SVf_UTF8 : 0);
-	    if (!stash)
-		packsv = sv;
-            else {
-	        SV* const ref = newSViv(PTR2IV(stash));
-	        (void)hv_store(PL_stashcache, packname,
-                                packname_is_utf8 ? -(I32)packlen : (I32)packlen, ref, 0);
-                DEBUG_o(Perl_deb(aTHX_ "PL_stashcache caching %p for '%"SVf"'\n",
-                                 (void*)stash, SVfARG(sv)));
-	    }
-	    goto fetch;
-	}
-	/* it _is_ a filehandle name -- replace with a reference */
-	*(PL_stack_base + TOPMARK + 1) = sv_2mortal(newRV(MUTABLE_SV(iogv)));
-    }
-
-    /* if we got here, ob should be an object or a glob */
-    if (!ob || !(SvOBJECT(ob)
-		 || (isGV_with_GP(ob)
-		     && (ob = MUTABLE_SV(GvIO((const GV *)ob)))
-		     && SvOBJECT(ob))))
-    {
-	Perl_croak(aTHX_ "Can't call method \"%"SVf"\" on unblessed reference",
-		   SVfARG((SvSCREAM(meth) && strEQ(SvPV_nolen_const(meth),"isa"))
-                                        ? newSVpvs_flags("DOES", SVs_TEMP)
-                                        : meth));
-    }
-
-    stash = SvSTASH(ob);
-
-  fetch:
-    /* NOTE: stash may be null, hope hv_fetch_ent and
-       gv_fetchmethod can cope (it seems they can) */
-
-    /* shortcut for simple names */
-    if (hashp) {
-	const HE* const he = hv_fetch_ent(stash, meth, 0, *hashp);
-	if (he) {
-	    gv = MUTABLE_GV(HeVAL(he));
-	    assert(stash);
-	    if (isGV(gv) && GvCV(gv) &&
-		(!GvCVGEN(gv) || GvCVGEN(gv)
-                  == (PL_sub_generation + HvMROMETA(stash)->cache_gen)))
-		return MUTABLE_SV(GvCV(gv));
-	}
-    }
-
-    assert(stash || packsv);
-    gv = gv_fetchmethod_sv_flags(stash ? stash : MUTABLE_HV(packsv),
-                                 meth, GV_AUTOLOAD | GV_CROAK);
+    gv = gv_fetchmethod_ent(CopSTASH(PL_curcop), &meth_entry, GV_AUTOLOAD|GV_CROAK|GV_SUPER);
     assert(gv);
 
-    return isGV(gv) ? MUTABLE_SV(GvCV(gv)) : MUTABLE_SV(gv);
+    XPUSHs(isGV(gv) ? MUTABLE_SV(GvCV(gv)) : MUTABLE_SV(gv));
+    RETURN;
+}
+
+PP(pp_method_redir) {
+    dSP;
+    GV* gv;
+    HV* stash;
+    SV* meth   = cMETHOPx_meth_sv(PL_op);
+    SV* rclass = cMETHOPx_rclass_sv(PL_op);
+    const SVMAP_ENT meth_entry   = SVMAP_ENT_SV(meth, cMETHOPx(PL_op)->op_hash);
+    const SVMAP_ENT rclass_entry = SVMAP_ENT_SV(rclass, cMETHOPx(PL_op)->op_rclass_hash);
+
+    I32 flags = GV_AUTOLOAD|GV_CROAK;
+    if (PL_op->op_private & OPpMETHOD_SUPER) flags |= GV_SUPER;
+
+    PL_methstash = opmethod_stash(cMETHOPx(PL_op), meth);
+    
+    stash = gv_stashent(&rclass_entry, 0);
+    if (!stash) stash = MUTABLE_HV(rclass);
+
+    gv = gv_fetchmethod_ent(stash, &meth_entry, flags);
+    assert(gv);
+
+    XPUSHs(isGV(gv) ? MUTABLE_SV(GvCV(gv)) : MUTABLE_SV(gv));
+    RETURN;
 }
 
 /*

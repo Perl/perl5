@@ -147,7 +147,9 @@ PERLVAR(I, Sv,		SV *)		/* used to hold temporary values */
 
 PERLVAR(I, parser,	yy_parser *)	/* current parser state */
 
-PERLVAR(I, stashcache,	HV *)		/* Cache to speed up S_method_common */
+PERLVAR(I, stashcache, SVMAP*)	   /* Cache to speed up stash lookups */
+PERLVARI(I, methstash, HV*, NULL); /* Holds the stash of the first argument (object/classname) if CV called as class/object method.
+                                    * NULL if CV called as function or via goto. Valid only until next CV call */
 
 
 /*

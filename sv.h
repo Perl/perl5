@@ -586,7 +586,7 @@ typedef U32 cv_flags_t;
 				  * compilation) in the lexically enclosing	\
 				  * sub */					\
     cv_flags_t	xcv_flags;						\
-    I32	xcv_depth	/* >= 2 indicates recursive call */
+    I32	xcv_depth;	/* >= 2 indicates recursive call */
 
 /* This structure must match XPVCV in cv.h */
 
@@ -2294,6 +2294,26 @@ Evaluates I<sv> more than once.  Sets I<len> to 0 if C<SvOOK(sv)> is false.
 #define SV_CONST_DESTROY 34
 
 #define SV_CONSTS_COUNT 35
+
+/* entry for storing SVs in fast C hash (for perl internal needs - caches and so on) */
+struct svmap_entry {
+    union {
+        SV* sv;
+        HV* hv;
+        GV* gv;
+	AV* av;
+	CV* cv;
+    }           value;
+    U64TYPE     hash;
+    const char* name;
+    STRLEN      len;
+    U32         flags;
+};
+
+#define SVMAP_ENT_PVN(name,len,flags,hash) {{NULL}, hash, name, len, flags} 
+#define SVMAP_ENT_SV(sv,hash)              {{NULL}, hash, SvPVX(sv), SvCUR(sv), SvFLAGS(sv) & SVf_UTF8}
+
+DEFINE_HASHMAP(svmap, SVMAP, SVMAP_ENT);
 
 /*
  * Local variables:

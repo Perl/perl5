@@ -41,21 +41,21 @@ typedef PERL_BITFIELD16 Optype;
 #ifdef BASEOP_DEFINITION
 #define BASEOP BASEOP_DEFINITION
 #else
-#define BASEOP				\
-    OP*		op_next;		\
-    OP*		op_sibling;		\
-    OP*		(*op_ppaddr)(pTHX);	\
-    PADOFFSET	op_targ;		\
-    PERL_BITFIELD16 op_type:9;		\
-    PERL_BITFIELD16 op_opt:1;		\
-    PERL_BITFIELD16 op_slabbed:1;	\
-    PERL_BITFIELD16 op_savefree:1;	\
-    PERL_BITFIELD16 op_static:1;	\
-    PERL_BITFIELD16 op_folded:1;	\
-    PERL_BITFIELD16 op_lastsib:1;       \
-    PERL_BITFIELD16 op_spare:1;		\
-    U8		op_flags;		\
-    U8		op_private;
+#define BASEOP                     \
+    OP* op_next;                   \
+    OP*	op_sibling;                \
+    OP*	(*op_ppaddr)(pTHX);        \
+    PADOFFSET op_targ;             \
+    PERL_BITFIELD16 op_type:9;     \
+    PERL_BITFIELD16 op_opt:1;      \
+    PERL_BITFIELD16 op_slabbed:1;  \
+    PERL_BITFIELD16 op_savefree:1; \
+    PERL_BITFIELD16 op_static:1;   \
+    PERL_BITFIELD16 op_folded:1;   \
+    PERL_BITFIELD16 op_lastsib:1;  \
+    PERL_BITFIELD16 op_spare:1;	   \
+    U16 op_private;                \
+    U8  op_flags;
 #endif
 
 /* If op_type:9 is changed to :10, also change PUSHEVAL in cop.h.
@@ -235,9 +235,13 @@ is no conversion of op type.
      in dynamic context */
 #define OPpENTERSUB_LVAL_MASK (OPpLVAL_INTRO|OPpENTERSUB_INARGS)
 
+  /* OP_METHOD_* only */
+#define OPpMETHOD_SUPER 1    /* SUPER flag for OP_METHOD_REDIR */
+
   /* OP_RV2CV only */
 #define OPpENTERSUB_AMPER	8	/* Used & form to call. */
 #define OPpENTERSUB_NOPAREN	128	/* bare sub call (without parens) */
+#define OPpENTERSUB_METHOD  256 /* object or class method call */
 #define OPpMAY_RETURN_CONSTANT	1	/* If a constant sub, return the constant */
 
   /* OP_GV only */
@@ -383,6 +387,24 @@ struct listop {
     BASEOP
     OP *	op_first;
     OP *	op_last;
+};
+
+struct methop {
+    BASEOP
+    union { /* by nature METHOP is either extended UNOP (OP_METHOD) or extended SVOP (OP_METHOD_*) */
+        OP* op_first; /* when UNOP: optree for method name */
+        SV* op_sv;    /* when SVOP: method name */
+    } op_u;
+    /* method name for OP_METHOD_* ops lies in op_sv/op_targ, hash in op_hash */
+    U64TYPE   op_hash;
+    /* class name for OP_METHOD and OP_METHOD_* ops if it is const (MyClass->method) */
+    SV*       op_class_sv;
+    U64TYPE   op_class_hash; /* zero if left operand is not a const ($class->method) */
+    PADOFFSET op_class_targ;
+    /* alternate class name for OP_METHOD_REDIR op (if method is const) (MyClass->Other::method) */
+    SV*       op_rclass_sv;
+    U64TYPE   op_rclass_hash;
+    PADOFFSET op_rclass_targ;
 };
 
 struct pmop {
@@ -543,6 +565,7 @@ struct loop {
 #define cPVOPx(o)	((PVOP*)o)
 #define cCOPx(o)	((COP*)o)
 #define cLOOPx(o)	((LOOP*)o)
+#define cMETHOPx(o)	((METHOP*)o)
 
 #define cUNOP		cUNOPx(PL_op)
 #define cBINOP		cBINOPx(PL_op)
@@ -588,13 +611,30 @@ struct loop {
 				 ? cSVOPx(v)->op_sv : PAD_SVl((v)->op_targ))
 #  define	cSVOPx_svp(v)	(cSVOPx(v)->op_sv \
 				 ? &cSVOPx(v)->op_sv : &PAD_SVl((v)->op_targ))
+#  define	cMETHOPx_class_sv(v)  (cMETHOPx(v)->op_class_sv ? cMETHOPx(v)->op_class_sv : PAD_SVl(cMETHOPx(v)->op_class_targ))
+#  define       cMETHOPx_rclass_sv(v) (cMETHOPx(v)->op_rclass_sv ? cMETHOPx(v)->op_rclass_sv : PAD_SVl(cMETHOPx(v)->op_rclass_targ))
 #else
 #  define	cGVOPx_gv(o)	((GV*)cSVOPx(o)->op_sv)
 #  define	IS_PADGV(v)	FALSE
 #  define	IS_PADCONST(v)	FALSE
 #  define	cSVOPx_sv(v)	(cSVOPx(v)->op_sv)
 #  define	cSVOPx_svp(v)	(&cSVOPx(v)->op_sv)
+#  define	cMETHOPx_class_sv(v)  (cMETHOPx(v)->op_class_sv)
+#  define	cMETHOPx_rclass_sv(v) (cMETHOPx(v)->op_rclass_sv)
 #endif
+
+#define cMETHOPx_meth_sv(v)	cSVOPx_sv(v)
+
+#define cMETHOPx_set_class(v,sv)  do {						\
+        SV* _tmp = (sv);							\
+        cMETHOPx(v)->op_class_sv = _tmp;					\
+        cMETHOPx(v)->op_class_hash = PERL_HASH64(SvPVX(_tmp), SvCUR(_tmp));	\
+    } while(0)
+#define cMETHOPx_set_rclass(v,sv) do {						\
+        SV* _tmp = (sv);							\
+        cMETHOPx(v)->op_rclass_sv = _tmp;					\
+        cMETHOPx(v)->op_rclass_hash = PERL_HASH64(SvPVX(_tmp), SvCUR(_tmp));	\
+    } while(0)
 
 #define	cGVOP_gv		cGVOPx_gv(PL_op)
 #define	cGVOPo_gv		cGVOPx_gv(o)

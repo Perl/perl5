@@ -718,7 +718,7 @@ case 2:
     { (yyval.opval) = convert(OP_ENTERSUB, OPf_STACKED,
 				op_append_elem(OP_LIST,
 				    op_prepend_elem(OP_LIST, scalar((ps[(1) - (6)].val.opval)), (ps[(5) - (6)].val.opval)),
-				    newUNOP(OP_METHOD, 0, (ps[(3) - (6)].val.opval))));
+				    newMETHOP(OP_METHOD, 0, (ps[(3) - (6)].val.opval))));
 			}
     break;
 
@@ -726,7 +726,7 @@ case 2:
 #line 644 "perly.y"
     { (yyval.opval) = convert(OP_ENTERSUB, OPf_STACKED,
 				op_append_elem(OP_LIST, scalar((ps[(1) - (3)].val.opval)),
-				    newUNOP(OP_METHOD, 0, (ps[(3) - (3)].val.opval))));
+				    newMETHOP(OP_METHOD, 0, (ps[(3) - (3)].val.opval))));
 			}
     break;
 
@@ -735,7 +735,7 @@ case 2:
     { (yyval.opval) = convert(OP_ENTERSUB, OPf_STACKED,
 				op_append_elem(OP_LIST,
 				    op_prepend_elem(OP_LIST, (ps[(2) - (3)].val.opval), (ps[(3) - (3)].val.opval)),
-				    newUNOP(OP_METHOD, 0, (ps[(1) - (3)].val.opval))));
+				    newMETHOP(OP_METHOD, 0, (ps[(1) - (3)].val.opval))));
 			}
     break;
 
@@ -744,7 +744,7 @@ case 2:
     { (yyval.opval) = convert(OP_ENTERSUB, OPf_STACKED,
 				op_append_elem(OP_LIST,
 				    op_prepend_elem(OP_LIST, (ps[(2) - (5)].val.opval), (ps[(4) - (5)].val.opval)),
-				    newUNOP(OP_METHOD, 0, (ps[(1) - (5)].val.opval))));
+				    newMETHOP(OP_METHOD, 0, (ps[(1) - (5)].val.opval))));
 			}
     break;
 
@@ -1464,6 +1464,6 @@ case 2:
     
 
 /* Generated from:
- * 7e6c275bbd1dbc800c205a8a8b0cd785e4859f94976ee7372149598471f16f81 perly.y
+ * 304625ecafb12d39df3c43a63a66f18501770731f29031dead3bb385d10a5baa perly.y
  * d1d4df7b8e30ac9dede664af9179e6e5e7ddc7f2ad9c4eff9e2e5b32c9e16a6e regen_perly.pl
  * ex: set ro: */

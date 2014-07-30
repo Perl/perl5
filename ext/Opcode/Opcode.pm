@@ -6,7 +6,7 @@ use strict;
 
 our($VERSION, @ISA, @EXPORT_OK);
 
-$VERSION = "1.27";
+$VERSION = "1.28";
 
 use Carp;
 use Exporter ();
@@ -339,7 +339,8 @@ invert_opset function.
 
     rv2cv anoncode prototype coreargs
 
-    entersub leavesub leavesublv return method method_named
+    entersub leavesub leavesublv return method method_named method_super
+    method_redir
      -- XXX loops via recursion?
 
     leaveeval -- needed for Safe to operate, is safe

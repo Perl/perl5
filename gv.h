@@ -20,6 +20,7 @@ struct gp {
     GV *	gp_egv;		/* effective gv, if *glob */
     line_t	gp_line;	/* line first declared at (for -w) */
     HEK *	gp_file_hek;	/* file first declared in (for -w) */
+    U32     gp_flags;   /* flags for gp */
 };
 
 #define GvXPVGV(gv)	((XPVGV*)SvANY(gv))
@@ -199,6 +200,13 @@ Return the CV from the GV.
 #define GvIN_PAD_on(gv)		(GvFLAGS(gv) |= GVf_IN_PAD)
 #define GvIN_PAD_off(gv)	(GvFLAGS(gv) &= ~GVf_IN_PAD)
 
+#define GPf_LOCALIZED  0x01
+#define GvGPFLAGS(gv) (GvGP(gv)->gp_flags)
+
+#define GvLOCALIZED(gv)     (GvGPFLAGS(gv) & GPf_LOCALIZED)
+#define GvLOCALIZED_on(gv)  (GvGPFLAGS(gv) |= GPf_LOCALIZED)
+#define GvLOCALIZED_off(gv) (GvGPFLAGS(gv) &= ~GPf_LOCALIZED)
+
 #ifndef PERL_CORE
 #  define Nullgv Null(GV*)
 #endif
@@ -237,7 +245,11 @@ Return the CV from the GV.
 				   used only by gv_fetchsv(_nomg) */
 
 /* Flags for gv_fetchmeth_pvn and gv_autoload_pvn*/
-#define GV_SUPER	0x1000	/* SUPER::method */
+#define GV_SUPER	     0x1000	/* SUPER::method */
+#define GV_METHOD_SIMPLE 0x2000  /* gv_fetchmethod_flags() should not search for '::' in method name */
+
+/* Flags for gv_stash*/
+#define GV_CACHE_ONLY 0x4000  /* gv_stashpvn should only return stash from cache or NULL if no entry in cache */
 
 /* Flags for gv_autoload_*/
 #define GV_AUTOLOAD_ISMETHOD 1	/* autoloading a method? */
