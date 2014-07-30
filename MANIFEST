@@ -232,6 +232,7 @@ cpan/CPAN/lib/CPAN/Version.pm		Simple math with different flavors of version str
 cpan/CPAN-Meta/lib/CPAN/Meta/Converter.pm
 cpan/CPAN-Meta/lib/CPAN/Meta/Feature.pm
 cpan/CPAN-Meta/lib/CPAN/Meta/History.pm
+cpan/CPAN-Meta/lib/CPAN/Meta/Merge.pm
 cpan/CPAN-Meta/lib/CPAN/Meta.pm
 cpan/CPAN-Meta/lib/CPAN/Meta/Prereqs.pm
 cpan/CPAN-Meta/lib/CPAN/Meta/Spec.pm
@@ -296,6 +297,7 @@ cpan/CPAN-Meta/t/data-valid/META-1_0.yml
 cpan/CPAN-Meta/t/data-valid/META-1_1.yml
 cpan/CPAN-Meta/t/data-valid/scalar-meta-spec.yml
 cpan/CPAN-Meta/t/load-bad.t
+cpan/CPAN-Meta/t/merge.t
 cpan/CPAN-Meta/t/meta-obj.t
 cpan/CPAN-Meta/t/no-index.t
 cpan/CPAN-Meta/t/prereqs-finalize.t

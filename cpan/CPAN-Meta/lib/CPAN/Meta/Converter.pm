@@ -2,7 +2,7 @@ use 5.006;
 use strict;
 use warnings;
 package CPAN::Meta::Converter;
-our $VERSION = '2.141520'; # VERSION
+our $VERSION = '2.142060'; # VERSION
 
 #pod =head1 SYNOPSIS
 #pod
@@ -741,12 +741,15 @@ sub _provides {
 }
 
 sub _convert {
-  my ($data, $spec, $to_version) = @_;
+  my ($data, $spec, $to_version, $is_fragment) = @_;
 
   my $new_data = {};
   for my $key ( keys %$spec ) {
     next if $key eq ':custom' || $key eq ':drop';
     next unless my $fcn = $spec->{$key};
+    if ( $is_fragment && $key eq 'generated_by' ) {
+      $fcn = \&_keep;
+    }
     die "spec for '$key' is not a coderef"
       unless ref $fcn && ref $fcn eq 'CODE';
     my $new_value = $fcn->($data->{$key}, $key, $data, $to_version);
@@ -1384,13 +1387,14 @@ sub convert {
   my $args = { %args };
 
   my $new_version = $args->{version} || $HIGHEST;
+  my $is_fragment = $args->{is_fragment};
 
   my ($old_version) = $self->{spec};
   my $converted = _dclone($self->{data});
 
   if ( $old_version == $new_version ) {
-    $converted = _convert( $converted, $cleanup{$old_version}, $old_version );
-    unless ( $args->{no_validation} ) {
+    $converted = _convert( $converted, $cleanup{$old_version}, $old_version, $is_fragment );
+    unless ( $args->{is_fragment} ) {
       my $cmv = CPAN::Meta::Validator->new( $converted );
       unless ( $cmv->is_valid ) {
         my $errs = join("\n", $cmv->errors);
@@ -1405,8 +1409,8 @@ sub convert {
       next if $vers[$i] > $old_version;
       last if $vers[$i+1] < $new_version;
       my $spec_string = "$vers[$i+1]-from-$vers[$i]";
-      $converted = _convert( $converted, $down_convert{$spec_string}, $vers[$i+1] );
-      unless ( $args->{no_validation} ) {
+      $converted = _convert( $converted, $down_convert{$spec_string}, $vers[$i+1], $is_fragment );
+      unless ( $args->{is_fragment} ) {
         my $cmv = CPAN::Meta::Validator->new( $converted );
         unless ( $cmv->is_valid ) {
           my $errs = join("\n", $cmv->errors);
@@ -1422,8 +1426,8 @@ sub convert {
       next if $vers[$i] < $old_version;
       last if $vers[$i+1] > $new_version;
       my $spec_string = "$vers[$i+1]-from-$vers[$i]";
-      $converted = _convert( $converted, $up_convert{$spec_string}, $vers[$i+1] );
-      unless ( $args->{no_validation} ) {
+      $converted = _convert( $converted, $up_convert{$spec_string}, $vers[$i+1], $is_fragment );
+      unless ( $args->{is_fragment} ) {
         my $cmv = CPAN::Meta::Validator->new( $converted );
         unless ( $cmv->is_valid ) {
           my $errs = join("\n", $cmv->errors);
@@ -1453,7 +1457,7 @@ sub upgrade_fragment {
     grep { defined }
     map { $fragments_generate{$old_version}{$_} }
     keys %{ $self->{data} };
-  my $converted = $self->convert( version => $HIGHEST, no_validation => 1 );
+  my $converted = $self->convert( version => $HIGHEST, is_fragment => 1 );
   for my $key ( keys %$converted ) {
     next if $key =~ /^x_/i || $key eq 'meta-spec';
     delete $converted->{$key} unless $expected{$key};
@@ -1475,7 +1479,7 @@ CPAN::Meta::Converter - Convert CPAN distribution metadata structures
 
 =head1 VERSION
 
-version 2.141520
+version 2.142060
 
 =head1 SYNOPSIS
 
