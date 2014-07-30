@@ -3737,9 +3737,12 @@ PP(pp_require)
 
 	RETPUSHYES;
     }
+    if (!SvOK(sv))
+        DIE(aTHX_ "Missing or undefined argument to require");
     name = SvPV_const(sv, len);
     if (!(name && len > 0 && *name))
-	DIE(aTHX_ "Null filename used");
+        DIE(aTHX_ "Missing or undefined argument to require");
+
     if (!IS_SAFE_PATHNAME(name, len, "require")) {
         DIE(aTHX_ "Can't locate %s:   %s",
             pv_escape(newSVpvs_flags("",SVs_TEMP),SvPVX(sv),SvCUR(sv),

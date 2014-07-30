@@ -3617,10 +3617,11 @@ to UTC.  If it's not, define the logical name
 F<SYS$TIMEZONE_DIFFERENTIAL> to translate to the number of seconds which
 need to be added to UTC to get local time.
 
-=item Null filename used
+=item Missing or undefined argument to require
 
-(F) You can't require the null filename, especially because on many
-machines that means the current directory!  See L<perlfunc/require>.
+(F) You tried to call require with no argument or with an undefined
+value as an argument. Require expects either a package name or a
+file-specification as an argument. See L<perlfunc/require>.
 
 =item NULL OP IN RUN
 
