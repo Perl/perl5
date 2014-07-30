@@ -390,7 +390,7 @@ Cygwin processes have their own pid, which is different from the
 underlying windows pid.  Most posix compliant Proc functions expect
 the cygwin pid, but several Win32::Process functions expect the
 winpid. E.g. C<$$> is the cygwin pid of F</usr/bin/perl>, which is not
-the winpid.  Use C<Cygwin::winpid_to_pid()> and C<Cygwin::winpid_to_pid()>
+the winpid.  Use C<Cygwin::pid_to_winpid()> and C<Cygwin::winpid_to_pid()>
 to translate between them.
 
 =item * Cygwin vs. Windows errors
