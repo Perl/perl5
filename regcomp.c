@@ -11792,7 +11792,6 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                 RExC_contains_locale = 1;
             }
 	    ret = reg_node(pRExC_state, op);
-	    FLAGS(ret) = get_regex_charset(RExC_flags);
 	    *flagp |= SIMPLE;
 	    if ((U8) *(RExC_parse + 1) == '{') {
                 /* diag_listed_as: Use "%s" instead of "%s" */
@@ -11810,7 +11809,6 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                 RExC_contains_locale = 1;
             }
 	    ret = reg_node(pRExC_state, op);
-	    FLAGS(ret) = get_regex_charset(RExC_flags);
 	    *flagp |= SIMPLE;
 	    if ((U8) *(RExC_parse + 1) == '{') {
                 /* diag_listed_as: Use "%s" instead of "%s" */
