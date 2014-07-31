@@ -4657,90 +4657,103 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 	    break;
 	}
 
-	/* XXX Could improve efficiency by separating these all out using a
-	 * macro or in-line function.  At that point regcomp.c would no longer
-	 * have to set the FLAGS fields of these */
-	case BOUNDL:  /*  /\b/l  */
+	/* XXX At that point regcomp.c would no longer * have to set the FLAGS fields of these */
 	case NBOUNDL: /*  /\B/l  */
-            _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
+            to_complement = 1;
             /* FALLTHROUGH */
-	case BOUND:   /*  /\b/   */
-	case BOUNDU:  /*  /\b/u  */
-	case BOUNDA:  /*  /\b/a  */
-	case NBOUND:  /*  /\B/   */
-	case NBOUNDU: /*  /\B/u  */
-	case NBOUNDA: /*  /\B/a  */
-	    /* was last char in word? */
-	    if (utf8_target
-		&& FLAGS(scan) != REGEX_ASCII_RESTRICTED_CHARSET
-		&& FLAGS(scan) != REGEX_ASCII_MORE_RESTRICTED_CHARSET)
-	    {
-		if (locinput == reginfo->strbeg)
-		    ln = '\n';
-		else {
-		    const U8 * const r =
-                            reghop3((U8*)locinput, -1, (U8*)(reginfo->strbeg));
 
-		    ln = utf8n_to_uvchr(r, (U8*) reginfo->strend - r,
-                                                                   0, uniflags);
-		}
-		if (FLAGS(scan) != REGEX_LOCALE_CHARSET) {
-		    ln = isWORDCHAR_uni(ln);
-                    if (NEXTCHR_IS_EOS)
-                        n = isWORDCHAR_LC('\n');
-                    else {
-                        LOAD_UTF8_CHARCLASS_ALNUM();
-                        n = swash_fetch(PL_utf8_swash_ptrs[_CC_WORDCHAR], (U8*)locinput,
-                                                                utf8_target);
-                    }
-		}
+	case BOUNDL:  /*  /\b/l  */
+            _CHECK_AND_WARN_PROBLEMATIC_LOCALE;
+	    if (utf8_target) {
+		if (locinput == reginfo->strbeg)
+		    ln = isWORDCHAR_LC('\n');
 		else {
-		    ln = isWORDCHAR_LC_uvchr(ln);
-		    n = NEXTCHR_IS_EOS ? isWORDCHAR_LC('\n') : isWORDCHAR_LC_utf8((U8*)locinput);
+                    ln = isWORDCHAR_LC_utf8(reghop3((U8*)locinput, -1,
+                                                        (U8*)(reginfo->strbeg)));
 		}
+                n = (NEXTCHR_IS_EOS)
+                    ? isWORDCHAR_LC('\n')
+                    : isWORDCHAR_LC_utf8((U8*)locinput);
+	    }
+	    else { /* Here the string isn't utf8 */
+		ln = (locinput == reginfo->strbeg)
+                     ? isWORDCHAR_LC('\n')
+                     : isWORDCHAR_LC(UCHARAT(locinput - 1));
+                n = (NEXTCHR_IS_EOS)
+                    ? isWORDCHAR_LC('\n')
+                    : isWORDCHAR_LC(nextchr);
+	    }
+            if (to_complement ^ (ln == n)) {
+                sayNO;
+            }
+	    break;
+
+	case NBOUND:  /*  /\B/   */
+            to_complement = 1;
+            /* FALLTHROUGH */
+
+	case BOUND:   /*  /\b/   */
+	    if (utf8_target) {
+                goto bound_utf8;
+            }
+            goto bound_ascii_match_only;
+
+	case NBOUNDA: /*  /\B/a  */
+            to_complement = 1;
+            /* FALLTHROUGH */
+
+	case BOUNDA:  /*  /\b/a  */
+
+      bound_ascii_match_only:
+            /* Here the string isn't utf8, or is utf8 and only ascii characters
+             * are to match \w.  In the latter case looking at the byte just
+             * prior to the current one may be just the final byte of a
+             * multi-byte character.  This is ok.  There are two cases:
+             * 1) it is a single byte character, and then the test is doing
+             *    just what it's supposed to.
+             * 2) it is a multi-byte character, in which case the final byte is
+             *    never mistakable for ASCII, and so the test will say it is
+             *    not a word character, which is the correct answer. */
+            ln = (locinput == reginfo->strbeg)
+                 ? isWORDCHAR_A('\n')
+                 : isWORDCHAR_A(UCHARAT(locinput - 1));
+            n = (NEXTCHR_IS_EOS)
+                ? isWORDCHAR_A('\n')
+                : isWORDCHAR_A(nextchr);
+            if (to_complement ^ (ln == n)) {
+                sayNO;
+            }
+	    break;
+
+	case NBOUNDU: /*  /\B/u  */
+            to_complement = 1;
+            /* FALLTHROUGH */
+
+	case BOUNDU:  /*  /\b/u  */
+	    if (utf8_target) {
+
+          bound_utf8:
+                ln = (locinput == reginfo->strbeg)
+                     ? isWORDCHAR_L1('\n')
+                     : isWORDCHAR_utf8(reghop3((U8*)locinput, -1,
+                                                        (U8*)(reginfo->strbeg)));
+                n = (NEXTCHR_IS_EOS)
+                    ? isWORDCHAR_L1('\n')
+                    : isWORDCHAR_utf8((U8*)locinput);
 	    }
 	    else {
+                ln = (locinput == reginfo->strbeg)
+                    ? isWORDCHAR_L1('\n')
+                    : isWORDCHAR_L1(UCHARAT(locinput - 1));
+                n = (NEXTCHR_IS_EOS)
+                    ? isWORDCHAR_L1('\n')
+                    : isWORDCHAR_L1(nextchr);
 
-		/* Here the string isn't utf8, or is utf8 and only ascii
-		 * characters are to match \w.  In the latter case looking at
-		 * the byte just prior to the current one may be just the final
-		 * byte of a multi-byte character.  This is ok.  There are two
-		 * cases:
-		 * 1) it is a single byte character, and then the test is doing
-		 *	just what it's supposed to.
-		 * 2) it is a multi-byte character, in which case the final
-		 *	byte is never mistakable for ASCII, and so the test
-		 *	will say it is not a word character, which is the
-		 *	correct answer. */
-		ln = (locinput != reginfo->strbeg)
-                     ? UCHARAT(locinput - 1)
-                     : '\n';
-		switch (FLAGS(scan)) {
-		    case REGEX_UNICODE_CHARSET:
-			ln = isWORDCHAR_L1(ln);
-			n = NEXTCHR_IS_EOS ? isWORDCHAR_L1('\n') : isWORDCHAR_L1(nextchr);
-			break;
-		    case REGEX_LOCALE_CHARSET:
-			ln = isWORDCHAR_LC(ln);
-			n = NEXTCHR_IS_EOS ? isWORDCHAR_LC('\n') : isWORDCHAR_LC(nextchr);
-			break;
-		    case REGEX_DEPENDS_CHARSET:
-			ln = isWORDCHAR(ln);
-			n = NEXTCHR_IS_EOS ? isWORDCHAR('\n') : isWORDCHAR(nextchr);
-			break;
-		    case REGEX_ASCII_RESTRICTED_CHARSET:
-		    case REGEX_ASCII_MORE_RESTRICTED_CHARSET:
-			ln = isWORDCHAR_A(ln);
-			n = NEXTCHR_IS_EOS ? isWORDCHAR_A('\n') : isWORDCHAR_A(nextchr);
-			break;
-		    default:
-			Perl_croak(aTHX_ "panic: Unexpected FLAGS %u in op %u", FLAGS(scan), OP(scan));
-		}
 	    }
-	    /* Note requires that all BOUNDs be lower than all NBOUNDs in
-	     * regcomp.sym */
-	    if (((!ln) == (!n)) == (OP(scan) < NBOUND))
-		    sayNO;
+
+            if (to_complement ^ (ln == n)) {
+                sayNO;
+            }
 	    break;
 
 	case ANYOFL:  /*  /[abc]/l      */
