@@ -1432,6 +1432,7 @@ test_prep test-prep: test_prep_pre \$(MINIPERL_EXE) \$(unidatafiles) \$(PERL_EXE
 	$to cpan/*/t
 	$to dist/*/t
 	$to ext/*/t
+	$to cpan/Archive-Tar/*
 	$to cpan/Term-Cap/test.pl
 	$to cpan/Pod-Usage/*
 	$to cpan/Pod-Parser/*
@@ -1457,6 +1458,9 @@ test_prep test-prep: test_prep_pre \$(MINIPERL_EXE) \$(unidatafiles) \$(PERL_EXE
 	$to *.h
 # --- For t/x2p/s2p.t
 	$to x2p
+# --- For t/porting/customized.t
+	$to vutil.c
+	$to vxs.inc
 # --- For t/TEST
 	$to config.sh
 # --- For lib/diagnostics.t with -Duseshrplib
