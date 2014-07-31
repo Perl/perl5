@@ -4687,7 +4687,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		if (FLAGS(scan) != REGEX_LOCALE_CHARSET) {
 		    ln = isWORDCHAR_uni(ln);
                     if (NEXTCHR_IS_EOS)
-                        n = 0;
+                        n = isWORDCHAR_LC('\n');
                     else {
                         LOAD_UTF8_CHARCLASS_ALNUM();
                         n = swash_fetch(PL_utf8_swash_ptrs[_CC_WORDCHAR], (U8*)locinput,
@@ -4696,7 +4696,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		}
 		else {
 		    ln = isWORDCHAR_LC_uvchr(ln);
-		    n = NEXTCHR_IS_EOS ? 0 : isWORDCHAR_LC_utf8((U8*)locinput);
+		    n = NEXTCHR_IS_EOS ? isWORDCHAR_LC('\n') : isWORDCHAR_LC_utf8((U8*)locinput);
 		}
 	    }
 	    else {
@@ -4718,20 +4718,20 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		switch (FLAGS(scan)) {
 		    case REGEX_UNICODE_CHARSET:
 			ln = isWORDCHAR_L1(ln);
-			n = NEXTCHR_IS_EOS ? 0 : isWORDCHAR_L1(nextchr);
+			n = NEXTCHR_IS_EOS ? isWORDCHAR_L1('\n') : isWORDCHAR_L1(nextchr);
 			break;
 		    case REGEX_LOCALE_CHARSET:
 			ln = isWORDCHAR_LC(ln);
-			n = NEXTCHR_IS_EOS ? 0 : isWORDCHAR_LC(nextchr);
+			n = NEXTCHR_IS_EOS ? isWORDCHAR_LC('\n') : isWORDCHAR_LC(nextchr);
 			break;
 		    case REGEX_DEPENDS_CHARSET:
 			ln = isWORDCHAR(ln);
-			n = NEXTCHR_IS_EOS ? 0 : isWORDCHAR(nextchr);
+			n = NEXTCHR_IS_EOS ? isWORDCHAR('\n') : isWORDCHAR(nextchr);
 			break;
 		    case REGEX_ASCII_RESTRICTED_CHARSET:
 		    case REGEX_ASCII_MORE_RESTRICTED_CHARSET:
 			ln = isWORDCHAR_A(ln);
-			n = NEXTCHR_IS_EOS ? 0 : isWORDCHAR_A(nextchr);
+			n = NEXTCHR_IS_EOS ? isWORDCHAR_A('\n') : isWORDCHAR_A(nextchr);
 			break;
 		    default:
 			Perl_croak(aTHX_ "panic: Unexpected FLAGS %u in op %u", FLAGS(scan), OP(scan));
