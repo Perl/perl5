@@ -4712,8 +4712,9 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 		 *	byte is never mistakable for ASCII, and so the test
 		 *	will say it is not a word character, which is the
 		 *	correct answer. */
-		ln = (locinput != reginfo->strbeg) ?
-		    UCHARAT(locinput - 1) : '\n';
+		ln = (locinput != reginfo->strbeg)
+                     ? UCHARAT(locinput - 1)
+                     : '\n';
 		switch (FLAGS(scan)) {
 		    case REGEX_UNICODE_CHARSET:
 			ln = isWORDCHAR_L1(ln);
