@@ -11761,23 +11761,8 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
             goto join_posix;
 
 	case 'B':
-	    RExC_seen_zerolen++;
-            RExC_seen |= REG_LOOKBEHIND_SEEN;
-	    op = NBOUND + get_regex_charset(RExC_flags);
-            if (op > NBOUNDA) { /* /aa is same as /a */
-                op = NBOUNDA;
-            }
-            else if (op == NBOUNDL) {
-                RExC_contains_locale = 1;
-            }
-	    ret = reg_node(pRExC_state, op);
-	    *flagp |= SIMPLE;
-	    if ((U8) *(RExC_parse + 1) == '{') {
-                /* diag_listed_as: Use "%s" instead of "%s" */
-	        vFAIL("Use \"\\B\\{\" instead of \"\\B{\"");
-	    }
-	    goto finish_meta_pat;
-
+            invert = 1;
+            /* FALLTHROUGH */
 	case 'b':
 	    RExC_seen_zerolen++;
             RExC_seen |= REG_LOOKBEHIND_SEEN;
@@ -11788,11 +11773,16 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
             else if (op == BOUNDL) {
                 RExC_contains_locale = 1;
             }
+
+            if (invert) {
+                op += NBOUND - BOUND;
+            }
+
 	    ret = reg_node(pRExC_state, op);
 	    *flagp |= SIMPLE;
 	    if ((U8) *(RExC_parse + 1) == '{') {
                 /* diag_listed_as: Use "%s" instead of "%s" */
-	        vFAIL("Use \"\\b\\{\" instead of \"\\b{\"");
+	        vFAIL3("Use \"\\%c\\{\" instead of \"\\%c{\"", *RExC_parse, *RExC_parse);
 	    }
 	    goto finish_meta_pat;
 
