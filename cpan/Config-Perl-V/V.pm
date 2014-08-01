@@ -8,7 +8,7 @@ use warnings;
 use Config;
 use Exporter;
 use vars qw($VERSION @ISA @EXPORT_OK %EXPORT_TAGS);
-$VERSION     = "0.20";
+$VERSION     = "0.21";
 @ISA         = ("Exporter");
 @EXPORT_OK   = qw( plv2hash summary myconfig signature );
 %EXPORT_TAGS = (
@@ -29,21 +29,21 @@ $VERSION     = "0.20";
 my %BTD = map { $_ => 0 } qw(
 
     DEBUGGING
-    NO_MATHOMS
     NO_HASH_SEED
+    NO_MATHOMS
     NO_TAINT_SUPPORT
     PERL_BOOL_AS_CHAR
     PERL_DISABLE_PMC
     PERL_DONT_CREATE_GVSV
     PERL_EXTERNAL_GLOB
-    PERL_HASH_FUNC_SIPHASH
-    PERL_HASH_FUNC_SDBM
     PERL_HASH_FUNC_DJB2
-    PERL_HASH_FUNC_SUPERFAST
     PERL_HASH_FUNC_MURMUR3
     PERL_HASH_FUNC_ONE_AT_A_TIME
     PERL_HASH_FUNC_ONE_AT_A_TIME_HARD
     PERL_HASH_FUNC_ONE_AT_A_TIME_OLD
+    PERL_HASH_FUNC_SDBM
+    PERL_HASH_FUNC_SIPHASH
+    PERL_HASH_FUNC_SUPERFAST
     PERL_IS_MINIPERL
     PERL_MALLOC_WRAP
     PERL_MEM_LOG
@@ -78,12 +78,13 @@ my %BTD = map { $_ => 0 } qw(
     HAVE_INTERP_INTERN
     MULTIPLICITY
     MYMALLOC
-    PERLIO_LAYERS
     PERL_DEBUG_READONLY_COW
     PERL_DEBUG_READONLY_OPS
     PERL_GLOBAL_STRUCT
+    PERL_GLOBAL_STRUCT_PRIVATE
     PERL_IMPLICIT_CONTEXT
     PERL_IMPLICIT_SYS
+    PERLIO_LAYERS
     PERL_MAD
     PERL_MICRO
     PERL_NEED_APPCTX
@@ -102,6 +103,7 @@ my %BTD = map { $_ => 0 } qw(
     USE_LARGE_FILES
     USE_LOCALE_COLLATE
     USE_LOCALE_NUMERIC
+    USE_LOCALE_TIME
     USE_LONG_DOUBLE
     USE_PERLIO
     USE_REENTRANT_API
@@ -229,27 +231,26 @@ sub _make_derived
 sub plv2hash
 {
     my %config;
-    for (split m/\n+/ => join "\n", @_) {
 
-	if (s/^Summary of my\s+(\S+)\s+\(\s*(.*?)\s*\)//) {
-	    $config{"package"} = $1;
-	    my $rev = $2;
-	    $rev =~ s/^ revision \s+ (\S+) \s*//x and $config{revision} = $1;
-	    $rev and $config{version_patchlevel_string} = $rev;
-	    my ($rel) = $config{package} =~ m{perl(\d)};
-	    my ($vers, $subvers) = $rev =~ m{version\s+(\d+)\s+subversion\s+(\d+)};
-	    defined $vers && defined $subvers && defined $rel and
-		$config{version} = "$rel.$vers.$subvers";
-	    next;
-	    }
+    my $pv = join "\n" => @_;
 
-	if (s/^\s+(Snapshot of:)\s+(\S+)//) {
-	    $config{git_commit_id_title} = $1;
-	    $config{git_commit_id}       = $2;
-	    next;
-	    }
+    if ($pv =~ m/^Summary of my\s+(\S+)\s+\(\s*(.*?)\s*\)/m) {
+	$config{"package"} = $1;
+	my $rev = $2;
+	$rev =~ s/^ revision \s+ (\S+) \s*//x and $config{revision} = $1;
+	$rev and $config{version_patchlevel_string} = $rev;
+	my ($rel) = $config{"package"} =~ m{perl(\d)};
+	my ($vers, $subvers) = $rev =~ m{version\s+(\d+)\s+subversion\s+(\d+)};
+	defined $vers && defined $subvers && defined $rel and
+	    $config{version} = "$rel.$vers.$subvers";
+	}
 
-	my %kv = m/\G,?\s*([^=]+)=('[^']+?'|\S+)/gc;
+    if ($pv =~ m/^\s+(Snapshot of:)\s+(\S+)/) {
+	$config{git_commit_id_title} = $1;
+	$config{git_commit_id}       = $2;
+	}
+
+    if (my %kv = ($pv =~ m/\b(\w+)\s*=\s*('[^']+?'|\S+)/g)) {
 
 	while (my ($k, $v) = each %kv) {
 	    $k =~ s/\s+$//;
@@ -260,8 +261,21 @@ sub plv2hash
 	    $config{$k} = $v;
 	    }
 	}
+
     my $build = { %empty_build };
+
+    $pv =~ m{^\s+Compiled at\s+(.*)}m
+	and $build->{stamp}   = $1;
+    $pv =~ m{^\s+Locally applied patches:(?:\s+|\n)(.*)}m
+	and $build->{patches} = [ split m/\n+/, $1 ];
+    $pv =~ m{^\s+Compile-time options:(?:\s+|\n)(.*)}m
+	and map { $build->{options}{$_} = 1 } split m/\s+|\n/ => $1;
+
     $build->{osname} = $config{osname};
+    $pv =~ m{^\s+Built under\s+(.*)}m
+	and $build->{osname}  = $1;
+    $config{osname} ||= $build->{osname};
+
     return _make_derived ({
 	build		=> $build,
 	environment	=> {},
@@ -322,20 +336,9 @@ sub myconfig
 	}
     else {
 	#y $pv = qx[$^X -e"sub Config::myconfig{};" -V];
-	my $pv = qx[$^X -V];
-	   $pv =~ s{.*?\n\n}{}s;
-	   $pv =~ s{\n(?:  \s+|\t\s*)}{\0}g;
+	my $cnf = plv2hash (qx[$^X -V]);
 
-	# print STDERR $pv;
-
-	$pv =~ m{^\s+Built under\s+(.*)}m
-	    and $build->{osname}  = $1;
-	$pv =~ m{^\s+Compiled at\s+(.*)}m
-	    and $build->{stamp}   = $1;
-	$pv =~ m{^\s+Locally applied patches:(?:\s+|\0)(.*)}m
-	    and $build->{patches} = [ split m/\0+/, $1 ];
-	$pv =~ m{^\s+Compile-time options:(?:\s+|\0)(.*)}m
-	    and map { $build->{options}{$_} = 1 } split m/\s+|\0/ => $1;
+	$build->{$_} = $cnf->{build}{$_} for qw( osname stamp patches options );
 	}
 
     my @KEYS = keys %ENV;
