@@ -1548,9 +1548,11 @@ EXMpR	|HV*	|_swash_inversion_hash	|NN SV* const swash
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C)
 ApM	|SV*	|_get_regclass_nonbitmap_data				   \
 				|NULLOK const regexp *prog		   \
-				|NN const struct regnode *node|bool doinit \
+				|NN const struct regnode *node		   \
+				|bool doinit				   \
 				|NULLOK SV **listsvp			   \
-				|NULLOK SV **lonly_utf8_locale
+				|NULLOK SV **lonly_utf8_locale		   \
+				|NULLOK SV *exclude_list
 EXp	|void|_load_PL_utf8_foldclosures|
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined (PERL_IN_DUMP_C)
@@ -2189,7 +2191,9 @@ Es	|const regnode*|dumpuntil|NN const regexp *r|NN const regnode *start \
 				|NULLOK const regnode *plast \
 				|NN SV* sv|I32 indent|U32 depth
 Es	|void	|put_byte	|NN SV* sv|int c
-Es	|bool	|put_charclass_bitmap_innards|NN SV* sv|NN char* bitmap
+Es	|bool	|put_charclass_bitmap_innards|NN SV* sv	    \
+				|NN char* bitmap	    \
+				|NULLOK SV** bitmap_invlist
 Es	|void	|put_range	|NN SV* sv|UV start|UV end
 Es	|void	|dump_trie	|NN const struct _reg_trie_data *trie\
 				|NULLOK HV* widecharmap|NN AV *revcharmap\

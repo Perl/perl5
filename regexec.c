@@ -7630,7 +7630,7 @@ Perl_regclass_swash(pTHX_ const regexp *prog, const regnode* node, bool doinit, 
         *altsvp = NULL;
     }
 
-    return newSVsv(_get_regclass_nonbitmap_data(prog, node, doinit, listsvp, NULL));
+    return newSVsv(_get_regclass_nonbitmap_data(prog, node, doinit, listsvp, NULL, NULL));
 }
 
 #endif /* !defined(PERL_IN_XSUB_RE) || defined(PLUGGABLE_RE_EXTENSION) */
@@ -7754,7 +7754,7 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
         {
             SV* only_utf8_locale = NULL;
 	    SV * const sw = _get_regclass_nonbitmap_data(prog, n, TRUE, 0,
-                                                            &only_utf8_locale);
+                                                       &only_utf8_locale, NULL);
 	    if (sw) {
                 U8 utf8_buffer[2];
 		U8 * utf8_p;

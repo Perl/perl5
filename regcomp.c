@@ -14925,6 +14925,10 @@ parseit:
 	swash = NULL;
     }
 
+    /* Note that the optimization of using 'swash' if it is the only thing in
+     * the class doesn't have us change swash at all, so it can include things
+     * that are also in the bitmap; otherwise we have purposely deleted that
+     * duplicate information */
     set_ANYOF_arg(pRExC_state, ret, cp_list,
                   (HAS_NONLOCALE_RUNTIME_PROPERTY_DEFINITION)
                    ? listsv : NULL,
@@ -15019,13 +15023,14 @@ S_set_ANYOF_arg(pTHX_ RExC_state_t* const pRExC_state,
 }
 
 #if !defined(PERL_IN_XSUB_RE) || defined(PLUGGABLE_RE_EXTENSION)
-
 SV *
 Perl__get_regclass_nonbitmap_data(pTHX_ const regexp *prog,
                                         const regnode* node,
                                         bool doinit,
                                         SV** listsvp,
-                                        SV** only_utf8_locale_ptr)
+                                        SV** only_utf8_locale_ptr,
+                                        SV*  exclude_list)
+
 {
     /* For internal core use only.
      * Returns the swash for the input 'node' in the regex 'prog'.
@@ -15036,7 +15041,11 @@ Perl__get_regclass_nonbitmap_data(pTHX_ const regexp *prog,
      *    swash exists, by calling this function with 'doinit' set to false, in
      *    which case the components that will be used to eventually create the
      *    swash are returned  (in a printable form).
-     * Tied intimately to how S_set_ANYOF_arg sets up the data structure */
+     * If <exclude_list> is not NULL, it is an inversion list of things to
+     *    exclude from what's returned in <listsvp>.
+     * Tied intimately to how S_set_ANYOF_arg sets up the data structure.  Note
+     * that, in spite of this function's name, the swash it returns may include
+     * the bitmap data as well */
 
     SV *sw  = NULL;
     SV *si  = NULL;         /* Input swash initialization string */
@@ -15125,14 +15134,21 @@ Perl__get_regclass_nonbitmap_data(pTHX_ const regexp *prog,
 	/* Add the inversion list to whatever we have.  This may have come from
 	 * the swash, or from an input parameter */
 	if (invlist) {
-	    sv_catsv(matches_string, _invlist_contents(invlist));
+            if (exclude_list) {
+                SV* clone = invlist_clone(invlist);
+                _invlist_subtract(clone, exclude_list, &clone);
+                sv_catsv(matches_string, _invlist_contents(clone));
+                SvREFCNT_dec_NN(clone);
+            }
+            else {
+                sv_catsv(matches_string, _invlist_contents(invlist));
+            }
 	}
 	*listsvp = matches_string;
     }
 
     return sw;
 }
-
 #endif /* !defined(PERL_IN_XSUB_RE) || defined(PLUGGABLE_RE_EXTENSION) */
 
 /* reg_skipcomment()
@@ -15843,9 +15859,11 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         );
         if ( IS_ANYOF_TRIE(op) || trie->bitmap ) {
             sv_catpvs(sv, "[");
-            (void) put_charclass_bitmap_innards(sv, IS_ANYOF_TRIE(op)
-                                                   ? ANYOF_BITMAP(o)
-                                                   : TRIE_BITMAP(trie));
+            (void) put_charclass_bitmap_innards(sv,
+                                                (IS_ANYOF_TRIE(op))
+                                                 ? ANYOF_BITMAP(o)
+                                                 : TRIE_BITMAP(trie),
+                                                NULL);
             sv_catpvs(sv, "]");
         }
 
@@ -15909,6 +15927,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
     else if (k == ANYOF) {
 	const U8 flags = ANYOF_FLAGS(o);
 	int do_sep = 0;
+        SV* bitmap_invlist;  /* Will hold what the bit map contains */
 
 
 	if (flags & ANYOF_LOCALE_FLAGS)
@@ -15921,7 +15940,8 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
 
         /* output what the standard cp 0-NUM_ANYOF_CODE_POINTS-1 bitmap matches
          * */
-        do_sep = put_charclass_bitmap_innards(sv, ANYOF_BITMAP(o));
+        do_sep = put_charclass_bitmap_innards(sv, ANYOF_BITMAP(o),
+                                                            &bitmap_invlist);
 
         /* output any special charclass tests (used entirely under use
          * locale) * */
@@ -15960,9 +15980,12 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
                                                been output */
                 SV *only_utf8_locale;
 
-                /* Get the stuff that wasn't in the bitmap */
+                /* Get the stuff that wasn't in the bitmap.  'bitmap_invlist'
+                 * is used to guarantee that nothing in the bitmap gets
+                 * returned */
                 (void) _get_regclass_nonbitmap_data(prog, o, FALSE,
-                                                    &lv, &only_utf8_locale);
+                                                    &lv, &only_utf8_locale,
+                                                    bitmap_invlist);
                 if (lv && lv != &PL_sv_undef) {
                     char *s = savesvpv(lv);
                     char * const origs = s;
@@ -16036,6 +16059,8 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
                 }
             }
 	}
+        SvREFCNT_dec(bitmap_invlist);
+
 
 	Perl_sv_catpvf(aTHX_ sv, "%s]", PL_colors[1]);
     }
@@ -16793,26 +16818,39 @@ S_put_range(pTHX_ SV *sv, UV start, UV end)
 }
 
 STATIC bool
-S_put_charclass_bitmap_innards(pTHX_ SV *sv, char *bitmap)
+S_put_charclass_bitmap_innards(pTHX_ SV *sv, char *bitmap, SV** bitmap_invlist)
 {
     /* Appends to 'sv' a displayable version of the innards of the bracketed
      * character class whose bitmap is 'bitmap';  Returns 'TRUE' if it actually
-     * output anything */
+     * output anything.  'bitmap_invlist', if not NULL, will contain an
+     * inversion list of what is in the bit map */
 
     int i;
     bool has_output_anything = FALSE;
 
     PERL_ARGS_ASSERT_PUT_CHARCLASS_BITMAP_INNARDS;
 
+    if (bitmap_invlist) {
+        *bitmap_invlist = _new_invlist(128);  /* worst case is exactly
+                                                 every-other code point is in
+                                                 the list */
+    }
     for (i = 0; i < NUM_ANYOF_CODE_POINTS; i++) {
         if (BITMAP_TEST((U8 *) bitmap,i)) {
+            int j;
+
+            if (bitmap_invlist) {
+                *bitmap_invlist = add_cp_to_invlist(*bitmap_invlist, i);
+            }
 
             /* The character at index i should be output.  Find the next
              * character that should NOT be output */
-            int j;
             for (j = i + 1; j < NUM_ANYOF_CODE_POINTS; j++) {
                 if (! BITMAP_TEST((U8 *) bitmap, j)) {
                     break;
+                }
+                if (bitmap_invlist) {
+                    *bitmap_invlist = add_cp_to_invlist(*bitmap_invlist, j);
                 }
             }
 

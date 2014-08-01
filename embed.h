@@ -816,7 +816,7 @@
 #define _new_invlist_C_array(a)	Perl__new_invlist_C_array(aTHX_ a)
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C)
-#define _get_regclass_nonbitmap_data(a,b,c,d,e)	Perl__get_regclass_nonbitmap_data(aTHX_ a,b,c,d,e)
+#define _get_regclass_nonbitmap_data(a,b,c,d,e,f)	Perl__get_regclass_nonbitmap_data(aTHX_ a,b,c,d,e,f)
 #endif
 #if defined(UNLINK_ALL_VERSIONS)
 #define unlnk(a)		Perl_unlnk(aTHX_ a)
@@ -917,7 +917,7 @@
 #define dump_trie_interim_table(a,b,c,d,e)	S_dump_trie_interim_table(aTHX_ a,b,c,d,e)
 #define dumpuntil(a,b,c,d,e,f,g,h)	S_dumpuntil(aTHX_ a,b,c,d,e,f,g,h)
 #define put_byte(a,b)		S_put_byte(aTHX_ a,b)
-#define put_charclass_bitmap_innards(a,b)	S_put_charclass_bitmap_innards(aTHX_ a,b)
+#define put_charclass_bitmap_innards(a,b,c)	S_put_charclass_bitmap_innards(aTHX_ a,b,c)
 #define put_range(a,b,c)	S_put_range(aTHX_ a,b,c)
 #define regdump_extflags(a,b)	S_regdump_extflags(aTHX_ a,b)
 #define regdump_intflags(a,b)	S_regdump_intflags(aTHX_ a,b)
