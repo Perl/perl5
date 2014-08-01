@@ -16557,12 +16557,12 @@ S_put_latin1_charclass_innards(pTHX_ SV *sv, char *bitmap)
     PERL_ARGS_ASSERT_PUT_LATIN1_CHARCLASS_INNARDS;
 
     for (i = 0; i < 256; i++) {
-        if (i < 256 && BITMAP_TEST((U8 *) bitmap,i)) {
+        if (BITMAP_TEST((U8 *) bitmap,i)) {
 
             /* The character at index i should be output.  Find the next
              * character that should NOT be output */
             int j;
-            for (j = i + 1; j <= 256; j++) {
+            for (j = i + 1; j < 256; j++) {
                 if (! BITMAP_TEST((U8 *) bitmap, j)) {
                     break;
                 }
