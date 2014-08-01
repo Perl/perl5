@@ -3496,7 +3496,7 @@ S_scan_const(pTHX_ char *start)
 		*d++ = '\t';
 		break;
 	    case 'e':
-		*d++ = ASCII_TO_NATIVE('\033');
+		*d++ = ESC_NATIVE;
 		break;
 	    case 'a':
 		*d++ = '\a';

@@ -11887,7 +11887,7 @@ tryagain:
 			p++;
 			break;
 		    case 'e':
-			  ender = ASCII_TO_NATIVE('\033');
+			ender = ESC_NATIVE;
 			p++;
 			break;
 		    case 'a':
@@ -13705,7 +13705,7 @@ parseit:
 	    case 't':	value = '\t';			break;
 	    case 'f':	value = '\f';			break;
 	    case 'b':	value = '\b';			break;
-	    case 'e':	value = ASCII_TO_NATIVE('\033');break;
+	    case 'e':	value = ESC_NATIVE;             break;
 	    case 'a':	value = '\a';                   break;
 	    case 'o':
 		RExC_parse--;	/* function expects to be pointed at the 'o' */
