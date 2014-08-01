@@ -235,9 +235,7 @@ cpan/Compress-Raw-Zlib/zlib-src/zutil.c		Compress::Raw::Zlib
 cpan/Compress-Raw-Zlib/zlib-src/zutil.h		Compress::Raw::Zlib
 cpan/Compress-Raw-Zlib/Zlib.xs			Compress::Raw::Zlib
 cpan/Config-Perl-V/t/10_base.t			Config::Perl::V
-cpan/Config-Perl-V/t/20_plv510.t		Config::Perl::V
 cpan/Config-Perl-V/t/20_plv56.t			Config::Perl::V
-cpan/Config-Perl-V/t/21_plv518.t		Config::Perl::V
 cpan/Config-Perl-V/t/21_plv58.t			Config::Perl::V
 cpan/Config-Perl-V/t/22_plv510.t		Config::Perl::V
 cpan/Config-Perl-V/t/23_plv512.t		Config::Perl::V
