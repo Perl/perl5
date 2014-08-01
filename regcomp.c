@@ -16666,11 +16666,11 @@ S_put_byte(pTHX_ SV *sv, int c)
 
     if (!isPRINT(c)) {
         switch (c) {
-            case '\r': Perl_sv_catpvf(aTHX_ sv, "\\r"); break;
-            case '\n': Perl_sv_catpvf(aTHX_ sv, "\\n"); break;
-            case '\t': Perl_sv_catpvf(aTHX_ sv, "\\t"); break;
-            case '\f': Perl_sv_catpvf(aTHX_ sv, "\\f"); break;
             case '\a': Perl_sv_catpvf(aTHX_ sv, "\\a"); break;
+            case '\f': Perl_sv_catpvf(aTHX_ sv, "\\f"); break;
+            case '\n': Perl_sv_catpvf(aTHX_ sv, "\\n"); break;
+            case '\r': Perl_sv_catpvf(aTHX_ sv, "\\r"); break;
+            case '\t': Perl_sv_catpvf(aTHX_ sv, "\\t"); break;
 
             default:
                 Perl_sv_catpvf(aTHX_ sv, "\\x{%x}", c);
