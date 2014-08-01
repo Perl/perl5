@@ -48,7 +48,8 @@ package XSLoader;
 sub load {
     package DynaLoader;
 
-    my ($module, $modlibname) = caller();
+    my ($caller, $modlibname) = caller();
+    my $module = $caller;
 
     if (@_) {
         $module = $_[0];
@@ -84,7 +85,7 @@ EOT
 
 print OUT <<'EOT';
     my $modpname = join('/',@modparts);
-    my $c = @modparts;
+    my $c = () = split(/::/,$caller,-1);
     $modlibname =~ s,[\\/][^\\/]+$,, while $c--;    # Q&D basename
 EOT
 

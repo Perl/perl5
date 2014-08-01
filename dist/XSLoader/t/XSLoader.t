@@ -117,8 +117,6 @@ SKIP: {
     unless $module_path;
 
   # [perl #122455]
-  use vars '$TODO';
-  local $TODO = "Modules not loaded from correct relative path";
   # die instead of falling back to DynaLoader
   local *XSLoader::bootstrap_inherit = sub { die "Fallback to DynaLoader\n" };
   ::ok( eval <<EOS, "test correct path searched for modules")
