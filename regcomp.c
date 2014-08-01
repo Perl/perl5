@@ -15018,6 +15018,122 @@ S_set_ANYOF_arg(pTHX_ RExC_state_t* const pRExC_state,
     }
 }
 
+#if !defined(PERL_IN_XSUB_RE) || defined(PLUGGABLE_RE_EXTENSION)
+
+SV *
+Perl__get_regclass_nonbitmap_data(pTHX_ const regexp *prog,
+                                        const regnode* node,
+                                        bool doinit,
+                                        SV** listsvp,
+                                        SV** only_utf8_locale_ptr)
+{
+    /* For internal core use only.
+     * Returns the swash for the input 'node' in the regex 'prog'.
+     * If <doinit> is 'true', will attempt to create the swash if not already
+     *	  done.
+     * If <listsvp> is non-null, will return the printable contents of the
+     *    swash.  This can be used to get debugging information even before the
+     *    swash exists, by calling this function with 'doinit' set to false, in
+     *    which case the components that will be used to eventually create the
+     *    swash are returned  (in a printable form).
+     * Tied intimately to how S_set_ANYOF_arg sets up the data structure */
+
+    SV *sw  = NULL;
+    SV *si  = NULL;         /* Input swash initialization string */
+    SV*  invlist = NULL;
+
+    RXi_GET_DECL(prog,progi);
+    const struct reg_data * const data = prog ? progi->data : NULL;
+
+    PERL_ARGS_ASSERT__GET_REGCLASS_NONBITMAP_DATA;
+
+    assert(ANYOF_FLAGS(node)
+                        & (ANYOF_UTF8|ANYOF_NONBITMAP_NON_UTF8|ANYOF_LOC_FOLD));
+
+    if (data && data->count) {
+	const U32 n = ARG(node);
+
+	if (data->what[n] == 's') {
+	    SV * const rv = MUTABLE_SV(data->data[n]);
+	    AV * const av = MUTABLE_AV(SvRV(rv));
+	    SV **const ary = AvARRAY(av);
+	    U8 swash_init_flags = _CORE_SWASH_INIT_ACCEPT_INVLIST;
+
+	    si = *ary;	/* ary[0] = the string to initialize the swash with */
+
+	    /* Elements 3 and 4 are either both present or both absent. [3] is
+	     * any inversion list generated at compile time; [4] indicates if
+	     * that inversion list has any user-defined properties in it. */
+            if (av_tindex(av) >= 2) {
+                if (only_utf8_locale_ptr
+                    && ary[2]
+                    && ary[2] != &PL_sv_undef)
+                {
+                    *only_utf8_locale_ptr = ary[2];
+                }
+                else {
+                    assert(only_utf8_locale_ptr);
+                    *only_utf8_locale_ptr = NULL;
+                }
+
+                if (av_tindex(av) >= 3) {
+                    invlist = ary[3];
+                    if (SvUV(ary[4])) {
+                        swash_init_flags |= _CORE_SWASH_INIT_USER_DEFINED_PROPERTY;
+                    }
+                }
+                else {
+                    invlist = NULL;
+                }
+	    }
+
+	    /* Element [1] is reserved for the set-up swash.  If already there,
+	     * return it; if not, create it and store it there */
+	    if (ary[1] && SvROK(ary[1])) {
+		sw = ary[1];
+	    }
+	    else if (doinit && ((si && si != &PL_sv_undef)
+                                 || (invlist && invlist != &PL_sv_undef))) {
+		assert(si);
+		sw = _core_swash_init("utf8", /* the utf8 package */
+				      "", /* nameless */
+				      si,
+				      1, /* binary */
+				      0, /* not from tr/// */
+				      invlist,
+				      &swash_init_flags);
+		(void)av_store(av, 1, sw);
+	    }
+	}
+    }
+
+    /* If requested, return a printable version of what this swash matches */
+    if (listsvp) {
+	SV* matches_string = newSVpvs("");
+
+        /* The swash should be used, if possible, to get the data, as it
+         * contains the resolved data.  But this function can be called at
+         * compile-time, before everything gets resolved, in which case we
+         * return the currently best available information, which is the string
+         * that will eventually be used to do that resolving, 'si' */
+	if ((! sw || (invlist = _get_swash_invlist(sw)) == NULL)
+            && (si && si != &PL_sv_undef))
+        {
+	    sv_catsv(matches_string, si);
+	}
+
+	/* Add the inversion list to whatever we have.  This may have come from
+	 * the swash, or from an input parameter */
+	if (invlist) {
+	    sv_catsv(matches_string, _invlist_contents(invlist));
+	}
+	*listsvp = matches_string;
+    }
+
+    return sw;
+}
+
+#endif /* !defined(PERL_IN_XSUB_RE) || defined(PLUGGABLE_RE_EXTENSION) */
 
 /* reg_skipcomment()
 
