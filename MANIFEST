@@ -234,11 +234,18 @@ cpan/Compress-Raw-Zlib/zlib-src/zlib.h		Compress::Raw::Zlib
 cpan/Compress-Raw-Zlib/zlib-src/zutil.c		Compress::Raw::Zlib
 cpan/Compress-Raw-Zlib/zlib-src/zutil.h		Compress::Raw::Zlib
 cpan/Compress-Raw-Zlib/Zlib.xs			Compress::Raw::Zlib
-cpan/Config-Perl-V/t/00_pod.t			Config::Perl::V
-cpan/Config-Perl-V/t/01_pod.t			Config::Perl::V
 cpan/Config-Perl-V/t/10_base.t			Config::Perl::V
 cpan/Config-Perl-V/t/20_plv510.t		Config::Perl::V
+cpan/Config-Perl-V/t/20_plv56.t			Config::Perl::V
 cpan/Config-Perl-V/t/21_plv518.t		Config::Perl::V
+cpan/Config-Perl-V/t/21_plv58.t			Config::Perl::V
+cpan/Config-Perl-V/t/22_plv510.t		Config::Perl::V
+cpan/Config-Perl-V/t/23_plv512.t		Config::Perl::V
+cpan/Config-Perl-V/t/24_plv514.t		Config::Perl::V
+cpan/Config-Perl-V/t/25_plv516.t		Config::Perl::V
+cpan/Config-Perl-V/t/26_plv5182.t		Config::Perl::V
+cpan/Config-Perl-V/t/26_plv518.t		Config::Perl::V
+cpan/Config-Perl-V/t/27_plv5200.t		Config::Perl::V
 cpan/Config-Perl-V/V.pm				Config::Perl::V
 cpan/CPAN/lib/App/Cpan.pm		helper package for CPAN.pm
 cpan/CPAN/lib/CPAN/API/HOWTO.pod		recipe book for programming with CPAN.pm

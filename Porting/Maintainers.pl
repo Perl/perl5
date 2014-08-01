@@ -233,9 +233,13 @@ use File::Glob qw(:case);
     },
 
     'Config::Perl::V' => {
-        'DISTRIBUTION' => 'HMBRAND/Config-Perl-V-0.20.tgz',
+        'DISTRIBUTION' => 'HMBRAND/Config-Perl-V-0.21.tgz',
         'FILES'        => q[cpan/Config-Perl-V],
-        'EXCLUDED'     => ['examples/show-v.pl'],
+        'EXCLUDED'     => [qw(
+		examples/show-v.pl
+		t/00_pod.t
+		t/01_pod.t
+		)],
     },
 
     'constant' => {
