@@ -5,7 +5,7 @@ use warnings;
 
 BEGIN {
     use Test::More;
-    my $tests = 8;
+    my $tests = 91;
     unless ($ENV{PERL_CORE}) {
 	require Test::NoWarnings;
 	Test::NoWarnings->import ();
@@ -23,6 +23,11 @@ ok (exists $conf->{$_}, "Has $_ entry") for qw( build environment config inc );
 is ($conf->{build}{osname}, $conf->{config}{osname}, "osname");
 is ($conf->{build}{stamp}, 0, "No build time known");
 is ($conf->{config}{version}, "5.10.0", "reconstructed \%Config{version}");
+
+my $opt = Config::Perl::V::plv2hash ("")->{build}{options};
+foreach my $o (sort keys %$opt) {
+    is ($conf->{build}{options}{$o}, 0, "Runtime option $o unset");
+    }
 
 __END__
 Summary of my perl5 (revision 5 version 10 subversion 0) configuration:

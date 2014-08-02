@@ -8,7 +8,7 @@ use warnings;
 use Config;
 use Exporter;
 use vars qw($VERSION @ISA @EXPORT_OK %EXPORT_TAGS);
-$VERSION     = "0.21";
+$VERSION     = "0.22";
 @ISA         = ("Exporter");
 @EXPORT_OK   = qw( plv2hash summary myconfig signature );
 %EXPORT_TAGS = (
@@ -250,13 +250,22 @@ sub plv2hash
 	$config{git_commit_id}       = $2;
 	}
 
-    if (my %kv = ($pv =~ m/\b(\w+)\s*=\s*('[^']+?'|\S+)/g)) {
+    if (my %kv = ($pv =~ m{\b
+	    (\w+)		# key
+	    \s*=		# assign
+	    ( '\s*[^']*?\s*'	# quoted value
+	    | \S+[^=]*?\s*\n	# unquoted running till end of line
+	    | \S+		# unquoted value
+	    | \s*\n		# empty
+	    )
+	    (?:,?\s+|\s*\n)?	# separator (5.8.x reports did not have a ','
+	    }gx)) {		# between every kv pair
 
 	while (my ($k, $v) = each %kv) {
 	    $k =~ s/\s+$//;
+	    $v =~ s/\s*\n\z//;
 	    $v =~ s/,$//;
 	    $v =~ m/^'(.*)'$/ and $v = $1;
-	    $v =~ s/^\s+//;
 	    $v =~ s/\s+$//;
 	    $config{$k} = $v;
 	    }
@@ -266,9 +275,9 @@ sub plv2hash
 
     $pv =~ m{^\s+Compiled at\s+(.*)}m
 	and $build->{stamp}   = $1;
-    $pv =~ m{^\s+Locally applied patches:(?:\s+|\n)(.*)}m
-	and $build->{patches} = [ split m/\n+/, $1 ];
-    $pv =~ m{^\s+Compile-time options:(?:\s+|\n)(.*)}m
+    $pv =~ m{^\s+Locally applied patches:(?:\s+|\n)(.*?)(?:[\s\n]+Buil[td] under)}ms
+	and $build->{patches} = [ split m/\n+\s*/, $1 ];
+    $pv =~ m{^\s+Compile-time options:(?:\s+|\n)(.*?)(?:[\s\n]+(?:Locally applied|Buil[td] under))}ms
 	and map { $build->{options}{$_} = 1 } split m/\s+|\n/ => $1;
 
     $build->{osname} = $config{osname};
