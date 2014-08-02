@@ -5,7 +5,7 @@ use warnings;
 
 BEGIN {
     use Test::More;
-    my $tests = 9;
+    my $tests = 92;
     unless ($ENV{PERL_CORE}) {
 	require Test::NoWarnings;
 	Test::NoWarnings->import ();
@@ -23,7 +23,22 @@ ok (exists $conf->{$_}, "Has $_ entry") for qw( build environment config inc );
 is ($conf->{build}{osname}, $conf->{config}{osname}, "osname");
 is ($conf->{build}{stamp}, "Mar 12 2013 08:36:17", "Build time");
 is ($conf->{config}{version}, "5.16.3", "reconstructed \%Config{version}");
-is ($conf->{config}{ccversion}, "", "Using gcc. nonn-gcc version should not be defined");
+is ($conf->{config}{ccversion}, "", "Using gcc. non-gcc version should not be defined");
+
+my $opt = Config::Perl::V::plv2hash ("")->{build}{options};
+foreach my $o (sort qw(
+	HAS_TIMES PERLIO_LAYERS PERL_DONT_CREATE_GVSV
+	PERL_MALLOC_WRAP PERL_PRESERVE_IVUV USE_64_BIT_INT
+	USE_LARGE_FILES USE_LOCALE USE_LOCALE_COLLATE
+	USE_LOCALE_CTYPE USE_LOCALE_NUMERIC USE_PERLIO
+	USE_PERL_ATOF
+	)) {
+    is ($conf->{build}{options}{$o}, 1, "Runtime option $o set");
+    delete $opt->{$o};
+    }
+foreach my $o (sort keys %$opt) {
+    is ($conf->{build}{options}{$o}, 0, "Runtime option $o unset");
+    }
 
 __END__
 Summary of my perl5 (revision 5 version 16 subversion 3) configuration:

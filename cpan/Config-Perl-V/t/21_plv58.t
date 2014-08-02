@@ -5,7 +5,7 @@ use warnings;
 
 BEGIN {
     use Test::More;
-    my $tests = 9;
+    my $tests = 92;
     unless ($ENV{PERL_CORE}) {
 	require Test::NoWarnings;
 	Test::NoWarnings->import ();
@@ -24,6 +24,20 @@ is ($conf->{build}{osname}, $conf->{config}{osname}, "osname");
 is ($conf->{build}{stamp}, "Oct 21 2010 14:50:53", "Build time");
 is ($conf->{config}{version}, "5.8.9", "reconstructed \%Config{version}");
 is ($conf->{config}{usethreads}, "define", "This was a threaded perl");
+
+my $opt = Config::Perl::V::plv2hash ("")->{build}{options};
+foreach my $o (sort qw(
+	DEBUGGING MULTIPLICITY PERL_IMPLICIT_CONTEXT
+	PERL_MALLOC_WRAP THREADS_HAVE_PIDS USE_64_BIT_INT
+	USE_FAST_STDIO USE_ITHREADS USE_LARGE_FILES
+	USE_LONG_DOUBLE USE_PERLIO USE_REENTRANT_API
+	)) {
+    is ($conf->{build}{options}{$o}, 1, "Runtime option $o set");
+    delete $opt->{$o};
+    }
+foreach my $o (sort keys %$opt) {
+    is ($conf->{build}{options}{$o}, 0, "Runtime option $o unset");
+    }
 
 __END__
 Summary of my perl5 (revision 5 version 8 subversion 9) configuration:

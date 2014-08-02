@@ -240,6 +240,7 @@ cpan/Config-Perl-V/t/21_plv58.t			Config::Perl::V
 cpan/Config-Perl-V/t/22_plv510.t		Config::Perl::V
 cpan/Config-Perl-V/t/23_plv512.t		Config::Perl::V
 cpan/Config-Perl-V/t/24_plv514.t		Config::Perl::V
+cpan/Config-Perl-V/t/25_plv5162.t		Config::Perl::V
 cpan/Config-Perl-V/t/25_plv516.t		Config::Perl::V
 cpan/Config-Perl-V/t/26_plv5182.t		Config::Perl::V
 cpan/Config-Perl-V/t/26_plv518.t		Config::Perl::V

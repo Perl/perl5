@@ -5,7 +5,7 @@ use warnings;
 
 BEGIN {
     use Test::More;
-    my $tests = 35;
+    my $tests = 111;
     unless ($ENV{PERL_CORE}) {
 	require Test::NoWarnings;
 	Test::NoWarnings->import ();
@@ -24,10 +24,23 @@ is ($conf->{build}{osname}, $conf->{config}{osname}, "osname");
 is ($conf->{build}{stamp}, "May 18 2013 17:34:20", "Build time");
 is ($conf->{config}{version}, "5.18.0", "reconstructed \$Config{version}");
 
-# Some random checks
-is ($conf->{build}{options}{$_}, 0, "Runtime option $_") for qw(
-    DEBUG_LEAKING_SCALARS NO_HASH_SEED PERL_MEM_LOG_STDERR PERL_MEM_LOG_ENV
-    PERL_MEM_LOG_TIMESTAMP PERL_MICRO USE_ATTRIBUTES_FOR_PERLIO VMS_DO_SOCKETS );
+my $opt = Config::Perl::V::plv2hash ("")->{build}{options};
+foreach my $o (sort qw(
+	HAS_TIMES PERLIO_LAYERS PERL_DONT_CREATE_GVSV
+	PERL_HASH_FUNC_ONE_AT_A_TIME_HARD PERL_MALLOC_WRAP
+	PERL_PRESERVE_IVUV PERL_SAWAMPERSAND USE_64_BIT_INT
+	USE_LARGE_FILES USE_LOCALE USE_LOCALE_COLLATE
+	USE_LOCALE_CTYPE USE_LOCALE_NUMERIC USE_LONG_DOUBLE
+	USE_PERLIO USE_PERL_ATOF
+	)) {
+    is ($conf->{build}{options}{$o}, 1, "Runtime option $o set");
+    delete $opt->{$o};
+    }
+foreach my $o (sort keys %$opt) {
+    is ($conf->{build}{options}{$o}, 0, "Runtime option $o unset");
+    }
+
+is_deeply ($conf->{build}{patches}, [], "No local patches");
 
 my %check = (
     alignbytes      => 4,
