@@ -1,6 +1,6 @@
 package B::Debug;
 
-our $VERSION = '1.19';
+our $VERSION = '1.20';
 
 use strict;
 require 5.006;
@@ -361,7 +361,7 @@ EOT
 sub B::SPECIAL::debug {
     my $sv = shift;
     my $i = ref $sv ? $$sv : 0;
-    print exists $specialsv_name[$i] ? $specialsv_name[$i] : "", "\n";
+    print defined $specialsv_name[$i] ? $specialsv_name[$i] : "", "\n";
 }
 
 sub B::PADLIST::debug {
