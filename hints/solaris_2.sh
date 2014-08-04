@@ -686,7 +686,7 @@ EOCBU
 #
 cat >> config.over <<'EOOVER'
 if test "$d_unsetenv" = "$define" -a \
-    `expr "$ccflags" : '.*-D_PERL_USE_SAFE_PUTENV'` -eq 0; then
+    `expr "$ccflags" : '.*-DPERL_USE_SAFE_PUTENV'` -eq 0; then
         ccflags="$ccflags -DPERL_USE_SAFE_PUTENV"
 fi
 EOOVER
