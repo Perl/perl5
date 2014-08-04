@@ -16,5 +16,5 @@ autodie cpan/autodie/t/utf8_open.t 5295851351c49f939008c5aca6a798742b1e503d
 podlators cpan/podlators/scripts/pod2man.PL f81acf53f3ff46cdcc5ebdd661c5d13eb35d20d6
 podlators cpan/podlators/scripts/pod2text.PL b4693fcfe4a0a1b38a215cfb8985a65d5d025d69
 version cpan/version/lib/version.pm fa9931d4db05aff9a0a6ef558610b1a472d9306e
-version vutil.c abd88f59a6e0cfe7b4e45b1859f414042ea254aa
+version vutil.c 668f17ca43e2527645674d29ba772b86330d5663
 version vxs.inc 9064aacbdfe42bb584a068f62b505dd11dbb4dc4
