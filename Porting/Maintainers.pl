@@ -864,7 +864,7 @@ use File::Glob qw(:case);
     },
 
     'perlfaq' => {
-        'DISTRIBUTION' => 'LLAP/perlfaq-5.0150044.tar.gz',
+        'DISTRIBUTION' => 'LLAP/perlfaq-5.0150045.tar.gz',
         'FILES'        => q[cpan/perlfaq],
         'EXCLUDED'     => [
             qw( t/release-pod-syntax.t

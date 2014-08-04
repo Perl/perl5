@@ -431,8 +431,10 @@ temporary files in one process, use a counter:
 
     BEGIN {
         use Fcntl;
-        my $temp_dir = -d '/tmp' ? '/tmp' : $ENV{TMPDIR} || $ENV{TEMP};
-        my $base_name = sprintf "%s/%d-%d-0000", $temp_dir, $$, time;
+        use File::Spec;
+        my $temp_dir  = File::Spec->tmpdir();
+        my $file_base = sprintf "%d-%d-0000", $$, time;
+        my $base_name = File::Spec->catfile($temp_dir, $file_base);
 
         sub temp_file {
             my $fh;
