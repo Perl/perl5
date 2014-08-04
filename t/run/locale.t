@@ -36,7 +36,9 @@ fresh_perl_is("for (qw(@locales)) {\n" . <<'EOF',
 EOF
     "", {}, "no locales where LC_NUMERIC breaks");
 
-{
+SKIP: {
+    skip("Windows has a default without environment setting", 1 )
+                                                            if $^O eq 'MSWin32';
     local $ENV{LC_NUMERIC}; # So not taken as a default
     local $ENV{LC_ALL}; # so it never overrides LC_NUMERIC
     local $ENV{LANG};   # So not taken as a default
