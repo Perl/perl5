@@ -1,3 +1,6 @@
+2.36 Mon Aug 04 2014
+    - critical bugfix: outside packages could be replaced (fix in Opcode)
+
 2.35 Thu Feb 21 2013
     - localize %SIG in the Safe compartment
     - actually check that we call execution methods on a Safe object

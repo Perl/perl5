@@ -310,7 +310,7 @@ PPCODE:
     dummy_hv = save_hash(PL_incgv);
     GvHV(PL_incgv) = (HV*)SvREFCNT_inc(GvHV(gv_HVadd(gv_fetchpvs("INC",GV_ADD,SVt_PVHV))));
 
-    /* Invalidate ISA and method caches */
+    /* Invalidate class and method caches */
     ++PL_sub_generation;
     hv_clear(PL_stashcache);
 
@@ -319,6 +319,10 @@ PPCODE:
     sv_free( (SV *) dummy_hv);  /* get rid of what save_hash gave us*/
     SPAGAIN; /* for the PUTBACK added by xsubpp */
     LEAVE;
+
+    /* Invalidate again */
+    ++PL_sub_generation;
+    hv_clear(PL_stashcache);
 
 
 int
