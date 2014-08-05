@@ -359,6 +359,13 @@ EOM
 			d_attribute_pure='undef'
 			d_attribute_unused='undef'
 			d_attribute_warn_unused_result='undef'
+			# The c99 doesn't like bare -O.
+			case "$cc" in
+			*c99)	case "$optimize" in
+				''|-O) optimize=-O3 ;;
+				esac
+				;;
+			esac
 			;;
 		esac
 	fi
