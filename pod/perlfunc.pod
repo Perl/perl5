@@ -1683,6 +1683,9 @@ returned by C<each()>, so the following code works properly:
           delete $hash{$key};   # This is safe
         }
 
+Tied hashes may have a different ordering behaviour to perl's hash
+implementation.
+
 This prints out your environment like the printenv(1) program,
 but in a different order:
 
@@ -3155,7 +3158,9 @@ rely on C<keys>, C<values> and C<each> to repeatedly return the same order
 as each other.  See L<perlsec/"Algorithmic Complexity Attacks"> for
 details on why hash order is randomized.  Aside from the guarantees
 provided here the exact details of Perl's hash algorithm and the hash
-traversal order are subject to change in any release of Perl.
+traversal order are subject to change in any release of Perl.  Tied hashes
+may behave differently to Perl's hashes with respect to changes in order on
+insertion and deletion of items.
 
 As a side effect, calling keys() resets the internal iterator of the HASH or
 ARRAY (see L</each>).  In particular, calling keys() in void context resets
@@ -8746,7 +8751,9 @@ rely on C<keys>, C<values> and C<each> to repeatedly return the same order
 as each other.  See L<perlsec/"Algorithmic Complexity Attacks"> for
 details on why hash order is randomized.  Aside from the guarantees
 provided here the exact details of Perl's hash algorithm and the hash
-traversal order are subject to change in any release of Perl.
+traversal order are subject to change in any release of Perl.  Tied hashes
+may behave differently to Perl's hashes with respect to changes in order on
+insertion and deletion of items.
 
 As a side effect, calling values() resets the HASH or ARRAY's internal
 iterator, see L</each>.  (In particular, calling values() in void context
