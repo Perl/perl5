@@ -534,6 +534,9 @@ or the CPAN module C<Algorithm::Numerical::Shuffle>), or for generating
 permutations (use e.g. the CPAN modules C<Algorithm::Permute> or
 C<Algorithm::FastPermute>), or for any cryptographic applications.
 
+Tied hashes may have their own ordering and algorithmic complexity
+attacks.
+
 =item *
 
 Regular expressions - Perl's regular expression engine is so called NFA
