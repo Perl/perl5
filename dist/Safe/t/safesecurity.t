@@ -25,7 +25,7 @@ my $c = new Safe;
 $c->reval(q{
     package My::Controller;
     sub jopa { return "hacked" }
-    
+
     My::Controller->jopa; # let it cache package
 });
 

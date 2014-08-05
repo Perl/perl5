@@ -1,5 +1,11 @@
-2.36 Mon Aug 04 2014
+2.38 Mon Aug 04 2014
     - critical bugfix: outside packages could be replaced (fix in Opcode)
+
+2.37 Sat Jun 22 2013
+    - Doc and presentation nits
+
+2.36 Thu May 23 18:08:48 2013
+    - Doc and test fixes for newer perls
 
 2.35 Thu Feb 21 2013
     - localize %SIG in the Safe compartment
@@ -10,7 +16,7 @@
       cf Perl 5 change 42440e3c68e8bafb7e2a74763360939de0fad6be
 
 2.33 Tue Apr  3 2012
-    - Don’t eval code under ‘no strict’ (Father Chrysostomos)
+      Don't eval code under "no strict" (Father Chrysostomos)
       cf. Perl 5 change 25dc25e774abbe993644899cf4d9f9925a9fb9a8
 
 2.32 Sat Mar 31 2012
