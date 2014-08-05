@@ -340,7 +340,7 @@ EOM
 	if $tryworkshopcc >/dev/null 2>&1; then
 		cc_name=`$run ./try`
 		if test "$cc_name" = "workshop"; then
-			ccversion="`${cc:-cc} -V 2>&1|sed -n -e '1s/^[Cc][Cc]: //p'`"
+			ccversion="`${cc:-cc} -V 2>&1|sed -n -e '1s/^[Cc][Cc9]9*: //p'`"
 		fi
 		if test "$cc_name" = "workshop CC"; then
 			ccversion="`${cc:-CC} -V 2>&1|sed -n -e '1s/^[Cc][C]: //p'`"
