@@ -788,7 +788,7 @@ Perl_av_len(pTHX_ AV *av)
 Set the highest index in the array to the given number, equivalent to
 Perl's C<$#array = $fill;>.
 
-The number of elements in the an array will be C<fill + 1> after
+The number of elements in the array will be C<fill + 1> after
 av_fill() returns.  If the array was previously shorter, then the
 additional elements appended are set to NULL.  If the array
 was longer, then the excess elements are freed.  C<av_fill(av, -1)> is
