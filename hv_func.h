@@ -21,6 +21,8 @@
         || defined(PERL_HASH_FUNC_ONE_AT_A_TIME) \
         || defined(PERL_HASH_FUNC_ONE_AT_A_TIME_HARD) \
         || defined(PERL_HASH_FUNC_ONE_AT_A_TIME_OLD) \
+        || defined(PERL_HASH_FUNC_MURMUR_HASH_64A) \
+        || defined(PERL_HASH_FUNC_MURMUR_HASH_64B) \
     )
 #define PERL_HASH_FUNC_ONE_AT_A_TIME_HARD
 #endif
@@ -57,6 +59,14 @@
 #   define PERL_HASH_FUNC "ONE_AT_A_TIME_OLD"
 #   define PERL_HASH_SEED_BYTES 4
 #   define PERL_HASH_WITH_SEED(seed,hash,str,len) (hash)= S_perl_hash_old_one_at_a_time((seed),(U8*)(str),(len))
+#elif defined(PERL_HASH_FUNC_MURMUR_HASH_64A)
+#   define PERL_HASH_FUNC "MURMUR_HASH_64A"
+#   define PERL_HASH_SEED_BYTES 8
+#   define PERL_HASH_WITH_SEED(seed,hash,str,len) (hash)= S_perl_hash_murmur_hash_64a((seed),(U8*)(str),(len))
+#elif defined(PERL_HASH_FUNC_MURMUR_HASH_64B)
+#   define PERL_HASH_FUNC "MURMUR_HASH_64B"
+#   define PERL_HASH_SEED_BYTES 8
+#   define PERL_HASH_WITH_SEED(seed,hash,str,len) (hash)= S_perl_hash_murmur_hash_64b((seed),(U8*)(str),(len))
 #endif
 
 #ifndef PERL_HASH_WITH_SEED
@@ -553,6 +563,134 @@ S_perl_hash_old_one_at_a_time(const unsigned char * const seed, const unsigned c
     hash ^= (hash >> 11);
     return (hash + (hash << 15));
 }
+
+#ifdef PERL_HASH_FUNC_MURMUR_HASH_64A
+/* This code is from Austin Appleby and is in the public domain.
+   Altered by Yves Orton to match Perl's hash interface, and to
+   return a 32 bit hash.
+
+   Note uses unaligned 64 bit loads - will NOT work on machines with
+   strict alginment requirements.
+
+   Also this code may not be suitable for big-endian machines.
+*/
+
+/* a 64 bit hash where we only use the low 32 bits */
+PERL_STATIC_INLINE U32
+S_perl_hash_murmur_hash_64a (const unsigned char * const seed, const unsigned char *str, const STRLEN len)
+{
+        const U64TYPE m = 0xc6a4a7935bd1e995;
+        const int r = 47;
+        U64TYPE h = *((U64TYPE*)seed) ^ len;
+        const U64TYPE * data = (const U64TYPE *)str;
+        const U64TYPE * end = data + (len/8);
+        const unsigned char * data2;
+
+        while(data != end)
+        {
+            U64TYPE k = *data++;
+
+            k *= m;
+            k ^= k >> r;
+            k *= m;
+
+            h ^= k;
+            h *= m;
+        }
+
+        data2 = (const unsigned char *)data;
+
+        switch(len & 7)
+        {
+            case 7: h ^= (U64TYPE)(data2[6]) << 48; /* fallthrough */
+            case 6: h ^= (U64TYPE)(data2[5]) << 40; /* fallthrough */
+            case 5: h ^= (U64TYPE)(data2[4]) << 32; /* fallthrough */
+            case 4: h ^= (U64TYPE)(data2[3]) << 24; /* fallthrough */
+            case 3: h ^= (U64TYPE)(data2[2]) << 16; /* fallthrough */
+            case 2: h ^= (U64TYPE)(data2[1]) << 8;  /* fallthrough */
+            case 1: h ^= (U64TYPE)(data2[0]);       /* fallthrough */
+                    h *= m;
+        };
+
+        h ^= h >> r;
+        h *= m;
+        h ^= h >> r;
+
+        /* was: return h; */
+        return h & 0xFFFFFFFF;
+}
+
+#endif
+
+#ifdef PERL_HASH_FUNC_MURMUR_HASH_64B
+/* This code is from Austin Appleby and is in the public domain.
+   Altered by Yves Orton to match Perl's hash interface and return
+   a 32 bit value
+
+   Note uses unaligned 32 bit loads - will NOT work on machines with
+   strict alginment requirements.
+
+   Also this code may not be suitable for big-endian machines.
+*/
+
+/* a 64-bit hash for 32-bit platforms where we only use the low 32 bits */
+PERL_STATIC_INLINE U32
+S_perl_hash_murmur_hash_64b (const unsigned char * const seed, const unsigned char *str, STRLEN len)
+{
+        const U32 m = 0x5bd1e995;
+        const int r = 24;
+
+        U32 h1 = ((U32 *)seed)[0] ^ len;
+        U32 h2 = ((U32 *)seed)[1];
+
+        const U32 * data = (const U32 *)str;
+
+        while(len >= 8)
+        {
+            U32 k1, k2;
+            k1 = *data++;
+            k1 *= m; k1 ^= k1 >> r; k1 *= m;
+            h1 *= m; h1 ^= k1;
+            len -= 4;
+
+            k2 = *data++;
+            k2 *= m; k2 ^= k2 >> r; k2 *= m;
+            h2 *= m; h2 ^= k2;
+            len -= 4;
+        }
+
+        if(len >= 4)
+        {
+            U32 k1 = *data++;
+            k1 *= m; k1 ^= k1 >> r; k1 *= m;
+            h1 *= m; h1 ^= k1;
+            len -= 4;
+        }
+
+        switch(len)
+        {
+            case 3: h2 ^= ((unsigned char*)data)[2] << 16;  /* fallthrough */
+            case 2: h2 ^= ((unsigned char*)data)[1] << 8;   /* fallthrough */
+            case 1: h2 ^= ((unsigned char*)data)[0];        /* fallthrough */
+                    h2 *= m;
+        };
+
+        h1 ^= h2 >> 18; h1 *= m;
+        h2 ^= h1 >> 22; h2 *= m;
+        /*
+        The following code has been removed as it is unused
+        when only the low 32 bits are used. -- Yves
+
+        h1 ^= h2 >> 17; h1 *= m;
+
+        U64TYPE h = h1;
+
+        h = (h << 32) | h2;
+        */
+
+        return h2;
+}
+#endif
 
 /* legacy - only mod_perl should be doing this.  */
 #ifdef PERL_HASH_INTERNAL_ACCESS
