@@ -5131,8 +5131,11 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVuf" RHS=%"UVuf"\n",
 			 */
 			ssc_init(pRExC_state, data->start_class);
 		    }  else {
-			/* AND before and after: combine and continue */
+                        /* AND before and after: combine and continue.  These
+                         * assertions are zero-length, so can match an EMPTY
+                         * string */
 			ssc_and(pRExC_state, data->start_class, (regnode_charclass *) &intrnl);
+                        ANYOF_FLAGS(data->start_class) |= ANYOF_EMPTY_STRING;
 		    }
                 }
 	    }
@@ -5204,6 +5207,7 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVuf" RHS=%"UVuf"\n",
 
                 if (f & SCF_DO_STCLASS_AND) {
                     ssc_and(pRExC_state, data->start_class, (regnode_charclass *) &intrnl);
+                    ANYOF_FLAGS(data->start_class) |= ANYOF_EMPTY_STRING;
                 }
                 if (data) {
                     if (data_fake.flags & (SF_HAS_PAR|SF_IN_PAR))
