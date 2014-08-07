@@ -28,7 +28,7 @@ if ( @ARGV ) {
 my @toolchain = qw(cpan/AutoLoader/lib
 		   dist/Carp/lib
 		   dist/PathTools dist/PathTools/lib
-		   dist/ExtUtils-Command/lib
+		   cpan/ExtUtils-Command/lib
 		   dist/ExtUtils-Install/lib
 		   cpan/ExtUtils-MakeMaker/lib
 		   dist/ExtUtils-Manifest/lib

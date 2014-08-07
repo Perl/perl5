@@ -25,7 +25,6 @@ no_index:
     - dist/Env
     - dist/Exporter
     - dist/ExtUtils-CBuilder
-    - dist/ExtUtils-Command
     - dist/ExtUtils-Install
     - dist/ExtUtils-Manifest
     - dist/ExtUtils-ParseXS

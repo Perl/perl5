@@ -437,7 +437,7 @@ use File::Glob qw(:case);
 
     'ExtUtils::Command' => {
         'DISTRIBUTION' => 'FLORA/ExtUtils-Command-1.18.tar.gz',
-        'FILES'        => q[dist/ExtUtils-Command],
+        'FILES'        => q[cpan/ExtUtils-Command],
         'EXCLUDED'     => [qr{^t/release-}],
     },
 
