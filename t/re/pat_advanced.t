@@ -2302,6 +2302,12 @@ EOP
         is($word, 'раб', "Handles UTF8 trie correctly");
     }
 
+    { # [perl #122460]
+        my $a = "rdvark";
+        $a =~ /(?{})(?=[A-Za-z0-9_])a*?/g;
+        is (pos $a, 0, "optimizer correctly thinks (?=...) is 0-length");
+    }
+
     #
     # Keep the following tests last -- they may crash perl
     #
