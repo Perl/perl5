@@ -59,6 +59,7 @@ __DEPARSE_FAILURES__
 ../cpan/ExtUtils-MakeMaker/t/arch_check.t
 ../cpan/ExtUtils-MakeMaker/t/min_perl_version.t
 ../cpan/ExtUtils-MakeMaker/t/xs.t
+../cpan/ExtUtils-Manifest/t/Manifest.t
 ../cpan/File-Path/t/taint.t
 ../cpan/File-Temp/t/object.t
 ../cpan/HTTP-Tiny/t/001_api.t
@@ -274,7 +275,6 @@ __DEPARSE_FAILURES__
 ../dist/ExtUtils-Install/t/Installapi2.t
 ../dist/ExtUtils-Install/t/Packlist.t
 ../dist/ExtUtils-Install/t/can_write_dir.t
-../dist/ExtUtils-Manifest/t/Manifest.t
 ../dist/Filter-Simple/t/data.t
 ../dist/I18N-LangTags/t/50_super.t
 ../dist/IO/t/io_file_export.t
