@@ -10,9 +10,8 @@ use Carp;
 use strict;
 use warnings;
 
-use Exporter 5.57 'import';
-
-our $VERSION = '1.64';
+our $VERSION = '1.65';
+our @ISA = ('Exporter');
 our @EXPORT_OK = qw(mkmanifest
                 manicheck  filecheck  fullcheck  skipcheck
                 manifind   maniread   manicopy   maniadd
@@ -122,6 +121,7 @@ sub mkmanifest {
     $bakbase =~ s/\./_/g if $Is_VMS_nodot; # avoid double dots
     rename $MANIFEST, "$bakbase.bak" unless $manimiss;
     open M, "> $MANIFEST" or die "Could not open $MANIFEST: $!";
+    binmode M, ':raw';
     my $skip = maniskip();
     my $found = manifind();
     my($key,$val,$file,%all);
@@ -481,6 +481,7 @@ sub _check_mskip_directives {
         warn "Problem opening $mfile: $!";
         return;
     }
+    binmode M, ':raw';
     print M $_ for (@lines);
     close M;
     return;
@@ -694,6 +695,7 @@ sub maniadd {
 
     open(MANIFEST, ">>$MANIFEST") or
       die "maniadd() could not open $MANIFEST: $!";
+    binmode MANIFEST, ':raw';
 
     foreach my $file (_sort @needed) {
         my $comment = $additions->{$file} || '';
@@ -735,6 +737,7 @@ sub _fix_manifest {
     if ( $must_rewrite ) {
         1 while unlink $MANIFEST; # avoid multiple versions on VMS
         open MANIFEST, ">", $MANIFEST or die "(must_rewrite=$must_rewrite) Could not open >$MANIFEST: $!";
+	binmode MANIFEST, ':raw';
         for (my $i=0; $i<=$#manifest; $i+=2) {
             print MANIFEST "$manifest[$i]\n";
         }

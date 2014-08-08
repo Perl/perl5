@@ -13,7 +13,7 @@ chdir 't';
 
 use strict;
 
-use Test::More tests => 96;
+use Test::More tests => 97;
 use Cwd;
 
 use File::Spec;
@@ -47,6 +47,7 @@ sub add_file {
     $file =~ s/ /^_/g if $Is_VMS_noefs; # escape spaces
     1 while unlink $file;  # or else we'll get multiple versions on VMS
     open( T, '> '.$file) or return;
+    binmode T, ':raw'; # no CRLFs please
     print T $data;
     close T;
     return 0 unless -e $file;  # exists under the name we gave it ?
@@ -231,6 +232,14 @@ $files = maniread;
 is( $files->{wibble}, '',    'maniadd() with undef comment' );
 is( $files->{yarrow}, 'hock','          with comment' );
 is( $files->{foobar}, '',    '          preserved old entries' );
+
+my $manicontents = do {
+  local $/;
+  open my $fh, "MANIFEST" or die;
+  binmode $fh, ':raw';
+  <$fh>
+};
+is index($manicontents, "\015\012"), -1, 'MANIFEST no CRLF';
 
 {
     # EOL normalization in maniadd()
