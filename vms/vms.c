@@ -1033,9 +1033,14 @@ Perl_vmstrnenv(const char *lnm, char *eqv, unsigned long int idx,
       }
     }
     if (retsts & 1) { eqv[eqvlen] = '\0'; return eqvlen; }
-    else if (retsts == LIB$_NOSUCHSYM || retsts == LIB$_INVSYMNAM ||
-             retsts == SS$_IVLOGNAM   || retsts == SS$_IVLOGTAB   ||
+    else if (retsts == LIB$_NOSUCHSYM ||
              retsts == SS$_NOLOGNAM) {
+     /* Unsuccessful lookup is normal -- no need to set errno */
+     return 0;
+    }
+    else if (retsts == LIB$_INVSYMNAM ||
+             retsts == SS$_IVLOGNAM   ||
+             retsts == SS$_IVLOGTAB) {
       set_errno(EINVAL);  set_vaxc_errno(retsts);
     }
     else _ckvmssts_noperl(retsts);
@@ -1077,7 +1082,7 @@ Perl_my_getenv(pTHX_ const char *lnm, bool sys)
     static char *__my_getenv_eqv = NULL;
     char uplnm[LNM$C_NAMLENGTH+1], *cp2, *eqv;
     unsigned long int idx = 0;
-    int success, secure, saverr, savvmserr;
+    int success, secure;
     int midx, flags;
     SV *tmpsv;
 
@@ -1127,7 +1132,6 @@ Perl_my_getenv(pTHX_ const char *lnm, bool sys)
       if (sys) {
         /* Impose security constraints only if tainting */
         secure = PL_curinterp ? TAINTING_get : will_taint;
-        saverr = errno;  savvmserr = vaxc$errno;
       }
       else {
         secure = 0;
@@ -1159,10 +1163,6 @@ Perl_my_getenv(pTHX_ const char *lnm, bool sys)
 
       success = vmstrnenv(lnm,eqv,idx,secure ? fildev : NULL,flags);
 
-      /* Discard NOLOGNAM on internal calls since we're often looking
-       * for an optional name, and this "error" often shows up as the
-       * (bogus) exit status for a die() call later on.  */
-      if (sys && vaxc$errno == SS$_NOLOGNAM) SETERRNO(saverr,savvmserr);
       return success ? eqv : NULL;
     }
 
@@ -1179,7 +1179,7 @@ Perl_my_getenv_len(pTHX_ const char *lnm, unsigned long *len, bool sys)
     unsigned long idx = 0;
     int midx, flags;
     static char *__my_getenv_len_eqv = NULL;
-    int secure, saverr, savvmserr;
+    int secure;
     SV *tmpsv;
     
     midx = my_maxidx(lnm) + 1;
@@ -1226,7 +1226,6 @@ Perl_my_getenv_len(pTHX_ const char *lnm, unsigned long *len, bool sys)
       if (sys) {
         /* Impose security constraints only if tainting */
         secure = PL_curinterp ? TAINTING_get : will_taint;
-        saverr = errno;  savvmserr = vaxc$errno;
       }
       else {
         secure = 0;
@@ -1264,10 +1263,6 @@ Perl_my_getenv_len(pTHX_ const char *lnm, unsigned long *len, bool sys)
 	}
       }
 
-      /* Discard NOLOGNAM on internal calls since we're often looking
-       * for an optional name, and this "error" often shows up as the
-       * (bogus) exit status for a die() call later on.  */
-      if (sys && vaxc$errno == SS$_NOLOGNAM) SETERRNO(saverr,savvmserr);
       return *len ? buf : NULL;
     }
 
