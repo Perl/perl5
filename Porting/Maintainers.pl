@@ -458,7 +458,7 @@ use File::Glob qw(:case);
 
     'ExtUtils::Install' => {
         'DISTRIBUTION' => 'BINGOS/ExtUtils-Install-1.68.tar.gz',
-        'FILES'        => q[dist/ExtUtils-Install],
+        'FILES'        => q[cpan/ExtUtils-Install],
         'EXCLUDED'     => [
             qw( t/lib/Test/Builder.pm
                 t/lib/Test/Builder/Module.pm

@@ -25,7 +25,6 @@ no_index:
     - dist/Env
     - dist/Exporter
     - dist/ExtUtils-CBuilder
-    - dist/ExtUtils-Install
     - dist/ExtUtils-ParseXS
     - dist/Filter-Simple
     - dist/I18N-Collate

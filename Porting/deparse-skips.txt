@@ -56,6 +56,9 @@ __DEPARSE_FAILURES__
 ../cpan/Encode/t/jis7-fallback.t
 ../cpan/Encode/t/jperl.t
 ../cpan/Encode/t/mime-header.t
+../cpan/ExtUtils-Install/t/Installapi2.t
+../cpan/ExtUtils-Install/t/Packlist.t
+../cpan/ExtUtils-Install/t/can_write_dir.t
 ../cpan/ExtUtils-MakeMaker/t/arch_check.t
 ../cpan/ExtUtils-MakeMaker/t/min_perl_version.t
 ../cpan/ExtUtils-MakeMaker/t/xs.t
@@ -272,9 +275,6 @@ __DEPARSE_FAILURES__
 ../dist/Data-Dumper/t/perl-74170.t
 ../dist/Data-Dumper/t/quotekeys.t
 ../dist/Exporter/t/Exporter.t
-../dist/ExtUtils-Install/t/Installapi2.t
-../dist/ExtUtils-Install/t/Packlist.t
-../dist/ExtUtils-Install/t/can_write_dir.t
 ../dist/Filter-Simple/t/data.t
 ../dist/I18N-LangTags/t/50_super.t
 ../dist/IO/t/io_file_export.t

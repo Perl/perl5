@@ -40,6 +40,7 @@ my %abs = (
 	   '../cpan/Encode' => 1,
 	   '../cpan/ExtUtils-Command' => 1,
 	   '../cpan/ExtUtils-Constant' => 1,
+	   '../cpan/ExtUtils-Install' => 1,
 	   '../cpan/ExtUtils-MakeMaker' => 1,
 	   '../cpan/ExtUtils-Manifest' => 1,
 	   '../cpan/File-Fetch' => 1,
@@ -53,7 +54,6 @@ my %abs = (
 	   '../cpan/Test-Simple' => 1,
 	   '../cpan/podlators' => 1,
 	   '../dist/Cwd' => 1,
-	   '../dist/ExtUtils-Install' => 1,
 	   '../dist/ExtUtils-ParseXS' => 1,
 	   '../dist/Tie-File' => 1,
 	  );
