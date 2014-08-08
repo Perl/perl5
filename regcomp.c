@@ -5043,7 +5043,8 @@ PerlIO_printf(Perl_debug_log, "LHS=%"UVuf" RHS=%"UVuf"\n",
 	else if (  PL_regkind[OP(scan)] == BRANCHJ
 		 /* Lookbehind, or need to calculate parens/evals/stclass: */
 		   && (scan->flags || data || (flags & SCF_DO_STCLASS))
-		   && (OP(scan) == IFMATCH || OP(scan) == UNLESSM)) {
+		   && (OP(scan) == IFMATCH || OP(scan) == UNLESSM))
+        {
             if ( OP(scan) == UNLESSM &&
                  scan->flags == 0 &&
                  OP(NEXTOPER(NEXTOPER(scan))) == NOTHING &&
