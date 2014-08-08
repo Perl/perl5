@@ -1360,6 +1360,7 @@ Perl_gv_stashpvn(pTHX_ const char *name, U32 namelen, I32 flags)
         (flags & SVf_UTF8) ? HVhek_UTF8 : 0, 0, NULL, 0
     );
     if (he) return INT2PTR(HV*,SvIVX(HeVAL(he)));
+    else if (flags & GV_CACHE_ONLY) return NULL;
 
     stash = S_stashpvn(aTHX_ name, namelen, flags);
     if (stash && namelen) {

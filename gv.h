@@ -235,6 +235,8 @@ Return the CV from the GV.
 #define GV_ADDMG	0x400	/* add if magical */
 #define GV_NO_SVGMAGIC	0x800	/* Skip get-magic on an SV argument;
 				   used only by gv_fetchsv(_nomg) */
+#define GV_CACHE_ONLY	0x1000  /* return stash only if found in cache;
+				   used only in flags parameter to gv_stash* family */
 
 /* Flags for gv_fetchmeth_pvn and gv_autoload_pvn*/
 #define GV_SUPER	0x1000	/* SUPER::method */

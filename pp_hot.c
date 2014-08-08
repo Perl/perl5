@@ -3000,22 +3000,12 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
 	GV* iogv;
         STRLEN packlen;
         const char * const packname = SvPV_nomg_const(sv, packlen);
-        const bool packname_is_utf8 = !!SvUTF8(sv);
-        const HE* const he =
-	    (const HE *)hv_common(
-                PL_stashcache, NULL, packname, packlen,
-                packname_is_utf8 ? HVhek_UTF8 : 0, 0, NULL, 0
-	    );
-	  
-        if (he) { 
-            stash = INT2PTR(HV*,SvIV(HeVAL(he)));
-            DEBUG_o(Perl_deb(aTHX_ "PL_stashcache hit %p for '%"SVf"'\n",
-                             (void*)stash, SVfARG(sv)));
-            goto fetch;
-        }
+        const U32 packname_utf8 = SvUTF8(sv);
+        stash = gv_stashpvn(packname, packlen, packname_utf8 | GV_CACHE_ONLY);
+        if (stash) goto fetch;
 
 	if (!(iogv = gv_fetchpvn_flags(
-	        packname, packlen, SVf_UTF8 * packname_is_utf8, SVt_PVIO
+	        packname, packlen, packname_utf8, SVt_PVIO
 	     )) ||
 	    !(ob=MUTABLE_SV(GvIO(iogv))))
 	{
@@ -3027,16 +3017,8 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
 				  SVfARG(meth));
 	    }
 	    /* assume it's a package name */
-	    stash = gv_stashpvn(packname, packlen, packname_is_utf8 ? SVf_UTF8 : 0);
-	    if (!stash)
-		packsv = sv;
-            else {
-	        SV* const ref = newSViv(PTR2IV(stash));
-	        (void)hv_store(PL_stashcache, packname,
-                                packname_is_utf8 ? -(I32)packlen : (I32)packlen, ref, 0);
-                DEBUG_o(Perl_deb(aTHX_ "PL_stashcache caching %p for '%"SVf"'\n",
-                                 (void*)stash, SVfARG(sv)));
-	    }
+	    stash = gv_stashpvn(packname, packlen, packname_utf8);
+	    if (!stash) packsv = sv;
 	    goto fetch;
 	}
 	/* it _is_ a filehandle name -- replace with a reference */
