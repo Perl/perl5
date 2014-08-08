@@ -14052,6 +14052,9 @@ vmsperl_set_features(void)
 	 set_feature_default("DECC$DISABLE_POSIX_ROOT", 0);
 	 vms_unlink_all_versions = 1;
 	 vms_posix_exit = 1;
+	 /* Reverse default ordering of PERL_ENV_TABLES. */
+	 defenv[0] = &crtlenvdsc;
+	 defenv[1] = &fildevdsc;
     }
     /* Some reasonable defaults that are not CRTL defaults */
     set_feature_default("DECC$EFS_CASE_PRESERVE", 1);
