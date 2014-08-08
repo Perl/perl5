@@ -1313,8 +1313,8 @@ The most important of which are probably GV_ADD and SVf_UTF8.
 =cut
 */
 
-HV*
-Perl_gv_stashpvn(pTHX_ const char *name, U32 namelen, I32 flags)
+PERL_STATIC_INLINE HV*
+S_stashpvn(pTHX_ const char *name, U32 namelen, I32 flags)
 {
     char smallbuf[128];
     char *tmpbuf;
@@ -1347,6 +1347,25 @@ Perl_gv_stashpvn(pTHX_ const char *name, U32 namelen, I32 flags)
 	   names, see that this one gets them, too. */
 	if (HvAUX(GvSTASH(tmpgv))->xhv_name_count)
 	    mro_package_moved(stash, NULL, tmpgv, 1);
+    }
+    return stash;
+}
+
+HV*
+Perl_gv_stashpvn(pTHX_ const char *name, U32 namelen, I32 flags)
+{
+    HV* stash;
+    const HE* const he = (const HE *)hv_common(
+        PL_stashcache, NULL, name, namelen,
+        (flags & SVf_UTF8) ? HVhek_UTF8 : 0, 0, NULL, 0
+    );
+    if (he) return INT2PTR(HV*,SvIVX(HeVAL(he)));
+
+    stash = S_stashpvn(aTHX_ name, namelen, flags);
+    if (stash && namelen) {
+        SV* const ref = newSViv(PTR2IV(stash));
+        hv_store(PL_stashcache, name,
+            (flags & SVf_UTF8) ? -(I32)namelen : (I32)namelen, ref, 0);
     }
     return stash;
 }
