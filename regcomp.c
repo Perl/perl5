@@ -13484,7 +13484,13 @@ parseit:
         {
             namedclass = regpposixcc(pRExC_state, value, strict);
         }
-        else if (value == '\\') {
+        else if (value != '\\') {
+#ifdef EBCDIC
+            literal_endpoint++;
+#endif
+        }
+        else {
+            /* Is a backslash; get the code point of the char after it */
 	    if (UTF) {
 		value = utf8n_to_uvchr((U8*)RExC_parse,
 				   RExC_end - RExC_parse,
@@ -13815,10 +13821,6 @@ parseit:
 		break;
 	    }   /* End of switch on char following backslash */
 	} /* end of handling backslash escape sequences */
-#ifdef EBCDIC
-        else
-            literal_endpoint++;
-#endif
 
         /* Here, we have the current token in 'value' */
 
