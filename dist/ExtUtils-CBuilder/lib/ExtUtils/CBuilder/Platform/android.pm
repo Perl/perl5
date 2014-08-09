@@ -1,11 +1,12 @@
 package ExtUtils::CBuilder::Platform::android;
 
 use strict;
+use Config;
 use File::Spec;
 use ExtUtils::CBuilder::Platform::Unix;
 
 use vars qw($VERSION @ISA);
-$VERSION = '0.280216';
+$VERSION = '0.280217';
 @ISA = qw(ExtUtils::CBuilder::Platform::Unix);
 
 # The Android linker will not recognize symbols from
@@ -18,6 +19,7 @@ sub link {
       $self->split_like_shell($args{extra_linker_flags}),
       '-L' . $self->perl_inc(),
       '-lperl',
+      $self->split_like_shell($Config{perllibs}),
     ];
   }
 
