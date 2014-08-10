@@ -193,22 +193,6 @@ operator which expects either a number or a string matching
 C</^[a-zA-Z]*[0-9]*\z/>.  See L<perlop/Auto-increment and
 Auto-decrement> for details.
 
-=item charnames alias definitions may not contain a sequence of multiple spaces
-
-(F) You defined a character name which had multiple space characters
-in a row.  Change them to single spaces.  Usually these names are
-defined in the C<:alias> import argument to C<use charnames>, but they
-could be defined by a translator installed into C<$^H{charnames}>.  See
-L<charnames/CUSTOM ALIASES>.
-
-=item charnames alias definitions may not contain trailing white-space
-
-(F) You defined a character name which ended in a space
-character.  Remove the trailing space(s).  Usually these names are
-defined in the C<:alias> import argument to C<use charnames>, but they
-could be defined by a translator installed into C<$^H{charnames}>.
-See L<charnames/CUSTOM ALIASES>.
-
 =item assertion botched: %s
 
 (X) The malloc package that comes with Perl had an internal failure.
@@ -227,6 +211,11 @@ the special variable C<$[>, which is deprecated, is now a fixed zero value.
 (F) If you assign to a conditional operator, the 2nd and 3rd arguments
 must either both be scalars or both be lists.  Otherwise Perl won't
 know which context to supply to the right side.
+
+=item <> at require-statement should be quotes
+
+(F) You wrote C<< require <file> >> when you should have written
+C<require 'file'>.
 
 =item Attempt to access disallowed key '%s' in a restricted hash
 
@@ -535,16 +524,6 @@ encountered an invalid data type.
 (W internal) A warning peculiar to VMS.  While Perl was preparing to
 iterate over %ENV, it encountered a logical name or symbol definition
 which was too long, so it was truncated to the string shown.
-
-=item \C is deprecated in regex; marked by <-- HERE in m/%s/
-
-(D deprecated, regexp) The \C character class is deprecated, and will
-become a compile-time error in a future release of perl (tentatively
-v5.24). This construct allows you to match a single byte of what makes up
-a multi-byte single UTF8 character, and breaks encapsulation. It is
-currently also very buggy. If you really need to process the individual
-bytes, you probably want to convert your string to one where each
-underlying byte is stored as a character, with utf8::encode().
 
 =item Callback called exit
 
@@ -1426,6 +1405,32 @@ value below 256), but some of the characters had a higher value.  Perl
 uses the character values modulus 256 instead, as if you had provided:
 
    unpack("s", "\x{f3}b")
+
+=item charnames alias definitions may not contain a sequence of multiple spaces
+
+(F) You defined a character name which had multiple space characters
+in a row.  Change them to single spaces.  Usually these names are
+defined in the C<:alias> import argument to C<use charnames>, but they
+could be defined by a translator installed into C<$^H{charnames}>.  See
+L<charnames/CUSTOM ALIASES>.
+
+=item charnames alias definitions may not contain trailing white-space
+
+(F) You defined a character name which ended in a space
+character.  Remove the trailing space(s).  Usually these names are
+defined in the C<:alias> import argument to C<use charnames>, but they
+could be defined by a translator installed into C<$^H{charnames}>.
+See L<charnames/CUSTOM ALIASES>.
+
+=item \C is deprecated in regex; marked by <-- HERE in m/%s/
+
+(D deprecated, regexp) The \C character class is deprecated, and will
+become a compile-time error in a future release of perl (tentatively
+v5.24). This construct allows you to match a single byte of what makes up
+a multi-byte single UTF8 character, and breaks encapsulation. It is
+currently also very buggy. If you really need to process the individual
+bytes, you probably want to convert your string to one where each
+underlying byte is stored as a character, with utf8::encode().
 
 =item "\c%c" is more clearly written simply as "%s"
 
@@ -2400,14 +2405,6 @@ expression that contains a call to a user-defined character property
 function, i.e. C<\p{IsFoo}> or C<\p{InFoo}>.
 See L<perlunicode/User-Defined Character Properties> and L<perlsec>.
 
-=item In '(?...)', the '(' and '?' must be adjacent in regex;
-marked by S<<-- HERE> in m/%s/
-
-(F) The two-character sequence C<"(?"> in this context in a regular
-expression pattern should be an indivisible token, with nothing
-intervening between the C<"("> and the C<"?">, but you separated them
-with whitespace.
-
 =item Integer overflow in format string for %s
 
 (F) The indexes and widths specified in the format string of C<printf()>
@@ -2481,6 +2478,14 @@ discovered.
 followed by parentheses turns into a function, with all the list
 operators arguments found inside the parentheses.  See
 L<perlop/Terms and List Operators (Leftward)>.
+
+=item In '(?...)', the '(' and '?' must be adjacent in regex;
+marked by S<<-- HERE> in m/%s/
+
+(F) The two-character sequence C<"(?"> in this context in a regular
+expression pattern should be an indivisible token, with nothing
+intervening between the C<"("> and the C<"?">, but you separated them
+with whitespace.
 
 =item Invalid %s attribute: %s
 
@@ -3014,13 +3019,6 @@ arguments than were supplied, but might be used in the future for
 other cases where we can statically determine that arguments to
 functions are missing, e.g. for the L<perlfunc/pack> function.
 
-=item Redundant argument in %s
-
-(W redundant) You called a function with more arguments than other
-arguments you supplied indicated would be needed. Currently only
-emitted when a printf-type format required fewer arguments than were
-supplied, but might be used in the future for e.g. L<perlfunc/pack>.
-
 =item Missing argument to -%c
 
 (F) The argument to the indicated command line switch must follow
@@ -3075,6 +3073,12 @@ can vary from one line to the next.
 
 (S syntax) This is an educated guess made in conjunction with the message
 "%s found where operator expected".  Often the missing operator is a comma.
+
+=item Missing or undefined argument to require
+
+(F) You tried to call require with no argument or with an undefined
+value as an argument.  Require expects either a package name or a
+file-specification as an argument.  See L<perlfunc/require>.
 
 =item Missing right brace on \%c{} in regex; marked by S<<-- HERE> in m/%s/
 
@@ -3618,12 +3622,6 @@ timezone offset, so it's assuming that local system time is equivalent
 to UTC.  If it's not, define the logical name
 F<SYS$TIMEZONE_DIFFERENTIAL> to translate to the number of seconds which
 need to be added to UTC to get local time.
-
-=item Missing or undefined argument to require
-
-(F) You tried to call require with no argument or with an undefined
-value as an argument.  Require expects either a package name or a
-file-specification as an argument.  See L<perlfunc/require>.
 
 =item NULL OP IN RUN
 
@@ -4176,6 +4174,14 @@ and there is a bug in Perl in which the built-in regular expression
 folding rules are not accurate.  This may lead to incorrect results.
 Please report this as a bug using the L<perlbug> utility.
 
+=item PerlIO layer ':win32' is experimental
+
+(S experimental::win32_perlio) The C<:win32> PerlIO layer is
+experimental.  If you want to take the risk of using this layer,
+simply disable this warning:
+
+    no warnings "experimental::win32_perlio";
+
 =item Perl_my_%s() not available
 
 (F) Your platform has very uncommon byte-order and integer size,
@@ -4257,14 +4263,6 @@ are as follows.
 
 Both numeric and string values are accepted, but note that string values are
 case sensitive.  The default for this setting is "RANDOM" or 1.
-
-=item PerlIO layer ':win32' is experimental
-
-(S experimental::win32_perlio) The C<:win32> PerlIO layer is
-experimental.  If you want to take the risk of using this layer,
-simply disable this warning:
-
-    no warnings "experimental::win32_perlio";
 
 =item pid %x not a child
 
@@ -4635,6 +4633,13 @@ loading PerlIO::scalar explicitly first.
 (F) While calculating the method resolution order (MRO) of a package, Perl
 believes it found an infinite loop in the C<@ISA> hierarchy.  This is a
 crude check that bails out after 100 levels of C<@ISA> depth.
+
+=item Redundant argument in %s
+
+(W redundant) You called a function with more arguments than other
+arguments you supplied indicated would be needed. Currently only
+emitted when a printf-type format required fewer arguments than were
+supplied, but might be used in the future for e.g. L<perlfunc/pack>.
 
 =item refcnt_dec: fd %d%s
 
@@ -5037,11 +5042,6 @@ take the risk of using this feature, simply disable this warning:
 (W syntax) The non-matching operator is !~, not !=~.  !=~ will be
 interpreted as the != (numeric not equal) and ~ (1's complement)
 operators: probably not what you intended.
-
-=item <> at require-statement should be quotes
-
-(F) You wrote C<< require <file> >> when you should have written
-C<require 'file'>.
 
 =item /%s/ should probably be written as "%s"
 
