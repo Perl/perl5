@@ -3586,6 +3586,7 @@ $ GOSUB link_ok
 $ IF link_status .NE. good_link
 $ THEN
 $   longdblsize="0"
+$   longdblkind="-1"
 $   d_longdbl="undef"
 $   echo "You do not have long double."
 $ ELSE
@@ -3593,6 +3594,7 @@ $   echo "You have long double."
 $   echo4 "Checking to see how big your long doubles are..."
 $   GOSUB just_mcr_it
 $   longdblsize = tmp
+$   longdblkind = "1"
 $   d_longdbl = "define"
 $   echo "Your long doubles are ''longdblsize' bytes long."
 $ ENDIF
@@ -6507,6 +6509,7 @@ $ WC "libs='" + libs + "'"
 $ WC "libswanted='" + "'"
 $ WC "libswanted_uselargefiles='" + "'"
 $ WC "longdblsize='" + longdblsize + "'"
+$ WC "longdblkind='" + longdblkind + "'"
 $ WC "longlongsize='" + longlongsize + "'"
 $ WC "longsize='" + longsize + "'"
 $ IF uselargefiles .OR. uselargefiles .EQS. "define"

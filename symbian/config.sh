@@ -672,6 +672,7 @@ libc='stdlib'
 libm_lib_version='0'
 libperl='libperl.a'
 localtime_r_proto='0'
+longdblkind=0
 longdblsize=8
 longlongsize=8
 longsize='4'

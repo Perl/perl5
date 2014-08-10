@@ -648,6 +648,7 @@ ivtype='long'
 ld_can_script='define'
 lib_ext='.a'
 localtime_r_proto='0'
+longdblkind=0
 longdblsize=8
 longlongsize=8
 longsize='4'

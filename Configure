@@ -593,6 +593,7 @@ localtime_r_proto=''
 d_locconv=''
 d_lockf=''
 d_longdbl=''
+longdblkind=''
 longdblsize=''
 d_longlong=''
 longlongsize=''
@@ -15958,6 +15959,90 @@ $echo "(IV will be "$ivtype", $ivsize bytes)"
 $echo "(UV will be "$uvtype", $uvsize bytes)"
 $echo "(NV will be "$nvtype", $nvsize bytes)"
 
+$echo "Checking the kind of long doubles you have..." >&4
+: volatile so that the compiler has to store it out to memory.
+if test X"$d_volatile" = X"$define"; then
+	volatile=volatile
+fi
+case "$d_longdbl" in
+define)
+$cat <<EOP >try.c
+#$i_float I_FLOAT
+#$i_stdlib I_STDLIB
+#define LONGDBLSIZE $longdblsize
+#ifdef I_FLOAT
+#include <float.h>
+#endif
+#ifdef I_STDLIB
+#include <stdlib.h>
+#endif
+#include <stdio.h>
+static const long double d = -0.1L;
+int main() {
+  unsigned const char* b = (unsigned const char*)(&d);
+#if LDBL_MANT_DIG == 113 && LONGDBLSIZE == 16
+  if (b[0] == 0x9A && b[1] == 0x99 && b[15] == 0xBF) {
+    /* IEEE 754 128-bit little-endian */
+    printf("1\n");
+    exit(0);
+  }
+  if (b[0] == 0xBF && b[14] == 0x99 && b[15] == 0x9A) {
+    /* IEEE 128-bit big-endian, e.g. solaris sparc */
+    printf("2\n");
+    exit(0);
+  }
+#endif
+#if LDBL_MANT_DIG == 64 && (LONGDBLSIZE == 16 || LONGDBLSIZE == 12)
+  if (b[0] == 0xCD && b[9] == 0xBF && b[10] == 0x00) {
+    /* x86 80-bit little-endian, sizeof 12 (ILP32, Solaris x86)
+     * or 16 (LP64, Linux and OS X), 4 or 6 bytes of padding.
+     * Also known as "extended precision". */
+    printf("3\n");
+    exit(0);
+  }
+  if (b[LONGDBLSIZE - 11] == 0x00 && b[LONGDBLSIZE - 10] == 0xBF &&
+      b[LONGDBLSIZE -  1] == 0xCD) {
+    /* is there ever big-endian 80-bit, really? */
+    printf("4\n");
+    exit(0);
+  }
+#endif
+#if LDBL_MANT_DIG == 106 && LONGDBLSIZE == 16
+  /* software "double double", the 106 is 53+53 */
+  if (b[0] == 0xCD && b[7] == 0x3C && b[8] == 0x9A && b[15] == 0xBF) {
+    /* double double 128-bit little-endian */
+    printf("5\n");
+    exit(0);
+  }
+  if (b[0] == 0xBF && b[7] == 0x9A && b[8] == 0x3C && b[15] == 0x9A) {
+    /* double double 128-bit big-endian, e.g. PPC/Power and MIPS:
+     * bf b9 99 99 99 99 99 9a 3c 59 99 99 99 99 99 9a */
+    printf("6\n");
+    exit(0);
+  }
+#endif
+  printf("-1\n"); /* unknown */
+  exit(0);
+}
+EOP
+set try
+if eval $compile; then
+    longdblkind=`$run ./try`
+else
+    longdblkind=-1
+fi
+;;
+*) longdblkind=0 ;;
+esac
+case "$longdblkind" in
+0) echo "Your long doubles are doubles." >&4 ;;
+1) echo "You have IEEE 754 128-bit little endian long doubles." >&4 ;;
+2) echo "You have IEEE 754 128-bit big endian long doubles." >&4 ;;
+3) echo "You have x86 80-bit little endian long doubles." >& 4 ;;
+*) echo "Cannot figure out your long double." >&4 ;;
+esac
+$rm_try
+
 $cat >try.c <<EOCP
 #$i_inttypes I_INTTYPES
 #ifdef I_INTTYPES
@@ -23727,6 +23812,7 @@ lns='$lns'
 localtime_r_proto='$localtime_r_proto'
 locincpth='$locincpth'
 loclibpth='$loclibpth'
+longdblkind='$longdblkind'
 longdblsize='$longdblsize'
 longlongsize='$longlongsize'
 longsize='$longsize'

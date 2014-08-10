@@ -3796,6 +3796,13 @@ loclibpth (libpth.U):
 	libraries.  It is prepended to libpth, and is intended to be easily
 	set from the command line.
 
+longdblkind (longdblkind.U):
+	This variable, if defined, encodes the type of a long double:
+	0 = double, 1 = IEEE 754 128-bit big little endian,
+	2 = IEEE 754 128-bit big big endian, 3 = x86 80-bit little endian,
+	4 = x86 80-bit big endian, 5 = double-double 128-bit little endian,
+	6 = double-double 128-bit big endian, -1 = unknown format.
+
 longdblsize (d_longdbl.U):
 	This variable contains the value of the LONG_DOUBLESIZE symbol, which
 	indicates to the C program how many bytes there are in a long double,

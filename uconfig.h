@@ -1900,9 +1900,24 @@
  *	C preprocessor can make decisions based on it.  It is only
  *	defined if the system supports long doubles.
  */
+/* LONG_DOUBLEKIND:
+ *	LONG_DOUBLEKIND will be one of
+ *	LONG_DOUBLE_IS_DOUBLE
+ *	LONG_DOUBLE_IS_IEEE_754_128_BIT_LITTLE_ENDIAN
+ *	LONG_DOUBLE_IS_IEEE_754_128_BIT_BIG_ENDIAN
+ *	LONG_DOUBLE_IS_X86_80_BIT_LITTLE_ENDIAN
+ *	LONG_DOUBLE_IS_UNKNOWN_FORMAT
+ *	It is only defined if the system supports long doubles.
+ */
 /*#define HAS_LONG_DOUBLE		/ **/
 #ifdef HAS_LONG_DOUBLE
 #define LONG_DOUBLESIZE 8		/**/
+#define LONG_DOUBLEKIND 0		/**/
+#define LONG_DOUBLE_IS_DOUBLE				0
+#define LONG_DOUBLE_IS_IEEE_754_128_BIT_LITTLE_ENDIAN	1
+#define LONG_DOUBLE_IS_IEEE_754_128_BIT_BIG_ENDIAN	2
+#define LONG_DOUBLE_IS_X86_80_BIT_LITTLE_ENDIAN		3
+#define LONG_DOUBLE_IS_UNKNOWN_FORMAT			-1
 #endif
 
 /* HAS_LONG_LONG:
@@ -4742,6 +4757,6 @@
 #endif
 
 /* Generated from:
- * 727eb338c23fdd320f556ca32fd7eb5473f68b6ce74db8cec7d83399a2621346 config_h.SH
- * 4b709c0b049c660c04c0932eaa8481f9ca6fdc697ec4ffaa86b7bef21ee886a8 uconfig.sh
+ * c4bf570c111b3c66095fb11639d17a0af192b7c0a37356b5aee77aba07159a26 config_h.SH
+ * bcda3e57ce7783c031fe7cc8670ceac0dd6344d01f9a36ede1b34c48cb7d4f21 uconfig.sh
  * ex: set ro: */
