@@ -7,7 +7,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan(tests => 6);
+plan(tests => 10);
 
 my @warns;
 local $SIG{__WARN__}= sub { push @warns, $_[0] };
@@ -17,6 +17,30 @@ eval "require; 1" or $error = $@;
 ok(1, "Check that eval 'require' does not segv");
 ok(0 == @warns, "We expect the eval to die, without producing warnings");
 like($error, qr/Missing or undefined argument to require/, "Make sure we got the error we expect");
+
+@warns= ();
+$error= undef;
+
+sub TIESCALAR{bless[]}
+sub STORE{}
+sub FETCH{}
+tie my $x, "";
+$x = "x";
+eval 'require $x; 1' or $error = $@;
+ok(0 == @warns,
+  'no warnings from require $tied_undef_after_str_assignment');
+like($error, qr/^Missing or undefined argument to require/,
+    "Make sure we got the error we expect");
+
+@warns= ();
+$error= undef;
+
+$x = 3;
+eval 'require $x; 1' or $error = $@;
+ok(0 == @warns,
+  'no warnings from require $tied_undef_after_num_assignment');
+like($error, qr/^Missing or undefined argument to require/,
+    "Make sure we got the error we expect");
 
 @warns= ();
 $error= undef;

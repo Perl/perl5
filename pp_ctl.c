@@ -3680,6 +3680,7 @@ PP(pp_require)
     bool path_searchable;
 
     sv = POPs;
+    SvGETMAGIC(sv);
     if ( (SvNIOKp(sv) || SvVOK(sv)) && PL_op->op_type != OP_DOFILE) {
 	sv = sv_2mortal(new_version(sv));
 	if (!Perl_sv_derived_from_pvn(aTHX_ PL_patchlevel, STR_WITH_LEN("version"), 0))
@@ -3739,7 +3740,7 @@ PP(pp_require)
     }
     if (!SvOK(sv))
         DIE(aTHX_ "Missing or undefined argument to require");
-    name = SvPV_const(sv, len);
+    name = SvPV_nomg_const(sv, len);
     if (!(name && len > 0 && *name))
         DIE(aTHX_ "Missing or undefined argument to require");
 
