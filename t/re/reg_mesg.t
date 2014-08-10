@@ -96,6 +96,8 @@ my @death =
  '/(?(1)x|y|z)/' => 'Switch (?(condition)... contains too many branches {#} m/(?(1)x|y|{#}z)/',
 
  '/(?(x)y|x)/' => 'Unknown switch condition (?(...)) {#} m/(?(x{#})y|x)/',
+ '/(?(??{}))/' => 'Unknown switch condition (?(...)) {#} m/(?(?{#}?{}))/',
+ '/(?(?[]))/' => 'Unknown switch condition (?(...)) {#} m/(?(?{#}[]))/',
 
  '/(?/' => 'Sequence (? incomplete {#} m/(?{#}/',
 

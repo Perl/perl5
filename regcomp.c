@@ -9974,6 +9974,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                         REGTAIL(pRExC_state, ret, tail);
 			goto insert_if;
 		    }
+		    /* Fall through to ‘Unknown switch condition’ at the
+		       end of the if/else chain. */
 		}
 		else if ( RExC_parse[0] == '<'     /* (?(<NAME>)...) */
 		         || RExC_parse[0] == '\'' ) /* (?('NAME')...) */
@@ -10097,10 +10099,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                                     but I can't figure out why. -- dmq*/
 		    return ret;
 		}
-		else {
-                    RExC_parse += UTF ? UTF8SKIP(RExC_parse) : 1;
-                    vFAIL("Unknown switch condition (?(...))");
-		}
+                RExC_parse += UTF ? UTF8SKIP(RExC_parse) : 1;
+                vFAIL("Unknown switch condition (?(...))");
 	    }
 	    case '[':           /* (?[ ... ]) */
                 return handle_regex_sets(pRExC_state, NULL, flagp, depth,
