@@ -344,7 +344,10 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+Failing to compile C<use Foo> in an eval could leave a spurious
+C<BEGIN> subroutine definition, which would produce a "Subroutine
+BEGIN redefined" warning on the next use of C<use>, or other C<BEGIN>
+block.  [perl #122107]
 
 =back
 
