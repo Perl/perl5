@@ -195,11 +195,11 @@ Auto-decrement> for details.
 
 =item charnames alias definitions may not contain a sequence of multiple spaces
 
-(F) You defined a character name which had multiple space
-characters in a row.  Change them to single spaces.  Usually these
-names are defined in the C<:alias> import argument to C<use charnames>, but
-they could be defined by a translator installed into C<$^H{charnames}>.
-See L<charnames/CUSTOM ALIASES>.
+(F) You defined a character name which had multiple space characters
+in a row.  Change them to single spaces.  Usually these names are
+defined in the C<:alias> import argument to C<use charnames>, but they
+could be defined by a translator installed into C<$^H{charnames}>.  See
+L<charnames/CUSTOM ALIASES>.
 
 =item charnames alias definitions may not contain trailing white-space
 
@@ -1195,14 +1195,16 @@ other than "=" after the module name.
 =item Can't use a hash as a reference
 
 (F) You tried to use a hash as a reference, as in
-C<< %foo->{"bar"} >> or C<< %$ref->{"hello"} >>.  Versions of perl <= 5.6.1
-used to allow this syntax, but shouldn't have.
+C<< %foo->{"bar"} >> or C<< %$ref->{"hello"} >>.  Versions of perl
+<= 5.22.0 used to allow this syntax, but shouldn't
+have.  This was deprecated in perl 5.6.1.
 
 =item Can't use an array as a reference
 
 (F) You tried to use an array as a reference, as in
-C<< @foo->[23] >> or C<< @$ref->[99] >>.  Versions of perl <= 5.6.1 used to
-allow this syntax, but shouldn't have.
+C<< @foo->[23] >> or C<< @$ref->[99] >>.  Versions of perl <= 5.22.0
+used to allow this syntax, but shouldn't have.  This
+was deprecated in perl 5.6.1.
 
 =item Can't use anonymous symbol table for method lookup
 
@@ -1471,8 +1473,8 @@ but not higher.  Code points above 0xFFFF_FFFF require larger than a
 =item %s: Command not found
 
 (A) You've accidentally run your script through B<csh> or another shell
-instead of Perl.  Check the #! line, or manually feed your script
-into Perl yourself.  The #! line at the top of your file could look like
+instead of Perl.  Check the #! line, or manually feed your script into
+Perl yourself.  The #! line at the top of your file could look like
 
   #!/usr/bin/perl -w
 
@@ -2401,10 +2403,10 @@ See L<perlunicode/User-Defined Character Properties> and L<perlsec>.
 =item In '(?...)', the '(' and '?' must be adjacent in regex;
 marked by S<<-- HERE> in m/%s/
 
-(F) The two-character sequence C<"(?"> in
-this context in a regular expression pattern should be an
-indivisible token, with nothing intervening between the C<"(">
-and the C<"?">, but you separated them.
+(F) The two-character sequence C<"(?"> in this context in a regular
+expression pattern should be an indivisible token, with nothing
+intervening between the C<"("> and the C<"?">, but you separated them
+with whitespace.
 
 =item Integer overflow in format string for %s
 
@@ -3227,10 +3229,10 @@ names.  If you had a good reason for having a unique name, then
 just mention it again somehow to suppress the message.  The C<our>
 declaration is also provided for this purpose.
 
-NOTE: This warning detects package symbols that have been used only
-once. This means lexical variables will never trigger this warning.
-It also means that all of the package variables $c, @c, %c, as well
-as *c, &c, sub c{}, c(), and c (the filehandle or
+NOTE: This warning detects package symbols that have been used
+only once.  This means lexical variables will never trigger this
+warning.  It also means that all of the package variables $c, @c,
+%c, as well as *c, &c, sub c{}, c(), and c (the filehandle or
 format) are considered the same; if a program uses $c only once
 but also uses any of the others it will not trigger this warning.
 Symbols beginning with an underscore and symbols using special
@@ -3620,8 +3622,8 @@ need to be added to UTC to get local time.
 =item Missing or undefined argument to require
 
 (F) You tried to call require with no argument or with an undefined
-value as an argument. Require expects either a package name or a
-file-specification as an argument. See L<perlfunc/require>.
+value as an argument.  Require expects either a package name or a
+file-specification as an argument.  See L<perlfunc/require>.
 
 =item NULL OP IN RUN
 
@@ -5680,11 +5682,11 @@ Check the #! line, or manually feed your script into Perl yourself.
 marked by <-- HERE in m/%s/
 
 (D deprecated, regexp) You used a literal C<"{"> character in a regular
-expression pattern. You should change to use C<"\{"> instead, because a future
-version of Perl (tentatively v5.26) will consider this to be a syntax error.  If
-the pattern delimiters are also braces, any matching right brace
-(C<"}">) should also be escaped to avoid confusing the parser, for
-example,
+expression pattern. You should change to use C<"\{"> instead, because a
+future version of Perl (tentatively v5.26) will consider this to be a
+syntax error.  If the pattern delimiters are also braces, any matching
+right brace (C<"}">) should also be escaped to avoid confusing the parser,
+for example,
 
     qr{abc\{def\}ghi}
 
@@ -5756,16 +5758,16 @@ with the characters in the Lao and Thai scripts.
 =item Unicode non-character U+%X is illegal for open interchange
 
 (S nonchar) Certain codepoints, such as U+FFFE and U+FFFF, are
-defined by the Unicode standard to be non-characters.  Those are
-legal codepoints, but are reserved for internal use; so, applications
-shouldn't attempt to exchange them.  An application may not be
-expecting any of these characters at all, and receiving them
-may lead to bugs.  If you know what you are doing
-you can turn off this warning by C<no warnings 'nonchar';>.
+defined by the Unicode standard to be non-characters.  Those
+are legal codepoints, but are reserved for internal use; so,
+applications shouldn't attempt to exchange them.  An application
+may not be expecting any of these characters at all, and receiving
+them may lead to bugs.  If you know what you are doing you can
+turn off this warning by C<no warnings 'nonchar';>.
 
-This is not really a "serious" error, but it is supposed to be raised
-by default even if warnings are not enabled, and currently the only
-way to do that in Perl is to mark it as serious.
+This is not really a "severe" error, but it is supposed to be
+raised by default even if warnings are not enabled, and currently
+the only way to do that in Perl is to mark it as serious.
 
 =item Unicode surrogate U+%X is illegal in UTF-8
 
