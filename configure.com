@@ -3343,6 +3343,7 @@ $   uquadtype = "unsigned long long"
 $   quadkind  = "3"
 $!
 $   d_frexpl = "define"
+$   d_ldexpl = "define"
 $   d_modfl = "define"
 $   d_modflproto = "define"
 $ ELSE
@@ -3364,6 +3365,7 @@ $   uquadtype = "undef"
 $   quadkind  = "undef"
 $!
 $   d_frexpl = "undef"
+$   d_ldexpl = "undef"
 $   d_modfl = "undef"
 $   d_modflproto = "undef"
 $ ENDIF
@@ -6063,6 +6065,7 @@ $ WC "d_isnanl='" + d_isnanl + "'"
 $ WC "d_killpg='undef'"
 $ WC "d_lchown='" + d_lchown + "'"
 $ WC "d_ldbl_dig='define'"
+$ WC "d_ldexpl='" + d_ldexpl + "'"
 $ WC "d_libm_lib_version='undef'"
 $ WC "d_link='" + d_link + "'"
 $ WC "d_llseek='undef'"

@@ -1336,6 +1336,10 @@ d_ldbl_dig (d_ldbl_dig.U):
 	header files provide LDBL_DIG, which is the number of significant
 	digits in a long double precision number.
 
+d_ldexpl (d_ldexpl.U):
+	This variable conditionally defines the HAS_LDEXPL symbol, which
+	indicates to the C program that the ldexpl() routine is available.
+
 d_libm_lib_version (d_libm_lib_version.U):
 	This variable conditionally defines the LIBM_LIB_VERSION symbol,
 	which indicates to the C program that math.h defines _LIB_VERSION

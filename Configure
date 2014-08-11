@@ -585,6 +585,7 @@ d_isnanl=''
 d_killpg=''
 d_lchown=''
 d_ldbl_dig=''
+d_ldexpl=''
 d_libm_lib_version=''
 d_link=''
 d_localtime_r=''
@@ -15427,6 +15428,10 @@ $rm -f ldbl_dig.?
 set d_ldbl_dig
 eval $setvar
 
+: see if ldexpl exists
+set ldexpl d_ldexpl
+eval $inlibc
+
 : see if this is a math.h system
 set math.h i_math
 eval $inhdr
@@ -15792,6 +15797,9 @@ if $test "$uselongdouble" = "$define"; then
 	else
 	    message="$message frexpl"
 	fi
+    fi
+    if $test "$d_ldexpl" != "$define"; then
+	message="$message ldexpl"
     fi
 
     if $test "$message" != ""; then
@@ -23308,6 +23316,7 @@ d_isnanl='$d_isnanl'
 d_killpg='$d_killpg'
 d_lchown='$d_lchown'
 d_ldbl_dig='$d_ldbl_dig'
+d_ldexpl='$d_ldexpl'
 d_libm_lib_version='$d_libm_lib_version'
 d_libname_unique='$d_libname_unique'
 d_link='$d_link'

@@ -1906,6 +1906,9 @@
  *	LONG_DOUBLE_IS_IEEE_754_128_BIT_LITTLE_ENDIAN
  *	LONG_DOUBLE_IS_IEEE_754_128_BIT_BIG_ENDIAN
  *	LONG_DOUBLE_IS_X86_80_BIT_LITTLE_ENDIAN
+ *	LONG_DOUBLE_IS_X86_80_BIT_BIG_ENDIAN
+ *	LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_LITTLE_ENDIAN
+ *	LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_BIG_ENDIAN
  *	LONG_DOUBLE_IS_UNKNOWN_FORMAT
  *	It is only defined if the system supports long doubles.
  */
@@ -1917,6 +1920,9 @@
 #define LONG_DOUBLE_IS_IEEE_754_128_BIT_LITTLE_ENDIAN	1
 #define LONG_DOUBLE_IS_IEEE_754_128_BIT_BIG_ENDIAN	2
 #define LONG_DOUBLE_IS_X86_80_BIT_LITTLE_ENDIAN		3
+#define LONG_DOUBLE_IS_X86_80_BIT_BIG_ENDIAN		4
+#define LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_LITTLE_ENDIAN	5
+#define LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_BIG_ENDIAN	6
 #define LONG_DOUBLE_IS_UNKNOWN_FORMAT			-1
 #endif
 
@@ -3576,6 +3582,13 @@
  */
 /*#define HAS_FREXPL		/ **/
 
+/* HAS_LDEXPL:
+ *	This symbol, if defined, indicates that the ldexpl routine is
+ *	available to shift a long double floating-point number
+ *	by an integral power of 2.
+ */
+/*#define HAS_LDEXPL		/ **/
+
 /* HAS_STRUCT_FS_DATA:
  *	This symbol, if defined, indicates that the struct fs_data
  *	to do statfs() is supported.
@@ -4757,6 +4770,6 @@
 #endif
 
 /* Generated from:
- * c4bf570c111b3c66095fb11639d17a0af192b7c0a37356b5aee77aba07159a26 config_h.SH
- * bcda3e57ce7783c031fe7cc8670ceac0dd6344d01f9a36ede1b34c48cb7d4f21 uconfig.sh
+ * 5f68e17a9d9e989b824daf55d2adcad3b7af2becfa8f627c6cb1d0e376f7e1a5 config_h.SH
+ * 98397a7d818a024628d6b34e5903a8f408da96601a2a19471c480511f3c8d914 uconfig.sh
  * ex: set ro: */
