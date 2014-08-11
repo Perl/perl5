@@ -2979,7 +2979,15 @@ it interprets special characters, so if you have a script like this:
 and call it with C<perl dangerous.pl 'rm -rfv *|'>, it actually opens a
 pipe, executes the C<rm> command and reads C<rm>'s output from that pipe.
 If you want all items in C<@ARGV> to be interpreted as file names, you
-can use the module C<ARGV::readonly> from CPAN.
+can use the module C<ARGV::readonly> from CPAN, or use the double bracket:
+
+    while (<<>>) {
+        print;
+    }
+
+Using double angle brackets inside of a while causes the open to use the
+three argument form (with the second argument being C<< < >>), so all
+arguments in ARGV are treated as literal filenames.
 
 You can modify @ARGV before the first <> as long as the array ends up
 containing the list of filenames you really want.  Line numbers (C<$.>)
