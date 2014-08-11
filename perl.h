@@ -1903,6 +1903,13 @@ EXTERN_C long double modfl(long double, long double *);
 #           define Perl_frexp(x,y) Perl_my_frexpl(x,y)
 #       endif
 #   endif
+#   ifdef HAS_LDEXPL
+#       define Perl_ldexp(x, y) ldexpl(x,y)
+#   else
+#       if defined(HAS_SCALBNL) && FLT_RADIX == 2
+#           define Perl_ldexp(x,y) scalbnl(x,y)
+#       endif
+#   endif
 #   ifndef Perl_isnan
 #       ifdef HAS_ISNANL
 #           define Perl_isnan(x) isnanl(x)
@@ -1953,6 +1960,7 @@ EXTERN_C long double modfl(long double, long double *);
 #   define Perl_fmod fmod
 #   define Perl_modf(x,y) modf(x,y)
 #   define Perl_frexp(x,y) frexp(x,y)
+#   define Perl_ldexp(x,y) ldexp(x,y)
 #endif
 
 /* rumor has it that Win32 has _fpclass() */
