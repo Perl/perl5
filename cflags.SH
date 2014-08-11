@@ -306,6 +306,17 @@ case "$gccversion" in
   ;;
 esac
 
+# Older clang releases are not wise enough for -Wunused-value.
+case "$gccversion" in
+*"Apple LLVM "[34]*|*"Apple LLVM version "[34]*)
+  for f in -Wno-unused-value
+  do
+    echo "cflags.SH: Adding $f because clang version '$gccversion'" 
+    warn="$warn $f"
+  done
+  ;;
+esac
+
 case "$cc" in
 *g++*)
   # Extra paranoia in case people have bad canned ccflags:
