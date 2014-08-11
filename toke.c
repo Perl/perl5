@@ -5449,6 +5449,11 @@ Perl_yylex(pTHX)
 	    PL_lex_allbrackets++;
 	    PL_expect = XSTATE;
 	    break;
+	case XBLOCKTERM:
+	    PL_lex_brackstack[PL_lex_brackets++] = XTERM;
+	    PL_lex_allbrackets++;
+	    PL_expect = XSTATE;
+	    break;
 	default: {
 		const char *t;
 		if (PL_oldoldbufptr == PL_last_lop)
@@ -6634,7 +6639,9 @@ Perl_yylex(pTHX)
 		    if (!PL_lex_allbrackets &&
 			    PL_lex_fakeeof > LEX_FAKEEOF_LOWLOGIC)
 			PL_lex_fakeeof = LEX_FAKEEOF_LOWLOGIC;
-		    PREBLOCK(METHOD);
+		    PL_expect = XBLOCKTERM;
+		    PL_bufptr = s;
+		    return REPORT(METHOD);
 		}
 
 		/* If followed by a bareword, see if it looks like indir obj. */
