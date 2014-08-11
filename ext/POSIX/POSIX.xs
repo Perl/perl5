@@ -537,7 +537,6 @@ static XSPROTO(is_common); /* prototype to pass -Wmissing-prototypes */
 static XSPROTO(is_common)
 {
     dXSARGS;
-    static PTR_TBL_t * is_common_ptr_table;
 
     if (items != 1)
        croak_xs_usage(cv,  "charstring");
@@ -558,14 +557,12 @@ static XSPROTO(is_common)
              * called.  See thread at
              * http://markmail.org/thread/jhqcag5njmx7jpyu */
 
-	    if (! is_common_ptr_table) {
-               is_common_ptr_table = ptr_table_new();
-            }
-	    if (! ptr_table_fetch(is_common_ptr_table, PL_op)) {
+	    HV *warned = get_hv("POSIX::_warned", GV_ADD | GV_ADDMULTI);
+	    if (! hv_exists(warned, (const char *)&PL_op, sizeof(PL_op))) {
                 Perl_warner(aTHX_ packWARN(WARN_DEPRECATED),
                             "Calling POSIX::%"HEKf"() is deprecated",
                             HEKfARG(GvNAME_HEK(CvGV(cv))));
-                ptr_table_store(is_common_ptr_table, PL_op, (void *) 1);
+		hv_store(warned, (const char *)&PL_op, sizeof(PL_op), &PL_sv_yes, 0);
             }
         }
 

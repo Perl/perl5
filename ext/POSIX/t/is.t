@@ -130,7 +130,6 @@ SKIP:
     skip("No Win32API::File", 1)
       unless $Config{extensions} =~ m(\bWin32API/File\b);
 
-    local $TODO = "this code crashes perl";
     local $ENV{PERL5LIB} =
       join($Config{path_sep},
 	   map / / ? qq("$_") : $_, @INC);
