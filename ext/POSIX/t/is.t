@@ -71,7 +71,7 @@ foreach my $s (keys %classes) {
 
 # Expected number of tests is one each for every combination of a
 # known is<xxx> function and string listed above.
-plan(tests => keys(%classes) * keys(%functions) + 1);
+plan(tests => keys(%classes) * keys(%functions) + 2);
 
 # Main test loop: Run all POSIX::is<xxx> tests on each string defined above.
 # Only the character classes listed for that string should return 1.  We
@@ -118,4 +118,22 @@ foreach my $s (sort keys %classes) {
     # Each of the 10 classes should warn twice, because each has 2 lexical
     # calls
     is(scalar @warnings, 20);
+}
+
+SKIP:
+{
+    # [perl #122476] - is*() could crash when threads were involved on Win32
+    # this only crashed on Win32, only test there
+    # When the is*() functions are removed, also remove "iscrash"
+    skip("Not Win32", 1) unless $^O eq "MSWin32";
+    skip("No threads", 1) unless $Config{useithreads};
+    skip("No Win32API::File", 1)
+      unless $Config{extensions} =~ m(\bWin32API/File\b);
+
+    local $TODO = "this code crashes perl";
+    local $ENV{PERL5LIB} =
+      join($Config{path_sep},
+	   map / / ? qq("$_") : $_, @INC);
+    my $result = `$^X t/iscrash`;
+    like($result, qr/\bok\b/, "is in threads didn't crash");
 }
