@@ -1842,9 +1842,6 @@ typedef NVTYPE NV;
 #   ifdef LDBL_MANT_DIG
 #       define NV_MANT_DIG LDBL_MANT_DIG
 #   endif
-#   ifdef LDBL_MANT_BITS
-#       define NV_MANT_BITS LDBL_MANT_BITS
-#   endif
 #   ifdef LDBL_MIN
 #       define NV_MIN LDBL_MIN
 #   endif
@@ -1933,9 +1930,6 @@ EXTERN_C long double modfl(long double, long double *);
 #   define NV_DIG DBL_DIG
 #   ifdef DBL_MANT_DIG
 #       define NV_MANT_DIG DBL_MANT_DIG
-#   endif
-#   ifdef DBL_MANT_BITS
-#       define NV_MANT_BITS DBL_MANT_BITS
 #   endif
 #   ifdef DBL_MIN
 #       define NV_MIN DBL_MIN

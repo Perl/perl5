@@ -2179,6 +2179,22 @@ created on an emergency basis to prevent a core dump.
 (F) The parser has given up trying to parse the program after 10 errors.
 Further error messages would likely be uninformative.
 
+=item Hexadecimal float: exponent overflow
+
+(W overflow) The hexadecimal floating point has larger exponent
+than the floating point supports.
+
+=item Hexadecimal float: exponent underflow
+
+(W overflow) The hexadecimal floating point has smaller exponent
+than the floating point supports.
+
+=item Hexadecimal float: mantissa overflow
+
+(W overflow) The hexadecimal floating point literal had more bits in
+the mantissa (the part between the 0x and the exponent, also known as
+the fraction or the significand) than the floating point supports.
+
 =item Hexadecimal float: precision loss
 
 (W overflow) The hexadecimal floating point had internally more

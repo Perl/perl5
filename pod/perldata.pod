@@ -402,6 +402,7 @@ integer formats:
     0xdead_beef         # more hex   
     0377                # octal (only numbers, begins with 0)
     0b011011            # binary
+    0x1.999ap-4         # hexadecimal floating point (the 'p' is required)
 
 You are allowed to use underscores (underbars) in numeric literals
 between digits for legibility (but not multiple underscores in a row:
@@ -424,6 +425,14 @@ Hexadecimal, octal, or binary, representations in string literals
 (e.g. '0xff') are not automatically converted to their integer
 representation.  The hex() and oct() functions make these conversions
 for you.  See L<perlfunc/hex> and L<perlfunc/oct> for more details.
+
+Hexadecimal floating point can start just like a hexadecimal literal,
+and it can be followed by an optional fractional hexadecimal part,
+but it must be followed by C<p>, an optional sign, and a power of two.
+The format is useful for accurately presenting floating point values,
+avoiding conversions to or from decimal floating point, and therefore
+avoiding possible loss in precision.  Notice that while most current
+platforms use the 64-bit IEEE 754 floating point, not all do.
 
 You can also embed newlines directly in your strings, i.e., they can end
 on a different line than they begin.  This is nice, but if you forget
