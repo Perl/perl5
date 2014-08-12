@@ -73,9 +73,22 @@ dual-life modules would have a F<Changes> file that could be cribbed.
 
 =item *
 
+L<Config::Perl::V> has been upgraded from version 0.20 to 0.22.
+
+The list of Perl versions covered has been updated and some flaws in the
+parsing have been fixed.
+
+=item *
+
 L<Exporter> has been upgraded from version 5.70 to 5.71.
 
 Illegal POD syntax in the documentation has been corrected.
+
+=item *
+
+C<ExtUtils::CBuilder> has been upgraded from version 0.280216 to 0.280217.
+
+Android builds now link to both B<-lperl> and C<$Config{perllibs}>.
 
 =item *
 
@@ -171,6 +184,12 @@ Clarify where C<NUL> may be embedded or is required to terminate a string.
 C<-l> now notes that it will return false if symlinks aren't supported by the
 file system.
 L<[perl #121523]|https://rt.perl.org/Ticket/Display.html?id=121523>
+
+=item *
+
+Note that C<each>, C<keys> and C<values> may produce different orderings for
+tied hashes compared to other perl hashes.
+L<[perl #121404]|https://rt.perl.org/Ticket/Display.html?id=121404>
 
 =item *
 
@@ -325,10 +344,23 @@ L</Modules and Pragmata> section.
 
 =over 4
 
+=item Android
+
+Some minor build improvements have been made when cross-compiling for Android.
+
 =item OpenBSD
 
 Corrected architectures and version numbers used in configuration hints when
 building Perl.
+
+=item Solaris
+
+C<setenv> is now used on Solaris if it is available.
+
+=item VMS
+
+An old bug in feature checking, mainly affecting pre-7.3 systems, has been
+fixed.
 
 =back
 
@@ -356,6 +388,11 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 [ List each fix as a =item entry ]
 
 =over 4
+
+=item *
+
+A regression with C<(?{})(?=...)> and C<pos> has been fixed.
+L<[perl #122460]|https://rt.perl.org/Ticket/Display.html?id=122460>
 
 =item *
 
