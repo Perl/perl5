@@ -1842,11 +1842,20 @@ typedef NVTYPE NV;
 #   ifdef LDBL_MANT_DIG
 #       define NV_MANT_DIG LDBL_MANT_DIG
 #   endif
+#   ifdef LDBL_MANT_BITS
+#       define NV_MANT_BITS LDBL_MANT_BITS
+#   endif
 #   ifdef LDBL_MIN
 #       define NV_MIN LDBL_MIN
 #   endif
 #   ifdef LDBL_MAX
 #       define NV_MAX LDBL_MAX
+#   endif
+#   ifdef LDBL_MIN_EXP
+#       define NV_MIN_EXP LDBL_MIN_EXP
+#   endif
+#   ifdef LDBL_MAX_EXP
+#       define NV_MAX_EXP LDBL_MAX_EXP
 #   endif
 #   ifdef LDBL_MIN_10_EXP
 #       define NV_MIN_10_EXP LDBL_MIN_10_EXP
@@ -1925,11 +1934,20 @@ EXTERN_C long double modfl(long double, long double *);
 #   ifdef DBL_MANT_DIG
 #       define NV_MANT_DIG DBL_MANT_DIG
 #   endif
+#   ifdef DBL_MANT_BITS
+#       define NV_MANT_BITS DBL_MANT_BITS
+#   endif
 #   ifdef DBL_MIN
 #       define NV_MIN DBL_MIN
 #   endif
 #   ifdef DBL_MAX
 #       define NV_MAX DBL_MAX
+#   endif
+#   ifdef DBL_MIN_EXP
+#       define NV_MIN_EXP DBL_MIN_EXP
+#   endif
+#   ifdef DBL_MAX_EXP
+#       define NV_MAX_EXP DBL_MAX_EXP
 #   endif
 #   ifdef DBL_MIN_10_EXP
 #       define NV_MIN_10_EXP DBL_MIN_10_EXP

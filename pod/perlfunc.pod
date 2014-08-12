@@ -7114,6 +7114,8 @@ In addition, Perl permits the following widely-supported conversions:
    %p    a pointer (outputs the Perl value's address in hexadecimal)
    %n    special: *stores* the number of characters output so far
          into the next argument in the parameter list
+   %a    hexadecimal floating point
+   %A    like %a, but using upper-case letters
 
 Finally, for backward (and we do mean "backward") compatibility, Perl
 permits these unnecessary but widely-supported conversions:
@@ -7128,7 +7130,9 @@ Note that the number of exponent digits in the scientific notation produced
 by C<%e>, C<%E>, C<%g> and C<%G> for numbers with the modulus of the
 exponent less than 100 is system-dependent: it may be three or less
 (zero-padded as necessary).  In other words, 1.23 times ten to the
-99th may be either "1.23e99" or "1.23e099".
+99th may be either "1.23e99" or "1.23e099".  Similarly for C<%a> and C<%A>:
+the exponent or the hexadecimal digits may float: especially the
+"long doubles" Perl configuration option may cause surprises.
 
 Between the C<%> and the format letter, you may specify several
 additional attributes controlling the interpretation of the format.

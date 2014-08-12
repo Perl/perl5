@@ -12,7 +12,117 @@ BEGIN {
 eval { my $q = pack "q", 0 };
 my $Q = $@ eq '';
 
-plan tests => 1406 + ($Q ? 0 : 12);
+# %a and %A depend on the floating point config
+# This totally doesn't test non-IEEE-754 float formats.
+my @hexfloat;
+print "# uvsize = $Config{uvsize}\n";
+print "# nvsize = $Config{nvsize}\n";
+print "# nv_preserves_uv_bits = $Config{nv_preserves_uv_bits}\n";
+print "# d_quad = $Config{d_quad}\n";
+if ($Config{nvsize} == 8 &&
+    (
+     # IEEE-754, we hope, the most common out there.
+     ($Config{uvsize} == 8 && $Config{nv_preserves_uv_bits} == 53)
+     ||
+     # If we have a quad we get still get the mantissa bits.
+     ($Config{uvsize} == 4&&  $Config{d_quad})
+     )
+    ) {
+    @hexfloat =  (
+        [ '%a',       '0',       '0x0p+0' ],
+        [ '%a',       '1',       '0x1p+0' ],
+        [ '%a',       '1.0',     '0x1p+0' ],
+        [ '%a',       '0.5',     '0x1p-1' ],
+        [ '%a',       '0.25',    '0x1p-2' ],
+        [ '%a',       '0.75',    '0x1.8p-1' ],
+        [ '%a',       '3.14',    '0x1.91eb851eb851fp+1' ],
+        [ '%a',       '-1.0',    '-0x1p+0' ],
+        [ '%a',       '-3.14',   '-0x1.91eb851eb851fp+1' ],
+        [ '%a',       '0.1',     '0x1.999999999999ap-4' ],
+        [ '%a',       '1/7',     '0x1.2492492492492p-3' ],
+        [ '%a',       'sqrt(2)', '0x1.6a09e667f3bcdp+0' ],
+        [ '%a',       'exp(1)',  '0x1.5bf0a8b145769p+1' ],
+        [ '%a',       '2**-10',  '0x1p-10' ],
+        [ '%a',       '2**10',   '0x1p+10' ],
+        [ '%a',       '1e-9',    '0x1.12e0be826d695p-30' ],
+        [ '%a',       '1e9',     '0x1.dcd65p+29' ],
+
+        [ '%#a',      '1',       '0x1.p+0' ],
+        [ '%+a',      '1',       '+0x1p+0' ],
+        [ '%+a',      '-1',      '-0x1p+0' ],
+        [ '% a',      ' 1',      ' 0x1p+0' ],
+        [ '% a',      '-1',      '-0x1p+0' ],
+
+        [ '%8a',      '3.14',   '0x1.91eb851eb851fp+1' ],
+        [ '%13a',     '3.14',   '0x1.91eb851eb851fp+1' ],
+        [ '%20a',     '3.14',   '0x1.91eb851eb851fp+1' ],
+        [ '%.4a',     '3.14',   '0x1.91ecp+1' ],
+        [ '%.5a',     '3.14',   '0x1.91eb8p+1' ],
+        [ '%.6a',     '3.14',   '0x1.91eb85p+1' ],
+        [ '%.20a',    '3.14',   '0x1.91eb851eb851f0000000p+1' ],
+        [ '%20.10a',  '3.14',   '   0x1.91eb851eb8p+1' ],
+        [ '%20.15a',  '3.14',   '0x1.91eb851eb851f00p+1' ],
+        [ '% 20.10a', '3.14',   '   0x1.91eb851eb8p+1' ],
+        [ '%020.10a', '3.14',   '0x0001.91eb851eb8p+1' ],
+
+        [ '%30a',  '3.14',   '          0x1.91eb851eb851fp+1' ],
+        [ '%-30a', '3.14',   '0x1.91eb851eb851fp+1          ' ],
+        [ '%030a',  '3.14',  '0x00000000001.91eb851eb851fp+1' ],
+        [ '%-030a', '3.14',  '0x1.91eb851eb851fp+1          ' ],
+
+        [ '%A',       '3.14',   '0X1.91EB851EB851FP+1' ],
+        );
+} elsif ($Config{nvsize} == 16 || $Config{nvsize} == 12) {
+    # x86 long double, at least
+    @hexfloat =  (
+        [ '%a',       '0',       '0x0p+0' ],
+        [ '%a',       '1',       '0x8p-3' ],
+        [ '%a',       '1.0',     '0x8p-3' ],
+        [ '%a',       '0.5',     '0x8p-4' ],
+        [ '%a',       '0.25',    '0x8p-5' ],
+        [ '%a',       '0.75',    '0xcp-4' ],
+        [ '%a',       '3.14',    '0xc.8f5c28f5c28f5c3p-2' ],
+        [ '%a',       '-1.0',    '-0x8p-3' ],
+        [ '%a',       '-3.14',   '-0xc.8f5c28f5c28f5c3p-2' ],
+        [ '%a',       '0.1',     '0xc.ccccccccccccccdp-7' ],
+        [ '%a',       '1/7',     '0x9.249249249249249p-6' ],
+        [ '%a',       'sqrt(2)', '0xb.504f333f9de6484p-3' ],
+        [ '%a',       'exp(1)',  '0xa.df85458a2bb4a9bp-2' ],
+        [ '%a',       '2**-10',  '0x8p-13' ],
+        [ '%a',       '2**10',   '0x8p+7' ],
+        [ '%a',       '1e-9',    '0x8.9705f4136b4a597p-33' ],
+        [ '%a',       '1e9',     '0xe.e6b28p+26' ],
+
+        [ '%#a',      '1',       '0x8.p-3' ],
+        [ '%+a',      '1',       '+0x8p-3' ],
+        [ '%+a',      '-1',      '-0x8p-3' ],
+        [ '% a',      ' 1',      ' 0x8p-3' ],
+        [ '% a',      '-1',      '-0x8p-3' ],
+
+        [ '%8a',      '3.14',    '0xc.8f5c28f5c28f5c3p-2' ],
+        [ '%13a',     '3.14',    '0xc.8f5c28f5c28f5c3p-2' ],
+        [ '%20a',     '3.14',    '0xc.8f5c28f5c28f5c3p-2' ],
+        [ '%.4a',     '3.14',    '0xc.8f5cp-2' ],
+        [ '%.5a',     '3.14',    '0xc.8f5c3p-2' ],
+        [ '%.6a',     '3.14',    '0xc.8f5c29p-2' ],
+        [ '%.20a',    '3.14',    '0xc.8f5c28f5c28f5c300000p-2' ],
+        [ '%20.10a',  '3.14',    '   0xc.8f5c28f5c3p-2' ],
+        [ '%20.15a',  '3.14',    '0xc.8f5c28f5c28f5c3p-2' ],
+        [ '% 20.10a', '3.14',    '   0xc.8f5c28f5c3p-2' ],
+        [ '%020.10a', '3.14',    '0x000c.8f5c28f5c3p-2' ],
+
+        [ '%30a',  '3.14',   '        0xc.8f5c28f5c28f5c3p-2' ],
+        [ '%-30a', '3.14',   '0xc.8f5c28f5c28f5c3p-2        ' ],
+        [ '%030a',  '3.14',  '0x00000000c.8f5c28f5c28f5c3p-2' ],
+        [ '%-030a', '3.14',  '0xc.8f5c28f5c28f5c3p-2        ' ],
+
+        [ '%A',       '3.14',    '0XC.8F5C28F5C28F5C3P-2' ],
+        );
+} else {
+    print "# no hexfloat tests\n";
+}
+
+plan tests => 1406 + ($Q ? 0 : 12) + @hexfloat;
 
 use strict;
 use Config;
@@ -336,3 +446,10 @@ is $o::count, '1', 'sprinf %1s overload count';
 $o::count = 0;
 () = sprintf "%.1s", $o;
 is $o::count, '1', 'sprinf %.1s overload count';
+
+for my $t (@hexfloat) {
+    my ($format, $arg, $expected) = @$t;
+    $arg = eval $arg;
+    my $result = sprintf($format, $arg);
+    is($result, $expected, "'$format' '$arg' -> '$result' cf '$expected'");
+}
