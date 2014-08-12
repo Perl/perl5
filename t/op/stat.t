@@ -477,6 +477,7 @@ like $@, qr/^The stat preceding lstat\(\) wasn't an lstat at /,
     stat "test.pl";
     my @lstatbuf = lstat *FOO{IO};
     is "@lstatbuf", "@statbuf", 'lstat $ioref reverts to regular fstat';
+    close(FOO);
     unlink $tmpfile or print "# unlink failed: $!\n";
 }
   
