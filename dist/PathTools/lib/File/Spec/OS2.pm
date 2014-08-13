@@ -9,6 +9,12 @@ $VERSION =~ tr/_//;
 
 @ISA = qw(File::Spec::Unix);
 
+# 2012-06-08 SHL
+# Some regexes we use for path splitting
+my $DRIVE_RX = '[a-zA-Z]:';
+my $UNC_RX = '(?:\\\\\\\\|//)[^\\\\/]+[\\\\/][^\\\\/]+';
+my $VOL_RX = "(?:$DRIVE_RX|$UNC_RX)";
+
 sub devnull {
     return "/dev/nul";
 }
@@ -19,7 +25,14 @@ sub case_tolerant {
 
 sub file_name_is_absolute {
     my ($self,$file) = @_;
-    return scalar($file =~ m{^([a-z]:)?[\\/]}is);
+    # 2012-06-08 SHL
+    if ($file =~ m{^($VOL_RX)}o) {
+      my $vol = $1;
+      return ($vol =~ m{^$UNC_RX}o ? 2
+             : $file =~ m{^$DRIVE_RX[\\/]}o ? 2
+             : 0);
+    }
+    return $file =~  m{^[\\/]} ? 1 : 0;
 }
 
 sub path {
@@ -202,32 +215,42 @@ sub abs2rel {
 sub rel2abs {
     my ($self,$path,$base ) = @_;
 
-    if ( ! $self->file_name_is_absolute( $path ) ) {
+    my $is_abs = $self->file_name_is_absolute($path);
 
-        if ( !defined( $base ) || $base eq '' ) {
-	    $base = $self->_cwd();
-        }
-        elsif ( ! $self->file_name_is_absolute( $base ) ) {
-            $base = $self->rel2abs( $base ) ;
-        }
-        else {
-            $base = $self->canonpath( $base ) ;
-        }
+    # Check for volume (should probably document the '2' thing...)
+    return $self->canonpath( $path ) if $is_abs == 2;
 
-        my ( $path_directories, $path_file ) =
-            ($self->splitpath( $path, 1 ))[1,2] ;
-
-        my ( $base_volume, $base_directories ) =
-            $self->splitpath( $base, 1 ) ;
-
-        $path = $self->catpath( 
-            $base_volume, 
-            $self->catdir( $base_directories, $path_directories ), 
-            $path_file
-        ) ;
+    if ($is_abs) {
+      # It's missing a volume, add one
+      my $vol = ($self->splitpath( $self->_cwd() ))[0];
+      return $self->canonpath( $vol . $path );
     }
+ 
+    if ( !defined( $base ) || $base eq '' ) {
+      require Cwd ;
+      $base = Cwd::getdcwd( ($self->splitpath( $path ))[0] ) if defined &Cwd::getdcwd ;
+      $base = $self->_cwd() unless defined $base ;
+    }
+    elsif ( ! $self->file_name_is_absolute( $base ) ) {
+      $base = $self->rel2abs( $base ) ;
+    }
+    else {
+      $base = $self->canonpath( $base ) ;
+     }
+ 
+    my ( $path_directories, $path_file ) =
+      ($self->splitpath( $path, 1 ))[1,2] ;
 
-    return $self->canonpath( $path ) ;
+    my ( $base_volume, $base_directories ) =
+      $self->splitpath( $base, 1 ) ;
+
+    $path = $self->catpath( 
+                          $base_volume, 
+                          $self->catdir( $base_directories, $path_directories ), 
+                          $path_file
+                         ) ;
+
+     return $self->canonpath( $path ) ;
 }
 
 1;

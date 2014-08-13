@@ -4,7 +4,7 @@ use File::Spec;
 use lib File::Spec->catdir('t', 'lib');
 use Test::More;
 
-if( $^O eq 'MSWin32' ) {
+if( $^O eq 'MSWin32' || $^O eq 'os2' ) {
   plan tests => 4;
 } else {
   plan skip_all => 'this is not win32';

@@ -14,10 +14,12 @@
 #pragma pack()
 #endif
 
+#ifndef __KLIBC__
 extern ULONG _emx_exception (	EXCEPTIONREPORTRECORD *,
 				EXCEPTIONREGISTRATIONRECORD *,
                                 CONTEXTRECORD *,
                                 void *);
+#endif
 
 static RXSTRING * strs;
 static int	  nstrs;
@@ -157,14 +159,18 @@ static ULONG
 PERLCALLcv(PCSZ name, SV *cv, ULONG argc, PRXSTRING argv, PCSZ queue, PRXSTRING ret)
 {
     dTHX;
+#ifndef __KLIBC__
     EXCEPTIONREGISTRATIONRECORD xreg = { NULL, _emx_exception };
+#endif
     int i, rc;
     unsigned long len;
     char *str;
     SV *res;
     dSP;
 
+#ifndef __KLIBC__
     DosSetExceptionHandler(&xreg);
+#endif
 
     ENTER;
     SAVETMPS;

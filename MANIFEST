@@ -4327,7 +4327,6 @@ opnames.h			Automatically generated opcode header
 op_reg_common.h			Common parts of op.h, regexp.h header
 os2/Changes			Changelog for OS/2 port
 os2/diff.configure		Patches to Configure
-os2/dlfcn.h			Addon for dl_open
 os2/dl_os2.c			Addon for dl_open
 os2/Makefile.SHs		Shared library generation for OS/2
 os2/os2add.sym			Overriding symbols to export
@@ -4369,7 +4368,6 @@ os2/OS2/OS2-REXX/REXX.pm	DLL access module
 os2/OS2/OS2-REXX/REXX.xs	DLL access module
 os2/OS2/OS2-REXX/t/rx_cmprt.t	DLL access module
 os2/OS2/OS2-REXX/t/rx_dllld.t	DLL access module
-os2/OS2/OS2-REXX/t/rx_emxrv.t	DLL access module
 os2/OS2/OS2-REXX/t/rx_objcall.t	DLL access module
 os2/OS2/OS2-REXX/t/rx_sql.test	DLL access module
 os2/OS2/OS2-REXX/t/rx_tiesql.test	DLL access module

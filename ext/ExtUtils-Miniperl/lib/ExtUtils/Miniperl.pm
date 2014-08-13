@@ -74,6 +74,21 @@ sub writemain{
 
 #define PERL_IN_MINIPERLMAIN_C
 %s
+
+#ifdef __OS2__
+#  define INCL_DOSEXCEPTIONS
+#  define INCL_DOSPROCESS
+#  define INCL_LOADEXCEPTQ
+#  include <os2.h>
+unsigned long _System DosFreeModule (HMODULE hmod);
+unsigned long _System DosLoadModule (PSZ pszObject, unsigned long uObjectLen, PCSZ pszModule,
+    PHMODULE phmod);
+unsigned long _System DosQueryModuleName (HMODULE hmod, unsigned long ulNameLength, PCHAR pNameBuf);
+unsigned long _System DosQueryProcAddr (HMODULE hmod, unsigned long ulOrdinal, PCSZ pszProcName,
+    PPFN pProcAddr);
+#  include "exceptq.h"
+#endif
+
 static void xs_init (pTHX);
 static PerlInterpreter *my_perl;
 
@@ -110,6 +125,11 @@ main(int argc, char **argv, char **env)
 #ifndef PERL_USE_SAFE_PUTENV
     PL_use_safe_putenv = FALSE;
 #endif /* PERL_USE_SAFE_PUTENV */
+
+#ifdef __OS2__
+    EXCEPTIONREGISTRATIONRECORD exRegRec;
+    LoadExceptq(&exRegRec, "I", "perl");
+#endif
 
     /* if user wants control of gprof profiling off by default */
     /* noop unless Configure is given -Accflags=-DPERL_GPROF_CONTROL */
@@ -172,6 +192,10 @@ main(int argc, char **argv, char **env)
      * routines that are eventually called.
      */
     environ = env;
+#endif
+
+#ifdef __OS2__
+    UninstallExceptq(&exRegRec);
 #endif
 
     PERL_SYS_TERM();

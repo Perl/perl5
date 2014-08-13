@@ -98,11 +98,12 @@ sub copy {
     }
 
     if ((($Config{d_symlink} && $Config{d_readlink}) || $Config{d_link}) &&
-	!($^O eq 'MSWin32' || $^O eq 'os2')) {
+	!($^O eq 'MSWin32')) {
 	my @fs = stat($from);
 	if (@fs) {
 	    my @ts = stat($to);
-	    if (@ts && $fs[0] == $ts[0] && $fs[1] == $ts[1] && !-p $from) {
+	    if (@ts && $fs[0] == $ts[0] && $fs[1] == $ts[1] && !-p $from &&
+                 ($^O ne 'os2' || ($fs[0] != 0 && $fs[1] != 0))) {
 		carp("'$from' and '$to' are identical (not copied)");
                 return 0;
 	    }

@@ -104,7 +104,7 @@ sub link {
 sub chmod {
     my($mode,$name) = @_;
 
-    return if ($^O eq 'dos');
+    return if ($^O eq 'dos' || $^O eq 'os2');
     printf "  chmod %o %s\n", $mode, $name if $opts{verbose};
     CORE::chmod($mode,$name)
 	|| warn sprintf("Couldn't chmod %o %s: $!\n", $mode, $name)

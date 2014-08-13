@@ -3484,7 +3484,8 @@ S_minus_v(pTHX)
 #ifdef OS2
 	PerlIO_printf(PIO_stdout,
 		      "\n\nOS/2 port Copyright (c) 1990, 1991, Raymond Chen, Kai Uwe Rommel\n"
-		      "Version 5 port Copyright (c) 1994-2002, Andreas Kaiser, Ilya Zakharevich\n");
+		      "Version 5 port Copyright (c) 1994-2002, Andreas Kaiser, Ilya Zakharevich\n"
+                      "Version 5.8.8+ ports Copyright (c) 2007-2013, Paul Smedley, Knut St. Osmundsen\n");
 #endif
 #ifdef OEMVS
 	PerlIO_printf(PIO_stdout,
@@ -4469,9 +4470,6 @@ S_init_perllib(pTHX)
 #    define PERLLIB_SEP ':'
 #  endif
 #endif
-#ifndef PERLLIB_MANGLE
-#  define PERLLIB_MANGLE(s,n) (s)
-#endif
 
 #ifndef PERL_IS_MINIPERL
 /* Push a directory onto @INC if it exists.
@@ -4505,12 +4503,12 @@ S_mayberelocate(pTHX_ const char *const dir, STRLEN len, U32 flags)
     PERL_ARGS_ASSERT_MAYBERELOCATE;
     assert(len > 0);
 
-    /* I am not convinced that this is valid when PERLLIB_MANGLE is
-       defined to so something (in os2/os2.c), but the code has been
-       this way, ignoring any possible changed of length, since
-       760ac839baf413929cd31cc32ffd6dba6b781a81 (5.003_02) so I'll leave
-       it be.  */
-    libdir = newSVpvn(PERLLIB_MANGLE(dir, len), len);
+#ifdef PERLLIB_MANGLE
+    const char *dir2 = PERLLIB_MANGLE(dir, len);
+    libdir = newSVpvn(dir2, strlen(dir2));
+#else
+    libdir = newSVpvn(dir, len);
+#endif
 
 #ifdef VMS
     {

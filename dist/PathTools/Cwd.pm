@@ -177,7 +177,7 @@ $VERSION =~ tr/_//;
 
 @ISA = qw/ Exporter /;
 @EXPORT = qw(cwd getcwd fastcwd fastgetcwd);
-push @EXPORT, qw(getdcwd) if $^O eq 'MSWin32';
+push @EXPORT, qw(getdcwd) if $^O eq 'MSWin32' || $^O eq 'os2';
 @EXPORT_OK = qw(chdir abs_path fast_abs_path realpath fast_realpath);
 
 # sys_cwd may keep the builtin command
@@ -588,6 +588,10 @@ sub _perl_abs_path
 	    return abs_path($link_target);
 	}
 	
+        if ($^O eq 'os2' && $dir =~ /^[a-zA-Z]:$/) {
+           return abs_path($dir.'/') . "$file";
+        }
+
 	return $dir ? abs_path($dir) . "/$file" : "/$file";
     }
 

@@ -219,8 +219,10 @@ my_type()
     int rc;
     TIB *tib;
     PIB *pib;
-    
+
+#ifndef __KLIBC__
     if (!(_emx_env & 0x200)) return (char*)ptypes[1]; /* not OS/2. */
+#endif
     if (CheckOSError(DosGetInfoBlocks(&tib, &pib))) 
 	return NULL; 
     
@@ -233,8 +235,10 @@ file_type(char *path)
     int rc;
     ULONG apptype;
     
+#ifndef __KLIBC__
     if (!(_emx_env & 0x200)) 
 	croak("file_type not implemented on DOS"); /* not OS/2. */
+#endif
     if (CheckOSError(DosQueryAppType(path, &apptype))) {
 #if 0
 	if (rc == ERROR_INVALID_EXE_SIGNATURE) 
@@ -490,8 +494,10 @@ switch_of(HWND hwnd, PID pid)
 {
 	 HSWITCH hSwitch;    
 
+#ifndef __KLIBC__
 	 if (!(_emx_env & 0x200)) 
 	     croak("switch_entry not implemented on DOS"); /* not OS/2. */
+#endif
 	 if (CheckWinError(hSwitch = 
 			   myWinQuerySwitchHandle(hwnd, pid)))
 	     croak_with_os2error("WinQuerySwitchHandle");
@@ -743,8 +749,10 @@ process_swentry(unsigned long pid, HWND hwnd)
 {
     SWENTRY swentry;
 
+#ifndef __KLIBC__
     if (!(_emx_env & 0x200)) 
 	     croak("process_swentry not implemented on DOS"); /* not OS/2. */
+#endif
     fill_swentry(&swentry, hwnd, pid);
     return newSVpvn((char*)&swentry, sizeof(swentry));
 }
@@ -757,8 +765,10 @@ swentries_list()
     PSWBLOCK pswblk;
     SV *sv = newSVpvs("");
 
+#ifndef __KLIBC__
     if (!(_emx_env & 0x200)) 
 	     croak("swentries_list not implemented on DOS"); /* not OS/2. */
+#endif
     if (!pWinQuerySwitchList)
 	AssignFuncPByORD(pWinQuerySwitchList, ORD_WinQuerySwitchList);
     num = pWinQuerySwitchList(0, NULL, 0);	/* HAB is not required */
@@ -819,8 +829,10 @@ change_swentrysw(SWENTRY *sw)
 {
     ULONG rc;			/* For CheckOSError */
 
+#ifndef __KLIBC__
     if (!(_emx_env & 0x200)) 
 	     croak("change_entry() not implemented on DOS"); /* not OS/2. */
+#endif
     if (!pWinChangeSwitchEntry)
 	AssignFuncPByORD(pWinChangeSwitchEntry, ORD_WinChangeSwitchEntry);
     return !CheckOSError(pWinChangeSwitchEntry(sw->hswitch, &sw->swctl));
@@ -1068,7 +1080,12 @@ vioFont(int type, int *w, int *h) /* 0 for actual RAM font, 1 for ROM font */
     vio->cb = sizeof(*vio);
     vio->type = type;			/* BIOS or the loaded font. */
     vio->cbData = 0xFFFF;		/* How large is my buffer? */
-    vio->pbData = _emx_32to16(buf);	/* Wants an 16:16 pointer */
+    /* Wants an 16:16 pointer */
+#ifdef __KLIBC__
+    vio->pbData = _libc_32to16(buf);
+#else
+    vio->pbData = _emx_32to16(buf);
+#endif
     if (CheckOSError(VioGetFont( vio, 0 )))
 	croak_with_os2error("Can't get VIO font");
     *w = vio->cxCell;
@@ -1099,7 +1116,12 @@ vioFont_set(SV *sv, int cellwidth, int cellheight, int type)
     vio->cb = sizeof(*vio);
     vio->type = type;			/* BIOS or the loaded font. */
     vio->cbData = l;			/* How large is my buffer? */
-    vio->pbData = _emx_32to16(buf);	/* Wants an 16:16 pointer */
+    /* Wants an 16:16 pointer */
+#ifdef __KLIBC__
+    vio->pbData = _libc_32to16(buf);
+#else
+    vio->pbData = _emx_32to16(buf);
+#endif
     vio->cxCell = cellwidth;
     vio->cyCell = cellheight;
     Copy(s, buf, l, char);
@@ -1185,7 +1207,12 @@ _vioState(int what, int first, int count)
 	/* Wants an 16:16 pointer */
 	if (count < 0 || count > 256)
 	    croak("unexpected palette count");
-	vio->colorreg.colorregaddr = (PCH)_emx_32to16(vio->colorreg_padded.rgb);
+    /* Wants an 16:16 pointer */
+#ifdef __KLIBC__
+        vio->colorreg.colorregaddr = (PCH)_libc_32to16(vio->colorreg_padded.rgb);
+#else
+        vio->colorreg.colorregaddr = (PCH)_emx_32to16(vio->colorreg_padded.rgb);
+#endif
 	vio->colorreg.numcolorregs = count;		/* 256 is max */
 	vio->colorreg.firstcolorreg = first;
 	size += 3 * count;
@@ -1224,7 +1251,11 @@ _vioState_set(SV *sv)
     }
     Copy(s, (char*)vio, size, char);
     if (what == 3)	/* We expect colors put after VIOCOLORREG */
+#ifdef __KLIBC__
+        vio->colorreg.colorregaddr = (PCH)_libc_32to16(vio->colorreg_padded.rgb);
+#else
 	vio->colorreg.colorregaddr = (PCH)_emx_32to16(vio->colorreg_padded.rgb);
+#endif
 
     if (CheckOSError(VioSetState( (void*)vio, 0 )))
 	croak_with_os2error("Can't set VIO state");

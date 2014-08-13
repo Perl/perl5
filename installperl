@@ -184,14 +184,41 @@ die "Patchlevel of perl ($patchlevel)",
     "and patchlevel of config.sh ($Config{'PERL_VERSION'}) don't match\n"
 	if $patchlevel != $Config{'PERL_VERSION'};
 
-# Fetch some frequently-used items from %Config
-my $installbin = "$opts{destdir}$Config{installbin}";
-my $installscript = "$opts{destdir}$Config{installscript}";
-my $installprivlib = "$opts{destdir}$Config{installprivlib}";
-my $installarchlib = "$opts{destdir}$Config{installarchlib}";
-my $installsitelib = "$opts{destdir}$Config{installsitelib}";
-my $installsitearch = "$opts{destdir}$Config{installsitearch}";
-my $installman1dir = "$opts{destdir}$Config{installman1dir}";
+my %MyConfig;
+$MyConfig{'installbin'}      = $Config{'installbin'};
+$MyConfig{'installscript'}   = $Config{'installscript'};
+$MyConfig{'installarchlib'}  = $Config{'installarchlib'};
+$MyConfig{'installsitelib'}  = $Config{'installsitelib'};
+$MyConfig{'installsitearch'} = $Config{'installsitearch'};
+$MyConfig{'installprivlib'}  = $Config{'installprivlib'};
+$MyConfig{'installman1dir'}  = $Config{'installman1dir'};
+$MyConfig{'installman3dir'}  = $Config{'installman3dir'};
+if ($^O eq 'os2' && "$opts{destdir}" ne '') {
+    # Drop the /@unixroot bit if not installing to the unixroot.
+    my $unixroot = '/@unixroot';
+    $MyConfig{'installbin'}      =~ s/^$unixroot//;
+    $MyConfig{'installscript'}   =~ s/^$unixroot//;
+    $MyConfig{'installarchlib'}  =~ s/^$unixroot//;
+    $MyConfig{'installsitelib'}  =~ s/^$unixroot//;
+    $MyConfig{'installsitearch'} =~ s/^$unixroot//;
+    $MyConfig{'installprivlib'}  =~ s/^$unixroot//;
+    $MyConfig{'installman1dir'}  =~ s/^$unixroot//;
+    $MyConfig{'installman3dir'}  =~ s/^$unixroot//;
+    #$Config{'archlibexp'}      =~ s/^$unixroot//;
+    #$Config{'privlibexp'}      =~ s/^$unixroot//;
+    #$Config{'scriptdir'}       =~ s/^$unixroot//;
+    #$Config{'sitearchexp'}     =~ s/^$unixroot//;
+    #$Config{'sitelibexp'}      =~ s/^$unixroot//;
+}
+
+ # Fetch some frequently-used items from %Config
+my $installbin = "$opts{destdir}$MyConfig{installbin}";
+my $installscript = "$opts{destdir}$MyConfig{installscript}";
+my $installprivlib = "$opts{destdir}$MyConfig{installprivlib}";
+my $installarchlib = "$opts{destdir}$MyConfig{installarchlib}";
+my $installsitelib = "$opts{destdir}$MyConfig{installsitelib}";
+my $installsitearch = "$opts{destdir}$MyConfig{installsitearch}";
+my $installman1dir = "$opts{destdir}$MyConfig{installman1dir}";
 my $man1ext = $Config{man1ext};
 my $libperl = $Config{libperl};
 # Shared library and dynamic loading suffixes.
@@ -272,6 +299,24 @@ if (($Is_W32 and ! $Is_NetWare) or $Is_Cygwin) {
     chmod(0755, "$installbin/$perldll");
     $packlist->{"$Config{installbin}/$perldll"} = { type => 'file' };
 } # if (($Is_W32 and ! $Is_NetWare) or $Is_Cygwin)
+elsif ($^O eq 'os2') {
+    # Install the DLL
+    my $perldll = `cat imp_version | tr -d '\r\n'`;
+    if ($perldll ne '') {
+        $perldll .= ".dll";
+    } else {
+        print "warning: imp_version is missing...";
+        my @perldllfiles;
+        @perldllfiles = <perl*.dll>;
+        $perldll = pop @perldllfiles;
+        die 'error: cannot find the perl dll!' if $perldll eq '';
+    }
+
+    safe_unlink("$installbin/../lib/$perldll");
+    copy("$perldll", "$installbin/../lib/$perldll");
+    chmod(0644, "$installbin/../lib/$perldll");
+    $packlist->{"$installbin/../lib/$perldll"} = { type => 'file' };
+}
 
 # First we install the version-numbered executables.
 

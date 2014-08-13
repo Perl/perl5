@@ -1217,7 +1217,7 @@ if ($ARGS{PLATFORM} =~ /^win(?:32|ce)$/) {
 if ($ARGS{PLATFORM} eq 'os2') {
     my (%mapped, @missing);
     open MAP, 'miniperl.map' or die 'Cannot read miniperl.map';
-    /^\s*[\da-f:]+\s+(\w+)/i and $mapped{$1}++ foreach <MAP>;
+    /^\s*[\da-f:]+[\s*+]\s*_(\w+)/i and $mapped{$1}++ foreach <MAP>;
     close MAP or die 'Cannot close miniperl.map';
 
     @missing = grep { !exists $mapped{$_} }
@@ -1287,11 +1287,7 @@ foreach my $symbol (@symbols) {
     }
     elsif ($ARGS{PLATFORM} eq 'os2') {
 	printf qq(    %-31s \@%s\n),
-	  qq("$symbol"), $ordinal{$symbol} || ++$sym_ord;
-	printf qq(    %-31s \@%s\n),
-	  qq("$exportperlmalloc{$symbol}" = "$symbol"),
-	  $ordinal{$exportperlmalloc{$symbol}} || ++$sym_ord
-	  if $exportperlmalloc and exists $exportperlmalloc{$symbol};
+	  qq("_$symbol"), $ordinal{$symbol} || ++$sym_ord;
     }
     elsif ($ARGS{PLATFORM} eq 'netware') {
 	print "\t$symbol,\n";
@@ -1304,10 +1300,10 @@ foreach my $symbol (@symbols) {
 
 if ($ARGS{PLATFORM} eq 'os2') {
     print <<EOP;
-    dll_perlmain=main
-    fill_extLibpath
-    dir_subst
-    Perl_OS2_handler_install
+    _dll_perlmain=main
+    _fill_extLibpath
+    _dir_subst
+    _Perl_OS2_handler_install
 
 ; LAST_ORDINAL=$sym_ord
 EOP

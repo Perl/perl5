@@ -2,10 +2,16 @@
 #include "string.h"
 #include "stdio.h"
 
+#define INCL_EXAPIS
+#define INCL_EXAPIS_MAPPINGS
 #define INCL_BASE
 #include <os2.h>
 #include <float.h>
 #include <stdlib.h>
+
+#ifdef __KLIBC__
+# define MCW_EM                  0x003f
+#endif
 
 static ULONG retcode;
 static char fail[300];
@@ -110,7 +116,10 @@ dlopen(const char *path, int mode)
             strcpy(fail, "can't load from myself: compiled without -DDLOPEN_INITTERM");
 	    return 0;
 	}
-	if ((rc = DosLoadModule(fail, sizeof fail, (char*)path, &handle)) == 0)
+        beg = tmp;
+        if (!_realrealpath(path, tmp, sizeof(tmp)))
+            beg = path;
+        if ((rc = DosLoadModule(fail, sizeof fail, (char *)beg, &handle)) == 0)
 		goto ret;
 
 	retcode = rc;
@@ -160,7 +169,7 @@ dlsym(void *handle, const char *symbol)
 	return NULL;
 }
 
-char *
+const char *
 dlerror(void)
 {
 	static char buf[700];

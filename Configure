@@ -94,8 +94,8 @@ p_=:
 if test -d c:/. || ( uname -a | grep -i 'os\(/\|\)2' 2>&1 ) 2>&1 >/dev/null ; then
 	if test -n "$OS2_SHELL"; then
 		p_=\;
-		PATH=`cmd /c "echo %PATH%" | tr '\\\\' / `
-		OS2_SHELL=`cmd /c "echo %OS2_SHELL%" | tr '\\\\' / | tr '[A-Z]' '[a-z]'`
+		PATH=`echo "$PATH" | tr '\\\\' / `
+		OS2_SHELL=`echo $OS2_SHELL | tr '\\\\' / | tr '[A-Z]' '[a-z]'`
 		is_os2=yes
 	elif test -n "$DJGPP"; then
 		case "X${MACHTYPE:-nonesuchmach}" in
@@ -7640,6 +7640,8 @@ case "$nm_opt" in
 		nm_opt='-p'	# DG-UX
 	elif $test -f /lib64/rld; then
 		nm_opt='-p'	# 64-bit Irix
+        elif $test "X$osname" = "os2"; then
+                nm_opt='-pa'    # OS/2 - must include the aliases
 	else
 		nm_opt=''
 	fi;;
@@ -7823,6 +7825,10 @@ if com="$sed -n -e 's/__IO//' -e 's/^.* $xxx  *//p'";\
 	eval $xscan;\
 	$contains '^fprintf$' libc.list >/dev/null 2>&1; then
 		eval $xrun
+elif test "X$osname" = "Xos2" && com="$sed -n -e 's/^.* [ADTSIWe]  *_//p' -e 's/^_std_//' -e 's/^.* [ADTSIWe]  *//p'";\
+       eval $xscan;\
+       $contains '^fprintf$' libc.list >/dev/null 2>&1; then
+               eval $xrun
 elif com="$sed -n -e 's/^__*//' -e 's/^\([a-zA-Z_0-9$]*\).*xtern.*/\1/p'";\
 	eval $xscan;\
 	$contains '^fprintf$' libc.list >/dev/null 2>&1; then
@@ -7905,7 +7911,13 @@ else
 				    < tmp.imp >>libc.tmp
 				$rm -f tmp.imp
 			done
-			$sed -e "s/\\$_o\$//" -e 's/^ \+//' < libc.tmp > libc.list
+			 # assumes libc and emxomfar
+                       $sed -e "s/\\$_o\$//" -e 's/^ \+//' \
+                            -e '/^ *$/d' \
+                            -e '/ (page [0-9]/d' \
+                            -e 's/^_//' \
+                            -e 's/^__std_//' \
+                            libc.tmp > libc.list
 			echo "Ok." >&4
 		else
 			echo "$ar didn't seem to work right." >&4

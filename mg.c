@@ -831,7 +831,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
             else
                 sv_setpvs(sv,"");
         }
-#elif defined(OS2)
+#elif defined(OS2) && !defined(__KLIBC__)
         if (!(_emx_env & 0x200)) {	/* Under DOS */
             sv_setnv(sv, (NV)errno);
             sv_setpv(sv, errno ? my_strerror(errno) : "");

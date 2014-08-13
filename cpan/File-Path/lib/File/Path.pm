@@ -362,6 +362,9 @@ sub _rmtree {
                 _error($arg, "cannot reset chmod", $canon);
             }
 
+            # ensure that we are not in a current working directory on OS/2
+            chdir("$root/$updir") if $^O eq 'os2';
+            
             # don't leave the client code in an unexpected directory
             chdir($arg->{cwd})
                 or _croak("cannot chdir to $arg->{cwd} from $canon: $!, aborting.");

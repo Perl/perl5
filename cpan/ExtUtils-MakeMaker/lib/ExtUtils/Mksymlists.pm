@@ -104,8 +104,23 @@ sub _write_os2 {
     print $def "CODE LOADONCALL\n";
     print $def "DATA LOADONCALL NONSHARED MULTIPLE\n";
     print $def "EXPORTS\n  ";
-    print $def join("\n  ",@{$data->{DL_VARS}}, "\n") if @{$data->{DL_VARS}};
-    print $def join("\n  ",@{$data->{FUNCLIST}}, "\n") if @{$data->{FUNCLIST}};
+    my @syms;
+    # Export public symbols both with and without underscores to
+    # ensure compatibility between DLLs from different compilers
+    # NOTE: DynaLoader itself only uses the names without underscores,
+    # so this is only to cover the case when the extension DLL may be
+    # linked to directly from C. GSAR 97-07-10
+    if ($Config::Config{'cc'} =~ /^bcc/i) {
+       for (@{$data->{DL_VARS}}, @{$data->{FUNCLIST}}) {
+           push @syms, "_$_", "$_ = _$_";
+       }
+    }
+    else {
+       for (@{$data->{DL_VARS}}, @{$data->{FUNCLIST}}) {
+           push @syms, "_$_";
+       }
+    }
+    print $def join("\n  ",@syms, "\n") if @syms;
     _print_imports($def, $data);
     close $def;
 }
