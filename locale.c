@@ -1133,9 +1133,7 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
          * result */
         if (is_utf8) {
             wchar_t wc;
-            GCC_DIAG_IGNORE(-Wunused-result);
-            (void) mbtowc(&wc, NULL, 0);    /* Reset any shift state */
-            GCC_DIAG_RESTORE;
+            PERL_UNUSED_RESULT(mbtowc(&wc, NULL, 0));/* Reset any shift state */
             errno = 0;
             if ((size_t)mbtowc(&wc, HYPHEN_UTF8, strlen(HYPHEN_UTF8))
                                                         != strlen(HYPHEN_UTF8)
