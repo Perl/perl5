@@ -10065,7 +10065,8 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
                                                    "Hexadecimal float: exponent underflow");
 #endif
                                     break;
-                                } else {
+                                }
+                                else {
 #ifdef NV_MAX_EXP
                                     if (!negexp &&
                                         hexfp_exp > NV_MAX_EXP - 1) {
@@ -10211,7 +10212,8 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
             if ((*s == 'e' || *s == 'E')) {
 		/* At least some Mach atof()s don't grok 'E' */
                 *d++ = 'e';
-            } else if (UNLIKELY(hexfp && (*s == 'p' || *s == 'P'))) {
+            }
+            else if (UNLIKELY(hexfp && (*s == 'p' || *s == 'P'))) {
                 *d++ = 'p';
             }
 

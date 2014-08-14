@@ -11462,7 +11462,8 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                             need += SvLEN(PL_numeric_radix_sv);
                         RESTORE_LC_NUMERIC();
 #endif
-                } else if (i > 0) {
+                }
+                else if (i > 0) {
                     need = BIT_DIGITS(i);
                 } /* if i < 0, the number of digits is hard to predict. */
 	    }
@@ -11834,7 +11835,8 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 
                     while (zerotail--)
                         *p++ = '0';
-                } else {
+                }
+                else {
                     *p++ = '0';
                     exponent = 0;
                 }
@@ -11848,7 +11850,8 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                     if (left) {
                         /* Pad the back with spaces. */
                         memset(PL_efloatbuf + elen, ' ', width - elen);
-                    } else if (fill == '0') {
+                    }
+                    else if (fill == '0') {
                         /* Insert the zeros between the "0x" and
                          * the digits, otherwise we end up with
                          * "0000xHHH..." */
@@ -11856,7 +11859,8 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                         char* zerox = PL_efloatbuf + 2;
                         Move(zerox, zerox + nzero,  elen - 2, char);
                         memset(zerox, fill, nzero);
-                    } else {
+                    }
+                    else {
                         /* Move it to the right. */
                         Move(PL_efloatbuf, PL_efloatbuf + width - elen,
                              elen, char);
