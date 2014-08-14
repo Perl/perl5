@@ -9805,16 +9805,18 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
     static const char* const number_too_long = "Number too long";
     /* Hexadecimal floating point.
      *
-     * In many places (where UV is quad and NV is IEEE 754 double)
-     * we can fit the mantissa bits of a NV into a UV.  This will not
-     * work everywhere, though (either no quads, or using long doubles),
-     * in which case we have to resort to NV, which will probably mean
-     * horrible loss of precision due to multiple fp operations. */
+     * In many places (where we have quads and NV is IEEE 754 double)
+     * we can fit the mantissa bits of a NV into an unsigned quad.
+     * (Note that UVs might not be quads even when we have quads.)
+     * This will not work everywhere, though (either no quads, or
+     * using long doubles), in which case we have to resort to NV,
+     * which will probably mean horrible loss of precision due to
+     * multiple fp operations. */
     bool hexfp = FALSE;
     int total_bits = 0;
-#if UVSIZE == 8 && NVSIZE == 8
-#  define HEXFP_UV
-    UV hexfp_uv = 0;
+#if NVSIZE == 8 && defined(HAS_QUAD) && defined(Uquad_t)
+#  define HEXFP_UQUAD
+    Uquad_t hexfp_uquad = 0;
     int hexfp_frac_bits = 0;
 #else
 #  define HEXFP_NV
@@ -10004,27 +10006,27 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
                  * detection will shortly be more thorough with the
                  * underbar checks. */
                 const char* h = s;
-#ifdef HEXFP_UV
-                hexfp_uv = u;
+#ifdef HEXFP_UQUAD
+                hexfp_uquad = u;
 #else /* HEXFP_NV */
                 hexfp_nv = u;
 #endif
                 if (*h == '.') {
 #ifdef HEXFP_NV
-                    NV hfm = 1 / 16.0;
+                    NV mult = 1 / 16.0;
 #endif
                     h++;
                     while (isXDIGIT(*h) || *h == '_') {
                         if (isXDIGIT(*h)) {
                             U8 b = XDIGIT_VALUE(*h);
                             total_bits += shift;
-#ifdef HEXFP_UV
-                            hexfp_uv <<= shift;
-                            hexfp_uv |= b;
+#ifdef HEXFP_UQUAD
+                            hexfp_uquad <<= shift;
+                            hexfp_uquad |= b;
                             hexfp_frac_bits += shift;
 #else /* HEXFP_NV */
-                            hexfp_nv += b * hfm;
-                            hfm /= 16.0;
+                            hexfp_nv += b * mult;
+                            mult /= 16.0;
 #endif
                         }
                         h++;
@@ -10078,7 +10080,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
                         }
                         if (negexp)
                             hexfp_exp = -hexfp_exp;
-#ifdef HEXFP_UV
+#ifdef HEXFP_UQUAD
                         hexfp_exp -= hexfp_frac_bits;
 #endif
                         hexfp_mult = pow(2.0, hexfp_exp);
@@ -10285,8 +10287,8 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
                     Perl_ck_warner(aTHX_ packWARN(WARN_OVERFLOW),
                                    "Hexadecimal float: mantissa overflow");
 #  endif
-#ifdef HEXFP_UV
-                nv = hexfp_uv * hexfp_mult;
+#ifdef HEXFP_UQUAD
+                nv = hexfp_uquad * hexfp_mult;
 #else /* HEXFP_NV */
                 nv = hexfp_nv * hexfp_mult;
 #endif
