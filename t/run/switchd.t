@@ -9,7 +9,7 @@ BEGIN { require "./test.pl"; }
 
 # This test depends on t/lib/Devel/switchd*.pm.
 
-plan(tests => 19);
+plan(tests => 20);
 
 my $r;
 
@@ -285,3 +285,21 @@ is(
   "42\n",
   '-d does not conflict with sort optimisations'
 );
+
+{
+local $TODO = "This crashes";
+is(
+  runperl(
+   switches => [ '-Ilib', '-d:switchd_empty' ],
+   progs => [ split "\n",
+    'use bignum;
+     $DB::single=2;
+     print qq/debugged\n/;
+    '
+   ],
+   stderr => 1
+  ),
+  "debugged\n",
+  "\$DB::single set to overload"
+);
+}
