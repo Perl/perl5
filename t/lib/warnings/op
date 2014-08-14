@@ -1081,8 +1081,6 @@ Can't use 'defined(@array)' (Maybe you should just omit the defined()?) at - lin
 # op.c
 defined(@a = (1,2,3));
 EXPECT
-OPTION fatal
-Can't use 'defined(@array)' (Maybe you should just omit the defined()?) at - line 2.
 ########
 # op.c
 defined(%h);

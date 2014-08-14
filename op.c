@@ -9381,7 +9381,6 @@ Perl_ck_defined(pTHX_ OP *o)		/* 19990527 MJD */
 	switch (cUNOPo->op_first->op_type) {
 	case OP_RV2AV:
 	case OP_PADAV:
-	case OP_AASSIGN:		/* Is this a good idea? */
 	    Perl_croak(aTHX_ "Can't use 'defined(@array)'"
 			     " (Maybe you should just omit the defined()?)");
 	break;
