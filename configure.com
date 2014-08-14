@@ -3588,7 +3588,7 @@ $ GOSUB link_ok
 $ IF link_status .NE. good_link
 $ THEN
 $   longdblsize="0"
-$   longdblkind="-1"
+$   longdblkind="0"
 $   d_longdbl="undef"
 $   echo "You do not have long double."
 $ ELSE
