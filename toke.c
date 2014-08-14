@@ -10016,10 +10016,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
                     h++;
                     while (isXDIGIT(*h) || *h == '_') {
                         if (isXDIGIT(*h)) {
-                            const char* p = strchr(PL_hexdigit, *h);
-                            U8 b;
-                            assert(p);
-                            b = ((p - PL_hexdigit) & 0x0F);
+                            U8 b = XDIGIT_VALUE(*h);
                             total_bits += shift;
 #ifdef HEXFP_UV
                             hexfp_uv <<= shift;
