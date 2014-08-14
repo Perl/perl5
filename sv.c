@@ -11456,7 +11456,12 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                         2 + /* "p+" */
                         (i >= 0 ? BIT_DIGITS(i) : 1 + BIT_DIGITS(-i)) +
                         1;   /* \0 */
-                    /* XXX if PL_numeric_radix_sv && IN_LC(LC_NUMERIC) */
+#ifdef USE_LOCALE_NUMERIC
+                        STORE_LC_NUMERIC_SET_TO_NEEDED();
+                        if (PL_numeric_radix_sv && IN_LC(LC_NUMERIC))
+                            need += SvLEN(PL_numeric_radix_sv);
+                        RESTORE_LC_NUMERIC();
+#endif
                 } else if (i > 0) {
                     need = BIT_DIGITS(i);
                 } /* if i < 0, the number of digits is hard to predict. */
