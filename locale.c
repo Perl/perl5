@@ -1558,6 +1558,41 @@ Perl_my_strerror(pTHX_ const int errnum) {
 }
 
 /*
+
+=head1 Locale-related functions and macros
+
+=for apidoc sync_locale
+
+Changing the program's locale should be avoided by XS code.  Nevertheless,
+certain non-Perl libraries called from XS, such as C<Gtk> do so.  When this
+happens, Perl needs to be told that the locale has changed.  Use this function
+to do so, before returning to Perl.
+
+=cut
+*/
+
+void
+Perl_sync_locale(pTHX)
+{
+
+#ifdef USE_LOCALE_CTYPE
+    new_ctype(setlocale(LC_CTYPE, NULL));
+#endif /* USE_LOCALE_CTYPE */
+
+#ifdef USE_LOCALE_COLLATE
+    new_collate(setlocale(LC_COLLATE, NULL));
+#endif
+
+#ifdef USE_LOCALE_NUMERIC
+    set_numeric_local();    /* Switch from "C" to underlying LC_NUMERIC */
+    new_numeric(setlocale(LC_NUMERIC, NULL));
+#endif /* USE_LOCALE_NUMERIC */
+
+}
+
+
+
+/*
  * Local variables:
  * c-indentation-style: bsd
  * c-basic-offset: 4
