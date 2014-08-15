@@ -11675,11 +11675,11 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                         Perl_ldexp(Perl_frexp(PERL_ABS(nv), &exponent),
                                    NV_MANT_DIG);
                     const U8* nvp = (const U8*)(&mantissa);
-                    /* Theoretically we have all the bytes [0, UVSIZE - 1]
+                    /* Theoretically we have all the bytes [0, MANTISSASIZE-1]
                      * to inspect; but in practice we don't want the
                      * leading nybbles that are zero.  With the common
                      * IEEE 754 value for NV_MANT_DIG being 53, we want
-                     * the limit byte to be (int)((52-1)/8) == 6.
+                     * the limit byte to be (int)((53-1)/8) == 6.
                      *
                      * Note that this is _not_ inspecting the in-memory
                      * format of the nv (as opposed to the long double
@@ -11696,7 +11696,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                      * We generate 4-bit xdigits (nybble/nibble)
                      * instead of 8-bit bytes, since we might need
                      * to handle printf precision, and also insert
-                     * the decimal point.
+                     * the radix.
                      */
 #  if BYTEORDER == 0x12345678 || BYTEORDER == 0x1234 || \
      LONG_DOUBLEKIND == LONG_DOUBLE_IS_IEEE_754_128_BIT_LITTLE_ENDIAN || \
@@ -11791,7 +11791,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                                         /* If the carry goes all the way to
                                          * the front, we need to output
                                          * a single '1'. This goes against
-                                         * the "xdigit and then decimal point"
+                                         * the "xdigit and then radix"
                                          * but since this is "cannot happen"
                                          * category, that is probably good. */
                                         *p++ = xdig[1];
@@ -11809,9 +11809,8 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                     v = vdig;
                     *p++ = xdig[*v++];
 
-                    /* The decimal point is always output after
-                     * the first non-zero xdigit, or if alt.  */
-                    /* XXX if PL_numeric_radix_sv && IN_LC(LC_NUMERIC) */
+                    /* The radix is always output after the first
+                     * non-zero xdigit, or if alt.  */
                     if (vfnz < vlnz || alt) {
 #ifndef USE_LOCALE_NUMERIC
                         *p++ = '.';
