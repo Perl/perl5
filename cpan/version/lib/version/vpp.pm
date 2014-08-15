@@ -122,7 +122,7 @@ use strict;
 
 use Config;
 use vars qw($VERSION $CLASS @ISA $LAX $STRICT);
-$VERSION = 0.9908;
+$VERSION = 0.9909;
 $CLASS = 'version::vpp';
 
 require version::regex;

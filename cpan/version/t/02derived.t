@@ -10,7 +10,7 @@ use File::Temp qw/tempfile/;
 BEGIN {
     (my $coretests = $0) =~ s'[^/]+\.t'coretests.pm';
     require $coretests;
-    use_ok("version", 0.9908);
+    use_ok("version", 0.9909);
     # If we made it this far, we are ok.
 }
 
