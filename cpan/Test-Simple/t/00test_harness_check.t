@@ -18,7 +18,7 @@ Please install a new version from CPAN.
 If you've already tried to upgrade Test::Harness and still get this
 message, the new version may be "shadowed" by the old.  Check the
 output of Test::Harness's "make install" for "## Differing version"
-messages.  You can delete the old version by running 
+messages.  You can delete the old version by running
 "make install UNINST=1".
 
 INSTRUCTIONS

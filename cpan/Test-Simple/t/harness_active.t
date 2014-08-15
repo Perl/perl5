@@ -66,7 +66,7 @@ ERR
 
 {
     local $ENV{HARNESS_ACTIVE} = 1;
-                   
+
 #line 71
     fail( "this fails" );
     err_ok( <<ERR );

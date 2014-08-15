@@ -46,10 +46,10 @@ subtest 'bar' => sub {
 $Test->is_eq( $output, <<'OUT' );
 1..4
 ok 1
-    # Subtest: bar
+# Subtest: bar
     1..3
     ok 1
-        # Subtest: sub_bar
+    # Subtest: sub_bar
         1..3
         ok 1
         ok 2

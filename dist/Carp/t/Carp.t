@@ -310,15 +310,13 @@ cluck_undef( 0, "undef", 2, undef, 4 );
 
 # check that Carp respects CORE::GLOBAL::caller override after Carp
 # has been compiled
+require B; # For older Test::More versions that do not auto-load it
 for my $bodge_job ( 2, 1, 0 ) { SKIP: {
     skip "can't safely detect incomplete caller override on perl $]", 6
 	if $bodge_job && !Carp::CALLER_OVERRIDE_CHECK_OK;
     print '# ', ( $bodge_job ? 'Not ' : '' ),
         "setting \@DB::args in caller override\n";
-    if ( $bodge_job == 1 ) {
-        require B;
-        print "# required B\n";
-    }
+
     my $accum = '';
     local *CORE::GLOBAL::caller = sub {
         local *__ANON__ = "fakecaller";
@@ -334,11 +332,22 @@ for my $bodge_job ( 2, 1, 0 ) { SKIP: {
             return CORE::caller( ( $_[0] || 0 ) + 1 );
         }
     };
+
     eval "scalar caller()";
     like( $accum, qr/main::fakecaller/,
         "test CORE::GLOBAL::caller override in eval" );
+
     $accum = '';
-    my $got = XA::long(42);
+    my $got;
+    {
+        # Test::Builder loads B now, so we have to pretend it is not loaded.
+        # Carp simply wraps a call to svref_2object in an eval, so if that
+        # method does not exist we emulate not having B. Localizing the glob
+        # temporarily removes the sub.
+        local *B::svref_2object unless $bodge_job == 1;
+        $got = XA::long(42);
+    }
+
     like( $accum, qr/main::fakecaller/,
         "test CORE::GLOBAL::caller override in Carp" );
     my $package = 'XA';

@@ -202,6 +202,7 @@
 /if.pm
 /lib.pm
 /mro.pm
+/ok.pm
 /ops.pm
 /parent.pm
 /perlfaq.pm

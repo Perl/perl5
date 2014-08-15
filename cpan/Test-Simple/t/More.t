@@ -40,7 +40,7 @@ unlike(@foo, '/foo/');
 
 can_ok('Test::More', qw(require_ok use_ok ok is isnt like skip can_ok
                         pass fail eq_array eq_hash eq_set));
-can_ok(bless({}, "Test::More"), qw(require_ok use_ok ok is isnt like skip 
+can_ok(bless({}, "Test::More"), qw(require_ok use_ok ok is isnt like skip
                                    can_ok pass fail eq_array eq_hash eq_set));
 
 
@@ -54,7 +54,7 @@ isa_ok(\42, 'SCALAR');
 }
 
 
-# can_ok() & isa_ok should call can() & isa() on the given object, not 
+# can_ok() & isa_ok should call can() & isa() on the given object, not
 # just class, in case of custom can()
 {
        local *Foo::can;
@@ -143,7 +143,7 @@ ok( !eq_hash(\%hash1, \%hash2),
     'eq_hash with slightly different complicated hashes' );
 is @Test::More::Data_Stack, 0;
 
-is( Test::Builder->new, Test::More->builder,    'builder()' );
+is( Test::Builder->new, Test::More->builder, 'builder()' );
 
 
 cmp_ok(42, '==', 42,        'cmp_ok ==');

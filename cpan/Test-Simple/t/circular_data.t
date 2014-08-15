@@ -59,7 +59,7 @@ ok( eq_array ([$s], [$r]) );
 
 {
     # rt.cpan.org 11623
-    # Make sure the circular ref checks don't get confused by a reference 
+    # Make sure the circular ref checks don't get confused by a reference
     # which is simply repeating.
     my $a = {};
     my $b = {};

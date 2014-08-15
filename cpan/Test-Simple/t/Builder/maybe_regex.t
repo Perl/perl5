@@ -23,7 +23,7 @@ ok(('bar' !~ /$r/), 'qr// bad match');
 
 SKIP: {
     skip "blessed regex checker added in 5.10", 3 if $] < 5.010;
-    
+
     my $obj = bless qr/foo/, 'Wibble';
     my $re = $Test->maybe_regex($obj);
     ok( defined $re, "blessed regex detected" );

@@ -11,7 +11,14 @@ BEGIN {
 }
 
 use strict;
-use Test::More tests => 21;
+use Test::More;
+
+BEGIN {
+    require warnings;
+    if( eval "warnings->can('carp')" ) {
+        plan skip_all => 'Modern::Open is installed, which breaks this test';
+    }
+}
 
 BEGIN { $^W = 1; }
 
@@ -36,7 +43,7 @@ sub warnings_like {
 
 
 my $Filename = quotemeta $0;
-   
+
 
 is( undef, undef,           'undef is undef');
 no_warnings;
@@ -96,3 +103,5 @@ no_warnings;
     is_deeply([ undef ], [ undef ]);
     no_warnings;
 }
+
+done_testing;

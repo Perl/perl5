@@ -33,17 +33,17 @@ subtest 'fork within subtest' => sub {
 
         is $?, 0, 'child exit status';
         like $child_output, qr/^[\s#]+Child Done\s*\z/, 'child output';
-    } 
+    }
     else {
         $pipe->writer;
 
         # Force all T::B output into the pipe, for the parent
         # builder as well as the current subtest builder.
-        no warnings 'redefine';
-        *Test::Builder::output         = sub { $pipe };
-        *Test::Builder::failure_output = sub { $pipe };
-        *Test::Builder::todo_output    = sub { $pipe };
-        
+        my $builder = Test::Builder->new;
+        $builder->tap->output($pipe);
+        $builder->tap->failure_output($pipe);
+        $builder->tap->todo_output($pipe);
+
         diag 'Child Done';
         exit 0;
     }

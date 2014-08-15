@@ -1297,7 +1297,9 @@ _cleaner2:
 	-rmdir lib/autodie/Scope lib/autodie lib/XS lib/Win32API lib/VMS
 	-rmdir lib/Unicode/Collate/Locale lib/Unicode/Collate/CJK
 	-rmdir lib/Unicode/Collate lib/Tie/Hash lib/Thread lib/Text
-	-rmdir lib/Test/Builder/Tester lib/Test/Builder lib/Test lib/Term
+	-rmdir lib/Test/use lib/Test/Tester lib/Test/Builder/Trace
+	-rmdir lib/Test/Builder/Tester lib/Test/Builder/Result
+	-rmdir lib/Test/Builder/Formatter lib/Test/Builder lib/Test lib/Term
 	-rmdir lib/TAP/Parser/YAMLish lib/TAP/Parser/SourceHandler
 	-rmdir lib/TAP/Parser/Scheduler lib/TAP/Parser/Result
 	-rmdir lib/TAP/Parser/Iterator lib/TAP/Parser lib/TAP/Harness

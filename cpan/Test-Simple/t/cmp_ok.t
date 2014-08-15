@@ -15,7 +15,7 @@ $TB->level(0);
 
 sub try_cmp_ok {
     my($left, $cmp, $right, $error) = @_;
-    
+
     my %expect;
     if( $error ) {
         $expect{ok} = 0;
@@ -33,7 +33,7 @@ sub try_cmp_ok {
     eval { $ok = cmp_ok($left, $cmp, $right, "cmp_ok"); };
 
     $TB->is_num(!!$ok, !!$expect{ok}, "  right return");
-    
+
     my $diag = $err->read;
 
     if ($@) {

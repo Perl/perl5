@@ -8,6 +8,10 @@ BEGIN {
 use Test::More;
 
 BEGIN {
+    require warnings;
+    if( eval "warnings->can('carp')" ) {
+        plan skip_all => 'Modern::Open is installed, which breaks this test';
+    }
     if( !$ENV{HARNESS_ACTIVE} && $ENV{PERL_CORE} ) {
         plan skip_all => "Won't work with t/TEST";
     }

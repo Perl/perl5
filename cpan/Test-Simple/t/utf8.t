@@ -43,9 +43,9 @@ SKIP: {
 
     for my $method (keys %handles) {
         my $src = $handles{$method};
-        
+
         my $dest = Test::More->builder->$method;
-        
+
         is_deeply { map { $_ => 1 } PerlIO::get_layers($dest) },
                   { map { $_ => 1 } PerlIO::get_layers($src)  },
                   "layers copied to $method";
@@ -56,7 +56,7 @@ SKIP: {
 # Test utf8 is ok.
 {
     my $uni = "\x{11e}";
-    
+
     my @warnings;
     local $SIG{__WARN__} = sub {
         push @warnings, @_;

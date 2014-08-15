@@ -69,7 +69,7 @@ Test::More->builder->is_eq ($obj, "foo");
 
     package Foo;
     ::is_deeply(['TestPackage'], ['TestPackage']);
-    ::is_deeply({'TestPackage' => 'TestPackage'}, 
+    ::is_deeply({'TestPackage' => 'TestPackage'},
                 {'TestPackage' => 'TestPackage'});
     ::is_deeply('TestPackage', 'TestPackage');
 }
