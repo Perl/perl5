@@ -1679,6 +1679,7 @@ EXp	|int	|yylex
 p	|void	|yyunlex
 : Used in perl.c, pp_ctl.c
 p	|int	|yyparse	|int gramtype
+p	|int	|yyemit		|int token
 : Only used in scope.c
 p	|void	|parser_free	|NN const yy_parser *parser
 #ifdef PERL_CORE

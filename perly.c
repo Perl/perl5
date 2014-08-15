@@ -228,6 +228,7 @@ S_clear_yystack(pTHX_  const yy_parser *parser)
     Safefree(parser->stack);
 }
 
+int S_yyprocess (pTHX_ bool newstate, int token);
 
 /*----------.
 | yyparse.  |
@@ -236,22 +237,10 @@ S_clear_yystack(pTHX_  const yy_parser *parser)
 int
 Perl_yyparse (pTHX_ int gramtype)
 {
-    int yystate;
-    int yyn;
     int yyresult;
-
-    /* Lookahead token as an internal (translated) token number.  */
-    int yytoken = 0;
 
     yy_parser *parser;	    /* the parser object */
     yy_stack_frame  *ps;   /* current parser stack frame */
-
-#define YYPOPSTACK   parser->ps = --ps
-#define YYPUSHSTACK  parser->ps = ++ps
-
-    /* The variable used to return semantic value and location from the
-	  action routines: ie $$.  */
-    YYSTYPE yyval;
 
     YYDPRINTF ((Perl_debug_log, "Starting parse\n"));
 
@@ -275,6 +264,62 @@ Perl_yyparse (pTHX_ int gramtype)
     ps = parser->ps = parser->stack;
     ps->state = 0;
     SAVEDESTRUCTOR_X(S_clear_yystack, parser);
+
+    yyresult = S_yyprocess(aTHX_ TRUE, 0);
+    while (yyresult == -1) {
+	yyresult = S_yyprocess(aTHX_ FALSE, yylex());
+    }
+    return yyresult;
+}
+
+/*------------------------------------------------------------------.
+| yyemit -- yylex calls this to emit extra tokens before the one it |
+|           will return.                                            |
+`------------------------------------------------------------------*/
+
+int
+Perl_yyemit (pTHX_ int token)
+{
+    assert(PL_parser && PL_parser->yychar != YYEOF);
+    return S_yyprocess(aTHX_ FALSE, token);
+}
+
+/*-------------------------------------------------------------------.
+| yyprocess -- The parsing algorithm, called by yyparse and yyemit.  |
+`-------------------------------------------------------------------*/
+
+int
+S_yyprocess (pTHX_ bool newstate, int token)
+{
+
+    int yystate;
+    int yyn;
+    int yyresult;
+
+    /* Lookahead token as an internal (translated) token number.  */
+    int yytoken = 0;
+
+    yy_parser *parser;	    /* the parser object */
+    yy_stack_frame  *ps;   /* current parser stack frame */
+
+#define YYPOPSTACK   parser->ps = --ps
+#define YYPUSHSTACK  parser->ps = ++ps
+
+    /* The variable used to return semantic value and location from the
+	  action routines: ie $$.  */
+    YYSTYPE yyval;
+
+    parser = PL_parser;
+    ps = parser->ps;
+
+    if (!newstate) {
+	assert(parser->yychar == YYEMPTY);
+	parser->yychar = token;
+	yystate = ps->state;
+	yyn = yypact[yystate];
+	assert(yyn != YYPACT_NINF);
+	goto got_token;
+    }
 
 /*------------------------------------------------------------.
 | yynewstate -- Push a new state, which is found in yystate.  |
@@ -319,8 +364,13 @@ Perl_yyparse (pTHX_ int gramtype)
     /* YYCHAR is either YYEMPTY or YYEOF or a valid lookahead symbol.  */
     if (parser->yychar == YYEMPTY) {
 	YYDPRINTF ((Perl_debug_log, "Reading a token: "));
-	parser->yychar = yylex();
+	/* Return and have the caller call yylex for us. */
+	return -1;
 
+	/* Once the caller has provided the token from yylex, we jump here
+	   and continue. */
+      got_token:
+	NOOP;
 /* perly.tab is shipped based on an ASCII system; if it were to be regenerated
  * on a platform that doesn't use ASCII, this translation back would need to be
  * removed */
