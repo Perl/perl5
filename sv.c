@@ -11630,9 +11630,9 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                         *v++ = nvp[ix] & 0xF;
                     }
 #  elif LONG_DOUBLEKIND == LONG_DOUBLE_IS_X86_80_BIT_BIG_ENDIAN
-                    /* The last 10 bytes are the mantissa/fraction.
+                    /* The last 8 bytes are the mantissa/fraction.
                      * (does this format ever happen?) */
-                    for (ix = LONGDBLSIZE - 10; ix < LONGDBLSIZE; ix++) {
+                    for (ix = LONGDBLSIZE - 8; ix < LONGDBLSIZE; ix++) {
                         *v++ = nvp[ix] >> 4;
                         *v++ = nvp[ix] & 0xF;
                     }
