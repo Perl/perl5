@@ -11668,10 +11668,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                      * format is known but not yet supported), try to
                      * retrieve the mantissa bits via frexp+ldexp. */
 
-                    MANTISSATYPE mantissa =
-                        Perl_ldexp(Perl_frexp(PERL_ABS(nv), &exponent),
-                                   NV_MANT_DIG);
-                    const U8* nvp = (const U8*)(&mantissa);
+                    NV norm = Perl_frexp(PERL_ABS(nv), &exponent);
                     /* Theoretically we have all the bytes [0, MANTISSASIZE-1]
                      * to inspect; but in practice we don't want the
                      * leading nybbles that are zero.  With the common
@@ -11682,7 +11679,23 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                      * format of the nv (as opposed to the long double
                      * method), but instead the UV retrieved with the
                      * frexp+ldexp invocation. */
+#  if MANTISSASIZE * 8 > NV_MANT_DIG
+                    MANTISSATYPE mantissa = Perl_ldexp(norm, NV_MANT_DIG);
                     int limit_byte = (NV_MANT_DIG - 1) / 8;
+#  else
+                    /* There will be low-order precision loss.
+                     * Try to salvage as many bits as possible.
+                     * Will truncate, not round. */
+                    MANTISSATYPE mantissa =
+                        Perl_ldexp(norm,
+                                   /* The highest possible shift by
+                                    * two that fits in the mantissa
+                                    * and is aligned (by four) the
+                                    * same was as NV_MANT_DIG. */
+                                   MANTISSASIZE * 8 - (4 - NV_MANT_DIG % 4));
+                    int limit_byte = MANTISSASIZE - 1;
+#  endif
+                    const U8* nvp = (const U8*)(&mantissa);
                     /* We make here the wild assumption that
                      * the endianness of doubles is similar to
                      * the endianness of integers, and that
