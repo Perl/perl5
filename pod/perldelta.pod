@@ -392,7 +392,11 @@ well.
 
 =item *
 
-XXX
+Added L<perlapi/sync_locale>.
+Changing the program's locale should be avoided by XS code.  Nevertheless,
+certain non-Perl libraries called from XS, such as C<Gtk> do so.  When this
+happens, Perl needs to be told that the locale has changed.  Use this function
+to do so, before returning to Perl.
 
 =back
 
