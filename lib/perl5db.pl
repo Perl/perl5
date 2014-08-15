@@ -528,7 +528,7 @@ BEGIN {
 # Debugger for Perl 5.00x; perl5db.pl patch level:
 use vars qw($VERSION $header);
 
-$VERSION = '1.45';
+$VERSION = '1.46';
 
 $header = "perl5db.pl version $VERSION";
 
@@ -1957,7 +1957,7 @@ sub _DB__handle_y_command {
         my @vars = split( ' ', $match_vars || '' );
 
         # Find the pad.
-        my $h = eval { PadWalker::peek_my( ( $match_level || 0 ) + 1 ) };
+        my $h = eval { PadWalker::peek_my( ( $match_level || 0 ) + 2 ) };
 
         # Oops. Can't find it.
         if (my $Err = $@) {
