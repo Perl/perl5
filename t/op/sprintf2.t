@@ -24,8 +24,8 @@ if ($Config{nvsize} == 8 &&
      # IEEE-754, we hope, the most common out there.
      ($Config{uvsize} == 8 && $Config{nv_preserves_uv_bits} == 53)
      ||
-     # If we have a quad we get still get the mantissa bits.
-     ($Config{uvsize} == 4&&  $Config{d_quad})
+     # If we have a quad we can still get the mantissa bits.
+     ($Config{uvsize} == 4 && $Config{d_quad})
      )
     ) {
     @hexfloat =  (
@@ -72,8 +72,10 @@ if ($Config{nvsize} == 8 &&
 
         [ '%A',       '3.14',   '0X1.91EB851EB851FP+1' ],
         );
-} elsif ($Config{nvsize} == 16 || $Config{nvsize} == 12) {
-    # x86 long double, at least
+} elsif (($Config{nvsize} == 16 || $Config{nvsize} == 12) &&
+         # 80-bit long double, pack F is the NV
+         (pack("F", 0.1) =~ /^\xCD/ ||  # LE
+          pack("F", 0.1) =~ /\xCD$/)) { # BE (if this ever happens)
     @hexfloat =  (
         [ '%a',       '0',       '0x0p+0' ],
         [ '%a',       '1',       '0x8p-3' ],
