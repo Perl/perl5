@@ -11590,14 +11590,11 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                  * at most as many bits as our widest unsigned integer
                  * type is.  We try to get a 64-bit unsigned integer
                  * even if we are not having 64-bit UV. */
-#if UVSIZE == 8
-#  define MANTISSATYPE UV
-#  define MANTISSASIZE UVSIZE
-#elif defined(HAS_QUAD) && defined(Uquad_t)
+#if defined(HAS_QUAD) && defined(Uquad_t)
 #  define MANTISSATYPE Uquad_t
 #  define MANTISSASIZE 8
 #else
-#  define MANTISSATYPE UV /* Will likely lose precision. */
+#  define MANTISSATYPE UV /* May lose precision if UVSIZE is not 8. */
 #  define MANTISSASIZE UVSIZE
 #endif
 
