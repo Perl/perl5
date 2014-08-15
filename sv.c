@@ -11709,7 +11709,8 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                     }
 #  else
                     /* Big endian. */
-                    for (ix = 0; ix <= limit_byte; ix++) {
+                    for (ix = MANTISSASIZE - 1 - limit_byte;
+                         ix < MANTISSASIZE; ix++) {
                         *v++ = nvp[ix] >> 4;
                         *v++ = nvp[ix] & 0xF;
                     }
