@@ -125,7 +125,9 @@ XXX
 
 =item *
 
-L<XXX> has been upgraded from version A.xx to B.yy.
+L<perl5db.pl> has been upgraded from version 1,45 to 1.46.
+
+Fixed the scope level handling of the debugger's C<y> command.
 
 =back
 
