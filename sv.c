@@ -11637,31 +11637,49 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                         *v++ = nvp[ix] & 0xF;
                     }
 #  elif LONG_DOUBLEKIND == LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_LITTLE_ENDIAN
-                    /* XXX: implement, the mantissa/fraction bits are in
-                     * two separate stretches. */
-#   define LONGDOUBLE_FALLBACK
-                    goto frexp_ldexp_fallback;
+                    /* Where is this used?
+                     *
+                     * Guessing that the format would be the reverse
+                     * of big endian, i.e. for -0.1L:
+                     * 9a 99 99 99 99 99 59 3c 9a 99 99 99 99 99 b9 bf */
+                    for (ix = 13; ix >= 8; ix--) {
+                        *v++ = nvp[ix] >> 4;
+                        *v++ = nvp[ix] & 0xF;
+                    }
+                    for (ix = 5; ix >= 0; ix--) {
+                        *v++ = nvp[ix] >> 4;
+                        *v++ = nvp[ix] & 0xF;
+                    }
 #  elif LONG_DOUBLEKIND == LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_BIG_ENDIAN
-                    /* XXX: implement, the mantissa/fraction bits are in
-                     * two separate stretches. */
-                    /* Used in e.g. PPC/Power and MIPS. */
-                    /* -0.1L:
+                    /* Used in e.g. PPC/Power and MIPS.
+                     *
+                     * The mantissa bits are in two separate stretches,
+                     * e.g. for -0.1L:
                      * bf b9 99 99 99 99 99 9a 3c 59 99 99 99 99 99 9a
-                     * as seen in PowerPC AIX, as opposed to "true" 128-bit
-                     * IEEE 754:
+                     * as seen in PowerPC AIX, as opposed to "true"
+                     * 128-bit IEEE 754:
                      * bf fb 99 99 99 99 99 99 99 99 99 99 99 99 99 9a
-                     * as seen in HP-PA HP-UX. */
-#   define LONGDOUBLE_FALLBACK
-                    goto frexp_ldexp_fallback;
+                     * as seen in HP-PA HP-UX.
+                     *
+                     * Note that this blind copying might be considered
+                     * not to be the right thing, since the first double
+                     * already does rounding (0x9A as opposed to 0x99).
+                     * But then again, we probably should just copy
+                     * the bits as they are?
+                     */
+                    for (ix = 2; ix < 8; ix++) {
+                        *v++ = nvp[ix] >> 4;
+                        *v++ = nvp[ix] & 0xF;
+                    }
+                    for (ix = 10; ix < 16; ix++) {
+                        *v++ = nvp[ix] >> 4;
+                        *v++ = nvp[ix] & 0xF;
+                    }
 #  else
                     Perl_croak(aTHX_
                                "Hexadecimal float: unsupported long double format");
 #  endif
                 }
-
-#  ifdef LONGDOUBLE_FALLBACK
-            frexp_ldexp_fallback:
-#  endif
 #else
                 {
                     /* If not using long doubles (or if the long double
@@ -11726,7 +11744,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                     }
 #  endif
                     /* If there are not enough bits in MANTISSATYPE,
-                     * we couldn't get all of them.
+                     * we couldn't get all of them, issue a warning.
                      *
                      * Note that NV_PRESERVES_UV_BITS would not help
                      * here, it is the wrong way around. */
