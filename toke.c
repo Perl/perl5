@@ -4154,7 +4154,8 @@ S_tokenize_use(pTHX_ int is_use, char *s) {
 #ifdef DEBUGGING
     static const char* const exp_name[] =
 	{ "OPERATOR", "TERM", "REF", "STATE", "BLOCK", "ATTRBLOCK",
-	  "ATTRTERM", "TERMBLOCK", "POSTDEREF", "TERMORDORDOR"
+	  "ATTRTERM", "TERMBLOCK", "XBLOCKTERM", "POSTDEREF",
+	  "TERMORDORDOR"
 	};
 #endif
 
