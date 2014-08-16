@@ -4908,9 +4908,8 @@ Perl_yylex(pTHX)
 	}
 	if (PL_lex_formbrack && PL_lex_brackets <= PL_lex_formbrack) {
 	    PL_lex_state = LEX_FORMLINE;
-	    NEXTVAL_NEXTTOKE.ival = 0;
-	    force_next(FORMRBRACK);
-	    TOKEN(';');
+	    YYEMIT(';');
+	    TOKEN(FORMRBRACK);
 	}
 	goto retry;
     case '\r':
@@ -4951,9 +4950,8 @@ Perl_yylex(pTHX)
                 incline(s);
 	    if (PL_lex_formbrack && PL_lex_brackets <= PL_lex_formbrack) {
 		PL_lex_state = LEX_FORMLINE;
-		NEXTVAL_NEXTTOKE.ival = 0;
-		force_next(FORMRBRACK);
-		TOKEN(';');
+		YYEMIT(';');
+		TOKEN(FORMRBRACK);
 	    }
 	}
 	else {
