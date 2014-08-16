@@ -5373,7 +5373,8 @@ Perl_yylex(pTHX)
 	    TOKEN(0);
 	CLINE;
 	s++;
-	OPERATOR(';');
+	PL_expect = XSTATE;
+	TOKEN(';');
     case ')':
 	if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_CLOSING)
 	    TOKEN(0);
@@ -5599,13 +5600,15 @@ Perl_yylex(pTHX)
 	    PL_bufptr = s;
 	    return yylex();		/* ignore fake brackets */
 	}
-	force_next(formbrack ? '.' : '}');
-	if (formbrack) LEAVE;
-	if (formbrack == 2) { /* means . where arguments were expected */
-	    force_next(';');
-	    TOKEN(FORMRBRACK);
+	if (formbrack) {
+	    LEAVE;
+	    if (formbrack == 2) /* means . where arguments were expected */
+		YYEMIT(FORMRBRACK);
+	    YYEMIT(';');
+	    TOKEN('.');
 	}
-	TOKEN(';');
+	YYEMIT(';');
+	TOKEN('}');
     case '&':
 	if (PL_expect == XPOSTDEREF) POSTDEREF('&');
 	s++;
