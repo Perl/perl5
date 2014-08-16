@@ -2189,6 +2189,10 @@ than the floating point supports.
 (W overflow) The hexadecimal floating point has smaller exponent
 than the floating point supports.
 
+=item Hexadecimal float: internal error
+
+(F) Something went horribly bad in hexadecimal float handling.
+
 =item Hexadecimal float: mantissa overflow
 
 (W overflow) The hexadecimal floating point literal had more bits in
