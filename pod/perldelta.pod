@@ -121,6 +121,12 @@ XXX
 
 L<XXX> has been upgraded from version A.xx to B.yy.
 
+=item *
+
+L<File::Find> has been upgraded from version 1.27 to 1.28.
+C<find()> and C<finddepth()> will now warn if passed inappropriate or
+misspelled options.
+
 =back
 
 =head2 Removed Modules and Pragmata

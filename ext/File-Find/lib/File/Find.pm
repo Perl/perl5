@@ -3,7 +3,7 @@ use 5.006;
 use strict;
 use warnings;
 use warnings::register;
-our $VERSION = '1.27';
+our $VERSION = '1.28';
 require Exporter;
 require Cwd;
 
@@ -1055,21 +1055,42 @@ sub _find_dir_symlnk($$$) {
 sub wrap_wanted {
     my $wanted = shift;
     if ( ref($wanted) eq 'HASH' ) {
+        # RT #122547
+        my %valid_options = map {$_ => 1} qw(
+            wanted
+            bydepth
+            preprocess
+            postprocess
+            follow
+            follow_fast
+            follow_skip
+            dangling_symlinks
+            no_chdir
+            untaint
+            untaint_pattern
+            untaint_skip
+        );
+        my @invalid_options = ();
+        for my $v (keys %{$wanted}) {
+            push @invalid_options, $v unless exists $valid_options{$v};
+        }
+        warn "Invalid option(s): @invalid_options" if @invalid_options;
+
         unless( exists $wanted->{wanted} and ref( $wanted->{wanted} ) eq 'CODE' ) {
             die 'no &wanted subroutine given';
         }
-	if ( $wanted->{follow} || $wanted->{follow_fast}) {
-	    $wanted->{follow_skip} = 1 unless defined $wanted->{follow_skip};
-	}
-	if ( $wanted->{untaint} ) {
-	    $wanted->{untaint_pattern} = $File::Find::untaint_pattern
-		unless defined $wanted->{untaint_pattern};
-	    $wanted->{untaint_skip} = 0 unless defined $wanted->{untaint_skip};
-	}
-	return $wanted;
+        if ( $wanted->{follow} || $wanted->{follow_fast}) {
+            $wanted->{follow_skip} = 1 unless defined $wanted->{follow_skip};
+        }
+        if ( $wanted->{untaint} ) {
+            $wanted->{untaint_pattern} = $File::Find::untaint_pattern
+            unless defined $wanted->{untaint_pattern};
+            $wanted->{untaint_skip} = 0 unless defined $wanted->{untaint_skip};
+        }
+        return $wanted;
     }
     elsif( ref( $wanted ) eq 'CODE' ) {
-	return { wanted => $wanted };
+        return { wanted => $wanted };
     }
     else {
        die 'no &wanted subroutine given';
