@@ -6623,7 +6623,6 @@ Perl_yylex(pTHX)
 			    goto its_constant;
 			}
 		    }
-		    PL_expect = XOPERATOR;
 		    op_free(off ? pl_yylval.opval : rv2cv_op);
 		    if (!off)
 			rv2cv_op = pl_yylval.opval;
