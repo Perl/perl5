@@ -6623,14 +6623,14 @@ Perl_yylex(pTHX)
 			    goto its_constant;
 			}
 		    }
-		    NEXTVAL_NEXTTOKE.opval =
-			off ? rv2cv_op : pl_yylval.opval;
 		    PL_expect = XOPERATOR;
-		    if (off)
-			 op_free(pl_yylval.opval), force_next(PRIVATEREF);
-		    else op_free(rv2cv_op),	   force_next(WORD);
+		    op_free(off ? pl_yylval.opval : rv2cv_op);
+		    if (!off)
+			rv2cv_op = pl_yylval.opval;
 		    pl_yylval.ival = 0;
-		    TOKEN('&');
+		    YYEMIT('&');
+		    pl_yylval.opval = rv2cv_op;
+		    TOKEN (off ? PRIVATEREF : WORD);
 		}
 
 		/* If followed by var or block, call it a method (unless sub) */
