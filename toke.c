@@ -6736,13 +6736,11 @@ Perl_yylex(pTHX)
 			    PREBLOCK(LSTOPSUB);
 			}
 		    }
-		    NEXTVAL_NEXTTOKE.opval = pl_yylval.opval;
-		    PL_expect = XTERM;
-		    force_next(off ? PRIVATEREF : WORD);
 		    if (!PL_lex_allbrackets &&
 			    PL_lex_fakeeof > LEX_FAKEEOF_LOWLOGIC)
 			PL_lex_fakeeof = LEX_FAKEEOF_LOWLOGIC;
-		    TOKEN(NOAMP);
+		    YYEMIT(NOAMP);
+		    OPERATOR(off ? PRIVATEREF : WORD);
 		}
 
 		/* Call it a bare word */
