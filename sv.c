@@ -10664,7 +10664,7 @@ S_hextract(pTHX_ const NV nv, int* exponent, U8* vhex, U8* vend)
     /* x86 80-bit "extended precision", 64 bits of mantissa / fraction /
      * significand, 15 bits of exponent, 1 bit of sign.  NVSIZE can
      * be either 12 (ILP32, Solaris x86) or 16 (LP64, Linux and OS X),
-     * meaning that 4 or 6 bytes are empty padding. */
+     * meaning that 2 or 6 bytes are empty padding. */
     /* The bytes 7..0 are the mantissa/fraction */
     /* There explicitly is *no* implicit bit in this case. */
     for (ix = 7; ix >= 0; ix--) {
