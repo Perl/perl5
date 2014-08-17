@@ -10603,7 +10603,7 @@ S_hextract(pTHX_ const NV nv, int* exponent, U8* vhex, U8* vend)
     int ix;
     int ixmin = 0, ixmax = 0;
 
-    /* XXX Inf/NaN handling in the HEXTRACT_IMPLICIT_BIT,
+    /* XXX Inf/NaN/denormal handling in the HEXTRACT_IMPLICIT_BIT,
      * and elsewhere. */
 
     /* These macros are just to reduce typos, they have multiple
@@ -10637,7 +10637,7 @@ S_hextract(pTHX_ const NV nv, int* exponent, U8* vhex, U8* vend)
 #  define HEXTRACTSIZE NVSIZE
     (void)Perl_frexp(PERL_ABS(nv), exponent);
 #  if LONG_DOUBLEKIND == LONG_DOUBLE_IS_IEEE_754_128_BIT_LITTLE_ENDIAN
-    /* Used in e.g. VMS and HP-UX IA64, e.g. -0.1L:
+    /* Used in e.g. VMS and HP-UX IA-64, e.g. -0.1L:
      * 9a 99 99 99 99 99 99 99 99 99 99 99 99 99 fb 3f */
     /* The bytes 13..0 are the mantissa/fraction,
      * the 15,14 are the sign+exponent. */
@@ -10649,7 +10649,7 @@ S_hextract(pTHX_ const NV nv, int* exponent, U8* vhex, U8* vend)
             HEXTRACT_COUNT();
     }
 #  elif LONG_DOUBLEKIND == LONG_DOUBLE_IS_IEEE_754_128_BIT_BIG_ENDIAN
-    /* Used in e.g. Solaris Sparc and HP-PA HP-UX, e.g. -0.1L:
+    /* Used in e.g. Solaris Sparc and HP-UX PA-RISC, e.g. -0.1L:
      * bf fb 99 99 99 99 99 99 99 99 99 99 99 99 99 9a */
     /* The bytes 2..15 are the mantissa/fraction,
      * the 0,1 are the sign+exponent. */
@@ -10703,14 +10703,11 @@ S_hextract(pTHX_ const NV nv, int* exponent, U8* vhex, U8* vend)
             HEXTRACT_COUNT();
     }
 #  elif LONG_DOUBLEKIND == LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_BIG_ENDIAN
-    /* Used in e.g. PPC/Power and MIPS.
+    /* Used in e.g. PPC/Power (AIX) and MIPS.
      *
      * The mantissa bits are in two separate stretches,
      * e.g. for -0.1L:
      * bf b9 99 99 99 99 99 9a 3c 59 99 99 99 99 99 9a
-     * as seen in PowerPC AIX, as opposed to "true" 128-bit IEEE 754:
-     * bf fb 99 99 99 99 99 99 99 99 99 99 99 99 99 9a
-     * as seen in HP-PA HP-UX.
      *
      * Note that this blind copying might be considered not to be
      * the right thing, since the first double already does
