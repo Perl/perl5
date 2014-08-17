@@ -16017,8 +16017,9 @@ int main() {
 #endif
 #if LDBL_MANT_DIG == 106 && LONGDBLSIZE == 16
   /* software "double double", the 106 is 53+53 */
-  if (b[0] == 0xCD && b[7] == 0x3C && b[8] == 0x9A && b[15] == 0xBF) {
-    /* double double 128-bit little-endian */
+  if (b[0] == 0x9A && b[7] == 0x3C && b[8] == 0x9A && b[15] == 0xBF) {
+    /* double double 128-bit little-endian,
+     * 9a 99 99 99 99 99 59 3c 9a 99 99 99 99 99 b9 bf */
     printf("5\n");
     exit(0);
   }
