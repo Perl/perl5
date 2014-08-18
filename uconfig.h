@@ -3728,11 +3728,24 @@
  */
 /*#define HAS_ISFINITE		/ **/
 
+/* HAS_ISFINITEL:
+ *	This symbol, if defined, indicates that the isfinite routine is
+ *	available to check whether a long double is finitel
+ *	(non-infinity non-NaN).
+ */
+/*#define HAS_ISFINITEL		/ **/
+
 /* HAS_ISINF:
  *	This symbol, if defined, indicates that the isinf routine is
  *	available to check whether a double is an infinity.
  */
 /*#define HAS_ISINF		/ **/
+
+/* HAS_ISINF:
+ *	This symbol, if defined, indicates that the isinf routine is
+ *	available to check whether a long double is an infinity.
+ */
+/*#define HAS_ISINFL		/ **/
 
 /* HAS_ISNAN:
  *	This symbol, if defined, indicates that the isnan routine is
@@ -4769,6 +4782,6 @@
 #endif
 
 /* Generated from:
- * 394b82a122b70b8af04c1a412f13b605c9c555b2d3ac7701aa3ef78debe46e6b config_h.SH
- * 98397a7d818a024628d6b34e5903a8f408da96601a2a19471c480511f3c8d914 uconfig.sh
+ * 3a8b6e52ff62682a65ae8226490afb36ea008df0a79fd0d937208d700652f767 config_h.SH
+ * 3d7a2b8d30cfcbe1bd9cc89f0f87458c63713edef6604af2eb999f63eb6db629 uconfig.sh
  * ex: set ro: */

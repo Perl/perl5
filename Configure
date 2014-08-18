@@ -579,7 +579,9 @@ d_int64_t=''
 d_isascii=''
 d_isblank=''
 d_isfinite=''
+d_isfinitel=''
 d_isinf=''
+d_isinfl=''
 d_isnan=''
 d_isnanl=''
 d_killpg=''
@@ -15439,8 +15441,16 @@ $rm -f isblank*
 set isfinite d_isfinite
 eval $inlibc
 
+: see if isfinitel exists
+set isfinitel d_isfinitel
+eval $inlibc
+
 : see if isinf exists
 set isinf d_isinf
+eval $inlibc
+
+: see if isinfl exists
+set isinfl d_isinfl
 eval $inlibc
 
 : see if isnan exists
@@ -23308,7 +23318,9 @@ d_ipv6_mreq_source='$d_ipv6_mreq_source'
 d_isascii='$d_isascii'
 d_isblank='$d_isblank'
 d_isfinite='$d_isfinite'
+d_isfinitel='$d_isfinitel'
 d_isinf='$d_isinf'
+d_isinfl='$d_isinfl'
 d_isnan='$d_isnan'
 d_isnanl='$d_isnanl'
 d_killpg='$d_killpg'

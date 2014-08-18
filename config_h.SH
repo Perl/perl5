@@ -3763,11 +3763,24 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_isfinite HAS_ISFINITE		/**/
 
+/* HAS_ISFINITEL:
+ *	This symbol, if defined, indicates that the isfinite routine is
+ *	available to check whether a long double is finitel
+ *	(non-infinity non-NaN).
+ */
+#$d_isfinitel HAS_ISFINITEL		/**/
+
 /* HAS_ISINF:
  *	This symbol, if defined, indicates that the isinf routine is
  *	available to check whether a double is an infinity.
  */
 #$d_isinf HAS_ISINF		/**/
+
+/* HAS_ISINF:
+ *	This symbol, if defined, indicates that the isinf routine is
+ *	available to check whether a long double is an infinity.
+ */
+#$d_isinfl HAS_ISINFL		/**/
 
 /* HAS_ISNAN:
  *	This symbol, if defined, indicates that the isnan routine is

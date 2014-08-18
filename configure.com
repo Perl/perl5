@@ -6070,7 +6070,9 @@ $   WC "d_isfinite='define'"
 $ ELSE
 $   WC "d_isfinite='undef'"
 $ ENDIF
+$ WC "d_isfinitel='undef'"
 $ WC "d_isinf='undef'"
+$ WC "d_isinfl='undef'"
 $ WC "d_isnan='" + d_isnan + "'"
 $ WC "d_isnanl='" + d_isnanl + "'"
 $ WC "d_killpg='undef'"

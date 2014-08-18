@@ -1309,9 +1309,17 @@ d_isfinite (d_isfinite.U):
 	This variable conditionally defines the HAS_ISFINITE symbol, which
 	indicates to the C program that the isfinite() routine is available.
 
+d_isfinitel (d_isfinitel.U):
+	This variable conditionally defines the HAS_ISFINITEL symbol, which
+	indicates to the C program that the isfinitel() routine is available.
+
 d_isinf (d_isinf.U):
 	This variable conditionally defines the HAS_ISINF symbol, which
 	indicates to the C program that the isinf() routine is available.
+
+d_isinfl (d_isinfl.U):
+	This variable conditionally defines the HAS_ISINFL symbol, which
+	indicates to the C program that the isinfl() routine is available.
 
 d_isnan (d_isnan.U):
 	This variable conditionally defines the HAS_ISNAN symbol, which
