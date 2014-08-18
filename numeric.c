@@ -586,6 +586,103 @@ Perl_grok_number(pTHX_ const char *pv, STRLEN len, UV *valuep)
     return grok_number_flags(pv, len, valuep, 0);
 }
 
+/*
+=for apidoc grok_infnan
+
+Helper for grok_number(), accepts various ways of spelling "infinity"
+or "not a number", and returns one of the following flag combinations:
+
+  IS_NUMBER_INFINITE
+  IS_NUMBER_NAN
+  IS_NUMBER_INFINITE | IS_NUMBER_NEG
+  IS_NUMBER_NAN | IS_NUMBER_NEG
+  0
+
+If an infinity or not-a-number is recognized, the *sp will point to
+one past the end of the recognized string.  If the recognition fails,
+zero is returned, and the *sp will not move.
+
+=cut
+*/
+
+int
+Perl_grok_infnan(const char** sp, const char* send)
+{
+    const char* s = *sp;
+    int flags = 0;
+
+    PERL_ARGS_ASSERT_GROK_INFNAN;
+
+    if (*s == '-') {
+        flags |= IS_NUMBER_NEG; /* Yes, -NaN happens. Incorrect but happens. */
+        s++; if (s == send) return 0;
+    }
+
+    if (*s == '1') {
+        /* Visual C: 1.#SNAN, -1.#QNAN, 1#INF, 1#.IND (maybe also 1.#NAN) */
+        s++; if (s == send) return 0;
+        if (*s == '.') {
+            s++; if (s == send) return 0;
+        }
+        if (*s == '#') {
+            s++; if (s == send) return 0;
+        } else
+            return 0;
+    }
+
+    if (*s == 'I' || *s == 'i') {
+        /* INF or IND (1.#IND is indeterminate, a certain type of NAN) */
+        s++; if (s == send || (*s != 'N' && *s != 'n')) return 0;
+        s++; if (s == send) return 0;
+        if (*s == 'F' || *s == 'f') {
+            s++;
+            if (s < send && (*s == 'I' || *s == 'i')) {
+                s++; if (s == send || (*s != 'N' && *s != 'n')) return 0;
+                s++; if (s == send || (*s != 'I' && *s != 'i')) return 0;
+                s++; if (s == send || (*s != 'T' && *s != 't')) return 0;
+                /* XXX maybe also grok "infinite"? */
+                s++; if (s == send || (*s != 'Y' && *s != 'y')) return 0;
+                s++;
+            } else if (*s)
+                return 0;
+            flags |= IS_NUMBER_INFINITY | IS_NUMBER_NOT_INT;
+        }
+        else if (*s == 'D' || *s == 'd') {
+            s++;
+            flags |= IS_NUMBER_NAN | IS_NUMBER_NOT_INT;
+        } else
+            return 0;
+
+        *sp = s;
+        return flags;
+    }
+    else {
+        /* NAN */
+        if (*s == 'S' || *s == 's' || *s == 'Q' || *s == 'q') {
+            /* snan, qNaN */
+            /* XXX do something with the snan/qnan difference */
+            s++; if (s == send || (*s != 'N' && *s != 'n')) return 0;
+        }
+
+        if (*s == 'N' || *s == 'n') {
+            s++; if (s == send || (*s != 'A' && *s != 'a')) return 0;
+            s++; if (s == send || (*s != 'N' && *s != 'n')) return 0;
+            s++;
+
+            /* NaN can be followed by various stuff since there are
+             * multiple different NaN values, and some implementations
+             * output the "payload" values, e.g. NaN123. */
+
+            flags |= IS_NUMBER_NAN | IS_NUMBER_NOT_INT;
+        }
+
+        *sp = s;
+        return flags;
+    }
+
+    return 0;
+}
+
 static const UV uv_max_div_10 = UV_MAX / 10;
 static const U8 uv_max_mod_10 = UV_MAX % 10;
 
@@ -724,31 +821,25 @@ Perl_grok_number_flags(pTHX_ const char *pv, STRLEN len, UV *valuep, U32 flags)
     }
     else
       return 0;
-  } else if (*s == 'I' || *s == 'i') {
-    s++; if (s == send || (*s != 'N' && *s != 'n')) return 0;
-    s++; if (s == send || (*s != 'F' && *s != 'f')) return 0;
-    s++; if (s < send && (*s == 'I' || *s == 'i')) {
-      s++; if (s == send || (*s != 'N' && *s != 'n')) return 0;
-      s++; if (s == send || (*s != 'I' && *s != 'i')) return 0;
-      s++; if (s == send || (*s != 'T' && *s != 't')) return 0;
-      s++; if (s == send || (*s != 'Y' && *s != 'y')) return 0;
-      s++;
-    }
-    sawinf = 1;
-  } else if (*s == 'N' || *s == 'n') {
-    /* XXX TODO: There are signaling NaNs and quiet NaNs. */
-    s++; if (s == send || (*s != 'A' && *s != 'a')) return 0;
-    s++; if (s == send || (*s != 'N' && *s != 'n')) return 0;
-    s++;
-    sawnan = 1;
-  } else
-    return 0;
+  }
+  else {
+      int infnan_flags = Perl_grok_infnan(&s, send);
+      if ((infnan_flags & IS_NUMBER_INFINITY)) {
+          numtype |= infnan_flags;
+          sawinf = 1;
+      }
+      else if ((infnan_flags & IS_NUMBER_NAN)) {
+          numtype |= infnan_flags;
+          sawnan = 1;
+      } else
+          return 0;
+  }
 
   if (sawinf) {
-    numtype &= IS_NUMBER_NEG; /* Keep track of sign  */
+    /* Keep the sign for infinity. */
     numtype |= IS_NUMBER_INFINITY | IS_NUMBER_NOT_INT;
   } else if (sawnan) {
-    numtype &= IS_NUMBER_NEG; /* Keep track of sign  */
+    numtype &= IS_NUMBER_NEG; /* Clear sign for nan.  */
     numtype |= IS_NUMBER_NAN | IS_NUMBER_NOT_INT;
   } else if (s < send) {
     /* we can have an optional exponent part */
