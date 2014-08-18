@@ -4239,8 +4239,16 @@ S_check_scalar_slice(pTHX_ char *s)
 */
 
 
+int S_yylex(pTHX);
+
 int
 Perl_yylex(pTHX)
+{
+    return S_yylex(aTHX);
+}
+
+int
+S_yylex(pTHX)
 {
     dVAR;
     char *s = PL_bufptr;
