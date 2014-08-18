@@ -9781,9 +9781,10 @@ S_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int re
 
   \d(_?\d)*(\.(\d(_?\d)*)?)?[Ee][\+\-]?(\d(_?\d)*)	12 12.34 12.
   \.\d(_?\d)*[Ee][\+\-]?(\d(_?\d)*)			.34
-  0b[01](_?[01])*
-  0[0-7](_?[0-7])*
-  0x[0-9A-Fa-f](_?[0-9A-Fa-f])*
+  0b[01](_?[01])*                                       binary integers
+  0[0-7](_?[0-7])*                                      octal integers
+  0x[0-9A-Fa-f](_?[0-9A-Fa-f])*                         hexadecimal integers
+  0x[0-9A-Fa-f](_?[0-9A-Fa-f])*(?:\.\d*)?p[+-]?[0-9]+   hexadecimal floats
 
   Like most scan_ routines, it uses the PL_tokenbuf buffer to hold the
   thing it reads.
