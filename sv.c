@@ -10648,6 +10648,7 @@ S_hextract(pTHX_ const NV nv, int* exponent, U8* vhex, U8* vend)
         else
             HEXTRACT_COUNT();
     }
+    *exponent -= 4;
 #  elif LONG_DOUBLEKIND == LONG_DOUBLE_IS_IEEE_754_128_BIT_BIG_ENDIAN
     /* Used in e.g. Solaris Sparc and HP-UX PA-RISC, e.g. -0.1L:
      * bf fb 99 99 99 99 99 99 99 99 99 99 99 99 99 9a */
@@ -10660,6 +10661,7 @@ S_hextract(pTHX_ const NV nv, int* exponent, U8* vhex, U8* vend)
         else
             HEXTRACT_COUNT();
     }
+    *exponent -= 4;
 #  elif LONG_DOUBLEKIND == LONG_DOUBLE_IS_X86_80_BIT_LITTLE_ENDIAN
     /* x86 80-bit "extended precision", 64 bits of mantissa / fraction /
      * significand, 15 bits of exponent, 1 bit of sign.  NVSIZE can
@@ -10673,6 +10675,7 @@ S_hextract(pTHX_ const NV nv, int* exponent, U8* vhex, U8* vend)
         else
             HEXTRACT_COUNT();
     }
+    *exponent -= 4;
 #  elif LONG_DOUBLEKIND == LONG_DOUBLE_IS_X86_80_BIT_BIG_ENDIAN
     /* The last 8 bytes are the mantissa/fraction.
      * (does this format ever happen?) */
@@ -10683,6 +10686,7 @@ S_hextract(pTHX_ const NV nv, int* exponent, U8* vhex, U8* vend)
         else
             HEXTRACT_COUNT();
     }
+    *exponent -= 4;
 #  elif LONG_DOUBLEKIND == LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_LITTLE_ENDIAN
     /* Where is this used?
      *
@@ -10702,17 +10706,13 @@ S_hextract(pTHX_ const NV nv, int* exponent, U8* vhex, U8* vend)
         else
             HEXTRACT_COUNT();
     }
+    (*exponent)--;
 #  elif LONG_DOUBLEKIND == LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_BIG_ENDIAN
     /* Used in e.g. PPC/Power (AIX) and MIPS.
      *
      * The mantissa bits are in two separate stretches,
      * e.g. for -0.1L:
      * bf b9 99 99 99 99 99 9a 3c 59 99 99 99 99 99 9a
-     *
-     * Note that this blind copying might be considered not to be
-     * the right thing, since the first double already does
-     * rounding (0x9A as opposed to 0x99).  But then again, we
-     * probably should just copy the bits as they are?
      */
     HEXTRACT_IMPLICIT_BIT();
     for (ix = 2; ix < 8; ix++) {
@@ -10727,6 +10727,7 @@ S_hextract(pTHX_ const NV nv, int* exponent, U8* vhex, U8* vend)
         else
             HEXTRACT_COUNT();
     }
+    (*exponent)--;
 #  else
     Perl_croak(aTHX_
                "Hexadecimal float: unsupported long double format");
@@ -11825,7 +11826,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                  * human-readable xdigits. */
                 const char* xdig = PL_hexdigit;
                 int zerotail = 0; /* how many extra zeros to append */
-                int exponent; /* exponent of the floating point input */
+                int exponent = 0; /* exponent of the floating point input */
 
                 vend = S_hextract(aTHX_ nv, &exponent, vhex, NULL);
                 S_hextract(aTHX_ nv, &exponent, vhex, vend);
@@ -11862,9 +11863,10 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                         }
                     }
 
-                    /* Adjust the exponent so that the first output
-                     * xdigit aligns with the 4-bit nybbles. */
-                    exponent -= NV_MANT_DIG % 4 ? NV_MANT_DIG % 4 : 4;
+#if NVSIZE == DOUBLESIZE
+                    /* For long doubles S_hextract() took care of this. */
+                    exponent--;
+#endif
 
                     if (precis > 0) {
                         v = vhex + precis + 1;
