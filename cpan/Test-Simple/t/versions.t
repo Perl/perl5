@@ -7,16 +7,19 @@
 use strict;
 use Test::More;
 
-require Test::Builder;
-require Test::Builder::Module;
-require Test::Simple;
-require Test::Builder::Tester;
-require Test::Tester2;
-require Test::Tester;
+{
+    local $SIG{__WARN__} = sub { 1 };
+    require Test::Builder;
+    require Test::Builder::Module;
+    require Test::Simple;
+    require Test::Builder::Tester;
+    require Test::Tester2;
+    require Test::Tester;
+}
 
 my $dist_version = Test::More->VERSION;
 
-like( $dist_version, qr/^ \d+ \. \d+ $/x );
+like( $dist_version, qr/^ \d+ \. \d+ $/x, "Version number is sane" );
 
 my @modules = qw(
     Test::Simple

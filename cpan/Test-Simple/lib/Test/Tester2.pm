@@ -10,13 +10,13 @@ use Scalar::Util qw/blessed reftype/;
 use Carp qw/croak/;
 
 use Test::Builder::Provider;
-gives qw/intercept display_results display_result render_result/;
-provides qw/results_are/;
+gives qw/intercept display_events display_event render_event/;
+provides qw/events_are/;
 
 sub intercept(&) {
     my ($code) = @_;
 
-    my @results;
+    my @events;
 
     my ($ok, $error) = try {
         Test::Builder::Stream->intercept(
@@ -27,7 +27,7 @@ sub intercept(&) {
                 $stream->listen(
                     INTERCEPTOR => sub {
                         my ($item) = @_;
-                        push @results => $item;
+                        push @events => $item;
                     }
                 );
                 $code->();
@@ -35,15 +35,15 @@ sub intercept(&) {
         );
     };
 
-    die $error unless $ok || (blessed($error) && $error->isa('Test::Builder::Result'));
+    die $error unless $ok || (blessed($error) && $error->isa('Test::Builder::Event'));
 
-    return \@results;
+    return \@events;
 }
 
-sub results_are {
-    my ($results, @checks) = @_;
+sub events_are {
+    my ($events, @checks) = @_;
 
-    my @res_list = @$results;
+    my @res_list = @$events;
 
     my $overall_name;
     my $seek = 0;
@@ -88,7 +88,7 @@ sub results_are {
         elsif ($action eq 'end') {
             if(@res_list) {
                 $ok = 0;
-                push @diag => "Expected end of results, but more results remain";
+                push @diag => "Expected end of events, but more events remain";
             }
             $overall_name = shift @checks;
             last;
@@ -112,19 +112,19 @@ sub results_are {
 
         if (!$got) {
             $ok = 0;
-            push @diag => "($id) Wanted result type '$type', But no more results left to check!";
-            push @diag => "Full result found was: " . render_result($got);
+            push @diag => "($id) Wanted event type '$type', But no more events left to check!";
+            push @diag => "Full event found was: " . render_event($got);
             last;
         }
 
         if ($type ne $got->type) {
             $ok = 0;
-            push @diag => "($id) Wanted result type '$type', But got: '" . $got->type . "'";
-            push @diag => "Full result found was: " . render_result($got);
+            push @diag => "($id) Wanted event type '$type', But got: '" . $got->type . "'";
+            push @diag => "Full event found was: " . render_event($got);
             last;
         }
 
-        my $fields = _simplify_result($got);
+        my $fields = _simplify_event($got);
 
         for my $key (keys %$want) {
             my $wval = $want->{$key};
@@ -164,7 +164,7 @@ sub results_are {
         }
 
         unless ($ok) {
-            push @diag => "Full result found was: " . render_result($got);
+            push @diag => "Full event found was: " . render_event($got);
             last;
         }
     }
@@ -175,21 +175,21 @@ sub results_are {
         $overall_name = shift @checks;
     }
 
-    builder()->ok($ok, $overall_name || "Got expected results", @diag);
+    builder()->ok($ok, $overall_name || "Got expected events", @diag);
     return $ok;
 }
 
-sub display_results {
-    my ($results) = @_;
-    display_result($_) for @$results;
+sub display_events {
+    my ($events) = @_;
+    display_event($_) for @$events;
 }
 
-sub display_result {
-    print STDERR render_result(@_);
+sub display_event {
+    print STDERR render_event(@_);
 }
 
-sub render_result {
-    my ($result) = @_;
+sub render_event {
+    my ($event) = @_;
 
     my @order = qw/
         name bool real_bool action max
@@ -201,7 +201,7 @@ sub render_result {
         tap
     /;
 
-    my $fields = _simplify_result($result);
+    my $fields = _simplify_event($event);
 
     my %seen;
     my $out = "$fields->{type} => {\n";
@@ -226,7 +226,7 @@ sub render_result {
     return $out;
 }
 
-sub _simplify_result {
+sub _simplify_event {
     my ($r) = @_;
 
     my $fields = {map { ref $r->{$_} ? () : ($_ => $r->{$_}) } keys %$r};
@@ -279,7 +279,7 @@ __END__
 
 =head1 NAME
 
-Test::Tester2 - Tools for validating the results produced by your testing
+Test::Tester2 - Tools for validating the events produced by your testing
 tools.
 
 =head1 DESCRIPTION
@@ -289,10 +289,10 @@ validate your tools!
 
 =head1 TEST COMPONENT MAP
 
-  [Test Script] > [Test Tool] > [Test::Builder] > [Test::Bulder::Stream] > [Result Formatter]
+  [Test Script] > [Test Tool] > [Test::Builder] > [Test::Bulder::Stream] > [Event Formatter]
 
 A test script uses a test tool such as L<Test::More>, which uses Test::Builder
-to produce results. The results are sent to L<Test::Builder::Stream> which then
+to produce events. The events are sent to L<Test::Builder::Stream> which then
 forwards them on to one or more formatters. The default formatter is
 L<Test::Builder::Fromatter::TAP> which produces TAP output.
 
@@ -301,19 +301,19 @@ L<Test::Builder::Fromatter::TAP> which produces TAP output.
     use Test::More;
     use Test::Tester2;
 
-    # Intercept all the Test::Builder::Result objects produced in the block.
-    my $results = intercept {
+    # Intercept all the Test::Builder::Event objects produced in the block.
+    my $events = intercept {
         ok(1, "pass");
         ok(0, "fail");
         diag("xxx");
     };
 
     # By Hand
-    is($results->[0]->{bool}, 1, "First result passed");
+    is($events->[0]->{bool}, 1, "First event passed");
 
     # With help
-    results_are(
-        $results,
+    events_are(
+        $events,
         ok   => { id => 'a', bool => 1, name => 'pass' },
 
         ok   => { id => 'b1', bool => 0, name => 'fail',         line => 7, file => 'my_test.t' },
@@ -325,7 +325,7 @@ L<Test::Builder::Fromatter::TAP> which produces TAP output.
     );
 
     # You can combine the 2:
-    results_are(
+    events_are(
         intercept { ... },
         ok => { bool => 1 },
         ...
@@ -337,71 +337,71 @@ L<Test::Builder::Fromatter::TAP> which produces TAP output.
 
 =over 4
 
-=item $results = intercept { ... }
+=item $events = intercept { ... }
 
-Capture the L<Test::Builder::Result> objects generated by tests inside the block.
+Capture the L<Test::Builder::Event> objects generated by tests inside the block.
 
-=item results_are($results, ...)
+=item events_are($events, ...)
 
-Validate the given results.
+Validate the given events.
+
+=item $dump = render_event($event)
+
+This will produce a simplified string of the event data for easy reading. This
+is useful in debugging, in fact this is the same string that events_are will
+print when there is a mismatch to show you the event.
+
+=item display_event($event)
+
+=item display_events($events)
+
+These will print the render_event string to STDERR.
 
 =back
 
-=item $dump = render_result($result)
+=head1 INTERCEPTING EVENTS
 
-This will produce a simplified string of the result data for easy reading. This
-is useful in debugging, in fact this is the same string that results_are will
-print when there is a mismatch to show you the result.
-
-=item display_result($result)
-
-=item display_results($results)
-
-These will print the render_result string to STDERR.
-
-=head1 INTERCEPTING RESULTS
-
-    my $results = intercept {
+    my $events = intercept {
         ok(1, "pass");
         ok(0, "fail");
         diag("xxx");
     };
 
-Any results generated within the block will be intercepted and placed inside
-the C<$results> array reference.
+Any events generated within the block will be intercepted and placed inside
+the C<$events> array reference.
 
-=head2 RESULT TYPES
+=head2 EVENT TYPES
 
-All results will be subclasses of L<Test::Builder::Result>
+All events will be subclasses of L<Test::Builder::Event>
 
 =over 4
 
-=item L<Test::Builder::Result::Ok>
+=item L<Test::Builder::Event::Ok>
 
-=item L<Test::Builder::Result::Note>
+=item L<Test::Builder::Event::Note>
 
-=item L<Test::Builder::Result::Diag>
+=item L<Test::Builder::Event::Diag>
 
-=item L<Test::Builder::Result::Plan>
+=item L<Test::Builder::Event::Plan>
 
-=item L<Test::Builder::Result::Finish>
+=item L<Test::Builder::Event::Finish>
 
-=item L<Test::Builder::Result::Bail>
+=item L<Test::Builder::Event::Bail>
 
-=item L<Test::Builder::Result::Child>
+=item L<Test::Builder::Event::Child>
 
 =back
 
-=head1 VALIDATING RESULTS
+=head1 VALIDATING EVENTS
 
-    my $results = intercept {
+    my $events = intercept {
         ok(1, "pass");
         ok(0, "fail");
         diag("xxx");
     };
 
-    results_are(
-        $results,
+    events_are(
+        $events,
         name => 'Name of the test',                       # Name this overall test
         ok   => { id => 'a', bool => 1, name => 'pass' }, # check an 'ok' with ID 'a'
         ok   => { id => 'b', bool => 0, name => 'fail' }, # check an 'ok' with ID 'b'
@@ -410,14 +410,14 @@ All results will be subclasses of L<Test::Builder::Result>
         'end'                                             # directive 'end'
     );
 
-The first argument to C<results_are()> must be an arrayref containing
-L<Test::Builder::Result> objects. Such an arrayref can be produced by
+The first argument to C<events_are()> must be an arrayref containing
+L<Test::Builder::Event> objects. Such an arrayref can be produced by
 C<intercept { ... }>.
 
-All additional arguments to C<results_are()> must be key value pairs (except
-for 'end'). The key must either be a directive, or a result-type optionally
+All additional arguments to C<events_are()> must be key value pairs (except
+for 'end'). The key must either be a directive, or a event-type optionally
 followed by a name. Values for directives are specific to the directives.
-Values for result types must always be hashrefs with 0 or more fields to check.
+Values for event types must always be hashrefs with 0 or more fields to check.
 
 =head2 TYPES AND IDS
 
@@ -431,9 +431,9 @@ This can be very helpful when tracking down the location of a failing check.
 
 =head2 VALIDATING FIELDS
 
-The hashref against which results are checked is composed of keys, and values.
+The hashref against which events are checked is composed of keys, and values.
 The values may be regular values, which are checked for equality with the
-corresponding property of the result object. Alternatively you can provide a
+corresponding property of the event object. Alternatively you can provide a
 regex to match against, or a coderef that validates it for you.
 
 =over 4
@@ -448,18 +448,18 @@ The specified field must match the regular expression.
 
 =item field => sub { my $val = shift; return $val ? 1 : 0 },
 
-The value from the result will be passed into your coderef as the only
+The value from the event will be passed into your coderef as the only
 argument. The coderef should return true for valid, false for invalid.
 
 =back
 
-=head2 FIELDS PRESENT FOR ALL RESULT TYPES
+=head2 FIELDS PRESENT FOR ALL EVENT TYPES
 
 =over 4
 
 =item pid
 
-The process ID the result came from.
+The process ID the event came from.
 
 =item depth
 
@@ -468,11 +468,11 @@ Usually 0, but will be 1 for subtests, 2 for nested subtests, etc.
 =item source
 
 Usually $0, but in a subtest it will be the name of the subtest that generated
-the result.
+the event.
 
 =item in_todo
 
-True if the result was generated inside a todo.
+True if the event was generated inside a todo.
 
 =item line
 
@@ -496,20 +496,20 @@ package to which errors will be reported
 
 B<Note:> Only present if applicable.
 
-If the result was generated by an L<Test::Builder::Provider>, this will tell
+If the event was generated by an L<Test::Builder::Provider>, this will tell
 you what package provided the tool.
 
-For example, if the result was provided by C<Test::More::ok()> this will
+For example, if the event was provided by C<Test::More::ok()> this will
 contain C<'Test::More'>.
 
 =item tool_name
 
 B<Note:> Only present if applicable.
 
-If the result was generated by an L<Test::Builder::Provider>, this will tell
+If the event was generated by an L<Test::Builder::Provider>, this will tell
 you what the tool was called.
 
-For example, if the result was provided by C<Test::More::ok()> this will
+For example, if the event was provided by C<Test::More::ok()> this will
 contain C<'ok'>.
 
 =item tap
@@ -522,7 +522,7 @@ encoding, the original message however will be untranslated.
 
 =back
 
-=head2 RESULT SPECIFIC FIELDS
+=head2 EVENT SPECIFIC FIELDS
 
 =head3 ok
 
@@ -534,7 +534,7 @@ True if the test passed (or failed but is in todo).
 
 =item real_bool
 
-The actual result of the test, not mangled by todo.
+The actual event of the test, not mangled by todo.
 
 =item name
 
@@ -623,7 +623,7 @@ child is destroyed.
 
 =head2 VALIDATION DIRECTIVES
 
-These provide ways to filter or skip results. They apply as seen, and do not
+These provide ways to filter or skip events. They apply as seen, and do not
 effect checks before they are seen.
 
 =head3 filter_provider
@@ -638,7 +638,7 @@ effect checks before they are seen.
 
 =item '!filter_providers' => [...]
 
-Filter results so that you only see ones where the tool provider matches one or
+Filter events so that you only see ones where the tool provider matches one or
 more of the conditions specified. Conditions may be a value to match, a regex
 to match, or a codref that takes the provider name and validates it returning
 either true or false.
@@ -646,27 +646,27 @@ either true or false.
 Prefixing with '!' will negate the matching, that is only tool providers that
 do not match will be checked.
 
-The filter will remove any results that do not match for the remainder of the
-checks. Checks before the directive are used will see unfiltered results.
+The filter will remove any events that do not match for the remainder of the
+checks. Checks before the directive are used will see unfiltered events.
 
 example:
 
-    my $results = intercept {
+    my $events = intercept {
         Test::More::ok(1, "foo");
         Test::More::ok(1, "bar");
         Test::More::ok(1, "baz");
         Test::Simple::ok(1, "bat");
     };
 
-    results_are(
-        $results,
+    events_are(
+        $events,
         ok => { name => "foo" },
         ok => { name => "bar" },
 
-        # From this point on, only more 'Test::Simple' results will be checked.
+        # From this point on, only more 'Test::Simple' events will be checked.
         filter_provider => 'Test::Simple',
 
-        # So it goes right to the Test::Simple result.
+        # So it goes right to the Test::Simple event.
         ok => { name => "bat" },
     );
 
@@ -684,7 +684,7 @@ example:
 
 =item '!filter_types' => [...]
 
-Filter results so that you only see ones where the type matches one or more of
+Filter events so that you only see ones where the type matches one or more of
 the conditions specified. Conditions may be a value to match, a regex to match,
 or a codref that takes the provider name and validates it returning either true
 or false.
@@ -692,12 +692,12 @@ or false.
 Prefixing with '!' will negate the matching, that is only types that do not
 match will be checked.
 
-The filter will remove any results that do not match for the remainder of the
-checks. Checks before the directive are used will see unfiltered results.
+The filter will remove any events that do not match for the remainder of the
+checks. Checks before the directive are used will see unfiltered events.
 
 example:
 
-    my $results = intercept {
+    my $events = intercept {
         ok(1, "foo");
         diag("XXX");
 
@@ -708,8 +708,8 @@ example:
         diag("ZZZ");
     };
 
-    results_are(
-        $results,
+    events_are(
+        $events,
         ok => { name => "foo" },
         diag => { message => 'XXX' },
         ok => { name => "bar" },
@@ -732,11 +732,11 @@ example:
 
 =item skip => '*'
 
-The numeric form will skip the next # results.
+The numeric form will skip the next # events.
 
 example:
 
-    my $results = intercept {
+    my $events = intercept {
         ok(1, "foo");
         diag("XXX");
 
@@ -747,8 +747,8 @@ example:
         diag("ZZZ");
     };
 
-    results_are(
-        $results,
+    events_are(
+        $events,
         ok => { name => "foo" },
 
         skip => 1, # Skips the diag
@@ -760,12 +760,12 @@ example:
         diag => { message => 'ZZZ' },
     );
 
-When '*' is used as an argument, the checker will skip until a result type
+When '*' is used as an argument, the checker will skip until a event type
 matching the next type to check is found.
 
 example:
 
-    my $results = intercept {
+    my $events = intercept {
         ok(1, "foo");
 
         diag("XXX");
@@ -775,8 +775,8 @@ example:
         ok(1, "bar");
     };
 
-    results_are(
-        $results,
+    events_are(
+        $events,
         ok => { name => "foo" },
 
         skip => '*', # Skip until the next 'ok' is found since that is our next check.
@@ -792,10 +792,10 @@ example:
 
 =item seek => $BOOL
 
-When turned on (true), any unexpected results will be skipped. You can turn
+When turned on (true), any unexpected events will be skipped. You can turn
 this on and off any time.
 
-    my $results = intercept {
+    my $events = intercept {
         ok(1, "foo");
 
         diag("XXX");
@@ -807,8 +807,8 @@ this on and off any time.
         ok(1, "baz");
     };
 
-    results_are(
-        $results,
+    events_are(
+        $events,
 
         seek => 1,
         ok => { name => "foo" },
@@ -841,12 +841,12 @@ Used to name the test when not using 'end'.
 
 =item end => 'Test Name'
 
-Used to say that there should not be any more results. Without this any results
+Used to say that there should not be any more events. Without this any events
 after your last check are simply ignored. This will generate a failure if any
-unchecked results remain.
+unchecked events remain.
 
 This is also how you can name the overall test. The default name is 'Got
-expected results'.
+expected events'.
 
 =back
 
@@ -880,3 +880,4 @@ This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
 
 See F<http://www.perl.com/perl/misc/Artistic.html>
+

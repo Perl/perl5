@@ -142,3 +142,4 @@ my $cap;
 	$test->is_eq($res_fail->{diag}, "multi fail diag\n", "run multi fail diag");
 	$test->is_num($res_pass->{depth}, 0, "run multi fail depth");
 }
+

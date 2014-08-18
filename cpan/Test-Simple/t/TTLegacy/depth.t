@@ -36,3 +36,4 @@ sub deeper
 	$test->is_num($results[1]->{depth}, 1, "depth 1");
 	$test->is_num($results[2]->{depth}, 2, "deeper");
 }
+

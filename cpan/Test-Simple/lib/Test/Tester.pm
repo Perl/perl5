@@ -21,7 +21,7 @@ require Exporter;
 use vars qw( @ISA @EXPORT $VERSION );
 
 
-our $VERSION = '1.301001_034';
+our $VERSION = '1.301001_040';
 $VERSION = eval $VERSION;    ## no critic (BuiltinFunctions::ProhibitStringyEval)
 
 @EXPORT  = qw( run_tests check_tests check_test cmp_results show_space );
@@ -387,7 +387,7 @@ should allow your test scripts to do
 
 and after that any tests inside your module will captured.
 
-=head1 TEST RESULTS
+=head1 TEST EVENTS
 
 The result of each test is captured in a hash. These hashes are the same as
 the hashes returned by Test::Builder->details but with a couple of extra

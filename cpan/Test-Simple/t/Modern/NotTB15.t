@@ -44,3 +44,4 @@ Can't locate object method "$method" via package "Test::Builder" at $file line $
 }
 
 done_testing;
+

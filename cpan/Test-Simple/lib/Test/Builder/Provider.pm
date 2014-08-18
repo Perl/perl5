@@ -227,12 +227,12 @@ Test::Builder::Provider - Helper for writing testing tools
 
 =head1 TEST COMPONENT MAP
 
-  [Test Script] > [Test Tool] > [Test::Builder] > [Test::Bulder::Stream] > [Result Formatter]
+  [Test Script] > [Test Tool] > [Test::Builder] > [Test::Bulder::Stream] > [Event Formatter]
                        ^
                   You are here
 
 A test script uses a test tool such as L<Test::More>, which uses Test::Builder
-to produce results. The results are sent to L<Test::Builder::Stream> which then
+to produce events. The events are sent to L<Test::Builder::Stream> which then
 forwards them on to one or more formatters. The default formatter is
 L<Test::Builder::Fromatter::TAP> which produces TAP output.
 
@@ -289,7 +289,7 @@ functions to define exports on the fly.
     sub subtests_alt(&) { ... }
     sub subtests_xxx(&) { ... }
 
-    # Export a helper function that does not produce any results (regular
+    # Export a helper function that does not produce any events (regular
     # export).
     give echo => sub { print @_ };
 
@@ -345,7 +345,7 @@ any references to C<$Test::Builder::Level> which is now deprecated.
     sub subtests_alt(&) { ... }
     sub subtests_xxx(&) { ... }
 
-    # No special marking needed for these as they do not produce results.
+    # No special marking needed for these as they do not produce events.
     sub echo { print @_ }
     sub echo_stdout { ... }
     sub echo_stderr { ... }
@@ -406,7 +406,7 @@ exporting it.
 
 =item provide $name => sub { ... }
 
-Provide a testing tool that will produce results. If no coderef is given it
+Provide a testing tool that will produce events. If no coderef is given it
 will look for a coderef with $name in your package.
 
 You may also use this to export refs of any type.
@@ -421,14 +421,14 @@ Like provide except you can specify multiple subs to export.
 
 =item &nest($code)
 
-Used as a tracing barrier, any results generated inside the nest will trace to
+Used as a tracing barrier, any events generated inside the nest will trace to
 the nest as opposed to the call to your provided tool.
 
 =item give $name
 
 =item give $name => sub { ... }
 
-Export a helper function that does not produce results.
+Export a helper function that does not produce events.
 
 =item gives qw/sub1 sub2 .../
 

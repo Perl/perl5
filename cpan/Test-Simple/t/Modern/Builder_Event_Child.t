@@ -3,12 +3,12 @@ use warnings;
 
 use Test::More 'modern';
 
-require_ok 'Test::Builder::Result::Child';
+require_ok 'Test::Builder::Event::Child';
 
-my $one = Test::Builder::Result::Child->new();
+my $one = Test::Builder::Event::Child->new();
 
-isa_ok($one, 'Test::Builder::Result::Child');
-isa_ok($one, 'Test::Builder::Result');
+isa_ok($one, 'Test::Builder::Event::Child');
+isa_ok($one, 'Test::Builder::Event');
 
 can_ok($one, qw/name is_subtest action/);
 

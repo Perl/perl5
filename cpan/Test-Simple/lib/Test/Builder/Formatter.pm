@@ -11,8 +11,8 @@ sub handle {
     my $self = shift;
     my ($item) = @_;
 
-    confess "Handler did not get a valid Test::Builder::Result object! ($item)"
-        unless $item && blessed($item) && $item->isa('Test::Builder::Result');
+    confess "Handler did not get a valid Test::Builder::Event object! ($item)"
+        unless $item && blessed($item) && $item->isa('Test::Builder::Event');
 
     my $method = $item->type;
 
@@ -55,18 +55,18 @@ Test::Builder::Formatter - Base class for formatters
 
 =head1 DESCRIPTION
 
-Results go to L<Test::Builder::Stream> which then forwards them on to one or
+Events go to L<Test::Builder::Stream> which then forwards them on to one or
 more formatters. This module is a base class for formatters. You do not NEED to
 use this module to write a formatter, but it can help.
 
 =head1 TEST COMPONENT MAP
 
-  [Test Script] > [Test Tool] > [Test::Builder] > [Test::Bulder::Stream] > [Result Formatter]
+  [Test Script] > [Test Tool] > [Test::Builder] > [Test::Bulder::Stream] > [Event Formatter]
                                                                                    ^
                                                                              You are here
 
 A test script uses a test tool such as L<Test::More>, which uses Test::Builder
-to produce results. The results are sent to L<Test::Builder::Stream> which then
+to produce events. The events are sent to L<Test::Builder::Stream> which then
 forwards them on to one or more formatters. The default formatter is
 L<Test::Builder::Fromatter::TAP> which produces TAP output.
 
@@ -77,7 +77,7 @@ L<Test::Builder::Fromatter::TAP> which produces TAP output.
 
     sub ok {
         my $self = shift;
-        my ($result) = @_;
+        my ($event) = @_;
 
         ...
     }
@@ -123,13 +123,13 @@ Construct an instance using %params, and add it as a listener on the stream.
 id of the listener, the stream to which the instance will listen, or the
 L<Test::Builder> instance from which to find the stream.
 
-=item $L->handle($result)
+=item $L->handle($event)
 
-Forward the resutl on to the correct method.
+Forward the event on to the correct method.
 
 =item $subref = $L->to_handler()
 
-Returns an anonymous sub that accepts results as arguments and passes them into
+Returns an anonymous sub that accepts events as arguments and passes them into
 handle() on this instance.
 
 =back
@@ -138,22 +138,22 @@ handle() on this instance.
 
 =over 4
 
-=item $self->ok($result)
+=item $self->ok($event)
 
-=item $self->note($result)
+=item $self->note($event)
 
-=item $self->diag($result)
+=item $self->diag($event)
 
-=item $self->plan($result)
+=item $self->plan($event)
 
-=item $self->finish($result)
+=item $self->finish($event)
 
-=item $self->bail($result)
+=item $self->bail($event)
 
-=item $self->child($result)
+=item $self->child($event)
 
-Any results given to the handle() method will be passed into the associated
-sub. If the sub is not defined then results of that type will be ignored.
+Any events given to the handle() method will be passed into the associated
+sub. If the sub is not defined then events of that type will be ignored.
 
 =back
 

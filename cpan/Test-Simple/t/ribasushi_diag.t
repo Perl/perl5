@@ -27,7 +27,7 @@ BEGIN {
 use SQL::Abstract::Test;
 use Test::Tester2;
 
-my $results = intercept {
+my $events = intercept {
     local $TODO = "Not today";
 
     Worker::do_work(
@@ -42,13 +42,13 @@ my $results = intercept {
     );
 };
 
-results_are(
-    $results,
+events_are(
+    $events,
     ok   => { in_todo => 1 },
     diag => { in_todo => 1 },
     note => { in_todo => 1 },
     note => { in_todo => 1 },
-    end => "All results are TODO"
+    end => "All events are TODO"
 );
 
 done_testing;

@@ -136,16 +136,24 @@ sub _accessor {
     my ($caller, $attr, $default) = @_;
     my $name = lc $attr;
 
-    my $sub = sub {
-        my $self = shift;
-        croak "$name\() must be called on a blessed instance, got: $self"
-            unless blessed $self;
+    my $sub;
+    if ($default) {
+        $sub = sub {
+            my $self = shift;
 
-        $self->{$attr} = $self->$default if $default && !exists $self->{$attr};
-        ($self->{$attr}) = @_ if @_;
+            $self->{$attr} = $self->$default unless exists $self->{$attr};
+            ($self->{$attr}) = @_ if @_;
 
-        return $self->{$attr};
-    };
+            return $self->{$attr};
+        };
+    }
+    else {
+        $sub = sub {
+            my $self = shift;
+            ($self->{$attr}) = @_ if @_;
+            return $self->{$attr};
+        };
+    }
 
     no strict 'refs';
     *{"$caller\::$name"} = $sub;
@@ -285,12 +293,10 @@ sub is_provider {
 }
 
 sub find_builder {
-    my $trace = Test::Builder->trace_test;
-
-    if ($trace && $trace->report) {
-        my $pkg = $trace->report->package;
-        return $pkg->TB_INSTANCE
-            if $pkg && package_sub($pkg, 'TB_INSTANCE');
+    my $level = 1;
+    while (my @call = caller($level++)) {
+        next unless package_sub($call[0], 'TB_INSTANCE');
+        return $call[0]->TB_INSTANCE;
     }
 
     return Test::Builder->new;
@@ -441,3 +447,4 @@ This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
 
 See F<http://www.perl.com/perl/misc/Artistic.html>
+

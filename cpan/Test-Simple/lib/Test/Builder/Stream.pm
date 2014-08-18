@@ -81,8 +81,8 @@ sub new {
 sub follow_up {
     my $self = shift;
     my ($type, @action) = @_;
-    croak "'$type' is not a result type"
-        unless $type && $type->isa('Test::Builder::Result');
+    croak "'$type' is not an event type"
+        unless $type && $type->isa('Test::Builder::Event');
 
     if (@action) {
         my ($sub) = @action;
@@ -98,8 +98,8 @@ sub follow_up {
 sub legacy_followup {
     my $self = shift;
     $self->_follow_up({
-        'Test::Builder::Result::Bail' => sub { exit 255 },
-        'Test::Builder::Result::Plan' => sub {
+        'Test::Builder::Event::Bail' => sub { exit 255 },
+        'Test::Builder::Event::Plan' => sub {
             my ($plan) = @_;
             return unless $plan->directive;
             return unless $plan->directive eq 'SKIP';
@@ -112,8 +112,8 @@ sub exception_followup {
     my $self = shift;
 
     $self->_follow_up({
-        'Test::Builder::Result::Bail' => sub {die $_[0]},
-        'Test::Builder::Result::Plan' => sub {
+        'Test::Builder::Event::Bail' => sub {die $_[0]},
+        'Test::Builder::Event::Plan' => sub {
             my $plan = shift;
             return unless $plan->directive;
             return unless $plan->directive eq 'SKIP';
@@ -250,15 +250,15 @@ sub send {
     }
 
     for my $item (@$items) {
-        if ($item->isa('Test::Builder::Result::Plan')) {
+        if ($item->isa('Test::Builder::Event::Plan')) {
             $self->plan($item);
         }
 
-        if ($item->isa('Test::Builder::Result::Bail')) {
+        if ($item->isa('Test::Builder::Event::Bail')) {
             $self->bailed_out($item);
         }
 
-        if ($item->isa('Test::Builder::Result::Ok')) {
+        if ($item->isa('Test::Builder::Event::Ok')) {
             $self->tests_run(1);
             $self->tests_failed(1) unless $item->bool;
         }
@@ -384,20 +384,20 @@ Test::Bulder::Stream - The stream between Test::Builder and the formatters.
 
 =head1 TEST COMPONENT MAP
 
-  [Test Script] > [Test Tool] > [Test::Builder] > [Test::Bulder::Stream] > [Result Formatter]
+  [Test Script] > [Test Tool] > [Test::Builder] > [Test::Bulder::Stream] > [Event Formatter]
                                                              ^
                                                        You are here
 
 A test script uses a test tool such as L<Test::More>, which uses Test::Builder
-to produce results. The results are sent to L<Test::Builder::Stream> which then
+to produce events. The events are sent to L<Test::Builder::Stream> which then
 forwards them on to one or more formatters. The default formatter is
 L<Test::Builder::Fromatter::TAP> which produces TAP output.
 
 =head1 DESCRIPTION
 
-This module is responsible for taking result object from L<Test::Builder> and
+This module is responsible for taking event object from L<Test::Builder> and
 forwarding them to the listeners/formatters. It also has facilities for
-intercepting the results and munging them. Examples of this are forking support
+intercepting the events and munging them. Examples of this are forking support
 and L<Test::Tester2>.
 
 =head1 METHODS
@@ -517,12 +517,12 @@ Check if tests are passing, optinally you can pass in a $bool to reset this.
 
 enable/disable endings. Defaults to false.
 
-=item $action = $stream->follow_up('Test::Builder::Result::...')
+=item $action = $stream->follow_up('Test::Builder::Event::...')
 
-=item $stream->follow_up('Test::Builder::Result::...' => sub { ($r) = @_; ... })
+=item $stream->follow_up('Test::Builder::Event::...' => sub { ($r) = @_; ... })
 
-Fetch or Specify a followup behavior to run after all listeners have gotten a
-result of the specified type.
+Fetch or Specify a followup behavior to run after all listeners have gotten an
+event of the specified type.
 
 =item $stream->legacy_followup
 
@@ -531,7 +531,7 @@ switch to legacy follow-up behavior. This means exiting for bailout or skip_all.
 =item $stream->exception_followup
 
 Switch to exception follow-up behavior. This means throwing an exception on
-bailout or skip_all. This is necessary for intercepting results.
+bailout or skip_all. This is necessary for intercepting events.
 
 =item $fork_handler = $stream->fork
 
@@ -570,7 +570,7 @@ Get the listener with the given ID.
 =item $unlisten = $stream->listen($id, $listener)
 
 Add a listener with the given ID. The listener can either be a coderef that
-takes a result object as an argument, or any object that implements a handle()
+takes a event object as an argument, or any object that implements a handle()
 method.
 
 This method returns a coderef that can be used to remove the listener. It is
@@ -601,7 +601,7 @@ Disable the legacy tap listener.
 
 =back
 
-=head3 LEGACY RESULTS LISTENER
+=head3 LEGACY EVENTS LISTENER
 
 =over 4
 
@@ -619,15 +619,15 @@ Disable legacy results
 
 =back
 
-=head2 MUNGING RESULTS
+=head2 MUNGING EVENTS
 
-Mungers are expected to take a result object and return 1 or more result
+Mungers are expected to take an event object and return 1 or more event
 objects to replace the original. They are also allowed to simply modify the
 original, or return nothing to remove it.
 
 Mungers are run in the order they are added, it is possible that the first
-munger will remove a result in which case later mungers will never see it.
-Listeners get the product of running all the mungers on the original results.
+munger will remove an event in which case later mungers will never see it.
+Listeners get the product of running all the mungers on the original event.
 
 =over 4
 
@@ -637,7 +637,7 @@ Get the munger with the specified ID.
 
 =item $unmunge = $stream->munge($id => $munger)
 
-Add a munger. The munger may be a coderef that takes a single result object as
+Add a munger. The munger may be a coderef that takes a single event object as
 an argument, or it can be any object that implements a handle() method.
 
 This method returns a coderef that can be used to remove the munger. It is
@@ -650,13 +650,13 @@ Remove a munger by id.
 
 =back
 
-=head2 PROVIDING RESULTS
+=head2 PROVIDING EVENTS
 
 =over 4
 
-=item $stream->send($result)
+=item $stream->send($event)
 
-Send a result to all listeners (also goes through munging and the form handler,
+Send a event to all listeners (also goes through munging and the form handler,
 etc.)
 
 =back

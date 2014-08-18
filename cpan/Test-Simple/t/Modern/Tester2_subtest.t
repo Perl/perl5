@@ -5,7 +5,7 @@ use utf8;
 use Test::More qw/modern/;
 use Test::Tester2;
 
-my $results = intercept {
+my $events = intercept {
     ok(0, "test failure" );
     ok(1, "test success" );
 
@@ -23,8 +23,8 @@ my $results = intercept {
     ok(1, "another test success" );
 };
 
-results_are(
-    $results,
+events_are(
+    $events,
 
     ok   => {bool => 0},
     diag => {},
@@ -60,7 +60,7 @@ results_are(
     diag => {},
     ok   => {bool => 1},
 
-    end => "subtest results as expected",
+    end => "subtest events as expected",
 );
 
 done_testing;

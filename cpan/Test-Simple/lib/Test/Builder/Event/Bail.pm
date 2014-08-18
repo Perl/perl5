@@ -1,19 +1,15 @@
-package Test::Builder::Result::Note;
+package Test::Builder::Event::Bail;
 use strict;
 use warnings;
 
-use base 'Test::Builder::Result';
+use base 'Test::Builder::Event';
 
 use Test::Builder::Util qw/accessors/;
-accessors qw/message/;
+accessors qw/reason/;
 
 sub to_tap {
     my $self = shift;
-
-    chomp(my $msg = $self->message);
-    $msg = "# $msg" unless $msg =~ m/^\n/;
-    $msg =~ s/\n/\n# /g;
-    return "$msg\n";
+    return "Bail out!  " . $self->reason . "\n";
 }
 
 1;
@@ -22,15 +18,15 @@ __END__
 
 =head1 NAME
 
-Test::Builder::Result::Note - Note result type
+Test::Builder::Event::Bail - Bailout!
 
 =head1 DESCRIPTION
 
-Notes in tests
+Sent when the test needs to bail out.
 
 =head1 METHODS
 
-See L<Test::Builder::Result> which is the base class for this module.
+See L<Test::Builder::Event> which is the base class for this module.
 
 =head2 CONSTRUCTORS
 
@@ -46,9 +42,9 @@ Create a new instance
 
 =over 4
 
-=item $r->message
+=item $r->reason
 
-The message in the note.
+Reason for the bailout.
 
 =item $r->trace
 
@@ -56,24 +52,24 @@ Get the test trace info, including where to report errors.
 
 =item $r->pid
 
-PID in which the result was created.
+PID in which the event was created.
 
 =item $r->depth
 
-Builder depth of the result (0 for normal, 1 for subtest, 2 for nested, etc).
+Builder depth of the event (0 for normal, 1 for subtest, 2 for nested, etc).
 
 =item $r->in_todo
 
-True if the result was generated inside a todo.
+True if the event was generated inside a todo.
 
 =item $r->source
 
-Builder that created the result, usually $0, but the name of a subtest when
+Builder that created the event, usually $0, but the name of a subtest when
 inside a subtest.
 
 =item $r->constructed
 
-Package, File, and Line in which the result was built.
+Package, File, and Line in which the event was built.
 
 =back
 
@@ -87,12 +83,12 @@ Returns the TAP string for the plan (not indented).
 
 =item $r->type
 
-Type of result. Usually this is the lowercased name from the end of the
-package. L<Test::Builder::Result::Ok> = 'ok'.
+Type of event. Usually this is the lowercased name from the end of the
+package. L<Test::Builder::Event::Ok> = 'ok'.
 
 =item $r->indent
 
-Returns the indentation that should be used to display the result ('    ' x
+Returns the indentation that should be used to display the event ('    ' x
 depth).
 
 =back

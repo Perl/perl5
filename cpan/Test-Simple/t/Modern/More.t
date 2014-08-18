@@ -2,7 +2,10 @@ use strict;
 use warnings;
 use Test::More qw/modern/;
 use Test::Tester2;
+use PerlIO;
 use utf8;
+
+our $default_utf8 = grep { $_ eq 'utf8' } PerlIO::get_layers(\*STDOUT);
 
 helpers qw/my_ok/;
 sub my_ok { Test::Builder->new->ok(@_) }
@@ -18,7 +21,7 @@ sub my_nester(&) {
 
 my @lines;
 
-my $results = intercept {
+my $events = intercept {
     my_ok( 1, "good" ); push @lines => __LINE__;
     my_ok( 0, "bad" );  push @lines => __LINE__;
 
@@ -31,8 +34,8 @@ my $results = intercept {
     }; push @lines => __LINE__;
 };
 
-results_are(
-    $results,
+events_are(
+    $events,
 
     ok   => { line => $lines[0], bool => 1, name => "good" },
     ok   => { line => $lines[1], bool => 0, name => "bad" },
@@ -57,14 +60,14 @@ sub helped(&) {
     diag( 'teardown' );
 };
 
-$results = intercept {
+$events = intercept {
     helped {
         ok(0 ,'helped test' ); $place{helped} = __LINE__; 0;
     }; $place{inhelp} = __LINE__;
 };
 
-results_are(
-    $results,
+events_are(
+    $events,
 
     diag => { message => 'setup' },
 
@@ -85,7 +88,8 @@ ok($ok, "Can import \$TODO");
     use Test::More 'utf8';
     use Test::Tester2;
 
-    my $results = intercept { ok(1, "blah") };
+    my $events = intercept { ok(1, "blah") };
+    is($events->[0]->encoding, 'utf8', "utf8 encoding set for modern");
 
     my @warnings;
     {
@@ -99,13 +103,16 @@ ok($ok, "Can import \$TODO");
     ok(!@warnings, "no warnings");
 }
 
-{
+SKIP: {
     package main_old;
     use Test::More;
     use Test::Tester2;
 
-    my $results = intercept { ok(1, "blah") };
-    is($results->[0]->encoding, 'legacy', "legacy encoding set for non-modern");
+    skip "UTF8 by default, skipping legacy" => 5
+        if $main::default_utf8;
+
+    my $events = intercept { ok(1, "blah") };
+    is($events->[0]->encoding, 'legacy', "legacy encoding set for non-modern");
 
     my @warnings;
     {
@@ -135,15 +142,36 @@ ok($ok, "Can import \$TODO");
     package main_oblivious;
     use Test::Tester2;
 
-    my $results = intercept { Test::More::ok(1, "blah") };
-    Test::More::is($results->[0]->encoding, undef, "no encoding set for non-consumer");
+    my $events = intercept { Test::More::ok(1, "blah") };
+    Test::More::is($events->[0]->encoding, undef, "no encoding set for non-consumer");
 }
+
+{
+    package arg_encoding;
+    use Test::More encoding => 'utf8';
+    use Test::Tester2;
+
+    my $events = intercept { ok(1, "blah") };
+    is($events->[0]->encoding, 'utf8', "utf8 encoding set by arg encoding");
+
+    my @warnings;
+    {
+        local $SIG{__WARN__} = sub { push @warnings => @_ };
+        ok(1, "Ճȴģȳф utf8 name");
+    }
+    ok(!@warnings, "no warnings - argument 'encoding'");
+}
+
 
 require PerlIO;
 my $legacy = Test::Builder->new->tap->io_set('legacy')->[0];
 my $modern = Test::Builder->new->tap->io_set('utf8')->[0];
-ok( !(grep { $_ eq 'utf8' } PerlIO::get_layers(\*STDOUT)), "Did not add utf8 to STDOUT" );
-ok( !(grep { $_ eq 'utf8' } PerlIO::get_layers($legacy)),  "Did not add utf8 to legacy" );
-ok(  (grep { $_ eq 'utf8' } PerlIO::get_layers($modern)),  "Did add utf8 to UTF8 handle" );
+ok( (grep { $_ eq 'utf8' } PerlIO::get_layers($modern)),  "Did add utf8 to UTF8 handle" );
+SKIP: {
+    skip "UTF8 by default, skipping legacy" => 2
+        if $main::default_utf8;
+    ok( !(grep { $_ eq 'utf8' } PerlIO::get_layers(\*STDOUT)), "Did not add utf8 to STDOUT" );
+    ok( !(grep { $_ eq 'utf8' } PerlIO::get_layers($legacy)),  "Did not add utf8 to legacy" );
+}
 
 done_testing;

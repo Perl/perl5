@@ -7,16 +7,16 @@ use warnings;
 use Test::Builder::Util qw/try protect/;
 use Scalar::Util();
 use Test::Builder::Stream;
-use Test::Builder::Result;
-use Test::Builder::Result::Ok;
-use Test::Builder::Result::Diag;
-use Test::Builder::Result::Note;
-use Test::Builder::Result::Plan;
-use Test::Builder::Result::Bail;
-use Test::Builder::Result::Child;
+use Test::Builder::Event;
+use Test::Builder::Event::Ok;
+use Test::Builder::Event::Diag;
+use Test::Builder::Event::Note;
+use Test::Builder::Event::Plan;
+use Test::Builder::Event::Bail;
+use Test::Builder::Event::Child;
 use Test::Builder::Trace;
 
-our $VERSION = '1.301001_034';
+our $VERSION = '1.301001_040';
 $VERSION = eval $VERSION;    ## no critic (BuiltinFunctions::ProhibitStringyEval)
 
 # The mostly-singleton, and other package vars.
@@ -134,14 +134,14 @@ sub intercept {
 
     local $self->{stream} = $stream;
 
-    my @results;
+    my @events;
     $stream->listen(INTERCEPTOR => sub {
         my ($item) = @_;
-        push @results => $item;
+        push @events => $item;
     });
     $code->($stream);
 
-    return \@results;
+    return \@events;
 }
 
 #########################
@@ -185,7 +185,7 @@ sub child {
 
     $child->depth($self->depth + 1);
 
-    my $res = Test::Builder::Result::Child->new(
+    my $res = Test::Builder::Event::Child->new(
         $self->context,
         name    => $child->name,
         action  => 'push',
@@ -275,7 +275,7 @@ sub finalize {
     $? = $self->{Child_Error};
     my $parent = delete $self->{Parent};
 
-    my $res = Test::Builder::Result::Child->new(
+    my $res = Test::Builder::Event::Child->new(
         $self->context,
         name    => $self->{Name} || undef,
         action  => 'pop',
@@ -296,15 +296,24 @@ sub finalize {
 #####################################
 
 sub trace_test {
+    my $self = shift;
+    return $self->{_trace_cache} if $self->{_trace_cache};
     my $out;
     protect { $out = Test::Builder::Trace->new };
     return $out;
 }
 
 sub find_TODO {
-    my( $self, $pack, $set, $new_value ) = @_;
+    my( $self, $where, $set, $new_value ) = @_;
 
-    $pack ||= $self->trace_test->todo_package || $self->exported_to;
+    my $pack;
+    if ($where && Scalar::Util::blessed($where) && $where->isa('Test::Builder::Trace')) {
+        $pack = $where->todo_package || $self->exported_to;
+    }
+    else {
+        $pack = $where || $self->trace_test->todo_package || $self->exported_to;
+    }
+
     return unless $pack;
 
     no strict 'refs';    ## no critic
@@ -395,7 +404,7 @@ sub _issue_plan {
         $self->croak("You tried to plan twice");
     }
 
-    my $plan = Test::Builder::Result::Plan->new(
+    my $plan = Test::Builder::Event::Plan->new(
         $self->context,
         directive => $directive     || undef,
         reason    => $reason        || undef,
@@ -423,7 +432,7 @@ sub done_testing {
 
     if( $self->{Done_Testing} ) {
         my($file, $line) = @{$self->{Done_Testing}}[1,2];
-        my $ok = Test::Builder::Result::Ok->new(
+        my $ok = Test::Builder::Event::Ok->new(
             $self->context,
             real_bool => 0,
             name      => "done_testing() was already called at $file line $line",
@@ -440,7 +449,7 @@ sub done_testing {
     $self->{Done_Testing} = [caller];
 
     if ($expected && defined($num_tests) && $num_tests != $expected) {
-        my $ok = Test::Builder::Result::Ok->new(
+        my $ok = Test::Builder::Event::Ok->new(
             $self->context,
             real_bool => 0,
             name      => "planned to run $expected but done_testing() expects $num_tests",
@@ -469,7 +478,7 @@ sub done_testing {
 ################
 
 #############################
-# {{{ Base Result Producers #
+# {{{ Base Event Producers #
 #############################
 
 sub _ok_obj {
@@ -497,7 +506,7 @@ sub _ok_obj {
 
     $self->_unoverload_str( \$todo );
 
-    my $ok = Test::Builder::Result::Ok->new(
+    my $ok = Test::Builder::Event::Ok->new(
         $self->context,
         real_bool => $test,
         bool      => $self->in_todo ? 1 : $test,
@@ -526,6 +535,7 @@ sub _ok_obj {
 
 sub ok {
     my $self = shift;
+    local $self->{_trace_cache} = $self->trace_test unless $self->{_trace_cache};
     my( $test, $name, @diag ) = @_;
 
     my $ok = $self->_ok_obj($test, $name, @diag);
@@ -557,7 +567,7 @@ sub BAIL_OUT {
         die bless {} => 'Test::Builder::Exception';
     }
 
-    my $bail = Test::Builder::Result::Bail->new(
+    my $bail = Test::Builder::Event::Bail->new(
         $self->context,
         reason  => $reason,
         in_todo => $self->in_todo || 0,
@@ -570,7 +580,7 @@ sub skip {
     $why ||= '';
     $self->_unoverload_str( \$why );
 
-    my $ok = Test::Builder::Result::Ok->new(
+    my $ok = Test::Builder::Event::Ok->new(
         $self->context,
         real_bool => 1,
         bool      => 1,
@@ -585,7 +595,7 @@ sub todo_skip {
     my( $self, $why ) = @_;
     $why ||= '';
 
-    my $ok = Test::Builder::Result::Ok->new(
+    my $ok = Test::Builder::Event::Ok->new(
         $self->context,
         real_bool => 0,
         bool      => 1,
@@ -602,7 +612,7 @@ sub diag {
 
     my $msg = join '', map { defined($_) ? $_ : 'undef' } @_;
 
-    my $r = Test::Builder::Result::Diag->new(
+    my $r = Test::Builder::Event::Diag->new(
         $self->context,
         in_todo => $self->in_todo || 0,
         message => $msg,
@@ -615,7 +625,7 @@ sub note {
 
     my $msg = join '', map { defined($_) ? $_ : 'undef' } @_;
 
-    my $r = Test::Builder::Result::Note->new(
+    my $r = Test::Builder::Event::Note->new(
         $self->context,
         in_todo => $self->in_todo || 0,
         message => $msg,
@@ -624,11 +634,11 @@ sub note {
 }
 
 #############################
-# }}} Base Result Producers #
+# }}} Base Event Producers #
 #############################
 
 #################################
-# {{{ Advanced Result Producers #
+# {{{ Advanced Event Producers #
 #################################
 
 my %numeric_cmps = map { ( $_, 1 ) } ( "<", "<=", ">", ">=", "==", "!=", "<=>" );
@@ -647,17 +657,25 @@ sub cmp_ok {
     my $error;
     my @diag;
 
-    my($pack, $file, $line) = $self->trace_test->report->call;
+    local $self->{_trace_cache} = $self->trace_test unless $self->{_trace_cache};
 
+    my @warnings;
     (undef, $error) = try {
+        local $SIG{__WARN__} = sub { push @warnings => @_ };
         # This is so that warnings come out at the caller's level
         ## no critic (BuiltinFunctions::ProhibitStringyEval)
         eval qq[
-#line $line "(eval in cmp_ok) $file"
+#line 999 "__REPLACE__ME__"
 \$test = \$got $type \$expect;
 1;
         ] || die $@;
     };
+
+    for my $warn (@warnings) {
+        my ($pkg, $file, $line) = $self->trace_test->report->call;
+        $warn =~ s/at __REPLACE__ME__ line 999/at (eval in cmp_ok) $file line $line/g;
+        warn $warn;
+    }
 
     # Treat overloaded objects as numbers if we're asked to do a
     # numeric comparison.
@@ -771,7 +789,7 @@ sub unlike {
 
 
 #################################
-# }}} Advanced Result Producers #
+# }}} Advanced Event Producers #
 #################################
 
 #######################
@@ -1101,14 +1119,21 @@ sub _regex_ok {
     }
 
     my $test;
-    my $context = $self->_caller_context;
+    my $context = '#line 999 "__REPLACE__ME__"' . "\n";
 
+    my @warnings;
     try {
+        local $SIG{__WARN__} = sub { push @warnings => @_ };
         # No point in issuing an uninit warning, they'll see it in the diagnostics
         no warnings 'uninitialized';
         ## no critic (BuiltinFunctions::ProhibitStringyEval)
         $test = eval $context . q{$test = $thing =~ /$usable_regex/ ? 1 : 0};
     };
+    for my $warn (@warnings) {
+        my ($pkg, $file, $line) = $self->trace_test->report->call;
+        $warn =~ s/at __REPLACE__ME__ line 999/at $file line $line/g;
+        warn $warn;
+    }
 
     $test = !$test if $cmp eq '!~';
 
@@ -1478,12 +1503,12 @@ work together>.
 
 =head1 TEST COMPONENT MAP
 
-  [Test Script] > [Test Tool] > [Test::Builder] > [Test::Bulder::Stream] > [Result Formatter]
+  [Test Script] > [Test Tool] > [Test::Builder] > [Test::Bulder::Stream] > [Event Formatter]
                                       ^
                                  You are here
 
 A test script uses a test tool such as L<Test::More>, which uses Test::Builder
-to produce results. The results are sent to L<Test::Builder::Stream> which then
+to produce events. The events are sent to L<Test::Builder::Stream> which then
 forwards them on to one or more formatters. The default formatter is
 L<Test::Builder::Fromatter::TAP> which produces TAP output.
 
@@ -1499,7 +1524,7 @@ Create a completely independant Test::Builder object.
 
     my $Test = Test::Builder->create;
 
-Create a Test::Builder object that sends results to the shared output stream
+Create a Test::Builder object that sends events to the shared output stream
 (usually what you want).
 
     my $Test = Test::Builder->create(shared_stream => 1);
@@ -1648,19 +1673,19 @@ B<Note:> Do not set this to the shared stream yourself, set it to undef. This
 is because the shared stream is actually a stack, and this always returns the
 top of the stack.
 
-=item $results = $Test->intercept(\&code)
+=item $events = $Test->intercept(\&code)
 
 Any tests run inside the codeblock will be intercepted and not sent to the
-normal stream. Instead they will be added to C<$results> which is an array of
-L<Test::Builder::Result> objects.
+normal stream. Instead they will be added to C<$events> which is an array of
+L<Test::Builder::Event> objects.
 
 B<Note:> This will also intercept BAIL_OUT and skipall.
 
-B<Note:> This will only intercept results generated with the Test::Builder
+B<Note:> This will only intercept events generated with the Test::Builder
 object on which C<intercept()> was called. Other builders will still send to
 the normal places.
 
-See L<Test::Tester2> for a method of capturing results sent to the global
+See L<Test::Tester2> for a method of capturing events sent to the global
 stream.
 
 =back
@@ -1740,12 +1765,12 @@ Declares that you are done testing, no more tests will be run after this point.
 If a plan has not yet been output, it will do so.
 
 $num_tests is the number of tests you planned to run.  If a numbered
-plan was already declared, and if this contradicts, a failing result
+plan was already declared, and if this contradicts, a failing event
 will be run to reflect the planning mistake.  If C<no_plan> was declared,
 this will override.
 
 If C<done_testing()> is called twice, the second call will issue a
-failing result.
+failing event.
 
 If C<$num_tests> is omitted, the number of tests run will be used, like
 no_plan.
@@ -1765,10 +1790,10 @@ Or to plan a variable number of tests:
 
 =back
 
-=head2 SIMPLE RESULT PRODUCERS
+=head2 SIMPLE EVENT PRODUCERS
 
-Each of these produces 1 or more L<Test::Builder::Result> objects which are fed
-into the result stream.
+Each of these produces 1 or more L<Test::Builder::Event> objects which are fed
+into the event stream.
 
 =over 4
 
@@ -1782,7 +1807,7 @@ Your basic test.  Pass if C<$test> is true, fail if $test is false.  Just
 like L<Test::Simple>'s C<ok()>.
 
 You may also specify diagnostics messages in the form of simple strings, or
-complete <Test::Builder::Result> objects. Typically you would only do this in a
+complete <Test::Builder::Event> objects. Typically you would only do this in a
 failure, but you are allowed to add diags to passes as well.
 
 =item $Test->BAIL_OUT($reason);
@@ -1834,7 +1859,7 @@ normally be seen by the user except in verbose mode.
 
 =back
 
-=head2 ADVANCED RESULT PRODUCERS
+=head2 ADVANCED EVENT PRODUCERS
 
 =over 4
 
@@ -2041,7 +2066,7 @@ Of course, test #1 is $tests[0], etc...
 
 =item $self->details
 
-B<Deprecated:> Moved to the L<Test::Builder::Formatter::LegacyResults> object.
+B<Deprecated:> Moved to the L<Test::Builder::Formatter::LegacyEvents> object.
 
 The style of result recording used here is deprecated. The functionality was
 moved to its own object to contain the legacy code.

@@ -26,12 +26,12 @@ $trace_legacy->report->file($filename);
 is($trace_utf8->encoding, 'utf8', "got a utf8 trace");
 is($trace_legacy->encoding, 'legacy', "got a legacy trace");
 
-my $diag_utf8 = Test::Builder::Result::Diag->new(
+my $diag_utf8 = Test::Builder::Event::Diag->new(
     message => "failed blah de blah\nFatal error in $filename line 42.\n",
     trace   => $trace_utf8,
 );
 
-my $diag_legacy = Test::Builder::Result::Diag->new(
+my $diag_legacy = Test::Builder::Event::Diag->new(
     message => "failed blah de blah\nFatal error in $filename line 42.\n",
     trace   => $trace_legacy,
 );

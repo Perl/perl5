@@ -2,7 +2,7 @@ use strict;
 use warnings;
 
 sub trace {
-    my $trace = Test::Builder->trace_test;
+    my $trace = Test::Builder->new->trace_test;
     return $trace;
 }
 
@@ -60,7 +60,7 @@ BEGIN {
     sub do_it {
         my $builder = __PACKAGE__->builder;
 
-        my $trace = Test::Builder->trace_test;
+        my $trace = Test::Builder->new->trace_test;
         return $trace;
     }
 
@@ -73,7 +73,7 @@ BEGIN {
 # line 1800
     sub do_nestit(&) {
         my ($code) = @_;
-        my $trace = Test::Builder->trace_test;
+        my $trace = Test::Builder->new->trace_test;
         # TODO: I Think this is wrong...
         local $Test::Builder::Level = $Test::Builder::Level + 3;
         $code->();
@@ -138,36 +138,36 @@ is($trace->report->package, 'XXX::Tester', "got correct package");
 is($trace->report->level,   1,             "Is level");
 ok(!$trace->report->provider_tool, "No Tool");
 
-my @results;
+my @events;
 
 # Here we simulate subtests
 # line 2800
 $trace = nestit {
-    push @results => explodable();
-    push @results => explodadouble();
-    push @results => explode();
-    push @results => do_it();
-    push @results => do_it_2();
+    push @events => explodable();
+    push @events => explodadouble();
+    push @events => explode();
+    push @events => do_it();
+    push @events => do_it_2();
 }; # Report line is here
 
 is($trace->report->line, 2806, "Nesting tool reported correct line");
 
-is($results[0]->report->line, 2801, "Got nested line, our tool");
-is($results[1]->report->line, 2200, "Nested, but tool is not 'provided' so goes up to provided");
-is($results[2]->report->line, 2803, "Got nested line external tool");
-is($results[3]->report->line, 2804, "Got nested line legacy tool");
-is($results[4]->report->line, 2805, "Got nested line deeper legacy tool");
+is($events[0]->report->line, 2801, "Got nested line, our tool");
+is($events[1]->report->line, 2200, "Nested, but tool is not 'provided' so goes up to provided");
+is($events[2]->report->line, 2803, "Got nested line external tool");
+is($events[3]->report->line, 2804, "Got nested line legacy tool");
+is($events[4]->report->line, 2805, "Got nested line deeper legacy tool");
 
-@results = ();
+@events = ();
 my $outer;
 # line 2900
 $outer = nestit {
     $trace = nestit {
-        push @results => explodable();
-        push @results => explodadouble();
-        push @results => explode();
-        push @results => do_it();
-        push @results => do_it_2();
+        push @events => explodable();
+        push @events => explodadouble();
+        push @events => explode();
+        push @events => do_it();
+        push @events => do_it_2();
     }; # Report line is here
 };
 
@@ -176,47 +176,48 @@ is($outer->report->line, 2908, "Nesting tool reported correct line");
 is($trace->report->line, 2907, "Nesting tool reported correct line");
 
 # line 2930
-is($results[0]->report->line, 2902, "Got nested line, our tool");
-is($results[1]->report->line, 2200, "Nested, but tool is not 'provided' so goes up to provided");
-is($results[2]->report->line, 2904, "Got nested line external tool");
-is($results[3]->report->line, 2905, "Got nested line legacy tool");
-is($results[4]->report->line, 2906, "Got nested line deeper legacy tool");
+is($events[0]->report->line, 2902, "Got nested line, our tool");
+is($events[1]->report->line, 2200, "Nested, but tool is not 'provided' so goes up to provided");
+is($events[2]->report->line, 2904, "Got nested line external tool");
+is($events[3]->report->line, 2905, "Got nested line legacy tool");
+is($events[4]->report->line, 2906, "Got nested line deeper legacy tool");
 
-@results = ();
+@events = ();
 # line 3000
 $trace = nonest {
-    push @results => explodable();
-    push @results => explodadouble();
-    push @results => explode();
-    push @results => do_it();
-    push @results => do_it_2();
+    push @events => explodable();
+    push @events => explodadouble();
+    push @events => explode();
+    push @events => do_it();
+    push @events => do_it_2();
 }; # Report line is here
 
 is($trace->report->line, 3006, "NoNesting tool reported correct line");
 
-is($results[0]->report->line, 3006, "Lowest tool is nonest, so these get squashed (Which is why you use nesting)");
-is($results[1]->report->line, 3006, "Lowest tool is nonest, so these get squashed (Which is why you use nesting)");
-is($results[2]->report->line, 3006, "Lowest tool is nonest, so these get squashed (Which is why you use nesting)");
-is($results[3]->report->line, 3006, "Lowest tool is nonest, so these get squashed(Legacy) (Which is why you use nesting)");
-is($results[4]->report->line, 3006, "Lowest tool is nonest, so these get squashed(Legacy) (Which is why you use nesting)");
+is($events[0]->report->line, 3006, "Lowest tool is nonest, so these get squashed (Which is why you use nesting)");
+is($events[1]->report->line, 3006, "Lowest tool is nonest, so these get squashed (Which is why you use nesting)");
+is($events[2]->report->line, 3006, "Lowest tool is nonest, so these get squashed (Which is why you use nesting)");
+is($events[3]->report->line, 3006, "Lowest tool is nonest, so these get squashed(Legacy) (Which is why you use nesting)");
+is($events[4]->report->line, 3006, "Lowest tool is nonest, so these get squashed(Legacy) (Which is why you use nesting)");
 
-@results = ();
+@events = ();
 
 # line 3100
 $trace = do_nestit {
-    push @results => explodable();
-    push @results => explodadouble();
-    push @results => explode();
-    push @results => do_it();
-    push @results => do_it_2();
+    push @events => explodable();
+    push @events => explodadouble();
+    push @events => explode();
+    push @events => do_it();
+    push @events => do_it_2();
 }; # Report line is here
 
 is($trace->report->line, 3106, "Nesting tool reported correct line");
 
-is($results[0]->report->line, 3101, "Got nested line, our tool");
-is($results[1]->report->line, 2200, "Nested, but tool is not 'provided' so goes up to provided");
-is($results[2]->report->line, 3103, "Got nested line external tool");
-is($results[3]->report->line, 3104, "Got nested line legacy tool");
-is($results[4]->report->line, 3105, "Got nested line deeper legacy tool");
+is($events[0]->report->line, 3101, "Got nested line, our tool");
+is($events[1]->report->line, 2200, "Nested, but tool is not 'provided' so goes up to provided");
+is($events[2]->report->line, 3103, "Got nested line external tool");
+is($events[3]->report->line, 3104, "Got nested line legacy tool");
+is($events[4]->report->line, 3105, "Got nested line deeper legacy tool");
 
 done_testing;
+

@@ -25,10 +25,10 @@ sub handle {
     my $self = shift;
     my ($item) = @_;
 
-    return if $item && blessed($item) && $item->isa('Test::Builder::Result::Finish');
+    return if $item && blessed($item) && $item->isa('Test::Builder::Event::Finish');
 
-    confess "Did not get a valid Test::Builder::Result object! ($item)"
-        unless $item && blessed($item) && $item->isa('Test::Builder::Result');
+    confess "Did not get a valid Test::Builder::Event object! ($item)"
+        unless $item && blessed($item) && $item->isa('Test::Builder::Event');
 
     my $stream = Test::Builder::Stream->shared;
     return 0 if $$ == $stream->pid;
@@ -53,7 +53,7 @@ sub cull {
 
         require Storable;
         my $obj = Storable::retrieve("$dir/$file");
-        die "Empty result object found" unless $obj;
+        die "Empty event object found" unless $obj;
 
         Test::Builder::Stream->shared->send($obj);
 
@@ -82,7 +82,7 @@ sub DESTROY {
     opendir(my $dh, $dir) || die "Could not open temp dir!";
     while(my $file = readdir($dh)) {
         next if $file =~ m/^\.+$/;
-        die "Unculled result! You ran tests in a child process, but never pulled them in!\n"
+        die "Unculled event! You ran tests in a child process, but never pulled them in!\n"
             if $file !~ m/\.complete$/;
         unlink("$dir/$file") || die "Could not unlink file: $file";
     }
@@ -113,7 +113,7 @@ This module is used by L<Test::Builder::Stream> to support forking.
         $f->cull;
     }
     else {
-        $f->handle(Test::Builder::Result::Ok->new(bool => 1);
+        $f->handle(Test::Builder::Event::Ok->new(bool => 1);
     }
 
     ...
@@ -132,15 +132,15 @@ Original PID in which the fork object was created.
 
 =item $f->tmpdir
 
-Temp dir used to share results between procs
+Temp dir used to share events between procs
 
-=item $f->handle($result)
+=item $f->handle($event)
 
-Send a result object to the parent
+Send a event object to the parent
 
 =item $f->cull
 
-Retrieve result objects and send them to the stream
+Retrieve event objects and send them to the stream
 
 =back
 

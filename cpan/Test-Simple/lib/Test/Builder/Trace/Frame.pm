@@ -7,26 +7,26 @@ use Test::Builder::Util qw/accessors accessor is_provider is_tester/;
 my %BUILDER_PACKAGES = (
     __PACKAGE__, 1,
     'Test::Builder'                => 1,
-    'Test::Builder::Result'        => 1,
-    'Test::Builder::Result::Bail'  => 1,
-    'Test::Builder::Result::Child' => 1,
-    'Test::Builder::Result::Diag'  => 1,
-    'Test::Builder::Result::Note'  => 1,
-    'Test::Builder::Result::Ok'    => 1,
-    'Test::Builder::Result::Plan'  => 1,
+    'Test::Builder::Event'        => 1,
+    'Test::Builder::Event::Bail'  => 1,
+    'Test::Builder::Event::Child' => 1,
+    'Test::Builder::Event::Diag'  => 1,
+    'Test::Builder::Event::Note'  => 1,
+    'Test::Builder::Event::Ok'    => 1,
+    'Test::Builder::Event::Plan'  => 1,
     'Test::Builder::Stream'        => 1,
     'Test::Builder::Trace'         => 1,
     'Test::Builder::Util'          => 1,
 );
 
 accessors qw{
-    depth package file line subname
+    depth package file line subname todo
     level report
 };
 
 sub new {
     my $class = shift;
-    my ($depth, $pkg, $file, $line, $sub) = @_;
+    my ($depth, $pkg, $file, $line, $sub, $todo) = @_;
 
     return bless {
         depth   => $depth || 0,
@@ -34,6 +34,7 @@ sub new {
         file    => $file  || undef,
         line    => $line  || 0,
         subname => $sub   || undef,
+        todo    => $todo  || undef,
     }, $class;
 }
 
@@ -46,17 +47,6 @@ sub call {
         $self->subname,
     );
 }
-
-accessor todo => sub {
-    my $self = shift;
-    no strict 'refs';
-    no warnings 'once';
-
-    my $ref = *{$self->package . '::TODO'}{SCALAR};
-    return 1 if $ref == *Test::More::TODO{SCALAR};
-    return 0 unless defined $$ref;
-    return 1;
-};
 
 accessor transition => sub {
     my $self = shift;
@@ -192,10 +182,7 @@ They will be cached for future calls.
 
 =item $todo = $frame->todo
 
-True if the frame comes from a package where $TODO is present.
-
-B<Caveat> Will not find the $TODO if it is undefined UNLESS the $TODO came from
-L<Test::More>.
+Returns the TODO message if $TODO is set in the package the frame is from.
 
 =item $bool = $frame->nest
 
@@ -250,3 +237,4 @@ This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
 
 See F<http://www.perl.com/perl/misc/Artistic.html>
+

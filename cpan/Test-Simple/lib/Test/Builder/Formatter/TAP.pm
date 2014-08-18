@@ -41,14 +41,14 @@ sub init {
 #######################
 
 #######################
-# {{{ RESULT METHODS
+# {{{ EVENT METHODS
 #######################
 
 for my $handler (qw/bail nest/) {
     my $sub = sub {
         my $self = shift;
         my ($item) = @_;
-        $self->_print_to_fh($self->result_handle($item, OUT), $item->indent || "", $item->to_tap);
+        $self->_print_to_fh($self->event_handle($item, OUT), $item->indent || "", $item->to_tap);
     };
     no strict 'refs';
     *$handler = $sub;
@@ -61,7 +61,7 @@ sub child {
     return unless $item->action eq 'push' && $item->is_subtest;
 
     my $name = $item->name;
-    $self->_print_to_fh($self->result_handle($item, OUT), $item->indent || "", "# Subtest: $name\n");
+    $self->_print_to_fh($self->event_handle($item, OUT), $item->indent || "", "# Subtest: $name\n");
 }
 
 sub finish {
@@ -80,7 +80,7 @@ sub finish {
     }
 
     my $total = $item->tests_run;
-    $self->_print_to_fh($self->result_handle($item, OUT), $item->indent || '', "1..$total\n");
+    $self->_print_to_fh($self->event_handle($item, OUT), $item->indent || '', "1..$total\n");
 }
 
 sub plan {
@@ -96,7 +96,7 @@ sub plan {
     my $out = $item->to_tap;
     return unless $out;
 
-    my $handle = $self->result_handle($item, OUT);
+    my $handle = $self->event_handle($item, OUT);
     $self->_print_to_fh($handle, $item->indent || "", $out);
 }
 
@@ -104,9 +104,9 @@ sub ok {
     my $self = shift;
     my ($item) = @_;
 
-    $self->atomic_result(sub {
+    $self->atomic_event(sub {
         my $num = $self->use_numbers ? ++($self->{number}) : undef;
-        $self->_print_to_fh($self->result_handle($item, OUT), $item->indent || "", $item->to_tap($num));
+        $self->_print_to_fh($self->event_handle($item, OUT), $item->indent || "", $item->to_tap($num));
     });
 }
 
@@ -120,7 +120,7 @@ sub diag {
     return if $^C;
 
     my $want_handle = $item->in_todo ? TODO : FAIL;
-    my $handle = $self->result_handle($item, $want_handle);
+    my $handle = $self->event_handle($item, $want_handle);
 
     $self->_print_to_fh( $handle, $item->indent || "", $item->to_tap );
 }
@@ -134,11 +134,11 @@ sub note {
     # Prevent printing headers when compiling (i.e. -c)
     return if $^C;
 
-    $self->_print_to_fh( $self->result_handle($item, OUT), $item->indent || "", $item->to_tap );
+    $self->_print_to_fh( $self->event_handle($item, OUT), $item->indent || "", $item->to_tap );
 }
 
 #######################
-# }}} RESULT METHODS
+# }}} EVENT METHODS
 #######################
 
 ##############################
@@ -179,11 +179,11 @@ sub encoding_set {
     return $self->io_sets->{$encoding};
 }
 
-sub result_handle {
+sub event_handle {
     my $self = shift;
-    my ($result, $index) = @_;
+    my ($event, $index) = @_;
 
-    my $rencoding = $result ? $result->encoding : undef;
+    my $rencoding = $event ? $event->encoding : undef;
 
     # Open handles in the encoding if one is set.
     $self->encoding_set($rencoding) if $rencoding && $rencoding ne 'legacy';
@@ -288,7 +288,7 @@ sub current_test {
 
     if (@_) {
         my ($new) = @_;
-        $self->atomic_result(sub { $self->{number} = $new });
+        $self->atomic_event(sub { $self->{number} = $new });
     }
 
     return $self->{number};
@@ -330,7 +330,7 @@ sub open_handles {
     return ($out, $err);
 }
 
-sub atomic_result {
+sub atomic_event {
     my $self = shift;
     my ($code) = @_;
     lock $self->{lock};
@@ -410,18 +410,18 @@ Test::Builder::Formatter::TAP - TAP formatter.
 
 =head1 TEST COMPONENT MAP
 
-  [Test Script] > [Test Tool] > [Test::Builder] > [Test::Bulder::Stream] > [Result Formatter]
+  [Test Script] > [Test Tool] > [Test::Builder] > [Test::Bulder::Stream] > [Event Formatter]
                                                                                    ^
                                                                              You are here
 
 A test script uses a test tool such as L<Test::More>, which uses Test::Builder
-to produce results. The results are sent to L<Test::Builder::Stream> which then
+to produce events. The events are sent to L<Test::Builder::Stream> which then
 forwards them on to one or more formatters. The default formatter is
 L<Test::Builder::Fromatter::TAP> which produces TAP output.
 
 =head1 DESCRIPTION
 
-This module is responsible for taking results from the stream and outputting
+This module is responsible for taking events from the stream and outputting
 TAP. You probably should not directly interact with this.
 
 =head1 AUTHORS

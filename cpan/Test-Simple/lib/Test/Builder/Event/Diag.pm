@@ -1,8 +1,8 @@
-package Test::Builder::Result::Diag;
+package Test::Builder::Event::Diag;
 use strict;
 use warnings;
 
-use base 'Test::Builder::Result';
+use base 'Test::Builder::Event';
 
 use Scalar::Util();
 use Test::Builder::Util qw/accessors try/;
@@ -51,15 +51,15 @@ __END__
 
 =head1 NAME
 
-Test::Builder::Result::Diag - Diag result type
+Test::Builder::Event::Diag - Diag event type
 
 =head1 DESCRIPTION
 
-The diag result type.
+The diag event type.
 
 =head1 METHODS
 
-See L<Test::Builder::Result> which is the base class for this module.
+See L<Test::Builder::Event> which is the base class for this module.
 
 =head2 CONSTRUCTORS
 
@@ -85,28 +85,28 @@ Get the test trace info, including where to report errors.
 
 =item $r->pid
 
-PID in which the result was created.
+PID in which the event was created.
 
 =item $r->depth
 
-Builder depth of the result (0 for normal, 1 for subtest, 2 for nested, etc).
+Builder depth of the event (0 for normal, 1 for subtest, 2 for nested, etc).
 
 =item $r->in_todo
 
-True if the result was generated inside a todo.
+True if the event was generated inside a todo.
 
 =item $r->source
 
-Builder that created the result, usually $0, but the name of a subtest when
+Builder that created the event, usually $0, but the name of a subtest when
 inside a subtest.
 
 =item $r->constructed
 
-Package, File, and Line in which the result was built.
+Package, File, and Line in which the event was built.
 
 =item $r->linked
 
-If this diag is linked to a specific L<Test::Builder::Result::Ok> object, this
+If this diag is linked to a specific L<Test::Builder::Event::Ok> object, this
 will be set to the object. Note this is automatically turned into a weak
 reference as it is assumed that the Ok will also link to this object. This is
 to avoid cycled and memory leaks.
@@ -123,12 +123,12 @@ Returns the TAP string for the plan (not indented).
 
 =item $r->type
 
-Type of result. Usually this is the lowercased name from the end of the
-package. L<Test::Builder::Result::Ok> = 'ok'.
+Type of event. Usually this is the lowercased name from the end of the
+package. L<Test::Builder::Event::Ok> = 'ok'.
 
 =item $r->indent
 
-Returns the indentation that should be used to display the result ('    ' x
+Returns the indentation that should be used to display the event ('    ' x
 depth).
 
 =back

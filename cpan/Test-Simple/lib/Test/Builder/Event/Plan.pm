@@ -1,8 +1,8 @@
-package Test::Builder::Result::Plan;
+package Test::Builder::Event::Plan;
 use strict;
 use warnings;
 
-use base 'Test::Builder::Result';
+use base 'Test::Builder::Event';
 
 use Test::Builder::Util qw/accessors/;
 accessors qw/max directive reason/;
@@ -29,15 +29,15 @@ __END__
 
 =head1 NAME
 
-Test::Builder::Result::Plan - The result of a plan
+Test::Builder::Event::Plan - The event of a plan
 
 =head1 DESCRIPTION
 
-The plan result object.
+The plan event object.
 
 =head1 METHODS
 
-See L<Test::Builder::Result> which is the base class for this module.
+See L<Test::Builder::Event> which is the base class for this module.
 
 =head2 CONSTRUCTORS
 
@@ -71,24 +71,24 @@ Get the test trace info, including where to report errors.
 
 =item $r->pid
 
-PID in which the result was created.
+PID in which the event was created.
 
 =item $r->depth
 
-Builder depth of the result (0 for normal, 1 for subtest, 2 for nested, etc).
+Builder depth of the event (0 for normal, 1 for subtest, 2 for nested, etc).
 
 =item $r->in_todo
 
-True if the result was generated inside a todo.
+True if the event was generated inside a todo.
 
 =item $r->source
 
-Builder that created the result, usually $0, but the name of a subtest when
+Builder that created the event, usually $0, but the name of a subtest when
 inside a subtest.
 
 =item $r->constructed
 
-Package, File, and Line in which the result was built.
+Package, File, and Line in which the event was built.
 
 =back
 
@@ -102,12 +102,12 @@ Returns the TAP string for the plan (not indented).
 
 =item $r->type
 
-Type of result. Usually this is the lowercased name from the end of the
-package. L<Test::Builder::Result::Ok> = 'ok'.
+Type of event. Usually this is the lowercased name from the end of the
+package. L<Test::Builder::Event::Ok> = 'ok'.
 
 =item $r->indent
 
-Returns the indentation that should be used to display the result ('    ' x
+Returns the indentation that should be used to display the event ('    ' x
 depth).
 
 =back

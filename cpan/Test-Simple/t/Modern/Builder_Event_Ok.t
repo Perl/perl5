@@ -3,11 +3,11 @@ use warnings;
 
 use Test::More 'modern';
 
-require_ok 'Test::Builder::Result::Ok';
+require_ok 'Test::Builder::Event::Ok';
 
-isa_ok('Test::Builder::Result::Ok', 'Test::Builder::Result');
+isa_ok('Test::Builder::Event::Ok', 'Test::Builder::Event');
 
-can_ok('Test::Builder::Result::Ok', qw/bool real_bool name todo skip/);
+can_ok('Test::Builder::Event::Ok', qw/bool real_bool name todo skip/);
 
 my $trace = bless {
     _report => bless {
@@ -27,7 +27,7 @@ my %init = (
     skip => undef,
 );
 
-my $one = Test::Builder::Result::Ok->new(%init);
+my $one = Test::Builder::Event::Ok->new(%init);
 
 is($one->to_tap(1), "ok 1 - fake\n", "TAP output, success");
 
@@ -55,25 +55,25 @@ ok( !eval { $one->to_tap; 1}, "Different reasons dies" );
 like( $@, qr{^2 different reasons to skip/todo: \$VAR1}, "Useful message" );
 
 
-my $two = Test::Builder::Result::Ok->new(%init);
+my $two = Test::Builder::Event::Ok->new(%init);
 
-is($two->diag, undef, "No diag on bool => true result");
+is($two->diag, undef, "No diag on bool => true event");
 
-$two = Test::Builder::Result::Ok->new(%init, in_todo => 1, todo => 'blah', skip => 'blah', real_bool => 1);
-is($two->diag, undef, "No diag on todo+skip result");
+$two = Test::Builder::Event::Ok->new(%init, in_todo => 1, todo => 'blah', skip => 'blah', real_bool => 1);
+is($two->diag, undef, "No diag on todo+skip event");
 
-$two = Test::Builder::Result::Ok->new(%init, skip => 'blah', real_bool => 0, bool => 0);
-ok($two->diag, "added diag on skip result");
+$two = Test::Builder::Event::Ok->new(%init, skip => 'blah', real_bool => 0, bool => 0);
+ok($two->diag, "added diag on skip event");
 
-$two = Test::Builder::Result::Ok->new(%init, bool => 0,  real_bool => 0);
+$two = Test::Builder::Event::Ok->new(%init, bool => 0,  real_bool => 0);
 ok($two->diag, "Have diag");
 $two->clear_diag;
 is($two->diag, undef, "Removed diag");
 
-my $diag_a = Test::Builder::Result::Diag->new(message => 'foo');
-my $diag_b = Test::Builder::Result::Diag->new(message => 'bar');
+my $diag_a = Test::Builder::Event::Diag->new(message => 'foo');
+my $diag_b = Test::Builder::Event::Diag->new(message => 'bar');
 
-$two = Test::Builder::Result::Ok->new(%init);
+$two = Test::Builder::Event::Ok->new(%init);
 $two->diag($diag_a);
 is_deeply($two->diag, [$diag_a], "pushed diag");
 is($diag_a->linked, $two, "Added link");
@@ -90,10 +90,10 @@ is($two->diag, undef, "Removed diag");
 ok(!$diag_a->linked, "Removed link");
 ok(!$diag_b->linked, "Removed link");
 
-$two = Test::Builder::Result::Ok->new(%init, in_todo => 1, todo => 'blah', real_bool => 0);
+$two = Test::Builder::Event::Ok->new(%init, in_todo => 1, todo => 'blah', real_bool => 0);
 ok($two->diag->[0]->{in_todo}, "in_todo passed to the diag");
 
-my $d = Test::Builder::Result::Ok->new(
+my $d = Test::Builder::Event::Ok->new(
     bool      => 0,
     real_bool => 0,
     name      => 'blah',
@@ -104,3 +104,4 @@ my $d = Test::Builder::Result::Ok->new(
 is(@{$d->diag}, 2, "Normal Diag + the one we spec'd");
 
 done_testing;
+

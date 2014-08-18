@@ -4,43 +4,43 @@ use warnings;
 use Test::More 'modern';
 use Test::Tester2;
 
-can_ok( __PACKAGE__, 'intercept', 'results_are' );
+can_ok( __PACKAGE__, 'intercept', 'events_are' );
 
-my $results = intercept {
+my $events = intercept {
     ok(1, "Woo!");
     ok(0, "Boo!");
 };
 
-isa_ok($results->[0], 'Test::Builder::Result::Ok');
-is($results->[0]->bool, 1, "Got one success");
-is($results->[0]->name, "Woo!", "Got test name");
+isa_ok($events->[0], 'Test::Builder::Event::Ok');
+is($events->[0]->bool, 1, "Got one success");
+is($events->[0]->name, "Woo!", "Got test name");
 
-isa_ok($results->[1], 'Test::Builder::Result::Ok');
-is($results->[1]->bool, 0, "Got one fail");
-is($results->[1]->name, "Boo!", "Got test name");
+isa_ok($events->[1], 'Test::Builder::Event::Ok');
+is($events->[1]->bool, 0, "Got one fail");
+is($events->[1]->name, "Boo!", "Got test name");
 
-$results = intercept {
+$events = intercept {
     ok(1, "Woo!");
     BAIL_OUT("Ooops");
     ok(0, "Should not see this");
 };
-is(@$results, 2, "Only got 2");
-isa_ok($results->[0], 'Test::Builder::Result::Ok');
-isa_ok($results->[1], 'Test::Builder::Result::Bail');
+is(@$events, 2, "Only got 2");
+isa_ok($events->[0], 'Test::Builder::Event::Ok');
+isa_ok($events->[1], 'Test::Builder::Event::Bail');
 
-$results = intercept {
+$events = intercept {
     plan skip_all => 'All tests are skipped';
 
     ok(1, "Woo!");
     BAIL_OUT("Ooops");
     ok(0, "Should not see this");
 };
-is(@$results, 1, "Only got 1");
-isa_ok($results->[0], 'Test::Builder::Result::Plan');
+is(@$events, 1, "Only got 1");
+isa_ok($events->[0], 'Test::Builder::Event::Plan');
 
-results_are(
+events_are(
     intercept {
-        results_are(
+        events_are(
             intercept { ok(1, "foo") },
             ok => {id => 'blah', bool => 0},
             end => 'Lets name this test!',
@@ -52,7 +52,7 @@ results_are(
     diag => {message => qr{Failed test 'Lets name this test!'.*at (\./)?t/Modern/Tester2\.t line}s},
     diag => {message => q{(ok blah) Wanted bool => '0', but got bool => '1'}},
     diag => {message => <<"    EOT"},
-Full result found was: ok => {
+Full event found was: ok => {
   name: foo
   bool: 1
   real_bool: 1
@@ -71,9 +71,9 @@ Full result found was: ok => {
     end => 'Failure diag checking',
 );
 
-results_are(
+events_are(
     intercept {
-        results_are(
+        events_are(
             intercept { ok(1, "foo"); ok(1, "bar") },
             ok => {id => 'blah', bool => 1},
             'end'
@@ -83,40 +83,25 @@ results_are(
     ok => {id => 'first', bool => 0},
 
     diag => {},
-    diag => {message => q{Expected end of results, but more results remain}},
+    diag => {message => q{Expected end of events, but more events remain}},
 
     end => 'skipping a diag',
 );
 
-{
-    my @warn;
-    local $SIG{__WARN__} = sub { push @warn => @_ };
-    my $doit = sub {
-        local $Test::Builder::Level = $Test::Builder::Level + 1;
-        ok(1, "example");
-    };
-
-    # The results generated here are to be ignored. We are just checking on warnings.
-    intercept { $doit->(); $doit->(); $doit->() };
-
-    is(@warn, 1, "got a warning, but only once");
-    like($warn[0], qr/\$Test::Builder::Level was used to trace a test! \$Test::Builder::Level is deprecated!/, "Expected warning");
-}
-
 DOCS_1: {
-    # Intercept all the Test::Builder::Result objects produced in the block.
-    my $results = intercept {
+    # Intercept all the Test::Builder::Event objects produced in the block.
+    my $events = intercept {
         ok(1, "pass");
         ok(0, "fail");
         diag("xxx");
     };
 
     # By Hand
-    is($results->[0]->{bool}, 1, "First result passed");
+    is($events->[0]->{bool}, 1, "First event passed");
 
     # With help
-    results_are(
-        $results,
+    events_are(
+        $events,
         ok   => { id => 'a', bool => 1, name => 'pass' },
         ok   => { id => 'b', bool => 0, name => 'fail' },
         diag => { message => qr/Failed test 'fail'/ },
@@ -127,22 +112,22 @@ DOCS_1: {
 
 DOCS_2: {
     require Test::Simple;
-    my $results = intercept {
+    my $events = intercept {
         Test::More::ok(1, "foo");
         Test::More::ok(1, "bar");
         Test::More::ok(1, "baz");
         Test::Simple::ok(1, "bat");
     };
 
-    results_are(
-        $results,
+    events_are(
+        $events,
         ok => { name => "foo" },
         ok => { name => "bar" },
 
-        # From this point on, only more 'Test::Simple' results will be checked.
+        # From this point on, only more 'Test::Simple' events will be checked.
         filter_provider => 'Test::Simple',
 
-        # So it goes right to the Test::Simple result.
+        # So it goes right to the Test::Simple event.
         ok => { name => "bat" },
 
         end => 'docs 2',
@@ -150,7 +135,7 @@ DOCS_2: {
 }
 
 DOCS_3: {
-    my $results = intercept {
+    my $events = intercept {
         ok(1, "foo");
         diag("XXX");
 
@@ -161,8 +146,8 @@ DOCS_3: {
         diag("ZZZ");
     };
 
-    results_are(
-        $results,
+    events_are(
+        $events,
         ok => { name => "foo" },
         diag => { message => 'XXX' },
         ok => { name => "bar" },
@@ -179,7 +164,7 @@ DOCS_3: {
 }
 
 DOCS_4: {
-    my $results = intercept {
+    my $events = intercept {
         ok(1, "foo");
         diag("XXX");
 
@@ -190,8 +175,8 @@ DOCS_4: {
         diag("ZZZ");
     };
 
-    results_are(
-        $results,
+    events_are(
+        $events,
         ok => { name => "foo" },
 
         skip => 1, # Skips the diag
@@ -207,7 +192,7 @@ DOCS_4: {
 }
 
 DOCS_5: {
-    my $results = intercept {
+    my $events = intercept {
         ok(1, "foo");
 
         diag("XXX");
@@ -217,8 +202,8 @@ DOCS_5: {
         ok(1, "bar");
     };
 
-    results_are(
-        $results,
+    events_are(
+        $events,
         ok => { name => "foo" },
 
         skip => '*', # Skip until the next 'ok' is found since that is our next check.
@@ -230,7 +215,7 @@ DOCS_5: {
 }
 
 DOCS_6: {
-    my $results = intercept {
+    my $events = intercept {
         ok(1, "foo");
 
         diag("XXX");
@@ -242,10 +227,10 @@ DOCS_6: {
         ok(1, "baz");
     };
 
-    results_are(
+    events_are(
         intercept {
-            results_are(
-                $results,
+            events_are(
+                $events,
 
                 name => 'docs 6 inner',
 
@@ -263,8 +248,8 @@ DOCS_6: {
 
         ok => { bool => 0 },
         diag => { message => qr/Failed test 'docs 6 inner'/ },
-        diag => { message => q{(ok 3) Wanted result type 'ok', But got: 'diag'} },
-        diag => { message => qr/Full result found was:/ },
+        diag => { message => q{(ok 3) Wanted event type 'ok', But got: 'diag'} },
+        diag => { message => qr/Full event found was:/ },
 
         end => 'docs 6',
     );

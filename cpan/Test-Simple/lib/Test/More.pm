@@ -20,7 +20,7 @@ sub _carp {
     return warn @_, " at $file line $line\n";
 }
 
-our $VERSION = '1.301001_034';
+our $VERSION = '1.301001_040';
 $VERSION = eval $VERSION;    ## no critic (BuiltinFunctions::ProhibitStringyEval)
 
 our $TODO;
@@ -110,7 +110,7 @@ sub before_import {
         elsif ($item eq 'encoding') {
             modernize($dest) unless $modern++;
             $encoding_set++;
-            my $encoding = @{$list->[$idx++]};
+            my $encoding = $list->[$idx++];
             _set_tap_encoding($dest, $encoding);
         }
         else {
@@ -918,12 +918,12 @@ Test::More - yet another framework for writing test scripts
 
 =head1 TEST COMPONENT MAP
 
-  [Test Script] > [Test Tool] > [Test::Builder] > [Test::Bulder::Stream] > [Result Formatter]
+  [Test Script] > [Test Tool] > [Test::Builder] > [Test::Bulder::Stream] > [Event Formatter]
                        ^
                  You are here
 
 A test script uses a test tool such as L<Test::More>, which uses Test::Builder
-to produce results. The results are sent to L<Test::Builder::Stream> which then
+to produce events. The events are sent to L<Test::Builder::Stream> which then
 forwards them on to one or more formatters. The default formatter is
 L<Test::Builder::Fromatter::TAP> which produces TAP output.
 
@@ -1031,22 +1031,22 @@ This is safer than and replaces the "no_plan" plan.
 
 =item use Test::More 'enable_forking';
 
-Turn on forking support. This lets you fork and generate results from each
+Turn on forking support. This lets you fork and generate events from each
 process. It is your job to call C<cull()> periodically in the original process
-to collect the results from other processes.
+to collect the events from other processes.
 
     use strict;
     use warnings;
     use Test::More tests => 2, qw/enable_forking/;
 
-    ok(1, "Result in parent" );
+    ok(1, "Event in parent" );
 
     if (my $pid = fork()) {
         waitpid($pid, 0);
         cull();
     }
     else {
-        ok(1, "Result in child");
+        ok(1, "Event in child");
         exit 0;
     }
 
@@ -2002,7 +2002,7 @@ Key feature milestones include:
 
 =over 4
 
-=item result stream
+=item event stream
 
 =item forking support
 
@@ -2213,3 +2213,4 @@ This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
 
 See F<http://www.perl.com/perl/misc/Artistic.html>
+

@@ -1,8 +1,8 @@
-package Test::Builder::Result::Ok;
+package Test::Builder::Event::Ok;
 use strict;
 use warnings;
 
-use base 'Test::Builder::Result';
+use base 'Test::Builder::Event';
 
 use Carp qw/confess/;
 use Scalar::Util qw/blessed reftype/;
@@ -110,14 +110,14 @@ sub diag {
         my $array = $type eq 'ARRAY' ? $i : [$i];
         for my $d (@$array) {
             if (ref $d) {
-                confess "Only Diag objects can be linked to results."
-                    unless blessed($d) && $d->isa('Test::Builder::Result::Diag');
+                confess "Only Diag objects can be linked to events."
+                    unless blessed($d) && $d->isa('Test::Builder::Event::Diag');
 
-                confess "Diag argument '$d' is already linked to a result."
+                confess "Diag argument '$d' is already linked to a event."
                     if $d->linked;
             }
             else {
-                $d = Test::Builder::Result::Diag->new( message => $d );
+                $d = Test::Builder::Event::Diag->new( message => $d );
             }
 
             for (qw/trace pid depth in_todo source/) {
@@ -138,15 +138,15 @@ __END__
 
 =head1 NAME
 
-Test::Builder::Result::Ok - Ok result type
+Test::Builder::Event::Ok - Ok event type
 
 =head1 DESCRIPTION
 
-The ok result type.
+The ok event type.
 
 =head1 METHODS
 
-See L<Test::Builder::Result> which is the base class for this module.
+See L<Test::Builder::Event> which is the base class for this module.
 
 =head2 CONSTRUCTORS
 
@@ -188,35 +188,35 @@ Get the test trace info, including where to report errors.
 
 =item $r->pid
 
-PID in which the result was created.
+PID in which the event was created.
 
 =item $r->depth
 
-Builder depth of the result (0 for normal, 1 for subtest, 2 for nested, etc).
+Builder depth of the event (0 for normal, 1 for subtest, 2 for nested, etc).
 
 =item $r->in_todo
 
-True if the result was generated inside a todo.
+True if the event was generated inside a todo.
 
 =item $r->source
 
-Builder that created the result, usually $0, but the name of a subtest when
+Builder that created the event, usually $0, but the name of a subtest when
 inside a subtest.
 
 =item $r->constructed
 
-Package, File, and Line in which the result was built.
+Package, File, and Line in which the event was built.
 
 =item $r->diag
 
-Either undef, or an arrayref of L<Test::Builder::Result::Diag> objects. These
-objects will be linked to this Ok result. Calling C<< $diag->linked >> on them
+Either undef, or an arrayref of L<Test::Builder::Event::Diag> objects. These
+objects will be linked to this Ok event. Calling C<< $diag->linked >> on them
 will return this Ok object. References here are strong references, references
 to this object from the linked Diag objects are weakened to avoid cycles.
 
 You can push diag objects into the arrayref by using them as arguments to this
 method. Objects will be validated to ensure that they are Diag objects, and not
-already linked to a result. As well C<linked> will be set on them.
+already linked to a event. As well C<linked> will be set on them.
 
 =item $r->clear_diag
 
@@ -235,12 +235,12 @@ Returns the TAP string for the plan (not indented).
 
 =item $r->type
 
-Type of result. Usually this is the lowercased name from the end of the
-package. L<Test::Builder::Result::Ok> = 'ok'.
+Type of event. Usually this is the lowercased name from the end of the
+package. L<Test::Builder::Event::Ok> = 'ok'.
 
 =item $r->indent
 
-Returns the indentation that should be used to display the result ('    ' x
+Returns the indentation that should be used to display the event ('    ' x
 depth).
 
 =back

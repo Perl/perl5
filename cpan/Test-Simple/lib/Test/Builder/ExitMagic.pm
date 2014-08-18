@@ -3,7 +3,7 @@ use strict;
 use warnings;
 
 use Test::Builder::Util qw/new accessors/;
-require Test::Builder::Result::Finish;
+require Test::Builder::Event::Finish;
 
 accessors qw/stream tb ended pid/;
 
@@ -34,7 +34,7 @@ sub do_magic {
     my $fails = $stream->tests_failed;
 
     $stream->send(
-        Test::Builder::Result::Finish->new(
+        Test::Builder::Event::Finish->new(
             tests_run    => $total,
             tests_failed => $fails,
             depth        => $tb->depth,

@@ -3,12 +3,12 @@ use warnings;
 
 use Test::More 'modern';
 
-require_ok 'Test::Builder::Result::Plan';
+require_ok 'Test::Builder::Event::Plan';
 
-my $one = Test::Builder::Result::Plan->new;
+my $one = Test::Builder::Event::Plan->new;
 
-isa_ok($one, 'Test::Builder::Result::Plan');
-isa_ok($one, 'Test::Builder::Result');
+isa_ok($one, 'Test::Builder::Event::Plan');
+isa_ok($one, 'Test::Builder::Event');
 
 can_ok($one, qw/max directive reason/);
 
