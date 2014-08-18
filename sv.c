@@ -10703,6 +10703,9 @@ S_hextract(pTHX_ const NV nv, int* exponent, U8* vhex, U8* vend)
         else
             HEXTRACT_COUNT(ix, 2);
     }
+    /* XXX not extracting from the second double -- see the discussion
+     * below for the big endian double double. */
+#    if 0
     if (vend)
         HEXTRACT_OUTPUT_LO(6);
     else
@@ -10713,6 +10716,7 @@ S_hextract(pTHX_ const NV nv, int* exponent, U8* vhex, U8* vend)
         else
             HEXTRACT_COUNT(ix, 2);
     }
+#    endif
     (*exponent)--;
 #  elif LONG_DOUBLEKIND == LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_BIG_ENDIAN
     /* Used in e.g. PPC/Power (AIX) and MIPS.
@@ -10731,6 +10735,12 @@ S_hextract(pTHX_ const NV nv, int* exponent, U8* vhex, U8* vend)
         else
             HEXTRACT_COUNT(ix, 2);
     }
+    /* XXX not extracting the second double mantissa bits- this is not
+     * right nor ideal (we effectively reduce the output format to
+     * that of a "single double", only 53 bits), but we do not know
+     * exactly how to do the extraction correctly so that it matches
+     * the semantics of, say, the IEEE quadruple float. */
+#    if 0
     if (vend)
         HEXTRACT_OUTPUT_LO(9);
     else
@@ -10741,6 +10751,7 @@ S_hextract(pTHX_ const NV nv, int* exponent, U8* vhex, U8* vend)
         else
             HEXTRACT_COUNT(ix, 2);
     }
+#   endif
     (*exponent)--;
 #  else
     Perl_croak(aTHX_

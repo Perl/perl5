@@ -132,9 +132,8 @@ if ($Config{nvsize} == 8 &&
     # IEEE 754 128-bit ("quadruple precision"), e.g. IA-64 (Itanium) in VMS
     $Config{nvsize} == 16 &&
     # 9a 99 99 99 99 99 99 99 99 99 99 99 99 99 fb 3f (LE), pack F is the NV
-    # (compare this with "double-double")
     (pack("F", 0.1) =~ /^\x9A\x99{6}/ ||  # LE
-     pack("F", 0.1) =~ /\x99{6}x9A$/)     # BE
+     pack("F", 0.1) =~ /\x99{6}x9A$/)    # BE
     ) {
     @hexfloat = (
 	[ '%a', '0',       '0x1p-1' ],
@@ -186,14 +185,13 @@ if ($Config{nvsize} == 8 &&
 } elsif (
     # "double-double", two 64-bit doubles end to end
     $Config{nvsize} == 16 &&
-    # bf b9 99 99 99 99 99 9a 3c 59 99 99 99 99 99 9a (BE), pack F is the NV
-    # (compare this with "quadruple precision")
-    (pack("F", 0.1) =~ /^\x9A\x99{5}\x59\x3C/ ||  # LE
-     pack("F", 0.1) =~ /\x3C\x59\x99{5}\x9A$/)    # BE
+    # bf b9 99 99 99 99 99 9a bc 59 99 99 99 99 99 9a (BE), pack F is the NV
+    (pack("F", 0.1) =~ /^\x9A\x99{5}\x59\xBC/ ||  # LE
+     pack("F", 0.1) =~ /\xBC\x59\x99{5}\x9A$/)    # BE
     ) {
-    # XXX these values are probably slightly wrong, even if
-    # the double-double extraction code gets fixed, the exact
-    # truncation/rounding effects are unknown.
+    # XXX these values are actually only "single-double" since
+    # we currently do not know how to exactly handle the second
+    # double.  See the discussion in sv.c:S_hextract().
     @hexfloat = (
 	[ '%a', '0',       '0x1p-1' ],
 	[ '%a', '1',       '0x1p+0' ],
@@ -201,16 +199,16 @@ if ($Config{nvsize} == 8 &&
 	[ '%a', '0.5',     '0x1p-1' ],
 	[ '%a', '0.25',    '0x1p-2' ],
 	[ '%a', '0.75',    '0x1.8p-1' ],
-	[ '%a', '3.14',    '0x1.91eb851eb851eb851eb851eb852p+1' ],
+	[ '%a', '3.14',    '0x1.91eb851eb851fp+1' ],
 	[ '%a', '-1',      '-0x1p+0' ],
-	[ '%a', '-3.14',   '-0x1.91eb851eb851eb851eb851eb852p+1' ],
-	[ '%a', '0.1',     '0x1.99999999999999999999999999ap-4' ],
-	[ '%a', '1/7',     '0x1.249249249249249249249249249p-3' ],
-	[ '%a', 'sqrt(2)', '0x1.6a09e667f3bcc908b2fb1366ea9p+0' ],
-	[ '%a', 'exp(1)',  '0x1.5bf0a8b1457695355fb8ac404e8p+1' ],
+	[ '%a', '-3.14',   '-0x1.91eb851eb851fp+1' ],
+	[ '%a', '0.1',     '0x1.999999999999ap-4' ],
+	[ '%a', '1/7',     '0x1.2492492492492p-3' ],
+	[ '%a', 'sqrt(2)', '0x1.6a09e661366ebp+0' ],
+	[ '%a', 'exp(1)',  '0x1.5bf0a8b145769p+1' ],
 	[ '%a', '2**-10',  '0x1p-10' ],
 	[ '%a', '2**10',   '0x1p+10' ],
-	[ '%a', '1e-09',   '0x1.12e0be826d694b2e62d01511f13p-30' ],
+	[ '%a', '1e-09',   '0x1.12e0be826d695p-30' ],
 	[ '%a', '1e9',     '0x1.dcd65p+29' ],
 
 	[ '%#a', '1',      '0x1.p+0' ],
@@ -219,27 +217,27 @@ if ($Config{nvsize} == 8 &&
 	[ '% a', '1',      ' 0x1p+0' ],
 	[ '% a', '-1',     '-0x1p+0' ],
 
-	[ '%8a',      '3.14', '0x1.91eb851eb851eb851eb851eb852p+1' ],
-	[ '%13a',     '3.14', '0x1.91eb851eb851eb851eb851eb852p+1' ],
-	[ '%20a',     '3.14', '0x1.91eb851eb851eb851eb851eb852p+1' ],
+	[ '%8a',      '3.14', '0x1.91eb851eb851fp+1' ],
+	[ '%13a',     '3.14', '0x1.91eb851eb851fp+1' ],
+	[ '%20a',     '3.14', '0x1.91eb851eb851fp+1' ],
 	[ '%.4a',     '3.14', '0x1.91ecp+1' ],
 	[ '%.5a',     '3.14', '0x1.91eb8p+1' ],
 	[ '%.6a',     '3.14', '0x1.91eb85p+1' ],
-	[ '%.20a',    '3.14', '0x1.91eb851eb851eb851eb8p+1' ],
+        [ '%.20a',    '3.14',   '0x1.91eb851eb851f0000000p+1' ],
 	[ '%20.10a',  '3.14', '   0x1.91eb851eb8p+1' ],
-	[ '%20.15a',  '3.14', '0x1.91eb851eb851eb8p+1' ],
+        [ '%20.15a',  '3.14',   '0x1.91eb851eb851f00p+1' ],
 	[ '% 20.10a', '3.14', '   0x1.91eb851eb8p+1' ],
 	[ '%020.10a', '3.14', '0x0001.91eb851eb8p+1' ],
 
-	[ '%30a',     '3.14', '0x1.91eb851eb851eb851eb851eb852p+1' ],
-	[ '%-30a',    '3.14', '0x1.91eb851eb851eb851eb851eb852p+1' ],
-	[ '%030a',    '3.14', '0x1.91eb851eb851eb851eb851eb852p+1' ],
-	[ '%-030a',   '3.14', '0x1.91eb851eb851eb851eb851eb852p+1' ],
+        [ '%30a',  '3.14',   '          0x1.91eb851eb851fp+1' ],
+        [ '%-30a', '3.14',   '0x1.91eb851eb851fp+1          ' ],
+        [ '%030a',  '3.14',  '0x00000000001.91eb851eb851fp+1' ],
+        [ '%-030a', '3.14',  '0x1.91eb851eb851fp+1          ' ],
 
         [ '%.40a',  '3.14',
-          '0x1.91eb851eb851eb851eb851eb8520000000000000p+1' ],
+          '0x1.91eb851eb851f000000000000000000000000000p+1' ],
 
-	[ '%A',       '3.14', '0X1.91EB851EB851EB851EB851EB852P+1' ],
+	[ '%A',       '3.14', '0X1.91EB851EB851FP+1' ],
         );
 } else {
     print "# no hexfloat tests\n";
