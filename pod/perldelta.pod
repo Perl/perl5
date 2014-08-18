@@ -362,6 +362,11 @@ C<BEGIN> subroutine definition, which would produce a "Subroutine
 BEGIN redefined" warning on the next use of C<use>, or other C<BEGIN>
 block.  [perl #122107]
 
+=item *
+
+C<method { BLOCK } ARGS> syntax now correctly parses the arguments if they
+begin with an opening brace.  [perl #46947]
+
 =back
 
 =head1 Known Problems
