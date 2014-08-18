@@ -11701,12 +11701,10 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 		: SvNV(argsv);
 
 	    need = 0;
-	    /* nv * 0 will be NaN for NaN, +Inf and -Inf, and 0 for anything
-	       else. frexp() has some unspecified behaviour for those three */
-	    if (c != 'e' && c != 'E' && (nv * 0) == 0) {
+	    /* frexp() has some unspecified behaviour for nan/inf,
+             * so let's avoid calling that. */
+	    if (c != 'e' && c != 'E' && Perl_isfinite(nv)) {
                 i = PERL_INT_MIN;
-                /* FIXME: if HAS_LONG_DOUBLE but not USE_LONG_DOUBLE this
-                   will cast our (long double) to (double) */
                 (void)Perl_frexp(nv, &i);
                 if (i == PERL_INT_MIN)
                     Perl_die(aTHX_ "panic: frexp");
