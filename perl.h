@@ -1922,7 +1922,12 @@ EXTERN_C long double modfl(long double, long double *);
 #       endif
 #   endif
 #   ifndef Perl_isinf
-#       ifdef HAS_FINITEL
+#       if defined(HAS_ISFINITEL) && defined(Perl_isnan)
+#           define Perl_isinf(x) !(isfinitel(x)||Perl_isnan(x))
+#       endif
+#   endif
+#   ifndef Perl_isinf
+#       if defined(HAS_FINITEL) && defined(Perl_isnan)
 #           define Perl_isinf(x) !(finitel(x)||Perl_isnan(x))
 #       endif
 #   endif
