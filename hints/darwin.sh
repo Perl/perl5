@@ -24,6 +24,15 @@ case "$osvers" in
     ;;
 esac
 
+# finite() deprecated in 10.9, use isfinite() instead.
+case "$osvers" in
+[1-8].*) ;;
+*) d_finite='undef' ;;
+esac
+
+# The Configure checks isfinite as libc symbol, but it is a macro+inline.
+d_isfinite='define'
+
 # This was previously used in all but causes three cases
 # (no -Ddprefix=, -Dprefix=/usr, -Dprefix=/some/thing/else)
 # but that caused too much grief.
