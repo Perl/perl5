@@ -1987,8 +1987,6 @@ EXTERN_C long double modfl(long double, long double *);
 #   define Perl_ldexp(x,y) ldexp(x,y)
 #endif
 
-/* rumor has it that Win32 has _fpclass() */
-
 /* SGI has fpclassl... but not with the same result values,
  * and it's via a typedef (not via #define), so will need to redo Configure
  * to use. Not worth the trouble, IMO, at least until the below is used
@@ -2082,7 +2080,34 @@ EXTERN_C long double modfl(long double, long double *);
 #    define Perl_fp_class_zero(x)	(Perl_fp_class(x)==FP_MINUS_ZERO||Perl_fp_class(x)==FP_PLUS_ZERO)
 #endif
 
-/* rumor has it that Win32 has _isnan() */
+#ifdef WIN32
+#  ifndef Perl_isnan
+#    define Perl_isnan(x) _isnan(x)
+#  endif
+#  ifndef Perl_isfinite
+#    define Perl_isfinite(x) _finite(x)
+#  endif
+#  ifndef Perl_fp_class_snan
+#    define Perl_fp_class_snan(x) (_fpclass(x) & _FPCLASS_SNAN)
+#    define Perl_fp_class_qnan(x) (_fpclass(x) & _FPCLASS_QNAN)
+#    define Perl_fp_class_nan(x) (_fpclass(x) & (_FPCLASS_QNAN|_FPCLASS_QNAN))
+#    define Perl_fp_class_ninf(x) (_fpclass(x) & _FPCLASS_NINF))
+#    define Perl_fp_class_pinf(x) (_fpclass(x) & _FPCLASS_PINF))
+#    define Perl_fp_class_inf(x) (_fpclass(x) & (_FPCLASS_NINF|_FPCLASS_PINF))
+#    define Perl_fp_class_nnorm(x) (_fpclass(x) & _FPCLASS_NN)
+#    define Perl_fp_class_pnorm(x) (_fpclass(x) & _FPCLASS_PN)
+#    define Perl_fp_class_norm(x) (_fpclass(x) & (_FPCLASS_NN|_FPCLASS_PN))
+#    define Perl_fp_class_ndenorm(x) (_fpclass(x) & _FPCLASS_ND)
+#    define Perl_fp_class_pdenorm(x) (_fpclass(x) & _FPCLASS_PD)
+#    define Perl_fp_class_denorm(x) (_fpclass(x) & (_FPCLASS_ND|_FPCLASS_PD))
+#    define Perl_fp_class_nzero(x) (_fpclass(x) & _FPCLASS_NZ)
+#    define Perl_fp_class_pzero(x) (_fpclass(x) & _FPCLASS_PZ)
+#    define Perl_fp_class_zero(x) (_fpclass(x) & (_FPCLASS_NZ|_FPCLASS_PZ))
+#  endif
+#  ifndef Perl_isinf
+#    define Perl_isinf(x) Perl_fp_class_inf(x)
+#  endif
+#endif
 
 #ifndef Perl_isnan
 #   ifdef HAS_ISNAN
