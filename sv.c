@@ -10610,14 +10610,16 @@ S_hextract(pTHX_ const NV nv, int* exponent, U8* vhex, U8* vend)
      * repetitions below, but usually only one (or sometimes two)
      * of them is really being used. */
     /* HEXTRACT_OUTPUT() extracts the high nybble first. */
-#define HEXTRACT_OUTPUT() \
+#define HEXTRACT_OUTPUT_HI(ix) (*v++ = nvp[ix] >> 4)
+#define HEXTRACT_OUTPUT_LO(ix) (*v++ = nvp[ix] & 0xF)
+#define HEXTRACT_OUTPUT(ix) \
     STMT_START { \
-      *v++ = nvp[ix] >> 4; \
-      *v++ = nvp[ix] & 0xF; \
+        HEXTRACT_OUTPUT_HI(ix); \
+        HEXTRACT_OUTPUT_LO(ix); \
     } STMT_END
-#define HEXTRACT_COUNT() \
+#define HEXTRACT_COUNT(ix, c) \
     STMT_START { \
-      v += 2; \
+      v += c; \
       if (ix < ixmin) \
         ixmin = ix; \
       else if (ix > ixmax) \
@@ -10644,9 +10646,9 @@ S_hextract(pTHX_ const NV nv, int* exponent, U8* vhex, U8* vend)
     HEXTRACT_IMPLICIT_BIT();
     for (ix = 13; ix >= 0; ix--) {
         if (vend)
-            HEXTRACT_OUTPUT();
+            HEXTRACT_OUTPUT(ix);
         else
-            HEXTRACT_COUNT();
+            HEXTRACT_COUNT(ix, 2);
     }
     *exponent -= 4;
 #  elif LONG_DOUBLEKIND == LONG_DOUBLE_IS_IEEE_754_128_BIT_BIG_ENDIAN
@@ -10657,9 +10659,9 @@ S_hextract(pTHX_ const NV nv, int* exponent, U8* vhex, U8* vend)
     HEXTRACT_IMPLICIT_BIT();
     for (ix = 2; ix <= 15; ix++) {
         if (vend)
-            HEXTRACT_OUTPUT();
+            HEXTRACT_OUTPUT(ix);
         else
-            HEXTRACT_COUNT();
+            HEXTRACT_COUNT(ix, 2);
     }
     *exponent -= 4;
 #  elif LONG_DOUBLEKIND == LONG_DOUBLE_IS_X86_80_BIT_LITTLE_ENDIAN
@@ -10671,9 +10673,9 @@ S_hextract(pTHX_ const NV nv, int* exponent, U8* vhex, U8* vend)
     /* There explicitly is *no* implicit bit in this case. */
     for (ix = 7; ix >= 0; ix--) {
         if (vend)
-            HEXTRACT_OUTPUT();
+            HEXTRACT_OUTPUT(ix);
         else
-            HEXTRACT_COUNT();
+            HEXTRACT_COUNT(ix, 2);
     }
     *exponent -= 4;
 #  elif LONG_DOUBLEKIND == LONG_DOUBLE_IS_X86_80_BIT_BIG_ENDIAN
@@ -10682,50 +10684,62 @@ S_hextract(pTHX_ const NV nv, int* exponent, U8* vhex, U8* vend)
     /* There explicitly is *no* implicit bit in this case. */
     for (ix = LONGDBLSIZE - 8; ix < LONGDBLSIZE; ix++) {
         if (vend)
-            HEXTRACT_OUTPUT();
+            HEXTRACT_OUTPUT(ix);
         else
-            HEXTRACT_COUNT();
+            HEXTRACT_COUNT(ix, 2);
     }
     *exponent -= 4;
 #  elif LONG_DOUBLEKIND == LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_LITTLE_ENDIAN
     /* Where is this used?
-     *
-     * Guessing that the format would be the reverse
-     * of big endian, i.e. for -0.1L:
-     * 9a 99 99 99 99 99 59 3c 9a 99 99 99 99 99 b9 bf */
+     * 9a 99 99 99 99 99 59 bc 9a 99 99 99 99 99 b9 3f */
     HEXTRACT_IMPLICIT_BIT();
+    if (vend)
+        HEXTRACT_OUTPUT_LO(14);
+    else
+        HEXTRACT_COUNT(14, 1);
     for (ix = 13; ix >= 8; ix--) {
         if (vend)
-            HEXTRACT_OUTPUT();
+            HEXTRACT_OUTPUT(ix);
         else
-            HEXTRACT_COUNT();
+            HEXTRACT_COUNT(ix, 2);
     }
+    if (vend)
+        HEXTRACT_OUTPUT_LO(6);
+    else
+        HEXTRACT_COUNT(6, 1);
     for (ix = 5; ix >= 0; ix--) {
         if (vend)
-            HEXTRACT_OUTPUT();
+            HEXTRACT_OUTPUT(ix);
         else
-            HEXTRACT_COUNT();
+            HEXTRACT_COUNT(ix, 2);
     }
     (*exponent)--;
 #  elif LONG_DOUBLEKIND == LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_BIG_ENDIAN
     /* Used in e.g. PPC/Power (AIX) and MIPS.
      *
-     * The mantissa bits are in two separate stretches,
-     * e.g. for -0.1L:
-     * bf b9 99 99 99 99 99 9a 3c 59 99 99 99 99 99 9a
+     * The mantissa bits are in two separate stretches, e.g. for -0.1L:
+     * 3f b9 99 99 99 99 99 9a bc 59 99 99 99 99 99 9a
      */
     HEXTRACT_IMPLICIT_BIT();
+    if (vend)
+        HEXTRACT_OUTPUT_LO(1);
+    else
+        HEXTRACT_COUNT(1, 1);
     for (ix = 2; ix < 8; ix++) {
         if (vend)
-            HEXTRACT_OUTPUT();
+            HEXTRACT_OUTPUT(ix);
         else
-            HEXTRACT_COUNT();
+            HEXTRACT_COUNT(ix, 2);
     }
+    if (vend)
+        HEXTRACT_OUTPUT_LO(9);
+    else
+        HEXTRACT_COUNT(9, 1);
     for (ix = 10; ix < 16; ix++) {
         if (vend)
-            HEXTRACT_OUTPUT();
+            HEXTRACT_OUTPUT(ix);
         else
-            HEXTRACT_COUNT();
+            HEXTRACT_COUNT(ix, 2);
     }
     (*exponent)--;
 #  else
@@ -10778,17 +10792,17 @@ S_hextract(pTHX_ const NV nv, int* exponent, U8* vhex, U8* vend)
     /* Little endian. */
     for (ix = limit_byte; ix >= 0; ix--) {
         if (vend)
-            HEXTRACT_OUTPUT();
+            HEXTRACT_OUTPUT(ix);
         else
-            HEXTRACT_COUNT();
+            HEXTRACT_COUNT(ix, 2);
     }
 #  else
     /* Big endian. */
     for (ix = MANTISSASIZE - 1 - limit_byte; ix < MANTISSASIZE; ix++) {
         if (vend)
-            HEXTRACT_OUTPUT();
+            HEXTRACT_OUTPUT(ix);
         else
-            HEXTRACT_COUNT();
+            HEXTRACT_COUNT(ix, 2);
     }
 #  endif
     /* If there are not enough bits in MANTISSATYPE, we couldn't get
