@@ -1204,11 +1204,8 @@ it is not.
 
 If Configure detects this system has a signbit() that will work with
 our NVs, then we just use it via the #define in perl.h.  Otherwise,
-fall back on this implementation.  As a first pass, this gets everything
-right except -0.0.  Alas, catching -0.0 is the main use for this function,
-so this is not too helpful yet.  Still, at least we have the scaffolding
-in place to support other systems, should that prove useful.
-
+fall back on this implementation.  The main use of this function
+is catching -0.0.
 
 Configure notes:  This function is called 'Perl_signbit' instead of a
 plain 'signbit' because it is easy to imagine a system having a signbit()
@@ -1224,7 +1221,12 @@ Users should just always call Perl_signbit().
 #if !defined(HAS_SIGNBIT)
 int
 Perl_signbit(NV x) {
+#  ifdef Perl_fp_class_nzero
+    if (x == 0)
+        return Perl_fp_class_nzero(x);
+#  else
     return (x < 0.0) ? 1 : 0;
+#  endif
 }
 #endif
 
