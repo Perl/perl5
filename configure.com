@@ -5968,8 +5968,14 @@ $ WC "d_fd_set='" + d_fd_set + "'"
 $ WC "d_fd_macros='define'"
 $ WC "d_fds_bits='define'"
 $ WC "d_fgetpos='define'"
-$ WC "d_finite='undef'"
-$ WC "d_finitel='undef'"
+$ IF F$ELEMENT(0, "-", archname) .NES. "VMS_VAX" .AND. use_ieee_math
+$ THEN
+$   WC "d_finite='define'"
+$   WC "d_finitel='define'"
+$ ELSE
+$   WC "d_finite='undef'"
+$   WC "d_finitel='undef'"
+$ ENDIF
 $ WC "d_flexfnam='define'"
 $ WC "d_flock='undef'"
 $ WC "d_flockproto='undef'"
@@ -6058,7 +6064,12 @@ $ WC "d_ipv6_mreq='define'"
 $ WC "d_ipv6_mreq_source='undef'"
 $ WC "d_isascii='define'"
 $ WC "d_isblank='undef'"
-$ WC "d_isfinite='undef'"
+$ IF F$ELEMENT(0, "-", archname) .NES. "VMS_VAX" .AND. use_ieee_math
+$ THEN
+$   WC "d_isfinite='define'"
+$ ELSE
+$   WC "d_isfinite='undef'"
+$ ENDIF
 $ WC "d_isinf='undef'"
 $ WC "d_isnan='" + d_isnan + "'"
 $ WC "d_isnanl='" + d_isnanl + "'"
