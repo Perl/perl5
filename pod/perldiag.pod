@@ -2181,12 +2181,12 @@ Further error messages would likely be uninformative.
 
 =item Hexadecimal float: exponent overflow
 
-(W overflow) The hexadecimal floating point has larger exponent
+(W overflow) The hexadecimal floating point has a larger exponent
 than the floating point supports.
 
 =item Hexadecimal float: exponent underflow
 
-(W overflow) The hexadecimal floating point has smaller exponent
+(W overflow) The hexadecimal floating point has a smaller exponent
 than the floating point supports.
 
 =item Hexadecimal float: internal error
@@ -2209,7 +2209,7 @@ long double formats, or by 64-bit integers not being available
 =item Hexadecimal float: unsupported long double format
 
 (F) You have configured Perl to use long doubles but
-the internals of the long double format are unknown,
+the internals of the long double format are unknown;
 therefore the hexadecimal float output is impossible.
 
 =item Hexadecimal number > 0xffffffff non-portable
