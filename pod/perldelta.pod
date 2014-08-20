@@ -71,6 +71,10 @@ L<ExtUtils::CBuilder> was moved from F<dist> to F<cpan>.
 
 =item *
 
+L<ExtUtils::CBuilder> has been upgraded from version 0.280216 to 0.280217.
+
+=item *
+
 L<ExtUtils::Install> was moved from F<dist> to F<cpan>.
 
 =item *
@@ -88,15 +92,23 @@ L<IPC::Open3> has been upgraded from version 1.17 to 1.18.
 
 =item *
 
-L<perl5db.pl> has been upgraded from version 1.45 to 1.46.
-
-=item *
-
-L<POSIX> has been upgraded from version 1.41 to 1.42.
+L<Module::CoreList> has been upgraded from version 5.021002 to 5.021003.
 
 =item *
 
 L<Opcode> has been upgraded from version 1.27 to 1.28.
+
+=item *
+
+L<perl5db.pl> has been upgraded from version 1.45 to 1.46.
+
+=item *
+
+L<perlfaq> has been upgraded from version 5.0150044 to 5.0150045.
+
+=item *
+
+L<POSIX> has been upgraded from version 1.41 to 1.42.
 
 =item *
 
@@ -109,6 +121,10 @@ L<Socket> has been upgraded from version 2.014 to 2.015.
 =item *
 
 L<Sys::Hostname> has been upgraded from version 1.18 to 1.19
+
+=item *
+
+L<UNIVERSAL> has been upgraded from version 1.11 to 1.12.
 
 =back
 
@@ -341,9 +357,35 @@ regex could cause C<pos> to see an incorrect value.  [perl #122460]
 
 =head1 Acknowledgements
 
-XXX Generate this with:
+Perl 5.21.3 represents approximately 4 weeks of development since Perl 5.21.2
+and contains approximately 21,000 lines of changes across 250 files from 25
+authors.
 
-  perl Porting/acknowledgements.pl v5.21.2..HEAD
+Excluding auto-generated files, documentation and release tools, there were
+approximately 18,000 lines of changes to 160 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its third decade thanks to a vibrant community
+of users and developers. The following people are known to have contributed the
+improvements that became Perl 5.21.3:
+
+Aaron Crane, Abigail, Alberto Simões, Andy Dougherty, Brian Fraser, Chad
+Granum, Chris 'BinGOs' Williams, Craig A. Berry, Dagfinn Ilmari Mannsåker,
+Daniel Dragan, David Mitchell, Father Chrysostomos, H.Merijn Brand, James E
+Keenan, Jan Dubois, Jarkko Hietaniemi, Karen Etheridge, Karl Williamson, Lukas
+Mai, Peter Martini, Rafael Garcia-Suarez, syber, Tony Cook, Vladimir Marek,
+Yves Orton.
+
+The list above is almost certainly incomplete as it is automatically generated
+from version control history. In particular, it does not include the names of
+the (very much appreciated) contributors who reported issues to the Perl bug
+tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please see
+the F<AUTHORS> file in the Perl source distribution.
 
 =head1 Reporting Bugs
 
