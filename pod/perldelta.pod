@@ -35,14 +35,6 @@ been patched to 2.38 to address this.
 
 =head1 Incompatible Changes
 
-XXX For a release on a stable branch, this section aspires to be:
-
-    There are no changes intentionally incompatible with 5.XXX.XXX
-    If any exist, they are bugs, and we request that you submit a
-    report.  See L</Reporting Bugs> below.
-
-[ List each incompatible change as a =head2 entry ]
-
 =head2 S<C<use UNIVERSAL '...'>> is now a fatal error
 
 Importing functions from C<UNIVERSAL> has been deprecated since v5.12, and
@@ -52,33 +44,6 @@ allowed.
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.
-
-=head2 Module removals
-
-XXX Remove this section if inapplicable.
-
-The following modules will be removed from the core distribution in a
-future release, and will at that time need to be installed from CPAN.
-Distributions on CPAN which require these modules will need to list them as
-prerequisites.
-
-The core versions of these modules will now issue C<"deprecated">-category
-warnings to alert you to this fact.  To silence these deprecation warnings,
-install the modules in question from CPAN.
-
-Note that these are (with rare exceptions) fine modules that you are encouraged
-to continue to use.  Their disinclusion from core primarily hinges on their
-necessity to bootstrapping a fully functional, CPAN-capable Perl installation,
-not usually on concerns over their design.
-
-=over
-
-=item XXX
-
-XXX Note that deprecated modules should be listed here even if they are listed
-as an updated module in the L</Modules and Pragmata> section.
-
-=back
 
 [ List each other deprecation as a =head2 entry ]
 
@@ -98,24 +63,6 @@ XXX
 =back
 
 =head1 Modules and Pragmata
-
-XXX All changes to installed files in F<cpan/>, F<dist/>, F<ext/> and F<lib/>
-go here.  If Module::CoreList is updated, generate an initial draft of the
-following sections using F<Porting/corelist-perldelta.pl>.  A paragraph summary
-for important changes should then be added by hand.  In an ideal world,
-dual-life modules would have a F<Changes> file that could be cribbed.
-
-[ Within each section, list entries as a =item entry ]
-
-=head2 New Modules and Pragmata
-
-=over 4
-
-=item *
-
-XXX
-
-=back
 
 =head2 Updated Modules and Pragmata
 
@@ -175,28 +122,10 @@ a slight change to the pattern used for IPv4 address matching.
 
 =back
 
-=head2 Removed Modules and Pragmata
-
-=over 4
-
-=item *
-
-XXX
-
-=back
-
 =head1 Documentation
 
 XXX Changes to files in F<pod/> go here.  Consider grouping entries by
 file and be sure to link to the appropriate page, e.g. L<perlfunc>.
-
-=head2 New Documentation
-
-XXX Changes which create B<new> files in F<pod/> go here.
-
-=head3 L<XXX>
-
-XXX Description of the purpose of the new file here
 
 =head2 Changes to Existing Documentation
 
@@ -301,25 +230,6 @@ XXX Describe change here
 
 =back
 
-=head1 Utility Changes
-
-XXX Changes to installed programs such as F<perlbug> and F<xsubpp> go here.
-Most of these are built within the directory F<utils>.
-
-[ List utility changes as a =head2 entry for each utility and =item
-entries for each change
-Use L<XXX> with program names to get proper documentation linking. ]
-
-=head2 L<XXX>
-
-=over 4
-
-=item *
-
-XXX
-
-=back
-
 =head1 Configuration and Compilation
 
 XXX Changes to F<Configure>, F<installperl>, F<installman>, and analogous tools
@@ -361,33 +271,6 @@ XXX Any changes to platform support should be listed in the sections below.
 
 [ Within the sections, list each platform as a =item entry with specific
 changes as paragraphs below it. ]
-
-=head2 New Platforms
-
-XXX List any platforms that this version of perl compiles on, that previous
-versions did not.  These will either be enabled by new files in the F<hints/>
-directories, or new subdirectories and F<README> files at the top level of the
-source tree.
-
-=over 4
-
-=item XXX-some-platform
-
-XXX
-
-=back
-
-=head2 Discontinued Platforms
-
-XXX List any platforms that this version of perl no longer compiles on.
-
-=over 4
-
-=item XXX-some-platform
-
-XXX
-
-=back
 
 =head2 Platform-Specific Notes
 
@@ -473,11 +356,6 @@ XXX Add anything here that we forgot to add, or were mistaken about, in
 the perldelta of a previous release.
 
 =back
-
-=head1 Obituary
-
-XXX If any significant core contributor has died, we've added a short obituary
-here.
 
 =head1 Acknowledgements
 
