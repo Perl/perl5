@@ -125,6 +125,12 @@ XXX
 
 =item *
 
+L<ExtUtils::Manifest> has been upgraded from version 1.64 to 1.65.
+
+The MANIFEST is now opened with C<:raw>, to prevent C<CRLF>s leaking in.
+
+=item *
+
 L<perl5db.pl> has been upgraded from version 1.45 to 1.46.
 
 Fixed the scope level handling of the debugger's C<y> command.
