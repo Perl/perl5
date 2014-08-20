@@ -572,5 +572,63 @@ for my $t (@hexfloat) {
     my ($format, $arg, $expected) = @$t;
     $arg = eval $arg;
     my $result = sprintf($format, $arg);
-    is($result, $expected, "'$format' '$arg' -> '$result' cf '$expected'");
+    my $ok = $result eq $expected;
+    unless ($ok) {
+        # It seems that there can be difference in the last bits:
+        # [perl #122578]
+        #      got "0x1.5bf0a8b14576ap+1"
+        # expected "0x1.5bf0a8b145769p+1"
+        # (Android on ARM)
+        #
+        # Exact cause unknown but suspecting different fp rounding modes,
+        # (towards zero? towards +inf? towards -inf?) about which Perl
+        # is blissfully unaware.
+        #
+        # Try extracting one (or sometimes two) last mantissa
+        # hexdigits, and see if they differ in value by one.
+        my ($rh, $eh) = ($result, $expected);
+        sub extract_prefix {
+            ($_[0] =~ s/^(-?0x[0-9a-fA-F]+\.)//) && return $1;
+        }
+        my $rp = extract_prefix($rh);
+        my $ep = extract_prefix($eh);
+        print "# rp = $rp, ep = $ep (rh $rh, eh $eh)\n";
+        if ($rp eq $ep) { # If prefixes match.
+            sub extract_exponent {
+                ($_[0] =~ s/([pP][+-]?\d+)$//) && return $1;
+            }
+            my $re = extract_exponent($rh);
+            my $ee = extract_exponent($eh);
+            print "# re = $re, ee = $ee (rh $rh, eh $eh)\n";
+            if ($re eq $ee) { # If exponents match.
+                # Remove the common prefix of the mantissa bits.
+                my $la = length($rh);
+                my $lb = length($eh);
+                my $i;
+                for ($i = 0; $i < $la && $i < $lb; $i++) {
+                    last if substr($rh, $i, 1) ne substr($eh, $i, 1);
+                }
+                $rh = substr($rh, $i);
+                $eh = substr($eh, $i);
+                print "# (rh $rh, eh $eh)\n";
+                if ($rh ne $eh) {
+                    # If necessary, pad the shorter one on the right
+                    # with one zero (for example "...1f" vs "...2",
+                    # we want to compare "1f" to "20").
+                    if (length $rh < length $eh) {
+                        $rh .= '0';
+                    } elsif (length $eh < length $rh) {
+                        $eh .= '0';
+                    }
+                    print "# (rh $rh, eh $eh)\n";
+                    if (length $eh == length $rh) {
+                        if (abs(hex($eh) - hex($rh)) == 1) {
+                            $ok = 1;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    ok($ok, "'$format' '$arg' -> '$result' cf '$expected'");
 }
