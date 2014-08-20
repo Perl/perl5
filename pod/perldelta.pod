@@ -19,10 +19,9 @@ L<perl5212delta>, which describes differences between 5.21.1 and 5.21.2.
 In 5.21.1, C<defined(@array)> was made fatal.  This has been relaxed
 to not die if the argument is assigning to an array.
 
-=head2 Floating point handling and parsing has been improved
+=head2 Floating point parsing has been improved
 
 Parsing and printing of floating point values has been improved.
-XXX what in addition to hexadecimal floats? if nothing, change the head2.
 
 As a completely new feature, hexadecimal floating point literals
 (like 0x1.23p-4)  are now supported, and they can be output with
