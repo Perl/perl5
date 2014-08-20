@@ -348,6 +348,10 @@ certain non-Perl libraries called from XS, such as C<Gtk> do so.  When this
 happens, Perl needs to be told that the locale has changed.  Use this function
 to do so, before returning to Perl.
 
+=item *
+
+Added L<perlapi/grok_atou> as a safer replacement for atoi and strtol.
+
 =back
 
 =head1 Selected Bug Fixes
