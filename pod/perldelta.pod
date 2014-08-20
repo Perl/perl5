@@ -136,6 +136,13 @@ L<POSIX> has been upgraded from version 1.41 to 1.42.
 Replaced the thread-unsafe code used to prevent duplicate warning
 messages for using the isxxx() functions.  [perl #122476]
 
+=item *
+
+L<Socket> has been upgraded from version 2.014 to 2.015.
+
+Test suite updates, particularly useful for Solaris and cygwin, and
+a slight change to the pattern used for IPv4 address matching.
+
 =back
 
 =head2 Removed Modules and Pragmata
