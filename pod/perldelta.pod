@@ -129,6 +129,10 @@ L<B::Debug> has been upgraded from version 1.19 to 1.21
 
 =item *
 
+L<CPAN::Meta> has been upgraded from version 2.141520 to 2.142060.
+
+=item *
+
 L<CPAN::Meta::Requirements> has been upgraded from version 2.125 to 2.126.
 
 =item *
