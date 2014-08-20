@@ -125,6 +125,10 @@ XXX
 
 =item *
 
+L<B::Debug> has been upgraded from version 1.20 to 1.21
+
+=item *
+
 L<ExtUtils::Manifest> has been upgraded from version 1.64 to 1.65.
 
 The MANIFEST is now opened with C<:raw>, to prevent C<CRLF>s leaking in.
