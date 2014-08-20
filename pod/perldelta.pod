@@ -28,11 +28,10 @@ to not die if the argument is assigning to an array.
 
 =head1 Security
 
-XXX Any security-related notices go here.  In particular, any security
-vulnerabilities closed should be noted here rather than in the
-L</Selected Bug Fixes> section.
+=head2 The L<Safe> module could allow outside packages to be replaced
 
-[ List each security issue as a =head2 entry ]
+Critical bugfix: outside packages could be replaced.  L<Safe> has
+been patched to 2.38 to address this.
 
 =head1 Incompatible Changes
 
@@ -160,6 +159,12 @@ L<POSIX> has been upgraded from version 1.41 to 1.42.
 
 Replaced the thread-unsafe code used to prevent duplicate warning
 messages for using the isxxx() functions.  [perl #122476]
+
+=item *
+
+L<Safe> has been upgraded from version 2.37 to 2.38.
+
+Critical bugfix: outside packages could be replaced.
 
 =item *
 
