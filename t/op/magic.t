@@ -407,7 +407,7 @@ EOP
 # argv[0] assignment and by calling prctl()
 {
   SKIP: {
-    skip "We don't have prctl() here", 2 unless $Config{d_prctl_set_name};
+    skip "We don't have prctl() here, or we're on Android", 2 unless $Config{d_prctl_set_name} && $^O ne 'android';
 
     # We don't really need these tests. prctl() is tested in the
     # Kernel, but test it anyway for our sanity. If something doesn't
@@ -754,13 +754,14 @@ SKIP: {
 
     SKIP: {
 	    skip("\$0 check only on Linux and FreeBSD", 2)
-		unless $^O =~ /^(linux|freebsd)$/
+		unless $^O =~ /^(linux|android|freebsd)$/
 		    && open CMDLINE, "/proc/$$/cmdline";
 
 	    chomp(my $line = scalar <CMDLINE>);
 	    my $me = (split /\0/, $line)[0];
 	    is $me, $0, 'altering $0 is effective (testing with /proc/)';
 	    close CMDLINE;
+            skip("\$0 check with 'ps' only on Linux (but not Android) and FreeBSD", 1) if $^O eq 'android';
             # perlbug #22811
             my $mydollarzero = sub {
               my($arg) = shift;
