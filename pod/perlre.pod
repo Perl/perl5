@@ -646,9 +646,9 @@ also work:
  \o{}, \000  character whose ordinal is the given octal number
  \l          lowercase next char (think vi)
  \u          uppercase next char (think vi)
- \L          lowercase till \E (think vi)
- \U          uppercase till \E (think vi)
- \Q          quote (disable) pattern metacharacters till \E
+ \L          lowercase until \E (think vi)
+ \U          uppercase until \E (think vi)
+ \Q          quote (disable) pattern metacharacters until \E
  \E          end either case modification or quoted section, think vi
 
 Details are in L<perlop/Quote and Quote-like Operators>.
