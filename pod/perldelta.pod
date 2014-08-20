@@ -21,11 +21,10 @@ XXX Any important notices here
 
 =head1 Core Enhancements
 
-XXX New core language features go here.  Summarize user-visible core language
-enhancements.  Particularly prominent performance optimisations could go
-here, but most should go in the L</Performance Enhancements> section.
+=head2 C<defined(@array = LIST)> is no longer fatal
 
-[ List each enhancement as a =head2 entry ]
+In 5.21.1, C<defined(@array)> was made fatal.  This has been relaxed
+to not die if the argument is assigning to an array.
 
 =head1 Security
 
