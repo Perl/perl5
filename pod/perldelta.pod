@@ -21,8 +21,12 @@ to not die if the argument is assigning to an array.
 
 =head2 Floating point handling and parsing has been improved
 
-A number of area in the core that handle the parsing and printing
-of floating point values have been improved.
+Parsing and printing of floating point values has been improved.
+XXX what in addition to hexadecimal floats? if nothing, change the head2.
+
+As a completely new feature, hexadecimal floating point literals
+(like 0x1.23p-4)  are now supported, and they can be output with
+C<printf %a>.
 
 =head1 Security
 
