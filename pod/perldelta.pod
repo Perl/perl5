@@ -2,9 +2,6 @@
 
 =head1 NAME
 
-[ this is a template for a new perldelta file.  Any text flagged as XXX needs
-to be processed before release. ]
-
 perldelta - what is new for perl v5.21.3
 
 =head1 DESCRIPTION
@@ -15,16 +12,17 @@ release.
 If you are upgrading from an earlier release such as 5.21.1, first read
 L<perl5212delta>, which describes differences between 5.21.1 and 5.21.2.
 
-=head1 Notice
-
-XXX Any important notices here
-
 =head1 Core Enhancements
 
 =head2 C<defined(@array = LIST)> is no longer fatal
 
 In 5.21.1, C<defined(@array)> was made fatal.  This has been relaxed
 to not die if the argument is assigning to an array.
+
+=head2 Floating point handling and parsing has been improved
+
+A number of area in the core that handle the parsing and printing
+of floating point values have been improved.
 
 =head1 Security
 
@@ -49,7 +47,7 @@ allowed.
 
 =item *
 
-L<B::Debug> has been upgraded from version 1.19 to 1.21
+L<B::Debug> has been upgraded from version 1.19 to 1.21.
 
 =item *
 
@@ -67,8 +65,6 @@ L<CPAN::Meta::Requirements> has been upgraded from version 2.125 to 2.126.
 
 L<ExtUtils::Manifest> has been upgraded from version 1.64 to 1.65.
 
-The MANIFEST is now opened with C<:raw>, to prevent C<CRLF>s leaking in.
-
 =item *
 
 L<HTTP::Tiny> has been upgraded from version 0.043 to 0.047.
@@ -77,27 +73,17 @@ L<HTTP::Tiny> has been upgraded from version 0.043 to 0.047.
 
 L<perl5db.pl> has been upgraded from version 1.45 to 1.46.
 
-Fixed the scope level handling of the debugger's C<y> command.
-
 =item *
 
 L<POSIX> has been upgraded from version 1.41 to 1.42.
-
-Replaced the thread-unsafe code used to prevent duplicate warning
-messages for using the isxxx() functions.  [perl #122476]
 
 =item *
 
 L<Safe> has been upgraded from version 2.37 to 2.38.
 
-Critical bugfix: outside packages could be replaced.
-
 =item *
 
 L<Socket> has been upgraded from version 2.014 to 2.015.
-
-Test suite updates, particularly useful for Solaris and cygwin, and
-a slight change to the pattern used for IPv4 address matching.
 
 =back
 
@@ -243,41 +229,12 @@ it dies with C<Missing or undefined argument to require>.
 
 =head1 Configuration and Compilation
 
-XXX Changes to F<Configure>, F<installperl>, F<installman>, and analogous tools
-go here.  Any other changes to the Perl build process should be listed here.
-However, any platform-specific changes should be listed in the
-L</Platform Support> section, instead.
-
-[ List changes as a =item entry ].
-
 =over 4
-
-=item *
-
-Internal handling of floating point values has been improved.
 
 =item *
 
 MurmurHash64A and MurmurHash64B can now be configured as the internal hash
 function.
-
-=back
-
-=head1 Testing
-
-XXX Any significant changes to the testing of a freshly built perl should be
-listed here.  Changes which create B<new> files in F<t/> go here as do any
-large changes to the testing harness (e.g. when parallel testing was added).
-Changes to existing files in F<t/> aren't worth summarizing, although the bugs
-that they represent may be covered elsewhere.
-
-[ List each test improvement as a =item entry ]
-
-=over 4
-
-=item *
-
-XXX
 
 =back
 
@@ -311,12 +268,6 @@ C<%I64d> is now being used instead of C<%lld> for MinGW.
 
 =head1 Internal Changes
 
-XXX Changes which affect the interface available to C<XS> code go here.  Other
-significant internal changes for future core maintainers should be noted as
-well.
-
-[ List each change as a =item entry ]
-
 =over 4
 
 =item *
@@ -334,11 +285,6 @@ Added L<perlapi/grok_atou> as a safer replacement for atoi and strtol.
 =back
 
 =head1 Selected Bug Fixes
-
-XXX Important bug fixes in the core language are summarized here.  Bug fixes in
-files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
-
-[ List each fix as a =item entry ]
 
 =over 4
 
@@ -365,33 +311,6 @@ it handles the locales correctly.  [perl #121930]
 
 A bug has been fixed where zero-length assertions and code blocks inside of a
 regex could cause L<pos> to see an incorrect value.  [perl #122460]
-
-=back
-
-=head1 Known Problems
-
-XXX Descriptions of platform agnostic bugs we know we can't fix go here.  Any
-tests that had to be C<TODO>ed for the release would be noted here.  Unfixed
-platform specific bugs also go here.
-
-[ List each fix as a =item entry ]
-
-=over 4
-
-=item *
-
-XXX
-
-=back
-
-=head1 Errata From Previous Releases
-
-=over 4
-
-=item *
-
-XXX Add anything here that we forgot to add, or were mistaken about, in
-the perldelta of a previous release.
 
 =back
 
