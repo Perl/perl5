@@ -251,6 +251,9 @@ fi # Cross-compiling with adb
 
 case "$usecrosscompile" in
 define)
+# The tests for this in Configure doesn't play nicely with
+# cross-compiling
+d_procselfexe="define"
 if $test "X$hostosname" = "Xdarwin"; then
   firstmakefile=GNUmakefile;
 fi
@@ -280,9 +283,15 @@ case "$src" in
         ;;
 esac
 
-$cat <<EOO >> $pwd/config.arch
+$cat <<'EOO' >> $pwd/config.arch
 
 osname='android'
+
+if $test "X$procselfexe" = X; then
+    case "$d_procselfexe" in
+        define) procselfexe='"/proc/self/exe"';;
+    esac
+fi
 EOO
 
 # Android is a linux variant, so run those hints.
