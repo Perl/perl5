@@ -220,7 +220,48 @@ XXX L<message|perldiag/"message">
 
 =item *
 
-XXX L<message|perldiag/"message">
+L<Hexadecimal float: exponent overflow|perldiag/"Hexadecimal float: exponent overflow">
+
+(W overflow) The hexadecimal floating point has larger exponent
+than the floating point supports.
+
+=item *
+
+L<Hexadecimal float: exponent underflow|perldiag/"Hexadecimal float: exponent underflow">
+
+(W overflow) The hexadecimal floating point has smaller exponent
+than the floating point supports.
+
+=item *
+
+L<Hexadecimal float: internal error|perldiag/"Hexadecimal float: internal error">
+
+(F) Something went horribly bad in hexadecimal float handling.
+
+=item *
+
+L<Hexadecimal float: mantissa overflow|perldiag/"Hexadecimal float: mantissa overflow">
+
+(W overflow) The hexadecimal floating point literal had more bits in
+the mantissa (the part between the 0x and the exponent, also known as
+the fraction or the significand) than the floating point supports.
+
+=item *
+
+L<Hexadecimal float: precision loss|perldiag/"Hexadecimal float: precision loss">
+
+(W overflow) The hexadecimal floating point had internally more
+digits than could be output.  This can be caused by unsupported
+long double formats, or by 64-bit integers not being available
+(needed to retrieve the digits under some configurations).
+
+=item *
+
+L<Hexadecimal float: unsupported long double format|perldiag/"Hexadecimal float: unsupported long double format">
+
+(F) You have configured Perl to use long doubles but
+the internals of the long double format are unknown,
+therefore the hexadecimal float output is impossible.
 
 =back
 
@@ -268,7 +309,7 @@ L</Platform Support> section, instead.
 
 =item *
 
-XXX
+Internal handling of floating point values has been improved.
 
 =back
 
