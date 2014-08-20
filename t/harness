@@ -219,6 +219,7 @@ my $h = TAP::Harness->new({
     color       => $color,
     jobs        => $jobs,
     verbosity   => $Verbose,
+    timer       => $ENV{HARNESS_TIMER},
     exec        => sub {
 	my ($harness, $test) = @_;
 
