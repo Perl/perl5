@@ -310,23 +310,29 @@ XXX
 
 =head1 Platform Support
 
-XXX Any changes to platform support should be listed in the sections below.
-
-[ Within the sections, list each platform as a =item entry with specific
-changes as paragraphs below it. ]
-
 =head2 Platform-Specific Notes
-
-XXX List any changes for specific platforms.  This could include configuration
-and compilation changes or changes in portability/compatibility.  However,
-changes within modules for platforms should generally be listed in the
-L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
+=item Android
 
-XXX
+Build support has been improved for cross-compiling in general and for
+Android in particular.
+
+=item Solaris
+
+C<c99> options have been cleaned up, hints look for C<solstudio>
+as well as C<SUNWspro>, and support for native C<setenv> has been added.
+
+=item VMS
+
+C<finite>, C<finitel>, and C<isfinite> detection has been added to
+C<configure.com>, environment handling has had some minor changes, and
+a fix for legacy feature checking status.
+
+=item Windows
+
+C<%I64d> is now being used instead of C<%lld> for MinGW.
 
 =back
 
