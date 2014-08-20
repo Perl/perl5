@@ -129,6 +129,10 @@ L<B::Debug> has been upgraded from version 1.19 to 1.21
 
 =item *
 
+L<CPAN::Meta::Requirements> has been upgraded from version 2.125 to 2.126.
+
+=item *
+
 L<ExtUtils::Manifest> has been upgraded from version 1.64 to 1.65.
 
 The MANIFEST is now opened with C<:raw>, to prevent C<CRLF>s leaking in.
