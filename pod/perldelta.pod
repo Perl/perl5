@@ -171,13 +171,7 @@ The following additions or changes have been made to diagnostic output,
 including warnings and fatal error messages.  For the complete list of
 diagnostic messages, see L<perldiag>.
 
-XXX New or changed warnings emitted by the core's C<C> code go here.  Also
-include any changes in L<perldiag> that reconcile it to the C<C> code.
-
 =head2 New Diagnostics
-
-XXX Newly added diagnostic messages go under here, separated into New Errors
-and New Warnings
 
 =head3 New Errors
 
@@ -185,7 +179,17 @@ and New Warnings
 
 =item *
 
-XXX L<message|perldiag/"message">
+L<Hexadecimal float: internal error|perldiag/"Hexadecimal float: internal error">
+
+(F) Something went horribly bad in hexadecimal float handling.
+
+=item *
+
+L<Hexadecimal float: unsupported long double format|perldiag/"Hexadecimal float: unsupported long double format">
+
+(F) You have configured Perl to use long doubles but
+the internals of the long double format are unknown,
+therefore the hexadecimal float output is impossible.
 
 =back
 
@@ -209,12 +213,6 @@ than the floating point supports.
 
 =item *
 
-L<Hexadecimal float: internal error|perldiag/"Hexadecimal float: internal error">
-
-(F) Something went horribly bad in hexadecimal float handling.
-
-=item *
-
 L<Hexadecimal float: mantissa overflow|perldiag/"Hexadecimal float: mantissa overflow">
 
 (W overflow) The hexadecimal floating point literal had more bits in
@@ -229,14 +227,6 @@ L<Hexadecimal float: precision loss|perldiag/"Hexadecimal float: precision loss"
 digits than could be output.  This can be caused by unsupported
 long double formats, or by 64-bit integers not being available
 (needed to retrieve the digits under some configurations).
-
-=item *
-
-L<Hexadecimal float: unsupported long double format|perldiag/"Hexadecimal float: unsupported long double format">
-
-(F) You have configured Perl to use long doubles but
-the internals of the long double format are unknown,
-therefore the hexadecimal float output is impossible.
 
 =back
 
