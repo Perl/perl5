@@ -1935,6 +1935,11 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	C preprocessor can make decisions based on it.  It is only
  *	defined if the system supports long doubles.
  */
+/* HAS_LDEXPL:
+ *	This symbol, if defined, indicates that the ldexpl routine is
+ *	available to shift a long double floating-point number
+ *	by an integral power of 2.
+ */
 /* LONG_DOUBLEKIND:
  *	LONG_DOUBLEKIND will be one of
  *	LONG_DOUBLE_IS_DOUBLE
@@ -1947,6 +1952,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	LONG_DOUBLE_IS_UNKNOWN_FORMAT
  *	It is only defined if the system supports long doubles.
  */
+#$d_ldexpl  HAS_LDEXPL		/**/
 #$d_longdbl HAS_LONG_DOUBLE		/**/
 #ifdef HAS_LONG_DOUBLE
 #define LONG_DOUBLESIZE $longdblsize		/**/
@@ -3616,13 +3622,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	a normalized fraction and an integral power of 2.
  */
 #$d_frexpl HAS_FREXPL		/**/
-
-/* HAS_LDEXPL:
- *	This symbol, if defined, indicates that the ldexpl routine is
- *	available to shift a long double floating-point number
- *	by an integral power of 2.
- */
-#$d_ldexpl HAS_LDEXPL		/**/
 
 /* HAS_STRUCT_FS_DATA:
  *	This symbol, if defined, indicates that the struct fs_data

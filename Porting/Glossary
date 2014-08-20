@@ -1336,7 +1336,7 @@ d_ldbl_dig (d_ldbl_dig.U):
 	header files provide LDBL_DIG, which is the number of significant
 	digits in a long double precision number.
 
-d_ldexpl (d_ldexpl.U):
+d_ldexpl (d_longdbl.U):
 	This variable conditionally defines the HAS_LDEXPL symbol, which
 	indicates to the C program that the ldexpl() routine is available.
 
@@ -3800,7 +3800,7 @@ loclibpth (libpth.U):
 	libraries.  It is prepended to libpth, and is intended to be easily
 	set from the command line.
 
-longdblkind (longdblkind.U):
+longdblkind (d_longdbl.U):
 	This variable, if defined, encodes the type of a long double:
 	0 = double, 1 = IEEE 754 128-bit big little endian,
 	2 = IEEE 754 128-bit big big endian, 3 = x86 80-bit little endian,

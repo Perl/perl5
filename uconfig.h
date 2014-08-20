@@ -1900,6 +1900,11 @@
  *	C preprocessor can make decisions based on it.  It is only
  *	defined if the system supports long doubles.
  */
+/* HAS_LDEXPL:
+ *	This symbol, if defined, indicates that the ldexpl routine is
+ *	available to shift a long double floating-point number
+ *	by an integral power of 2.
+ */
 /* LONG_DOUBLEKIND:
  *	LONG_DOUBLEKIND will be one of
  *	LONG_DOUBLE_IS_DOUBLE
@@ -1912,6 +1917,7 @@
  *	LONG_DOUBLE_IS_UNKNOWN_FORMAT
  *	It is only defined if the system supports long doubles.
  */
+/*#define  HAS_LDEXPL		/ **/
 /*#define HAS_LONG_DOUBLE		/ **/
 #ifdef HAS_LONG_DOUBLE
 #define LONG_DOUBLESIZE 8		/**/
@@ -3582,13 +3588,6 @@
  */
 /*#define HAS_FREXPL		/ **/
 
-/* HAS_LDEXPL:
- *	This symbol, if defined, indicates that the ldexpl routine is
- *	available to shift a long double floating-point number
- *	by an integral power of 2.
- */
-/*#define HAS_LDEXPL		/ **/
-
 /* HAS_STRUCT_FS_DATA:
  *	This symbol, if defined, indicates that the struct fs_data
  *	to do statfs() is supported.
@@ -4770,6 +4769,6 @@
 #endif
 
 /* Generated from:
- * 5f68e17a9d9e989b824daf55d2adcad3b7af2becfa8f627c6cb1d0e376f7e1a5 config_h.SH
+ * 394b82a122b70b8af04c1a412f13b605c9c555b2d3ac7701aa3ef78debe46e6b config_h.SH
  * 98397a7d818a024628d6b34e5903a8f408da96601a2a19471c480511f3c8d914 uconfig.sh
  * ex: set ro: */
