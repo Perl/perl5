@@ -124,22 +124,65 @@ a slight change to the pattern used for IPv4 address matching.
 
 =head1 Documentation
 
-XXX Changes to files in F<pod/> go here.  Consider grouping entries by
-file and be sure to link to the appropriate page, e.g. L<perlfunc>.
-
 =head2 Changes to Existing Documentation
 
-XXX Changes which significantly change existing files in F<pod/> go here.
-However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
-section.
-
-=head3 L<XXX>
+=head3 L<perlexperiment>
 
 =over 4
 
 =item *
 
-XXX Description of the change here
+Added reference to L<feature>.
+
+=back
+
+=head3 L<perlguts>
+
+=over 4
+
+=item *
+
+Details on C level symbols and libperl.t added.
+
+=back
+
+=head3 L<perlhacktips>
+
+=over 4
+
+=item *
+
+Recommended replacements for tmpfile, atoi, strtol, and strtoul added.
+ 
+=back
+
+=head3 L<perlop>
+
+=over 4
+
+=item *
+
+ASCII v. EBCDIC clarifications added.
+
+=back
+
+=head3 L<perlsec>
+
+=over 4
+
+=item *
+
+Comments added on algorithmic complexity and tied hashes.
+
+=back
+
+=head3 L<perlvms>
+
+=over 4
+
+=item *
+
+Updated documentation on environment and shell interaction in VMS.
 
 =back
 
