@@ -388,6 +388,11 @@ This is problematic when parsing version strings if the locale's numeric
 separator has been changed.  Version parsing has been patched to ensure
 it handles the locales correctly.  [perl #121930]
 
+=item *
+
+A bug has been fixed where zero-length assertions and code blocks inside of a
+regex could cause L<pos> to see an incorrect value.  [perl #122460]
+
 =back
 
 =head1 Known Problems
