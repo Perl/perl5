@@ -67,7 +67,16 @@ L<CPAN::Meta::Requirements> has been upgraded from version 2.125 to 2.126.
 
 =item *
 
+L<ExtUtils::CBuilder> was moved from F<dist> to F<cpan>.
+
+=item *
+
+L<ExtUtils::Install> was moved from F<dist> to F<cpan>.
+
+=item *
+
 L<ExtUtils::Manifest> has been upgraded from version 1.64 to 1.65.
+It was also moved from F<dist> to F<cpan>.
 
 =item *
 
