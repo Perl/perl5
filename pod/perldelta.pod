@@ -232,13 +232,12 @@ long double formats, or by 64-bit integers not being available
 
 =head2 Changes to Existing Diagnostics
 
-XXX Changes (i.e. rewording) of diagnostic messages go here
-
 =over 4
 
 =item *
 
-XXX Describe change here
+L<require> with no argument or undef used to warn about a Null filename; now
+it dies with C<Missing or undefined argument to require>.
 
 =back
 
