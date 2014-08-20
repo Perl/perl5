@@ -84,6 +84,10 @@ L<HTTP::Tiny> has been upgraded from version 0.043 to 0.047.
 
 =item *
 
+L<IPC::Open3> has been upgraded from version 1.17 to 1.18.
+
+=item *
+
 L<perl5db.pl> has been upgraded from version 1.45 to 1.46.
 
 =item *
@@ -92,11 +96,19 @@ L<POSIX> has been upgraded from version 1.41 to 1.42.
 
 =item *
 
+L<Opcode> has been upgraded from version 1.27 to 1.28.
+
+=item *
+
 L<Safe> has been upgraded from version 2.37 to 2.38.
 
 =item *
 
 L<Socket> has been upgraded from version 2.014 to 2.015.
+
+=item *
+
+L<Sys::Hostname> has been upgraded from version 1.18 to 1.19
 
 =back
 
