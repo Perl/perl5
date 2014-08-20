@@ -7,9 +7,9 @@ use Symbol;
 # create temporary file handles that still point indirectly
 # to the right place
 
-my $orig_o = gensym;
+my $orig_o = gensym; 
 my $orig_t = gensym;
-my $orig_f = gensym;
+my $orig_f = gensym; 
 
 tie *$orig_o, "My::Passthru", \*STDOUT;
 tie *$orig_t, "My::Passthru", \*STDERR;

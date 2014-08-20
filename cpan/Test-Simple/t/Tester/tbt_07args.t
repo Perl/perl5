@@ -64,7 +64,7 @@ sub my_test_test
   my $text = shift;
   local $^W = 0;
 
-  # reset the outputs
+  # reset the outputs 
   $t->output($original_output_handle);
   $t->failure_output($original_failure_handle);
   $t->todo_output($original_todo_handle);

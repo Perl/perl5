@@ -9,13 +9,6 @@ BEGIN {
 
 use Test::More;
 
-BEGIN {
-    require warnings;
-    if( eval "warnings->can('carp')" ) {
-        plan skip_all => 'Modern::Open is installed, which breaks this test';
-    }
-}
-
 plan tests => 36;
 
 
@@ -89,9 +82,9 @@ my $builder = Test::More->builder;
 my $exported_to = $builder->exported_to;
 TODO: {
     $builder->exported_to("Wibble");
-
+    
     local $TODO = "testing \$TODO with an incorrect exported_to()";
-
+    
     fail("Just testing todo");
 }
 
@@ -144,7 +137,6 @@ is $is_todo, 'Nesting TODO',
     ok $in_todo,    "  but we're in_todo()";
 }
 
-# line 200
 eval {
     $builder->todo_end;
 };

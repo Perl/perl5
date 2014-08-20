@@ -23,7 +23,7 @@ ok( eq_set([1,2,[3]], [1,[3],2]) );
 # bugs.perl.org 36354
 my $ref = \2;
 ok( eq_set( [$ref, "$ref", "$ref", $ref],
-            ["$ref", $ref, $ref, "$ref"]
+            ["$ref", $ref, $ref, "$ref"] 
           ) );
 
 TODO: {

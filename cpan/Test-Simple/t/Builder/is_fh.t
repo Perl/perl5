@@ -41,7 +41,7 @@ package Lying::isa;
 sub isa {
     my $self = shift;
     my $parent = shift;
-
+    
     return 1 if $parent eq 'IO::Handle';
 }
 

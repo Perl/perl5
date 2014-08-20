@@ -66,9 +66,9 @@ sub create {
     tie *$err,  "Test::Builder::NoOutput::Tee", \$outputs{all}, \$outputs{err};
     tie *$todo, "Test::Builder::NoOutput::Tee", \$outputs{all}, \$outputs{todo};
 
-    $self->tap->output($out);
-    $self->tap->failure_output($err);
-    $self->tap->todo_output($todo);
+    $self->output($out);
+    $self->failure_output($err);
+    $self->todo_output($todo);
 
     return $self;
 }
@@ -101,7 +101,7 @@ sub TIEHANDLE {
 
     my @fhs;
     for my $ref (@refs) {
-        my $fh = Test::Builder->new->tap->_new_fh($ref);
+        my $fh = Test::Builder->_new_fh($ref);
         push @fhs, $fh;
     }
 

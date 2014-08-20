@@ -8,7 +8,7 @@ BEGIN {
     else {
         unshift @INC, 't/lib';
     }
-}
+}   
 
 use strict;
 

@@ -14,7 +14,6 @@ package My::Test;
 # Test::Builder's own and the ending diagnostics don't come out right.
 require Test::Builder;
 my $TB = Test::Builder->create;
-$TB->stream->use_lresults;
 $TB->plan(tests => 3);
 
 

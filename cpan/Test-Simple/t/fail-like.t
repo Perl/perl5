@@ -22,7 +22,7 @@ package My::Test;
 # This has to be a require or else the END block below runs before
 # Test::Builder's own and the ending diagnostics don't come out right.
 require Test::Builder;
-my $TB = Test::Builder->create();
+my $TB = Test::Builder->create;
 $TB->plan(tests => 4);
 
 
@@ -71,5 +71,7 @@ OUT
 
 }
 
-# Test::More thinks it failed.  Override that.
-Test::Builder->new->no_ending(1);
+END {
+    # Test::More thinks it failed.  Override that.
+    exit(scalar grep { !$_ } $TB->summary);
+}

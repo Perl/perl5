@@ -3,7 +3,7 @@
 use strict;
 use Config;
 use Test::More;
-my (%modules, %no_unload);
+my %modules;
 
 my $db_file;
 BEGIN {
@@ -24,16 +24,10 @@ BEGIN {
     $db_file     => q| ::is( ref $db_file->can('TIEHASH'), 'CODE' ) |,  # 5.0
     'Socket'     => q| ::is( ref Socket->can('inet_aton'),'CODE' ) |,    # 5.0
     'Time::HiRes'=> q| ::is( ref Time::HiRes->can('usleep'),'CODE' ) |,  # 5.7.3
-    'B'          => q| ::is( ref B->can('svref_2object'),'CODE' ) |, # Test::Builder loads this.
-    'Encode'     => q| ::is( ref Encode->can('decode'),'CODE' ) |, # Test::Builder loads this.
 );
 
-# These modules must not be unloaded since they are needed by Test::Builder
-%no_unload = (
-    'B'          => 1,
-    'Encode'     => 1,
-    'List::Util' => 1,
-);
+plan tests => 26 + keys(%modules) * 3;
+
 
 # Try to load the module
 use_ok( 'DynaLoader' );
@@ -143,6 +137,7 @@ for my $module (sort keys %modules) {
     }
 }
 
+# checking internal consistency
 is( scalar @DynaLoader::dl_librefs, scalar keys %modules, "checking number of items in \@dl_librefs" );
 is( scalar @DynaLoader::dl_modules, scalar keys %modules, "checking number of items in \@dl_modules" );
 
@@ -155,7 +150,6 @@ for my $libref (reverse @DynaLoader::dl_librefs) {
             skip "unloading unsupported on $^O", 2
                 if ($old_darwin || $^O eq 'VMS');
             my $module = pop @loaded_modules;
-            next if $no_unload{$module};
             skip "File::Glob sets PL_opfreehook", 2 if $module eq 'File::Glob';
             my $r = eval { DynaLoader::dl_unload_file($libref) };
             is( $@, '', "calling dl_unload_file() for $module" );
@@ -192,5 +186,3 @@ SKIP: {
         "mod2fname + libname_unique correctly truncates long names"
     );
 }
-
-done_testing;

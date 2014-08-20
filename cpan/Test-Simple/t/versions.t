@@ -7,34 +7,22 @@
 use strict;
 use Test::More;
 
-{
-    local $SIG{__WARN__} = sub { 1 };
-    require Test::Builder;
-    require Test::Builder::Module;
-    require Test::Simple;
-    require Test::Builder::Tester;
-    require Test::Tester2;
-    require Test::Tester;
-}
+require Test::Builder;
+require Test::Builder::Module;
+require Test::Simple;
 
 my $dist_version = Test::More->VERSION;
 
-like( $dist_version, qr/^ \d+ \. \d+ $/x, "Version number is sane" );
+like( $dist_version, qr/^ \d+ \. \d+ $/x );
 
 my @modules = qw(
     Test::Simple
     Test::Builder
     Test::Builder::Module
-    Test::Builder::Tester
-    Test::Tester2
-    Test::Tester
 );
 
 for my $module (@modules) {
-    my $file = $module;
-    $file =~ s{(::|')}{/}g;
-    $file .= ".pm";
-    is( $module->VERSION, $module->VERSION, sprintf("%-22s %s", $module, $INC{$file}) );
+    is( $dist_version, $module->VERSION, $module );
 }
 
-done_testing();
+done_testing(4);

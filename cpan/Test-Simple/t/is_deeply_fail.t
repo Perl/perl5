@@ -83,7 +83,7 @@ ERR
 
 #line 88
 ok !is_deeply({ this => 42 }, { this => 43 }, 'hashes with different values');
-is( $out, "not ok 3 - hashes with different values\n",
+is( $out, "not ok 3 - hashes with different values\n", 
                                         'hashes with different values' );
 is( $err, <<ERR,                        '   right diagnostic' );
 #   Failed test 'hashes with different values'
@@ -223,7 +223,7 @@ foreach my $test (@tests) {
     local $SIG{__WARN__} = sub { $warning .= join '', @_; };
     ok !is_deeply(@$test);
 
-    like \$warning,
+    like \$warning, 
          "/^is_deeply\\(\\) takes two or three args, you gave $num_args\.\n/";
 }
 

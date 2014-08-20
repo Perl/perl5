@@ -13,11 +13,10 @@ BEGIN {
 }
 chdir 't';
 
+
 use Test::Builder;
-use Test::Builder::Formatter::LegacyResults;
 my $Test = Test::Builder->new;
 my $tb = Test::Builder->create;
-$tb->stream->use_lresults;
 
 # We'll need this later to know the outputs were reset
 my %Original_Output;
@@ -70,6 +69,7 @@ $Test->is_eq( fileno $tb->todo_output,
 
 # The reset Test::Builder will take over from here.
 $Test->no_ending(1);
+
 
 $tb->current_test($Test->current_test);
 $tb->level(0);

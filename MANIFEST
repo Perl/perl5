@@ -2233,212 +2233,146 @@ cpan/Test-Harness/t/yamlish-output.t			Test::Harness test
 cpan/Test-Harness/t/yamlish.t				Test::Harness test
 cpan/Test-Harness/t/yamlish-writer.t			Test::Harness test
 cpan/Test/lib/Test.pm		A simple framework for writing test scripts
-cpan/Test-Simple/lib/ok.pm			ok tool
-cpan/Test-Simple/lib/Test/Builder/Event/Bail.pm			Test::Builder module
-cpan/Test-Simple/lib/Test/Builder/Event/Child.pm			Test::Builder module
-cpan/Test-Simple/lib/Test/Builder/Event/Diag.pm			Test::Builder module
-cpan/Test-Simple/lib/Test/Builder/Event/Finish.pm			Test::Builder module
-cpan/Test-Simple/lib/Test/Builder/Event/Note.pm			Test::Builder module
-cpan/Test-Simple/lib/Test/Builder/Event/Ok.pm			Test::Builder module
-cpan/Test-Simple/lib/Test/Builder/Event/Plan.pm			Test::Builder module
-cpan/Test-Simple/lib/Test/Builder/Event.pm			Test::Builder module
-cpan/Test-Simple/lib/Test/Builder/ExitMagic.pm			Test::Builder module
-cpan/Test-Simple/lib/Test/Builder/Fork.pm			Test::Builder module
-cpan/Test-Simple/lib/Test/Builder/Formatter/LegacyResults.pm			Test::Builder module
-cpan/Test-Simple/lib/Test/Builder/Formatter.pm			Test::Builder module
-cpan/Test-Simple/lib/Test/Builder/Formatter/TAP.pm			Test::Builder module
-cpan/Test-Simple/lib/Test/Builder/Module.pm			Test::Builder module
-cpan/Test-Simple/lib/Test/Builder.pm			Test::Builder
-cpan/Test-Simple/lib/Test/Builder/Provider.pm			Test::Builder module
-cpan/Test-Simple/lib/Test/Builder/Stream.pm			Test::Builder module
-cpan/Test-Simple/lib/Test/Builder/Tester/Color.pm			Test::Builder module
-cpan/Test-Simple/lib/Test/Builder/Tester.pm			Test::Builder module
-cpan/Test-Simple/lib/Test/Builder/Threads.pm			Test::Builder module
-cpan/Test-Simple/lib/Test/Builder/Trace/Frame.pm			Test::Builder module
-cpan/Test-Simple/lib/Test/Builder/Trace.pm			Test::Builder module
-cpan/Test-Simple/lib/Test/Builder/Util.pm			Test::Builder module
-cpan/Test-Simple/lib/Test/FAQ.pod			Testing FAQ
-cpan/Test-Simple/lib/Test/More.pm			Test::More
-cpan/Test-Simple/lib/Test/Simple.pm			Test::Simple
-cpan/Test-Simple/lib/Test/Tester2.pm			Test::Tester2
-cpan/Test-Simple/lib/Test/Tester/Capture.pm			Test::Tester module
-cpan/Test-Simple/lib/Test/Tester/CaptureRunner.pm			Test::Tester module
-cpan/Test-Simple/lib/Test/Tester/Delegate.pm			Test::Tester module
-cpan/Test-Simple/lib/Test/Tester.pm			Test::Tester
-cpan/Test-Simple/lib/Test/Tutorial.pod			Testing Tutorial
-cpan/Test-Simple/lib/Test/use/ok.pm			ok.pm documentation
-cpan/Test-Simple/t/bad_plan.t			Test-Simple test
-cpan/Test-Simple/t/bail_out.t			Test-Simple test
-cpan/Test-Simple/t/BEGIN_require_ok.t			Test-Simple test
-cpan/Test-Simple/t/BEGIN_use_ok.t			Test-Simple test
-cpan/Test-Simple/t/buffer.t			Test-Simple test
-cpan/Test-Simple/t/Builder/Builder.t			Test-Simple test
-cpan/Test-Simple/t/Builder/carp.t			Test-Simple test
-cpan/Test-Simple/t/Builder/create.t			Test-Simple test
-cpan/Test-Simple/t/Builder/current_test.t			Test-Simple test
-cpan/Test-Simple/t/Builder/current_test_without_plan.t			Test-Simple test
-cpan/Test-Simple/t/Builder/details.t			Test-Simple test
-cpan/Test-Simple/t/Builder/done_testing_double.t			Test-Simple test
-cpan/Test-Simple/t/Builder/done_testing_plan_mismatch.t			Test-Simple test
-cpan/Test-Simple/t/Builder/done_testing.t			Test-Simple test
-cpan/Test-Simple/t/Builder/done_testing_with_no_plan.t			Test-Simple test
-cpan/Test-Simple/t/Builder/done_testing_with_number.t			Test-Simple test
-cpan/Test-Simple/t/Builder/done_testing_with_plan.t			Test-Simple test
-cpan/Test-Simple/t/Builder/fork_with_new_stdout.t			Test-Simple test
-cpan/Test-Simple/t/Builder/has_plan2.t			Test-Simple test
-cpan/Test-Simple/t/Builder/has_plan.t			Test-Simple test
-cpan/Test-Simple/t/Builder/is_fh.t			Test-Simple test
-cpan/Test-Simple/t/Builder/is_passing.t			Test-Simple test
-cpan/Test-Simple/t/Builder/maybe_regex.t			Test-Simple test
-cpan/Test-Simple/t/Builder/no_diag.t			Test-Simple test
-cpan/Test-Simple/t/Builder/no_ending.t			Test-Simple test
-cpan/Test-Simple/t/Builder/no_header.t			Test-Simple test
-cpan/Test-Simple/t/Builder/no_plan_at_all.t			Test-Simple test
-cpan/Test-Simple/t/Builder/ok_obj.t			Test-Simple test
-cpan/Test-Simple/t/Builder/output.t			Test-Simple test
-cpan/Test-Simple/t/Builder/reset_outputs.t			Test-Simple test
-cpan/Test-Simple/t/Builder/reset.t			Test-Simple test
-cpan/Test-Simple/t/Builder/try.t			Test-Simple test
-cpan/Test-Simple/t/c_flag.t			Test-Simple test
-cpan/Test-Simple/t/circular_data.t			Test-Simple test
-cpan/Test-Simple/t/cmp_ok.t			Test-Simple test
-cpan/Test-Simple/t/dependents.t			Test-Simple test
-cpan/Test-Simple/t/diag.t			Test-Simple test
-cpan/Test-Simple/t/died.t			Test-Simple test
-cpan/Test-Simple/t/dont_overwrite_die_handler.t			Test-Simple test
-cpan/Test-Simple/t/eq_set.t			Test-Simple test
-cpan/Test-Simple/t/exit.t			Test-Simple test
-cpan/Test-Simple/t/explain.t			Test-Simple test
-cpan/Test-Simple/t/extra_one.t			Test-Simple test
-cpan/Test-Simple/t/extra.t			Test-Simple test
-cpan/Test-Simple/t/fail-like.t			Test-Simple test
-cpan/Test-Simple/t/fail-more.t			Test-Simple test
-cpan/Test-Simple/t/fail_one.t			Test-Simple test
-cpan/Test-Simple/t/fail.t			Test-Simple test
-cpan/Test-Simple/t/filehandles.t			Test-Simple test
-cpan/Test-Simple/t/fork.t			Test-Simple test
-cpan/Test-Simple/t/harness_active.t			Test-Simple test
-cpan/Test-Simple/t/import.t			Test-Simple test
-cpan/Test-Simple/t/is_deeply_dne_bug.t			Test-Simple test
-cpan/Test-Simple/t/is_deeply_fail.t			Test-Simple test
-cpan/Test-Simple/t/is_deeply_with_threads.t			Test-Simple test
-cpan/Test-Simple/t/lib/Dev/Null.pm			Test-Simple test
-cpan/Test-Simple/t/lib/Dummy.pm			Test-Simple test
-cpan/Test-Simple/t/lib/MyOverload.pm			Test-Simple test
-cpan/Test-Simple/t/lib/MyTest.pm			Test-Simple test
-cpan/Test-Simple/t/lib/NoExporter.pm			Test-Simple test
-cpan/Test-Simple/t/lib/SigDie.pm			Test-Simple test
-cpan/Test-Simple/t/lib/SmallTest.pm			Test-Simple test
-cpan/Test-Simple/t/lib/Test/Builder/NoOutput.pm			Test-Simple test
-cpan/Test-Simple/t/lib/Test/Simple/Catch.pm			Test-Simple test
-cpan/Test-Simple/t/lib/Test/Simple/sample_tests/death_in_eval.plx			Test-Simple test
-cpan/Test-Simple/t/lib/Test/Simple/sample_tests/death.plx			Test-Simple test
-cpan/Test-Simple/t/lib/Test/Simple/sample_tests/death_with_handler.plx			Test-Simple test
-cpan/Test-Simple/t/lib/Test/Simple/sample_tests/exit.plx			Test-Simple test
-cpan/Test-Simple/t/lib/Test/Simple/sample_tests/extras.plx			Test-Simple test
-cpan/Test-Simple/t/lib/Test/Simple/sample_tests/five_fail.plx			Test-Simple test
-cpan/Test-Simple/t/lib/Test/Simple/sample_tests/last_minute_death.plx			Test-Simple test
-cpan/Test-Simple/t/lib/Test/Simple/sample_tests/missing_done_testing.plx			Test-Simple test
-cpan/Test-Simple/t/lib/Test/Simple/sample_tests/one_fail.plx			Test-Simple test
-cpan/Test-Simple/t/lib/Test/Simple/sample_tests/one_fail_without_plan.plx			Test-Simple test
-cpan/Test-Simple/t/lib/Test/Simple/sample_tests/pre_plan_death.plx			Test-Simple test
-cpan/Test-Simple/t/lib/Test/Simple/sample_tests/require.plx			Test-Simple test
-cpan/Test-Simple/t/lib/Test/Simple/sample_tests/success.plx			Test-Simple test
-cpan/Test-Simple/t/lib/Test/Simple/sample_tests/too_few_fail.plx			Test-Simple test
-cpan/Test-Simple/t/lib/Test/Simple/sample_tests/too_few.plx			Test-Simple test
-cpan/Test-Simple/t/lib/Test/Simple/sample_tests/two_fail.plx			Test-Simple test
-cpan/Test-Simple/t/lib/TieOut.pm			Test-Simple test
-cpan/Test-Simple/t/missing.t			Test-Simple test
-cpan/Test-Simple/t/Modern/Builder_Event_Child.t			Test-Simple test
-cpan/Test-Simple/t/Modern/Builder_Event_Diag.t			Test-Simple test
-cpan/Test-Simple/t/Modern/Builder_Event_Finish.t			Test-Simple test
-cpan/Test-Simple/t/Modern/Builder_Event_Note.t			Test-Simple test
-cpan/Test-Simple/t/Modern/Builder_Event_Ok.t			Test-Simple test
-cpan/Test-Simple/t/Modern/Builder_Event_Plan.t			Test-Simple test
-cpan/Test-Simple/t/Modern/Builder_Event.t			Test-Simple test
-cpan/Test-Simple/t/Modern/Builder_Fork.t			Test-Simple test
-cpan/Test-Simple/t/Modern/Builder_Formatter.t			Test-Simple test
-cpan/Test-Simple/t/Modern/Builder_Formatter_TAP.t			Test-Simple test
-cpan/Test-Simple/t/Modern/Builder_Module.t			Test-Simple test
-cpan/Test-Simple/t/Modern/Builder_Provider.t			Test-Simple test
-cpan/Test-Simple/t/Modern/Builder_Stream.t			Test-Simple test
-cpan/Test-Simple/t/Modern/Builder.t			Test-Simple test
-cpan/Test-Simple/t/Modern/Builder_Tester.t			Test-Simple test
-cpan/Test-Simple/t/Modern/Builder_Trace_Frame.t			Test-Simple test
-cpan/Test-Simple/t/Modern/Builder_Trace.t			Test-Simple test
-cpan/Test-Simple/t/Modern/Builder_Util.t			Test-Simple test
-cpan/Test-Simple/t/Modern/encoding_test.t			Test-Simple test
-cpan/Test-Simple/t/Modern/More.t			Test-Simple test
-cpan/Test-Simple/t/Modern/NotTB15.t			Test-Simple test
-cpan/Test-Simple/t/Modern/Simple.t			Test-Simple test
-cpan/Test-Simple/t/Modern/Tester2_subtest.t			Test-Simple test
-cpan/Test-Simple/t/Modern/Tester2.t			Test-Simple test
-cpan/Test-Simple/t/Modern/tracing.t			Test-Simple test
-cpan/Test-Simple/t/More.t			Test-Simple test
-cpan/Test-Simple/t/new_ok.t			Test-Simple test
-cpan/Test-Simple/t/no_plan.t			Test-Simple test
-cpan/Test-Simple/t/no_tests.t			Test-Simple test
-cpan/Test-Simple/t/note.t			Test-Simple test
-cpan/Test-Simple/t/overload.t			Test-Simple test
-cpan/Test-Simple/t/overload_threads.t			Test-Simple test
-cpan/Test-Simple/t/PerlIO.t			Test-Simple test
-cpan/Test-Simple/t/plan_bad.t			Test-Simple test
-cpan/Test-Simple/t/plan_is_noplan.t			Test-Simple test
-cpan/Test-Simple/t/plan_no_plan.t			Test-Simple test
-cpan/Test-Simple/t/plan_shouldnt_import.t			Test-Simple test
-cpan/Test-Simple/t/plan_skip_all.t			Test-Simple test
-cpan/Test-Simple/t/plan.t			Test-Simple test
-cpan/Test-Simple/t/pod.t			Test-Simple test
-cpan/Test-Simple/t/require_ok.t			Test-Simple test
-cpan/Test-Simple/t/ribasushi_diag.t			Test-Simple test
-cpan/Test-Simple/t/ribasushi_threads.t			Test-Simple test
-cpan/Test-Simple/t/Simple/load.t			Test-Simple test
-cpan/Test-Simple/t/simple.t			Test-Simple test
-cpan/Test-Simple/t/skipall.t			Test-Simple test
-cpan/Test-Simple/t/skip.t			Test-Simple test
-cpan/Test-Simple/t/strays.t			Test-Simple test
-cpan/Test-Simple/t/subtest/args.t			Test-Simple test
-cpan/Test-Simple/t/subtest/bail_out.t			Test-Simple test
-cpan/Test-Simple/t/subtest/basic.t			Test-Simple test
-cpan/Test-Simple/t/subtest/die.t			Test-Simple test
-cpan/Test-Simple/t/subtest/do.t			Test-Simple test
-cpan/Test-Simple/t/subtest/exceptions.t			Test-Simple test
-cpan/Test-Simple/t/subtest/for_do_t.test			Test-Simple test
-cpan/Test-Simple/t/subtest/fork.t			Test-Simple test
-cpan/Test-Simple/t/subtest/implicit_done.t			Test-Simple test
-cpan/Test-Simple/t/subtest/line_numbers.t			Test-Simple test
-cpan/Test-Simple/t/subtest/plan.t			Test-Simple test
-cpan/Test-Simple/t/subtest/predicate.t			Test-Simple test
-cpan/Test-Simple/t/subtest/singleton.t			Test-Simple test
-cpan/Test-Simple/t/subtest/threads.t			Test-Simple test
-cpan/Test-Simple/t/subtest/todo.t			Test-Simple test
-cpan/Test-Simple/t/subtest/wstat.t			Test-Simple test
-cpan/Test-Simple/t/tbm_doesnt_set_exported_to.t			Test-Simple test
-cpan/Test-Simple/t/Tester/tbt_01basic.t			Test-Simple test
-cpan/Test-Simple/t/Tester/tbt_02fhrestore.t			Test-Simple test
-cpan/Test-Simple/t/Tester/tbt_03die.t			Test-Simple test
-cpan/Test-Simple/t/Tester/tbt_04line_num.t			Test-Simple test
-cpan/Test-Simple/t/Tester/tbt_05faildiag.t			Test-Simple test
-cpan/Test-Simple/t/Tester/tbt_06errormess.t			Test-Simple test
-cpan/Test-Simple/t/Tester/tbt_07args.t			Test-Simple test
-cpan/Test-Simple/t/Tester/tbt_08subtest.t			Test-Simple test
-cpan/Test-Simple/t/Tester/tbt_09do_script.pl			Test-Simple test
-cpan/Test-Simple/t/Tester/tbt_09do.t			Test-Simple test
-cpan/Test-Simple/t/Tester/tbt_is_bug.t			Test-Simple test
-cpan/Test-Simple/t/test_use_ok.t			Test-Simple test
-cpan/Test-Simple/t/threads.t			Test-Simple test
-cpan/Test-Simple/t/thread_taint.t			Test-Simple test
-cpan/Test-Simple/t/todo.t			Test-Simple test
-cpan/Test-Simple/t/TTLegacy/auto.t			Test-Simple test
-cpan/Test-Simple/t/TTLegacy/capture.t			Test-Simple test
-cpan/Test-Simple/t/TTLegacy/check_tests.t			Test-Simple test
-cpan/Test-Simple/t/TTLegacy/depth.t			Test-Simple test
-cpan/Test-Simple/t/TTLegacy/run_test.t			Test-Simple test
-cpan/Test-Simple/t/undef.t			Test-Simple test
-cpan/Test-Simple/t/useing.t			Test-Simple test
-cpan/Test-Simple/t/use_ok.t			Test-Simple test
-cpan/Test-Simple/t/utf8.t			Test-Simple test
-cpan/Test-Simple/t/versions.t			Test-Simple test
+cpan/Test-Simple/lib/Test/Builder/Module.pm		Base class for test modules
+cpan/Test-Simple/lib/Test/Builder.pm			For writing new test libraries
+cpan/Test-Simple/lib/Test/Builder/Tester/Color.pm	Turn on color in Test::Builder::Tester
+cpan/Test-Simple/lib/Test/Builder/Tester.pm		For testing Test::Builder based classes
+cpan/Test-Simple/lib/Test/More.pm			More utilities for writing tests
+cpan/Test-Simple/lib/Test/Simple.pm			Basic utility for writing tests
+cpan/Test-Simple/lib/Test/Tutorial.pod			A tutorial on writing tests
+cpan/Test-Simple/t/00test_harness_check.t		Test::Simple test
+cpan/Test-Simple/t/bad_plan.t				Test::Builder plan() test
+cpan/Test-Simple/t/bail_out.t				Test::Builder BAIL_OUT test
+cpan/Test-Simple/t/BEGIN_require_ok.t			Test::More require_ok() testing
+cpan/Test-Simple/t/BEGIN_use_ok.t			Test::More use_ok() testing
+cpan/Test-Simple/t/buffer.t				Test::Builder buffering test
+cpan/Test-Simple/t/Builder/Builder.t			Test::Builder tests
+cpan/Test-Simple/t/Builder/carp.t			Test::Builder test
+cpan/Test-Simple/t/Builder/create.t			Test::Builder test
+cpan/Test-Simple/t/Builder/current_test.t		Test::Builder tests
+cpan/Test-Simple/t/Builder/current_test_without_plan.t	Test::Builder tests
+cpan/Test-Simple/t/Builder/details.t			Test::Builder tests
+cpan/Test-Simple/t/Builder/done_testing_double.t		Test::Builder tests
+cpan/Test-Simple/t/Builder/done_testing_plan_mismatch.t	Test::Builder tests
+cpan/Test-Simple/t/Builder/done_testing.t		Test::Builder tests
+cpan/Test-Simple/t/Builder/done_testing_with_no_plan.t	Test::Builder tests
+cpan/Test-Simple/t/Builder/done_testing_with_number.t	Test::Builder tests
+cpan/Test-Simple/t/Builder/done_testing_with_plan.t	Test::Builder tests
+cpan/Test-Simple/t/Builder/fork_with_new_stdout.t	Test::Builder tests
+cpan/Test-Simple/t/Builder/has_plan2.t			Test::Builder tests
+cpan/Test-Simple/t/Builder/has_plan.t			Test::Builder tests
+cpan/Test-Simple/t/Builder/is_fh.t			Test::Builder tests
+cpan/Test-Simple/t/Builder/is_passing.t			Test::Builder tests
+cpan/Test-Simple/t/Builder/maybe_regex.t		Test::Builder tests
+cpan/Test-Simple/t/Builder/no_diag.t			Test::Builder tests
+cpan/Test-Simple/t/Builder/no_ending.t			Test::Builder tests
+cpan/Test-Simple/t/Builder/no_header.t			Test::Builder tests
+cpan/Test-Simple/t/Builder/no_plan_at_all.t		Test::Builder tests
+cpan/Test-Simple/t/Builder/ok_obj.t			Test::Builder tests
+cpan/Test-Simple/t/Builder/output.t			Test::Builder tests
+cpan/Test-Simple/t/Builder/reset.t			Test::Builder tests
+cpan/Test-Simple/t/Builder/try.t			Test::Builder tests
+cpan/Test-Simple/t/c_flag.t				Test::Simple test
+cpan/Test-Simple/t/circular_data.t			Test::Simple test
+cpan/Test-Simple/t/cmp_ok.t				Test::More test
+cpan/Test-Simple/t/dependents.t				Test::More test
+cpan/Test-Simple/t/diag.t				Test::More diag() test
+cpan/Test-Simple/t/died.t				Test::Simple test
+cpan/Test-Simple/t/dont_overwrite_die_handler.t		Test::More tests
+cpan/Test-Simple/t/eq_set.t				Test::Simple test
+cpan/Test-Simple/t/exit.t				Test::Simple test, exit codes
+cpan/Test-Simple/t/explain.t				Test::Simple test
+cpan/Test-Simple/t/extra_one.t				Test::Simple test
+cpan/Test-Simple/t/extra.t				Test::Simple test
+cpan/Test-Simple/t/fail-like.t				Test::More test, like() failures
+cpan/Test-Simple/t/fail-more.t				Test::More test, tests failing
+cpan/Test-Simple/t/fail_one.t				Test::Simple test
+cpan/Test-Simple/t/fail.t				Test::Simple test, test failures
+cpan/Test-Simple/t/filehandles.t			Test::Simple test, STDOUT can be played with
+cpan/Test-Simple/t/fork.t				Test::More fork tests
+cpan/Test-Simple/t/harness_active.t			Test::Simple test
+cpan/Test-Simple/t/import.t				Test::More test, importing functions
+cpan/Test-Simple/t/is_deeply_dne_bug.t			Test::More test
+cpan/Test-Simple/t/is_deeply_fail.t			Test::More test, is_deeply()
+cpan/Test-Simple/t/is_deeply_with_threads.t		Test::More test
+cpan/Test-Simple/t/lib/Dev/Null.pm			Test::More test module
+cpan/Test-Simple/t/lib/Dummy.pm				Test::More test module
+cpan/Test-Simple/t/lib/MyOverload.pm			Test::More test module
+cpan/Test-Simple/t/lib/NoExporter.pm			Test::Simple test module
+cpan/Test-Simple/t/lib/SigDie.pm			Test module for Test::More
+cpan/Test-Simple/t/lib/Test/Builder/NoOutput.pm		Utility module for testing Test::Builder
+cpan/Test-Simple/t/lib/Test/Simple/Catch.pm		Utility module for testing Test::Simple
+cpan/Test-Simple/t/lib/Test/Simple/sample_tests/death_in_eval.plx	for exit.t
+cpan/Test-Simple/t/lib/Test/Simple/sample_tests/death.plx		for exit.t
+cpan/Test-Simple/t/lib/Test/Simple/sample_tests/death_with_handler.plx	for exit.t
+cpan/Test-Simple/t/lib/Test/Simple/sample_tests/exit.plx			for exit.t
+cpan/Test-Simple/t/lib/Test/Simple/sample_tests/extras.plx		for exit.t
+cpan/Test-Simple/t/lib/Test/Simple/sample_tests/five_fail.plx		for exit.t
+cpan/Test-Simple/t/lib/Test/Simple/sample_tests/last_minute_death.plx	for exit.t
+cpan/Test-Simple/t/lib/Test/Simple/sample_tests/missing_done_testing.plx	for exit.t
+cpan/Test-Simple/t/lib/Test/Simple/sample_tests/one_fail.plx		for exit.t
+cpan/Test-Simple/t/lib/Test/Simple/sample_tests/one_fail_without_plan.plx	for exit.t
+cpan/Test-Simple/t/lib/Test/Simple/sample_tests/pre_plan_death.plx	for exit.t
+cpan/Test-Simple/t/lib/Test/Simple/sample_tests/require.plx		for exit.t
+cpan/Test-Simple/t/lib/Test/Simple/sample_tests/success.plx		for exit.t
+cpan/Test-Simple/t/lib/Test/Simple/sample_tests/too_few_fail.plx		for exit.t
+cpan/Test-Simple/t/lib/Test/Simple/sample_tests/too_few.plx		for exit.t
+cpan/Test-Simple/t/lib/Test/Simple/sample_tests/two_fail.plx		for exit.t
+cpan/Test-Simple/t/lib/TieOut.pm			Testing library to capture prints
+cpan/Test-Simple/t/missing.t				Test::Simple test, missing tests
+cpan/Test-Simple/t/More.t				Test::More test, basic stuff
+cpan/Test-Simple/t/new_ok.t				Test::More test
+cpan/Test-Simple/t/no_plan.t				Test::Simple test, forgot the plan
+cpan/Test-Simple/t/no_tests.t				Test::More test
+cpan/Test-Simple/t/note.t				Test::More test
+cpan/Test-Simple/t/overload.t				Test::Simple test
+cpan/Test-Simple/t/overload_threads.t			Test::Simple test
+cpan/Test-Simple/t/plan_bad.t				Test::Simple test
+cpan/Test-Simple/t/plan_is_noplan.t			Test::Simple test, no_plan
+cpan/Test-Simple/t/plan_no_plan.t			Test::More test, plan() w/no_plan
+cpan/Test-Simple/t/plan_shouldnt_import.t		Test::Simple test
+cpan/Test-Simple/t/plan_skip_all.t			Test::More test, plan() w/skip_all
+cpan/Test-Simple/t/plan.t				Test::More test, plan()
+cpan/Test-Simple/t/require_ok.t				Test::Simple test
+cpan/Test-Simple/t/Simple/load.t			Test::Builder tests
+cpan/Test-Simple/t/simple.t				Test::Simple test, basic stuff
+cpan/Test-Simple/t/skipall.t				Test::More test, skip all tests
+cpan/Test-Simple/t/skip.t				Test::More test, SKIP tests
+cpan/Test-Simple/t/subtest/args.t			Test::More test
+cpan/Test-Simple/t/subtest/bail_out.t			Test::More test
+cpan/Test-Simple/t/subtest/basic.t			Test::More test
+cpan/Test-Simple/t/subtest/die.t			Test::More test
+cpan/Test-Simple/t/subtest/do.t				Test::More test
+cpan/Test-Simple/t/subtest/exceptions.t			Test::More test
+cpan/Test-Simple/t/subtest/for_do_t.test		Test::More test
+cpan/Test-Simple/t/subtest/fork.t			Test::Builder tests
+cpan/Test-Simple/t/subtest/implicit_done.t			Test::Builder tests
+cpan/Test-Simple/t/subtest/line_numbers.t			Test::Builder tests
+cpan/Test-Simple/t/subtest/plan.t			Test::Builder tests
+cpan/Test-Simple/t/subtest/predicate.t			Test::Builder tests
+cpan/Test-Simple/t/subtest/singleton.t			Test::More test
+cpan/Test-Simple/t/subtest/threads.t			Test::More test
+cpan/Test-Simple/t/subtest/todo.t			Test::Builder tests
+cpan/Test-Simple/t/subtest/wstat.t			Test::More test
+cpan/Test-Simple/t/tbm_doesnt_set_exported_to.t		Test::Builder::Module test
+cpan/Test-Simple/t/Tester/tbt_01basic.t			Test::Builder::Tester test
+cpan/Test-Simple/t/Tester/tbt_02fhrestore.t		Test::Builder::Tester test
+cpan/Test-Simple/t/Tester/tbt_03die.t			Test::Builder::Tester test
+cpan/Test-Simple/t/Tester/tbt_04line_num.t		Test::Builder::Tester test
+cpan/Test-Simple/t/Tester/tbt_05faildiag.t		Test::Builder::Tester test
+cpan/Test-Simple/t/Tester/tbt_06errormess.t		Test::Builder::Tester test
+cpan/Test-Simple/t/Tester/tbt_07args.t			Test::Builder::Tester test
+cpan/Test-Simple/t/Tester/tbt_08subtest.t		Test::Builder::Tester test
+cpan/Test-Simple/t/Tester/tbt_09do_script.pl		Test::Builder::Tester test
+cpan/Test-Simple/t/Tester/tbt_09do.t			Test::Builder::Tester test
+cpan/Test-Simple/t/threads.t				Test::Builder thread-safe checks
+cpan/Test-Simple/t/thread_taint.t			Test::Simple test
+cpan/Test-Simple/t/todo.t				Test::More test, TODO tests
+cpan/Test-Simple/t/undef.t				Test::More test, undefs don't cause warnings
+cpan/Test-Simple/t/useing.t				Test::More test, compile test
+cpan/Test-Simple/t/use_ok.t				Test::More test, use_ok()
+cpan/Test-Simple/t/utf8.t				Test::More test
+cpan/Test-Simple/t/versions.t				Test::More test
 cpan/Test/t/05_about_verbose.t	See if Test works
 cpan/Test/t/fail.t		See if Test works
 cpan/Test/t/mix.t		See if Test works
