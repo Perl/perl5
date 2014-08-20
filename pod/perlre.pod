@@ -1226,7 +1226,8 @@ A zero-width positive look-behind assertion.  For example, C</(?<=\t)\w+/>
 matches a word that follows a tab, without including the tab in C<$&>.
 Works only for fixed-width look-behind.
 
-There is a special form of this construct, called C<\K>, which causes the
+There is a special form of this construct, called C<\K> (available since
+Perl 5.10.0), which causes the
 regex engine to "keep" everything it had matched prior to the C<\K> and
 not include it in C<$&>. This effectively provides variable-length
 look-behind. The use of C<\K> inside of another look-around assertion
