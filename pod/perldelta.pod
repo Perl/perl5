@@ -41,27 +41,6 @@ Importing functions from C<UNIVERSAL> has been deprecated since v5.12, and
 is now a fatal error.  S<C<"use UNIVERSAL">> without any arguments is still
 allowed.
 
-=head1 Deprecations
-
-XXX Any deprecated features, syntax, modules etc. should be listed here.
-
-[ List each other deprecation as a =head2 entry ]
-
-=head1 Performance Enhancements
-
-XXX Changes which enhance performance without changing behaviour go here.
-There may well be none in a stable release.
-
-[ List each enhancement as a =item entry ]
-
-=over 4
-
-=item *
-
-XXX
-
-=back
-
 =head1 Modules and Pragmata
 
 =head2 Updated Modules and Pragmata
