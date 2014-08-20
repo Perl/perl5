@@ -118,7 +118,7 @@ Details on C level symbols and libperl.t added.
 =item *
 
 Recommended replacements for tmpfile, atoi, strtol, and strtoul added.
- 
+
 =back
 
 =head3 L<perlop>
@@ -222,7 +222,7 @@ long double formats, or by 64-bit integers not being available
 
 =item *
 
-L<require> with no argument or undef used to warn about a Null filename; now
+C<require> with no argument or undef used to warn about a Null filename; now
 it dies with C<Missing or undefined argument to require>.
 
 =back
@@ -310,7 +310,7 @@ it handles the locales correctly.  [perl #121930]
 =item *
 
 A bug has been fixed where zero-length assertions and code blocks inside of a
-regex could cause L<pos> to see an incorrect value.  [perl #122460]
+regex could cause C<pos> to see an incorrect value.  [perl #122460]
 
 =back
 
