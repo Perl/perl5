@@ -16541,6 +16541,9 @@ d_prctl_set_name=$undef
 case $d_prctl in
     $define)
 	$cat >try.c <<EOM
+#ifdef __ANDROID__
+#include <unistd.h>
+#endif
 #include <sys/prctl.h>
 
 int main (int argc, char *argv[])
