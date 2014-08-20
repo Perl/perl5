@@ -125,7 +125,7 @@ XXX
 
 =item *
 
-L<B::Debug> has been upgraded from version 1.20 to 1.21
+L<B::Debug> has been upgraded from version 1.19 to 1.21
 
 =item *
 
