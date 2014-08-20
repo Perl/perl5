@@ -133,7 +133,7 @@ if ($Config{nvsize} == 8 &&
     $Config{nvsize} == 16 &&
     # 9a 99 99 99 99 99 99 99 99 99 99 99 99 99 fb 3f (LE), pack F is the NV
     (pack("F", 0.1) =~ /^\x9A\x99{6}/ ||  # LE
-     pack("F", 0.1) =~ /\x99{6}x9A$/)    # BE
+     pack("F", 0.1) =~ /\x99{6}\x9A$/)    # BE
     ) {
     @hexfloat = (
 	[ '%a', '0',       '0x1p-1' ],
