@@ -256,6 +256,11 @@ L</Platform Support> section, instead.
 
 Internal handling of floating point values has been improved.
 
+=item *
+
+MurmurHash64A and MurmurHash64B can now be configured as the internal hash
+function.
+
 =back
 
 =head1 Testing
