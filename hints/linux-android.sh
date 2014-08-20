@@ -286,6 +286,7 @@ esac
 $cat <<'EOO' >> $pwd/config.arch
 
 osname='android'
+eval "libpth='$libpth /system/lib /vendor/lib'"
 
 if $test "X$procselfexe" = X; then
     case "$d_procselfexe" in
