@@ -5563,6 +5563,16 @@ typedef struct am_table_short AMTS;
 
 #endif /* !USE_LOCALE_NUMERIC */
 
+#if defined(HAS_LONG_DOUBLE) && defined(USE_LONG_DOUBLE)
+#  if defined(HAS_STRTOLD)
+#    define Perl_strtod(s, e) strtold(s, e)
+#  elif defined(HAS_STRTOD)
+#    define Perl_strtod(s, e) (NV)strtod(s, e) /* Unavoidable loss. */
+#  endif
+#elif defined(HAS_STRTOD)
+#  define Perl_strtod(s, e) strtod(s, e)
+#endif
+
 #if !defined(Strtol) && defined(USE_64_BIT_INT) && defined(IV_IS_QUAD) && \
 	(QUADKIND == QUAD_IS_LONG_LONG || QUADKIND == QUAD_IS___INT64)
 #    ifdef __hpux

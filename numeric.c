@@ -1188,7 +1188,7 @@ Perl_my_atof2(pTHX_ const char* orig, NV* value)
             /* The native strtod() may not get all the possible
              * inf/nan strings PEEK_INFNAN() recognizes. */
             char* endp;
-            NV nv = strtod(p, &endp);
+            NV nv = Perl_strtod(p, &endp);
             if (p != endp) {
                 *value = nv;
                 return endp;
