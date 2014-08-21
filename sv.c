@@ -10650,7 +10650,6 @@ S_hextract(pTHX_ const NV nv, int* exponent, U8* vhex, U8* vend)
         else
             HEXTRACT_COUNT(ix, 2);
     }
-    (*exponent)--;
 #  elif LONG_DOUBLEKIND == LONG_DOUBLE_IS_IEEE_754_128_BIT_BIG_ENDIAN
     /* Used in e.g. Solaris Sparc and HP-UX PA-RISC, e.g. -0.1L:
      * bf fb 99 99 99 99 99 99 99 99 99 99 99 99 99 9a */
@@ -10663,7 +10662,6 @@ S_hextract(pTHX_ const NV nv, int* exponent, U8* vhex, U8* vend)
         else
             HEXTRACT_COUNT(ix, 2);
     }
-    *exponent -= 4;
 #  elif LONG_DOUBLEKIND == LONG_DOUBLE_IS_X86_80_BIT_LITTLE_ENDIAN
     /* x86 80-bit "extended precision", 64 bits of mantissa / fraction /
      * significand, 15 bits of exponent, 1 bit of sign.  NVSIZE can
@@ -10677,7 +10675,6 @@ S_hextract(pTHX_ const NV nv, int* exponent, U8* vhex, U8* vend)
         else
             HEXTRACT_COUNT(ix, 2);
     }
-    (*exponent)--;
 #  elif LONG_DOUBLEKIND == LONG_DOUBLE_IS_X86_80_BIT_BIG_ENDIAN
     /* The last 8 bytes are the mantissa/fraction.
      * (does this format ever happen?) */
@@ -10688,7 +10685,6 @@ S_hextract(pTHX_ const NV nv, int* exponent, U8* vhex, U8* vend)
         else
             HEXTRACT_COUNT(ix, 2);
     }
-    *exponent -= 4;
 #  elif LONG_DOUBLEKIND == LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_LITTLE_ENDIAN
     /* Where is this used?
      * 9a 99 99 99 99 99 59 bc 9a 99 99 99 99 99 b9 3f */
@@ -10717,7 +10713,6 @@ S_hextract(pTHX_ const NV nv, int* exponent, U8* vhex, U8* vend)
             HEXTRACT_COUNT(ix, 2);
     }
 #    endif
-    (*exponent)--;
 #  elif LONG_DOUBLEKIND == LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_BIG_ENDIAN
     /* Used in e.g. PPC/Power (AIX) and MIPS.
      *
@@ -10752,7 +10747,6 @@ S_hextract(pTHX_ const NV nv, int* exponent, U8* vhex, U8* vend)
             HEXTRACT_COUNT(ix, 2);
     }
 #   endif
-    (*exponent)--;
 #  else
     Perl_croak(aTHX_
                "Hexadecimal float: unsupported long double format");
@@ -11862,6 +11856,15 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                 vend = S_hextract(aTHX_ nv, &exponent, vhex, NULL);
                 S_hextract(aTHX_ nv, &exponent, vhex, vend);
 
+#if NVSIZE > DOUBLESIZE && defined(LONG_DOUBLEKIND)
+#  if LONG_DOUBLEKIND == LONG_DOUBLE_IS_X86_80_BIT_LITTLE_ENDIAN || \
+      LONG_DOUBLEKIND == LONG_DOUBLE_IS_X86_80_BIT_BIG_ENDIAN
+                exponent -= 4;
+#  else
+                exponent--;
+#  endif
+#endif
+
                 if (nv < 0)
                     *p++ = '-';
                 else if (plus)
@@ -11895,7 +11898,6 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                     }
 
 #if NVSIZE == DOUBLESIZE
-                    /* For long doubles S_hextract() took care of this. */
                     exponent--;
 #endif
 
