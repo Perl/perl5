@@ -390,7 +390,7 @@ other named unary operator.  The operator may be any of:
     -g  File has setgid bit set.
     -k  File has sticky bit set.
 
-    -T  File is an ASCII text file (heuristic guess).
+    -T  File is an ASCII or UTF-8 text file (heuristic guess).
     -B  File is a "binary" file (opposite of -T).
 
     -M  Script start time minus file modification time, in days.
@@ -449,12 +449,18 @@ filehandle won't cache the results of the file tests when this pragma is
 in effect.  Read the documentation for the C<filetest> pragma for more
 information.
 
-The C<-T> and C<-B> switches work as follows.  The first block or so of the
-file is examined for odd characters such as strange control codes or
-characters with the high bit set.  If too many strange characters (>30%)
-are found, it's a C<-B> file; otherwise it's a C<-T> file.  Also, any file
-containing a zero byte in the first block is considered a binary file.  If C<-T>
-or C<-B> is used on a filehandle, the current IO buffer is examined
+The C<-T> and C<-B> switches work as follows.  The first block or so of
+the file is examined to see if it is valid UTF-8 that includes non-ASCII
+characters.  If, so it's a C<-T> file.  Otherwise, that same portion of
+the file is examined for odd characters such as strange control codes or
+characters with the high bit set.  If more than a third of the
+characters are strange, it's a C<-B> file; otherwise it's a C<-T> file.
+Also, any file containing a zero byte in the examined portion is
+considered a binary file.  (If executed within the scope of a L<S<use
+locale>|perllocale> which includes C<LC_CTYPE>, odd characters are
+anything that isn't a printable nor space in the current locale.) If
+C<-T> or C<-B> is used on a filehandle, the current IO buffer is
+examined
 rather than the first block.  Both C<-T> and C<-B> return true on an empty
 file, or a file at EOF when testing a filehandle.  Because you have to
 read a file to do the C<-T> test, on most occasions you want to use a C<-f>
