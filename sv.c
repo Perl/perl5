@@ -2806,6 +2806,39 @@ S_uiv_2buf(char *const buf, const IV iv, UV uv, const int is_uv, char **const pe
     return ptr;
 }
 
+/* Helper for sv_2pv_flags and sv_vcatpvfn_flags.  If the NV is an
+ * infinity or a not-a-number, writes the approrpriate strings to the
+ * buffer, including a zero byte.  Returns the written length,
+ * excluding the zero byte, or zero. */
+STATIC size_t
+S_infnan_copy(NV nv, char* buffer, size_t maxlen) {
+    if (maxlen < 4)
+        return 0;
+    else {
+        char* s = buffer;
+        if (Perl_isinf(nv)) {
+            if (nv < 0) {
+                if (maxlen < 5)
+                    return 0;
+                *s++ = '-';
+            }
+            *s++ = 'I';
+            *s++ = 'n';
+            *s++ = 'f';
+        }
+        else if (Perl_isnan(nv)) {
+            *s++ = 'N';
+            *s++ = 'a';
+            *s++ = 'N';
+            /* XXX output the payload mantissa bits as "(hhh...)" */
+        }
+        else
+            return 0;
+        *s++ = 0;
+        return s - buffer - 1;
+    }
+}
+
 /*
 =for apidoc sv_2pv_flags
 
@@ -2989,37 +3022,44 @@ Perl_sv_2pv_flags(pTHX_ SV *const sv, STRLEN *const lp, const I32 flags)
 	    *s++ = '0';
 	    *s = '\0';
 	} else {
-	    dSAVE_ERRNO;
+            STRLEN len;
 	    /* The +20 is pure guesswork.  Configure test needed. --jhi */
 	    s = SvGROW_mutable(sv, NV_DIG + 20);
-	    /* some Xenix systems wipe out errno here */
+
+            len = S_infnan_copy(SvNVX(sv), s, SvLEN(sv));
+            if (len > 0)
+                s += len;
+            else {
+                dSAVE_ERRNO;
+                /* some Xenix systems wipe out errno here */
 
 #ifndef USE_LOCALE_NUMERIC
-            PERL_UNUSED_RESULT(Gconvert(SvNVX(sv), NV_DIG, 0, s));
-            SvPOK_on(sv);
-#else
-            {
-                DECLARE_STORE_LC_NUMERIC_SET_TO_NEEDED();
                 PERL_UNUSED_RESULT(Gconvert(SvNVX(sv), NV_DIG, 0, s));
-
-                /* If the radix character is UTF-8, and actually is in the
-                 * output, turn on the UTF-8 flag for the scalar */
-                if (PL_numeric_local
-                    && PL_numeric_radix_sv && SvUTF8(PL_numeric_radix_sv)
-                    && instr(s, SvPVX_const(PL_numeric_radix_sv)))
+                SvPOK_on(sv);
+#else
                 {
-                    SvUTF8_on(sv);
-                }
-                RESTORE_LC_NUMERIC();
-            }
+                    DECLARE_STORE_LC_NUMERIC_SET_TO_NEEDED();
+                    PERL_UNUSED_RESULT(Gconvert(SvNVX(sv), NV_DIG, 0, s));
 
-            /* We don't call SvPOK_on(), because it may come to pass that the
-             * locale changes so that the stringification we just did is no
-             * longer correct.  We will have to re-stringify every time it is
-             * needed */
+                    /* If the radix character is UTF-8, and actually is in the
+                     * output, turn on the UTF-8 flag for the scalar */
+                    if (PL_numeric_local
+                        && PL_numeric_radix_sv && SvUTF8(PL_numeric_radix_sv)
+                        && instr(s, SvPVX_const(PL_numeric_radix_sv)))
+                        {
+                            SvUTF8_on(sv);
+                        }
+                    RESTORE_LC_NUMERIC();
+                }
+
+                /* We don't call SvPOK_on(), because it may come to
+                 * pass that the locale changes so that the
+                 * stringification we just did is no longer correct.  We
+                 * will have to re-stringify every time it is needed */
 #endif
-	    RESTORE_ERRNO;
-	    while (*s) s++;
+                RESTORE_ERRNO;
+            }
+            while (*s) s++;
 	}
     }
     else if (isGV_with_GP(sv)) {
@@ -12007,25 +12047,13 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                     elen = width;
                 }
             }
-            else if (Perl_isinf(nv)) {
-                if (nv > 0.0) {
-                    elen = 4;
-                    Copy("Inf", PL_efloatbuf, elen, char);
-                }
-                else {
-                    elen = 5;
-                        Copy("-Inf", PL_efloatbuf, elen, char);
-                }
-            }
-            else if (Perl_isnan(nv)) {
-                elen = 4;
-                Copy("NaN", PL_efloatbuf, elen, char);
-            }
-            else {
-		char *ptr = ebuf + sizeof ebuf;
-		*--ptr = '\0';
-		*--ptr = c;
-		/* FIXME: what to do if HAS_LONG_DOUBLE but not PERL_PRIfldbl? */
+            else
+                elen = S_infnan_copy(nv, PL_efloatbuf, PL_efloatsize);
+            if (elen == 0) {
+                char *ptr = ebuf + sizeof ebuf;
+                *--ptr = '\0';
+                *--ptr = c;
+                /* FIXME: what to do if HAS_LONG_DOUBLE but not PERL_PRIfldbl? */
 #if defined(HAS_LONG_DOUBLE) && defined(PERL_PRIfldbl)
 		if (intsize == 'q') {
 		    /* Copy the one or more characters in a long double

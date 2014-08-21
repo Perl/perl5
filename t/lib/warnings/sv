@@ -411,7 +411,7 @@ $x = "ABC"; ++$x;
 $x = "ABC123"; ++$x;
 $x = " +10"; ++$x;
 EXPECT
-Argument "a_c" treated as 0 in increment (++) at - line 5.
-Argument "(?^:abc)" treated as 0 in increment (++) at - line 6.
+Argument "a_c" isn't numeric in preincrement (++) at - line 5.
+Argument "(?^:abc)" isn't numeric in preincrement (++) at - line 6.
 Argument "123x" isn't numeric in preincrement (++) at - line 7.
 Argument "123e" isn't numeric in preincrement (++) at - line 8.
