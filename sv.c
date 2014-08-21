@@ -10650,7 +10650,7 @@ S_hextract(pTHX_ const NV nv, int* exponent, U8* vhex, U8* vend)
         else
             HEXTRACT_COUNT(ix, 2);
     }
-    *exponent -= 4;
+    (*exponent)--;
 #  elif LONG_DOUBLEKIND == LONG_DOUBLE_IS_IEEE_754_128_BIT_BIG_ENDIAN
     /* Used in e.g. Solaris Sparc and HP-UX PA-RISC, e.g. -0.1L:
      * bf fb 99 99 99 99 99 99 99 99 99 99 99 99 99 9a */
@@ -10677,7 +10677,7 @@ S_hextract(pTHX_ const NV nv, int* exponent, U8* vhex, U8* vend)
         else
             HEXTRACT_COUNT(ix, 2);
     }
-    *exponent -= 4;
+    (*exponent)--;
 #  elif LONG_DOUBLEKIND == LONG_DOUBLE_IS_X86_80_BIT_BIG_ENDIAN
     /* The last 8 bytes are the mantissa/fraction.
      * (does this format ever happen?) */
