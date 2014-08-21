@@ -617,7 +617,7 @@ struct loop {
 #define OA_DANGEROUS 64
 #define OA_DEFGV 128
 
-/* The next 4 bits encode op class information */
+/* The next 4 bits (8..11) encode op class information */
 #define OCSHIFT 8
 
 #define OA_CLASS_MASK (15 << OCSHIFT)
@@ -637,9 +637,10 @@ struct loop {
 #define OA_FILESTATOP (12 << OCSHIFT)
 #define OA_LOOPEXOP (13 << OCSHIFT)
 
+/* Each remaining nybble of PL_opargs (i.e. bits 12..15, 16..19 etc)
+ * encode the type for each arg */
 #define OASHIFT 12
 
-/* Remaining nybbles of PL_opargs */
 #define OA_SCALAR 1
 #define OA_LIST 2
 #define OA_AVREF 3
