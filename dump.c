@@ -879,121 +879,6 @@ S_op_private_to_names(pTHX_ SV *tmpsv, U32 optype, U32 op_private) {
     return FALSE;
 }
 
-#define DUMP_OP_FLAGS(o,level,file)                                 \
-    if (o->op_flags || o->op_slabbed || o->op_savefree || o->op_static) { \
-        SV * const tmpsv = newSVpvs("");                                \
-        switch (o->op_flags & OPf_WANT) {                               \
-        case OPf_WANT_VOID:                                             \
-            sv_catpv(tmpsv, ",VOID");                                   \
-            break;                                                      \
-        case OPf_WANT_SCALAR:                                           \
-            sv_catpv(tmpsv, ",SCALAR");                                 \
-            break;                                                      \
-        case OPf_WANT_LIST:                                             \
-            sv_catpv(tmpsv, ",LIST");                                   \
-            break;                                                      \
-        default:                                                        \
-            sv_catpv(tmpsv, ",UNKNOWN");                                \
-            break;                                                      \
-        }                                                               \
-        append_flags(tmpsv, o->op_flags, op_flags_names);               \
-        if (o->op_slabbed)  sv_catpvs(tmpsv, ",SLABBED");               \
-        if (o->op_savefree) sv_catpvs(tmpsv, ",SAVEFREE");              \
-        if (o->op_static)   sv_catpvs(tmpsv, ",STATIC");                \
-        if (o->op_folded)   sv_catpvs(tmpsv, ",FOLDED");                \
-        if (o->op_lastsib)  sv_catpvs(tmpsv, ",LASTSIB");               \
-        Perl_dump_indent(aTHX_ level, file, "FLAGS = (%s)\n",           \
-                         SvCUR(tmpsv) ? SvPVX_const(tmpsv) + 1 : "");   \
-    }
-
-#define DUMP_OP_PRIVATE(o,level,file)                                   \
-    if (o->op_private) {                                                \
-        U32 optype = o->op_type;                                        \
-        U32 oppriv = o->op_private;                                     \
-        SV * const tmpsv = newSVpvs("");                                \
-	if (PL_opargs[optype] & OA_TARGLEX) {                           \
-	    if (oppriv & OPpTARGET_MY)                                  \
-		sv_catpv(tmpsv, ",TARGET_MY");                          \
-	}                                                               \
-	else if (optype == OP_ENTERSUB ||                               \
-                 optype == OP_RV2SV ||                                  \
-                 optype == OP_GVSV ||                                   \
-                 optype == OP_RV2AV ||                                  \
-                 optype == OP_RV2HV ||                                  \
-                 optype == OP_RV2GV ||                                  \
-                 optype == OP_AELEM ||                                  \
-                 optype == OP_HELEM )                                   \
-        {                                                               \
-            if (optype == OP_ENTERSUB) {                                \
-                append_flags(tmpsv, oppriv, op_entersub_names);         \
-            }                                                           \
-            else {                                                      \
-                switch (oppriv & OPpDEREF) {                            \
-                case OPpDEREF_SV:                                       \
-                    sv_catpv(tmpsv, ",SV");                             \
-                    break;                                              \
-                case OPpDEREF_AV:                                       \
-                    sv_catpv(tmpsv, ",AV");                             \
-                    break;                                              \
-                case OPpDEREF_HV:                                       \
-                    sv_catpv(tmpsv, ",HV");                             \
-                    break;                                              \
-                }                                                       \
-                if (oppriv & OPpMAYBE_LVSUB)                            \
-                    sv_catpv(tmpsv, ",MAYBE_LVSUB");                    \
-            }                                                           \
-            if (optype == OP_AELEM || optype == OP_HELEM) {             \
-                if (oppriv & OPpLVAL_DEFER)                             \
-                    sv_catpv(tmpsv, ",LVAL_DEFER");                     \
-            }                                                           \
-            else if (optype == OP_RV2HV || optype == OP_PADHV) {        \
-                if (oppriv & OPpMAYBE_TRUEBOOL)                         \
-                    sv_catpvs(tmpsv, ",OPpMAYBE_TRUEBOOL");             \
-                if (oppriv & OPpTRUEBOOL)                               \
-                    sv_catpvs(tmpsv, ",OPpTRUEBOOL");                   \
-            }                                                           \
-            else {                                                      \
-                if (oppriv & HINT_STRICT_REFS)                          \
-                    sv_catpv(tmpsv, ",STRICT_REFS");                    \
-                if (oppriv & OPpOUR_INTRO)                              \
-                    sv_catpv(tmpsv, ",OUR_INTRO");                      \
-            }                                                           \
-        }                                                               \
-	else if (S_op_private_to_names(aTHX_ tmpsv, optype, oppriv)) {  \
-	}                                                               \
-	else if (OP_IS_FILETEST(o->op_type)) {                          \
-            if (oppriv & OPpFT_ACCESS)                                  \
-                sv_catpv(tmpsv, ",FT_ACCESS");                          \
-            if (oppriv & OPpFT_STACKED)                                 \
-                sv_catpv(tmpsv, ",FT_STACKED");                         \
-            if (oppriv & OPpFT_STACKING)                                \
-                sv_catpv(tmpsv, ",FT_STACKING");                        \
-            if (oppriv & OPpFT_AFTER_t)                                 \
-                sv_catpv(tmpsv, ",AFTER_t");                            \
-	}                                                               \
-	else if (o->op_type == OP_AASSIGN) {                            \
-	    if (oppriv & OPpASSIGN_COMMON)                              \
-		sv_catpvs(tmpsv, ",COMMON");                            \
-	    if (oppriv & OPpMAYBE_LVSUB)                                \
-		sv_catpvs(tmpsv, ",MAYBE_LVSUB");                       \
-	}                                                               \
-	if (o->op_flags & OPf_MOD && oppriv & OPpLVAL_INTRO)            \
-	    sv_catpv(tmpsv, ",INTRO");                                  \
-	if (o->op_type == OP_PADRANGE)                                  \
-	    Perl_sv_catpvf(aTHX_ tmpsv, ",COUNT=%"UVuf,                 \
-                           (UV)(oppriv & OPpPADRANGE_COUNTMASK));       \
-        if (  (o->op_type == OP_RV2HV || o->op_type == OP_RV2AV ||      \
-               o->op_type == OP_PADAV || o->op_type == OP_PADHV ||      \
-               o->op_type == OP_ASLICE || o->op_type == OP_HSLICE)      \
-           && oppriv & OPpSLICEWARNING  )                               \
-            sv_catpvs(tmpsv, ",SLICEWARNING");                          \
-	if (SvCUR(tmpsv)) {                                             \
-            Perl_dump_indent(aTHX_ level, file, "PRIVATE = (%s)\n", SvPVX_const(tmpsv) + 1); \
-	} else                                                          \
-            Perl_dump_indent(aTHX_ level, file, "PRIVATE = (0x%"UVxf")\n", \
-                             (UV)oppriv);                               \
-    }
-
 
 void
 Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, const OP *o)
@@ -1054,8 +939,120 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, const OP *o)
     Perl_dump_indent(aTHX_ level, file, "ADDR = 0x%"UVxf" => 0x%"UVxf"\n", (UV)o, (UV)o->op_next);
 #endif
 
-    DUMP_OP_FLAGS(o,level,file);
-    DUMP_OP_PRIVATE(o,level,file);
+    if (o->op_flags || o->op_slabbed || o->op_savefree || o->op_static) {
+        SV * const tmpsv = newSVpvs("");
+        switch (o->op_flags & OPf_WANT) {
+        case OPf_WANT_VOID:
+            sv_catpv(tmpsv, ",VOID");
+            break;
+        case OPf_WANT_SCALAR:
+            sv_catpv(tmpsv, ",SCALAR");
+            break;
+        case OPf_WANT_LIST:
+            sv_catpv(tmpsv, ",LIST");
+            break;
+        default:
+            sv_catpv(tmpsv, ",UNKNOWN");
+            break;
+        }
+        append_flags(tmpsv, o->op_flags, op_flags_names);
+        if (o->op_slabbed)  sv_catpvs(tmpsv, ",SLABBED");
+        if (o->op_savefree) sv_catpvs(tmpsv, ",SAVEFREE");
+        if (o->op_static)   sv_catpvs(tmpsv, ",STATIC");
+        if (o->op_folded)   sv_catpvs(tmpsv, ",FOLDED");
+        if (o->op_lastsib)  sv_catpvs(tmpsv, ",LASTSIB");
+        Perl_dump_indent(aTHX_ level, file, "FLAGS = (%s)\n",
+                         SvCUR(tmpsv) ? SvPVX_const(tmpsv) + 1 : "");
+    }
+
+    if (o->op_private) {
+        U32 optype = o->op_type;
+        U32 oppriv = o->op_private;
+        SV * const tmpsv = newSVpvs("");
+	if (PL_opargs[optype] & OA_TARGLEX) {
+	    if (oppriv & OPpTARGET_MY)
+		sv_catpv(tmpsv, ",TARGET_MY");
+	}
+	else if (optype == OP_ENTERSUB ||
+                 optype == OP_RV2SV ||
+                 optype == OP_GVSV ||
+                 optype == OP_RV2AV ||
+                 optype == OP_RV2HV ||
+                 optype == OP_RV2GV ||
+                 optype == OP_AELEM ||
+                 optype == OP_HELEM )
+        {
+            if (optype == OP_ENTERSUB) {
+                append_flags(tmpsv, oppriv, op_entersub_names);
+            }
+            else {
+                switch (oppriv & OPpDEREF) {
+                case OPpDEREF_SV:
+                    sv_catpv(tmpsv, ",SV");
+                    break;
+                case OPpDEREF_AV:
+                    sv_catpv(tmpsv, ",AV");
+                    break;
+                case OPpDEREF_HV:
+                    sv_catpv(tmpsv, ",HV");
+                    break;
+                }
+                if (oppriv & OPpMAYBE_LVSUB)
+                    sv_catpv(tmpsv, ",MAYBE_LVSUB");
+            }
+            if (optype == OP_AELEM || optype == OP_HELEM) {
+                if (oppriv & OPpLVAL_DEFER)
+                    sv_catpv(tmpsv, ",LVAL_DEFER");
+            }
+            else if (optype == OP_RV2HV || optype == OP_PADHV) {
+                if (oppriv & OPpMAYBE_TRUEBOOL)
+                    sv_catpvs(tmpsv, ",OPpMAYBE_TRUEBOOL");
+                if (oppriv & OPpTRUEBOOL)
+                    sv_catpvs(tmpsv, ",OPpTRUEBOOL");
+            }
+            else {
+                if (oppriv & HINT_STRICT_REFS)
+                    sv_catpv(tmpsv, ",STRICT_REFS");
+                if (oppriv & OPpOUR_INTRO)
+                    sv_catpv(tmpsv, ",OUR_INTRO");
+            }
+        }
+	else if (S_op_private_to_names(aTHX_ tmpsv, optype, oppriv)) {
+	}
+	else if (OP_IS_FILETEST(o->op_type)) {
+            if (oppriv & OPpFT_ACCESS)
+                sv_catpv(tmpsv, ",FT_ACCESS");
+            if (oppriv & OPpFT_STACKED)
+                sv_catpv(tmpsv, ",FT_STACKED");
+            if (oppriv & OPpFT_STACKING)
+                sv_catpv(tmpsv, ",FT_STACKING");
+            if (oppriv & OPpFT_AFTER_t)
+                sv_catpv(tmpsv, ",AFTER_t");
+	}
+	else if (o->op_type == OP_AASSIGN) {
+	    if (oppriv & OPpASSIGN_COMMON)
+		sv_catpvs(tmpsv, ",COMMON");
+	    if (oppriv & OPpMAYBE_LVSUB)
+		sv_catpvs(tmpsv, ",MAYBE_LVSUB");
+	}
+	if (o->op_flags & OPf_MOD && oppriv & OPpLVAL_INTRO)
+	    sv_catpv(tmpsv, ",INTRO");
+	if (o->op_type == OP_PADRANGE)
+	    Perl_sv_catpvf(aTHX_ tmpsv, ",COUNT=%"UVuf,
+                           (UV)(oppriv & OPpPADRANGE_COUNTMASK));
+        if (  (o->op_type == OP_RV2HV || o->op_type == OP_RV2AV ||
+               o->op_type == OP_PADAV || o->op_type == OP_PADHV ||
+               o->op_type == OP_ASLICE || o->op_type == OP_HSLICE)
+           && oppriv & OPpSLICEWARNING  )
+            sv_catpvs(tmpsv, ",SLICEWARNING");
+	if (SvCUR(tmpsv)) {
+            Perl_dump_indent(aTHX_ level, file, "PRIVATE = (%s)\n", SvPVX_const(tmpsv) + 1);
+	} else
+            Perl_dump_indent(aTHX_ level, file, "PRIVATE = (0x%"UVxf")\n",
+                             (UV)oppriv);
+    }
+
+
 
 
     switch (optype) {
