@@ -9,6 +9,7 @@ if ($] >= 5.010000) {
 	use experimental 'lexical_topic';
 	my $_ = 1;
 	is($_, 1, '$_ is 1');
+	1;
 END
 }
 else {
@@ -16,10 +17,27 @@ else {
 }
 
 if ($] >= 5.010001) {
+	is (eval <<'END', 1, 'switch compiles') or diag $@;
+	use experimental 'switch';
+	sub bar { 1 };
+	given(1) {
+		when (\&bar) {
+			pass("bar matches 1");
+		}
+		default {
+			fail("bar matches 1");
+		}
+	}
+	1;
+END
+}
+
+if ($] >= 5.010001) {
 	is (eval <<'END', 1, 'smartmatch compiles') or diag $@;
 	use experimental 'smartmatch';
 	sub bar { 1 };
 	is(1 ~~ \&bar, 1, "is 1");
+	1;
 END
 }
 

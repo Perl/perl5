@@ -1,5 +1,5 @@
 package experimental;
-$experimental::VERSION = '0.008';
+$experimental::VERSION = '0.010';
 use strict;
 use warnings;
 use version ();
@@ -8,16 +8,35 @@ use feature ();
 use Carp qw/croak carp/;
 
 my %warnings = map { $_ => 1 } grep { /^experimental::/ } keys %warnings::Offsets;
-my %features = map { $_ => 1 } keys %feature::feature;
+my %features = map { $_ => 1 } $] > 5.015006 ? keys %feature::feature : do {
+	my @features;
+	if ($] >= 5.010) {
+		push @features, qw/switch say state/;
+		push @features, 'unicode_strings' if $] > 5.011002;
+	}
+	@features;
+};
 
 my %min_version = (
-	array_base    => version->new('5'),
-	autoderef     => version->new('5.14.0'),
-	lexical_topic => version->new('5.10.0'),
-	regex_sets    => version->new('5.18.0'),
-	smartmatch    => version->new('5.10.1'),
-	signatures    => version->new('5.20.0'),
+	array_base      => '5',
+	autoderef       => '5.14.0',
+	current_sub     => '5.16.0',
+	evalbytes       => '5.16.0',
+	fc              => '5.16.0',
+	lexical_topic   => '5.10.0',
+	lexical_subs    => '5.18.0',
+	postderef       => '5.20.0',
+	postderef_qq    => '5.20.0',
+	regex_sets      => '5.18.0',
+	say             => '5.10.0',
+	smartmatch      => '5.10.0',
+	signatures      => '5.20.0',
+	state           => '5.10.0',
+	switch          => '5.10.0',
+	unicode_eval    => '5.16.0',
+	unicode_strings => '5.12.0',
 );
+$_ = version->new($_) for values %min_version;
 
 my %additional = (
 	postderef  => ['postderef_qq'],
@@ -93,7 +112,7 @@ experimental - Experimental features made easy
 
 =head1 VERSION
 
-version 0.008
+version 0.010
 
 =head1 SYNOPSIS
 
