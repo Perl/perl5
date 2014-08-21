@@ -588,14 +588,14 @@ for my $t (@hexfloat) {
         # hexdigits, and see if they differ in value by one.
         my ($rh, $eh) = ($result, $expected);
         sub extract_prefix {
-            ($_[0] =~ s/^(-?0x[0-9a-fA-F]+\.)//) && return $1;
+            ($_[0] =~ s/(-?0x[0-9a-fA-F]+\.)//) && return $1;
         }
         my $rp = extract_prefix($rh);
         my $ep = extract_prefix($eh);
         print "# rp = $rp, ep = $ep (rh $rh, eh $eh)\n";
         if ($rp eq $ep) { # If prefixes match.
             sub extract_exponent {
-                ($_[0] =~ s/([pP][+-]?\d+)$//) && return $1;
+                ($_[0] =~ s/([pP][+-]?\d+)//) && return $1;
             }
             my $re = extract_exponent($rh);
             my $ee = extract_exponent($eh);
