@@ -586,6 +586,13 @@ Perl_grok_number(pTHX_ const char *pv, STRLEN len, UV *valuep)
     return grok_number_flags(pv, len, valuep, 0);
 }
 
+/* Peek ahead to see whether this could be Inf/NaN/qNaN/snan/1.#INF */
+#define PEEK_INFNAN(d) \
+    (*s == 'I' || *s == 'i' || *s == 'N' || *s == 'n') || \
+     ((*s == 'Q' || *s == 'q' || *s == 'S' || *s == 's') && \
+      (s[1] == 'N' || s[1] == 'n')) || \
+    (*s == '1' && ((s[1] == '.' && s[2] == '#') || s[1] == '#'))
+
 /*
 =for apidoc grok_infnan
 
@@ -661,7 +668,7 @@ Perl_grok_infnan(const char** sp, const char* send)
         if (*s == 'S' || *s == 's' || *s == 'Q' || *s == 'q') {
             /* snan, qNaN */
             /* XXX do something with the snan/qnan difference */
-            s++; if (s == send || (*s != 'N' && *s != 'n')) return 0;
+            s++; if (s == send) return 0;
         }
 
         if (*s == 'N' || *s == 'n') {
@@ -669,12 +676,16 @@ Perl_grok_infnan(const char** sp, const char* send)
             s++; if (s == send || (*s != 'N' && *s != 'n')) return 0;
             s++;
 
+            flags |= IS_NUMBER_NAN | IS_NUMBER_NOT_INT;
+
             /* NaN can be followed by various stuff since there are
              * multiple different NaN values, and some implementations
-             * output the "payload" values, e.g. NaN123. */
-
-            flags |= IS_NUMBER_NAN | IS_NUMBER_NOT_INT;
+             * output the "payload" values, e.g. NaN123, NAN(abc),
+             * some implementation just have weird stuff like NaN%. */
+            s = send;
         }
+        else
+            return 0;
 
         *sp = s;
         return flags;
@@ -691,6 +702,7 @@ Perl_grok_number_flags(pTHX_ const char *pv, STRLEN len, UV *valuep, U32 flags)
 {
   const char *s = pv;
   const char * const send = pv + len;
+  const char *d;
   int numtype = 0;
   int sawinf = 0;
   int sawnan = 0;
@@ -710,6 +722,10 @@ Perl_grok_number_flags(pTHX_ const char *pv, STRLEN len, UV *valuep, U32 flags)
 
   if (s == send)
     return 0;
+
+  /* The first digit (after optional sign): note that might
+   * also point to "infinity" or "nan". */
+  d = s;
 
   /* next must be digit or the radix separator or beginning of infinity */
   if (isDIGIT(*s)) {
@@ -820,19 +836,23 @@ Perl_grok_number_flags(pTHX_ const char *pv, STRLEN len, UV *valuep, U32 flags)
       }
     }
     else
-      return 0;
+        return 0;
   }
   else {
-      int infnan_flags = Perl_grok_infnan(&s, send);
-      if ((infnan_flags & IS_NUMBER_INFINITY)) {
-          numtype |= infnan_flags;
-          sawinf = 1;
+      if (PEEK_INFNAN(d)) {
+          int infnan = Perl_grok_infnan(&d, send);
+          if ((infnan & IS_NUMBER_INFINITY)) {
+              numtype |= infnan;
+              sawinf = 1;
+          }
+          else if ((infnan & IS_NUMBER_NAN)) {
+              numtype |= infnan;
+              sawnan = 1;
+          }
+          else
+              return 0;
+          s = d;
       }
-      else if ((infnan_flags & IS_NUMBER_NAN)) {
-          numtype |= infnan_flags;
-          sawnan = 1;
-      } else
-          return 0;
   }
 
   if (sawinf) {
@@ -1093,7 +1113,7 @@ Perl_my_atof2(pTHX_ const char* orig, NV* value)
 #ifdef USE_PERL_ATOF
     UV accumulator[2] = {0,0};	/* before/after dp */
     bool negative = 0;
-    const char* send = s + strlen(orig) - 1;
+    const char* send = s + strlen(orig); /* one past the last */
     bool seen_digit = 0;
     I32 exp_adjust[2] = {0,0};
     I32 exp_acc[2] = {-1, -1};
@@ -1148,20 +1168,34 @@ Perl_my_atof2(pTHX_ const char* orig, NV* value)
 	    ++s;
     }
 
-    /* punt to strtod for NaN/Inf; if no support for it there, tough luck */
-
-#ifdef HAS_STRTOD
-    if (*s == 'n' || *s == 'N' || *s == 'i' || *s == 'I') {
-        const char *p = negative ? s - 1 : s;
-        char *endp;
-        NV rslt;
-        rslt = strtod(p, &endp);
-        if (endp != p) {
-            *value = rslt;
-            return (char *)endp;
+    {
+        const char *p0 = negative ? s - 1 : s;
+        const char *p = p0;
+#if defined(NV_INF) && defined(NV_NAN)
+        int infnan_flags = grok_infnan(&p, send);
+        if (infnan_flags && p != p0) {
+            if ((infnan_flags & IS_NUMBER_INFINITY)) {
+                *value = (infnan_flags & IS_NUMBER_NEG) ? -NV_INF: NV_INF;
+                return (char*)p;
+            }
+            else if ((infnan_flags & IS_NUMBER_NAN)) {
+                *value = NV_NAN;
+                return (char*)p;
+            }
         }
-    }
+#elif defined(HAS_STRTOD)
+        if (PEEK_INFNAN(s)) {
+            /* The native strtod() may not get all the possible
+             * inf/nan strings PEEK_INFNAN() recognizes. */
+            char* endp;
+            NV nv = strtod(p, &endp);
+            if (p != endp) {
+                *value = nv;
+                return endp;
+            }
+        }
 #endif
+    }
 
     /* we accumulate digits into an integer; when this becomes too
      * large, we add the total to NV and start again */

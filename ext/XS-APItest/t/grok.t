@@ -98,9 +98,9 @@ my @groks =
    #[ "Infin",PERL_SCAN_TRAILING, undef,
    #  IS_NUMBER_INFINITY | IS_NUMBER_NOT_INT | IS_NUMBER_TRAILING ],
    [ "nan",  0,                  undef, IS_NUMBER_NAN | IS_NUMBER_NOT_INT ],
-   [ "nanx", 0,                  undef, 0 ],
-   [ "nanx", PERL_SCAN_TRAILING, undef,
-     IS_NUMBER_NAN | IS_NUMBER_NOT_INT | IS_NUMBER_TRAILING],
+   # even without PERL_SCAN_TRAILING nan can have weird stuff trailing
+   [ "nanx", 0,                  undef, IS_NUMBER_NAN | IS_NUMBER_NOT_INT ],
+   [ "nanx", PERL_SCAN_TRAILING, undef, IS_NUMBER_NAN | IS_NUMBER_NOT_INT ],
   );
 
 for my $grok (@groks) {
