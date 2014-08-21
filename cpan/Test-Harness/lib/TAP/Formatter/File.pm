@@ -13,11 +13,11 @@ TAP::Formatter::File - Harness output delegate for file output
 
 =head1 VERSION
 
-Version 3.32
+Version 3.33
 
 =cut
 
-our $VERSION = '3.32';
+our $VERSION = '3.33';
 
 =head1 DESCRIPTION
 
@@ -30,7 +30,7 @@ This provides file orientated output formatting for TAP::Harness.
 
 =head2 C<< open_test >>
 
-See L<TAP::Formatter::base>
+See L<TAP::Formatter::Base>
 
 =cut
 

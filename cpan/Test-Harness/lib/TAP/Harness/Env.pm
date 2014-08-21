@@ -7,7 +7,7 @@ use constant IS_VMS => ( $^O eq 'VMS' );
 use TAP::Object;
 use Text::ParseWords qw/shellwords/;
 
-our $VERSION = '3.32';
+our $VERSION = '3.33';
 
 # Get the parts of @INC which are changed from the stock list AND
 # preserve reordering of stock directories.
@@ -126,24 +126,40 @@ TAP::Harness::Env - Parsing harness related environmental variables where approp
 
 =head1 VERSION
 
-Version 3.32
+Version 3.33
 
 =head1 SYNOPSIS
 
- my ($class, $args) = get_test_arguments();
- require_module($class);
- $class->new($args);
+ my $harness = TAP::Harness::Env->create(\%extra_args)
 
 =head1 DESCRIPTION
 
-This module implements the environmental variables that L<Test::Harness> for use with TAP::Harness.
-
-=head1 FUNCTIONS
+This module implements the environmental variables that L<Test::Harness> for use with TAP::Harness, and instantiates it with the appropriate arguments.
 
 =over 4
 
-=item * get_test_options( \%args )
+=item * HARNESS_PERL_SWITCHES
 
-This function reads the environment and generates an appropriate argument hash from it. If given any arguments, there will override the environmental defaults. It will return of C<$class> and C<$args>.
+=item * HARNESS_VERBOSE
+
+=item * HARNESS_SUBCLASS
+
+=item * HARNESS_OPTIONS
+
+=item * HARNESS_TIMER
+
+=item * HARNESS_COLOR
+
+=item * HARNESS_IGNORE_EXIT
+
+=back
+
+=head1 METHODS
+
+=over 4
+
+=item * create( \%args )
+
+This function reads the environment and generates an appropriate argument hash from it. If given any arguments in C<%extra_args>, these will override the environmental defaults. In accepts C<harness_class> (which defaults to C<TAP::Harness>), and any argument the harness class accepts.
 
 =back
