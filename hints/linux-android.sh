@@ -283,6 +283,7 @@ esac
 $cat <<EOO >> $pwd/config.arch
 
 osname='android'
+eval "libpth='$libpth /system/lib /vendor/lib'"
 EOO
 
 # Android is a linux variant, so run those hints.
