@@ -2919,11 +2919,11 @@ PP(pp_oct)
         tmps++, len--;
     if (*tmps == '0')
         tmps++, len--;
-    if (*tmps == 'x' || *tmps == 'X') {
+    if (isALPHA_FOLD_EQ(*tmps, 'x')) {
     hex:
         result_uv = grok_hex (tmps, &len, &flags, &result_nv);
     }
-    else if (*tmps == 'b' || *tmps == 'B')
+    else if (isALPHA_FOLD_EQ(*tmps, 'b'))
         result_uv = grok_bin (tmps, &len, &flags, &result_nv);
     else
         result_uv = grok_oct (tmps, &len, &flags, &result_nv);

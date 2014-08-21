@@ -3906,7 +3906,7 @@ Perl_doing_taint(int argc, char *argv[], char *envp[])
      * if -T are the first chars together; otherwise one gets
      *  "Too late" message. */
     if ( argc > 1 && argv[1][0] == '-'
-         && (argv[1][1] == 't' || argv[1][1] == 'T') )
+         && isALPHA_FOLD_EQ(argv[1][1], 't'))
 	return 1;
     return 0;
 }

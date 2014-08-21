@@ -377,24 +377,6 @@ typedef struct scan_data_t {
     regnode_ssc *start_class;
 } scan_data_t;
 
-/* The below is perhaps overboard, but this allows us to save a test at the
- * expense of a mask.  This is because on both EBCDIC and ASCII machines, 'A'
- * and 'a' differ by a single bit; the same with the upper and lower case of
- * all other ASCII-range alphabetics.  On ASCII platforms, they are 32 apart;
- * on EBCDIC, they are 64.  This uses an exclusive 'or' to find that bit and
- * then inverts it to form a mask, with just a single 0, in the bit position
- * where the upper- and lowercase differ.  XXX There are about 40 other
- * instances in the Perl core where this micro-optimization could be used.
- * Should decide if maintenance cost is worse, before changing those
- *
- * Returns a boolean as to whether or not 'v' is either a lowercase or
- * uppercase instance of 'c', where 'c' is in [A-Za-z].  If 'c' is a
- * compile-time constant, the generated code is better than some optimizing
- * compilers figure out, amounting to a mask and test.  The results are
- * meaningless if 'c' is not one of [A-Za-z] */
-#define isARG2_lower_or_UPPER_ARG1(c, v) \
-                              (((v) & ~('A' ^ 'a')) ==  ((c) & ~('A' ^ 'a')))
-
 /*
  * Forward declarations for pregcomp()'s friends.
  */
@@ -3518,8 +3500,8 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
                 }
 
                 if (len == 2
-                    && isARG2_lower_or_UPPER_ARG1('s', *s)
-                    && isARG2_lower_or_UPPER_ARG1('s', *(s+1)))
+                    && isALPHA_FOLD_EQ(*s, 's')
+                    && isALPHA_FOLD_EQ(*(s+1), 's'))
                 {
 
                     /* EXACTF nodes need to know that the minimum length
@@ -12129,9 +12111,8 @@ tryagain:
                             && (PL_fold[ender] != PL_fold_latin1[ender]
                                 || ender == LATIN_SMALL_LETTER_SHARP_S
                                 || (len > 0
-                                   && isARG2_lower_or_UPPER_ARG1('s', ender)
-                                   && isARG2_lower_or_UPPER_ARG1('s',
-                                                                 *(s-1)))))
+                                   && isALPHA_FOLD_EQ(ender, 's')
+                                   && isALPHA_FOLD_EQ(*(s-1), 's'))))
                         {
                             maybe_exactfu = FALSE;
                         }
@@ -12315,7 +12296,7 @@ tryagain:
                      * as if it turns into an EXACTFU, it could later get
                      * joined with another 's' that would then wrongly match
                      * the sharp s */
-                    if (maybe_exactfu && isARG2_lower_or_UPPER_ARG1('s', ender))
+                    if (maybe_exactfu && isALPHA_FOLD_EQ(ender, 's'))
                     {
                         maybe_exactfu = FALSE;
                     }

@@ -4788,7 +4788,7 @@ Perl_yylex(pTHX)
 		     * line contains "Perl" rather than "perl" */
 		    if (!d) {
 			for (d = ipathend-4; d >= ipath; --d) {
-			    if ((*d == 'p' || *d == 'P')
+			    if (isALPHA_FOLD_EQ(*d, 'p')
 				&& !ibcmp(d, "perl", 4))
 			    {
 				break;
@@ -4870,7 +4870,7 @@ Perl_yylex(pTHX)
 				    != PL_unicode)
 				    baduni = TRUE;
 			    }
-			    if (baduni || *d1 == 'M' || *d1 == 'm') {
+			    if (baduni || isALPHA_FOLD_EQ(*d1, 'M')) {
 				const char * const m = d1;
 				while (*d1 && !isSPACE(*d1))
 				    d1++;
@@ -9868,17 +9868,17 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 	    const char *base, *Base, *max;
 
 	    /* check for hex */
-	    if (s[1] == 'x' || s[1] == 'X') {
+	    if (isALPHA_FOLD_EQ(s[1], 'x')) {
 		shift = 4;
 		s += 2;
 		just_zero = FALSE;
-	    } else if (s[1] == 'b' || s[1] == 'B') {
+	    } else if (isALPHA_FOLD_EQ(s[1], 'b')) {
 		shift = 1;
 		s += 2;
 		just_zero = FALSE;
 	    }
 	    /* check for a decimal in disguise */
-	    else if (s[1] == '.' || s[1] == 'e' || s[1] == 'E')
+	    else if (s[1] == '.' || isALPHA_FOLD_EQ(s[1], 'e'))
 		goto decimal;
 	    /* so it must be octal */
 	    else {
@@ -9982,8 +9982,8 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
                      * to avoid matching ".." */
 #define HEXFP_PEEK(s) \
 	(((s[0] == '.') && \
-	  (isXDIGIT(s[1]) || s[1] == 'p' || s[1] == 'P')) \
-	 || s[0] == 'p' || s[0] == 'P')
+	  (isXDIGIT(s[1]) || isALPHA_FOLD_EQ(s[1], 'p'))) \
+	 || isALPHA_FOLD_EQ(s[0], 'p'))
                     if (UNLIKELY(HEXFP_PEEK(s))) {
                         goto out;
                     }
@@ -10044,7 +10044,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
                         total_bits--;
                 }
 
-                if (total_bits > 0 && (*h == 'p' || *h == 'P')) {
+                if (total_bits > 0 && (isALPHA_FOLD_EQ(*h, 'p'))) {
                     bool negexp = FALSE;
                     h++;
                     if (*h == '+')
@@ -10203,18 +10203,19 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 	}
 
 	/* read exponent part, if present */
-	if (((*s == 'e' || *s == 'E') ||
-             UNLIKELY(hexfp && (*s == 'p' || *s == 'P'))) &&
-            strchr("+-0123456789_", s[1])) {
+	if ((isALPHA_FOLD_EQ(*s, 'e')
+              || UNLIKELY(hexfp && isALPHA_FOLD_EQ(*s, 'p')))
+            && strchr("+-0123456789_", s[1]))
+        {
             floatit = TRUE;
 
 	    /* regardless of whether user said 3E5 or 3e5, use lower 'e',
                ditto for p (hexfloats) */
-            if ((*s == 'e' || *s == 'E')) {
+            if ((isALPHA_FOLD_EQ(*s, 'e'))) {
 		/* At least some Mach atof()s don't grok 'E' */
                 *d++ = 'e';
             }
-            else if (UNLIKELY(hexfp && (*s == 'p' || *s == 'P'))) {
+            else if (UNLIKELY(hexfp && (isALPHA_FOLD_EQ(*s, 'p')))) {
                 *d++ = 'p';
             }
 

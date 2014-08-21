@@ -3775,7 +3775,7 @@ S_fold_constants(pTHX_ OP *o)
 	    {
 		const char *s = SvPVX_const(sv);
 		while (s < SvEND(sv)) {
-		    if (*s == 'p' || *s == 'P') goto nope;
+		    if (isALPHA_FOLD_EQ(*s, 'p')) goto nope;
 		    s++;
 		}
 	    }

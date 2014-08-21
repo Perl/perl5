@@ -153,11 +153,11 @@ Perl_grok_bin(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result)
            for compatibility silently suffer "b" and "0b" as valid binary
            numbers. */
         if (len >= 1) {
-            if (s[0] == 'b' || s[0] == 'B') {
+            if (isALPHA_FOLD_EQ(s[0], 'b')) {
                 s++;
                 len--;
             }
-            else if (len >= 2 && s[0] == '0' && (s[1] == 'b' || s[1] == 'B')) {
+            else if (len >= 2 && s[0] == '0' && (isALPHA_FOLD_EQ(s[1], 'b'))) {
                 s+=2;
                 len-=2;
             }
@@ -274,11 +274,11 @@ Perl_grok_hex(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result)
            for compatibility silently suffer "x" and "0x" as valid hex numbers.
         */
         if (len >= 1) {
-            if (s[0] == 'x' || s[0] == 'X') {
+            if (isALPHA_FOLD_EQ(s[0], 'x')) {
                 s++;
                 len--;
             }
-            else if (len >= 2 && s[0] == '0' && (s[1] == 'x' || s[1] == 'X')) {
+            else if (len >= 2 && s[0] == '0' && (isALPHA_FOLD_EQ(s[1], 'x'))) {
                 s+=2;
                 len-=2;
             }
@@ -588,9 +588,9 @@ Perl_grok_number(pTHX_ const char *pv, STRLEN len, UV *valuep)
 
 /* Peek ahead to see whether this could be Inf/NaN/qNaN/snan/1.#INF */
 #define PEEK_INFNAN(d) \
-    (*s == 'I' || *s == 'i' || *s == 'N' || *s == 'n') || \
-     ((*s == 'Q' || *s == 'q' || *s == 'S' || *s == 's') && \
-      (s[1] == 'N' || s[1] == 'n')) || \
+    (isALPHA_FOLD_EQ(*s, 'I') || isALPHA_FOLD_EQ(*s, 'N')) || \
+     ((isALPHA_FOLD_EQ(*s, 'Q') || isALPHA_FOLD_EQ(*s, 'S')) && \
+      isALPHA_FOLD_EQ(s[1], 'N')) || \
     (*s == '1' && ((s[1] == '.' && s[2] == '#') || s[1] == '#'))
 
 /*
@@ -637,24 +637,24 @@ Perl_grok_infnan(const char** sp, const char* send)
             return 0;
     }
 
-    if (*s == 'I' || *s == 'i') {
+    if (isALPHA_FOLD_EQ(*s, 'I')) {
         /* INF or IND (1.#IND is indeterminate, a certain type of NAN) */
-        s++; if (s == send || (*s != 'N' && *s != 'n')) return 0;
+        s++; if (s == send || isALPHA_FOLD_NE(*s, 'N')) return 0;
         s++; if (s == send) return 0;
-        if (*s == 'F' || *s == 'f') {
+        if (isALPHA_FOLD_EQ(*s, 'F')) {
             s++;
-            if (s < send && (*s == 'I' || *s == 'i')) {
-                s++; if (s == send || (*s != 'N' && *s != 'n')) return 0;
-                s++; if (s == send || (*s != 'I' && *s != 'i')) return 0;
-                s++; if (s == send || (*s != 'T' && *s != 't')) return 0;
+            if (s < send && (isALPHA_FOLD_EQ(*s, 'I'))) {
+                s++; if (s == send || isALPHA_FOLD_NE(*s, 'N')) return 0;
+                s++; if (s == send || isALPHA_FOLD_NE(*s, 'I')) return 0;
+                s++; if (s == send || isALPHA_FOLD_NE(*s, 'T')) return 0;
                 /* XXX maybe also grok "infinite"? */
-                s++; if (s == send || (*s != 'Y' && *s != 'y')) return 0;
+                s++; if (s == send || isALPHA_FOLD_NE(*s, 'Y')) return 0;
                 s++;
             } else if (*s)
                 return 0;
             flags |= IS_NUMBER_INFINITY | IS_NUMBER_NOT_INT;
         }
-        else if (*s == 'D' || *s == 'd') {
+        else if (isALPHA_FOLD_EQ(*s, 'D')) {
             s++;
             flags |= IS_NUMBER_NAN | IS_NUMBER_NOT_INT;
         } else
@@ -665,15 +665,15 @@ Perl_grok_infnan(const char** sp, const char* send)
     }
     else {
         /* NAN */
-        if (*s == 'S' || *s == 's' || *s == 'Q' || *s == 'q') {
+        if (isALPHA_FOLD_EQ(*s, 'S') || isALPHA_FOLD_EQ(*s, 'Q')) {
             /* snan, qNaN */
             /* XXX do something with the snan/qnan difference */
             s++; if (s == send) return 0;
         }
 
-        if (*s == 'N' || *s == 'n') {
-            s++; if (s == send || (*s != 'A' && *s != 'a')) return 0;
-            s++; if (s == send || (*s != 'N' && *s != 'n')) return 0;
+        if (isALPHA_FOLD_EQ(*s, 'N')) {
+            s++; if (s == send || isALPHA_FOLD_NE(*s, 'A')) return 0;
+            s++; if (s == send || isALPHA_FOLD_NE(*s, 'N')) return 0;
             s++;
 
             flags |= IS_NUMBER_NAN | IS_NUMBER_NOT_INT;
@@ -863,7 +863,7 @@ Perl_grok_number_flags(pTHX_ const char *pv, STRLEN len, UV *valuep, U32 flags)
     numtype |= IS_NUMBER_NAN | IS_NUMBER_NOT_INT;
   } else if (s < send) {
     /* we can have an optional exponent part */
-    if (*s == 'e' || *s == 'E') {
+    if (isALPHA_FOLD_EQ(*s, 'e')) {
       s++;
       if (s < send && (*s == '-' || *s == '+'))
         s++;
@@ -1268,7 +1268,7 @@ Perl_my_atof2(pTHX_ const char* orig, NV* value)
 	result[1] = S_mulexp10(result[1], exp_acc[1]) + (NV)accumulator[1];
     }
 
-    if (seen_digit && (*s == 'e' || *s == 'E')) {
+    if (seen_digit && (isALPHA_FOLD_EQ(*s, 'e'))) {
 	bool expnegative = 0;
 
 	++s;

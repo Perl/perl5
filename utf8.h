@@ -577,8 +577,7 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
 	 (ANYOF_NONBITMAP(node)) && \
 	 (ANYOF_FLAGS(node) & ANYOF_LOC_NONBITMAP_FOLD) && \
 	 ((end) > (input) + 1) && \
-	 toFOLD((input)[0]) == 's' && \
-	 toFOLD((input)[1]) == 's')
+	 isALPHA_FOLD_EQ((input)[0], 's'))
 
 #define SHARP_S_SKIP 2
 

@@ -1706,6 +1706,24 @@ typedef U32 line_t;
  * both ASCII and EBCDIC the last 3 bits of the octal digits range from 0-7. */
 #define OCTAL_VALUE(c) (__ASSERT_(isOCTAL(c)) (7 & (c)))
 
+/* Efficiently returns a boolean as to if two native characters are equivalent
+ * case-insenstively.  At least one of the characters must be one of [A-Za-z];
+ * the ALPHA in the name is to remind you of that.  This is asserted() in
+ * DEBUGGING builds.  Because [A-Za-z] are invariant under UTF-8, this macro
+ * works (on valid input) for both non- and UTF-8-encoded bytes.
+ *
+ * When one of the inputs is a compile-time constant and gets folded by the
+ * compiler, this reduces to an AND and a TEST.  On both EBCDIC and ASCII
+ * machines, 'A' and 'a' differ by a single bit; the same with the upper and
+ * lower case of all other ASCII-range alphabetics.  On ASCII platforms, they
+ * are 32 apart; on EBCDIC, they are 64.  This uses an exclusive 'or' to find
+ * that bit and then inverts it to form a mask, with just a single 0, in the
+ * bit position where the upper- and lowercase differ. */
+#define isALPHA_FOLD_EQ(c1, c2)                                         \
+                      (__ASSERT_(isALPHA_A(c1) || isALPHA_A(c2))        \
+                      ((c1) & ~('A' ^ 'a')) ==  ((c2) & ~('A' ^ 'a')))
+#define isALPHA_FOLD_NE(c1, c2) (! isALPHA_FOLD_EQ((c1), (c2)))
+
 /*
 =head1 Memory Management
 

@@ -8655,7 +8655,7 @@ Perl_sv_inc_nomg(pTHX_ SV *const sv)
 	     * arranged in order (although not consecutively) and that only
 	     * [A-Za-z] are accepted by isALPHA in the C locale.
 	     */
-	    if (*d != 'z' && *d != 'Z') {
+	    if (isALPHA_FOLD_NE(*d, 'z')) {
 		do { ++*d; } while (!isALPHA(*d));
 		return;
 	    }
@@ -9743,7 +9743,7 @@ Perl_sv_reftype(pTHX_ const SV *const sv, const int ob)
 	case SVt_PVLV:		return (char *)  (SvROK(sv) ? "REF"
 				/* tied lvalues should appear to be
 				 * scalars for backwards compatibility */
-				: (LvTYPE(sv) == 't' || LvTYPE(sv) == 'T')
+				: (isALPHA_FOLD_EQ(LvTYPE(sv), 't'))
 				    ? "SCALAR" : "LVALUE");
 	case SVt_PVAV:		return "ARRAY";
 	case SVt_PVHV:		return "HASH";
@@ -11739,12 +11739,12 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
              * nan/inf/-inf, so let's avoid calling that on those
              * three values. nv * 0 will be NaN for NaN, +Inf and -Inf,
              * and 0 for anything else. */
-	    if (c != 'e' && c != 'E' && (nv * 0) == 0) {
+	    if (isALPHA_FOLD_NE(c, 'e') && (nv * 0) == 0) {
                 i = PERL_INT_MIN;
                 (void)Perl_frexp(nv, &i);
                 if (i == PERL_INT_MIN)
                     Perl_die(aTHX_ "panic: frexp");
-                hexfp = (c == 'a' || c == 'A');
+                hexfp = isALPHA_FOLD_EQ(c, 'a');
                 if (UNLIKELY(hexfp)) {
                     /* Hexadecimal floating point: this size
                      * computation probably overshoots, but that is
