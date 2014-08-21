@@ -12007,6 +12007,20 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                     elen = width;
                 }
             }
+            else if (Perl_isinf(nv)) {
+                if (nv > 0.0) {
+                    elen = 4;
+                    Copy("Inf", PL_efloatbuf, elen, char);
+                }
+                else {
+                    elen = 5;
+                        Copy("-Inf", PL_efloatbuf, elen, char);
+                }
+            }
+            else if (Perl_isnan(nv)) {
+                elen = 4;
+                Copy("NaN", PL_efloatbuf, elen, char);
+            }
             else {
 		char *ptr = ebuf + sizeof ebuf;
 		*--ptr = '\0';
