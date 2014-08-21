@@ -12,7 +12,7 @@ use File::Spec::Functions qw(catfile catdir splitdir);
 use vars qw($VERSION @Pagers $Bindir $Pod2man
   $Temp_Files_Created $Temp_File_Lifetime
 );
-$VERSION = '3.23';
+$VERSION = '3.24';
 
 #..........................................................................
 
@@ -939,7 +939,7 @@ sub maybe_generate_dynamic_pod {
         $self->aside("Hm, I found some Pod from that search!\n");
         my ($buffd, $buffer) = $self->new_tempfile('pod', 'dyn');
         if ( $] >= 5.008 && $self->opt_L ) {
-            binmode($buffd, ":utf8");
+            binmode($buffd, ":encoding(UTF-8)");
             print $buffd "=encoding utf8\n\n";
         }
 
@@ -1043,6 +1043,7 @@ sub search_perlvar {
     open(PVAR, "<", $perlvar)               # "Funk is its own reward"
         or $self->die("Can't open $perlvar: $!");
 
+    binmode(PVAR, ":encoding(UTF-8)");
     if ( $opt ne '$0' && $opt =~ /^\$\d+$/ ) { # handle $1, $2, ...
       $opt = '$<I<digits>>';
     }
@@ -1112,6 +1113,7 @@ sub search_perlop {
   # especially since we need to support UTF8 or other encoding when dealing
   # with perlop, perlfunc, perlapi, perlfaq[1-9]
   open( PERLOP, '<', $perlop ) or $self->die( "Can't open $perlop: $!" );
+  binmode(PERLOP, ":encoding(UTF-8)");
 
   my $thing = $self->opt_f;
 
@@ -1202,7 +1204,7 @@ sub search_perlapi {
             $self->aside("Your old perl doesn't really have proper unicode support.");
         }
         else {
-            binmode(PAPI, ":utf8");
+            binmode(PAPI, ":encoding(UTF-8)");
         }
     }
 
@@ -1284,7 +1286,7 @@ sub search_perlfunc {
             $self->aside("Your old perl doesn't really have proper unicode support.");
         }
         else {
-            binmode(PFUNC, ":utf8");
+            binmode(PFUNC, ":encoding(UTF-8)");
         }
     }
 
@@ -1379,6 +1381,7 @@ EOD
         $self->die( "invalid file spec: $!" ) if $file =~ /[<>|]/;
         open(INFAQ, "<", $file)  # XXX 5.6ism
          or $self->die( "Can't read-open $file: $!\nAborting" );
+        binmode(INFAQ, ":encoding(UTF-8)");
         while (<INFAQ>) {
             if ( m/^=head2\s+.*(?:$search_key)/i ) {
                 $found = 1;
