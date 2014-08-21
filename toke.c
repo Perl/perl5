@@ -5379,7 +5379,8 @@ Perl_yylex(pTHX)
 	    TOKEN(0);
 	CLINE;
 	s++;
-	OPERATOR(';');
+	PL_expect = XSTATE;
+	TOKEN(';');
     case ')':
 	if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_CLOSING)
 	    TOKEN(0);

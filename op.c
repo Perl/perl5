@@ -5297,7 +5297,6 @@ Perl_package(pTHX_ OP *o)
 
     PL_hints |= HINT_BLOCK_SCOPE;
     PL_parser->copline = NOLINE;
-    PL_parser->expect = XSTATE;
 
     op_free(o);
 }
@@ -5436,7 +5435,6 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
 
     PL_hints |= HINT_BLOCK_SCOPE;
     PL_parser->copline = NOLINE;
-    PL_parser->expect = XSTATE;
     PL_cop_seqmax++; /* Purely for B::*'s benefit */
     if (PL_cop_seqmax == PERL_PADSEQ_INTRO) /* not a legal value */
 	PL_cop_seqmax++;

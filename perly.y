@@ -348,12 +348,16 @@ barestmt:	PLUGSTMT
 				      $4, $7, $8, $6));
 			  PL_parser->copline = (line_t)$1;
 			}
-	|	FOR '(' remember mnexpr ';' texpr ';' mintro mnexpr ')'
+	|	FOR '(' remember mnexpr ';'
+			{ parser->expect = XTERM; }
+		texpr ';'
+			{ parser->expect = XTERM; }
+		mintro mnexpr ')'
 		mblock
 			{
 			  OP *initop = $4;
 			  OP *forop = newWHILEOP(0, 1, (LOOP*)(OP*)NULL,
-				      scalar($6), $11, $9, $8);
+				      scalar($7), $13, $11, $10);
 			  if (initop) {
 			      forop = op_prepend_elem(OP_LINESEQ, initop,
 				  op_append_elem(OP_LINESEQ,
@@ -403,12 +407,10 @@ barestmt:	PLUGSTMT
 			}
 	|	sideff ';'
 			{
-			  PL_parser->expect = XSTATE;
 			  $$ = $1;
 			}
 	|	';'
 			{
-			  PL_parser->expect = XSTATE;
 			  $$ = (OP*)NULL;
 			  PL_parser->copline = NOLINE;
 			}
@@ -599,9 +601,7 @@ realsubbody:	remember subsignature '{' stmtseq '}'
 
 /* Optional subroutine body, for named subroutine declaration */
 optsubbody:	realsubbody { $$ = $1; }
-	|	';'	{ $$ = (OP*)NULL;
-			  PL_parser->expect = XSTATE;
-			}
+	|	';'	{ $$ = (OP*)NULL; }
 	;
 
 /* Ordinary expressions; logical combinations */
