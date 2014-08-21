@@ -3434,7 +3434,6 @@ PP(pp_fttext)
     }
 
     /* now scan s to look for textiness */
-    /*   XXX ASCII dependent code */
 
 #if defined(DOSISH) || defined(USEMYBINMODE)
     /* ignore trailing ^Z on short files */
@@ -3442,43 +3441,53 @@ PP(pp_fttext)
 	--len;
 #endif
 
+    assert(len);
+    if (! is_ascii_string((U8 *) s, len)) {
+        const U8 *ep;
+
+        /* Here contains a non-ASCII.  See if the entire string is UTF-8.  But
+         * the buffer may end in a partial character, so consider it UTF-8 if
+         * the first non-UTF8 char is an ending partial */
+        if (is_utf8_string_loc((U8 *) s, len, &ep)
+            || ep + UTF8SKIP(ep)  > (U8 *) (s + len))
+        {
+            if (PL_op->op_type == OP_FTTEXT) {
+                FT_RETURNYES;
+            }
+            else {
+                FT_RETURNNO;
+            }
+        }
+    }
+
+    /* Here, is not UTF-8 or is entirely ASCII.  Look through the buffer for
+     * things that wouldn't be in ASCII text or rich ASCII text.  Count these
+     * in 'odd' */
     for (i = 0; i < len; i++, s++) {
 	if (!*s) {			/* null never allowed in text */
 	    odd += len;
 	    break;
 	}
-#ifdef EBCDIC
-        else if (!(isPRINT(*s) || isSPACE(*s)))
-            odd++;
-#else
-	else if (*s & 128) {
 #ifdef USE_LOCALE_CTYPE
-	    if (IN_LC_RUNTIME(LC_CTYPE) && isALPHA_LC(*s))
+        if (IN_LC_RUNTIME(LC_CTYPE)) {
+            if ( isPRINT_LC(*s) || isSPACE_LC(*s)) {
 		continue;
+            }
+        }
+        else
 #endif
-	    /* utf8 characters don't count as odd */
-	    if (UTF8_IS_START(*s)) {
-		int ulen = UTF8SKIP(s);
-		if (ulen < len - i) {
-		    int j;
-		    for (j = 1; j < ulen; j++) {
-			if (!UTF8_IS_CONTINUATION(s[j]))
-			    goto not_utf8;
-		    }
-		    --ulen;	/* loop does extra increment */
-		    s += ulen;
-		    i += ulen;
-		    continue;
-		}
-	    }
-	  not_utf8:
-	    odd++;
-	}
-	else if (*s < 32 &&
-	  *s != '\n' && *s != '\r' && *s != '\b' &&
-	  *s != '\t' && *s != '\f' && *s != 27)
-	    odd++;
-#endif
+        if (isPRINT_A(*s)
+                   /* VT occurs so rarely in text, that we consider it odd */
+                || (isSPACE_A(*s) && *s != VT_NATIVE)
+
+                    /* But there is a fair amount of backspaces and escapes in
+                     * some text */
+                || *s == '\b'
+                || *s == ESC_NATIVE)
+        {
+            continue;
+        }
+        odd++;
     }
 
     if ((odd * 3 > len) == (PL_op->op_type == OP_FTTEXT)) /* allow 1/3 odd */
