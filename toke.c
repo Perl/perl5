@@ -7442,7 +7442,7 @@ Perl_yylex(pTHX)
 
 	case KEY_no:
 	    s = tokenize_use(0, s);
-	    TERM(USE);
+	    TOKEN(USE);
 
 	case KEY_not:
 	    if (*s == '(' || (s = SKIPSPACE1(s), *s == '('))
@@ -8005,7 +8005,7 @@ Perl_yylex(pTHX)
 
 	case KEY_use:
 	    s = tokenize_use(1, s);
-	    OPERATOR(USE);
+	    TOKEN(USE);
 
 	case KEY_values:
 	    UNI(OP_VALUES);
