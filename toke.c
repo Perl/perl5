@@ -1848,7 +1848,10 @@ S_check_uni(pTHX)
 /*
  * S_lop
  * Build a list operator (or something that might be one).  The rules:
- *  - if we have a next token, then it's a list operator [why?]
+ *  - if we have a next token, then it's a list operator (no parens) for
+ *    which the next token has already been parsed; e.g.,
+ *       sort foo @args
+ *       sort foo (@args)
  *  - if the next thing is an opening paren, then it's a function
  *  - else it's a list operator
  */
