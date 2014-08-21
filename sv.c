@@ -11695,9 +11695,11 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 		: SvNV(argsv);
 
 	    need = 0;
-	    /* frexp() has some unspecified behaviour for nan/inf,
-             * so let's avoid calling that. */
-	    if (c != 'e' && c != 'E' && Perl_isfinite(nv)) {
+	    /* frexp() (or frexpl) has some unspecified behaviour for
+             * nan/inf/-inf, so let's avoid calling that on those
+             * three values. nv * 0 will be NaN for NaN, +Inf and -Inf,
+             * and 0 for anything else. */
+	    if (c != 'e' && c != 'E' && (nv * 0) == 0) {
                 i = PERL_INT_MIN;
                 (void)Perl_frexp(nv, &i);
                 if (i == PERL_INT_MIN)
