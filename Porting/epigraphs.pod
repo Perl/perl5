@@ -17,6 +17,19 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.21.3 - Robert Service, The Men that Don't Fit In
+
+L<Announced on 2014-08-20 by Peter Martini|http://www.nntp.perl.org/group/perl.perl5.porters/2014/08/msg218826.html>
+
+    If they just went straight they might go far,
+    They are strong and brave and true;
+    But they're always tired of the things that are,
+    And they want the strange and new.
+    They say: "Could I find my proper groove,
+    What a deep mark I would make!"
+    So they chop and change, and each fresh move
+    Is only a fresh mistake.
+
 =head2 v5.21.2 - Neil Armstrong, Buzz Aldrin, Charlie Duke, Final minutes of communication of the first manned moon landing, July 20, 1969.
 
 L<Announced on 2014-07-20 by Abigail|http://www.nntp.perl.org/group/perl.perl5.porters/2014/07/msg217937.html>
