@@ -8,7 +8,7 @@ BEGIN {
     }
 }
 
-use Test::More tests => 109;
+use Test::More tests => 111;
 
 use POSIX qw(fcntl_h signal_h limits_h _exit getcwd open read strftime write
 	     errno localeconv dup dup2 lseek access);
@@ -171,6 +171,22 @@ SKIP: {
     ($n, $x) = &POSIX::strtod('3.14159_OR_SO');
     cmp_ok(abs("3.14159" - $n), '<', 1e-6, 'strtod works');
     is($x, 6, 'strtod works');
+
+    &POSIX::setlocale(&POSIX::LC_NUMERIC, $lc) if $Config{d_setlocale};
+}
+
+SKIP: {
+    skip("strtold() not present", 2) unless $Config{d_strtold};
+
+    if ($Config{d_setlocale}) {
+        $lc = &POSIX::setlocale(&POSIX::LC_NUMERIC);
+        &POSIX::setlocale(&POSIX::LC_NUMERIC, 'C');
+    }
+
+    # we're just checking that strtold works, not how accurate it is
+    ($n, $x) = &POSIX::strtod('2.718_ISH');
+    cmp_ok(abs("2.718" - $n), '<', 1e-6, 'strtold works');
+    is($x, 4, 'strtold works');
 
     &POSIX::setlocale(&POSIX::LC_NUMERIC, $lc) if $Config{d_setlocale};
 }

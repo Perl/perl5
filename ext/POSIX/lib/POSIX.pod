@@ -1543,6 +1543,11 @@ The second returned item and C<$!> can be used to check for valid input:
 
 When called in a scalar context strtol returns the parsed number.
 
+=item C<strtold>
+
+Like L</strtod> but for long doubles.  Defined only if the
+system supports long doubles.
+
 =item C<strtoul>
 
 String to unsigned (long) integer translation.  C<strtoul()> is identical

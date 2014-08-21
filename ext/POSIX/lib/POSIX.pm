@@ -329,7 +329,7 @@ our %EXPORT_TAGS = (
     stdlib_h =>	[qw(EXIT_FAILURE EXIT_SUCCESS MB_CUR_MAX NULL RAND_MAX
 		abort atexit atof atoi atol bsearch calloc div
 		free getenv labs ldiv malloc mblen mbstowcs mbtowc
-		qsort realloc strtod strtol strtoul wcstombs wctomb)],
+		qsort realloc strtod strtol strtold strtoul wcstombs wctomb)],
 
     string_h =>	[qw(NULL memchr memcmp memcpy memmove memset strcat
 		strchr strcmp strcoll strcpy strcspn strerror strlen

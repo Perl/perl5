@@ -189,6 +189,9 @@ START_EXTERN_C
 double strtod (const char *, char **);
 long strtol (const char *, char **, int);
 unsigned long strtoul (const char *, char **, int);
+#ifdef HAS_STRTOLD
+long double strtold (const char *, char **);
+#endif
 END_EXTERN_C
 #endif
 
@@ -226,6 +229,9 @@ END_EXTERN_C
 #endif
 #ifndef HAS_STRTOD
 #define strtod(s1,s2) not_here("strtod")
+#endif
+#ifndef HAS_STRTOLD
+#define strtold(s1,s2) not_here("strtold")
 #endif
 #ifndef HAS_STRTOL
 #define strtol(s1,s2,b) not_here("strtol")
@@ -1569,6 +1575,29 @@ strtod(str)
 		PUSHs(&PL_sv_undef);
 	}
         RESTORE_NUMERIC_STANDARD();
+
+#ifdef HAS_STRTOLD
+
+void
+strtold(str)
+	char *		str
+    PREINIT:
+	long double num;
+	char *unparsed;
+    PPCODE:
+        STORE_NUMERIC_STANDARD_FORCE_LOCAL();
+	num = strtold(str, &unparsed);
+	PUSHs(sv_2mortal(newSVnv(num)));
+	if (GIMME == G_ARRAY) {
+	    EXTEND(SP, 1);
+	    if (unparsed)
+		PUSHs(sv_2mortal(newSViv(strlen(unparsed))));
+	    else
+		PUSHs(&PL_sv_undef);
+	}
+        RESTORE_NUMERIC_STANDARD();
+
+#endif
 
 void
 strtol(str, base = 0)

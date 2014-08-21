@@ -96,10 +96,10 @@ my %expect = (
 		  sinh sscanf stderr stdin stdout strcat strchr strcmp strcoll
 		  strcpy strcspn strerror strftime strlen strncat strncmp
 		  strncpy strpbrk strrchr strspn strstr strtod strtok strtol
-		  strtoul strxfrm sysconf tan tanh tcdrain tcflow tcflush
-		  tcgetattr tcgetpgrp tcsendbreak tcsetattr tcsetpgrp tmpfile
-		  tmpnam tolower toupper ttyname tzname tzset uname ungetc
-		  vfprintf vprintf vsprintf wcstombs wctomb)],
+		  strtold strtoul strxfrm sysconf tan tanh tcdrain tcflow
+		  tcflush tcgetattr tcgetpgrp tcsendbreak tcsetattr tcsetpgrp
+		  tmpfile tmpnam tolower toupper ttyname tzname tzset uname
+		  ungetc vfprintf vprintf vsprintf wcstombs wctomb)],
     EXPORT_OK => [qw(abs alarm atan2 chdir chmod chown close closedir cos exit
 		     exp fcntl fileno fork getc getgrgid getgrnam getlogin
 		     getpgrp getppid getpwnam getpwuid gmtime kill lchown link
