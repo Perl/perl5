@@ -132,6 +132,12 @@ The documentation has some minor formatting improvements.
 
 L<version> has been upgraded from version 0.9908 to 0.9909.
 
+External libraries and Perl may have different ideas of what the locale is.
+This is problematic when parsing version strings if the locale's numeric
+separator has been changed.  Version parsing has been patched to ensure it
+handles the locales correctly.
+L<[perl #121930]|https://rt.perl.org/Ticket/Display.html?id=121930>
+
 =back
 
 =head1 Documentation
