@@ -1046,16 +1046,6 @@ C<E<sol>d> rules for the entire regular expression containing it.
 
 =back
 
-The C<E<sol>x> processing within this class is an extended form.
-Besides the characters that are considered white space in normal C</x>
-processing, there are 5 others, recommended by the Unicode standard:
-
- U+0085 NEXT LINE
- U+200E LEFT-TO-RIGHT MARK
- U+200F RIGHT-TO-LEFT MARK
- U+2028 LINE SEPARATOR
- U+2029 PARAGRAPH SEPARATOR
-
 Note that skipping white space applies only to the interior of this
 construct.  There must not be any space between any of the characters
 that form the initial C<(?[>.  Nor may there be space between the
