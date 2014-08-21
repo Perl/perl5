@@ -5285,6 +5285,12 @@ typedef struct am_table_short AMTS;
 #define PERLDB_SAVESRC_NOSUBS	(PL_perldb && (PL_perldb & PERLDBf_SAVESRC_NOSUBS))
 #define PERLDB_SAVESRC_INVALID	(PL_perldb && (PL_perldb & PERLDBf_SAVESRC_INVALID))
 
+/* Temporary for maint.  Is a function in 5.21 */
+#define sync_locale() (new_ctype(setlocale(LC_CTYPE, NULL)),        \
+                       new_collate(setlocale(LC_COLLATE, NULL)),    \
+                       set_numeric_local(),                         \
+                       new_numeric(setlocale(LC_NUMERIC, NULL)))
+
 #ifdef USE_LOCALE_NUMERIC
 
 /* Returns TRUE if the plain locale pragma without a parameter is in effect
