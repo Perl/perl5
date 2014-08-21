@@ -28,5 +28,3 @@ libnet cpan/libnet/Makefile.PL 13a8e4a8c7fb2607219c3106cad6c3d7173f7221
 podlators cpan/podlators/scripts/pod2man.PL f81acf53f3ff46cdcc5ebdd661c5d13eb35d20d6
 podlators cpan/podlators/scripts/pod2text.PL b4693fcfe4a0a1b38a215cfb8985a65d5d025d69
 version cpan/version/lib/version.pm fa9931d4db05aff9a0a6ef558610b1a472d9306e
-version vutil.c aca8dfacc47d0df8401a4cc478788a8a19ba5746
-version vxs.inc 9064aacbdfe42bb584a068f62b505dd11dbb4dc4

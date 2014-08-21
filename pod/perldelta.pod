@@ -128,6 +128,10 @@ L<utf8> has been upgraded from version 1.13 to 1.13_01.
 
 The documentation has some minor formatting improvements.
 
+=item *
+
+L<version> has been upgraded from version 0.9908 to 0.9909.
+
 =back
 
 =head1 Documentation
