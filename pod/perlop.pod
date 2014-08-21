@@ -322,7 +322,8 @@ operand is not enclosed in parentheses, it returns a string consisting
 of the left operand repeated the number of times specified by the right
 operand.  In list context, if the left operand is enclosed in
 parentheses or is a list formed by C<qw/STRING/>, it repeats the list.
-If the right operand is zero or negative, it returns an empty string
+If the right operand is zero or negative (raising a warning on
+negative), it returns an empty string
 or an empty list, depending on the context.
 X<x>
 
