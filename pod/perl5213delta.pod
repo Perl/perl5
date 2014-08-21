@@ -1,0 +1,422 @@
+=encoding utf8
+
+=head1 NAME
+
+perl5213delta - what is new for perl v5.21.3
+
+=head1 DESCRIPTION
+
+This document describes differences between the 5.21.2 release and the 5.21.3
+release.
+
+If you are upgrading from an earlier release such as 5.21.1, first read
+L<perl5212delta>, which describes differences between 5.21.1 and 5.21.2.
+
+=head1 Core Enhancements
+
+=head2 C<defined(@array = LIST)> is no longer fatal
+
+In 5.21.1, C<defined(@array)> was made fatal.  This has been relaxed
+to not die if the argument is assigning to an array.
+
+=head2 Floating point parsing has been improved
+
+Parsing and printing of floating point values has been improved.
+
+As a completely new feature, hexadecimal floating point literals
+(like 0x1.23p-4)  are now supported, and they can be output with
+C<printf %a>.
+
+=head1 Security
+
+=head2 The L<Safe> module could allow outside packages to be replaced
+
+Critical bugfix: outside packages could be replaced.  L<Safe> has
+been patched to 2.38 to address this.
+
+=head1 Incompatible Changes
+
+=head2 S<C<use UNIVERSAL '...'>> is now a fatal error
+
+Importing functions from C<UNIVERSAL> has been deprecated since v5.12, and
+is now a fatal error.  S<C<"use UNIVERSAL">> without any arguments is still
+allowed.
+
+=head1 Modules and Pragmata
+
+=head2 Updated Modules and Pragmata
+
+=over 4
+
+=item *
+
+L<B::Debug> has been upgraded from version 1.19 to 1.21.
+
+=item *
+
+L<Config::Perl::V> has been upgraded from version 0.20 to 0.22.
+
+=item *
+
+L<CPAN::Meta> has been upgraded from version 2.141520 to 2.142060.
+
+=item *
+
+L<CPAN::Meta::Requirements> has been upgraded from version 2.125 to 2.126.
+
+=item *
+
+L<ExtUtils::CBuilder> was moved from F<dist> to F<cpan>.
+
+=item *
+
+L<ExtUtils::CBuilder> has been upgraded from version 0.280216 to 0.280217.
+
+=item *
+
+L<ExtUtils::Install> was moved from F<dist> to F<cpan>.
+
+=item *
+
+L<ExtUtils::Manifest> has been upgraded from version 1.64 to 1.65.
+It was also moved from F<dist> to F<cpan>.
+
+=item *
+
+L<HTTP::Tiny> has been upgraded from version 0.043 to 0.047.
+
+=item *
+
+L<IPC::Open3> has been upgraded from version 1.17 to 1.18.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.021002 to 5.021003.
+
+=item *
+
+L<Opcode> has been upgraded from version 1.27 to 1.28.
+
+=item *
+
+L<perl5db.pl> has been upgraded from version 1.45 to 1.46.
+
+=item *
+
+L<perlfaq> has been upgraded from version 5.0150044 to 5.0150045.
+
+=item *
+
+L<POSIX> has been upgraded from version 1.41 to 1.42.
+
+=item *
+
+L<Safe> has been upgraded from version 2.37 to 2.38.
+
+=item *
+
+L<Socket> has been upgraded from version 2.014 to 2.015.
+
+=item *
+
+L<Sys::Hostname> has been upgraded from version 1.18 to 1.19
+
+=item *
+
+L<UNIVERSAL> has been upgraded from version 1.11 to 1.12.
+
+=back
+
+=head1 Documentation
+
+=head2 Changes to Existing Documentation
+
+=head3 L<perlexperiment>
+
+=over 4
+
+=item *
+
+Added reference to L<feature>.
+
+=back
+
+=head3 L<perlguts>
+
+=over 4
+
+=item *
+
+Details on C level symbols and libperl.t added.
+
+=back
+
+=head3 L<perlhacktips>
+
+=over 4
+
+=item *
+
+Recommended replacements for tmpfile, atoi, strtol, and strtoul added.
+
+=back
+
+=head3 L<perlop>
+
+=over 4
+
+=item *
+
+ASCII v. EBCDIC clarifications added.
+
+=back
+
+=head3 L<perlsec>
+
+=over 4
+
+=item *
+
+Comments added on algorithmic complexity and tied hashes.
+
+=back
+
+=head3 L<perlvms>
+
+=over 4
+
+=item *
+
+Updated documentation on environment and shell interaction in VMS.
+
+=back
+
+=head1 Diagnostics
+
+The following additions or changes have been made to diagnostic output,
+including warnings and fatal error messages.  For the complete list of
+diagnostic messages, see L<perldiag>.
+
+=head2 New Diagnostics
+
+=head3 New Errors
+
+=over 4
+
+=item *
+
+L<Hexadecimal float: internal error|perldiag/"Hexadecimal float: internal error">
+
+(F) Something went horribly bad in hexadecimal float handling.
+
+=item *
+
+L<Hexadecimal float: unsupported long double format|perldiag/"Hexadecimal float: unsupported long double format">
+
+(F) You have configured Perl to use long doubles but
+the internals of the long double format are unknown,
+therefore the hexadecimal float output is impossible.
+
+=back
+
+=head3 New Warnings
+
+=over 4
+
+=item *
+
+L<Hexadecimal float: exponent overflow|perldiag/"Hexadecimal float: exponent overflow">
+
+(W overflow) The hexadecimal floating point has larger exponent
+than the floating point supports.
+
+=item *
+
+L<Hexadecimal float: exponent underflow|perldiag/"Hexadecimal float: exponent underflow">
+
+(W overflow) The hexadecimal floating point has smaller exponent
+than the floating point supports.
+
+=item *
+
+L<Hexadecimal float: mantissa overflow|perldiag/"Hexadecimal float: mantissa overflow">
+
+(W overflow) The hexadecimal floating point literal had more bits in
+the mantissa (the part between the 0x and the exponent, also known as
+the fraction or the significand) than the floating point supports.
+
+=item *
+
+L<Hexadecimal float: precision loss|perldiag/"Hexadecimal float: precision loss">
+
+(W overflow) The hexadecimal floating point had internally more
+digits than could be output.  This can be caused by unsupported
+long double formats, or by 64-bit integers not being available
+(needed to retrieve the digits under some configurations).
+
+=back
+
+=head2 Changes to Existing Diagnostics
+
+=over 4
+
+=item *
+
+C<require> with no argument or undef used to warn about a Null filename; now
+it dies with C<Missing or undefined argument to require>.
+
+=back
+
+=head1 Configuration and Compilation
+
+=over 4
+
+=item *
+
+MurmurHash64A and MurmurHash64B can now be configured as the internal hash
+function.
+
+=back
+
+=head1 Platform Support
+
+=head2 Platform-Specific Notes
+
+=over 4
+
+=item Android
+
+Build support has been improved for cross-compiling in general and for
+Android in particular.
+
+=item Solaris
+
+C<c99> options have been cleaned up, hints look for C<solstudio>
+as well as C<SUNWspro>, and support for native C<setenv> has been added.
+
+=item VMS
+
+C<finite>, C<finitel>, and C<isfinite> detection has been added to
+C<configure.com>, environment handling has had some minor changes, and
+a fix for legacy feature checking status.
+
+=item Windows
+
+C<%I64d> is now being used instead of C<%lld> for MinGW.
+
+=back
+
+=head1 Internal Changes
+
+=over 4
+
+=item *
+
+Added L<perlapi/sync_locale>.
+Changing the program's locale should be avoided by XS code.  Nevertheless,
+certain non-Perl libraries called from XS, such as C<Gtk> do so.  When this
+happens, Perl needs to be told that the locale has changed.  Use this function
+to do so, before returning to Perl.
+
+=item *
+
+Added L<perlapi/grok_atou> as a safer replacement for atoi and strtol.
+
+=back
+
+=head1 Selected Bug Fixes
+
+=over 4
+
+=item *
+
+Failing to compile C<use Foo> in an eval could leave a spurious
+C<BEGIN> subroutine definition, which would produce a "Subroutine
+BEGIN redefined" warning on the next use of C<use>, or other C<BEGIN>
+block.  [perl #122107]
+
+=item *
+
+C<method { BLOCK } ARGS> syntax now correctly parses the arguments if they
+begin with an opening brace.  [perl #46947]
+
+=item *
+
+External libraries and Perl may have different ideas of what the locale is.
+This is problematic when parsing version strings if the locale's numeric
+separator has been changed.  Version parsing has been patched to ensure
+it handles the locales correctly.  [perl #121930]
+
+=item *
+
+A bug has been fixed where zero-length assertions and code blocks inside of a
+regex could cause C<pos> to see an incorrect value.  [perl #122460]
+
+=back
+
+=head1 Acknowledgements
+
+Perl 5.21.3 represents approximately 4 weeks of development since Perl 5.21.2
+and contains approximately 21,000 lines of changes across 250 files from 25
+authors.
+
+Excluding auto-generated files, documentation and release tools, there were
+approximately 18,000 lines of changes to 160 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its third decade thanks to a vibrant community
+of users and developers. The following people are known to have contributed the
+improvements that became Perl 5.21.3:
+
+Aaron Crane, Abigail, Alberto Simões, Andy Dougherty, Brian Fraser, Chad
+Granum, Chris 'BinGOs' Williams, Craig A. Berry, Dagfinn Ilmari Mannsåker,
+Daniel Dragan, David Mitchell, Father Chrysostomos, H.Merijn Brand, James E
+Keenan, Jan Dubois, Jarkko Hietaniemi, Karen Etheridge, Karl Williamson, Lukas
+Mai, Peter Martini, Rafael Garcia-Suarez, syber, Tony Cook, Vladimir Marek,
+Yves Orton.
+
+The list above is almost certainly incomplete as it is automatically generated
+from version control history. In particular, it does not include the names of
+the (very much appreciated) contributors who reported issues to the Perl bug
+tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please see
+the F<AUTHORS> file in the Perl source distribution.
+
+=head1 Reporting Bugs
+
+If you find what you think is a bug, you might check the articles recently
+posted to the comp.lang.perl.misc newsgroup and the perl bug database at
+https://rt.perl.org/ .  There may also be information at
+http://www.perl.org/ , the Perl Home Page.
+
+If you believe you have an unreported bug, please run the L<perlbug> program
+included with your release.  Be sure to trim your bug down to a tiny but
+sufficient test case.  Your bug report, along with the output of C<perl -V>,
+will be sent off to perlbug@perl.org to be analysed by the Perl porting team.
+
+If the bug you are reporting has security implications, which make it
+inappropriate to send to a publicly archived mailing list, then please send it
+to perl5-security-report@perl.org.  This points to a closed subscription
+unarchived mailing list, which includes all the core committers, who will be
+able to help assess the impact of issues, figure out a resolution, and help
+co-ordinate the release of patches to mitigate or fix the problem across all
+platforms on which Perl is supported.  Please only use this address for
+security issues in the Perl core, not for modules independently distributed on
+CPAN.
+
+=head1 SEE ALSO
+
+The F<Changes> file for an explanation of how to view exhaustive details on
+what changed.
+
+The F<INSTALL> file for how to build Perl.
+
+The F<README> file for general stuff.
+
+The F<Artistic> and F<Copying> files for copyright information.
+
+=cut
