@@ -346,7 +346,8 @@ L</Modules and Pragmata> section.
 
 =item Android
 
-Some minor build improvements have been made when cross-compiling for Android.
+Build support has been improved for cross-compiling in general and for Android
+in particular.
 
 =item OpenBSD
 
@@ -355,12 +356,17 @@ building Perl.
 
 =item Solaris
 
-C<setenv> is now used on Solaris if it is available.
+B<c99> options have been cleaned up, hints look for B<solstudio> as well as
+B<SUNWspro>, and support for native C<setenv> has been added.
 
 =item VMS
 
 An old bug in feature checking, mainly affecting pre-7.3 systems, has been
 fixed.
+
+item Windows
+
+C<%I64d> is now being used instead of C<%lld> for MinGW.
 
 =back
 
@@ -391,7 +397,8 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-A regression with C<(?{})(?=...)> and C<pos> has been fixed.
+A bug has been fixed where zero-length assertions and code blocks inside of a
+regex could cause C<pos> to see an incorrect value.
 L<[perl #122460]|https://rt.perl.org/Ticket/Display.html?id=122460>
 
 =item *
