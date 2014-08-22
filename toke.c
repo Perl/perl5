@@ -1863,12 +1863,12 @@ S_lop(pTHX_ I32 f, int x, char *s)
 
     pl_yylval.ival = f;
     CLINE;
-    PL_expect = x;
     PL_bufptr = s;
     PL_last_lop = PL_oldbufptr;
     PL_last_lop_op = (OPCODE)f;
     if (PL_nexttoke)
 	goto lstop;
+    PL_expect = x;
     if (*s == '(')
 	return REPORT(FUNC);
     s = PEEKSPACE(s);
