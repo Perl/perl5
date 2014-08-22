@@ -7,7 +7,7 @@
 case 2:
 #line 114 "perly.y"
     {
-			  PL_parser->expect = XSTATE;
+			  parser->expect = XSTATE;
 			;}
     break;
 
@@ -105,16 +105,16 @@ case 2:
 
   case 14:
 #line 180 "perly.y"
-    { if (PL_parser->copline > (line_t)(ps[(1) - (4)].val.ival))
-			      PL_parser->copline = (line_t)(ps[(1) - (4)].val.ival);
+    { if (parser->copline > (line_t)(ps[(1) - (4)].val.ival))
+			      parser->copline = (line_t)(ps[(1) - (4)].val.ival);
 			  (yyval.opval) = block_end((ps[(2) - (4)].val.ival), (ps[(3) - (4)].val.opval));
 			;}
     break;
 
   case 15:
 #line 188 "perly.y"
-    { if (PL_parser->copline > (line_t)(ps[(1) - (7)].val.ival))
-			      PL_parser->copline = (line_t)(ps[(1) - (7)].val.ival);
+    { if (parser->copline > (line_t)(ps[(1) - (7)].val.ival))
+			      parser->copline = (line_t)(ps[(1) - (7)].val.ival);
 			  (yyval.opval) = block_end((ps[(2) - (7)].val.ival), (ps[(5) - (7)].val.opval));
 			;}
     break;
@@ -126,8 +126,8 @@ case 2:
 
   case 17:
 #line 199 "perly.y"
-    { if (PL_parser->copline > (line_t)(ps[(1) - (4)].val.ival))
-			      PL_parser->copline = (line_t)(ps[(1) - (4)].val.ival);
+    { if (parser->copline > (line_t)(ps[(1) - (4)].val.ival))
+			      parser->copline = (line_t)(ps[(1) - (4)].val.ival);
 			  (yyval.opval) = block_end((ps[(2) - (4)].val.ival), (ps[(3) - (4)].val.opval));
 			;}
     break;
@@ -229,8 +229,8 @@ case 2:
 						CvOUTSIDE(PL_compcv)
 					     ))[(ps[(2) - (3)].val.opval)->op_targ]))
 			      CvCLONE_on(PL_compcv);
-			  PL_parser->in_my = 0;
-			  PL_parser->in_my_stash = NULL;
+			  parser->in_my = 0;
+			  parser->in_my_stash = NULL;
 			;}
     break;
 
@@ -276,7 +276,7 @@ case 2:
     {
 			  (yyval.opval) = block_end((ps[(3) - (7)].val.ival),
 			      newCONDOP(0, (ps[(4) - (7)].val.opval), op_scope((ps[(6) - (7)].val.opval)), (ps[(7) - (7)].val.opval)));
-			  PL_parser->copline = (line_t)(ps[(1) - (7)].val.ival);
+			  parser->copline = (line_t)(ps[(1) - (7)].val.ival);
 			;}
     break;
 
@@ -285,7 +285,7 @@ case 2:
     {
 			  (yyval.opval) = block_end((ps[(3) - (7)].val.ival),
 			      newCONDOP(0, (ps[(4) - (7)].val.opval), op_scope((ps[(6) - (7)].val.opval)), (ps[(7) - (7)].val.opval)));
-			  PL_parser->copline = (line_t)(ps[(1) - (7)].val.ival);
+			  parser->copline = (line_t)(ps[(1) - (7)].val.ival);
 			;}
     break;
 
@@ -299,7 +299,7 @@ case 2:
 				    || PAD_COMPNAME_FLAGS_isOUR(offset)
 				      ? 0
 				      : offset));
-			  PL_parser->copline = (line_t)(ps[(1) - (6)].val.ival);
+			  parser->copline = (line_t)(ps[(1) - (6)].val.ival);
 			;}
     break;
 
@@ -319,7 +319,7 @@ case 2:
 			  (yyval.opval) = block_end((ps[(3) - (8)].val.ival),
 				  newWHILEOP(0, 1, (LOOP*)(OP*)NULL,
 				      (ps[(4) - (8)].val.opval), (ps[(7) - (8)].val.opval), (ps[(8) - (8)].val.opval), (ps[(6) - (8)].val.ival)));
-			  PL_parser->copline = (line_t)(ps[(1) - (8)].val.ival);
+			  parser->copline = (line_t)(ps[(1) - (8)].val.ival);
 			;}
     break;
 
@@ -329,7 +329,7 @@ case 2:
 			  (yyval.opval) = block_end((ps[(3) - (8)].val.ival),
 				  newWHILEOP(0, 1, (LOOP*)(OP*)NULL,
 				      (ps[(4) - (8)].val.opval), (ps[(7) - (8)].val.opval), (ps[(8) - (8)].val.opval), (ps[(6) - (8)].val.ival)));
-			  PL_parser->copline = (line_t)(ps[(1) - (8)].val.ival);
+			  parser->copline = (line_t)(ps[(1) - (8)].val.ival);
 			;}
     break;
 
@@ -356,7 +356,7 @@ case 2:
 				      forop));
 			  }
 			  (yyval.opval) = block_end((ps[(3) - (13)].val.ival), forop);
-			  PL_parser->copline = (line_t)(ps[(1) - (13)].val.ival);
+			  parser->copline = (line_t)(ps[(1) - (13)].val.ival);
 			;}
     break;
 
@@ -364,7 +364,7 @@ case 2:
 #line 371 "perly.y"
     {
 			  (yyval.opval) = block_end((ps[(3) - (9)].val.ival), newFOROP(0, (ps[(4) - (9)].val.opval), (ps[(6) - (9)].val.opval), (ps[(8) - (9)].val.opval), (ps[(9) - (9)].val.opval)));
-			  PL_parser->copline = (line_t)(ps[(1) - (9)].val.ival);
+			  parser->copline = (line_t)(ps[(1) - (9)].val.ival);
 			;}
     break;
 
@@ -373,7 +373,7 @@ case 2:
     {
 			  (yyval.opval) = block_end((ps[(4) - (8)].val.ival), newFOROP(0,
 				      op_lvalue((ps[(2) - (8)].val.opval), OP_ENTERLOOP), (ps[(5) - (8)].val.opval), (ps[(7) - (8)].val.opval), (ps[(8) - (8)].val.opval)));
-			  PL_parser->copline = (line_t)(ps[(1) - (8)].val.ival);
+			  parser->copline = (line_t)(ps[(1) - (8)].val.ival);
 			;}
     break;
 
@@ -382,7 +382,7 @@ case 2:
     {
 			  (yyval.opval) = block_end((ps[(3) - (7)].val.ival),
 				  newFOROP(0, (OP*)NULL, (ps[(4) - (7)].val.opval), (ps[(6) - (7)].val.opval), (ps[(7) - (7)].val.opval)));
-			  PL_parser->copline = (line_t)(ps[(1) - (7)].val.ival);
+			  parser->copline = (line_t)(ps[(1) - (7)].val.ival);
 			;}
     break;
 
@@ -411,8 +411,8 @@ case 2:
 			  /* a block is a loop that happens once */
 			  (yyval.opval) = newWHILEOP(0, 1, (LOOP*)(OP*)NULL,
 				  (OP*)NULL, block_end((ps[(5) - (8)].val.ival), (ps[(7) - (8)].val.opval)), (OP*)NULL, 0);
-			  if (PL_parser->copline > (line_t)(ps[(4) - (8)].val.ival))
-			      PL_parser->copline = (line_t)(ps[(4) - (8)].val.ival);
+			  if (parser->copline > (line_t)(ps[(4) - (8)].val.ival))
+			      parser->copline = (line_t)(ps[(4) - (8)].val.ival);
 			;}
     break;
 
@@ -427,7 +427,7 @@ case 2:
 #line 413 "perly.y"
     {
 			  (yyval.opval) = (OP*)NULL;
-			  PL_parser->copline = NOLINE;
+			  parser->copline = NOLINE;
 			;}
     break;
 
@@ -441,9 +441,9 @@ case 2:
 			  else {
 			      list = (ps[(1) - (2)].val.opval);
 			  }
-			  if (PL_parser->copline == NOLINE)
-			       PL_parser->copline = CopLINE(PL_curcop)-1;
-			  else PL_parser->copline--;
+			  if (parser->copline == NOLINE)
+			       parser->copline = CopLINE(PL_curcop)-1;
+			  else parser->copline--;
 			  (yyval.opval) = newSTATEOP(0, NULL,
 					  convert(OP_FORMLINE, 0, list));
 			;}
@@ -492,7 +492,7 @@ case 2:
   case 61:
 #line 457 "perly.y"
     { (yyval.opval) = newFOROP(0, (OP*)NULL, (ps[(3) - (3)].val.opval), (ps[(1) - (3)].val.opval), (OP*)NULL);
-			  PL_parser->copline = (line_t)(ps[(2) - (3)].val.ival); ;}
+			  parser->copline = (line_t)(ps[(2) - (3)].val.ival); ;}
     break;
 
   case 62:
@@ -515,7 +515,7 @@ case 2:
 
   case 65:
 #line 472 "perly.y"
-    { PL_parser->copline = (line_t)(ps[(1) - (6)].val.ival);
+    { parser->copline = (line_t)(ps[(1) - (6)].val.ival);
 			    (yyval.opval) = newCONDOP(0,
 				newSTATEOP(OPf_SPECIAL,NULL,(ps[(3) - (6)].val.opval)),
 				op_scope((ps[(5) - (6)].val.opval)), (ps[(6) - (6)].val.opval));
@@ -653,15 +653,15 @@ case 2:
     {
 			  (yyval.opval) = op_append_list(OP_LINESEQ, (ps[(2) - (3)].val.opval),
 				newSTATEOP(0, NULL, sawparens(newNULLLIST())));
-			  PL_parser->expect = XBLOCK;
+			  parser->expect = XBLOCK;
 			;}
     break;
 
   case 94:
 #line 594 "perly.y"
     {
-			  if (PL_parser->copline > (line_t)(ps[(3) - (5)].val.ival))
-			      PL_parser->copline = (line_t)(ps[(3) - (5)].val.ival);
+			  if (parser->copline > (line_t)(ps[(3) - (5)].val.ival))
+			      parser->copline = (line_t)(ps[(3) - (5)].val.ival);
 			  (yyval.opval) = block_end((ps[(1) - (5)].val.ival),
 				op_append_list(OP_LINESEQ, (ps[(2) - (5)].val.opval), (ps[(4) - (5)].val.opval)));
 			;}
@@ -1380,7 +1380,7 @@ case 2:
 
   case 225:
 #line 1018 "perly.y"
-    { PL_parser->in_my = 0; (yyval.opval) = my((ps[(1) - (1)].val.opval)); ;}
+    { parser->in_my = 0; (yyval.opval) = my((ps[(1) - (1)].val.opval)); ;}
     break;
 
   case 226:
@@ -1464,6 +1464,6 @@ case 2:
     
 
 /* Generated from:
- * 83084fd3dca0e3c3a6f15a4ebdb137fc8ab3aa93ca0f1c04ea06228ac4ea79c3 perly.y
+ * 39b6174c4729deec2a6ee4698d7dcd6496acb0a8f063daf726d1f853d4dcb54e perly.y
  * d1d4df7b8e30ac9dede664af9179e6e5e7ddc7f2ad9c4eff9e2e5b32c9e16a6e regen_perly.pl
  * ex: set ro: */
