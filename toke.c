@@ -218,10 +218,9 @@ static const char* const lex_state_names[] = {
 #define PREREF(retval) return (PL_expect = XREF,PL_bufptr = s, REPORT(retval))
 #define TERM(retval) return (CLINE, PL_expect = XOPERATOR, PL_bufptr = s, REPORT(retval))
 #define POSTDEREF(f) return (PL_bufptr = s, S_postderef(aTHX_ REPORT(f),s[1]))
-#define LOOPX(f) return (PL_expect = XOPERATOR, \
-			 PL_bufptr = force_word(s,WORD,TRUE,FALSE), \
+#define LOOPX(f) return (PL_bufptr = force_word(s,WORD,TRUE,FALSE), \
 			 pl_yylval.ival=f, \
-			 (void)(PL_nexttoke || (PL_expect = XTERM)), \
+			 PL_expect = PL_nexttoke ? XOPERATOR : XTERM, \
 			 REPORT((int)LOOPEX))
 #define FTST(f)  return (pl_yylval.ival=f, PL_expect=XTERMORDORDOR, PL_bufptr=s, REPORT((int)UNIOP))
 #define FUN0(f)  return (pl_yylval.ival=f, PL_expect=XOPERATOR, PL_bufptr=s, REPORT((int)FUNC0))
@@ -7611,7 +7610,6 @@ Perl_yylex(pTHX)
 
 	case KEY_require:
 	    s = SKIPSPACE1(s);
-	    PL_expect = XOPERATOR;
 	    if (isDIGIT(*s)) {
 		s = force_version(s, FALSE);
 	    }
@@ -7632,7 +7630,7 @@ Perl_yylex(pTHX)
 	    }
 	    else 
 		pl_yylval.ival = 0;
-	    if (!PL_nexttoke) PL_expect = XTERM;
+	    PL_expect = PL_nexttoke ? XOPERATOR : XTERM;
 	    PL_bufptr = s;
 	    PL_last_uni = PL_oldbufptr;
 	    PL_last_lop_op = OP_REQUIRE;
