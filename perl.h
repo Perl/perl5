@@ -1922,13 +1922,8 @@ EXTERN_C long double modfl(long double, long double *);
 #       endif
 #   endif
 #   ifndef Perl_isinf
-#       if defined(HAS_ISFINITEL) && defined(Perl_isnan)
-#           define Perl_isinf(x) !(isfinitel(x)||Perl_isnan(x))
-#       endif
-#   endif
-#   ifndef Perl_isinf
-#       if defined(HAS_FINITEL) && defined(Perl_isnan)
-#           define Perl_isinf(x) !(finitel(x)||Perl_isnan(x))
+#       if defined(HAS_ISINFL)
+#           define Perl_isinf(x) isinfl(x)
 #       endif
 #   endif
 #   ifndef Perl_isfinite
@@ -2151,7 +2146,7 @@ EXTERN_C long double modfl(long double, long double *);
 
 #ifndef Perl_isnan
 #   ifdef HAS_ISNAN
-#       define Perl_isnan(x) isnan((NV)x)
+#       define Perl_isnan(x) isnan((double)x)
 #   else
 #       ifdef Perl_fp_class_nan
 #           define Perl_isnan(x) Perl_fp_class_nan(x)
@@ -2169,23 +2164,11 @@ EXTERN_C long double modfl(long double, long double *);
 int isnan(double d);
 #endif
 
-#ifndef Perl_isinf
-#   ifdef HAS_ISINF
-#       define Perl_isinf(x) isinf((NV)x)
-#   else
-#       ifdef Perl_fp_class_inf
-#           define Perl_isinf(x) Perl_fp_class_inf(x)
-#       else
-#           define Perl_isinf(x) ((x)==NV_INF)
-#       endif
-#   endif
-#endif
-
 #ifndef Perl_isfinite
 #   ifdef HAS_ISFINITE
-#     define Perl_isfinite(x) isfinite((NV)x)
+#     define Perl_isfinite(x) isfinite((double)x)
 #   elif defined(HAS_FINITE)
-#       define Perl_isfinite(x) finite((NV)x)
+#       define Perl_isfinite(x) finite((double)x)
 #   elif defined(Perl_fp_class_finite)
 #     define Perl_isfinite(x) Perl_fp_class_finite(x)
 #   elif defined(Perl_is_inf) && defined(Perl_is_nan)
@@ -2193,6 +2176,12 @@ int isnan(double d);
 #   else
 /* NaN*0 is NaN, [+-]Inf*0 is NaN, zero for anything else. */
 #     define Perl_isfinite(x) (((x) * 0) == 0)
+#   endif
+#endif
+
+#ifndef Perl_isinf
+#   if defined(Perl_isfinite) && defined(Perl_isnan)
+#       define Perl_isinf(x) !(Perl_isfinite(x)||Perl_isnan(x))
 #   endif
 #endif
 
