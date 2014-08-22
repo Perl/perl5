@@ -211,17 +211,7 @@ locale isn't exposed to Perl space.
 
 XS modules for all categories but C<LC_NUMERIC> get the underlying
 locale, and hence any C library functions they call will use that
-underlying locale.
-
-Perl tries to keep C<LC_NUMERIC> set to C<"C">
-because too many modules are unable to cope with the decimal point in a
-floating point number not being a dot (it's a comma in many locales).
-Macros are provided for XS code to temporarily change to use the
-underlying locale when necessary; however buggy code that fails to
-restore when done can break other XS code (but not Perl code) in this
-regard.  The API for these macros has not yet been nailed down, but will be
-during the course of v5.21.  Send email to
-L<mailto:perl5-porters@perl.org> for guidance.
+underlying locale.  For more discussion, see L<perlxs/CAVEATS>.
 
 =back
 
