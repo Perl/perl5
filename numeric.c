@@ -587,11 +587,14 @@ Perl_grok_number(pTHX_ const char *pv, STRLEN len, UV *valuep)
 }
 
 /* Peek ahead to see whether this could be Inf/NaN/qNaN/snan/1.#INF */
-#define PEEK_INFNAN(d) \
-    (isALPHA_FOLD_EQ(*s, 'I') || isALPHA_FOLD_EQ(*s, 'N')) || \
-     ((isALPHA_FOLD_EQ(*s, 'Q') || isALPHA_FOLD_EQ(*s, 'S')) && \
-      isALPHA_FOLD_EQ(s[1], 'N')) || \
-    (*s == '1' && ((s[1] == '.' && s[2] == '#') || s[1] == '#'))
+#define INFNAN_PEEK(s, send) \
+    (s < send && \
+     ((isALPHA_FOLD_EQ(*s, 'I') || isALPHA_FOLD_EQ(*s, 'N')) ||  \
+      ((s + 4) < send &&                                         \
+       (isALPHA_FOLD_EQ(*s, 'Q') || isALPHA_FOLD_EQ(*s, 'S')) && \
+       isALPHA_FOLD_EQ(s[1], 'N')) || \
+      ((s + 5) < send &&                                                \
+       (*s == '1' && ((s[1] == '.' && s[2] == '#') || s[1] == '#')))))
 
 /*
 =for apidoc grok_infnan
@@ -839,7 +842,7 @@ Perl_grok_number_flags(pTHX_ const char *pv, STRLEN len, UV *valuep, U32 flags)
         return 0;
   }
   else {
-      if (PEEK_INFNAN(d)) {
+      if (INFNAN_PEEK(d, send)) {
           int infnan = Perl_grok_infnan(&d, send);
           if ((infnan & IS_NUMBER_INFINITY)) {
               numtype |= infnan;
@@ -1184,9 +1187,9 @@ Perl_my_atof2(pTHX_ const char* orig, NV* value)
             }
         }
 #elif defined(HAS_STRTOD)
-        if (PEEK_INFNAN(s)) {
+        if (INFNAN_PEEK(s, send)) {
             /* The native strtod() may not get all the possible
-             * inf/nan strings PEEK_INFNAN() recognizes. */
+             * inf/nan strings INFNAN_PEEK() recognizes. */
             char* endp;
             NV nv = Perl_strtod(p, &endp);
             if (p != endp) {

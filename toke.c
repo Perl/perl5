@@ -114,6 +114,11 @@ static const char* const ident_too_long = "Identifier too long";
 
 #define SPACE_OR_TAB(c) isBLANK_A(c)
 
+#define HEXFP_PEEK(s)     \
+    (((s[0] == '.') && \
+      (isXDIGIT(s[1]) || isALPHA_FOLD_EQ(s[1], 'p'))) || \
+     isALPHA_FOLD_EQ(s[0], 'p'))
+
 /* LEX_* are values for PL_lex_state, the state of the lexer.
  * They are arranged oddly so that the guard on the switch statement
  * can get by with a single comparison (if the compiler is smart enough).
@@ -9980,10 +9985,6 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 
                     /* this could be hexfp, but peek ahead
                      * to avoid matching ".." */
-#define HEXFP_PEEK(s) \
-	(((s[0] == '.') && \
-	  (isXDIGIT(s[1]) || isALPHA_FOLD_EQ(s[1], 'p'))) \
-	 || isALPHA_FOLD_EQ(s[0], 'p'))
                     if (UNLIKELY(HEXFP_PEEK(s))) {
                         goto out;
                     }
