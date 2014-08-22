@@ -680,9 +680,7 @@ method	:	METHOD
 subscripted:    gelem '{' expr ';' '}'        /* *main::{something} */
                         /* In this and all the hash accessors, ';' is
                          * provided by the tokeniser */
-			{ $$ = newBINOP(OP_GELEM, 0, $1, scalar($3));
-			    PL_parser->expect = XOPERATOR;
-			}
+			{ $$ = newBINOP(OP_GELEM, 0, $1, scalar($3)); }
 	|	scalar '[' expr ']'          /* $array[$element] */
 			{ $$ = newBINOP(OP_AELEM, 0, oopsAV($1), scalar($3));
 			}
@@ -698,20 +696,15 @@ subscripted:    gelem '{' expr ';' '}'        /* *main::{something} */
 			}
 	|	scalar '{' expr ';' '}'    /* $foo{bar();} */
 			{ $$ = newBINOP(OP_HELEM, 0, oopsHV($1), jmaybe($3));
-			    PL_parser->expect = XOPERATOR;
 			}
 	|	term ARROW '{' expr ';' '}' /* somehref->{bar();} */
 			{ $$ = newBINOP(OP_HELEM, 0,
 					ref(newHVREF($1),OP_RV2HV),
-					jmaybe($4));
-			    PL_parser->expect = XOPERATOR;
-			}
+					jmaybe($4)); }
 	|	subscripted '{' expr ';' '}' /* $foo->[bar]->{baz;} */
 			{ $$ = newBINOP(OP_HELEM, 0,
 					ref(newHVREF($1),OP_RV2HV),
-					jmaybe($3));
-			    PL_parser->expect = XOPERATOR;
-			}
+					jmaybe($3)); }
 	|	term ARROW '(' ')'          /* $subref->() */
 			{ $$ = newUNOP(OP_ENTERSUB, OPf_STACKED,
 				   newCVREF(0, scalar($1))); }
@@ -886,7 +879,6 @@ term	:	termbinop
 			  if ($$ && $1)
 			      $$->op_private |=
 				  $1->op_private & OPpSLICEWARNING;
-			    PL_parser->expect = XOPERATOR;
 			}
 	|	kvslice '{' expr ';' '}'                 /* %hash{@keys} */
 			{ $$ = op_prepend_elem(OP_KVHSLICE,
@@ -897,7 +889,6 @@ term	:	termbinop
 			  if ($$ && $1)
 			      $$->op_private |=
 				  $1->op_private & OPpSLICEWARNING;
-			    PL_parser->expect = XOPERATOR;
 			}
 	|	THING	%prec '('
 			{ $$ = $1; }

@@ -5449,15 +5449,15 @@ Perl_yylex(pTHX)
 		}
 	    }
 	    /* FALLTHROUGH */
-	case XATTRBLOCK:
-	case XBLOCK:
-	    PL_lex_brackstack[PL_lex_brackets++] = XSTATE;
-	    PL_lex_allbrackets++;
-	    PL_expect = XSTATE;
-	    break;
 	case XATTRTERM:
 	case XTERMBLOCK:
 	    PL_lex_brackstack[PL_lex_brackets++] = XOPERATOR;
+	    PL_lex_allbrackets++;
+	    PL_expect = XSTATE;
+	    break;
+	case XATTRBLOCK:
+	case XBLOCK:
+	    PL_lex_brackstack[PL_lex_brackets++] = XSTATE;
 	    PL_lex_allbrackets++;
 	    PL_expect = XSTATE;
 	    break;
