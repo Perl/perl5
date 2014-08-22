@@ -112,9 +112,6 @@
     GE_COWBUF_WASTE_THRESHOLD((cur),(len)) && \
     GE_COWBUF_WASTE_FACTOR_THRESHOLD((cur),(len)) \
 )
-/* void Gconvert: on Linux at least, gcvt (which Gconvert gets deffed to),
- * has a mandatory return value, even though that value is just the same
- * as the buf arg */
 
 #ifdef PERL_UTF8_CACHE_ASSERT
 /* if adding more checks watch out for the following tests:
