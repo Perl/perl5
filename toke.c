@@ -4282,7 +4282,6 @@ Perl_yylex(pTHX)
 	pl_yylval = PL_nextval[PL_nexttoke];
 	if (!PL_nexttoke) {
 	    PL_lex_state = PL_lex_defer;
-	    PL_expect = PL_lex_expect;
 	    PL_lex_defer = LEX_NORMAL;
 	}
 	{
@@ -7519,8 +7518,7 @@ Perl_yylex(pTHX)
 	    s = force_word(s,WORD,FALSE,TRUE);
 	    s = SKIPSPACE1(s);
 	    s = force_strict_version(s);
-	    PL_lex_expect = XBLOCK;
-	    OPERATOR(PACKAGE);
+	    PREBLOCK(PACKAGE);
 
 	case KEY_pipe:
 	    LOP(OP_PIPE_OP,XTERM);
