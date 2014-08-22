@@ -112,7 +112,7 @@
 /* Top-level choice of what kind of thing yyparse was called to parse */
 grammar	:	GRAMPROG
 			{
-			  PL_parser->expect = XSTATE;
+			  parser->expect = XSTATE;
 			}
 		remember stmtseq
 			{
@@ -177,16 +177,16 @@ grammar	:	GRAMPROG
 
 /* An ordinary block */
 block	:	'{' remember stmtseq '}'
-			{ if (PL_parser->copline > (line_t)$1)
-			      PL_parser->copline = (line_t)$1;
+			{ if (parser->copline > (line_t)$1)
+			      parser->copline = (line_t)$1;
 			  $$ = block_end($2, $3);
 			}
 	;
 
 /* format body */
 formblock:	'=' remember ';' FORMRBRACK formstmtseq ';' '.'
-			{ if (PL_parser->copline > (line_t)$1)
-			      PL_parser->copline = (line_t)$1;
+			{ if (parser->copline > (line_t)$1)
+			      parser->copline = (line_t)$1;
 			  $$ = block_end($2, $5);
 			}
 	;
@@ -196,8 +196,8 @@ remember:	/* NULL */	/* start a full lexical scope */
 	;
 
 mblock	:	'{' mremember stmtseq '}'
-			{ if (PL_parser->copline > (line_t)$1)
-			      PL_parser->copline = (line_t)$1;
+			{ if (parser->copline > (line_t)$1)
+			      parser->copline = (line_t)$1;
 			  $$ = block_end($2, $3);
 			}
 	;
@@ -279,8 +279,8 @@ barestmt:	PLUGSTMT
 						CvOUTSIDE(PL_compcv)
 					     ))[$2->op_targ]))
 			      CvCLONE_on(PL_compcv);
-			  PL_parser->in_my = 0;
-			  PL_parser->in_my_stash = NULL;
+			  parser->in_my = 0;
+			  parser->in_my_stash = NULL;
 			}
 		proto subattrlist optsubbody
 			{
@@ -311,13 +311,13 @@ barestmt:	PLUGSTMT
 			{
 			  $$ = block_end($3,
 			      newCONDOP(0, $4, op_scope($6), $7));
-			  PL_parser->copline = (line_t)$1;
+			  parser->copline = (line_t)$1;
 			}
 	|	UNLESS '(' remember miexpr ')' mblock else
 			{
 			  $$ = block_end($3,
 			      newCONDOP(0, $4, op_scope($6), $7));
-			  PL_parser->copline = (line_t)$1;
+			  parser->copline = (line_t)$1;
 			}
 	|	GIVEN '(' remember mexpr ')' mblock
 			{
@@ -328,7 +328,7 @@ barestmt:	PLUGSTMT
 				    || PAD_COMPNAME_FLAGS_isOUR(offset)
 				      ? 0
 				      : offset));
-			  PL_parser->copline = (line_t)$1;
+			  parser->copline = (line_t)$1;
 			}
 	|	WHEN '(' remember mexpr ')' mblock
 			{ $$ = block_end($3, newWHENOP($4, op_scope($6))); }
@@ -339,14 +339,14 @@ barestmt:	PLUGSTMT
 			  $$ = block_end($3,
 				  newWHILEOP(0, 1, (LOOP*)(OP*)NULL,
 				      $4, $7, $8, $6));
-			  PL_parser->copline = (line_t)$1;
+			  parser->copline = (line_t)$1;
 			}
 	|	UNTIL '(' remember iexpr ')' mintro mblock cont
 			{
 			  $$ = block_end($3,
 				  newWHILEOP(0, 1, (LOOP*)(OP*)NULL,
 				      $4, $7, $8, $6));
-			  PL_parser->copline = (line_t)$1;
+			  parser->copline = (line_t)$1;
 			}
 	|	FOR '(' remember mnexpr ';'
 			{ parser->expect = XTERM; }
@@ -365,24 +365,24 @@ barestmt:	PLUGSTMT
 				      forop));
 			  }
 			  $$ = block_end($3, forop);
-			  PL_parser->copline = (line_t)$1;
+			  parser->copline = (line_t)$1;
 			}
 	|	FOR MY remember my_scalar '(' mexpr ')' mblock cont
 			{
 			  $$ = block_end($3, newFOROP(0, $4, $6, $8, $9));
-			  PL_parser->copline = (line_t)$1;
+			  parser->copline = (line_t)$1;
 			}
 	|	FOR scalar '(' remember mexpr ')' mblock cont
 			{
 			  $$ = block_end($4, newFOROP(0,
 				      op_lvalue($2, OP_ENTERLOOP), $5, $7, $8));
-			  PL_parser->copline = (line_t)$1;
+			  parser->copline = (line_t)$1;
 			}
 	|	FOR '(' remember mexpr ')' mblock cont
 			{
 			  $$ = block_end($3,
 				  newFOROP(0, (OP*)NULL, $4, $6, $7));
-			  PL_parser->copline = (line_t)$1;
+			  parser->copline = (line_t)$1;
 			}
 	|	block cont
 			{
@@ -402,8 +402,8 @@ barestmt:	PLUGSTMT
 			  /* a block is a loop that happens once */
 			  $$ = newWHILEOP(0, 1, (LOOP*)(OP*)NULL,
 				  (OP*)NULL, block_end($5, $7), (OP*)NULL, 0);
-			  if (PL_parser->copline > (line_t)$4)
-			      PL_parser->copline = (line_t)$4;
+			  if (parser->copline > (line_t)$4)
+			      parser->copline = (line_t)$4;
 			}
 	|	sideff ';'
 			{
@@ -412,7 +412,7 @@ barestmt:	PLUGSTMT
 	|	';'
 			{
 			  $$ = (OP*)NULL;
-			  PL_parser->copline = NOLINE;
+			  parser->copline = NOLINE;
 			}
 	;
 
@@ -426,9 +426,9 @@ formline:	THING formarg
 			  else {
 			      list = $1;
 			  }
-			  if (PL_parser->copline == NOLINE)
-			       PL_parser->copline = CopLINE(PL_curcop)-1;
-			  else PL_parser->copline--;
+			  if (parser->copline == NOLINE)
+			       parser->copline = CopLINE(PL_curcop)-1;
+			  else parser->copline--;
 			  $$ = newSTATEOP(0, NULL,
 					  convert(OP_FORMLINE, 0, list));
 			}
@@ -455,7 +455,7 @@ sideff	:	error
 			{ $$ = newLOOPOP(OPf_PARENS, 1, $3, $1); }
 	|	expr FOR expr
 			{ $$ = newFOROP(0, (OP*)NULL, $3, $1, (OP*)NULL);
-			  PL_parser->copline = (line_t)$2; }
+			  parser->copline = (line_t)$2; }
 	|	expr WHEN expr
 			{ $$ = newWHENOP($3, op_scope($1)); }
 	;
@@ -469,7 +469,7 @@ else	:	/* NULL */
 			  $$ = op_scope($2);
 			}
 	|	ELSIF '(' mexpr ')' mblock else
-			{ PL_parser->copline = (line_t)$1;
+			{ parser->copline = (line_t)$1;
 			    $$ = newCONDOP(0,
 				newSTATEOP(OPf_SPECIAL,NULL,$3),
 				op_scope($5), $6);
@@ -585,15 +585,15 @@ subsignature:	/* NULL */ { $$ = (OP*)NULL; }
 			{
 			  $$ = op_append_list(OP_LINESEQ, $<opval>2,
 				newSTATEOP(0, NULL, sawparens(newNULLLIST())));
-			  PL_parser->expect = XBLOCK;
+			  parser->expect = XBLOCK;
 			}
 	;
 
 /* Subroutine body - block with optional signature */
 realsubbody:	remember subsignature '{' stmtseq '}'
 			{
-			  if (PL_parser->copline > (line_t)$3)
-			      PL_parser->copline = (line_t)$3;
+			  if (parser->copline > (line_t)$3)
+			      parser->copline = (line_t)$3;
 			  $$ = block_end($1,
 				op_append_list(OP_LINESEQ, $2, $4));
 			}
@@ -1015,7 +1015,7 @@ optexpr:	/* NULL */
 /* A little bit of trickery to make "for my $foo (@bar)" actually be
    lexical */
 my_scalar:	scalar
-			{ PL_parser->in_my = 0; $$ = my($1); }
+			{ parser->in_my = 0; $$ = my($1); }
 	;
 
 amper	:	'&' indirob
