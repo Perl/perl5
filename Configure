@@ -957,6 +957,7 @@ d_pwgecos=''
 d_pwpasswd=''
 d_pwquota=''
 i_pwd=''
+i_quadmath=''
 i_shadow=''
 i_socks=''
 i_stdbool=''
@@ -15683,6 +15684,98 @@ EOCP
 
     esac
 
+: check for fpclassify
+echo " "
+echo "Checking to see if you have fpclassify..." >&4
+$cat >try.c <<EOCP
+#$i_math I_MATH
+#ifdef I_MATH
+#include <math.h>
+#endif
+int main() { return fpclassify(1.0) == FP_NORMAL ? 0 : 1; }
+EOCP
+set try
+if eval $compile; then
+	val="$define"
+	echo "You have fpclassify."
+else
+	val="$undef"
+	echo "You do not have fpclassify."
+fi
+$rm_try
+set d_fpclassify
+eval $setvar
+
+: check for isfinite
+echo " "
+echo "Checking to see if you have isfinite..." >&4
+$cat >try.c <<EOCP
+#$i_math I_MATH
+#ifdef I_MATH
+#include <math.h>
+#endif
+int main() { return isfinite(0.0); }
+EOCP
+set try
+if eval $compile; then
+	val="$define"
+	echo "You have isfinite."
+else
+	val="$undef"
+	echo "You do not have isfinite."
+fi
+$rm_try
+set d_isfinite
+eval $setvar
+
+: check for isinf
+echo " "
+echo "Checking to see if you have isinf..." >&4
+$cat >try.c <<EOCP
+#$i_math I_MATH
+#ifdef I_MATH
+#include <math.h>
+#endif
+int main() { return isinf(0.0); }
+EOCP
+set try
+if eval $compile; then
+	val="$define"
+	echo "You have isinf."
+else
+	val="$undef"
+	echo "You do not have isinf."
+fi
+$rm_try
+set d_isinf
+eval $setvar
+
+: check for isnan
+echo " "
+echo "Checking to see if you have isnan..." >&4
+$cat >try.c <<EOCP
+#$i_math I_MATH
+#ifdef I_MATH
+#include <math.h>
+#endif
+int main() { return isnan(0.0); }
+EOCP
+set try
+if eval $compile; then
+	val="$define"
+	echo "You have isnan."
+else
+	val="$undef"
+	echo "You do not have isnan."
+fi
+$rm_try
+set d_isnan
+eval $setvar
+
+: see if this is a quadmath.h system
+set quadmath.h i_quadmath
+eval $inhdr
+
 : see if link exists
 set link d_link
 eval $inlibc
@@ -23869,6 +23962,7 @@ i_poll='$i_poll'
 i_prot='$i_prot'
 i_pthread='$i_pthread'
 i_pwd='$i_pwd'
+i_quadmath='$i_quadmath'
 i_rpcsvcdbm='$i_rpcsvcdbm'
 i_sgtty='$i_sgtty'
 i_shadow='$i_shadow'

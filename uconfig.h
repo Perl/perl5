@@ -2847,6 +2847,12 @@
 /*#define PWGECOS	/ **/
 /*#define PWPASSWD	/ **/
 
+/* I_QUADMATH:
+ *	This symbol, if defined, indicates to the C program that it should
+ *	include <quadmath.h>.
+ */
+/*#define   I_QUADMATH                / **/
+
 /* I_SYS_ACCESS:
  *     This symbol, if defined, indicates to the C program that it should
  *     include <sys/access.h>.
@@ -4851,6 +4857,6 @@
 #endif
 
 /* Generated from:
- * 8d61fec9ecb01eecea08d68eef7ee547e6ec951a411600e1e178c1270ba17d89 config_h.SH
- * 6039ef141e931b6582a919f2049d2e4d68a5f977e2cf27b898966e83d5f3ed62 uconfig.sh
+ * 8efb374b21480cf581be7abbe612d8fe38e1648e146cc8c19e16d9b533257b24 config_h.SH
+ * b42f107a4c0dff0588550e034bef79028c4ac588dfda1fffcc777c3ce3adf867 uconfig.sh
  * ex: set ro: */

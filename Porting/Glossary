@@ -3255,6 +3255,10 @@ i_pwd (i_pwd.U):
 	This variable conditionally defines I_PWD, which indicates
 	to the C program that it should include <pwd.h>.
 
+i_quadmath (i_quadmath.U):
+	This variable conditionally defines I_QUADMATH, which indicates
+	to the C program that it should include <quadmath.h>.
+
 i_rpcsvcdbm (i_dbm.U):
 	This variable conditionally defines the I_RPCSVC_DBM symbol, which
 	indicates to the C program that <rpcsvc/dbm.h> exists and should

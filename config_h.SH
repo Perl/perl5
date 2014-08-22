@@ -2882,6 +2882,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #$d_pwgecos PWGECOS	/**/
 #$d_pwpasswd PWPASSWD	/**/
 
+/* I_QUADMATH:
+ *	This symbol, if defined, indicates to the C program that it should
+ *	include <quadmath.h>.
+ */
+#$i_quadmath   I_QUADMATH                /**/
+
 /* I_SYS_ACCESS:
  *     This symbol, if defined, indicates to the C program that it should
  *     include <sys/access.h>.
