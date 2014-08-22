@@ -474,8 +474,8 @@ S_deprecate_commaless_var_list(pTHX) {
 /*
  * S_ao
  *
- * This subroutine detects &&=, ||=, and //= and turns an ANDAND, OROR or DORDOR
- * into an OP_ANDASSIGN, OP_ORASSIGN, or OP_DORASSIGN
+ * This subroutine looks for an '=' next to the operator that has just been
+ * parsed and turns it into an ASSIGNOP if it finds one.
  */
 
 STATIC int
