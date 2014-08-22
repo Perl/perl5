@@ -217,7 +217,11 @@ static const char* const lex_state_names[] = {
 #define PREREF(retval) return (PL_expect = XREF,PL_bufptr = s, REPORT(retval))
 #define TERM(retval) return (CLINE, PL_expect = XOPERATOR, PL_bufptr = s, REPORT(retval))
 #define POSTDEREF(f) return (PL_bufptr = s, S_postderef(aTHX_ REPORT(f),s[1]))
-#define LOOPX(f) return (pl_yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, REPORT((int)LOOPEX))
+#define LOOPX(f) return (PL_expect = XOPERATOR, \
+			 PL_bufptr = force_word(s,WORD,TRUE,FALSE), \
+			 pl_yylval.ival=f, \
+			 (void)(PL_nexttoke || (PL_expect = XTERM)), \
+			 REPORT((int)LOOPEX))
 #define FTST(f)  return (pl_yylval.ival=f, PL_expect=XTERMORDORDOR, PL_bufptr=s, REPORT((int)UNIOP))
 #define FUN0(f)  return (pl_yylval.ival=f, PL_expect=XOPERATOR, PL_bufptr=s, REPORT((int)FUNC0))
 #define FUN0OP(f)  return (pl_yylval.opval=f, CLINE, PL_expect=XOPERATOR, PL_bufptr=s, REPORT((int)FUNC0OP))
@@ -7084,8 +7088,6 @@ Perl_yylex(pTHX)
 	    UNI(OP_DBMCLOSE);
 
 	case KEY_dump:
-	    PL_expect = XOPERATOR;
-	    s = force_word(s,WORD,TRUE,FALSE);
 	    LOOPX(OP_DUMP);
 
 	case KEY_else:
@@ -7209,8 +7211,6 @@ Perl_yylex(pTHX)
 	    LOP(OP_GREPSTART, XREF);
 
 	case KEY_goto:
-	    PL_expect = XOPERATOR;
-	    s = force_word(s,WORD,TRUE,FALSE);
 	    LOOPX(OP_GOTO);
 
 	case KEY_gmtime:
@@ -7335,8 +7335,6 @@ Perl_yylex(pTHX)
 	    LOP(OP_KILL,XTERM);
 
 	case KEY_last:
-	    PL_expect = XOPERATOR;
-	    s = force_word(s,WORD,TRUE,FALSE);
 	    LOOPX(OP_LAST);
 	
 	case KEY_lc:
@@ -7435,8 +7433,6 @@ Perl_yylex(pTHX)
 	    OPERATOR(MY);
 
 	case KEY_next:
-	    PL_expect = XOPERATOR;
-	    s = force_word(s,WORD,TRUE,FALSE);
 	    LOOPX(OP_NEXT);
 
 	case KEY_ne:
@@ -7647,8 +7643,6 @@ Perl_yylex(pTHX)
 	    UNI(OP_RESET);
 
 	case KEY_redo:
-	    PL_expect = XOPERATOR;
-	    s = force_word(s,WORD,TRUE,FALSE);
 	    LOOPX(OP_REDO);
 
 	case KEY_rename:
