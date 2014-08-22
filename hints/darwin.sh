@@ -331,6 +331,11 @@ i_dbm=undef;
 # NeilW says this should be acceptable on all darwin versions.
 ranlib='ranlib'
 
+# Catch MacPorts gcc/g++ extra libdir
+case "$($cc -v 2>&1)" in
+*"MacPorts gcc"*) loclibpth="$loclibpth /opt/local/lib/libgcc" ;;
+esac
+
 ##
 # Build process
 ##
