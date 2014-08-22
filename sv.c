@@ -10716,10 +10716,9 @@ S_hextract(pTHX_ const NV nv, int* exponent, U8* vhex, U8* vend)
             HEXTRACT_COUNT(ix, 2);
     }
 #  elif LONG_DOUBLEKIND == LONG_DOUBLE_IS_X86_80_BIT_BIG_ENDIAN
-    /* The last 8 bytes are the mantissa/fraction.
-     * (does this format ever happen?) */
+    /* (does this format ever happen?) */
     /* There explicitly is *no* implicit bit in this case. */
-    for (ix = LONGDBLSIZE - 8; ix < LONGDBLSIZE; ix++) {
+    for (ix = 0; ix < 8; ix++) {
         if (vend)
             HEXTRACT_OUTPUT(ix);
         else

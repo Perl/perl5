@@ -6842,8 +6842,7 @@ int main() {
     printf("3\n");
     exit(0);
   }
-  if (b[LONGDBLSIZE - 11] == 0x00 && b[LONGDBLSIZE - 10] == 0xBF &&
-      b[LONGDBLSIZE -  1] == 0xCD) {
+  if (b[0] == 0xBF && b[9] == 0xCD && b[10] == 0x00) {
     /* is there ever big-endian 80-bit, really? */
     printf("4\n");
     exit(0);
