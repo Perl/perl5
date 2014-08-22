@@ -2180,7 +2180,9 @@ int isnan(double d);
 #endif
 
 #ifndef Perl_isinf
-#   if defined(Perl_isfinite) && defined(Perl_isnan)
+#   if defined(Perl_fp_class_inf)
+#       define Perl_isinf(x) Perl_fp_class_inf(x)
+#   elif defined(Perl_isfinite) && defined(Perl_isnan)
 #       define Perl_isinf(x) !(Perl_isfinite(x)||Perl_isnan(x))
 #   endif
 #endif
@@ -3993,6 +3995,15 @@ START_EXTERN_C
 END_EXTERN_C
 #endif
 
+#ifdef WIN32
+#  if !defined(NV_INF) && defined(HUGE_VAL)
+#    define NV_INF HUGE_VAL
+#  endif
+#  ifndef NV_NAN
+#    define NV_NAN (NV_INF-NV_INF)
+#  endif
+#endif
+
 #if !defined(NV_INF) && defined(USE_LONG_DOUBLE) && defined(LDBL_INFINITY)
 #  define NV_INF LDBL_INFINITY
 #endif
@@ -4040,6 +4051,9 @@ END_EXTERN_C
 #endif
 #if !defined(NV_NAN) && defined(NAN)
 #  define NV_NAN (NV)NAN
+#endif
+#if !defined(NV_NAN) && defined(NV_INF)
+#  define NV_NAN (NV_INF-NV_INF)
 #endif
 
 #ifndef __cplusplus
