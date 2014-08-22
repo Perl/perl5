@@ -1909,7 +1909,6 @@ S_force_next(pTHX_ I32 type)
     PL_nexttoke++;
     if (PL_lex_state != LEX_KNOWNEXT) {
 	PL_lex_defer = PL_lex_state;
-	PL_lex_expect = PL_expect;
 	PL_lex_state = LEX_KNOWNEXT;
     }
 }
