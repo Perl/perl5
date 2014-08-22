@@ -16814,9 +16814,8 @@ S_put_charclass_bitmap_innards(pTHX_ SV *sv, char *bitmap, SV** bitmap_invlist)
     PERL_ARGS_ASSERT_PUT_CHARCLASS_BITMAP_INNARDS;
 
     if (bitmap_invlist) {
-        *bitmap_invlist = _new_invlist(128);  /* worst case is exactly
-                                                 every-other code point is in
-                                                 the list */
+        /* Worst case is exactly every-other code point is in the list */
+        *bitmap_invlist = _new_invlist(NUM_ANYOF_CODE_POINTS / 2);
     }
     for (i = 0; i < NUM_ANYOF_CODE_POINTS; i++) {
         if (BITMAP_TEST((U8 *) bitmap,i)) {
