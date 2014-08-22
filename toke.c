@@ -4390,7 +4390,7 @@ Perl_yylex(pTHX)
 		PL_lex_starts = 0;
 		/* commas only at base level: /$a\Ub$c/ => ($a,uc(b.$c)) */
 		if (PL_lex_casemods == 1 && PL_lex_inpat)
-		    OPERATOR(',');
+		    TOKEN(',');
 		else
 		    AopNOASSIGN(OP_CONCAT);
 	    }
@@ -4437,9 +4437,9 @@ Perl_yylex(pTHX)
 	    s = PL_bufptr;
 	    /* commas only at base level: /$a\Ub$c/ => ($a,uc(b.$c)) */
 	    if (!PL_lex_casemods && PL_lex_inpat)
-		OPERATOR(',');
+		TOKEN(',');
 	    else
-		Aop(OP_CONCAT);
+		AopNOASSIGN(OP_CONCAT);
 	}
 	return yylex();
 
@@ -4527,9 +4527,9 @@ Perl_yylex(pTHX)
 	    if (PL_lex_starts++) {
 		/* commas only at base level: /$a\Ub$c/ => ($a,uc(b.$c)) */
 		if (!PL_lex_casemods && PL_lex_inpat)
-		    OPERATOR(',');
+		    TOKEN(',');
 		else
-		    Aop(OP_CONCAT);
+		    AopNOASSIGN(OP_CONCAT);
 	    }
 	    else {
 		PL_bufptr = s;
