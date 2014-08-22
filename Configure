@@ -16305,6 +16305,9 @@ define:define)
 	nvsize=$doublesize
 	;;
 esac
+case "$usequadmath:$i_quadmath" in
+define:define) nvtype="__float128" ;;
+esac
 
 $echo "(IV will be "$ivtype", $ivsize bytes)"
 $echo "(UV will be "$uvtype", $uvsize bytes)"
