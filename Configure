@@ -4454,7 +4454,6 @@ case "$usequadmath" in
 *)	usequadmath="$undef" ;;
 esac
 
-
 : Check if morebits is requested
 case "$usemorebits" in
 "$define"|true|[yY]*)
@@ -6808,6 +6807,10 @@ eval $setvar
 set ldexpl d_ldexpl
 eval $inlibc
 
+: see if this is a quadmath.h system
+set quadmath.h i_quadmath
+eval $inhdr
+
 : check for length of long double
 case "${d_longdbl}${longdblsize}" in
 $define)
@@ -6855,11 +6858,18 @@ $cat <<EOP >try.c
 #ifdef I_STDLIB
 #include <stdlib.h>
 #endif
-#include <stdio.h>
+#$usequadmath USE_QUADMATH
+#$i_quadmath I_QUADMATH
+#if defined(USE_QUADMATH) && defined(I_QUADMATH)
+#include <quadmath.h>
+static const __float128 d = -0.1Q;
+#else
 static const long double d = -0.1L;
+#endif
+#include <stdio.h>
 int main() {
   unsigned const char* b = (unsigned const char*)(&d);
-#if LDBL_MANT_DIG == 113 && LONGDBLSIZE == 16
+#if (LDBL_MANT_DIG == 113 || FLT128_MANT_DIG == 113) && LONGDBLSIZE == 16
   if (b[0] == 0x9A && b[1] == 0x99 && b[15] == 0xBF) {
     /* IEEE 754 128-bit little-endian */
     printf("1\n");
