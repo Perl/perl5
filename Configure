@@ -1260,6 +1260,7 @@ libswanted_uselargefiles=''
 uselargefiles=''
 uselongdouble=''
 usemorebits=''
+usequadmath=''
 usemultiplicity=''
 nm_opt=''
 nm_so_opt=''
@@ -4445,6 +4446,15 @@ esac
 set usemultiplicity
 eval $setvar
 
+: Check if quadmath is requested
+case "$usequadmath" in
+"$define"|true|[yY]*)
+	uselongdouble="$define"
+	;;
+*)	usequadmath="$undef" ;;
+esac
+
+
 : Check if morebits is requested
 case "$usemorebits" in
 "$define"|true|[yY]*)
@@ -5167,6 +5177,9 @@ case "$usesocks" in
 esac
 case "$usecbacktrace" in
 "$define") libswanted="$libswanted bfd" ;;
+esac
+case "$usequadmath" in
+"$define") libswanted="$libswanted quadmath" ;;
 esac
 libsfound=''
 libsfiles=''
@@ -24341,6 +24354,7 @@ usensgetexecutablepath='$usensgetexecutablepath'
 useopcode='$useopcode'
 useperlio='$useperlio'
 useposix='$useposix'
+usequadmath='$usequadmath'
 usereentrant='$usereentrant'
 userelocatableinc='$userelocatableinc'
 useshrplib='$useshrplib'

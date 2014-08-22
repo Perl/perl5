@@ -52,6 +52,7 @@ $ use64bitall = "n"
 $ use64bitint = "n"
 $ uselongdouble = "n"
 $ uselargefiles = "y"
+$ usequadmath = "n"
 $ usestdstat = "n"
 $ usesitecustomize = "n"
 $ C_Compiler_Replace = "CC="
@@ -925,7 +926,7 @@ $!
 $   config_symbols0 ="|archlib|archlibexp|bin|binexp|builddir|cf_email|config_sh|installarchlib|installbin|installman1dir|installman3dir|"
 $   config_symbols1 ="|installprivlib|installscript|installsitearch|installsitelib|most|oldarchlib|oldarchlibexp|osname|pager|perl_symbol|perl_verb|"
 $   config_symbols2 ="|prefix|privlib|privlibexp|scriptdir|sitearch|sitearchexp|sitebin|sitelib|sitelib_stem|sitelibexp|usecxx|use64bitall|use64bitint|"
-$   config_symbols3 ="|usecasesensitive|usedefaulttypes|usedevel|useieee|useithreads|uselongdouble|usemultiplicity|usemymalloc|usedebugging_perl|"
+$   config_symbols3 ="|usecasesensitive|usedefaulttypes|usedevel|useieee|useithreads|uselongdouble|usequadmath|usemultiplicity|usemymalloc|usedebugging_perl|"
 $   config_symbols4 ="|usesecurelog|usethreads|usevmsdebug|usefaststdio|usemallocwrap|unlink_all_versions|uselargefiles|usesitecustomize|"
 $   config_symbols5 ="|buildmake|builder|usethreadupcalls|usekernelthreads|useshortenedsymbols|useversionedarchname"
 $!  
@@ -6730,6 +6731,7 @@ $ WC "usemultiplicity='" + usemultiplicity + "'"
 $ WC "usemymalloc='" + usemymalloc + "'"
 $ WC "useperlio='define'"
 $ WC "useposix='false'"
+$ WC "usequadmath='" + usequadmath + "'"
 $ WC "usereentrant='undef'"
 $ WC "userelocatableinc='undef'"
 $ WC "usesecurelog='" + usesecurelog + "'"  ! VMS-specific
@@ -6966,6 +6968,10 @@ $ ENDIF
 $ IF uselongdouble .OR. uselongdouble .EQS. "define"
 $ THEN
 $   WC "#define USE_LONG_DOUBLE"
+$ ENDIF
+$ IF usequadmath .OR. usequadmath .EQS. "define"
+$ THEN
+$   WC "#define USE_QUADMATH"
 $ ENDIF
 $ IF use64bitall .OR. use64bitall .EQS. "define" THEN -
     WC "#define USE_64_BIT_ALL"

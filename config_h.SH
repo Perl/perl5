@@ -4849,6 +4849,14 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #$uselongdouble	USE_LONG_DOUBLE		/**/
 #endif
 
+/* USE_QUADMATH:
+ *	This symbol, if defined, indicates that the quadmath library should
+ *	be used when available.
+ */
+#ifndef USE_QUADMATH
+#$usequadmath	USE_QUADMATH		/**/
+#endif
+
 /* USE_MORE_BITS:
  *	This symbol, if defined, indicates that 64-bit interfaces and
  *	long doubles should be used when available.

@@ -4814,6 +4814,14 @@
 /*#define	USE_LONG_DOUBLE		/ **/
 #endif
 
+/* USE_QUADMATH:
+ *	This symbol, if defined, indicates that the quadmath library should
+ *	be used when available.
+ */
+#ifndef USE_QUADMATH
+/*#define	USE_QUADMATH		/ **/
+#endif
+
 /* USE_MORE_BITS:
  *	This symbol, if defined, indicates that 64-bit interfaces and
  *	long doubles should be used when available.
@@ -4857,6 +4865,6 @@
 #endif
 
 /* Generated from:
- * 8efb374b21480cf581be7abbe612d8fe38e1648e146cc8c19e16d9b533257b24 config_h.SH
- * b42f107a4c0dff0588550e034bef79028c4ac588dfda1fffcc777c3ce3adf867 uconfig.sh
+ * d7da79ac72d2191d6814ec98688e342f20eba70c64292c2e0b6b5622cdf3b6e6 config_h.SH
+ * a3cd0b705a952f6915cc1424cc116d4183481f54ba9605415baf93bc57e12122 uconfig.sh
  * ex: set ro: */

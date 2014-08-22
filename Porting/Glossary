@@ -5248,6 +5248,11 @@ useposix (Extensions.U):
 	for hints files to indicate that POSIX will not compile
 	on a particular system.
 
+usequadmath (usequadmath.U):
+	This variable conditionally defines the USE_QUADMATH symbol,
+	and indicates that the quadmath library __float128 long doubles
+	should be used when available.
+
 usereentrant (usethreads.U):
 	This variable conditionally defines the USE_REENTRANT_API symbol,
 	which indicates that the thread code may try to use the various
