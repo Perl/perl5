@@ -196,6 +196,7 @@ static const char* const lex_state_names[] = {
  * PWop         : power operator
  * PMop         : pattern-matching operator
  * Aop          : addition-level operator
+ * AopNOASSIGN  : addition-level operator that is never part of .=
  * Mop          : multiplication-level operator
  * Eop          : equality-testing operator
  * Rop          : relational operator <= != gt
@@ -232,6 +233,7 @@ static const char* const lex_state_names[] = {
 #define PWop(f)  return ao((pl_yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, REPORT((int)POWOP)))
 #define PMop(f)  return(pl_yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, REPORT((int)MATCHOP))
 #define Aop(f)   return ao((pl_yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, REPORT((int)ADDOP)))
+#define AopNOASSIGN(f) return (pl_yylval.ival=f, PL_bufptr=s, REPORT((int)ADDOP))
 #define Mop(f)   return ao((pl_yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, REPORT((int)MULOP)))
 #define Eop(f)   return (pl_yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, REPORT((int)EQOP))
 #define Rop(f)   return (pl_yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, REPORT((int)RELOP))
@@ -4390,7 +4392,7 @@ Perl_yylex(pTHX)
 		if (PL_lex_casemods == 1 && PL_lex_inpat)
 		    OPERATOR(',');
 		else
-		    Aop(OP_CONCAT);
+		    AopNOASSIGN(OP_CONCAT);
 	    }
 	    else
 		return yylex();
