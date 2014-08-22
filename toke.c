@@ -7632,7 +7632,7 @@ Perl_yylex(pTHX)
 	    }
 	    else 
 		pl_yylval.ival = 0;
-	    PL_expect = XTERM;
+	    if (!PL_nexttoke) PL_expect = XTERM;
 	    PL_bufptr = s;
 	    PL_last_uni = PL_oldbufptr;
 	    PL_last_lop_op = OP_REQUIRE;
