@@ -5285,6 +5285,20 @@ typedef struct am_table_short AMTS;
 #define PERLDB_SAVESRC_NOSUBS	(PL_perldb && (PL_perldb & PERLDBf_SAVESRC_NOSUBS))
 #define PERLDB_SAVESRC_INVALID	(PL_perldb && (PL_perldb & PERLDBf_SAVESRC_INVALID))
 
+/*
+
+=head1 Locale-related functions and macros
+
+=for apidoc sync_locale
+
+Changing the program's locale should be avoided by XS code.  Nevertheless,
+certain non-Perl libraries called from XS, such as C<Gtk> do so.  When this
+happens, Perl needs to be told that the locale has changed.  Use this macro
+to do so, before returning to Perl code.
+
+=cut
+*/
+
 /* Temporary for maint.  Is a function in 5.21 */
 #define sync_locale() (new_ctype(setlocale(LC_CTYPE, NULL)),        \
                        new_collate(setlocale(LC_COLLATE, NULL)),    \
