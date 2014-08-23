@@ -133,6 +133,7 @@ char *tzname[] = { "" , "" };
 #  define setuid(a)		not_here("setuid")
 #  define setgid(a)		not_here("setgid")
 #endif	/* NETWARE */
+#  define strtold(s1,s2)	not_here("strtold")
 #else
 
 #  ifndef HAS_MKFIFO

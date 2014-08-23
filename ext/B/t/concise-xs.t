@@ -190,6 +190,7 @@ my $testpkgs = {
 			qw /WEXITSTATUS WIFEXITED WIFSIGNALED WIFSTOPPED
 			    WSTOPSIG WTERMSIG/,
 		       'int_macro_int', # Removed in POSIX 1.16
+                       'strtold', # platform varying
 		       ],
 	       perl => [qw/ import croak AUTOLOAD /,
 			$] >= 5.015
@@ -200,7 +201,7 @@ my $testpkgs = {
 	       XS => [qw/ write wctomb wcstombs uname tzset tzname
 		      ttyname tmpnam times tcsetpgrp tcsendbreak
 		      tcgetpgrp tcflush tcflow tcdrain tanh tan
-		      sysconf strxfrm strtoul strtol strtod strtold
+		      sysconf strxfrm strtoul strtol strtod
 		      strftime strcoll sinh sigsuspend sigprocmask
 		      sigpending sigaction setuid setsid setpgid
 		      setlocale setgid read pipe pause pathconf
