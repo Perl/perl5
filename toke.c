@@ -1896,7 +1896,7 @@ S_lop(pTHX_ I32 f, int x, char *s)
  */
 
 STATIC void
-S_force_next(pTHX_ I32 type)
+S_force_next_unshift(pTHX_ I32 type, bool unshift)
 {
 #ifdef DEBUGGING
     if (DEBUG_T_TEST) {
@@ -1911,6 +1911,8 @@ S_force_next(pTHX_ I32 type)
 	PL_lex_state = LEX_KNOWNEXT;
     }
 }
+
+#define force_next_unshift(a,b) S_force_next_unshift(aTHX_ (a),(b))
 
 /*
  * S_postderef
@@ -1931,9 +1933,9 @@ S_postderef(pTHX_ int const funny, char const next)
 	if (PL_lex_state == LEX_INTERPNORMAL && !PL_lex_brackets) {
 	    assert('@' == funny || '$' == funny || DOLSHARP == funny);
 	    PL_lex_state = LEX_INTERPEND;
-	    force_next(POSTJOIN);
+	    force_next_unshift(POSTJOIN, FALSE);
 	}
-	force_next(next);
+	force_next_unshift(next, FALSE);
 	PL_bufptr+=2;
     }
     else {
@@ -1961,7 +1963,7 @@ Perl_yyunlex(pTHX)
 		PL_lex_allbrackets--;
 		yyc |= (2<<24);
 	    }
-	    force_next(yyc);
+	    force_next_unshift(yyc, FALSE);
 	}
 	PL_parser->yychar = YYEMPTY;
     }
@@ -2028,7 +2030,7 @@ S_force_word(pTHX_ char *start, int token, int check_keyword, int allow_pack)
 	    = (OP*)newSVOP(OP_CONST,0,
 			   S_newSV_maybe_utf8(aTHX_ PL_tokenbuf, len));
 	NEXTVAL_NEXTTOKE.opval->op_private |= OPpCONST_BARE;
-	force_next(token);
+	force_next_unshift(token, FALSE);
     }
     return s;
 }
@@ -2052,7 +2054,7 @@ S_force_ident(pTHX_ const char *s, int kind)
 	OP* const o = (OP*)newSVOP(OP_CONST, 0, newSVpvn_flags(s, len,
                                                                 UTF ? SVf_UTF8 : 0));
 	NEXTVAL_NEXTTOKE.opval = o;
-	force_next(WORD);
+	force_next_unshift(WORD, FALSE);
 	if (kind) {
 	    o->op_private = OPpCONST_ENTERED;
 	    /* XXX see note in pp_entereval() for why we forgo typo
@@ -2074,7 +2076,7 @@ static void
 S_force_ident_maybe_lex(pTHX_ char pit)
 {
     NEXTVAL_NEXTTOKE.ival = pit;
-    force_next('p');
+    force_next_unshift('p', FALSE);
 }
 
 NV
@@ -2147,7 +2149,7 @@ S_force_version(pTHX_ char *s, int guessing)
 
     /* NOTE: The parser sees the package name and the VERSION swapped */
     NEXTVAL_NEXTTOKE.opval = version;
-    force_next(WORD);
+    force_next_unshift(WORD, FALSE);
 
     return s;
 }
@@ -2184,7 +2186,7 @@ S_force_strict_version(pTHX_ char *s)
 
     /* NOTE: The parser sees the package name and the VERSION swapped */
     NEXTVAL_NEXTTOKE.opval = version;
-    force_next(WORD);
+    force_next_unshift(WORD, FALSE);
 
     return s;
 }
@@ -3874,7 +3876,7 @@ S_intuit_method(pTHX_ char *start, GV *gv, CV *cv)
 						  S_newSV_maybe_utf8(aTHX_ tmpbuf, len));
 	    NEXTVAL_NEXTTOKE.opval->op_private = OPpCONST_BARE;
 	    PL_expect = XTERM;
-	    force_next(WORD);
+	    force_next_unshift(WORD, FALSE);
 	    PL_bufptr = s;
 	    return *s == '(' ? FUNCMETH : METHOD;
 	}
@@ -4148,7 +4150,7 @@ S_tokenize_use(pTHX_ int is_use, char *s) {
 	if (*s == ';' || *s == '}'
 		|| (s = SKIPSPACE1(s), (*s == ';' || *s == '}'))) {
 	    NEXTVAL_NEXTTOKE.opval = NULL;
-	    force_next(WORD);
+	    force_next_unshift(WORD, FALSE);
 	}
 	else if (*s == 'v') {
 	    s = force_word(s,WORD,FALSE,TRUE);
@@ -4371,7 +4373,7 @@ S_yylex(pTHX)
 		PL_lex_casestack[PL_lex_casemods] = '\0';
 		PL_lex_state = LEX_INTERPCONCAT;
 		NEXTVAL_NEXTTOKE.ival = 0;
-		force_next((2<<24)|'(');
+		force_next_unshift((2<<24)|'(', FALSE);
 		if (*s == 'l')
 		    NEXTVAL_NEXTTOKE.ival = OP_LCFIRST;
 		else if (*s == 'u')
@@ -4388,7 +4390,7 @@ S_yylex(pTHX)
 		    Perl_croak(aTHX_ "panic: yylex, *s=%u", *s);
 		PL_bufptr = s + 1;
 	    }
-	    force_next(FUNC);
+	    force_next_unshift(FUNC, FALSE);
 	    if (PL_lex_starts) {
 		s = PL_bufptr;
 		PL_lex_starts = 0;
@@ -4418,14 +4420,14 @@ S_yylex(pTHX)
 	PL_lex_state = LEX_INTERPNORMAL;
 	if (PL_lex_dojoin) {
 	    NEXTVAL_NEXTTOKE.ival = 0;
-	    force_next(',');
+	    force_next_unshift(',', FALSE);
 	    force_ident("\"", '$');
 	    NEXTVAL_NEXTTOKE.ival = 0;
-	    force_next('$');
+	    force_next_unshift('$', FALSE);
 	    NEXTVAL_NEXTTOKE.ival = 0;
-	    force_next((2<<24)|'(');
+	    force_next_unshift((2<<24)|'(', FALSE);
 	    NEXTVAL_NEXTTOKE.ival = OP_JOIN;	/* emulate join($", ...) */
-	    force_next(FUNC);
+	    force_next_unshift(FUNC, FALSE);
 	}
 	/* Convert (?{...}) and friends to 'do {...}' */
 	if (PL_lex_inpat && *PL_bufptr == '(') {
@@ -4434,7 +4436,7 @@ S_yylex(pTHX)
 	    if (*PL_bufptr != '{')
 		PL_bufptr++;
 	    PL_expect = XTERMBLOCK;
-	    force_next(DO);
+	    force_next_unshift(DO, FALSE);
 	}
 
 	if (PL_lex_starts++) {
@@ -4493,7 +4495,7 @@ S_yylex(pTHX)
 	    NEXTVAL_NEXTTOKE.opval =
 		    (OP*)newSVOP(OP_CONST, 0,
 				 sv);
-	    force_next(THING);
+	    force_next_unshift(THING, FALSE);
 	    PL_parser->lex_shared->re_eval_start = NULL;
 	    PL_expect = XTERM;
 	    return REPORT(',');
@@ -4527,7 +4529,7 @@ S_yylex(pTHX)
 	if (s != PL_bufptr) {
 	    NEXTVAL_NEXTTOKE = pl_yylval;
 	    PL_expect = XTERM;
-	    force_next(THING);
+	    force_next_unshift(THING, FALSE);
 	    if (PL_lex_starts++) {
 		/* commas only at base level: /$a\Ub$c/ => ($a,uc(b.$c)) */
 		if (!PL_lex_casemods && PL_lex_inpat)
@@ -4926,7 +4928,7 @@ S_yylex(pTHX)
 	if (PL_lex_formbrack && PL_lex_brackets <= PL_lex_formbrack) {
 	    PL_lex_state = LEX_FORMLINE;
 	    NEXTVAL_NEXTTOKE.ival = 0;
-	    force_next(FORMRBRACK);
+	    force_next_unshift(FORMRBRACK, FALSE);
 	    TOKEN(';');
 	}
 	goto retry;
@@ -4969,7 +4971,7 @@ S_yylex(pTHX)
 	    if (PL_lex_formbrack && PL_lex_brackets <= PL_lex_formbrack) {
 		PL_lex_state = LEX_FORMLINE;
 		NEXTVAL_NEXTTOKE.ival = 0;
-		force_next(FORMRBRACK);
+		force_next_unshift(FORMRBRACK, FALSE);
 		TOKEN(';');
 	    }
 	}
@@ -5367,7 +5369,7 @@ S_yylex(pTHX)
 	got_attrs:
 	    if (attrs) {
 		NEXTVAL_NEXTTOKE.opval = attrs;
-		force_next(THING);
+		force_next_unshift(THING, FALSE);
 	    }
 	    TOKEN(COLONATTR);
 	}
@@ -5453,7 +5455,7 @@ S_yylex(pTHX)
 		    const char minus = (PL_tokenbuf[0] == '-');
 		    s = force_word(s + minus, WORD, FALSE, TRUE);
 		    if (minus)
-			force_next('-');
+			force_next_unshift('-', FALSE);
 		}
 	    }
 	    /* FALLTHROUGH */
@@ -5619,10 +5621,10 @@ S_yylex(pTHX)
 	    PL_bufptr = s;
 	    return yylex();		/* ignore fake brackets */
 	}
-	force_next(formbrack ? '.' : '}');
+	force_next_unshift(formbrack ? '.' : '}', FALSE);
 	if (formbrack) LEAVE;
 	if (formbrack == 2) { /* means . where arguments were expected */
-	    force_next(';');
+	    force_next_unshift(';', FALSE);
 	    TOKEN(FORMRBRACK);
 	}
 	TOKEN(';');
@@ -6644,8 +6646,8 @@ S_yylex(pTHX)
 			off ? rv2cv_op : pl_yylval.opval;
 		    PL_expect = XOPERATOR;
 		    if (off)
-			 op_free(pl_yylval.opval), force_next(PRIVATEREF);
-		    else op_free(rv2cv_op),	   force_next(WORD);
+			 op_free(pl_yylval.opval), force_next_unshift(PRIVATEREF, FALSE);
+		    else op_free(rv2cv_op),	   force_next_unshift(WORD, FALSE);
 		    pl_yylval.ival = 0;
 		    TOKEN('&');
 		}
@@ -6756,7 +6758,7 @@ S_yylex(pTHX)
 		    }
 		    NEXTVAL_NEXTTOKE.opval = pl_yylval.opval;
 		    PL_expect = XTERM;
-		    force_next(off ? PRIVATEREF : WORD);
+		    force_next_unshift(off ? PRIVATEREF : WORD, FALSE);
 		    if (!PL_lex_allbrackets &&
 			    PL_lex_fakeeof > LEX_FAKEEOF_LOWLOGIC)
 			PL_lex_fakeeof = LEX_FAKEEOF_LOWLOGIC;
@@ -7874,7 +7876,7 @@ S_yylex(pTHX)
                         NEXTVAL_NEXTTOKE.opval
                             = (OP*)newSVOP(OP_CONST,0, format_name);
                         NEXTVAL_NEXTTOKE.opval->op_private |= OPpCONST_BARE;
-                        force_next(WORD);
+                        force_next_unshift(WORD, FALSE);
                     }
 		    PREBLOCK(FORMAT);
 		}
@@ -7906,7 +7908,7 @@ S_yylex(pTHX)
 		    NEXTVAL_NEXTTOKE.opval =
 			(OP*)newSVOP(OP_CONST, 0, PL_lex_stuff);
 		    PL_lex_stuff = NULL;
-		    force_next(THING);
+		    force_next_unshift(THING, FALSE);
 		}
 		if (!have_name) {
 		    if (PL_curstash)
@@ -10415,10 +10417,10 @@ S_scan_formline(pTHX_ char *s)
 	    if (*s2 == '{') {
 		PL_expect = XTERMBLOCK;
 		NEXTVAL_NEXTTOKE.ival = 0;
-		force_next(DO);
+		force_next_unshift(DO, FALSE);
 	    }
 	    NEXTVAL_NEXTTOKE.ival = 0;
-	    force_next(FORMLBRACK);
+	    force_next_unshift(FORMLBRACK, FALSE);
 	}
 	if (!IN_BYTES) {
 	    if (UTF && is_utf8_string((U8*)SvPVX_const(stuff), SvCUR(stuff)))
@@ -10427,7 +10429,7 @@ S_scan_formline(pTHX_ char *s)
 		sv_recode_to_utf8(stuff, PL_encoding);
 	}
 	NEXTVAL_NEXTTOKE.opval = (OP*)newSVOP(OP_CONST, 0, stuff);
-	force_next(THING);
+	force_next_unshift(THING, FALSE);
     }
     else {
 	SvREFCNT_dec(stuff);
