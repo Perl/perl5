@@ -4446,9 +4446,11 @@ esac
 set usemultiplicity
 eval $setvar
 
-: Check if quadmath is requested
+: Check if usequadmath is requested
 case "$usequadmath" in
 "$define"|true|[yY]*)
+	usequadmath="$define"
+        # if usequadmath enabled also enable uselongdouble
 	uselongdouble="$define"
 	;;
 *)	usequadmath="$undef" ;;
@@ -16305,8 +16307,47 @@ define:define)
 	nvsize=$doublesize
 	;;
 esac
+
 case "$usequadmath:$i_quadmath" in
-define:define) nvtype="__float128" ;;
+define:define)
+  nvtype="__float128"
+  nvsize=16
+  case "$libs" in
+  *quadmath*) ;;
+  *) $cat <<EOM >&4
+
+*** You requested the use of the quadmath library, but you
+*** do not seem to have the quadmath library installed.
+*** Cannot continue, aborting.
+EOM
+    exit 1
+    ;;
+  esac
+  ;;
+define:*) $cat <<EOM >&4
+
+*** You requested the use of the quadmath library, but you
+*** do not seem to have the required header, <quadmath.h>.
+EOM
+  case "$gccversion" in
+  [23].*|4.[0-5]*)
+   $cat <<EOM >&4
+*** Your gcc looks a bit old:
+*** $gccversion
+EOM
+    ;;
+  '')
+   $cat <<EOM >&4
+*** You are not running a gcc.
+EOM
+    ;;
+  esac
+  $cat <<EOM >&4
+*** For the quadmath library you need at least gcc 4.6.
+*** Cannot continue, aborting.
+EOM
+  exit 1
+  ;;
 esac
 
 $echo "(IV will be "$ivtype", $ivsize bytes)"
