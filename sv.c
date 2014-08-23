@@ -3495,7 +3495,7 @@ must_be_utf8:
 		 * set so starts from there.  Otherwise, can use memory copy to
 		 * get up to where we are now, and then start from here */
 
-		if (invariant_head <= 0) {
+		if (invariant_head == 0) {
 		    d = dst;
 		} else {
 		    Copy(s, dst, invariant_head, char);
