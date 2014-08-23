@@ -19,8 +19,8 @@ my @NaN = ("NAN", "nan", "qnan", "SNAN", "NanQ", "NANS",
            "NaN123", "NAN(123)", "nan%",
            "nanonano"); # RIP, Robin Williams.
 
-my $inf_tests = 6 + 6 * @PInf + 4;
-my $nan_tests = 5 + 2 * @NaN + 2;
+my $inf_tests = 6 + 6 * @PInf + 5;
+my $nan_tests = 5 + 2 * @NaN + 3;
 my $infnan_tests = 4;
 
 plan tests => $inf_tests + $nan_tests + $infnan_tests;
@@ -61,6 +61,8 @@ SKIP: {
 
   is(1/$PInf, 0, "one per +Inf is zero");
   is(1/$NInf, 0, "one per -Inf is zero");
+
+  is(9**9**9, $PInf, "9**9**9 is +Inf");
 }
 
 SKIP: {
@@ -86,6 +88,8 @@ SKIP: {
   # is() okay with $NaN because eq is used.
   is($NaN * 0, $NaN, "NaN times zero is NaN");
   is($NaN * 2, $NaN, "NaN times two is NaN");
+
+  is(sin(9**9**9), $NaN, "sin(9**9**9) is NaN");
 }
 
 SKIP: {
