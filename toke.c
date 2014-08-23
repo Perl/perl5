@@ -54,7 +54,6 @@ Individual members of C<PL_parser> have their own documentation.
 #define PL_lex_casestack        (PL_parser->lex_casestack)
 #define PL_lex_defer		(PL_parser->lex_defer)
 #define PL_lex_dojoin		(PL_parser->lex_dojoin)
-#define PL_lex_expect		(PL_parser->lex_expect)
 #define PL_lex_formbrack        (PL_parser->lex_formbrack)
 #define PL_lex_inpat		(PL_parser->lex_inpat)
 #define PL_lex_inwhat		(PL_parser->lex_inwhat)
