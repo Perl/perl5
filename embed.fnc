@@ -71,7 +71,7 @@
 :
 :   m  Implemented as a macro:
 :
-:         suppress proto.h entry
+:         suppress proto.h entry (actually, not suppressed, but commented out)
 :         suppress entry in the list of exported symbols
 :         suppress embed.h entry
 :
