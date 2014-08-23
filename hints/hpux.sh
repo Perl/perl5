@@ -765,3 +765,11 @@ case "$d_oldpthreads" in
 # H.Merijn says it's not 1998 anymore: ODBM is not needed,
 # and it seems to be buggy in HP-UX anyway.
 i_dbm=undef
+
+# In HP-UXes prior to 11.23 strtold() returned a HP-UX
+# specific union called long_double, not a C99 long double.
+case "`grep "double strtold.const" /usr/include/stdlib.h`" in
+*"long double strtold"*) ;; # strtold should be safe.
+*) echo "Looks like your strtold() is non-standard..." >&4
+   d_strtold=undef ;;
+esac
