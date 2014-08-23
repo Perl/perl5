@@ -10,6 +10,8 @@ use HTTP::Tiny;
 
 # Require a true value
 for my $proxy (undef, "", 0){
+    local $ENV{all_proxy} = undef;
+    local $ENV{ALL_PROXY} = undef;
     local $ENV{http_proxy} = $proxy;
     my $c = HTTP::Tiny->new();
     ok(!defined $c->http_proxy);

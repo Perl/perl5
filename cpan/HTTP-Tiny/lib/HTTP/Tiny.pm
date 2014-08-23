@@ -3,7 +3,7 @@ package HTTP::Tiny;
 use strict;
 use warnings;
 # ABSTRACT: A small, simple, correct HTTP/1.1 client
-our $VERSION = '0.047'; # VERSION
+our $VERSION = '0.048'; # VERSION
 
 use Carp ();
 
@@ -1444,7 +1444,7 @@ HTTP::Tiny - A small, simple, correct HTTP/1.1 client
 
 =head1 VERSION
 
-version 0.047
+version 0.048
 
 =head1 SYNOPSIS
 
@@ -2009,47 +2009,13 @@ David Golden <dagolden@cpan.org>
 
 =head1 CONTRIBUTORS
 
+=for stopwords Alan Gardner James Raspass Jess Robinson Lukas Eklund Martin J. Evans Martin-Louis Bright Mike Doherty Petr Písař Serguei Trouchelle Syohei YOSHIDA Sören Kornetzki Alessandro Ghedini Tom Hukins Tony Cook Brad Gilbert Chris Nehren Weyl Claes Jakobsson Clinton Gormley Craig Berry David Mitchell Edward Zborowski
+
 =over 4
 
 =item *
 
 Alan Gardner <gardner@pythian.com>
-
-=item *
-
-Alessandro Ghedini <al3xbio@gmail.com>
-
-=item *
-
-Brad Gilbert <bgills@cpan.org>
-
-=item *
-
-Chris Nehren <apeiron@cpan.org>
-
-=item *
-
-Chris Weyl <rsrchboy@cpan.org>
-
-=item *
-
-Claes Jakobsson <claes@surfar.nu>
-
-=item *
-
-Clinton Gormley <clint@traveljury.com>
-
-=item *
-
-Craig Berry <cberry@cpan.org>
-
-=item *
-
-David Mitchell <davem@iabyn.com>
-
-=item *
-
-Edward Zborowski <ed@rubensteintech.com>
 
 =item *
 
@@ -2093,7 +2059,47 @@ Sören Kornetzki <soeren.kornetzki@delti.com>
 
 =item *
 
+Alessandro Ghedini <al3xbio@gmail.com>
+
+=item *
+
+Tom Hukins <tom@eborcom.com>
+
+=item *
+
 Tony Cook <tony@develop-help.com>
+
+=item *
+
+Brad Gilbert <bgills@cpan.org>
+
+=item *
+
+Chris Nehren <apeiron@cpan.org>
+
+=item *
+
+Chris Weyl <rsrchboy@cpan.org>
+
+=item *
+
+Claes Jakobsson <claes@surfar.nu>
+
+=item *
+
+Clinton Gormley <clint@traveljury.com>
+
+=item *
+
+Craig Berry <cberry@cpan.org>
+
+=item *
+
+David Mitchell <davem@iabyn.com>
+
+=item *
+
+Edward Zborowski <ed@rubensteintech.com>
 
 =back
 
