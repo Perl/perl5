@@ -16675,6 +16675,8 @@ S_put_byte(pTHX_ SV *sv, int c)
     if (!isPRINT(c)) {
         switch (c) {
             case '\a': Perl_sv_catpvf(aTHX_ sv, "\\a"); break;
+            case '\b': Perl_sv_catpvf(aTHX_ sv, "\\b"); break;
+            case ESC_NATIVE: Perl_sv_catpvf(aTHX_ sv, "\\e"); break;
             case '\f': Perl_sv_catpvf(aTHX_ sv, "\\f"); break;
             case '\n': Perl_sv_catpvf(aTHX_ sv, "\\n"); break;
             case '\r': Perl_sv_catpvf(aTHX_ sv, "\\r"); break;
