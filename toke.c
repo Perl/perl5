@@ -6318,12 +6318,12 @@ Perl_yylex(pTHX)
 	    } else if (result == KEYWORD_PLUGIN_STMT) {
 		pl_yylval.opval = o;
 		CLINE;
-		PL_expect = XSTATE;
+		if (!PL_nexttoke) PL_expect = XSTATE;
 		return REPORT(PLUGSTMT);
 	    } else if (result == KEYWORD_PLUGIN_EXPR) {
 		pl_yylval.opval = o;
 		CLINE;
-		PL_expect = XOPERATOR;
+		if (!PL_nexttoke) PL_expect = XOPERATOR;
 		return REPORT(PLUGEXPR);
 	    } else {
 		Perl_croak(aTHX_ "Bad plugin affecting keyword '%s'",
