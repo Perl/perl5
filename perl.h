@@ -3979,6 +3979,10 @@ char *strcpy(), *strcat();
 
 #ifdef I_MATH
 #    include <math.h>
+#    ifdef __VMS
+     /* isfinite and others are here rather than in math.h as C99 stipulates */
+#        include <fp.h>
+#    endif
 #else
 START_EXTERN_C
 	    double exp (double);
