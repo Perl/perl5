@@ -6064,12 +6064,7 @@ $ WC "d_ipv6_mreq='define'"
 $ WC "d_ipv6_mreq_source='undef'"
 $ WC "d_isascii='define'"
 $ WC "d_isblank='undef'"
-$ IF F$ELEMENT(0, "-", archname) .NES. "VMS_VAX" .AND. use_ieee_math
-$ THEN
-$   WC "d_isfinite='define'"
-$ ELSE
-$   WC "d_isfinite='undef'"
-$ ENDIF
+$ WC "d_isfinite='define'"
 $ WC "d_isfinitel='undef'"
 $ WC "d_isinf='undef'"
 $ WC "d_isinfl='undef'"
