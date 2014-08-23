@@ -1352,9 +1352,8 @@ Perl_signbit(NV x) {
 #  ifdef Perl_fp_class_nzero
     if (x == 0)
         return Perl_fp_class_nzero(x);
-#  else
-    return (x < 0.0) ? 1 : 0;
 #  endif
+    return (x < 0.0) ? 1 : 0;
 }
 #endif
 
