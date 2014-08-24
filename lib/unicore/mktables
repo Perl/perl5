@@ -6999,11 +6999,14 @@ END
                     }
                 }
 
-                # I (khw) have never waded through this line to
-                # understand it well enough to comment it.
+                # The unpack yields a list of the bytes that comprise the
+                # UTF-8 of $code_point, which are each placed in \xZZ format
+                # and output in the %s to map to $tostr, so the result looks
+                # like:
+                # "\xC4\xB0" => "\x{0069}\x{0307}",
                 my $utf8 = sprintf(qq["%s" => "$tostr",],
                         join("", map { sprintf "\\x%02X", $_ }
-                            unpack("U0C*", pack("U", $code_point))));
+                            unpack("U0C*", chr $code_point)));
 
                 # Add a comment so that a human reader can more easily
                 # see what's going on.
