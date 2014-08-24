@@ -2881,7 +2881,7 @@ Perl_eval_sv(pTHX_ SV *sv, I32 flags)
 /*
 =for apidoc p||eval_pv
 
-Tells Perl to C<eval> the given string and return an SV* result.
+Tells Perl to C<eval> the given string in scalar context and return an SV* result.
 
 =cut
 */
