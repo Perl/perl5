@@ -469,6 +469,7 @@ d_flock=''
 d_flockproto=''
 d_fork=''
 d_fp_class=''
+d_fp_classify=''
 d_fpclass=''
 d_fpclassify=''
 d_fpclassl=''
@@ -13706,6 +13707,10 @@ eval $inlibc
 set fpclassify d_fpclassify
 eval $inlibc
 
+: see if fp_classify exists
+set fpclassify d_fp_classify
+eval $inlibc
+
 : see if fpclassl exists
 set fpclassl d_fpclassl
 eval $inlibc
@@ -23228,6 +23233,7 @@ d_flock='$d_flock'
 d_flockproto='$d_flockproto'
 d_fork='$d_fork'
 d_fp_class='$d_fp_class'
+d_fp_classify='$d_fp_class'
 d_fpathconf='$d_fpathconf'
 d_fpclass='$d_fpclass'
 d_fpclassify='$d_fpclassify'

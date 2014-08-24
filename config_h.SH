@@ -3561,6 +3561,19 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_fp_class HAS_FP_CLASS		/**/
 
+/* HAS_FP_CLASSIFY:
+ *	This symbol, if defined, indicates that the fp_classify routine is
+ *	available to classify doubles.
+ *	The returned values are defined in <math.h> and are:
+ *
+ *	FP_NAN
+ *	FP_INFINITE
+ *	FP_NORMAL
+ *	FP_SUBNORMAL
+ *	FP_ZERO
+ */
+#$d_fp_classify HAS_FP_CLASSIFY		/**/
+
 /* HAS_FPCLASS:
  *	This symbol, if defined, indicates that the fpclass routine is
  *	available to classify doubles.  Available for example in Solaris/SVR4.

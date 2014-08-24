@@ -3526,6 +3526,19 @@
  */
 /*#define HAS_FP_CLASS		/ **/
 
+/* HAS_FP_CLASSIFY:
+ *	This symbol, if defined, indicates that the fp_classify routine is
+ *	available to classify doubles.
+ *	The returned values are defined in <math.h> and are:
+ *
+ *	FP_NAN
+ *	FP_INFINITE
+ *	FP_NORMAL
+ *	FP_SUBNORMAL
+ *	FP_ZERO
+ */
+/*#define HAS_FP_CLASSIFY		/ **/
+
 /* HAS_FPCLASS:
  *	This symbol, if defined, indicates that the fpclass routine is
  *	available to classify doubles.  Available for example in Solaris/SVR4.
@@ -4782,6 +4795,6 @@
 #endif
 
 /* Generated from:
- * 3a8b6e52ff62682a65ae8226490afb36ea008df0a79fd0d937208d700652f767 config_h.SH
- * 3d7a2b8d30cfcbe1bd9cc89f0f87458c63713edef6604af2eb999f63eb6db629 uconfig.sh
+ * eea1777e1cae43debb19e13948791a5e43ed8c3926cdd93fe13a15f1ac584f99 config_h.SH
+ * 5e0d1abf03833f9d8aac2f5eb4332356c3503d1f0538f03cd9078423015eed73 uconfig.sh
  * ex: set ro: */

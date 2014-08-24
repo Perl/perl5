@@ -838,6 +838,10 @@ d_fp_class (d_fp_class.U):
 	This variable conditionally defines the HAS_FP_CLASS symbol, which
 	indicates to the C program that the fp_class() routine is available.
 
+d_fp_classify (d_fp_classify.U):
+	This variable conditionally defines the HAS_FP_CLASSIFY symbol, which
+	indicates to the C program that the fp_classify() routine is available.
+
 d_fpathconf (d_pathconf.U):
 	This variable conditionally defines the HAS_FPATHCONF symbol, which
 	indicates to the C program that the pathconf() routine is available
