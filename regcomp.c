@@ -16705,12 +16705,16 @@ S_put_range(pTHX_ SV *sv, UV start, const UV end)
      * 'start' to 'end'.  It assumes that only ASCII printables are displayable
      * as-is (though some of these will be escaped by put_byte()). */
 
+    const int min_range_count = 3;
+
     assert(start <= end);
 
     PERL_ARGS_ASSERT_PUT_RANGE;
 
     while (start <= end) {
-        if (end - start < 3) {  /* Individual chars in short ranges */
+        if (end - start < min_range_count) {
+
+            /* Individual chars in short ranges */
             for (; start <= end; start++) {
                 put_byte(sv, start);
             }
