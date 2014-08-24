@@ -15,7 +15,7 @@ $| = 1;
 
 BEGIN {
     chdir 't' if -d 't';
-    @INC = ('../lib','.');
+    @INC = ('../lib','.','../ext/re');
     require Config; import Config;
     require './test.pl';
 }

@@ -3,7 +3,7 @@
 # Tests the scoping of $^H and %^H
 
 BEGIN {
-    @INC = qw(. ../lib);
+    @INC = qw(. ../lib ../ext/re);
     chdir 't';
 }
 

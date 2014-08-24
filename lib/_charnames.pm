@@ -6,7 +6,6 @@
 package _charnames;
 use strict;
 use warnings;
-use File::Spec;
 our $VERSION = '1.41';
 use unicore::Name;    # mktables-generated algorithmically-defined names
 
@@ -237,6 +236,7 @@ sub not_legal_use_bytes_msg {
 
 sub alias_file ($)  # Reads a file containing alias definitions
 {
+  require File::Spec;
   my ($arg, $file) = @_;
   if (-f $arg && File::Spec->file_name_is_absolute ($arg)) {
     $file = $arg;
