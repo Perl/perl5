@@ -6674,14 +6674,14 @@ S_yylex(pTHX)
 			    goto its_constant;
 			}
 		    }
-		    NEXTVAL_NEXTTOKE.opval =
-			off ? rv2cv_op : pl_yylval.opval;
+		    PL_parser->shift_nexttoke = 1;
+		    NEXTVAL_NEXTTOKE.ival = 0;
+		    force_next('&');
 		    PL_expect = XOPERATOR;
+		    op_free(off ? pl_yylval.opval : rv2cv_op);
 		    if (off)
-			 op_free(pl_yylval.opval), force_next(PRIVATEREF);
-		    else op_free(rv2cv_op),	   force_next(WORD);
-		    pl_yylval.ival = 0;
-		    TOKEN('&');
+			pl_yylval.opval = rv2cv_op;
+		    TOKEN (off ? PRIVATEREF : WORD);
 		}
 
 		/* If followed by var or block, call it a method (unless sub) */
