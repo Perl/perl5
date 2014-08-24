@@ -16667,6 +16667,11 @@ Perl_save_re_context(pTHX)
 
 #ifdef DEBUGGING
 
+/* Certain characters are output as a sequence with the first being a
+ * backslash. */
+#define isBACKSLASHED_PUNCT(c)                                              \
+                    ((c) == '-' || (c) == ']' || (c) == '\\' || (c) == '^')
+
 STATIC void
 S_put_byte(pTHX_ SV *sv, int c)
 {
@@ -16686,7 +16691,7 @@ S_put_byte(pTHX_ SV *sv, int c)
     }
     else {
 	const char string = c;
-	if (c == '-' || c == ']' || c == '\\' || c == '^')
+	if (isBACKSLASHED_PUNCT(c))
 	    sv_catpvs(sv, "\\");
 	sv_catpvn(sv, &string, 1);
     }
