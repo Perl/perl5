@@ -107,6 +107,7 @@ Jesse Vincent <jesse@cpan.org>
 Leon Brocard <acme@astray.com>
 Matt Trout <mst@shadowcat.co.uk>
 Max Maischein <corion@cpan.org>
+Peter Martini <petercmartini@gmail.com>
 Philippe Bruhat <book@cpan.org>
 Ricardo Signes <rjbs@cpan.org>
 Stevan Little <stevan.little@iinteractive.com>
