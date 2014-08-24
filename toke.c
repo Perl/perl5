@@ -4954,9 +4954,10 @@ S_yylex(pTHX)
 	}
 	if (PL_lex_formbrack && PL_lex_brackets <= PL_lex_formbrack) {
 	    PL_lex_state = LEX_FORMLINE;
+	    PL_parser->shift_nexttoke = 1;
 	    NEXTVAL_NEXTTOKE.ival = 0;
-	    force_next(FORMRBRACK);
-	    TOKEN(';');
+	    force_next(';');
+	    TOKEN(FORMRBRACK);
 	}
 	goto retry;
     case '\r':
@@ -4997,9 +4998,10 @@ S_yylex(pTHX)
                 incline(s);
 	    if (PL_lex_formbrack && PL_lex_brackets <= PL_lex_formbrack) {
 		PL_lex_state = LEX_FORMLINE;
+		PL_parser->shift_nexttoke = 1;
 		NEXTVAL_NEXTTOKE.ival = 0;
-		force_next(FORMRBRACK);
-		TOKEN(';');
+		force_next(';');
+		TOKEN(FORMRBRACK);
 	    }
 	}
 	else {
