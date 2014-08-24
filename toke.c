@@ -1968,6 +1968,10 @@ Perl_yyunlex(pTHX)
 		}
 		*PL_nextval  = pl_yylval;
 		*PL_nexttype = yyc;
+		if (PL_lex_state != LEX_KNOWNEXT) {
+		    PL_lex_defer = PL_lex_state;
+		    PL_lex_state = LEX_KNOWNEXT;
+		}
 	    }
 	    else {
 		NEXTVAL_NEXTTOKE = PL_parser->yylval;
@@ -4255,11 +4259,14 @@ int S_yylex(pTHX);
 int
 Perl_yylex(pTHX)
 {
-    int ret = S_yylex(aTHX);
+    int ret;
+    if (PL_lex_state == LEX_KNOWNEXT)
+	return S_yylex(aTHX);
+    ret = S_yylex(aTHX);
     if (PL_nexttoke && PL_parser->shift_nexttoke) {
 	NEXTVAL_NEXTTOKE = pl_yylval;
 	force_next(ret);
-	return S_yylex();
+	return S_yylex(aTHX);
     }
     return ret;
 }
