@@ -1980,6 +1980,23 @@ EXTERN_C long double modfl(long double, long double *);
 #   define Perl_modf(x,y) modf(x,y)
 #   define Perl_frexp(x,y) frexp(x,y)
 #   define Perl_ldexp(x,y) ldexp(x,y)
+#   ifndef Perl_isnan
+#       ifdef HAS_ISNAN
+#           define Perl_isnan(x) isnan(x)
+#       endif
+#   endif
+#   ifndef Perl_isinf
+#       if defined(HAS_ISINF)
+#           define Perl_isinf(x) isinf(x)
+#       endif
+#   endif
+#   ifndef Perl_isfinite
+#     ifdef HAS_ISFINITE
+#       define Perl_isfinite(x) isfinite(x)
+#     elif defined(HAS_FINITE)
+#       define Perl_isfinite(x) finite(x)
+#     endif
+#   endif
 #endif
 
 /* Solaris and IRIX have fpclass/fpclassl, but they are using
@@ -2061,12 +2078,12 @@ EXTERN_C long double modfl(long double, long double *);
 #if !defined(Perl_fp_class) && defined(HAS_FPCLASSIFY)
 #    include <math.h>
 #    define Perl_fp_class(x)		fpclassify(x)
-#    define Perl_fp_class_inf(x)	(fp_classify(x)==FP_INFINITE)
-#    define Perl_fp_class_snan(x)	(fp_classify(x)==FP_SNAN)
-#    define Perl_fp_class_qnan(x)	(fp_classify(x)==FP_QNAN)
-#    define Perl_fp_class_norm(x)	(fp_classify(x)==FP_NORMAL)
-#    define Perl_fp_class_denorm(x)	(fp_classify(x)==FP_SUBNORMAL)
-#    define Perl_fp_class_zero(x)	(fp_classify(x)==FP_ZERO)
+#    define Perl_fp_class_inf(x)	(fpclassify(x)==FP_INFINITE)
+#    define Perl_fp_class_snan(x)	(fpclassify(x)==FP_SNAN)
+#    define Perl_fp_class_qnan(x)	(fpclassify(x)==FP_QNAN)
+#    define Perl_fp_class_norm(x)	(fpclassify(x)==FP_NORMAL)
+#    define Perl_fp_class_denorm(x)	(fpclassify(x)==FP_SUBNORMAL)
+#    define Perl_fp_class_zero(x)	(fpclassify(x)==FP_ZERO)
 #endif
 
 #if !defined(Perl_fp_class) && defined(HAS_CLASS)
@@ -2144,24 +2161,26 @@ EXTERN_C long double modfl(long double, long double *);
     (Perl_fp_class_pdenorm(x) || Perl_fp_class_ndenorm(x))
 #endif
 
+#ifdef UNDER_CE
+int isnan(double d);
+#endif
+
 #ifndef Perl_isnan
-#   ifdef HAS_ISNAN
-#       define Perl_isnan(x) isnan((double)x)
+#   ifdef Perl_fp_class_nan
+#       define Perl_isnan(x) Perl_fp_class_nan(x)
 #   else
-#       ifdef Perl_fp_class_nan
-#           define Perl_isnan(x) Perl_fp_class_nan(x)
+#       ifdef HAS_UNORDERED
+#           define Perl_isnan(x) unordered((x), 0.0)
 #       else
-#           ifdef HAS_UNORDERED
-#               define Perl_isnan(x) unordered((x), 0.0)
-#           else
-#               define Perl_isnan(x) ((x)!=(x))
-#           endif
+#           define Perl_isnan(x) ((x)!=(x))
 #       endif
 #   endif
 #endif
 
-#ifdef UNDER_CE
-int isnan(double d);
+#ifndef Perl_isinf
+#   ifdef Perl_fp_class_inf
+#       define Perl_isinf(x) Perl_fp_class_inf(x)
+#   endif
 #endif
 
 #ifndef Perl_isfinite
