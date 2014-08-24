@@ -6787,13 +6787,12 @@ S_yylex(pTHX)
 			    PREBLOCK(LSTOPSUB);
 			}
 		    }
-		    NEXTVAL_NEXTTOKE.opval = pl_yylval.opval;
-		    PL_expect = XTERM;
-		    force_next(off ? PRIVATEREF : WORD);
 		    if (!PL_lex_allbrackets &&
 			    PL_lex_fakeeof > LEX_FAKEEOF_LOWLOGIC)
 			PL_lex_fakeeof = LEX_FAKEEOF_LOWLOGIC;
-		    TOKEN(NOAMP);
+		    PL_parser->shift_nexttoke = 1;
+		    force_next(NOAMP);
+		    OPERATOR(off ? PRIVATEREF : WORD);
 		}
 
 		/* Call it a bare word */
