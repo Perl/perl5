@@ -10802,7 +10802,7 @@ S_hextract(pTHX_ const NV nv, int* exponent, U8* vhex, U8* vend)
      * nv (as opposed to the long double method), but instead the UV
      * retrieved with the frexp+ldexp invocation. */
 #  if MANTISSASIZE * 8 > NV_MANT_DIG
-    MANTISSATYPE mantissa = Perl_ldexp(norm, NV_MANT_DIG);
+    MANTISSATYPE mantissa = (MANTISSATYPE)Perl_ldexp(norm, NV_MANT_DIG);
     int limit_byte = (NV_MANT_DIG - 1) / 8;
 #  else
     /* There will be low-order precision loss.  Try to salvage as many
