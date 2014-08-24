@@ -1056,7 +1056,7 @@ EXTCONST U32 PL_charclass[];
 #   define isALPHANUMERIC_A(c) _generic_isCC_A(c, _CC_ALPHANUMERIC)
 #   define isBLANK_A(c)  _generic_isCC_A(c, _CC_BLANK)
 #   define isCNTRL_A(c)  _generic_isCC_A(c, _CC_CNTRL)
-#   define isDIGIT_A(c)  _generic_isCC(c, _CC_DIGIT)
+#   define isDIGIT_A(c)  _generic_isCC(c, _CC_DIGIT) /* No non-ASCII digits */
 #   define isGRAPH_A(c)  _generic_isCC_A(c, _CC_GRAPH)
 #   define isLOWER_A(c)  _generic_isCC_A(c, _CC_LOWER)
 #   define isPRINT_A(c)  _generic_isCC_A(c, _CC_PRINT)
@@ -1065,7 +1065,7 @@ EXTCONST U32 PL_charclass[];
 #   define isSPACE_A(c)  _generic_isCC_A(c, _CC_SPACE)
 #   define isUPPER_A(c)  _generic_isCC_A(c, _CC_UPPER)
 #   define isWORDCHAR_A(c) _generic_isCC_A(c, _CC_WORDCHAR)
-#   define isXDIGIT_A(c)  _generic_isCC(c, _CC_XDIGIT)
+#   define isXDIGIT_A(c)  _generic_isCC(c, _CC_XDIGIT) /* No non-ASCII xdigits */
 #   define isIDFIRST_A(c) _generic_isCC_A(c, _CC_IDFIRST)
 #   define isALPHA_L1(c)  _generic_isCC(c, _CC_ALPHA)
 #   define isALPHANUMERIC_L1(c) _generic_isCC(c, _CC_ALPHANUMERIC)
@@ -1716,9 +1716,10 @@ typedef U32 line_t;
  * compiler, this reduces to an AND and a TEST.  On both EBCDIC and ASCII
  * machines, 'A' and 'a' differ by a single bit; the same with the upper and
  * lower case of all other ASCII-range alphabetics.  On ASCII platforms, they
- * are 32 apart; on EBCDIC, they are 64.  This uses an exclusive 'or' to find
- * that bit and then inverts it to form a mask, with just a single 0, in the
- * bit position where the upper- and lowercase differ. */
+ * are 32 apart; on EBCDIC, they are 64.  At compile time, this uses an
+ * exclusive 'or' to find that bit and then inverts it to form a mask, with
+ * just a single 0, in the bit position where the upper- and lowercase differ.
+ * */
 #define isALPHA_FOLD_EQ(c1, c2)                                         \
                       (__ASSERT_(isALPHA_A(c1) || isALPHA_A(c2))        \
                       ((c1) & ~('A' ^ 'a')) ==  ((c2) & ~('A' ^ 'a')))

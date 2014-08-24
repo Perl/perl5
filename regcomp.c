@@ -16783,7 +16783,7 @@ S_put_range(pTHX_ SV *sv, UV start, UV end)
                 continue;
             }
 
-            /* We output any remaining printables as individual characters */
+            /* We output any other printables as individual characters */
             if (isPUNCT_A(start) || isSPACE_A(start)) {
                 while (start <= end && (isPUNCT_A(start) || isSPACE_A(start))) {
                     put_byte(sv, start);
@@ -16809,7 +16809,7 @@ S_put_charclass_bitmap_innards(pTHX_ SV *sv, char *bitmap, SV** bitmap_invlist)
 {
     /* Appends to 'sv' a displayable version of the innards of the bracketed
      * character class whose bitmap is 'bitmap';  Returns 'TRUE' if it actually
-     * output anything.  'bitmap_invlist', if not NULL, will contain an
+     * output anything, and bitmap_invlist, if not NULL, will point to an
      * inversion list of what is in the bit map */
 
     int i;
