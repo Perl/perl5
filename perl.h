@@ -1999,6 +1999,18 @@ EXTERN_C long double modfl(long double, long double *);
 #   endif
 #endif
 
+/* fpclassify(): C99.  It is supposed to be a macro that switches on
+* the sizeof() of its argument, so there's no need for e.g. fpclassifyl().*/
+#if !defined(Perl_fp_class) && defined(HAS_FPCLASSIFY)
+#    include <math.h>
+#    define Perl_fp_class(x)		fpclassify(x)
+#    define Perl_fp_class_inf(x)	(Perl_fp_class(x)==FP_INFINITE)
+#    define Perl_fp_class_nan(x)	(Perl_fp_class(x)==FP_NAN)
+#    define Perl_fp_class_norm(x)	(Perl_fp_class(x)==FP_NORMAL)
+#    define Perl_fp_class_denorm(x)	(Perl_fp_class(x)==FP_SUBNORMAL)
+#    define Perl_fp_class_zero(x)	(Perl_fp_class(x)==FP_ZERO)
+#endif
+
 /* Solaris and IRIX have fpclass/fpclassl, but they are using
  * an enum typedef, not cpp symbols, and Configure doesn't detect that.
  * Define one symbol also as a cpp symbol so we can detect it. */
@@ -2006,6 +2018,12 @@ EXTERN_C long double modfl(long double, long double *);
 # define FP_SNAN FP_SNAN
 #endif
 
+/* Feel free to check with me for the SGI manpages, SGI testing,
+ * etcetera, if you want to try getting this to work with IRIX.
+ *
+ * - Allen <allens@cpan.org> */
+
+/* fpclass(): SysV, at least Solaris and some versions of IRIX. */
 #if !defined(Perl_fp_class) && (defined(HAS_FPCLASS)||defined(HAS_FPCLASSL))
 #    include <math.h>
 #    ifdef I_IEEFP
@@ -2044,12 +2062,8 @@ EXTERN_C long double modfl(long double, long double *);
 #    endif
 #endif
 
-/* Feel free to check with me for the SGI manpages, SGI testing,
- * etcetera, if you want to try getting this to work with IRIX.
- *
- * - Allen <allens@cpan.org> */
-
-#if !defined(Perl_fp_class) && defined(HAS_FP_CLASS)
+/* fp_class(): Legacy: at least Tru64, some versions of IRIX. */
+#if !defined(Perl_fp_class) && (defined(HAS_FP_CLASS)||defined(HAS_FP_CLASSL))
 #    include <math.h>
 #    if !defined(FP_SNAN) && defined(I_FP_CLASS)
 #        include <fp_class.h>
@@ -2061,31 +2075,25 @@ EXTERN_C long double modfl(long double, long double *);
 #            define Perl_fp_class(x)	fp_class_d(x)
 #        endif
 #    else
-#        define Perl_fp_class(x)	fp_class(x)
+#        if defined(USE_LONG_DOUBLE) && defined(HAS_FP_CLASSL)
+#            define Perl_fp_class(x)	fp_classl(x)
+#        else
+#            define Perl_fp_class(x)	fp_class(x)
+#        endif
 #    endif
-#    define Perl_fp_class_snan(x)	(fp_class(x)==FP_SNAN)
-#    define Perl_fp_class_qnan(x)	(fp_class(x)==FP_QNAN)
-#    define Perl_fp_class_ninf(x)	(fp_class(x)==FP_NEG_INF)
-#    define Perl_fp_class_pinf(x)	(fp_class(x)==FP_POS_INF)
-#    define Perl_fp_class_nnorm(x)	(fp_class(x)==FP_NEG_NORM)
-#    define Perl_fp_class_pnorm(x)	(fp_class(x)==FP_POS_NORM)
-#    define Perl_fp_class_ndenorm(x)	(fp_class(x)==FP_NEG_DENORM)
-#    define Perl_fp_class_pdenorm(x)	(fp_class(x)==FP_POS_DENORM)
-#    define Perl_fp_class_nzero(x)	(fp_class(x)==FP_NEG_ZERO)
-#    define Perl_fp_class_pzero(x)	(fp_class(x)==FP_POS_ZERO)
+#    define Perl_fp_class_snan(x)	(Perl_fp_class(x)==FP_SNAN)
+#    define Perl_fp_class_qnan(x)	(Perl_fp_class(x)==FP_QNAN)
+#    define Perl_fp_class_ninf(x)	(Perl_fp_class(x)==FP_NEG_INF)
+#    define Perl_fp_class_pinf(x)	(Perl_fp_class(x)==FP_POS_INF)
+#    define Perl_fp_class_nnorm(x)	(Perl_fp_class(x)==FP_NEG_NORM)
+#    define Perl_fp_class_pnorm(x)	(Perl_fp_class(x)==FP_POS_NORM)
+#    define Perl_fp_class_ndenorm(x)	(Perl_fp_class(x)==FP_NEG_DENORM)
+#    define Perl_fp_class_pdenorm(x)	(Perl_fp_class(x)==FP_POS_DENORM)
+#    define Perl_fp_class_nzero(x)	(Perl_fp_class(x)==FP_NEG_ZERO)
+#    define Perl_fp_class_pzero(x)	(Perl_fp_class(x)==FP_POS_ZERO)
 #endif
 
-#if !defined(Perl_fp_class) && defined(HAS_FPCLASSIFY)
-#    include <math.h>
-#    define Perl_fp_class(x)		fpclassify(x)
-#    define Perl_fp_class_inf(x)	(fpclassify(x)==FP_INFINITE)
-#    define Perl_fp_class_snan(x)	(fpclassify(x)==FP_SNAN)
-#    define Perl_fp_class_qnan(x)	(fpclassify(x)==FP_QNAN)
-#    define Perl_fp_class_norm(x)	(fpclassify(x)==FP_NORMAL)
-#    define Perl_fp_class_denorm(x)	(fpclassify(x)==FP_SUBNORMAL)
-#    define Perl_fp_class_zero(x)	(fpclassify(x)==FP_ZERO)
-#endif
-
+/* _class(): Legacy: AIX. */
 #if !defined(Perl_fp_class) && defined(HAS_CLASS)
 #    include <math.h>
 #    ifndef _cplusplus
@@ -2105,6 +2113,18 @@ EXTERN_C long double modfl(long double, long double *);
 #    define Perl_fp_class_pzero(x)	(Perl_fp_class(x)==FP_PLUS_ZERO)
 #endif
 
+/* fp_classify(): Legacy: Unicos? */
+#if !defined(Perl_fp_class) && defined(HAS_FP_CLASSIFY)
+#    include <math.h>
+#    define Perl_fp_class(x)		fp_classify(x)
+#    define Perl_fp_class_inf(x)	(Perl_fp_class(x)==FP_INFINITE)
+#    define Perl_fp_class_nan(x)	(Perl_fp_class(x)==FP_NAN)
+#    define Perl_fp_class_norm(x)	(Perl_fp_class(x)==FP_NORMAL)
+#    define Perl_fp_class_denorm(x)	(Perl_fp_class(x)==FP_SUBNORMAL)
+#    define Perl_fp_class_zero(x)	(Perl_fp_class(x)==FP_ZERO)
+#endif
+
+/* Win32: _fpclass(), _isnan(), _finite(). */
 #ifdef WIN32
 #  ifndef Perl_isnan
 #    define Perl_isnan(x) _isnan(x)
@@ -2180,6 +2200,8 @@ int isnan(double d);
 #ifndef Perl_isinf
 #   ifdef Perl_fp_class_inf
 #       define Perl_isinf(x) Perl_fp_class_inf(x)
+#   elif defined(Perl_isfinite) && defined(Perl_isnan)
+#       define Perl_isinf(x) !(Perl_isfinite(x)||Perl_isnan(x))
 #   endif
 #endif
 
@@ -2195,14 +2217,6 @@ int isnan(double d);
 #   else
 /* NaN*0 is NaN, [+-]Inf*0 is NaN, zero for anything else. */
 #     define Perl_isfinite(x) (((x) * 0) == 0)
-#   endif
-#endif
-
-#ifndef Perl_isinf
-#   if defined(Perl_fp_class_inf)
-#       define Perl_isinf(x) Perl_fp_class_inf(x)
-#   elif defined(Perl_isfinite) && defined(Perl_isnan)
-#       define Perl_isinf(x) !(Perl_isfinite(x)||Perl_isnan(x))
 #   endif
 #endif
 
