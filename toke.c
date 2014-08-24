@@ -5650,13 +5650,16 @@ S_yylex(pTHX)
 	    PL_bufptr = s;
 	    return yylex();		/* ignore fake brackets */
 	}
-	force_next(formbrack ? '.' : '}');
-	if (formbrack) LEAVE;
-	if (formbrack == 2) { /* means . where arguments were expected */
+	PL_parser->shift_nexttoke = 1;
+	if (formbrack) {
+	    LEAVE;
+	    if (formbrack == 2) /* means . where arguments were expected */
+		force_next(FORMRBRACK);
 	    force_next(';');
-	    TOKEN(FORMRBRACK);
+	    TOKEN('.');
 	}
-	TOKEN(';');
+	force_next(';');
+	TOKEN('}');
     case '&':
 	if (PL_expect == XPOSTDEREF) POSTDEREF('&');
 	s++;
