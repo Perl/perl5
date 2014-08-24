@@ -1952,7 +1952,6 @@ Perl_yyunlex(pTHX)
     int yyc = PL_parser->yychar;
     if (yyc != YYEMPTY) {
 	if (yyc) {
-	    NEXTVAL_NEXTTOKE = PL_parser->yylval;
 	    if (yyc == '{'/*}*/ || yyc == HASHBRACK || yyc == '['/*]*/) {
 		PL_lex_allbrackets--;
 		PL_lex_brackets--;
@@ -1961,7 +1960,19 @@ Perl_yyunlex(pTHX)
 		PL_lex_allbrackets--;
 		yyc |= (2<<24);
 	    }
-	    force_next(yyc);
+	    if (PL_parser->shift_nexttoke) {
+		int i = ++PL_nexttoke;
+		while (--i) {
+		    PL_nextval [i] = PL_nextval [i-1];
+		    PL_nexttype[i] = PL_nexttype[i-1];
+		}
+		*PL_nextval  = pl_yylval;
+		*PL_nexttype = yyc;
+	    }
+	    else {
+		NEXTVAL_NEXTTOKE = PL_parser->yylval;
+		force_next(yyc);
+	    }
 	}
 	PL_parser->yychar = YYEMPTY;
     }
@@ -4244,7 +4255,13 @@ int S_yylex(pTHX);
 int
 Perl_yylex(pTHX)
 {
-    return S_yylex(aTHX);
+    int ret = S_yylex(aTHX);
+    if (PL_nexttoke && PL_parser->shift_nexttoke) {
+	NEXTVAL_NEXTTOKE = pl_yylval;
+	force_next(ret);
+	return S_yylex();
+    }
+    return ret;
 }
 
 int
@@ -4284,14 +4301,26 @@ S_yylex(pTHX)
     /* when we've already built the next token, just pull it out of the queue */
     case LEX_KNOWNEXT:
 	PL_nexttoke--;
-	pl_yylval = PL_nextval[PL_nexttoke];
 	if (!PL_nexttoke) {
 	    PL_lex_state = PL_lex_defer;
 	    PL_lex_defer = LEX_NORMAL;
 	}
 	{
 	    I32 next_type;
-	    next_type = PL_nexttype[PL_nexttoke];
+	    if (PL_parser->shift_nexttoke) {
+		int i = -1;
+		pl_yylval = PL_nextval[0];
+		next_type = PL_nexttype[0];
+		while (++i <= PL_nexttoke) {
+		    PL_nextval [i] = PL_nextval [i+1];
+		    PL_nexttype[i] = PL_nexttype[i+1];
+		}
+		if (!PL_nexttoke) PL_parser->shift_nexttoke = 0;
+	    }
+	    else {
+		pl_yylval = PL_nextval [PL_nexttoke];
+		next_type = PL_nexttype[PL_nexttoke];
+	    }
 	    if (next_type & (7<<24)) {
 		if (next_type & (1<<24)) {
 		    if (PL_lex_brackets > 100)
