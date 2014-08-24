@@ -768,7 +768,7 @@ i_dbm=undef
 
 # In HP-UXes prior to 11.23 strtold() returned a HP-UX
 # specific union called long_double, not a C99 long double.
-case "`grep "double strtold.const" /usr/include/stdlib.h`" in
+case "`grep 'double strtold.const' /usr/include/stdlib.h`" in
 *"long double strtold"*) ;; # strtold should be safe.
 *) echo "Looks like your strtold() is non-standard..." >&4
    d_strtold=undef ;;
