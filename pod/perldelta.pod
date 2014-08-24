@@ -259,6 +259,16 @@ loops.
 
 =back
 
+=head3 L<perlxs>
+
+=over 4
+
+=item *
+
+Added a discussion of locale issues in XS code.
+
+=back
+
 =head1 Diagnostics
 
 The following additions or changes have been made to diagnostic output,
