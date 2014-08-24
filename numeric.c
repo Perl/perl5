@@ -586,16 +586,6 @@ Perl_grok_number(pTHX_ const char *pv, STRLEN len, UV *valuep)
     return grok_number_flags(pv, len, valuep, 0);
 }
 
-/* Peek ahead to see whether this could be Inf/NaN/qNaN/snan/1.#INF */
-#define INFNAN_PEEK(s, send) \
-    (s < send && \
-     ((isALPHA_FOLD_EQ(*s, 'I') || isALPHA_FOLD_EQ(*s, 'N')) ||  \
-      ((s + 4) < send &&                                         \
-       (isALPHA_FOLD_EQ(*s, 'Q') || isALPHA_FOLD_EQ(*s, 'S')) && \
-       isALPHA_FOLD_EQ(s[1], 'N')) || \
-      ((s + 5) < send &&                                                \
-       (*s == '1' && ((s[1] == '.' && s[2] == '#') || s[1] == '#')))))
-
 /*
 =for apidoc grok_infnan
 
@@ -623,7 +613,10 @@ Perl_grok_infnan(const char** sp, const char* send)
 
     PERL_ARGS_ASSERT_GROK_INFNAN;
 
-    if (*s == '-') {
+    if (*s == '+') {
+        s++; if (s == send) return 0;
+    }
+    else if (*s == '-') {
         flags |= IS_NUMBER_NEG; /* Yes, -NaN happens. Incorrect but happens. */
         s++; if (s == send) return 0;
     }
@@ -650,8 +643,11 @@ Perl_grok_infnan(const char** sp, const char* send)
                 s++; if (s == send || isALPHA_FOLD_NE(*s, 'N')) return 0;
                 s++; if (s == send || isALPHA_FOLD_NE(*s, 'I')) return 0;
                 s++; if (s == send || isALPHA_FOLD_NE(*s, 'T')) return 0;
-                /* XXX maybe also grok "infinite"? */
-                s++; if (s == send || isALPHA_FOLD_NE(*s, 'Y')) return 0;
+                s++; if (s == send ||
+                         /* allow either Infinity or Infinite */
+                         (isALPHA_FOLD_NE(*s, 'Y') &&
+                          isALPHA_FOLD_NE(*s, 'E')))
+                         return 0;
                 s++;
             } else if (*s)
                 return 0;
@@ -681,10 +677,11 @@ Perl_grok_infnan(const char** sp, const char* send)
 
             flags |= IS_NUMBER_NAN | IS_NUMBER_NOT_INT;
 
-            /* NaN can be followed by various stuff since there are
-             * multiple different NaN values, and some implementations
-             * output the "payload" values, e.g. NaN123, NAN(abc),
-             * some implementation just have weird stuff like NaN%. */
+            /* NaN can be followed by various stuff (NaNQ, NaNS), but
+             * there are also multiple different NaN values, and some
+             * implementations output the "payload" values,
+             * e.g. NaN123, NAN(abc), while some implementations just
+             * have weird stuff like NaN%. */
             s = send;
         }
         else
@@ -707,8 +704,6 @@ Perl_grok_number_flags(pTHX_ const char *pv, STRLEN len, UV *valuep, U32 flags)
   const char * const send = pv + len;
   const char *d;
   int numtype = 0;
-  int sawinf = 0;
-  int sawnan = 0;
 
   PERL_ARGS_ASSERT_GROK_NUMBER_FLAGS;
 
@@ -727,10 +722,10 @@ Perl_grok_number_flags(pTHX_ const char *pv, STRLEN len, UV *valuep, U32 flags)
     return 0;
 
   /* The first digit (after optional sign): note that might
-   * also point to "infinity" or "nan". */
+   * also point to "infinity" or "nan", or "1.#INF". */
   d = s;
 
-  /* next must be digit or the radix separator or beginning of infinity */
+  /* next must be digit or the radix separator or beginning of infinity/nan */
   if (isDIGIT(*s)) {
     /* UVs are at least 32 bits, so the first 9 decimal digits cannot
        overflow.  */
@@ -841,30 +836,8 @@ Perl_grok_number_flags(pTHX_ const char *pv, STRLEN len, UV *valuep, U32 flags)
     else
         return 0;
   }
-  else {
-      if (INFNAN_PEEK(d, send)) {
-          int infnan = Perl_grok_infnan(&d, send);
-          if ((infnan & IS_NUMBER_INFINITY)) {
-              numtype |= infnan;
-              sawinf = 1;
-          }
-          else if ((infnan & IS_NUMBER_NAN)) {
-              numtype |= infnan;
-              sawnan = 1;
-          }
-          else
-              return 0;
-          s = d;
-      }
-  }
 
-  if (sawinf) {
-    /* Keep the sign for infinity. */
-    numtype |= IS_NUMBER_INFINITY | IS_NUMBER_NOT_INT;
-  } else if (sawnan) {
-    numtype &= IS_NUMBER_NEG; /* Clear sign for nan.  */
-    numtype |= IS_NUMBER_NAN | IS_NUMBER_NOT_INT;
-  } else if (s < send) {
+  if (s < send) {
     /* we can have an optional exponent part */
     if (isALPHA_FOLD_EQ(*s, 'e')) {
       s++;
@@ -893,6 +866,18 @@ Perl_grok_number_flags(pTHX_ const char *pv, STRLEN len, UV *valuep, U32 flags)
     if (valuep)
       *valuep = 0;
     return IS_NUMBER_IN_UV;
+  }
+  /* We could be e.g. at "Inf" or "NaN", or at the "#" of "1.#INF". */
+  if ((s + 2 < send) && strchr("inqs#", toFOLD(*s))) {
+      /* Really detect inf/nan. Start at d, not s, since the above
+       * code might have already consumed the "1." or "1". */
+      int infnan = Perl_grok_infnan(&d, send);
+      if ((infnan & IS_NUMBER_INFINITY)) {
+          return (numtype | infnan); /* Keep sign for infinity. */
+      }
+      else if ((infnan & IS_NUMBER_NAN)) {
+          return (numtype | infnan) & ~IS_NUMBER_NEG; /* Clear sign for nan. */
+      }
   }
   else if (flags & PERL_SCAN_TRAILING) {
     return numtype | IS_NUMBER_TRAILING;
@@ -1174,30 +1159,68 @@ Perl_my_atof2(pTHX_ const char* orig, NV* value)
     {
         const char *p0 = negative ? s - 1 : s;
         const char *p = p0;
-#if defined(NV_INF) && defined(NV_NAN)
-        int infnan_flags = grok_infnan(&p, send);
-        if (infnan_flags && p != p0) {
-            if ((infnan_flags & IS_NUMBER_INFINITY)) {
-                *value = (infnan_flags & IS_NUMBER_NEG) ? -NV_INF: NV_INF;
+        int infnan = grok_infnan(&p, send);
+        if (infnan && p != p0) {
+            /* If we can generate inf/nan directly, let's do so. */
+#ifdef NV_INF
+            if ((infnan & IS_NUMBER_INFINITY)) {
+                *value = (infnan & IS_NUMBER_NEG) ? -NV_INF: NV_INF;
                 return (char*)p;
             }
-            else if ((infnan_flags & IS_NUMBER_NAN)) {
+#endif
+#ifdef NV_NAN
+            if ((infnan & IS_NUMBER_NAN)) {
                 *value = NV_NAN;
                 return (char*)p;
             }
-        }
-#elif defined(HAS_STRTOD)
-        if (INFNAN_PEEK(s, send)) {
-            /* The native strtod() may not get all the possible
-             * inf/nan strings INFNAN_PEEK() recognizes. */
-            char* endp;
-            NV nv = Perl_strtod(p, &endp);
-            if (p != endp) {
-                *value = nv;
-                return endp;
-            }
-        }
 #endif
+#ifdef Perl_strtod
+            /* If still here, we didn't have either NV_INF or INV_NAN,
+             * and can try falling back to native strtod/strtold.
+             *
+             * The native interface might not recognize all the possible
+             * inf/nan strings Perl recognizes.  What we can try
+             * is to try faking the input.  We will try inf/-inf/nan
+             * as the most promising/portable input. */
+            {
+                const char* fake = NULL;
+                char* endp;
+                NV nv;
+                if ((infnan & IS_NUMBER_INFINITY)) {
+                    fake = ((infnan & IS_NUMBER_NEG)) ? "-inf" : "inf";
+                }
+                else if ((infnan & IS_NUMBER_NAN)) {
+                    fake = "nan";
+                }
+                assert(fake);
+                nv = Perl_strtod(fake, &endp);
+                if (fake != endp) {
+                    if ((infnan & IS_NUMBER_INFINITY)) {
+#ifdef Perl_isinf
+                        if (Perl_isinf(nv))
+                            *value = nv;
+#else
+                        /* last resort, may generate SIGFPE */
+                        *value = Perl_exp((NV)1e9);
+                        if ((infnan & IS_NUMBER_NEG))
+                            *value = -*value;
+#endif
+                        return (char*)p; /* p, not endp */
+                    }
+                    else if ((infnan & IS_NUMBER_NAN)) {
+#ifdef Perl_isnan
+                        if (Perl_isnan(nv))
+                            *value = nv;
+#else
+                        /* last resort, may generate SIGFPE */
+                        *value = Perl_log((NV)-1.0);
+#endif
+                        return (char*)p; /* p, not endp */
+                    }
+                }
+            }
+#endif /* #ifdef Perl_strtod */
+        }
     }
 
     /* we accumulate digits into an integer; when this becomes too
