@@ -1927,14 +1927,19 @@ S_postderef(pTHX_ int const funny, char const next)
     assert(funny == DOLSHARP || strchr("$@%&*", funny));
     assert(strchr("*[{", next));
     if (next == '*') {
+	PL_parser->shift_nexttoke = 1;
 	PL_expect = XOPERATOR;
-	if (PL_lex_state == LEX_INTERPNORMAL && !PL_lex_brackets) {
-	    assert('@' == funny || '$' == funny || DOLSHARP == funny);
-	    PL_lex_state = LEX_INTERPEND;
-	    if ('@' == funny) force_next(POSTJOIN);
-	}
-	force_next(next);
 	PL_bufptr+=2;
+	force_next(funny);
+	if (PL_lex_defer == LEX_INTERPNORMAL && !PL_lex_brackets) {
+	    assert('@' == funny || '$' == funny || DOLSHARP == funny);
+	    PL_lex_defer = LEX_INTERPEND;
+	    if ('@' == funny) {
+		force_next(next);
+		return POSTJOIN;
+	    }
+	}
+	return next;
     }
     else {
 	if ('@' == funny && PL_lex_state == LEX_INTERPNORMAL
