@@ -2,9 +2,6 @@
 
 =head1 NAME
 
-[ this is a template for a new perldelta file.  Any text flagged as XXX needs
-to be processed before release. ]
-
 perldelta - what is new for perl v5.20.1
 
 =head1 DESCRIPTION
@@ -15,18 +12,6 @@ release.
 If you are upgrading from an earlier release such as 5.19.0, first read
 L<perl5200delta>, which describes differences between 5.19.0 and 5.20.0.
 
-=head1 Notice
-
-XXX Any important notices here
-
-=head1 Security
-
-XXX Any security-related notices go here.  In particular, any security
-vulnerabilities closed should be noted here rather than in the
-L</Selected Bug Fixes> section.
-
-[ List each security issue as a =head2 entry ]
-
 =head1 Incompatible Changes
 
 There are no changes intentionally incompatible with 5.20.0.  If any exist,
@@ -34,11 +19,6 @@ they are bugs, and we request that you submit a report.  See L</Reporting Bugs>
 below.
 
 =head1 Performance Enhancements
-
-XXX Changes which enhance performance without changing behaviour go here.
-There may well be none in a stable release.
-
-[ List each enhancement as a =item entry ]
 
 =over 4
 
@@ -58,14 +38,6 @@ L<[perl #121977]|https://rt.perl.org/Ticket/Display.html?id=121977>
 =back
 
 =head1 Modules and Pragmata
-
-XXX All changes to installed files in F<cpan/>, F<dist/>, F<ext/> and F<lib/>
-go here.  If Module::CoreList is updated, generate an initial draft of the
-following sections using F<Porting/corelist-perldelta.pl>.  A paragraph summary
-for important changes should then be added by hand.  In an ideal world,
-dual-life modules would have a F<Changes> file that could be cribbed.
-
-[ Within each section, list entries as a =item entry ]
 
 =head2 Updated Modules and Pragmata
 
@@ -88,7 +60,7 @@ Illegal POD syntax in the documentation has been corrected.
 
 C<ExtUtils::CBuilder> has been upgraded from version 0.280216 to 0.280217.
 
-Android builds now link to both B<-lperl> and C<$Config{perllibs}>.
+Android builds now link to both B<-lperl> and C<$Config::Config{perllibs}>.
 
 =item *
 
@@ -142,22 +114,7 @@ L<[perl #121930]|https://rt.perl.org/Ticket/Display.html?id=121930>
 
 =head1 Documentation
 
-XXX Changes to files in F<pod/> go here.  Consider grouping entries by
-file and be sure to link to the appropriate page, e.g. L<perlfunc>.
-
-=head2 New Documentation
-
-XXX Changes which create B<new> files in F<pod/> go here.
-
-=head3 L<XXX>
-
-XXX Description of the purpose of the new file here
-
 =head2 Changes to Existing Documentation
-
-XXX Changes which significantly change existing files in F<pod/> go here.
-However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
-section.
 
 =head3 L<perlapi>
 
@@ -188,6 +145,10 @@ Clarify where C<NUL> may be embedded or is required to terminate a string.
 =head3 L<perlfunc>
 
 =over 4
+
+=item *
+
+Clarify the meaning of C<-B> and C<-T>.
 
 =item *
 
@@ -232,8 +193,8 @@ L<[perl #116925]|https://rt.perl.org/Ticket/Display.html?id=116925>
 
 =item *
 
-We now have a code of conduct for the I<< p5p >> mailing list, as documented
-in L<< perlpolicy/STANDARDS OF CONDUCT >>.
+We now have a code of conduct for the I<< p5p >> mailing list, as documented in
+L<< perlpolicy/STANDARDS OF CONDUCT >>.
 
 =back
 
@@ -275,12 +236,7 @@ The following additions or changes have been made to diagnostic output,
 including warnings and fatal error messages.  For the complete list of
 diagnostic messages, see L<perldiag>.
 
-XXX New or changed warnings emitted by the core's C<C> code go here.  Also
-include any changes in L<perldiag> that reconcile it to the C<C> code.
-
 =head2 Changes to Existing Diagnostics
-
-XXX Changes (i.e. rewording) of diagnostic messages go here
 
 =over 4
 
@@ -292,33 +248,7 @@ Information about Unicode behaviour has been added.
 
 =back
 
-=head1 Utility Changes
-
-XXX Changes to installed programs such as F<perlbug> and F<xsubpp> go here.
-Most of these are built within the directories F<utils> and F<x2p>.
-
-[ List utility changes as a =head2 entry for each utility and =item
-entries for each change
-Use L<XXX> with program names to get proper documentation linking. ]
-
-=head2 L<XXX>
-
-=over 4
-
-=item *
-
-XXX
-
-=back
-
 =head1 Configuration and Compilation
-
-XXX Changes to F<Configure>, F<installperl>, F<installman>, and analogous tools
-go here.  Any other changes to the Perl build process should be listed here.
-However, any platform-specific changes should be listed in the
-L</Platform Support> section, instead.
-
-[ List changes as a =item entry ].
 
 =over 4
 
@@ -330,37 +260,9 @@ L<[perl #121585]|https://rt.perl.org/Ticket/Display.html?id=121585>
 
 =back
 
-=head1 Testing
-
-XXX Any significant changes to the testing of a freshly built perl should be
-listed here.  Changes which create B<new> files in F<t/> go here as do any
-large changes to the testing harness (e.g. when parallel testing was added).
-Changes to existing files in F<t/> aren't worth summarizing, although the bugs
-that they represent may be covered elsewhere.
-
-[ List each test improvement as a =item entry ]
-
-=over 4
-
-=item *
-
-XXX
-
-=back
-
 =head1 Platform Support
 
-XXX Any changes to platform support should be listed in the sections below.
-
-[ Within the sections, list each platform as a =item entry with specific
-changes as paragraphs below it. ]
-
 =head2 Platform-Specific Notes
-
-XXX List any changes for specific platforms.  This could include configuration
-and compilation changes or changes in portability/compatibility.  However,
-changes within modules for platforms should generally be listed in the
-L</Modules and Pragmata> section.
 
 =over 4
 
@@ -392,12 +294,6 @@ C<%I64d> is now being used instead of C<%lld> for MinGW.
 
 =head1 Internal Changes
 
-XXX Changes which affect the interface available to C<XS> code go here.  Other
-significant internal changes for future core maintainers should be noted as
-well.
-
-[ List each change as a =item entry ]
-
 =over 4
 
 =item *
@@ -411,11 +307,6 @@ to do so, before returning to Perl.
 =back
 
 =head1 Selected Bug Fixes
-
-XXX Important bug fixes in the core language are summarized here.  Bug fixes in
-files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
-
-[ List each fix as a =item entry ]
 
 =over 4
 
@@ -438,9 +329,9 @@ C<system> and friends should now work properly on more Android builds.
 Due to an oversight, the value specified through B<-Dtargetsh> to F<Configure>
 would end up being ignored by some of the build process.  This caused perls
 cross-compiled for Android to end up with defective versions of C<system>,
-C<exec> and backticks: the commands would end up looking for F</bin/sh>
-instead of F</system/bin/sh>, and so would fail for the vast majority of
-devices, leaving C<$!> as C<ENOENT>.
+C<exec> and backticks: the commands would end up looking for F</bin/sh> instead
+of F</system/bin/sh>, and so would fail for the vast majority of devices,
+leaving C<$!> as C<ENOENT>.
 
 =item *
 
@@ -449,50 +340,18 @@ fixed.
 
 =back
 
-=head1 Known Problems
-
-XXX Descriptions of platform agnostic bugs we know we can't fix go here.  Any
-tests that had to be C<TODO>ed for the release would be noted here.  Unfixed
-platform specific bugs also go here.
-
-[ List each fix as a =item entry ]
-
-=over 4
-
-=item *
-
-XXX
-
-=back
-
-=head1 Errata From Previous Releases
-
-=over 4
-
-=item *
-
-XXX Add anything here that we forgot to add, or were mistaken about, in
-the perldelta of a previous release.
-
-=back
-
-=head1 Obituary
-
-XXX If any significant core contributor has died, we've added a short obituary
-here.
-
 =head1 Acknowledgements
 
 XXX Generate this with:
 
-  perl Porting/acknowledgements.pl v5.20.1..HEAD
+  perl Porting/acknowledgements.pl v5.20.0..HEAD
 
 =head1 Reporting Bugs
 
 If you find what you think is a bug, you might check the articles recently
 posted to the comp.lang.perl.misc newsgroup and the perl bug database at
-https://rt.perl.org/ .  There may also be information at
-http://www.perl.org/ , the Perl Home Page.
+https://rt.perl.org/ .  There may also be information at http://www.perl.org/ ,
+the Perl Home Page.
 
 If you believe you have an unreported bug, please run the L<perlbug> program
 included with your release.  Be sure to trim your bug down to a tiny but
