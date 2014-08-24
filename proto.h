@@ -5392,7 +5392,7 @@ STATIC bool	S_put_charclass_bitmap_innards(pTHX_ SV* sv, char* bitmap, SV** bitm
 #define PERL_ARGS_ASSERT_PUT_CHARCLASS_BITMAP_INNARDS	\
 	assert(sv); assert(bitmap)
 
-STATIC void	S_put_range(pTHX_ SV* sv, UV start, const UV end)
+STATIC void	S_put_range(pTHX_ SV* sv, UV start, const UV end, const bool allow_literals)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_PUT_RANGE	\
 	assert(sv)

@@ -2194,7 +2194,8 @@ Es	|void	|put_byte	|NN SV* sv|int c
 Es	|bool	|put_charclass_bitmap_innards|NN SV* sv	    \
 				|NN char* bitmap	    \
 				|NULLOK SV** bitmap_invlist
-Es	|void	|put_range	|NN SV* sv|UV start|const UV end
+Es	|void	|put_range	|NN SV* sv|UV start|const UV end    \
+				|const bool allow_literals
 Es	|void	|dump_trie	|NN const struct _reg_trie_data *trie\
 				|NULLOK HV* widecharmap|NN AV *revcharmap\
 				|U32 depth

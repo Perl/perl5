@@ -16031,7 +16031,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
                     invlist_iterinit(only_utf8_locale);
                     while (invlist_iternext(only_utf8_locale,
                                             &start, &end)) {
-                        put_range(sv, start, end);
+                        put_range(sv, start, end, FALSE);
                         max_entries --;
                         if (max_entries < 0) {
                             sv_catpvs(sv, "...");
@@ -16667,6 +16667,12 @@ Perl_save_re_context(pTHX)
 
 #ifdef DEBUGGING
 
+/* Given that c is a control character, is it one for which we have a
+ * mnemonic? */
+#define isMNEMONIC_CNTRL(c) ((isSPACE_A(c) && (c) != '\v')  \
+                          || (c) == '\a'                    \
+                          || (c) == '\b'                    \
+                          || (c) == ESC_NATIVE)
 /* Certain characters are output as a sequence with the first being a
  * backslash. */
 #define isBACKSLASHED_PUNCT(c)                                              \
@@ -16686,7 +16692,7 @@ S_put_byte(pTHX_ SV *sv, int c)
             case '\n': Perl_sv_catpvf(aTHX_ sv, "\\n"); break;
             case '\r': Perl_sv_catpvf(aTHX_ sv, "\\r"); break;
             case '\t': Perl_sv_catpvf(aTHX_ sv, "\\t"); break;
-            default: Perl_sv_catpvf(aTHX_ sv, "\\x{%x}", c); break;
+            default: Perl_sv_catpvf(aTHX_ sv, "\\x{%02X}", c); break;
         }
     }
     else {
@@ -16697,10 +16703,15 @@ S_put_byte(pTHX_ SV *sv, int c)
     }
 }
 
-STATIC void
-S_put_range(pTHX_ SV *sv, UV start, const UV end)
-{
+#define MAX_PRINT_A MAX_PRINT_A_FOR_USE_ONLY_BY_REGCOMP_DOT_C
 
+#ifndef MIN
+#define MIN(a,b) ((a) < (b) ? (a) : (b))
+#endif
+
+STATIC void
+S_put_range(pTHX_ SV *sv, UV start, const UV end, const bool allow_literals)
+{
     /* Appends to 'sv' a displayable version of the range of code points from
      * 'start' to 'end'.  It assumes that only ASCII printables are displayable
      * as-is (though some of these will be escaped by put_byte()). */
@@ -16721,84 +16732,125 @@ S_put_range(pTHX_ SV *sv, UV start, const UV end)
             break;
         }
 
-        /* For small ranges that include printable ASCII characters, it's more
-         * legible to print those characters rather than hex values.  For
-         * larger ranges that include more than printables, it's probably
-         * clearer to just give the start and end points of the range in hex,
-         * and that's all we can do if there aren't any printables within the
-         * range
-         *
-         * On ASCII platforms the range of printables is contiguous.  If the
-         * entire range is printable, we print each character as such.  If the
-         * range is partially printable and partially not, it's less likely
-         * that the individual printables are meaningful, especially if all or
-         * almost all of them are in the range.  But we err on the side of the
-         * individual printables being meaningful by using the hex only if the
-         * range contains all but 2 of the printables.
-         *
-         * On EBCDIC platforms, the printables are scattered around so that the
-         * maximum range length containing only them is about 10.  Anything
-         * longer we treat as hex; otherwise we examine the range character by
-         * character to see */
-#ifdef EBCDIC
-        if (start < 256 && (((end < 255) ? end : 255) - start <= 10))
-#else
-        if ((isPRINT_A(start) && isPRINT_A(end))
-            || (end >= 0x7F && (isPRINT_A(start) && start > 0x21))
-            || ((end < 0x7D && isPRINT_A(end)) && start < 0x20))
-#endif
-        {
-            /* If the range beginning isn't an ASCII printable, we find the
-             * last such in the range, then split the output, so all the
-             * non-printables are in one subrange; then process the remaining
-             * portion as usual.  If the entire range isn't printables, we
-             * don't split, but drop down to print as hex */
+        /* If permitted by the input options, and there is a possibility that
+         * this range contains a printable literal, look to see if there is
+         * one.  */
+        if (allow_literals && start <= MAX_PRINT_A) {
+
+            /* If the range begin isn't an ASCII printable, effectively split
+             * the range into two parts:
+             *  1) the portion before the first such printable,
+             *  2) the rest
+             * and output them separately. */
             if (! isPRINT_A(start)) {
                 UV temp_end = start + 1;
-                while (temp_end <= end && ! isPRINT_A(temp_end)) {
+
+                /* There is no point looking beyond the final possible
+                 * printable, in MAX_PRINT_A */
+                UV max = MIN(end, MAX_PRINT_A);
+
+                while (temp_end <= max && ! isPRINT_A(temp_end)) {
                     temp_end++;
                 }
-                if (temp_end <= end) {
-                    put_range(sv, start, temp_end - 1);
-                    start = temp_end;
-                    continue;
-                }
-            }
 
-            /* If the range beginning is a digit, output a subrange of just the
-             * digits, then process the remaining portion as usual */
-            if (isDIGIT_A(start)) {
-                put_byte(sv, start);
-                sv_catpvs(sv, "-");
-                while (start <= end && isDIGIT_A(start)) start++;
-                put_byte(sv, start - 1);
+                /* Here, temp_end points to one beyond the first printable if
+                 * found, or to one beyond 'max' if not.  If none found, make
+                 * sure that we use the entire range */
+                if (temp_end > MAX_PRINT_A) {
+                    temp_end = end + 1;
+                }
+
+                /* Output the first part of the split range, the part that
+                 * doesn't have printables, with no looking for literals
+                 * (otherwise we would infinitely recurse) */
+                put_range(sv, start, temp_end - 1, FALSE);
+
+                /* The 2nd part of the range (if any) starts here. */
+                start = temp_end;
+
+                /* We continue instead of dropping down because even if the 2nd
+                 * part is non-empty, it could be so short that we want to
+                 * output it specially, as tested for at the top of this loop.
+                 * */
                 continue;
             }
 
-            /* Similarly for alphabetics.  Because in both ASCII and EBCDIC,
-             * the code points for upper and lower A-Z and a-z aren't
-             * intermixed, the resulting subrange will consist solely of either
-             * upper- or lower- alphabetics */
-            if (isALPHA_A(start)) {
-                put_byte(sv, start);
-                sv_catpvs(sv, "-");
-                while (start <= end && isALPHA_A(start)) start++;
-                put_byte(sv, start - 1);
+            /* Here, 'start' is a printable ASCII.  If it is an alphanumeric,
+             * output a sub-range of just the digits or letters, then process
+             * the remaining portion as usual. */
+            if (isALPHANUMERIC_A(start)) {
+                UV mask = (isDIGIT_A(start))
+                           ? _CC_DIGIT
+                             : isUPPER_A(start)
+                               ? _CC_UPPER
+                               : _CC_LOWER;
+                UV temp_end = start + 1;
+
+                /* Find the end of the sub-range that includes just the
+                 * characters in the same class as the first character in it */
+                while (temp_end <= end && _generic_isCC_A(temp_end, mask)) {
+                    temp_end++;
+                }
+                temp_end--;
+
+                /* For short ranges, don't duplicate the code above to output
+                 * them; just call recursively */
+                if (temp_end - start < min_range_count) {
+                    put_range(sv, start, temp_end, FALSE);
+                }
+                else {  /* Output as a range */
+                    put_byte(sv, start);
+                    sv_catpvs(sv, "-");
+                    put_byte(sv, temp_end);
+                }
+                start = temp_end + 1;
                 continue;
             }
 
             /* We output any other printables as individual characters */
             if (isPUNCT_A(start) || isSPACE_A(start)) {
-                while (start <= end && (isPUNCT_A(start) || isSPACE_A(start))) {
+                while (start <= end && (isPUNCT_A(start)
+                                        || isSPACE_A(start)))
+                {
                     put_byte(sv, start);
                     start++;
                 }
                 continue;
             }
+        } /* End of looking for literals */
+
+        /* Here is not to output as a literal.  Some control characters have
+         * mnemonic names.  Split off any of those at the beginning and end of
+         * the range to print mnemonically.  It isn't possible for many of
+         * these to be in a row, so this won't overwhelm with output */
+        if (isMNEMONIC_CNTRL(start)) {
+            while (isMNEMONIC_CNTRL(start) && start <= end) {
+                put_byte(sv, start);
+                start++;
+            }
+        }
+        if (start < end && isMNEMONIC_CNTRL(end)) {
+
+            /* Here, the final character in the range has a mnemonic name.
+             * Work backwards from the end to find the final non-mnemonic */
+            UV temp_end = end - 1;
+            while (isMNEMONIC_CNTRL(temp_end)) {
+                temp_end--;
+            }
+
+            /* And separately output the range that doesn't have mnemonics */
+            put_range(sv, start, temp_end, FALSE);
+
+            /* Then output the mnemonic trailing controls */
+            start = temp_end + 1;
+            while (start <= end) {
+                put_byte(sv, start);
+                start++;
+            }
+            break;
         }
 
-        /* Here is a control or non-ascii.  Output the range or subrange as
-         * hex. */
+        /* As a final resort, output the range or subrange as hex. */
         Perl_sv_catpvf(aTHX_ sv, "\\x{%02" UVXf "}-\\x{%02" UVXf "}",
                        start,
                        (end < NUM_ANYOF_CODE_POINTS)
@@ -16817,42 +16869,99 @@ S_put_charclass_bitmap_innards(pTHX_ SV *sv, char *bitmap, SV** bitmap_invlist)
      * inversion list of what is in the bit map */
 
     int i;
-    bool has_output_anything = FALSE;
+    UV start, end;
+    unsigned int punct_count = 0;
+    SV* invlist = NULL;
+    SV** invlist_ptr;   /* Temporary, in case bitmap_invlist is NULL */
+    bool allow_literals = TRUE;
 
     PERL_ARGS_ASSERT_PUT_CHARCLASS_BITMAP_INNARDS;
 
-    if (bitmap_invlist) {
-        /* Worst case is exactly every-other code point is in the list */
-        *bitmap_invlist = _new_invlist(NUM_ANYOF_CODE_POINTS / 2);
-    }
+    invlist_ptr = (bitmap_invlist) ? bitmap_invlist : &invlist;
+
+    /* Worst case is exactly every-other code point is in the list */
+    *invlist_ptr = _new_invlist(NUM_ANYOF_CODE_POINTS / 2);
+
+    /* Convert the bit map to an inversion list, keeping track of how many
+     * ASCII puncts are set, including an extra amount for the backslashed
+     * ones.  */
     for (i = 0; i < NUM_ANYOF_CODE_POINTS; i++) {
         if (BITMAP_TEST((U8 *) bitmap,i)) {
-            int j;
-
-            if (bitmap_invlist) {
-                *bitmap_invlist = add_cp_to_invlist(*bitmap_invlist, i);
-            }
-
-            /* The character at index i should be output.  Find the next
-             * character that should NOT be output */
-            for (j = i + 1; j < NUM_ANYOF_CODE_POINTS; j++) {
-                if (! BITMAP_TEST((U8 *) bitmap, j)) {
-                    break;
-                }
-                if (bitmap_invlist) {
-                    *bitmap_invlist = add_cp_to_invlist(*bitmap_invlist, j);
+            *invlist_ptr = add_cp_to_invlist(*invlist_ptr, i);
+            if (isPUNCT_A(i)) {
+                punct_count++;
+                if isBACKSLASHED_PUNCT(i) {
+                    punct_count++;
                 }
             }
-
-            /* Everything between them is a single range that should be output
-             * */
-            put_range(sv, i, j - 1);
-            has_output_anything = TRUE;
-            i = j;
         }
     }
 
-    return has_output_anything;
+    /* Nothing to output */
+    if (_invlist_len(*invlist_ptr) == 0) {
+        SvREFCNT_dec(invlist);
+        return FALSE;
+    }
+
+    /* Generally, it is more readable if printable characters are output as
+     * literals, but if a range (nearly) spans all of them, it's best to output
+     * it as a single range.  This code will use a single range if all but 2
+     * printables are in it */
+    invlist_iterinit(*invlist_ptr);
+    while (invlist_iternext(*invlist_ptr, &start, &end)) {
+
+        /* If range starts beyond final printable, it doesn't have any in it */
+        if (start > MAX_PRINT_A) {
+            break;
+        }
+
+        /* In both ASCII and EBCDIC, a SPACE is the lowest printable.  To span
+         * all but two, the range must start and end no later than 2 from
+         * either end */
+        if (start < ' ' + 2 && end > MAX_PRINT_A - 2) {
+            if (end > MAX_PRINT_A) {
+                end = MAX_PRINT_A;
+            }
+            if (start < ' ') {
+                start = ' ';
+            }
+            if (end - start >= MAX_PRINT_A - ' ' - 2) {
+                allow_literals = FALSE;
+            }
+            break;
+        }
+    }
+    invlist_iterfinish(*invlist_ptr);
+
+    /* The legibility of the output depends mostly on how many punctuation
+     * characters are output.  There are 32 possible ASCII ones, and some have
+     * an additional backslash, bringing it to currently 36, so if any more
+     * than 18 are to be output, we can instead output it as its complement,
+     * yielding fewer puncts, and making it more legible.  But give some weight
+     * to the fact that outputting it as a complement is less legible than a
+     * straight output, so don't complement unless we are somewhat over the 18
+     * mark */
+    if (allow_literals && punct_count > 22) {
+        sv_catpvs(sv, "^");
+
+        /* Add everything remaining to the list, so when we invert it just
+         * below, it will be excluded */
+        *invlist_ptr = _add_range_to_invlist(*invlist_ptr,
+                                             NUM_ANYOF_CODE_POINTS, UV_MAX);
+        _invlist_invert(*invlist_ptr);
+    }
+
+    /* Here we have figured things out.  Output each range */
+    invlist_iterinit(*invlist_ptr);
+    while (invlist_iternext(*invlist_ptr, &start, &end)) {
+        if (start >= NUM_ANYOF_CODE_POINTS) {
+            break;
+        }
+        put_range(sv, start, end, allow_literals);
+    }
+    invlist_iterfinish(*invlist_ptr);
+
+    return TRUE;
 }
 
 #define CLEAR_OPTSTART \
