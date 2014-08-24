@@ -16698,7 +16698,7 @@ S_put_byte(pTHX_ SV *sv, int c)
 }
 
 STATIC void
-S_put_range(pTHX_ SV *sv, UV start, UV end)
+S_put_range(pTHX_ SV *sv, UV start, const UV end)
 {
 
     /* Appends to 'sv' a displayable version of the range of code points from
