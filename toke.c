@@ -6677,7 +6677,6 @@ S_yylex(pTHX)
 		    PL_parser->shift_nexttoke = 1;
 		    NEXTVAL_NEXTTOKE.ival = 0;
 		    force_next('&');
-		    PL_expect = XOPERATOR;
 		    op_free(off ? pl_yylval.opval : rv2cv_op);
 		    if (off)
 			pl_yylval.opval = rv2cv_op;
