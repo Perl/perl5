@@ -147,6 +147,13 @@ foreach my $charset (get_supported_code_pages()) {
         }
         printf $out_fh "#   define %s%s  %s    /* U+%04X */\n", $name, $suffix, $str, $U_cp;
     }
+
+    my $max_PRINT_A = 0;
+    for my $i (0x20 .. 0x7E) {
+        $max_PRINT_A = $a2n[$i] if $a2n[$i] > $max_PRINT_A;
+    }
+    printf $out_fh "#   define MAX_PRINT_A_FOR_USE_ONLY_BY_REGCOMP_DOT_C   0x%02X   /* The max code point that isPRINT_A */\n", $max_PRINT_A;
+
     print $out_fh "\n" . get_conditional_compile_line_end();
 }
 
