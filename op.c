@@ -8834,30 +8834,6 @@ Perl_ck_rvconst(pTHX_ OP *o)
 
 	/* Is it a constant from cv_const_sv()? */
 	if (SvROK(kidsv) && SvREADONLY(kidsv)) {
-	    SV * const rsv = SvRV(kidsv);
-	    const svtype type = SvTYPE(rsv);
-            const char *badtype = NULL;
-
-	    switch (o->op_type) {
-	    case OP_RV2SV:
-		if (type > SVt_PVMG)
-		    badtype = "a SCALAR";
-		break;
-	    case OP_RV2AV:
-		if (type != SVt_PVAV)
-		    badtype = "an ARRAY";
-		break;
-	    case OP_RV2HV:
-		if (type != SVt_PVHV)
-		    badtype = "a HASH";
-		break;
-	    case OP_RV2CV:
-		if (type != SVt_PVCV)
-		    badtype = "a CODE";
-		break;
-	    }
-	    if (badtype)
-		Perl_croak(aTHX_ "Constant is not %s reference", badtype);
 	    return o;
 	}
 	if (SvTYPE(kidsv) == SVt_PVAV) return o;

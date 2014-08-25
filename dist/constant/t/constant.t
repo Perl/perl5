@@ -122,7 +122,7 @@ print $output CCODE->($curr_test+4);
 $TB->current_test($curr_test+4);
 
 eval q{ CCODE->{foo} };
-ok scalar($@ =~ /^Constant is not a HASH/);
+ok scalar($@ =~ /^Constant is not a HASH|Not a HASH reference/);
 
 
 # Allow leading underscore

@@ -48,7 +48,7 @@ package main;
 
 $| = 1;
 BEGIN { require './test.pl' }
-plan tests => 5194;
+plan tests => 5198;
 
 use Scalar::Util qw(tainted);
 
@@ -2730,6 +2730,23 @@ EOF
     pass("RT 121362");
 }
 
+package refsgalore {
+    use overload
+	'${}' => sub { \42  },
+	'@{}' => sub { [43] },
+	'%{}' => sub { { 44 => 45 } },
+	'&{}' => sub { sub { 46 } };
+}
+{
+    use feature 'postderef';
+    no warnings 'experimental::postderef';
+    tell myio; # vivifies *myio{IO} at compile time
+    use constant ioref => bless *myio{IO}, refsgalore::;
+    is ioref->$*, 42, '(overloaded constant that is not a scalar ref)->$*';
+    is ioref->[0], 43, '(ovrld constant that is not an array ref)->[0]';
+    is ioref->{44}, 45, "(ovrld const that is not a hash ref)->{key}";
+    is ioref->(), 46, '(overloaded constant that is not a sub ref)->()';
+}
 
 { # undefining the overload stash -- KEEP THIS TEST LAST
     package ant;
