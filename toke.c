@@ -54,7 +54,6 @@ Individual members of C<PL_parser> have their own documentation.
 #define PL_lex_casestack        (PL_parser->lex_casestack)
 #define PL_lex_defer		(PL_parser->lex_defer)
 #define PL_lex_dojoin		(PL_parser->lex_dojoin)
-#define PL_lex_expect		(PL_parser->lex_expect)
 #define PL_lex_formbrack        (PL_parser->lex_formbrack)
 #define PL_lex_inpat		(PL_parser->lex_inpat)
 #define PL_lex_inwhat		(PL_parser->lex_inwhat)
@@ -196,6 +195,7 @@ static const char* const lex_state_names[] = {
  * PWop         : power operator
  * PMop         : pattern-matching operator
  * Aop          : addition-level operator
+ * AopNOASSIGN  : addition-level operator that is never part of .=
  * Mop          : multiplication-level operator
  * Eop          : equality-testing operator
  * Rop          : relational operator <= != gt
@@ -217,7 +217,10 @@ static const char* const lex_state_names[] = {
 #define PREREF(retval) return (PL_expect = XREF,PL_bufptr = s, REPORT(retval))
 #define TERM(retval) return (CLINE, PL_expect = XOPERATOR, PL_bufptr = s, REPORT(retval))
 #define POSTDEREF(f) return (PL_bufptr = s, S_postderef(aTHX_ REPORT(f),s[1]))
-#define LOOPX(f) return (pl_yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, REPORT((int)LOOPEX))
+#define LOOPX(f) return (PL_bufptr = force_word(s,WORD,TRUE,FALSE), \
+			 pl_yylval.ival=f, \
+			 PL_expect = PL_nexttoke ? XOPERATOR : XTERM, \
+			 REPORT((int)LOOPEX))
 #define FTST(f)  return (pl_yylval.ival=f, PL_expect=XTERMORDORDOR, PL_bufptr=s, REPORT((int)UNIOP))
 #define FUN0(f)  return (pl_yylval.ival=f, PL_expect=XOPERATOR, PL_bufptr=s, REPORT((int)FUNC0))
 #define FUN0OP(f)  return (pl_yylval.opval=f, CLINE, PL_expect=XOPERATOR, PL_bufptr=s, REPORT((int)FUNC0OP))
@@ -228,6 +231,7 @@ static const char* const lex_state_names[] = {
 #define PWop(f)  return ao((pl_yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, REPORT((int)POWOP)))
 #define PMop(f)  return(pl_yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, REPORT((int)MATCHOP))
 #define Aop(f)   return ao((pl_yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, REPORT((int)ADDOP)))
+#define AopNOASSIGN(f) return (pl_yylval.ival=f, PL_bufptr=s, REPORT((int)ADDOP))
 #define Mop(f)   return ao((pl_yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, REPORT((int)MULOP)))
 #define Eop(f)   return (pl_yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, REPORT((int)EQOP))
 #define Rop(f)   return (pl_yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, REPORT((int)RELOP))
@@ -470,8 +474,8 @@ S_deprecate_commaless_var_list(pTHX) {
 /*
  * S_ao
  *
- * This subroutine detects &&=, ||=, and //= and turns an ANDAND, OROR or DORDOR
- * into an OP_ANDASSIGN, OP_ORASSIGN, or OP_DORASSIGN
+ * This subroutine looks for an '=' next to the operator that has just been
+ * parsed and turns it into an ASSIGNOP if it finds one.
  */
 
 STATIC int
@@ -1848,7 +1852,10 @@ S_check_uni(pTHX)
 /*
  * S_lop
  * Build a list operator (or something that might be one).  The rules:
- *  - if we have a next token, then it's a list operator [why?]
+ *  - if we have a next token, then it's a list operator (no parens) for
+ *    which the next token has already been parsed; e.g.,
+ *       sort foo @args
+ *       sort foo (@args)
  *  - if the next thing is an opening paren, then it's a function
  *  - else it's a list operator
  */
@@ -1860,12 +1867,12 @@ S_lop(pTHX_ I32 f, int x, char *s)
 
     pl_yylval.ival = f;
     CLINE;
-    PL_expect = x;
     PL_bufptr = s;
     PL_last_lop = PL_oldbufptr;
     PL_last_lop_op = (OPCODE)f;
     if (PL_nexttoke)
 	goto lstop;
+    PL_expect = x;
     if (*s == '(')
 	return REPORT(FUNC);
     s = PEEKSPACE(s);
@@ -1901,7 +1908,6 @@ S_force_next(pTHX_ I32 type)
     PL_nexttoke++;
     if (PL_lex_state != LEX_KNOWNEXT) {
 	PL_lex_defer = PL_lex_state;
-	PL_lex_expect = PL_expect;
 	PL_lex_state = LEX_KNOWNEXT;
     }
 }
@@ -4273,7 +4279,6 @@ Perl_yylex(pTHX)
 	pl_yylval = PL_nextval[PL_nexttoke];
 	if (!PL_nexttoke) {
 	    PL_lex_state = PL_lex_defer;
-	    PL_expect = PL_lex_expect;
 	    PL_lex_defer = LEX_NORMAL;
 	}
 	{
@@ -4381,9 +4386,9 @@ Perl_yylex(pTHX)
 		PL_lex_starts = 0;
 		/* commas only at base level: /$a\Ub$c/ => ($a,uc(b.$c)) */
 		if (PL_lex_casemods == 1 && PL_lex_inpat)
-		    OPERATOR(',');
+		    TOKEN(',');
 		else
-		    Aop(OP_CONCAT);
+		    AopNOASSIGN(OP_CONCAT);
 	    }
 	    else
 		return yylex();
@@ -4428,9 +4433,9 @@ Perl_yylex(pTHX)
 	    s = PL_bufptr;
 	    /* commas only at base level: /$a\Ub$c/ => ($a,uc(b.$c)) */
 	    if (!PL_lex_casemods && PL_lex_inpat)
-		OPERATOR(',');
+		TOKEN(',');
 	    else
-		Aop(OP_CONCAT);
+		AopNOASSIGN(OP_CONCAT);
 	}
 	return yylex();
 
@@ -4518,9 +4523,9 @@ Perl_yylex(pTHX)
 	    if (PL_lex_starts++) {
 		/* commas only at base level: /$a\Ub$c/ => ($a,uc(b.$c)) */
 		if (!PL_lex_casemods && PL_lex_inpat)
-		    OPERATOR(',');
+		    TOKEN(',');
 		else
-		    Aop(OP_CONCAT);
+		    AopNOASSIGN(OP_CONCAT);
 	    }
 	    else {
 		PL_bufptr = s;
@@ -5379,7 +5384,8 @@ Perl_yylex(pTHX)
 	    TOKEN(0);
 	CLINE;
 	s++;
-	OPERATOR(';');
+	PL_expect = XSTATE;
+	TOKEN(';');
     case ')':
 	if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_CLOSING)
 	    TOKEN(0);
@@ -5443,15 +5449,15 @@ Perl_yylex(pTHX)
 		}
 	    }
 	    /* FALLTHROUGH */
-	case XATTRBLOCK:
-	case XBLOCK:
-	    PL_lex_brackstack[PL_lex_brackets++] = XSTATE;
-	    PL_lex_allbrackets++;
-	    PL_expect = XSTATE;
-	    break;
 	case XATTRTERM:
 	case XTERMBLOCK:
 	    PL_lex_brackstack[PL_lex_brackets++] = XOPERATOR;
+	    PL_lex_allbrackets++;
+	    PL_expect = XSTATE;
+	    break;
+	case XATTRBLOCK:
+	case XBLOCK:
+	    PL_lex_brackstack[PL_lex_brackets++] = XSTATE;
 	    PL_lex_allbrackets++;
 	    PL_expect = XSTATE;
 	    break;
@@ -6308,12 +6314,12 @@ Perl_yylex(pTHX)
 	    } else if (result == KEYWORD_PLUGIN_STMT) {
 		pl_yylval.opval = o;
 		CLINE;
-		PL_expect = XSTATE;
+		if (!PL_nexttoke) PL_expect = XSTATE;
 		return REPORT(PLUGSTMT);
 	    } else if (result == KEYWORD_PLUGIN_EXPR) {
 		pl_yylval.opval = o;
 		CLINE;
-		PL_expect = XOPERATOR;
+		if (!PL_nexttoke) PL_expect = XOPERATOR;
 		return REPORT(PLUGEXPR);
 	    } else {
 		Perl_croak(aTHX_ "Bad plugin affecting keyword '%s'",
@@ -7080,8 +7086,6 @@ Perl_yylex(pTHX)
 	    UNI(OP_DBMCLOSE);
 
 	case KEY_dump:
-	    PL_expect = XOPERATOR;
-	    s = force_word(s,WORD,TRUE,FALSE);
 	    LOOPX(OP_DUMP);
 
 	case KEY_else:
@@ -7205,8 +7209,6 @@ Perl_yylex(pTHX)
 	    LOP(OP_GREPSTART, XREF);
 
 	case KEY_goto:
-	    PL_expect = XOPERATOR;
-	    s = force_word(s,WORD,TRUE,FALSE);
 	    LOOPX(OP_GOTO);
 
 	case KEY_gmtime:
@@ -7331,8 +7333,6 @@ Perl_yylex(pTHX)
 	    LOP(OP_KILL,XTERM);
 
 	case KEY_last:
-	    PL_expect = XOPERATOR;
-	    s = force_word(s,WORD,TRUE,FALSE);
 	    LOOPX(OP_LAST);
 	
 	case KEY_lc:
@@ -7431,8 +7431,6 @@ Perl_yylex(pTHX)
 	    OPERATOR(MY);
 
 	case KEY_next:
-	    PL_expect = XOPERATOR;
-	    s = force_word(s,WORD,TRUE,FALSE);
 	    LOOPX(OP_NEXT);
 
 	case KEY_ne:
@@ -7442,7 +7440,7 @@ Perl_yylex(pTHX)
 
 	case KEY_no:
 	    s = tokenize_use(0, s);
-	    TERM(USE);
+	    TOKEN(USE);
 
 	case KEY_not:
 	    if (*s == '(' || (s = SKIPSPACE1(s), *s == '('))
@@ -7517,8 +7515,7 @@ Perl_yylex(pTHX)
 	    s = force_word(s,WORD,FALSE,TRUE);
 	    s = SKIPSPACE1(s);
 	    s = force_strict_version(s);
-	    PL_lex_expect = XBLOCK;
-	    OPERATOR(PACKAGE);
+	    PREBLOCK(PACKAGE);
 
 	case KEY_pipe:
 	    LOP(OP_PIPE_OP,XTERM);
@@ -7611,7 +7608,6 @@ Perl_yylex(pTHX)
 
 	case KEY_require:
 	    s = SKIPSPACE1(s);
-	    PL_expect = XOPERATOR;
 	    if (isDIGIT(*s)) {
 		s = force_version(s, FALSE);
 	    }
@@ -7632,7 +7628,7 @@ Perl_yylex(pTHX)
 	    }
 	    else 
 		pl_yylval.ival = 0;
-	    PL_expect = XTERM;
+	    PL_expect = PL_nexttoke ? XOPERATOR : XTERM;
 	    PL_bufptr = s;
 	    PL_last_uni = PL_oldbufptr;
 	    PL_last_lop_op = OP_REQUIRE;
@@ -7643,8 +7639,6 @@ Perl_yylex(pTHX)
 	    UNI(OP_RESET);
 
 	case KEY_redo:
-	    PL_expect = XOPERATOR;
-	    s = force_word(s,WORD,TRUE,FALSE);
 	    LOOPX(OP_REDO);
 
 	case KEY_rename:
@@ -8005,7 +7999,7 @@ Perl_yylex(pTHX)
 
 	case KEY_use:
 	    s = tokenize_use(1, s);
-	    OPERATOR(USE);
+	    TOKEN(USE);
 
 	case KEY_values:
 	    UNI(OP_VALUES);
