@@ -922,6 +922,7 @@ my %delta = (
         changed => {
         },
         removed => {
+          'config_data' => 1,
         }
     },
 );
