@@ -7,8 +7,6 @@ use Config;
 BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
-    eval '0x0p0';
-    print "# $@\n";
 }
 
 plan(tests => 79);
@@ -103,14 +101,15 @@ is(0xAB.CDP+0, 171.80078125);
 # Underbars.
 is(0xa_b.c_dp+1_2, 703696);
 
-# Note that the hexfloat representation is not unique
-# since the exponent can be shifted: no different from
-# 3e4 cf 30e3 cf 30000.
+# Note that the hexfloat representation is not unique since the
+# exponent can be shifted, and the hexdigits with it: this is no
+# different from 3e4 cf 30e3 cf 30000.  The shifting of the hexdigits
+# makes it look stranger, though: 0xap1 == 0x5p2.
 
 # Needs to use within() instead of is() because of long doubles.
-within(0x1.999999999999ap-4, 0.1, 1e-9);
-within(0x3.3333333333333p-5, 0.1, 1e-9);
-within(0xc.ccccccccccccdp-7, 0.1, 1e-9);
+within(0x1.99999999999ap-4, 0.1, 1e-9);
+within(0x3.333333333333p-5, 0.1, 1e-9);
+within(0xc.cccccccccccdp-7, 0.1, 1e-9);
 
 my $warn;
 
