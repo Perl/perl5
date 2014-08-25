@@ -58,7 +58,7 @@ Illegal POD syntax in the documentation has been corrected.
 
 =item *
 
-C<ExtUtils::CBuilder> has been upgraded from version 0.280216 to 0.280217.
+L<ExtUtils::CBuilder> has been upgraded from version 0.280216 to 0.280217.
 
 Android builds now link to both B<-lperl> and C<$Config::Config{perllibs}>.
 
@@ -286,7 +286,7 @@ B<SUNWspro>, and support for native C<setenv> has been added.
 An old bug in feature checking, mainly affecting pre-7.3 systems, has been
 fixed.
 
-item Windows
+=item Windows
 
 C<%I64d> is now being used instead of C<%lld> for MinGW.
 
