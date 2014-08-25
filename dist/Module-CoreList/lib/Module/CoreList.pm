@@ -4,7 +4,7 @@ use vars qw/$VERSION %released %version %families %upstream
 	    %bug_tracker %deprecated %delta/;
 use Module::CoreList::TieHashDelta;
 use version;
-$VERSION = '5.020001';
+$VERSION = '3.12';
 
 my $dumpinc = 0;
 sub import {
@@ -249,7 +249,7 @@ sub changes_between {
     5.01901  => '2014-03-20',
     5.019011 => '2014-04-20',
     5.020000 => '2014-05-27',
-    5.020001 => '????-??-??',
+    5.021000 => '????-??-??',
   );
 
 for my $version ( sort { $a <=> $b } keys %released ) {
@@ -9806,13 +9806,14 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         removed => {
         }
     },
-    5.020001 => {
-        delta_from => 5.020000,
+    5.021000 => {
+        delta_from => 5.02,
         changed => {
-            'Config'                => '5.020001',
+            'Config'                => '5.021',
             'Module::CoreList'      => '3.11',
             'Module::CoreList::TieHashDelta'=> '3.11',
             'Module::CoreList::Utils'=> '3.11',
+            'Simple'                => '1.23',
         },
         removed => {
         }
@@ -10218,7 +10219,7 @@ for my $version (sort { $a <=> $b } keys %delta) {
         removed => {
         }
     },
-    5.020001 => {
+    5.021000 => {
         delta_from => 5.02,
         changed => {
         },
@@ -10552,6 +10553,7 @@ for my $version (sort { $a <=> $b } keys %deprecated) {
     'Pod::Text::Termcap'    => 'cpan',
     'Pod::Usage'            => 'cpan',
     'Scalar::Util'          => 'cpan',
+    'Simple'                => 'cpan',
     'Socket'                => 'cpan',
     'Sys::Syslog'           => 'cpan',
     'Sys::Syslog::Win32'    => 'cpan',
@@ -10961,6 +10963,7 @@ for my $version (sort { $a <=> $b } keys %deprecated) {
     'Pod::Text::Termcap'    => undef,
     'Pod::Usage'            => undef,
     'Scalar::Util'          => undef,
+    'Simple'                => undef,
     'Socket'                => undef,
     'Sys::Syslog'           => undef,
     'Sys::Syslog::Win32'    => undef,
