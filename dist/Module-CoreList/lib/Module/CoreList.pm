@@ -254,6 +254,7 @@ sub changes_between {
     5.021002 => '2014-07-20',
     5.021003 => '2014-08-20',
     5.021004 => '????-??-??',
+    5.020001 => '????-??-??',
   );
 
 for my $version ( sort { $a <=> $b } keys %released ) {
@@ -10138,6 +10139,52 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         removed => {
         }
     },
+    5.020001 => {
+        delta_from => 5.020000,
+        changed => {
+            'Config'                => '5.020001',
+            'Config::Perl::V'       => '0.22',
+            'Cwd'                   => '3.48',
+            'Exporter'              => '5.71',
+            'Exporter::Heavy'       => '5.71',
+            'ExtUtils::CBuilder'    => '0.280217',
+            'ExtUtils::CBuilder::Base'=> '0.280217',
+            'ExtUtils::CBuilder::Platform::Unix'=> '0.280217',
+            'ExtUtils::CBuilder::Platform::VMS'=> '0.280217',
+            'ExtUtils::CBuilder::Platform::Windows'=> '0.280217',
+            'ExtUtils::CBuilder::Platform::Windows::BCC'=> '0.280217',
+            'ExtUtils::CBuilder::Platform::Windows::GCC'=> '0.280217',
+            'ExtUtils::CBuilder::Platform::Windows::MSVC'=> '0.280217',
+            'ExtUtils::CBuilder::Platform::aix'=> '0.280217',
+            'ExtUtils::CBuilder::Platform::android'=> '0.280217',
+            'ExtUtils::CBuilder::Platform::cygwin'=> '0.280217',
+            'ExtUtils::CBuilder::Platform::darwin'=> '0.280217',
+            'ExtUtils::CBuilder::Platform::dec_osf'=> '0.280217',
+            'ExtUtils::CBuilder::Platform::os2'=> '0.280217',
+            'File::Copy'            => '2.30',
+            'File::Spec'            => '3.48',
+            'File::Spec::Cygwin'    => '3.48',
+            'File::Spec::Epoc'      => '3.48',
+            'File::Spec::Functions' => '3.48',
+            'File::Spec::Mac'       => '3.48',
+            'File::Spec::OS2'       => '3.48',
+            'File::Spec::Unix'      => '3.48',
+            'File::Spec::VMS'       => '3.48',
+            'File::Spec::Win32'     => '3.48',
+            'Module::CoreList'      => '5.020001',
+            'Module::CoreList::TieHashDelta'=> '5.020001',
+            'Module::CoreList::Utils'=> '5.020001',
+            'PerlIO::via'           => '0.15',
+            'Unicode::UCD'          => '0.58',
+            'XS::APItest'           => '0.60_01',
+            'utf8'                  => '1.13_01',
+            'version'               => '0.9909',
+            'version::regex'        => '0.9909',
+            'version::vpp'          => '0.9909',
+        },
+        removed => {
+        }
+    },
 );
 
 sub is_core
@@ -10569,6 +10616,13 @@ for my $version (sort { $a <=> $b } keys %delta) {
     },
     5.021004 => {
         delta_from => 5.021003,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.020001 => {
+        delta_from => 5.020000,
         changed => {
         },
         removed => {
