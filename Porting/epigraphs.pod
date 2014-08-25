@@ -17,6 +17,46 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.20.1-RC1 - Lorenzo da Ponte, Così fan tutte
+
+L<Announced on 2014-08-25 by Steve Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2014/08/msg218975.html>
+
+  DON ALFONSO:
+  I'd like to speak, but I haven't the heart:
+  my lip stammers.
+  My voice cannot emerge,
+  but remains in my throat.
+  What will you do? What shall I do?
+  Oh what a great catastrophe!
+  There can be nothing worse.
+  I feel pity for you and for them.
+
+  FIORDILIGI: Heavens! For mercy's sake, Signor Alfonso, don't make us
+  die.
+  DON ALFONSO: My children, you must arm yourselves with constancy.
+  DORABELLA: Ye Gods! What evil has occurred? What horrible event? Is my
+  love dead, perhaps?
+  FIORDILIGI: Is mine dead?
+  DON ALFONSO: They are not dead, but they are not far from it.
+  DORABELLA: Wounded?
+  DON ALFONSO: No.
+  FIORDILIGI: Ill?
+  DON ALFONSO: Nor that.
+  FIORDILIGI: What, then?
+  DON ALFONSO: A royal command summons them to the field of battle.
+  FIORDILIGI, DORABELLA: Alas, what do I hear? And they will leave?
+  DON ALFONSO: Immediately.
+  DORABELLA: And there is no way of preventing it?
+  DON ALFONSO: There is none.
+  FIORDILIGI: And not even a single farewell...
+  DON ALFONSO: The unhappy men haven't the courage to see you; but if
+  you wish it, they are ready...
+  DORABELLA: Where are they?
+  DON ALFONSO: Come in, friends.
+
+    -- Lorenzo da Ponte, /Così fan tutte/,
+       trans. William Weaver
+
 =head2 v5.21.3 - Robert Service, The Men that Don't Fit In
 
 L<Announced on 2014-08-20 by Peter Martini|http://www.nntp.perl.org/group/perl.perl5.porters/2014/08/msg218826.html>
