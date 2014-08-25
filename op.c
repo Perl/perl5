@@ -8833,7 +8833,7 @@ Perl_ck_rvconst(pTHX_ OP *o)
 	SV * const kidsv = kid->op_sv;
 
 	/* Is it a constant from cv_const_sv()? */
-	if (SvROK(kidsv) && SvREADONLY(kidsv)) {
+	if ((SvROK(kidsv) || isGV_with_GP(kidsv)) && SvREADONLY(kidsv)) {
 	    return o;
 	}
 	if (SvTYPE(kidsv) == SVt_PVAV) return o;

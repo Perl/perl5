@@ -12,7 +12,7 @@ BEGIN {
 
 use warnings;
 
-plan( tests => 267 );
+plan( tests => 269 );
 
 # type coercion on assignment
 $foo = 'foo';
@@ -1062,6 +1062,15 @@ is runperl(prog =>
            stderr=>1),
   "Undefined subroutine &main::foo called at -e line 1.\n",
   "gv_try_downgrade does not anonymise CVs referenced elsewhere";
+
+package glob_constant_test {
+  sub foo { 42 }
+  use constant bar => *foo;
+  BEGIN { undef *foo }
+  ::is eval { bar->() }, eval { &{+bar} },
+    'glob_constant->() is not mangled at compile time';
+  ::is "$@", "", 'no error from eval { &{+glob_constant} }';
+}
 
 # Look away, please.
 # This violates perl's internal structures by fiddling with stashes in a
