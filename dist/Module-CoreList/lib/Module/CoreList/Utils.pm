@@ -929,7 +929,11 @@ my %delta = (
         changed => {
         },
         removed => {
+            'a2p'                   => 1,
             'config_data'           => 1,
+            'find2perl'             => 1,
+            'psed'                  => 1,
+            's2p'                   => 1,
         }
     },
 );
