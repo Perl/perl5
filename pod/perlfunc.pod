@@ -9280,8 +9280,6 @@ This keyword is documented in L<perlsub/"Autoloading">.
 
 =item else
 
-=item elseif
-
 =item elsif
 
 =item for
@@ -9297,6 +9295,15 @@ This keyword is documented in L<perlsub/"Autoloading">.
 =item while
 
 These flow-control keywords are documented in L<perlsyn/"Compound Statements">.
+
+=item elseif
+
+The "else if" keyword is spelled C<elsif> in Perl. There's no C<elif>
+or C<else if> either. It does parse C<elseif>, but only to warn you
+about not using it.
+
+See the documentation for flow-control keywords in L<perlsyn/"Compound
+Statements">.
 
 =back
 
