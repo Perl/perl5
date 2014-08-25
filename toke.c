@@ -5484,6 +5484,11 @@ Perl_yylex(pTHX)
 		    }
 		    OPERATOR(HASHBRACK);
 		}
+		if (PL_expect == XREF && PL_oldoldbufptr != PL_last_lop) {
+		    /* ${...} or @{...} etc., but not print {...} */
+		    PL_expect = XTERM;
+		    break;
+		}
 		/* This hack serves to disambiguate a pair of curlies
 		 * as being a block or an anon hash.  Normally, expectation
 		 * determines that, but in cases where we're not in a

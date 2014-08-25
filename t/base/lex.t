@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..92\n";
+print "1..93\n";
 
 $x = 'x';
 
@@ -438,3 +438,9 @@ print "ok $test - => quotes keywords across lines\n"; $test++;
 # [perl #80368]
 print "not " unless eval '"a\U="' eq "a=";
 print "ok $test - [perl #80368] qq <a\\U=>\n"; $test++;
+
+sub Function_with_side_effects { $_ = "sidekick function called" }
+print "not " unless
+    (eval '${Function_with_side_effects,\$_}' || $@)
+      eq "sidekick function called";
+print "ok $test - \${...} where {...} looks like hash\n"; $test++;
