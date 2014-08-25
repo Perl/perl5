@@ -5503,7 +5503,7 @@ Perl_yylex(pTHX)
 		if (*s == '\'' || *s == '"' || *s == '`') {
 		    /* common case: get past first string, handling escapes */
 		    for (t++; t < PL_bufend && *t != *s;)
-			if (*t++ == '\\' && (*t == '\\' || *t == *s))
+			if (*t++ == '\\')
 			    t++;
 		    t++;
 		}
