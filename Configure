@@ -13708,12 +13708,8 @@ eval $inlibc
 set fpclass d_fpclass
 eval $inlibc
 
-: see if fpclassify exists
-set fpclassify d_fpclassify
-eval $inlibc
-
 : see if fp_classify exists
-set fpclassify d_fp_classify
+set fp_classify d_fp_classify
 eval $inlibc
 
 : see if fpclassl exists
@@ -15567,6 +15563,28 @@ EOCP
 	;;
 
     esac
+
+: check for fpclassify
+echo " "
+echo "Checking to see if you have fpclassify..." >&4
+$cat >try.c <<EOCP
+#$i_math I_MATH
+#ifdef I_MATH
+#include <math.h>
+#endif
+int main() { return fpclassify(1.0) == FP_NORMAL ? 0 : 1; }
+EOCP
+set try
+if eval $compile; then
+	val="$define"
+	echo "You have fpclassify."
+else
+	val="$undef"
+	echo "You do not have fpclassify."
+fi
+$rm_try
+set d_fpclassify
+eval $setvar
 
 : see if link exists
 set link d_link
@@ -23238,7 +23256,7 @@ d_flock='$d_flock'
 d_flockproto='$d_flockproto'
 d_fork='$d_fork'
 d_fp_class='$d_fp_class'
-d_fp_classify='$d_fp_class'
+d_fp_classify='$d_fp_classify'
 d_fp_classl='$d_fp_classl'
 d_fpathconf='$d_fpathconf'
 d_fpclass='$d_fpclass'
