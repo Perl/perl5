@@ -838,6 +838,10 @@ d_fp_class (d_fp_class.U):
 	This variable conditionally defines the HAS_FP_CLASS symbol, which
 	indicates to the C program that the fp_class() routine is available.
 
+d_fp_class_l (d_fp_classl.U):
+	This variable conditionally defines the HAS_FP_CLASSL symbol, which
+	indicates to the C program that the fp_classl() routine is available.
+
 d_fp_classify (d_fp_classify.U):
 	This variable conditionally defines the HAS_FP_CLASSIFY symbol, which
 	indicates to the C program that the fp_classify() routine is available.

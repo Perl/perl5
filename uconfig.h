@@ -3526,6 +3526,14 @@
  */
 /*#define HAS_FP_CLASS		/ **/
 
+/* HAS_FP_CLASSL:
+ *	This symbol, if defined, indicates that the fp_classl routine is
+ *	available to classify doubles.  Available for example in Digital UNIX.
+ *	See HAS_FP_CLASS.
+ *
+ */
+/*#define HAS_FP_CLASSL		/ **/
+
 /* HAS_FP_CLASSIFY:
  *	This symbol, if defined, indicates that the fp_classify routine is
  *	available to classify doubles.
@@ -4795,6 +4803,6 @@
 #endif
 
 /* Generated from:
- * eea1777e1cae43debb19e13948791a5e43ed8c3926cdd93fe13a15f1ac584f99 config_h.SH
- * 5e0d1abf03833f9d8aac2f5eb4332356c3503d1f0538f03cd9078423015eed73 uconfig.sh
+ * d11e261bb139be0ee56e1999842277e01b6c71ad49dcb6334cea88f982648fb4 config_h.SH
+ * 11ac8affd49fd0343b02249879adb0b00934fdfa8405591f28f73077e00105ab uconfig.sh
  * ex: set ro: */

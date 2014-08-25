@@ -3561,6 +3561,14 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_fp_class HAS_FP_CLASS		/**/
 
+/* HAS_FP_CLASSL:
+ *	This symbol, if defined, indicates that the fp_classl routine is
+ *	available to classify doubles.  Available for example in Digital UNIX.
+ *	See HAS_FP_CLASS.
+ *
+ */
+#$d_fp_classl HAS_FP_CLASSL		/**/
+
 /* HAS_FP_CLASSIFY:
  *	This symbol, if defined, indicates that the fp_classify routine is
  *	available to classify doubles.
