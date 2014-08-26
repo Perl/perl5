@@ -24,7 +24,8 @@ my $boolean = qr/^[01]?\z/;
 BEGIN {
     # We'd like to do use constant _CAN_PCS => $] > 5.009002
     # but that's a bit tricky before we load the constant module :-)
-    # By doing this, we save 1 run time check for *every* call to import.
+    # By doing this, we save several run time checks for *every* call
+    # to import.
     my $const = $] > 5.009002;
     my $downgrade = $] < 5.015004; # && $] >= 5.008
     my $constarray = exists &_make_const;
