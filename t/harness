@@ -206,6 +206,14 @@ if ($^O eq 'MSWin32') {
 @tests=grep /$re/, @tests 
     if $re;
 
+# Allow eg ./perl t/harness t/op/lc.t
+for (@tests) {
+    if (-f "../$_") {
+        $_ = "../$_";
+        s{^\.\./t/}{};
+    }
+}
+
 my %options;
 
 my $type = 'perl';
