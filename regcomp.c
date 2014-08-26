@@ -800,6 +800,30 @@ DEBUG_OPTIMISE_MORE_r(if(data){                                      \
     PerlIO_printf(Perl_debug_log,"\n");                              \
 });
 
+#ifdef DEBUGGING
+
+STATIC const char *
+S_cntrl_to_mnemonic(const U8 c)
+{
+    /* Returns the mnemonic string that represents character 'c', if one
+     * exists; NULL otherwise.  The only ones that exist for the purposes of
+     * this routine are a few control characters */
+
+    switch (c) {
+        case '\a':       return "\\a";
+        case '\b':       return "\\b";
+        case ESC_NATIVE: return "\\e";
+        case '\f':       return "\\f";
+        case '\n':       return "\\n";
+        case '\r':       return "\\r";
+        case '\t':       return "\\t";
+    }
+
+    return NULL;
+}
+
+#endif
+
 /* Mark that we cannot extend a found fixed substring at this point.
    Update the longest found anchored substring and the longest found
    floating substrings if needed. */
@@ -16714,15 +16738,12 @@ S_put_code_point(pTHX_ SV *sv, UV c)
 	sv_catpvn(sv, &string, 1);
     }
     else {
-        switch ((U8) c) {
-            case '\a': Perl_sv_catpvf(aTHX_ sv, "\\a"); break;
-            case '\b': Perl_sv_catpvf(aTHX_ sv, "\\b"); break;
-            case ESC_NATIVE: Perl_sv_catpvf(aTHX_ sv, "\\e"); break;
-            case '\f': Perl_sv_catpvf(aTHX_ sv, "\\f"); break;
-            case '\n': Perl_sv_catpvf(aTHX_ sv, "\\n"); break;
-            case '\r': Perl_sv_catpvf(aTHX_ sv, "\\r"); break;
-            case '\t': Perl_sv_catpvf(aTHX_ sv, "\\t"); break;
-            default: Perl_sv_catpvf(aTHX_ sv, "\\x{%02X}", (U8) c); break;
+        const char * const mnemonic = cntrl_to_mnemonic((char) c);
+        if (mnemonic) {
+            Perl_sv_catpvf(aTHX_ sv, "%s", mnemonic);
+        }
+        else {
+            Perl_sv_catpvf(aTHX_ sv, "\\x{%02X}", (U8) c);
         }
     }
 }

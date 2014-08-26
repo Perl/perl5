@@ -5356,6 +5356,9 @@ STATIC void	S_cv_dump(pTHX_ const CV *cv, const char *title)
 
 #  endif
 #  if defined(PERL_IN_REGCOMP_C)
+STATIC const char *	S_cntrl_to_mnemonic(const U8 c)
+			__attribute__pure__;
+
 STATIC void	S_dump_trie(pTHX_ const struct _reg_trie_data *trie, HV* widecharmap, AV *revcharmap, U32 depth)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_3);
