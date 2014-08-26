@@ -56,13 +56,13 @@ sub import {
     return unless @_;			# Ignore 'use constant;'
     my $constants;
     my $multiple  = ref $_[0];
-    my $pkg = caller;
+    my $caller = caller;
     my $flush_mro;
     my $symtab;
 
     if (_CAN_PCS) {
 	no strict 'refs';
-	$symtab = \%{$pkg . '::'};
+	$symtab = \%{$caller . '::'};
     };
 
     if ( $multiple ) {
@@ -80,6 +80,20 @@ sub import {
     }
 
     foreach my $name ( keys %$constants ) {
+	my $pkg;
+	my $symtab = $symtab;
+	my $orig_name = $name;
+	if ($name =~ s/(.*)(?:::|')(?=.)//s) {
+	    $pkg = $1;
+	    if (_CAN_PCS && $pkg ne $caller) {
+		no strict 'refs';
+		$symtab = \%{$pkg . '::'};
+	    }
+	}
+	else {
+	    $pkg = $caller;
+	}
+
 	# Normal constant name
 	if ($name =~ $normal_constant_name and !$forbidden{$name}) {
 	    # Everything is okay
@@ -127,7 +141,7 @@ sub import {
 	    my $full_name = "${pkg}::$name";
 	    $declared{$full_name}++;
 	    if ($multiple || @_ == 1) {
-		my $scalar = $multiple ? $constants->{$name} : $_[0];
+		my $scalar = $multiple ? $constants->{$orig_name} : $_[0];
 
 		if (_DOWNGRADE) { # for 5.8 to 5.14
 		    # Work around perl bug #31991: Sub names (actually glob
@@ -149,7 +163,7 @@ sub import {
 		    Internals::SvREADONLY($scalar, 1);
 		    if ($symtab && !exists $symtab->{$name}) {
 			$symtab->{$name} = \$scalar;
-			++$flush_mro;
+			++$flush_mro->{$pkg};
 		    }
 		    else {
 			local $constant::{_dummy} = \$scalar;
@@ -165,7 +179,7 @@ sub import {
 		    _make_const(@list);
 		    if ($symtab && !exists $symtab->{$name}) {
 			$symtab->{$name} = \@list;
-			$flush_mro++;
+			$flush_mro->{$pkg}++;
 		    }
 		    else {
 			local $constant::{_dummy} = \@list;
@@ -179,7 +193,9 @@ sub import {
 	}
     }
     # Flush the cache exactly once if we make any direct symbol table changes.
-    mro::method_changed_in($pkg) if _CAN_PCS && $flush_mro;
+    if (_CAN_PCS && $flush_mro) {
+	mro::method_changed_in($_) for keys %$flush_mro;
+    }
 }
 
 1;
