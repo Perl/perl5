@@ -3374,9 +3374,11 @@ $ IF useieee .OR. useieee .EQS. "define"
 $ THEN
 $   d_isnan = "define"
 $   d_isnanl = "define"
+$   d_fp_classify = "define"
 $ ELSE
 $   d_isnan = "undef"
 $   d_isnanl = "undef"
+$   d_fp_classify = "undef"
 $ ENDIF
 $!
 $! Now some that we build up
@@ -5981,6 +5983,7 @@ $ WC "d_flock='undef'"
 $ WC "d_flockproto='undef'"
 $ WC "d_fork='undef'"
 $ WC "d_fp_class='undef'"
+$ WC "d_fp_classify='" + d_fp_classify + "'"
 $ WC "d_fp_classify='undef'"
 $ WC "d_fp_classl='undef'"
 $ WC "d_fpathconf='" + d_fpathconf + "'"

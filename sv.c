@@ -11773,7 +11773,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                      * for the future.) */
 
                     /* 2 hexdigits for each byte. */ 
-                    need += ((1028 - NVSIZE * 8) / 8) * 2;
+                    need += (1028/8 - DOUBLESIZE + 1) * 2;
 #endif
 #ifdef USE_LOCALE_NUMERIC
                         STORE_LC_NUMERIC_SET_TO_NEEDED();
