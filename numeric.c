@@ -658,9 +658,6 @@ Perl_grok_infnan(const char** sp, const char* send)
             flags |= IS_NUMBER_NAN | IS_NUMBER_NOT_INT;
         } else
             return 0;
-
-        *sp = s;
-        return flags;
     }
     else {
         /* NAN */
@@ -686,12 +683,10 @@ Perl_grok_infnan(const char** sp, const char* send)
         }
         else
             return 0;
-
-        *sp = s;
-        return flags;
     }
 
-    return 0;
+    *sp = s;
+    return flags;
 }
 
 static const UV uv_max_div_10 = UV_MAX / 10;
