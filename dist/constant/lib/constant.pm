@@ -269,10 +269,6 @@ point to data which may be changed, as this code shows.
     ARRAY->[1] = " be changed";
     print ARRAY->[1];
 
-Dereferencing constant references incorrectly (such as using an array
-subscript on a constant hash reference, or vice versa) will be trapped at
-compile time.
-
 Constants belong to the package they are defined in.  To refer to a
 constant defined in another package, specify the full package name, as
 in C<Some::Package::CONSTANT>.  Constants may be exported by modules,
