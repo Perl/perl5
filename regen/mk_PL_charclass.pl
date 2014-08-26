@@ -47,6 +47,7 @@ my @properties = qw(
     XDIGIT
     VERTSPACE
     IS_IN_SOME_FOLD
+    MNEMONIC_CNTRL
 );
 
 # Read in the case fold mappings.
@@ -235,6 +236,9 @@ for my $ord (0..255) {
             $re = qr/\p{Is_Non_Final_Fold}/;
         } elsif ($name eq 'IS_IN_SOME_FOLD') {
             $re = qr/\p{_Perl_Any_Folds}/;
+        } elsif ($name eq 'MNEMONIC_CNTRL') {
+            # These are the control characters that there are mnemonics for
+            $re = qr/[\a\b\e\f\n\r\t]/;
         } else {    # The remainder have the same name and values as Unicode
             $re = eval "qr/\\p{$name}/";
             use Carp;

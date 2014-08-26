@@ -802,6 +802,9 @@ DEBUG_OPTIMISE_MORE_r(if(data){                                      \
 
 #ifdef DEBUGGING
 
+/* is c a control character for which we have a mnemonic? */
+#define isMNEMONIC_CNTRL(c) _IS_MNEMONIC_CNTRL_ONLY_FOR_USE_BY_REGCOMP_DOT_C(c)
+
 STATIC const char *
 S_cntrl_to_mnemonic(const U8 c)
 {
@@ -16711,13 +16714,6 @@ Perl_save_re_context(pTHX)
 #endif
 
 #ifdef DEBUGGING
-
-/* Given that c is a control character, is it one for which we have a
- * mnemonic? */
-#define isMNEMONIC_CNTRL(c) ((isSPACE_A(c) && (c) != '\v')  \
-                          || (c) == '\a'                    \
-                          || (c) == '\b'                    \
-                          || (c) == ESC_NATIVE)
 /* Certain characters are output as a sequence with the first being a
  * backslash. */
 #define isBACKSLASHED_PUNCT(c)                                              \

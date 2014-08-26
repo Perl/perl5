@@ -963,7 +963,8 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
 #  define _CC_QUOTEMETA                21
 #  define _CC_NON_FINAL_FOLD           22
 #  define _CC_IS_IN_SOME_FOLD          23
-/* Unused: 24-31
+#  define _CC_MNEMONIC_CNTRL           24
+/* Unused: 25-31
  * If more bits are needed, one could add a second word for non-64bit
  * QUAD_IS_INT systems, using some #ifdefs to distinguish between having a 2nd
  * word or not.  The IS_IN_SOME_FOLD bit is the most easily expendable, as it
@@ -1096,6 +1097,8 @@ EXTCONST U32 PL_charclass[];
                                             _generic_isCC(c, _CC_NON_FINAL_FOLD)
 #   define _IS_IN_SOME_FOLD_ONLY_FOR_USE_BY_REGCOMP_DOT_C(c) \
                                             _generic_isCC(c, _CC_IS_IN_SOME_FOLD)
+#   define _IS_MNEMONIC_CNTRL_ONLY_FOR_USE_BY_REGCOMP_DOT_C(c) \
+                                            _generic_isCC(c, _CC_MNEMONIC_CNTRL)
 #else   /* else we don't have perl.h */
 
     /* If we don't have perl.h, we are compiling a utility program.  Below we
