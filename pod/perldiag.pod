@@ -1435,10 +1435,10 @@ underlying byte is stored as a character, with utf8::encode().
 =item "\c%c" is more clearly written simply as "%s"
 
 (W syntax) The C<\cI<X>> construct is intended to be a way to specify
-non-printable characters.  You used it for a printable one, which is better
-written as simply itself, perhaps preceded by a backslash for non-word
-characters.  Doing it the way you did is not portable across ASCII vs
-EBCDIC platforms.
+non-printable characters.  You used it for a printable one, which
+is better written as simply itself, perhaps preceded by a backslash
+for non-word characters.  Doing it the way you did is not portable
+between ASCII and EBCDIC platforms.
 
 =item Cloning substitution context is unimplemented
 
