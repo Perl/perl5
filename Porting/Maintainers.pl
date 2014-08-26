@@ -1231,7 +1231,7 @@ use File::Glob qw(:case);
     },
 
     'version' => {
-        'DISTRIBUTION' => 'JPEACOCK/version-0.9908.tar.gz',
+        'DISTRIBUTION' => 'JPEACOCK/version-0.9909.tar.gz',
         'FILES'        => q[cpan/version vutil.c vutil.h vxs.inc],
         'EXCLUDED' => [
             qr{^vutil/lib/},
@@ -1250,7 +1250,6 @@ use File::Glob qw(:case);
 
             # Merged upstream, waiting for new CPAN release: see CPAN RT#92721
             qw( vutil.c
-                vxs.inc
                 ),
         ],
 
