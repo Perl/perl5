@@ -2093,7 +2093,7 @@ EXTERN_C long double modfl(long double, long double *);
 #    define Perl_fp_class_pzero(x)	(Perl_fp_class(x)==FP_POS_ZERO)
 #endif
 
-/* _class(): Legacy: AIX. */
+/* class(), _class(): Legacy: AIX. */
 #if !defined(Perl_fp_class) && defined(HAS_CLASS)
 #    include <math.h>
 #    ifndef _cplusplus
@@ -2113,7 +2113,7 @@ EXTERN_C long double modfl(long double, long double *);
 #    define Perl_fp_class_pzero(x)	(Perl_fp_class(x)==FP_PLUS_ZERO)
 #endif
 
-/* fp_classify(): Legacy: Unicos? */
+/* fp_classify(): Legacy: VMS, maybe Unicos? */
 #if !defined(Perl_fp_class) && defined(HAS_FP_CLASSIFY)
 #    include <math.h>
 #    define Perl_fp_class(x)		fp_classify(x)
