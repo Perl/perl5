@@ -16697,7 +16697,13 @@ S_put_byte(pTHX_ SV *sv, int c)
 {
     PERL_ARGS_ASSERT_PUT_BYTE;
 
-    if (!isPRINT(c)) {
+    if (isPRINT(c)) {
+	const char string = c;
+	if (isBACKSLASHED_PUNCT(c))
+	    sv_catpvs(sv, "\\");
+	sv_catpvn(sv, &string, 1);
+    }
+    else {
         switch (c) {
             case '\a': Perl_sv_catpvf(aTHX_ sv, "\\a"); break;
             case '\b': Perl_sv_catpvf(aTHX_ sv, "\\b"); break;
@@ -16708,12 +16714,6 @@ S_put_byte(pTHX_ SV *sv, int c)
             case '\t': Perl_sv_catpvf(aTHX_ sv, "\\t"); break;
             default: Perl_sv_catpvf(aTHX_ sv, "\\x{%02X}", c); break;
         }
-    }
-    else {
-	const char string = c;
-	if (isBACKSLASHED_PUNCT(c))
-	    sv_catpvs(sv, "\\");
-	sv_catpvn(sv, &string, 1);
     }
 }
 
