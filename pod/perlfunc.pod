@@ -458,7 +458,7 @@ characters are strange, it's a C<-B> file; otherwise it's a C<-T> file.
 Also, any file containing a zero byte in the examined portion is
 considered a binary file.  (If executed within the scope of a L<S<use
 locale>|perllocale> which includes C<LC_CTYPE>, odd characters are
-anything that isn't a printable nor space in the current locale.) If
+anything that isn't a printable nor space in the current locale.)  If
 C<-T> or C<-B> is used on a filehandle, the current IO buffer is
 examined
 rather than the first block.  Both C<-T> and C<-B> return true on an empty
@@ -744,7 +744,8 @@ Returns the context of the current pure perl subroutine call.  In scalar
 context, returns the caller's package name if there I<is> a caller (that is, if
 we're in a subroutine or C<eval> or C<require>) and the undefined value
 otherwise.  caller never returns XS subs and they are skipped.  The next pure
-perl sub will appear instead of the XS sub in caller's return values. In list
+perl sub will appear instead of the XS
+sub in caller's return values.  In list
 context, caller returns
 
     # 0         1          2
@@ -762,7 +763,7 @@ to go back before the current one.
      = caller($i);
 
 Here, $subroutine is the function that the caller called (rather than the
-function containing the caller). Note that $subroutine may be C<(eval)> if
+function containing the caller).  Note that $subroutine may be C<(eval)> if
 the frame is not a subroutine call, but an C<eval>.  In such a case
 additional elements $evaltext and
 C<$is_require> are set: C<$is_require> is true if the frame is created by a
@@ -1380,7 +1381,7 @@ straightforward.  Although exists() will return false for deleted entries,
 deleting array elements never changes indices of existing values; use shift()
 or splice() for that.  However, if any deleted elements fall at the end of an
 array, the array's size shrinks to the position of the highest element that
-still tests true for exists(), or to 0 if none do. In other words, an
+still tests true for exists(), or to 0 if none do.  In other words, an
 array won't have trailing nonexistent elements after a delete.
 
 B<WARNING:> Calling delete on array values is deprecated and likely to
@@ -9303,8 +9304,8 @@ These flow-control keywords are documented in L<perlsyn/"Compound Statements">.
 
 =item elseif
 
-The "else if" keyword is spelled C<elsif> in Perl. There's no C<elif>
-or C<else if> either. It does parse C<elseif>, but only to warn you
+The "else if" keyword is spelled C<elsif> in Perl.  There's no C<elif>
+or C<else if> either.  It does parse C<elseif>, but only to warn you
 about not using it.
 
 See the documentation for flow-control keywords in L<perlsyn/"Compound
