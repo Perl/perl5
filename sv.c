@@ -11744,24 +11744,37 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                  * Inf/NaN for Inf/NAN, not their hexfp. */
                 hexfp = isALPHA_FOLD_EQ(c, 'a');
                 if (UNLIKELY(hexfp)) {
-                    /* Hexadecimal floating point: this size
-                     * computation probably overshoots, but that is
-                     * better than undershooting. */
+                    /* This seriously overshoots in most cases, but
+                     * better the undershooting.  Firstly, all bytes
+                     * of the NV are not mantissa, some of them are
+                     * exponent.  Secondly, for the reasonably common
+                     * long doubles case, the "80-bit extended", two
+                     * or six bytes of the NV are unused. */
                     need +=
-                        (nv < 0) + /* possible unary minus */
+                        (nv < 0) ? 1 : 0 + /* possible unary minus */
                         2 + /* "0x" */
                         1 + /* the very unlikely carry */
                         1 + /* "1" */
                         1 + /* "." */
-                        /* We want one byte per each 4 bits in the
-                         * mantissa.  This works out to about 0.83
-                         * bytes per NV decimal digit (of 4 bits):
-                         * (NV_DIG * log(10)/log(2)) / 4,
-                         * we overestimate by using 5/6 (0.8333...) */
-                        ((NV_DIG * 5) / 6 + 1) +
+                        2 * NVSIZE + /* 2 hexdigits for each byte */
                         2 + /* "p+" */
-                        (i >= 0 ? BIT_DIGITS(i) : 1 + BIT_DIGITS(-i)) +
+                        BIT_DIGITS(NV_MAX_EXP) + /* exponent */
                         1;   /* \0 */
+#if LONG_DOUBLEKIND == LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_LITTLE_ENDIAN || \
+    LONG_DOUBLEKIND == LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_BIG_ENDIAN
+                    /* However, for the "double double", we need more.
+                     * Since each double has their own exponent, the
+                     * doubles may float (haha) rather far from each
+                     * other, and the number of required bits is much
+                     * larger, up to total of 1028 bits.  (NOTE: this
+                     * is not actually implemented properly yet,
+                     * we are using just the first double, see
+                     * S_hextract() for details.  But let's prepare
+                     * for the future.) */
+
+                    /* 2 hexdigits for each byte. */ 
+                    need += ((1028 - NVSIZE * 8) / 8) * 2;
+#endif
 #ifdef USE_LOCALE_NUMERIC
                         STORE_LC_NUMERIC_SET_TO_NEEDED();
                         if (PL_numeric_radix_sv && IN_LC(LC_NUMERIC))
