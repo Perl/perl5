@@ -745,7 +745,13 @@ Perl_pad_alloc(pTHX_ I32 optype, U32 tmptype)
 		   (sv = names[PL_padix]) && sv != &PL_sv_undef)
 		continue;
 	    sv = *av_fetch(PL_comppad, PL_padix, TRUE);
-	    if (!(SvFLAGS(sv) & (SVs_PADTMP | SVs_PADMY)) &&
+	    if (!(SvFLAGS(sv) &
+#ifdef USE_BROKEN_PAD_RESET
+		    (SVs_PADMY|(tmptype & SVf_READONLY ? SVs_PADTMP : 0))
+#else
+		    (SVs_PADMY|SVs_PADTMP)
+#endif
+		 ) &&
 		!IS_PADGV(sv))
 		break;
 	}
@@ -1658,15 +1664,6 @@ S_pad_reset(pTHX)
     );
 
     if (!TAINTING_get) {	/* Can't mix tainted and non-tainted temporaries. */
-        I32 po;
-	for (po = AvMAX(PL_comppad); po > PL_padix_floor; po--) {
-	    if (PL_curpad[po] && !SvIMMORTAL(PL_curpad[po])
-	     && !SvPADMY(PL_curpad[po])
-	     && (  PadnamelistMAX(PL_comppad_name) < po
-		|| !PadnamelistARRAY(PL_comppad_name)[po]
-		|| !PadnameLEN(PadnamelistARRAY(PL_comppad_name)[po]) ))
-		SvPADTMP_off(PL_curpad[po]);
-	}
 	PL_padix = PL_padix_floor;
     }
 #endif
