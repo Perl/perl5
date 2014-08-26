@@ -22,8 +22,8 @@ my @NaN = ("NAN", "nan", "qnan", "SNAN", "NanQ", "NANS",
            "NaN123", "NAN(123)", "nan%",
            "nanonano"); # RIP, Robin Williams.
 
-my $inf_tests = 9 + 3 * @PInf + 3 * @NInf + 5;
-my $nan_tests = 7 + 2 * @NaN + 3;
+my $inf_tests = 11 + 3 * @PInf + 3 * @NInf + 5;
+my $nan_tests =  9 + 2 * @NaN + 3;
 
 my $infnan_tests = 4;
 
@@ -48,6 +48,9 @@ SKIP: {
 
   is($PInf,  "Inf", "$PInf value stringifies as Inf");
   is($NInf, "-Inf", "$NInf value stringifies as -Inf");
+
+  cmp_ok($PInf * 2, '==', $PInf, "twice Inf is Inf");
+  cmp_ok($PInf / 2, '==', $PInf, "half of Inf is Inf");
 
   is(sprintf("%g", $PInf), "Inf", "$PInf sprintf %g is Inf");
   is(sprintf("%a", $PInf), "Inf", "$PInf sprintf %a is Inf");
@@ -83,10 +86,13 @@ SKIP: {
   cmp_ok($NaN, '!=', $NaN, "NaN is NaN numerically (by not being NaN)");
   ok($NaN eq $NaN, "NaN is NaN stringifically");
 
-  is("$NaN", "NaN", "$NaN value stringies as NaN");
+  is("$NaN", "NaN", "$NaN value stringifies as NaN");
 
   is("+NaN" + 0, "NaN", "+NaN is NaN");
   is("-NaN" + 0, "NaN", "-NaN is NaN");
+
+  is($NaN * 2, $NaN, "twice NaN is NaN");
+  is($NaN / 2, $NaN, "half of NaN is NaN");
 
   is(sprintf("%g", $NaN), "NaN", "$NaN sprintf %g is NaN");
   is(sprintf("%a", $NaN), "NaN", "$NaN sprintf %a is NaN");
