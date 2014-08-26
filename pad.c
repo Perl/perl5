@@ -1661,6 +1661,7 @@ S_pad_reset(pTHX)
         I32 po;
 	for (po = AvMAX(PL_comppad); po > PL_padix_floor; po--) {
 	    if (PL_curpad[po] && !SvIMMORTAL(PL_curpad[po])
+	     && !SvPADMY(PL_curpad[po])
 	     && (  PadnamelistMAX(PL_comppad_name) < po
 		|| !PadnamelistARRAY(PL_comppad_name)[po]
 		|| !PadnameLEN(PadnamelistARRAY(PL_comppad_name)[po]) ))
