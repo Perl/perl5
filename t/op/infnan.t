@@ -22,8 +22,10 @@ my @NaN = ("NAN", "nan", "qnan", "SNAN", "NanQ", "NANS",
            "NaN123", "NAN(123)", "nan%",
            "nanonano"); # RIP, Robin Williams.
 
-my $inf_tests = 11 + 3 * @PInf + 3 * @NInf + 5;
-my $nan_tests =  9 + 2 * @NaN + 3;
+my @fmt = qw(e f g a d x c p);
+
+my $inf_tests = 11 + @fmt + 3 * @PInf + 3 * @NInf + 5;
+my $nan_tests =  7 + @fmt + 2 * @NaN + 3;
 
 my $infnan_tests = 4;
 
@@ -54,6 +56,10 @@ SKIP: {
 
   is(sprintf("%g", $PInf), "Inf", "$PInf sprintf %g is Inf");
   is(sprintf("%a", $PInf), "Inf", "$PInf sprintf %a is Inf");
+
+  for my $f (@fmt) {
+      is(sprintf("%$f", $PInf), "Inf", "$PInf sprintf %$f is Inf");
+  }
 
   for my $i (@PInf) {
     cmp_ok($i + 0 , '==', $PInf, "$i is +Inf");
@@ -94,8 +100,9 @@ SKIP: {
   is($NaN * 2, $NaN, "twice NaN is NaN");
   is($NaN / 2, $NaN, "half of NaN is NaN");
 
-  is(sprintf("%g", $NaN), "NaN", "$NaN sprintf %g is NaN");
-  is(sprintf("%a", $NaN), "NaN", "$NaN sprintf %a is NaN");
+  for my $f (@fmt) {
+      is(sprintf("%$f", $NaN), "NaN", "$NaN sprintf %$f is NaN");
+  }
 
   for my $i (@NaN) {
     cmp_ok($i + 0, '!=', $i + 0, "$i is NaN numerically (by not being NaN)");

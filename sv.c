@@ -11380,6 +11380,25 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	    }
 	}
 
+        if (argsv && SvNOK(argsv)) {
+            /* XXX va_arg(*args) case? */
+            NV nv = SvNV(argsv);
+            char g = 0;
+#ifdef Perl_isinf
+            if (Perl_isinf(nv))
+                g = 'g';
+#endif
+#ifdef Perl_isnan
+            if (Perl_isnan(nv))
+                g = 'g';
+#endif
+            if (g) {
+                c = g;
+                q++;
+                goto floating_point;
+            }
+        }
+
 	switch (c = *q++) {
 
 	    /* STRINGS */
@@ -11457,6 +11476,13 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 #endif
 	    /* FALLTHROUGH */
 	case 'd':
+            /* XXX printf Inf/NaN for %[ducp], now produces quite
+             * surprising results: 1, 0, 18446744073709551615,
+             * 9223372036854775808, -9223372036854775807, bogus
+             * Unicode code points, random heap addresses in hex.
+             *
+             * For the argsv() doable (Perl_isinf, Perl_isnan), but
+             * how to do that for the va_arg(*args, ...)? */
 	case 'i':
 	    if (vectorize) {
 		STRLEN ulen;
@@ -11674,6 +11700,8 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	    break;
 
 	    /* FLOATING POINT */
+
+        floating_point:
 
 	case 'F':
 	    c = 'f';		/* maybe %F isn't supported here */
