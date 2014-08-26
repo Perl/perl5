@@ -277,6 +277,13 @@ as C<< Some::Package->CONSTANT >> or as C<< $obj->CONSTANT >> where
 C<$obj> is an instance of C<Some::Package>.  Subclasses may define
 their own constants to override those in their base class.
 
+As of version 1.32 of this module, constants can be defined in packages
+other than the caller, by including the package name in the name of the
+constant:
+
+    use constant "OtherPackage::FWIBBLE" => 7865;
+    constant->import("Other::FWOBBLE",$value); # dynamically at run time
+
 The use of all caps for constant names is merely a convention,
 although it is recommended in order to make constants stand out
 and to help avoid collisions with other barewords, keywords, and
