@@ -645,10 +645,9 @@ Perl_grok_infnan(const char** sp, const char* send)
                 s++; if (s == send || isALPHA_FOLD_NE(*s, 'T')) return 0;
                 s++; if (s == send ||
                          /* allow either Infinity or Infinite */
-                         (isALPHA_FOLD_NE(*s, 'Y') &&
-                          isALPHA_FOLD_NE(*s, 'E')))
-                         return 0;
-                s++;
+                         !(isALPHA_FOLD_EQ(*s, 'Y') ||
+                           isALPHA_FOLD_EQ(*s, 'E'))) return 0;
+                s++; if (s < send) return 0;
             } else if (*s)
                 return 0;
             flags |= IS_NUMBER_INFINITY | IS_NUMBER_NOT_INT;

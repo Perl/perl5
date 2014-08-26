@@ -24,7 +24,7 @@ my @NaN = ("NAN", "nan", "qnan", "SNAN", "NanQ", "NANS",
 
 my @fmt = qw(e f g a d x c p);
 
-my $inf_tests = 11 + @fmt + 3 * @PInf + 3 * @NInf + 5;
+my $inf_tests = 11 + @fmt + 3 * @PInf + 3 * @NInf + 5 + 3;
 my $nan_tests =  7 + @fmt + 2 * @NaN + 3;
 
 my $infnan_tests = 4;
@@ -80,6 +80,14 @@ SKIP: {
   is(1/$NInf, 0, "one per -Inf is zero");
 
   is(9**9**9, $PInf, "9**9**9 is Inf");
+}
+
+{
+    # Silence "isn't numeric in addition", that's kind of the point.
+    local $^W = 0;
+    for my $i (qw(Info Infiniti Infinityz)) {
+        cmp_ok("$i" + 0, '==', 0, "false infinity $i");
+    }
 }
 
 SKIP: {
