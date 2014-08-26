@@ -2641,6 +2641,9 @@ For example:
 
 The IVdf will expand to whatever is the correct format for the IVs.
 
+Note that there are different "long doubles": Perl will use
+whatever the compiler has.
+
 If you are printing addresses of pointers, use UVxf combined
 with PTR2UV(), do not use %lx or %p.
 

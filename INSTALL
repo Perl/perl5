@@ -329,6 +329,10 @@ range and precision of your double precision floating point numbers
 (that is, Perl's numbers).  Use Configure -Duselongdouble to enable
 this support (if it is available).
 
+Note that the exact format and range of long doubles varies:
+the most common is the x86 80-bit (64 bits of mantissa) format,
+but there are others, with different mantissa and exponent ranges.
+
 =head3 "more bits"
 
 You can "Configure -Dusemorebits" to turn on both the 64-bit support
