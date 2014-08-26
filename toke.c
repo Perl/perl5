@@ -6639,7 +6639,6 @@ Perl_yylex(pTHX)
 		    }
 		    NEXTVAL_NEXTTOKE.opval =
 			off ? rv2cv_op : pl_yylval.opval;
-		    PL_expect = XOPERATOR;
 		    if (off)
 			 op_free(pl_yylval.opval), force_next(PRIVATEREF);
 		    else op_free(rv2cv_op),	   force_next(WORD);
