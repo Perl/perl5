@@ -11740,6 +11740,8 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                 (void)Perl_frexp(nv, &i);
                 if (i == PERL_INT_MIN)
                     Perl_die(aTHX_ "panic: frexp");
+                /* Do not set hexfp earlier since we want to printf
+                 * Inf/NaN for Inf/NAN, not their hexfp. */
                 hexfp = isALPHA_FOLD_EQ(c, 'a');
                 if (UNLIKELY(hexfp)) {
                     /* Hexadecimal floating point: this size
