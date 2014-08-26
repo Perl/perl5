@@ -162,7 +162,7 @@ sub import {
 		    # The check in Perl_ck_rvconst knows that inlinable
 		    # constants from cv_const_sv are read only. So we have to:
 		    Internals::SvREADONLY($scalar, 1);
-		    if ($symtab && !exists $symtab->{$name}) {
+		    if (!exists $symtab->{$name}) {
 			$symtab->{$name} = \$scalar;
 			++$flush_mro->{$pkg};
 		    }
@@ -178,7 +178,7 @@ sub import {
 		if (_CAN_PCS_FOR_ARRAY) {
 		    _make_const($list[$_]) for 0..$#list;
 		    _make_const(@list);
-		    if ($symtab && !exists $symtab->{$name}) {
+		    if (!exists $symtab->{$name}) {
 			$symtab->{$name} = \@list;
 			$flush_mro->{$pkg}++;
 		    }
