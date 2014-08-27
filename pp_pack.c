@@ -2540,7 +2540,15 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 	    while (len-- > 0) {
 		IV aiv;
 		fromstr = NEXTFROM;
-		aiv = SvIV(fromstr);
+                if (SvNOK(fromstr) && Perl_isinfnan(SvNV(fromstr))) {
+                    /* 255 is a pretty arbitrary choice, but with
+                     * inf/-inf/nan and 256 bytes there is not much room. */
+                    aiv = 255;
+		    Perl_ck_warner(aTHX_ packWARN(WARN_PACK),
+				   "Character in 'c' format overflow in pack");
+                }
+                else
+                    aiv = SvIV(fromstr);
 		if ((-128 > aiv || aiv > 127))
 		    Perl_ck_warner(aTHX_ packWARN(WARN_PACK),
 				   "Character in 'c' format wrapped in pack");
@@ -2555,7 +2563,14 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 	    while (len-- > 0) {
 		IV aiv;
 		fromstr = NEXTFROM;
-		aiv = SvIV(fromstr);
+                if (SvNOK(fromstr) && Perl_isinfnan(SvNV(fromstr))) {
+                    /* See the 'c' case. */
+                    aiv = 255;
+		    Perl_ck_warner(aTHX_ packWARN(WARN_PACK),
+				   "Character in 'C' format overflow in pack");
+                }
+                else
+                    aiv = SvIV(fromstr);
 		if ((0 > aiv || aiv > 0xff))
 		    Perl_ck_warner(aTHX_ packWARN(WARN_PACK),
 				   "Character in 'C' format wrapped in pack");

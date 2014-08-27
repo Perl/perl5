@@ -24,8 +24,8 @@ my @NaN = ("NAN", "nan", "qnan", "SNAN", "NanQ", "NANS",
 
 my @num_fmt = qw(e f g a d u o b x p);
 
-my $inf_tests = 11 + @num_fmt + 4 + 3 * @PInf + 3 * @NInf + 5 + 3;
-my $nan_tests =  7 + @num_fmt + 2 + 2 * @NaN + 3;
+my $inf_tests = 11 + @num_fmt + 8 + 3 * @PInf + 3 * @NInf + 5 + 3;
+my $nan_tests =  7 + @num_fmt + 4 + 2 * @NaN + 3;
 
 my $infnan_tests = 4;
 
@@ -69,6 +69,12 @@ SKIP: {
 
       is(sprintf("%c", $NInf), chr(0xFFFD), "$NInf sprintf %c is Inf");
       is(chr($NInf), chr(0xFFFD), "$NInf chr() is U+FFFD");
+
+      is(pack('C', $PInf), chr(0xFF), "$PInf pack C is 0xFF byte");
+      is(pack('c', $PInf), chr(0xFF), "$PInf pack c is 0xFF byte");
+
+      is(pack('C', $NInf), chr(0xFF), "$NInf pack C is 0xFF byte");
+      is(pack('c', $NInf), chr(0xFF), "$NInf pack c is 0xFF byte");
   }
 
   for my $i (@PInf) {
@@ -127,6 +133,9 @@ SKIP: {
 
       is(sprintf("%c", $NaN), chr(0xFFFD), "$NaN sprintf %c is Inf");
       is(chr($NaN), chr(0xFFFD), "$NaN chr() is U+FFFD");
+
+      is(pack('C', $NaN), chr(0xFF), "$NaN pack C is 0xFF byte");
+      is(pack('c', $NaN), chr(0xFF), "$NaN pack c is 0xFF");
   }
 
   for my $i (@NaN) {

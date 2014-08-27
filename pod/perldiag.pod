@@ -1328,6 +1328,12 @@ Note that ASCII characters that don't map to control characters are
 discouraged, and will generate the warning (when enabled)
 L</""\c%c" is more clearly written simply as "%s"">.
 
+=item Character in 'C' format overflow in pack
+
+(W pack) You tried converting an infinity or not-a-number to an
+unsigned character, which makes no sense.  Perl behaved as if you
+tried to pack 0xFF.
+
 =item Character in 'C' format wrapped in pack
 
 (W pack) You said
@@ -1342,6 +1348,12 @@ and so on) and not for Unicode characters, so Perl behaved as if you meant
 
 If you actually want to pack Unicode codepoints, use the C<"U"> format
 instead.
+
+=item Character in 'c' format overflow in pack
+
+(W pack) You tried converting an infinity or not-a-number to a
+signed character, which makes no sense.  Perl behaved as if you
+tried to pack 0xFF.
 
 =item Character in 'c' format wrapped in pack
 
