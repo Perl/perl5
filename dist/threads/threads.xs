@@ -718,7 +718,7 @@ S_ithread_create(
           int fd = PerlIO_fileno(Perl_error_log);
           if (fd >= 0) {
             /* If there's no error_log, we cannot scream about it missing. */
-            PERL_UNUSED_RESULT(PerlLIO_write(fd, PL_no_mem, strlen(PL_no_mem)));
+            PerlLIO_write(fd, PL_no_mem, strlen(PL_no_mem));
           }
         }
         my_exit(1);
