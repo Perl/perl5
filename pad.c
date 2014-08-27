@@ -972,7 +972,7 @@ Perl_pad_findmy_pvn(pTHX_ const char *namepv, STRLEN namelen, U32 flags)
 
     nameav = PadlistARRAY(CvPADLIST(PL_compcv))[0];
     name_svp = AvARRAY(nameav);
-    for (offset = AvFILLp(nameav); offset > 0; offset--) {
+    for (offset = PadnamelistMAXNAMED(nameav); offset > 0; offset--) {
         const SV * const namesv = name_svp[offset];
 	if (namesv && PadnameLEN(namesv) == namelen
 	    && !SvFAKE(namesv)
