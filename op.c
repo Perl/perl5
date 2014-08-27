@@ -5202,7 +5202,8 @@ Perl_newPADOP(pTHX_ I32 type, I32 flags, SV *sv)
     NewOp(1101, padop, 1, PADOP);
     padop->op_type = (OPCODE)type;
     padop->op_ppaddr = PL_ppaddr[type];
-    padop->op_padix = pad_alloc(type, SVs_PADTMP);
+    padop->op_padix =
+	pad_alloc(type, IS_PADGV(sv) ? SVf_READONLY : SVs_PADTMP);
     SvREFCNT_dec(PAD_SVl(padop->op_padix));
     PAD_SETSV(padop->op_padix, sv);
     assert(sv);
