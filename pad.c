@@ -230,6 +230,7 @@ Perl_pad_new(pTHX_ int flags)
 	if (! (flags & padnew_CLONE)) {
 	    SAVESPTR(PL_comppad_name);
 	    SAVEI32(PL_padix);
+	    SAVEI32(PL_constpadix);
 	    SAVEI32(PL_comppad_name_fill);
 	    SAVEI32(PL_min_intro_pending);
 	    SAVEI32(PL_max_intro_pending);
@@ -286,6 +287,7 @@ Perl_pad_new(pTHX_ int flags)
 	PL_comppad_name_fill = 0;
 	PL_min_intro_pending = 0;
 	PL_padix	     = 0;
+	PL_constpadix	     = 0;
 	PL_cv_has_eval	     = 0;
     }
 
@@ -731,9 +733,12 @@ Perl_pad_alloc(pTHX_ I32 optype, U32 tmptype)
     else {
 	/* For a tmp, scan the pad from PL_padix upwards
 	 * for a slot which has no name and no active value.
+	 * For a constant, likewise, but use PL_constpadix.
 	 */
 	SV * const * const names = AvARRAY(PL_comppad_name);
         const SSize_t names_fill = AvFILLp(PL_comppad_name);
+	const bool konst = cBOOL(tmptype & SVf_READONLY);
+	retval = konst ? PL_constpadix : PL_padix;
 	for (;;) {
 	    /*
 	     * Entries that close over unavailable variables
@@ -741,13 +746,13 @@ Perl_pad_alloc(pTHX_ I32 optype, U32 tmptype)
 	     * Thus we must skip, not just pad values that are
 	     * marked as current pad values, but also those with names.
 	     */
-	    if (++PL_padix <= names_fill &&
-		   (sv = names[PL_padix]) && sv != &PL_sv_undef)
+	    if (++retval <= names_fill &&
+		   (sv = names[retval]) && sv != &PL_sv_undef)
 		continue;
-	    sv = *av_fetch(PL_comppad, PL_padix, TRUE);
+	    sv = *av_fetch(PL_comppad, retval, TRUE);
 	    if (!(SvFLAGS(sv) &
 #ifdef USE_BROKEN_PAD_RESET
-		    (SVs_PADMY|(tmptype & SVf_READONLY ? SVs_PADTMP : 0))
+		    (SVs_PADMY|(konst ? SVs_PADTMP : 0))
 #else
 		    (SVs_PADMY|SVs_PADTMP)
 #endif
@@ -755,12 +760,12 @@ Perl_pad_alloc(pTHX_ I32 optype, U32 tmptype)
 		!IS_PADGV(sv))
 		break;
 	}
-	if (tmptype & SVf_READONLY) {
-	    av_store(PL_comppad_name, PL_padix, &PL_sv_no);
+	if (konst) {
+	    av_store(PL_comppad_name, retval, &PL_sv_no);
 	    tmptype &= ~SVf_READONLY;
 	    tmptype |= SVs_PADTMP;
 	}
-	retval = PL_padix;
+	*(konst ? &PL_constpadix : &PL_padix) = retval;
     }
     SvFLAGS(sv) |= tmptype;
     PL_curpad = AvARRAY(PL_comppad);
@@ -1630,8 +1635,11 @@ Perl_pad_swipe(pTHX_ PADOFFSET po, bool refadjust)
 	}
 	PadnamelistARRAY(PL_comppad_name)[po] = &PL_sv_undef;
     }
-    if ((I32)po < PL_padix)
-	PL_padix = po - 1;
+    /* Use PL_constpadix here, not PL_padix.  The latter may have been
+       reset by pad_reset.  We don’t want pad_alloc to have to scan the
+       whole pad when allocating a constant. */
+    if ((I32)po < PL_constpadix)
+	PL_constpadix = po - 1;
 }
 
 /*
