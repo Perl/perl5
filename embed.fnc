@@ -2663,7 +2663,7 @@ Apnod	|Size_t	|my_strlcat	|NULLOK char *dst|NULLOK const char *src|Size_t size
 Apnod     |Size_t |my_strlcpy     |NULLOK char *dst|NULLOK const char *src|Size_t size
 #endif
 
-Apdn	|bool	|Perl_isinfnan	|NV nv
+Apdn	|bool	|isinfnan	|NV nv
 
 #if !defined(HAS_SIGNBIT)
 AMdnoP	|int	|Perl_signbit	|NV f
