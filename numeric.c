@@ -1324,6 +1324,22 @@ Perl_my_atof2(pTHX_ const char* orig, NV* value)
     return (char *)s;
 }
 
+/* Perl_isinfnan() is utility function that returns true if the NV
+ * argument is either an infinity or a NaN, false otherwise. */
+bool
+Perl_isinfnan(NV nv)
+{
+#ifdef Perl_isinf
+    if (Perl_isinf(nv))
+        return TRUE;
+#endif
+#ifdef Perl_isnan
+    if (Perl_isnan(nv))
+        return TRUE;
+#endif
+    return FALSE;
+}
+
 #if ! defined(HAS_MODFL) && defined(HAS_AINTL) && defined(HAS_COPYSIGNL)
 long double
 Perl_my_modfl(long double x, long double *ip)

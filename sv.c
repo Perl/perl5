@@ -11002,6 +11002,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	I32 epix = 0; /* explicit precision index */
 	I32 evix = 0; /* explicit vector index */
 	bool asterisk = FALSE;
+        bool infnan = FALSE;
 
 	/* echo everything up to the next format specification */
 	for (q = p; q < patend && *q != '%'; ++q) ;
@@ -11349,21 +11350,7 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 
         if (argsv && SvNOK(argsv)) {
             /* XXX va_arg(*args) case? */
-            NV nv = SvNV(argsv);
-            char g = 0;
-#ifdef Perl_isinf
-            if (Perl_isinf(nv))
-                g = 'g';
-#endif
-#ifdef Perl_isnan
-            if (Perl_isnan(nv))
-                g = 'g';
-#endif
-            if (g) {
-                c = g;
-                q++;
-                goto floating_point;
-            }
+            infnan = Perl_isinfnan(SvNV(argsv));
         }
 
 	switch (c = *q++) {
@@ -11373,7 +11360,8 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	case 'c':
 	    if (vectorize)
 		goto unknown;
-	    uv = (args) ? va_arg(*args, int) : SvIV(argsv);
+	    uv = (args) ? va_arg(*args, int) :
+                infnan ? UNICODE_REPLACEMENT : SvIV(argsv);
 	    if ((uv > 255 ||
 		 (!UVCHR_IS_INVARIANT(uv) && SvUTF8(sv)))
 		&& !IN_BYTES) {
@@ -11429,6 +11417,10 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	    /* INTEGERS */
 
 	case 'p':
+            if (infnan) {
+                c = 'g';
+                goto floating_point;
+            }
 	    if (alt || vectorize)
 		goto unknown;
 	    uv = PTR2UV(args ? va_arg(*args, void*) : argsv);
@@ -11443,14 +11435,11 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 #endif
 	    /* FALLTHROUGH */
 	case 'd':
-            /* XXX printf Inf/NaN for %[ducp], now produces quite
-             * surprising results: 1, 0, 18446744073709551615,
-             * 9223372036854775808, -9223372036854775807, bogus
-             * Unicode code points, random heap addresses in hex.
-             *
-             * For the argsv() doable (Perl_isinf, Perl_isnan), but
-             * how to do that for the va_arg(*args, ...)? */
 	case 'i':
+            if (infnan) {
+                c = 'g';
+                goto floating_point;
+            }
 	    if (vectorize) {
 		STRLEN ulen;
 		if (!veclen)
@@ -11552,6 +11541,10 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
 	    base = 16;
 
 	uns_integer:
+            if (infnan) {
+                c = 'g';
+                goto floating_point;
+            }
 	    if (vectorize) {
 		STRLEN ulen;
 	vector:

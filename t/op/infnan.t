@@ -22,10 +22,10 @@ my @NaN = ("NAN", "nan", "qnan", "SNAN", "NanQ", "NANS",
            "NaN123", "NAN(123)", "nan%",
            "nanonano"); # RIP, Robin Williams.
 
-my @fmt = qw(e f g a d x c p);
+my @num_fmt = qw(e f g a d u o b x p);
 
-my $inf_tests = 11 + @fmt + 3 * @PInf + 3 * @NInf + 5 + 3;
-my $nan_tests =  7 + @fmt + 2 * @NaN + 3;
+my $inf_tests = 11 + @num_fmt + 4 + 3 * @PInf + 3 * @NInf + 5 + 3;
+my $nan_tests =  7 + @num_fmt + 2 + 2 * @NaN + 3;
 
 my $infnan_tests = 4;
 
@@ -57,8 +57,18 @@ SKIP: {
   is(sprintf("%g", $PInf), "Inf", "$PInf sprintf %g is Inf");
   is(sprintf("%a", $PInf), "Inf", "$PInf sprintf %a is Inf");
 
-  for my $f (@fmt) {
+  for my $f (@num_fmt) {
       is(sprintf("%$f", $PInf), "Inf", "$PInf sprintf %$f is Inf");
+  }
+
+  {
+      local $^W = 0;
+
+      is(sprintf("%c", $PInf), chr(0xFFFD), "$PInf sprintf %c is Inf");
+      is(chr($PInf), chr(0xFFFD), "$PInf chr() is U+FFFD");
+
+      is(sprintf("%c", $NInf), chr(0xFFFD), "$NInf sprintf %c is Inf");
+      is(chr($NInf), chr(0xFFFD), "$NInf chr() is U+FFFD");
   }
 
   for my $i (@PInf) {
@@ -108,8 +118,15 @@ SKIP: {
   is($NaN * 2, $NaN, "twice NaN is NaN");
   is($NaN / 2, $NaN, "half of NaN is NaN");
 
-  for my $f (@fmt) {
+  for my $f (@num_fmt) {
       is(sprintf("%$f", $NaN), "NaN", "$NaN sprintf %$f is NaN");
+  }
+
+  {
+      local $^W = 0;
+
+      is(sprintf("%c", $NaN), chr(0xFFFD), "$NaN sprintf %c is Inf");
+      is(chr($NaN), chr(0xFFFD), "$NaN chr() is U+FFFD");
   }
 
   for my $i (@NaN) {

@@ -33,6 +33,7 @@ PERL_CALLCONV UV	NATIVE_TO_NEED(const UV enc, const UV ch)
 			__attribute__pure__;
 
 PERL_CALLCONV const char *	Perl_PerlIO_context_layers(pTHX_ const char *mode);
+PERL_CALLCONV bool	Perl_Perl_isinfnan(NV nv);
 PERL_CALLCONV void*	Perl_Slab_Alloc(pTHX_ size_t sz)
 			__attribute__malloc__
 			__attribute__warn_unused_result__;

@@ -2591,8 +2591,14 @@ a module that is a MRO plugin.  See L<mro> and L<perlmroapi>.
 =item Invalid negative number (%s) in chr
 
 (W utf8) You passed a negative number to C<chr>.  Negative numbers are
-not valid characters numbers, so it return the Unicode replacement
+not valid character numbers, so it return the Unicode replacement
 character (U+FFFD).
+
+=item Invalid number (%f) in chr
+
+(W utf8) You passed an invalid number (like an infinity or
+not-a-number) to C<chr>.  Those are not valid character numbers,
+so it return the Unicode replacement character (U+FFFD).
 
 =item invalid option -D%c, use -D'' to see choices
 
