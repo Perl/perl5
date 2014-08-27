@@ -1810,7 +1810,9 @@ Free the SV at offset po in the current pad.
 void
 Perl_pad_free(pTHX_ PADOFFSET po)
 {
+#ifndef USE_BROKEN_PAD_RESET
     SV *sv;
+#endif
     ASSERT_CURPAD_LEGAL("pad_free");
     if (!PL_curpad)
 	return;
@@ -1825,10 +1827,11 @@ Perl_pad_free(pTHX_ PADOFFSET po)
 	    PTR2UV(PL_comppad), PTR2UV(PL_curpad), (long)po)
     );
 
-
+#ifndef USE_BROKEN_PAD_RESET
     sv = PL_curpad[po];
     if (sv && sv != &PL_sv_undef && !SvPADMY(sv))
 	SvFLAGS(sv) &= ~SVs_PADTMP;
+#endif
 
     if ((I32)po < PL_padix)
 	PL_padix = po - 1;
