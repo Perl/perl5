@@ -846,7 +846,7 @@ Perl_leave_scope(pTHX_ I32 base)
 	    {
 		if ((char *)svp < (char *)GvGP(ARG2_GV)
 		 || (char *)svp > (char *)GvGP(ARG2_GV) + sizeof(struct gp)
-		 || GvREFCNT(ARG2_GV) > 1)
+		 || GvREFCNT(ARG2_GV) > 2) /* "> 2" to ignore savestack's ref */
 		    PL_sub_generation++;
 		else mro_method_changed_in(hv);
 	    }

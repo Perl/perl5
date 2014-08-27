@@ -3968,7 +3968,15 @@ S_glob_assign_ref(pTHX_ SV *const dstr, SV *const sstr)
 	    }
 	    GvCVGEN(dstr) = 0; /* Switch off cacheness. */
 	    GvASSUMECV_on(dstr);
-	    if(GvSTASH(dstr)) gv_method_changed(dstr); /* sub foo { 1 } sub bar { 2 } *bar = \&foo */
+	    if(GvSTASH(dstr)) { /* sub foo { 1 } sub bar { 2 } *bar = \&foo */
+		if (intro && GvREFCNT(dstr) > 1) {
+		    /* temporary remove extra savestack's ref */
+		    --GvREFCNT(dstr);
+		    gv_method_changed(dstr);
+		    ++GvREFCNT(dstr);
+		}
+		else gv_method_changed(dstr);
+	    }
 	}
 	*location = SvREFCNT_inc_simple_NN(sref);
 	if (import_flag && !(GvFLAGS(dstr) & import_flag)
