@@ -745,6 +745,10 @@ Perl_pad_alloc(pTHX_ I32 optype, U32 tmptype)
 	     * in outer subs contain values not marked PADMY.
 	     * Thus we must skip, not just pad values that are
 	     * marked as current pad values, but also those with names.
+	     * If pad_reset is enabled, ‘current’ means different
+	     * things depending on whether we are allocating a con-
+	     * stant or a target.  For a target, things marked PADTMP
+	     * can be reused; not so for constants.
 	     */
 	    if (++retval <= names_fill &&
 		   (sv = names[retval]) && sv != &PL_sv_undef)
@@ -1483,6 +1487,12 @@ Perl_pad_block_start(pTHX_ int full)
     PL_min_intro_pending = 0;
     SAVEI32(PL_comppad_name_fill);
     SAVEI32(PL_padix_floor);
+    /* PL_padix_floor is what PL_padix is reset to at the start of each
+       statement, by pad_reset().  We set it when entering a new scope
+       to keep things like this working:
+	    print "$foo$bar", do { this(); that() . "foo" };
+       We must not let "$foo$bar" and the later concatenation share the
+       same target.  */
     PL_padix_floor = PL_padix;
     PL_pad_reset_pending = FALSE;
 }
@@ -1654,12 +1664,11 @@ Mark all the current temporaries for reuse
 =cut
 */
 
-/* XXX pad_reset() is currently disabled because it results in serious bugs.
- * It causes pad temp TARGs to be shared between OPs. Since TARGs are pushed
- * on the stack by OPs that use them, there are several ways to get an alias
- * to  a shared TARG.  Such an alias will change randomly and unpredictably.
- * We avoid doing this until we can think of a Better Way.
- * GSAR 97-10-29 */
+/* pad_reset() causes pad temp TARGs (operator targets) to be shared
+ * between OPs from different statements.  During compilation, at the start
+ * of each statement pad_reset resets PL_padix back to its previous value.
+ * When allocating a target, pad_alloc begins its scan through the pad at
+ * PL_padix+1.  */
 static void
 S_pad_reset(pTHX)
 {
