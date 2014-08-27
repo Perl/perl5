@@ -1542,7 +1542,7 @@ dumpindent is 4 at - line 1.
     }
     {
 5       TYPE = entersub  ===> 1
-        TARG = TARGS_REPLACE
+        TARG = 1
         FLAGS = (VOID,KIDS,STACKED,SLABBED,LASTSIB)
         PRIVATE = (HASTARG)
         {
@@ -1568,7 +1568,6 @@ dumpindent is 4 at - line 1.
 }
 EODUMP
 
-$e =~ s/TARGS_REPLACE/$threads ? 3 : 1/e;
 $e =~ s/GV_OR_PADIX/$threads ? "PADIX = 2" : "GV = t::DumpProg"/e;
 
 test_DumpProg("package t;", $e, "DumpProg() has no 'Attempt to free X prematurely' warning", "is" );
