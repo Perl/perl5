@@ -966,6 +966,10 @@ Perl_pad_findmy_pvn(pTHX_ const char *namepv, STRLEN namelen, U32 flags)
     if ((PADOFFSET)offset != NOT_IN_PAD) 
 	return offset;
 
+    /* Skip the ‘our’ hack for subroutines, as the warning does not apply.
+     */
+    if (*namepv == '&') return NOT_IN_PAD;
+
     /* look for an our that's being introduced; this allows
      *    our $foo = 0 unless defined $foo;
      * to not give a warning. (Yes, this is a hack) */
