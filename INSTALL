@@ -332,11 +332,27 @@ this support (if it is available).
 Note that the exact format and range of long doubles varies:
 the most common is the x86 80-bit (64 bits of mantissa) format,
 but there are others, with different mantissa and exponent ranges.
+In fact, the type may not be called "long double" at C level, and
+therefore the C<uselongdouble> means "using floating point larger
+than double".
 
 =head3 "more bits"
 
 You can "Configure -Dusemorebits" to turn on both the 64-bit support
 and the long double support.
+
+=head3 quadmath
+
+Another option for long doubles is that gcc 4.6 and later have library
+called quadmath, which implements the IEEE 754 quadruple precision
+(128-bit, 113 bits of mantissa) floating point numbers.  The library
+works at least on x86 and ia64 platforms.  It may be part of your gcc
+installation, or you may need to install it separately.
+
+With "Configure -Dusequadmath" you can enable its use, but note the
+compiler dependency, you may need to also add "-Dcc=..."  This option
+also turns on -Duselongdouble.  At C level the type is called C<__float128>,
+(note, not "long double") but Perl source knows it as NV.
 
 =head3 Algorithmic Complexity Attacks on Hashes
 
