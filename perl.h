@@ -28,6 +28,12 @@
 #   include "config.h"
 #endif
 
+#ifndef HAS_C99
+# if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L && !defined(__VMS)
+#  define HAS_C99 1
+# endif
+#endif
+
 /* See L<perlguts/"The Perl API"> for detailed notes on
  * PERL_IMPLICIT_CONTEXT and PERL_IMPLICIT_SYS */
 
@@ -1917,16 +1923,16 @@ EXTERN_C long double modfl(long double, long double *);
 #       endif
 #   endif
 #   ifndef Perl_isnan
-#       ifdef HAS_ISNANL
+#       if defined(HAS_ISNANL) && !(defined(isnan) && HAS_C99)
 #           define Perl_isnan(x) isnanl(x)
 #       endif
 #   endif
 #   ifndef Perl_isinf
-#       if defined(HAS_ISINFL)
+#       if defined(HAS_ISINFL) && !(defined(isinf) && HAS_C99)
 #           define Perl_isinf(x) isinfl(x)
 #       endif
 #   endif
-#   ifndef Perl_isfinite
+#   if !defined(Perl_isfinite) && !(defined(isfinite) && HAS_C99)
 #     ifdef HAS_ISFINITEL
 #       define Perl_isfinite(x) isfinitel(x)
 #     elif defined(HAS_FINITEL)

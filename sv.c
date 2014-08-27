@@ -35,11 +35,6 @@
 # include <rms.h>
 #endif
 
-#ifndef HAS_C99
-# if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L && !defined(__VMS)
-#  define HAS_C99 1
-# endif
-#endif
 #ifdef HAS_C99
 # include <stdint.h>
 #endif
