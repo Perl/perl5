@@ -15445,24 +15445,12 @@ set d_isblank
 eval $setvar
 $rm -f isblank*
 
-: see if isfinite exists
-set isfinite d_isfinite
-eval $inlibc
-
 : see if isfinitel exists
 set isfinitel d_isfinitel
 eval $inlibc
 
-: see if isinf exists
-set isinf d_isinf
-eval $inlibc
-
 : see if isinfl exists
 set isinfl d_isinfl
-eval $inlibc
-
-: see if isnan exists
-set isnan d_isnan
 eval $inlibc
 
 : see if isnanl exists
@@ -15584,6 +15572,72 @@ else
 fi
 $rm_try
 set d_fpclassify
+eval $setvar
+
+: check for isfinite
+echo " "
+echo "Checking to see if you have isfinite..." >&4
+$cat >try.c <<EOCP
+#$i_math I_MATH
+#ifdef I_MATH
+#include <math.h>
+#endif
+int main() { return isfinite(0.0); }
+EOCP
+set try
+if eval $compile; then
+	val="$define"
+	echo "You have isfinite."
+else
+	val="$undef"
+	echo "You do not have isfinite."
+fi
+$rm_try
+set d_isfinite
+eval $setvar
+
+: check for isinf
+echo " "
+echo "Checking to see if you have isinf..." >&4
+$cat >try.c <<EOCP
+#$i_math I_MATH
+#ifdef I_MATH
+#include <math.h>
+#endif
+int main() { return isinf(0.0); }
+EOCP
+set try
+if eval $compile; then
+	val="$define"
+	echo "You have isinf."
+else
+	val="$undef"
+	echo "You do not have isinf."
+fi
+$rm_try
+set d_isinf
+eval $setvar
+
+: check for isnan
+echo " "
+echo "Checking to see if you have isnan..." >&4
+$cat >try.c <<EOCP
+#$i_math I_MATH
+#ifdef I_MATH
+#include <math.h>
+#endif
+int main() { return isnan(0.0); }
+EOCP
+set try
+if eval $compile; then
+	val="$define"
+	echo "You have isnan."
+else
+	val="$undef"
+	echo "You do not have isnan."
+fi
+$rm_try
+set d_isnan
 eval $setvar
 
 : see if link exists
