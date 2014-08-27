@@ -1843,10 +1843,10 @@ Perl_pad_free(pTHX_ PADOFFSET po)
     sv = PL_curpad[po];
     if (sv && sv != &PL_sv_undef && !SvPADMY(sv))
 	SvFLAGS(sv) &= ~SVs_PADTMP;
-#endif
 
     if ((I32)po < PL_padix)
 	PL_padix = po - 1;
+#endif
 }
 
 /*
