@@ -2231,13 +2231,8 @@ S_sv_2iuv_common(pTHX_ SV *const sv)
 	    if (! numtype && ckWARN(WARN_NUMERIC))
 		not_a_number(sv);
 
-#if defined(USE_LONG_DOUBLE)
-	    DEBUG_c(PerlIO_printf(Perl_debug_log, "0x%"UVxf" 2iv(%" PERL_PRIgldbl ")\n",
+	    DEBUG_c(PerlIO_printf(Perl_debug_log, "0x%"UVxf" 2iv(%" NVgf ")\n",
 				  PTR2UV(sv), SvNVX(sv)));
-#else
-	    DEBUG_c(PerlIO_printf(Perl_debug_log, "0x%"UVxf" 2iv(%"NVgf")\n",
-				  PTR2UV(sv), SvNVX(sv)));
-#endif
 
 #ifdef NV_PRESERVES_UV
             (void)SvIOKp_on(sv);
@@ -2581,22 +2576,13 @@ Perl_sv_2nv_flags(pTHX_ SV *const sv, const I32 flags)
     if (SvTYPE(sv) < SVt_NV) {
 	/* The logic to use SVt_PVNV if necessary is in sv_upgrade.  */
 	sv_upgrade(sv, SVt_NV);
-#ifdef USE_LONG_DOUBLE
 	DEBUG_c({
 	    STORE_NUMERIC_LOCAL_SET_STANDARD();
 	    PerlIO_printf(Perl_debug_log,
-			  "0x%"UVxf" num(%" PERL_PRIgldbl ")\n",
+			  "0x%"UVxf" num(%" NVgf ")\n",
 			  PTR2UV(sv), SvNVX(sv));
 	    RESTORE_NUMERIC_LOCAL();
 	});
-#else
-	DEBUG_c({
-	    STORE_NUMERIC_LOCAL_SET_STANDARD();
-	    PerlIO_printf(Perl_debug_log, "0x%"UVxf" num(%"NVgf")\n",
-			  PTR2UV(sv), SvNVX(sv));
-	    RESTORE_NUMERIC_LOCAL();
-	});
-#endif
     }
     else if (SvTYPE(sv) < SVt_PVNV)
 	sv_upgrade(sv, SVt_PVNV);
@@ -2725,21 +2711,12 @@ Perl_sv_2nv_flags(pTHX_ SV *const sv, const I32 flags)
 	   and ideally should be fixed.  */
 	return 0.0;
     }
-#if defined(USE_LONG_DOUBLE)
     DEBUG_c({
 	STORE_NUMERIC_LOCAL_SET_STANDARD();
-	PerlIO_printf(Perl_debug_log, "0x%"UVxf" 2nv(%" PERL_PRIgldbl ")\n",
+	PerlIO_printf(Perl_debug_log, "0x%"UVxf" 2nv(%" NVgf ")\n",
 		      PTR2UV(sv), SvNVX(sv));
 	RESTORE_NUMERIC_LOCAL();
     });
-#else
-    DEBUG_c({
-	STORE_NUMERIC_LOCAL_SET_STANDARD();
-	PerlIO_printf(Perl_debug_log, "0x%"UVxf" 1nv(%"NVgf")\n",
-		      PTR2UV(sv), SvNVX(sv));
-	RESTORE_NUMERIC_LOCAL();
-    });
-#endif
     return SvNVX(sv);
 }
 
@@ -8623,13 +8600,8 @@ Perl_sv_inc_nomg(pTHX_ SV *const sv)
 	    /* I don't think we can get here. Maybe I should assert this
 	       And if we do get here I suspect that sv_setnv will croak. NWC
 	       Fall through. */
-#if defined(USE_LONG_DOUBLE)
-	    DEBUG_c(PerlIO_printf(Perl_debug_log,"sv_inc punt failed to convert '%s' to IOK or NOKp, UV=0x%"UVxf" NV=%"PERL_PRIgldbl"\n",
-				  SvPVX_const(sv), SvIVX(sv), SvNVX(sv)));
-#else
 	    DEBUG_c(PerlIO_printf(Perl_debug_log,"sv_inc punt failed to convert '%s' to IOK or NOKp, UV=0x%"UVxf" NV=%"NVgf"\n",
 				  SvPVX_const(sv), SvIVX(sv), SvNVX(sv)));
-#endif
 	}
 #endif /* PERL_PRESERVE_IVUV */
         if (!numtype && ckWARN(WARN_NUMERIC))
@@ -8800,13 +8772,8 @@ Perl_sv_dec_nomg(pTHX_ SV *const sv)
 	    /* I don't think we can get here. Maybe I should assert this
 	       And if we do get here I suspect that sv_setnv will croak. NWC
 	       Fall through. */
-#if defined(USE_LONG_DOUBLE)
-	    DEBUG_c(PerlIO_printf(Perl_debug_log,"sv_dec punt failed to convert '%s' to IOK or NOKp, UV=0x%"UVxf" NV=%"PERL_PRIgldbl"\n",
-				  SvPVX_const(sv), SvIVX(sv), SvNVX(sv)));
-#else
 	    DEBUG_c(PerlIO_printf(Perl_debug_log,"sv_dec punt failed to convert '%s' to IOK or NOKp, UV=0x%"UVxf" NV=%"NVgf"\n",
 				  SvPVX_const(sv), SvIVX(sv), SvNVX(sv)));
-#endif
 	}
     }
 #endif /* PERL_PRESERVE_IVUV */
@@ -12094,13 +12061,16 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                 *--ptr = c;
                 /* FIXME: what to do if HAS_LONG_DOUBLE but not PERL_PRIfldbl? */
 #if defined(HAS_LONG_DOUBLE) && defined(PERL_PRIfldbl)
+		/* Note that this is HAS_LONG_DOUBLE and PERL_PRIfldbl,
+		 * not USE_LONG_DOUBLE and NVff.  In other words,
+		 * this needs to work without USE_LONG_DOUBLE. */
 		if (intsize == 'q') {
 		    /* Copy the one or more characters in a long double
 		     * format before the 'base' ([efgEFG]) character to
 		     * the format string. */
-		    static char const prifldbl[] = PERL_PRIfldbl;
-		    char const *p = prifldbl + sizeof(prifldbl) - 3;
-		    while (p >= prifldbl) { *--ptr = *p--; }
+		    static char const ldblf[] = PERL_PRIfldbl;
+		    char const *p = ldblf + sizeof(ldblf) - 3;
+		    while (p >= ldblf) { *--ptr = *p--; }
 		}
 #endif
 		if (has_precis) {
