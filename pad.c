@@ -751,7 +751,7 @@ Perl_pad_alloc(pTHX_ I32 optype, U32 tmptype)
 		continue;
 	    sv = *av_fetch(PL_comppad, retval, TRUE);
 	    if (!(SvFLAGS(sv) &
-#ifdef USE_BROKEN_PAD_RESET
+#ifdef USE_PAD_RESET
 		    (SVs_PADMY|(konst ? SVs_PADTMP : 0))
 #else
 		    (SVs_PADMY|SVs_PADTMP)
@@ -1626,7 +1626,7 @@ Perl_pad_swipe(pTHX_ PADOFFSET po, bool refadjust)
 
     /* if pad tmps aren't shared between ops, then there's no need to
      * create a new tmp when an existing op is freed */
-#ifdef USE_BROKEN_PAD_RESET
+#ifdef USE_PAD_RESET
     PL_curpad[po] = newSV(0);
     SvPADTMP_on(PL_curpad[po]);
 #else
@@ -1663,7 +1663,7 @@ Mark all the current temporaries for reuse
 static void
 S_pad_reset(pTHX)
 {
-#ifdef USE_BROKEN_PAD_RESET
+#ifdef USE_PAD_RESET
     if (AvARRAY(PL_comppad) != PL_curpad)
 	Perl_croak(aTHX_ "panic: pad_reset curpad, %p!=%p",
 		   AvARRAY(PL_comppad), PL_curpad);
@@ -1822,7 +1822,7 @@ Free the SV at offset po in the current pad.
 void
 Perl_pad_free(pTHX_ PADOFFSET po)
 {
-#ifndef USE_BROKEN_PAD_RESET
+#ifndef USE_PAD_RESET
     SV *sv;
 #endif
     ASSERT_CURPAD_LEGAL("pad_free");
@@ -1839,7 +1839,7 @@ Perl_pad_free(pTHX_ PADOFFSET po)
 	    PTR2UV(PL_comppad), PTR2UV(PL_curpad), (long)po)
     );
 
-#ifndef USE_BROKEN_PAD_RESET
+#ifndef USE_PAD_RESET
     sv = PL_curpad[po];
     if (sv && sv != &PL_sv_undef && !SvPADMY(sv))
 	SvFLAGS(sv) &= ~SVs_PADTMP;
