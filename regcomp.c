@@ -16716,7 +16716,7 @@ S_put_range(pTHX_ SV *sv, UV start, const UV end, const bool allow_literals)
      * 'start' to 'end'.  It assumes that only ASCII printables are displayable
      * as-is (though some of these will be escaped by put_byte()). */
 
-    const int min_range_count = 3;
+    const unsigned int min_range_count = 3;
 
     assert(start <= end);
 
