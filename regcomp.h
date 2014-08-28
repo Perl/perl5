@@ -500,7 +500,7 @@ struct regnode_ssc {
 
 #define ANYOF_FLAGS(p)		((p)->flags)
 
-#define ANYOF_BIT(c)		(1 << ((c) & 7))
+#define ANYOF_BIT(c)		(1U << ((c) & 7))
 
 #define ANYOF_POSIXL_SET(p, c)	(((regnode_charclass_posixl*) (p))->classflags |= (1U << (c)))
 #define ANYOF_CLASS_SET(p, c)	ANYOF_POSIXL_SET((p), (c))
@@ -546,7 +546,7 @@ struct regnode_ssc {
 #define ANYOF_BITMAP_BYTE(p, c)	(ANYOF_BITMAP(p)[(((U8)(c)) >> 3) & 31])
 #define ANYOF_BITMAP_SET(p, c)	(ANYOF_BITMAP_BYTE(p, c) |=  ANYOF_BIT(c))
 #define ANYOF_BITMAP_CLEAR(p,c)	(ANYOF_BITMAP_BYTE(p, c) &= ~ANYOF_BIT(c))
-#define ANYOF_BITMAP_TEST(p, c)	(ANYOF_BITMAP_BYTE(p, c) &   ANYOF_BIT(c))
+#define ANYOF_BITMAP_TEST(p, c)	cBOOL(ANYOF_BITMAP_BYTE(p, c) &   ANYOF_BIT(c))
 
 #define ANYOF_BITMAP_SETALL(p)		\
 	memset (ANYOF_BITMAP(p), 255, ANYOF_BITMAP_SIZE)
